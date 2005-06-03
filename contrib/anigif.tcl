@@ -11,7 +11,7 @@
 #
 # ###############################  USAGE  #################################
 #
-#  ::anigif::anigif FILENAME INDEX
+#  ::anigif::anigif FILENAME NAME INDEX
 #    FILENAME: appropriate path and file to use for the animated gif
 #    INDEX:    what image to begin on (first image is 0) (Default: 0)
 #
@@ -19,6 +19,7 @@
 #  ::anigif::restart IMAGE INDEX
 #    INDEX:    defaults to next index in loop
 #  ::anigif::destroy IMAGE
+#  ::anigif::delete IMAGE
 #
 #  NOTES:
 #    There is currently a -zoom and -subsample hack to keep transparency.
@@ -31,6 +32,7 @@
 #
 # ############################## HISTORY #################################
 #
+#  1.4: Major rewrite by Mats
 #  1.3: Fixed error in disposal flag handling.
 #       Added handling for non-valid comment/graphic blocks.
 #       Searches for actual loop control block.  If it extists, loops.
@@ -43,75 +45,46 @@
 #  0.9: Initial release
 # 
 
-namespace eval anigif {
-    variable image_number 0
-    variable allNames {}
+package provide anigif 1.4
 
-    proc anigif2 {img list delay {idx 0}} {
-	
-	# Mats: need a way to detect if original image was deleted.
-	if {[catch {image inuse $img}]} {
-	    destroy $img
-	    return
-	}
-	if { $idx >= [llength $list]  } {
-	    set idx 0
-	    if { [set ::anigif::${img}(repeat)] == 0} {
-		# Non-repeating GIF
-		::anigif::stop $img
-		return
-	    }
-	} 
-	set dispflag [lindex [set ::anigif::${img}(disposal)] $idx]
-	switch -- "$dispflag" {
-	    "000" {
-		# Do nothing
-	    }
-	    "001" {
-		# Do not dispose
-	    }
-	    "100" {
-		# Restore to background
-		[set ::anigif::${img}(curimage)] blank
-	    }
-	    "101" {
-		# Restore to previous - not supported
-		# As recommended, since this is not supported, it is set to blank
-		[set ::anigif::${img}(curimage)] blank
-	    }
-	    default { puts "no match: $dispflag" }
-	}
-	[set ::anigif::${img}(curimage)] copy [lindex $list $idx] -subsample 2 2
-	if { [lindex $delay $idx] == 0 } {
-	    ::anigif::stop $img
-	    return
-	}
-	# # #    update
-	set ::anigif::${img}(asdf) "::anigif::anigif2 $img [list $list]"
-	set ::anigif::${img}(loop) [after [lindex $delay $idx] "[set ::anigif::${img}(asdf)] [list $delay] [expr {$idx + 1}]"]
-	set ::anigif::${img}(idx) [incr idx]
+
+namespace eval ::anigif {
+    variable allNames {}
+    variable heartbeat
+    array set heartbeat {
+	ms          1000
+	runs        0
     }
 
 
-    proc anigif {fnam name {idx 0}} {
-	variable image_number
+    proc anigif {fileName name {idx 0}} {
 	variable allNames
+	variable heartbeat
 
 	set n 0
 	set images {}
 	set delay {}
-	#set img anigifimage[incr image_number]
-	# Mats:
+	
+	if {$allNames == {}} {
+	    Beat
+	}
+
+	# Read image file.
+	set fd [open $fileName r]
+	fconfigure $fd -translation binary
+	set data [read $fd [file size $fileName]]
+	close $fd
+
 	if {$name == ""} {
 	    set img [image create photo]
 	} else {
 	    set img [image create photo $name]
 	}
 	lappend allNames $img
-	set fin [open $fnam r]
-	fconfigure $fin -translation binary
-	set data [read $fin [file size $fnam]]
-	close $fin
+	
+	set token [GetToken $img]
+	upvar 0 $token state
+	variable $token
 
 	# Find Loop Record
 	set start [string first "\x21\xFF\x0B" $data]
@@ -124,39 +97,39 @@ namespace eval anigif {
 
 	# Find Control Records
 	set start [string first "\x21\xF9\x04" $data]
-	while {![catch "image create photo xpic$n$img \
-                              -file ${fnam} \
-                              -format \{gif89 -index $n\}"]} {
+	
+	set cmd [list image create photo -file $fileName \
+	  -format [list gif89 -index $n]]
+
+	while {![catch $cmd tmpname]} {
 	    set stop [string first "\x00" $data [expr {$start + 1}]]
 	    if {$stop < $start} {
 		break
 	    }
 	    set record [string range $data $start $stop]
-	    binary scan $record @4c1 thisdelay
-	    if {[info exists thisdelay]} {
+	    
+	    if {[binary scan $record @4c1 thisdelay]} {
 
 		# Change to unsigned integer
-		set thisdelay [expr {$thisdelay & 0xFF}];
-
-		binary scan $record @2b3b3b1b1 -> disposalval userinput transflag
-
-		lappend images pic$n$img
-		image create photo pic$n$img
-		pic$n$img copy xpic$n$img -zoom 2 2
-		image delete xpic$n$img
-		lappend disposal $disposalval
+		set thisdelay [expr {$thisdelay & 0xFF}]
 
 		# Convert hundreths to thousandths for after
 		set thisdelay [expr {$thisdelay * 10}]
 
 		# If 0, set to fastest (25 ms min to seem to match browser default)
-		if {$thisdelay == 0} {set thisdelay 40}
-
+		if {$thisdelay == 0} {
+		    set thisdelay 40
+		}
 		lappend delay $thisdelay
-		unset thisdelay
 
+		binary scan $record @2b3b3b1b1 -> disposalval userinput transflag
+
+		lappend images $tmpname
+		lappend disposal $disposalval
 		incr n
 	    }
+	    set cmd [list image create photo -file $fileName \
+	      -format [list gif89 -index $n]]
 
 	    if {($start >= 0) && ($stop >= 0)} {
 		set start [string first "\x21\xF9\x04" $data [expr {$stop + 1}]]
@@ -164,62 +137,150 @@ namespace eval anigif {
 		break
 	    }
 	}
-	set ::anigif::${img}(repeat) $repeat
-	set ::anigif::${img}(delay) $delay
-	set ::anigif::${img}(disposal) $disposal
-	set ::anigif::${img}(curimage) $img
-	[set ::anigif::${img}(curimage)] blank
-	[set ::anigif::${img}(curimage)] copy pic0${img} -subsample 2 2
-	#$img configure -image [set ::anigif::${img}(curimage)]
-
-	anigif2 $img $images $delay $idx
+	
+	set state(repeat)   $repeat
+	set state(delay)    $delay
+	set state(disposal) $disposal
+	set state(current)  $img
+	set state(images)   $images
+	set state(idx)      $idx
+	
+	$state(current) blank
+	$state(current) copy [lindex $images 0]
+	
+	Step $token $idx
 
 	return $img
     }
+    
+    proc GetToken {img} {
+	
+	# Protect from the case when the image name contains any ::
+	# Not 100% foolproof!
+	#set img [string map {- --} $img]
+	return ::anigif::[string map {:: -} $img]
+    }
+
+    proc Step {token {idx 0}} {
+	upvar 0 $token state
+	variable $token
+	
+	# Need a way to detect if original image was deleted.
+	if {![array exists state]} {
+	    return
+	}
+	set img $state(current)
+	if {[catch {image inuse $img}]} {
+	    delete $img
+	    return
+	}
+	if {$idx >= [llength $state(images)]} {
+	    set idx 0
+	    if {$state(repeat) == 0} {
+		# Non-repeating GIF
+		stop $img
+		return
+	    }
+	} 
+	set dispflag [lindex $state(disposal) $idx]
+	
+	switch -- $dispflag {
+	    "000" {
+		# Do nothing
+	    }
+	    "001" {
+		# Do not dispose
+	    }
+	    "100" {
+		# Restore to background
+		$state(current) blank
+	    }
+	    "101" {
+		# Restore to previous - not supported
+		# As recommended, since this is not supported, it is set to blank
+		$state(current) blank
+	    }
+	    default { 
+		puts "no match: $dispflag" 
+	    }
+	}
+	$state(current) copy [lindex $state(images) $idx]
+	if {[lindex $state(delay) $idx] == 0} {
+	    stop $img
+	    return
+	}
+	
+	# Reschedule.
+	set delay [lindex $state(delay) $idx]
+	set state(after) [after $delay [list ::anigif::Step $token [incr idx]]]
+	set state(idx) [incr idx]
+    }
 
     proc stop {img} {
+	set token [GetToken $img]
+	upvar 0 $token state
+	variable $token
+
 	catch {
-	    after cancel [set ::anigif::${img}(loop)]
+	    after cancel $state(after)
 	}
     }
 
     # TODO
-    proc restart {w {idx -1}} {
+    proc restart {img {idx -1}} {
+	set token [GetToken $img]
+	upvar 0 $token state
+	variable $token
+
 	if {$idx == -1} {
-	    if { [lindex ::anigif::${w}(delay) $idx] < 0 } {
+	    if {[lindex $state(delay) $idx] < 0} {
 		set idx 0
 	    } else {
-		set idx [set ::anigif::${w}(idx)]
+		set idx $state(idx)
 	    }
 	}
 	catch {
-	    ::anigif::stop $w
-	    eval "[set ::anigif::${w}(asdf)] [list [set ::anigif::${w}(delay)]] $idx"
+	    stop $img
+	    Step $token $idx
 	}
     }
 
-    proc destroy {w} {
+    proc destroy {img} {
+	delete $img
+    }
+    
+    proc delete {img} {
+	set token [GetToken $img]
+	upvar 0 $token state
+	variable $token
+	variable allNames
+
+	set allNames [lsearch -all -not -inline $allNames $img]
+	
 	catch {
-	    ::anigif::stop $w
-	    set wlength [string length $w]
-	    foreach imagename [image names] {
-		if {[string equal [string range $imagename [string first "." $imagename] end] $w]} {
-		    image delete $imagename
-		}
-	    }
-	    unset ::anigif::${w}
+	    stop $img
+	    eval {image delete $state(current)} $state(images)
+	    unset state
 	}
     }
     
-    proc isanigif {name} {
+    proc isanigif {img} {
+	set token [GetToken $img]
+	upvar 0 $token state
+
+	return [array exists state]
+    }
+    
+    # Static procedures to schedule timers only when needed.
+    # @@@ TODO
+    proc Beat { } {
 	variable allNames
-	
-	if {[lsearch $allNames $name] >= 0} {
-	    return 1
-	} else {
-	    return 0
-	}
+	variable heartbeat
+    
+	foreach name $allNames {
+	    
+	    
+	}	
     }
 }
 
-package provide anigif 1.3

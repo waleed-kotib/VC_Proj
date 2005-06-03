@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.42 2005-02-08 08:57:16 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.43 2005-06-03 13:00:06 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -306,8 +306,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(thisServPort)    prefs_thisServPort    $prefs(thisServPort)]   \
       [list prefs(httpdPort)       prefs_httpdPort       $prefs(httpdPort)]   \
       [list prefs(remotePort)      prefs_remotePort      $prefs(remotePort)]     \
-      [list prefs(setNATip)        prefs_setNATip        $prefs(setNATip)]       \
-      [list prefs(NATip)           prefs_NATip           $prefs(NATip)]          \
       [list prefs(postscriptOpts)  prefs_postscriptOpts  $prefs(postscriptOpts)] \
       [list prefs(firstLaunch)     prefs_firstLaunch     $prefs(firstLaunch)     userDefault] \
       [list prefs(unixPrintCmd)    prefs_unixPrintCmd    $prefs(unixPrintCmd)]   \

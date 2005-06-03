@@ -9,7 +9,7 @@
 # full path name of this file's directory.
 
 package ifneeded alertbox 1.0 [list source [file join $dir alertbox.tcl]]
-package ifneeded anigif 1.3 [list source [file join $dir anigif.tcl]]
+package ifneeded anigif 1.4 [list source [file join $dir anigif.tcl]]
 package ifneeded balloonhelp 1.0 [list source [file join $dir balloonhelp.tcl]]
 package ifneeded base64 1.0 [list source [file join $dir base64.tcl]]
 package ifneeded buttontray 1.0 [list source [file join $dir buttontray.tcl]]

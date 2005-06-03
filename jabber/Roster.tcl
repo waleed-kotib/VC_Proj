@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.128 2005-05-30 14:16:59 matben Exp $
+# $Id: Roster.tcl,v 1.129 2005-06-03 13:00:06 matben Exp $
 
 package provide Roster 1.0
 
@@ -110,9 +110,9 @@ namespace eval ::Roster:: {
 	mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}
 	mRemoveContact user               {::Roster::SendRemove $jid}
 	separator      {}                 {}
-	mDirStatus     user               {::Roster::DirectedPresenceDlg $jid}
 	mRefreshRoster {}                 {::Roster::Refresh}
     }  
+    # mDirStatus     user               {::Roster::DirectedPresenceDlg $jid}
     # mLastLogin/Activity user          {::Jabber::GetLast $jid}
     # mvCard         user               {::VCard::Fetch other $jid}
     # mVersion       {user available}   {::Jabber::GetVersion $jid3}

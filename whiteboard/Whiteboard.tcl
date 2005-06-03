@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.38 2005-05-26 12:16:42 matben Exp $
+# $Id: Whiteboard.tcl,v 1.39 2005-06-03 13:00:06 matben Exp $
 
 package require anigif
 package require entrycomp
@@ -1072,7 +1072,7 @@ proc ::WB::GarbageImages {wtop} {
     
     foreach name $canvasImages {
 	if {[::anigif::isanigif $name]} {
-	    ::anigif::destroy $name
+	    ::anigif::delete $name
 	} else {
 	    if {![catch {image inuse $name}]} {
 		catch {image delete $name}
@@ -1531,7 +1531,7 @@ proc ::WB::SetToolButton {wtop btName} {
 	    bind SnackFrame <Shift-B1-Motion>  \
 	      [subst {::CanvasDraw::FinMoveFrame $wCan %W %x %y}]
 	    
-	    $wCan config -cursor hand2
+	    $wCan config -cursor fleur
 	    ::WB::SetStatusMessage $wtop [mc uastatmove]
 	}
 	line {
