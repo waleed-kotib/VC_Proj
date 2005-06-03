@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.29 2005-05-26 12:16:35 matben Exp $
+# $Id: Emoticons.tcl,v 1.30 2005-06-03 13:00:06 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -252,8 +252,6 @@ proc ::Emoticons::ParseIcon {name dir xmllist} {
     
     switch -- $mime {
 	image/gif {
-	    #set im [image create photo -format gif  \
-	    #  -file [file join $dir $object]]
 	    set im [::Utils::CreateGif [file join $dir $object]]
 	    foreach key $keyList {
 		set tmpicons($name,$key) $im
@@ -331,7 +329,7 @@ proc ::Emoticons::FreeSmileyArr { } {
     #puts "::Emoticons::FreeSmileyArr"
     
     # This could create empty images for any open dialogs. BAD?
-    # MEMLEAK!
+    # @@@ MEMLEAK!
     #eval {image delete} [array names smileyInv]
     unset -nocomplain smiley smileyInv
 }
@@ -348,7 +346,7 @@ proc ::Emoticons::FreeTmpSet {name} {
 	lappend ims [string map [list "$name," ""] $ind]
     }
     # This could create empty images for any open dialogs. BAD?
-    # MEMLEAK!
+    # @@@ MEMLEAK!
     #eval {image delete} $ims
     array unset meta $name,*
     array unset tmpicons $name,*
@@ -366,6 +364,7 @@ proc ::Emoticons::FreeAllTmpSets { } {
     foreach {key photo} [array get tmpicons ] {
 	lappend ims $photo
     }
+    #puts ">>>>>>>>>>{image delete} [lsort -unique $ims]"
     eval {image delete} [lsort -unique $ims]
     unset -nocomplain meta state tmpicons tmpiconsInv
 }
