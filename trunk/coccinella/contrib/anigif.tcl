@@ -52,10 +52,8 @@ namespace eval ::anigif {
     variable allNames {}
     variable heartbeat
     array set heartbeat {
-	ms          1000
-	runs        0
+	ms          2000
     }
-
 
     proc anigif {fileName name {idx 0}} {
 	variable allNames
@@ -64,10 +62,6 @@ namespace eval ::anigif {
 	set n 0
 	set images {}
 	set delay {}
-	
-	if {$allNames == {}} {
-	    Beat
-	}
 
 	# Read image file.
 	set fd [open $fileName r]
@@ -144,12 +138,14 @@ namespace eval ::anigif {
 	set state(current)  $img
 	set state(images)   $images
 	set state(idx)      $idx
+	set state(runs)     1
 	
 	$state(current) blank
 	$state(current) copy [lindex $images 0]
 	
-	Step $token $idx
-
+	if {![info exists heartbeat(after)]} {
+	    Beat
+	}
 	return $img
     }
     
@@ -166,6 +162,7 @@ namespace eval ::anigif {
 	variable $token
 	
 	# Need a way to detect if original image was deleted.
+	# Internal error handling in tk seems inconsistent!
 	if {![array exists state]} {
 	    return
 	}
@@ -193,18 +190,27 @@ namespace eval ::anigif {
 	    }
 	    "100" {
 		# Restore to background
-		$state(current) blank
+		if {[catch {$state(current) blank}]} {
+		    delete $img
+		    return
+		}
 	    }
 	    "101" {
 		# Restore to previous - not supported
 		# As recommended, since this is not supported, it is set to blank
-		$state(current) blank
+		if {[catch {$state(current) blank}]} {
+		    delete $img
+		    return
+		}
 	    }
 	    default { 
 		puts "no match: $dispflag" 
 	    }
 	}
-	$state(current) copy [lindex $state(images) $idx]
+	if {[catch {$state(current) copy [lindex $state(images) $idx]}]} {
+	    delete $img
+	    return
+	}
 	if {[lindex $state(delay) $idx] == 0} {
 	    stop $img
 	    return
@@ -224,6 +230,8 @@ namespace eval ::anigif {
 	catch {
 	    after cancel $state(after)
 	}
+	set state(runs) 0
+	unset -nocomplain state(after)
     }
 
     # TODO
@@ -271,16 +279,45 @@ namespace eval ::anigif {
 	return [array exists state]
     }
     
-    # Static procedures to schedule timers only when needed.
-    # @@@ TODO
+    proc Pause {token} {
+	upvar 0 $token state
+	variable $token
+
+	catch {
+	    after cancel $state(after)
+	}
+	unset -nocomplain state(after)
+    }	
+    
+    # Static procedure to schedule timers only when needed.
     proc Beat { } {
 	variable allNames
 	variable heartbeat
     
+	if {$allNames == {}} {
+	    catch {after cancel $heartbeat(after)}
+	    unset -nocomplain heartbeat(after)
+	    return
+	}
+	
+	# This shall start and stop timers for each image when needed.
 	foreach name $allNames {
-	    
-	    
+	    set token [GetToken $name]
+	    upvar 0 $token state
+	    variable $token
+
+	    # Need a way to detect if original image was deleted.
+	    if {[catch {image inuse $name} inuse]} {
+		delete $name
+		continue
+	    }
+	    if {$inuse && ![info exists state(after)]} {
+		Step $token
+	    } elseif {!$inuse && [info exists state(after)]} {
+		Pause [GetToken $name]
+	    }
 	}	
+	set heartbeat(after) [after $heartbeat(ms) [namespace current]::Beat]
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.13 2005-05-29 14:33:27 matben Exp $
+# $Id: Init.tcl,v 1.14 2005-06-04 10:33:59 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -365,14 +365,14 @@ proc ::Init::LoadPackages { } {
     array set extraPacksArr {
 	macintosh   {http Tclapplescript MacPrint}
 	macosx      {http Tclapplescript tls Thread MacCarbonPrint}
-	windows     {http printer gdi tls Thread optcl tcom}
+	windows     {Itcl http printer gdi tls Thread optcl tcom}
 	unix        {http tls Thread}
     }
     foreach {platform packList} [array get extraPacksArr] {
 	foreach name $packList {
 	    set prefs($name) 0
 	}
-    }
+    }    
     foreach name $extraPacksArr($this(platform)) {
 	::SplashScreen::SetMsg "[mc splashlook] $name..."
 	if {![catch {package require $name} msg]} {
