@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.108 2005-06-01 06:52:55 matben Exp $
+# $Id: GroupChat.tcl,v 1.109 2005-06-05 14:54:12 matben Exp $
 
 package require History
 
@@ -1579,6 +1579,7 @@ proc ::GroupChat::Save {token} {
 	foreach {meRoomJid mynick}  \
 	  [::Jabber::JlibCmd service hashandnick $roomjid] break
 	set fd [open $ans w]
+	fconfigure $fd -encoding utf-8
 	puts $fd "Groupchat in:\t$roomjid"
 	puts $fd "Subject:     \t$state(subject)"
 	puts $fd "My nick:     \t$mynick"

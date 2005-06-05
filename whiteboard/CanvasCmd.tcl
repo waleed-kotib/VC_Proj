@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.7 2004-12-02 08:22:35 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.8 2005-06-05 14:54:13 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -376,17 +376,19 @@ proc ::CanvasCmd::DoPutCanvas {w {toIPnum all}} {
     set absFilePath [file join $this(tmpPath) $tmpFile]
 
     # Save canvas to temporary file.
-    if {[catch [list open $absFilePath w] fileId]} {
+    if {[catch {open $absFilePath w} fileId]} {
 	::UI::MessageBox -message [mc messfailopwrite $tmpFile $fileId] \
 	  -icon error -type ok
     }
+    fconfigure $fileId -encoding utf-8
     ::CanvasFile::CanvasToFile $w $fileId $absFilePath
     catch {close $fileId}
 
-    if {[catch [list open $absFilePath r] fileId]} {
+    if {[catch {open $absFilePath r} fileId]} {
 	::UI::MessageBox -message [mcset en messfailopread $tmpFile $fileId] \
 	  -icon error -type ok
     }
+    fconfigure $fileId -encoding utf-8
     
     # Distribute to all other client canvases.
     if {$toIPnum == "all"} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.68 2005-02-27 14:11:06 matben Exp $
+# $Id: MailBox.tcl,v 1.69 2005-06-05 14:54:12 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -840,6 +840,7 @@ proc ::MailBox::PutMessageInInbox {row} {
 	set exists 1
     }
     if {![catch {open $this(inboxFile) a} fd]} {
+	fconfigure $fd -encoding utf-8
 	if {!$exists} {
 	    WriteInboxHeader $fd
 	    if {[string equal $this(platform) "macintosh"]} {
@@ -875,6 +876,7 @@ proc ::MailBox::SaveMsg { } {
 	      -message "Failed opening file [file tail $ans]: $fd"
 	    return
 	}
+	fconfigure $fd -encoding utf-8
 	set subject [lindex $row $colindex(subject)]
 	set time [lindex $row $colindex(secs)]
 	set time [clock format [clock scan $time]]
@@ -1296,6 +1298,7 @@ proc ::MailBox::SaveMailboxVer1 { } {
 	  -message [mc jamesserrinboxopen $tmpFile]
 	return
     }
+    fconfigure $fd -encoding utf-8
     
     # Header information.
     puts $fid "# Version: 1"
@@ -1375,6 +1378,7 @@ proc ::MailBox::SaveMailboxVer2 {args} {
 	  -message [mc jamesserrinboxopen $tmpFile]
 	return
     }
+    fconfigure $fd -encoding utf-8
     
     # Start by writing the header info.
     WriteInboxHeader $fid
@@ -1439,6 +1443,7 @@ proc ::MailBox::GetMailboxVersion { } {
     set version ""
     if {[file exist $this(inboxFile)]} {
 	if {![catch {open $this(inboxFile) r} fd]} {
+	    fconfigure $fd -encoding utf-8
 	    if {[gets $fd line] >= 0} { 
 		if {![regexp -nocase {^ *# *version: *([0-9]+)} $line match version]} {
 		    set version 1

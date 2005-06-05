@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.11 2005-02-19 11:10:55 matben Exp $
+# $Id: Rosticons.tcl,v 1.12 2005-06-05 14:54:13 matben Exp $
 
 package provide Rosticons 1.0
 
@@ -259,6 +259,7 @@ proc ::Rosticons::LoadTmpIconSet {path} {
 	return -code error "missing icondef.xml file in archive"
     }
     set fd [open $icondefPath]
+    fconfigure $fd -encoding utf-8
     set xmldata [read $fd]
     close $fd
         
