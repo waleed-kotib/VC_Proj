@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.3 2005-05-26 14:39:22 matben Exp $
+# $Id: UserInfo.tcl,v 1.4 2005-06-05 14:54:13 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -360,6 +360,7 @@ proc ::UserInfo::SaveNotes {token} {
     # Work on a temporary file and switch later.
     set tmp $this(notesFile).tmp
     if {![catch {open $tmp w} fd]} {
+	fconfigure $fd -encoding utf-8
 	puts $fd "# Notes file"
 	puts $fd "# The data written at: [clock format [clock seconds]]\n#"
 	foreach {jid str} [array get notes] {

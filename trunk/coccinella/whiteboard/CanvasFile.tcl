@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.19 2005-01-31 14:06:59 matben Exp $
+# $Id: CanvasFile.tcl,v 1.20 2005-06-05 14:54:13 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -41,6 +41,7 @@ proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
 	  -message [mc messfailopread $tail $fd]
 	return
     }
+    fconfigure $fd -encoding utf-8
     eval {::CanvasFile::FileToCanvas $wCan $fd $filePath} $args
     close $fd
 }
@@ -62,6 +63,7 @@ proc ::CanvasFile::OpenCanvas {w fileName args} {
     }
     ::CanvasCmd::DoEraseAll $wtop     
     ::undo::reset [::WB::GetUndoToken $wtop]
+    fconfigure $fd -encoding utf-8
     eval {FileToCanvas $w $fd $fileName} $args
     close $fd
 }
@@ -484,6 +486,7 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
 	  -icon error -type ok
 	return
     }
+    fconfigure $fd -encoding utf-8
     puts $fd "# Version: 2"
 
     # Be sure to strip off the "CANVAS:" prefix. ???
@@ -672,6 +675,7 @@ proc ::CanvasFile::SaveCanvas {wCan fileName args} {
 		  -message [mc messfailopwrite $tail $fd]
 		return ""
 	    }	    
+	    fconfigure $fd -encoding utf-8
 	    ::CanvasFile::CanvasToFile $wCan $fd $fileName
 	    close $fd
 	}
@@ -702,6 +706,7 @@ proc ::CanvasCmd::DoSaveAsItem {wtop} {
 	  -message [mc messfailopwrite $tail $fd]
 	return
     }	    
+    fconfigure $fd -encoding utf-8
     ::CanvasFile::CanvasToFile $wCan $fd $fileName -keeputag 0
     close $fd
 }
@@ -776,6 +781,7 @@ proc ::CanvasFile::SVGFileToCanvas {wtop filePath} {
 	  -message [mc messfailopread $tail $fd]
 	return
     }
+    fconfigure $fd -encoding utf-8
     set xml [read $fd]
     set xmllist [tinydom::documentElement [tinydom::parse $xml]]
     

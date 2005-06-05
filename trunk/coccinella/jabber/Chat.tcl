@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.115 2005-02-24 13:58:07 matben Exp $
+# $Id: Chat.tcl,v 1.116 2005-06-05 14:54:12 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1704,6 +1704,7 @@ proc ::Chat::Save {dlgtoken} {
     if {[string length $ans]} {
 	set allText [::Text::TransformToPureText $wtext]
 	set fd [open $ans w]
+	fconfigure $fd -encoding utf-8
 	puts $fd "Chat with:\t$chatstate(fromjid)"
 	puts $fd "Subject:\t$chatstate(subject)"
 	puts $fd "\n"
@@ -2332,6 +2333,7 @@ proc ::Chat::SaveHistory {jid wtext} {
     if {[string length $ans]} {
 	set allText [::Text::TransformToPureText $wtext]
 	set fd [open $ans w]
+	fconfigure $fd -encoding utf-8
 	puts $fd $allText	
 	close $fd
 	if {[string equal $this(platform) "macintosh"]} {

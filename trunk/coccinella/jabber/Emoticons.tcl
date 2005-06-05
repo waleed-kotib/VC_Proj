@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.30 2005-06-03 13:00:06 matben Exp $
+# $Id: Emoticons.tcl,v 1.31 2005-06-05 14:54:12 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -181,6 +181,7 @@ proc ::Emoticons::LoadTmpIconSet {path} {
 	return -code error "missing icondef.xml file in archive"
     }
     set fd [open $icondefPath]
+    fconfigure $fd -encoding utf-8
     set xmldata [read $fd]
     close $fd
     

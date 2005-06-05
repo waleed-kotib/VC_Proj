@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.7 2005-02-02 15:21:19 matben Exp $
+# $Id: History.tcl,v 1.8 2005-06-05 14:54:12 matben Exp $
 
 package require uriencode
 
@@ -35,6 +35,7 @@ proc ::History::PutToFile {jid msg} {
     
     set path [file join $this(historyPath) [uriencode::quote $jid]]    
     if {![catch {open $path a} fd]} {
+	fconfigure $fd -encoding utf-8
 	puts $fd "set message(\[incr uid]) {$msg}"
 	close $fd
     }

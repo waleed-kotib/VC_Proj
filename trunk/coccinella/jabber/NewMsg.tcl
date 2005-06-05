@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.60 2005-04-29 12:07:05 matben Exp $
+# $Id: NewMsg.tcl,v 1.61 2005-06-05 14:54:13 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -879,6 +879,7 @@ proc ::NewMsg::SaveMsg {w} {
     if {[string length $ans]} {
 	set allText [::Text::TransformToPureText $wtext]
 	set fd [open $ans w]
+	fconfigure $fd -encoding utf-8
 	for {set i 1} {$i <= $locals($w,addrline)} {incr i} {
 	    set addr $locals($w,addr$i)
 	    if {[string length $addr] > 0} {
