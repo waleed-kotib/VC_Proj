@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.39 2005-06-03 13:00:06 matben Exp $
+# $Id: Whiteboard.tcl,v 1.40 2005-06-07 07:28:55 matben Exp $
 
 package require anigif
 package require entrycomp
@@ -1642,8 +1642,10 @@ proc ::WB::RemoveAllBindings {w} {
     Debug 3 "::WB::RemoveAllBindings w=$w"
     
     # List all tags that we may bind to.
-    set btags {all std text tbbox&&arc tbbox&&(oval||rectangle)}
-    foreach btag $btags {
+    foreach btag {
+	all  std  std&&locked  std&&!locked  
+	text  tbbox&&arc  tbbox&&(oval||rectangle)
+    } {
 	foreach seq [$w bind $btag] {
 	    $w bind $btag $seq {}
 	}
