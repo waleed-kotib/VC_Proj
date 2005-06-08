@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.73 2005-02-25 14:08:59 matben Exp $
+# $Id: Preferences.tcl,v 1.74 2005-06-08 11:50:32 matben Exp $
  
 package require mnotebook
 package require tree
@@ -907,6 +907,7 @@ proc ::Preferences::CleanUp { } {
 proc ::Preferences::HasChanged { } {
     variable hasChanged
 
+    ::CallTrace 4
     set hasChanged 1
 }
 
