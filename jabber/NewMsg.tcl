@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.61 2005-06-05 14:54:13 matben Exp $
+# $Id: NewMsg.tcl,v 1.62 2005-06-08 11:50:32 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -951,30 +951,6 @@ proc ::NewMsg::CloseDlg {w} {
 	::UI::SaveWinGeom $wDlgs(jsendmsg) $w
 	destroy $w
 	array unset locals $w,*
-    }
-}
-
-proc ::NewMsg::GetAllCCP { } {
-    
-    variable locals
-    
-    set res {}
-    foreach key [array names locals "*,wccp"] {
-	if {[winfo exists $locals($key)]} {
-	    lappend res $locals($key)
-	}
-    }
-    return $res
-}
-
-proc ::NewMsg::GetCCP {w} {
-    
-    variable locals
-    
-    if {[info exists locals($w,wccp)]} {
-	return $locals($w,wccp)
-    } else {
-	return {}
     }
 }
 

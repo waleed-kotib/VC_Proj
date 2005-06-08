@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.57 2005-02-19 11:10:55 matben Exp $
+# $Id: Dialogs.tcl,v 1.58 2005-06-08 11:50:32 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -857,6 +857,7 @@ proc ::Dialogs::Canvas {filePath args} {
     if {[catch {open $filePath r} fd]} {
 	return
     }
+    fconfigure $fd -encoding utf-8
     set w .spcan[incr uidcan]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}

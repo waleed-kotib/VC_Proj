@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.44 2005-05-26 12:16:42 matben Exp $
+# $Id: Utils.tcl,v 1.45 2005-06-08 11:50:32 matben Exp $
 
 
 package provide Utils 1.0
@@ -98,6 +98,32 @@ proc listintersectnonempty {alist blist} {
 }
     
 proc arraysequal {arrName1 arrName2} {
+    upvar 1 $arrName1 arr1 $arrName2 arr2
+    
+    if {![array exists arr1]} {
+	return -code error "$arrName1 is not an array"
+    }
+    if {![array exists arr2]} {
+	return -code error "$arrName2 is not an array"
+    } 
+    if {[array size arr1] != [array size arr2]} {
+	return 0
+    }
+    if {[array size arr1] == 0} {
+	return 1
+    }
+    foreach {key value} [array get arr1] {
+	if {![info exists arr2($key)]} {
+	    return 0
+	}
+	if {![string equal $arr1($key) $arr2($key)]} {
+	    return 0
+	}
+    }
+    return 1
+}
+
+proc arraysequalBU {arrName1 arrName2} {
     
     set names1 [lsort [uplevel 1 [format {array names %s} $arrName1]]]
     set names2 [lsort [uplevel 1 [format {array names %s} $arrName2]]]
