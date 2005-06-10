@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.45 2005-06-08 11:50:32 matben Exp $
+# $Id: Utils.tcl,v 1.46 2005-06-10 07:52:57 matben Exp $
 
 
 package provide Utils 1.0
@@ -100,6 +100,7 @@ proc listintersectnonempty {alist blist} {
 proc arraysequal {arrName1 arrName2} {
     upvar 1 $arrName1 arr1 $arrName2 arr2
     
+    #puts "arraysequal"
     if {![array exists arr1]} {
 	return -code error "$arrName1 is not an array"
     }
@@ -107,6 +108,7 @@ proc arraysequal {arrName1 arrName2} {
 	return -code error "$arrName2 is not an array"
     } 
     if {[array size arr1] != [array size arr2]} {
+	#puts "\t array size: [array size arr1] != [array size arr2]"
 	return 0
     }
     if {[array size arr1] == 0} {
@@ -114,26 +116,11 @@ proc arraysequal {arrName1 arrName2} {
     }
     foreach {key value} [array get arr1] {
 	if {![info exists arr2($key)]} {
+	    #puts "\t !info exists: [info exists arr2($key)]"
 	    return 0
 	}
 	if {![string equal $arr1($key) $arr2($key)]} {
-	    return 0
-	}
-    }
-    return 1
-}
-
-proc arraysequalBU {arrName1 arrName2} {
-    
-    set names1 [lsort [uplevel 1 [format {array names %s} $arrName1]]]
-    set names2 [lsort [uplevel 1 [format {array names %s} $arrName2]]]
-    if {![string equal $names1 $names2]} {
-	return 0
-    }
-    upvar 1 $arrName1 arr1
-    upvar 1 $arrName2 arr2
-    foreach name $names1 {
-	if {![string equal $arr1($name) $arr2($name)]} {
+	    #puts "\t !equal: $arr1($key) $arr2($key)"
 	    return 0
 	}
     }
