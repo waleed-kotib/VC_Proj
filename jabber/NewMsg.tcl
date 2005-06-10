@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.62 2005-06-08 11:50:32 matben Exp $
+# $Id: NewMsg.tcl,v 1.63 2005-06-10 07:52:20 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -706,7 +706,7 @@ proc ::NewMsg::PopupCmd {w n} {
 	msn {
 	    set locals($w,addr$n) "userName%hotmail.com@$locals(servicejid,msn)"
 	}
-	email {
+	email - smtp {
 	    set locals($w,addr$n) "userName%emailserver@$locals(servicejid,smtp)"
 	}
 	default {

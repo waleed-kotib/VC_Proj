@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.69 2005-06-05 14:54:12 matben Exp $
+# $Id: MailBox.tcl,v 1.70 2005-06-10 07:52:20 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1298,7 +1298,7 @@ proc ::MailBox::SaveMailboxVer1 { } {
 	  -message [mc jamesserrinboxopen $tmpFile]
 	return
     }
-    fconfigure $fd -encoding utf-8
+    fconfigure $fid -encoding utf-8
     
     # Header information.
     puts $fid "# Version: 1"
@@ -1378,7 +1378,7 @@ proc ::MailBox::SaveMailboxVer2 {args} {
 	  -message [mc jamesserrinboxopen $tmpFile]
 	return
     }
-    fconfigure $fd -encoding utf-8
+    fconfigure $fid -encoding utf-8
     
     # Start by writing the header info.
     WriteInboxHeader $fid

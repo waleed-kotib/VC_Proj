@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.38 2005-06-08 11:50:32 matben Exp $
+# $Id: Profiles.tcl,v 1.39 2005-06-10 07:52:20 matben Exp $
 
 package provide Profiles 1.0
 
@@ -239,9 +239,21 @@ proc ::Profiles::SortProfileList { } {
     set tmp {}
     array set profArr $profiles
     foreach name [GetAllNames] {
-	lappend tmp $name $profArr($name)
+	set noopts [lrange $profArr($name) 0 2]
+	set opts [SortOptsList [lrange $profArr($name) 3 end]]
+	lappend tmp $name [concat $noopts $opts]
     }
     set profiles $tmp
+}
+
+proc ::Profiles::SortOptsList {opts} {
+    
+    set tmp {}
+    array set arr $opts
+    foreach name [lsort [array names arr]] {
+	lappend tmp $name $arr($name)
+    }
+    return $tmp
 }
 
 proc ::Profiles::ImportIfNecessary { } {
@@ -325,8 +337,9 @@ proc ::Profiles::BuildPage {page} {
 
     set pui $lfr.fr
     pack [frame $pui] -side left  
-    
-    # Make temp array for servers.
+        
+    # Make temp array for servers. Be sure they are sorted first.
+    SortProfileList
     MakeTmpProfArr
     set tmpSelected $selected
 		
@@ -852,9 +865,11 @@ proc ::Profiles::GetTmpProfiles { } {
 	set plist [list $tmpProfArr($name,server) $tmpProfArr($name,username) \
 	  $tmpProfArr($name,password)]
 	
-	# Set the optional options as "-key value ..."
-	foreach {key value} [array get tmpProfArr $name,-*] {
+	# Set the optional options as "-key value ...". Sorted!
+	foreach key [lsort [array names tmpProfArr $name,-*]] {
 	    set optname [string map [list $name,- ""] $key]
+	    set value $tmpProfArr($key)
+	    
 	    switch -- $optname {
 		resource {
 		    if {$value != ""} {
