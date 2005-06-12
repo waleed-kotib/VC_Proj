@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.14 2005-05-29 14:41:13 matben Exp $
+# $Id: Sounds.tcl,v 1.15 2005-06-12 13:43:38 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -379,6 +379,7 @@ proc ::Sounds::Free { } {
 proc  ::Sounds::InitPrefsHook { } {
     variable sprefs
     variable allSounds
+    variable priv
     
     set sprefs(soundSet) ""
     set sprefs(volume)   100
@@ -394,7 +395,12 @@ proc  ::Sounds::InitPrefsHook { } {
 	set sprefs($name) 1
 	lappend optList [list ::Sounds::sprefs($name) sound_${name} $sprefs($name)]
     }
-    ::PreferencesUtils::Add $optList    
+    ::PreferencesUtils::Add $optList
+    
+    # Volume seems to be set globally on snack.
+    if {$priv(snack)} {
+	set sprefs(volume) [snack::audio play_gain]
+    }
 }
 
 proc ::Sounds::BuildPrefsHook {wtree nbframe} {
