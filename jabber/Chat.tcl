@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.116 2005-06-05 14:54:12 matben Exp $
+# $Id: Chat.tcl,v 1.117 2005-06-12 13:44:55 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1503,6 +1503,9 @@ proc ::Chat::SetFont {theFont} {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
+	if {![info exists chatstate(w)]} {
+	    continue
+	}
 	set w $chatstate(w)
 	if {[winfo exists $w]} {
 	    ConfigureTextTags $w $chatstate(wtext)
