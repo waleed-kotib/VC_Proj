@@ -899,6 +899,7 @@ namespace eval ::EditShortcuts:: {
 
 # translate!
 ::msgcat::mcset de jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
+::msgcat::mcset de jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
 
 
 # Setup assistant:

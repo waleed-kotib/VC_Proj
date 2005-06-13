@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.59 2005-05-30 14:16:59 matben Exp $
+# $Id: Disco.tcl,v 1.60 2005-06-13 08:04:45 matben Exp $
 
 package provide Disco 1.0
 
@@ -112,6 +112,9 @@ namespace eval ::Disco:: {
     # This is needed for the balloons that need a real canvas tag, and that
     # we can't use jid's for this since they may contain special chars (!)!
     variable treeuid 0
+
+    variable wtab -
+    variable wtree -
 }
 
 proc ::Disco::InitHook { } {
@@ -264,57 +267,43 @@ proc ::Disco::ItemsCB {disconame type from subiq args} {
 	if {[jlib::jidequal $from $jserver(this)]} {
 	    ::Jabber::UI::NewPage "Disco"
 	}
-	unset -nocomplain tstate(run,$from)
-	$wwave animate -1
 	
 	# Add to tree:
-	#       v = {item item ...}  with item = jid|node
+	#       vstruct = {item item ...}  with item = {jid node}
 	# These nodes are only identical to the nodes we have just obtained
-	# if it is the first node level of this jid.
-	set nodes [$jstate(disco) nodes $from]
-	if {$nodes == {}} {
-	    set parents [$jstate(disco) parents $from]
-	    set v [concat $parents [list $from]]
-	} else {
-	    
-	    # Need to look at any children to get any parent node.
-	    set child [lindex [wrapper::getchildren $subiq] 0]
-	    set node [wrapper::getattribute $child node]
-	    set pnode [$jstate(disco) parentnode $from $node]
-	    set plist [$jstate(disco) parentitemslist $from $node]
-	    set v $plist
-	    if {0} {
-		::Debug 4 "\t child=$child"
-		::Debug 4 "\t nodes=$nodes"
-		::Debug 4 "\t node=$node"
-		::Debug 4 "\t pnode=$pnode"
-		::Debug 4 "\t plist=$plist"
-		::Debug 4 "\t v=$v"
-	    }
-	}
+	# if it is the first node level of this jid!
+	# Note that jids and nodes can be mixed!
+    
+	set pnode   [wrapper::getattribute $subiq "node"]
+	set ppv     [$jstate(disco) parents2 $from $pnode]
+	set pitem   [list $from $pnode]
+	set vstruct [concat $ppv [list $pitem]]
 	
+	#puts "\t pnode=$pnode"
+	#puts "\t ppv=$ppv"
+	#puts "\t vstruct=$vstruct"
+	#parray ${disconame}::items
+
+	unset -nocomplain tstate(run,$vstruct)
+	$wwave animate -1
+
 	# We add the jid+node corresponding to the subiq element.
-	AddToTree $v
+	AddToTree $vstruct
 	
-	# Get info for the login servers children.
-	if {$nodes == {}} {
-	    set childs [$jstate(disco) children $from]
-	    foreach cjid $childs {
-		
-		# We disco servers jid 'items+info', and disco its childrens 'info'.
-		# Perhaps we should discover depending on items category?
-		if {[llength $v] == 1} {
-		    GetInfo $cjid
-		} elseif {[llength $childs] < $discoInfoLimit} {
-		    GetInfo $cjid
-		}
-	    }
-	} else {
-	    set cnodes [$jstate(disco) nodes $from $pnode]
-	    if {[llength $cnodes] < $discoInfoLimit} {
-		foreach nd $cnodes {
-		    GetInfo $from $nd
-		}
+	# Get info:
+	# We disco servers jid 'items+info', and disco its childrens 'info'.
+	# Perhaps we should discover depending on items category?
+	set centlist [$jstate(disco) childs2 $from $pnode]
+	set clen [llength $centlist]
+	foreach cent $centlist {
+	    set cjid  [lindex $cent 0]
+	    set cnode [lindex $cent 1]
+	    if {[llength $vstruct] == 1} {
+		GetInfo $cjid $cnode
+	    } elseif {$clen < $discoInfoLimit} {
+		GetInfo $cjid $cnode
+	    } elseif {($cnode ne "") && ($clen < $discoInfoLimit)} {
+		GetInfo $cjid $cnode
 	    }
 	}
 	if {[jlib::jidequal $from $jserver(this)]} {
@@ -329,11 +318,11 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
     variable wtree
     variable typeIcon
     upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::Disco::InfoCB type=$type, from=$from"
-    
+     
     set from [jlib::jidmap $from]
     set node [wrapper::getattribute $subiq node]
+   
+    ::Debug 2 "::Disco::InfoCB type=$type, from=$from, node=$node"
     
     if {[string equal $type "error"]} {
 	::Jabber::AddErrorLog $from $subiq
@@ -344,30 +333,37 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
 	# need to be set since we get items before name.
 	# 
 	# BUT the items element may also have a name attribute???
-	if {![info exists wtree] || ![winfo exists $wtree]} {
+	if {![winfo exists $wtree]} {
 	    return
 	}
-	set name [$jstate(disco) name $from $node]
-	
-	# Icon.
+	set ppv     [$jstate(disco) parents2 $from $node]
+	set item    [list $from $node]
+	set vstruct [concat $ppv [list $item]]
 	set cattype [lindex [$jstate(disco) types $from $node] 0]
-	set icon  ""
-	if {[info exists typeIcon($cattype)]} {
-	    set icon $typeIcon($cattype)
-	}
 	
-	# Find the 'v' using from jid and any node.
-	set v [$jstate(disco) getflatlist $from $node]
-	if {[$wtree isitem $v]} {
+	if {[$wtree isitem $vstruct]} {
+	    
+	    # Icon.
+	    set icon  ""
+	    if {[info exists typeIcon($cattype)]} {
+		set icon $typeIcon($cattype)
+	    }
+	    set opts {}	    
+	    set name [$jstate(disco) name $from $node]
 	    if {$name != ""} {
-		$wtree itemconfigure $v -text $name
+		lappend opts -text $name
 	    }
 	    if {$icon != ""} {
-		$wtree itemconfigure $v -image $icon
+		lappend opts -image $icon
 	    }
-	    set treectag [$wtree itemconfigure $v -canvastags]
+	    if {$node != ""} {
+		lappend opts -dir [IsBranchNode $from $node]
+	    }
+	    eval {$wtree itemconfigure $vstruct} $opts
+
+	    set treectag [$wtree itemconfigure $vstruct -canvastags]
 	    MakeBalloonHelp $from $node $treectag
-	    SetDirItemUsingCategory $from $node
+	    SetDirItemUsingCategory $vstruct
 	}
 	
 	# Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
@@ -380,14 +376,15 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
     }
 }
 
-proc ::Disco::SetDirItemUsingCategory {jid {node ""}} {
+proc ::Disco::SetDirItemUsingCategory {vstruct} {
     variable wtree
     upvar ::Jabber::jstate jstate
         
+    set jid  [lindex $vstruct end 0]
+    set node [lindex $vstruct end 1]
+
     if {[IsBranchCategory $jid $node]} {
-	set v [$jstate(disco) getflatlist $jid $node]
-	$wtree itemconfigure $v -dir 1 -sortcommand {lsort -dictionary} \
-	  -style bold
+	$wtree itemconfigure $vstruct -dir 1 -sortcommand {lsort -dictionary}
     }
 }
 
@@ -432,9 +429,16 @@ proc ::Disco::IsJidBranchCategory {jid} {
 proc ::Disco::IsBranchNode {jid node} {
     upvar ::Jabber::jstate jstate
     
-    set isdir 0
-    if {[$jstate(disco) iscategorytype hierarchy/branch $jid $node]} {
+    if {0} {
+	set isdir 0
+	if {[$jstate(disco) iscategorytype hierarchy/branch $jid $node]} {
+	    set isdir 1
+	}
+    } else {
 	set isdir 1
+	if {[$jstate(disco) iscategorytype hierarchy/leaf $jid $node]} {
+	    set isdir 0
+	}
     }
     return $isdir
 }
@@ -746,22 +750,21 @@ proc ::Disco::RegisterPopupEntry {menuSpec} {
 #       
 # Arguments:
 #       w           widget that issued the command: tree or text
-#       v           tree item path {item item ...}  with item = jid|node
+#       vstruct     tree item path {item item ...}  with item = {jid node}
 #       
 # Results:
 #       popup menu displayed
 
-proc ::Disco::Popup {w v x y} {
+proc ::Disco::Popup {w vstruct x y} {
     global  wDlgs this
     
     variable popMenuDefs
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Disco::Popup w=$w, v='$v', x=$x, y=$y"
+    ::Debug 2 "::Disco::Popup w=$w, vstruct='$vstruct', x=$x, y=$y"
         
-    set items [$jstate(disco) splititemlist $v]
-    set jid  [lindex $items 0 end]
-    set node [lindex $items 1 0]
+    set jid  [lindex $vstruct end 0]
+    set node [lindex $vstruct end 1]
 
     # An item can have more than one type, for instance,
     # msn.domain can have: {gateway/msn conference/text}
@@ -779,7 +782,7 @@ proc ::Disco::Popup {w v x y} {
     #   search:     search support
     #   user:       user that can be communicated with
     #   wb:         whiteboarding
-    #   jid:        generic type
+    #   jid:        generic type, no node
     #   "":         not specific
 
     # Make a list of all the features of the clicked item.
@@ -808,7 +811,7 @@ proc ::Disco::Popup {w v x y} {
 	lappend clicked wb
     }
     # 'jid' is the generic type.
-    if {$jid != ""} {
+    if {($jid ne "") && ($node eq "")} {
 	lappend clicked jid
     }
     
@@ -886,42 +889,36 @@ proc ::Disco::SelectCmd {w v} {
 #
 # Arguments:
 #       w           tree widget
-#       v           tree item path {item item ...}  with item = jid|node
+#       vstruct     tree item path {item item ...}  with item = {jid node}
 #       
 # Results:
 #       none.
 
-proc ::Disco::OpenTreeCmd {w v} {   
+proc ::Disco::OpenTreeCmd {w vstruct} {   
     variable wtree
     variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Disco::OpenTreeCmd v=$v"
+    ::Debug 2 "::Disco::OpenTreeCmd vstruct=$vstruct"
 
-    if {[llength $v]} {
-	set items [$jstate(disco) splititemlist $v]
-	set jid  [lindex $items 0 end]
-	set node [lindex $items 1 0]
+    if {[llength $vstruct]} {
+	set jid  [lindex $vstruct end 0]
+	set node [lindex $vstruct end 1]
 
 	# If we have not yet discoed this jid, do it now!
 	# We should have a method to tell if children have been added to tree!!!
 	if {![$jstate(disco) isdiscoed items $jid $node]} {
-	    set tstate(run,$jid) 1
+	    set tstate(run,$vstruct) 1
 	    $wwave animate 1
 	    
 	    # Discover services available.
 	    GetItems $jid $node
-	} elseif {[llength [$wtree children $v]] == 0} {
+	} elseif {[llength [$wtree children $vstruct]] == 0} {
 	    
 	    # An item may have been discoed but not from here.
-	    set children [$jstate(disco) children $jid]
-	    foreach c $children {
-		AddToTree [concat $v [list $c]]
-	    }
-	    set nodes [$jstate(disco) nodes $jid $node]
-	    foreach c $nodes {
-		AddToTree [concat $v [list $c]]
+	    foreach item [$jstate(disco) childs2 $jid $node] {
+		AddToTree [concat $vstruct [list $item]]
 	    }
 	}
 	
@@ -929,14 +926,13 @@ proc ::Disco::OpenTreeCmd {w v} {
     }    
 }
 
-proc ::Disco::CloseTreeCmd {w v} {
+proc ::Disco::CloseTreeCmd {w vstruct} {
     variable wwave
     variable tstate
     
-    ::Debug 2 "::Disco::CloseTreeCmd v=$v"
-    set item [lindex $v end]
-    if {[info exists tstate(run,$item)]} {
-	unset tstate(run,$item)
+    ::Debug 2 "::Disco::CloseTreeCmd vstruct=$vstruct"
+    if {[info exists tstate(run,$vstruct)]} {
+	unset tstate(run,$vstruct)
 	$wwave animate -1
     }
 }
@@ -946,62 +942,73 @@ proc ::Disco::CloseTreeCmd {w v} {
 #       Fills tree with content. Calls itself recursively.
 #
 # Arguments:
-#       v           tree item path {item item ...}  with item = jid|node
+#       vstruct     {{jid node} {jid node} ...}
 #
 
-proc ::Disco::AddToTree {v} {    
+proc ::Disco::AddToTree {vstruct} {    
     variable wtree    
     variable treeuid
     upvar ::Jabber::jstate jstate
- 
+    
     # We disco servers jid 'items+info', and disco its childrens 'info'.    
-    ::Debug 4 "::Disco::AddToTree v='$v'"
-
-    set items [$jstate(disco) splititemlist $v]
-    set jid  [lindex $items 0 end]
-    set node [lindex $items 1 0]
-    set icon ""
+    ::Debug 4 "::Disco::AddToTree vstruct='$vstruct'"
     
-    # Ad-hoc way to figure out if dir or not. Use the category attribute.
-    # <identity category='server' type='im' name='ejabberd'/>
-    if {[llength $v] == 1} {
-	set isdir 1
-    } else {
-	set isdir [IsBranchCategory $jid $node]
-	#puts "\t IsBranchCategory=$isdir"
-    }
+    set jid   [lindex $vstruct end 0]
+    set node  [lindex $vstruct end 1]
+    set pjid  [lindex $vstruct end-1 0]
+    set pnode [lindex $vstruct end-1 1]
     
-    # Display text string. Room participants with their nicknames.
-    jlib::splitjid $jid jid2 res
-    if {[$jstate(disco) isroom $jid2] && [string length $res]} {
-	set name [$jstate(jlib) service nick $jid]
-	set isdir 0
-	set icon [::Roster::GetPresenceIconFromJid $jid]
-    } else {
-	set name [$jstate(disco) name $jid $node]
-	if {$name == ""} {
-	    if {$node == ""} {
-		set name $jid
-	    } else {
-		set name $node
+    ::Debug 4 "\t jid=$jid"
+    ::Debug 4 "\t node=$node"
+    
+    # Do not create if exists which preserves -open.
+    if {![$wtree isitem $vstruct]} {
+	
+	# Ad-hoc way to figure out if dir or not. Use the category attribute.
+	# <identity category='server' type='im' name='ejabberd'/>
+	if {[llength $vstruct] == 1} {
+	    set isdir 1
+	} else {
+	    set isdir [IsBranchCategory $jid $node]
+	}
+	
+	# jid that are children of node is never a dir
+	if {($pnode ne "") && ($jid ne $pjid)} {
+	    set isdir 0
+	}
+	
+	# Display text string. Room participants with their nicknames.
+	jlib::splitjid $jid jid2 res
+	set icon ""
+	if {[$jstate(disco) isroom $jid2] && [string length $res]} {
+	    set name [$jstate(jlib) service nick $jid]
+	    set isdir 0
+	    set icon [::Roster::GetPresenceIconFromJid $jid]
+	} else {
+	    set name [$jstate(disco) name $jid $node]
+	    if {$name == ""} {
+		if {$node == ""} {
+		    set name $jid
+		} else {
+		    set name $node
+		}
 	    }
 	}
-    }
-    
-    # Make the first two levels, server and its children bold, rest normal style.
-    set style normal
-    if {[llength $v] <= 1} {
-	set style bold
-    } elseif {$isdir} {
-	set style bold
-    }
-    set isopen 0
-    if {[llength $v] == 1} {
-	set isopen 1
-    }
-        
-    # Do not create if exists which preserves -open.
-    if {![$wtree isitem $v]} {
+	
+	# Make the first two levels, server and its children bold, rest normal style.
+	set style normal
+	if {[llength $vstruct] <= 2} {
+	    set style bold
+	} elseif {$isdir && ($node == "")} {
+	    set style bold
+	}
+	if {$node != ""} {
+	    set style normal
+	}
+	set isopen 0
+	if {[llength $vstruct] == 1} {
+	    set isopen 1
+	}
 	set treectag item[incr treeuid]
 	if {$node == ""} {
 	    set tags [list jid $jid]
@@ -1010,34 +1017,25 @@ proc ::Disco::AddToTree {v} {
 	}
 	set opts [list -text $name -tags $tags -style $style -dir $isdir \
 	  -image $icon -open $isopen -canvastags $treectag]
-	if {$isdir && ([llength $v] >= 2)} {
+	if {$isdir && ([llength $vstruct] >= 2)} {
 	    lappend opts -sortcommand {lsort -dictionary}
 	}
-	eval {$wtree newitem $v} $opts
+	eval {$wtree newitem $vstruct} $opts
 	
 	# Balloon.
 	MakeBalloonHelp $jid $node $treectag
     }
-
+    
     # Add all child or node elements as well.
-    # These are mutually exclusive.
-    set childs [$jstate(disco) children $jid]
-    if {[llength $childs]} {
-	::Debug 4 "\t childs=$childs"
-	foreach citem $childs {
-	    set cv [concat $v [list $citem]]
-	    AddToTree $cv
-	}	    
-    } else {
-	if {0} {
-	    ::Debug 4 "\t items=$items"
-	    ::Debug 4 "\t nodes=[$jstate(disco) nodes $jid $node]"
-	}
-	foreach cnode [$jstate(disco) nodes $jid $node] {
-	    set cv [concat $v [list $cnode]]
-	    AddToTree $cv
-	}
-    }
+    # Note: jid and node childs can be mixed!
+    set cstructs [$jstate(disco) childs2 $jid $node]
+    
+    ::Debug 4 "\t cstructs=$cstructs"
+    
+    foreach c $cstructs {
+	set cv [concat $vstruct [list $c]]
+	AddToTree $cv
+    }	    
 }
 
 proc ::Disco::MakeBalloonHelp {jid node treectag} {
@@ -1059,27 +1057,29 @@ proc ::Disco::MakeBalloonHelp {jid node treectag} {
     ::balloonhelp::balloonfortree $wtree $treectag $msg
 }
 
-proc ::Disco::Refresh {jid} {    
+proc ::Disco::Refresh {jid {node ""}} {    
     variable wtree
     variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Disco::Refresh jid=$jid"
+    ::Debug 2 "::Disco::Refresh jid=$jid, node=$node"
 	
     # Clear internal state of the disco object for this jid.
     $jstate(disco) reset $jid
     
     # Remove all children of this jid from disco tree.
-    foreach v [$wtree find withtag $jid] {
-	$wtree delitem $v -childsonly 1
-    }
+    # @@@ take node into account
+    set vstruct [lindex [$wtree find withtag $jid] 0]
+    if {$vstruct != {}} {
+	$wtree delitem $vstruct -childsonly 1
     
-    # Disco once more, let callback manage rest.
-    set tstate(run,$jid) 1
-    $wwave animate 1
-    GetInfo  $jid
-    GetItems $jid
+	# Disco once more, let callback manage rest.
+	set tstate(run,$vstruct) 1
+	$wwave animate 1
+	GetInfo  $jid $node
+	GetItems $jid $node
+    }
 }
 
 proc ::Disco::Clear { } {    
@@ -1116,9 +1116,10 @@ proc ::Disco::PresenceHook {jid presence args} {
 	set icon [eval {
 	    ::Roster::GetPresenceIcon $jid3 $presArr(-type)
 	} $presList]
-	set v [concat [$jstate(disco) parents $jid3] $jid3]
-	if {[$wtree isitem $v]} {
-	    $wtree itemconfigure $v -image $icon
+	set item [list $jid3 {}]
+	set vstruct [concat [$jstate(disco) parents2 $jid3] [list $item]]
+	if {[$wtree isitem $vstruct]} {
+	    $wtree itemconfigure $vstruct -image $icon
 	}
     }
 }
