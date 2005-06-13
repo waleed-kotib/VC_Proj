@@ -892,6 +892,7 @@ Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jadisrmall   {Tag bort samtliga servrar som permanent upptäcks automatiskt.}
 ::msgcat::mcset sv jauserinnote {Lägg till dina personliga anteckningar om denna kontakt}
 ::msgcat::mcset sv jaregisterex {Skriv jabber serverns namn där du vill registrera. Tryck sedan på Hämta knappen för att få registreringsinfo. Fyll i och registrera.}
+::msgcat::mcset sv jaloginjid   {Fyll i din Jabber id som "joey@myjabb.org", eller välj profil. Du måste ha ett konto på servern sedan tidigare.}
 
 
 
