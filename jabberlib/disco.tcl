@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.20 2005-06-13 08:04:45 matben Exp $
+# $Id: disco.tcl,v 1.21 2005-06-15 06:28:11 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -249,17 +249,18 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
 # 
 #       Fills the internal records with this disco items query result.
 #       There are four parent-childs combinations:
-#         (0)   jid
-#                   jid
+#       
+#         (0)   jid1
+#                   jid         jid1 != jid
 #               
-#         (1)   jid
-#                   jid+node
+#         (1)   jid1
+#                   jid1+node   jid equal
 #               
-#         (2)   jid+node
-#                   jid
+#         (2)   jid1+node1
+#                   jid         jid1 != jid
 #               
-#         (3)   jid+node
-#                   jid+node
+#         (3)   jid1+node1
+#                   jid+node    jid1 != jid
 #        
 #        Typical xml:
 #        <iq type='result' ...>
@@ -287,6 +288,10 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
 #       of items that cannot be addressed as JIDs; each associated item has 
 #       its own JID+node, but no such JID equals JID1 and each NodeID is
 #       unique in the context of the associated JID. 
+#       
+#   In addition, the results MAY also be mixed, so that a query to a JID or a 
+#   JID+node could yield both (1) items that are addressed as JIDs and (2) 
+#   items that are addressed as JID+node combinations. 
 
 proc disco::parse_get_items {disconame from subiq} {
     upvar ${disconame}::items items
@@ -347,8 +352,8 @@ proc disco::parse_get_items {disconame from subiq} {
 	lappend items($from,$pnode,childs2) [list $jid $node]
 	
 	# Parents--->
-	# @@@ All this fails if we get jids as children of nodes which are
-	# not unique in the disco tree!
+	# Case (2) above is particularly problematic since an entity jid's
+	# position in the disco tree is not unique.
 	if {$node == ""} {
 	    
 	    # This is a jid.
@@ -362,10 +367,10 @@ proc disco::parse_get_items {disconame from subiq} {
 	    } else {
 
 		# case (2):
-		# Server nodes may publish the server in turn. Beware!
+		# The owning entity is required to describe this item. BAD.
 		set xcase 2
-		set items(2,$jid,$node,parent) $from
-		set items(2,$jid,$node,parents) $from
+		set items(2,$from,$pnode,$jid,$node,parent) $from
+		set items(2,$from,$pnode,$jid,$node,parents) $from
 	    }
 	} else {
 	    
@@ -384,10 +389,10 @@ proc disco::parse_get_items {disconame from subiq} {
 	}
 	if {$xcase == 2} {
 
-	    # Server nodes may publish the server in turn. Beware!
-	    set items(2,$jid,$node,parent2) $pitem
-	    set items(2,$jid,$node,parents2) [concat $items($from,$pnode,parents2) \
-	      [list $pitem]]
+	    # The owning entity is required to describe this item. BAD.
+	    set items(2,$from,$pnode,$jid,$node,parent2) $pitem
+	    set items(2,$from,$pnode,$jid,$node,parents2) 7
+	    [concat $items($from,$pnode,parents2) [list $pitem]]
 	} else {
 	    set items($jid,$node,parent2) $pitem
 	    set items($jid,$node,parents2) [concat $items($from,$pnode,parents2) \

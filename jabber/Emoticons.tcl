@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.31 2005-06-05 14:54:12 matben Exp $
+# $Id: Emoticons.tcl,v 1.32 2005-06-15 06:28:11 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -197,9 +197,15 @@ proc ::Emoticons::LoadTmpIconSet {path} {
 }
 
 proc ::Emoticons::ParseIconDef {name dir xmldata} {
+    variable tmpicons
+    variable tmpiconsInv
 
     set token [tinydom::parse $xmldata]
     set xmllist [tinydom::documentElement $token]
+    
+    # @@@ Any images shall be freed!!!
+    array unset tmpicons $name,*
+    array unset tmpiconsInv $name,*
     
     foreach elem [tinydom::children $xmllist] {
 	
@@ -287,13 +293,11 @@ proc ::Emoticons::SetPermanentSet {selected} {
     variable state
     variable smiley
 
-    #puts "::Emoticons::SetPermanentSet selected=$selected"
     set setsLoaded {}
     foreach ind [array names state *,loaded] {
 	set name [string map [list ",loaded" ""] $ind]
 	lappend setsLoaded $name
     }
-    #puts "\t setsLoaded=$setsLoaded"
     if {[info exists smiley]} {
 	FreeSmileyArr
     }
@@ -313,7 +317,6 @@ proc ::Emoticons::SetSmileyArr {name} {
     variable smiley
     variable smileyInv
     
-    #puts "::Emoticons::SetSmileyArr name=$name"
     foreach ind [array names tmpiconsInv $name,*] {
 	set im [string map [list "$name," ""] $ind]
 	foreach key $tmpiconsInv($ind) {
@@ -327,8 +330,6 @@ proc ::Emoticons::FreeSmileyArr { } {
     variable smiley
     variable smileyInv
     
-    #puts "::Emoticons::FreeSmileyArr"
-    
     # This could create empty images for any open dialogs. BAD?
     # @@@ MEMLEAK!
     #eval {image delete} [array names smileyInv]
@@ -341,7 +342,6 @@ proc ::Emoticons::FreeTmpSet {name} {
     variable tmpicons
     variable tmpiconsInv
     
-    #puts "::Emoticons::FreeTmpSet name=$name"
     set ims {}
     foreach ind [array names tmpiconsInv $name,*] {
 	lappend ims [string map [list "$name," ""] $ind]
@@ -365,7 +365,6 @@ proc ::Emoticons::FreeAllTmpSets { } {
     foreach {key photo} [array get tmpicons ] {
 	lappend ims $photo
     }
-    #puts ">>>>>>>>>>{image delete} [lsort -unique $ims]"
     eval {image delete} [lsort -unique $ims]
     unset -nocomplain meta state tmpicons tmpiconsInv
 }
