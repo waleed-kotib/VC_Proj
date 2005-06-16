@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.92 2005-05-27 06:41:47 matben Exp $
+# $Id: UI.tcl,v 1.93 2005-06-16 07:34:03 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -90,10 +90,16 @@ proc ::UI::InitCommonBinds { } {
 		}
 	    }
 	}
-    } else {
+    } elseif {[string equal [tk windowingsystem] "aqua"]} {
 	bind Canvas <MouseWheel> {
 	    if {![string equal [%W yview] "0 1"]} {
 		%W yview scroll [expr {- (%D)}] units
+	    }
+	}
+    } else {
+	bind Canvas <MouseWheel> {
+	    if {![string equal [%W yview] "0 1"]} {
+		%W yview scroll [expr {- (%D / 120) * 4}] units
 	    }
 	}
     }

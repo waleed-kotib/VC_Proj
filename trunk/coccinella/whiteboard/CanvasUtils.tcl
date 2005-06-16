@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.26 2005-05-28 07:04:27 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.27 2005-06-16 07:34:03 matben Exp $
 
 package require sha1pure
 
@@ -2088,10 +2088,16 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
 		}
 	    }
 	}
-    } else {
+    } elseif {[string equal [tk windowingsystem] "aqua"]} {
 	bind Whiteboard <MouseWheel> {
 	    if {![string equal [%W yview] "0 1"]} {
 		%W yview scroll [expr {- (%D)}] units
+	    }
+	}
+    } else {
+	bind Whiteboard <MouseWheel> {
+	    if {![string equal [%W yview] "0 1"]} {
+		%W yview scroll [expr {- (%D / 120) * 4}] units
 	    }
 	}
     }
