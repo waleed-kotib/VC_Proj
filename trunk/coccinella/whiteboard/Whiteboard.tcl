@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.40 2005-06-07 07:28:55 matben Exp $
+# $Id: Whiteboard.tcl,v 1.41 2005-06-16 12:39:26 matben Exp $
 
 package require anigif
 package require entrycomp
@@ -1041,18 +1041,24 @@ proc ::WB::DestroyMain {wtop} {
 proc ::WB::CreateImageForWtop {wtop name args} {
     
     upvar ::WB::${wtop}::canvasImages canvasImages
-
+    
     array set argsArr $args
-    set photoOpts {}
     if {[info exists argsArr(-file)]} {
-	lappend photoOpts -file $argsArr(-file)
 	if {[string tolower [file extension $argsArr(-file)]] == ".gif"} {
 	    set photo [::Utils::CreateGif $argsArr(-file) $name]
 	} else {
-	    set photo [eval {image create photo} $name]
+	    if {$name == ""} {
+		set photo [image create photo -file $argsArr(-file)]
+	    } else {
+		set photo [image create photo $name -file $argsArr(-file)]
+	    }
 	}
     } else {
-	set photo [eval {image create photo} $name {-data $argsArr(-data)}]
+	if {$name == ""} {
+	    set photo [image create photo -data $argsArr(-data)]
+	} else {
+	    set photo [image create photo $name -data $argsArr(-data)]
+	}
     }
 
     lappend canvasImages $photo
