@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.21 2005-06-15 06:28:11 matben Exp $
+# $Id: disco.tcl,v 1.22 2005-06-16 07:10:40 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -424,7 +424,7 @@ proc disco::parse_get_info {disconame from subiq} {
 
     set node [wrapper::getattribute $subiq "node"]
 
-    array unset info "$from,$node,*"
+    array unset info [jlib::ESC $from],[jlib::ESC $node],*
     set info($from,$node,xml) $subiq
     set isconference 0
     
@@ -1079,9 +1079,9 @@ proc disco::ResetJid {disconame jid} {
 	    set parents $items($jid,parents)
 	}
 	
-	array unset items $jid,*
-	array unset info $jid,*
-	array unset rooms $jid,*
+	array unset items [jlib::ESC $jid],*
+	array unset info  [jlib::ESC $jid],*
+	array unset rooms [jlib::ESC $jid],*
 	
 	# Add back parent(s).
 	if {[info exists parent]} {

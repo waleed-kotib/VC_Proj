@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.33 2005-03-02 13:49:41 matben Exp $
+# $Id: roster.tcl,v 1.34 2005-06-16 07:10:40 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -295,8 +295,8 @@ proc roster::removeitem {rostName jid} {
     unset -nocomplain rostArr($mjid,item)
     
     # Be sure to unset all, also jid3 entries!
-    array unset presArr "${mjid}*"
-    array unset oldpresArr "${mjid}*"
+    array unset presArr [jlib::ESC $mjid]*
+    array unset oldpresArr [jlib::ESC $mjid]*
     return {}
 }
 
@@ -400,6 +400,8 @@ proc roster::clearpresence {rostName {jidpattern ""}} {
     upvar ${rostName}::presArr presArr
     upvar ${rostName}::oldpresArr oldpresArr
 
+    Debug 2 "roster::clearpresence $rostName '$jidpattern'"
+
     if {$jidpattern == ""} {
 	unset -nocomplain presArr
     } else {
@@ -449,11 +451,12 @@ proc roster::setpresence {rostName jid type args} {
     } else {
 	
 	# Keep cache of any old state.
-	array unset oldpresArr "${mjid},*"
-	array set oldpresArr [array get presArr "${mjid},*"]
+        # Note special handling of * for array unset - prefix with \\ to quote.
+	array unset oldpresArr [jlib::ESC $mjid],*
+	array set oldpresArr [array get presArr [jlib::ESC $mjid],*]
 	
 	# Clear out the old presence state since elements may still be lurking.
-	array unset presArr "${mjid},*"
+	array unset presArr [jlib::ESC $mjid],*
 	
 	# Should we add something more to our roster, such as subscription,
 	# if we haven't got our roster before this?
@@ -536,11 +539,11 @@ proc roster::setpresence2 {rostName jid type args} {
     } else {
 	
 	# Keep cache of any old state.
-	array unset oldpresArr2 "${mjid},*"
-	array set oldpresArr2 [array get presArr2 "${mjid},*"]
+	array unset oldpresArr2 [jlib::ESC $mjid],*
+	array set oldpresArr2 [array get presArr2 [jlib::ESC $mjid],*]
 	
 	# Clear out the old presence state since elements may still be lurking.
-	array unset presArr2 "${mjid},*"
+	array unset presArr2 [jlib::ESC $mjid],*
     
 	set presArr2($mjid,type) $type
 	set presArr2($mjid,jid)  $mjid
@@ -656,7 +659,7 @@ proc roster::getusers {rostName args} {
 	    set isavailable 0
 
 	    # Be sure to handle empty resources as well: '1234@icq.host'
-	    foreach key [array names presArr "${jid2}*,type"] {
+	    foreach key [array names presArr "[jlib::ESC $jid2]*,type"] {
 		if {[string equal $presArr($key) "available"]} {
 		    set isavailable 1
 		    break
@@ -799,12 +802,12 @@ proc roster::getpresence2 {rostName jid args} {
     if {$resource == ""} {
 	
 	# 2-tier jid. Match any resource.
-	set arrlist [concat [array get presArr2 $mjid,jid] \
-	  [array get presArr2 $mjid/*,jid]]
+	set arrlist [concat [array get presArr2 [jlib::ESC $mjid],jid] \
+                         [array get presArr2 [jlib::ESC $mjid]/*,jid]]
 	foreach {key value} $arrlist {
 	    set thejid $value
 	    set jidresult {}
-	    foreach {akey avalue} [array get presArr2 $thejid,*] {
+	    foreach {akey avalue} [array get presArr2 [jlib::ESC $thejid],*] {
 		set thekey [string map [list $thejid, ""] $akey]
 		lappend jidresult -$thekey $avalue
 	    }
@@ -979,8 +982,8 @@ proc roster::getmatchingjids2 {rostName jid args} {
     upvar ${rostName}::presArr2 presArr2
     
     set jidlist {}
-    set arrlist [concat [array get presArr2 $mjid,jid] \
-      [array get presArr2 $mjid/*,jid]]
+    set arrlist [concat [array get presArr2 [jlib::ESC $mjid],jid] \
+                     [array get presArr2 [jlib::ESC $mjid]/*,jid]]
     foreach {key value} $arrlist {
 	lappend jidlist $value
     }
@@ -1085,7 +1088,7 @@ proc roster::isavailable {rostName jid} {
     } else {
 	
 	# Be sure to allow for 'user@domain' with empty resource.
-	foreach key [array names presArr "${jid2}*,type"] {
+	foreach key [array names presArr "[jlib::ESC $jid2]*,type"] {
 	    if {[string equal $presArr($key) "available"]} {
 		return 1
 	    }
@@ -1118,7 +1121,7 @@ proc roster::isavailable2 {rostName jid} {
     } else {
 	
 	# Be sure to allow for 'user@domain' with empty resource.
-	foreach key [array names presArr "${jid2}*,type"] {
+	foreach key [array names presArr "[jlib::ESC $jid2]*,type"] {
 	    if {[string equal $presArr($key) "available"]} {
 		return 1
 	    }
@@ -1162,7 +1165,7 @@ proc roster::wasavailable {rostName jid} {
     } else {
 	
 	# Be sure to allow for 'user@domain' with empty resource.
-	foreach key [array names oldpresArr "${jid2}*,type"] {
+	foreach key [array names oldpresArr "[jlib::ESC $jid2]*,type"] {
 	    if {[string equal $oldpresArr($key) "available"]} {
 		return 1
 	    }
