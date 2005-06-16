@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.27 2005-06-16 07:34:03 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.28 2005-06-16 12:39:26 matben Exp $
 
 package require sha1pure
 
@@ -923,7 +923,7 @@ proc ::CanvasUtils::GetImportCmdForSnack {cmd args} {
 proc ::CanvasUtils::GetImportOptsURI {uritype filePath args} {
     
     array set argsArr $args
-    
+       
     switch -- $uritype {
 	file {
 	    if {[info exists argsArr(-basepath)]} {
