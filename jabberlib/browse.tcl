@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.31 2005-05-31 07:42:00 matben Exp $
+# $Id: browse.tcl,v 1.32 2005-06-16 07:10:39 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -922,7 +922,7 @@ proc browse::ClearJid {browsename jid} {
     }
 
     # Remove this specific jid from our internal state.
-    array unset locals "$jid,*"
+    array unset locals [jlib::ESC $jid],*
     if {[info exists parent]} {
     	set locals($jid,parent) $parent
     }

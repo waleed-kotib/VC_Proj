@@ -11,7 +11,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.3 2005-03-02 13:49:41 matben Exp $
+# $Id: caps.tcl,v 1.4 2005-06-16 07:10:40 matben Exp $
 
 # UNFINISHED!!!
 #      
@@ -124,7 +124,7 @@ proc jlib::caps::unavail_cb {jlibname jid type args} {
 	    set capsjids($node,$ver) [lreplace $capsjids($node,$ver) $ind $ind]
 	}
     }
-    array unset cache "jid,$jid,*"
+    array unset cache jid,[jlib::ESC $jid],*
 }
 
 proc jlib::caps::free {jlibname} {

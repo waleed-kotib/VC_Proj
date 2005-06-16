@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.98 2005-05-26 12:16:42 matben Exp $
+# $Id: jabberlib.tcl,v 1.99 2005-06-16 07:10:40 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2821,7 +2821,7 @@ proc jlib::getagent {jlibname jid} {
     upvar ${jlibname}::agent agent
 
     if {[info exists agent($jid,parent)]} {
-	return [array get agent "$jid,*"]
+	return [array get agent [jlib::ESC $jid],*]
     } else {
 	return ""
     }
@@ -3385,6 +3385,18 @@ namespace eval jlib {
 }
 
 # Various utility procedures to handle jid's....................................
+
+# jlib::ESC --
+#
+#	array get and array unset accepts glob characters. These need to be
+#	escaped if they occur as part of a JID.
+#
+
+proc jlib::ESC {s} {
+    return [string map {* \\* ? \\? [ \\[ ] \\] \\ \\\\} $s]
+}
+
+# STRINGPREPs for the differnt parts of jids.
 
 proc jlib::UnicodeListToRE {ulist} {
     

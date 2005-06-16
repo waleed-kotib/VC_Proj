@@ -139,10 +139,10 @@
 ::msgcat::mcset pl State/Region	Państwo/Region
 ::msgcat::mcset pl Stop		Stop
 ::msgcat::mcset pl Subject	Temat
-::msgcat::mcset pl Subscribe	Subskrybuj
-::msgcat::mcset pl Subscribed	Zasubskrybowany/a
-::msgcat::mcset pl Subscription	Subskrybcja
-::msgcat::mcset pl Subscriptions	Subskrypcje
+::msgcat::mcset pl Subscribe	{Poproś o autoryzację}
+::msgcat::mcset pl Subscribed	Autoryzowany/a
+::msgcat::mcset pl Subscription	Autoryzacja
+::msgcat::mcset pl Subscriptions	Autoryzacje
 ::msgcat::mcset pl Text		Tekst
 ::msgcat::mcset pl Time		Czas
 ::msgcat::mcset pl Timeout	{Czas upłynął}
@@ -153,8 +153,8 @@
 ::msgcat::mcset pl Trash	Makulatura
 ::msgcat::mcset pl Type		Typ
 ::msgcat::mcset pl Unregister	Wyrejestruj
-::msgcat::mcset pl Unsubscribe	Odsubskrybuj
-::msgcat::mcset pl Unsubscribed	Odsubskrybowany
+::msgcat::mcset pl Unsubscribe	{Zrezygnuj z autoryzacji}
+::msgcat::mcset pl Unsubscribed	{Brak autoryzacji}
 ::msgcat::mcset pl Username	Użytkownik
 ::msgcat::mcset pl Value	Wartość
 ::msgcat::mcset pl Visitors	Goście
@@ -526,7 +526,7 @@
 ::msgcat::mcset pl {Start Chat}           {Rozpocznij rozmowę}
 ::msgcat::mcset pl {Status message}       {Opis statusu}
 ::msgcat::mcset pl {Status when logging out}  {Opis statusu przy wylogowaniu}
-::msgcat::mcset pl {Subscription Failed}  {Nieudana subskrypcja}
+::msgcat::mcset pl {Subscription Failed}  {Nieudana autoryzacja}
 ::msgcat::mcset pl {Subscription Pending} {Oczekiwanie na zgodę}
 ::msgcat::mcset pl {Synthetic speech}     {Syntetyczna mowa}
 ::msgcat::mcset pl {System fonts}         {Czcionki systemowe}
@@ -552,7 +552,6 @@
 ::msgcat::mcset pl {Version Info}         {Dane wersji}
 ::msgcat::mcset pl {Whiteboard fonts}     {Czcionki Tablicy}
 ::msgcat::mcset pl {Writing file}         {Zapis pliku}
-#::msgcat::mcset pl {Groupchat presence change} 
 
 
 # Splash screen:
@@ -605,15 +604,15 @@
 
 # Messages for tk_messageBox:
 ::msgcat::mcset pl jamesserrsend	{W trakcie wysyłania wiadomości do "%s" zdarzył się błąd. Kod błędu: %s, informacja: %s}
-::msgcat::mcset pl jamessallowsub	{Użytkownik %s zezwala Ci na obserwację jego obecności (udzielił subskrypcji).}
-::msgcat::mcset pl jamessunsub		{Użytkownik %s zrezygnował z Twojej subskrypcji i został usunięty z Twej listy.}
-::msgcat::mcset pl jamessunsubpres	{Użytkownik %s nie obserwuje już Twojej obecności (zrezygnował z subskrypcji).}
-::msgcat::mcset pl jamessunsubask	{Użytkownik %s anulował Twoją subskrypcję. Czy chcesz go usunąć z listy kontaktów?}
-::msgcat::mcset pl jamessunsubscribed	{Zrezygnowałeś z obserwacji obecności użytkownika %s (rezygnacja z subskrypcji).}
+::msgcat::mcset pl jamessallowsub	{Użytkownik %s zezwala Ci na obserwację jego obecności (udzielił autoryzacji).}
+::msgcat::mcset pl jamessunsub		{Użytkownik %s zrezygnował z Twojej autoryzacji i został usunięty z Twej listy.}
+::msgcat::mcset pl jamessunsubpres	{Użytkownik %s nie obserwuje już Twojej obecności (zrezygnował z autoryzacji).}
+::msgcat::mcset pl jamessunsubask	{Użytkownik %s cofnął Ci autoryzację. Czy chcesz go usunąć z listy kontaktów?}
+::msgcat::mcset pl jamessunsubscribed	{Zrezygnowałeś z obserwacji obecności użytkownika %s (rezygnacja z autoryzacji).}
 ::msgcat::mcset pl jamesserrpres	{Odebrano błąd obecności (statusu). Kod błędu: %s, informacja: %s}
-::msgcat::mcset pl jamessautoaccepted	{Prośba o subskrypcję ze strony użytkownika %s automatycznie zaakceptowana.}
-::msgcat::mcset pl jamessautoreject	{Prośba o subskrypcję ze strony użytkownika %s automatycznie odrzucona.}
-::msgcat::mcset pl jamessautosubs	{Automatycznie udzielono Ci zgody na obserwację obecności (subskrypcję) użytkownika %s.}
+::msgcat::mcset pl jamessautoaccepted	{Prośba o autoryzację ze strony użytkownika %s automatycznie zaakceptowana.}
+::msgcat::mcset pl jamessautoreject	{Prośba o autoryzację ze strony użytkownika %s automatycznie odrzucona.}
+::msgcat::mcset pl jamessautosubs	{Automatycznie udzielono Ci zgody na obserwację obecności (autoryzacja) użytkownika %s.}
 
 
 ::msgcat::mcset pl jamessconnbroken	{Połączenie niespodziewanie przerwane.}
@@ -630,7 +629,7 @@
 ::msgcat::mcset pl jamesserrvers	{Błąd przy próbie sprawdzenia wersji %s. Problem: %s}
 ::msgcat::mcset pl jamesserrautoupdate 	{Błąd przy próbie sprawdzenia %s na dostępność nowszej wersji oprogramowania. Problem: %s}
 ::msgcat::mcset pl jamesswarberasewb	{Czy mam najpierw skasować zawartość Tablicy?}
-::msgcat::mcset pl jamesswarnremove	{Usunięcia elementu listy nie da się potem cofnąć - w razie takiej potrzeby zajdzie konieczność ponownego wysłania prośby o subskrypcję. Usunąć?}
+::msgcat::mcset pl jamesswarnremove	{Usunięcia elementu listy nie da się potem cofnąć - w razie takiej potrzeby zajdzie konieczność ponownego wysłania prośby o autoryzację. Usunąć?}
 ::msgcat::mcset pl jamessillegalchar	{Niedozwolony znak w %s: "%s"!}
 ::msgcat::mcset pl jamessbadjid		{Błędna forma adresu JID "%s". Kontynuować?}
 ::msgcat::mcset pl jamessalreadyinrost	{Przecież masz już ma liście JID "%s". Czy kontynuować?}
@@ -694,14 +693,14 @@
 ::msgcat::mcset pl jamessaddforeign	        {Dodając użytkownika innego niż Jabber systemu IM, musisz mieć w tymże systemie własne konto - i tego właśnie konta używać korzystając\
 z odpowiedniego "transportu" osiągalnego na serwerze %s. Czy chcesz to załatwić teraz?}
 ::msgcat::mcset pl jamessowntrpt	        {To Twoje własne konto w %s, które działa jako usługa serwerowa, przekazująca wiadomości do tego systemu IM. Ono musi się znajdować na Twojej liście.\
-Otrzymałeś subskrypcję od %s: %s.}
+Otrzymałeś autoryzację od %s: %s.}
 ::msgcat::mcset pl jamesswbchatlost	        {Po zamknięciu niniejszej tablicy całość zapisu rozmowy przepadnie. Czy na pewno chcesz ją skończyć?}
 ::msgcat::mcset pl jamesschatoffline            {Ten użytkownik nie jest już obecny w sieci, przeto wiadomość nie została mu przekazana.}
 ::msgcat::mcset pl jamessregloginok             {Zarejestrowałeś się, i zostałeś automatycznie zalogowany jako "%s"}
 ::msgcat::mcset pl jamessregerrinuse            {Rejestracja nieudana, gdyż z tej nazwy użytkownika (loginu) ktoś już korzysta. Jeśli to właśnie Ty - zaloguj się po prostu. Błąd: %s}
 ::msgcat::mcset pl jamessregerr                 {Błąd nieudanej rejestracji: %s}
 ::msgcat::mcset pl jamesstrptsubsc              {Twoje konto zarejestrowane w systemie %s znajdzie się na Twojej własnej liście jako przekaźnik wiadomości ("transport") do tego systemu.}
-::msgcat::mcset pl jamessfailedsubsc            {Nieudana subskrypcja obecności %s - ten użytkownik nie wyraził zgody.}
+::msgcat::mcset pl jamessfailedsubsc            {Brak autoryzacji ze strony %s - użytkownik nie wyraził zgody.}
 ::msgcat::mcset pl jamessstarttls-nofeature     {Brak możliwości skorzystania z TLS na serwerze "%s".}
 ::msgcat::mcset pl jamessstarttls-failure       {Nieudana negocjacja TLS z serwerem "%s".}
 ::msgcat::mcset pl jamessgcinvite               {Masz zaproszenie do wzięcia udziału w konferencji %s (od %s). Przyłączysz się?}
@@ -762,12 +761,12 @@ Jeżeli w "ustawieniach sieci" nie wybrano połączenia "peer-to-peer" (P2P) - p
 ::msgcat::mcset pl prefaaset     {Ustawienia automatycznie ustawianych statusów:}
 ::msgcat::mcset pl prefminaw     {Ile minut do "zaraz wracam":}
 ::msgcat::mcset pl prefminea     {Ile minut do "niedostępny":}
-::msgcat::mcset pl prefsuif      {Jeśli ktokolwiek zwraca się z prośbą o subskrypcję, i...}
+::msgcat::mcset pl prefsuif      {Jeśli ktokolwiek zwraca się z prośbą o autoryzację, i...}
 ::msgcat::mcset pl prefsuis      {...jest już na mojej liście kontaktów:}
 ::msgcat::mcset pl prefsuisnot   {...nie mam go na liście:}
-::msgcat::mcset pl prefsuauto    {Automatyczne żądanie subskrypcji od tych, którzy chcą subskrypcji ode mnie}
-::msgcat::mcset pl prefrorm      {Usuwaj z listy użytkowników, którzy cofnęli subskrypcję}
-::msgcat::mcset pl prefroallow   {Umieszczaj na liście także tych bez subskrypcji}
+::msgcat::mcset pl prefsuauto    {Automatyczne żądanie autoryzacji od tych, którzy chcą autoryzacji ode mnie}
+::msgcat::mcset pl prefrorm      {Usuwaj z listy użytkowników, którzy cofnęli Ci autoryzację}
+::msgcat::mcset pl prefroallow   {Umieszczaj na liście także kontakty bez autoryzacji}
 ::msgcat::mcset pl prefroclr     {Ukryj zawartość listy po wylogowaniu}
 ::msgcat::mcset pl prefrochat    {Rozmowa przy "dwukliku" na kontakcie - jeśli nie: wyślij wiadomość}
 ::msgcat::mcset pl prefrosysicons {Dla kontaktów z innych systemów IM używaj ich specyficznych ikonek}
@@ -841,7 +840,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jalogin 	{Podaj nazwę lub adres IP serwera Jabbera, alb wskaż w menu. Na tym serwerze winno już być obecne Twoje konto.}
 ::msgcat::mcset pl janewaccount {Podaj nazwę lub adres IP serwera Jabbera, alb wskaż w menu. Wybierz nazwę użytkownika ("login"), i hasło.}
 ::msgcat::mcset pl janewpass    {Ustaw nowe hasło dla:}
-::msgcat::mcset pl jasubwant    {Użytkownik "%s" zwraca się do Ciebie z prośbą o subskrypcję.}
+::msgcat::mcset pl jasubwant    {Użytkownik "%s" zwraca się do Ciebie z prośbą o autoryzację.}
 ::msgcat::mcset pl jasubopts    {Wybierz z poniższych opcji - wybór pseudonimu i grupy jest opcjonalny, i wyłącznie do Twego użytku.}
 ::msgcat::mcset pl jasubgetvcard {Pobierz e-wizytówkę (vCard) tej osoby}
 ::msgcat::mcset pl jasubsndmsg  {Wyślij tej osobie wiadomość:}
@@ -850,8 +849,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jarostadd	{Dodaj użytkownika sieci Jabber do listy. Pseudonim i grupa mogą być w dowolnej chwili nadane lub zmienione. Aby móc dodać użytkownika innego niż Jabber systemu IM, musisz mieć w tymże systemie\
   wcześniej już założone konto, i użyć go najpierw w trakcie rejestracji w transporcie (lub bramie) do tego serwisu IM, udostępnianym przez serwera Jabbera.}
 ::msgcat::mcset pl jarostset	{Pseudonim i grupę użytkownika "%s" możesz ustawić dowolnie - w każdej chwili będzie można jeszcze to zmienić.}
-::msgcat::mcset pl jarostsub	{Zwróć się o subskrypcję}
-::msgcat::mcset pl jarostunsub	{Zrezygnuj z subskrypcji}
+::msgcat::mcset pl jarostsub	{Wystąp o autoryzację}
+::msgcat::mcset pl jarostunsub	{Zrezygnuj z autoryzacji}
 ::msgcat::mcset pl jasearch	{Znajdź użytkownika z pomocą wybranego serwisu. Kliknij przycisk "pobierz", aby ponownie wypełnić formularz .}
 ::msgcat::mcset pl jasearchwait	{Czekam na naciśnięcie "Pobierz"}
 ::msgcat::mcset pl jaservclosed	{Połączenie z serwerem zakończone.}
@@ -888,9 +887,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jadisrmall   {Usuń adresy wszystkich serwerów dodanych na stałe, przeglądanych automatycznie.}
 ::msgcat::mcset pl jauserinnote {Możesz o tym użytkowniku napisać coś "od siebie"}
 
-# translate!
-::msgcat::mcset pl jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
-::msgcat::mcset pl jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+
 
 
 # Setup assistant:
