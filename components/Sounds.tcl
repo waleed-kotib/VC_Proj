@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.15 2005-06-12 13:43:38 matben Exp $
+# $Id: Sounds.tcl,v 1.16 2005-06-17 06:15:57 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -384,6 +384,7 @@ proc  ::Sounds::InitPrefsHook { } {
     set sprefs(soundSet) ""
     set sprefs(volume)   100
     set sprefs(midiCmd)  ""
+    
     ::PreferencesUtils::Add [list  \
       [list ::Sounds::sprefs(soundSet) sound_set     $sprefs(soundSet)] \
       [list ::Sounds::sprefs(volume)   sound_volume  $sprefs(volume)]   \
@@ -397,7 +398,7 @@ proc  ::Sounds::InitPrefsHook { } {
     }
     ::PreferencesUtils::Add $optList
     
-    # Volume seems to be set globally on snack.
+    # Volume seems to be set globally on snack. Always ignore prefs settings.
     if {$priv(snack)} {
 	set sprefs(volume) [snack::audio play_gain]
     }
@@ -424,6 +425,11 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     
     set fontS  [option get . fontSmall {}]    
     set fontSB [option get . fontSmallBold {}]    
+
+    # System gain can have been changed.
+    if {$priv(snack)} {
+	set sprefs(volume) [snack::audio play_gain]
+    }
 
     foreach name $allSounds {
 	set tmpPrefs($name) $sprefs($name)
@@ -570,6 +576,9 @@ proc ::Sounds::SavePrefsHook { } {
 		$wmovie configure -volume [expr {int($sprefs(volume) * 2.55)}]
 	    }
 	}
+    }
+    if {$priv(snack)} {
+	snack::audio play_gain $sprefs(volume)
     }
 }
 
