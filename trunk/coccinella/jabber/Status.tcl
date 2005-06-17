@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.4 2005-02-25 14:08:59 matben Exp $
+# $Id: Status.tcl,v 1.5 2005-06-17 14:02:44 matben Exp $
 
 package provide Status 1.0
 
@@ -288,6 +288,7 @@ proc ::Jabber::Status::BuildStatusMenuDef { } {
     global  this
     variable mapShowElemToText
     variable mapShowTextToMLabel
+    upvar ::Jabber::jprefs jprefs
     
     set entries {available {} away chat dnd xa invisible {} unavailable}
     set statMenuDef {}
@@ -297,16 +298,14 @@ proc ::Jabber::Status::BuildStatusMenuDef { } {
 	    lappend statMenuDef {separator}
 	} else {
 	    set mName $mapShowTextToMLabel($name)
+	    set cmd [list ::Jabber::SetStatus $name]
 	    if {[string match "mac*" $this(platform)]} {
-		lappend statMenuDef [list radio $mName  \
-		  [list ::Jabber::SetStatus $name] normal {}  \
-		  [list -variable ::Jabber::jstate(status) -value $name]]
+		set opts [list -variable ::Jabber::jstate(status) -value $name]
 	    } else {
-		lappend statMenuDef [list radio $mName  \
-		  [list ::Jabber::SetStatus $name] normal {}  \
-		  [list -variable ::Jabber::jstate(status) -value $name  \
-		  -compound left -image [::Rosticons::Get status/$name]]]
+		set opts [list -variable ::Jabber::jstate(status) -value $name \
+		  -compound left -image [::Rosticons::Get status/$name]]
 	    }
+	    lappend statMenuDef [list radio $mName $cmd normal {} $opts]
 	}
     }
     lappend statMenuDef {separator}  \
