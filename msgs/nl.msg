@@ -515,7 +515,7 @@
 ::msgcat::mcset nl {Send File}			{Bestand verzenden}
 ::msgcat::mcset nl {Send Live}			{Live verzenden}
 ::msgcat::mcset nl {Server Info}		{Servergegevens}
-::msgcat::mcset nl {Service server}		{Service server}
+::msgcat::mcset nl {Service server}		{Server van service}
 ::msgcat::mcset nl {Set Directed Presence} 	{Voorgeschreven status instellen}
 ::msgcat::mcset nl {Set New Nickname}		{Nieuwe bijnaam instellen}
 ::msgcat::mcset nl {Set New Topic}		{Nieuw onderwerp instellen}
@@ -555,7 +555,7 @@
 ::msgcat::mcset nl {Version Info}		{Versiegegevens}
 ::msgcat::mcset nl {Whiteboard fonts}		{Whiteboard lettertypes}
 ::msgcat::mcset nl {Writing file}		{Bezig met wegschrijven bestand}
-#::msgcat::mcset nl {Groupchat presence change}
+::msgcat::mcset nl {Groupchat presence change}	{Statuswijziging van groepsgesprek}
 
 
 # Splash screen:
@@ -625,7 +625,7 @@
 ::msgcat::mcset nl jamessautoawayset 	{De status "Automatisch afwezig" werd ingesteld op %s. Wilt u de status terug instellen op "Beschikbaar"?}
 ::msgcat::mcset nl jamesserrgetpublic	{Fout ontvangen bij ophalen van de publiek toegankelijke gegevens van %s. De foutcode is %s met als foutmelding: %s}
 ::msgcat::mcset nl jamesserrlastactive	{Fout ontvangen bij het opvragen bij %s voor laatste activiteit. De fout was: %s}
-::msgcat::mcset nl jamesserrnotimeinfo	{Client/service %s verzende geen tijdsinformatie terug.}
+::msgcat::mcset nl jamesserrnotimeinfo	{De client/service %s verzende geen tijdsinformatie terug.}
 ::msgcat::mcset nl jamesstimeused	{Tijd sinds client "%s" het laatst actief in gebruik was: }
 ::msgcat::mcset nl jamesstimeconn	{Tijd verstreken sinds gebruiker "%s" de laatste keer online was: }
 ::msgcat::mcset nl jamesstimeservstart	{Tijd verstreken sinds server "%s" gestart is: }
@@ -659,7 +659,7 @@
 ::msgcat::mcset nl jamessnotconnected	{Kan niet verzenden: er is geen verbinding met een server}
 ::msgcat::mcset nl jamessaddrmiss	{U moet minstens één geldig adres invullen}
 ::msgcat::mcset nl jamesschatclose	{Als u dit venster sluit, dan verliest u ook de volledige conversatie. Wilt u het werkelijk sluiten?}
-::msgcat::mcset nl jamessnogroupchat	{Er is geen dienst herkend die groepchat aanbied}
+::msgcat::mcset nl jamessnogroupchat	{Er is geen dienst herkend voor groepsgesprekken}
 ::msgcat::mcset nl jamessinroommiss	{Het is verplicht dat alle velden ingevuld zijn voordat u een kamer betreedt}
 ::msgcat::mcset nl jamesswarnexitroom	{Wilt u werkelijk kamer "%s" verlaten?}
 ::msgcat::mcset nl jamesserrbrowse	{Er is een fout opgetreden tijdens het browsen naar "%s": %s}
@@ -682,12 +682,12 @@
 ::msgcat::mcset nl jamessoobtimeout	{Tijdslimiet overschreden tijdens het ophalen van een bestand via HTTP}
 ::msgcat::mcset nl jamessooberr406      {Gebruiker %s weigerde het bestand %s te ontvangen.}
 #::msgcat::mcset nl jamessooberr404      {Er deed zich een fout voor tijdens het verzenden van bestand %s naar %s. De foutcode is %s en de foutmelding: %s}
-::msgcat::mcset nl jamessnogchat	{Er is geen service gedetecteerd die groepchat aanbied}
+::msgcat::mcset nl jamessnogchat	{Er is geen service gedetecteerd voor groepsgesprekken}
 ::msgcat::mcset nl jamesserrinboxopen	{Openen van Postvak in-bestand %s tijdens het proberen op te slaan mislukte.}
 ::msgcat::mcset nl jamesserrinboxread	{Er is een fout opgetreden tijdens het proberen te lezen van het Jabber message box bestand "%s": %s}
 ::msgcat::mcset nl jamesschatclose	{Als u dit venster sluit dan verliest u de volledige conversatie. Wilt u het werkelijk sluiten?}
 ::msgcat::mcset nl jamessgchatfields	{Het is vereist dat alle velden ingevuld zijn voordat u een kamer betreedt.}
-::msgcat::mcset nl jamessconfmsg	{Selecteer een conferentieservice en een kamernaam. Druk daarna op "Downloaden" om de toegangsspecificatie af te halen van\
+::msgcat::mcset nl jamessconfmsg	{Selecteer een service voor groepsgesprekken en een kamernaam. Druk daarna op "Downloaden" om de toegangsspecificatie af te halen van\
   de gewenste kamer (elke kamer & server kan verschillende benodigdheden hebben).}
 ::msgcat::mcset nl jamesssavemsg	{Wilt u dit bericht opslaan?}
 ::msgcat::mcset nl jamessskipsendq	{Adres "%s" is niet correct. Wilt u het overslaan en verzenden naar de anderen?}
@@ -864,8 +864,8 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jasendauth	{Server "%s" antwoorde. Bezig met autorisatie-informatie verzenden.}
 ::msgcat::mcset nl jaerrlogin	{Aanmelden op %s mislukte: %s}
 ::msgcat::mcset nl jaauthok	{Autorisatie met server "%s" is gelukt. Bezig met afhalen van roster...}
-::msgcat::mcset nl jagchatmsg	{Kies een conferentie service, selecteer een kamer en geef uw naam en bijnaam op}
-::msgcat::mcset nl jacreateroom	{Selecteer een conferentie service en voer optioneel een kamernaam in. Druk dan op "Ophalen" om de specificatie voor het aanmaken van de gewenste\
+::msgcat::mcset nl jagchatmsg	{Kies een service voor groepsgesprekken, selecteer een kamer en geef uw naam en bijnaam op}
+::msgcat::mcset nl jacreateroom	{Selecteer een service voor groepsgesprekken en voer optioneel een kamernaam in. Druk dan op "Ophalen" om de specificatie voor het aanmaken van de gewenste\
   kamer af te halen (elke server kan verschillende benodigdheden hebben).}
 ::msgcat::mcset nl jawaitserver	{Bezig met wachten op server...}
 ::msgcat::mcset nl jaregmsg	{Registratie voor een specifieke service op deze server. Als u al geregistreerd bent, dan kunt u hiermee uw persoonlijke gegevens publiceren.}
