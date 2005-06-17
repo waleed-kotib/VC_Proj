@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.136 2005-05-26 12:16:35 matben Exp $
+# $Id: Jabber.tcl,v 1.137 2005-06-17 14:02:43 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -1179,12 +1179,18 @@ proc ::Jabber::IsMyGroupchatJid {jid} {
 proc ::Jabber::SetStatus {type args} {    
     variable jstate
     variable jserver
+    variable jprefs
     
     array set argsArr {
 	-notype         0
     }
+
+    # Any default status?
+    if {$type eq "unavailable"} {
+	set argsArr(-status) $jprefs(logoutStatus)
+    }
     array set argsArr $args
-    
+        
     # This way clients get the info necessary for file transports.
     # Necessary for each status change since internal cache cleared.
     if {$type != "unavailable"} {
@@ -1247,7 +1253,8 @@ proc ::Jabber::SetStatus {type args} {
 	    set toServer 1
 	}
 	if {$toServer && ($type == "unavailable")} {
-	    DoCloseClientConnection
+	    after idle $jstate(jlib) closestream	    
+	    SetClosedState
 	}
     }
 }
