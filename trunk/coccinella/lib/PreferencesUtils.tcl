@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.45 2005-06-17 14:02:44 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.46 2005-06-20 13:55:29 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -186,6 +186,7 @@ proc ::PreferencesUtils::SaveToFile { } {
 	  -message [mc messerrpreffile $tmpFile]
 	return
     }
+    fconfigure $fid -encoding utf-8
     
     # Header information.
     puts $fid "!\n!   User preferences for the Whiteboard application."

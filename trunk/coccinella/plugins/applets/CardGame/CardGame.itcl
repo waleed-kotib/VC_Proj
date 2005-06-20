@@ -3,7 +3,7 @@
 #       Creates a card game in a whiteboard canvas. 
 # 
 # 
-# $Id: CardGame.itcl,v 1.10 2004-09-02 13:59:38 matben Exp $
+# $Id: CardGame.itcl,v 1.11 2005-06-20 13:55:29 matben Exp $
 
 namespace eval CardGame {
     
@@ -139,8 +139,8 @@ if {[itcl::find classes CardGame] == ""} {
 	set b1MotionStackInst   [list %W bind $idstack <B1-Motion>]
 	set b1ReleaseStackInst  [list %W bind $idstack <ButtonRelease-1>]
 	
-	switch -- [GetThis platform] {
-	    macintosh - macosx {
+	switch -- [tk windowingsystem] {
+	    aqua {
 		set b1PopupStack {%W bind cardstack <Control-Button-1>}
 		set b1PopupCard  {%W bind playcard  <Control-Button-1>}
 		set b1PopupRel   {%W bind playcard  <Control-ButtonRelease-1>}
@@ -177,8 +177,8 @@ if {[itcl::find classes CardGame] == ""} {
 	  point   [list $b1ReleaseStackInst {}] \
 	  del     [list $b1StackInst        {}]]
 
-	switch -- [GetThis platform] {
-	    macintosh - macosx {
+	switch -- [tk windowingsystem] {
+	    aqua {
 		lappend classBindList \
 		  point   [list $b1PopupStack   [code $this StackPopup %X %Y]] \
 		  *       [list $b1PopupCard    [code $this CardPopup %X %Y]]  \

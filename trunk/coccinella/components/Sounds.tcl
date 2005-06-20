@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.16 2005-06-17 06:15:57 matben Exp $
+# $Id: Sounds.tcl,v 1.17 2005-06-20 13:55:26 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -175,13 +175,13 @@ proc ::Sounds::LoadSoundSet {soundSet} {
 proc ::Sounds::Create {name path} {
     global  this    
     variable priv
-    variable midiPath
+    variable nameToPath
     
     # QuickTime doesn't understand vfs; need to copy out to tmp dir.
-    if {$priv(QuickTimeTcl) && [info exists ::starkit::topdir]} {
-	set path [CopyToTemp $path]
-    }
     if {$priv(QuickTimeTcl)} {
+	if {[info exists ::starkit::topdir]} {
+	    set path [CopyToTemp $path]
+	}
 	if {[catch {
 	    movie .fake.$name -file $path -controller 0
 	}]} {
@@ -189,9 +189,7 @@ proc ::Sounds::Create {name path} {
 	}
     } elseif {[file extension $path] eq ".mid"} {
 	if {[info exists ::starkit::topdir]} {
-	    set midiPath($name) [CopyToTemp $path]
-	} else {
-	    set midiPath($name) $path
+	    set path [CopyToTemp $path]
 	}
     } elseif {$priv(snack)} {
 	
@@ -202,13 +200,14 @@ proc ::Sounds::Create {name path} {
 	    # ?
 	}
     }
+    set nameToPath($name) $path
 }
 
 proc ::Sounds::Play {snd} {
     variable sprefs
     variable priv
     variable afterid
-    variable midiPath
+    variable nameToPath
     variable soundIndex
 
     # Check the jabber prefs if sound should be played.
@@ -221,8 +220,8 @@ proc ::Sounds::Play {snd} {
 	if {[catch {.fake.$snd play}]} {
 	    # ?
 	}
-    } elseif {[file extension $soundIndex($snd)] eq ".mid"} {
-	PlayMIDI $midiPath($snd)
+    } elseif {[file extension $nameToPath($snd)] eq ".mid"} {
+	PlayMIDI $nameToPath($snd)
     } elseif {$priv(snack)} {
 	if {[catch {$snd play}]} {
 	    # ?
@@ -592,10 +591,6 @@ proc ::Sounds::CancelPrefsHook { } {
 	return
     }    
     
-    # Reset volume.
-    if {$priv(snack)} {
-	snack::audio play_gain $sprefs(volume)
-    }
     foreach name $allSounds {
 	if {$sprefs($name) != $tmpPrefs($name)} {
 	    ::Preferences::HasChanged

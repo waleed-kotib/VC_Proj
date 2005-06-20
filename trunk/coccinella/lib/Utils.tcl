@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.46 2005-06-10 07:52:57 matben Exp $
+# $Id: Utils.tcl,v 1.47 2005-06-20 13:55:29 matben Exp $
 
 
 package provide Utils 1.0
@@ -533,8 +533,11 @@ proc ::Utils::AnimateHandle {uid} {
 	set cmd $anim($uid,command)
 	set val [lindex $anim($uid,vlist) $pos]
 	regsub -all {\\|&} $val {\\\0} val
-	regsub -all {%v} $cmd $val cmd
-	uplevel #0 $cmd
+	regsub -all {%v} $cmd $val cmd	
+	if {[catch {uplevel #0 $cmd}]} {
+	    AnimateStop $uid
+	    return
+	}
 	if {[incr pos] >= [llength $anim($uid,vlist)]} {
 	    set pos 0
 	}

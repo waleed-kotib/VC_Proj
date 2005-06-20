@@ -3,7 +3,7 @@
 #       Creates a dice in a whiteboard canvas. 
 # 
 # 
-# $Id: Dice.itcl,v 1.4 2004-09-03 07:47:07 matben Exp $
+# $Id: Dice.itcl,v 1.5 2005-06-20 13:55:29 matben Exp $
 
 namespace eval Dice {
     
@@ -155,6 +155,10 @@ if {[itcl::find classes Dice] == ""} {
     
     body Dice::Turn {} {
 	
+	# Do not invoke while still running.
+	if {[info exists animateuid]} {
+	    return
+	}
 	set n [expr [UnifRand 6] + 1]
 	AnimateAndSet  $n
 	GenCommand "DICE: turn $utagdice $n" remote

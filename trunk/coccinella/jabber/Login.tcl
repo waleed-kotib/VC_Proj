@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.63 2005-04-02 13:58:37 matben Exp $
+# $Id: Login.tcl,v 1.64 2005-06-20 13:55:27 matben Exp $
 
 package provide Login 1.0
 
@@ -228,8 +228,9 @@ proc ::Login::TraceMenuVar {name key op} {
     set password $tmpProfArr($profile,password)
     foreach {key value} [array get tmpProfArr $profile,-*] {
 	set optname [string map [list $profile,- ""] $key]
-	set moreOpts($optname) $value
-	#puts "optname=$optname, value=$value"
+	if {$optname ne "resource"} {
+	    set moreOpts($optname) $value
+	}
     }
     set resource $tmpProfArr($profile,-resource)
     if {!$prefs(tls)} {
@@ -283,12 +284,14 @@ proc ::Login::Profiles { } {
 
 proc ::Login::Close {w} {
     variable menuVar
+    variable tmpProfArr
     
     # Clean up.
     ::UI::SaveWinGeom $w
     ::Profiles::SetSelectedName $menuVar
     trace vdelete [namespace current]::menuVar w  \
       [namespace current]::TraceMenuVar
+    array unset tmpProfArr
     catch {grab release $w}
     catch {destroy $w}    
 }

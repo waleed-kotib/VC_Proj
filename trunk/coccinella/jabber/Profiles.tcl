@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.39 2005-06-10 07:52:20 matben Exp $
+# $Id: Profiles.tcl,v 1.40 2005-06-20 13:55:29 matben Exp $
 
 package provide Profiles 1.0
 
@@ -42,6 +42,12 @@ proc ::Profiles::InitHook { } {
     ::PreferencesUtils::Add [list  \
       [list ::Profiles::profiles   profiles          $profiles   userDefault] \
       [list ::Profiles::selected   selected_profile  $selected   userDefault]]
+    
+    # Verify that 'selected' exists in 'profiles'.
+    set all [GetAllNames]
+    if {[lsearch -exact $all $selected] < 0} {
+	set selected [lindex $all 0]
+    }
 }
 
 # Profiles::Set --
@@ -203,10 +209,9 @@ proc ::Profiles::GetSelectedName { } {
  
     set all [GetAllNames]
     if {[lsearch -exact $all $selected] < 0} {
-	return [lindex $all 0]
-    } else {
-	return $selected
+	set selected [lindex $all 0]
     }
+    return $selected
 }
 
 proc ::Profiles::SetSelectedName {name} {
@@ -406,7 +411,7 @@ proc ::Profiles::BuildPage {page} {
 	
 	switch -- $optname {
 	    resource {
-		set resource $tmpProfArr($profile,-resource)
+		set resource $value
 	    }
 	    default {
 		set moreOpts($optname) $value
@@ -510,7 +515,6 @@ proc ::Profiles::NotebookOptionWidget {w token} {
 	grid $pageproxy.lpoll $pageproxy.spoll -sticky e
 	grid $pageproxy.set   -   -sticky w
     }
-    #bind [winfo toplevel $w] <Control-Key-t> [list $w nextpage]
     
     # Set defaults.
     NotebookSetDefaults $token
@@ -703,7 +707,6 @@ proc ::Profiles::SaveCurrentToTmp {profName} {
 		set tmpProfArr($profName,-$key) $moreOpts($key)
 	    }
 	}
-	#parray tmpProfArr $profName,-*
 	set tmpSelected $profName  
     }
 }

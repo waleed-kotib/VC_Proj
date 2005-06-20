@@ -70,9 +70,9 @@ namespace eval ::anigif {
 	close $fd
 
 	if {$name == ""} {
-	    set img [image create photo]
+	    set img [image create photo -file $fileName]
 	} else {
-	    set img [image create photo $name]
+	    set img [image create photo $name -file $fileName]
 	}
 	lappend allNames $img
 	
