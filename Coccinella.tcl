@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.115 2005-05-24 07:32:13 matben Exp $
+# $Id: Coccinella.tcl,v 1.116 2005-06-20 13:55:25 matben Exp $
 	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
@@ -193,14 +193,6 @@ set allLibSourceFiles {
 
 foreach sourceName $allLibSourceFiles {
     source [file join $this(path) lib $sourceName]
-}
-
-# On the mac we have some extras. Should go away in later versions of AquaTk.
-if {[string equal $this(platform) "macosx"]} {
-    if {![catch {package require MovableAlerts} msg]} {
-	rename tk_messageBox ""
-	rename tk_newMessageBox tk_messageBox
-    }
 }
 
 switch -- $this(platform) {
