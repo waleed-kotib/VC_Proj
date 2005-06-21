@@ -681,7 +681,7 @@
 ::msgcat::mcset nl jamessoobgetfail	{Ophalen van URL "%s" mislukte: %s}
 ::msgcat::mcset nl jamessoobtimeout	{Tijdslimiet overschreden tijdens het ophalen van een bestand via HTTP}
 ::msgcat::mcset nl jamessooberr406      {Gebruiker %s weigerde het bestand %s te ontvangen.}
-#::msgcat::mcset nl jamessooberr404      {Er deed zich een fout voor tijdens het verzenden van bestand %s naar %s. De foutcode is %s en de foutmelding: %s}
+::msgcat::mcset nl jamessooberr404      {Er deed zich een fout voor tijdens het verzenden van bestand %s naar %s. De foutcode is %s en de foutmelding: %s}
 ::msgcat::mcset nl jamessnogchat	{Er is geen service gedetecteerd voor groepsgesprekken}
 ::msgcat::mcset nl jamesserrinboxopen	{Openen van Postvak in-bestand %s tijdens het proberen op te slaan mislukte.}
 ::msgcat::mcset nl jamesserrinboxread	{Er is een fout opgetreden tijdens het proberen te lezen van het Jabber message box bestand "%s": %s}
@@ -891,9 +891,10 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jadisrmall {Alle permanente servers uit de lijst verwijderen.}
 ::msgcat::mcset nl jauserinnote {Uw persoonlijke opmerkingen over deze gebruiker kunt u hier bewaren}
 
-# translate
+#--- Translate ---
 ::msgcat::mcset nl jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
 ::msgcat::mcset nl jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+#--- Translate ---
 
 
 # Setup assistant:

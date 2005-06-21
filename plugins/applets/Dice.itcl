@@ -3,7 +3,7 @@
 #       Creates a dice in a whiteboard canvas. 
 # 
 # 
-# $Id: Dice.itcl,v 1.5 2005-06-20 13:55:29 matben Exp $
+# $Id: Dice.itcl,v 1.6 2005-06-21 08:15:35 matben Exp $
 
 namespace eval Dice {
     
@@ -79,7 +79,6 @@ if {[itcl::find classes Dice] == ""} {
 	    common animatelength 3000
 	    common animatesequence {3 1 5 4 6 2}
 	    common animateicons
-	    common animateuid
 	}
 	
 	# ---------------------------
@@ -89,6 +88,8 @@ if {[itcl::find classes Dice] == ""} {
 	protected {
 	    variable iddice
 	    variable utagdice
+	    variable animateuid
+	    variable animatestopuid
 	}    
     }
 
@@ -115,12 +116,17 @@ if {[itcl::find classes Dice] == ""} {
 	  ]
 	
 	RegisterCanvasClassBinds Dice $classBindList
-	RegisterCanvasInstBinds  Dice:$this $instBindList	
+	RegisterCanvasInstBinds  Dice:$this $instBindList
+	
+	bind $tkCanvas <Destroy> +[list delete object $this]
     }
     
     body Dice::destructor {} {	
 	if {[info exists animateuid]} {
 	    ::Utils::AnimateStop $animateuid
+	}
+	if {[info exists animatestopuid]} {
+	    after cancel $animatestopuid
 	}
     }
     
@@ -168,13 +174,13 @@ if {[itcl::find classes Dice] == ""} {
 	
 	set animateuid [::Utils::AnimateStart $animatemillis $animateicons \
 	  [list $tkCanvas itemconfigure $iddice -image %v]]
-	after $animatelength [code $this StopAnimation $n]
+	set animatestopuid [after $animatelength [code $this StopAnimation $n]]
     }
     
     body Dice::StopAnimation {n} {
 	
 	::Utils::AnimateStop $animateuid
-	unset animateuid
+	unset -nocomplain animateuid animatestopuid
 	SetOwnSide $n
     }
     

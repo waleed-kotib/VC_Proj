@@ -3,7 +3,7 @@
 #       Supposed to handle cardstacks. It doesn't handle any display things,
 #       and not any user interaction or interface stuff.
 # 
-# $Id: CardStack.itcl,v 1.4 2004-08-03 14:04:45 matben Exp $
+# $Id: CardStack.itcl,v 1.5 2005-06-21 08:15:35 matben Exp $
 
 class CardStack {
         
@@ -99,8 +99,14 @@ body CardStack::constructor {args} {
 }
 
 body CardStack::destructor {} {
-
-    eval {image delete} [image names ${imgbase}::*]
+    
+    # We should delete images when no objects left.
+    if {0} {
+	if {[llength [itcl::find objects CardStack]] == 1} {
+	    eval {image delete} [lsearch -inline -glob -all [image names] ${imgbase}::*]
+	    set inited 0
+	}
+    }
 }
 
 body CardStack::CreateAllCards {} {
