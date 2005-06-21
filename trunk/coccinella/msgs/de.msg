@@ -8,6 +8,7 @@
 #     (hj dot beckers at onlinehome dot de)
 
 ::msgcat::mcset de Accept	Akzeptieren
+#::msgcat::mcset de Action
 ::msgcat::mcset de Active 	aktiv
 ::msgcat::mcset de Add		Hinzufügen
 ::msgcat::mcset de Address	Adresse
@@ -554,7 +555,7 @@
 ::msgcat::mcset de {Version Info}         {Versions-Info}
 ::msgcat::mcset de {Whiteboard fonts}     {Schriften Zeichenfläche}
 ::msgcat::mcset de {Writing file}         {Schreibe Datei}
-#::msgcat::mcset en {Groupchat presence change}
+#::msgcat::mcset de {Groupchat presence change}
 
 
 # Splash screen:
@@ -894,12 +895,12 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jainmsgshow {Eingehende Nachrichten in diesem Fenster zeigen}
 ::msgcat::mcset de jadisaddserv {Suchen Sie einen weiteren Server für Gruppenräume und andere Dienste. Sie können einen Server permanent hinzufügen, der dann automatisch erkannt wird. Der Anmelde-Server wird immer erkannt.}
 ::msgcat::mcset de jadisrmall {Alle Server entfernen, die automatisch und permanent erkannt wurden.}
-
 ::msgcat::mcset de jauserinnote {Ihre persönlichen Notizen über diesen Benutzer hinzufügen}
 
-# translate!
+#--- Translate ---
 ::msgcat::mcset de jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
 ::msgcat::mcset de jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+#--- Translate ---
 
 
 # Setup assistant:
