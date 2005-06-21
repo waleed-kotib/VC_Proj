@@ -885,16 +885,13 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jasettopic   {Nieuw onderwerp instellen voor deze kamer.}
 ::msgcat::mcset nl jadirpresmsg {Voorgeschreven status verzenden naar gebruiker "%s".}
 ::msgcat::mcset nl jatlsnegot   {Bezig met het tot stand brengen van een met TLS beveiligde verbinding...}
-::msgcat::mcset nl jamucentermsg {Voer een bijnaam in en druk op Betreden om een kamer te betreden. U kunt met de knop Browse een lijst van beschikbare kamers verkrijgen op de gespecificeerde conferentieserver. Voor een leden-only kamer hebt u een wachtwoord nodig.}
+::msgcat::mcset nl jamucentermsg {Voer een bijnaam in en druk op Betreden om een kamer te betreden. U kunt met de knop "Browse" een lijst van beschikbare kamers verkrijgen op de gespecificeerde conferentieserver. Voor een leden-only kamer hebt u een wachtwoord nodig.}
 ::msgcat::mcset nl jainmsgshow {Inkomende berichten in dit venster laten zien}
 ::msgcat::mcset nl jadisaddserv {Hiermee kunt u een server toevoegen. U kunt een server permanent toevoegen waardoor die dan automatisch in de lijst verschijnt. Bij de server waarop u aanmeldt is dit altijd het geval.}
 ::msgcat::mcset nl jadisrmall {Alle permanente servers uit de lijst verwijderen.}
 ::msgcat::mcset nl jauserinnote {Uw persoonlijke opmerkingen over deze gebruiker kunt u hier bewaren}
-
-#--- Translate ---
-::msgcat::mcset nl jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
-::msgcat::mcset nl jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
-#--- Translate ---
+::msgcat::mcset nl jaregisterex {Voer de naam van de Jabber-server in waarop u een account wilt aanmaken. Druk vervolgens op de knop "Ophalen" om de gewenste registratiegegevens af te halen. Voer de nodige gegevens in en registreer.}
+::msgcat::mcset nl jaloginjid   {Voer uw JID in, in de vorm "joey@myjabb.org" of kies een profiel. U beschikt normaal al over een account op deze server.}
 
 
 # Setup assistant:
