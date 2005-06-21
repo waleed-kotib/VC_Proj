@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.6 2005-01-31 14:07:00 matben Exp $
+# $Id: CanvasText.tcl,v 1.7 2005-06-21 10:20:30 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -186,7 +186,6 @@ proc ::CanvasText::Copy {c} {
 	set priv(sha1) [sha1pure::sha1 "$priv(magic)$str"]
 	#OwnClipboard $c
     }
-    puts "priv(font)=$priv(font) "
 }
 
 proc ::CanvasText::OwnClipboard {c} {
