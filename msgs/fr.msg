@@ -901,9 +901,10 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jadisrmall {Enlever les serveurs qui étaient automatiquement et définitivement découverts.}
 ::msgcat::mcset fr jauserinnote {Ajouter vos notes personnelles sur cet utilisateur}
 
-# Translate!
+#--- Translate ---
 ::msgcat::mcset fr jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
 ::msgcat::mcset fr jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+#--- Translate ---
 
 
 # Assistant de configuration :

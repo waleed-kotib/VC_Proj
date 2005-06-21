@@ -86,59 +86,64 @@ if {$::tcl_platform(platform) == "macintosh"} {
 
 # If you want to compare an existing message catalog with the original
 # en.msg to see if any parts missing use the script below.
-# Quit Wish when finished!
 
 namespace eval ::msgcat:: {}
+rename ::msgcat::mcset ::msgcat::mcset_tmp
 proc ::msgcat::mcset {lang key {str ""}} {
     global arr keylist table
     if {$lang == "en"} {
-        lappend keylist $key
+	lappend keylist $key
     }
     set table($lang,$key) $str
     set arr($lang,$key) [uplevel 1 {namespace current}]
 }
 set keylist {}
-set src [tk_getOpenFile -title {Pick en.msg File} \
-	-filetypes {{{Message Catalog}       {.msg}}}]
-if {$src == ""} return
-if {[file tail $src] != "en.msg"} {
-    tk_messageBox -message "Wrong file!"
+array unset arr
+array unset table
+
+set dir [tk_chooseDirectory -title {Pick Catalog Directory}]
+if {$dir == ""} return
+cd $dir
+if {![file exists en.msg]} {
+    tk_messageBox -message "Directory $dir does not contain en.msg"
     return
 }
-set dst [tk_getOpenFile -title {Pick Your Message Catalog} \
-	-filetypes {{{Message Catalog}       {.msg}}}]
-if {$dst == ""} return
-set rootdst [file rootname [file tail $dst]]
-set lang $rootdst
-source $src
-source $dst
-foreach name [lsort [array names arr en,*]] {
-    regexp {en,(.*)} $name match key
-    if {![info exists arr($lang,$key)]} {
-         puts "Missing: $key"
-    } elseif {$arr(en,$key) != $arr($lang,$key)} {
-        puts "Wrong namespace: $key, \t$arr($lang,$key) -> $arr(en,$key)"
+source en.msg
+
+set files [glob *.msg]
+foreach f $files {
+    if {$f == "en.msg"} continue
+    set lang [file rootname [file tail $f]]
+    puts "Processing $lang file $f"
+    source $f
+    foreach name [lsort [array names arr en,*]] {
+	regexp {en,(.*)} $name match key
+	if {![info exists arr($lang,$key)]} {
+	     puts "\t missing: $key"
+	} elseif {$arr(en,$key) != $arr($lang,$key)} {
+	    puts "\t wrong namespace: $key, \t$arr($lang,$key) -> $arr(en,$key)"
+	}
     }
 }
 
-if {0} {
-# Create 'new' catalog. Encoding wrong!!!
-set dir [file dirname $dst]
-set new [file join $dir ${lang}_new.msg]
-set fd [open $new w]
-fconfigure $fd -encoding utf-8
-foreach key $keylist {
-    if {[info exists table($lang,$key)]} {
-        puts $fd [list ::msgcat::mcset $lang $key $table($lang,$key)]
-    } else {
-        puts $fd [list #::msgcat::mcset $lang $key $table(en,$key)]
-    }
-}
-close $fd
-unset keylist
-}
-unset arr
-puts "\n::msgcat::mcset has been redefined; do not reuse this shell"
+rename ::msgcat::mcset ""
+rename ::msgcat::mcset_tmp ::msgcat::mcset
 
 ........................................................................
 
+if {0} {
+    # Create 'new' catalog. Encoding wrong!!!
+    set dir [file dirname $dst]
+    set new [file join $dir ${lang}_new.msg]
+    set fd [open $new w]
+    fconfigure $fd -encoding utf-8
+    foreach key $keylist {
+	if {[info exists table($lang,$key)]} {
+	    puts $fd [list ::msgcat::mcset $lang $key $table($lang,$key)]
+	} else {
+	    puts $fd [list #::msgcat::mcset $lang $key $table(en,$key)]
+	}
+    }
+    close $fd
+    unset keylist
+}
