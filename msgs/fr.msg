@@ -404,6 +404,7 @@
 ::msgcat::mcset fr {Get File}			{Voir le fichier}
 ::msgcat::mcset fr {Get File Error}		{Erreur lors de la réception du fichier}
 ::msgcat::mcset fr {Get vCard}			{Voir la carte de visite}
+#::msgcat::mcset fr {Getting available rooms...}
 ::msgcat::mcset fr {Group chat in room}		{Grouper la discussion et le salon}
 ::msgcat::mcset fr {Groupchat-1.0 (fallback)}	{Groupchat 1.0 (fallback)}
 ::msgcat::mcset fr {Handled By}			{Géré par}

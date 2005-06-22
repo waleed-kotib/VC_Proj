@@ -400,6 +400,7 @@
 ::msgcat::mcset en {Get File}
 ::msgcat::mcset en {Get File Error}
 ::msgcat::mcset en {Get vCard}
+::msgcat::mcset en {Getting available rooms...}
 ::msgcat::mcset en {Group chat in room}
 ::msgcat::mcset en {Groupchat-1.0 (fallback)}
 ::msgcat::mcset en {Handled By}

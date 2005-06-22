@@ -405,6 +405,7 @@
 ::msgcat::mcset nl {Get File}			{Bestand ophalen}
 ::msgcat::mcset nl {Get File Error}		{Bestandsfout ophalen}
 ::msgcat::mcset nl {Get vCard}			{vCard ophalen}
+::msgcat::mcset nl {Getting available rooms...} {De beschikbare kamers worden opgezocht...}
 ::msgcat::mcset nl {Group chat in room}		{Groepsgesprek in kamer}
 ::msgcat::mcset nl {Groupchat-1.0 (fallback)}	{Groupchat-1.0 (terugvalling)}
 ::msgcat::mcset nl {Handled By}			{Behandeld door}
