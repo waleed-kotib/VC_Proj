@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.41 2005-06-16 12:39:26 matben Exp $
+# $Id: Whiteboard.tcl,v 1.42 2005-06-22 10:04:26 matben Exp $
 
 package require anigif
 package require entrycomp
@@ -800,7 +800,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     
     # The 'Coccinella'.
     set wapp(bugImage) [::Theme::GetImage ladybug]
-    label $wapp(buglabel) -image $wapp(bugImage)
+    label $wapp(buglabel) -image $wapp(bugImage) -borderwidth 0
     pack $wapp(buglabel) -side bottom
     
     # Make the tool buttons and invoke the one from the prefs file.
