@@ -401,6 +401,7 @@
 ::msgcat::mcset sv {Get File}		   {H確ta fil}
 ::msgcat::mcset sv {Get File Error}        {H確ta fil fel}
 ::msgcat::mcset sv {Get vCard}             {H確ta vCard}
+::msgcat::mcset sv {Getting available rooms...} {H確tar tillg穫gliga rum...}
 ::msgcat::mcset sv {Group chat in room}    {Gruppchatt i rum}
 ::msgcat::mcset sv {Groupchat-1.0 (fallback)} {Groupchat-1.0 (reserv)}
 ::msgcat::mcset sv {Handled By}            {Hanteras av}

@@ -402,6 +402,7 @@
 ::msgcat::mcset pl {Get File}             {Pobierz plik}
 ::msgcat::mcset pl {Get File Error}       {Błąd pobierania}
 ::msgcat::mcset pl {Get vCard}            {Pobierz wizytówkę}
+#::msgcat::mcset pl {Getting available rooms...}
 ::msgcat::mcset pl {Group chat in room}   {Konferencja w pokoju}
 ::msgcat::mcset pl {Groupchat-1.0 (fallback)}  {Groupchat-1.0 ("fallback")}
 ::msgcat::mcset pl {Handled By}           {Zarządzana przez}

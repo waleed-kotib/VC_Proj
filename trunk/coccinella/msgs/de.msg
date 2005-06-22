@@ -405,6 +405,7 @@
 ::msgcat::mcset de {Get File}             {Datei abrufen}
 ::msgcat::mcset de {Get File Error}       {Fehler Dateiabruf}
 ::msgcat::mcset de {Get vCard}            {vCard abrufen}
+#::msgcat::mcset de {Getting available rooms...}
 ::msgcat::mcset de {Group chat in room}   {Gruppen-Chat in Raum}
 ::msgcat::mcset de {Groupchat-1.0 (fallback)}  {Groupchat-1.0 (Ausweichmöglichkeit)}
 ::msgcat::mcset de {Handled By}           {verwaltet von}
