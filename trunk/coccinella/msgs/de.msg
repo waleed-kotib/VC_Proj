@@ -8,7 +8,7 @@
 #     (hj dot beckers at onlinehome dot de)
 
 ::msgcat::mcset de Accept	Akzeptieren
-#::msgcat::mcset de Action
+::msgcat::mcset de Action	Aktion
 ::msgcat::mcset de Active 	aktiv
 ::msgcat::mcset de Add		Hinzufügen
 ::msgcat::mcset de Address	Adresse
@@ -555,7 +555,7 @@
 ::msgcat::mcset de {Version Info}         {Versions-Info}
 ::msgcat::mcset de {Whiteboard fonts}     {Schriften Zeichenfläche}
 ::msgcat::mcset de {Writing file}         {Schreibe Datei}
-#::msgcat::mcset de {Groupchat presence change}
+::msgcat::mcset de {Groupchat presence change} {Statuswechsel Gruppen-Chat}
 
 
 # Splash screen:
@@ -898,8 +898,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jauserinnote {Ihre persönlichen Notizen über diesen Benutzer hinzufügen}
 
 #--- Translate ---
-::msgcat::mcset de jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
-::msgcat::mcset de jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+::msgcat::mcset de jaregisterex {Geben Sie die Jabber-Server an, bei denen Sie sich registrieren möchten. Zum Empfang der gewünschten Registrierungsinformation drüccken Sie die Schaltfläche Abruf. Füllen Sie die Informationen aus und regestrieren Sie.}
+::msgcat::mcset de jaloginjid   {Geben Sie Ihre Jabber-ID als "joey@myjabb.org" ein oder wählen Sie ein Profil. Sie sollten bereits über ein Konto auf diesem Server verfügen..}
 #--- Translate ---
 
 
