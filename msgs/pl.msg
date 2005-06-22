@@ -441,6 +441,7 @@
 ::msgcat::mcset pl {New Account}          {Nowe konto}
 ::msgcat::mcset pl {New chat message}     {"Odezwanie się" rozmówcy}
 ::msgcat::mcset pl {New chat thread}      {Rozpoczęcie nowej rozmowy}
+::msgcat::mcset pl {Groupchat presence change}  {Zmiana statusu "czatownika"}
 ::msgcat::mcset pl {New Color}            {Nowy kolor}
 ::msgcat::mcset pl {New incoming message} {Nadeszła nowa wiadomość}
 ::msgcat::mcset pl {New Message}          {Nowa wiadomość}
@@ -886,10 +887,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jadisaddserv {Szukaj pokoi konferencyjnych (i innych serwisów) na jakimś innym serwerze - można dopisać jego adres na stałe, dzięki czemu będzie automatycznie przeszukiwany po każdym połączeniu. Serwer, na który się logujesz, jest przeglądany zawsze.}
 ::msgcat::mcset pl jadisrmall   {Usuń adresy wszystkich serwerów dodanych na stałe, przeglądanych automatycznie.}
 ::msgcat::mcset pl jauserinnote {Możesz o tym użytkowniku napisać coś "od siebie"}
-
-# translate!....................
-::msgcat::mcset pl jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
-::msgcat::mcset pl jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+::msgcat::mcset pl jaregisterex {Wpisz nazwę (adres) serwera Jabbera, gdzie chcesz się zarejestrować - kliknij przycisk "Pobierz", aby otrzymać stosowny formularz do wypełnienia; wypełnij go i dokonaj rejestracji.}
+::msgcat::mcset pl jaloginjid   {Wpisz swój JID, w rodzaju "janek@serwer.org.pl", lub wybierz stosowny profil. Uwaga: na serwerze powinno być już założone Twoje konto!}
 
 
 
