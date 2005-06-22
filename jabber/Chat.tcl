@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.117 2005-06-12 13:44:55 matben Exp $
+# $Id: Chat.tcl,v 1.118 2005-06-22 12:24:50 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -322,9 +322,13 @@ proc ::Chat::StartThread {jid args} {
 	}
     }
     
-    # Since we initated this thread need to set recipient to jid2.
+    # Since we initated this thread need to set recipient to jid2 unless room.
     jlib::splitjid $jid jid2 res
-    set chatstate(fromjid) $jid2
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	set chatstate(fromjid) $jid
+    } else {
+	set chatstate(fromjid) $jid2
+    }
     SetTitle $chattoken
     
     return $chattoken
@@ -1609,7 +1613,7 @@ proc ::Chat::Send {dlgtoken} {
     # Get text to send. Strip off any ending newlines.
     # There might by smiley icons in the text widget. Parse them to text.
     set allText [::Text::TransformToPureText $wtextsnd]
-    set allText [string trimright $allText "\n"]
+    set allText [string trimright $allText]
     if {$allText == ""} {
 	return
     }
