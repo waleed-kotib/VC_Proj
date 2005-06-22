@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.22 2005-06-16 07:10:40 matben Exp $
+# $Id: disco.tcl,v 1.23 2005-06-22 12:47:05 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -391,8 +391,8 @@ proc disco::parse_get_items {disconame from subiq} {
 
 	    # The owning entity is required to describe this item. BAD.
 	    set items(2,$from,$pnode,$jid,$node,parent2) $pitem
-	    set items(2,$from,$pnode,$jid,$node,parents2) 7
-	    [concat $items($from,$pnode,parents2) [list $pitem]]
+	    set items(2,$from,$pnode,$jid,$node,parents2) \
+	      [concat $items($from,$pnode,parents2) [list $pitem]]
 	} else {
 	    set items($jid,$node,parent2) $pitem
 	    set items($jid,$node,parents2) [concat $items($from,$pnode,parents2) \
