@@ -630,8 +630,8 @@
 ::msgcat::mcset en jamesswarberasewb	{Do you want to erase the whiteboard first?}
 ::msgcat::mcset en jamesswarnremove	{Removing an item in your roster is not an undoable process. You need to subscribe once more to this user if you want to add it back. Do you want to continue anyway?}
 ::msgcat::mcset en jamessillegalchar	{Illegal character(s) in %s: "%s"!}
-::msgcat::mcset en jamessbadjid		{The jid "%s" is not well formed. Do you want to continue anyway?}
-::msgcat::mcset en jamessalreadyinrost	{The jid "%s" is already in your roster. Do you want to continue anyway?}
+::msgcat::mcset en jamessbadjid		{The JID "%s" is not well formed. Do you want to continue anyway?}
+::msgcat::mcset en jamessalreadyinrost	{The JID "%s" is already in your roster. Do you want to continue anyway?}
 ::msgcat::mcset en jamessfailsetnick	{There was a failure when setting the nick name or group of user "%s". The error code is %s with the message: %s}
 ::msgcat::mcset en jamessnamemissing	{The %s is missing or is too short!}
 ::msgcat::mcset en jamessnosocket	{Couldn't create socket to server "%s". Maybe networking is not functioning or server is down. Message: %s}
@@ -746,7 +746,7 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 ::msgcat::mcset en prefnetjabb  {The Jabber server system. Extensive user administration using dialogs via the "Jabber" menu. Uses a XML based protocol.}
 ::msgcat::mcset en prefnetmulti {Connect automatically to all clients in this network when connecting any of them.}
 ::msgcat::mcset en prefnetadv   {A client normally runs two different servers, the built in server, which is always present in the peer-to-peer case, and a http server.\
-The jabber server refers normally to a remote server, and its port is usually 5222. The port numbers set below usually only take effect after a relaunch.}
+The Jabber server refers normally to a remote server, and its port is usually 5222. The port numbers set below usually only take effect after a relaunch.}
 ::msgcat::mcset en prefsounsynwb {Have synthetic speech of text written in the whiteboard}
 ::msgcat::mcset en prefsounsynno {Have synthetic speech of normal messages}
 ::msgcat::mcset en prefsounsynch {Have synthetic speech of chat}
@@ -837,7 +837,7 @@ namespace eval ::EditShortcuts:: {
 
 
 ::msgcat::mcset en jalogin 	{Write Jabber server ip number or name, or choose from the popup menu. You should already have an account with this server.}
-::msgcat::mcset en janewaccount {Write jabber server ip number or name. Pick your username and password.}
+::msgcat::mcset en janewaccount {Write Jabber server ip number or name. Pick your username and password.}
 ::msgcat::mcset en janewpass    {Set new password for:}
 ::msgcat::mcset en jasubwant    {The user "%s" wants to subscibe to your presence.}
 ::msgcat::mcset en jasubopts    {Choose from the options below. Picking a nick name and group is optional, and for your personal use only.}
@@ -845,7 +845,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jasubsndmsg  {Send a message to this person:}
 ::msgcat::mcset en jasuballow   {Allow "%s" to see my presence}
 ::msgcat::mcset en jasubadd     {Add "%s" to my roster}
-::msgcat::mcset en jarostadd	{Add a jabber user to my roster. Nick name and group may be set or changed at any time. To add a user from a foreign IM system you must have an account already\
+::msgcat::mcset en jarostadd	{Add a Jabber user to my roster. Nick name and group may be set or changed at any time. To add a user from a foreign IM system you must have an account already\
   on that system, and that you use it when registering with the Jabber servers transport or gateway.}
 ::msgcat::mcset en jarostset	{Set nick name and group of user "%s" to what you want. They may be set or changed at any time later.}
 ::msgcat::mcset en jarostsub	{Subscribe to this user}
@@ -885,8 +885,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
 ::msgcat::mcset en jadisrmall   {Remove all servers that are automatically and permanently discovered.}
 ::msgcat::mcset en jauserinnote {Add your personal notes about this user}
-::msgcat::mcset en jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
-::msgcat::mcset en jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+::msgcat::mcset en jaregisterex {Fill in the Jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
+::msgcat::mcset en jaloginjid   {Enter your JID as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
 
 
 # Setup assistant:
