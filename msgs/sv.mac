@@ -848,7 +848,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset sv jasubsndmsg  {Skicka ett meddelande till den här personen:}
 ::msgcat::mcset sv jasuballow   {Tillåt "%s" att se min närvaro}
 ::msgcat::mcset sv jasubadd     {Lägg till "%s" till min roster}
-::msgcat::mcset sv jarostadd	{Lägg till en jabber användare till min roster. Kortnamn och grupp kan ändras när som helst senare.\
+::msgcat::mcset sv jarostadd	{Lägg till en Jabber användare till min roster. Kortnamn och grupp kan ändras när som helst senare.\
 För att lägga till en användare från ett annat IM system så måste du ha ett konto för det systemet sedan tidigare och att du använder detta konto när du registrerar dig hos Jabber serverns\
 transport komponent.}
 ::msgcat::mcset sv jarostset	{Sätt kortnamn och grupp för "%s" till självvalt namn. De kan ändras när som helst senare.}
@@ -891,7 +891,7 @@ Vissa rum kan kräva medlemskap och lösenord.}
 Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jadisrmall   {Tag bort samtliga servrar som permanent upptäcks automatiskt.}
 ::msgcat::mcset sv jauserinnote {Lägg till dina personliga anteckningar om denna kontakt}
-::msgcat::mcset sv jaregisterex {Skriv jabber serverns namn där du vill registrera. Tryck sedan på Hämta knappen för att få registreringsinfo. Fyll i och registrera.}
+::msgcat::mcset sv jaregisterex {Skriv Jabber serverns namn där du vill registrera. Tryck sedan på Hämta knappen för att få registreringsinfo. Fyll i och registrera.}
 ::msgcat::mcset sv jaloginjid   {Fyll i din Jabber id som "joey@myjabb.org", eller välj profil. Du måste ha ett konto på servern sedan tidigare.}
 
 
