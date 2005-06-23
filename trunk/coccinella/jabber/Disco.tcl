@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.60 2005-06-13 08:04:45 matben Exp $
+# $Id: Disco.tcl,v 1.61 2005-06-23 13:44:22 matben Exp $
 
 package provide Disco 1.0
 
@@ -359,8 +359,9 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
 	    if {$node != ""} {
 		lappend opts -dir [IsBranchNode $from $node]
 	    }
-	    eval {$wtree itemconfigure $vstruct} $opts
-
+	    if {$opts != {}} {
+		eval {$wtree itemconfigure $vstruct} $opts
+	    }
 	    set treectag [$wtree itemconfigure $vstruct -canvastags]
 	    MakeBalloonHelp $from $node $treectag
 	    SetDirItemUsingCategory $vstruct
@@ -948,7 +949,9 @@ proc ::Disco::CloseTreeCmd {w vstruct} {
 proc ::Disco::AddToTree {vstruct} {    
     variable wtree    
     variable treeuid
-    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jstate  jstate
+    upvar ::Jabber::jprefs  jprefs
+    upvar ::Jabber::jserver jserver
     
     # We disco servers jid 'items+info', and disco its childrens 'info'.    
     ::Debug 4 "::Disco::AddToTree vstruct='$vstruct'"
@@ -958,8 +961,20 @@ proc ::Disco::AddToTree {vstruct} {
     set pjid  [lindex $vstruct end-1 0]
     set pnode [lindex $vstruct end-1 1]
     
-    ::Debug 4 "\t jid=$jid"
-    ::Debug 4 "\t node=$node"
+    if {0} {
+	::Debug 4 "\t jid=$jid"
+	::Debug 4 "\t node=$node"
+	::Debug 4 "\t pjid=$pjid"
+	::Debug 4 "\t pnode=$pnode"
+    }
+    
+    # If this is a tree root element add only if a discoed server.
+    if {($pjid == "") && ($pnode == "")} {
+	set all [concat $jprefs(disco,autoServers) [list $jserver(this)]]
+	if {[lsearch -exact $all $jid] == -1} {
+	    return
+	}
+    }
     
     # Do not create if exists which preserves -open.
     if {![$wtree isitem $vstruct]} {
@@ -1311,6 +1326,9 @@ proc ::Disco::AutoDiscoServers { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
     
+    # Guard against empty elements. Old bug!
+    lprune jprefs(disco,autoServers) {}
+    
     foreach server $jprefs(disco,autoServers) {
 	if {![jlib::jidequal $server $jserver(this)]} {
 	    DiscoServer $server
@@ -1406,8 +1424,9 @@ proc ::Disco::AddServerDo {w} {
     if {$addservervar != ""} {
 	DiscoServer $addservervar
 	if {$permdiscovar} {
-	    set jprefs(disco,autoServers) [lsort -unique \
-	      [concat $addservervar [list $jprefs(disco,autoServers)]]]
+	    lappend jprefs(disco,autoServers) $addservervar
+	    set jprefs(disco,autoServers) \
+	      [lsort -unique $jprefs(disco,autoServers)]
 	}
     }
 }
