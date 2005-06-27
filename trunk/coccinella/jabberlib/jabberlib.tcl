@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.99 2005-06-16 07:10:40 matben Exp $
+# $Id: jabberlib.tcl,v 1.100 2005-06-27 10:32:52 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3306,7 +3306,7 @@ proc jlib::getrecipientjid {jlibname jid} {
 
     upvar ${jlibname}::lib lib
     
-    jlib::splitjid $jid jid2 resource 
+    splitjid $jid jid2 resource 
     set isroom [[namespace current]::service::isroom $jlibname $jid2]
     if {$isroom} {
 	return $jid

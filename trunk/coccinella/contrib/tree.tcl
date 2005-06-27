@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.47 2005-05-30 14:16:43 matben Exp $
+# $Id: tree.tcl,v 1.48 2005-06-27 10:32:51 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1129,7 +1129,7 @@ proc ::tree::ConfigureItem {w v args} {
     }
     
     if {[llength $args] == 0} {
-	return -code error {Usage: "pathName itemconfigure treeItem ?-key? ?value?"}
+	return ""
     } elseif {[llength $args] == 1} {
 	
 	# If only one -key and no value, return present value.
@@ -2007,6 +2007,7 @@ proc ::tree::CloseTree {w v} {
 
     upvar ::tree::${w}::state state
     upvar ::tree::${w}::v2uid v2uid
+    upvar ::tree::${w}::options options
     
     set v [NormList $v]
     set uid $v2uid($v)
@@ -2016,7 +2017,7 @@ proc ::tree::CloseTree {w v} {
 	BuildWhenIdle $w
 	
 	# Evaluate any open command callback.
-	if {[llength $options(-closecommand)]} {
+	if {$options(-closecommand) != {}} {
 	    uplevel #0 $options(-closecommand) [list $w $v]
 	}
     }

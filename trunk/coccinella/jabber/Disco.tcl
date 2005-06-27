@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.61 2005-06-23 13:44:22 matben Exp $
+# $Id: Disco.tcl,v 1.62 2005-06-27 10:32:52 matben Exp $
 
 package provide Disco 1.0
 
@@ -118,7 +118,9 @@ namespace eval ::Disco:: {
 }
 
 proc ::Disco::InitHook { } {
-    
+    upvar ::Jabber::jprefs jprefs
+
+    set jprefs(disco,tmpServers) {}
     
     # We could add more icons for other categories here!
     variable typeIcon
@@ -306,7 +308,7 @@ proc ::Disco::ItemsCB {disconame type from subiq args} {
 		GetInfo $cjid $cnode
 	    }
 	}
-	if {[jlib::jidequal $from $jserver(this)]} {
+	if {[jlib::jidequal $from $jserver(this)] && ($pnode == "")} {
 	    AutoDiscoServers
 	}
     }
@@ -970,7 +972,7 @@ proc ::Disco::AddToTree {vstruct} {
     
     # If this is a tree root element add only if a discoed server.
     if {($pjid == "") && ($pnode == "")} {
-	set all [concat $jprefs(disco,autoServers) [list $jserver(this)]]
+	set all [concat $jprefs(disco,tmpServers) [list $jserver(this)]]
 	if {[lsearch -exact $all $jid] == -1} {
 	    return
 	}
@@ -1427,6 +1429,10 @@ proc ::Disco::AddServerDo {w} {
 	    lappend jprefs(disco,autoServers) $addservervar
 	    set jprefs(disco,autoServers) \
 	      [lsort -unique $jprefs(disco,autoServers)]
+	} else {
+	    lappend jprefs(disco,tmpServers) $addservervar
+	    set jprefs(disco,tmpServers) \
+	      [lsort -unique $jprefs(disco,tmpServers)]
 	}
     }
 }
