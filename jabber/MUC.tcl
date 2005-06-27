@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.60 2005-05-25 13:44:14 matben Exp $
+# $Id: MUC.tcl,v 1.61 2005-06-27 10:32:52 matben Exp $
 
 package require entrycomp
 package require muc
@@ -395,7 +395,7 @@ proc ::MUC::BusyEnterDlgIncr {token {num 1}} {
     incr enter(statuscount) $num
     
     if {$enter(statuscount) > 0} {
-	set enter(status) "Getting available rooms..."
+	set enter(status) [mc {Getting available rooms...}]
 	$enter(wsearrows) start
 	$enter(wpopupserver) configure -state disabled
 	$enter(wpopuproom)   configure -state disabled
