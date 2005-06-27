@@ -170,7 +170,7 @@ XML/SVG:
 Distribution:
 
     It is distributed under the standard GPL license.
-    (c) Copyright by Mats Bengtsson (1999-2004).
+    (c) Copyright by Mats Bengtsson (1999-2005).
     Buttons are stolen from Gimp and slightly changed (Thank You!).
 
 Home:
