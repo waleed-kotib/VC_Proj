@@ -407,6 +407,7 @@
 #::msgcat::mcset fr {Getting available rooms...}
 ::msgcat::mcset fr {Group chat in room}		{Grouper la discussion et le salon}
 ::msgcat::mcset fr {Groupchat-1.0 (fallback)}	{Groupchat 1.0 (fallback)}
+::msgcat::mcset fr {Groupchat presence change}	{Changement de statut sur un salon}
 ::msgcat::mcset fr {Handled By}			{Géré par}
 ::msgcat::mcset fr {Host name}			{Nom de domaine}
 ::msgcat::mcset fr {HTTP port}			{Port HTTP}
@@ -555,7 +556,6 @@
 ::msgcat::mcset fr {Version Info}		{Infos sur la version}
 ::msgcat::mcset fr {Whiteboard fonts}		{Polices du tableau}
 ::msgcat::mcset fr {Writing file}		{Écriture du fichier}
-#::msgcat::mcset fr {Groupchat presence change}
 
 
 # Écran de démarrage :
@@ -901,11 +901,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jadisaddserv {Découvrir un autre serveur pour les salons de discussions et autres services. Vous pouvez ajouter un serveur définitivement quand il est découvert automatiquement. Le serveur de connexion est automatiquement découvert.}
 ::msgcat::mcset fr jadisrmall {Enlever les serveurs qui étaient automatiquement et définitivement découverts.}
 ::msgcat::mcset fr jauserinnote {Ajouter vos notes personnelles sur cet utilisateur}
-
-#--- Translate ---
-::msgcat::mcset fr jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
-::msgcat::mcset fr jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
-#--- Translate ---
+::msgcat::mcset fr jaregisterex {Indiquez le nom du serveur Jabber sur lequel vous voulez vous enregistrer. Cliquez ensuite su le bouton Recevoir pour obtenir les informations d'inscription. Remplissez ces informations et inscrivez-vous.}
+::msgcat::mcset fr jaloginjid   {Entrez votre adresse ("joey@myjabb.org" par exemple) ou choisissez un profil. Vous devez déjà avoir un compte sur ce serveur.}
 
 
 # Assistant de configuration :

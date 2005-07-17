@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.82 2005-05-24 07:32:13 matben Exp $
+# $Id: JUI.tcl,v 1.83 2005-07-17 06:43:59 matben Exp $
 
 package provide JUI 1.0
 
@@ -268,14 +268,14 @@ proc ::Jabber::UI::Build {w} {
 	set haveAppleMenu 0
     }
     if {$haveAppleMenu} {
-	::UI::BuildAppleMenu $wtop ${wmenu}.apple normal
+	::UI::BuildAppleMenu $wtop $wmenu.apple normal
     }
-    ::UI::NewMenu $wtop ${wmenu}.file    mFile     $menuDefs(rost,file)  normal
+    ::UI::NewMenu $wtop $wmenu.file    mFile     $menuDefs(rost,file)  normal
     if {[string match "mac*" $this(platform)]} {
-	::UI::NewMenu $wtop ${wmenu}.edit  mEdit   $menuDefs(rost,edit)   normal
+	::UI::NewMenu $wtop $wmenu.edit  mEdit   $menuDefs(rost,edit)   normal
     }
-    ::UI::NewMenu $wtop ${wmenu}.jabber  mJabber   $menuDefs(rost,jabber) normal
-    ::UI::NewMenu $wtop ${wmenu}.info    mInfo     $menuDefs(rost,info)   normal
+    ::UI::NewMenu $wtop $wmenu.jabber  mJabber   $menuDefs(rost,jabber) normal
+    ::UI::NewMenu $wtop $wmenu.info    mInfo     $menuDefs(rost,info)   normal
     $w configure -menu $wmenu
     
     # Use a frame here just to be able to set the class (JMain) which
