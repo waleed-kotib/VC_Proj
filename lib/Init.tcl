@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.15 2005-06-17 14:02:44 matben Exp $
+# $Id: Init.tcl,v 1.16 2005-07-27 08:55:52 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -189,7 +189,7 @@ proc ::Init::SetThis {thisScript} {
 	set this(username) $::env(LOGIN)
     } elseif {[info exists ::env(USERNAME)]} {
 	set this(username) $::env(USERNAME)
-    } elseif {[llength $this(hostname)]} {
+    } elseif {[llength [set this(hostname) [info hostname]]]} {
 	set this(username) $this(hostname)
     } else {
 	set this(username) "Unknown"
