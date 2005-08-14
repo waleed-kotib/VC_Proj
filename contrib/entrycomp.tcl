@@ -3,12 +3,10 @@
 #      This file is part of The Coccinella application. It implements an
 #      entry with completion.
 #      
-#  Copyright (c) 2003  Mats Bengtsson
+#  Copyright (c) 2003-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: entrycomp.tcl,v 1.6 2004-10-12 13:48:56 matben Exp $
+# $Id: entrycomp.tcl,v 1.7 2005-08-14 06:56:45 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -28,6 +26,7 @@
 #
 #       0.1      first release
 #       0.2      using bindtags instead
+#       050519   using tile
 
 package provide entrycomp 0.2
 
@@ -43,27 +42,26 @@ namespace eval ::entrycomp:: {
     set priv(initted) 0
     
     # New bindtag for this widget. Be sure not to override any commands.
-    bind EntryComp <KeyPress> [list ::entrycomp::Insert %W %A]
-    bind EntryComp <Control-KeyPress> {# nothing}
-    bind EntryComp <BackSpace> {# nothing}
-    bind EntryComp <Select> {# nothing}
-    bind EntryComp <Home> {# nothing}
-    bind EntryComp <End> {# nothing}
-    bind EntryComp <Delete> {# nothing}
-    bind EntryComp <<Cut>> {# nothing}
-    bind EntryComp <<Copy>> {# nothing}
-    bind EntryComp <<Paste>> {# nothing}
-    bind EntryComp <<Clear>> {# nothing}
-    bind EntryComp <<PasteSelection>> {# nothing}
-    bind EntryComp <Alt-KeyPress> {# nothing}
-    bind EntryComp <Meta-KeyPress> {# nothing}
-    bind EntryComp <Control-KeyPress> {# nothing}
-    bind EntryComp <Escape> {# nothing}
-    bind EntryComp <Return> {# nothing}
-    bind EntryComp <KP_Enter> {# nothing}
-    bind EntryComp <Tab> {# nothing}
-    if {[string equal [tk windowingsystem] "classic"]
-            || [string equal [tk windowingsystem] "aqua"]} {
+    bind EntryComp <KeyPress>             { ::entrycomp::Insert %W %A }
+    bind EntryComp <Control-KeyPress>     {# nothing}
+    bind EntryComp <BackSpace>            {# nothing}
+    bind EntryComp <Select>               {# nothing}
+    bind EntryComp <Home>                 {# nothing}
+    bind EntryComp <End>                  {# nothing}
+    bind EntryComp <Delete>               {# nothing}
+    bind EntryComp <<Cut>>                {# nothing}
+    bind EntryComp <<Copy>>               {# nothing}
+    bind EntryComp <<Paste>>              {# nothing}
+    bind EntryComp <<Clear>>              {# nothing}
+    bind EntryComp <<PasteSelection>>     {# nothing}
+    bind EntryComp <Alt-KeyPress>         {# nothing}
+    bind EntryComp <Meta-KeyPress>        {# nothing}
+    bind EntryComp <Control-KeyPress>     {# nothing}
+    bind EntryComp <Escape>               {# nothing}
+    bind EntryComp <Return>               {# nothing}
+    bind EntryComp <KP_Enter>             {# nothing}
+    bind EntryComp <Tab>                  {# nothing}
+    if {[string equal [tk windowingsystem] "aqua"]} {
 	bind EntryComp <Command-KeyPress> {# nothing}
     }
 }
@@ -87,6 +85,16 @@ proc ::entrycomp::Init { } {
 #       Wiidget path
 
 proc ::entrycomp::entrycomp {w liblist args} {
+
+    return [eval {Build $w $liblist 1} $args]
+}
+
+proc ::entrycomp::entrycomptk {w liblist args} {
+
+    return [eval {Build $w $liblist 0} $args]
+}
+
+proc ::entrycomp::Build {w liblist tile args} {
     variable priv
     
     if {!$priv(initted)} {
@@ -101,10 +109,17 @@ proc ::entrycomp::entrycomp {w liblist args} {
     upvar ::entrycomp::${w}::options options
     
     set options(liblist) $liblist
+    set options(tile) $tile
 
-    eval {entry $w} $args
-    set bindList [bindtags $w]
-    set ind [lsearch $bindList Entry]
+    if {$tile} {
+	eval {ttk::entry $w} $args
+	set bindList [bindtags $w]
+	set ind [lsearch $bindList TEntry]
+    } else {
+	eval {entry $w} $args
+	set bindList [bindtags $w]
+	set ind [lsearch $bindList Entry]
+    }
     if {$ind >= 0} {
 	set bindList [linsert $bindList $ind EntryComp]
 	bindtags $w $bindList
@@ -114,6 +129,7 @@ proc ::entrycomp::entrycomp {w liblist args} {
     bind $w <Destroy> [list [namespace current]::DestroyHandler $w]
     return $w
 }
+
 
 # ::entrycomp::Insert --
 # 
@@ -144,7 +160,11 @@ proc ::entrycomp::Insert {w s} {
     } else {
 	#$w delete $insert end
     }    
-    ::tk::EntrySeeInsert $w
+    if {$options(tile)} {
+	tile::entry::See $w insert
+    } else {
+	::tk::EntrySeeInsert $w
+    }
     
     # Stop Entry class handler from executing, else we get double characters.
     # Problem: this also stops handlers bound to the toplevel bindtag!!!!!
@@ -169,7 +189,7 @@ proc ::entrycomp::DestroyHandler {w} {
 
 # test
 if {0} {
-    set liblist {abcdefg abcert abczzz abc123 zzz uuu www}
+    set liblist {abcdefg abcdefgdghdfgskagdhs abcert abczzz abc123 zzz uuu www}
     toplevel .top
     pack [::entrycomp::entrycomp .top.ent1 $liblist]
     pack [::entrycomp::entrycomp .top.ent2 $liblist]

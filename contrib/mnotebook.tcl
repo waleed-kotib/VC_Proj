@@ -7,7 +7,7 @@
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mnotebook.tcl,v 1.2 2005-01-31 14:06:53 matben Exp $
+# $Id: mnotebook.tcl,v 1.3 2005-08-14 06:56:45 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -324,13 +324,13 @@ proc ::mnotebook::Page {w name} {
     if {$widgetGlobals(debug) > 1} {
 	puts "::mnotebook::Page w=$w, name=$name"
     }
-    set page "$w.page[incr nbInfo(uid)]"
+    set page $w.page[incr nbInfo(uid)]
     lappend nbInfo(pages)  $page
     set nbInfo(page-$name) $page
     set nbInfo(name-$page) $name
     
     # We should probably add configuration options here.
-    frame $page
+    ttk::frame $page
     
     # If this is the only page, display it.
     if {[llength $nbInfo(pages)] == 1} {

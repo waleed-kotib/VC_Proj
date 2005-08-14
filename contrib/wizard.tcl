@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application.
 #      It implements a setup assistant toplevel interface.
 #      
-#  Copyright (c) 2002-2003  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: wizard.tcl,v 1.6 2004-12-04 15:01:06 matben Exp $
+# $Id: wizard.tcl,v 1.7 2005-08-14 06:56:45 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -37,10 +37,11 @@
 #
 # ########################### CHANGES ##########################################
 #
-#       1.0     
+#       1.0    
+#       050517       using tile 
 
-package require Tk 8.4
 package require mnotebook
+
 package provide wizard 1.0
 
 namespace eval ::wizard::  {
@@ -96,25 +97,11 @@ proc ::wizard::Init { } {
     # The legal widget commands. These are actually the Notebook commands.
     set widgetCommands {cget configure deletepage displaypage newpage}
 
-    option add *Wizard.activeTabColor      #efefef      widgetDefault
     option add *Wizard.background          #ffffff      widgetDefault
     option add *Wizard.closeCommand        {}           widgetDefault
     option add *Wizard.finishCommand       {}           widgetDefault
     option add *Wizard.nextPageCommand     {}           widgetDefault
-    
-    # Platform specifics...
-    switch $tcl_platform(platform) {
-	unix {
-	    option add *Wizard.font    {Helvetica -12 bold}   widgetDefault
-	}
-	windows {
-	    option add *Wizard.font    {system}    widgetDefault
-	}
-	macintosh {
-	    option add *Wizard.font    {system}    widgetDefault
-	}
-    }
-  
+      
     # This allows us to clean up some things when we go away.
     bind Wizard <Destroy> [list ::wizard::DestroyHandler %W]
 }
@@ -163,12 +150,12 @@ proc ::wizard::wizard {w args} {
     upvar ::wizard::${w}::suInfo suInfo
 
     # We use a frame for this specific widget class.
-    set widgets(this) [frame $w -class Wizard]
-    set widgets(frame) ::wizard::${w}::${w}
-    set widgets(nbframe) $w.notebook
-    set widgets(head) $w.head
-    set widgets(btframe) $w.btframe
-    set widgets(btforward) $w.btframe.fwd
+    set widgets(this)       [frame $w -class Wizard]
+    set widgets(frame)      ::wizard::${w}::${w}
+    set widgets(nbframe)    $w.notebook
+    set widgets(head)       $w.head
+    set widgets(btframe)    $w.btframe
+    set widgets(btforward)  $w.btframe.fwd
     set widgets(btbackward) $w.btframe.bwd
     
     # Necessary to remove the original frame procedure from the global
@@ -207,28 +194,33 @@ proc ::wizard::wizard {w args} {
     }
     
     # Build.
-    pack [label $widgets(head) -text {Setup Assistant} -font $options(-font) \
-      -anchor w -bg $options(-background)] -padx 10 -pady 4 -side top -fill x
-    pack [frame $w.div1 -height 2 -borderwidth 2 -relief sunken  \
-      -bg $options(-background)] -fill x -pady 2
+    ttk::label $widgets(head) -style Headlabel \
+      -text [mc {Setup Assistant}]
+    ttk::separator $w.div1
+    pack $widgets(head) -side top -fill x
+    pack $w.div1 -side top -fill x
     
     # Creating the notebook widget also makes all the database initializations.
     eval {::mnotebook::mnotebook $widgets(nbframe)} $notebookArgs
     $widgets(frame) configure -bg $options(-background)
     pack $widgets(nbframe) -expand yes -fill both
     
-    pack [frame $w.div2 -height 2 -borderwidth 2 -relief sunken  \
-       -bg $options(-background)] -fill x -pady 2
-    pack [frame $widgets(btframe) -bg $options(-background)]  \
-      -fill x -side top
-    pack [button $widgets(btforward) -text [::msgcat::mc Next] -width 10   \
-      -command [list [namespace current]::ForwardCmd $w]  \
-      -highlightbackground $options(-background)]   \
-      -side right -padx 5 -pady 5
-    pack [button $widgets(btbackward) -text [::msgcat::mc Close] -width 10 \
-       -command [list [namespace current]::BackwardCmd $w]  \
-       -highlightbackground $options(-background)] \
-       -side right -padx 5 -pady 5
+    ttk::separator $w.div2
+    pack $w.div2 -side top -fill x
+    ttk::frame $widgets(btframe) -padding [option get . okcancelPadding {}]
+    ttk::button $widgets(btforward) -text [::msgcat::mc Next] \
+      -command [list [namespace current]::ForwardCmd $w] -width -8
+    ttk::button $widgets(btbackward) -text [::msgcat::mc Close] \
+      -command [list [namespace current]::BackwardCmd $w] -width -8
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $widgets(btforward) -side right
+	pack $widgets(btbackward) -side right -padx $padx
+    } else {
+	pack $widgets(btbackward) -side right
+	pack $widgets(btforward) -side right -padx $padx
+    }
+    pack $widgets(btframe) -side top -fill x
     
     set suInfo(current) {}
     set suInfo(pending) {}
@@ -326,7 +318,6 @@ proc ::wizard::Configure {w args} {
 	    set optName [lindex $widgetOptions($opt) 0]
 	    set optClass [lindex $widgetOptions($opt) 1]
 	    set def [option get $w $optName $optClass]
-	    #puts "opt=$opt, optName=$optName, optClass=$optClass, def=$def"
 	    lappend results [list $opt $optName $optClass $def $options($opt)]
 	}
 	

@@ -1,9 +1,7 @@
 #  Copyright (c) 2002  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: fontselection.tcl,v 1.12 2004-10-12 13:48:56 matben Exp $
-
-package require combobox
+# $Id: fontselection.tcl,v 1.13 2005-08-14 06:56:45 matben Exp $
 
 package provide fontselection 1.0
 
@@ -33,18 +31,14 @@ proc ::fontselection::fontselection {w args} {
     variable fontFamilies
     
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
     toplevel $w
     
-    switch -- $tcl_platform(platform) {
-	unix {
-	    if {[string equal [tk windowingsystem] "aqua"]} {
-		::tk::unsupported::MacWindowStyle style $w document closeBox
-	    }
-	}
-	macintosh {
-	    ::tk::unsupported::MacWindowStyle style $w documentProc
+    switch -- [tk windowingsystem] {
+	aqua {
+	    ::tk::unsupported::MacWindowStyle style $w document closeBox
 	}
     }
     
@@ -58,13 +52,17 @@ proc ::fontselection::fontselection {w args} {
     array set initialFontArr [font actual $opts(-initialfont)]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
     # Top frame.
-    set frtop $w.frall.frtop
-    frame $frtop
-    pack $frtop -side top -fill x -padx 4 -pady 4
+    set wtop $wbox.top
+    ttk::frame $wtop
+    pack $wtop -side top -fill x
     
     # System fonts.
     set font $initialFontArr(-family)
@@ -73,9 +71,10 @@ proc ::fontselection::fontselection {w args} {
     if {![info exists fontFamilies]} {
 	set fontFamilies [font families]
     }
-    set frfont $w.frall.frtop.font
-    frame $frfont
-    pack $frfont -side left -fill y -padx 4 -pady 4
+    set frfont $wtop.font
+    ttk::frame $frfont
+    pack $frfont -side left -fill y
+    
     set wlb $frfont.lb
     set ysc $frfont.ysc
     listbox $wlb -width 28 -height 10 -yscrollcommand [list $ysc set]
@@ -85,49 +84,61 @@ proc ::fontselection::fontselection {w args} {
     eval $wlb insert 0 $fontFamilies
 
     # Font size, weight etc.
-    set frprop $w.frall.frtop.prop
-    frame $frprop
-    pack $frprop -side top -fill y -padx 8 -pady 8
+    set frprop $wtop.prop
+    ttk::frame $frprop -padding {12 0 0 0}
+    pack $frprop -side top -fill y
 
     set size $initialFontArr(-size)
-    label $frprop.lsize -text {Font size:}
-    ::combobox::combobox $frprop.size -width 8  \
+    ttk::label $frprop.lsize -text {Font size:}
+    ttk::combobox $frprop.size -width 8  \
       -textvariable [namespace current]::size  \
-      -command [namespace current]::Select
-    eval {$frprop.size list insert end} {9 10 12 14 16 18 24 36 48 60 72}
+      -values {9 10 12 14 16 18 24 36 48 60 72}
+    ttk::separator $frprop.s -orient horizontal
 
-    grid $frprop.lsize -sticky w
-    grid $frprop.size  -sticky ew
+    grid  $frprop.lsize  -sticky w
+    grid  $frprop.size   -sticky ew
+    grid  $frprop.s      -sticky ew -pady 12
+
+    bind $frprop.lsize <<ComboboxSelected>> [namespace current]::Select
 
     set weight $initialFontArr(-weight)
-    label $frprop.lwe -text {Font weight:}
-    ::combobox::combobox $frprop.we -width 10  \
-      -textvariable [namespace current]::weight -editable 0  \
-      -command [namespace current]::Select
-    eval {$frprop.we list insert end} {normal bold italic}
+    ttk::label $frprop.lwe -text {Font weight:}
+    ttk::combobox $frprop.we -width 10  \
+      -textvariable [namespace current]::weight -state readonly \
+      -values {normal bold italic}
 
-    grid $frprop.lwe -sticky w
-    grid $frprop.we  -sticky ew
-    
+    grid  $frprop.lwe  -sticky w
+    grid  $frprop.we   -sticky ew
+
+    bind $frprop.we <<ComboboxSelected>> [namespace current]::Select
+
     # Font text.
-    set frmid [frame $w.frall.frmid -borderwidth 0]
+    set frmid $wbox.frmid
+    ttk::frame $frmid
     set wcan [canvas $frmid.can -width 200 -height 48 \
-      -highlightthickness 0 -border 1 -relief sunken]
-    pack $frmid -side top -fill both -expand 1 -padx 8 -pady 6
+      -highlightthickness 0 -border 1 -relief sunken -bg white]
+    pack $frmid -side top -fill both -expand 1 -pady 16
     pack $frmid.can -fill both -expand 1
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btset -text [::msgcat::mc Select] -default active  \
-      -command [list [namespace current]::OK $w]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
-      -command [list [namespace current]::Cancel $w]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btdef -text [::msgcat::mc Default]  \
-      -command [namespace current]::SetDefault]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot
+    ttk::button $frbot.btset -text [::msgcat::mc Select] -default active  \
+      -command [list [namespace current]::OK $w]
+    ttk::button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+      -command [list [namespace current]::Cancel $w]
+    ttk::button $frbot.btdef -text [::msgcat::mc Default]  \
+      -command [namespace current]::SetDefault
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btset -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btset -side right -padx $padx
+    }
+    pack $frbot.btdef -side left
+    pack $frbot -side top -fill x
     
     wm resizable $w 0 0
     if {[info exists prefs(winGeom)]} {
@@ -135,7 +146,7 @@ proc ::fontselection::fontselection {w args} {
 	wm geometry $w $pos
     }
     bind $w   <Return> {}
-    bind $wlb <<ListboxSelect>> "[namespace current]::Select $wlb font"
+    bind $wlb <<ListboxSelect>> [list [namespace current]::Select $wlb font]
     bind $wlb <Button-1> {+ focus %W}
     Select $wlb xxx
     if {$ind >= 0} {

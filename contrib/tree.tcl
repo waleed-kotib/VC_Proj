@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.48 2005-06-27 10:32:51 matben Exp $
+# $Id: tree.tcl,v 1.49 2005-08-14 06:56:45 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -53,7 +53,7 @@
 #       -sortlevels, sortLevels, SortLevels
 #       -stripecolors, stripeColors, StripeColors
 #	-styleicons, styleIcons, StyleIcons                  
-#	                 (plusminus|plusminusbw|plusminusgray|triangle|crystal)
+#	           (plusminus|plusminusbw|plusminusgray|triangle|crystal|aqua)
 #	-treecolor, treeColor, TreeColor                      color?
 #	-treedash, treeDash, TreeDash                         dash
 #	-width, width, Width
@@ -67,6 +67,7 @@
 #      pathName closetree itemPath
 #      pathName configure ?option? ?value option value ...?
 #      pathName delitem itemPath ?-childsonly (0|1)?
+#      pathName element
 #      pathName find withtag aTag
 #      pathName getselection
 #      pathName getcanvas
@@ -76,6 +77,7 @@
 #      pathName newitem itemPath
 #      pathName opentree itemPath
 #      pathName setselection itemPath
+#      pathName style
 #      pathName xview args
 #      pathName yview args
 #      
@@ -88,7 +90,7 @@
 #      -image         imageName
 #      -open          0|1
 #      -sortcommand   ""|tclProc
-#      -style         normal|bold|italic
+#      -fontstyle         normal|bold|italic
 #      -tags
 #      -text
 #
@@ -117,6 +119,8 @@
 #                   reworked internals
 #       041029      major rework of drawing and a lot of other things
 #       050223      added -showrootbutton; added -indention and -xmargin lists
+#       050628      -style -> -fontstyle
+#                   new styled items
 
 package require Tcl 8.4
 package require colorutils
@@ -257,6 +261,18 @@ namespace eval tree {
 	UXWOUaCKTBM3QfPShYEszaMygUJC0YhAJhXaIdFwHCkVhmA6eEiggIpWC8Ge
 	IoTXV3wiA0IAOw==
     }]
+    
+    # Aqua gray arrows.
+    set widgetGlobals(openAqua) [image create photo -data {
+	R0lGODlhCQAJAPMAMf///62trZycnJSUlIyMjISEhHNzcwAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAJAAkAAAQccJhJzZB1DlBy
+	AUCQBSBHfSVApSBhECxoxKCQRgA7
+    }]
+    set widgetGlobals(closeAqua) [image create photo -data {
+	R0lGODlhCQAJAPMAMf///62trZycnJSUlIyMjISEhHNzcwAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAJAAkAAAQacAxAKzCmBHtx
+	tp5HUGEolMbYYQWYbZbEUREAOw==
+    }]
 
     # Let them be accesible from the outside. 
     set ::tree::idir            $widgetGlobals(idir)
@@ -321,9 +337,9 @@ proc ::tree::Init { } {
 	-selectoutline       {selectOutline        SelectOutline       }
 	-showrootbutton      {showRootButton       ShowRootButton      }
 	-silent              {silent               Silent              }
-	-sortlevels          {sortLevels           SortLevels          }
 	-sortcommand         {sortCommand          SortCommand         }
 	-sortcommand2        {sortCommand2         SortCommand2        }
+	-sortlevels          {sortLevels           SortLevels          }
 	-stripecolors        {stripeColors         StripeColors        }
 	-styleicons          {styleIcons           StyleIcons          }
 	-treecolor           {treeColor            TreeColor           }
@@ -343,9 +359,9 @@ proc ::tree::Init { } {
   
     # The legal widget commands.
     set widgetCommands {cget children closetree configure delitem   \
-      getselection getcanvas isitem itemconfigure labelat loweritem \
-      newitem opentree   \
-      raiseitem setselection xview yview}
+      getselection getcanvas isitem itemconfigure labelat \
+      loweritem newitem opentree   \
+      raiseitem setselection style xview yview}
 
     # Options for this widget
     option add *Tree.background            white           widgetDefault
@@ -362,7 +378,6 @@ proc ::tree::Init { } {
     option add *Tree.height                100             widgetDefault
     option add *Tree.indention             8               widgetDefault
     option add *Tree.itemBackgoundBd       0               widgetDefault
-    option add *Tree.lsortCommand          ""              widgetDefault
     option add *Tree.openImage             ""              widgetDefault
     option add *Tree.openCommand           {}              widgetDefault
     option add *Tree.pyjamasColor          white           widgetDefault
@@ -385,30 +400,37 @@ proc ::tree::Init { } {
     option add *Tree.yScrollCommand        {}              widgetDefault
     
     # Platform specifics...
-    switch $tcl_platform(platform) {
-	unix {
-	    if {[tk windowingsystem] == "aqua"} {
-		option add *Tree.selectBackground systemHighlight     widgetDefault
-		option add *Tree.selectForeground systemHighlightText widgetDefault
-		set widgetGlobals(font)             {{Lucida Grande} 11 normal}
-		set widgetGlobals(fontbold)         {{Lucida Grande} 11 bold}
-		set widgetGlobals(fontitalic)       {{Lucida Grande} 11 italic}
-	    } else {
-		option add *Tree.selectBackground black widgetDefault
-		option add *Tree.selectForeground white widgetDefault
-		set widgetGlobals(font)             {Helvetica 10 normal}
-		set widgetGlobals(fontbold)         {Helvetica 10 bold}
-		set widgetGlobals(fontitalic)       {Helvetica 10 italic}
-	    }
-	}
-	windows {
+    switch -- [tk windowingsystem] {
+	"aqua" {
 	    option add *Tree.selectBackground systemHighlight     widgetDefault
 	    option add *Tree.selectForeground systemHighlightText widgetDefault
-	    set widgetGlobals(font)             {{MS Sans Serif} 8 normal}
-	    set widgetGlobals(fontbold)         {{MS Sans Serif} 8 bold}
-	    set widgetGlobals(fontitalic)       {{MS Sans Serif} 8 italic}
+	    option add *Tree.styleIcons         aqua              widgetDefault
+	    option add *Tree.treeColor          {}                widgetDefault
+	    set widgetGlobals(font)             {{Lucida Grande} 11 normal}
+	    set widgetGlobals(fontbold)         {{Lucida Grande} 11 bold}
+	    set widgetGlobals(fontitalic)       {{Lucida Grande} 11 italic}
 	}
-	macintosh {
+	"x11" {
+	    option add *Tree.selectBackground black widgetDefault
+	    option add *Tree.selectForeground white widgetDefault
+	    set widgetGlobals(font)             {Helvetica 10 normal}
+	    set widgetGlobals(fontbold)         {Helvetica 10 bold}
+	    set widgetGlobals(fontitalic)       {Helvetica 10 italic}
+	}
+	"win32" {
+	    if {$tcl_platform(osVersion) >= 5.1} {
+		set family "Tahoma"
+		option add *Tree.treeColor      {}                widgetDefault
+	    } else {
+		set family "MS Sans Serif"
+	    }
+	    option add *Tree.selectBackground systemHighlight     widgetDefault
+	    option add *Tree.selectForeground systemHighlightText widgetDefault
+	    set widgetGlobals(font)             [list $family 8 normal]
+	    set widgetGlobals(fontbold)         [list $family 8 bold]
+	    set widgetGlobals(fontitalic)       [list $family 8 italic]
+	}
+	"classic" {
 	    option add *Tree.selectBackground systemHighlight     widgetDefault
 	    option add *Tree.selectForeground systemHighlightText widgetDefault
 	    set widgetGlobals(font)             {Geneva 9 normal}
@@ -420,19 +442,12 @@ proc ::tree::Init { } {
     option add *Tree.fontDir      $widgetGlobals(fontbold)  widgetDefault
         
     # Some platform specific drawing issues.
-    switch $tcl_platform(platform) {
-	unix {
-	    if {[tk windowingsystem] == "aqua"} {
-		set widgetGlobals(yTreeOff) 0
-	    } else {
-		set widgetGlobals(yTreeOff) 1
-	    }
-	}
-	windows {
-	    set widgetGlobals(yTreeOff) 1
-	}
-	macintosh {
+    switch -- [tk windowingsystem] {
+	"aqua" {
 	    set widgetGlobals(yTreeOff) 0
+	}
+	default {
+	    set widgetGlobals(yTreeOff) 1
 	}
     }
     
@@ -848,6 +863,19 @@ proc ::tree::WidgetProc {w command args} {
 	setselection {
 	    set result [eval SetSelection $w $args]
 	}
+	style {
+	    switch -- [lindex $args 0] {
+		element {
+		    set result [eval StyleElement $w [lrange $args 1 end]]
+		}
+		layout {
+		    set result [eval StyleLayout $w [lrange $args 1 end]]
+		}
+		default {
+		    return -code error "unknown style command \"[lindex $args 0]\""
+		}
+	    }
+	}
 	xview {
 	    if {[llength $args] == 0} {
 		set result [$widgets(canvas) xview]
@@ -1050,6 +1078,10 @@ proc ::tree::ConfigureIcons {w} {
 	    set priv(imclose) $widgetGlobals(closeCrystal)	
 	    set priv(imopen)  $widgetGlobals(openCrystal)
 	}
+	aqua {
+	    set priv(imclose) $widgetGlobals(closeAqua)	
+	    set priv(imopen)  $widgetGlobals(openAqua)
+	}
 	"" {
 	    set priv(imclose) ""
 	    set priv(imopen)  ""
@@ -1088,9 +1120,10 @@ proc ::tree::ItemInit {w v} {
     set state($uid:icon) {}
     set state($uid:tags) {}
     set state($uid:text) [lindex $v end]
-    set state($uid:bg) {}
-    set state($uid:bd) 0
-    set state($uid:fg) {}
+    set state($uid:bg)   {}
+    set state($uid:bd)   0
+    set state($uid:fg)   {}
+    set state($uid:xxxxxx) {}
 }
 
 # ::tree::ConfigureItem --
@@ -1186,8 +1219,8 @@ proc ::tree::ConfigureItem {w v args} {
 		    set result ""
 		}
 	    }
-	    -style {
-		set result $state($uid:style)
+	    -fontstyle {
+		set result $state($uid:fontstyle)
 	    }
 	    -tags {
 		set result $state($uid:tags)
@@ -1259,11 +1292,11 @@ proc ::tree::SetItemOptions {w v args} {
 		set state($uid:children)  \
 		  [eval $state($uid:scmd) {$state($uid:children)}]
 	    }
-	    -style {
+	    -fontstyle {
 		if {[regexp {(normal|bold|italic)} $val]} {
-		    set state($uid:style) $val
+		    set state($uid:fontstyle) $val
 		} else {
-		    return -code error "Use -style normal|bold|italic"
+		    return -code error "Use -fontstyle normal|bold|italic"
 		}
 	    }
 	    -tags {
@@ -1321,7 +1354,7 @@ proc ::tree::NewItem {w v args} {
     set v [NormList $v]   
     set dir  [lrange $v 0 end-1]
     set tail [lindex $v end]
-        
+	
     if {![info exists v2uid($dir)]} {
 	return -code error "parent item \"$dir\" is missing"
     }
@@ -1895,9 +1928,9 @@ proc ::tree::BuildLayer {w v xin} {
 	    lappend ids $id
 	    incr x [expr {[image width $icon] + 6}]
 	}
-	if {[info exists state($uidc:style)]} {
-	    set style $state($uidc:style)
-	    set itemFont $priv(font${style}) 
+	if {[info exists state($uidc:fontstyle)]} {
+	    set fontstyle $state($uidc:fontstyle)
+	    set itemFont $priv(font${fontstyle}) 
 	} else {
 	    if {$isDir} {
 		set itemFont $options(-fontdir)
@@ -1953,6 +1986,16 @@ proc ::tree::BuildLayer {w v xin} {
 	  $xin [expr {$ycent + $yTreeOff}]  \
 	  -fill $treeCol -tags ttreev -dash $options(-treedash)
     }
+}
+
+# tree::DrawItem --
+# 
+#       Draws a nonstyled element.
+
+proc ::tree::DrawItem {w uid} {
+    
+    
+    
 }
 
 # ::tree::OpenTree --
@@ -2203,6 +2246,317 @@ proc ::tree::NormList {alist} {
     return $ans
 }
 
+# Style ........................................................................
+# 
+#       Items built from simple image and label elements using layout.
+#       Separate display options from content options.
+#       
+#       o Style element options: -padding, -font,..
+#       o Style layout options: -side, -sticky
+#       o Item content options: -text, -image
+#   
+#   Examples:
+#   
+#   style element elementName image|label -padding, -font, -background,
+#                                         -foreground
+#       
+#   style layout styleName {
+#       avatar -side left
+#       top -side top -sticky w
+#       bot -side bot -sticky ew
+#   }
+#   
+#   newitem v -style styleName \
+#    -avatar.image imageName -top.text str -bot.text str
+
+
+# tree::StyleLayout --
+# 
+#       Create a layout.
+
+proc ::tree::StyleLayout {w style script} {
+
+    upvar ::tree::${w}::layout layout
+    
+    array unset layout $style,*
+    set layout($style,names) {}
+    
+    foreach elem [split [string trim $script "\n"] "\n"] {
+	set name [lindex $elem 0]
+	lappend layout($style,names) $name
+	array set opts {-side top -sticky ""}
+	array set opts [lrange $elem 1 end]
+	set layout($style,$name,-side)   $opts(-side)
+	set layout($style,$name,-sticky) $opts(-sticky)
+    }    
+}
+
+
+# tree::StyleElement --
+# 
+#       Create an element.
+
+proc ::tree::StyleElement {w name type args} {
+    
+    variable widgetGlobals
+    upvar ::tree::${w}::element element
+    
+    set def(image) [list -padding {0}]
+    set def(label) [list -background "" -foreground black \
+      -padding {0} -compound text -font $widgetGlobals(font)]
+    
+    array unset element $name,*
+    set element($name,type) $type
+    
+    array set opts $def($type)
+    array set opts $args
+    foreach {key value} [array get opts] {
+	set element($name,$key) $value
+    }
+    set padding [NormalizePadding $element($name,-padding)]
+    foreach s {left top right bottom} v $padding {
+	set element($name,pad,$s) $v
+    }
+    
+    if {$type eq "label"} {
+	
+	# Compute typical height.
+	set element($name,linespace) [font metrics $opts(-font) -linespace]
+    }
+}
+
+proc ::tree::NormalizePadding {padding} {
+    
+    switch -- [llength $padding] {
+	1 {
+	    return [list $padding $padding $padding $padding]
+	}
+	2 {
+	    set pad0 [lindex $padding 0]
+	    set pad1 [lindex $padding 1]
+	    return [list $pad0 $pad1 $pad0 $pad1]
+	}
+	4 {
+	    return $padding
+	}
+    }
+}
+
+proc ::tree::StyleElementSize {w uid name sizeName} {
+    
+    upvar $sizeName size
+    upvar ::tree::${w}::state   state
+    upvar ::tree::${w}::element element
+    
+    set elemW [expr {$element($name,pad,left) + $element($name,pad,right)}]
+    set elemH [expr {$element($name,pad,top)  + $element($name,pad,bottom)}]
+
+    switch -- $element($name,type) {
+	image {
+	    if {$state($uid:$name:-image) != ""} {
+		set im $state($uid:$name:-image)
+		incr elemW [image width  $im]
+		incr elemH [image height $im]
+	    }
+	}
+	label {
+	    # @@@ -compound & -image
+	    incr elemW [font measure $element($name,-font) \
+	      $state($uid:$name:-text)]
+	    incr elemH $element($name,linespace)
+	}
+    }
+    return [list $elemW $elemH]
+}
+
+proc ::tree::StyleItemSize {w sizeName} {
+    
+    upvar $sizeName size
+    upvar ::tree::${w}::state   state
+    upvar ::tree::${w}::element element
+    upvar ::tree::${w}::layout  layout
+    
+    set totW 0
+    set totH 0
+    set cavW 0
+    set cavH 0
+    
+    foreach name $layout($style,names) {
+	switch -- $layout($name,-side) {
+	    top - bottom {
+		if {$size($name,w) > $cavW} {
+		    set totW [expr {$totW + $size($name,w) - $cavW}]
+		    set cavW $size($name,w)
+		}
+		incr cavH -$size($name,h)
+	    }
+	    left - right {
+		if {$size($name,h) > $cavH} {
+		    set totH [expr {$totW + $size($name,h) - $cavH}]
+		    set cavH $size($name,h)
+		}
+		incr cavW -$size($name,w)
+	    }
+	}
+    }    
+    return [list $totW $totH]
+}
+
+proc ::tree::StyleSetItemDefaults {w uid style} {
+    
+    upvar ::tree::${w}::state   state
+    upvar ::tree::${w}::element element
+    upvar ::tree::${w}::layout  layout
+
+    foreach name $layout($style,names) {
+	switch -- $element($name,type) {
+	    image {
+		set state($uid:$name:-image) ""
+	    }
+	    label {
+		set state($uid:$name:-text) ""
+	    }
+	}
+    }
+}
+
+proc ::tree::StyleConfigureItem {w v style args} {
+    
+    upvar ::tree::${w}::state   state
+    upvar ::tree::${w}::element element
+    upvar ::tree::${w}::layout  layout
+    upvar ::tree::${w}::v2uid v2uid
+    
+    Debug 1 "::tree::StyleConfigureItem w=$w, v='$v', args='$args'"
+
+    set v [NormList $v]
+    set dir  [lrange $v 0 end-1]
+    set tail [lindex $v end]
+
+    if {![info exists v2uid($v)]} {
+	return -code error "item \"$v\" doesn't exist"
+    }
+    set uid $v2uid($v)
+    
+    set state($uid:style) $style
+    StyleSetItemDefaults $w $uid $style
+    
+    foreach {key value} {
+	lassign [split [string range $key 1 end] .] name opt
+	set state($uid:$name:-$opt) $value
+    }
+    
+    # Geometry. Keep only stuff we need for drawing.
+    foreach name $layout($style,names) {
+	lassign [StyleElementSize $uid $name] size($name,w) size($name,h)
+    }
+    lassign [StyleItemSize $w size] itemW itemH
+    
+    
+    StyleItemLayout $w $style ...
+    
+}
+
+proc ::tree::StyleItemLayout {w style width height sizeVar} {
+    
+    upvar $sizeVar size
+    upvar ::tree::${w}::element element
+    upvar ::tree::${w}::layout  layout
+
+    # Initial cavity.
+    array set cav [list x 0 y 0 w $width h $height]
+    
+    foreach name $layout($style,names) {
+	lassign [StylePackElement $w cav $size($name,w) $size($name,h) \
+	  $layout($style,$name,-side) $layout($style,$name,-sticky)] zzzz
+	
+    }
+}
+
+# tree::StylePackElement --
+# 
+#       Given a cavity and an element size find elements geometry and
+#       remaining cavity.
+
+proc ::tree::StylePackElement {w cavityVar width height side sticky} {
+    
+    upvar $cavityVar cav
+
+    switch -- $side {
+	top {
+	    set box [StyleStickElement $cavityVar $width $height $sticky]
+	    incr cav(y) $height
+	    incr cav(h) -$height	    
+	}
+	bottom {
+	    
+	    incr cav(h) -$height	    
+	}
+	left {
+	    
+	    incr cav(x) $width
+	    incr cav(w) -$width
+	}
+	right {
+	    
+	    incr cav(w) -$width
+	}
+    }
+    return
+}
+
+# tree::StyleStickElement --
+# 
+#       Sticks an element in box.
+
+proc ::tree::StyleStickElement {cavityVar width height sticky} {
+    
+    upvar $cavityVar cav
+   
+   # e-w
+   if {[string match *e*w* $sticky] || [string match *w*e* $sticky]} {
+       set boxX $cav(x)
+       set boxW $cav(w)
+   } elseif {[string match *w* $sticky]} {
+       set boxX $cav(x)
+       set boxW $width
+   } elseif {[string match *e* $sticky]} {
+       set boxX [expr {$cav(x) + $cav(w) - $width}]
+       set boxW $width
+   } else {
+       # Center.
+       set boxX [expr {$cav(x) + ($cav(w) - $width)/2}]
+       set boxW $width
+   }
+   
+   # n-s
+   if {[string match *n*s* $sticky] || [string match *s*n* $sticky]} {
+       set boxY $cav(y)
+       set boxH $cav(h)
+   } elseif {[string match *n* $sticky]} {
+       set boxY $cav(y)
+       set boxH $width
+   } elseif {[string match *s* $sticky]} {
+       set boxY [expr {$cav(y) + $cav(h) - $width}]
+       set boxH $width
+   } else {
+       # Center.
+       set boxY [expr {$cav(y) + ($cav(h) - $width)/2}]
+       set boxH $width
+   }
+   return [list $boxX $boxY $boxW $boxH]
+}
+
+proc ::tree::StyleDrawItem {w v} {
+    
+    
+}
+
+proc ::tree::StyleDrawElement {w uid name x y} {
+    
+    
+}
+
 # ::tree::DestroyHandler --
 #
 #       The exit handler of a tree.
@@ -2226,12 +2580,27 @@ proc ::tree::DestroyHandler {w} {
     namespace delete ::tree::${w}
 }
 
+if {![llength [info commands lassign]]} {
+    proc ::tree::lassign {vals args} {uplevel 1 [list foreach $args $vals break] }
+}
+
 proc ::tree::Debug {num str} {
     variable debug
     if {$num <= $debug} {
 	puts $str
     }
 }
+
+if {0} {
+    $w style layout Mats {
+	avatar -side left
+	top -side top -sticky w
+	bot -side bot -sticky e
+    }
+    $w style element avatar image 
+    $w style element top label
+    $w style element bot label
+}    
 
 #-------------------------------------------------------------------------------
 

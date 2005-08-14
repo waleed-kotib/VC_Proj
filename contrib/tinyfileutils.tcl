@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: tinyfileutils.tcl,v 1.5 2004-12-04 15:01:06 matben Exp $
+# $Id: tinyfileutils.tcl,v 1.6 2005-08-14 06:56:45 matben Exp $
 
 package provide tinyfileutils 1.0
 
@@ -237,25 +237,6 @@ proc ::tfileutils::tempfile {tmpdir prefix} {
     } else {
 	return -code error "Failed to find an unused temporary file name"
     }
-}
-
-# This could be a smarter way.
-
-proc ::tfileutils::newuid { } {
-    
-    set tm1 [clock format [clock seconds] -format "%m%d%H%M%S"]
-    set hx1 [format %X [string trimleft $tm1 0]]
-    set tm2 [string range [clock clicks -milliseconds] end-2 end]
-    set hx2 [format %X [string trimleft $tm2 0]]
-    if {$hx2 == ""} {
-	set hx2 0
-    }
-    set ran [string trimleft [string range [expr rand()] end-7 end] 0.]
-    set hx3 [format %X $ran]
-    if {$hx3 == ""} {
-	set hx3 0
-    }
-    return ${hx1}-${hx2}-${hx3}
 }
 
 #------------------------------------------------------------------------------
