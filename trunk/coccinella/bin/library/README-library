@@ -1,0 +1,5 @@
+
+README-library
+
+This shall contain the script support used by binary packages if they
+use 'tcl_findLibrary' mechaism.
