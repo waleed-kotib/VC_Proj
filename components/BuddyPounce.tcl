@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.9 2005-02-02 15:21:17 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.10 2005-08-14 08:37:51 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -26,13 +26,11 @@ proc ::BuddyPounce::Init { } {
     ::hooks::register newChatMessageHook       ::BuddyPounce::NewChatMsgHook
     ::hooks::register presenceHook             ::BuddyPounce::PresenceHook    
     ::hooks::register prefsInitHook            ::BuddyPounce::InitPrefsHook
-    ::hooks::register closeWindowHook          ::BuddyPounce::CloseHook
     
     # Register popmenu entry.
-    set popMenuSpec [list  \
-      {Buddy Pouncing}  \
-      {group user}  \
-      {::BuddyPounce::Build $clicked $jid $group}]
+    set popMenuSpec {
+	command {Buddy Pouncing} {group user} {::BuddyPounce::Build $clicked $jid $group} {}
+    }
     ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
     
     component::register BuddyPounce  \
@@ -115,7 +113,7 @@ proc ::BuddyPounce::InitPrefsHook { } {
     
     variable budprefsany
         
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::BuddyPounce::budprefs      budprefs_array      [GetJidPrefsArr]] \
       [list ::BuddyPounce::budprefsgroup budprefsgroup_array [GetGroupPrefsArr]]\
       [list ::BuddyPounce::budprefsany   budprefsany         $budprefsany]   \
@@ -194,7 +192,6 @@ proc ::BuddyPounce::Build {typeselected item group} {
     
     # Get all sounds.
     set allSounds [GetAllSounds]
-    set fontS      [option get . fontSmall {}]
     set contrastBg [option get . backgroundLightContrast {}]
     set maxlen 0
     set maxstr ""
@@ -207,78 +204,91 @@ proc ::BuddyPounce::Build {typeselected item group} {
     }
     
     # Toplevel with class BuddyPounce.
-    ::UI::Toplevel $w -class BuddyPounce -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -class BuddyPounce \
+      -usemacmainmenu 1 -macstyle documentProc -command ::BuddyPounce::CloseHook
     wm title $w $title
 
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 4
+    set nwin [llength [::UI::GetPrefixedToplevels $wdlg]]
+    if {$nwin == 1} {
+	::UI::SetWindowPosition $w $wdlg
+    }
 
-    ::headlabel::headlabel $w.frall.head -text [mc {Buddy Pouncing}]
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    ttk::label $w.frall.head -style Headlabel \
+      -text [mc {Buddy Pouncing}] -compound left
     pack $w.frall.head -side top -fill both -expand 1
-    label $w.frall.msg -wraplength 300 -justify left -padx 10 -pady 2 \
-      -text $msg
-    pack $w.frall.msg -side top -anchor w
-    
-    frame $w.frall.fr -bg $contrastBg -bd 0
-    pack  $w.frall.fr -padx 6 -pady 4
-    
-    set wnb $w.frall.fr.nb
-    ::mactabnotebook::mactabnotebook $wnb
-    pack $wnb -padx 1 -pady 1
+
+    ttk::separator $w.frall.s -orient horizontal
+    pack $w.frall.s -side top -fill x
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left -text $msg
+    pack $wbox.msg -side top -anchor w
+        
+    set wnb $wbox.nb
+    ttk::notebook $wnb -padding {4}
+    pack $wnb
         
     # Fake menubutton to compute max width.
     set wtmp $w.frall._tmp
-    menubutton $wtmp -text $maxstr
+    ttk::menubutton $wtmp -text $maxstr
     set soundMaxWidth [winfo reqwidth $wtmp]
     destroy $wtmp
     
     set i 0
-    foreach eventStr $events(str) ekey $events(keys) {
+    foreach estr $events(str) ekey $events(keys) {
 
-	set wpage [$wnb newpage $eventStr -text [mc $eventStr]]	
+	$wnb add [ttk::frame $wnb.$ekey] -text [mc $estr] -sticky news
 		
 	# Action
-	set wact $wpage.f$ekey
-	frame $wact
-	pack  $wact -padx 6 -pady 2
-	checkbutton $wact.alrt -text " [mc {Show Popup}]" \
+	set wact $wnb.$ekey.f
+	ttk::frame $wact -padding [option get . notebookPagePadding {}]
+	pack  $wact  -side top -anchor [option get . dialogAnchor {}]
+	
+	ttk::checkbutton $wact.alrt -text [mc {Show Popup}] \
 	  -variable $token\($ekey,msgbox)
 	
-	checkbutton $wact.lsound -text " [mc {Play Sound}]:" \
+	ttk::checkbutton $wact.lsound -text "[mc {Play Sound}]:" \
 	  -variable $token\($ekey,sound)
-	set wmenu [eval {
-	    tk_optionMenu $wact.msound $token\($ekey,soundfile)
-	} $allSounds]
-	$wmenu configure -font $fontS
+	eval {
+	    ttk::optionmenu $wact.msound $token\($ekey,soundfile)
+	} $allSounds
 
 	set wpad $wact.pad[incr i]
-	frame $wpad -width [expr $soundMaxWidth + 40] -height 1
+	ttk::frame $wpad -width [expr {$soundMaxWidth + 40}] -height 1
 
-	checkbutton $wact.chat -text " [mc {Start Chat}]" \
+	ttk::checkbutton $wact.chat -text [mc {Start Chat}] \
 	  -variable $token\($ekey,chat)
+
 	set wmsg $wact.fmsg
-	frame $wmsg
+	ttk::frame $wmsg
 	
-	frame $wmsg.f1
+	ttk::frame $wmsg.f1
 	pack  $wmsg.f1 -side top -anchor w
-	checkbutton $wmsg.f1.c -text " [mc {Send Message with subject}]:" \
+	ttk::checkbutton $wmsg.f1.c -text "[mc {Send Message with subject}]:" \
 	  -variable $token\($ekey,msg)
-	entry $wmsg.f1.e -width 12 -textvariable $token\($ekey,msg,subject)
+	ttk::entry $wmsg.f1.e -width 12 -textvariable $token\($ekey,msg,subject)
 	pack  $wmsg.f1.c $wmsg.f1.e -side left
 	
-	frame $wmsg.f2
+	ttk::frame $wmsg.f2 -padding {0 2}
 	pack  $wmsg.f2 -side top -anchor w -fill x
-	label $wmsg.f2.l -text "[mc Message]:"
-	text  $wmsg.f2.t -height 2 -width 24 -wrap word
+	ttk::label $wmsg.f2.l -text "[mc Message]:"
+	text  $wmsg.f2.t -height 2 -width 24 -wrap word -bd 1 -relief sunken
 	pack  $wmsg.f2.l -side left -anchor n
 	pack  $wmsg.f2.t -side top -fill x
 	
 	set state($ekey,msg,wtext) $wmsg.f2.t
 	
-	grid x          x            $wpad
-	grid $wact.alrt $wact.lsound $wact.msound -sticky w  -padx 4 -pady 1
-	grid $wact.chat $wact.fmsg   -            -sticky nw -padx 4 -pady 1
+	grid  x           x             $wpad
+	grid  $wact.alrt  $wact.lsound  $wact.msound  -sticky w  -padx 4 -pady 1
+	grid  $wact.chat  $wact.fmsg    -             -sticky nw -padx 4 -pady 1
 		
 	if {([llength audioSuffixes] == 0) || ![component::exists Sounds]} {
 	    $wact.lsound configure -state disabled
@@ -287,22 +297,26 @@ proc ::BuddyPounce::Build {typeselected item group} {
     }
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc OK] \
-      -default active -command [list [namespace current]::OK $token]] \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::Cancel $token]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btoff -text [mc {All Off}]  \
-      -command [list [namespace current]::AllOff $token]]  \
-      -side left -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
-
-    set nwin [llength [::UI::GetPrefixedToplevels $wdlg]]
-    if {$nwin == 1} {
-	::UI::SetWindowPosition $w $wdlg
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc OK] -default active \
+      -command [list [namespace current]::OK $token]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::Cancel $token]
+    ttk::button $frbot.btoff -text [mc {All Off}]  \
+      -command [list [namespace current]::AllOff $token]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+	pack $frbot.btoff -side right
+    } else {
+	pack $frbot.btoff -side right
+	pack $frbot.btcancel -side right -padx $padx
+	pack $frbot.btok -side right
     }
+    pack $frbot -side bottom -fill x
+
     wm resizable $w 0 0
     
     AllOff $token
@@ -312,7 +326,7 @@ proc ::BuddyPounce::Build {typeselected item group} {
     set script [format {
 	update idletasks
 	%s configure -wraplength [expr [winfo reqwidth %s] - 12]
-    } $w.frall.msg $w]    
+    } $wbox.msg $w]    
     after idle $script
 
     return $token
@@ -628,10 +642,8 @@ proc ::BuddyPounce::QuitHook { } {
 
 proc ::BuddyPounce::CloseHook {wclose} {
     variable wdlg
-    
-    if {[string match $wdlg* $wclose]} {
-	::UI::SaveWinGeom $wdlg $wclose
-    }   
+
+    ::UI::SaveWinGeom $wdlg $wclose
     return ""
 }
 

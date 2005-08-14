@@ -2,7 +2,7 @@
 #      
 #  Copyright (c) 1999-2003  Mats Bengtsson
 #  
-# $Id: Multicast.tcl,v 1.4 2004-12-02 08:22:35 matben Exp $
+# $Id: Multicast.tcl,v 1.5 2005-08-14 08:37:52 matben Exp $
 
 package provide Multicast 1.0
 
@@ -21,7 +21,7 @@ namespace eval ::Multicast:: {
 #       Makes dialog to open streaming audio/video.
 #   
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       wtop        toplevel widget path
 #       w           the toplevel dialog.
 #       
 # Results:
@@ -40,53 +40,56 @@ proc ::Multicast::OpenMulticast {wtop} {
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
     wm title $w [mc {Open Stream}]
-    set fontSB [option get . fontSmallBold {}]
-    
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    
-    # Labelled frame.
-    set wcfr $w.frall.fr
-    labelframe $wcfr -text [mc openquicktime]
-    pack $wcfr -side top -fill both -padx 8 -pady 4 -ipadx 10 -ipady 6 -in $w.frall
-    
-    # Overall frame for whole container.
-    set frtot [frame $wcfr.frin]
-    pack $frtot
-    label $frtot.lbltop -text [mc writeurl] -font $fontSB
+
     set shorts [lindex $prefs(shortsMulticastQT) 0]
-    set optMenu [eval {tk_optionMenu $frtot.optm  \
-      [namespace current]::selMulticastName} $shorts]
-    $frtot.optm configure -highlightthickness 0 -foreground black
-    #set selMulticastName [lindex [lindex $prefs(shortsMulticastQT) 0] 0]
-    label $frtot.lblhttp -text {http://} -font $fontSB
-    entry $frtot.entip -width 60   \
-      -textvariable [namespace current]::txtvarEntMulticast
-    message $frtot.msg -borderwidth 0 -aspect 500 \
-      -text [mc openquicktimeurlmsg]
-    grid $frtot.lbltop -column 0 -row 0 -sticky sw -padx 0 -pady 2 -columnspan 2
-    grid $frtot.optm -column 2 -row 0 -sticky e -padx 2 -pady 2
-    grid $frtot.lblhttp -column 0 -row 1 -sticky e -padx 0 -pady 6
-    grid $frtot.entip -column 1 -row 1 -columnspan 2 -sticky w -padx 0 -pady 6
-    grid $frtot.msg -column 0 -row 2 -columnspan 3 -padx 4 -pady 2 -sticky news
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    # Labelled frame.
+    set frtot $wbox.fr
+    ttk::labelframe $frtot -padding [option get . groupSmallPadding {}] \
+      -text [mc openquicktime]
+    pack $frtot -side top -fill both
     
+    ttk::label $frtot.lbltop -text [mc writeurl]
+    eval {ttk::optionmenu $frtot.optm  \
+      [namespace current]::selMulticastName} $shorts
+    ttk::label $frtot.lblhttp -text {http://}
+    ttk::entry $frtot.entip -width 40  \
+      -textvariable [namespace current]::txtvarEntMulticast
+    ttk::label $frtot.msg -style Small.TLabel \
+      -wraplength 400 -justify left -text [mc openquicktimeurlmsg]
+
+    grid  $frtot.lbltop   -             $frtot.optm  -padx 2 -pady 2 -sticky w
+    grid  $frtot.lblhttp  $frtot.entip  -            -padx 2 -pady 2 -sticky e
+    grid  $frtot.msg      -             -            -sticky ew
+    
+    grid  $frtot.optm  $frtot.entip  -sticky ew
+    grid columnconfigure $frtot 1 -weight 1
+        
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]  
-    pack [button $frbot.btconn -text [mc Open] -default active  \
-      -command [list Multicast::OpenMulticastQTStream $wtop $frtot.entip]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command "set [namespace current]::finished 0"]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btedit -text "[mc Edit]..."   \
-      -command [list Multicast::DoAddOrEditQTMulticastShort edit $frtot.optm]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btadd -text "[mc Add]..."   \
-      -command [list Multicast::DoAddOrEditQTMulticastShort add $frtot.optm]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -in $w.frall  \
-      -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btconn -text [mc Open] -default active  \
+      -command [list Multicast::OpenMulticastQTStream $wtop $frtot.entip]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list set [namespace current]::finished 0]
+    ttk::button $frbot.btedit -text "[mc Edit]..."   \
+      -command [list ::Multicast::DoAddOrEditQTMulticastShort edit $frtot.optm]
+    ttk::button $frbot.btadd -text "[mc Add]..."   \
+      -command [list ::Multicast::DoAddOrEditQTMulticastShort add $frtot.optm]
+    set padx [option get . buttonPadX {}]
+    pack  $frbot.btconn  -side right
+    pack  $frbot.btcancel  -side right -padx $padx
+    pack  $frbot.btedit  -side right
+    pack  $frbot.btadd  -side right -padx $padx
+    pack  $frbot  -side bottom -fill x
     
     wm resizable $w 0 0
     
@@ -159,13 +162,13 @@ proc ::Multicast::TraceSelMulticastName {name junk1 junk2} {
 #       Initiates a separate download of the tiny SDR file with http.
 #   
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       wtop        toplevel widget path
 
 proc ::Multicast::OpenMulticastQTStream {wtop wentry} {
     global  this prefs
     variable finished
 
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $wtop]
 
     # Patterns.
     set proto_ {[^:]+}
@@ -203,15 +206,15 @@ proc ::Multicast::OpenMulticastQTStream {wtop wentry} {
     }
     
     # This is opened as an ordinary movie.
-    set anchor [::CanvasUtils::NewImportAnchor $wCan]
-    ::Import::DoImport $wCan $anchor -url $url
+    set anchor [::CanvasUtils::NewImportAnchor $wcan]
+    ::Import::DoImport $wcan $anchor -url $url
 }
 
 proc ::Multicast::CleanupMulticastQTStream {wtop fid fullName token} { 
 
     upvar #0 $token state    
 
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $wtop]
     set no_ {^2[0-9]+}
     catch {close $fid}
     
@@ -249,8 +252,8 @@ proc ::Multicast::CleanupMulticastQTStream {wtop fid fullName token} {
     }
     
     # This is opened as an ordinary movie.
-    set anchor [::CanvasUtils::NewImportAnchor $wCan]
-    ::Import::DoImport $wCan "$anchor" -file $fullName  \
+    set anchor [::CanvasUtils::NewImportAnchor $wcan]
+    ::Import::DoImport $wcan "$anchor" -file $fullName  \
       -where "local"
     set fileTail [file tail $fullName]
     ::WB::SetStatusMessage $wtop "Opened streaming live multicast: $fileTail."

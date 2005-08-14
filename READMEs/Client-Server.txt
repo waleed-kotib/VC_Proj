@@ -30,6 +30,4 @@ wish Whiteboard.tcl -prefs_protocol client -prefs_remotePort 8235 \
 	-connect 192.168.0.2
 
 If you do it from wish do 'exec ... &'.
-You may also strip out Jabber stuff by setting prefs(stripJabber) 1
-instead of 0 in Whiteboard.tcl.
 

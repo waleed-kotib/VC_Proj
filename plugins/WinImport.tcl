@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WinImport.tcl,v 1.9 2004-12-02 08:22:35 matben Exp $
+# $Id: WinImport.tcl,v 1.10 2005-08-14 08:37:52 matben Exp $
 
 #package require WindowsUtils
 
@@ -186,7 +186,7 @@ proc ::WinImport::Import {wcan optListVar args} {
 	return -code error "Does not yet support -data option"
     }
     set fileName $argsArr(-file)
-    set wtop [::UI::GetToplevelNS $wcan]
+    set w [winfo toplevel $wcan]
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
@@ -196,7 +196,7 @@ proc ::WinImport::Import {wcan optListVar args} {
 	set useTag [::CanvasUtils::NewUtag]
     }
     set uniqueName [::CanvasUtils::UniqueImageName]		
-    set wfr ${wcan}.fr_${uniqueName}    
+    set wfr $wcan.fr_${uniqueName}    
     set mime [::Types::GetMimeTypeForFileName $fileName]
     
     # Make actual object in a frame with special -class.
@@ -206,7 +206,7 @@ proc ::WinImport::Import {wcan optListVar args} {
     } else {
 	::WinImport::MakeGenericAppIcon32 ${wfr}.icon [file extension $fileName]
     }
-    pack ${wfr}.icon -padx 4 -pady 4
+    pack $wfr.icon -padx 4 -pady 4
     
     set id [$wcan create window $x $y -anchor nw -window $wfr -tags  \
       [list frame $useTag]]
@@ -217,7 +217,7 @@ proc ::WinImport::Import {wcan optListVar args} {
     if {[info exists optArr(-url)]} {
 	lappend configOpts -url $optArr(-url)
     }
-    eval {::CanvasUtils::ItemSet $wtop $id} $configOpts
+    eval {::CanvasUtils::ItemSet $w $id} $configOpts
     
     bind $wfr.icon <Double-Button-1> [list [namespace current]::Clicked $id]
 
@@ -291,17 +291,15 @@ proc ::WinImport::MakeGenericAppIcon32 {w suff} {
     
     variable locals
     
-    set fontSB [option get . fontSmallBold {}]
-    
     canvas $w -bg white -width 32 -height 32 -scrollregion {0 0 32 32} \
       -highlightthickness 0
     set col gray20
     $w create image 0 0 -anchor nw -image $locals(docim)
-    $w create text 18 24 -anchor c -text $suff -font $fontSB -fill gray70 \
+    $w create text 18 24 -anchor c -text $suff -font CociSmallBoldFont -fill gray70 \
       -tags txt
-    $w create text 17 23 -anchor c -text $suff -font $fontSB -fill gray60 \
+    $w create text 17 23 -anchor c -text $suff -font CociSmallBoldFont -fill gray60 \
       -tags txt
-    $w create text 16 22 -anchor c -text $suff -font $fontSB -fill gray10 \
+    $w create text 16 22 -anchor c -text $suff -font CociSmallBoldFont -fill gray10 \
       -tags txt
     return $w
 }

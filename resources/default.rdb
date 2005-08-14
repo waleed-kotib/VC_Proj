@@ -6,57 +6,90 @@
 !
 ! Fonts may be set to other if our system encoding is nonlatin.
 !
-*fontTiny:                           Helvetica 10
-*fontSmall:                          Helvetica 10
-*fontSmallBold:                      Helvetica 10 bold
-*fontMedium:                         Helvetica 10
-*fontLarge:                          Helvetica 18
 *backgroundGeneral:                  #dedede
 *backgroundLightContrast:            #bcbcbc
 
+! Tile specific standard paddings for WinXP and...
+!
+*dialogPadding:                      6 8 6 8
+*dialogSmallPadding:                 6 8 6 8
+*dialogNotebookPadding:              6 8 6 8
+*notebookPagePadding:                6 8 6 8
+*notebookPageSmallPadding:           6 8 6 8
+*groupPadding:                       6 8 6 8
+*groupSmallPadding:                  6 8 6 8
+*okcancelPadding:                    6 8 6 8
+*okcancelTopPadding:                 0 8 0 0
+*okcancelNoTopPadding:               6 0 6 8
+*dialogAnchor:                       w
+*dialogSticky:                       new
+*okcancelButtonOrder:                okcancel
+*buttonPadX:                         6
+
 ! general settings for all widgets
 !
-*background:                         #dedede
-*highlightBackground:                #dedede
+!*background:                         #dedede
+!*highlightBackground:                #dedede
 *highlightColor:                     #6363ce
 *disabledForeground:                 #7a7a7a
 
+! Standard backgrounds
+!
+*Canvas.background:                  #dedede
+*Canvas.highlightBackground:         #dedede
+*Checkbutton.background:             #dedede
+*Checkbutton.highlightBackground:    #dedede
+*Frame.background:                   #dedede
+*Frame.highlightBackground:          #dedede
+*Label.background:                   #dedede
+*Label.highlightBackground:          #dedede
+*Labelframe.background:              #dedede
+*Labelframe.highlightBackground:     #dedede
+*Radiobutton.background:             #dedede
+*Radiobutton.highlightBackground:    #dedede
+
 ! tk standard widgets
 !
-*Checkbutton.Font:                   Helvetica 10
+*Checkbutton.Font:                   CociSmallFont
 *Entry.background:                   white
 *Entry.borderWidth:                  1
 *Entry.disableBackground:            #dedede
 *Entry.disableForeground:            gray20
-*Entry.Font:                         Helvetica 10
+*Entry.Font:                         CociSmallFont
 *Entry.foreground:                   black
 *Entry.highlightThickness:           2
-*Label.Font:                         Helvetica 10
-*Labelframe.Font:                    Helvetica 10 bold
+*Label.Font:                         CociSmallFont
+*Labelframe.Font:                    CociSmallBoldFont
 *Listbox.background:                 white
 *Listbox.borderWidth:                1
-*Listbox.Font:                       Helvetica 10
+*Listbox.Font:                       CociSmallFont
 *Listbox.highlightThickness:         2
-*Message.Font:                       Helvetica 10
-*Radiobutton.Font:                   Helvetica 10
-*Scale.Font:                         Helvetica 10
+*Menu.font:                          CociSmallFont
+*Message.Font:                       CociSmallFont
+*Radiobutton.Font:                   CociSmallFont
+*Scale.Font:                         CociSmallFont
 *Text.background:                    white
-*Text.Font:                          Helvetica 10
+*Text.Font:                          CociSmallFont
+*Text.highlightBackground:           white
 *Text.highlightThickness:            2
 
 ! contributed widgets
 !
 *Balloonhelp.background:             #ffff9f
+*ChaseArrows.background:             #dedede
 *Combobox.background:                white
-*Combobox.Font:                      Helvetica 10
+*Combobox.Font:                      CociSmallFont
 *HeadLabel.background:               #cecece
 *Progressbar.borderWidth:            0
 *Tablelist.borderWidth:              1
-*Tablelist.Font:                     Helvetica 10
+*Tablelist.Font:                     CociSmallFont
 *Tablelist.highlightThickness:       2
-*Tablelist.labelBackground:          #cecece
+*Tablelist.labelBackground:          #dedede
+*Tablelist.labelBorderWidth:         1
 *Tablelist.stripeBackground:         #dedeff
 *Tablelist.background:               white
+*TToolbar.TLabel.font:               CociSmallFont
+*WaveLabel.background:               #cecece
 
 ! specific megawidgets
 !
@@ -72,4 +105,16 @@
 *NewMsg*Scrollbar.width:             12
 *Roster*Scrollbar.width:             12
 *Roster*Tree.highlightThickness:     0
+*Preferences*Tree.highlightBackground:  white
+*Preferences*Tree.stripeColors:      white #dedeff
 
+! button widths for ok and cancel buttons
+!
+!*Frame.btok.width:                  8
+!*Frame.btcancel.width:              8
+
+! tile widgets
+!
+
+!*TFrame.btok.width:                   -6
+!*TFrame.btcancel.width:               -6

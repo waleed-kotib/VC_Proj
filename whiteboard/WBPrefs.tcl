@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.6 2004-12-20 15:17:05 matben Exp $
+# $Id: WBPrefs.tcl,v 1.7 2005-08-14 08:37:52 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -42,7 +42,7 @@ proc ::WBPrefs::InitPrefsHook { } {
     # We should have used accesor functions and not direct access to internal
     # arrays. Sorry for this.
     # 
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list prefs(canScrollWidth)  prefs_canScrollWidth  $prefs(canScrollWidth)]  \
       [list prefs(canScrollHeight) prefs_canScrollHeight $prefs(canScrollHeight)]  \
       [list prefs(canvasFonts)     prefs_canvasFonts     $prefs(canvasFonts)]  \
@@ -78,26 +78,34 @@ proc ::WBPrefs::BuildWhiteboardPage {page} {
     set tmpPrefs(canScrollWidth)  $prefs(canScrollWidth)
     set tmpPrefs(canScrollHeight) $prefs(canScrollHeight)
     
-    set wfr $page.fr
-    labelframe $wfr -text [mc {Canvas Size}]
-    pack $wfr -side top -padx 8 -pady 4 -anchor w
-    label $wfr.lh -text [mc prefwbscroll $prefs(mincanScrollWidth) \
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set wsi $wc.si
+    ttk::labelframe $wsi -text [mc {Canvas Size}] \
+      -padding [option get . groupSmallPadding {}]
+    pack  $wsi  -side top -anchor w
+    
+    ttk::label $wsi.lh -text [mc prefwbscroll $prefs(mincanScrollWidth) \
       $prefs(mincanScrollHeight)]
-    pack  $wfr.lh -side top -anchor w -padx 6
-    set afr $wfr.fr
-    frame $afr
-    pack  $afr -side top -anchor w
-    label $afr.w -text "[mc Width]:"
-    label $afr.h -text "[mc Height]:"
-    entry $afr.width  -width 6 \
+    pack  $wsi.lh -side top -anchor w -padx 6
+    set afr $wsi.fr
+    ttk::frame $afr
+    pack  $afr -side top -anchor [option get . dialogAnchor {}]
+    ttk::label $afr.w -text "[mc Width]:"
+    ttk::label $afr.h -text "[mc Height]:"
+    ttk::entry $afr.width -font CociSmallFont \
+      -width 6 \
       -textvariable [namespace current]::tmpPrefs(canScrollWidth)
-    entry $afr.height -width 6 \
+    ttk::entry $afr.height -font CociSmallFont \
+      -width 6 \
       -textvariable [namespace current]::tmpPrefs(canScrollHeight)
     
-    grid $afr.w   $afr.width
-    grid $afr.h   $afr.height
-    grid $afr.w -padx 2 -sticky e
-    grid $afr.h -padx 2 -sticky e
+    grid  $afr.w   $afr.width   -pady 2
+    grid  $afr.h   $afr.height  -pady 2
+    grid  $afr.w  -padx 2 -sticky e
+    grid  $afr.h  -padx 2 -sticky e
 }
 
 # Fonts Page ...................................................................
@@ -112,83 +120,81 @@ proc ::WBPrefs::BuildFontsPage {page} {
     variable wsamp
     variable fontFamilies
     
-    set xpadbt [option get [winfo toplevel $page] xPadBt {}]
-    set fontS  [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    ttk::label $wc.head -text [mc {Import/Remove fonts}]
+    ttk::label $wc.sysfont -text [mc {System fonts}]
+    ttk::label $wc.wifont -text [mc {Whiteboard fonts}]
+    ttk::frame $wc.fr1
+    ttk::frame $wc.fr2
+    ttk::frame $wc.fr3
+
+    grid  $wc.head     -        -
+    grid  $wc.sysfont  x        $wc.wifont  -padx 4 -pady 6
+    grid  $wc.fr1      $wc.fr2  $wc.fr3    
+    grid  $wc.fr2   -sticky n -padx 4 -pady 2
     
-    # Labelled frame.
-    set wcfr $page.fr
-    labelframe $wcfr -text [mc {Import/Remove fonts}]
-    pack $wcfr -side top -padx 8 -pady 4
-    
-    # Overall frame for whole container.
-    set frtot [frame $wcfr.frin]
-    pack $frtot -padx 4 -pady 2
-    
-    label $frtot.sysfont -text [mc {System fonts}] -font $fontSB
-    label $frtot.wifont -text [mc {Whiteboard fonts}] -font $fontSB
-    grid $frtot.sysfont x $frtot.wifont -padx 4 -pady 6
-    
-    grid [frame $frtot.fr1] -column 0 -row 1
-    grid [frame $frtot.fr2] -column 1 -row 1 -sticky n -padx 4 -pady 2
-    grid [frame $frtot.fr3] -column 2 -row 1
-    set wlbsys $frtot.fr1.lb
-    set wlbwb $frtot.fr3.lb
+    set wlbsys $wc.fr1.lb
+    set wlbwb  $wc.fr3.lb
     
     # System fonts.
-    listbox $wlbsys -width 20 -height 10  \
-      -yscrollcommand [list $frtot.fr1.sc set]
-    scrollbar $frtot.fr1.sc -orient vertical   \
-      -command [list $frtot.fr1.lb yview]
-    pack $frtot.fr1.lb $frtot.fr1.sc -side left -fill y
+    listbox $wlbsys -width 18 -height 10  \
+      -yscrollcommand [list $wc.fr1.sc set]
+    tuscrollbar $wc.fr1.sc -orient vertical   \
+      -command [list $wc.fr1.lb yview]
+    pack $wc.fr1.lb $wc.fr1.sc -side left -fill y
     
     # Cache font families since can be slow.
     if {![info exists fontFamilies]} {
 	set fontFamilies [font families]
     }
-    eval $frtot.fr1.lb insert 0 $fontFamilies
+    eval $wc.fr1.lb insert 0 $fontFamilies
     
     # Mid buttons.
-    set btimport $frtot.fr2.imp
-    set btremove $frtot.fr2.rm
-    pack [button $btimport -text {>>Import>>} -state disabled \
-      -font $fontS -padx $xpadbt   \
+    set btimport $wc.fr2.imp
+    set btremove $wc.fr2.rm
+    ttk::button $btimport -text {>>Import>>} \
       -command "[namespace current]::PushBtImport  \
-      \[$wlbsys curselection] $wlbsys $wlbwb"] -padx 1 -pady 6 -fill x
-    pack [button $btremove -text [mc Remove] -state disabled  \
-      -font $fontS -padx $xpadbt   \
+      \[$wlbsys curselection] $wlbsys $wlbwb"
+    ttk::button $btremove -text [mc Remove]  \
       -command "[namespace current]::PushBtRemove  \
-      \[$wlbwb curselection] $wlbwb"] -padx 1 -pady 6 -fill x
-    pack [button $frtot.fr2.std -text {Standard} -font $fontS    \
-      -padx $xpadbt -command "[namespace current]::PushBtStandard $wlbwb"] \
-      -padx 1 -pady 6 -fill x
+      \[$wlbwb curselection] $wlbwb"
+    ttk::button $wc.fr2.std -text {Standard}    \
+      -command [list [namespace current]::PushBtStandard $wlbwb]
+    
+    pack  $btimport  $btremove  $wc.fr2.std  -padx 1 -pady 6 -fill x
+    
+    $btimport state {disabled}
+    $btremove state {disabled}
     
     # Whiteboard fonts.
-    listbox $wlbwb -width 20 -height 10  \
-      -yscrollcommand [list $frtot.fr3.sc set]
-    scrollbar $frtot.fr3.sc -orient vertical   \
-      -command [list $frtot.fr3.lb yview]
-    pack $wlbwb $frtot.fr3.sc -side left -fill y
+    listbox $wlbwb -width 18 -height 10  \
+      -yscrollcommand [list $wc.fr3.sc set]
+    tuscrollbar $wc.fr3.sc -orient vertical   \
+      -command [list $wc.fr3.lb yview]
+    pack $wlbwb $wc.fr3.sc -side left -fill y
     eval $wlbwb insert 0 $prefs(canvasFonts)
     
-    label $frtot.msg -text [mc preffontmsg] -wraplength 300 \
-      -justify left
-    set wsamp $frtot.samp
+    ttk::label $wc.msg -text [mc preffontmsg] -wraplength 300 \
+      -justify left -padding {0 6}
+    set wsamp $wc.samp
     canvas $wsamp -width 200 -height 48 -highlightthickness 0 -border 1 \
-      -relief sunken
-    grid $frtot.msg -columnspan 3 -sticky news -padx 4 -pady 2
-    grid $frtot.samp -columnspan 3 -sticky news
+      -relief sunken -bg white
+    grid  $wc.msg   -columnspan 3 -sticky news -padx 4 -pady 2
+    grid  $wc.samp  -columnspan 3 -sticky news
     
     bind $wlbsys <Button-1> {+ focus %W}
-    bind $wlbwb <Button-1> {+ focus %W}
+    bind $wlbwb  <Button-1> {+ focus %W}
     bind $wlbsys <<ListboxSelect>> [list [namespace current]::SelectFontCmd system]
-    bind $wlbwb <<ListboxSelect>> [list [namespace current]::SelectFontCmd wb]
+    bind $wlbwb  <<ListboxSelect>> [list [namespace current]::SelectFontCmd wb]
 	
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
 	%s.msg configure -wraplength [expr [winfo reqwidth %s] - 20]
-    } $frtot $frtot]    
+    } $wc $wc]    
     after idle $script
 }
   
@@ -200,10 +206,10 @@ proc ::WBPrefs::SelectFontCmd {which} {
     variable btremove
     variable wsamp
 
-    if {$which == "system"} {
+    if {$which eq "system"} {
 	set selInd [$wlbsys curselection]
 	if {[llength $selInd]} {
-	    $btimport configure -state normal
+	    $btimport state {!disabled}
 	    set fntName [$wlbsys get $selInd]
 	    if {[llength $fntName]} {
 		$wsamp delete all
@@ -211,13 +217,13 @@ proc ::WBPrefs::SelectFontCmd {which} {
 		  -font [list $fntName 36]
 	    }
 	} else {
-	    $btimport configure -state disabled
+	    $btimport state {disabled}
 	}
-    } elseif {$which == "wb"} {
+    } elseif {$which eq "wb"} {
 	if {[llength [$wlbwb curselection]]} {
-	    $btremove configure -state normal
+	    $btremove state {!disabled}
 	} else {
-	    $btremove configure -state disabled
+	    $btremove state {disabled}
 	}
     }
 }
@@ -236,7 +242,7 @@ proc ::WBPrefs::SelectFontCmd {which} {
 
 proc ::WBPrefs::PushBtImport {indSel wsys wapp} {
     
-    if {$indSel == ""} {
+    if {$indSel eq ""} {
 	return
     }
     set fntName [$wsys get $indSel]
@@ -251,7 +257,7 @@ proc ::WBPrefs::PushBtImport {indSel wsys wapp} {
     
 proc ::WBPrefs::PushBtRemove {indSel wapp} {
     
-    if {$indSel == ""} {
+    if {$indSel eq ""} {
 	return
     }
     set fntName [$wapp get $indSel]
@@ -296,22 +302,24 @@ proc ::WBPrefs::PushBtStandard {wapp} {
 proc ::WBPrefs::BuildPagePrivacy {page} {
     global  prefs
     variable tmpPrefs
-    
-    set xpadbt [option get [winfo toplevel $page] xPadBt {}]
-    
+        
     set tmpPrefs(privacy) $prefs(privacy)
 
-    set labfrpbl $page.fr
-    labelframe $labfrpbl -text [mc Privacy]
-    pack $labfrpbl -side top -anchor w -padx 8 -pady 4
-    set pbl $labfrpbl.frin
-    frame $pbl
-    pack  $pbl -padx 10 -pady 6 -side left -fill x
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set wpr $wc.pr
+    ttk::labelframe $wpr -text [mc Privacy] \
+      -padding [option get . groupSmallPadding {}]
+    pack $wpr -side top
     
-    label $pbl.msg -text [mc prefpriv] -wraplength 340 -justify left
-    checkbutton $pbl.only -anchor w -text "  [mc Privacy]"  \
+    ttk::label $wpr.msg -text [mc prefpriv] -wraplength 340 -justify left
+    ttk::checkbutton $wpr.only -anchor w -text [mc Privacy]  \
       -variable [namespace current]::tmpPrefs(privacy)
-    pack $pbl.msg $pbl.only -side top -fill x -anchor w
+    
+    grid  $wpr.msg   -sticky w
+    grid  $wpr.only  -sticky w
 }
 
 proc ::WBPrefs::SavePrefsHook { } {

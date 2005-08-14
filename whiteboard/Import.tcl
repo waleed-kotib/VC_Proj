@@ -3,11 +3,9 @@
 #      This file is part of The Coccinella application. It implements image
 #      and movie stuff.
 #      
-#  Copyright (c) 2002-2003  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: Import.tcl,v 1.20 2005-03-04 14:21:36 matben Exp $
+# $Id: Import.tcl,v 1.21 2005-08-14 08:37:52 matben Exp $
 
 package require http
 package require httpex
@@ -35,20 +33,20 @@ namespace eval ::Import:: {
 #       'type' must match.
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       
 # Results:
 #       Defines option arrays and icons for movie controllers.
 
-proc ::Import::ImportImageOrMovieDlg {wtop} {    
+proc ::Import::ImportImageOrMovieDlg {w} {    
     global  prefs    
     
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     set userDir [::Utils::GetDirIfExist $prefs(userPath)]
     set opts [list -initialdir $userDir]
     set fileName [eval {tk_getOpenFile -title [mc {Open Image/Movie}] \
       -filetypes [::Plugins::GetTypeListDialogOption all]} $opts]
-    if {$fileName == ""} {
+    if {$fileName eq ""} {
 	return
     }
     set prefs(userPath) [file dirname $fileName]
@@ -58,9 +56,9 @@ proc ::Import::ImportImageOrMovieDlg {wtop} {
     # this MIME type.
     set mime [::Types::GetMimeTypeForFileName $fileName]
     if {[::Plugins::HaveImporterForMime $mime]} {
-	set opts [list -coords [::CanvasUtils::NewImportAnchor $wCan]]	
-	set errMsg [::Import::DoImport $wCan $opts -file $fileName]
-	if {$errMsg != ""} {
+	set opts [list -coords [::CanvasUtils::NewImportAnchor $wcan]]	
+	set errMsg [::Import::DoImport $wcan $opts -file $fileName]
+	if {$errMsg ne ""} {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 	      -message "Failed importing: $errMsg"
 	}
@@ -78,7 +76,7 @@ proc ::Import::ImportImageOrMovieDlg {wtop} {
 #       (-url). 
 #
 # Arguments:
-#       w         the canvas widget path.
+#       wcan      the canvas widget path.
 #       opts      a list of '-key value' pairs, and everything is on 
 #                 a single line.
 #       args:          
@@ -103,7 +101,7 @@ proc ::Import::ImportImageOrMovieDlg {wtop} {
 # Results:
 #       an error string which is empty if things went ok so far.
 
-proc ::Import::DoImport {w opts args} {
+proc ::Import::DoImport {wcan opts args} {
     global  prefs this
     
     ::Debug 2 "DoImport:: opts=$opts \n\t args='$args'"
@@ -135,7 +133,7 @@ proc ::Import::DoImport {w opts args} {
     } else {
 	set isLocal 1
     }
-    set wtopNS [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     set errMsg ""
         
     # Define a standard set of put/import options that may be overwritten by
@@ -153,7 +151,7 @@ proc ::Import::DoImport {w opts args} {
 	array set optArr [list   \
 	  -mime     [::Types::GetMimeTypeForFileName $fileName] \
 	  -size     [file size $fileName]                       \
-	  -coords   [::CanvasUtils::NewImportAnchor $w]         \
+	  -coords   [::CanvasUtils::NewImportAnchor $wcan]         \
 	  -tags     [::CanvasUtils::NewUtag]]
     } else {
 	    
@@ -180,7 +178,7 @@ proc ::Import::DoImport {w opts args} {
     
     # Find import package if any for this MIME type.
     set importPackage [::Plugins::GetPreferredPackageForMime $mime]
-    if {$importPackage == ""} {
+    if {$importPackage eq ""} {
 	return "No importer found for the file \"$fileTail\" with\
 	  MIME type $mime"
     }
@@ -191,7 +189,7 @@ proc ::Import::DoImport {w opts args} {
     } else {
 	set importer $importPackage
     }    
-    if {$argsArr(-where) == "all" || $argsArr(-where) == "local"} {
+    if {$argsArr(-where) eq "all" || $argsArr(-where) eq "local"} {
 	set drawLocal 1
     } else {
 	set drawLocal 0
@@ -214,10 +212,10 @@ proc ::Import::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			DrawImage $w putOpts
+			DrawImage $wcan putOpts
 		    } [array get argsArr]]
 		} else {
-		    HttpGet2 $wtopNS $argsArr(-url) $putOpts
+		    HttpGet2 $w $argsArr(-url) $putOpts
 		}
 	    }
 	}
@@ -234,17 +232,17 @@ proc ::Import::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			DrawQuickTimeTcl $w putOpts
+			DrawQuickTimeTcl $wcan putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
-			HttpGetQuickTimeTcl $wtopNS $argsArr(-url) $putOpts
+			HttpGetQuickTimeTcl $w $argsArr(-url) $putOpts
 		    } [array get argsArr]]
 			
 		    # Perhaps there shall be an option to get QT stuff via
 		    # http without streaming it?
 		    if {0} {
-			HttpGet2 $wtopNS $argsArr(-url) $putOpts
+			HttpGet2 $w $argsArr(-url) $putOpts
 		    }
 		}
 	    }
@@ -262,10 +260,10 @@ proc ::Import::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			DrawSnack $w putOpts
+			DrawSnack $wcan putOpts
 		    } [array get argsArr]]
 		} else {
-		    HttpGet2 $wtopNS $argsArr(-url) $putOpts
+		    HttpGet2 $w $argsArr(-url) $putOpts
 		}    
 	    }
 	}	    
@@ -282,10 +280,10 @@ proc ::Import::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			DrawXanim $w putOpts
+			DrawXanim $wcan putOpts
 		    } [array get argsArr]]
 		} else {
-		    HttpGet2 $wtopNS $argsArr(-url) $putOpts
+		    HttpGet2 $w $argsArr(-url) $putOpts
 		}
 	    }
 	}
@@ -297,7 +295,7 @@ proc ::Import::DoImport {w opts args} {
 		if {$isLocal} {
 		    set importProc [::Plugins::GetImportProcForMime $mime]
 		    set errMsg [eval {
-			$importProc $w putOpts} [array get argsArr]]
+			$importProc $wcan putOpts} [array get argsArr]]
 		} else {
 		    
 		    # Find out if this plugin has registerd a special proc
@@ -306,10 +304,10 @@ proc ::Import::DoImport {w opts args} {
 			set impHTTPProc \
 			  [::Plugins::GetHTTPImportProcForPlugin $importer]
 			set errMsg [eval {
-			    $impHTTPProc $wtopNS $argsArr(-url) $putOpts
+			    $impHTTPProc $w $argsArr(-url) $putOpts
 			} [array get argsArr]]
 		    } else {			
-			HttpGet2 $wtopNS $argsArr(-url) $putOpts
+			HttpGet2 $w $argsArr(-url) $putOpts
 		    }
 		}    
 	    }
@@ -317,11 +315,11 @@ proc ::Import::DoImport {w opts args} {
     }
     
     # Put to remote peers but require we did not fail ourself.   
-    if {$doPut && ($errMsg == "")} {	
+    if {$doPut && ($errMsg eq "")} {	
 	if {$isLocal} {
 	    set optArr(-url) [::Utils::GetHttpFromFile $fileName]
 	    set putOpts [array get optArr]
-	    set putOpts [GetStackOptions $w $putOpts $useTag]
+	    set putOpts [GetStackOptions $wcan $putOpts $useTag]
 	    	    
 	    # Either we use the put/get method with a new connection,
 	    # or use standard http.
@@ -329,14 +327,14 @@ proc ::Import::DoImport {w opts args} {
 	    switch -- $prefs(trptMethod) {
 		putget {
 		    set putArgs {}
-		    if {$argsArr(-where) != "all"} {
+		    if {$argsArr(-where) ne "all"} {
 			lappend putArgs -where $argsArr(-where)
 		    }
-		    eval {::WB::PutFile $wtopNS $fileName $putOpts} $putArgs
+		    eval {::WB::PutFile $w $fileName $putOpts} $putArgs
 		}
 		http {
-		    set id [$w find withtag $useTag]
-		    set line [::CanvasUtils::GetOneLinerForAny $w $id  \
+		    set id [$wcan find withtag $useTag]
+		    set line [::CanvasUtils::GetOneLinerForAny $wcan $id  \
 		      -uritype http]
 		    
 		    # There are a few things we should add from $opts.
@@ -348,7 +346,7 @@ proc ::Import::DoImport {w opts args} {
 		    }
 		    set line [concat [lrange $line 0 2] [array get impArr]]
 		    if {[llength $line]} {
-			::WB::SendMessageList $wtopNS [list $line]
+			::WB::SendMessageList $w [list $line]
 		    }
 		}
 	    }
@@ -359,10 +357,10 @@ proc ::Import::DoImport {w opts args} {
     }
     
     # Construct redo/undo entry.
-    if {$argsArr(-addundo) && ($errMsg == "")} {
-	set redo [concat [list ::Import::DoImport $w $opts -addundo 0] $args]
-	set undo [list ::CanvasUtils::Command $wtopNS [list delete $useTag]]
-	undo::add [::WB::GetUndoToken $wtopNS] $undo $redo
+    if {$argsArr(-addundo) && ($errMsg eq "")} {
+	set redo [concat [list ::Import::DoImport $wcan $opts -addundo 0] $args]
+	set undo [list ::CanvasUtils::Command $w [list delete $useTag]]
+	undo::add [::WB::GetUndoToken $w] $undo $redo
     }
     return $errMsg
 }
@@ -373,7 +371,7 @@ proc ::Import::DoImport {w opts args} {
 #       in 'opts' into account.
 #       
 # Arguments:
-#       w           canvas path
+#       wcan        the canvas widget path.
 #       optsVar     the *name* of the 'opts' variable.
 #       args     -file
 #                -data
@@ -381,7 +379,7 @@ proc ::Import::DoImport {w opts args} {
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::Import::DrawImage {w optsVar args} {
+proc ::Import::DrawImage {wcan optsVar args} {
     upvar $optsVar opts
 
     ::Debug 2 "::Import::DrawImage args='$args',\n\t opts=$opts"
@@ -401,7 +399,7 @@ proc ::Import::DrawImage {w optsVar args} {
     set theTags [list std image $utag]
     set mime $optArr(-mime)
     regexp {([^/]+)/([^/]+)} $mime match mimeBase mimeSubType
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
     if {[info exists optArr(-image)]} {
 	set imageName $optArr(-image)
@@ -411,19 +409,19 @@ proc ::Import::DrawImage {w optsVar args} {
         
     # Create internal image.
     if {[catch {
-	eval {::WB::CreateImageForWtop $wtop $imageName} $args
+	eval {::WB::CreateImageForWtop $w $imageName} $args
     } err]} {
 	return $err
     }
     
     # Treat if image should be zoomed.
-    if {[info exists optArr(-zoom-factor)] && ($optArr(-zoom-factor) != "")} {
+    if {[info exists optArr(-zoom-factor)] && ($optArr(-zoom-factor) ne "")} {
 	set zoomFactor $optArr(-zoom-factor)
 	set newImName ${imageName}_zoom${zoomFactor}
 	
 	# Make new scaled image.
 	image create photo $newImName
-	::WB::AddImageToGarbageCollector $wtop $newImName
+	::WB::AddImageToGarbageCollector $w $newImName
 	if {$zoomFactor > 0} {
 	    $newImName copy $imageName -zoom $zoomFactor
 	} else {
@@ -433,14 +431,14 @@ proc ::Import::DrawImage {w optsVar args} {
     }
     set cmd [list create image $x $y -image $imageName -anchor nw  \
       -tags $theTags]
-    set id [eval {$w} $cmd]
+    set id [eval {$wcan} $cmd]
     
     # Handle stacking order. Need catch since relative items may not yet exist.
     if {[info exists optArr(-above)]} {
-	catch {$w raise $utag $optArr(-above)}
+	catch {$wcan raise $utag $optArr(-above)}
     } 
     if {[info exists optArr(-below)]} {
-	catch {$w lower $utag $optArr(-below)}
+	catch {$wcan lower $utag $optArr(-below)}
     }
     lappend opts -width [image width $imageName]  \
       -height [image height $imageName]
@@ -456,7 +454,7 @@ proc ::Import::DrawImage {w optsVar args} {
     if {[info exists optArr(-zoom-factor)]} {
 	lappend configOpts -zoom-factor $optArr(-zoom-factor)
     }
-    eval {::CanvasUtils::ItemSet $wtop $id} $configOpts
+    eval {::CanvasUtils::ItemSet $w $id} $configOpts
     
     return $errMsg
 }
@@ -466,14 +464,14 @@ proc ::Import::DrawImage {w optsVar args} {
 #       Draws a local QuickTime movie onto canvas.
 #       
 # Arguments:
-#       w           canvas path
+#       wcan        the canvas widget path.
 #       optsVar     the *name* of the 'opts' variable.
 #       args
 #
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::Import::DrawQuickTimeTcl {w optsVar args} {
+proc ::Import::DrawQuickTimeTcl {wcan optsVar args} {
     upvar $optsVar opts
     
     ::Debug 2 "::Import::DrawQuickTimeTcl args='$args'"
@@ -492,26 +490,27 @@ proc ::Import::DrawQuickTimeTcl {w optsVar args} {
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
     set utag [::CanvasUtils::GetUtagFromTagList $optArr(-tags)]
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
+    set wtopname [winfo name [winfo toplevel $wcan]]
     
     # Make a frame for the movie; need special class to catch 
     # mouse events.
     set uniqueName [::CanvasUtils::UniqueImageName]		
-    set wfr ${w}.fr_${uniqueName}
+    set wfr $wcan.fr_${uniqueName}
     frame $wfr -height 1 -width 1 -bg gray40 -class QTFrame    
-    set wmovie ${wfr}.m	
+    set wmovie $wfr.m	
 
     if {[catch {movie $wmovie -file $fileName -controller 1} err]} {
 	catch {destroy $wfr}
 	return $err
     }
     
-    set id [$w create window $x $y -anchor nw -window $wfr  \
+    set id [$wcan create window $x $y -anchor nw -window $wfr  \
       -tags [list frame $utag]]
     pack $wmovie -in $wfr -padx 3 -pady 3
     
     if {[info exists optArr(-above)]} {
-	catch {$w raise $utag $optArr(-above)}
+	catch {$wcan raise $utag $optArr(-above)}
     }
     
     # 'fileName' can be the cached name. If -url use its tail instead.
@@ -534,7 +533,7 @@ proc ::Import::DrawQuickTimeTcl {w optsVar args} {
     if {[info exists optArr(-url)]} {
 	lappend configOpts -url $optArr(-url)
     }
-    eval {::CanvasUtils::ItemSet $wtop $id} $configOpts
+    eval {::CanvasUtils::ItemSet $w $id} $configOpts
 
     return $errMsg
 }
@@ -568,14 +567,14 @@ proc ::Import::QuickTimeBalloonMsg {wmovie fileName} {
 #       Draws a local snack movie onto canvas. 
 #       
 # Arguments:
-#       w           canvas path
+#       wcan        the canvas widget path.
 #       optsVar  the *name* of the opts variable.
 #       args
 #
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::Import::DrawSnack {w optsVar args} {
+proc ::Import::DrawSnack {wcan optsVar args} {
     upvar $optsVar opts
     variable snackSounds
     
@@ -595,7 +594,7 @@ proc ::Import::DrawSnack {w optsVar args} {
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
     set utag [::CanvasUtils::GetUtagFromTagList $optArr(-tags)]
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
     set uniqueName [::CanvasUtils::UniqueImageName]		
     
@@ -605,16 +604,16 @@ proc ::Import::DrawSnack {w optsVar args} {
 	return $err
     }
     lappend snackSounds($w) $uniqueName
-    set wfr ${w}.fr_${uniqueName}
+    set wfr $wcan.fr_${uniqueName}
     frame $wfr -height 1 -width 1 -bg gray40 -class SnackFrame
-    set wmovie ${wfr}.m
+    set wmovie $wfr.m
     ::moviecontroller::moviecontroller $wmovie -snacksound $uniqueName
-    set id [$w create window $x $y -anchor nw -window $wfr  \
+    set id [$wcan create window $x $y -anchor nw -window $wfr  \
       -tags [list frame $utag]]
     pack $wmovie -in $wfr -padx 3 -pady 3
     update idletasks
     if {[info exists optArr(-above)]} {
-	catch {$w raise $utag $optArr(-above)}
+	catch {$wcan raise $utag $optArr(-above)}
     }
     set fileTail [file tail $fileName]
     
@@ -638,7 +637,7 @@ proc ::Import::DrawSnack {w optsVar args} {
     if {[info exists optArr(-url)]} {
 	lappend configOpts -url $optArr(-url)
     }
-    eval {::CanvasUtils::ItemSet $wtop $id} $configOpts
+    eval {::CanvasUtils::ItemSet $w $id} $configOpts
 
     return $errMsg
 }
@@ -648,14 +647,14 @@ proc ::Import::DrawSnack {w optsVar args} {
 #       Draws a local xanim movie onto canvas.
 #       
 # Arguments:
-#       w           canvas path
+#       wcan        the canvas widget path.
 #       optsVar     the *name* of the opts variable.
 #       args
 #
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::Import::DrawXanim {w optsVar args} {
+proc ::Import::DrawXanim {wcan optsVar args} {
     upvar $optsVar opts
     
     variable xanimPipe2Frame 
@@ -679,7 +678,7 @@ proc ::Import::DrawXanim {w optsVar args} {
     set utag [::CanvasUtils::GetUtagFromTagList $optArr(-tags)]
     
     set uniqueName [::CanvasUtils::UniqueImageName]		
-    set wfr ${w}.fr_${uniqueName}
+    set wfr $wcan.fr_${uniqueName}
     
     frame $wfr -height 1 -width 1 -bg gray40 -class XanimFrame
     
@@ -692,14 +691,14 @@ proc ::Import::DrawXanim {w optsVar args} {
     set width [lindex $size 0]
     set height [lindex $size 1]
     $wfr configure -width [expr $width + 6] -height [expr $height + 6]
-    $w create window $x $y -anchor nw -window $wfr -tags [list frame $utag]
+    $wcan create window $x $y -anchor nw -window $wfr -tags [list frame $utag]
     
     # Make special frame for xanim to draw in.
     set frxanim [frame $wfr.xanim -container 1 -bg black  \
       -width $width -height $height]
     place $frxanim -in $wfr -anchor nw -x 3 -y 3
     if {[info exists optArr(-above)]} {
-	catch {$w raise $utag $optArr(-above)}
+	catch {$wcan raise $utag $optArr(-above)}
     }
     
     # Important, make sure that the frame is mapped before continuing.
@@ -712,19 +711,19 @@ proc ::Import::DrawXanim {w optsVar args} {
     } else {
 	set xanimPipe2Frame($xpipe) $wfr
 	set xanimPipe2Item($xpipe) $utag
-	fileevent $xpipe readable [list XanimReadOutput $w $wfr $xpipe]
+	fileevent $xpipe readable [list XanimReadOutput $wcan $wfr $xpipe]
     }    
     lappend opts -width $width -height $height
     
     return $errMsg
 }
 
-proc ::Import::Free {wtop} {
+proc ::Import::Free {w} {
     variable snackSounds
     
-    set w [::WB::GetCanvasFromWtop $wtop]
-    if {[info exists snackSounds($w)]} {
-	foreach s $snackSounds($w) {
+    set wcan [::WB::GetCanvasFromWtop $w]
+    if {[info exists snackSounds($wcan)]} {
+	foreach s $snackSounds($wcan) {
 	    $s stop
 	    $s destroy
 	}
@@ -740,7 +739,7 @@ proc ::Import::Free {wtop} {
 #       ui stuff during transport, such as progress etc.
 #       
 # Arguments:
-#       wtop
+#       w
 #       url
 #       opts      a list of '-key value' pairs, where most keys correspond 
 #                 to a valid "canvas create" option, and everything is on 
@@ -749,11 +748,11 @@ proc ::Import::Free {wtop} {
 # Results:
 #       none
 
-proc ::Import::HttpGet2 {wtop url opts} {
+proc ::Import::HttpGet2 {w url opts} {
     global  this prefs
     variable locals
     
-    ::Debug 2 "::Import::HttpGet2 wtop=$wtop, url=$url, \n\t opts=$opts"
+    ::Debug 2 "::Import::HttpGet2 w=$w, url=$url, \n\t opts=$opts"
 
     # Make local state array for convenient storage. 
     # Use 'variable' for permanent storage.
@@ -766,7 +765,7 @@ proc ::Import::HttpGet2 {wtop url opts} {
       [::Utils::GetFilePathFromUrl $url]]]
     set dstPath [::FileCache::MakeCacheFileName $fileTail]
 
-    set getstate(wtop)          $wtop
+    set getstate(w)          $w
     set getstate(url)           $url
     set getstate(dstPath)       $dstPath
     set getstate(tail)          $fileTail
@@ -796,12 +795,12 @@ proc ::Import::HttpCmd2 {gettoken httptoken status {msg ""}} {
 
     ::Debug 2 "::Import::HttpCmd2 status=$status, gettoken=$gettoken"
 
-    set wtop $getstate(wtop)
-    set wcan [::WB::GetCanvasFromWtop $wtop]
+    set w $getstate(w)
+    set wcan [::WB::GetCanvasFromWtop $w]
 
     switch -- $status {
 	ok {
-	    ::WB::SetStatusMessage $wtop $msg
+	    ::WB::SetStatusMessage $w $msg
 	    
 	    # Add to the lists of known files.
 	    ::FileCache::Set $getstate(url) $getstate(dstPath)
@@ -810,7 +809,7 @@ proc ::Import::HttpCmd2 {gettoken httptoken status {msg ""}} {
 	    DoImport $wcan $getstate(opts) -file $getstate(dstPath) -where local
 	}
 	default {
-	    ::WB::SetStatusMessage $wtop $msg
+	    ::WB::SetStatusMessage $w $msg
 	    array set opts $getstate(opts)
 	    eval {NewBrokenImage $wcan $opts(-coords) -url $getstate(url)} \
 	      $getstate(opts)
@@ -828,7 +827,7 @@ proc ::Import::HttpProgress2 {gettoken str} {
     variable $gettoken
     upvar 0 $gettoken getstate
     
-    ::WB::SetStatusMessage $getstate(wtop) $str
+    ::WB::SetStatusMessage $getstate(w) $str
 }
 
 #  OUTDATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -841,7 +840,7 @@ proc ::Import::HttpProgress2 {gettoken str} {
 #       all UI is redirected to these procs.
 #       
 # Arguments:
-#       wtop
+#       w
 #       url
 #       importPackage
 #       opts      a list of '-key value' pairs, where most keys correspond 
@@ -854,11 +853,11 @@ proc ::Import::HttpProgress2 {gettoken str} {
 # Results:
 #       an error string which is empty if things went ok so far.
 
-proc ::Import::HttpGet {wtop url importPackage opts args} {
+proc ::Import::HttpGet {w url importPackage opts args} {
     global  this prefs
     variable locals
     
-    ::Debug 2 "::Import::HttpGet wtop=$wtop, url=$url, \
+    ::Debug 2 "::Import::HttpGet w=$w, url=$url, \
       importPackage=$importPackage,\n\t opts=$opts,\n\t args='$args'"
 
     # Make local state array for convenient storage. 
@@ -876,8 +875,8 @@ proc ::Import::HttpGet {wtop url importPackage opts args} {
     }
     
     # Store stuff in gettoken array.
-    set getstate(wtop)          $wtop
-    set getstate(wcan)          [::WB::GetCanvasFromWtop $wtop]
+    set getstate(w)             $w
+    set getstate(wcan)          [::WB::GetCanvasFromWtop $w]
     set getstate(url)           $url
     set getstate(importPackage) $importPackage
     set getstate(optList)       $opts
@@ -909,7 +908,7 @@ proc ::Import::HttpGet {wtop url importPackage opts args} {
     foreach {name value} $state(meta) {
         if {[regexp -nocase ^location$ $name]} {
 	    close $dst
-            eval {::Import::HttpGet $wtop [string trim $value] \
+            eval {::Import::HttpGet $w [string trim $value] \
 	      $importPackage $opts} $args
         }
     }
@@ -933,7 +932,7 @@ proc ::Import::HttpProgress {gettoken token total current} {
     
     ::Debug 9 "."
     array set argsArr $getstate(args)
-    if {[info exists argsArr(-progress)] && ($argsArr(-progress) != "")} {
+    if {[info exists argsArr(-progress)] && ($argsArr(-progress) ne "")} {
 	set haveProgress 1
     } else {
 	set haveProgress 0
@@ -973,7 +972,7 @@ proc ::Import::HttpProgress {gettoken token total current} {
 	    } else {
 		set tmsg [::timing::getmessage $getstate(timingkey) $total]
 		set msg "Getting \"$getstate(tail)\", $tmsg"
-		::WB::SetStatusMessage $getstate(wtop) $msg
+		::WB::SetStatusMessage $getstate(w) $msg
 	    }	    
 	}
     }
@@ -1002,7 +1001,7 @@ proc ::Import::HttpCommand {gettoken token} {
 
     ::Debug 2 "::Import::HttpCommand state = $getstate(state)"
     
-    set wtop     $getstate(wtop)
+    set w     $getstate(w)
     set wcan     $getstate(wcan)
     set dstPath  $getstate(dstPath)
     set opts     $getstate(optList)
@@ -1018,7 +1017,7 @@ proc ::Import::HttpCommand {gettoken token} {
     }
     
     array set argsArr $getstate(args)
-    if {[info exists argsArr(-command)] && ($argsArr(-command) != "")} {
+    if {[info exists argsArr(-command)] && ($argsArr(-command) ne "")} {
 	set haveCommand 1
     } else {
 	set haveCommand 0
@@ -1026,7 +1025,7 @@ proc ::Import::HttpCommand {gettoken token} {
     set errMsg ""
     
     # Catch the case when we get a non 200 return code and is otherwise ok.
-    if {($thestate == "final") && ($status == "ok") && ($getstate(ncode) != "200")} {
+    if {($thestate eq "final") && ($status eq "ok") && ($getstate(ncode) ne "200")} {
 	set status error
  	set stateStatus error
 	set httpMsg [httpex::ncodetotext $getstate(ncode)]
@@ -1040,15 +1039,15 @@ proc ::Import::HttpCommand {gettoken token} {
 	switch -- $status {
 	    timeout {
 		set msg "Timeout waiting for file \"$tail\""
-		::WB::SetStatusMessage $wtop $msg
+		::WB::SetStatusMessage $w $msg
 		::UI::MessageBox -title [mc Timeout] -icon info \
 		  -type ok -message $msg
 	    }
 	    ok {
-		::WB::SetStatusMessage $wtop "Finished getting file \"$tail\""
+		::WB::SetStatusMessage $w "Finished getting file \"$tail\""
 	    }
 	    error {
-		::WB::SetStatusMessage $wtop $errMsg
+		::WB::SetStatusMessage $w $errMsg
 	    }
 	    default {
 		# ???
@@ -1063,7 +1062,7 @@ proc ::Import::HttpCommand {gettoken token} {
 	set impErr ""
 	
 	# Import stuff.
-	if {($status == "ok") && ($getstate(ncode) == "200")} {
+	if {($status eq "ok") && ($getstate(ncode) eq "200")} {
 	    
 	    # Add to the lists of known files.
 	    ::FileCache::Set $getstate(url) $dstPath
@@ -1075,22 +1074,22 @@ proc ::Import::HttpCommand {gettoken token} {
 	}
 	
 	# Catch errors from 'errMsg'.
-	if {$errMsg != ""} {
+	if {$errMsg ne ""} {
 	    set stateStatus error
 	    set getstate(error) $errMsg
-	} elseif {$impErr != ""} {
+	} elseif {$impErr ne ""} {
 	    set stateStatus error
 	    set getstate(error) $impErr
 	}
 	if {$haveCommand} {
 	    uplevel #0 $argsArr(-command) [list $stateStatus $gettoken $token]	
-	} elseif {$errMsg != ""} {
-	    ::WB::SetStatusMessage $wtop "Failed importing \"$tail\" $errMsg"
+	} elseif {$errMsg ne ""} {
+	    ::WB::SetStatusMessage $w "Failed importing \"$tail\" $errMsg"
 	}
 	
 	# Cleanup:
 	::httpex::cleanup $token
-	if {($errMsg != "") || ($impErr != "")} {
+	if {($errMsg ne "") || ($impErr ne "")} {
 	    catch {file delete -force $getstate(dstPath)}
 	}
 	unset getstate
@@ -1108,7 +1107,7 @@ proc ::Import::ImportProgress {line status gettoken httptoken total current} {
     upvar #0 $token state
     upvar #0 $gettoken getstate
     
-    set wtop $getstate(wtop)
+    set w $getstate(w)
     
     if {[string equal $status "error"]} {
 	if {[info exists state(error)]} {
@@ -1116,11 +1115,11 @@ proc ::Import::ImportProgress {line status gettoken httptoken total current} {
 	} else {
 	    set errmsg "File transfer error for \"$getstate(url)\""
 	}
-	::WB::SetStatusMessage $wtop "Failed getting url: $errmsg"
+	::WB::SetStatusMessage $w "Failed getting url: $errmsg"
     } else {
 	set tmsg [::timing::getmessage $getstate(timingkey) $total]
 	set msg "Getting \"$getstate(tail)\", $tmsg"
-	::WB::SetStatusMessage $wtop $msg
+	::WB::SetStatusMessage $w $msg
     }
 }
 
@@ -1139,24 +1138,24 @@ proc ::Import::ImportCommand {line stateStatus gettoken httptoken} {
 	return
     }
     set wcan     $getstate(wcan)
-    set wtop     $getstate(wtop)
+    set w     $getstate(w)
     set tail     $getstate(tail)
     set thestate $getstate(state)
     set status   $getstate(status)
 
     switch -- $stateStatus {
 	timeout {
-	    ::WB::SetStatusMessage $wtop "Timeout waiting for file \"$tail\""
+	    ::WB::SetStatusMessage $w "Timeout waiting for file \"$tail\""
 	}
 	connect {
 	    set domain [::Utils::GetDomainNameFromUrl $getstate(url)]
-	    ::WB::SetStatusMessage $wtop "Contacting $domain..."
+	    ::WB::SetStatusMessage $w "Contacting $domain..."
 	}
 	ok {
-	    ::WB::SetStatusMessage $wtop "Finished getting file \"$tail\""
+	    ::WB::SetStatusMessage $w "Finished getting file \"$tail\""
 	}
 	error {
-	    if {$getstate(ncode) != "200"} {
+	    if {$getstate(ncode) ne "200"} {
 		set status error
 		set httpMsg [httpex::ncodetotext $getstate(ncode)]
 		set msg "Failed getting file \"$tail\": $httpMsg"
@@ -1165,16 +1164,16 @@ proc ::Import::ImportCommand {line stateStatus gettoken httptoken} {
 		append msg [httpex::error $httptoken]
 		append msg $getstate(error)
 	    }
-	    ::WB::SetStatusMessage $wtop $msg
+	    ::WB::SetStatusMessage $w $msg
 	}
 	eof {
-	    ::WB::SetStatusMessage $wtop "Error getting file \"$tail\""
+	    ::WB::SetStatusMessage $w "Error getting file \"$tail\""
 	}
     }
 
     # We should be final here!
     if {[string equal $thestate "final"]} {
-	if {$status != "ok"} {
+	if {$status ne "ok"} {
 	    eval {NewBrokenImage $wcan [lrange $line 1 2]} [lrange $line 3 end]
 	}
     }
@@ -1182,20 +1181,20 @@ proc ::Import::ImportCommand {line stateStatus gettoken httptoken} {
 
 # Import::HttpResetAll --
 # 
-#       Cancel and reset all ongoing http transactions for this wtop.
+#       Cancel and reset all ongoing http transactions for this w.
 
-proc ::Import::HttpResetAll {wtop} {
+proc ::Import::HttpResetAll {w} {
 
     set gettokenList [GetTokenList]
     
-    ::Debug 2 "::Import::HttpResetAll wtop=$wtop, gettokenList='$gettokenList'"
+    ::Debug 2 "::Import::HttpResetAll w=$w, gettokenList='$gettokenList'"
     
     foreach gettoken $gettokenList {
 	upvar #0 $gettoken getstate          
 
-	if {[info exists getstate(wtop)] && ($getstate(wtop) == $wtop)} {
+	if {[info exists getstate(w)] && ($getstate(w) == $w)} {
 	    HttpReset $gettoken
-	    ::WB::SetStatusMessage $wtop "All file transport reset"
+	    ::WB::SetStatusMessage $w "All file transport reset"
 	}
     }
 }
@@ -1248,12 +1247,12 @@ proc ::Import::GetTokenList { } {
 #       This must be done since commands received during transport are
 #       otherwise lost.
 
-proc ::Import::TrptCachePostDrawHook {wtop cmd args} {
+proc ::Import::TrptCachePostDrawHook {w cmd args} {
     
     set utag [::CanvasUtils::GetUtagFromCanvasCmd $cmd]
     set gettoken [GetTokenFrom utag $utag]
 
-    if {$gettoken != ""} {
+    if {$gettoken ne ""} {
 	upvar #0 $gettoken getstate          
 	
 	switch -- [lindex $cmd 0] {
@@ -1261,7 +1260,7 @@ proc ::Import::TrptCachePostDrawHook {wtop cmd args} {
 		
 		# Note order since reset triggers unsetting gettoken.
 		set msg "Cancelled transport of \"$getstate(tail)\"; was deleted"
-		::WB::SetStatusMessage $getstate(wtop) $msg
+		::WB::SetStatusMessage $getstate(w) $msg
 		HttpReset $gettoken
 	    }
 	    import {
@@ -1280,7 +1279,7 @@ proc ::Import::TrptCachePostImport {gettoken} {
     
     if {[info exists getstate(trptcmds)]} {
 	foreach cmd $getstate(trptcmds) {
-	    ::CanvasUtils::HandleCanvasDraw $getstate(wtop) $cmd -where local
+	    ::CanvasUtils::HandleCanvasDraw $getstate(w) $cmd -where local
 	}
     }
 }
@@ -1291,7 +1290,7 @@ proc ::Import::TrptCachePostImport {gettoken} {
 #       movie being streamed must be prepared for this. Currently there
 #       is no mechanism for checking this.
 
-proc ::Import::HttpGetQuickTimeTcl {wtop url opts args} {
+proc ::Import::HttpGetQuickTimeTcl {w url opts args} {
     variable locals
     
     ::Debug 2 "::Import::HttpGetQuickTimeTcl"
@@ -1303,16 +1302,16 @@ proc ::Import::HttpGetQuickTimeTcl {wtop url opts args} {
     upvar 0 $gettoken getstate
     
     array set optArr $opts
-    set w [::WB::GetCanvasFromWtop $wtop]    
+    set wcan [::WB::GetCanvasFromWtop $w]    
     
     # Make a frame for the movie; need special class to catch 
     # mouse events. Postpone display until playable from callback.
     set uniqueName [::CanvasUtils::UniqueImageName]		
-    set wfr ${w}.fr_${uniqueName}
+    set wfr $wcan.fr_${uniqueName}
     frame $wfr -height 1 -width 1 -bg gray40 -class QTFrame    
-    set wmovie ${wfr}.m	
+    set wmovie $wfr.m	
 
-    set getstate(wtop) $wtop
+    set getstate(w) $w
     set getstate(url) $url
     set getstate(optList) $opts
     set getstate(args) $args
@@ -1333,18 +1332,18 @@ proc ::Import::HttpGetQuickTimeTcl {wtop url opts args} {
 	catch {destroy $wfr}
 	return
     }
-    ::WB::SetStatusMessage $wtop "Opening $url"    
+    ::WB::SetStatusMessage $w "Opening $url"    
 }
 
 # Import::QuickTimeTclCallback --
 # 
 #       Callback for QuickTimeTcl package when using -url.
 
-proc ::Import::QuickTimeTclCallback {gettoken w msg {err {}}} {
+proc ::Import::QuickTimeTclCallback {gettoken wmovie msg {err {}}} {
 
     upvar #0 $gettoken getstate          
     
-    set wtop $getstate(wtop)
+    set w $getstate(w)
     set url $getstate(url)
     set getstate(qtstate) $msg
     set canmap 0
@@ -1357,21 +1356,21 @@ proc ::Import::QuickTimeTclCallback {gettoken w msg {err {}}} {
 	    if {[string length $err]} {
 		append msg " $err"
 	    }
-	    ::WB::SetStatusMessage $wtop ""
+	    ::WB::SetStatusMessage $w ""
 	    ::UI::MessageBox -icon error -type ok -message $msg
 	    unset getstate
 	    return
 	}
 	loading {	    
-	    ::WB::SetStatusMessage $wtop "Loading: \"$getstate(tail)\""
+	    ::WB::SetStatusMessage $w "Loading: \"$getstate(tail)\""
 	}
 	playable {
 	    set canmap 1
-	    ::WB::SetStatusMessage $wtop "Now playable: \"$getstate(tail)\""
+	    ::WB::SetStatusMessage $w "Now playable: \"$getstate(tail)\""
 	}
 	complete {
 	    set canmap 1	    
-	    ::WB::SetStatusMessage $wtop "Completed: \"$getstate(tail)\""
+	    ::WB::SetStatusMessage $w "Completed: \"$getstate(tail)\""
 	}
     }
     
@@ -1383,7 +1382,7 @@ proc ::Import::QuickTimeTclCallback {gettoken w msg {err {}}} {
     }
     
     # Cleanup when completely finished.
-    if {$msg == "complete"} {
+    if {$msg eq "complete"} {
 	unset getstate
     }
 }
@@ -1396,10 +1395,10 @@ proc ::Import::QuickTimeTclCallback {gettoken w msg {err {}}} {
 proc ::Import::DrawQuickTimeTclFromHttp {gettoken} {
     upvar #0 $gettoken getstate          
     
-    set wtop $getstate(wtop)
+    set w $getstate(w)
     set url $getstate(url)
         
-    set w [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     set wfr $getstate(wfr)
     set wmovie $getstate(wmovie)
     array set optArr $getstate(optList)
@@ -1408,12 +1407,12 @@ proc ::Import::DrawQuickTimeTclFromHttp {gettoken} {
     foreach {x y} $optArr(-coords) break
     set utag [::CanvasUtils::GetUtagFromTagList $optArr(-tags)]
 
-    $w create window $x $y -anchor nw -window $wfr \
+    $wcan create window $x $y -anchor nw -window $wfr \
       -tags [list frame $utag]
     pack $wmovie -in $wfr -padx 3 -pady 3
     
     if {[info exists optArr(-above)]} {
-	catch {$w raise $utag $optArr(-above)}
+	catch {$wcan raise $utag $optArr(-above)}
     }
 
     set qtBalloonMsg [::Import::QuickTimeBalloonMsg $wmovie $getstate(tail)]
@@ -1428,18 +1427,18 @@ proc ::Import::DrawQuickTimeTclFromHttp {gettoken} {
 # 
 #       Like ::CanvasUtils::GetStackingOption but using apriori info from opts.
 
-proc ::Import::GetStackOptions {w opts tag} {
+proc ::Import::GetStackOptions {wcan opts tag} {
     
     array set optsArr $opts
 
     if {![info exists optsArr(-above)]} {
-	set belowutag [::CanvasUtils::FindBelowUtag $w $tag]
+	set belowutag [::CanvasUtils::FindBelowUtag $wcan $tag]
 	if {[string length $belowutag]} {
 	    set optsArr(-above) $belowutag
 	}
      }
      if {![info exists optsArr(-below)]} {
-	 set aboveutag [::CanvasUtils::FindAboveUtag $w $tag]
+	 set aboveutag [::CanvasUtils::FindAboveUtag $wcan $tag]
 	 if {[string length $aboveutag]} {
 	     set optsArr(-below) $aboveutag
 	 }
@@ -1468,7 +1467,7 @@ proc ::Import::XanimQuerySize {fileName} {
 	
 	# Ok, parse size.
 	if {[regexp "Size=(${num_})x(${num_})" $res match w h]} {
-	    return [list $w $h]
+	    return [list $wcan $h]
 	} else {
 	    return {}
 	}
@@ -1479,7 +1478,7 @@ proc ::Import::XanimQuerySize {fileName} {
     }
 }
 
-proc ::Import::XanimReadOutput {w wfr xpipe} {
+proc ::Import::XanimReadOutput {wcan wfr xpipe} {
     
     variable xanimPipe2Frame 
     variable xanimPipe2Item
@@ -1487,8 +1486,8 @@ proc ::Import::XanimReadOutput {w wfr xpipe} {
     if [eof $xpipe] {
 	
 	# Movie is stopped, cleanup.
-	set co [$w coords $xanimPipe2Item($xpipe)]
-	::CanvasDraw::DeleteFrame $w $wfr [lindex $co 0] [lindex $co 1]
+	set co [$wcan coords $xanimPipe2Item($xpipe)]
+	::CanvasDraw::DeleteFrame $wcan $wfr [lindex $co 0] [lindex $co 1]
 	catch {close $xpipe}
     } else {
 	
@@ -1507,7 +1506,7 @@ proc ::Import::XanimReadOutput {w wfr xpipe} {
 #       Typically used when reading canvas file version 2.
 #
 # Arguments:
-#       w:          the canvas widget path.
+#       wcan        the canvas widget path.
 #       line:       this is typically an "import" command similar to items but
 #                   for images and movies that need to be transported.
 #                   It shall contain either a -file or -url option, but not both.
@@ -1529,7 +1528,7 @@ proc ::Import::XanimReadOutput {w wfr xpipe} {
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::Import::HandleImportCmd {w line args} {
+proc ::Import::HandleImportCmd {wcan line args} {
     
     Debug 2 "::Import::HandleImportCmd \n\t line=$line \n\t args=$args"
     
@@ -1577,7 +1576,7 @@ proc ::Import::HandleImportCmd {w line args} {
 	# in 'line'.
 	if {[info exists optArr(-file)]} {
 	    set path $optArr(-file)
-	    if {[file pathtype $path] == "relative"} {
+	    if {[file pathtype $path] eq "relative"} {
 		if {![info exists argsArr(-basepath) ]} {
 		    return -code error "Must have \"-basebath\" option if relative path"
 		}
@@ -1602,14 +1601,14 @@ proc ::Import::HandleImportCmd {w line args} {
 	    }
 	}	
 
-	set errMsg [eval {DoImport $w $opts} $impArgs]
+	set errMsg [eval {DoImport $wcan $opts} $impArgs]
     }
     
     # Not -tryimport or error.
-    if {$argsArr(-showbroken) && (($errMsg != "") || !$doImport)} {
+    if {$argsArr(-showbroken) && (($errMsg ne "") || !$doImport)} {
 	
 	# Display a broken image to indicate for the user.
-	eval {NewBrokenImage $w [lrange $line 1 2]} [lrange $line 3 end]
+	eval {NewBrokenImage $wcan [lrange $line 1 2]} [lrange $line 3 end]
     }
     
     return $errMsg
@@ -1622,63 +1621,63 @@ proc ::Import::HandleImportCmd {w line args} {
 #       Executing any of these commands should be package neutral.
 #       Must be called *before* item is deleted.
 
-proc ::Import::ImageImportCmd {w utag} {
+proc ::Import::ImageImportCmd {wcan utag} {
     
-    set imageName [$w itemcget $utag -image]
+    set imageName [$wcan itemcget $utag -image]
     set imageFile [$imageName cget -file]
     set imArgs [list -file $imageFile]
-    set optList [list -coords [$w coords $utag] -tags $utag]
+    set optList [list -coords [$wcan coords $utag] -tags $utag]
     
     return [concat  \
-      [list ::Import::DoImport $w $optList] $imArgs]
+      [list ::Import::DoImport $wcan $optList] $imArgs]
 }
     
-proc ::Import::QTImportCmd {w utag} {
+proc ::Import::QTImportCmd {wcan utag} {
     
     # We need to reconstruct how it was imported.
-    set win [$w itemcget $utag -window]
-    set wmovie ${win}.m
+    set win [$wcan itemcget $utag -window]
+    set wmovie $win.m
     set movFile [$wmovie cget -file]
     set movUrl [$wmovie cget -url]
-    set optList [list -coords [$w coords $utag] -tags $utag]
-    if {$movFile != ""} {
+    set optList [list -coords [$wcan coords $utag] -tags $utag]
+    if {$movFile ne ""} {
 	set movargs [list -file $movFile]
-    } elseif {$movUrl != ""} {
+    } elseif {$movUrl ne ""} {
 	set movargs [list -url $movUrl]
     }
     return [concat  \
-      [list ::Import::DoImport $w $optList] $movargs]
+      [list ::Import::DoImport $wcan $optList] $movargs]
 }
 
-proc ::Import::SnackImportCmd {w utag} {
+proc ::Import::SnackImportCmd {wcan utag} {
     
     # We need to reconstruct how it was imported.
     # 'wmovie' is a moviecontroller widget.
-    set win [$w itemcget $utag -window]
-    set wmovie ${win}.m
+    set win [$wcan itemcget $utag -window]
+    set wmovie $win.m
     set soundObject [$wmovie cget -snacksound]
     set soundFile [$soundObject cget -file]
-    set optList [list -coords [$w coords $utag] -tags $utag]
+    set optList [list -coords [$wcan coords $utag] -tags $utag]
     set movargs [list -file $soundFile]
     return [concat  \
-      [list ::Import::DoImport $w $optList] $movargs]
+      [list ::Import::DoImport $wcan $optList] $movargs]
 }
 
 # Generic command for plugins, typically.
 
-proc ::Import::FrameImportCmd {w utag} {
+proc ::Import::FrameImportCmd {wcan utag} {
     
-    set wtop [::UI::GetToplevelNS $w]
-    set opts [::CanvasUtils::ItemCGet $wtop $utag]
+    set w [winfo toplevel $wcan]
+    set opts [::CanvasUtils::ItemCGet $w $utag]
     array set optsArr $opts
     set impArgs {}
     if {[info exists optsArr(-file)]} {
 	lappend impArgs -file $optsArr(-file)
     }
-    set optList [list -coords [$w coords $utag] -tags $utag]
+    set optList [list -coords [$wcan coords $utag] -tags $utag]
     
     return [concat  \
-      [list ::Import::DoImport $w $optList] $impArgs]
+      [list ::Import::DoImport $wcan $optList] $impArgs]
 }
     
 # Import::GetTclSyntaxOptsFromTransport --
@@ -1751,7 +1750,7 @@ proc ::Import::GetTransportSyntaxOptsFromTcl {optList} {
 #       -2 for a size decrease to half size.   
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       zoomFactor   an integer factor to scale with.
 #       which    "sel": selected images, or a specific image with tag 'which'.
 #       newTag   "auto": generate a new utag, 
@@ -1765,11 +1764,11 @@ proc ::Import::GetTransportSyntaxOptsFromTcl {optList} {
 # Results:
 #       image item resized, propagated to clients.
 
-proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
+proc ::Import::ResizeImage {w zoomFactor which newTag {where all}} {
         
-    set w [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
 
-    Debug 2 "ResizeImage: wtop=$wtop, w=$w, which=$which"
+    Debug 2 "ResizeImage: w=$w, wcan=$wcan, which=$which"
     Debug 2 "    zoomFactor=$zoomFactor"
 
     set scaleFactor 2
@@ -1785,10 +1784,10 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
     } else {
 	return
     }
-    if {$which == "sel"} {
-	set ids [$w find withtag selected]
+    if {$which eq "sel"} {
+	set ids [$wcan find withtag selected]
     } else {
-	set ids [$w find withtag $which]
+	set ids [$wcan find withtag $which]
 	if {[llength $ids] == 0} {
 	    return
 	}
@@ -1796,19 +1795,19 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
     set idsNewSelected {}
     foreach id $ids {
 	
-	if {$where == "all" || $where == "local"} {	    
-	    set type [$w type $id]
+	if {$where eq "all" || $where eq "local"} {	    
+	    set type [$wcan type $id]
 	    if {![string equal $type "image"]} {
 		continue
 	    }
 	    
 	    # Check if no privacy problems. Only if 'which' is the selected.
-	    set utagOrig [::CanvasUtils::GetUtag $w $id]
-	    if {$which == "sel" && $utagOrig == ""} {
+	    set utagOrig [::CanvasUtils::GetUtag $wcan $id]
+	    if {$which eq "sel" && $utagOrig eq ""} {
 		continue
 	    }
-	    set coords [$w coords $id]
-	    set theIm [$w itemcget $id -image]
+	    set coords [$wcan coords $id]
+	    set theIm [$wcan itemcget $id -image]
 	    
 	    # Resized photos add tag to name '_zoom2' for double size,
 	    # '_zoom-2' for half size etc.
@@ -1858,27 +1857,27 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
 	    }
 	    
 	    # Choose this clients automatic tags or take 'newTag'.
-	    if {$newTag == "auto"} {
+	    if {$newTag eq "auto"} {
 		set useTag [::CanvasUtils::NewUtag]
 	    } else {
 		set useTag $newTag
 	    }
 	    
 	    # Be sure to keep old stacking order.
-	    set isAbove [$w find above $id]
+	    set isAbove [$wcan find above $id]
 	    set cmdlocal "create image $coords -image $newImName -anchor nw  \
 	      -tags {std image $useTag}"
 	    set cmdExList [list [list $cmdlocal local]]
-	    if {$isAbove != ""} {
+	    if {$isAbove ne ""} {
 		lappend cmdExList [list [list lower $useTag $isAbove] local]
 	    }
 	    set undocmd  \
-	      "create image $coords [::CanvasUtils::GetItemOpts $w $id all]"
+	      "create image $coords [::CanvasUtils::GetItemOpts $wcan $id all]"
 	    set undocmdExList [list [list $undocmd local]  \
 	      [list [list delete $useTag] local]]
 	    
 	    # Collect tags of selected originals.
-	    if {[lsearch [$w itemcget $id -tags] "selected"] >= 0} {
+	    if {[lsearch [$wcan itemcget $id -tags] "selected"] >= 0} {
 		lappend idsNewSelected $useTag
 	    }
 	}
@@ -1886,10 +1885,10 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
 	# We need to do something different here!!!!!!!!!!!!!!!!!!!!!!!!!
 	
 	# Assemble remote command.
-	if {$where != "local"} {
+	if {$where ne "local"} {
 	    set cmdremote "RESIZE IMAGE: $utagOrig $useTag $zoomFactor"
 	    set undocmdremote "RESIZE IMAGE: $useTag $utagOrig [expr -$zoomFactor]"
-	    if {$where == "remote" || $where == "all"} {
+	    if {$where eq "remote" || $where eq "all"} {
 		lappend cmdExList [list $cmdremote remote]
 		lappend undocmdExList [list $undocmdremote remote]
 	    } else {
@@ -1900,16 +1899,16 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
 	
 	# Remove old.
 	lappend cmdExList [list [list delete $utagOrig] local]
-	set redo [list ::CanvasUtils::GenCommandExList $wtop $cmdExList]
-	set undo [list ::CanvasUtils::GenCommandExList $wtop $undocmdExList]
+	set redo [list ::CanvasUtils::GenCommandExList $w $cmdExList]
+	set undo [list ::CanvasUtils::GenCommandExList $w $undocmdExList]
 	eval $redo
-	undo::add [::WB::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $w] $undo $redo
     }
-    ::CanvasCmd::DeselectAll $wtop
+    ::CanvasCmd::DeselectAll $w
     
     # Mark the new ones if old ones selected.
     foreach id $idsNewSelected {
-	::CanvasDraw::MarkBbox $w 1 $id
+	::CanvasDraw::MarkBbox $wcan 1 $id
     }
 }
 
@@ -1919,14 +1918,15 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
 #       It is rescaled by factors of two.
 #       
 # Arguments:
+#       wcan        the canvas widget path.
 #
 # Results:
 
-proc ::Import::GetAutoFitSize {w theMovie} {
+proc ::Import::GetAutoFitSize {wcan theMovie} {
 
     set factor 2.0
-    set canw [winfo width $w]
-    set canh [winfo height $w]
+    set canw [winfo width $wcan]
+    set canh [winfo height $wcan]
     set msize [$theMovie size]
     set imw [lindex $msize 0]
     set imh [lindex $msize 1]
@@ -1943,9 +1943,9 @@ proc ::Import::GetAutoFitSize {w theMovie} {
 #
 #       Some handy utilities for the popup menu callbacks.
 
-proc ::Import::SaveImageAsFile {w id} {
+proc ::Import::SaveImageAsFile {wcan id} {
 
-    set imageName [$w itemcget $id -image]
+    set imageName [$wcan itemcget $id -image]
     set origFile [$imageName cget -file]
     
     # Do different things depending on if in cache or not.
@@ -1954,28 +1954,28 @@ proc ::Import::SaveImageAsFile {w id} {
 	set initFile Untitled${ext}
 	set fileName [tk_getSaveFile -defaultextension $ext   \
 	  -title [mc {Save As}] -initialfile $initFile]
-	if {$fileName != ""} {
+	if {$fileName ne ""} {
 	    file copy $origFile $fileName
 	}
     } else {
 	set initFile Untitled.gif
 	set fileName [tk_getSaveFile -defaultextension gif   \
 	  -title [mc {Save As GIF}] -initialfile $initFile]
-	if {$fileName != ""} {
+	if {$fileName ne ""} {
 	    $imageName write $fileName -format gif
 	}
     }
 }
 
-proc ::Import::ExportImageAsFile {w id} {
+proc ::Import::ExportImageAsFile {wcan id} {
     
-    set imageName [$w itemcget $id -image]
+    set imageName [$wcan itemcget $id -image]
     catch {$imageName write {Untitled.gif} -format {quicktime -dialog}}
 }
 
-proc ::Import::ExportMovie {wtop winfr} {
+proc ::Import::ExportMovie {w winfr} {
     
-    set wmov ${winfr}.m
+    set wmov $winfr.m
     $wmov export
 }
 
@@ -1983,15 +1983,15 @@ proc ::Import::ExportMovie {wtop winfr} {
 # 
 #       Synchronized playback for linear QuickTime movies.
 
-proc ::Import::SyncPlay {wtop winfr} {
+proc ::Import::SyncPlay {w winfr} {
     
-    set wmov ${winfr}.m
+    set wmov $winfr.m
     set cmd [$wmov cget -mccommand]
     if {$cmd == {}} {
 	
 	# We need to get the corresponding utag.
 	set utag [::CanvasUtils::GetUtagFromWindow $winfr]
-	if {$utag == ""} {
+	if {$utag eq ""} {
 	    return
 	}
 	$wmov configure -mccommand [list ::Import::QuickTimeMCCallback $utag]
@@ -2004,16 +2004,16 @@ proc ::Import::SyncPlay {wtop winfr} {
 # 
 #       Procedure for the -mccommand for QuickTime widgets.
 
-proc ::Import::QuickTimeMCCallback {utag w msg {par {}}} {
+proc ::Import::QuickTimeMCCallback {utag wmovie msg {par {}}} {
     variable moviestate
 
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wmovie]
         
     # It is possible to add more commands.
 
     switch -- $msg {
 	play {
-	    set time [$w time]
+	    set time [$wcan time]
 	    set rate $par
 	    #puts "MCCallback time=$time, par (rate)=$rate"
 	    
@@ -2031,7 +2031,7 @@ proc ::Import::QuickTimeMCCallback {utag w msg {par {}}} {
 	    #puts "\t timetrig=$timetrig, ratetrig=$ratetrig"
 	    if {$timetrig || $ratetrig} {
 		set str "QUICKTIME: play $utag $time $rate"
-		::CanvasUtils::GenCommand $wtop $str remote
+		::CanvasUtils::GenCommand $w $str remote
 	    }
 	}
     }
@@ -2097,15 +2097,15 @@ proc ::Import::QuickTimeHandler {wcan type cmd args} {
     }
 }
 
-proc ::Import::TakeShot {wtop winfr} {
+proc ::Import::TakeShot {w winfr} {
     global  this
     
     set utag [::CanvasUtils::GetUtagFromWindow $winfr]
-    if {$utag == ""} {
+    if {$utag eq ""} {
 	return
     }
-    set wcan [::WB::GetCanvasFromWtop $wtop]
-    set wmov ${winfr}.m
+    set wcan [::WB::GetCanvasFromWtop $w]
+    set wmov $winfr.m
     set im [image create photo]
     $wmov picture [$wmov time] $im
     
@@ -2122,9 +2122,9 @@ proc ::Import::TakeShot {wtop winfr} {
     DoImport $wcan $opts -file $tmpfile
 }
 
-proc ::Import::TimeCode {wtop winfr} {
+proc ::Import::TimeCode {w winfr} {
     
-    set wmov ${winfr}.m
+    set wmov $winfr.m
     if {![$wmov isvisual]} {
 	return
     }
@@ -2156,13 +2156,13 @@ proc ::Import::TimeCode {wtop winfr} {
 # 
 #       Reloads a binary entity, image and such.
 
-proc ::Import::ReloadImage {wtop id} {
+proc ::Import::ReloadImage {w id} {
         
     ::Debug 3 "::Import::ReloadImage"
     
     # Need to have an url stored here.
-    set wcan [::WB::GetCanvasFromWtop $wtop]
-    set opts [::CanvasUtils::ItemCGet $wtop $id]
+    set wcan [::WB::GetCanvasFromWtop $w]
+    set opts [::CanvasUtils::ItemCGet $w $id]
     array set optsArr $opts  
     set coords [$wcan coords $id]
         
@@ -2184,7 +2184,7 @@ proc ::Import::ReloadImage {wtop id} {
 	  -progress [list [namespace current]::ImportProgress $line] \
 	  -command  [list [namespace current]::ImportCommand $line]
     }]
-    if {$errMsg != ""} {
+    if {$errMsg ne ""} {
 
 	# Display a broken image to indicate for the user.
 	eval {NewBrokenImage $wcan $coords} $opts
@@ -2199,10 +2199,11 @@ proc ::Import::ReloadImage {wtop id} {
 #       kind of failure somewhere.
 # 
 # Arguments:
+#       wcan        the canvas widget path.
 #
 # Results:
 
-proc ::Import::NewBrokenImage {w coords args} {
+proc ::Import::NewBrokenImage {wcan coords args} {
 
     ::Debug 2 "::Import::NewBrokenImage coords=$coords, args='$args'"
     
@@ -2229,21 +2230,21 @@ proc ::Import::NewBrokenImage {w coords args} {
     if {[lsearch $argsArr(-tags) broken] < 0} {
 	set argsArr(-tags) [list std broken $utag]
     }
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
 
-    set name [::WB::CreateBrokenImage $wtop $argsArr(-width) $argsArr(-height)]
+    set name [::WB::CreateBrokenImage $wcan $argsArr(-width) $argsArr(-height)]
 
-    set id [eval {$w create image} $coords \
+    set id [eval {$wcan create image} $coords \
       {-image $name -anchor nw -tags $argsArr(-tags)}]
     if {[info exists argsArr(-above)]} {
-	catch {$w raise $utag $argsArr(-above)}
+	catch {$wcan raise $utag $argsArr(-above)}
     } 
     if {[info exists optArr(-below)]} {
-	catch {$w lower $utag $argsArr(-below)}
+	catch {$wcan lower $utag $argsArr(-below)}
     }
 
     # Cache options.
-    eval {::CanvasUtils::ItemSet $wtop $id} [array get argsArr]
+    eval {::CanvasUtils::ItemSet $w $id} [array get argsArr]
 }
 
 #-------------------------------------------------------------------------------

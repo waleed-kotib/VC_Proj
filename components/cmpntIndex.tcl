@@ -7,6 +7,7 @@ component::attempt BuddyPounce  [file join $dir BuddyPounce.tcl] ::BuddyPounce::
 component::attempt GnomeMeeting [file join $dir GMeeting.tcl]    ::GMeeting::Init
 component::attempt ICQ          [file join $dir ICQ.tcl]         ::ICQ::Init
 component::attempt ImageMagic   [file join $dir ImageMagic.tcl]  ::ImageMagic::Init
+component::attempt ParseMeCData [file join $dir ParseMeCData.tcl]  ::ParseMeCData::Init
 component::attempt Notifier     [file join $dir Notifier.tcl]    ::Notifier::Init
 component::attempt ParseURI     [file join $dir ParseURI.tcl]    ::ParseURI::Init
 component::attempt SlideShow    [file join $dir SlideShow.tcl]   ::SlideShow::Load  

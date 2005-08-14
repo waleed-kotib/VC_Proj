@@ -9,7 +9,7 @@
 #       To be safe the code should run in a safe interpreter with all
 #       methods and variables in this base class aliased.
 # 
-# $Id: BaseWBCanvas.itcl,v 1.3 2004-08-03 14:04:45 matben Exp $
+# $Id: BaseWBCanvas.itcl,v 1.4 2005-08-14 08:37:52 matben Exp $
 
 class BaseWBCanvas {
 	
@@ -116,8 +116,7 @@ body BaseWBCanvas::GetUtag {id} {
 }
 
 body BaseWBCanvas::GetThis {key} {
-    global  this
-    
+    global  this    
     return $this($key)
 }
 
@@ -138,8 +137,8 @@ body BaseWBCanvas::FinalMoveCurrentGrid {x y grid} {
 }
 
 body BaseWBCanvas::AddUndo {undo redo} {
-    set wtop [::UI::GetToplevelNS $tkCanvas]
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    set w [winfo toplevel $tkCanvas]
+    undo::add [::WB::GetUndoToken $w] $undo $redo
 }
 
 body BaseWBCanvas::DeleteCurrent {} {
@@ -151,18 +150,18 @@ body BaseWBCanvas::AddGarbageImages {name args} {
 }
 
 body BaseWBCanvas::Command {cmd {where all}} {
-    set wtop [::UI::GetToplevelNS $tkCanvas]
-    ::CanvasUtils::Command $wtop $cmd $where
+    set w [winfo toplevel $tkCanvas]
+    ::CanvasUtils::Command $w $cmd $where
 }
 
 body BaseWBCanvas::CommandList {cmdList {where all}} {
-    set wtop [::UI::GetToplevelNS $tkCanvas]
-    ::CanvasUtils::CommandList $wtop $cmdList $where
+    set w [winfo toplevel $tkCanvas]
+    ::CanvasUtils::CommandList $w $cmdList $where
 }
 
 body BaseWBCanvas::GenCommand {cmd {where all}} {
-    set wtop [::UI::GetToplevelNS $tkCanvas]
-    ::CanvasUtils::GenCommand $wtop $cmd $where
+    set w [winfo toplevel $tkCanvas]
+    ::CanvasUtils::GenCommand $w $cmd $where
 }
 
 

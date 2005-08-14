@@ -85,6 +85,8 @@
 ::msgcat::mcset sv Never		{Aldrig}
 ::msgcat::mcset sv New 			{Nytt}
 ::msgcat::mcset sv Next 		{Nästa}
+::msgcat::mcset sv Nick                 {Kortnamn}
+::msgcat::mcset sv Nickname             {Kortnamn}
 ::msgcat::mcset sv No 			{Nej}
 ::msgcat::mcset sv no 			{nej}
 ::msgcat::mcset sv None                 {Ingen}
@@ -112,6 +114,7 @@
 ::msgcat::mcset sv Progress		{Framsteg}
 ::msgcat::mcset sv Quit?                {Avsluta?}
 ::msgcat::mcset sv Quote                {Citera}
+::msgcat::mcset sv Reason               {Anledning}
 ::msgcat::mcset sv Register             {Registrera}
 ::msgcat::mcset sv Remaining		{Återstående}
 ::msgcat::mcset sv Remove 		{Tag bort}
@@ -125,6 +128,7 @@
 ::msgcat::mcset sv Send 		{Skicka}
 ::msgcat::mcset sv Server		{Server}
 ::msgcat::mcset sv Servers		{Servrar}
+::msgcat::mcset sv Service              {Tjänst}
 ::msgcat::mcset sv Set                  {Sätt}
 ::msgcat::mcset sv Settings             {Ställ in}
 ::msgcat::mcset sv Shortcut             {Genväg}
@@ -329,6 +333,9 @@
 ::msgcat::mcset sv mLoginTrpt     	{Logga på transport}
 ::msgcat::mcset sv mLogoutTrpt     	{Logga ut transport}
 ::msgcat::mcset sv mRemoveContact  	{Tag bort kontakt...}
+::msgcat::mcset sv mShow         	{Visa}
+::msgcat::mcset sv mOffline         	{Ej tillgängliga}
+::msgcat::mcset sv mTransports         	{Transporter}
 
 
 
@@ -370,6 +377,7 @@
 ::msgcat::mcset sv {Create Room}	   {Skapa rum}
 ::msgcat::mcset sv {Default group}         {Standard grupp}
 ::msgcat::mcset sv {Default Logout Status} {Standard utloggningsstatus}
+::msgcat::mcset sv {Default status descriptions} {Standard statusmeddelanden}
 ::msgcat::mcset sv {Delete Rule}           {Tag bort regel}
 ::msgcat::mcset sv {Disk Cache}            {Diskminne}
 ::msgcat::mcset sv {Different Passwords}   {Lösenorden skiljer}
@@ -401,10 +409,11 @@
 ::msgcat::mcset sv {Get File}		   {Hämta fil}
 ::msgcat::mcset sv {Get File Error}        {Hämta fil fel}
 ::msgcat::mcset sv {Get vCard}             {Hämta vCard}
-::msgcat::mcset sv {Getting available rooms...} {Hämtar tillgängliga rum...}
-::msgcat::mcset sv {Group chat in room}    {Gruppchatt i rum}
+::msgcat::mcset sv {Getting available rooms...}  {Hämtar rumslista...}
+::msgcat::mcset sv {Groupchat in room}    {Gruppchatt i rum}
 ::msgcat::mcset sv {Groupchat-1.0 (fallback)} {Groupchat-1.0 (reserv)}
 ::msgcat::mcset sv {Handled By}            {Hanteras av}
+::msgcat::mcset sv {History length}        {Historielängd}
 ::msgcat::mcset sv {Host name}		   {Värdnamn}
 ::msgcat::mcset sv {HTTP port}             {HTTP port}
 ::msgcat::mcset sv {Import using}          {Importera med}
@@ -413,6 +422,7 @@
 ::msgcat::mcset sv {Incoming Messages}     {Inkommande meddelanden}
 ::msgcat::mcset sv {Incoming Presence}     {Inkommande närvaro}
 ::msgcat::mcset sv {Inspect Associations}  {Inspektera association}
+::msgcat::mcset sv {Invite User}           {Bjud in användare}
 ::msgcat::mcset sv {IP address}            {IP adress}
 ::msgcat::mcset sv {Is connected}          {Är uppkopplad}
 ::msgcat::mcset sv {Is safe}		   {Är säker}
@@ -421,8 +431,8 @@
 ::msgcat::mcset sv {Jabber Client}         {Jabberklient}
 ::msgcat::mcset sv {Jabber Server}         {Jabberserver}
 ::msgcat::mcset sv {Jabber server port}    {Jabber server port}
-::msgcat::mcset sv {Jabber user id}	   {Jabber användar id}
-::msgcat::mcset sv {Jabber Id}             {Jabber Id}
+::msgcat::mcset sv {Jabber user ID}	   {Jabber användar ID}
+::msgcat::mcset sv {Jabber ID}             {Jabber ID}
 ::msgcat::mcset sv {JID to block}          {Blockera JID}
 ::msgcat::mcset sv {Last Activity}	   {Senaste aktivitet}
 ::msgcat::mcset sv {Last name}             {Efternamn}
@@ -455,6 +465,7 @@
 ::msgcat::mcset sv {NAT Address}	   {NAT adress}
 ::msgcat::mcset sv {Nick name}             {Kortnamn}
 ::msgcat::mcset sv {No Address}		   {Adress saknas}
+::msgcat::mcset sv {No Available}          {Inga tillgängliga}
 ::msgcat::mcset sv {No Inbox}		   {Ingen inkorg}
 ::msgcat::mcset sv {No Printing}           {Ingen utskrift}
 ::msgcat::mcset sv {Not Available}	   {Ej tillgängligt}
@@ -512,7 +523,7 @@
 ::msgcat::mcset sv {Send File}             {Skicka fil}
 ::msgcat::mcset sv {Send Live}             {Skicka lajv}
 ::msgcat::mcset sv {Server Info}           {Server info}
-::msgcat::mcset sv {Service server}	   {Tjänst server}
+::msgcat::mcset sv {Service server}	   {Tjänsteserver}
 ::msgcat::mcset sv {Set Directed Presence} {Riktad närvaro}
 ::msgcat::mcset sv {Set New Nickname}      {Sätt nytt kortnamn}
 ::msgcat::mcset sv {Set New Topic}         {Sätt nytt ämne}
@@ -536,7 +547,7 @@
 ::msgcat::mcset sv {This IP number}	   {Eget IP nummer}
 ::msgcat::mcset sv {Thread started}	   {Diskussionstråd startad}
 ::msgcat::mcset sv {To/from JID}           {Till/från JID}
-::msgcat::mcset sv {To Jabber id}          {Till Jabber id}
+::msgcat::mcset sv {To Jabber ID}          {Till Jabber ID}
 ::msgcat::mcset sv {To Send or Not}	   {Skicka eller ej}
 ::msgcat::mcset sv {Type of File}          {Filtyp}
 ::msgcat::mcset sv {Unknown: Prompt user}  {Okänt: Fråga användare}
@@ -654,6 +665,8 @@ Den ska vara av typen 'username@jabber.org'.}
 ::msgcat::mcset sv jamessaddrmiss	{Du måste fylla i åtminstone en giltig adress.}
 ::msgcat::mcset sv jamesschatclose	{Om du stänger det här chat fönstret så förlorar du också hela konversationen. Vill du verkligen stänga?}
 ::msgcat::mcset sv jamessnogroupchat	{Vi lyckades ej identifiera någon tjänst för gruppsamtal.}
+::msgcat::mcset sv jamessgcnoroomname   {Du måste fylla i ett rumsnamn.}
+::msgcat::mcset sv jamessgcnoroomnick   {Du måste fylla i ett kortnamn.}
 ::msgcat::mcset sv jamessinroommiss	{Alla fält måste fyllas i innan du kan stiga in i rummet.}
 ::msgcat::mcset sv jamesswarnexitroom	{Vill du verkligen lämna rummet "%s" ?}
 ::msgcat::mcset sv jamesserrbrowse	{Vi fick ett fel när "browsade" "%s": %s}
@@ -786,7 +799,7 @@ Uppgifter som är serverlagrade är sökbara för samtliga användare.}
 ::msgcat::mcset sv prefcubrowse  {Browse service om möjligt}
 ::msgcat::mcset sv prefcuagent   {Använd alltid Agent metod}
 ::msgcat::mcset sv prefcuupdate  {Kontrollera automatiskt om ny Coccinella version finns}
-::msgcat::mcset sv prefcuremdlgs {Kom ihåg öppna dialoger mellen sessionerna}
+::msgcat::mcset sv prefcuremdlgs {Kom ihåg öppna dialoger mellan sessionerna}
 ::msgcat::mcset sv preffmhelp    {Hjälpplugg för filtyp}
 ::msgcat::mcset sv preffmsave    {Spara på disk i inmappen}
 ::msgcat::mcset sv preffontmsg   {Varning: om importerar ett annat typsnitt än de tre standard (Times, Helvetica or Courier) så måste du vara säker på att alla andra klienter också har\
@@ -849,7 +862,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset sv jasubsndmsg  {Skicka ett meddelande till den här personen:}
 ::msgcat::mcset sv jasuballow   {Tillåt "%s" att se min närvaro}
 ::msgcat::mcset sv jasubadd     {Lägg till "%s" till min roster}
-::msgcat::mcset sv jarostadd	{Lägg till en Jabber användare till min roster. Kortnamn och grupp kan ändras när som helst senare.\
+::msgcat::mcset sv jarostadd	{Lägg till en jabber användare till min roster. Kortnamn och grupp kan ändras när som helst senare.\
 För att lägga till en användare från ett annat IM system så måste du ha ett konto för det systemet sedan tidigare och att du använder detta konto när du registrerar dig hos Jabber serverns\
 transport komponent.}
 ::msgcat::mcset sv jarostset	{Sätt kortnamn och grupp för "%s" till självvalt namn. De kan ändras när som helst senare.}
@@ -892,8 +905,12 @@ Vissa rum kan kräva medlemskap och lösenord.}
 Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jadisrmall   {Tag bort samtliga servrar som permanent upptäcks automatiskt.}
 ::msgcat::mcset sv jauserinnote {Lägg till dina personliga anteckningar om denna kontakt}
-::msgcat::mcset sv jaregisterex {Skriv Jabber serverns namn där du vill registrera. Tryck sedan på Hämta knappen för att få registreringsinfo. Fyll i och registrera.}
-::msgcat::mcset sv jaloginjid   {Fyll i din Jabber id som "joey@myjabb.org", eller välj profil. Du måste ha ett konto på servern sedan tidigare.}
+::msgcat::mcset sv jaregisterex {Skriv jabber serverns namn där du vill registrera. Tryck sedan på Hämta knappen för att få registreringsinfo. Fyll i och registrera.}
+::msgcat::mcset sv jaloginjid   {Fyll i din Jabber ID som "joey@myjabb.org", eller välj profil. Du måste ha ett konto på servern sedan tidigare.}
+::msgcat::mcset sv jaregalready {Du är redan registrerad hos den här tjänsten. Detta är dina nuvarande registreringsparametrar.}
+::msgcat::mcset sv jaactiveret  {Om kryssad så skickar Retur annars använd Ctrl/Cmd-Retur}
+::msgcat::mcset sv jainvitegchat {Bjud in användare till gruppchatt i rum %s}
+::msgcat::mcset sv jaxformreq   {Fält med (*) är obligatoriska}
 
 
 

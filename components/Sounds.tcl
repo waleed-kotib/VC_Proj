@@ -5,10 +5,10 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.17 2005-06-20 13:55:26 matben Exp $
+# $Id: Sounds.tcl,v 1.18 2005-08-14 08:37:51 matben Exp $
 
 namespace eval ::Sounds:: {
-        
+	
     variable nameToText 
     array set nameToText {
 	online          "User is online"
@@ -33,6 +33,8 @@ namespace eval ::Sounds:: {
 	connected       connected.wav
 	groupchatpres   clicked.wav
     }
+    
+    variable wqtframe .quicktime::audio
 
     variable allSounds
     set allSounds [array names soundIndex]
@@ -118,7 +120,7 @@ proc ::Sounds::Init { } {
     variable allSounds
     variable priv
     variable sprefs
-        
+	
     ::Debug 2 "::Sounds::Init"
     
     # Create all sounds from current sound set (which is "" as default).
@@ -137,11 +139,12 @@ proc ::Sounds::LoadSoundSet {soundSet} {
     variable allSounds
     variable soundIndex
     variable priv
+    variable wqtframe
 
     ::Debug 2 "::Sounds::LoadSoundSet: soundSet=$soundSet"
     
     Free
-        
+	
     array set sound [array get soundIndex]
     
     # Search for given sound set.
@@ -165,7 +168,7 @@ proc ::Sounds::LoadSoundSet {soundSet} {
 	}
     }
     if {$priv(QuickTimeTcl)} {
-	frame .fake
+	frame $wqtframe
     }
     foreach s $allSounds {
 	Create $s [file join $path $sound($s)]
@@ -176,6 +179,7 @@ proc ::Sounds::Create {name path} {
     global  this    
     variable priv
     variable nameToPath
+    variable wqtframe
     
     # QuickTime doesn't understand vfs; need to copy out to tmp dir.
     if {$priv(QuickTimeTcl)} {
@@ -183,7 +187,7 @@ proc ::Sounds::Create {name path} {
 	    set path [CopyToTemp $path]
 	}
 	if {[catch {
-	    movie .fake.$name -file $path -controller 0
+	    movie $wqtframe.$name -file $path -controller 0
 	}]} {
 	    # ?
 	}
@@ -209,6 +213,7 @@ proc ::Sounds::Play {snd} {
     variable afterid
     variable nameToPath
     variable soundIndex
+    variable wqtframe
 
     # Check the jabber prefs if sound should be played.
     if {[info exists sprefs($snd)] && !$sprefs($snd)} {
@@ -217,7 +222,7 @@ proc ::Sounds::Play {snd} {
     
     unset -nocomplain afterid($snd)
     if {$priv(QuickTimeTcl)} {
-	if {[catch {.fake.$snd play}]} {
+	if {[catch {$wqtframe.$snd play}]} {
 	    # ?
 	}
     } elseif {[file extension $nameToPath($snd)] eq ".mid"} {
@@ -232,7 +237,7 @@ proc ::Sounds::Play {snd} {
 proc ::Sounds::PlayWhenIdle {snd} {
     variable afterid
     variable sprefs
-        
+	
     if {![info exists sprefs($snd)] || !$sprefs($snd)} {
 	return
     }
@@ -245,15 +250,16 @@ proc ::Sounds::PlayWhenIdle {snd} {
 proc ::Sounds::PlaySoundTmp {path} {
     global  this
     variable priv
+    variable wqtframe
     
     if {$priv(QuickTimeTcl)} {
 	if {[info exists ::starkit::topdir]} {
 	    set path [CopyToTemp $path]
 	}
-	catch {destroy .fake._tmp}
+	catch {destroy $wqtframe._tmp}
 	catch {
-	    movie .fake._tmp -file $path -controller 0
-	    .fake._tmp play
+	    movie $wqtframe._tmp -file $path -controller 0
+	    $wqtframe._tmp play
 	}
     } elseif {[file extension $path] eq ".mid"} {
 	if {[info exists ::starkit::topdir]} {
@@ -346,7 +352,7 @@ proc ::Sounds::Presence {jid presence args} {
     
     array set argsArr $args
     jlib::splitjid $jid jid2 res
-        
+	
     # Alert sounds.
     if {[::Jabber::JlibCmd service isroom $jid2]} {
 	PlayWhenIdle groupchatpres
@@ -363,9 +369,10 @@ proc ::Sounds::Presence {jid presence args} {
 proc ::Sounds::Free { } {
     variable priv
     variable allSounds
+    variable wqtframe
     
     if {$priv(QuickTimeTcl)} {
-	catch {destroy .fake}
+	catch {destroy $wqtframe}
     } elseif {$priv(snack)} {
 	foreach name $allSounds {
 	    catch {$name destroy}
@@ -383,8 +390,8 @@ proc  ::Sounds::InitPrefsHook { } {
     set sprefs(soundSet) ""
     set sprefs(volume)   100
     set sprefs(midiCmd)  ""
-    
-    ::PreferencesUtils::Add [list  \
+
+    ::PrefUtils::Add [list  \
       [list ::Sounds::sprefs(soundSet) sound_set     $sprefs(soundSet)] \
       [list ::Sounds::sprefs(volume)   sound_volume  $sprefs(volume)]   \
       [list ::Sounds::sprefs(midiCmd)  sound_midiCmd $sprefs(midiCmd)]  \
@@ -395,9 +402,9 @@ proc  ::Sounds::InitPrefsHook { } {
 	set sprefs($name) 1
 	lappend optList [list ::Sounds::sprefs($name) sound_${name} $sprefs($name)]
     }
-    ::PreferencesUtils::Add $optList
+    ::PrefUtils::Add $optList    
     
-    # Volume seems to be set globally on snack. Always ignore prefs settings.
+    # Volume seems to be set globally on snack.
     if {$priv(snack)} {
 	set sprefs(volume) [snack::audio play_gain]
     }
@@ -407,8 +414,7 @@ proc ::Sounds::BuildPrefsHook {wtree nbframe} {
     variable priv
     
     if {$priv(canPlay)} {
-	$wtree newitem {General Sounds}  \
-	  -text [mc {Sounds}]
+	$wtree newitem {General Sounds} -text [mc {Sounds}]
 
 	set wpage [$nbframe page {Sounds}]    
 	BuildPrefsPage $wpage
@@ -421,64 +427,73 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     variable tmpPrefs
     variable allSounds
     variable priv
-    
-    set fontS  [option get . fontSmall {}]    
-    set fontSB [option get . fontSmallBold {}]    
 
     # System gain can have been changed.
     if {$priv(snack)} {
 	set sprefs(volume) [snack::audio play_gain]
     }
-
+    
     foreach name $allSounds {
 	set tmpPrefs($name) $sprefs($name)
     }
-    if {[string equal $sprefs(soundSet) ""]} {
+    if {$sprefs(soundSet) == ""} {
 	set tmpPrefs(soundSet) [mc Default]
     } else {
 	set tmpPrefs(soundSet) $sprefs(soundSet)
     }
     set tmpPrefs(volume) $sprefs(volume)
-    set tmpPrefs(midiCmd) $sprefs(midiCmd)
-    
-    set labpalrt $wpage.alrt
-    labelframe $labpalrt -text [mc {Alert sounds}]
-    pack $labpalrt -side top -anchor w -padx 8 -pady 4
-    
-    set frs $labpalrt.frs
-    pack [frame $frs] -side top -anchor w -padx 8 -pady 2
-    
     set soundSets [concat [list [mc Default]] [GetAllSets]]
-    label $frs.lsets -text "[mc {Sound Set}]:"
-    set wpopsets $frs.popsets
-    set wpopupmenu [eval {tk_optionMenu $wpopsets   \
-      [namespace current]::tmpPrefs(soundSet)} $soundSets]
-    $wpopsets configure -highlightthickness 0 -font $fontSB
-    grid $frs.lsets $wpopsets -sticky w
     
-    set fr $labpalrt.fr
-    pack [frame $fr] -side left
-    label $fr.lbl -text [mc prefsounpick]
-    grid $fr.lbl -columnspan 2 -sticky w -padx 10
+    set wc $wpage.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
 
-    set row 1
+    set walrt $wc.fr
+    ttk::labelframe $walrt -text [mc {Alert sounds}] \
+      -padding [option get . groupSmallPadding {}]
+    pack  $walrt  -side top -fill x
+   
+    set fss $walrt.fss
+    ttk::frame $fss
+    ttk::label $fss.l -text "[mc {Sound Set}]:"
+    eval {ttk::optionmenu $fss.p [namespace current]::tmpPrefs(soundSet)} \
+      $soundSets
+
+    grid  $fss.l  $fss.p  -sticky w -padx 2
+    grid  $fss.p  -sticky ew
+    
+    ttk::label $walrt.lbl -text [mc prefsounpick]
+
+    set wmid $walrt.m
+    ttk::frame $wmid
+
+    pack  $walrt.fss  -side top -anchor w
+    pack  $walrt.lbl  -side top -anchor w -pady 8
+    pack  $walrt.m    -side top
+    
     foreach name $allSounds {
 	set txt $nameToText($name)
-	checkbutton $fr.$name -text "  [mc $txt]"  \
+	ttk::checkbutton $wmid.c$name -text [mc $txt]  \
 	  -variable [namespace current]::tmpPrefs($name)
-	button $fr.b${name} -text [mc Play] \
-	  -font $fontS \
+	ttk::button $wmid.b$name -text [mc Play] \
 	  -command [list [namespace current]::PlayTmpPrefSound $name]
-	grid $fr.$name    -column 0 -row $row -sticky w  -padx 8
-	grid $fr.b${name} -column 1 -row $row -sticky ew -padx 8
-	incr row
+	grid  $wmid.c$name  $wmid.b$name  -sticky w -padx 4 -pady 1
+	grid  $wmid.b$name  -sticky ew
     }
-    scale $fr.vol -showvalue 1 -variable [namespace current]::tmpPrefs(volume) \
-      -from 0 -to 100 -label [mc Volume] -orient horizontal -bd 1
-    grid $fr.vol -stick ew -padx 12 -pady 4
-    
-    button $fr.midi -text "MIDI Player" -command ::Sounds::MidiPlayer
-    grid $fr.midi x -sticky w -padx 12 -pady 4
+
+    set fvol $walrt.fvol
+    ttk::frame $fvol
+    ttk::label $fvol.l -text "[mc Volume]:"
+    ttk::scale $fvol.v -orient horizontal -from 0 -to 100 \
+      -variable [namespace current]::tmpPrefs(volume) -value $tmpPrefs(volume) \
+      -font CociSmallFont
+
+    pack  $fvol.l  -side left -padx 4
+    pack  $fvol.v  -side left -padx 4
+    pack  $fvol  -side top -pady 4 -anchor [option get . dialogAnchor {}]
+
+    ttk::button $walrt.midi -text "MIDI Player" -command ::Sounds::MidiPlayer
+    pack  $walrt.midi -pady 4
 }
 
 proc ::Sounds::MidiPlayer { } {
@@ -504,6 +519,7 @@ proc ::Sounds::PlayTmpPrefSound {name} {
     variable priv
     variable soundIndex
     variable tmpPrefs
+    variable wqtframe
     
     array set sound [array get soundIndex]
     
@@ -535,11 +551,11 @@ proc ::Sounds::PlayTmpPrefSound {name} {
 	    file copy -force $f $tmp
 	    set f $tmp
 	}
-	catch {destroy .fake._tmp}
+	catch {destroy $wqtframe._tmp}
 	catch {
-	    movie .fake._tmp -file $f -controller 0 \
+	    movie $wqtframe._tmp -file $f -controller 0 \
 	      -volume [expr {int($tmpPrefs(volume) * 2.55)}]
-	    .fake._tmp play
+	    $wqtframe._tmp play
 	}
     } elseif {$priv(snack)} {
 	catch {_tmp destroy}
@@ -553,6 +569,7 @@ proc ::Sounds::SavePrefsHook { } {
     variable tmpPrefs
     variable allSounds
     variable priv
+    variable wqtframe
     
     if {!$priv(canPlay)} {
 	return
@@ -565,12 +582,11 @@ proc ::Sounds::SavePrefsHook { } {
     }
     set sprefs(soundSet) $tmpPrefs(soundSet)
     set sprefs(volume)   $tmpPrefs(volume)
-    set sprefs(midiCmd)  $tmpPrefs(midiCmd)
     foreach name $allSounds {
 	set sprefs($name) $tmpPrefs($name)
     }
     if {$priv(QuickTimeTcl)} {
-	foreach wmovie [winfo children .fake] {
+	foreach wmovie [winfo children $wqtframe] {
 	    if {[winfo class $wmovie] == "Movie"} {
 		$wmovie configure -volume [expr {int($sprefs(volume) * 2.55)}]
 	    }

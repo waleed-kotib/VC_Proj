@@ -88,6 +88,8 @@
 ::msgcat::mcset fr Never		{Jamais}
 ::msgcat::mcset fr New			{Nouveau}
 ::msgcat::mcset fr Next			{Suivant}
+# ::msgcat::mcset fr Nick {}
+# ::msgcat::mcset fr Nickname {}
 ::msgcat::mcset fr No			{Non}
 ::msgcat::mcset fr no			{non}
 ::msgcat::mcset fr None			{Aucun}
@@ -115,6 +117,7 @@
 ::msgcat::mcset fr Progress		{Progression}
 ::msgcat::mcset fr Quit?		{Quitter ?}
 ::msgcat::mcset fr Quote		{Citer}
+# ::msgcat::mcset fr Reason {}
 ::msgcat::mcset fr Register		{S'enregistrer}
 ::msgcat::mcset fr Remaining		{Restant}
 ::msgcat::mcset fr Remove		{Enlever}
@@ -128,6 +131,7 @@
 ::msgcat::mcset fr Send			{Envoyer}
 ::msgcat::mcset fr Server		{Serveur}
 ::msgcat::mcset fr Servers		{Serveurs}
+# ::msgcat::mcset fr Service {}
 ::msgcat::mcset fr Set			{Installer}
 ::msgcat::mcset fr Settings		{Paramètres}
 ::msgcat::mcset fr Shortcut		{Raccourci}
@@ -332,6 +336,9 @@
 ::msgcat::mcset fr mLoginTrpt     	{Se connecter à un serveur de transport}
 ::msgcat::mcset fr mLogoutTrpt     	{Se déconnecter d'un serveur de transport}
 ::msgcat::mcset fr mRemoveContact  	{Enlever le contact...}
+# ::msgcat::mcset fr mShow Show
+# ::msgcat::mcset fr mOffline Offline
+# ::msgcat::mcset fr mTransports Transports
 
 
 
@@ -373,6 +380,7 @@
 ::msgcat::mcset fr {Create Room}		{Créer un salon}
 ::msgcat::mcset fr {Default group}		{Groupe par défaut}
 ::msgcat::mcset fr {Default Logout Status}	{Déconnexion par défaut}
+# ::msgcat::mcset fr {Default status descriptions} {}
 ::msgcat::mcset fr {Delete Rule}		{Règle de suppression}
 ::msgcat::mcset fr {Disk Cache}			{Cache}
 ::msgcat::mcset fr {Different Passwords}        {Différents mots de passe}
@@ -405,10 +413,10 @@
 ::msgcat::mcset fr {Get File Error}		{Erreur lors de la réception du fichier}
 ::msgcat::mcset fr {Get vCard}			{Voir la carte de visite}
 #::msgcat::mcset fr {Getting available rooms...}
-::msgcat::mcset fr {Group chat in room}		{Grouper la discussion et le salon}
+::msgcat::mcset fr {Groupchat in room}		{Grouper la discussion et le salon}
 ::msgcat::mcset fr {Groupchat-1.0 (fallback)}	{Groupchat 1.0 (fallback)}
-::msgcat::mcset fr {Groupchat presence change}	{Changement de statut sur un salon}
 ::msgcat::mcset fr {Handled By}			{Géré par}
+# ::msgcat::mcset fr {History length} {}
 ::msgcat::mcset fr {Host name}			{Nom de domaine}
 ::msgcat::mcset fr {HTTP port}			{Port HTTP}
 ::msgcat::mcset fr {Import using}		{Importer en utilisant...}
@@ -417,6 +425,7 @@
 ::msgcat::mcset fr {Incoming Messages}		{Messages entrants}
 ::msgcat::mcset fr {Incoming Presence}		{Connexion en cours}
 ::msgcat::mcset fr {Inspect Associations}	{Inspecter les associations}
+# ::msgcat::mcset fr {Invite User} {}
 ::msgcat::mcset fr {IP address}			{Adresse IP}
 ::msgcat::mcset fr {Is connected}		{Connecté}
 ::msgcat::mcset fr {Is safe}			{Sûr}
@@ -425,8 +434,8 @@
 ::msgcat::mcset fr {Jabber Client}		{Client Jabber}
 ::msgcat::mcset fr {Jabber Server}		{Serveur Jabber}
 ::msgcat::mcset fr {Jabber server port}		{Port du serveur Jabber}
-::msgcat::mcset fr {Jabber user id}		{Identifiant de l'utilisateur Jabber}
-::msgcat::mcset fr {Jabber Id}			{Identifiant Jabber}
+::msgcat::mcset fr {Jabber user ID}		{Identifiant de l'utilisateur Jabber}
+::msgcat::mcset fr {Jabber ID}			{Identifiant Jabber}
 ::msgcat::mcset fr {JID to block}		{JID à bloquer}
 ::msgcat::mcset fr {Last Activity}		{Dernière activité}
 ::msgcat::mcset fr {Last name}			{Nom}
@@ -459,6 +468,7 @@
 ::msgcat::mcset fr {NAT Address}		{Adresse NAT}
 ::msgcat::mcset fr {Nick name}			{Pseudo}
 ::msgcat::mcset fr {No Address}			{Pas d'adresse}
+# ::msgcat::mcset fr {No Available} {}
 ::msgcat::mcset fr {No Inbox}			{Pas de message entrant}
 ::msgcat::mcset fr {No Printing}		{Pas d'impression}
 ::msgcat::mcset fr {Not Available}		{Indisponible}
@@ -540,7 +550,7 @@
 ::msgcat::mcset fr {This IP number}		{Cette adresse IP}
 ::msgcat::mcset fr {Thread started}		{Flux initialisé}
 ::msgcat::mcset fr {To/from JID}		{À/De JID}
-::msgcat::mcset fr {To Jabber id}		{À l'ID Jabber}
+::msgcat::mcset fr {To Jabber ID}		{À l'ID Jabber}
 ::msgcat::mcset fr {To Send or Not}		{À envoyer ou non}
 ::msgcat::mcset fr {Type of File}		{Type de fichier}
 ::msgcat::mcset fr {Unknown: Prompt user}	{Inconnu : Nom d'utilisateur}
@@ -556,6 +566,7 @@
 ::msgcat::mcset fr {Version Info}		{Infos sur la version}
 ::msgcat::mcset fr {Whiteboard fonts}		{Polices du tableau}
 ::msgcat::mcset fr {Writing file}		{Écriture du fichier}
+::msgcat::mcset fr {Groupchat presence change}	{Changement de statut sur un salon}
 
 
 # Écran de démarrage :
@@ -667,6 +678,10 @@
 ::msgcat::mcset fr jamessaddrmiss	{Vous devez renseigner au moins une adresse correcte.}
 ::msgcat::mcset fr jamesschatclose	{Si vous fermez cette fenêtre, vous perdrez la conversation en cours. Voulez-vous tout de même la fermer ?}
 ::msgcat::mcset fr jamessnogroupchat	{Aucun service du groupe de discussion n'est reconnu.}
+#--- translate
+::msgcat::mcset en jamessgcnoroomname   {You must provide a roomname.}
+::msgcat::mcset en jamessgcnoroomnick   {You must provide a nickname.}
+#
 ::msgcat::mcset fr jamessinroommiss	{Tous les champs doivent être renseignés avant d'entrer dans le salon.}
 ::msgcat::mcset fr jamesswarnexitroom	{Voulez-vous quitter le salon %s ?}
 ::msgcat::mcset fr jamesserrbrowse	{Erreur lors de la navigation dans "%s": %s}
@@ -718,6 +733,10 @@
 ::msgcat::mcset fr jamessstarttls-failure       {Erreur lors de la sécurisation TLS avec le serveur "%s".}
 ::msgcat::mcset fr jamessgcinvite               {Vous avez été invité dans le salon %s par %s. Voulez-vous y aller ?}
 
+#--- Translate ---
+::msgcat::mcset fr jamessgcnoroomname {You must provide a roomname.}
+::msgcat::mcset fr jamessgcnoroomnick {You must provide a nickname.}
+#--- Translate ---
 
 
 ::msgcat::mcset fr openquicktime		{Ouvrir le streaming QuickTime}
@@ -904,6 +923,13 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jaregisterex {Indiquez le nom du serveur Jabber sur lequel vous voulez vous enregistrer. Cliquez ensuite su le bouton Recevoir pour obtenir les informations d'inscription. Remplissez ces informations et inscrivez-vous.}
 ::msgcat::mcset fr jaloginjid   {Entrez votre adresse ("joey@myjabb.org" par exemple) ou choisissez un profil. Vous devez déjà avoir un compte sur ce serveur.}
 
+#--- Translate ---
+::msgcat::mcset fr jaxformreq   {Labels with (*) are required}
+::msgcat::mcset fr jaregalready {You are already registered with this service. These are your current settings of your registration parameters.}
+::msgcat::mcset fr jaactiveret {If checked Return sends message else use Ctrl/Cmd-Return}
+::msgcat::mcset fr jainvitegchat {Invite a user for groupchat in room %s}
+#--- Translate ---
+
 
 # Assistant de configuration :
 ::msgcat::mcset fr suintro1 	{Bienvenue sur l'assistant de configuration qui vous aidera à remplir les informations nécessaires pour un ancien ou nouveau compte sur un serveur Jabber.}
@@ -959,3 +985,4 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr putneterr       {Erreur de transfert lors de la réception de %s.}
 
 # END --------------------------------------------------------------------------
+

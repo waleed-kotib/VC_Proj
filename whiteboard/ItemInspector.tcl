@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: ItemInspector.tcl,v 1.4 2005-04-29 12:07:06 matben Exp $
+# $Id: ItemInspector.tcl,v 1.5 2005-08-14 08:37:52 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -81,34 +81,34 @@ namespace eval ::ItemInspector::  {
 #       Shows options dialog for the selected canvas item.
 #   
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       which       a valid specifier for a canvas item
 #       args        ?-state normal|disabled?
 #       
 # Results:
 #       dialog displayed.
 
-proc ::ItemInspector::ItemInspector {wtop which args} {
+proc ::ItemInspector::ItemInspector {w which args} {
     
-    Debug 2 "ItemInspector:: wtop=$wtop, which=$which"
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    Debug 2 "ItemInspector:: w=$w, which=$which"
+    set wcan [::WB::GetCanvasFromWtop $w]
     
     # We need to create an item specific instance. 
     # Use the item id for instance.
-    set idlist [$wCan find withtag $which]
+    set idlist [$wcan find withtag $which]
     if {$idlist == {}}  {
 	return
     }
     
     # Query the whiteboard's state.
-    array set opts [::WB::ConfigureMain $wtop]
+    array set opts [::WB::ConfigureMain $w]
     array set opts $args
     foreach id $idlist {
-	set tags [$wCan gettags $id]
+	set tags [$wcan gettags $id]
 	if {[lsearch $tags broken] >= 0} {
-	    eval {Broken $wtop $id} [array get opts]
+	    eval {Broken $w $id} [array get opts]
 	} else {
-	    eval {Build $wtop $id} [array get opts]
+	    eval {Build $w $id} [array get opts]
 	}
     }
 }
@@ -121,13 +121,13 @@ proc ::ItemInspector::ItemInspector {wtop which args} {
 #
 #
 # Results:
-#       toplevel window path
+#       dialog window path
 
-proc ::ItemInspector::Build {wtop itemid args} {
+proc ::ItemInspector::Build {wtoplevel itemid args} {
     global  prefs fontPoints2Size this wDlgs
     upvar ::WB::dashShort2Full dashShort2Full
     
-    ::Debug 2 "::ItemInspector::Build wtop=$wtop, itemid=$itemid"
+    ::Debug 2 "::ItemInspector::Build wtoplevel=$wtoplevel, itemid=$itemid"
 
     set w $wDlgs(iteminsp)$itemid
     
@@ -136,7 +136,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
 	raise $w
 	return
     }
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $wtoplevel]
     
     # Keep state array for item options etc.
     set token [namespace current]::$itemid
@@ -144,7 +144,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
     upvar 0 $token state
 
     set state(w)      $w
-    set state(wCan)   $wCan
+    set state(wcan)   $wcan
     set state(itemid) $itemid
     set state(finished) -1
 
@@ -160,21 +160,21 @@ proc ::ItemInspector::Build {wtop itemid args} {
     set canvasState $argsArr(-state)
     
     set nl_ {\\n}
-    set utag [::CanvasUtils::GetUtag $wCan $itemid]
+    set utag [::CanvasUtils::GetUtag $wcan $itemid]
     if {$utag == {}}  {
 	return
     }
     set state(utag) $utag
     
     # Movies may not be selected this way; temporary solution?
-    if {[lsearch [$wCan gettags $utag] "frame"] >= 0}  {
+    if {[lsearch [$wcan gettags $utag] "frame"] >= 0}  {
 	#return
     }	
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Item Inspector}
-    bind $wCan <Destroy> [list +[namespace current]::Cancel $token]
+    bind $wcan <Destroy> [list +[namespace current]::Cancel $token]
     
     set typWidth 24
         
@@ -211,7 +211,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
     
     # Item type.
     set line 0
-    set itemType [$wCan type $itemid]
+    set itemType [$wcan type $itemid]
     set state(type)       $itemType
     set state(type,value) $itemType
     set wlabel $frtot.l$line
@@ -225,7 +225,8 @@ proc ::ItemInspector::Build {wtop itemid args} {
     set state(type,w) $wentry
     
     # Coordinates.
-    set theCoords [$wCan coords $itemid]
+    set theCoords [$wcan coords $itemid]
+    set state(coords) $theCoords
     set state(coords,value) $theCoords
     lappend state(allopts) "coords"
     incr line
@@ -240,7 +241,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
     set state(coords,w) $wentry
         
     # Get all item options. Fonts need special treatment.
-    set opts [$wCan itemconfigure $itemid]
+    set opts [$wcan itemconfigure $itemid]
     set ind [lsearch $opts "-font*"]
     
     # We have got a font option.
@@ -259,7 +260,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
     }
     
     # Get any cached info for this id. Flat list!
-    foreach {key value} [::CanvasUtils::ItemCGet $wtop $itemid] {
+    foreach {key value} [::CanvasUtils::ItemCGet $wtoplevel $itemid] {
 	lappend opts [list $key {} {} {} $value]
     }
     
@@ -290,7 +291,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
 	    -fill        -
 	    -outline     {		
 		frame $frtot.e$line
-		if {$val == ""}  {
+		if {$val eq ""}  {
 		    set state($op) "transparent"
 		} else {
 		    set state($op) "fill"
@@ -302,7 +303,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
 		} $menuOpts($opname)]
 		$wmb configure -highlightthickness 0 -foreground black
 		entry $wentry -width 4 -state disabled
-		if {$val != ""} {
+		if {$val ne ""} {
 		    set rgb8 {}
 		    # winfo rgb . white -> 65535 65535 65535
 		    foreach rgb [winfo rgb . $val] {
@@ -349,7 +350,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
 		if {[string equal $op "-smooth"]}  {
 		    
 		    # Get full menu name.
-		    if {$val == ""}  {
+		    if {$val eq ""}  {
 			set state($op) "false"
 		    } else  {
 			set state($op) $boolShort2Full($val)
@@ -357,7 +358,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
 		} elseif {[string equal $op "-dash"]}  {
 		    set state($op) $dashShort2Full($val)
 		} else  {
-		    if {$val == ""}  {
+		    if {$val eq ""}  {
 			set state($op) "none"
 		    } else  {
 			set state($op) $val
@@ -367,7 +368,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
 		set wMenu [eval {
 		    tk_optionMenu $wmb $token\($op)
 		} $menuOpts($opname)]
-		if {$canvasState == "disabled"} {
+		if {$canvasState eq "disabled"} {
 		    $wmb configure -state disabled
 		}
 		$wmb configure -highlightthickness 0
@@ -378,7 +379,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
 		# Just an editable text entry widget.
 		set wentry $frtot.e$line
 		entry $wentry -width $typWidth -textvariable $token\($op)
-		if {$canvasState == "disabled"} {
+		if {$canvasState eq "disabled"} {
 		    $wentry configure -state disabled
 		}
 		set state($op) $val
@@ -396,7 +397,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
       -variable $token\(locked) -command $lockCmd
     grid  x  $frtot.lock$line  -sticky w
     set state(locked) 0
-    if {[::CanvasUtils::IsLocked $wCan $itemid]} {
+    if {[::CanvasUtils::IsLocked $wcan $itemid]} {
 	set state(locked) 1
     }
     set state(locked,value) $state(locked)
@@ -411,7 +412,7 @@ proc ::ItemInspector::Build {wtop itemid args} {
     pack $frbot.btcancel -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
-    if {$canvasState == "disabled"} {
+    if {$canvasState eq "disabled"} {
 	$frbot.btsave configure -state disabled
     }
     set state(wbtsave) $frbot.btsave
@@ -471,7 +472,7 @@ proc ::ItemInspector::Configure {token} {
     
     set utag $state(utag)
     set type $state(type)
-    set wCan $state(wCan)
+    set wcan $state(wcan)
         
     # Loop through all options. Assemble a configure list.
     set allNewOpts {}
@@ -580,21 +581,21 @@ proc ::ItemInspector::Configure {token} {
     
     # Do the actual change.
     if {$allNewOpts != {}}  {
-	eval {::CanvasUtils::ItemConfigure $wCan $utag} $allNewOpts
+	eval {::CanvasUtils::ItemConfigure $wcan $utag} $allNewOpts
     }
     set selected 0
-    if {[::CanvasDraw::IsSelected $wCan $utag]} {
+    if {[::CanvasDraw::IsSelected $wcan $utag]} {
 	set selected 1
     }
     if {$state(locked,value) != $state(locked)} {
-	::CanvasDraw::DeselectItem $wCan $utag
+	::CanvasDraw::DeselectItem $wcan $utag
 	if {$state(locked)} {
-	    ::CanvasUtils::AddTag $wCan $utag "locked"
+	    ::CanvasUtils::AddTag $wcan $utag "locked"
 	} else {
-	    ::CanvasUtils::DeleteTag $wCan $utag "locked"
+	    ::CanvasUtils::DeleteTag $wcan $utag "locked"
 	}
 	if {$selected} {
-	    ::CanvasDraw::SelectItem $wCan $utag
+	    ::CanvasDraw::SelectItem $wcan $utag
 	}
     }
     set state(finished) 1 
@@ -631,7 +632,7 @@ proc ::ItemInspector::Free {token} {
 #
 #
 
-proc ::ItemInspector::Movie {wtop winfr args} {
+proc ::ItemInspector::Movie {wtoplevel winfr args} {
     global  wDlgs
     
     variable skipMovieOpts
@@ -646,7 +647,7 @@ proc ::ItemInspector::Movie {wtop winfr args} {
 	raise $w
 	return
     }
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $wtoplevel]
     
     # Keep state array for item options etc.
     set token [namespace current]::m$uid
@@ -654,7 +655,7 @@ proc ::ItemInspector::Movie {wtop winfr args} {
     upvar 0 $token state
 
     set state(w)      $w
-    set state(wCan)   $wCan
+    set state(wcan)   $wcan
     set state(finished) -1
 
     array set argsArr {
@@ -664,7 +665,7 @@ proc ::ItemInspector::Movie {wtop winfr args} {
     set canvasState $argsArr(-state)
     
     if {0} {
-	set utag [::CanvasUtils::GetUtag $wCan $itemid]
+	set utag [::CanvasUtils::GetUtag $wcan $itemid]
 	if {$utag == {}}  {
 	    return
 	}
@@ -675,7 +676,7 @@ proc ::ItemInspector::Movie {wtop winfr args} {
       -macclass {document closeBox}  \
       -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Movie Inspector}
-    bind $wCan  <Destroy> [list +[namespace current]::Cancel $token]
+    bind $wcan  <Destroy> [list +[namespace current]::Cancel $token]
     bind $winfr <Destroy> [list +[namespace current]::Cancel $token]
     
     set typWidth 24
@@ -712,7 +713,7 @@ proc ::ItemInspector::Movie {wtop winfr args} {
 	if {[lsearch $skipMovieOpts($type) $opname] >= 0} {
 	    continue
 	}
-	if {!$isvisual && ($op == "-height" || $op == "-width")} {
+	if {!$isvisual && ($op eq "-height" || $op eq "-width")} {
 	    continue
 	}
 	set state($op,isbool) 0
@@ -730,7 +731,7 @@ proc ::ItemInspector::Movie {wtop winfr args} {
 		set wmb $frtot.e$i
 		set state($op) $boolShort2Full($val)
 		set wMenu [tk_optionMenu $wmb $token\($op) true false]
-		if {$canvasState == "disabled"} {
+		if {$canvasState eq "disabled"} {
 		    $wmb configure -state disabled
 		}
 		$wmb configure -highlightthickness 0
@@ -747,7 +748,7 @@ proc ::ItemInspector::Movie {wtop winfr args} {
 			$wentry configure -state disabled
 		    }
 		}
-		if {$canvasState == "disabled"} {
+		if {$canvasState eq "disabled"} {
 		    $wentry configure -state disabled
 		}
 		set state($op) $val
@@ -812,7 +813,7 @@ proc ::ItemInspector::MovieConfigure {token} {
     Free $token
 }
 
-proc ::ItemInspector::Broken {wtop itemid args} {
+proc ::ItemInspector::Broken {wtoplevel itemid args} {
     global  wDlgs
         
     set w $wDlgs(iteminsp)$itemid
@@ -822,7 +823,7 @@ proc ::ItemInspector::Broken {wtop itemid args} {
 	raise $w
 	return
     }
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     
     # Keep state array for item options etc.
     set token [namespace current]::$itemid
@@ -830,11 +831,11 @@ proc ::ItemInspector::Broken {wtop itemid args} {
     upvar 0 $token state
 
     set state(w)      $w
-    set state(wCan)   $wCan
+    set state(wcan)   $wcan
     set state(itemid) $itemid
     set state(finished) -1
 
-    set utag [::CanvasUtils::GetUtag $wCan $itemid]
+    set utag [::CanvasUtils::GetUtag $wcan $itemid]
     if {$utag == {}}  {
 	return
     }
@@ -844,7 +845,7 @@ proc ::ItemInspector::Broken {wtop itemid args} {
       -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Item Inspector}
-    bind $wCan <Destroy> [list +[namespace current]::Cancel $token]
+    bind $wcan <Destroy> [list +[namespace current]::Cancel $token]
             
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
@@ -858,10 +859,10 @@ proc ::ItemInspector::Broken {wtop itemid args} {
     pack $fr -padx 10 -pady 10
     
     # Get any cached info for this id.
-    set itemcget [::CanvasUtils::ItemCGet $wtop $itemid]
+    set itemcget [::CanvasUtils::ItemCGet $wtoplevel $itemid]
     set i 0
     foreach {key value} $itemcget {
-	if {$key == "-optlist"} {
+	if {$key eq "-optlist"} {
 	    foreach {optkey optvalue} $value {
 		set name [string totitle [string trimright $optkey :]]
 		label $fr.l$i -text $name

@@ -8,7 +8,7 @@
 #     (hj dot beckers at onlinehome dot de)
 
 ::msgcat::mcset de Accept	Akzeptieren
-::msgcat::mcset de Action	Aktion
+#::msgcat::mcset de Action
 ::msgcat::mcset de Active 	aktiv
 ::msgcat::mcset de Add		Hinzufügen
 ::msgcat::mcset de Address	Adresse
@@ -89,6 +89,8 @@
 ::msgcat::mcset de Never	Niemals
 ::msgcat::mcset de New		Neu
 ::msgcat::mcset de Next		Weiter
+# ::msgcat::mcset de Nick 
+# ::msgcat::mcset de Nickname 
 ::msgcat::mcset de No		Nein
 ::msgcat::mcset de no		nein
 ::msgcat::mcset de None		Kein
@@ -116,6 +118,7 @@
 ::msgcat::mcset de Progress	Verlauf
 ::msgcat::mcset de Quit?	Beenden?
 ::msgcat::mcset de Quote	Zitat
+# ::msgcat::mcset de Reason 
 ::msgcat::mcset de Register	Registrieren
 ::msgcat::mcset de Remaining	Verbleibend
 ::msgcat::mcset de Remove	Entfernen
@@ -129,6 +132,7 @@
 ::msgcat::mcset de Send		Senden
 ::msgcat::mcset de Server	Server
 ::msgcat::mcset de Servers	Server
+# ::msgcat::mcset de Service 
 ::msgcat::mcset de Set		Setzen
 ::msgcat::mcset de Settings	Einstellungen
 ::msgcat::mcset de Shortcut	Abkürzung
@@ -313,6 +317,9 @@
 ::msgcat::mcset de mTakeSnapShot        {Schnappschuss erstellen}
 ::msgcat::mcset de mTimeCode            {Zeitstempel ein-/ausblenden}
 ::msgcat::mcset de mUserInfo            {Benutzerinformation ...}
+# ::msgcat::mcset de mShow Show
+# ::msgcat::mcset de mOffline Offline
+# ::msgcat::mcset de mTransports Transports
 
 
 # Popups
@@ -374,6 +381,7 @@
 ::msgcat::mcset de {Create Room}          {Raum erstellen}
 ::msgcat::mcset de {Default group}        {Standard-Gruppe}
 ::msgcat::mcset de {Default Logout Status}  {Standard-Abmeldestatus}
+# ::msgcat::mcset de {Default status descriptions} {}
 ::msgcat::mcset de {Delete Rule} 	  {Regel löschen}
 ::msgcat::mcset de {Disk Cache}           {Zwischenspeicher}
 ::msgcat::mcset de {Different Passwords}  {Passwörter unterschiedlich}
@@ -405,10 +413,12 @@
 ::msgcat::mcset de {Get File}             {Datei abrufen}
 ::msgcat::mcset de {Get File Error}       {Fehler Dateiabruf}
 ::msgcat::mcset de {Get vCard}            {vCard abrufen}
-#::msgcat::mcset de {Getting available rooms...}
-::msgcat::mcset de {Group chat in room}   {Gruppen-Chat in Raum}
+# ::msgcat::mcset de {Getting available rooms...} {}
+::msgcat::mcset de {Groupchat in room}   {Gruppen-Chat in Raum}
+# ::msgcat::mcset de {Groupchat presence change} {}
 ::msgcat::mcset de {Groupchat-1.0 (fallback)}  {Groupchat-1.0 (Ausweichmöglichkeit)}
 ::msgcat::mcset de {Handled By}           {verwaltet von}
+# ::msgcat::mcset de {History length} {}
 ::msgcat::mcset de {Host name}            {Host-Name}
 ::msgcat::mcset de {HTTP port}            {HTTP-Port:}
 ::msgcat::mcset de {Import using}         {Import mittels}
@@ -417,6 +427,7 @@
 ::msgcat::mcset de {Incoming Messages} {Eingehende Nachricht}
 ::msgcat::mcset de {Incoming Presence} {Eingehende Anwesenheitsnachricht}
 ::msgcat::mcset de {Inspect Associations} {Assoziationen ansehen}
+# ::msgcat::mcset de {Invite User} {}
 ::msgcat::mcset de {IP address}           {IP-Adresse}
 ::msgcat::mcset de {Is connected}         {ist verbunden}
 ::msgcat::mcset de {Is safe}              {Ist sicher}
@@ -425,8 +436,8 @@
 ::msgcat::mcset de {Jabber Client}        {Jabber-Client}
 ::msgcat::mcset de {Jabber Server}        {Jabber-Server}
 ::msgcat::mcset de {Jabber server port}   {Jabber-Serverport:}
-::msgcat::mcset de {Jabber user id}       {Jabber-Benutzer-Id}
-::msgcat::mcset de {Jabber Id}            {Jabber-Id}
+::msgcat::mcset de {Jabber user ID}       {Jabber-Benutzer-ID}
+::msgcat::mcset de {Jabber ID}            {Jabber-ID}
 ::msgcat::mcset de {JID to block}         {zu blokierende JID}
 ::msgcat::mcset de {Last Activity}        {Letzte Aktivität}
 ::msgcat::mcset de {Last name}            {Nachname}
@@ -459,6 +470,7 @@
 ::msgcat::mcset de {NAT Address}          {NAT-Adresse}
 ::msgcat::mcset de {Nick name}            {Spitzname}
 ::msgcat::mcset de {No Address}           {Keine Adresse}
+# ::msgcat::mcset de {No Available} {}
 ::msgcat::mcset de {No Inbox}             {Kein Eingangsfach}
 ::msgcat::mcset de {No Printing}          {Kein Druck}
 ::msgcat::mcset de {Not Available}        {Nicht verfügbar}
@@ -540,7 +552,7 @@
 ::msgcat::mcset de {This IP number}       {Diese IP-Nummer}
 ::msgcat::mcset de {Thread started}       {Thema gestartet}
 ::msgcat::mcset de {To/from JID}          {Von/zu JID}
-::msgcat::mcset de {To Jabber id}         {Zu Jabber-id}
+::msgcat::mcset de {To Jabber ID}         {Zu Jabber-ID}
 ::msgcat::mcset de {To Send or Not}       {Senden: Ja/Nein}
 ::msgcat::mcset de {Type of File}         {Dateityp}
 ::msgcat::mcset de {Unknown: Prompt user} {Unbekannt: Benutzer fragen}
@@ -556,7 +568,7 @@
 ::msgcat::mcset de {Version Info}         {Versions-Info}
 ::msgcat::mcset de {Whiteboard fonts}     {Schriften Zeichenfläche}
 ::msgcat::mcset de {Writing file}         {Schreibe Datei}
-::msgcat::mcset de {Groupchat presence change} {Statuswechsel Gruppen-Chat}
+#::msgcat::mcset de {Groupchat presence change}
 
 
 # Splash screen:
@@ -661,6 +673,10 @@
 ::msgcat::mcset de jamessaddrmiss	{Sie müssen mindestens eine gültige Adresse eintragen}
 ::msgcat::mcset de jamesschatclose	{Wenn Sie dieses Chat-Fenster schliessen, verlieren Sie die vollständige Konversation. Wirklich schliessen?}
 ::msgcat::mcset de jamessnogroupchat	{Es konnte kein Dienst gefunden werden, der Gruppen-Chat ermöglicht}
+#--- translate
+::msgcat::mcset de jamessgcnoroomname   {You must provide a roomname.}
+::msgcat::mcset de jamessgcnoroomnick   {You must provide a nickname.}
+#--- translate
 ::msgcat::mcset de jamessinroommiss	{Vor dem Betreten eines Raumes müssen alle Felder ausgefüllt sein}
 ::msgcat::mcset de jamesswarnexitroom	{Wollen Sie wirklich den Raum "%s" verlassen?}
 ::msgcat::mcset de jamesserrbrowse	{Fehler beim Durchsuchen von "%s": %s}
@@ -899,8 +915,12 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jauserinnote {Ihre persönlichen Notizen über diesen Benutzer hinzufügen}
 
 #--- Translate ---
-::msgcat::mcset de jaregisterex {Geben Sie die Jabber-Server an, bei denen Sie sich registrieren möchten. Zum Empfang der gewünschten Registrierungsinformation drüccken Sie die Schaltfläche Abruf. Füllen Sie die Informationen aus und regestrieren Sie.}
-::msgcat::mcset de jaloginjid   {Geben Sie Ihre Jabber-ID als "joey@myjabb.org" ein oder wählen Sie ein Profil. Sie sollten bereits über ein Konto auf diesem Server verfügen..}
+::msgcat::mcset de jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
+::msgcat::mcset de jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+::msgcat::mcset de jaxformreq   {Labels with (*) are required}
+::msgcat::mcset de jaregalready {You are already registered with this service. These are your current settings of your registration parameters.}
+::msgcat::mcset de jaactiveret {If checked Return sends message else use Ctrl/Cmd-Return}
+::msgcat::mcset de jainvitegchat {Invite a user for groupchat in room %s}
 #--- Translate ---
 
 

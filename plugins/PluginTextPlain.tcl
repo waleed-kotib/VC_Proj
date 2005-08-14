@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PluginTextPlain.tcl,v 1.14 2004-12-02 08:22:35 matben Exp $
+# $Id: PluginTextPlain.tcl,v 1.15 2005-08-14 08:37:52 matben Exp $
 
 
 namespace eval ::TextImporter:: {
@@ -128,7 +128,7 @@ proc ::TextImporter::Import {wcan optListVar args} {
 	return -code error "Does not yet support -data option"
     }
     set fileName $argsArr(-file)
-    set wtop [::UI::GetToplevelNS $wcan]
+    set w [winfo toplevel $wcan]
     set errMsg ""
     
     # Extract coordinates and tags which must be there. error checking?
@@ -144,7 +144,7 @@ proc ::TextImporter::Import {wcan optListVar args} {
     # Make actual object in a frame with special -class.
     frame $wfr -bg gray50 -class TextDocFrame
     label $wfr.icon -background white -image $locals(icon)
-    pack $wfr.icon -padx 4 -pady 4
+    pack  $wfr.icon -padx 4 -pady 4
     
     set id [$wcan create window $x $y -anchor nw -window $wfr -tags  \
       [list frame $useTag]]
@@ -155,7 +155,7 @@ proc ::TextImporter::Import {wcan optListVar args} {
     if {[info exists optArr(-url)]} {
 	lappend configOpts -url $optArr(-url)
     }
-    eval {::CanvasUtils::ItemSet $wtop $id} $configOpts
+    eval {::CanvasUtils::ItemSet $w $id} $configOpts
     
     bind $wfr.icon <Double-Button-1> [list [namespace current]::Clicked $id]
 
@@ -209,15 +209,13 @@ proc ::TextImporter::Clicked {id} {
     
     variable locals
 
-    set fontSB [option get . fontSmallBold {}]
-    
     set win .ty7588[incr locals(wuid)]
     toplevel $win
     wm title $win "Plain Text Browser"
     pack [frame ${win}.f -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
     set txt "The content of the text file: $locals(name,$id)"
-    pack [label ${win}.f.la -text $txt -font $fontSB]  \
+    pack [label ${win}.f.la -text $txt -font CociSmallBoldFont]  \
       -side top -anchor w -padx 12 -pady 6
     
     # Button part.

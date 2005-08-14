@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.13 2004-07-07 13:07:14 matben Exp $
+# $Id: Example.tcl,v 1.14 2005-08-14 08:37:52 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -88,7 +88,7 @@ proc ::Example::Import {wcan optListVar args} {
     }
     set fileName $argsArr(-file)
     set locals(file) $fileName    
-    set wtop [::UI::GetToplevelNS $wcan]
+    set w [winfo toplevel $wcan]
     set errMsg ""
     if {![catch {open $locals(file) r} fd]} {
 	set locals(body) [read $fd]
@@ -109,7 +109,7 @@ proc ::Example::Import {wcan optListVar args} {
     set wbt ${wfr}.bt
     frame $wfr -bg gray50 -class ExampleFrame
     button $wbt -text {Example Plugin} -command [namespace current]::Clicked
-    pack ${wfr}.bt -padx 3 -pady 3
+    pack $wfr.bt -padx 3 -pady 3
     
     set id [$wcan create window $x $y -anchor nw -window $wfr -tags  \
       [list frame $useTag]]
@@ -120,7 +120,7 @@ proc ::Example::Import {wcan optListVar args} {
     if {[info exists optArr(-url)]} {
 	lappend configOpts -url $optArr(-url)
     }
-    eval {::CanvasUtils::ItemSet $wtop $id} $configOpts
+    eval {::CanvasUtils::ItemSet $w $id} $configOpts
 
     # We may let remote clients know our size.
     lappend optList -width [winfo reqwidth $wbt] -height [winfo reqheight $wbt]
@@ -167,8 +167,6 @@ proc ::Example::Clicked { } {
     toplevel $win
     wm title $win "Example Plugin:"
     
-    set fontSB [option get . fontSmallBold {}]
-    
     pack [frame ${win}.f -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
     if {[info exists locals(file)]} {
@@ -176,7 +174,7 @@ proc ::Example::Clicked { } {
     } else {
 	set txt "The content of the imported file: none"
     }
-    pack [label ${win}.f.la -text $txt -font $fontSB]  \
+    pack [label ${win}.f.la -text $txt -font CociSmallBoldFont]  \
       -side top -anchor w -padx 12 -pady 6
     pack [frame ${win}.f.fr] -side top -fill both -expand 1
     set wtext ${win}.f.fr.t

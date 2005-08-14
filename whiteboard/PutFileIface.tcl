@@ -6,9 +6,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: PutFileIface.tcl,v 1.5 2005-01-31 14:07:00 matben Exp $
+# $Id: PutFileIface.tcl,v 1.6 2005-08-14 08:37:52 matben Exp $
 
 package require putfile
 package require uriencode
@@ -25,7 +23,7 @@ namespace eval ::PutFileIface:: {
 # 
 #       Puts the given fileName to the specified ip address.
 
-proc ::PutFileIface::PutFile {wtop fileName ip optList} {
+proc ::PutFileIface::PutFile {w fileName ip optList} {
     global  prefs
     variable uid
     
@@ -43,7 +41,7 @@ proc ::PutFileIface::PutFile {wtop fileName ip optList} {
     variable $puttoken
     upvar 0 $puttoken putstate
 
-    set putstate(wtop)     $wtop
+    set putstate(w)        $w
     set putstate(file)     $fileName
     set putstate(filetail) [file tail $fileName]
     set putstate(mime)     $mime
@@ -93,7 +91,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
     
     Debug 2 "+\t\tPutCommand:: token=$token, what=$what msg=$msg"
 
-    set wtop $putstate(wtop)
+    set w $putstate(w)
     set str [::PutFileIface::FormatMessage $puttoken $msg]
     
     if {[string equal $what "error"]} {
@@ -109,7 +107,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 	    # The 'msg' is typically a low level error msg.
 	    switch -- $ncode {
 		320 - 321 - 323 {
-		    ::WB::SetStatusMessage $wtop $str
+		    ::WB::SetStatusMessage $w $str
 		} 
 		default {
 		    set errmsg "Failed while putting file \"$putstate(filetail)\""
@@ -117,14 +115,14 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 			::UI::MessageBox -title [mc {Put File Error}] \
 			  -type ok -message $errmsg
 		    }
-		    ::WB::SetStatusMessage $wtop $errmsg
+		    ::WB::SetStatusMessage $w $errmsg
 		}		
 	    }
 	}
 	unset putstate
     } elseif {[string equal $what "ok"]} {
-	::WB::SetStatusMessage $wtop $str
-	if {[::putfile::status $token] == "ok"} {
+	::WB::SetStatusMessage $w $str
+	if {[::putfile::status $token] eq "ok"} {
 	    ::putfile::cleanup $token
 	    unset putstate
 	}
@@ -188,7 +186,7 @@ proc ::PutFileIface::FormatMessage {puttoken msg} {
 # Results:
 #    none.
 
-proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath opts} {
+proc ::PutFileIface::PutFileToClient {w s ip relativeFilePath opts} {
     global  tclwbProtMsg this
     variable uid
     
@@ -211,7 +209,7 @@ proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath opts} {
     variable $puttoken
     upvar 0 $puttoken putstate
 
-    set putstate(wtop)     $wtop
+    set putstate(w)        $w
     set putstate(file)     $fileName
     set putstate(filetail) [file tail $fileName]
     set putstate(mime)     $mime
@@ -223,7 +221,7 @@ proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath opts} {
 	::putfile::puttoclient $s $fileName        \
 	  -mimetype $mime -optlist $optList        \
 	  -progress ::PutFileIface::PutProgress    \
-	  -command [list ::PutFileIface::PutCommand $wtop]
+	  -command [list ::PutFileIface::PutCommand $w]
     } tok]} {
 	::UI::MessageBox -title [mc {File Transfer Error}] \
 	  -type ok -message $tok
@@ -259,9 +257,9 @@ proc ::PutFileIface::CancelAll { } {
     }
 }
 
-proc ::PutFileIface::CancelAllWtop {wtop} {
+proc ::PutFileIface::CancelAllWtop {w} {
 
-    Debug 2 "+::PutFileIface::CancelAllWtop wtop=$wtop"
+    Debug 2 "+::PutFileIface::CancelAllWtop w=$w"
     
     # Close and clean up.
     set puttokenList [concat  \
@@ -272,8 +270,8 @@ proc ::PutFileIface::CancelAllWtop {wtop} {
     foreach puttoken $puttokenList {
 	upvar #0 $puttoken putstate          
 
-	if {[info exists putstate(wtop)] &&  \
-	  [string equal $putstate(wtop) $wtop]} {
+	if {[info exists putstate(w)] &&  \
+	  [string equal $putstate(w) $w]} {
 	    set tok $putstate(token)
 	    putfile::reset $tok
 	    putfile::cleanup $tok

@@ -4,7 +4,7 @@
 #       background.
 #       This is just a first sketch.
 #       
-# $Id: Notifier.tcl,v 1.2 2004-12-10 10:01:42 matben Exp $
+# $Id: Notifier.tcl,v 1.3 2005-08-14 08:37:51 matben Exp $
 
 namespace eval ::Notifier:: {
     
@@ -36,7 +36,7 @@ proc ::Notifier::InitPrefsHook { } {
 
     set jprefs(notifier,state) 0
     
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(notifier,state)  jprefs_notifier_state  $jprefs(notifier,state)]]   
 }
 

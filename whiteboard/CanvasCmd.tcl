@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.8 2005-06-05 14:54:13 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.9 2005-08-14 08:37:52 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -20,19 +20,19 @@ namespace eval ::CanvasCmd:: {
 #       Selects all items in the canvas.
 #   
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       
 # Results:
 #       none
 
-proc ::CanvasCmd::SelectAll {wtop} {
+proc ::CanvasCmd::SelectAll {w} {
     
-    set wCan [::WB::GetCanvasFromWtop $wtop]
-    $wCan delete tbbox
-    set ids [$wCan find all]
+    set wcan [::WB::GetCanvasFromWtop $w]
+    $wcan delete tbbox
+    set ids [$wcan find all]
     foreach id $ids {
-	$wCan dtag $id selected
-	::CanvasDraw::MarkBbox $wCan 1 $id
+	$wcan dtag $id selected
+	::CanvasDraw::MarkBbox $wcan 1 $id
     }
 }
 
@@ -41,19 +41,19 @@ proc ::CanvasCmd::SelectAll {wtop} {
 #       Deselects all items in the canvas.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       w           toplevel widget path
 #       
 # Results:
 #       none
 
-proc ::CanvasCmd::DeselectAll {wtop} {
+proc ::CanvasCmd::DeselectAll {w} {
 	
-    set wCan [::WB::GetCanvasFromWtop $wtop]
-    $wCan delete withtag tbbox
-    $wCan dtag all selected
+    set wcan [::WB::GetCanvasFromWtop $w]
+    $wcan delete withtag tbbox
+    $wcan dtag all selected
     
     # menus
-    ::UI::FixMenusWhenSelection $wCan
+    ::UI::FixMenusWhenSelection $wcan
 }
 
 # CanvasCmd::RaiseOrLowerItems --
@@ -61,39 +61,39 @@ proc ::CanvasCmd::DeselectAll {wtop} {
 #       Raise or lower the stacking order of the selected canvas item.
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
-#       what   "raise" or "lower"
+#       w           toplevel widget path
+#       what        "raise" or "lower"
 #       
 # Results:
 #       none.
 
-proc ::CanvasCmd::RaiseOrLowerItems {wtop {what raise}} {
+proc ::CanvasCmd::RaiseOrLowerItems {w {what raise}} {
     
-    upvar ::WB::${wtop}::state state
+    upvar ::WB::${w}::state state
     
-    set w [::WB::GetCanvasFromWtop $wtop]    
+    set wcan [::WB::GetCanvasFromWtop $w]    
 
     set cmdList {}
     set undoList {}
     
     # The items are returned in stacking order, with the lowest item first.
     # If lower we must start with the topmost, and then go downwards!
-    set selected [$w find withtag selected]
+    set selected [$wcan find withtag selected]
     if {[string equal $what "lower"]} {
 	set selected [lrevert $selected]
     }
     foreach id $selected {
-	set utag [::CanvasUtils::GetUtag $w $id]
+	set utag [::CanvasUtils::GetUtag $wcan $id]
 	lappend cmdList [list $what $utag all]
-	lappend undoList [::CanvasUtils::GetStackingCmd $w $utag]
+	lappend undoList [::CanvasUtils::GetStackingCmd $wcan $utag]
     }
     if {$state(canGridOn) && [string equal $what "lower"]} {
 	lappend cmdList [list lower grid all]
     }
-    set redo [list ::CanvasUtils::CommandList $wtop $cmdList]
-    set undo [list ::CanvasUtils::CommandList $wtop $undoList]
+    set redo [list ::CanvasUtils::CommandList $w $cmdList]
+    set undo [list ::CanvasUtils::CommandList $w $undoList]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
 }
 
 # CanvasCmd::SetCanvasBgColor --
@@ -101,27 +101,27 @@ proc ::CanvasCmd::RaiseOrLowerItems {wtop {what raise}} {
 #       Sets background color of canvas.
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       
 # Results:
 #       color dialog shown.
 
-proc ::CanvasCmd::SetCanvasBgColor {wtop} {
+proc ::CanvasCmd::SetCanvasBgColor {w} {
     global  prefs state
 	
-    set w [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     set prevCol $state(bgColCan)
     set col [tk_chooseColor -initialcolor $state(bgColCan)]
-    if {[string length $col] > 0} {
+    if {$col ne ""} {
 	
 	# The change should be triggered automatically through the trace.
 	set state(bgColCan) $col
-	set cmd [list configure -bg $col]
-	set undocmd [list configure -bg $prevCol]
-	set redo [list ::CanvasUtils::Command $wtop $cmd]
-	set undo [list ::CanvasUtils::Command $wtop $undocmd]
+	set cmd [list configure -bg $col -highlightbackground $col]
+	set undocmd [list configure -bg $prevCol -highlightbackground $prevCol]
+	set redo [list ::CanvasUtils::Command $w $cmd]
+	set undo [list ::CanvasUtils::Command $w $undocmd]
 	eval $redo
-	undo::add [::WB::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $w] $undo $redo
     }
 }
 
@@ -134,38 +134,38 @@ proc ::CanvasCmd::SetCanvasBgColor {wtop} {
 # Results:
 #       grid shown/hidden.
 
-proc ::CanvasCmd::DoCanvasGrid {wtop} {
+proc ::CanvasCmd::DoCanvasGrid {w} {
     global  prefs this
     
-    upvar ::WB::${wtop}::state state
+    upvar ::WB::${w}::state state
 
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     set length 2000
     set gridDist $prefs(gridDist)
     if {$state(canGridOn) == 0} {
-	$wCan delete grid
+	$wcan delete grid
 	return
     }
-    if {$this(platform) == "windows"} {
+    if {$this(platform) eq "windows"} {
 	for {set x $gridDist} {$x <= $length} {set x [expr $x + $gridDist]} {
-	    $wCan create line $x 0 $x $length  \
+	    $wcan create line $x 0 $x $length  \
 	      -width 1 -fill gray50 -tags {notactive grid}
 	}
 	for {set y $gridDist} {$y <= $length} {set y [expr $y + $gridDist]} {
-	    $wCan create line 0 $y $length $y  \
+	    $wcan create line 0 $y $length $y  \
 	      -width 1 -fill gray50 -tags {notactive grid}
 	}
     } else {
 	for {set x $gridDist} {$x <= $length} {set x [expr $x + $gridDist]} {
-	    $wCan create line $x 0 $x $length  \
+	    $wcan create line $x 0 $x $length  \
 	      -width 1 -fill gray50 -tags {notactive grid} -stipple gray50
 	}
 	for {set y $gridDist} {$y <= $length} {set y [expr $y + $gridDist]} {
-	    $wCan create line 0 $y $length $y  \
+	    $wcan create line 0 $y $length $y  \
 	      -width 1 -fill gray50 -tags {notactive grid} -stipple gray50
 	}
     }
-    $wCan lower grid
+    $wcan lower grid
 }
 
 # CanvasCmd::ResizeItem --
@@ -174,22 +174,22 @@ proc ::CanvasCmd::DoCanvasGrid {wtop} {
 #       Not all item types are rescaled. 
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
-#       factor   a numerical factor to scale with.
+#       w           toplevel widget path
+#       factor      a numerical factor to scale with.
 #       
 # Results:
 #       item resized, propagated to clients.
 
-proc ::CanvasCmd::ResizeItem {wtop factor} {
+proc ::CanvasCmd::ResizeItem {w factor} {
     global  prefs
 	
-    set w [::WB::GetCanvasFromWtop $wtop]
-    set ids [$w find withtag selected]
+    set wcan [::WB::GetCanvasFromWtop $w]
+    set ids [$wcan find withtag selected]
     if {[string length $ids] == 0} {
 	return
     }
     if {$prefs(scaleCommonCG)} {
-	set bbox [eval $w bbox $ids]
+	set bbox [eval $wcan bbox $ids]
 	set cgx [expr ([lindex $bbox 0] + [lindex $bbox 2])/2.0]
 	set cgy [expr ([lindex $bbox 1] + [lindex $bbox 3])/2.0]
     }
@@ -197,36 +197,35 @@ proc ::CanvasCmd::ResizeItem {wtop factor} {
     set undoList {}
     set invfactor [expr 1.0/$factor]
     foreach id $ids {
-	set utag [::CanvasUtils::GetUtag $w $id]
-	if {[string length $utag] == 0} {
+	set utag [::CanvasUtils::GetUtag $wcan $id]
+	if {$utag eq ""} {
 	    continue
 	}	
 
 	# Sort out the nonrescalable ones.
-	set theType [$w type $id]
-	if {[string equal $theType "text"] ||   \
-	  [string equal $theType "image"] ||    \
-	  [string equal $theType "window"]} {
+	set type [$wcan type $id]
+	if {[string equal $type "text"] ||   \
+	  [string equal $type "image"] ||    \
+	  [string equal $type "window"]} {
 	    continue
 	}
 	if {!$prefs(scaleCommonCG)} {
-	    foreach {left top right bottom} [$w bbox $id] break
+	    foreach {left top right bottom} [$wcan bbox $id] break
 	    set cgx [expr ($left + $right)/2.0]
 	    set cgy [expr ($top + $bottom)/2.0]
 	}
 	lappend cmdList [list scale $utag $cgx $cgy $factor $factor]
 	lappend undoList [list scale $utag $cgx $cgy $invfactor $invfactor]
     }    
-    set redo [list ::CanvasUtils::CommandList $wtop $cmdList]
-    set undo [list ::CanvasUtils::CommandList $wtop $undoList]
+    set redo [list ::CanvasUtils::CommandList $w $cmdList]
+    set undo [list ::CanvasUtils::CommandList $w $undoList]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
     
     # New markers.
     foreach id $ids {
-	$w delete id$id
-	$w dtag $id selected
-	::CanvasDraw::MarkBbox $w 1 $id
+	::CanvasDraw::DeleteSelection $wcan $id
+	::CanvasDraw::MarkBbox $wcan 1 $id
     }
 }
 
@@ -234,24 +233,24 @@ proc ::CanvasCmd::ResizeItem {wtop factor} {
 #
 #
 
-proc ::CanvasCmd::FlipItem {wtop direction} {
+proc ::CanvasCmd::FlipItem {w direction} {
 	
-    set w [::WB::GetCanvasFromWtop $wtop]
-    set id [$w find withtag selected]
+    set wcan [::WB::GetCanvasFromWtop $w]
+    set id [$wcan find withtag selected]
     if {[llength $id] != 1} {
 	return
     }
-    set theType [$w type $id]
+    set theType [$wcan type $id]
     if {![string equal $theType "line"] &&  \
       ![string equal $theType "polygon"]} {
 	return
     }
-    set utag [::CanvasUtils::GetUtag $w $id]
-    foreach {left top right bottom} [$w bbox $id] break
+    set utag [::CanvasUtils::GetUtag $wcan $id]
+    foreach {left top right bottom} [$wcan bbox $id] break
     set xmid [expr ($left + $right)/2]
     set ymid [expr ($top + $bottom)/2]
     set flipco {}
-    set coords [$w coords $id]
+    set coords [$wcan coords $id]
     if {[string equal $direction "horizontal"]} {
 	foreach {x y} $coords {
 	    lappend flipco [expr 2*$xmid - $x] $y
@@ -261,41 +260,41 @@ proc ::CanvasCmd::FlipItem {wtop direction} {
 	    lappend flipco $x [expr 2*$ymid - $y]
 	}	
     }
-    set cmd "coords $utag $flipco"
-    set undocmd "coords $utag $coords"    
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+    set cmd [concat coords $utag $flipco]
+    set undocmd [concat coords $utag $coords]
+    set redo [list ::CanvasUtils::Command $w $cmd]
+    set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
 	
     # New markers.
-    $w delete id$id
-    ::CanvasDraw::MarkBbox $w 1 $id
+    ::CanvasDraw::DeleteSelection $wcan $id
+    ::CanvasDraw::MarkBbox $wcan 1 $id
 }
 
 # CanvasCmd::Undo --
 #
 #       The undo command.
 
-proc ::CanvasCmd::Undo {wtop} {
+proc ::CanvasCmd::Undo {w} {
     
     # Make the text stuff in sync.
-    set wCan [::WB::GetCanvasFromWtop $wtop]
-    ::CanvasText::EvalBufferedText $wCan
+    set wcan [::WB::GetCanvasFromWtop $w]
+    ::CanvasText::EvalBufferedText $wcan
     
     # The actual undo command.
-    undo::undo [::WB::GetUndoToken $wtop]
+    undo::undo [::WB::GetUndoToken $w]
     
-    ::CanvasDraw::SyncMarks $wtop
+    ::CanvasDraw::SyncMarks $w
 }
 
 # CanvasCmd::Redo --
 #
 #       The redo command.
 
-proc ::CanvasCmd::Redo {wtop} {
+proc ::CanvasCmd::Redo {w} {
     
-    undo::redo [::WB::GetUndoToken $wtop]
+    undo::redo [::WB::GetUndoToken $w]
 }
 
 # CanvasCmd::DoEraseAll --
@@ -303,7 +302,7 @@ proc ::CanvasCmd::Redo {wtop} {
 #       Erases all items in canvas except for grids. Deselects all items.
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       where    "all": erase this canvas and all others.
 #                "remote": erase only client canvases.
 #                "local": erase only own canvas.
@@ -311,18 +310,18 @@ proc ::CanvasCmd::Redo {wtop} {
 # Results:
 #       all items deleted, propagated to all clients.
 
-proc ::CanvasCmd::DoEraseAll {wtop {where all}} {
+proc ::CanvasCmd::DoEraseAll {w {where all}} {
 	
-    set wCan [::WB::GetCanvasFromWtop $wtop]
-    ::CanvasCmd::DeselectAll $wtop
-    ::CanvasDraw::DeleteIds $wCan [$wCan find all] $where
+    set wcan [::WB::GetCanvasFromWtop $w]
+    DeselectAll $w
+    ::CanvasDraw::DeleteIds $wcan [$wcan find all] $where
 }
 
-proc ::CanvasCmd::EraseAll {wtop} {
+proc ::CanvasCmd::EraseAll {w} {
 	
-    set wCan [::WB::GetCanvasFromWtop $wtop]
-    foreach id [$wCan find all] {
-	$wCan delete $id
+    set wcan [::WB::GetCanvasFromWtop $w]
+    foreach id [$wcan find all] {
+	$wcan delete $id
     }
 }
 
@@ -331,26 +330,26 @@ proc ::CanvasCmd::EraseAll {wtop} {
 #       Erases all client canvases, transfers this canvas to all clients.
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       
 # Results:
 #       all items deleted, propagated to all clients.
 
-proc ::CanvasCmd::DoPutCanvasDlg {wtop} {
+proc ::CanvasCmd::DoPutCanvasDlg {w} {
 	
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     set ans [::UI::MessageBox -message  \
       "Warning! Syncing this canvas first erases all client canvases." \
       -icon warning -type okcancel -default ok]
-    if {$ans != "ok"} {
+    if {$ans ne "ok"} {
 	return
     }
     
     # Erase all other client canvases.
-    DoEraseAll $wtop remote
+    DoEraseAll $w remote
 
     # Put this canvas to all others.
-    ::CanvasCmd::DoPutCanvas $wCan all
+    ::CanvasCmd::DoPutCanvas $wcan all
 }
     
 # CanvasCmd::DoPutCanvas --
@@ -360,17 +359,17 @@ proc ::CanvasCmd::DoPutCanvasDlg {wtop} {
 #       If 'toIPnum' then put canvas 'w' only to that ip number.
 #       
 # Arguments:
-#       w        the canvas.
+#       wcan     the canvas.
 #       toIPnum  if ip number given, then put canvas 'w' only to that ip number.
 #                else put to all clients.
 #       
 # Results:
 #       .
 
-proc ::CanvasCmd::DoPutCanvas {w {toIPnum all}} {
+proc ::CanvasCmd::DoPutCanvas {wcan {toIPnum all}} {
     global  this
 
-    Debug 2 "::CanvasCmd::DoPutCanvas w=$w, toIPnum=$toIPnum"
+    Debug 2 "::CanvasCmd::DoPutCanvas wcan=$wcan, toIPnum=$toIPnum"
 
     set tmpFile ".tmp[clock seconds].can"
     set absFilePath [file join $this(tmpPath) $tmpFile]
@@ -381,7 +380,7 @@ proc ::CanvasCmd::DoPutCanvas {w {toIPnum all}} {
 	  -icon error -type ok
     }
     fconfigure $fileId -encoding utf-8
-    ::CanvasFile::CanvasToFile $w $fileId $absFilePath
+    ::CanvasFile::CanvasToFile $wcan $fileId $absFilePath
     catch {close $fileId}
 
     if {[catch {open $absFilePath r} fileId]} {
@@ -391,10 +390,10 @@ proc ::CanvasCmd::DoPutCanvas {w {toIPnum all}} {
     fconfigure $fileId -encoding utf-8
     
     # Distribute to all other client canvases.
-    if {$toIPnum == "all"} {
-	::CanvasFile::FileToCanvas $w $fileId $absFilePath -where remote
+    if {$toIPnum eq "all"} {
+	::CanvasFile::FileToCanvas $wcan $fileId $absFilePath -where remote
     } else {
-	::CanvasFile::FileToCanvas $w $fileId $absFilePath -where $toIPnum
+	::CanvasFile::FileToCanvas $wcan $fileId $absFilePath -where $toIPnum
     }
     catch {close $fileId}
 
@@ -407,26 +406,26 @@ proc ::CanvasCmd::DoPutCanvas {w {toIPnum all}} {
 #       .
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       
 # Results:
 #       .
 
-proc ::CanvasCmd::DoGetCanvas {wtop} {
+proc ::CanvasCmd::DoGetCanvas {w} {
     
     # The dialog to select remote client.
     set getCanIPNum [::Dialogs::GetCanvas .getcan]
     Debug 2 "DoGetCanvas:: getCanIPNum=$getCanIPNum"
 
-    if {$getCanIPNum == ""} {
+    if {$getCanIPNum eq ""} {
 	return
     }    
     
     # Erase everything in own canvas.
-    DoEraseAll $wtop local
+    DoEraseAll $w local
     
     # GET CANVAS.
-    ::WB::SendGenMessageList $wtop [list "GET CANVAS:"] -ips $getCanIPNum
+    ::WB::SendGenMessageList $w [list "GET CANVAS:"] -ips $getCanIPNum
 }
 
 # CanvasCmd::DoSendCanvas --
@@ -436,13 +435,13 @@ proc ::CanvasCmd::DoGetCanvas {wtop} {
 #       Needed because jabber should get everything in single batch.
 #       Lets remote client get binary entities (images ...) via http.
 
-proc ::CanvasCmd::DoSendCanvas {wtop} {
+proc ::CanvasCmd::DoSendCanvas {w} {
     
-    set w [::WB::GetCanvasFromWtop $wtop]
-    set cmdList [::CanvasUtils::GetCompleteCanvas $w]
+    set wcan [::WB::GetCanvasFromWtop $w]
+    set cmdList [::CanvasUtils::GetCompleteCanvas $wcan]
         
     # Just invoke the send message hook.
-    ::WB::SendMessageList $wtop $cmdList -force 1
+    ::WB::SendMessageList $w $cmdList -force 1
 }
 
 #-------------------------------------------------------------------------------
