@@ -89,6 +89,8 @@
 ::msgcat::mcset nl Never		{Nooit}
 ::msgcat::mcset nl New			{Nieuw}
 ::msgcat::mcset nl Next			{Volgende}
+# ::msgcat::mcset nl Nick {}
+# ::msgcat::mcset nl Nickname {}
 ::msgcat::mcset nl No			{Nee}
 ::msgcat::mcset nl no			{nee}
 ::msgcat::mcset nl None			{Geen}
@@ -117,6 +119,7 @@
 ::msgcat::mcset nl Progress		{Vooruitgang}
 ::msgcat::mcset nl Quit?		{Afsluiten?}
 ::msgcat::mcset nl Quote		{Quoteren}
+# ::msgcat::mcset nl Reason {}
 ::msgcat::mcset nl Register		{Registreren}
 ::msgcat::mcset nl Remaining		{Resterend}
 ::msgcat::mcset nl Remove		{Verwijderen}
@@ -131,6 +134,7 @@
 ::msgcat::mcset nl Send			{Verzenden}
 ::msgcat::mcset nl Server		{Server}
 ::msgcat::mcset nl Servers		{Servers}
+# ::msgcat::mcset nl Service {}
 ::msgcat::mcset nl Set			{Instellen}
 ::msgcat::mcset nl Settings		{Instellingen}
 ::msgcat::mcset nl Shortcut		{Snelkoppeling}
@@ -335,6 +339,9 @@
 ::msgcat::mcset nl mLoginTrpt     	{Transport aanmelden}
 ::msgcat::mcset nl mLogoutTrpt     	{Transport afmelden}
 ::msgcat::mcset nl mRemoveContact  	{Contactpersoon verwijderen...}
+# ::msgcat::mcset nl mShow Show
+# ::msgcat::mcset nl mOffline Offline
+# ::msgcat::mcset nl mTransports Transports
 
 
 
@@ -376,6 +383,7 @@
 ::msgcat::mcset nl {Create Room}		{Kamer aanmaken}
 ::msgcat::mcset nl {Default group}		{Standaard groep}
 ::msgcat::mcset nl {Default Logout Status}	{Standaard afmeldstatus}
+# ::msgcat::mcset nl {Default status descriptions} {}
 ::msgcat::mcset nl {Delete Rule}		{Regel verwijderen}
 ::msgcat::mcset nl {Disk Cache}			{Schijfcache}
 ::msgcat::mcset nl {Different Passwords}        {Verschillende wachtwoorden}
@@ -408,9 +416,11 @@
 ::msgcat::mcset nl {Get File Error}		{Bestandsfout ophalen}
 ::msgcat::mcset nl {Get vCard}			{vCard ophalen}
 ::msgcat::mcset nl {Getting available rooms...} {De beschikbare kamers worden opgezocht...}
-::msgcat::mcset nl {Group chat in room}		{Groepsgesprek in kamer}
+::msgcat::mcset nl {Groupchat in room}		{Groepsgesprek in kamer}
+# ::msgcat::mcset nl {Groupchat presence change} {}
 ::msgcat::mcset nl {Groupchat-1.0 (fallback)}	{Groupchat-1.0 (terugvalling)}
 ::msgcat::mcset nl {Handled By}			{Behandeld door}
+# ::msgcat::mcset nl {History length} {}
 ::msgcat::mcset nl {Host name}			{Hostnaam}
 ::msgcat::mcset nl {HTTP port}			{HTTP poort}
 ::msgcat::mcset nl {Import using}		{Importeer gebruik makend van}
@@ -419,6 +429,7 @@
 ::msgcat::mcset nl {Incoming Messages}		{Inkomende berichten}
 ::msgcat::mcset nl {Incoming Presence}		{Inkomende status}
 ::msgcat::mcset nl {Inspect Associations}	{Associaties inspecteren}
+# ::msgcat::mcset nl {Invite User} {}
 ::msgcat::mcset nl {IP address}			{IP-adres}
 ::msgcat::mcset nl {Is connected}		{Is verbonden}
 ::msgcat::mcset nl {Is safe}			{Is veilig}
@@ -427,8 +438,8 @@
 ::msgcat::mcset nl {Jabber Client}		{Jabberclient}
 ::msgcat::mcset nl {Jabber Server}		{Jabberserver}
 ::msgcat::mcset nl {Jabber server port}		{Jabberserver poort}
-::msgcat::mcset nl {Jabber user id}		{Jabber gebruikers id}
-::msgcat::mcset nl {Jabber Id}			{Jabber Id}
+::msgcat::mcset nl {Jabber user ID}		{Jabber gebruikers ID}
+::msgcat::mcset nl {Jabber ID}			{Jabber ID}
 ::msgcat::mcset nl {JID to block}		{JID om te blokkeren}
 ::msgcat::mcset nl {Last Activity}		{Laatste activiteit}
 ::msgcat::mcset nl {Last name}			{Achternaam}
@@ -461,6 +472,7 @@
 ::msgcat::mcset nl {NAT Address}		{NAT adres}
 ::msgcat::mcset nl {Nick name}			{Bijnaam}
 ::msgcat::mcset nl {No Address}			{Geen adres}
+# ::msgcat::mcset nl {No Available} {}
 ::msgcat::mcset nl {No Inbox}			{Geen Postvak in}
 ::msgcat::mcset nl {No Printing}		{Geen printfunctie}
 ::msgcat::mcset nl {Not Available}		{Niet beschikbaar}
@@ -542,7 +554,7 @@
 ::msgcat::mcset nl {This IP number}		{Dit IP nummer}
 ::msgcat::mcset nl {Thread started}		{Draad gestart}
 ::msgcat::mcset nl {To/from JID}		{Naar/van JID}
-::msgcat::mcset nl {To Jabber id}		{Naar Jabber id}
+::msgcat::mcset nl {To Jabber ID}		{Naar Jabber ID}
 ::msgcat::mcset nl {To Send or Not}		{Wel of niet verzenden}
 ::msgcat::mcset nl {Type of File}		{Bestandstype}
 ::msgcat::mcset nl {Unknown: Prompt user}	{Onbekend: vraag gebruiker}
@@ -663,6 +675,10 @@
 ::msgcat::mcset nl jamessaddrmiss	{U moet minstens één geldig adres invullen}
 ::msgcat::mcset nl jamesschatclose	{Als u dit venster sluit, dan verliest u ook de volledige conversatie. Wilt u het werkelijk sluiten?}
 ::msgcat::mcset nl jamessnogroupchat	{Er is geen dienst herkend voor groepsgesprekken}
+#--- translate
+::msgcat::mcset nl jamessgcnoroomname   {You must provide a roomname.}
+::msgcat::mcset nl jamessgcnoroomnick   {You must provide a nickname.}
+#--- translate
 ::msgcat::mcset nl jamessinroommiss	{Het is verplicht dat alle velden ingevuld zijn voordat u een kamer betreedt}
 ::msgcat::mcset nl jamesswarnexitroom	{Wilt u werkelijk kamer "%s" verlaten?}
 ::msgcat::mcset nl jamesserrbrowse	{Er is een fout opgetreden tijdens het browsen naar "%s": %s}
@@ -895,6 +911,15 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jauserinnote {Uw persoonlijke opmerkingen over deze gebruiker kunt u hier bewaren}
 ::msgcat::mcset nl jaregisterex {Voer de naam van de Jabber-server in waarop u een account wilt aanmaken. Druk vervolgens op de knop "Ophalen" om de gewenste registratiegegevens af te halen. Voer de nodige gegevens in en registreer.}
 ::msgcat::mcset nl jaloginjid   {Voer uw JID in, in de vorm "joey@myjabb.org" of kies een profiel. U beschikt normaal al over een account op deze server.}
+
+#--- Translate ---
+::msgcat::mcset nl jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
+::msgcat::mcset nl jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+::msgcat::mcset nl jaxformreq   {Labels with (*) are required}
+::msgcat::mcset nl jaregalready {You are already registered with this service. These are your current settings of your registration parameters.}
+::msgcat::mcset nl jaactiveret {If checked Return sends message else use Ctrl/Cmd-Return}
+::msgcat::mcset nl jainvitegchat {Invite a user for groupchat in room %s}
+#--- Translate ---
 
 
 # Setup assistant:
