@@ -100,6 +100,7 @@
 ::msgcat::mcset en Options
 ::msgcat::mcset en Participants
 ::msgcat::mcset en Password
+::msgcat::mcset en Pause
 ::msgcat::mcset en Pick
 ::msgcat::mcset en Phone
 ::msgcat::mcset en Play
@@ -121,6 +122,7 @@
 ::msgcat::mcset en Remove
 ::msgcat::mcset en Reply
 ::msgcat::mcset en Resource
+::msgcat::mcset en Restart
 ::msgcat::mcset en Room
 ::msgcat::mcset en Roster
 ::msgcat::mcset en Save

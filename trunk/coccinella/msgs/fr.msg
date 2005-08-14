@@ -102,6 +102,7 @@
 ::msgcat::mcset fr Options		{Options}
 ::msgcat::mcset fr Participants		{Participants}
 ::msgcat::mcset fr Password		{Mot de passe}
+# ::msgcat::mcset fr Pause
 ::msgcat::mcset fr Pick			{Choisir}
 ::msgcat::mcset fr Phone		{Téléphone}
 ::msgcat::mcset fr Play			{Jouer}
@@ -123,6 +124,7 @@
 ::msgcat::mcset fr Remove		{Enlever}
 ::msgcat::mcset fr Reply		{Répondre}
 ::msgcat::mcset fr Resource		{Ressources}
+# ::msgcat::mcset fr Restart
 ::msgcat::mcset fr Room			{Salon}
 ::msgcat::mcset fr Roster		{Contacts}
 ::msgcat::mcset fr Save			{Enregistrer}
