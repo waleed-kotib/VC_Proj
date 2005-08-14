@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.40 2005-06-20 13:55:29 matben Exp $
+# $Id: Profiles.tcl,v 1.41 2005-08-14 07:10:51 matben Exp $
 
 package provide Profiles 1.0
 
@@ -18,11 +18,20 @@ namespace eval ::Profiles:: {
     ::hooks::register prefsCancelHook        ::Profiles::CancelHook
     ::hooks::register prefsUserDefaultsHook  ::Profiles::UserDefaultsHook
     
-    ::hooks::register initHook               ::Profiles::ImportIfNecessary
-    ::hooks::register closeWindowHook        ::Profiles::CloseDlgHook
+    #::hooks::register initHook               ::Profiles::ImportIfNecessary
     
+    option add *JProfiles*TLabel.style        Small.TLabel        widgetDefault
+    #option add *JProfiles*TLabelframe.style   Small.TLabelframe   widgetDefault
+    option add *JProfiles*TButton.style       Small.TButton       widgetDefault
+    option add *JProfiles*TMenubutton.style   Small.TMenubutton   widgetDefault
+    option add *JProfiles*TRadiobutton.style  Small.TRadiobutton  widgetDefault
+    option add *JProfiles*TCheckbutton.style  Small.TCheckbutton  widgetDefault
+    option add *JProfiles*TEntry.style        Small.TEntry        widgetDefault
+    option add *JProfiles*TScale.style        Small.Horizontal.TScale        widgetDefault
+    option add *JProfiles*TNotebook.Tab.style  Small.Tab   widgetDefault
+
     # Internal storage:
-    #   {name1 {server1 username1 password1 ?-key value ...?} \
+    #   {name1 {server1 username1 password1 ?-key value ...?}
     #    name2 {server2 username2 password2 ?-key value ...?} ... }
     variable profiles
     
@@ -39,15 +48,42 @@ proc ::Profiles::InitHook { } {
     set profiles {jabber.org {jabber.org myUsername myPassword}}
     set selected [lindex $profiles 0]
 
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Profiles::profiles   profiles          $profiles   userDefault] \
       [list ::Profiles::selected   selected_profile  $selected   userDefault]]
     
+    # Sanity check.
+    SanityCheck
+}
+
+# Profiles::SanityCheck --
+# 
+#       Make sure we have got the correct form:
+#          {name1 {server1 username1 password1 ?-key value ...?}
+#           name2 {server2 username2 password2 ?-key value ...?} ... }
+
+
+proc ::Profiles::SanityCheck { } {
+    variable profiles
+    variable selected
+
     # Verify that 'selected' exists in 'profiles'.
     set all [GetAllNames]
     if {[lsearch -exact $all $selected] < 0} {
 	set selected [lindex $all 0]
     }
+    array set arr $profiles
+    foreach {name spec} $profiles {
+	# Incomplete
+	if {[llength $spec] < 3} {
+	    unset -nocomplain arr($name)
+	}
+	# Odd number opts are corrupt. Skip these.
+	if {[expr {[llength [lrange $spec 3 end]] % 2}] == 1} {
+	    set arr($name) [lrange $spec 0 2]
+	}
+    }
+    set profiles [array get arr]
 }
 
 # Profiles::Set --
@@ -139,7 +175,7 @@ proc ::Profiles::FindProfileNameFromJID {jid} {
     if {[regexp {(^.+)@([^/]+)(/(.*))?} $jid m username server x resource]} {    
 	foreach {prof spec} $profiles {
 	    
-	    foreach {serv user pass} $spec break
+	    lassign $spec serv user pass
 	    unset -nocomplain opts
 	    set opts(-resource) ""
 	    array set opts [lrange $spec 3 end]
@@ -286,7 +322,7 @@ proc ::Profiles::ImportFromJserver { } {
     #  
     set profiles {}
     foreach {name spec} $jserver(profile) {
-	foreach {se us pa re} $spec break
+	lassign $spec se us pa re
 	set plist [list $se $us $pa]
 	if {$re != ""} {
 	    lappend plist -resource $re
@@ -300,8 +336,7 @@ proc ::Profiles::ImportFromJserver { } {
 
 proc ::Profiles::BuildHook {wtree nbframe} {
     
-    $wtree newitem {Jabber {User Profiles}}  \
-      -text [mc {User Profiles}]
+    $wtree newitem {Jabber {User Profiles}} -text [mc {User Profiles}]
 
     set wpage [$nbframe page {User Profiles}]    
     BuildPage $wpage
@@ -325,24 +360,6 @@ proc ::Profiles::BuildPage {page} {
     variable tmpSelected
     variable wpage $page
     
-    set fontS  [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
-    set contrastBg [option get . backgroundLightContrast {}]
-
-    set lfr $page.fr
-    labelframe $lfr -text [mc {User Profiles}]
-    pack $lfr -side top -anchor w -padx 8 -pady 4
-    
-    label $lfr.msg -text [mc prefprof] -wraplength 200 -justify left
-    pack  $lfr.msg -side top -anchor w -fill x
-    
-    # Need to pack options here to get the complete bottom slice.
-    set  popt [frame $lfr.fropt -bd 1 -relief flat -bg $contrastBg]
-    pack $popt -padx 10 -pady 6 -side bottom -fill x -expand 1
-
-    set pui $lfr.fr
-    pack [frame $pui] -side left  
-        
     # Make temp array for servers. Be sure they are sorted first.
     SortProfileList
     MakeTmpProfArr
@@ -355,52 +372,77 @@ proc ::Profiles::BuildPage {page} {
     set password $tmpProfArr($profile,password)
     
     set allNames [GetAllNames]
-
-    # Option menu for the servers.
-    label $pui.lpop -text "[mc Profile]:" -anchor e
     
-    set wmenubt $pui.popup
-    set wmenu [eval {tk_optionMenu $wmenubt [namespace current]::profile} \
-      $allNames]
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+    
+    set wp $wc.p
+    ttk::labelframe $wp -text [mc {User Profiles}] \
+      -padding [option get . groupSmallPadding {}]
+    pack  $wp  -side top -fill x
+    
+    ttk::label $wp.msg -text [mc prefprof] -wraplength 200 -justify left
+    pack $wp.msg -side top -anchor w -fill x
+    
+    # Need to pack options here to get the complete bottom slice.
+    set wopt $wp.fopt
+    ttk::frame $wopt
+    pack  $wopt  -side bottom -fill x -expand 1
+
+    set wui $wp.u
+    ttk::frame $wui
+    pack  $wui  -side left
+
+    ttk::label $wui.lpop -text "[mc Profile]:" -anchor e
+    
+    set wmenu [eval {
+	ttk::optionmenu $wui.pop [namespace current]::profile
+    } $allNames]
     trace variable [namespace current]::profile w  \
       [namespace current]::TraceProfile
-
-    grid $pui.lpop -column 0 -row 0 -sticky e
-    grid $wmenubt -column 1 -row 0 -sticky ew
     
-    label $pui.lserv -text "[mc {Jabber Server}]:" -anchor e
-    entry $pui.eserv -width 22   \
+    ttk::label $wui.lserv -text "[mc {Jabber Server}]:" -anchor e
+    ttk::entry $wui.eserv -font CociSmallFont \
+      -width 22   \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
-    label $pui.luser -text "[mc Username]:" -anchor e
-    entry $pui.euser -width 22  \
+    ttk::label $wui.luser -text "[mc Username]:" -anchor e
+    ttk::entry $wui.euser -font CociSmallFont \
+      -width 22  \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStr %S}
-    label $pui.lpass -text "[mc Password]:" -anchor e
-    entry $pui.epass -width 22 -show {*}  \
+    ttk::label $wui.lpass -text "[mc Password]:" -anchor e
+    ttk::entry $wui.epass -font CociSmallFont \
+      -width 22 -show {*}  \
       -textvariable [namespace current]::password -validate key  \
-      -validatecommand {::Jabber::ValidatePasswdChars %S}
-    label $pui.lres -text "[mc Resource]:" -anchor e
-    entry $pui.eres -width 22   \
+      -validatecommand {::Jabber::ValidatePasswordStr %S}
+    ttk::label $wui.lres -text "[mc Resource]:" -anchor e
+    ttk::entry $wui.eres -font CociSmallFont \
+      -width 22   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateResourceStr %S}
-    set wuserinfofocus $pui.eserv
 
-    grid $pui.lserv $pui.eserv
-    grid $pui.luser $pui.euser
-    grid $pui.lpass $pui.epass
-    grid $pui.lres  $pui.eres
-    grid $pui.lserv $pui.luser $pui.lpass $pui.lres -sticky e
-    grid $pui.eserv $pui.euser $pui.epass $pui.eres -sticky w
+    grid  $wui.lpop   $wui.pop    -sticky e -pady 2
+    grid  $wui.lserv  $wui.eserv  -sticky e -pady 2
+    grid  $wui.luser  $wui.euser  -sticky e -pady 2
+    grid  $wui.lpass  $wui.epass  -sticky e -pady 2
+    grid  $wui.lres   $wui.eres   -sticky e -pady 2
     
-    set  puibt [frame $lfr.frbt]
-    pack $puibt -padx 8 -pady 6 -side right -fill y
-    pack [button $puibt.new -font $fontS -text [mc New]  \
-      -command [namespace current]::NewCmd]   \
-      -side top -fill x -pady 4
-    pack [button $puibt.del -font $fontS -text [mc Delete]  \
-      -command [namespace current]::DeleteCmd]   \
-      -side top -fill x -pady 4
+    grid  $wui.pop  $wui.eserv  $wui.euser  $wui.epass  $wui.eres  -sticky ew
+    
+    set wuserinfofocus $wui.eserv
+        
+    set wbt $wp.bt 
+    ttk::frame $wbt -padding {6 0 0 0}
+    pack  $wbt  -side right -fill y
+    
+    ttk::button $wbt.new -text [mc New] \
+      -command [namespace current]::NewCmd
+    ttk::button $wbt.del -text [mc Delete] \
+      -command [namespace current]::DeleteCmd
+
+    pack  $wbt.new  $wbt.del  -side top -fill x -pady 4
 
     # We use an array for "more" options.
     set token [namespace current]::moreOpts
@@ -420,7 +462,7 @@ proc ::Profiles::BuildPage {page} {
     }
 
     # Tabbed notebook for more options.
-    set wtabnb $popt.nb
+    set wtabnb $wopt.nb
     NotebookOptionWidget $wtabnb $token
     pack $wtabnb -fill x
     
@@ -428,13 +470,13 @@ proc ::Profiles::BuildPage {page} {
     SetCurrentFromTmp $tmpSelected
 
     # This allows us to clean up some things when we go away.
-    bind $lfr <Destroy> [list [namespace current]::DestroyHandler]
+    bind $wc <Destroy> [list [namespace current]::DestroyHandler]
 
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
 	%s.msg configure -wraplength [expr [winfo reqwidth %s] - 20]
-    } $lfr $lfr]    
+    } $wp $wp]    
     after idle $script
 }
 
@@ -444,60 +486,74 @@ proc ::Profiles::BuildPage {page} {
 #       Can be used elsewhere as well.
 
 proc ::Profiles::NotebookOptionWidget {w token} {
-    global  prefs
+    global  prefs this
     variable $token
     upvar 0 $token state
     variable defaultOptionsArr
     
     Debug 2 "::Profiles::NotebookOptionWidget"
     
-    set fontS  [option get . fontSmall {}]
-
     # Tabbed notebook for more options.
-    ::mactabnotebook::mactabnotebook $w
+    ttk::notebook $w -style Small.TNotebook -padding {4}
 
     # Login options.
-    set wpage [$w newpage {Login} -text [mc {Login}]]
-    set pagelog $wpage.f
-    pack [frame $pagelog] -side top -anchor w -padx 6 -pady 4
-    checkbutton $pagelog.cdig -text " [mc {Scramble password}]"  \
+    $w add [ttk::frame $w.log] -text [mc {Login}] -sticky news
+
+    set wlog $w.log.f
+    ttk::frame $wlog -padding [option get . notebookPageSmallPadding {}]
+    pack  $wlog  -side top -anchor [option get . dialogAnchor {}]
+
+    ttk::checkbutton $wlog.cdig -style Small.TCheckbutton \
+      -text [mc {Scramble password}]  \
       -variable $token\(digest)
-    label $pagelog.lp -text "[mc {Priority}]:"
-    spinbox $pagelog.sp -textvariable $token\(priority) \
+    ttk::label $wlog.lp -style Small.TLabel \
+      -text "[mc {Priority}]:"
+    spinbox $wlog.sp -font CociSmallFont \
+      -textvariable $token\(priority) \
       -width 5 -state readonly -increment 1 -from 0 -to 127
-    checkbutton $pagelog.cinv  \
-      -text " [mc {Login as invisible}]"  \
+    ttk::checkbutton $wlog.cinv -style Small.TCheckbutton \
+      -text [mc {Login as invisible}]  \
       -variable $token\(invisible)
-    grid $pagelog.cdig   - -sticky w
-    grid $pagelog.cinv   - -sticky w
-    grid $pagelog.lp     $pagelog.sp
+    
+    grid  $wlog.cdig   -          -sticky w
+    grid  $wlog.cinv   -          -sticky w
+    grid  $wlog.lp     $wlog.sp
     
     # Connection page.
-    set wpage [$w newpage {Connection} -text [mc {Connection}]] 
-    set pageconn $wpage.f
-    pack [frame $pageconn] -side top -anchor w -padx 6 -pady 4
-    label $pageconn.lip   -text "[mc {IP address}]:"
-    entry $pageconn.eip   -textvariable $token\(ip)
-    label $pageconn.lport -text "[mc Port]:"
-    entry $pageconn.eport -textvariable $token\(port) -width 6
-    checkbutton $pageconn.cssl -text " [mc {Use SSL for security}]" \
+    $w add [ttk::frame $w.con] -text [mc {Connection}] -sticky news
+
+    set wcon $w.con.f
+    ttk::frame $wcon -padding [option get . notebookPageSmallPadding {}]
+    pack  $wcon  -side top -anchor [option get . dialogAnchor {}]
+
+    ttk::label $wcon.lip -style Small.TLabel \
+      -text "[mc {IP address}]:"
+    ttk::entry $wcon.eip -font CociSmallFont \
+      -textvariable $token\(ip)
+    ttk::label $wcon.lport -style Small.TLabel \
+      -text "[mc Port]:"
+    ttk::entry $wcon.eport -font CociSmallFont \
+      -textvariable $token\(port) -width 6 -validate key  \
+      -validatecommand {::Register::ValidatePortNumber %S}
+    ttk::checkbutton $wcon.cssl -style Small.TCheckbutton \
+      -text [mc {Use SSL for security}] \
       -variable $token\(ssl)   
-    if {!$prefs(tls)} {
-	$pageconn.cssl configure -state disabled
+    ttk::checkbutton $wcon.csasl -style Small.TCheckbutton \
+      -text [mc prefsusesasl] -variable $token\(sasl)   
+    
+    grid  $wcon.lip    $wcon.eip    -sticky e -pady 1
+    grid  $wcon.lport  $wcon.eport  -sticky e -pady 1
+    grid  x            $wcon.cssl   -sticky w
+    grid  x            $wcon.csasl  -sticky w
+    
+    grid  $wcon.eip  $wcon.eport  -sticky w
+
+    if {!$this(package,tls)} {
+	$wcon.cssl state {disabled}
     }
-    checkbutton $pageconn.csasl -text " [mc prefsusesasl]" \
-      -variable $token\(sasl)   
     if {![jlib::havesasl]} {
-	$pageconn.csasl configure -state disabled
+	$wcon.csasl state {disabled}
     }
-    grid $pageconn.lip   $pageconn.eip  
-    grid $pageconn.lport $pageconn.eport
-    grid x               $pageconn.cssl
-    grid x               $pageconn.csasl
-    grid $pageconn.lip $pageconn.lport -sticky e
-    grid $pageconn.eip $pageconn.eport -sticky w
-    grid $pageconn.cssl  -sticky w
-    grid $pageconn.csasl -sticky w
 
     # HTTP proxy. Still untested!
     if {0} {
@@ -509,12 +565,13 @@ proc ::Profiles::NotebookOptionWidget {w token} {
 	label $pageproxy.lpoll -text [mc {Poll interval (secs)}]
 	spinbox $pageproxy.spoll -textvariable $token\(pollsecs) \
 	  -width 4 -state readonly -increment 1 -from 1 -to 120
-	button $pageproxy.set -font $fontS -text [mc {Proxy Settings}] \
+	button $pageproxy.set -font CociSmallFont -text [mc {Proxy Settings}] \
 	  -command [list ::Preferences::Build -page {General {Proxy Setup}}]
 	grid $pageproxy.http  -   -sticky w
 	grid $pageproxy.lpoll $pageproxy.spoll -sticky e
 	grid $pageproxy.set   -   -sticky w
     }
+    #bind [winfo toplevel $w] <Control-Key-t> [list $w nextpage]
     
     # Set defaults.
     NotebookSetDefaults $token
@@ -549,7 +606,7 @@ proc ::Profiles::NotebookSetDefaults {token} {
 }
 
 proc ::Profiles::InitDefaultOptions { } {
-    global  prefs
+    global  prefs this
     variable initedDefaultOptions
     variable defaultOptionsArr
     upvar ::Jabber::jprefs jprefs
@@ -566,7 +623,7 @@ proc ::Profiles::InitDefaultOptions { } {
     }
     set defaultOptionsArr(port) $jprefs(port)
     set defaultOptionsArr(ssl)  $jprefs(usessl)
-    if {!$prefs(tls)} {
+    if {!$this(package,tls)} {
 	set defaultOptionsArr(ssl) 0
     }
     set defaultOptionsArr(sasl) 0
@@ -622,9 +679,8 @@ proc ::Profiles::SetCmd {profName} {
     # previous one.
     Debug 2 "::Profiles::SetCmd profName=$profName, tmpSelected=$tmpSelected"
 
-    set previousExists [info exists tmpProfArr($tmpSelected,name)]
-    Debug 2 "\t previousExists=$previousExists"
-    if {$previousExists} {
+    if {[info exists tmpProfArr($tmpSelected,name)]} {
+	Debug 2 "\t tmpSelected exists"
 	
 	# Check if there are any empty fields.
 	if {![VerifyNonEmpty]} {
@@ -707,6 +763,7 @@ proc ::Profiles::SaveCurrentToTmp {profName} {
 		set tmpProfArr($profName,-$key) $moreOpts($key)
 	    }
 	}
+	#parray tmpProfArr $profName,-*
 	set tmpSelected $profName  
     }
 }
@@ -919,39 +976,53 @@ proc ::Profiles::UserDefaultsHook { } {
     SetCmd $selected
 }
 
-# Standalone dialog --
+# Profiles::BuildDialog --
+# 
+#       Standalone dialog profile settings dialog.
 
 proc ::Profiles::BuildDialog { } {
     global  wDlgs
     
     set w $wDlgs(jprofiles)
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
     
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
+    ::UI::Toplevel $w -class JProfiles \
+      -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
+      -closecommand ::Profiles::CloseDlgHook
     wm title $w [mc Profiles]
+    ::UI::SetWindowPosition $w
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
 
     set wpage $w.frall.page
-    pack [frame $wpage] -padx 4 -pady 4
+    ttk::frame $wpage -padding {8}
     BuildPage $wpage
+    pack $wpage -side top
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [mc Save]  \
-      -default active -command [list [namespace current]::SaveDlg $w]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::CancelDlg $w]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
-    
-    ::UI::SetWindowPosition $w
+    set frbot $w.frall.b
+    ttk::frame $frbot -padding [option get . okcancelNoTopPadding {}]
+    ttk::button $frbot.btok -style TButton \
+      -text [mc Save]  \
+      -default active -command [list [namespace current]::SaveDlg $w]
+    ttk::button $frbot.btcancel -style TButton \
+      -text [mc Cancel]  \
+      -command [list [namespace current]::CancelDlg $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
+
     wm resizable $w 0 0
 }
 
@@ -965,6 +1036,10 @@ proc ::Profiles::CloseDlgHook {wclose} {
 
 proc ::Profiles::SaveDlg {w} {
     
+    # If created new it may not have been verified.
+    if {![VerifyNonEmpty]} {
+	return
+    }
     ::UI::SaveWinGeom $w
     SaveHook
     destroy $w

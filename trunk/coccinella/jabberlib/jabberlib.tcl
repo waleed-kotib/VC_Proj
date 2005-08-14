@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.100 2005-06-27 10:32:52 matben Exp $
+# $Id: jabberlib.tcl,v 1.101 2005-08-14 07:13:18 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -202,10 +202,9 @@ package require service
 package require stanzaerror
 package require streamerror
 package require groupchat
-package require caps
-package require pubsub
 
 package provide jlib 2.0
+
 
 namespace eval jlib {
     
@@ -226,6 +225,11 @@ namespace eval jlib {
     
     # Running number.
     variable uid 0
+    
+    # Let jlib components register themselves for subcommands, ensamble,
+    # so that they can be invoked by: jlibname subcommand ...
+    #   ensamble(name) tclProc
+    variable ensamble
     
     # Some common xmpp xml namespaces.
     variable xmppxmlns
@@ -299,6 +303,7 @@ proc jlib::new {rostername clientcmd args} {
     variable statics
     variable objectmap
     variable uid
+    variable ensamble
     
     # Generate unique command token for this jlib instance.
     # Fully qualified!
@@ -368,10 +373,15 @@ proc jlib::new {rostername clientcmd args} {
     # Init conference and groupchat state.
     set conf(allroomsin) {}
     groupchat::init $jlibname
-    if {$opts(-autodiscocaps)} {
-	caps::init $jlibname
-    }
     
+    # Init ensamble commands using name convention init proc.
+    foreach ename [array names ensamble] {
+	set ecmd ${ename}::init
+	if {[llength [info commands $ecmd]]} {
+	    eval $ecmd $jlibname $args
+	}
+    }
+        
     # Register some standard iq handlers that are handled internally.
     iq_register $jlibname get jabber:iq:last    \
       [namespace current]::handle_get_last
@@ -460,6 +470,23 @@ proc jlib::havetls { } {
     return $statics(tls)
 }
 
+# jlib::ensamble_register --
+# 
+#       Register a sub command.
+#       This is then used as: 'jlibName subCmd ...'
+
+proc jlib::ensamble_register {name cmd} {
+    variable ensamble
+    
+    set ensamble($name) $cmd
+}
+
+proc jlib::ensamble_deregister {name} {
+    variable ensamble
+    
+    array unset ensamble $name
+}
+
 # jlib::cmdproc --
 #
 #       Just dispatches the command to the right procedure.
@@ -473,11 +500,16 @@ proc jlib::havetls { } {
 #       none.
 
 proc jlib::cmdproc {jlibname cmd args} {
+    variable ensamble
     
     Debug 5 "jlib::cmdproc: jlibname=$jlibname, cmd='$cmd', args='$args'"
 
     # Which command? Just dispatch the command to the right procedure.
-    return [eval {$cmd $jlibname} $args]
+    if {[info exists ensamble($cmd)]} {
+	return [eval {$ensamble($cmd) $jlibname} $args]
+    } else {
+	return [eval {$cmd $jlibname} $args]
+    }
 }
 
 # jlib::getrostername --
@@ -502,7 +534,7 @@ proc jlib::getrostername {jlibname} {
 #       depending on args.
 
 proc jlib::config {jlibname args} {    
-
+    variable ensamble
     upvar ${jlibname}::opts opts
     
     array set argsArr $args
@@ -543,13 +575,15 @@ proc jlib::config {jlibname args} {
 	    }
 	}
     }
-    if {[info exists argsArr(-autodiscocaps)]} {
-	if {$opts(-autodiscocaps)} {
-	    caps::init $jlibname
-	} else {
-	    caps::free $jlibname
+    
+    # Let components configure themselves.
+    foreach ename [array names ensamble] {
+	set ecmd ${ename}::configure
+	if {[llength [info commands $ecmd]]} {
+	    eval $ecmd $jlibname $args
 	}
     }
+
     return ""
 }
 
@@ -724,6 +758,18 @@ proc jlib::recvsocket {jlibname} {
     # Feed the XML parser. When the end of a command element tag is reached,
     # we get a callback to 'jlib::dispatcher'.
     wrapper::parse $lib(wrap) $temp
+}
+
+# jlib::ipsocket --
+# 
+# Need to have some generic mechanism for this since wont work for other
+# transport mechanisms.
+
+proc jlib::ipsocket {jlibname} {
+    
+    upvar ${jlibname}::lib lib
+    
+    return [lindex [fconfigure $lib(sock) -sockname] 0]
 }
 
 # standard socket transport layer end ------------------------------------------
@@ -1044,23 +1090,37 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    # Return a "Not Implemented" to the sender. Just switch to/from,
 	    # type='result', and add an <error> element.
 	    if {[info exists attrArr(from)]} {
-		set attrArr(to) $attrArr(from)
-		unset attrArr(from)
-		set attrArr(type) "error"
-		set xmldata [wrapper::setattrlist $xmldata [array get attrArr]]
-		
-		set errstanza [wrapper::createtag "feature-not-implemented" \
-		  -attrlist [list xmlns $xmppxmlns(stanzas)]]
-		set errtag [wrapper::createtag "error" -subtags [list $errstanza] \
-		  -attrlist {code 501 type cancel}]
-		
-		lappend childlist $errtag
-		set xmldata [wrapper::setchildlist $xmldata $childlist]
-		
-		send $jlibname $xmldata
+		return_error $jlibname $xmldata 501 cancel "feature-not-implemented"
 	    }
 	}
     }
+}
+
+# jlib::return_error --
+# 
+# 
+
+proc jlib::return_error {jlibname xmldata errcode errtype errtag} {
+    variable xmppxmlns
+    
+    array set attr [wrapper::getattrlist $xmldata]
+    set childlist  [wrapper::getchildren $xmldata]
+    
+    # Switch from -> to, type='error', retain any id.
+    set attr(to)   $attr(from)
+    set attr(type) "error"
+    unset attr(from)
+
+    set xmldata [wrapper::setattrlist $xmldata [array get attr]]    
+    set stanzaElem [wrapper::createtag $errtag \
+      -attrlist [list xmlns $xmppxmlns(stanzas)]]
+    set errElem [wrapper::createtag "error" -subtags [list $stanzaElem] \
+      -attrlist [list code $errcode type $errtype]]
+    
+    lappend childlist $errElem
+    set xmldata [wrapper::setchildlist $xmldata $childlist]
+
+    send $jlibname $xmldata
 }
     
 # jlib::message_handler --
@@ -2948,7 +3008,17 @@ proc jlib::vcard_set {jlibname cmd args} {
 	      -subtags $elem]
 	}
     }
-
+    
+    # The <photo> sub elements.
+    if {[info exists arr(-photo_binval)]} {
+	set elem {}
+	lappend elem [wrapper::createtag "BINVAL" -chdata $arr(-photo_binval)]
+	if {[info exists arr(-photo_type)]} {
+	    lappend elem [wrapper::createtag "TYPE" -chdata $arr(-photo_type)]
+	}
+	lappend subelem [wrapper::createtag "PHOTO" -subtags $elem]
+    }
+    
     set xmllist [wrapper::createtag vCard -attrlist $attrlist \
       -subtags $subelem]
     send_iq $jlibname "set" [list $xmllist] -command \
@@ -3390,7 +3460,6 @@ namespace eval jlib {
 #
 #	array get and array unset accepts glob characters. These need to be
 #	escaped if they occur as part of a JID.
-#
 
 proc jlib::ESC {s} {
     return [string map {* \\* ? \\? [ \\[ ] \\] \\ \\\\} $s]

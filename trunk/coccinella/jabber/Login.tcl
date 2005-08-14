@@ -5,12 +5,17 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.64 2005-06-20 13:55:27 matben Exp $
+# $Id: Login.tcl,v 1.65 2005-08-14 07:10:51 matben Exp $
 
 package provide Login 1.0
 
 namespace eval ::Login:: {
     
+    # Use option database for customization.
+    option add *JLogin.connectImage             connect         widgetDefault
+    option add *JLogin.connectDisImage          connectDis      widgetDefault
+    option add *JLogin.uiForm                   "jid"           widgetDefault
+
     variable server
     variable username
     variable password
@@ -22,10 +27,8 @@ namespace eval ::Login:: {
     
     # Add all event hooks.
     ::hooks::register quitAppHook     ::Login::QuitAppHook
-    ::hooks::register closeWindowHook ::Login::CloseHook
     ::hooks::register launchFinalHook ::Login::LaunchHook
     
-    #::UTile::Use
 }
 
 # Login::Dlg --
@@ -53,6 +56,7 @@ proc ::Login::Dlg { } {
     variable wfrmore
     variable wpopupMenu
     variable tmpProfArr
+    variable uiForm
     upvar ::Jabber::jprefs jprefs
     
     set w $wDlgs(jlogin)
@@ -62,114 +66,147 @@ proc ::Login::Dlg { } {
     }
     set wtoplevel $w
     
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
+    ::UI::Toplevel $w -class JLogin \
+      -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
+      -closecommand [namespace current]::Close
     wm title $w [mc Login]
+
+    ::UI::SetWindowPosition $w
     
-    set contrastBg [option get . backgroundLightContrast {}]
+    set connectim   [::Theme::GetImage [option get $w connectImage {}]]
+    set connectimd  [::Theme::GetImage [option get $w connectDisImage {}]]
+    set uiForm      [option get $w uiForm {}]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill x
+    ttk::frame $w.frall
+    pack  $w.frall  -fill x
                                  
-    ::headlabel::headlabel $w.frall.head -text [mc Login]    
-    pack  $w.frall.head -side top -fill both -expand 1
-    label $w.frall.msg -wraplength 280 -justify left -text [mc jalogin]
-    pack  $w.frall.msg -side top -fill both -expand 1 -padx 10
+    ttk::label $w.frall.head -style Headlabel \
+      -text [mc Login] -compound left \
+      -image [list $connectim background $connectimd]
+    pack  $w.frall.head  -side top -fill both -expand 1
+
+    ttk::separator $w.frall.s -orient horizontal
+    pack  $w.frall.s  -side top -fill x
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack  $wbox  -fill both -expand 1
+
+    if {$uiForm eq "jid"} {
+	set str [mc jaloginjid]
+    } else {
+	set str [mc jalogin]
+    }
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left -text $str
+    pack  $wbox.msg  -side top -fill x
     
-    # Entries etc.
-    set frmid [frame $w.frall.frmid -borderwidth 0]
-    pack $frmid -side top -fill both -expand 1
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack  $frmid  -side top -fill both -expand 1
 	
     # Option menu for selecting user profile.
-    label $frmid.lpop -text "[mc Profile]:" -anchor e
+    ttk::label $frmid.lpop -text "[mc Profile]:" -anchor e
     set wpopup $frmid.popup
-    
-    set fontSB [::Utils::FontBold [$frmid.lpop cget -font]]
-    $frmid.lpop configure -font $fontSB
-    
-    set wpopupMenu [tk_optionMenu $wpopup [namespace current]::menuVar {}]
-    $wpopup configure -highlightthickness 0 -foreground black
-    grid $frmid.lpop -column 0 -row 0 -sticky e
-    grid $wpopup -column 1 -row 0 -sticky e
+        
+    set wpopupMenu [ttk::optionmenu $wpopup [namespace current]::menuVar {}]
     
     LoadProfiles
 
-    label $frmid.lserv -text "[mc {Jabber server}]:" -font $fontSB -anchor e
-    entry $frmid.eserv -width 22    \
+    # Depending on 'uiForm' not all get mapped.
+    ttk::label $frmid.ljid -text "[mc {Jabber ID}]:" -anchor e
+    ttk::entry $frmid.ejid -width 22    \
+      -textvariable [namespace current]::jid
+    ttk::label $frmid.lserv -text "[mc {Jabber server}]:" -anchor e
+    ttk::entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
-    label $frmid.luser -text "[mc Username]:" -font $fontSB -anchor e
-    entry $frmid.euser -width 22   \
+    ttk::label $frmid.luser -text "[mc Username]:" -anchor e
+    ttk::entry $frmid.euser -width 22   \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStr %S}
-    label $frmid.lpass -text "[mc Password]:" -font $fontSB -anchor e
-    entry $frmid.epass -width 22   \
+    ttk::label $frmid.lpass -text "[mc Password]:" -anchor e
+    ttk::entry $frmid.epass -width 22   \
       -textvariable [namespace current]::password -show {*} -validate key \
-      -validatecommand {::Jabber::ValidatePasswdChars %S}
-    label $frmid.lres -text "[mc Resource]:" -font $fontSB -anchor e
-    entry $frmid.eres -width 22   \
+      -validatecommand {::Jabber::ValidatePasswordStr %S}
+    ttk::label $frmid.lres -text "[mc Resource]:" -anchor e
+    ttk::entry $frmid.eres -width 22   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateResourceStr %S}
     
-    grid $frmid.lserv -column 0 -row 1 -sticky e
-    grid $frmid.eserv -column 1 -row 1 -sticky w
-    grid $frmid.luser -column 0 -row 2 -sticky e
-    grid $frmid.euser -column 1 -row 2 -sticky w
-    grid $frmid.lpass -column 0 -row 3 -sticky e
-    grid $frmid.epass -column 1 -row 3 -sticky w
-    grid $frmid.lres  -column 0 -row 4 -sticky e
-    grid $frmid.eres  -column 1 -row 4 -sticky w
+    if {$uiForm eq "jid"} {
+	grid  $frmid.lpop   $frmid.popup  -sticky e -pady 2
+	grid  $frmid.ljid   $frmid.ejid   -sticky e -pady 2
+	grid  $frmid.lpass  $frmid.epass  -sticky e -pady 2
+	
+	grid  $frmid.ejid   $frmid.epass  -sticky ew
+    } else {
+	grid  $frmid.lpop   $frmid.popup  -sticky e -pady 2
+	grid  $frmid.lserv  $frmid.eserv  -sticky e -pady 2
+	grid  $frmid.luser  $frmid.euser  -sticky e -pady 2
+	grid  $frmid.lpass  $frmid.epass  -sticky e -pady 2
+	grid  $frmid.lres   $frmid.eres   -sticky e -pady 2
+	
+	grid  $frmid.eserv  $frmid.euser  $frmid.epass  $frmid.eres  -sticky ew
+    }
+    grid  $frmid.popup  -sticky ew
+    grid columnconfigure $frmid 1 -weight 1
     
     # Triangle switch for more options.
-    set frtri [frame $w.frall.tri -borderwidth 0]
-    pack $frtri -side top -fill both -expand 1 -padx 6
-    set wtri $frtri.tri
-    set wtrilab $frtri.l
-    label $wtri -image [::UI::GetIcon mactriangleclosed]
-    label $wtrilab -text "[mc More]..."
-    pack $wtri $wtrilab -side left -padx 2
-    bind $wtri <Button-1> [list [namespace current]::MoreOpts $w]
+    set wtri $wbox.tri
+    ttk::button $wtri -style Small.Toolbutton \
+      -compound left -image [::UI::GetIcon mactriangleclosed] \
+      -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
+    pack $wtri -side top -anchor w
     
     # More options.
-    set wfrmore [frame $w.frall.frmore -borderwidth 0]
-    set wfrmfr  [frame $wfrmore.fr -bd 1 -relief flat -bg $contrastBg]
-    pack $wfrmfr -padx 4 -pady 6 -side bottom -fill x -expand 1
+    set wfrmore $wbox.frmore
+    ttk::frame $wfrmore
     
     # Tabbed notebook for more options.
     set token [namespace current]::moreOpts
     variable $token
     upvar 0 $token options
-    set wtabnb $wfrmfr.nb
+    
+    set wtabnb $wfrmore.nb
     ::Profiles::NotebookOptionWidget $wtabnb $token
-    pack $wtabnb -fill x -expand 1
+    pack  $wtabnb  -fill x -expand 1
             
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Login] \
-      -default active -command [namespace current]::DoLogin]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::DoCancel $w]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btprof -text [mc Profiles]  \
-      -command [namespace current]::Profiles]  \
-      -side left -padx 5 -pady 5
-    pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Login] \
+      -default active -command [namespace current]::DoLogin
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::DoCancel $w]
+    ttk::button $frbot.btprof -text [mc Profiles]  \
+      -command [namespace current]::Profiles
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+	pack $frbot.btprof -side left
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+	pack $frbot.btprof -side left
+    }
+    pack $frbot -side bottom -fill x
     
     # Necessary to trace the popup menu variable.
     trace variable [namespace current]::menuVar w  \
       [namespace current]::TraceMenuVar
     set menuVar $profile
 	
-    ::UI::SetWindowPosition $w
     wm resizable $w 0 0
-    bind $w <Return>  [list $frbot.btok invoke]
-    bind $w <Escape>  [list ::Login::DoCancel $w]
-    bind $w <Destroy> [list ::Login::DoCancel $w]
+    
+    bind $w <<ReturnEnter>> [list $frbot.btok invoke]
+    
     if {$password == ""} {
 	focus $frmid.epass
     }
+    after 100 [list [namespace current]::GetNormalSize $w]
 }
 
 proc ::Login::LoadProfiles { } {
@@ -209,13 +246,14 @@ proc ::Login::LoadProfiles { } {
 }
 
 proc ::Login::TraceMenuVar {name key op} {
-    global  prefs
+    global  prefs this
     
     variable profile
     variable server
     variable username
     variable password
     variable resource
+    variable jid
     variable menuVar
     variable tmpProfArr
     variable moreOpts
@@ -233,41 +271,46 @@ proc ::Login::TraceMenuVar {name key op} {
 	}
     }
     set resource $tmpProfArr($profile,-resource)
-    if {!$prefs(tls)} {
+    set jid      [jlib::joinjid $username $server $resource]
+    if {!$this(package,tls)} {
 	set moreOpts(ssl) 0
     }
 }
 
-proc ::Login::CloseHook {wclose} {
-    global  wDlgs
-    variable finished
+proc ::Login::GetNormalSize {w} {
+    variable size
     
-    if {[string equal $wclose $wDlgs(jlogin)]} {
-	set finished 0
-	Close $wclose
-    }
+    set geom [::UI::ParseWMGeometry [wm geometry $w]]
+    set size(width)  [lindex $geom 0]
+    set size(height) [lindex $geom 1]
+}
+
+proc ::Login::SetNormalSize {w} {
+    variable size
+
+    wm geometry $w $size(width)x$size(height)
 }
 
 proc ::Login::MoreOpts {w} {
     variable wtri
-    variable wtrilab
     variable wfrmore
-      
-    pack $wfrmore -side top -fill x -padx 10
-    $wtri configure -image [::UI::GetIcon mactriangleopen]
-    $wtrilab configure -text "[mc Less]..."
-    bind $wtri <Button-1> [list [namespace current]::LessOpts $w]
+
+    pack $wfrmore -side top -fill x -padx 2
+    $wtri configure -command [list [namespace current]::LessOpts $w] \
+      -image [::UI::GetIcon mactriangleopen] -text "[mc Less]..."   
 }
 
 proc ::Login::LessOpts {w} {
     variable wtri
-    variable wtrilab
     variable wfrmore
+
+    SetNormalSize $w
+    update idletasks
     
     pack forget $wfrmore
-    $wtri configure -image [::UI::GetIcon mactriangleclosed]
-    $wtrilab configure -text "[mc More]..."
-    bind $wtri <Button-1> [list [namespace current]::MoreOpts $w]
+    $wtri configure -command [list [namespace current]::MoreOpts $w] \
+      -image [::UI::GetIcon mactriangleclosed] -text "[mc More]..."   
+    after 100 [list wm geometry $w {}]
 }
 
 proc ::Login::DoCancel {w} {
@@ -325,7 +368,9 @@ proc ::Login::DoLogin {} {
     variable username
     variable password
     variable resource
+    variable jid
     variable moreOpts
+    variable uiForm
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
@@ -333,6 +378,10 @@ proc ::Login::DoLogin {} {
     
     # Kill any pending open states.
     Kill
+
+    if {$uiForm eq "jid"} {
+	jlib::splitjidex $jid username server resource
+    }
     
     # Check 'server', 'username' and 'password' if acceptable.
     foreach name {server username password} {
@@ -361,7 +410,7 @@ proc ::Login::DoLogin {} {
 	      -message [mc jamessillegalchar $name $var]
 	    return
 	}
-    }    
+    }
     set finished 1
     Close $wtoplevel
     

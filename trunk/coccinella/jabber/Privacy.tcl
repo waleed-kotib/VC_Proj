@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.11 2004-12-20 15:16:46 matben Exp $
+# $Id: Privacy.tcl,v 1.12 2005-08-14 07:10:51 matben Exp $
 
 package provide Privacy 1.0
 
@@ -18,7 +18,6 @@ namespace eval ::Privacy:: {
     ::hooks::register prefsSaveHook          ::Privacy::SavePrefsHook
     ::hooks::register prefsCancelHook        ::Privacy::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Privacy::UserDefaultsHook
-    ::hooks::register closeWindowHook        ::Privacy::List::CloseHook
 
     # User database options.
     option add *FilterDlg*Radiobutton.background  white
@@ -69,41 +68,45 @@ proc ::Privacy::BuildPrefsPage {page} {
     variable prevselectediline ""
     variable selectBackground
     variable selectForeground
+
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
     
-    set xpadbt [option get [winfo toplevel $page] xPadBt {}]
+    set wfi $wc.fi
+    ttk::labelframe $wfi -text [mc Filter] \
+      -padding [option get . groupSmallPadding {}]
+    pack  $wfi  -side top -fill x
+	      
+    ttk::label $wfi.lmsg -text [mc prefprivmsg] \
+      -wraplength 300 -justify left -padding {0 0 0 6}
+    pack  $wfi.lmsg -side top -anchor w
     
-    set fpage $page.f
-    labelframe $fpage -text [mc Filter] -padx 4 -pady 2
-    pack $fpage -side top -anchor w -padx 8 -pady 4
-    
-    label $fpage.lmsg -wraplength 300 -justify left -text [mc prefprivmsg]
-    pack  $fpage.lmsg -side top -anchor w -padx 4 -pady 1
-    
-    frame  $fpage.bottom
-    pack   $fpage.bottom -side bottom -pady 1 -fill x
-    set warrows $fpage.bottom.arr
+    set warrows $wfi.bottom.arr
+    ttk::frame  $wfi.bottom
+    pack $wfi.bottom -side bottom -pady 1 -fill x
+    ttk::label $wfi.bottom.lhead -textvariable [namespace current]::statmsg
     ::chasearrows::chasearrows $warrows -size 16
+    pack $wfi.bottom.lhead -side left -anchor w -pady 1
     pack $warrows -side left -padx 5 -pady 5
-    label $fpage.bottom.lhead -textvariable [namespace current]::statmsg
-    pack  $fpage.bottom.lhead -side left -anchor w -pady 1
     
-    set   wfr $fpage.fr
-    frame $wfr
-    pack  $wfr -side top -anchor w -pady 1
+    set  wfr $wfi.fr
+    ttk::frame $wfr
+    pack $wfr -side top -anchor w -pady 1
     
-    set   wtabbox $wfr.ft
+    set wtabbox $wfr.ft
+    set wlabfr $wtabbox.lf
+    set wtable $wtabbox.tl
+    set wysc $wtabbox.ysc
+
     frame $wtabbox -bd 1 -relief sunken -class FilterDlg
-    set   wlabfr $wtabbox.lf
-    set   wtable $wtabbox.tl
-    set   wysc $wtabbox.ysc
-    
+       
     set selectBackground [option get $wtabbox selectBackground {}]
     set selectForeground [option get $wtabbox selectForeground {}]
-    
     set iline 0
    
     frame $wlabfr -borderwidth 0
-    scrollbar $wysc -orient vertical -command [list $wtable yview]
+    tuscrollbar $wysc -orient vertical -command [list $wtable yview]
     text $wtable -width 32 -height 8 -borderwidth 1 -exportselection 0 \
       -highlightthickness 0 -state disabled -yscrollcommand [list $wysc set] \
       -insertwidth 0 -padx 0 -pady 0 -state normal -takefocus 0 -wrap none
@@ -114,15 +117,17 @@ proc ::Privacy::BuildPrefsPage {page} {
     bind $wtable <Button-1>        {::Privacy::TableSelect %W %x %y}
     bind $wtable <Double-Button-1> ::Privacy::EditList
     
-    label $wlabfr.l1 -bd 1 -relief raised -padx 4 -text [mc Default]
-    label $wlabfr.l2 -bd 1 -relief raised -padx 4 -text [mc Active]
-    label $wlabfr.l3 -bd 1 -relief raised -padx 4 -text [mc Name] \
-      -anchor w
-    pack  $wlabfr.l1 $wlabfr.l2 -side left
-    pack  $wlabfr.l3 -side left -expand 1 -fill x -anchor w
+    foreach name { def act nam } str { Default Active Name } {
+	set f $wlabfr.$name
+	frame $f -bd 1 -relief raised
+	ttk::label $f.l -text [mc $str] -anchor w -padding {4 0}
+	pack $f.l -fill both
+	pack $f -side left
+    }
+    pack $wlabfr.nam -expand 1 -fill x
     
-    set width1 [winfo reqwidth $wlabfr.l1]
-    set width2 [winfo reqwidth $wlabfr.l2]
+    set width1 [winfo reqwidth $wlabfr.def]
+    set width2 [winfo reqwidth $wlabfr.act]
     set tabs [list [expr $width1/2] center [expr $width1 + $width2/2] center \
       [expr $width1 + $width2] left]
     $wtable configure -tabs $tabs
@@ -136,21 +141,21 @@ proc ::Privacy::BuildPrefsPage {page} {
     
     # Buttons.
     set wfrbt $wfr.bt
-    frame $wfrbt
-    pack  $wfrbt -side right
+    ttk::frame $wfrbt
     
     set wbts(new)  $wfrbt.new
     set wbts(edit) $wfrbt.edit
     set wbts(del)  $wfrbt.del    
     
-    button $wfrbt.new -text [mc New] -state disabled \
+    ttk::button $wfrbt.new -text [mc New] -state disabled \
       -command [namespace current]::NewList
-    button $wfrbt.edit -text [mc Edit] -state disabled \
+    ttk::button $wfrbt.edit -text [mc Edit] -state disabled \
       -command [namespace current]::EditList
-    button $wfrbt.del -text [mc Delete] -state disabled \
+    ttk::button $wfrbt.del -text [mc Delete] -state disabled \
       -command [namespace current]::DelList
     pack $wfrbt.new $wfrbt.edit $wfrbt.del -side top -padx 6 -pady 4 \
       -fill x
+    pack  $wfrbt -side right
     
     Deselected
     if {[::Jabber::IsConnected]} {
@@ -164,7 +169,7 @@ proc ::Privacy::BuildPrefsPage {page} {
     set script [format {
 	update idletasks
 	%s.lmsg configure -wraplength [expr [winfo reqwidth %s] - 20]
-    } $fpage $fpage]    
+    } $wfi $wfi]    
     after idle $script
     
     #foreach a {mats cool junk} {
@@ -403,8 +408,8 @@ proc ::Privacy::GetListsCB {jlibname type subiq args} {
 
 proc ::Privacy::NewList { } {
     
-    set token [::Privacy::List::Build]
-    ::Privacy::List::BuildItem $token
+    set token [List::Build]
+    List::BuildItem $token
 }
 
 proc ::Privacy::EditList { } {
@@ -413,7 +418,7 @@ proc ::Privacy::EditList { } {
     
     if {$selected != ""} {	
 	$warrows start
-	::Privacy::List::GetList $selected
+	List::GetList $selected
     }
 }
 
@@ -424,8 +429,8 @@ proc ::Privacy::Save { } {
     
     #puts "::Privacy::Save"
     if {$cache(haveprivacy) && [::Jabber::IsConnected]} {
-	::Privacy::SetActiveDefaultList active  $activeVar
-	::Privacy::SetActiveDefaultList default $defaultVar
+	SetActiveDefaultList active  $activeVar
+	SetActiveDefaultList default $defaultVar
     }
 }
 
@@ -619,83 +624,100 @@ proc ::Privacy::List::Build { } {
     set state(w) $w
     
     # Toplevel with class JPrivacy.
-    ::UI::Toplevel $w -class JPrivacy -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -class JPrivacy \
+      -usemacmainmenu 1 -macstyle documentProc \
+      -closecommand ::Privacy::List::CloseHook
 
-    wm title $w "[mc {Privacy List}]"
+    wm title $w [mc {Privacy List}]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 4
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
 
-    label $w.frall.msg -wraplength 440 -justify left -text [mc prefprivrules]
-    pack  $w.frall.msg -side top -anchor w -pady 2 -padx 10
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
     
-    set wfr $w.frall.fr
-    frame $wfr
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 400 -justify left -text [mc prefprivrules]
+    pack $wbox.msg -side top -anchor w
+    
+    set wfr $wbox.fr
+    ttk::frame $wfr
     pack  $wfr -side top -anchor w
     
     set state(wname) $wfr.ename
-    label $wfr.lname -text "[mc {Name of list}]:"
-    entry $wfr.ename -width 16 -textvariable $token\(name)
-    pack $wfr.lname $wfr.ename -side left
+    ttk::label $wfr.lname -text "[mc {Name of list}]:"
+    ttk::entry $wfr.ename -width 16 -textvariable $token\(name)
+    pack  $wfr.lname  $wfr.ename  -side left
     
-    set wit $w.frall.fit
-    frame $wit
+    set wit $wbox.fit
+    ttk::frame $wit
     pack  $wit
     
     set state(wit) $wit
     
     set i 0    
     foreach {wtype wval wblk wact wdel}  \
-      [list $wit.t${i} $wit.v${i} $wit.bl${i} $wit.a${i} $wit.bt${i}] break
-    label $wtype -text [mc {Type}]
-    label $wval  -text [mc {Value}]
-    label $wblk  -text [mc {Block}]    
-    label $wact  -text [mc {Action}]    
-    label $wdel  -text [mc {Delete Rule}]    
-    grid $wtype $wval $wblk $wact $wdel
+      [list $wit.t$i $wit.v$i $wit.bl$i $wit.a$i $wit.bt$i] break
+    ttk::label $wtype -text [mc {Type}]
+    ttk::label $wval  -text [mc {Value}]
+    ttk::label $wblk  -text [mc {Block}]    
+    ttk::label $wact  -text [mc {Action}]    
+    ttk::label $wdel  -text [mc {Delete Rule}]    
+
+    grid  $wtype  $wval  $wblk  $wact  $wdel
     
     # Build a row of empty frames to hold the max size of menubuttons.
     # Fake menubutton to compute max width.
     incr i
     foreach what {type block action} {
 	set wtmp $w.frall._tmp
-	menubutton $wtmp -text $labels(max,$what)
+	ttk::menubutton $wtmp -text $labels(max,$what)
 	set maxwidth [winfo reqwidth $wtmp]
 	destroy $wtmp
-	frame ${wit}.${what}${i} -width [expr $maxwidth + 20]
+	frame ${wit}.${what}$i -width [expr $maxwidth + 20]
     }
-    grid $wit.type${i} x $wit.block${i} $wit.action${i}
+    grid $wit.type$i x $wit.block$i $wit.action$i
     
     set state(i) $i
     
     set state(statmsg) ""    
    
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
+    set frbot $wbox.b
     set warrows $frbot.arr
-    pack [button $frbot.btok -text [mc Set] \
-      -default active -command [list [namespace current]::Set $token]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::Cancel $token]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btprof -text [mc {New Rule}]  \
-      -command [list [namespace current]::New $token]]  \
-      -side left -padx 5 -pady 5
-    pack [::chasearrows::chasearrows $warrows -size 16] \
-      -side left -padx 5 -pady 0
-    pack [label $frbot.stat -textvariable $token\(statmsg)] \
-      -side left -padx 5 -pady 0
-    pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Set] \
+      -default active -command [list [namespace current]::Set $token]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::Cancel $token]
+    ttk::button $frbot.btprof -text [mc {New Rule}]  \
+      -command [list [namespace current]::New $token]
+    ::chasearrows::chasearrows $warrows -size 16
+    ttk::label $frbot.stat -textvariable $token\(statmsg)
+
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot.btprof -side left
+    pack $warrows -side left -padx $padx
+    pack $frbot.stat -side left
+    pack $frbot -side bottom -fill x
+
 
     wm resizable $w 0 0
     
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s.frall.msg configure -wraplength [expr [winfo reqwidth %s] - 30]
-    } $w $w]    
+	%s configure -wraplength [expr [winfo reqwidth %s] - 30]
+    } $wbox.msg $w]    
     after idle $script
     
     return $token
@@ -776,19 +798,19 @@ proc ::Privacy::List::BuildItem {token} {
     incr state(i)
     set i $state(i)
     foreach {wtype wval wblk wact wdel}  \
-      [list $wit.t${i} $wit.v${i} $wit.bl${i} $wit.a${i} $wit.bt${i}] break
-    eval {tk_optionMenu $wtype $token\(type${i})} $labels(type)
-    entry         $wval -width 12 -textvariable $token\(value${i})
-    eval {tk_optionMenu $wblk $token\(block${i})} $labels(block)
-    eval {tk_optionMenu $wact $token\(action${i})} $labels(action)
-    button        $wdel -text [mc Delete]  \
+      [list $wit.t$i $wit.v$i $wit.bl$i $wit.a$i $wit.bt$i] break
+    eval {ttk::optionmenu $wtype $token\(type$i)} $labels(type)
+    ttk::entry $wval -width 12 -textvariable $token\(value$i)
+    eval {ttk::optionmenu $wblk $token\(block$i)} $labels(block)
+    eval {ttk::optionmenu $wact $token\(action$i)} $labels(action)
+    ttk::button $wdel -text [mc Delete]  \
       -command [list [namespace current]::Delete $token $i]
     
     grid $wtype $wval $wblk $wact $wdel -sticky e
     
-    set state(action${i}) [mc Deny]
-    set state(value${i})  ""
-    set state(block${i})  {Incoming Messages}
+    set state(action$i) [mc Deny]
+    set state(value$i)  ""
+    set state(block$i)  {Incoming Messages}
     return $state(i)
 }
 
@@ -822,7 +844,7 @@ proc ::Privacy::List::Delete {token i} {
     
     set wit $state(wit)
     foreach {wtype wval wblk wact wdel}  \
-      [list $wit.t${i} $wit.v${i} $wit.bl${i} $wit.a${i} $wit.bt${i}] break
+      [list $wit.t$i $wit.v$i $wit.bl$i $wit.a$i $wit.bt$i] break
     destroy $wtype $wval $wblk $wact $wdel
 }
 
@@ -902,13 +924,10 @@ proc ::Privacy::List::GetTokenFromToplevel {w} {
 #       Be sure to cleanup when closing window directly.
 
 proc ::Privacy::List::CloseHook {wclose} {
-    global  wDlgs
-    
-    if {[string match $wDlgs(jprivacy)* $wclose]} {
-	set token [::Privacy::List::GetTokenFromToplevel $wclose]
-	if {$token != ""} {
-	    unset $token
-	}
+
+    set token [::Privacy::List::GetTokenFromToplevel $wclose]
+    if {$token != ""} {
+	unset $token
     }   
     return ""
 }

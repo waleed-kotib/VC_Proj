@@ -3,14 +3,19 @@
 #      This file is part of The Coccinella application. 
 #      It implements subscription parts.
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.26 2005-05-30 14:17:00 matben Exp $
+# $Id: Subscribe.tcl,v 1.27 2005-08-14 07:10:51 matben Exp $
 
 package provide Subscribe 1.0
 
 namespace eval ::Subscribe:: {
 
+    # Use option database for customization.
+    option add *JSubscribe.newuserImage           newuser         widgetDefault
+    option add *JSubscribe.newuserDisImage        newuserDis      widgetDefault
+
+    
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Subscribe::InitPrefsHook
     ::hooks::register prefsBuildHook         ::Subscribe::BuildPrefsHook
@@ -58,9 +63,17 @@ proc ::Subscribe::NewDlg {jid args} {
 
     ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token] \
-      -usemacmainmenu 1
+      -usemacmainmenu 1 -class JSubscribe
     wm title $w [mc Subscribe]  
     
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsubsc)]]
+    if {$nwin == 1} {
+	::UI::SetWindowPosition $w $wDlgs(jsubsc)
+    }
+  
+    set im   [::Theme::GetImage [option get $w newuserImage {}]]
+    set imd  [::Theme::GetImage [option get $w newuserDisImage {}]]
+
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]
 
@@ -74,64 +87,75 @@ proc ::Subscribe::NewDlg {jid args} {
 
     # Global frame.
     set wall $w.fr
-    frame $wall -borderwidth 1 -relief raised
-    pack  $wall -fill both -expand 1 -ipadx 2 -ipady 4
+    ttk::frame $wall
+    pack $wall -fill both -expand 1
 
-    ::headlabel::headlabel $wall.head -text [mc Subscribe]
+    ttk::label $wall.head -style Headlabel \
+      -text [mc Subscribe] -compound left \
+      -image [list $im background $imd]
     pack $wall.head -side top -fill both -expand 1
+
+    ttk::separator $wall.s -orient horizontal
+    pack $wall.s -side top -fill x
+
+    set wbox $wall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
 
     set str [mc jasubwant $jid]
     if {!$havesubsc} {
 	append str " [mc jasubopts]"
     }
-    label $wall.msg -wraplength 200 -justify left \
-      -text $str
-    pack $wall.msg -padx 10 -side top -fill both -expand 1
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 200 -justify left -text $str
+    pack $wbox.msg -side top -anchor w
 
     # If we already have a subscription we've already got the opportunity
     # to select nickname and group. Do not repeat that.
     if {!$havesubsc} {
-	set wbox $wall.opt
-	labelframe $wbox -text [mc {Options}]
-	pack $wbox -side top -fill both -padx 20 -pady 6
+	set frmid $wbox.frmid
+	ttk::frame $frmid
+	pack $frmid -side top -fill both -expand 1
 	
-	label $wbox.lnick -text "[mc {Nick name}]:" -anchor e
-	entry $wbox.enick -width 24 -textvariable $token\(name)
-	label $wbox.lgroup -text "[mc Group]:" -anchor e
-	::combobox::combobox $wbox.egroup -width 12  \
+	ttk::label $frmid.lnick -text "[mc {Nick name}]:" -anchor e
+	ttk::entry $frmid.enick -width 24 -textvariable $token\(name)
+	ttk::label $frmid.lgroup -text "[mc Group]:" -anchor e
+	ttk::combobox $frmid.egroup -values [concat None $allGroups] \
 	  -textvariable $token\(group)
-	eval {$wbox.egroup list insert end} "None $allGroups"
-	
-	grid $wbox.lnick  $wbox.enick  -sticky e
-	grid $wbox.lgroup $wbox.egroup -sticky e
-	grid $wbox.enick  $wbox.egroup -sticky ew
+
+	grid  $frmid.lnick   $frmid.enick  -sticky e -pady 2
+	grid  $frmid.lgroup  $frmid.egroup -sticky e -pady 2
+	grid  $frmid.enick   $frmid.egroup -sticky ew	
     }
     
     # Button part.
-    set frbot [frame $wall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Accept] -default active \
-      -command [list [namespace current]::Accept $token]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Deny]  \
-      -command [list [namespace current]::Deny $token]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.bvcard -text "[mc {Get vCard}]..."  \
-      -command [list ::VCard::Fetch other $jid]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
-
-    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsubsc)]]
-    if {$nwin == 1} {
-	::UI::SetWindowPosition $w $wDlgs(jsubsc)
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Accept] -default active \
+      -command [list [namespace current]::Accept $token]
+    ttk::button $frbot.btcancel -text [mc Deny]  \
+      -command [list [namespace current]::Deny $token]
+    ttk::button $frbot.bvcard -text "[mc {Get vCard}]..."  \
+      -command [list ::VCard::Fetch other $jid]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+	pack $frbot.bvcard -side left -padx 4
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+	pack $frbot.bvcard -side left -padx 4
     }
+    pack $frbot -side top -fill x
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
 
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 10]
-    } $wall.msg $w]    
+	%s configure -wraplength [expr [winfo reqwidth %s] - 30]
+    } $wbox.msg $w]    
     after idle $script
 
     return ""
@@ -237,7 +261,7 @@ proc ::Subscribe::InitPrefsHook { } {
     set jprefs(subsc,auto)          0
     set jprefs(subsc,group)         {}
 	
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(subsc,inrost)     jprefs_subsc_inrost      $jprefs(subsc,inrost)]  \
       [list ::Jabber::jprefs(subsc,notinrost)  jprefs_subsc_notinrost   $jprefs(subsc,notinrost)]  \
       [list ::Jabber::jprefs(subsc,auto)       jprefs_subsc_auto        $jprefs(subsc,auto)]  \
@@ -258,44 +282,53 @@ proc ::Subscribe::BuildPrefsHook {wtree nbframe} {
 proc ::Subscribe::BuildPageSubscriptions {page} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
-
-    set ypad [option get [winfo toplevel $page] yPad {}]
     
     foreach key {inrost notinrost auto group} {
 	set tmpJPrefs(subsc,$key) $jprefs(subsc,$key)
     }
-    
-    set labfrpsubs $page.fr
-    labelframe $labfrpsubs -text [mc Subscribe]
-    pack $labfrpsubs -side top -anchor w -padx 8 -pady 4
-    set psubs [frame $labfrpsubs.frin]
-    pack $psubs -padx 10 -pady 6 -side left
 
-    label $psubs.la1 -text [mc prefsuif]
-    label $psubs.lin -text [mc prefsuis]
-    label $psubs.lnot -text [mc prefsuisnot]
-    grid $psubs.la1 -columnspan 2 -sticky w -pady $ypad
-    grid $psubs.lin $psubs.lnot -sticky w -pady $ypad
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+    
+    set wsubs $wc.fr
+    ttk::labelframe $wsubs -text [mc Subscribe] \
+      -padding [option get . groupSmallPadding {}]
+
+    ttk::label $wsubs.la1 -text [mc prefsuif]
+    ttk::label $wsubs.lin -text [mc prefsuis]
+    ttk::label $wsubs.lnot -text [mc prefsuisnot]
+    ttk::separator $wsubs.s -orient vertical
+    
+    grid  $wsubs.la1  -         -            -sticky w
+    grid  $wsubs.lin  -         $wsubs.lnot  -sticky w
+    grid  x           $wsubs.s  x            -sticky ns -padx 16
+    
     foreach  \
-      val {accept      reject      ask}   \
-      txt {Auto-accept Auto-reject {Ask each time}} {
+      val { accept        reject        ask }   \
+      txt { "Auto-accept" "Auto-reject" "Ask each time" } {
 	foreach val2 {inrost notinrost} {
-	    radiobutton ${psubs}.${val2}${val}  \
+	    ttk::radiobutton $wsubs.${val2}${val}  \
 	      -text [mc $txt] -value $val  \
 	      -variable [namespace current]::tmpJPrefs(subsc,$val2)	      
 	}
-	grid $psubs.inrost${val} $psubs.notinrost${val} -sticky w -pady $ypad
+	grid  $wsubs.inrost${val}  ^  $wsubs.notinrost${val}  -sticky w
     }
-
-    set frauto [frame $page.auto]
-    pack $frauto -side top -anchor w -padx 10 -pady $ypad
-    checkbutton $frauto.autosub -text "  [mc prefsuauto]"  \
+    
+    set wauto [ttk::frame $wc.auto]
+    ttk::checkbutton $wauto.autosub -text [mc prefsuauto] \
       -variable [namespace current]::tmpJPrefs(subsc,auto)
-    label $frauto.autola -text [mc {Default group}]:
-    entry $frauto.autoent -width 22   \
+    ttk::label $wauto.autola -text [mc {Default group}]:
+    ttk::entry $wauto.autoent -font CociSmallFont -width 22   \
       -textvariable [namespace current]::tmpJPrefs(subsc,group)
-    pack $frauto.autosub -side top -pady $ypad
-    pack $frauto.autola $frauto.autoent -side left -pady $ypad -padx 4
+    
+    grid  $wauto.autosub  -               -sticky w
+    grid  $wauto.autola   $wauto.autoent  
+    grid  $wauto.autoent  -sticky ew
+    grid columnconfigure $wauto 1 -weight 1
+    
+    pack  $wsubs  -side top -fill x
+    pack  $wauto  -side top -fill x -pady 12
 }
 
 proc ::Subscribe::SavePrefsHook { } {

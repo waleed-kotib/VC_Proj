@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.21 2005-02-02 15:21:20 matben Exp $
+# $Id: Theme.tcl,v 1.22 2005-08-14 07:17:55 matben Exp $
 
 package provide Theme 1.0
 
@@ -29,6 +29,9 @@ proc ::Theme::Init { } {
         
     # Handle theme name and locale from prefs file.
     NameAndLocalePrefs
+    
+    # Create named standard fonts.
+    Fonts
     
     # Priorities.
     # widgetDefault: 20
@@ -62,7 +65,7 @@ proc ::Theme::Init { } {
     # 4) imagePath
     set this(imagePathList) {}
     set themeDir [option get . themeImageDir {}]
-    if {$themeDir != ""} {
+    if {$themeDir ne ""} {
 	set dir [file join $this(altImagePath) $themeDir]
 	if {[file isdirectory $dir]} {
 	    lappend this(imagePathList) $dir
@@ -77,14 +80,14 @@ proc ::Theme::Init { } {
 
     # Figure out if additional image formats needed.
     set themeImageSuffixes [option get . themeImageSuffixes {}]
-    if {$themeImageSuffixes != ""} {
+    if {$themeImageSuffixes ne ""} {
 	set ind [lsearch $themeImageSuffixes .gif]
 	if {$ind >= 0} {
 	    set themeImageSuffixes [lreplace $themeImageSuffixes $ind $ind]
 	}
     }
     set this(themeImageSuffixes) ""
-    if {$themeImageSuffixes != ""} {
+    if {$themeImageSuffixes ne ""} {
 	set this(themeImageSuffixes) $themeImageSuffixes
     }
     set allImageSuffixes [concat .gif $themeImageSuffixes]
@@ -92,6 +95,90 @@ proc ::Theme::Init { } {
     # Make all images used for widgets that doesn't use the Theme package.
     PreLoadImages
 
+    # Any named fonts from any resource file must be constructed.
+    PostProcessFontDefs
+}
+
+# Theme::Fonts --
+# 
+#       Named fonts are created and configured for each platform.
+
+proc ::Theme::Fonts { } {
+    global  tcl_platform
+    
+    catch {font create CociDefaultFont}
+    catch {font create CociSmallFont}
+    catch {font create CociSmallBoldFont}
+    catch {font create CociTinyFont}
+    catch {font create CociLargeFont}
+
+    switch -- [tk windowingsystem] {
+	win32 {
+	    if {$tcl_platform(osVersion) >= 5.0} {
+		variable family "Tahoma"
+	    } else {
+		variable family "MS Sans Serif"
+	    }
+	    variable size 8
+	    variable largesize 14
+
+	    font configure CociDefaultFont   -family $family -size $size
+	    font configure CociSmallFont     -family $family -size $size
+	    font configure CociSmallBoldFont -family $family -size $size -weight bold
+	    font configure CociTinyFont      -family $family -size $size
+	    font configure CociLargeFont     -family $family -size $largesize
+	}
+	aqua {
+	    variable family "Lucida Grande"
+	    variable size 13
+	    variable viewsize 12
+	    variable smallsize 11
+	    variable largesize 18
+
+	    font configure CociDefaultFont   -family $family -size $size
+	    font configure CociSmallFont     -family $family -size $smallsize
+	    font configure CociSmallBoldFont -family $family -size $smallsize -weight bold
+	    font configure CociTinyFont      -family Geneva  -size 9
+	    font configure CociLargeFont     -family $family -size $largesize
+	}
+	x11 {
+	    if {![catch {tk::pkgconfig get fontsystem} fs] && $fs eq "xft"} {
+		variable family "sans-serif"
+	    } else {
+		variable family "Helvetica"
+	    }
+	    variable size -12
+	    variable smallsize -10
+	    variable largesize -18
+
+	    font configure CociDefaultFont   -family $family -size $size
+	    font configure CociSmallFont     -family $family -size $smallsize
+	    font configure CociSmallBoldFont -family $family -size $smallsize -weight bold
+	    font configure CociTinyFont      -family $family -size $size
+	    font configure CociLargeFont     -family $family -size $largesize
+	}
+    }
+}
+
+# Theme::PostProcessFontDefs --
+# 
+#       If a resource file specifies a font as:
+#       
+#       *fontNames:        myCoolFont ...
+#       *myCoolFont:       {Helvetica 24 bold}
+#       
+#       then the actual font with that name is constructed here.
+#       Note: Must start with LOWER case!
+
+proc ::Theme::PostProcessFontDefs { } {
+    
+    foreach name [option get . fontNames {}] {
+	catch {font create $name}
+	set spec [option get . $name {}]
+	if {$spec != {}} {
+	    eval {font configure $name} [font actual $spec]
+	}
+    }
 }
 
 proc ::Theme::NameAndLocalePrefs { } {
@@ -100,17 +187,17 @@ proc ::Theme::NameAndLocalePrefs { } {
     set prefs(themeName)     ""
     set prefs(messageLocale) ""
     
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list prefs(themeName)      prefs_themeName      $prefs(themeName)] \
       [list prefs(messageLocale)  prefs_messageLocale  $prefs(messageLocale)] \
       ]    
 
     set appName    [option get . appName {}]
     set theAppName [option get . theAppName {}]
-    if {$appName != ""} {
+    if {$appName ne ""} {
 	set prefs(appName) $appName
     }
-    if {$theAppName != ""} {
+    if {$theAppName ne ""} {
 	set prefs(theAppName) $theAppName
     }
     if {![CanLoadTheme $prefs(themeName)]} {
@@ -209,7 +296,7 @@ proc ::Theme::GetImage {name args} {
 		    break
 		}
 	    }
-	    if {$ans != ""} {
+	    if {$ans ne ""} {
 		break
 	    }
 	}
@@ -228,7 +315,7 @@ proc ::Theme::GetImage {name args} {
 proc ::Theme::GetImageFromExisting {name arrName} {
     
     set imname [GetImage $name]
-    if {$imname == ""} {
+    if {$imname eq ""} {
 
 	# Call by name.
 	upvar $arrName arr

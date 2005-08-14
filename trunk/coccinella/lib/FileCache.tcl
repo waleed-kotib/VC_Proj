@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.21 2005-02-02 15:21:19 matben Exp $
+# $Id: FileCache.tcl,v 1.22 2005-08-14 07:17:55 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -45,7 +45,7 @@
 #       MakeCacheFileName fileName
 #       Dump
 
-package require tinyfileutils
+package require uuid
 package require uriencode
 
 package provide FileCache 1.0
@@ -136,7 +136,7 @@ proc ::FileCache::Set {key {fileName ""}} {
     if {!$readcache} {
 	ReadTable
     }
-    if {$fileName == ""} {
+    if {$fileName eq ""} {
 	set absFileName $key
     } else {
 	if {[string equal [file dirname $fileName] "."]} {
@@ -366,7 +366,7 @@ proc ::FileCache::MakeCacheFileName {uri} {
     if {![file isdirectory $cachedir]} {
 	return -code error "the cache directory not set"
     }
-    set name [::tfileutils::newuid][file extension $uri]
+    set name [uuid::uuid generate][file extension $uri]
     set cacheToName($name) [file tail $uri]
     set fileName [file join $cachedir $name]
     return $fileName
@@ -570,7 +570,7 @@ proc ::FileCache::InitPrefsHook { } {
     set prefs(checkCache) "launch"
     set prefs(cacheSize)  $maxbytes
 
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list prefs(checkCache)      prefs_checkCache      $prefs(checkCache)] \
       [list prefs(incomingPath)    prefs_incomingPath    $prefs(incomingPath)] \
       [list prefs(cacheSize)       prefs_cacheSize       $prefs(cacheSize)]]
@@ -595,47 +595,52 @@ proc ::FileCache::BuildPage {page} {
     global  prefs
     variable tmpPrefs
         
-    set fontS [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
-
     set tmpPrefs(checkCache) $prefs(checkCache)
     set tmpPrefs(mbsize)     [expr wide($prefs(cacheSize)/1e6)]
     
-    set pca $page.fr
-    labelframe $pca -text [mc {File Cache}]
-    pack $pca -side top -anchor w -padx 8 -pady 4
-    message $pca.msg -width 300 -text [mc preffilecache]
-    pack $pca.msg -side top -anchor w -pady 2
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set pca $wc.fr
+    ttk::labelframe $pca -text [mc {File Cache}] \
+      -padding [option get . groupSmallPadding {}]
+    pack  $pca  -side top -anchor w
+    
+    ttk::label $pca.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc preffilecache]
+    pack $pca.msg -side top -anchor w
 
     set frca $pca.cas
-    pack [frame $frca] -fill x -padx 10
-    pack [label $frca.dsk -text "[mc {Disk Cache}]:"] -side left
-    pack [entry $frca.emb -width 6  \
-      -textvariable [namespace current]::tmpPrefs(mbsize)] -side left
-    pack [label $frca.mb -text [mc {MBytes}]] -side left
-    pack [button $frca.bt -padx 12 -text [mc {Clear Disk Cache Now}] \
-      -command [namespace current]::ClearCache -font $fontS]  \
-      -side right 
+    ttk::frame $frca
+    pack $frca -fill x -pady 2
+    
+    ttk::label $frca.dsk -text "[mc {Disk Cache}]:"
+    ttk::entry $frca.emb \
+      -width 6 -textvariable [namespace current]::tmpPrefs(mbsize)
+    ttk::label $frca.mb -text [mc {MBytes}]
+    ttk::button $frca.bt -padx 12 -text [mc {Clear Disk Cache Now}] \
+      -command [namespace current]::ClearCache
+    
+    pack  $frca.dsk  $frca.emb  $frca.mb  $frca.bt  -side left
 
     set frfo $pca.fo
-    pack [frame $frfo] -fill x -padx 10
-    pack [label $frfo.fo -text "[mc {Cache folder}]:"] -side left
-    pack [button $frfo.bt -padx 6 -text "[mc {Choose}]..." \
-      -command [namespace current]::SetCachePath -padx 12 -font $fontS]  \
+    pack [ttk::frame $frfo] -pady 2
+    pack [ttk::label $frfo.fo -text "[mc {Cache folder}]:"] -side left
+    pack [ttk::button $frfo.bt -padx 6 -text "[mc {Choose}]..." \
+      -command [namespace current]::SetCachePath]  \
       -side right 
-    
-    
-    set pwhen $page.frw
-    labelframe $pwhen -text [mc prefcachecmp]
-    pack $pwhen -side top -anchor w -padx 8 -pady 4
-    set frw $pwhen.cas
-    pack [frame $frw] -side left -padx 16 -pady 2
+        
+    set pwhen $wc.frw
+    ttk::labelframe $pwhen -text [mc prefcachecmp] \
+      -padding [option get . groupSmallPadding {}]
+    pack $pwhen -side top -fill x -pady 8
     foreach  \
-      val {always       launch             never}   \
-      txt {{Every time} {Once per session} {Never}} {
-	radiobutton $frw.$val -text [mc $txt]   \
+      val { always       launch             never   } \
+      txt { {Every time} {Once per session} {Never} } {
+	ttk::radiobutton $pwhen.$val -text [mc $txt]   \
 	  -variable [namespace current]::tmpPrefs(checkCache) -value $val
-	grid $frw.$val -sticky w
+	grid $pwhen.$val -sticky w
     }
 }
 
@@ -644,7 +649,7 @@ proc ::FileCache::SetCachePath { } {
     
     set dir [tk_chooseDirectory -title [mc {Pick Cache Folder}] \
       -initialdir $prefs(incomingPath) -mustexist 1]
-    if {$dir != ""} {
+    if {$dir ne ""} {
 	set prefs(incomingPath) $dir
     }
 }

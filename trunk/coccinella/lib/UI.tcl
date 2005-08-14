@@ -5,9 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: UI.tcl,v 1.93 2005-06-16 07:34:03 matben Exp $
+# $Id: UI.tcl,v 1.94 2005-08-14 07:17:55 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -16,7 +14,9 @@ package provide UI 1.0
 
 namespace eval ::UI:: {
 
+    # Add all event hooks.
     #::hooks::register initHook               ::UI::InitHook
+    ::hooks::register firstLaunchHook         ::UI::FirstLaunchHook
 
     # Icons
     option add *buttonOKImage            buttonok       widgetDefault
@@ -27,6 +27,18 @@ namespace eval ::UI:: {
     # components stuff.
     variable menuSpecPublic
     set menuSpecPublic(wpaths) {}
+
+    # The mac look-alike triangles.
+    set ::UI::icons(mactriangleopen) [image create photo -data {
+	R0lGODlhCwALAPMAAP///97e3s7O/729vZyc/4yMjGNjzgAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQgMMhJq7316M1P
+	OEIoEkchHURKGOUwoWubsYVryZiNVREAOw==
+    }]
+    set ::UI::icons(mactriangleclosed) [image create photo -data {
+	R0lGODlhCwALAPMAAP///97e3s7O/729vZyc/4yMjGNjzgAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQiMMgjqw2H3nqE
+	3h3xWaEICgRhjBi6FgMpvDEpwuCBg3sVAQA7
+    }]
 }
 
 proc ::UI::InitHook { } {
@@ -36,6 +48,11 @@ proc ::UI::InitHook { } {
     # Various initializations for canvas stuff and UI.
     #::UI::Init
     #::UI::InitMenuDefs  
+}
+
+proc ::UI::FirstLaunchHook { } {
+    SetupAss
+    WelcomeCanvas
 }
 
 # UI::Init --
@@ -60,17 +77,17 @@ proc ::UI::InitCommonBinds { } {
     # A mechanism to set -state of cut/copy/paste. Not robust!!!
     # All selections are not detected (shift <- -> etc).
     # Entry copy/paste.
-    bind Entry <FocusIn>         "+ ::UI::FixMenusWhenSelection %W"
-    bind Entry <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
-    bind Entry <<Cut>>           "+ ::UI::FixMenusWhenSelection %W"
-    bind Entry <<Copy>>          "+ ::UI::FixMenusWhenSelection %W"
+    bind Entry <FocusIn>         {+ ::UI::FixMenusWhenSelection %W }
+    bind Entry <ButtonRelease-1> {+ ::UI::FixMenusWhenSelection %W }
+    bind Entry <<Cut>>           {+ ::UI::FixMenusWhenSelection %W }
+    bind Entry <<Copy>>          {+ ::UI::FixMenusWhenSelection %W }
 	
     # Text copy/paste.
-    bind Text <FocusIn>         "+ ::UI::FixMenusWhenSelection %W"
-    bind Text <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
-    bind Text <<Cut>>           "+ ::UI::FixMenusWhenSelection %W"
-    bind Text <<Copy>>          "+ ::UI::FixMenusWhenSelection %W"
-    
+    bind Text <FocusIn>         {+ ::UI::FixMenusWhenSelection %W }
+    bind Text <ButtonRelease-1> {+ ::UI::FixMenusWhenSelection %W }
+    bind Text <<Cut>>           {+ ::UI::FixMenusWhenSelection %W }
+    bind Text <<Copy>>          {+ ::UI::FixMenusWhenSelection %W }
+
     if {[string equal "x11" [tk windowingsystem]]} {
 	# Support for mousewheels on Linux/Unix commonly comes through mapping
 	# the wheel to the extended buttons.  If you have a mousewheel, find
@@ -112,10 +129,10 @@ proc ::UI::InitCommonBinds { } {
 
 proc ::UI::InitVirtualEvents { } {
     global  this
-    
-    
+      
     # Virtual events.
     event add <<CloseWindow>> <$this(modkey)-Key-w>
+    event add <<ReturnEnter>> <Return> <KP_Enter>
 
     switch -- $this(platform) {
 	macintosh {
@@ -156,10 +173,12 @@ proc ::UI::InitDlgs { } {
 	plugs           .plugs
 	setupass        .setupass
 	wb              .wb
+	mainwb          .wb0
     }
-
+    
     # Toplevel dialogs for the jabber part.
     array set wDlgs {
+	jmain           .jmain
 	jreg            .jreg
 	jlogin          .jlogin
 	jrost           .jrost
@@ -172,7 +191,6 @@ proc ::UI::InitDlgs { } {
 	jstartchat      .jstartchat
 	jchat           .jchat
 	jbrowse         .jbrowse
-	jrostbro        .jrostbro
 	jenterroom      .jenterroom
 	jcreateroom     .jcreateroom
 	jinbox          .jinbox
@@ -222,7 +240,7 @@ proc ::UI::InitMenuDefs { } {
     #      {{type name cmd state accelerator opts} {{...} {...} ...}}
 
     set menuDefs(main,info,aboutwhiteboard)  \
-      {command   mAboutCoccinella    {::SplashScreen::SplashScreen} normal   {}}
+      {command   mAboutCoccinella    {::Splash::SplashScreen} normal   {}}
     set menuDefs(main,info,aboutquicktimetcl)  \
       {command   mAboutQuickTimeTcl  {::Dialogs::AboutQuickTimeTcl}                normal   {}}
 
@@ -235,6 +253,71 @@ proc ::UI::InitMenuDefs { } {
     if {$haveAppleMenu && ![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefs(main,apple) 1 3 disabled
     }
+}
+
+# UI::SetupAss --
+# 
+#       Setup assistant. Must be called after initing the jabber stuff.
+
+proc ::UI::SetupAss { } {
+    global wDlgs
+    
+    package require SetupAss
+
+    catch {destroy $wDlgs(splash)}
+    update
+    ::Jabber::SetupAss::SetupAss
+    ::UI::CenterWindow $wDlgs(setupass)
+    raise $wDlgs(setupass)
+    tkwait window $wDlgs(setupass)
+}
+
+# UI::WelcomeCanvas --
+# 
+#       Is it the first time it is launched, then show the welcome canvas.
+
+proc ::UI::WelcomeCanvas { } {
+    global  this
+    
+    set systemLocale [lindex [split $this(systemLocale) _] 0]
+    set floc [file join $this(docsPath) Welcome_${systemLocale}.can]
+    if {[file exists $floc]} {
+	set f $floc
+    } else {
+	set f [file join $this(docsPath) Welcome_en.can]
+    }
+    ::Dialogs::Canvas $f -title [mc {Welcome}] -encoding utf-8
+}
+
+proc ::UI::GetMainWindow { } {
+    global  prefs
+    
+    switch -- $prefs(protocol) {
+	jabber {
+	    return [::Jabber::UI::GetMainWindow]
+	}
+	default {
+	    return [::P2P::GetMainWindow]
+	}
+    }
+}
+
+proc ::UI::GetMainMenu { } {
+    global  prefs wDlgs
+    
+    switch -- $prefs(protocol) {
+	jabber {
+	    return [::Jabber::UI::GetMainMenu]
+	}
+	default {
+	    return [GetMenuFromWindow [::P2P::GetMainWindow]]
+	}
+    }
+}
+
+proc ::UI::GetMenuFromWindow {w} {
+    
+    return $w.menu
 }
 
 #proc ::UI::GetIcon {name} {
@@ -266,7 +349,7 @@ proc ::UI::IsAppInFront { } {
     foreach w [wm stackorder .] {
 	#puts "w=$w, state=[wm state $w], wfocus=$wfocus"
 	if {[string equal [wm state $w] "normal"]} {
-	    if {($wfocus != "") && [string equal [winfo toplevel $wfocus] $w]} {
+	    if {($wfocus ne "") && [string equal [winfo toplevel $wfocus] $w]} {
 		set isfront 1
 		break
 	    }
@@ -350,49 +433,41 @@ namespace eval ::UI:: {
 #       -macclass
 #           macosx only; {class attributesList} 
 #           class = alert moveableAlert modal moveableModal floating document
-#           help toolbar
+#                   help toolbar
 #           attributes = closeBox noActivates horizontalZoom verticalZoom 
-#           collapseBox resizable sideTitlebar noUpdates noActivates
+#                   collapseBox resizable sideTitlebar noUpdates noActivates
 #       -usemacmainmenu
 
 proc ::UI::Toplevel {w args} {
-    global  this
+    global  this prefs
     variable topcache
     
     array set argsArr {
 	-usemacmainmenu   0
     }
     array set argsArr $args
-    set topopts {}
+    set opts {}
     if {[info exists argsArr(-class)]} {
-	lappend topopts -class $argsArr(-class)
+	lappend opts -class $argsArr(-class)
     }
     if {[info exists argsArr(-closecommand)]} {
 	set topcache($w,-closecommand) $argsArr(-closecommand)
     }
+    if {[string equal $this(platform) "macosx"]} {
+	if {$argsArr(-usemacmainmenu)} {
+	    lappend opts -menu [GetMainMenu]
+	}
+    }
     set topcache($w,prevstate) "normal"
     set topcache($w,w) $w
-    eval {toplevel $w} $topopts
+    eval {toplevel $w} $opts
         
     # We direct all close events through DoCloseWindow so things can
     # be handled from there.
     wm protocol $w WM_DELETE_WINDOW [list ::UI::DoCloseWindow $w]
+    bind $w <Escape> [list destroy $w]
     
-    if {[string equal $this(platform) "macintosh"]} {
-	foreach {key value} $args {	    
-	    switch -- $key {
-		-usemacmainmenu {
-		    if {$argsArr(-usemacmainmenu)} {
-			::UI::MacUseMainMenu $w
-		    }
-		}
-		-macstyle {
-		    eval {::tk::unsupported::MacWindowStyle style $w}  \
-		      $argsArr(-macstyle)
-		}
-	    }
-	}
-    } elseif {[string equal $this(platform) "macosx"]} {
+    if {[tk windowingsystem] eq "aqua"} {
 	if {[info exists argsArr(-macclass)]} {
 	    eval {::tk::unsupported::MacWindowStyle style $w}  \
 	      $argsArr(-macclass)
@@ -400,11 +475,22 @@ proc ::UI::Toplevel {w args} {
 	    ::tk::unsupported::MacWindowStyle style $w $argsArr(-macstyle)
 	}
 	if {$argsArr(-usemacmainmenu)} {
-	    MacUseMainMenu $w
+	    SetMenuAcceleratorBinds $w [GetMainMenu]
 	}
     } else {
-	#bind $w <$this(modkey)-Key-w> [list ::UI::DoCloseWindow $w]
 	bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w]
+    }
+    if {$prefs(opacity) != 100} {
+	array set attr [wm attributes $w]
+	if {[info exists attr(-alpha)]} {
+	    after idle [list \
+	      wm attributes $w -alpha [expr {$prefs(opacity)/100.0}]]
+	}
+    }
+    
+    # This is binding for the apple menu which is created automatically.
+    if {[tk windowingsystem] eq "aqua"} {
+	bind $w <$this(modkey)-Key-q> { ::UserActions::DoQuit -warning 1 }
     }
     ::hooks::run newToplevelWindowHook $w
     
@@ -418,7 +504,7 @@ proc ::UI::Toplevel {w args} {
 #       Notes: There are three ways to close a window:
 #       1) from the menus Close Window command
 #       2) using the menu keyboard shortcut command/control-w
-#       3) clicking the menus close button
+#       3) clicking the windows close button
 #       
 #       If any cleanup etc. is necessary all three must execute the same code.
 #       In case where window must not be destroyed a hook must be registered
@@ -429,24 +515,37 @@ proc ::UI::DoCloseWindow {{wevent ""}} {
     variable topcache
     
     set w ""
-    if {$wevent == ""} {
+    if {$wevent eq ""} {
 	set wfocus [focus]
-	if {$wfocus != ""} {
+	if {$wfocus ne ""} {
 	    set w [winfo toplevel [focus]]
 	}
     } else {
 	set w $wevent
     }
-    if {$w != ""} {
+    if {$w ne ""} {
+
 	Debug 2 "::UI::DoCloseWindow winfo class $w=[winfo class $w]"
+
+	# Give components a chance to intersect destruction. (Win taskbar)
+	set result [::hooks::run preCloseWindowHook $w]    
+	if {[string equal $result "stop"]} {
+	    return
+	}
+	
 	if {[info exists topcache($w,-closecommand)]} {
-	    uplevel #0 $topcache($w,-closecommand) $w
+	    set result [uplevel #0 $topcache($w,-closecommand) $w]
+	    if {[string equal $result "stop"]} {
+		return
+	    }
+	    catch {destroy $w}
+	    array unset topcache $w,*
 	}
     
 	# Run hooks. Only the one corresponding to the $w needs to act!
 	set result [::hooks::run closeWindowHook $w]    
 	if {![string equal $result "stop"]} {
-	    destroy $w
+	    catch {destroy $w}
 	    array unset topcache $w,*
 	}
     }
@@ -499,42 +598,118 @@ proc ::UI::GetToplevelState { } {
     return $topcache(state)
 }
 
-# UI::GetToplevelNS --
-#
-#       Returns the toplevel widget from any descendent, but with an extra
-#       dot appended except for ".".
-
-proc ::UI::GetToplevelNS {w} {
-
-    set wtop [winfo toplevel $w]
-    if {[string equal $wtop "."]} {
-	return $wtop
-    } else {
-	return ${wtop}.
-    }
-}
-
-proc ::UI::GetToplevel {w} {
-
-    if {[string equal $w "."]} {
-	return $w
-    } else {
-	set w [string trimright $w "."]
-	return [winfo toplevel $w]
-    }
-}
-
-#       As GetToplevel but window need not exist.
+# UI::GetToplevelFromPath --
+# 
+#       As 'winfo toplevel' but window need not exist.
 
 proc ::UI::GetToplevelFromPath {w} {
 
     if {[string equal $w "."]} {
 	return $w
     } else {
-	regexp {^(\.[^.]+)\.} $w match wpath
+	regexp {^(\.[^.]+)} $w match wpath
 	return $wpath
     }
 }
+
+# UI::Grab --
+# 
+# 
+
+proc ::UI::Grab {w} {
+    
+    catch {grab $w}
+    if {[tk windowingsystem] eq "aqua"} {
+	
+	# Disable menubar except Edit menu.
+	set m [$w cget -menu]
+	MenubarDisableBut $m edit
+    }
+}
+
+proc ::UI::GrabRelease {w} {
+    
+    catch {grab release $w}
+    if {[tk windowingsystem] eq "aqua"} {
+	
+	# Enable menubar.
+	MenubarEnableAll [$w cget -menu]
+    }
+}
+
+# UI::ScrollFrame --
+# 
+#       A few functions to make scrollable frames.
+
+proc ::UI::ScrollFrame {w args} {
+    
+    array set opts {
+	-bd         0
+	-padding    {0}
+	-propagate  1
+	-relief     flat
+	-width      0
+    }
+    array set opts $args
+    
+    frame $w -class Scrollframe -bd $opts(-bd) -relief $opts(-relief)
+    tuscrollbar $w.ysc -command [list $w.can yview]
+    if {$opts(-width)} {
+	set cwidth [expr {$opts(-width) - $opts(-bd) - [winfo reqwidth $w.ysc]}]
+	canvas $w.can -yscrollcommand [list $w.ysc set] -highlightthickness 0 \
+	  -width $cwidth
+    } else {
+	canvas $w.can -yscrollcommand [list $w.ysc set] -highlightthickness 0
+    }
+    pack $w.ysc -side right -fill y
+    pack $w.can -side left -fill both -expand 1
+    
+    if {!$opts(-propagate)} {
+	ttk::frame $w.can.bg
+	$w.can create window 0 0 -anchor nw -window $w.can.bg -tags twin
+    }
+    ttk::frame $w.can.f -padding $opts(-padding)
+    $w.can create window 0 0 -anchor nw -window $w.can.f -tags twin
+    
+    if {$opts(-propagate)} {
+	bind $w.can.f <Configure> [list ::UI::ScrollFrameResize $w]
+    } else {
+	bind $w.can.f <Configure> [list ::UI::ScrollFrameResizeScroll $w]
+	bind $w.can   <Configure> [list ::UI::ScrollFrameResizeBg $w]
+    }
+    return $w
+}
+
+proc ::UI::ScrollFrameResize {w} {
+        
+    set bbox [$w.can bbox twin]
+    set width [winfo width $w.can.f]
+    $w.can configure -width $width -scrollregion $bbox
+}
+
+proc ::UI::ScrollFrameResizeScroll {w} {
+	
+    set bbox [$w.can bbox all]
+    $w.can configure -scrollregion $bbox
+}
+
+proc ::UI::ScrollFrameResizeBg {w} {
+    
+    set bbox [$w.can bbox all]
+    set width  [winfo width $w.can]
+    set height [winfo height $w.can]
+    #$w.can.bg configure -width $width -height [lindex $bbox 3]
+    $w.can.bg configure -width $width -height $height
+}
+
+proc ::UI::ScrollFrameInterior {w} {
+ 
+    return $w.can.f
+}
+
+# UI::ScrollSet --
+# 
+#       Command for auto hide/show scrollbars.
 
 proc ::UI::ScrollSet {wscrollbar geocmd offset size} {
     
@@ -544,6 +719,36 @@ proc ::UI::ScrollSet {wscrollbar geocmd offset size} {
     } else {
 	set manager [lindex $geocmd 0]
 	$manager forget $wscrollbar
+    }
+}
+
+proc ::UI::GetPaddingWidth {padding} {
+    
+    switch -- [llength $padding] {
+	1 {
+	    return [expr {2*$padding}]
+	}
+	2 {
+	    return [expr {2*[lindex $padding 0]}]
+	}
+	4 {
+	    return [expr {[lindex $padding 0] + [lindex $padding 2]}]
+	}
+    }
+}
+
+proc ::UI::GetPaddingHeight {padding} {
+    
+    switch -- [llength $padding] {
+	1 {
+	    return [expr {2*$padding}]
+	}
+	2 {
+	    return [expr {2*[lindex $padding 1]}]
+	}
+	4 {
+	    return [expr {[lindex $padding 1] + [lindex $padding 3]}]
+	}
     }
 }
 
@@ -557,10 +762,10 @@ proc ::UI::ScrollSet {wscrollbar geocmd offset size} {
 #                   is the actual toplevel window.
 # 
 
-proc ::UI::SaveWinGeom {key {w {}}} {
+proc ::UI::SaveWinGeom {key {w ""}} {
     global  prefs
     
-    if {$w == ""} {
+    if {$w eq ""} {
 	set w $key
     }
     if {[winfo exists $w]} {
@@ -570,12 +775,12 @@ proc ::UI::SaveWinGeom {key {w {}}} {
 
 proc ::UI::SaveWinPrefixGeom {wprefix {key ""}} {
     
-    if {$key == ""} {
+    if {$key eq ""} {
 	set key $wprefix
     }
-    set win [::UI::GetFirstPrefixedToplevel $wprefix]
-    if {$win != ""} {
-	::UI::SaveWinGeom $key $win
+    set win [GetFirstPrefixedToplevel $wprefix]
+    if {$win ne ""} {
+	SaveWinGeom $key $win
     }	
 }
 
@@ -606,16 +811,24 @@ proc ::UI::SavePanePos {key wpaned {orient horizontal}} {
     }
 }
 
+proc ::UI::SaveSashPos {key w} {
+    global  prefs
+    
+    if {[winfo exists $w]} {
+	set prefs(sashPos,$key) [$w sashpos 0]
+    }
+}
+
 proc ::UI::SetWindowPosition {w {key ""}} {
     global  prefs
     
-    if {$key == ""} {
+    if {$key eq ""} {
 	set key $w
     }
     if {[info exists prefs(winGeom,$key)]} {
 
 	# We shall verify that the window is not put offscreen.
-	foreach {width height x y} [ParseWMGeometry $prefs(winGeom,$key)] {break}
+	lassign [ParseWMGeometry $prefs(winGeom,$key)] width height x y
 	KeepOnScreen $w x y $width $height
 	wm geometry $w +${x}+${y}
     }
@@ -624,15 +837,25 @@ proc ::UI::SetWindowPosition {w {key ""}} {
 proc ::UI::SetWindowGeometry {w {key ""}} {
     global  prefs
     
-    if {$key == ""} {
+    if {$key eq ""} {
 	set key $w
     }
     if {[info exists prefs(winGeom,$key)]} {
 
 	# We shall verify that the window is not put offscreen.
-	foreach {width height x y} [ParseWMGeometry $prefs(winGeom,$key)] {break}
+	lassign [ParseWMGeometry $prefs(winGeom,$key)] width height x y
 	KeepOnScreen $w x y $width $height
 	wm geometry $w ${width}x${height}+${x}+${y}
+    }
+}
+
+# @@@ not working...
+
+proc ::UI::SetSashPos {key w} {
+    global  prefs
+    
+    if {[info exists prefs(sashPos,$key)]} {
+	$w sashpos 0 $prefs(sashPos,$key)
     }
 }
 
@@ -673,11 +896,11 @@ proc ::UI::GetFirstPrefixedToplevel {wprefix} {
 	
 	# 1st priority, pick if on top.
 	set wfocus [focus]
-	if {$wfocus != ""} {
+	if {$wfocus ne ""} {
 	    set win [winfo toplevel $wfocus]
 	}
 	set win [lsearch -inline $wins $wfocus]
-	if {$win == ""} {
+	if {$win eq ""} {
 	    
 	    # 2nd priority, just get first in list.
 	    set win [lindex $wins 0]
@@ -697,7 +920,7 @@ proc ::UI::GetPrefixedToplevels {wprefix} {
 #       Creates a new menu from a previously defined menu definition list.
 #       
 # Arguments:
-#       wtop        toplevel window. ("." or ".main2." with extra dot!)
+#       w           toplevel window
 #       wmenu       the menus widget path name (".menu.file" etc.).
 #       label       its label.
 #       menuSpec    a hierarchical list that defines the menu content.
@@ -708,15 +931,15 @@ proc ::UI::GetPrefixedToplevels {wprefix} {
 # Results:
 #       $wmenu
 
-proc ::UI::NewMenu {wtop wmenu label menuSpec state args} {    
+proc ::UI::NewMenu {w wmenu label menuSpec state args} {    
     variable mapWmenuToWtop
     variable cachedMenuSpec
-        
+            
     # Need to cache the complete menuSpec's since needed in MenuMethod.
-    set cachedMenuSpec($wtop,$wmenu) $menuSpec
-    set mapWmenuToWtop($wmenu)       $wtop
+    set cachedMenuSpec($w,$wmenu) $menuSpec
+    set mapWmenuToWtop($wmenu)    $w
 
-    eval {::UI::BuildMenu $wtop $wmenu $label $menuSpec $state} $args
+    eval {BuildMenu $w $wmenu $label $menuSpec $state} $args
 }
 
 # UI::BuildMenu --
@@ -725,7 +948,7 @@ proc ::UI::NewMenu {wtop wmenu label menuSpec state args} {
 #       Only called from ::UI::NewMenu!
 #
 # Arguments:
-#       wtop        toplevel window. ("." or ".main2." with extra dot!)
+#       w           toplevel window
 #       wmenu       the menus widget path name (".menu.file" etc.).
 #       label       its label.
 #       menuDef     a hierarchical list that defines the menu content.
@@ -736,19 +959,14 @@ proc ::UI::NewMenu {wtop wmenu label menuSpec state args} {
 # Results:
 #       $wmenu
 
-proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
+proc ::UI::BuildMenu {w wmenu label menuDef state args} {
     global  this wDlgs prefs
 
     variable menuKeyToIndex
     variable menuNameToWmenu
     variable mapWmenuToWtop
     variable cachedMenuSpec
-    
-    if {$wtop == "."} {
-	set topw .
-    } else {
-	set topw [string trimright $wtop "."]
-    }
+        
     set m [menu $wmenu -tearoff 0]
     set wparent [winfo parent $wmenu]
     
@@ -768,7 +986,7 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
       [string equal [winfo class $wparent] "Frame"]} {
 	label ${wmenu}la -text [mc $label]
 	pack ${wmenu}la -side left -padx 4
-	bind ${wmenu}la <Button-1> [list ::UI::DoTopMenuPopup %W $wtop $wmenu]
+	bind ${wmenu}la <Button-1> [list ::UI::DoTopMenuPopup %W $wmenu]
     }
     
     set mod $this(modkey)
@@ -777,13 +995,13 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 	foreach {type name cmd mstate accel mopts subdef} $line {
 	    
 	    # Localized menu label. Special for mAboutCoccinella!
-	    if {$name == "mAboutCoccinella"} {
+	    if {$name eq "mAboutCoccinella"} {
 		set locname [mc {About %s} $prefs(appName)]
 	    } else {
 		set locname [mc $name]
 	    }
 	    set menuKeyToIndex($wmenu,$name) $i
-	    set menuNameToWmenu($wtop,$label,$name) $wmenu
+	    set menuNameToWmenu($w,$label,$name) $wmenu
 	    set ampersand [string first & $locname]
 	    if {$ampersand != -1} {
 		regsub -all & $locname "" locname
@@ -797,18 +1015,18 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 		regsub -all -- " " [string tolower $name] "" mt
 		regsub -all -- {\.} $mt "" mt
 		
-		set wsubmenu ${wmenu}.${mt}
-		set cachedMenuSpec($wtop,$wsubmenu) $subdef
-		set mapWmenuToWtop($wsubmenu) $wtop
-		eval {::UI::BuildMenu $wtop $wsubmenu $name $subdef $state} \
-		  $args
+		set wsubmenu $wmenu.$mt
+		set cachedMenuSpec($w,$wsubmenu) $subdef
+		set mapWmenuToWtop($wsubmenu) $w
+		eval {BuildMenu $w $wsubmenu $name $subdef $state} $args
 		
 		# Explicitly set any disabled state of cascade.
-		::UI::MenuMethod $m entryconfigure $name -state $mstate
+		MenuMethod $m entryconfigure $name -state $mstate
 	    } else {
 		
 		# All variables (and commands) in menuDef's cmd shall be 
 		# substituted! Be sure they are all in here.
+
 		set cmd [subst -nocommands $cmd]
 		if {[string length $accel]} {
 		    lappend mopts -accelerator ${mod}+${accel}
@@ -821,10 +1039,10 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 			
 			if {[string equal $state "normal"]} {
 			    if {[string equal $mstate "normal"]} {
-				bind $topw <${mod}-Key-${key}> $cmd
+				bind $w <${mod}-Key-${key}> $cmd
 			    }
 			} else {
-			    bind $topw <${mod}-Key-${key}> {}
+			    bind $w <${mod}-Key-${key}> {}
 			}			
 		    }
 		}
@@ -837,25 +1055,25 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
     return $wmenu
 }
 
-proc ::UI::GetMenu {wtop label1 {label2 ""}} {
+proc ::UI::GetMenu {w label1 {label2 ""}} {
     variable menuNameToWmenu
 
-    return $menuNameToWmenu($wtop,$label1,$label2)
+    return $menuNameToWmenu($w,$label1,$label2)
 }
 
-proc ::UI::FreeMenu {wtop} {
+proc ::UI::FreeMenu {w} {
     variable mapWmenuToWtop
     variable cachedMenuSpec
     variable menuKeyToIndex
     variable menuNameToWmenu
     
-    foreach key [array names cachedMenuSpec $wtop,*] {
-	set wmenu [string map [list "$wtop," ""] $key]
+    foreach key [array names cachedMenuSpec $w,*] {
+	set wmenu [string map [list "$w," ""] $key]
 	unset mapWmenuToWtop($wmenu)
 	array unset menuKeyToIndex $wmenu,*
     }
-    array unset cachedMenuSpec  $wtop,*
-    array unset menuNameToWmenu $wtop,*
+    array unset cachedMenuSpec  $w,*
+    array unset menuNameToWmenu $w,*
 }
 
 # UI::MenuMethod --
@@ -879,10 +1097,15 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
     variable mapWmenuToWtop
     variable cachedMenuSpec
     variable wThatUseMainMenu
-        
+    
+    # Be silent about nonexistent entries?
+    if {![info exists menuKeyToIndex($wmenu,$key)]} {
+	#return
+    }
+    
     # Need to cache the complete menuSpec's since needed in MenuMethod.
-    set wtop     $mapWmenuToWtop($wmenu)
-    set menuSpec $cachedMenuSpec($wtop,$wmenu)
+    set w        $mapWmenuToWtop($wmenu)
+    set menuSpec $cachedMenuSpec($w,$wmenu)
     set mind     $menuKeyToIndex($wmenu,$key)
     
     # This would be enough unless we needed to work with accelerator keys.
@@ -890,14 +1113,14 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
     
     # Handle any menu accelerators as well. 
     # Make sure the necessary variables for the command exist here!
-    if {[string equal $this(platform) "macintosh"]} {
-	return
-    }
-    if {$wtop == "."} {
-	set topw .
+    
+    set wmain [GetMainWindow]
+    set wlist $wmain
+
+    if {$w == $wmain} {
 	
-	# Handle Macs that use the main menu.
-	if {[string equal $this(platform) "macosx"]} {
+	# Handle Macs that use (inherit) the main menu.
+	if {[tk windowingsystem] eq "aqua"} {
 	    set wtmp $wThatUseMainMenu
 	    set wThatUseMainMenu {}
 	    foreach wmac $wtmp {
@@ -905,10 +1128,10 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
 		    lappend wThatUseMainMenu $wmac
 		}
 	    }
-	    set topw [concat . $wThatUseMainMenu]
+	    set wlist [concat $wmain $wThatUseMainMenu]
 	}	
     } else {
-	set topw [string trimright $wtop "."]
+	set wlist $w
     }
 	    
     foreach {key val} $args {
@@ -920,14 +1143,13 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
 		set acc [lindex $menuSpec $mind 4]
 
 		# Cut, Copy & Paste handled by widgets internally!
-		if {[string length $acc] && ![regexp {(X|C|V)} $acc]} {
-		    set acckey [string map {< less > greater}  \
-		      [string tolower $acc]]
-		    foreach w $topw {
-			if {[string equal $val "normal"]} {
-			    bind $w <$this(modkey)-Key-${acckey}> $mcmd
+		if {($acc ne "") && ![regexp {(X|C|V)} $acc]} {
+		    set akey [string map {< less > greater} [string tolower $acc]]
+		    foreach w $wlist {
+			if {$val eq "normal"} {
+			    bind $w <$this(modkey)-Key-${akey}> $mcmd
 			} else {
-			    bind $w <$this(modkey)-Key-${acckey}> {}
+			    bind $w <$this(modkey)-Key-${akey}> {}
 			}
 		    }
 		}
@@ -936,78 +1158,65 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
     }
 }
 
-# UI::MacUseMainMenu --
+# UI::SetMenuAcceleratorBinds --
 # 
 #       Used on MacOSX to set accelerator keys for a toplevel that inherits
-#       the menu from ".".
+#       the menu from 'wmenubar'.
 #       
 # Arguments:
-#       w           toplevel widget that uses the "." menu.
+#       w
+#       wmenu
 #       
 # Results:
 #       none
 
-proc ::UI::MacUseMainMenu {w} {
+proc ::UI::SetMenuAcceleratorBinds {w wmenubar} {
     global  this
+    
+    variable menuKeyToIndex
     variable mapWmenuToWtop
     variable cachedMenuSpec
-    variable menuKeyToIndex
     variable wThatUseMainMenu
     
     if {![string match "mac*" $this(platform)]} {
 	return
     }
-    ::Debug 3 "::UI::MacUseMainMenu w=$w"
-	
-    # Set up menu accelerators from ".".
-    if {![string equal $w "."] && [string equal $this(platform) "macosx"]} {
-	lappend wThatUseMainMenu $w
-	
-	set wmenuList {}
-	foreach {wmenu wtop} [array get mapWmenuToWtop] {
-	    if {[string equal $wtop "."]} {
-		lappend wmenuList $wmenu
-	    }
-	}
-	
-	# Need to loop through all menuDefs to look for accelerators.
-	foreach wmenu $wmenuList {
-	    foreach line $cachedMenuSpec(.,$wmenu) {
-		
-		# {type name cmd mstate accel mopts subdef} $line
-		# Cut, Copy & Paste handled by widgets internally!
-		set accel [lindex $line 4]
-		if {[string length $accel] && ![regexp {(X|C|V)} $accel]} {
 
-		    # Must check the actual state of menu!
-		    set name [lindex $line 1]
-		    set mind $menuKeyToIndex($wmenu,$name)
-		    set state [$wmenu entrycget $mind -state]
-		    if {[string equal $state "normal"]} {
-			set acckey [string map {< less > greater}  \
-			  [string tolower $accel]]
-			bind $w <$this(modkey)-Key-${acckey}> [lindex $line 2]
-			#bind $w <$this(modkey)-Key-${acckey}> \
-			 # [list $wmenu invoke $mind]
-		    }
+    lappend wThatUseMainMenu $w
+
+    foreach {wmenu wtop} [array get mapWmenuToWtop $wmenubar.*] {
+	foreach line $cachedMenuSpec($wtop,$wmenu) {
+	    
+	    # {type name cmd mstate accel mopts subdef} $line
+	    # Cut, Copy & Paste handled by widgets internally!
+	    set accel [lindex $line 4]
+	    if {[string length $accel] && ![regexp {(X|C|V)} $accel]} {
+
+		# Must check the actual state of menu!
+		set name [lindex $line 1]
+		set mind $menuKeyToIndex($wmenu,$name)
+		set state [$wmenu entrycget $mind -state]
+		if {[string equal $state "normal"]} {
+		    set acckey [string map {< less > greater}  \
+		      [string tolower $accel]]
+		    bind $w <$this(modkey)-Key-${acckey}> [lindex $line 2]
 		}
 	    }
 	}
     }
+
+    # This sets up the edit menu that we inherit from the main menu.
+    bind $w <FocusIn> +[list ::UI::MacFocusFixEditMenu $w $wmenubar %W]
     
-    # This sets up the edit menu that we inherit from ".".
-    bind $w <FocusIn> "+ ::UI::MacFocusFixEditMenu $w . %W"
-    
-    # If we hand over to a 3rd party toplevel window, it by default inherits
-    # the "." menu bar, so we need to take precautions.
-    bind $w <FocusOut> "+ ::UI::MacFocusFixEditMenu $w . %W"
+    # If we hand over to a 3rd party toplevel window we need to take precautions.
+    bind $w <FocusOut> +[list ::UI::MacFocusFixEditMenu $w $wmenubar %W]
 }
 
-proc ::UI::BuildAppleMenu {wtop wmenuapple state} {
+proc ::UI::BuildAppleMenu {w wmenuapple state} {
     global  this wDlgs
     variable menuDefs
     
-    ::UI::NewMenu $wtop $wmenuapple {} $menuDefs(main,apple) $state
+    ::UI::NewMenu $w $wmenuapple {} $menuDefs(main,apple) $state
     
     if {[string equal $this(platform) "macosx"]} {
 	proc ::tk::mac::ShowPreferences { } {
@@ -1016,16 +1225,46 @@ proc ::UI::BuildAppleMenu {wtop wmenuapple state} {
     }
 }
 
+proc ::UI::MenubarDisableBut {mbar name} {
+
+    # @@@ This doesn't fix accelerators!
+    set iend [$mbar index end]
+    for {set ind 0} {$ind <= $iend} {incr ind} {
+	set m [$mbar entrycget $ind -menu]
+	if {$name ne [winfo name $m]} {
+	    $mbar entryconfigure $ind -state disabled
+	}
+    }
+}
+
+proc ::UI::MenubarEnableAll {mbar} {
+    
+    # @@@ This doesn't fix accelerators!
+    set iend [$mbar index end]
+    for {set ind 0} {$ind <= $iend} {incr ind} {
+	$mbar entryconfigure $ind -state normal
+    }    
+}
+
 proc ::UI::MenuDisableAllBut {mw normalList} {
 
     set iend [$mw index end]
     for {set i 0} {$i <= $iend} {incr i} {
-	if {[$mw type $i] != "separator"} {
+	if {[$mw type $i] ne "separator"} {
 	    $mw entryconfigure $i -state disabled
 	}
     }
     foreach name $normalList {
 	::UI::MenuMethod $mw entryconfigure $name -state normal
+    }
+}
+
+proc ::UI::DoTopMenuPopup {w wmenu} {
+    
+    if {[winfo exists $wmenu]} {
+	set x [winfo rootx $w]
+	set y [expr [winfo rooty $w] + [winfo height $w]]
+	tk_popup $wmenu $x $y
     }
 }
 
@@ -1171,14 +1410,14 @@ proc ::UI::Public::GetRegisteredMenuDefs {mtail} {
 
 #--- There are actually more; sort out later -----------------------------------
 
-proc ::UI::BuildPublicMenus {wtop wmenu} {
+proc ::UI::BuildPublicMenus {w wmenu} {
     variable menuSpecPublic
     
     foreach mtail $menuSpecPublic(wpaths) {	
 	set m [menu ${wmenu}.${mtail} -tearoff 0]
 	$wmenu add cascade -label $menuSpecPublic($mtail,name) -menu $m
 	foreach menuSpec $menuSpecPublic($mtail,specs) {
-	    ::UI::BuildMenuEntryFromSpec $wtop $m $menuSpec
+	    BuildMenuEntryFromSpec $w $m $menuSpec
 	}
     }
 }
@@ -1193,14 +1432,14 @@ proc ::UI::BuildPublicMenus {wtop wmenu} {
 # Results:
 #       none
 
-proc ::UI::BuildMenuEntryFromSpec {wtop m menuSpec} {
+proc ::UI::BuildMenuEntryFromSpec {w m menuSpec} {
     
     foreach {type label cmd state accel opts submenu} $menuSpec {
 	if {[llength $submenu]} {
 	    set mt [menu ${m}.sub -tearoff 0]
 	    $m add cascade -label $label -menu $mt
 	    foreach subm $submenu {
-		::UI::BuildMenuEntryFromSpec $mt $subm
+		BuildMenuEntryFromSpec $mt $subm
 	    }
 	} else {
 	    set cmd [subst -nocommands $cmd]
@@ -1214,33 +1453,17 @@ proc ::UI::BuildMenuEntryFromSpec {wtop m menuSpec} {
 #       Callback for the undo/redo object.
 #       Sets the menu's states.
 
-proc ::UI::UndoConfig {wtop token what mstate} {
+proc ::UI::UndoConfig {w token what mstate} {
         
-    set medit ${wtop}menu.edit
+    set medit $w.menu.edit
     
     switch -- $what {
 	undo {
-	    ::UI::MenuMethod $medit entryconfigure mUndo -state $mstate
+	    MenuMethod $medit entryconfigure mUndo -state $mstate
 	}
 	redo {
-	    ::UI::MenuMethod $medit entryconfigure mRedo -state $mstate	    
+	    MenuMethod $medit entryconfigure mRedo -state $mstate	    
 	}
-    }
-}
-
-proc ::UI::OpenCanvasInfoFile {wtop theFile} {
-    global  this
-    
-    if {[string equal $wtop "."]} {
-	set w .
-    } else {
-	set w [string trimright $wtop .]
-    }
-    set ans [::UI::MessageBox -type yesno -icon warning -parent $w \
-      -title [mc {Open Helpfile}]  \
-      -message [mc messopenhelpfile]]
-    if {$ans == "yes"} {
-	::CanvasFile::OpenCanvasFileDlg $wtop [file join $this(path) docs $theFile]
     }
 }
 
@@ -1302,39 +1525,59 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok args} {
 	    }
 	}
     }
+    if {![info exists entryVar]} {
+	set entryVar ""
+    }
     
     set w .mega[incr megauid]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
+      -macclass {document closeBox} \
+      -closecommand ::UI::MegaDlgMsgCloseCmd
     wm title $w $title
     set finmega -1
-    wm protocol $w WM_DELETE_WINDOW [list set [namespace current]::finmega 0]
-    
-    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 4
-    pack [label $w.frall.msg -wraplength 300 -justify left -text $msg] \
-      -side top -fill both -padx 8 -pady 6
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    ttk::label $wbox.msg  \
+      -padding {0 0 0 6} -wraplength 300 -justify left -text $msg
+    pack $wbox.msg -side top -anchor w
     
-    set wmid $w.frall.fr
-    set wentry $wmid.en
-    pack [frame $wmid] -side top -fill x -expand 1 -padx 6
-    label $wmid.la -font $fontSB -text $label
-    eval {entry $wentry} $entryopts
-    grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
-    grid $wmid.en -column 1 -row 0 -sticky ew -padx 2 
+    set wmid $wbox.m
+    set wentry $wmid.e
+    ttk::frame $wmid
+    pack  $wmid  -side top -fill x
+    
+    ttk::label $wmid.l -text $label
+    eval {ttk::entry $wentry} $entryopts
+
+    grid  $wmid.l  $wmid.e
+    grid  $wmid.e  -sticky ew
+    grid columnconfigure $wmid 1 -weight 1
+    
+    $wentry insert end $entryVar
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $frbot.btok -text $btok  \
-      -default active -command [list set [namespace current]::finmega 1]] \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text $btcancel  \
-      -command [list set [namespace current]::finmega 0]]  \
-      -side right -padx 5 -pady 5  
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text $btok  \
+      -default active -command [list set [namespace current]::finmega 1]
+    ttk::button $frbot.btcancel -text $btcancel  \
+      -command [list set [namespace current]::finmega 0]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
@@ -1353,6 +1596,41 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok args} {
     catch {destroy $w}
     catch {focus $oldFocus}
     return [expr {($finmega <= 0) ? "cancel" : "ok"}]
+}
+
+proc ::UI::MegaDlgMsgCloseCmd {w} {
+    variable finmega
+    
+    set finmega 0
+    return stop
+}
+
+# UI::OkCancelButtons --
+# 
+# 
+
+proc ::UI::OkCancelButtons {args} {
+    
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	set i 0
+	foreach spec $args {
+	    set wbt [eval {ttk::button} $spec]
+	    pack $wbt -side right
+	    if {[expr $i & 2] == 1} {
+		pack $wbt -padx $padx
+	    }
+	    incr i
+	}
+    } else {
+	for {set i [expr [llength $args] - 1]} {$i >= 0} {incr i -1} {
+	    set wbt [eval {ttk::button} [lindex $args $i]]
+	    pack $wbt -side right
+	    if {[expr $i & 2] == 1} {
+		pack $wbt -padx $padx
+	    }
+	}
+    }
 }
 
 #--- Cut, Copy, & Paste stuff --------------------------------------------------
@@ -1488,10 +1766,10 @@ proc ::UI::NewCutCopyPaste {w} {
     }
     pack $w.cut $w.copy $w.paste -side left -padx 0 -pady 0
     
-    set locals($w,wtop) [winfo toplevel $w]
+    set locals($w,w) [winfo toplevel $w]
     
     # Set binding to focus to set normal/disabled correctly.
-    bind $locals($w,wtop) <FocusIn> "+ ::UI::CutCopyPasteFocusIn $w"
+    bind $locals($w,w) <FocusIn> "+ ::UI::CutCopyPasteFocusIn $w"
     bind $w.cut <Button-1> [list $w.cut configure -image $locals(imcutPush)]
     bind $w.copy <Button-1> [list $w.copy configure -image $locals(imcopyPush)]
     bind $w.paste <Button-1> [list $w.paste configure -image $locals(impastePush)]
@@ -1524,7 +1802,7 @@ proc ::UI::CutCopyPasteCmd {cmd} {
     set wfocus [focus]    
     ::Debug 2 "::UI::CutCopyPasteCmd cmd=$cmd, wfocus=$wfocus"
     
-    if {$wfocus == ""} {
+    if {$wfocus eq ""} {
 	return
     }
 
@@ -1557,14 +1835,14 @@ proc ::UI::CutCopyPasteConfigure {w which args} {
 	set val $opts($opt)
 	switch -- $opt {
 	    -state {
-		if {$val == "normal"} {
+		if {$val eq "normal"} {
 		    $w.$which configure -image $locals(im$which)
 		    bind $w.$which <Button-1>   \
 		      [list $w.$which configure -image $locals(im${which}Push)]
 		    bind $w.$which <ButtonRelease>  \
 		      "[list $w.$which configure -image $locals(im$which)]; \
 		      [list ::UI::CutCopyPasteCmd $which]"
-		} elseif {$val == "disabled"} {
+		} elseif {$val eq "disabled"} {
 		    $w.$which configure -image $locals(im${which}Dis)
 		    bind $w.$which <Button-1> {}
 		    bind $w.$which <ButtonRelease> {}
@@ -1585,7 +1863,7 @@ proc ::UI::CutCopyPasteHelpSetState {w} {
     set wClass [winfo class $wfocus]
     set setState disabled
     if {[string equal $wClass "Entry"]} {
-	if {[$wfocus selection present] == "1"} {
+	if {[$wfocus selection present] eq "1"} {
 	    set setState normal
 	}
     } elseif {[string equal $wClass "Text"]} {
@@ -1639,7 +1917,7 @@ proc ::UI::NewPrint {w cmd} {
 	::UI::InitCutCopyPaste
     }    
     label $w -image $locals(imprint) -borderwidth 0
-    set locals($w,wtop) [winfo toplevel $w]
+    set locals($w,w) [winfo toplevel $w]
     
     bind $w <Button-1> [list $w configure -image $locals(imprintPush)]
     bind $w <ButtonRelease> "[list $w configure -image $locals(imprint)]; $cmd"
@@ -1660,7 +1938,6 @@ proc ::UI::NewPrint {w cmd} {
 #       list {width height x y}
 
 proc ::UI::ParseWMGeometry {wmgeom} {
-    
     regexp {([0-9]+)x([0-9]+)\+(\-?[0-9]+)\+(\-?[0-9]+)} $wmgeom m w h x y
     return [list $w $h $x $y]
 }
@@ -1671,40 +1948,37 @@ proc ::UI::ParseWMGeometry {wmgeom} {
 #       Take the whiteboard's state into accounts.
 #       
 # Arguments:
-#       w       the widget that contains something that is selected.
+#       win     the widget that contains something that is selected.
 #
 # Results:
 
-proc ::UI::FixMenusWhenSelection {w} {
+proc ::UI::FixMenusWhenSelection {win} {
     global  this
     
-    set wtop [::UI::GetToplevelNS $w]
-    set wClass [winfo class $w]
-    set wToplevel [winfo toplevel $w]
-    set wToplevelClass [winfo class $wToplevel]
-    set medit ${wtop}menu.edit 
+    set w      [winfo toplevel $win]
+    set wClass [winfo class $win]
+    set medit $w.menu.edit 
     
-    Debug 5 "::UI::FixMenusWhenSelection w=$w,\n\twtop=$wtop, wClass=$wClass,\
-      wToplevelClass=$wToplevelClass"
+    Debug 6 "::UI::FixMenusWhenSelection win=$win,\n\tw=$w, wClass=$wClass"
     
     # Do different things dependent on the type of widget.
-    if {[winfo exists ${wtop}menu] && [string equal $wClass "Canvas"]} {
+    if {[winfo exists $w.menu] && [string equal $wClass "Canvas"]} {
 	
 	# Respect any disabled whiteboard state.
-	upvar ::WB::${wtop}::opts opts
+	upvar ::WB::${w}::opts opts
 	set isDisabled 0
 	if {[string equal $opts(-state) "disabled"]} {
 	    set isDisabled 1
 	}
 	
 	# Any images selected?
-	set allSelected [$w find withtag selected]
+	set allSelected [$win find withtag selected]
 	set anyImageSel 0
 	set anyNotImageSel 0
 	set anyTextSel 0
 	set allowFlip 0	
 	foreach id $allSelected {
-	    set theType [$w type $id]
+	    set theType [$win type $id]
 	    if {[string equal $theType "line"] ||  \
 	      [string equal $theType "polygon"]} {
 		if {[llength $allSelected] == 1} {
@@ -1724,7 +1998,7 @@ proc ::UI::FixMenusWhenSelection {w} {
 	    }
 	}
 	if {([llength $allSelected] == 0) && \
-	  ([llength [$w select item]] == 0)} {
+	  ([llength [$win select item]] == 0)} {
 	    
 	    # There is no selection in the canvas.
 	    if {$isDisabled} {
@@ -1773,12 +2047,12 @@ proc ::UI::FixMenusWhenSelection {w} {
 	
 	switch -- $wClass {
 	    Entry {
-		if {[$w selection present] == "1"} {
+		if {[$win selection present] eq "1"} {
 		    set setState normal
 		}
 	    }
 	    Text {
-		if {[string length [$w tag ranges sel]] > 0} {
+		if {[string length [$win tag ranges sel]] > 0} {
 		    set setState normal
 		}
 	    }
@@ -1797,18 +2071,18 @@ proc ::UI::FixMenusWhenSelection {w} {
 	    ::UI::MenuMethod $medit entryconfigure mCut -state $setState
 	    ::UI::MenuMethod $medit entryconfigure mCopy -state $setState
 	    ::UI::MenuMethod $medit entryconfigure mPaste -state $haveClipState
-	} elseif {[string equal $this(platform) "macintosh"] || \
-	  [string equal $this(platform) "macosx"]} {
+	} elseif {[string equal $this(platform) "macosx"]} {
 	    
-	    # Else we use the menu associated with "." since it is default one.
-	    ::UI::MenuMethod .menu.edit entryconfigure mCut -state $setState
-	    ::UI::MenuMethod .menu.edit entryconfigure mCopy -state $setState
-	    ::UI::MenuMethod .menu.edit entryconfigure mPaste -state $haveClipState
+	    # We use the menu associated with wmainmenu since it is default one.
+	    set medit [GetMainMenu].edit
+	    ::UI::MenuMethod $medit entryconfigure mCut -state $setState
+	    ::UI::MenuMethod $medit entryconfigure mCopy -state $setState
+	    ::UI::MenuMethod $medit entryconfigure mPaste -state $haveClipState
 	}
 	
 	# If we have a cut/copy/paste row of buttons need to set their state.
-	if {[winfo exists $w]} {
-	    ::UI::CutCopyPasteCheckState $w $setState $haveClipState
+	if {[winfo exists $win]} {
+	    ::UI::CutCopyPasteCheckState $win $setState $haveClipState
 	}
     } 
 }
@@ -1820,24 +2094,24 @@ proc ::UI::FixMenusWhenSelection {w} {
 #       
 # Arguments:
 #       w           the toplevel which gets focus
-#       wtopmenu    the 'wtop' which cooresponds to the menu to use (".").
+#       wmenu
 #       wfocus      the %W which is either equal to $w or a children of it.
 #       
 # Results:
 #       none
 
-proc ::UI::MacFocusFixEditMenu {w wtopmenu wfocus} {
+proc ::UI::MacFocusFixEditMenu {w wmenu wfocus} {
     
     # Binding to a toplevel is also triggered by its children.
     if {$w != $wfocus} {
 	return
-    }    
-    ::Debug 8 "MacFocusFixEditMenu: w=$w, wfocus=$wfocus"
+    }
+    ::Debug 6 "MacFocusFixEditMenu: w=$w, wmenu=$wmenu, wfocus=$wfocus"
     
     # The <FocusIn> events are sent in order, from toplevel and down
     # to the actual window with focus.
     # Any '::UI::FixMenusWhenSelection' will therefore be called after this.
-    set medit ${wtopmenu}menu.edit
+    set medit $wmenu.edit
     ::UI::MenuMethod $medit entryconfigure mPaste -state disabled
     ::UI::MenuMethod $medit entryconfigure mCut -state disabled
     ::UI::MenuMethod $medit entryconfigure mCopy -state disabled

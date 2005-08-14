@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.70 2005-06-10 07:52:20 matben Exp $
+# $Id: MailBox.tcl,v 1.71 2005-08-14 07:10:51 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -19,6 +19,8 @@
 # The inbox must be read to memory when mailbox is displayed, or when (before)
 # receiving first message. This is to keep the mailbox array in sync.
 # The inbox needs only be saved if we have edits.
+
+package require uuid
 
 package provide MailBox 1.0
 
@@ -45,27 +47,37 @@ namespace eval ::MailBox:: {
     option add *MailBox*wbIcon13Image         wbIcon13         widgetDefault
 
     # Standard widgets.
-    option add *MailBox.frall.borderWidth          1                50
-    option add *MailBox.frall.relief               raised           50
-    option add *MailBox*top.padX                   0                50
-    option add *MailBox*top.padY                   0                50
-    option add *MailBox*divt.borderWidth           2                50
-    option add *MailBox*divt.height                2                50
-    option add *MailBox*divt.relief                sunken           50
-    option add *MailBox*mid.padX                   4                50
-    option add *MailBox*mid.padY                   4                50
-
-    option add *MailBox*frpane.borderWidth         1                50
-    option add *MailBox*frpane.relief              sunken           50
+    if {0} {
+	option add *MailBox.frall.borderWidth          1                50
+	option add *MailBox.frall.relief               raised           50
+	option add *MailBox*top.padX                   0                50
+	option add *MailBox*top.padY                   0                50
+	option add *MailBox*divt.borderWidth           2                50
+	option add *MailBox*divt.height                2                50
+	option add *MailBox*divt.relief                sunken           50
+	option add *MailBox*mid.padX                   4                50
+	option add *MailBox*mid.padY                   4                50
+	
+	option add *MailBox*frpane.borderWidth         1                50
+	option add *MailBox*frpane.relief              sunken           50
+	option add *MailBox*frmsg.text.borderWidth     1                50
+	option add *MailBox*frmsg.text.relief          sunken           50
+    }
+    if {[tk windowingsystem] eq "aqua"} {
+	option add *MailBox*mid.padding                {12 10 12 18}    50
+    } else {
+	option add *MailBox*mid.padding                {10  8 10  8}    50
+    }
+    option add *MailBox*mid.ff.borderWidth         1                50
+    option add *MailBox*mid.ff.relief              raised           50
     option add *MailBox*frmsg.text.borderWidth     1                50
     option add *MailBox*frmsg.text.relief          sunken           50
-
+    
     # Add some hooks...
     ::hooks::register initHook        ::MailBox::Init
     ::hooks::register prefsInitHook   ::MailBox::InitPrefsHook
     ::hooks::register launchFinalHook ::MailBox::LaunchHook
     ::hooks::register newMessageHook  ::MailBox::GotMsg
-    ::hooks::register closeWindowHook ::MailBox::CloseHook
     ::hooks::register jabberInitHook  ::MailBox::InitHandler
     ::hooks::register quitAppHook     ::MailBox::QuitHook
 
@@ -155,7 +167,7 @@ proc ::MailBox::InitPrefsHook { } {
         
     set jprefs(mailbox,dialog) 0
     
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(mailbox,dialog)  jprefs_mailbox_dialog  $jprefs(mailbox,dialog)]  \
       ]
 }
@@ -254,15 +266,17 @@ proc ::MailBox::Build {args} {
     }
     
     # Toplevel of class MailBox.
-    ::UI::Toplevel $w -macstyle documentProc -class MailBox -usemacmainmenu 1
+    ::UI::Toplevel $w -class MailBox \
+      -macstyle documentProc -usemacmainmenu 1 \
+      -closecommand ::MailBox::CloseHook
     wm title $w [mc Inbox]
 
-    set locals(wtop) $w
+    set locals(w) $w
     set jstate(inboxVis) 1
     
-    # Global frame. D = -borderwidth 1 -relief raised
-    frame $w.frall
-    pack  $w.frall -fill both -expand 1
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
     # Button part.
     set iconNew        [::Theme::GetImage [option get $w newmsgImage {}]]
@@ -287,13 +301,9 @@ proc ::MailBox::Build {args} {
       [option get $w readMsgImage {}] ::MailBox::icons]
     set locals(iconUnreadMsg)  [::Theme::GetImageFromExisting \
       [option get $w unreadMsgImage {}] ::MailBox::icons]
-
-    set wtop $w.frall.top
-    frame $wtop
-    pack  $wtop -side top -fill x
     
-    set wtray $wtop.tray
-    ::buttontray::buttontray $wtray
+    set wtray $w.frall.tray
+    ::ttoolbar::ttoolbar $wtray
     pack $wtray -side top -fill x
     set locals(wtray) $wtray
 
@@ -318,23 +328,24 @@ proc ::MailBox::Build {args} {
     
     ::hooks::run buildMailBoxButtonTrayHook $wtray
 
-    # D = -bd 2 -relief sunken
-    pack [frame $w.frall.divt] -fill x -side top
+    # D = 
+    ttk::separator $w.frall.divt -orient horizontal
+    pack $w.frall.divt -side top -fill x
     
-    if {[string match "mac*" $this(platform)]} {
-	pack [frame $w.frall.pad -height 12] -side bottom
-    }
-
-    # D = -padx 4 -pady 4
+    # D = 
     set wmid $w.frall.mid
-    frame $wmid
-    pack  $wmid -side top -fill both -expand 1
+    ttk::frame $wmid
+    pack $wmid -side top -fill both -expand 1
 
     # Frame to serve as container for the pane geometry manager.
-    # D = -relief sunken -bd 1
-    set frpane $wmid.frpane
-    pack [frame $frpane -height 250 -width 380 -class Pane] \
-      -side top -fill both -expand 1
+    # D =
+    frame $wmid.ff -bd 1 -relief sunken
+    pack $wmid.ff -side top -fill both -expand 1
+
+    # Pane geometry manager.
+    set frpane $wmid.ff.frpane
+    ttk::paned $frpane -orient vertical
+    pack $frpane -side top -fill both -expand 1    
     
     # The actual mailbox list as a tablelist.
     set wfrmbox $frpane.frmbox
@@ -345,7 +356,7 @@ proc ::MailBox::Build {args} {
     # Columns: {iswb subject from secs(H) date isread(H) uidmsg(H)}
     set columns [list \
       0 {} 16 [mc Subject] 16 [mc From] 0 {} 0 [mc Date] 0 {} 0 {}]
-    scrollbar $wysctbl -orient vertical -command [list $wtbl yview]
+    tuscrollbar $wysctbl -orient vertical -command [list $wtbl yview]
     tablelist::tablelist $wtbl -columns $columns  \
       -yscrollcommand [list ::UI::ScrollSet $wysctbl \
       [list grid $wysctbl -column 1 -row 0 -sticky ns]] \
@@ -368,8 +379,8 @@ proc ::MailBox::Build {args} {
 	$wtbl columnconfigure $value -name $key
     }
     
-    grid $wtbl    -column 0 -row 0 -sticky news
-    grid $wysctbl -column 1 -row 0 -sticky ns
+    grid  $wtbl     -column 0 -row 0 -sticky news
+    grid  $wysctbl  -column 1 -row 0 -sticky ns
     grid columnconfigure $wfrmbox 0 -weight 1
     grid rowconfigure $wfrmbox 0 -weight 1
     
@@ -381,42 +392,30 @@ proc ::MailBox::Build {args} {
     
     # Display message in a text widget.
     set wfrmsg $frpane.frmsg    
-    frame $wfrmsg
     set wtextmsg $wfrmsg.text
     set wyscmsg  $wfrmsg.ysc
+    frame $wfrmsg
     text $wtextmsg -height 4 -width 1 -wrap word \
       -yscrollcommand [list ::UI::ScrollSet $wyscmsg \
       [list grid $wyscmsg -column 1 -row 0 -sticky ns]] \
       -state disabled
     $wtextmsg tag configure normal
-    scrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
-    grid $wtextmsg -column 0 -row 0 -sticky news
-    grid $wyscmsg  -column 1 -row 0 -sticky ns
+    tuscrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
+
+    grid  $wtextmsg  -column 0 -row 0 -sticky news
+    grid  $wyscmsg   -column 1 -row 0 -sticky ns
     grid columnconfigure $wfrmsg 0 -weight 1
     grid rowconfigure $wfrmsg 0 -weight 1
     
-    set imageHorizontal  \
-      [::Theme::GetImage [option get $frpane imageHorizontal {}]]
-    set sashHBackground [option get $frpane sashHBackground {}]
-
-    set paneopts [list -orient vertical -limit 0.0]
-    if {[info exists prefs(paneGeom,$w]} {
-	lappend paneopts -relative $prefs(paneGeom,$w)
-    } else {
-	lappend paneopts -relative {0.75 0.25}
-    }
-    if {$sashHBackground != ""} {
-	lappend paneopts -image "" -handlelook [list -background $sashHBackground]
-    } elseif {$imageHorizontal != ""} {
-	lappend paneopts -image $imageHorizontal
-    }    
-    eval {::pane::pane $wfrmbox $wfrmsg} $paneopts
+    $frpane add $wfrmbox -weight 1
+    $frpane add $wfrmsg -weight 1
     
     set locals(wfrmbox)  $wfrmbox
     set locals(wtbl)     $wtbl
     set locals(wtextmsg) $wtextmsg
         
     ::UI::SetWindowGeometry $w
+    after 10 [list ::UI::SetSashPos $w $frpane]
     wm minsize $w 300 260
     wm maxsize $w 1200 1000
     
@@ -424,7 +423,7 @@ proc ::MailBox::Build {args} {
     if {!$locals(hooksInited)} {
 	set locals(hooksInited) 1
 	::hooks::register quitAppHook [list ::UI::SaveWinGeom $w]
-	::hooks::register quitAppHook [list ::UI::SavePanePos $w $locals(wfrmbox)]
+	::hooks::register quitAppHook [list ::UI::SaveSashPos $w $frpane]
     }
     
     # Grab and focus.
@@ -448,14 +447,10 @@ proc ::MailBox::Build {args} {
 
 
 proc ::MailBox::CloseHook {wclose} {
-    global  wDlgs
     
     set result ""
-    if {[string equal $wclose $wDlgs(jinbox)]} {
-	ShowHide -visible 0
-	set result stop
-    }
-    return $result
+    ShowHide -visible 0
+    return stop
 }
 
 # MailBox::InsertRow --
@@ -493,9 +488,6 @@ proc ::MailBox::InsertRow {wtbl row i} {
     
     set item [list {} $subject $from $secs $smartdate $isread $uidmsg]
     
-    set fontS  [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
-
     $wtbl insert end $item
     set tableUid2Key($uidmsg) [$wtbl getkeys end]
     if {$haswb} {
@@ -503,10 +495,10 @@ proc ::MailBox::InsertRow {wtbl row i} {
     }
     set colsub $colindex(subject)
     if {[lindex $item $colindex(isread)] == 0} {
-	$wtbl rowconfigure $i -font $fontSB
+	$wtbl rowconfigure $i -font CociSmallBoldFont
 	$wtbl cellconfigure "${i},${colsub}" -image $locals(iconUnreadMsg)
     } else {
-	$wtbl rowconfigure $i -font $fontS
+	$wtbl rowconfigure $i -font CociSmallFont
 	$wtbl cellconfigure "${i},${colsub}" -image $locals(iconReadMsg)
     }
 }
@@ -542,8 +534,8 @@ proc ::MailBox::UpdateDateAndTime {wtbl} {
 proc ::MailBox::GetToplevel { } {    
     variable locals
     
-    if {[info exists locals(wtop)] && [winfo exists $locals(wtop)]} {
-	return $locals(wtop)
+    if {[info exists locals(w)] && [winfo exists $locals(w)]} {
+	return $locals(w)
     } else {
 	return {}
     }
@@ -639,14 +631,13 @@ proc ::MailBox::MarkMsgAsRead {uid} {
 	lset mailbox($uid) $mailboxindex(isread) 1
 	
 	if {[winfo exists $wDlgs(jinbox)]} {
-	    set fontS [option get . fontSmall {}]
 	    set colsub $colindex(subject)
 	    set wtbl $locals(wtbl)
 	    
 	    # Map uid to row (item) index.
 	    set key $tableUid2Key($uid)
 	    set item [$wtbl index k${key}]
-	    $wtbl rowconfigure $item -font $fontS
+	    $wtbl rowconfigure $item -font CociSmallFont
 	    $wtbl cellconfigure "${item},${colsub}" -image $locals(iconReadMsg)
 	}
 	set locals(haveEdits) 1
@@ -741,8 +732,8 @@ proc ::MailBox::HandleRawWBMessage {jlibname xmlns args} {
     }
     set messageList [eval {MakeMessageList ""} $args]
     set rawList     [::Jabber::WB::GetRawCanvasMessageList $argsArr(-x) $xmlns]
-    set canvasuid   [::Utils::GenerateHexUID]
-    set filePath    [file join $this(inboxCanvasPath) ${canvasuid}.can]
+    set canvasuid   [uuid::uuid generate]
+    set filePath    [file join $this(inboxCanvasPath) $canvasuid.can]
     ::CanvasFile::DataToFile $filePath $rawList
     lappend messageList -canvasuid $canvasuid
     set mailbox($uidmsg) $messageList
@@ -840,7 +831,7 @@ proc ::MailBox::PutMessageInInbox {row} {
 	set exists 1
     }
     if {![catch {open $this(inboxFile) a} fd]} {
-	fconfigure $fd -encoding utf-8
+	#fconfigure $fd -encoding utf-8
 	if {!$exists} {
 	    WriteInboxHeader $fd
 	    if {[string equal $this(platform) "macintosh"]} {
@@ -876,7 +867,7 @@ proc ::MailBox::SaveMsg { } {
 	      -message "Failed opening file [file tail $ans]: $fd"
 	    return
 	}
-	fconfigure $fd -encoding utf-8
+	#fconfigure $fd -encoding utf-8
 	set subject [lindex $row $colindex(subject)]
 	set time [lindex $row $colindex(secs)]
 	set time [clock format [clock scan $time]]
@@ -905,7 +896,7 @@ proc ::MailBox::TrashMsg { } {
     # Need selected line here.
     set wtbl  $locals(wtbl)
     set items [$wtbl curselection]
-    set wtop  $locals(wtop)
+    set w     $locals(w)
     set wtray $locals(wtray)
     set lastitem [lindex $items end]
     if {[llength $items] == 0} {
@@ -964,7 +955,7 @@ proc ::MailBox::SelectMsg { } {
     
     set wtextmsg $locals(wtextmsg)
     set wtbl     $locals(wtbl)
-    set wtop     $locals(wtop)
+    set w        $locals(w)
     set wtray    $locals(wtray)
     set item     [$wtbl curselection]
     if {[llength $item] == 0} {
@@ -1041,7 +1032,7 @@ proc ::MailBox::DisplayRawMessage {jid3 uid} {
     upvar ::Jabber::jstate jstate
     
     jlib::splitjid $jid3 jid2 res
-    set wtop [MakeWhiteboard $jid2]
+    set w [MakeWhiteboard $jid2]
     
     # Only if user available shall we try to import.
     set tryimport 0
@@ -1052,7 +1043,7 @@ proc ::MailBox::DisplayRawMessage {jid3 uid} {
 	    
     set fileName ${uid}.can
     set filePath [file join $this(inboxCanvasPath) $fileName]
-    set numImports [::CanvasFile::DrawCanvasItemFromFile $wtop \
+    set numImports [::CanvasFile::DrawCanvasItemFromFile $w \
       $filePath -where local -tryimport $tryimport]
     if {!$tryimport && $numImports > 0} {
 	
@@ -1074,7 +1065,7 @@ proc ::MailBox::DisplayXElementSVG {jid3 xlist} {
     
     jlib::splitjid $jid3 jid2 res
     
-    set wtop [MakeWhiteboard $jid2]
+    set w [MakeWhiteboard $jid2]
     
     # Only if user available shall we try to import.
     set tryimport 0
@@ -1083,9 +1074,9 @@ proc ::MailBox::DisplayXElementSVG {jid3 xlist} {
 	set tryimport 1
     }
 
-    set cmdList [::Jabber::WB::GetSVGWBMessageList $wtop $xlist]
+    set cmdList [::Jabber::WB::GetSVGWBMessageList $w $xlist]
     foreach line $cmdList {
-	::CanvasUtils::HandleCanvasDraw $wtop $line -tryimport $tryimport
+	::CanvasUtils::HandleCanvasDraw $w $line -tryimport $tryimport
     }         
 }
 
@@ -1096,22 +1087,21 @@ proc ::MailBox::DisplayXElementSVG {jid3 xlist} {
 proc ::MailBox::MakeWhiteboard {jid2} {
     global  prefs wDlgs
     
-    set wwb  $wDlgs(jwbinbox)
-    set wtop ${wwb}.
+    set w    $wDlgs(jwbinbox)
     set title "Inbox: $jid2"
     
-    if {[winfo exists $wwb]} {
-	::Import::HttpResetAll  $wtop
-	::CanvasCmd::EraseAll   $wtop
-	::WB::ConfigureMain     $wtop -title $title	    
-	::WB::SetStatusMessage  $wtop ""
-	::Jabber::WB::Configure $wtop -jid $jid2
-	undo::reset [::WB::GetUndoToken $wtop]
+    if {[winfo exists $w]} {
+	::Import::HttpResetAll  $w
+	::CanvasCmd::EraseAll   $w
+	::WB::ConfigureMain     $w -title $title	    
+	::WB::SetStatusMessage  $w ""
+	::Jabber::WB::Configure $w -jid $jid2
+	undo::reset [::WB::GetUndoToken $w]
     } else {
-	::Jabber::WB::NewWhiteboard -wtop $wtop -state disabled \
+	::Jabber::WB::NewWhiteboard -w $w -state disabled \
 	  -title $title -jid $jid2 -usewingeom 1
     }
-    return $wtop
+    return $w
 }
 
 proc ::MailBox::DoubleClickMsg { } {
@@ -1203,7 +1193,7 @@ proc ::MailBox::DisplayMsg {id} {
     
     $wtextmsg configure -state normal
     $wtextmsg delete 1.0 end
-    ::Text::Parse $wtextmsg $body normal
+    ::Text::ParseMsg normal $from $wtextmsg $body normal
     $wtextmsg insert end \n
     $wtextmsg configure -state disabled
     
@@ -1269,10 +1259,9 @@ proc ::MailBox::DoPrint { } {
     variable locals
 
     set allText [::Text::TransformToPureText $locals(wtextmsg)]
-    set fontS [option get . fontSmall {}]
     
     ::UserActions::DoPrintText $locals(wtextmsg)  \
-      -data $allText -font $fontS
+      -data $allText -font CociSmallFont
 }
 
 proc ::MailBox::SaveMailbox {args} {
@@ -1298,7 +1287,7 @@ proc ::MailBox::SaveMailboxVer1 { } {
 	  -message [mc jamesserrinboxopen $tmpFile]
 	return
     }
-    fconfigure $fid -encoding utf-8
+    #fconfigure $fid -encoding utf-8
     
     # Header information.
     puts $fid "# Version: 1"
@@ -1378,7 +1367,7 @@ proc ::MailBox::SaveMailboxVer2 {args} {
 	  -message [mc jamesserrinboxopen $tmpFile]
 	return
     }
-    fconfigure $fid -encoding utf-8
+    #fconfigure $fid -encoding utf-8
     
     # Start by writing the header info.
     WriteInboxHeader $fid
@@ -1443,7 +1432,7 @@ proc ::MailBox::GetMailboxVersion { } {
     set version ""
     if {[file exist $this(inboxFile)]} {
 	if {![catch {open $this(inboxFile) r} fd]} {
-	    fconfigure $fd -encoding utf-8
+	    #fconfigure $fd -encoding utf-8
 	    if {[gets $fd line] >= 0} { 
 		if {![regexp -nocase {^ *# *version: *([0-9]+)} $line match version]} {
 		    set version 1

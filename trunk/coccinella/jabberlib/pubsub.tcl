@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.3 2005-02-21 07:59:08 matben Exp $
+# $Id: pubsub.tcl,v 1.4 2005-08-14 07:13:18 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -29,17 +29,25 @@
 #      
 # EXPERIMENTAL!!!
 
-package provide pubsub 1.0
+package provide jlib::pubsub 0.1
 
 namespace eval jlib::pubsub {
     
-    
+    jlib::ensamble_register pubsub [namespace current]::cmdproc
 }
 
-proc jlib::pubsub {jlibname cmd args} {
+proc jlib::pubsub::init {jlibname} {
+    # empty.
+}
+
+proc jlib::pubsub::configure {jlibname args} {
+    # empty.
+}
+
+proc jlib::caps::cmdproc {jlibname cmd args} {
     
     # Which command? Just dispatch the command to the right procedure.
-    return [eval {[namespace current]::pubsub::${cmd} $jlibname} $args]
+    return [eval {$cmd $jlibname} $args]
 }
 
 proc jlib::pubsub::affiliations {jlibname jid node args} {

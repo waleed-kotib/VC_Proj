@@ -5,10 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: Utils.tcl,v 1.47 2005-06-20 13:55:29 matben Exp $
-
+# $Id: Utils.tcl,v 1.48 2005-08-14 07:17:55 matben Exp $
 
 package provide Utils 1.0
 
@@ -97,10 +94,18 @@ proc listintersectnonempty {alist blist} {
     return 0
 }
     
+# ESCglobs --
+#
+#	array get and array unset accepts glob characters. These need to be
+#	escaped if they occur as part of a variable.
+
+proc ESCglobs {s} {
+    return [string map {* \\* ? \\? [ \\[ ] \\] \\ \\\\} $s]
+}
+
 proc arraysequal {arrName1 arrName2} {
     upvar 1 $arrName1 arr1 $arrName2 arr2
     
-    #puts "arraysequal"
     if {![array exists arr1]} {
 	return -code error "$arrName1 is not an array"
     }
@@ -108,7 +113,6 @@ proc arraysequal {arrName1 arrName2} {
 	return -code error "$arrName2 is not an array"
     } 
     if {[array size arr1] != [array size arr2]} {
-	#puts "\t array size: [array size arr1] != [array size arr2]"
 	return 0
     }
     if {[array size arr1] == 0} {
@@ -116,15 +120,17 @@ proc arraysequal {arrName1 arrName2} {
     }
     foreach {key value} [array get arr1] {
 	if {![info exists arr2($key)]} {
-	    #puts "\t !info exists: [info exists arr2($key)]"
 	    return 0
 	}
 	if {![string equal $arr1($key) $arr2($key)]} {
-	    #puts "\t !equal: $arr1($key) $arr2($key)"
 	    return 0
 	}
     }
     return 1
+}
+
+if {![llength [info commands lassign]]} {
+    proc lassign {vals args} {uplevel 1 [list foreach $args $vals break] }
 }
 
 # getdirname ---
@@ -149,14 +155,13 @@ proc getdirname {filePath} {
 # SecondCoccinella --
 # 
 #       This gets called if a second instance of this app is launched,
-#       before it kills itself
+#       before it kills itself.
 
 proc SecondCoccinella {args} {
     
-    wm deiconify .
-    raise .
-    
-    ::Debug 2 "--> relaunchHook $args"
+    set w [::UI::GetMainWindow]
+    wm deiconify $w
+    raise $w
     eval {::hooks::run relaunchHook} $args
 }
 
@@ -164,9 +169,6 @@ proc SecondCoccinella {args} {
 
 namespace eval ::Utils:: {
     
-    # Running counter for GenerateHexUID.
-    variable uid 0
-    variable maxuidpersec 10000
 }
 
 # ::Utils::FontEqual --
@@ -344,7 +346,7 @@ proc ::Utils::UnixGetWebBrowser { } {
     global  this prefs env
     
     set browser ""
-    if {$this(platform) == "unix"} {
+    if {$this(platform) eq "unix"} {
 	if {[info exists env(BROWSER)]} {
 	    if {[llength [auto_execok $env(BROWSER)]] > 0} {
 		set browser $env(BROWSER)
@@ -368,12 +370,12 @@ proc ::Utils::UnixGetWebBrowser { } {
 proc ::Utils::UnixOpenUrl {url} {
     global  prefs
 
-    if {$prefs(webBrowser) == ""} {
+    if {$prefs(webBrowser) eq ""} {
 	set browser [UnixGetWebBrowser]
     } else {
 	set browser $prefs(webBrowser)
     }
-    if {$browser != ""} {
+    if {$browser ne ""} {
 	if {[catch {eval exec $browser -remote \"openURL($url, new-tab)\"}]} {
 	    if {[catch {exec $browser -remote $url}]} {
 		if {[catch {exec $browser $url &}]} {
@@ -382,7 +384,7 @@ proc ::Utils::UnixOpenUrl {url} {
 	    }
 	}
     } 
-    if {$browser == ""} {
+    if {$browser eq ""} {
 	::UI::MessageBox -icon error -type ok -message \
 	  "Couldn't localize a web browser on this system.\
 	  Define a shell variable env(BROWSER) to point to a web browser."
@@ -418,28 +420,6 @@ proc ::Utils::ValidMinutes {str} {
 	bell
 	return 0
     }
-}
-
-# Utils::GenerateHexUID --
-#
-#       Makes a unique hex string stamped by time.
-#       Can generate max 'maxuidpersec' (uniques) uid's per second.
-#       
-#       See also ::tfileutils::newuid !!!
-
-proc ::Utils::GenerateHexUID { } {
-    variable uid
-    variable maxuidpersec
-    
-    set rem [expr [incr uid] % $maxuidpersec]
-    set secs [clock seconds]
-    
-    # Remove any leading 0 to avoid octal interpretation.
-    set hex1 [format %x [string trimleft \
-      [clock format $secs -format "%y%j%H"] 0]]
-    set hex2 [format %x [string trimleft \
-      [clock format $secs -format "%M%S${rem}"] 0]]
-    return ${hex1}${hex2}
 }
 
 # Utils::GetDirIfExist --
@@ -497,10 +477,38 @@ proc ::Utils::CreateGif {fileName {imageName ""}} {
     if {[IsAnimatedGif $fileName]} {
 	return [::anigif::anigif $fileName $imageName]
     } else {
-	if {$imageName == ""} {
+	if {$imageName eq ""} {
 	    return [image create photo -file $fileName -format gif]
 	} else {
 	    return [image create photo $imageName -file $fileName -format gif]
+	}
+    }
+}
+
+proc ::Utils::ImageFromData {data {mime ""}} {
+    global  this
+    
+    set type ""
+    lassign [split $mime /] x type
+    if {$type eq "gif"} {
+	return [image create photo -data $data -format gif]
+    } else {
+	if {![catch {image create photo -data $data} name]} {
+	    return $name
+	} 
+	set tmpfile [::tfileutils::tempfile $this(tmpPath) vcard]
+	if {$type ne ""} {
+	    append tmpfile .$type
+	}
+	#puts "tmpfile=$tmpfile"
+	set fd [open $tmpfile {CREAT WRONLY}]
+	fconfigure $fd -translation binary
+	puts -nonewline $fd [::base64::decode $data]
+	close $fd
+	if {![catch {image create photo -file $tmpfile} name]} {
+	    return $name
+	} else {
+	    return ""
 	}
     }
 }
@@ -533,7 +541,7 @@ proc ::Utils::AnimateHandle {uid} {
 	set cmd $anim($uid,command)
 	set val [lindex $anim($uid,vlist) $pos]
 	regsub -all {\\|&} $val {\\\0} val
-	regsub -all {%v} $cmd $val cmd	
+	regsub -all {%v} $cmd $val cmd
 	if {[catch {uplevel #0 $cmd}]} {
 	    AnimateStop $uid
 	    return
@@ -568,12 +576,11 @@ namespace eval ::Text:: {
     array set urlColor {fg blue activefg red}
 }
 
-# Text::Parse, ... --
+# Text::ParseMsg --
 # 
-#       It takes a text widget, the text, and a default tag, and parses
-#       smileys and urls.
+#       Parses message text (body).
 
-proc ::Text::Parse {w str tag} {
+proc ::Text::ParseMsg {type jid w str tagList} {
     
     # Split string into words and whitespaces.
     set wsp {[ \t\r\n]+}
@@ -583,7 +590,7 @@ proc ::Text::Parse {w str tag} {
     }
     set start 0
     while {[regexp -start $start -indices -- $wsp $str match]} {
-	foreach {matchStart matchEnd} $match break
+	lassign $match matchStart matchEnd
 	
 	# The "space" part.
 	set space [string range $str $matchStart $matchEnd]
@@ -594,24 +601,39 @@ proc ::Text::Parse {w str tag} {
 	set word [string range $str $start $matchStart]
 	set start $matchEnd
 	
-	# Process the actual word.
-	ParseWord $w $word $tag
+	# Process the actual word:
+	# Run first the hook to see if anyone else wants to parse it.
+	if {[hooks::run textParseWordHook $type $jid $w $word $tagList] ne "stop"} {	    
+	    ParseWord $w $word $tagList
+	}
 	
 	# Insert the whitespace after word.
-	$w insert end $space $tag
+	$w insert end $space $tagList
     }
     
     # And the final word.
     set word [string range $str $start end]
-    ParseWord $w $word $tag
+    if {[hooks::run textParseWordHook $type $jid $w $word $tagList] ne "stop"} {	    
+	ParseWord $w $word $tagList
+    }
 }
 
-proc ::Text::ParseWord {w word tag} {
+# Text::Parse, ... --
+# 
+#       It takes a text widget, the text, and a default tag, and parses
+#       smileys and urls.
+
+proc ::Text::Parse {w str tagList} {
+
+    ParseMsg {} {} $w $str $tagList
+}
+
+proc ::Text::ParseWord {w word tagList} {
     
     if {[::Emoticons::Exists $word]} {
 	::Emoticons::Make $w $word
     } elseif {![ParseUrl $w $word]} {
-	$w insert end $word $tag
+	$w insert end $word $tagList
     }
 }
 
@@ -624,10 +646,10 @@ proc ::Text::ParseUrl {w word} {
 	set urltag url${idurl}
 	set urlfg       [option get $w urlForeground       Text]
 	set urlactivefg [option get $w urlActiveForeground Text]
-	if {$urlfg == ""} {
+	if {$urlfg eq ""} {
 	    set urlfg $urlColor(fg)
 	}
-	if {$urlactivefg == ""} {
+	if {$urlactivefg eq ""} {
 	    set activefg $urlColor(activefg)
 	}
 	$w tag configure $urltag -foreground $urlfg -underline 1
@@ -675,10 +697,10 @@ proc ::Text::InsertURL {w str url tag} {
     set urltag url${idurl}
     set urlfg       [option get $w urlForeground       Text]
     set urlactivefg [option get $w urlActiveForeground Text]
-    if {$urlfg == ""} {
+    if {$urlfg eq ""} {
 	set urlfg $urlColor(fg)
     }
-    if {$urlactivefg == ""} {
+    if {$urlactivefg eq ""} {
 	set activefg $urlColor(activefg)
     }
     $w tag configure $urltag -foreground $urlfg -underline 1
@@ -695,7 +717,7 @@ proc ::Text::InsertURL {w str url tag} {
 proc ::Text::TransformToPureText {w args} {    
     variable puretext
     
-    if {[winfo class $w] != "Text"} {
+    if {[winfo class $w] ne "Text"} {
 	error {TransformToPureText needs a text widget here}
     }
     unset -nocomplain puretext($w)

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.49 2005-03-02 13:49:41 matben Exp $
+# $Id: OOB.tcl,v 1.50 2005-08-14 07:10:51 matben Exp $
 
 package require uriencode
 
@@ -15,6 +15,9 @@ namespace eval ::OOB:: {
 
     ::hooks::register initHook            ::OOB::InitHook    
     ::hooks::register jabberInitHook      ::OOB::InitJabberHook
+
+    option add *JOOB.sendFileImage         sendfile         widgetDefault
+    option add *JOOB.sendFileDisImage      sendfileDis      widgetDefault
 
     variable locals
     set locals(initialLocalDir) [pwd]
@@ -58,9 +61,11 @@ proc ::OOB::BuildSet {jid} {
     variable desc ""
     variable locals
     
-    set localpath [FileOpen]
-    if {$localpath == ""} {
-	return
+    if {!$locals(haveTkDnD)} {
+	set localpath [FileOpen]
+	if {$localpath == ""} {
+	    return
+	}
     }
     
     set w $wDlgs(joobs)
@@ -68,46 +73,71 @@ proc ::OOB::BuildSet {jid} {
 	return
     }
     set finished -1
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
+    ::UI::Toplevel $w -class JOOB \
+      -macstyle documentProc -usemacmainmenu 1 -macclass {document closeBox}
     wm title $w [mc {Send File}]
     set locals(jid) $jid
-    set fontS [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
     
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
-    
-    message $w.frall.msg -width 300 -text [mc oobmsg $jid]
-    pack $w.frall.msg -side top -fill both -expand 1
-    
-    # Entries etc.
-    set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.lfile -text "[mc {File}]:" -font $fontSB -anchor e
-    entry $frmid.efile    \
-      -textvariable [namespace current]::localpath
-    button $frmid.btfile -text "[mc {File}]..." -width 6 -font $fontS  \
-      -command [namespace current]::FileOpenCmd
-    label $frmid.ldesc -text "[mc {Description}]:" -font $fontSB -anchor e
-    entry $frmid.edesc -width 36    \
-      -textvariable [namespace current]::desc
-    grid $frmid.lfile -column 0 -row 0 -sticky e
-    grid $frmid.efile -column 1 -row 0 -sticky ew
-    grid $frmid.btfile -column 2 -row 0 
-    grid $frmid.ldesc -column 0 -row 1 -sticky e
-    grid $frmid.edesc -column 1 -row 1 -sticky ew -columnspan 2
-    pack $frmid -side top -fill both -expand 1
+    set im   [::Theme::GetImage [option get $w sendFileImage {}]]
+    set imd  [::Theme::GetImage [option get $w sendFileDisImage {}]]
 
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    ttk::label $w.frall.head -style Headlabel \
+      -text [mc {Send File}] -compound left \
+      -image [list $im background $imd]
+    pack $w.frall.head -side top -anchor w
+
+    ttk::separator $w.frall.s -orient horizontal
+    pack $w.frall.s -side top -fill x
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 200 -anchor w -justify left \
+      -text [mc oobmsg $jid]
+    pack $wbox.msg -side top -fill both -expand 1
+    
+    lappend wrapthese $wbox.msg
+        
+    # Entries etc.
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    ttk::button $frmid.btfile -text "[mc {File}]..." -width -10  \
+      -command [namespace current]::FileOpenCmd
+    ttk::entry $frmid.efile \
+      -textvariable [namespace current]::localpath
+    ttk::label $frmid.ldesc -text "[mc {Description}]:" -anchor e
+    ttk::entry $frmid.edesc -width 32  \
+      -textvariable [namespace current]::desc
+
+    grid  $frmid.btfile  $frmid.efile  -padx 2 -pady 2 -sticky e
+    grid  $frmid.ldesc   $frmid.edesc  -padx 2 -pady 2 -sticky e
+    grid  $frmid.efile   $frmid.edesc  -sticky ew
+    grid columnconfigure $frmid 0 -weight 1
+
+    pack  $frmid  -side top -fill both -expand 1
+    
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Send] -default active \
-      -command [namespace current]::DoSend]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command "set [namespace current]::finished 2"]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Send] -default active \
+      -command [namespace current]::DoSend
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list set [namespace current]::finished 2]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
     
     wm resizable $w 0 0
     bind $w <Return> ::OOB::DoSend
@@ -115,6 +145,17 @@ proc ::OOB::BuildSet {jid} {
 	update
 	::OOB::InitDnD $frmid.efile
     }
+
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	set wrapthese [list %s]
+	set width [winfo reqwidth %s]
+	foreach wl $wrapthese {
+	    $wl configure -wraplength $width
+	}
+    } $wrapthese $wbox]    
+    after idle $script
     
     # Grab and focus.
     focus $w

@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.12 2005-02-13 13:17:42 matben Exp $
+# $Id: wrapper.tcl,v 1.13 2005-08-14 07:13:18 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -89,7 +89,7 @@ namespace eval wrapper {
     variable debug 0
     
     # Running id that is never reused; start from 0.
-    set wrapper(freeid) 0
+    set wrapper(uid) 0
     
     # Keep all 'id's in this list.
     set wrapper(list) {}
@@ -121,8 +121,7 @@ proc wrapper::new {streamstartcmd streamendcmd parsecmd errorcmd} {
     }
     
     # Handle id of the wrapper.
-    set id "wrap$wrapper(freeid)"
-    incr wrapper(freeid)
+    set id wrap[incr wrapper(uid)]
     lappend wrapper(list) $id
     
     set wrapper($id,streamstartcmd) $streamstartcmd
@@ -433,8 +432,6 @@ proc wrapper::reset {id} {
     if {$debug > 1} {
 	puts "wrapper::reset id=$id"
     }
-
-    if {1} {
 	
     # This resets the actual XML parser. Not sure this is actually needed.
     $wrapper($id,parser) reset
@@ -462,7 +459,6 @@ proc wrapper::reset {id} {
 	  -errorcommand         [list [namespace current]::xmlerror $id]       \
 	  -ignorewhitespace     1                                              \
 	  -defaultexpandinternalentities 0
-    }
     }
     
     # Cleanup internal state vars.
@@ -739,6 +735,17 @@ proc wrapper::getfromchilds {childs tag} {
     return $clist
 }
 
+proc wrapper::deletefromchilds {childs tag} {
+    
+    set clist {}
+    foreach celem $childs {
+	if {![string equal [lindex $celem 0] $tag]} {
+	    lappend clist $celem
+	}
+    }
+    return $clist
+}
+
 proc wrapper::getnamespacefromchilds {childs tag ns} {
     
     set clist {}
@@ -754,6 +761,50 @@ proc wrapper::getnamespacefromchilds {childs tag ns} {
 	}
     }
     return $clist
+}
+
+# wrapper::getdhildsdeep --
+# 
+#       Searches recursively for childs with matching tags and optionally,
+#       matching xmlns attributes.
+#       
+# Arguments:
+#       xmllist:    an xml hierarchical list.
+#       childSpecs: {{tag ?xmlns?} {tag ?xmlns?} ...}
+#       
+# Results:
+#       first found matching child element or empty if not found
+
+proc wrapper::getdhildsdeep {xmllist childSpecs} {
+    
+    set xlist $xmllist
+    
+    foreach cspec $childSpecs {
+	set tag   [lindex $cspec 0]
+	set xmlns [lindex $cspec 1]
+	
+	foreach c [lindex $xlist 4] {
+	    if {[string equal $tag [lindex $c 0]]} {
+		if {[string length $xmlns]} {
+		    array unset attr
+		    array set attr [lindex $c 1]
+		    if {[info exists attr(xmlns)] && \
+		      [string equal $xmlns $attr(xmlns)]} {
+			set xlist $c
+			break
+		    } else {
+			# tag matched but not xmlns; go for next child.
+			continue
+		    }
+		}
+		set xlist $c
+		break
+	    }
+	}
+	# No matches found.
+	return ""
+    }
+    return $xlist
 }
 
 proc wrapper::setattrlist {xmllist attrlist} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.109 2005-06-05 14:54:12 matben Exp $
+# $Id: GroupChat.tcl,v 1.110 2005-08-14 07:10:51 matben Exp $
 
 package require History
 
@@ -21,7 +21,7 @@ namespace eval ::GroupChat:: {
     ::hooks::register quitAppHook             ::GroupChat::QuitAppHook
     ::hooks::register quitAppHook             ::GroupChat::GetFirstPanePos
     ::hooks::register newGroupChatMessageHook ::GroupChat::GotMsg
-    ::hooks::register closeWindowHook         ::GroupChat::CloseHook
+    ::hooks::register newMessageHook          ::GroupChat::NormalMsgHook
     ::hooks::register loginHook               ::GroupChat::LoginHook
     ::hooks::register logoutHook              ::GroupChat::LogoutHook
     ::hooks::register presenceHook            ::GroupChat::PresenceHook
@@ -63,7 +63,7 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*sysPreForeground     #26b412          widgetDefault
     option add *GroupChat*sysTextForeground    #26b412          widgetDefault
     option add *GroupChat*histHeadForeground   ""               widgetDefault
-    option add *GroupChat*histHeadBackground   gray60           widgetDefault
+    option add *GroupChat*histHeadBackground   gray80           widgetDefault
     option add *GroupChat*histHeadFont         ""               widgetDefault
     option add *GroupChat*clockFormat          "%H:%M"          widgetDefault
     option add *GroupChat*clockFormatNotToday  "%b %d %H:%M"    widgetDefault
@@ -72,7 +72,7 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*userBackground       ""               widgetDefault
     option add *GroupChat*userFont             ""               widgetDefault
     
-    option add *GroupChat*Tree.background      white            widgetDefault
+    option add *GroupChat*Tree.background      white            50
 
     # List of: {tagName optionName resourceName resourceClass}
     variable groupChatOptions {
@@ -96,17 +96,12 @@ namespace eval ::GroupChat:: {
     }
     
     # Standard wigets.
-    option add *GroupChat.frall.borderWidth          1               50
-    option add *GroupChat.frall.relief               raised          50
-    option add *GroupChat*top.padX                   0               50
-    option add *GroupChat*top.padY                   0               50
-    option add *GroupChat*divt.borderWidth           2               50
-    option add *GroupChat*divt.height                2               50
-    option add *GroupChat*divt.relief                sunken          50
+    option add *GroupChat.padding              {12  0 12  0}   50
+    option add *GroupChat*active.padding       {1}             50
+    option add *GroupChat*TMenubutton.padding  {1}             50
+    option add *GroupChat*top.padding          {0   0 0   8}   50
+    option add *GroupChat*bot.padding          { 0  8  0  0}   50
 
-    option add *GroupChat*bot.padX                   10              50
-    option add *GroupChat*bot.padY                   8               50
-    
     
     # Local stuff
     variable enteruid 0
@@ -124,7 +119,7 @@ namespace eval ::GroupChat:: {
 	mMessage       user      {::NewMsg::Build -to $jid}
 	mChat          user      {::Chat::StartThread $jid}
 	mSendFile      user      {::OOB::BuildSet $jid}
-	mvCard         user      {::VCard::Fetch other $jid}
+	mUserInfo      user      {::UserInfo::Get $jid}
 	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
     }    
     
@@ -390,8 +385,11 @@ proc ::GroupChat::BuildEnter {args} {
     upvar 0 $token enter
     
     set w $wDlgs(jgcenter)[incr dlguid]
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox} \
+      -closecommand [namespace current]::CloseEnterCB
     wm title $w [mc {Enter/Create Room}]
+    
     set enter(w) $w
     array set enter {
 	finished    -1
@@ -402,69 +400,82 @@ proc ::GroupChat::BuildEnter {args} {
     set enter(nickname) $jprefs(defnick)
     array set argsArr $args
     
-    set fontSB [option get . fontSmallBold {}]
-
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 4
-        
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
     set enter(server) [lindex $chatservers 0]
-    set frmid $w.frall.mid
-    pack [frame $frmid] -side top -fill both -expand 1
+    set frmid $wbox.mid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
+
     set msg [mc jagchatmsg]
-    message $frmid.msg -width 260 -text $msg
-    label $frmid.lserv -text "[mc Servers]:" -anchor e
+    ttk::label $frmid.msg -style Small.TLabel \
+      -padding {0 0 0 6} -anchor w -wraplength 300 -justify left -text $msg
+    ttk::label $frmid.lserv -text "[mc Servers]:" -anchor e
 
     set wcomboserver $frmid.eserv
-    ::combobox::combobox $wcomboserver -width 18  \
-      -textvariable $token\(server)
-    eval {$frmid.eserv list insert end} $chatservers
-    label $frmid.lroom -text "[mc Room]:" -anchor e
-    entry $frmid.eroom -width 24    \
+    ttk::combobox $wcomboserver -width 18  \
+      -textvariable $token\(server) -values $chatservers
+    ttk::label $frmid.lroom -text "[mc Room]:" -anchor e
+    ttk::entry $frmid.eroom -width 24    \
       -textvariable $token\(roomname) -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStr %S}
-    label $frmid.lnick -text "[mc {Nick name}]:" \
+    ttk::label $frmid.lnick -text "[mc {Nick name}]:" \
       -anchor e
-    entry $frmid.enick -width 24    \
+    ttk::entry $frmid.enick -width 24    \
       -textvariable $token\(nickname) -validate key  \
       -validatecommand {::Jabber::ValidateResourceStr %S}
     
-    grid $frmid.msg   -            -sticky ew
-    grid $frmid.lserv $frmid.eserv
-    grid $frmid.lroom $frmid.eroom
-    grid $frmid.lnick $frmid.enick
-    grid $frmid.lserv $frmid.lroom $frmid.lnick -sticky e
-    grid $frmid.eserv $frmid.eroom $frmid.enick -sticky ew
+    grid  $frmid.msg    -             -pady 2 -sticky w
+    grid  $frmid.lserv  $frmid.eserv  -pady 2
+    grid  $frmid.lroom  $frmid.eroom  -pady 2
+    grid  $frmid.lnick  $frmid.enick  -pady 2
+    grid  $frmid.lserv  $frmid.lroom  $frmid.lnick -sticky e
+    grid  $frmid.eserv  $frmid.eroom  $frmid.enick -sticky ew
     
     if {[info exists argsArr(-roomjid)]} {
 	jlib::splitjidex $argsArr(-roomjid) node service res
 	set enter(roomname) $node
 	set enter(server)   $service
-	$wcomboserver configure -state disabled
-	$frmid.eroom configure -state disabled
+	$wcomboserver state {disabled}
+	$frmid.eroom  state {disabled}
     }
     if {[info exists argsArr(-server)]} {
 	set server $argsArr(-server)
 	set enter(server) $argsArr(-server)
-	$wcomboserver configure -state disabled
+	$wcomboserver state {disabled}
     }
     if {[info exists argsArr(-nickname)]} {
 	set enter(nickname) $argsArr(-nickname)
     }
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Enter] -default active \
-      -command [list [namespace current]::DoEnter $token]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]   \
-      -command [list [namespace current]::Cancel $token]]  \
-      -side right -padx 5 -pady 5  
-    pack $frbot -side bottom -fill x
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Enter] -default active \
+      -command [list [namespace current]::DoEnter $token]
+    ttk::button $frbot.btcancel -text [mc Cancel]   \
+      -command [list [namespace current]::Cancel $token]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
     
     # Grab and focus.
     set oldFocus [focus]
     focus $w
+    wm resizable $w 0 0
+    ::UI::SetWindowPosition $w $wDlgs(jgcenter)
     bind $w <Return> [list $frbot.btok invoke]
     
     # Wait here for a button press and window to be destroyed.
@@ -474,6 +485,13 @@ proc ::GroupChat::BuildEnter {args} {
     set finished $enter(finished)
     unset enter
     return [expr {($finished <= 0) ? "cancel" : "enter"}]
+}
+
+proc ::GroupChat::CloseEnterCB {w} {
+    global  wDlgs
+    
+    ::UI::SaveWinPrefixGeom $wDlgs(jgcenter)
+    return ""
 }
 
 proc ::GroupChat::Cancel {token} {
@@ -521,6 +539,66 @@ proc ::GroupChat::EnterCallback {jlibName type args} {
     
     # Cache groupchat protocol type (muc|conference|gc-1.0).
     ::hooks::run groupchatEnterRoomHook $argsArr(-from) "gc-1.0"
+}
+
+# GroupChat::NormalMsgHook --
+# 
+#       MUC (and others) send invitations using normal messages. Catch!
+
+proc ::GroupChat::NormalMsgHook {body args} {
+    upvar ::Jabber::xmppxmlns xmppxmlns
+    
+    array set argsArr $args
+
+    set isinvite 0
+    if {[info exists argsArr(-x)]} {
+    
+	::Debug 2 "::GroupChat::NormalMsgHook args='$args'"
+
+	set xList $argsArr(-x)
+	set cList [wrapper::getnamespacefromchilds $xList x $xmppxmlns(muc,user)]
+	set roomjid $argsArr(-from)
+	
+	puts "cList=$cList"
+	if {$cList != {}} {
+	    set inviteElem [wrapper::getfirstchildwithtag [lindex $cList 0] invite]
+	    puts "inviteElem=$inviteElem"
+	    if {$inviteElem != {}} {
+		set isinvite 1
+		set str2 ""
+		set invitejid [wrapper::getattribute $inviteElem from]
+		set reasonElem [wrapper::getfirstchildwithtag $inviteElem reason]
+		if {$reasonElem != {}} {
+		    append str2 "Reason: [wrapper::getcdata $reasonElem]"
+		}
+		set passwordElem [wrapper::getfirstchildwithtag $cList password]
+		if {$passwordElem != {}} {
+		    append str2 " Password: [wrapper::getcdata $passwordElem]"
+		}
+	    }
+	} else {
+	    set cList [wrapper::getnamespacefromchilds $xList x \
+	      "jabber:x:conference"]
+	    if {$cList != {}} {
+		set isinvite 1
+		set xElem [lindex $cList 0]
+		set invitejid [wrapper::getattribute $xElem jid]
+		set str2 "Reason: [wrapper::getcdata $xElem]"
+	    }	    
+	}
+    }
+    if {$isinvite} {
+	set str [mc jamessgcinvite $roomjid $invitejid]
+	append str " " $str2
+	set ans [::UI::MessageBox -title [mc Invite] -icon info -type yesno \
+	  -message $str]
+	if {$ans eq "yes"} {
+	    EnterOrCreate enter -roomjid $roomjid
+	}
+	return stop
+    } else {
+	return ""
+    }
 }
 
 # GroupChat::GotMsg --
@@ -623,7 +701,9 @@ proc ::GroupChat::Build {roomjid args} {
     }
     
     # Toplevel of class GroupChat.
-    ::UI::Toplevel $w -class GroupChat -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -class GroupChat \
+      -usemacmainmenu 1 -macstyle documentProc \
+      -closecommand ::GroupChat::CloseHook
     
     # Not sure how old-style groupchat works here???
     #set roomName [$jstate(browse) getname $roomjid]
@@ -636,30 +716,34 @@ proc ::GroupChat::Build {roomjid args} {
     }
     wm title $w "[mc Groupchat]: $tittxt"
     
-    set fontS  [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
-
     foreach {optName optClass} $groupChatOptions {
 	set $optName [option get $w $optName $optClass]
     }
     
     # Global frame.
-    frame $w.frall
-    pack  $w.frall -fill both -expand 1
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
     # Widget paths.
-    set wtop      $w.frall.top
-    set wtray     $wtop.tray
-    set frmid     $w.frall.frmid
-    set wtxt      $frmid.frtxt
-    set wtext     $wtxt.0.text
-    set wysc      $wtxt.0.ysc
-    set wfrusers  $wtxt.1
-    set wusers    $wfrusers.text
-    set wyscusers $wfrusers.ysc
-    set wtxtsnd   $frmid.frtxtsnd
-    set wtextsnd  $wtxtsnd.text
-    set wyscsnd   $wtxtsnd.ysc
+    set wtray       $w.frall.tray
+    set wbox        $w.frall.f
+    set wtop        $wbox.top
+    set wbot        $wbox.bot
+    set wmid        $wbox.m
+    
+    set wpanev      $wmid.pv
+    set wfrsend     $wpanev.bot
+    set wtextsend   $wfrsend.text
+    set wyscsend    $wfrsend.ysc
+    
+    set wpaneh      $wpanev.top
+    set wfrchat     $wpaneh.left
+    set wfrusers    $wpaneh.right
+        
+    set wtext       $wfrchat.text
+    set wysc        $wfrchat.ysc
+    set wusers      $wfrusers.text
+    set wyscusers   $wfrusers.ysc
     
     # Shortcut button part.
     set iconSend        [::Theme::GetImage [option get $w sendImage {}]]
@@ -675,10 +759,7 @@ proc ::GroupChat::Build {roomjid args} {
     set iconPrint       [::Theme::GetImage [option get $w printImage {}]]
     set iconPrintDis    [::Theme::GetImage [option get $w printDisImage {}]]
 
-    frame $wtop
-    pack  $wtop -side top -fill x
-
-    ::buttontray::buttontray $wtray
+    ::ttoolbar::ttoolbar $wtray
     pack $wtray -side top -fill x
 
     $wtray newbutton send -text [mc Send] \
@@ -704,76 +785,113 @@ proc ::GroupChat::Build {roomjid args} {
     
     set shortBtWidth [expr [$wtray minwidth] + 8]
 
+    ttk::separator $w.frall.divt -orient horizontal
+    pack $w.frall.divt -side top -fill x
+    
+    ttk::frame $wbox -padding [option get . dialogSmallPadding {}]
+    pack $wbox -fill both -expand 1
+
     # Button part.
-    set frbot [frame $w.frall.bot]
-    pack $frbot -side bottom -fill x
-    set wbtsend $frbot.btok
-    pack [button $wbtsend -text [mc Send]  \
-      -default active -command [list [namespace current]::Send $token]] \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Exit]  \
-      -command [list [namespace current]::Exit $token]]  \
-      -side right -padx 5  
-    pack [::Emoticons::MenuButton $frbot.smile -text $wtextsnd]  \
-      -side right -padx 6
-    set wbtstatus $frbot.stat
-    
-    set state(wbstatus) $wbtstatus
-
-    ::Jabber::Status::Button $wbtstatus \
+    ttk::frame $wbot
+    ttk::button $wbot.btok -text [mc Send]  \
+      -default active -command [list [namespace current]::Send $token]
+    ttk::button $wbot.btcancel -text [mc Exit]  \
+      -command [list [namespace current]::Exit $token]
+    ::Emoticons::MenuButton $wbot.smile -text $wtextsend
+    ::Jabber::Status::Button $wbot.stat \
       $token\(status) -command [list [namespace current]::StatusCmd $token] 
-    ::Jabber::Status::ConfigButton $wbtstatus available
-    
-    pack $wbtstatus -side right -padx 6
-
-    pack [checkbutton $frbot.active -text " [mc {Active <Return>}]" \
+    ::Jabber::Status::ConfigButton $wbot.stat available
+    ttk::checkbutton $wbot.active -style Toolbutton \
+      -image [::Theme::GetImage return] \
       -command [list [namespace current]::ActiveCmd $token] \
-      -variable $token\(active)]  \
-      -side left -padx 5
-            
-    # D = -bd 2 -relief sunken
-    pack [frame $w.frall.divt] -fill x -side top
+      -variable $token\(active)
     
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $wbot.btok  -side right
+	pack $wbot.btcancel -side right -padx $padx
+    } else {
+	pack $wbot.btcancel -side right
+	pack $wbot.btok -side right -padx $padx
+    }
+    pack  $wbot.active  -side left -fill y -padx 4
+    pack  $wbot.stat    -side left -fill y -padx 4
+    pack  $wbot.smile   -side left -fill y -padx 4    
+    pack  $wbot  -side bottom -fill x
+        
+    set wbtsend   $wbot.btok
+    set wbtstatus $wbot.stat    
+
+    ::balloonhelp::balloonforwindow $wbot.active [mc jaactiveret]
+
     # Header fields.
-    set   frtop [frame $w.frall.frtop -borderwidth 0]
-    pack  $frtop -side top -fill x
-    set wbtsubject $frtop.btp
-    button $frtop.btp -text "[mc Topic]:" -font $fontS  \
+    ttk::frame $wtop
+    pack $wtop -side top -fill x
+
+    ttk::button $wtop.btp -style Small.TButton \
+      -text "[mc Topic]:" \
       -command [list [namespace current]::SetTopic $token]
-    entry $frtop.etp -textvariable $token\(subject) -state disabled
-    set wbtnick $frtop.bni
-    button $wbtnick -text "[mc {Nick name}]..."  \
-      -font $fontS -command [list ::MUC::SetNick $roomjid]
+    ttk::entry $wtop.etp -font CociSmallFont \
+      -textvariable $token\(subject) -state disabled
+    ttk::button $wtop.bni -style Small.TButton \
+      -text "[mc {Nick name}]..."  \
+      -command [list ::MUC::SetNick $roomjid]
     
-    grid $frtop.btp -column 0 -row 0 -sticky w -padx 6 -pady 1
-    grid $frtop.etp -column 1 -row 0 -sticky ew -padx 4 -pady 1
-    grid $frtop.bni -column 2 -row 0 -sticky ew -padx 6 -pady 1
-    grid columnconfigure $frtop 1 -weight 1
+    grid  $wtop.btp  $wtop.etp  $wtop.bni  -sticky e -padx 4
+    grid  $wtop.etp  -sticky ew
+    grid columnconfigure $wtop 1 -weight 1
     
+    set wbtsubject $wtop.btp
+    set wbtnick    $wtop.bni
+
     if {!( [info exists protocol($roomjid)] && ($protocol($roomjid) == "muc") )} {
-	$wbtnick configure -state disabled
+	$wbtnick state {disabled}
 	$wtray buttonconfigure invite -state disabled
 	$wtray buttonconfigure info   -state disabled
     }
     
-    # Text chat display.
-    pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1 -class Pane] \
-      -side top -fill both -expand 1 -padx 4 -pady 4
-    frame $wtxt -height 200
-    frame $wtxt.0
-    text $wtext -height 12 -width 1 -font $fontS -state disabled  \
+    # Main frame for panes.
+    frame $wmid -height 250 -width 300 -relief sunken -bd 1
+    pack  $wmid -side top -fill both -expand 1
+
+    # Pane geometry manager.
+    ttk::paned $wpanev -orient vertical
+    pack $wpanev -side top -fill both -expand 1    
+
+    # Text send.
+    frame $wfrsend -height 100 -width 300
+    text  $wtextsend -height 4 -width 1 -font CociSmallFont -wrap word \
+      -borderwidth 1 -relief sunken -yscrollcommand \
+      [list ::UI::ScrollSet $wyscsend \
+      [list grid $wyscsend -column 1 -row 0 -sticky ns]]
+    tuscrollbar $wyscsend -orient vertical -command [list $wtextsend yview]
+
+    grid  $wtextsend  -column 0 -row 0 -sticky news
+    grid  $wyscsend   -column 1 -row 0 -sticky ns
+    grid columnconfigure $wfrsend 0 -weight 1
+    grid rowconfigure    $wfrsend 0 -weight 1
+    
+    # Pane for chat and users list.
+    ttk::paned $wpaneh -orient horizontal
+    $wpanev add $wpaneh -weight 1
+    $wpanev add $wfrsend -weight 1
+    
+    # Chat text widget.
+    frame $wfrchat
+    text  $wtext -height 12 -width 50 -font CociSmallFont -state disabled  \
       -borderwidth 1 -relief sunken -wrap word -cursor {}  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns -padx 2]]
-    scrollbar $wysc -orient vertical -command [list $wtext yview]
-    grid $wtext -column 0 -row 0 -sticky news
-    grid $wysc  -column 1 -row 0 -sticky ns -padx 2
-    grid columnconfigure $wtxt.0 0 -weight 1
-    grid rowconfigure    $wtxt.0 0 -weight 1
+    tuscrollbar $wysc -orient vertical -command [list $wtext yview]
+ 
+    grid  $wtext  -column 0 -row 0 -sticky news
+    grid  $wysc   -column 1 -row 0 -sticky ns -padx 2
+    grid columnconfigure $wfrchat 0 -weight 1
+    grid rowconfigure    $wfrchat 0 -weight 1
     
     # Users list.
     frame $wfrusers
-    scrollbar $wyscusers -orient vertical -command [list $wusers yview]
+    tuscrollbar $wyscusers -orient vertical -command [list $wusers yview]
     ::tree::tree $wusers -width 120 -height 100 -silent 1 -scrollwidth 400 \
       -treecolor "" -styleicons "" -indention 0 -pyjamascolor "" -xmargin 2 \
       -yscrollcommand [list ::UI::ScrollSet $wyscusers \
@@ -784,67 +902,27 @@ proc ::GroupChat::Build {roomjid args} {
 	$wusers configure -buttonpresscommand [namespace current]::Popup
     }
 
-    grid $wusers    -column 0 -row 0 -sticky news
-    grid $wyscusers -column 1 -row 0 -sticky ns -padx 2
+    grid  $wusers     -column 0 -row 0 -sticky news
+    grid  $wyscusers  -column 1 -row 0 -sticky ns -padx 2
     grid columnconfigure $wfrusers 0 -weight 1
     grid rowconfigure    $wfrusers 0 -weight 1
     
-    set imageVertical   [::Theme::GetImage [option get $frmid imageVertical {}]]
-    set imageHorizontal [::Theme::GetImage [option get $frmid imageHorizontal {}]]
-    set sashVBackground [option get $frmid sashVBackground {}]
-    set sashHBackground [option get $frmid sashHBackground {}]
-
-    set paneopts [list -orient horizontal -limit 0.0]
-    if {[info exists prefs(paneGeom,groupchatDlgHori)]} {
-	lappend paneopts -relative $prefs(paneGeom,groupchatDlgHori)
-    } else {
-	lappend paneopts -relative {0.8 0.2}
-    }
-    if {$sashVBackground != ""} {
-	lappend paneopts -image "" -handlelook [list -background $sashVBackground]
-    } elseif {$imageVertical != ""} {
-	lappend paneopts -image $imageVertical
-    }    
-    eval {::pane::pane $wtxt.0 $wfrusers} $paneopts
+    $wpaneh add $wfrchat -weight 1
+    $wpaneh add $wfrusers -weight 1
     
     # The tags.
     ConfigureTextTags $w $wtext
-    
-    # Text send.
-    frame $wtxtsnd -height 100 -width 300
-    text  $wtextsnd -height 4 -width 1 -font $fontS -wrap word \
-      -borderwidth 1 -relief sunken -yscrollcommand \
-      [list ::UI::ScrollSet $wyscsnd \
-      [list grid $wyscsnd -column 1 -row 0 -sticky ns]]
-    scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
-    grid $wtextsnd -column 0 -row 0 -sticky news
-    grid $wyscsnd  -column 1 -row 0 -sticky ns
-    grid columnconfigure $wtxtsnd 0 -weight 1
-    grid rowconfigure    $wtxtsnd 0 -weight 1
-    
-    set paneopts [list -orient vertical -limit 0.0]
-    if {[info exists prefs(paneGeom,groupchatDlgVert)]} {
-	lappend paneopts -relative $prefs(paneGeom,groupchatDlgVert)
-    } else {
-	lappend paneopts -relative {0.8 0.2}
-    }
-    if {$sashHBackground != ""} {
-	lappend paneopts -image "" -handlelook [list -background $sashHBackground]
-    } elseif {$imageHorizontal != ""} {
-	lappend paneopts -image $imageHorizontal
-    }    
-    eval {::pane::pane $wtxt $wtxtsnd} $paneopts
-    
+        
     set state(wtray)      $wtray
     set state(wbtnick)    $wbtnick
     set state(wbtsubject) $wbtsubject
     set state(wbtstatus)  $wbtstatus
     set state(wtext)      $wtext
-    set state(wtextsnd)   $wtextsnd
+    set state(wtextsend)  $wtextsend
     set state(wusers)     $wusers
-    set state(wtxt.0)     $wtxt.0
-    set state(wtxt)       $wtxt
     set state(wbtsend)    $wbtsend
+    set state(wpanev)     $wpanev
+    set state(wpaneh)     $wpaneh
     
     if {$state(active)} {
 	ActiveCmd $token
@@ -855,12 +933,14 @@ proc ::GroupChat::Build {roomjid args} {
     if {$nwin == 1} {
 	::UI::SetWindowGeometry $w $wDlgs(jgc)
     }
+    ::UI::SetSashPos groupchatDlgVert $wpanev
+    ::UI::SetSashPos groupchatDlgHori $wpaneh
     wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
     wm maxsize $w 800 2000
 
-    bind $wtextsnd <Return> \
+    bind $wtextsend <Return> \
       [list [namespace current]::ReturnKeyPress $token]
-    bind $wtextsnd <$this(modkey)-Return> \
+    bind $wtextsend <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $token]
     
     focus $w
@@ -938,7 +1018,7 @@ proc ::GroupChat::InsertMessage {token from body args} {
     $wtext configure -state normal
     $wtext insert end $prefix ${whom}pre
     
-    ::Text::Parse $wtext "  $body" ${whom}text
+    ::Text::ParseMsg groupchat $from $wtext "  $body" ${whom}text
     $wtext insert end \n
     
     $wtext configure -state disabled
@@ -946,7 +1026,8 @@ proc ::GroupChat::InsertMessage {token from body args} {
 
     # History.
     set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
-    ::History::PutToFile $roomjid [list $nick $dateISO $body $whom]
+    ::History::PutToFileEx $roomjid \
+      -type groupchat -name $nick -time $dateISO -body $body -tag $whom
 }
 
 proc ::GroupChat::SetState {token theState} {
@@ -961,17 +1042,14 @@ proc ::GroupChat::SetState {token theState} {
 }
 
 proc ::GroupChat::CloseHook {wclose} {
-    global  wDlgs
     
     set result ""
-    if {[string match $wDlgs(jgc)* $wclose]} {
-	set token [GetTokenFrom w $wclose]
-	if {$token != ""} {
-	    set w $wclose
-	    set ans [Exit $token]
-	    if {$ans == "no"} {
-		set result stop
-	    }
+    set token [GetTokenFrom w $wclose]
+    if {$token != ""} {
+	set w $wclose
+	set ans [Exit $token]
+	if {$ans == "no"} {
+	    set result stop
 	}
     }  
     return $result
@@ -1044,19 +1122,19 @@ proc ::GroupChat::Send {token} {
 	  -message [mc jamessnotconnected]
 	return
     }
-    set wtextsnd $state(wtextsnd)
+    set wtextsend $state(wtextsend)
     set roomjid  $state(roomjid)
 
     # Get text to send. Strip off any ending newlines from Return.
     # There might by smiley icons in the text widget. Parse them to text.
-    set allText [::Text::TransformToPureText $wtextsnd]
-    set allText [string trimright $allText "\n"]
+    set allText [::Text::TransformToPureText $wtextsend]
+    set allText [string trimright $allText]
     if {$allText != ""} {	
 	::Jabber::JlibCmd send_message $roomjid -type groupchat -body $allText
     }
     
     # Clear send.
-    $wtextsnd delete 1.0 end
+    $wtextsend delete 1.0 end
     set state(hot1stmsg) 1
 }
 
@@ -1183,15 +1261,21 @@ proc ::GroupChat::PresenceHook {jid presence args} {
     set inroom [expr [lsearch $allroomsin $jid2] < 0 ? 0 : 1]
     set isconf [expr [lsearch $conferences $service] < 0 ? 0 : 1]
     set isroom [$jstate(jlib) service isroom $jid]
-    ::Debug 4 "..........................."
-    ::Debug 4 "conferences=$conferences"
-    ::Debug 4 "allroomsin=$allroomsin"
-    ::Debug 4 "inroom=$inroom, isconf=$isconf, isroom=$isroom"
+    set istrpt [::Roster::IsTransport $service]
     
-    if {!$inroom && $isconf && ($presence == "available")} {
+    # @@@ BAD heuristics!
+    set isinvite 0
+    if {$istrpt && !$inroom && $isconf && ($presence == "available")} {
+	set isinvite 1
+    }
+    ::Debug 4 "\t conferences=$conferences"
+    ::Debug 4 "\t allroomsin=$allroomsin"
+    ::Debug 4 "\t inroom=$inroom, isconf=$isconf, isroom=$isroom, istrpt=$istrpt"
+    
+    if {$isinvite} {
 	
 	# This seems to be a kind of invitation for a groupchat.
-	set str [mc jamessgcinvite ${node}@${service} $argsArr(-from)]
+	set str [mc jamessgcinvite $jid2 $argsArr(-from)]
 	set ans [::UI::MessageBox -icon info -type yesno -message $str]
 	if {$ans == "yes"} {
 	    jlib::splitjidex $argsArr(-to) nd hst rs
@@ -1272,7 +1356,7 @@ proc ::GroupChat::AddUsers {token} {
     
     set roomjid $state(roomjid)
     
-    set presenceList [$jstate(roster) getpresence $roomjid]
+    set presenceList [$jstate(roster) getpresence $roomjid -type available]
     foreach pres $presenceList {
 	unset -nocomplain presArr
 	array set presArr $pres
@@ -1558,8 +1642,7 @@ proc ::GroupChat::BuildHistory {token} {
     variable $token
     upvar 0 $token state
 
-    
-    ::History::BuildHistory $state(roomjid) -class GroupChat  \
+    ::History::BuildHistory $state(roomjid) groupchat -class GroupChat  \
       -tagscommand ::GroupChat::ConfigureTextTags
 }
 
@@ -1661,12 +1744,8 @@ proc ::GroupChat::Close {token} {
 
     if {[info exists state(w)] && [winfo exists $state(w)]} {
 	::UI::SaveWinGeom $wDlgs(jgc) $state(w)
-    	::UI::SavePanePos groupchatDlgVert $state(wtxt)
-    	::UI::SavePanePos groupchatDlgHori $state(wtxt.0) vertical
-	
-    	# after idle seems to be needed to avoid crashing the mac :-(
-    	# trace variable ???
-    	#after idle destroy $state(w)
+	::UI::SaveSashPos groupchatDlgVert $state(wpanev)
+	::UI::SaveSashPos groupchatDlgHori $state(wpaneh)
 	destroy $state(w)
 	
 	# Array cleanup?
@@ -1715,8 +1794,8 @@ proc ::GroupChat::GetFirstPanePos { } {
 	variable $token
 	upvar 0 $token state
 
-	::UI::SavePanePos groupchatDlgVert $state(wtxt)
-	::UI::SavePanePos groupchatDlgHori $state(wtxt.0) vertical
+	::UI::SaveSashPos groupchatDlgVert $state(wpanev)
+	::UI::SaveSashPos groupchatDlgHori $state(wpaneh)
     }
 }
 
@@ -1731,7 +1810,7 @@ proc ::GroupChat::InitPrefsHook { } {
     set jprefs(prefgchatproto) "muc"
     set jprefs(defnick)        ""
 	
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(prefgchatproto)   jprefs_prefgchatproto    $jprefs(prefgchatproto)]  \
       [list ::Jabber::jprefs(defnick)          jprefs_defnick           $jprefs(defnick)]  \
       ]   
@@ -1749,34 +1828,36 @@ proc ::GroupChat::BuildPrefsHook {wtree nbframe} {
 proc ::GroupChat::BuildPageConf {page} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
-
-    set ypad [option get [winfo toplevel $page] yPad {}]
     
     set tmpJPrefs(prefgchatproto) $jprefs(prefgchatproto)
     set tmpJPrefs(defnick)        $jprefs(defnick)
     
     # Conference (groupchat) stuff.
-    set labfr $page.fr
-    labelframe $labfr -text [mc {Preferred Protocol}]
-    pack $labfr -side top -anchor w -padx 8 -pady 4
-    set pbl [frame $labfr.frin]
-    pack $pbl -padx 10 -pady 6 -side left
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set wpp $wc.fr
+    ttk::labelframe $wpp -text [mc {Preferred Protocol}] \
+      -padding [option get . groupSmallPadding {}]
+    pack  $wpp  -side top -anchor w
     
     foreach  \
-      val {gc-1.0                     muc}   \
-      txt {{Groupchat-1.0 (fallback)} prefmucconf} {
-	set wrad ${pbl}.[string map {. ""} $val]
-	radiobutton $wrad -text [mc $txt] -value $val  \
+      val { gc-1.0                     muc }         \
+      txt { {Groupchat-1.0 (fallback)} prefmucconf } {
+	set wrad $wpp.[string map {. ""} $val]
+	ttk::radiobutton $wrad -text [mc $txt] -value $val  \
 	  -variable [namespace current]::tmpJPrefs(prefgchatproto)	      
-	grid $wrad -sticky w -pady $ypad
+	grid $wrad -sticky w
     }
     
-    frame $page.nick
-    label $page.nick.l -text "Default nickname:"
-    entry $page.nick.e \
+    set wnick $wc.n
+    ttk::frame $wnick
+    ttk::label $wnick.l -text "Default nickname:"
+    ttk::entry $wnick.e \
       -textvariable [namespace current]::tmpJPrefs(defnick)
-    pack $page.nick.l $page.nick.e -side left
-    pack $page.nick -side top -anchor w -padx 8 -pady 4
+    pack $wnick.l $wnick.e -side left
+    pack $wnick -side top -anchor w -pady 8
 }
 
 proc ::GroupChat::SavePrefsHook { } {

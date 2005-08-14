@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Httpd.tcl,v 1.3 2005-03-02 13:49:41 matben Exp $
+# $Id: Httpd.tcl,v 1.4 2005-08-14 07:17:55 matben Exp $
     
 package provide Httpd 1.0
 
@@ -18,13 +18,13 @@ proc ::Httpd::InitHook { } {
     global  prefs this auto_path
     
     # Start httpd thread. It enters its event loop if created without a sript.
-    if {$prefs(Thread)} {
+    if {$this(package,Thread)} {
 	set this(httpdthreadid) [thread::create]
 	thread::send $this(httpdthreadid) [list set auto_path $auto_path]
     }
     
     # The 'tinyhttpd' package must be loaded in its threads interpreter if exists.
-    if {$prefs(Thread)} {
+    if {$this(package,Thread)} {
 	thread::send $this(httpdthreadid) {package require tinyhttpd}
     } else {
 	package require tinyhttpd
@@ -41,7 +41,7 @@ proc ::Httpd::Httpd { } {
     
     # Start the tinyhttpd server, in its own thread if available.
     
-    if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
+    if {($prefs(protocol) ne "client") && $prefs(haveHttpd)} {
 	set script [list ::tinyhttpd::start -port $prefs(httpdPort)  \
 	  -rootdirectory $this(httpdRootPath)]
 	
@@ -51,7 +51,7 @@ proc ::Httpd::Httpd { } {
 	}
 	
 	if {[catch {
-	    if {$prefs(Thread)} {
+	    if {$this(package,Thread)} {
 		thread::send $this(httpdthreadid) $script
 		
 		# Add more Mime types than the standard built in ones.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.5 2005-06-17 14:02:44 matben Exp $
+# $Id: Status.tcl,v 1.6 2005-08-14 07:10:51 matben Exp $
 
 package provide Status 1.0
 
@@ -58,6 +58,12 @@ namespace eval ::Jabber::Status:: {
 
 }
 
+proc ::Jabber::Status::GetStatusTextArray { } {
+    variable mapShowElemToText
+    
+    return [array get mapShowElemToText]
+}
+
 proc ::Jabber::Status::Widget {w style varName args} {
     
     switch -- $style {
@@ -77,14 +83,14 @@ proc ::Jabber::Status::Widget {w style varName args} {
 proc ::Jabber::Status::Configure {w status} {
     
     switch -- [winfo class $w] {
-	Button {
+	TButton {
 	    ConfigButton $w $status
 	}
-	Label {
+	TLabel {
 	    ConfigLabel $w $status
 	}
-	MenuButton {
-	    # empty
+	TMenubutton {
+	    ConfigButton $w $status
 	}
     }
 }
@@ -108,12 +114,14 @@ proc ::Jabber::Status::Button {w varName args} {
     array set argsArr $args
 
     set wmenu $w.menu
-    button $w -bd 1 -image [::Rosticons::Get status/$status] \
-      -width 16 -height 16
+    ttk::menubutton $w -style Toolbutton \
+      -compound image -image [::Rosticons::Get status/$status]
     ConfigButton $w $status
     menu $wmenu -tearoff 0
     BuildGenPresenceMenu $wmenu -variable $varName -command  \
       [list [namespace current]::ButtonCmd $w $varName $argsArr(-command)]
+    $w configure -menu $wmenu
+
     return $w
 }
 
@@ -130,12 +138,9 @@ proc ::Jabber::Status::ConfigButton {w status} {
     
     $w configure -image [::Rosticons::Get status/$status]
     if {[string equal $status "unavailable"]} {
-	$w configure -state disabled
-	bind $w <Button-1> {}
+	$w state {disabled}
     } else {
-	$w configure -state normal
-	bind $w <Button-1> \
-	  [list [namespace current]::PostMenu $w.menu %X %Y]
+	$w state {!disabled}
     }
 }
 
@@ -189,7 +194,7 @@ proc ::Jabber::Status::Label {w varName args} {
     set cmd $argsArr(-command)
     unset argsArr(-command)
 
-    eval {label $w} [array get argsArr]
+    eval {ttk::label $w} [array get argsArr]
     ConfigLabel $w $status
     set wmenu $w.menu
     menu $wmenu -tearoff 0

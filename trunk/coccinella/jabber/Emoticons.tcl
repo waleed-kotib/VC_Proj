@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.32 2005-06-15 06:28:11 matben Exp $
+# $Id: Emoticons.tcl,v 1.33 2005-08-14 07:10:51 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -42,14 +42,15 @@ proc ::Emoticons::Init { } {
     
     # We need the 'vfs::zip' package and if not using starkit we also need
     # the 'Memchan' package which is not automatically checked for.
+    # 'rechan' is the tclkits built in version of 'Memchan'.
     if {[catch {package require vfs::zip}]} {
 	set priv(havezip) 0
-    } elseif {[info exists starkit::topdir]} {
+    } elseif {![catch {package require rechan}]} {
 	set priv(havezip) 1
-    } elseif {[catch {package require Memchan}]} {
-	set priv(havezip) 0
+    } elseif {![catch {package require Memchan}]} {
+	set priv(havezip) 1
     } else {
-	set priv(havezip) 1
+	set priv(havezip) 0
     }
 
     # Cache stuff we need later.
@@ -202,11 +203,11 @@ proc ::Emoticons::ParseIconDef {name dir xmldata} {
 
     set token [tinydom::parse $xmldata]
     set xmllist [tinydom::documentElement $token]
-    
+
     # @@@ Any images shall be freed!!!
     array unset tmpicons $name,*
     array unset tmpiconsInv $name,*
-    
+
     foreach elem [tinydom::children $xmllist] {
 	
 	switch -- [tinydom::tagname $elem] {
@@ -387,43 +388,25 @@ proc ::Emoticons::MenuButton {w args} {
 
     # If we have -compound left -image ... -label ... working.
     set prefs(haveMenuImage) 0
-    if {([package vcompare [info tclversion] 8.4] >= 0) &&  \
-      ![string equal $this(platform) "macosx"]} {
+    if {![string equal $this(platform) "macosx"]} {
 	set prefs(haveMenuImage) 1
-    }
-    if {[string match "mac*" $this(platform)]} {
-	set btbd 2
-    } else {
-	set btbd 1
-    }
-
-    # Workaround for missing -image option on my macmenubutton.
-    if {[string equal $this(platform) "macintosh"] && \
-      [string length [info command menubuttonOrig]]} {
-	set menubuttonImage menubuttonOrig
-    } else {
-	set menubuttonImage button
     }
     
     # Button image.
     set btim ""
-    set size 16
     foreach key {:) :-) ;) ;-) :( :-(} {
 	if {[info exists smiley($key)]} {
 	    set btim $smiley($key)
-	    set size [image width $btim]
-	    if {$size < 16} {
-		set size 16
-	    }
 	    break
 	}
     }
-    set wmenu ${w}.m
-    $menubuttonImage $w -image $btim -bd $btbd -width $size -height $size
+    set wmenu $w.m
+    ttk::menubutton $w -style Toolbutton \
+      -compound image -image $btim
     
     eval {::Emoticons::BuildMenu $wmenu} $args
+    $w configure -menu $wmenu
 
-    bind $w <Button-1> [list [namespace current]::PostMenu $w $wmenu %X %Y]
     return $w
 }
 
@@ -551,7 +534,7 @@ proc  ::Emoticons::InitPrefsHook { } {
     set jprefs(emoticonSet) $priv(defaultSet)
     
     # Do NOT store the complete path!
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(emoticonSet) jprefs_emoticonSet $jprefs(emoticonSet)]]
 }
 
@@ -560,7 +543,7 @@ proc ::Emoticons::BuildPrefsHook {wtree nbframe} {
     $wtree newitem {Jabber Emoticons} -text [mc {Emoticons}]
     
     set wpage [$nbframe page {Emoticons}]    
-    ::Emoticons::BuildPrefsPage $wpage
+    BuildPrefsPage $wpage
 }
 
 proc ::Emoticons::BuildPrefsPage {wpage} {
@@ -569,32 +552,38 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     variable priv
     upvar ::Jabber::jprefs jprefs
     
-    set fontS  [option get . fontSmall {}]    
-    set fontSB [option get . fontSmallBold {}]    
+    set allSets [GetAllSets]
 
-    set wpop $wpage.pop
-    set wfr $wpage.fr
-    set wpreftext $wfr.t
-    set wysc $wfr.ysc
-    set allSets [::Emoticons::GetAllSets]
-    
     # This should never happen!
-    if {[llength $allSets] == 0} {
+    if {$allSets == {}} {
 	set allSets None
     }
-    label $wpage.l -text [mc preficonsel]
-    pack  $wpage.l -side top -anchor w -padx 8 -pady 4
-    eval {tk_optionMenu $wpop [namespace current]::tmpSet} $allSets
-    labelframe $wfr -labelwidget $wpop -padx 6 -pady 4
-    pack $wfr -side top -anchor w -padx 8 -pady 4 -fill both -expand 1
+
+    set wc $wpage.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -fill both -expand 1 \
+      -anchor [option get . dialogAnchor {}]
     
-    scrollbar $wysc -orient vertical -command [list $wpreftext yview]
-    text $wpreftext -yscrollcommand [list $wysc set] -width 20 -height 10
-    grid $wpreftext -row 0 -column 0 -sticky news
-    grid $wysc -row 0 -column 1 -sticky ns
+    ttk::label $wc.l -text [mc preficonsel]
+    pack  $wc.l  -side top -anchor w -pady 4
+    eval {ttk::optionmenu $wc.mb [namespace current]::tmpSet} $allSets
+
+    set wfr $wc.fr
+    ttk::labelframe $wfr -labelwidget $wc.mb \
+      -padding [option get . groupSmallPadding {}]
+    pack $wfr -side top -anchor w -fill both -expand 1
+    
+    tuscrollbar $wfr.ysc -orient vertical -command [list $wfr.t  yview]
+    text $wfr.t -yscrollcommand [list $wfr.ysc set] -width 20 -height 14 \
+      -highlightthickness 0
+    
+    grid  $wfr.t   $wfr.ysc  -sticky ns
+    grid  $wfr.t   -sticky news
     grid columnconfigure $wfr 0 -weight 1
     grid rowconfigure    $wfr 0 -weight 1
-
+    
+    set wpreftext $wfr.t
+    
     trace add variable [namespace current]::tmpSet write  \
       [namespace current]::PopCmd
 
@@ -615,7 +604,7 @@ proc ::Emoticons::PopCmd {name1 name2 op} {
 
     if {![info exists state($var,loaded)]} {
 	if {[catch {
-	    ::Emoticons::LoadTmpIconSet $state($var,path)
+	    LoadTmpIconSet $state($var,path)
 	} err]} {
 	    ::UI::MessageBox -icon error -title [mc Error] \
 	      -message "Failed loading iconset $var. $err" \
@@ -623,11 +612,11 @@ proc ::Emoticons::PopCmd {name1 name2 op} {
 	    set priv(havezip) 0
 	    set jprefs(emoticonSet) $priv(defaultSet)
 	    set tmpSet $priv(defaultSet)
-	    ::Emoticons::LoadTmpIconSet [::Emoticons::GetPrefSetPathExists]
+	    LoadTmpIconSet [GetPrefSetPathExists]
 	    return
 	}
     }
-    ::Emoticons::InsertTextLegend $wpreftext $var
+    InsertTextLegend $wpreftext $var
 }
 
 proc ::Emoticons::FreePrefsPage { } {
@@ -641,10 +630,10 @@ proc ::Emoticons::SavePrefsHook { } {
     upvar ::Jabber::jprefs jprefs
 
     if {![string equal $jprefs(emoticonSet) $tmpSet]} {
-	::Emoticons::SetPermanentSet $tmpSet
+	SetPermanentSet $tmpSet
 
     }
-    ::Emoticons::FreePrefsPage
+    FreePrefsPage
     set jprefs(emoticonSet) $tmpSet
 }
 
@@ -657,15 +646,15 @@ proc ::Emoticons::CancelPrefsHook { } {
     if {![string equal $jprefs(emoticonSet) $tmpSet]} {
 	#::Preferences::HasChanged
     }
-    ::Emoticons::FreePrefsPage
-    ::Emoticons::FreeAllTmpSets
+    FreePrefsPage
+    FreeAllTmpSets
 }
 
 proc ::Emoticons::UserDefaultsHook { } {
     variable tmpSet
     upvar ::Jabber::jprefs jprefs
     
-    set allSets [::Emoticons::GetAllSets]
+    set allSets [GetAllSets]
     if {[lsearch $allSets $jprefs(emoticonSet)] < 0} {
 	set tmpSet $priv(defaultSet)
     } else {

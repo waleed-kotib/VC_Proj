@@ -1,13 +1,11 @@
-#  PreferencesUtils.tcl ---
+#  PrefUtils.tcl ---
 #  
 #      This file is part of The Coccinella application. It defines some 
 #      utilities for keeping the user preferences. 
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
-#  
-#  See the README file for license, bugs etc.
+#  Copyright (c) 1999-2005  Mats Bengtsson
 #
-# $Id: PreferencesUtils.tcl,v 1.46 2005-06-20 13:55:29 matben Exp $
+# $Id: PrefUtils.tcl,v 1.1 2005-08-14 07:17:55 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -34,9 +32,9 @@
 #          
 ################################################################################
 
-package provide PreferencesUtils 1.0
+package provide PrefUtils 1.0
 
-namespace eval ::PreferencesUtils:: {
+namespace eval ::PrefUtils:: {
     
     variable priNameToNum
     array set priNameToNum {0 0 20 20 40 40 60 60 80 80 100 100   \
@@ -47,7 +45,7 @@ namespace eval ::PreferencesUtils:: {
       absolute 100}
 }
 
-# PreferencesUtils::Init --
+# PrefUtils::Init --
 # 
 #       Reads the preference file into the internal option database.
 #       Use pre 0.94.2 prefs file as a fallback.
@@ -57,7 +55,7 @@ namespace eval ::PreferencesUtils:: {
 # Results:
 #       updates the internal option database.
 
-proc ::PreferencesUtils::Init { } {
+proc ::PrefUtils::Init { } {
     global  this
     
     set prefsFilePath $this(userPrefsFilePath)
@@ -81,7 +79,7 @@ proc ::PreferencesUtils::Init { } {
     }
 }
 
-# PreferencesUtils::Add --
+# PrefUtils::Add --
 # 
 #       Set the user preferences from the preferences file if they are there,
 #       else take the hardcoded defaults.
@@ -96,7 +94,7 @@ proc ::PreferencesUtils::Init { } {
 # Results:
 #       none
 
-proc ::PreferencesUtils::Add {thePrefs} {
+proc ::PrefUtils::Add {thePrefs} {
     global  prefs
     
     variable priNameToNum
@@ -135,7 +133,7 @@ proc ::PreferencesUtils::Add {thePrefs} {
     }   
 }
 
-# PreferencesUtils::GetValue --
+# PrefUtils::GetValue --
 # 
 #       Returns the preference variables value, either from the preference
 #       file, or if there is no value for it there, return the default
@@ -149,7 +147,7 @@ proc ::PreferencesUtils::Add {thePrefs} {
 # Results:
 #       a value for the preference with the given name. 
 
-proc ::PreferencesUtils::GetValue {varName resName defValue} {
+proc ::PrefUtils::GetValue {varName resName defValue} {
     upvar #0 varName theVar
     
     set theVar [option get . $resName {}]
@@ -161,7 +159,7 @@ proc ::PreferencesUtils::GetValue {varName resName defValue} {
     return $theVar
 }
   
-# PreferencesUtils::SaveToFile --
+# PrefUtils::SaveToFile --
 # 
 #       Saves the preferences to a file. Preferences must be stored in
 #       the master copy 'prefs(master)' in the corresponding list format.
@@ -176,7 +174,7 @@ proc ::PreferencesUtils::GetValue {varName resName defValue} {
 # Results:
 #       preference file written. 
 
-proc ::PreferencesUtils::SaveToFile { } {
+proc ::PrefUtils::SaveToFile { } {
     global prefs this
 
     # Work on a temporary file and switch later.
@@ -195,7 +193,7 @@ proc ::PreferencesUtils::SaveToFile { } {
     
     # Only preferences indicated in the master copy are saved.
     foreach item $prefs(master) {
-	foreach {varName resName defVal} $item {break}
+	lassign $item varName resName defVal
 	
 	# All names must be fully qualified. Therefore #0.
 	upvar #0 $varName var
@@ -225,7 +223,7 @@ proc ::PreferencesUtils::SaveToFile { } {
     }
 }
 
-# PreferencesUtils::ResetToFactoryDefaults --
+# PrefUtils::ResetToFactoryDefaults --
 # 
 #       Resets the preferences in 'prefs(master)' to their hardcoded values.
 #
@@ -236,7 +234,7 @@ proc ::PreferencesUtils::SaveToFile { } {
 # Results:
 #       prefs values may change, and user interface stuff updated. 
 
-proc ::PreferencesUtils::ResetToFactoryDefaults {maxPriority} {
+proc ::PrefUtils::ResetToFactoryDefaults {maxPriority} {
     global  prefs
     
     variable priNameToNum
@@ -260,7 +258,7 @@ proc ::PreferencesUtils::ResetToFactoryDefaults {maxPriority} {
     }
 }
 
-# PreferencesUtils::ResetToUserDefaults --
+# PrefUtils::ResetToUserDefaults --
 # 
 #       Resets the applications state to correspond to the existing
 #       preference file.
@@ -270,7 +268,7 @@ proc ::PreferencesUtils::ResetToFactoryDefaults {maxPriority} {
 # Results:
 #       prefs values may change, and user interface stuff updated. 
 
-proc ::PreferencesUtils::ResetToUserDefaults { } {
+proc ::PrefUtils::ResetToUserDefaults { } {
     global  prefs
 	
     # Need to make a temporary storage in order not to duplicate items.
@@ -282,7 +280,7 @@ proc ::PreferencesUtils::ResetToUserDefaults { } {
     Add $thePrefs
 }
 
-# PreferencesUtils::SetUserPreferences --
+# PrefUtils::SetUserPreferences --
 #
 #       Set defaults in the option database for widget classes.
 #       First, on all platforms...
@@ -293,19 +291,14 @@ proc ::PreferencesUtils::ResetToUserDefaults { } {
 #                 {thePriority 20}}.
 # Note: it may prove useful to have the versions numbers as the first elements!
 
-proc ::PreferencesUtils::SetUserPreferences { } {
-    global  prefs
+proc ::PrefUtils::SetUserPreferences { } {
+    global  prefs this
     
-    ::Debug 2 "::PreferencesUtils::SetUserPreferences"
+    ::Debug 2 "::PrefUtils::SetUserPreferences"
     
-    ::PreferencesUtils::Add [list  \
-      [list prefs(majorVers)       prefs_majorVers       $prefs(majorVers)       absolute] \
-      [list prefs(minorVers)       prefs_minorVers       $prefs(minorVers)       absolute] \
-      [list prefs(protocol)        prefs_protocol        $prefs(protocol)]       \
-      [list prefs(autoConnect)     prefs_autoConnect     $prefs(autoConnect)]    \
-      [list prefs(multiConnect)    prefs_multiConnect    $prefs(multiConnect)]   \
-      [list prefs(thisServPort)    prefs_thisServPort    $prefs(thisServPort)]   \
-      [list prefs(httpdPort)       prefs_httpdPort       $prefs(httpdPort)]   \
+    ::PrefUtils::Add [list  \
+      [list this(vers,major)       this_majorVers        $this(vers,major)       absolute] \
+      [list this(vers,minor)       this_minorVers        $this(vers,minor)       absolute] \
       [list prefs(remotePort)      prefs_remotePort      $prefs(remotePort)]     \
       [list prefs(postscriptOpts)  prefs_postscriptOpts  $prefs(postscriptOpts)] \
       [list prefs(firstLaunch)     prefs_firstLaunch     $prefs(firstLaunch)     userDefault] \
@@ -314,6 +307,7 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(userPath)        prefs_userPath        $prefs(userPath)]        \
       [list prefs(winGeom)         prefs_winGeom         $prefs(winGeom)]        \
       [list prefs(paneGeom)        prefs_paneGeom        $prefs(paneGeom)]       \
+      [list prefs(sashPos)         prefs_sashPos         $prefs(sashPos)]        \
       ]    
             
     # Map list of win geoms into an array.
@@ -323,25 +317,24 @@ proc ::PreferencesUtils::SetUserPreferences { } {
     foreach {win pos} $prefs(paneGeom) {
 	set prefs(paneGeom,$win) $pos
     }
-    
-    # The prefs(stripJabber) option always overrides overrides prefs(protocol)!
-    if {$prefs(stripJabber)} {
-	set prefs(protocol) "symmetric"
+    foreach {win pos} $prefs(sashPos) {
+	set prefs(sashPos,$win) $pos
     }
 }
 
-# PreferencesUtils::ParseCommandLineOptions --
+# PrefUtils::ParseCommandLineOptions --
 #
 #       Process command line options. Some systems (Mac OS X) add their own
 #       things in the beginning. Skip these.
 
-proc ::PreferencesUtils::ParseCommandLineOptions {cargc cargv} {
+proc ::PrefUtils::ParseCommandLineOptions {cargv} {
     global  prefs argvArr
     
-    if {!$prefs(stripJabber)} {
-	upvar ::Jabber::jprefs jprefs
-	upvar ::Jabber::jstate jstate
+    if {$cargv == {}} {
+	return
     }
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
     
     # Skip anything that does not start with "-". Skip also -psn_...
     if {![regexp {(-[a-z].+$)} $cargv match optList]} {

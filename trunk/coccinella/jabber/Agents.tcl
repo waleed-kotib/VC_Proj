@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.36 2005-02-08 08:57:13 matben Exp $
+# $Id: Agents.tcl,v 1.37 2005-08-14 07:10:51 matben Exp $
 
 package provide Agents 1.0
 
@@ -15,7 +15,12 @@ namespace eval ::Agents:: {
     ::hooks::register logoutHook     ::Agents::LogoutHook
 
     option add *Agent.waveImage            wave           widgetDefault
-    
+
+    # Standard widgets and standard options.
+    option add *Agent.padding              4               50
+    option add *Agent*box.borderWidth      1               50
+    option add *Agent*box.relief           sunken          50
+
     # Template for the agent popup menu.
     variable popMenuDefs
     
@@ -35,7 +40,8 @@ namespace eval ::Agents:: {
     }    
 
     # Temporary.
-    variable wagents xxx
+    variable wagents -
+    variable wtab    -
 }
 
 proc ::Agents::LoginCmd { } {
@@ -49,8 +55,13 @@ proc ::Agents::LoginCmd { } {
 }
 
 proc ::Agents::LogoutHook { } {
+    variable wtab
     
-    
+    if {[winfo exists $wtab]} {
+	set wnb [::Jabber::UI::GetNotebook]
+	$wnb forget $wtab
+	destroy $wtab
+    }
 }
 
 # Agents::GetAll --
@@ -143,7 +154,7 @@ proc ::Agents::AgentsCallback {jid jlibName type subiq} {
 	ok - result {
 
 	    # It is at this stage we are confident that an Agents page is needed.
-	    ::Jabber::UI::NewPage "Agents"
+	    NewPage
 	    
 	    $wtree newitem $jid -dir 1 -open 1 -tags $jid
 	    set bmsg "jid: $jid"
@@ -296,6 +307,22 @@ proc ::Agents::AddAgentToTree {parentJid jid subAgent} {
     }
 }
 
+proc ::Agents::NewPage { } {
+    variable wtab
+    
+    set wnb [::Jabber::UI::GetNotebook]
+    set wtab $wnb.ag
+    if {![winfo exists $wtab]} {
+	set im [::Theme::GetImage \
+	  [option get [winfo toplevel $wnb] browser16Image {}]]
+	set imd [::Theme::GetImage \
+	  [option get [winfo toplevel $wnb] browser16DisImage {}]]
+	set imSpec [list $im disabled $imd background $imd]
+	Build $wtab
+	$wnb add $wtab -text [mc Agents] -image $imSpec -compound left
+    }
+}
+
 # Agents::Build --
 #
 #       This is supposed to create a frame which is pretty object like,
@@ -321,27 +348,27 @@ proc ::Agents::Build {w args} {
     
     ::Debug 2 "::Agents::Build w=$w"
         
-    set fontS [option get . fontSmall {}]
+    set wagents $w
+    set wwave   $w.fs
+    set wbox    $w.box
+    set wtree   $wbox.tree
+    set wxsc    $wbox.xsc
+    set wysc    $wbox.ysc
 
     # The frame.
-    frame $w -borderwidth 0 -relief flat -class Agent
-    set wagents $w
+    ttk::frame $w -class Agent
     
-    set wwave $w.fs
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
     ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
       -type image -image $waveImage
     pack $wwave -side bottom -fill x -padx 8 -pady 2
     
-    # Tree part
-    set wbox $w.box
-    pack [frame $wbox -border 1 -relief sunken]   \
-      -side top -fill both -expand 1 -padx 6 -pady 6
-    set wtree $wbox.tree
-    set wxsc $wbox.xsc
-    set wysc $wbox.ysc
-    scrollbar $wxsc -orient horizontal -command [list $wtree xview]
-    scrollbar $wysc -orient vertical -command [list $wtree yview]
+    # D = -border 1 -relief sunken
+    frame $wbox
+    pack  $wbox -side top -fill both -expand 1
+
+    tuscrollbar $wxsc -orient horizontal -command [list $wtree xview]
+    tuscrollbar $wysc -orient vertical -command [list $wtree yview]
     ::tree::tree $wtree -width 100 -height 100 -silent 1  \
       -scrollwidth 400 \
       -xscrollcommand [list ::UI::ScrollSet $wxsc \
@@ -351,13 +378,15 @@ proc ::Agents::Build {w args} {
       -selectcommand ::Agents::SelectCmd   \
       -opencommand ::Agents::OpenTreeCmd  \
       -eventlist [list [list <<ButtonPopup>> [namespace current]::Popup]]
-    set wtreecanvas [$wtree getcanvas]
+
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [namespace current]::Popup
     }
-    grid $wtree -row 0 -column 0 -sticky news
-    grid $wysc  -row 0 -column 1 -sticky ns
-    grid $wxsc  -row 1 -column 0 -sticky ew
+    set wtreecanvas [$wtree getcanvas]
+
+    grid  $wtree  -row 0 -column 0 -sticky news
+    grid  $wysc   -row 0 -column 1 -sticky ns
+    grid  $wxsc   -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure $wbox 0 -weight 1
     
