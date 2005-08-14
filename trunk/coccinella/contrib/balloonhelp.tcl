@@ -5,7 +5,7 @@
 #  Code idee from Harrison & McLennan
 #  This source file is distributed under the BSD license.
 #  
-# $Id: balloonhelp.tcl,v 1.14 2004-10-12 13:48:56 matben Exp $
+# $Id: balloonhelp.tcl,v 1.15 2005-08-14 06:56:45 matben Exp $
 
 package provide balloonhelp 1.0
 
@@ -132,9 +132,9 @@ proc ::balloonhelp::balloonforwindow {win msg args} {
     set locals($win) $msg
     set locals($win,args) $args
     # Perhaps we shall have "+" for all bindings to not interfere...
-    bind $win <Enter> [list ::balloonhelp::Pending %W "window"]
-    bind $win <Leave> [list ::balloonhelp::Cancel %W]
-    bind $win <Button-1> {+ ::balloonhelp::Cancel %W}
+    bind $win <Enter>    {+::balloonhelp::Pending %W "window" }
+    bind $win <Leave>    {+::balloonhelp::Cancel %W }
+    bind $win <Button-1> {+::balloonhelp::Cancel %W }
 }
 
 proc ::balloonhelp::balloonforcanvas {win itemid msg args} {
@@ -217,6 +217,10 @@ proc ::balloonhelp::Show {win type} {
     
     variable locals    
 
+    if {![winfo exists $win]} {
+	unset -nocomplain locals(pending)
+	return
+    }
     set w .balloonhelp
     if {[focus] != $w} {
 	set locals(focus) [focus]

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MSSpeech.tcl,v 1.4 2004-10-12 13:48:56 matben Exp $
+# $Id: MSSpeech.tcl,v 1.5 2005-08-14 06:56:45 matben Exp $
 
 namespace eval ::MSSpeech:: {
 
@@ -34,18 +34,18 @@ proc ::MSSpeech::Init { } {
 	set idVoiceToken [$idVoice Voice]
 	set name [$idVoiceToken GetDescription]
 	set voiceName2ObjectArr($name) $idVoice
-	set allVoices [::MSSpeech::GetVoices]
+	set allVoices [GetVoices]
     }
 }
 
-proc ::MSSpeech::Speak {msg {voice {}}} {
+proc ::MSSpeech::Speak {msg {voice ""}} {
         
     variable idVoice
     variable voiceName2ObjectArr
     variable allVoices
 
     # 1 means async.
-    if {[string length $voice] == 0} {
+    if {$voice == ""} {
 	$idVoice Speak $msg 1
     } else {
 	set ind [lsearch $allVoices $voice]

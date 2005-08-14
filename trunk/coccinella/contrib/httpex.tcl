@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2005  Mats Bengtsson only for the new and rewritten parts.
 #  This source file is distributed under the BSD license.
 #
-# $Id: httpex.tcl,v 1.20 2005-03-02 13:49:40 matben Exp $
+# $Id: httpex.tcl,v 1.21 2005-08-14 06:56:45 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -1178,8 +1178,8 @@ proc httpex::CopyStart {s token} {
 	set blocksize [expr {$state(totalsize) - $state(currentsize)}]
     }
     if {[catch {
-	fcopy $s $state(-channel) -size $blocksize -command \
-	    [list httpex::CopyDone $token]
+	fcopy $s $state(-channel) -size $blocksize \
+	  -command [list httpex::CopyDone $token]
     } err]} {
 	Finish $token $err
     }

@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.30 2005-03-04 14:21:35 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.31 2005-08-14 06:56:45 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -250,7 +250,12 @@ proc ::mactabnotebook::Init { } {
 	    option add *MacTabnotebook.font    {Helvetica -11}   widgetDefault
 	}
 	windows {
-	    option add *MacTabnotebook.font    {system}   widgetDefault
+	    if {$tcl_platform(osVersion) >= 5.0} {
+		set family "Tahoma"
+	    } else {
+		set family "MS Sans Serif"
+	    }
+	    option add *MacTabnotebook.font    [list $family 8]  widgetDefault
 	}
 	macintosh {
 	    option add *MacTabnotebook.font    {system}    widgetDefault
