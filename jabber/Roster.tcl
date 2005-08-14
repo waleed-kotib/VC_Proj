@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.129 2005-06-03 13:00:06 matben Exp $
+# $Id: Roster.tcl,v 1.130 2005-08-14 07:10:51 matben Exp $
 
 package provide Roster 1.0
 
@@ -28,8 +28,6 @@ namespace eval ::Roster:: {
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
-    set fontS  [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
     
     # Standard widgets and standard options.
     option add *Roster.borderWidth          0               50
@@ -40,6 +38,10 @@ namespace eval ::Roster:: {
     option add *Roster*box.relief           sunken          50
     option add *Roster.stat.f.padX          8               50
     option add *Roster.stat.f.padY          2               50
+    
+    option add *Roster.padding              4               50
+    
+    
     
     # Specials.
     option add *Roster.backgroundImage      sky             widgetDefault
@@ -99,18 +101,22 @@ namespace eval ::Roster:: {
     
     # General.
     set popMenuDefs(roster,def) {
-	mMessage       {head group user}  {::NewMsg::Build -to $jid}
-	mChat          {user available}   {::Chat::StartThread $jid3}
-	mWhiteboard    {wb available}     {::Jabber::WB::NewWhiteboardTo $jid3}
-	mSendFile      user               {::OOB::BuildSet $jid3}
-	separator      {}                 {}
-	mAddNewUser    {}                 {::Jabber::User::NewDlg}
-	mEditUser      user               {::Jabber::User::EditDlg $jid}
-	mUserInfo      user               {::UserInfo::Get $jid3}
-	mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}
-	mRemoveContact user               {::Roster::SendRemove $jid}
-	separator      {}                 {}
-	mRefreshRoster {}                 {::Roster::Refresh}
+	command     mMessage       {head group user}  {::NewMsg::Build -to $jid}          {}
+	command     mChat          {user available}   {::Chat::StartThread $jid3}         {}
+	command     mWhiteboard    {wb available}     {::Jabber::WB::NewWhiteboardTo $jid3} {}
+	command     mSendFile      user               {::OOB::BuildSet $jid3}             {}
+	separator   {}             {}                 {} {}
+	command     mAddNewUser    {}                 {::Jabber::User::NewDlg}            {}
+	command     mEditUser      user               {::Jabber::User::EditDlg $jid}      {}
+	command     mUserInfo      user               {::UserInfo::Get $jid3}             {}
+	command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
+	command     mRemoveContact user               {::Roster::SendRemove $jid}         {}
+	separator   {}             {}                 {} {}
+	cascade     mShow          {}                 {
+	    check     mOffline     {}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
+	    check     mTransports  {}     {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)}
+	} {}
+	command     mRefreshRoster {}                 {::Roster::Refresh} {}
     }  
     # mDirStatus     user               {::Roster::DirectedPresenceDlg $jid}
     # mLastLogin/Activity user          {::Jabber::GetLast $jid}
@@ -119,15 +125,15 @@ namespace eval ::Roster:: {
 
     # Transports.
     set popMenuDefs(roster,trpt,def) {
-	mLastLogin/Activity user          {::Jabber::GetLast $jid}
-	mvCard         user               {::VCard::Fetch other $jid}
-	mAddNewUser    {}                 {::Jabber::User::NewDlg}
-	mEditUser      user               {::Jabber::User::EditDlg $jid}
-	mVersion       user               {::Jabber::GetVersion $jid3}
-	mLoginTrpt     {trpt unavailable} {::Roster::LoginTrpt $jid3}
-	mLogoutTrpt    {trpt available}   {::Roster::LogoutTrpt $jid3}
-	separator      {}                 {}
-	mRefreshRoster {}                 {::Roster::Refresh}
+	command     mLastLogin/Activity user          {::Jabber::GetLast $jid}        {}
+	command     mvCard         user               {::VCard::Fetch other $jid}     {}
+	command     mAddNewUser    {}                 {::Jabber::User::NewDlg}        {}
+	command     mEditUser      user               {::Jabber::User::EditDlg $jid}  {}
+	command     mVersion       user               {::Jabber::GetVersion $jid3}    {}
+	command     mLoginTrpt     {trpt unavailable} {::Roster::LoginTrpt $jid3}     {}
+	command     mLogoutTrpt    {trpt available}   {::Roster::LogoutTrpt $jid3}    {}
+	separator   {}             {}                 {} {}
+	command     mRefreshRoster {}                 {::Roster::Refresh}             {}
     }  
 
     # Can't run our http server on macs :-(
@@ -242,8 +248,6 @@ proc ::Roster::BuildToplevel {w} {
     wm title $w {Roster (Contact list)}
     wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
     
-    set fontSB [option get . fontSmallBold {}]
-        
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
@@ -251,7 +255,7 @@ proc ::Roster::BuildToplevel {w} {
     # Top frame for info.
     set frtop $w.frall.frtop
     pack [frame $frtop] -fill x -side top -anchor w -padx 10 -pady 4
-    label $frtop.la -text {Connected to:} -font $fontSB
+    label $frtop.la -text {Connected to:} -font CociSmallBoldFont
     label $frtop.laserv -textvariable [namespace current]::servtxt
     pack $frtop.la $frtop.laserv -side left -pady 4
     set servtxt {not connected}
@@ -286,45 +290,33 @@ proc ::Roster::Build {w} {
     variable wwave
     upvar ::Jabber::jprefs jprefs
         
-    # The frame of class Roster. D = -bd 0 -relief flat
-    frame $w -class Roster
-    
-    # Keep empty frame for any padding.
-    frame $w.tpad
-    pack  $w.tpad -side top -fill x
-    
+    # The frame of class Roster.
+    ttk::frame $w -class Roster
+        
     # Tree frame with scrollbars.
     set wroster $w
-    set wpad    $w.pad
-    set wbox    $w.pad.box
+    set wbox    $w.box
     set wxsc    $wbox.xsc
     set wysc    $wbox.ysc
     set wtree   $wbox.tree
+    set wwave   $w.wa
     
-    # D = -padx 4 -pady 4
-    frame $wpad
-    pack  $wpad -side top -fill both -expand 1
     # D = -border 1 -relief sunken
     frame $wbox
     pack  $wbox -side top -fill both -expand 1
     
-    # D = -padx 0 -pady 0
-    frame $w.stat
-    frame $w.stat.f
-    pack  $w.stat   -side bottom -fill x
-    pack  $w.stat.f -side bottom -fill x
-    set wwave $w.stat.f.wa
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
-    ::wavelabel::wavelabel $wwave -type image -image $waveImage
-    pack $wwave -side bottom -fill x
+    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
+      -type image -image $waveImage
+    pack $wwave -side bottom -fill x -padx 8 -pady 2
     
     TreeNew $w $wtree $wxsc $wysc
 
-    scrollbar $wxsc -command [list $wtree xview] -orient horizontal
-    scrollbar $wysc -command [list $wtree yview] -orient vertical
-    grid $wtree -row 0 -column 0 -sticky news
-    grid $wysc  -row 0 -column 1 -sticky ns
-    grid $wxsc  -row 1 -column 0 -sticky ew
+    tuscrollbar $wxsc -command [list $wtree xview] -orient horizontal
+    tuscrollbar $wysc -command [list $wtree yview] -orient vertical
+    grid  $wtree  -row 0 -column 0 -sticky news
+    grid  $wysc   -row 0 -column 1 -sticky ns
+    grid  $wxsc   -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure    $wbox 0 -weight 1
     
@@ -532,17 +524,17 @@ proc ::Roster::RegisterPopupEntry {menuSpec} {
     if {![info exists regPopMenuSpec]} {
 	
 	# Add separator if this is the first addon entry.
-	incr ind 3
-	set popMenuDefs(roster,def) [linsert $popMenuDefs(roster,def)  \
-	  $ind {separator} {} {}]
+	incr ind 5
+	set popMenuDefs(roster,def) \
+	  [linsert $popMenuDefs(roster,def) $ind separator {} {} {} {}]
 	set regPopMenuSpec {}
 	set ind [lindex [lsearch -all $popMenuDefs(roster,def) "separator"] end]
     }
     
     # Add new entry just before the last separator
     set v $popMenuDefs(roster,def)
-    set popMenuDefs(roster,def) [concat [lrange $v 0 [expr $ind-1]] $menuSpec \
-      [lrange $v $ind end]]
+    set popMenuDefs(roster,def) \
+      [concat [lrange $v 0 [expr $ind-1]] $menuSpec [lrange $v $ind end]]
     set regPopMenuSpec [concat $regPopMenuSpec $menuSpec]
 }
 
@@ -566,14 +558,7 @@ proc ::Roster::DoPopup {jid3 clicked status group x y} {
     
     upvar ::Jabber::jstate jstate
         
-    # Make jid (jid2) of all jid3.
-    set jid {}
-    foreach u $jid3 {
-	jlib::splitjid $u jid2 res
-	lappend jid $jid2
-    }
-    
-    ::Debug 2 "::Roster::DoPopup jid=$jid, jid3=$jid3, clicked=$clicked, status=$status"
+    ::Debug 2 "::Roster::DoPopup jid3=$jid3, clicked=$clicked, status=$status"
         
     # Make the appropriate menu.
     set m $jstate(wpopup,roster)
@@ -588,23 +573,72 @@ proc ::Roster::DoPopup {jid3 clicked status group x y} {
 	}
     }
     
-    foreach {item type cmd} $menuDef {
-	if {[string index $cmd 0] == "@"} {
-	    set mt [menu ${m}.sub${i} -tearoff 0]
-	    set locname [mc $item]
-	    $m add cascade -label $locname -menu $mt -state disabled
-	    eval [string range $cmd 1 end] $mt
-	    incr i
-	} elseif {[string equal $item "separator"]} {
-	    $m add separator
-	    continue
-	} else {
+    # We build menus using this proc to be able to make cascades.
+    BuildMenu $m $menuDef $jid3 $clicked $status $group
+        
+    # This one is needed on the mac so the menu is built before it is posted.
+    update idletasks
+    
+    # Post popup menu.
+    set X [expr [winfo rootx $wtree] + $x]
+    set Y [expr [winfo rooty $wtree] + $y]
+    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
+    
+    # Mac bug... (else can't post menu while already posted if toplevel...)
+    if {[string equal "macintosh" $this(platform)]} {
+	catch {destroy $m}
+	update
+    }
+}
 
-	    # Substitute the jid arguments. Preserve list structure!
-	    set cmd [eval list $cmd]
-	    set locname [mc $item]
-	    $m add command -label $locname -command [list after 40 $cmd]  \
-	      -state disabled
+# Roster::BuildMenu --
+# 
+#       Build popup menu recursively if necessary.
+
+proc ::Roster::BuildMenu {m menuDef jid3 clicked status group} {
+    
+    # Make jid (jid2) of all jid3.
+    set jid {}
+    foreach u $jid3 {
+	jlib::splitjid $u jid2 res
+	lappend jid $jid2
+    }
+    set i 0
+    
+    foreach {op item type cmd opts} $menuDef {
+	
+	set locname [mc $item]
+
+	switch -- $op {
+	    command {
+    
+		# Substitute the jid arguments. Preserve list structure!
+		set cmd [eval list $cmd]
+		eval {$m add command -label $locname -command [list after 40 $cmd]  \
+		  -state disabled} $opts
+	    }
+	    radio {
+		set cmd [eval list $cmd]
+		eval {$m add radiobutton -label $locname -command [list after 40 $cmd]  \
+		  -state disabled} $opts
+	    }
+	    check {
+		set cmd [eval list $cmd]
+		#puts "\t cmd=$cmd, opts=$opts"
+		#puts "\t showOffline=$::Jabber::jprefs(rost,showOffline)"
+		eval {$m add checkbutton -label $locname -command [list after 40 $cmd]  \
+		  -state disabled} $opts
+	    }
+	    separator {
+		$m add separator
+		continue
+	    }
+	    cascade {
+		set mt [menu ${m}.sub${i} -tearoff 0]
+		eval {$m add cascade -label $locname -menu $mt -state disabled} $opts
+		BuildMenu $mt $cmd $jid3 $clicked $status $group
+		incr i
+	    }
 	}
 	if {![::Jabber::IsConnected] && ([lsearch $type always] < 0)} {
 	    continue
@@ -633,20 +667,6 @@ proc ::Roster::DoPopup {jid3 clicked status group x y} {
 	if {[string equal $state "normal"]} {
 	    $m entryconfigure $locname -state normal
 	}
-    }
-    
-    # This one is needed on the mac so the menu is built before it is posted.
-    update idletasks
-    
-    # Post popup menu.
-    set X [expr [winfo rootx $wtree] + $x]
-    set Y [expr [winfo rooty $wtree] + $y]
-    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
-    
-    # Mac bug... (else can't post menu while already posted if toplevel...)
-    if {[string equal "macintosh" $this(platform)]} {
-	catch {destroy $m}
-	update
     }
 }
 
@@ -685,7 +705,7 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    if {[info exists attrArr(-type)]} {
 		set type $attrArr(-type)
 	    }
-	    if {![regexp $type {(available|unavailable|unsubscribed)}]} {
+	    if {![regexp $type {(available|unavailable)}]} {
 		return
 	    }
 	    
@@ -1216,6 +1236,20 @@ proc ::Roster::LogoutTrpt {jid3} {
     ::Jabber::SetStatus unavailable -to $jid3    
 }
 
+proc ::Roster::ShowOffline {} {
+    variable wroster
+
+    # Need to repopulate the roster?
+    RePopulateTree $wroster
+}
+
+proc ::Roster::ShowTransports {} {
+    variable wroster
+    
+    # Need to repopulate the roster?
+    RePopulateTree $wroster
+}
+
 # Roster::BrowseSetHook, DiscoInfoHook --
 # 
 #       It is first when we have obtained either browse or disco info it is
@@ -1333,7 +1367,7 @@ proc ::Roster::TreeInit {w} {
     set offlineImage [::Theme::GetImage [option get $wtree offlineImage {}]]
 
     set opts {}
-    if {$jprefs(rost,hideOffline)} {
+    if {!$jprefs(rost,showOffline)} {
 	lappend opts -showrootbutton 0 -indention {6 16 20} -xmargin {0 6 10}
     } else {
 	set indention [lindex [$wtree configure -indention] 3]
@@ -1349,7 +1383,7 @@ proc ::Roster::TreeInit {w} {
     }
     eval {$wtree newitem [list available] -dir 1 -open $isopen \
       -text $mcHead(available) -tags head -image $onlineImage} $rootOpts
-    if {!$jprefs(rost,hideOffline)} {
+    if {$jprefs(rost,showOffline)} {
 	set isopen 1
 	if {[lsearch $jprefs(rost,closedItems) unavailable] >= 0} {
 	    set isopen 0
@@ -1388,7 +1422,7 @@ proc ::Roster::TreeNewItem {jid presence args} {
     if {![regexp $presence {(available|unavailable)}]} {
 	return
     }
-    if {$jprefs(rost,hideOffline) && ($presence == "unavailable")} {
+    if {!$jprefs(rost,showOffline) && ($presence == "unavailable")} {
 	return
     }
     array set argsArr $args
@@ -1420,7 +1454,7 @@ proc ::Roster::TreeNewItem {jid presence args} {
     ::Debug 5 "\t jidx=$jidx"
 
     set istrpt [IsTransportHeuristics $jid3]
-    if {$istrpt && $jprefs(rost,hideTrpts)} {
+    if {$istrpt && !$jprefs(rost,showTrpts)} {
 	return
     }
 
@@ -1825,7 +1859,7 @@ namespace eval ::Roster:: {
     # name description ...
     # Excluding smtp since it works differently.
     variable trptToAddressName {
-	jabber      {Jabber Id}
+	jabber      {Jabber ID}
 	icq         {ICQ (number)}
 	aim         {AIM}
 	msn         {MSN}
@@ -1976,23 +2010,23 @@ proc ::Roster::InitPrefsHook { } {
     set jprefs(rost,allowSubNone)   1
     set jprefs(rost,clrLogout)      1
     set jprefs(rost,dblClk)         normal
-    set jprefs(rost,hideOffline)    0
-    set jprefs(rost,hideTrpts)      0
-    
+    set jprefs(rost,showOffline)    1
+    set jprefs(rost,showTrpts)      1
+
     # Show special icons for foreign IM systems?
     set jprefs(rost,haveIMsysIcons) 1
     
     # Keep track of all closed tree items. Default is all open.
     set jprefs(rost,closedItems) {}
 	
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(rost,clrLogout)   jprefs_rost_clrRostWhenOut $jprefs(rost,clrLogout)]  \
       [list ::Jabber::jprefs(rost,dblClk)      jprefs_rost_dblClk       $jprefs(rost,dblClk)]  \
       [list ::Jabber::jprefs(rost,rmIfUnsub)   jprefs_rost_rmIfUnsub    $jprefs(rost,rmIfUnsub)]  \
       [list ::Jabber::jprefs(rost,allowSubNone) jprefs_rost_allowSubNone $jprefs(rost,allowSubNone)]  \
       [list ::Jabber::jprefs(rost,haveIMsysIcons)   jprefs_rost_haveIMsysIcons    $jprefs(rost,haveIMsysIcons)]  \
-      [list ::Jabber::jprefs(rost,hideOffline) jprefs_rost_hideOffline  $jprefs(rost,hideOffline)]  \
-      [list ::Jabber::jprefs(rost,hideTrpts)   jprefs_rost_hideTrpts    $jprefs(rost,hideTrpts)]  \
+      [list ::Jabber::jprefs(rost,showOffline) jprefs_rost_showOffline  $jprefs(rost,showOffline)]  \
+      [list ::Jabber::jprefs(rost,showTrpts)   jprefs_rost_showTrpts    $jprefs(rost,showTrpts)]  \
       [list ::Jabber::jprefs(rost,closedItems) jprefs_rost_closedItems  $jprefs(rost,closedItems)]  \
       ]
     
@@ -2010,35 +2044,44 @@ proc ::Roster::BuildPrefsHook {wtree nbframe} {
 proc ::Roster::BuildPageRoster {page} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
-
-    set ypad [option get [winfo toplevel $page] yPad {}]
     
     foreach key {
 	rmIfUnsub allowSubNone clrLogout dblClk haveIMsysIcons 
-	hideOffline hideTrpts
+	showOffline showTrpts
     } {
 	set tmpJPrefs(rost,$key) $jprefs(rost,$key)
     }
 
-    checkbutton $page.rmifunsub -text " [mc prefrorm]"  \
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    ttk::checkbutton $wc.rmifunsub -text [mc prefrorm]  \
       -variable [namespace current]::tmpJPrefs(rost,rmIfUnsub)
-    checkbutton $page.allsubno -text " [mc prefroallow]"  \
+    ttk::checkbutton $wc.allsubno -text [mc prefroallow]  \
       -variable [namespace current]::tmpJPrefs(rost,allowSubNone)
-    checkbutton $page.clrout -text " [mc prefroclr]"  \
+    ttk::checkbutton $wc.clrout -text [mc prefroclr]  \
       -variable [namespace current]::tmpJPrefs(rost,clrLogout)
-    checkbutton $page.dblclk -text " [mc prefrochat]" \
+    ttk::checkbutton $wc.dblclk -text [mc prefrochat] \
       -variable [namespace current]::tmpJPrefs(rost,dblClk)  \
       -onvalue chat -offvalue normal
-    checkbutton $page.sysicons -text " [mc prefrosysicons]" \
+    ttk::checkbutton $wc.sysicons -text [mc prefrosysicons] \
       -variable [namespace current]::tmpJPrefs(rost,haveIMsysIcons)    
-    checkbutton $page.hideoff -text " [mc prefrohideoff]" \
-      -variable [namespace current]::tmpJPrefs(rost,hideOffline)
-    checkbutton $page.hidetrpt -text " [mc prefrohidetrpt]" \
-      -variable [namespace current]::tmpJPrefs(rost,hideTrpts)
+    ttk::checkbutton $wc.hideoff -text [mc prefrohideoff] \
+      -variable [namespace current]::tmpJPrefs(rost,showOffline) \
+      -onvalue 0 -offvalue 1
+    ttk::checkbutton $wc.hidetrpt -text [mc prefrohidetrpt] \
+      -variable [namespace current]::tmpJPrefs(rost,showTrpts) \
+      -onvalue 0 -offvalue 1
 
-    pack $page.rmifunsub $page.allsubno $page.clrout $page.dblclk  \
-      $page.sysicons $page.hideoff $page.hidetrpt \
-      -side top -anchor w -pady $ypad -padx 10
+    grid  $wc.rmifunsub  -sticky w
+    grid  $wc.allsubno   -sticky w
+    grid  $wc.clrout     -sticky w
+    grid  $wc.dblclk     -sticky w
+    grid  $wc.sysicons   -sticky w
+    grid  $wc.hideoff    -sticky w
+    grid  $wc.rmifunsub  -sticky w
+    grid  $wc.hidetrpt   -sticky w    
 }
 
 proc ::Roster::SavePrefsHook { } {
@@ -2047,8 +2090,8 @@ proc ::Roster::SavePrefsHook { } {
     variable wroster
     
     # Need to repopulate the roster?
-    if {$jprefs(rost,hideOffline) != $tmpJPrefs(rost,hideOffline)} {
-	set jprefs(rost,hideOffline) $tmpJPrefs(rost,hideOffline)
+    if {$jprefs(rost,showOffline) != $tmpJPrefs(rost,showOffline)} {
+	set jprefs(rost,showOffline) $tmpJPrefs(rost,showOffline)
 	RePopulateTree $wroster
     }
     array set jprefs [array get tmpJPrefs]

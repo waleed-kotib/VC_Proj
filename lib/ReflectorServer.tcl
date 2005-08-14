@@ -16,7 +16,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: ReflectorServer.tcl,v 1.4 2004-07-30 12:55:55 matben Exp $
+# $Id: ReflectorServer.tcl,v 1.5 2005-08-14 07:17:55 matben Exp $
 # 
 #  Since this is a pretty complex piece of code we describe the principles in
 #  some detail here.
@@ -698,7 +698,7 @@ proc TraceProcFirstChunk { ip s groupId varName ind op } {
 	  varName=$varName, ind=$ind, op=$op"
     }
     
-    if {$op == "w"} {
+    if {$op eq "w"} {
 	fileevent $s writable [list WriteChunk $ip $s $groupId 0]
 	
 	# There may be a remaining trace that needs to be removed. 
@@ -907,7 +907,7 @@ proc WriteChunk { ip s groupId chunkNo } {
 #  Make sure that we are in the directory of the application itself.
 
 set this(path) [file dirname [info script]]
-if {$this(path) != ""}  {
+if {$this(path) ne ""}  {
     cd $this(path)
 }
 StartReflectorServer $thisPortNumber

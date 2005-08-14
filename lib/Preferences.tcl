@@ -5,9 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: Preferences.tcl,v 1.74 2005-06-08 11:50:32 matben Exp $
+# $Id: Preferences.tcl,v 1.75 2005-08-14 07:17:55 matben Exp $
  
 package require mnotebook
 package require tree
@@ -27,46 +25,20 @@ namespace eval ::Preferences:: {
 
     # Add all event hooks.
     ::hooks::register quitAppHook     ::Preferences::QuitAppHook
-    ::hooks::register closeWindowHook ::Preferences::CloseHook
 
-    variable xpadbt
-    variable ypad 
-    variable ypadtiny
-    variable ypadbig
+
+    option add *Preferences*Menu.font           CociSmallFont       widgetDefault
+
+    option add *Preferences*TLabel.style        Small.TLabel        widgetDefault
+    option add *Preferences*TLabelframe.style   Small.TLabelframe   widgetDefault
+    option add *Preferences*TButton.style       Small.TButton       widgetDefault
+    option add *Preferences*TMenubutton.style   Small.TMenubutton   widgetDefault
+    option add *Preferences*TRadiobutton.style  Small.TRadiobutton  widgetDefault
+    option add *Preferences*TCheckbutton.style  Small.TCheckbutton  widgetDefault
+    option add *Preferences*TEntry.style        Small.TEntry        widgetDefault
+    option add *Preferences*TEntry.font         CociSmallFont       widgetDefault
+    #option add *Preferences*TScale.style        Small.TScale        widgetDefault
     
-    # Unfortunately it is necessary to do some platform specific things to
-    # get the pages to look nice.
-
-    switch -glob -- $this(platform) {
-	macintosh {
-	    set ypadtiny 1
-	    set ypad     3
-	    set ypadbig  4
-	    set xpadbt   7
-	}
-	macosx {
-	    set ypadtiny 0
-	    set ypad     0
-	    set ypadbig  1
-	    set xpadbt   7
-	}
-	windows {
-	    set ypadtiny 0
-	    set ypad     0
-	    set ypadbig  1
-	    set xpadbt   4
-	}
-	default {
-	    set ypadtiny 0
-	    set ypad     1
-	    set ypadbig  2
-	    set xpadbt   2
-	}
-    }    
-    option add *Preferences.xPadBt              $xpadbt       widgetDefault
-    option add *Preferences.yPadTiny            $ypadtiny     widgetDefault
-    option add *Preferences.yPad                $ypad         widgetDefault
-    option add *Preferences.yPadBig             $ypadbig      widgetDefault
 }
 
 proc ::Preferences::QuitAppHook { } {
@@ -94,10 +66,12 @@ proc ::Preferences::Build {args} {
 	raise $w
 	return
     }
-    ::UI::Toplevel $w -class Preferences -usemacmainmenu 1  \
-      -macstyle documentProc -macclass {document closeBox}
+    ::UI::Toplevel $w -class Preferences \
+      -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
+      -closecommand ::Preferences::CloseHook
     wm title $w [mc Preferences]
     wm withdraw $w
+    ::UI::SetWindowPosition $w
     
     set finished 0
     set wtoplevel $w
@@ -107,24 +81,32 @@ proc ::Preferences::Build {args} {
     array set tmpPrefs [array get prefs]
     array set tmpJPrefs [::Jabber::GetjprefsArray]
     
-    set fontSB [option get . fontSmallBold {}]
-    
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
     # Frame for everything except the buttons.
-    pack [frame $w.frall.fr] -fill both -expand 1 -side top
+    set wcont $wbox.f
+    ttk::frame $wcont
+    pack $wcont -fill both -expand 1 -side top
     
     # Tree frame with scrollbars.
-    pack [frame $w.frall.fr.t -relief sunken -bd 1]   \
-      -fill y -side left -padx 4 -pady 4
-    set frtree $w.frall.fr.t.frtree
-    pack [frame $frtree] -fill both -expand 1 -side left
+    frame $wcont.t -relief sunken -bd 1
+    pack  $wcont.t -fill y -side left -padx 4 -pady 4
+    set frtree $wcont.t.frtree
+    frame $frtree
+    pack  $frtree -fill both -expand 1 -side left
     
     # Set a width in the label to act as a spacer when scrollbar is unpacked.
-    pack [label $frtree.la -text [mc {Settings Panels}]  \
-      -font $fontSB -relief raised -width 24 -bd 1 -bg #bdbdbd] -side top -fill x
+    frame $frtree.fl -relief raised -bd 1
+    ttk::label $frtree.fl.l -text [mc {Settings Panels}] -width 24
+    pack $frtree.fl -side top -fill x
+    pack $frtree.fl.l
+    
     set wtree $frtree.t
     ::tree::tree $wtree -width 100 -height 300 -indention 0 \
       -yscrollcommand [list ::UI::ScrollSet $frtree.sby \
@@ -133,48 +115,50 @@ proc ::Preferences::Build {args} {
       -doubleclickcommand {} \
       -showrootbutton 1 -indention 0 -xmargin 6
     #  -showrootbutton 1 -indention {0 10} -xmargin {0 8}
-    scrollbar $frtree.sby -orient vertical -command [list $wtree yview]
+    tuscrollbar $frtree.sby -orient vertical -command [list $wtree yview]
     
     pack $wtree -side left -fill both -expand 1
     pack $frtree.sby -side right -fill y
     
     # Fill tree.
     $wtree newitem {General} -text [mc General]
-    $wtree newitem {General {Network Setup}} -text [mc {Network Setup}]
-    if {!$prefs(stripJabber)} {
-	$wtree newitem {Jabber}
-    }
+    $wtree newitem {Jabber}
     
     # The notebook and its pages.
-    set nbframe [::mnotebook::mnotebook $w.frall.fr.nb -borderwidth 1 -relief sunken]
+    set nbframe [::mnotebook::mnotebook $wcont.nb -borderwidth 1 -relief sunken]
     pack $nbframe -expand 1 -fill both -padx 4 -pady 4
     
-    # Make the notebook pages.
-    
-    # Network Setup page -------------------------------------------------------
-    set frpnet [$nbframe page {Network Setup}]
-    ::Preferences::NetSetup::BuildPage $frpnet
-    
+    # Make the notebook pages.    
     # Each code component makes its own page.
     ::hooks::run prefsBuildHook $wtree $nbframe
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Save] -default active \
-      -command ::Preferences::SavePushBt]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command ::Preferences::CancelPushBt]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btfactory -text [mc {Factory Settings}]   \
-      -command [list ::Preferences::ResetToFactoryDefaults "40"]]  \
-      -side left -padx 5 -pady 5
-    pack [button $frbot.btrevert -text [mc {Revert Panel}]  \
-      -command ::Preferences::ResetToUserDefaults]  \
-      -side left -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -style TButton \
+      -text [mc Save] -default active \
+      -command ::Preferences::SavePushBt
+    ttk::button $frbot.btcancel -style TButton \
+      -text [mc Cancel]  \
+      -command ::Preferences::Cancel
+    ttk::button $frbot.btfactory -style TButton \
+      -text [mc {Factory Settings}]   \
+      -command [list ::Preferences::ResetToFactoryDefaults "40"]
+    ttk::button $frbot.btrevert -style TButton \
+      -text [mc {Revert Panel}]  \
+      -command ::Preferences::ResetToUserDefaults
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok     -side right -fill y
+	pack $frbot.btcancel -side right -fill y -padx $padx
+    } else {
+	pack $frbot.btcancel -side right -fill y
+	pack $frbot.btok     -side right -fill y -padx $padx
+    }
+    pack $frbot.btfactory -side left -fill y
+    pack $frbot.btrevert  -side left -fill y -padx $padx
+    pack $frbot -side top -fill x
 
-    ::UI::SetWindowPosition $w
     wm resizable $w 0 0
     bind $w <Return> {}
     
@@ -214,7 +198,7 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
     # Warn first.
     set ans [::UI::MessageBox -title [mc Warning] -type yesno -icon warning \
       -message [mc messfactorydefaults] -default no]
-    if {$ans == "no"} {
+    if {$ans eq "no"} {
 	return
     }
     foreach item $prefs(master) {
@@ -247,76 +231,152 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
 #       Revert panels to the state when dialog showed.
 
 proc ::Preferences::ResetToUserDefaults { } {
-    global  prefs
     
-    variable tmpPrefs
-    variable tmpJPrefs
-
-    Debug 2 "::Preferences::ResetToUserDefaults"
-
-    array set tmpPrefs [array get prefs]
-    array set tmpJPrefs [::Jabber::GetjprefsArray]
-
     # Run hook for the components.
     ::hooks::run prefsUserDefaultsHook
 }
 
-# namespace  ::Preferences::NetSetup:: -----------------------------------------
+# namespace  ::Preferences::Net:: -----------------------------------------
 
-namespace eval ::Preferences::NetSetup:: {
+namespace eval ::Preferences::Net:: {
 
+    ::hooks::register prefsInitHook          ::Preferences::Net::InitPrefsHook  20
+    ::hooks::register prefsBuildHook         ::Preferences::Net::BuildPrefsHook 20
+    ::hooks::register prefsSaveHook          ::Preferences::Net::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Preferences::Net::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Preferences::Net::UserDefaultsHook
+    ::hooks::register prefsDestroyHook       ::Preferences::Net::DestroyPrefsHook
+
+    variable opts
+    set opts(main) {protocol autoConnect multiConnect}
+    set opts(adv)  {thisServPort httpdPort}
+    set opts(all)  [concat $opts(main) $opts(adv)]
+}
+
+proc ::Preferences::Net::InitPrefsHook { } {
+    global  prefs
+    
+    # Connect automatically to connecting clients if 'symmetricNet'.
+    set prefs(autoConnect) 1                
+    
+    # Disconnect automatically to disconnecting clients.
+    set prefs(autoDisconnect) $prefs(autoConnect)	
+    
+    # When connecting to other client, connect automatically to all *its* clients.
+    set prefs(multiConnect) 1
+    
+    ::PrefUtils::Add [list  \
+      [list prefs(protocol)        this_protocol         $prefs(protocol)]       \
+      [list prefs(autoConnect)     prefs_autoConnect     $prefs(autoConnect)]    \
+      [list prefs(multiConnect)    prefs_multiConnect    $prefs(multiConnect)]   \
+      [list prefs(thisServPort)    prefs_thisServPort    $prefs(thisServPort)]   \
+      [list prefs(httpdPort)       prefs_httpdPort       $prefs(httpdPort)]   \
+      ]    
+}
+
+proc ::Preferences::Net::BuildPrefsHook {wtree nbframe} {
+    
+    $wtree newitem {General {Network Setup}} -text [mc {Network Setup}]
+    set wpage [$nbframe page {Network Setup}]
+    ::Preferences::Net::BuildPage $wpage
+}
+
+proc ::Preferences::Net::SavePrefsHook { } {
+    global prefs
+    variable tmpPrefs
+    
+    array set prefs [array get tmpPrefs]
+}
+
+proc ::Preferences::Net::CancelPrefsHook { } {
+    global prefs
+    variable tmpPrefs
+	
+    foreach key [array names tmpPrefs] {
+	if {![string equal $prefs($key) $tmpPrefs($key)]} {
+	    ::Preferences::HasChanged
+	    break
+	}
+    }
+}
+
+proc ::Preferences::Net::UserDefaultsHook { } {
+    global prefs
+    variable tmpPrefs
+    
+    foreach key [array names tmpPrefs] {
+	set tmpPrefs($key) $prefs($key)
+    }
+}
+
+proc ::Preferences::Net::DestroyPrefsHook { } {
+    variable tmpPrefs
+    
+    unset -nocomplain tmpPrefs
 }
     
-proc ::Preferences::NetSetup::BuildPage {page} {
+proc ::Preferences::Net::BuildPage {page} {
     global  prefs this state
 
-    variable wopt
-
-    upvar ::Preferences::ypadtiny ypadtiny
-    upvar ::Preferences::ypadbig ypadbig
+    variable wfr
+    variable tmpPrefs
+    variable tmpAdvPrefs
+    variable opts
     
-    set fontSB [option get . fontSmallBold {}]
-        
-    set wcont $page.fr
-    labelframe $wcont -text [mc prefnetconf]
-    pack $wcont -side top -anchor w -padx 8 -pady 4
-
-    # Frame for everything inside the labeled container.
-    set fr [frame $wcont.fr]    
-    pack $fr -side left -padx 2    
-    label $fr.msg -wraplength 200 -justify left \
-      -text [mc prefnethead]
-    pack $fr.msg -side top -padx 2 -anchor w -pady $ypadbig
+    foreach key $opts(main) {
+	set tmpPrefs($key) $prefs($key)
+    }
+    foreach key $opts(adv) {
+	set tmpAdvPrefs($key) $prefs($key)
+    }
     
-    # The actual options.
-    set fropt [frame $fr.fropt]
-    set wopt $fropt
-        
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set wfr $wc.f
+    ttk::labelframe $wfr -text [mc prefnetconf] \
+      -padding [option get . groupSmallPadding {}]
+
+    ttk::label $wfr.msg -wraplength 200 -justify left \
+      -padding {0 0 0 8} -text [mc prefnethead]
+    pack $wfr.msg -side top
+            
     # The Jabber server.
-    radiobutton $fropt.jabb -text [mc {Jabber Client}]  \
-      -value jabber -variable ::Preferences::tmpPrefs(protocol)
-    label $fropt.jabbmsg -wraplength 200 -justify left  \
+    ttk::radiobutton $wfr.jabb -text [mc {Jabber Client}]  \
+      -value jabber -variable [namespace current]::tmpPrefs(protocol)
+    ttk::label $wfr.jabbmsg -wraplength 200 -justify left  \
       -text [mc prefnetjabb]
     
     # For the symmetric network config.
-    radiobutton $fropt.symm -text [mc {Peer-to-Peer}]  \
-      -variable ::Preferences::tmpPrefs(protocol) -value symmetric
-    checkbutton $fropt.auto -text "  [mc {Auto Connect}]"  \
-      -variable ::Preferences::tmpPrefs(autoConnect)
-    label $fropt.automsg -wraplength 200 -justify left  \
+    ttk::radiobutton $wfr.symm -text [mc {Peer-to-Peer}]  \
+      -variable [namespace current]::tmpPrefs(protocol) -value symmetric
+    ttk::checkbutton $wfr.auto -text [mc {Auto Connect}]  \
+      -variable [namespace current]::tmpPrefs(autoConnect)
+    ttk::label $wfr.automsg -wraplength 200 -justify left  \
       -text [mc prefnetauto]
-    checkbutton $fropt.multi -text "  [mc {Multi Connect}]"  \
-      -variable ::Preferences::tmpPrefs(multiConnect)
-    label $fropt.multimsg -wraplength 200 -justify left  \
+    ttk::checkbutton $wfr.multi -text [mc {Multi Connect}]  \
+      -variable [namespace current]::tmpPrefs(multiConnect)
+    ttk::label $wfr.multimsg -wraplength 200 -justify left  \
       -text [mc prefnetmulti]
+    ttk::button $wfr.adv -text "[mc Advanced]..." \
+      -command [list ::Preferences::Net::Advanced]
+    
+    grid  $wfr.msg    -              -sticky w
+    grid  $wfr.jabb   $wfr.jabbmsg   -sticky nw
+    grid  $wfr.symm   $wfr.auto      -sticky w
+    grid  x           $wfr.automsg   -sticky w
+    grid  x           $wfr.multi     -sticky w
+    grid  x           $wfr.multimsg  -sticky w
+    grid  $wfr.adv    -              -sticky w
+    
+    pack  $wfr  -fill x
+
     if {![string equal $prefs(protocol) "symmetric"]} { 
-	$fropt.auto configure -state disabled
-	$fropt.multi configure -state disabled
+	$wfr.auto  state {disabled}
+	$wfr.multi state {disabled}
     }    
-    
-    button $fropt.adv -text "[mc Advanced]..." -command  \
-      [list ::Preferences::NetSetup::Advanced]
-    
+
     # If already connected don't allow network topology to be changed.
     
     switch -- $prefs(protocol) {
@@ -328,37 +388,26 @@ proc ::Preferences::NetSetup::BuildPage {page} {
 	}
     }
     if {$connected} {
-	$fropt.jabb configure -state disabled
-	$fropt.symm configure -state disabled
+	$wfr.jabb state {disabled}
+	$wfr.symm state {disabled}
     }
-    if {$prefs(stripJabber) ||  \
-      ($prefs(protocol) == "server") || ($prefs(protocol) == "client")} {
-	$fropt.jabb configure -state disabled
-	$fropt.symm configure -state disabled
+    if {($prefs(protocol) eq "server") || ($prefs(protocol) eq "client")} {
+	$wfr.jabb state {disabled}
+	$wfr.symm state {disabled}
     }
-    grid $fropt.jabb -column 0 -row 0 -rowspan 4 -sticky nw -padx 10 -pady $ypadtiny
-    grid $fropt.jabbmsg -column 1 -row 0 -sticky w -padx 10 -pady $ypadtiny
-    grid $fropt.symm -column 0 -row 1 -rowspan 4 -sticky nw -padx 10 -pady $ypadtiny
-    grid $fropt.auto -column 1 -row 1 -sticky w -padx 10 -pady $ypadtiny
-    grid $fropt.automsg -column 1 -row 2 -sticky w -padx 10 -pady $ypadtiny
-    grid $fropt.multi -column 1 -row 3 -sticky w -padx 10 -pady $ypadtiny
-    grid $fropt.multimsg -column 1 -row 4 -sticky w -padx 10 -pady $ypadtiny
-    grid $fropt.adv -column 0 -row 6 -sticky w -padx 10 -pady $ypadbig
-
-    pack $fropt -side top -padx 5 -pady $ypadbig
     
-    trace variable ::Preferences::tmpPrefs(protocol) w  \
+    trace variable [namespace current]::tmpPrefs(protocol) w  \
       [namespace current]::TraceNetConfig
 	
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
 	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
-    } $fr.msg $fr]    
+    } $wfr.msg $page]    
     after idle $script
 }
 
-# ::Preferences::NetSetup::TraceNetConfig --
+# ::Preferences::Net::TraceNetConfig --
 #
 #       Trace command for the 'tmpPrefs(protocol)' variable that is
 #       used for the network type radio buttons.
@@ -371,27 +420,30 @@ proc ::Preferences::NetSetup::BuildPage {page} {
 # Results:
 #       shows dialog.
 
-proc ::Preferences::NetSetup::TraceNetConfig {name index op} {
+proc ::Preferences::Net::TraceNetConfig {name index op} {
     
-    variable wopt
-    upvar ::Preferences::tmpPrefs tmpPrefs
+    variable wfr
+    variable tmpPrefs
     
-    Debug 2 "::Preferences::NetSetup::TraceNetConfig"
+    Debug 2 "::Preferences::Net::TraceNetConfig"
 
-    set fropt $wopt
-    if {$tmpPrefs(protocol) == {symmetric}} { 
-	$fropt.auto configure -state normal
-	$fropt.multi configure -state normal
-    } elseif {$tmpPrefs(protocol) == {central}} {
-	$fropt.auto configure -state disabled
-	$fropt.multi configure -state disabled
-    } elseif {$tmpPrefs(protocol) == {jabber}} {
-	$fropt.auto configure -state disabled
-	$fropt.multi configure -state disabled
+    switch -- $tmpPrefs(protocol) {
+	symmetric {
+	    $wfr.auto  state {!disabled}
+	    $wfr.multi state {!disabled}
+	}
+	central {
+	    $wfr.auto  state {disabled}
+	    $wfr.multi state {disabled}
+	}
+	jabber {
+	    $wfr.auto  state {disabled}
+	    $wfr.multi state {disabled}
+	}
     }
 }
 
-# ::Preferences::NetSetup::UpdateUI --
+# ::Preferences::Net::UpdateUI --
 #
 #       If network setup changed be sure to update the UI to reflect this.
 #       Must be called after saving in 'prefs' etc.
@@ -401,48 +453,47 @@ proc ::Preferences::NetSetup::TraceNetConfig {name index op} {
 # Results:
 #       .
 
-proc ::Preferences::NetSetup::UpdateUI { } {
+proc ::Preferences::Net::UpdateUI { } {
     global  prefs state wDlgs
     
-    Debug 2 "::Preferences::NetSetup::UpdateUI"
+    Debug 2 "::Preferences::Net::UpdateUI"
+    
+    set wmenu [::UI::GetMainMenu]
     
     # Update menus.
     switch -- $prefs(protocol) {
 	jabber {
 	    
 	    # Show our combination window.
-	    ::Jabber::UI::Show $wDlgs(jrostbro)
+	    ::Jabber::UI::Show $wDlgs(jmain)
 	}
 	central {
 	    
 	    # We are only a client.
-	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection  \
+	    ::UI::MenuMethod $wmenu.file entryconfigure mOpenConnection  \
 	      -command [list ::P2PNet::OpenConnection $wDlgs(openConn)]
-	    .menu entryconfigure *Jabber* -state disabled
+	    $wmenu entryconfigure *Jabber* -state disabled
 	    
 	    # Hide our combination window.
-	    ::Jabber::UI::Close $wDlgs(jrostbro)
+	    ::Jabber::UI::Close $wDlgs(jmain)
 	}
 	default {
-	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection   \
+	    ::UI::MenuMethod $wmenu.file entryconfigure mOpenConnection   \
 	      -command [list ::P2PNet::OpenConnection $wDlgs(openConn)]
-	    if {!$prefs(stripJabber)} {
-		.menu entryconfigure *Jabber* -state disabled
+	    $wmenu entryconfigure *Jabber* -state disabled
 		
-		# Hide our combination window.
-		::Jabber::UI::Close $wDlgs(jrostbro)
-	    }
+	    # Hide our combination window.
+	    ::Jabber::UI::Close $wDlgs(jmain)
 	}
     }
     
     # Other UI updates needed.
     foreach w [::WB::GetAllWhiteboards] {
-	set wtop [::UI::GetToplevelNS $w]
-
+	# ???
     }
 }
 
-# Preferences::NetSetup::Advanced --
+# Preferences::Net::Advanced --
 #
 #       Shows dialog for setting the "advanced" network options.
 #       
@@ -451,7 +502,7 @@ proc ::Preferences::NetSetup::UpdateUI { } {
 # Results:
 #       shows dialog.
 
-proc ::Preferences::NetSetup::Advanced {  } {
+proc ::Preferences::Net::Advanced {  } {
     global  this prefs
 
     variable finishedAdv -1
@@ -461,59 +512,56 @@ proc ::Preferences::NetSetup::Advanced {  } {
       -macclass {document closeBox}
     wm title $w [mc {Advanced Setup}]
     
-    set fontSB [option get . fontSmallBold {}]
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
     
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall
-    set wcont $w.frtop
-    labelframe $wcont -text [mc {Advanced Configuration}]
-    pack $wcont -in $w.frall -side top -padx 8 -pady 4
-    
-    # Frame for everything inside the labeled container.
-    set fr [frame $wcont.fr]
-    message $fr.msg -width 260 -text [mc prefnetadv]
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 320 -justify left -text [mc prefnetadv]
+    pack $wbox.msg -side top -anchor w
     
     # The actual options.
-    set fropt [frame $fr.fropt]
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
 
-    label $fropt.lserv -text "[mc {Built in server port}]:"
-    label $fropt.lhttp -text "[mc {HTTP port}]:"
-    entry $fropt.eserv -width 6 -textvariable  \
-      ::Preferences::tmpPrefs(thisServPort)
-    entry $fropt.ehttp -width 6 -textvariable  \
-      ::Preferences::tmpPrefs(httpdPort)
+    ttk::label $frmid.lserv -text "[mc {Built in server port}]:"
+    ttk::label $frmid.lhttp -text "[mc {HTTP port}]:"
+    ttk::entry $frmid.eserv -width 6 -textvariable  \
+      [namespace current]::tmpAdvPrefs(thisServPort)
+    ttk::entry $frmid.ehttp -width 6 -textvariable  \
+      [namespace current]::tmpAdvPrefs(httpdPort)
 
-    if {!$prefs(haveHttpd)} {
-	$fropt.ehttp configure -state disabled
-    }
+    grid  $frmid.lserv  $frmid.eserv  -sticky e -pady 2
+    grid  $frmid.lhttp  $frmid.ehttp  -sticky e -pady 2
     
-    set py 0
-    set px 2
-    set row 0
-    foreach wid {serv http} {
-	grid $fropt.l$wid -column 0 -row $row -sticky e   \
-	  -padx $px -pady $py
-	grid $fropt.e$wid -column 1 -row $row -sticky w   \
-	  -padx $px -pady $py
-	incr row
+    if {!$prefs(haveHttpd)} {
+	$frmid.ehttp state {disabled}
     }
-        
-    pack $fr.msg -side top -padx 2 -pady 6
-    pack $fropt -side top -padx 5 -pady 6
-    pack $fr -side left -padx 2    
-    pack $wcont -fill x    
     
     # Button part.
-    pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
-      -padx 8 -pady 6 -side bottom
-    pack [button $w.btok -text [mc Save] -default active \
-      -command [namespace current]::AdvSetupSave]  \
-      -in $w.frbot -side right -padx 5 -pady 5
-    pack [button $w.btcancel -text [mc Cancel]  \
-      -command "set [namespace current]::finishedAdv 0"]  \
-      -in $w.frbot -side right -padx 5 -pady 5
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Save] -default active \
+      -command [namespace current]::AdvSetupSave
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list set [namespace current]::finishedAdv 0]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
+
     wm resizable $w 0 0
-    bind $w <Return> "$w.btok invoke"
+    bind $w <Return> [list $frbot.btok invoke]
     
     # Grab and focus.
     focus $w
@@ -526,7 +574,7 @@ proc ::Preferences::NetSetup::Advanced {  } {
     destroy $w
 }
     
-# ::Preferences::NetSetup::AdvSetupSave --
+# ::Preferences::Net::AdvSetupSave --
 #
 #       Saves the values set in dialog in the preference variables.
 #       It saves these port numbers independently of the main panel!!!
@@ -537,16 +585,16 @@ proc ::Preferences::NetSetup::Advanced {  } {
 # Results:
 #       none.
 
-proc ::Preferences::NetSetup::AdvSetupSave {  } {
+proc ::Preferences::Net::AdvSetupSave {  } {
     global  prefs
     
     variable finishedAdv
-    upvar ::Preferences::tmpPrefs tmpPrefs
-    upvar ::Preferences::tmpJPrefs tmpJPrefs
+    variable tmpAdvPrefs
+    variable opts
 
-    set prefs(thisServPort) $tmpPrefs(thisServPort)
-    set prefs(httpdPort) $tmpPrefs(httpdPort)
-
+    foreach key $opts(adv) {
+	set prefs($key) $tmpAdvPrefs($key)
+    }
     set finishedAdv 1
 }
 
@@ -584,7 +632,7 @@ proc ::Preferences::Proxies::InitPrefsHook { } {
     } \\] 
     ::Preferences::Proxies::Init
     
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list prefs(setNATip)           prefs_setNATip           $prefs(setNATip)]  \
       [list prefs(NATip)              prefs_NATip              $prefs(NATip)]  \
       [list prefs(httpproxyserver)    prefs_httpproxyserver    $prefs(httpproxyserver)]  \
@@ -612,7 +660,7 @@ proc ::Preferences::Proxies::Init { } {
 	    set no_proxy $env(no_proxy)
 	}
     } else {
-	if {$tcl_platform(platform) == "windows"} {
+	if {$tcl_platform(platform) eq "windows"} {
 	    package require registry 1.0
 	    array set reg {ProxyEnable 0 ProxyServer "" ProxyOverride {}}
 	    catch {
@@ -682,15 +730,22 @@ proc ::Preferences::Proxies::BuildPage {page} {
 	set tmpPrefs($key) $prefs($key)
     }
     
-    set pcnat $page.nat
-    labelframe $pcnat -text [mc {NAT Address}] -padx 4 -pady 2
-    pack $pcnat -side top -anchor w -padx 12 -pady 4
-    checkbutton $pcnat.cb -text "  [mc prefnatip]" \
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set wnat $wc.fr
+    ttk::labelframe $wnat -text [mc {NAT Address}] \
+      -padding [option get . groupSmallPadding {}]
+    ttk::checkbutton $wnat.cb -text [mc prefnatip] \
       -variable [namespace current]::tmpPrefs(setNATip)
-    entry $pcnat.eip -textvariable [namespace current]::tmpPrefs(NATip) \
-      -width 32
-    grid $pcnat.cb -sticky w -pady $ypad
-    grid $pcnat.eip -sticky ew -pady $ypad
+    ttk::entry $wnat.eip \
+      -textvariable [namespace current]::tmpPrefs(NATip)
+
+    grid  $wnat.cb  -sticky w
+    grid  $wnat.eip -sticky ew
+    
+    pack  $wnat  -side top -fill x
     
     if {0} {
 	set pca $page.fr
@@ -776,7 +831,7 @@ proc ::Preferences::SavePushBt { } {
     if {![string equal $prefs(protocol) $tmpPrefs(protocol)]} {
 	set ans [::UI::MessageBox -title Relaunch -icon info -type yesno \
 	  -message [mc messprotocolch]]
-	if {$ans == "no"} {
+	if {$ans eq "no"} {
 	    set finished 1
 	    return
 	} else {
@@ -798,8 +853,8 @@ proc ::Preferences::SavePushBt { } {
     }
 
     # Save the preference file.
-    ::PreferencesUtils::SaveToFile
-    ::Preferences::CleanUp
+    ::PrefUtils::SaveToFile
+    CleanUp
     
     set finished 1
     destroy $wtoplevel
@@ -807,23 +862,20 @@ proc ::Preferences::SavePushBt { } {
 }
 
 proc ::Preferences::CloseHook {wclose} {
-    global  wDlgs
     
     set result ""
-    if {[string equal $wclose $wDlgs(prefs)]} {
-	set ans [::Preferences::CancelPushBt]
-	if {$ans == "no"} {
-	    set result stop
-	  }
+    set ans [Cancel]
+    if {$ans eq "no"} {
+	set result stop
     }   
     return $result
 }
 
-# Preferences::CancelPushBt --
+# Preferences::Cancel --
 #
 #       User presses the cancel button. Warn if anything changed.
 
-proc ::Preferences::CancelPushBt { } {
+proc ::Preferences::Cancel { } {
     global  prefs wDlgs
     
     variable wtoplevel
@@ -869,7 +921,7 @@ proc ::Preferences::CancelPushBt { } {
 	set ans [::UI::MessageBox -title [mc Warning]  \
 	  -type yesno -default no -parent $wDlgs(prefs) -icon warning \
 	  -message [mc messprefschanged]]
-	if {$ans == "yes"} {
+	if {$ans eq "yes"} {
 	    set finished 2
 	}
     } else {
@@ -894,7 +946,7 @@ proc ::Preferences::CleanUp { } {
     
     # Clean up.
     trace vdelete ::Preferences::tmpPrefs(protocol) w  \
-      ::Preferences::NetSetup::TraceNetConfig
+      ::Preferences::Net::TraceNetConfig
 
     ::UI::SaveWinGeom $wtoplevel
 }
@@ -907,7 +959,6 @@ proc ::Preferences::CleanUp { } {
 proc ::Preferences::HasChanged { } {
     variable hasChanged
 
-    ::CallTrace 4
     set hasChanged 1
 }
 

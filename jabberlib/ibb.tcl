@@ -3,9 +3,9 @@
 #      This file is part of the jabberlib. It provides support for the
 #      ibb stuff (In Band Bytestreams).
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 20042005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.5 2005-02-16 14:26:46 matben Exp $
+# $Id: ibb.tcl,v 1.6 2005-08-14 07:13:18 matben Exp $
 # 
 ############################# USAGE ############################################
 #

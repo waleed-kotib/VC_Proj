@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.76 2005-06-01 06:26:40 matben Exp $
+# $Id: Browse.tcl,v 1.77 2005-08-14 07:10:51 matben Exp $
 
 package provide Browse 1.0
 
@@ -18,10 +18,16 @@ namespace eval ::Browse:: {
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
-    option add *Browse.waveImage            wave           widgetDefault
+    option add *Browse.waveImage            wave            widgetDefault
+
+    # Standard widgets and standard options.
+    option add *Browse.padding              4               50
+    option add *Browse*box.borderWidth      1               50
+    option add *Browse*box.relief           sunken          50
 
     variable wtop  -
     variable wwave -
+    variable wtab  -
     variable wtree -
     
     variable dlguid 0
@@ -100,8 +106,6 @@ proc ::Browse::NewJlibHook {jlibName} {
 proc ::Browse::LoginCmd { } {
     upvar ::Jabber::jprefs jprefs
     
-    SetUIWhen "connect"
-
     # Get the services for all our servers on the list. Depends on our settings:
     # If browsing fails must use "agents" as a fallback.
     if {[string equal $jprefs(serviceMethod) "browse"]} {
@@ -109,11 +113,14 @@ proc ::Browse::LoginCmd { } {
     }
 }
 
-proc ::Browse::LogoutHook { } {
+proc ::Browse::LogoutHook { } {    
+    variable wtab
     
-    if {[lsearch [::Jabber::UI::Pages] "Browser"] >= 0} {
-	SetUIWhen "disconnect"
-	Clear
+    Clear
+    if {[winfo exists $wtab]} {
+	set wnb [::Jabber::UI::GetNotebook]
+	$wnb forget $wtab
+	destroy $wtab
     }
 }
 
@@ -283,7 +290,7 @@ proc ::Browse::Callback {browseName type from subiq} {
     
 	    # It is at this stage we are confident that a Browser page is needed.
 	    if {[jlib::jidequal $from $jserver(this)]} {
-		::Jabber::UI::NewPage "Browser"
+		NewPage
 	    }
 	    
 	    # We shall fill in the browse tree. 
@@ -484,17 +491,16 @@ proc ::Browse::BuildToplevel {w} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w {Jabber Browser}
     
-    set fontS [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
-    
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     
-    message $w.frall.msg -width 220 -font $fontSB -anchor w -text \
-      {Services that are available on each Jabber server listed.}
-    message $w.frall.msg2 -width 220 -font $fontS -anchor w -text  \
-      {Open to display its properties}
+    ttk::label $w.frall.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left \
+      -text "Services that are available on each Jabber server listed."
+    ttk::label $w.frall.msg2 -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left \
+      -text "Open to display its properties"
     pack $w.frall.msg $w.frall.msg2 -side top -fill x -padx 4 -pady 2
 
     # And the real stuff.
@@ -502,6 +508,22 @@ proc ::Browse::BuildToplevel {w} {
     
     wm minsize $w 180 260
     wm maxsize $w 420 2000
+}
+
+proc ::Browse::NewPage { } {
+    variable wtab
+    
+    set wnb [::Jabber::UI::GetNotebook]
+    set wtab $wnb.br
+    if {![winfo exists $wtab]} {
+	set im [::Theme::GetImage \
+	  [option get [winfo toplevel $wnb] browser16Image {}]]
+	set imd [::Theme::GetImage \
+	  [option get [winfo toplevel $wnb] browser16DisImage {}]]
+	set imSpec [list $im disabled $imd background $imd]
+	Build $wtab
+	$wnb add $wtab -text [mc Browser] -image $imSpec -compound left
+    }
 }
     
 # Browse::Build --
@@ -526,27 +548,28 @@ proc ::Browse::Build {w} {
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Browse::Build"
-    
-    set fontS [option get . fontSmall {}]
+
+    set wbrowser $w
+    set wwave    $w.fs
+    set wbox     $w.box
+    set wtree    $wbox.tree
+    set wxsc     $wbox.xsc
+    set wysc     $wbox.ysc
 
     # The frame of class Browse.
-    frame $w -borderwidth 0 -relief flat -class Browse
-    set wbrowser $w
+    ttk::frame $w -class Browse
         
-    set wwave $w.fs
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
     ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
       -type image -image $waveImage
     pack $wwave -side bottom -fill x -padx 8 -pady 2
 
-    set wbox $w.box
-    pack [frame $wbox -border 1 -relief sunken]   \
-      -side top -fill both -expand 1 -padx 4 -pady 4
-    set wtree $wbox.tree
-    set wxsc $wbox.xsc
-    set wysc $wbox.ysc
-    scrollbar $wxsc -orient horizontal -command [list $wtree xview]
-    scrollbar $wysc -orient vertical -command [list $wtree yview]
+    # D = -border 1 -relief sunken
+    frame $wbox
+    pack  $wbox -side top -fill both -expand 1
+
+    tuscrollbar $wxsc -command [list $wtree xview] -orient horizontal
+    tuscrollbar $wysc -command [list $wtree yview] -orient vertical
     ::tree::tree $wtree -width 100 -height 100 -silent 1 -scrollwidth 400 \
       -xscrollcommand [list ::UI::ScrollSet $wxsc \
       [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
@@ -560,9 +583,9 @@ proc ::Browse::Build {w} {
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [namespace current]::Popup
     }
-    grid $wtree -row 0 -column 0 -sticky news
-    grid $wysc -row 0 -column 1 -sticky ns
-    grid $wxsc -row 1 -column 0 -sticky ew
+    grid  $wtree  -row 0 -column 0 -sticky news
+    grid  $wysc   -row 0 -column 1 -sticky ns
+    grid  $wxsc   -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure $wbox 0 -weight 1
         
@@ -828,7 +851,7 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 			set icon $typeIcon($cattype)
 		    }
 		    $wtree newitem $jidList -text $txt -tags [list $jid] \
-		      -style $style -canvastags $treectag -image $icon
+		      -fontstyle $style -canvastags $treectag -image $icon
 		} else {
 		    
 		    # This is a service, transport, room, etc.
@@ -907,100 +930,6 @@ proc ::Browse::PresenceHook {jid type args} {
     } else {
 	
 	# Replaced by presence element, and disco as a fallback.
-	# OUTDATED!!!!!!!!!!!!!
-	if {0} {
-    
-	# If users shall be automatically browsed to.
-	# Seems only necessary to find out if Coccinella or not.
-	if {$jprefs(autoBrowseUsers) && [string equal $type "available"]} {
-	    set coccielem \
-	      [$jstate(roster) getextras $jid3 $coccixmlns(servers)]
-	    if {$coccielem == {}} {
-		if {![::Roster::IsTransportHeuristics $jid3]} {
-		    if {![$jstate(browse) isbrowsed $jid3]} {
-			eval {AutoBrowse $jid3 $type} $args
-		    }
-		}
-	    }	
-	}
-	}
-    }
-}
-
-#       OUTDATED!!!
-# Browse::AutoBrowse --
-# 
-#       If presence from user browse that user including its resource.
-#       
-# Arguments:
-#       jid:        
-#       presence    "available" or "unavailable"
-
-proc ::Browse::AutoBrowse {jid presence args} {    
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-
-    ::Debug 2 "::Browse::AutoBrowse jid=$jid, presence=$presence, args='$args'"
-
-    array set argsArr $args
-    
-    switch -- $presence {
-	available {
-	
-	    # Browse only potential Coccinella (all jabber) clients.
-	    jlib::splitjidex $jid node host x
-	    set type [$jstate(browse) gettype $host]
-	    
-	    ::Debug 4 "\t type=$type"
-	    
-	    # We may not yet have browsed this (empty).
-	    if {($type == "") || ($type == "service/jabber")} {		
-		$jstate(browse) send_get $jid [namespace current]::AutoBrowseCmd
-	    }
-	}
-	unavailable {
-	    # empty
-	}
-    }
-}
-
-#       OUTDATED!!!
-
-proc ::Browse::AutoBrowseCmd {browseName type jid subiq args} {
-    
-    ::Debug 2 "::Browse::AutoBrowseCmd type=$type"
-    
-    switch -- $type {
-	error {
-	    ErrorProc 1 $browseName $type $jid $subiq
-	}
-	result - ok {
-	    AutoBrowseCallback $browseName $type $jid $subiq
-	}
-    }
-}
-
-#       OUTDATED!!!
-# Browse::AutoBrowseCallback --
-# 
-#       The intention here is to signal which services a particular client
-#       supports to the UI. If coccinella, for instance.
-#       
-# Arguments:
-#       jid:        
-
-proc ::Browse::AutoBrowseCallback {browseName type jid subiq} {    
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::coccixmlns coccixmlns    
-    
-    ::Debug 2 "::Browse::AutoBrowseCallback, jid=$jid,\
-      [string range "subiq='$subiq'" 0 40]..."
-    
-    if {[$jstate(browse) hasnamespace $jid "coccinella:wb"] || \
-      [$jstate(browse) hasnamespace $jid $coccixmlns(whiteboard)]} {
-	
-	::hooks::run autobrowsedCoccinellaHook $jid
-	::Roster::SetCoccinella $jid
     }
 }
 
@@ -1109,14 +1038,10 @@ proc ::Browse::ClearRoom {roomJid} {
 }
 
 proc ::Browse::Clear { } {    
-    variable wtree    
     upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Browse::Clear"
-    
-    # Remove the complete tree. We could relogin, and then we need a fresh start.
-    $wtree delitem {}
-    
+        
     # Clears out all cached info in browse object.
     $jstate(browse) clear
 }
@@ -1135,6 +1060,7 @@ proc ::Browse::AddServer { } {
 
     set w .jaddsrv
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
     set finishedAdd 0
@@ -1144,30 +1070,44 @@ proc ::Browse::AddServer { } {
     wm title $w [mc {Add Server}]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
-    message $w.frall.msg -width 220 -text [mc jabrowseaddserver]
-    entry $w.frall.ent -width 24   \
-      -textvariable [namespace current]::addserver
-    pack $w.frall.msg $w.frall.ent -side top -fill x -anchor w -padx 10  \
-      -pady 4
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left \
+      -text [mc jabrowseaddserver]
+    ttk::entry $wbox.ent -width 24  \
+      -textvariable [namespace current]::addserver \
+      -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
+    pack  $wbox.msg  $wbox.ent  -side top -fill x -anchor w -pady 2
 
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btadd -text [mc Add] -default active \
-      -command [list [namespace current]::DoAddServer $w]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::CancelAdd $w]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
-        
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Add] -default active \
+      -command [list [namespace current]::DoAddServer $w]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::CancelAdd $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
+
     wm resizable $w 0 0
-    bind $w <Return> [list $frbot.btadd invoke]
+    bind $w <Return> [list $frbot.btok invoke]
         
     # Grab and focus.
     set oldFocus [focus]
-    focus $w.frall.ent
+    focus $wbox.ent
     catch {grab $w}
     
     # Wait here for a button press and window to be destroyed.
@@ -1211,30 +1151,6 @@ proc ::Browse::DoAddServer {w} {
     
 }
 
-# Browse::SetUIWhen --
-#
-#       Update the browse buttons etc to reflect the current state.
-#
-# Arguments:
-#       what        any of "connect", "disconnect"
-#
-
-proc ::Browse::SetUIWhen {what} {    
-    variable btaddserv
-
-    # unused!
-    return
-    
-    switch -- $what {
-	connect {
-	    $btaddserv configure -state normal
-	}
-	disconnect {
-	    $btaddserv configure -state disabled
-	}
-    }
-}
-
 proc ::Browse::GetInfo {jid args} {    
     upvar ::Jabber::jstate jstate
     
@@ -1271,7 +1187,6 @@ proc ::Browse::InfoResultCB {browseName type jid subiq args} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
     wm title $w "Browse Info: $jid"
-    set fontS [option get . fontSmall {}]
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised

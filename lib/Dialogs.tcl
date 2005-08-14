@@ -5,9 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: Dialogs.tcl,v 1.58 2005-06-08 11:50:32 matben Exp $
+# $Id: Dialogs.tcl,v 1.59 2005-08-14 07:17:55 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -32,52 +30,63 @@ proc ::Dialogs::GetCanvas {w} {
     set ipNames {}
     foreach ip [::P2PNet::GetIP to] {
 	set name [::P2PNet::GetValueFromIP $ip name]
-	if {$name != ""} {
+	if {$name ne ""} {
 	    lappend ipNames $name
 	}
     }
-    if {[llength $ipNames] == 0} {
+    if {$ipNames == {}} {
 	return 
     }
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w {Get Canvas}
+    wm title $w [mc {Get Canvas}]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
     # Labelled frame.
-    set wcfr $w.frall.fr
-    labelframe $wcfr -text {Get Canvas}
-    pack $wcfr -side top -fill both -padx 8 -pady 4
+    set wcfr $wbox.fr
+    ttk::labelframe $wcfr -padding [option get . groupSmallPadding {}] \
+      -text [mc {Get Canvas}]
+    pack $wcfr -side top -fill both
     
-    # Overall frame for whole container.
-    set frtot [frame $wcfr.frin]
-    pack $frtot
-    message $frtot.msg -borderwidth 0 -aspect 500 \
-      -text {Choose client from which you want to get the canvas.\
-      Your own canvas will be erased.}
-    eval {tk_optionMenu $frtot.optm [namespace current]::getIPName} $ipNames
-    $frtot.optm configure -highlightthickness 0 -foreground black
-    grid $frtot.msg -column 0 -row 0 -columnspan 2 -padx 4 -pady 2 -sticky news
-    grid $frtot.optm -column 1 -row 1 -padx 4 -pady 0 -sticky e
+    ttk::label $wcfr.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left  \
+      -text "Choose client from which you want to get the canvas.\
+      Your own canvas will be erased."
+    eval {ttk::optionmenu $wcfr.optm [namespace current]::getIPName} $ipNames
+
+    grid  $wcfr.msg  -           -pady 4 -sticky news
+    grid  x          $wcfr.optm  -pady 4 -sticky e
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [mc Get] -default active \
-      -command "set [namespace current]::finished 1"]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel] \
-      -command "set [namespace current]::finished 2"]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Get] -default active \
+      -command [list set [namespace current]::finished 1]
+    ttk::button $frbot.btcancel -text [mc Cancel] \
+      -command [list set [namespace current]::finished 2]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
     
     wm resizable $w 0 0
-    bind $w <Return> "set [namespace current]::finished 1"
+    bind $w <Return> [list set [namespace current]::finished 1]
     
     # Grab and focus.
     focus $w
@@ -115,27 +124,31 @@ proc ::Dialogs::InfoOnPlugins { } {
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [mc {Plugin Info}]
-    set fontS  [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
     
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    
-    # Button part.
-    pack [frame $w.frall.frbot -borderwidth 0] -fill both -side bottom \
-      -padx 8 -pady 6
-    pack [button $w.frall.frbot.btok -text [mc OK]  \
-      -command "destroy $w"] -side right -padx 5 -pady 5
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
 
-    set fbox $w.frall.fbox
-    pack [frame $fbox -bd 1 -relief sunken] -side top -padx 4 -pady 4  \
-      -fill both -expand 1
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    # Button part.
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w]
+    pack $frbot.btok -side right
+    pack $frbot -side bottom -fill x
+
+    set fbox $wbox.f
+    frame $fbox -bd 1 -relief sunken
+    pack  $fbox -side top -fill both -expand 1
     
     set xtab1 80
     set xtab2 90
-    set wtxt $w.frall.fbox.txt
-    set wysc $w.frall.fbox.ysc
-    scrollbar $wysc -orient vertical -command [list $wtxt yview]
+    set wtxt $fbox.txt
+    set wysc $fbox.ysc
+    tuscrollbar $wysc -orient vertical -command [list $wtxt yview]
     text $wtxt -yscrollcommand [list $wysc set] -highlightthickness 0  \
       -bg white -wrap word -width 50 -height 30  \
       -exportselection 1 -tabs [list $xtab1 right $xtab2 left]
@@ -143,10 +156,10 @@ proc ::Dialogs::InfoOnPlugins { } {
     pack $wtxt -side left -fill both -expand 1
     
     $wtxt tag configure ttitle -foreground black -background #dedede  \
-      -spacing1 2 -spacing3 2 -lmargin1 20 -font $fontSB
-    $wtxt tag configure tkey -font $fontSB -spacing1 2  \
+      -spacing1 2 -spacing3 2 -lmargin1 20 -font CociSmallBoldFont
+    $wtxt tag configure tkey -font CociSmallBoldFont -spacing1 2  \
       -tabs [list $xtab1 right $xtab2 left]
-    $wtxt tag configure ttxt -font $fontS -wrap word -lmargin1 $xtab2 \
+    $wtxt tag configure ttxt -font CociSmallFont -wrap word -lmargin1 $xtab2 \
       -lmargin2 $xtab2
     $wtxt tag configure tline -font {Helvetica -1} -background black
     
@@ -163,39 +176,23 @@ proc ::Dialogs::InfoOnPlugins { } {
 	::Text::Parse $wtxt $ad ttxt
 	$wtxt insert end "\n\n"
     }
-    
-    # OBSOLETE!!!!!!!!!!!!!
-    # If Windows and not MSSpeech, make an ad as the first item.
-    if {[::Plugins::IsHost MSSpeech] && ![::Plugins::HavePackage MSSpeech]} {
-
-	$wtxt insert end "\n" tline
-	$wtxt insert end "Microsoft Speech\n" ttitle
-	$wtxt insert end "\n" tline
-	$wtxt insert end "\tDownload:\t" tkey
-	$wtxt insert end "Get Microsoft Speech for free from Microsoft at " ttxt
-	::Text::InsertURL $wtxt "download.microsoft.com"  \
-	  "http://download.microsoft.com/download/speechSDK/SDK/5.1/WXP/EN-US/Sp5TTIntXP.exe" \
-	  ttxt
-	$wtxt insert end " It adds synthetic speech of text messages." ttxt	
-	$wtxt insert end "\n\n"
-    }
-        
+            
     # Try the known plugind and apps, and make a labelled frame for each.
     foreach plug [::Plugins::GetAllPackages loaded] {
 	
 	set txtver [::Plugins::GetVersionForPackage $plug]
-	if {$txtver == ""} {
+	if {$txtver eq ""} {
 	    set txtver "unknown"
 	}
 	set txtsuf [::Plugins::GetSuffixes $plug]
-	if {$txtsuf == ""} {
+	if {$txtsuf eq ""} {
 	    set txtsuff "none"
 	}
 	
 	$wtxt insert end "\n" tline
 	$wtxt insert end " " ttitle
 	set icon [::Plugins::GetIconForPackage $plug 16]
-	if {$icon != ""} {
+	if {$icon ne ""} {
 	    $wtxt image create end -image $icon
 	}
 	$wtxt insert end " $plug\n" ttitle
@@ -211,7 +208,7 @@ proc ::Dialogs::InfoOnPlugins { } {
 	$wtxt insert end "\n"
     }
     $wtxt configure -state disabled
-    bind $w <Return> "$w.frall.frbot.btok invoke"
+    bind $w <Return> [list $frbot.btok invoke]
     
     tkwait window $w
     grab release $w
@@ -228,56 +225,51 @@ proc ::Dialogs::InfoComponents { } {
     }
     set w $wDlgs(comp)
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [mc {Component Info}]
-    set fontS  [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
      
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
 
     # Button part.
-    pack [frame $w.frall.frbot -borderwidth 0] -fill both -side bottom \
-      -padx 8 -pady 6
-    pack [button $w.frall.frbot.btok -text [mc OK]  \
-      -command [list destroy $w]] -side right -padx 5 -pady 5
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w]
+    pack $frbot.btok -side right
+    pack $frbot -side bottom -fill x
 
-    set fbox $w.frall.fbox
-    pack [frame $fbox -bd 1 -relief sunken] -side top -padx 4 -pady 4  \
-      -fill both -expand 1
+    set tbox $wbox.t
+    frame $tbox -bd 1 -relief sunken
+    pack  $tbox -fill both -expand 1
 
-    set wtxt $fbox.txt
-    set wysc $fbox.ysc
-    scrollbar $wysc -orient vertical -command [list $wtxt yview]
+    set wtxt $tbox.txt
+    set wysc $tbox.ysc
+    tuscrollbar $wysc -orient vertical -command [list $wtxt yview]
     text $wtxt -yscrollcommand [list $wysc set] -highlightthickness 0  \
       -bg white -wrap word -width 50 -height 16 -exportselection 1
-    #text $wtxt -yscrollcommand  \
-    #  [list ::UI::ScrollSet $wysc [list grid $wysc -row 0 -column 1 -sticky ns]]\
-    #  -highlightthickness 0  \
-    #  -bg white -wrap word -width 50 -height 16 -exportselection 1
+
     pack $wysc -side right -fill y
     pack $wtxt -side left -fill both -expand 1
-    #grid $wtxt -row 0 -column 0 -sticky news
-    #grid $wysc -row 0 -column 1 -sticky ns
-    #grid columnconfigure $fbox 0 -weight 1
-    #grid rowconfigure $fbox 0 -weight 1    
 
     $wtxt tag configure ttitle -foreground black -background #dedede  \
-      -spacing1 2 -spacing3 2 -lmargin1 20 -font $fontSB
-    $wtxt tag configure ttxt -font $fontS -wrap word -lmargin1 10 -lmargin2 10 \
+      -spacing1 2 -spacing3 2 -lmargin1 20 -font CociSmallBoldFont
+    $wtxt tag configure ttxt -font CociSmallFont -wrap word -lmargin1 10 -lmargin2 10 \
       -spacing1 6 -spacing3 6
     $wtxt tag configure tline -font {Helvetica -1} -background black
     
     foreach {name str} $compList {
-	#$wtxt insert end "\n" tline
 	$wtxt insert end "$name\n" ttitle
-	#$wtxt insert end "\n" tline   
 	$wtxt insert end "$str\n" ttxt
     }
     $wtxt configure -state disabled
-    bind $w <Return> "$w.frall.frbot.btok invoke"
+    bind $w <Return> [list $frbot.btok invoke]
 }
 
 # Printing the canvas on Unix/Linux.
@@ -356,42 +348,53 @@ proc ::Dialogs::UnixPrintLpr {w wtoprint} {
     set psCmd $prefs(unixPrintCmd)
     
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
+      -macclass {document closeBox} -closecommand ::Dialogs::UnixPrintLprClose
     wm title $w [mc Print]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    set w1 $w.frall.fr1
-    labelframe $w1 -text [mc Print]
-    
-    # Overall frame for whole container.
-    set frtot [frame $w1.frin]
-    pack $frtot -padx 10 -pady 10
-    
-    message $frtot.msg -borderwidth 0 -aspect 1000 -text [mc printunixcmd]
-    entry $frtot.entcmd -width 20   \
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    set frtot $wbox.f
+    ttk::labelframe $frtot -padding [option get . groupSmallPadding {}] \
+      -text [mc Print]
+    pack $frtot -side top
+        
+    ttk::label $frtot.msg -style Small.TLabel \
+      -wraplength 300 -justify left -text [mc printunixcmd]
+    ttk::entry $frtot.entcmd -width 20   \
       -textvariable [namespace current]::psCmd
-    grid $frtot.msg -column 0 -row 0 -padx 4 -pady 2 -sticky news
-    grid $frtot.entcmd -column 0 -row 1 -padx 4 -pady 2 -sticky news
-    pack $w1 -fill x -padx 8 -pady 4
+
+    grid  $frtot.msg     -pady 2 -sticky news
+    grid  $frtot.entcmd  -pady 2 -sticky news
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Print] -default active  \
-      -command "set [namespace current]::finishedPrint 1"]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command "set [namespace current]::finishedPrint 0"]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -in $w.frall  \
-      -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Print] -default active  \
+      -command [list set [namespace current]::finishedPrint 1]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list set [namespace current]::finishedPrint 0]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
+
     wm resizable $w 0 0
     
     # Grab and focus.
     focus $w
     focus $frtot.entcmd
-    bind $w <Return> "$frbot.btok invoke"
+    bind $w <Return> [list $frbot.btok invoke]
     tkwait variable [namespace current]::finishedPrint
     
     # Print...
@@ -422,6 +425,12 @@ proc ::Dialogs::UnixPrintLpr {w wtoprint} {
     return $finishedPrint
 }
 
+proc ::Dialogs::UnixPrintLprClose {w} {
+    variable finishedPrint
+    
+    set finishedPrint 0
+}
+
 # Choosing postscript options for the canvas.
 
 namespace eval ::PSPageSetup:: {
@@ -449,7 +458,7 @@ namespace eval ::PSPageSetup:: {
 # Results:
 #       shows dialog.
 
-proc ::PSPageSetup::PSPageSetup { w } {
+proc ::PSPageSetup::PSPageSetup {w} {
     global  prefs this
     
     variable copyOfPostscriptOpts
@@ -491,33 +500,33 @@ proc ::PSPageSetup::PSPageSetup { w } {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
+      -macclass {document closeBox} -closecommand ::PSPageSetup::CloseCmd
     wm title $w "Page Setup"
-    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    set w1 $w.frall.fr1
-    labelframe $w1 -text {Postscript Page Setup}
-    
-    # Overall frame for whole container.
-    set frtot [frame $w1.frin]
-    pack $frtot -padx 10 -pady 10
-    
-    message $frtot.msg -width 200 -text  \
-      "Set any of the following options for the postscript\
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    set frtot $wbox.f
+    ttk::labelframe $frtot -padding [option get . groupSmallPadding {}] \
+      -text {Postscript Page Setup}
+    pack $frtot
+        
+    ttk::label $frtot.msg -style Small.TLabel \
+      -wraplength 300 -justify left -padding {0 0 0 8} \
+      -text "Set any of the following options for the postscript\
       generated when printing or saving the canvas as\
       a postscript file."
-    grid $frtot.msg -column 0 -columnspan 2 -row 0 -sticky news   \
-      -padx 2 -pady 1
+
+    grid  $frtot.msg  -  -  -sticky news
     
     # All the options.
-    set iLine 0
     foreach optName $allOptNames {
-	incr iLine
-	label $frtot.lbl$optName -text "${optName}:" -font $fontSB
-	frame $frtot.fr$optName
+	ttk::label $frtot.l$optName -text "${optName}:"
 	
 	if {[string equal $optName "colormode"] ||  \
 	  [string equal $optName "pageanchor"] ||  \
@@ -539,14 +548,13 @@ proc ::PSPageSetup::PSPageSetup { w } {
 		set menuBtVar($optName)   \
 		  [lindex $theMenuOpts($optName) 0]
 	    }
-	    set wMenu [eval {tk_optionMenu $frtot.menu$optName   \
-	      [namespace current]::menuBtVar($optName)}    \
-	      $theMenuOpts($optName)]
-	    $wMenu configure -font $fontSB
-	    $frtot.menu$optName configure -font $fontSB   \
-	      -highlightthickness 0 -foreground black
-	    pack $frtot.menu$optName -in $frtot.fr$optName
+	    eval {ttk::optionmenu $frtot.m$optName   \
+	      [namespace current]::menuBtVar($optName)} \
+	      $theMenuOpts($optName)
 	    
+	    grid  $frtot.l$optName  $frtot.m$optName  -  -sticky e -padx 2 -pady 2
+	    grid  $frtot.m$optName  -sticky ew
+	      
 	} else {
 	    
 	    # Length option.
@@ -560,35 +568,38 @@ proc ::PSPageSetup::PSPageSetup { w } {
 		set txtvarEnt($optName) {}
 		set menuBtVar($optName) [lindex $unitsFull 0]
 	    }
-	    entry $frtot.ent$optName -width 8   \
+	    ttk::entry $frtot.e$optName -width 8   \
 	      -textvariable [namespace current]::txtvarEnt($optName)
-	    set wMenu [eval {tk_optionMenu $frtot.menu$optName   \
+	    eval {ttk::optionmenu $frtot.m$optName   \
 	      [namespace current]::menuBtVar($optName)}   \
-	      $unitsFull]
-	    $wMenu configure -font $fontSB
-	    $frtot.menu$optName configure -font $fontSB   \
-	      -highlightthickness 0 -foreground black
-	    pack $frtot.ent$optName $frtot.menu$optName   \
-	      -in $frtot.fr$optName -side left
+	      $unitsFull
+
+	    grid  $frtot.l$optName  $frtot.e$optName  $frtot.m$optName  \
+	      -sticky e -padx 2 -pady 2
+	    grid  $frtot.e$optName  $frtot.m$optName  -sticky ew
 	}
-	grid $frtot.lbl$optName -column 0 -row $iLine -sticky e -padx 2 -pady 1
-	grid $frtot.fr$optName -column 1 -row $iLine -sticky w -padx 2 -pady 1
     }
-    pack $w1 -fill x -padx 8 -pady 4
+    grid columnconfigure $frtot 1 -weight 1
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsave -text [mc Save] -default active  \
-      -command [list [namespace current]::PushBtSave]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command "set [namespace current]::finished 0"]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -in $w.frall  \
-      -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Save] -default active  \
+      -command [list [namespace current]::PushBtSave]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list set [namespace current]::finished 0]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
     
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btsave invoke"
+    bind $w <Return> [list $frbot.btok invoke]
     
     # Grab and focus.
     focus $w
@@ -597,6 +608,12 @@ proc ::PSPageSetup::PSPageSetup { w } {
     catch {grab release $w}
     destroy $w
     return $finished
+}
+
+proc ::PSPageSetup::CloseCmd {w} {
+    variable finished
+    
+    set finished 0
 }
     
 #   PushBtSave ---
@@ -655,6 +672,8 @@ proc ::PSPageSetup::PushBtSave {  } {
 
 #-- end ::PSPageSetup:: --------------------------------------------------------
 
+# OBSOLETE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 # Dialogs::ShowInfoClients --
 #
 #       It implements a dialog that shows client information. ???
@@ -678,7 +697,6 @@ proc ::Dialogs::ShowInfoClients { } {
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
     wm title $w "Client Info"
-    set fontSB [option get . fontSmallBold {}]
     
     pack [frame $w.frall -borderwidth 1 -relief raised]
     pack [frame $w.frtop -borderwidth 0] -in $w.frall
@@ -698,19 +716,19 @@ proc ::Dialogs::ShowInfoClients { } {
 	
 	# Frame for everything inside the labeled container.
 	set fr [frame $wcont.fr]
-	label $fr.a1 -text "IP number:" -font $fontSB
+	label $fr.a1 -text "IP number:" -font CociSmallBoldFont
 	label $fr.a2 -text "[lindex $peername 0]"
-	label $fr.b1 -text "Host name:" -font $fontSB
+	label $fr.b1 -text "Host name:" -font CociSmallBoldFont
 	label $fr.b2 -text "[lindex $peername 1]"
-	label $fr.c1 -text "User name:" -font $fontSB
+	label $fr.c1 -text "User name:" -font CociSmallBoldFont
 	label $fr.c2 -text [::P2PNet::GetValueFromIP $ip user]
-	label $fr.d1 -text "Port number:" -font $fontSB
+	label $fr.d1 -text "Port number:" -font CociSmallBoldFont
 	label $fr.d2 -text [::P2PNet::GetValueFromIP $ip servPort]
-	label $fr.e1 -text "Buffering:" -font $fontSB
+	label $fr.e1 -text "Buffering:" -font CociSmallBoldFont
 	label $fr.e2 -text "$buff"
-	label $fr.f1 -text "Blocking:" -font $fontSB
+	label $fr.f1 -text "Blocking:" -font CociSmallBoldFont
 	label $fr.f2 -text "$block"
-	label $fr.g1 -text "Since:" -font $fontSB
+	label $fr.g1 -text "Since:" -font CociSmallBoldFont
 	label $fr.g2 -text [clock format [::P2PNet::GetValueFromIP $ip connectTime] \
 	  -format "%X  %x"]
 	grid $fr.a1 -column 0 -row 0 -sticky e
@@ -770,70 +788,71 @@ proc ::Dialogs::ShowInfoServer { } {
       -macclass {document closeBox}
     wm title $w [mc {Server Info}]
     
-    pack [frame $w.frall -borderwidth 1 -relief raised]
-    set wcont $w.frtop
-    labelframe $wcont -text [mc {Server Info}]
-    pack $wcont -in $w.frall -padx 8 -pady 6  
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
     
-    # Frame for everything inside the labeled container.
-    set fr [frame $wcont.fr]
-    label $fr.x1 -text "[mc {Is server up}]:"
-    label $fr.x2 -text $boolToYesNo($state(isServerUp))
-    label $fr.a1 -text "[mc {This IP number}]:"
-    label $fr.b1 -text "[mc {Host name}]:"
-    label $fr.c1 -text "[mc Username]:"
-    label $fr.d1 -text "[mc {Port number}]:"
-    label $fr.e1 -text "[mc Buffering]:"
-    label $fr.f1 -text "[mc Blocking]:"
-    label $fr.g1 -text "[mc {Is safe}]:"
+    set fr $wbox.f
+    ttk::labelframe $fr -padding [option get . groupSmallPadding {}] \
+      -text [mc {Server Info}]
+    pack $fr
+    
+    option add *$fr.TLabel.style Small.TLabel
+    
+    ttk::label $fr.x1 -text "[mc {Is server up}]:"
+    ttk::label $fr.x2 -text $boolToYesNo($state(isServerUp))
+    ttk::label $fr.a1 -text "[mc {This IP number}]:"
+    ttk::label $fr.b1 -text "[mc {Host name}]:"
+    ttk::label $fr.c1 -text "[mc Username]:"
+    ttk::label $fr.d1 -text "[mc {Port number}]:"
+    ttk::label $fr.e1 -text "[mc Buffering]:"
+    ttk::label $fr.f1 -text "[mc Blocking]:"
+    ttk::label $fr.g1 -text "[mc {Is safe}]:"
 
     if {!$state(isServerUp)} {
-	label $fr.a2 -text $this(ipnum)
-	label $fr.b2 -text $this(hostname)
-	label $fr.c2 -text $this(username)
-	label $fr.d2 -text [mc {Not available}]
-	label $fr.e2 -text [mc {Not available}]
-	label $fr.f2 -text [mc {Not available}]
-	label $fr.g2 -text [mc {Not available}]
+	ttk::label $fr.a2 -text $this(ipnum)
+	ttk::label $fr.b2 -text $this(hostname)
+	ttk::label $fr.c2 -text $this(username)
+	ttk::label $fr.d2 -text [mc {Not available}]
+	ttk::label $fr.e2 -text [mc {Not available}]
+	ttk::label $fr.f2 -text [mc {Not available}]
+	ttk::label $fr.g2 -text [mc {Not available}]
 	
     } elseif {$state(isServerUp)} {
 	set sockname [fconfigure $state(serverSocket) -sockname]
-	label $fr.a2 -text $this(ipnum)
-	label $fr.b2 -text $this(hostname)
-	label $fr.c2 -text $this(username)
-	label $fr.d2 -text $prefs(thisServPort)
-	label $fr.e2 -text [mc {Not available}]
-	label $fr.f2 -text [mc {Not available}]
-	label $fr.g2 -text "$boolToYesNo($prefs(makeSafeServ))"
+	ttk::label $fr.a2 -text $this(ipnum)
+	ttk::label $fr.b2 -text $this(hostname)
+	ttk::label $fr.c2 -text $this(username)
+	ttk::label $fr.d2 -text $prefs(thisServPort)
+	ttk::label $fr.e2 -text [mc {Not available}]
+	ttk::label $fr.f2 -text [mc {Not available}]
+	ttk::label $fr.g2 -text "$boolToYesNo($prefs(makeSafeServ))"
 
     }
-    grid $fr.x1 -column 0 -row 0 -sticky e
-    grid $fr.x2 -column 1 -row 0 -sticky w
-    grid $fr.a1 -column 0 -row 1 -sticky e
-    grid $fr.a2 -column 1 -row 1 -sticky w
-    grid $fr.b1 -column 0 -row 2 -sticky e
-    grid $fr.b2 -column 1 -row 2 -sticky w
-    grid $fr.c1 -column 0 -row 3 -sticky e
-    grid $fr.c2 -column 1 -row 3 -sticky w
-    grid $fr.d1 -column 0 -row 4 -sticky e
-    grid $fr.d2 -column 1 -row 4 -sticky w
-    grid $fr.e1 -column 0 -row 5 -sticky e
-    grid $fr.e2 -column 1 -row 5 -sticky w
-    grid $fr.f1 -column 0 -row 6 -sticky e
-    grid $fr.f2 -column 1 -row 6 -sticky w
-    grid $fr.g1 -column 0 -row 7 -sticky e
-    grid $fr.g2 -column 1 -row 7 -sticky w
-    pack $fr -side left -padx 20    
-    pack $wcont -fill x    
+    grid  $fr.x1  $fr.x2  -sticky e
+    grid  $fr.a1  $fr.a2  -sticky e
+    grid  $fr.b1  $fr.b2  -sticky e
+    grid  $fr.c1  $fr.c2  -sticky e
+    grid  $fr.d1  $fr.d2  -sticky e
+    grid  $fr.e1  $fr.e2  -sticky e
+    grid  $fr.f1  $fr.f2  -sticky e
+    grid  $fr.g1  $fr.g2  -sticky e
+
+    grid  $fr.x2  $fr.a2  $fr.b2  $fr.c2  $fr.d2  $fr.e2  $fr.f2  $fr.g2  -sticky w
         
     # button part
-    pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
-      -padx 8 -pady 6
-    pack [button $w.btok -text [mc OK]  \
-      -command "destroy $w"]  \
-      -in $w.frbot -side right -padx 5 -pady 5
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w]
+    pack $frbot.btok -side right
+    pack $frbot -side bottom -fill x
+
     wm resizable $w 0 0
-    bind $w <Return> "$w.btok invoke"
+    bind $w <Return> [list $frbot.btok invoke]
     
     tkwait window $w
     grab release $w
@@ -854,18 +873,13 @@ proc ::Dialogs::Canvas {filePath args} {
     global this prefs
     variable uidcan
     
-    if {[catch {open $filePath r} fd]} {
-	return
-    }
-    fconfigure $fd -encoding utf-8
     set w .spcan[incr uidcan]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
     wm withdraw $w
     
     # Make the namespace exist.
-    set wtop ${w}.
-    namespace eval ::WB::${wtop}:: {}
+    namespace eval ::WB::${w}:: {}
 
     array set argsArr [list -title [file rootname [file tail $filePath]]]
     array set argsArr $args
@@ -877,6 +891,14 @@ proc ::Dialogs::Canvas {filePath args} {
     set wcan $w.can
     canvas $wcan -width $xmax -height $ymax -highlightthickness 0 -bg white
     pack $wcan
+
+    if {[catch {open $filePath r} fd]} {
+	return
+    }
+    fconfigure $fd -encoding utf-8
+    if {[info exists argsArr(-encoding)]} {
+	fconfigure $fd -encoding $argsArr(-encoding)
+    }
     
     while {[gets $fd line] >= 0} { 
 	
@@ -907,14 +929,14 @@ proc ::Dialogs::Canvas {filePath args} {
 	}
     }
     catch {close $fd}
-    foreach {x0 y0 x1 y1} [eval {$wcan bbox} [$wcan find all]] break
+    lassign [$wcan bbox all] x0 y0 x1 y1
     incr x1 20
     incr y1 20
     $wcan configure -width $x1 -height $y1
     update idletasks
     wm deiconify $w
     raise $w
- }
+}
 
 namespace eval ::Dialogs:: {
     
@@ -947,7 +969,7 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
     variable wAboutQuickTimeTcl
     
     if {!$initedAboutQuickTimeTcl} {
-	::Dialogs::InitAboutQuickTimeTcl
+	InitAboutQuickTimeTcl
     }
     set w $wAboutQuickTimeTcl
     if {[winfo exists $w]} {
@@ -965,7 +987,7 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
     set theSize [$w.m size]
     set mw [lindex $theSize 0]
     set mh [lindex $theSize 1]
-    foreach {screenW screenH} [::UI::GetScreenSize] break
+    lassign [::UI::GetScreenSize] screenW screenH
     wm geometry $w +[expr ($screenW - $mw)/2]+[expr ($screenH - $mh)/2]
     update
     wm resizable $w 0 0

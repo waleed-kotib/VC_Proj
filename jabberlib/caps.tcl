@@ -11,21 +11,23 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.4 2005-06-16 07:10:40 matben Exp $
+# $Id: caps.tcl,v 1.5 2005-08-14 07:13:18 matben Exp $
 
 # UNFINISHED!!!
 #      
 # EXPERIMENTAL!!!
 
-package provide caps 1.0
+package require jlib
 
-namespace eval jlib::caps {}
+package provide jlib::caps 0.1
 
-proc jlib::caps::init {jlibname} {
-    
-    jlib::presence_register $jlibname available   [namespace current]::presence_cb
-    jlib::presence_register $jlibname unavailable [namespace current]::unavail_cb
-    
+namespace eval jlib::caps {
+
+    jlib::ensamble_register caps [namespace current]::cmdproc
+}
+
+proc jlib::caps::init {jlibname args} {
+        
     namespace eval ${jlibname}::caps {
 
 	# The internal cache keps record if the particular client and version
@@ -34,6 +36,31 @@ proc jlib::caps::init {jlibname} {
 	
 	variable cache
     }
+    eval {configure $jlibname} $args
+}
+
+proc jlib::caps::register {jlibname} {
+    
+    jlib::presence_register $jlibname available   [namespace current]::presence_cb
+    jlib::presence_register $jlibname unavailable [namespace current]::unavail_cb
+}
+
+proc jlib::caps::configure {jlibname args} {
+    
+    array set argsArr $args
+    if {[info exists argsArr(-autodiscocaps)]} {
+	if {$argsArr(-autodiscocaps)} {
+	    register $jlibname
+	} else {
+	    free $jlibname
+	}
+    }    
+}
+
+proc jlib::caps::cmdproc {jlibname cmd args} {
+    
+    # Which command? Just dispatch the command to the right procedure.
+    return [eval {$cmd $jlibname} $args]
 }
 
 proc jlib::caps::presence_cb {jlibname jid type args} {

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.12 2005-01-31 14:06:59 matben Exp $
+# $Id: Types.tcl,v 1.13 2005-08-14 07:17:55 matben Exp $
 
 package provide Types 1.0
 
@@ -484,7 +484,7 @@ proc ::Types::GetFileTailAddSuffix {filePath} {
     set fileTail [file tail $filePath]
     if {[string equal $this(platform) "macintosh"]} {
 	set fext [file extension $fileTail]
-	if {$fext == ""} {
+	if {$fext eq ""} {
 	    set fileTailSuff "${fileTail}[GetSuffixForMacFile $filePath]"
 	} else {
 	    set fileTailSuff $fileTail

@@ -4,12 +4,11 @@
 #      It implements dialogs that are used for editing things, such as,
 #      for instance, shortcut lists or font families.
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
+#  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: EditDialogs.tcl,v 1.14 2004-12-02 08:22:34 matben Exp $
+# $Id: EditDialogs.tcl,v 1.15 2005-08-14 07:17:55 matben Exp $
 
+package provide EditDialogs 1.0
 
 #       ::EditShortcuts:: implements dialogs for editing shortcuts. 
 #       Typical shortcut lists is shorts for ip domain names, or streaming 
@@ -50,82 +49,100 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     
     # Call by reference.
     upvar #0 $nameOfShortcutList theShortcuts
+
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
+
     set finEdit -1
     set anyChange 0
     
     # First, make a copy of shortcuts to work on.
     set shortCopy $theShortcuts
     
-    if {[winfo exists $w]} {
-	return
-    }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
+      -macclass {document closeBox} \
+      -closecommand ::EditShortcuts::CloseCmd
     wm title $w [mc {Edit Shortcuts}]
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall
-    
-    # The top part.
-    set wcont $w.frtop
-    labelframe $wcont -text [mc {Edit Shortcuts}]]
-    pack $wcont -in $w.frall
-    
-    # Overall frame for whole container.
-    set frtot [frame $wcont.fr]
-    
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    set wcont $wbox.f
+    ttk::labelframe $wcont -padding [option get . groupSmallPadding {}] \
+      -text [mc {Edit Shortcuts}]
+    pack $wcont
+        
     # Frame for listbox and scrollbar.
-    set frlist [frame $frtot.lst]
+    set frlist $wcont.f
+    frame $frlist -bd 1 -relief sunken
+    pack  $frlist -side left -fill y
     
     # The listbox.
-    set wsb $frlist.sb
-    set wlbox [listbox $frlist.lb -height 7 -width 18 -yscrollcommand "$wsb set"]
+    set wsb   $frlist.sb
+    set wlbox $frlist.lb
+    listbox $wlbox -height 8 -width 20 -yscrollcommand [list $wsb set] \
+      -selectmode single
     set edshort {}
     foreach ele [lindex $shortCopy 0] {
 	lappend edshort "  $ele"
     }
-    eval "$wlbox insert 0 $edshort"
-    scrollbar $wsb -command "$wlbox yview"
-    pack $wlbox  -side left -fill both
-    pack $wsb -side left -fill both
+    eval {$wlbox insert 0} $edshort
+    tuscrollbar $wsb -command [list $wlbox yview]
+    pack  $wlbox  -side left -fill both
+    pack  $wsb    -side left -fill y
     
     # Buttons at the right side.
-    button $frtot.btadd -text "[mc Add]..."   \
+    set frbt $wcont.b
+    ttk::frame $frbt -padding {10 0 0 0}
+    pack $frbt -side right -fill y
+    ttk::button $frbt.btadd -text "[mc Add]..."   \
       -command "[namespace current]::AddOrEditShortcuts add  \
       [namespace current]::shortCopy -1 $wlbox"
-    button $frtot.btrem -text [mc Remove] -state disabled  \
-      -command "[namespace current]::RemoveShortcuts $wlbox"
+    ttk::button $frbt.btrem -text [mc Remove]  \
+      -command [list [namespace current]::RemoveShortcuts $wlbox]
     
     # Trick: postpone command substitution; only variable substitution.
-    button $frtot.btedit -text "[mc Edit]..." -state disabled  \
+    ttk::button $frbt.btedit -text "[mc Edit]..."  \
       -command "[namespace current]::AddOrEditShortcuts edit   \
       [namespace current]::shortCopy \[$wlbox curselection] $wlbox"
     
-    grid $frlist -rowspan 3
-    grid $frtot.btadd -column 1 -row 0 -sticky ew -padx 10
-    grid $frtot.btrem -column 1 -row 1 -sticky ew -padx 10
-    grid $frtot.btedit -column 1 -row 2 -sticky ew -padx 10
+    grid  $frbt.btadd   -sticky ew -pady 8
+    grid  $frbt.btrem   -sticky ew -pady 8
+    grid  $frbt.btedit  -sticky ew -pady 8
     
-    pack $frtot -side left -padx 16 -pady 10    
-    pack $wcont -fill x    
+    $frbt.btrem  state {disabled}
+    $frbt.btedit state {disabled}
     
     # The bottom part.
-    pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both   \
-      -padx 8 -pady 6
-    pack [button $w.frbot.bt1 -text [mc Save] -default active  \
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Save] -default active  \
       -command [list [namespace current]::DoSaveEditedShortcuts   \
-      $nameOfShortcutList]]   \
-      -side right -padx 5 -pady 5
-    pack [button $w.frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::DoCancel $nameOfShortcutList]]  \
-      -side right -padx 5 -pady 5
+      $nameOfShortcutList]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::DoCancel $nameOfShortcutList]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
     
-    bind $w <Return> [list $w.frbot.bt1 invoke]
+    bind $w <Return> [list $frbot.btok invoke]
     bind $wlbox <Button-1> {+ focus %W}
-    bind $wlbox <Double-Button-1> "$frtot.btedit invoke"
-    bind $wlbox <FocusIn> "$frtot.btrem configure -state normal;  \
-      $frtot.btedit configure -state normal"
-    bind $wlbox <FocusOut> "$frtot.btrem configure -state disabled;  \
-      $frtot.btedit configure -state disabled"
+    bind $wlbox <Double-Button-1> [list $frbt.btedit invoke]
+    bind $wlbox <<ListboxSelect>> [list ::EditShortcuts::SelectCmd %W $frbt]
+    
     wm resizable $w 0 0
     
     # Grab and focus.
@@ -143,6 +160,23 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
 	# Cancel
 	return 0
     }
+}
+
+proc ::EditShortcuts::SelectCmd {wlbox frbt} {
+    
+    if {[$wlbox curselection] == {}} {
+	$frbt.btrem  state {disabled}
+	$frbt.btedit state {disabled}
+    } else {
+	$frbt.btrem  state {!disabled}
+	$frbt.btedit state {!disabled}
+    }
+}
+
+proc ::EditShortcuts::CloseCmd {w} {
+    variable finEdit
+    
+    set finEdit 0
 }
 
 # EditShortcuts::DoSaveEditedShortcuts, DoCancel --
@@ -216,50 +250,54 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
     
     Debug 2 "AddOrEditShortcuts:: nameOfShortsCopy=$nameOfShortsCopy"
 
-    if {$what == "edit" && $indShortcuts == ""} {
+    if {$what eq "edit" && $indShortcuts eq ""} {
 	return
     } 
     set w .taddshorts$what
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
-    if {$what == "add"} {
+    if {$what eq "add"} {
 	set txt [mc {Add Shortcut}]
 	set txt1 "[mc {New shortcut}]:"
 	set txt2 "[mc shortip]:"
 	set txtbt [mc Add]
-    } elseif {$what == "edit"} {
+    } elseif {$what eq "edit"} {
 	set txt [mc {Edit Shortcut}]
 	set txt1 "[mc Shortcut]:"
 	set txt2 "[mc shortip]:"
 	set txtbt [mc Save]
     }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox} \
+      -closecommand ::EditShortcuts::CloseAddCmd
     wm title $w $txt
-    set fontSB [option get . fontSmallBold {}]
     
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
     # The top part.
-    set wcont $w.frtop
-    labelframe $wcont -text $txt]
-    pack $wcont -in $w.frall
+    set frtot $wbox.f
+    ttk::labelframe $frtot  -padding [option get . groupSmallPadding {}] \
+      -text $txt
+    pack $frtot
     
-    # Overall frame for whole container.
-    set frtot [frame $wcont.fr]
-    label $frtot.lbl1 -text $txt1 -font $fontSB
-    entry $frtot.ent1 -width 36 
-    label $frtot.lbl2 -text $txt2 -font $fontSB
-    entry $frtot.ent2 -width 36 
-    grid $frtot.lbl1 -sticky w -padx 6 -pady 1
-    grid $frtot.ent1 -sticky ew -padx 6 -pady 1
-    grid $frtot.lbl2 -sticky w -padx 6 -pady 1
-    grid $frtot.ent2 -sticky ew -padx 6 -pady 1
+    ttk::label $frtot.lbl1 -text $txt1
+    ttk::entry $frtot.ent1 -width 36 
+    ttk::label $frtot.lbl2 -padding {0 8 0 0} -text $txt2
+    ttk::entry $frtot.ent2 -width 36 
     
-    pack $frtot -side left -padx 16 -pady 10
-    pack $wcont -fill x    
+    grid  $frtot.lbl1  -sticky w
+    grid  $frtot.ent1
+    grid  $frtot.lbl2  -sticky w
+    grid  $frtot.ent2
+    
     focus $frtot.ent1
     
     # Get the short pair to edit.
@@ -271,18 +309,25 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
     }
     
     # The bottom part.
-    pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
-      -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     # Trick: postpone command substitution; only variable substitution.
-    button $w.frbot.bt1 -text "$txtbt" -default active  \
+    ttk::button $frbot.btok -text $txtbt -default active  \
       -command "[namespace current]::PushBtAddOrEditShortcut $what  \
       $nameOfShortsCopy $indShortcuts \[$frtot.ent1 get] \[$frtot.ent2 get] "
-    pack $w.frbot.bt1 -side right -padx 5 -pady 5
-    pack [button $w.frbot.btcancel -text [mc Cancel]  \
-      -command "set [namespace current]::finAdd 0"]  \
-      -side right -padx 5 -pady 5
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list set [namespace current]::finAdd 0]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
     
-    bind $w <Return> "$w.frbot.bt1 invoke"
+    bind $w <Return> [list $frbot.btok invoke]
     wm resizable $w 0 0
     
     # Grab and focus.
@@ -301,13 +346,19 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
 	    foreach ele [lindex $theShortCopy 0] {
 		lappend edshort "  $ele"
 	    }
-	    eval "$wListBox insert 0 $edshort"
+	    eval {$wListBox insert 0} $edshort
 	}
 	return 1
     } else {
 	# Cancel, keep old shortcuts.
 	return 0
     }
+}
+
+proc ::EditShortcuts::CloseAddCmd {w} {
+    variable finAdd
+    
+    set finAdd 0
 }
 
 # EditShortcuts::PushBtAddOrEditShortcut, EditShortcuts::RemoveShortcuts --
@@ -336,11 +387,11 @@ proc ::EditShortcuts::PushBtAddOrEditShortcut {what nameOfShorts ind short ip} {
     upvar #0 $nameOfShorts locShorts
     #puts "PushBtAddOrEditShortcut:: ind=$ind, short=$short, ip=$ip"
     set anyChange 0
-    if {$what == "edit" && $ind == -1} {
+    if {$what eq "edit" && $ind == -1} {
 	set finAdd 0
 	return
     }
-    if {$short == "" || $ip == ""} {
+    if {$short eq "" || $ip eq ""} {
 	set finAdd 0
 	return
     }
@@ -348,13 +399,13 @@ proc ::EditShortcuts::PushBtAddOrEditShortcut {what nameOfShorts ind short ip} {
     # We now know there is something to be added.
     set shcp [lindex $locShorts 0]
     set lncp [lindex $locShorts 1]
-    if {$what == "add"} {
+    if {$what eq "add"} {
 	
 	# Just append at the end.
 	lappend shcp $short
 	lappend lncp $ip
 	set locShorts [list $shcp $lncp]
-    } elseif {$what == "edit"} {
+    } elseif {$what eq "edit"} {
 	
 	# Replace old with new.
 	set shcp [lreplace $shcp $ind $ind $short]

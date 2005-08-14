@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.20 2004-12-02 15:22:07 matben Exp $
+# $Id: P2P.tcl,v 1.21 2005-08-14 07:17:55 matben Exp $
 
 package provide P2P 1.0
 
@@ -18,7 +18,7 @@ namespace eval ::P2P:: {
     variable initted 0
         
     # For the communication entries.
-    # variables:              $wtop is used as a key in these vars.
+    # variables:              $w is used as a key in these vars.
     #       nEnt              a running counter for the communication frame entries
     #                         that is *never* reused.
     #       ipNum2iEntry:     maps ip number to the entry line (nEnt) in the connect 
@@ -42,7 +42,9 @@ proc ::P2P::Init {} {
     variable initted
     
     ::Debug 2 "::P2P::Init"
-    
+
+    ::hooks::register launchFinalHook                ::P2P::LaunchFinalHook
+
     # Register canvas draw event handler.
     ::hooks::register whiteboardBuildEntryHook       ::P2P::BuildEntryHook
     ::hooks::register whiteboardSetMinsizeHook       ::P2P::SetMinsizeHook    
@@ -68,12 +70,12 @@ proc ::P2P::Init {} {
 
     set buttonTrayDefs(symmetric) {
 	connect    {::P2PNet::OpenConnection $wDlgs(openConn)}
-	save       {::CanvasFile::Save $wtop}
-	open       {::CanvasFile::OpenCanvasFileDlg $wtop}
-	import     {::Import::ImportImageOrMovieDlg $wtop}
-	send       {::CanvasCmd::DoPutCanvasDlg $wtop}
-	print      {::UserActions::DoPrintCanvas $wtop}
-	stop       {::P2P::CancelAllPutGetAndPendingOpen $wtop}
+	save       {::CanvasFile::Save $w}
+	open       {::CanvasFile::OpenCanvasFileDlg $w}
+	import     {::Import::ImportImageOrMovieDlg $w}
+	send       {::CanvasCmd::DoPutCanvasDlg $w}
+	print      {::UserActions::DoPrintCanvas $w}
+	stop       {::P2P::CancelAllPutGetAndPendingOpen $w}
     }
     set buttonTrayDefs(client) $buttonTrayDefs(symmetric)
     set buttonTrayDefs(server) $buttonTrayDefs(symmetric)
@@ -83,21 +85,21 @@ proc ::P2P::Init {} {
 	{command   mOpenConnection     {::UserActions::DoConnect}                 normal   O}
 	{command   mCloseWindow        {::UI::DoCloseWindow}                      normal   W}
 	{separator}
-	{command   mPutCanvas          {::CanvasCmd::DoPutCanvasDlg $wtop}        disabled {}}
-	{command   mGetCanvas          {::CanvasCmd::DoGetCanvas $wtop}           disabled {}}
-	{command   mPutFile            {::P2P::PutFileDlg $wtop}         disabled {}}
-	{command   mStopPut/Get/Open   {::P2P::CancelAllPutGetAndPendingOpen $wtop} normal {}}
+	{command   mPutCanvas          {::CanvasCmd::DoPutCanvasDlg $w}        disabled {}}
+	{command   mGetCanvas          {::CanvasCmd::DoGetCanvas $w}           disabled {}}
+	{command   mPutFile            {::P2P::PutFileDlg $w}         disabled {}}
+	{command   mStopPut/Get/Open   {::P2P::CancelAllPutGetAndPendingOpen $w} normal {}}
 	{separator}
-	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop}    normal  I}
-	{command   mOpenURLStream      {::Multicast::OpenMulticast $wtop}     normal   {}}
+	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $w}    normal  I}
+	{command   mOpenURLStream      {::Multicast::OpenMulticast $w}     normal   {}}
 	{separator}
-	{command   mOpenCanvas         {::CanvasFile::OpenCanvasFileDlg $wtop}     normal   {}}
-	{command   mSaveCanvas         {::CanvasFile::Save $wtop}             normal   S}
+	{command   mOpenCanvas         {::CanvasFile::OpenCanvasFileDlg $w}     normal   {}}
+	{command   mSaveCanvas         {::CanvasFile::Save $w}             normal   S}
 	{separator}
-	{command   mSaveAs             {::CanvasFile::SaveAsDlg $wtop}        normal   {}}
-	{command   mSaveAsItem         {::CanvasCmd::DoSaveAsItem $wtop}      normal   {}}
-	{command   mPageSetup          {::UserActions::PageSetup $wtop}           normal   {}}
-	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
+	{command   mSaveAs             {::CanvasFile::SaveAsDlg $w}        normal   {}}
+	{command   mSaveAsItem         {::CanvasCmd::DoSaveAsItem $w}      normal   {}}
+	{command   mPageSetup          {::UserActions::PageSetup $w}           normal   {}}
+	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $w}       normal   P}
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
     }
@@ -120,6 +122,22 @@ proc ::P2P::Init {} {
     set initted 1
 }
 
+proc ::P2P::LaunchFinalHook { } {
+    global  argvArr prefs
+    
+    if {[info exists argvArr(-connect)]} {
+	update idletasks
+	after $prefs(afterConnect) [list ::P2PNet::DoConnect  \
+	  $argvArr(-connect) $prefs(remotePort)]
+    }
+}
+
+proc ::P2P::GetMainWindow { } {
+    global wDlgs
+    
+    return $wDlgs(mainwb)
+}
+
 proc ::P2P::BuildButtonsHook {wtray} {
     global  prefs
 
@@ -132,12 +150,12 @@ proc ::P2P::BuildButtonsHook {wtray} {
 # 
 #       Build the p2p specific part of the whiteboard.
 
-proc ::P2P::BuildEntryHook {wtop wclass wcomm} {
+proc ::P2P::BuildEntryHook {w wclass wcomm} {
     global  prefs
     variable nEnt
     variable wp2p
       
-    set nEnt($wtop) 0
+    set nEnt($w) 0
   
     set contactOffImage [::Theme::GetImage [option get $wclass contactOffImage {}]]
     set contactOnImage  [::Theme::GetImage [option get $wclass contactOnImage {}]]
@@ -150,9 +168,9 @@ proc ::P2P::BuildEntryHook {wtop wclass wcomm} {
     frame $wgrid -relief flat -borderwidth 0
     pack  $wgrid -side left
     
-    set wp2p($wtop,wclass) $wclass
-    set wp2p($wtop,wfr)    $fr
-    set wp2p($wtop,wgrid)  $wgrid
+    set wp2p($w,wclass) $wclass
+    set wp2p($w,wfr)    $fr
+    set wp2p($w,wgrid)  $wgrid
 
     set waddr ${wgrid}.comm
     set wuser ${wgrid}.user
@@ -208,7 +226,7 @@ proc ::P2P::BuildEntryHook {wtop wclass wcomm} {
 #                         panel.
 #                    
 # Arguments:
-#       wtop
+#       w
 #       ipNum       the ip number.
 #       to          0/1/-1 if off/on/indifferent respectively.
 #       from        0/1/-1 if off/on/indifferent respectively.
@@ -218,39 +236,39 @@ proc ::P2P::BuildEntryHook {wtop wclass wcomm} {
 # Results:
 #       updated communication frame.
 
-proc ::P2P::SetCommEntry {wtop ipNum to from args} { 
+proc ::P2P::SetCommEntry {w ipNum to from args} { 
     global  prefs
     
     variable commTo
     variable commFrom
     
-    Debug 2 "SetCommEntry:: wtop=$wtop, ipNum=$ipNum, to=$to, from=$from, \
+    Debug 2 "SetCommEntry:: w=$w, ipNum=$ipNum, to=$to, from=$from, \
       args='$args'"
     
     # Need to check if already exist before adding a completely new entry.
     set alreadyThere 0
-    if {[info exists commTo($wtop,$ipNum)]} {
+    if {[info exists commTo($w,$ipNum)]} {
 	set alreadyThere 1
     } else {
-	set commTo($wtop,$ipNum) 0		
+	set commTo($w,$ipNum) 0		
     }
-    if {[info exists commFrom($wtop,$ipNum)]} {
+    if {[info exists commFrom($w,$ipNum)]} {
 	set alreadyThere 1
     } else {
-	set commFrom($wtop,$ipNum) 0		
+	set commFrom($w,$ipNum) 0		
     }
 
     Debug 2 "\t SetCommEntry:: alreadyThere=$alreadyThere, ipNum=$ipNum"
-    Debug 2 "\t\t commTo($wtop,$ipNum)=$commTo($wtop,$ipNum), commFrom($wtop,$ipNum)=$commFrom($wtop,$ipNum)"
+    Debug 2 "\t\t commTo($w,$ipNum)=$commTo($w,$ipNum), commFrom($w,$ipNum)=$commFrom($w,$ipNum)"
 
     if {$to >= 0} {
-	set commTo($wtop,$ipNum) $to
+	set commTo($w,$ipNum) $to
     }
     if {$from >= 0} {
-	set commFrom($wtop,$ipNum) $from
+	set commFrom($w,$ipNum) $from
     }
-    set toip   $commTo($wtop,$ipNum)
-    set fromip $commFrom($wtop,$ipNum)
+    set toip   $commTo($w,$ipNum)
+    set fromip $commFrom($w,$ipNum)
     
     # If it is not there and shouldn't be added, just return.
     if {!$alreadyThere && ($toip == 0) && ($fromip == 0)} {
@@ -277,9 +295,9 @@ proc ::P2P::SetCommEntry {wtop ipNum to from args} {
     if {($toip == 0) && ($fromip == 0)} {
 
 	# If both 'to' and 'from' 0, and not jabber, then remove entry.
-	::P2P::RemoveCommEntry $wtop $ipNum
+	RemoveCommEntry $w $ipNum
     } elseif {!$alreadyThere} {
-	eval {::P2P::BuildCommEntry $wtop $ipNum} $args
+	eval {BuildCommEntry $w $ipNum} $args
     } 
 }
 
@@ -289,7 +307,7 @@ proc ::P2P::SetCommEntry {wtop ipNum to from args} {
 #       Should only be called from SetCommEntry'.
 #       
 # Arguments:
-#       wtop
+#       w
 #       ipNum       the ip number.
 #       args        '-jidvariable varName', '-validatecommand cmd',
 #                   '-dosendvariable varName'
@@ -297,7 +315,7 @@ proc ::P2P::SetCommEntry {wtop ipNum to from args} {
 # Results:
 #       updated communication frame with new client.
 
-proc ::P2P::BuildCommEntry {wtop ipNum args} {
+proc ::P2P::BuildCommEntry {w ipNum args} {
     global  prefs
     
     variable commTo
@@ -307,18 +325,13 @@ proc ::P2P::BuildCommEntry {wtop ipNum args} {
     variable addr
     variable wp2p
     
-    Debug 2 "BuildCommEntry:: wtop=$wtop, ipNum=$ipNum, args='$args'"
+    Debug 2 "BuildCommEntry:: w=$w, ipNum=$ipNum, args='$args'"
 
     array set argsArr $args
-    if {[string equal $wtop "."]} {
-	set w .
-    } else {
-	set w [string trimright $wtop .]
-    }
-	
+
     set size [::UI::ParseWMGeometry [wm geometry $w]]
-    set n $nEnt($wtop)
-    set wcomm $wp2p($wtop,wgrid)
+    set n $nEnt($w)
+    set wcomm $wp2p($w,wgrid)
     set waddr ${wcomm}.ad${n}
     set wuser ${wcomm}.us${n}
     set wto   ${wcomm}.to${n}
@@ -332,33 +345,33 @@ proc ::P2P::BuildCommEntry {wtop ipNum args} {
 	}
 	symmetric {
 	    entry $waddr -width 24 -relief sunken -state disabled \
-	      -textvariable [namespace current]::addr($wtop,$ipNum)
+	      -textvariable [namespace current]::addr($w,$ipNum)
 	    entry $wuser -width 16 -state disabled  \
 	      -textvariable ::P2PNet::ipNumTo(user,$ipNum) -relief sunken
 	    checkbutton $wto -highlightthickness 0 \
-	      -variable [namespace current]::commTo($wtop,$ipNum)   \
-	      -command [list [namespace current]::CheckCommTo $wtop $ipNum]
+	      -variable [namespace current]::commTo($w,$ipNum)   \
+	      -command [list [namespace current]::CheckCommTo $w $ipNum]
 	    checkbutton $wfrom -highlightthickness 0 -state disabled \
-	      -variable [namespace current]::commFrom($wtop,$ipNum)
+	      -variable [namespace current]::commFrom($w,$ipNum)
 	    grid $waddr $wuser $wto $wfrom -padx 4 -pady 0
 	}
 	client {
 	    entry $waddr -width 24 -relief sunken -state disabled \
-	      -textvariable [namespace current]::addr($wtop,$ipNum)
+	      -textvariable [namespace current]::addr($w,$ipNum)
 	    entry $wuser -width 16 -relief sunken -state disabled  \
 	      -textvariable ::P2PNet::ipNumTo(user,$ipNum)
 	    checkbutton $wto -highlightthickness 0  \
-	      -variable [namespace current]::commTo($wtop,$ipNum)   \
-	      -command [list [namespace current]::CheckCommTo $wtop $ipNum]
+	      -variable [namespace current]::commTo($w,$ipNum)   \
+	      -command [list [namespace current]::CheckCommTo $w $ipNum]
 	    grid $waddr $wuser $wto -padx 4 -pady 0
 	}
 	server {
 	    entry $waddr -width 24 -relief sunken -state disabled \
-	      -textvariable [namespace current]::addr($wtop,$ipNum)
+	      -textvariable [namespace current]::addr($w,$ipNum)
 	    entry $wuser -width 16 -relief sunken -state disabled  \
 	      -textvariable ::P2PNet::ipNumTo(user,$ipNum)
 	    checkbutton $wfrom -highlightthickness 0 -state disabled \
-	      -variable [namespace current]::commFrom($wtop,$ipNum)
+	      -variable [namespace current]::commFrom($w,$ipNum)
 	    grid $waddr $wuser $wfrom -padx 4 -pady 0
 	}
     }  
@@ -366,9 +379,9 @@ proc ::P2P::BuildCommEntry {wtop ipNum args} {
     # If no ip name given (unknown) pick ip number instead.
     if {[info exists ::P2PNet::ipNumTo(name,$ipNum)]} {
 	if {[string match "*unknown*" [string tolower $::P2PNet::ipNumTo(name,$ipNum)]]} {
-	    set addr($wtop,$ipNum) $ipNum
+	    set addr($w,$ipNum) $ipNum
 	} else {
-	    set addr($wtop,$ipNum) $::P2PNet::ipNumTo(name,$ipNum)
+	    set addr($w,$ipNum) $::P2PNet::ipNumTo(name,$ipNum)
 	}
     }
     
@@ -388,13 +401,13 @@ proc ::P2P::BuildCommEntry {wtop ipNum args} {
     wm geometry $w [lindex $size 0]x$newHeight
     
     # Geometry considerations. Update geometry vars and set new minsize.
-    after idle [list [namespace current]::SetMinsize $wtop]
+    after idle [list [namespace current]::SetMinsize $w]
     
     # Map ip name to nEnt.
-    set ipNum2iEntry($wtop,$ipNum) $nEnt($wtop)
+    set ipNum2iEntry($w,$ipNum) $nEnt($w)
     
     # Step up running index. This must *never* be reused!
-    incr nEnt($wtop)
+    incr nEnt($w)
 }
 
 # ::P2P::CheckCommTo --
@@ -402,37 +415,37 @@ proc ::P2P::BuildCommEntry {wtop ipNum args} {
 #       This is the callback function when the checkbutton 'To' has been trigged.
 #       
 # Arguments:
-#       wtop 
+#       w 
 #       ipNum       the ip number.
 #       
 # Results:
 #       updated communication frame.
 
-proc ::P2P::CheckCommTo {wtop ipNum} {
+proc ::P2P::CheckCommTo {w ipNum} {
     
     variable commTo
     
     Debug 2 "CheckCommTo:: ipNum=$ipNum"
 
-    if {$commTo($wtop,$ipNum) == 0} {
+    if {$commTo($w,$ipNum) == 0} {
 	
 	# Close connection.
 	set res [::UI::MessageBox -message \
 	  "Are you sure that you want to disconnect $::P2PNet::ipNumTo(name,$ipNum)?" \
 	  -icon warning -type yesno -default yes]
-	if {$res == "no"} {
+	if {$res eq "no"} {
 	    
 	    # Reset.
-	    set commTo($wtop,$ipNum) 1
+	    set commTo($w,$ipNum) 1
 	    return
-	} elseif {$res == "yes"} {
+	} elseif {$res eq "yes"} {
 	    ::P2PNet::DoCloseClientConnection $ipNum
 	}
-    } elseif {$commTo($wtop,$ipNum) == 1} {
+    } elseif {$commTo($w,$ipNum) == 1} {
 	
 	# Open connection. Let propagateSizeToClients = true.
 	::P2PNet::DoConnect $ipNum $::P2PNet::ipNumTo(servPort,$ipNum) 1
-	::P2P::SetCommEntry $wtop $ipNum 1 -1
+	SetCommEntry $w $ipNum 1 -1
     }
 }
 
@@ -447,7 +460,7 @@ proc ::P2P::CheckCommTo {wtop ipNum} {
 # Results:
 #       updated communication frame.
 
-proc ::P2P::RemoveCommEntry {wtop ipNum} {
+proc ::P2P::RemoveCommEntry {w ipNum} {
     global  prefs
     
     variable commTo
@@ -455,18 +468,12 @@ proc ::P2P::RemoveCommEntry {wtop ipNum} {
     variable ipNum2iEntry
     variable wp2p
     
-    if {[string equal $wtop "."]} {
-	set w .
-    } else {
-	set w [string trimright $wtop .]
-    }
-    
     # Find widget paths from ipNum and remove the entries.
-    set n $ipNum2iEntry($wtop,$ipNum)
+    set n $ipNum2iEntry($w,$ipNum)
 
     Debug 2 "RemoveCommEntry:: n=$n"
     
-    set wcomm $wp2p($wtop,wgrid)
+    set wcomm $wp2p($w,wgrid)
     set waddr ${wcomm}.ad${n}
     set wuser ${wcomm}.us${n}
     set wto   ${wcomm}.to${n}
@@ -476,7 +483,7 @@ proc ::P2P::RemoveCommEntry {wtop ipNum} {
     array set infoArr [grid info $waddr]
     foreach {width height x y} [::UI::ParseWMGeometry [wm geometry $w]] break
     foreach {xoff yoff ewidth eheight}  \
-      [grid bbox $wp2p($wtop,wgrid) $infoArr(-column) $infoArr(-row)] break
+      [grid bbox $wp2p($w,wgrid) $infoArr(-column) $infoArr(-row)] break
     #puts "height=$height, eheight=$eheight"
 
     # Remove the widgets.
@@ -486,31 +493,25 @@ proc ::P2P::RemoveCommEntry {wtop ipNum} {
     wm geometry $w ${width}x[expr $height - $eheight]
     
     # These variables must be unset to indicate that entry does not exists.
-    unset -nocomplain commTo($wtop,$ipNum) commFrom($wtop,$ipNum)
+    unset -nocomplain commTo($w,$ipNum) commFrom($w,$ipNum)
     
     # Geometry considerations. Update geometry vars and set new minsize.
-    after idle [list [namespace current]::SetMinsize $wtop]
+    after idle [list [namespace current]::SetMinsize $w]
 }
 
-proc ::P2P::SetMinsizeHook {wtop} {
+proc ::P2P::SetMinsizeHook {w} {
     
-    after idle ::P2P::SetMinsize $wtop
+    after idle ::P2P::SetMinsize $w
 }
 
-proc ::P2P::SetMinsize {wtop} {
+proc ::P2P::SetMinsize {w} {
     variable wp2p
 
-    if {[string equal $wtop "."]} {
-	set w .
-    } else {
-	set w [string trimright $wtop .]
-    }
-    
-    foreach {wMin hMin} [::WB::GetBasicWhiteboardMinsize $wtop] break
+    foreach {wMin hMin} [::WB::GetBasicWhiteboardMinsize $w] break
 
     # Add the communication entries.
-    set wMinEntry [winfo reqheight $wp2p($wtop,wfr)]
-    set hMinEntry [winfo reqheight $wp2p($wtop,wfr)]
+    set wMinEntry [winfo reqheight $wp2p($w,wfr)]
+    set hMinEntry [winfo reqheight $wp2p($w,wfr)]
     set wMin [expr $wMin + $wMinEntry]
     set hMin [expr $hMin + $hMinEntry]
     
@@ -518,20 +519,23 @@ proc ::P2P::SetMinsize {wtop} {
 }
 
 proc ::P2P::CloseHook {wclose} {
+    global  wDlgs
     variable wp2p
     
-    if {$wclose == "."} {
+    if {$wclose == $wDlgs(mainwb)} {
+	set win $wDlgs(mainwb)
 	
 	# Must save "clean" size without any user entries.
-	foreach {w h x y} [::UI::ParseWMGeometry [wm geometry .]] break
-	foreach {xoff yoff width height} [grid bbox $wp2p(.,wgrid) 0 1 0 9] break
-	::UI::SaveWinGeomUseSize . ${w}x[expr $h-$height]+${x}+${y}
+	foreach {w h x y} [::UI::ParseWMGeometry [wm geometry $win]] break
+	foreach {xoff yoff width height} [grid bbox $wp2p($win,wgrid) 0 1 0 9] break
+	::UI::SaveWinGeomUseSize $win ${w}x[expr $h-$height]+${x}+${y}
     }      
 }
 
 proc ::P2P::QuitHook { } {
+    global  wDlgs
     
-    ::P2P::CloseHook .
+    CloseHook $wDlgs(mainwb)
 }
 
 # P2P::SendMessageListHook --
@@ -539,7 +543,7 @@ proc ::P2P::QuitHook { } {
 #       Sends to command to whoever we are connected to.
 #   
 # Arguments:
-#       wtop
+#       w
 #       msgList     list of commands to send.
 #       args   ?-key value ...?
 #       -ips         (D=all ips) send to this list of ip numbers. 
@@ -549,7 +553,7 @@ proc ::P2P::QuitHook { } {
 # Results:
 #       none
 
-proc ::P2P::SendMessageListHook {wtop msgList args} {
+proc ::P2P::SendMessageListHook {w msgList args} {
     global  prefs
     
     array set opts [list -ips [::P2PNet::GetIP to] -force 0]
@@ -571,7 +575,7 @@ proc ::P2P::SendMessageListHook {wtop msgList args} {
 # 
 #       As above but allows any prefix.
 
-proc ::P2P::SendGenMessageListHook {wtop msgList args} {
+proc ::P2P::SendGenMessageListHook {w msgList args} {
     global  prefs
     
     array set opts [list -ips [::P2PNet::GetIP to] -force 0]
@@ -594,16 +598,16 @@ proc ::P2P::SendGenMessageListHook {wtop msgList args} {
 #       Sets the correct state for menus and buttons when 'what'.
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       what        "connect", "disconnect", "disconnectserver"
 #
 # Results:
 
-proc ::P2P::FixMenusWhenHook {wtop what} {
+proc ::P2P::FixMenusWhenHook {w what} {
     global  prefs
-    
-    set mfile [::WB::GetMenu $wtop].file 
-    set wtray [::WB::GetButtonTray $wtop]
+
+    set mfile [::WB::GetMenu $w].file 
+    set wtray [::WB::GetButtonTray $w]
     
     switch -exact -- $what {
 	connect {
@@ -671,20 +675,20 @@ proc ::P2P::FixMenusWhenHook {wtop what} {
 #       Opens a file in a dialog and lets 'PutFile' do the job of transferring
 #       the file to all other clients.
 
-proc ::P2P::PutFileDlg {wtop} {
+proc ::P2P::PutFileDlg {w} {
     
     if {[llength [::P2PNet::GetIP to]] == 0} {
 	return
     }
     set ans [tk_getOpenFile -title [mc {Put Image/Movie}] \
       -filetypes [::Plugins::GetTypeListDialogOption]]
-    if {$ans == ""} {
+    if {$ans eq ""} {
 	return
     }
     set fileName $ans
     
     # Do the actual putting once the file is chosen. 
-    ::P2P::PutFileHook $wtop $fileName "all"
+    PutFileHook $w $fileName "all"
 }
 
 # P2P::PutFileHook --
@@ -693,7 +697,7 @@ proc ::P2P::PutFileDlg {wtop} {
 #       work.
 #       
 # Arguments:
-#       wtop
+#       w
 #       fileName   the local path to the file to be put.
 #       opts      a list of '-key value' pairs, where most keys correspond 
 #                 to a valid "canvas create" option, and everything is on 
@@ -702,7 +706,7 @@ proc ::P2P::PutFileDlg {wtop} {
 #       -where = "remote" or "all": put only to remote clients.
 #       -where = ip number: put only to this remote client.
 
-proc ::P2P::PutFileHook {wtop fileName opts args} {
+proc ::P2P::PutFileHook {w fileName opts args} {
     global  prefs this
     
     Debug 2 "+PutFile:: fileName=$fileName, opts=$opts"
@@ -728,10 +732,10 @@ proc ::P2P::PutFileHook {wtop fileName opts args} {
 	    set relFilePath [::tfileutils::relative $this(path) $fileName]
 	    set relFilePath [uriencode::quotepath $relFilePath]
 	    set putCmd "PUT NEW: [list $relFilePath] $optList"
-	    if {$where == "remote" || $where == "all"} {
-		::WB::SendGenMessageList $wtop [list $putCmd]
+	    if {$where eq "remote" || $where eq "all"} {
+		::WB::SendGenMessageList $w [list $putCmd]
 	    } else {
-		::WB::SendGenMessageList $wtop [list $putCmd] -ips $where
+		::WB::SendGenMessageList $w [list $putCmd] -ips $where
 	    }
 	}
 	default {
@@ -751,7 +755,7 @@ proc ::P2P::PutFileHook {wtop fileName opts args} {
 	    
 	    # Loop over all connected servers or only the specified one.
 	    foreach ip $allPutIP {
-		::PutFileIface::PutFile $wtop $fileName $ip $optList
+		::PutFileIface::PutFile $w $fileName $ip $optList
 	    }
 	}
     }
@@ -766,26 +770,28 @@ proc ::P2P::PutFileHook {wtop fileName opts args} {
 #
 # Results:
 
-proc ::P2P::CancelAllPutGetAndPendingOpen {wtop} {
+proc ::P2P::CancelAllPutGetAndPendingOpen {w} {
     
-    ::GetFileIface::CancelAllWtop $wtop
-    ::Import::HttpResetAll $wtop
+    ::GetFileIface::CancelAllWtop $w
+    ::Import::HttpResetAll $w
     ::P2PNet::OpenCancelAllPending
-    ::WB::SetStatusMessage $wtop {}
-    ::WB::StartStopAnimatedWave $wtop 0
+    ::WB::SetStatusMessage $w ""
+    ::WB::StartStopAnimatedWave $w 0
 }
 
 proc ::P2P::HandleGetRequest {channel ip fileName opts} {
+    global  wDlgs
 
     # A file is requested from this server. 'fileName' may be
     # a relative path so beware. This should be taken care for in
     # 'PutFileToClient'.		    
-    ::PutFileIface::PutFileToClient . $channel $ip $fileName $opts
+    ::PutFileIface::PutFileToClient $wDlgs(mainwb) $channel $ip $fileName $opts
 }
 
 proc ::P2P::HandlePutRequest {channel fileName opts} {
+    global  wDlgs
     
-    ::GetFileIface::GetFile . $channel $fileName $opts
+    ::GetFileIface::GetFile $wDlgs(mainwb) $channel $fileName $opts
 }
 
 proc ::P2P::PostInitHook { } {
@@ -825,7 +831,7 @@ proc ::P2P::RegisterHandlerHook {prefix cmd} {
 #       none.
 
 proc ::P2P::HandleServerCmd {channel ip port line args} {
-    global  clientRecord prefs this
+    global  clientRecord prefs this wDlgs
 
     variable handler
     
@@ -857,7 +863,7 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
     switch -exact -- $prefix {
 	CANVAS {
 	    if {[string length $instr] > 0} {
-		::CanvasUtils::HandleCanvasDraw . $instr
+		::CanvasUtils::HandleCanvasDraw $wDlgs(mainwb) $instr
 	    }		
 	}
 	IDENTITY {
@@ -879,8 +885,9 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 		set ::P2PNet::ipNumTo(connectTime,$ip) [clock seconds]
 		
 		# Add entry in the communication frame.
-		::P2P::SetCommEntry . $ip -1 1
-		::UI::MenuMethod .menu.info entryconfigure mOnClients  \
+		set wmenu [::UI::GetMainMenu]
+		::P2P::SetCommEntry $wDlgs(mainwb) $ip -1 1
+		::UI::MenuMethod $wmenu.info entryconfigure mOnClients  \
 		  -state normal
 		
 		# Check that not own ip and user.
@@ -901,7 +908,7 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 		    # Let propagateSizeToClients = false.
 		    ::P2PNet::DoConnect $ip $::P2PNet::ipNumTo(servPort,$ip) 0
 		} elseif {[string equal $prefs(protocol) "server"]} {
-		    ::hooks::run whiteboardFixMenusWhenHook . "connect"
+		    ::hooks::run whiteboardFixMenusWhenHook $wDlgs(mainwb) "connect"
 		}
 	    }		
 	}
@@ -961,7 +968,7 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 		
 		# For some reason the outer {} must be stripped off.
 		set relFilePath [lindex $relFilePath 0]
-		::GetFileIface::GetFileFromServer . $ip $::P2PNet::ipNumTo(servPort,$ip) \
+		::GetFileIface::GetFileFromServer $wDlgs(mainwb) $ip $::P2PNet::ipNumTo(servPort,$ip) \
 		  $relFilePath $optList
 	    }		
 	}
@@ -981,7 +988,7 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 		# Image (photo) resizing.	
 		::Debug 2 "--->RESIZE IMAGE: itOrig=$itOrig, itNew=$itNew, \
 		  zoomFactor=$zoomFactor"
-		::Import::ResizeImage . $zoomFactor $itOrig $itNew "local"
+		::Import::ResizeImage $wDlgs(mainwb) $zoomFactor $itOrig $itNew "local"
 	    }		
 	}
 	default {
@@ -1004,7 +1011,7 @@ namespace eval ::P2P::Prefs:: {
 proc ::P2P::Prefs::InitPrefsHook { } {
     global  prefs
 
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list prefs(shortcuts)  prefs_shortcuts  $prefs(shortcuts)  userDefault]]
 }
 
@@ -1027,22 +1034,22 @@ proc ::P2P::Prefs::BuildPrefsPage {wpage} {
     variable tmpPrefs
     
     set tmpPrefs(shortcuts) $prefs(shortcuts)
+        
+    set wc $wpage.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set wcont $wc.ca
+    ttk::labelframe $wcont -text [mc {Edit Shortcuts}] \
+      -padding [option get . groupSmallPadding {}]
+    pack  $wcont  -side top -fill x
     
-    set fontS [option get . fontSmall {}]
-    
-    set wcont $wpage.frtop
-    labelframe $wcont -text [mc {Edit Shortcuts}]
-    pack $wcont -side top -anchor w -padx 8 -pady 4
-    
-    # Overall frame for whole container.
-    set frtot [frame $wcont.fr]
-    pack $frtot -side left -padx 6 -pady 6    
-    message $frtot.msg -borderwidth 0 -aspect 600 \
-      -text [mc prefshortcut]
-    pack $frtot.msg -side top -padx 4 -pady 6
+    ttk::label $wcont.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc prefshortcut]
+    pack $wcont.msg -side top
     
     # Frame for listbox and scrollbar.
-    set frlist [frame $frtot.lst]
+    set frlist [frame $wcont.lst]
     
     # The listbox.
     set wsb $frlist.sb
@@ -1050,27 +1057,33 @@ proc ::P2P::Prefs::BuildPrefsPage {wpage} {
     foreach pair $tmpPrefs(shortcuts) {
 	lappend shortListVar [lindex $pair 0]
     }
-    set wlbox [listbox $frlist.lb -height 10 -width 18   \
+    set wlbox $frlist.lb
+    listbox $wlbox -height 10 -width 18   \
       -listvar [namespace current]::shortListVar \
-      -yscrollcommand [list $wsb set] -selectmode extended]
-    scrollbar $wsb -command [list $wlbox yview]
-    pack $wlbox -side left -fill both
-    pack $wsb -side left -fill both
-    pack $frlist -side left
+      -yscrollcommand [list $wsb set] -selectmode extended
+    tuscrollbar $wsb -command [list $wlbox yview]
+    pack  $wlbox  -side left -fill both
+    pack  $wsb    -side left -fill both
+    pack  $frlist -side left
     
     # Buttons at the right side.
-    frame $frtot.btfr
-    set btadd $frtot.btfr.btadd
-    set btrem $frtot.btfr.btrem
-    set btedit $frtot.btfr.btedit
-    button $btadd -text "[mc Add]..." -font $fontS  \
+    set frbt $wcont.btfr
+    ttk::frame $frbt
+    set btadd  $frbt.btadd
+    set btrem  $frbt.btrem
+    set btedit $frbt.btedit
+    ttk::button $btadd -text "[mc Add]..."  \
       -command [list [namespace current]::AddOrEdit add]
-    button $btrem -text [mc Remove] -font $fontS -state disabled  \
+    ttk::button $btrem -text [mc Remove]  \
       -command [namespace current]::Remove
-    button $btedit -text "[mc Edit]..." -state disabled -font $fontS \
+    ttk::button $btedit -text "[mc Edit]..."  \
       -command [list [namespace current]::AddOrEdit edit]
-    pack $frtot.btfr -side top -anchor w
-    pack $btadd $btrem $btedit -side top -fill x -padx 4 -pady 4
+
+    pack  $frbt  -side top -anchor w
+    pack  $btadd  $btrem  $btedit  -side top -fill x -padx 4 -pady 4
+    
+    $btrem  state {disabled}
+    $btedit state {disabled}
 	
     # Listbox bindings.
     bind $wlbox <Button-1> {+ focus %W}
@@ -1086,13 +1099,13 @@ proc ::P2P::Prefs::SelectCmd { } {
     variable wlbox
 
     if {[llength [$wlbox curselection]]} {
-	$btrem configure -state normal
+	$btrem state {!disabled}
     } else {
-	$btrem configure -state disabled
-	$btedit configure -state disabled
+	$btrem  state {disabled}
+	$btedit state {disabled}
     }
     if {[llength [$wlbox curselection]] == 1} {
-	$btedit configure -state normal
+	$btedit state {!disabled}
     }
 }
 
@@ -1135,7 +1148,7 @@ proc ::P2P::Prefs::AddOrEdit {what} {
     Debug 2 "::P2P::Prefs::AddOrEdit"
 
     set indShortcuts [lindex [$wlbox curselection] 0]
-    if {$what == "edit" && $indShortcuts == ""} {
+    if {$what eq "edit" && $indShortcuts eq ""} {
 	return
     } 
     set w .taddshorts$what
@@ -1144,14 +1157,14 @@ proc ::P2P::Prefs::AddOrEdit {what} {
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    if {$what == "add"} {
+    if {$what eq "add"} {
 	set txt [mc {Add Shortcut}]
 	set txt1 "[mc {New shortcut}]:"
 	set txt2 "[mc prefshortip]:"
 	set txtbt [mc Add]
 	set shortTextVar {}
 	set longTextVar {}
-    } elseif {$what == "edit"} {
+    } elseif {$what eq "edit"} {
 	set txt [mc {Edit Shortcut}]
 	set txt1 "[mc Shortcut]:"
 	set txt2 "[mc prefshortip]:"
@@ -1160,30 +1173,29 @@ proc ::P2P::Prefs::AddOrEdit {what} {
     set finAdd 0
     wm title $w $txt
     
-    set fontSB [option get . fontSmallBold {}]
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    set wcont $wbox.f
+    ttk::labelframe $wcont -text $txt -padding [option get . groupPadding {}]
+    pack $wcont -side top
+
+    ttk::label $wcont.lbl1 -text $txt1
+    ttk::entry $wcont.ent1 -width 36 -textvariable [namespace current]::shortTextVar
+    ttk::label $wcont.lbl2 -text $txt2
+    ttk::entry $wcont.ent2 -width 36 -textvariable [namespace current]::longTextVar
     
-    # The top part.
-    set wcont $w.frtop
-    labelframe $wcont -text $txt
-    pack $wcont -in $w.frall -padx 8 -pady 4
+    grid  $wcont.lbl1  -sticky w  -pady 1
+    grid  $wcont.ent1  -sticky ew -pady 1
+    grid  $wcont.lbl2  -sticky w  -pady 1
+    grid  $wcont.ent2  -sticky ew -pady 1
     
-    # Overall frame for whole container.
-    set frtot [frame $wcont.fr]
-    label $frtot.lbl1 -text $txt1 -font $fontSB
-    entry $frtot.ent1 -width 36 -textvariable [namespace current]::shortTextVar
-    label $frtot.lbl2 -text $txt2 -font $fontSB
-    entry $frtot.ent2 -width 36 -textvariable [namespace current]::longTextVar
-    grid $frtot.lbl1 -sticky w -padx 6 -pady 1
-    grid $frtot.ent1 -sticky ew -padx 6 -pady 1
-    grid $frtot.lbl2 -sticky w -padx 6 -pady 1
-    grid $frtot.ent2 -sticky ew -padx 6 -pady 1
-    
-    pack $frtot -side left -padx 16 -pady 10
-    pack $wcont -fill x    
-    focus $frtot.ent1
+    focus $wcont.ent1
     
     # Get the short pair to edit.
     if {[string equal $what "edit"]} {
@@ -1193,15 +1205,22 @@ proc ::P2P::Prefs::AddOrEdit {what} {
 	
     }
     
-    # The bottom part.
-    pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
-      -padx 8 -pady 6
-    button $w.frbot.bt1 -text "$txtbt" -default active  \
+    # Button part.
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text $txtbt -default active  \
       -command [list [namespace current]::PushBtAddOrEdit $what]
-    pack $w.frbot.bt1 -side right -padx 5 -pady 5
-    pack [button $w.frbot.btcancel -text [mc Cancel]  \
-      -command "set [namespace current]::finAdd 2"]  \
-      -side right -padx 5 -pady 5
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list set [namespace current]::finAdd 2]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
     
     bind $w <Return> [list $w.frbot.bt1 invoke]
     wm resizable $w 0 0
@@ -1223,11 +1242,11 @@ proc ::P2P::Prefs::PushBtAddOrEdit {what} {
     variable longTextVar
     variable tmpPrefs
 
-    if {($shortTextVar == "") || ($longTextVar == "")} {
+    if {($shortTextVar eq "") || ($longTextVar eq "")} {
 	set finAdd 1
 	return
     }
-    if {$what == "add"} {
+    if {$what eq "add"} {
  
 	# Save shortcuts in listbox.
 	lappend shortListVar $shortTextVar

@@ -9,12 +9,15 @@
 # full path name of this file's directory.
 
 package ifneeded Dialogs 1.0 [list source [file join $dir Dialogs.tcl]]
+package ifneeded EditDialogs 1.0 [list source [file join $dir EditDialogs.tcl]]
+package ifneeded FactoryDefaults 1.0 [list source [file join $dir SetFactoryDefaults.tcl]]
 package ifneeded FileCache 1.0 [list source [file join $dir FileCache.tcl]]
 package ifneeded Httpd 1.0 [list source [file join $dir Httpd.tcl]]
 package ifneeded HttpTrpt 1.0 [list source [file join $dir HttpTrpt.tcl]]
+package ifneeded Network 1.0 [list source [file join $dir Network.tcl]]
 package ifneeded P2P 1.0 [list source [file join $dir P2P.tcl]]
 package ifneeded P2PNet 1.0 [list source [file join $dir P2PNet.tcl]]
-package ifneeded PreferencesUtils 1.0 [list source [file join $dir PreferencesUtils.tcl]]
+package ifneeded PrefUtils 1.0 [list source [file join $dir PrefUtils.tcl]]
 package ifneeded Preferences 1.0 [list source [file join $dir Preferences.tcl]]
 package ifneeded Sounds 1.0 [list source [file join $dir Sounds.tcl]]
 package ifneeded Speech 1.0 [list source [file join $dir Speech.tcl]]
@@ -25,9 +28,15 @@ package ifneeded TheServer 1.0 [list source [file join $dir TheServer.tcl]]
 package ifneeded Types 1.0 [list source [file join $dir Types.tcl]]
 package ifneeded UI 1.0 [list source [file join $dir UI.tcl]]
 package ifneeded UserActions 1.0 [list source [file join $dir UserActions.tcl]]
-package ifneeded UTile 0.1 [list source [file join $dir UTile.tcl]]
 package ifneeded Utils 1.0 [list source [file join $dir Utils.tcl]]
 
-if {[string equal $::tcl_platform(platform) "windows"]} {
-    package ifneeded WindowsUtils 1.0 [list source [file join $dir WindowsUtils.tcl]]
+switch -- $::tcl_platform(platform) {
+    unix {
+	if {[string equal [tk windowingsystem] "aqua"]} {
+	    package ifneeded MacintoshUtils 1.0 [list source [file join $dir MacintoshUtils.tcl]]
+	}
+    }
+    windows {
+	package ifneeded WindowsUtils 1.0 [list source [file join $dir WindowsUtils.tcl]]
+    }
 }

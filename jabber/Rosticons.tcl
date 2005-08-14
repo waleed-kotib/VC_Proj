@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.12 2005-06-05 14:54:13 matben Exp $
+# $Id: Rosticons.tcl,v 1.13 2005-08-14 07:10:51 matben Exp $
 
 package provide Rosticons 1.0
 
@@ -31,7 +31,7 @@ proc ::Rosticons::InitPrefsHook { } {
     set jprefs(rost,haveWBicons) 1
     
     # Do NOT store the complete path!
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(rost,haveWBicons) jprefs_rost_haveWBicons $jprefs(rost,haveWBicons)] \
       [list ::Jabber::jprefs(rost,iconSet) jprefs_rost_iconSet $jprefs(rost,iconSet)]]
 
@@ -57,14 +57,15 @@ proc ::Rosticons::Init { } {
     
     # We need the 'vfs::zip' package and if not using starkit we also need
     # the 'Memchan' package which is not automatically checked for.
+    # 'rechan' is the tclkits built in version of 'Memchan'.
     if {[catch {package require vfs::zip}]} {
 	set priv(havezip) 0
-    } elseif {[info exists starkit::topdir]} {
+    } elseif {![catch {package require rechan}]} {
 	set priv(havezip) 1
-    } elseif {[catch {package require Memchan}]} {
-	set priv(havezip) 0
+    } elseif {![catch {package require Memchan}]} {
+	set priv(havezip) 1
     } else {
-	set priv(havezip) 1
+	set priv(havezip) 0
     }
 
     # Cache stuff we need later.
@@ -320,13 +321,13 @@ proc ::Rosticons::ParseIcon {name dir xmllist} {
 	    data {
 		# base64 coded image data
 		set data [tinydom::chdata $elem]
-		array set attrArr [tinydom::attrlist $elem]
-		set mime $attrArr(mime)
+		array set attr [tinydom::attrlist $elem]
+		set mime $attr(mime)
 	    }
 	    object {
 		set object [tinydom::chdata $elem]
-		array set attrArr [tinydom::attrlist $elem]
-		set mime $attrArr(mime)
+		array set attr [tinydom::attrlist $elem]
+		set mime $attr(mime)
 	    }
 	}
     }

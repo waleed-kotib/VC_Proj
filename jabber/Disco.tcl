@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.62 2005-06-27 10:32:52 matben Exp $
+# $Id: Disco.tcl,v 1.63 2005-08-14 07:10:51 matben Exp $
 
 package provide Disco 1.0
 
@@ -27,9 +27,13 @@ namespace eval ::Disco:: {
     option add *Disco.stat.f.padX           8               50
     option add *Disco.stat.f.padY           2               50
 
+    option add *Disco.padding               4               50
+    
     # Specials.
     option add *Disco.waveImage             wave            widgetDefault
-
+    option add *Disco.fontStyleMixed        0               widgetDefault
+    
+    
     # Used for discoing ourselves using a node hierarchy.
     variable debugNodes 0
     
@@ -55,7 +59,7 @@ namespace eval ::Disco:: {
 	conference            1
 	directory             1
 	gateway               0
-	headline              0
+	headline              1
 	proxy                 0
 	pubsub                1
 	server                1
@@ -88,11 +92,7 @@ namespace eval ::Disco:: {
 	mCreateRoom    conference   {::GroupChat::EnterOrCreate create \
 	  -server $jid}
 	separator      {}           {}
-	mInfo          jid          {::Disco::InfoCmd $jid $node}
-	mLastLogin/Activity jid     {::Jabber::GetLast $jid}
-	mLocalTime     jid          {::Jabber::GetTime $jid}
-	mvCard         jid          {::VCard::Fetch other $jid}
-	mVersion       jid          {::Jabber::GetVersion $jid}
+	mInfo          jid          {::UserInfo::Get $jid $node}
 	separator      {}           {}
 	mSearch        search       {
 	    ::Search::Build -server $jid -autoget 1
@@ -112,7 +112,7 @@ namespace eval ::Disco:: {
     # This is needed for the balloons that need a real canvas tag, and that
     # we can't use jid's for this since they may contain special chars (!)!
     variable treeuid 0
-
+    
     variable wtab -
     variable wtree -
 }
@@ -122,16 +122,6 @@ proc ::Disco::InitHook { } {
 
     set jprefs(disco,tmpServers) {}
     
-    # We could add more icons for other categories here!
-    variable typeIcon
-    array set typeIcon [list                                    \
-	gateway/aim           [::Rosticons::Get aim/online]     \
-	gateway/icq           [::Rosticons::Get icq/online]     \
-	gateway/msn           [::Rosticons::Get msn/online]     \
-	gateway/yahoo         [::Rosticons::Get yahoo/online]   \
-	gateway/x-gadugadu    [::Rosticons::Get gadugadu/online]\
-	gateway/smtp          [::Rosticons::Get smtp/online]\
-	]
 }
 
 proc ::Disco::NewJlibHook {jlibName} {
@@ -157,9 +147,12 @@ proc ::Disco::LoginHook { } {
 }
 
 proc ::Disco::LogoutHook { } {
+    variable wtab
     
-    if {[lsearch [::Jabber::UI::Pages] "Disco"] >= 0} {
-	#SetUIWhen "disconnect"
+    if {[winfo exists $wtab]} {
+	set wnb [::Jabber::UI::GetNotebook]
+	$wnb forget $wtab
+	destroy $wtab
     }
     Clear
 }
@@ -267,7 +260,7 @@ proc ::Disco::ItemsCB {disconame type from subiq args} {
 	
 	# It is at this stage we are confident that a Disco page is needed.
 	if {[jlib::jidequal $from $jserver(this)]} {
-	    ::Jabber::UI::NewPage "Disco"
+	    NewPage
 	}
 	
 	# Add to tree:
@@ -318,7 +311,6 @@ proc ::Disco::ItemsCB {disconame type from subiq args} {
 
 proc ::Disco::InfoCB {disconame type from subiq args} {
     variable wtree
-    variable typeIcon
     upvar ::Jabber::jstate jstate
      
     set from [jlib::jidmap $from]
@@ -344,12 +336,7 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
 	set cattype [lindex [$jstate(disco) types $from $node] 0]
 	
 	if {[$wtree isitem $vstruct]} {
-	    
-	    # Icon.
-	    set icon  ""
-	    if {[info exists typeIcon($cattype)]} {
-		set icon $typeIcon($cattype)
-	    }
+	    set icon [::Servicons::Get $cattype]
 	    set opts {}	    
 	    set name [$jstate(disco) name $from $node]
 	    if {$name != ""} {
@@ -382,7 +369,7 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
 proc ::Disco::SetDirItemUsingCategory {vstruct} {
     variable wtree
     upvar ::Jabber::jstate jstate
-        
+	
     set jid  [lindex $vstruct end 0]
     set node [lindex $vstruct end 1]
 
@@ -457,7 +444,7 @@ proc ::Disco::IsBranchNode {jid node} {
 #       none
 
 proc ::Disco::ParseGetInfo {from subiq args} {
-    global  prefs
+    global  prefs this
     variable xmlns
     variable debugNodes
     upvar ::Jabber::jstate jstate
@@ -499,7 +486,7 @@ proc ::Disco::ParseGetInfo {from subiq args} {
 	      -attrlist [list var $var]]
 	}	
 	set found 1
-    } elseif {[string equal $node "$coccixmlns(caps)#$prefs(fullVers)"]} {
+    } elseif {[string equal $node "$coccixmlns(caps)#$this(vers,full)"]} {
 	
 	# Return version number.
 	set subtags [list [wrapper::createtag "identity" -attrlist  \
@@ -569,7 +556,7 @@ proc ::Disco::ParseGetInfo {from subiq args} {
 #       none
 
 proc ::Disco::ParseGetItems {from subiq args} {
-    global  prefs
+    global  prefs this
     variable xmlns
     variable debugNodes
     upvar ::Jabber::jstate jstate    
@@ -598,7 +585,7 @@ proc ::Disco::ParseGetItems {from subiq args} {
 	    set myjid [::Jabber::GetMyJid]
 	}
 	set subtags {}
-	set cnode "$coccixmlns(caps)#$prefs(fullVers)"
+	set cnode "$coccixmlns(caps)#$this(vers,full)"
 	lappend subtags [wrapper::createtag "item" \
 	  -attrlist [list jid $myjid node $cnode]]
 	set exts [::Jabber::GetCapsExtKeyList]
@@ -635,6 +622,22 @@ proc ::Disco::ParseGetItems {from subiq args} {
 
 # UI parts .....................................................................
     
+proc ::Disco::NewPage { } {
+    variable wtab
+    
+    set wnb [::Jabber::UI::GetNotebook]
+    set wtab $wnb.di
+    if {![winfo exists $wtab]} {
+	set im [::Theme::GetImage \
+	  [option get [winfo toplevel $wnb] browser16Image {}]]
+	set imd [::Theme::GetImage \
+	  [option get [winfo toplevel $wnb] browser16DisImage {}]]
+	set imSpec [list $im disabled $imd background $imd]
+	Build $wtab
+	$wnb add $wtab -text [mc Disco] -image $imSpec -compound left
+    }
+}
+
 # Disco::Build --
 #
 #       Makes mega widget to show the services available for the $server.
@@ -651,6 +654,7 @@ proc ::Disco::Build {w} {
     variable wtree
     variable wtop
     variable wwave
+    variable wdisco
     variable btaddserv
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -658,42 +662,28 @@ proc ::Disco::Build {w} {
     
     ::Debug 2 "::Disco::Build"
     
-    set fontS [option get . fontSmall {}]
-
-    # The frame of class Disco. D = -bd 0 -relief flat
-    frame $w -class Disco
-
-    # Keep empty frame for any padding.
-    frame $w.tpad
-    pack  $w.tpad -side top -fill x
-
-    # D = -padx 0 -pady 0
-    frame $w.stat
-    frame $w.stat.f
-    pack  $w.stat   -side bottom -fill x
-    pack  $w.stat.f -side bottom -fill x
-    set wwave $w.stat.f.wa
-    set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
-    ::wavelabel::wavelabel $wwave -type image -image $waveImage
-    pack $wwave -side bottom -fill x
+    # The frame of class Disco.
+    ttk::frame $w -class Disco
     
     # Tree frame with scrollbars.
     set wdisco  $w
-    set wpad    $w.pad
-    set wbox    $w.pad.box
+    set wbox    $w.box
     set wxsc    $wbox.xsc
     set wysc    $wbox.ysc
     set wtree   $wbox.tree
-    
-    # D = -padx 4 -pady 4
-    frame $wpad
-    pack  $wpad -side top -fill both -expand 1
+    set wwave   $w.wa
 
+    # D = -padx 0 -pady 0
+    set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
+    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
+      -type image -image $waveImage
+    pack $wwave -side bottom -fill x -padx 8 -pady 2
+    
     # D = -border 1 -relief sunken
     frame $wbox
     pack  $wbox -side top -fill both -expand 1
-    scrollbar $wxsc -command [list $wtree xview] -orient horizontal
-    scrollbar $wysc -command [list $wtree yview] -orient vertical
+    tuscrollbar $wxsc -command [list $wtree xview] -orient horizontal
+    tuscrollbar $wysc -command [list $wtree yview] -orient vertical
     ::tree::tree $wtree -width 180 -height 100 -silent 1 -scrollwidth 400 \
       -xscrollcommand [list ::UI::ScrollSet $wxsc \
       [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
@@ -707,14 +697,12 @@ proc ::Disco::Build {w} {
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [namespace current]::Popup
     }
-    grid $wtree -row 0 -column 0 -sticky news
-    grid $wysc  -row 0 -column 1 -sticky ns
-    grid $wxsc  -row 1 -column 0 -sticky ew
+    grid  $wtree  -row 0 -column 0 -sticky news
+    grid  $wysc   -row 0 -column 1 -sticky ns
+    grid  $wxsc   -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure    $wbox 0 -weight 1
-	
-    # All tree content is set from browse callback from the browse object.
-    
+	    
     return $w
 }
     
@@ -950,6 +938,7 @@ proc ::Disco::CloseTreeCmd {w vstruct} {
 
 proc ::Disco::AddToTree {vstruct} {    
     variable wtree    
+    variable wdisco
     variable treeuid
     upvar ::Jabber::jstate  jstate
     upvar ::Jabber::jprefs  jprefs
@@ -976,7 +965,7 @@ proc ::Disco::AddToTree {vstruct} {
 	if {[lsearch -exact $all $jid] == -1} {
 	    return
 	}
-    }
+    }    
     
     # Do not create if exists which preserves -open.
     if {![$wtree isitem $vstruct]} {
@@ -1013,14 +1002,16 @@ proc ::Disco::AddToTree {vstruct} {
 	}
 	
 	# Make the first two levels, server and its children bold, rest normal style.
-	set style normal
-	if {[llength $vstruct] <= 2} {
-	    set style bold
-	} elseif {$isdir && ($node == "")} {
-	    set style bold
-	}
-	if {$node != ""} {
-	    set style normal
+	set fontstyle normal
+	if {[option get $wdisco fontStyleMixed {}]} {
+	    if {[llength $vstruct] <= 2} {
+		set fontstyle bold
+	    } elseif {$isdir && ($node == "")} {
+		set fontstyle bold
+	    }
+	    if {$node != ""} {
+		set fontstyle normal
+	    }
 	}
 	set isopen 0
 	if {[llength $vstruct] == 1} {
@@ -1032,8 +1023,8 @@ proc ::Disco::AddToTree {vstruct} {
 	} else {
 	    set tags [list node $jid $node]
 	}
-	set opts [list -text $name -tags $tags -style $style -dir $isdir \
-	  -image $icon -open $isopen -canvastags $treectag]
+	set opts [list -text $name -tags $tags -fontstyle $fontstyle \
+	  -dir $isdir -image $icon -open $isopen -canvastags $treectag]
 	if {$isdir && ([llength $vstruct] >= 2)} {
 	    lappend opts -sortcommand {lsort -dictionary}
 	}
@@ -1264,21 +1255,61 @@ proc ::Disco::InfoResultCB {type jid subiq args} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
     wm title $w "Disco Info: $txt"
-    set fontS [option get . fontSmall {}]
     
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
-    set wtext $w.frall.t
-    set iconInfo [::Theme::GetImage info]
-    label $w.frall.l -text "Description of services provided by $txt" \
-      -justify left -image $iconInfo -compound left
-    text $wtext -wrap word -width 60 -bg gray80 \
-      -tabs {180} -spacing1 3 -spacing3 2 -bd 0
-    set twidth [expr 10*[font measure [$wtext cget -font] "sixmmm"] + 10]
-    $w.frall.l configure -wraplength $twidth
+    set im  [::Theme::GetImage info]
+    set imd [::Theme::GetImage infoDis]
 
-    pack $w.frall.l $wtext -side top -anchor w -padx 10 -pady 1
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+    
+    ttk::label $w.frall.head -style Headlabel \
+      -text [mc {Disco Info}] -compound left \
+      -image [list $im background $imd]
+    pack $w.frall.head -side top -anchor w
+
+    ttk::separator $w.frall.s -orient horizontal
+    pack $w.frall.s -side top -fill x
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    BuildInfoPage $wbox.f $jid $node
+    pack $wbox.f -fill both -expand 1
+    
+    # Button part.
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btcancel -text [mc Close] \
+      -command [list destroy $w]
+    pack $frbot.btcancel -side right
+    pack $frbot -side top -fill x
+	
+    wm resizable $w 0 0	
+}
+
+proc ::Disco::BuildInfoPage {win jid {node ""}} {
+    upvar ::Jabber::nsToText nsToText
+    upvar ::Jabber::jstate jstate
+    
+    if {$node == ""} {
+	set str $jid
+    } else {
+	set str "$jid, node $node"
+    }
+    ttk::frame $win
+    ttk::label $win.l -padding {0 0 0 8} \
+      -text "Description of services provided by $str"
+    pack $win.l -side top -anchor w
+
+    set wtext $win.t
+    text $wtext -wrap word -width 60 -bg gray80 \
+      -highlightthickness 0 -tabs {180} -spacing1 3 -spacing3 2 -bd 0
+    set twidth [expr 10*[font measure [$wtext cget -font] "sixmmm"] + 10]
+    $win.l configure -wraplength $twidth
+
+    pack $wtext -side top -anchor w
     
     $wtext tag configure head -background gray70 -lmargin1 6
     $wtext tag configure feature -lmargin1 6
@@ -1311,18 +1342,10 @@ proc ::Disco::InfoResultCB {type jid subiq args} {
 	$wtext insert end "The component did not return any services"
 	incr n
     }
-    $wtext configure -height $n
-
-    # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btadd -text [mc Close] \
-      -command [list destroy $w]]  \
-      -side right -padx 5 -pady 4
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 2
-	
-    wm resizable $w 0 0	
+    $wtext configure -height $n -state disabled
+    
+    return $win
 }
-
 
 proc ::Disco::AutoDiscoServers { } {
     upvar ::Jabber::jprefs jprefs
@@ -1330,7 +1353,7 @@ proc ::Disco::AutoDiscoServers { } {
     
     # Guard against empty elements. Old bug!
     lprune jprefs(disco,autoServers) {}
-    
+
     foreach server $jprefs(disco,autoServers) {
 	if {![jlib::jidequal $server $jserver(this)]} {
 	    DiscoServer $server
@@ -1348,60 +1371,76 @@ proc ::Disco::AddServerDlg { } {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
     wm title $w [mc {Add Server}]
-    set fontS [option get . fontSmall {}]
     
     set width 260
     
     # Global frame.
     set wall $w.frall
-    frame $wall -borderwidth 1 -relief raised
-    pack  $wall -fill both -expand 1
+    ttk::frame $wall
+    pack $wall -fill both -expand 1
     
-    message $wall.msg -text [mc jadisaddserv] \
-      -anchor w -justify left -width $width
-    pack $wall.msg -side top -padx 8 -pady 6
+    set wbox $wall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc jadisaddserv]
+    pack $wbox.msg -side top -anchor w
     
-    set wfr $wall.fr
-    labelframe $wfr -text [mc Add]
-    pack  $wfr -side top -fill x -padx 10 -pady 2
-    label $wfr.l -text "[mc Server]:"
-    entry $wfr.e -textvariable [namespace current]::addservervar
-    checkbutton $wfr.ch -anchor w -text " [mc {Add permanently}]" \
+    set wfr $wbox.fr
+    ttk::labelframe $wfr -text [mc Add] \
+      -padding [option get . notebookPageSmallPadding {}]
+    pack $wfr -side top -fill x -pady 4
+    ttk::label $wfr.l -text "[mc Server]:"
+    ttk::entry $wfr.e -textvariable [namespace current]::addservervar \
+      -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
+    ttk::checkbutton $wfr.ch -style Small.TCheckbutton \
+      -anchor w -text [mc {Add permanently}] \
       -variable [namespace current]::permdiscovar
 
-    grid $wfr.l $wfr.e  -pady 2
-    grid x      $wfr.ch -pady 2 -sticky ew
-    grid $wfr.l -sticky e
-    grid $wfr.e -sticky ew
+    grid  $wfr.l  $wfr.e   -padx 2 -pady 2
+    grid  x       $wfr.ch  -pady 2 -sticky ew
+    grid  $wfr.l  -sticky e
+    grid  $wfr.e  -sticky ew
     
-    set wfr2 $wall.fr2
-    labelframe $wfr2 -text [mc Remove] -padx 4
-    pack  $wfr2 -side top -fill x -padx 10 -pady 2
-    label  $wfr2.l -wraplength [expr $width-10] -anchor w -justify left\
+    set wfr2 $wbox.fr2
+    ttk::labelframe $wfr2 -text [mc Remove] \
+      -padding [option get . notebookPageSmallPadding {}]
+    pack $wfr2 -side top -fill x -pady 4
+    ttk::label $wfr2.l -style Small.TLabel \
+      -wraplength [expr $width-10] -anchor w -justify left\
       -text [mc jadisrmall]
-    button $wfr2.b -text [mc Remove] -font $fontS \
-      -command [namespace current]::AddServerNone
-    pack $wfr2.l -side top
-    pack $wfr2.b -side right -padx 6 -pady 2
+    ttk::button $wfr2.b -style Small.TButton \
+      -text [mc Remove] -command [namespace current]::AddServerNone
+
+    pack  $wfr2.l  -side top
+    pack  $wfr2.b  -side right -padx 6 -pady 2
     
     if {$jprefs(disco,autoServers) == {}} {
 	$wfr2.b configure -state disabled
     }
-    set frbot [frame $wall.frbot -borderwidth 0]
-    pack [button $frbot.btabtokdd -text [mc Add] \
-      -command [list [namespace current]::AddServerDo $w]]  \
-      -side right -padx 5 -pady 4
-    pack [button $frbot.btcancel -text [mc Close] \
-      -command [list destroy $w]]  \
-      -side right -padx 5 -pady 4
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 2
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Add] \
+      -command [list [namespace current]::AddServerDo $w]
+    ttk::button $frbot.btcancel -text [mc Close] \
+      -command [list destroy $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
 	
     wm resizable $w 0 0
-    bind $w <Return> [list $frbot.btabtokdd invoke]
+    bind $w <Return> [list $frbot.btok invoke]
     
     # Grab and focus.
     set oldFocus [focus]
-    focus $wall.fr.e
+    focus $wfr.e
     catch {grab $w}
     
     # Wait here for a button press and window to be destroyed.

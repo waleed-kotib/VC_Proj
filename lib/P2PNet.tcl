@@ -6,9 +6,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: P2PNet.tcl,v 1.8 2005-01-31 14:06:59 matben Exp $
+# $Id: P2PNet.tcl,v 1.9 2005-08-14 07:17:55 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -91,7 +89,7 @@ proc ::P2PNet::NewConnectHook {channel ip port} {
     }
 	
     # If we are a server in a client/server set up store socket if this is first time.
-    if {($prefs(protocol) == "server") && ![info exists ipNumTo(socket,$ip)]} {
+    if {($prefs(protocol) eq "server") && ![info exists ipNumTo(socket,$ip)]} {
 	set ipNumTo(socket,$ip) $channel
     }
     set sockname [fconfigure $channel -sockname] 
@@ -261,7 +259,7 @@ proc ::P2PNet::PushBtConnect { } {
     }
     
     # Check that you do not connect to yourself. Only allowed if central net.
-    if {$prefs(protocol) == "symmetric"} {
+    if {$prefs(protocol) eq "symmetric"} {
 	if {($txtvarEntIPnameOrNum == $this(ipnum)) ||  \
 	  ($txtvarEntIPnameOrNum == $this(hostname))} {
 	    ::UI::MessageBox -icon error -type ok -message  \
@@ -443,7 +441,7 @@ proc ::P2PNet::WhenSocketOpensInits {nameOrIP server remoteServPort \
     # handler that is used to handle remote commands.
     # Same for "client".
     
-    if {($prefs(protocol) == "central") || ($prefs(protocol) == "client")} {
+    if {($prefs(protocol) eq "central") || ($prefs(protocol) eq "client")} {
 	fileevent $server readable    \
 	  [list ::TheServer::HandleClientRequest $server $ipNum $remoteServPort]
     }    
@@ -543,7 +541,7 @@ proc ::P2PNet::SetIpArrays {nameOrIP sock remoteServPort} {
 	      -message "Something went wrong: $sockname"
 	    return 0
 	}
-	if {[lindex $sockname 0] != "0.0.0.0"} {
+	if {[lindex $sockname 0] ne "0.0.0.0"} {
 	    set this(ipnum) [lindex $sockname 0]
 	    Debug 2 "\tSetting this(ipnum) = $this(ipnum), sockname=$sockname"
 	}
@@ -731,7 +729,7 @@ proc ::P2PNet::DoCloseServerConnection {ipNum args} {
     
     # If we are running an internal server, close client connections.
     # Applies only to the case with symmetric network topology.    
-    if {($prefs(protocol) == "symmetric") && $prefs(autoDisconnect)} {
+    if {($prefs(protocol) eq "symmetric") && $prefs(autoDisconnect)} {
 	::P2PNet::DoCloseClientConnection $ipNum
     }
     
@@ -833,7 +831,7 @@ proc ::P2PNet::GetIP {type} {
 
 	switch -- $prefs(protocol) {
 	    server {
-		if {$type == "to"} {
+		if {$type eq "to"} {
 		    set ans $ipNums(from)
 		} else {
 		    set ans $ipNums($type)	    

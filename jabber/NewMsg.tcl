@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.63 2005-06-10 07:52:20 matben Exp $
+# $Id: NewMsg.tcl,v 1.64 2005-08-14 07:10:51 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -15,7 +15,6 @@ namespace eval ::NewMsg:: {
     global this
 
     # Add all event hooks.
-    ::hooks::register closeWindowHook    ::NewMsg::CloseHook
     ::hooks::register quitAppHook        ::NewMsg::QuitAppHook
 
     # Use option database for customization.
@@ -34,21 +33,14 @@ namespace eval ::NewMsg:: {
     option add *NewMsg.printDisImage        printDis        widgetDefault
 
     # Standard widgets.
-    option add *NewMsg.frall.borderWidth    1               50
-    option add *NewMsg.frall.relief         raised          50
-    option add *NewMsg*divt.borderWidth     2               50
-    option add *NewMsg*divt.height          2               50
-    option add *NewMsg*divt.relief          sunken          50
-    option add *NewMsg*addpad.padX          6               50
-    option add *NewMsg*addpad.padY          4               50
-    option add *NewMsg*fradd.borderWidth    1               50
-    option add *NewMsg*fradd.relief         sunken          50
-    option add *NewMsg*frsub.padX           6               50
-    option add *NewMsg*frsub.padY           0               50
-    option add *NewMsg*frsub.sp1.width      8               50
-    option add *NewMsg*frsub.sp2.width      12              50
-    option add *NewMsg*frtxt.padX           6               50
-    option add *NewMsg*frtxt.padY           2               50
+    
+    if {[tk windowingsystem] eq "aqua"} {
+	option add *NewMsg*box.padding                {12 10 12 18}  50
+    } else {
+	option add *NewMsg*box.padding                {10  8 10  8}   50
+    }
+    option add *NewMsg*frsub.padding              {12  4 12  4}   50
+    option add *NewMsg*TMenubutton.padding        {1}           50
 
     option add *JMultiAddress.background    #999999         50
 
@@ -82,7 +74,7 @@ namespace eval ::NewMsg:: {
     # {subtype popupText entryText}
     variable transportDefs
     array set transportDefs {
-	jabber      {Jabber     {Jabber Id:}          }
+	jabber      {Jabber     {Jabber ID:}          }
 	icq         {ICQ        {ICQ number:}         }
 	aim         {AIM        {AIM:}                }
 	msn         {MSN        {MSN:}                }
@@ -203,18 +195,18 @@ proc ::NewMsg::Build {args} {
     }
     
     # Toplevel of class NewMsg.
-    ::UI::Toplevel $w -class NewMsg -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -class NewMsg \
+      -usemacmainmenu 1 -macstyle documentProc -closecommand ::NewMsg::CloseHook
     wm title $w [mc {New Message}]
     
     # Toplevel menu for mac only.
     if {[string match "mac*" $this(platform)]} {
 	$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
-    set fontSB [option get . fontSmallBold {}]
     
-    # Global frame. D = -borderwidth 1 -relief raised
-    frame $w.frall
-    pack  $w.frall -fill both -expand 1
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
     # Button part.
     set iconSend      [::Theme::GetImage [option get $w sendImage {}]]
@@ -242,28 +234,26 @@ proc ::NewMsg::Build {args} {
 	    set buttonAnchor c
 	}
     }
+
     set wtop $w.frall.top
     set wbot $w.frall.bot
-    frame $wtop
-    frame $wbot
-    pack  $wtop -side top -fill x
-    pack  $wbot -side bottom -fill x
+    ttk::frame $wtop
+    ttk::frame $wbot
+    pack $wtop -side top -fill x
+    pack $wbot -side bottom -fill x
     
     switch -- $buttonRowPosition {
 	top {
 	    set wtray $wtop.tray
-	    ::buttontray::buttontray $wtray
+	    ::ttoolbar::ttoolbar $wtray
 	    pack $wtray -side $buttonRowSide -fill y
-	    if {[string match "mac*" $this(platform)]} {
-		$wbot configure -height 12
-	    }
 	    if {$topBannerImage == ""} {
 		pack $wtray -fill both -expand 1
 	    }
 	}
 	bottom {
 	    set wtray $wbot.tray
-	    ::buttontray::buttontray $wtray
+	    ::ttoolbar::ttoolbar $wtray
 	    pack $wtray -side $buttonRowSide -fill y
 	    if {$botBannerImage == ""} {
 		pack $wtray -fill both -expand 1
@@ -271,11 +261,11 @@ proc ::NewMsg::Build {args} {
 	}
     }
     if {$topBannerImage != ""} {
-	label $wtop.banner -bd 0 -anchor $buttonAnchor -image $topBannerImage
+	ttk::label $wtop.banner -anchor $buttonAnchor -image $topBannerImage
 	pack  $wtop.banner -side $buttonRowSide -fill x -expand 1
     }
     if {$botBannerImage != ""} {
-	label $wbot.banner -bd 0 -anchor $buttonAnchor -image $botBannerImage
+	ttk::label $wbot.banner -anchor $buttonAnchor -image $botBannerImage
 	pack  $wbot.banner -side $buttonRowSide -fill x -expand 1
     }
 
@@ -295,22 +285,24 @@ proc ::NewMsg::Build {args} {
     
     ::hooks::run buildNewMsgButtonTrayHook $wtray
 
-    # D = -bd 2 -relief sunken
-    pack [frame $w.frall.divt] -fill x -side top
+    # D =
+    ttk::separator $w.frall.divt -orient horizontal
+    pack $w.frall.divt -side top -fill x
     
-    # D = -padx 6 -pady 4
-    set waddpad $w.frall.addpad
-    frame $waddpad
-    pack  $waddpad -side top -fill x 
+    # D =
+    set wbox $w.frall.box
+    ttk::frame $wbox
+    pack $wbox -side top -fill both -expand 1
     
-    # Address list. D = -borderwidth 1 -relief sunken
-    set   fradd $waddpad.fradd
+    # Address list. D =
+    set   fradd $wbox.fradd
     frame $fradd
-    pack  $fradd -side top -fill x 
-    scrollbar $fradd.ysc -command [list $fradd.can yview]
+    pack $fradd -side top -fill x 
+    tuscrollbar $fradd.ysc -command [list $fradd.can yview]
     pack $fradd.ysc -side right -fill y
-    set waddcan [canvas $fradd.can -bd 0 -highlightthickness 1 \
-      -yscrollcommand [list $fradd.ysc set]]
+    set waddcan $fradd.can
+    canvas $waddcan -bd 0 -highlightthickness 1 \
+      -yscrollcommand [list $fradd.ysc set]
     pack $waddcan -side left -fill both -expand 1
     
     # Make new class since easier to set resources. 
@@ -331,23 +323,24 @@ proc ::NewMsg::Build {args} {
     set id [$waddcan create window 0 0 -anchor nw -window $waddr]
             
     # Text.
-    set wtxt  $w.frall.frtxt
+    set wtxt  $wbox.frtxt
     set wtext $wtxt.text
     set wysc  $wtxt.ysc
     
     # Subject.
-    set   frsub $w.frall.frsub
+    set   frsub $wbox.frsub
     set   wsubject $frsub.esub
-    # D = -padx 6 -pady 0
-    frame $frsub
+    # D =
+    ttk::frame $frsub
     pack  $frsub -side top -fill x
-    label $frsub.lsub -text "[mc Subject]:" -anchor e -takefocus 0
-    entry $wsubject -textvariable [namespace current]::locals($w,subject)
+    ttk::label $frsub.lsub -style Small.TLabel \
+      -text "[mc Subject]:" -anchor e -takefocus 0 -padx 2
+    ttk::entry $wsubject -font CociSmallFont \
+      -textvariable [namespace current]::locals($w,subject)
     pack  $frsub.lsub -side left
-    pack  $frsub.esub -side left -fill x -expand 1
-    pack  [frame $frsub.sp1] -side left
-    pack  [frame $frsub.sp2] -side right
+    pack  $frsub.esub -side left -fill x -expand 1 -padx 6
     pack  [::Emoticons::MenuButton $frsub.smile -text $wtext] -side right
+    pack  [ttk::frame $frsub.space] -side right
     
     # Text.
     frame $wtxt
@@ -356,9 +349,9 @@ proc ::NewMsg::Build {args} {
       -borderwidth 1 -relief sunken  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns]]
-    scrollbar $wysc -orient vertical -command [list $wtext yview]
-    grid $wtext -column 0 -row 0 -sticky news
-    grid $wysc  -column 1 -row 0 -sticky ns
+    tuscrollbar $wysc -orient vertical -command [list $wtext yview]
+    grid  $wtext  -column 0 -row 0 -sticky news
+    grid  $wysc   -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxt 0 -weight 1
     grid rowconfigure $wtxt 0 -weight 1
 
@@ -456,8 +449,6 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     variable locals
     upvar ::Jabber::jstate jstate
     
-    set fontSB [option get . fontSmallBold {}]
-    
     set bg1   [option get $wfr entry1Background {}]
     set fg1   [option get $wfr entry1Foreground {}]
     set bg2   [option get $wfr entry2Background {}]
@@ -470,16 +461,16 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     
     set jidlist [$jstate(roster) getusers]
     set num $locals($w,num)
-    frame $wfr.f${n} -bd 0
-    entry $wfr.f${n}.trpt -width 18 -bd 0 -highlightthickness 0 \
+    frame $wfr.f$n -bd 0
+    entry $wfr.f$n.trpt -width 18 -bd 0 -highlightthickness 0 \
       -state disabled -textvariable [namespace current]::locals($w,enttrpt$n) \
       -disabledforeground $fg1 -disabledbackground $bg3
-    label $wfr.f${n}.la -bd 0 -bg $bgpop
-    pack  $wfr.f${n}.trpt -side left -fill y -anchor w
-    pack  $wfr.f${n}.la -side right -fill both -expand 1
+    label $wfr.f$n.la -bd 0 -bg $bgpop
+    pack  $wfr.f$n.trpt -side left -fill y -anchor w
+    pack  $wfr.f$n.la -side right -fill both -expand 1
     
-    set wentry $wfr.addr${n}
-    ::entrycomp::entrycomp $wentry $jidlist -bd 0 -highlightthickness 0 \
+    set wentry $wfr.addr$n
+    ::entrycomp::entrycomptk $wentry $jidlist -bd 0 -highlightthickness 0 \
       -textvariable [namespace current]::locals($w,addr$n) -state disabled \
       -bg $bg2 -fg $fg2 -disabledbackground $bg4
     
@@ -497,8 +488,8 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     bind $wentry <Key-Up>     [list ::NewMsg::KeyUpDown -1 $w $wfr $n]
     bind $wentry <Key-Down>   [list ::NewMsg::KeyUpDown 1 $w $wfr $n]
     
-    grid $wfr.f${n} -padx 1 -pady 1 -column 0 -row $n -sticky news
-    grid $wentry    -padx 1 -pady 1 -column 1 -row $n -sticky news
+    grid  $wfr.f$n  -padx 1 -pady 1 -column 0 -row $n -sticky news
+    grid  $wentry   -padx 1 -pady 1 -column 1 -row $n -sticky news
     grid columnconfigure $wfr 1 -weight 1
     grid rowconfigure $wfr $n -minsize [expr $locals(minheight) + 2]
     set locals($w,addrline) $n
@@ -520,7 +511,6 @@ proc ::NewMsg::FillAddrLine {w wfr n} {
     bind $wfr.f${n}.la <Button-1> [list ::NewMsg::TrptPopup $w $n %X %Y]
     bind $wfr.f${n}.la <ButtonRelease-1> [list ::NewMsg::TrptPopupRelease $w $n]
     set locals($w,fillline) $n
-    #set locals($w,poptrpt$n) [lindex $transportDefs(jabber) 1]
     set locals($w,poptrpt$n) jabber
     set locals($w,enttrpt$n) [lindex $transportDefs(jabber) 1]
 }
@@ -618,15 +608,15 @@ proc ::NewMsg::EmptyAddrLine {w wfr n} {
     set bg3 [option get $wfr entry3Background {}]
     set bgpop [option get $wfr popup2Background {}]
 
-    $wfr.f${n}.trpt configure -disabledbackground $bg3
-    $wfr.f${n}.la configure -image "" -bg $bgpop
-    $wfr.addr${n} configure -state disabled
+    $wfr.f$n.trpt configure -disabledbackground $bg3
+    $wfr.f$n.la configure -image "" -bg $bgpop
+    $wfr.addr$n configure -state disabled
     set locals($w,poptrpt$n) ""
     set locals($w,addr$n) ""
     set locals($w,enttrpt$n) ""
     set locals($w,fillline) [expr $n - 1]
-    bind $wfr.f${n}.la <Button-1> {}
-    bind $wfr.f${n}.la <ButtonRelease-1> {}    
+    bind $wfr.f$n.la <Button-1> {}
+    bind $wfr.f$n.la <ButtonRelease-1> {}    
 }
 
 proc ::NewMsg::DeleteLastAddrLine {w wfr} {
@@ -636,11 +626,11 @@ proc ::NewMsg::DeleteLastAddrLine {w wfr} {
     set n $locals($w,addrline)
     set num $locals($w,num)
     eval {grid forget} [grid slaves $wfr -row $n]
-    destroy $wfr.f${n}
-    destroy $wfr.f${n}.trpt
-    destroy $wfr.f${n}.la
-    destroy $wfr.addr${n}
-    destroy $locals(wpopupbase)${num}_${n}
+    destroy $wfr.f$n
+    destroy $wfr.f$n.trpt
+    destroy $wfr.f$n.la
+    destroy $wfr.addr$n
+    destroy $locals(wpopupbase)${num}_$n
 }
 
 proc ::NewMsg::SeeLine {w n} {
@@ -687,7 +677,7 @@ proc ::NewMsg::PopupCmd {w n} {
     }
     
     # Seems to be necessary to achive any selection.
-    set wentry $wfrport.addr${n}
+    set wentry $wfrport.addr$n
     focus $wentry
 
     switch -- $trpt {
@@ -900,25 +890,40 @@ proc ::NewMsg::DoPrint {w} {
     
     variable locals
     upvar ::Jabber::jstate jstate
-    
-    set fontS [option get . fontSmall {}]
-    
+        
     set allText [::Text::TransformToPureText $locals($w,wtext)]    
     ::UserActions::DoPrintText $locals($w,wtext)  \
-      -data $allText -font $fontS    
+      -data $allText -font CociSmallFont    
 }
 
 proc ::NewMsg::CloseHook {wclose} {
-    global  wDlgs
     variable locals
 	
-    if {[string match $wDlgs(jsendmsg)* $wclose]} {
-	CloseDlg $wclose
-    }   
+    return [CloseDlg $wclose]
 }
 
 proc ::NewMsg::QuitAppHook { } {
     global  wDlgs
+    variable locals
+    
+    # Any open windows with unsaved message?
+    foreach {key w} [array get locals *,w] {
+	if {[winfo exists $w]} {
+	    set wtext $locals($w,wtext)
+	    set allText [$wtext get 1.0 "end - 1 char"]
+	    if {$allText != ""} {
+		set str "There are unsaved messages. Do you still want to quit?"
+		set ans [::UI::MessageBox -title [mc {To Send or Not}]  \
+		  -icon warning -type yesno -default "no" \
+		  -message $str]
+		if {$ans == "no"} {
+		    # @@@ mising return check here!
+		    return 
+		}
+		break
+	    }
+	}
+    }
     
     ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)
 }
@@ -930,7 +935,7 @@ proc ::NewMsg::CloseDlg {w} {
     set wtext $locals($w,wtext)
     set allText [$wtext get 1.0 "end - 1 char"]
     set doDestroy 0
-    if {[string length $allText] > 0} {
+    if {$allText != ""} {
 	set ans [::UI::MessageBox -title [mc {To Send or Not}]  \
 	  -icon warning -type yesnocancel -default "no" -parent $w \
 	  -message [mc jamesssavemsg]]
@@ -951,6 +956,9 @@ proc ::NewMsg::CloseDlg {w} {
 	::UI::SaveWinGeom $wDlgs(jsendmsg) $w
 	destroy $w
 	array unset locals $w,*
+	return ""
+    } else {
+	return "stop"
     }
 }
 

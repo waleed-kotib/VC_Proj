@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.25 2005-02-24 13:58:08 matben Exp $
+# $Id: JPrefs.tcl,v 1.26 2005-08-14 07:10:51 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -22,9 +22,12 @@ namespace eval ::JPrefs:: {
 
 
 proc ::JPrefs::InitPrefsHook { } {
+    global  prefs
     upvar ::Jabber::jprefs jprefs
     
     # Defaults...
+    set prefs(opacity) 100
+    
     # Auto away page:
     set jprefs(autoaway)     0
     set jprefs(xautoaway)    0
@@ -59,7 +62,7 @@ proc ::JPrefs::InitPrefsHook { } {
     
     set jprefs(rememberDialogs) 0
 
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(autoaway)         jprefs_autoaway          $jprefs(autoaway)]  \
       [list ::Jabber::jprefs(xautoaway)        jprefs_xautoaway         $jprefs(xautoaway)]  \
       [list ::Jabber::jprefs(awaymin)          jprefs_awaymin           $jprefs(awaymin)]  \
@@ -86,13 +89,13 @@ proc ::JPrefs::InitPrefsHook { } {
 	  ::Jabber::jprefs(iq:register,$key) jprefs_iq_register_$key   \
 	  $jprefs(iq:register,$key) userDefault]
     }
-    ::PreferencesUtils::Add $jprefsRegList
+    ::PrefUtils::Add $jprefsRegList
     
     # We add 'serviceMethod' with a 'serviceMethod2' key so we ignore any 
     # existing installations. This is our new default. 
     # Change back in the future.
 
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $jprefs(chatFont)]  \
       [list ::Jabber::jprefs(chat,tabbedui)    jprefs_chat_tabbedui     $jprefs(chat,tabbedui)]  \
       [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $jprefs(inboxSave)]  \
@@ -105,9 +108,27 @@ proc ::JPrefs::InitPrefsHook { } {
       [list ::Jabber::jprefs(chat,dialogs)     jprefs_chat_dialogs      $jprefs(chat,dialogs)]  \
       ]
     
+    # Default status messages.
+    foreach {status str} [::Jabber::Status::GetStatusTextArray] {
+	set jprefs(statusMsg,bool,$status) 0
+	set jprefs(statusMsg,msg,$status) ""
+
+	::PrefUtils::Add [list  \
+	  [list ::Jabber::jprefs(statusMsg,bool,$status)  \
+	  jprefs_statusMsg_bool_$status                   \
+	  $jprefs(statusMsg,bool,$status)]                \
+	  [list ::Jabber::jprefs(statusMsg,msg,$status)   \
+	  jprefs_statusMsg_msg_$status                    \
+	  $jprefs(statusMsg,msg,$status)]                 \
+	  ]
+    }
     if {$jprefs(chatFont) != ""} {
 	set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
     }
+    ::PrefUtils::Add [list  \
+      [list prefs(opacity)         prefs_opacity          $prefs(opacity)]  \
+      ]
+
 }
 
 proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
@@ -144,59 +165,77 @@ proc ::JPrefs::BuildAutoAwayPage {page} {
       logoutStatus} {
 	set tmpJPrefs($key) $jprefs($key)
     }
+    foreach {status str} [::Jabber::Status::GetStatusTextArray] {
+	set tmpJPrefs(statusMsg,bool,$status) $jprefs(statusMsg,bool,$status)
+	set tmpJPrefs(statusMsg,msg,$status)  $jprefs(statusMsg,msg,$status)
+    }
     
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
     # Auto away stuff.
-    set labfrpbl $page.fr
-    labelframe $labfrpbl -text [mc {Auto Away}]
-    pack $labfrpbl -side top -anchor w -padx 8 -pady 4
-    set pbl [frame $labfrpbl.frin]
-    pack $pbl -padx 10 -pady 6 -side left
-    pack [label $pbl.lab -text [mc prefaaset]] \
-      -side top -anchor w
-    
-    pack [frame $pbl.frma] -side top -anchor w
-    checkbutton $pbl.frma.lminaw -anchor w \
-      -text "  [mc prefminaw]"  \
+    set waa $wc.faa
+    set waf $waa.fm
+    set was $waa.fs
+    ttk::labelframe $waa -text [mc {Auto Away}] \
+      -padding [option get . groupSmallPadding {}]
+
+    ttk::label $waa.lab -text [mc prefaaset]
+
+    ttk::frame $waf
+    ttk::checkbutton $waf.lminaw -anchor w \
+      -text [mc prefminaw]  \
       -variable [namespace current]::tmpJPrefs(autoaway)
-    entry $pbl.frma.eminaw -width 3  \
+    ttk::entry $waf.eminaw -font CociSmallFont  \
+      -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
       -textvariable [namespace current]::tmpJPrefs(awaymin)
-    checkbutton $pbl.frma.lminxa -anchor w \
-      -text "  [mc prefminea]"  \
+    ttk::checkbutton $waf.lminxa -anchor w \
+      -text [mc prefminea]  \
       -variable [namespace current]::tmpJPrefs(xautoaway)
-    entry $pbl.frma.eminxa -width 3  \
+    ttk::entry $waf.eminxa -font CociSmallFont \
+      -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
       -textvariable [namespace current]::tmpJPrefs(xawaymin)
-    grid $pbl.frma.lminaw -column 0 -row 0 -sticky w
-    grid $pbl.frma.eminaw -column 1 -row 0 -sticky w
-    grid $pbl.frma.lminxa -column 0 -row 1 -sticky w
-    grid $pbl.frma.eminxa -column 1 -row 1 -sticky w
 
-    pack [frame $pbl.frmsg] -side top -fill x -anchor w
-    label $pbl.frmsg.lawmsg -text "[mc {Away status}]:"
-    entry $pbl.frmsg.eawmsg -width 32  \
+    grid  $waf.lminaw  $waf.eminaw  -sticky w -pady 1
+    grid  $waf.lminxa  $waf.eminxa  -sticky w -pady 1
+
+    ttk::frame $was
+    ttk::label $was.lawmsg -text "[mc {Away status}]:"
+    ttk::entry $was.eawmsg -font CociSmallFont \
+      -width 32  \
       -textvariable [namespace current]::tmpJPrefs(awaymsg)
-    label $pbl.frmsg.lxa -text "[mc {Extended Away status}]:"
-    entry $pbl.frmsg.examsg -width 32  \
+    ttk::label $was.lxa -text "[mc {Extended Away status}]:"
+    ttk::entry $was.examsg -font CociSmallFont \
+      -width 32  \
       -textvariable [namespace current]::tmpJPrefs(xawaymsg)
     
-    grid $pbl.frmsg.lawmsg -column 0 -row 0 -sticky e
-    grid $pbl.frmsg.eawmsg -column 1 -row 0 -sticky w
-    grid $pbl.frmsg.lxa    -column 0 -row 1 -sticky e
-    grid $pbl.frmsg.examsg -column 1 -row 1 -sticky w
+    grid  $was.lawmsg  $was.eawmsg  -sticky e -pady 1
+    grid  $was.lxa     $was.examsg  -sticky e -pady 1
+
+    pack  $waa.lab  $waf  $was  -side top -anchor w
     
     # Default logout status.
-    set labfrstat $page.frstat
-    labelframe $labfrstat -text [mc {Default Logout Status}]
-    pack $labfrstat -side top -anchor w -padx 8 -pady 4
-    set pstat [frame $labfrstat.frin]
-    pack $pstat -padx 10 -pady 6 -side left
-
-    label $pstat.l -text "[mc {Status when logging out}]:"
-    entry $pstat.e -width 32  \
-      -textvariable [namespace current]::tmpJPrefs(logoutStatus)
-    grid $pstat.l -column 0 -row 0 -sticky e
-    grid $pstat.e -column 1 -row 0 -sticky w
+    array set statusTextArr [::Jabber::Status::GetStatusTextArray]
+    set wlo $wc.lo
+    ttk::labelframe $wlo -text [mc {Default status descriptions}] \
+      -padding [option get . groupSmallPadding {}]
+    
+    foreach {status str} [array get statusTextArr] {
+	ttk::checkbutton $wlo.c$status -text $str \
+	  -variable [namespace current]::tmpJPrefs(statusMsg,bool,$status)
+	ttk::entry $wlo.e$status -font CociSmallFont \
+	  -textvariable [namespace current]::tmpJPrefs(statusMsg,msg,$status)
+	  
+	grid  $wlo.c$status  $wlo.e$status  -sticky w -pady 1
+	grid  $wlo.e$status  -sticky ew
+    }
+    grid columnconfigure $wlo 1 -weight 1
+    
+    pack  $waa  -side top -fill x
+    pack  $wlo  -side top -fill x -pady 12
 }
 
 proc ::JPrefs::BuildPersInfoPage {wpage} {
@@ -207,7 +246,8 @@ proc ::JPrefs::BuildPersInfoPage {wpage} {
     labelframe $ppers -text [mc {Personal Information}]
     pack $ppers -side top -anchor w -padx 8 -pady 4
 
-    message $ppers.msg -text [mc prefpers] -aspect 800
+    ttk::label $ppers.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc prefpers]
     grid $ppers.msg -columnspan 2 -sticky w
     
     label $ppers.first -text "[mc {First name}]:"
@@ -262,20 +302,17 @@ proc ::JPrefs::UpdateAutoAwaySettings { } {
 }
 
 proc ::JPrefs::BuildAppearancePage {page} {
-    global  this prefs
+    global  this prefs wDlgs
     
-    variable wlbblock
-    variable btrem
-    variable wlbblock
     variable tmpJPrefs
     variable tmpPrefs
     upvar ::Jabber::jprefs jprefs
     
-    set fontS [option get . fontSmall {}]    
-    set ypad  [option get [winfo toplevel $page] yPad {}]
-
     foreach key {rost,useBgImage rost,bgImagePath chat,tabbedui chatFont} {
 	set tmpJPrefs($key) $jprefs($key)
+    }
+    foreach key {opacity} {
+	set tmpPrefs($key) $prefs($key)
     }
     
     # An empty themeName is the default value.
@@ -283,61 +320,119 @@ proc ::JPrefs::BuildAppearancePage {page} {
     if {$tmpPrefs(themeName) == ""} {
 	set tmpPrefs(themeName) [mc None]
     }
+    set allrsrc [concat [mc None] [::Theme::GetAllAvailable]]
 
-    set labfrpbl $page.fr
-    labelframe $labfrpbl -text [mc Appearance]
-    pack $labfrpbl -side top -anchor w -padx 8 -pady 2
-    set pbl [frame $labfrpbl.frin]
-    pack $pbl -padx 10 -pady 6 -side left
+    # Tile:
+    # The descriptive names of the builtin themes:
+    set tileThemeList {
+	default  	"Default"
+	classic  	"Classic"
+	alt      	"Revitalized"
+	clam            "Clam"
+	winnative	"Windows native"
+	xpnative	"XP Native"
+	aqua    	"Aqua"
+    }
+    array set tileThemeArr $tileThemeList;
+
+    # Add in any available loadable themes:
+    foreach name [tile::availableThemes] {
+	if {![info exists tileThemeArr($name)]} {
+	    lappend tileThemeList \
+	      $name [set tileThemeArr($name) [string totitle $name]]
+	}
+    }
+    set tmpPrefs(tileTheme) ::tile::currentTheme
+
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set wap $wc.ap
+    ttk::labelframe $wap -text [mc Appearance] \
+      -padding [option get . groupSmallPadding {}]
      
-    checkbutton $pbl.tabbed -text " [mc prefstabui]"  \
+    ttk::checkbutton $wap.tab -text [mc prefstabui]  \
       -variable [namespace current]::tmpJPrefs(chat,tabbedui)
 
     # Roster bg image.
-    checkbutton $pbl.bgim -text " [mc prefrostbgim]" \
+    ttk::checkbutton $wap.bgim -text [mc prefrostbgim] \
       -variable [namespace current]::tmpJPrefs(rost,useBgImage)
-    button $pbl.bgpick -text "[mc {Pick}]..."  \
-      -command [list [namespace current]::PickBgImage rost] -font $fontS
-    button $pbl.bgdefk -text "[mc {Default}]"  \
-      -command [list [namespace current]::DefaultBgImage rost] -font $fontS
+    ttk::button $wap.bgpick -text "[mc {Pick}]..."  \
+      -command [list [namespace current]::PickBgImage rost] -font CociSmallFont
+    ttk::button $wap.bgdefk -text [mc {Default}]  \
+      -command [list [namespace current]::DefaultBgImage rost] -font CociSmallFont
 	    
     # Chat font.
-    label  $pbl.lfont -text [mc prefcufont]
-    button $pbl.btfont -text "[mc Pick]..." -font $fontS \
+    ttk::label  $wap.lfont -text [mc prefcufont]
+    ttk::button $wap.btfont -text "[mc Pick]..." -font CociSmallFont \
       -command [namespace current]::PickFont
-    button $pbl.dfont -text "[mc {Default}]"  \
-      -command [list set [namespace current]::tmpJprefs(chatFont) ""] -font $fontS
+    ttk::button $wap.dfont -text [mc {Default}]  \
+      -command [list set [namespace current]::tmpJprefs(chatFont) ""] -font CociSmallFont
 
-    set frtheme $pbl.ftheme
-    frame $frtheme
-    set wpoptheme $frtheme.pop
-    set allrsrc [concat [mc None] [::Theme::GetAllAvailable]]
-    set wpopupmenuin [eval {tk_optionMenu $wpoptheme   \
-      [namespace current]::tmpPrefs(themeName)} $allrsrc]
-    pack [label $frtheme.l -text "[mc preftheme]:"] -side left
-    pack $wpoptheme -side left
+    set wthe $wap.the
+    ttk::frame $wthe
+    ttk::label $wthe.l -text "[mc preftheme]:"
+    eval {ttk::optionmenu $wthe.p [namespace current]::tmpPrefs(themeName)} \
+      $allrsrc
     
-    grid $pbl.tabbed -          -           -padx 2 -pady $ypad -sticky w
-    grid $pbl.bgim  $pbl.bgpick $pbl.bgdefk -padx 2 -pady $ypad -sticky w
-    grid $pbl.lfont $pbl.btfont $pbl.dfont  -padx 2 -sticky w
-    grid $frtheme   -           -           -padx 2 -pady $ypad -sticky w
+    # Tile's themes (skins).
+    set wskin $wap.skin
+    set wmenu $wskin.b.m
+    ttk::frame $wskin
+    ttk::label $wskin.l -text "Pick skin:"
+    ttk::menubutton $wskin.b -textvariable ::tile::currentTheme \
+      -menu $wmenu -direction flush
+    menu $wmenu -tearoff 0
+    
+    foreach {theme name} $tileThemeList {
+	$wmenu add radiobutton -label $name \
+	  -variable ::tile::currentTheme -value $theme \
+	  -command [list tile::setTheme $theme]
+	if {[lsearch -exact [package names] tile::theme::$theme] == -1} {
+	    $wmenu entryconfigure $name -state disabled
+	}
+    }
+    
+    grid  $wthe.l   $wthe.p
+    grid  $wskin.l  $wskin.b
+    
+    # Window opacities if exists.
+    array set wmopts [wm attributes $wDlgs(jmain)]
+    set haveOpacity 0
+    if {[info exists wmopts(-alpha)]} {
+	set haveOpacity 1
+	set wop $wap.op
+	ttk::frame $wop
+	ttk::label $wop.l -text "Set windows opacity:"
+	ttk::scale $wop.s -orient horizontal -from 50 -to 100 \
+	  -variable [namespace current]::tmpPrefs(opacity) \
+	  -value $tmpPrefs(opacity) -font CociSmallFont
+
+	grid  $wop.l  $wop.s
+    }
+    
+    grid  $wap.tab    -            -            -padx 2 -pady 2 -sticky w
+    grid  $wap.bgim   $wap.bgpick  $wap.bgdefk  -padx 2 -pady 2 -sticky w
+    grid  $wap.lfont  $wap.btfont  $wap.dfont   -padx 2 -pady 2 -sticky w
+    grid  $wthe       -            -            -padx 2 -pady 2 -sticky w
+    grid  $wskin      -            -            -padx 2 -pady 2 -sticky w
+    if {$haveOpacity} {
+	grid  $wop    -            -            -padx 2 -pady 2 -sticky w
+    }
+    grid  $wap.lfont  -sticky e
+    grid  $wap.bgpick  $wap.bgdefk  $wap.btfont  $wap.dfont  -sticky ew
+    
+    pack  $wap  -side top -fill x
 }
 
 proc ::JPrefs::BuildCustomPage {page} {
     global  this prefs
     
-    variable wlbblock
-    variable btrem
-    variable wlbblock
     variable tmpJPrefs
     variable tmpPrefs
     upvar ::Jabber::jprefs jprefs
         
-    set fontS  [option get . fontSmall {}]    
-    set fontSB [option get . fontSmallBold {}]
-    set xpadbt [option get [winfo toplevel $page] xPadBt {}]
-    set ypad   [option get [winfo toplevel $page] yPad {}]
-
     foreach key {inboxSave rost,useBgImage rost,bgImagePath serviceMethod \
       autoLogin notifier,state rememberDialogs} {
 	if {[info exists jprefs($key)]} {
@@ -345,62 +440,66 @@ proc ::JPrefs::BuildCustomPage {page} {
 	}
     }
 
-    set labfrpbl $page.fr
-    labelframe $labfrpbl -text [mc Customization]
-    pack $labfrpbl -side top -anchor w -padx 8 -pady 2
-    set pbl [frame $labfrpbl.frin]
-    pack $pbl -padx 10 -pady 6 -side left
-     
-    checkbutton $pbl.savein -text " [mc prefcusave]" \
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set wcu $wc.fr
+    ttk::labelframe $wcu -text [mc Customization] \
+      -padding [option get . groupSmallPadding {}]
+         
+    ttk::checkbutton $wcu.savein -text [mc prefcusave] \
       -variable [namespace current]::tmpJPrefs(inboxSave)
-    checkbutton $pbl.log -text " [mc prefcuautologin]" \
+    ttk::checkbutton $wcu.log -text [mc prefcuautologin] \
       -variable [namespace current]::tmpJPrefs(autoLogin)
-    checkbutton $pbl.rem -text " [mc prefcuremdlgs]" \
+    ttk::checkbutton $wcu.rem -text [mc prefcuremdlgs] \
       -variable [namespace current]::tmpJPrefs(rememberDialogs)
     if {[string equal $this(platform) "windows"]} {
-	checkbutton $pbl.not -text " Show notfier window" \
+	ttk::checkbutton $wcu.not -text  "Show notfier window" \
 	  -variable [namespace current]::tmpJPrefs(notifier,state)
     }
-        
-    label $pbl.lserv -text [mc prefcudisc]
-    radiobutton $pbl.disco   \
-      -text " [mc {Disco method}]"  \
+    ttk::separator $wcu.sep -orient horizontal    
+    
+    ttk::label $wcu.lserv -text [mc prefcudisc]
+    ttk::radiobutton $wcu.disco  \
+      -text [mc {Disco method}]  \
       -variable [namespace current]::tmpJPrefs(serviceMethod) -value "disco"
-    radiobutton $pbl.browse   \
-      -text " [mc prefcubrowse]"  \
+    ttk::radiobutton $wcu.browse   \
+      -text [mc prefcubrowse]  \
       -variable [namespace current]::tmpJPrefs(serviceMethod) -value "browse"
-    radiobutton $pbl.agents  \
-      -text " [mc prefcuagent]" -value "agents" \
+    ttk::radiobutton $wcu.agents  \
+      -text [mc prefcuagent] -value "agents" \
       -variable [namespace current]::tmpJPrefs(serviceMethod)
     
-    grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $pbl.log    -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $pbl.rem    -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid  $wcu.savein  -sticky w
+    grid  $wcu.log     -sticky w
+    grid  $wcu.rem     -sticky w
     if {[string equal $this(platform) "windows"]} {
-	grid $pbl.not    -padx 2 -pady $ypad -sticky w -columnspan 2
+	grid  $wcu.not  -sticky w
     }
-    grid $pbl.lserv  -padx 2 -pady $ypad -sticky w
-    grid $pbl.disco  -padx 2 -pady $ypad -sticky w
-    grid $pbl.browse -padx 2 -pady $ypad -sticky w
-    grid $pbl.agents -padx 2 -pady $ypad -sticky w
+    grid  $wcu.sep    -sticky ew -pady 6
+    grid  $wcu.lserv  -sticky w
+    grid  $wcu.disco  -sticky w
+    grid  $wcu.browse -sticky w
+    grid  $wcu.agents -sticky w
+    
+    pack  $wcu  -side top -fill x
 }
 
 proc ::JPrefs::PickFont { } {
     variable tmpJPrefs
     
-    set fontS [option get . fontSmall {}]
-
     if {[string length $tmpJPrefs(chatFont)]} {
-	set opts [list -defaultfont $fontS -initialfont $tmpJPrefs(chatFont)]
+	set opts [list -defaultfont CociSmallFont -initialfont $tmpJPrefs(chatFont)]
     } else {
-	set opts [list -defaultfont $fontS -initialfont $fontS]
+	set opts [list -defaultfont CociSmallFont -initialfont CociSmallFont]
     }
     
     # Check if theFont is the default font.
     # 'chatFont' empty means that default font should be used.
     set theFont [eval {::fontselection::fontselection .mnb} $opts]
     if {[llength $theFont]} {
-	if {[::Utils::FontEqual $theFont $fontS]} {
+	if {[::Utils::FontEqual $theFont CociSmallFont]} {
 	    set tmpJPrefs(chatFont) ""
 	} else {
 	    set tmpJPrefs(chatFont) $theFont
@@ -428,6 +527,15 @@ proc ::JPrefs::DefaultBgImage {where} {
     set tmpJPrefs($where,bgImagePath) ""
 }
 
+proc ::JPrefs::SetOpacity {opacity} {
+    
+    foreach w [winfo children .] {
+	if {[winfo ismapped $w]} {
+	    wm attributes $w -alpha [expr {$opacity/100.0}]
+	}
+    }
+}
+
 proc ::JPrefs::SavePrefsHook { } {
     global  prefs
     upvar ::Jabber::jprefs jprefs
@@ -438,15 +546,20 @@ proc ::JPrefs::SavePrefsHook { } {
     if {!$jstate(haveJabberUI)} {
 	return
     }
-    array set jprefs [array get tmpJPrefs]
     if {$tmpPrefs(themeName) == [mc None]} {
 	set tmpPrefs(themeName) ""
     }
-    if {$prefs(themeName) != $tmpPrefs(themeName)} {
-	::Preferences::NeedRestart
+    foreach key {themeName} {
+	if {$prefs($key) != $tmpPrefs($key)} {
+	    ::Preferences::NeedRestart
+	}
     }
-    set prefs(themeName) $tmpPrefs(themeName)
-
+    if {$prefs(opacity) != $tmpPrefs(opacity)} {
+	SetOpacity $tmpPrefs(opacity)
+    }
+    array set jprefs [array get tmpJPrefs]
+    array set prefs  [array get tmpPrefs]
+    
     # If changed present auto away settings, may need to reconfigure.
     ::JPrefs::UpdateAutoAwaySettings    
 
@@ -458,13 +571,28 @@ proc ::JPrefs::SavePrefsHook { } {
 }
 
 proc ::JPrefs::CancelPrefsHook { } {
+    global  prefs
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
+    variable tmpPrefs
 	
     foreach key [array names tmpJPrefs] {
 	if {![string equal $jprefs($key) $tmpJPrefs($key)]} {
 	    ::Preferences::HasChanged
-	    break
+	    return
+	}
+    }
+    if {$tmpPrefs(themeName) eq [mc None]} {
+	set tmpPrefs(themeName) ""
+    }
+    
+    # @@@ FIX!
+    unset tmpPrefs(tileTheme)
+    
+    foreach key [array names tmpPrefs] {
+	if {![string equal $prefs($key) $tmpPrefs($key)]} {
+	    ::Preferences::HasChanged
+	    return
 	}
     }
 }

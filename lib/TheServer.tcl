@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.28 2005-01-31 14:06:59 matben Exp $
+# $Id: TheServer.tcl,v 1.29 2005-08-14 07:17:55 matben Exp $
     
 package provide TheServer 1.0
 
@@ -32,7 +32,7 @@ proc ::TheServer::LaunchHook { } {
     # there was a timing problem in '::TheServer::DoStartServer'.
     # Don't start the server if we are a client only.
 
-    if {($prefs(protocol) != "client") && $prefs(autoStartServer)} {
+    if {($prefs(protocol) ne "client") && $prefs(autoStartServer)} {
 	after $prefs(afterStartServer) [list ::TheServer::DoStartServer $prefs(thisServPort)]
     }
 }
@@ -58,7 +58,7 @@ proc ::TheServer::DoStartServer {thisServPort} {
 	
 	# Sometimes this gives 0.0.0.0, why I don't know.
 	set sockname [fconfigure $sock -sockname]
-	if {[lindex $sockname 0] != "0.0.0.0"} {
+	if {[lindex $sockname 0] ne "0.0.0.0"} {
 	    set this(ipnum) [lindex $sockname 0]
 	}
 

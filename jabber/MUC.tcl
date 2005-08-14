@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.61 2005-06-27 10:32:52 matben Exp $
+# $Id: MUC.tcl,v 1.62 2005-08-14 07:10:51 matben Exp $
 
 package require entrycomp
 package require muc
@@ -17,7 +17,6 @@ package provide MUC 1.0
 namespace eval ::MUC:: {
       
     ::hooks::register jabberInitHook     ::MUC::Init
-    ::hooks::register closeWindowHook    ::MUC::EnterCloseHook
     
     # Local stuff
     variable dlguid 0
@@ -129,10 +128,11 @@ proc ::MUC::BuildEnter {args} {
 
     ::Debug 2 "::MUC::BuildEnter confServers='$confServers'; allConfServ=$allConfServ"
 
-    if {[llength $confServers] == 0} {
+    if {$confServers == {}} {
 	::UI::MessageBox -type ok -icon error -title "No Conference"  \
 	  -message "Failed to find any multi user chat service component"
 	return
+	set confServers junk
     }
 
     # State variable to collect instance specific variables.
@@ -141,9 +141,16 @@ proc ::MUC::BuildEnter {args} {
     upvar 0 $token enter
     
     set w $wDlgs(jmucenter)[incr dlguid]
-    ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
-      -usemacmainmenu 1
+    ::UI::Toplevel $w \
+      -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
+      -closecommand [list ::MUC::EnterCloseCmd $token]
     wm title $w [mc {Enter Room}]
+
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
+    if {$nwin == 1} {
+	::UI::SetWindowPosition $w $wDlgs(jmucenter)
+    }
+
     set enter(w) $w
     set enter(args) $args
     array set enter {
@@ -156,22 +163,28 @@ proc ::MUC::BuildEnter {args} {
     }
     set enter(nickname) $jprefs(defnick)
     
-    set fontSB [option get . fontSmallBold {}]
-    
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    label $w.frall.msg -wraplength 260 -justify left -text [mc jamucentermsg]
-    pack  $w.frall.msg -side top -fill x -anchor w -padx 8 -pady 4
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
 
-    set frtop $w.frall.top
-    pack [frame $frtop] -side top -anchor w -padx 12
-    label $frtop.lserv -text "[mc {Conference server}]:" 
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+    
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc jamucentermsg]
+    pack $wbox.msg -side top -anchor w
+
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
+
+    ttk::label $frmid.lserv -text "[mc {Conference server}]:" 
     
     # First menubutton: servers. (trace below)
-    set wpopupserver $frtop.eserv
-     eval {tk_optionMenu $wpopupserver $token\(server)} $confServers
-    label $frtop.lroom -text "[mc {Room name}]:"
+    set wpopupserver $frmid.eserv
+    eval {ttk::optionmenu $wpopupserver $token\(server)} $confServers
+    ttk::label $frmid.lroom -text "[mc {Room name}]:"
     
     # Find the default conferencing server.
     if {[info exists argsArr(-server)]} {
@@ -185,76 +198,84 @@ proc ::MUC::BuildEnter {args} {
 
     # Second menubutton: rooms for above server. Fill in below.
     # Combobox since we sometimes want to enter room manually.
-    set wpopuproom     $frtop.eroom
-    set enter(wbrowse) $frtop.browse
+    set wpopuproom     $frmid.eroom
+    set wbrowse        $frmid.browse
+    set wsearrows      $frmid.st.arr
+    set wstatus        $frmid.st.stat
     
-    ::combobox::combobox $wpopuproom -width 8 -textvariable $token\(roomname)
-    button $enter(wbrowse) -text [mc Browse] \
-      -command [list [namespace current]::Browse $token]
+    ttk::::combobox $wpopuproom -width -20 -textvariable $token\(roomname)
+    ttk::button $wbrowse -text [mc Browse] \
+      -command [list [namespace current]::Browse $token]    
+    ttk::label $frmid.lnick -text "[mc {Nick name}]:"
+    ttk::entry $frmid.enick -textvariable $token\(nickname) -width 24
+    ttk::label $frmid.lpass -text "[mc Password]:"
+    ttk::entry $frmid.epass -textvariable $token\(password) -show {*} -validate key \
+      -validatecommand {::Jabber::ValidatePasswordStr %S}
+   
+    # Busy arrows and status message.
+    ttk::frame $frmid.st
+    pack [::chasearrows::chasearrows $wsearrows -size 16] \
+      -side left -padx 5 -pady 0
+    ttk::label $wstatus -textvariable $token\(status)
+    pack $wstatus -side left -padx 5
+    
+    grid  $frmid.lserv    $wpopupserver  $wbrowse  -sticky e -pady 2
+    grid  $frmid.lroom    $wpopuproom    -  -sticky e -padx 2 -pady 2
+    grid  $frmid.lnick    $frmid.enick   -  -sticky e -pady 2
+    grid  $frmid.lpass    $frmid.epass   -  -sticky e -pady 2
+    grid  $frmid.st       -              -  -sticky w -pady 2
+    grid  $wpopupserver   $wpopuproom    $frmid.enick  $frmid.epass  -sticky ew
+    grid  $wbrowse  -padx 10
+    grid columnconfigure $frmid 1 -weight 1
+
     if {[info exists argsArr(-roomjid)]} {
 	jlib::splitjidex $argsArr(-roomjid) enter(roomname) enter(server) z
 	set enter(server-state) disabled
 	set enter(room-state)   disabled
-	$wpopupserver configure -state disabled
-	$wpopuproom   configure -state disabled
+	$wpopupserver state {disabled}
+	$wpopuproom   state {disabled}
     }
     if {[info exists argsArr(-server)]} {
 	set enter(server) $argsArr(-server)
 	set enter(server-state) disabled
-	$wpopupserver configure -state disabled
+	$wpopupserver state {disabled}
     }
     if {[info exists argsArr(-command)]} {
 	set enter(-command) $argsArr(-command)
     }
-    
-    label $frtop.lnick -text "[mc {Nick name}]:"
-    entry $frtop.enick -textvariable $token\(nickname) -width 30
-    label $frtop.lpass -text "[mc Password]:"
-    entry $frtop.epass -textvariable $token\(password) -show {*} -validate key \
-      -validatecommand {::Jabber::ValidatePasswdChars %S}
-   
-    # Busy arrows and status message.
-    set wsearrows $frtop.st.arr
-    set wstatus   $frtop.st.stat
-    frame $frtop.st
-    pack [::chasearrows::chasearrows $wsearrows -size 16] \
-      -side left -padx 5 -pady 0
-    pack [label $wstatus -textvariable $token\(status) -pady 0 -bd 0] \
-      -side left -padx 5 -pady 0
-    
-    grid $frtop.lserv   $wpopupserver -  -sticky e
-    grid $frtop.lroom   $wpopuproom   $enter(wbrowse)  -sticky e
-    grid $frtop.lnick   $frtop.enick  -  -sticky e
-    grid $frtop.lpass   $frtop.epass  -  -sticky e
-    grid $frtop.st      -             -  -sticky w
-    grid $wpopupserver  $wpopuproom  $frtop.enick  $frtop.epass  -sticky ew
-
     if {[info exists argsArr(-nickname)]} {
 	set enter(nickname) $argsArr(-nickname)
-	$frtop.enick configure -state disabled
+	$frmid.enick state {disabled}
     }
     if {[info exists argsArr(-password)]} {
 	set enter(password) $argsArr(-password)
-	$frtop.epass configure -state disabled
+	$frmid.epass state {disabled}
     }
        
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack $frbot -side bottom -fill x -expand 0 -padx 8 -pady 0
+    set frbot $wbox.b
     set wbtenter  $frbot.btok
-    pack [button $wbtenter -text [mc Enter] \
-      -default active -command [list [namespace current]::DoEnter $token]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::CancelEnter $token]]  \
-      -side right -padx 5 -pady 5
-    pack [frame $w.frall.pad -height 8 -width 1] -side bottom -pady 0
+    ttk::frame $frbot
+    ttk::button $wbtenter -text [mc Enter] \
+      -default active -command [list [namespace current]::DoEnter $token]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::CancelEnter $token]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
 
     set enter(status)       "  "
     set enter(wpopupserver) $wpopupserver
     set enter(wpopuproom)   $wpopuproom
     set enter(wsearrows)    $wsearrows
     set enter(wbtenter)     $wbtenter
+    set enter(wbrowse) $wbrowse
     
     if {$enter(-autobrowse) && [string equal $enter(room-state) "normal"]} {
 
@@ -275,32 +296,29 @@ proc ::MUC::BuildEnter {args} {
     
     set oldFocus [focus]
     if {[info exists argsArr(-roomjid)]} {
-    	focus $frtop.enick
+    	focus $frmid.enick
     } elseif {[info exists argsArr(-server)]} {
-    	focus $frtop.eroom
+    	focus $frmid.eroom
     } else {
-    	focus $frtop.eserv
+    	focus $frmid.eserv
     }
 
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
 	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
-    } $w.frall.msg $w]    
+    } $wbox.msg $w]    
     after idle $script
-
-    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
-    if {$nwin == 1} {
-	::UI::SetWindowPosition $w $wDlgs(jmucenter)
-    }
     
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
+    # Wait here.
+    tkwait variable $token\(finished)
     
     catch {focus $oldFocus}
     trace vdelete $token\(server) w  \
       [list [namespace current]::ConfigRoomList $token]
     set finished $enter(finished)
+    ::UI::SaveWinGeom $wDlgs(jmucenter) $w
+    catch {destroy $enter(w)}
     
     # Unless cancelled we keep 'enter' until got callback.
     if {$finished <= 0} {
@@ -313,17 +331,16 @@ proc ::MUC::CancelEnter {token} {
     variable $token
     upvar 0 $token enter
 
-    EnterCloseHook $enter(w)
     set enter(finished) 0
-    catch {destroy $enter(w)}
 }
 
-proc ::MUC::EnterCloseHook {wclose} {
+proc ::MUC::EnterCloseCmd {token wclose} {
     global  wDlgs
+    variable $token
+    upvar 0 $token enter
 
-    if {[string match $wDlgs(jmucenter)* $wclose]} {
-	::UI::SaveWinGeom $wDlgs(jmucenter) $wclose
-    }
+    ::UI::SaveWinGeom $wDlgs(jmucenter) $wclose
+    set enter(finished) 0
 }
 
 proc ::MUC::Browse {token} {
@@ -355,7 +372,7 @@ proc ::MUC::ConfigRoomList {token name junk1 junk2} {
 	if {$enter(-autobrowse)} {
 	    Browse $token
 	} else {
-	    $enter(wpopuproom) list delete 0 end
+	    $enter(wpopuproom) configure -values {}
 	    set enter(roomname) ""
 	}
     }
@@ -383,8 +400,7 @@ proc ::MUC::FillRoomList {token} {
     }
     
     set roomList [lsort $roomList]
-    $enter(wpopuproom) list delete 0 end
-    eval {$enter(wpopuproom) list insert end} $roomList
+    $enter(wpopuproom) configure -values $roomList
     set enter(roomname) [lindex $roomList 0]
 }
 
@@ -397,20 +413,20 @@ proc ::MUC::BusyEnterDlgIncr {token {num 1}} {
     if {$enter(statuscount) > 0} {
 	set enter(status) [mc {Getting available rooms...}]
 	$enter(wsearrows) start
-	$enter(wpopupserver) configure -state disabled
-	$enter(wpopuproom)   configure -state disabled
-	$enter(wbtenter)     configure -state disabled
+	$enter(wpopupserver) state {disabled}
+	$enter(wpopuproom)   state {disabled}
+	$enter(wbtenter)     state {disabled}
     } else {
 	set enter(statuscount) 0
 	set enter(status) ""
 	$enter(wsearrows) stop
 	if {[string equal $enter(server-state) "normal"]} {
-	    $enter(wpopupserver) configure -state normal
+	    $enter(wpopupserver) state {!disabled}
 	}
 	if {[string equal $enter(room-state) "normal"]} {
-	    $enter(wpopuproom)   configure -state normal
+	    $enter(wpopuproom)   state {!disabled}
 	}
-	$enter(wbtenter)     configure -state normal
+	$enter(wbtenter)     state {!disabled}
     }
 }
 
@@ -458,8 +474,6 @@ proc ::MUC::DoEnter {token} {
     eval {$jstate(muc) enter $roomJid $enter(nickname) -command \
       [list [namespace current]::EnterCallback $token]} $opts
     set enter(finished) 1
-    EnterCloseHook $enter(w)
-    catch {destroy $enter(w)}
 }
 
 # MUC::EnterCallback --
@@ -561,7 +575,8 @@ namespace eval ::MUC:: {
     
     variable inviteuid 0
 
-    ::hooks::register closeWindowHook    ::MUC::InviteCloseHook
+    option add *JMUCInvite.inviteImage         invite         widgetDefault
+    option add *JMUCInvite.inviteDisImage      inviteDis      widgetDefault
 }
 
 # MUC::Invite --
@@ -581,75 +596,109 @@ proc ::MUC::Invite {roomjid} {
     upvar 0 $token invite
     
     set w $wDlgs(jmucinvite)[incr dlguid]
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
-    wm title $w {Invite User}
-    set invite(w)        $w
-    set invite(reason)   ""
-    set invite(finished) -1
-    set invite(roomjid)  $roomjid
-    
-    set fontSB [option get . fontSmallBold {}]
-    
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 4
-    regexp {^([^@]+)@.*} $roomjid match roomName
-    set msg "Invite a user for groupchat in room $roomName"
-    pack [message $w.frall.msg -width 220 -text $msg] \
-      -side top -fill both -padx 4 -pady 2
-    
-    set jidlist [$jstate(roster) getusers -type available]
-    set wmid $w.frall.fr
-    pack [frame $wmid] -side top -fill x -expand 1 -padx 6
-    label $wmid.la -font $fontSB -text "Invite Jid:"
-    ::entrycomp::entrycomp $wmid.ejid $jidlist -textvariable $token\(jid)
-    label $wmid.lre -font $fontSB -text "Reason:"
-    entry $wmid.ere -textvariable $token\(reason)
-    
-    grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
-    grid $wmid.ejid -column 1 -row 0 -sticky ew -padx 2 
-    grid $wmid.lre -column 0 -row 1 -sticky e -padx 2 
-    grid $wmid.ere -column 1 -row 1 -sticky ew -padx 2 
-    
-    # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $frbot.btok -text [mc OK]  \
-      -default active -command [list [namespace current]::DoInvite $token]] \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::CancelInvite $token]]  \
-      -side right -padx 5 -pady 5  
-    
-    wm resizable $w 0 0
-    bind $w <Return> [list $frbot.btok invoke]
-    bind $w <Escape> [list $frbot.btcancel invoke]
+    ::UI::Toplevel $w -class JMUCInvite \
+      -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
+      -closecommand [list [namespace current]::InviteCloseCmd $token]
+    wm title $w [mc {Invite User}]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucinvite)]]
     if {$nwin == 1} {
 	::UI::SetWindowPosition $w $wDlgs(jmucinvite)
     }
+    jlib::splitjidex $roomjid node domain res
+    set jidlist [$jstate(roster) getusers -type available]
+
+    set invite(w)        $w
+    set invite(reason)   ""
+    set invite(finished) -1
+    set invite(roomjid)  $roomjid
+
+    set im   [::Theme::GetImage [option get $w inviteImage {}]]
+    set imd  [::Theme::GetImage [option get $w inviteDisImage {}]]
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+    
+    ttk::label $w.frall.head -style Headlabel \
+      -text [mc {Invite User}] -compound left \
+      -image [list $im background $imd]
+    pack $w.frall.head -side top -anchor w
+
+    ttk::separator $w.frall.s -orient horizontal
+    pack $w.frall.s -side top -fill x
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+    
+    set msg [mc jainvitegchat $node]
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left -text $msg
+    pack $wbox.msg -side top -anchor w
+
+    set wmid $wbox.fr
+    ttk::frame $wmid
+    pack $wmid -side top -fill x -expand 1
+    
+    ttk::label $wmid.la -text "[mc Invite] JID:"
+    ::entrycomp::entrycomp $wmid.ejid $jidlist -textvariable $token\(jid)
+    ttk::label $wmid.lre -text "[mc Reason]:"
+    ttk::entry $wmid.ere -textvariable $token\(reason)
+    
+    grid  $wmid.la   $wmid.ejid  -sticky e -padx 2 -pady 2
+    grid  $wmid.lre  $wmid.ere   -sticky e -padx 2 -pady 2
+    
+    # Button part.
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc OK]  \
+      -default active -command [list [namespace current]::DoInvite $token]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::CancelInvite $token]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
+    
+    wm resizable $w 0 0
+    bind $w <Return> [list $frbot.btok invoke]
     
     # Grab and focus.
     set oldFocus [focus]
     focus $wmid.ejid
     
     # Wait here for a button press and window to be destroyed.
-    tkwait window $w
+    tkwait variable $token\(finished)
 
     catch {focus $oldFocus}
-    
+    ::UI::SaveWinGeom $wDlgs(jmucinvite) $w
+    catch {destroy $invite(w)}
+    set finished $invite(finished)
+    unset invite
+    return [expr {($finished <= 0) ? "cancel" : "ok"}]
+}
+
+proc ::MUC::InviteCloseCmd {token wclose} {
+    global  wDlgs
+    variable $token
+    upvar 0 $token invite
+
+    ::UI::SaveWinGeom $wDlgs(jmucinvite) $invite(w)
+    set invite(finished) 0
+    return ""
 }
 
 proc ::MUC::CancelInvite {token} {
     variable $token
     upvar 0 $token invite
 
-    InviteCloseHook $invite(w)
     set invite(finished) 0
-    catch {destroy $invite(w)}
-    unset invite
 }
 
 proc ::MUC::DoInvite {token} {
@@ -660,7 +709,7 @@ proc ::MUC::DoInvite {token} {
     set jid     $invite(jid)
     set reason  $invite(reason)
     set roomjid $invite(roomjid)
-    InviteCloseHook $invite(w)
+    InviteCloseCmd $token $invite(w)
     
     set opts [list -command [list [namespace current]::InviteCB $token]]
     if {$reason != ""} {
@@ -668,7 +717,6 @@ proc ::MUC::DoInvite {token} {
     }
     eval {$jstate(muc) invite $roomjid $jid} $opts
     set invite(finished) 1
-    catch {destroy $invite(w)}
 }
 
 proc ::MUC::InviteCB {token jlibname type args} {
@@ -687,14 +735,6 @@ proc ::MUC::InviteCB {token jlibname type args} {
 	::UI::MessageBox -icon error -title [mc Error] -type ok -message $msg
     }
     unset invite
-}
-
-proc ::MUC::InviteCloseHook {wclose} {
-    global  wDlgs
-        
-    if {[string match $wDlgs(jmucinvite)* $wclose]} {
-	::UI::SaveWinGeom $wDlgs(jmucinvite) $wclose
-    }   
 }
 
 # MUC::MUCMessage --
@@ -754,7 +794,11 @@ proc ::MUC::MUCMessage {jlibname xmlns args} {
 
 namespace eval ::MUC:: {
     
-    ::hooks::register closeWindowHook    ::MUC::InfoCloseHook
+    option add *JMUCInfo.infoImage         info         widgetDefault
+    option add *JMUCInfo.infoDisImage      infoDis      widgetDefault
+
+    option add *JMUCInfo*TButton.style     Small.TButton 50
+    option add *JMUCInfo*TLabelframe.style  Small.TLabelframe 50
 }
 
 # MUC::BuildInfo --
@@ -779,72 +823,81 @@ proc ::MUC::BuildInfo {roomjid} {
     }    
     set w $wDlgs(jmucinfo)[incr dlguid]
 
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
     set roomName [$jstate(jlib) service name $roomjid]
     if {$roomName == ""} {
-	regexp {([^@]+)@.+} $roomjid match roomName
+	jlib::splitjidex $roomjid roomName x y
     }
-    wm title $w "Info Room: $roomName"
+
     set locals($roomjid,w) $w
     set locals($w,roomjid) $roomjid
     set locals($roomjid,mynick) [$jstate(muc) mynick $roomjid]
     set locals($roomjid,myrole) none
     set locals($roomjid,myaff) none
-    switch -- $this(platform) {
-	macintosh {
-	    set pady 4
-	}
-	macosx {
-	    set pady 2
-	}
-	default {
-	    set pady 4
-	}
-    }
-    set fontS [option get . fontSmall {}]
+
+    ::UI::Toplevel $w -class JMUCInfo \
+      -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
+      -closecommand [namespace current]::InfoCloseHook
+    wm title $w "Info Room: $roomName"
     
+    set im   [::Theme::GetImage [option get $w infoImage {}]]
+    set imd  [::Theme::GetImage [option get $w infoDisImage {}]]
+
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
-    # 
-    pack [message $w.frall.msg -width 400 -text \
-      "This dialog makes available a number of options and actions for a\
+    ttk::label $w.frall.head -style Headlabel \
+      -text "Info Room" -compound left \
+      -image [list $im background $imd]
+    pack $w.frall.head -side top -anchor w
+
+    ttk::separator $w.frall.s -orient horizontal
+    pack $w.frall.s -side top -fill x
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+    
+    set msg "This dialog makes available a number of options and actions for a\
       room. Your role and affiliation determines your privilege to act.\
       Further restrictions may exist depending on specific room\
-      configuration."]  \
-      -side top -anchor w -padx 4 -pady 4
-    
+      configuration."
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 12} -wraplength 300 -justify left -text $msg
+    pack $wbox.msg -side top -anchor w
+        
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btcancel -text [mc Close]  \
-      -command [list [namespace current]::Close $roomjid]] \
-      -side right -padx 5 -pady 5
-    pack $frbot -side bottom -fill x -padx 10 -pady 8
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btcancel -style TButton \
+      -text [mc Close]  \
+      -command [list [namespace current]::Close $roomjid]
+    pack $frbot.btcancel -side right
+    pack $frbot -side bottom -fill x
     
     # A frame.
-    set froom $w.frall.room
-    pack [frame $froom] -side left -padx 4 -pady 4
+    set frleft $wbox.fleft
+    ttk::frame $frleft
+    pack $frleft -side left
     
     # Tablelist with scrollbar ---
-    set frtab $froom.frtab    
-    set wysc $frtab.ysc
-    set wtbl $frtab.tb
-    pack [frame $frtab] -padx 0 -pady 0 -side top
-    #label $frtab.l -text "Participants:" -font $fontSB
+    set frtab $frleft.frtab    
+    set wysc  $frtab.ysc
+    set wtbl  $frtab.tb
+    ttk::frame $frtab
+    pack $frtab -side top
     set columns [list 0 Nickname 0 Role 0 Affiliation]
     
     tablelist::tablelist $wtbl  \
       -columns $columns -stretch all -selectmode single  \
       -yscrollcommand [list $wysc set] -width 36 -height 8
-    scrollbar $wysc -orient vertical -command [list $wtbl yview]
-    button $frtab.ref -text Refresh -font $fontS -command  \
+    tuscrollbar $wysc -orient vertical -command [list $wtbl yview]
+    ttk::button $frtab.ref -text [mc Refresh] -font CociSmallFont -command  \
       [list [namespace current]::Refresh $roomjid]
-    #grid $frtab.l -sticky w
-    grid $wtbl $wysc -sticky news
+
+    grid  $wtbl       $wysc  -sticky news
+    grid  $frtab.ref  x      -sticky e -pady 2
     grid columnconfigure $frtab 0 -weight 1
-    grid $frtab.ref -sticky e -pady 2
     
     # Special bindings for the tablelist.
     set body [$wtbl bodypath]
@@ -857,60 +910,70 @@ proc ::MUC::BuildInfo {roomjid} {
     FillTable $roomjid
     
     # A frame.
-    set frgrantrevoke $froom.grrev
-    pack [frame $frgrantrevoke] -side top
+    set frgrantrevoke $frleft.grrev
+    ttk::frame $frgrantrevoke -padding {0 8 0 0}
+    pack $frgrantrevoke -side top
         
     # Grant buttons ---
     set wgrant $frgrantrevoke.grant
-    labelframe $wgrant -text "Grant:"
-    pack $wgrant -side left -padx 8 -pady 4
+    ttk::labelframe $wgrant -text "Grant:" \
+      -padding [option get . groupSmallPadding {}]
+    
     foreach txt {Voice Member Moderator Admin Owner} {
 	set stxt [string tolower $txt]
-	button $wgrant.bt${stxt} -text $txt  \
+	ttk::button $wgrant.bt$stxt -text [mc $txt]  \
 	  -command [list [namespace current]::GrantRevoke $roomjid grant $stxt]
-	grid $wgrant.bt${stxt} -sticky ew -padx 8 -pady $pady 
+	grid  $wgrant.bt$stxt  -sticky ew -pady 4
     }
     
     # Revoke buttons ---
     set wrevoke $frgrantrevoke.rev
-    labelframe $wrevoke -text "Revoke:"
-    pack $wrevoke -side left -padx 8 -pady 4
+    ttk::labelframe $wrevoke -text "Revoke:" \
+      -padding [option get . groupSmallPadding {}]
+    
     foreach txt {Voice Member Moderator Admin Owner} {
 	set stxt [string tolower $txt]
-	button $wrevoke.bt${stxt} -text $txt  \
+	ttk::button $wrevoke.bt$stxt -text [mc $txt]  \
 	  -command [list [namespace current]::GrantRevoke $roomjid revoke $stxt]
-	grid $wrevoke.bt${stxt} -sticky ew -padx 8 -pady $pady 
-    }    
+	grid $wrevoke.bt$stxt -sticky ew -pady 4
+    }
+    grid  $wgrant  $wrevoke  -padx 8  
     
     # A frame.
-    set frmid $w.frall.mid
-    pack [frame $frmid] -side top
+    set frmid $wbox.mid
+    ttk::frame $frmid
+    pack $frmid -side top
     
     # Other buttons ---
     set wother $frmid.fraff
-    pack [frame $wother] -side top -padx 2 -pady 2
-    button $wother.btkick -text "Kick Participant"  \
+    ttk::frame $wother
+    pack $wother -side top
+
+    ttk::button $wother.btkick -text "Kick Participant"  \
       -command [list [namespace current]::Kick $roomjid]
-    button $wother.btban -text "Ban Participant"  \
+    ttk::button $wother.btban -text "Ban Participant"  \
       -command [list [namespace current]::Ban $roomjid]
-    button $wother.btconf -text "Configure Room"  \
+    ttk::button $wother.btconf -text "Configure Room"  \
       -command [list [namespace current]::RoomConfig $roomjid]
-    button $wother.btdest -text "Destroy Room"  \
+    ttk::button $wother.btdest -text "Destroy Room"  \
       -command [list [namespace current]::Destroy $roomjid]
-    grid $wother.btkick -sticky ew -pady $pady
-    grid $wother.btban -sticky ew -pady $pady
-    grid $wother.btconf -sticky ew -pady $pady
-    grid $wother.btdest -sticky ew -pady $pady
+
+    grid  $wother.btkick  -sticky ew -pady 4
+    grid  $wother.btban   -sticky ew -pady 4
+    grid  $wother.btconf  -sticky ew -pady 4
+    grid  $wother.btdest  -sticky ew -pady 4
     
     # Edit lists ---
     set wlist $frmid.lists
-    labelframe $wlist -text "Edit Lists:"
-    pack $wlist -side top -padx 8 -pady 4
+    ttk::labelframe $wlist -text "Edit Lists:" \
+      -padding [option get . groupSmallPadding {}]
+    pack $wlist -side top -pady 8
+
     foreach txt {Voice Ban Member Moderator Admin Owner} {
 	set stxt [string tolower $txt]	
-	button $wlist.bt${stxt} -text "$txt..."  \
+	ttk::button $wlist.bt$stxt -text "$txt..."  \
 	  -command [list [namespace current]::EditListBuild $roomjid $stxt]
-	grid $wlist.bt${stxt} -sticky ew -padx 8 -pady $pady
+	grid  $wlist.bt$stxt  -sticky ew -pady 4
     }
 
     # Collect various widget paths.
@@ -926,8 +989,10 @@ proc ::MUC::BuildInfo {roomjid} {
     wm resizable $w 0 0    
     
     set idleScript [format {
-	%s.frall.msg configure -width [winfo reqwidth %s]} $w $w]
-    #after idle $idleScript
+	update idletasks
+	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $wbox.msg $w]
+    after idle $idleScript
     return ""
 }
 
@@ -1012,11 +1077,11 @@ proc ::MUC::SetButtonsState {roomjid role affiliation} {
 
     foreach wbt $enabledBtRoleList($role) {
 	set wbt [subst -nobackslashes -nocommands $wbt]
-	$wbt configure -state normal
+	$wbt state {!disabled}
     }
     foreach wbt $enabledBtAffList($affiliation) {
 	set wbt [subst -nobackslashes -nocommands $wbt]
-	$wbt configure -state normal
+	$wbt state {!disabled}
     }
 }
 
@@ -1031,7 +1096,7 @@ proc ::MUC::DisableAll {roomjid} {
 
     foreach {action wbt} [array get mapAction2Bt] {
 	set wbt [subst -nobackslashes -nocommands $wbt]
-    	$wbt configure -state disabled
+    	$wbt state {!disabled}
     }
 }
 
@@ -1204,7 +1269,7 @@ proc ::MUC::Ban {roomjid} {
 
 namespace eval ::MUC:: {
     
-    ::hooks::register closeWindowHook    ::MUC::EditListCloseHook
+
 }
 
 # MUC::EditListBuild --
@@ -1221,21 +1286,19 @@ namespace eval ::MUC:: {
 proc ::MUC::EditListBuild {roomjid type} {
     global this wDlgs
     
-    upvar [namespace current]::${roomjid}::editlocals editlocals
     upvar ::Jabber::jstate jstate
-    variable fineditlist -1
     variable dlguid
     variable editcalluid
     variable setListDefs
     
     # Customize according to the $type.
     array set editmsg {
-	voice     {Edit the privilege to speak in the room, the voice.}
-	ban       {Edit the ban list}
-	member    {Edit the member list}
-	moderator {Edit the moderator list}
-	admin     {Edit the admin list}
-	owner     {Edit the owner list}
+	voice     "Edit the privilege to speak in the room, the voice."
+	ban       "Edit the ban list"
+	member    "Edit the member list"
+	moderator "Edit the moderator list"
+	admin     "Edit the admin list"
+	owner     "Edit the owner list"
     }
     array set setListDefs {
 	voice     {nick affiliation role jid reason}
@@ -1250,45 +1313,56 @@ proc ::MUC::EditListBuild {roomjid type} {
 	    lappend columns($what) 0 [string totitle $txt]
 	}
     }
-    
+
+    # State variable to collect instance specific variables.
+    set token [namespace current]::edtlst[incr dlguid]
+    variable $token
+    upvar 0 $token state
+
     set titleType [string totitle $type]
     set tblwidth [expr 10 + 12 * [llength $setListDefs($type)]]
-    set editlocals(listvar) {}
+    set roomName [$jstate(jlib) service name $roomjid]
+    if {$roomName == ""} {
+	jlib::splitjidex $roomjid roomName x y
+    }
     
     set w $wDlgs(jmucedit)[incr dlguid]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
-    set roomName [$jstate(jlib) service name $roomjid]
-    if {$roomName == ""} {
-	regexp {([^@]+)@.+} $roomjid match roomName
-    }
+      -macclass {document closeBox} \
+      -closecommand ::MUC::EditListCloseHook
     wm title $w "Edit List $titleType: $roomName"
-    
-    set fontS [option get . fontSmall {}]
-    
+        
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 4
-    regexp {^([^@]+)@.*} $roomjid match roomName
-    pack [message $w.frall.msg -width 300  \
-      -text $editmsg($type)] -side top -anchor w -padx 4 -pady 2
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+    
+    ttk::label $wbox.msg  \
+      -padding {0 0 0 6} -wraplength 300 -justify left -text $editmsg($type)
+    pack $wbox.msg -side top -anchor w
     
     #
-    set wmid $w.frall.fr
-    pack [frame $wmid] -side top -fill x -expand 1 -padx 6
+    set wmid $wbox.fr
+    ttk::frame $wmid
+    pack $wmid -side top -fill x -expand 1
     
     # Tablelist with scrollbar ---
     set frtab $wmid.tab    
-    set wysc $frtab.ysc
-    set wtbl $frtab.tb
-    pack [frame $frtab] -padx 0 -pady 0 -side left
+    set wysc  $frtab.ysc
+    set wtbl  $frtab.tb
+    frame $frtab
+    pack  $frtab -side left
     tablelist::tablelist $wtbl -width $tblwidth -height 8 \
       -columns $columns($type) -stretch all -selectmode single  \
       -yscrollcommand [list $wysc set]  \
-      -editendcommand [list [namespace current]::VerifyEditEntry $roomjid] \
-      -listvariable [namespace current]::${roomjid}::editlocals(listvar)
-    scrollbar $wysc -orient vertical -command [list $wtbl yview]
-    grid $wtbl $wysc -sticky news
+      -editendcommand [list [namespace current]::VerifyEditEntry $token] \
+      -listvariable $token\(listvar)
+    tuscrollbar $wysc -orient vertical -command [list $wtbl yview]
+
+    grid  $wtbl  $wysc  -sticky news
     grid columnconfigure $frtab 0 -weight 1
 
     option add *$wtbl*selectBackground		navy      widgetDefault
@@ -1317,60 +1391,75 @@ proc ::MUC::EditListBuild {roomjid type} {
     # Special bindings for the tablelist.
     set body [$wtbl bodypath]
     bind $body <Button-1> {+ focus %W}
-    #bind $body <Double-1> [list [namespace current]::XXX $roomjid]
-    bind $wtbl <<ListboxSelect>> [list [namespace current]::EditListSelect $roomjid]
+    bind $wtbl <<ListboxSelect>> \
+      [list [namespace current]::EditListSelect $token]
     
     # Action buttons.
-    set wbts $wmid.fr
-    set wbtadd $wbts.add
+    set wbts    $wmid.fr
+    set wbtadd  $wbts.add
     set wbtedit $wbts.edit
-    set wbtrm $wbts.rm
-    pack [frame $wbts] -side right -anchor n -padx 4 -pady 4
-    button $wbtadd -text "Add" -font $fontS -state disabled -command \
-      [list [namespace current]::EditListDoAdd $roomjid]
-    button $wbtedit -text "Edit" -font $fontS -state disabled -command \
-      [list [namespace current]::EditListDoEdit $roomjid]
-    button $wbtrm -text "Remove" -font $fontS -state disabled -command \
-      [list [namespace current]::EditListDoRemove $roomjid]
+    set wbtrm   $wbts.rm
+    ttk::frame $wbts
+    pack $wbts -side right -anchor n -padx 4 -pady 4
     
-    grid $wbtadd -pady 2 -sticky ew
-    grid $wbtedit -pady 2 -sticky ew
-    grid $wbtrm -pady 2 -sticky ew
+    ttk::button $wbtadd -text [mc Add] \
+      -command [list [namespace current]::EditListDoAdd $token]
+    ttk::button $wbtedit -text [mc Edit] \
+      -command [list [namespace current]::EditListDoEdit $token]
+    ttk::button $wbtrm -text [mc Remove] \
+      -command [list [namespace current]::EditListDoRemove $token]
+    
+    grid  $wbtadd   -pady 8 -sticky ew
+    grid  $wbtedit  -pady 8 -sticky ew
+    grid  $wbtrm    -pady 8 -sticky ew
+    
+    $wbtadd  state {disabled}
+    $wbtedit state {disabled}
+    $wbtrm   state {disabled}
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
+    set frbot     $wbox.b
     set wsearrows $frbot.arr
-    set wbtok $frbot.btok
+    set wbtok     $frbot.btok
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $wbtok -text [mc OK] -state disabled \
-      -default active -command "set [namespace current]::fineditlist 1"] \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command "set [namespace current]::fineditlist 0"]  \
-      -side right -padx 5 -pady 5  
-    pack [::chasearrows::chasearrows $wsearrows -size 16] \
-      -side left -padx 5 -pady 5
-    pack [button $frbot.btres -text [mc Reset]  \
-      -command [list [namespace current]::EditListReset $roomjid]]  \
-      -side left -padx 5 -pady 5  
+    ttk::button $frbot.btok -text [mc OK] \
+      -default active -command [list [namespace current]::EditListOK $token]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::EditListCancel $token]
+    ::chasearrows::chasearrows $frbot.arr -size 16
+    ttk::button $frbot.btres -text [mc Reset]  \
+      -command [list [namespace current]::EditListReset $token]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot.arr -side left -padx 8
+    pack $frbot.btres -side left
+    pack $frbot -side bottom -fill x
+    
+    $frbot.btok state {disabled}
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
-    bind $w <Escape> [list $frbot.btcancel invoke]
     
-    # Grab and focus.
     set oldFocus [focus]
     
     # Cache local variables.
-    set editlocals(wtbl) $wtbl
-    set editlocals(wsearrows) $wsearrows
-    set editlocals(wbtok) $wbtok  
-    set editlocals(type) $type
-    set editlocals(wbtadd) $wbtadd
-    set editlocals(wbtedit) $wbtedit
-    set editlocals(wbtrm) $wbtrm
-    set editlocals(origlistvar) {}
-    set editlocals(listvar) {}
+    set state(wtbl)        $wtbl
+    set state(wsearrows)   $wsearrows
+    set state(wbtok)       $wbtok  
+    set state(type)        $type
+    set state(wbtadd)      $wbtadd
+    set state(wbtedit)     $wbtedit
+    set state(wbtrm)       $wbtrm
+    set state(origlistvar) {}
+    set state(listvar)     {}
+    set state(finished)    -1
     
     # How and what to get.
     switch -- $type {
@@ -1408,60 +1497,73 @@ proc ::MUC::EditListBuild {roomjid type} {
 	    return -code error "Unrecognized type \"$type\""
 	}
     }
-    set editlocals(getact) $getact
-    set editlocals(setact) $setact
+    set state(getact) $getact
+    set state(setact) $setact
     
     # Now, go and get it!
     $wsearrows start
-    set editlocals(callid) [incr editcalluid]
+    set state(callid) [incr editcalluid]
     if {[catch {
 	$jstate(muc) $getact $roomjid $what \
-	  [list [namespace current]::EditListGetCB $roomjid $editlocals(callid)]
+	  [list [namespace current]::EditListGetCB $token $state(callid)]
     } err]} {
 	$wsearrows stop
-	::UI::MessageBox -type ok -icon error -title "Network Error" \
-	  -message "Network error ocurred: $err"
     }      
     
     # Wait here for a button press.
-    tkwait variable [namespace current]::fineditlist
-    
-    ::UI::SaveWinGeom $w
+    tkwait variable $token\(finished)
+
+    ::UI::SaveWinPrefixGeom $wDlgs(jmucedit)
     catch {destroy $w}
     catch {focus $oldFocus}
 
-    set opts {}
-
-    if {$fineditlist > 0} {
-	EditListSet $roomjid
+    if {$state(finished) > 0} {
+	EditListSet $token
     }
-    return [expr {($fineditlist <= 0) ? "cancel" : "ok"}]
+    set finished $state(finished)
+    unset state
+    return [expr {($finished <= 0) ? "cancel" : "ok"}]
 }
 
-proc ::MUC::EditListCloseHook {wclose} {
+proc ::MUC::EditListCloseHook {token wclose} {
     global  wDlgs
-    variable fineditlist
+    variable $token
+    upvar 0 $token state
 	
-    if {[string equal $wDlgs(jmucedit) $wclose]} {
-	set fineditlist 0
-    }   
+    ::UI::SaveWinPrefixGeom $wDlgs(jmucedit)
+    set state(finished) 0
 }
 
-proc ::MUC::EditListGetCB {roomjid callid mucname type subiq} {
+proc ::MUC::EditListOK {token} {
+    variable $token
+    upvar 0 $token state
+    
+    set state(finished) 1
+}
 
-    upvar [namespace current]::${roomjid}::editlocals editlocals
+proc ::MUC::EditListCancel {token} {
+    variable $token
+    upvar 0 $token state
+    
+    set state(finished) 0
+}
+
+proc ::MUC::EditListGetCB {token callid mucname type subiq} {
+    variable $token
+    upvar 0 $token state
+
     upvar ::Jabber::jstate jstate
 
-    set type $editlocals(type)
-    set wtbl $editlocals(wtbl)
-    set wsearrows $editlocals(wsearrows)
-    set wbtok $editlocals(wbtok)
-    set wbtadd $editlocals(wbtadd)
-    set wbtedit $editlocals(wbtedit)
-    set wbtrm $editlocals(wbtrm)
+    set type      $state(type)
+    set wtbl      $state(wtbl)
+    set wsearrows $state(wsearrows)
+    set wbtok     $state(wbtok)
+    set wbtadd    $state(wbtadd)
+    set wbtedit   $state(wbtedit)
+    set wbtrm     $state(wbtrm)
 
     # Verify that this callback does indeed be the most recent.
-    if {$callid != $editlocals(callid)} {
+    if {$callid != $state(callid)} {
 	return
     }
     if {![winfo exists $wsearrows]} {
@@ -1474,47 +1576,49 @@ proc ::MUC::EditListGetCB {roomjid callid mucname type subiq} {
 	return
     }
     
-    set editlocals(subiq) $subiq
+    set state(subiq) $subiq
 
     # Fill tablelist.
-    FillEditList $roomjid
-    $wbtok configure -state normal -default active
+    FillEditList $token
+    $wbtok configure -default active
+    $wbtok state {!disabled}
 
     switch -- $type {
 	voice {
-	    $wbtrm configure -state normal
+	    $wbtrm state {!disabled}
 	}
 	ban {
-	    $wbtadd configure -state normal
-	    $wbtrm configure -state normal
+	    $wbtadd state {!disabled}
+	    $wbtrm  state {!disabled}
 	}
 	member {
-	    $wbtrm configure -state normal
+	    $wbtrm state {!disabled}
 	}
 	moderator {
-	    $wbtrm configure -state normal
+	    $wbtrm state {!disabled}
 	}
 	admin {
-	    $wbtadd configure -state normal
-	    $wbtrm configure -state normal
+	    $wbtadd state {!disabled}
+	    $wbtrm  state {!disabled}
 	}
 	owner {    
-	    $wbtedit configure -state normal
+	    $wbtedit state {!disabled}
 	} 
     }
 }
 
-proc ::MUC::FillEditList {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
+proc ::MUC::FillEditList {token} {
+    variable $token
+    upvar 0 $token state
 
     variable setListDefs
 
-    set wtbl $editlocals(wtbl)
-    set wsearrows $editlocals(wsearrows)
-    set wbtok $editlocals(wbtok)
-    set type $editlocals(type)
+    set wtbl      $state(wtbl)
+    set wsearrows $state(wsearrows)
+    set wbtok     $state(wbtok)
+    set type      $state(type)
     
-    set queryElem [wrapper::getchildren $editlocals(subiq)]
+    set queryElem [wrapper::getchildren $state(subiq)]
     set tmplist {}
     
     foreach item [wrapper::getchildren $queryElem] {
@@ -1534,15 +1638,16 @@ proc ::MUC::FillEditList {roomjid} {
     }
     
     # Fill table. Cache orig result.
-    set editlocals(origlistvar) $tmplist
-    set editlocals(listvar) $tmplist
+    set state(origlistvar) $tmplist
+    set state(listvar) $tmplist
 }
 
-proc ::MUC::VerifyEditEntry {roomjid wtbl row col text} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
+proc ::MUC::VerifyEditEntry {token wtbl row col text} {
+    variable $token
+    upvar 0 $token state
     variable setListDefs
 
-    set type $editlocals(type)
+    set type $state(type)
 
     # Is this a jid entry?
     if {[lsearch $setListDefs($type) jid] != $col} {
@@ -1558,24 +1663,26 @@ proc ::MUC::VerifyEditEntry {roomjid wtbl row col text} {
     }
 }
 
-proc ::MUC::EditListSelect {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
+proc ::MUC::EditListSelect {token} {
+    variable $token
+    upvar 0 $token state
     
-    set wtbl $editlocals(wtbl)
+    set wtbl $state(wtbl)
     
 }
 
-proc ::MUC::EditListDoAdd {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
+proc ::MUC::EditListDoAdd {token} {
+    variable $token
+    upvar 0 $token state
     variable setListDefs
 
-    set wtbl $editlocals(wtbl)
-    set type $editlocals(type)
+    set wtbl $state(wtbl)
+    set type $state(type)
     set len [llength $setListDefs($type)]
     for {set i 0} {$i < $len} {incr i} {
 	lappend empty {}
     }
-    lappend editlocals(listvar) $empty
+    lappend state(listvar) $empty
     set indjid [lsearch $setListDefs($type) jid]
     array set indColumnFocus [list  \
 	voice      end      \
@@ -1591,11 +1698,12 @@ proc ::MUC::EditListDoAdd {roomjid} {
     focus [$wtbl entrypath]
 }
 
-proc ::MUC::EditListDoEdit {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
+proc ::MUC::EditListDoEdit {token} {
+    variable $token
+    upvar 0 $token state
 
-    set wtbl $editlocals(wtbl)
-    set type $editlocals(type)
+    set wtbl $state(wtbl)
+    set type $state(type)
 
     switch -- $type {
 	owner {
@@ -1604,12 +1712,13 @@ proc ::MUC::EditListDoEdit {roomjid} {
     }
 }
 
-proc ::MUC::EditListDoRemove {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
+proc ::MUC::EditListDoRemove {token} {
+    variable $token
+    upvar 0 $token state
     variable setListDefs
 
-    set wtbl $editlocals(wtbl)
-    set type $editlocals(type)
+    set wtbl $state(wtbl)
+    set type $state(type)
     set item [$wtbl curselection]
     if {[string length $item] == 0} {
 	return 
@@ -1639,26 +1748,28 @@ proc ::MUC::EditListDoRemove {roomjid} {
     }
 }
 
-proc ::MUC::EditListReset {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
+proc ::MUC::EditListReset {token} {
+    variable $token
+    upvar 0 $token state
 
-    set editlocals(listvar) $editlocals(origlistvar)
+    set state(listvar) $state(origlistvar)
 }
 
 # MUC::EditListSet --
 # 
 #       Set (send) the dited list to the muc service.
 
-proc ::MUC::EditListSet {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
+proc ::MUC::EditListSet {token} {
+    variable $token
+    upvar 0 $token state
     variable setListDefs
     upvar ::Jabber::jstate jstate
 
     # Original and present content of tablelist.
-    set origlist $editlocals(origlistvar)
-    set thislist $editlocals(listvar)
-    set type $editlocals(type)
-    set setact $editlocals(setact)
+    set origlist $state(origlistvar)
+    set thislist $state(listvar)
+    set type     $state(type)
+    set setact   $state(setact)
     
     # Only the 'diff' is necessary to send.
     # Loop through each row in the tablelist.
@@ -1692,13 +1803,8 @@ proc ::MUC::EditListSet {roomjid} {
 
     
     
-    if {[catch {eval {
-	$jstate(muc) $setact $roomjid xxx \
+    eval {$jstate(muc) $setact $roomjid xxx \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
-    } err]} {
-	::UI::MessageBox -type ok -icon error -title "Network Error" \
-	  -message "Network error ocurred: $err"
-    }    
 }
     
 # End edit lists ---------------------------------------------------------------
@@ -1713,7 +1819,7 @@ namespace eval ::MUC:: {
 proc ::MUC::RoomConfig {roomjid} {
     global  this wDlgs
     
-    variable wbox
+    variable wscrollframe
     variable wsearrows
     variable wbtok
     variable dlguid
@@ -1721,34 +1827,47 @@ proc ::MUC::RoomConfig {roomjid} {
     upvar ::Jabber::jstate jstate
     
     set w $wDlgs(jmuccfg)[incr dlguid]
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox} -class MUCConfig
     wm title $w "Configure Room"
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 4
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
             
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
+    set frbot     $wbox.b
     set wsearrows $frbot.arr
-    set wbtok $frbot.btok
+    set wbtok     $frbot.btok
     set wbtcancel $frbot.btcancel
-    pack [button $wbtok -text [mc OK] -default active \
-      -state disabled -command  \
-        [list [namespace current]::DoRoomConfig $roomjid $w]]  \
-      -side right -padx 5 -pady 5
-    pack [button $wbtcancel -text [mc Cancel]  \
-      -command [list [namespace current]::CancelConfig $roomjid $w]]  \
-      -side right -padx 5 -pady 5
-    pack [::chasearrows::chasearrows $wsearrows -size 16] \
-      -side left -padx 5 -pady 5
-    pack $frbot -side bottom -fill x -expand 0 -padx 8 -pady 6
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc OK] -default active \
+      -command [list [namespace current]::DoRoomConfig $roomjid $w]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::CancelConfig $roomjid $w]
+    ::chasearrows::chasearrows $wsearrows -size 16
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $wsearrows -side left
+    pack $frbot -side bottom -fill x
+    
+    $frbot.btok state {disabled}
     
     # The form part.
-    set wbox $w.frall.frmid
-    ::Jabber::Forms::BuildScrollForm $wbox -height 200 -width 320
-    pack $wbox -side top -fill both -expand 1 -padx 8 -pady 4
-    
+    set wscrollframe $wbox.scform
+    ::UI::ScrollFrame $wscrollframe -padding {8 12} -bd 1 -relief sunken
+    pack $wscrollframe
+        
     # Now, go and get it!
     $wsearrows start
     if {[catch {
@@ -1792,24 +1911,39 @@ proc ::MUC::CancelConfig {roomjid w} {
 }
 
 proc ::MUC::ConfigGetCB {roomjid mucname type subiq} {
-    variable wbox
+    variable wscrollframe
     variable wsearrows
     variable wbtok
+    variable wform
+    variable formtoken
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
 
+    puts "::MUC::ConfigGetCB---------------"
+    puts $subiq
+    
     $wsearrows stop
-    set childList [wrapper::getchildren $subiq]    
-    ::Jabber::Forms::FillScrollForm $wbox $childList -template "room"
-    $wbtok configure -state normal -default active
+    
+    if {$type eq "error"} {
+	lassign $subiq errcode errmsg
+	::UI::MessageBox -icon error -type ok -title [mc Error] -message $errmsg
+    } else {
+	set frint [::UI::ScrollFrameInterior $wscrollframe]
+	set wform $frint.f
+	set formtoken [::JForms::Build $wform $subiq -tilestyle Small -width 200]
+	pack $wform
+	$wbtok configure -default active
+	$wbtok state {!disabled}
+    }
 }
 
 proc ::MUC::DoRoomConfig {roomjid w} {
-    variable wbox
+    variable wform
+    variable formtoken
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
 
-    set subelements [::Jabber::Forms::GetScrollForm $wbox]
+    set subelements [::JForms::GetXML $formtoken]
     
     if {[catch {
 	$jstate(muc) setroom $roomjid submit -form $subelements \
@@ -1840,15 +1974,17 @@ proc ::MUC::SetNick {roomjid} {
     variable locals
     upvar ::Jabber::jstate jstate
     
-    set topic ""
+    puts ::MUC::SetNick
+    
+    set nickname ""
     set ans [::UI::MegaDlgMsgAndEntry  \
       [mc "Set New Nickname"]  \
       [mc "Select a new nickname"]  \
       "[mc {New Nickname}]:"  \
       nickname [mc Cancel] [mc OK]]
+    puts "ans=$ans, nickname=$nickname"
     
     # Perhaps check that characters are valid?
-
     if {($ans == "ok") && ($nickname != "")} {
 	if {[catch {
 	    $jstate(muc) setnick $roomjid $nickname \
@@ -1863,63 +1999,76 @@ proc ::MUC::SetNick {roomjid} {
 
 namespace eval ::MUC:: {
     
-    ::hooks::register closeWindowHook    ::MUC::DestroyCloseHook
+
 }
 
 proc ::MUC::Destroy {roomjid} {
     global this wDlgs
     
     upvar ::Jabber::jstate jstate
-    variable findestroy
+    variable findestroy -1
+    variable destroyjid    ""
+    variable destroyreason ""
     variable dlguid
     
     set w $wDlgs(jmucdestroy)[incr dlguid]
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
+    ::UI::Toplevel $w \
+      -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
+      -closecommand ::MUC::DestroyCloseCmd
     set roomName [$jstate(jlib) service name $roomjid]
     if {$roomName == ""} {
-	regexp {([^@]+)@.+} $roomjid match roomName
+	jlib::splitjidex $roomjid roomName x y
     }
     wm title $w "Destroy Room: $roomName"
+    ::UI::SetWindowPosition $w $wDlgs(jmucdestroy)
     set findestroy -1
     
-    set fontSB [option get . fontSmallBold {}]
-    
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall  -fill both -expand 1 -ipadx 4
-    regexp {^([^@]+)@.*} $roomjid match roomName
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+    
     set msg "You are about to destroy the room \"$roomName\".\
       Optionally you may give any present room particpants an\
       alternative room jid and a reason."
-    pack [message $w.frall.msg -width 280 -text $msg] \
-      -side top -anchor w -padx 4 -pady 2
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left -text $msg
+    pack $wbox.msg -side top -anchor w
     
-    set wmid $w.frall.fr
-    pack [frame $wmid] -side top -fill x -expand 1 -padx 6
-    label $wmid.la -font $fontSB -text "Alternative Room Jid:"
-    entry $wmid.ejid
-    label $wmid.lre -font $fontSB -text "Reason:"
-    entry $wmid.ere
+    set wmid $wbox.fr
+    ttk::frame $wmid
+    pack $wmid -side top -fill x -expand 1
     
-    grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
-    grid $wmid.ejid -column 1 -row 0 -sticky ew -padx 2 
-    grid $wmid.lre -column 0 -row 1 -sticky e -padx 2 
-    grid $wmid.ere -column 1 -row 1 -sticky ew -padx 2 
+    ttk::label $wmid.la -text "Alternative Room Jid:"
+    ttk::entry $wmid.ejid -textvariable [namespace current]::destroyjid
+    ttk::label $wmid.lre -text "Reason:"
+    ttk::entry $wmid.ere -textvariable [namespace current]::destroyreason
     
+    grid  $wmid.la   $wmid.ejid  -sticky e -padx 2 -pady 2
+    grid  $wmid.lre  $wmid.ere   -sticky e -padx 2 -pady 2
+        
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $frbot.btok -text [mc OK]  \
-      -default active -command "set [namespace current]::findestroy 1"] \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command "set [namespace current]::findestroy 0"]  \
-      -side right -padx 5 -pady 5  
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc OK]  \
+      -default active -command [list set [namespace current]::findestroy 1]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list set [namespace current]::findestroy 0]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
-    bind $w <Escape> [list $frbot.btcancel invoke]
     
     # Grab and focus.
     set oldFocus [focus]
@@ -1929,41 +2078,33 @@ proc ::MUC::Destroy {roomjid} {
     # Wait here for a button press.
     tkwait variable [namespace current]::findestroy
     
-    set jid [$wmid.ejid get]
-    set reason [$wmid.ere get]
-    ::UI::SaveWinGeom $w
+    ::UI::SaveWinPrefixGeom $wDlgs(jmucdestroy)
 
     catch {grab release $w}
     catch {destroy $w}
     catch {focus $oldFocus}
 
     set opts {}
-    if {$reason != ""} {
-	set opts [list -reason $reason]
+    if {$destroyreason != ""} {
+	set opts [list -reason $destroyreason]
     }
-    if {$jid != ""} {
-	set opts [list -alternativejid $jid]
+    if {$destroyjid != ""} {
+	set opts [list -alternativejid $destroyjid]
     }
 
     if {$findestroy > 0} {
-	if {[catch {eval {
-	    $jstate(muc) destroy $roomjid  \
-	      -command [list [namespace current]::IQCallback $roomjid]} $opts
-	} err]} {
-	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
-	      -message "Network error ocurred: $err"
-	}
+	eval {$jstate(muc) destroy $roomjid  \
+	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
     return [expr {($findestroy <= 0) ? "cancel" : "ok"}]
 }
 
-proc ::MUC::DestroyCloseHook {wclose} {
+proc ::MUC::DestroyCloseCmd {wclose} {
     global  wDlgs
     variable findestroy
 	
-    if {[string equal $wDlgs(jmucdestroy) $wclose]} {
-	set findestroy 0
-    }   
+    ::UI::SaveWinPrefixGeom $wDlgs(jmucdestroy)
+    set findestroy 0
 }
 
 # MUC::IQCallback, PresCallback --

@@ -5,9 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: UserActions.tcl,v 1.42 2005-02-02 15:21:22 matben Exp $
+# $Id: UserActions.tcl,v 1.43 2005-08-14 07:17:55 matben Exp $
 
 package provide UserActions 1.0
 
@@ -19,25 +17,25 @@ namespace eval ::UserActions:: {
 #
 #       Platform independent printing of canvas.
 
-proc ::UserActions::DoPrintCanvas {wtop} {
+proc ::UserActions::DoPrintCanvas {w} {
     global  this prefs wDlgs
         
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     
     switch -- $this(platform) {
-	macintosh - macosx {
-	    ::Mac::Printer::Print $wtop
+	macosx {
+	    ::Mac::Printer::Print $w
 	}
 	windows {
-	    if {!$prefs(printer)} {
+	    if {!$this(package,printer)} {
 		::UI::MessageBox -icon error -title [mc {No Printing}] \
 		  -message [mc messprintnoextension]
 	    } else {
-		::Windows::Printer::Print $wCan
+		::Windows::Printer::Print $wcan
 	    }
 	}
 	unix {
-	    ::Dialogs::UnixPrintPS $wDlgs(print) $wCan
+	    ::Dialogs::UnixPrintPS $wDlgs(print) $wcan
 	}
     }
 }
@@ -49,19 +47,15 @@ proc ::UserActions::DoPrintCanvas {wtop} {
 proc ::UserActions::DoPrintText {wtext args} {
     global  this prefs wDlgs
         
-    if {[winfo class $wtext] != "Text"} {
+    if {[winfo class $wtext] ne "Text"} {
 	error "::UserActions::DoPrintText: $wtext not a text widget!"
     }
     switch -- $this(platform) {
-	macintosh {
-	    ::UI::MessageBox -icon error -title [mc {No Printing}] \
-	      -message [mc messprintnoextension]
-	}
 	macosx {
 	    ::Mac::MacCarbonPrint::PrintText $wtext
 	}
 	windows {
-	    if {!$prefs(printer)} {
+	    if {!$this(package,printer)} {
 		::UI::MessageBox -icon error -title [mc {No Printing}] \
 		  -message [mc messprintnoextension]
 	    } else {
@@ -74,18 +68,15 @@ proc ::UserActions::DoPrintText {wtext args} {
     }
 }
 
-proc ::UserActions::PageSetup {wtop} {
+proc ::UserActions::PageSetup {w} {
     global  this prefs wDlgs
     
     switch -- $this(platform) {
-	macintosh {
-	    ::Mac::MacPrint::PageSetup $wtop
-	}
 	macosx {
-	    ::Mac::MacCarbonPrint::PageSetup $wtop
+	    ::Mac::MacCarbonPrint::PageSetup $w
 	}
 	windows {
-	    if {!$prefs(printer)} {
+	    if {!$this(package,printer)} {
 		::UI::MessageBox -icon error -title [mc {No Printing}] \
 		  -message [mc messprintnoextension]
 	    } else {
@@ -133,7 +124,7 @@ proc ::UserActions::DoQuit {args} {
     if {$argsArr(-warning)} {
 	set ans [::UI::MessageBox -title [mc Quit?] -type yesno -icon warning \
 	  -default yes -message [mc messdoquit?]]
-	if {$ans == "no"} {
+	if {$ans eq "no"} {
 	    return $ans
 	}
     }
@@ -157,9 +148,14 @@ proc ::UserActions::DoQuit {args} {
 	regexp {paneGeom,(.*)$} $key match winkey
 	lappend prefs(paneGeom) $winkey $value
     }
+    set prefs(sashPos) {}
+    foreach {key value} [array get prefs sashPos,*] {
+	regexp {sashPos,(.*)$} $key match winkey
+	lappend prefs(sashPos) $winkey $value
+    }
          
     # Save to the preference file and quit...
-    ::PreferencesUtils::SaveToFile
+    ::PrefUtils::SaveToFile
         
     # Cleanup. Beware, no windows with open movies must exist here!
     catch {file delete -force $this(tmpPath)}

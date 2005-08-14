@@ -5,18 +5,27 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.83 2005-07-17 06:43:59 matben Exp $
+# $Id: JUI.tcl,v 1.84 2005-08-14 07:10:51 matben Exp $
 
 package provide JUI 1.0
 
 
 namespace eval ::Jabber::UI:: {
+    
+    # Add all event hooks.
+    ::hooks::register quitAppHook            ::Jabber::UI::QuitHook
+    ::hooks::register loginHook              ::Jabber::UI::LoginCmd
+    ::hooks::register logoutHook             ::Jabber::UI::LogoutHook
+    ::hooks::register setPresenceHook        ::Jabber::UI::SetPresenceHook
+    ::hooks::register groupchatEnterRoomHook ::Jabber::UI::EnterRoomHook
+    ::hooks::register groupchatExitRoomHook  ::Jabber::UI::ExitRoomHook
 
     # Use option database for customization.
     # Shortcut buttons.
     option add *JMain.connectImage                connect         widgetDefault
     option add *JMain.connectDisImage             connectDis      widgetDefault
     option add *JMain.connectedImage              connected       widgetDefault
+    option add *JMain.connectedDisImage           connectedDis    widgetDefault
     option add *JMain.inboxImage                  inbox           widgetDefault
     option add *JMain.inboxDisImage               inboxDis        widgetDefault
     option add *JMain.inboxLetterImage            inboxLetter     widgetDefault
@@ -26,7 +35,9 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.stopImage                   stop            widgetDefault
     option add *JMain.stopDisImage                stopDis         widgetDefault
     option add *JMain.roster16Image               roster16        widgetDefault
+    option add *JMain.roster16DisImage            roster16Dis     widgetDefault
     option add *JMain.browser16Image              browser16       widgetDefault
+    option add *JMain.browser16DisImage           browser16Dis    widgetDefault
 
     # Top header image if any.
     option add *JMain.headImage                   ""              widgetDefault
@@ -43,54 +54,37 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.resizeHandleImage           resizehandle    widgetDefault
 
     # Standard widgets.
-    option add *JMain.fnb.borderWidth             1               50
-    option add *JMain.fnb.relief                  raised          50
-    option add *JMain.bot.borderWidth             1               50
-    option add *JMain.bot.padX                    0               50
-    option add *JMain.bot.padY                    0               50
-    option add *JMain.bot.relief                  raised          50
-    option add *JMain.bpad.height                 0               50
-    option add *JMain.bot.f.pad.padX              6               50
-    option add *JMain.bot.f.pad.padY              2               50
- 
-    option add *JMain.ButtonTray.borderWidth      1               50
-    option add *JMain.ButtonTray.relief           raised          50
+    switch -- [tk windowingsystem] {
+	aqua - x11 {
+	    option add *JMain*TNotebook.padding   {8}             50
+	    option add *JMain*bot.f.padding       {8 0 8 4}       50
+	}
+	default {
+	    option add *JMain*TNotebook.padding   {4 4 4 2}       50
+	    option add *JMain*bot.f.padding       {8 0 8 0}       50
+	}
+    }
+    option add *JMain*TMenubutton.padding         {1}             50
 
+    # Special for X11 menus to look ok.
+    if {[tk windowingsystem] eq "x11"} {
+	option add *JMain.Menu.borderWidth        0               50
+    }
+    
     # Generic tree options.
     option add *JMain*Tree.background             #dedede         30
     option add *JMain*Tree.backgroundImage        {}              30
     option add *JMain*Tree.highlightBackground    white           30
     option add *JMain*Tree.highlightColor         black           30
-    option add *JMain*Tree.styleIcons             plusminus       30
     option add *JMain*Tree.pyjamasColor           white           30
-    option add *JMain*Tree.selectBackground       black           30
-    option add *JMain*Tree.selectForeground       white           30
     option add *JMain*Tree.selectMode             1               30
-    option add *JMain*Tree.treeColor              gray50          30
 
-    # The tab notebook options.
-    option add *JMain*MacTabnotebook.activeForeground     black         50
-    option add *JMain*MacTabnotebook.activeTabColor       #efefef       50
-    option add *JMain*MacTabnotebook.activeTabBackground  #cdcdcd       50
-    option add *JMain*MacTabnotebook.activeTabOutline     black         50
-    option add *JMain*MacTabnotebook.tabBackground        #dedede       50
-    option add *JMain*MacTabnotebook.tabColor             #cecece       50
-    option add *JMain*MacTabnotebook.tabOutline           gray20        50
 
     variable treeOpts {background backgroundImage highlightBackground \
       highlightColor indention styleIcons pyjamasColor selectBackground \
       selectForeground selectMode treeColor}
     variable macTabOpts {activeForeground activeTabColor activeTabBackground \
       activeTabOutline background style tabBackground tabColor tabOutline}
-    
-    # Add all event hooks.
-    ::hooks::register quitAppHook            ::Jabber::UI::QuitHook
-    ::hooks::register loginHook              ::Jabber::UI::LoginCmd
-    ::hooks::register closeWindowHook        ::Jabber::UI::CloseHook
-    ::hooks::register logoutHook             ::Jabber::UI::LogoutHook
-    ::hooks::register setPresenceHook        ::Jabber::UI::SetPresenceHook
-    ::hooks::register groupchatEnterRoomHook ::Jabber::UI::EnterRoomHook
-    ::hooks::register groupchatExitRoomHook  ::Jabber::UI::ExitRoomHook
 
     # Collection of useful and common widget paths.
     variable jwapp
@@ -168,7 +162,7 @@ proc ::Jabber::UI::Init { } {
 	    {checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \
 	      {-variable ::Jabber::jstate(debugCmd)}}
 	    {separator}
-	    {command     mAboutCoccinella  {::SplashScreen::SplashScreen} normal   {}}
+	    {command     mAboutCoccinella  {::Splash::SplashScreen} normal   {}}
 	    {command     mCoccinellaHome   {::Jabber::UI::OpenCoccinellaURL} normal {}}
 	    {command     mBugReport        {::Jabber::UI::OpenBugURL}   normal {}}
 	}
@@ -211,7 +205,7 @@ proc ::Jabber::UI::Show {w args} {
     ::Debug 2 "::Jabber::UI::Show w=$w, jstate(rostBrowseVis)=$jstate(rostBrowseVis)"
 
     if {$jstate(rostBrowseVis)} {
-	::Jabber::UI::Build $w
+	Build $w
 	wm deiconify $w
 	raise $w
     } else {
@@ -225,7 +219,7 @@ proc ::Jabber::UI::Show {w args} {
 #       Must be persistant since roster/browser etc. are built once.
 #       
 # Arguments:
-#       w         the real toplevel path
+#       w           toplevel path
 #       
 # Results:
 #       $w
@@ -244,85 +238,83 @@ proc ::Jabber::UI::Build {w} {
     if {!$inited} {
 	Init
     }
-    if {$w != "."} {
-	::UI::Toplevel $w -macstyle documentProc
-	set wtop ${w}.
-    } else {
-	set wtop .
-    }
-    if {[string match "mac*" $this(platform)]} {
-	bind $w <FocusIn>  "+ ::UI::MacFocusFixEditMenu $w $wtop %W"
-	bind $w <FocusOut> "+ ::UI::MacFocusFixEditMenu $w $wtop %W"
-    }    
-    set jwapp(wtopRost) $w
+    ::UI::Toplevel $w -class JMain \
+      -macstyle documentProc -closecommand ::Jabber::UI::CloseHook
     wm title $w $prefs(theAppName)
+    ::UI::SetWindowGeometry $w
+    set jwapp(jmain) $w
 
     # Build minimal menu for Jabber stuff.
     MergeMenuDefs
-    set wmenu ${wtop}menu
+    
+    # Make main menus.
+    set wmenu $w.menu
     set jwapp(wmenu) $wmenu
     menu $wmenu -tearoff 0
+    if {[string match "mac*" $this(platform)]} {
+	bind $w <FocusIn>  +[list ::UI::MacFocusFixEditMenu $w $wmenu %W]
+	bind $w <FocusOut> +[list ::UI::MacFocusFixEditMenu $w $wmenu %W]
+    }    
     if {[string match "mac*" $this(platform)] && $prefs(haveMenus)} {
 	set haveAppleMenu 1
     } else {
 	set haveAppleMenu 0
     }
     if {$haveAppleMenu} {
-	::UI::BuildAppleMenu $wtop $wmenu.apple normal
+	::UI::BuildAppleMenu $w $wmenu.apple normal
     }
-    ::UI::NewMenu $wtop $wmenu.file    mFile     $menuDefs(rost,file)  normal
-    if {[string match "mac*" $this(platform)]} {
-	::UI::NewMenu $wtop $wmenu.edit  mEdit   $menuDefs(rost,edit)   normal
+    ::UI::NewMenu $w $wmenu.file    mFile     $menuDefs(rost,file)  normal
+    if {[tk windowingsystem] eq "aqua"} {
+	::UI::NewMenu $w $wmenu.edit  mEdit   $menuDefs(rost,edit)   normal
     }
-    ::UI::NewMenu $wtop $wmenu.jabber  mJabber   $menuDefs(rost,jabber) normal
-    ::UI::NewMenu $wtop $wmenu.info    mInfo     $menuDefs(rost,info)   normal
+    ::UI::NewMenu $w $wmenu.jabber  mJabber   $menuDefs(rost,jabber) normal
+    ::UI::NewMenu $w $wmenu.info    mInfo     $menuDefs(rost,info)   normal
     $w configure -menu $wmenu
     
-    # Use a frame here just to be able to set the class (JMain) which
-    # is useful for setting options.
-    if {$w == "."} {
-	set wmain .f
-    } else {
-	set wmain $w.f
-    }
-    set jwapp(fall) $wmain
-    frame $wmain -class JMain
-    pack  $wmain -fill both -expand 1
+    # Global frame.
+    set wall $w.frall
+    ttk::frame $wall
+    pack $wall -fill both -expand 1
     
+    # Special for X11 menus to look ok.
+    if {[tk windowingsystem] eq "x11"} {
+	ttk::separator $wall.stop -orient horizontal
+	pack $wall.stop -side top -fill x
+    }
+
     # Any header image?
-    set headImage [::Theme::GetImage [option get $wmain headImage {}]]
+    set headImage [::Theme::GetImage [option get $w headImage {}]]
     if {$headImage != ""} {
-	label $wmain.head -image $headImage
-	pack  $wmain.head -side top -anchor w
+	label $wall.head -image $headImage
+	pack  $wall.head -side top -anchor w
     }
     
     # Shortcut button part.
-    set iconConnect     [::Theme::GetImage [option get $wmain connectImage {}]]
-    set iconConnectDis  [::Theme::GetImage [option get $wmain connectDisImage {}]]
-    set iconInboxLett   [::Theme::GetImage [option get $wmain inboxLetterImage {}]]
-    set iconInboxLettDis  [::Theme::GetImage \
-      [option get $wmain inboxLetterDisImage {}]]
-    set iconInbox       [::Theme::GetImage [option get $wmain inboxImage {}]]
-    set iconInboxDis    [::Theme::GetImage [option get $wmain inboxDisImage {}]]
-    set iconNewUser     [::Theme::GetImage [option get $wmain newuserImage {}]]
-    set iconNewUserDis  [::Theme::GetImage [option get $wmain newuserDisImage {}]]
-    set iconStop        [::Theme::GetImage [option get $wmain stopImage {}]]
-    set iconStopDis     [::Theme::GetImage [option get $wmain stopDisImage {}]]
+    set iconConnect     [::Theme::GetImage [option get $w connectImage {}]]
+    set iconConnectDis  [::Theme::GetImage [option get $w connectDisImage {}]]
+    set iconInboxLett   [::Theme::GetImage [option get $w inboxLetterImage {}]]
+    set iconInboxLettDis [::Theme::GetImage [option get $w inboxLetterDisImage {}]]
+    set iconInbox       [::Theme::GetImage [option get $w inboxImage {}]]
+    set iconInboxDis    [::Theme::GetImage [option get $w inboxDisImage {}]]
+    set iconNewUser     [::Theme::GetImage [option get $w newuserImage {}]]
+    set iconNewUserDis  [::Theme::GetImage [option get $w newuserDisImage {}]]
+    set iconStop        [::Theme::GetImage [option get $w stopImage {}]]
+    set iconStopDis     [::Theme::GetImage [option get $w stopDisImage {}]]
 
     # Other icons.
-    set iconContactOff [::Theme::GetImage [option get $wmain contactOffImage {}]]
-    set iconResize     [::Theme::GetImage [option get $wmain resizeHandleImage {}]]
-    set iconRoster     [::Theme::GetImage [option get $wmain roster16Image {}]]
-    set statusImage    [::Theme::GetImage [option get $wmain statusWidgetImage {}]]
+    set iconContactOff [::Theme::GetImage [option get $w contactOffImage {}]]
+    set iconResize     [::Theme::GetImage [option get $w resizeHandleImage {}]]
+    set iconRoster     [::Theme::GetImage [option get $w roster16Image {}]]
+    set iconRosterDis  [::Theme::GetImage [option get $w roster16DisImage {}]]
+    set statusImage    [::Theme::GetImage [option get $w statusWidgetImage {}]]
 
-    set statusStyle  [option get $wmain statusWidgetStyle {}]
-    set fontS        [option get . fontSmall {}]
+    set statusStyle  [option get $w statusWidgetStyle {}]
     
-    set wtray $wmain.top
-    # D = -borderwidth 1 -relief raised
-    ::buttontray::buttontray $wtray
-    pack $wtray -side top -fill x
+    set wtray $wall.top
     set jwapp(wtray) $wtray
+
+    ::ttoolbar::ttoolbar $wtray
+    pack $wtray -side top -fill x
     
     $wtray newbutton connect -text [mc Connect] \
       -image $iconConnect -disabledimage $iconConnectDis \
@@ -339,66 +331,50 @@ proc ::Jabber::UI::Build {w} {
     $wtray newbutton newuser -text [mc Contact] \
       -image $iconNewUser -disabledimage $iconNewUserDis  \
       -command ::Jabber::User::NewDlg -state disabled
-    if {0} {
-	$wtray newbutton stop -text [mc Stop] \
-	  -image $iconStop -disabledimage $iconStopDis \
-	  -command ::Jabber::UI::StopConnect \
-	  -state disabled
-    }
+
     ::hooks::run buildJMainButtonTrayHook $wtray
 
     set shortBtWidth [$wtray minwidth]
 
-    # Keep empty frame for any padding.
-    frame $wmain.bpad
-    if {[$wmain.bpad cget -height] > 0} {
-	pack  $wmain.bpad -side bottom -fill x
-    }
+    ttk::separator $wall.s -orient horizontal
+    pack $wall.s -side top -fill x
 
-    # Build bottom and up to handle clipping when resizing.
-    # Jid entry with electric plug indicator.
-    set wbot              $wmain.bot.f
-    set jwapp(elplug)     $wbot.icon
-    set jwapp(mystatus)   $wbot.pad.stat
-    set jwapp(myjid)      $wbot.jid
-
-    frame $wmain.bot
-    pack  $wmain.bot -side bottom -fill x
-
-    frame $wbot
-    pack  $wbot -side bottom -fill x
-            
-    # D = -padx 6 -pady 2
-    frame $wbot.pad
-    pack  $wbot.pad -side left
-    ::Jabber::Status::Widget $jwapp(mystatus) $statusStyle \
-      ::Jabber::jstate(status) -command ::Jabber::SetStatus -image $statusImage
-    
-    pack  $jwapp(mystatus) -side left
+    # Status frame.
+    set wbot $wall.bot
+    ttk::frame $wbot
+    pack $wbot -side bottom -fill x
     if {![string match "mac*" $this(platform)]} {
-	label $wbot.size -image $iconResize
-	pack  $wbot.size -side right
+	ttk::label $wbot.size -compound image -image $iconResize
+	pack  $wbot.size -side right -anchor s
     }
-    label $jwapp(elplug) -image $iconContactOff
-    pack  $jwapp(elplug) -side right -pady 0 -padx 0
-    entry $jwapp(myjid) -state disabled -width 0 \
+    ttk::frame $wbot.f
+    pack $wbot.f -fill x
+  
+    ::Jabber::Status::Widget $wbot.f.bst $statusStyle \
+      ::Jabber::jstate(status) -command ::Jabber::SetStatus -image $statusImage    
+    ttk::label $wbot.f.l -style Small.TLabel \
       -textvariable ::Jabber::jstate(mejid)
-    pack  $jwapp(myjid) -side left -fill x -expand 1 -pady 0 -padx 0
-        
-    # Notebook frame.
-    set frtbook $wmain.fnb
-    # D = -bd 1 -relief raised
-    frame $frtbook    
-    pack  $frtbook -fill both -expand 1
-    set nbframe [::mactabnotebook::mactabnotebook ${frtbook}.tn]
+    pack  $wbot.f.bst  $wbot.f.l  -side left
+
+    set jwapp(mystatus)  $wbot.f.bst
+    set jwapp(myjid)     $wbot.f.l
+
+    # Notebook.
+    set nbframe $wall.fnb
     set jwapp(nbframe) $nbframe
+    ttk::notebook $nbframe
     pack $nbframe -fill both -expand 1
     
     # Make the notebook pages.
     # Start with the Roster page -----------------------------------------------
-    set ro [$nbframe newpage {Roster} -text [mc Contacts] -image $iconRoster]
+    set ro $nbframe.ro
+    frame $ro
+    set imSpec [list $iconRoster disabled $iconRosterDis background $iconRosterDis]
+    $nbframe add $ro -compound left -text [mc Contacts] -image $imSpec
     pack [::Roster::Build $ro.ro] -fill both -expand 1
 
+    set jwapp(rostertab) $ro
+    
     # Build only Browser and/or Agents page when needed.
     set minWidth [expr $shortBtWidth > 200 ? $shortBtWidth : 200]
     wm geometry $w ${minWidth}x360
@@ -406,15 +382,28 @@ proc ::Jabber::UI::Build {w} {
     wm minsize $w $minWidth 320
     wm maxsize $w 420 2000
     
+    ::hooks::run jabberBuildMain
+    
     return $w
 }
 
+proc ::Jabber::UI::GetMainWindow { } {
+    global wDlgs
+    
+    return $wDlgs(jmain)
+}
+
+proc ::Jabber::UI::GetMainMenu { } {
+    variable jwapp
+    
+    return $jwapp(wmenu)
+}
 
 proc ::Jabber::UI::CloseHook {wclose} {    
     variable jwapp
     
     set result ""
-    if {[info exists jwapp(wtopRost)] && [string equal $jwapp(wtopRost) $wclose]} {
+    if {[info exists jwapp(jmain)]} {
 	set ans [::UserActions::DoQuit -warning 1]
 	if {$ans == "no"} {
 	    set result stop
@@ -426,8 +415,8 @@ proc ::Jabber::UI::CloseHook {wclose} {
 proc ::Jabber::UI::QuitHook { } {
     variable jwapp
 
-    if {[info exists jwapp(wtopRost)]} {
-	::UI::SaveWinGeom $jwapp(wtopRost)
+    if {[info exists jwapp(jmain)]} {
+	::UI::SaveWinGeom $jwapp(jmain)
     }
 }
 
@@ -437,7 +426,7 @@ proc ::Jabber::UI::SetPresenceHook {type args} {
     array set argsArr [list -to $jserver(this)]
     array set argsArr $args
     if {[jlib::jidequal $jserver(this) $argsArr(-to)]} {
-	::Jabber::UI::WhenSetStatus $type
+	WhenSetStatus $type
     }
 }
 
@@ -449,20 +438,18 @@ proc ::Jabber::UI::LoginCmd { } {
 
     # Update UI in Roster window.
     set server [::Jabber::GetServerJid]
-    ::Jabber::UI::SetStatusMessage [mc jaauthok $server]
-    ::Jabber::UI::FixUIWhen "connectfin"
+    SetStatusMessage [mc jaauthok $server]
+    FixUIWhen "connectfin"
 }
 
 proc ::Jabber::UI::LogoutHook { } {
     
-    ::Jabber::UI::SetStatusMessage [mc {Logged out}]
-    ::Jabber::UI::FixUIWhen "disconnect"
-    ::Jabber::UI::WhenSetStatus "unavailable"
+    SetStatusMessage [mc {Logged out}]
+    FixUIWhen "disconnect"
+    WhenSetStatus "unavailable"
     
     # Be sure to kill the wave; could end up here when failing to connect.
-    ::Jabber::UI::StartStopAnimatedWave 0
-    
-    ::Jabber::UI::LogoutClear    
+    StartStopAnimatedWave 0
 }
     
 proc ::Jabber::UI::GetRosterWmenu { } {
@@ -482,75 +469,16 @@ proc ::Jabber::UI::OpenBugURL { } {
       "http://sourceforge.net/tracker/?group_id=68334&atid=520863"
 }
 
-# Jabber::UI::NewPage --
-#
-#       Makes sure that there exists a page in the notebook with the
-#       given name. Build it if missing. On return the page always exists.
-
-proc ::Jabber::UI::NewPage {name} {   
-    variable jwapp
-
-    set nbframe $jwapp(nbframe)
-    set pages [$nbframe pages]
-    ::Debug 2 "+++> ::Jabber::UI::NewPage name=$name, pages=$pages"
-    
-    switch -exact $name {
-	Agents {
-
-	    # Agents page
-	    if {[lsearch $pages Agents] < 0} {
-		set ag [$nbframe newpage {Agents} -text [msgcat::mc Agents]]    
-		pack [::Agents::Build $ag.ag] -fill both -expand 1
-	    }
-	}
-	Browser {
-    
-	    # Browser page
-	    set iconBrowser [::Theme::GetImage \
-	      [option get $jwapp(fall) browser16Image {}]]
-	    if {[lsearch $pages Browser] < 0} {
-		set br [$nbframe newpage {Browser} -text [msgcat::mc Browser] \
-		  -image $iconBrowser]    
-		pack [::Browse::Build $br.br] -fill both -expand 1
-	    }
-	}
-	Disco {
-	    set iconBrowser [::Theme::GetImage \
-	      [option get $jwapp(fall) browser16Image {}]]
-	    if {[lsearch $pages Disco] < 0} {
-		set di [$nbframe newpage {Disco} -text [msgcat::mc Disco] \
-		  -image $iconBrowser]    
-		pack [::Disco::Build $di.di] -fill both -expand 1
-	    }
-	}
-	default {
-	    # Nothing
-	    return -code error "Not recognized page name $name"
-	}
-    }    
-}
-
 proc ::Jabber::UI::StopConnect { } {
     
     ::Jabber::DoCloseClientConnection
     ::Login::Kill
 }    
 
-proc ::Jabber::UI::Pages { } {
+proc ::Jabber::UI::GetNotebook { } {
     variable jwapp
     
-    return [$jwapp(nbframe) pages]
-}
-
-proc ::Jabber::UI::LogoutClear { } {
-    variable jwapp
-    
-    set nbframe $jwapp(nbframe)
-    foreach page [$nbframe pages] {
-	if {![string equal $page "Roster"]} {
-	    $nbframe deletepage $page
-	}
-    }
+    return $jwapp(nbframe)
 }
 
 proc ::Jabber::UI::StartStopAnimatedWave {start} {
@@ -570,16 +498,15 @@ proc ::Jabber::UI::SetStatusMessage {msg} {
 proc ::Jabber::UI::MailBoxState {mailboxstate} {
     variable jwapp    
     
-    set w $jwapp(wtopRost)
-    set fall $jwapp(fall)
+    set w $jwapp(jmain)
         
     switch -- $mailboxstate {
 	empty {
-	    set im [::Theme::GetImage [option get $fall inboxImage {}]]
+	    set im [::Theme::GetImage [option get $w inboxImage {}]]
 	    $jwapp(wtray) buttonconfigure inbox -image $im
 	}
 	nonempty {
-	    set im [::Theme::GetImage [option get $fall inboxLetterImage {}]]
+	    set im [::Theme::GetImage [option get $w inboxLetterImage {}]]
 	    $jwapp(wtray) buttonconfigure inbox -image $im
 	}
     }
@@ -604,12 +531,12 @@ proc ::Jabber::UI::WhenSetStatus {type} {
 
 proc ::Jabber::UI::EnterRoomHook {roomJid protocol} {
     
-    ::Jabber::UI::GroupChat enter $roomJid
+    GroupChat enter $roomJid
 }
 
 proc ::Jabber::UI::ExitRoomHook {roomJid} {
     
-    ::Jabber::UI::GroupChat exit $roomJid
+    GroupChat exit $roomJid
 }
 
 # Jabber::UI::GroupChat --
@@ -707,26 +634,22 @@ proc ::Jabber::UI::MergeMenuDefs { } {
 proc ::Jabber::UI::FixUIWhen {what} {
     variable jwapp
         
-    set w     $jwapp(wtopRost)
-    set wtop  ${w}.
-    set wall  $jwapp(fall)
+    set w     $jwapp(jmain)
     set wmenu $jwapp(wmenu)
-    set wmj   ${wmenu}.jabber
-    set wmi   ${wmenu}.info
+    set wmj   $wmenu.jabber
+    set wmi   $wmenu.info
     set wtray $jwapp(wtray)
 
-    set contactOffImage [::Theme::GetImage [option get $wall contactOffImage {}]]
-    set contactOnImage  [::Theme::GetImage [option get $wall contactOnImage {}]]
-    set connectedImage  [::Theme::GetImage [option get $wall connectedImage {}]]
-    set stopImage       [::Theme::GetImage [option get $wall stopImage {}]]
-    set iconConnect     [::Theme::GetImage [option get $wall connectImage {}]]
+    set contactOffImage [::Theme::GetImage [option get $w contactOffImage {}]]
+    set contactOnImage  [::Theme::GetImage [option get $w contactOnImage {}]]
 
     switch -exact -- $what {
 	connectinit {
-	    #$wtray buttonconfigure connect -state disabled
-	    $wtray buttonconfigure connect -text [mc Stop] -image $stopImage \
+	    set stopImage       [::Theme::GetImage [option get $w stopImage {}]]
+
+	    $wtray buttonconfigure connect -text [mc Stop] \
+	      -image $stopImage -disabledimage $stopImage \
 	      -command ::Jabber::UI::StopConnect
-	    #$wtray buttonconfigure stop -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state disabled
@@ -736,12 +659,13 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	      -label [mc mLogout] -state normal
 	}
 	connectfin - connect {
-	    #$wtray buttonconfigure connect -state disabled
+	    set connectedImage    [::Theme::GetImage [option get $w connectedImage {}]]
+	    set connectedDisImage [::Theme::GetImage [option get $w connectedDisImage {}]]
+
 	    $wtray buttonconfigure connect -text [mc Logout] \
-	      -image $connectedImage -command ::Jabber::LoginLogout
+	      -image $connectedImage -disabledimage $connectedDisImage \
+	      -command ::Jabber::LoginLogout
 	    $wtray buttonconfigure newuser -state normal
-	    #$wtray buttonconfigure stop -state disabled
-	    $jwapp(elplug) configure -image $contactOnImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label [mc mLogout] -state normal
@@ -761,12 +685,13 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state disabled
 	}
 	disconnect {
-	    #$wtray buttonconfigure connect -state normal
+	    set iconConnect     [::Theme::GetImage [option get $w connectImage {}]]
+	    set iconConnectDis  [::Theme::GetImage [option get $w connectDisImage {}]]
+
 	    $wtray buttonconfigure connect -text [mc Login] \
-	      -image $iconConnect -command ::Jabber::LoginLogout
+	      -image $iconConnect -disabledimage $iconConnectDis \
+	      -command ::Jabber::LoginLogout
 	    $wtray buttonconfigure newuser -state disabled
-	    #$wtray buttonconfigure stop -state disabled
-	    $jwapp(elplug) configure -image $contactOffImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label [mc mLogin] -state normal

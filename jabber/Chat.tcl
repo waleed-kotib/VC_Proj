@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.118 2005-06-22 12:24:50 matben Exp $
+# $Id: Chat.tcl,v 1.119 2005-08-14 07:10:51 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -21,8 +21,6 @@ namespace eval ::Chat:: {
     ::hooks::register newChatMessageHook         ::Chat::GotMsg
     ::hooks::register newMessageHook             ::Chat::GotNormalMsg
     ::hooks::register presenceHook               ::Chat::PresenceHook
-    ::hooks::register closeWindowHook            ::Chat::CloseHook
-    ::hooks::register closeWindowHook            ::Chat::CloseHistoryHook
     ::hooks::register loginHook                  ::Chat::LoginHook
     ::hooks::register logoutHook                 ::Chat::LogoutHook
 
@@ -37,8 +35,6 @@ namespace eval ::Chat:: {
     # Use option database for customization. 
     # These are nonstandard option valaues and we may therefore keep priority
     # widgetDefault.
-    set fontS  [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
 
     # Icons
     option add *Chat*sendImage            send                  widgetDefault
@@ -56,6 +52,9 @@ namespace eval ::Chat:: {
 
     option add *Chat*notifierImage        notifier              widgetDefault    
     option add *Chat*tabAlertImage        lightbulbon           widgetDefault    
+
+    option add *Chat*tabCloseImage        closebutton           widgetDefault    
+    option add *Chat*tabCloseActiveImage  closebuttonActive     widgetDefault    
     
     option add *Chat*mePreForeground      red                   widgetDefault
     option add *Chat*mePreBackground      ""                    widgetDefault
@@ -74,7 +73,7 @@ namespace eval ::Chat:: {
     option add *Chat*sysPreFont           ""                    widgetDefault
     option add *Chat*sysTextFont          ""                    widgetDefault
     option add *Chat*histHeadForeground   ""                    widgetDefault
-    option add *Chat*histHeadBackground   gray60                widgetDefault
+    option add *Chat*histHeadBackground   gray80                widgetDefault
     option add *Chat*histHeadFont         ""                    widgetDefault
     option add *Chat*clockFormat          "%H:%M"               widgetDefault
     option add *Chat*clockFormatNotToday  "%b %d %H:%M"         widgetDefault
@@ -103,31 +102,23 @@ namespace eval ::Chat:: {
     }
 
     # Standard widgets.
-    option add *Chat.frall.borderWidth          1               50
-    option add *Chat.frall.relief               raised          50
-    option add *Chat*top.padX                   4               50
-    option add *Chat*top.padY                   2               50
-    option add *Chat*divt.borderWidth           2               50
-    option add *Chat*divt.height                2               50
-    option add *Chat*divt.relief                sunken          50
-
-    option add *ChatThread*fsub.padX            6               50
-    option add *ChatThread*fsub.padY            2               50
-    option add *ChatThread*fsub.l.padX          2               50
-    option add *ChatThread*fsub.p1.width        6               50
-    option add *ChatThread*fsub.p2.width        6               50
-    option add *ChatThread*mid.padX             6               50
-    option add *ChatThread*mid.padY             2               50
+    if {[tk windowingsystem] eq "aqua"} {
+	option add *Chat*TNotebook.padding         {8 8 8 18}       50
+    } else {
+	option add *Chat*TNotebook.padding         {8 8 8 8}        50
+    }
     option add *ChatThread*pane.borderWidth     1               50
     option add *ChatThread*pane.relief          sunken          50
     option add *ChatThread*frtxt.text.borderWidth     1                50
     option add *ChatThread*frtxt.text.relief          sunken           50
     option add *ChatThread*frtxtsnd.text.borderWidth  1                50
     option add *ChatThread*frtxtsnd.text.relief       sunken           50
-    option add *ChatThread*bot.padX             16              50
-    option add *ChatThread*bot.smile.padX       6               50
-    option add *ChatThread*bot.smile.padY       2               50
     
+    option add *ChatThread.padding              {12  0 12  0}   50
+    option add *ChatThread*active.padding       {1}             50
+    option add *ChatThread*TMenubutton.padding  {1}             50
+    option add *ChatThread*top.padding          {12  8 12  8}   50
+    option add *ChatThread*bot.padding          {0   6  0  6}   50
 
     
     # Local preferences.
@@ -172,39 +163,54 @@ proc ::Chat::StartThreadDlg {args} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
     wm title $w [mc {Start Chat}]
-    
-    set fontSB [option get . fontSmallBold {}]
-    
+    ::UI::SetWindowPosition $w
+       
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
-    ::headlabel::headlabel $w.frall.head -text [mc {Chat with}]
+    ttk::label $w.frall.head -style Headlabel \
+      -text [mc {Chat with}] -compound left
     pack $w.frall.head -side top -fill both -expand 1
+
+    ttk::separator $w.frall.s -orient horizontal
+    pack $w.frall.s -side top -fill x
     
     # Entries etc.
-    set frmid [frame $w.frall.frmid -borderwidth 0]
-    pack $frmid -side top -fill both -expand 1 -pady 6
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -side top -fill both -expand 1
     
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
+
     set jidlist [::Jabber::RosterCmd getusers -type available]
-    label $frmid.luser -text "[mc {Jabber user id}]:"  \
-      -font $fontSB -anchor e
+    ttk::label $frmid.luser -text "[mc {Jabber user ID}]:"  \
+      -anchor e
     ::entrycomp::entrycomp $frmid.euser $jidlist -width 26    \
       -textvariable [namespace current]::user
-    grid $frmid.luser -column 0 -row 1 -sticky e
-    grid $frmid.euser -column 1 -row 1 -sticky w
+
+    grid  $frmid.luser  $frmid.euser  -sticky e -padx 2
+    grid  $frmid.euser  -sticky w
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc OK] \
-      -default active -command [list [namespace current]::DoStart $w]] \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::DoCancel $w]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc OK] \
+      -default active -command [list [namespace current]::DoStart $w]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::DoCancel $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
     
-    ::UI::SetWindowPosition $w
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
     
@@ -291,7 +297,8 @@ proc ::Chat::StartThread {jid args} {
 	    upvar 0 $chattoken chatstate
 	}
     } else {
-	set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
+	set key "[pid].[clock seconds].$jstate(mejid)"
+	set threadID [::sha1pure::sha1 $key]
     }
     
     if {!$havedlg} {
@@ -304,8 +311,7 @@ proc ::Chat::StartThread {jid args} {
 		variable $chattoken
 		upvar 0 $chattoken chatstate
 	    } else {
-		set chattoken [NewPage $dlgtoken $threadID \
-		  -from $jid]
+		set chattoken [NewPage $dlgtoken $threadID -from $jid]
 		
 		# Make page frontmost.
 		variable $chattoken
@@ -315,7 +321,7 @@ proc ::Chat::StartThread {jid args} {
 		variable $dlgtoken
 		upvar 0 $dlgtoken dlgstate
 		
-		$dlgstate(wnb) displaypage $chatstate(pagename)
+		$dlgstate(wnb) select $chatstate(wpage)
 	    }
 	} else {
 	    eval {Build $threadID -from $jid} $args
@@ -422,16 +428,16 @@ proc ::Chat::GotMsg {body args} {
     upvar 0 $dlgtoken dlgstate
 
     # We may have reset its jid to a 2-tier jid if it has been offline.
-    set chatstate(jid)       $mjid
-    set chatstate(fromjid)   $jid
-    set chatstate(shortname) [::Roster::GetDisplayName $jid]
+    set chatstate(jid)         $mjid
+    set chatstate(fromjid)     $jid
+    set chatstate(displayname) [::Roster::GetDisplayName $jid]
     
     # If new chat dialog check to see if we have got a thread history to insert.
     if {$newdlg} {
 	if {[info exists argsArr(-thread)]} {
 	    InsertHistory $chattoken
 	} else {
-	    InsertHistory $chattoken last 10
+	    InsertHistory $chattoken last $jprefs(chat,histLen)
 	}
     }
     set w $dlgstate(w)
@@ -446,7 +452,7 @@ proc ::Chat::GotMsg {body args} {
 
 	# See if we've got a jabber:x:event (JEP-0022).
 	# 
-	#  Should we handle this with hooks????
+	# @@@ Should we handle this with hooks?
 	eval {XEventHandleAnyXElem $chattoken $argsArr(-x)} $args
     }
 
@@ -468,7 +474,9 @@ proc ::Chat::GotMsg {body args} {
 	    set secs [clock seconds]
 	}
 	set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
-	PutMessageInHistoryFile $jid2 [list $jid2 $threadID $dateISO $body]
+	::History::PutToFileEx $jid2 \
+	 -type chat -name $jid2 -thread $threadID -time $dateISO -body $body \
+	 -tag you
 	eval {TabAlert $chattoken} $args
 	XEventCancel $chattoken
     }
@@ -518,6 +526,7 @@ proc ::Chat::GotNormalMsg {body args} {
 #       Puts message in text chat window.
 #       
 #       args:   -secs seconds
+#               -jidfrom jid
 
 proc ::Chat::InsertMessage {chattoken whom body args} {
     variable $chattoken
@@ -528,10 +537,16 @@ proc ::Chat::InsertMessage {chattoken whom body args} {
     set w     $chatstate(w)
     set wtext $chatstate(wtext)
     set jid   $chatstate(jid)
+    
         
     switch -- $whom {
 	me {
-	    jlib::splitjidex [::Jabber::GetMyJid] node host res
+	    if {[info exists argsArr(-jidfrom)]} {
+		set myjid $argsArr(-jidfrom)
+	    } else {
+		set myjid [::Jabber::GetMyJid]
+	    }
+	    jlib::splitjidex $myjid node host res
 	    if {$node == ""} {
 		set name $host
 	    } else {
@@ -539,11 +554,16 @@ proc ::Chat::InsertMessage {chattoken whom body args} {
 	    }
 	}
 	you {
-	    jlib::splitjid $jid jid2 res
+	    if {[info exists argsArr(-jidfrom)]} {
+		set youjid $argsArr(-jidfrom)
+	    } else {
+		set youjid $jid
+	    }
+	    jlib::splitjid $youjid jid2 res
 	    if {[::Jabber::JlibCmd service isroom $jid2]} {
 		set name [::Jabber::JlibCmd service nick $jid]
 	    } else {
-		set name $chatstate(shortname)
+		set name $chatstate(displayname)
 	    }
 	}
     }
@@ -577,13 +597,13 @@ proc ::Chat::InsertMessage {chattoken whom body args} {
 	me {
 	    $wtext insert end $prefix mepre
 	    $wtext insert end "   " metext
-	    ::Text::Parse $wtext $body metext
+	    ::Text::ParseMsg chat $jid $wtext $body metext
 	    $wtext insert end \n
 	}
 	you {
 	    $wtext insert end $prefix youpre
 	    $wtext insert end "   " youtext
-	    ::Text::Parse $wtext $body youtext
+	    ::Text::ParseMsg chat $jid $wtext $body youtext
 	    $wtext insert end \n
 	}
 	sys {
@@ -605,58 +625,62 @@ proc ::Chat::InsertHistory {chattoken {which thread} {detail ""}} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    ::Debug 2 "::Chat::InsertHistory"
+    ::Debug 2 "::Chat::InsertHistory which=$which, detail=$detail"
     
     # First find any matching history file.
     set jid2 $chatstate(jid2)
-    set path [file join $this(historyPath) [uriencode::quote $jid2]] 
-    if {![file exists $path]} {
+    if {![::History::HaveMessageFile $jid2]} {
 	return
     }
-
     set threadID $chatstate(threadid)
-    set uidstart 1000
-    set uid $uidstart
-    incr uidstart
-    if {[catch {source $path}]} {
-	return
-    }
-    set uidstop $uid
+    
+    array set msg [::History::ReadMessageFile $jid2]
+    set names [lsort -integer [array names msg]]
     set keys {}
 
-    if {[string equal $which "thread"]} {
-	
-	# Collect all matching threads.	
-	foreach i [lsort -integer [array names message]] {
-	    set cthread [lindex $message($i) 1]
-	    if {[string equal $cthread $threadID]} {
-		lappend keys $i
+    switch -- $which {
+	thread {	
+	    # Collect all matching threads.	
+	    foreach i $names {
+		array unset tmp
+		array set tmp $msg($i)
+		if {[info exists tmp(-thread)] && \
+		  [string equal $tmp(-thread) $threadID]} {
+		    lappend keys $i
+		}
 	    }
 	}
-    } elseif {[string equal $which "all"]} {
-	
-	# All.
-	set keys [lsort -integer [array names message]]
-    } elseif {[string equal $which "last"]} {
-	
-	# Last number
-	if {[string is integer -strict $detail]} {
-	    set keys [lsort -integer [array names message]]
-	    set keys [lrange $keys end-$detail end]
+	all {
+	    # All.
+	    set keys $names
+	}
+	last {
+	    # Last number
+	    if {[string is integer -strict $detail]} {
+		set keys [lrange $names end-$detail end]
+	    }
 	}
     }
     
     foreach i $keys {
-	set cjid [lindex $message($i) 0]
-	set date [lindex $message($i) 2]
-	set body [lindex $message($i) 3]
-	set secs [clock scan $date]
-	if {[string equal $cjid $jid2]} {
+	array unset tmp
+	foreach key {body name tag type thread} {
+	    set tmp(-$key) ""
+	}
+	array set tmp $msg($i)
+
+	if {$tmp(-time) != ""} {
+	    set secs [clock scan $tmp(-time)]
+	} else {
+	    set secs ""
+	}
+	if {[string equal $tmp(-name) $jid2]} {
 	    set whom you
 	} else {
 	    set whom me
 	}
-	InsertMessage $chattoken $whom $body -secs $secs
+	InsertMessage $chattoken $whom $tmp(-body) -secs $secs \
+	  -jidfrom $tmp(-name)
     }
 }
 
@@ -691,21 +715,20 @@ proc ::Chat::Build {threadID args} {
     array set argsArr $args
 
     set dlgstate(w)           $w
+    set dlgstate(uid)         0
     set dlgstate(got1stMsg)   0
     set dlgstate(recentctokens) {}
     
     # Toplevel with class Chat.
-    ::UI::Toplevel $w -class Chat -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -class Chat \
+      -usemacmainmenu 1 -macstyle documentProc -closecommand ::Chat::CloseHook
 
-    set fontSB [option get . fontSmallBold {}]
-
-    # Global frame. D = -borderwidth 1 -relief raised
-    frame $w.frall
-    pack  $w.frall -fill both -expand 1
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
     # Widget paths.
-    set wtop        $w.frall.top
-    set wtray       $wtop.tray
+    set wtray       $w.frall.tray
     set wcont       $w.frall.cc        ;# container frame for wthread or wnb
     set wthread     $w.frall.fthr
     set wnb         $w.frall.nb        ;# tabbed notebook
@@ -730,11 +753,7 @@ proc ::Chat::Build {threadID args} {
     set iconNotifier    [::Theme::GetImage [option get $w notifierImage {}]]
     set dlgstate(iconNotifier) $iconNotifier
 
-    # D = -padx 4 -pady 2
-    frame $wtop
-    pack  $wtop -side top -fill x
-
-    ::buttontray::buttontray $wtray
+    ::ttoolbar::ttoolbar $wtray
     pack $wtray -side top -fill x
 
     $wtray newbutton send  \
@@ -766,13 +785,14 @@ proc ::Chat::Build {threadID args} {
     
     set shortBtWidth [$wtray minwidth]
     
-    # D = -bd 2 -relief sunken
-    pack [frame $w.frall.divt] -fill x -side top
+    # D =
+    ttk::separator $w.frall.divt -orient horizontal
+    pack $w.frall.divt -side top -fill x
 
     # Having the frame with thread frame as a sibling makes it possible
     # to pack it in a different place.
-    frame $wcont -bd 0
-    pack  $wcont -side top -fill both -expand 1
+    ttk::frame $wcont
+    pack $wcont -side top -fill both -expand 1
     
     # Use an extra frame that contains everything thread specific.
     set chattoken [eval {
@@ -780,9 +800,7 @@ proc ::Chat::Build {threadID args} {
     pack $wthread -in $wcont -fill both -expand 1
     variable $chattoken
     upvar 0 $chattoken chatstate
-            
-    set dlgstate(wbtsend)    $w.frall.frbot.btok
- 
+             
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jchat)]]
     if {$nwin == 1} {
 	::UI::SetWindowGeometry $w $wDlgs(jchat)
@@ -831,8 +849,6 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     lappend dlgstate(chattokens) $chattoken
     lappend dlgstate(recentctokens) $chattoken
 
-    set fontS  [option get . fontSmall {}]
-
     # -from is sometimes a 3-tier jid /resource included.
     # Try to keep any /resource part unless not possible.
     
@@ -848,7 +864,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(fromjid)          $jid
     set chatstate(jid)              $mjid
     set chatstate(jid2)             $jid2
-    set chatstate(shortname)        [::Roster::GetDisplayName $mjid]
+    set chatstate(displayname)      [::Roster::GetDisplayName $mjid]
     set chatstate(dlgtoken)         $dlgtoken
     set chatstate(threadid)         $threadID
     set chatstate(nameorjid)        [::Roster::GetNameOrjid $jid2]
@@ -877,83 +893,84 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     }
     
     # Use an extra frame that contains everything thread specific.
-    frame $wthread -class ChatThread
+    ttk::frame $wthread -class ChatThread
     set w [winfo toplevel $wthread]
     set chatstate(w) $w
 
     SetTitle $chattoken
 
+    set wtop        $wthread.top
     set wbot        $wthread.bot
+    set wsubject    $wtop.e
+    set wpresimage  $wtop.i
     set wnotifier   $wbot.lnot
-    set wsmile      $wbot.smile.pad
-    set wsubject    $wthread.frtop.fsub.e
-    set wpresimage  $wthread.frtop.fsub.i
+    set wsmile      $wbot.smile
     
     # To and subject fields.
-    set frtop [frame $wthread.frtop]
-    pack $frtop -side top -anchor w -fill x
+    ttk::frame $wtop
+    pack $wtop -side top -anchor w -fill x
     
     set icon [::Roster::GetPresenceIconFromJid $jid]
     
-    # D = -padx 6 -pady 2
-    set   wsub $frtop.fsub
-    frame $wsub
-    label $wsub.l -text "[mc Subject]:"
-    entry $wsub.e -textvariable $chattoken\(subject)
-    frame $wsub.p1
-    label $wsub.i  -image $icon
-    frame $wsub.p2
-    pack  $wsub    -side top -anchor w -fill x
-    pack  $wsub.l  -side left
-    pack  $wsub.p2 -side right
-    pack  $wsub.i  -side right
-    pack  $wsub.p1 -side right
-    pack  $wsub.e  -side top -fill x
+    # D =
+    ttk::label $wtop.l -style Small.TLabel \
+      -text "[mc Subject]:" -padx 4
+    ttk::entry $wtop.e -font CociSmallFont \
+      -textvariable $chattoken\(subject)
+    ttk::frame $wtop.p1 -width 8
+    ttk::label $wtop.i  -image $icon
+    pack  $wtop.l  -side left
+    pack  $wtop.i  -side right
+    pack  $wtop.p1 -side right
+    pack  $wtop.e  -side top -fill x
 
     # Notifier label.
     set chatstate(wnotifier) $wnotifier
         
     # The bottom frame.
-    frame $wbot
-    pack  $wbot -side bottom -anchor w -fill x
-    checkbutton $wbot.active -text " [mc {Active <Return>}]" \
+    ttk::frame $wbot
+    ttk::checkbutton $wbot.active -style Toolbutton \
+      -image [::Theme::GetImage return] \
       -command [list [namespace current]::ActiveCmd $chattoken] \
       -variable $chattoken\(active)
-    pack $wbot.active -side left
-    frame $wbot.p1
-    pack  $wbot.p1 -side left
-    frame $wbot.smile
-    pack  $wbot.smile -side left
     set cmd [list [namespace current]::SmileyCmd $chattoken]
     ::Emoticons::MenuButton $wsmile -command $cmd
-    pack $wsmile -side left	
-    label $wnotifier -textvariable $chattoken\(notifier) -pady 0 -bd 0 \
-      -compound left -anchor w
-    pack $wnotifier -side left
+    ttk::label $wnotifier -style Small.TLabel \
+      -textvariable $chattoken\(notifier) \
+      -padding {10 0} -compound left -anchor w
+    pack  $wbot        -side bottom -anchor w -fill x
+    pack  $wbot.active -side left -fill y -padx 4
+    pack  $wsmile      -side left -fill y -padx 4
+    pack  $wnotifier   -side left         -padx 4
+    
+    ::balloonhelp::balloonforwindow $wbot.active [mc jaactiveret]
 
-    set wmid        $wthread.mid
+    set wmid        $wthread.m
     set wpane       $wmid.pane
     set wtxt        $wpane.frtxt
+    set wtxtsnd     $wpane.frtxtsnd        
     set wtext       $wtxt.text
     set wysc        $wtxt.ysc
-    set wtxtsnd     $wpane.frtxtsnd        
     set wtextsnd    $wtxtsnd.text
     set wyscsnd     $wtxtsnd.ysc
 
-    frame $wmid
+    # Frame to serve as container for the pane geometry manager.
+    # D =
+    frame $wmid -bd 1 -relief sunken
     pack  $wmid -side top -fill both -expand 1
 
-    # Text chat.
-    frame $wpane -height 250 -width 300 -class Pane
-    pack  $wpane -side top -fill both -expand 1
-    frame $wtxt
-	
+    # Pane geometry manager.
+    ttk::paned $wpane -orient vertical
+    pack $wpane -side top -fill both -expand 1    
+
+    # Text chat dialog.
+    frame $wtxt	
     text $wtext -height 12 -width 1 -state disabled -cursor {} -wrap word  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns]]
-    scrollbar $wysc -orient vertical -command [list $wtext yview]
-    grid $wtext -column 0 -row 0 -sticky news
-    grid $wysc  -column 1 -row 0 -sticky ns
+    tuscrollbar $wysc -orient vertical -command [list $wtext yview]
+    grid  $wtext  -column 0 -row 0 -sticky news
+    grid  $wysc   -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxt 0 -weight 1
     grid rowconfigure    $wtxt 0 -weight 1
     
@@ -965,12 +982,15 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     text  $wtextsnd -height 4 -width 1 -wrap word \
       -yscrollcommand [list ::UI::ScrollSet $wyscsnd \
       [list grid $wyscsnd -column 1 -row 0 -sticky ns]]
-    scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
-    grid $wtextsnd -column 0 -row 0 -sticky news
-    grid $wyscsnd -column 1 -row 0 -sticky ns
+    tuscrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
+    grid  $wtextsnd  -column 0 -row 0 -sticky news
+    grid  $wyscsnd   -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxtsnd 0 -weight 1
     grid rowconfigure $wtxtsnd 0 -weight 1
     
+    $wpane add $wtxt -weight 1
+    $wpane add $wtxtsnd -weight 1
+
     if {$jprefs(chatFont) != ""} {
 	$wtextsnd configure -font $jprefs(chatFont)
     }
@@ -981,23 +1001,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 	ActiveCmd $chattoken
     }
     
-    set imageHorizontal \
-      [::Theme::GetImage [option get $wpane imageHorizontal {}]]
-    set sashHBackground [option get $wpane sashHBackground {}]
-
-    set paneopts [list -orient vertical -limit 0.0]
-    if {[info exists prefs(paneGeom,$wDlgs(jchat))]} {
-	lappend paneopts -relative $prefs(paneGeom,$wDlgs(jchat))
-    } else {
-	lappend paneopts -relative {0.75 0.25}
-    }
-    if {$sashHBackground != ""} {
-	lappend paneopts -image "" -handlelook [list -background $sashHBackground]
-    } elseif {$imageHorizontal != ""} {
-	lappend paneopts -image $imageHorizontal
-    }    
-    eval {::pane::pane $wtxt $wtxtsnd} $paneopts
-
+    after 10 [list ::UI::SetSashPos $w $wpane]
+    
     bind $wtextsnd <Return>  \
       [list [namespace current]::ReturnKeyPress $chattoken]    
     bind $wtextsnd <$this(modkey)-Return> \
@@ -1011,10 +1016,10 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 	  [list +[namespace current]::KeyPressEvent $chattoken %A]
     }
     set chatstate(wthread)  $wthread
+    set chatstate(wpane)    $wpane
     set chatstate(wtext)    $wtext
     set chatstate(wtxt)     $wtxt
     set chatstate(wtextsnd) $wtextsnd
-    #set chatstate(wclose)   $wclose
     set chatstate(wsubject) $wsubject
     set chatstate(wsmile)   $wsmile
     set chatstate(wpresimage) $wpresimage
@@ -1029,8 +1034,11 @@ proc ::Chat::SetTitle {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
         
-    wm title $chatstate(w) \
-      "[mc Chat]: $chatstate(shortname) ($chatstate(fromjid))"
+    set str "[mc Chat]: $chatstate(displayname)"
+    if {$chatstate(displayname) ne $chatstate(fromjid)} {
+	append str " ($chatstate(fromjid))"
+    }
+    wm title $chatstate(w) $str
 }
 
 # ::Chat::NewPage, ... --
@@ -1050,12 +1058,9 @@ proc ::Chat::NewPage {dlgtoken threadID args} {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
-	set name $chatstate(shortname)
-	set chatstate(pagename) $name
-	set dlgstate(name2token,$name) $chattoken
-	
 	# Repack the ChatThread in notebook page.
 	MoveThreadToPage $dlgtoken $chattoken
+	DrawCloseButton $dlgtoken
     } 
 
     # Make fresh page with chat widget.
@@ -1063,33 +1068,26 @@ proc ::Chat::NewPage {dlgtoken threadID args} {
     return $chattoken
 }
 
-proc ::Chat::MakeNewPage {dlgtoken threadID args} {
+proc ::Chat::DrawCloseButton {dlgtoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
-    variable uidpage
-    array set argsArr $args
-        
-    # Make fresh page with chat widget.
-    set name [::Roster::GetDisplayName $argsArr(-from)]
-    set wnb $dlgstate(wnb)
-    set name [$wnb getuniquename $name]
-    set wpage [$wnb newpage $name]
+    # Close button (exp). 
+    set w $dlgstate(w)
+    set im       [::Theme::GetImage [option get $w tabCloseImage {}]]
+    set imactive [::Theme::GetImage [option get $w tabCloseActiveImage {}]]
+    set wclose $dlgstate(wnb).close
+    ttk::label $wclose  \
+      -image [list $im active $imactive] -compound image
+    place $wclose -anchor ne -relx 1.0 -x -6 -y 6
 
-    # We must make thye new page a sibling of the notebook in order to be
-    # able to reparent it when notebook gons.
-    set wthread $dlgstate(wthread)[incr uidpage]
-    set chattoken [eval {
-	BuildThreadWidget $dlgtoken $wthread $threadID
-    } $args]
-    pack $wthread -in $wpage -fill both -expand true
-    
-    variable $chattoken
-    upvar 0 $chattoken chatstate
-    set chatstate(pagename) $name
-    set dlgstate(name2token,$name) $chattoken
-    
-    return $chattoken
+    bind $wclose <Enter> {+%W state active }
+    bind $wclose <Leave> {+%W state !active }
+    bind  $wclose <ButtonPress-1> \
+      [list [namespace current]::ClosePageCmd $dlgtoken]
+
+    ::balloonhelp::balloonforwindow $wclose [mc {Close page}]
+    set dlgstate(wclose) $wclose
 }
 
 proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
@@ -1102,16 +1100,54 @@ proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
     set wnb     $dlgstate(wnb)
     set wcont   $dlgstate(wcont)
     set wthread $chatstate(wthread)
-    set name    $chatstate(pagename)
+    set dispname  $chatstate(displayname)
     
     pack forget $wthread
-    ::mactabnotebook::mactabnotebook $wnb -closebutton 1  \
-      -closecommand [list [namespace current]::ClosePageCmd $dlgtoken]  \
-      -selectcommand [list [namespace current]::SelectPageCmd $dlgtoken]
+
+    ttk::notebook $wnb
+    bind $wnb <<NotebookTabChanged>> \
+      [list [namespace current]::TabChanged $dlgtoken]
+    tile::notebook::enableTraversal $wnb
     pack $wnb -in $wcont -fill both -expand true -side right
-    set wpage [$wnb newpage $name]	
+
+    set wpage $wnb.p[incr dlgstate(uid)]
+    ttk::frame $wpage
+    $wnb add $wpage -sticky news -text $dispname -compound left
     pack $wthread -in $wpage -fill both -expand true -side right
     raise $wthread
+    
+    set chatstate(wpage) $wpage
+    set dlgstate(wpage2token,$wpage) $chattoken
+}
+
+proc ::Chat::MakeNewPage {dlgtoken threadID args} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    variable uidpage
+    array set argsArr $args
+        
+    # Make fresh page with chat widget.
+    set dispname [::Roster::GetDisplayName $argsArr(-from)]
+    set wnb $dlgstate(wnb)
+    set wpage $wnb.p[incr dlgstate(uid)]
+    ttk::frame $wpage
+    $wnb add $wpage -sticky news -text $dispname -compound left
+
+    # We must make thye new page a sibling of the notebook in order to be
+    # able to reparent it when notebook gons.
+    set wthread $dlgstate(wthread)[incr uidpage]
+    set chattoken [eval {
+	BuildThreadWidget $dlgtoken $wthread $threadID
+    } $args]
+    pack $wthread -in $wpage -fill both -expand true
+    
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    set chatstate(wpage) $wpage
+    set dlgstate(wpage2token,$wpage) $chattoken
+    
+    return $chattoken
 }
 
 proc ::Chat::CloseThread {chattoken} {
@@ -1120,7 +1156,7 @@ proc ::Chat::CloseThread {chattoken} {
     
     set dlgtoken $chatstate(dlgtoken)
     DeletePage $chattoken
-     set newchattoken [GetActiveChatToken $dlgtoken]
+    set newchattoken [GetActiveChatToken $dlgtoken]
 
     # Set state of new page.
     SetThreadState $dlgtoken $newchattoken
@@ -1134,9 +1170,9 @@ proc ::Chat::DeletePage {chattoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
-    set name $chatstate(pagename)
-    $dlgstate(wnb) deletepage $name
-    unset dlgstate(name2token,$name)
+    set wpage $chatstate(wpage)
+    $dlgstate(wnb) forget $wpage
+    unset dlgstate(wpage2token,$wpage)
     
     # Delete the actual widget.
     destroy $chatstate(wthread)
@@ -1151,7 +1187,6 @@ proc ::Chat::DeletePage {chattoken} {
 	upvar 0 $chattoken chatstate
 
 	MoveThreadFromPage $dlgtoken $chattoken
-	pack forget $chatstate(wclose)
     }
 }
 
@@ -1163,8 +1198,10 @@ proc ::Chat::MoveThreadFromPage {dlgtoken chattoken} {
     
     set wnb     $dlgstate(wnb)
     set wcont   $dlgstate(wcont)
-    set name    $chatstate(pagename)
     set wthread $chatstate(wthread)
+    
+    # This seems necessary on mac in order to not get a blank page.
+    update idletasks
 
     pack forget $wthread
     destroy $wnb
@@ -1173,37 +1210,47 @@ proc ::Chat::MoveThreadFromPage {dlgtoken chattoken} {
     SetThreadState $dlgtoken $chattoken
 }
 
-proc ::Chat::ClosePageCmd {dlgtoken w name} {
+proc ::Chat::ClosePageCmd {dlgtoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
-    # We could issue some kind of info/warning here?
-    
-    set chattoken [GetTokenFrom chat pagename $name]
+    set chattoken [GetActiveChatToken $dlgtoken]
     if {$chattoken != ""} {	
 	CloseThread $chattoken
     }
-    
-    # We handle the page destruction here already since need to clean up after.
-    return -code break
 }
 
-# Chat::SelectPageCmd --
+# Chat::TabChanged --
 # 
-#       Callback command from tab notebook widget when selecting new tab.
+#       Callback command from notebook widget when selecting new tab.
 
-proc ::Chat::SelectPageCmd {dlgtoken w name} {
+proc ::Chat::TabChanged {dlgtoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
-    Debug 3 "::Chat::SelectPageCmd name=$name"
-        
-    set chattoken $dlgstate(name2token,$name)
+    Debug 2 "::Chat::TabChanged"
+
+    set wnb $dlgstate(wnb)
+    set wpage [GetNotebookWpageFromIndex $wnb [$wnb index current]]
+    set chattoken $dlgstate(wpage2token,$wpage)
+
     SetThreadState $dlgtoken $chattoken
     SetFocus $dlgtoken $chattoken
     
     lappend dlgstate(recentctokens) $chattoken
     set dlgstate(recentctokens) [lrange $dlgstate(recentctokens) end-1 end]
+}
+
+proc ::Chat::GetNotebookWpageFromIndex {wnb index} {
+    
+    set wpage ""
+    foreach w [$wnb tabs] {
+	if {[$wnb index $w] == $index} {
+	    set wpage $w
+	    break
+	}
+    }
+    return $wpage
 }
 
 proc ::Chat::SetThreadState {dlgtoken chattoken} {
@@ -1223,9 +1270,11 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
 	SetState $chattoken disabled
     }
     if {[winfo exists $dlgstate(wnb)]} {
-	$dlgstate(wnb) pageconfigure $chatstate(pagename) -image ""
+	$dlgstate(wnb) tab $chatstate(wpage) -image ""
     }
     SetTitle $chattoken
+    
+    SetState $chattoken normal
 }
 
 # Chat::SetFocus --
@@ -1240,9 +1289,8 @@ proc ::Chat::SetFocus {dlgtoken chattoken} {
 
     variable $chattoken
     upvar 0 $chattoken chatstate
-
+    
     # Try remember any previous focus on previous page.
-    #puts ".....$dlgstate(recentctokens)"
     if {[llength dlgstate(recentctokens)]} {
 	set ctoken [lindex $dlgstate(recentctokens) end]
 	variable $ctoken
@@ -1256,6 +1304,7 @@ proc ::Chat::SetFocus {dlgtoken chattoken} {
     } else {
 	set wfocus $chatstate(wtextsnd)
     }
+    
     # This seems to be needed on macs.
     if {[string equal $this(platform) "macosx"]} {
 	update idletasks
@@ -1283,7 +1332,6 @@ proc ::Chat::SetState {chattoken state} {
     foreach name {send sendfile} {
 	$dlgstate(wtray) buttonconfigure $name -state $state 
     }
-    #$dlgstate(wbtsend)   configure -state $state
     $chatstate(wtextsnd) configure -state $state
     $chatstate(wsubject) configure -state $state
     $chatstate(wsmile)   configure -state $state
@@ -1299,8 +1347,9 @@ proc ::Chat::GetActiveChatToken {dlgtoken} {
     upvar 0 $dlgtoken dlgstate
     
     if {[winfo exists $dlgstate(wnb)]} {
-	set name [$dlgstate(wnb) displaypage]
-	set chattoken $dlgstate(name2token,$name)
+	set wnb $dlgstate(wnb)
+	set wpage [GetNotebookWpageFromIndex $wnb [$wnb index current]]
+	set chattoken $dlgstate(wpage2token,$wpage)
     } else {
 	set chattoken [lindex $dlgstate(chattokens) 0]
     }
@@ -1318,10 +1367,11 @@ proc ::Chat::TabAlert {chattoken args} {
     if {[winfo exists $dlgstate(wnb)]} {
 	set w       $dlgstate(w)
 	set wnb     $dlgstate(wnb)
-	set name    $chatstate(pagename)
-	if {[$wnb displaypage] != $name} {
+	
+	# Show only if not current page.
+	if {[GetActiveChatToken $dlgtoken] != $chattoken} {
 	    set icon [::Theme::GetImage [option get $w tabAlertImage {}]]
-	    $wnb pageconfigure $name -image $icon
+	    $wnb tab $chatstate(wpage) -image $icon
 	}
     }
 }
@@ -1338,14 +1388,11 @@ proc ::Chat::SmileyCmd {chattoken im key} {
 #       Various hooks.
 
 proc ::Chat::CloseHook {wclose} {
-    global  wDlgs
-    
-    if {[string match $wDlgs(jchat)* $wclose]} {
-	set dlgtoken [GetTokenFrom dlg w $wclose]
-	if {$dlgtoken != ""} {
-	    Close $dlgtoken
-	}
-    }   
+
+    set dlgtoken [GetTokenFrom dlg w $wclose]
+    if {$dlgtoken != ""} {
+	Close $dlgtoken
+    }
     return ""
 }
 
@@ -1384,7 +1431,7 @@ proc ::Chat::QuitHook { } {
     
     ::UI::SaveWinGeom $wDlgs(jstartchat)
     ::UI::SaveWinPrefixGeom $wDlgs(jchat)
-    GetFirstPanePos
+    GetFirstSashPos
     SaveDialogs
     
     # This sends cancel compose to all.
@@ -1418,7 +1465,7 @@ proc ::Chat::BuildSavedDialogs { } {
 	set chattoken [GetTokenFrom chat jid ${jid}*]
 	if {$chattoken == ""} {
 	    set chattoken [StartThread $jid]
-	    InsertHistory $chattoken last 10
+	    InsertHistory $chattoken last $jprefs(chat,histLen)
 	}
     }
 }
@@ -1621,9 +1668,10 @@ proc ::Chat::Send {dlgtoken} {
     # Put in history file.
     set secs [clock seconds]
     set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
-    PutMessageInHistoryFile $jid2 \
-      [list $jstate(mejid) $threadID $dateISO $allText]
-    
+    ::History::PutToFileEx $jid2 \
+     -type chat -name $jstate(mejid) -thread $threadID -time $dateISO \
+     -body $allText -tag me
+
     # Need to detect if subject changed.
     set opts {}
     if {![string equal $chatstate(subject) $chatstate(lastsubject)]} {
@@ -1922,7 +1970,7 @@ proc ::Chat::Close {dlgtoken} {
 	upvar 0 $chattoken chatstate
 
 	::UI::SaveWinGeom $wDlgs(jchat) $dlgstate(w)
-	::UI::SavePanePos $wDlgs(jchat) $chatstate(wtxt)
+	::UI::SaveSashPos $wDlgs(jchat) $chatstate(wpane)
 	destroy $dlgstate(w)
 	
 	foreach chattoken $dlgstate(chattokens) {
@@ -1944,7 +1992,7 @@ proc ::Chat::Free {dlgtoken} {
     unset dlgstate
 }
 
-proc ::Chat::GetFirstPanePos { } {
+proc ::Chat::GetFirstSashPos { } {
     global  wDlgs
     
     set win [::UI::GetFirstPrefixedToplevel $wDlgs(jchat)]
@@ -1955,7 +2003,7 @@ proc ::Chat::GetFirstPanePos { } {
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
 
-	    ::UI::SavePanePos $wDlgs(jchat) $chatstate(wtxt)
+	    ::UI::SaveSashPos $wDlgs(jchat) $chatstate(wpane)
 	}
     }
 }
@@ -2026,7 +2074,7 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
 		set name [::Jabber::JlibCmd service nick $chatstate(jid)]
 
 	    } else {
-		set name $chatstate(shortname)
+		set name $chatstate(displayname)
 	    }
 	}
 	set dlgtoken $chatstate(dlgtoken)
@@ -2142,35 +2190,6 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
     eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
 }
 
-# Various methods to handle chat history .......................................
-
-namespace eval ::Chat:: {
-    
-    variable uidhist 1000
-}
-
-# Chat::PutMessageInHistoryFile --
-#
-#       Writes chat event send/received to history file.
-#       
-# Arguments:
-#       jid       2-tier jid
-#       msg       {jid2 threadID dateISO body}
-#       
-# Results:
-#       none.
-
-proc ::Chat::PutMessageInHistoryFile {jid msg} {
-    global  this
-    
-    set mjid [jlib::jidmap $jid]
-    set path [file join $this(historyPath) [uriencode::quote $jid]]    
-    if {![catch {open $path a} fd]} {
-	puts $fd "set message(\[incr uid]) {$msg}"
-	close $fd
-    }
-}
-
 proc ::Chat::BuildHistory {dlgtoken} {
 
     set chattoken [GetActiveChatToken $dlgtoken]
@@ -2178,175 +2197,15 @@ proc ::Chat::BuildHistory {dlgtoken} {
     upvar 0 $chattoken chatstate
     
     jlib::splitjid $chatstate(jid) jid2 res
-    BuildHistoryForJid $jid2
+    ::History::BuildHistory $jid2 chat -class Chat \
+      -tagscommand ::Chat::ConfigureTextTags
 }
-
-# Chat::BuildHistoryForJid --
-#
-#       Builds chat history dialog for jid.
-#       
-# Arguments:
-#       jid       2-tier jid
-#       
-# Results:
-#       dialog displayed.
 
 proc ::Chat::BuildHistoryForJid {jid} {
-    global  prefs this wDlgs
-    variable uidhist
-    variable historyOptions
-    upvar ::Jabber::jstate jstate
     
-    set jid [jlib::jidmap $jid]
-    set w $wDlgs(jchist)[incr uidhist]
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
-    
-    set rosterName [$jstate(roster) getname $jid]
-    if {$rosterName == ""} {
-	set title "[mc {Chat History}]: $jid"
-    } else {
-	set title "[mc {Chat History}]: $rosterName ($jid)"
-    }
-    wm title $w $title
-    
-    set wtxt  $w.frall.fr
-    set wtext $wtxt.t
-    set wysc  $wtxt.ysc
-    
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    
-    # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btclose -text [mc Close] \
-      -command [list [namespace current]::CloseHistory $w]] \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btclear -text [mc Clear]  \
-      -command [list [namespace current]::ClearHistory $jid $wtext]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btprint -text [mc Print]  \
-      -command [list [namespace current]::PrintHistory $wtext]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btsave -text [mc Save]  \
-      -command [list [namespace current]::SaveHistory $jid $wtext]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side bottom -fill x -padx 8 -pady 6
-    
-    # Text.
-    set wchatframe $w.frall.fr
-    pack [frame $wchatframe -class Chat] -fill both -expand 1
-    text $wtext -height 20 -width 72 -cursor {} \
-      -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word
-    scrollbar $wysc -orient vertical -command [list $wtext yview]
-    grid $wtext -column 0 -row 0 -sticky news
-    grid $wysc -column 1 -row 0 -sticky ns
-    grid columnconfigure $wtxt 0 -weight 1
-    grid rowconfigure $wtxt 0 -weight 1    
-        
-    # The tags.
-    ConfigureTextTags $wchatframe $wtext    
-    
-    set path [file join $this(historyPath) [uriencode::quote $jid]] 
-    if {[file exists $path]} {
-	set uidstart 1000
-	set uid $uidstart
-	incr uidstart
-	catch {source $path}
-	set uidstop $uid
-	
-	# Organize chat sessions into the threads.
-	# First, identify the threads and order them.
-	set allThreads {}
-	for {set i $uidstart} {$i <= $uidstop} {incr i} {
-	    set thread [lindex $message($i) 1]
-	    if {![info exists threadDate($thread)]} {
-		set threadDate($thread) [lindex $message($i) 2]
-		lappend allThreads $thread
-	    }
-	}	
-
-	foreach thread $allThreads {
-	    set when [clock format [clock scan $threadDate($thread)]  \
-	      -format "%A %e %B %Y"]
-	    $wtext insert end "[mc {Thread started}] $when\n" histhead
-	    
-	    for {set i $uidstart} {$i <= $uidstop} {incr i} {
-		foreach {cjid cthread time body} $message($i) break
-		if {![string equal $cthread $thread]} {
-		    continue
-		}
-		set syssecs [clock scan $time]
-		set cwhen [clock format $syssecs -format "%H:%M:%S"]
-		if {[string equal $cjid $jid]} {
-		    set ptag youpre
-		    set ptxttag youtext
-		} else {
-		    set ptag mepre
-		    set ptxttag metext
-		}
-		$wtext insert end "\[$cwhen\] <$cjid>" $ptag
-		$wtext insert end "   " $ptxttag
-		
-		::Text::Parse $wtext $body $ptxttag
-		$wtext insert end \n
-	    }
-	}
-    } else {
-	$wtext insert end "No registered chat history for $jid\n" histhead
-    }
-    $wtext configure -state disabled
-    ::UI::SetWindowGeometry $w $wDlgs(jchist)
-    wm minsize $w 200 320
-}
-
-proc ::Chat::ClearHistory {jid wtext} {
-    global  this
-    
-    $wtext configure -state normal
-    $wtext delete 1.0 end
-    $wtext configure -state disabled
-    set path [file join $this(historyPath) [uriencode::quote $jid]] 
-    if {[file exists $path]} {
-	file delete $path
-    }
-}
-
-proc ::Chat::CloseHistory {w} {
-
-    CloseHistoryHook $w
-    destroy $w
-}
-
-proc ::Chat::CloseHistoryHook {wclose} {
-    global  wDlgs
-    
-    if {[string match $wDlgs(jchist)* $wclose]} {
-	::UI::SaveWinPrefixGeom $wDlgs(jchist)
-    }   
-}
-
-proc ::Chat::PrintHistory {wtext} {
-        
-    ::UserActions::DoPrintText $wtext
-}
-
-proc ::Chat::SaveHistory {jid wtext} {
-    global  this
-	
-    set ans [tk_getSaveFile -title [mc Save] \
-      -initialfile "Chat ${jid}.txt"]
-
-    if {[string length $ans]} {
-	set allText [::Text::TransformToPureText $wtext]
-	set fd [open $ans w]
-	fconfigure $fd -encoding utf-8
-	puts $fd $allText	
-	close $fd
-	if {[string equal $this(platform) "macintosh"]} {
-	    file attributes $ans -type TEXT -creator ttxt
-	}
-    }
+    jlib::splitjid $jid jid2 res
+    ::History::BuildHistory $jid2 chat -class Chat \
+      -tagscommand ::Chat::ConfigureTextTags
 }
 
 # Preference page --------------------------------------------------------------
@@ -2358,12 +2217,15 @@ proc ::Chat::InitPrefsHook { } {
     set jprefs(showMsgNewWin) 1
     set jprefs(inbox2click)   "newwin"
     set jprefs(chat,normalAsChat) 0
+    set jprefs(chat,histLen)      10
     
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(showMsgNewWin) jprefs_showMsgNewWin $jprefs(showMsgNewWin)]  \
       [list ::Jabber::jprefs(inbox2click)   jprefs_inbox2click   $jprefs(inbox2click)]  \
       [list ::Jabber::jprefs(chat,normalAsChat)   jprefs_chatnormalAsChat   $jprefs(chat,normalAsChat)]  \
-      [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)]]    
+      [list ::Jabber::jprefs(chat,histLen)  jprefs_chathistLen   $jprefs(chat,histLen)]  \
+      [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)] \
+      ]    
 }
 
 proc ::Chat::BuildPrefsHook {wtree nbframe} {
@@ -2378,39 +2240,56 @@ proc ::Chat::BuildPrefsPage {wpage} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
-    set fontS  [option get . fontSmall {}]    
-    set fontSB [option get . fontSmallBold {}]
-
-    foreach key {chatActiveRet showMsgNewWin inbox2click chat,normalAsChat} {
+    foreach key {
+	chatActiveRet showMsgNewWin inbox2click chat,normalAsChat
+	chat,histLen
+    } {
 	set tmpJPrefs($key) $jprefs($key)
     }
     
-    set labfr ${wpage}.alrt
-    labelframe $labfr -text [mc {Chat}]
-    pack $labfr -side top -anchor w -padx 8 -pady 4
-    
-    set fr $labfr.fr
-    pack [frame $fr] -side top -anchor w -padx 10 -pady 2
+    set wc $wpage.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set wca $wc.ca
+    ttk::labelframe $wca -text [mc Chat] \
+      -padding [option get . groupSmallPadding {}]
  
-    checkbutton $fr.active -text " [mc prefchactret]"  \
+    ttk::checkbutton $wca.active -text [mc prefchactret]  \
       -variable [namespace current]::tmpJPrefs(chatActiveRet)
-    checkbutton $fr.newwin -text " [mc prefcushow]" \
+    ttk::checkbutton $wca.newwin -text [mc prefcushow] \
       -variable [namespace current]::tmpJPrefs(showMsgNewWin)
-    checkbutton $fr.normal -text " [mc prefchnormal]"  \
+    ttk::checkbutton $wca.normal -text [mc prefchnormal]  \
       -variable [namespace current]::tmpJPrefs(chat,normalAsChat)
-    label $fr.lmb2 -text [mc prefcu2clk]
-    radiobutton $fr.rb2new -text " [mc prefcuopen]" \
+
+    ttk::separator $wca.sep -orient horizontal    
+
+    ttk::label $wca.lmb2 -text [mc prefcu2clk]
+    ttk::radiobutton $wca.rb2new -text [mc prefcuopen] \
       -value newwin -variable [namespace current]::tmpJPrefs(inbox2click)
-    radiobutton $fr.rb2re   \
-      -text " [mc prefcureply]" -value reply \
+    ttk::radiobutton $wca.rb2re   \
+      -text [mc prefcureply] -value reply \
       -variable [namespace current]::tmpJPrefs(inbox2click)
 
-    grid $fr.active -sticky w
-    grid $fr.newwin -sticky w
-    grid $fr.normal -sticky w
-    grid $fr.lmb2   -sticky w
-    grid $fr.rb2new -sticky w
-    grid $fr.rb2re  -sticky w
+    ttk::separator $wca.sep2 -orient horizontal
+    
+    ttk::label $wca.lhist -text "[mc {History length}]:"
+    spinbox $wca.shist -width 4 -from 0 -increment 5 -to 1000 -state readonly \
+      -textvariable [namespace current]::tmpJPrefs(chat,histLen)
+
+    grid  $wca.active  -  -sticky w
+    grid  $wca.newwin  -  -sticky w
+    grid  $wca.normal  -  -sticky w
+    grid  $wca.sep     -  -sticky ew -pady 6
+    grid  $wca.lmb2    -  -sticky w
+    grid  $wca.rb2new  -  -sticky w
+    grid  $wca.rb2re   -  -sticky w
+    grid  $wca.sep2    -  -sticky ew -pady 6
+    grid  $wca.lhist   $wca.shist  -sticky w
+    
+    grid columnconfigure $wca 1 -weight 1
+
+    pack  $wca  -side top -fill x
 }
 
 proc ::Chat::SavePrefsHook { } {

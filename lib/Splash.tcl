@@ -2,13 +2,13 @@
 #  
 #       Handles the splash screen.
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
+#  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Splash.tcl,v 1.10 2005-01-31 14:06:59 matben Exp $
+# $Id: Splash.tcl,v 1.11 2005-08-14 07:17:55 matben Exp $
    
 package provide Splash 1.0
 
-namespace eval ::SplashScreen:: {
+namespace eval ::Splash:: {
     
     set text1 "Written by Mats Bengtsson (C) 1999-2005"
     set text2 "Distributed under the Gnu General Public License"
@@ -33,7 +33,7 @@ array set wDlgs {
 }
 
 
-# SplashScreen::SplashScreen --
+# Splash::SplashScreen --
 #
 #       Shows the splash screen.
 #       
@@ -43,8 +43,8 @@ array set wDlgs {
 # Results:
 #       none
 
-proc ::SplashScreen::SplashScreen { } {
-    global  this prefs wDlgs
+proc ::Splash::SplashScreen { } {
+    global  this prefs wDlgs this
     variable topwin
     variable canwin
     variable startMsg
@@ -56,9 +56,8 @@ proc ::SplashScreen::SplashScreen { } {
 	return
     }
     toplevel $w -class Splash
-    if {[string match "mac*" $this(platform)]} {
-	::tk::unsupported::MacWindowStyle style $w movableDBoxProc
-	wm transient $w .
+    if {[tk windowingsystem] eq "aqua"} {
+	::tk::unsupported::MacWindowStyle style $w document {closeBox}
     } else {
 	wm transient $w
     }
@@ -68,21 +67,19 @@ proc ::SplashScreen::SplashScreen { } {
     set screenH [winfo vrootheight .]
 
     wm geometry $w +[expr ($screenW - 450)/2]+[expr ($screenH - 300)/2]
-    set fontTiny      [option get . fontTiny {}]
     set showMinor     [option get $w showMinor {}]
     set showCopyright [option get $w showCopyright {}]
     set copyrightX    [option get $w copyrightX {}]
     set copyrightY    [option get $w copyrightY {}]
-    set fontS  [option get . fontSmall {}]
     
     # If image not already there, get it.
     set imsplash [::Theme::GetImage [option get $w image {}]]
     set imHeight [image height $imsplash]
     set imWidth [image width $imsplash]
-    if {$copyrightX == ""} {
+    if {$copyrightX eq ""} {
 	set copyrightX 50
     }
-    if {$copyrightY == ""} {
+    if {$copyrightY eq ""} {
 	set copyrightY [expr $imHeight - 70]
     }
     foreach {r g b} [$imsplash get 50 [expr $imHeight - 20]] break
@@ -95,20 +92,20 @@ proc ::SplashScreen::SplashScreen { } {
     canvas $w.can -width $imWidth -height $imHeight -bd 0 -highlightthickness 0
     $w.can create image 0 0 -anchor nw -image $imsplash
     $w.can create text 50 [expr $imHeight - 20] -anchor nw -tags tsplash  \
-      -font $fontTiny -text $startMsg -fill $textcol
+      -font CociTinyFont -text $startMsg -fill $textcol
     
     # Print patch level for dev versions.
-    if {$showMinor && ($prefs(releaseVers) != "")} {
+    if {$showMinor && ($this(vers,release) ne "")} {
 	$w.can create text 418 [expr $imHeight - 42] -anchor nw  \
-	  -font {Helvetica -18} -text ".$prefs(releaseVers)" -fill #ef2910
+	  -font {Helvetica -18} -text ".$this(vers,release)" -fill #ef2910
     }
     if {$showCopyright} {
 	set text1 [option get $w copyrightText1 {}]
 	set text2 [option get $w copyrightText2 {}]
 	$w.can create text $copyrightX $copyrightY -anchor nw \
-	  -font $fontS -text $text1 -fill $textcol
+	  -font CociSmallFont -text $text1 -fill $textcol
 	$w.can create text $copyrightX [expr $copyrightY - 15] -anchor nw \
-	  -font $fontS -text $text2 -fill $textcol
+	  -font CociSmallFont -text $text2 -fill $textcol
     }
     
     pack $w.can
@@ -116,7 +113,7 @@ proc ::SplashScreen::SplashScreen { } {
     bind $w <Button-1> [list destroy $w]
 }
 
-proc ::SplashScreen::SetMsg {msg} {
+proc ::Splash::SetMsg {msg} {
     global this
     variable topwin
     variable canwin

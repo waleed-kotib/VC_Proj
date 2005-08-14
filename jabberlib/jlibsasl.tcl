@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.14 2005-05-22 10:03:24 matben Exp $
+# $Id: jlibsasl.tcl,v 1.15 2005-08-14 07:13:18 matben Exp $
 
 # We need to be flexible here since can have cyrus based sasl or our 
 # own special pure tcl saslmd5.
@@ -467,26 +467,13 @@ namespace eval jlib {
     
     variable saslmsg
     array set saslmsg {
-    aborted             {The receiving entity acknowledges an abort
-       element sent by the initiating entity.}
-    incorrect-encoding  {The data provided by the initiating
-       entity could not be processed because the [BASE64] encoding is
-       incorrect.}
-    invalid-authzid     {The authzid provided by the initiating
-       entity is invalid, either because it is incorrectly formatted or
-       because the initiating entity does not have permissions to
-       authorize that ID.}
-    invalid-mechanism   {The initiating entity did not provide a
-       mechanism or requested a mechanism that is not supported by the
-       receiving entity.}
-    mechanism-too-weak  {The mechanism requested by the initiating
-       entity is weaker than server policy permits for that initiating
-       entity.}
-    not-authorized      {The authentication failed because the
-       initiating entity did not provide valid credentials (this includes
-       but is not limited to the case of an unknown username).}
-    temporary-auth-failure {The authentication failed because of
-       a temporary error condition within the receiving entity.}
+    aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
+    incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
+    invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
+    invalid-mechanism   {The initiating entity did not provide a mechanism or requested a mechanism that is not supported by the receiving entity.}
+    mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
+    not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
+    temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
    }
 }
 

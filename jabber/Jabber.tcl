@@ -3,10 +3,8 @@
 #      This file is part of The Coccinella application. 
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
-#  
-#  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.137 2005-06-17 14:02:43 matben Exp $
+# $Id: Jabber.tcl,v 1.138 2005-08-14 07:10:51 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -21,6 +19,10 @@ package require tinyfileutils
 package require tree
 package require uriencode
 package require wavelabel
+
+
+# jlib components shall be declared here, or later.
+#package require jlib::caps
 
 # We should have some component mechanism that lets packages load themselves.
 package require Agents
@@ -47,6 +49,7 @@ package require Register
 package require Roster
 package require Rosticons
 package require Search
+package require Servicons
 package require Status
 package require Subscribe
 package require UserInfo
@@ -59,6 +62,7 @@ namespace eval ::Jabber:: {
     
     # Add all event hooks.
     ::hooks::register quitAppHook        ::Jabber::EndSession
+    ::hooks::register prefsInitHook      ::Jabber::InitPrefsHook
 
     # Jabber internal storage.
     variable jstate
@@ -107,51 +111,51 @@ namespace eval ::Jabber:: {
     # Array that maps namespace (ns) to a descriptive name.
     variable nsToText
     array set nsToText {
-	iq                           {Info/query}
-	message                      {Message handling}
-	presence                     {Presence notification}
-	presence-invisible           {Allows invisible users}
-	jabber:client                {Client entity}
-	jabber:iq:agent              {Server component properties}
-	jabber:iq:agents             {Server component properties}
-	jabber:iq:auth               {Client authentization}      
-	jabber:iq:autoupdate         {Release information}
-	jabber:iq:browse             {Browsing services}
-	jabber:iq:conference         {Conferencing service}
-	jabber:iq:gateway            {Gateway}
-	jabber:iq:last               {Last time}
-	jabber:iq:oob                {Out of band data}
-	jabber:iq:privacy            {Blocking communication}
-	jabber:iq:private            {Store private data}
-	jabber:iq:register           {Interactive registration}
-	jabber:iq:roster             {Roster management}
-	jabber:iq:search             {Searching user database}
-	jabber:iq:time               {Client time}
-	jabber:iq:version            {Client version}
-	jabber:x:autoupdate          {Client update notification}
-	jabber:x:conference          {Conference invitation}
-	jabber:x:delay               {Object delayed}
-	jabber:x:encrypted           {Encrypted message}
-	jabber:x:envelope            {Message envelope}
-	jabber:x:event               {Message events}
-	jabber:x:expire              {Message expiration}
-	jabber:x:oob                 {Out of band attachment}
-	jabber:x:roster              {Roster item in message}
-	jabber:x:signed              {Signed presence}
-	vcard-temp                   {Business card exchange}
-	http://jabber.org/protocol/muc   {Multi user chat}
-	http://jabber.org/protocol/disco {Feature discovery}
-	http://jabber.org/protocol/caps  {Entity capabilities}
+	iq                           "Info/query"
+	message                      "Message handling"
+	presence                     "Presence notification"
+	presence-invisible           "Allows invisible users"
+	jabber:client                "Client entity"
+	jabber:iq:agent              "Server component properties"
+	jabber:iq:agents             "Server component properties"
+	jabber:iq:auth               "Client authentization"      
+	jabber:iq:autoupdate         "Release information"
+	jabber:iq:browse             "Browsing services"
+	jabber:iq:conference         "Conferencing service"
+	jabber:iq:gateway            "Gateway"
+	jabber:iq:last               "Last time"
+	jabber:iq:oob                "Out of band data"
+	jabber:iq:privacy            "Blocking communication"
+	jabber:iq:private            "Store private data"
+	jabber:iq:register           "Interactive registration"
+	jabber:iq:roster             "Roster management"
+	jabber:iq:search             "Searching user database"
+	jabber:iq:time               "Client time"
+	jabber:iq:version            "Client version"
+	jabber:x:autoupdate          "Client update notification"
+	jabber:x:conference          "Conference invitation"
+	jabber:x:delay               "Object delayed"
+	jabber:x:encrypted           "Encrypted message"
+	jabber:x:envelope            "Message envelope"
+	jabber:x:event               "Message events"
+	jabber:x:expire              "Message expiration"
+	jabber:x:oob                 "Out of band attachment"
+	jabber:x:roster              "Roster item in message"
+	jabber:x:signed              "Signed presence"
+	vcard-temp                   "Business card exchange"
+	http://jabber.org/protocol/muc   "Multi user chat"
+	http://jabber.org/protocol/disco "Feature discovery"
+	http://jabber.org/protocol/caps  "Entity capabilities"
     }    
     
     # XML namespaces defined here.
     variable coccixmlns
     array set coccixmlns {
-	coccinella      http://coccinella.sourceforge.net/protocol/coccinella
-	servers         http://coccinella.sourceforge.net/protocol/servers
-	whiteboard      http://coccinella.sourceforge.net/protocol/whiteboard
-	public          http://coccinella.sourceforge.net/protocol/private
-	caps            http://coccinella.sourceforge.net/protocol/caps
+	coccinella      "http://coccinella.sourceforge.net/protocol/coccinella"
+	servers         "http://coccinella.sourceforge.net/protocol/servers"
+	whiteboard      "http://coccinella.sourceforge.net/protocol/whiteboard"
+	public          "http://coccinella.sourceforge.net/protocol/private"
+	caps            "http://coccinella.sourceforge.net/protocol/caps"
     }
     
     # Standard jabber (xmpp + JEP) protocol namespaces.
@@ -186,15 +190,15 @@ namespace eval ::Jabber:: {
     # Short error names.
     variable errorCodeToShort
     array set errorCodeToShort {
-      301 {Moved Permanently}
-      307 {Moved Temporarily}
-      400 {Bad Request}
-      401 {Unauthorized}
-      404 {Not Found}
-      405 {Not Allowed}
-      406 {Not Acceptable}
-      407 {Registration Required}
-      408 {Request Timeout}
+      301 "Moved Permanently"
+      307 "Moved Temporarily"
+      400 "Bad Request"
+      401 "Unauthorized"
+      404 "Not Found"
+      405 "Not Allowed"
+      406 "Not Acceptable"
+      407 "Registration Required"
+      408 "Request Timeout"
     }
     
     # Jabber specific mappings from three digit error code to text.
@@ -293,7 +297,7 @@ proc ::Jabber::FactoryDefaults { } {
     set prefs(paneGeom,groupchatDlgVert) {0.8 0.2}
     set prefs(paneGeom,groupchatDlgHori) {0.8 0.2}
     
-    set jprefs(useXDataSearch) 1
+    set jprefs(useXData) 1
     
     set jstate(rosterVis) 1
     set jstate(browseVis) 0
@@ -328,7 +332,7 @@ proc ::Jabber::FactoryDefaults { } {
     }    
 }
 
-# Jabber::SetUserPreferences --
+# Jabber::InitPrefsHook --
 # 
 #       Set defaults in the option database for widget classes.
 #       First, on all platforms...
@@ -338,7 +342,7 @@ proc ::Jabber::FactoryDefaults { } {
 #       following way:  {theVarName itsResourceName itsHardCodedDefaultValue
 #                 {thePriority 20}}.
 
-proc ::Jabber::SetUserPreferences { } {
+proc ::Jabber::InitPrefsHook { } {
     
     variable jstate
     variable jprefs
@@ -346,7 +350,7 @@ proc ::Jabber::SetUserPreferences { } {
     
     # The profile stuff here is OUTDATED and replaced.
 
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(port)             jprefs_port              $jprefs(port)]  \
       [list ::Jabber::jprefs(sslport)          jprefs_sslport           $jprefs(sslport)]  \
       [list ::Jabber::jprefs(agentsServers)    jprefs_agentsServers     $jprefs(agentsServers)]  \
@@ -504,7 +508,7 @@ proc ::Jabber::Init { } {
       [list $jprefs(prefgchatproto) "gc-1.0"]
     
     if {[string equal $prefs(protocol) "jabber"]} {
-	::Jabber::UI::Show $wDlgs(jrostbro)
+	::Jabber::UI::Show $wDlgs(jmain)
 	set jstate(haveJabberUI) 1
     }
     
@@ -915,22 +919,35 @@ proc ::Jabber::ErrorLogDlg { } {
 	return
     }
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
-    wm title $w {Error Log (noncriticals)}
+    wm title $w [mc {Error Log (noncriticals)}]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
     
+    # Button part.
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Close] -command [list destroy $w]
+    pack  $frbot.btok  -side right
+    pack  $frbot       -side bottom -fill x
+
     # Text.
-    set wtxt $w.frall.frtxt
-    pack [frame $wtxt] -side top -fill both -expand 1 -padx 4 -pady 4
+    set wtxt  $wbox.frtxt
     set wtext $wtxt.text
-    set wysc $wtxt.ysc
+    set wysc  $wtxt.ysc
+    frame $wtxt -bd 1 -relief sunken
+    pack $wtxt -side top -fill both -expand 1
+
     text $wtext -height 12 -width 48 -wrap word \
-      -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
-    scrollbar $wysc -orient vertical -command [list $wtext yview]
-    grid $wtext -column 0 -row 0 -sticky news
-    grid $wysc -column 1 -row 0 -sticky ns
+      -highlightthickness 0 -yscrollcommand [list $wysc set]
+    tuscrollbar $wysc -orient vertical -command [list $wtext yview]
+    grid  $wtext  -column 0 -row 0 -sticky news
+    grid  $wysc   -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxt 0 -weight 1
     grid rowconfigure $wtxt 0 -weight 1
     
@@ -949,12 +966,6 @@ proc ::Jabber::ErrorLogDlg { } {
 	$wtext insert end "\n"
     }
     $wtext configure -state disabled
-    
-    # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btset -text [mc Close]  \
-      -command "destroy $w"] -side right -padx 5 -pady 5
-    pack $frbot -side top -fill x -padx 8 -pady 6
 }
 
 # Jabber::IqSetGetCallback --
@@ -1121,7 +1132,7 @@ proc ::Jabber::ValidateResourceStr {str} {
     }
 }
 
-# Jabber::ValidatePasswdChars --
+# Jabber::ValidatePasswordStr --
 #
 #       Validate entry for password. Not so sure about this. Docs?
 #       
@@ -1131,7 +1142,7 @@ proc ::Jabber::ValidateResourceStr {str} {
 # Results:
 #       boolean: 0 if reject, 1 if accept
 
-proc ::Jabber::ValidatePasswdChars {str} {
+proc ::Jabber::ValidatePasswordStr {str} {
     
     if {[regexp {[ ]} $str match junk]} {
 	bell
@@ -1184,13 +1195,18 @@ proc ::Jabber::SetStatus {type args} {
     array set argsArr {
 	-notype         0
     }
+    
+    # Any -status take precedence, even if empty.
+    array set argsArr $args
 
     # Any default status?
-    if {$type eq "unavailable"} {
-	set argsArr(-status) $jprefs(logoutStatus)
+    if {![info exists argsArr(-status)]} {
+	if {$jprefs(statusMsg,bool,$type) \
+	  && ($jprefs(statusMsg,msg,$type) ne "")} {
+	    set argsArr(-status) $jprefs(statusMsg,msg,$type)
+	}
     }
-    array set argsArr $args
-        
+    
     # This way clients get the info necessary for file transports.
     # Necessary for each status change since internal cache cleared.
     if {$type != "unavailable"} {
@@ -1269,9 +1285,11 @@ proc ::Jabber::SetStatus {type args} {
 #                <ip protocol='putget' port='8235'>212.214.113.57</ip>
 #                <ip protocol='http' port='8077'>212.214.113.57</ip>
 #  </coccinella>
+#  
+#  Now <x .../> instead.
 
 proc ::Jabber::CreateCoccinellaPresElement { } {
-    global  prefs
+    global  prefs this
     
     variable jstate
     variable coccixmlns
@@ -1283,8 +1301,12 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
     set subelem [list  \
       [wrapper::createtag ip -chdata $ip -attrlist $attrputget]  \
       [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
-    set xmllist [wrapper::createtag coccinella -subtags $subelem \
-      -attrlist [list xmlns $coccixmlns(servers) ver $prefs(fullVers)]]
+    #set xmllist [wrapper::createtag coccinella -subtags $subelem \
+    #  -attrlist [list xmlns $coccixmlns(servers) ver $this(vers,full)]]
+
+    # Switch to x-element.
+    set xmllist [wrapper::createtag x -subtags $subelem \
+      -attrlist [list xmlns $coccixmlns(servers) ver $this(vers,full)]]
 
     return $xmllist
 }
@@ -1297,7 +1319,7 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
 #       are not instance specific (can't send ip addresses).
 
 proc ::Jabber::CreateCapsPresElement { } {
-    global  prefs
+    global  this
     variable coccixmlns
     variable capsExtArr
     variable xmppxmlns
@@ -1305,7 +1327,7 @@ proc ::Jabber::CreateCapsPresElement { } {
     set node $coccixmlns(caps)
     set exts [lsort [array names capsExtArr]]
     set xmllist [wrapper::createtag c -attrlist \
-      [list xmlns $xmppxmlns(caps) node $node ver $prefs(fullVers) ext $exts]]
+      [list xmlns $xmppxmlns(caps) node $node ver $this(vers,full) ext $exts]]
 
     return $xmllist
 }
@@ -1347,6 +1369,7 @@ proc ::Jabber::SetStatusWithMessage { } {
     variable finishedStat
     variable show
     variable wtext
+    variable clearStatusMsg
     variable jprefs
     variable jstate
 
@@ -1360,46 +1383,62 @@ proc ::Jabber::SetStatusWithMessage { } {
     wm title $w [mc {Set Status}]
     set finishedStat -1
     
-    set fontSB [option get . fontSmallBold {}]
-    
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
     # Top frame.
-    set frtop $w.frall.frtop
-    labelframe $frtop -text [mc {My Status}]
-    pack $frtop -side top -fill x -padx 4 -pady 4
-    set i 0
+    set wtop $wbox.top
+    ttk::labelframe $wtop -text [mc {My Status}] \
+      -padding [option get . groupPadding {}]
+    pack $wtop -side top -fill x
+
     foreach val {available chat away xa dnd invisible} {
-	label ${frtop}.l${val} -image [::Roster::GetPresenceIconFromKey $val]
-	radiobutton ${frtop}.${val} -text [mc jastat${val}]  \
-	  -variable [namespace current]::show -value $val
-	grid ${frtop}.l${val} -sticky e -column 0 -row $i -padx 4 -pady 3
-	grid ${frtop}.${val} -sticky w -column 1 -row $i -padx 8 -pady 3
-	incr i
+	ttk::radiobutton $wtop.$val -style Small.TRadiobutton \
+	  -compound left -text [mc jastat${val}]  \
+	  -image [::Roster::GetPresenceIconFromKey $val]  \
+	  -variable [namespace current]::show -value $val  \
+	  -command [namespace current]::StatusMsgRadioCmd
+	grid  $wtop.$val  -sticky w
     }
     
     # Set present status.
     set show $jstate(status)
+    set clearStatusMsg 0
     
-    pack [label $w.frall.lbl -text "[mc {Status message}]:" \
-      -font $fontSB]  \
-      -side top -anchor w -padx 6 -pady 0
-    set wtext $w.frall.txt
-    text $wtext -height 4 -width 36 -wrap word \
-      -borderwidth 1 -relief sunken
-    pack $wtext -expand 1 -fill both -padx 6 -pady 4    
+    ttk::label $wbox.lbl -text "[mc {Status message}]:" \
+      -padding [option get . groupTopPadding {}]
+    pack $wbox.lbl -side top -anchor w -padx 6
+
+    set wtext $wbox.txt
+    text $wtext -height 4 -width 36 -wrap word -bd 1 -relief sunken
+    pack $wtext -expand 1 -fill both
+    
+    ttk::checkbutton $wbox.clear -style Small.TCheckbutton \
+      -text "Clear status message if empty" \
+      -variable [namespace current]::clearStatusMsg
+    pack $wbox.clear -side top -anchor w
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Set] -default active \
-      -command [list [namespace current]::BtSetStatus $w]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::SetStatusCancel $w]] \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Set] -default active \
+      -command [list [namespace current]::BtSetStatus $w]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::SetStatusCancel $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
     
     wm resizable $w 0 0
     bind $w <Return> {}
@@ -1417,6 +1456,12 @@ proc ::Jabber::SetStatusWithMessage { } {
     return [expr {($finishedStat <= 0) ? "cancel" : "set"}]
 }
 
+proc ::Jabber::StatusMsgRadioCmd { } {
+    
+    
+    
+}
+
 proc ::Jabber::SetStatusCancel {w} {    
     variable finishedStat
 
@@ -1428,13 +1473,19 @@ proc ::Jabber::BtSetStatus {w} {
     variable finishedStat
     variable show
     variable wtext
+    variable clearStatusMsg
     variable jstate
     
-    set statusOpt {}
-    set allText [string trim [$wtext get 1.0 end] " \n"]
+    set opts {}
+    set allText [string trim [$wtext get 1.0 end]]
+    if {$allText ne ""} {
+	lappend opts -status $allText
+    } elseif {$clearStatusMsg} {
+	lappend opts -status ""
+    }
     
     # Set present status.
-    SetStatus $show -status $allText    
+    eval {SetStatus $show} $opts
     set finishedStat 1
     destroy $w
 }
@@ -1504,30 +1555,43 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 	    ::UI::MessageBox -title [mc {Last Activity}] -icon info  \
 	      -type ok -message [mc jamesserrnotimeinfo $from]
 	} else {
-	    set secs [expr [clock seconds] - $attrArr(seconds)]
-	    set uptime [clock format $secs -format "%a %b %d %H:%M:%S %Y"]
-	    if {[wrapper::getcdata $subiq] != ""} {
-		set msg "The message: [wrapper::getcdata $subiq]"
-	    } else {
-		set msg {}
-	    }
-	    
-	    # Time interpreted differently for different jid types.
-	    if {$from != ""} {
-		if {[regexp {^[^@]+@[^/]+/.*$} $from match]} {
-		    set msg1 [mc jamesstimeused $from]
-		} elseif {[regexp {^.+@[^/]+$} $from match]} {
-		    set msg1 [mc jamesstimeconn $from]
-		} else {
-		    set msg1 [mc jamesstimeservstart $from]
-		}
-	    } else {
-		set msg1 [mc jamessuptime]
-	    }
 	    ::UI::MessageBox -title [mc {Last Activity}] -icon info  \
-	      -type ok -message "$msg1 $uptime. $msg"
+	      -type ok -message [GetLastString $from $subiq]
 	}
     }
+}
+
+proc ::Jabber::GetLastString {jid subiq} {
+    
+    array set attrArr [wrapper::getattrlist $subiq]
+    if {![info exists attrArr(seconds)]} {
+	set str [mc jamesserrnotimeinfo $jid]
+    } elseif {![string is integer -strict $attrArr(seconds)]} {
+	set str [mc jamesserrnotimeinfo $jid]
+    } else {
+	set secs [expr [clock seconds] - $attrArr(seconds)]
+	set uptime [clock format $secs -format "%a %b %d %H:%M:%S %Y"]
+	if {[wrapper::getcdata $subiq] != ""} {
+	    set msg "The message: [wrapper::getcdata $subiq]"
+	} else {
+	    set msg ""
+	}
+	
+	# Time interpreted differently for different jid types.
+	if {$jid != ""} {
+	    if {[regexp {^[^@]+@[^/]+/.*$} $jid match]} {
+		set msg1 [mc jamesstimeused $jid]
+	    } elseif {[regexp {^.+@[^/]+$} $jid match]} {
+		set msg1 [mc jamesstimeconn $jid]
+	    } else {
+		set msg1 [mc jamesstimeservstart $jid]
+	    }
+	} else {
+	    set msg1 [mc jamessuptime]
+	}
+	set str "$msg1 $uptime. $msg"
+    }
+    return $str
 }
 
 # Jabber::GetTime --
@@ -1560,24 +1624,29 @@ proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
 	      -message [mc jamesserrtime $from [lindex $subiq 1]]
 	}
     } else {
-	
-	# Display the cdata of <display>, or <utc>.
-	foreach child [wrapper::getchildren $subiq] {
-	    set tag [lindex $child 0]
-	    set $tag [lindex $child 3]
-	}
-	if {[info exists display]} {
-	    set msg $display
-	} elseif {[info exists utc]} {
-	    set msg [clock format [clock scan $utc]]
-	} elseif {[info exists tz]} {
-	    # ???
-	} else {
-	    set msg "unknown"
-	}
+	set msg [GetTimeString $subiq]
 	::UI::MessageBox -title [mc {Local Time}] -icon info -type ok \
 	  -message [mc jamesslocaltime $from $msg]
     }
+}
+
+proc ::Jabber::GetTimeString {subiq} {
+    
+    # Display the cdata of <display>, or <utc>.
+    foreach child [wrapper::getchildren $subiq] {
+	set tag [lindex $child 0]
+	set $tag [lindex $child 3]
+    }
+    if {[info exists display]} {
+	set msg $display
+    } elseif {[info exists utc]} {
+	set msg [clock format [clock scan $utc]]
+    } elseif {[info exists tz]} {
+	# ???
+    } else {
+	set msg "unknown"
+    }
+    return $msg
 }
 
 namespace eval ::Jabber:: {
@@ -1609,8 +1678,6 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     
     variable uidvers
     
-    set fontSB [option get . fontSmallBold {}]
-    
     if {[string equal $type "error"]} {
 	::Jabber::AddErrorLog $from  \
 	  [mc jamesserrvers $from [lindex $subiq 1]]
@@ -1618,29 +1685,61 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 	      -message [mc jamesserrvers $from [lindex $subiq 1]]
 	}
-    } else {
-	set w .jvers[incr uidvers]
-	::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-	  -macclass {document closeBox}
-	wm title $w [mc {Version Info}]
-	set iconInfo [::Theme::GetImage info]
-	pack [label $w.icon -image $iconInfo] -side left -anchor n -padx 10 -pady 10
-	pack [label $w.msg -text [mc javersinfo $from] -font $fontSB] \
-	  -side top -padx 8 -pady 4
-	pack [frame $w.fr] -padx 10 -pady 4 -side top 
-	set i 0
-	foreach child [wrapper::getchildren $subiq] {
-	    label $w.fr.l$i -font $fontSB -text "[lindex $child 0]:"
-	    label $w.fr.lr$i -text [lindex $child 3]
-	    grid $w.fr.l$i -column 0 -row $i -sticky e
-	    grid $w.fr.lr$i -column 1 -row $i -sticky w
-	    incr i
-	}
-	pack [button $w.btok -text [mc OK] \
-	  -command "destroy $w"] -side right -padx 10 -pady 8
-	wm resizable $w 0 0
-	bind $w <Return> "$w.btok invoke"
+	return
     }
+    
+    set w .jvers[incr uidvers]
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
+    wm title $w [mc {Version Info}]
+
+    set im  [::Theme::GetImage info]
+    set imd [::Theme::GetImage infoDis]
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+    
+    ttk::label $w.frall.head -style Headlabel \
+      -text [mc {Version Info}] -compound left \
+      -image [list $im background $imd]
+    pack $w.frall.head -side top -anchor w
+
+    ttk::separator $w.frall.s -orient horizontal
+    pack $w.frall.s -side top -fill x
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+    
+    ttk::label $wbox.msg  \
+      -padding {0 0 0 6} -wraplength 300 -justify left \
+      -text [mc javersinfo $from]
+    pack $wbox.msg -side top -anchor w
+
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
+
+    set i 0
+    foreach child [wrapper::getchildren $subiq] {
+	ttk::label $frmid.l$i -style Small.TLabel \
+	  -text "[lindex $child 0]:"
+	ttk::label $frmid.lr$i -style Small.TLabel \
+	  -text [lindex $child 3]
+
+	grid  $frmid.l$i   $frmid.lr$i  -sticky ne
+	grid  $frmid.lr$i  -sticky w
+	incr i
+    }
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w]
+    pack $frbot.btok -side right
+    pack $frbot -side top -fill x
+
+    wm resizable $w 0 0
+    bind $w <Return> [list $frbot.btok invoke]
 }
 
 # Jabber::CacheGroupchatType --
@@ -1689,7 +1788,7 @@ proc ::Jabber::CacheGroupchatType {confjid jlibname type subiq} {
 #       Respond to an incoming 'jabber:iq:version' get query.
 
 proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
-    global  prefs tcl_platform
+    global  prefs tcl_platform this
     variable jstate
     
     ::Debug 2 "Jabber::ParseGetVersion args='$args'"
@@ -1707,7 +1806,7 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
     if {[info exists tcl_platform(osVersion)]} {
 	append os " $tcl_platform(osVersion)"
     }
-    set version $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
+    set version $this(vers,full)
     set subtags [list  \
       [wrapper::createtag name    -chdata "Coccinella"]  \
       [wrapper::createtag version -chdata $version]      \
@@ -1798,54 +1897,68 @@ proc ::Jabber::Passwd::Build { } {
     variable validate
     upvar ::Jabber::jstate jstate
     
+    set password ""
+    set validate ""
+
     set w $wDlgs(jpasswd)
     if {[winfo exists $w]} {
 	return
     }
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
+      -macclass {document closeBox} \
+      -closecommand [namespace current]::Close
     wm title $w [mc {New Password}]
     
-    set fontSB [option get . fontSmallBold {}]
-    
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
-    set password ""
-    set validate ""
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
     # Entries etc.
-    set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.ll -font $fontSB -text [mc janewpass]
-    label $frmid.le -font $fontSB -text $jstate(mejid)
-    label $frmid.lserv -text "[mc {New password}]:" -anchor e
-    entry $frmid.eserv -width 18 -show *  \
-      -textvariable [namespace current]::password -validate key  \
-      -validatecommand {::Jabber::ValidatePasswdChars %S}
-    label $frmid.lvalid -text "[mc {Retype password}]:" -anchor e
-    entry $frmid.evalid -width 18 -show * \
-      -textvariable [namespace current]::validate -validate key  \
-      -validatecommand {::Jabber::ValidatePasswdChars %S}
-    grid $frmid.ll -column 0 -row 0 -sticky e
-    grid $frmid.le -column 1 -row 0 -sticky w
-    grid $frmid.lserv -column 0 -row 1 -sticky e
-    grid $frmid.eserv -column 1 -row 1 -sticky w
-    grid $frmid.lvalid -column 0 -row 2 -sticky e
-    grid $frmid.evalid -column 1 -row 2 -sticky w
+    set frmid $wbox.frmid
+    ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
+    ttk::label $frmid.ll -text [mc janewpass]
+    ttk::label $frmid.le -text $jstate(mejid)
+    ttk::label $frmid.lserv -text "[mc {New password}]:" -anchor e
+    ttk::entry $frmid.eserv -width 18 -show *  \
+      -textvariable [namespace current]::password -validate key  \
+      -validatecommand {::Jabber::ValidatePasswordStr %S}
+    ttk::label $frmid.lvalid -text "[mc {Retype password}]:" -anchor e
+    ttk::entry $frmid.evalid -width 18 -show * \
+      -textvariable [namespace current]::validate -validate key  \
+      -validatecommand {::Jabber::ValidatePasswordStr %S}
+
+    grid  $frmid.ll      $frmid.le      -sticky e -pady 2
+    grid  $frmid.lserv   $frmid.eserv   -sticky e -pady 2
+    grid  $frmid.lvalid  $frmid.evalid  -sticky e -pady 2
+    
+    grid  $frmid.le  -sticky w
+
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Set] -default active \
-      -command [list [namespace current]::Doit $w]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]   \
-      -command [list [namespace current]::Cancel $w]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Set] -default active \
+      -command [list [namespace current]::Doit $w]
+    ttk::button $frbot.btcancel -text [mc Cancel]   \
+      -command [list [namespace current]::Cancel $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
     
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btok invoke"
+    ::UI::SetWindowPosition $w
+    bind $w <Return> [list $frbot.btok invoke]
     
     # Grab and focus.
     set oldFocus [focus]
@@ -1858,6 +1971,12 @@ proc ::Jabber::Passwd::Build { } {
     catch {grab release $w}
     catch {focus $oldFocus}
     return [expr {($finished <= 0) ? "cancel" : "set"}]
+}
+
+proc ::Jabber::Passwd::Close {w} {
+    
+    ::UI::SaveWinPrefixGeom $w
+    return ""
 }
 
 proc ::Jabber::Passwd::Cancel {w} {
@@ -1945,13 +2064,17 @@ proc ::Jabber::LoginLogout { } {
 
 # The ::Jabber::Logout:: namespace ---------------------------------------------
 
-namespace eval ::Jabber::Logout:: { }
+namespace eval ::Jabber::Logout:: { 
+
+    option add *JLogout.connectImage             connect         widgetDefault
+    option add *JLogout.connectDisImage          connectDis      widgetDefault
+}
 
 proc ::Jabber::Logout::WithStatus { } {
     global  prefs this wDlgs
 
     variable finished -1
-    variable status ""
+    variable wtextstatus
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
@@ -1959,45 +2082,67 @@ proc ::Jabber::Logout::WithStatus { } {
 
     set w $wDlgs(joutst)
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
     
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
+      -macclass {document closeBox} -class JLogout \
+      -closecommand [namespace current]::DoCancel
     wm title $w [mc {Logout With Message}]
-    
-    set fontSB [option get . fontSmallBold {}]
-    
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
-    
-    ::headlabel::headlabel $w.frall.head -text [mc Logout]
-    pack $w.frall.head -side top -fill both -expand 1
-    
-    # Entries etc.
-    set frmid [frame $w.frall.frmid -borderwidth 0]
-    pack $frmid -side top -fill both -expand 1 -pady 6
-    
-    label $frmid.lstat -text "[mc Message]:" -font $fontSB -anchor e
-    entry $frmid.estat -width 36  \
-      -textvariable [namespace current]::status
-    grid $frmid.lstat -column 0 -row 1 -sticky e
-    grid $frmid.estat -column 1 -row 1 -sticky w
-    
-    # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btout -text [mc Logout]  \
-      -default active -command [list [namespace current]::DoLogout $w]] \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::DoCancel $w]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
-    
     ::UI::SetWindowPosition $w
+
+    set im   [::Theme::GetImage [option get $w connectImage {}]]
+    set imd  [::Theme::GetImage [option get $w connectDisImage {}]]
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+    
+    ttk::label $w.frall.head -style Headlabel \
+      -text [mc Logout] -compound left \
+      -image [list $im background $imd]
+    pack $w.frall.head -side top -fill both -expand 1
+
+    ttk::separator $w.frall.s -orient horizontal
+    pack $w.frall.s -side top -fill x
+    
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    # Entries etc.
+    set frmid $wbox.mid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
+    
+    ttk::label $frmid.lstat -text "[mc Message]:" -anchor e
+    text $frmid.estat -font TkDefaultFont \
+      -width 36 -height 2 -wrap word
+    
+    grid  $frmid.lstat  $frmid.estat  -sticky ne -padx 2 -pady 4
+    
+    set wtextstatus $frmid.estat
+
+    # Button part.
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Logout]  \
+      -default active -command [list [namespace current]::DoLogout $w]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::DoCancel $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
+    
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btout invoke"
+    bind $w <Return> [list $frbot.btok invoke]
     
     # Grab and focus.
     set oldFocus [focus]
@@ -2005,30 +2150,30 @@ proc ::Jabber::Logout::WithStatus { } {
     catch {grab $w}
     
     # Wait here for a button press and window to be destroyed.
-    tkwait window $w
+    tkwait variable [namespace current]::finished
     
     # Clean up.
     catch {grab release $w}
     catch {focus $oldFocus}
+    ::UI::SaveWinGeom $w
+    destroy $w
     return [expr {($finished <= 0) ? "cancel" : "logout"}]
 }
 
 proc ::Jabber::Logout::DoCancel {w} {
     variable finished
     
+    ::UI::SaveWinGeom $w
     set finished 0
-    destroy $w
 }
 
 proc ::Jabber::Logout::DoLogout {w} {
     variable finished
-    variable status
-    upvar ::Jabber::jstate jstate
+    variable wtextstatus
     
+    set msg [string trimright [$wtextstatus get 1.0 end]]
+    ::Jabber::DoCloseClientConnection -status $msg
     set finished 1
-    destroy $w
-    ::Jabber::DoCloseClientConnection -status $status
 }
-
 
 #-------------------------------------------------------------------------------

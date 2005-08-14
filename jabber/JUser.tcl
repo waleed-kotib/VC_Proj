@@ -3,14 +3,17 @@
 #      This file is part of The Coccinella application. 
 #      It implements the UI for adding and editing users.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.13 2005-05-30 14:16:59 matben Exp $
+# $Id: JUser.tcl,v 1.14 2005-08-14 07:10:51 matben Exp $
 
 package provide JUser 1.0
 
 namespace eval ::Jabber::User:: {
 	
+    option add *JUser.newuserImage                newuser         widgetDefault
+    option add *JUser.newuserDisImage             newuserDis      widgetDefault
+
     # A unique running identifier.
     variable uid 0
 
@@ -28,7 +31,7 @@ proc ::Jabber::User::QuitAppHook { } {
 # 
 #       Add new user dialog.
 
-proc ::Jabber::User::NewDlg { } {
+proc ::Jabber::User::NewDlg {args} {
     global  this prefs wDlgs
 
     variable uid
@@ -40,80 +43,111 @@ proc ::Jabber::User::NewDlg { } {
     variable $token
     upvar 0 $token state
     
+    array set argsArr $args
+    
     set w $wDlgs(jrostadduser)${uid}
     set state(w) $w
     set state(finished) -1
 
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+    ::UI::Toplevel $w -class JUser \
+      -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox} -closecommand [namespace current]::CloseCmd
     wm title $w [mc {Add New User}]
-    
+
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jrostadduser)]]
+    if {$nwin == 1} {
+	::UI::SetWindowPosition $w $wDlgs(jrostadduser)
+    }
+
+    set im  [::Theme::GetImage [option get $w newuserImage {}]]
+    set imd [::Theme::GetImage [option get $w newuserDisImage {}]]
+
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]
     set allTypes  [::Roster::GetTransportNames $token]
     
     # Global frame.
     set wall $w.fr
-    frame $wall -borderwidth 1 -relief raised
-    pack  $wall -fill both -expand 1 -ipadx 2 -ipady 4
+    ttk::frame $wall
+    pack $wall -fill both -expand 1
 
-    ::headlabel::headlabel $wall.head -text [mc {Add New User}]
+    ttk::label $wall.head -style Headlabel \
+      -text [mc {Add New User}] -compound left \
+      -image [list $im background $imd]
     pack $wall.head -side top -fill both -expand 1
-       
-    label $wall.msg -wraplength 280 -justify left -text [mc jarostadd]
-    pack  $wall.msg -side top -fill both -expand 1 -padx 10
 
-    set wbox $wall.fbox
-    frame $wbox
-    pack  $wbox -side top
+    ttk::separator $wall.s -orient horizontal
+    pack $wall.s -side top -fill x
 
-    label $wbox.ltype -text "[mc {Contact Type}]:"
-    eval {tk_optionMenu $wbox.type $token\(type)} $allTypes
-    label $wbox.ljid -text "[mc {Jabber user id}]:" -anchor e
-    entry $wbox.ejid -textvariable $token\(jid)
-    label $wbox.lnick -text "[mc {Nick name}]:" -anchor e
-    entry $wbox.enick -width 24 -textvariable $token\(name)
-    label $wbox.lgroup -text "[mc Group]:" -anchor e
-    ::combobox::combobox $wbox.egroup -width 12  \
-      -textvariable $token\(group)
-    eval {$wbox.egroup list insert end} "None $allGroups"
+    set wbox $wall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 280 -justify left -text [mc jarostadd]
+    pack $wbox.msg -side top -anchor w
+
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
+
+    ttk::label $frmid.ltype -text "[mc {Contact Type}]:"
+    eval {ttk::optionmenu $frmid.type $token\(type)} $allTypes
+    ttk::label $frmid.ljid -text "[mc {Jabber user ID}]:" -anchor e
+    ttk::entry $frmid.ejid -textvariable $token\(jid)
+    ttk::label $frmid.lnick -text "[mc {Nick name}]:" -anchor e
+    ttk::entry $frmid.enick -textvariable $token\(name)
+    ttk::label $frmid.lgroup -text "[mc Group]:" -anchor e
+    ttk::combobox $frmid.egroup  \
+      -textvariable $token\(group) -values [concat None $allGroups]
     
-    grid $wbox.ltype  $wbox.type   -sticky e
-    grid $wbox.ljid   $wbox.ejid   -sticky e
-    grid $wbox.lnick  $wbox.enick  -sticky e
-    grid $wbox.lgroup $wbox.egroup -sticky e
-    grid $wbox.type $wbox.ejid $wbox.enick $wbox.egroup -sticky ew
+    grid  $frmid.ltype   $frmid.type   -sticky e -pady 2
+    grid  $frmid.ljid    $frmid.ejid   -sticky e -pady 2
+    grid  $frmid.lnick   $frmid.enick  -sticky e -pady 2
+    grid  $frmid.lgroup  $frmid.egroup -sticky e -pady 2
 
+    grid $frmid.type $frmid.ejid $frmid.enick $frmid.egroup -sticky ew
+
+    set state(jid)   ""
+    set state(name)  ""
+    set state(group) ""
+    if {[info exists argsArr(-jid)]} {
+	set state(jid) $argsArr(-jid)
+    }
+    
     # Cache state variables for the dialog.
-    set state(wjid)   $wbox.ejid
-    set state(wnick)  $wbox.enick
-    set state(wgroup) $wbox.egroup
+    set state(wjid)   $frmid.ejid
+    set state(wnick)  $frmid.enick
+    set state(wgroup) $frmid.egroup
     
     # Button part.
-    set frbot [frame $wall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Add] -default active \
-      -command [list [namespace current]::DoAdd $token]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::CancelAdd $token]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6    
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Add] -default active \
+      -command [list [namespace current]::DoAdd $token]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::CancelAdd $token]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
     
     trace add variable $token\(type) write \
       [list [namespace current]::TypeCmd $token]
 
-    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jrostadduser)]]
-    if {$nwin == 1} {
-	::UI::SetWindowPosition $w $wDlgs(jrostadduser)
-    }
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
     
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 10]
-    } $wall.msg $w]    
+	%s configure -wraplength [expr [winfo reqwidth %s] - 30]
+    } $wbox.msg $w]    
     after idle $script
 
     #::balloonhelp::balloonforwindow $wbox.ltype [mc jarostadd]
@@ -358,10 +392,18 @@ proc ::Jabber::User::EditUserDlg {jid} {
 	set title [mc {Edit User}]
     }
 
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+    ::UI::Toplevel $w -class JUser \
+      -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox} -closecommand [namespace current]::CloseCmd
     wm title $w $title
     
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jrostedituser)]]
+    if {$nwin == 1} {
+	::UI::SetWindowPosition $w $wDlgs(jrostedituser)
+    }
+    set im  [::Theme::GetImage [option get $w newuserImage {}]]
+    set imd [::Theme::GetImage [option get $w newuserDisImage {}]]
+
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]
 
@@ -384,7 +426,7 @@ proc ::Jabber::User::EditUserDlg {jid} {
     if {$groups == {}} {
 	set groups "None"
     }
-    
+
     set state(jid)         $jid
     set state(name)        $name
     set state(group)       $group
@@ -405,96 +447,111 @@ proc ::Jabber::User::EditUserDlg {jid} {
 
     # Global frame.
     set wall $w.fr
-    frame $wall -borderwidth 1 -relief raised
-    pack  $wall -fill both -expand 1 -ipadx 2 -ipady 4
+    ttk::frame $wall
+    pack $wall -fill both -expand 1
 
-    ::headlabel::headlabel $wall.head -text $title
+    ttk::label $wall.head -style Headlabel \
+      -text $title -compound left \
+      -image [list $im background $imd]
     pack $wall.head -side top -fill both -expand 1
-       
-    label $wall.msg -wraplength 280 -justify left -text $msg
-    pack  $wall.msg -side top -fill both -expand 1 -padx 10
 
-    set wbox $wall.fbox
-    frame $wbox
-    pack  $wbox -side top
+    ttk::separator $wall.s -orient horizontal
+    pack $wall.s -side top -fill x
 
-    label $wbox.lnick -text "[mc {Nick name}]:" -anchor e
-    entry $wbox.enick -width 24 -textvariable $token\(name)
-    grid  $wbox.lnick  $wbox.enick  -sticky e
-    grid  $wbox.enick  -sticky ew
-    
+    set wbox $wall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 280 -justify left -text $msg
+    pack $wbox.msg -side top -anchor w
+
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
+
+    ttk::label $frmid.lnick -text "[mc {Nick name}]:" -anchor e
+    ttk::entry $frmid.enick -textvariable $token\(name)
+    grid  $frmid.lnick   $frmid.enick   -pady 2
+    grid  $frmid.lnick  -sticky e
+    grid  $frmid.enick  -sticky ew
+
     set igroup 0
     foreach group $groups {
-	set wglabel $wbox.lgroup${igroup}
-	set wgcombo $wbox.egroup${igroup}
-	label $wglabel -text "[mc Group]:" -anchor e
-	::combobox::combobox $wgcombo -width 12  \
-	  -textvariable $token\(group${igroup})
-	if {$group eq "None"} {
-	    set state(group${igroup}) ""	    
-	} else {
-	    set state(group${igroup}) $group
-	}
-	eval {$wgcombo list insert end} "None $allGroups"
-	grid  $wglabel  $wgcombo  -sticky e
+	set wglabel $frmid.lgroup${igroup}
+	set wgcombo $frmid.egroup${igroup}
+	ttk::label $wglabel -text "[mc Group]:" -anchor e
+	ttk::combobox $wgcombo  \
+	  -textvariable $token\(group${igroup}) -values [concat None $allGroups]
+	set state(group${igroup}) $group
+	grid  $wglabel  $wgcombo  -pady 2 -sticky e
 	grid  $wgcombo  -sticky ew
 	incr igroup
     }
+
     if {!$istransport} {
 
 	# Give user an opportunity to subscribe/unsubscribe other jid.
 	switch -- $subscription {
 	    from - none {
-		checkbutton $wbox.csubs -text "  [mc jarostsub]"  \
+		ttk::checkbutton $frmid.csubs -style Small.TCheckbutton \
+		  -text [mc jarostsub]  \
 		  -variable $token\(subscribe)
 	    }
 	    both - to {
-		checkbutton $wbox.csubs -text "  [mc jarostunsub]" \
+		ttk::checkbutton $frmid.csubs -style Small.TCheckbutton \
+		  -text [mc jarostunsub]  \
 		  -variable $token\(unsubscribe)
 	    }
 	}
 	
 	# Present subscription.
-	set str "[mc Subscription]: [mc [string totitle $subscription]]"
-	label $wbox.lsub -text $str -anchor e
+	set str "[mc Subscription]: "
+	append str [mc [string totitle $subscription]]
+	ttk::label $frmid.lsub -style Small.TLabel \
+	  -text $str -anchor e
     }
     
     if {!$istransport} {
-	grid x            $wbox.csubs  -sticky w
-	grid x            $wbox.lsub   -sticky w
+	grid  x  $frmid.csubs  -sticky w -pady 2
+	grid  x  $frmid.lsub   -sticky w -pady 2
     }
     
     # Cache state variables for the dialog.
-    set state(wjid)   $wbox.ejid
-    set state(wnick)  $wbox.enick
+    set state(wjid)   $frmid.ejid
+    set state(wnick)  $frmid.enick
+    set state(wgroup) $frmid.egroup
     
     # Button part.
-    set frbot [frame $wall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Set] -default active \
-      -command [list [namespace current]::DoEdit $token]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::CancelEdit $token]]  \
-      -side right -padx 5 -pady 5
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Set] -default active \
+      -command [list [namespace current]::DoEdit $token]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::CancelEdit $token]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
     if {!$istransport} {
-	pack [button $frbot.bvcard -text " [mc {Get vCard}]..."  \
-	  -command [list ::VCard::Fetch other $jid]]  \
-	  -side right -padx 5 -pady 5
+	ttk::button $frbot.bvcard -text "[mc {Get vCard}]..."  \
+	  -command [list ::VCard::Fetch other $jid]
+	pack $frbot.bvcard -side right
     }
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6    
+    pack $frbot -side top -fill x
     
-    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jrostedituser)]]
-    if {$nwin == 1} {
-	::UI::SetWindowPosition $w $wDlgs(jrostedituser)
-    }
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
     	
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 10]
-    } $wall.msg $w]    
+	%s configure -wraplength [expr [winfo reqwidth %s] - 40]
+    } $wbox.msg $w]    
     after idle $script
 
     # Wait here for a button press and window to be destroyed.
@@ -530,7 +587,7 @@ proc ::Jabber::User::DoEdit {token} {
     set origgroups  $state(origgroups)
     set subscribe   $state(subscribe)
     set unsubscribe $state(unsubscribe)
-        
+	
     # This is the only situation when a client "sets" a roster item.
     # The actual roster item is pushed back to us, and not set from here.
     set opts {}

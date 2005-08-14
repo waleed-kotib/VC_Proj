@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.19 2004-12-02 08:22:34 matben Exp $
+# $Id: Search.tcl,v 1.20 2005-08-14 07:10:51 matben Exp $
 
 package provide Search 1.0
 
@@ -29,162 +29,209 @@ namespace eval ::Search:: {
 proc ::Search::Build {args} {
     global  this prefs wDlgs
 
-    variable wtop
-    variable wbox
-    variable wbtsearch
-    variable wbtget
-    variable wcomboserver
-    variable wtb
-    variable wxsc
-    variable wysc
-    variable woob
-    variable server
-    variable wsearrows
-    variable stattxt
+    variable sstate
     upvar ::Jabber::jstate jstate
     
     set w $wDlgs(jsearch)
     if {[winfo exists $w]} {
 	return
     }
+    array set argsArr {
+	-server         ""
+	-autoget        0
+    }
     array set argsArr $args
     set finished -1
+    set wraplength 200
     
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document {closeBox resizable}}
     wm title $w [mc {Search Service}]
-    set wtop $w
-
-    set fontS [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
+    set sstate(w) $w
+    ::UI::SetWindowPosition $wDlgs(jsearch)
 
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 6 -ipady 4
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
     
     # Left half.
-    set wleft $w.frall.fl
-    pack [frame $wleft] -side left -fill y
+    set wleft $wbox.fl
+    ttk::frame $wleft -padding {0 0 12 0}
+    pack $wleft -side left -fill y
     
     # Right half.
-    set wright $w.frall.fr
-    pack [frame $wright] -side right -expand 1 -fill both
+    set wright $wbox.fr
+    ttk::frame $wright
+    pack $wright -side right -expand 1 -fill both
     
-    message $wleft.msg -width 200  \
-      -text [mc jasearch] -anchor w
-    pack $wleft.msg -side top -fill x -anchor w -padx 4 -pady 2
+    ttk::label $wleft.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength $wraplength -justify left \
+      -text [mc jasearch]
+    pack $wleft.msg -side top -anchor w
+    
     set frtop $wleft.top
-    pack [frame $frtop] -side top -fill x -anchor w -padx 4 -pady 2
-    label $frtop.lserv -text "[mc {Search Service}]:" -font $fontSB
+    ttk::frame $frtop
+    pack $frtop -side top -fill x -anchor w
     
     # Button part.
-    set frbot [frame $wleft.frbot -borderwidth 0]
-    set wsearrows $frbot.arr
-    set wbtsearch $frbot.btenter
-    pack [button $wbtsearch -text [mc Search] -state disabled \
-      -command [namespace current]::DoSearch]  \
-      -side right -padx 5 -pady 2
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command "destroy $w"]  \
-      -side right -padx 5 -pady 2
-    pack [::chasearrows::chasearrows $wsearrows -size 16] \
-      -side left -padx 5 -pady 2
-    pack $frbot -side bottom -fill x -padx 8 -pady 6
+    set frbot     $wleft.frbot
+    set wbtsearch $frbot.search
+    ttk::frame $frbot
+    ttk::button $frbot.search -text [mc Search] \
+      -command [namespace current]::DoSearch
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list destroy $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.search   -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.search   -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
+    
+    $wbtsearch state {disabled}
     
     # OOB alternative.
-    set woob [frame $wleft.foob]
-    pack $woob -side bottom -fill x -padx 8 -pady 0
+    set woob $wleft.foob
+    ttk::frame $wleft.foob
+    pack $wleft.foob -side bottom -fill x
     
     # Get all (browsed) services that support search.
     set searchServ [::Jabber::JlibCmd service getjidsfor "search"]
     set wcomboserver $frtop.eserv
-    ::combobox::combobox $wcomboserver -width 20   \
-      -textvariable [namespace current]::server -editable 0
-    eval {$frtop.eserv list insert end} $searchServ
+    set wbtget       $frtop.btget
+    ttk::label    $frtop.lserv -text "[mc {Search Service}]:"
+    ttk::button   $frtop.btget -text [mc Get] -default active \
+      -command [list ::Search::Get]
+    ttk::combobox $frtop.eserv -values $searchServ \
+      -textvariable [namespace current]::sstate(server) -state readonly
+
+    grid  $frtop.lserv  $frtop.btget  -sticky w  -pady 2
+    grid  $frtop.eserv  -             -sticky ew -pady 2
+    grid columnconfigure $frtop 0 -weight 1
     
     # Find the default search server.
-    if {[llength $searchServ]} {
-	set server [lindex $searchServ 0]
+    set sstate(server) ""
+    if {$searchServ != {}} {
+	set sstate(server) [lindex $searchServ 0]
     }
-    if {[info exists argsArr(-server)]} {
-	set server $argsArr(-server)
+    if {$argsArr(-server) != ""} {
+	set sstate(server) $argsArr(-server)
 	$wcomboserver configure -state disabled
     }
+    if {$searchServ == {}} {
+	$wbtget       state {disabled}
+	$wcomboserver state {disabled}
+    }
     
-    # Get button.
-    set wbtget $frtop.btget
-    button $wbtget -text [mc Get] -width 6 -default active \
-      -command [list ::Search::Get]
+    set wscrollframe $wleft.frsc
+    ::UI::ScrollFrame $wscrollframe -padding {8 12} -bd 1 -relief sunken \
+      -propagate 0 -width $wraplength
+    pack $wscrollframe -fill both -expand 1 -pady 4
 
-    grid $frtop.lserv -sticky w
-    grid $wcomboserver -row 1 -column 0 -sticky ew
-    grid $wbtget -row 1 -column 1 -sticky e -padx 2
+    
+    # Status part.
+    set wfrstatus $wleft.stat
+    set wsearrows $wfrstatus.arr
+    ttk::frame $wleft.stat
+    ::chasearrows::chasearrows $wfrstatus.arr -size 16
+    ttk::label $wfrstatus.la -style Small.TLabel \
+      -textvariable [namespace current]::sstate(status)
 
-    # This part must be built dynamically from the 'get' xml data.
-    # May be different for each conference server.
-    set wfr $wleft.frlab
-    labelframe $wfr -text [mc {Search Specifications}]
-    pack $wfr -side top -fill both -padx 6 -pady 4
-
-    set wbox [frame $wfr.box]
-    pack $wbox -side left -fill both -padx 4 -pady 4 -expand 1
-    pack [label $wbox.la -textvariable "[namespace current]::stattxt"]  \
-      -padx 0 -pady 10 -side left
-    set stattxt "-- [mc jasearchwait] --"
+    pack  $wfrstatus.arr  $wfrstatus.la  -side left -padx 2
+    pack  $wfrstatus  -side top -anchor w
     
     # The Search result tablelist widget.
     set frsearch $wright.se
-    pack [frame $frsearch -borderwidth 1 -relief sunken] -side top -fill both \
-      -expand 1 -padx 4 -pady 4
-    set wtb $frsearch.tb
-    set wxsc $frsearch.xsc
-    set wysc $frsearch.ysc
+    set wtb      $frsearch.tb
+    set wxsc     $frsearch.xsc
+    set wysc     $frsearch.ysc
+    frame $wright.se -bd 1 -relief sunken
+    pack $wright.se -side top -fill both -expand 1
     tablelist::tablelist $wtb \
       -columns [list 60 [mc {Search results}]]  \
       -xscrollcommand [list $wxsc set] -yscrollcommand [list $wysc set]  \
       -width 60 -height 20
-    #-labelcommand "[namespace current]::LabelCommand"  \
     
-    scrollbar $wysc -orient vertical -command [list $wtb yview]
-    scrollbar $wxsc -orient horizontal -command [list $wtb xview]
-    grid $wtb $wysc -sticky news
-    grid $wxsc -sticky ew -column 0 -row 1
+    tuscrollbar $wysc -command [list $wtb yview] -orient vertical
+    tuscrollbar $wxsc -command [list $wtb xview] -orient horizontal
+    grid  $wtb   $wysc  -sticky news
+    grid  $wxsc  -      -sticky ew
     grid rowconfigure $frsearch 0 -weight 1
     grid columnconfigure $frsearch 0 -weight 1
     
+    bind [$wtb bodytag] <Double-Button-1> { ::Search::TableCmd %W %x %y }
+    
     wm minsize $w 400 320
-	    
+
+    set sstate(wsearrows)     $wsearrows
+    set sstate(wcomboserver)  $wcomboserver
+    set sstate(wbtget)        $wbtget
+    set sstate(wtb)           $wtb
+    set sstate(wscrollframe)  $wscrollframe
+    set sstate(wbtsearch)     $wbtsearch
+    set sstate(wraplength)    $wraplength
+    set sstate(status)        ""
+	        
     # If only a single search service, or if specified as argument.
-    if {([llength $searchServ] == 1) ||  \
-      [info exists argsArr(-autoget)] && $argsArr(-autoget)} {
+    set search 0
+    if {[llength $searchServ] == 1} {
+	set search 1
+    } elseif {$argsArr(-autoget)} {
+	set search 1
+    }
+    if {$search} {
 	::Search::Get
     }
 }
 
+proc ::Search::TableCmd {w x y} {
+    upvar ::Jabber::jstate jstate
+    
+    lassign [tablelist::convEventFields $w $x $y] wtb xtb ytb
+    set ind [$wtb containing $ytb]
+        
+    if {$ind >= 0} {
+	set row [$wtb get $ind]
+	set jid [string trim [lindex $row 0]]
+
+	# Warn if already in our roster.
+	set users [$jstate(roster) getusers]
+	if {[lsearch -exact $users $jid] >= 0} {
+	    set ans [::UI::MessageBox -message [mc jamessalreadyinrost $jid] \
+	      -icon error -type ok]
+	} else {
+	    ::Jabber::User::NewDlg -jid $jid
+	}
+    }
+}
+
 proc ::Search::Get { } {    
-    variable server
-    variable wsearrows
-    variable wcomboserver
-    variable wbtget
-    variable wtb
-    variable stattxt
+    variable sstate
     upvar ::Jabber::jstate jstate
     
     # Verify.
-    if {[string length $server] == 0} {
+    if {$sstate(server) == ""} {
 	::UI::MessageBox -type ok -icon error  \
 	  -message [mc jamessregnoserver]
 	return
     }	
-    $wcomboserver configure -state disabled
-    $wbtget configure -state disabled
-    set stattxt "-- [mc jawaitserver] --"
+    $sstate(wcomboserver) state {disabled}
+    $sstate(wbtget)       state {disabled}
+    set sstate(status) [mc jawaitserver]
     
     # Send get register.
-    ::Jabber::JlibCmd search_get $server ::Search::GetCB    
-    $wsearrows start
+    ::Jabber::JlibCmd search_get $sstate(server) ::Search::GetCB    
+    $sstate(wsearrows) start
     
-    $wtb configure -columns [list 60 [mc {Search results}]]
-    $wtb delete 0 end
+    $sstate(wtb) configure -columns [list 60 [mc {Search results}]]
+    $sstate(wtb) delete 0 end
 }
 
 # Search::GetCB --
@@ -194,33 +241,23 @@ proc ::Search::Get { } {
 #       search, but this is untested.
 
 proc ::Search::GetCB {jlibName type subiq} {
-    
-    variable wtop
-    variable wbox
-    variable wtb
-    variable wxsc
-    variable wysc
-    variable woob
-    variable wsearrows
-    variable wbtsearch
-    variable wbtget
+    variable sstate
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Search::GetCB type=$type, subiq='$subiq'"
     
-    if {![winfo exists $wtop]} {
+    if {![winfo exists $sstate(w)]} {
 	return
     }
-    $wsearrows stop
+    $sstate(wsearrows) stop
+    set sstate(status) ""
     
     if {$type == "error"} {
 	::UI::MessageBox -type ok -icon error  \
 	  -message [mc jamesserrsearch [lindex $subiq 0] [lindex $subiq 1]]
 	return
     }
-    catch {destroy $wbox}
-    catch {destroy $woob.oob}
     set subiqChildList [wrapper::getchildren $subiq]
     
     # We must figure out if we have an oob thing.
@@ -237,29 +274,40 @@ proc ::Search::GetCB {jlibName type subiq} {
     }
 	
     # Build form dynamically from XML.
-    ::Jabber::Forms::Build $wbox $subiqChildList -template "search" -width 160
-    pack $wbox -side left -padx 2 -pady 10
-    if {$hasOOBForm} {
-	set woobtxt [::OOB::BuildText ${woob}.oob $xmlOOBElem]
+    set frint [::UI::ScrollFrameInterior $sstate(wscrollframe)]
+    set wform $frint.f
+    if {[winfo exists $wform]} {
+	destroy $wform
+    }
+    set width [expr {$sstate(wraplength) - 40}]
+    set formtoken [::JForms::Build $wform $subiq -tilestyle Small -width $width]
+    pack $wform -fill both -expand 1
+
+    set sstate(formtoken) $formtoken
+
+    if {0 && $hasOOBForm} {
+	set woobtxt [::OOB::BuildText $woob.oob $xmlOOBElem]
 	pack $woobtxt -side top -fill x
     }
-    $wbtsearch configure -state normal -default active
-    $wbtget configure -state normal -default disabled   
+
+    $sstate(wbtsearch) configure -default active
+    $sstate(wbtget)    configure -default disabled   
+    $sstate(wbtsearch) state {!disabled}
+    $sstate(wbtget)    state {!disabled}
 }
 
 proc ::Search::DoSearch { } {    
-    variable server
-    variable wsearrows
-    variable wbox
-    variable wtb
+    variable sstate
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    $wsearrows start
-    $wtb delete 0 end
+    $sstate(wsearrows) start
+    $sstate(wtb) delete 0 end
+    set sstate(status) "Waiting for search result..."
 
     # Returns the hierarchical xml list starting with the <x> element.
-    set subelements [::Jabber::Forms::GetXML $wbox]    
+    set subelements [::JForms::GetXML $sstate(formtoken)]
+    set server $sstate(server)
     ::Jabber::JlibCmd search_set $server  \
       [list [namespace current]::ResultCallback $server] -subtags $subelements
 }
@@ -277,20 +325,18 @@ proc ::Search::DoSearch { } {
 #       subiq:
 
 proc ::Search::ResultCallback {server type subiq} {   
-    variable wtop
-    variable wtb
-    variable wbox
-    variable wsearrows
+    variable sstate
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Search::ResultCallback server=$server, type=$type, \
       subiq='$subiq'"
     
-    if {![winfo exists $wtop]} {
+    if {![winfo exists $sstate(w)]} {
 	return
     }
-    $wsearrows stop
+    $sstate(wsearrows) stop
+    set sstate(status) ""
     if {[string equal $type "error"]} {
 	foreach {ecode emsg} [lrange $subiq 0 1] break
 	if {$ecode == "406"} {
@@ -304,8 +350,10 @@ proc ::Search::ResultCallback {server type subiq} {
 	
 	# This returns the search result and sets the reported stuff.
 	set columnSpec {}
-	set resultList [::Jabber::Forms::ResultList $wbox $subiq]
-	foreach {var label} [::Jabber::Forms::GetReported $wbox] {
+	set wtb $sstate(wtb)
+	set formtoken $sstate(formtoken)
+	set resultList [::JForms::ResultList $formtoken $subiq]
+	foreach {var label} [::JForms::GetReported $formtoken] {
 	    lappend columnSpec 0 $label	    
 	}
 	$wtb configure -columns $columnSpec

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.16 2005-07-27 08:55:52 matben Exp $
+# $Id: Init.tcl,v 1.17 2005-08-14 07:17:55 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -92,6 +92,8 @@ proc ::Init::SetThis {thisScript} {
     set this(altEmoticonsPath)  [file join $this(prefsPath) iconsets emoticons]
     set this(rosticonsPath)     [file join $this(path) iconsets roster]
     set this(altRosticonsPath)  [file join $this(prefsPath) iconsets roster]
+    set this(serviconsPath)     [file join $this(path) iconsets service]
+    set this(altServiconsPath)  [file join $this(prefsPath) iconsets service]
     set this(inboxFile)         [file join $this(prefsPath) Inbox.tcl]
     set this(notesFile)         [file join $this(prefsPath) Notes.tcl]
     set this(httpdRootPath)     $this(path)
@@ -115,7 +117,7 @@ proc ::Init::SetThis {thisScript} {
     }
     
     # This is where the "Batteries Included" binaries go. Empty if non.
-    if {$this(platform) == "unix"} {
+    if {$this(platform) eq "unix"} {
 	set machine $tcl_platform(machine)
 	if {[regexp {[2-9]86} $tcl_platform(machine) match]} {
 	    set machine "i686"
@@ -128,16 +130,11 @@ proc ::Init::SetThis {thisScript} {
     # Make cvs happy.
     regsub -all " " $machineSpecPath "" machineSpecPath
     
-    # TclKits on macintosh can't load sharedlibs. Placed side-by-side with tclkit.
-    if {($this(platform) == "macintosh") &&  \
-      ([info exists tclkit::topdir] ||  \
-      [string match -nocase tclkit* [file tail [info nameofexecutable]]])} {
-	set this(binPath) [file dirname [info nameofexecutable]]
-    } else {
-	set this(binPath) [file join $this(path) bin $this(platform) $machineSpecPath]
-    }
+    set this(binLibPath) [file join $this(path) bin library]
+    set this(binPath)    [file join $this(path) bin $this(platform) $machineSpecPath]
     if {[file exists $this(binPath)]} {
 	set auto_path [concat [list $this(binPath)] $auto_path]
+	set auto_path [concat [list $this(binLibPath)] $auto_path]
     } else {
 	set this(binPath) {}
     }
@@ -198,6 +195,31 @@ proc ::Init::SetThis {thisScript} {
     MakeDirs
 }
 
+proc ::Init::SetThisVersion { } {
+    global  this
+    
+    # The application major and minor version numbers; should only be written to
+    # default file, never read.
+    set this(vers,major)    0
+    set this(vers,minor)   95
+    set this(vers,release)  9
+    set this(vers,full) $this(vers,major).$this(vers,minor).$this(vers,release)
+}
+
+proc ::Init::SetThisEmbedded { } {
+    global  this
+    
+    # We may be embedded in another application, say an ActiveX component.
+    # The TclControl ActiveX package defines the browser namespace.
+    # So does the TclPlugin, at least version 2.0:
+    # http://www.tcl.tk/man/plugin2.0/pluginDoc/plugin.htm
+    if {[namespace exists ::browser]} {
+	set this(embedded) 1
+    } else {
+	set this(embedded) 0
+    }
+}
+
 proc ::Init::MakeDirs { } {
     global  this tcl_platform
     
@@ -233,21 +255,16 @@ proc ::Init::SetAutoPath { } {
     # Add the contrib directory which has things like widgets etc. 
     lappend auto_path [file join $this(path) contrib]
 
-    set prefs(stripJabber) 0
-
-    if {!$prefs(stripJabber)} {
-	
-	# Add the jabberlib directory which provides jabber support. 
-	lappend auto_path [file join $this(path) jabberlib]
-	
-	# Add the jabber directory which provides client specific jabber stuffs. 
-	lappend auto_path [file join $this(path) jabber]
-	
-	# Do we need TclXML. This is in its own app specific dir.
-	# Perhaps there can be a conflict if there is already an TclXML
-	# package installed in the standard 'auto_path'. Be sure to have it first!
-	set auto_path [concat [list [file join $this(path) TclXML]] $auto_path]
-    }
+    # Add the jabberlib directory which provides jabber support. 
+    lappend auto_path [file join $this(path) jabberlib]
+    
+    # Add the jabber directory which provides client specific jabber stuffs. 
+    lappend auto_path [file join $this(path) jabber]
+    
+    # Do we need TclXML. This is in its own app specific dir.
+    # Perhaps there can be a conflict if there is already an TclXML
+    # package installed in the standard 'auto_path'. Be sure to have it first!
+    set auto_path [concat [list [file join $this(path) TclXML]] $auto_path]
 }
 
 proc ::Init::Msgcat { } {
@@ -256,7 +273,7 @@ proc ::Init::Msgcat { } {
     package require msgcat
 
     # The message catalog for language customization. Use 'en' as fallback.
-    if {$prefs(messageLocale) == ""} {
+    if {$prefs(messageLocale) eq ""} {
 	if {[string match -nocase "c" [::msgcat::mclocale]]} {
 	    ::msgcat::mclocale en
 	}
@@ -280,7 +297,7 @@ proc ::Init::Msgcat { } {
     }
 
     # Test here if you want a particular message catalog (en, nl, de, fr, sv,...).
-    #::msgcat::mclocale en
+    #::msgcat::mclocale fr
     uplevel #0 [list ::msgcat::mcload $this(msgcatPath)]
 
     # This is a method to override default messages with custom ones for each
@@ -325,7 +342,8 @@ proc ::Init::Msgcat { } {
 #	The directory for temporary files.
 
 proc ::Init::TempDir {} {
-    global tcl_platform env
+    global  tcl_platform env
+    
     set attempdirs [list]
 
     foreach tmp {TMPDIR TEMP TMP} {
@@ -358,33 +376,57 @@ proc ::Init::TempDir {} {
 }
 
 proc ::Init::LoadPackages { } {
-    global  this prefs
+    global  this
+    
+    # tile may be statically linked (Windows).
+    if {[lsearch -exact [info loaded] {{} tile}] >= 0} {
+	package require tile 0.6
+    } else {
+    
+	# We must be sure script libraries for tile come from us (tcl_findLibrary).
+	::Splash::SetMsg "[mc splashlook] tile..."
+	namespace eval ::tile {}
+	set ::tile::library [file join $this(binLibPath) tile]
+	if {[catch {uplevel #0 {package require tile 0.6}} msg]} {
+	    tk_messageBox -icon error \
+	      -message "This application requires the tile package to work! $::errorInfo"
+	    exit
+	}
+    }
     
     # Other utility packages that can be platform specific.
     # The 'Thread' package requires that the Tcl core has been built with support.
     array set extraPacksArr {
-	macintosh   {http Tclapplescript MacPrint}
-	macosx      {http Tclapplescript tls Thread MacCarbonPrint}
+	macosx      {Itcl http Tclapplescript tls Thread MacCarbonPrint}
 	windows     {Itcl http printer gdi tls Thread optcl tcom}
-	unix        {http tls Thread}
+	unix        {Itcl http tls Thread}
     }
     foreach {platform packList} [array get extraPacksArr] {
 	foreach name $packList {
-	    set prefs($name) 0
-	}
-    }    
-    foreach name $extraPacksArr($this(platform)) {
-	::SplashScreen::SetMsg "[mc splashlook] $name..."
-	if {![catch {package require $name} msg]} {
-	    set prefs($name) 1
+	    set this(package,$name) 0
 	}
     }
-    if {!($prefs(printer) && $prefs(gdi))} {
-	set prefs(printer) 0
+    foreach name $extraPacksArr($this(platform)) {
+	::Splash::SetMsg "[mc splashlook] $name..."
+	if {![catch {package require $name} msg]} {
+	    set this(package,$name) 1
+	}
+    }
+    if {$this(package,Itcl)} {
+	uplevel #0 {namespace import ::itcl::*}
+    }
+    if {!($this(package,printer) && $this(package,gdi))} {
+	set this(package,printer) 0
     }
 
     # Not ready for this yet.
-    set prefs(Thread) 0
+    set this(package,Thread) 0
+}
+
+proc ::Init::SetHostname { } {
+    global  this
+    
+    set this(hostname) [info hostname]
 }
 
 #-------------------------------------------------------------------------------

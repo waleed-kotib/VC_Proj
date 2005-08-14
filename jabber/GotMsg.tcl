@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.40 2005-05-28 07:04:15 matben Exp $
+# $Id: GotMsg.tcl,v 1.41 2005-08-14 07:10:51 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -13,7 +13,6 @@ namespace eval ::GotMsg:: {
 
     # Add all event hooks.
     ::hooks::register quitAppHook        ::GotMsg::QuitAppHook
-    ::hooks::register closeWindowHook    ::GotMsg::CloseHook
     ::hooks::register presenceHook       ::GotMsg::PresenceHook    
     
     # Wait for this variable to be set.
@@ -57,7 +56,7 @@ proc ::GotMsg::GotMsg {id} {
     
     # Queue up this message or show right away?
     if {[winfo exists $w]} {
-	$wbtnext configure -state normal
+	$wbtnext state {!disabled}
     } else {
 	Show $id
     }
@@ -129,13 +128,13 @@ proc ::GotMsg::Show {thisMsgId} {
     # Insert the actual body of the message.
     $wtext configure -state normal
     $wtext delete 1.0 end
-    ::Text::Parse $wtext $body normal
+    ::Text::ParseMsg normal $jid $wtext $body normal
     $wtext insert end \n
     $wtext configure -state disabled
     
     # If no more messages after this one...
     if {[::MailBox::IsLastMessage $msgIdDisplay]} {
-	$wbtnext configure -state disabled
+	$wbtnext state {disabled}
     }
     
     # Run display message hook (speech).
@@ -176,76 +175,92 @@ proc ::GotMsg::Build { } {
 
     set w $wDlgs(jgotmsg)
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
     set finished 0
     
     # Toplevel with class GotMsg.
-    ::UI::Toplevel $w -class GotMsg -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -class GotMsg \
+      -usemacmainmenu 1 -macstyle documentProc -closecommand ::GotMsg::CloseHook
     wm title $w [mc {Incoming Message}]
     
     set bg [option get . backgroundGeneral {}]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 0   
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
 
-    pack [frame $w.frall.pad -height 8] -side bottom
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
 
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
+    set frbot $wbox.b
+    ttk::frame $frbot
     set wbtnext $frbot.btnext
-    set bwidth [expr [::Utils::GetMaxMsgcatWidth Next Reply] + 2]
-    pack [button $wbtnext -text [mc Next] -default active \
-      -width $bwidth -state normal -command [list ::GotMsg::NextMsg]] \
-      -side right -padx 5
-    pack [button $frbot.btreply -text [mc Reply]   \
-      -width $bwidth -command [list ::GotMsg::Reply]]  \
-      -side right -padx 5
-    pack $frbot -side bottom -fill x -padx 10 -pady 0
-    pack [checkbutton $w.frall.ch -text " [mc jainmsgshow]" \
-      -variable ::Jabber::jprefs(showMsgNewWin)] \
-      -side bottom -anchor w -padx 8
+    ttk::button $wbtnext -text [mc Next] -default active \
+      -width -8 -command [list ::GotMsg::NextMsg]
+    ttk::button $frbot.btreply -text [mc Reply]   \
+      -width -8 -command [list ::GotMsg::Reply]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $wbtnext -side right
+	pack $frbot.btreply -side right -padx $padx
+    } else {
+	pack $frbot.btreply -side right
+	pack $wbtnext -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
 
+    ttk::checkbutton $wbox.ch -style Small.TCheckbutton \
+      -text [mc jainmsgshow] \
+      -variable ::Jabber::jprefs(showMsgNewWin)
+    pack  $wbox.ch  -side bottom -anchor w -pady 4
+    
     # From, subject, and time fields.
-    set frmid [frame $w.frall.frmid -borderwidth 0]
-    pack $frmid -side top -fill x -padx 0 -pady 0
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack $frmid -side top -fill x
     
     # From field.
-    set wfrom     $frmid.from
-    set wpresence $wfrom.icon
-    labelframe $wfrom -text [mc From]
-    pack $wfrom -side top -fill both -padx 10 -pady 4
-    entry $wfrom.username -width 10 \
-      -textvariable [namespace current]::username -state disabled \
-      -borderwidth 1 -relief sunken -background $bg
-    pack  $wfrom.username -side left -fill x -expand 1
-    label $wfrom.time -textvariable [namespace current]::smartdate
-    pack  $wfrom.time -side left -padx 8 -pady 0
-    label $wpresence -compound left -image "" \
+    set wfrom     $frmid.lfrom
+    set wpresence $frmid.ifrom
+    ttk::label $frmid.lfrom -text "[mc From]:"
+    ttk::label $frmid.efrom \
+      -textvariable [namespace current]::username
+    ttk::label $frmid.time -style Small.TLabel \
+      -textvariable [namespace current]::smartdate
+    ttk::label $frmid.ifrom -style Small.TLabel \
+      -compound left -compound left -image "" \
       -textvariable [namespace current]::prestext
-    pack  $wpresence -side right -padx 4 -pady 0
-        
+
     # Subject field.
-    pack [frame $frmid.fsub -border 0] -side top -fill x -expand 1 -padx 6
-    pack [label $frmid.fsub.l -text "[mc Subject]:"  \
-      -anchor e] -side left -padx 2 -pady 1
-    pack [entry $frmid.fsub.e -width 10 \
-      -borderwidth 1 -relief sunken -background $bg \
-      -textvariable [namespace current]::subject -state disabled] \
-      -side left -padx 4 -pady 1 -fill x -expand 1
+    ttk::label $frmid.lsub -text "[mc Subject]:" -anchor e
+    ttk::label $frmid.esub \
+      -textvariable [namespace current]::subject
     
+    grid  $frmid.lfrom  $frmid.efrom  $frmid.time   -sticky e -padx 2 -pady 2
+    grid  $frmid.lsub   $frmid.esub   $frmid.ifrom  -sticky e -padx 2 -pady 2
+    grid  $frmid.efrom  $frmid.esub   -sticky w
+    grid  $frmid.time   $frmid.ifrom  -sticky w
+    grid columnconfigure $frmid 1 -weight 1
+        
     # Text.
-    set wtxtfr $w.frall.frtxt
-    pack [frame $wtxtfr] -side top -fill both -expand 1 -padx 4 -pady 4
-    set wtext $wtxtfr.text
-    set wysc $wtxtfr.ysc
-    text $wtext -height 6 -width 48 -wrap word  \
-      -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
+    set wtxtfr $wbox.frtxt
+    set wtext  $wtxtfr.text
+    set wysc   $wtxtfr.ysc
+    ttk::frame $wtxtfr -padding {0 4 0 0}
+    pack  $wtxtfr -side top -fill both -expand 1
+    text $wtext -highlightthickness 0 -height 6 -width 48 -wrap word  \
+      -borderwidth 1 -relief sunken \
+      -yscrollcommand [list ::UI::ScrollSet $wysc \
+      [list grid $wysc -column 1 -row 0 -sticky ns]]
     $wtext tag configure normal
-    scrollbar $wysc -orient vertical -command [list $wtext yview]
-    grid $wtext -column 0 -row 0 -sticky news
-    grid $wysc -column 1 -row 0 -sticky ns
+    tuscrollbar $wysc -orient vertical -command [list $wtext yview]
+
+    grid  $wtext  -column 0 -row 0 -sticky news
+    grid  $wysc   -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxtfr 0 -weight 1
     grid rowconfigure $wtxtfr 0 -weight 1
     
@@ -278,14 +293,11 @@ proc ::GotMsg::UpdateDate { } {
 }
 
 proc ::GotMsg::CloseHook {wclose} {
-    global  wDlgs
     variable locals
     
-    if {[string equal $wDlgs(jgotmsg) $wclose]} {
-	::UI::SaveWinGeom $wclose
-	if {$locals(updateDateid) != ""} {
-	    after cancel $locals(updateDateid)
-	}
+    ::UI::SaveWinGeom $wclose
+    if {$locals(updateDateid) != ""} {
+	after cancel $locals(updateDateid)
     }   
 }
 

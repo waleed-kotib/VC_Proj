@@ -7,7 +7,9 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.16 2005-02-08 08:57:16 matben Exp $
+# $Id: Network.tcl,v 1.17 2005-08-14 07:17:55 matben Exp $
+
+package provide Network 1.0
 
 namespace eval ::Network:: {
     
@@ -202,7 +204,7 @@ proc ::Network::KillAll { } {
 proc ::Network::GetThisPublicIP { } {
     global  this prefs
     
-    if {$prefs(setNATip) && ($prefs(NATip) != "")} {
+    if {$prefs(setNATip) && ($prefs(NATip) ne "")} {
 	return $prefs(NATip)
     } else {
 	return $this(ipnum)

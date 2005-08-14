@@ -7,10 +7,10 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WindowsUtils.tcl,v 1.9 2004-08-24 13:25:11 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.10 2005-08-14 07:17:55 matben Exp $
 
 package require registry
-package provide WindowsUtils
+package provide WindowsUtils 1.0
 
 namespace eval ::Windows:: {
 
@@ -170,7 +170,7 @@ proc ::Windows::Printer::PrintText {w hdc pName} {
     variable iLine 0
     upvar 1 $pName p
     
-    if {[winfo class $w] != "Text"} {
+    if {[winfo class $w] ne "Text"} {
 	error "::Windows::Printer::PrintText for text widgets only"
     }
     
@@ -181,7 +181,7 @@ proc ::Windows::Printer::PrintText {w hdc pName} {
     set tm [expr round($p(tm) * $facy)]
     set pw [expr round(($p(pw) - $p(lm) - $p(rm)) * $facx)]
     set pl [expr round(($p(pl) - $p(tm) - $p(bm)) * $facy)]
-    if {$::tcl_platform(platform) == "windows"} {
+    if {$::tcl_platform(platform) eq "windows"} {
 	set ppiScreen 94
     } else {
 	set ppiScreen 72
@@ -278,7 +278,7 @@ proc ::Windows::Printer::TextDumpCallback {hdc key value index} {
 	    set len 0
 	    set totlen [string length $value]
 	    set dcwidth 0
-	    if {$bg == "white"} {
+	    if {$bg eq "white"} {
 		set backfill {}
 	    } else {
 		set backfill [list -backfill $bg]
@@ -289,7 +289,7 @@ proc ::Windows::Printer::TextDumpCallback {hdc key value index} {
 		# Handle text paragraph by paragraph, separated by \n.
 		# split \n  to list ??
 		set end [string first "\n" $str]
-		if {$str == ""} {
+		if {$str eq ""} {
 		    set str " "
 		}
 		set maxlen [string length $str]
