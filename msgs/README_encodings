@@ -42,7 +42,7 @@ Use the following code to do this:
 
 set src [tk_getOpenFile -title {Pick your language catalog}]
 if {$src == ""} return
-set new "[file rootname [file tail $src]].msg"
+set new [file rootname [file tail $src]].msg
 set fdsrc [open $src "r"]
 set txt [read $fdsrc];
 close $fdsrc

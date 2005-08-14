@@ -99,6 +99,7 @@
 ::msgcat::mcset sv Options              {Valmöjligheter}
 ::msgcat::mcset sv Participants         {Deltagare}
 ::msgcat::mcset sv Password 		{Lösenord}
+::msgcat::mcset sv Pause                {Paus}
 ::msgcat::mcset sv Pick 		{Välj}
 ::msgcat::mcset sv Phone                {Telefon}
 ::msgcat::mcset sv Play                 {Spela upp}
@@ -120,6 +121,7 @@
 ::msgcat::mcset sv Remove 		{Tag bort}
 ::msgcat::mcset sv Reply 		{Retur}
 ::msgcat::mcset sv Resource             {Resurs}
+::msgcat::mcset sv Restart              {Återstart}
 ::msgcat::mcset sv Room			{Rum}
 ::msgcat::mcset sv Roster               {Roster}
 ::msgcat::mcset sv Save 		{Spara}
