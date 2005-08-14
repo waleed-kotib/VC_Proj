@@ -1,31 +1,48 @@
 ! Resource database entries for Unix/Linux
 !
-! General appearance
+! General appearance 
 !
-*fontTiny:                           Helvetica -10
-*fontSmall:                          Helvetica -10
-*fontSmallBold:                      Helvetica -10 bold
-*fontMedium:                         Helvetica -10
-*fontLarge:                          Helvetica 18
-*backgroundGeneral:                  #dedede
+*backgroundGeneral:                  #dcdad5
 
-! tk standard widgets
+*tileTheme:                          clam
+
+! general settings for all widgets
 !
 
-*Checkbutton.Font:                   Helvetica -10
-*Entry.Font:                         Helvetica -10
-*Label.Font:                         Helvetica -10
-*Labelframe.Font:                    Helvetica -10 bold
-*Listbox.Font:                       Helvetica -10
+! Standard backgrounds
+!
+*Canvas.background:                  #dcdad5
+*Canvas.highlightBackground:         #dcdad5
+*Checkbutton.background:             #dcdad5
+*Checkbutton.highlightBackground:    #dcdad5
+*Frame.background:                   #dcdad5
+*Frame.highlightBackground:          #dcdad5
+*Label.background:                   #dcdad5
+*Label.highlightBackground:          #dcdad5
+*Labelframe.background:              #dcdad5
+*Labelframe.highlightBackground:     #dcdad5
+*Radiobutton.background:             #dcdad5
+*Radiobutton.highlightBackground:    #dcdad5
+
+! tk standard widgets (clam theme background)
+!
+*Menu.background:                    #dcdad5
 *Menu.borderWidth:                   1
-*Menu.Font:                          Helvetica -10
-*Message.Font:                       Helvetica -10
-*Radiobutton.Font:                   Helvetica -10
-*Scale.Font:                         Helvetica -10
-*Text.Font:                          Helvetica -10
 *Scrollbar.borderWidth:              1
 *Scrollbar.width:                    12
 *Scrollbar.troughColor:              #bdbdbd
+*Text.highlightBackground:           #dcdad5
+
+! contributed widgets
+!
+*ChaseArrows.background:             #dcdad5
+*Tablelist.labelBackground:          #dcdad5
+*WaveLabel.background:               #dcdad5
+
+
+! specific megawidgets
+!
+
 
 ! button icons for ok and cancel buttons
 !
@@ -33,8 +50,3 @@
 *btok.compound:                      left
 *btcancel.image:                     buttoncancel
 *btcancel.compound:                  left
-
-! contributed widgets
-!
-*Combobox.Font:                      Helvetica -10
-*Tablelist.Font:                     Helvetica -10

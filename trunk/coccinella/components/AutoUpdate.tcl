@@ -5,9 +5,7 @@
 #
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: AutoUpdate.tcl,v 1.11 2005-01-31 14:06:52 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.12 2005-08-14 08:37:51 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -45,16 +43,16 @@ proc ::AutoUpdate::InitPrefsHook { } {
     set prefs(lastAutoUpdateVersion) 0.0
     set prefs(doneAutoUpdate) 0
     
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list prefs(lastAutoUpdateVersion) prefs_lastAutoUpdateVersion \
       $prefs(lastAutoUpdateVersion)] ]    
 }
 
 proc ::AutoUpdate::LaunchHook { } {
-    global  prefs
+    global  prefs this
     
     if {!$prefs(doneAutoUpdate) &&  \
-      ([package vcompare $prefs(fullVers) $prefs(lastAutoUpdateVersion)] > 0)} {
+      ([package vcompare $this(vers,full) $prefs(lastAutoUpdateVersion)] > 0)} {
 	after 10000 ::AutoUpdate::Get 
     }
 }
@@ -86,7 +84,7 @@ proc ::AutoUpdate::Get {args} {
 }
 
 proc ::AutoUpdate::Command {token} {
-    global  prefs
+    global  prefs this
     upvar #0 $token state
     variable opts
     variable newVersion
@@ -123,11 +121,11 @@ proc ::AutoUpdate::Command {token} {
 	set newVersion $releaseArr(version)
 	
 	# Show dialog if newer version available.
-	if {[package vcompare $prefs(fullVers) $releaseArr(version)] == -1} {
+	if {[package vcompare $this(vers,full) $releaseArr(version)] == -1} {
 	    ::AutoUpdate::Dialog $releaseAttr $message $changesList
 	} elseif {!$opts(-silent)} {
 	    ::UI::MessageBox -icon info -type ok -message \
-	      [mc messaupdatelatest $prefs(fullVers)]
+	      [mc messaupdatelatest $this(vers,full)]
 	}
 	tinydom::cleanup $token
     }
@@ -144,25 +142,29 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -closecommand [namespace current]::Destroy
     wm title $w [mc {New Version}]
-    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
     # Text.
-    set wtext $w.frall.text
+    set wtext $wbox.text
     text $wtext -width 60 -height 16 -wrap word \
       -borderwidth 1 -relief sunken -background white
     pack $wtext
     
     $wtext tag configure msgtag -lmargin1 10 -spacing1 4 -spacing3 4 \
-      -font $fontSB
+      -font CociSmallBoldFont
     $wtext tag configure attrtag -lmargin1 10 -spacing1 2 -spacing3 2
     $wtext tag configure changestag -lmargin1 10 -spacing1 4 -spacing3 4 \
-      -font $fontSB
+      -font CociSmallBoldFont
     $wtext tag configure itemtag -lmargin1 20 -lmargin2 30 \
       -spacing1 2 -spacing3 2
     $wtext configure -tabs {100 right 110 left}
@@ -202,25 +204,25 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     $wtext configure -height [expr int([$wtext cget -height]/$yfrac) + 0]
     
     set noautocheck 0
-    if {[package vcompare $prefs(fullVers) $prefs(lastAutoUpdateVersion)] <= 0} {
+    if {[package vcompare $this(vers,full) $prefs(lastAutoUpdateVersion)] <= 0} {
     	set noautocheck 1
     }
-    checkbutton $w.frall.ch -text " [mc autoupdatenot]" \
+    ttk::checkbutton $wbox.ch -text [mc autoupdatenot] \
       -variable [namespace current]::noautocheck
-    pack $w.frall.ch -side top -anchor w -padx 10 -pady 4
+    pack $wbox.ch -side top -anchor w -pady 8
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btset -text [mc Close] \
-      -command "destroy $w"] -side right -padx 5 -pady 5
-    pack $frbot -side top -fill x -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot
+    ttk::button $frbot.btok -text [mc Close] \
+      -command [list destroy $w]
+    pack $frbot.btok -side right
+    pack $frbot -side top -fill x
     
     wm resizable $w 0 0
-    
-    bind $w <Destroy> [namespace current]::Destroy
 }
 
-proc ::AutoUpdate::Destroy { } {
+proc ::AutoUpdate::Destroy {w} {
     global  prefs
     variable noautocheck
     variable newVersion

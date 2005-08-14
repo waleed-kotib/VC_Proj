@@ -3,51 +3,49 @@
 
 ! General appearance
 !
-*fontTiny:                           Arial 8
-*fontSmall:                          Arial 8
-*fontSmallBold:                      Arial 8 bold
-*fontMedium:                         Arial 8
-*fontLarge:                          Helvetica 16
-*backgroundGeneral:                  #e5e4e8
+*backgroundGeneral:                  #ece9d8
 
 ! general settings for all widgets
 !
-*background:                         #e5e4e8
-*highlightBackground:                #e5e4e8
+!*background:                         #ece9d8
+*highlightBackground:                #ece9d8
+
+! Standard backgrounds
+!
+*Canvas.background:                  #ece9d8
+*Canvas.highlightBackground:         #ece9d8
+*Checkbutton.background:             #ece9d8
+*Checkbutton.highlightBackground:    #ece9d8
+*Frame.background:                   #ece9d8
+*Frame.highlightBackground:          #ece9d8
+*Label.background:                   #ece9d8
+*Label.highlightBackground:          #ece9d8
+*Labelframe.background:              #ece9d8
+*Labelframe.highlightBackground:     #ece9d8
+*Radiobutton.background:             #ece9d8
+*Radiobutton.highlightBackground:    #ece9d8
 
 ! tk standard widgets
 !
 *Button.padX:                        10
 *Button.padY:                        2
-*Checkbutton.Font:                   Arial 8
-*Entry.background:                   white
-*Entry.Font:                         Arial 8
-*Label.Font:                         Arial 8
-*Labelframe.Font:                    Arial 8 bold
-*Listbox.background:                 white
-*Listbox.Font:                       Arial 8
-*Message.Font:                       Arial 8
-*Radiobutton.Font:                   Arial 8
-*Scale.Font:                         Arial 8
-*Text.background:                    white
-*Text.Font:                          Arial 8
 
 ! button icons for ok and cancel buttons
 !
-*btok.image:                         buttonok
-*btok.compound:                      left
-*btcancel.image:                     buttoncancel
-*btcancel.compound:                  left
+!*btok.image:                         buttonok
+!*btok.compound:                      left
+!*btcancel.image:                     buttoncancel
+!*btcancel.compound:                  left
 
 ! contributed widgets
 !
 *Balloonhelp.background:             #ffff9f
+*ChaseArrows.background:             #ece9d8
 *Combobox.background:                white
-*Combobox.Font:                      Arial 8
 *HeadLabel.background:               #cecece
-*MacTabnotebook.Font:                Arial 8
 *Tablelist.background:               white
-*Tablelist.Font:                     Arial 8
+*Tablelist.labelBackground:          #ece9d8
+*WaveLabel.background:               #ece9d8
 
 ! specific megawidgets
 !

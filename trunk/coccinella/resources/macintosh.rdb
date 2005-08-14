@@ -3,11 +3,6 @@
 
 ! General appearance
 !
-*fontTiny:                           Geneva 9
-*fontSmall:                          Geneva 9
-*fontSmallBold:                      Geneva 9 bold
-*fontMedium:                         Geneva 9
-*fontLarge:                          Helvetica 18
 *backgroundGeneral:                  #dedede
 
 ! general settings for all widgets
@@ -17,23 +12,13 @@
 ! tk standard widgets
 !
 
-*Checkbutton.Font:                   Geneva 9
-*Entry.Font:                         Geneva 9
 *Entry.highlightThickness:           3
-*Label.Font:                         Geneva 9
-*Labelframe.Font:                    Geneva 9 bold
-*Listbox.Font:                       Geneva 9
 *Listbox.highlightThickness:         3
-*Message.Font:                       Geneva 9
-*Radiobutton.Font:                   Geneva 9
-*Text.Font:                          Geneva 9
 *Text.highlightThickness:            3
 
 ! contributed widgets
 !
-*Combobox.Font:                      Geneva 9
 *MacTabnotebook.style:               mac
-*Tablelist.Font:                     Geneva 9
 *Tablelist.highlightThickness:       3
 *Tree.styleIcons:                     triangle
 *Tree.treeColor:                     

@@ -3,7 +3,7 @@
 #       Demo of some of the functionality for components.
 #       This is just a first sketch.
 #       
-# $Id: CarbonNotification.tcl,v 1.4 2004-12-01 15:15:40 matben Exp $
+# $Id: CarbonNotification.tcl,v 1.5 2005-08-14 08:37:51 matben Exp $
 
 namespace eval ::CarbonNotification:: {
     
@@ -12,7 +12,7 @@ namespace eval ::CarbonNotification:: {
 proc ::CarbonNotification::Init { } {
     global  this
     
-    if {![string equal $this(platform) "macosx"]} {
+    if {[tk windowingsystem] ne "aqua"} {
 	return
     }
     if {[catch {package require tclCarbonNotification}]} {
@@ -30,9 +30,9 @@ proc ::CarbonNotification::Init { } {
 proc ::CarbonNotification::EventHook {args} {    
 
     # Notify only if in background.
-    
-    
-    tclCarbonNotification 1 ""
+    if {![::UI::IsAppInFront]} {
+	tclCarbonNotification 1 ""
+    }
 }
 
 #-------------------------------------------------------------------------------

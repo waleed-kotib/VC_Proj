@@ -87,42 +87,134 @@ if {$::tcl_platform(platform) == "macintosh"} {
 # If you want to compare an existing message catalog with the original
 # en.msg to see if any parts missing use the script below.
 
-namespace eval ::msgcat:: {}
-rename ::msgcat::mcset ::msgcat::mcset_tmp
-proc ::msgcat::mcset {lang key {str ""}} {
-    global arr keylist table
-    if {$lang == "en"} {
-	lappend keylist $key
-    }
-    set table($lang,$key) $str
-    set arr($lang,$key) [uplevel 1 {namespace current}]
-}
-set keylist {}
-array unset arr
-array unset table
 
-set dir [tk_chooseDirectory -title {Pick Catalog Directory}]
-if {$dir == ""} return
+namespace eval ::msgcat:: {}
+if {[llength [info commands ::msgcat::mcset]]} {
+    rename ::msgcat::mcset ::msgcat::mcset_tmp
+}
+array unset table
+array unset uidc
+
+proc ::msgcat::mcset {lang key {str ""}} {
+    global table uidc
+
+    set uid [incr uidc($lang)]
+    set table(uid,$lang,$key) $uid
+    set table(iuid,$lang,$uid) $key
+    set table(str,$lang,$key) $str
+    set table(ns,$lang,$key) [uplevel 1 {namespace current}]
+    #if {$lang == "en"} {puts "uid=$uid, key=$key"}
+}
+proc evalcatalog {f} {
+    set fd [open $f "r"]
+    fconfigure $fd -encoding utf-8
+    uplevel 1 [read $fd]
+    close $fd
+}
+
+if {1} {
+    set dir [tk_chooseDirectory -title {Pick Catalog Directory}]
+    if {$dir == ""} return
+} else {
+    set dir [file dirname [info script]]
+}
 cd $dir
 if {![file exists en.msg]} {
     tk_messageBox -message "Directory $dir does not contain en.msg"
     return
 }
-source en.msg
+set uidc(en) 0
+evalcatalog en.msg
 
 set files [glob *.msg]
 foreach f $files {
     if {$f == "en.msg"} continue
+    if {[string match *_new.msg $f]} continue
     set lang [file rootname [file tail $f]]
+    set uidc($lang) 0
     puts "Processing $lang file $f"
-    source $f
-    foreach name [lsort [array names arr en,*]] {
-	regexp {en,(.*)} $name match key
-	if {![info exists arr($lang,$key)]} {
-	     puts "\t missing: $key"
-	} elseif {$arr(en,$key) != $arr($lang,$key)} {
-	    puts "\t wrong namespace: $key, \t$arr($lang,$key) -> $arr(en,$key)"
+    evalcatalog $f
+    set missinguids {}
+    foreach name [lsort [array names table ns,en,*]] {
+	regexp {ns,en,(.*)} $name match key
+	if {![info exists table(ns,$lang,$key)]} {
+	    lappend missinguids $table(uid,en,$key)
+	    puts "\t missing: $key, $table(uid,en,$key)"
+	} elseif {$table(ns,en,$key) != $table(ns,$lang,$key)} {
+	    puts "\t wrong namespace: $key, \t $table(ns,$lang,$key) -> $table(ns,en,$key)"
 	}
+    }
+
+    # Print template missing entries.
+    foreach uid [lsort -integer $missinguids] {
+        set key  $table(iuid,en,$uid)
+	set str  $table(str,en,$key)
+        puts "# [list ::msgcat::mcset $lang $key $str]"
+    }
+
+    # If you want to create "patched" catalogs.
+    # Wrong encoding. NOT YET WORKING!!!
+    if {0} {
+	unset -nocomplain key2idx
+
+	# Read old first line by line.
+	set fd [open $f "r"]
+	fconfigure $fd -encoding utf-8
+	set lines [split [read $fd] \n]
+	close $fd
+
+	# Join multiple lines.
+	set tmp {}
+	set multi 0
+	foreach line $lines {
+	    if {$multi} {
+		set pline [string trimright [lindex $tmp end] \\]
+		lset tmp end "$pline [string trimleft $line]"
+	    } else {
+		lappend tmp $line
+	    }
+	    if {[regexp {.*\\$} $line]} {
+		set multi 1
+	    } else {
+		set multi 0
+	    }
+	}
+	set lines $tmp
+	
+	# Map key to line index.
+	set idx 0
+	foreach line $lines {
+	    if {[regexp {[ \t]*::msgcat::mcset} $line]} {
+		foreach {cmd l k} $line break
+		set key2idx($k) $idx
+	    }
+	    incr idx
+	}
+	set missinguids [lsort -integer -decreasing $missinguids]
+	
+	foreach uid $missinguids {
+	    set key  $table(iuid,en,$uid)
+	    set akey $table(iuid,en,[expr $uid+1])
+	    set pat [string map [list @lang $lang @key $akey] \
+	      {[ \t]*::msgcat::mcset +@lang +@key[\n\t ]}]
+	    set idx [lsearch -regexp $lines $pat]
+	    puts "idx=$idx, key=$key, akey=$akey"
+	    
+	    set str $table(str,en,$key)
+	    set line "#::msgcat::mcset [list $lang $key $str]"
+	    set lines [linsert $lines $idx $line]
+	}
+	
+	# New catalog.
+	set new [file join $dir ${lang}_new.msg]
+	set fd [open $new w]
+	fconfigure $fd -encoding utf-8
+	foreach line $lines {
+	    puts $fd $line
+	}
+	close $fd
+	puts "missinguids=$missinguids"
+	break
     }
 }
 
@@ -130,20 +222,3 @@ rename ::msgcat::mcset ""
 rename ::msgcat::mcset_tmp ::msgcat::mcset
 
 ........................................................................
-
-if {0} {
-    # Create 'new' catalog. Encoding wrong!!!
-    set dir [file dirname $dst]
-    set new [file join $dir ${lang}_new.msg]
-    set fd [open $new w]
-    fconfigure $fd -encoding utf-8
-    foreach key $keylist {
-	if {[info exists table($lang,$key)]} {
-	    puts $fd [list ::msgcat::mcset $lang $key $table($lang,$key)]
-	} else {
-	    puts $fd [list #::msgcat::mcset $lang $key $table(en,$key)]
-	}
-    }
-    close $fd
-    unset keylist
-}

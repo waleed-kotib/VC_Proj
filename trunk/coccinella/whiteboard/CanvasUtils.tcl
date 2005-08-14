@@ -5,11 +5,10 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: CanvasUtils.tcl,v 1.28 2005-06-16 12:39:26 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.29 2005-08-14 08:37:52 matben Exp $
 
 package require sha1pure
+package require can2svg
 
 package provide CanvasUtils 1.0
 
@@ -50,7 +49,7 @@ proc ::CanvasUtils::Init { } {
     
     # Unique tag prefix for items created by this client.
     set utagpref $this(hostname)
-    if {$utagpref == ""} {
+    if {$utagpref eq ""} {
         set utagpref $this(internalIPname)
     }
     
@@ -76,113 +75,113 @@ proc ::CanvasUtils::Init { } {
     
     set menuDefs(pop,thickness)  \
       {cascade     mThickness     {}                                       normal   {} {} {
-	{radio   1 {::CanvasUtils::ItemConfigure $w $id -width 1}          normal   {} \
+	{radio   1 {::CanvasUtils::ItemConfigure $wcan $id -width 1}          normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-width)}}
-	{radio   2 {::CanvasUtils::ItemConfigure $w $id -width 2}          normal   {} \
+	{radio   2 {::CanvasUtils::ItemConfigure $wcan $id -width 2}          normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-width)}}
-	{radio   4 {::CanvasUtils::ItemConfigure $w $id -width 4}          normal   {} \
+	{radio   4 {::CanvasUtils::ItemConfigure $wcan $id -width 4}          normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-width)}}
-	{radio   6 {::CanvasUtils::ItemConfigure $w $id -width 6}          normal   {} \
+	{radio   6 {::CanvasUtils::ItemConfigure $wcan $id -width 6}          normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-width)}}}
     }
     set menuDefs(pop,brushthickness)  \
       {cascade     mBrushThickness  {}                                     normal   {} {} {
-	{radio   8 {::CanvasUtils::ItemConfigure $w $id -width 8}          normal   {} \
+	{radio   8 {::CanvasUtils::ItemConfigure $wcan $id -width 8}          normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}
-	{radio  10 {::CanvasUtils::ItemConfigure $w $id -width 10}         normal   {} \
+	{radio  10 {::CanvasUtils::ItemConfigure $wcan $id -width 10}         normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}
-	{radio  12 {::CanvasUtils::ItemConfigure $w $id -width 12}         normal   {} \
+	{radio  12 {::CanvasUtils::ItemConfigure $wcan $id -width 12}         normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}
-	{radio  14 {::CanvasUtils::ItemConfigure $w $id -width 14}         normal   {} \
+	{radio  14 {::CanvasUtils::ItemConfigure $wcan $id -width 14}         normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}}
     }
     set menuDefs(pop,arcs)  \
       {cascade   mArcs      {}                                      normal   {} {} {
-	{radio   mPieslice  {::CanvasUtils::ItemConfigure $w $id -style pieslice}  normal   {} \
+	{radio   mPieslice  {::CanvasUtils::ItemConfigure $wcan $id -style pieslice}  normal   {} \
 	  {-value pieslice -variable ::CanvasUtils::popupVars(-arc)}}
-	{radio   mChord     {::CanvasUtils::ItemConfigure $w $id -style chord}     normal   {} \
+	{radio   mChord     {::CanvasUtils::ItemConfigure $wcan $id -style chord}     normal   {} \
 	  {-value chord -variable ::CanvasUtils::popupVars(-arc)}}
-	{radio   mArc       {::CanvasUtils::ItemConfigure $w $id -style arc}       normal   {} \
+	{radio   mArc       {::CanvasUtils::ItemConfigure $wcan $id -style arc}       normal   {} \
 	  {-value arc -variable ::CanvasUtils::popupVars(-arc)}}}
     }
     set menuDefs(pop,color)  \
-      {command   mColor        {::CanvasUtils::SetItemColorDialog $w $id -fill}  normal {}}
+      {command   mColor        {::CanvasUtils::SetItemColorDialog $wcan $id -fill}  normal {}}
     set menuDefs(pop,fillcolor)  \
-      {command   mFillColor    {::CanvasUtils::SetItemColorDialog $w $id -fill}  normal {}}
+      {command   mFillColor    {::CanvasUtils::SetItemColorDialog $wcan $id -fill}  normal {}}
     set menuDefs(pop,outline)  \
-      {command   mOutlineColor {::CanvasUtils::SetItemColorDialog $w $id -outline}  normal {}}
+      {command   mOutlineColor {::CanvasUtils::SetItemColorDialog $wcan $id -outline}  normal {}}
     set menuDefs(pop,inspect)  \
-      {command   mInspectItem  {::ItemInspector::ItemInspector $wtop $id}   normal {}}
+      {command   mInspectItem  {::ItemInspector::ItemInspector $w $id}   normal {}}
     set menuDefs(pop,inspectqt)  \
-      {command   mInspectItem  {::ItemInspector::Movie $wtop $winfr}        normal {}}
+      {command   mInspectItem  {::ItemInspector::Movie $w $winfr}        normal {}}
     set menuDefs(pop,saveimageas)  \
-      {command   mSaveImageAs  {::Import::SaveImageAsFile $w $id}    normal {}}
+      {command   mSaveImageAs  {::Import::SaveImageAsFile $wcan $id}    normal {}}
     set menuDefs(pop,imagelarger)  \
-      {command   mImageLarger  {::Import::ResizeImage $wtop 2 $id auto}   normal {}}
+      {command   mImageLarger  {::Import::ResizeImage $w 2 $id auto}   normal {}}
     set menuDefs(pop,imagesmaller)  \
-      {command   mImageSmaller {::Import::ResizeImage $wtop -2 $id auto}   normal {}}
+      {command   mImageSmaller {::Import::ResizeImage $w -2 $id auto}   normal {}}
     set menuDefs(pop,exportimage)  \
-      {command   mExportImage  {::Import::ExportImageAsFile $w $id}  normal {}}
+      {command   mExportImage  {::Import::ExportImageAsFile $wcan $id}  normal {}}
     set menuDefs(pop,exportmovie)  \
-      {command   mExportMovie  {::Import::ExportMovie $wtop $winfr}  normal {}}
+      {command   mExportMovie  {::Import::ExportMovie $w $winfr}  normal {}}
     set menuDefs(pop,syncplay)  \
-      {checkbutton  mSyncPlayback {::Import::SyncPlay $wtop $winfr}  normal {} {} \
+      {checkbutton  mSyncPlayback {::Import::SyncPlay $w $winfr}  normal {} {} \
 	{-variable ::CanvasUtils::popupVars(-syncplay)}}
     set menuDefs(pop,shot)  \
-      {command   mTakeSnapShot  {::Import::TakeShot $wtop $winfr}  normal {}}
+      {command   mTakeSnapShot  {::Import::TakeShot $w $winfr}  normal {}}
     set menuDefs(pop,timecode)  \
-	{checkbutton  mTimeCode {::Import::TimeCode $wtop $winfr}  normal {} {} \
+	{checkbutton  mTimeCode {::Import::TimeCode $w $winfr}  normal {} {} \
 	  {-variable ::CanvasUtils::popupVars(-timecode)}}
     set menuDefs(pop,inspectbroken)  \
-      {command   mInspectItem  {::ItemInspector::Broken $wtop $id}          normal {}}
+      {command   mInspectItem  {::ItemInspector::Broken $w $id}          normal {}}
     set menuDefs(pop,reloadimage)  \
-      {command   mReloadImage  {::Import::ReloadImage $wtop $id}     normal {}}
+      {command   mReloadImage  {::Import::ReloadImage $w $id}     normal {}}
     set menuDefs(pop,smoothness)  \
       {cascade     mLineSmoothness   {}                                    normal   {} {} {
-	{radio None {::CanvasUtils::ItemConfigure $w $id -smooth 0 -splinesteps  0} normal {} \
+	{radio None {::CanvasUtils::ItemConfigure $wcan $id -smooth 0 -splinesteps  0} normal {} \
 	  {-value 0 -variable ::CanvasUtils::popupVars(-smooth)}}
-	{radio 2    {::CanvasUtils::ItemConfigure $w $id -smooth 1 -splinesteps  2} normal {} \
+	{radio 2    {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps  2} normal {} \
 	  {-value 2 -variable ::CanvasUtils::popupVars(-smooth)}}
-	{radio 4    {::CanvasUtils::ItemConfigure $w $id -smooth 1 -splinesteps  4} normal {} \
+	{radio 4    {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps  4} normal {} \
 	  {-value 4 -variable ::CanvasUtils::popupVars(-smooth)}}
-	{radio 6    {::CanvasUtils::ItemConfigure $w $id -smooth 1 -splinesteps  6} normal {} \
+	{radio 6    {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps  6} normal {} \
 	  {-value 6 -variable ::CanvasUtils::popupVars(-smooth)}}
-	{radio 10   {::CanvasUtils::ItemConfigure $w $id -smooth 1 -splinesteps 10} normal {} \
+	{radio 10   {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps 10} normal {} \
 	  {-value 10 -variable ::CanvasUtils::popupVars(-smooth)}}}
     }
     set menuDefs(pop,smooth)  \
-      {checkbutton mLineSmoothness   {::CanvasUtils::ItemSmooth $w $id}    normal   {} \
+      {checkbutton mLineSmoothness   {::CanvasUtils::ItemSmooth $wcan $id}    normal   {} \
       {-variable ::CanvasUtils::popupVars(-smooth) -offvalue 0 -onvalue 1}}
     set menuDefs(pop,straighten)  \
-      {command     mStraighten       {::CanvasUtils::ItemStraighten $w $id} normal   {} {}}
+      {command     mStraighten       {::CanvasUtils::ItemStraighten $wcan $id} normal   {} {}}
     set menuDefs(pop,font)  \
       {cascade     mFont             {}                                    normal   {} {} {}}
     set menuDefs(pop,fontsize)  \
       {cascade     mSize             {}                                    normal   {} {} {
-	{radio   1  {::CanvasUtils::SetTextItemFontSize $w $id 1}          normal   {} \
+	{radio   1  {::CanvasUtils::SetTextItemFontSize $wcan $id 1}          normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
-	{radio   2  {::CanvasUtils::SetTextItemFontSize $w $id 2}          normal   {} \
+	{radio   2  {::CanvasUtils::SetTextItemFontSize $wcan $id 2}          normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
-	{radio   3  {::CanvasUtils::SetTextItemFontSize $w $id 3}          normal   {} \
+	{radio   3  {::CanvasUtils::SetTextItemFontSize $wcan $id 3}          normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
-	{radio   4  {::CanvasUtils::SetTextItemFontSize $w $id 4}          normal   {} \
+	{radio   4  {::CanvasUtils::SetTextItemFontSize $wcan $id 4}          normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
-	{radio   5  {::CanvasUtils::SetTextItemFontSize $w $id 5}          normal   {} \
+	{radio   5  {::CanvasUtils::SetTextItemFontSize $wcan $id 5}          normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
-	{radio   6  {::CanvasUtils::SetTextItemFontSize $w $id 6}          normal   {} \
+	{radio   6  {::CanvasUtils::SetTextItemFontSize $wcan $id 6}          normal   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}}
     }
     set menuDefs(pop,fontweight)  \
       {cascade     mWeight           {}                                    normal   {} {} {
-	{radio   mNormal {::CanvasUtils::SetTextItemFontWeight $w $id normal} normal   {} \
+	{radio   mNormal {::CanvasUtils::SetTextItemFontWeight $wcan $id normal} normal   {} \
 	  {-value normal -variable ::CanvasUtils::popupVars(-fontweight)}}
-	{radio   mBold {::CanvasUtils::SetTextItemFontWeight $w $id bold}  normal   {} \
+	{radio   mBold {::CanvasUtils::SetTextItemFontWeight $wcan $id bold}  normal   {} \
 	  {-value bold   -variable ::CanvasUtils::popupVars(-fontweight)}}
-	{radio   mItalic {::CanvasUtils::SetTextItemFontWeight $w $id italic} normal   {} \
+	{radio   mItalic {::CanvasUtils::SetTextItemFontWeight $wcan $id italic} normal   {} \
 	  {-value italic -variable ::CanvasUtils::popupVars(-fontweight)}}}
     }	
     set menuDefs(pop,speechbubble)  \
-      {command   mAddSpeechBubble  {::CanvasDraw::MakeSpeechBubble $w $id}   normal {}}
+      {command   mAddSpeechBubble  {::CanvasDraw::MakeSpeechBubble $wcan $id}   normal {}}
     
     # Dashes need a special build process.
     set dashList {}
@@ -229,25 +228,25 @@ proc ::CanvasUtils::Init { } {
 #       connected. Useful for implementing Undo/Redo.
 #       
 # Arguments:
-#       wtop    namespaced toplevel (.top.)
+#       w       toplevel widget path
 #       cmd     canvas command without canvasPath
 #       where   (D="all"):
 #               "local"  only local canvas
 #               "remote" only remote canvases
 #               ip       name or number; send only to this address, not local.
 
-proc ::CanvasUtils::Command {wtop cmd {where all}} {
+proc ::CanvasUtils::Command {w cmd {where all}} {
     
-    set w [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     if {[string equal $where "all"] || [string equal $where "local"]} {
 	
 	# Make drawing in own canvas.
-        eval {$w} $cmd
+        eval {$wcan} $cmd
     }
     if {![string equal $where "local"]} {
 	
 	# This call just invokes any registered drawing hook.
-	::WB::SendMessageList $wtop [list $cmd]
+	::WB::SendMessageList $w [list $cmd]
     }
 }
 
@@ -255,10 +254,10 @@ proc ::CanvasUtils::Command {wtop cmd {where all}} {
 #
 #       Gives an opportunity to have a list of commands to be executed.
 
-proc ::CanvasUtils::CommandList {wtop cmdList {where all}} {
+proc ::CanvasUtils::CommandList {w cmdList {where all}} {
     
     foreach cmd $cmdList {
-        Command $wtop $cmd $where
+        Command $w $cmd $where
     }
 }
 
@@ -266,11 +265,11 @@ proc ::CanvasUtils::CommandList {wtop cmdList {where all}} {
 #
 #       Makes it possible to have different commands local and remote.
 
-proc ::CanvasUtils::CommandExList {wtop cmdExList} {
+proc ::CanvasUtils::CommandExList {w cmdExList} {
     
     foreach cmdList $cmdExList {
         foreach {cmd where} $cmdList {
-            Command $wtop $cmd $where
+            Command $w $cmd $where
         }
     }
 }
@@ -280,31 +279,31 @@ proc ::CanvasUtils::CommandExList {wtop cmdExList} {
 #       Identical to the procedures above but are not constrained to the
 #       "CANVAS:" prefix. The prefix shall be included in 'cmd'.
 
-proc ::CanvasUtils::GenCommand {wtop cmd {where all}} {
+proc ::CanvasUtils::GenCommand {w cmd {where all}} {
     
-    set w [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     if {[string equal $where "all"] || [string equal $where "local"]} {
-        eval {$w} $cmd
+        eval {$wcan} $cmd
     }
     if {![string equal $where "local"]} {
 	
 	# This call just invokes any registered drawing hook.
-	::WB::SendGenMessageList $wtop [list $cmd]
+	::WB::SendGenMessageList $w [list $cmd]
     }
 }
 
-proc ::CanvasUtils::GenCommandList {wtop cmdList {where all}} {
+proc ::CanvasUtils::GenCommandList {w cmdList {where all}} {
     
     foreach cmd $cmdList {
-        GenCommand $wtop $cmd $where
+        GenCommand $w $cmd $where
     }
 }
 
-proc ::CanvasUtils::GenCommandExList {wtop cmdExList} {
+proc ::CanvasUtils::GenCommandExList {w cmdExList} {
     
     foreach cmdList $cmdExList {
         foreach {cmd where} $cmdList {
-            GenCommand $wtop $cmd $where
+            GenCommand $w $cmd $where
         }
     }
 }
@@ -361,7 +360,7 @@ proc ::CanvasUtils::GetUtag {c fromWhat {force 0}} {
     } else {
         set tags [$c gettags $fromWhat]
     }
-    if {$tags == ""} {
+    if {$tags eq ""} {
         return ""
     }
     if {$prefs(privacy) && !$force} {
@@ -469,6 +468,34 @@ proc ::CanvasUtils::ReplaceUtagPrefix {str prefix} {
     return $str
 }
 
+# CanvasUtils::FindIdFromOverlapping --
+#   
+#       Finds the specific item at given coords and with tag 'type'.
+#   
+# Arguments:
+#       c         the canvas widget path.
+#       x, y      coords
+#       type
+#       
+# Results:
+#       item id or empty if none.
+
+proc ::CanvasUtils::FindIdFromOverlapping {c x y type} {    
+    
+    set ids [$c find overlapping [expr $x-2] [expr $y-2]  \
+      [expr $x+2] [expr $y+2]]
+    set id {}
+    
+    # Choose the first item with tags $type.
+    foreach i $ids {
+	if {[lsearch [$c gettags $i] $type] >= 0} {
+	    set id $i
+	    break
+	}
+    }
+    return $id
+}
+
 # CanvasUtils::GetUndoCommand --
 #
 #       Finds the inverse canvas command. The actual item is assumed
@@ -480,9 +507,9 @@ proc ::CanvasUtils::ReplaceUtagPrefix {str prefix} {
 # Results:
 #       a complete command
 
-proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
+proc ::CanvasUtils::GetUndoCommand {w cmd} {
     
-    set w [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     set undo {}
     
     switch -- [lindex $cmd 0] {
@@ -490,53 +517,53 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 	    set utag [lindex $cmd 1]
 	    set tag [lindex $cmd 3]
 	    set canUndo [list dtag $utag $tag]
-	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
+	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
 	}
 	coords {
 	    set utag [lindex $cmd 1]
-	    set canUndo [concat [list coords $utag] [$w coords $utag]]
-	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
+	    set canUndo [concat [list coords $utag] [$wcan coords $utag]]
+	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
 	}
 	create {
 	    set utag [GetUtagFromCreateCmd $cmd]
-	    if {$utag != ""} {
+	    if {$utag ne ""} {
 		set canUndo [list delete $utag]
-		set undo [list ::CanvasUtils::Command $wtop $canUndo]	
+		set undo [list ::CanvasUtils::Command $wcan $canUndo]	
 	    }
 	}
 	dchars {
 	    set utag [lindex $cmd 1]
 	    set ind [lindex $cmd 2]
 	    set ilast [lindex $cmd end]
-	    set thetext [$w itemcget $utag -text]
+	    set thetext [$wcan itemcget $utag -text]
 	    set str [string range $thetext $ind $ilast]
 	    set canUndo [list insert $utag $ind $str]
-	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
+	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
 	}
 	delete {
 	    set utag [lindex $cmd 1]
-	    set type [$w type $utag]
+	    set type [$wcan type $utag]
 	    
 	    switch -- $type {
 		image - window {
-		    set line [GetOneLinerForAny $w $utag \
+		    set line [GetOneLinerForAny $wcan $utag \
 		      -usehtmlsize 0 -encodenewlines 0]
 		    if {[string equal [lindex $line 0] "import"]} {
-			set undo [list ::Import::HandleImportCmd $w $line \
+			set undo [list ::Import::HandleImportCmd $wcan $line \
 			  -addundo 0]
 		    } else {
-			set stackCmd [GetStackingCmd $w $utag]
+			set stackCmd [GetStackingCmd $wcan $utag]
 			set canUndoList [list $line $stackCmd]
-			set undo [list ::CanvasUtils::CommandList $wtop $canUndoList]	
+			set undo [list ::CanvasUtils::CommandList $wcan $canUndoList]	
 		    }
 		}
 		default {
-		    set co [$w coords $utag]
-		    set opts [GetItemOpts $w $utag]
+		    set co [$wcan coords $utag]
+		    set opts [GetItemOpts $wcan $utag]
 		    set createCmd [concat [list create $type] $co $opts]
-		    set stackCmd [GetStackingCmd $w $utag]
+		    set stackCmd [GetStackingCmd $wcan $utag]
 		    set canUndoList [list $createCmd $stackCmd]
-		    set undo [list ::CanvasUtils::CommandList $wtop $canUndoList]	
+		    set undo [list ::CanvasUtils::CommandList $wcan $canUndoList]	
 		}
 	    }
 	}
@@ -544,22 +571,22 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 	    set utag [lindex $cmd 1]
 	    set tag [lindex $cmd 2]
 	    set canUndo [list addtag $tag withtag $utag]
-	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
+	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
 	}
 	insert {
 	    foreach {dum utag ind str} $cmd break
 	    set canUndo [list dchars $utag $ind [expr $ind + [string length $str]]]
-	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
+	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
 	}
 	move {
 	    foreach {dum utag dx dy} $cmd break
 	    set canUndo [list move $utag [expr -$dx] [expr -$dy]]
-	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
+	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
 	}
 	lower - raise {
 	    set utag [lindex $cmd 1]
-	    set canUndo [GetStackingCmd $w $utag]
-	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
+	    set canUndo [GetStackingCmd $wcan $utag]
+	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
 	}
     }
     return $undo
@@ -570,7 +597,7 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 #       Dispatcher for the GetOneLiner procs.
 #       
 # Arguments:
-#       w           canvas
+#       wcan        canvas
 #       id          item id or tag
 #       args:
 #           -basepath absolutePath    translate image -file to a relative path.
@@ -582,8 +609,8 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 # Results:
 #       a single command line.
 
-proc ::CanvasUtils::GetOneLinerForAny {w id args} {
-    global  prefs
+proc ::CanvasUtils::GetOneLinerForAny {wcan id args} {
+    global  prefs this
 
     array set argsArr {
 	-keeputag     1
@@ -591,20 +618,20 @@ proc ::CanvasUtils::GetOneLinerForAny {w id args} {
     array set argsArr $args
     set keeputag $argsArr(-keeputag)
     
-    set tags [$w gettags $id]
-    set type [$w type $id]
+    set tags [$wcan gettags $id]
+    set type [$wcan type $id]
     set havestd [expr [lsearch -exact $tags std] < 0 ? 0 : 1]
     set line ""
  
     switch -glob -- $type,$havestd {
 	image,1 {
-	    set line [eval {GetOnelinerForImage $w $id} $args]
+	    set line [eval {GetOnelinerForImage $wcan $id} $args]
 	    if {!$keeputag} {
 		set line [ReplaceUtagPrefix $line *]
 	    }
 	} 
 	window,* {
-	    set line [eval {GetOneLinerForWindow $w $id} $args]
+	    set line [eval {GetOneLinerForWindow $wcan $id} $args]
 	    if {$line != {}} {
 		if {!$keeputag} {
 		    set line [ReplaceUtagPrefix $line *]
@@ -615,10 +642,10 @@ proc ::CanvasUtils::GetOneLinerForAny {w id args} {
     
 	    # A standard canvas item with 'std' tag.	
 	    # Skip text items without any text.	
-	    if {($type == "text") && ([$w itemcget $id -text] == "")} {
+	    if {($type eq "text") && ([$wcan itemcget $id -text] eq "")} {
 		# empty
 	    } else {
-		set line [eval {GetOneLinerForItem $w $id} $args]
+		set line [eval {GetOneLinerForItem $wcan $id} $args]
 		if {!$keeputag} {
 		    set line [ReplaceUtagPrefix $line *]
 		}
@@ -628,7 +655,7 @@ proc ::CanvasUtils::GetOneLinerForAny {w id args} {
 	    
 	    # A non window item witout 'std' tag.
 	    # Look for any Itcl object with a Save method.
-	    if {$prefs(haveItcl)} {
+	    if {$this(package,Itcl)} {
 		if {[regexp {object:([^ ]+)} $tags match object]} {
 		    if {![catch {
 			eval {$object Save $id} $args
@@ -642,21 +669,21 @@ proc ::CanvasUtils::GetOneLinerForAny {w id args} {
     return $line
 }
 
-proc ::CanvasUtils::GetOneLinerForWindow {w id args} {
+proc ::CanvasUtils::GetOneLinerForWindow {wcan id args} {
        
     # A movie: for QT we have a complete widget; 
-    set windowName [$w itemcget $id -window]
+    set windowName [$wcan itemcget $id -window]
     set windowClass [winfo class $windowName]
     set line {}
     
     switch -- $windowClass {
 	QTFrame {
 	    set line [eval {
-		GetOnelinerForQTMovie $w $id} $args]
+		GetOnelinerForQTMovie $wcan $id} $args]
 	}
 	SnackFrame {			
 	    set line [eval {
-		GetOnelinerForSnack $w $id} $args]
+		GetOnelinerForSnack $wcan $id} $args]
 	}
 	XanimFrame {
 	    # ?
@@ -665,7 +692,7 @@ proc ::CanvasUtils::GetOneLinerForWindow {w id args} {
 	    if {[::Plugins::HaveSaveProcForWinClass $windowClass]} {
 		set procName \
 		  [::Plugins::GetSaveProcForWinClass $windowClass]
-		set line [eval {$procName $w $id} $args]
+		set line [eval {$procName $wcan $id} $args]
 	    }
 	}
     }
@@ -678,7 +705,7 @@ proc ::CanvasUtils::GetOneLinerForWindow {w id args} {
 #       sending on network. Not for images or windows!
 #       Doesn't add values equal to defaults.
 
-proc ::CanvasUtils::GetOneLinerForItem {w id args} {
+proc ::CanvasUtils::GetOneLinerForItem {wcan id args} {
     global  prefs fontPoints2Size
     
     array set argsArr {
@@ -687,8 +714,8 @@ proc ::CanvasUtils::GetOneLinerForItem {w id args} {
     }
     array set argsArr $args
     
-    set opts [$w itemconfigure $id]
-    set type [$w type $id]
+    set opts [$wcan itemconfigure $id]
+    set type [$wcan type $id]
     if {[string equal $type "image"] || [string equal $type "window"]} {
 	return -code error "items of type \"$type\" not allowed here"
     }
@@ -728,7 +755,7 @@ proc ::CanvasUtils::GetOneLinerForItem {w id args} {
 	    
 		# Seems to be a bug in tcl8.3; -smooth should be 0/1, 
 		# not bezier.		
-		if {$val == "bezier"} {
+		if {$val eq "bezier"} {
 		    set val 1
 		}
 	    }
@@ -744,7 +771,7 @@ proc ::CanvasUtils::GetOneLinerForItem {w id args} {
 	lappend opcmd $op $val
     }
     
-    return [concat "create" $type [$w coords $id] $opcmd]
+    return [concat "create" $type [$wcan coords $id] $opcmd]
 }
 
 # CanvasUtils::GetOnelinerForImage, ..QTMovie, ..Snack --
@@ -755,15 +782,15 @@ proc ::CanvasUtils::GetOneLinerForItem {w id args} {
 #       command.
 #
 # Arguments:
-#       w           the canvas widget
+#       wcan        the canvas widget
 #       id
 #       args:
 #           -basepath absolutePath    translate image -file to a relative path.
 #           -uritype ( file | http )
 
-proc ::CanvasUtils::GetOnelinerForImage {w id args} {
+proc ::CanvasUtils::GetOnelinerForImage {wcan id args} {
     
-    set type [$w type $id]
+    set type [$wcan type $id]
     if {![string equal $type "image"]} {
 	return -code error "must have an \"image\" item type"
     }
@@ -771,16 +798,16 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
 	-uritype file
     }
     array set argsArr $args
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
     # The 'broken image' options are cached.
     # This can be anything imported, it is just represented as an image.
-    set isbroken [expr {[lsearch [$w itemcget $id -tags] broken] < 0} ? 0 : 1]
-    array set impArr [ItemCGet $wtop $id]
+    set isbroken [expr {[lsearch [$wcan itemcget $id -tags] broken] < 0} ? 0 : 1]
+    array set impArr [ItemCGet $w $id]
         
     # Real images needs more processing.
     if {!$isbroken} {
-	set imageName [$w itemcget $id -image]
+	set imageName [$wcan itemcget $id -image]
    
 	# Find out if zoomed.		
 	if {[regexp {(.+)_zoom(|-)([0-9]+)} $imageName match origImName \
@@ -803,37 +830,37 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
     }
     
     # -above & -below??? Be sure to overwrite any cached options.
-    array set impArr [GetStackingOption $w $id]
-    set impArr(-tags) [GetUtag $w $id 1]
+    array set impArr [GetStackingOption $wcan $id]
+    set impArr(-tags) [GetUtag $wcan $id 1]
 
-    return [concat import [$w coords $id] [array get impArr]]
+    return [concat import [$wcan coords $id] [array get impArr]]
 }
 
-proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
+proc ::CanvasUtils::GetOnelinerForQTMovie {wcan id args} {
         
     array set argsArr {
 	-uritype file
     }
     array set argsArr $args
 
-    set wtop [::UI::GetToplevelNS $w]
-    set opts [GetItemOpts $w $id]
-    set opts [concat $opts [ItemCGet $wtop $id]]
-    set cmd  [concat create window [$w coords $id] $opts]
+    set w [winfo toplevel $wcan]
+    set opts [GetItemOpts $wcan $id]
+    set opts [concat $opts [ItemCGet $w $id]]
+    set cmd  [concat create window [$wcan coords $id] $opts]
     return [eval {GetImportCmdForQTMovie $cmd} $args]
 }
 
-proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
+proc ::CanvasUtils::GetOnelinerForSnack {wcan id args} {
     
     array set argsArr {
 	-uritype file
     }
     array set argsArr $args
     
-    set wtop [::UI::GetToplevelNS $w]
-    set opts [GetItemOpts $w $id]
-    set opts [concat $opts [ItemCGet $wtop $id]]
-    set cmd  [concat create window [$w coords $id] $opts]
+    set w [winfo toplevel $wcan]
+    set opts [GetItemOpts $wcan $id]
+    set opts [concat $opts [ItemCGet $w $id]]
+    set cmd  [concat create window [$wcan coords $id] $opts]
     return [eval {GetImportCmdForSnack $cmd} $args]
 }
 
@@ -861,22 +888,22 @@ proc ::CanvasUtils::GetImportCmdForQTMovie {cmd args} {
 
     switch -- $argsArr(-uritype) {
 	file {
-	    if {$movFile != ""} {
+	    if {$movFile ne ""} {
 		if {[info exists argsArr(-basepath)]} {
 		    set movFile [::tfileutils::relative $argsArr(-basepath) $movFile]	    
 		} 
 		set optsArr(-file) $movFile
 		unset -nocomplain impArr(-url)
-	    } elseif {$movUrl != ""} {
+	    } elseif {$movUrl ne ""} {
 		
 		# In this case we don't have access to QT's internal cache.
 		set optsArr(-url) $movUrl
 	    }
 	}
 	http {
-	    if {$movFile != ""} {
+	    if {$movFile ne ""} {
 		set optsArr(-url) [::Utils::GetHttpFromFile $movFile]
-	    } elseif {$movUrl != ""} {
+	    } elseif {$movUrl ne ""} {
 		set optsArr(-url) $movUrl
 	    }	    
 	    unset -nocomplain optsArr(-file)
@@ -923,7 +950,7 @@ proc ::CanvasUtils::GetImportCmdForSnack {cmd args} {
 proc ::CanvasUtils::GetImportOptsURI {uritype filePath args} {
     
     array set argsArr $args
-       
+    
     switch -- $uritype {
 	file {
 	    if {[info exists argsArr(-basepath)]} {
@@ -1019,7 +1046,7 @@ proc ::CanvasUtils::GetSVGForeignFromImportCmd {cmd args} {
 #       Tries to import a 'foreignObject' element to canvas using any
 #       suitable importer.
 
-proc ::CanvasUtils::SVGForeignObjectHandler {wtop xmllist paropts transformList args} {
+proc ::CanvasUtils::SVGForeignObjectHandler {w xmllist paropts transformList args} {
     
     ::Debug 4 "::CanvasUtils::SVGForeignObjectHandler \n\
       \t xmllist=$xmllist\n\t args=$args"
@@ -1030,7 +1057,7 @@ proc ::CanvasUtils::SVGForeignObjectHandler {wtop xmllist paropts transformList 
     #        xlink:href file:///Users/sounds/startup.wav 
     #        size 22270 mime audio/wav} 0 {} {}}}
 
-    set w [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     set embedElems [wrapper::getchildwithtaginnamespace $xmllist "embed" \
       "http://jabber.org/protocol/svgwb/embed/"]
     if {[llength $embedElems]} {
@@ -1073,7 +1100,7 @@ proc ::CanvasUtils::SVGForeignObjectHandler {wtop xmllist paropts transformList 
 		}
 	    }
 	    if {$haveXlink} {
-		eval {::Import::HandleImportCmd $w $cmd  \
+		eval {::Import::HandleImportCmd $wcan $cmd  \
 		  -progress [list ::Import::ImportProgress $cmd]  \
 		  -command  [list ::Import::ImportCommand $cmd]} $args
 	    }
@@ -1086,17 +1113,15 @@ proc ::CanvasUtils::CreateItem {w args} {
     
     Debug 2 "::CanvasUtils::CreateItem args=$args"
     
-    set wtop [::UI::GetToplevelNS $w]
-
     set utag [GetUtagFromCreateCmd $args]
     set cmd [concat create $args]
     set undocmd [list delete $utag]
     
-    set redo [list ::CanvasUtils::CommandList $wtop [list $cmd]]
-    set undo [list ::CanvasUtils::CommandList $wtop [list $undocmd]]
+    set redo [list ::CanvasUtils::CommandList $w [list $cmd]]
+    set undo [list ::CanvasUtils::CommandList $w [list $undocmd]]
     
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
 }
 
 # CanvasUtils::ItemConfigure --
@@ -1105,40 +1130,40 @@ proc ::CanvasUtils::CreateItem {w args} {
 #       Selection, if any, redone.
 #       
 # Arguments:
-#       w      the canvas.
-#       id     the item id to configure, could be "current" etc.
-#       args   list of '-key value' pairs.
+#       wcan        the canvas widget
+#       id          the item id to configure, could be "current" etc.
+#       args        list of '-key value' pairs.
 #       
 # Results:
 #       item configured, here and there.
 
-proc ::CanvasUtils::ItemConfigure {w id args} {
+proc ::CanvasUtils::ItemConfigure {wcan id args} {
     
     Debug 2 "::CanvasUtils::ItemConfigure id=$id, args=$args"
 
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
     # Be sure to get the real id (number).
-    set id [$w find withtag $id]
-    set utag [GetUtag $w $id]
+    set id [$wcan find withtag $id]
+    set utag [GetUtag $wcan $id]
     set cmd [concat itemconfigure $utag $args]
-    set undocmd [concat itemconfigure $utag [GetItemOpts $w $utag $args]]
+    set undocmd [concat itemconfigure $utag [GetItemOpts $wcan $utag $args]]
     
     # Handle font points -> size for the network command.
     set cmdremote [FontHtmlToPointSize $cmd -1]
     set undocmdremote [FontHtmlToPointSize $undocmd -1]
     
-    set redo [list ::CanvasUtils::CommandExList $wtop  \
+    set redo [list ::CanvasUtils::CommandExList $w  \
       [list [list $cmd local] [list $cmdremote remote]]]
-    set undo [list ::CanvasUtils::CommandExList $wtop  \
+    set undo [list ::CanvasUtils::CommandExList $w  \
       [list [list $undocmd local] [list $undocmdremote remote]]]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
     
     # If selected, redo the selection to fit.
-    if {[::CanvasDraw::IsSelected $w $id]} {
-	::CanvasDraw::DeselectItem $w $id
-	::CanvasDraw::MarkBbox $w 0 $id
+    if {[::CanvasDraw::IsSelected $wcan $id]} {
+	::CanvasDraw::DeselectItem $wcan $id
+	::CanvasDraw::MarkBbox $wcan 0 $id
     }
 }
 
@@ -1148,65 +1173,65 @@ proc ::CanvasUtils::ItemConfigure {w id args} {
 #       Selection, if any, redone.
 #       
 # Arguments:
-#       w      the canvas.
+#       wcan   the canvas widget
 #       id     the item id to configure, could be "current" etc.
 #       coords
 #       
 # Results:
 #       item coords set, here and there.
 
-proc ::CanvasUtils::ItemCoords {w id coords} {
+proc ::CanvasUtils::ItemCoords {wcan id coords} {
     
     Debug 2 "::CanvasUtils::ItemCoords id=$id"
 
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
     # Be sure to get the real id (number).
-    set id [$w find withtag $id]
-    set utag [GetUtag $w $id]
+    set id [$wcan find withtag $id]
+    set utag [GetUtag $wcan $id]
     set cmd [concat coords $utag $coords]
-    set undocmd [concat coords $utag [$w coords $id]]
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+    set undocmd [concat coords $utag [$wcan coords $id]]
+    set redo [list ::CanvasUtils::Command $w $cmd]
+    set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
     
     # If selected, redo the selection to fit.
-    set idsMarker [$w find withtag id$id]
+    set idsMarker [$wcan find withtag id$id]
     if {[string length $idsMarker] > 0} {
-	$w delete id$id
-	::CanvasDraw::MarkBbox $w 1 $id
+	$wcan delete id$id
+	::CanvasDraw::MarkBbox $wcan 1 $id
     }
 }
 
-proc ::CanvasUtils::AddTag {w id tag} {
+proc ::CanvasUtils::AddTag {wcan id tag} {
     
-    set wtop [::UI::GetToplevelNS $w]
-    set id [$w find withtag $id]
-    set utag [GetUtag $w $id]
+    set w [winfo toplevel $wcan]
+    set id [$wcan find withtag $id]
+    set utag [GetUtag $wcan $id]
     set cmd [list addtag $tag withtag $utag]
     set undocmd [list dtag $utag $tag]
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+    set redo [list ::CanvasUtils::Command $w $cmd]
+    set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
 }
 
-proc ::CanvasUtils::DeleteTag {w id tag} {
+proc ::CanvasUtils::DeleteTag {wcan id tag} {
     
-    set wtop [::UI::GetToplevelNS $w]
-    set id [$w find withtag $id]
-    set utag [GetUtag $w $id]
+    set w [winfo toplevel $wcan]
+    set id [$wcan find withtag $id]
+    set utag [GetUtag $wcan $id]
     set cmd [list dtag $utag $tag]
     set undocmd [list addtag $tag withtag $utag]
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+    set redo [list ::CanvasUtils::Command $w $cmd]
+    set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
 }
 
-proc ::CanvasUtils::IsLocked {w id} {
-    return [expr {[lsearch -exact [$w itemcget $id -tags] "locked"] >= 0} \
+proc ::CanvasUtils::IsLocked {wcan id} {
+    return [expr {[lsearch -exact [$wcan itemcget $id -tags] "locked"] >= 0} \
       ? 1 : 0]
 }
 
@@ -1215,14 +1240,14 @@ proc ::CanvasUtils::IsLocked {w id} {
 #       Sets a timer (after) for the item popup menu.
 #       
 # Arguments:
-#       w           the canvas.
+#       wcan        the canvas widget
 #       x           mouse in global coords.
 #       y           mouse in global coords.
 #       
 # Results:
 #       none
 
-proc ::CanvasUtils::StartTimerToItemPopup {w x y} {
+proc ::CanvasUtils::StartTimerToItemPopup {wcan x y} {
     variable itemAfterId
         
     Debug 2 "::CanvasUtils::StartTimerToItemPopup"
@@ -1230,7 +1255,7 @@ proc ::CanvasUtils::StartTimerToItemPopup {w x y} {
     if {[info exists itemAfterId]} {
 	catch {after cancel $itemAfterId}
     }
-    set itemAfterId [after 1000 [list ::CanvasUtils::DoItemPopup $w $x $y]]
+    set itemAfterId [after 1000 [list ::CanvasUtils::DoItemPopup $wcan $x $y]]
 }
 
 proc ::CanvasUtils::StopTimerToItemPopup { } {
@@ -1243,13 +1268,13 @@ proc ::CanvasUtils::StopTimerToItemPopup { } {
 
 # Same as above but hardcoded to windows.
 
-proc ::CanvasUtils::StartTimerToWindowPopup {w x y} {
+proc ::CanvasUtils::StartTimerToWindowPopup {wcan x y} {
     variable winAfterId
     
     if {[info exists winAfterId]} {
 	catch {after cancel $winAfterId}
     }
-    set winAfterId [after 1000 [list ::CanvasUtils::DoWindowPopup $w $x $y]]
+    set winAfterId [after 1000 [list ::CanvasUtils::DoWindowPopup $wcan $x $y]]
 }
 
 proc ::CanvasUtils::StopTimerToWindowPopup { } {
@@ -1284,38 +1309,37 @@ proc ::CanvasUtils::StopTimerToPopupEx { } {
 #       Posts the item popup menu depending on item type.
 #       
 # Arguments:
-#       w           the canvas.
+#       wcan        the canvas widget
 #       x           mouse in global coords.
 #       y           mouse in global coords.
 #       
 # Results:
 #       none
 
-proc ::CanvasUtils::DoItemPopup {w x y} {
+proc ::CanvasUtils::DoItemPopup {wcan x y} {
     global  prefs fontPoints2Size
     variable itemAfterId
     variable popupVars
     variable menuDefs
     
-    Debug 2 "::CanvasUtils::DoItemPopup: w=$w"
+    Debug 2 "::CanvasUtils::DoItemPopup:"
 
     StopTimerToItemPopup
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
     # Clear and cancel the triggering of any selections.
-    ::CanvasDraw::CancelBox $w
-    set id [$w find withtag current]
-    if {$id == ""} {
+    ::CanvasDraw::CancelBox $wcan
+    set id [$wcan find withtag current]
+    if {$id eq ""} {
 	return
     }
     
     # Get 'type', broken is a special form of image.
-    set type [$w type $id]
-    set tags [$w gettags $id]
+    set type [$wcan type $id]
+    set tags [$wcan gettags $id]
     if {[lsearch $tags broken] >= 0} {
 	set type broken
     }
-    Debug 2 "   type=$type"
         
     # In order to get the present value of id it turned out to be 
     # easiest to make a fresh menu each time.
@@ -1324,9 +1348,9 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     set m .popup${type}
     catch {destroy $m}
     if {![winfo exists $m]} {
-	::UI::NewMenu $wtop $m {} $menuDefs(pop,$type) normal -id $id -w $w
+	::UI::NewMenu $w $m {} $menuDefs(pop,$type) normal -id $id -wcan $wcan
 	if {[string equal $type "text"]} {
-	    BuildCanvasPopupFontMenu $w ${m}.mfont $id $prefs(canvasFonts)
+	    BuildCanvasPopupFontMenu $wcan $m.mfont $id $prefs(canvasFonts)
 	}
 	
 	# This one is needed on the mac so the menu is built before
@@ -1336,9 +1360,9 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     
     # Set actual values for this particular item.
     if {[regexp {arc|line|oval|rectangle|polygon} $type]} {
-	set popupVars(-width) [expr int([$w itemcget $id -width])]
-	set dashShort [$w itemcget $id -dash]
-	if {$dashShort == ""} {
+	set popupVars(-width) [expr int([$wcan itemcget $id -width])]
+	set dashShort [$wcan itemcget $id -dash]
+	if {$dashShort eq ""} {
 	    set dashShort " "
 	}
 	set popupVars(-dash) $dashShort
@@ -1347,14 +1371,14 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
 	}
     }
     if {[regexp {line|polygon} $type]} {
-	set smooth [$w itemcget $id -smooth]
+	set smooth [$wcan itemcget $id -smooth]
 	if {[string equal $smooth "bezier"]} {
 	    set smooth 1
 	}
 	set popupVars(-smooth) $smooth
     }
     if {[regexp {text} $type]} {
-	set fontOpt [$w itemcget $id -font]
+	set fontOpt [$wcan itemcget $id -font]
 	if {[llength $fontOpt] >= 3} {
 	    set popupVars(-fontfamily) [lindex $fontOpt 0]
 	    set pointSize [lindex $fontOpt 1]
@@ -1364,30 +1388,30 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
 	    set popupVars(-fontweight) [lindex $fontOpt 2]
 	}
     }
-    if {$type == "arc"} {
-	set popupVars(-arc) [$w itemcget $id -style]
+    if {$type eq "arc"} {
+	set popupVars(-arc) [$wcan itemcget $id -style]
     }
     
     # Post popup menu.
     tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
 }
 
-proc ::CanvasUtils::BuildCanvasPopupFontMenu {w wmenu id allFonts} {
+proc ::CanvasUtils::BuildCanvasPopupFontMenu {wcan wmenu id allFonts} {
 
     set mt $wmenu    
     $mt delete 0 end
     foreach afont $allFonts {
 	$mt add radio -label $afont -variable ::CanvasUtils::popupVars(-fontfamily)  \
-	  -command [list ::CanvasUtils::SetTextItemFontFamily $w $id $afont]
+	  -command [list ::CanvasUtils::SetTextItemFontFamily $wcan $id $afont]
     }
 }
 
-proc ::CanvasUtils::DoWindowPopup {w x y} {
+proc ::CanvasUtils::DoWindowPopup {win x y} {
     variable menuDefs
     
-    switch -- [winfo class $w] {
+    switch -- [winfo class $win] {
 	SnackFrame {
-	    PostGeneralMenu $w $x $y .popupsnack \
+	    PostGeneralMenu $win $x $y .popupsnack \
 	      $menuDefs(pop,snack)
 	}
 	default {
@@ -1397,21 +1421,21 @@ proc ::CanvasUtils::DoWindowPopup {w x y} {
     }
 }
 
-proc ::CanvasUtils::DoLockedPopup {w x y} {
+proc ::CanvasUtils::DoLockedPopup {wcan x y} {
     variable menuDefs
     
     # Clear and cancel the triggering of any selections.
-    ::CanvasDraw::CancelBox $w
-    set id [$w find withtag current]
-    if {$id == ""} {
+    ::CanvasDraw::CancelBox $wcan
+    set id [$wcan find withtag current]
+    if {$id eq ""} {
 	return
     }
+    set w [winfo toplevel $wcan]
     set type "locked"
-    set wtop [::UI::GetToplevelNS $w]
     set m .popup${type}
     catch {destroy $m}
     if {![winfo exists $m]} {
-	::UI::NewMenu $wtop $m {} $menuDefs(pop,$type) normal -id $id -w $w
+	::UI::NewMenu $w $m {} $menuDefs(pop,$type) normal -id $id -wcan $wcan
 	update idletasks
     }
     
@@ -1419,18 +1443,18 @@ proc ::CanvasUtils::DoLockedPopup {w x y} {
     tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
 }
 
-proc ::CanvasUtils::DoQuickTimePopup {w x y} {
+proc ::CanvasUtils::DoQuickTimePopup {win x y} {
     variable menuDefs
     variable popupVars
     
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $win]
     set m .popupqt
     
     # Build popup menu.
     catch {destroy $m}
-    ::UI::BuildMenu $wtop $m {} $menuDefs(pop,qt) normal -winfr $w
+    ::UI::BuildMenu $w $m {} $menuDefs(pop,qt) normal -winfr $win
 
-    set wmov [lindex [winfo children $w] 0]
+    set wmov [lindex [winfo children $win] 0]
     set cmd [$wmov cget -mccommand]
     if {$cmd == {}} {
 	set popupVars(-syncplay) 0
@@ -1455,13 +1479,13 @@ proc ::CanvasUtils::DoQuickTimePopup {w x y} {
     tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
 }
 
-proc ::CanvasUtils::PostGeneralMenu {w x y m mDef} {
+proc ::CanvasUtils::PostGeneralMenu {win x y m mDef} {
             
-    set wtop [::UI::GetToplevelNS $w]    
+    set w [winfo toplevel $win]    
         
     # Build popup menu.
     catch {destroy $m}
-    ::UI::BuildMenu $wtop $m {} $mDef normal -winfr $w
+    ::UI::BuildMenu $w $m {} $mDef normal -winfr $win
     
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
@@ -1475,24 +1499,24 @@ proc ::CanvasUtils::PostGeneralMenu {w x y m mDef} {
 #
 #       Some handy utilities for the popup menu callbacks.
 
-proc ::CanvasUtils::ItemSmooth {w id} {
+proc ::CanvasUtils::ItemSmooth {wcan id} {
     
-    set smooth [$w itemcget $id -smooth]
+    set smooth [$wcan itemcget $id -smooth]
     if {[string equal $smooth "bezier"]} {
 	set smooth 1
     }
     
     # Just toggle smooth state.
-    ItemConfigure $w $id -smooth [expr 1 - $smooth]
+    ItemConfigure $wcan $id -smooth [expr 1 - $smooth]
 }
 
-proc ::CanvasUtils::ItemStraighten {w id} {
+proc ::CanvasUtils::ItemStraighten {wcan id} {
     global  prefs
     
     set frac $prefs(straightenFrac)
-    set coords [$w coords $id]
+    set coords [$wcan coords $id]
     set len [expr [llength $coords]/2]
-    set type [$w type $id]
+    set type [$wcan type $id]
     
     switch -- $type {
 	line {
@@ -1509,56 +1533,56 @@ proc ::CanvasUtils::ItemStraighten {w id} {
     set dsorted [lsort -real [::CanvasDraw::GetDistList $coords]]
     set dlimit [lindex $dsorted [expr int($len * $frac + 1)]]
     set coords [::CanvasDraw::StripClosePoints $coords $dlimit]
-    ItemCoords $w $id $coords
+    ItemCoords $wcan $id $coords
     
-    if {[::CanvasDraw::IsSelected $w $id]} {
-	::CanvasDraw::DeselectItem $w $id
-	::CanvasDraw::SelectItem $w $id
+    if {[::CanvasDraw::IsSelected $wcan $id]} {
+	::CanvasDraw::DeselectItem $wcan $id
+	::CanvasDraw::SelectItem $wcan $id
     }
 }
 
-proc ::CanvasUtils::SetItemColorDialog {w id opt} {
+proc ::CanvasUtils::SetItemColorDialog {wcan id opt} {
     
-    set presentColor [$w itemcget $id $opt]
-    if {$presentColor == ""} {
+    set presentColor [$wcan itemcget $id $opt]
+    if {$presentColor eq ""} {
 	set presentColor black
     }
     set color [tk_chooseColor -initialcolor $presentColor  \
       -title [mc {New Color}]]
-    if {$color != ""} {
-	ItemConfigure $w $id $opt $color
+    if {$color ne ""} {
+	ItemConfigure $wcan $id $opt $color
     }
 }
 
-proc ::CanvasUtils::SetTextItemFontFamily {w id fontfamily} {
+proc ::CanvasUtils::SetTextItemFontFamily {wcan id fontfamily} {
     
     # First, get existing font value.
-    set fontOpts [$w itemcget $id -font]
+    set fontOpts [$wcan itemcget $id -font]
     
     # Then configure with new one.
     set fontOpts [list {-font} [lreplace $fontOpts 0 0 $fontfamily]]
-    eval {CanvasUtils::ItemConfigure $w $id} $fontOpts    
+    eval {ItemConfigure $wcan $id} $fontOpts    
 }
     
-proc ::CanvasUtils::SetTextItemFontSize {w id fontsize} {
+proc ::CanvasUtils::SetTextItemFontSize {wcan id fontsize} {
     
     # First, get existing font value.
-    set fontOpts [$w itemcget $id -font]
+    set fontOpts [$wcan itemcget $id -font]
     
     # Then configure with new one.
     set fontOpts [lreplace $fontOpts 1 1 $fontsize]
     set fontOpts [FontHtmlToPointSize [list {-font} $fontOpts]]
-    eval {CanvasUtils::ItemConfigure $w $id} $fontOpts
+    eval {ItemConfigure $wcan $id} $fontOpts
 }
 
-proc ::CanvasUtils::SetTextItemFontWeight {w id fontweight} {
+proc ::CanvasUtils::SetTextItemFontWeight {wcan id fontweight} {
     
     # First, get existing font value.
-    set fontOpts [$w itemcget $id -font]
+    set fontOpts [$wcan itemcget $id -font]
     
     # Then configure with new one.
     set fontOpts [list {-font} [lreplace $fontOpts 2 2 $fontweight]]
-    eval {CanvasUtils::ItemConfigure $w $id} $fontOpts    
+    eval {ItemConfigure $wcan $id} $fontOpts    
 }
 
 # CanvasUtils::NewImportAnchor --
@@ -1602,7 +1626,7 @@ proc ::CanvasUtils::NewImportAnchor {wcan} {
 #       As canvas itemconfigure but only the actual options.
 #       
 # Arguments:
-#       w         the canvas widget path.
+#       wcan      the canvas widget path
 #       id        item tag or id.
 #       which   nondef:  return only values that are not identical to defaults.
 #               all:     return all options.
@@ -1611,16 +1635,16 @@ proc ::CanvasUtils::NewImportAnchor {wcan} {
 # Results:
 #       list of options and values as '-option value' ....
 
-proc ::CanvasUtils::GetItemOpts {w id {which "nondef"}} {
+proc ::CanvasUtils::GetItemOpts {wcan id {which "nondef"}} {
     
     set opcmd {}
     if {[llength $which] > 1} {
 	foreach {op val} $which {
-	    lappend opcmd $op [$w itemcget $id $op]
+	    lappend opcmd $op [$wcan itemcget $id $op]
 	}
     } else {
 	set all [string equal $which "all"]
-	set opts [$w itemconfigure $id]
+	set opts [$wcan itemconfigure $id]
 	foreach oplist $opts {
 	    foreach {op x y defval val} $oplist {
 		if {[string equal $op "-tags"]} {
@@ -1645,12 +1669,12 @@ proc ::CanvasUtils::GetItemOpts {w id {which "nondef"}} {
 #       ordinary items, for which there is a utag, and not markers etc.
 #       Returns a utag if found, else empty.
 
-proc ::CanvasUtils::FindAboveUtag {w id} {
+proc ::CanvasUtils::FindAboveUtag {wcan id} {
 
     set aboveutag ""
-    set aboveid [$w find above $id]
-    while {[set aboveutag [GetUtag $w $aboveid 1]] == ""} {
-	if {[set aboveid [$w find above $id]] == ""} {
+    set aboveid [$wcan find above $id]
+    while {[set aboveutag [GetUtag $wcan $aboveid 1]] eq ""} {
+	if {[set aboveid [$wcan find above $id]] eq ""} {
 	    break
 	}
 	set id $aboveid
@@ -1658,12 +1682,12 @@ proc ::CanvasUtils::FindAboveUtag {w id} {
     return $aboveutag
 }
 
-proc ::CanvasUtils::FindBelowUtag {w id} {
+proc ::CanvasUtils::FindBelowUtag {wcan id} {
 
     set belowutag ""
-    set belowid [$w find below $id]
-    while {[set belowutag [GetUtag $w $belowid 1]] == ""} {
-	if {[set belowid [$w find below $id]] == ""} {
+    set belowid [$wcan find below $id]
+    while {[set belowutag [GetUtag $wcan $belowid 1]] eq ""} {
+	if {[set belowid [$wcan find below $id]] eq ""} {
 	    break
 	}
 	set id $belowid
@@ -1675,15 +1699,15 @@ proc ::CanvasUtils::FindBelowUtag {w id} {
 #
 #       Returns a list '-below utag', '-above utag' or empty.
 
-proc ::CanvasUtils::GetStackingOption {w id} {
+proc ::CanvasUtils::GetStackingOption {wcan id} {
     
     # below before above since stacking order when saving to file.
     set opt {}
-    set belowutag [FindBelowUtag $w $id]
+    set belowutag [FindBelowUtag $wcan $id]
     if {[string length $belowutag]} {
 	lappend opt -above $belowutag
     }
-    set aboveutag [FindAboveUtag $w $id]
+    set aboveutag [FindAboveUtag $wcan $id]
     if {[string length $aboveutag]} {
 	lappend opt -below $aboveutag
     }
@@ -1695,15 +1719,15 @@ proc ::CanvasUtils::GetStackingOption {w id} {
 #       Returns a canvas command (without pathName) that restores the
 #       stacking order of $utag.
 
-proc ::CanvasUtils::GetStackingCmd {w utag} {
+proc ::CanvasUtils::GetStackingCmd {wcan utag} {
     
-    set aboveid [$w find above $utag]
+    set aboveid [$wcan find above $utag]
     if {[string length $aboveid]} {
-	set cmd [list lower $utag [GetUtag $w $aboveid 1]]
+	set cmd [list lower $utag [GetUtag $wcan $aboveid 1]]
     } else {
-	set belowid [$w find below $utag]
+	set belowid [$wcan find below $utag]
 	if {[string length $belowid]} {
-	    set cmd [list raise $utag [GetUtag $w $belowid 1]]
+	    set cmd [list raise $utag [GetUtag $wcan $belowid 1]]
 	} else {
 	    
 	    # If a single item on canvas, do dummy.
@@ -1738,34 +1762,6 @@ proc ::CanvasUtils::UniqueImageName { } {
     append str [format "%x" $utaguid]
     incr utaguid
     return "im${str}"
-}
-
-# CanvasUtils::FindTypeFromOverlapping --
-#   
-#       Finds the specific item at given coords and with tag 'type'.
-#   
-# Arguments:
-#       c         the canvas widget path.
-#       x, y      coords
-#       type
-#       
-# Results:
-#       item id or empty if none.
-
-proc ::CanvasUtils::FindTypeFromOverlapping {c x y type} {    
-    
-    set ids [$c find overlapping [expr $x-2] [expr $y-2]  \
-      [expr $x+2] [expr $y+2]]
-    set id {}
-    
-    # Choose the first item with tags $type.
-    foreach i $ids {
-	if {[lsearch [$c gettags $i] $type] >= 0} {
-	    set id $i
-	    break
-	}
-    }
-    return $id
 }
 
 # CanvasUtils::FontHtmlToPointSize --
@@ -1919,7 +1915,7 @@ proc ::CanvasUtils::CreateFontSizeMapping { } {
 #       Handle a CANVAS drawing command from the server.
 #       
 # Arguments:
-#       wtop        toplevel window. ("." or ".main2." with extra dot!)
+#       w           toplevel widget path
 #       instr       everything after CANVAS:
 #       args
 #               -tryimport (0|1)
@@ -1927,7 +1923,7 @@ proc ::CanvasUtils::CreateFontSizeMapping { } {
 # Returns:
 #       none.
 
-proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
+proc ::CanvasUtils::HandleCanvasDraw {w instr args} {
     global  prefs canvasSafeInterp
     
     # Special chars.
@@ -1937,7 +1933,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
     set punct_ {[.,;?!]}
     
     # Regular drawing commands in the canvas.
-    set wServCan [::WB::GetServerCanvasFromWtop $wtop]
+    set wServCan [::WB::GetServerCanvasFromWtop $w]
     
     # If html sizes in text items, be sure to translate them into
     # platform specific point sizes.
@@ -1979,12 +1975,12 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
     # Find and register the undo command (and redo), and push
     # on our undo/redo stack. Security ???
     if {$prefs(privacy) == 0} {
-	set redo [list ::CanvasUtils::Command $wtop $instr]
-	set undo [GetUndoCommand $wtop $instr]
-	undo::add [::WB::GetUndoToken $wtop] $undo $redo
+	set redo [list ::CanvasUtils::Command $w $instr]
+	set undo [GetUndoCommand $w $instr]
+	undo::add [::WB::GetUndoToken $w] $undo $redo
     }
     
-    eval {::hooks::run whiteboardPreCanvasDraw $wtop $bsinstr} $args
+    eval {::hooks::run whiteboardPreCanvasDraw $w $bsinstr} $args
     
     # The 'import' command is an exception case (for the future). 
     if {[string equal $cmd "import"]} {
@@ -2014,7 +2010,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
     
     switch -- $cmd {
 	move - coords - scale - itemconfigure - dtag - addtag {
-	    if {$cmd == "addtag"} {
+	    if {$cmd eq "addtag"} {
 		set utag [lindex $instr 3]
 	    } else {
 		set utag [lindex $instr 1]
@@ -2049,7 +2045,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
 	eval $pcmd
     }
     
-    eval {::hooks::run whiteboardPostCanvasDraw $wtop $bsinstr} $args
+    eval {::hooks::run whiteboardPostCanvasDraw $w $bsinstr} $args
 }
 
 # CanvasUtils::CanvasDrawSafe --
@@ -2292,14 +2288,14 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
 #       Handling cached info for items not set elsewhere.
 #       Automatically garbage collected.
 
-proc ::CanvasUtils::ItemSet {wtop id args} {
-    upvar ::WB::${wtop}::itemopts itemopts
+proc ::CanvasUtils::ItemSet {w id args} {
+    upvar ::WB::${w}::itemopts itemopts
 
     set itemopts($id) $args
 }
 
-proc ::CanvasUtils::ItemCGet {wtop id} {
-    upvar ::WB::${wtop}::itemopts itemopts
+proc ::CanvasUtils::ItemCGet {w id} {
+    upvar ::WB::${w}::itemopts itemopts
     
     if {[info exists itemopts($id)]} {
 	return $itemopts($id)
@@ -2308,8 +2304,8 @@ proc ::CanvasUtils::ItemCGet {wtop id} {
     }
 }
 
-proc ::CanvasUtils::ItemFree {wtop} {
-    upvar ::WB::${wtop}::itemopts itemopts
+proc ::CanvasUtils::ItemFree {w} {
+    upvar ::WB::${w}::itemopts itemopts
     
     unset -nocomplain itemopts
 }
@@ -2329,7 +2325,7 @@ proc ::CanvasUtils::GetCompleteCanvas {wcan} {
 	    continue
 	}
 	set line [GetOneLinerForAny $wcan $id -uritype http]
-	if {$line != ""} {
+	if {$line ne ""} {
 	    lappend cmdList $line
 	}
     }

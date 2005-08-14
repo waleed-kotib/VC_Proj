@@ -5,10 +5,8 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasDraw.tcl,v 1.12 2005-05-04 13:58:37 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.13 2005-08-14 08:37:52 matben Exp $
 
-#  All code in this file is placed in one common namespace.
-#  
 #-- TAGS -----------------------------------------------------------------------
 #  
 #  All items are associated with tags. Each item must have a global unique
@@ -30,18 +28,18 @@ namespace eval ::CanvasDraw:: {}
 # 
 #       Moves all selected items.
 
-proc ::CanvasDraw::InitMoveSelected {w x y} {
+proc ::CanvasDraw::InitMoveSelected {wcan x y} {
     variable moveArr
     
-    set selected [$w find withtag selected&&!locked]
+    set selected [$wcan find withtag selected&&!locked]
     if {[llength $selected] == 0} {
 	return
     }
-    if {[HitMovableTBBox $w $x $y]} {
+    if {[HitMovableTBBox $wcan $x $y]} {
 	return
     }
-    $w dtag _move
-    $w addtag _move withtag selected&&!locked
+    $wcan dtag _move
+    $wcan addtag _move withtag selected&&!locked
     set moveArr(x) $x
     set moveArr(y) $y
     set moveArr(x0) $x
@@ -50,14 +48,14 @@ proc ::CanvasDraw::InitMoveSelected {w x y} {
     set moveArr(type) selected
     set moveArr(selected) $selected
     foreach id $selected {
-	set moveArr(coords0,$id) [$w coords $id]
+	set moveArr(coords0,$id) [$wcan coords $id]
     }
 }
 
-proc ::CanvasDraw::DragMoveSelected {w x y {modifier {}}} {
+proc ::CanvasDraw::DragMoveSelected {wcan x y {modifier {}}} {
     variable moveArr
     
-    set selected [$w find withtag _move]
+    set selected [$wcan find withtag _move]
     if {[llength $selected] == 0} {
 	return
     }
@@ -65,22 +63,22 @@ proc ::CanvasDraw::DragMoveSelected {w x y {modifier {}}} {
 	return
     }
     if {[string equal $modifier "shift"]} {
-	foreach {x y} [::CanvasDraw::GetConstrainedXY $x $y] {break}
+	lassign [::CanvasDraw::GetConstrainedXY $x $y] x y
     }
-    set dx [expr $x - $moveArr(x)]
-    set dy [expr $y - $moveArr(y)]
-    $w move _move $dx $dy
-    $w move tbbox&&!locked $dx $dy
+    set dx [expr {$x - $moveArr(x)}]
+    set dy [expr {$y - $moveArr(y)}]
+    $wcan move _move $dx $dy
+    $wcan move tbbox&&!locked $dx $dy
     set moveArr(x) $x
     set moveArr(y) $y
 }
 
-proc ::CanvasDraw::FinalMoveSelected {w x y} {
+proc ::CanvasDraw::FinalMoveSelected {wcan x y} {
     variable moveArr
     
-    # Protect thsi from beeing trigged when moving individual points.
-    set selected [$w find withtag _move]
-    if {[llength $selected] == 0} {
+    # Protect this from beeing trigged when moving individual points.
+    set selected [$wcan find withtag _move]
+    if {$selected == {}} {
 	return
     }
     if {![info exists moveArr]} {
@@ -91,24 +89,24 @@ proc ::CanvasDraw::FinalMoveSelected {w x y} {
     }
     
     # Have moved a bunch of ordinary items.
-    set dx [expr $x - $moveArr(x0)]
-    set dy [expr $y - $moveArr(y0)]
-    set mdx [expr -$dx]
-    set mdy [expr -$dy]
+    set dx [expr {$x - $moveArr(x0)}]
+    set dy [expr {$y - $moveArr(y0)}]
+    set mdx [expr {-1*$dx}]
+    set mdy [expr {-1*$dy}]
     set cmdList {}
     set cmdUndoList {}
     
     foreach id $selected {
-	set utag [::CanvasUtils::GetUtag $w $id]
+	set utag [::CanvasUtils::GetUtag $wcan $id]
 	
 	# Let images use coords instead since more robust if transported.
-	switch -- [$w type $id] {
+	switch -- [$wcan type $id] {
 	    image {
 		
 		# Find new coords.
-		foreach {x0 y0} $moveArr(coords0,$id) {break}
-		set x [expr $x0 + $dx]
-		set y [expr $y0 + $dy]
+		lassign $moveArr(coords0,$id) x0 y0
+		set x [expr {$x0 + $dx}]
+		set y [expr {$y0 + $dy}]
 		lappend cmdList [list coords $utag $x $y]
 		lappend cmdUndoList \
 		  [concat coords $utag $moveArr(coords0,$id)]
@@ -119,13 +117,13 @@ proc ::CanvasDraw::FinalMoveSelected {w x y} {
 	    }
 	}
     }
-    set wtop [::UI::GetToplevelNS $w]
-    set redo [list ::CanvasUtils::CommandList $wtop $cmdList]
-    set undo [list ::CanvasUtils::CommandList $wtop $cmdUndoList]
+    set w [winfo toplevel $wcan]
+    set redo [list ::CanvasUtils::CommandList $w $cmdList]
+    set undo [list ::CanvasUtils::CommandList $w $cmdUndoList]
     eval $redo remote
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo    
+    undo::add [::WB::GetUndoToken $w] $undo $redo    
     
-    $w dtag _move
+    $wcan dtag _move
     unset -nocomplain moveArr
 }
 
@@ -133,69 +131,69 @@ proc ::CanvasDraw::FinalMoveSelected {w x y} {
 # 
 #       Moves 'current' item.
 
-proc ::CanvasDraw::InitMoveCurrent {w x y} {
+proc ::CanvasDraw::InitMoveCurrent {wcan x y} {
     variable moveArr
     
-    set selected [$w find withtag selected&&!locked]
+    set selected [$wcan find withtag selected&&!locked]
     if {[llength $selected] > 0} {
 	return
     }
-    set id [$w find withtag current]
+    set id [$wcan find withtag current]
     set moveArr(x) $x
     set moveArr(y) $y
     set moveArr(x0) $x
     set moveArr(y0) $y
     set moveArr(id) $id
-    set moveArr(coords0,$id) [$w coords $id]
+    set moveArr(coords0,$id) [$wcan coords $id]
     set moveArr(bindType) std
-    set moveArr(type) [$w type $id]
+    set moveArr(type) [$wcan type $id]
 }
 
-proc ::CanvasDraw::DragMoveCurrent {w x y {modifier {}}} {
+proc ::CanvasDraw::DragMoveCurrent {wcan x y {modifier {}}} {
     variable moveArr
     
-    set selected [$w find withtag selected&&!locked]
+    set selected [$wcan find withtag selected&&!locked]
     if {[llength $selected] > 0} {
 	return
     }
     if {[string equal $modifier "shift"]} {
-	foreach {x y} [::CanvasDraw::GetConstrainedXY $x $y] {break}
+	lassign [GetConstrainedXY $x $y] x y
     }
-    set dx [expr $x - $moveArr(x)]
-    set dy [expr $y - $moveArr(y)]
-    $w move $moveArr(id) $dx $dy
+    set dx [expr {$x - $moveArr(x)}]
+    set dy [expr {$y - $moveArr(y)}]
+    $wcan move $moveArr(id) $dx $dy
     set moveArr(x) $x
     set moveArr(y) $y
 }
 
-proc ::CanvasDraw::FinalMoveCurrent {w x y} {
+proc ::CanvasDraw::FinalMoveCurrent {wcan x y} {
     variable moveArr
     
-    set selected [$w find withtag selected&&!locked]
-    if {[llength $selected] > 0} {
+    set selected [$wcan find withtag selected&&!locked]
+    if {$selected != {}} {
 	return
     }
     if {![info exists moveArr]} {
 	return
     }
-    set dx [expr $x - $moveArr(x0)]
-    set dy [expr $y - $moveArr(y0)]
-    set mdx [expr -$dx]
-    set mdy [expr -$dy]
+    set dx [expr {$x - $moveArr(x0)}]
+    set dy [expr {$y - $moveArr(y0)}]
+    set mdx [expr {-1*$dx}]
+    set mdy [expr {-1*$dy}]
     set cmdList {}
     set cmdUndoList {}
     
     set id $moveArr(id)
-    set utag [::CanvasUtils::GetUtag $w $id]
+    set utag [::CanvasUtils::GetUtag $wcan $id]
 	
     # Let images use coords instead since more robust if transported.
-    switch -- [$w type $id] {
+    switch -- [$wcan type $id] {
 	image {
 	    
 	    # Find new coords.
-	    foreach {x0 y0} $moveArr(coords0,$id) {break}
-	    set x [expr $x0 + $dx]
-	    set y [expr $y0 + $dy]
+	    lassign $moveArr(coords0,$id) x0 y0
+	    set x [expr {$x0 + $dx}]
+	    set y [expr {$y0 + $dy}]
 	    lappend cmdList [list coords $utag $x $y]
 	    lappend cmdUndoList \
 	      [concat coords $utag $moveArr(coords0,$id)]
@@ -205,11 +203,11 @@ proc ::CanvasDraw::FinalMoveCurrent {w x y} {
 	    lappend cmdUndoList [list move $utag $mdx $mdy]
 	}
     }
-    set wtop [::UI::GetToplevelNS $w]
-    set redo [list ::CanvasUtils::CommandList $wtop $cmdList]
-    set undo [list ::CanvasUtils::CommandList $wtop $cmdUndoList]
+    set w [winfo toplevel $wcan]
+    set redo [list ::CanvasUtils::CommandList $w $cmdList]
+    set undo [list ::CanvasUtils::CommandList $w $cmdUndoList]
     eval $redo remote
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo    
+    undo::add [::WB::GetUndoToken $w] $undo $redo    
     
     unset -nocomplain moveArr
 }
@@ -218,25 +216,25 @@ proc ::CanvasDraw::FinalMoveCurrent {w x y} {
 # 
 #       For rectangle and oval corner points.
 
-proc ::CanvasDraw::InitMoveRectPoint {w x y} {
+proc ::CanvasDraw::InitMoveRectPoint {wcan x y} {
     variable moveArr
     
-    if {![HitTBBox $w $x $y]} {
+    if {![HitTBBox $wcan $x $y]} {
 	return
     }
 
     # Moving a marker of a selected item, highlight marker.
     # 'current' must be a marker with tag 'tbbox'.
-    set id [$w find withtag current]
-    $w addtag hitBbox withtag $id
+    set id [$wcan find withtag current]
+    $wcan addtag hitBbox withtag $id
 
     # Find associated id for the actual item. Saved in the tags of the marker.
-    if {![regexp {id:([0-9]+)} [$w gettags $id] match itemid]} {
+    if {![regexp {id:([0-9]+)} [$wcan gettags $id] match itemid]} {
 	return
     }
-    DrawHighlightBox $w $itemid $id
-    set itemcoords [$w coords $itemid]
-    set utag [::CanvasUtils::GetUtag $w $itemid]
+    DrawHighlightBox $wcan $itemid $id
+    set itemcoords [$wcan coords $itemid]
+    set utag [::CanvasUtils::GetUtag $wcan $itemid]
 
     # Get the index of the coordinates that was 'hit'. Then update only
     # this coordinate when moving.
@@ -253,11 +251,11 @@ proc ::CanvasDraw::InitMoveRectPoint {w x y} {
       [lindex $itemcoords 2] [lindex $itemcoords 3]]
   
     set ind [FindClosestCoordsIndex $x $y $longcoo]
-    set ptind [expr $ind/2]
+    set ptind [expr {$ind/2}]
     
     # Keep only hit corner and the diagonally opposite one.
     set coords [list [lindex $longcoo $ind]  \
-      [lindex $longcoo [expr $ind + 1]]]
+      [lindex $longcoo [expr {$ind + 1}]]]
     
     switch -- $ptind {
 	0 {
@@ -281,14 +279,14 @@ proc ::CanvasDraw::InitMoveRectPoint {w x y} {
     set moveArr(id) $id
     set moveArr(itemid) $itemid
     set moveArr(utag) $utag
-    set moveArr(coords0) [$w coords $id]
+    set moveArr(coords0) [$wcan coords $id]
     set moveArr(itemcoords0) $coo
     set moveArr(undocmd) [concat coords $utag $itemcoords]
     set moveArr(bindType) tbbox:rect
-    set moveArr(type) [$w type $itemid]
+    set moveArr(type) [$wcan type $itemid]
 }
 
-proc ::CanvasDraw::DragMoveRectPoint {w x y {modifier {}}} {
+proc ::CanvasDraw::DragMoveRectPoint {wcan x y {modifier {}}} {
     variable moveArr
     
     if {![info exists moveArr]} {
@@ -298,19 +296,19 @@ proc ::CanvasDraw::DragMoveRectPoint {w x y {modifier {}}} {
 	return
     }
     if {[string equal $modifier "shift"]} {
-	foreach {x y} [::CanvasDraw::GetConstrainedXY $x $y] {break}
+	lassign [GetConstrainedXY $x $y] x y
     }
-    set dx [expr $x - $moveArr(x)]
-    set dy [expr $y - $moveArr(y)]
+    set dx [expr {$x - $moveArr(x)}]
+    set dy [expr {$y - $moveArr(y)}]
     set newcoo [lreplace $moveArr(itemcoords0) 0 1 $x $y]
-    eval $w coords $moveArr(itemid) $newcoo
-    $w move hitBbox $dx $dy
-    $w move lightBbox $dx $dy
+    eval $wcan coords $moveArr(itemid) $newcoo
+    $wcan move hitBbox $dx $dy
+    $wcan move lightBbox $dx $dy
     set moveArr(x) $x
     set moveArr(y) $y
 }
 
-proc ::CanvasDraw::FinalMoveRectPoint {w x y} {
+proc ::CanvasDraw::FinalMoveRectPoint {wcan x y} {
     variable moveArr
     
     if {![info exists moveArr]} {
@@ -319,22 +317,23 @@ proc ::CanvasDraw::FinalMoveRectPoint {w x y} {
     if {![string equal $moveArr(bindType) "tbbox:rect"]} {
 	return
     }
-    $w delete lightBbox
-    $w dtag all hitBbox 
+    $wcan delete lightBbox
+    $wcan dtag all hitBbox 
 
     # Move all markers along.
-    $w delete id$moveArr(itemid)
-    MarkBbox $w 0 $moveArr(itemid)
+    $wcan delete id$moveArr(itemid)
+    MarkBbox $wcan 0 $moveArr(itemid)
 
     set itemid $moveArr(itemid)
     set utag $moveArr(utag)
-    set utag [::CanvasUtils::GetUtag $w $itemid]
-    set wtop [::UI::GetToplevelNS $w]
-    set cmd [concat coords $utag [$w coords $itemid]]
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::Command $wtop $moveArr(undocmd)]
+    set utag [::CanvasUtils::GetUtag $wcan $itemid]
+    set cmd [concat coords $utag [$wcan coords $itemid]]
+
+    set w [winfo toplevel $wcan]
+    set redo [list ::CanvasUtils::Command $w $cmd]
+    set undo [list ::CanvasUtils::Command $w $moveArr(undocmd)]
     eval $redo remote
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
 
     unset -nocomplain moveArr
 }
@@ -343,18 +342,18 @@ proc ::CanvasDraw::FinalMoveRectPoint {w x y} {
 #
 #
 
-proc ::CanvasDraw::InitMoveArcPoint {w x y} {
+proc ::CanvasDraw::InitMoveArcPoint {wcan x y} {
     global  kGrad2Rad
     variable moveArr
     
-    if {![HitTBBox $w $x $y]} {
+    if {![HitTBBox $wcan $x $y]} {
 	return
     }
 
     # Moving a marker of a selected item, highlight marker.
     # 'current' must be a marker with tag 'tbbox'.
-    set id [$w find withtag current]
-    $w addtag hitBbox withtag $id
+    set id [$wcan find withtag current]
+    $wcan addtag hitBbox withtag $id
 
     set moveArr(x) $x
     set moveArr(y) $y
@@ -364,12 +363,12 @@ proc ::CanvasDraw::InitMoveArcPoint {w x y} {
     set moveArr(type) arc
 
     # Find associated id for the actual item. Saved in the tags of the marker.
-    if {![regexp {id:([0-9]+)} [$w gettags $id] match itemid]} {
+    if {![regexp {id:([0-9]+)} [$wcan gettags $id] match itemid]} {
 	return
     }
-    DrawHighlightBox $w $itemid $id
-    set itemcoords [$w coords $itemid]
-    set utag [::CanvasUtils::GetUtag $w $itemid]
+    DrawHighlightBox $wcan $itemid $id
+    set itemcoords [$wcan coords $itemid]
+    set utag [::CanvasUtils::GetUtag $wcan $itemid]
     
     set moveArr(itemid) $itemid
     set moveArr(coords) $itemcoords
@@ -382,27 +381,27 @@ proc ::CanvasDraw::InitMoveArcPoint {w x y} {
     set moveArr(arcX) $x
     set moveArr(arcY) $y
     foreach {x1 y1 x2 y2} $itemcoords break
-    set r [expr abs(($x1 - $x2)/2.0)]
-    set cx [expr ($x1 + $x2)/2.0]
-    set cy [expr ($y1 + $y2)/2.0]
+    set r [expr {abs(($x1 - $x2)/2.0)}]
+    set cx [expr {($x1 + $x2)/2.0}]
+    set cy [expr {($y1 + $y2)/2.0}]
     set moveArr(arcCX) $cx
     set moveArr(arcCY) $cy
-    set startAng [$w itemcget $itemid -start]
+    set startAng [$wcan itemcget $itemid -start]
     
     # Put branch cut at +-180!
     if {$startAng > 180} {
-	set startAng [expr $startAng - 360]
+	set startAng [expr {$startAng - 360}]
     }
-    set extentAng [$w itemcget $itemid -extent]
-    set xstart [expr $cx + $r * cos($kGrad2Rad * $startAng)]
-    set ystart [expr $cy - $r * sin($kGrad2Rad * $startAng)]
-    set xfin [expr $cx + $r * cos($kGrad2Rad * ($startAng + $extentAng))]
-    set yfin [expr $cy - $r * sin($kGrad2Rad * ($startAng + $extentAng))]
-    set dstart [expr hypot($xstart - $x,$ystart - $y)]
-    set dfin [expr hypot($xfin - $x,$yfin - $y)]
+    set extentAng [$wcan itemcget $itemid -extent]
+    set xstart [expr {$cx + $r * cos($kGrad2Rad * $startAng)}]
+    set ystart [expr {$cy - $r * sin($kGrad2Rad * $startAng)}]
+    set xfin [expr {$cx + $r * cos($kGrad2Rad * ($startAng + $extentAng))}]
+    set yfin [expr {$cy - $r * sin($kGrad2Rad * ($startAng + $extentAng))}]
+    set dstart [expr {hypot($xstart - $x,$ystart - $y)}]
+    set dfin [expr {hypot($xfin - $x,$yfin - $y)}]
     set moveArr(arcStart) $startAng
     set moveArr(arcExtent) $extentAng
-    set moveArr(arcFin) [expr $startAng + $extentAng]
+    set moveArr(arcFin) [expr {$startAng + $extentAng}]
     if {$dstart < $dfin} {
 	set moveArr(arcHit) "start"
     } else {
@@ -412,15 +411,15 @@ proc ::CanvasDraw::InitMoveArcPoint {w x y} {
       -start $startAng -extent $extentAng]
 }
 
-proc ::CanvasDraw::DragMoveArcPoint {w x y {modifier {}}} {
+proc ::CanvasDraw::DragMoveArcPoint {wcan x y {modifier {}}} {
     global  kGrad2Rad kRad2Grad
     variable moveArr
     
     if {[string equal $modifier "shift"]} {
-	foreach {x y} [::CanvasDraw::GetConstrainedXY $x $y] {break}
+	lassign [GetConstrainedXY $x $y] x y
     }
-    set dx [expr $x - $moveArr(x)]
-    set dy [expr $y - $moveArr(y)]
+    set dx [expr {$x - $moveArr(x)}]
+    set dy [expr {$y - $moveArr(y)}]
     set moveArr(x) $x
     set moveArr(y) $y
     
@@ -428,87 +427,87 @@ proc ::CanvasDraw::DragMoveArcPoint {w x y {modifier {}}} {
     set coords $moveArr(coords)
     set itemid $moveArr(itemid)
 
-    foreach {x1 y1 x2 y2} $coords break
-    set r [expr abs(($x1 - $x2)/2.0)]
-    set cx [expr ($x1 + $x2)/2.0]
-    set cy [expr ($y1 + $y2)/2.0]
-    set startAng [$w itemcget $itemid -start]
-    set extentAng [$w itemcget $itemid -extent]
-    set xstart [expr $cx + $r * cos($kGrad2Rad * $startAng)]
-    set ystart [expr $cy - $r * sin($kGrad2Rad * $startAng)]
-    set xfin [expr $cx + $r * cos($kGrad2Rad * ($startAng + $extentAng))]
-    set yfin [expr $cy - $r * sin($kGrad2Rad * ($startAng + $extentAng))]
-    set newAng [expr $kRad2Grad * atan2($cy - $y,-($cx - $x))]
+    lassign $coords x1 y1 x2 y2
+    set r [expr {abs(($x1 - $x2)/2.0)}]
+    set cx [expr {($x1 + $x2)/2.0}]
+    set cy [expr {($y1 + $y2)/2.0}]
+    set startAng [$wcan itemcget $itemid -start]
+    set extentAng [$wcan itemcget $itemid -extent]
+    set xstart [expr {$cx + $r * cos($kGrad2Rad * $startAng)}]
+    set ystart [expr {$cy - $r * sin($kGrad2Rad * $startAng)}]
+    set xfin [expr {$cx + $r * cos($kGrad2Rad * ($startAng + $extentAng))}]
+    set yfin [expr {$cy - $r * sin($kGrad2Rad * ($startAng + $extentAng))}]
+    set newAng [expr {$kRad2Grad * atan2($cy - $y,-($cx - $x))}]
     
     # Dragging the 'extent' point or the 'start' point?
     if {[string equal $moveArr(arcHit) "extent"]} { 
-	set extentAng [expr $newAng - $moveArr(arcStart)]
+	set extentAng [expr {$newAng - $moveArr(arcStart)}]
 	
 	# Same trick as when drawing it; take care of the branch cut.
 	if {$moveArr(arcExtent) - $extentAng > 180} {
-	    set extentAng [expr $extentAng + 360]
+	    set extentAng [expr {$extentAng + 360}]
 	} elseif {$moveArr(arcExtent) - $extentAng < -180} {
-	    set extentAng [expr $extentAng - 360]
+	    set extentAng [expr {$extentAng - 360}]
 	}
 	set moveArr(arcExtent) $extentAng
 	
 	# Update angle.
-	$w itemconfigure $itemid -extent $extentAng
+	$wcan itemconfigure $itemid -extent $extentAng
 	
 	# Move highlight box.
-	$w move hitBbox [expr $xfin - $moveArr(arcX)]   \
-	  [expr $yfin - $moveArr(arcY)]
-	$w move lightBbox [expr $xfin - $moveArr(arcX)]   \
-	  [expr $yfin - $moveArr(arcY)]
+	$wcan move hitBbox [expr {$xfin - $moveArr(arcX)}]   \
+	  [expr {$yfin - $moveArr(arcY)}]
+	$wcan move lightBbox [expr {$xfin - $moveArr(arcX)}]   \
+	  [expr {$yfin - $moveArr(arcY)}]
 	set moveArr(arcX) $xfin
 	set moveArr(arcY) $yfin
 	
     } elseif {[string equal $moveArr(arcHit) "start"]} {
 
 	# Need to update start angle as well as extent angle.
-	set newExtentAng [expr $moveArr(arcFin) - $newAng]
+	set newExtentAng [expr {$moveArr(arcFin) - $newAng}]
 	# Same trick as when drawing it; take care of the branch cut.
 	if {$moveArr(arcExtent) - $newExtentAng > 180} {
-	    set newExtentAng [expr $newExtentAng + 360]
+	    set newExtentAng [expr {$newExtentAng + 360}]
 	} elseif {$moveArr(arcExtent) - $newExtentAng < -180} {
-	    set newExtentAng [expr $newExtentAng - 360]
+	    set newExtentAng [expr {$newExtentAng - 360}]
 	}
 	set moveArr(arcExtent) $newExtentAng
 	set moveArr(arcStart) $newAng
-	$w itemconfigure $itemid -start $newAng
-	$w itemconfigure $itemid -extent $newExtentAng
+	$wcan itemconfigure $itemid -start $newAng
+	$wcan itemconfigure $itemid -extent $newExtentAng
 	
 	# Move highlight box.
-	$w move hitBbox [expr $xstart - $moveArr(arcX)]   \
-	  [expr $ystart - $moveArr(arcY)]
-	$w move lightBbox [expr $xstart - $moveArr(arcX)]   \
-	  [expr $ystart - $moveArr(arcY)]
+	$wcan move hitBbox [expr {$xstart - $moveArr(arcX)}]   \
+	  [expr {$ystart - $moveArr(arcY)}]
+	$wcan move lightBbox [expr {$xstart - $moveArr(arcX)}]   \
+	  [expr {$ystart - $moveArr(arcY)}]
 	set moveArr(arcX) $xstart
 	set moveArr(arcY) $ystart
     }
 }
 
-proc ::CanvasDraw::FinalMoveArcPoint {w x y} {
+proc ::CanvasDraw::FinalMoveArcPoint {wcan x y} {
     variable moveArr
     
     if {![info exists moveArr]} {
 	return
     }
     set id $moveArr(itemid)
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
 
-    $w delete lightBbox
-    $w dtag all hitBbox 
+    $wcan delete lightBbox
+    $wcan dtag all hitBbox 
 
     # The arc item: update both angles.
     set utag $moveArr(utag)
     set cmd [concat itemconfigure $utag -start $moveArr(arcStart)   \
       -extent $moveArr(arcExtent)]
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::Command $wtop $moveArr(undocmd)]
+    set redo [list ::CanvasUtils::Command $w $cmd]
+    set undo [list ::CanvasUtils::Command $w $moveArr(undocmd)]
 
     eval $redo remote
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
     
     unset -nocomplain moveArr
 }
@@ -518,17 +517,17 @@ proc ::CanvasDraw::FinalMoveArcPoint {w x y} {
 # 
 #       For moving polygon and line item points.
 
-proc ::CanvasDraw::InitMovePolyLinePoint {w x y} {
+proc ::CanvasDraw::InitMovePolyLinePoint {wcan x y} {
     variable moveArr
     
-    if {![HitTBBox $w $x $y]} {
+    if {![HitTBBox $wcan $x $y]} {
 	return
     }
 
     # Moving a marker of a selected item, highlight marker.
     # 'current' must be a marker with tag 'tbbox'.
-    set id [$w find withtag current]
-    $w addtag hitBbox withtag $id
+    set id [$wcan find withtag current]
+    $wcan addtag hitBbox withtag $id
 
     set moveArr(x) $x
     set moveArr(y) $y
@@ -536,28 +535,28 @@ proc ::CanvasDraw::InitMovePolyLinePoint {w x y} {
     set moveArr(y0) $y
 
     # Find associated id for the actual item. Saved in the tags of the marker.
-    if {![regexp {id:([0-9]+)} [$w gettags $id] match itemid]} {
+    if {![regexp {id:([0-9]+)} [$wcan gettags $id] match itemid]} {
 	return
     }
-    DrawHighlightBox $w $itemid $id
-    set itemcoords [$w coords $itemid]
+    DrawHighlightBox $wcan $itemid $id
+    set itemcoords [$wcan coords $itemid]
     set ind [FindClosestCoordsIndex $x $y $itemcoords]
 
     set moveArr(itemid) $itemid
     set moveArr(coords) $itemcoords
     set moveArr(hitInd) $ind
-    set moveArr(type) [$w type $itemid]
+    set moveArr(type) [$wcan type $itemid]
     set moveArr(bindType) tbbox:polyline
 }
 
-proc ::CanvasDraw::DragMovePolyLinePoint {w x y {modifier {}}} {
+proc ::CanvasDraw::DragMovePolyLinePoint {wcan x y {modifier {}}} {
     variable moveArr
 
     if {[string equal $modifier "shift"]} {
-	foreach {x y} [::CanvasDraw::GetConstrainedXY $x $y] {break}
+	lassign [GetConstrainedXY $x $y] x y
     }
-    set dx [expr $x - $moveArr(x)]
-    set dy [expr $y - $moveArr(y)]
+    set dx [expr {$x - $moveArr(x)}]
+    set dy [expr {$y - $moveArr(y)}]
     set moveArr(x) $x
     set moveArr(y) $y
     
@@ -565,13 +564,13 @@ proc ::CanvasDraw::DragMovePolyLinePoint {w x y {modifier {}}} {
     set itemid $moveArr(itemid)
 
     set ind $moveArr(hitInd)
-    set newcoo [lreplace $coords $ind [expr $ind + 1] $x $y]
-    eval $w coords $itemid $newcoo
-    $w move hitBbox $dx $dy
-    $w move lightBbox $dx $dy
+    set newcoo [lreplace $coords $ind [expr {$ind + 1}] $x $y]
+    eval $wcan coords $itemid $newcoo
+    $wcan move hitBbox $dx $dy
+    $wcan move lightBbox $dx $dy
 }
 
-proc ::CanvasDraw::FinalMovePolyLinePoint {w x y} {
+proc ::CanvasDraw::FinalMovePolyLinePoint {wcan x y} {
     variable moveArr
 
     if {![info exists moveArr]} {
@@ -579,27 +578,27 @@ proc ::CanvasDraw::FinalMovePolyLinePoint {w x y} {
     }
     set itemid $moveArr(itemid)
     set coords $moveArr(coords)
-    set utag [::CanvasUtils::GetUtag $w $itemid]
-    set wtop [::UI::GetToplevelNS $w]
-    set itemcoo [$w coords $itemid]
+    set utag [::CanvasUtils::GetUtag $wcan $itemid]
+    set w [winfo toplevel $wcan]
+    set itemcoo [$wcan coords $itemid]
 
-    $w delete lightBbox
-    $w dtag all hitBbox 
+    $wcan delete lightBbox
+    $wcan dtag all hitBbox 
  
     # If endpoints overlap in line item, make closed polygon.
     # Find out if closed polygon or open line item. If closed, remove duplicate.
 
-    set len [expr hypot(  \
+    set len [expr {hypot(  \
       [lindex $itemcoo end-1] - [lindex $itemcoo 0],  \
-      [lindex $itemcoo end] -  [lindex $itemcoo 1] )]
+      [lindex $itemcoo end] -  [lindex $itemcoo 1] )}]
     if {[string equal $moveArr(type) "line"] && ($len < 8)} {
 	    
 	# Make the line segments to a closed polygon.
 	# Get all actual options.
-	set lineopts [::CanvasUtils::GetItemOpts $w $itemid]
+	set lineopts [::CanvasUtils::GetItemOpts $wcan $itemid]
 	set polycoo [lreplace $itemcoo end-1 end]
 	set cmd1 [list delete $utag]
-	eval $w $cmd1
+	eval $wcan $cmd1
 	
 	# Make the closed polygon. Get rid of non-applicable options.
 	set opcmd $lineopts
@@ -612,30 +611,30 @@ proc ::CanvasDraw::FinalMovePolyLinePoint {w x y} {
 	# Replace -fill with -outline.
 	set ind [lsearch -exact $lineopts -fill]
 	if {$ind >= 0} {
-	    set opcmdArr(-outline) [lindex $lineopts [expr $ind+1]]
+	    set opcmdArr(-outline) [lindex $lineopts [expr {$ind+1}]]
 	}
 	set utag [::CanvasUtils::NewUtag]
 	set opcmdArr(-fill) {} 
 	set opcmdArr(-tags) [list polygon std $utag]
 	set cmd2 [concat create polygon $polycoo [array get opcmdArr]]
-	set polyid [eval $w $cmd2]
+	set polyid [eval $wcan $cmd2]
 	set ucmd1 [list delete $utag]
 	set ucmd2 [concat create line $coords $lineopts]
-	set undo [list ::CanvasUtils::CommandList $wtop [list $ucmd1 $ucmd2]]
-	set redo [list ::CanvasUtils::CommandList $wtop [list $cmd1 $cmd2]]
+	set undo [list ::CanvasUtils::CommandList $w [list $ucmd1 $ucmd2]]
+	set redo [list ::CanvasUtils::CommandList $w [list $cmd1 $cmd2]]
 	
 	# Move all markers along.
-	$w delete id:$itemid
-	MarkBbox $w 0 $polyid
+	$wcan delete id:$itemid
+	MarkBbox $wcan 0 $polyid
     } else {
 	set undocmd [concat coords $utag $coords]
-	set cmd [concat coords $utag [$w coords $itemid]]
-	set undo [list ::CanvasUtils::Command $wtop $undocmd]
-	set redo [list ::CanvasUtils::Command $wtop $cmd]
+	set cmd [concat coords $utag [$wcan coords $itemid]]
+	set undo [list ::CanvasUtils::Command $w $undocmd]
+	set redo [list ::CanvasUtils::Command $w $cmd]
     }
 
     eval $redo remote
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
    
     unset -nocomplain moveArr
 }
@@ -647,10 +646,18 @@ proc ::CanvasDraw::FinalMovePolyLinePoint {w x y} {
 proc ::CanvasDraw::InitMoveFrame {wcan wframe x y} {
     global  kGrad2Rad    
     variable  xDragFrame
-    
+        
+    # If frame then make ghost rectangle. 
+    # Movies (and windows) do not obey the usual stacking order!    
+    set utag [::CanvasUtils::GetUtagFromWindow $wframe]
+    if {$utag eq ""} {
+	return
+    }
+
     # Fix x and y.
-    set x [$wcan canvasx [expr [winfo x $wframe] + $x]]
-    set y [$wcan canvasx [expr [winfo y $wframe] + $y]]
+    set x [$wcan canvasx [expr {[winfo x $wframe] + $x}]]
+    set y [$wcan canvasx [expr {[winfo y $wframe] + $y}]]
+    
     Debug 2 "InitMoveFrame:: wcan=$wcan, wframe=$wframe x=$x, y=$y"
 	
     set xDragFrame(what) "frame"
@@ -663,23 +670,9 @@ proc ::CanvasDraw::InitMoveFrame {wcan wframe x y} {
     # specific coordinate.
     
     set xDragFrame(type) [$wcan type current]
-    
-    # If frame then make ghost rectangle. 
-    # Movies (and windows) do not obey the usual stacking order!
-    
-    set id [::CanvasUtils::FindTypeFromOverlapping $wcan $x $y "frame"]
-    if {$id == ""} {
-	Debug 2 "  InitMoveFrame:: FindTypeFromOverlapping rejected"
-	return
-    }
-    set it [::CanvasUtils::GetUtag $wcan $id]
-    if {$it == ""} {
-	Debug 2 "  InitMoveFrame:: GetUtag rejected"
-	return
-    }
-    set xDragFrame(undocmd) [concat coords $it [$wcan coords $id]]
-    $wcan addtag selectedframe withtag $id
-    foreach {x1 y1 x2 y2} [$wcan bbox $id] break
+    set xDragFrame(undocmd) [concat coords $utag [$wcan coords $utag]]
+    $wcan addtag _moveframe withtag $utag
+    foreach {x1 y1 x2 y2} [$wcan bbox $utag] break
     incr x1 -1
     incr y1 -1
     incr x2 +1
@@ -701,11 +694,12 @@ proc ::CanvasDraw::DoMoveFrame {wcan wframe x y} {
     }
     
     # Fix x and y.
-    set x [$wcan canvasx [expr [winfo x $wframe] + $x]]
-    set y [$wcan canvasx [expr [winfo y $wframe] + $y]]
+    set x [$wcan canvasx [expr {[winfo x $wframe] + $x}]]
+    set y [$wcan canvasx [expr {[winfo y $wframe] + $y}]]
     
     # Moving a frame window item (ghostrect).
-    $wcan move ghostrect [expr $x - $xDragFrame(baseX)] [expr $y - $xDragFrame(baseY)]
+    $wcan move ghostrect \
+      [expr {$x - $xDragFrame(baseX)}] [expr {$y - $xDragFrame(baseY)}]
     
     set xDragFrame(baseX) $x
     set xDragFrame(baseY) $y
@@ -721,32 +715,33 @@ proc ::CanvasDraw::FinMoveFrame {wcan wframe  x y} {
     }
    
     # Fix x and y.
-    set x [$wcan canvasx [expr [winfo x $wframe] + $x]]
-    set y [$wcan canvasx [expr [winfo y $wframe] + $y]]
-    set id [$wcan find withtag selectedframe]
+    set x [$wcan canvasx [expr {[winfo x $wframe] + $x}]]
+    set y [$wcan canvasx [expr {[winfo y $wframe] + $y}]]
+    set id [$wcan find withtag _moveframe]
     set utag [::CanvasUtils::GetUtag $wcan $id]
-    set wtop [::UI::GetToplevelNS $wcan]
+    
     Debug 2 "  FinMoveFrame id=$id, utag=$utag, x=$x, y=$y"
 
-    if {$utag == ""} {
+    if {$utag eq ""} {
 	return
     }
-    $wcan move selectedframe [expr $x - $xDragFrame(anchorX)]  \
-      [expr $y - $xDragFrame(anchorY)]
-    $wcan dtag selectedframe selectedframe
+    $wcan move _moveframe [expr {$x - $xDragFrame(anchorX)}]  \
+      [expr {$y - $xDragFrame(anchorY)}]
+    $wcan dtag _moveframe _moveframe
     set cmd [concat coords $utag [$wcan coords $utag]]
     
     # Delete the ghost rect or highlighted marker if any. Remove temporary tags.
     $wcan delete ghostrect
     
     # Do send to all connected.
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
+    set w [winfo toplevel $wcan]
+    set redo [list ::CanvasUtils::Command $w $cmd]
     if {[info exists xDragFrame(undocmd)]} {
-	set undo [list ::CanvasUtils::Command $wtop $xDragFrame(undocmd)]
+	set undo [list ::CanvasUtils::Command $w $xDragFrame(undocmd)]
     }
     eval $redo remote
     if {[info exists undo]} {
-	undo::add [::WB::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $w] $undo $redo
     }    
     unset -nocomplain xDragFrame
 }
@@ -757,11 +752,16 @@ proc ::CanvasDraw::FinMoveFrame {wcan wframe  x y} {
 
 proc ::CanvasDraw::InitMoveWindow {wcan win x y} {
     global  kGrad2Rad    
-    variable  xDragWin
+    variable xDragWin
     
+    set utag [::CanvasUtils::GetUtagFromWindow $win]
+    if {$utag eq ""} {
+	return
+    }
+
     # Fix x and y.
-    set x [$wcan canvasx [expr [winfo x $win] + $x]]
-    set y [$wcan canvasx [expr [winfo y $win] + $y]]
+    set x [$wcan canvasx [expr {[winfo x $win] + $x}]]
+    set y [$wcan canvasx [expr {[winfo y $win] + $y}]]
     Debug 2 "InitMoveWindow:: wcan=$wcan, win=$win x=$x, y=$y"
 	
     set xDragWin(what) "window"
@@ -773,17 +773,6 @@ proc ::CanvasDraw::InitMoveWindow {wcan win x y} {
     # In some cases we need the anchor point to be an exact item 
     # specific coordinate.    
     set xDragWin(type) [$wcan type current]
-	
-    set id [::CanvasUtils::FindTypeFromOverlapping $wcan $x $y "frame"]
-    if {$id == ""} {
-	Debug 2 "  InitMoveWindow:: FindTypeFromOverlapping rejected"
-	return
-    }
-    set it [::CanvasUtils::GetUtag $wcan $id]
-    if {$it == ""} {
-	Debug 2 "  InitMoveWindow:: GetUtag rejected"
-	return
-    }
     set xDragWin(winbg) [$win cget -bg]
     set xDragWin(undocmd) [concat coords $it [$wcan coords $id]]
     $win configure -bg gray20
@@ -803,12 +792,12 @@ proc ::CanvasDraw::DoMoveWindow {wcan win x y} {
     }
     
     # Fix x and y.
-    set x [$wcan canvasx [expr [winfo x $win] + $x]]
-    set y [$wcan canvasx [expr [winfo y $win] + $y]]
+    set x [$wcan canvasx [expr {[winfo x $win] + $x}]]
+    set y [$wcan canvasx [expr {[winfo y $win] + $y}]]
     
     # Moving a frame window item (ghostrect).
     $wcan move selectedwindow \
-      [expr $x - $xDragWin(baseX)] [expr $y - $xDragWin(baseY)]
+      [expr {$x - $xDragWin(baseX)}] [expr {$y - $xDragWin(baseY)}]
     
     set xDragWin(baseX) $x
     set xDragWin(baseY) $y
@@ -828,14 +817,14 @@ proc ::CanvasDraw::FinMoveWindow {wcan win x y} {
     }
    
     # Fix x and y.
-    set x [$wcan canvasx [expr [winfo x $win] + $x]]
-    set y [$wcan canvasx [expr [winfo y $win] + $y]]
+    set x [$wcan canvasx [expr {[winfo x $win] + $x}]]
+    set y [$wcan canvasx [expr {[winfo y $win] + $y}]]
     set id [$wcan find withtag selectedwindow]
     set utag [::CanvasUtils::GetUtag $wcan $id]
-    set wtop [::UI::GetToplevelNS $wcan]
+
     Debug 2 "  FinMoveWindow id=$id, utag=$utag, x=$x, y=$y"
 
-    if {$utag == ""} {
+    if {$utag eq ""} {
 	return
     }
     $wcan dtag selectedwindow selectedwindow
@@ -843,13 +832,14 @@ proc ::CanvasDraw::FinMoveWindow {wcan win x y} {
     $win configure -bg $xDragWin(winbg)
 	
     # Do send to all connected.
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
+    set w [winfo toplevel $wcan]
+    set redo [list ::CanvasUtils::Command $w $cmd]
     if {[info exists xDragWin(undocmd)]} {
-	set undo [list ::CanvasUtils::Command $wtop $xDragWin(undocmd)]
+	set undo [list ::CanvasUtils::Command $w $xDragWin(undocmd)]
     }
     eval $redo remote
     if {[info exists undo]} {
-	undo::add [::WB::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $w] $undo $redo
     }    
     unset -nocomplain xDragWin
 }
@@ -858,55 +848,55 @@ proc ::CanvasDraw::FinMoveWindow {wcan win x y} {
 # 
 #       A way to constrain movements to a grid.
 
-proc ::CanvasDraw::FinalMoveCurrentGrid {w x y grid args} {
+proc ::CanvasDraw::FinalMoveCurrentGrid {wcan x y grid args} {
     variable moveArr
     
     Debug 2 "::CanvasDraw::FinalMoveCurrentGrid"
 
-    set selected [$w find withtag selected&&!locked]
-    if {[llength $selected] > 0} {
+    set selected [$wcan find withtag selected&&!locked]
+    if {$selected != {}} {
 	return
     }
-    set dx [expr $x - $moveArr(x0)]
-    set dy [expr $y - $moveArr(y0)]    
+    set dx [expr {$x - $moveArr(x0)}]
+    set dy [expr {$y - $moveArr(y0)}]    
     set id $moveArr(id)
-    set utag [::CanvasUtils::GetUtag $w $id]
-    if {$utag == ""} {
+    set utag [::CanvasUtils::GetUtag $wcan $id]
+    if {$utag eq ""} {
 	return
     }
     array set argsArr {
 	-anchor     nw
     }
     array set argsArr $args
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
 
     # Extract grid specifiers.
     foreach {xmin dx nx} [lindex $grid 0] break
     foreach {ymin dy ny} [lindex $grid 1] break
     
     # Position of item.
-    foreach {x0 y0 x1 y1} [$w bbox $id] break
-    set xc [expr int(($x0 + $x1)/2)]
-    set yc [expr int(($y0 + $y1)/2)]
-    set width2 [expr int(($x1 - $x0)/2)]
-    set height2 [expr int(($y1 - $y0)/2)]
-    set ix [expr round(double($xc - $xmin)/$dx)]
-    set iy [expr round(double($yc - $ymin)/$dy)]
+    foreach {x0 y0 x1 y1} [$wcan bbox $id] break
+    set xc [expr {int(($x0 + $x1)/2)}]
+    set yc [expr {int(($y0 + $y1)/2)}]
+    set width2 [expr {int(($x1 - $x0)/2)}]
+    set height2 [expr {int(($y1 - $y0)/2)}]
+    set ix [expr {round(double($xc - $xmin)/$dx)}]
+    set iy [expr {round(double($yc - $ymin)/$dy)}]
     
     # Figure out if in the domain of the grid.
     if {($ix >= 0) && ($ix <= $nx) && ($iy >= 0) && ($iy <= $ny)} {
 	set doGrid 1
-	set newx [expr $xmin + $ix * $dx]
-	set newy [expr $ymin + $iy * $dy]
+	set newx [expr {$xmin + $ix * $dx}]
+	set newy [expr {$ymin + $iy * $dy}]
     } else {
 	set doGrid 0
-	set newx [expr int($x)]
-	set newy [expr int($y)]
+	set newx [expr {int($x)}]
+	set newy [expr {int($y)}]
     }
        
     if {[string equal $moveArr(type) "image"]} {
 	if {$doGrid} {
-	    set anchor [$w itemcget $id -anchor]
+	    set anchor [$wcan itemcget $id -anchor]
 	    
 	    switch -- $anchor {
 		nw {
@@ -924,9 +914,9 @@ proc ::CanvasDraw::FinalMoveCurrentGrid {w x y grid args} {
 	}
 	set cmd [list coords $utag $newx $newy]
 	if {$doGrid} {
-	    set redo [list ::CanvasUtils::Command $wtop $cmd]
+	    set redo [list ::CanvasUtils::Command $w $cmd]
 	} else {
-	    set redo [list ::CanvasUtils::Command $wtop $cmd remote]
+	    set redo [list ::CanvasUtils::Command $w $cmd remote]
 	}
 	set undoCmd [concat coords $utag $moveArr(coords0,$id)]
     } else {
@@ -937,54 +927,54 @@ proc ::CanvasDraw::FinalMoveCurrentGrid {w x y grid args} {
 	#    remote item needs to be moved all the way.
 	if {$doGrid} {
 	    set anchor c
-	    set cmdlocal [list move $utag [expr $newx - $xc] [expr $newy - $yc]]
-	    set deltax [expr $newx - $moveArr(x0)]
-	    set deltay [expr $newy - $moveArr(y0)]
+	    set cmdlocal [list move $utag [expr {$newx - $xc}] [expr {$newy - $yc}]]
+	    set deltax [expr {$newx - $moveArr(x0)}]
+	    set deltay [expr {$newy - $moveArr(y0)}]
 	    set cmdremote [list move $utag $deltax $deltay]
-	    set redo [list ::CanvasUtils::CommandExList $wtop  \
+	    set redo [list ::CanvasUtils::CommandExList $w  \
 	      [list [list $cmdlocal local] [list $cmdremote remote]]]
-	    set undoCmd [list move $utag [expr -$deltax] [expr -$deltay]]
+	    set undoCmd [list move $utag [expr {-1*$deltax}] [expr {-1*$deltay}]]
 	} else {
 	    set cmd [list move $utag $dx $dy]
-	    set redo [list ::CanvasUtils::Command $wtop $cmd remote]
-	    set undoCmd [list move $utag [expr -($x - $moveArr(x0))] \
-	      [expr -($y - $moveArr(y0))]]
+	    set redo [list ::CanvasUtils::Command $w $cmd remote]
+	    set undoCmd [list move $utag [expr {-1*($x - $moveArr(x0))}] \
+	      [expr {-1*($y - $moveArr(y0))}]]
 	}
     }
 	
     # Do send to all connected.
-    set undo [list ::CanvasUtils::Command $wtop $undoCmd]
+    set undo [list ::CanvasUtils::Command $w $undoCmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo    
+    undo::add [::WB::GetUndoToken $w] $undo $redo    
 
     unset -nocomplain moveArr
 }
 
-proc ::CanvasDraw::HitTBBox {w x y} {
+proc ::CanvasDraw::HitTBBox {wcan x y} {
     
     set hit 0
     set d 2
-    $w addtag _tmp overlapping  \
-      [expr $x-$d] [expr $y-$d] [expr $x+$d] [expr $y+$d]
-    if {[$w find withtag tbbox&&_tmp&&!locked] != {}} {
+    $wcan addtag _tmp overlapping  \
+      [expr {$x-$d}] [expr {$y-$d}] [expr {$x+$d}] [expr {$y+$d}]
+    if {[$wcan find withtag tbbox&&_tmp&&!locked] != {}} {
 	set hit 1
     }
-    $w dtag _tmp
+    $wcan dtag _tmp
     return $hit
 }
 
-proc ::CanvasDraw::HitMovableTBBox {w x y} {
+proc ::CanvasDraw::HitMovableTBBox {wcan x y} {
 
     set hit 0
     set d 2
     set movable {arc line polygon rectangle oval}
-    set ids [$w find overlapping \
-      [expr $x-$d] [expr $y-$d] [expr $x+$d] [expr $y+$d]]
+    set ids [$wcan find overlapping \
+      [expr {$x-$d}] [expr {$y-$d}] [expr {$x+$d}] [expr {$y+$d}]]
     foreach id $ids {
-	set tags [$w gettags $id]
+	set tags [$wcan gettags $id]
 	if {[lsearch $tags tbbox] >= 0} {
 	    if {[regexp {id:([0-9]+)} $tags match itemid]} {
-		if {[lsearch $movable [$w type $itemid]] >= 0} {
+		if {[lsearch $movable [$wcan type $itemid]] >= 0} {
 		    set hit 1
 		    break
 		}
@@ -994,16 +984,16 @@ proc ::CanvasDraw::HitMovableTBBox {w x y} {
     return $hit
 }
 
-proc ::CanvasDraw::DrawHighlightBox {w itemid id} {
+proc ::CanvasDraw::DrawHighlightBox {wcan itemid id} {
     
     # Make a highlightbox at the 'hitBbox' marker.
-    set bbox [$w bbox $id]
-    set x1 [expr [lindex $bbox 0] - 1]
-    set y1 [expr [lindex $bbox 1] - 1]
-    set x2 [expr [lindex $bbox 2] + 1]
-    set y2 [expr [lindex $bbox 3] + 1]
+    set bbox [$wcan bbox $id]
+    set x1 [expr {[lindex $bbox 0] - 1}]
+    set y1 [expr {[lindex $bbox 1] - 1}]
+    set x2 [expr {[lindex $bbox 2] + 1}]
+    set y2 [expr {[lindex $bbox 3] + 1}]
 
-    $w create rectangle $x1 $y1 $x2 $y2 -outline black -width 1 \
+    $wcan create rectangle $x1 $y1 $x2 $y2 -outline black -width 1 \
       -tags [list lightBbox id:${itemid}] -fill white
 }
 
@@ -1013,8 +1003,8 @@ proc ::CanvasDraw::FindClosestCoordsIndex {x y coords} {
     set min 1000000
     set ind 0
     for {set i 0} {$i < $n} {incr i 2} {
-	set len [expr hypot([lindex $coords $i] - $x,  \
-	  [lindex $coords [expr $i+1]] - $y)]
+	set len [expr {hypot([lindex $coords $i] - $x,  \
+	  [lindex $coords [expr {$i+1}]] - $y)}]
 	if {$len < $min} {
 	    set ind $i
 	    set min $len
@@ -1047,19 +1037,19 @@ proc ::CanvasDraw::GetConstrainedXY {x y} {
 #       Initializes drawing of a rectangles, ovals, and ghost rectangles.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       type   item type (rectangle, oval, ...).
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::InitBox {w x y type} {
+proc ::CanvasDraw::InitBox {wcan x y type} {
     
     variable theBox
     
-    set theBox($w,anchor) [list $x $y]
-    unset -nocomplain theBox($w,last)
+    set theBox($wcan,anchor) [list $x $y]
+    unset -nocomplain theBox($wcan,last)
 }
 
 # CanvasDraw::BoxDrag --
@@ -1067,7 +1057,7 @@ proc ::CanvasDraw::InitBox {w x y type} {
 #       Draws rectangles, ovals, and ghost rectangles.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       shift  constrain to square or circle.
 #       type   item type (rectangle, oval, ...).
@@ -1077,25 +1067,25 @@ proc ::CanvasDraw::InitBox {w x y type} {
 # Results:
 #       none
 
-proc ::CanvasDraw::BoxDrag {w x y shift type {mark 0}} {
+proc ::CanvasDraw::BoxDrag {wcan x y shift type {mark 0}} {
     global  prefs
     
     variable theBox
     
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    array set state [::WB::GetStateArray $w]
 
-    catch {$w delete $theBox($w,last)}
+    catch {$wcan delete $theBox($wcan,last)}
     
     # If not set anchor, just return.
-    if {![info exists theBox($w,anchor)]} {
+    if {![info exists theBox($wcan,anchor)]} {
 	return
     }
-    set boxOrig $theBox($w,anchor)
+    set boxOrig $theBox($wcan,anchor)
     
     # If 'shift' constrain to square or circle.
     if {$shift} {
-	set box [eval "ConstrainedBoxDrag $theBox($w,anchor) $x $y $type"]
+	set box [eval "ConstrainedBoxDrag $theBox($wcan,anchor) $x $y $type"]
 	set boxOrig [lrange $box 0 1]
 	set x [lindex $box 2]
 	set y [lindex $box 3]
@@ -1110,17 +1100,17 @@ proc ::CanvasDraw::BoxDrag {w x y shift type {mark 0}} {
     if {$mark == 0} {
 	set tags [list std $type]
 	if {$state(fill) == 0} {
-	    set theBox($w,last) [eval {$w create $type} $boxOrig  \
+	    set theBox($wcan,last) [eval {$wcan create $type} $boxOrig  \
 	      {$x $y -outline $state(fgCol) -width $state(penThick)  \
 	      -tags $tags} $extras]
 	} else {
-	    set theBox($w,last) [eval {$w create $type} $boxOrig  \
+	    set theBox($wcan,last) [eval {$wcan create $type} $boxOrig  \
 	      {$x $y -outline $state(fgCol) -fill $state(fgCol)  \
 	      -width $state(penThick) -tags $tags}  \
 	      $extras]
 	}
     } else {
-	set theBox($w,last) [eval {$w create $type} $boxOrig	\
+	set theBox($wcan,last) [eval {$wcan create $type} $boxOrig	\
 	  {$x $y -outline gray50 -stipple gray50 -width 2 -tags "markbox" }]
     }
 }
@@ -1131,7 +1121,7 @@ proc ::CanvasDraw::BoxDrag {w x y shift type {mark 0}} {
 #       clients know etc.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       shift  constrain to square or circle.
 #       type   item type (rectangle, oval, ...).
@@ -1141,19 +1131,19 @@ proc ::CanvasDraw::BoxDrag {w x y shift type {mark 0}} {
 # Results:
 #       none
 
-proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
+proc ::CanvasDraw::FinalizeBox {wcan x y shift type {mark 0}} {
     global  prefs
     
     variable theBox
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    array set state [::WB::GetStateArray $w]
     
-    # If no theBox($w,anchor) defined just return.
-    if {![info exists theBox($w,anchor)]}  {
+    # If no theBox($wcan,anchor) defined just return.
+    if {![info exists theBox($wcan,anchor)]}  {
 	return
     }
-    catch {$w delete $theBox($w,last)}
-    foreach {xanch yanch} $theBox($w,anchor) break
+    catch {$wcan delete $theBox($wcan,last)}
+    foreach {xanch yanch} $theBox($wcan,anchor) break
     if {($xanch == $x) && ($yanch == $y)} {
 	set nomove 1
 	return
@@ -1161,13 +1151,13 @@ proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
 	set nomove 0
     }
     if {$mark} {
-	set ids [eval {$w find overlapping} $theBox($w,anchor) {$x $y}]
+	set ids [eval {$wcan find overlapping} $theBox($wcan,anchor) {$x $y}]
 	Debug 2 "FinalizeBox:: ids=$ids"
 
 	foreach id $ids {
-	    MarkBbox $w 1 $id
+	    MarkBbox $wcan 1 $id
 	}
-	$w delete withtag markbox
+	$wcan delete withtag markbox
     }
     if {$prefs(haveDash)} {
 	set extras [list -dash $state(dash)]
@@ -1177,11 +1167,11 @@ proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
     
     # Create real objects.
     if {!$mark && !$nomove} {
-	set boxOrig $theBox($w,anchor)
+	set boxOrig $theBox($wcan,anchor)
 	
 	# If 'shift' constrain to square or circle.
 	if {$shift} {
-	    set box [eval "ConstrainedBoxDrag $theBox($w,anchor) $x $y $type"]
+	    set box [eval "ConstrainedBoxDrag $theBox($wcan,anchor) $x $y $type"]
 	    set boxOrig [lrange $box 0 1]
 	    set x [lindex $box 2]
 	    set y [lindex $box 3]
@@ -1198,19 +1188,19 @@ proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
 	  -tags {std $type $utag} -outline $state(fgCol)  \
 	  -width $state(penThick) $extras"
 	set undocmd [list delete $utag]
-	set redo [list ::CanvasUtils::Command $wtop $cmd]
-	set undo [list ::CanvasUtils::Command $wtop $undocmd]
+	set redo [list ::CanvasUtils::Command $w $cmd]
+	set undo [list ::CanvasUtils::Command $w $undocmd]
 	eval $redo
-	undo::add [::WB::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $w] $undo $redo
     }
     unset -nocomplain theBox
 }
 
-proc ::CanvasDraw::CancelBox {w} {
+proc ::CanvasDraw::CancelBox {wcan} {
     
     variable theBox
     unset -nocomplain theBox
-    $w delete withtag markbox
+    $wcan delete withtag markbox
 }
 
 # ConstrainedBoxDrag --
@@ -1228,31 +1218,31 @@ proc ::CanvasDraw::CancelBox {w} {
 
 proc ::CanvasDraw::ConstrainedBoxDrag {xanch yanch x y type} {
     
-    set deltax [expr $x - $xanch]
-    set deltay [expr $y - $yanch]
-    set prod [expr $deltax * $deltay]
-    if {$type == "rectangle"} {
+    set deltax [expr {$x - $xanch}]
+    set deltay [expr {$y - $yanch}]
+    set prod [expr {$deltax * $deltay}]
+    if {$type eq "rectangle"} {
 	set boxOrig [list $xanch $yanch]
 	if {$prod != 0} {
-	    set sign [expr $prod / abs($prod)]
+	    set sign [expr {$prod / abs($prod)}]
 	} else {
 	    set sign 1
 	}
-	if {[expr abs($deltax)] > [expr abs($deltay)]} {
-	    set x [expr $sign * ($y - $yanch) + $xanch]
+	if {[expr {abs($deltax)}] > [expr {abs($deltay)}]} {
+	    set x [expr {$sign * ($y - $yanch) + $xanch}]
 	} else {
-	    set y [expr $sign * ($x - $xanch) + $yanch]
+	    set y [expr {$sign * ($x - $xanch) + $yanch}]
 	}
 	
 	# A pure circle is not made with the bounding rectangle model.
 	# The anchor and the present x, y define the diagonal instead.
-    } elseif {$type == "oval"} {
-	set r [expr hypot($deltax, $deltay)/2.0]
-	set midx [expr ($xanch + $x)/2.0]
-	set midy [expr ($yanch + $y)/2.0]
-	set boxOrig [list [expr int($midx - $r)] [expr int($midy - $r)]]
-	set x [expr int($midx + $r)]
-	set y [expr int($midy + $r)]
+    } elseif {$type eq "oval"} {
+	set r [expr {hypot($deltax, $deltay)/2.0}]
+	set midx [expr {($xanch + $x)/2.0}]
+	set midy [expr {($yanch + $y)/2.0}]
+	set boxOrig [list [expr {int($midx - $r)}] [expr {int($midy - $r)}]]
+	set x [expr {int($midx + $r)}]
+	set y [expr {int($midy + $r)}]
     }
     return [concat $boxOrig $x $y]
 }
@@ -1266,7 +1256,7 @@ proc ::CanvasDraw::ConstrainedBoxDrag {xanch yanch x y type} {
 #       First click sets center, second button press sets start point.
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       type   item type (rectangle, oval, ...).
 #       shift  constrain to 45 or 90 degree arcs.
@@ -1274,65 +1264,65 @@ proc ::CanvasDraw::ConstrainedBoxDrag {xanch yanch x y type} {
 # Results:
 #       none
 
-proc ::CanvasDraw::InitArc {w x y {shift 0}} {
+proc ::CanvasDraw::InitArc {wcan x y {shift 0}} {
     global  kRad2Grad this
     
     variable arcBox
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
-    Debug 2 "InitArc:: w=$w, x=$x, y=$y, shift=$shift"
+    Debug 2 "InitArc:: wcan=$wcan, x=$x, y=$y, shift=$shift"
 
-    if {![info exists arcBox($w,setcent)] || $arcBox($w,setcent) == 0} {
+    if {![info exists arcBox($wcan,setcent)] || $arcBox($wcan,setcent) == 0} {
 	
 	# First button press.
-	set arcBox($w,center) [list $x $y]
-	set arcBox($w,setcent) 1
+	set arcBox($wcan,center) [list $x $y]
+	set arcBox($wcan,setcent) 1
 	# Hack.
 	if {[string match "mac*" $this(platform)]} {
-	    $w create oval [expr $x - 2] [expr $y - 2] [expr $x + 3] [expr $y + 3]  \
+	    $wcan create oval [expr {$x - 2}] [expr {$y - 2}] [expr {$x + 3}] [expr {$y + 3}]  \
 	      -outline gray50 -fill {} -tags tcent
-	    $w create line [expr $x - 5] $y [expr $x + 5] $y -fill gray50 -tags tcent
-	    $w create line $x [expr $y - 5] $x [expr $y + 5] -fill gray50 -tags tcent 
+	    $wcan create line [expr {$x - 5}] $y [expr {$x + 5}] $y -fill gray50 -tags tcent
+	    $wcan create line $x [expr {$y - 5}] $x [expr {$y + 5}] -fill gray50 -tags tcent 
 	} else {
-	    $w create oval [expr $x - 3] [expr $y - 3] [expr $x + 3] [expr $y + 3]  \
+	    $wcan create oval [expr {$x - 3}] [expr {$y - 3}] [expr {$x + 3}] [expr {$y + 3}]  \
 	      -outline gray50 -fill {} -tags tcent
-	    $w create line [expr $x - 5] $y [expr $x + 6] $y -fill gray50 -tags tcent
-	    $w create line $x [expr $y - 5] $x [expr $y + 6] -fill gray50 -tags tcent 
+	    $wcan create line [expr {$x - 5}] $y [expr {$x + 6}] $y -fill gray50 -tags tcent
+	    $wcan create line $x [expr {$y - 5}] $x [expr {$y + 6}] -fill gray50 -tags tcent 
 	}
-	focus $w
-	bind $w <KeyPress-space> {
+	focus $wcan
+	bind $wcan <KeyPress-space> {
 	    ::CanvasDraw::ArcCancel %W
 	}
-	::WB::SetStatusMessage $wtop [mc uastatarc2]
+	::WB::SetStatusMessage $w [mc uastatarc2]
 	
     } else {
 	
 	# If second button press, bind mouse motion.
-	set cx [lindex $arcBox($w,center) 0]
-	set cy [lindex $arcBox($w,center) 1]
+	set cx [lindex $arcBox($wcan,center) 0]
+	set cy [lindex $arcBox($wcan,center) 1]
 	if {$shift} {
 	    set newco [ConstrainedDrag $x $y $cx $cy]
 	    foreach {x y} $newco {}
 	}
-	set arcBox($w,first) [list $x $y]
-	set arcBox($w,startAng) [expr $kRad2Grad * atan2($cy - $y, -($cx - $x))]
-	set arcBox($w,extent) {0.0}
-	set r [expr hypot($cx - $x, $cy - $y)]
-	set x1 [expr $cx + $r]
-	set y1 [expr $cy + $r]
-	set arcBox($w,co1) [list $x1 $y1]
-	set arcBox($w,co2) [list [expr $cx - $r] [expr $cy - $r]]
-	bind $w <B1-Motion> {
+	set arcBox($wcan,first) [list $x $y]
+	set arcBox($wcan,startAng) [expr {$kRad2Grad * atan2($cy - $y, -($cx - $x))}]
+	set arcBox($wcan,extent) {0.0}
+	set r [expr {hypot($cx - $x, $cy - $y)}]
+	set x1 [expr {$cx + $r}]
+	set y1 [expr {$cy + $r}]
+	set arcBox($wcan,co1) [list $x1 $y1]
+	set arcBox($wcan,co2) [list [expr {$cx - $r}] [expr {$cy - $r}]]
+	bind $wcan <B1-Motion> {
 	    ::CanvasDraw::ArcDrag %W [%W canvasx %x] [%W canvasy %y]
 	}
-	bind $w <Shift-B1-Motion> {
+	bind $wcan <Shift-B1-Motion> {
 	    ::CanvasDraw::ArcDrag %W [%W canvasx %x] [%W canvasy %y] 1
 	}
-	bind $w <ButtonRelease-1> {
+	bind $wcan <ButtonRelease-1> {
 	    ::CanvasDraw::FinalizeArc %W [%W canvasx %x] [%W canvasy %y]
 	}
     }
-    unset -nocomplain arcBox($w,last)
+    unset -nocomplain arcBox($wcan,last)
 }
 
 # CanvasDraw::ArcDrag --
@@ -1341,23 +1331,23 @@ proc ::CanvasDraw::InitArc {w x y {shift 0}} {
 #       The tricky part is to choose one of the two possible solutions, CW or CCW.
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       shift  constrain to 45 or 90 degree arcs.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::ArcDrag {w x y {shift 0}} {
+proc ::CanvasDraw::ArcDrag {wcan x y {shift 0}} {
     global  kRad2Grad prefs
 
     variable arcBox
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    array set state [::WB::GetStateArray $w]
 
     # If constrained to 90/45 degrees.
     if {$shift} {
-	foreach {cx cy} $arcBox($w,center) {}
+	foreach {cx cy} $arcBox($wcan,center) {}
 	set newco [ConstrainedDrag $x $y $cx $cy]
 	foreach {x y} $newco {}
     }
@@ -1365,16 +1355,16 @@ proc ::CanvasDraw::ArcDrag {w x y {shift 0}} {
     # Choose one of two possible solutions, either CW or CCW.
     # Make sure that the 'extent' angle is more or less continuous.
     
-    set stopAng [expr $kRad2Grad *   \
-      atan2([lindex $arcBox($w,center) 1] - $y, -([lindex $arcBox($w,center) 0] - $x))]
-    set extentAng [expr $stopAng - $arcBox($w,startAng)]
-    if {$arcBox($w,extent) - $extentAng > 180} {
-	set extentAng [expr $extentAng + 360]
-    } elseif {$arcBox($w,extent) - $extentAng < -180} {
-	set extentAng [expr $extentAng - 360]
+    set stopAng [expr {$kRad2Grad *   \
+      atan2([lindex $arcBox($wcan,center) 1] - $y, -([lindex $arcBox($wcan,center) 0] - $x))}]
+    set extentAng [expr {$stopAng - $arcBox($wcan,startAng)}]
+    if {[expr {$arcBox($wcan,extent) - $extentAng}] > 180} {
+	set extentAng [expr {$extentAng + 360}]
+    } elseif {[expr {$arcBox($wcan,extent) - $extentAng}] < -180} {
+	set extentAng [expr {$extentAng - 360}]
     }
-    set arcBox($w,extent) $extentAng
-    catch {$w delete $arcBox($w,last)}
+    set arcBox($wcan,extent) $extentAng
+    catch {$wcan delete $arcBox($wcan,last)}
     if {$state(fill) == 0} {
 	set theFill [list -fill {}]
     } else {
@@ -1385,8 +1375,8 @@ proc ::CanvasDraw::ArcDrag {w x y {shift 0}} {
     } else {
 	set extras {}
     }
-    set arcBox($w,last) [eval {$w create arc} $arcBox($w,co1)   \
-      $arcBox($w,co2) {-start $arcBox($w,startAng) -extent $extentAng  \
+    set arcBox($wcan,last) [eval {$wcan create arc} $arcBox($wcan,co1)   \
+      $arcBox($wcan,co2) {-start $arcBox($wcan,startAng) -extent $extentAng  \
       -width $state(penThick) -style $state(arcstyle) -outline $state(fgCol)  \
       -tags arc} $theFill $extras]
 }
@@ -1396,30 +1386,30 @@ proc ::CanvasDraw::ArcDrag {w x y {shift 0}} {
 #       Finalize the arc drawing, tell all other clients.
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::FinalizeArc {w x y} {
+proc ::CanvasDraw::FinalizeArc {wcan x y} {
     global  prefs 
 
     variable arcBox
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    array set state [::WB::GetStateArray $w]
 
-    Debug 2 "FinalizeArc:: w=$w"
+    Debug 2 "FinalizeArc:: wcan=$wcan"
 
-    ::WB::SetStatusMessage $wtop [mc uastatarc]
-    bind $w <B1-Motion> {}
-    bind $w <ButtonRelease-1> {}
-    bind $w <KeyPress-space> {}
-    catch {$w delete tcent}
-    catch {$w delete $arcBox($w,last)}
+    ::WB::SetStatusMessage $w [mc uastatarc]
+    bind $wcan <B1-Motion> {}
+    bind $wcan <ButtonRelease-1> {}
+    bind $wcan <KeyPress-space> {}
+    catch {$wcan delete tcent}
+    catch {$wcan delete $arcBox($wcan,last)}
     
     # If extent angle zero, nothing to draw, nothing to send.
-    if {$arcBox($w,extent) == "0.0"} {
+    if {$arcBox($wcan,extent) eq "0.0"} {
 	unset -nocomplain arcBox
 	return
     }
@@ -1436,15 +1426,15 @@ proc ::CanvasDraw::FinalizeArc {w x y} {
 	set extras {}
     }
     set utag [::CanvasUtils::NewUtag]
-    set cmd "create arc $arcBox($w,co1)   \
-      $arcBox($w,co2) -start $arcBox($w,startAng) -extent $arcBox($w,extent)  \
+    set cmd "create arc $arcBox($wcan,co1)   \
+      $arcBox($wcan,co2) -start $arcBox($wcan,startAng) -extent $arcBox($wcan,extent)  \
       -width $state(penThick) -style $state(arcstyle) -outline $state(fgCol)  \
       -tags {std arc $utag} $theFill $extras"
     set undocmd "delete $utag"
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+    set redo [list ::CanvasUtils::Command $w $cmd]
+    set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
     unset -nocomplain arcBox
 }
 
@@ -1453,18 +1443,18 @@ proc ::CanvasDraw::FinalizeArc {w x y} {
 #       Cancel the arc drawing.
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan      the canvas widget.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::ArcCancel {w} {
+proc ::CanvasDraw::ArcCancel {wcan} {
     
     variable arcBox
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
 
-    ::WB::SetStatusMessage $wtop [mc uastatarc]
-    catch {$w delete tcent}
+    ::WB::SetStatusMessage $w [mc uastatarc]
+    catch {$wcan delete tcent}
     unset -nocomplain arcBox
 }
 
@@ -1477,13 +1467,13 @@ proc ::CanvasDraw::ArcCancel {w} {
 #       Polygon drawing routines.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::PolySetPoint {w x y} {
+proc ::CanvasDraw::PolySetPoint {wcan x y} {
     
     variable thePoly
 
@@ -1494,14 +1484,14 @@ proc ::CanvasDraw::PolySetPoint {w x y} {
 	set thePoly(N) 0
 	set thePoly(0) [list $x $y]
     } elseif {[expr   \
-      hypot([lindex $thePoly(0) 0] - $x, [lindex $thePoly(0) 1] - $y)] < 6} {
+      {hypot([lindex $thePoly(0) 0] - $x, [lindex $thePoly(0) 1] - $y)}] < 6} {
 	
 	# If this point close enough to 'thePoly(0)', close polygon.
-	PolyDrag $w [lindex $thePoly(0) 0] [lindex $thePoly(0) 1]
+	PolyDrag $wcan [lindex $thePoly(0) 0] [lindex $thePoly(0) 1]
 	set thePoly(last) {}
 	incr thePoly(N)
 	set thePoly($thePoly(N)) $thePoly(0)
-	FinalizePoly $w [lindex $thePoly(0) 0] [lindex $thePoly(0) 1]
+	FinalizePoly $wcan [lindex $thePoly(0) 0] [lindex $thePoly(0) 1]
 	return
     } else {
 	set thePoly(last) {}
@@ -1510,14 +1500,14 @@ proc ::CanvasDraw::PolySetPoint {w x y} {
     }
     
     # Let the latest line segment follow the mouse movements.
-    focus $w
-    bind $w <Motion> {
+    focus $wcan
+    bind $wcan <Motion> {
 	::CanvasDraw::PolyDrag %W [%W canvasx %x] [%W canvasy %y]
     }
-    bind $w <Shift-Motion> {
+    bind $wcan <Shift-Motion> {
 	::CanvasDraw::PolyDrag %W [%W canvasx %x] [%W canvasy %y] 1
     }
-    bind $w <KeyPress-space> {
+    bind $wcan <KeyPress-space> {
 	::CanvasDraw::FinalizePoly %W [%W canvasx %x] [%W canvasy %y]
     }
 }               
@@ -1527,26 +1517,26 @@ proc ::CanvasDraw::PolySetPoint {w x y} {
 #       Polygon drawing routines.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       shift  constrain.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::PolyDrag {w x y {shift 0}} {
+proc ::CanvasDraw::PolyDrag {wcan x y {shift 0}} {
     global  prefs
 
     variable thePoly
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    array set state [::WB::GetStateArray $w]
 
     # Move one end point of the latest line segment of the polygon.
     # If anchor not set just return.
     if {![info exists thePoly(0)]} {
 	return
     }
-    catch {$w delete $thePoly(last)}
+    catch {$wcan delete $thePoly(last)}
     
     # Vertical or horizontal.
     if {$shift} {
@@ -1562,7 +1552,7 @@ proc ::CanvasDraw::PolyDrag {w x y {shift 0}} {
     
     # Keep track of last coordinates. Important for 'shift'.
     set thePoly(xy) [list $x $y]
-    set thePoly(last) [eval {$w create line} $thePoly($thePoly(N))  \
+    set thePoly(last) [eval {$wcan create line} $thePoly($thePoly(N))  \
       {$x $y -tags "polylines" -fill $state(fgCol)  \
       -width $state(penThick)} $extras]
 }
@@ -1572,21 +1562,21 @@ proc ::CanvasDraw::PolyDrag {w x y {shift 0}} {
 #       Polygon drawing routines.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::FinalizePoly {w x y} {
+proc ::CanvasDraw::FinalizePoly {wcan x y} {
     global  prefs
     
     variable thePoly
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    array set state [::WB::GetStateArray $w]
 
-    bind $w <Motion> {}
-    bind $w <KeyPress-space> {}
+    bind $wcan <Motion> {}
+    bind $wcan <KeyPress-space> {}
     
     # If anchor not set just return.
     if {![info exists thePoly(0)]} {
@@ -1595,13 +1585,13 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
     
     # If too few segment.
     if {$thePoly(N) <= 1} {
-	$w delete polylines
+	$wcan delete polylines
 	unset -nocomplain thePoly
 	return
     }
     
     # Delete last line segment.
-    catch {$w delete $thePoly(last)}
+    catch {$wcan delete $thePoly(last)}
     
     # Find out if closed polygon or open line item. If closed, remove duplicate.
     set isClosed 0
@@ -1617,7 +1607,7 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
     for {set i 0} {$i <= $thePoly(N)} {incr i} {
 	append coords $thePoly($i) " "
     }
-    $w delete polylines
+    $wcan delete polylines
     if {$state(fill) == 0} {
 	set theFill [list -fill {}]
     } else {
@@ -1643,10 +1633,10 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
 	  -smooth $state(smooth) $extras"
     }
     set undocmd [list delete $utag]
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+    set redo [list ::CanvasUtils::Command $w $cmd]
+    set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
     unset -nocomplain thePoly
 }
 
@@ -1660,19 +1650,19 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
 #       to store anchor point and end point of the line.
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       opt    0 for line and arrow for arrow.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::InitLine {w x y {opt 0}} {
+proc ::CanvasDraw::InitLine {wcan x y {opt 0}} {
 
     variable theLine
     
-    set theLine($w,anchor) [list $x $y]
-    unset -nocomplain theLine($w,last)
+    set theLine($wcan,anchor) [list $x $y]
+    unset -nocomplain theLine($wcan,last)
 }
 
 # CanvasDraw::LineDrag --
@@ -1681,7 +1671,7 @@ proc ::CanvasDraw::InitLine {w x y {opt 0}} {
 #       to store anchor point and end point of the line.
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       shift  constrain the line to be vertical or horizontal.
 #       opt    If 'opt'=arrow draw an arrow at the final line end.
@@ -1689,19 +1679,19 @@ proc ::CanvasDraw::InitLine {w x y {opt 0}} {
 # Results:
 #       none
 
-proc ::CanvasDraw::LineDrag {w x y shift {opt 0}} {
+proc ::CanvasDraw::LineDrag {wcan x y shift {opt 0}} {
     global  prefs
     
     variable theLine
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    array set state [::WB::GetStateArray $w]
 
     # If anchor not set just return.
-    if {![info exists theLine($w,anchor)]} {
+    if {![info exists theLine($wcan,anchor)]} {
 	return
     }
 
-    catch {$w delete $theLine($w,last)}
+    catch {$wcan delete $theLine($wcan,last)}
     if {[string equal $opt "arrow"]} {
 	set extras [list -arrow last]
     } else {
@@ -1713,11 +1703,11 @@ proc ::CanvasDraw::LineDrag {w x y shift {opt 0}} {
     
     # Vertical or horizontal.
     if {$shift} {
-	set newco [ConstrainedDrag $x $y [lindex $theLine($w,anchor) 0]  \
-	  [lindex $theLine($w,anchor) 1]]
+	set newco [ConstrainedDrag $x $y [lindex $theLine($wcan,anchor) 0]  \
+	  [lindex $theLine($wcan,anchor) 1]]
 	foreach {x y} $newco {}
     }
-    set theLine($w,last) [eval {$w create line} $theLine($w,anchor)  \
+    set theLine($wcan,last) [eval {$wcan create line} $theLine($wcan,anchor)  \
       {$x $y -tags line -fill $state(fgCol)  \
       -width $state(penThick)} $extras]
 }
@@ -1729,7 +1719,7 @@ proc ::CanvasDraw::LineDrag {w x y shift {opt 0}} {
 #       Lets all other clients know.
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       shift  constrain the line to be vertical or horizontal.
 #       opt    If 'opt'=arrow draw an arrow at the final line end.
@@ -1737,21 +1727,21 @@ proc ::CanvasDraw::LineDrag {w x y shift {opt 0}} {
 # Results:
 #       none
 
-proc ::CanvasDraw::FinalizeLine {w x y shift {opt 0}} {
+proc ::CanvasDraw::FinalizeLine {wcan x y shift {opt 0}} {
     global  prefs
     
     variable theLine
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    array set state [::WB::GetStateArray $w]
 
     # If anchor not set just return.
-    if {![info exists theLine($w,anchor)]} {
+    if {![info exists theLine($wcan,anchor)]} {
 	return
     }
-    catch {$w delete $theLine($w,last)}
+    catch {$wcan delete $theLine($wcan,last)}
 
     # If not dragged, zero line, and just return.
-    if {![info exists theLine($w,last)]} {
+    if {![info exists theLine($wcan,last)]} {
 	return
     }
     if {[string equal $opt "arrow"]} {
@@ -1765,19 +1755,19 @@ proc ::CanvasDraw::FinalizeLine {w x y shift {opt 0}} {
     
     # Vertical or horizontal.
     if {$shift} {
-	set newco [ConstrainedDrag $x $y [lindex $theLine($w,anchor) 0]  \
-	  [lindex $theLine($w,anchor) 1]]
+	set newco [ConstrainedDrag $x $y [lindex $theLine($wcan,anchor) 0]  \
+	  [lindex $theLine($wcan,anchor) 1]]
 	foreach {x y} $newco break
     }
     set utag [::CanvasUtils::NewUtag]
-    set cmd "create line $theLine($w,anchor) $x $y	\
+    set cmd "create line $theLine($wcan,anchor) $x $y	\
       -tags {std line $utag} -joinstyle round	\
       -fill $state(fgCol) -width $state(penThick) $extras"
-    set undocmd "delete $utag"
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+    set undocmd [list delete $utag]
+    set redo [list ::CanvasUtils::Command $w $cmd]
+    set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
     unset -nocomplain theLine
 }
 
@@ -1793,13 +1783,13 @@ proc ::CanvasDraw::FinalizeLine {w x y shift {opt 0}} {
 #       else use the 'thick' argument as line thickness.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::InitStroke {w x y} {
+proc ::CanvasDraw::InitStroke {wcan x y} {
 
     variable stroke
     
@@ -1815,19 +1805,19 @@ proc ::CanvasDraw::InitStroke {w x y} {
 #       the number of such points.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       brush  (D=0) boolean, 1 for brush, 0 for pen.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::StrokeDrag {w x y {brush 0}} {
+proc ::CanvasDraw::StrokeDrag {wcan x y {brush 0}} {
     global  prefs
     
     variable stroke
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    array set state [::WB::GetStateArray $w]
 
     # If stroke not set just return.
     if {![info exists stroke(N)]} {
@@ -1847,7 +1837,7 @@ proc ::CanvasDraw::StrokeDrag {w x y {brush 0}} {
     } else {
 	set extras ""
     }
-    eval {$w create line} $coords {-tags segments -fill $state(fgCol)  \
+    eval {$wcan create line} $coords {-tags segments -fill $state(fgCol)  \
       -width $thisThick} $extras
 }
 
@@ -1858,19 +1848,19 @@ proc ::CanvasDraw::StrokeDrag {w x y {brush 0}} {
 #       the number of such points.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       brush  (D=0) boolean, 1 for brush, 0 for pen.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
+proc ::CanvasDraw::FinalizeStroke {wcan x y {brush 0}} {
     global  prefs
     
     variable stroke
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    array set state [::WB::GetStateArray $w]
 
     Debug 2 "FinalizeStroke::"
 
@@ -1879,8 +1869,8 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
     if {![info exists stroke(N)]} {
 	return
     }
-    set coords [::CanvasDraw::StrokePostProcess $w]
-    $w delete segments
+    set coords [::CanvasDraw::StrokePostProcess $wcan]
+    $wcan delete segments
     if {[llength $coords] <= 2} {
 	return
     }
@@ -1900,10 +1890,10 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
       -smooth $state(smooth) -fill $state(fgCol) -width $thisThick]
     set cmd [concat $cmd $extras]
     set undocmd [list delete $utag]
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+    set redo [list ::CanvasUtils::Command $w $cmd]
+    set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
     unset -nocomplain stroke
 }
 
@@ -1912,24 +1902,24 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
 #       Reduce the number of coords in the stroke in a smart way that also
 #       smooths it. Always keep first and last.
 
-proc ::CanvasDraw::StrokePostProcess {w} {    
+proc ::CanvasDraw::StrokePostProcess {wcan} {    
     variable stroke
     
     set coords $stroke(0)
     
     # First pass: remove duplicates if any. Seems not to be the case!
-    for {set i 0} {$i <= [expr $stroke(N) - 1]} {incr i} {
-	if {$stroke($i) != $stroke([expr $i+1])} {
-	    set coords [concat $coords $stroke([expr $i+1])]
+    for {set i 0} {$i <= [expr {$stroke(N) - 1}]} {incr i} {
+	if {$stroke($i) != $stroke([expr {$i+1}])} {
+	    set coords [concat $coords $stroke([expr {$i+1}])]
 	}
     }
     
     # Next pass: remove points that are close to each other.
-    set coords [::CanvasDraw::StripClosePoints $coords 6]
+    set coords [StripClosePoints $coords 6]
     
     # Next pass: remove points that gives a too small radius or points
     # lying on a straight line.
-    set coords [::CanvasDraw::StripExtremeRadius $coords 6 10000]
+    set coords [StripExtremeRadius $coords 6 10000]
     return $coords
 }
 
@@ -1943,28 +1933,28 @@ proc ::CanvasDraw::StrokePostProcess {w} {
 #       Tell all other clients.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       shift  makes transparent.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::DoPaint {w x y {shift 0}} {
+proc ::CanvasDraw::DoPaint {wcan x y {shift 0}} {
     global  prefs kRad2Grad
 
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    array set state [::WB::GetStateArray $w]
 
-    Debug 2 "DoPaint:: w=$w, x=$x, y=$y, shift=$shift"
+    Debug 2 "DoPaint:: wcan=$wcan, x=$x, y=$y, shift=$shift"
     
     # Find items overlapping x and y. Doesn't work for transparent items.
-    #set ids [$w find overlapping $x $y $x $y]
+    #set ids [$wcan find overlapping $x $y $x $y]
     # This is perhaps not an efficient solution.
-    set ids [$w find all]
+    set ids [$wcan find all]
 
     foreach id $ids {
-	set theType [$w type $id]
+	set theType [$wcan type $id]
 
 	# Sort out uninteresting items early.
 	if {![string equal $theType "rectangle"] &&   \
@@ -1974,14 +1964,14 @@ proc ::CanvasDraw::DoPaint {w x y {shift 0}} {
 	}
 	
 	# Must be in bounding box.
-	set theBbox [$w bbox $id]
+	set theBbox [$wcan bbox $id]
 
 	if {$x >= [lindex $theBbox 0] && $x <= [lindex $theBbox 2] &&  \
 	  $y >= [lindex $theBbox 1] && $y <= [lindex $theBbox 3]} {
 	    # OK, inside!
 	    # Allow privacy.
-	    set theItno [::CanvasUtils::GetUtag $w $id]
-	    if {$theItno == ""} {
+	    set theItno [::CanvasUtils::GetUtag $wcan $id]
+	    if {$theItno eq ""} {
 		continue
 	    }
 	    set cmd ""
@@ -1994,12 +1984,12 @@ proc ::CanvasDraw::DoPaint {w x y {shift 0}} {
 	    } elseif {[string equal $theType "oval"]} {
 		
 		# Use ellipsis equation (1 = x^2/a^2 + y^2/b^2) to find if inside.
-		set centx [expr ([lindex $theBbox 0] + [lindex $theBbox 2])/2.0]
-		set centy [expr ([lindex $theBbox 1] + [lindex $theBbox 3])/2.0]
-		set a [expr abs($centx - [lindex $theBbox 0])]
-		set b [expr abs($centy - [lindex $theBbox 1])]
-		if {[expr ($x-$centx)*($x-$centx)/($a*$a) +   \
-		  ($y-$centy)*($y-$centy)/($b*$b)] <= 1} {
+		set centx [expr {([lindex $theBbox 0] + [lindex $theBbox 2])/2.0}]
+		set centy [expr {([lindex $theBbox 1] + [lindex $theBbox 3])/2.0}]
+		set a [expr {abs($centx - [lindex $theBbox 0])}]
+		set b [expr {abs($centy - [lindex $theBbox 1])}]
+		if {[expr {($x-$centx)*($x-$centx)/($a*$a) +   \
+		  ($y-$centy)*($y-$centy)/($b*$b)}] <= 1} {
 		    # Inside!
 		    if {$shift == 0} {
 			set cmd [list itemconfigure $theItno -fill $state(fgCol)]
@@ -2008,11 +1998,11 @@ proc ::CanvasDraw::DoPaint {w x y {shift 0}} {
 		    }
 		}
 	    } elseif {[string equal $theType "arc"]} {
-		set theCoords [$w coords $id]
-		set cx [expr ([lindex $theCoords 0] + [lindex $theCoords 2])/2.0]
-		set cy [expr ([lindex $theCoords 1] + [lindex $theCoords 3])/2.0]
-		set r [expr abs([lindex $theCoords 2] - [lindex $theCoords 0])/2.0]
-		set rp [expr hypot($x - $cx, $y - $cy)]
+		set theCoords [$wcan coords $id]
+		set cx [expr {([lindex $theCoords 0] + [lindex $theCoords 2])/2.0}]
+		set cy [expr {([lindex $theCoords 1] + [lindex $theCoords 3])/2.0}]
+		set r [expr {abs([lindex $theCoords 2] - [lindex $theCoords 0])/2.0}]
+		set rp [expr {hypot($x - $cx, $y - $cy)}]
 		
 		# Sort out point outside the radius of the arc.
 		if {$rp > $r} {
@@ -2022,8 +2012,8 @@ proc ::CanvasDraw::DoPaint {w x y {shift 0}} {
 		if {$phi < 0} {
 		    set phi [expr $phi + 360]
 		}
-		set startPhi [$w itemcget $id -start]
-		set extentPhi [$w itemcget $id -extent]
+		set startPhi  [$wcan itemcget $id -start]
+		set extentPhi [$wcan itemcget $id -extent]
 		if {$extentPhi >= 0} {
 		    set phi1 $startPhi
 		    set phi2 [expr $startPhi + $extentPhi]
@@ -2063,13 +2053,13 @@ proc ::CanvasDraw::DoPaint {w x y {shift 0}} {
 		    }
 		}
 	    }
-	    if {[string length $cmd] > 0} {
+	    if {$cmd != {}} {
 		set undocmd [list itemconfigure $theItno  \
-		  -fill [$w itemcget $theItno -fill]]
-		set redo [list ::CanvasUtils::Command $wtop $cmd]
-		set undo [list ::CanvasUtils::Command $wtop $undocmd]
+		  -fill [$wcan itemcget $theItno -fill]]
+		set redo [list ::CanvasUtils::Command $w $cmd]
+		set undo [list ::CanvasUtils::Command $w $undocmd]
 		eval $redo
-		undo::add [::WB::GetUndoToken $wtop] $undo $redo	    
+		undo::add [::WB::GetUndoToken $w] $undo $redo	    
 	    }
 	}
     }
@@ -2085,28 +2075,28 @@ proc ::CanvasDraw::DoPaint {w x y {shift 0}} {
 #       Inits a rotate operation.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::InitRotateItem {w x y} {
+proc ::CanvasDraw::InitRotateItem {wcan x y} {
     
     variable rotDrag
 
     # Only one single selected item is allowed to be rotated.
-    set id [$w find withtag selected&&!locked]
+    set id [$wcan find withtag selected&&!locked]
     if {[llength $id] != 1} {
 	return
     }
-    set it [::CanvasUtils::GetUtag $w $id]
-    if {[string length $it] == 0} {
+    set it [::CanvasUtils::GetUtag $wcan $id]
+    if {$it eq ""} {
 	return
     }
     
     # Certain item types cannot be rotated.
-    set rotDrag(type) [$w type $id]
+    set rotDrag(type) [$wcan type $id]
     if {[string equal $rotDrag(type) "text"]} {
 	unset rotDrag
 	return
@@ -2114,12 +2104,12 @@ proc ::CanvasDraw::InitRotateItem {w x y} {
     
     # Get center of gravity and cache undo command.
     if {[string equal $rotDrag(type) "arc"]} {
-	set colist [$w coords $id]
-	set rotDrag(arcStart) [$w itemcget $id -start]
+	set colist [$wcan coords $id]
+	set rotDrag(arcStart) [$wcan itemcget $id -start]
 	set rotDrag(undocmd) [list itemconfigure $it -start $rotDrag(arcStart)]
     } else {
-	set colist [$w bbox $id]
-	set rotDrag(undocmd) [concat coords $it [$w coords $it]]
+	set colist [$wcan bbox $id]
+	set rotDrag(undocmd) [concat coords $it [$wcan coords $it]]
     }
     set rotDrag(cgX) [expr ([lindex $colist 0] + [lindex $colist 2])/2.0]
     set rotDrag(cgY) [expr ([lindex $colist 1] + [lindex $colist 3])/2.0]
@@ -2130,7 +2120,7 @@ proc ::CanvasDraw::InitRotateItem {w x y} {
     set rotDrag(lastAng) 0.0
     
     # Save coordinates relative cg.
-    set theCoords [$w coords $id]
+    set theCoords [$wcan coords $id]
     set rotDrag(n) [expr [llength $theCoords]/2]    ;# Number of points.
     set i 0
     foreach {cx cy} $theCoords {
@@ -2148,14 +2138,14 @@ proc ::CanvasDraw::InitRotateItem {w x y} {
 #       Rotates an item.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       shift  constrains rotation.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::DoRotateItem {w x y {shift 0}} {
+proc ::CanvasDraw::DoRotateItem {wcan x y {shift 0}} {
     global  kPI kRad2Grad prefs
     
     variable rotDrag
@@ -2196,7 +2186,7 @@ proc ::CanvasDraw::DoRotateItem {w x y {shift 0}} {
 	if {[string equal $rotDrag(type) "arc"]} {
 	    
 	    # Different coordinate system for arcs...and units...
-	    $w itemconfigure $rotDrag(id) -start   \
+	    $wcan itemconfigure $rotDrag(id) -start   \
 	      [expr $kRad2Grad * $angRot + $rotDrag(arcStart)]
 	} else {
 	    # Compute new coordinates from the original ones.
@@ -2206,7 +2196,7 @@ proc ::CanvasDraw::DoRotateItem {w x y {shift 0}} {
 		lappend new [expr $rotDrag(cgY) - $sinAng * $rotDrag(x,$i) +  \
 		  $cosAng * $rotDrag(y,$i)]
 	    }
-	    eval $w coords $rotDrag(id) $new
+	    eval $wcan coords $rotDrag(id) $new
 	}
     }
     set rotDrag(lastAng) $angRot
@@ -2217,38 +2207,38 @@ proc ::CanvasDraw::DoRotateItem {w x y {shift 0}} {
 #       Finalizes the rotation operation. Tells all other clients.
 #   
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       x,y    the mouse coordinates.
 #       
 # Results:
 #       none
 
-proc ::CanvasDraw::FinalizeRotate {w x y} {
+proc ::CanvasDraw::FinalizeRotate {wcan x y} {
     global  kRad2Grad        
     variable rotDrag
 
     if {![info exists rotDrag]} {
 	return
     }
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
     # Move all markers along.
-    $w delete id$rotDrag(id)
-    MarkBbox $w 0 $rotDrag(id)
+    $wcan delete id$rotDrag(id)
+    MarkBbox $wcan 0 $rotDrag(id)
     if {[string equal $rotDrag(type) "arc"]} {
 	
 	# Get new start angle.
 	set cmd [list itemconfigure $rotDrag(itno) -start   \
-	      [$w itemcget $rotDrag(itno) -start]]
+	      [$wcan itemcget $rotDrag(itno) -start]]
     } else {
 	# Or update all coordinates.
-	set cmd [concat coords $rotDrag(itno) [$w coords $rotDrag(id)]]
+	set cmd [concat coords $rotDrag(itno) [$wcan coords $rotDrag(id)]]
     }    
     set undocmd $rotDrag(undocmd)
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::Command $wtop $undocmd]
-    ::CanvasUtils::Command $wtop $cmd remote
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo	    
+    set redo [list ::CanvasUtils::Command $w $cmd]
+    set undo [list ::CanvasUtils::Command $w $undocmd]
+    ::CanvasUtils::Command $w $cmd remote
+    undo::add [::WB::GetUndoToken $w] $undo $redo	    
     unset -nocomplain rotDrag
 }
 
@@ -2263,33 +2253,31 @@ namespace eval ::CanvasDraw:: {
 # 
 #       Bindings to the 'std' tag.
 
-proc ::CanvasDraw::DeleteCurrent {w} {
+proc ::CanvasDraw::DeleteCurrent {wcan} {
 
-    set utag [::CanvasUtils::GetUtag $w current]
-    if {[string length $utag] > 0} {
-	::CanvasDraw::DeleteIds $w $utag all
+    set utag [::CanvasUtils::GetUtag $wcan current]
+    if {$utag ne ""} {
+	::CanvasDraw::DeleteIds $wcan $utag all
     }
 }
 
-proc ::CanvasDraw::DeleteSelected {w} {
+proc ::CanvasDraw::DeleteSelected {wcan} {
     
-    set ids [$w find withtag selected&&!locked]
-    
-    ::Debug 6 "::CanvasDraw::DeleteSelected, ids=$ids"
+    set ids [$wcan find withtag selected&&!locked]
     if {$ids == {}} {
 	return
     }
-    ::CanvasDraw::DeleteIds $w $ids all
-    set wtop [::UI::GetToplevelNS $w]
-    ::CanvasCmd::DeselectAll $wtop
+    ::CanvasDraw::DeleteIds $wcan $ids all
+    set w [winfo toplevel $wcan]
+    ::CanvasCmd::DeselectAll $w
 }
 
 # CanvasDraw::DeleteIds --
 # 
 # 
 
-proc ::CanvasDraw::DeleteIds {w ids where args} {
-    global  prefs
+proc ::CanvasDraw::DeleteIds {wcan ids where args} {
+    global  prefs this
     variable itemImagesDeleted
 
     ::Debug 6 "::CanvasDraw::DeleteIds ids=$ids"
@@ -2299,7 +2287,7 @@ proc ::CanvasDraw::DeleteIds {w ids where args} {
     }
     array set argsArr $args
     set trashImages $argsArr(-trashunusedimages)
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
 
     # List of canvas commands without widget path.
     set cmdList {}
@@ -2309,12 +2297,12 @@ proc ::CanvasDraw::DeleteIds {w ids where args} {
     set undoCmdList {}
     
     foreach id $ids {
-	set utag [::CanvasUtils::GetUtag $w $id]
-	if {[string length $utag] == 0} {
+	set utag [::CanvasUtils::GetUtag $wcan $id]
+	if {$utag eq ""} {
 	    continue
 	}
-	set tags [$w gettags $id]
-	set type [$w type $id]
+	set tags [$wcan gettags $id]
+	set type [$wcan type $id]
 	set havestd [expr [lsearch -exact $tags std] < 0 ? 0 : 1]
 	
 	# We are only allowed to delete 'std' items.
@@ -2322,34 +2310,34 @@ proc ::CanvasDraw::DeleteIds {w ids where args} {
 	    image,1 {
 		set cmd [list delete $utag]
 		lappend cmdList $cmd
-		lappend undoCmdList [::CanvasUtils::GetUndoCommand $wtop $cmd]
+		lappend undoCmdList [::CanvasUtils::GetUndoCommand $w $cmd]
 		if {$trashImages} {
-		    lappend itemImagesDeleted [$w itemcget $id -image]
+		    lappend itemImagesDeleted [$wcan itemcget $id -image]
 		}
 	    } 
 	    window,* {
 		set cmd [list delete $utag]
 		lappend cmdList $cmd
-		set win [$w itemcget $utag -window]
+		set win [$wcan itemcget $utag -window]
 		lappend redoCmdList [list destroy $win]		
-		lappend undoCmdList [::CanvasUtils::GetUndoCommand $wtop $cmd]
+		lappend undoCmdList [::CanvasUtils::GetUndoCommand $w $cmd]
 	    }
 	    *,1 {
 		set cmd [list delete $utag]
 		lappend cmdList $cmd
-		lappend undoCmdList [::CanvasUtils::GetUndoCommand $wtop $cmd]
+		lappend undoCmdList [::CanvasUtils::GetUndoCommand $w $cmd]
 	    }
 	    default {
 		
 		# A non window item witout 'std' tag.
 		# Look for any Itcl object with a Delete method.
-		if {$prefs(haveItcl)} {
+		if {$this(package,Itcl)} {
 		    if {[regexp {object:([^ ]+)} $tags match object]} {
 			if {![catch {
 			    set objdel [$object Delete $id]
 			}]} {
 			    if {[llength $objdel] == 2} {
-				foreach {del undo} $objdel {break}
+				lassign $objdel del undo
 				if {$del != {}} {
 				    lappend cmdList $del
 				    if {$undo != {}} {
@@ -2365,16 +2353,16 @@ proc ::CanvasDraw::DeleteIds {w ids where args} {
     }
     
     # Manufacture complete commands.
-    set canRedo [list ::CanvasUtils::CommandList $wtop $cmdList $where]
+    set canRedo [list ::CanvasUtils::CommandList $w $cmdList $where]
     set redo [list ::CanvasDraw::EvalCommandList  \
       [concat [list $canRedo] $redoCmdList]]
     set undo [list ::CanvasDraw::EvalCommandList $undoCmdList]
     
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
 
     # Garbage collect unused images with 'std' tag.
-    ::CanvasDraw::GarbageUnusedImages
+    GarbageUnusedImages
 }
 
 # CanvasDraw::GarbageUnusedImages --
@@ -2410,7 +2398,8 @@ proc ::CanvasDraw::AddGarbageImages {name args} {
 #       canvas!
 #       
 # Arguments:
-#       w      the frame widget.
+#       wcan
+#       wframe the frame widget.
 #       x,y    the mouse coordinates.
 #       where    "all": erase this canvas and all others.
 #                "remote": erase only client canvases.
@@ -2426,15 +2415,13 @@ proc ::CanvasDraw::DeleteFrame {wcan wframe x y {where all}} {
     # Fix x and y (frame to canvas coordinates).
     set x [$wcan canvasx [expr [winfo x $wframe] + $x]]
     set y [$wcan canvasx [expr [winfo y $wframe] + $y]]
-    set wtop [::UI::GetToplevelNS $wcan]
+    set w [winfo toplevel $wcan]
     set cmdList {}
     set canUndoList {}
     set undoCmdList {}
     
-    # BAD solution...
-    set id [lindex [$wcan find closest $x $y 3] 0]
-    set utag [::CanvasUtils::GetUtag $wcan $id]
-    if {$utag == ""} {
+    set utag [::CanvasUtils::GetUtagFromWindow $wframe]
+    if {$utag eq ""} {
 	return
     }
     
@@ -2442,13 +2429,13 @@ proc ::CanvasDraw::DeleteFrame {wcan wframe x y {where all}} {
     lappend cmdList [list delete $utag]
     set extraCmd [list destroy $wframe]
     
-    set redo [list ::CanvasUtils::CommandList $wtop $cmdList $where]
+    set redo [list ::CanvasUtils::CommandList $w $cmdList $where]
     set redo [list ::CanvasDraw::EvalCommandList [list $redo $extraCmd]]
         
     # We need to reconstruct how it was imported.
-    set undo [::CanvasUtils::GetUndoCommand $wtop [list delete $utag]]
+    set undo [::CanvasUtils::GetUndoCommand $w [list delete $utag]]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
 }
 
 # CanvasDraw::DeleteWindow --
@@ -2457,7 +2444,8 @@ proc ::CanvasDraw::DeleteFrame {wcan wframe x y {where all}} {
 #       something from a plugin. 
 #       
 # Arguments:
-#       w      the frame widget.
+#       wcan
+#       win    the frame widget.
 #       x,y    the mouse coordinates.
 #       where    "all": erase this canvas and all others.
 #                "remote": erase only client canvases.
@@ -2473,15 +2461,13 @@ proc ::CanvasDraw::DeleteWindow {wcan win x y {where all}} {
     # Fix x and y (frame to canvas coordinates).
     set x [$wcan canvasx [expr [winfo x $win] + $x]]
     set y [$wcan canvasx [expr [winfo y $win] + $y]]
-    set wtop [::UI::GetToplevelNS $wcan]
+    set w [winfo toplevel $wcan]
     set cmdList {}
     set canUndoList {}
     set undoCmdList {}
     
-    # BAD solution...
-    set id [lindex [$wcan find closest $x $y 3] 0]
-    set utag [::CanvasUtils::GetUtag $wcan $id]
-    if {$utag == ""} {
+    set utag [::CanvasUtils::GetUtagFromWindow $win]
+    if {$utag eq ""} {
 	return
     }
     
@@ -2489,21 +2475,21 @@ proc ::CanvasDraw::DeleteWindow {wcan win x y {where all}} {
     lappend cmdList [list delete $utag]
     set extraCmd [list destroy $win]
     
-    set redo [list ::CanvasUtils::CommandList $wtop $cmdList $where]
+    set redo [list ::CanvasUtils::CommandList $w $cmdList $where]
     set redo [list ::CanvasDraw::EvalCommandList [list $redo $extraCmd]]
         
     # We need to reconstruct how it was imported.
-    set undo [::CanvasUtils::GetUndoCommand $wtop [list delete $utag]]
+    set undo [::CanvasUtils::GetUndoCommand $w [list delete $utag]]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
 }
 
-proc ::CanvasDraw::PointButton {w x y {modifier {}}} {
+proc ::CanvasDraw::PointButton {wcan x y {modifier {}}} {
     
     if {[string equal $modifier "shift"]} {
-	::CanvasDraw::MarkBbox $w 1
+	::CanvasDraw::MarkBbox $wcan 1
     } else {
-	::CanvasDraw::MarkBbox $w 0
+	::CanvasDraw::MarkBbox $wcan 0
     }
 }
 
@@ -2512,7 +2498,7 @@ proc ::CanvasDraw::PointButton {w x y {modifier {}}} {
 #        Administrates a selection, drawing, ui etc.
 #       
 # Arguments:
-#       w           the canvas widget.
+#       wcan        the canvas widget.
 #       shift       If 'shift', then just select item, else deselect all 
 #                   other first.
 #       which       can either be "current", another tag, or an id.
@@ -2520,127 +2506,125 @@ proc ::CanvasDraw::PointButton {w x y {modifier {}}} {
 # Results:
 #       none
 
-proc ::CanvasDraw::MarkBbox {w shift {which current}} {
+proc ::CanvasDraw::MarkBbox {wcan shift {which current}} {
     global  prefs kGrad2Rad
     
-    Debug 3 "MarkBbox:: w=$w, shift=$shift, which=$which"
+    Debug 3 "MarkBbox:: wcan=$wcan, shift=$shift, which=$which"
 
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
     # If no shift key, deselect all.
     if {$shift == 0} {
-	::CanvasCmd::DeselectAll $wtop
+	::CanvasCmd::DeselectAll $w
     }
-    set id [$w find withtag $which]
-    if {$id == ""} {
+    set id [$wcan find withtag $which]
+    if {$id eq ""} {
 	return
     }
-    set utag [::CanvasUtils::GetUtag $w $which]
-    if {$utag == ""} {
+    set utag [::CanvasUtils::GetUtag $wcan $which]
+    if {$utag eq ""} {
 	return
     }
-    if {[lsearch [$w gettags $id] "std"] < 0} {
+    if {[lsearch [$wcan gettags $id] "std"] < 0} {
 	return
     }
     
     # If already selected, and shift clicked, deselect.
     if {$shift == 1} {
-	if {[IsSelected $w $id]} {
-	    $w delete tbbox&&id:${id}
-	    $w dtag $id selected
+	if {[IsSelected $wcan $id]} {
+	    $wcan delete tbbox&&id:${id}
+	    $wcan dtag $id selected
 	    return
 	}
     }    
-    SelectItem $w $which
-    focus $w
+    SelectItem $wcan $which
+    focus $wcan
     
     # Enable cut and paste etc.
-    ::UI::FixMenusWhenSelection $w
+    ::UI::FixMenusWhenSelection $wcan
     
     # Testing..
-    selection own -command [list ::CanvasDraw::LostSelection $wtop] $w
+    selection own -command [list ::CanvasDraw::LostSelection $w] $wcan
 }
 
-proc ::CanvasDraw::SelectItem {w which} {
+proc ::CanvasDraw::SelectItem {wcan which} {
     
     # Add tag 'selected' to the selected item. Indicate to which item id
     # a marker belongs with adding a tag 'id$id'.
-    set type [$w type $which]
-    $w addtag "selected" withtag $which
-    set id [$w find withtag $which]
-    if {[::CanvasUtils::IsLocked $w $id]} {
+    set type [$wcan type $which]
+    $wcan addtag "selected" withtag $which
+    set id [$wcan find withtag $which]
+    if {[::CanvasUtils::IsLocked $wcan $id]} {
 	set tmark [list tbbox $type id:${id} locked]	
     } else {
 	set tmark [list tbbox $type id:${id}]
     }
-    DrawItemSelection $w $which $tmark
+    DrawItemSelection $wcan $which $tmark
 }
 
-proc ::CanvasDraw::DeselectItem {w which} {
+proc ::CanvasDraw::DeselectItem {wcan which} {
     
-    set id [$w find withtag $which]
-    $w delete tbbox&&id:${id}
-    $w dtag $id selected
+    set id [$wcan find withtag $which]
+    $wcan delete tbbox&&id:${id}
+    $wcan dtag $id selected
 
     # menus
-    ::UI::FixMenusWhenSelection $w
+    ::UI::FixMenusWhenSelection $wcan
 }
 
-proc ::CanvasDraw::DeleteSelection {w which} {
+proc ::CanvasDraw::DeleteSelection {wcan which} {
     
-    set id [$w find withtag $which]
-    $w delete tbbox&&id:${id}
-    $w dtag $id selected
+    set id [$wcan find withtag $which]
+    $wcan delete tbbox&&id:${id}
+    $wcan dtag $id selected
 }
 
-proc ::CanvasDraw::IsSelected {w which} {
+proc ::CanvasDraw::IsSelected {wcan which} {
     
-    return [expr [lsearch [$w gettags $which] "selected"] < 0 ? 0 : 1]
+    return [expr [lsearch [$wcan gettags $which] "selected"] < 0 ? 0 : 1]
 }
 
-proc ::CanvasDraw::AnySelected {w} {
+proc ::CanvasDraw::AnySelected {wcan} {
     
-    return [expr {[$w find withtag "selected"] == ""} ? 0 : 1]
+    return [expr {[$wcan find withtag "selected"] eq ""} ? 0 : 1]
 }
 
 # CanvasDraw::DrawItemSelection --
 # 
 #       Does the actual drawing of any selection.
 
-proc ::CanvasDraw::DrawItemSelection {w which tmark} {
+proc ::CanvasDraw::DrawItemSelection {wcan which tmark} {
     global  prefs kGrad2Rad
         
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::wapp wapp
+    set type [$wcan type $which]
+    set bbox [$wcan bbox $which]
+    set id   [$wcan find withtag $which]
 
-    set type [$w type $which]
-    set bbox [$w bbox $which]
-    set id   [$w find withtag $which]
-    
-    set a  [option get $wapp(frall) aSelect {}]
-    if {[::CanvasUtils::IsLocked $w $id]} {
-	set fg [option get $wapp(frall) fgSelectLocked {}]
+    set w [winfo toplevel $wcan]
+    set a  [option get $w aSelect {}]
+    if {[::CanvasUtils::IsLocked $wcan $id]} {
+	set fg [option get $w fgSelectLocked {}]
     } else {
-	set fg [option get $wapp(frall) fgSelectNormal {}]
+	set fg [option get $w fgSelectNormal {}]
     }
 
     # If mark the bounding box. Also for all "regular" shapes.
     
-    if {$prefs(bboxOrCoords) || ($type == "oval") || ($type == "text")  \
-      || ($type == "rectangle") || ($type == "image")} {
+    if {$prefs(bboxOrCoords) || ($type eq "oval") || ($type eq "text")  \
+      || ($type eq "rectangle") || ($type eq "image")} {
 
 	foreach {x1 y1 x2 y2} $bbox break
-	$w create rectangle [expr $x1-$a] [expr $y1-$a] [expr $x1+$a] [expr $y1+$a] \
+	$wcan create rectangle [expr $x1-$a] [expr $y1-$a] [expr $x1+$a] [expr $y1+$a] \
 	  -tags $tmark -fill white -outline $fg
-	$w create rectangle [expr $x1-$a] [expr $y2-$a] [expr $x1+$a] [expr $y2+$a] \
+	$wcan create rectangle [expr $x1-$a] [expr $y2-$a] [expr $x1+$a] [expr $y2+$a] \
 	  -tags $tmark -fill white -outline $fg
-	$w create rectangle [expr $x2-$a] [expr $y1-$a] [expr $x2+$a] [expr $y1+$a] \
+	$wcan create rectangle [expr $x2-$a] [expr $y1-$a] [expr $x2+$a] [expr $y1+$a] \
 	  -tags $tmark -fill white -outline $fg
-	$w create rectangle [expr $x2-$a] [expr $y2-$a] [expr $x2+$a] [expr $y2+$a] \
+	$wcan create rectangle [expr $x2-$a] [expr $y2-$a] [expr $x2+$a] [expr $y2+$a] \
 	  -tags $tmark -fill white -outline $fg
     } else {
 	
-	set coords [$w coords $which]
+	set coords [$wcan coords $which]
 	if {[string length $coords] == 0} {
 	    return
 	}
@@ -2656,16 +2640,16 @@ proc ::CanvasDraw::DrawItemSelection {w which tmark} {
 	    set r [expr abs(($x1 - $x2)/2.0)]
 	    set cx [expr ($x1 + $x2)/2.0]
 	    set cy [expr ($y1 + $y2)/2.0]
-	    set startAng [$w itemcget $id -start]
-	    set extentAng [$w itemcget $id -extent]
+	    set startAng [$wcan itemcget $id -start]
+	    set extentAng [$wcan itemcget $id -extent]
 	    set xstart [expr $cx + $r * cos($kGrad2Rad * $startAng)]
 	    set ystart [expr $cy - $r * sin($kGrad2Rad * $startAng)]
 	    set xfin [expr $cx + $r * cos($kGrad2Rad * ($startAng + $extentAng))]
 	    set yfin [expr $cy - $r * sin($kGrad2Rad * ($startAng + $extentAng))]
-	    $w create rectangle [expr $xstart-$a] [expr $ystart-$a]   \
+	    $wcan create rectangle [expr $xstart-$a] [expr $ystart-$a]   \
 	      [expr $xstart+$a] [expr $ystart+$a] -tags $tmark -fill white \
 	      -outline $fg
-	    $w create rectangle [expr $xfin-$a] [expr $yfin-$a]   \
+	    $wcan create rectangle [expr $xfin-$a] [expr $yfin-$a]   \
 	      [expr $xfin+$a] [expr $yfin+$a] -tags $tmark -fill white \
 	      -outline $fg
 	    
@@ -2673,7 +2657,7 @@ proc ::CanvasDraw::DrawItemSelection {w which tmark} {
 	    
 	    # Mark each coordinate. {x0 y0 x1 y1 ... }
 	    foreach {x y} $coords {
-		$w create rectangle [expr $x-$a] [expr $y-$a] [expr $x+$a] [expr $y+$a] \
+		$wcan create rectangle [expr $x-$a] [expr $y-$a] [expr $x+$a] [expr $y+$a] \
 		  -tags $tmark -fill white -outline $fg
 	    }
 	}
@@ -2684,20 +2668,19 @@ proc ::CanvasDraw::DrawItemSelection {w which tmark} {
 #
 #       Lost selection to other window. Deselect only if same toplevel.
 
-proc ::CanvasDraw::LostSelection {wtop} {
+proc ::CanvasDraw::LostSelection {w} {
     
-    set wtopReal [::UI::GetToplevel $wtop]
-    if {$wtopReal == [selection own]} {
-	::CanvasCmd::DeselectAll $wtop
+    if {$w == [selection own]} {
+	::CanvasCmd::DeselectAll $w
     }
 }
 
-proc ::CanvasDraw::SyncMarks {wtop} {
+proc ::CanvasDraw::SyncMarks {w} {
 
-    set wCan [::WB::GetCanvasFromWtop $wtop]
-    $wCan delete withtag tbbox
-    foreach id [$wCan find withtag "selected"] {
-	::CanvasDraw::MarkBbox $wCan 1 $id	
+    set wcan [::WB::GetCanvasFromWtop $w]
+    $wcan delete withtag tbbox
+    foreach id [$wcan find withtag "selected"] {
+	::CanvasDraw::MarkBbox $wcan 1 $id	
     }
 }
     
@@ -2766,22 +2749,22 @@ proc ::CanvasDraw::ConstrainedDrag {x y xanch yanch} {
 #
 #       Makes and draws a speech bubble for a text item.
 
-proc ::CanvasDraw::MakeSpeechBubble {w id} {
+proc ::CanvasDraw::MakeSpeechBubble {wcan id} {
     
-    set wtop [::UI::GetToplevelNS $w]
-    set bbox [$w bbox $id]
-    set utagtext [::CanvasUtils::GetUtag $w $id]
-    foreach {utag redocmd} [::CanvasDraw::SpeechBubbleCmd $w $bbox] break
-    set undocmd "delete $utag"
+    set w [winfo toplevel $wcan]
+    set bbox [$wcan bbox $id]
+    set utagtext [::CanvasUtils::GetUtag $wcan $id]
+    foreach {utag redocmd} [::CanvasDraw::SpeechBubbleCmd $wcan $bbox] break
+    set undocmd [list delete $utag]
     set cmdLower [list lower $utag $utagtext]
     
-    set redo [list ::CanvasUtils::CommandList $wtop [list $redocmd $cmdLower]]
-    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+    set redo [list ::CanvasUtils::CommandList $w [list $redocmd $cmdLower]]
+    set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $w] $undo $redo
 }
 
-proc ::CanvasDraw::SpeechBubbleCmd {w bbox args} {
+proc ::CanvasDraw::SpeechBubbleCmd {wcan bbox args} {
     
     set a 8
     set b 12

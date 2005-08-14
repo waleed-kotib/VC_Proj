@@ -5,10 +5,15 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.95.8 (050622):
+Coccinella-0.95.9 (050822):
+
+	- completely rewritten user interface with new theming engine (tile)
+	- vCard avatar
+
+
+Coccinella-0.95.8 (050620):
 
 	- reworked the registration process
-	- animated emoticons
 
 Coccinella-0.95.7 (050429):
 

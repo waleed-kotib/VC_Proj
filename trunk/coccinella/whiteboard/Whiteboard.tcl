@@ -5,9 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: Whiteboard.tcl,v 1.42 2005-06-22 10:04:26 matben Exp $
+# $Id: Whiteboard.tcl,v 1.43 2005-08-14 08:37:52 matben Exp $
 
 package require anigif
 package require entrycomp
@@ -19,6 +17,7 @@ package require CanvasUtils
 package require CanvasCutCopyPaste
 package require CanvasCmd
 package require CanvasFile
+package require FileCache
 package require FilePrefs
 package require GetFileIface
 package require Import
@@ -27,7 +26,6 @@ package require Plugins
 package require PutFileIface
 package require WBPrefs
 
-
 package provide Whiteboard 1.0
 
 namespace eval ::WB:: {
@@ -35,7 +33,6 @@ namespace eval ::WB:: {
     # Add all event hooks.
     ::hooks::register quitAppHook         ::WB::QuitAppHook
     ::hooks::register quitAppHook         ::WB::SaveAnyState
-    ::hooks::register closeWindowHook     ::WB::CloseHook
     ::hooks::register whiteboardCloseHook ::WB::CloseWhiteboard
     ::hooks::register loginHook           ::WB::LoginHook
     ::hooks::register logoutHook          ::WB::LogoutHook
@@ -59,6 +56,8 @@ namespace eval ::WB:: {
     }
 
     # Use option database for customization.
+    option add *Whiteboard*TRadiobutton.padding  {0}             50
+
     # Shortcut buttons.
     option add *Whiteboard*connectImage         connect         widgetDefault
     option add *Whiteboard*connectDisImage      connectDis      widgetDefault
@@ -85,27 +84,30 @@ namespace eval ::WB:: {
     option add *Whiteboard.barvertImage         barvert         widgetDefault
 
     # Drawing tool buttons.
-    for {set icol 0} {$icol <= 1} {incr icol} {
-	for {set irow 0} {$irow <= 6} {incr irow} {
-	    set idx ${irow}${icol}
-	    option add *Whiteboard.toolOff$btNo2Name($idx)Image off${idx}  widgetDefault
-	    option add *Whiteboard.toolOn$btNo2Name($idx)Image  on${idx} widgetDefault
-	}
+    foreach tname [array names btName2No] {
+	option add *Whiteboard.tool${tname}Image $tname         widgetDefault
     }
 
     # Color selector.
     option add *Whiteboard.bwrectImage          bwrect          widgetDefault
-    option add *Whiteboard.imcolorImage         imcolor         widgetDefault
+    option add *Whiteboard.colorSelectorImage   colorSelector   widgetDefault
+    option add *Whiteboard.colorSelBWImage      colorSelBW      widgetDefault
+    option add *Whiteboard.colorSelSwapImage    colorSelSwap    widgetDefault
     
     # Canvas selections.
     option add *Whiteboard.aSelect              2               widgetDefault
     option add *Whiteboard.fgSelectNormal       black           widgetDefault
     option add *Whiteboard.fgSelectLocked       red             widgetDefault
-    
+
+    # Special for X11 menus to look ok.
+    if {[tk windowingsystem] eq "x11"} {
+	option add *Whiteboard.Menu.borderWidth 0               50
+    }
+
     # Keeps various geometry info.
     variable dims
     
-    # BAD!!!!!!!!!!!!!!!!!!!!!!???????????????
+    # @@@ BAD!!!!!!!!!!!!!!!!!!!!!!???????????????
     # Canvas size; these are also min sizes. Add new line of tools.
     set dims(wCanOri) 350
     set dims(hCanOri) [expr 328 + 28]
@@ -177,7 +179,7 @@ namespace eval ::WB:: {
 # WB::InitPrefsHook --
 # 
 #       There is a global 'state' array which contains a generic state
-#       that is inherited by instance specific 'state' array '::WB::${wtop}::state'
+#       that is inherited by instance specific 'state' array '::WB::${w}::state'
 
 proc ::WB::InitPrefsHook { } {
     global  state prefs this
@@ -185,9 +187,10 @@ proc ::WB::InitPrefsHook { } {
     ::Debug 2 "::WB::InitPrefsHook"
     
     # The tool buttons.
-    set state(btState) 00
-    set state(btStateOld) 00
-
+    set state(tool)      "point"
+    set state(toolPrev)  "point"
+    set state(toolCache) "point"
+    
     # Is the toolbar visible?
     set state(visToolbar) 1
     
@@ -241,10 +244,10 @@ proc ::WB::InitPrefsHook { } {
       www.apple.com/quicktime/favorites/bbc_world1/bbc_world1.mov}}
 
     # States and prefs to be stored in prefs file.
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list prefs(45)              prefs_45              $prefs(45)]             \
       [list prefs(shortsMulticastQT) prefs_shortsMulticastQT $prefs(shortsMulticastQT) userDefault] \
-      [list state(btState)         state_btState         $state(btState)]        \
+      [list state(tool)            state_tool            $state(tool)]           \
       [list state(bgColCan)        state_bgColCan        $state(bgColCan)]       \
       [list state(fgCol)           state_fgCol           $state(fgCol)]          \
       [list state(penThick)        state_penThick        $state(penThick)]       \
@@ -318,7 +321,8 @@ proc ::WB::InitIcons {w} {
     
     variable icons
     variable iconsInitted 1
-    variable btNo2Name 
+    variable btNo2Name
+    variable btName2No
     variable wbicons
     	
     # Get icons.
@@ -326,25 +330,87 @@ proc ::WB::InitIcons {w} {
       -file [file join $this(imagePath) brokenImage.gif]]	
 
     # Make all standard icons.
-    package require WBIcons
+    CreateToolImages
+    Stuff
     
     set wbicons(barhoriz) [::WB::GetThemeImage [option get $w barhorizImage {}]]
     set wbicons(barvert)  [::WB::GetThemeImage [option get $w barvertImage {}]]
 
     # Drawing tool buttons.
-    for {set icol 0} {$icol <= 1} {incr icol} {
-	for {set irow 0} {$irow <= 6} {incr irow} {
-	    set idx ${irow}${icol}
-	    set wbicons(off${idx}) [::WB::GetThemeImage  \
-	      [option get $w toolOff$btNo2Name($idx)Image {}]]
-	    set wbicons(on${idx})  [::WB::GetThemeImage  \
-	      [option get $w toolOn$btNo2Name($idx)Image {}]]
-	}
+    foreach name [array names btName2No] {
+	set wbicons($name) [::WB::GetThemeImage  \
+	  [option get $w tool${name}Image {}]]
     }
     
     # Color selector.
-    set wbicons(imcolor) [::WB::GetThemeImage [option get $w imcolorImage {}]]
+    foreach name {colorSelector colorSelBW colorSelSwap} {
+	set wbicons($name) [::WB::GetThemeImage  \
+	  [option get $w ${name}Image {}]]
+    }
     set wbicons(bwrect)  [::WB::GetThemeImage [option get $w bwrectImage {}]]
+}
+
+proc ::WB::CreateToolImages { } {
+    global  this
+    variable iconsPreloaded
+    variable btName2No
+    
+    set dir [file join $this(imagePath) tools]
+    
+    # Actual tools.
+    foreach name [array names btName2No] {
+	set iconsPreloaded($name) [image create photo \
+	  -format gif -file [file join $dir ${name}.gif]]
+    }
+    
+    # Color selector.
+    foreach name {colorSelector colorSelBW colorSelSwap} {
+	set iconsPreloaded($name) [image create photo \
+	  -format gif -file [file join $dir ${name}.gif]]
+    }
+}
+
+proc ::WB::Stuff { } {
+    variable iconsPreloaded
+    
+    # height = 54
+    set ::WB::iconsPreloaded(barvert) [image create photo -data {
+	R0lGODdhCwA2ALMAAP////e1ve+cre9zhOdae+dKY94xUtYAIdDQ0M7Ozpyc
+	nISEhFJSUgAAAAAAAAAAACwAAAAACwA2AAAEYjDJSauVQQzCSTGLdIzksShT
+	aaIUeV7rJScAVVcMlc/VLfmTnUTI+9ksRGIRCBzqisdJM5GESqPPoNV4xWWt
+	TOQXGvZqt+Wxkpc+O9FYN3VLi7/vZPtcvtRXEwiBgoOEhQgRADs=
+    }]
+
+    # height = 58
+    set ::WB::iconsPreloaded(barvert) [image create photo -data {
+    R0lGODdhCwA6AMQAAM7Ozve1ve+cre9zhOdae+dKY94xUoSEhNYAIZycnP//
+    /1JSUtDQ0P///////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    AAAAAAAAAAAAAAAAAAAAAAAAACwAAAAACwA6AAAFbiAgjmRpioEwECxRGIeI
+    zDRyJGNt4yR9n7uTEKAgFUsLUnJYOoqco6VIynwaTVRqFQqdKqvXUReQBYvD
+    36jZekamzVzsGxx3q9f1uZaZv3vxaH5ka0SBf4d0hoOCW4plAAyRkpOSCpOW
+    kYJ7hGshADs=
+    }]
+
+    set ::WB::iconsPreloaded(barhoriz) [image create photo -data {
+	R0lGODdhQQALAOcAAP//////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////
+	/////++Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+U
+	pe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe97lO97lO97lO97
+	lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97
+	lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lNYAIdYAIdYAIdYAIdYAIdYAIdYAIdYA
+	IdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYA
+	IdYAIdYAIdYAIdYAIdYAIdYAIc7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O
+	zs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O
+	zs7Ozs7OzpycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJyc
+	nJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnISEhISEhISE
+	hISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISE
+	hISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhFJSUv//////////////////////
+	////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////ywAAAAAQQALAAAIdwABCRxIsKDBgwgTKlzIsKHD
+	hw9DIAQgkCIgixgrary4MSPHjx4tHgwBBgzCbwJRAlLJMqXLlS9bwpwpU2VBkiVNQtzJc2TO
+	nD2D8gTy86fQow5/KV26dGDIjlBBRn0q9SCoq1ivEqwZsytNr1y/Ih1LtqxZhAEBADs=
+    }]
+
 }
 
 # WB::InitMenuDefs --
@@ -369,24 +435,24 @@ proc ::WB::InitMenuDefs { } {
     # May be customized by jabber, p2p...
 
     set menuDefs(main,info,aboutwhiteboard)  \
-      {command   mAboutCoccinella    {::SplashScreen::SplashScreen} normal   {}}
+      {command   mAboutCoccinella    {::Splash::SplashScreen} normal   {}}
     set menuDefs(main,info,aboutquicktimetcl)  \
       {command   mAboutQuickTimeTcl  {::Dialogs::AboutQuickTimeTcl}                normal   {}}
 
     # Only basic functionality.
     set menuDefs(main,file) {
-	{command   mCloseWindow     {::UI::DoCloseWindow}                   normal   W}
+	{command   mCloseWindow     {::UI::DoCloseWindow $w}             normal   W}
 	{separator}
-	{command   mOpenImage/Movie {::Import::ImportImageOrMovieDlg $wtop} normal  I}
-	{command   mOpenURLStream   {::Multicast::OpenMulticast $wtop}  normal   {}}
+	{command   mOpenImage/Movie {::Import::ImportImageOrMovieDlg $w} normal  I}
+	{command   mOpenURLStream   {::Multicast::OpenMulticast $w}  normal   {}}
 	{separator}
-	{command   mOpenCanvas      {::CanvasFile::OpenCanvasFileDlg $wtop} normal   {}}
-	{command   mSaveCanvas      {::CanvasFile::Save $wtop}              normal   S}
+	{command   mOpenCanvas      {::CanvasFile::OpenCanvasFileDlg $w} normal   {}}
+	{command   mSaveCanvas      {::CanvasFile::Save $w}              normal   S}
 	{separator}
-	{command   mSaveAs          {::CanvasFile::SaveAsDlg $wtop}         normal   {}}
-	{command   mSaveAsItem      {::CanvasCmd::DoSaveAsItem $wtop}       normal   {}}
-	{command   mPageSetup       {::UserActions::PageSetup $wtop}        normal   {}}
-	{command   mPrintCanvas     {::UserActions::DoPrintCanvas $wtop}    normal   P}
+	{command   mSaveAs          {::CanvasFile::SaveAsDlg $w}         normal   {}}
+	{command   mSaveAsItem      {::CanvasCmd::DoSaveAsItem $w}       normal   {}}
+	{command   mPageSetup       {::UserActions::PageSetup $w}        normal   {}}
+	{command   mPrintCanvas     {::UserActions::DoPrintCanvas $w}    normal   P}
 	{separator}
 	{command   mQuit            {::UserActions::DoQuit}                 normal   Q}
     }
@@ -395,103 +461,103 @@ proc ::WB::InitMenuDefs { } {
     }
 	    
     # If embedded the embedding app should close us down.
-    if {$prefs(embedded)} {
+    if {$this(embedded)} {
 	lset menuDefs(main,file) end 3 disabled
     } else {
 	package require Multicast
     }
 
     set menuDefs(main,edit) {    
-	{command     mUndo             {::CanvasCmd::Undo $wtop}             normal   Z}
-	{command     mRedo             {::CanvasCmd::Redo $wtop}             normal   {}}
+	{command     mUndo             {::CanvasCmd::Undo $w}             normal   Z}
+	{command     mRedo             {::CanvasCmd::Redo $w}             normal   {}}
 	{separator}
 	{command     mCut              {::UI::CutCopyPasteCmd cut}           disabled X}
 	{command     mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
 	{command     mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
-	{command     mAll              {::CanvasCmd::SelectAll $wtop}        normal   A}
-	{command     mEraseAll         {::CanvasCmd::DoEraseAll $wtop}       normal   {}}
+	{command     mAll              {::CanvasCmd::SelectAll $w}        normal   A}
+	{command     mEraseAll         {::CanvasCmd::DoEraseAll $w}       normal   {}}
 	{separator}
-	{command     mInspectItem      {::ItemInspector::ItemInspector $wtop selected} disabled {}}
+	{command     mInspectItem      {::ItemInspector::ItemInspector $w selected} disabled {}}
 	{separator}
-	{command     mRaise            {::CanvasCmd::RaiseOrLowerItems $wtop raise} disabled R}
-	{command     mLower            {::CanvasCmd::RaiseOrLowerItems $wtop lower} disabled L}
+	{command     mRaise            {::CanvasCmd::RaiseOrLowerItems $w raise} disabled R}
+	{command     mLower            {::CanvasCmd::RaiseOrLowerItems $w lower} disabled L}
 	{separator}
-	{command     mLarger           {::CanvasCmd::ResizeItem $wtop $prefs(scaleFactor)} disabled >}
-	{command     mSmaller          {::CanvasCmd::ResizeItem $wtop $prefs(invScaleFac)} disabled <}
+	{command     mLarger           {::CanvasCmd::ResizeItem $w $prefs(scaleFactor)} disabled >}
+	{command     mSmaller          {::CanvasCmd::ResizeItem $w $prefs(invScaleFac)} disabled <}
 	{cascade     mFlip             {}                                      disabled {} {} {
-	    {command   mHorizontal     {::CanvasCmd::FlipItem $wtop horizontal}  normal   {} {}}
-	    {command   mVertical       {::CanvasCmd::FlipItem $wtop vertical}    normal   {} {}}}
+	    {command   mHorizontal     {::CanvasCmd::FlipItem $w horizontal}  normal   {} {}}
+	    {command   mVertical       {::CanvasCmd::FlipItem $w vertical}    normal   {} {}}}
 	}
-	{command     mImageLarger      {::Import::ResizeImage $wtop 2 sel auto} disabled {}}
-	{command     mImageSmaller     {::Import::ResizeImage $wtop -2 sel auto} disabled {}}
+	{command     mImageLarger      {::Import::ResizeImage $w 2 sel auto} disabled {}}
+	{command     mImageSmaller     {::Import::ResizeImage $w -2 sel auto} disabled {}}
     }
     
     # These are used not only in the drop-down menus.
     set menuDefs(main,prefs,separator) 	{separator}
     set menuDefs(main,prefs,background)  \
-      {command     mBackgroundColor      {::CanvasCmd::SetCanvasBgColor $wtop} normal   {}}
+      {command     mBackgroundColor      {::CanvasCmd::SetCanvasBgColor $w} normal   {}}
     set menuDefs(main,prefs,grid)  \
-      {checkbutton mGrid             {::CanvasCmd::DoCanvasGrid $wtop}   normal   {} \
-      {-variable ::WB::${wtop}::state(canGridOn)}}
+      {checkbutton mGrid             {::CanvasCmd::DoCanvasGrid $w}   normal   {} \
+      {-variable ::WB::${w}::state(canGridOn)}}
     set menuDefs(main,prefs,thickness)  \
       {cascade     mThickness        {}                                    normal   {} {} {
 	{radio   1                 {}                                      normal   {} \
-	  {-variable ::WB::${wtop}::state(penThick)}}
+	  {-variable ::WB::${w}::state(penThick)}}
 	{radio   2                 {}                                      normal   {} \
-	  {-variable ::WB::${wtop}::state(penThick)}}
+	  {-variable ::WB::${w}::state(penThick)}}
 	{radio   4                 {}                                      normal   {} \
-	  {-variable ::WB::${wtop}::state(penThick)}}
+	  {-variable ::WB::${w}::state(penThick)}}
 	{radio   6                 {}                                      normal   {} \
-	  {-variable ::WB::${wtop}::state(penThick)}}}
+	  {-variable ::WB::${w}::state(penThick)}}}
     }
     set menuDefs(main,prefs,brushthickness)  \
       {cascade     mBrushThickness   {}                                    normal   {} {} {
 	{radio   8                 {}                                      normal   {} \
-	  {-variable ::WB::${wtop}::state(brushThick)}}
+	  {-variable ::WB::${w}::state(brushThick)}}
 	{radio   10                {}                                      normal   {} \
-	  {-variable ::WB::${wtop}::state(brushThick)}}
+	  {-variable ::WB::${w}::state(brushThick)}}
 	{radio   12                {}                                      normal   {} \
-	  {-variable ::WB::${wtop}::state(brushThick)}}
+	  {-variable ::WB::${w}::state(brushThick)}}
 	{radio   16                {}                                      normal   {} \
-	  {-variable ::WB::${wtop}::state(brushThick)}}}
+	  {-variable ::WB::${w}::state(brushThick)}}}
     }
     set menuDefs(main,prefs,fill)  \
       {checkbutton mFill             {}                                    normal   {} \
-      {-variable ::WB::${wtop}::state(fill)}}
+      {-variable ::WB::${w}::state(fill)}}
     set menuDefs(main,prefs,smoothness)  \
       {cascade     mLineSmoothness   {}                                    normal   {} {} {
-	{radio   None              {set ::WB::${wtop}::state(smooth) 0}        normal   {} \
-	  {-value 0 -variable ::WB::${wtop}::state(splinesteps)}}
-	{radio   2                 {set ::WB::${wtop}::state(smooth) 1}        normal   {} \
-	  {-value 2 -variable ::WB::${wtop}::state(splinesteps)}}
-	{radio   4                 {set ::WB::${wtop}::state(smooth) 1}        normal   {} \
-	  {-value 4 -variable ::WB::${wtop}::state(splinesteps)}}
-	{radio   6                 {set ::WB::${wtop}::state(smooth) 1}        normal   {} \
-	  {-value 6 -variable ::WB::${wtop}::state(splinesteps)}}
-	{radio   10                {set ::WB::${wtop}::state(smooth) 1}        normal   {} \
-	  {-value 10 -variable ::WB::${wtop}::state(splinesteps)}}}
+	{radio   None              {set ::WB::${w}::state(smooth) 0}        normal   {} \
+	  {-value 0 -variable ::WB::${w}::state(splinesteps)}}
+	{radio   2                 {set ::WB::${w}::state(smooth) 1}        normal   {} \
+	  {-value 2 -variable ::WB::${w}::state(splinesteps)}}
+	{radio   4                 {set ::WB::${w}::state(smooth) 1}        normal   {} \
+	  {-value 4 -variable ::WB::${w}::state(splinesteps)}}
+	{radio   6                 {set ::WB::${w}::state(smooth) 1}        normal   {} \
+	  {-value 6 -variable ::WB::${w}::state(splinesteps)}}
+	{radio   10                {set ::WB::${w}::state(smooth) 1}        normal   {} \
+	  {-value 10 -variable ::WB::${w}::state(splinesteps)}}}
     }
     set menuDefs(main,prefs,smooth)  \
       {checkbutton mLineSmoothness   {}                                    normal   {} \
-      {-variable ::WB::${wtop}::state(smooth)}}
+      {-variable ::WB::${w}::state(smooth)}}
     set menuDefs(main,prefs,arcs)  \
       {cascade     mArcs             {}                                    normal   {} {} {
 	{radio   mPieslice         {}                                      normal   {} \
-	  {-value pieslice -variable ::WB::${wtop}::state(arcstyle)}}
+	  {-value pieslice -variable ::WB::${w}::state(arcstyle)}}
 	{radio   mChord            {}                                      normal   {} \
-	  {-value chord -variable ::WB::${wtop}::state(arcstyle)}}
+	  {-value chord -variable ::WB::${w}::state(arcstyle)}}
 	{radio   mArc              {}                                      normal   {} \
-	  {-value arc -variable ::WB::${wtop}::state(arcstyle)}}}
+	  {-value arc -variable ::WB::${w}::state(arcstyle)}}}
     }
     
-    # Dashes need a special build process. Be sure not to substitute $wtop.
+    # Dashes need a special build process. Be sure not to substitute $w.
     set dashList {}
     foreach dash [lsort -decreasing [array names ::WB::dashFull2Short]] {
 	set dashval $::WB::dashFull2Short($dash)
 	if {[string equal " " $dashval]} {
-	    set dopts {-value { } -variable ::WB::${wtop}::state(dash)}
+	    set dopts {-value { } -variable ::WB::${w}::state(dash)}
 	} else {
-	    set dopts [format {-value %s -variable ::WB::${wtop}::state(dash)} $dashval]
+	    set dopts [format {-value %s -variable ::WB::${w}::state(dash)} $dashval]
 	}
 	lappend dashList [list radio $dash {} normal {} $dopts]
     }
@@ -509,27 +575,27 @@ proc ::WB::InitMenuDefs { } {
       {cascade     mFont             {}                                    normal   {} {} {}}
     set menuDefs(main,prefs,fontsize)  \
       {cascade     mSize             {}                                    normal   {} {} {
-	{radio   1                 {::WB::FontChanged $wtop size}          normal   {} \
-	  {-variable ::WB::${wtop}::state(fontSize)}}
-	{radio   2                 {::WB::FontChanged $wtop size}          normal   {} \
-	  {-variable ::WB::${wtop}::state(fontSize)}}
-	{radio   3                 {::WB::FontChanged $wtop size}          normal   {} \
-	  {-variable ::WB::${wtop}::state(fontSize)}}
-	{radio   4                 {::WB::FontChanged $wtop size}          normal   {} \
-	  {-variable ::WB::${wtop}::state(fontSize)}}
-	{radio   5                 {::WB::FontChanged $wtop size}          normal   {} \
-	  {-variable ::WB::${wtop}::state(fontSize)}}
-	{radio   6                 {::WB::FontChanged $wtop size}          normal   {} \
-	  {-variable ::WB::${wtop}::state(fontSize)}}}
+	{radio   1                 {::WB::FontChanged $w size}          normal   {} \
+	  {-variable ::WB::${w}::state(fontSize)}}
+	{radio   2                 {::WB::FontChanged $w size}          normal   {} \
+	  {-variable ::WB::${w}::state(fontSize)}}
+	{radio   3                 {::WB::FontChanged $w size}          normal   {} \
+	  {-variable ::WB::${w}::state(fontSize)}}
+	{radio   4                 {::WB::FontChanged $w size}          normal   {} \
+	  {-variable ::WB::${w}::state(fontSize)}}
+	{radio   5                 {::WB::FontChanged $w size}          normal   {} \
+	  {-variable ::WB::${w}::state(fontSize)}}
+	{radio   6                 {::WB::FontChanged $w size}          normal   {} \
+	  {-variable ::WB::${w}::state(fontSize)}}}
     }
     set menuDefs(main,prefs,fontweight)  \
       {cascade     mWeight           {}                                    normal   {} {} {
-	{radio   mNormal           {::WB::FontChanged $wtop weight}        normal   {} \
-	  {-value normal -variable ::WB::${wtop}::state(fontWeight)}}
-	{radio   mBold             {::WB::FontChanged $wtop weight}        normal   {} \
-	  {-value bold -variable ::WB::${wtop}::state(fontWeight)}}
-	{radio   mItalic           {::WB::FontChanged $wtop weight}        normal   {} \
-	  {-value italic -variable ::WB::${wtop}::state(fontWeight)}}}
+	{radio   mNormal           {::WB::FontChanged $w weight}        normal   {} \
+	  {-value normal -variable ::WB::${w}::state(fontWeight)}}
+	{radio   mBold             {::WB::FontChanged $w weight}        normal   {} \
+	  {-value bold -variable ::WB::${w}::state(fontWeight)}}
+	{radio   mItalic           {::WB::FontChanged $w weight}        normal   {} \
+	  {-value italic -variable ::WB::${w}::state(fontWeight)}}}
     }
     set menuDefs(main,prefs,prefs)  \
       {command     mPreferences...   {::Preferences::Build}                normal   {}}
@@ -623,27 +689,22 @@ proc ::WB::QuitAppHook { } {
 #               ?-key value ...? custom arguments
 #       
 # Results:
-#       toplevel window. (.) If not "." then ".top."; extra dot!
+#       toplevel widget path
 
 proc ::WB::NewWhiteboard {args} { 
     global wDlgs
     variable uidmain
     
-    # Need to reuse ".". Outdated!
-    if {[wm state .] == "normal"} {
-	set wtop [::WB::GetNewToplevelPath]
-    } else {
-	set wtop .
-    }
-    eval {::WB::BuildWhiteboard $wtop} $args
-    return $wtop
+    set w [::WB::GetNewToplevelPath]
+    eval {::WB::BuildWhiteboard $w} $args
+    return $w
 }
 
 proc ::WB::GetNewToplevelPath { } {
     global wDlgs
     variable uidmain
     
-    return $wDlgs(wb)[incr uidmain].
+    return $wDlgs(wb)[incr uidmain]
 }
 
 # WB::BuildWhiteboard --
@@ -651,81 +712,62 @@ proc ::WB::GetNewToplevelPath { } {
 #       Makes the main toplevel window.
 #
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       args        see above
 #       
 # Results:
 #       new instance toplevel created.
 
-proc ::WB::BuildWhiteboard {wtop args} {
+proc ::WB::BuildWhiteboard {w args} {
     global  this prefs
     
     variable dims
     variable wbicons
     variable iconsInitted
     
-    Debug 2 "::WB::BuildWhiteboard wtop=$wtop, args='$args'"
+    Debug 2 "::WB::BuildWhiteboard w=$w, args='$args'"
     
-    if {![string equal [string index $wtop end] "."]} {
-	set wtop ${wtop}.
-    }    
-    namespace eval ::WB::${wtop}:: { }
+    namespace eval ::WB::${w}:: { }
     
-    upvar ::WB::${wtop}::wapp wapp
-    upvar ::WB::${wtop}::state state
-    upvar ::WB::${wtop}::opts opts
-    upvar ::WB::${wtop}::canvasImages canvasImages
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::state state
+    upvar ::WB::${w}::opts opts
+    upvar ::WB::${w}::canvasImages canvasImages
     
-    eval {::hooks::run whiteboardPreBuildHook $wtop} $args
+    eval {::hooks::run whiteboardPreBuildHook $w} $args
     
-    if {[string equal $wtop "."]} {
-	set wbTitle "$prefs(theAppName) (Main)"
-    } else {
-	set wbTitle $prefs(theAppName)
-    }
-    set titleString $wbTitle
-    array set opts [list -state normal -title $titleString -usewingeom 0]
+    array set opts [list -state normal -title $prefs(theAppName) -usewingeom 0]
     array set opts $args
-    
-    if {[string equal $wtop "."]} {
-	set w .
-    } else {
-	set w [string trimright $wtop .]
-    }
+        
+    set wfmain          $w.fmain
+    set wfrleft         $wfmain.frleft
+    set wfrcan          $wfmain.fc
+    set wcomm           $w.fcomm
     
     # Common widget paths.
     set wapp(toplevel)  $w
-    if {$w == "."} {
-	set wall            .f
-	set wapp(menu)      .menu
-    } else {
-	set wall            ${w}.f
-	set wapp(menu)      ${w}.menu
-    }
-    set wapp(frall)     $wall
-    set wapp(frtop)     $wall.frtop
-    set wapp(tray)      $wapp(frtop).on.fr
-    set wapp(tool)      $wall.fmain.frleft.frbt
-    set wapp(buglabel)  $wall.fmain.frleft.pad.bug
-    set wapp(frcan)     $wall.fmain.fc
-    set wapp(comm)      $wall.fcomm
-    set wcomm           $wapp(comm)
-    set wapp(statmess)  ${wcomm}.stat.lbl
-    set wapp(frstat)    ${wcomm}.st
-    set wapp(topchilds) [list $wall.menu $wall.frtop $wall.fmain $wall.fcomm]
+    set wapp(menu)      $w.menu
+    set wapp(frtop)     $w.frtop
+    set wapp(tray)      $w.frtop.on.fr
+    set wapp(tool)      $wfrleft.f.tool
+    set wapp(buglabel)  $wfrleft.pad.f.bug
+    set wapp(frcan)     $wfrcan
+    set wapp(comm)      $wcomm
+    set wapp(frstat)    $wcomm.st    
+    set wapp(topchilds) [list $w.menu $w.frtop $w.fmain $w.fcomm]
     
     # temporary...
-    set wapp(can)       $wall.fmain.fc.can
-    set wapp(xsc)       $wall.fmain.fc.xsc
-    set wapp(ysc)       $wall.fmain.fc.ysc
+    set wapp(can)       $wfrcan.can
+    set wapp(xsc)       $wfrcan.xsc
+    set wapp(ysc)       $wfrcan.ysc
     set wapp(can,)      $wapp(can)
     
     # Having the frame with canvas + scrollbars as a sibling makes it possible
     # to pack it in a different place.
-    set wapp(ccon)      $wall.fmain.cc
+    set wapp(ccon)      $w.fmain.cc
     
     # Notebook widget path to be packed into wapp(ccon).
-    set wapp(nb)        $wall.fmain.nb
+    set wapp(nb)        $w.fmain.nb
     
     set canvasImages {}
     
@@ -733,102 +775,101 @@ proc ::WB::BuildWhiteboard {wtop args} {
     # Inherit from the factory + preferences state.
     array set state [array get ::state]
     set state(fileName) ""
-    if {$opts(-state) == "disabled"} {
-	set state(btState) 00
+    if {$opts(-state) eq "disabled"} {
+	set state(tool) "point"
     }
+    set state(msg) ""
     
-    if {![winfo exists $w] && ($wtop != ".")} {
-	::UI::Toplevel $w -class Whiteboard
-	wm withdraw $w
-    }
+    ::UI::Toplevel $w -class Whiteboard -closecommand ::WB::CloseHook
+    wm withdraw $w
     wm title $w $opts(-title)
     
-    # Have an overall frame here of class Whiteboard. Needed for option db.
-    frame $wall -class Whiteboard
-    pack  $wall -fill both -expand 1
-    
-    set fontS [option get . fontSmall {}]
-    set fg    black
-    set iconResize [::Theme::GetImage [option get $wall resizeHandleImage {}]]
+    set iconResize [::Theme::GetImage [option get $w resizeHandleImage {}]]
     set wbicons(resizehandle) $iconResize
     if {!$iconsInitted} {
-	::WB::InitIcons $wall
+	InitIcons $w
     }
     
     # Note that the order of calls can be critical as any 'update' may trigger
     # network events to attempt drawing etc. Beware!!!
      
     # Start with menus.
-    ::WB::BuildWhiteboardMenus $wtop
+    BuildWhiteboardMenus $w
 	
+    # Special for X11 menus to look ok.
+    if {[tk windowingsystem] eq "x11"} {
+	ttk::separator $w.stop -orient horizontal
+	pack $w.stop -side top -fill x
+    }
+
     # Shortcut buttons at top? Do we want the toolbar to be visible.
-    if {$state(visToolbar)} {
-	::WB::ConfigShortcutButtonPad $wtop init
-    } else {
-	::WB::ConfigShortcutButtonPad $wtop init off
+    CreateShortcutButtonPad $w
+    if {!$state(visToolbar)} {
+	ConfigShortcutButtonPad $w off
     }
 
     # Make the connection frame.
-    frame $wcomm
-    pack $wcomm -side bottom -fill x
+    ttk::frame $wcomm
+    pack  $wcomm  -side bottom -fill x
     
     # Status message part.
-    frame  $wapp(frstat) -relief raised -borderwidth 1
-    frame  ${wcomm}.stat -relief groove -bd 2
-    canvas $wapp(statmess) -bd 0 -highlightthickness 0 -height 14
-    pack   $wapp(frstat) -side top -fill x -pady 0
-    pack   ${wcomm}.stat -side top -fill x -padx 10 -pady 2 -in $wapp(frstat)
-    pack   $wapp(statmess) -side left -pady 1 -padx 6 -fill x -expand true
-    $wapp(statmess) create text 0 [expr 14/2] -anchor w -text {} -font $fontS \
-      -tags stattxt -fill $fg
+    ttk::label $wapp(frstat) -style Small.TLabel \
+      -textvariable ::WB::${w}::state(msg) -anchor w -padding {16 2}
+    pack  $wapp(frstat)  -side top -fill x
+
+    ttk::separator $wcomm.s -orient horizontal
+    pack  $wcomm.s  -side top -fill x
     
     # Build the header for the actual network setup. This is where we
     # may have mode specific parts, p2p, jabber...
-    ::hooks::run whiteboardBuildEntryHook $wtop $wall $wcomm
+    ::hooks::run whiteboardBuildEntryHook $w $w $wcomm
+    
+    ttk::separator $w.tsep -orient horizontal
+    pack  $w.tsep  -side top -fill x
     
     # Make frame for toolbar + canvas.
-    frame $wall.fmain -borderwidth 0 -relief flat
-    frame $wall.fmain.frleft
-    frame $wapp(tool)
-    frame $wall.fmain.frleft.pad -relief raised -borderwidth 1
-    frame $wapp(ccon) -bd 1 -relief raised
-    pack  $wall.fmain -side top -fill both -expand true
-    pack  $wall.fmain.frleft -side left -fill y
-    pack  $wapp(tool) -side top
-    pack  $wall.fmain.frleft.pad -fill both -expand true
-    pack  $wapp(ccon) -fill both -expand true -side right
+    frame $w.fmain
+    frame $w.fmain.frleft
+    frame $w.fmain.frleft.f -relief raised -borderwidth 1
+    ttk::frame $w.fmain.frleft.f.tool
+    frame $w.fmain.frleft.pad -relief raised -borderwidth 1
+    ttk::frame $w.fmain.frleft.pad.f
+    frame $w.fmain.cc -bd 1 -relief raised
+
+    pack  $w.fmain            -side top -fill both -expand 1
+    pack  $w.fmain.frleft     -side left -fill y
+    pack  $w.fmain.frleft.f   -fill both
+    pack  $w.fmain.frleft.f.tool -side top
+    pack  $w.fmain.frleft.pad -fill both -expand 1
+    pack  $w.fmain.frleft.pad.f  -fill both -expand 1
+    pack  $w.fmain.cc         -fill both -expand 1 -side right
     
     # The 'Coccinella'.
     set wapp(bugImage) [::Theme::GetImage ladybug]
-    label $wapp(buglabel) -image $wapp(bugImage) -borderwidth 0
-    pack $wapp(buglabel) -side bottom
+    ttk::label $wapp(buglabel) -borderwidth 0 -image $wapp(bugImage)
+    pack $wapp(buglabel) -side bottom -fill x    
     
     # Make the tool buttons and invoke the one from the prefs file.
-    ::WB::CreateAllButtons $wtop
+    CreateAllButtons $w
     
     # ...and the drawing canvas.
-    ::WB::NewCanvas $wapp(frcan) -background $state(bgColCan)
+    NewCanvas $wapp(frcan) -background $state(bgColCan)
     set wapp(servCan) $wapp(can)
     pack $wapp(frcan) -in $wapp(ccon) -fill both -expand true -side right
     
     # Invoke tool button.
-    ::WB::SetToolButton $wtop [::WB::ToolBtNumToName $state(btState)]
+    SetToolButton $w $state(tool)
 
     # Add things that are defined in the prefs file and not updated else.
-    ::CanvasCmd::DoCanvasGrid $wtop
+    ::CanvasCmd::DoCanvasGrid $w
     
     # Create the undo/redo object.
-    set state(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]
+    set state(undotoken) [undo::new -command [list ::UI::UndoConfig $w]]
 
     # Set up paste menu if something on the clipboard.
-    ::WB::GetFocus $wtop $w
-    bind $w         <FocusIn>  [list [namespace current]::GetFocus $wtop %W]
+    GetFocus $w $w
+    bind $w         <FocusIn>  [list [namespace current]::GetFocus $w %W]
     bind $wapp(can) <Button-1> [list focus $wapp(can)]
-    
-    # Cut, copy, paste commands for the canvas.
-    bind $wapp(can) <<Cut>>   [list ::CanvasCCP::CutCopyPasteCmd cut]
-    bind $wapp(can) <<Copy>>  [list ::CanvasCCP::CutCopyPasteCmd copy]
-    bind $wapp(can) <<Paste>> [list ::CanvasCCP::CutCopyPasteCmd paste]
         
     if {$opts(-usewingeom)} {
 	::UI::SetWindowGeometry $w
@@ -836,25 +877,25 @@ proc ::WB::BuildWhiteboard {wtop args} {
 	
 	# Set window position only for the first whiteboard on screen.
 	# Subsequent whiteboards are placed by the window manager.
-	if {[llength [::WB::GetAllWhiteboards]] == 1} {	
+	if {[llength [GetAllWhiteboards]] == 1} {	
 	    ::UI::SetWindowGeometry $w whiteboard
 	}
     }
     if {$prefs(haveTkDnD)} {
 	update
-	::WB::InitDnD $wapp(can)
+	InitDnD $wapp(can)
     }
     catch {wm deiconify $w}
     #raise $w     This makes the window flashing when showed (linux)
     
     # A trick to let the window manager be finished before getting the geometry.
     # An 'update idletasks' needed anyway.
-    after idle ::hooks::run whiteboardSetMinsizeHook $wtop
+    after idle ::hooks::run whiteboardSetMinsizeHook $w
 
     if {[info exists opts(-file)]} {
-	::CanvasFile::DrawCanvasItemFromFile $wtop $opts(-file)
+	::CanvasFile::DrawCanvasItemFromFile $w $opts(-file)
     }
-    ::hooks::run whiteboardPostBuildHook $wtop
+    ::hooks::run whiteboardPostBuildHook $w
 }
 
 # WB::NewCanvas --
@@ -871,20 +912,22 @@ proc ::WB::NewCanvas {w args} {
     array set argsArr $args
     
     frame $w -class WBCanvas
-    set wcan ${w}.can
-    set wxsc ${w}.xsc
-    set wysc ${w}.ysc
+    set wcan $w.can
+    set wxsc $w.xsc
+    set wysc $w.ysc
+    
+    set bg $argsArr(-background)
     
     canvas $wcan -height $dims(hCanOri) -width $dims(wCanOri)  \
-      -relief raised -bd 0 -background $argsArr(-background)   \
+      -relief raised -bd 0 -background $bg -highlightbackground $bg \
       -scrollregion [list 0 0 $prefs(canScrollWidth) $prefs(canScrollHeight)]  \
       -xscrollcommand [list $wxsc set] -yscrollcommand [list $wysc set]	
-    scrollbar $wxsc -command [list $wcan xview] -orient horizontal
-    scrollbar $wysc -command [list $wcan yview] -orient vertical
+    tuscrollbar $wxsc -command [list $wcan xview] -orient horizontal
+    tuscrollbar $wysc -command [list $wcan yview] -orient vertical
     
-    grid $wcan -row 0 -column 0 -sticky news -padx 0 -pady 0
-    grid $wysc -row 0 -column 1 -sticky ns
-    grid $wxsc -row 1 -column 0 -sticky ew
+    grid  $wcan  -row 0 -column 0 -sticky news -padx 0 -pady 0
+    grid  $wysc  -row 0 -column 1 -sticky ns
+    grid  $wxsc  -row 1 -column 0 -sticky ew
     grid columnconfigure $w 0 -weight 1
     grid rowconfigure    $w 0 -weight 1
 
@@ -894,31 +937,31 @@ proc ::WB::NewCanvas {w args} {
     bind $wcan <Control-Left>  [list $wcan xview scroll -1 units]
     bind $wcan <Control-Down>  [list $wcan yview scroll  1 units]
     bind $wcan <Control-Up>    [list $wcan yview scroll -1 units]
-    
+
     return $wcan
 }
 
 # Testing Pages...
 
-proc ::WB::NewCanvasPage {wtop name} {
-    upvar ::WB::${wtop}::wapp wapp
-    upvar ::WB::${wtop}::state state
+proc ::WB::NewCanvasPage {w name} {
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::state state
     
     if {[string equal [winfo class [pack slaves $wapp(ccon)]] "WBCanvas"]} {
 	
 	# Repack the WBCanvas in notebook page.
-	::WB::MoveCanvasToPage $wtop $name
+	MoveCanvasToPage $w $name
     } else {
 	set wpage [$wapp(nb) newpage $name]
 	set frcan $wpage.fc
-	::WB::NewCanvas $frcan -background $state(bgColCan)
+	NewCanvas $frcan -background $state(bgColCan)
 	pack $frcan -fill both -expand true -side right
 	set wapp(can,$name) $frcan.can
     }
 }
 
-proc ::WB::MoveCanvasToPage {wtop name} {
-    upvar ::WB::${wtop}::wapp wapp
+proc ::WB::MoveCanvasToPage {w name} {
+    upvar ::WB::${w}::wapp wapp
     
     # Repack the WBCanvas in notebook page.
     pack forget $wapp(frcan)
@@ -932,40 +975,33 @@ proc ::WB::MoveCanvasToPage {wtop name} {
     set wapp(can,$name) $wapp(can,)
 }
 
-proc ::WB::DeleteCanvasPage {wtop name} {
-    upvar ::WB::${wtop}::wapp wapp
+proc ::WB::DeleteCanvasPage {w name} {
+    upvar ::WB::${w}::wapp wapp
     
     $wapp(nb) deletepage $name
 }
 
-proc ::WB::SelectPageCmd {w name} {
+proc ::WB::SelectPageCmd {wpage name} {
     
-    set wtop [winfo toplevel $w].
-    upvar ::WB::${wtop}::wapp wapp
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wpage]
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::state state
 
     Debug 3 "::WB::SelectPageCmd name=$name"
     
     set wapp(can) $wapp(can,$name)
     
     # Invoke tool button.
-    ::WB::SetToolButton $wtop [::WB::ToolBtNumToName $state(btState)]
-    ::hooks::run whiteboardSelectPage $wtop $name
+    SetToolButton $w $state(tool)
+    ::hooks::run whiteboardSelectPage $w $name
 }
 
-proc ::WB::CloseHook {wclose} {
-    global  wDlgs
+proc ::WB::CloseHook {w} {
     
-    if {[winfo exists $wclose] && \
-      [string equal [winfo class $wclose] "Whiteboard"]} {
-	if {$wclose == "."} {
-	    set wtop .
-	} else {
-	    set wtop ${wclose}.
-	}
-	set wcan [::WB::GetCanvasFromWtop $wtop]
+    if {[winfo exists $w] && [string equal [winfo class $w] "Whiteboard"]} {
+	set wcan [GetCanvasFromWtop $w]
 	::Plugins::DeregisterCanvasInstBinds $wcan
-	::hooks::run whiteboardCloseHook $wtop
+	::hooks::run whiteboardCloseHook $w
     }   
 }
 
@@ -973,61 +1009,57 @@ proc ::WB::CloseHook {wclose} {
 #
 #       Called when closing whiteboard window; cleanup etc.
 
-proc ::WB::CloseWhiteboard {wtop} {
-    upvar ::WB::${wtop}::wapp wapp
+proc ::WB::CloseWhiteboard {w} {
     
-    Debug 3 "::WB::CloseWhiteboard wtop=$wtop"
+    Debug 3 "::WB::CloseWhiteboard w=$w"
     
     # Verify that window still exists.
-    if {$wtop != "."} {
-	if {![winfo exists [string trimright $wtop .]]} {
-	    return
-	}
+    if {![winfo exists $w]} {
+	return
     }
+    upvar ::WB::${w}::wapp wapp
     
     # Reset and cancel all put/get file operations related to this window!
     # I think we let put operations go on.
-    #::PutFileIface::CancelAllWtop $wtop
-    ::GetFileIface::CancelAllWtop $wtop
-    ::Import::HttpResetAll $wtop
-    ::Import::Free $wtop
-    ::WB::DestroyMain $wtop
+    #::PutFileIface::CancelAllWtop $w
+    ::GetFileIface::CancelAllWtop $w
+    ::Import::HttpResetAll $w
+    ::Import::Free $w
+    DestroyMain $w
 }
 
 # WB::DestroyMain --
 # 
 #       Destroys toplevel whiteboard and cleans up.
 
-proc ::WB::DestroyMain {wtop} {
+proc ::WB::DestroyMain {w} {
     global  prefs
     
-    upvar ::WB::${wtop}::wapp wapp
-    upvar ::WB::${wtop}::opts opts
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::opts opts
     
-    Debug 3 "::WB::DestroyMain wtop=$wtop"
+    Debug 3 "::WB::DestroyMain w=$w"
     
     # Save instance specific 'state' array into generic 'state'.
     if {$opts(-usewingeom)} {
-	::UI::SaveWinGeom $wapp(toplevel)
+	::UI::SaveWinGeom $w
     } else {
-	::UI::SaveWinGeom whiteboard $wapp(toplevel)
+	::UI::SaveWinGeom whiteboard $w
     }
-    ::WB::SaveWhiteboardState $wtop
+    SaveWhiteboardState $w
     
-    if {$wtop == "."} {
+    if {$w == [::UI::GetMainWindow]} {
 	::UserActions::DoQuit -warning 1
     } else {
-	set topw $wapp(toplevel)
-	
-	catch {destroy $topw}    
+	catch {destroy $w}    
 	unset opts
 	unset wapp
     }
     
     # We could do some cleanup here.
-    GarbageImages $wtop
-    ::CanvasUtils::ItemFree $wtop
-    ::UI::FreeMenu $wtop
+    GarbageImages $w
+    ::CanvasUtils::ItemFree $w
+    ::UI::FreeMenu $w
 }
 
 # WB::CreateImageForWtop --
@@ -1044,17 +1076,17 @@ proc ::WB::CreateImageForWtop {wtop name args} {
     
     array set argsArr $args
     if {[info exists argsArr(-file)]} {
-	if {[string tolower [file extension $argsArr(-file)]] == ".gif"} {
+	if {[string tolower [file extension $argsArr(-file)]] eq ".gif"} {
 	    set photo [::Utils::CreateGif $argsArr(-file) $name]
 	} else {
-	    if {$name == ""} {
+	    if {$name eq ""} {
 		set photo [image create photo -file $argsArr(-file)]
 	    } else {
 		set photo [image create photo $name -file $argsArr(-file)]
 	    }
 	}
     } else {
-	if {$name == ""} {
+	if {$name eq ""} {
 	    set photo [image create photo -data $argsArr(-data)]
 	} else {
 	    set photo [image create photo $name -data $argsArr(-data)]
@@ -1065,16 +1097,16 @@ proc ::WB::CreateImageForWtop {wtop name args} {
     return $photo
 }
 
-proc ::WB::AddImageToGarbageCollector {wtop name} {
+proc ::WB::AddImageToGarbageCollector {w name} {
     
-    upvar ::WB::${wtop}::canvasImages canvasImages
+    upvar ::WB::${w}::canvasImages canvasImages
 
     lappend canvasImages $name
 }
 
-proc ::WB::GarbageImages {wtop} {
+proc ::WB::GarbageImages {w} {
     
-    upvar ::WB::${wtop}::canvasImages canvasImages
+    upvar ::WB::${w}::canvasImages canvasImages
     
     foreach name $canvasImages {
 	if {[::anigif::isanigif $name]} {
@@ -1091,55 +1123,58 @@ proc ::WB::GarbageImages {wtop} {
 # 
 # 
 
-proc ::WB::SaveWhiteboardState {wtop} {
+proc ::WB::SaveWhiteboardState {w} {
 
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::wapp wapp
       
     # Read back instance specific 'state' into generic 'state'.
-    array set ::state [array get ::WB::${wtop}::state]
+    array set ::state [array get ::WB::${w}::state]
 
     # Widget geometries:
-    #::WB::SaveWhiteboardDims $wtop
+    #::WB::SaveWhiteboardDims $w
     #::UI::SaveWinGeom whiteboard $wapp(toplevel)
 }
 
 proc ::WB::SaveAnyState { } {
     
     set win ""
-    set wbs [::WB::GetAllWhiteboards]
+    set wbs [GetAllWhiteboards]
     if {[llength $wbs]} {
 	set wfocus [focus]
-	if {$wfocus != ""} {
+	if {$wfocus ne ""} {
 	    set win [winfo toplevel $wfocus]
 	}
 	set win [lsearch -inline $wbs $wfocus]
-	if {$win == ""} {
+	if {$win eq ""} {
 	    set win [lindex $wbs 0]
 	}
-	if {$win != ""} {
-	    if {$win != "."} {
-		set win ${win}.
-	    }
+	if {$win ne ""} {
 	    ::WB::SaveWhiteboardState $win
 	}	
     }
+}
+
+proc ::WB::GetStateArray {w} {
+    upvar ::WB::${w}::state state
+
+    return [array get state]
 }
 
 # WB::SaveWhiteboardDims --
 # 
 #       Stores the present whiteboard widget geom state in 'dims' array.
 
-proc ::WB::SaveWhiteboardDims {wtop} {
+proc ::WB::SaveWhiteboardDims {w} {
     global  this
 
     upvar ::WB::dims dims
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::wapp wapp
     
-    set w $wapp(toplevel)
-    set wCan $wapp(can)
+    set wcan $wapp(can)
         	    
     # Update actual size values. 'Root' no menu, 'Tot' with menu.
-    set dims(wStatMess) [winfo width $wapp(statmess)]
+    #set dims(wStatMess) [winfo width $wapp(statmess)]
+    set dims(wStatMess) [winfo width $wapp(frstat)]
     set dims(wRoot) [winfo width $w]
     set dims(hRoot) [winfo height $w]
     set dims(x) [winfo x $w]
@@ -1151,16 +1186,16 @@ proc ::WB::SaveWhiteboardDims {wtop} {
 	# MATS: seems to always give 1 Linux not...
 	### EAS BEGIN
 	set dims(hMenu) 1
-	if {[winfo exists ${wtop}#menu]} {
-	    set dims(hMenu) [winfo height ${wtop}#menu]
+	if {[winfo exists $w.#menu]} {
+	    set dims(hMenu) [winfo height $w.#menu]
 	}
 	### EAS END
     } else {
 	set dims(hMenu) 0
     }
     set dims(hTot) [expr $dims(hRoot) + $dims(hMenu)]
-    set dims(wCanvas) [winfo width $wCan]
-    set dims(hCanvas) [winfo height $wCan]
+    set dims(wCanvas) [winfo width $wcan]
+    set dims(hCanvas) [winfo height $wcan]
 
     Debug 3 "::WB::SaveWhiteboardDims dims(hRoot)=$dims(hRoot)"
 }
@@ -1173,13 +1208,13 @@ proc ::WB::SaveWhiteboardDims {wtop} {
 #       in the communication frame. Non jabber only. Only needed when quitting
 #       to get the correct dims when set from preferences when launched again.
 
-proc ::WB::SaveCleanWhiteboardDims {wtop} {
+proc ::WB::SaveCleanWhiteboardDims {w} {
     global prefs
 
     upvar ::WB::dims dims
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::wapp wapp
 
-    if {$wtop != "."} {
+    if {$w ne "."} {
 	return
     }
     foreach {dims(wRoot) hRoot dims(x) dims(y)} [::UI::ParseWMGeometry [wm geometry .]] break
@@ -1193,16 +1228,11 @@ proc ::WB::SaveCleanWhiteboardDims {wtop} {
 #       Configure the options 'opts' state of a whiteboard.
 #       Returns 'opts' if no arguments.
 
-proc ::WB::ConfigureMain {wtop args} {
+proc ::WB::ConfigureMain {w args} {
     
-    upvar ::WB::${wtop}::wapp wapp
-    upvar ::WB::${wtop}::opts opts
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::opts opts
     
-    if {[string equal $wtop "."]} {
-	set w .
-    } else {
-	set w [string trimright $wtop .]
-    }
     if {[llength $args] == 0} {
 	return [array get opts]
     } else {
@@ -1219,13 +1249,13 @@ proc ::WB::ConfigureMain {wtop args} {
 			
 		    } else {
 			::WB::DisableWhiteboardMenus $wmenu
-			::WB::DisableShortcutButtonPad $wtop
+			DisableShortcutButtonPad $w
 		    }
 		}
 	    }
 	}
     }
-    eval {::hooks::run whiteboardConfigureHook $wtop} $args
+    eval {::hooks::run whiteboardConfigureHook $w} $args
 }
 
 proc ::WB::SetButtonTrayDefs {buttonDefs} {
@@ -1248,49 +1278,46 @@ proc ::WB::GetMenuDefs {key} {
 
 proc ::WB::LoginHook { } {
     
-    foreach w [::WB::GetAllWhiteboards] {
-	set wtop [::UI::GetToplevelNS $w]
+    foreach w [GetAllWhiteboards] {
 
 	# Make menus consistent.
-	::hooks::run whiteboardFixMenusWhenHook $wtop "connect"
+	::hooks::run whiteboardFixMenusWhenHook $w "connect"
     }
 }
 
 proc ::WB::LogoutHook { } {
     
     # Multiinstance whiteboard UI stuff.
-    foreach w [::WB::GetAllWhiteboards] {
-	set wtop [::UI::GetToplevelNS $w]
+    foreach w [GetAllWhiteboards] {
 
 	# If no more connections left, make menus consistent.
-	::hooks::run whiteboardFixMenusWhenHook $wtop "disconnect"
+	::hooks::run whiteboardFixMenusWhenHook $w "disconnect"
     }   
 }
 
 # WB::SetStatusMessage --
 
-proc ::WB::SetStatusMessage {wtop msg} {
+proc ::WB::SetStatusMessage {w msg} {
     
     # Make it failsafe.
-    set w $wtop
-    if {![string equal $wtop "."]} {
-	set w [string trimright $wtop "."]
-    }
     if {![winfo exists $w]} {
 	return
     }
-    upvar ::WB::${wtop}::wapp wapp
-    $wapp(statmess) itemconfigure stattxt -text $msg
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::state state
+
+    set state(msg) $msg
+    #$wapp(statmess) itemconfigure stattxt -text $msg
 }
 
-proc ::WB::GetServerCanvasFromWtop {wtop} {    
-    upvar ::WB::${wtop}::wapp wapp
+proc ::WB::GetServerCanvasFromWtop {w} {    
+    upvar ::WB::${w}::wapp wapp
     
     return $wapp(servCan)
 }
 
-proc ::WB::GetCanvasFromWtop {wtop} {    
-    upvar ::WB::${wtop}::wapp wapp
+proc ::WB::GetCanvasFromWtop {w} {    
+    upvar ::WB::${w}::wapp wapp
     
     return $wapp(can)
 }
@@ -1300,33 +1327,32 @@ proc ::WB::GetCanvasFromWtop {wtop} {
 #       This is a utility function mainly for plugins to get the tool buttons 
 #       state.
 
-proc ::WB::GetButtonState {wtop} {
-    upvar ::WB::${wtop}::state state
-    variable btNo2Name     
+proc ::WB::GetButtonState {w} {
+    upvar ::WB::${w}::state state
 
-    return $btNo2Name($state(btState))
+    return $state(tool)
 }
 
-proc ::WB::GetUndoToken {wtop} {    
-    upvar ::WB::${wtop}::state state
+proc ::WB::GetUndoToken {w} {    
+    upvar ::WB::${w}::state state
     
     return $state(undotoken)
 }
 
-proc ::WB::GetButtonTray {wtop} {
-    upvar ::WB::${wtop}::wapp wapp
+proc ::WB::GetButtonTray {w} {
+    upvar ::WB::${w}::wapp wapp
 
     return $wapp(tray)
 }
 
-proc ::WB::GetMenu {wtop} {
+proc ::WB::GetMenu {w} {
 
-    return ${wtop}menu
+    return [GetMenuFromWindow $w]
 }
 
 # WB::GetAllWhiteboards --
 # 
-#       Return all whiteboard's wtop as a list. 
+#       Return all whiteboard's toplevel widget paths as a list. 
 
 proc ::WB::GetAllWhiteboards { } {    
     global  wDlgs
@@ -1335,107 +1361,313 @@ proc ::WB::GetAllWhiteboards { } {
       [lsearch -all -inline -glob [winfo children .] $wDlgs(wb)*]]
 }
 
+# WB::ToolCmd --
+# 
+#       Command for radiobutton tools.
+
+proc ::WB::ToolCmd {w} {
+    upvar ::WB::${w}::state state
+        
+    set state(toolPrev)  $state(toolCache)
+    set state(toolCache) $state(tool)
+
+    SetToolButton $w $state(tool)
+}
+
 # WB::SetToolButton --
 #
-#       Uhhh...  When a tool button is clicked. Mainly sets all button specific
-#       bindings.
+#       Uhhh...  When a tool button is clicked.
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       btName 
 #       
 # Results:
 #       tool buttons created and mapped
 
-proc ::WB::SetToolButton {wtop btName} {
+proc ::WB::SetToolButton {w btName} {
     global  prefs wapp this
     
-    variable wbicons
-    upvar ::WB::${wtop}::wapp wapp
-    upvar ::WB::${wtop}::state state
-    upvar ::WB::${wtop}::opts opts
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::state state
+    upvar ::WB::${w}::opts opts
 
-    Debug 3 "SetToolButton:: wtop=$wtop, btName=$btName"
+    Debug 3 "SetToolButton:: w=$w, btName=$btName"
     
-    set wCan $wapp(can)
-    set wtoplevel $wapp(toplevel)
-    set state(btState) [::WB::ToolBtNameToNum $btName]
-    set irow [string index $state(btState) 0]
-    set icol [string index $state(btState) 1]
-    $wapp(tool).bt$irow$icol configure -image $wbicons(on${irow}${icol})
-    if {$state(btState) != $state(btStateOld)} {
-	set irow [string index $state(btStateOld) 0]
-	set icol [string index $state(btStateOld) 1]
-	$wapp(tool).bt$irow$icol configure -image $wbicons(off${irow}${icol})
-    }
-    set oldButton $state(btStateOld)
-    set oldBtName [::WB::ToolBtNumToName $oldButton]
-    set state(btStateOld) $state(btState)
-    ::WB::RemoveAllBindings $wCan
+    set wcan $wapp(can)
     
     # Deselect text items.
-    if {$btName != "text"} {
-	$wCan select clear
+    if {$btName ne "text"} {
+	$wcan select clear
     }
-    if {$btName == "del" || $btName == "text"} {
-	::CanvasCmd::DeselectAll $wtop
+    if {$btName eq "del" || $btName eq "text"} {
+	::CanvasCmd::DeselectAll $w
     }
     
     # Cancel any outstanding polygon drawings.
-    ::CanvasDraw::FinalizePoly $wCan -10 -10
+    ::CanvasDraw::FinalizePoly $wcan -10 -10
     
-    $wCan config -cursor {}
+    $wcan config -cursor {}
     
+    RemoveAllBindings $wcan
+    SetItemBinds $w $btName    
+    SetFrameItemBinds $w $btName
+
+    # This is a hook for plugins to register their own bindings.
+    # Calls any registered bindings for the plugin, and deregisters old ones.
+    ::Plugins::SetCanvasBinds $wcan $state(toolPrev) $btName
+}
+
+# WB::SetItemBinds --
+#
+#       Mainly sets all button specific bindings.
+#       
+# Arguments:
+#       w           toplevel widget path
+#       btName 
+#       
+# Results:
+#       none
+
+proc ::WB::SetItemBinds {w btName} {
+    global  this wapp
+
+    upvar ::WB::${w}::wapp wapp
+
+    set wcan $wapp(can)
+
     # Bindings directly to the canvas widget are dealt with using bindtags.
     
     # These ones are needed to cancel selection since we compete
     # with Button-1 binding to canvas.
     switch -- $this(platform) {
 	macintosh - macosx {
-	    $wCan bind std <Control-ButtonRelease-1> {
+	    $wcan bind std <Control-ButtonRelease-1> {
 		::CanvasDraw::CancelBox %W
 	    }
-	    $wCan bind std <Control-B1-Motion> {
+	    $wcan bind std <Control-B1-Motion> {
 		::CanvasDraw::CancelBox %W
 	    }
 	}
     }
 
     # Typical B3 bindings independent of tool selected.
-    $wCan bind std&&!locked <<ButtonPopup>> {
+    $wcan bind std&&!locked <<ButtonPopup>> {
 	::CanvasUtils::DoItemPopup %W %X %Y 
     }
-    $wCan bind std&&locked <<ButtonPopup>> {
+    $wcan bind std&&locked <<ButtonPopup>> {
 	::CanvasUtils::DoLockedPopup %W %X %Y 
     }
+
+    switch -- $btName {
+	point {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardPoint WhiteboardNonText Whiteboard $w all]
+
+	    $wcan bind std <Double-Button-1>  \
+	      [list ::ItemInspector::ItemInspector $w current]
+
+	    switch -- $this(platform) {
+		macintosh - macosx {
+		    $wcan bind std&&!locked <Button-1> {
+			::CanvasUtils::StartTimerToPopupEx %W %X %Y \
+			  ::CanvasUtils::DoItemPopup
+		    }
+		    $wcan bind std&&locked <Button-1> {
+			::CanvasUtils::StartTimerToPopupEx %W %X %Y \
+			  ::CanvasUtils::DoLockedPopup
+		    }
+		    $wcan bind std <ButtonRelease-1> {
+			::CanvasUtils::StopTimerToPopupEx
+		    }
+		    SetStatusMessage $w [mc uastatpointmac]
+		}
+		default {
+		    SetStatusMessage $w [mc uastatpoint]		      
+		}
+	    }
+	}
+	move {
+	    
+	    # Bindings for moving items; movies need special class.
+	    # The frame with the movie gets the mouse events, not the canvas.
+	    # Binds directly to canvas widget since we want to move selected 
+	    # items as well.
+	    # With shift constrained move.
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardMove WhiteboardNonText Whiteboard $w all]	    
+
+	    $wcan bind std&&!locked <Button-1> {
+		::CanvasDraw::InitMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind std&&!locked <B1-Motion> {
+		::CanvasDraw::DragMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind std&&!locked <ButtonRelease-1> {
+		::CanvasDraw::FinalMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind std&&!locked <Shift-B1-Motion> {
+		::CanvasDraw::DragMoveCurrent %W [%W canvasx %x] [%W canvasy %y] shift
+	    }
+	    
+	    $wcan bind tbbox&&(oval||rectangle) <Button-1> {
+		::CanvasDraw::InitMoveRectPoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind tbbox&&(oval||rectangle) <B1-Motion> {
+		::CanvasDraw::DragMoveRectPoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind tbbox&&(oval||rectangle) <ButtonRelease-1> {
+		::CanvasDraw::FinalMoveRectPoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind tbbox&&(oval||rectangle) <Shift-B1-Motion> {
+		::CanvasDraw::DragMoveRectPoint %W [%W canvasx %x] [%W canvasy %y] shift
+	    }
+	    
+	    $wcan bind tbbox&&(line||polygon) <Button-1> {
+		::CanvasDraw::InitMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind tbbox&&(line||polygon) <B1-Motion> {
+		::CanvasDraw::DragMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind tbbox&&(line||polygon) <ButtonRelease-1> {
+		::CanvasDraw::FinalMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind tbbox&&(line||polygon) <Shift-B1-Motion> {
+		::CanvasDraw::DragMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y] shift
+	    }
+	    
+	    $wcan bind tbbox&&arc <Button-1> {
+		::CanvasDraw::InitMoveArcPoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind tbbox&&arc <B1-Motion> {
+		::CanvasDraw::DragMoveArcPoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind tbbox&&arc <ButtonRelease-1> {
+		::CanvasDraw::FinalMoveArcPoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wcan bind tbbox&&arc <Shift-B1-Motion> {
+		::CanvasDraw::DragMoveArcPoint %W [%W canvasx %x] [%W canvasy %y] shift
+	    }
+	    
+	    $wcan config -cursor fleur
+	    SetStatusMessage $w [mc uastatmove]
+	}
+	line {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardLine WhiteboardNonText Whiteboard $w all]
+	    SetStatusMessage $w [mc uastatline]
+	}
+	arrow {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardArrow WhiteboardNonText Whiteboard $w all]
+	    SetStatusMessage $w [mc uastatarrow]
+	}
+	rect {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardRect WhiteboardNonText Whiteboard $w all]
+	    SetStatusMessage $w [mc uastatrect]
+	}
+	oval {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardOval WhiteboardNonText Whiteboard $w all]
+	    SetStatusMessage $w [mc uastatoval]
+	}
+	text {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardText Whiteboard $w all]
+	    ::CanvasText::EditBind $wcan
+	    $wcan config -cursor xterm
+	    SetStatusMessage $w [mc uastattext]
+	}
+	del {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardDel WhiteboardNonText Whiteboard $w all]
+	    $wcan bind std&&!locked <Button-1> {
+		::CanvasDraw::DeleteCurrent %W
+	    }
+	}
+	pen {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardPen WhiteboardNonText Whiteboard $w all]
+	    $wcan config -cursor pencil
+	    SetStatusMessage $w [mc uastatpen]
+	}
+	brush {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardBrush WhiteboardNonText Whiteboard $w all]
+	    SetStatusMessage $w [mc uastatbrush]
+	}
+	paint {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardPaint WhiteboardNonText Whiteboard $w all]
+	    SetStatusMessage $w [mc uastatpaint]	      
+	}
+	poly {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardPoly WhiteboardNonText Whiteboard $w all]
+	    SetStatusMessage $w [mc uastatpoly]	      
+	}       
+	arc {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardArc WhiteboardNonText Whiteboard $w all]
+	    SetStatusMessage $w [mc uastatarc]	      
+	}
+	rot {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardRot WhiteboardNonText Whiteboard $w all]
+	    $wcan config -cursor exchange
+	    SetStatusMessage $w [mc uastatrot]	      
+	}
+    }
+    
+    # Collect all common non textual bindings in one procedure.
+    if {$btName ne "text"} {
+	GenericNonTextBindings $w
+    }
+}
+
+# WB::SetFrameItemBinds --
+#
+#       Binding to canvas windows (QTFrame) must be made specifically for each
+#       whiteboard instance.
+#       Needed in two situations:
+#       1) Clicking tool button
+#       2) When whiteboard gets focus
+#       
+# Arguments:
+#       w           toplevel widget path
+#       btName 
+#       
+# Results:
+#       none
+
+proc ::WB::SetFrameItemBinds {w btName} {
+    global  this
+    upvar ::WB::${w}::wapp wapp
+    
+    set wcan $wapp(can)
+    
+    bind QTFrame <Button-1> {}
+    bind QTFrame <B1-Motion> {}
+    bind QTFrame <ButtonRelease-1> {}
+    bind QTFrame <Shift-B1-Motion> {}
+    bind SnackFrame <Button-1> {}
+    bind SnackFrame <B1-Motion> {}
+    bind SnackFrame <ButtonRelease-1> {}
+    bind SnackFrame <Shift-B1-Motion> {}
+
     bind QTFrame <<ButtonPopup>> {
 	::CanvasUtils::DoQuickTimePopup %W %X %Y 
     }
     bind SnackFrame <<ButtonPopup>> {
 	::CanvasUtils::DoWindowPopup %W %X %Y 
     }
-
+    
     switch -- $btName {
 	point {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardPoint WhiteboardNonText Whiteboard $wtoplevel all]
-
-	    $wCan bind std <Double-Button-1>  \
-	      [list ::ItemInspector::ItemInspector $wtop current]
 
 	    switch -- $this(platform) {
 		macintosh - macosx {
-		    $wCan bind std&&!locked <Button-1> {
-			::CanvasUtils::StartTimerToPopupEx %W %X %Y \
-			  ::CanvasUtils::DoItemPopup
-		    }
-		    $wCan bind std&&locked <Button-1> {
-			::CanvasUtils::StartTimerToPopupEx %W %X %Y \
-			  ::CanvasUtils::DoLockedPopup
-		    }
-		    $wCan bind std <ButtonRelease-1> {
-			::CanvasUtils::StopTimerToPopupEx
-		    }
 		    bind QTFrame <Button-1> {
 			::CanvasUtils::StartTimerToPopupEx %W %X %Y \
 			  ::CanvasUtils::DoQuickTimePopup
@@ -1449,188 +1681,48 @@ proc ::WB::SetToolButton {wtop btName} {
 		    bind SnackFrame <ButtonRelease-1> {
 			::CanvasUtils::StopTimerToWindowPopup
 		    }
-		    ::WB::SetStatusMessage $wtop [mc uastatpointmac]
-		}
-		default {
-		    ::WB::SetStatusMessage $wtop [mc uastatpoint]		      
 		}
 	    }
 	}
 	move {
 	    
-	    # Bindings for moving items; movies need special class.
-	    # The frame with the movie gets the mouse events, not the canvas.
-	    # Binds directly to canvas widget since we want to move selected 
-	    # items as well.
-	    # With shift constrained move.
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardMove WhiteboardNonText Whiteboard $wtoplevel all]	    
-
-	    $wCan bind std&&!locked <Button-1> {
-		::CanvasDraw::InitMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind std&&!locked <B1-Motion> {
-		::CanvasDraw::DragMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind std&&!locked <ButtonRelease-1> {
-		::CanvasDraw::FinalMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind std&&!locked <Shift-B1-Motion> {
-		::CanvasDraw::DragMoveCurrent %W [%W canvasx %x] [%W canvasy %y] shift
-	    }
-	    
-	    $wCan bind tbbox&&(oval||rectangle) <Button-1> {
-		::CanvasDraw::InitMoveRectPoint %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind tbbox&&(oval||rectangle) <B1-Motion> {
-		::CanvasDraw::DragMoveRectPoint %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind tbbox&&(oval||rectangle) <ButtonRelease-1> {
-		::CanvasDraw::FinalMoveRectPoint %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind tbbox&&(oval||rectangle) <Shift-B1-Motion> {
-		::CanvasDraw::DragMoveRectPoint %W [%W canvasx %x] [%W canvasy %y] shift
-	    }
-	    
-	    $wCan bind tbbox&&(line||polygon) <Button-1> {
-		::CanvasDraw::InitMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind tbbox&&(line||polygon) <B1-Motion> {
-		::CanvasDraw::DragMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind tbbox&&(line||polygon) <ButtonRelease-1> {
-		::CanvasDraw::FinalMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind tbbox&&(line||polygon) <Shift-B1-Motion> {
-		::CanvasDraw::DragMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y] shift
-	    }
-	    
-	    $wCan bind tbbox&&arc <Button-1> {
-		::CanvasDraw::InitMoveArcPoint %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind tbbox&&arc <B1-Motion> {
-		::CanvasDraw::DragMoveArcPoint %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind tbbox&&arc <ButtonRelease-1> {
-		::CanvasDraw::FinalMoveArcPoint %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan bind tbbox&&arc <Shift-B1-Motion> {
-		::CanvasDraw::DragMoveArcPoint %W [%W canvasx %x] [%W canvasy %y] shift
-	    }
-		
-	    # Need to substitute $wCan.
+	    # Need to substitute $wcan.
 	    bind QTFrame <Button-1>  \
-	      [subst {::CanvasDraw::InitMoveFrame $wCan %W %x %y}]
+	      [subst {::CanvasDraw::InitMoveFrame $wcan %W %x %y}]
 	    bind QTFrame <B1-Motion>  \
-	      [subst {::CanvasDraw::DoMoveFrame $wCan %W %x %y}]
+	      [subst {::CanvasDraw::DoMoveFrame $wcan %W %x %y}]
 	    bind QTFrame <ButtonRelease-1>  \
-	      [subst {::CanvasDraw::FinMoveFrame $wCan %W %x %y}]
+	      [subst {::CanvasDraw::FinMoveFrame $wcan %W %x %y}]
 	    bind QTFrame <Shift-B1-Motion>  \
-	      [subst {::CanvasDraw::FinMoveFrame $wCan %W %x %y}]
+	      [subst {::CanvasDraw::FinMoveFrame $wcan %W %x %y}]
 	    
 	    bind SnackFrame <Button-1>  \
-	      [subst {::CanvasDraw::InitMoveFrame $wCan %W %x %y}]
+	      [subst {::CanvasDraw::InitMoveFrame $wcan %W %x %y}]
 	    bind SnackFrame <B1-Motion>  \
-	      [subst {::CanvasDraw::DoMoveFrame $wCan %W %x %y}]
+	      [subst {::CanvasDraw::DoMoveFrame $wcan %W %x %y}]
 	    bind SnackFrame <ButtonRelease-1>  \
-	      [subst {::CanvasDraw::FinMoveFrame $wCan %W %x %y}]
+	      [subst {::CanvasDraw::FinMoveFrame $wcan %W %x %y}]
 	    bind SnackFrame <Shift-B1-Motion>  \
-	      [subst {::CanvasDraw::FinMoveFrame $wCan %W %x %y}]
-	    
-	    $wCan config -cursor fleur
-	    ::WB::SetStatusMessage $wtop [mc uastatmove]
-	}
-	line {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardLine WhiteboardNonText Whiteboard $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [mc uastatline]
-	}
-	arrow {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardArrow WhiteboardNonText Whiteboard $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [mc uastatarrow]
-	}
-	rect {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardRect WhiteboardNonText Whiteboard $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [mc uastatrect]
-	}
-	oval {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardOval WhiteboardNonText Whiteboard $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [mc uastatoval]
-	}
-	text {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardText Whiteboard $wtoplevel all]
-	    ::CanvasText::EditBind $wCan
-	    $wCan config -cursor xterm
-	    ::WB::SetStatusMessage $wtop [mc uastattext]
+	      [subst {::CanvasDraw::FinMoveFrame $wcan %W %x %y}]
 	}
 	del {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardDel WhiteboardNonText Whiteboard $wtoplevel all]
-	    $wCan bind std&&!locked <Button-1> {
-		::CanvasDraw::DeleteCurrent %W
-	    }
 	    bind QTFrame <Button-1>  \
-	      [subst {::CanvasDraw::DeleteFrame $wCan %W %x %y}]
+	      [subst {::CanvasDraw::DeleteFrame $wcan %W %x %y}]
 	    bind SnackFrame <Button-1>  \
-	      [subst {::CanvasDraw::DeleteFrame $wCan %W %x %y}]
-	    ::WB::SetStatusMessage $wtop [mc uastatdel]
-	}
-	pen {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardPen WhiteboardNonText Whiteboard $wtoplevel all]
-	    $wCan config -cursor pencil
-	    ::WB::SetStatusMessage $wtop [mc uastatpen]
-	}
-	brush {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardBrush WhiteboardNonText Whiteboard $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [mc uastatbrush]
-	}
-	paint {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardPaint WhiteboardNonText Whiteboard $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [mc uastatpaint]	      
-	}
-	poly {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardPoly WhiteboardNonText Whiteboard $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [mc uastatpoly]	      
-	}       
-	arc {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardArc WhiteboardNonText Whiteboard $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [mc uastatarc]	      
-	}
-	rot {
-	    bindtags $wCan  \
-	      [list $wCan WhiteboardRot WhiteboardNonText Whiteboard $wtoplevel all]
-	    $wCan config -cursor exchange
-	    ::WB::SetStatusMessage $wtop [mc uastatrot]	      
+	      [subst {::CanvasDraw::DeleteFrame $wcan %W %x %y}]
+	    SetStatusMessage $w [mc uastatdel]
 	}
     }
-    
-    # Collect all common non textual bindings in one procedure.
-    if {$btName != "text"} {
-	GenericNonTextBindings $wtop
-    }
-
-    # This is a hook for plugins to register their own bindings.
-    # Calls any registered bindings for the plugin, and deregisters old ones.
-    ::Plugins::SetCanvasBinds $wCan $oldBtName $btName
 }
 
-proc ::WB::GenericNonTextBindings {wtop} {
+proc ::WB::GenericNonTextBindings {w} {
     
-    upvar ::WB::${wtop}::wapp wapp
-    set wCan $wapp(can)
+    upvar ::WB::${w}::wapp wapp
+    set wcan $wapp(can)
     
     # Various bindings.
-    bind $wCan <BackSpace> [list ::CanvasDraw::DeleteSelected $wCan]
-    bind $wCan <Control-d> [list ::CanvasDraw::DeleteSelected $wCan]
+    bind $wcan <BackSpace> [list ::CanvasDraw::DeleteSelected $wcan]
+    bind $wcan <Control-d> [list ::CanvasDraw::DeleteSelected $wcan]
 }
 
 # WB::RemoveAllBindings --
@@ -1638,37 +1730,30 @@ proc ::WB::GenericNonTextBindings {wtop} {
 #       Clears all application defined bindings in the canvas.
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       
 # Results:
 #       none
 
-proc ::WB::RemoveAllBindings {w} {
+proc ::WB::RemoveAllBindings {wcan} {
     
-    Debug 3 "::WB::RemoveAllBindings w=$w"
+    Debug 3 "::WB::RemoveAllBindings wcan=$wcan"
     
     # List all tags that we may bind to.
     foreach btag {
 	all  std  std&&locked  std&&!locked  
 	text  tbbox&&arc  tbbox&&(oval||rectangle)
     } {
-	foreach seq [$w bind $btag] {
-	    $w bind $btag $seq {}
+	foreach seq [$wcan bind $btag] {
+	    $wcan bind $btag $seq {}
 	}
     }
     
     # Seems necessary for the arc item... More?
-    bind $w <Shift-B1-Motion> {}
-	
-    bind QTFrame <Button-1> {}
-    bind QTFrame <B1-Motion> {}
-    bind QTFrame <ButtonRelease-1> {}
-    bind SnackFrame <Button-1> {}
-    bind SnackFrame <B1-Motion> {}
-    bind SnackFrame <ButtonRelease-1> {}
-    
+    bind $wcan <Shift-B1-Motion> {}
+	    
     # Remove any text insertion...
-    $w focus {}
+    $wcan focus {}
 }
 
 # RegisterCanvasClassBinds, RegisterCanvasInstBinds --
@@ -1684,31 +1769,23 @@ proc ::WB::RegisterCanvasClassBinds {name canvasBindList} {
     
     # Must set the bindings for each instance.
     foreach w [::WB::GetAllWhiteboards] {
-	set wtop $w
-	if {$w != "."} {
-	    set wtop ${wtop}.
-	}
-	upvar ::WB::${wtop}::state state
-	upvar ::WB::${wtop}::wapp wapp
+	upvar ::WB::${w}::state state
+	upvar ::WB::${w}::wapp wapp
 	
-	set btName    [::WB::ToolBtNumToName $state(btState)]
-	set oldBtName [::WB::ToolBtNumToName $state(btStateOld)]
-	::Plugins::SetCanvasBinds $wapp(can) $oldBtName $btName
+	::Plugins::SetCanvasBinds $wapp(can) $state(toolPrev) $state(tool)
     }
 }
 
-proc ::WB::RegisterCanvasInstBinds {w name canvasBindList} {
+proc ::WB::RegisterCanvasInstBinds {wcan name canvasBindList} {
 
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::state state
+    set w [winfo toplevel $wcan]
+    upvar ::WB::${w}::state state
 
     # Register the actual bindings.
-    ::Plugins::RegisterCanvasInstBinds $w $name $canvasBindList
+    ::Plugins::RegisterCanvasInstBinds $wcan $name $canvasBindList
     
     # Must set the bindings for this instance.
-    set btName    [::WB::ToolBtNumToName $state(btState)]
-    set oldBtName [::WB::ToolBtNumToName $state(btStateOld)]
-    ::Plugins::SetCanvasBinds $w $oldBtName $btName
+    ::Plugins::SetCanvasBinds $wcan $state(toolPrev) $state(tool)
 }
 
 # WB::BuildWhiteboardMenus --
@@ -1716,23 +1793,22 @@ proc ::WB::RegisterCanvasInstBinds {w name canvasBindList} {
 #       Makes all menus for a toplevel window.
 #
 # Arguments:
-#       wtop        toplevel window. ("." or ".main2." with extra dot!)
+#       w           toplevel widget path
 #       
 # Results:
 #       menu created
 
-proc ::WB::BuildWhiteboardMenus {wtop} {
+proc ::WB::BuildWhiteboardMenus {w} {
     global  this wDlgs prefs dashFull2Short
     
     variable menuDefs
-    upvar ::WB::${wtop}::wapp wapp
-    upvar ::WB::${wtop}::state state
-    upvar ::WB::${wtop}::opts opts
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::state state
+    upvar ::WB::${w}::opts opts
     
     ::Debug 2 "::WB::BuildWhiteboardMenus"
 	
-    set topwindow $wapp(toplevel)
-    set wCan      $wapp(can)
+    set wcan      $wapp(can)
     set wmenu     $wapp(menu)
     
     if {$prefs(haveMenus)} {
@@ -1746,29 +1822,29 @@ proc ::WB::BuildWhiteboardMenus {wtop} {
 	set haveAppleMenu 0
     }
     if {$haveAppleMenu} {
-	::UI::BuildAppleMenu $wtop ${wmenu}.apple $opts(-state)
+	::UI::BuildAppleMenu $w $wmenu.apple $opts(-state)
     }
-    ::UI::NewMenu $wtop ${wmenu}.file   mFile        $menuDefs(main,file)  $opts(-state)
-    ::UI::NewMenu $wtop ${wmenu}.edit   mEdit        $menuDefs(main,edit)  $opts(-state)
-    ::UI::NewMenu $wtop ${wmenu}.prefs  mPreferences $menuDefs(main,prefs) $opts(-state)
-    ::UI::NewMenu $wtop ${wmenu}.items  mLibrary     $menuDefs(main,items) $opts(-state)
+    ::UI::NewMenu $w $wmenu.file   mFile        $menuDefs(main,file)  $opts(-state)
+    ::UI::NewMenu $w $wmenu.edit   mEdit        $menuDefs(main,edit)  $opts(-state)
+    ::UI::NewMenu $w $wmenu.prefs  mPreferences $menuDefs(main,prefs) $opts(-state)
+    ::UI::NewMenu $w $wmenu.items  mLibrary     $menuDefs(main,items) $opts(-state)
     
     # Plugin menus if any.
-    ::UI::BuildPublicMenus $wtop $wmenu
+    ::UI::BuildPublicMenus $w $wmenu
     
-    ::UI::NewMenu $wtop ${wmenu}.info mInfo $menuDefs(main,info) $opts(-state)
+    ::UI::NewMenu $w $wmenu.info mInfo $menuDefs(main,info) $opts(-state)
 
     # Handle '-state disabled' option. Keep Edit/Copy.
-    if {$opts(-state) == "disabled"} {
+    if {$opts(-state) eq "disabled"} {
 	::WB::DisableWhiteboardMenus $wmenu
     }
     
     # Use a function for this to dynamically build this menu if needed.
-    ::WB::BuildFontMenu $wtop $prefs(canvasFonts)    
+    ::WB::BuildFontMenu $w $prefs(canvasFonts)    
 	
     # End menus; place the menubar.
     if {$prefs(haveMenus)} {
-	$topwindow configure -menu $wmenu
+	$w configure -menu $wmenu
     } else {
 	pack $wmenu -side top -fill x
     }
@@ -1781,10 +1857,10 @@ proc ::WB::BuildWhiteboardMenus {wtop} {
 proc ::WB::DisableWhiteboardMenus {wmenu} {
     variable menuSpecPublic
     
-    ::UI::MenuDisableAllBut ${wmenu}.file {
-	mNew mCloseWindow mSaveCanvas mPageSetup mPrintCanvas mQuit
+    ::UI::MenuDisableAllBut $wmenu.file {
+	mNew mCloseWindow mSaveCanvas mPageSetup mPrintCanvas
     }
-    ::UI::MenuDisableAllBut ${wmenu}.edit {mAll}
+    ::UI::MenuDisableAllBut $wmenu.edit {mAll}
     $wmenu entryconfigure [mc mPreferences] -state disabled
     $wmenu entryconfigure [mc mLibrary] -state disabled
     $wmenu entryconfigure [mc mInfo] -state disabled
@@ -1796,144 +1872,129 @@ proc ::WB::DisableWhiteboardMenus {wmenu} {
     }
 }
 
+proc ::WB::CreateShortcutButtonPad {w} {
+    variable wbicons
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::opts opts
+    upvar ::WB::${w}::state state    
+    
+    Debug 3 "::WB::CreateShortcutButtonPad"
+
+    set wfrtop  $wapp(frtop)
+    set wfron   $wfrtop.on
+    set wonbar  $wfrtop.on.barvert
+    set wonfr   $wonbar.f
+    set woffbar $wfrtop.barhoriz    
+    
+    frame $wfrtop
+    frame $wfron
+
+    # On bar.
+    frame $wonbar -bd 1 -relief raised
+    ttk::frame $wonbar.f
+    ttk::label $wonbar.f.l -compound image -image [::UI::GetIcon mactriangleopen]
+    pack  $wonbar.f    -fill both -expand 1
+    pack  $wonbar.f.l  -side top
+    
+    bind  $wonfr <Button-1> [list $wonbar configure -relief sunken]
+    bind  $wonfr <ButtonRelease-1>  \
+      [list [namespace current]::ConfigShortcutButtonPad $w "off"]	
+    bind  $wonfr.l <Button-1> [list $wonbar configure -relief sunken]
+    bind  $wonfr.l <ButtonRelease-1>  \
+      [list [namespace current]::ConfigShortcutButtonPad $w "off"]
+    
+    # Off bar.
+    label $woffbar -image $wbicons(barhoriz) -relief raised -borderwidth 1
+    
+    bind $woffbar <Button-1> [list $woffbar configure -relief sunken]
+    bind $woffbar <ButtonRelease-1>   \
+      [list [namespace current]::ConfigShortcutButtonPad $w "on"]
+
+    pack  $wfrtop -side top -fill x
+    pack  $wfron -fill x -side left -expand 1
+    pack  $wonbar  -side left -fill y
+    
+    # Build the actual toolbar.
+    BuildToolbar $w
+    pack $wapp(tray) -side left -fill both -expand 1
+    if {$opts(-state) eq "disabled"} {
+	DisableShortcutButtonPad $w
+    }
+}
+
 # WB::ConfigShortcutButtonPad --
 #
-#       Makes the top shortcut button pad. Switches between 'on' and 'off' state.
-#       The 'subSpec' is only valid for 'init' where it can be 'off'.
+#       Switches between 'on' and 'off' state.
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
-#       what        can be "init", "on", or "off".
-#       subSpec     is only valid for 'init' where it can be 'off'.
+#       w           toplevel widget path
+#       what        can be "on", or "off".
 #       
 # Results:
 #       toolbar created, or state toggled.
 
-proc ::WB::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
+proc ::WB::ConfigShortcutButtonPad {w what} {
     global  this wDlgs prefs
     
-    variable dims
     variable wbicons
-    upvar ::WB::${wtop}::wapp wapp
-    upvar ::WB::${wtop}::opts opts
-    upvar ::WB::${wtop}::state state    
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::opts opts
+    upvar ::WB::${w}::state state    
     
-    Debug 3 "::WB::ConfigShortcutButtonPad what=$what, subSpec=$subSpec"
+    Debug 3 "::WB::ConfigShortcutButtonPad what=$what"
 
-    if {$wtop != "."} {
-	set topw [string trimright $wtop .]
-    } else {
-	set topw $wtop
-    }
     set wfrtop  $wapp(frtop)
-    set wfron   ${wfrtop}.on
-    set wonbar  ${wfrtop}.on.barvert
-    set woffbar ${wfrtop}.barhoriz
-        
-    if {![winfo exists $wfrtop]} {
-	frame $wfrtop -relief raised -borderwidth 0
-	frame $wfron -borderwidth 0
-	label $wonbar -image $wbicons(barvert) -bd 1 -relief raised
-	label $woffbar -image $wbicons(barhoriz) -relief raised -borderwidth 1
-	pack  $wfrtop -side top -fill x
-	pack  $wfron -fill x -side left -expand 1
-	pack  $wonbar -padx 0 -pady 0 -side left
-	bind  $wonbar <Button-1> [list $wonbar configure -relief sunken]
-	bind  $wonbar <ButtonRelease-1>  \
-	  [list [namespace current]::ConfigShortcutButtonPad $wtop "off"]
-	
-	# Build the actual shortcut button pad.
-	::WB::BuildShortcutButtonPad $wtop
-	pack $wapp(tray) -side left -fill both -expand 1
-	if {$opts(-state) == "disabled"} {
-	    ::WB::DisableShortcutButtonPad $wtop
-	}
-	
-	# Cache the heights of the button tray.
-	set dims(hTopOn)    [winfo reqheight $wonbar]
-	set dims(hTopOff)   [winfo reqheight $woffbar]
-	Debug 3 "hTopOn=$dims(hTopOn), hTopOff=$dims(hTopOff)"
-    }
- 
-    switch -- $what {
-	init {
+    set wfron   $wfrtop.on
+    set wonbar  $wfrtop.on.barvert
+    set woffbar $wfrtop.barhoriz
     
-	    # Do we want the toolbar to be collapsed at initialization?
-	    if {[string equal $subSpec "off"]} {
-		pack forget $wfron
-		$wfrtop configure -bg gray75
-		pack $woffbar -side left -padx 0 -pady 0
-		bind $woffbar <ButtonRelease-1>   \
-		  [list [namespace current]::ConfigShortcutButtonPad $wtop "on"]
-	    }
-	}
+    wm positionfrom $w user
+         
+    switch -- $what {
 	off {
-	    foreach {wMin hMin} [wm minsize $topw] break
-	    
-	    # Relax the min size.
-	    wm minsize $topw 0 0
-	    
-	    # New size, keep width.
-	    foreach {width height x y} [::UI::ParseWMGeometry [wm geometry $topw]] break
-	    set hNew    [expr $height - $dims(hTopOn) + $dims(hTopOff)]
-	    set hMinNew [expr $hMin - $dims(hTopOn) + $dims(hTopOff)]
-	    wm geometry $topw ${width}x${hNew}
 	    pack forget $wfron
 	    $wfrtop configure -bg gray75
 	    pack $woffbar -side left -padx 0 -pady 0
-	    bind $woffbar <Button-1> [list $woffbar configure -relief sunken]
-	    bind $woffbar <ButtonRelease-1>   \
-	      [list [namespace current]::ConfigShortcutButtonPad $wtop "on"]
 	    $wonbar configure -relief raised
 	    set state(visToolbar) 0
-	    after idle [list wm minsize $topw $wMin $hMinNew]
 	}
 	on {
-	
-	    # New size, keep width.
-	    foreach {wMin hMin} [wm minsize $topw] break
-	    foreach {width height x y} [::UI::ParseWMGeometry [wm geometry $topw]] break
-	    set hNew    [expr $height - $dims(hTopOff) + $dims(hTopOn)]
-	    set hMinNew [expr $hMin - $dims(hTopOff) + $dims(hTopOn)]
-	    wm geometry $topw ${width}x${hNew}
 	    pack forget $woffbar
 	    pack $wfron -fill x -side left -expand 1
 	    $woffbar configure -relief raised
-	    bind $woffbar <Button-1> [list $woffbar configure -relief sunken]
-	    bind $woffbar <ButtonRelease-1>   \
-	      [list [namespace current]::ConfigShortcutButtonPad $wtop "off"]
 	    set state(visToolbar) 1
-	    after idle [list wm minsize $topw $wMin $hMinNew]
 	}
     }
+    
+    # New minsize is required.
+    after idle ::hooks::run whiteboardSetMinsizeHook $w
 }
 
 namespace eval ::WB:: {
     variable extButtonDefs {}
 }
 
-# WB::BuildShortcutButtonPad --
+# WB::BuildToolbar --
 #
 #       Build the actual shortcut button pad.
 
-proc ::WB::BuildShortcutButtonPad {wtop} {
+proc ::WB::BuildToolbar {w} {
     global  wDlgs
     variable wbicons
     variable btShortDefs
     variable extButtonDefs
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::wapp wapp
     
-    set wCan   $wapp(can)
+    set wcan   $wapp(can)
     set wtray  $wapp(tray)
-    set wfrall $wapp(frall)
     set h [image height $wbicons(barvert)]
 
-    ::buttontray::buttontray $wtray -height $h -relief raised -borderwidth 1
+    ::ttoolbar::ttoolbar $wtray -height $h -relief raised -borderwidth 1
 
-    # We need to substitute $wCan, $wtop etc specific for this wb instance.
+    # We need to substitute $wcan, $w etc specific for this wb instance.
     foreach {name cmd} $btShortDefs {
-	set icon    [::Theme::GetImage [option get $wfrall ${name}Image {}]]
-	set iconDis [::Theme::GetImage [option get $wfrall ${name}DisImage {}]]
+	set icon    [::Theme::GetImage [option get $w ${name}Image {}]]
+	set iconDis [::Theme::GetImage [option get $w ${name}DisImage {}]]
 	set cmd [subst -nocommands -nobackslashes $cmd]
 	set txt [string totitle $name]
 	$wtray newbutton $name -text [mc $txt] \
@@ -1995,9 +2056,9 @@ proc ::WB::DeregisterShortcutButton {name} {
 #
 #       Sets the state of the main to "read only".
 
-proc ::WB::DisableShortcutButtonPad {wtop} {
+proc ::WB::DisableShortcutButtonPad {w} {
     variable btShortDefs
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::wapp wapp
 
     set wtray $wapp(tray)
     foreach {name cmd} $btShortDefs {
@@ -2018,84 +2079,109 @@ proc ::WB::DisableShortcutButtonPad {wtop} {
 #       Makes the toolbar button pad for the drawing tools.
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
+#       
 # Results:
 #       tool buttons created and mapped
 
-proc ::WB::CreateAllButtons {wtop} {
+proc ::WB::CreateAllButtons {w} {
     global  prefs this
     
     variable btNo2Name 
     variable btName2No
     variable wbicons
-    upvar ::WB::${wtop}::state state
-    upvar ::WB::${wtop}::wapp wapp
-    upvar ::WB::${wtop}::opts opts
+    upvar ::WB::${w}::state state
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::opts opts
     
     set wtool $wapp(tool)
     
     for {set icol 0} {$icol <= 1} {incr icol} {
 	for {set irow 0} {$irow <= 6} {incr irow} {
-	    
-	    # The icons are Mime coded gifs.
-	    set lwi [label $wtool.bt$irow$icol -image $wbicons(off${irow}${icol}) \
-	      -borderwidth 0]
-	    grid $lwi -row $irow -column $icol -padx 0 -pady 0
 	    set name $btNo2Name($irow$icol)
+	    set wlabel $wtool.bt$irow$icol
 	    
-	    if {![string equal $opts(-state) "disabled"]} {
-		bind $lwi <Button-1>  \
-		  [list [namespace current]::SetToolButton $wtop $name]
+	    ttk::radiobutton $wlabel -style Toolbutton \
+	      -variable ::WB::${w}::state(tool) -value $name \
+	      -command [list [namespace current]::ToolCmd $w] \
+	      -image $wbicons($name)
+	    grid  $wlabel  -row $irow -column $icol -padx 0 -pady 0
+	    
+	    if {[string equal $opts(-state) "disabled"]} {
+		$wlabel state {disabled}
+	    } else {
 		
 		# Handle bindings to popup options.
 		if {[string match "mac*" $this(platform)]} {
-		    bind $lwi <Button-1> "+ [namespace current]::StartTimerToToolPopup %W $wtop $name"
-		    bind $lwi <ButtonRelease-1> [namespace current]::StopTimerToToolPopup
+		    bind $wlabel <Button-1>        \
+		      [list +[namespace current]::StartTimerToToolPopup $w %W $name]
+		    bind $wlabel <ButtonRelease-1> \
+		      [namespace current]::StopTimerToToolPopup
 		}
-		bind $lwi <<ButtonPopup>> [list [namespace current]::DoToolPopup %W $wtop $name]
+		bind $wlabel <<ButtonPopup>> [list [namespace current]::DoToolPopup $w %W $name]
 	    }
 	}
     }
     
     # Make all popups.
-    ::WB::BuildToolPopups $wtop
-    ::WB::BuildToolPopupFontMenu $wtop $prefs(canvasFonts)
+    BuildToolPopups $w
+    BuildToolPopupFontMenu $w $prefs(canvasFonts)
     
     # Color selector.
-    set wcolsel $wtool.cacol
-    set imheight [image height $wbicons(imcolor)]
-    canvas $wcolsel -width 56 -height $imheight -highlightthickness 0
-    $wcolsel create image 0 0 -anchor nw -image $wbicons(imcolor)
-    set idColSel [$wcolsel create rectangle 7 7 33 30 \
-      -fill $state(fgCol) -outline {} -tags tcolSel]
-    set idBg [$wcolsel create polygon 21 32  35 32  35 22  48 22  48 44  21 44 \
-      -fill $state(bgCol) -smooth 0 -outline {} -tags tbgcol] 
-    set wapp(colSel) $wcolsel
-    
-    # Black and white reset rectangle.
-    set idBWReset [$wtool.cacol create image 4 34 -anchor nw  \
-      -image $wbicons(bwrect)]
-    
-    # bg and fg switching.
-    set idBWSwitch [$wtool.cacol create image 38 4 -anchor nw  \
-      -image $wbicons(bwrect)]
-    grid $wtool.cacol -  -padx 0 -pady 0
-
-    if {![string equal $opts(-state) "disabled"]} {
-	$wcolsel bind $idColSel <Button-1>  \
-	  [list [namespace current]::ColorSelector $wtop $state(fgCol)]
-	$wcolsel bind $idBWReset <Button-1>  \
-	  [list [namespace current]::ResetColorSelector $wtop]
-	$wcolsel bind $idBWSwitch <Button-1> \
-	  [list [namespace current]::SwitchBgAndFgCol $wtop]
-    }
+    CreateColorSelector $w 
 }
 
-proc ::WB::BuildToolPopups {wtop} {
+proc ::WB::CreateColorSelector {w} {
+    variable wbicons
+    upvar ::WB::${w}::state state
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::opts opts
+    
+    set wtool $wapp(tool)
+    set wcolsel $wtool.f.col
+    set wfg     $wcolsel.fg
+    set wbg1    $wcolsel.bg1
+    set wbg2    $wcolsel.bg2
+    set wbw     $wcolsel.bw
+    set wswap   $wcolsel.swap
+
+    set fg $state(fgCol)
+    set bg $state(bgCol)
+
+    # Need an extra frame else place gets misplaced.
+    ttk::frame $wtool.f
+    ttk::label $wcolsel -compound image -image $wbicons(colorSelector)
+    label $wfg   -image $wbicons(bwrect) -bd 0 -width 34 -height 24 -bg $fg
+    label $wbg1  -image $wbicons(bwrect) -bd 0 -width 14 -height 12 -bg $bg
+    label $wbg2  -image $wbicons(bwrect) -bd 0 -width 34 -height 12 -bg $bg
+    ttk::label $wbw   -image $wbicons(colorSelBW)   -width 12 -height 12
+    ttk::label $wswap -image $wbicons(colorSelSwap) -width 12 -height 12
+    
+    # The ttk::label seems to put an extra 2 pixel border. @@@ BAD
+    set off 2
+    grid  $wtool.f  -  -sticky ew
+    pack  $wcolsel  -side top
+    place $wfg   -x [expr {6+$off}]  -y [expr {5+$off}]
+    place $wbg1  -x [expr {42+$off}] -y [expr {19+$off}]
+    place $wbg2  -x [expr {22+$off}] -y [expr {31+$off}]
+    place $wbw   -x  4 -y 33
+    place $wswap -x 46 -y  3
+
+    if {![string equal $opts(-state) "disabled"]} {
+	bind $wfg   <Button-1> [list [namespace current]::ColorSelector $w $fg]
+	bind $wbw   <Button-1> [list [namespace current]::ResetColorSelector $w]
+	bind $wswap <Button-1> [list [namespace current]::SwitchBgAndFgCol $w]
+    }
+    set wapp(colSel)    $wfg
+    set wapp(colSelBg1) $wbg1
+    set wapp(colSelBg2) $wbg2
+}
+
+proc ::WB::BuildToolPopups {w} {
     global  prefs
     
     variable menuDefs
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::wapp wapp
     
     set wtool $wapp(tool)
     
@@ -2116,9 +2202,9 @@ proc ::WB::BuildToolPopups {wtop} {
 	foreach key $menuArr($name) {
 	    lappend mDef($name) $menuDefs(main,prefs,$key)
 	}
-	::UI::NewMenu $wtop ${wtool}.pop${name} {} $mDef($name) normal
+	::UI::NewMenu $w $wtool.pop${name} {} $mDef($name) normal
 	if {!$prefs(haveDash) && ([lsearch $menuArr($name) dash] >= 0)} {
-	    ::UI::MenuMethod ${wtool}.pop${name} entryconfigure mDash -state disabled
+	    ::UI::MenuMethod $wtool.pop${name} entryconfigure mDash -state disabled
 	}
     }
 }
@@ -2127,14 +2213,15 @@ proc ::WB::BuildToolPopups {wtop} {
 #
 #       Some functions to handle the tool popup menu.
 
-proc ::WB::StartTimerToToolPopup {w wtop name} {
+proc ::WB::StartTimerToToolPopup {w wbutton name} {
     
     variable toolPopupId
     
     if {[info exists toolPopupId]} {
 	catch {after cancel $toolPopupId}
     }
-    set toolPopupId [after 1000 [list [namespace current]::DoToolPopup $w $wtop $name]]
+    set toolPopupId [after 1000 \
+      [list [namespace current]::DoToolPopup $w $wbutton $name]]
 }
 
 proc ::WB::StopTimerToToolPopup { } {
@@ -2146,35 +2233,27 @@ proc ::WB::StopTimerToToolPopup { } {
     }
 }
 
-proc ::WB::DoToolPopup {w wtop name} {
+proc ::WB::DoToolPopup {w wbutton name} {
     
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::wapp wapp
 
     set wtool $wapp(tool)
-    set wpop ${wtool}.pop${name}
+    set wpop $wtool.pop${name}
     if {[winfo exists $wpop]} {
 	set x [winfo rootx $w]
-	set y [expr [winfo rooty $w] + [winfo height $w]]
+	set y [expr [winfo rooty $wbutton] + [winfo height $wbutton]]
 	tk_popup $wpop $x $y
     }
 }
 
-proc ::WB::DoTopMenuPopup {w wtop wmenu} {
+proc ::WB::SwitchBgAndFgCol {w} {
     
-    if {[winfo exists $wmenu]} {
-	set x [winfo rootx $w]
-	set y [expr [winfo rooty $w] + [winfo height $w]]
-	tk_popup $wmenu $x $y
-    }
-}
+    upvar ::WB::${w}::state state
+    upvar ::WB::${w}::wapp wapp
 
-proc ::WB::SwitchBgAndFgCol {wtop} {
-    
-    upvar ::WB::${wtop}::state state
-    upvar ::WB::${wtop}::wapp wapp
-
-    $wapp(colSel) itemconfigure tcolSel -fill $state(bgCol)
-    $wapp(colSel) itemconfigure tbgcol  -fill $state(fgCol)
+    $wapp(colSel)    configure -bg $state(bgCol)
+    $wapp(colSelBg1) configure -bg $state(fgCol)
+    $wapp(colSelBg2) configure -bg $state(fgCol)
     set tmp $state(fgCol)
     set state(fgCol) $state(bgCol)
     set state(bgCol) $tmp
@@ -2190,26 +2269,26 @@ proc ::WB::SwitchBgAndFgCol {wtop} {
 # Results:
 #       color dialog shown.
 
-proc ::WB::ColorSelector {wtop col} {
+proc ::WB::ColorSelector {w col} {
     
-    upvar ::WB::${wtop}::state state
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::state state
+    upvar ::WB::${w}::wapp wapp
 
     set col [tk_chooseColor -initialcolor $col]
-    if {[string length $col] > 0} {
+    if {$col ne ""} {
 	set state(fgCol) $col
-	$wapp(colSel) itemconfigure tcolSel -fill $state(fgCol)
-	$wapp(colSel) raise tcolSel
+	$wapp(colSel) configure -bg $state(fgCol)
     }
 }
 
-proc ::WB::ResetColorSelector {wtop} {
+proc ::WB::ResetColorSelector {w} {
 
-    upvar ::WB::${wtop}::state state
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::state state
+    upvar ::WB::${w}::wapp wapp
 
-    $wapp(colSel) itemconfigure tcolSel -fill black
-    $wapp(colSel) itemconfigure tbgcol  -fill white
+    $wapp(colSel)    configure -bg black
+    $wapp(colSelBg1) configure -bg white
+    $wapp(colSelBg2) configure -bg white
     set state(fgCol) black
     set state(bgCol) white
 }
@@ -2233,15 +2312,9 @@ proc ::WB::ToolBtNumToName {num} {
 #       Makes a wm minsize call to set the minsize of the basic whiteboard.
 #       Shall only be called after idle!
 
-proc ::WB::SetBasicMinsize {wtop} {
+proc ::WB::SetBasicMinsize {w} {
     
-    if {[string equal $wtop "."]} {
-	set w .
-    } else {
-	set w [string trimright $wtop .]
-    }
-    
-    eval {wm minsize $w} [::WB::GetBasicWhiteboardMinsize $wtop]
+    eval {wm minsize $w} [GetBasicWhiteboardMinsize $w]
 }
 
 # WB::GetBasicWhiteboardMinsize --
@@ -2249,11 +2322,11 @@ proc ::WB::SetBasicMinsize {wtop} {
 #       Computes the minimum width and height of whiteboard including any menu
 #       but excluding any custom made entry parts.
 
-proc ::WB::GetBasicWhiteboardMinsize {wtop} {
+proc ::WB::GetBasicWhiteboardMinsize {w} {
     global  this prefs
     
     variable wbicons
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::wapp wapp
 
     # Let the geometry manager finish before getting widget sizes.
     update idletasks
@@ -2265,7 +2338,7 @@ proc ::WB::GetBasicWhiteboardMinsize {wtop} {
 	if {![string match "mac*" $this(platform)]} {
 	     set hMenu 1
 	     # In 8.4 it seems that .wb1.#wb1#menu is used.
-	     set wmenu_ ${wtop}#[string trim $wtop .]#menu
+	     set wmenu_ $w.#${w}#menu
 	     if {[winfo exists $wmenu_]} {
 		 set hMenu [winfo height $wmenu_]
 	     }
@@ -2306,14 +2379,9 @@ proc ::WB::GetBasicWhiteboardMinsize {wtop} {
 # Results:
 #       None.
 
-proc ::WB::SetCanvasSize {wtop cw ch} {
+proc ::WB::SetCanvasSize {w cw ch} {
     global  this
-    upvar ::WB::${wtop}::wapp wapp
-
-    set w $wtop
-    if {![string equal $wtop "."]} {
-	set w [string trimright $wtop "."]
-    }
+    upvar ::WB::${w}::wapp wapp
 
     # Compute new root size from the desired canvas size.
     set thick [expr int([$wapp(can) cget -highlightthickness])]
@@ -2350,20 +2418,14 @@ proc ::WB::SetCanvasSize {wtop cw ch} {
       heighttot=$heighttot"
 }
 
-proc ::WB::GetCanvasSize {wtop} {
-    upvar ::WB::${wtop}::wapp wapp
+proc ::WB::GetCanvasSize {w} {
+    upvar ::WB::${w}::wapp wapp
 
     return [list [winfo width $wapp(can)] [winfo height $wapp(can)]]
 }
 
 proc ::WB::SetScrollregion {w swidth sheight} {
-    
-    if {$w == "."} {
-	set wtop .
-    } else {
-	set wtop ${w}.
-    }
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::wapp wapp
 
     $wapp(can) configure -scrollregion [list 0 0 $swidth $sheight]
 }
@@ -2375,23 +2437,21 @@ proc ::WB::SetScrollregion {w swidth sheight} {
 # Results:
 #       updates state of menus.
 
-proc ::WB::GetFocus {wtop w} {
+proc ::WB::GetFocus {w wevent} {
     
-    upvar ::WB::${wtop}::opts opts
-    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${w}::opts opts
+    upvar ::WB::${w}::wapp wapp
 
     # Bind to toplevel may fire multiple times.
-    set wtopReal $wtop
-    if {![string equal $wtop "."]} {
-	set wtopReal [string trimright $wtop "."]
-    }
-    if {$wtopReal != $w} {
+    if {$w != $wevent} {
 	return
     }
-    Debug 3 "GetFocus:: wtop=$wtop, w=$w"
+    Debug 3 "GetFocus:: w=$w, wevent=$wevent"
+    
+    SetFrameItemBinds $w [GetButtonState $w]
     
     # Can't see why this should happen?
-    set medit ${wtop}menu.edit
+    set medit $w.menu.edit
     if {![winfo exists $medit]} {
 	return
     }
@@ -2399,7 +2459,7 @@ proc ::WB::GetFocus {wtop w} {
     # Check the clipboard or selection.
     if {[catch {selection get -selection CLIPBOARD} sel]} {
 	::UI::MenuMethod $medit entryconfigure mPaste -state disabled
-    } elseif {($sel != "") && ($opts(-state) == "normal")} {
+    } elseif {($sel ne "") && ($opts(-state) eq "normal")} {
 	::UI::MenuMethod $medit entryconfigure mPaste -state normal
     }
     
@@ -2415,22 +2475,22 @@ proc ::WB::GetFocus {wtop w} {
 #       Sets the correct state for menus and buttons when copy something.
 #       
 # Arguments:
-#       w       the widget that contains something that is copied.
+#       wevent    the widget that contains something that is copied.
 #
 # Results:
 
-proc ::WB::FixMenusWhenCopy {w} {
+proc ::WB::FixMenusWhenCopy {wevent} {
 
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::WB::${wtop}::opts opts
+    set w [winfo toplevel $wevent]
+    upvar ::WB::${w}::opts opts
 
-    if {$opts(-state) == "normal"} {
-	::UI::MenuMethod ${wtop}menu.edit entryconfigure mPaste -state normal
+    if {$opts(-state) eq "normal"} {
+	::UI::MenuMethod $w.menu.edit entryconfigure mPaste -state normal
     } else {
-	::UI::MenuMethod ${wtop}menu.edit entryconfigure mPaste -state disabled
+	::UI::MenuMethod $w.menu.edit entryconfigure mPaste -state disabled
     }
         
-    ::hooks::run whiteboardFixMenusWhenHook $wtop copy
+    ::hooks::run whiteboardFixMenusWhenHook $w "copy"
 }
 
 # WB::MakeItemMenuDef --
@@ -2456,7 +2516,7 @@ proc ::WB::MakeItemMenuDef {dir} {
 	    }
 	} elseif {[string equal [file extension $f] ".can"]} {
 	    set name [file rootname [file tail $f]]
-	    set cmd {::CanvasFile::DrawCanvasItemFromFile $wtop}
+	    set cmd {::CanvasFile::DrawCanvasItemFromFile $w}
 	    lappend cmd $f
 	    lappend mdef [list command $name $cmd normal {}]
 	}
@@ -2475,48 +2535,43 @@ proc ::WB::MakeItemMenuDef {dir} {
 # Results:
 #       font submenu built.
 
-proc ::WB::BuildFontMenu {wtop allFonts} {
+proc ::WB::BuildFontMenu {w allFonts} {
     
-    set mt ${wtop}menu.prefs.mfont
+    set mt $w.menu.prefs.mfont
     
     $mt delete 0 end
     foreach afont $allFonts {
-	$mt add radio -label $afont -variable ::WB::${wtop}::state(font)  \
-	  -command [list ::WB::FontChanged $wtop name]
+	$mt add radio -label $afont -variable ::WB::${w}::state(font)  \
+	  -command [list ::WB::FontChanged $w name]
     }
     
     # Be sure that the presently selected font family is still there,
     # else choose helvetica.
-    set fontStateVar ::WB::${wtop}::state(font)
+    set fontStateVar ::WB::${w}::state(font)
     if {[lsearch -exact $allFonts $fontStateVar] == -1} {
-	set ::WB::${wtop}::state(font) {Helvetica}
+	set ::WB::${w}::state(font) {Helvetica}
     }
 }
 
-proc ::WB::BuildToolPopupFontMenu {wtop allFonts} {
-    upvar ::WB::${wtop}::wapp wapp
+proc ::WB::BuildToolPopupFontMenu {w allFonts} {
+    upvar ::WB::${w}::wapp wapp
     
     set wtool $wapp(tool)
-    set mt ${wtool}.poptext.mfont
+    set mt $wtool.poptext.mfont
     
     $mt delete 0 end
     foreach afont $allFonts {
-	$mt add radio -label $afont -variable ::WB::${wtop}::state(font)  \
-	  -command [list ::WB::FontChanged $wtop name]
+	$mt add radio -label $afont -variable ::WB::${w}::state(font)  \
+	  -command [list ::WB::FontChanged $w name]
     }
 }
 
 proc ::WB::BuildAllFontMenus {allFonts} {
 
     # Must do this for all open whiteboards!
-    foreach wtopreal [::WB::GetAllWhiteboards] {
-	if {$wtopreal != "."} {
-	    set wtop "${wtopreal}."
-	} else {
-	    set wtop $wtopreal
-	}
-	::WB::BuildFontMenu $wtop $allFonts
-	::WB::BuildToolPopupFontMenu $wtop $allFonts
+    foreach w [GetAllWhiteboards] {
+	BuildFontMenu $w $allFonts
+	BuildToolPopupFontMenu $w $allFonts
     }
 }
 
@@ -2526,62 +2581,66 @@ proc ::WB::BuildAllFontMenus {allFonts} {
 #       and we have focus on a text item, change the font spec of this item.
 #
 # Arguments:
-#       wtop        toplevel window. ("." or ".main2." with extra dot!)
-#       what        name, size or weight.
+#       w           toplevel widget path
+#       what        name, size or weight
 #       
 # Results:
 #       updates text item, sends to all clients.
 
-proc ::WB::FontChanged {wtop what} {
+proc ::WB::FontChanged {w what} {
     global  fontSize2Points fontPoints2Size
 
-    upvar ::WB::${wtop}::wapp wapp
-    upvar ::WB::${wtop}::state state
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::state state
     
-    set wCan $wapp(can)
+    set wcan $wapp(can)
 
     # If there is a focus on a text item, change the font for this item.
-    set idfocus [$wCan focus]
+    set idfocus [$wcan focus]
     
     if {[string length $idfocus] > 0} {
-	set theItno [::CanvasUtils::GetUtag $wCan focus]
+	set theItno [::CanvasUtils::GetUtag $wcan focus]
 	if {[string length $theItno] == 0} {
 	    return
 	}
-	if {[$wCan type $theItno] != "text"} {
+	if {[$wcan type $theItno] ne "text"} {
 	    return
 	}
-	set fontSpec [$wCan itemcget $theItno -font]
+	set fontSpec [$wcan itemcget $theItno -font]
 	if {[llength $fontSpec] > 0} {
 	    array set whatToInd {name 0 size 1 weight 2}
 	    array set whatToPref {name font size fontSize weight fontWeight}
 	    set ind $whatToInd($what)
 
 	    # Need to translate html size to point size.
-	    if {$what == "size"} {
+	    if {$what eq "size"} {
 		set newFontSpec [lreplace $fontSpec $ind $ind  \
 		  $fontSize2Points($state($whatToPref($what)))]
 	    } else {
 		set newFontSpec [lreplace $fontSpec $ind $ind  \
 		  $state($whatToPref($what))]
 	    }
-	    ::CanvasUtils::ItemConfigure $wCan $theItno -font $newFontSpec
+	    ::CanvasUtils::ItemConfigure $wcan $theItno -font $newFontSpec
 	}
     }
 }
 
-proc ::WB::StartStopAnimatedWave {wtop start} {
-    upvar ::WB::${wtop}::wapp wapp
+proc ::WB::StartStopAnimatedWave {w start} {
+    upvar ::WB::${w}::wapp wapp
     
-    set waveImage [::Theme::GetImage [option get $wapp(frall) waveImage {}]]  
-    ::UI::StartStopAnimatedWave $wapp(statmess) $waveImage $start
+    
+    #set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
+    #::UI::StartStopAnimatedWave $wapp(statmess) $waveImage $start
 }
 
-proc ::WB::StartStopAnimatedWaveOnMain {start} {    
-    upvar ::WB::.::wapp wapp
+proc ::WB::StartStopAnimatedWaveOnMain {start} {
+    global  wDlgs
     
-    set waveImage [::Theme::GetImage [option get $wapp(frall) waveImage {}]]  
-    ::UI::StartStopAnimatedWave $wapp(statmess) $waveImage $start
+    set w [::P2P::GetMainWindow]
+    upvar ::WB::${w}::wapp wapp
+    
+    #set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
+    #::UI::StartStopAnimatedWave $wapp(statmess) $waveImage $start
 }
 
 # WB::CreateBrokenImage --
@@ -2589,9 +2648,11 @@ proc ::WB::StartStopAnimatedWaveOnMain {start} {
 #       Creates an actual image with the broken symbol that matches
 #       up the width and height. The image is garbage collected.
 
-proc ::WB::CreateBrokenImage {wtop width height} {
-    variable icons    
-    upvar ::WB::${wtop}::canvasImages canvasImages
+proc ::WB::CreateBrokenImage {wcan width height} {
+    variable icons
+    
+    set w [winfo toplevel $wcan]
+    upvar ::WB::${w}::canvasImages canvasImages
     
     if {($width == 0) || ($height == 0)} {
 	set name $icons(brokenImage)
@@ -2620,15 +2681,12 @@ proc ::WB::InitDnD {wcan} {
     dnd bindtarget $wcan text/uri-list <DragLeave> [list ::WB::DnDLeave %W %D %T]       
 }
 
-proc ::WB::DnDDrop {w data type x y} {
+proc ::WB::DnDDrop {wcan data type x y} {
     global  prefs
     
     ::Debug 2 "::WB::DnDDrop data=$data, type=$type"
 
-    set wtop [winfo toplevel $w]
-    if {$wtop != "."} {
-	set wtop ${wtop}.
-    }
+    set w [winfo toplevel $wcan]
 
     foreach f $data {
 	
@@ -2637,35 +2695,35 @@ proc ::WB::DnDDrop {w data type x y} {
 	set f [uriencode::decodefile $f]
 	
 	# Allow also .can files to be dropped.
-	if {[file extension $f] == ".can"} {
-	    ::CanvasFile::DrawCanvasItemFromFile $wtop $f
+	if {[file extension $f] eq ".can"} {
+	    ::CanvasFile::DrawCanvasItemFromFile $w $f
 	} else {
 	    set mime [::Types::GetMimeTypeForFileName $f]
 	    set haveImporter [::Plugins::HaveImporterForMime $mime]
-	    if {$haveImporter} {	   
-		set errMsg [::Import::DoImport $w [list -coords [list $x $y]] -file $f]
-		if {$errMsg != ""} {
+	    if {$haveImporter} {
+		set opts [list -coords [list $x $y]]
+		set errMsg [::Import::DoImport $wcan $opts -file $f]
+		if {$errMsg ne ""} {
 		    ::UI::MessageBox -title [mc Error] -icon error -type ok \
-		      -message "Failed importing: $errMsg" -parent [winfo toplevel $w]
+		      -message "Failed importing: $errMsg" -parent $w
 		}
 		incr x $prefs(offsetCopy)
 		incr y $prefs(offsetCopy)
 	    } else {
 		::UI::MessageBox -title [mc Error] -icon error -type ok \
-		  -message [mc messfailmimeimp $mime] \
-		  -parent [winfo toplevel $w]
+		  -message [mc messfailmimeimp $mime] -parent $w
 	    }
 	}
     }
 }
 
-proc ::WB::DnDEnter {w action data type} {
+proc ::WB::DnDEnter {wcan action data type} {
     
     ::Debug 2 "::WB::DnDEnter action=$action, data=$data, type=$type"
 
     set act "none"
     foreach f $data {
-	if {[file extension $f] == ".can"} {
+	if {[file extension $f] eq ".can"} {
 	    set haveImporter 1
 	} else {
 	    
@@ -2674,7 +2732,7 @@ proc ::WB::DnDEnter {w action data type} {
 	      [::Types::GetMimeTypeForFileName $f]]
 	}
 	if {$haveImporter} {
-	    focus $w
+	    focus $wcan
 	    set act $action
 	    break
 	}
@@ -2682,9 +2740,9 @@ proc ::WB::DnDEnter {w action data type} {
     return $act
 }
 
-proc ::WB::DnDLeave {w data type} {
+proc ::WB::DnDLeave {wcan data type} {
     
-    focus [winfo toplevel $w] 
+    focus [winfo toplevel $wcan] 
 }
 
 # ::WB::GetThemeImage --
@@ -2707,9 +2765,9 @@ proc ::WB::GetThemeImage {name} {
 #       Invokes any registered send message hook. The 'cmdList' must
 #       be without the "CANVAS:" prefix!
 
-proc ::WB::SendMessageList {wtop cmdList args} {
+proc ::WB::SendMessageList {w cmdList args} {
     
-    eval {::hooks::run whiteboardSendMessageHook $wtop $cmdList} $args
+    eval {::hooks::run whiteboardSendMessageHook $w $cmdList} $args
 }
 
 # ::WB::SendGenMessageList --
@@ -2717,11 +2775,11 @@ proc ::WB::SendMessageList {wtop cmdList args} {
 #       Invokes any registered send message hook. 
 #       The commands in the cmdList may include any prefix.
 #       The prefix shall be included in commands of the cmdList.
-#       THIS IS ACTUALLY A BAD SOLUTION AND SHALL BE REMOVED LATER!!!
+#       @@@ THIS IS ACTUALLY A BAD SOLUTION AND SHALL BE REMOVED LATER!!!
 
-proc ::WB::SendGenMessageList {wtop cmdList args} {
+proc ::WB::SendGenMessageList {w cmdList args} {
     
-    eval {::hooks::run whiteboardSendGenMessageHook $wtop $cmdList} $args
+    eval {::hooks::run whiteboardSendGenMessageHook $w $cmdList} $args
 }
 
 # ::WB::PutFile --
@@ -2729,9 +2787,9 @@ proc ::WB::SendGenMessageList {wtop cmdList args} {
 #       Invokes any registered hook for putting a file. This is only called
 #       when we want to do p2p file transports (put/get).
 
-proc ::WB::PutFile {wtop fileName opts args} {
+proc ::WB::PutFile {w fileName opts args} {
     
-    eval {::hooks::run whiteboardPutFileHook $wtop $fileName $opts} $args
+    eval {::hooks::run whiteboardPutFileHook $w $fileName $opts} $args
 }
 
 # ::WB::RegisterHandler --

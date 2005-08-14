@@ -6,9 +6,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: CanvasCutCopyPaste.tcl,v 1.7 2005-01-31 14:06:59 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.8 2005-08-14 08:37:52 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -38,13 +36,13 @@ proc ::CanvasCCP::CutCopyPasteCmd {cmd} {
     set wfocus [focus]
     ::Debug 4 "::CanvasCCP::CutCopyPasteCmd cmd=$cmd, wfocus=$wfocus"
     
-    if {$wfocus == ""} {
+    if {$wfocus eq ""} {
 	return
     }
 	    
     # Operate on the whiteboard's canvas.
-    set wtop [::UI::GetToplevelNS $wfocus]
-    upvar ::WB::${wtop}::wapp wapp
+    set w [winfo toplevel $wfocus]
+    upvar ::WB::${w}::wapp wapp
     
     switch -- $cmd {
 	cut - copy {
@@ -65,34 +63,34 @@ proc ::CanvasCCP::CutCopyPasteCmd {cmd} {
 #       doWhat: "cut" or "copy".
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan        the canvas widget.
 #       doWhat "cut" or "copy".
 #       
 # Results:
 #       none
  
-proc ::CanvasCCP::CopySelectedToClipboard {w doWhat} {
+proc ::CanvasCCP::CopySelectedToClipboard {wcan doWhat} {
     variable clipToken
     variable magicToken
     
-    Debug 4 "CopySelectedToClipboard:: w=$w, doWhat=$doWhat"
-    Debug 4 "\t focus=[focus], class=[winfo class $w]"
+    Debug 4 "CopySelectedToClipboard:: wcan=$wcan, doWhat=$doWhat"
+    Debug 4 "\t focus=[focus], class=[winfo class $wcan]"
 
-    if {![string equal [winfo class $w] "Canvas"]} {
+    if {![string equal [winfo class $wcan] "Canvas"]} {
 	return
     }
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     clipboard clear
     
     # Assume for the moment that we have copied from the Canvas.
     # First, get canvas objects with tag 'selected'.
-    set ids [$w find withtag selected]	
+    set ids [$wcan find withtag selected]	
     
     # If selected text within text item.
     if {$ids == {}} {
-	::CanvasText::Copy $w
+	::CanvasText::Copy $wcan
 	if {[string equal $doWhat "cut"]} {
-	    ::CanvasText::Delete $w
+	    ::CanvasText::Delete $wcan
 	}
 	set clipToken "string"
     } else {
@@ -100,31 +98,31 @@ proc ::CanvasCCP::CopySelectedToClipboard {w doWhat} {
 	# See format definition above.
 	clipboard append "$magicToken {"
 	foreach id $ids {
-	    CopySingleItemToClipboard $w $doWhat $id
+	    CopySingleItemToClipboard $wcan $doWhat $id
 	}
 	clipboard append "}"
 	set clipToken "item"
     }
     
     # This was an attempt to do image garbage collection...
-    #selection handle -selection CLIPBOARD $w \
-    #  [list [namespace current]::SelectionHandle $w]
+    #selection handle -selection CLIPBOARD $wcan \
+    #  [list [namespace current]::SelectionHandle $wcan]
     #selection own -selection CLIPBOARD \
-    #  -command [list [namespace current]::SelectionLost $w] $w
-    ::WB::FixMenusWhenCopy $w
+    #  -command [list [namespace current]::SelectionLost $wcan] $wcan
+    ::WB::FixMenusWhenCopy $wcan
 }
 
 # CanvasCCP::SelectionLost --
 # 
 #       Shall do garabage collection of images.
 
-proc ::CanvasCCP::SelectionLost {w} {
+proc ::CanvasCCP::SelectionLost {wcan} {
     
-    puts "_______::CanvasCCP::SelectionLost w=$w"
+    puts "_______::CanvasCCP::SelectionLost wcan=$wcan"
     
 }
 
-proc ::CanvasCCP::SelectionHandle {w offset maxbytes} {
+proc ::CanvasCCP::SelectionHandle {wcan offset maxbytes} {
     puts "::CanvasCCP::SelectionHandle w=$w, offset=$offset, maxbytes=$maxbytes"
     
     if {[catch {selection get -sel CLIPBOARD} str]} {
@@ -141,22 +139,22 @@ proc ::CanvasCCP::SelectionHandle {w offset maxbytes} {
 #       doWhat: "cut" or "copy".
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       doWhat "cut" or "copy".
 #       id
 #       
 # Results:
 #       none
 
-proc ::CanvasCCP::CopySingleItemToClipboard {w doWhat id} {
+proc ::CanvasCCP::CopySingleItemToClipboard {wcan doWhat id} {
     
     Debug 4 "CopySingleItemToClipboard:: id=$id"
 
-    if {$id == ""} {
+    if {$id eq ""} {
 	return
     }
-    set wtop [::UI::GetToplevelNS $w]
-    set tags [$w gettags $id]
+    set w [winfo toplevel $wcan]
+    set tags [$wcan gettags $id]
     
     # Do not allow copies of broken images (mess).
     if {[lsearch $tags broken] >= 0} {
@@ -164,19 +162,19 @@ proc ::CanvasCCP::CopySingleItemToClipboard {w doWhat id} {
     }
     
     # Get all actual options.
-    set opcmd [::CanvasUtils::GetItemOpts $w $id]
+    set opcmd [::CanvasUtils::GetItemOpts $wcan $id]
     
     # Strip off options that are irrelevant; is helpful for other clients with
     # version numbers lower than this if they don't understand new options.
     set opcmd [CanvasStripItemOptions $opcmd]
-    set itemType [$w type $id]
-    set co [$w coords $id]
+    set itemType [$wcan type $id]
+    set co [$wcan coords $id]
     set cmd [concat "create" $itemType $co $opcmd]
     
     # If we use the 'import' command for images garbage collection would work,
     # but this costs an extra network connection.
     if {0} {
-	set cmd [::CanvasUtils::GetOneLinerForAny $w $id -usehtmlsize 0 \
+	set cmd [::CanvasUtils::GetOneLinerForAny $wcan $id -usehtmlsize 0 \
 	  -encodenewlines 0]
     }
     
@@ -188,45 +186,45 @@ proc ::CanvasCCP::CopySingleItemToClipboard {w doWhat id} {
 	cut {
 	    
 	    # There is currently a memory leak when images are cut!
-	    ::CanvasDraw::DeselectItem $w $id
-	    ::CanvasDraw::DeleteIds $w $id all -trashunusedimages 0
+	    ::CanvasDraw::DeselectItem $wcan $id
+	    ::CanvasDraw::DeleteIds $wcan $id all -trashunusedimages 0
 	}
 	copy {
 	    # empty
 	}	
     }
-    ::WB::FixMenusWhenCopy $w
+    ::WB::FixMenusWhenCopy $wcan
 }
 
 # CanvasCCP::PasteFromClipboardTo
 #
 #       
 # Arguments:
-#       w      the focus (canvas) widget.
+#       win    the focus (canvas) widget.
 #       
 # Results:
 #       none
 
-proc ::CanvasCCP::PasteFromClipboardTo {w} {
+proc ::CanvasCCP::PasteFromClipboardTo {win} {
     
-    set wClass [winfo class $w]
-    Debug 4 "PasteFromClipboardTo:: w=$w, wClass=$wClass"
+    set wClass [winfo class $win]
+    Debug 4 "PasteFromClipboardTo:: win=$win, wClass=$wClass"
 
     switch -glob -- $wClass {
 	Canvas {
-	    ::CanvasCCP::PasteFromClipboardToCanvas $w
+	    ::CanvasCCP::PasteFromClipboardToCanvas $win
 	} 
 	Wish* - Whiteboard {
 	
 	    # We assume that it is the canvas that should receive this?
-	    set wtop [::UI::GetToplevelNS $w]
-	    set wCan [::WB::GetCanvasFromWtop $wtop]
-	    ::CanvasCCP::PasteFromClipboardToCanvas $wCan
+	    set w [winfo toplevel $win]
+	    set wcan [::WB::GetCanvasFromWtop $w]
+	    ::CanvasCCP::PasteFromClipboardToCanvas $wcan
 	}
 	default {
 	
 	    # Wild guess...
-	    event generate $w <<Paste>>
+	    event generate $win <<Paste>>
 	}
     }
 }
@@ -237,22 +235,22 @@ proc ::CanvasCCP::PasteFromClipboardTo {w} {
 #       Items are pasted one by one using 'PasteSingleFromClipboardToCanvas'.
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan   the canvas widget.
 #       
 # Results:
 #       none
 
-proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
+proc ::CanvasCCP::PasteFromClipboardToCanvas {wcan} {
     variable clipToken
     variable magicToken
 
-    Debug 4 "PasteFromClipboardToCanvas:: w=$w"
+    Debug 4 "PasteFromClipboardToCanvas:: wcan=$wcan"
     
     if {[catch {selection get -sel CLIPBOARD} str]} {
 	return
     }
     Debug 4 "\t str=$str"
-    ::CanvasCmd::DeselectAll [::UI::GetToplevelNS $w]
+    ::CanvasCmd::DeselectAll [winfo toplevel $wcan]
         
     # Check first if it has the potential of a canvas command.
     if {[regexp ^$magicToken $str]} {
@@ -266,19 +264,19 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
 	string {
 	
 	    # Find out if there is a current focus on a text item.
-	    set itemfocus [$w focus]
-	    if {$itemfocus == ""} {
-		eval ::CanvasText::SetFocus $w \
-		  [::CanvasUtils::NewImportAnchor $w] 1
+	    set itemfocus [$wcan focus]
+	    if {$itemfocus eq ""} {
+		eval ::CanvasText::SetFocus $wcan \
+		  [::CanvasUtils::NewImportAnchor $wcan] 1
 	    }
-	    ::CanvasText::Insert $w $str
+	    ::CanvasText::Insert $wcan $str
 	    
 	    # ...and remove (set) focus if not there before.
-	    $w focus $itemfocus
+	    $wcan focus $itemfocus
 	} 
 	item {
 	    foreach cmd [lindex $str 1] {
-		PasteSingleFromClipboardToCanvas $w $cmd
+		PasteSingleFromClipboardToCanvas $wcan $cmd
 	    }
 	}
     }
@@ -295,18 +293,18 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
 #       Be sure to treat newlines correctly when sending command to clients.
 #       
 # Arguments:
-#       w      the canvas widget.
+#       wcan      the canvas widget.
 #       cmd
 #       
 # Results:
 #       copied canvas item, sent to all clients.
 
-proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
+proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {wcan cmd} {
     global  prefs
     
     Debug 4 "PasteSingleFromClipboardToCanvas:: cmd=$cmd"
     
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
     switch -- [lindex $cmd 0] {
 	import {
@@ -316,7 +314,7 @@ proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
 	    set y [expr [lindex $cmd 2] + $prefs(offsetCopy)]
 	    set cmd [lreplace $cmd 1 2 $x $y]
 	    set cmd [::CanvasUtils::SkipStackingOptions $cmd]
-	    ::Import::HandleImportCmd $w $cmd
+	    ::Import::HandleImportCmd $wcan $cmd
 	}
 	create {
 	    
@@ -359,19 +357,19 @@ proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
 	    # Write to all other clients; need to make a one liner first.
 	    set nl_ {\\n}
 	    regsub -all "\n" $cmdremote $nl_ cmdremote
-	    set redo [list ::CanvasUtils::CommandExList $wtop  \
+	    set redo [list ::CanvasUtils::CommandExList $w  \
 	      [list [list $newcmd local] [list $cmdremote remote]]]
-	    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+	    set undo [list ::CanvasUtils::Command $w $undocmd]
 	    eval $redo
-	    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+	    undo::add [::WB::GetUndoToken $w] $undo $redo
 	}
     }
     
     # Create new bbox and select item.
-    ::CanvasDraw::MarkBbox $w 1 $utag
+    ::CanvasDraw::MarkBbox $wcan 1 $utag
     
     # Copy the newly pasted object to clipboard.
-    CopySelectedToClipboard $w copy
+    CopySelectedToClipboard $wcan copy
 }
 
 # CanvasCCP::CmdToken --
@@ -390,7 +388,7 @@ proc ::CanvasCCP::CmdToken {cmdName separator} {
     upvar $cmdName theCmd
     
     # If nothing then return -1.
-    if {$theCmd == ""} {
+    if {$theCmd eq ""} {
 	return -1
     }
     set indSep [lsearch -exact $theCmd $separator]
@@ -403,7 +401,7 @@ proc ::CanvasCCP::CmdToken {cmdName separator} {
     }
     
     # If separator in -text then ???.
-    if {[lindex $theCmd [expr $indSep - 1]] != "-text"} {
+    if {[lindex $theCmd [expr $indSep - 1]] ne "-text"} {
 	set firstPart [lrange $theCmd 0 [expr $indSep - 1]]
     } else {
 	puts "Warning in CmdToken: -text part wrong"
@@ -431,7 +429,7 @@ proc ::CanvasCCP::CanvasStripItemOptions {optList} {
 	# First, discard if empty list. This is not true for -fill for polygons.
 	# A nonexistent -fill option for a polygon fills it with black, which
 	# is correct for Tk 8.0 but a bug in Tk 8.3.
-	if {($val == "") && ![string equal $name "-fill"]} {
+	if {($val eq "") && ![string equal $name "-fill"]} {
 	    continue
 	}
 	

@@ -12,9 +12,9 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.116 2005-06-20 13:55:25 matben Exp $
-	
+# $Id: Coccinella.tcl,v 1.117 2005-08-14 08:37:51 matben Exp $	
 
+	
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
 
@@ -26,7 +26,7 @@ if {[catch {package require Tk 8.4}]} {
     return -code error "We need Tk 8.4 or later here. Run Wish!"
 }
 
-# Hide the main window during launch.
+# The main window "." shall never be displayed. Use it for QT sounds etc.
 wm withdraw .
 tk appname coccinella
 
@@ -38,24 +38,25 @@ set argc [llength $argv]
 array set argvArr $argv
 
 # We use a variable 'this(platform)' that is more convenient for MacOSX.
-switch -- $tcl_platform(platform) {
+switch -- $::tcl_platform(platform) {
     unix {
 	if {[string equal [tk windowingsystem] "aqua"]} {
 	    set this(platform) "macosx"
 	} else {
-	    set this(platform) $tcl_platform(platform)
+	    set this(platform) $::tcl_platform(platform)
 	}
     }
-    windows - macintosh {
-	set this(platform) $tcl_platform(platform)
+    default {
+	set this(platform) $::tcl_platform(platform)
     }
 }
 
-# We should only allow a single instance of this application.
+# Early platform dependent stuff.
 switch -- $this(platform) {
     windows {
 	
-	# A COM interface would be better...
+	# We should only allow a single instance of this application.
+	# A COM interface would be better... (safer)
 	package require dde
 	
 	# If any services available for coccinella then provide the argv.
@@ -119,23 +120,6 @@ proc resolve_cmd_realpath {infile} {
     }
 }
 
-# The application major and minor version numbers; should only be written to
-# default file, never read.
-set prefs(majorVers)    0
-set prefs(minorVers)   95
-set prefs(releaseVers)  8
-set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
-set prefs(appName)    "Coccinella"
-set prefs(theAppName) "The Coccinella"
-
-# We may be embedded in another application, say an ActiveX component.
-# Need a way to detect if we are run in the Tcl plugin.
-if {[llength [namespace children :: "::browser*"]] > 0} {
-    set prefs(embedded) 1
-} else {
-    set prefs(embedded) 0
-}
-
 # Identify our own position in the file system.
 if {[string equal $this(platform) "unix"]} {
     set thisScript [file normalize [resolve_cmd_realpath [info script]]]
@@ -154,120 +138,130 @@ source [file join $thisPath lib Debug.tcl]
 
 ::Debug 2 "Installation rootdir:  [file dirname $thisScript]"
 
-# Set up 'this' array which contains admin stuff.
+# Set up 'this' array which contains search paths admin stuff.
 source [file join $thisPath lib Init.tcl]
 ::Init::SetThis $thisScript
+::Init::SetThisVersion
+::Init::SetThisEmbedded
 ::Init::SetAutoPath
 
-# See if we have Itcl avialable already here; import namespace.
-set prefs(haveItcl) 0
-if {![catch {package require Itcl 3.2}]} {
-    namespace import ::itcl::*
-    set prefs(haveItcl) 1
-}
+set prefs(appName)    "Coccinella"
+set prefs(theAppName) "The Coccinella"
 
 # Read our prefs file containing the theme name and locale needed before splash.
-package require PreferencesUtils
+package require PrefUtils
 package require Theme
-::PreferencesUtils::Init
+::PrefUtils::Init
 ::Theme::Init
 
 # Find our language and load message catalog.
 ::Init::Msgcat
 
-# Show it! Need a full update here, at least on Windows.
+if {[string equal $this(platform) "windows"]} {
+    wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
+}
+
+# Splash! Need a full update here, at least on Windows.
 package require Splash
-::SplashScreen::SplashScreen
-::SplashScreen::SetMsg [mc splashsource]
+::Splash::SplashScreen
+::Splash::SetMsg [mc splashsource]
 update
 
-package require UTile
-::UTile::Init
-
-# These are auxilary procedures that we need to source, rest is found in packages.
-set allLibSourceFiles {
-  Base64Icons.tcl        \
-  EditDialogs.tcl        \
-  Network.tcl            \
-}
-
-foreach sourceName $allLibSourceFiles {
-    source [file join $this(path) lib $sourceName]
-}
-
-switch -- $this(platform) {
-    macintosh - macosx {
-	source [file join $this(path) lib MacintoshUtils.tcl]
-    }
-    windows {
-	source [file join $this(path) lib WindowsUtils.tcl]
-    }
-}
-
+# Beware! [info hostname] can be very slow on Macs first time it is called.
+::Splash::SetMsg [mc splashhost]
+::Init::SetHostname
 ::Init::LoadPackages
 
-# We should make this a little different!
-# Separate packages into two levels, basic support and application specific.
-::SplashScreen::SetMsg [mc splashload]
+set tileTheme [option get . tileTheme {}]
+if {[lsearch -exact [tile::availableThemes] $tileTheme] >= 0} {
+    tile::setTheme $tileTheme
+}
 
-foreach packName {
-    balloonhelp
-    buttontray
-    can2svg       
-    combobox
+# The packages are divided into categories depending on their degree
+# of generality.
+::Splash::SetMsg [mc splashload]
+set packages(generic) {
     component
-    fontselection
-    headlabel
     hooks
-    tablelist
+    tileutils
     undo
-    Dialogs
-    FileCache
-    Httpd
-    HttpTrpt
-    Preferences
-    Types
-    Plugins
+}
+set packages(uibase) {
+    balloonhelp
+    combobox
+    fontselection
+    tablelist
     Pane
     ProgressWindow
+    ttoolbar
+}
+set packages(application) {
+    Dialogs
+    EditDialogs
+    FactoryDefaults
+    Httpd
+    HttpTrpt
+    Network
+    Plugins
+    Preferences
     TheServer
+    Types
     UI
     UserActions
     Utils
     Whiteboard
-} {
-    package require $packName
+}
+foreach class {generic uibase application} {
+    foreach name $packages($class) {
+	package require $name
+    }
+}
+
+# Platform dependent packages.
+switch -- $this(platform) {
+    macosx {
+	package require MacintoshUtils
+    }
+    windows {
+	package require WindowsUtils
+    }
 }
 
 # The Jabber stuff.
-if {!$prefs(stripJabber)} {
-    ::SplashScreen::SetMsg [mc splashsourcejabb]
-    package require Jabber
-}
-
-::UI::InitDlgs
-
-# Beware! [info hostname] can be very slow on Macs first time it is called.
-::SplashScreen::SetMsg [mc splashhost]
-set this(hostname) [info hostname]
-
-::SplashScreen::SetMsg [mc splashinit]
-    
-# Standard (factory) preferences are set here.
-# These are the hardcoded, application default, values, and can be
-# overridden by the ones in user default file.
-source [file join $this(path) lib SetFactoryDefaults.tcl]
-::SplashScreen::SetMsg [mc splashprefs]
-
-# Set the user preferences from the preferences file if they are there,
-# else take the hardcoded defaults.
-::PreferencesUtils::SetUserPreferences
-if {!$prefs(stripJabber)} {
-    ::Jabber::SetUserPreferences
-}
+::Splash::SetMsg [mc splashsourcejabb]
+package require Jabber
 
 # Define MIME types etc.
 ::Types::Init
+::UI::InitDlgs
+
+# Standard (factory) preferences are set here.
+# These are the hardcoded, application default, values, and can be
+# overridden by the ones in user default file.
+::Splash::SetMsg [mc splashinit]
+FactoryDefaults
+::Jabber::FactoryDefaults
+
+# Set the user preferences from the preferences file if they are there,
+# else take the hardcoded defaults.
+::Splash::SetMsg [mc splashprefs]
+::PrefUtils::SetUserPreferences
+
+# Parse any command line options. Can set protocol!
+::PrefUtils::ParseCommandLineOptions $argv
+
+switch -- $prefs(protocol) {
+    jabber {
+	# empty ???
+    }
+    symmetric - server - client {
+	package require P2P
+	package require P2PNet
+    }
+    default {
+	return -code error "Unknown protocol \"$prefs(protocol)\""
+    }
+}
 
 # To provide code to be run before loading componenets.
 ::Debug 2 "--> earlyInitHook"
@@ -281,22 +275,6 @@ component::load
 # Components that need to add their own preferences need to be registered here.
 ::Debug 2 "--> prefsInitHook"
 ::hooks::run prefsInitHook
-
-# Parse any command line options.
-if {$argc > 0} {
-    ::Debug 2 "argv=$argv"
-    ::PreferencesUtils::ParseCommandLineOptions $argc $argv
-}
-
-switch -- $prefs(protocol) {
-    jabber {
-	# empty
-    }
-    default {
-	package require P2P
-	package require P2PNet
-    }
-}
 
 # Check that the mime type preference settings are consistent.
 ::Types::VerifyInternal
@@ -317,87 +295,33 @@ switch -- $prefs(protocol) {
 ::Debug 2 "--> postInitHook"
 ::hooks::run postInitHook
 
-# Let main window "." be roster in jabber and whiteboard else.
-if {[string equal $prefs(protocol) "jabber"]} {
-    set wDlgs(jrostbro) .
-    set wDlgs(mainwb)   .wb0
-} else {
-    set wDlgs(jrostbro) .jrostbro
-    set wDlgs(mainwb)   .
-}
-
-# Make the actual whiteboard with canvas, tool buttons etc...
-# Jabber has the roster window as "main" window.
-if {![string equal $prefs(protocol) "jabber"]} {
-    ::SplashScreen::SetMsg [mc splashbuild]
-    ::WB::BuildWhiteboard $wDlgs(mainwb) -usewingeom 1
-}
-if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
-    if {[winfo exists $wDlgs(mainwb)]} {
-	wm withdraw $wDlgs(mainwb)
-    }
-    set displaySetup 1
-} else {
-    set displaySetup 0
-}
-
-if {[string equal $this(platform) "windows"]} {
-    wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
-}
-wm protocol . WM_DELETE_WINDOW {::UI::DoCloseWindow .}
-
 # At this point we should be finished with the launch and delete the splash 
 # screen.
-::SplashScreen::SetMsg ""
-after 500 {catch {destroy $wDlgs(splash)}}
+::Splash::SetMsg ""
+after 500 {catch {destroy $::wDlgs(splash)}}
 
-# Do we need all the jabber stuff? Is this the right place? Need it for setup!
-if {($prefs(protocol) == "jabber") && !$prefs(stripJabber)} {
-    ::Jabber::Init
-} else {
-    
-    # The most convinient solution is to create the namespaces at least.
-    namespace eval ::Jabber:: {}
+switch -- $prefs(protocol) {
+    jabber {
+	::Jabber::Init
+    }
+    symmetric - server - client {
+	::WB::BuildWhiteboard [::P2P::GetMainWindow] -usewingeom 1
+	if {$prefs(firstLaunch)} {
+	    wm withdraw [::P2P::GetMainWindow]
+	}
+	
+	# The most convinient solution is to create the namespaces at least.
+	namespace eval ::Jabber:: {}
+    }
 }
-
-# Setup assistant. Must be called after initing the jabber stuff.
-if {$displaySetup} {
-    package require SetupAss
-
-    catch {destroy $wDlgs(splash)}
-    update
-    ::Jabber::SetupAss::SetupAss
-    ::UI::CenterWindow $wDlgs(setupass)
-    raise $wDlgs(setupass)
-    tkwait window $wDlgs(setupass)
-}
-
-# Is it the first time it is launched, then show the welcome canvas.
 if {$prefs(firstLaunch)} {
-    set systemLocale [lindex [split $this(systemLocale) _] 0]
-    set floc [file join $this(docsPath) Welcome_${systemLocale}.can]
-    if {[file exists $floc]} {
-	set f $floc
-    } else {
-	set f [file join $this(docsPath) Welcome_en.can]
-    }
-    ::Dialogs::Canvas $f -title [mc {Welcome}]
+    ::hooks::run firstLaunchHook
 }
-set prefs(firstLaunch) 0
-
-::Debug 7 "auto_path:\n[join $auto_path \n]"
-
-# Handle any actions we need to do (-connect) according to command line options.
-if {$argc > 0} {
-    if {[info exists argvArr(-connect)]} {
-	update idletasks
-	after $prefs(afterConnect) [list ::P2PNet::DoConnect  \
-	  $argvArr(-connect) $prefs(remotePort)]
-    }
-}
-
 update idletasks
+
 ::Debug 2 "--> launchFinalHook"
 ::hooks::run launchFinalHook
+
+set prefs(firstLaunch) 0
 
 #-------------------------------------------------------------------------------

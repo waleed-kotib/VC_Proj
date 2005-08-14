@@ -10,9 +10,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: Plugins.tcl,v 1.16 2005-01-31 14:07:00 matben Exp $
+# $Id: Plugins.tcl,v 1.17 2005-08-14 08:37:52 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -130,7 +128,7 @@ namespace eval ::Plugins:: {
     array set helpers2Platform {xanim unix} 
     
     # Snack buggy on NT4.
-    if {($tcl_platform(os) == "Windows NT") &&  \
+    if {($tcl_platform(os) eq "Windows NT") &&  \
       ($tcl_platform(osVersion) == 4.0)} {
 	set packages2Platform(snack)  \
 	  [lsearch -inline -not -all $packages2Platform(snack) "windows"]
@@ -384,7 +382,7 @@ proc ::Plugins::CompileAndLoadPackages { } {
 	    
 		# Search for it! Be silent.
 		if {[string equal $plugin($name,type) "internal"]} {
-		    ::SplashScreen::SetMsg "[mc splashlook] $name..."
+		    ::Splash::SetMsg "[mc splashlook] $name..."
 		    if {![catch {
 			eval {package require} $plugin($name,pack)
 		    } msg]} {
@@ -571,7 +569,7 @@ proc ::Plugins::MakeTypeListDialogOption { } {
 	application {}
     }
     
-    if {$this(platform) == "macintosh"}  {
+    if {$this(platform) eq "macintosh"}  {
 	
 	# On Mac either file extension or 'type' must match.
 	set typelist(text) [list  \
@@ -1154,7 +1152,7 @@ proc ::Plugins::RegisterCanvasClassBinds {name bindList} {
 proc ::Plugins::DeregisterCanvasClassBinds {{name {}}} {
     variable canvasClassBinds
 
-    if {$name == ""} {
+    if {$name eq ""} {
 	array unset canvasClassBinds
     } else {
 	array unset canvasClassBinds "${name},*"
@@ -1179,7 +1177,7 @@ proc ::Plugins::RegisterCanvasInstBinds {w name bindList} {
 proc ::Plugins::DeregisterCanvasInstBinds {w {name {}}} {
     variable canvasInstBinds
 
-    if {$name == ""} {
+    if {$name eq ""} {
 	array unset canvasInstBinds "${w},*"
     } else {
 	array unset canvasInstBinds "${w},${name},*"
@@ -1203,7 +1201,7 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	set name $canvasClassBinds($key)
     
 	# Remove any previous binds.
-	if {($oldTool != "") && [info exists canvasClassBinds($name,$oldTool)]} {
+	if {($oldTool ne "") && [info exists canvasClassBinds($name,$oldTool)]} {
 	    foreach binds $canvasClassBinds($name,$oldTool) {
 		foreach {bindDef cmd} $binds {
 		    regsub -all {\\|&} $bindDef {\\\0} bindDef
@@ -1237,7 +1235,7 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	set name $canvasInstBinds($key)
     
 	# Remove any previous binds.
-	if {($oldTool != "") && [info exists canvasInstBinds($wcan,$name,$oldTool)]} {
+	if {($oldTool ne "") && [info exists canvasInstBinds($wcan,$name,$oldTool)]} {
 	    foreach binds $canvasInstBinds($wcan,$name,$oldTool) {
 		foreach {bindDef cmd} $binds {
 		    regsub -all {\\|&} $bindDef {\\\0} bindDef
@@ -1276,7 +1274,7 @@ proc ::Plugins::InitPrefsHook { } {
     set prefs(pluginBanList) {}
     ::Debug 2 "::Plugins::InitPrefsHook"
     
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list prefs(pluginBanList)   prefs_pluginBanList   $prefs(pluginBanList)]]
     
     # Load all plugins available.
@@ -1301,31 +1299,33 @@ proc ::Plugins::BuildPrefsPage {page} {
     variable prefplugins
     variable tmpPrefPlugins
 
-    # Conference (groupchat) stuff.
-    set labfr $page.fr
-    labelframe $labfr -text [mc {Plugin Control}]
-    pack $labfr -side top -anchor w -padx 8 -pady 4
-    set pbl [frame $labfr.frin]
-    pack $pbl -padx 10 -pady 6 -side left
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set pbl $wc.fr
+    ttk::labelframe $pbl -text [mc {Plugin Control}] \
+      -padding [option get . groupSmallPadding {}]
+    pack  $pbl  -side top -anchor w
     
-    label ${pbl}.lhead -wraplength 300 -anchor w -justify left \
-      -text [mc prefplugctrl]
-    pack ${pbl}.lhead -padx 0 -pady 2 -side top -anchor w
+    ttk::label $pbl.lhead -wraplength 300 -anchor w -justify left \
+      -text [mc prefplugctrl] -padding {0 0 0 4}
+    pack $pbl.lhead -side top -anchor w
         
-    set pfr [frame ${pbl}.frpl]
+    set pfr $pbl.p
+    ttk::frame $pfr
     pack $pfr -side top -anchor w
+    
     set i 0
-    foreach plug [::Plugins::GetAllPackages platform] {
-	set icon [::Plugins::GetIconForPackage $plug 12]
-	if {$icon != ""} {
-	    label ${pfr}.i${i} -image $icon
-	    grid ${pfr}.i${i} -row $i -column 0 -sticky w
-	}
-	set tmpPrefPlugins($plug) [::Plugins::IsLoaded $plug]
+    foreach plug [GetAllPackages platform] {
+	set tmpPrefPlugins($plug) [IsLoaded $plug]
 	set prefplugins($plug) $tmpPrefPlugins($plug)
-	checkbutton ${pfr}.c${i} -anchor w -text " $plug"  \
+	set icon [GetIconForPackage $plug 12]
+
+	ttk::label $pfr.i$i -image $icon
+	ttk::checkbutton $pfr.c$i -anchor w -text $plug  \
 	  -variable [namespace current]::tmpPrefPlugins($plug)
-	grid ${pfr}.c${i} -row $i -column 1 -padx 2 -sticky ew
+	grid  $pfr.i$i  $pfr.c$i  -sticky w  -padx 4
 	incr i
     }
     foreach plug $prefs(pluginBanList) {

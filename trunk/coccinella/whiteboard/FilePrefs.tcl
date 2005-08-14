@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.6 2004-12-02 08:22:35 matben Exp $
+# $Id: FilePrefs.tcl,v 1.7 2005-08-14 08:37:52 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -19,6 +19,15 @@ namespace eval ::FilePrefs:: {
     ::hooks::register prefsCancelHook        ::FilePrefs::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::FilePrefs::UserDefaultsHook
     
+    option add *FilePrefsSet*Menu.font           CociSmallFont       widgetDefault
+
+    option add *FilePrefsSet*TLabel.style        Small.TLabel        widgetDefault
+    option add *FilePrefsSet*TLabelframe.style   Small.TLabelframe   widgetDefault
+    option add *FilePrefsSet*TButton.style       Small.TButton       widgetDefault
+    option add *FilePrefsSet*TMenubutton.style   Small.TMenubutton   widgetDefault
+    option add *FilePrefsSet*TRadiobutton.style  Small.TRadiobutton  widgetDefault
+    option add *FilePrefsSet*TCheckbutton.style  Small.TCheckbutton  widgetDefault
+
     # Wait for this variable to be set in the "Inspect Associations" dialog.
     variable finishedInspect
 	
@@ -41,7 +50,7 @@ proc ::FilePrefs::InitPrefsHook { } {
     # We should have used accesor functions and not direct access to internal
     # arrays. Sorry for this.
     # 
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Types::mime2Desc     mime2Desc_array         [::Types::GetDescriptionArr]] \
       [list ::Types::mimeIsText    mimeTypeIsText_array    [::Types::GetIsMimeTextArr]]  \
       [list ::Types::mime2SuffList mime2SuffixList_array   [::Types::GetSuffixListArr]]  \
@@ -69,9 +78,6 @@ proc ::FilePrefs::BuildPage {page} {
     variable tmpMimeTypeDoWhat
     variable tmpPrefMimeType2Package
     variable wmclist
-
-    set xpadbt [option get [winfo toplevel $page] xPadBt {}]
-    set fontS  [option get . fontSmall {}]
 	
     # Work only on copies of list of MIME types in case user presses the 
     # Cancel button. The MIME type works as a key in our database
@@ -83,31 +89,33 @@ proc ::FilePrefs::BuildPage {page} {
     array set tmpMimeTypeDoWhat       [::Plugins::GetDoWhatForMimeArr]
     array set tmpPrefMimeType2Package [::Plugins::GetPreferredPackageArr]
     
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
     # Frame for everything inside the labeled container.
-    set wcont1 $page.frtop
-    labelframe $wcont1 -text [mc preffmhelp]
-    pack $wcont1 -side top -anchor w -padx 8 -pady 4
-    set fr1 [frame $wcont1.fr]
-    
-    pack $fr1 -side left -padx 16 -pady 10 -fill x
-    
+    set wlc $wc.lc
+    ttk::labelframe $wlc -text [mc preffmhelp] \
+      -padding [option get . groupSmallPadding {}]
+    pack $wlc -side top
+        
     # Make the multi column listbox. 
     # Keep an invisible index column with index as a tag.
     set colDef [list 0 [mc Description] 0 [mc {Handled By}] 0 ""]
-    set wmclist $fr1.mclist
+    set wmclist $wlc.mclist
     
     tablelist::tablelist $wmclist  \
-      -columns $colDef -yscrollcommand [list $fr1.vsb set]  \
+      -columns $colDef -yscrollcommand [list $wlc.vsb set]  \
       -labelcommand tablelist::sortByColumn  \
       -stretch all -width 42 -height 12
     $wmclist columnconfigure 2 -hide 1
 
-    scrollbar $fr1.vsb -orient vertical -command [list $wmclist yview]
+    tuscrollbar $wlc.vsb -orient vertical -command [list $wmclist yview]
     
-    grid $wmclist -column 0 -row 0 -sticky news
-    grid $fr1.vsb -column 1 -row 0 -sticky ns
-    grid columnconfigure $fr1 0 -weight 1
-    grid rowconfigure $fr1 0 -weight 1
+    grid  $wmclist  -column 0 -row 0 -sticky news
+    grid  $wlc.vsb  -column 1 -row 0 -sticky ns
+    grid columnconfigure $wlc 0 -weight 1
+    grid rowconfigure $wlc 0 -weight 1
 	
     # Insert all MIME types.
     set i 0
@@ -115,7 +123,7 @@ proc ::FilePrefs::BuildPage {page} {
 	set doWhat [::Plugins::GetDoWhatForMime $mime]
 	set icon   [::Plugins::GetIconForPackage $doWhat 12]
 	set desc   [::Types::GetDescriptionForMime $mime]
-	if {![regexp {(unavailable|reject|save|ask)} $doWhat] && ($icon != "")} {
+	if {![regexp {(unavailable|reject|save|ask)} $doWhat] && ($icon ne "")} {
 	    $wmclist insert end [list " $desc" $doWhat $mime]
 	    $wmclist cellconfigure "$i,1" -image $icon
 	} else {
@@ -125,28 +133,34 @@ proc ::FilePrefs::BuildPage {page} {
     }    
     
     # Add, Change, and Remove buttons.
-    set frbt [frame $fr1.frbot]
-    grid $frbt -row 1 -column 0 -columnspan 2 -sticky nsew -padx 0 -pady 0
-    button $frbt.rem -text [mc Delete]  \
-      -state disabled -padx $xpadbt -font $fontS  \
+    set wbot $wlc.bot
+    ttk::frame $wbot
+    grid $wbot -row 1 -column 0 -columnspan 2 -sticky news
+    
+    ttk::button $wbot.rem -text [mc Delete]  \
       -command [list [namespace current]::DeleteAssociation $wmclist]
-    button $frbt.change -text "[mc Edit]..."  \
-      -state disabled -padx $xpadbt -font $fontS -command  \
-      [list [namespace current]::Inspect $wDlgs(fileAssoc) edit $wmclist]
-    button $frbt.add -text "[mc New]..." -padx $xpadbt -font $fontS \
+    ttk::button $wbot.change -text "[mc Edit]..."  \
+      -command [list [namespace current]::Inspect $wDlgs(fileAssoc) edit $wmclist]
+    ttk::button $wbot.add -text "[mc New]..."  \
       -command [list [namespace current]::Inspect .setass new $wmclist -1]
-    pack $frbt.rem $frbt.change $frbt.add -side right -padx 10 -pady 5 \
+
+    pack  $wbot.rem  $wbot.change  $wbot.add  -side right -padx 10 -pady 5 \
       -fill x -expand 1
+    
+    $wbot.rem    state {disabled}
+    $wbot.change state {disabled}
     
     # Special bindings for the tablelist.
     set body [$wmclist bodypath]
     bind $body <Button-1> {+ focus %W}
-    bind $body <Double-1> [list $frbt.change invoke]
-    bind $wmclist <FocusIn> "$frbt.rem configure -state normal;  \
-      $frbt.change configure -state normal"
-    bind $wmclist <FocusOut> "$frbt.rem configure -state disabled;  \
-      $frbt.change configure -state disabled"
-    #bind $wmclist <<ListboxSelect>> [list [namespace current]::SelectMsg]
+    bind $body <Double-1> [list $wbot.change invoke]
+    bind $wmclist <<ListboxSelect>> [list [namespace current]::Select $wbot]
+}
+
+proc ::FilePrefs::Select {wbot} {
+
+    $wbot.rem state !disabled
+    $wbot.change state !disabled
 }
 
 # ::FilePrefs::DeleteAssociation --
@@ -166,9 +180,9 @@ proc ::FilePrefs::DeleteAssociation {wmclist {indSel {}}} {
     variable tmpMime2SuffixList
     variable tmpPrefMimeType2Package
 
-    if {$indSel == ""} {
+    if {$indSel eq ""} {
 	set indSel [$wmclist curselection]
-	if {$indSel == ""} {
+	if {$indSel eq ""} {
 	    return
 	}
     }
@@ -247,19 +261,20 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
     set codingVar 0
     
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
     if {[string length $indSel] == 0} {
 	set indSel [$wlist curselection]
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
+      -macclass {document closeBox} -class FilePrefsSet
     wm title $w [mc {Inspect Associations}]
+    ::UI::SetWindowPosition $w
+
     set finishedInspect -1
     
-    set fontSB [option get . fontSmallBold {}]
-    
-    if {$doWhat == "edit"} {
+    if {$doWhat eq "edit"} {
 	if {$indSel < 0} {
 	    error {::FilePrefs::Inspect called with illegal index}
 	}
@@ -294,7 +309,7 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
 	    set packageList None
 	    set packageVar None
 	}
-    } elseif {$doWhat == "new"} {
+    } elseif {$doWhat eq "new"} {
 	set textVarMime {}
 	set textVarDesc {}
 	set textVarSuffix {}
@@ -303,101 +318,107 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
 	set packageVar None
 	set packageList None
     }
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
     
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
     # Frame for everything inside the labeled container: "Type of File".
-    set wcont1 $w.frtop
-    labelframe $wcont1 -text [mc {Type of File}]
-    pack $wcont1 -in $w.frall -padx 8 -pady 4
-    set fr1 [frame $wcont1.fr]
-    label $fr1.x1 -text "[mc Description]:"
-    entry $fr1.x2 -width 30   \
+    set wty $wbox.fty
+    ttk::labelframe $wty -text [mc {Type of File}] \
+      -padding [option get . groupSmallPadding {}]
+    pack $wty -fill x
+    
+    ttk::label $wty.x1 -text "[mc Description]:"
+    ttk::entry $wty.x2 -font CociSmallFont -width 30   \
       -textvariable [namespace current]::textVarDesc
-    label $fr1.x3 -text "[mc {MIME type}]:"
-    entry $fr1.x4 -width 30   \
+    ttk::label $wty.x3 -text "[mc {MIME type}]:"
+    ttk::entry $wty.x4 -font CociSmallFont -width 30   \
       -textvariable [namespace current]::textVarMime
-    label $fr1.x5 -text "[mc {File suffixes}]:"
-    entry $fr1.x6 -width 30   \
+    ttk::label $wty.x5 -text "[mc {File suffixes}]:"
+    ttk::entry $wty.x6 -font CociSmallFont -width 30   \
       -textvariable [namespace current]::textVarSuffix
     
-    set px 1
-    set py 1
-    grid $fr1.x1 -column 0 -row 0 -sticky e -padx $px -pady $py
-    grid $fr1.x2 -column 1 -row 0 -sticky w -padx $px -pady $py
-    grid $fr1.x3 -column 0 -row 1 -sticky e -padx $px -pady $py
-    grid $fr1.x4 -column 1 -row 1 -sticky w -padx $px -pady $py
-    grid $fr1.x5 -column 0 -row 2 -sticky e -padx $px -pady $py
-    grid $fr1.x6 -column 1 -row 2 -sticky w -padx $px -pady $py
-    
-    pack $fr1 -side left -padx 8 -fill x
-    pack $wcont1 -fill x    
-    
-    if {$doWhat == "edit"} {
-	$fr1.x2 configure -state disabled
-	$fr1.x4 configure -state disabled
+    grid  $wty.x1  $wty.x2  -sticky e -pady 2
+    grid  $wty.x3  $wty.x4  -sticky e -pady 2
+    grid  $wty.x5  $wty.x6  -sticky e -pady 2
+        
+    if {$doWhat eq "edit"} {
+	$wty.x2 state {disabled}
+	$wty.x4 state {disabled}
     }
     
     # Frame for everything inside the labeled container: "Handling".
-    set wcont2 $w.frmid
-    labelframe $wcont2 -text [mc Handling]
-    pack $wcont2 -in $w.frall -padx 8 -pady 4
-    set fr2 [frame $wcont2.fr]
-    radiobutton $fr2.x1 -text " [mc {Reject receive}]"  \
+    set wha $wbox.fha
+    ttk::labelframe $wha -text [mc Handling] \
+      -padding [option get . groupSmallPadding {}]
+    pack $wha -fill x -pady 10
+
+    ttk::radiobutton $wha.x1 -text [mc {Reject receive}]  \
       -variable [namespace current]::receiveVar -value reject
-    radiobutton $fr2.x2 -text " [mc preffmsave]"  \
+    ttk::radiobutton $wha.x2 -text [mc preffmsave]  \
       -variable [namespace current]::receiveVar -value save
-    frame $fr2.fr
-    radiobutton $fr2.x3 -text " [mc {Import using}]:  "  \
+    ttk::frame $wha.fr
+    ttk::radiobutton $wha.x3 -text "[mc {Import using}]:"  \
       -variable [namespace current]::receiveVar -value import
-    
     set wMenu [eval {
-	tk_optionMenu $fr2.opt [namespace current]::packageVar
+	ttk::optionmenu $wha.x3m [namespace current]::packageVar
     } $packageList]
-    $wMenu configure -font $fontSB 
-    $fr2.opt configure -font $fontSB -highlightthickness 0
-    
-    radiobutton $fr2.x8 -text " [mc {Unknown: Prompt user}]"  \
+    $wMenu configure -font CociSmallFont     
+    ttk::radiobutton $wha.x8 -text [mc {Unknown: Prompt user}]  \
       -variable [namespace current]::receiveVar -value ask
-    frame $fr2.frcode
-    label $fr2.x4 -text " [mc {File coding}]:"
-    radiobutton $fr2.x5 -text " [mc {As text}]" -anchor w  \
+    ttk::frame $wha.fc
+    ttk::label $wha.fc.l -text "[mc {File coding}]:"
+    ttk::radiobutton $wha.fc.t -text [mc {As text}] -anchor w  \
       -variable [namespace current]::codingVar -value 1
-    radiobutton $fr2.x6 -text " [mc Binary]" -anchor w   \
+    ttk::radiobutton $wha.fc.b -text [mc Binary] -anchor w   \
       -variable [namespace current]::codingVar -value 0
     
+    grid  $wha.x1  -         -sticky w
+    grid  $wha.x2  -         -sticky w
+    grid  $wha.x3  $wha.x3m  -sticky w
+    grid  $wha.x8  -         -sticky w
+    grid  $wha.fc  -         -sticky w -padx 16
+    
+    grid  $wha.fc.l  $wha.fc.t  -sticky w
+    grid  x          $wha.fc.b  -sticky w
+        
     # If we dont have any registered packages for this MIME, disable this
     # option.
     
-    if {($doWhat == "edit") && ($packageList == "None")} {
-	$fr2.x3 configure -state disabled
-	$fr2.opt configure -state disabled
+    if {($doWhat eq "edit") && ($packageList eq "None")} {
+	$wha.x3  state {disabled}
+	$wha.x3m state {disabled}
     }
-    if {$doWhat == "new"} {
-	$fr2.x3 configure -state disabled
+    if {$doWhat eq "new"} {
+	$wha.x3 state {disabled}
     }
-    pack $fr2.x1 $fr2.x2 $fr2.fr -side top -padx 10 -pady $ypad -anchor w
-    pack $fr2.x3 $fr2.opt -in $fr2.fr -side left -padx 0 -pady 0
-    pack $fr2.x8 -side top -padx 10 -pady $ypad -anchor w
-    pack $fr2.frcode -side top -padx 10 -pady $ypad -anchor w
-    grid $fr2.x4 $fr2.x5 -in $fr2.frcode -sticky w -padx 3 -pady $ypad
-    grid x       $fr2.x6 -in $fr2.frcode -sticky w -padx 3 -pady $ypad
-    
-    pack $fr2 -side left -padx 8 -fill x
-    pack $wcont2 -fill x    
     
     # Button part
-    pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
-      -padx 8 -pady 6
-    button $w.btok -text [mc Save] -default active  \
+    set frbot $wbox.b
+    ttk::frame $frbot
+    ttk::button $frbot.btok -style TButton \
+      -text [mc Save] -default active  \
       -command [list [namespace current]::SaveThisAss $wlist $indSel]
-    button $w.btcancel -text [mc Cancel]  \
-      -command "set [namespace current]::finishedInspect 0"
-    pack $w.btok $w.btcancel -in $w.frbot -side right -padx 5 -pady 5
+    ttk::button $frbot.btcancel -style TButton \
+      -text [mc Cancel]  \
+      -command [list set [namespace current]::finishedInspect 0]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
     
-    ::UI::SetWindowPosition $w
     wm resizable $w 0 0
-    bind $w <Return> "$w.btok invoke"
+    bind $w <Return> [list $frbot.btok invoke]
     
     # Wait here for a button press.
     tkwait variable [namespace current]::finishedInspect
@@ -435,7 +456,7 @@ proc ::FilePrefs::SaveThisAss {wlist indSel} {
     variable tmpPrefMimeType2Package
 
     # Check that no fields are empty.
-    if {($textVarDesc == "") || ($textVarMime == "") || ($textVarSuffix == "")} {
+    if {($textVarDesc eq "") || ($textVarMime eq "") || ($textVarSuffix eq "")} {
 	::UI::MessageBox -title [mc Error] -icon error -type ok  \
 	  -message [mc messfieldsmissing]
 	return
@@ -443,7 +464,7 @@ proc ::FilePrefs::SaveThisAss {wlist indSel} {
     
     # Put this specific MIME type associations in the tmp arrays.
     set tmpMime2Description($textVarMime) $textVarDesc
-    if {$packageVar == "None"} {
+    if {$packageVar eq "None"} {
 	set tmpPrefMimeType2Package($textVarMime) ""
     }
     
@@ -486,7 +507,7 @@ proc ::FilePrefs::SaveThisAss {wlist indSel} {
 	
     set doWhat $tmpMimeTypeDoWhat($textVarMime)
     set icon [::Plugins::GetIconForPackage $doWhat 12]
-    if {![regexp {(unavailable|reject|save|ask)} $doWhat] && ($icon != "")} {
+    if {![regexp {(unavailable|reject|save|ask)} $doWhat] && ($icon ne "")} {
 	$wlist insert $indInsert [list " $tmpMime2Description($textVarMime)" \
 	  $doWhat $textVarMime]
 	$wlist cellconfigure "$indInsert,1" -image $icon

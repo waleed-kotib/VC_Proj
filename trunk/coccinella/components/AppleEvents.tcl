@@ -3,7 +3,7 @@
 #       Experimental!
 #       Some code from Alpha.
 # 
-# $Id: AppleEvents.tcl,v 1.5 2004-11-30 15:11:10 matben Exp $
+# $Id: AppleEvents.tcl,v 1.6 2005-08-14 08:37:51 matben Exp $
 
 namespace eval ::AppleEvents:: { }
 
@@ -80,8 +80,8 @@ proc ::AppleEvents::PrintHandler {theAppleEvent theReplyAE} {
     foreach f $paths {	
 	switch -- [file extension $f] {
 	    .can {
-		set wtop [::WB::NewWhiteboard -file $f]
-		::UserActions::DoPrintCanvas $wtop
+		set w [::WB::NewWhiteboard -file $f]
+		::UserActions::DoPrintCanvas $w
 	    }
 	}
     }

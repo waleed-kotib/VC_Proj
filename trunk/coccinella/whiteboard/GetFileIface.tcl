@@ -6,9 +6,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: GetFileIface.tcl,v 1.6 2004-12-06 15:27:01 matben Exp $
+# $Id: GetFileIface.tcl,v 1.7 2005-08-14 08:37:52 matben Exp $
 
 package require getfile
 package require uriencode
@@ -19,6 +17,7 @@ namespace eval ::GetFileIface:: {
     
     # Internal vars only.
     variable uid 0
+    variable noErr 0
 }
 
 # GetFileIface::GetFile --
@@ -27,17 +26,18 @@ namespace eval ::GetFileIface:: {
 #       Wrapper around 'getfile::get' for handling UI etc.
 #       
 # Arguments:
-#       wtop       toplevel for whiteboard
+#       w          toplevel widget path
 #       sock
 #       fileName   the file name (tail), uri encoded.
 #       opts       is a list of '-key value' pairs that contains additional 
 #                  information.
 
-proc ::GetFileIface::GetFile {wtop sock fileName opts} {
-    global prefs noErr wDlgs
+proc ::GetFileIface::GetFile {w sock fileName opts} {
+    global prefs wDlgs
     variable uid
+    variable noErr
         
-    ::Debug 2 "::GetFileIface::GetFile wtop=$wtop, fileName=$fileName"
+    ::Debug 2 "::GetFileIface::GetFile w=$w, fileName=$fileName"
     
     array set optArr $opts    
     if {[info exists optArr(-mime)]} {
@@ -64,8 +64,8 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     variable $gettoken
     upvar 0 $gettoken getstate
     
-    set getstate(wtop)        $wtop
-    set getstate(can)         [::WB::GetCanvasFromWtop $wtop]
+    set getstate(w)           $w
+    set getstate(can)         [::WB::GetCanvasFromWtop $w]
     set getstate(sock)        $sock
     set getstate(filetail)    $fileTail
     set getstate(dstpath)     $dstpath
@@ -136,7 +136,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
 #       Open new temporary socket only for this get operation.
 #       
 # Arguments:
-#       wtop       toplevel for whiteboard
+#       w          toplevel widget path
 #       ip         the ip number of the remote server.
 #       port
 #       path       It must be a pathname relative the servers base 
@@ -145,11 +145,12 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
 #       opts       is a list of '-key value' pairs that contains additional 
 #                  information.
 
-proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
-    global prefs wDlgs noErr
+proc ::GetFileIface::GetFileFromServer {w ip port path opts} {
+    global prefs wDlgs
     variable uid
+    variable noErr
     
-    ::Debug 2 "::GetFileIface::GetFileFromServer wtop=$wtop, path=$path"
+    ::Debug 2 "::GetFileIface::GetFileFromServer w=$w, path=$path"
     
     array set optArr $opts
     
@@ -177,8 +178,8 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
     variable $gettoken
     upvar 0 $gettoken getstate
     
-    set getstate(wtop)       $wtop
-    set getstate(can)        [::WB::GetCanvasFromWtop $wtop]
+    set getstate(w)          $w
+    set getstate(can)        [::WB::GetCanvasFromWtop $w]
     set getstate(filetail)   $fileTail
     set getstate(dstpath)    $dstpath
     set getstate(optlist)    $opts
@@ -249,14 +250,14 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
 #       May modify 'gettoken(dstpath)'!
 
 proc ::GetFileIface::Prepare {gettoken fileTail mime opts} {
-    global  prefs noErr this
-    
+    global  prefs  this
+    variable noErr
     upvar #0 $gettoken getstate          
 
     array set optArr $opts
    	
     set doWhat [::Plugins::GetDoWhatForMime $mime]
-    if {$doWhat == ""} {
+    if {$doWhat eq ""} {
 	return 321
     }
     
@@ -276,7 +277,7 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime opts} {
 	    } else {
 		set ans [tk_chooseDirectory -initialdir $prefs(incomingPath) \
 		  -title [mc {Pick Directory}]]
-		if {$ans == ""} {
+		if {$ans eq ""} {
 		    return 321
 		} else {
 		    set getstate(dstpath) [file join $ans $fileTail]
@@ -378,12 +379,12 @@ proc ::GetFileIface::Command {gettoken token what msg} {
     
     ::Debug 2 "+\t\t::GetFileIface::Command token=$token, what=$what msg=$msg"
 
-    set wtop $getstate(wtop)
+    set w $getstate(w)
     
     set str [::GetFileIface::FormatMessage $gettoken $msg]
     
     if {[string equal $what "error"]} {
-	::WB::SetStatusMessage $wtop $str
+	::WB::SetStatusMessage $w $str
 	if {$prefs(talkative) >= 1} {
 	    ::UI::MessageBox -title [mc {Get File Error}] \
 	      -type ok -message $msg
@@ -398,10 +399,10 @@ proc ::GetFileIface::Command {gettoken token what msg} {
 	unset getstate
 	getfile::cleanup $token
     } elseif {[string equal $what "ok"]} {
-	::WB::SetStatusMessage $wtop $str
+	::WB::SetStatusMessage $w $str
 
 	::Debug 3 "+        status=[::getfile::status $token]"
-	if {[::getfile::status $token] == "ok"} {
+	if {[::getfile::status $token] eq "ok"} {
 	    
 	    # Finished and ok!
 	    ::GetFileIface::DoImport $getstate(mime) $getstate(optlist)  \
@@ -517,7 +518,7 @@ proc ::GetFileIface::DoImport {mime opts args} {
 	} else {
 	    set errMsg [mc messfailmimeimp $mime]
 	}
-	if {$errMsg != ""} {
+	if {$errMsg ne ""} {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 	      -message "Failed importing: $errMsg"
 	}
@@ -535,7 +536,7 @@ proc ::GetFileIface::NewBrokenImage {code gettoken} {
     
     set msg "Failed importing $getstate(filetail): "
     append msg [getfile::ncodetotext $code]
-    ::WB::SetStatusMessage $getstate(wtop) $msg
+    ::WB::SetStatusMessage $getstate(w) $msg
 
     set opts $getstate(optlist)
     array set optArr $getstate(optlist)
@@ -588,9 +589,9 @@ proc ::GetFileIface::CancelAll { } {
     }
 }
 
-proc ::GetFileIface::CancelAllWtop {wtop} {
+proc ::GetFileIface::CancelAllWtop {w} {
 
-    ::Debug 2 "+::GetFileIface::CancelAllWtop wtop=$wtop"
+    ::Debug 2 "+::GetFileIface::CancelAllWtop w=$w"
     
     # Close and clean up.
     set gettokenList [concat  \
@@ -601,8 +602,8 @@ proc ::GetFileIface::CancelAllWtop {wtop} {
     foreach gettoken $gettokenList {
 	upvar #0 $gettoken getstate          
 
-	if {[info exists getstate(wtop)] &&  \
-	  [string equal $getstate(wtop) $wtop]} {
+	if {[info exists getstate(w)] &&  \
+	  [string equal $getstate(w) $w]} {
 	    set tok $getstate(token)
 	    getfile::reset $tok
 	    getfile::cleanup $tok

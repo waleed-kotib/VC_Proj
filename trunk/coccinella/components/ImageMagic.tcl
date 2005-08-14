@@ -6,7 +6,7 @@
 # 
 # Unix/Linux only.
 #
-# $Id: ImageMagic.tcl,v 1.5 2005-04-02 13:58:36 matben Exp $
+# $Id: ImageMagic.tcl,v 1.6 2005-08-14 08:37:51 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -36,20 +36,20 @@ proc ::ImageMagic::Init { } {
 	# 'type' 'label' 'command' 'opts' {subspec}
 	# where subspec defines a cascade menu recursively
 	set menuspec [list \
-	    command [mc {Take Snapshot}] {::ImageMagic::ImportWindowSnapShot $wtop} normal {} {} {} \
+	    command [mc {Take Snapshot}] {::ImageMagic::ImportWindowSnapShot $w} normal {} {} {} \
 	]
 	::UI::Public::RegisterNewMenu addon [mc mAddons] $menuspec
     }
 }
 
-proc ::ImageMagic::ImportWindowSnapShot {wtop} {
+proc ::ImageMagic::ImportWindowSnapShot {w} {
     global  this
     variable imageType
     variable tmpfiles
     variable haveImageMagic
     variable importcmd
     
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     
     if {$haveImageMagic == 0} {
 	::UI::MessageBox -icon error -type ok -message  \
@@ -63,8 +63,8 @@ proc ::ImageMagic::ImportWindowSnapShot {wtop} {
 	set tmpfile [::tfileutils::tempfile $this(tmpPath) imagemagic]
 	append tmpfile .$imageType
 	exec $importcmd $tmpfile
-	set optList [list -coords [::CanvasUtils::NewImportAnchor $wCan]]
-	set errMsg [::Import::DoImport $wCan $optList -file $tmpfile]
+	set optList [list -coords [::CanvasUtils::NewImportAnchor $wcan]]
+	set errMsg [::Import::DoImport $wcan $optList -file $tmpfile]
 	if {$errMsg == ""} {
 	    lappend tmpfiles $tmpfile
 	} else {
@@ -78,28 +78,37 @@ proc ::ImageMagic::BuildDialog {w} {
     variable imageType
     variable finished
     
-    toplevel $w
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     wm title $w {Take Snapshot}
     set finished -1
-    set fontS [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    set msg {Click on a window in the desktop or drag a rectangular }
-    append msg {area to import into the current whiteboard.}
-    message $w.frall.msg -width 260 -font $fontS -text $msg
-    pack $w.frall.msg -side top -fill both -expand 1
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    set msg "Click on a window in the desktop or drag a rectangular "
+    append msg "area to import into the current whiteboard."
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 300 -justify left \
+      -text $msg
+    pack $wbox.msg -side top -fill x -anchor w
     
-    pack [label $w.frall.la -text {Captured image format:} -font $fontSB]\
-      -side top -padx 10 -pady 4 -anchor w
-    set frbt $w.frall.frbt
-    pack [frame $frbt] -side top -padx 20 -pady 4 -anchor w
+    ttk::label $wbox.la -text {Captured image format:} -style Small.TLabel
+    pack $wbox.la -side top -anchor w
+
+    set frbt $wbox.frbt
+    ttk::frame $frbt
+    pack $frbt -side top -anchor w
+    
     foreach type {bmp gif jpeg png tiff} {
-	radiobutton ${frbt}.${type} -text $type -font $fontS   \
+	ttk::radiobutton $frbt.$type -text $type -style Small.TRadiobutton   \
 	  -variable [namespace current]::imageType -value $type
-	grid ${frbt}.${type} -sticky w -padx 20 -pady 1
+	grid $frbt.$type -sticky w -padx 20 -pady 1
 	
 	# Verify that we've got an importer for the format.
 	set theMime [::Types::GetMimeTypeForFileName x.$type]
@@ -109,14 +118,21 @@ proc ::ImageMagic::BuildDialog {w} {
     }
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc OK] -default active \
-      -command [list set [namespace current]::finished 1]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel] \
-      -command [list set [namespace current]::finished 0]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot     $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc OK] -default active \
+      -command [list set [namespace current]::finished 1]
+    ttk::button $frbot.btcancel -text [mc Cancel] \
+      -command [list set [namespace current]::finished 0]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
@@ -138,7 +154,7 @@ proc ::ImageMagic::BuildDialog {w} {
 #     w
 # 
 
-proc ::ImageMagic::ClearImportFiles { wCan } {
+proc ::ImageMagic::ClearImportFiles {wcan} {
     global  prefs
     
     variable tmpfiles

@@ -5,9 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: CanvasFile.tcl,v 1.20 2005-06-05 14:54:13 matben Exp $
+# $Id: CanvasFile.tcl,v 1.21 2005-08-14 08:37:52 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -24,25 +22,25 @@ namespace eval ::CanvasFile:: {}
 #       canvas, and closes the file.
 #
 # Arguments:
-#       wtop        the toplevel's namespace (::.main.::)
+#       w           toplevel widget path
 #       filePath    the file with canvas data.
 #       
 # Results:
 #       none
 
-proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
+proc ::CanvasFile::DrawCanvasItemFromFile {w filePath args} {
     
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
 
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
-	::UI::MessageBox -icon error -type ok -parent $wCan \
+	::UI::MessageBox -icon error -type ok -parent $wcan \
 	  -message [mc messfailopread $tail $fd]
 	return
     }
     fconfigure $fd -encoding utf-8
-    eval {::CanvasFile::FileToCanvas $wCan $fd $filePath} $args
+    eval {FileToCanvas $wcan $fd $filePath} $args
     close $fd
 }
 
@@ -50,9 +48,9 @@ proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
 # 
 #       Just a wrapper for FileToCanvas.
 
-proc ::CanvasFile::OpenCanvas {w fileName args} {
+proc ::CanvasFile::OpenCanvas {wcan fileName args} {
     
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
 
     # Opens the data file.
     if {[catch {open $fileName r} fd]} {
@@ -61,10 +59,10 @@ proc ::CanvasFile::OpenCanvas {w fileName args} {
 	  -icon error -type ok
 	return
     }
-    ::CanvasCmd::DoEraseAll $wtop     
-    ::undo::reset [::WB::GetUndoToken $wtop]
+    ::CanvasCmd::DoEraseAll $w   
+    ::undo::reset [::WB::GetUndoToken $w]
     fconfigure $fd -encoding utf-8
-    eval {FileToCanvas $w $fd $fileName} $args
+    eval {FileToCanvas $wcan $fd $fileName} $args
     close $fd
 }
 	  
@@ -116,7 +114,7 @@ proc ::CanvasFile::FileToCanvas {w fd absPath args} {
 #       Lines can also contain 'image create ...' commands.
 #       The file must be opened and file id given as 'fd'.
 
-proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
+proc ::CanvasFile::FileToCanvasVer1 {wcan fd absPath args} {
     global  prefs
     
     Debug 2 "FileToCanvasVer1 absPath=$absPath"
@@ -200,7 +198,7 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 	    # Use the image create command on the previous line if exist.
 	    # Extract the complete file path.
 	    
-	    if {$previousImageOrMovieCmd != ""} {
+	    if {$previousImageOrMovieCmd ne ""} {
 		set ind [lsearch -exact $previousImageOrMovieCmd "-file"]
 		if {$ind >= 0} {
 		    set filePath [lindex $previousImageOrMovieCmd [expr $ind + 1]]
@@ -241,7 +239,7 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 	    set x [lindex $line 2]
 	    set y [lindex $line 3]
 	    set opts [list -coords [list $x $y] -tags $ittag]
-	    if {$zoomOpts != ""} {
+	    if {$zoomOpts ne ""} {
 		lappend opts -zoom-factor $zoomOpts
 	    }
 	    
@@ -252,10 +250,10 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 	    }
 	    
 	    # Let the import procedure do the job; manufacture an option list.
-	    ::Import::DoImport $w $opts -file $filePath -where $where
+	    ::Import::DoImport $wcan $opts -file $filePath -where $where
 	    
 	} else {
-	    set wtop [::UI::GetToplevelNS $w]
+	    set w [winfo toplevel $wcan]
 	    
 	    # Draw ordinary item not image nor window (movie).
 	    if {[string equal $where "all"] || [string equal $where "local"]} {
@@ -266,7 +264,7 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 		} else {
 		    set cmdlocal $cmdnl
 		}
-		eval {$w} $cmdlocal
+		eval {$wcan} $cmdlocal
 	    }
 	    
 	    # Encode all newlines as \n .
@@ -274,11 +272,11 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 	    
 	    # Write to other clients.
 	    if {[string equal $where "all"] || [string equal $where "remote"]} {
-		::CanvasUtils::Command $wtop $cmdoneline remote
+		::CanvasUtils::Command $w $cmdoneline remote
 	    } elseif {![string equal $where "local"]} {
 		
 		# Write only to specified client with ip number 'where'.
-		::CanvasUtils::Command $wtop $cmdoneline $where
+		::CanvasUtils::Command $w $cmdoneline $where
 	    }
 		
 	    if {[string equal $where "all"] || [string equal $where "local"]} {
@@ -286,7 +284,7 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 		# Run all registered hookd like speech.
 		if {[string equal $type "text"]} {
 		    ::hooks::run whiteboardTextInsertHook me  \
-		      [$w itemcget $ittag -text]
+		      [$wcan itemcget $ittag -text]
 		}
 	    }
 	}
@@ -300,7 +298,7 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 #       Reads a canvas file version 2 into canvas. 
 #       Handles any 'import' commands.
 
-proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
+proc ::CanvasFile::FileToCanvasVer2 {wcan fd absPath args} {
     global  prefs
     
     Debug 2 "FileToCanvasVer2 absPath=$absPath args='$args'"
@@ -325,7 +323,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	set updateUtags 0
     }
     set dirPath [file dirname $absPath]
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
     set nimports 0
     set undoCmdList {}
@@ -368,17 +366,17 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 			set cmdlocal [subst -nocommands -novariables $cmdlocal]
 			set cmdlocal [::CanvasUtils::FontHtmlToPointSize $cmdlocal]
 		    }
-		    eval {$w} $cmdlocal
+		    eval {$wcan} $cmdlocal
 		}
 		
 		# Write to other clients.
 		if {[string equal $where "all"] || \
 		  [string equal $where "remote"]} {
-		    ::CanvasUtils::Command $wtop $line "remote"
+		    ::CanvasUtils::Command $w $line "remote"
 		} elseif {![string equal $where "local"]} {
 		    
 		    # Write only to specified client with ip number 'where'.
-		    ::CanvasUtils::Command $wtop $line $where
+		    ::CanvasUtils::Command $w $line $where
 		}
 		
 		# Speak...
@@ -386,7 +384,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 		    all - local {
 			if {[string equal $type "text"]} {
 			    ::hooks::run whiteboardTextInsertHook me \
-			      [$w itemcget $utag -text]
+			      [$wcan itemcget $utag -text]
 			}
 		    }
 		}
@@ -415,7 +413,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 
 		# This is typically an image or movie (QT or Snack).
 		set errMsg [eval {
-		    ::Import::HandleImportCmd $w $line  \
+		    ::Import::HandleImportCmd $wcan $line  \
 		      -addundo 0 -basepath $dirPath  \
 		      -progress [list ::Import::ImportProgress $line]  \
 		      -command  [list ::Import::ImportCommand $line]
@@ -507,17 +505,16 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
 #       open dialog.
 #
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
-#       filePath      absolute path to the save file.
+#       w           toplevel widget path
+#       filePath    absolute path to the save file.
 #       
 # Results:
 #       none
 
-proc ::CanvasFile::OpenCanvasFileDlg {wtop {filePath {}}} {
+proc ::CanvasFile::OpenCanvasFileDlg {w {filePath {}}} {
     global  prefs this
     
-    set w [::UI::GetToplevel $wtop]
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     
     if {[string length $filePath] == 0} {
 	set typelist {
@@ -527,14 +524,14 @@ proc ::CanvasFile::OpenCanvasFileDlg {wtop {filePath {}}} {
 	}
 	set ans [::UI::MessageBox -icon warning -type okcancel -default ok \
 	  -parent $w -message [mc messcanerasewarn]]
-	if {$ans == "cancel"} {
+	if {$ans eq "cancel"} {
 	    return
 	}
 	set userDir [::Utils::GetDirIfExist $prefs(userPath)]
 	set ans [tk_getOpenFile -title [mc {Open Canvas}]  \
 	  -filetypes $typelist -defaultextension ".can"  \
 	  -initialdir $userDir]
-	if {$ans == ""} {
+	if {$ans eq ""} {
 	    return
 	}
 	set prefs(userPath) [file dirname $ans]
@@ -545,12 +542,12 @@ proc ::CanvasFile::OpenCanvasFileDlg {wtop {filePath {}}} {
     
     switch -- [file extension $fileName] {
 	.svg {
-	    ::undo::reset [::WB::GetUndoToken $wtop]
-	    ::CanvasCmd::DoEraseAll $wtop     
-	    ::CanvasFile::SVGFileToCanvas $wtop $fileName
+	    ::undo::reset [::WB::GetUndoToken $w]
+	    ::CanvasCmd::DoEraseAll $w
+	    ::CanvasFile::SVGFileToCanvas $w $fileName
 	}
 	.can {	    
-	    OpenCanvas $wCan $fileName
+	    OpenCanvas $wcan $fileName
 	}
     }
 }
@@ -561,19 +558,19 @@ proc ::CanvasFile::OpenCanvasFileDlg {wtop {filePath {}}} {
 #       displays a Save As dialog instead.
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       
 # Results:
 #       file save dialog shown if needed, file written.
 
-proc ::CanvasFile::Save {wtop} {
-    upvar ::WB::${wtop}::state state
+proc ::CanvasFile::Save {w} {
+    upvar ::WB::${w}::state state
     
-    if {$state(fileName) == ""} {
-	set fileName [::CanvasFile::SaveAsDlg $wtop]
+    if {$state(fileName) eq ""} {
+	set fileName [SaveAsDlg $w]
     } else {
-	set wCan [::WB::GetCanvasFromWtop $wtop]
-	set fileName [::CanvasFile::SaveCanvas $wCan $state(fileName)]
+	set wcan [::WB::GetCanvasFromWtop $w]
+	set fileName [SaveCanvas $wcan $state(fileName)]
     }
     return $fileName
 }
@@ -583,16 +580,16 @@ proc ::CanvasFile::Save {wtop} {
 #       Displays a Save As dialog and acts correspondingly.
 #       
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       
 # Results:
 #       file save dialog shown, file written.
 
-proc ::CanvasFile::SaveAsDlg {wtop} {
-    upvar ::WB::${wtop}::state state
+proc ::CanvasFile::SaveAsDlg {w} {
+    upvar ::WB::${w}::state state
     
-    set fileName [::CanvasFile::SaveCanvasFileDlg $wtop]
-    if {$fileName != ""} {
+    set fileName [SaveCanvasFileDlg $w]
+    if {$fileName ne ""} {
 	set state(fileName) $fileName
     }
 }
@@ -603,15 +600,15 @@ proc ::CanvasFile::SaveAsDlg {wtop} {
 #       'CanvasToFile' to write into it, closes it.
 #
 # Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       w           toplevel widget path
 #       
 # Results:
 #       fileName or empty
 
-proc ::CanvasFile::SaveCanvasFileDlg {wtop} {
+proc ::CanvasFile::SaveCanvasFileDlg {w} {
     global  prefs this
         
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     set typelist {
 	{"Canvas"            {.can}}
 	{"XML/SVG"           {.svg}}
@@ -628,11 +625,11 @@ proc ::CanvasFile::SaveCanvasFileDlg {wtop} {
     }
     set fileName [eval {tk_getSaveFile -title [mc {Save Canvas}] \
       -defaultextension ".can"} $opts]
-    if {$fileName == ""} {
+    if {$fileName eq ""} {
 	return ""
     }
     set prefs(userPath) [file dirname $fileName]
-    ::CanvasFile::SaveCanvas $wCan $fileName
+    ::CanvasFile::SaveCanvas $wcan $fileName
     
     return $fileName
 }
@@ -642,7 +639,7 @@ proc ::CanvasFile::SaveCanvasFileDlg {wtop} {
 #       Write canvas to specified file name taking any specific file
 #       extension as an indication of format.
 
-proc ::CanvasFile::SaveCanvas {wCan fileName args} {
+proc ::CanvasFile::SaveCanvas {wcan fileName args} {
     global  prefs this
     
     set ext [file extension $fileName]
@@ -651,12 +648,12 @@ proc ::CanvasFile::SaveCanvas {wCan fileName args} {
 	.svg {
 	    
 	    # Not completely sure about -usetags.
-	    ::can2svg::canvas2file $wCan $fileName -uritype file -usetags all \
+	    ::can2svg::canvas2file $wcan $fileName -uritype file -usetags all \
 	      -allownewlines 0  \
 	      -windowitemhandler ::CanvasUtils::GetSVGForeignFromWindowItem
 	}
 	.ps {
-	    eval {$wCan postscript} $prefs(postscriptOpts) {-file $fileName}
+	    eval {$wcan postscript} $prefs(postscriptOpts) {-file $fileName}
 	    if {[string equal $this(platform) "macintosh"]} {
 		file attributes $ans -type TEXT -creator vgrd
 	    }
@@ -664,7 +661,7 @@ proc ::CanvasFile::SaveCanvas {wCan fileName args} {
 	default {
 	    
 	    # If not .txt make sure it's .can extension.
-	    if {$ext != ".txt"} {
+	    if {$ext ne ".txt"} {
 		set fileName "[file rootname $fileName].can"
 	    }
 	    
@@ -676,7 +673,7 @@ proc ::CanvasFile::SaveCanvas {wCan fileName args} {
 		return ""
 	    }	    
 	    fconfigure $fd -encoding utf-8
-	    ::CanvasFile::CanvasToFile $wCan $fd $fileName
+	    CanvasToFile $wcan $fd $fileName
 	    close $fd
 	}
     }
@@ -686,17 +683,17 @@ proc ::CanvasFile::SaveCanvas {wCan fileName args} {
 # 
 # 
 
-proc ::CanvasCmd::DoSaveAsItem {wtop} {
+proc ::CanvasCmd::DoSaveAsItem {w} {
     global  prefs this
 	
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
     set typelist {
 	{"Canvas"            {.can}}
     }
     set ans [tk_getSaveFile -title [mc {Save Canvas Item}] \
       -defaultextension ".can" -initialdir $this(altItemPath) \
       -initialfile Untitled.can]
-    if {$ans == ""} {
+    if {$ans eq ""} {
 	return
     }
     set fileName $ans
@@ -707,7 +704,7 @@ proc ::CanvasCmd::DoSaveAsItem {wtop} {
 	return
     }	    
     fconfigure $fd -encoding utf-8
-    ::CanvasFile::CanvasToFile $wCan $fd $fileName -keeputag 0
+    ::CanvasFile::CanvasToFile $wcan $fd $fileName -keeputag 0
     close $fd
 }
 
@@ -753,7 +750,7 @@ proc ::CanvasFile::ImagePathTranslation {optList absFilePath} {
     set ind [lsearch $optList "-file"]
     if {$ind >= 0} {
 	set absImPath [lindex $optList [expr $ind + 1]]
-	if {$absImPath != ""} {
+	if {$absImPath ne ""} {
 	    set newOptList [lreplace $optList   \
 	      [expr $ind + 1] [expr $ind + 1]   \
 	      [::tfileutils::relative $absFilePath $absImPath]]
@@ -770,14 +767,14 @@ proc ::CanvasFile::ImagePathTranslation {optList absFilePath} {
 # 
 #       Imports an svg file to canvas.
 
-proc ::CanvasFile::SVGFileToCanvas {wtop filePath} {
+proc ::CanvasFile::SVGFileToCanvas {w filePath} {
     
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
 
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
-	::UI::MessageBox -icon error -type ok -parent $wCan \
+	::UI::MessageBox -icon error -type ok -parent $w \
 	  -message [mc messfailopread $tail $fd]
 	return
     }
@@ -787,12 +784,12 @@ proc ::CanvasFile::SVGFileToCanvas {wtop filePath} {
     
     # Update the utags...
     set cmdList [svg2can::parsesvgdocument $xmllist  \
-      -imagehandler [list ::CanvasFile::SVGImageHandler $wtop] \
-      -foreignobjecthandler [list ::CanvasUtils::SVGForeignObjectHandler $wtop]]
+      -imagehandler [list ::CanvasFile::SVGImageHandler $w] \
+      -foreignobjecthandler [list ::CanvasUtils::SVGForeignObjectHandler $w]]
     foreach cmd $cmdList {
 	set utag [::CanvasUtils::NewUtag]
 	set cmd [::CanvasUtils::ReplaceUtag $cmd $utag]
-	eval $wCan $cmd
+	eval $wcan $cmd
     }
     close $fd
 }
@@ -802,12 +799,12 @@ proc ::CanvasFile::SVGFileToCanvas {wtop filePath} {
 #       Callback for svg to canvas translator to be able to garbage collect
 #       image when window closed.
 
-proc ::CanvasFile::SVGImageHandler {wtop cmd} {
+proc ::CanvasFile::SVGImageHandler {w cmd} {
     
     #puts "::CanvasFile::SVGImageHandler cmd=$cmd"
     set idx [lsearch -regexp $cmd {-[a-z]+}]
     array set argsArr [lrange $cmd $idx end]
-    return [::WB::CreateImageForWtop $wtop "" -file $argsArr(-file)]
+    return [::WB::CreateImageForWtop $w "" -file $argsArr(-file)]
 }
 
 # Perhaps a mechanism for components to register new open/save formats?
@@ -868,7 +865,7 @@ proc ::CanvasFile::CanvasToMetakit {w fileName} {
     mk::file close $tag
 }
 
-proc ::CanvasFile::MetakitToCanvas {w fileName} {
+proc ::CanvasFile::MetakitToCanvas {wcan fileName} {
     global  this
     variable mkdbuid
     
@@ -878,7 +875,7 @@ proc ::CanvasFile::MetakitToCanvas {w fileName} {
     mk::file open $tag $fileName
     set views [mk::file views $tag]
     puts "views=$views"
-    set wtop [::UI::GetToplevelNS $w]
+    set w [winfo toplevel $wcan]
     
     # Handle only 'canvas' view.
     if {[lsearch $views canvas] < 0} {
@@ -920,10 +917,10 @@ proc ::CanvasFile::MetakitToCanvas {w fileName} {
 		    # Wrong size
 		    set line $cmdlocal
 		}
-		::CanvasUtils::Command $wtop $line
+		::CanvasUtils::Command $w $line
 	    }
 	    import {
-		set errMsg [::Import::HandleImportCmd $w $line -addundo 0  \
+		set errMsg [::Import::HandleImportCmd $wcan $line -addundo 0  \
 		  -progress [list ::Import::ImportProgress $line]  \
 		  -command  [list ::Import::ImportCommand $line]]
 

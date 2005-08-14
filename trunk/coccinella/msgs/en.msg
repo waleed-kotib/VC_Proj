@@ -86,6 +86,8 @@
 ::msgcat::mcset en Never
 ::msgcat::mcset en New
 ::msgcat::mcset en Next
+::msgcat::mcset en Nick
+::msgcat::mcset en Nickname
 ::msgcat::mcset en No
 ::msgcat::mcset en no
 ::msgcat::mcset en None
@@ -113,6 +115,7 @@
 ::msgcat::mcset en Progress
 ::msgcat::mcset en Quit?
 ::msgcat::mcset en Quote
+::msgcat::mcset en Reason
 ::msgcat::mcset en Register
 ::msgcat::mcset en Remaining
 ::msgcat::mcset en Remove
@@ -126,6 +129,7 @@
 ::msgcat::mcset en Send
 ::msgcat::mcset en Server
 ::msgcat::mcset en Servers
+::msgcat::mcset en Service
 ::msgcat::mcset en Set
 ::msgcat::mcset en Settings
 ::msgcat::mcset en Shortcut
@@ -329,6 +333,9 @@
 ::msgcat::mcset en mLoginTrpt     	{Login To Transport}
 ::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
 ::msgcat::mcset en mRemoveContact  	{Remove Contact...}
+::msgcat::mcset en mShow         	{Show}
+::msgcat::mcset en mOffline         	{Offline}
+::msgcat::mcset en mTransports         	{Transports}
 
 
 # Short texts only. Use english text as database key.
@@ -369,6 +376,7 @@
 ::msgcat::mcset en {Create Room}
 ::msgcat::mcset en {Default group}
 ::msgcat::mcset en {Default Logout Status}
+::msgcat::mcset en {Default status descriptions}
 ::msgcat::mcset en {Delete Rule}
 ::msgcat::mcset en {Disk Cache}
 ::msgcat::mcset en {Different Passwords}
@@ -401,9 +409,11 @@
 ::msgcat::mcset en {Get File Error}
 ::msgcat::mcset en {Get vCard}
 ::msgcat::mcset en {Getting available rooms...}
-::msgcat::mcset en {Group chat in room}
+::msgcat::mcset en {Groupchat in room}
+::msgcat::mcset en {Groupchat presence change}
 ::msgcat::mcset en {Groupchat-1.0 (fallback)}
 ::msgcat::mcset en {Handled By}
+::msgcat::mcset en {History length}
 ::msgcat::mcset en {Host name}
 ::msgcat::mcset en {HTTP port}
 ::msgcat::mcset en {Import using}
@@ -412,6 +422,7 @@
 ::msgcat::mcset en {Incoming Messages}
 ::msgcat::mcset en {Incoming Presence}
 ::msgcat::mcset en {Inspect Associations}
+::msgcat::mcset en {Invite User}
 ::msgcat::mcset en {IP address}
 ::msgcat::mcset en {Is connected}
 ::msgcat::mcset en {Is safe}
@@ -420,8 +431,8 @@
 ::msgcat::mcset en {Jabber Client}
 ::msgcat::mcset en {Jabber Server}
 ::msgcat::mcset en {Jabber server port}
-::msgcat::mcset en {Jabber user id}
-::msgcat::mcset en {Jabber Id}
+::msgcat::mcset en {Jabber user ID}
+::msgcat::mcset en {Jabber ID}
 ::msgcat::mcset en {JID to block}
 ::msgcat::mcset en {Last Activity}
 ::msgcat::mcset en {Last name}
@@ -454,6 +465,7 @@
 ::msgcat::mcset en {NAT Address}
 ::msgcat::mcset en {Nick name}
 ::msgcat::mcset en {No Address}
+::msgcat::mcset en {No Available}
 ::msgcat::mcset en {No Inbox}
 ::msgcat::mcset en {No Printing}
 ::msgcat::mcset en {Not Available}
@@ -535,7 +547,7 @@
 ::msgcat::mcset en {This IP number}
 ::msgcat::mcset en {Thread started}
 ::msgcat::mcset en {To/from JID}
-::msgcat::mcset en {To Jabber id}
+::msgcat::mcset en {To Jabber ID}
 ::msgcat::mcset en {To Send or Not}
 ::msgcat::mcset en {Type of File}
 ::msgcat::mcset en {Unknown: Prompt user}
@@ -551,7 +563,6 @@
 ::msgcat::mcset en {Version Info}
 ::msgcat::mcset en {Whiteboard fonts}
 ::msgcat::mcset en {Writing file}
-::msgcat::mcset en {Groupchat presence change}
 
 
 # Splash screen:
@@ -631,8 +642,8 @@
 ::msgcat::mcset en jamesswarberasewb	{Do you want to erase the whiteboard first?}
 ::msgcat::mcset en jamesswarnremove	{Removing an item in your roster is not an undoable process. You need to subscribe once more to this user if you want to add it back. Do you want to continue anyway?}
 ::msgcat::mcset en jamessillegalchar	{Illegal character(s) in %s: "%s"!}
-::msgcat::mcset en jamessbadjid		{The JID "%s" is not well formed. Do you want to continue anyway?}
-::msgcat::mcset en jamessalreadyinrost	{The JID "%s" is already in your roster. Do you want to continue anyway?}
+::msgcat::mcset en jamessbadjid		{The jid "%s" is not well formed. Do you want to continue anyway?}
+::msgcat::mcset en jamessalreadyinrost	{The jid "%s" is already in your roster. Do you want to continue anyway?}
 ::msgcat::mcset en jamessfailsetnick	{There was a failure when setting the nick name or group of user "%s". The error code is %s with the message: %s}
 ::msgcat::mcset en jamessnamemissing	{The %s is missing or is too short!}
 ::msgcat::mcset en jamessnosocket	{Couldn't create socket to server "%s". Maybe networking is not functioning or server is down. Message: %s}
@@ -654,6 +665,8 @@
 ::msgcat::mcset en jamessaddrmiss	{You need to fill in at least one valid address}
 ::msgcat::mcset en jamesschatclose	{If you close this chat window you also loose the complete conversation. Do you actually like to close?}
 ::msgcat::mcset en jamessnogroupchat	{We could not recognize any service that provides groupchat}
+::msgcat::mcset en jamessgcnoroomname   {You must provide a roomname.}
+::msgcat::mcset en jamessgcnoroomnick   {You must provide a nickname.}
 ::msgcat::mcset en jamessinroommiss	{We require that all fields are nonempty before entering room}
 ::msgcat::mcset en jamesswarnexitroom	{Do you actually like to exit the room "%s" ?}
 ::msgcat::mcset en jamesserrbrowse	{We got an error when browsing "%s": %s}
@@ -747,7 +760,7 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 ::msgcat::mcset en prefnetjabb  {The Jabber server system. Extensive user administration using dialogs via the "Jabber" menu. Uses a XML based protocol.}
 ::msgcat::mcset en prefnetmulti {Connect automatically to all clients in this network when connecting any of them.}
 ::msgcat::mcset en prefnetadv   {A client normally runs two different servers, the built in server, which is always present in the peer-to-peer case, and a http server.\
-The Jabber server refers normally to a remote server, and its port is usually 5222. The port numbers set below usually only take effect after a relaunch.}
+The jabber server refers normally to a remote server, and its port is usually 5222. The port numbers set below usually only take effect after a relaunch.}
 ::msgcat::mcset en prefsounsynwb {Have synthetic speech of text written in the whiteboard}
 ::msgcat::mcset en prefsounsynno {Have synthetic speech of normal messages}
 ::msgcat::mcset en prefsounsynch {Have synthetic speech of chat}
@@ -838,7 +851,7 @@ namespace eval ::EditShortcuts:: {
 
 
 ::msgcat::mcset en jalogin 	{Write Jabber server ip number or name, or choose from the popup menu. You should already have an account with this server.}
-::msgcat::mcset en janewaccount {Write Jabber server ip number or name. Pick your username and password.}
+::msgcat::mcset en janewaccount {Write jabber server ip number or name. Pick your username and password.}
 ::msgcat::mcset en janewpass    {Set new password for:}
 ::msgcat::mcset en jasubwant    {The user "%s" wants to subscibe to your presence.}
 ::msgcat::mcset en jasubopts    {Choose from the options below. Picking a nick name and group is optional, and for your personal use only.}
@@ -846,7 +859,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jasubsndmsg  {Send a message to this person:}
 ::msgcat::mcset en jasuballow   {Allow "%s" to see my presence}
 ::msgcat::mcset en jasubadd     {Add "%s" to my roster}
-::msgcat::mcset en jarostadd	{Add a Jabber user to my roster. Nick name and group may be set or changed at any time. To add a user from a foreign IM system you must have an account already\
+::msgcat::mcset en jarostadd	{Add a jabber user to my roster. Nick name and group may be set or changed at any time. To add a user from a foreign IM system you must have an account already\
   on that system, and that you use it when registering with the Jabber servers transport or gateway.}
 ::msgcat::mcset en jarostset	{Set nick name and group of user "%s" to what you want. They may be set or changed at any time later.}
 ::msgcat::mcset en jarostsub	{Subscribe to this user}
@@ -886,10 +899,14 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
 ::msgcat::mcset en jadisrmall   {Remove all servers that are automatically and permanently discovered.}
 ::msgcat::mcset en jauserinnote {Add your personal notes about this user}
-::msgcat::mcset en jaregisterex {Fill in the Jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
-::msgcat::mcset en jaloginjid   {Enter your JID as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+::msgcat::mcset en jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
+::msgcat::mcset en jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+::msgcat::mcset en jaregalready {You are already registered with this service. These are your current settings of your registration parameters.}
+::msgcat::mcset en jaactiveret  {If checked Return sends message else use Ctrl/Cmd-Return}
+::msgcat::mcset en jainvitegchat {Invite a user for groupchat in room %s}
+::msgcat::mcset en jaxformreq   {Labels with (*) are required}
 
-
+   
 # Setup assistant:
 ::msgcat::mcset en suintro1 	{This is a setup assistant to help you fill in the necessary things that is needed for a new or an existing account on a Jabber server.}
 ::msgcat::mcset en suintro2 	{If you are going to run in peer-to-peer mode, you just set this in the Preferences panel, and relaunch the Coccinella.}

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Speech.tcl,v 1.6 2004-11-02 15:34:51 matben Exp $
+# $Id: Speech.tcl,v 1.7 2005-08-14 08:37:51 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -224,7 +224,7 @@ proc ::Speech::InitPrefsHook { } {
     set sprefs(speakChat)     0
     set sprefs(speakWBText)   0
 
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list ::Speech::sprefs(speakMsg)    speakMsg        $sprefs(speakMsg)]    \
       [list ::Speech::sprefs(speakChat)   speakChat       $sprefs(speakChat)]   \
       [list ::Speech::sprefs(speakWBText) speakWBText     $sprefs(speakWBText)] \
@@ -291,56 +291,59 @@ proc ::Speech::UserDefaultsPrefsHook { } {
 proc ::Speech::BuildPrefsPage {page} {
     variable sprefs
     variable tmpPrefs
-    
-    set fontSB [option get . fontSmallBold {}]
-    
+        
     array set tmpPrefs [array get sprefs]
     
-    set labpsp $page.sp
-    labelframe $labpsp -text [mc {Synthetic speech}]
-    pack $labpsp -side top -anchor w -padx 8 -pady 4
+    set wc $page.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    set wfr $wc.f
+    ttk::labelframe $wfr -text [mc {Synthetic speech}] \
+      -padding [option get . groupSmallPadding {}]
+    pack  $wfr  -side top
     
-    checkbutton $labpsp.speak     -text "  [mc prefsounsynwb]"  \
+    ttk::checkbutton $wfr.speak     -text [mc prefsounsynwb]  \
       -variable [namespace current]::tmpPrefs(speakWBText)
-    checkbutton $labpsp.speakmsg  -text "  [mc prefsounsynno]"  \
+    ttk::checkbutton $wfr.speakmsg  -text [mc prefsounsynno]  \
       -variable [namespace current]::tmpPrefs(speakMsg)
-    checkbutton $labpsp.speakchat -text "  [mc prefsounsynch]"  \
+    ttk::checkbutton $wfr.speakchat -text [mc prefsounsynch]  \
       -variable [namespace current]::tmpPrefs(speakChat)
-    pack $labpsp.speak     -side top -anchor w -padx 10
-    pack $labpsp.speakmsg  -side top -anchor w -padx 10
-    pack $labpsp.speakchat -side top -anchor w -padx 10
+
+    grid $wfr.speak      -sticky w
+    grid $wfr.speakmsg   -sticky w
+    grid $wfr.speakchat  -sticky w
     
     if {$sprefs(haveSpeech)} {
 	
 	# Get a list of voices
-	set voicelist "None [::Speech::SpeakGetVoices]"
+	set voicelist [concat None [::Speech::SpeakGetVoices]]
     } else {
 	set voicelist {None}
-	$labpsp.speak configure -state disabled
-	$labpsp.speakmsg configure -state disabled
-	$labpsp.speakchat configure -state disabled
+	$wfr.speak     state {disabled}
+	$wfr.speakmsg  state {disabled}
+	$wfr.speakchat state {disabled}
 	set tmpPrefs(SpeechOn) 0
     }
-    pack [frame $labpsp.fr] -side top -anchor w -padx 26 -pady 2
-    label $labpsp.fr.in  -text [mc prefsounvoin]
-    label $labpsp.fr.out -text [mc prefsounvoou]
     
-    set wpopin $labpsp.fr.popin
-    set wpopupmenuin [eval {tk_optionMenu $wpopin   \
-      [namespace current]::tmpPrefs(voiceOther)} $voicelist]
-    $wpopin configure -highlightthickness 0 -font $fontSB
-    set wpopout $labpsp.fr.popout
-    set wpopupmenuout [eval {tk_optionMenu $wpopout   \
-      [namespace current]::tmpPrefs(voiceUs)} $voicelist]
-    $wpopout configure -highlightthickness 0 -font $fontSB
+    set wfvo $wfr.fvo
+    ttk::frame $wfvo
+    grid  $wfvo  -pady 4
     
-    grid $labpsp.fr.in  -column 0 -row 0 -sticky e -pady 1
-    grid $wpopout       -column 1 -row 0 -sticky w -pady 1
-    grid $labpsp.fr.in  -column 0 -row 1 -sticky e -pady 1
-    grid $wpopout       -column 1 -row 1 -sticky w -pady 1
+    ttk::label $wfvo.in  -text [mc prefsounvoin]
+    ttk::label $wfvo.out -text [mc prefsounvoou]    
+    eval {ttk::optionmenu $wfvo.pin \
+      [namespace current]::tmpPrefs(voiceOther)} $voicelist
+    eval {ttk::optionmenu $wfvo.pout   \
+      [namespace current]::tmpPrefs(voiceUs)} $voicelist
+    
+    grid  $wfvo.in   $wfvo.pin   -sticky e -padx 2 -pady 1
+    grid  $wfvo.out  $wfvo.pout  -sticky e -padx 2 -pady 1
+    grid  $wfvo.pin  $wfvo.pout  -sticky ew
+
     if {!$sprefs(haveSpeech)} {
-	$wpopin configure -state disabled
-	$wpopout configure -state disabled
+	$wfvo.pin  state {disabled}
+	$wfvo.pout state {disabled}
     }    
 }
 

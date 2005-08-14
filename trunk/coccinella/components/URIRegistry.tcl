@@ -2,7 +2,7 @@
 # 
 # <a href='xmpp:jid[?query]'/>
 # 
-# $Id: URIRegistry.tcl,v 1.5 2005-06-03 13:00:06 matben Exp $
+# $Id: URIRegistry.tcl,v 1.6 2005-08-14 08:37:51 matben Exp $
 
 namespace eval ::URIRegistry:: { }
 

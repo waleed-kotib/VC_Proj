@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.13 2005-02-02 15:21:18 matben Exp $
+#       $Id: SlideShow.tcl,v 1.14 2005-08-14 08:37:51 matben Exp $
 
 package require undo
 
@@ -18,13 +18,13 @@ proc ::SlideShow::Load { } {
     ::Debug 2 "::SlideShow::Load"
     
     set menuspec \
-      {cascade     {Slide Show}     {}                              normal   {} {} {
-	{command   {Pick Directory} {::SlideShow::PickFolder $wtop} normal   {} {}}
+      {cascade     {Slide Show}     {}                           normal   {} {} {
+	{command   {Pick Directory} {::SlideShow::PickFolder $w} normal   {} {}}
 	{separator}
-	{command   {Previous}       {::SlideShow::Previous $wtop}   disabled {} {}}
-	{command   {Next}           {::SlideShow::Next $wtop}       disabled {} {}}
-	{command   {First}          {::SlideShow::First $wtop}      disabled {} {}}
-	{command   {Last}           {::SlideShow::Last $wtop}       disabled {} {}}
+	{command   {Previous}       {::SlideShow::Previous $w}   disabled {} {}}
+	{command   {Next}           {::SlideShow::Next $w}       disabled {} {}}
+	{command   {First}          {::SlideShow::First $w}      disabled {} {}}
+	{command   {Last}           {::SlideShow::Last $w}       disabled {} {}}
       }
     }
 
@@ -91,8 +91,8 @@ proc ::SlideShow::Load { } {
     }]
     
     set priv(btdefs) [list \
-      [list previous $priv(imprevious) $priv(imprevious)  {::SlideShow::Previous $wtop}] \
-      [list next     $priv(imnext)     $priv(imnext)      {::SlideShow::Next $wtop}] ]
+      [list previous $priv(imprevious) $priv(imprevious)  {::SlideShow::Previous $w}] \
+      [list next     $priv(imnext)     $priv(imnext)      {::SlideShow::Next $w}] ]
 }
 
 proc ::SlideShow::InitHook { } {
@@ -124,7 +124,7 @@ proc ::SlideShow::InitPrefsHook { } {
     set prefs(slideShow,buttons) 0
     set prefs(slideShow,autosize) 0
     
-    ::PreferencesUtils::Add [list  \
+    ::PrefUtils::Add [list  \
       [list prefs(slideShow,buttons) prefs_slideShow_buttons $prefs(slideShow,buttons)] \
       [list prefs(slideShow,autosize) prefs_slideShow_autosize $prefs(slideShow,autosize)] \
       [list prefs(slideShow,dir)     prefs_slideShow_dir     $prefs(slideShow,dir)]]
@@ -140,18 +140,25 @@ proc ::SlideShow::BuildPrefsHook {wtree nbframe} {
     $wtree newitem {Whiteboard {SlideShow}} -text [mc {Slide Show}]
     set wpage [$nbframe page {SlideShow}]    
     
-    set lfr $wpage.fr
-    labelframe $lfr -text [mc {Slide Show}]
-    pack $lfr -side top -anchor w -padx 8 -pady 4
+    set wc $wpage.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]
 
-    set tmpPrefs(slideShow,buttons) $prefs(slideShow,buttons)
+    set lfr $wc.fr
+    ttk::labelframe $lfr -text [mc {Slide Show}] \
+      -padding [option get . groupSmallPadding {}]
+    pack $lfr -side top -anchor w
+
+    set tmpPrefs(slideShow,buttons)  $prefs(slideShow,buttons)
     set tmpPrefs(slideShow,autosize) $prefs(slideShow,autosize)
 
-    checkbutton $lfr.ss -text " [mc prefssbts]"  \
+    ttk::checkbutton $lfr.ss -text [mc prefssbts]  \
       -variable [namespace current]::tmpPrefs(slideShow,buttons)
-    checkbutton $lfr.size -text " [mc prefssresize]"  \
+    ttk::checkbutton $lfr.size -text [mc prefssresize]  \
       -variable [namespace current]::tmpPrefs(slideShow,autosize)
-    pack $lfr.ss $lfr.size -side top -anchor w -padx 8 -pady 2
+ 
+    grid  $lfr.ss    -sticky w
+    grid  $lfr.size  -sticky w
 }
 
 proc ::SlideShow::SavePrefsHook { } {
@@ -197,8 +204,8 @@ proc ::SlideShow::BuildButtonsHook {wtray} {
     global  prefs
     variable priv
     
-    set wtop [::UI::GetToplevelNS $wtray]
-    set priv($wtop,wtray) $wtray
+    set w [winfo toplevel $wtray]
+    set priv($w,wtray) $wtray
     if {$prefs(slideShow,buttons)} {
 	foreach btdef $priv(btdefs) {
 	    $wtray buttonconfigure [lindex $btdef 0] -state disabled
@@ -206,7 +213,7 @@ proc ::SlideShow::BuildButtonsHook {wtray} {
     }
 }
 
-proc ::SlideShow::PickFolder {wtop} {
+proc ::SlideShow::PickFolder {w} {
     global  prefs
     variable priv
     
@@ -219,19 +226,19 @@ proc ::SlideShow::PickFolder {wtop} {
     if {$ans != ""} {
 	
 	# Check first if any useful content?
-	set priv($wtop,dir) $ans
+	set priv($w,dir) $ans
 	set prefs(slideShow,dir) $ans
-	set msshow [::UI::GetMenu $wtop "Slide Show" Next]
-	::UI::MenuMethod $msshow entryconfigure First    -state normal
-	::UI::MenuMethod $msshow entryconfigure Last     -state normal
-	LoadFolder $wtop
+	set msshow [::UI::GetMenu $w "Slide Show" Next]
+	::UI::MenuMethod $msshow entryconfigure First -state normal
+	::UI::MenuMethod $msshow entryconfigure Last  -state normal
+	LoadFolder $w
     }
 }
 
-proc ::SlideShow::LoadFolder {wtop} {
+proc ::SlideShow::LoadFolder {w} {
     variable priv
     
-    set dir $priv($wtop,dir)
+    set dir $priv($w,dir)
     set files {}
     foreach suff $priv(suffixes) {
 	set flist [glob -nocomplain -directory $dir -types f -tails *$suff]
@@ -245,14 +252,14 @@ proc ::SlideShow::LoadFolder {wtop} {
     set priv(pages) $pages
     
     # Pick first one.
-    OpenPage $wtop [lindex $pages 0]
-    SetMenuState $wtop
+    OpenPage $w [lindex $pages 0]
+    SetMenuState $w
 }
 
-proc ::SlideShow::GetFile {wtop page} {
+proc ::SlideShow::GetFile {w page} {
     variable priv
     
-    set rootpath [file join $priv($wtop,dir) $page]
+    set rootpath [file join $priv($w,dir) $page]
     set path ""
     foreach suff $priv(suffixes) {
 	if {[file exists ${rootpath}${suff}]} {
@@ -263,87 +270,87 @@ proc ::SlideShow::GetFile {wtop page} {
     return $path
 }
 
-proc ::SlideShow::OpenPage {wtop page} {
+proc ::SlideShow::OpenPage {w page} {
     variable priv
     
-    set fileName [GetFile $wtop $page]
-    OpenFile $wtop $fileName
-    set priv($wtop,current) $page
+    set fileName [GetFile $w $page]
+    OpenFile $w $fileName
+    set priv($w,current) $page
 }
 
-proc ::SlideShow::OpenFile {wtop fileName} {
+proc ::SlideShow::OpenFile {w fileName} {
     global  prefs
     variable priv
     
-    set wcan [::WB::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $w]
 
     switch -- [file extension $fileName] {
 	.can {
 	    ::CanvasFile::OpenCanvas $wcan $fileName
 	}
 	default {
-	    ::CanvasCmd::DoEraseAll $wtop     
-	    ::undo::reset [::WB::GetUndoToken $wtop]
+	    ::CanvasCmd::DoEraseAll $w  
+	    ::undo::reset [::WB::GetUndoToken $w]
 	    ::Import::DoImport $wcan {-coords {0 0}} -file $fileName
 	}
     }
     
     # Auto resize.
     if {$prefs(slideShow,autosize)} {
-	foreach {cwidth cheight} [::WB::GetCanvasSize $wtop] {break}
+	foreach {cwidth cheight} [::WB::GetCanvasSize $w] {break}
 	set bbox [$wcan bbox all]
 	if {[llength $bbox]} {
 	    foreach {bx by bw bh} $bbox {break}
 	    if {($cwidth < $bw) && ($cheight < $bh)} {
-		::WB::SetCanvasSize $wtop $bw $bh
+		::WB::SetCanvasSize $w $bw $bh
 	    } elseif {$cwidth < $bw} {
-		::WB::SetCanvasSize $wtop $bw $cheight
+		::WB::SetCanvasSize $w $bw $cheight
 	    } elseif {$cheight < $bh} {
-		::WB::SetCanvasSize $wtop $cwidth $bh
+		::WB::SetCanvasSize $w $cwidth $bh
 	    }
 	}
     }
 }
 
-proc ::SlideShow::Previous {wtop} {    
+proc ::SlideShow::Previous {w} {    
     variable priv
 
-    SaveCurrentCanvas $wtop
-    set ind [lsearch -exact $priv(pages) $priv($wtop,current)]
-    OpenPage $wtop [lindex $priv(pages) [expr $ind - 1]]
-    SetMenuState $wtop
+    SaveCurrentCanvas $w
+    set ind [lsearch -exact $priv(pages) $priv($w,current)]
+    OpenPage $w [lindex $priv(pages) [expr $ind - 1]]
+    SetMenuState $w
 }
 
-proc ::SlideShow::Next {wtop} {    
+proc ::SlideShow::Next {w} {    
     variable priv
 
-    SaveCurrentCanvas $wtop
-    set ind [lsearch -exact $priv(pages) $priv($wtop,current)]
-    OpenPage $wtop [lindex $priv(pages) [expr $ind + 1]]
-    SetMenuState $wtop
+    SaveCurrentCanvas $w
+    set ind [lsearch -exact $priv(pages) $priv($w,current)]
+    OpenPage $w [lindex $priv(pages) [expr $ind + 1]]
+    SetMenuState $w
 }
 
-proc ::SlideShow::First {wtop} {    
+proc ::SlideShow::First {w} {    
     variable priv
 
-    SaveCurrentCanvas $wtop
-    OpenPage $wtop [lindex $priv(pages) 0]
-    SetMenuState $wtop
+    SaveCurrentCanvas $w
+    OpenPage $w [lindex $priv(pages) 0]
+    SetMenuState $w
 }
 
-proc ::SlideShow::Last {wtop} {    
+proc ::SlideShow::Last {w} {    
     variable priv
 
-    SaveCurrentCanvas $wtop
-    OpenPage $wtop [lindex $priv(pages) end]
-    SetMenuState $wtop
+    SaveCurrentCanvas $w
+    OpenPage $w [lindex $priv(pages) end]
+    SetMenuState $w
 }
 
-proc ::SlideShow::SetMenuState {wtop} {
+proc ::SlideShow::SetMenuState {w} {
     variable priv
     
-    set wtray $priv($wtop,wtray)
-    set msshow [::UI::GetMenu $wtop "Slide Show" Next]
+    set wtray $priv($w,wtray)
+    set msshow [::UI::GetMenu $w "Slide Show" Next]
     if {[llength $priv(pages)]} {
 	::UI::MenuMethod $msshow entryconfigure Previous -state normal
 	::UI::MenuMethod $msshow entryconfigure Next     -state normal
@@ -352,12 +359,12 @@ proc ::SlideShow::SetMenuState {wtop} {
 	    $wtray buttonconfigure previous -state normal
 	}
     }
-    if {[string equal $priv($wtop,current) [lindex $priv(pages) 0]]} {
+    if {[string equal $priv($w,current) [lindex $priv(pages) 0]]} {
 	::UI::MenuMethod $msshow entryconfigure Previous -state disabled
 	if {[$wtray exists previous]} {
 	    $wtray buttonconfigure previous -state disabled
 	}
-    } elseif {[string equal $priv($wtop,current) [lindex $priv(pages) end]]} {
+    } elseif {[string equal $priv($w,current) [lindex $priv(pages) end]]} {
 	::UI::MenuMethod $msshow entryconfigure Next -state disabled
 	if {[$wtray exists next]} {
 	    $wtray buttonconfigure next -state disabled
@@ -365,21 +372,21 @@ proc ::SlideShow::SetMenuState {wtop} {
     }
 }
 
-proc ::SlideShow::SaveCurrentCanvas {wtop} {
+proc ::SlideShow::SaveCurrentCanvas {w} {
     variable priv
 
-    set wcan [::WB::GetCanvasFromWtop $wtop]
-    set fileName [file join $priv($wtop,dir) $priv($wtop,current)].can
+    set wcan [::WB::GetCanvasFromWtop $w]
+    set fileName [file join $priv($w,dir) $priv($w,current)].can
     ::CanvasFile::SaveCanvas $wcan $fileName
 }
 
-proc ::SlideShow::CloseHook {wtop} {
+proc ::SlideShow::CloseHook {w} {
     variable priv
 
     # Be sure to save the current page. Need to know that we have slide show?
-    # SaveCurrentCanvas $wtop
+    # SaveCurrentCanvas $w
     
-    array unset priv $wtop,*
+    array unset priv $w,*
 }
 
 #-------------------------------------------------------------------------------

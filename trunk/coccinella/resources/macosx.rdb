@@ -3,50 +3,43 @@
 
 ! General appearance
 !
-*fontTiny:                           Geneva 9
-*fontSmall:                          {Lucida Grande} 11
-*fontSmallBold:                      {Lucida Grande} 11 bold
-*fontMedium:                         {Lucida Grande} 11
-*fontLarge:                          {Lucida Grande} 18
-*backgroundGeneral:                  #dedede
+
+*backgroundGeneral:                 #dedede
+*highlightColor:                    #97bcdd
+
+! Tile specific standard paddings for aqua
+!
+*dialogPadding:                      20 14 20 20
+*dialogSmallPadding:                 10 10 10 12
+*dialogNotebookPadding:              20 12 20 20
+*notebookPagePadding:                16 14 16 16
+*notebookPageSmallPadding:           10  8 10 12
+*groupPadding:                       12 12 12 12
+*groupTopPadding:                     0 12  0  0
+*groupSmallPadding:                  10 10 10  8
+*okcancelPadding:                    20 12 20 20
+*okcancelTopPadding:                  0 12  0  0
+*okcancelNoTopPadding:               20  0 20 20
+*dialogAnchor:                       c
+*dialogSticky:                       new
+*okcancelButtonOrder:                okcancel
+*buttonPadX:                         12
 
 ! tk standard widgets
 !
 
-*Checkbutton.Font:                   {Lucida Grande} 11
-*Entry.highlightThickness:           3
-*Entry.Font:                         {Lucida Grande} 11
-*Label.Font:                         {Lucida Grande} 11
-*Labelframe.Font:                    {Lucida Grande} 11 bold
-*Labelframe.Foreground:              black
-*Listbox.Font:                       {Lucida Grande} 11
-*Listbox.highlightThickness:         3
-*Message.Font:                       {Lucida Grande} 11
-*Radiobutton.Font:                   {Lucida Grande} 11
-*Scale.Font:                         {Lucida Grande} 11
-*Text.Font:                          {Lucida Grande} 11
-*Text.highlightThickness:            3
-
-! button widths for ok and cancel buttons
-!
-*btok.width:                         8
-*btcancel.width:                     8
+*Entry.highlightThickness:          3
+*Labelframe.Foreground:             black
+*Listbox.highlightThickness:        3
+*Text.highlightThickness:           3
 
 ! contributed widgets
 !
-*Combobox.Font:                      {Lucida Grande} 11
-*MacTabnotebook.style:               aqua
-*Tablelist.Font:                     {Lucida Grande} 11
-*Tablelist.highlightThickness:       3
-*Tablelist.BorderWidth:              1              
-*Tree.styleIcons:                    triangle
-*Tree.treeColor:                     
+*MacTabnotebook.style:              aqua
+*Tablelist.highlightThickness:      3
+*Tablelist.BorderWidth:             1              
+*Tree.background:                   white
 
-! tile widgets
 !
-
-*TCheckbutton.Font:                   {Lucida Grande} 11
-*TEntry.Font:                         {Lucida Grande} 11
-*TLabel.Font:                         {Lucida Grande} 11
-*TLabelframe.Font:                    {Lucida Grande} 11
-*TRadiobutton.Font:                   {Lucida Grande} 11
+!
+*okcancelButtonOrder:                cancelok
