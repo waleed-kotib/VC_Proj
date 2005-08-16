@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.50 2005-08-14 07:10:51 matben Exp $
+# $Id: JWB.tcl,v 1.51 2005-08-16 12:22:35 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1624,33 +1624,13 @@ proc ::Jabber::WB::PutFileOrScheduleHook {w fileName opts} {
 		# This jid is online but has not told us its ip number.
 		# We need to get this jid's ip number and register the
 		# PutFile as a callback when receiving this ip.
-		if {0} {
-		    
-		    # OBSOLETE !!!
-		    GetIPnumber $jid3 \
-		      [list ::Jabber::WB::PutFile $w $fileName $mime $optjidList]
-		} else {
-		    
-		    # New through <iq> element.
-		    # Switch to this with version 0.94.8 or later!
-		    GetCoccinellaServers $jid3  \
-		      [list ::Jabber::WB::PutFile $w $fileName $mime  \
-		      $optjidList $jid3]
-		}
+		GetCoccinellaServers $jid3  \
+		  [list ::Jabber::WB::PutFile $w $fileName $mime  \
+		  $optjidList $jid3]
 	    }
 	} else {
 	    
-	    # We need to tell this jid to get this file from a server,
-	    # possibly as an OOB http transfer.
-	    array set optArr $opts
-	    if {[info exists optArr(-url)]} {
-		$jstate(jlib) oob_set $jid3 ::OOB::SetCallback  \
-		  $optArr(-url)  \
-		  -desc {This file is part of a whiteboard conversation.\
-		  You were not online when I opened this file}
-	    } else {
-		puts "   missing optArr(-url)"
-	    }
+	    # We are silent about this.
 	}
     }
 	

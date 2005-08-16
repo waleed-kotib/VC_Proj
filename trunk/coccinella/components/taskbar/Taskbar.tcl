@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.9 2004-11-27 14:52:53 matben Exp $
+# $Id: Taskbar.tcl,v 1.10 2005-08-16 12:22:34 matben Exp $
 
 namespace eval ::Taskbar:: {
     
@@ -13,9 +13,7 @@ namespace eval ::Taskbar:: {
     variable wmenu .tskbrpop
     variable wtearoff ""
     variable iconFile coccinella.ico
-    #variable iconFile machead.ico
 }
-
 
 proc ::Taskbar::Load { } {
     global  tcl_platform prefs this
@@ -24,7 +22,7 @@ proc ::Taskbar::Load { } {
     
     ::Debug 2 "::Taskbar::Load"
     
-    if {![string equal $tcl_platform(platform) "windows"]} {
+    if {[tk windowingsystem] ne "win32"} {
 	return 0
     }
     if {![string equal $prefs(protocol) "jabber"]} {
@@ -55,7 +53,7 @@ proc ::Taskbar::Load { } {
     }
     cd $oldDir
     component::register Taskbar  \
-      "Makes the taskbar icon on Windows which is handy as a shortcut"
+      "Makes the taskbar icon on Windows which is handy as a shortcut."
     
     # Add all event hooks.
     ::hooks::register initHook           ::Taskbar::InitHook
@@ -63,18 +61,22 @@ proc ::Taskbar::Load { } {
     ::hooks::register setPresenceHook    ::Taskbar::SetPresenceHook
     ::hooks::register loginHook          ::Taskbar::LoginHook
     ::hooks::register logoutHook         ::Taskbar::LogoutHook
-    ::hooks::register closeWindowHook    ::Taskbar::CloseHook        20
+    ::hooks::register preCloseWindowHook ::Taskbar::CloseHook        20
+    ::hooks::register jabberBuildMain    ::Taskbar::BuildMainHook
     
-    bind . <Map> [list [namespace current]::Update %W]
-    
-    set status [::Jabber::GetMyStatus]
+    set status    [::Jabber::GetMyStatus]
     set statusStr [::Roster::MapShowToText $status]
+    set str [encoding convertto "$prefs(theAppName) - $statusStr"]
 
-    winico taskbar add $icon -callback  \
-      [list [namespace current]::Cmd %m %X %Y] \
-      -text "$prefs(theAppName) - $statusStr"
+    winico taskbar add $icon \
+      -callback [list [namespace current]::Cmd %m %X %Y] -text $str
 
     return 1
+}
+
+proc ::Taskbar::BuildMainHook { } {
+    
+    bind [::UI::GetMainWindow] <Map> [list [namespace current]::Update %W]
 }
 
 proc ::Taskbar::InitHook { } {
@@ -87,7 +89,7 @@ proc ::Taskbar::InitHook { } {
       -tearoffcommand [namespace current]::TearOff -title $prefs(theAppName)
     
     set menuDef {
-	mAboutCoccinella     {::SplashScreen::SplashScreen}
+	mAboutCoccinella     {::Splash::SplashScreen}
 	separator            {}
 	mStatus              @::Jabber::Status::BuildMenu
 	mLogin               ::Login::Dlg
@@ -103,7 +105,7 @@ proc ::Taskbar::InitHook { } {
     set i 0
     foreach {item cmd} $menuDef {
 	if {[string index $cmd 0] == "@"} {
-	    set mt [menu ${m}.sub${i} -tearoff 0]
+	    set mt [menu $m.sub${i} -tearoff 0]
 	    $m add cascade -label [mc $item] -menu $mt
 	    eval [string range $cmd 1 end] $mt
 	    incr i
@@ -121,15 +123,11 @@ proc ::Taskbar::Cmd {event x y} {
     switch -- $event {
 	WM_LBUTTONUP {
 	    
-	    switch -- [wm state .] {
+	    switch -- [wm state [::UI::GetMainWindow]] {
 		zoomed - normal  {
-		    #set saved_state [wm state .]
-		    #wm state . withdrawn
 		    ::UI::WithdrawAllToplevels
 		}
 		default {
-		    #wm state . $saved_state
-		    #wm deiconify .
 		    ::UI::ShowAllToplevels
 		}
 	    }
@@ -142,7 +140,7 @@ proc ::Taskbar::Cmd {event x y} {
 
 proc ::Taskbar::Post {m} {
 
-    switch -- [wm state .] {
+    switch -- [wm state [::UI::GetMainWindow]] {
 	zoomed - normal {
 	    set state1 disabled
 	    set state2 normal
@@ -179,14 +177,12 @@ proc ::Taskbar::TearOff {wm wt} {
 
 proc ::Taskbar::HideMain { } {
     
-    #wm state . withdraw
     ::UI::WithdrawAllToplevels
-    ::Taskbar::Update .
+    Update [::UI::GetMainWindow]
 }
 
 proc ::Taskbar::ShowMain { } {
     
-    #wm deiconify .
     ::UI::ShowAllToplevels
 }
 
@@ -224,7 +220,7 @@ proc ::Taskbar::Update {w} {
     }
     if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
 	
-	switch -- [wm state .] {
+	switch -- [wm state [::UI::GetMainWindow]] {
 	    zoomed - normal {
 		set state1 disabled
 		set state2 normal
@@ -246,17 +242,17 @@ proc ::Taskbar::SetPresenceHook {type args} {
        
     # This can be used to update any specific icon in taskbar.
    if {$icon != ""} {
- 	set status [::Jabber::GetMyStatus]
-	set statusStr [::Roster::MapShowToText $status]
-	winico taskbar modify $icon -text "$prefs(theAppName) - $statusStr"
+	set statusStr [::Roster::MapShowToText [::Jabber::GetMyStatus]]
+	set str [encoding convertto "$prefs(theAppName) - $statusStr"]
+	winico taskbar modify $icon -text $str
     }
 }
 
 proc ::Taskbar::CloseHook {wclose} {
     
     set result ""
-    if {[string equal $wclose "."]} {
-	::Taskbar::HideMain
+    if {[string equal $wclose [::UI::GetMainWindow]]} {
+	HideMain
 	set result stop
     }
     return $result
