@@ -139,7 +139,7 @@ foreach f $files {
 	regexp {ns,en,(.*)} $name match key
 	if {![info exists table(ns,$lang,$key)]} {
 	    lappend missinguids $table(uid,en,$key)
-	    puts "\t missing: $key, $table(uid,en,$key)"
+	    puts "\t missing: $key"
 	} elseif {$table(ns,en,$key) != $table(ns,$lang,$key)} {
 	    puts "\t wrong namespace: $key, \t $table(ns,$lang,$key) -> $table(ns,en,$key)"
 	}
