@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.51 2005-08-16 12:22:35 matben Exp $
+# $Id: JWB.tcl,v 1.52 2005-08-17 14:26:51 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1297,8 +1297,7 @@ proc ::Jabber::WB::ChatMsg {cmdList args} {
     ::Debug 2 "::Jabber::WB::ChatMsg args='$args'"
     
     # This one returns empty if not exists.
-    set w [eval {GetWtopFromMessage chat $argsArr(-from)} \
-      $args]
+    set w [eval {GetWtopFromMessage chat $argsArr(-from)} $args]
     if {$w == ""} {
 	set w [eval {NewWhiteboardTo $argsArr(-from)} $args]
     }

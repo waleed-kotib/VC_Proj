@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasUtils.tcl,v 1.29 2005-08-14 08:37:52 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.30 2005-08-17 14:26:51 matben Exp $
 
 package require sha1pure
 package require can2svg
@@ -672,7 +672,7 @@ proc ::CanvasUtils::GetOneLinerForAny {wcan id args} {
 proc ::CanvasUtils::GetOneLinerForWindow {wcan id args} {
        
     # A movie: for QT we have a complete widget; 
-    set windowName [$wcan itemcget $id -window]
+    set windowName  [$wcan itemcget $id -window]
     set windowClass [winfo class $windowName]
     set line {}
     

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.117 2005-08-14 08:37:51 matben Exp $	
+# $Id: Coccinella.tcl,v 1.118 2005-08-17 14:26:51 matben Exp $	
 
 	
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
@@ -250,19 +250,6 @@ FactoryDefaults
 # Parse any command line options. Can set protocol!
 ::PrefUtils::ParseCommandLineOptions $argv
 
-switch -- $prefs(protocol) {
-    jabber {
-	# empty ???
-    }
-    symmetric - server - client {
-	package require P2P
-	package require P2PNet
-    }
-    default {
-	return -code error "Unknown protocol \"$prefs(protocol)\""
-    }
-}
-
 # To provide code to be run before loading componenets.
 ::Debug 2 "--> earlyInitHook"
 ::hooks::run earlyInitHook
@@ -275,6 +262,19 @@ component::load
 # Components that need to add their own preferences need to be registered here.
 ::Debug 2 "--> prefsInitHook"
 ::hooks::run prefsInitHook
+
+switch -- $prefs(protocol) {
+    jabber {
+	# empty ???
+    }
+    symmetric - server - client {
+	package require P2P
+	package require P2PNet
+    }
+    default {
+	return -code error "Unknown protocol \"$prefs(protocol)\""
+    }
+}
 
 # Check that the mime type preference settings are consistent.
 ::Types::VerifyInternal

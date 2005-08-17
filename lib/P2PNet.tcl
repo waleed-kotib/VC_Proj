@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: P2PNet.tcl,v 1.9 2005-08-14 07:17:55 matben Exp $
+# $Id: P2PNet.tcl,v 1.10 2005-08-17 14:26:51 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -138,10 +138,10 @@ proc ::P2PNet::EofHook {channel ip port} {
 proc ::P2PNet::OpenConnection {w} {
     global  prefs this
     
-    variable txtvarEntIPnameOrNum
+    variable txtvarEntIPnameOrNum ""
     variable menuShortVar
     variable connIPnum
-    variable compPort
+    variable compPort             ""
     variable finished
     variable wtoplevel $w
 
@@ -154,58 +154,72 @@ proc ::P2PNet::OpenConnection {w} {
     wm title $w {Open Connection}
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    
-    # Ip part.
-    set frip $w.frall.frip
-    labelframe $frip -text {Connect to}
-    pack $frip -side top -fill both -padx 8 -pady 6
-    
-    # Overall frame for whole container.
-    set frtot [frame $frip.fr]
-    pack $frtot -padx 6 -pady 2
-    label $frtot.msg -wraplength 230 -justify left -text  \
+    ttk::frame $w.frall
+    pack  $w.frall  -fill x
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack  $wbox  -fill both -expand 1
+
+    # IP part.
+    set frip $wbox.ip
+    ttk::labelframe $frip -style Small.TLabelframe -text [mc {Connect}] \
+      -padding [option get . notebookPageSmallPadding {}]
+    pack  $frip  -side top -fill x -pady 4
+
+    ttk::label $frip.msg -style Small.TLabel \
+      -wraplength 300 -justify left -text  \
       "Connect to a remote computer. Write remote computer name\
       or choose shortcut from the popup menu.\
       If necessary choose new remote port number."
-    label $frtot.lblip -text {Shortcut:}
-    entry $frtot.entip -width 30   \
+    ttk::label $frip.lblip -style Small.TLabel -text {Shortcut:}
+    ttk::entry $frip.entip -font CociSmallFont -width 30   \
       -textvariable [namespace current]::txtvarEntIPnameOrNum
     
     # The option menu. 
     set shorts [lindex $prefs(shortcuts) 0]
-    eval {tk_optionMenu $frtot.optm [namespace current]::menuShortVar} \
+    eval {ttk::optionmenu $frip.optm [namespace current]::menuShortVar} \
       $shorts 
     if {[string length $txtvarEntIPnameOrNum] == 0} {
 	set txtvarEntIPnameOrNum [lindex $prefs(shortcuts) 1 0]
     }
-    $frtot.optm configure -highlightthickness 0 -foreground black
-    grid $frtot.msg -column 0 -row 0 -columnspan 2 -sticky w -padx 6 -pady 2
-    grid $frtot.lblip -column 0 -row 1 -sticky w -padx 6 -pady 2
-    grid $frtot.optm -column 1 -row 1 -sticky e -padx 6 -pady 2
-    grid $frtot.entip -column 0 -row 2 -sticky ew -padx 10 -columnspan 2
+
+    grid  $frip.msg    -           -sticky w
+    grid  $frip.lblip  $frip.optm  -sticky w
+    grid  $frip.entip  -           -sticky ew
+    
+    grid  $frip.optm  -sticky ew
     
     # Port part.
-    set ofr $w.frport
-    labelframe $ofr -text "Port number"
-    label $ofr.lport -text "Remote server port:"
-    entry $ofr.entport -width 6 -textvariable [namespace current]::compPort
     set compPort $prefs(remotePort)
-    grid $ofr.lport -row 0 -column 0 -padx 3
-    grid $ofr.entport -row 0 -column 1 -padx 3
-    pack $ofr -side top -fill both -padx 8 -pady 4 -in $w.frall
+    set frport $wbox.port
+    ttk::labelframe $frport -style Small.TLabelframe \
+      -text [mc {Port number}] \
+      -padding [option get . notebookPageSmallPadding {}]
+    pack  $frport  -side top -fill x -pady 4
+
+    ttk::label $frport.l -style Small.TLabel -text "Remote server port:"
+    ttk::entry $frport.e -font CociSmallFont \
+      -width 6 -textvariable [namespace current]::compPort
+
+    grid  $frport.l  $frport.e
     
     # Button part.
-    frame $w.frbot -borderwidth 0
-    pack [button $w.btconn -text "Connect" -default active  \
-      -command [namespace current]::PushBtConnect]  \
-      -in $w.frbot -side right -padx 5 -pady 5
-    pack [button $w.btcancel -text [mc Cancel]   \
-      -command "destroy $w"]  \
-      -in $w.frbot -side right -padx 5 -pady 5
-    pack $w.frbot -side top -fill both -expand 1 -in $w.frall  \
-      -padx 8 -pady 6
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Connect] \
+      -command [namespace current]::PushBtConnect
+    ttk::button $frbot.btcancel -text [mc Cancel] \
+      -command [list destroy $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
     
     bind $w <Return> [namespace current]::PushBtConnect
     trace variable [namespace current]::menuShortVar w  \
@@ -213,14 +227,7 @@ proc ::P2PNet::OpenConnection {w} {
     
     ::UI::SetWindowPosition $w
     wm resizable $w 0 0
-    
-    # Trick to resize the labels wraplength.
-    set script [format {
-	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 10]
-    } $frtot.msg $frip]    
-    after idle $script
-
+        
     focus $w
     catch {grab $w}
     tkwait window $w
