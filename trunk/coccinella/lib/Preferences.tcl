@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.75 2005-08-14 07:17:55 matben Exp $
+# $Id: Preferences.tcl,v 1.76 2005-08-17 14:26:51 matben Exp $
  
 package require mnotebook
 package require tree
@@ -242,7 +242,7 @@ namespace eval ::Preferences::Net:: {
 
     ::hooks::register prefsInitHook          ::Preferences::Net::InitPrefsHook  20
     ::hooks::register prefsBuildHook         ::Preferences::Net::BuildPrefsHook 20
-    ::hooks::register prefsSaveHook          ::Preferences::Net::SavePrefsHook
+    ::hooks::register prefsSaveHook          ::Preferences::Net::SavePrefsHook  20
     ::hooks::register prefsCancelHook        ::Preferences::Net::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Preferences::Net::UserDefaultsHook
     ::hooks::register prefsDestroyHook       ::Preferences::Net::DestroyPrefsHook
@@ -282,8 +282,35 @@ proc ::Preferences::Net::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::Preferences::Net::SavePrefsHook { } {
-    global prefs
+    global prefs wDlgs
     variable tmpPrefs
+    
+    set protocolSet 0
+        
+    # Was protocol changed?
+    if {![string equal $prefs(protocol) $tmpPrefs(protocol)]} {	
+	set ans [::UI::MessageBox -title Relaunch -icon info -type yesno \
+	  -message [mc messprotocolch] -parent $wDlgs(prefs)]
+	if {$ans eq "no"} {
+	    set finished 1
+	    return stop
+	} else {
+	    set protocolSet 1
+	}
+    }
+    
+    if {$protocolSet} {
+
+	switch -- $tmpPrefs(protocol) {
+	    jabber {
+		package require Jabber
+	    }
+	    symmetric - server - client {
+		package require P2P
+		package require P2PNet
+	    }
+	}
+    }
     
     array set prefs [array get tmpPrefs]
 }
@@ -823,28 +850,19 @@ proc ::Preferences::SavePushBt { } {
     variable tmpPrefs
     variable tmpJPrefs
     variable needRestart
-    
-    set protocolSet 0
+    variable stopSave
+
     set needRestart 0
-    
-    # Was protocol changed?
-    if {![string equal $prefs(protocol) $tmpPrefs(protocol)]} {
-	set ans [::UI::MessageBox -title Relaunch -icon info -type yesno \
-	  -message [mc messprotocolch]]
-	if {$ans eq "no"} {
-	    set finished 1
-	    return
-	} else {
-	    set protocolSet 1
-	}
-    }
     
     # Copy the temporary copy to the real variables.
     array set prefs [array get tmpPrefs]
     ::Jabber::SetjprefsArray [array get tmpJPrefs]
     
     # Let components store themselves.
-    ::hooks::run prefsSaveHook
+    set ans [::hooks::run prefsSaveHook]    
+    if {$ans eq "stop"} {
+	return
+    }
 
     if {$needRestart} {
 	set ans [::UI::MessageBox -title [mc Warning]  \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.21 2005-08-14 07:17:55 matben Exp $
+# $Id: P2P.tcl,v 1.22 2005-08-17 14:26:51 matben Exp $
 
 package provide P2P 1.0
 
@@ -41,6 +41,10 @@ proc ::P2P::Init {} {
     global  prefs
     variable initted
     
+    # Do this only once.
+    if {$initted} {
+	return
+    }
     ::Debug 2 "::P2P::Init"
 
     ::hooks::register launchFinalHook                ::P2P::LaunchFinalHook
@@ -160,52 +164,62 @@ proc ::P2P::BuildEntryHook {w wclass wcomm} {
     set contactOffImage [::Theme::GetImage [option get $wclass contactOffImage {}]]
     set contactOnImage  [::Theme::GetImage [option get $wclass contactOnImage {}]]
 
-    set   fr ${wcomm}.f
-    frame $fr -relief raised -borderwidth 1
+    set fr $wcomm.f
+    frame $fr
     pack  $fr -side bottom -fill x
+        
+    set   wgrid  $fr.grid
+    ttk::frame $wgrid
+    pack  $wgrid  -side left
     
-    set   wgrid  ${fr}.grid
-    frame $wgrid -relief flat -borderwidth 0
-    pack  $wgrid -side left
+    ttk::frame $fr.pad
+    pack  $fr.pad  -side right -fill both -expand 1
     
     set wp2p($w,wclass) $wclass
     set wp2p($w,wfr)    $fr
     set wp2p($w,wgrid)  $wgrid
+    
+    set wodb [string trim $wgrid .]
+    
+    option add *$wodb*TLabel.style        Small.TLabel        widgetDefault
+    option add *$wodb*TCheckbutton.style  Small.TCheckbutton  widgetDefault
+    option add *$wodb*TEntry.style        Small.TEntry        widgetDefault
+    option add *$wodb*TEntry.font         CociSmallFont       widgetDefault
 
-    set waddr ${wgrid}.comm
-    set wuser ${wgrid}.user
-    set wto   ${wgrid}.to
-    set wfrom ${wgrid}.from
+    set waddr $wgrid.comm
+    set wuser $wgrid.user
+    set wto   $wgrid.to
+    set wfrom $wgrid.from
 
     switch -- $prefs(protocol) {
 	symmetric {
-	    label $waddr -text {  Remote address:} -width 22 -anchor w
-	    label $wuser -text {  User:} -width 14 -anchor w
-	    label $wto   -text [mc To]
-	    label $wfrom -text [mc From]
-	    grid  $waddr $wuser $wto $wfrom -sticky nws -pady 0
+	    ttk::label $waddr -text "Remote address:" -width 22 -anchor w
+	    ttk::label $wuser -text "User:" -width 14 -anchor w
+	    ttk::label $wto   -text [mc To]
+	    ttk::label $wfrom -text [mc From]
+	    grid  $waddr $wuser $wto $wfrom -sticky nws -padx 6 -pady 1
 	}
 	client {
-	    label $waddr -text {  Remote address:} -width 22 -anchor w
-	    label $wuser -text {  User:} -width 14 -anchor w
-	    label $wto   -text [mc To]
-	    grid  $waddr $wuser $wto -sticky nws -pady 0
+	    ttk::label $waddr -text "Remote address:" -width 22 -anchor w
+	    ttk::label $wuser -text "User:" -width 14 -anchor w
+	    ttk::label $wto   -text [mc To]
+	    grid  $waddr $wuser $wto -sticky nws -padx 6 -pady 1
 	}
 	server {
-	    label $waddr -text {  Remote address:} -width 22 -anchor w
-	    label $wuser -text {  User:} -width 14 -anchor w
-	    label $wfrom -text [mc From]
-	    grid  $waddr $wuser $wfrom -sticky nws -pady 0
+	    ttk::label $waddr -text "Remote address:" -width 22 -anchor w
+	    ttk::label $wuser -text "User:" -width 14 -anchor w
+	    ttk::label $wfrom -text [mc From]
+	    grid  $waddr $wuser $wfrom -sticky nws -padx 6 -pady 1
 	}
 	central {
 	    
 	    # If this is a client connected to a central server, no 'from' 
 	    # connections.
-	    label $waddr -text {  Remote address:} -width 22 -anchor w
-	    label $wuser -text {  User:} -width 14 -anchor w
-	    label $wto   -text [mc To]
-	    label $fr.icon -image $contactOffImage
-	    grid  $waddr $wuser $wto $fr.icon -sticky nws -pady 0
+	    ttk::label $waddr -text "Remote address:" -width 22 -anchor w
+	    ttk::label $wuser -text "User:" -width 14 -anchor w
+	    ttk::label $wto   -text [mc To]
+	    ttk::label $fr.icon -image $contactOffImage
+	    grid  $waddr $wuser $wto $fr.icon -sticky nws -padx 6 -pady 1
 	}
     }  
 }
@@ -332,10 +346,10 @@ proc ::P2P::BuildCommEntry {w ipNum args} {
     set size [::UI::ParseWMGeometry [wm geometry $w]]
     set n $nEnt($w)
     set wcomm $wp2p($w,wgrid)
-    set waddr ${wcomm}.ad${n}
-    set wuser ${wcomm}.us${n}
-    set wto   ${wcomm}.to${n}
-    set wfrom ${wcomm}.from${n}
+    set waddr $wcomm.ad${n}
+    set wuser $wcomm.us${n}
+    set wto   $wcomm.to${n}
+    set wfrom $wcomm.from${n}
     
     # Add new status line.
     
@@ -344,35 +358,48 @@ proc ::P2P::BuildCommEntry {w ipNum args} {
 	    # empty
 	}
 	symmetric {
-	    entry $waddr -width 24 -relief sunken -state disabled \
+	    ttk::entry $waddr -width 24  \
 	      -textvariable [namespace current]::addr($w,$ipNum)
-	    entry $wuser -width 16 -state disabled  \
-	      -textvariable ::P2PNet::ipNumTo(user,$ipNum) -relief sunken
-	    checkbutton $wto -highlightthickness 0 \
+	    ttk::entry $wuser -width 16  \
+	      -textvariable ::P2PNet::ipNumTo(user,$ipNum)
+	    ttk::checkbutton $wto  \
 	      -variable [namespace current]::commTo($w,$ipNum)   \
 	      -command [list [namespace current]::CheckCommTo $w $ipNum]
-	    checkbutton $wfrom -highlightthickness 0 -state disabled \
+	    ttk::checkbutton $wfrom  \
 	      -variable [namespace current]::commFrom($w,$ipNum)
-	    grid $waddr $wuser $wto $wfrom -padx 4 -pady 0
+	    
+	    grid $waddr $wuser $wto $wfrom -padx 6 -pady 1
+	    
+	    $waddr state {disabled}
+	    $wuser state {disabled}
+	    $wfrom state {disabled}
 	}
 	client {
-	    entry $waddr -width 24 -relief sunken -state disabled \
+	    ttk::entry $waddr -width 24 \
 	      -textvariable [namespace current]::addr($w,$ipNum)
-	    entry $wuser -width 16 -relief sunken -state disabled  \
+	    ttk::entry $wuser -width 16  \
 	      -textvariable ::P2PNet::ipNumTo(user,$ipNum)
-	    checkbutton $wto -highlightthickness 0  \
+	    ttk::checkbutton $wto  \
 	      -variable [namespace current]::commTo($w,$ipNum)   \
 	      -command [list [namespace current]::CheckCommTo $w $ipNum]
-	    grid $waddr $wuser $wto -padx 4 -pady 0
+	    
+	    grid $waddr $wuser $wto -padx 6 -pady 1
+
+	    $waddr state {disabled}
+	    $wuser state {disabled}
 	}
 	server {
-	    entry $waddr -width 24 -relief sunken -state disabled \
+	    ttk::entry $waddr -width 24 \
 	      -textvariable [namespace current]::addr($w,$ipNum)
-	    entry $wuser -width 16 -relief sunken -state disabled  \
+	    ttk::entry $wuser -width 16  \
 	      -textvariable ::P2PNet::ipNumTo(user,$ipNum)
-	    checkbutton $wfrom -highlightthickness 0 -state disabled \
+	    ttk::checkbutton $wfrom -state disabled \
 	      -variable [namespace current]::commFrom($w,$ipNum)
-	    grid $waddr $wuser $wfrom -padx 4 -pady 0
+
+	    grid $waddr $wuser $wfrom -padx 6 -pady 1
+
+	    $waddr state {disabled}
+	    $wuser state {disabled}
 	}
     }  
 	
@@ -977,7 +1004,7 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 		
 		# The present client requests to put this canvas.	
 		::Debug 2 "--->GET CANVAS:"
-		set wServCan [::WB::GetServerCanvasFromWtop .]
+		set wServCan [::WB::GetServerCanvasFromWtop [GetMainWindow]]
 		::CanvasCmd::DoPutCanvas $wServCan $ip
 	    }		
 	}
@@ -993,6 +1020,7 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 	}
 	default {
 	    if {[info exists handler($prefix)]} {
+		set wServCan [::WB::GetServerCanvasFromWtop [GetMainWindow]]
 		set code [catch {
 		    uplevel #0 $handler($prefix) [list $wServCan p2p $line] $args
 		} ans]

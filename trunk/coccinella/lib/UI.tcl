@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.94 2005-08-14 07:17:55 matben Exp $
+# $Id: UI.tcl,v 1.95 2005-08-17 14:26:51 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -319,11 +319,6 @@ proc ::UI::GetMenuFromWindow {w} {
     
     return $w.menu
 }
-
-#proc ::UI::GetIcon {name} {
-#    
-#    return [::Theme::GetImageFromExisting $name ::UI::icons]
-#}
 
 proc ::UI::GetIcon {name} {
     variable icons
@@ -1140,7 +1135,7 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
 	    -state {
 		set mcmd [lindex $menuSpec $mind 2]
 		set mcmd [subst -nocommands $mcmd]
-		set acc [lindex $menuSpec $mind 4]
+		set acc  [lindex $menuSpec $mind 4]
 
 		# Cut, Copy & Paste handled by widgets internally!
 		if {($acc ne "") && ![regexp {(X|C|V)} $acc]} {

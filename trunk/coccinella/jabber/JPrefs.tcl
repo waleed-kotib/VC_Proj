@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.26 2005-08-14 07:10:51 matben Exp $
+# $Id: JPrefs.tcl,v 1.27 2005-08-17 14:26:51 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -398,7 +398,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     grid  $wskin.l  $wskin.b
     
     # Window opacities if exists.
-    array set wmopts [wm attributes $wDlgs(jmain)]
+    array set wmopts [wm attributes .]
     set haveOpacity 0
     if {[info exists wmopts(-alpha)]} {
 	set haveOpacity 1

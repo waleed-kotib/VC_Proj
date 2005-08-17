@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.43 2005-08-14 08:37:52 matben Exp $
+# $Id: Whiteboard.tcl,v 1.44 2005-08-17 14:26:51 matben Exp $
 
 package require anigif
 package require entrycomp
@@ -1347,7 +1347,7 @@ proc ::WB::GetButtonTray {w} {
 
 proc ::WB::GetMenu {w} {
 
-    return [GetMenuFromWindow $w]
+    return [::UI::GetMenuFromWindow $w]
 }
 
 # WB::GetAllWhiteboards --
