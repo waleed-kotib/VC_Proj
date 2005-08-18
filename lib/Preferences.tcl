@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.76 2005-08-17 14:26:51 matben Exp $
+# $Id: Preferences.tcl,v 1.77 2005-08-18 09:52:07 matben Exp $
  
 package require mnotebook
 package require tree
@@ -266,11 +266,11 @@ proc ::Preferences::Net::InitPrefsHook { } {
     set prefs(multiConnect) 1
     
     ::PrefUtils::Add [list  \
-      [list prefs(protocol)        this_protocol         $prefs(protocol)]       \
+      [list prefs(protocol)        prefs_protocol        $prefs(protocol)]       \
       [list prefs(autoConnect)     prefs_autoConnect     $prefs(autoConnect)]    \
       [list prefs(multiConnect)    prefs_multiConnect    $prefs(multiConnect)]   \
       [list prefs(thisServPort)    prefs_thisServPort    $prefs(thisServPort)]   \
-      [list prefs(httpdPort)       prefs_httpdPort       $prefs(httpdPort)]   \
+      [list prefs(httpdPort)       prefs_httpdPort       $prefs(httpdPort)]      \
       ]    
 }
 

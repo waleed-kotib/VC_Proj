@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.44 2005-08-17 14:26:51 matben Exp $
+# $Id: Whiteboard.tcl,v 1.45 2005-08-18 09:52:07 matben Exp $
 
 package require anigif
 package require entrycomp
@@ -1039,7 +1039,7 @@ proc ::WB::DestroyMain {w} {
     upvar ::WB::${w}::opts opts
     
     Debug 3 "::WB::DestroyMain w=$w"
-    
+        
     # Save instance specific 'state' array into generic 'state'.
     if {$opts(-usewingeom)} {
 	::UI::SaveWinGeom $w
@@ -1047,14 +1047,10 @@ proc ::WB::DestroyMain {w} {
 	::UI::SaveWinGeom whiteboard $w
     }
     SaveWhiteboardState $w
-    
-    if {$w == [::UI::GetMainWindow]} {
-	::UserActions::DoQuit -warning 1
-    } else {
-	catch {destroy $w}    
-	unset opts
-	unset wapp
-    }
+
+    catch {destroy $w}    
+    unset opts
+    unset wapp
     
     # We could do some cleanup here.
     GarbageImages $w

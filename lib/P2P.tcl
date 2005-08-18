@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.22 2005-08-17 14:26:51 matben Exp $
+# $Id: P2P.tcl,v 1.23 2005-08-18 09:52:07 matben Exp $
 
 package provide P2P 1.0
 
@@ -62,8 +62,7 @@ proc ::P2P::Init {} {
     ::hooks::register serverPutRequestHook           ::P2P::HandlePutRequest
     ::hooks::register serverCmdHook                  ::P2P::HandleServerCmd
 
-    ::hooks::register closeWindowHook                ::P2P::CloseHook
-    ::hooks::register quitAppHook                    ::P2P::QuitHook
+    ::hooks::register preCloseWindowHook             ::P2P::CloseHook
 
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook                  ::P2P::Prefs::InitPrefsHook
@@ -551,18 +550,18 @@ proc ::P2P::CloseHook {wclose} {
     
     if {$wclose == $wDlgs(mainwb)} {
 	set win $wDlgs(mainwb)
+
+	Debug 4 "::P2P::CloseHook"
 	
 	# Must save "clean" size without any user entries.
-	foreach {w h x y} [::UI::ParseWMGeometry [wm geometry $win]] break
-	foreach {xoff yoff width height} [grid bbox $wp2p($win,wgrid) 0 1 0 9] break
+	lassign [::UI::ParseWMGeometry [wm geometry $win]] w h x y
+	lassign [grid bbox $wp2p($win,wgrid) 0 1 0 9] xoff yoff width height
 	::UI::SaveWinGeomUseSize $win ${w}x[expr $h-$height]+${x}+${y}
+	
+	if {![::UserActions::DoQuit -warning 1]} {
+	    return stop
+	}
     }      
-}
-
-proc ::P2P::QuitHook { } {
-    global  wDlgs
-    
-    CloseHook $wDlgs(mainwb)
 }
 
 # P2P::SendMessageListHook --

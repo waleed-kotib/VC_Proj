@@ -81,6 +81,8 @@
 *Combobox.Font:                      CociSmallFont
 *HeadLabel.background:               #cecece
 *Progressbar.borderWidth:            0
+*ProgressWindow.font1:               CociSmallFont
+*ProgressWindow.font2:               CociSmallFont
 *Tablelist.borderWidth:              1
 *Tablelist.Font:                     CociSmallFont
 *Tablelist.highlightThickness:       2

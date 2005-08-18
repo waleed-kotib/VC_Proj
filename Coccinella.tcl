@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.118 2005-08-17 14:26:51 matben Exp $	
+# $Id: Coccinella.tcl,v 1.119 2005-08-18 09:52:07 matben Exp $	
 
 	
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
@@ -247,9 +247,6 @@ FactoryDefaults
 ::Splash::SetMsg [mc splashprefs]
 ::PrefUtils::SetUserPreferences
 
-# Parse any command line options. Can set protocol!
-::PrefUtils::ParseCommandLineOptions $argv
-
 # To provide code to be run before loading componenets.
 ::Debug 2 "--> earlyInitHook"
 ::hooks::run earlyInitHook
@@ -262,6 +259,10 @@ component::load
 # Components that need to add their own preferences need to be registered here.
 ::Debug 2 "--> prefsInitHook"
 ::hooks::run prefsInitHook
+
+# Parse any command line options. Can set protocol!
+# @@@ There is a conflict here if some prefs settings depend on, say protocol.
+::PrefUtils::ParseCommandLineOptions $argv
 
 switch -- $prefs(protocol) {
     jabber {
