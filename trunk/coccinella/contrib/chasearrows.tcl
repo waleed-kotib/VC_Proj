@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: chasearrows.tcl,v 1.6 2004-10-12 13:48:56 matben Exp $
+# $Id: chasearrows.tcl,v 1.7 2005-08-18 09:52:07 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -231,6 +231,7 @@ proc ::chasearrows::Build {w args} {
     set widgets(this) [frame $w -class ChaseArrows]
     
     # Set only the name here.
+    set wcan $w.can
     set widgets(canvas) $w.can
     set widgets(frame) ::chasearrows::${w}::${w}
     
@@ -254,17 +255,25 @@ proc ::chasearrows::Build {w args} {
     # Create the actual widget procedure.
     proc ::${w} {command args}   \
       "eval ::chasearrows::WidgetProc {$w} \$command \$args"
-
-    canvas $widgets(canvas) -width $options(-size) -height $options(-size)  \
-      -bd 0 -highlightthickness 0 -bg $options(-background) \
-      -scrollregion [list 0 0 $options(-size) $options(-size)]
-    pack $widgets(canvas) -fill both
     
+    set size $options(-size)
+    canvas $wcan -width $size -height $size  \
+      -bd 0 -highlightthickness 0 -bg $options(-background) \
+      -scrollregion [list 0 0 $size $size]
+    pack $wcan -fill both
+
     # The actual drawing takes place from 'Configure' which calls
     # the 'Draw' procedure when necessary.
     eval Configure $widgets(this) [array get options]
 
     return $w
+}
+
+proc ::chasearrows::FrameSize {wcan} {
+    
+    set wdth [winfo width $wcan]
+    set hgth [winfo height $wcan]
+    $wcan.f configure -width $wdth -height $hgth
 }
 
 # ::chasearrows::WidgetProc --

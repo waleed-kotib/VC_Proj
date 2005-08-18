@@ -6,7 +6,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: wavelabel.tcl,v 1.7 2004-11-07 14:22:58 matben Exp $
+# $Id: wavelabel.tcl,v 1.8 2005-08-18 09:52:07 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -216,6 +216,7 @@ proc ::wavelabel::Build {w args} {
     set widgets(this) [frame $w -class WaveLabel]
     
     # Set only the name here.
+    set wcan $w.can
     set widgets(canvas) $w.can
     set widgets(frame) ::wavelabel::${w}::${w}
     
@@ -241,12 +242,11 @@ proc ::wavelabel::Build {w args} {
       "eval ::wavelabel::WidgetProc {$w} \$command \$args"
 
     # The height is just temporary.
-    canvas $widgets(canvas) -height 14  \
+    canvas $wcan -height 14  \
       -bd 0 -highlightthickness 0 -bg $options(-background)
-    pack $widgets(canvas) -fill both
+    pack $wcan -fill both
     
-    $widgets(canvas) create text 10 0 -anchor nw -text "" -font $options(-font) \
-      -tags tstr
+    $wcan create text 10 0 -anchor nw -font $options(-font) -tags tstr
     $widgets(frame) configure -relief $options(-relief) -bd $options(-bd)
     
     set priv(refcount) 0

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: UserActions.tcl,v 1.43 2005-08-14 07:17:55 matben Exp $
+# $Id: UserActions.tcl,v 1.44 2005-08-18 09:52:07 matben Exp $
 
 package provide UserActions 1.0
 
@@ -112,7 +112,7 @@ proc ::UserActions::DoConnect { } {
 #       args        ?-warning boolean?
 #       
 # Results:
-#       boolean, qid quit or not
+#       0 if not quited, else exitted
 
 proc ::UserActions::DoQuit {args} {
     global  prefs this
@@ -125,7 +125,7 @@ proc ::UserActions::DoQuit {args} {
 	set ans [::UI::MessageBox -title [mc Quit?] -type yesno -icon warning \
 	  -default yes -message [mc messdoquit?]]
 	if {$ans eq "no"} {
-	    return $ans
+	    return 0
 	}
     }
     
