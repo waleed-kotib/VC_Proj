@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.110 2005-08-14 07:10:51 matben Exp $
+# $Id: GroupChat.tcl,v 1.111 2005-08-26 15:02:34 matben Exp $
 
 package require History
 
@@ -122,6 +122,7 @@ namespace eval ::GroupChat:: {
 	mUserInfo      user      {::UserInfo::Get $jid}
 	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
     }    
+    # mIgnore        user      {::GroupChat::Ignore $jid}
     
     variable userRoleToStr
     set userRoleToStr(moderator)   [mc Moderators]
@@ -491,7 +492,7 @@ proc ::GroupChat::CloseEnterCB {w} {
     global  wDlgs
     
     ::UI::SaveWinPrefixGeom $wDlgs(jgcenter)
-    return ""
+    return
 }
 
 proc ::GroupChat::Cancel {token} {
@@ -597,7 +598,7 @@ proc ::GroupChat::NormalMsgHook {body args} {
 	}
 	return stop
     } else {
-	return ""
+	return
     }
 }
 
@@ -1203,7 +1204,7 @@ proc ::GroupChat::GetTokenFrom {key pattern} {
 	    return $token
 	}
     }
-    return ""
+    return
 }
 
 proc ::GroupChat::GetTokenList { } {

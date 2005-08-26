@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.62 2005-08-14 07:10:51 matben Exp $
+# $Id: MUC.tcl,v 1.63 2005-08-26 15:02:34 matben Exp $
 
 package require entrycomp
 package require muc
@@ -691,7 +691,7 @@ proc ::MUC::InviteCloseCmd {token wclose} {
 
     ::UI::SaveWinGeom $wDlgs(jmucinvite) $invite(w)
     set invite(finished) 0
-    return ""
+    return
 }
 
 proc ::MUC::CancelInvite {token} {
@@ -993,7 +993,7 @@ proc ::MUC::BuildInfo {roomjid} {
 	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
     } $wbox.msg $w]
     after idle $idleScript
-    return ""
+    return
 }
 
 proc ::MUC::FillTable {roomjid} {
@@ -1659,7 +1659,7 @@ proc ::MUC::VerifyEditEntry {token wtbl row col text} {
 	::UI::MessageBox -icon error -message "Illegal jid \"$text\"" \
 	  -parent [winfo toplevel $wtbl] -type ok
 	$wtbl rejectinput
-	return ""
+	return
     }
 }
 

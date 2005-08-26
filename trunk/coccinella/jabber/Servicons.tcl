@@ -8,7 +8,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Servicons.tcl,v 1.1 2005-08-14 07:11:36 matben Exp $
+# $Id: Servicons.tcl,v 1.2 2005-08-26 15:02:34 matben Exp $
 
 package provide Servicons 1.0
 
@@ -131,7 +131,7 @@ proc ::Servicons::Get {key} {
     if {[info exists icons($key)]} {
 	return $icons($key)
     } else {
-	return ""
+	return
     }
 }
 

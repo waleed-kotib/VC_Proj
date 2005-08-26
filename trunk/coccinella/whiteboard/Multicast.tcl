@@ -2,7 +2,7 @@
 #      
 #  Copyright (c) 1999-2003  Mats Bengtsson
 #  
-# $Id: Multicast.tcl,v 1.5 2005-08-14 08:37:52 matben Exp $
+# $Id: Multicast.tcl,v 1.6 2005-08-26 15:02:34 matben Exp $
 
 package provide Multicast 1.0
 
@@ -189,7 +189,7 @@ proc ::Multicast::OpenMulticastQTStream {wtop wentry} {
 	::UI::MessageBox -message   \
 	  "Inconsistent url=$url." -icon error -type ok
 	set finished 0
-	return ""
+	return
     }
     if {[string length $port] == 0} {
 	set port 80
@@ -202,7 +202,7 @@ proc ::Multicast::OpenMulticastQTStream {wtop wentry} {
     if {[string length $fileTail] == 0} {
 	tk_dialog .wrfn "No Path" "No file name in path." \
 	  error 0 Cancel
-	return ""
+	return
     }
     
     # This is opened as an ordinary movie.

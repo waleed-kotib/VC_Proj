@@ -5,7 +5,7 @@
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.22 2005-04-07 06:22:16 matben Exp $
+# $Id: svg2can.tcl,v 1.23 2005-08-26 15:02:34 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -406,10 +406,10 @@ proc svg2can::ParseImage {xmllist paropts transformList args} {
 		    lappend cmd -url $xlinkhref  -height $height -width $width
 		    uplevel #0 $parOptsArr(-httphandler) [list $cmd]
 		}
-		return ""
+		return
 	    }
 	    default {
-		return ""
+		return
 	    }
 	}	
     }
@@ -1703,7 +1703,7 @@ proc svg2can::AddAnyTransformCmds {cmdList transformList} {
 proc svg2can::MapNoneToEmpty {val} {
 
     if {[string equal $val "none"]} {
-	return ""
+	return
     } else {
 	return $val
     }

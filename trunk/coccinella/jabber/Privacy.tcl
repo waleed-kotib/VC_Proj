@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.12 2005-08-14 07:10:51 matben Exp $
+# $Id: Privacy.tcl,v 1.13 2005-08-26 15:02:34 matben Exp $
 
 package provide Privacy 1.0
 
@@ -864,7 +864,7 @@ proc ::Privacy::List::ExtractListElement {token} {
     if {$name == ""} {
 	::UI::MessageBox -title [mc Error] -message \
 	  {You must specify a nonempty list name!} -icon error
-	return ""
+	return
     }
     
     set order 1
@@ -880,7 +880,7 @@ proc ::Privacy::List::ExtractListElement {token} {
 	    if {$value == ""} {
 		::UI::MessageBox -title [mc Error] -message \
 		  "You must specify a nonempty value for $type!" -icon error
-		return ""
+		return
 	    }
 	    
 	    set attrlist [list type $type value $value action $action order $order]
@@ -916,7 +916,7 @@ proc ::Privacy::List::GetTokenFromToplevel {w} {
 	    return $token
 	}
     }
-    return ""
+    return
 }
 
 # Privacy::List::CloseHook --
@@ -929,7 +929,7 @@ proc ::Privacy::List::CloseHook {wclose} {
     if {$token != ""} {
 	unset $token
     }   
-    return ""
+    return
 }
 
 #-------------------------------------------------------------------------------

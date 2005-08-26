@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2005  Mats Bengtsson only for the new and rewritten parts.
 #  This source file is distributed under the BSD license.
 #
-# $Id: httpex.tcl,v 1.21 2005-08-14 06:56:45 matben Exp $
+# $Id: httpex.tcl,v 1.22 2005-08-26 15:02:34 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -1663,7 +1663,7 @@ proc httpex::ncode {token} {
     if {[info exists state(ncode)]} {
 	return $state(ncode)
     } else {
-	return ""
+	return
     }
 }
 proc httpex::ncodetotext {ncode} {
@@ -1671,7 +1671,7 @@ proc httpex::ncodetotext {ncode} {
     if {[info exists codeToText($ncode)]} {
 	return $codeToText($ncode)
     } else {
-	return ""
+	return
     }
 }
 proc httpex::error {token} {

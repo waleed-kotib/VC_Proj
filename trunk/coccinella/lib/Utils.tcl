@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.48 2005-08-14 07:17:55 matben Exp $
+# $Id: Utils.tcl,v 1.49 2005-08-26 15:02:34 matben Exp $
 
 package provide Utils 1.0
 
@@ -51,7 +51,7 @@ proc lprune {listName elem} {
     if {$idx >= 0} {
 	uplevel set $listName [list [lreplace $listValue $idx $idx]]
     }
-    return ""
+    return
 }
 
 # lrevert --
@@ -258,7 +258,7 @@ proc ::Utils::GetFilePathFromUrl {url} {
     if {[regexp {[^:]+://[^:/]+(:[0-9]+)?/(.*)} $url match port path]} {
 	return $path
     } else {
-	return ""
+	return
     }
 }
 
@@ -267,7 +267,7 @@ proc ::Utils::GetDomainNameFromUrl {url} {
     if {[regexp {[^:]+://([^:/]+)(:[0-9]+)?/.*} $url match domain port]} {
 	return $domain
     } else {
-	return ""
+	return
     }
 }
 
@@ -508,7 +508,7 @@ proc ::Utils::ImageFromData {data {mime ""}} {
 	if {![catch {image create photo -file $tmpfile} name]} {
 	    return $name
 	} else {
-	    return ""
+	    return
 	}
     }
 }

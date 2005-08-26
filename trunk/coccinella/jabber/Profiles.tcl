@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.41 2005-08-14 07:10:51 matben Exp $
+# $Id: Profiles.tcl,v 1.42 2005-08-26 15:02:34 matben Exp $
 
 package provide Profiles 1.0
 
@@ -131,7 +131,7 @@ proc ::Profiles::Set {name server username password args} {
     
     # Keep them sorted.
     SortProfileList
-    return ""
+    return
 }
 
 
@@ -152,7 +152,7 @@ proc ::Profiles::Remove {name} {
 	}
 	set profiles [lreplace $profiles $ind [incr ind]]
     }
-    return ""
+    return
 }
 
 # Profiles::FindProfileNameFromJID --
@@ -235,7 +235,7 @@ proc ::Profiles::GetProfile {name} {
     if {[info exists profArr($name)]} {
 	return $profArr($name)
     } else {
-	return ""
+	return
     }
     return $profiles
 }
@@ -555,26 +555,46 @@ proc ::Profiles::NotebookOptionWidget {w token} {
 	$wcon.csasl state {disabled}
     }
 
-    # HTTP proxy. Still untested!
-    if {0} {
-	set wpage [$w newpage {Proxy} -text [mc {HTTP Proxy}]] 
-	set pageproxy $wpage.f
-	pack [frame $pageproxy] -side top -anchor w -padx 6 -pady 4
-	checkbutton $pageproxy.http -text " [mc {Connect using Http proxy}]" \
-	  -variable $token\(httpproxy)
-	label $pageproxy.lpoll -text [mc {Poll interval (secs)}]
-	spinbox $pageproxy.spoll -textvariable $token\(pollsecs) \
-	  -width 4 -state readonly -increment 1 -from 1 -to 120
-	button $pageproxy.set -font CociSmallFont -text [mc {Proxy Settings}] \
-	  -command [list ::Preferences::Build -page {General {Proxy Setup}}]
-	grid $pageproxy.http  -   -sticky w
-	grid $pageproxy.lpoll $pageproxy.spoll -sticky e
-	grid $pageproxy.set   -   -sticky w
-    }
-    #bind [winfo toplevel $w] <Control-Key-t> [list $w nextpage]
+    # HTTP
+    $w add [ttk::frame $w.http] -text [mc {HTTP}] -sticky news
+    set whttp $w.http.f
+    ttk::frame $whttp -padding [option get . notebookPageSmallPadding {}]
+    pack  $whttp  -side top -fill x -anchor [option get . dialogAnchor {}]
+    
+    ttk::checkbutton $whttp.http -style Small.TCheckbutton \
+      -text [mc {Connect using HTTP}] -variable $token\(http)
+    
+    ttk::frame $whttp.u
+    ttk::label $whttp.u.lurl -style Small.TLabel  \
+      -text "[mc {URL}]:"
+    ttk::entry $whttp.u.eurl -font CociSmallFont  \
+      -textvariable $token\(httpurl)
+    grid  $whttp.u.lurl  $whttp.u.eurl  -sticky w
+    grid  $whttp.u.eurl  -sticky ew
+    grid columnconfigure $whttp.u 1 -weight 1
+    
+    ttk::frame $whttp.p
+    ttk::checkbutton $whttp.p.proxy -style Small.TCheckbutton \
+      -text [mc {Use proxy}] -variable $token\(proxy)   
+    ttk::button $whttp.p.bproxy -style Small.TButton  \
+      -text "[mc {Proxy Settings}]..."  \
+      -command [list ::Preferences::Build -page {General {Proxy Setup}}]
+    grid  $whttp.p.proxy  $whttp.p.bproxy  -sticky w
+    grid  $whttp.p.bproxy  -sticky e -padx 4
+
+    ttk::label $whttp.lpoll -style Small.TLabel  \
+      -text [mc {Poll interval (secs)}]
+    spinbox $whttp.spoll -textvariable $token\(pollsecs) \
+      -width 3 -state readonly -increment 1 -from 1 -to 120
+    
+    grid  $whttp.http    -             -sticky w  -pady 1
+    grid  $whttp.u       -             -sticky ew -pady 1
+    grid  $whttp.p       -             -sticky w  -pady 1
+    #grid  $whttp.lpoll   $whttp.spoll  -sticky w  -pady 1
+    grid columnconfigure $whttp 1 -weight 1
     
     # Set defaults.
-    NotebookSetDefaults $token
+    NotebookSetDefaults $token ""
 
     # Let components ad their own stuff here.
     ::hooks::run profileBuildTabNotebook $w $token
@@ -591,7 +611,7 @@ namespace eval ::Profiles:: {
     variable initedDefaultOptions 0
 }
 
-proc ::Profiles::NotebookSetDefaults {token} {
+proc ::Profiles::NotebookSetDefaults {token server} {
     variable $token
     upvar 0 $token state
     variable defaultOptionsArr
@@ -603,6 +623,7 @@ proc ::Profiles::NotebookSetDefaults {token} {
 	InitDefaultOptions
     }
     array set state [array get defaultOptionsArr]
+    set state(httpurl) "http://${server}:5280/http-poll/"
 }
 
 proc ::Profiles::InitDefaultOptions { } {
@@ -619,7 +640,9 @@ proc ::Profiles::InitDefaultOptions { } {
 	ip          ""
 	pollsecs    5
 	priority    0
-	httpproxy   0
+	http        0
+	httpurl     ""
+	proxy       0
     }
     set defaultOptionsArr(port) $jprefs(port)
     set defaultOptionsArr(ssl)  $jprefs(usessl)
@@ -647,10 +670,10 @@ proc ::Profiles::MakeTmpProfArr { } {
     
     foreach {name spec} $profiles {
 	set tmpProfArr($name,name) $name
-	foreach [list \
+	lassign $spec                \
 	  tmpProfArr($name,server)   \
 	  tmpProfArr($name,username) \
-	  tmpProfArr($name,password)] $spec break
+	  tmpProfArr($name,password)
 	set tmpProfArr($name,-resource) ""
 	foreach {key value} [lrange $spec 3 end] {
 	    set tmpProfArr($name,$key) $value
@@ -714,14 +737,14 @@ proc ::Profiles::SetCurrentFromTmp {profName} {
     set server   $tmpProfArr($profName,server)
     set username $tmpProfArr($profName,username)
     set password $tmpProfArr($profName,password)
-    NotebookSetDefaults [namespace current]::moreOpts
+    NotebookSetDefaults [namespace current]::moreOpts $server
     
     foreach {key value} [array get tmpProfArr $profName,-*] {
 	set optname [string map [list $profName,- ""] $key]
 	Debug 4 "\t key=$key, value=$value, optname=$optname"
 	
 	# The 'resource' is a bit special...
-	if {$optname == "resource"} {
+	if {$optname eq "resource"} {
 	    set resource $value
 	} else {
 	    set moreOpts($optname) $value
@@ -747,18 +770,22 @@ proc ::Profiles::SaveCurrentToTmp {profName} {
     # But only of the profile already exists since we may have just deleted it!
     if {[info exists tmpProfArr($profName,name)]} {
 	Debug 2 "\t exists tmpProfArr($profName,name)"
-	set tmpProfArr($profName,name)     $profName
-	set tmpProfArr($profName,server)   $server
-	set tmpProfArr($profName,username) $username
-	set tmpProfArr($profName,password) $password
-	set tmpProfArr($profName,-resource) $resource
+	set tmpProfArr($profName,name)       $profName
+	set tmpProfArr($profName,server)     $server
+	set tmpProfArr($profName,username)   $username
+	set tmpProfArr($profName,password)   $password
+	set tmpProfArr($profName,-resource)  $resource
 	
 	# Set more options if different from defaults.
 	foreach key [array names moreOpts] {
 	    
-	    # Cleanup any old entries.
+	    # Cleanup any old entries. Save only if different from default.
 	    unset -nocomplain tmpProfArr($profName,-$key)
-	    if {![string equal $moreOpts($key) $defaultOptionsArr($key)]} {
+	    if {$key eq "httpurl"} {
+		if {$moreOpts($key) ne "http://${server}:5280/http-poll"} {
+		    set tmpProfArr($profName,-$key) $moreOpts($key)
+		}
+	    } elseif {![string equal $moreOpts($key) $defaultOptionsArr($key)]} {
 		Debug 4 "\t key=$key"
 		set tmpProfArr($profName,-$key) $moreOpts($key)
 	    }
@@ -849,7 +876,7 @@ proc ::Profiles::NewCmd { } {
     set username  ""
     set password  ""
     set resource  ""
-    NotebookSetDefaults [namespace current]::moreOpts
+    NotebookSetDefaults [namespace current]::moreOpts $server
     
     # Must do this for it to be automatically saved.
     set tmpProfArr($profile,name) $profile

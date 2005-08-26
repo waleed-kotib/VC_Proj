@@ -5,11 +5,15 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.95.9 (050822):
+Coccinella-0.95.10 (05????):
+
+	- server transport using http possible
+	- 
+
+Coccinella-0.95.9 (050821):
 
 	- completely rewritten user interface with new theming engine (tile)
 	- vCard avatar
-
 
 Coccinella-0.95.8 (050620):
 

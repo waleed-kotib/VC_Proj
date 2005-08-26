@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: HtmlImport.tcl,v 1.12 2005-08-14 08:37:52 matben Exp $
+# $Id: HtmlImport.tcl,v 1.13 2005-08-26 15:02:34 matben Exp $
 
 
 namespace eval ::HtmlImport:: {
@@ -236,7 +236,7 @@ proc ::HtmlImport::Import {wcan optListVar args} {
     ::balloonhelp::balloonforwindow $wfr.icon $msg
     
     # Success.
-    return ""
+    return
 }
 
 proc ::HtmlImport::Clicked {id} {
@@ -270,7 +270,7 @@ proc ::HtmlImport::Save {wCan id args} {
 	lappend impArgs -mime [::Types::GetMimeTypeForFileName $fileName]
 	return [concat import [$wCan coords $id] $impArgs]
     } else {
-	return ""
+	return
     }
 }
 

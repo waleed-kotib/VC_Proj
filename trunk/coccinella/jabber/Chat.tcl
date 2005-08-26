@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.119 2005-08-14 07:10:51 matben Exp $
+# $Id: Chat.tcl,v 1.120 2005-08-26 15:02:34 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1393,7 +1393,7 @@ proc ::Chat::CloseHook {wclose} {
     if {$dlgtoken != ""} {
 	Close $dlgtoken
     }
-    return ""
+    return
 }
 
 proc ::Chat::LoginHook { } {
@@ -1404,7 +1404,7 @@ proc ::Chat::LoginHook { } {
     set cprefs(lastmejid) $jstate(mejidmap)
     BuildSavedDialogs
     
-    return ""
+    return
 }
 
 proc ::Chat::LogoutHook { } {
@@ -1423,7 +1423,7 @@ proc ::Chat::LogoutHook { } {
 	    set chatstate(presence) unavailable
 	}
     }
-    return ""
+    return
 }
 
 proc ::Chat::QuitHook { } {
@@ -1438,7 +1438,7 @@ proc ::Chat::QuitHook { } {
     foreach dlgtoken [GetTokenList dlg] {
 	Close $dlgtoken
     }
-    return ""
+    return
 }
 
 proc ::Chat::BuildSavedDialogs { } {
@@ -1844,10 +1844,10 @@ proc ::Chat::HaveChat {jid} {
 	if {[winfo exists $chatstate(w)]} {
 	    return $chatstate(w)
 	} else {
-	    return ""
+	    return
 	}
     } else {
-	return ""
+	return
     }
 }
 
@@ -1884,7 +1884,7 @@ proc ::Chat::GetTokenFrom {type key pattern} {
 	    return $token
 	}
     }
-    return ""
+    return
 }
 
 # Chat::GetAllTokensFrom --

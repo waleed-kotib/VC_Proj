@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: timing.tcl,v 1.1 2004-12-04 15:01:06 matben Exp $
+# $Id: timing.tcl,v 1.2 2005-08-26 15:02:34 matben Exp $
 
 package provide timing 1.0
 
@@ -33,7 +33,7 @@ proc ::timing::setbytes {key bytes} {
     variable priv
     
     lappend priv($key) [list [expr double([clock clicks -milliseconds])] $bytes]
-    return ""
+    return
 }
 
 proc ::timing::getrate {key} {

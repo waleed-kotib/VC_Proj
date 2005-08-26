@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasUtils.tcl,v 1.30 2005-08-17 14:26:51 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.31 2005-08-26 15:02:34 matben Exp $
 
 package require sha1pure
 package require can2svg
@@ -361,7 +361,7 @@ proc ::CanvasUtils::GetUtag {c fromWhat {force 0}} {
         set tags [$c gettags $fromWhat]
     }
     if {$tags eq ""} {
-        return ""
+        return
     }
     if {$prefs(privacy) && !$force} {
 	
@@ -394,7 +394,7 @@ proc ::CanvasUtils::GetUtagFromCreateCmd {cmd} {
 	return [lsearch -inline -regexp [lindex $cmd [incr ind]]  \
 	  {^[^/: ]+/[0-9]+$}]
     } else {  
-	return ""
+	return
     }
 }
 
@@ -2300,7 +2300,7 @@ proc ::CanvasUtils::ItemCGet {w id} {
     if {[info exists itemopts($id)]} {
 	return $itemopts($id)
     } else {
-	return ""
+	return
     }
 }
 

@@ -4,16 +4,13 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.138 2005-08-14 07:10:51 matben Exp $
+# $Id: Jabber.tcl,v 1.139 2005-08-26 15:02:34 matben Exp $
 
 package require balloonhelp
 package require browse
 package require chasearrows
 package require combobox
-package require disco
 package require http 2.3
-package require jlib
-package require roster
 package require sha1pure
 package require tinyfileutils
 package require tree
@@ -22,6 +19,10 @@ package require wavelabel
 
 
 # jlib components shall be declared here, or later.
+package require jlib
+package require roster
+package require disco
+package require jlib::http
 #package require jlib::caps
 
 # We should have some component mechanism that lets packages load themselves.
@@ -832,7 +833,8 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    DoCloseClientConnection
 	    if {[info exists argsArr(-errormsg)]} {
 		set msg "Receieved a fatal error: "
-		append msg "[lindex $argsArr(-errormsg) 1]\n"
+		append msg $argsArr(-errormsg)
+		append msg "\n"
 		append msg "The connection is closed."
 	    } else {
 		set msg "Receieved a fatal error. The connection is closed."
@@ -846,8 +848,10 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    DoCloseClientConnection
 	    if {[info exists argsArr(-errormsg)]} {
-		set msg "Receieved a fatal XML parsing error:\
-		  $argsArr(-errormsg). The connection is closed down."
+		set msg "Receieved a fatal XML parsing error: "
+		append msg $argsArr(-errormsg)
+		append msg "\n"
+		append msg "The connection is closed down."
 	    } else {
 		set msg "Receieved a fatal XML parsing error.\
 		  The connection is closed down."
@@ -860,7 +864,12 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    #::Jabber::DoCloseClientConnection
 	    SetClosedState
-	    ::UI::MessageBox -icon error -type ok -message [mc jamessconnbroken]
+	    set msg [mc jamessconnbroken]
+	    if {[info exists argsArr(-errormsg)]} {
+		append msg "\n"
+		append msg $argsArr(-errormsg)
+	    }
+	    ::UI::MessageBox -icon error -type ok -message $msg
 	}
     }
     return $ishandled
@@ -1976,7 +1985,7 @@ proc ::Jabber::Passwd::Build { } {
 proc ::Jabber::Passwd::Close {w} {
     
     ::UI::SaveWinPrefixGeom $w
-    return ""
+    return
 }
 
 proc ::Jabber::Passwd::Cancel {w} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Dialogs.tcl,v 1.59 2005-08-14 07:17:55 matben Exp $
+# $Id: Dialogs.tcl,v 1.60 2005-08-26 15:02:34 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -101,7 +101,7 @@ proc ::Dialogs::GetCanvas {w} {
     if {$finished == 1} {
 	return [::P2PNet::GetIPFromName $getIPName]
     } else {
-	return ""
+	return
     }
 }
 

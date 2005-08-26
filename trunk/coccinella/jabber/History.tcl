@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.9 2005-08-14 07:10:51 matben Exp $
+# $Id: History.tcl,v 1.10 2005-08-26 15:02:34 matben Exp $
 
 package require uriencode
 
@@ -297,7 +297,7 @@ proc ::History::NormalizeMessage {jid msg} {
 	    set norm $msg
 	}
 	"" {
-	    return ""
+	    return
 	}
     }
     return $norm
@@ -306,7 +306,7 @@ proc ::History::NormalizeMessage {jid msg} {
 proc ::History::GetTimeStr {secs clockFormat clockFormatNotToday} {
     
     if {![string is integer -strict $secs]} {
-	return ""
+	return
     } elseif {[::Utils::IsToday $secs]} {
 	set theTime [clock format $secs -format $clockFormat]
     } else {
@@ -315,7 +315,7 @@ proc ::History::GetTimeStr {secs clockFormat clockFormatNotToday} {
     if {$theTime != ""} {
 	return "\[$theTime\] "
     } else {
-	return ""
+	return
     }
 }
 
@@ -332,7 +332,7 @@ proc ::History::GetMsgFormat {msg} {
 	foreach {key val} $msg {
 	    if {![string match {-[a-z]*} $key]} {
 		# This is inconsistent.
-		return ""
+		return
 	    }
 	}
 	return ex

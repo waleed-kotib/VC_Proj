@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.23 2005-06-22 12:47:05 matben Exp $
+# $Id: disco.tcl,v 1.24 2005-08-26 15:02:34 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -542,7 +542,7 @@ proc disco::get {disconame discotype key jid {node ""}} {
 	    }
 	}
     }
-    return ""
+    return
 }
 
 # Both the items and the info elements may have name attributes! Related???

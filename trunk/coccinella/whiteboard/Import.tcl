@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Import.tcl,v 1.21 2005-08-14 08:37:52 matben Exp $
+# $Id: Import.tcl,v 1.22 2005-08-26 15:02:34 matben Exp $
 
 package require http
 package require httpex
@@ -782,7 +782,7 @@ proc ::Import::HttpGet2 {w url opts} {
     if {[array exists getstate]} {
 	set getstate(httptoken) $httptoken
     }
-    return ""
+    return
 }
 
 # Import::HttpCmd2, HttpProgress2 --
@@ -912,7 +912,7 @@ proc ::Import::HttpGet {w url importPackage opts args} {
 	      $importPackage $opts} $args
         }
     }
-    return ""
+    return
 }
 
 #  OUTDATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1230,7 +1230,7 @@ proc ::Import::GetTokenFrom {key pattern} {
 	    return $gettoken
 	}
     }
-    return ""
+    return
 }
 
 proc ::Import::GetTokenList { } {

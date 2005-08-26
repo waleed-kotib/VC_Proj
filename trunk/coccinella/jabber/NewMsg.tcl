@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.64 2005-08-14 07:10:51 matben Exp $
+# $Id: NewMsg.tcl,v 1.65 2005-08-26 15:02:34 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -956,7 +956,7 @@ proc ::NewMsg::CloseDlg {w} {
 	::UI::SaveWinGeom $wDlgs(jsendmsg) $w
 	destroy $w
 	array unset locals $w,*
-	return ""
+	return
     } else {
 	return "stop"
     }

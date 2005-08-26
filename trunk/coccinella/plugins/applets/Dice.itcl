@@ -3,7 +3,7 @@
 #       Creates a dice in a whiteboard canvas. 
 # 
 # 
-# $Id: Dice.itcl,v 1.6 2005-06-21 08:15:35 matben Exp $
+# $Id: Dice.itcl,v 1.7 2005-08-26 15:02:34 matben Exp $
 
 namespace eval Dice {
     
@@ -277,7 +277,7 @@ if {[itcl::find classes Dice] == ""} {
 
 	set tags [$tkCanvas gettags $id]
 	if {[lsearch $tags dice] < 0} {
-	    return ""
+	    return
 	}
 	array set argsArr {
 	    -uritype file

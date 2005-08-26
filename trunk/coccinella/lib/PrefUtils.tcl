@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #
-# $Id: PrefUtils.tcl,v 1.1 2005-08-14 07:17:55 matben Exp $
+# $Id: PrefUtils.tcl,v 1.2 2005-08-26 15:02:34 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -63,12 +63,12 @@ proc ::PrefUtils::Init { } {
     
     if {[file exists $prefsFilePath]} {
 	if {[catch {option readfile $prefsFilePath} err]} {
-	    ::UI::MessageBox -type ok -icon error \
+	    tk_messageBox -type ok -icon error \
 	      -message "Error reading preference file: $prefsFilePath."
 	}
     } elseif {[file exists $old]} {
 	if {[catch {option readfile $old} err]} {
-	    ::UI::MessageBox -type ok -icon error \
+	    tk_messageBox -type ok -icon error \
 	      -message "Error reading preference file: $old."
 	}
     }

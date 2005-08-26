@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.52 2005-08-17 14:26:51 matben Exp $
+# $Id: JWB.tcl,v 1.53 2005-08-26 15:02:34 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -295,7 +295,7 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 	      -autoget 1]
 	    if {$ans == "cancel"} {
 		Free $w
-		return ""
+		return
 	    }
 	    set doBuild 0
 	}

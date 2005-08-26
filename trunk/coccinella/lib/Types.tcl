@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.13 2005-08-14 07:17:55 matben Exp $
+# $Id: Types.tcl,v 1.14 2005-08-26 15:02:34 matben Exp $
 
 package provide Types 1.0
 
@@ -505,7 +505,7 @@ proc ::Types::GetSuffixListForMime {mime} {
     if {[info exists mime2SuffList($mime)]} {
 	return $mime2SuffList($mime)
     } else {
-	return ""
+	return
     }
 }
 
@@ -535,7 +535,7 @@ proc ::Types::GetMacTypeListForMime {mime} {
     if {[info exists mime2MacTypeList($mime)]} {
 	return $mime2MacTypeList($mime)
     } else {
-	return ""
+	return
     }
 }
 
@@ -545,7 +545,7 @@ proc ::Types::GetDescriptionForMime {mime} {
     if {[info exists mime2Desc($mime)]} {
 	return $mime2Desc($mime)
     } else {
-	return ""
+	return
     }
 }
 

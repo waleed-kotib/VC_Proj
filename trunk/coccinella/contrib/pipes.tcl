@@ -6,7 +6,7 @@
 #       input arguments and returns a result string, which is then used for
 #       next call etc.
 #       
-# $Id: pipes.tcl,v 1.1 2004-04-02 12:25:15 matben Exp $
+# $Id: pipes.tcl,v 1.2 2005-08-26 15:02:34 matben Exp $
 
 package provide pipes 1.0
 
@@ -25,7 +25,7 @@ proc pipes::run {pipe args} {
     variable $pipe
 
     if {![info exists $pipe]} {
-	return ""
+	return
     }
 
     foreach spec [set $pipe] {

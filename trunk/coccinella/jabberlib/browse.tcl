@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.32 2005-06-16 07:10:39 matben Exp $
+# $Id: browse.tcl,v 1.33 2005-08-26 15:02:34 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -327,7 +327,7 @@ proc browse::get {browsename jid} {
     if {[info exists locals($jid,xmllist)]} {
 	return $locals($jid,xmllist)
     } else {
-	return ""
+	return
     }
 }
 
@@ -391,7 +391,7 @@ proc browse::getparents {browsename jid} {
     if {[info exists locals($jid,parents)]} {
 	return $locals($jid,parents)
     } else {
-	return ""
+	return
     }
 }
     
@@ -414,7 +414,7 @@ proc browse::getchilds {browsename jid} {
     if {[info exists locals($jid,childs)]} {
 	return $locals($jid,childs)
     } else {
-	return ""
+	return
     }
 }
     
@@ -439,7 +439,7 @@ proc browse::getname {browsename jid} {
     if {[info exists locals($jid,name)]} {
 	return $locals($jid,name)
     } else {
-	return ""
+	return
     }
 }
     
@@ -464,7 +464,7 @@ proc browse::getusers {browsename jid} {
     if {[info exists locals($jid,allusers)]} {
 	return $locals($jid,allusers)
     } else {
-	return ""
+	return
     }
 }
     
@@ -491,7 +491,7 @@ proc browse::getservicesforns {browsename ns} {
     if {[info exists locals(ns,$ns)]} {
 	return $locals(ns,$ns)
     } else {
-	return ""
+	return
     }
 }
 
@@ -523,7 +523,7 @@ proc browse::gettype {browsename jid} {
     if {[info exists locals($jid,type)]} {
 	return $locals($jid,type)
     } else {
-	return ""
+	return
     }
 }    
 
@@ -600,7 +600,7 @@ proc browse::getnamespaces {browsename jid} {
     if {[info exists locals($jid,ns)]} {
 	return $locals($jid,ns)
     } else {
-	return ""
+	return
     }
 }
 

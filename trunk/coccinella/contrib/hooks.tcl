@@ -5,7 +5,7 @@
 #       
 #       Code idea from Alexey Shchepin, (and Vince Darley) Many Thanks!
 #       
-# $Id: hooks.tcl,v 1.5 2004-09-30 12:43:06 matben Exp $
+# $Id: hooks.tcl,v 1.6 2005-08-26 15:02:34 matben Exp $
 
 package provide hooks 1.0
 
@@ -23,7 +23,7 @@ proc hooks::deregister {hook func} {
     variable $hook
 
     if {![::info exists $hook]} {
-	return ""
+	return
     }
     set ind -1
     set found 0
@@ -65,7 +65,7 @@ proc hooks::run {hook args} {
     variable $hook
 
     if {![::info exists $hook]} {
-	return ""
+	return
     }
     set flags($hook) {}
     set result ""

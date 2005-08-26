@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.34 2005-06-16 07:10:40 matben Exp $
+# $Id: roster.tcl,v 1.35 2005-08-26 15:02:34 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -1198,7 +1198,7 @@ proc roster::getx {rostName jid xmlns} {
     if {[info exists presArr($jid,x,$xmlns)]} {
 	return $presArr($jid,x,$xmlns)
     } else {
-	return ""
+	return
     }
 }
 
@@ -1223,7 +1223,7 @@ proc roster::getextras {rostName jid xmlns} {
     if {[info exists presArr($jid,extras,$xmlns)]} {
 	return $presArr($jid,extras,$xmlns)
     } else {
-	return ""
+	return
     }
 }
 

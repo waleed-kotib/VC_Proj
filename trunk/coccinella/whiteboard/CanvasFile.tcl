@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: CanvasFile.tcl,v 1.21 2005-08-14 08:37:52 matben Exp $
+# $Id: CanvasFile.tcl,v 1.22 2005-08-26 15:02:34 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -626,7 +626,7 @@ proc ::CanvasFile::SaveCanvasFileDlg {w} {
     set fileName [eval {tk_getSaveFile -title [mc {Save Canvas}] \
       -defaultextension ".can"} $opts]
     if {$fileName eq ""} {
-	return ""
+	return
     }
     set prefs(userPath) [file dirname $fileName]
     ::CanvasFile::SaveCanvas $wcan $fileName
@@ -670,7 +670,7 @@ proc ::CanvasFile::SaveCanvas {wcan fileName args} {
 		set tail [file tail $fileName]
 		::UI::MessageBox -icon error -type ok \
 		  -message [mc messfailopwrite $tail $fd]
-		return ""
+		return
 	    }	    
 	    fconfigure $fd -encoding utf-8
 	    CanvasToFile $wcan $fd $fileName
