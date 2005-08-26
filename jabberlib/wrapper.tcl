@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.13 2005-08-14 07:13:18 matben Exp $
+# $Id: wrapper.tcl,v 1.14 2005-08-26 15:02:34 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -604,7 +604,7 @@ proc wrapper::getattr {attrlist attrname} {
 	    return $val
 	}
     }
-    return ""
+    return
 }
 
 proc wrapper::getattribute {xmllist attrname} {
@@ -614,7 +614,7 @@ proc wrapper::getattribute {xmllist attrname} {
 	    return $val
 	}
     }
-    return ""
+    return
 }
 
 proc wrapper::isattr {attrlist attrname} {
@@ -802,7 +802,7 @@ proc wrapper::getdhildsdeep {xmllist childSpecs} {
 	    }
 	}
 	# No matches found.
-	return ""
+	return
     }
     return $xlist
 }

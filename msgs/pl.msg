@@ -88,8 +88,8 @@
 ::msgcat::mcset pl Never	Nigdy
 ::msgcat::mcset pl New		Nowy
 ::msgcat::mcset pl Next		Dalej
-# ::msgcat::mcset pl Nick {}
-# ::msgcat::mcset pl Nickname {}
+::msgcat::mcset pl Nick		{Pseudo}
+::msgcat::mcset pl Nickname	{Pseudonim}
 ::msgcat::mcset pl No		Nie
 ::msgcat::mcset pl no		nie
 ::msgcat::mcset pl None		Brak
@@ -102,7 +102,7 @@
 ::msgcat::mcset pl Options	Opcje
 ::msgcat::mcset pl Participants	Uczestnicy
 ::msgcat::mcset pl Password	Hasło
-# ::msgcat::mcset pl Pause
+::msgcat::mcset pl Pause	Pauza
 ::msgcat::mcset pl Pick		Wskaż
 ::msgcat::mcset pl Phone	Telefon
 ::msgcat::mcset pl Play		Odtwórz
@@ -118,13 +118,13 @@
 ::msgcat::mcset pl Progress	Tok
 ::msgcat::mcset pl Quit?	Koniec?
 ::msgcat::mcset pl Quote	Cytat
-# ::msgcat::mcset pl Reason {}
+::msgcat::mcset pl Reason	{Przyczyna}
 ::msgcat::mcset pl Register	Zarejestruj
 ::msgcat::mcset pl Remaining	Pozostało
 ::msgcat::mcset pl Remove	Usuń
 ::msgcat::mcset pl Reply	Odpowiedź
 ::msgcat::mcset pl Resource	Zasób
-# ::msgcat::mcset pl Restart
+::msgcat::mcset pl Restart	Restart
 ::msgcat::mcset pl Room		Pokój
 ::msgcat::mcset pl Roster	Lista
 ::msgcat::mcset pl Save		Zapisz
@@ -133,7 +133,7 @@
 ::msgcat::mcset pl Send		Wyślij
 ::msgcat::mcset pl Server	Serwer
 ::msgcat::mcset pl Servers	Serwery
-# ::msgcat::mcset pl Service {}
+::msgcat::mcset pl Service	{Usługa}
 ::msgcat::mcset pl Set		Ustaw
 ::msgcat::mcset pl Settings	Ustawienia
 ::msgcat::mcset pl Shortcut	Skrót
@@ -337,9 +337,9 @@
 ::msgcat::mcset pl mLoginTrpt     	{Podłącz transport}
 ::msgcat::mcset pl mLogoutTrpt     	{Odłącz transport}
 ::msgcat::mcset pl mRemoveContact  	{Usuń z listy...}
-# ::msgcat::mcset pl mShow Show
-# ::msgcat::mcset pl mOffline Offline
-# ::msgcat::mcset pl mTransports Transports
+::msgcat::mcset pl mShow		Pokaż
+::msgcat::mcset pl mOffline		Nieobecny
+::msgcat::mcset pl mTransports		Transporty
 
 
 # Short texts only. Use english text as database key.
@@ -380,7 +380,7 @@
 ::msgcat::mcset pl {Create Room}          {Otwórz pokój}
 ::msgcat::mcset pl {Default group}        {Grupa domyślna}
 ::msgcat::mcset pl {Default Logout Status}  {Domyślny opis "nieobecności"}
-# ::msgcat::mcset pl {Default status descriptions} {}
+::msgcat::mcset pl {Default status descriptions}  {Domyślny opis statusu}
 ::msgcat::mcset pl {Delete Rule}          {Usuń regułę}
 ::msgcat::mcset pl {Disk Cache}           {Bufor dyskowy}
 ::msgcat::mcset pl {Different Passwords}  {Niezgodność haseł}
@@ -412,12 +412,12 @@
 ::msgcat::mcset pl {Get File}             {Pobierz plik}
 ::msgcat::mcset pl {Get File Error}       {Błąd pobierania}
 ::msgcat::mcset pl {Get vCard}            {Pobierz wizytówkę}
-# ::msgcat::mcset pl {Getting available rooms...} {}
+::msgcat::mcset pl {Getting available rooms...} {Wykrywam dostępne pokoje...}
 ::msgcat::mcset pl {Groupchat in room}   {Konferencja w pokoju}
-# ::msgcat::mcset pl {Groupchat presence change} {}
+::msgcat::mcset pl {Groupchat presence change} {Zmiana statusu "czatownika"}
 ::msgcat::mcset pl {Groupchat-1.0 (fallback)}  {Groupchat-1.0 ("fallback")}
 ::msgcat::mcset pl {Handled By}           {Zarządzana przez}
-# ::msgcat::mcset pl {History length} {}
+::msgcat::mcset pl {History length} {Rozmiar dziennika}
 ::msgcat::mcset pl {Host name}            {Nazwa komputera}
 ::msgcat::mcset pl {HTTP port}            {port HTTP}
 ::msgcat::mcset pl {Import using}         {Importuj poprzez}
@@ -426,7 +426,7 @@
 ::msgcat::mcset pl {Incoming Messages}    {Nadchodzą wiadomości}
 ::msgcat::mcset pl {Incoming Presence}    {Odnotowano obecność}
 ::msgcat::mcset pl {Inspect Associations} {Zbadaj powiązania}
-# ::msgcat::mcset pl {Invite User} {}
+::msgcat::mcset pl {Invite User}          {Zaproś użytkownika}
 ::msgcat::mcset pl {IP address}           {Adres IP}
 ::msgcat::mcset pl {Is connected}         {Połączenie}
 ::msgcat::mcset pl {Is safe}              {bezpieczny}
@@ -469,7 +469,7 @@
 ::msgcat::mcset pl {NAT Address}          {"Zewnętrzny" adres IP (NAT)}
 ::msgcat::mcset pl {Nick name}            {Pseudonim}
 ::msgcat::mcset pl {No Address}           {Brak adresu}
-# ::msgcat::mcset pl {No Available} {}
+::msgcat::mcset pl {No Available}         {Brak dostępności}
 ::msgcat::mcset pl {No Inbox}             {Brak skrzynki}
 ::msgcat::mcset pl {No Printing}          {Bez drukowania}
 ::msgcat::mcset pl {Not Available}        {Brak}
@@ -669,10 +669,8 @@
 ::msgcat::mcset pl jamessaddrmiss	{Wpisz przynajmniej jeden prawidłowy adres}
 ::msgcat::mcset pl jamesschatclose	{Zamykając okno rozmowy utracisz całą jej treść - na pewno chcesz je zamknąć?}
 ::msgcat::mcset pl jamessnogroupchat	{Nie znaleziono żadnego serwisu umożliwiającego konferencje}
-#--- translate
-::msgcat::mcset en jamessgcnoroomname   {You must provide a roomname.}
-::msgcat::mcset en jamessgcnoroomnick   {You must provide a nickname.}
-#--- translate
+::msgcat::mcset en jamessgcnoroomname   {Należy podać nazwę pokoju.}
+::msgcat::mcset en jamessgcnoroomnick   {Należy podać pseudonim.}
 ::msgcat::mcset pl jamessinroommiss	{Przed wejściem do pokoju należy wypełnić wszystkie pola}
 ::msgcat::mcset pl jamesswarnexitroom	{Faktycznie chcesz opuścić pokój "%s" ?}
 ::msgcat::mcset pl jamesserrbrowse	{Błąd w trakcie przeszukiwania "%s": %s}
@@ -905,15 +903,12 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jadisaddserv {Szukaj pokoi konferencyjnych (i innych serwisów) na jakimś innym serwerze - można dopisać jego adres na stałe, dzięki czemu będzie automatycznie przeszukiwany po każdym połączeniu. Serwer, na który się logujesz, jest przeglądany zawsze.}
 ::msgcat::mcset pl jadisrmall   {Usuń adresy wszystkich serwerów dodanych na stałe, przeglądanych automatycznie.}
 ::msgcat::mcset pl jauserinnote {Możesz o tym użytkowniku napisać coś "od siebie"}
-
-# translate!....................
-::msgcat::mcset pl jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
-::msgcat::mcset pl jaloginjid   {Enter your jid as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
-::msgcat::mcset pl jaxformreq   {Labels with (*) are required}
-::msgcat::mcset pl jaregalready {You are already registered with this service. These are your current settings of your registration parameters.}
-::msgcat::mcset pl jaactiveret {If checked Return sends message else use Ctrl/Cmd-Return}
-::msgcat::mcset pl jainvitegchat {Invite a user for groupchat in room %s}
-# translate!....................
+::msgcat::mcset pl jaregisterex {Podaj nazwę serwera Jabbera, gdzie zamierzasz się zarejestrować, po czym kliknij przycisk "Pobierz", aby pobrać formularz rejestracyjny. Wypełnij go, aby móc dokonać rejestracji.}
+::msgcat::mcset pl jaloginjid   {Podaj swój JID w postaci "joey@myjabb.org", lub wybierz profil - zakłada się, że masz już wcześniej założone konto na wskazanym serwerze.}
+::msgcat::mcset pl jaxformreq   {Wymaga się etykiet zawierających znak (*)}
+::msgcat::mcset pl jaregalready {Wygląda na to, że rejestracji dokonano już uprzednio - oto bieżące ustawienia Twoich danych rejestracyjnych.}
+::msgcat::mcset pl jaactiveret {Zaznaczenie tej opcji powoduje, że naciśnięcie Enter/Return wysyła wiadomość - w przeciwnym wypadku użyj Ctrl/Cmd-Return}
+::msgcat::mcset pl jainvitegchat {Zaproś użytkownika do udziału w konferencji w pokoju %s}
 
 
 

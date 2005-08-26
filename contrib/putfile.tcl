@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: putfile.tcl,v 1.5 2004-03-15 11:19:46 matben Exp $
+# $Id: putfile.tcl,v 1.6 2005-08-26 15:02:34 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -628,7 +628,7 @@ proc putfile::error {token} {
     if {[info exists state(error)]} {
 	return $state(error)
     }
-    return ""
+    return
 }
 
 # putfile::VerifyOptions

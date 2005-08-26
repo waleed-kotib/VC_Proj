@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: P2PNet.tcl,v 1.10 2005-08-17 14:26:51 matben Exp $
+# $Id: P2PNet.tcl,v 1.11 2005-08-26 15:02:34 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -241,7 +241,7 @@ proc ::P2PNet::OpenConnection {w} {
     if {$finished == 1} {
 	return $connIPnum
     } else {
-	return ""
+	return
     }
 }
 
@@ -858,7 +858,7 @@ proc ::P2PNet::GetValueFromIP {ipNum key} {
     if {[info exists ipNumTo($key,$ipNum)]} {
 	return $ipNumTo($key,$ipNum)
     } else {
-	return ""
+	return
     }
 }
 
@@ -868,7 +868,7 @@ proc ::P2PNet::GetIPFromName {ipName} {
     if {[info exists ipName2Num($ipName)]} {
 	return $ipName2Num($ipName)
     } else {
-	return ""
+	return
     }
 }
 

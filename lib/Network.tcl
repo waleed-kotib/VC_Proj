@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.17 2005-08-14 07:17:55 matben Exp $
+# $Id: Network.tcl,v 1.18 2005-08-26 15:02:34 matben Exp $
 
 package provide Network 1.0
 
@@ -55,7 +55,7 @@ proc ::Network::Open {nameOrIP port cmd args} {
     # Try opening socket async.
     if {[catch {eval $socketCmd {-async $nameOrIP $port}} sock]} {
 	uplevel #0 $cmd [list {} $nameOrIP $port error $sock]
-	return ""
+	return
     }
     
     # Write/read line by line.
@@ -80,7 +80,7 @@ proc ::Network::Open {nameOrIP port cmd args} {
 	::Network::ScheduleKiller $sock $cmd
     }
     
-    return ""
+    return
 }
 
 # Network::WhenSocketOpensInits --

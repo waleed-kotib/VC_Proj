@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Plugins.tcl,v 1.17 2005-08-14 08:37:52 matben Exp $
+# $Id: Plugins.tcl,v 1.18 2005-08-26 15:02:34 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -736,7 +736,7 @@ proc ::Plugins::GetPreferredPackageForMime {mime} {
     if {[info exists prefMimeType2Package($mime)]} {
 	return $prefMimeType2Package($mime)
     } else {
-	return ""
+	return
     }
 }
 
@@ -752,7 +752,7 @@ proc ::Plugins::GetPackageListForMime {mime} {
     if {[info exists mimeType2Packages($mime)]} {
 	return $mimeType2Packages($mime)
     } else {
-	return ""
+	return
     }
 }
 
@@ -776,7 +776,7 @@ proc ::Plugins::GetDoWhatForMime {mime} {
     if {[info exists mimeTypeDoWhat($mime)]} {
 	return $mimeTypeDoWhat($mime)
     } else {
-	return ""
+	return
     }
 }
 
@@ -893,7 +893,7 @@ proc ::Plugins::GetType {name} {
     if {[info exists plugin($name,type)]} {
 	return $plugin($name,type)
     } else {
-	return ""
+	return
     }
 }
 
@@ -903,7 +903,7 @@ proc ::Plugins::GetTypeDesc {name} {
     if {[info exists plugin($name,type)]} {
 	return [::Plugins::GetDescForPlugType $plugin($name,type)]
     } else {
-	return ""
+	return
     }
 }
 
@@ -915,7 +915,7 @@ proc ::Plugins::GetSuffixes {key} {
     if {[info exists supSuff($key)]} {
 	return $supSuff($key)
     } else {
-	return ""
+	return
     }
 }
 
@@ -925,7 +925,7 @@ proc ::Plugins::GetDescForPlugin {name} {
     if {[info exists plugin($name,desc)]} {
 	return $plugin($name,desc)
     } else {
-	return ""
+	return
     }
 }
 
@@ -935,7 +935,7 @@ proc ::Plugins::GetDescForPlugType {plugtype} {
     if {[info exists plugType2DescArr($plugtype)]} {
 	return $plugType2DescArr($plugtype)
     } else {
-	return ""
+	return
     }
 }
 
@@ -1004,7 +1004,7 @@ proc ::Plugins::GetVersionForPackage {name} {
     if {[info exists plugin($name,ver)]} {
 	return $plugin($name,ver)
     } else {
-	return ""
+	return
     }
 }
 
@@ -1014,7 +1014,7 @@ proc ::Plugins::GetIconForPackage {doWhat size} {
     if {[info exists plugin($doWhat,icon,$size)]} {
 	return $plugin($doWhat,icon,$size)
     } else {
-	return ""
+	return
     }
 }
 

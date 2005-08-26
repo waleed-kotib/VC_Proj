@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: HttpTrpt.tcl,v 1.4 2005-03-04 08:45:07 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.5 2005-08-26 15:02:34 matben Exp $
 
 package require httpex
 package require timing
@@ -58,7 +58,7 @@ proc ::HttpTrpt::Get {url fileName args} {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 	      -message $errstr
 	}
-	return ""
+	return
     }
 
     # Create an array that holds the instance specific state.
@@ -92,7 +92,7 @@ proc ::HttpTrpt::Get {url fileName args} {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 	      -message $errmsg
 	}
-	return ""
+	return
     }
     set state(httptoken) $httptoken
     return $token

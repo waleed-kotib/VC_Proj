@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: streamerror.tcl,v 1.2 2004-09-18 14:43:29 matben Exp $
+# $Id: streamerror.tcl,v 1.3 2005-08-26 15:02:34 matben Exp $
 # 
 
 # The syntax for stream errors is as follows:
@@ -108,7 +108,7 @@ proc streamerror::getmsg {condition} {
     if {[info exists msg($condition)]} {
 	return $msg($condition)
     } else {
-	return ""
+	return
     }
 }
 

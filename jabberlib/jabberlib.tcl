@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.101 2005-08-14 07:13:18 matben Exp $
+# $Id: jabberlib.tcl,v 1.102 2005-08-26 15:02:34 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -96,7 +96,7 @@
 #      jlibName mystatus
 #      jlibName oob_set to cmd url ?args?
 #      jlibName presence_register type cmd
-#      jlibName registertransport initProc sendProc resetProc
+#      jlibName registertransport name initProc sendProc resetProc ipProc
 #      jlibName register_set username password cmd ?args?
 #      jlibName register_get cmd ?args?
 #      jlibName register_remove to cmd ?args?
@@ -346,7 +346,7 @@ proc jlib::new {rostername clientcmd args} {
     }
     
     # Verify options.
-    if {[catch {eval jlib::verify_options $jlibname $args} msg]} {
+    if {[catch {eval verify_options $jlibname $args} msg]} {
 	return -code error $msg
     }
     
@@ -378,7 +378,7 @@ proc jlib::new {rostername clientcmd args} {
     foreach ename [array names ensamble] {
 	set ecmd ${ename}::init
 	if {[llength [info commands $ecmd]]} {
-	    eval $ecmd $jlibname $args
+	    uplevel #0 $ecmd $jlibname $args
 	}
     }
         
@@ -506,7 +506,7 @@ proc jlib::cmdproc {jlibname cmd args} {
 
     # Which command? Just dispatch the command to the right procedure.
     if {[info exists ensamble($cmd)]} {
-	return [eval {$ensamble($cmd) $jlibname} $args]
+	return [uplevel #0 $ensamble($cmd) $jlibname $args]
     } else {
 	return [eval {$cmd $jlibname} $args]
     }
@@ -580,11 +580,11 @@ proc jlib::config {jlibname args} {
     foreach ename [array names ensamble] {
 	set ecmd ${ename}::configure
 	if {[llength [info commands $ecmd]]} {
-	    eval $ecmd $jlibname $args
+	    uplevel #0 $ecmd $jlibname $args
 	}
     }
 
-    return ""
+    return
 }
 
 # jlib::verify_options
@@ -624,15 +624,25 @@ proc jlib::verify_options {jlibname args} {
 
 # jlib::registertransport --
 # 
-# 
+#       We must have a transport mechanism for our xml. Socket is standard but
+#       http is also possible.
 
-proc jlib::registertransport {jlibname initProc sendProc resetProc} {
+proc jlib::registertransport {jlibname name initProc sendProc resetProc ipProc} {
     
     upvar ${jlibname}::lib lib
 
-    set lib(transportinit)  $initProc
-    set lib(transportsend)  $sendProc
-    set lib(transportreset) $resetProc
+    set lib(transport,name)  $name
+    set lib(transport,init)  $initProc
+    set lib(transport,send)  $sendProc
+    set lib(transport,reset) $resetProc
+    set lib(transport,ip)    $ipProc
+}
+
+proc jlib::gettransport {jlibname} {
+    
+    upvar ${jlibname}::lib lib
+
+    return $lib(transport,name)
 }
 
 # jlib::setsockettransport --
@@ -645,16 +655,18 @@ proc jlib::setsockettransport {jlibname sock} {
     
     # Settings for the raw socket transport layer.
     set lib(sock) $sock
-    set lib(transportinit)  [list [namespace current]::initsocket $jlibname]
-    set lib(transportsend)  [list [namespace current]::putssocket $jlibname]
-    set lib(transportreset) [list [namespace current]::resetsocket $jlibname]
+    set lib(transport,name)  "socket"
+    set lib(transport,init)  [namespace current]::initsocket
+    set lib(transport,send)  [namespace current]::putssocket
+    set lib(transport,reset) [namespace current]::resetsocket
+    set lib(transport,ip)    [namespace current]::ipsocket
 }
 
 # The procedures for the standard socket transport layer -----------------------
 
 # jlib::initsocket
 #
-#	Default transport mechanism; init socket.
+#	Default transport mechanism; init already opened socket.
 #
 # Arguments:
 # 
@@ -720,6 +732,8 @@ proc jlib::resetsocket {jlibname} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
 
+    ::Debug 2 "jlib::resetsocket"
+    
     catch {close $lib(sock)}
     catch {after cancel $locals(aliveid)}
 }
@@ -738,7 +752,7 @@ proc jlib::resetsocket {jlibname} {
 proc jlib::recvsocket {jlibname} {
 
     upvar ${jlibname}::lib lib
-
+    
     if {[catch {eof $lib(sock)} iseof] || $iseof} {
 	kill $jlibname
 	uplevel #0 $lib(clientcmd) [list $jlibname networkerror]	  
@@ -762,14 +776,17 @@ proc jlib::recvsocket {jlibname} {
 
 # jlib::ipsocket --
 # 
-# Need to have some generic mechanism for this since wont work for other
-# transport mechanisms.
+#       Get our own ip address.
 
 proc jlib::ipsocket {jlibname} {
     
     upvar ${jlibname}::lib lib
     
-    return [lindex [fconfigure $lib(sock) -sockname] 0]
+    if {[string length $lib(sock)]} {
+	return [lindex [fconfigure $lib(sock) -sockname] 0]
+    } else {
+	return ""
+    }
 }
 
 # standard socket transport layer end ------------------------------------------
@@ -831,19 +848,20 @@ proc jlib::openstream {jlibname server args} {
 	    }
 	}
     }
+    set lib(isinstream) 1
 
     if {[catch {
 
 	# This call to the transport layer shall set up fileevent callbacks etc.
    	# to handle all incoming xml.
-	eval $lib(transportinit)
+	uplevel #0 $lib(transport,init) $jlibname
         
     	# Network errors if failed to open connection properly are likely to show here.
 	set xml "<?xml version='1.0' encoding='UTF-8'?><stream:stream\
 	  xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppxmlns(stream)'\
 	  xml:lang='[getlang]' to='$server'$optattr>"
 
-	eval $lib(transportsend) {$xml}
+	uplevel #0 $lib(transport,send) [list $jlibname $xml]
     } err]} {
 	
 	# The socket probably was never connected,
@@ -851,7 +869,7 @@ proc jlib::openstream {jlibname server args} {
 	closestream $jlibname
 	return -code error "The connection failed or dropped later: $err"
     }
-    return ""
+    return
 }
 
 # jlib::closestream --
@@ -870,11 +888,21 @@ proc jlib::closestream {jlibname} {
 
     upvar ${jlibname}::lib lib
 
-    Debug 3 "jlib::closestream"
-
     set xml "</stream:stream>"
-    catch {eval $lib(transportsend) {$xml}}
+    catch {uplevel #0 $lib(transport,send) [list $jlibname $xml]}
     kill $jlibname
+}
+
+# jlib::reporterror --
+# 
+#       Used for transports to report async, fatal and nonrecoverable errors.
+
+proc jlib::reporterror {jlibname err {msg ""}} {
+    
+    upvar ${jlibname}::lib lib
+
+    kill $jlibname
+    uplevel #0 $lib(clientcmd) [list $jlibname $err -errormsg $msg]
 }
 
 # jlib::kill --
@@ -885,13 +913,23 @@ proc jlib::kill {jlibname} {
     
     upvar ${jlibname}::lib lib
 
-    Debug 3 "jlib::kill"
-    
-    catch {eval $lib(transportreset)}
+    catch {uplevel #0 $lib(transport,reset) $jlibname}
     reset $jlibname
     
     # Be sure to reset the wrapper, which implicitly resets the XML parser.
     wrapper::reset $lib(wrap)
+    return
+}
+
+# jlib::getip --
+# 
+#       Transport independent way of getting own ip address.
+
+proc jlib::getip {jlibname} {
+    
+    upvar ${jlibname}::lib lib
+
+    return [$lib(transport,ip) $jlibname]
 }
 
 # jlib::dispatcher --
@@ -1417,7 +1455,8 @@ proc jlib::error_handler {jlibname xmllist} {
     } else {
 	set errspec [list unknown [wrapper::getcdata $xmllist]]
     }
-    uplevel #0 $lib(clientcmd) [list $jlibname streamerror -errormsg $errspec]
+    set errmsg [lindex $errspec 1]
+    uplevel #0 $lib(clientcmd) [list $jlibname streamerror -errormsg $errmsg]
 }
 
 # jlib::got_stream --
@@ -1444,7 +1483,6 @@ proc jlib::got_stream {jlibname args} {
     }
     uplevel #0 $lib(clientcmd) [list $jlibname connect]
     schedule_auto_away $jlibname
-    set lib(isinstream) 1
     
     # If we use    we should have a callback command here.
     if {[info exists lib(streamcmd)] && [llength $lib(streamcmd)]} {
@@ -1464,7 +1502,7 @@ proc jlib::getthis {jlibname name} {
     if {[info exists locals($name)]} {
 	return $locals($name)
     } else {
-	return ""
+	return
     }
 }
 
@@ -1479,7 +1517,7 @@ proc jlib::getstreamattr {jlibname name} {
     if {[info exists locals(streamattr,$name)]} {
 	return $locals(streamattr,$name)
     } else {
-	return ""
+	return
     }
 }
 
@@ -1499,7 +1537,7 @@ proc jlib::end_of_parse {jlibname} {
 
     Debug 3 "jlib::end_of_parse jlibname=$jlibname"
     
-    catch {eval $lib(transportreset)}
+    catch {eval $lib(transport,reset) $jlibname}
     uplevel #0 $lib(clientcmd) [list $jlibname disconnect]
     reset $jlibname
 }
@@ -1520,7 +1558,7 @@ proc jlib::xmlerror {jlibname args} {
 
     Debug 3 "jlib::xmlerror jlibname=$jlibname, args='$args'"
     
-    catch {eval $lib(transportreset)}
+    catch {eval $lib(transport,reset) $jlibname}
     uplevel #0 $lib(clientcmd) [list $jlibname xmlerror -errormsg $args]
     reset $jlibname
 }
@@ -2130,7 +2168,7 @@ proc jlib::element_deregister {jlibname tag func} {
     upvar ${jlibname}::elementhook elementhook
     
     if {![info exists elementhook($tag)]} {
-	return ""
+	return
     }
     set ind -1
     set found 0
@@ -2230,6 +2268,7 @@ proc jlib::send_iq {jlibname type xmldata args} {
     }
     
     send $jlibname $xmllist
+    return
 }
 
 # jlib::iq_get, iq_set --
@@ -2273,6 +2312,7 @@ proc jlib::iq_get {jlibname xmlns args} {
     set xmllist [wrapper::createtag "query" -attrlist $attrlist \
       -subtags $sublists]
     eval {send_iq $jlibname "get" [list $xmllist]} $opts
+    return
 }
 
 proc jlib::iq_set {jlibname xmlns args} {
@@ -2301,6 +2341,7 @@ proc jlib::iq_set {jlibname xmlns args} {
     set xmllist [wrapper::createtag "query" -attrlist [list xmlns $xmlns] \
       -subtags $sublists]
     eval {send_iq $jlibname "set" [list $xmllist]} $opts
+    return
 }
 
 # jlib::send_auth --
@@ -2341,17 +2382,19 @@ proc jlib::send_auth {jlibname username resource cmd args} {
 	    }
 	}
     }
-
-    set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:auth} \
-      -subtags $subelements]
-    eval {send_iq $jlibname "set" [list $xmllist] -command  \
-      [list [namespace current]::invoke_iq_callback $jlibname $cmd]} $toopt
     
     # Cache our login jid.
     set locals(username) $username
     set locals(resource) $resource
     set locals(myjid2)   ${username}@$locals(server)
     set locals(myjid)    ${username}@$locals(server)/${resource}
+
+    set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:auth} \
+      -subtags $subelements]
+    eval {send_iq $jlibname "set" [list $xmllist] -command  \
+      [list [namespace current]::invoke_iq_callback $jlibname $cmd]} $toopt
+
+    return
 }
 
 # jlib::register_get --
@@ -2379,6 +2422,7 @@ proc jlib::register_get {jlibname cmd args} {
     }
     eval {send_iq $jlibname "get" [list $xmllist] -command  \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]} $toopt
+    return
 }
 
 # jlib::register_set --
@@ -2436,6 +2480,7 @@ proc jlib::register_set {jlibname username password cmd args} {
     }
     eval {send_iq $jlibname "set" [list $xmllist] -command  \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]} $toopt
+    return
 }
 
 # jlib::register_remove --
@@ -2463,6 +2508,7 @@ proc jlib::register_remove {jlibname to cmd args} {
 
     eval {send_iq $jlibname "set" [list $xmllist] -command   \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]} -to $to
+    return
 }
 
 # jlib::search_get --
@@ -2485,6 +2531,7 @@ proc jlib::search_get {jlibname to cmd} {
     set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:search}]
     send_iq $jlibname "get" [list $xmllist] -to $to -command        \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
+    return
 }
 
 # jlib::search_set --
@@ -2516,6 +2563,7 @@ proc jlib::search_set {jlibname to cmd args} {
     }
     send_iq $jlibname "set" [list $xmllist] -to $to -command  \
       [list [namespace current]::parse_search_set $jlibname $cmd]
+    return
 }
 
 # jlib::send_message --
@@ -2592,6 +2640,7 @@ proc jlib::send_message {jlibname to args} {
       -subtags $children]
     
     send $jlibname $xmllist
+    return
 }
 
 # jlib::send_presence --
@@ -2674,6 +2723,7 @@ proc jlib::send_presence {jlibname args} {
     }
     
     send $jlibname $xmllist
+    return
 }
 
 # jlib::send --
@@ -2695,10 +2745,15 @@ proc jlib::send {jlibname xmllist} {
     # We fail only if already in stream.
     # The first failure reports the network error, closes the stream,
     # which stops multiple errors to be reported to the client.
-    if {$lib(isinstream) && [catch {eval $lib(transportsend) {$xml}} err]} {
-	kill $jlibname
-	uplevel #0 $lib(clientcmd) [list $jlibname networkerror]
+    if {$lib(isinstream)} {
+	if {[catch {
+	    uplevel #0 $lib(transport,send) [list $jlibname $xml]
+	} err]} {
+	    kill $jlibname
+	    uplevel #0 $lib(clientcmd) [list $jlibname networkerror]
+	}
     }
+    return
 }
 
 # jlib::mystatus --
@@ -2751,6 +2806,7 @@ proc jlib::oob_set {jlibname to cmd url args} {
       -subtags $children]
     send_iq $jlibname set [list $xmllist] -to $to -command  \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
+    return
 }
 
 # jlib::agent_get --
@@ -2770,6 +2826,7 @@ proc jlib::agent_get {jlibname to cmd} {
     set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:agent}]
     send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::parse_agent_get $jlibname $to $cmd]
+    return
 }
 
 proc jlib::agents_get {jlibname to cmd} {
@@ -2777,6 +2834,7 @@ proc jlib::agents_get {jlibname to cmd} {
     set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:agents}]
     send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::parse_agents_get $jlibname $to $cmd]
+    return
 }
 
 # parse_agent_get, parse_agents_get --
@@ -2883,7 +2941,7 @@ proc jlib::getagent {jlibname jid} {
     if {[info exists agent($jid,parent)]} {
 	return [array get agent [jlib::ESC $jid],*]
     } else {
-	return ""
+	return
     }
 }
 
@@ -2916,6 +2974,7 @@ proc jlib::vcard_get {jlibname to cmd} {
     set xmllist [wrapper::createtag "vCard" -attrlist $attrlist]
     send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
+    return
 }
 
 # jlib::vcard_set --
@@ -3023,6 +3082,7 @@ proc jlib::vcard_set {jlibname cmd args} {
       -subtags $subelem]
     send_iq $jlibname "set" [list $xmllist] -command \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]    
+    return
 }
 
 # jlib::get_last --
@@ -3035,6 +3095,7 @@ proc jlib::get_last {jlibname to cmd} {
       -attrlist {xmlns jabber:iq:last}]
     send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
+    return
 }
 
 # jlib::handle_get_last --
@@ -3074,6 +3135,7 @@ proc jlib::get_time {jlibname to cmd} {
       -attrlist {xmlns jabber:iq:time}]
     send_iq $jlibname "get" [list $xmllist] -to $to -command        \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
+    return
 }
 
 # jlib::handle_get_time --
@@ -3118,6 +3180,7 @@ proc jlib::get_version {jlibname to cmd} {
       -attrlist {xmlns jabber:iq:version}]
     send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
+    return
 }
 
 # jlib::handle_get_version --
@@ -3178,6 +3241,7 @@ proc jlib::roster_get {jlibname cmd args} {
       -attrlist {xmlns jabber:iq:roster}]
     send_iq $jlibname "get" [list $xmllist] -command   \
       [list [namespace current]::parse_roster_get $jlibname 0 $cmd]
+    return
 }
 
 # jlib::roster_set --
@@ -3236,6 +3300,7 @@ proc jlib::roster_set {jlibname jid cmd args} {
     send_iq $jlibname "set" [list $xmllist] -command   \
       [list [namespace current]::parse_roster_set $jlibname $jid $cmd  \
       $groups $name]
+    return
 }
 
 # jlib::roster_remove --
@@ -3265,6 +3330,7 @@ proc jlib::roster_remove {jlibname jid cmd args} {
       -attrlist [list jid $jid subscription remove]]]]
     send_iq $jlibname "set" [list $xmllist] -command   \
       [list [namespace current]::parse_roster_remove $jlibname $jid $cmd]
+    return
 }
 
 # jlib::schedule_keepalive --
@@ -3285,7 +3351,7 @@ proc jlib::schedule_keepalive {jlibname} {
 	} err]} {
 	    closestream $jlibname
 	    set errmsg "Network was disconnected"
-	    uplevel #0 $lib(clientcmd) [list $jlibname networkerror -body $errmsg]   
+	    uplevel #0 $lib(clientcmd) [list $jlibname networkerror -errormsg $errmsg]   
 	    return
 	}
 	set locals(aliveid) [after [expr 1000 * $opts(-keepalivesecs)] \
@@ -3757,7 +3823,7 @@ proc jlib::resourceprep {resource} {
 proc jlib::jidmap {jid} {
     
     if {$jid == ""} {
-	return ""
+	return
     }
     # Guard against spurious spaces.
     set jid [string trim $jid]
@@ -3777,7 +3843,7 @@ proc jlib::jidmap {jid} {
 proc jlib::jidprep {jid} {
     
     if {$jid == ""} {
-	return ""
+	return
     }
     if {[catch {splitjidex $jid node domain resource} res]} {
 	return -code error $res
@@ -3910,7 +3976,7 @@ proc jlib::conference::get_enter {jlibname room cmd} {
     [namespace parent]::send_iq $jlibname "get" [list $xmllist] -to $room -command  \
       [list [namespace parent]::invoke_iq_callback $jlibname $cmd]
     [namespace parent]::service::setroomprotocol $jlibname $room "conference"
-    return ""
+    return
 }
 
 proc jlib::conference::set_enter {jlibname room subelements cmd} {
@@ -3920,7 +3986,7 @@ proc jlib::conference::set_enter {jlibname room subelements cmd} {
       [list [wrapper::createtag "enter" -attrlist {xmlns jabber:iq:conference} \
       -subtags $subelements]] -to $room -command  \
       [list [namespace current]::parse_set_enter $jlibname $room $cmd]
-    return ""
+    return
 }
 
 # jlib::conference::parse_set_enter --
@@ -3999,7 +4065,7 @@ proc jlib::conference::set_create {jlibname room subelements cmd} {
       -subtags $subelements]] -to $room -command  \
       [list [namespace current]::parse_set_enter $jlibname $room $cmd]
     [namespace parent]::service::setroomprotocol $jlibname $room "conference"
-    return ""
+    return
 }
 
 # jlib::conference::delete --
@@ -4020,7 +4086,7 @@ proc jlib::conference::delete {jlibname room cmd} {
       -attrlist {xmlns jabber:iq:conference}]
     [namespace parent]::send_iq $jlibname "set" [list $xmllist] -to $room -command  \
       [list [namespace parent]::invoke_iq_callback $jlibname $cmd]
-    return ""
+    return
 }
 
 proc jlib::conference::exit {jlibname room} {
@@ -4034,7 +4100,7 @@ proc jlib::conference::exit {jlibname room} {
 	set conf(allroomsin) [lreplace $conf(allroomsin) $ind $ind]
     }
     $lib(rostername) clearpresence "${room}*"
-    return ""
+    return
 }
 
 # jlib::conference::set_user --

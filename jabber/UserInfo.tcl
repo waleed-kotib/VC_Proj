@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.5 2005-08-14 07:10:51 matben Exp $
+# $Id: UserInfo.tcl,v 1.6 2005-08-26 15:02:34 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -323,7 +323,7 @@ proc ::UserInfo::GetTokenFrom {key pattern} {
 	    return $ns
 	}
     }
-    return ""
+    return
 }
 
 proc ::UserInfo::Save {token} {

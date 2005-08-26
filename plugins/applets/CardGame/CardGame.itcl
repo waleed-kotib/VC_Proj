@@ -3,7 +3,7 @@
 #       Creates a card game in a whiteboard canvas. 
 # 
 # 
-# $Id: CardGame.itcl,v 1.12 2005-06-21 08:15:35 matben Exp $
+# $Id: CardGame.itcl,v 1.13 2005-08-26 15:02:34 matben Exp $
 
 namespace eval CardGame {
     
@@ -568,7 +568,7 @@ if {[itcl::find classes CardGame] == ""} {
 
 	set tags [$tkCanvas gettags $id]
 	if {[lsearch $tags cardstack] < 0} {
-	    return ""
+	    return
 	}
 	array set argsArr {
 	    -uritype file

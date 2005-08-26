@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: stanzaerror.tcl,v 1.5 2005-08-14 07:13:18 matben Exp $
+# $Id: stanzaerror.tcl,v 1.6 2005-08-26 15:02:34 matben Exp $
 # 
 
 package provide stanzaerror 1.0
@@ -52,7 +52,7 @@ proc stanzaerror::getmsg {condition} {
     if {[info exists msg($condition)]} {
 	return $msg($condition)
     } else {
-	return ""
+	return
     }
 }
 

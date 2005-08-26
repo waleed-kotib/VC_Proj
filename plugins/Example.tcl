@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.14 2005-08-14 08:37:52 matben Exp $
+# $Id: Example.tcl,v 1.15 2005-08-26 15:02:34 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -155,7 +155,7 @@ proc ::Example::Save {wCan id args} {
 	lappend impArgs -mime [::Types::GetMimeTypeForFileName $fileName]
 	return [concat import [$wCan coords $id] $impArgs]
     } else {
-	return ""
+	return
     }
 }
 

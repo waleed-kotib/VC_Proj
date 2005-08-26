@@ -59,6 +59,11 @@ Installation:
     * Starting with version 0.94.5, no installation whatsoever is needed.
       Just unzip and double click.
 
+    * If you want to run from sources the simplest is to get a tclkit from
+      http://www.equi4.com/pub/tk/downloads.html, 8.4.6 or later. A complete
+      Tcl/Tk installation can be obtained from http://tcl.activestate.com.
+      Be sure to have at least 8.4.6 for Coccinella 0.95.9 or later.
+
     It is necessary to have access to a unique server port on remote 
     machines, so it can be problematic if you are behind a firewall.  
     Firewalls are not dealt with at all at this stage.
@@ -66,10 +71,8 @@ Installation:
 Testing:
 
     It is to be considered as a developer release, so beware.  *It is far 
-    from being bug free*.  It has been tested on MacOS 9.2, Mac OS X 10.2, 
-    Red Hat Linux 8.0/9.0, and Windows 2000. It requires a Tcl version 8.4 or 
-    later. The Mac OS 8/9 version is no longer supported but will likely 
-    run anyway. Just increase the memory partition of Wish a lot (30MB).
+    from being bug free*.  The current releases get tested on Mac OS X 10.2,
+    Linux RH 9, Windows 2000, and Windows XP. 
 
     I would judge this as an alpha quality application, not beta, which is 
     reflected in the version number ( < 1.0). No instabilities are known, 
@@ -88,14 +91,6 @@ Documentation:
 
     There are a few additional README files, README-sounds, README-resources,
     which may be helpful if you want to do customization.
-
-Non-latin character sets:
-
-    On Macintosh with a "Chinese Language Kit" it is possible to write 
-    chinese, at least does it look as chinese to me.  But you need to import
-    the correct font from the Preference menu.  Be sure that all connected 
-    remote clients also have this font on their system; I don't think it 
-    needs to be imported. Probably any "Language Kit" should work.
 
 Translations:
 

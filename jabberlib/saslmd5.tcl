@@ -10,7 +10,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  BSD license
 #  
-# $Id: saslmd5.tcl,v 1.5 2005-04-03 10:42:04 matben Exp $
+# $Id: saslmd5.tcl,v 1.6 2005-08-26 15:02:34 matben Exp $
 
 package require base64
 package require md5 2.0
@@ -271,7 +271,7 @@ proc saslmd5::method_getprop {token property} {
     upvar 0 $token state
 
     # empty
-    return ""
+    return
 }
 
 proc saslmd5::method_info {args} {

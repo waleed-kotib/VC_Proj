@@ -8,7 +8,7 @@
 #  (c) 2003  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: socks5.tcl,v 1.11 2004-10-12 13:48:56 matben Exp $
+# $Id: socks5.tcl,v 1.12 2005-08-26 15:02:34 matben Exp $
 # 
 # TODO:  GSSAPI authentication which is a MUST is missing.
 #        Only CMD CONNECT implemented.
@@ -454,7 +454,7 @@ proc socks5::finish {token {errormsg ""}} {
 	    cleanup $token
 	    return -code error $errormsg
 	} else {
-	    return ""
+	    return
 	}
     }
 }

@@ -2,17 +2,15 @@
 #  
 #      Provides a http transport mechanism for jabberlib. 
 #      
-#  Copyright (c) 2002-2004  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.2 2004-10-18 14:01:04 matben Exp $
+# $Id: jlibhttp.tcl,v 1.3 2005-08-26 15:02:34 matben Exp $
 # 
 # USAGE ########################################################################
 #
 # jlib::http::new jlibname url ?-key value ...?
 #	url 	A valid url for the POST method of HTTP.
 #	
-#	-command callback	a tcl procedure of the form 'callback {status message}
-#	                        only errors are reported
 #       -keylength              sets the length of the key sequence
 #	-maxpollms ms	        max interval in ms for post requests
 #	-minpollms ms	        min interval in ms for post requests
@@ -25,38 +23,24 @@
 #	-usekeys 0|1            if keys should be used
 #
 # Callbacks for the JabberLib:
-#	jlib::http::transportinit, jlib::http::transportreset, jlib::http::send
+#	jlib::http::transportinit, jlib::http::transportreset, 
+#	jlib::http::send,          jlib::http::transportip
 #
-# ALGORITHM ####################################################################
-#
-# There are two parts that interact with each other:
-#   1) the post process for send/receive
-#   2) the poll process for receiving; this is actually an empty http post call
-#   
-# o Post with 'minpollms' and poll with 'maxpollms'.  
-# o Every post cancel any scheduled poll and reschedules it
-# o Every poll reschedules itself
-# o Every poll and post keep tracks of a common 'lastsecs'
-# o The first post triggers everything
-# o When send:
-#     if time - last < minpoll then just append xml to cache
-#     else do post
-
-# We should make this multiinstance in the future.
 
 package require jlib
-package require http 2.3
+package require http 2.4
 package require base64
 package require sha1pure
 
-package provide jlibhttp 0.1
+package provide jlib::http 0.1
 
 namespace eval jlib::http {
 
-    # All non-options should be in this array.
-    variable priv
-
+    # Inherit jlib's debug level.
     variable debug 4
+    if {!$debug} {
+	set debug [namespace parent]::debug
+    }
     variable errcode
     array set errcode {
 	0       "unknown error"
@@ -72,13 +56,17 @@ namespace eval jlib::http {
 
 proc jlib::http::new {jlibname url args} {
 
-    variable opts
-    variable priv
+    namespace eval ${jlibname}::http {
+	variable priv
+	variable opts
+    }
+    upvar ${jlibname}::http::priv priv
+    upvar ${jlibname}::http::opts opts
     
     Debug 2 "jlib::http::new url=$url, args=$args"
 
     array set opts {
-	-keylength             255
+	-keylength              16
 	-maxpollms           10000
 	-minpollms            4000
 	-proxyhost              ""
@@ -94,15 +82,15 @@ proc jlib::http::new {jlibname url args} {
     }
     if {![regexp -nocase {^(([^:]*)://)?([^/:]+)(:([0-9]+))?(/.*)?$} $url \
       x prefix proto host y port filepath]} {
-	return -code error "The url \"$url\" is not valid"
+	return -code error "the url \"$url\" is not valid"
     }
-    set opts(jlibname)        $jlibname
-    set opts(url)             $url
+    set opts(url)  $url
+    set opts(host) $host
+    set opts(port) $port
     array set opts $args
 
     set priv(id)      0
-    set priv(postid)  ""
-    set priv(pollid)  ""
+    set priv(afterid) ""
 
     # Perhaps the autoproxy package can be used here?
     if {[string length $opts(-proxyhost)] && [string length $opts(-proxyport)]} {
@@ -116,17 +104,18 @@ proc jlib::http::new {jlibname url args} {
     set opts(header) $opts(proxyheader)
     
     # Initialize.
-    transportreset
+    transportreset $jlibname
 
     set seed [expr {abs([pid]+[clock clicks]%100000)}]
     expr {srand(int($seed))}
 
-    $jlibname registertransport \
-      [namespace current]::transportinit \
-      [namespace current]::send \
-      [namespace current]::transportreset
-
-    return ""
+    $jlibname registertransport "http"    \
+      [namespace current]::transportinit  \
+      [namespace current]::send           \
+      [namespace current]::transportreset \
+      [namespace current]::transportip
+    
+    return
 }
 
 # jlib::http::BuildProxyHeader --
@@ -168,156 +157,213 @@ proc jlib::http::NewKeySequence {seed len} {
 #
 #	For the -transportinit command.
 
-proc jlib::http::transportinit { } {
+proc jlib::http::transportinit {jlibname} {
 
-    variable priv
-    variable opts
+    upvar ${jlibname}::http::priv priv
+    upvar ${jlibname}::http::opts opts
+    
+    puts "jlib::http::transportinit"
 
-    set priv(postid)    ""
-    set priv(pollid)    ""
-    set priv(xml)       ""
-    set priv(id)        0
-    set priv(lastsecs)  [clock scan "1 hour ago"]
+    transportreset $jlibname
+
     if {$opts(-usekeys)} {
 	
 	# Use keys from the end.
 	set priv(keys) [NewKeySequence [NewSeed] $opts(-keylength)]
-	set priv(keyind) [expr [llength $priv(keys)] - 1]
     }
-    transportreset
 }
 
 # jlib::http::transportreset --
 #
 #	For the -transportreset command.
 
-proc jlib::http::transportreset { } {
+proc jlib::http::transportreset {jlibname} {
 
-    variable priv
+    upvar ${jlibname}::http::priv priv
+    
+    puts "jlib::http::transportreset"
 
     # Stop polling and resends.
-    catch {after cancel $priv(resendid)}
-    if {[string length $priv(postid)]} {
-	catch {after cancel $priv(postid)}
+    # catch {after cancel $priv(resendid)}
+    if {[string length $priv(afterid)]} {
+	catch {after cancel $priv(afterid)}
     }
-    if {[string length $priv(pollid)]} {
-	catch {after cancel $priv(pollid)}
+    if {[info exists priv(token)]} {
+	::http::reset $priv(token)
     }
+    set priv(afterid)   ""
+    set priv(xml)       ""
+    set priv(id)        0
+    set priv(first)     1
+    set priv(postms)   -1
+    set priv(ip)        ""
+    set priv(lastpostms) [clock clicks -milliseconds]
+    set priv(keys)      {}
+}
+
+# jlib::http::transportip --
+# 
+#       Get our own ip address.
+#       @@@ If proxy we have the usual firewall problem!
+
+proc jlib::http::transportip {jlibname} {
     
-    # Cleanup the keys.
-    
+    upvar ${jlibname}::http::priv priv
+
+    return $priv(ip)
 }
 
 # jlib::http::send --
 #
 #	For the -transportsend command.
 
-proc jlib::http::send {xml} {
+proc jlib::http::send {jlibname xml} {
     
-    variable opts
-    variable priv
+    upvar ${jlibname}::http::priv priv
+    upvar ${jlibname}::http::opts opts
     
-    Debug 2 "jlib::http::send"
+    Debug 2 "jlib::http::send $xml"
     
     append priv(xml) $xml
     
-    # Cancel any scheduled poll.
-    if {[string length $priv(pollid)]} {
-	after cancel $priv(pollid)
-    }
-
-    # If we don't have a scheduled post,
-    # and time to previous post is larger than minumum, do post now.
-    if {($priv(postid) == "") && \
-      [expr [clock seconds] - $priv(lastsecs) > $opts(-minpollms)/1000.0]} {
-	PostScheduled
+    # If no post scheduled we shall post right away.
+    if {![string length $priv(afterid)]} {
+	puts "\t post right away"
+	Post $jlibname
+    } else {
+	
+	#        now (case A)         now (case B)
+	#           |                    |
+	#  ---------------------------------------------------> time
+	#   |                 ->|                       ->|
+	# last post            min                       max
+	
+	# We shall always use '-minpollms' when there is something to send.
+	set nowms [clock clicks -milliseconds]
+	set minms [expr {$priv(lastpostms) + $opts(-minpollms)}]
+	if {$nowms < $minms} {
+	    
+	    puts "\t case A"
+	    
+	    # Case A:
+	    # If next post is scheduled after min, then repost at min instead.
+	    if {$priv(nextpostms) > $minms} {
+		puts "\t reschedule post"
+		set afterms [expr {$minms - $nowms}]
+		SchedulePost $jlibname $afterms
+	    }
+	} else {
+	    puts "\t case B"
+	    
+	    # Case B:
+	    # We have already waited longer than '-minpollms'.
+	    after cancel $priv(afterid)
+	    set priv(afterid) ""
+	    Post $jlibname
+	}
     }
 }
 
-# jlib::http::PostScheduled --
+# jlib::http::SchedulePost --
 # 
-#       Just a wrapper for Post when sending xml.
-       
-proc jlib::http::PostScheduled { } {
-    
-    variable priv
+#       Schedule a post as a timer event.
 
-    Debug 2 "jlib::http::PostScheduled"
+proc jlib::http::SchedulePost {jlibname afterms} {
     
-    Post $priv(xml)
-    set priv(xml) ""
-    set priv(postid) ""
+    upvar ${jlibname}::http::priv priv
+
+    Debug 2 "jlib::http::SchedulePost afterms=$afterms"
+
+    set nowms [clock clicks -milliseconds]
+    set priv(afterms)    $afterms
+    set priv(nextpostms) [expr {$nowms + $afterms}]
+    set priv(postms)     [expr {$priv(nextpostms) - $priv(lastpostms)}]
+
+    if {[string length $priv(afterid)]} {
+	after cancel $priv(afterid)
+    }
+    set priv(afterid) [after $priv(afterms)  \
+      [list [namespace current]::Post $jlibname]]
 }
 
 # jlib::http::Post --
 # 
-#       Do actual posting with (any) xml to send.
+#       Just a wrapper for PostXML when sending xml.
        
-proc jlib::http::Post {xml} {
+proc jlib::http::Post {jlibname} {
     
-    variable opts
-    variable priv
+    upvar ${jlibname}::http::priv priv
+
+    Debug 2 "jlib::http::Post"
+    
+    set xml $priv(xml)
+    set priv(xml)     ""
+    set priv(afterid) ""
+    PostXML $jlibname $xml
+}
+
+# jlib::http::PostXML --
+# 
+#       Do actual posting with (any) xml to send.
+#       Always called from 'Post'.
+       
+proc jlib::http::PostXML {jlibname xml} {
+    
+    upvar ${jlibname}::http::priv priv
+    upvar ${jlibname}::http::opts opts
+    
+    Debug 2 "jlib::http::PostXML"
 
     if {$opts(-usekeys)} {
 	
-	# Administrate the keys.
-	set key [lindex $priv(keys) $priv(keyind)]
-	incr priv(keyind) -1
+	# Administrate the keys. Pick from end until one left.
+	set key [lindex $priv(keys) end]
+	set priv(keys) [lrange $priv(keys) 0 end-1]
 
 	# Need new key sequence?
-	if {$priv(keyind) <= 1} {
+	if {[llength $priv(keys)] == 0} {
 	    set priv(keys) [NewKeySequence [NewSeed] $opts(-keylength)]
-	    set priv(keyind) [expr [llength $priv(keys)] - 1]
-	    set newkey [lindex $priv(keys) end]
-	    set qry "$priv(id);$key;$newkey,$xml"
+	    set newkey     [lindex $priv(keys) end]
+	    set priv(keys) [lrange $priv(keys) 0 end-1]
+	    set query "$priv(id);$key;$newkey,$xml"
+	    puts "---------------------key change"
 	} else {
-	    set qry "$priv(id);$key,$xml"
+	    set query "$priv(id);$key,$xml"
 	}
     } else {
-	set qry "$priv(id),$xml"
+	set query "$priv(id),$xml"
     }
-    Debug 2 "POST: $qry"
+    
+    # If this is the first post do a dummy parallell connection to find out ip.
+    if {$priv(first)} {
+	if {[catch {Connect $jlibname} msg]} {
+	    Debug 2 "\t Connect failed: $msg"
+	    Finish $jlibname networkerror $msg
+	    return
+	}
+    }
+    
+    Debug 2 "POST: $query"
     
     # -query forces a POST request.
     # Make sure we send it as text dispite the application/* type.???
-    # Add extra path /jabber/http ?
     if {[catch {
 	set token [::http::geturl $opts(url)  \
-	  -timeout $opts(-timeout) -query $qry -headers $opts(header) \
-	  -command [namespace current]::Response]
+	  -binary  1                          \
+	  -timeout $opts(-timeout)            \
+	  -headers $opts(header)              \
+	  -query   $query                     \
+	  -command [list [namespace current]::Response $jlibname]]
     } msg]} {
 	Debug 2 "\t post failed: $msg"
-	#set priv(resendid) [after $opts(-resendinterval) \
-	#  [namespace current]::send $xml]]
+	Finish $jlibname networkerror $msg
     } else {
-	set priv(lastsecs) [clock seconds]
-	
-	# Reschedule next poll.
-	Debug 4 "after $opts(-maxpollms) Poll"
-	
-	set priv(pollid) [after $opts(-maxpollms) \
-	  [namespace current]::Poll]
-    }
-}
+	set priv(lastpostms) [clock clicks -milliseconds]
+	set priv(token) $token
 
-# jlib::http::Poll --
-#
-#	We need to poll the server at (regular?) intervals to see if it has
-#	got something for us.
-
-proc jlib::http::Poll { } {
-    
-    variable priv
-    variable opts
-    
-    # Send an empty POST request. Verify that we've sent our stream start.
-    if {![string equal $priv(id) "0"]} {
-	Post ""
+	# Reschedule next post.	
+	SchedulePost $jlibname $opts(-maxpollms)
     }
-    
-    # Reschedule next poll.
-    Debug 4 "after $opts(-maxpollms) Poll"
-    set priv(pollid) [after $opts(-maxpollms) [namespace current]::Poll]]
 }
 
 # jlib::http::Response --
@@ -325,73 +371,106 @@ proc jlib::http::Poll { } {
 #	The response to our POST request. Parse any indata that should
 #	be of mime type text/xml
 
-proc jlib::http::Response {token} {
+proc jlib::http::Response {jlibname token} {
 
     upvar #0 $token state
-    variable priv
-    variable opts
+    upvar ${jlibname}::http::priv priv
+    upvar ${jlibname}::http::opts opts
     variable errcode
+    
+    puts "jlib::http::Response entry"
+    
+    unset priv(token)
     
     # Trap any errors first.
     set status [::http::status $token]
+    if {[string equal $status "reset"]} {
+	return
+    }
+    
+    # Either we've already made the connection to the server and have ip,
+    # or we have to wait here which doesn't create any harm since already
+    # a callback.
+    if {$priv(first)} {
+	set priv(first) 0
+	if {$priv(wait)} {
+	    vwait ${jlibname}::http::priv(wait)
+	}
+	if {[string length $priv(err)]} {
+	    Finish $jlibname error $priv(err)
+	    return
+	}
+    }
     
     Debug 2 "jlib::http::Response status=$status, [::http::ncode $token]"
-    Debug 2 "data='[::http::data $token]'"
 
     switch -- $status {
 	ok {	    
 	    if {[::http::ncode $token] != 200} {
-		Finish error [::http::ncode $token]
+		Finish $jlibname error [::http::ncode $token]
 		return
-	    }
-	    Debug 4 "[parray state(meta)]"
-	    
+	    }	    
 	    set haveCookie 0
 	    set haveContentType 0
 	    
 	    foreach {key value} $state(meta) {
-		set lowkey [string tolower $key]
-		if {[string equal $lowkey "set-cookie"]} {
+		if {[string equal -nocase $key "set-cookie"]} {
 		    
-		    # Extract the 'id' from the Set-Cookie key.
-		    if {![regexp -nocase {ID=([0-9a-zA-Z:\-]+);} $value m id]} {
-			Finish error \
+		    # Extract the 'ID' from the Set-Cookie key.
+		    foreach pair [split $value ";"] {
+			set pair [string trim $pair]
+			if {[string equal -nocase -length 3 "ID=" $pair]} {
+			    set id [string range $pair 3 end]
+			    break
+			}
+		    }
+
+		    if {![info exists id]} {
+			Finish $jlibname error \
 			  "Set-Cookie in HTTP header \"$value\" invalid"
 			return
 		    }
 		    
-		    # Invesitigate the ID.
-		    set id2 [lindex [split $id :] end]
-		    if {[string equal $id2 "0"]} {
+		    # Invesitigate the ID:
+		    set ids [split $id :]
+		    if {[llength $ids] == 2} {
+
+			# Any identifier that ends in ':0' indicates an error.
+			if {[string equal [lindex $ids 1] "0"]} {
 			
-			# Server error
-			set code [lindex [split $id :] 0]
-			if {[info exists errcode($code)]} {
-			    set errmsg $errcode($code)
-			} else {
-			    set errmsg "Server error $id"
+			    #   ID=0:0  Unknown Error. The response body can 
+			    #           contain a textual error message. 
+			    #   ID=-1:0 Server Error.
+			    #   ID=-2:0 Bad Request.
+			    #   ID=-3:0 Key Sequence Error .
+			    set code [lindex $ids 0]
+			    if {[info exists errcode($code)]} {
+				set errmsg $errcode($code)
+			    } else {
+				set errmsg "Server error $id"
+			    }
+			    Finish $jlibname error $errmsg
+			    return
 			}
-			Finish error $errmsg
-			return
 		    }
 		    set haveCookie 1
-		} elseif {[string equal $lowkey "content-type"]} {
-		    if {![string equal $value "text/xml"]} {
+		} elseif {[string equal -nocase $key "content-type"]} {
+		    if {![string match -nocase "*text/xml*" $value]} {
 			# This is an invalid response.
 			set errmsg "Content-Type in HTTP header is "
 			append "\"$value\" expected \"text/xml\""
-			Finish error $errmsg
+			Finish $jlibname error $errmsg
 			return
 		    }
 		    set haveContentType 1
 		}
 	    }
 	    if {!$haveCookie} {
-		Finish error "missing Set-Cookie in HTTP header"
+		Finish $jlibname error "missing Set-Cookie in HTTP header"
 		return
 	    }
 	    if {!$haveContentType} {
-		Finish error "missing Content-Type in HTTP header"
+		Finish $jlibname error "missing Content-Type in HTTP header"
 		return
 	    }
 	    set priv(id) $id
@@ -400,28 +479,80 @@ proc jlib::http::Response {token} {
 	    Debug 2 "POLL: $body"
 	    
 	    # Send away to jabberlib for parsing and processing.
-	    if {$body != ""} {
-		[namespace parent]::recv $opts(jlibname) $body
+	    if {[string length $body]} {
+		[namespace parent]::recv $jlibname $body
 	    }
 	}
 	default {
-	    Finish $status [::http::error $token]
+	    Finish $jlibname $status [::http::error $token]
 	}
     }
-    parray $token
     
     # And cleanup after each post.
     ::http::cleanup $token
 }
 
-proc jlib::http::Finish {status {errmsg ""}} {
+# jlib::http::Connect --
+# 
+#       One way to get our real ip number since we can't get it from 
+#       the http package. Timout if any is handled by the http package.
+#       May throw error!
+
+proc jlib::http::Connect {jlibname} {
     
-    variable opts
+    upvar ${jlibname}::http::opts opts
+    upvar ${jlibname}::http::priv priv
+    
+    puts "--->jlib::http::Connect"
+
+    if {[string length $opts(-proxyhost)] && [string length $opts(-proxyport)]} {
+	set host $opts(-proxyhost)
+	set port $opts(-proxyport)
+    } else {
+	set host $opts(host)
+	set port $opts(port)
+    }
+    set priv(err)  ""
+    set priv(wait) 1
+    set priv(sock) [socket -async $host $port]
+    fileevent $priv(sock) writable [list [namespace current]::Writable $jlibname]
+}
+
+proc jlib::http::Writable {jlibname} {
+    
+    upvar ${jlibname}::http::priv priv
+    
+    puts "--->jlib::http::Writable"
+    
+    set s $priv(sock)
+    if {[catch {eof $s} iseof] || $iseof} {
+	set priv(err) "eof"	
+    } elseif {[catch {
+	set priv(ip) [lindex [fconfigure $s -sockname] 0]
+	close $s
+    }]} {
+	set priv(err) "eof"
+    }
+    unset priv(sock)
+    set priv(wait) 0    
+}
+
+# jlib::http::Finish --
+# 
+#       Only network errors and server errors are reported here.
+
+proc jlib::http::Finish {jlibname status {errmsg ""}} {
+    
+    upvar ${jlibname}::http::priv priv
 
     Debug 2 "jlib::http::Finish status=$status, errmsg=$errmsg"
-    if {[info exists opts(-command)]} {
-	uplevel #0 $opts(-command) [list $status $errmsg]
+    
+    if {[info exists priv(sock)]} {
+	catch {close $priv(sock)}
     }
+    
+    # @@@ We should be more specific here.
+    jlib::reporterror $jlibname networkerror $errmsg
 }
 
 proc jlib::http::Debug {num str} {

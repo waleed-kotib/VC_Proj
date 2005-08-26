@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.65 2005-08-14 07:10:51 matben Exp $
+# $Id: Login.tcl,v 1.66 2005-08-26 15:02:34 matben Exp $
 
 package provide Login 1.0
 
@@ -258,12 +258,13 @@ proc ::Login::TraceMenuVar {name key op} {
     variable tmpProfArr
     variable moreOpts
     
-    ::Profiles::NotebookSetDefaults [namespace current]::moreOpts
-    
     set profile  [set $name]
     set server   $tmpProfArr($profile,server)
     set username $tmpProfArr($profile,username)
     set password $tmpProfArr($profile,password)
+    
+    ::Profiles::NotebookSetDefaults [namespace current]::moreOpts $server
+
     foreach {key value} [array get tmpProfArr $profile,-*] {
 	set optname [string map [list $profile,- ""] $key]
 	if {$optname ne "resource"} {
@@ -501,7 +502,7 @@ proc ::Login::LaunchHook { } {
     upvar ::Jabber::jprefs jprefs
     
     if {!$jprefs(autoLogin)} {
-	return ""
+	return
     }
     
     # Use our selected profile.
@@ -556,8 +557,9 @@ proc ::Login::AutoLoginCB {logtoken status {errmsg ""}} {
 #       password
 #       cmd         callback command
 #       args:
-#           -digest  0|1
-#           -httpproxy
+#           -digest     0|1
+#           -http       0|1
+#           -httpurl
 #           -invisible  0|1
 #           -ip
 #           -priority
@@ -578,7 +580,7 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     
     array set argsArr {
 	-digest         1
-	-httpproxy      0
+	-http           0
 	-invisible      0
 	-ip             ""
 	-priority       0
@@ -617,18 +619,15 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     # In xmpp tls negotiating is made in stream using the standard port.
     set opts {}
     if {!$state(-sasl) && $state(-tls)} {
-	lappend opts -tls 1
+	set argsArr(-tls) 1
     }
-    if {$state(-httpproxy)} {
-	lappend opts -httpproxy 1
-    }
-    if {$state(-ip) != ""} {
-	lappend opts -ip $argsArr(-ip)
+    if {![string length $state(-ip)]} {
+	unset -nocomplain argsArr(-ip)
     }
     
     # Make a network connection.
     eval {Connect $server [list [namespace current]::HighConnectCB $token] \
-      -port $state(-port)} $opts
+      -port $state(-port)} [array get argsArr]
 }
 
 proc ::Login::HighConnectCB {token status msg} {
@@ -797,8 +796,9 @@ proc ::Login::HighFinish {token {err ""} {msg ""}} {
 #       cmd         callback command when socket connected
 #       args  -ip
 #             -port
-#             -tls 0|1
-#             -httpproxy 0|1
+#             -tls  0|1
+#             -http 0|1
+#             ...
 #       
 # Results:
 #       Callback scheduled.
@@ -810,11 +810,12 @@ proc ::Login::Connect {server cmd args} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Login::Connect args=$args"
-    
+        
     array set argsArr {
 	-ip         ""
 	-tls        0
-	-httpproxy  0
+	-http       0
+	-httpurl    ""
     }
     array set argsArr $args
     
@@ -845,13 +846,12 @@ proc ::Login::Connect {server cmd args} {
     # In xmpp tls negotiating is made in stream using the standard port.
     
     # Open socket unless we are using a http proxy.
-    if {!$argsArr(-httpproxy)} {
+    if {!$argsArr(-http)} {
 	::Network::Open $host $port [list [namespace current]::ConnectCB $cmd] \
 	  -timeout $prefs(timeoutSecs) -tls $argsArr(-tls)
     } else {
 	
 	# Perhaps it gives a better structure to have this elsewhere?
-	package require jlibhttp
 	
 	# Configure our jlib http transport.
 	set opts {}
@@ -865,27 +865,9 @@ proc ::Login::Connect {server cmd args} {
 	    lappend opts -proxyusername $prefs(httpproxyusername)
 	    lappend opts -proxypasswd $prefs(httpproxypassword)
 	}
-	eval {jlib::http::new $jstate(jlib) $host \
-	  -command [namespace current]::HttpProxyCmd} $opts
+	eval {jlib::http::new $jstate(jlib) $argsArr(-httpurl)} $opts -usekeys 0
 
 	uplevel #0 $cmd [list ok ""]
-    }
-}
-
-proc ::Login::HttpProxyCmd {status msg} {
-    
-    ::Debug 2 "::Login::HttpProxyCmd status=$status, msg=$msg"
-    
-    switch -- $status {
-	ok {
-	    # only errors are handled via callback
-	}
-	default {
-	    ::Jabber::DoCloseClientConnection
-	    ::UI::MessageBox -title [mc Error] -icon error \
-	      -message "The HTTP jabber service replied with a status\
-	      $status and message: $msg"
-	}
     }
 }
 
@@ -1077,8 +1059,8 @@ proc ::Login::AuthorizeCB {token jlibName type theQuery} {
 	# There is a potential problem if called from within a xml parser 
 	# callback which makes the subsequent parsing to fail. (after idle?)
 	after idle $jstate(jlib) closestream
-    } else {    
-	foreach {ip addr port} [fconfigure $jstate(sock) -sockname] break
+    } else {
+	set ip [$jstate(jlib) getip]
 	set jstate(ipNum) $ip
 	set this(ipnum)   $ip
 	::Debug 4 "\t this(ipnum)=$ip"

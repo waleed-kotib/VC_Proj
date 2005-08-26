@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.1 2005-08-14 07:13:18 matben Exp $
+# $Id: bytestreams.tcl,v 1.2 2005-08-26 15:02:34 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -77,7 +77,7 @@ proc jlib::bytestreams::streamhosts {jid} {
 	}
 	return $ans
     } else {
-	return ""
+	return
     }
 }
 

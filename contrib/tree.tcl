@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.49 2005-08-14 06:56:45 matben Exp $
+# $Id: tree.tcl,v 1.50 2005-08-26 15:02:34 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1043,7 +1043,7 @@ proc ::tree::Configure {w args} {
 	BuildWhenIdle $w
     }
 
-    return ""
+    return
 }
 
 # tree::ConfigureIcons --
@@ -1162,7 +1162,7 @@ proc ::tree::ConfigureItem {w v args} {
     }
     
     if {[llength $args] == 0} {
-	return ""
+	return
     } elseif {[llength $args] == 1} {
 	
 	# If only one -key and no value, return present value.
@@ -1236,7 +1236,7 @@ proc ::tree::ConfigureItem {w v args} {
     } else {
 	eval {::tree::SetItemOptions $w $v} $args
 	BuildWhenIdle $w
-	return ""
+	return
     }
 }
 
@@ -1551,7 +1551,7 @@ proc ::tree::RaiseLowerItem {w what v {which ""}} {
     set state($uidDir:children) [linsert $tmp $idxin $tail]	
     
     BuildWhenIdle $w
-    return ""
+    return
 }
 
 # These procedures are only used for handling the Button bind commands.
@@ -2109,15 +2109,15 @@ proc ::tree::DrawSelection {w} {
     # This is the current selection. It may have been deleted.
     set v $state(selection)
     if {$v == ""} {
-	return ""
+	return
     }
     if {[info exists v2uid($v)]} {
 	set uid $v2uid($v)
 	if {![info exists state($uid:tag)]} {
-	    return ""
+	    return
 	}
     } else {
-	return ""
+	return
     }
     
     # Select.
@@ -2137,7 +2137,7 @@ proc ::tree::DrawSelection {w} {
     } else {
 	set state(selidx) {}
     }
-    return ""
+    return
 }
 
 # Internal use only
@@ -2154,7 +2154,7 @@ proc ::tree::BuildWhenIdle {w} {
 	set state(pending) 1
 	after idle [list ::tree::Build $w]
     }
-    return ""
+    return
 }
 
 # ::tree::LabelAt --
@@ -2183,7 +2183,7 @@ proc ::tree::LabelAt {w x y} {
 	    return $state(v:$id)
 	}
     }
-    return ""
+    return
 }
 
 # ::tree::NextLabel --
@@ -2219,7 +2219,7 @@ proc ::tree::NextLabel {w direction} {
 	    }
 	}
     }
-    return ""
+    return
 }
 
 proc ::tree::FileTree {cmd arg} {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WinImport.tcl,v 1.10 2005-08-14 08:37:52 matben Exp $
+# $Id: WinImport.tcl,v 1.11 2005-08-26 15:02:34 matben Exp $
 
 #package require WindowsUtils
 
@@ -235,7 +235,7 @@ proc ::WinImport::Import {wcan optListVar args} {
     ::balloonhelp::balloonforwindow $wfr.icon $msg
     
     # Success.
-    return ""
+    return
 }
 
 proc ::WinImport::Clicked {id} {
@@ -269,7 +269,7 @@ proc ::WinImport::Save {wCan id args} {
 	lappend impArgs -mime [::Types::GetMimeTypeForFileName $fileName]
 	return [concat import [$wCan coords $id] $impArgs]
     } else {
-	return ""
+	return
     }
 }
 

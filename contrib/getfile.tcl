@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #
-# $Id: getfile.tcl,v 1.2 2005-01-31 14:06:53 matben Exp $
+# $Id: getfile.tcl,v 1.3 2005-08-26 15:02:34 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -647,7 +647,7 @@ proc getfile::error {token} {
     if {[info exists state(error)]} {
 	return $state(error)
     }
-    return ""
+    return
 }
 
 # getfile::VerifyOptions

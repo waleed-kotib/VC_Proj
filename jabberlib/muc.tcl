@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.23 2005-04-25 11:55:00 matben Exp $
+# $Id: muc.tcl,v 1.24 2005-08-26 15:02:34 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -629,7 +629,7 @@ proc jlib::muc::mynick {mucname roomjid} {
     if {[info exists cache($roomjid,mynick)]} {
 	return $cache($roomjid,mynick)
     } else {
-	return ""
+	return
     }
 }
 

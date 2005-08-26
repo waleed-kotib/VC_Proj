@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.31 2005-08-14 07:10:51 matben Exp $
+# $Id: VCard.tcl,v 1.32 2005-08-26 15:02:34 matben Exp $
 
 package provide VCard 1.0
 
@@ -645,7 +645,7 @@ proc ::VCard::GetTokenFrom {key pattern} {
 	    return $ns
 	}
     }
-    return ""
+    return
 }
 
 proc ::VCard::Close {token} {

@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: groupchat.tcl,v 1.3 2005-02-21 07:59:08 matben Exp $
+# $Id: groupchat.tcl,v 1.4 2005-08-26 15:02:34 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -65,7 +65,7 @@ proc jlib::groupchat::enter {jlibname room nick args} {
     set rooms($room) 1
     [namespace parent]::service::setroomprotocol $jlibname $room "gc-1.0"
     set gchat(allroomsin) [lsort -unique $gchat(allroomsin)]
-    return ""
+    return
 }
 
 proc jlib::groupchat::exit {jlibname room} {
@@ -87,7 +87,7 @@ proc jlib::groupchat::exit {jlibname room} {
 	set gchat(allroomsin) [lreplace $gchat(allroomsin) $ind $ind]
     }
     $lib(rostername) clearpresence "${room}*"
-    return ""
+    return
 }
 
 proc jlib::groupchat::mynick {jlibname room args} {

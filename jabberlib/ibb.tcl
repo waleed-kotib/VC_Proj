@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 20042005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.6 2005-08-14 07:13:18 matben Exp $
+# $Id: ibb.tcl,v 1.7 2005-08-26 15:02:34 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -24,45 +24,45 @@
 ############################# CHANGES ##########################################
 #
 #       0.1         first version
+#       
+#       NEVER TESTED!!!!!!!
 
 package require jlib
 package require base64
 
-package provide ibb 0.1
+package provide jlib::ibb 0.1
 
 namespace eval jlib::ibb {
 
-    variable uid  0
     variable usid 0
     variable inited 0
+
+    jlib::ensamble_register ibb [namespace current]::cmdproc
 }
 
-# jlib::ibb::new --
+# jlib::ibb::init --
 # 
 #       Sets up jabberlib handlers and makes a new instance if an ibb object.
   
-proc jlib::ibb::new {jlibname cmd args} {
+proc jlib::ibb::init {jlibname args} {
 
-    variable uid
-    variable jlib2ibbname
     variable inited
     upvar jlib::jxmlns jxmlns
         
     if {!$inited} {
-	Init
+	InitOnce
+    }    
+    namespace eval ${jlibname}::ibb {
+	variable priv
+	variable opts
     }
-    set ibbname [namespace current]::ibb[incr uid]
-    
-    upvar ${ibbname}::priv priv
-    upvar ${ibbname}::opts opts
+    upvar ${jlibname}::ibb::priv priv
+    upvar ${jlibname}::ibb::opts opts
     
     array set opts {
 	-block-size     4096
     }
     array set opts $args
-    set priv(jlibname) $jlibname
-    set priv(cmd)      $cmd
-    set jlib2ibbname($jlibname) $ibbname
     
     # Each base64 byte takes 6 bits; need to translate to binary bytes.
     set priv(binblock) [expr (6 * $opts(-block-size))/8]
@@ -71,14 +71,10 @@ proc jlib::ibb::new {jlibname cmd args} {
     # Register some standard iq handlers that is handled internally.
     $jlibname iq_register set $jxmlns(ibb) [namespace current]::handle_set
 
-    # Create the actual instance procedure.
-    proc $ibbname {cmd args}   \
-      "eval [namespace current]::cmdproc {$ibbname} \$cmd \$args"
-
-    return $ibbname
+    return
 }
 
-proc jlib::ibb::Init { } {
+proc jlib::ibb::InitOnce { } {
     
     variable ampElem
     variable inited
@@ -90,6 +86,7 @@ proc jlib::ibb::Init { } {
       -attrlist {condition match-resource value exact action error}]
     set ampElem [wrapper::createtag "amp" -attrlist \
       [list xmlns $jxmlns(ibb)] -subtags [list $rule1 $rule2]]
+
     set inited 1
 }
 
@@ -105,10 +102,10 @@ proc jlib::ibb::Init { } {
 # Results:
 #       none.
 
-proc jlib::ibb::cmdproc {ibbname cmd args} {
+proc jlib::ibb::cmdproc {jlibname cmd args} {
     
     # Which command? Just dispatch the command to the right procedure.
-    return [eval {$cmd $ibbname} $args]
+    return [eval {$cmd $jlibname} $args]
 }
 
 # jlib::ibb::send --
@@ -125,12 +122,12 @@ proc jlib::ibb::cmdproc {ibbname cmd args} {
 # Results:
 #       sid (Session IDentifier).
 
-proc jlib::ibb::send {ibbname to cmd args} {
+proc jlib::ibb::send {jlibname to cmd args} {
 
     variable usid
     upvar jlib::jxmlns jxmlns
-    upvar ${ibbname}::priv priv
-    upvar ${ibbname}::opts opts
+    upvar ${jlibname}::ibb::priv priv
+    upvar ${jlibname}::ibb::opts opts
 
     array set argsArr $opts
     array set argsArr $args
@@ -155,20 +152,20 @@ proc jlib::ibb::send {ibbname to cmd args} {
     return $sid
 }
 
-proc jlib::ibb::OpenCB {ibbname } {
+proc jlib::ibb::OpenCB {jlibname } {
     
-    upvar ${ibbname}::priv priv
-    upvar ${ibbname}::opts opts
+    upvar ${jlibname}::ibb::priv priv
+    upvar ${jlibname}::ibb::opts opts
 
     
     set priv(sid,$sid,offset) 0
     
 }
 
-proc jlib::ibb::SendDataChunk {iibname } {
+proc jlib::ibb::SendDataChunk {jlibname } {
     
-    upvar ${ibbname}::priv priv
-    upvar ${ibbname}::opts opts
+    upvar ${jlibname}::ibb::priv priv
+    upvar ${jlibname}::ibb::opts opts
 
     set bindata [string range $opts(-data) $offset \
       [expr $offset + $priv(binblock) -1]]
@@ -180,10 +177,10 @@ proc jlib::ibb::SendDataChunk {iibname } {
     SendData $ibbname $sid $data
 }
 
-proc jlib::ibb::InitFile {ibbname sid} {
+proc jlib::ibb::InitFile {jlibname sid} {
     
-    upvar ${ibbname}::priv priv
-    upvar ${ibbname}::opts opts
+    upvar ${jlibname}::ibb::priv priv
+    upvar ${jlibname}::ibb::opts opts
 
     if {[catch {open $opts(-file) r} fd]} {
 	return -code error $fd
@@ -194,9 +191,10 @@ proc jlib::ibb::InitFile {ibbname sid} {
     
 }
 
-proc jlib::ibb::SendFileChunk {iibname } {
+proc jlib::ibb::SendFileChunk {jlibname } {
     
-    upvar ${ibbname}::priv priv
+    upvar ${jlibname}::ibb::priv priv
+    upvar ${jlibname}::ibb::opts opts
     
     set fd $priv(sid,$sid,fd)
     set bindata [read $fd $priv(binblock)]
@@ -208,9 +206,10 @@ proc jlib::ibb::SendFileChunk {iibname } {
     SendData $ibbname $sid $data
 }
 
-proc jlib::ibb::SendData {ibbname sid data} {
+proc jlib::ibb::SendData {jlibname sid data} {
     
-    upvar ${ibbname}::priv priv
+    upvar ${jlibname}::ibb::priv priv
+    upvar ${jlibname}::ibb::opts opts
     
     
     $priv(jlibname) send_message   

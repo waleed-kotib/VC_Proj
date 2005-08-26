@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.39 2005-08-14 07:10:51 matben Exp $
+# $Id: Conference.tcl,v 1.40 2005-08-26 15:02:34 matben Exp $
 
 package provide Conference 1.0
 
@@ -217,7 +217,7 @@ proc ::Conference::CloseEnter {token w} {
     upvar 0 $token state
     
     ::UI::SaveWinGeom $wDlgs(jenterroom) $w
-    return ""
+    return
 }
 
 proc ::Conference::ConfigRoomList {token name junk1 junk2} {    
@@ -630,7 +630,7 @@ proc ::Conference::CloseCreate {token w} {
     upvar 0 $token state
     
     ::UI::SaveWinGeom $wDlgs(jcreateroom) $state(w)
-    return ""
+    return
 }
 
 proc ::Conference::CancelCreate {token} {

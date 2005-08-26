@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2003, Mats Bengtsson
 # 
-# $Id: maccarbonprint.tcl,v 1.1 2004-04-08 07:22:24 matben Exp $
+# $Id: maccarbonprint.tcl,v 1.2 2005-08-26 15:02:34 matben Exp $
 
 namespace eval ::maccarbonprint:: {
     
@@ -104,7 +104,7 @@ proc ::maccarbonprint::printcanvas {wcanvas printObj args} {
     if {$errMsg != ""} {
     	return -code error $errMsg
     } else {
-        return ""
+        return
     }
 }
 
@@ -232,7 +232,7 @@ proc ::maccarbonprint::printtext {wtext printObj args} {
     if {$errMsg != ""} {
 	return -code error $errMsg
     } else {
-	return ""
+	return
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.36 2005-08-14 07:10:51 matben Exp $
+# $Id: Register.tcl,v 1.37 2005-08-26 15:02:34 matben Exp $
 
 package provide Register 1.0
 
@@ -1153,7 +1153,7 @@ proc ::GenRegister::NewDlg {args} {
     }
     wm resizable $w 0 0
     
-    return ""
+    return
 }
 
 proc ::GenRegister::Get {token} {    

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.26 2005-03-02 13:49:40 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.27 2005-08-26 15:02:34 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -445,7 +445,7 @@ proc ::tinyhttpd::start {args} {
         
     LogMsg "Tiny Httpd started"
 
-    return ""
+    return
 }
 
 proc ::tinyhttpd::configure {args} {

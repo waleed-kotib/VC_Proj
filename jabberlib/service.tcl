@@ -6,7 +6,7 @@
 #       
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.17 2005-02-21 07:59:08 matben Exp $
+# $Id: service.tcl,v 1.18 2005-08-26 15:02:34 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -122,7 +122,7 @@ proc jlib::service::get {jlibname type} {
     if {$serv($type)} {
 	return $serv($type,name)
     } else {
-	return ""
+	return
     }
 }
 

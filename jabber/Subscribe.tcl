@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.27 2005-08-14 07:10:51 matben Exp $
+# $Id: Subscribe.tcl,v 1.28 2005-08-26 15:02:34 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -158,7 +158,7 @@ proc ::Subscribe::NewDlg {jid args} {
     } $wbox.msg $w]    
     after idle $script
 
-    return ""
+    return
 }
 
 # Subscribe::Deny --
