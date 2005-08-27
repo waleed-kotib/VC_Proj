@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.102 2005-08-26 15:02:34 matben Exp $
+# $Id: jabberlib.tcl,v 1.103 2005-08-27 13:50:49 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -113,6 +113,7 @@
 #      jlibName send_auth username resource ?args?
 #      jlibName send xmllist
 #      jlibName setsockettransport socket
+#      jlibName state
 #      jlibName vcard_get to cmd
 #      jlibName vcard_set cmd ?args?
 #      
@@ -367,6 +368,7 @@ proc jlib::new {rostername clientcmd args} {
     set lib(wrap)         $wrapper
     
     set lib(isinstream) 0
+    set lib(state)      ""
     
     init_inst $jlibname
             
@@ -622,6 +624,17 @@ proc jlib::verify_options {jlibname args} {
     }
 }
 
+# jlib::state --
+# 
+#       Accesor for the internal 'state'.
+
+proc jlib::state {jlibname} {
+    
+    upvar ${jlibname}::lib lib
+    
+    return $lib(state)
+}
+
 # jlib::registertransport --
 # 
 #       We must have a transport mechanism for our xml. Socket is standard but
@@ -849,6 +862,7 @@ proc jlib::openstream {jlibname server args} {
 	}
     }
     set lib(isinstream) 1
+    set lib(state)      "instream"
 
     if {[catch {
 
@@ -866,7 +880,8 @@ proc jlib::openstream {jlibname server args} {
 	
 	# The socket probably was never connected,
 	# or the connection dropped later.
-	closestream $jlibname
+	#closestream $jlibname
+	kill $jlibname
 	return -code error "The connection failed or dropped later: $err"
     }
     return
@@ -1600,7 +1615,8 @@ proc jlib::reset {jlibname} {
     init_inst $jlibname
 
     set lib(isinstream) 0
-    
+    set lib(state)      "reset"
+
     stream_reset $jlibname
     if {[havesasl]} {
 	sasl_reset $jlibname
