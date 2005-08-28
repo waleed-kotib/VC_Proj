@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.27 2005-08-17 14:26:51 matben Exp $
+# $Id: JPrefs.tcl,v 1.28 2005-08-28 13:37:03 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -158,8 +158,6 @@ proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
 proc ::JPrefs::BuildAutoAwayPage {page} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
-
-    set xpadbt [option get [winfo toplevel $page] xPadBt {}]
     
     foreach key {autoaway awaymin xautoaway xawaymin awaymsg xawaymsg \
       logoutStatus} {
@@ -234,8 +232,10 @@ proc ::JPrefs::BuildAutoAwayPage {page} {
     }
     grid columnconfigure $wlo 1 -weight 1
     
-    pack  $waa  -side top -fill x
-    pack  $wlo  -side top -fill x -pady 12
+    set anchor [option get . dialogAnchor {}]
+
+    pack  $waa  -side top -fill x -anchor $anchor
+    pack  $wlo  -side top -fill x -anchor $anchor -pady 12
 }
 
 proc ::JPrefs::BuildPersInfoPage {wpage} {

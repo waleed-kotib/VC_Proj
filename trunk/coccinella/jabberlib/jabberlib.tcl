@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.103 2005-08-27 13:50:49 matben Exp $
+# $Id: jabberlib.tcl,v 1.104 2005-08-28 13:37:04 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -114,6 +114,7 @@
 #      jlibName send xmllist
 #      jlibName setsockettransport socket
 #      jlibName state
+#      jlibName transport
 #      jlibName vcard_get to cmd
 #      jlibName vcard_set cmd ?args?
 #      
@@ -369,6 +370,7 @@ proc jlib::new {rostername clientcmd args} {
     
     set lib(isinstream) 0
     set lib(state)      ""
+    set lib(transport,name) ""
     
     init_inst $jlibname
             
@@ -651,7 +653,7 @@ proc jlib::registertransport {jlibname name initProc sendProc resetProc ipProc} 
     set lib(transport,ip)    $ipProc
 }
 
-proc jlib::gettransport {jlibname} {
+proc jlib::transport {jlibname} {
     
     upvar ${jlibname}::lib lib
 

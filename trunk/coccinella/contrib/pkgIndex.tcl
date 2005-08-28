@@ -46,6 +46,7 @@ package ifneeded TkInteractor 1.0 [list source [file join $dir TkInteractorPacka
 package ifneeded tree 1.0 [list source [file join $dir tree.tcl]]
 package ifneeded ttoolbar 1.0 [list source [file join $dir ttoolbar.tcl]]
 package ifneeded undo 0.1 [list source [file join $dir undo.tcl]]
+package ifneeded uri 1.1.4 [list source [file join $dir uri.tcl]]
 package ifneeded uriencode 1.0 [list source [file join $dir uriencode.tcl]]
 package ifneeded uuid 1.0 [list source [file join $dir uuid.tcl]]
 package ifneeded wavelabel 1.0 [list source [file join $dir wavelabel.tcl]]
