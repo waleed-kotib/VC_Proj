@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasUtils.tcl,v 1.31 2005-08-26 15:02:34 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.32 2005-08-28 15:15:05 matben Exp $
 
 package require sha1pure
 package require can2svg
@@ -2090,10 +2090,20 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
 		%W yview scroll [expr {- (%D)}] units
 	    }
 	}
+	bind Whiteboard <Shift-MouseWheel> {
+	    if {![string equal [%W xview] "0 1"]} {
+		%W xview scroll [expr {- (%D)}] units
+	    }
+	}
     } else {
 	bind Whiteboard <MouseWheel> {
 	    if {![string equal [%W yview] "0 1"]} {
 		%W yview scroll [expr {- (%D / 120) * 4}] units
+	    }
+	}
+	bind Whiteboard <Shift-MouseWheel> {
+	    if {![string equal [%W xview] "0 1"]} {
+		%W xview scroll [expr {- (%D / 120) * 4}] units
 	    }
 	}
     }

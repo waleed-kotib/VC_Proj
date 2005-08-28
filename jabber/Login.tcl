@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.66 2005-08-26 15:02:34 matben Exp $
+# $Id: Login.tcl,v 1.67 2005-08-28 15:15:03 matben Exp $
 
 package provide Login 1.0
 
@@ -852,20 +852,8 @@ proc ::Login::Connect {server cmd args} {
     } else {
 	
 	# Perhaps it gives a better structure to have this elsewhere?
-	
-	# Configure our jlib http transport.
-	set opts {}
-	if {[string length $prefs(httpproxyserver)]} {
-	    lappend opts -proxyhost $prefs(httpproxyserver)
-	}
-	if {[string length $prefs(httpproxyport)]} {
-	    lappend opts -proxyport $prefs(httpproxyport)
-	}
-	if {$prefs(httpproxyauth)} {
-	    lappend opts -proxyusername $prefs(httpproxyusername)
-	    lappend opts -proxypasswd $prefs(httpproxypassword)
-	}
-	eval {jlib::http::new $jstate(jlib) $argsArr(-httpurl)} $opts -usekeys 0
+	# Proxy configuration works transparently using autoproxy.
+	eval {jlib::http::new $jstate(jlib) $argsArr(-httpurl)} -usekeys 0
 
 	uplevel #0 $cmd [list ok ""]
     }
