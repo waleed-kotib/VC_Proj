@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.42 2005-08-26 15:02:34 matben Exp $
+# $Id: Profiles.tcl,v 1.43 2005-08-28 15:15:04 matben Exp $
 
 package provide Profiles 1.0
 
@@ -987,6 +987,8 @@ proc ::Profiles::CancelHook { } {
     set tmpProfiles [GetTmpProfiles]
     array set profArr $profiles
     array set tmpArr $tmpProfiles
+    puts " tmpArr=[array get tmpArr]"
+    puts "profArr=[array get profArr]"
     if {![arraysequal tmpArr profArr]} {
 	::Preferences::HasChanged
     }

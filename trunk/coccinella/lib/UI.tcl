@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.95 2005-08-17 14:26:51 matben Exp $
+# $Id: UI.tcl,v 1.96 2005-08-28 15:15:05 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -113,10 +113,20 @@ proc ::UI::InitCommonBinds { } {
 		%W yview scroll [expr {- (%D)}] units
 	    }
 	}
+	bind Canvas <Shift-MouseWheel> {
+	    if {![string equal [%W xview] "0 1"]} {
+		%W xview scroll [expr {- (%D)}] units
+	    }
+	}
     } else {
 	bind Canvas <MouseWheel> {
 	    if {![string equal [%W yview] "0 1"]} {
 		%W yview scroll [expr {- (%D / 120) * 4}] units
+	    }
+	}
+	bind Canvas <Shift-MouseWheel> {
+	    if {![string equal [%W xview] "0 1"]} {
+		%W xview scroll [expr {- (%D / 120) * 4}] units
 	    }
 	}
     }

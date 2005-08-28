@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.1 2005-08-28 13:37:04 matben Exp $
+# $Id: Proxy.tcl,v 1.2 2005-08-28 15:15:05 matben Exp $
  
 package require autoproxy
 
@@ -61,10 +61,29 @@ proc ::Proxy::InitPrefsHook { } {
       [list prefs(proxy_host)     prefs_proxyhost      $prefs(proxy_host)]    \
       [list prefs(proxy_port)     prefs_proxyport      $prefs(proxy_port)]    \
       [list prefs(proxyauth)      prefs_proxyauth      $prefs(proxyauth)]     \
-      [list prefs(proxy_user)     prefs_proxyuser      $prefs(proxy_user)]     \
-      [list prefs(proxy_pass)     prefs_proxypass      $prefs(proxy_pass)]     \
+      [list prefs(proxy_user)     prefs_proxyuser      $prefs(proxy_user)]    \
+      [list prefs(proxy_pass)     prefs_proxypass      $prefs(proxy_pass)]    \
       [list prefs(noproxy)        prefs_noproxy        $prefs(noproxy)]       \
       ]
+    
+    # We shall do our http proxy configuration here transparently for any
+    # package that uses the http package.
+    # Any user settings override the one we get when autoproxy::init. 
+    AutoProxyConfig
+}
+
+proc ::Proxy::AutoProxyConfig { } {
+    global  prefs
+    
+    ::autoproxy::configure  \
+      -proxy_host $prefs(proxy_host) \
+      -proxy_port $prefs(proxy_port) \
+      -no_proxy   $prefs(no_proxy)
+    
+    if {[string length $prefs(proxy_user)]} {
+	::autoproxy::configure  \
+	  -basic -user $prefs(proxy_user) -pass $prefs(proxy_pass)
+    }
 }
 
 proc ::Proxy::BuildPrefsHook {wtree nbframe} {
@@ -172,15 +191,7 @@ proc ::Proxy::SavePrefsHook { } {
     set prefs(proxy_user) [string trim $prefs(proxy_user)]
     set prefs(proxy_pass) [string trim $prefs(proxy_pass)]
     
-    ::autoproxy::configure  \
-      -proxy_host $prefs(proxy_host) \
-      -proxy_port $prefs(proxy_port) \
-      -no_proxy   $prefs(no_proxy)
-    
-    if {[string length $prefs(proxy_user)]} {
-	::autoproxy::configure  \
-	  -basic -user $prefs(proxy_user) -pass $prefs(proxy_pass)
-    }
+    AutoProxyConfig
 }
 
 proc ::Proxy::CancelPrefsHook { } {
