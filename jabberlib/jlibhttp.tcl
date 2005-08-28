@@ -4,7 +4,7 @@
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.4 2005-08-27 13:50:49 matben Exp $
+# $Id: jlibhttp.tcl,v 1.5 2005-08-28 13:37:04 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -21,6 +21,9 @@
 #	(-resendinterval ms	if sending fails, try again after this interval)
 #	-timeout ms		timeout for connecting the server
 #	-usekeys 0|1            if keys should be used
+#
+# Although you can use the -proxy* switches here, it is much simpler to let
+# the autoproxy package configure them.
 #
 # Callbacks for the JabberLib:
 #	jlib::http::transportinit, jlib::http::transportreset, 
@@ -81,7 +84,7 @@ proc jlib::http::new {jlibname url args} {
 	-maxpollms           16000
 	-minpollms            4000
 	-proxyhost              ""
-	-proxyport            8080
+	-proxyport              80
 	-proxyusername          ""
 	-proxypasswd            ""
 	-resendinterval      20000
@@ -163,8 +166,7 @@ proc jlib::http::InitState {jlibname} {
 proc jlib::http::BuildProxyHeader {proxyusername proxypasswd} {
     
     set str $proxyusername:$proxypasswd
-    set auth [list "Proxy-Authorization" \
-      "Basic [base64::encode [encoding convertto $str]]"]
+    set auth [list "Proxy-Authorization" "Basic [base64::encode $str]"]
     return $auth
 }
 
@@ -330,6 +332,8 @@ proc jlib::http::Post {jlibname} {
 
     Debug 2 "jlib::http::Post"
     
+    # If called directly any timers must have been cancelled before this.
+    set priv(afterid) ""
     set xml $priv(xml)
     set priv(xml) ""
     PostXML $jlibname $xml

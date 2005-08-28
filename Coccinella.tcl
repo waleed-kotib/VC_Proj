@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.119 2005-08-18 09:52:07 matben Exp $	
+# $Id: Coccinella.tcl,v 1.120 2005-08-28 13:37:03 matben Exp $	
 
 	
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
@@ -204,6 +204,7 @@ set packages(application) {
     Network
     Plugins
     Preferences
+    Proxy
     TheServer
     Types
     UI
