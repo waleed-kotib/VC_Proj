@@ -4,7 +4,7 @@
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.7 2005-08-29 12:39:37 matben Exp $
+# $Id: jlibhttp.tcl,v 1.8 2005-08-29 12:57:18 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -53,7 +53,7 @@ package provide jlib::http 0.1
 namespace eval jlib::http {
 
     # Inherit jlib's debug level.
-    variable debug 4
+    variable debug 0
     if {!$debug} {
 	set debug [namespace parent]::debug
     }
@@ -352,6 +352,8 @@ proc jlib::http::PostXML {jlibname xml} {
     upvar ${jlibname}::http::opts opts
     
     Debug 2 "jlib::http::PostXML"
+    
+    set xml [encoding convertto utf-8 $xml]
 
     if {$opts(-usekeys)} {
 	
@@ -390,8 +392,6 @@ proc jlib::http::PostXML {jlibname xml} {
     
     Debug 2 "POST: $query"
     
-    # 	  -binary  1                          
-
     # -query forces a POST request.
     # Make sure we send it as text dispite the application/* type.???
     if {[catch {
@@ -524,8 +524,6 @@ proc jlib::http::Response {jlibname token} {
 	    
 	    set body [::http::data $token]
 	    Debug 2 "POLL: $body"
-	    puts "\t iso8859-9=[encoding convertfrom iso8859-9 $body]"
-	    puts "\t utf-8=[encoding convertto utf-8 $body]"
 	    
 	    # Send away to jabberlib for parsing and processing.
 	    if {[string length $body] > 2} {
