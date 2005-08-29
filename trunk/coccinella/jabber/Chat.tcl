@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.120 2005-08-26 15:02:34 matben Exp $
+# $Id: Chat.tcl,v 1.121 2005-08-29 12:39:37 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1732,7 +1732,7 @@ proc ::Chat::SendFile {dlgtoken} {
 
 proc ::Chat::Settings {dlgtoken} {
     
-    ::Preferences::Build -page {Jabber Chat}
+    ::Preferences::Show {Jabber Chat}
 }
 
 proc ::Chat::Print {dlgtoken} {

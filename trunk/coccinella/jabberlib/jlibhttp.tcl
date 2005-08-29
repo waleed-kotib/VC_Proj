@@ -4,7 +4,7 @@
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.6 2005-08-29 07:38:37 matben Exp $
+# $Id: jlibhttp.tcl,v 1.7 2005-08-29 12:39:37 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -390,11 +390,12 @@ proc jlib::http::PostXML {jlibname xml} {
     
     Debug 2 "POST: $query"
     
+    # 	  -binary  1                          
+
     # -query forces a POST request.
     # Make sure we send it as text dispite the application/* type.???
     if {[catch {
 	set token [::http::geturl $opts(url)  \
-	  -binary  1                          \
 	  -timeout $opts(-timeout)            \
 	  -headers $opts(header)              \
 	  -query   $query                     \
@@ -523,7 +524,8 @@ proc jlib::http::Response {jlibname token} {
 	    
 	    set body [::http::data $token]
 	    Debug 2 "POLL: $body"
-	    #puts "\t iso8859-9=[encoding convertfrom iso8859-9 $body]"
+	    puts "\t iso8859-9=[encoding convertfrom iso8859-9 $body]"
+	    puts "\t utf-8=[encoding convertto utf-8 $body]"
 	    
 	    # Send away to jabberlib for parsing and processing.
 	    if {[string length $body] > 2} {
