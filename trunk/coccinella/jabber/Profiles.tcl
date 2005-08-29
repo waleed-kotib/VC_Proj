@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.43 2005-08-28 15:15:04 matben Exp $
+# $Id: Profiles.tcl,v 1.44 2005-08-29 07:38:37 matben Exp $
 
 package provide Profiles 1.0
 
@@ -573,23 +573,18 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     grid  $whttp.u.eurl  -sticky ew
     grid columnconfigure $whttp.u 1 -weight 1
     
-    ttk::frame $whttp.p
-    ttk::checkbutton $whttp.p.proxy -style Small.TCheckbutton \
-      -text [mc {Use proxy}] -variable $token\(proxy)   
-    ttk::button $whttp.p.bproxy -style Small.TButton  \
+    ttk::button $whttp.bproxy -style Small.TButton  \
       -text "[mc {Proxy Settings}]..."  \
       -command [list ::Preferences::Build -page {General {Proxy Setup}}]
-    grid  $whttp.p.proxy  $whttp.p.bproxy  -sticky w
-    grid  $whttp.p.bproxy  -sticky e -padx 4
 
     ttk::label $whttp.lpoll -style Small.TLabel  \
       -text [mc {Poll interval (secs)}]
-    spinbox $whttp.spoll -textvariable $token\(pollsecs) \
+    spinbox $whttp.spoll -textvariable $token\(minpollsecs) \
       -width 3 -state readonly -increment 1 -from 1 -to 120
     
     grid  $whttp.http    -             -sticky w  -pady 1
     grid  $whttp.u       -             -sticky ew -pady 1
-    grid  $whttp.p       -             -sticky w  -pady 1
+    grid  $whttp.bproxy  -                        -pady 1
     #grid  $whttp.lpoll   $whttp.spoll  -sticky w  -pady 1
     grid columnconfigure $whttp 1 -weight 1
     
@@ -623,7 +618,7 @@ proc ::Profiles::NotebookSetDefaults {token server} {
 	InitDefaultOptions
     }
     array set state [array get defaultOptionsArr]
-    set state(httpurl) "http://${server}:5280/http-poll/"
+    set state(httpurl) [GetDefaultHttpUrl $server]
 }
 
 proc ::Profiles::InitDefaultOptions { } {
@@ -638,11 +633,10 @@ proc ::Profiles::InitDefaultOptions { } {
 	digest      1
 	invisible   0
 	ip          ""
-	pollsecs    5
 	priority    0
 	http        0
 	httpurl     ""
-	proxy       0
+	minpollsecs 4
     }
     set defaultOptionsArr(port) $jprefs(port)
     set defaultOptionsArr(ssl)  $jprefs(usessl)
@@ -654,6 +648,30 @@ proc ::Profiles::InitDefaultOptions { } {
 	set defaultOptionsArr(sasl) 0
     }
     set initedDefaultOptions 1
+}
+
+proc ::Profiles::GetDefaultOptionValue {name server} {
+    variable initedDefaultOptions
+    variable defaultOptionsArr
+    
+    if {!$initedDefaultOptions} {
+	InitDefaultOptions
+    }
+    
+    switch -- $name {
+	httpurl {
+	    set value [GetDefaultHttpUrl $server]
+	}
+	default {
+	    set value $defaultOptionsArr($name)
+	}
+    }
+    return $value
+}
+
+proc ::Profiles::GetDefaultHttpUrl {server} {
+    
+    return "http://${server}:5280/http-poll/"
 }
 
 # Profiles::MakeTmpProfArr --
@@ -781,12 +799,8 @@ proc ::Profiles::SaveCurrentToTmp {profName} {
 	    
 	    # Cleanup any old entries. Save only if different from default.
 	    unset -nocomplain tmpProfArr($profName,-$key)
-	    if {$key eq "httpurl"} {
-		if {$moreOpts($key) ne "http://${server}:5280/http-poll"} {
-		    set tmpProfArr($profName,-$key) $moreOpts($key)
-		}
-	    } elseif {![string equal $moreOpts($key) $defaultOptionsArr($key)]} {
-		Debug 4 "\t key=$key"
+	    set dvalue [GetDefaultOptionValue $key $server]
+	    if {![string equal $moreOpts($key) $dvalue]} {
 		set tmpProfArr($profName,-$key) $moreOpts($key)
 	    }
 	}
@@ -949,22 +963,29 @@ proc ::Profiles::GetTmpProfiles { } {
     
     set tmpProfiles {}
     foreach name [GetAllTmpNames] {
-	set plist [list $tmpProfArr($name,server) $tmpProfArr($name,username) \
-	  $tmpProfArr($name,password)]
+	set s $tmpProfArr($name,server)
+	set u $tmpProfArr($name,username)
+	set p $tmpProfArr($name,password)
+	set plist [list $s $u $p]
 	
 	# Set the optional options as "-key value ...". Sorted!
 	foreach key [lsort [array names tmpProfArr $name,-*]] {
 	    set optname [string map [list $name,- ""] $key]
 	    set value $tmpProfArr($key)
-	    
+
 	    switch -- $optname {
 		resource {
-		    if {$value != ""} {
+		    if {[string length $value]} {
 			lappend plist -resource $value 
 		    }
 		}
 		default {
-		    lappend plist -$optname $value
+	
+		    # Save only if different from default.
+		    set dvalue [GetDefaultOptionValue $optname $s]
+		    if {![string equal $value $dvalue]} {
+			lappend plist -$optname $value
+		    }
 		}
 	    }
 	}
@@ -987,8 +1008,6 @@ proc ::Profiles::CancelHook { } {
     set tmpProfiles [GetTmpProfiles]
     array set profArr $profiles
     array set tmpArr $tmpProfiles
-    puts " tmpArr=[array get tmpArr]"
-    puts "profArr=[array get profArr]"
     if {![arraysequal tmpArr profArr]} {
 	::Preferences::HasChanged
     }

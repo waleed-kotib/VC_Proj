@@ -7,7 +7,7 @@ Not to mention all bugfixes and rewrites.
 
 Coccinella-0.95.10 (05????):
 
-	- server transport using http possible
+	- server connections using http possible; http proxy added
 	- 
 
 Coccinella-0.95.9 (050821):

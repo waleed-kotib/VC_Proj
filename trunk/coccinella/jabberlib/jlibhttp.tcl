@@ -4,7 +4,7 @@
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.5 2005-08-28 13:37:04 matben Exp $
+# $Id: jlibhttp.tcl,v 1.6 2005-08-29 07:38:37 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -40,6 +40,8 @@
 #                 "wait"      http post made, waiting for response
 #                 "error"     error status
 
+# TODO: more flexible posting (from Response?) that dynamically schedules
+#       the timing interval.
 
 package require jlib
 package require http 2.4
@@ -202,7 +204,7 @@ proc jlib::http::transportinit {jlibname} {
     upvar ${jlibname}::http::priv priv
     upvar ${jlibname}::http::opts opts
     
-    puts "jlib::http::transportinit"
+    #puts "jlib::http::transportinit"
 
     InitState $jlibname
 }
@@ -215,7 +217,7 @@ proc jlib::http::transportreset {jlibname} {
 
     upvar ${jlibname}::http::priv priv
     
-    puts "jlib::http::transportreset"
+    #puts "jlib::http::transportreset"
 
     # Stop polling and resends.
     if {[string length $priv(afterid)]} {
@@ -263,7 +265,7 @@ proc jlib::http::send {jlibname xml} {
     
     # If no post scheduled we shall post right away.
     if {![string length $priv(afterid)]} {
-	puts "\t post right away"
+	#puts "\t post right away"
 	Post $jlibname
     } else {
 	
@@ -278,17 +280,17 @@ proc jlib::http::send {jlibname xml} {
 	set minms [expr {$priv(lastpostms) + $opts(-minpollms)}]
 	if {$nowms < $minms} {
 	    
-	    puts "\t case A"
+	    #puts "\t case A"
 	    
 	    # Case A:
 	    # If next post is scheduled after min, then repost at min instead.
 	    if {$priv(nextpostms) > $minms} {
-		puts "\t reschedule post"
+		#puts "\t reschedule post"
 		set afterms [expr {$minms - $nowms}]
 		SchedulePost $jlibname $afterms
 	    }
 	} else {
-	    puts "\t case B"
+	    #puts "\t case B"
 	    
 	    # Case B:
 	    # We have already waited longer than '-minpollms'.
@@ -424,7 +426,7 @@ proc jlib::http::Response {jlibname token} {
     upvar ${jlibname}::http::opts opts
     variable errcode
     
-    puts "jlib::http::Response priv(state)=$priv(state)"
+    Debug 2 "jlib::http::Response priv(state)=$priv(state)"
     
     # We may have been 'reset' after this post was sent!
     if {[string equal $priv(state) "reset"]} {
@@ -446,7 +448,7 @@ proc jlib::http::Response {jlibname token} {
     }
     set status [::http::status $token]
     
-    Debug 2 "jlib::http::Response status=$status, [::http::ncode $token]"
+    Debug 2 "\t status=$status, ::http::ncode=[::http::ncode $token]"
 
     switch -- $status {
 	ok {	    
@@ -545,7 +547,8 @@ proc jlib::http::Response {jlibname token} {
 #       don't expect any further actions to be taken.
 
 proc jlib::http::NoopResponse {token} {
-    puts "jlib::http::NoopResponse"
+
+    Debug 2 "jlib::http::NoopResponse"
 
     # Only thing we shall do here.
     ::http::cleanup $token

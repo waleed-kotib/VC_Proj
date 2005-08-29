@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.67 2005-08-28 15:15:03 matben Exp $
+# $Id: Login.tcl,v 1.68 2005-08-29 07:38:37 matben Exp $
 
 package provide Login 1.0
 
@@ -853,7 +853,7 @@ proc ::Login::Connect {server cmd args} {
 	
 	# Perhaps it gives a better structure to have this elsewhere?
 	# Proxy configuration works transparently using autoproxy.
-	eval {jlib::http::new $jstate(jlib) $argsArr(-httpurl)} -usekeys 0
+	jlib::http::new $jstate(jlib) $argsArr(-httpurl)
 
 	uplevel #0 $cmd [list ok ""]
     }
