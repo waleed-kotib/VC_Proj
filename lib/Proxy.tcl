@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.2 2005-08-28 15:15:05 matben Exp $
+# $Id: Proxy.tcl,v 1.3 2005-08-29 07:38:37 matben Exp $
  
 package require autoproxy
 
@@ -25,14 +25,14 @@ proc ::Proxy::InitPrefsHook { } {
     
     variable keySpecs
     array set keySpecs {
-	setNATip        0
-	NATip           ""
-	proxyauth       0
+	useproxy        0
 	proxy_host      ""
 	proxy_port      ""
 	proxy_user      ""
 	proxy_pass      ""
 	noproxy         ""
+	setNATip        0
+	NATip           ""
     }
     
     # Just a dummy initialization.
@@ -56,20 +56,22 @@ proc ::Proxy::InitPrefsHook { } {
     }
     
     ::PrefUtils::Add [list  \
-      [list prefs(setNATip)       prefs_setNATip       $prefs(setNATip)]      \
-      [list prefs(NATip)          prefs_NATip          $prefs(NATip)]         \
+      [list prefs(useproxy)       prefs_useproxy       $prefs(useproxy)]      \
       [list prefs(proxy_host)     prefs_proxyhost      $prefs(proxy_host)]    \
       [list prefs(proxy_port)     prefs_proxyport      $prefs(proxy_port)]    \
-      [list prefs(proxyauth)      prefs_proxyauth      $prefs(proxyauth)]     \
       [list prefs(proxy_user)     prefs_proxyuser      $prefs(proxy_user)]    \
       [list prefs(proxy_pass)     prefs_proxypass      $prefs(proxy_pass)]    \
       [list prefs(noproxy)        prefs_noproxy        $prefs(noproxy)]       \
+      [list prefs(setNATip)       prefs_setNATip       $prefs(setNATip)]      \
+      [list prefs(NATip)          prefs_NATip          $prefs(NATip)]         \
       ]
     
     # We shall do our http proxy configuration here transparently for any
     # package that uses the http package.
     # Any user settings override the one we get when autoproxy::init. 
-    AutoProxyConfig
+    if {$prefs(useproxy)} {
+	AutoProxyConfig
+    }
 }
 
 proc ::Proxy::AutoProxyConfig { } {
@@ -98,11 +100,12 @@ proc ::Proxy::BuildPage {wpage} {
     global  prefs
     variable tmpPrefs
     variable wnoproxy
+    variable wprx
     
     set prefs(noproxy) [lsort -unique $prefs(noproxy)]
     
     foreach key {setNATip NATip \
-      proxy_host proxy_port proxyauth \
+      useproxy proxy_host proxy_port \
       proxy_user proxy_pass noproxy} {
 	set tmpPrefs($key) $prefs($key)
     }
@@ -122,12 +125,13 @@ proc ::Proxy::BuildPage {wpage} {
       -text "Usage of the Http proxy is determined\
       by each profile settings. File transfers wont work if you use Http proxy!"
     
+    ttk::checkbutton $wprx.use -text [mc {Use proxy}]  \
+      -command [namespace code SetUseProxyState]  \
+      -variable [namespace current]::tmpPrefs(useproxy)   
     ttk::label $wprx.lserv -text [mc {Proxy Server}]:
     ttk::entry $wprx.eserv -textvariable [namespace current]::tmpPrefs(proxy_host)
     ttk::label $wprx.lport -text [mc {Proxy Port}]:
     ttk::entry $wprx.eport -textvariable [namespace current]::tmpPrefs(proxy_port)
-    ttk::checkbutton $wprx.auth -text [mc {Use proxy authorization}] \
-      -variable [namespace current]::tmpPrefs(proxyauth)
     ttk::label $wprx.luser -text [mc Username]:
     ttk::entry $wprx.euser -textvariable [namespace current]::tmpPrefs(proxy_user)
     ttk::label $wprx.lpass -text [mc Password]:
@@ -138,9 +142,9 @@ proc ::Proxy::BuildPage {wpage} {
     text $wprx.noproxy -font CociSmallFont -height 4 -width 24 -bd 1 -relief sunken
     
     grid  $wprx.msg      -            -sticky w
+    grid  x              $wprx.use    -sticky w
     grid  $wprx.lserv    $wprx.eserv
     grid  $wprx.lport    $wprx.eport
-    grid  x              $wprx.auth   -sticky w
     grid  $wprx.luser    $wprx.euser
     grid  $wprx.lpass    $wprx.epass
     grid  $wprx.lnop     -            -sticky w
@@ -153,6 +157,7 @@ proc ::Proxy::BuildPage {wpage} {
 	$wnoproxy insert end $addr
 	$wnoproxy insert end "\n"
     }
+    SetUseProxyState
     
     # NAT address.
     ttk::labelframe $wnat -text [mc {NAT Address}] \
@@ -170,6 +175,28 @@ proc ::Proxy::BuildPage {wpage} {
 
     pack  $wprx  -side top -fill x -anchor $anchor
     pack  $wnat  -side top -fill x -anchor $anchor -pady 12
+}
+
+proc ::Proxy::SetUseProxyState { } {
+    variable wprx
+    variable tmpPrefs
+    
+    set state    disabled
+    set ttkstate {disabled}
+    if {$tmpPrefs(useproxy)} {
+	set state normal
+	set ttkstate {!disabled}
+    }
+    foreach w [winfo children $wprx] {
+	switch -- [winfo class $w] {
+	    Text {
+		$w configure -state $state
+	    }
+	    TEntry {
+		$w state $ttkstate
+	    }
+	}
+    }
 }
 
 proc ::Proxy::GetNoProxyList { } {    
@@ -191,7 +218,11 @@ proc ::Proxy::SavePrefsHook { } {
     set prefs(proxy_user) [string trim $prefs(proxy_user)]
     set prefs(proxy_pass) [string trim $prefs(proxy_pass)]
     
-    AutoProxyConfig
+    if {$prefs(useproxy)} {
+	AutoProxyConfig
+    } else {
+	http::config -proxyfilter {} -proxyhost {} -proxyport {}
+    }
 }
 
 proc ::Proxy::CancelPrefsHook { } {

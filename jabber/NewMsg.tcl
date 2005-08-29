@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.65 2005-08-26 15:02:34 matben Exp $
+# $Id: NewMsg.tcl,v 1.66 2005-08-29 07:38:37 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -35,12 +35,12 @@ namespace eval ::NewMsg:: {
     # Standard widgets.
     
     if {[tk windowingsystem] eq "aqua"} {
-	option add *NewMsg*box.padding                {12 10 12 18}  50
+	option add *NewMsg*box.padding            {12 10 12 18}   50
     } else {
-	option add *NewMsg*box.padding                {10  8 10  8}   50
+	option add *NewMsg*box.padding            {10  8 10  8}   50
     }
     option add *NewMsg*frsub.padding              {12  4 12  4}   50
-    option add *NewMsg*TMenubutton.padding        {1}           50
+    option add *NewMsg*TMenubutton.padding        {1}             50
 
     option add *JMultiAddress.background    #999999         50
 
@@ -826,16 +826,16 @@ proc ::NewMsg::DoSend {w} {
 	return
     }
     set wtext $locals($w,wtext)
-    set allText [string trimright [::Text::TransformToPureText $wtext] "\n"]
+    set str [string trimright [::Text::TransformToPureText $wtext]]
     
     if {[string length $locals($w,subject)] > 0} {
 	set subopt [list -subject $locals($w,subject)]
     } else {
 	set subopt {}
     }
-    if {[string length $allText]} {
+    if {[string length $str] || [llength $subopt]} {
 	foreach jid $addrList {
-	    eval {::Jabber::JlibCmd send_message $jid} $subopt {-body $allText}
+	    eval {::Jabber::JlibCmd send_message $jid} $subopt {-body $str}
 	}
     }
     set locals($w,finished) 1
