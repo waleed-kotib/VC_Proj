@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.78 2005-08-28 13:37:04 matben Exp $
+# $Id: Preferences.tcl,v 1.79 2005-08-29 12:39:37 matben Exp $
  
 package require mnotebook
 package require tree
@@ -45,6 +45,21 @@ proc ::Preferences::QuitAppHook { } {
     global  wDlgs
 
     ::UI::SaveWinGeom $wDlgs(prefs)
+}
+
+proc ::Preferences::Show {{page {}}} {
+    global  wDlgs
+    variable wtree
+    
+    set w $wDlgs(prefs)
+    if {[winfo exists $w]} {
+	raise $w
+    } else {
+	Build
+    }
+    if {[string length $page]} {
+	$wtree setselection $page
+    }
 }
 
 proc ::Preferences::Build {args} {

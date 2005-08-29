@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.44 2005-08-29 07:38:37 matben Exp $
+# $Id: Profiles.tcl,v 1.45 2005-08-29 12:39:37 matben Exp $
 
 package provide Profiles 1.0
 
@@ -575,7 +575,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     
     ttk::button $whttp.bproxy -style Small.TButton  \
       -text "[mc {Proxy Settings}]..."  \
-      -command [list ::Preferences::Build -page {General {Proxy Setup}}]
+      -command [list ::Preferences::Show {General {Proxy Setup}}]
 
     ttk::label $whttp.lpoll -style Small.TLabel  \
       -text [mc {Poll interval (secs)}]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.33 2005-08-14 07:10:51 matben Exp $
+# $Id: Emoticons.tcl,v 1.34 2005-08-29 12:39:37 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -64,21 +64,21 @@ proc ::Emoticons::Init { } {
 	set priv(needtmp)   1
 	set priv(pngformat) {}
     }
-    ::Debug 4 "sets=[::Emoticons::GetAllSets]"
-    ::Debug 4 "\t [::Emoticons::GetPrefSetPathExists]"
+    ::Debug 4 "sets=[GetAllSets]"
+    ::Debug 4 "\t [GetPrefSetPathExists]"
     
     # Load set.
     # Even if we succeed to get the vfs::zip package, it doesn't check
     # the Memchan package, and can therefore still fail.
     if {[catch {
-	::Emoticons::LoadTmpIconSet [::Emoticons::GetPrefSetPathExists]
+	LoadTmpIconSet [GetPrefSetPathExists]
     } err]} {
 	::Debug 4 "\t catch: $err"
 	set priv(havezip) 0
 	set jprefs(emoticonSet) $priv(defaultSet)
-	::Emoticons::LoadTmpIconSet [::Emoticons::GetPrefSetPathExists]
+	LoadTmpIconSet [GetPrefSetPathExists]
     }
-    ::Emoticons::SetPermanentSet $jprefs(emoticonSet)
+    SetPermanentSet $jprefs(emoticonSet)
 }
 
 proc ::Emoticons::Exists {word} {
@@ -404,7 +404,7 @@ proc ::Emoticons::MenuButton {w args} {
     ttk::menubutton $w -style Toolbutton \
       -compound image -image $btim
     
-    eval {::Emoticons::BuildMenu $wmenu} $args
+    eval {BuildMenu $wmenu} $args
     $w configure -menu $wmenu
 
     return $w
@@ -547,7 +547,9 @@ proc ::Emoticons::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::Emoticons::BuildPrefsPage {wpage} {
-    variable wpreftext 
+    variable wprefpage $wpage
+    variable wpreftext
+    variable wiconsetmenu
     variable tmpSet
     variable priv
     upvar ::Jabber::jprefs jprefs
@@ -566,7 +568,8 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     
     ttk::label $wc.l -text [mc preficonsel]
     pack  $wc.l  -side top -anchor w -pady 4
-    eval {ttk::optionmenu $wc.mb [namespace current]::tmpSet} $allSets
+    set wiconsetmenu [eval {
+	ttk::optionmenu $wc.mb [namespace current]::tmpSet} $allSets]
 
     set wfr $wc.fr
     ttk::labelframe $wfr -labelwidget $wc.mb \
@@ -584,6 +587,10 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     
     set wpreftext $wfr.t
     
+    ttk::button $wc.imp -text [mc {Import Iconset...}]  \
+      -command [namespace current]::ImportSet
+    pack $wc.imp -side top -anchor w -pady 4
+    
     trace add variable [namespace current]::tmpSet write  \
       [namespace current]::PopCmd
 
@@ -594,7 +601,40 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     }
 }
 
+proc ::Emoticons::ImportSet { } {
+    global  this
+    variable wprefpage
+    variable wiconsetmenu
+    
+    set types [list [list [mc {Jabber Iconset Archive}] {.jisp}]]
+    set fileName [tk_getOpenFile -parent [winfo toplevel $wprefpage] \
+      -filetypes $types -title [mc {Open jisp Archive}]]
+    if {[string length $fileName]} {
+	set tail [file tail $fileName]
+	set name [file rootname $tail]
+	if {[lsearch [GetAllSets] $name] >= 0} {
+	    ::UI::MessageBox -icon error -title [mc Error] \
+	      -message "Iconset \"$name\" already exists." \
+	      -parent [winfo toplevel $wprefpage]
+	    return
+	}
+	file copy $fileName $this(altEmoticonsPath)
+	set dst [file join $this(altEmoticonsPath) $tail]
+	if {[catch {
+	    LoadTmpIconSet $dst
+	} err]} {
+	    ::UI::MessageBox -icon error -title [mc Error] \
+	      -message "Failed loading iconset \"$name\". $err" \
+	      -parent [winfo toplevel $wprefpage]
+	} else {
+	    $wiconsetmenu add radiobutton -label $name  \
+	      -variable [namespace current]::tmpSet
+	}
+    }
+}
+
 proc ::Emoticons::PopCmd {name1 name2 op} {
+    variable wprefpage
     variable wpreftext 
     variable state
     variable tmpSet
@@ -608,7 +648,7 @@ proc ::Emoticons::PopCmd {name1 name2 op} {
 	} err]} {
 	    ::UI::MessageBox -icon error -title [mc Error] \
 	      -message "Failed loading iconset $var. $err" \
-	      -parent [winfo toplevel $wpreftext]
+	      -parent [winfo toplevel $wprefpage]
 	    set priv(havezip) 0
 	    set jprefs(emoticonSet) $priv(defaultSet)
 	    set tmpSet $priv(defaultSet)

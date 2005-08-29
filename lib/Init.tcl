@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.19 2005-08-26 15:02:34 matben Exp $
+# $Id: Init.tcl,v 1.20 2005-08-29 12:39:37 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -223,18 +223,22 @@ proc ::Init::SetThisEmbedded { } {
 proc ::Init::MakeDirs { } {
     global  this tcl_platform
     
-    if {![file isdirectory $this(prefsPath)]} {
-	file mkdir $this(prefsPath)
-    }
-    if {![file isdirectory $this(inboxCanvasPath)]} {
-	file mkdir $this(inboxCanvasPath)
-    }
-    if {![file isdirectory $this(historyPath)]} {
-	file mkdir $this(historyPath)
-    }
-    if {![file isdirectory $this(altItemPath)]} {
-	file mkdir $this(altItemPath)
-    }
+    foreach name {
+	prefsPath
+	inboxCanvasPath
+	historyPath
+	altItemPath
+	altEmoticonsPath
+	altRosticonsPath
+	altServiconsPath
+    } {
+	if {[file isfile $this($name)]} {
+	    file delete -force $this($name)
+	}
+	if {![file isdirectory $this($name)]} {
+	    file mkdir $this($name)
+	}
+    }	
     
     # Privacy!
     switch -- $tcl_platform(platform) {
@@ -397,9 +401,9 @@ proc ::Init::LoadPackages { } {
     # Other utility packages that can be platform specific.
     # The 'Thread' package requires that the Tcl core has been built with support.
     array set extraPacksArr {
-	macosx      {Itcl http Tclapplescript tls Thread MacCarbonPrint}
-	windows     {Itcl http printer gdi tls Thread optcl tcom}
-	unix        {Itcl http tls Thread}
+	macosx      {Itcl tkpng Tclapplescript tls Thread MacCarbonPrint}
+	windows     {Itcl tkpng printer gdi tls Thread optcl tcom}
+	unix        {Itcl tkpng tls Thread}
     }
     foreach {platform packList} [array get extraPacksArr] {
 	foreach name $packList {
