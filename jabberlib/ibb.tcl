@@ -3,9 +3,9 @@
 #      This file is part of the jabberlib. It provides support for the
 #      ibb stuff (In Band Bytestreams).
 #      
-#  Copyright (c) 20042005  Mats Bengtsson
+#  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.7 2005-08-26 15:02:34 matben Exp $
+# $Id: ibb.tcl,v 1.8 2005-08-31 09:51:59 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -13,13 +13,13 @@
 #      ibb - convenience command library for the ibb part of XMPP.
 #      
 #   SYNOPSIS
-#      jlib::ibb::new jlibname tclProc ?-opt value ...?
+#      jlib::ibb::init jlibname
 #
 #   OPTIONS
-#	-command tclProc
+#   
 #	
 #   INSTANCE COMMANDS
-#      ibbName send jid command ?-key value?
+#      jlibName ib send_set jid command ?-key value?
 #      
 ############################# CHANGES ##########################################
 #
@@ -28,16 +28,25 @@
 #       NEVER TESTED!!!!!!!
 
 package require jlib
-package require base64
+package require base64     ; # tcllib
+package require jlib::si
 
 package provide jlib::ibb 0.1
 
 namespace eval jlib::ibb {
 
-    variable usid 0
     variable inited 0
+    variable xmlns
+    set xmlns(ibb) "http://jabber.org/protocol/ibb"
 
-    jlib::ensamble_register ibb [namespace current]::cmdproc
+    jlib::ensamble_register ibb   \
+      [namespace current]::init   \
+      [namespace current]::cmdproc
+    
+    jlib::si::registertransport $xmlns(ibb) $xmlns(ibb) 80  \
+      [namespace current]::open   \
+      [namespace current]::send   \
+      [namespace current]::close    
 }
 
 # jlib::ibb::init --
@@ -46,9 +55,11 @@ namespace eval jlib::ibb {
   
 proc jlib::ibb::init {jlibname args} {
 
+    puts "jlib::ibb::init"
+    
     variable inited
-    upvar jlib::jxmlns jxmlns
-        
+    variable xmlns
+    
     if {!$inited} {
 	InitOnce
     }    
@@ -65,11 +76,11 @@ proc jlib::ibb::init {jlibname args} {
     array set opts $args
     
     # Each base64 byte takes 6 bits; need to translate to binary bytes.
-    set priv(binblock) [expr (6 * $opts(-block-size))/8]
-    set priv(binblock) [expr 6 * ($priv(binblock)/6)]    
+    set priv(binblock) [expr {(6 * $opts(-block-size))/8}]
+    set priv(binblock) [expr {6 * ($priv(binblock)/6)}]
     
     # Register some standard iq handlers that is handled internally.
-    $jlibname iq_register set $jxmlns(ibb) [namespace current]::handle_set
+    $jlibname iq_register set $xmlns(ibb) [namespace current]::handle_set
 
     return
 }
@@ -78,14 +89,15 @@ proc jlib::ibb::InitOnce { } {
     
     variable ampElem
     variable inited
-    upvar jlib::jxmlns jxmlns
+    variable xmlns
     
     set rule1 [wrapper::createtag "rule"  \
       -attrlist {condition deliver-at value stored action error}]
     set rule2 [wrapper::createtag "rule"  \
       -attrlist {condition match-resource value exact action error}]
-    set ampElem [wrapper::createtag "amp" -attrlist \
-      [list xmlns $jxmlns(ibb)] -subtags [list $rule1 $rule2]]
+    set ampElem [wrapper::createtag "amp"  \
+      -attrlist [list xmlns $xmlns(ibb)]   \
+      -subtags [list $rule1 $rule2]]
 
     set inited 1
 }
@@ -108,7 +120,44 @@ proc jlib::ibb::cmdproc {jlibname cmd args} {
     return [eval {$cmd $jlibname} $args]
 }
 
-# jlib::ibb::send --
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# jlib::ibb::open, send, close --
+# 
+#       Bindings for si.
+
+proc jlib::ibb::open {jlibname jid sid cmd} {
+    
+    puts "jlib::ibb::open"
+    
+    set open_cb [list [namespace current]::open_cb $jid $sid $cmd]
+    send_set $jlibname to $cmd   
+    return
+}
+
+proc jlib::ibb::open_cb {jid sid cmd } {
+    
+    
+    
+}
+
+proc jlib::ibb::send {jlibname } {
+    
+    puts "jlib::ibb::send"
+    
+    
+}
+
+proc jlib::ibb::close {jlibname } {
+    
+    puts "jlib::ibb::close"
+    
+    
+}
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# jlib::ibb::send_set --
 # 
 #       Initiates a transport
 #
@@ -122,22 +171,21 @@ proc jlib::ibb::cmdproc {jlibname cmd args} {
 # Results:
 #       sid (Session IDentifier).
 
-proc jlib::ibb::send {jlibname to cmd args} {
+proc jlib::ibb::send_set {jlibname to sid cmd args} {
 
-    variable usid
-    upvar jlib::jxmlns jxmlns
+    variable xmlns
     upvar ${jlibname}::ibb::priv priv
     upvar ${jlibname}::ibb::opts opts
 
     array set argsArr $opts
     array set argsArr $args
-    if {![info exists argsArr(-data)] && ![info exists argsArr(-file)] \\
+    if {![info exists argsArr(-data)]   \
+      && ![info exists argsArr(-file)]  \
       && ![info exists argsArr(-base64)]} {
 	return -code error "ibb must have any of -data, -file, or -base64"
     }
-    set sid [incr usid]
     set openElem [wrapper::createtag "open" -attrlist \
-      [list sid $sid block-size $argsArr(-block-size) xmlns $jxmlns(ibb)]
+      [list sid $sid block-size $argsArr(-block-size) xmlns $xmlns(ibb)]
     
     # Keep internal storage for this request.
     foreach {key value} $args {
@@ -146,8 +194,8 @@ proc jlib::ibb::send {jlibname to cmd args} {
     set priv(sid,$sid,to)  $to
     set priv(sid,$sid,cmd) $cmd
 
-    $priv(jlibname) send_iq set [list $openElem] -to $to  \
-      -command [list [namespace current]::OpenCB $ibbname]
+    jlib::send_iq $jlibname set [list $openElem] -to $to  \
+      -command [list [namespace current]::OpenCB $jlibname]
 
     return $sid
 }

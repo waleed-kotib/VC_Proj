@@ -11,7 +11,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.5 2005-08-14 07:13:18 matben Exp $
+# $Id: caps.tcl,v 1.6 2005-08-31 09:51:59 matben Exp $
 
 # UNFINISHED!!!
 #      
@@ -23,7 +23,9 @@ package provide jlib::caps 0.1
 
 namespace eval jlib::caps {
 
-    jlib::ensamble_register caps [namespace current]::cmdproc
+    jlib::ensamble_register caps  \
+      [namespace current]::init   \
+      [namespace current]::cmdproc
 }
 
 proc jlib::caps::init {jlibname args} {
