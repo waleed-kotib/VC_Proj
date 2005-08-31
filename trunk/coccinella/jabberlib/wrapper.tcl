@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.14 2005-08-26 15:02:34 matben Exp $
+# $Id: wrapper.tcl,v 1.15 2005-08-31 09:51:59 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -569,7 +569,7 @@ proc wrapper::createtag {tagname args} {
     array set xmlarr $xmldefaults
     
     # Override the defults with actual values.
-    if {[llength $args] > 0} {
+    if {[llength $args]} {
 	array set xmlarr $args
     }
     if {!(($xmlarr(-chdata) == "") && ($xmlarr(-subtags) == ""))} {
@@ -707,15 +707,28 @@ proc wrapper::getfirstchildwithtag {xmllist tag} {
     return $c
 }
 
+proc wrapper::getfirstchildwithxmlns {xmllist ns} {
+    
+    set c {}
+    foreach celem [lindex $xmllist 4] {
+	unset -nocomplain attr
+	array set attr [lindex $celem 1]
+	if {[info exists attr(xmlns)] && [string equal $attr(xmlns) $ns]} {
+	    set c $celem
+	    break
+	}
+    }
+    return $c
+}
+
 proc wrapper::getchildwithtaginnamespace {xmllist tag ns} {
     
     set clist {}
     foreach celem [lindex $xmllist 4] {
 	if {[string equal [lindex $celem 0] $tag]} {
-	    unset -nocomplain attrArr
-	    array set attrArr [lindex $celem 1]
-	    if {[info exists attrArr(xmlns)] &&  \
-	      [string equal $attrArr(xmlns) $ns]} {
+	    unset -nocomplain attr
+	    array set attr [lindex $celem 1]
+	    if {[info exists attr(xmlns)] && [string equal $attr(xmlns) $ns]} {
 		lappend clist $celem
 		break
 	    }
@@ -751,10 +764,9 @@ proc wrapper::getnamespacefromchilds {childs tag ns} {
     set clist {}
     foreach celem $childs {
 	if {[string equal [lindex $celem 0] $tag]} {
-	    unset -nocomplain attrArr
-	    array set attrArr [lindex $celem 1]
-	    if {[info exists attrArr(xmlns)] &&  \
-	      [string equal $attrArr(xmlns) $ns]} {
+	    unset -nocomplain attr
+	    array set attr [lindex $celem 1]
+	    if {[info exists attr(xmlns)] && [string equal $attr(xmlns) $ns]} {
 		lappend clist $celem
 		break
 	    }

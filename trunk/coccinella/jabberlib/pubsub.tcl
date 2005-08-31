@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.4 2005-08-14 07:13:18 matben Exp $
+# $Id: pubsub.tcl,v 1.5 2005-08-31 09:51:59 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -33,7 +33,9 @@ package provide jlib::pubsub 0.1
 
 namespace eval jlib::pubsub {
     
-    jlib::ensamble_register pubsub [namespace current]::cmdproc
+    jlib::ensamble_register pubsub  \
+      [namespace current]::init     \
+      [namespace current]::cmdproc
 }
 
 proc jlib::pubsub::init {jlibname} {

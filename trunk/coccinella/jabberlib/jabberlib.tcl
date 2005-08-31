@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.104 2005-08-28 13:37:04 matben Exp $
+# $Id: jabberlib.tcl,v 1.105 2005-08-31 09:51:59 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -230,8 +230,8 @@ namespace eval jlib {
     
     # Let jlib components register themselves for subcommands, ensamble,
     # so that they can be invoked by: jlibname subcommand ...
-    #   ensamble(name) tclProc
     variable ensamble
+    set ensamble(names) {}
     
     # Some common xmpp xml namespaces.
     variable xmppxmlns
@@ -378,12 +378,9 @@ proc jlib::new {rostername clientcmd args} {
     set conf(allroomsin) {}
     groupchat::init $jlibname
     
-    # Init ensamble commands using name convention init proc.
-    foreach ename [array names ensamble] {
-	set ecmd ${ename}::init
-	if {[llength [info commands $ecmd]]} {
-	    uplevel #0 $ecmd $jlibname $args
-	}
+    # Init ensamble commands.
+    foreach name $ensamble(names) {
+	uplevel #0 $ensamble($name,init) $jlibname $args
     }
         
     # Register some standard iq handlers that are handled internally.
@@ -479,16 +476,19 @@ proc jlib::havetls { } {
 #       Register a sub command.
 #       This is then used as: 'jlibName subCmd ...'
 
-proc jlib::ensamble_register {name cmd} {
+proc jlib::ensamble_register {name initProc cmdProc} {
     variable ensamble
     
-    set ensamble($name) $cmd
+    set ensamble(names) [lsort -unique [concat $ensamble(names) $name]]
+    set ensamble($name,init) $initProc
+    set ensamble($name,cmd)  $cmdProc
 }
 
 proc jlib::ensamble_deregister {name} {
     variable ensamble
     
-    array unset ensamble $name
+    set ensamble(names) [lsearch -all -not -inline $ensamble(names) $name]
+    array unset ensamble ${name},*
 }
 
 # jlib::cmdproc --
@@ -509,8 +509,8 @@ proc jlib::cmdproc {jlibname cmd args} {
     Debug 5 "jlib::cmdproc: jlibname=$jlibname, cmd='$cmd', args='$args'"
 
     # Which command? Just dispatch the command to the right procedure.
-    if {[info exists ensamble($cmd)]} {
-	return [uplevel #0 $ensamble($cmd) $jlibname $args]
+    if {[info exists ensamble($cmd,cmd)]} {
+	return [uplevel #0 $ensamble($cmd,cmd) $jlibname $args]
     } else {
 	return [eval {$cmd $jlibname} $args]
     }
@@ -1812,11 +1812,11 @@ proc jlib::bind_resource {jlibname resource cmd} {
     
     variable xmppxmlns
 
-    set xmllist [wrapper::createtag bind \
-      -attrlist [list xmlns $xmppxmlns(bind)] \
+    set xmllist [wrapper::createtag bind       \
+      -attrlist [list xmlns $xmppxmlns(bind)]  \
       -subtags [list [wrapper::createtag resource -chdata $resource]]]
-    send_iq $jlibname set [list $xmllist] -command \
-      [list [namespace current]::parse_bind_resource $jlibname $cmd]
+    send_iq $jlibname set [list $xmllist]  \
+      -command [list [namespace current]::parse_bind_resource $jlibname $cmd]
 }
 
 proc jlib::parse_bind_resource {jlibname cmd type subiq args} {
@@ -1827,9 +1827,9 @@ proc jlib::parse_bind_resource {jlibname cmd type subiq args} {
     # The server MAY change the 'resource' why we need to check this here.
     if {[string equal [wrapper::gettag $subiq] bind] &&  \
       [string equal [wrapper::getattribute $subiq xmlns] $xmppxmlns(bind)]} {
-	set jidelem [wrapper::getchildswithtag $subiq jid]
-	if {$jidelem != {}} {
-	    set sjid [wrapper::getcdata $jidelem]
+	set jidElem [wrapper::getchildswithtag $subiq jid]
+	if {[llength $jidElem]} {
+	    set sjid [wrapper::getcdata $jidElem]
 	    splitjid $sjid sjid2 sresource
 	    if {![string equal [resourcemap $locals(resource)] $sresource]} {
 		set locals(resource) $sresource

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.2 2005-08-26 15:02:34 matben Exp $
+# $Id: bytestreams.tcl,v 1.3 2005-08-31 09:51:59 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -39,7 +39,9 @@ namespace eval jlib::bytestreams {
 
     variable xmlnsbs "http://jabber.org/protocol/bytestreams"
     
-    jlib::ensamble_register bytestreams [namespace current]::cmdproc
+    jlib::ensamble_register bytestreams  \
+      [namespace current]::init          \
+      [namespace current]::cmdproc
 
 }
 
