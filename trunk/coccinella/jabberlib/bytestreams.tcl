@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.3 2005-08-31 09:51:59 matben Exp $
+# $Id: bytestreams.tcl,v 1.4 2005-09-01 14:01:09 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -37,12 +37,17 @@ package provide jlib::bytestreams 0.1
 
 namespace eval jlib::bytestreams {
 
-    variable xmlnsbs "http://jabber.org/protocol/bytestreams"
+    variable xmlns
+    set xmlns(bs)  "http://jabber.org/protocol/bytestreams"
     
     jlib::ensamble_register bytestreams  \
       [namespace current]::init          \
       [namespace current]::cmdproc
 
+    jlib::si::registertransport $xmlns(bs) $xmlns(bs) 40  \
+      [namespace current]::open   \
+      [namespace current]::send   \
+      [namespace current]::close    
 }
 
 # jlib::bytestreams::init --
@@ -51,11 +56,11 @@ namespace eval jlib::bytestreams {
 #       Note: this proc name is by convention, do not change!
   
 proc jlib::bytestreams::init {jlibname args} {
-    variable xmlnsbs
+    variable xmlns
     
     Debug 4 "jlib::bytestreams::init"
     
-    $jlibname iq_register set $xmlnsbs [namespace current]::handle_set
+    $jlibname iq_register set $xmlns(bs) [namespace current]::handle_set
 }
 
 proc jlib::bytestreams::cmdproc {jlibname cmd args} {
@@ -65,6 +70,44 @@ proc jlib::bytestreams::cmdproc {jlibname cmd args} {
     # Which command? Just dispatch the command to the right procedure.
     return [eval {$cmd $jlibname} $args]
 }
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# jlib::bytestreams::open, send, close --
+# 
+#       Bindings for si.
+
+proc jlib::bytestreams::open {jlibname jid sid cmd} {
+    
+    puts "jlib::bytestreams::open"
+    
+    set open_cb [list [namespace current]::open_cb $cmd]
+    #send_set $jlibname $jid $sid $open_cb
+    return
+}
+
+proc jlib::bytestreams::open_cb {jlibname jid sid cmd type subiq args} {
+    
+    puts "jlib::bytestreams::open_cb"
+    
+    uplevel #0 $cmd [list $jlibname $sid $type $subiq]
+}
+
+proc jlib::bytestreams::send {jlibname } {
+    
+    puts "jlib::bytestreams::send"
+    
+    
+}
+
+proc jlib::bytestreams::close {jlibname } {
+    
+    puts "jlib::bytestreams::close"
+    
+    
+}
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 proc jlib::bytestreams::streamhosts {jid} {    
     variable streamhosts
@@ -95,9 +138,9 @@ proc jlib::bytestreams::streamhosts {jid} {
 #       None
 
 proc jlib::bytestreams::get {jlibname to cmd} {
-    variable xmlnsbs
+    variable xmlns
     
-    $jlibname iq_get $xmlnsbs -to $to \
+    $jlibname iq_get $xmlns(bs) -to $to \
       -command [list [namespace current]::get_cb $to $cmd]
 }
 
@@ -123,9 +166,9 @@ proc jlib::bytestreams::get_cb {from cmd jlibname type queryElem} {
 #       -streamhost {jid (-host -port | -zeroconf)}
 
 proc jlib::bytestreams::initiate {jlibname to sid args} {
-    variable xmlnsbs
+    variable xmlns
     
-    set attrlist [list xmlns $xmlnsbs sid $sid mode tcp]
+    set attrlist [list xmlns $xmlns(bs) sid $sid mode tcp]
     set sublist {}
     set opts {}
     foreach {key value} $args {
@@ -160,7 +203,7 @@ proc jlib::bytestreams::initiate {jlibname to sid args} {
 #       Return an error to initiator.
 
 proc jlib::bytestreams::error {jlibname to type args} {
-    variable xmlnsbs
+    variable xmlns
     upvar jlib::xmppxmlns xmppxmlns
        
     switch -- $type {
@@ -176,7 +219,7 @@ proc jlib::bytestreams::error {jlibname to type args} {
 	    return -code error "unknown type \"$type\""
 	}
     }   
-    set queryElem [wrapper::createtag "query" -attrlist [list xmlns $xmlnsbs]]
+    set queryElem [wrapper::createtag "query" -attrlist [list xmlns $xmlns(bs)]]
     set subElem   [wrapper::createtag $errName \
       -attrlist [list xmlns $xmppxmlns(stanzas)]]
     set errorElem [wrapper::createtag "error" \
@@ -191,12 +234,12 @@ proc jlib::bytestreams::error {jlibname to type args} {
 #       Target notifies initiator of connection.
 
 proc jlib::bytestreams::used {jlibname to id hostjid} {
-    variable xmlnsbs
+    variable xmlns
     
     set usedElem [wrapper::createtag "streamhost-used" \
       -attrlist [list jid $hostjid]]
     set xmllist [wrapper::createtag "query" \
-      -attrlist [list xmlns $xmlnsbs] \
+      -attrlist [list xmlns $xmlns(bs)] \
       -subtags [list $usedElem]]
 
     $jlibname send_iq "result" [list $xmllist] -to $to -id $id
@@ -207,7 +250,7 @@ proc jlib::bytestreams::used {jlibname to id hostjid} {
 #       Initiator requests activation of bytestream.
 
 proc jlib::bytestreams::activate {jlibname to sid targetjid args} {
-    variable xmlnsbs
+    variable xmlns
     
     set opts {}
     foreach {key value} $args {
@@ -224,7 +267,7 @@ proc jlib::bytestreams::activate {jlibname to sid targetjid args} {
     set activateElem [wrapper::createtag "activate" \
       -attrlist [list jid $targetjid]]
     set xmllist [wrapper::createtag "query" \
-      -attrlist [list xmlns $xmlnsbs sid $sid] \
+      -attrlist [list xmlns $xmlns(bs) sid $sid] \
       -subtags [list $activateElem]]
 
     eval {$jlibname send_iq "set" [list $xmllist] -to $to} $opts
