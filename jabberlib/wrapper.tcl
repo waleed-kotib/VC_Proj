@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.15 2005-08-31 09:51:59 matben Exp $
+# $Id: wrapper.tcl,v 1.16 2005-09-01 14:01:09 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -572,7 +572,7 @@ proc wrapper::createtag {tagname args} {
     if {[llength $args]} {
 	array set xmlarr $args
     }
-    if {!(($xmlarr(-chdata) == "") && ($xmlarr(-subtags) == ""))} {
+    if {[string length $xmlarr(-chdata)] || [llength $xmlarr(-subtags)]} {
 	set xmlarr(-isempty) 0
     }
     

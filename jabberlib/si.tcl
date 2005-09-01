@@ -5,12 +5,12 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.1 2005-08-31 09:51:59 matben Exp $
+# $Id: si.tcl,v 1.2 2005-09-01 14:01:09 matben Exp $
 # 
 ############################# USAGE ############################################
 #
 #   NAME
-#      ibb - convenience command library for the si part of XMPP.
+#      si - convenience command library for stream initiation.
 #      
 #   SYNOPSIS
 #      jlib::si::init jlibName
@@ -20,12 +20,13 @@
 #	
 #   INSTANCE COMMANDS
 #      jlibName si send_set ...
+#      jlibName si send_data ...
+#      jlibName si close ...
+#      jlibName si getstate sid
 #      
 ############################# CHANGES ##########################################
 #
 #       0.1         first version
-#       
-#       NEVER TESTED!!!!!!!
 
 package require jlib			   
 			  
@@ -36,13 +37,13 @@ package provide jlib::si 0.1
 namespace eval jlib::si {
 
     variable xmlns
-    set xmlns(si)    "http://jabber.org/protocol/si"
-    set xmlns(neg)   "http://jabber.org/protocol/feature-neg"
-    set xmlns(xdata) "jabber:x:data"
+    set xmlns(si)     "http://jabber.org/protocol/si"
+    set xmlns(neg)    "http://jabber.org/protocol/feature-neg"
+    set xmlns(xdata)  "jabber:x:data"
     
     # Storage for registered transports.
     variable trpt
-    set trpt(names) {}
+    set trpt(list) {}
     
     jlib::ensamble_register si   \
       [namespace current]::init  \
@@ -51,7 +52,8 @@ namespace eval jlib::si {
 
 # jlib::si::registertransport --
 # 
-#       Register transports.
+#       Register transports. 
+#       Typically 'name' and 'ns' are xml namespaces and identical.
 
 proc jlib::si::registertransport {name ns priority openProc sendProc closeProc} {
 
@@ -59,18 +61,27 @@ proc jlib::si::registertransport {name ns priority openProc sendProc closeProc} 
     
     puts "jlib::si::registertransport"
     
-    lappend trpt(names) [list $name $priority]
-    set trpt(names) [lsort -unique -index 1 $trpt(names)]
+    lappend trpt(list) [list $name $priority]
+    set trpt(list) [lsort -unique -index 1 $trpt(list)]
     set trpt($name,ns)    $ns
     set trpt($name,open)  $openProc
     set trpt($name,send)  $sendProc
     set trpt($name,close) $closeProc
+
+    # Keep these in sync.
+    set trpt(names)   {}
+    set trpt(streams) {}
+    foreach spec $trpt(list) {
+	set nm [lindex $spec 0]
+	lappend trpt(names)   $nm
+	lappend trpt(streams) $trpt($nm,ns)
+    }
 }
 
-proc jlib::ibb::registerprofile {profile handler} {
+proc jlib::si::registerprofile {profile handler} {
     
     variable prof
-    puts "jlib::ibb::registerprofile"
+    puts "jlib::si::registerprofile"
     
     set prof($profile) $handler
 }
@@ -100,14 +111,17 @@ proc jlib::si::cmdproc {jlibname cmd args} {
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# These are all functions to use by a sender.
 
 # jlib::si::send_set --
 # 
 #       Makes a stream initiation.
 #       It will eventually, if negotiation went ok, invoke the stream
-#       'open' method.
+#       'open' method. 
+#       The 'args' ar transparently delivered to the streams 'open' method.
 
-proc jlib::si::send_set {jlibname jid sid mime profile profileElem cmd} {
+proc jlib::si::send_set {jlibname jid sid mime profile profileElem cmd args} {
     
     puts "jlib::si::send_set"
     
@@ -119,28 +133,32 @@ proc jlib::si::send_set {jlibname jid sid mime profile profileElem cmd} {
     set state($sid,mime)    $mime
     set state($sid,profile) $profile
     set state($sid,cmd)     $cmd
+    set state($sid,args)    $args
+    foreach {key val} $args {
+	set state($sid,$key) $val
+    }
     
     set optionElems {}
-    foreach spec $trpt(names) {
-	set name [lindex $spec 0]
+    foreach name $trpt(names) {
 	set valueElem [wrapper::createtag "value" -chdata $trpt($name,ns)]
 	lappend optionElems [wrapper::createtag "option"  \
-	  -subtags [list $valueElem]
+	  -subtags [list $valueElem]]
     }
     set fieldElem [wrapper::createtag "field"      \
-      -attrlist {var stream-method type list-single}]
+      -attrlist {var stream-method type list-single} \
+      -subtags $optionElems]
     set xElem [wrapper::createtag "x"              \
       -attrlist {xmlns jabber:x:data type form}    \
       -subtags [list $fieldElem]]
     set featureElem [wrapper::createtag "feature"  \
       -attrlist [list xmlns $xmlns(neg)]           \
-      -subtags [list $fieldElem]
-    
-    set siElem [wrapper::createtag "si"            \
+      -subtags [list $fieldElem]]
+        
+    set siElem [wrapper::createtag "si"  \
       -attrlist [list xmlns $xmlns(si) id $sid mime-type $mime profile $profile] \
-      -subtags [list $profileElem $featureElem]
+      -subtags [list $profileElem $featureElem]]
     
-    jlib::send_iq $jlibname set $siElem -to $jid  \
+    jlib::send_iq $jlibname set [list $siElem] -to $jid  \
       -command [list [namespace current]::send_set_cb $jlibname $sid]
 
     return
@@ -159,19 +177,16 @@ proc jlib::si::send_set_cb {jlibname sid type subiq args} {
     upvar ${jlibname}::si::state state
 
     if {[string equal $type "error"]} {
-	uplevel #0 $state(cmd) [list $type ...]
+	uplevel #0 $state($sid,cmd) [list $jlibname $type $sid $subiq]
 	free $jlibname $sid
 	return
     }
  
     # Verify that it is consistent.
-    set values {}
     set value {}
-    foreach name $trpt(names) {
-	lappend values $trpt($name,ns)
-    }
     if {![string equal [wrapper::gettag $subiq] "si"]} {
-	uplevel #0 $state(cmd) [list error ...]
+	# @@@ errors ?
+	uplevel #0 $state($sid,cmd) [list $jlibname error $sid {}]
 	free $jlibname $sid
 	return
     }
@@ -191,16 +206,17 @@ proc jlib::si::send_set_cb {jlibname sid type subiq args} {
     }
     
     # Find if matching transport.
-    if {[lsearch $values $value] >= 0} {
+    if {[lsearch $trpt(streams) $value] >= 0} {
 	
 	# Open transport. 
 	# We provide a callback for the transport when open is finished.
 	set state($sid,name) $value
 	set jid $state($sid,jid)
-	set cmd [list [namespace current]::transport_open_response $jlibname $sid]
-	uplevel #0 $trpt($value,open) [list $jlibname $jid $sid $cmd]
+	set cmd [namespace current]::transport_open_response
+	uplevel #0 $trpt($value,open) [list $jlibname $jid $sid $cmd]  \
+	  $state($sid,args)
     } else {
-	uplevel #0 $state(cmd) [list error ...]
+	uplevel #0 $state($sid,cmd) [list $jlibname error $sid {}]
 	free $jlibname $sid
     }
 }
@@ -211,22 +227,59 @@ proc jlib::si::send_set_cb {jlibname sid type subiq args} {
 #       It is also the end of the sequence of callbacks generated by 
 #       'jlib::si::send_set'.
 
-proc jlib::si::transport_open_response {jlibname sid type} {
+proc jlib::si::transport_open_response {jlibname sid type subiq} {
     
     upvar ${jlibname}::si::state state
     
     puts "jlib::si::transport_open_response"
     
-    # Rejected stream initiation.
-    if {[string equal $type "error"]} {
-	uplevel #0 $state(cmd) [list error ...]
-    } else {
-	uplevel #0 $state(cmd) [list result ...]
-    }
+    uplevel #0 $state(cmd) [list $jlibname $type $sid $subiq]
     free $jlibname $sid
 }
 
+# jlib::si::getstate --
+# 
+#       Just an access function to the internal state variables.
+
+proc jlib::si::getstate {jlibname sid} {
+    
+    upvar ${jlibname}::si::state state
+    
+    set arr {}
+    foreach {key value} [array get state $sid,*] {
+	set name [string map [list "$sid," ""] $key]
+	lappend arr $name $value
+    }
+    return $arr
+}
+
+#--- wrappers for send & close operations ---
+
+# jlib::si::send_data, close --
+# 
+#       Opaque calls to send a chunk or to close a stream.
+
+proc jlib::si::send_data {jlibname sid data} {
+    
+    variable trpt
+    upvar ${jlibname}::si::state state
+    
+    set stream $state($sid,name)
+    uplevel #0 $trpt($stream,send) [list $jlibname $sid $data]    
+}
+
+proc jlib::si::close {jlibname sid} {
+
+    variable trpt
+    upvar ${jlibname}::si::state state
+    
+    set stream $state($sid,name)
+    uplevel #0 $trpt($stream,close) [list $jlibname $sid]    
+}
+
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# These are all functions to use by a receiver of a stream.
 
 # jlib::si::handle_set --
 # 
@@ -276,15 +329,11 @@ proc jlib::si::handle_set {jlibname from subiq args} {
 	    }
 	}
     }
-    set myvalues {}
-    foreach name $trpt(names) {
-	lappend myvalues $trpt($name,ns)
-    }
     
     # Pick first matching since priority ordered.
     set stream {}
     foreach name $values {
-	if {[lsearch $myvalues $name] >= 0} {
+	if {[lsearch $trpt(streams) $name] >= 0} {
 	    set stream $name
 	    break
 	}
@@ -362,12 +411,10 @@ proc jlib::si::profile_response {jlibname sid type profileElem} {
     set jid $state($sid,-from)
     set id  $state($sid,-id)
     
-    jlib::send_iq $jlibname result $siElem -to $jid -id $id
+    jlib::send_iq $jlibname result [list $siElem] -to $jid -id $id
 
     return
 }
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 proc jlib::si::send_error {jlibname sid code type stanza ...} {
     

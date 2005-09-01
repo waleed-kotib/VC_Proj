@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.24 2005-08-26 15:02:34 matben Exp $
+# $Id: disco.tcl,v 1.25 2005-09-01 14:01:09 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -78,6 +78,7 @@
 package require jlib
 
 package provide disco 0.1
+package provide jlib::disco 0.1
 
 namespace eval disco {
     

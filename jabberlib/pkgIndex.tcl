@@ -26,4 +26,7 @@ package ifneeded wrapper 1.0  [list source [file join $dir wrapper.tcl]]
 
 package ifneeded jlib::bytestreams 0.1 [list source [file join $dir bytestreams.tcl]]
 package ifneeded jlib::caps        0.1 [list source [file join $dir caps.tcl]]
+package ifneeded jlib::ftrans      0.1 [list source [file join $dir ftrans.tcl]]
+package ifneeded jlib::ibb         0.1 [list source [file join $dir ibb.tcl]]
 package ifneeded jlib::pubsub      0.1 [list source [file join $dir pubsub.tcl]]
+package ifneeded jlib::si          0.1 [list source [file join $dir si.tcl]]

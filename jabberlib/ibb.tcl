@@ -1,11 +1,11 @@
 #  ibb.tcl --
 #  
-#      This file is part of the jabberlib. It provides support for the
-#      ibb stuff (In Band Bytestreams).
+#      This file is part of the jabberlib. 
+#      It provides support for the ibb stuff (In Band Bytestreams).
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.8 2005-08-31 09:51:59 matben Exp $
+# $Id: ibb.tcl,v 1.9 2005-09-01 14:01:09 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -24,8 +24,6 @@
 ############################# CHANGES ##########################################
 #
 #       0.1         first version
-#       
-#       NEVER TESTED!!!!!!!
 
 package require jlib
 package require base64     ; # tcllib
@@ -46,7 +44,7 @@ namespace eval jlib::ibb {
     jlib::si::registertransport $xmlns(ibb) $xmlns(ibb) 80  \
       [namespace current]::open   \
       [namespace current]::send   \
-      [namespace current]::close    
+      [namespace current]::close
 }
 
 # jlib::ibb::init --
@@ -126,19 +124,20 @@ proc jlib::ibb::cmdproc {jlibname cmd args} {
 # 
 #       Bindings for si.
 
-proc jlib::ibb::open {jlibname jid sid cmd} {
+proc jlib::ibb::open {jlibname jid sid cmd args} {
     
     puts "jlib::ibb::open"
     
-    set open_cb [list [namespace current]::open_cb $jid $sid $cmd]
-    send_set $jlibname to $cmd   
+    set open_cb [list [namespace current]::open_cb $cmd]
+    eval {send_open $jlibname $jid $sid $open_cb} $args
     return
 }
 
-proc jlib::ibb::open_cb {jid sid cmd } {
+proc jlib::ibb::open_cb {jlibname jid sid cmd type subiq args} {
     
+    puts "jlib::ibb::open_cb"
     
-    
+    uplevel #0 $cmd [list $jlibname $jid $sid $type $subiq]
 }
 
 proc jlib::ibb::send {jlibname } {
@@ -148,21 +147,92 @@ proc jlib::ibb::send {jlibname } {
     
 }
 
-proc jlib::ibb::close {jlibname } {
+proc jlib::ibb::close {jlibname jid sid cmd} {
     
     puts "jlib::ibb::close"
     
+    set open_cb [list [namespace current]::close_cb $cmd]
+    send_close $jlibname $jid $sid close_cb
+}
+
+proc jlib::ibb::close_cb {jlibname jid sid cmd type subiq args} {
     
+    puts "jlib::ibb::close_cb"
+    
+    uplevel #0 $cmd [list $jlibname $jid $sid $type $subiq]
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# jlib::ibb::send_set --
+proc jlib::ibb::configure {jlibname args} {
+    
+    upvar ${jlibname}::ibb::opts opts
+
+    # @@@ TODO
+    
+}
+
+# jlib::ibb::send_open --
 # 
-#       Initiates a transport
+#       Initiates a file transport. We must be able to configure 'block-size'
+#       from the file-transfer profile.
 #
 # Arguments:
-#       to
+# 
+
+proc jlib::ibb::send_open {jlibname jid sid cmd args} {
+    
+    variable xmlns
+    upvar ${jlibname}::ibb::opts opts
+    
+    array set arr [list -block-size $opts(-block-size)]
+    array set arr $args
+        
+    set openElem [wrapper::createtag "open"  \
+      -attrlist [list sid $sid block-size $arr(-block-size) xmlns $xmlns(ibb)]
+    jlib::send_iq $jlibname set [list $openElem] -to $jid  \
+      -command [concat $cmd [list $jlibname $jid $sid]]
+    return
+}
+
+# jlib::ibb::send_data --
+# 
+# 
+
+proc jlib::ibb::send_data {jlibname jid sid} {
+    
+    variable xmlns
+
+    
+    
+}
+
+# jlib::ibb::send_close --
+# 
+#       Initiates a file transport.
+#
+# Arguments:
+# 
+
+proc jlib::ibb::send_close {jlibname jid sid cmd} {
+    
+    variable xmlns
+
+    set closeElem [wrapper::createtag "close"  \
+      -attrlist [list sid $sid xmlns $xmlns(ibb)]
+    jlib::send_iq $jlibname set [list $closeElem] -to $jid  \
+      -command [concat $cmd [list $jlibname $jid $sid]]
+    return
+}
+
+# UNTESTED ...........
+
+# jlib::ibb::send_file --
+# 
+#       Supposed to be a high level send interface. Not used by si.
+#
+# Arguments:
+#       jid
 #       cmd
 #       args:   -data   binary data
 #               -file   file path
@@ -171,7 +241,7 @@ proc jlib::ibb::close {jlibname } {
 # Results:
 #       sid (Session IDentifier).
 
-proc jlib::ibb::send_set {jlibname to sid cmd args} {
+proc jlib::ibb::send_file {jlibname jid sid cmd args} {
 
     variable xmlns
     upvar ${jlibname}::ibb::priv priv
@@ -191,10 +261,10 @@ proc jlib::ibb::send_set {jlibname to sid cmd args} {
     foreach {key value} $args {
 	set priv(sid,$sid,$key) $value
     }
-    set priv(sid,$sid,to)  $to
+    set priv(sid,$sid,jid) $jid
     set priv(sid,$sid,cmd) $cmd
 
-    jlib::send_iq $jlibname set [list $openElem] -to $to  \
+    jlib::send_iq $jlibname set [list $openElem] -to $jid  \
       -command [list [namespace current]::OpenCB $jlibname]
 
     return $sid

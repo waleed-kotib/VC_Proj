@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.105 2005-08-31 09:51:59 matben Exp $
+# $Id: jabberlib.tcl,v 1.106 2005-09-01 14:01:09 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -377,11 +377,6 @@ proc jlib::new {rostername clientcmd args} {
     # Init conference and groupchat state.
     set conf(allroomsin) {}
     groupchat::init $jlibname
-    
-    # Init ensamble commands.
-    foreach name $ensamble(names) {
-	uplevel #0 $ensamble($name,init) $jlibname $args
-    }
         
     # Register some standard iq handlers that are handled internally.
     iq_register $jlibname get jabber:iq:last    \
@@ -397,6 +392,11 @@ proc jlib::new {rostername clientcmd args} {
     
     # Init the service layer for this jlib instance.
     service::init $jlibname
+    
+    # Init ensamble commands.
+    foreach name $ensamble(names) {
+	uplevel #0 $ensamble($name,init) $jlibname $args
+    }
     
     return $jlibname
 }
@@ -3941,6 +3941,17 @@ proc jlib::setdebug {args} {
     } else {
 	return -code error "Usage: jlib::setdebug ?integer?"
     }
+}
+
+# jlib::generateuuid --
+# 
+#       Simplified uuid generator. See the uuid package for a better one.
+
+proc jlib::generateuuid {} {
+        
+    set hex1 [format {%x} [clock clicks]]
+    set hex2 [format {%x} [expr int(100000000*rand())]]
+    return $hex1-$hex2
 }
 
 proc jlib::Debug {num str} {
