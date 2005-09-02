@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.139 2005-08-26 15:02:34 matben Exp $
+# $Id: Jabber.tcl,v 1.140 2005-09-02 17:06:25 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -23,7 +23,10 @@ package require jlib
 package require roster
 package require disco
 package require jlib::http
-#package require jlib::caps
+package require jlib::si
+package require jlib::bytestreams
+package require jlib::ibb
+package require jlib::ftrans
 
 # We should have some component mechanism that lets packages load themselves.
 package require Agents

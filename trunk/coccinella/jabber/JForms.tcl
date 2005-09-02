@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.20 2005-08-14 07:10:51 matben Exp $
+# $Id: JForms.tcl,v 1.21 2005-09-02 17:06:25 matben Exp $
 # 
 #      Updated to version 2.5 of JEP-0004
 #  
@@ -1018,14 +1018,11 @@ proc ::JForms::ResultXDataList {token queryElem} {
     upvar 0 $token state
     
     set res {}
-    set xlist [wrapper::getchildwithtaginnamespace $queryElem x "jabber:x:data"]
-    if {$xlist == {}} {
+    set xElem [wrapper::getfirstchild $queryElem x "jabber:x:data"]
+    if {$xElem == {}} {
 	return -code error "Did not identify the <x> element in search result"
     }
-    
-    # We expect just a single x element.
-    set xElem [lindex $xlist 0]    
-    
+        
     # Loop through the items. The first one must be a <reported> element.
     # We are not guaranteed to receive every field.
     

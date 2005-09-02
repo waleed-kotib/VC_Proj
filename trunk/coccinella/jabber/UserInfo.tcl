@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.6 2005-08-26 15:02:34 matben Exp $
+# $Id: UserInfo.tcl,v 1.7 2005-09-02 17:06:26 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -75,7 +75,13 @@ proc ::UserInfo::Get {jid {node ""}} {
     incr priv(ncount)
     
     # jabber:iq:version
-    if {$avail} {
+    set version 0
+    if {($priv(type) eq "user") && $avail} {
+	set version 1
+    } elseif {$priv(type) eq "item"} {
+	set version 1
+    }
+    if {$version} {
 	$jstate(jlib) get_version $jid [list [namespace current]::VersionCB $token]
 	incr priv(ncount)
     }
