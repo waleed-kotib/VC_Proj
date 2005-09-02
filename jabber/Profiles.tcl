@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.45 2005-08-29 12:39:37 matben Exp $
+# $Id: Profiles.tcl,v 1.46 2005-09-02 17:06:25 matben Exp $
 
 package provide Profiles 1.0
 
@@ -46,11 +46,19 @@ proc ::Profiles::InitHook { } {
     variable selected
     
     set profiles {jabber.org {jabber.org myUsername myPassword}}
+    lappend profiles {Google Talk} {gmail.com You from_gmail_your_account  \
+      -ip talk.google.com -port 5223 -ssl 1 -digest 0}
     set selected [lindex $profiles 0]
 
     ::PrefUtils::Add [list  \
       [list ::Profiles::profiles   profiles          $profiles   userDefault] \
       [list ::Profiles::selected   selected_profile  $selected   userDefault]]
+    
+    # Google Talk persistent?
+    if {[lsearch -glob $profiles "gmail.com *"] < 0} {
+	lappend profiles {Google Talk} {gmail.com You from_gmail_your_account  \
+	  -ip talk.google.com -port 5223 -ssl 1 -digest 0}
+    }	
     
     # Sanity check.
     SanityCheck

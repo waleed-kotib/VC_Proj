@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.50 2005-08-14 07:10:51 matben Exp $
+# $Id: OOB.tcl,v 1.51 2005-09-02 17:06:25 matben Exp $
 
 package require uriencode
 
@@ -118,7 +118,7 @@ proc ::OOB::BuildSet {jid} {
     grid  $frmid.btfile  $frmid.efile  -padx 2 -pady 2 -sticky e
     grid  $frmid.ldesc   $frmid.edesc  -padx 2 -pady 2 -sticky e
     grid  $frmid.efile   $frmid.edesc  -sticky ew
-    grid columnconfigure $frmid 0 -weight 1
+    grid columnconfigure $frmid 1 -weight 1
 
     pack  $frmid  -side top -fill both -expand 1
     
