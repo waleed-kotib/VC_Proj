@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.4 2005-09-01 14:01:09 matben Exp $
+# $Id: bytestreams.tcl,v 1.5 2005-09-02 17:05:50 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -45,9 +45,9 @@ namespace eval jlib::bytestreams {
       [namespace current]::cmdproc
 
     jlib::si::registertransport $xmlns(bs) $xmlns(bs) 40  \
-      [namespace current]::open   \
-      [namespace current]::send   \
-      [namespace current]::close    
+      [namespace current]::si_open   \
+      [namespace current]::si_send   \
+      [namespace current]::si_close    
 }
 
 # jlib::bytestreams::init --
@@ -73,36 +73,36 @@ proc jlib::bytestreams::cmdproc {jlibname cmd args} {
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# jlib::bytestreams::open, send, close --
+# jlib::bytestreams::si_open, si_send, si_close --
 # 
 #       Bindings for si.
 
-proc jlib::bytestreams::open {jlibname jid sid cmd} {
+proc jlib::bytestreams::si_open {jlibname jid sid cmd} {
     
-    puts "jlib::bytestreams::open"
+    puts "jlib::bytestreams::si_open"
     
-    set open_cb [list [namespace current]::open_cb $cmd]
-    #send_set $jlibname $jid $sid $open_cb
+    set si_open_cb [list [namespace current]::si_open_cb $cmd]
+    #send_set $jlibname $jid $sid $si_open_cb
     return
 }
 
-proc jlib::bytestreams::open_cb {jlibname jid sid cmd type subiq args} {
+proc jlib::bytestreams::si_open_cb {jlibname jid sid cmd type subiq args} {
     
-    puts "jlib::bytestreams::open_cb"
+    puts "jlib::bytestreams::si_open_cb"
     
     uplevel #0 $cmd [list $jlibname $sid $type $subiq]
 }
 
-proc jlib::bytestreams::send {jlibname } {
+proc jlib::bytestreams::si_send {jlibname } {
     
-    puts "jlib::bytestreams::send"
+    puts "jlib::bytestreams::si_send"
     
     
 }
 
-proc jlib::bytestreams::close {jlibname } {
+proc jlib::bytestreams::si_close {jlibname } {
     
-    puts "jlib::bytestreams::close"
+    puts "jlib::bytestreams::si_close"
     
     
 }

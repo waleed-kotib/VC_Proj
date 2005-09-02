@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.9 2005-09-01 14:01:09 matben Exp $
+# $Id: ibb.tcl,v 1.10 2005-09-02 17:05:50 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -42,9 +42,9 @@ namespace eval jlib::ibb {
       [namespace current]::cmdproc
     
     jlib::si::registertransport $xmlns(ibb) $xmlns(ibb) 80  \
-      [namespace current]::open   \
-      [namespace current]::send   \
-      [namespace current]::close
+      [namespace current]::si_open   \
+      [namespace current]::si_send   \
+      [namespace current]::si_close
 }
 
 # jlib::ibb::init --
@@ -61,12 +61,16 @@ proc jlib::ibb::init {jlibname args} {
     if {!$inited} {
 	InitOnce
     }    
+
+    # Keep different state arrays for initiator (i) and receiver (r).
     namespace eval ${jlibname}::ibb {
 	variable priv
 	variable opts
+	variable istate
+	variable rstate
     }
-    upvar ${jlibname}::ibb::priv priv
-    upvar ${jlibname}::ibb::opts opts
+    upvar ${jlibname}::ibb::priv  priv
+    upvar ${jlibname}::ibb::opts  opts
     
     array set opts {
 	-block-size     4096
@@ -89,9 +93,9 @@ proc jlib::ibb::InitOnce { } {
     variable inited
     variable xmlns
     
-    set rule1 [wrapper::createtag "rule"  \
+    set rule1 [wrapper::createtag "rule"   \
       -attrlist {condition deliver-at value stored action error}]
-    set rule2 [wrapper::createtag "rule"  \
+    set rule2 [wrapper::createtag "rule"   \
       -attrlist {condition match-resource value exact action error}]
     set ampElem [wrapper::createtag "amp"  \
       -attrlist [list xmlns $xmlns(ibb)]   \
@@ -119,47 +123,91 @@ proc jlib::ibb::cmdproc {jlibname cmd args} {
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# These are all functions to use by a sender.
 
-# jlib::ibb::open, send, close --
+# jlib::ibb::si_open, si_send, si_close --
 # 
 #       Bindings for si.
 
-proc jlib::ibb::open {jlibname jid sid cmd args} {
+proc jlib::ibb::si_open {jlibname jid sid cmd args} {
     
-    puts "jlib::ibb::open"
+    puts "jlib::ibb::si_open"
+    upvar ${jlibname}::ibb::istate istate
     
-    set open_cb [list [namespace current]::open_cb $cmd]
-    eval {send_open $jlibname $jid $sid $open_cb} $args
+    set istate($sid,jid) $jid
+    set istate($sid,cmd) $cmd
+    set istate($sid,seq) 0
+    set si_open_cb [namespace current]::si_open_cb
+    eval {send_open $jlibname $sid $si_open_cb} $args
     return
 }
 
-proc jlib::ibb::open_cb {jlibname jid sid cmd type subiq args} {
+proc jlib::ibb::si_open_cb {jlibname sid type subiq args} {
     
-    puts "jlib::ibb::open_cb"
+    puts "jlib::ibb::si_open_cb"    
+    upvar ${jlibname}::ibb::istate istate
     
+    set cmd $istate($sid,cmd)
+    set jid $istate($sid,jid)
+
     uplevel #0 $cmd [list $jlibname $jid $sid $type $subiq]
 }
 
-proc jlib::ibb::send {jlibname } {
+proc jlib::ibb::si_send {jlibname sid data} {
     
-    puts "jlib::ibb::send"
+    puts "jlib::ibb::si_send"
+    upvar ${jlibname}::ibb::istate istate
     
-    
+    set jid $istate($sid,jid)
+    send_data $jlibname $jid $sid $data [namespace current]::si_send_cb
 }
 
-proc jlib::ibb::close {jlibname jid sid cmd} {
-    
-    puts "jlib::ibb::close"
-    
-    set open_cb [list [namespace current]::close_cb $cmd]
-    send_close $jlibname $jid $sid close_cb
+# jlib::ibb::si_send_cb --
+# 
+#       JEP says that we SHOULD track each mesage, in case of error.
+
+proc jlib::ibb::si_send_cb {jlibname sid type subiq args} {
+
+    puts "jlib::ibb::si_send_cb"
+    upvar ${jlibname}::ibb::istate istate
+
+    if {[string equal $type "error"]} {
+	set cmd $istate($sid,cmd)
+	set jid $istate($sid,jid)
+	uplevel #0 $cmd [list $jlibname $jid $sid $type $subiq]
+    }
 }
 
-proc jlib::ibb::close_cb {jlibname jid sid cmd type subiq args} {
+proc jlib::ibb::si_close {jlibname sid} {
     
-    puts "jlib::ibb::close_cb"
+    puts "jlib::ibb::si_close"
+    upvar ${jlibname}::ibb::istate istate
+
+    set jid $istate($sid,jid)
+
+    send_close $jlibname $jid $sid [namespace current]::si_close_cb
+}
+
+proc jlib::ibb::si_close_cb {jlibname sid type subiq args} {
+    
+    puts "jlib::ibb::si_close_cb"
+    upvar ${jlibname}::ibb::istate istate
+
+    set cmd $istate($sid,cmd)
+    set jid $istate($sid,jid)
     
     uplevel #0 $cmd [list $jlibname $jid $sid $type $subiq]
+    # @@@ ???
+    ifree $jlibname $sid
+}
+
+proc jlib::ibb::ifree {jlibname sid} {
+    
+    puts "jlib::ibb::ifree"   
+    upvar ${jlibname}::ibb::istate istate
+
+    array unset istate $sid,*
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -191,7 +239,7 @@ proc jlib::ibb::send_open {jlibname jid sid cmd args} {
     set openElem [wrapper::createtag "open"  \
       -attrlist [list sid $sid block-size $arr(-block-size) xmlns $xmlns(ibb)]
     jlib::send_iq $jlibname set [list $openElem] -to $jid  \
-      -command [concat $cmd [list $jlibname $jid $sid]]
+      -command [concat $cmd [list $jlibname $sid]]
     return
 }
 
@@ -199,17 +247,28 @@ proc jlib::ibb::send_open {jlibname jid sid cmd args} {
 # 
 # 
 
-proc jlib::ibb::send_data {jlibname jid sid} {
+proc jlib::ibb::send_data {jlibname jid sid data cmd} {
     
     variable xmlns
+    variable ampElem
+    upvar ${jlibname}::ibb::istate istate
 
-    
-    
+    set jid $istate($sid,jid)
+    set seq $istate($sid,seq)
+    # @@@ What abot the extra = appended??? [string trimright $bindata =]
+    set edata [base64::encode $data]
+    set dataElem [wrapper::createtag "data"  \
+      -attrlist [list xmlns $xmlns(ibb) sid $sid seq $seq]  \
+      -chdata $edata]
+    set istate($sid,seq) [expr {($seq + 1) % 65536}]
+
+    jlib::send_message $jlibname $jid -xlist [list $dataElem $ampElem]  \
+      -command [concat $cmd [list $jlibname $sid]]
 }
 
 # jlib::ibb::send_close --
 # 
-#       Initiates a file transport.
+#       Sends the close tag.
 #
 # Arguments:
 # 
@@ -221,11 +280,82 @@ proc jlib::ibb::send_close {jlibname jid sid cmd} {
     set closeElem [wrapper::createtag "close"  \
       -attrlist [list sid $sid xmlns $xmlns(ibb)]
     jlib::send_iq $jlibname set [list $closeElem] -to $jid  \
-      -command [concat $cmd [list $jlibname $jid $sid]]
+      -command [concat $cmd [list $jlibname $sid]]
     return
 }
 
-# UNTESTED ...........
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# These are all functions to use by a receiver of a stream.
+
+# jlib::ibb::handle_set --
+# 
+#       Parse incoming ibb iq-set open/close element.
+#       It is being assumed that we already have accepted a stream initiation.
+
+proc jlib::ibb::handle_set {jlibname from subiq args} {
+
+    variable xmlns
+    upvar ${jlibname}::ibb::rstate rstate
+    
+    
+    
+    set tag [wrapper::gettag $subiq]
+    array set attr [wrapper::getattrlist $subiq]
+    array set argsArr $args
+    if {![info exists argsArr(-id)] || ![info exists attr(sid)]} {
+	# We can't do more here.
+	return
+    }
+    set sid $attr(sid)
+    
+    # We make sure that we have already got a si with this sid.
+    if {[jlib::si::havesi $jlibname $sid]} {
+	send error
+	return
+    }
+
+    switch -- $tag {
+	open {
+	    if {![info exists attr(block-size)]} {
+		send error
+		return
+	    }
+	    set rstate($sid,jid)        $from
+	    set rstate($sid,block-size) $attr(block-size)
+	    
+	    # Make a success response on open.
+	    jlib::send_iq $jlibname "result" {} -to $from -id $argsArr(-id)
+	}
+	close {
+	    
+	    # Make a success response on close.
+	    jlib::send_iq $jlibname "result" {} -to $from -id $argsArr(-id)
+	    jlib::si::stream_closed $jlibname $sid
+	    rfree $jlibname $sid
+	}
+	default {
+	    send error
+	    return
+	}
+    }
+    return 1
+}
+
+
+
+
+proc jlib::ibb::rfree {jlibname sid} {
+    
+    puts "jlib::ibb::rfree"   
+    upvar ${jlibname}::ibb::rstate rstate
+
+    array unset rstate $sid,*
+}
+
+# UNTESTED ........... !!!  DO NOT USE !!!--------------------------------------
+# 
+# ------------------------------------------------------------------------------
 
 # jlib::ibb::send_file --
 # 
@@ -241,11 +371,12 @@ proc jlib::ibb::send_close {jlibname jid sid cmd} {
 # Results:
 #       sid (Session IDentifier).
 
-proc jlib::ibb::send_file {jlibname jid sid cmd args} {
+proc jlib::ibb::send_fileXXX {jlibname jid sid cmd args} {
 
     variable xmlns
     upvar ${jlibname}::ibb::priv priv
     upvar ${jlibname}::ibb::opts opts
+    upvar ${jlibname}::ibb::state state
 
     array set argsArr $opts
     array set argsArr $args
@@ -259,10 +390,10 @@ proc jlib::ibb::send_file {jlibname jid sid cmd args} {
     
     # Keep internal storage for this request.
     foreach {key value} $args {
-	set priv(sid,$sid,$key) $value
+	set state($sid,$key) $value
     }
-    set priv(sid,$sid,jid) $jid
-    set priv(sid,$sid,cmd) $cmd
+    set state($sid,jid) $jid
+    set state($sid,cmd) $cmd
 
     jlib::send_iq $jlibname set [list $openElem] -to $jid  \
       -command [list [namespace current]::OpenCB $jlibname]
@@ -270,20 +401,20 @@ proc jlib::ibb::send_file {jlibname jid sid cmd args} {
     return $sid
 }
 
-proc jlib::ibb::OpenCB {jlibname } {
+proc jlib::ibb::OpenCBXXX {jlibname } {
     
-    upvar ${jlibname}::ibb::priv priv
-    upvar ${jlibname}::ibb::opts opts
+    upvar ${jlibname}::ibb::state state
 
     
-    set priv(sid,$sid,offset) 0
+    set state($sid,offset) 0
     
 }
 
-proc jlib::ibb::SendDataChunk {jlibname } {
+proc jlib::ibb::SendDataChunkXXX {jlibname } {
     
     upvar ${jlibname}::ibb::priv priv
     upvar ${jlibname}::ibb::opts opts
+    upvar ${jlibname}::ibb::state state
 
     set bindata [string range $opts(-data) $offset \
       [expr $offset + $priv(binblock) -1]]
@@ -295,26 +426,28 @@ proc jlib::ibb::SendDataChunk {jlibname } {
     SendData $ibbname $sid $data
 }
 
-proc jlib::ibb::InitFile {jlibname sid} {
+proc jlib::ibb::InitFileXXX {jlibname sid} {
     
     upvar ${jlibname}::ibb::priv priv
     upvar ${jlibname}::ibb::opts opts
+    upvar ${jlibname}::ibb::state state
 
     if {[catch {open $opts(-file) r} fd]} {
 	return -code error $fd
     }
-    set priv(sid,$sid,fd) $fd
+    set state($sid,fd) $fd
     fconfigure $fd -translation binary
     
     
 }
 
-proc jlib::ibb::SendFileChunk {jlibname } {
+proc jlib::ibb::SendFileChunkXXX {jlibname } {
     
     upvar ${jlibname}::ibb::priv priv
     upvar ${jlibname}::ibb::opts opts
+    upvar ${jlibname}::ibb::state state
     
-    set fd $priv(sid,$sid,fd)
+    set fd $state($sid,fd)
     set bindata [read $fd $priv(binblock)]
     if {![eof $fd]} {
 	set bindata [string trimright $bindata =]
@@ -324,16 +457,16 @@ proc jlib::ibb::SendFileChunk {jlibname } {
     SendData $ibbname $sid $data
 }
 
-proc jlib::ibb::SendData {jlibname sid data} {
+proc jlib::ibb::SendDataXXX {jlibname sid data} {
     
     upvar ${jlibname}::ibb::priv priv
     upvar ${jlibname}::ibb::opts opts
     
     
-    $priv(jlibname) send_message   
+    $jlibname send_message   
 }
 
-proc jlib::ibb::handle_set {jlibname from subiq args} {
+proc jlib::ibb::handle_setXXX {jlibname from subiq args} {
 
     array set argsArr $args
     
@@ -348,7 +481,7 @@ proc jlib::ibb::handle_set {jlibname from subiq args} {
 }
 
 
-proc jlib::ibb::receive {jlibname subiq args} {
+proc jlib::ibb::receiveXXX {jlibname subiq args} {
 
     
     
