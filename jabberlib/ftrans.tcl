@@ -3,9 +3,22 @@
 #      This file is part of the jabberlib. 
 #      It provides support for the file-transfer profile (JEP-0096).
 #      
+#      There are several layers involved when sending/receiving a file for 
+#      instance. Each layer reports only to the nearest layer above using
+#      callbacks. From top to bottom:
+#      
+#      1) application
+#      2) file-transfer profile (this)
+#      3) stream initiation (si)
+#      4) the streams, bytestreams (socks5), ibb, etc.
+#      5) jabberlib
+#      
+#      Each layer divides into two parts, the initiator and receiver.
+#      Keep different state arrays for initiator (i) and receiver (r).
+#      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.1 2005-09-01 14:01:09 matben Exp $
+# $Id: ftrans.tcl,v 1.2 2005-09-02 17:05:50 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -19,7 +32,9 @@
 #
 #	
 #   INSTANCE COMMANDS
-#      jlibName filetransfer ...
+#      jlibName filetransfer send ...
+#      jlibName filetransfer reset sid
+#      jlibName filetransfer ifree sid
 #      
 ############################# CHANGES ##########################################
 #
@@ -45,10 +60,11 @@ namespace eval jlib::ftrans {
 
 proc jlib::ftrans::init {jlibname args} {
     
+    # Keep different state arrays for initiator (i) and receiver (r).
     namespace eval ${jlibname}::ftrans {
-	variable state
+	variable istate
+	variable rstate
     }
-    upvar ${jlibname}::ftrans::state state
     
     # Register this feature with disco.
     
@@ -95,7 +111,7 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
     puts "jlib::ftrans::send"
     
     variable xmlns
-    upvar ${jlibname}::ftrans::state state
+    upvar ${jlibname}::ftrans::istate istate
  
     array set opts {
 	-progress     ""
@@ -141,19 +157,19 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
     
     set sid [jlib::generateuuid]
 
-    set state($sid,jid)    $jid
-    set state($sid,cmd)    $cmd
-    set state($sid,dtype)  $dtype
-    set state($sid,size)   $size
-    set state($sid,name)   $name
-    set state($sid,status) ""
-    set state($sid,bytes)  0
+    set istate($sid,jid)    $jid
+    set istate($sid,cmd)    $cmd
+    set istate($sid,dtype)  $dtype
+    set istate($sid,size)   $size
+    set istate($sid,name)   $name
+    set istate($sid,status) ""
+    set istate($sid,bytes)  0
     foreach {key value} [array get opts] {
-	set state($sid,$key) $value
+	set istate($sid,$key) $value
     }
     switch -- $dtype {
 	file {
-	    set state($sid,fd) $fd
+	    set istate($sid,fd) $fd
 	}
     }
     set subElems {}
@@ -172,7 +188,7 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
     
     # The 'block-size' is crucial here; must tell the stream in question.
     set cmd [namespace current]::filetransfer_cb
-    jlib::si::send_set $jlibname $jid $sid $opts(mime) $xmlns(ftrans)  \
+    jlib::si::send_set $jlibname $jid $sid $opts(-mime) $xmlns(ftrans)  \
       $fileElem $cmd -block-size $opts(-block-size)
       
     return $sid
@@ -183,11 +199,11 @@ proc jlib::ftrans::filetransfer_cb {jlibname type sid subiq} {
     puts "jlib::ftrans::filetransfer_cb"
     
     variable xmlns
-    upvar ${jlibname}::ftrans::state state
+    upvar ${jlibname}::ftrans::istate istate
     
     if {[string equal $type "error"]} {
-	set state($sid,status) "error"
-	uplevel #0 $state($sid,cmd) [list $jlibname error $sid $subiq]
+	set istate($sid,status) "error"
+	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid $subiq]
 	return
     }
     
@@ -202,66 +218,66 @@ proc jlib::ftrans::filetransfer_cb {jlibname type sid subiq} {
 
 proc jlib::ftrans::SendFileChunk {jlibname sid} {
     
-    upvar ${jlibname}::ftrans::state state
+    upvar ${jlibname}::ftrans::istate istate
     
     # If we have reached eof we receive empty.
     if {[catch {
-	set data [read $state($sid,fd) $state($sid,-block-size)]
+	set data [read $istate($sid,fd) $istate($sid,-block-size)]
     }]} {
-	set state($sid,status) "error"
-	uplevel #0 $state($sid,cmd) [list $jlibname error $sid {}]
+	set istate($sid,status) "error"
+	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {}]
 	return
     }
     set len [string length $data]
-    incr state($sid,bytes) $len
+    incr istate($sid,bytes) $len
     if {!$len} {
 	
 	# Empty -> eof.
-	catch {close $state($sid,fd)}
-	set state($sid,status) "ok"
+	catch {close $istate($sid,fd)}
+	set istate($sid,status) "ok"
 	
 	# Close stream.
-	jlib::si::close $jlibname $sid
-	uplevel #0 $state($sid,cmd) [list $jlibname ok $sid {}]
+	jlib::si::send_close $jlibname $sid
+	uplevel #0 $istate($sid,cmd) [list $jlibname ok $sid {}]
     } else {
 
 	# Invoke the si's method which calls the right stream handler to do the job.
 	jlib::si::send_data $jlibname $sid $data
 	
-	if {[string length $state($sid,-progress)]} {
-	    uplevel #0 $state($sid,-progress)  \
-	      [list $jlibname $sid $state($sid,size) $state($sid,bytes)]
+	if {[string length $istate($sid,-progress)]} {
+	    uplevel #0 $istate($sid,-progress)  \
+	      [list $jlibname $sid $istate($sid,size) $istate($sid,bytes)]
 	}
 
 	# Do like this to avoid blocking.
-	set state($sid,aid) [after idle  \
+	set istate($sid,aid) [after idle  \
 	  [list [namespace current]::SendFileChunk $jlibname $sid]]
     }
 }
 
 proc jlib::ftrans::reset {jlibname sid} {
 
-    upvar ${jlibname}::ftrans::state state
+    upvar ${jlibname}::ftrans::istate istate
     
-    if {[info exists state($sid,aid)]} {
-	after cancel $state($sid,aid)
+    if {[info exists istate($sid,aid)]} {
+	after cancel $istate($sid,aid)
     }
-    set state($sid,status) "reset"
-    uplevel #0 $state($sid,cmd) [list $jlibname reset $sid {}]
+    set istate($sid,status) "reset"
+    uplevel #0 $istate($sid,cmd) [list $jlibname reset $sid {}]
 }
 
-proc jlib::ftrans::free {jlibname sid} {
+proc jlib::ftrans::ifree {jlibname sid} {
 
-    upvar ${jlibname}::ftrans::state state
+    upvar ${jlibname}::ftrans::istate istate
 
-    array unset state $sid,*    
+    array unset istate $sid,*    
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 # These are all functions to use by a receiver of a stream.
 
-proc jlib::ftrans::profile_handler {jlibname ...} {
+proc jlib::ftrans::profile_handler {jlibname sid respCmd} {
     
     puts "jlib::ftrans::profile_handler"
     

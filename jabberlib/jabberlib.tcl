@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.106 2005-09-01 14:01:09 matben Exp $
+# $Id: jabberlib.tcl,v 1.107 2005-09-02 17:05:50 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -272,6 +272,19 @@ namespace eval jlib {
 	dnd             5
 	invisible       6
 	unavailable     7
+    }
+}
+
+proc jlib::getxmlns {name} {
+    variable xmppxmlns
+    variable jxmlns
+    
+    if {[info exists xmppxmlns($name)]} {
+	return $xmppxmlns($name)
+    } elseif {[info exists xmppxmlns($name)]} {
+	return $jxmlns($name)
+    } else {
+	return -code error "unknown xmlns for $name"
     }
 }
 
@@ -1012,9 +1025,10 @@ proc jlib::dispatcher {jlibname xmldata} {
 
 proc jlib::iq_handler {jlibname xmldata} {    
 
-    upvar ${jlibname}::lib lib
-    upvar ${jlibname}::iqcmd iqcmd
-    upvar ${jlibname}::opts opts    
+    upvar ${jlibname}::lib    lib
+    upvar ${jlibname}::iqcmd  iqcmd
+    upvar ${jlibname}::opts   opts    
+    upvar ${jlibname}::locals locals 
     variable xmppxmlns
 
     Debug 5 "jlib::iq_handler: ------------"
@@ -1070,6 +1084,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		# data is the same as the one we get from a 'roster_get'.
 		
 		parse_roster_get $jlibname 1 {} ok $subiq
+		# @@@
 		#parse_roster_get $jlibname 1 {} set $subiq
 		set ishandled 1
 	    }
@@ -1080,15 +1095,25 @@ proc jlib::iq_handler {jlibname xmldata} {
     #     Must be type 'result' or 'error'.
     #     Some components use type='set' instead of 'result'.
 
+    # @@@ It would be better not to have separate calls for errors.
+    
     switch -- $type {
 	result - set {
+	    
+	    # Protect us from our own 'set' calls when we are awaiting 
+	    # 'result' or 'error'.
+	    set setus 0
+	    if {[string equal $type "set"]  \
+	      && [string equal $afrom $locals(myjid)]} {
+		set setus 1
+	    }
 
 	    # A request for the entire roster is coming this way, 
 	    # and calls 'parse_roster_set'.
 	    # $iqcmd($id) contains the 'parse_...' call as 1st element.
-	    if {[info exists id] && [info exists iqcmd($id)]} {
+	    if {!$setus && [info exists id] && [info exists iqcmd($id)]} {
 		
-		# TODO: add attrArr to callback.
+		# @@@ TODO: add attrArr to callback.
 		uplevel #0 $iqcmd($id) [list result $subiq]
 		        
 		#uplevel #0 $iqcmd($id) [list result $subiq] $arglist
@@ -1153,29 +1178,41 @@ proc jlib::iq_handler {jlibname xmldata} {
 
 # jlib::return_error --
 # 
-# 
+#       Returns an iq-error response using complete iq-element.
 
-proc jlib::return_error {jlibname xmldata errcode errtype errtag} {
+proc jlib::return_error {jlibname iqElem errcode errtype errtag} {
     variable xmppxmlns
     
-    array set attr [wrapper::getattrlist $xmldata]
-    set childlist  [wrapper::getchildren $xmldata]
+    array set attr [wrapper::getattrlist $iqElem]
+    set childlist  [wrapper::getchildren $iqElem]
     
     # Switch from -> to, type='error', retain any id.
     set attr(to)   $attr(from)
     set attr(type) "error"
     unset attr(from)
 
-    set xmldata [wrapper::setattrlist $xmldata [array get attr]]    
+    set iqElem [wrapper::setattrlist $iqElem [array get attr]]    
     set stanzaElem [wrapper::createtag $errtag \
       -attrlist [list xmlns $xmppxmlns(stanzas)]]
     set errElem [wrapper::createtag "error" -subtags [list $stanzaElem] \
       -attrlist [list code $errcode type $errtype]]
     
     lappend childlist $errElem
-    set xmldata [wrapper::setchildlist $xmldata $childlist]
+    set iqElem [wrapper::setchildlist $iqElem $childlist]
 
-    send $jlibname $xmldata
+    send $jlibname $iqElem
+}
+
+# jlib::send_error --
+# 
+#       As 'return_error' buts uses the iq child element.
+
+proc jlib::send_error {jlibname iqChild jid id errcode errtype errtag} {
+    
+    set iqElem [wrapper::createtag "iq"  \
+      -attrlist [list from $jid id $id]    \
+      -subtags [list $iqChild]]
+    return_error $jlibname $iqElem $errcode $errtype $errtag
 }
     
 # jlib::message_handler --

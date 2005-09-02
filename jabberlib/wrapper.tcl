@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.16 2005-09-01 14:01:09 matben Exp $
+# $Id: wrapper.tcl,v 1.17 2005-09-02 17:05:50 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -721,7 +721,7 @@ proc wrapper::getfirstchildwithxmlns {xmllist ns} {
     return $c
 }
 
-proc wrapper::getchildwithtaginnamespace {xmllist tag ns} {
+proc wrapper::getchildswithtaginnamespace {xmllist tag ns} {
     
     set clist {}
     foreach celem [lindex $xmllist 4] {
@@ -730,11 +730,26 @@ proc wrapper::getchildwithtaginnamespace {xmllist tag ns} {
 	    array set attr [lindex $celem 1]
 	    if {[info exists attr(xmlns)] && [string equal $attr(xmlns) $ns]} {
 		lappend clist $celem
-		break
 	    }
 	}
     }
     return $clist
+}
+
+proc wrapper::getfirstchild {xmllist tag ns} {
+    
+    set elem {}
+    foreach celem [lindex $xmllist 4] {
+	if {[string equal [lindex $celem 0] $tag]} {
+	    unset -nocomplain attr
+	    array set attr [lindex $celem 1]
+	    if {[info exists attr(xmlns)] && [string equal $attr(xmlns) $ns]} {
+		set elem $celem
+		break
+	    }
+	}
+    }
+    return $elem
 }
 
 proc wrapper::getfromchilds {childs tag} {
@@ -775,25 +790,26 @@ proc wrapper::getnamespacefromchilds {childs tag ns} {
     return $clist
 }
 
-# wrapper::getdhildsdeep --
+# wrapper::getdhilddeep --
 # 
-#       Searches recursively for childs with matching tags and optionally,
-#       matching xmlns attributes.
+#       Searches recursively for the first child with matching tags and 
+#       optionally matching xmlns attributes.
 #       
 # Arguments:
 #       xmllist:    an xml hierarchical list.
-#       childSpecs: {{tag ?xmlns?} {tag ?xmlns?} ...}
+#       specs:      {{tag ?xmlns?} {tag ?xmlns?} ...}
 #       
 # Results:
 #       first found matching child element or empty if not found
 
-proc wrapper::getdhildsdeep {xmllist childSpecs} {
+proc wrapper::getdhilddeep {xmllist specs} {
     
     set xlist $xmllist
     
-    foreach cspec $childSpecs {
+    foreach cspec $specs {
 	set tag   [lindex $cspec 0]
 	set xmlns [lindex $cspec 1]
+	set match 0
 	
 	foreach c [lindex $xlist 4] {
 	    if {[string equal $tag [lindex $c 0]]} {
@@ -803,6 +819,7 @@ proc wrapper::getdhildsdeep {xmllist childSpecs} {
 		    if {[info exists attr(xmlns)] && \
 		      [string equal $xmlns $attr(xmlns)]} {
 			set xlist $c
+			set match 1
 			break
 		    } else {
 			# tag matched but not xmlns; go for next child.
@@ -810,11 +827,14 @@ proc wrapper::getdhildsdeep {xmllist childSpecs} {
 		    }
 		}
 		set xlist $c
+		set match 1
 		break
 	    }
 	}
 	# No matches found.
-	return
+	if {!$match} {
+	    return
+	}
     }
     return $xlist
 }
