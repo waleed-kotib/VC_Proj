@@ -5,7 +5,33 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.3 2005-09-02 17:05:50 matben Exp $
+# $Id: si.tcl,v 1.4 2005-09-04 16:58:56 matben Exp $
+# 
+#      There are several layers involved when sending/receiving a file for 
+#      instance. Each layer reports only to the nearest layer above using
+#      callbacks. From top to bottom:
+#      
+#      1) application
+#      2) profiles, file-transfer etc.
+#      3) stream initiation (si)
+#      4) the streams, bytestreams (socks5), ibb, etc.
+#      5) jabberlib
+#      
+#      Each layer divides into two parts, the initiator and target.
+#      Keep different state arrays for initiator (i) and target (t).
+#      The si layer act as a mediator between the profiles and the streams.
+#      Each profile registers with si, and each stream registers with si.
+#      
+#            profiles ...
+#                 \   |   /
+#                  \  |  /
+#                   \ | /
+#                     si (stream initiation)
+#                   / | \
+#                  /  |  \
+#                 /   |   \
+#             streams ...
+#      
 # 
 ############################# USAGE ############################################
 #
@@ -13,12 +39,14 @@
 #      si - convenience command library for stream initiation.
 #      
 #   SYNOPSIS
-#      jlib::si::init jlibName
+#      
 #
 #   OPTIONS
 #
 #	
 #   INSTANCE COMMANDS
+#      jlibName si registertransport ...
+#      jlibName si registerprofile ...
 #      jlibName si send_set ...
 #      jlibName si send_data ...
 #      jlibName si send_close ...
@@ -41,7 +69,6 @@ namespace eval jlib::si {
     set xmlns(neg)     "http://jabber.org/protocol/feature-neg"
     set xmlns(xdata)   "jabber:x:data"
     set xmlns(streams) "urn:ietf:params:xml:ns:xmpp-streams"
-    set xmlns(stanzas) "urn:ietf:params:xml:ns:xmpp-stanzas"
     
     # Storage for registered transports.
     variable trpt
@@ -83,14 +110,17 @@ proc jlib::si::registertransport {name ns priority openProc sendProc closeProc} 
 # jlib::si::registerprofile --
 # 
 #       This is used by profiles to register handler when receiving a si set
-#       with the specified profile.
+#       with the specified profile. It contains handlers for 'set', 'read',
+#       and 'close' streams.
 
-proc jlib::si::registerprofile {profile handler} {
+proc jlib::si::registerprofile {profile openProc readProc closeProc} {
     
     variable prof
     puts "jlib::si::registerprofile"
     
-    set prof($profile) $handler
+    set prof($profile,open)  $openProc
+    set prof($profile,read)  $readProc
+    set prof($profile,close) $closeProc
 }
 
 # jlib::si::init --
@@ -106,7 +136,7 @@ proc jlib::si::init {jlibname args} {
     # Keep different state arrays for initiator (i) and receiver (r).
     namespace eval ${jlibname}::si {
 	variable istate
-	variable rstate
+	variable tstate
     } 
     $jlibname iq_register set $xmlns(si) [namespace current]::handle_set
 }
@@ -132,7 +162,7 @@ proc jlib::si::cmdproc {jlibname cmd args} {
 
 proc jlib::si::send_set {jlibname jid sid mime profile profileElem cmd args} {
     
-    puts "jlib::si::send_set"
+    puts "jlib::si::send_set (i)"
     
     variable xmlns
     variable trpt
@@ -141,7 +171,7 @@ proc jlib::si::send_set {jlibname jid sid mime profile profileElem cmd args} {
     set istate($sid,jid)     $jid
     set istate($sid,mime)    $mime
     set istate($sid,profile) $profile
-    set istate($sid,cmd)     $cmd
+    set istate($sid,openCmd) $cmd
     set istate($sid,args)    $args
     foreach {key val} $args {
 	set istate($sid,$key) $val
@@ -179,14 +209,14 @@ proc jlib::si::send_set {jlibname jid sid mime profile profileElem cmd args} {
 
 proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
     
-    puts "jlib::si::send_set_cb"
+    puts "jlib::si::send_set_cb (i)"
     
     variable xmlns
     variable trpt
     upvar ${jlibname}::si::istate istate
 
     if {[string equal $type "error"]} {
-	uplevel #0 $istate($sid,cmd) [list $jlibname $type $sid $iqChild]
+	uplevel #0 $istate($sid,openCmd) [list $jlibname $type $sid $iqChild]
 	ifree $jlibname $sid
 	return
     }
@@ -195,7 +225,7 @@ proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
     if {![string equal [wrapper::gettag $iqChild] "si"]} {
 	
 	# @@@ errors ?
-	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {}]
+	uplevel #0 $istate($sid,openCmd) [list $jlibname error $sid {}]
 	ifree $jlibname $sid
 	return
     }
@@ -212,30 +242,53 @@ proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
 	
 	# Open transport. 
 	# We provide a callback for the transport when open is finished.
-	set istate($sid,name) $value
+	set istate($sid,stream) $value
 	set jid $istate($sid,jid)
-	set cmd [namespace current]::transport_open_response
-	uplevel #0 $trpt($value,open) [list $jlibname $jid $sid $cmd]  \
+	set cmd [namespace current]::transport_open_callback
+	uplevel #0 $trpt($value,open) [list $jlibname $jid $sid]  \
 	  $istate($sid,args)
     } else {
-	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {}]
+	uplevel #0 $istate($sid,openCmd) [list $jlibname error $sid {}]
 	ifree $jlibname $sid
     }
 }
 
-# jlib::si::transport_open_response --
+# jlib::si::transport_open_callback --
 # 
 #       This is a transports way of reporting result from it's 'open' method.
-#       It is also the end of the sequence of callbacks generated by 
-#       'jlib::si::send_set'.
 
-proc jlib::si::transport_open_response {jlibname sid type iqChild} {
+proc jlib::si::transport_open_callback {jlibname sid type iqChild} {
     
     upvar ${jlibname}::si::istate istate
     
-    puts "jlib::si::transport_open_response"
+    puts "jlib::si::transport_open_callback (i)"
     
-    uplevel #0 $istate(cmd) [list $jlibname $type $sid $iqChild]
+    # Just report this to the relevant profile.
+    uplevel #0 $istate($sid,openCmd) [list $jlibname $type $sid $iqChild]
+}
+
+# jlib::si::send_close --
+# 
+#       Used by profile to close down the stream.
+
+proc jlib::si::send_close {jlibname sid cmd} {
+
+    variable trpt
+    upvar ${jlibname}::si::istate istate
+    
+    set istate($sid,closeCmd) $cmd
+    set stream $istate($sid,stream)
+    uplevel #0 $trpt($stream,close) [list $jlibname $sid]    
+}
+
+proc jlib::si::transport_close_callback {jlibname sid type iqChild} {
+    
+    upvar ${jlibname}::si::istate istate
+    puts "jlib::si::transport_close_callback (i)"
+    
+    # Just report this to the relevant profile.
+    uplevel #0 $istate($sid,closeCmd) [list $jlibname $type $sid $iqChild]
+    
     ifree $jlibname $sid
 }
 
@@ -255,40 +308,31 @@ proc jlib::si::getstate {jlibname sid} {
     return $arr
 }
 
-#--- wrappers for send & close operations ---
-
-# jlib::si::send_data, send_close --
+# jlib::si::send_data --
 # 
-#       Opaque calls to send a chunk or to close a stream.
+#       Opaque calls to send a chunk.
 
 proc jlib::si::send_data {jlibname sid data} {
     
     variable trpt
     upvar ${jlibname}::si::istate istate
+    puts "jlib::si::send_data (i)"
     
-    set stream $istate($sid,name)
+    set stream $istate($sid,stream)
     uplevel #0 $trpt($stream,send) [list $jlibname $sid $data]    
-}
-
-proc jlib::si::send_close {jlibname sid} {
-
-    variable trpt
-    upvar ${jlibname}::si::istate istate
-    
-    set stream $istate($sid,name)
-    uplevel #0 $trpt($stream,close) [list $jlibname $sid]    
 }
 
 proc jlib::si::ifree {jlibname sid} {
     
     upvar ${jlibname}::si::istate istate
+    puts "jlib::si::ifree (i) sid=$sid"
 
     array unset istate $sid,*
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# These are all functions to use by a receiver of a stream.
+# These are all functions to use by a receiver (target) of a stream.
 
 # jlib::si::handle_set --
 # 
@@ -301,10 +345,9 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
     variable xmlns
     variable trpt
     variable prof
-    upvar ${jlibname}::si::rstate rstate
+    upvar ${jlibname}::si::tstate tstate
     
-    puts "jlib::si::handle_set"
-    puts "\t iqChild=$iqChild"
+    puts "jlib::si::handle_set (t)"
     
     array set iqattr $args
     
@@ -320,7 +363,7 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
     set profile $attr(profile)
     
     # This is a profile we don't understand.
-    if {![info exists prof($profile)]} {
+    if {![info exists prof($profile,open)]} {
 	set errElem [wrapper::createtag "bad-profile"  \
 	  -attrlist [list xmlns $xmlns(si)]]
 	send_error $jlibname $from $iqattr(-id) $sid 400 cancel bad-request  \
@@ -365,16 +408,16 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
 	return 1
     }
 
-    set rstate($sid,profile)   $profile
-    set rstate($sid,stream)    $stream
-    set rstate($sid,mime-type) $attr(mime-type)
+    set tstate($sid,profile)   $profile
+    set tstate($sid,stream)    $stream
+    set tstate($sid,mime-type) $attr(mime-type)
     foreach {key val} $args {
-	set rstate($sid,$key)  $val
+	set tstate($sid,$key)  $val
     }
     
-    # Invoke registered handler.
+    # Invoke registered handler for this profile.
     set respCmd [list [namespace current]::profile_response $jlibname $sid]
-    uplevel #0 $prof($profile) [list $jlibname $sid $respCmd]
+    uplevel #0 $prof($profile,open) [list $jlibname $sid $iqChild $respCmd]
 
     return 1
 }
@@ -389,13 +432,13 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
 
 proc jlib::si::profile_response {jlibname sid type profileElem args} {
     
-    puts "jlib::si::profile_response"
+    puts "jlib::si::profile_response (t) type=$type"
     
     variable xmlns
-    upvar ${jlibname}::si::rstate rstate
+    upvar ${jlibname}::si::tstate tstate
     
-    set jid $rstate($sid,-from)
-    set id  $rstate($sid,-id)
+    set jid $tstate($sid,-from)
+    set id  $tstate($sid,-id)
 
     # Rejected stream initiation.
     if {[string equal $type "error"]} {
@@ -408,7 +451,7 @@ proc jlib::si::profile_response {jlibname sid type profileElem args} {
 
     # Construct si element from selected profile.
     set valueElem [wrapper::createtag "value"  \
-      -chdata $rstate($sid,stream)]
+      -chdata $tstate($sid,stream)]
     set fieldElem [wrapper::createtag "field"  \
       -attrlist {var stream-method}            \
       -subtags [list $valueElem]]
@@ -426,7 +469,7 @@ proc jlib::si::profile_response {jlibname sid type profileElem args} {
     }
     set siElem [wrapper::createtag "si"  \
       -attrlist [list xmlns $xmlns(si)]  \
-      -subtags $siChilds
+      -subtags $siChilds]
     
     jlib::send_iq $jlibname result [list $siElem] -to $jid -id $id
 
@@ -441,13 +484,28 @@ proc jlib::si::profile_response {jlibname sid type profileElem args} {
 
 proc jlib::si::havesi {jlibname sid} {
     
-    upvar ${jlibname}::si::rstate rstate
+    upvar ${jlibname}::si::tstate tstate
 
-    if {[info exists rstate($sid,profile)]} {
+    if {[info exists tstate($sid,profile)]} {
 	return 1
     } else {
 	return 0
     }
+}
+
+# jlib::si::stream_recv --
+# 
+#       Used by transports (streams) to deliver the actual data.
+
+proc jlib::si::stream_recv {jlibname sid data} {
+    
+    variable prof
+    upvar ${jlibname}::si::tstate tstate
+    puts "jlib::si::stream_recv (t)"
+    
+    # Each stream should check that we exist before calling us!
+    set profile $tstate($sid,profile)
+    uplevel #0 $prof($profile,read) [list $jlibname $sid $data]    
 }
 
 # jlib::si::stream_closed --
@@ -456,11 +514,14 @@ proc jlib::si::havesi {jlibname sid} {
 
 proc jlib::si::stream_closed {jlibname sid} {
     
-    upvar ${jlibname}::si::rstate rstate
+    variable prof
+    upvar ${jlibname}::si::tstate tstate
+    puts "jlib::si::stream_closed (t)"
     
-    # @@@ callback!!??
-
-    rfree $jlibname $sid
+    # Each stream should check that we exist before calling us!
+    set profile $tstate($sid,profile)
+    uplevel #0 $prof($profile,close) [list $jlibname $sid]
+    tfree $jlibname $sid
 }
 
 # jlib::si::send_error --
@@ -470,30 +531,17 @@ proc jlib::si::stream_closed {jlibname sid} {
 proc jlib::si::send_error {jlibname jid id sid errcode errtype stanza {extraElem {}}} {
     
     puts "jlib::si::send_error"
-    variable xmlns
 
-    set stanzaElem [wrapper::createtag $stanza  \
-      -attrlist [list xmlns $xmlns(stanzas)]]
-    set errChilds [list $stanzaElem]
-    if {[llength $extraElem]} {
-	lappend errChilds $extraElem
-    }
-    set errElem [wrapper::createtag "error"         \
-      -attrlist [list code $errcode type $errtype]  \
-      -subtags $errChilds]
-    set iqElem [wrapper::createtag "iq"  \
-      -attrlist [list type error to $jid id $id]  \
-      -subtags [list $errElem]]
-
-    jlib::send $jlibname $iqElem
-
-    rfree $jlibname $sid
+    jlib::send_iq_error $jlibname $jid $id $errcode $errtype $stanza $extraElem
+    tfree $jlibname $sid
 }
 
-proc jlib::si::rfree {jlibname sid} {
+proc jlib::si::tfree {jlibname sid} {
     
-    upvar ${jlibname}::si::rstate rstate
+    upvar ${jlibname}::si::tstate tstate
+    puts "jlib::si::tfree (t)"
 
-    array unset rstate $sid,*
+    array unset tstate $sid,*
 }
 
+#-------------------------------------------------------------------------------

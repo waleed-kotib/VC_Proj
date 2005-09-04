@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.10 2005-09-02 17:05:50 matben Exp $
+# $Id: ibb.tcl,v 1.11 2005-09-04 16:58:56 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -36,12 +36,14 @@ namespace eval jlib::ibb {
     variable inited 0
     variable xmlns
     set xmlns(ibb) "http://jabber.org/protocol/ibb"
+    set xmlns(amp) "http://jabber.org/protocol/amp"
 
     jlib::ensamble_register ibb   \
       [namespace current]::init   \
       [namespace current]::cmdproc
     
-    jlib::si::registertransport $xmlns(ibb) $xmlns(ibb) 80  \
+    # @@@ change to 80 later
+    jlib::si::registertransport $xmlns(ibb) $xmlns(ibb) 10  \
       [namespace current]::si_open   \
       [namespace current]::si_send   \
       [namespace current]::si_close
@@ -67,7 +69,7 @@ proc jlib::ibb::init {jlibname args} {
 	variable priv
 	variable opts
 	variable istate
-	variable rstate
+	variable tstate
     }
     upvar ${jlibname}::ibb::priv  priv
     upvar ${jlibname}::ibb::opts  opts
@@ -83,6 +85,7 @@ proc jlib::ibb::init {jlibname args} {
     
     # Register some standard iq handlers that is handled internally.
     $jlibname iq_register set $xmlns(ibb) [namespace current]::handle_set
+    $jlibname message_register * $xmlns(ibb) [namespace current]::message_handler
 
     return
 }
@@ -98,7 +101,7 @@ proc jlib::ibb::InitOnce { } {
     set rule2 [wrapper::createtag "rule"   \
       -attrlist {condition match-resource value exact action error}]
     set ampElem [wrapper::createtag "amp"  \
-      -attrlist [list xmlns $xmlns(ibb)]   \
+      -attrlist [list xmlns $xmlns(amp)]   \
       -subtags [list $rule1 $rule2]]
 
     set inited 1
@@ -130,33 +133,31 @@ proc jlib::ibb::cmdproc {jlibname cmd args} {
 # 
 #       Bindings for si.
 
-proc jlib::ibb::si_open {jlibname jid sid cmd args} {
+proc jlib::ibb::si_open {jlibname jid sid args} {
     
-    puts "jlib::ibb::si_open"
+    puts "jlib::ibb::si_open (i)"
     upvar ${jlibname}::ibb::istate istate
     
     set istate($sid,jid) $jid
-    set istate($sid,cmd) $cmd
     set istate($sid,seq) 0
     set si_open_cb [namespace current]::si_open_cb
-    eval {send_open $jlibname $sid $si_open_cb} $args
+    eval {send_open $jlibname $jid $sid $si_open_cb} $args
     return
 }
 
 proc jlib::ibb::si_open_cb {jlibname sid type subiq args} {
     
-    puts "jlib::ibb::si_open_cb"    
+    puts "jlib::ibb::si_open_cb (i)"    
     upvar ${jlibname}::ibb::istate istate
     
-    set cmd $istate($sid,cmd)
     set jid $istate($sid,jid)
 
-    uplevel #0 $cmd [list $jlibname $jid $sid $type $subiq]
+    jlib::si::transport_open_callback $jlibname $sid $type $subiq
 }
 
 proc jlib::ibb::si_send {jlibname sid data} {
     
-    puts "jlib::ibb::si_send"
+    puts "jlib::ibb::si_send (i)"
     upvar ${jlibname}::ibb::istate istate
     
     set jid $istate($sid,jid)
@@ -169,42 +170,41 @@ proc jlib::ibb::si_send {jlibname sid data} {
 
 proc jlib::ibb::si_send_cb {jlibname sid type subiq args} {
 
-    puts "jlib::ibb::si_send_cb"
+    puts "jlib::ibb::si_send_cb (i)"
     upvar ${jlibname}::ibb::istate istate
 
     if {[string equal $type "error"]} {
 	set cmd $istate($sid,cmd)
 	set jid $istate($sid,jid)
-	uplevel #0 $cmd [list $jlibname $jid $sid $type $subiq]
+	uplevel #0 $cmd [list $jlibname $sid $type $subiq]
     }
 }
 
 proc jlib::ibb::si_close {jlibname sid} {
     
-    puts "jlib::ibb::si_close"
+    puts "jlib::ibb::si_close (i)"
     upvar ${jlibname}::ibb::istate istate
 
     set jid $istate($sid,jid)
+    set cmd [namespace current]::si_close_cb
 
-    send_close $jlibname $jid $sid [namespace current]::si_close_cb
+    send_close $jlibname $jid $sid $cmd
 }
 
 proc jlib::ibb::si_close_cb {jlibname sid type subiq args} {
     
-    puts "jlib::ibb::si_close_cb"
+    puts "jlib::ibb::si_close_cb (i)"
     upvar ${jlibname}::ibb::istate istate
 
-    set cmd $istate($sid,cmd)
     set jid $istate($sid,jid)
     
-    uplevel #0 $cmd [list $jlibname $jid $sid $type $subiq]
-    # @@@ ???
+    jlib::si::transport_close_callback $jlibname $sid $type $subiq
     ifree $jlibname $sid
 }
 
 proc jlib::ibb::ifree {jlibname sid} {
     
-    puts "jlib::ibb::ifree"   
+    puts "jlib::ibb::ifree (i)"   
     upvar ${jlibname}::ibb::istate istate
 
     array unset istate $sid,*
@@ -233,11 +233,13 @@ proc jlib::ibb::send_open {jlibname jid sid cmd args} {
     variable xmlns
     upvar ${jlibname}::ibb::opts opts
     
+    puts "jlib::ibb::send_open (i)"
+    
     array set arr [list -block-size $opts(-block-size)]
     array set arr $args
         
     set openElem [wrapper::createtag "open"  \
-      -attrlist [list sid $sid block-size $arr(-block-size) xmlns $xmlns(ibb)]
+      -attrlist [list sid $sid block-size $arr(-block-size) xmlns $xmlns(ibb)]]
     jlib::send_iq $jlibname set [list $openElem] -to $jid  \
       -command [concat $cmd [list $jlibname $sid]]
     return
@@ -252,10 +254,10 @@ proc jlib::ibb::send_data {jlibname jid sid data cmd} {
     variable xmlns
     variable ampElem
     upvar ${jlibname}::ibb::istate istate
+    puts "jlib::ibb::send_data (i) sid=$sid, cmd=$cmd"
 
     set jid $istate($sid,jid)
     set seq $istate($sid,seq)
-    # @@@ What abot the extra = appended??? [string trimright $bindata =]
     set edata [base64::encode $data]
     set dataElem [wrapper::createtag "data"  \
       -attrlist [list xmlns $xmlns(ibb) sid $sid seq $seq]  \
@@ -276,9 +278,10 @@ proc jlib::ibb::send_data {jlibname jid sid data cmd} {
 proc jlib::ibb::send_close {jlibname jid sid cmd} {
     
     variable xmlns
+    puts "jlib::ibb::send_close (i)"
 
     set closeElem [wrapper::createtag "close"  \
-      -attrlist [list sid $sid xmlns $xmlns(ibb)]
+      -attrlist [list sid $sid xmlns $xmlns(ibb)]]
     jlib::send_iq $jlibname set [list $closeElem] -to $jid  \
       -command [concat $cmd [list $jlibname $sid]]
     return
@@ -296,9 +299,9 @@ proc jlib::ibb::send_close {jlibname jid sid cmd} {
 proc jlib::ibb::handle_set {jlibname from subiq args} {
 
     variable xmlns
-    upvar ${jlibname}::ibb::rstate rstate
+    upvar ${jlibname}::ibb::tstate tstate
     
-    
+    puts "jlib::ibb::handle_set (t)"
     
     set tag [wrapper::gettag $subiq]
     array set attr [wrapper::getattrlist $subiq]
@@ -310,19 +313,23 @@ proc jlib::ibb::handle_set {jlibname from subiq args} {
     set sid $attr(sid)
     
     # We make sure that we have already got a si with this sid.
-    if {[jlib::si::havesi $jlibname $sid]} {
-	send error
-	return
+    if {![jlib::si::havesi $jlibname $sid]} {
+	send_error $jlibname $from $argsArr(-id) $sid 404 cancel  \
+	  item-not-found
+	return 1
     }
 
     switch -- $tag {
 	open {
 	    if {![info exists attr(block-size)]} {
-		send error
+		# @@@ better stanza!
+		send_error $jlibname $from $argsArr(-id) $sid 501 cancel  \
+		  feature_not_implemented
 		return
 	    }
-	    set rstate($sid,jid)        $from
-	    set rstate($sid,block-size) $attr(block-size)
+	    set tstate($sid,jid)        $from
+	    set tstate($sid,block-size) $attr(block-size)
+	    set tstate($sid,seq)        0
 	    
 	    # Make a success response on open.
 	    jlib::send_iq $jlibname "result" {} -to $from -id $argsArr(-id)
@@ -332,25 +339,85 @@ proc jlib::ibb::handle_set {jlibname from subiq args} {
 	    # Make a success response on close.
 	    jlib::send_iq $jlibname "result" {} -to $from -id $argsArr(-id)
 	    jlib::si::stream_closed $jlibname $sid
-	    rfree $jlibname $sid
+	    tfree $jlibname $sid
 	}
 	default {
-	    send error
-	    return
+	    return 0
 	}
     }
     return 1
 }
 
+proc jlib::ibb::message_handler {jlibname ns msgElem args} {
 
-
-
-proc jlib::ibb::rfree {jlibname sid} {
+    variable xmlns
+    upvar ${jlibname}::ibb::tstate tstate
     
-    puts "jlib::ibb::rfree"   
-    upvar ${jlibname}::ibb::rstate rstate
+    array set argsArr $args
+    puts "jlib::ibb::message_handler (t) ns=$ns"
+    
+    set jid [wrapper::getattribute $msgElem "from"]
+    
+    # Pack up the data and deliver to si.
+    set dataElems [wrapper::getchildswithtagandxmlns $msgElem data $xmlns(ibb)]
+    foreach dataElem $dataElems {
+	array set attr [wrapper::getattrlist $dataElem]
+	set sid $attr(sid)
+	set seq $attr(seq)
+		
+	# We make sure that we have already got a si with this sid.
+	# Since there can be many of these, reply with error only to first.
+	if {![jlib::si::havesi $jlibname $sid]} {
+	    if {[info exists argsArr(-id)]} {
+		set id $argsArr(-id)
+		jlib::send_message_error $jlibname $jid $id 404 cancel  \
+		  item-not-found
+	    }
+	    return 1
+	}
+	
+	# Check that no packets have been lost.
+	if {$seq != $tstate($sid,seq)} {
+	    if {[info exists argsArr(-id)]} {
+		puts "\t seq=$seq, expectseq=$expectseq"
+		set id $argsArr(-id)
+		jlib::send_message_error $jlibname $jid $id 400 cancel  \
+		  bad-request
+	    }
+	    return 1
+	}
+	
+	set encdata [wrapper::getcdata $dataElem]
+	if {[catch {
+	    set data [base64::decode $encdata]
+	}]} {
+	    if {[info exists argsArr(-id)]} {
+		jlib::send_message_error $jlibname $jid $id 400 cancel bad-request
+	    }
+	    return 1
+	}
+	
+	# Next expected 'seq'.
+	set tstate($sid,seq) [expr {($seq + 1) % 65536}]
 
-    array unset rstate $sid,*
+	# Deliver to si for further processing.
+	jlib::si::stream_recv $jlibname $sid $data
+    }
+    return 1
+}
+
+proc jlib::ibb::send_error {jlibname jid id sid errcode errtype stanza} {
+
+    jlib::send_iq_error $jlibname $jid $id $errcode $errtype $stanza    
+    tfree $jlibname $sid
+}
+
+proc jlib::ibb::tfree {jlibname sid} {
+    
+    puts "jlib::ibb::tfree (t)"   
+    upvar ${jlibname}::ibb::tstate tstate
+
+    array unset tstate $sid,*
 }
 
 # UNTESTED ........... !!!  DO NOT USE !!!--------------------------------------
@@ -418,6 +485,7 @@ proc jlib::ibb::SendDataChunkXXX {jlibname } {
 
     set bindata [string range $opts(-data) $offset \
       [expr $offset + $priv(binblock) -1]]
+    # @@@ ???
     if {[string length $bindata] == $priv(binblock)]} {
 	set bindata [string trimright $bindata =]
     }
@@ -449,9 +517,6 @@ proc jlib::ibb::SendFileChunkXXX {jlibname } {
     
     set fd $state($sid,fd)
     set bindata [read $fd $priv(binblock)]
-    if {![eof $fd]} {
-	set bindata [string trimright $bindata =]
-    }
     incr offset $priv(binblock)
     set data [::base64::encode $bindata]
     SendData $ibbname $sid $data

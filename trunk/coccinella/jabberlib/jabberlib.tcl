@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.107 2005-09-02 17:05:50 matben Exp $
+# $Id: jabberlib.tcl,v 1.108 2005-09-04 16:58:56 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1203,18 +1203,29 @@ proc jlib::return_error {jlibname iqElem errcode errtype errtag} {
     send $jlibname $iqElem
 }
 
-# jlib::send_error --
+# jlib::send_iq_error --
 # 
-#       As 'return_error' buts uses the iq child element.
+#       Sends an iq error element as a response to a iq element.
 
-proc jlib::send_error {jlibname iqChild jid id errcode errtype errtag} {
-    
+proc jlib::send_iq_error {jlibname jid id errcode errtype stanza {extraElem {}}} {
+    variable xmppxmlns
+ 
+    set stanzaElem [wrapper::createtag $stanza  \
+      -attrlist [list xmlns $xmppxmlns(stanzas)]]
+    set errChilds [list $stanzaElem]
+    if {[llength $extraElem]} {
+	lappend errChilds $extraElem
+    }
+    set errElem [wrapper::createtag "error"         \
+      -attrlist [list code $errcode type $errtype]  \
+      -subtags $errChilds]
     set iqElem [wrapper::createtag "iq"  \
-      -attrlist [list from $jid id $id]    \
-      -subtags [list $iqChild]]
-    return_error $jlibname $iqElem $errcode $errtype $errtag
+      -attrlist [list type error to $jid id $id]  \
+      -subtags [list $errElem]]
+
+    jlib::send $jlibname $iqElem
 }
-    
+
 # jlib::message_handler --
 #
 #       Callback for incoming <message> elements. See 'jlib::dispatcher'.
@@ -1255,8 +1266,8 @@ proc jlib::message_handler {jlibname xmldata} {
     }
    
     # Extract the message sub-elements.
-    set x {}
-    set xxmlnsList {}
+    # @@@ really bad solution...
+    set xmlnsList  {}
     foreach child $childlist {
 	
 	# Extract the message sub-elements XML data items.
@@ -1267,31 +1278,34 @@ proc jlib::message_handler {jlibname xmldata} {
 	    body - subject - thread {
 		lappend arglist -$ctag $cchdata
 	    }
-	    x {
-		lappend x $child
-		lappend xxmlnsList [wrapper::getattribute $child xmlns]
+	    default {
+		lappend elem(-$ctag) $child
+		lappend xmlnsList [wrapper::getattribute $child xmlns]
 	    }
 	}
     }
+    set xmlnsList [lsort -unique $xmlnsList]	
     
-    # Invoke any registered handler for this message.
+    # Invoke any registered handler for this particular message.
     set iscallback 0
     if {[info exists attrArr(id)]} {
 	set id $attrArr(id)
-	if {[info exists msgcmd($id)]} {
+	
+	# Avoid the weird situation when we send to ourself.
+	if {[info exists msgcmd($id)] && ![info exists msgcmd($id,self)]} {
 	    uplevel #0 $msgcmd($id) [list $jlibname $type] $arglist
 	    unset -nocomplain msgcmd($id)
 	    set iscallback 1
 	}
+	unset -nocomplain msgcmd($id,self)
     }	
-    if {[llength $x]} {
-	lappend arglist -x $x
-	set xxmlnsList [lsort -unique $xxmlnsList]
-	
-	# Invoke any registered message handlers.
-	foreach xxmlns $xxmlnsList {
+
+    # Invoke any registered message handlers for this type and xmlns.
+    if {[array exists elem]} {
+	set arglist [concat $arglist [array get elem]]
+	foreach xmlns $xmlnsList {
 	    set ishandled [eval {
-		message_run_hook $jlibname $type $xxmlns} $arglist]
+		message_run_hook $jlibname $type $xmlns $xmldata} $arglist]
 	    if {$ishandled} {
 		break
 	    }
@@ -1307,7 +1321,30 @@ proc jlib::message_handler {jlibname xmldata} {
 	}
     }
 }
-    
+
+# jlib::send_message_error --
+# 
+#       Sends a message error element as a response to another message.
+
+proc jlib::send_message_error {jlibname jid id errcode errtype stanza {extraElem {}}} {
+    variable xmppxmlns
+ 
+    set stanzaElem [wrapper::createtag $stanza  \
+      -attrlist [list xmlns $xmppxmlns(stanzas)]]
+    set errChilds [list $stanzaElem]
+    if {[llength $extraElem]} {
+	lappend errChilds $extraElem
+    }
+    set errElem [wrapper::createtag "error"         \
+      -attrlist [list code $errcode type $errtype]  \
+      -subtags $errChilds]
+    set msgElem [wrapper::createtag "iq"  \
+      -attrlist [list type error to $jid id $id]  \
+      -subtags [list $errElem]]
+
+    jlib::send $jlibname $msgElem
+}
+
 # jlib::presence_handler --
 #
 #       Callback for incoming <presence> elements. See 'jlib::dispatcher'.
@@ -2125,11 +2162,11 @@ proc jlib::message_register {jlibname type xmlns func {seq 50}} {
     upvar ${jlibname}::msghook msghook
     
     lappend msghook($type,$xmlns) [list $func $seq]
-    set msghook($type,$xmlns) \
+    set msghook($type,$xmlns)  \
       [lsort -integer -index 1 [lsort -unique $msghook($type,$xmlns)]]
 }
 
-proc jlib::message_run_hook {jlibname type xmlns args} {
+proc jlib::message_run_hook {jlibname type xmlns msgElem args} {
     
     upvar ${jlibname}::msghook msghook
 
@@ -2140,7 +2177,7 @@ proc jlib::message_run_hook {jlibname type xmlns args} {
 	    foreach spec $msghook($key) {
 		set func [lindex $spec 0]
 		set code [catch {
-		    uplevel #0 $func [list $jlibname $xmlns] $args
+		    uplevel #0 $func [list $jlibname $xmlns $msgElem] $args
 		} ans]
 		if {$code} {
 		    bgerror "msghook $func failed: $code\n$::errorInfo"
@@ -2657,6 +2694,7 @@ proc jlib::search_set {jlibname to cmd args} {
 proc jlib::send_message {jlibname to args} {
 
     upvar ${jlibname}::msgcmd msgcmd
+    upvar ${jlibname}::locals locals 
 
     Debug 3 "jlib::send_message to=$to, args=$args"
     
@@ -2669,9 +2707,17 @@ proc jlib::send_message {jlibname to args} {
 	
 	switch -- $name {
 	    -command {
-		lappend attrlist "id" $msgcmd(uid)
-		set msgcmd($msgcmd(uid)) $value
+		set uid $msgcmd(uid)
+		lappend attrlist "id" $uid
+		set msgcmd($uid) $value
 		incr msgcmd(uid)
+		
+		# There exist a weird situation if we send to ourself.
+		# Skip this registered command the 1st time we get this,
+		# and let any handlers take over. Trigger this 2nd time.
+		if {[string equal $to $locals(myjid)]} {
+		    set msgcmd($uid,self) 1
+		}
 	    }
 	    -xlist {
 		foreach xchild $value {
