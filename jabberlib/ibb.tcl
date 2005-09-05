@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.11 2005-09-04 16:58:56 matben Exp $
+# $Id: ibb.tcl,v 1.12 2005-09-05 14:01:39 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -42,8 +42,7 @@ namespace eval jlib::ibb {
       [namespace current]::init   \
       [namespace current]::cmdproc
     
-    # @@@ change to 80 later
-    jlib::si::registertransport $xmlns(ibb) $xmlns(ibb) 10  \
+    jlib::si::registertransport $xmlns(ibb) $xmlns(ibb) 80  \
       [namespace current]::si_open   \
       [namespace current]::si_send   \
       [namespace current]::si_close
@@ -64,7 +63,7 @@ proc jlib::ibb::init {jlibname args} {
 	InitOnce
     }    
 
-    # Keep different state arrays for initiator (i) and receiver (r).
+    # Keep different state arrays for initiator (i) and target (t).
     namespace eval ${jlibname}::ibb {
 	variable priv
 	variable opts
@@ -84,7 +83,7 @@ proc jlib::ibb::init {jlibname args} {
     set priv(binblock) [expr {6 * ($priv(binblock)/6)}]
     
     # Register some standard iq handlers that is handled internally.
-    $jlibname iq_register set $xmlns(ibb) [namespace current]::handle_set
+    $jlibname iq_register    set $xmlns(ibb) [namespace current]::handle_set
     $jlibname message_register * $xmlns(ibb) [namespace current]::message_handler
 
     return
@@ -127,7 +126,7 @@ proc jlib::ibb::cmdproc {jlibname cmd args} {
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# These are all functions to use by a sender.
+# These are all functions to use by a sender (initiator).
 
 # jlib::ibb::si_open, si_send, si_close --
 # 
@@ -148,10 +147,7 @@ proc jlib::ibb::si_open {jlibname jid sid args} {
 proc jlib::ibb::si_open_cb {jlibname sid type subiq args} {
     
     puts "jlib::ibb::si_open_cb (i)"    
-    upvar ${jlibname}::ibb::istate istate
     
-    set jid $istate($sid,jid)
-
     jlib::si::transport_open_callback $jlibname $sid $type $subiq
 }
 
@@ -176,7 +172,7 @@ proc jlib::ibb::si_send_cb {jlibname sid type subiq args} {
     if {[string equal $type "error"]} {
 	set cmd $istate($sid,cmd)
 	set jid $istate($sid,jid)
-	uplevel #0 $cmd [list $jlibname $sid $type $subiq]
+	eval $cmd [list $jlibname $sid $type $subiq]
     }
 }
 
@@ -289,7 +285,7 @@ proc jlib::ibb::send_close {jlibname jid sid cmd} {
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# These are all functions to use by a receiver of a stream.
+# These are all functions to use by a receiver (target) of a stream.
 
 # jlib::ibb::handle_set --
 # 
@@ -308,7 +304,7 @@ proc jlib::ibb::handle_set {jlibname from subiq args} {
     array set argsArr $args
     if {![info exists argsArr(-id)] || ![info exists attr(sid)]} {
 	# We can't do more here.
-	return
+	return 0
     }
     set sid $attr(sid)
     

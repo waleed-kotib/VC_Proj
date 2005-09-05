@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.4 2005-09-04 16:58:56 matben Exp $
+# $Id: si.tcl,v 1.5 2005-09-05 14:01:39 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -19,7 +19,7 @@
 #      
 #      Each layer divides into two parts, the initiator and target.
 #      Keep different state arrays for initiator (i) and target (t).
-#      The si layer act as a mediator between the profiles and the streams.
+#      The si layer acts as a mediator between the profiles and the streams.
 #      Each profile registers with si, and each stream registers with si.
 #      
 #            profiles ...
@@ -216,7 +216,7 @@ proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
     upvar ${jlibname}::si::istate istate
 
     if {[string equal $type "error"]} {
-	uplevel #0 $istate($sid,openCmd) [list $jlibname $type $sid $iqChild]
+	eval $istate($sid,openCmd) [list $jlibname $type $sid $iqChild]
 	ifree $jlibname $sid
 	return
     }
@@ -225,7 +225,7 @@ proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
     if {![string equal [wrapper::gettag $iqChild] "si"]} {
 	
 	# @@@ errors ?
-	uplevel #0 $istate($sid,openCmd) [list $jlibname error $sid {}]
+	eval $istate($sid,openCmd) [list $jlibname error $sid {}]
 	ifree $jlibname $sid
 	return
     }
@@ -245,10 +245,10 @@ proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
 	set istate($sid,stream) $value
 	set jid $istate($sid,jid)
 	set cmd [namespace current]::transport_open_callback
-	uplevel #0 $trpt($value,open) [list $jlibname $jid $sid]  \
+	eval $trpt($value,open) [list $jlibname $jid $sid]  \
 	  $istate($sid,args)
     } else {
-	uplevel #0 $istate($sid,openCmd) [list $jlibname error $sid {}]
+	eval $istate($sid,openCmd) [list $jlibname error $sid {}]
 	ifree $jlibname $sid
     }
 }
@@ -264,7 +264,7 @@ proc jlib::si::transport_open_callback {jlibname sid type iqChild} {
     puts "jlib::si::transport_open_callback (i)"
     
     # Just report this to the relevant profile.
-    uplevel #0 $istate($sid,openCmd) [list $jlibname $type $sid $iqChild]
+    eval $istate($sid,openCmd) [list $jlibname $type $sid $iqChild]
 }
 
 # jlib::si::send_close --
@@ -278,7 +278,7 @@ proc jlib::si::send_close {jlibname sid cmd} {
     
     set istate($sid,closeCmd) $cmd
     set stream $istate($sid,stream)
-    uplevel #0 $trpt($stream,close) [list $jlibname $sid]    
+    eval $trpt($stream,close) [list $jlibname $sid]    
 }
 
 proc jlib::si::transport_close_callback {jlibname sid type iqChild} {
@@ -287,7 +287,7 @@ proc jlib::si::transport_close_callback {jlibname sid type iqChild} {
     puts "jlib::si::transport_close_callback (i)"
     
     # Just report this to the relevant profile.
-    uplevel #0 $istate($sid,closeCmd) [list $jlibname $type $sid $iqChild]
+    eval $istate($sid,closeCmd) [list $jlibname $type $sid $iqChild]
     
     ifree $jlibname $sid
 }
@@ -319,7 +319,7 @@ proc jlib::si::send_data {jlibname sid data} {
     puts "jlib::si::send_data (i)"
     
     set stream $istate($sid,stream)
-    uplevel #0 $trpt($stream,send) [list $jlibname $sid $data]    
+    eval $trpt($stream,send) [list $jlibname $sid $data]    
 }
 
 proc jlib::si::ifree {jlibname sid} {
@@ -417,7 +417,7 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
     
     # Invoke registered handler for this profile.
     set respCmd [list [namespace current]::profile_response $jlibname $sid]
-    uplevel #0 $prof($profile,open) [list $jlibname $sid $iqChild $respCmd]
+    eval $prof($profile,open) [list $jlibname $sid $iqChild $respCmd]
 
     return 1
 }
@@ -505,7 +505,7 @@ proc jlib::si::stream_recv {jlibname sid data} {
     
     # Each stream should check that we exist before calling us!
     set profile $tstate($sid,profile)
-    uplevel #0 $prof($profile,read) [list $jlibname $sid $data]    
+    eval $prof($profile,read) [list $jlibname $sid $data]    
 }
 
 # jlib::si::stream_closed --
@@ -520,7 +520,7 @@ proc jlib::si::stream_closed {jlibname sid} {
     
     # Each stream should check that we exist before calling us!
     set profile $tstate($sid,profile)
-    uplevel #0 $prof($profile,close) [list $jlibname $sid]
+    eval $prof($profile,close) [list $jlibname $sid]
     tfree $jlibname $sid
 }
 
