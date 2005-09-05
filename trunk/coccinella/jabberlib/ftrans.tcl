@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.3 2005-09-04 16:58:56 matben Exp $
+# $Id: ftrans.tcl,v 1.4 2005-09-05 14:01:39 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -114,7 +114,7 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
     variable xmlns
     upvar ${jlibname}::ftrans::istate istate
  
-    # 4096 is recommended block-size
+    # 4096 is the recommended block-size
     array set opts {
 	-progress     ""
 	-description  ""
@@ -205,7 +205,7 @@ proc jlib::ftrans::open_cb {jlibname type sid subiq} {
     
     if {[string equal $type "error"]} {
 	set istate($sid,status) "error"
-	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid $subiq]
+	eval $istate($sid,cmd) [list $jlibname error $sid $subiq]
 	return
     }
     
@@ -229,7 +229,7 @@ proc jlib::ftrans::SendFileChunk {jlibname sid} {
     } err]} {
 	puts "\t err=$err"
 	set istate($sid,status) "error"
-	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {}]
+	eval $istate($sid,cmd) [list $jlibname error $sid {}]
 	ifree $jlibname $sid
 	return
     }
@@ -252,7 +252,7 @@ proc jlib::ftrans::SendFileChunk {jlibname sid} {
 	jlib::si::send_data $jlibname $sid $data
 	
 	if {[string length $istate($sid,-progress)]} {
-	    uplevel #0 $istate($sid,-progress)  \
+	    eval $istate($sid,-progress)  \
 	      [list $jlibname $sid $istate($sid,size) $istate($sid,bytes)]
 	}
 
@@ -267,7 +267,7 @@ proc jlib::ftrans::close_cb {jlibname type sid subiq} {
     upvar ${jlibname}::ftrans::istate istate
     puts "jlib::ftrans::close_cb (i)"
 
-    uplevel #0 $istate($sid,cmd) [list $jlibname $type $sid $subiq]
+    eval $istate($sid,cmd) [list $jlibname $type $sid $subiq]
     ifree $jlibname $sid
 }
 
@@ -279,7 +279,7 @@ proc jlib::ftrans::ireset {jlibname sid} {
 	after cancel $istate($sid,aid)
     }
     set istate($sid,status) "reset"
-    uplevel #0 $istate($sid,cmd) [list $jlibname reset $sid {}]
+    eval $istate($sid,cmd) [list $jlibname reset $sid {}]
     # ifree $jlibname $sid
 }
 
@@ -349,14 +349,19 @@ proc jlib::ftrans::open_handler {jlibname sid iqChild respCmd} {
 # jlib::ftrans::accept --
 # 
 #       Used by profile handler to accept/reject file transfer.
+#       
+#       -channel
+#       -command
+#       -progress
 
 proc jlib::ftrans::accept {jlibname sid accepted args} {
     
     upvar ${jlibname}::ftrans::tstate tstate
     
     array set opts {
-	-progress     ""
-	-command      ""
+	-channel    ""
+	-command    ""
+	-progress   ""
     }
     array set opts $args
     foreach {key value} [array get opts] {
@@ -366,6 +371,10 @@ proc jlib::ftrans::accept {jlibname sid accepted args} {
 	set type ok
     } else {
 	set type error
+    }
+    set tstate($sid,data) ""
+    if {[string length $opts(-channel)]} {
+	fconfigure $opts(-channel) -translation binary
     }
 
     set respCmd $tstate($sid,cmd)
@@ -382,11 +391,18 @@ proc jlib::ftrans::recv {jlibname sid data} {
     
     set len [string bytelength $data]
     incr tstate($sid,bytes) $len
-    if {[llength $tstate($sid,-progress)]} {
-	uplevel #0 $tstate($sid,-progress) [list $jlibname $sid  \
-	  $tstate($sid,size) $tstate($sid,bytes)]
+    if {[string length $tstate($sid,-channel)]} {
+	if {[catch {puts -nonewline $tstate($sid,-channel) $data} err]} {
+	    tError $jlibname $sid
+	    return
+	}
+    } else {
+	append tstate($sid,data) $data
     }
-    
+    if {[string length $tstate($sid,-progress)]} {
+	eval $tstate($sid,-progress) [list $jlibname $sid  \
+	  $tstate($sid,size) $tstate($sid,bytes)]
+    }   
 }
 
 proc jlib::ftrans::closed {jlibname sid} {
@@ -394,10 +410,18 @@ proc jlib::ftrans::closed {jlibname sid} {
     upvar ${jlibname}::ftrans::tstate tstate
     puts "jlib::ftrans::closed (t)"
     
-    if {[llength $tstate($sid,-command)]} {
-	uplevel #0 $tstate($sid,-command) [list $jlibname $sid ok]
+    if {[string length $tstate($sid,-command)]} {
+	eval $tstate($sid,-command) [list $jlibname $sid ok]
+    }
+    if {[string length $tstate($sid,-channel)]} {
+	close $tstate($sid,-channel)
     }
     tfree $jlibname $sid
+}
+
+proc jlib::ftrans::data {jlibname sid} {
+    
+    return $tstate($sid,data)
 }
 
 proc jlib::ftrans::treset {jlibname sid} {
@@ -405,9 +429,27 @@ proc jlib::ftrans::treset {jlibname sid} {
     upvar ${jlibname}::ftrans::tstate tstate
     
     set tstate($sid,status) "reset"
-    if {[llength $tstate($sid,-command)]} {
-	uplevel #0 $tstate($sid,-command) [list $jlibname $sid reset]
+    if {[string length $tstate($sid,-channel)]} {
+	close $tstate($sid,-channel)
     }
+    if {[string length $tstate($sid,-command)]} {
+	eval $tstate($sid,-command) [list $jlibname $sid reset]
+    }
+    tfree $jlibname $sid
+}
+
+proc jlib::ftrans::tError {jlibname sid {errormsg ""}} {
+    
+    upvar ${jlibname}::ftrans::tstate tstate
+    puts "jlib::ftrans::tError (t)"
+    
+    if {[string length $tstate($sid,-channel)]} {
+	close $tstate($sid,-channel)
+    }
+    if {[string length $tstate($sid,-command)]} {
+	eval $tstate($sid,-command) [list $jlibname $sid error]
+    }
+    tfree $jlibname $sid
 }
 
 proc jlib::ftrans::tfree {jlibname sid} {
