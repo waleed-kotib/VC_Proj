@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.6 2005-09-05 14:01:39 matben Exp $
+# $Id: bytestreams.tcl,v 1.7 2005-09-06 15:03:04 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -79,7 +79,7 @@ proc jlib::bytestreams::cmdproc {jlibname cmd args} {
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# These are all functions to use by a sender (initiator).
+# These are all functions to use by a initiator (sender).
 
 # jlib::bytestreams::si_open, si_send, si_close --
 # 
@@ -110,17 +110,19 @@ proc jlib::bytestreams::si_open_cb {jlibname sid type subiq args} {
     upvar ${jlibname}::bytestreams::istate istate
     puts "jlib::bytestreams::si_open_cb (i)"
     
-    jlib::si::transport_open_callback $jlibname $sid $type $subiq
+    jlib::si::transport_open_cb $jlibname $sid $type $subiq
 }
 
 proc jlib::bytestreams::si_send {jlibname sid data} {
     
     upvar ${jlibname}::bytestreams::istate istate
     puts "jlib::bytestreams::si_send (i)"
+    puts "\t len=[string bytelength $data]"
     
     set s $istate($sid,sock)
     if {[catch {puts -nonewline $s $data}]} {
-	
+	# @@@ TODO
+	# error
     }
 }
 
@@ -129,7 +131,11 @@ proc jlib::bytestreams::si_close {jlibname sid} {
     upvar ${jlibname}::bytestreams::istate istate
     puts "jlib::bytestreams::si_close (i)"
     
-    
+    jlib::si::transport_close_cb $jlibname $sid result {}
+
+    # Close both sockets!
+    catch {close $istate($sid,sock)}
+    catch {close $istate($sid,ssock)}
     ifree $jlibname $sid
 }
 
@@ -202,20 +208,21 @@ proc jlib::bytestreams::s5i_accept {jlibname sid sock addr port} {
     fconfigure $sock -translation binary -blocking 0
 
     fileevent $sock readable \
-      [list [namespace current]::s5i_wait_for_methods $jlibname $sid]
+      [list [namespace current]::s5i_read_methods $jlibname $sid]
 }
 
-proc jlib::bytestreams::s5i_wait_for_methods {jlibname sid} {
+proc jlib::bytestreams::s5i_read_methods {jlibname sid} {
    
     upvar ${jlibname}::bytestreams::istate istate
-    puts "jlib::bytestreams::s5i_wait_for_methods (i)"   
+    puts "jlib::bytestreams::s5i_read_methods (i)"   
     
     set sock $istate($sid,sock)
     fileevent $sock readable {}
     if {[catch {read $sock} data] || [eof $sock]} {
 	catch {close $sock}
 	return
-    }  
+    }
+    puts "\t read [string bytelength $data]"
     
     # Pick method. Must be \x00
     binary scan $data ccc* ver nmethods methods
@@ -229,17 +236,18 @@ proc jlib::bytestreams::s5i_wait_for_methods {jlibname sid} {
     if {[catch {
 	puts -nonewline $sock "\x05\x00"
 	flush $sock
+	puts "\t wrote 2: 'x05x00'"
     }]} {
 	return
     }
     fileevent $sock readable \
-      [list [namespace current]::s5i_wait_for_request $jlibname $sid]
+      [list [namespace current]::s5i_read_auth $jlibname $sid]
 }
 
-proc jlib::bytestreams::s5i_wait_for_request {jlibname sid} {
+proc jlib::bytestreams::s5i_read_auth {jlibname sid} {
     
     upvar ${jlibname}::bytestreams::istate istate
-    puts "jlib::bytestreams::s5i_wait_for_request (i)"
+    puts "jlib::bytestreams::s5i_read_auth (i)"
 
     set sock $istate($sid,sock)
     fileevent $sock readable {}
@@ -247,6 +255,7 @@ proc jlib::bytestreams::s5i_wait_for_request {jlibname sid} {
 	catch {close $sock}
 	return
     }    
+    puts "\t read [string bytelength $data]"
     
     binary scan $data ccccc ver cmd rsv atyp len
     if {$ver != 5 || $cmd != 1 || $atyp != 3} {
@@ -264,6 +273,7 @@ proc jlib::bytestreams::s5i_wait_for_request {jlibname sid} {
 	set reply [string replace $data 1 1 \x00]
 	puts -nonewline $sock $reply
 	flush $sock
+	puts "\t wrote [string bytelength $reply]"
     } else {
 	set reply [string replace $data 1 1 \x02]
 	catch {
@@ -284,7 +294,7 @@ proc jlib::bytestreams::ifree {jlibname sid} {
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# These are all functions to use by a receiver (target) of a stream.
+# These are all functions to use by a target (receiver) of a stream.
 
 # jlib::bytestreams::handle_set --
 # 
@@ -308,7 +318,7 @@ proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
 	return 0
     }
     if {![info exists attr(sid)]} {
-	eval {return_bad_request $jlibname $queryElem} $args
+	eval {return_error $jlibname $queryElem 400 modify bad-request} $args
 	return 1
     }
     set id  $argsArr(-id)
@@ -316,7 +326,7 @@ proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
 
     # We make sure that we have already got a si with this sid.
     if {![jlib::si::havesi $jlibname $sid]} {
-	return_error $jlibname $from $id $sid 404 cancel item-not-found
+	eval {return_error $jlibname $queryElem 406 cancel not-acceptable} $args
 	return 1
     }
 
@@ -334,13 +344,14 @@ proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
     }
     puts "\t hosts=$hosts"
     if {![llength $hosts]} {
-	eval {return_bad_request $jlibname $queryElem} $args
+	eval {return_error $jlibname $queryElem 400 modify bad-request} $args
 	return 1
     }
     set tstate($sid,id)     $id
     set tstate($sid,jid)    $from
     set tstate($sid,hosts)  $hosts
     set tstate($sid,rhosts) $hosts
+    set tstate($sid,queryElem) $queryElem
 
     # Try the host(s) in turn.
     connect_host $jlibname $sid
@@ -358,7 +369,7 @@ proc jlib::bytestreams::connect_host {jlibname sid} {
     
     set rhosts $tstate($sid,rhosts)
     if {![llength $rhosts]} {
-	# error
+	send_error $jlibname $sid 404 cancel item-not-found
 	return
     }
 
@@ -377,6 +388,8 @@ proc jlib::bytestreams::connect_host {jlibname sid} {
     if {[catch {
 	set tstate($sid,sock) [socks5 $jlibname $sid $addr $port $cmd]
     } err]} {
+	
+	# Try next one if any.
 	puts "\t err=$err"
 	connect_host $jlibname $sid
     }
@@ -400,6 +413,10 @@ proc jlib::bytestreams::connect_host_cb {jlibname sid {errmsg ""}} {
     }
 }
 
+# jlib::bytestreams::readable --
+# 
+#       Reads channel and delivers data up to si.
+
 proc  jlib::bytestreams::readable {jlibname sid} {
     
     upvar ${jlibname}::bytestreams::tstate tstate
@@ -407,11 +424,15 @@ proc  jlib::bytestreams::readable {jlibname sid} {
     
     set sock $tstate($sid,sock)
     if {[catch {eof $sock} iseof] || $iseof} {
-	fileevent readable $sock {}
-	
-	
+	puts "\t eof"
+	catch {close $sock}
+	# @@@ Perhaps we should check number of bytes reveived or something???
+	jlib::si::stream_closed $jlibname $sid
+	tfree $jlibname $sid
     } else {
 	set data [read $sock]
+	set len [string bytelength $data]
+	puts "\t len=$len"
     
 	# Deliver to si for further processing.
 	jlib::si::stream_recv $jlibname $sid $data
@@ -442,7 +463,7 @@ proc jlib::bytestreams::send_used {jlibname to id hostjid} {
 
 proc jlib::bytestreams::socks5 {jlibname sid addr port cmd} {
 
-    puts "jlib::bytestreams::target::socks5 (t)"
+    puts "jlib::bytestreams::socks5 (t)"
     
     if {[catch {
 	set sock [socket -async $addr $port]
@@ -455,25 +476,27 @@ proc jlib::bytestreams::socks5 {jlibname sid addr port cmd} {
     if {[catch {
 	puts -nonewline $sock "\x05\x01\x00"
 	flush $sock
+	puts "\t wrote 3: 'x05x01x00'"
     } err]} {
 	return -code error $err
     }
     fileevent $sock readable  \
-      [list [namespace current]::s5t_wait_for_method $jlibname $sid $sock $cmd]
+      [list [namespace current]::s5t_method_result $jlibname $sid $sock $cmd]
     return $sock
 }
 
-proc jlib::bytestreams::s5t_wait_for_method {jlibname sid sock cmd} {
+proc jlib::bytestreams::s5t_method_result {jlibname sid sock cmd} {
     
     upvar ${jlibname}::bytestreams::tstate tstate
-    puts "jlib::bytestreams::s5t_wait_for_method (t)"
+    puts "jlib::bytestreams::s5t_method_result (t)"
     
     fileevent $sock readable {}
-    if {[catch {read $sock 2} data] || [eof $sock]} {
+    if {[catch {read $sock} data] || [eof $sock]} {
 	catch {close $sock}
 	eval $cmd error-network-read
 	return
     }    
+    puts "\t read [string bytelength $data]"
     binary scan $data cc ver method
     if {($ver != 5) || ($method != 0)} {
 	catch {close $sock}
@@ -487,26 +510,27 @@ proc jlib::bytestreams::s5t_wait_for_method {jlibname sid sock cmd} {
     if {[catch {
 	puts -nonewline $sock "\x05\x01\x00\x03$len$hash\x00\x00"
 	flush $sock
+	puts "\t wrote [string bytelength "\x05\x01\x00\x03$len$hash\x00\x00"]: 'x05x01x00x03${len}${hash}x00x00'"
     } err]} {
 	catch {close $sock}
 	eval $cmd error-network-write
 	return
     }
     fileevent $sock readable \
-      [list [namespace current]::s5t_wait_for_reply $jlibname $sid $sock $cmd]
+      [list [namespace current]::s5t_auth_result $jlibname $sid $sock $cmd]
 }
 
-proc jlib::bytestreams::s5t_wait_for_reply {jlibname sid sock cmd} {
+proc jlib::bytestreams::s5t_auth_result {jlibname sid sock cmd} {
+    
+    puts "jlib::bytestreams::s5t_auth_result (t)"
     
     fileevent $sock readable {}
-    puts "jlib::bytestreams::s5t_wait_for_reply (t)"
-    
-    fileevent $sock readable {}
-    if {[catch {read $sock 2} data] || [eof $sock]} {
+    if {[catch {read $sock} data] || [eof $sock]} {
 	catch {close $sock}
 	eval $cmd error-network-read
 	return
-    }    
+    }
+    puts "\t read [string bytelength $data]"
     binary scan $data cc ver method
     if {($ver != 5) || ($method != 0)} {
 	catch {close $sock}
@@ -518,39 +542,42 @@ proc jlib::bytestreams::s5t_wait_for_reply {jlibname sid sock cmd} {
     uplevel #0 $cmd
 }
 
-# @@@ missing id attribute!!!!!!!!!!!!!!!!!
-proc jlib::bytestreams::return_bad_request {jlibname queryElem args} {
+# jlib::bytestreams::return_error, send_error --
+# 
+#       Various helper functions to return errors.
+
+proc jlib::bytestreams::return_error {jlibname qElem errcode errtype stanza args} {
     
-    return_error $jlibname $queryElem 400 modify "bad-request"
+    array set attr $args
+    set id  $attr(-id)
+    set jid $attr(-from)
+    jlib::send_iq_error $jlibname $jid $id $errcode $errtype $stanza $qElem
 }
 
-proc jlib::bytestreams::return_item_not_found {jlibname queryElem args} {
+proc jlib::bytestreams::send_error {jlibname sid errcode errtype stanza} {
+
+    puts "jlib::bytestreams::send_error (t)"
     
-    return_error $jlibname $queryElem 404 cancel "item-not-found"
-}
-
-proc jlib::bytestreams::return_error {jlibname queryElem errcode errtype errtag} {
-
-    foreach {key value} $args {
-	set name [string trimleft $key -]
-	set attr($name) $value
-    }
-    set xmldata [wrapper::createtag "iq" \
-      -subtags [list $queryElem] -attrlist [array get attr]]
-    $jlibname return_error $xmldata $errcode $errtype $errtag
+    set id  $tstate($sid,id)
+    set jid $tstate($sid,jid)
+    set qel $tstate($sid,queryElem)
+    jlib::send_iq_error $jlibname $jid $id $errcode $errtype $stanza $qel 
+    tfree $jlibname $sid
 }
 
 proc jlib::bytestreams::tfree {jlibname sid} {
     
     upvar ${jlibname}::bytestreams::tstate tstate
-    puts "jlib::bytestreams::ifree (t)"
+    puts "jlib::bytestreams::tfree (t)"
 
     array unset tstate $sid,*
 }
 
 
-
-
+# SURPLUS CODE ------------------------------------
+# 
+# 
+# -------------------------
 
 #--- initiator section ---------------------------------------------------------
 
@@ -790,7 +817,7 @@ proc jlib::bytestreams::target::wait_for_method {jlibname sid} {
     set sock $state($sid,sock)
     set cmd  $state($sid,cmd)
     fileevent $sock readable {}
-    if {[catch {read $sock 2} data] || [eof $sock]} {
+    if {[catch {read $sock} data] || [eof $sock]} {
 	catch {close $sock}
 	uplevel #0 $cmd error-network-read
 	return
@@ -823,7 +850,7 @@ proc jlib::bytestreams::target::wait_for_reply {jlibname sid} {
     set sock $state($sid,sock)
     set cmd  $state($sid,cmd)
     fileevent $sock readable {}
-    if {[catch {read $sock 2} data] || [eof $sock]} {
+    if {[catch {read $sock} data] || [eof $sock]} {
 	catch {close $sock}
 	uplevel #0 $cmd error-network-read
 	return
