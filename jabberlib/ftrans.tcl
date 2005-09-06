@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.4 2005-09-05 14:01:39 matben Exp $
+# $Id: ftrans.tcl,v 1.5 2005-09-06 15:03:04 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -19,7 +19,8 @@
 #
 #	
 #   INSTANCE COMMANDS
-#      jlibName filetransfer send ...
+#      jlibName filetransfer send jid tclProc  \
+#                 -progress, -description, -date, -hash, -block-size, -mime
 #      jlibName filetransfer reset sid
 #      jlibName filetransfer ifree sid
 #      
@@ -92,7 +93,7 @@ proc jlib::ftrans::cmdproc {jlibname cmd args} {
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# These are all functions used by the sender (initiator).
+# These are all functions used by the initiator (sender).
 
 
 # jlib::ftrans::send --
@@ -159,6 +160,7 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
     
     set sid [jlib::generateuuid]
 
+    set istate($sid,sid)    $sid
     set istate($sid,jid)    $jid
     set istate($sid,cmd)    $cmd
     set istate($sid,dtype)  $dtype
@@ -234,6 +236,7 @@ proc jlib::ftrans::SendFileChunk {jlibname sid} {
 	return
     }
     set len [string bytelength $data]
+    puts "\t len=$len"
     incr istate($sid,bytes) $len
     if {!$len} {
 	puts "\t eof"
@@ -271,6 +274,8 @@ proc jlib::ftrans::close_cb {jlibname type sid subiq} {
     ifree $jlibname $sid
 }
 
+# @@@ NEVER TESTED
+#
 proc jlib::ftrans::ireset {jlibname sid} {
 
     upvar ${jlibname}::ftrans::istate istate
@@ -281,6 +286,27 @@ proc jlib::ftrans::ireset {jlibname sid} {
     set istate($sid,status) "reset"
     eval $istate($sid,cmd) [list $jlibname reset $sid {}]
     # ifree $jlibname $sid
+}
+
+# jlib::ftrans::initiatorinfo --
+# 
+#       Returns current open transfers we have initiated.
+
+proc jlib::ftrans::initiatorinfo {jlibname} {
+    
+    upvar ${jlibname}::ftrans::istate istate
+
+    set iList {}
+    foreach skey [array names istate *,sid] {
+	set sid $istate($skey)
+	set opts {}
+	foreach {key value} [array get istate $sid,*] {
+	    set name [string map [list $sid, ""] $key]
+	    lappend opts $name $value
+	}
+	lappend tList $opts
+    }
+    return $iList
 }
 
 proc jlib::ftrans::ifree {jlibname sid} {
@@ -299,7 +325,7 @@ proc jlib::ftrans::ifree {jlibname sid} {
 # 
 #       Callback when si receives this specific profile (file-transfer).
 
-proc jlib::ftrans::open_handler {jlibname sid iqChild respCmd} {
+proc jlib::ftrans::open_handler {jlibname sid jid iqChild respCmd} {
     
     variable handler
     variable xmlns
@@ -312,6 +338,8 @@ proc jlib::ftrans::open_handler {jlibname sid iqChild respCmd} {
 	# Exception
 	return
     }
+    set tstate($sid,sid)  $sid
+    set tstate($sid,jid)  $jid
     set tstate($sid,mime) [wrapper::getattribute $siElem "mime-type"]
     
     # File element attributes 'name' and 'size' are required!
@@ -342,7 +370,8 @@ proc jlib::ftrans::open_handler {jlibname sid iqChild respCmd} {
     # Make a call up to application level to pick destination file.
     # This is an idle call in order to not block.
     set cmd [list [namespace current]::accept $jlibname $sid]
-    after idle [list eval $handler [list $jlibname $attr(name) $attr(size) $cmd] $opts]
+    after idle [list eval $handler  \
+      [list $jlibname $jid $attr(name) $attr(size) $cmd] $opts]
     return
 }
 
@@ -384,22 +413,28 @@ proc jlib::ftrans::accept {jlibname sid accepted args} {
     }
 }
 
+# jlib::ftrans::recv --
+# 
+#       Registered handler when receiving data. Called indirectly from stream.
+
 proc jlib::ftrans::recv {jlibname sid data} {
     
     upvar ${jlibname}::ftrans::tstate tstate
     puts "jlib::ftrans::recv (t)"
     
     set len [string bytelength $data]
+    puts "\t len=$len"
     incr tstate($sid,bytes) $len
     if {[string length $tstate($sid,-channel)]} {
 	if {[catch {puts -nonewline $tstate($sid,-channel) $data} err]} {
-	    tError $jlibname $sid
+	    tError $jlibname $sid $err
 	    return
 	}
     } else {
+	puts "\t append"
 	append tstate($sid,data) $data
     }
-    if {[string length $tstate($sid,-progress)]} {
+    if {$len && [string length $tstate($sid,-progress)]} {
 	eval $tstate($sid,-progress) [list $jlibname $sid  \
 	  $tstate($sid,size) $tstate($sid,bytes)]
     }   
@@ -438,10 +473,31 @@ proc jlib::ftrans::treset {jlibname sid} {
     tfree $jlibname $sid
 }
 
+# jlib::ftrans::targetinfo --
+# 
+#       Returns current target transfers.
+
+proc jlib::ftrans::targetinfo {jlibname} {
+    
+    upvar ${jlibname}::ftrans::tstate tstate
+
+    set tList {}
+    foreach skey [array names tstate *,sid] {
+	set sid $tstate($skey)
+	set opts {}
+	foreach {key value} [array get tstate $sid,*] {
+	    set name [string map [list $sid, ""] $key]
+	    lappend opts $name $value
+	}
+	lappend tList $opts
+    }
+    return $tList
+}
+
 proc jlib::ftrans::tError {jlibname sid {errormsg ""}} {
     
     upvar ${jlibname}::ftrans::tstate tstate
-    puts "jlib::ftrans::tError (t)"
+    puts "jlib::ftrans::tError (t) errormsg=$errormsg"
     
     if {[string length $tstate($sid,-channel)]} {
 	close $tstate($sid,-channel)

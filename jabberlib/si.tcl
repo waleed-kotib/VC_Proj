@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.5 2005-09-05 14:01:39 matben Exp $
+# $Id: si.tcl,v 1.6 2005-09-06 15:03:04 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -151,7 +151,7 @@ proc jlib::si::cmdproc {jlibname cmd args} {
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# These are all functions to use by a sender.
+# These are all functions to use by a initiator (sender).
 
 # jlib::si::send_set --
 # 
@@ -244,7 +244,7 @@ proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
 	# We provide a callback for the transport when open is finished.
 	set istate($sid,stream) $value
 	set jid $istate($sid,jid)
-	set cmd [namespace current]::transport_open_callback
+	set cmd [namespace current]::transport_open_cb
 	eval $trpt($value,open) [list $jlibname $jid $sid]  \
 	  $istate($sid,args)
     } else {
@@ -253,15 +253,14 @@ proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
     }
 }
 
-# jlib::si::transport_open_callback --
+# jlib::si::transport_open_cb --
 # 
 #       This is a transports way of reporting result from it's 'open' method.
 
-proc jlib::si::transport_open_callback {jlibname sid type iqChild} {
+proc jlib::si::transport_open_cb {jlibname sid type iqChild} {
     
-    upvar ${jlibname}::si::istate istate
-    
-    puts "jlib::si::transport_open_callback (i)"
+    upvar ${jlibname}::si::istate istate    
+    puts "jlib::si::transport_open_cb (i)"
     
     # Just report this to the relevant profile.
     eval $istate($sid,openCmd) [list $jlibname $type $sid $iqChild]
@@ -275,16 +274,17 @@ proc jlib::si::send_close {jlibname sid cmd} {
 
     variable trpt
     upvar ${jlibname}::si::istate istate
+    puts "jlib::si::send_close (i)"
     
     set istate($sid,closeCmd) $cmd
     set stream $istate($sid,stream)
     eval $trpt($stream,close) [list $jlibname $sid]    
 }
 
-proc jlib::si::transport_close_callback {jlibname sid type iqChild} {
+proc jlib::si::transport_close_cb {jlibname sid type iqChild} {
     
     upvar ${jlibname}::si::istate istate
-    puts "jlib::si::transport_close_callback (i)"
+    puts "jlib::si::transport_close_cb (i)"
     
     # Just report this to the relevant profile.
     eval $istate($sid,closeCmd) [list $jlibname $type $sid $iqChild]
@@ -332,7 +332,7 @@ proc jlib::si::ifree {jlibname sid} {
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# These are all functions to use by a receiver (target) of a stream.
+# These are all functions to use by a target (receiver) of a stream.
 
 # jlib::si::handle_set --
 # 
@@ -414,10 +414,11 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
     foreach {key val} $args {
 	set tstate($sid,$key)  $val
     }
+    set jid $tstate($sid,-from)
     
     # Invoke registered handler for this profile.
     set respCmd [list [namespace current]::profile_response $jlibname $sid]
-    eval $prof($profile,open) [list $jlibname $sid $iqChild $respCmd]
+    eval $prof($profile,open) [list $jlibname $sid $jid $iqChild $respCmd]
 
     return 1
 }
@@ -511,6 +512,7 @@ proc jlib::si::stream_recv {jlibname sid data} {
 # jlib::si::stream_closed --
 # 
 #       This should be the final stage for a succesful transfer.
+#       Called by transports (streams).
 
 proc jlib::si::stream_closed {jlibname sid} {
     
