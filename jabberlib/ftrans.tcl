@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.5 2005-09-06 15:03:04 matben Exp $
+# $Id: ftrans.tcl,v 1.6 2005-09-07 12:52:08 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -42,10 +42,11 @@ namespace eval jlib::ftrans {
       [namespace current]::init           \
       [namespace current]::cmdproc
     
+    # Our target handlers.
     jlib::si::registerprofile $xmlns(ftrans)  \
       [namespace current]::open_handler       \
       [namespace current]::recv               \
-      [namespace current]::closed
+      [namespace current]::close_handler
 }
 
 # jlib::ftrans::registerhandler --
@@ -208,22 +209,28 @@ proc jlib::ftrans::open_cb {jlibname type sid subiq} {
     if {[string equal $type "error"]} {
 	set istate($sid,status) "error"
 	eval $istate($sid,cmd) [list $jlibname error $sid $subiq]
-	return
-    }
+	ifree $jlibname $sid
+    } else {
     
-    # @@@ assuming -file type
-    SendFileChunk $jlibname $sid
+	# @@@ assuming -file type
+	send_file_chunk $jlibname $sid
+    }
 }
 
-# jlib::ftrans::SendFileChunk --
+# jlib::ftrans::send_file_chunk --
 # 
 #       Invokes the si's 'send_data' method which in turn calls the right
 #       stream handler for this.
 
-proc jlib::ftrans::SendFileChunk {jlibname sid} {
+proc jlib::ftrans::send_file_chunk {jlibname sid} {
     
     upvar ${jlibname}::ftrans::istate istate
-    puts "jlib::ftrans::SendFileChunk (i) sid=$sid"
+    puts "jlib::ftrans::send_file_chunk (i) sid=$sid"
+    
+    # We can have been reset since this is an idle call.
+    if {![info exists istate($sid,sid)]} {
+	return
+    }
     
     # If we have reached eof we receive empty.
     if {[catch {
@@ -252,8 +259,13 @@ proc jlib::ftrans::SendFileChunk {jlibname sid} {
     } else {
 
 	# Invoke the si's method which calls the right stream handler to do the job.
-	jlib::si::send_data $jlibname $sid $data
+	set cmd [namespace current]::send_chunk_error_cb
+	jlib::si::send_data $jlibname $sid $data $cmd
 	
+	# There is a potential problem if we've been reset here...
+	if {![info exists istate($sid,sid)]} {
+	    return
+	}
 	if {[string length $istate($sid,-progress)]} {
 	    eval $istate($sid,-progress)  \
 	      [list $jlibname $sid $istate($sid,size) $istate($sid,bytes)]
@@ -261,8 +273,21 @@ proc jlib::ftrans::SendFileChunk {jlibname sid} {
 
 	# Do like this to avoid blocking.
 	set istate($sid,aid) [after idle  \
-	  [list [namespace current]::SendFileChunk $jlibname $sid]]
+	  [list [namespace current]::send_file_chunk $jlibname $sid]]
     }
+}
+
+# jlib::ftrans::send_chunk_error_cb --
+# 
+#       Only errors should be reported.
+
+proc jlib::ftrans::send_chunk_error_cb {jlibname sid} {
+    
+    upvar ${jlibname}::ftrans::istate istate
+    puts "jlib::ftrans::send_chunk_error_cb (i)"
+
+    eval $istate($sid,cmd) [list $jlibname error $sid {}]
+    ifree $jlibname $sid
 }
 
 proc jlib::ftrans::close_cb {jlibname type sid subiq} {
@@ -312,7 +337,7 @@ proc jlib::ftrans::initiatorinfo {jlibname} {
 proc jlib::ftrans::ifree {jlibname sid} {
 
     upvar ${jlibname}::ftrans::istate istate
-    puts "jlib::ftrans::ifree sid=$sid"
+    puts "jlib::ftrans::ifree (i) sid=$sid"
 
     array unset istate $sid,*    
 }
@@ -427,7 +452,7 @@ proc jlib::ftrans::recv {jlibname sid data} {
     incr tstate($sid,bytes) $len
     if {[string length $tstate($sid,-channel)]} {
 	if {[catch {puts -nonewline $tstate($sid,-channel) $data} err]} {
-	    tError $jlibname $sid $err
+	    terror $jlibname $sid $err
 	    return
 	}
     } else {
@@ -440,13 +465,23 @@ proc jlib::ftrans::recv {jlibname sid data} {
     }   
 }
 
-proc jlib::ftrans::closed {jlibname sid} {
+# jlib::ftrans::close_handler --
+# 
+#       Registered handler when closing the stream.
+#       This is called both for normal close and when an error occured
+#       in the stream to close prematurely.
+
+proc jlib::ftrans::close_handler {jlibname sid {errmsg ""}} {
     
     upvar ${jlibname}::ftrans::tstate tstate
-    puts "jlib::ftrans::closed (t)"
+    puts "jlib::ftrans::close_handler (t)"
     
     if {[string length $tstate($sid,-command)]} {
-	eval $tstate($sid,-command) [list $jlibname $sid ok]
+	if {[string length $errmsg]} {
+	    eval $tstate($sid,-command) [list $jlibname $sid error $errmsg]	    
+	} else {
+	    eval $tstate($sid,-command) [list $jlibname $sid ok]
+	}
     }
     if {[string length $tstate($sid,-channel)]} {
 	close $tstate($sid,-channel)
@@ -459,9 +494,17 @@ proc jlib::ftrans::data {jlibname sid} {
     return $tstate($sid,data)
 }
 
+# jlib::ftrans::treset --
+# 
+#       Resets are closes down target side file-transfer during transport.
+
 proc jlib::ftrans::treset {jlibname sid} {
 
     upvar ${jlibname}::ftrans::tstate tstate
+    puts "jlib::ftrans::treset (t)"
+    
+    # Tell transport we are resetting.
+    jlib::si::reset $jlibname $sid
     
     set tstate($sid,status) "reset"
     if {[string length $tstate($sid,-channel)]} {
@@ -494,16 +537,16 @@ proc jlib::ftrans::targetinfo {jlibname} {
     return $tList
 }
 
-proc jlib::ftrans::tError {jlibname sid {errormsg ""}} {
+proc jlib::ftrans::terror {jlibname sid {errormsg ""}} {
     
     upvar ${jlibname}::ftrans::tstate tstate
-    puts "jlib::ftrans::tError (t) errormsg=$errormsg"
+    puts "jlib::ftrans::terror (t) errormsg=$errormsg"
     
     if {[string length $tstate($sid,-channel)]} {
 	close $tstate($sid,-channel)
     }
     if {[string length $tstate($sid,-command)]} {
-	eval $tstate($sid,-command) [list $jlibname $sid error]
+	eval $tstate($sid,-command) [list $jlibname $sid error $errormsg]
     }
     tfree $jlibname $sid
 }

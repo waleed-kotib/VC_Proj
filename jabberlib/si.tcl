@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.6 2005-09-06 15:03:04 matben Exp $
+# $Id: si.tcl,v 1.7 2005-09-07 12:52:08 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -32,6 +32,28 @@
 #                 /   |   \
 #             streams ...
 #      
+#       INITIATOR: each transport (stream) registers for open, send & close 
+#           using 'registertransport'. The profiles call these indirectly
+#           through si. The profile gets feedback from streams using direct
+#           callbacks.
+#           
+#       TARGET: each profile (file-transfer) registers for open, read & close
+#           using 'registerprofile'. The transports registers for element
+#           handlers for their specific protocol. When activated, the transport
+#           calls si which in turn calls the profile using its registered 
+#           handlers.
+# 
+#                 Initiator:                Target:
+# 
+#       profiles   |    :    :               /|\   :    :
+#                  |    :    :                |    :    :
+#                 \|/   :    :                |    :    :
+#       si        =============  <-------->  =============
+#                  :    |    :                :   /|\   :
+#                  :    |    :                :    |    :
+#       streams    :   \|/   :                :    |    :
+#                       o .......................> o
+# 
 # 
 ############################# USAGE ############################################
 #
@@ -81,14 +103,14 @@ namespace eval jlib::si {
 
 # jlib::si::registertransport --
 # 
-#       Register transports. This is used by the streams that do the actual job.
+#       Register transports on the initiator (sender) side. 
+#       This is used by the streams that do the actual job.
 #       Typically 'name' and 'ns' are xml namespaces and identical.
 
 proc jlib::si::registertransport {name ns priority openProc sendProc closeProc} {
 
-    variable trpt
-    
-    puts "jlib::si::registertransport"
+    variable trpt    
+    puts "jlib::si::registertransport (i)"
     
     lappend trpt(list) [list $name $priority]
     set trpt(list) [lsort -unique -index 1 $trpt(list)]
@@ -111,12 +133,12 @@ proc jlib::si::registertransport {name ns priority openProc sendProc closeProc} 
 # 
 #       This is used by profiles to register handler when receiving a si set
 #       with the specified profile. It contains handlers for 'set', 'read',
-#       and 'close' streams.
+#       and 'close' streams. These belong to the target side.
 
 proc jlib::si::registerprofile {profile openProc readProc closeProc} {
     
     variable prof
-    puts "jlib::si::registerprofile"
+    puts "jlib::si::registerprofile (t)"
     
     set prof($profile,open)  $openProc
     set prof($profile,read)  $readProc
@@ -130,8 +152,7 @@ proc jlib::si::registerprofile {profile openProc readProc closeProc} {
 proc jlib::si::init {jlibname args} {
 
     variable xmlns
-    
-    Debug 4 "jlib::si::init"
+    puts "jlib::si::init"
 
     # Keep different state arrays for initiator (i) and receiver (r).
     namespace eval ${jlibname}::si {
@@ -143,7 +164,7 @@ proc jlib::si::init {jlibname args} {
 
 proc jlib::si::cmdproc {jlibname cmd args} {
     
-    Debug 4 "jlib::si::cmdproc jlibname=$jlibname, cmd='$cmd', args='$args'"
+    puts "jlib::si::cmdproc jlibname=$jlibname, cmd='$cmd', args='$args'"
 
     # Which command? Just dispatch the command to the right procedure.
     return [eval {$cmd $jlibname} $args]
@@ -155,7 +176,7 @@ proc jlib::si::cmdproc {jlibname cmd args} {
 
 # jlib::si::send_set --
 # 
-#       Makes a stream initiation.
+#       Makes a stream initiation (open).
 #       It will eventually, if negotiation went ok, invoke the stream
 #       'open' method. 
 #       The 'args' ar transparently delivered to the streams 'open' method.
@@ -312,14 +333,28 @@ proc jlib::si::getstate {jlibname sid} {
 # 
 #       Opaque calls to send a chunk.
 
-proc jlib::si::send_data {jlibname sid data} {
+proc jlib::si::send_data {jlibname sid data cmd} {
     
     variable trpt
     upvar ${jlibname}::si::istate istate
     puts "jlib::si::send_data (i)"
     
+    set istate($sid,sendCmd) $cmd
     set stream $istate($sid,stream)
     eval $trpt($stream,send) [list $jlibname $sid $data]    
+}
+
+# jlib::si::transport_send_data_error_cb --
+# 
+#       This is a transports way of reporting errors when sending data.
+#       ONLY ERRORS HERE!
+
+proc jlib::si::transport_send_data_error_cb {jlibname sid} {
+    
+    upvar ${jlibname}::si::istate istate
+    puts "jlib::si::transport_send_data_error_cb (i)"
+        
+    eval $istate($sid,sendCmd) [list $jlibname $sid]
 }
 
 proc jlib::si::ifree {jlibname sid} {
@@ -477,6 +512,21 @@ proc jlib::si::profile_response {jlibname sid type profileElem args} {
     return
 }
 
+# jlib::si::reset --
+# 
+#       Used by profile when doing reset.
+
+proc jlib::si::reset {jlibname sid} {
+    
+    upvar ${jlibname}::si::tstate tstate
+    puts "jlib::si::reset (t)"
+    
+    # @@@ Tell transport we are resetting???
+    # Brute force.
+    
+    tfree $jlibname $sid
+}
+
 # jlib::si::havesi --
 # 
 #       The streams may need to know if we have got a si request (set).
@@ -523,6 +573,21 @@ proc jlib::si::stream_closed {jlibname sid} {
     # Each stream should check that we exist before calling us!
     set profile $tstate($sid,profile)
     eval $prof($profile,close) [list $jlibname $sid]
+    tfree $jlibname $sid
+}
+
+# jlib::si::stream_error --
+# 
+#       Called by transports to report an error.
+
+proc jlib::si::stream_error {jlibname sid errmsg} {
+    
+    variable prof
+    upvar ${jlibname}::si::tstate tstate
+    puts "jlib::si::stream_error (t)"
+    
+    set profile $tstate($sid,profile)
+    eval $prof($profile,close) [list $jlibname $sid $errmsg]
     tfree $jlibname $sid
 }
 
