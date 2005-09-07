@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.7 2005-09-06 15:03:04 matben Exp $
+# $Id: bytestreams.tcl,v 1.8 2005-09-07 12:52:08 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -121,8 +121,8 @@ proc jlib::bytestreams::si_send {jlibname sid data} {
     
     set s $istate($sid,sock)
     if {[catch {puts -nonewline $s $data}]} {
-	# @@@ TODO
-	# error
+	jlib::si::transport_send_data_error_cb $jlibname $sid
+	ifinish $jlibname $sid
     }
 }
 
@@ -132,7 +132,14 @@ proc jlib::bytestreams::si_close {jlibname sid} {
     puts "jlib::bytestreams::si_close (i)"
     
     jlib::si::transport_close_cb $jlibname $sid result {}
+    ifinish $jlibname $sid
+}
 
+proc jlib::bytestreams::ifinish {jlibname sid} {
+
+    upvar ${jlibname}::bytestreams::istate istate
+    puts "jlib::bytestreams::ifinish (i)"
+    
     # Close both sockets!
     catch {close $istate($sid,sock)}
     catch {close $istate($sid,ssock)}
@@ -360,7 +367,7 @@ proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
 
 # jlib::bytestreams::connect_host --
 # 
-# 
+#       Is called recursively for each host until socks5 connection established.
 
 proc jlib::bytestreams::connect_host {jlibname sid} {
     
@@ -369,7 +376,13 @@ proc jlib::bytestreams::connect_host {jlibname sid} {
     
     set rhosts $tstate($sid,rhosts)
     if {![llength $rhosts]} {
+	
+	# Deliver error to initiator.
 	send_error $jlibname $sid 404 cancel item-not-found
+
+	# Deliver error to target profile.
+	jlib::si::stream_error $jlibname $sid item-not-found
+	tfree $jlibname $sid
 	return
     }
 
@@ -421,6 +434,13 @@ proc  jlib::bytestreams::readable {jlibname sid} {
     
     upvar ${jlibname}::bytestreams::tstate tstate
     puts "jlib::bytestreams::readable (t)"
+
+    # We may have been reset or something.
+    if {![jlib::si::havesi $jlibname $sid]} {
+	catch {close $tstate($sid,sock)}
+	tfree $jlibname $sid
+	return
+    }
     
     set sock $tstate($sid,sock)
     if {[catch {eof $sock} iseof] || $iseof} {
@@ -579,294 +599,12 @@ proc jlib::bytestreams::tfree {jlibname sid} {
 # 
 # -------------------------
 
-#--- initiator section ---------------------------------------------------------
-
-namespace eval jlib::bytestreams::initiator { }
-
-
-proc jlib::bytestreams::initiator::connect {jlibname jid sid} {
-    variable state
-    
-    set sock [socket -server [list [namespace current]::accept $sid] 0]
-    lassign [fconfigure $sock -sockname] addr hostname port
-    set ip    [jlib::getip $jlibname]
-    set myjid [jlib::myjid $jlibname]
-    set hash  [::sha1::sha1 ${sid}${myjid}${jid}]
-    
-    set state($sid,jid)   $jid
-    set state($sid,ip)    $ip
-    set state($sid,sport) $port
-    set state($sid,hash)  $hash
-    set state($sid,ssock) $sock
-    
-    set host [list $myjid -host $ip -port $port]
-    
-    jlib::bytestreams::initiate $jlibname $jid $sid -streamhost $host \
-      -command [list [namespace current]::connect_cb $jlibname $sid]
-    
-    
-}
-
-proc jlib::bytestreams::initiator::connect_cb {jlibname sid type queryElem args} {
-    variable state
-
-    if {$type eq "error"} {
-	
-	
-    } else {
-	
-    }
-}
-
-proc jlib::bytestreams::initiator::accept {sid sock addr port} {
-    variable state
-
-    set state($sid,sock) $sock
-    fconfigure $sock -translation binary -blocking 0
-
-    fileevent $sock readable \
-      [list [namespace current]::wait_for_methods $sid]
-}
-
-proc jlib::bytestreams::initiator::wait_for_methods {sid} {
-    variable state
-
-    set sock $state($sid,sock)
-    fileevent $sock readable {}
-    if {[catch {read $sock} data] || [eof $sock]} {
-	catch {close $sock}
-
-	return
-    }  
-    
-    # Pick method. Must be \x00
-    binary scan $data ccc* ver nmethods methods
-    if {($ver != 5) || ([lsearch -exact $methods 0] < 0)} {
-	catch {
-	    puts -nonewline $sock "\x05\xff"
-	    close $sock
-	}
-
-	return
-    }
-    if {[catch {
-	puts -nonewline $sock "\x05\x00"
-	flush $sock
-    }]} {
-	
-	return
-    }
-    fileevent $sock readable \
-      [list [namespace current]::wait_for_request $sid]
-}
-
-proc jlib::bytestreams::initiator::wait_for_request {sid} {
-    variable state
-
-    set sock $state($sid,sock)
-    fileevent $sock readable {}
-    if {[catch {read $sock} data] || [eof $sock]} {
-	catch {close $sock}
-
-	return
-    }    
-    
-    binary scan $data ccccc ver cmd rsv atyp len
-    if {$ver != 5 || $cmd != 1 || $atyp != 3} {
-	set reply [string replace $data 1 1 \x07]
-	catch {
-	    puts -nonewline $sock $reply
-	    close $sock
-	}
-	
-	return
-    }
-    
-    binary scan $data @5a${len} hash
-
-    if {[string equal $state($sid,hash) $hash]} {
-	set reply [string replace $data 1 1 \x00]
-	puts -nonewline $sock $reply
-	flush $sock
-    } else {
-	set reply [string replace $data 1 1 \x02]
-	catch {
-	    puts -nonewline $sock $reply
-	    close $sock
-	}
-	
-	return
-    }
-}
 
 #--- target section ------------------------------------------------------------
 
 namespace eval jlib::bytestreams::target { }
 
-# jlib::bytestreams::target::connect --
-# 
-#       Try to do a socks5 connection on any of the indicated hosts in turn.
-#       
-# Arguments:
-#       jid
-#       sid
-#       hosts   {{jid ip port} ...}
-#       
-# Results:
-#       none.
 
-proc jlib::bytestreams::target::init {jlibname jid queryElem sid hosts args} {
-    variable state
-
-    puts "jlib::bytestreams::target::init (t)"
-    set state($sid,jid)       $jid
-    set state($sid,hosts)     $hosts
-    set state($sid,queryElem) $queryElem
-    set state($sid,args)      $args
-    
-    connect $jlibname $jid $sid $rhosts
-}
-
-proc jlib::bytestreams::target::connect {jlibname sid rhosts} {
-    variable state
-    puts "jlib::bytestreams::target::connect (t)"
-    
-    # Pick first host in rhost list.
-    set host [lindex $rhosts 0]
-    set rhosts [lrange 1 end]
-    
-    socks5 $jlibname $jid $sid $host \
-      [list [namespace current]::connect_cb $jlibname $sid $rhosts]    
-}
-
-proc jlib::bytestreams::target::connect_cb {jlibname sid rhosts err} {
-    variable state
-    puts "jlib::bytestreams::target::connect_cb (t)"
-    
-    set jid     $state($sid,jid)
-    set jidhost $state($sid,jidhost)
-    
-    if {$err eq ""} {
-	
-	# socks5 connection ok. 
-	# Answer with 'result' and keep id attribute.
-	array set argsArr $state($sid,args)
-	set id $argsArr(-id)
-	jlib::bytestreams::used $jlibname $jid $id $jidhost
-
-	free $sid
-    } else {
-	if {$remhosts == {}} {
-	    
-	    # item-not-found
-	    set queryElem $state($sid,queryElem)
-	    set aargs     $state($sid,args)
-	    eval {jlib::bytestreams::return_item_not_found $jlibname \
-	      $queryElem} $aargs
-
-	    free $sid 
-	} else {
-	    
-	    # Try next host.
-	    connect $jlibname $jid $sid $rhosts
-	}
-    }
-}
-
-proc jlib::bytestreams::target::free {sid} {
-    variable state
-    
-    array unset state $sid,*
-}
-
-proc jlib::bytestreams::target::socks5 {jlibname jid sid host cmd} {
-    variable state
-    puts "jlib::bytestreams::target::socks5 (t)"
-    
-    lassign $host jidhost addr port
-    if {[catch {
-	set sock [socket -async $addr $port]
-    } err]} {
-	uplevel #0 $cmd error-socket
-	return
-    }
-    fconfigure $sock -translation binary -blocking 0
-
-    set state($sid,sock)    $sock
-    set state($sid,host)    $host
-    set state($sid,addr)    $addr
-    set state($sid,jidhost) $jidhost
-    set state($sid,cmd)     $cmd
-    set state($sid,status)  0
-    
-    # Announce method (\x00).
-    if {[catch {
-	puts -nonewline $sock "\x05\x01\x00"
-	flush $sock
-    } err]} {
-	uplevel #0 $cmd error-socket
-	return
-    }
-    fileevent $sock readable \
-      [list [namespace current]::wait_for_method $jlibname $sid]    
-}
-
-proc jlib::bytestreams::target::wait_for_method {jlibname sid} {
-    variable state
-
-    set sock $state($sid,sock)
-    set cmd  $state($sid,cmd)
-    fileevent $sock readable {}
-    if {[catch {read $sock} data] || [eof $sock]} {
-	catch {close $sock}
-	uplevel #0 $cmd error-network-read
-	return
-    }    
-    binary scan $data cc ver method
-    if {($ver != 5) || ($method != 0)} {
-	catch {close $sock}
-	uplevel #0 $cmd error-socks5
-	return
-    }
-    set myjid [$jlibname myjid]
-    set jid $state($sid,jid)
-    set hash [::sha1::sha1 ${sid}${jid}${mylid}]    
-    set len [binary format c [string length $hash]]
-    if {[catch {
-	puts -nonewline $sock "\x05\x01\x00\x03$len$hash\x00\x00"
-	flush $sock
-    } err]} {
-	catch {close $sock}
-	uplevel #0 $cmd error-network-read
-	return
-    }
-    fileevent $sock readable \
-      [list [namespace current]::wait_for_reply $jlibname $sid]
-}
-
-proc jlib::bytestreams::target::wait_for_reply {jlibname sid} {
-    variable state
-
-    set sock $state($sid,sock)
-    set cmd  $state($sid,cmd)
-    fileevent $sock readable {}
-    if {[catch {read $sock} data] || [eof $sock]} {
-	catch {close $sock}
-	uplevel #0 $cmd error-network-read
-	return
-    }    
-    binary scan $data cc ver method
-    if {($ver != 5) || ($method != 0)} {
-	catch {close $sock}
-	uplevel #0 $cmd error-socks5
-	return
-    }
-
-    # Here we should be finished.
-
-
-    uplevel #0 $cmd ""
-}
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -919,45 +657,6 @@ proc jlib::bytestreams::get_cb {from cmd jlibname type queryElem} {
 	}
     }
     uplevel #0 $cmd [list $jlibname $type $queryElem]
-}
-
-# jlib::bytestreams::initiate --
-# 
-#       -command tclProc
-#       -streamhost {jid (-host -port | -zeroconf)}
-
-proc jlib::bytestreams::initiateXXX {jlibname to sid args} {
-    variable xmlns
-    
-    puts "jlib::bytestreams::initiate (i)"
-    set attrlist [list xmlns $xmlns(bs) sid $sid mode tcp]
-    set sublist {}
-    set opts {}
-    foreach {key value} $args {
-	
-	switch -- $key {
-	    -command {
-		set opts [list -command $value]
-	    }
-	    -streamhost {
-		set jid [lindex $value 0]
-		set hostattr [list jid $jid]
-		foreach {hkey hvalue} [lrange $value 1 end] {
-		    lappend hostattr [string trimleft $hkey -] $hvalue
-		}
-		lappend sublist \
-		  [wrapper::createtag "streamhost" -attrlist $hostattr]
-	    }
-	    default {
-		return -code error "unknown option \"$key\""
-	    }
-	}
-    }
-    set xmllist [wrapper::createtag "query" -attrlist $attrlist \
-      -subtags $sublist]
-    eval {$jlibname send_iq "set" [list $xmllist] -to $to} $opts
-
-    return $sid
 }
 
 # jlib::bytestreams::error --

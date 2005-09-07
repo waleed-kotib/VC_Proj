@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.13 2005-09-06 15:03:04 matben Exp $
+# $Id: ibb.tcl,v 1.14 2005-09-07 12:52:08 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -137,6 +137,7 @@ proc jlib::ibb::si_open {jlibname jid sid args} {
     upvar ${jlibname}::ibb::istate istate
     puts "jlib::ibb::si_open (i)"
     
+    set istate($sid,sid) $sid
     set istate($sid,jid) $jid
     set istate($sid,seq) 0
     set si_open_cb [namespace current]::si_open_cb
@@ -168,11 +169,14 @@ proc jlib::ibb::si_send_cb {jlibname sid type subiq args} {
 
     upvar ${jlibname}::ibb::istate istate
     puts "jlib::ibb::si_send_cb (i)"
-
+    
+    # We get this async so we may have been reset or something.
+    if {![info exists istate($sid,sid)]} {
+	return
+    }
     if {[string equal $type "error"]} {
-	set cmd $istate($sid,cmd)
-	set jid $istate($sid,jid)
-	eval $cmd [list $jlibname $sid $type $subiq]
+	jlib::si::transport_send_data_error_cb $jlibname $sid
+	ifree $jlibname $sid
     }
 }
 
@@ -322,6 +326,7 @@ proc jlib::ibb::handle_set {jlibname from subiq args} {
 		  feature_not_implemented
 		return
 	    }
+	    set tstate($sid,sid)        $sid
 	    set tstate($sid,jid)        $from
 	    set tstate($sid,block-size) $attr(block-size)
 	    set tstate($sid,seq)        0
@@ -343,6 +348,10 @@ proc jlib::ibb::handle_set {jlibname from subiq args} {
     return 1
 }
 
+# jlib::ibb::message_handler --
+# 
+#       Message handler for incoming http://jabber.org/protocol/ibb elements.
+
 proc jlib::ibb::message_handler {jlibname ns msgElem args} {
 
     variable xmlns
@@ -362,7 +371,8 @@ proc jlib::ibb::message_handler {jlibname ns msgElem args} {
 		
 	# We make sure that we have already got a si with this sid.
 	# Since there can be many of these, reply with error only to first.
-	if {![jlib::si::havesi $jlibname $sid]} {
+	if {![jlib::si::havesi $jlibname $sid]  \
+	  || ![info exists tstate($sid,sid)]} {
 	    if {[info exists argsArr(-id)]} {
 		set id $argsArr(-id)
 		jlib::send_message_error $jlibname $jid $id 404 cancel  \
