@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.7 2005-09-07 12:52:08 matben Exp $
+# $Id: si.tcl,v 1.8 2005-09-08 12:52:36 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -79,6 +79,7 @@
 #       0.1         first version
 
 package require jlib			   
+package require jlib::disco
 			  
 package provide jlib::si 0.1
 
@@ -99,6 +100,8 @@ namespace eval jlib::si {
     jlib::ensamble_register si   \
       [namespace current]::init  \
       [namespace current]::cmdproc
+    
+    jlib::disco::registerfeature $xmlns(si)
 }
 
 # jlib::si::registertransport --

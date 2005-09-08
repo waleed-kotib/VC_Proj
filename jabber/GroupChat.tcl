@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.111 2005-08-26 15:02:34 matben Exp $
+# $Id: GroupChat.tcl,v 1.112 2005-09-08 12:52:35 matben Exp $
 
 package require History
 
@@ -560,10 +560,8 @@ proc ::GroupChat::NormalMsgHook {body args} {
 	set cList [wrapper::getnamespacefromchilds $xList x $xmppxmlns(muc,user)]
 	set roomjid $argsArr(-from)
 	
-	puts "cList=$cList"
 	if {$cList != {}} {
 	    set inviteElem [wrapper::getfirstchildwithtag [lindex $cList 0] invite]
-	    puts "inviteElem=$inviteElem"
 	    if {$inviteElem != {}} {
 		set isinvite 1
 		set str2 ""

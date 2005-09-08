@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.6 2005-09-07 12:52:08 matben Exp $
+# $Id: ftrans.tcl,v 1.7 2005-09-08 12:52:36 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -30,6 +30,7 @@
 
 package require jlib		
 package require jlib::si
+package require jlib::disco
 			  
 package provide jlib::ftrans 0.1
 
@@ -47,6 +48,8 @@ namespace eval jlib::ftrans {
       [namespace current]::open_handler       \
       [namespace current]::recv               \
       [namespace current]::close_handler
+    
+    jlib::disco::registerfeature $xmlns(ftrans)
 }
 
 # jlib::ftrans::registerhandler --
@@ -208,7 +211,7 @@ proc jlib::ftrans::open_cb {jlibname type sid subiq} {
     
     if {[string equal $type "error"]} {
 	set istate($sid,status) "error"
-	eval $istate($sid,cmd) [list $jlibname error $sid $subiq]
+	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid $subiq]
 	ifree $jlibname $sid
     } else {
     
@@ -238,7 +241,7 @@ proc jlib::ftrans::send_file_chunk {jlibname sid} {
     } err]} {
 	puts "\t err=$err"
 	set istate($sid,status) "error"
-	eval $istate($sid,cmd) [list $jlibname error $sid {}]
+	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {}]
 	ifree $jlibname $sid
 	return
     }
@@ -267,7 +270,7 @@ proc jlib::ftrans::send_file_chunk {jlibname sid} {
 	    return
 	}
 	if {[string length $istate($sid,-progress)]} {
-	    eval $istate($sid,-progress)  \
+	    uplevel #0 $istate($sid,-progress)  \
 	      [list $jlibname $sid $istate($sid,size) $istate($sid,bytes)]
 	}
 
@@ -286,7 +289,7 @@ proc jlib::ftrans::send_chunk_error_cb {jlibname sid} {
     upvar ${jlibname}::ftrans::istate istate
     puts "jlib::ftrans::send_chunk_error_cb (i)"
 
-    eval $istate($sid,cmd) [list $jlibname error $sid {}]
+    uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {}]
     ifree $jlibname $sid
 }
 
@@ -295,7 +298,7 @@ proc jlib::ftrans::close_cb {jlibname type sid subiq} {
     upvar ${jlibname}::ftrans::istate istate
     puts "jlib::ftrans::close_cb (i)"
 
-    eval $istate($sid,cmd) [list $jlibname $type $sid $subiq]
+    uplevel #0 $istate($sid,cmd) [list $jlibname $type $sid $subiq]
     ifree $jlibname $sid
 }
 
@@ -309,7 +312,7 @@ proc jlib::ftrans::ireset {jlibname sid} {
 	after cancel $istate($sid,aid)
     }
     set istate($sid,status) "reset"
-    eval $istate($sid,cmd) [list $jlibname reset $sid {}]
+    uplevel #0 $istate($sid,cmd) [list $jlibname reset $sid {}]
     # ifree $jlibname $sid
 }
 
@@ -460,7 +463,7 @@ proc jlib::ftrans::recv {jlibname sid data} {
 	append tstate($sid,data) $data
     }
     if {$len && [string length $tstate($sid,-progress)]} {
-	eval $tstate($sid,-progress) [list $jlibname $sid  \
+	uplevel #0 $tstate($sid,-progress) [list $jlibname $sid  \
 	  $tstate($sid,size) $tstate($sid,bytes)]
     }   
 }
@@ -478,9 +481,9 @@ proc jlib::ftrans::close_handler {jlibname sid {errmsg ""}} {
     
     if {[string length $tstate($sid,-command)]} {
 	if {[string length $errmsg]} {
-	    eval $tstate($sid,-command) [list $jlibname $sid error $errmsg]	    
+	    uplevel #0 $tstate($sid,-command) [list $jlibname $sid error $errmsg]	    
 	} else {
-	    eval $tstate($sid,-command) [list $jlibname $sid ok]
+	    uplevel #0 $tstate($sid,-command) [list $jlibname $sid ok]
 	}
     }
     if {[string length $tstate($sid,-channel)]} {
@@ -511,7 +514,7 @@ proc jlib::ftrans::treset {jlibname sid} {
 	close $tstate($sid,-channel)
     }
     if {[string length $tstate($sid,-command)]} {
-	eval $tstate($sid,-command) [list $jlibname $sid reset]
+	uplevel #0 $tstate($sid,-command) [list $jlibname $sid reset]
     }
     tfree $jlibname $sid
 }
@@ -546,7 +549,7 @@ proc jlib::ftrans::terror {jlibname sid {errormsg ""}} {
 	close $tstate($sid,-channel)
     }
     if {[string length $tstate($sid,-command)]} {
-	eval $tstate($sid,-command) [list $jlibname $sid error $errormsg]
+	uplevel #0 $tstate($sid,-command) [list $jlibname $sid error $errormsg]
     }
     tfree $jlibname $sid
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.130 2005-08-14 07:10:51 matben Exp $
+# $Id: Roster.tcl,v 1.131 2005-09-08 12:52:35 matben Exp $
 
 package provide Roster 1.0
 
@@ -978,8 +978,8 @@ proc ::Roster::IsCoccinella {jid3} {
 	} elseif {[$jstate(browse) hasnamespace $jid3 "coccinella:wb"] || \
 	  [$jstate(browse) hasnamespace $jid3 $coccixmlns(whiteboard)]} {
 	    set ans 1
-	} elseif {[$jstate(disco) hasfeature $coccixmlns(whiteboard) $jid3] || \
-	  [$jstate(disco) hasfeature $coccixmlns(coccinella) $jid3]} {
+	} elseif {[$jstate(jlib) disco hasfeature $coccixmlns(whiteboard) $jid3] || \
+	  [$jstate(jlib) disco hasfeature $coccixmlns(coccinella) $jid3]} {
 	    set ans 1
 	}
     }

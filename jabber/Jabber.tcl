@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.140 2005-09-02 17:06:25 matben Exp $
+# $Id: Jabber.tcl,v 1.141 2005-09-08 12:52:35 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -21,7 +21,7 @@ package require wavelabel
 # jlib components shall be declared here, or later.
 package require jlib
 package require roster
-package require disco
+package require jlib::disco
 package require jlib::http
 package require jlib::si
 package require jlib::bytestreams
@@ -455,7 +455,7 @@ proc ::Jabber::BrowseCmd {args}  {
 proc ::Jabber::DiscoCmd {args}  {
     variable jstate
     
-    eval {$jstate(disco)} $args
+    eval {$jstate(jlib) disco} $args
 }
 
 # Generic ::Jabber:: stuff -----------------------------------------------------
@@ -572,7 +572,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
     variable jstate
     variable jprefs
     
-    ::Debug 2 "::Jabber::MessageCallback type=$type, args='$args'"
+    ::Debug 2 "::Jabber::MessageCallback type=$type"
     
     array set argsArr {-body ""}
     array set argsArr $args
@@ -1872,6 +1872,10 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
      # Tell jlib's iq-handler that we handled the event.
     return 1
 }
+
+# ::Jabber::AddClientXmlns --
+# 
+#       Reserved for specific client xmlns, not library ones.
 
 proc ::Jabber::AddClientXmlns {xmlnsList} {
     variable clientxmlns

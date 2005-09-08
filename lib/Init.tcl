@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.20 2005-08-29 12:39:37 matben Exp $
+# $Id: Init.tcl,v 1.21 2005-09-08 12:52:36 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -398,12 +398,21 @@ proc ::Init::LoadPackages { } {
 	}
     }
     
+    # tkpng is required for the gui.
+    ::Splash::SetMsg "[mc splashlook] tkpng..."
+    if {[catch {package require tkpng 0.7}]} {
+	tk_messageBox -icon error \
+	  -message "The tkpng package is required for the GUI"
+	exit
+    }
+    set this(package,tkpng) 1
+    
     # Other utility packages that can be platform specific.
     # The 'Thread' package requires that the Tcl core has been built with support.
     array set extraPacksArr {
-	macosx      {Itcl tkpng Tclapplescript tls Thread MacCarbonPrint}
-	windows     {Itcl tkpng printer gdi tls Thread optcl tcom}
-	unix        {Itcl tkpng tls Thread}
+	macosx      {Itcl Tclapplescript tls Thread MacCarbonPrint}
+	windows     {Itcl printer gdi tls Thread optcl tcom}
+	unix        {Itcl tls Thread}
     }
     foreach {platform packList} [array get extraPacksArr] {
 	foreach name $packList {

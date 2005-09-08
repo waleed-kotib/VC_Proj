@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.22 2005-08-14 07:17:55 matben Exp $
+# $Id: Theme.tcl,v 1.23 2005-09-08 12:52:36 matben Exp $
 
 package provide Theme 1.0
 
@@ -90,7 +90,7 @@ proc ::Theme::Init { } {
     if {$themeImageSuffixes ne ""} {
 	set this(themeImageSuffixes) $themeImageSuffixes
     }
-    set allImageSuffixes [concat .gif $themeImageSuffixes]
+    set allImageSuffixes [concat .gif .png $themeImageSuffixes]
 
     # Make all images used for widgets that doesn't use the Theme package.
     PreLoadImages
@@ -289,6 +289,8 @@ proc ::Theme::GetImage {name args} {
 		if {[file exists $f]} {
 		    if {[string equal $suff .gif]} {
 			image create photo $nsname -file $f -format gif
+		    } elseif {[string equal $suff .png]} {
+			image create photo $nsname -file $f -format png
 		    } else {
 			image create photo $nsname -file $f
 		    }

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.24 2005-08-26 15:02:34 matben Exp $
+# $Id: muc.tcl,v 1.25 2005-09-08 12:52:36 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -42,7 +42,11 @@
 #       0.1         first version
 #       0.2         rewritten as a standalone component
 
+package require jlib
+package require jlib::disco
+
 package provide muc 0.2
+package provide jlib::muc 0.2
 
 namespace eval jlib::muc {
     
@@ -59,6 +63,8 @@ namespace eval jlib::muc {
 	"owner"         "http://jabber.org/protocol/muc#owner"
 	"user"          "http://jabber.org/protocol/muc#user"
     }
+    
+    jlib::disco::registerfeature $xmlnsmuc()
     
     variable muc
     set muc(affiliationExp) {(owner|admin|member|outcast|none)}

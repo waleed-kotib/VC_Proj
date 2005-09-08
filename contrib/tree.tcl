@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.50 2005-08-26 15:02:34 matben Exp $
+# $Id: tree.tcl,v 1.51 2005-09-08 12:52:35 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -597,10 +597,10 @@ proc ::tree::tree {w args} {
       [list ::tree::ButtonDoubleClickCmd $w %x %y]
     bind $widgets(canvas) <Button-1>   \
       [list ::tree::ButtonClickCmd $w %x %y]
-    bind $widgets(canvas) <Key-Up> [list ::tree::SelectNext $w -1]
-    bind $widgets(canvas) <Key-Down> [list ::tree::SelectNext $w +1]
+    bind $widgets(canvas) <Key-Up>          [list ::tree::SelectNext $w -1]
+    bind $widgets(canvas) <Key-Down>        [list ::tree::SelectNext $w +1]
     bind $widgets(canvas) <ButtonRelease-1> [list ::tree::ButtonRelease $w]
-    bind $widgets(canvas) <Configure> [list ::tree::ConfigureCallback $w]
+    bind $widgets(canvas) <Configure>       [list ::tree::ConfigureCallback $w]
     
     if {[llength $options(-rightclickcommand)]} {
 	bind $widgets(canvas) <Button-3>   \
@@ -738,7 +738,7 @@ proc ::tree::ConfigureCallback {w} {
     
     upvar ::tree::${w}::widgets widgets
     upvar ::tree::${w}::options options
-
+    
     if {[string length $options(-backgroundimage)] > 0} {
 	::tree::DrawBackgroundImage $w
     }

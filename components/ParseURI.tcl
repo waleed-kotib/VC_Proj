@@ -7,7 +7,7 @@
 #       Most recent reference at the time of writing:
 #       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
 # 
-# $Id: ParseURI.tcl,v 1.21 2005-04-04 09:14:48 matben Exp $
+# $Id: ParseURI.tcl,v 1.22 2005-09-08 12:52:35 matben Exp $
 
 package require uriencode
 
@@ -221,7 +221,7 @@ proc ::ParseURI::DoGroupchat {token} {
     set state(discocmd)  [list ::ParseURI::DiscoInfoHook $token]
 
     # We should check if we've got info before setting up the hooks.
-    if {[$jstate(disco) isdiscoed info $service]} {
+    if {[$jstate(jlib) disco isdiscoed info $service]} {
 	DiscoInfoHook $token result $service {}
     } elseif {[$jstate(browse) isbrowsed $service]} {
 	BrowseSetHook $token $service {}
