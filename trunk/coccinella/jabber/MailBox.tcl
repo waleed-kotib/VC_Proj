@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.71 2005-08-14 07:10:51 matben Exp $
+# $Id: MailBox.tcl,v 1.72 2005-09-08 12:52:35 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -716,7 +716,7 @@ proc ::MailBox::GotMsg {bodytxt args} {
 # 
 #       Same as above, but for raw whiteboard messages.
 
-proc ::MailBox::HandleRawWBMessage {jlibname xmlns args} {
+proc ::MailBox::HandleRawWBMessage {jlibname xmlns msgElem args} {
     global  prefs this
 
     variable mailbox
@@ -725,6 +725,9 @@ proc ::MailBox::HandleRawWBMessage {jlibname xmlns args} {
     
     ::Debug 2 "::MailBox::HandleRawWBMessage args=$args"
     array set argsArr $args
+    if {![info exists argsArr(-x)]} {
+	return
+    }
 	
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {
@@ -757,7 +760,7 @@ proc ::MailBox::HandleRawWBMessage {jlibname xmlns args} {
 # 
 #       As above but for SVG whiteboard messages.
 
-proc ::MailBox::HandleSVGWBMessage {jlibname xmlns args} {
+proc ::MailBox::HandleSVGWBMessage {jlibname xmlns msgElem args} {
     global  prefs
 
     variable mailbox
@@ -766,6 +769,9 @@ proc ::MailBox::HandleSVGWBMessage {jlibname xmlns args} {
     
     ::Debug 2 "::MailBox::HandleSVGWBMessage args='$args'"
     array set argsArr $args
+    if {![info exists argsArr(-x)]} {
+	return
+    }
 	
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {

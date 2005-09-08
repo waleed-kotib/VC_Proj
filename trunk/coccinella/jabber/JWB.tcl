@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.53 2005-08-26 15:02:34 matben Exp $
+# $Id: JWB.tcl,v 1.54 2005-09-08 12:52:35 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -932,11 +932,13 @@ proc ::Jabber::WB::FilterTags {tags} {
 # 
 #       Takes care of any special (BAD) commands from the old protocol.
 
-proc ::Jabber::WB::HandleSpecialMessage {jlibname xmlns args} {
+proc ::Jabber::WB::HandleSpecialMessage {jlibname xmlns msgElem args} {
         
     ::Debug 2 "::Jabber::WB::HandleSpecialMessage $xmlns, args=$args"
     array set argsArr $args
-        
+    if {![info exists argsArr(-x)]} {
+	return
+    }
     set rawList [GetRawMessageList $argsArr(-x) $xmlns]
     set ishandled 1
     foreach raw $rawList {
@@ -974,10 +976,13 @@ proc ::Jabber::WB::HandleSpecialMessage {jlibname xmlns args} {
 #       This is the dispatcher for "raw" chat whiteboard messages using the
 #       CANVAS: (and RESIZE IMAGE: etc.) prefixed drawing commands.
 
-proc ::Jabber::WB::HandleRawChatMessage {jlibname xmlns args} {
+proc ::Jabber::WB::HandleRawChatMessage {jlibname xmlns msgElem args} {
         
     ::Debug 2 "::Jabber::WB::HandleRawChatMessage args=$args"
     array set argsArr $args
+    if {![info exists argsArr(-x)]} {
+	return
+    }
         
     set cmdList [GetRawMessageList $argsArr(-x) $xmlns]
     set cmdList [eval {HandleNonCanvasCmds chat $cmdList} $args]
@@ -994,10 +999,13 @@ proc ::Jabber::WB::HandleRawChatMessage {jlibname xmlns args} {
 #       This is the dispatcher for "raw" chat whiteboard messages using the
 #       CANVAS: (and RESIZE IMAGE: etc.) prefixed drawing commands.
 
-proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns args} {
+proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns msgElem args} {
 	
     ::Debug 2 "::Jabber::WB::HandleRawGroupchatMessage args=$args"	
     array set argsArr $args
+    if {![info exists argsArr(-x)]} {
+	return
+    }
     
     # Don't do anything if we haven't entered the room using whiteboard.
     set mjid [jlib::jidmap $argsArr(-from)]
@@ -1021,10 +1029,13 @@ proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns args} {
     return $ishandled
 }
 
-proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns args} {
+proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns msgElem args} {
     
     ::Debug 2 "::Jabber::WB::HandleSVGWBChatMessage"
     array set argsArr $args
+    if {![info exists argsArr(-x)]} {
+	return
+    }
 	
     # Need to have the actual canvas before doing svg -> canvas translation.
     # This is a duplicate; fix later...
@@ -1043,10 +1054,13 @@ proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns args} {
     return 1
 }
 
-proc ::Jabber::WB::HandleSVGWBGroupchatMessage {jlibname xmlns args} {
+proc ::Jabber::WB::HandleSVGWBGroupchatMessage {jlibname xmlns msgElem args} {
     
     ::Debug 2 "::Jabber::WB::HandleSVGWBGroupchatMessage"
     array set argsArr $args
+    if {![info exists argsArr(-x)]} {
+	return
+    }
     
     # Don't do anything if we haven't entered the room using whiteboard.
     set mjid [jlib::jidmap $argsArr(-from)]

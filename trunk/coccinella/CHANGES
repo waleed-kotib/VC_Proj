@@ -5,10 +5,11 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.95.10 (05????):
+Coccinella-0.95.10 (0509??):
 
 	- server connections using http possible; http proxy added
-	- 
+	- added the tkpng package; png support now required
+	-
 
 Coccinella-0.95.9 (050821):
 

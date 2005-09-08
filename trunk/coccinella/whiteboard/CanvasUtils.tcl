@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasUtils.tcl,v 1.33 2005-09-02 17:07:01 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.34 2005-09-08 12:52:36 matben Exp $
 
 package require sha1pure
 package require can2svg
@@ -1058,7 +1058,7 @@ proc ::CanvasUtils::SVGForeignObjectHandler {w xmllist paropts transformList arg
     #        size 22270 mime audio/wav} 0 {} {}}}
 
     set wcan [::WB::GetCanvasFromWtop $w]
-    set embedElems [wrapper::getchildswithtaginnamespace $xmllist "embed" \
+    set embedElems [wrapper::getchildswithtagandxmlns $xmllist "embed" \
       "http://jabber.org/protocol/svgwb/embed/"]
     if {[llength $embedElems]} {
 	set x 0

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.63 2005-08-26 15:02:34 matben Exp $
+# $Id: MUC.tcl,v 1.64 2005-09-08 12:52:35 matben Exp $
 
 package require entrycomp
 package require muc
@@ -86,8 +86,6 @@ proc ::MUC::Init {jlibName} {
     set jstate(muc) [jlib::muc::new $jlibName]
 
     $jstate(jlib) message_register * $xmppxmlns(muc,user) ::MUC::MUCMessage
-    
-    ::Jabber::AddClientXmlns [list $xmppxmlns(muc)]
 }
 
 # MUC::BuildEnter --
@@ -742,12 +740,15 @@ proc ::MUC::InviteCB {token jlibname type args} {
 #       Handle incoming message tagged with muc namespaced x-element.
 #       Invitation?
 
-proc ::MUC::MUCMessage {jlibname xmlns args} {
+proc ::MUC::MUCMessage {jlibname xmlns msgElem args} {
    
     # This seems handled by the muc component by sending a message.
     return
    
     array set argsArr $args
+    if {![info exists argsArr(-x)]} {
+	return
+    }
     set from $argsArr(-from)
     set xlist $argsArr(-x)
     

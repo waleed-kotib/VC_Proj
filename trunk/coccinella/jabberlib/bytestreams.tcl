@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.8 2005-09-07 12:52:08 matben Exp $
+# $Id: bytestreams.tcl,v 1.9 2005-09-08 12:52:36 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -26,6 +26,7 @@
 #       0.1         first version
 
 package require jlib
+package require jlib::disco
 package require sha1      ;# tcllib                           
                           
 package provide jlib::bytestreams 0.1
@@ -45,6 +46,8 @@ namespace eval jlib::bytestreams {
       [namespace current]::si_open   \
       [namespace current]::si_send   \
       [namespace current]::si_close    
+    
+    jlib::disco::registerfeature $xmlns(bs)
 }
 
 # jlib::bytestreams::init --

@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: groupchat.tcl,v 1.4 2005-08-26 15:02:34 matben Exp $
+# $Id: groupchat.tcl,v 1.5 2005-09-08 12:52:36 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -19,6 +19,7 @@
 ################################################################################
 
 package provide groupchat 1.0
+package provide jlib::groupchat 1.0
 
 namespace eval jlib { }
 

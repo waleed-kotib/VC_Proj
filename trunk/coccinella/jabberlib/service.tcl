@@ -6,7 +6,7 @@
 #       
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.18 2005-08-26 15:02:34 matben Exp $
+# $Id: service.tcl,v 1.19 2005-09-08 12:52:36 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -134,8 +134,8 @@ proc jlib::service::send_getchildren {jlibname jid cmd} {
     # We must have a way to figure out which method to use!!!
     if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
 	$serv(browse,name) send_get $jid $cmd
-    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed items $locals(server)]} {
-	$serv(disco,name) send_get items $jid $cmd
+    } elseif {$serv(disco) && [$jlibname disco isdiscoed items $locals(server)]} {
+	$jlibname disco send_get items $jid $cmd
     }
 }
 
@@ -281,7 +281,7 @@ proc jlib::service::isinvestigated {jlibname jid} {
     set ans 0
     if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
 	set ans 1
-    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed items $jid]} {
+    } elseif {$serv(disco) && [$jlibname disco isdiscoed items $jid]} {
 	set ans 1
     }
     return $ans
@@ -295,8 +295,8 @@ proc jlib::service::parent {jlibname jid} {
     # ???
     if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
 	return [$serv(browse,name) getparentjid $jid]
-    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed items $jid]} {
-	return [$serv(disco,name) parent $jid]
+    } elseif {$serv(disco) && [$jlibname disco isdiscoed items $jid]} {
+	return [$jlibname disco parent $jid]
     } else {
 	set jid [jlib::jidmap $jid]
 	if {[info exists agent($jid,parent)]} {
@@ -315,8 +315,8 @@ proc jlib::service::childs {jlibname jid} {
     # ???
     if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
 	return [$serv(browse,name) getchilds $jid]
-    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed items $jid]} {
-	return [$serv(disco,name) children $jid]
+    } elseif {$serv(disco) && [$jlibname disco isdiscoed items $jid]} {
+	return [$jlibname disco children $jid]
     } else {
 	set jid [jlib::jidmap $jid]
 	if {[info exists agent($jid,childs)]} {
@@ -381,7 +381,7 @@ proc jlib::service::getjidsfor {jlibname what} {
     
     # Disco
     if {$serv(disco)} {
-	set jidsdi [$serv(disco,name) getjidsforfeature jabber:iq:${what}]
+	set jidsdi [$jlibname disco getjidsforfeature jabber:iq:${what}]
 	
 	switch -- $what {
 	    groupchat - muc {
@@ -390,7 +390,7 @@ proc jlib::service::getjidsfor {jlibname what} {
 		#set jidsdi [concat $jidsdi [$serv(disco,name) getjidsforfeature \
 		#  "http://jabber.org/protocol/muc"]]
 		
-		set jidsdi [concat $jidsdi [$serv(disco,name) getconferences]]
+		set jidsdi [concat $jidsdi [$jlibname disco getconferences]]
 	    }
 	}
 	set jids [concat $jids $jidsdi]
@@ -414,7 +414,7 @@ proc jlib::service::getconferences {jlibname} {
 	set jids [$serv(browse,name) getconferenceservers]
     }
     if {$serv(disco)} {
-	set jids [concat $jids [$serv(disco,name) getconferences]]
+	set jids [concat $jids [$jlibname disco getconferences]]
     }
     return [lsort -unique $jids]
 }
@@ -428,8 +428,8 @@ proc jlib::service::hasfeature {jlibname jid xmlns} {
     if {$serv(browse)} {
 	set ans [$serv(browse,name) hasnamespace $jid $xmlns]
     } 
-    if {!$ans && $serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
-	set ans [$serv(disco,name) hasfeature $xmlns $jid]
+    if {!$ans && $serv(disco) && [$jlibname disco isdiscoed info $jid]} {
+	set ans [$jlibname disco hasfeature $xmlns $jid]
     }
     return $ans
 }
@@ -463,7 +463,7 @@ proc jlib::service::gettransportjids {jlibname what} {
 	# The Jabber registrar defines the type/subtype for all
 	# categories. The actual server is "server/im".
 	set jids [concat $jids \
-	  [$serv(disco,name) getjidsforcategory "gateway/$what"]]
+	  [$jlibname disco getjidsforcategory "gateway/$what"]]
     }
 
     # Agent service if any.
@@ -497,8 +497,8 @@ proc jlib::service::gettype {jlibname jid} {
     if {$serv(browse)} {
 	set type [$serv(browse,name) gettype $jid]
     }
-    if {$serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
-	set type [lindex [$serv(disco,name) types $jid] 0]
+    if {$serv(disco) && [$jlibname disco isdiscoed info $jid]} {
+	set type [lindex [$jlibname disco types $jid] 0]
     }
     set jid [jlib::jidmap $jid]
     if {[info exists agent($jid,service)]} {
@@ -522,8 +522,8 @@ proc jlib::service::name {jlibname jid} {
     if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
 	set name [$serv(browse,name) getname $jid]
     }
-    if {$serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
-	set name [$serv(disco,name) name $jid]
+    if {$serv(disco) && [$jlibname disco isdiscoed info $jid]} {
+	set name [$jlibname disco name $jid]
     }
     return $name
 }
@@ -546,8 +546,8 @@ proc jlib::service::isroom {jlibname jid} {
     if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
 	set isroom [$serv(browse,name) isroom $jid]
     }
-    if {!$isroom && $serv(disco) && [$serv(disco,name) isdiscoed info $locals(server)]} {
-	set isroom [$serv(disco,name) isroom $jid]
+    if {!$isroom && $serv(disco) && [$jlibname disco isdiscoed info $locals(server)]} {
+	set isroom [$jlibname disco isroom $jid]
     }
     if {!$isroom && $serv(muc)} {
 	set isroom [$serv(muc,name) isroom $jid]

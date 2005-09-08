@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.7 2005-09-02 17:06:26 matben Exp $
+# $Id: UserInfo.tcl,v 1.8 2005-09-08 12:52:35 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -93,7 +93,7 @@ proc ::UserInfo::Get {jid {node ""}} {
 	    lappend opts -node $node
 	}
 	set discoCB [list [namespace current]::DiscoCB $token]
-	eval {$jstate(disco) send_get items $jid $discoCB} $opts
+	eval {$jstate(jlib) disco send_get items $jid $discoCB} $opts
 	incr priv(ncount)
     }
     
@@ -109,11 +109,12 @@ proc ::UserInfo::Get {jid {node ""}} {
 }
 
 proc ::UserInfo::DiscoCB {token disconame type from subiq args} {
-    upvar ${token}::priv priv    
     
     if {![Exists $token]} {
 	return
     }
+    upvar ${token}::priv priv    
+
     incr priv(ncount) -1
     if {$priv(ncount) <= 0} {
 	$priv(warrow) stop
@@ -138,11 +139,12 @@ proc ::UserInfo::DiscoCB {token disconame type from subiq args} {
 }
 
 proc ::UserInfo::VersionCB {token jlibname type subiq} {
-    upvar ${token}::priv priv    
     
     if {![Exists $token]} {
 	return
     }
+    upvar ${token}::priv priv    
+
     if {![info exists priv(wpageversion)]} {
 	LastAndVersionPage $token
     }
@@ -179,11 +181,12 @@ proc ::UserInfo::VersionCB {token jlibname type subiq} {
 }
 
 proc ::UserInfo::LastCB {token jlibname type subiq} {
-    upvar ${token}::priv priv    
     
     if {![Exists $token]} {
 	return
     }
+    upvar ${token}::priv priv    
+
     incr priv(ncount) -1
     if {$priv(ncount) <= 0} {
 	$priv(warrow) stop
@@ -207,11 +210,12 @@ proc ::UserInfo::LastCB {token jlibname type subiq} {
 }
 
 proc ::UserInfo::TimeCB {token jlibname type subiq} {
-    upvar ${token}::priv priv    
     
     if {![Exists $token]} {
 	return
     }
+    upvar ${token}::priv priv    
+
     incr priv(ncount) -1
     if {$priv(ncount) <= 0} {
 	$priv(warrow) stop
@@ -233,11 +237,12 @@ proc ::UserInfo::TimeCB {token jlibname type subiq} {
 }
 
 proc ::UserInfo::VCardCB {token jlibname type subiq} {
-    upvar ${token}::priv priv    
     
     if {![Exists $token]} {
 	return
     }
+    upvar ${token}::priv priv    
+
     incr priv(ncount) -1
     if {$priv(ncount) <= 0} {
 	$priv(warrow) stop
@@ -310,8 +315,12 @@ proc ::UserInfo::Build {token} {
 }
 
 proc ::UserInfo::Exists {token} {
-    upvar ${token}::priv priv    
     
+    if {![namespace exists $token]} {
+	return 0
+    }
+    upvar ${token}::priv priv    
+
     if {![info exists priv]} {
 	return 0
     } elseif {![winfo exists $priv(w)]} {

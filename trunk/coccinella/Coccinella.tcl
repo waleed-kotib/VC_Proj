@@ -12,11 +12,11 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.120 2005-08-28 13:37:03 matben Exp $	
+# $Id: Coccinella.tcl,v 1.121 2005-09-08 12:52:35 matben Exp $	
 
 	
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
-set debugLevel 0
+set debugLevel 4
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0

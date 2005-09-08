@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.14 2005-09-07 12:52:08 matben Exp $
+# $Id: ibb.tcl,v 1.15 2005-09-08 12:52:36 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -27,6 +27,7 @@
 
 package require jlib
 package require base64     ; # tcllib
+package require jlib::disco
 package require jlib::si
 
 package provide jlib::ibb 0.1
@@ -46,6 +47,8 @@ namespace eval jlib::ibb {
       [namespace current]::si_open   \
       [namespace current]::si_send   \
       [namespace current]::si_close
+    
+    jlib::disco::registerfeature $xmlns(ibb)
 }
 
 # jlib::ibb::init --

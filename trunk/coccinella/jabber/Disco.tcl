@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.63 2005-08-14 07:10:51 matben Exp $
+# $Id: Disco.tcl,v 1.64 2005-09-08 12:52:35 matben Exp $
 
 package provide Disco 1.0
 
@@ -125,12 +125,8 @@ proc ::Disco::InitHook { } {
 }
 
 proc ::Disco::NewJlibHook {jlibName} {
-    variable xmlns
-    upvar ::Jabber::jstate jstate
 	    
-    set jstate(disco) [disco::new $jlibName -command ::Disco::Command]
-
-    ::Jabber::AddClientXmlns [list $xmlns(disco)]
+    $jlibName disco registerhandler ::Disco::Command
 }
 
 proc ::Disco::LoginHook { } {
@@ -161,12 +157,11 @@ proc ::Disco::HaveTree { } {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     
-    if {[info exists jstate(disco)]} {
-	if {[$jstate(disco) isdiscoed items $jserver(this)]} {
-	    return 1
-	}
-    }    
-    return 0
+    if {[$jstate(jlib) disco isdiscoed items $jserver(this)]} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 proc ::Disco::DiscoServer {server} {
@@ -193,7 +188,7 @@ proc ::Disco::GetInfo {jid {node ""}} {
     if {$node != ""} {
 	lappend opts -node $node
     }
-    eval {$jstate(disco) send_get info $jid [namespace current]::InfoCB} $opts
+    eval {$jstate(jlib) disco send_get info $jid [namespace current]::InfoCB} $opts
 }
 
 proc ::Disco::GetItems {jid {node ""}} {    
@@ -204,7 +199,7 @@ proc ::Disco::GetItems {jid {node ""}} {
     if {$node != ""} {
 	lappend opts -node $node
     }
-    eval {$jstate(disco) send_get items $jid [namespace current]::ItemsCB} $opts
+    eval {$jstate(jlib) disco send_get items $jid [namespace current]::ItemsCB} $opts
 }
 
 # Disco::Command --
@@ -212,7 +207,7 @@ proc ::Disco::GetItems {jid {node ""}} {
 #       Registered callback for incoming (async) get requests from other
 #       entities.
 
-proc ::Disco::Command {disconame discotype from subiq args} {
+proc ::Disco::Command {jlibname discotype from subiq args} {
     upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Disco::Command discotype=$discotype, from=$from"
@@ -227,7 +222,7 @@ proc ::Disco::Command {disconame discotype from subiq args} {
     return 1
 }
 
-proc ::Disco::ItemsCB {disconame type from subiq args} {
+proc ::Disco::ItemsCB {jlibname type from subiq args} {
     variable tstate
     variable wwave
     variable discoInfoLimit
@@ -270,14 +265,14 @@ proc ::Disco::ItemsCB {disconame type from subiq args} {
 	# Note that jids and nodes can be mixed!
     
 	set pnode   [wrapper::getattribute $subiq "node"]
-	set ppv     [$jstate(disco) parents2 $from $pnode]
+	set ppv     [$jstate(jlib) disco parents2 $from $pnode]
 	set pitem   [list $from $pnode]
 	set vstruct [concat $ppv [list $pitem]]
 	
 	#puts "\t pnode=$pnode"
 	#puts "\t ppv=$ppv"
 	#puts "\t vstruct=$vstruct"
-	#parray ${disconame}::items
+	#parray ${jlibname}::disco::items
 
 	unset -nocomplain tstate(run,$vstruct)
 	$wwave animate -1
@@ -288,7 +283,7 @@ proc ::Disco::ItemsCB {disconame type from subiq args} {
 	# Get info:
 	# We disco servers jid 'items+info', and disco its childrens 'info'.
 	# Perhaps we should discover depending on items category?
-	set centlist [$jstate(disco) childs2 $from $pnode]
+	set centlist [$jstate(jlib) disco childs2 $from $pnode]
 	set clen [llength $centlist]
 	foreach cent $centlist {
 	    set cjid  [lindex $cent 0]
@@ -309,7 +304,7 @@ proc ::Disco::ItemsCB {disconame type from subiq args} {
     eval {::hooks::run discoItemsHook $type $from $subiq} $args
 }
 
-proc ::Disco::InfoCB {disconame type from subiq args} {
+proc ::Disco::InfoCB {jlibname type from subiq args} {
     variable wtree
     upvar ::Jabber::jstate jstate
      
@@ -330,15 +325,15 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
 	if {![winfo exists $wtree]} {
 	    return
 	}
-	set ppv     [$jstate(disco) parents2 $from $node]
+	set ppv     [$jstate(jlib) disco parents2 $from $node]
 	set item    [list $from $node]
 	set vstruct [concat $ppv [list $item]]
-	set cattype [lindex [$jstate(disco) types $from $node] 0]
+	set cattype [lindex [$jstate(jlib) disco types $from $node] 0]
 	
 	if {[$wtree isitem $vstruct]} {
 	    set icon [::Servicons::Get $cattype]
 	    set opts {}	    
-	    set name [$jstate(disco) name $from $node]
+	    set name [$jstate(jlib) disco name $from $node]
 	    if {$name != ""} {
 		lappend opts -text $name
 	    }
@@ -399,7 +394,7 @@ proc ::Disco::IsJidBranchCategory {jid} {
         
     # Ad-hoc way to figure out if dir or not. Use the category attribute.
     set isdir 0
-    set types [$jstate(disco) types $jid]
+    set types [$jstate(jlib) disco types $jid]
     foreach type $types {
 	set category [lindex [split $type /] 0]
 	if {[info exists branchCategory($category)] && \
@@ -411,7 +406,7 @@ proc ::Disco::IsJidBranchCategory {jid} {
     
     # Don't forget the rooms.
     if {!$isdir} {
-	set isdir [$jstate(disco) isroom $jid]
+	set isdir [$jstate(jlib) disco isroom $jid]
     }
     return $isdir
 }
@@ -421,12 +416,12 @@ proc ::Disco::IsBranchNode {jid node} {
     
     if {0} {
 	set isdir 0
-	if {[$jstate(disco) iscategorytype hierarchy/branch $jid $node]} {
+	if {[$jstate(jlib) disco iscategorytype hierarchy/branch $jid $node]} {
 	    set isdir 1
 	}
     } else {
 	set isdir 1
-	if {[$jstate(disco) iscategorytype hierarchy/leaf $jid $node]} {
+	if {[$jstate(jlib) disco iscategorytype hierarchy/leaf $jid $node]} {
 	    set isdir 0
 	}
     }
@@ -473,10 +468,9 @@ proc ::Disco::ParseGetInfo {from subiq args} {
     if {$node == ""} {
 	    
 	# No node. Adding private namespaces.
-	set vars {}
-	foreach ns [::Jabber::GetClientXmlnsList] {
-	    lappend vars $ns
-	}
+	set vars [concat  \
+	  [jlib::disco::getregisteredfeatures]  \
+	  [::Jabber::GetClientXmlnsList]]
 	set subtags [list [wrapper::createtag "identity" -attrlist  \
 	  [list category client type pc name Coccinella]]]
 	lappend subtags [wrapper::createtag "feature" \
@@ -759,7 +753,7 @@ proc ::Disco::Popup {w vstruct x y} {
 
     # An item can have more than one type, for instance,
     # msn.domain can have: {gateway/msn conference/text}
-    set categoryList [string tolower [$jstate(disco) types $jid $node]]
+    set categoryList [string tolower [$jstate(jlib) disco types $jid $node]]
     set categoryType [lindex $categoryList 0]
     
     ::Debug 4 "\t jid=$jid, node=$node, categoryList=$categoryList"
@@ -787,14 +781,14 @@ proc ::Disco::Popup {w vstruct x y} {
 	lappend clicked user
     }
     if {$username != ""} {
-	if {[$jstate(disco) isroom $jid]} {
+	if {[$jstate(jlib) disco isroom $jid]} {
 	    lappend clicked room
 	} else {
 	    lappend clicked user
 	}
     }
     foreach name {search register} {
-	if {[$jstate(disco) hasfeature "jabber:iq:${name}" $jid]} {
+	if {[$jstate(jlib) disco hasfeature "jabber:iq:${name}" $jid]} {
 	    lappend clicked $name
 	}
     }
@@ -899,7 +893,7 @@ proc ::Disco::OpenTreeCmd {w vstruct} {
 
 	# If we have not yet discoed this jid, do it now!
 	# We should have a method to tell if children have been added to tree!!!
-	if {![$jstate(disco) isdiscoed items $jid $node]} {
+	if {![$jstate(jlib) disco isdiscoed items $jid $node]} {
 	    set tstate(run,$vstruct) 1
 	    $wwave animate 1
 	    
@@ -908,7 +902,7 @@ proc ::Disco::OpenTreeCmd {w vstruct} {
 	} elseif {[llength [$wtree children $vstruct]] == 0} {
 	    
 	    # An item may have been discoed but not from here.
-	    foreach item [$jstate(disco) childs2 $jid $node] {
+	    foreach item [$jstate(jlib) disco childs2 $jid $node] {
 		AddToTree [concat $vstruct [list $item]]
 	    }
 	}
@@ -986,12 +980,12 @@ proc ::Disco::AddToTree {vstruct} {
 	# Display text string. Room participants with their nicknames.
 	jlib::splitjid $jid jid2 res
 	set icon ""
-	if {[$jstate(disco) isroom $jid2] && [string length $res]} {
+	if {[$jstate(jlib) disco isroom $jid2] && [string length $res]} {
 	    set name [$jstate(jlib) service nick $jid]
 	    set isdir 0
 	    set icon [::Roster::GetPresenceIconFromJid $jid]
 	} else {
-	    set name [$jstate(disco) name $jid $node]
+	    set name [$jstate(jlib) disco name $jid $node]
 	    if {$name == ""} {
 		if {$node == ""} {
 		    set name $jid
@@ -1036,7 +1030,7 @@ proc ::Disco::AddToTree {vstruct} {
     
     # Add all child or node elements as well.
     # Note: jid and node childs can be mixed!
-    set cstructs [$jstate(disco) childs2 $jid $node]
+    set cstructs [$jstate(jlib) disco childs2 $jid $node]
     
     ::Debug 4 "\t cstructs=$cstructs"
     
@@ -1058,7 +1052,7 @@ proc ::Disco::MakeBalloonHelp {jid node treectag} {
     if {$node != ""} {
 	append msg "\nnode: $node"
     }
-    set types [$jstate(disco) types $jid $node]
+    set types [$jstate(jlib) disco types $jid $node]
     if {$types != {}} {
 	append msg "\ntype: $types"
     }
@@ -1074,7 +1068,7 @@ proc ::Disco::Refresh {jid {node ""}} {
     ::Debug 2 "::Disco::Refresh jid=$jid, node=$node"
 	
     # Clear internal state of the disco object for this jid.
-    $jstate(disco) reset $jid
+    $jstate(jlib) disco reset $jid
     
     # Remove all children of this jid from disco tree.
     # @@@ take node into account
@@ -1093,7 +1087,7 @@ proc ::Disco::Refresh {jid {node ""}} {
 proc ::Disco::Clear { } {    
     upvar ::Jabber::jstate jstate
     
-    $jstate(disco) reset
+    $jstate(jlib) disco reset
 }
 
 # Disco::PresenceHook --
@@ -1125,7 +1119,7 @@ proc ::Disco::PresenceHook {jid presence args} {
 	    ::Roster::GetPresenceIcon $jid3 $presArr(-type)
 	} $presList]
 	set item [list $jid3 {}]
-	set vstruct [concat [$jstate(disco) parents2 $jid3] [list $item]]
+	set vstruct [concat [$jstate(jlib) disco parents2 $jid3] [list $item]]
 	if {[$wtree isitem $vstruct]} {
 	    $wtree itemconfigure $vstruct -image $icon
 	}
@@ -1145,7 +1139,7 @@ proc ::Disco::TryIdentifyCoccinella {jid3 presence args} {
 	  [$jstate(roster) getextras $jid3 $coccixmlns(servers)]
 	if {$coccielem == {}} {
 	    if {![::Roster::IsTransportHeuristics $jid3]} {
-		if {![$jstate(disco) isdiscoed items $jid3] && \
+		if {![$jstate(jlib) disco isdiscoed items $jid3] && \
 		  ![$jstate(roster) wasavailable $jid3]} {
 		    eval {AutoDisco $jid3 $presence} $args
 		}
@@ -1175,17 +1169,17 @@ proc ::Disco::AutoDisco {jid presence args} {
     
     # Disco only potential Coccinella (all jabber) clients.
     jlib::splitjidex $jid node host x
-    set type [lindex [$jstate(disco) types $host] 0]
+    set type [lindex [$jstate(jlib) disco types $host] 0]
     
     ::Debug 4 "::Disco::AutoDisco jid=$jid, type=$type"
 
     # We may not yet have discoed this (empty).
     if {($type == "") || ($type == "service/jabber")} {		
-	$jstate(disco) send_get info $jid [namespace current]::AutoDiscoCmd
+	$jstate(jlib) disco send_get info $jid [namespace current]::AutoDiscoCmd
     }
 }
 
-proc ::Disco::AutoDiscoCmd {disconame type from subiq args} {
+proc ::Disco::AutoDiscoCmd {jlibname type from subiq args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns    
     
@@ -1196,8 +1190,8 @@ proc ::Disco::AutoDiscoCmd {disconame type from subiq args} {
 	    ::Jabber::AddErrorLog $from "Failed disco: $subiq"
 	}
 	result - ok {
-	    if {[$jstate(disco) hasfeature $coccixmlns(whiteboard) $from] || \
-	      [$jstate(disco) hasfeature $coccixmlns(coccinella) $from]} {
+	    if {[$jstate(jlib) disco hasfeature $coccixmlns(whiteboard) $from] || \
+	      [$jstate(jlib) disco hasfeature $coccixmlns(coccinella) $from]} {
 		::Roster::SetCoccinella $from
 	    }
 	}
@@ -1209,8 +1203,8 @@ proc ::Disco::InfoCmd {jid {node ""}} {
 
     ::Debug 4 "::Disco::InfoCmd jid=$jid"
     
-    if {![$jstate(disco) isdiscoed info $jid $node]} {
-	set xmllist [$jstate(disco) get info xml $jid $node]
+    if {![$jstate(jlib) disco isdiscoed info $jid $node]} {
+	set xmllist [$jstate(jlib) disco get info xml $jid $node]
 	InfoResultCB result $jid $xmllist
     } else {
 	set opts {}
@@ -1218,12 +1212,12 @@ proc ::Disco::InfoCmd {jid {node ""}} {
 	    lappend opts -node $node
 	}
 	eval {
-	    $jstate(disco) send_get info $jid [namespace current]::InfoCmdCB
+	    $jstate(jlib) disco send_get info $jid [namespace current]::InfoCmdCB
 	} $opts
     }
 }
 
-proc ::Disco::InfoCmdCB {disconame type jid subiq args} {
+proc ::Disco::InfoCmdCB {jlibname type jid subiq args} {
     
     ::Debug 4 "::Disco::InfoCmdCB type=$type, jid=$jid"
     
@@ -1315,7 +1309,7 @@ proc ::Disco::BuildInfoPage {win jid {node ""}} {
     $wtext tag configure feature -lmargin1 6
     $wtext insert end "Feature\tXML namespace\n" head
     
-    set features [$jstate(disco) features $jid $node]
+    set features [$jstate(jlib) disco features $jid $node]
     
     set tfont [$wtext cget -font]
     set maxw 0
@@ -1485,11 +1479,6 @@ proc ::Disco::AddServerErrorCheck {from} {
     upvar ::Jabber::jprefs jprefs
     
     lprune jprefs(disco,autoServers) $from
-}
-
-if {0} {
-    proc cb {args} {puts "cb: $args"}
-    $::Jabber::jstate(disco) send_get info marilu@jabber.dk/coccinella cb
 }
 
 #-------------------------------------------------------------------------------
