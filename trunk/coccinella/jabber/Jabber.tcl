@@ -4,14 +4,14 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.141 2005-09-08 12:52:35 matben Exp $
+# $Id: Jabber.tcl,v 1.142 2005-09-19 06:37:21 matben Exp $
 
 package require balloonhelp
 package require browse
 package require chasearrows
 package require combobox
 package require http 2.3
-package require sha1pure
+package require sha1
 package require tinyfileutils
 package require tree
 package require uriencode
@@ -35,6 +35,7 @@ package require Chat
 package require Conference
 package require Disco
 package require Emoticons
+package require FTrans
 package require GotMsg
 package require GroupChat
 package require JForms
@@ -955,7 +956,7 @@ proc ::Jabber::ErrorLogDlg { } {
     frame $wtxt -bd 1 -relief sunken
     pack $wtxt -side top -fill both -expand 1
 
-    text $wtext -height 12 -width 48 -wrap word \
+    text $wtext -height 12 -width 48 -wrap word -bd 0 \
       -highlightthickness 0 -yscrollcommand [list $wysc set]
     tuscrollbar $wysc -orient vertical -command [list $wtext yview]
     grid  $wtext  -column 0 -row 0 -sticky news

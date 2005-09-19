@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.51 2005-09-08 12:52:35 matben Exp $
+# $Id: tree.tcl,v 1.52 2005-09-19 06:37:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1696,6 +1696,7 @@ proc ::tree::Build {w} {
 
     Debug 1 "::tree::Build w=$w"
 
+    unset -nocomplain state(buildid)
     set can $widgets(canvas)
     
     foreach col $options(-stripecolors) {
@@ -2152,7 +2153,7 @@ proc ::tree::BuildWhenIdle {w} {
 
     if {![info exists state(pending)]} {
 	set state(pending) 1
-	after idle [list ::tree::Build $w]
+	set state(buildid) [after idle [list ::tree::Build $w]]
     }
     return
 }
@@ -2571,10 +2572,14 @@ proc ::tree::DestroyHandler {w} {
 
     variable widgetGlobals
     upvar ::tree::${w}::widgets widgets
+    upvar ::tree::${w}::state   state
     
     Debug 1 "::tree::DestroyHandler w=$w"
     #set can $widgets(canvas)
     #catch {DelItem $w {}}
+    if {[info exists state(buildid)]} {
+	after cancel $state(buildid)
+    }
     
     # Remove the namespace with the widget.
     namespace delete ::tree::${w}

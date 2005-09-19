@@ -5,9 +5,9 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasUtils.tcl,v 1.34 2005-09-08 12:52:36 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.35 2005-09-19 06:37:21 matben Exp $
 
-package require sha1pure
+package require sha1
 package require can2svg
 
 package provide CanvasUtils 1.0
@@ -42,7 +42,7 @@ proc ::CanvasUtils::Init { } {
     # Need to make sure we don't get: "integer value too large to represent"
     
     if {[catch {
-        set utaguid [format %i 0x[string range [sha1pure::sha1 [clock clicks]$this(hostname)] 0 6]]
+        set utaguid [format %i 0x[string range [sha1::sha1 [clock clicks]$this(hostname)] 0 6]]
     }]} {
         set utaguid [string trimleft [string range [expr rand()] 2 10] 0]
     }

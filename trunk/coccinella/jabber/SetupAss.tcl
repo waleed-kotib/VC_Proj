@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.30 2005-08-14 07:10:51 matben Exp $
+# $Id: SetupAss.tcl,v 1.31 2005-09-19 06:37:21 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -20,7 +20,11 @@ namespace eval ::Jabber::SetupAss::  {
     variable server
     variable haveRegistered 0
     variable finished 0
-    
+
+    # Icons
+    option add *SetupAss*assistantImage       assistant        widgetDefault
+    option add *SetupAss*assistantDisImage    assistantDis     widgetDefault
+
     # Make the selected (first) server the default one.
     set profile [::Profiles::GetSelectedName]
     set spec [::Profiles::GetProfile $profile]
@@ -41,12 +45,16 @@ proc ::Jabber::SetupAss::SetupAss { } {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
+      -macclass {document closeBox} -class SetupAss
     wm title $w [::msgcat::mc {Setup Assistant}]
     
+    set im  [::Theme::GetImage [option get $w assistantImage {}]]
+    set imd [::Theme::GetImage [option get $w assistantDisImage {}]]
+
     set ns [namespace current]
     set su $w.su
     wizard::wizard $su  \
+      -image [list $im background $imd]  \
       -closecommand [list [namespace current]::DoClose $w]   \
       -finishcommand [list [namespace current]::DoFinish $w]  \
       -nextpagecommand [list [namespace current]::NextPage $w]
@@ -229,7 +237,7 @@ proc ::Jabber::SetupAss::DoRegister { } {
     variable password
     variable haveRegistered
 
-    ::RegisterEx::New -server $server  \
+    ::Register::NewDlg -server $server  \
       -username $username -password $password
     set haveRegistered 1
 }

@@ -5,9 +5,9 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasText.tcl,v 1.8 2005-08-14 08:37:52 matben Exp $
+# $Id: CanvasText.tcl,v 1.9 2005-09-19 06:37:21 matben Exp $
 
-package require sha1pure
+package require sha1
 
 package provide CanvasText 1.0
 
@@ -179,7 +179,7 @@ proc ::CanvasText::Copy {wcan} {
 	# Keep track of font in clipboard and a hash to see if changed
 	# before pasting it.
 	set priv(font) [$wcan itemcget $t -font]
-	set priv(sha1) [sha1pure::sha1 "$priv(magic)$str"]
+	set priv(sha1) [sha1::sha1 "$priv(magic)$str"]
 	#OwnClipboard $wcan
     }
 }
@@ -312,7 +312,7 @@ proc ::CanvasText::Insert {wcan char} {
     
     # If this is an empty text item then reuse any cached font.
     if {([$wcan itemcget $itfocus -text] eq "") && ($priv(font) != {})} {
-	if {[string equal $priv(sha1) [sha1pure::sha1 "$priv(magic)$char"]]} {
+	if {[string equal $priv(sha1) [sha1::sha1 "$priv(magic)$char"]]} {
 	    ::CanvasUtils::ItemConfigure $wcan $itfocus -font $priv(font)
 	}
     }

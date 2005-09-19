@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: wizard.tcl,v 1.7 2005-08-14 06:56:45 matben Exp $
+# $Id: wizard.tcl,v 1.8 2005-09-19 06:37:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -25,6 +25,7 @@
 #	-closecommand, closeCommand, CloseCommand
 #	-finishcommand, finishCommand, FinishCommand
 #	-font, font, Font
+#	-image
 #	-nextpagecommand, nextPageCommand, NextPageCommand
 #	-takefocus, takeFocus, TakeFocus
 #	
@@ -41,6 +42,7 @@
 #       050517       using tile 
 
 package require mnotebook
+package require tileutils
 
 package provide wizard 1.0
 
@@ -86,12 +88,14 @@ proc ::wizard::Init { } {
 	-closecommand        {closeCommand         CloseCommand        }  \
 	-finishcommand       {finishCommand        FinishCommand       }  \
 	-font                {font                 Font                }  \
+	-image               {image                Image               }  \
 	-nextpagecommand     {nextPageCommand      NextPageCommand     }  \
 	-takefocus           {takeFocus            TakeFocus           }  \
     }
     set notebookOptions {-borderwidth -relief}
     set suOptions {
-	-background -font -takefocus -closecommand -finishcommand -nextpagecommand
+	-background -font -takefocus -closecommand -finishcommand -image  
+	-nextpagecommand
     }
   
     # The legal widget commands. These are actually the Notebook commands.
@@ -195,7 +199,7 @@ proc ::wizard::wizard {w args} {
     
     # Build.
     ttk::label $widgets(head) -style Headlabel \
-      -text [mc {Setup Assistant}]
+      -text [mc {Setup Assistant}] -image $options(-image) -compound left
     ttk::separator $w.div1
     pack $widgets(head) -side top -fill x
     pack $w.div1 -side top -fill x

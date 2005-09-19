@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.26 2005-09-08 12:52:36 matben Exp $
+# $Id: disco.tcl,v 1.27 2005-09-19 06:37:21 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -1048,11 +1048,15 @@ proc jlib::disco::handle_get {discotype jlibname from subiq args} {
 proc jlib::disco::reset {jlibname {jid ""} {node ""}} {
 
     upvar ${jlibname}::disco::items items
+    upvar ${jlibname}::disco::info  info
+    upvar ${jlibname}::disco::rooms rooms
 
-    if {($jid == "") && ($node == "")} {
+    if {($jid eq "") && ($node eq "")} {
 	array unset items
 	array unset info
 	array unset rooms
+
+	set info(conferences) {}
     } else {
 	set jid [jlib::jidmap $jid]	
 	

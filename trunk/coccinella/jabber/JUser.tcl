@@ -5,14 +5,14 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.14 2005-08-14 07:10:51 matben Exp $
+# $Id: JUser.tcl,v 1.15 2005-09-19 06:37:21 matben Exp $
 
 package provide JUser 1.0
 
 namespace eval ::Jabber::User:: {
 	
-    option add *JUser.newuserImage                newuser         widgetDefault
-    option add *JUser.newuserDisImage             newuserDis      widgetDefault
+    option add *JUser.adduserImage                adduser         widgetDefault
+    option add *JUser.adduserDisImage             adduserDis      widgetDefault
 
     # A unique running identifier.
     variable uid 0
@@ -59,8 +59,8 @@ proc ::Jabber::User::NewDlg {args} {
 	::UI::SetWindowPosition $w $wDlgs(jrostadduser)
     }
 
-    set im  [::Theme::GetImage [option get $w newuserImage {}]]
-    set imd [::Theme::GetImage [option get $w newuserDisImage {}]]
+    set im  [::Theme::GetImage [option get $w adduserImage {}]]
+    set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
 
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]
@@ -401,8 +401,8 @@ proc ::Jabber::User::EditUserDlg {jid} {
     if {$nwin == 1} {
 	::UI::SetWindowPosition $w $wDlgs(jrostedituser)
     }
-    set im  [::Theme::GetImage [option get $w newuserImage {}]]
-    set imd [::Theme::GetImage [option get $w newuserDisImage {}]]
+    set im  [::Theme::GetImage [option get $w adduserImage {}]]
+    set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
 
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]

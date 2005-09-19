@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.9 2005-09-08 12:52:36 matben Exp $
+# $Id: bytestreams.tcl,v 1.10 2005-09-19 06:37:21 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -120,7 +120,7 @@ proc jlib::bytestreams::si_send {jlibname sid data} {
     
     upvar ${jlibname}::bytestreams::istate istate
     puts "jlib::bytestreams::si_send (i)"
-    puts "\t len=[string bytelength $data]"
+    puts "\t len=[string length $data]"
     
     set s $istate($sid,sock)
     if {[catch {puts -nonewline $s $data}]} {
@@ -453,8 +453,8 @@ proc  jlib::bytestreams::readable {jlibname sid} {
 	jlib::si::stream_closed $jlibname $sid
 	tfree $jlibname $sid
     } else {
-	set data [read $sock]
-	set len [string bytelength $data]
+	set data [read $sock 4096]
+	set len [string length $data]
 	puts "\t len=$len"
     
 	# Deliver to si for further processing.

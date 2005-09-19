@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.54 2005-09-08 12:52:35 matben Exp $
+# $Id: JWB.tcl,v 1.55 2005-09-19 06:37:21 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -309,7 +309,7 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 	if {[info exists argsArr(-thread)]} {
 	    set thread $argsArr(-thread)
 	} else {
-	    set thread [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
+	    set thread [::sha1::sha1 "$jstate(mejid)[clock seconds]"]
 	}
 	set name [$jstate(roster) getname $jid]
 	if {[string length $name]} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.7 2005-09-08 12:52:36 matben Exp $
+# $Id: ftrans.tcl,v 1.8 2005-09-19 06:37:21 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -153,7 +153,7 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
 	    if {[catch {open $fileName {RDONLY}} fd]} {
 		return -code error "failed open file \"$fileName\""
 	    }
-	    fconfigure $fd -translation binary
+	    fconfigure $fd -translation binary -buffersize $opts(-block-size)
 	    set size [file size $fileName]
 	    set name [file tail $fileName]
 	}
@@ -241,11 +241,11 @@ proc jlib::ftrans::send_file_chunk {jlibname sid} {
     } err]} {
 	puts "\t err=$err"
 	set istate($sid,status) "error"
-	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {}]
+	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {networkerror ""}]
 	ifree $jlibname $sid
 	return
     }
-    set len [string bytelength $data]
+    set len [string length $data]
     puts "\t len=$len"
     incr istate($sid,bytes) $len
     if {!$len} {
@@ -289,7 +289,7 @@ proc jlib::ftrans::send_chunk_error_cb {jlibname sid} {
     upvar ${jlibname}::ftrans::istate istate
     puts "jlib::ftrans::send_chunk_error_cb (i)"
 
-    uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {}]
+    uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {networkerror ""}]
     ifree $jlibname $sid
 }
 
@@ -337,6 +337,18 @@ proc jlib::ftrans::initiatorinfo {jlibname} {
     return $iList
 }
 
+proc jlib::ftrans::getinitiatorstate {jlibname sid} {
+    
+    upvar ${jlibname}::ftrans::istate istate
+    
+    set opts {}
+    foreach {key value} [array get istate $sid,*] {
+	set name [string map [list $sid, ""] $key]
+	lappend opts $name $value
+    }
+    return $opts
+}
+
 proc jlib::ftrans::ifree {jlibname sid} {
 
     upvar ${jlibname}::ftrans::istate istate
@@ -359,6 +371,10 @@ proc jlib::ftrans::open_handler {jlibname sid jid iqChild respCmd} {
     variable xmlns
     upvar ${jlibname}::ftrans::tstate tstate
     puts "jlib::ftrans::open_handler (t)"
+    
+    if {![info exists handler]} {
+	return -code break
+    }
     
     set siElem $iqChild
     set fileElem [wrapper::getfirstchild $siElem "file" $xmlns(ftrans)]
@@ -426,13 +442,13 @@ proc jlib::ftrans::accept {jlibname sid accepted args} {
     }
     if {$accepted} {
 	set type ok
+	if {[string length $opts(-channel)]} {
+	    fconfigure $opts(-channel) -translation binary -buffersize 4096
+	}
     } else {
 	set type error
     }
     set tstate($sid,data) ""
-    if {[string length $opts(-channel)]} {
-	fconfigure $opts(-channel) -translation binary
-    }
 
     set respCmd $tstate($sid,cmd)
     eval $respCmd [list $type {}]
@@ -450,7 +466,7 @@ proc jlib::ftrans::recv {jlibname sid data} {
     upvar ${jlibname}::ftrans::tstate tstate
     puts "jlib::ftrans::recv (t)"
     
-    set len [string bytelength $data]
+    set len [string length $data]
     puts "\t len=$len"
     incr tstate($sid,bytes) $len
     if {[string length $tstate($sid,-channel)]} {
@@ -538,6 +554,18 @@ proc jlib::ftrans::targetinfo {jlibname} {
 	lappend tList $opts
     }
     return $tList
+}
+
+proc jlib::ftrans::gettargetstate {jlibname sid} {
+    
+    upvar ${jlibname}::ftrans::tstate tstate
+    
+    set opts {}
+    foreach {key value} [array get tstate $sid,*] {
+	set name [string map [list $sid, ""] $key]
+	lappend opts $name $value
+    }
+    return $opts
 }
 
 proc jlib::ftrans::terror {jlibname sid {errormsg ""}} {

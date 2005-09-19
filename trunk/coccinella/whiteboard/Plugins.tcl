@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Plugins.tcl,v 1.18 2005-08-26 15:02:34 matben Exp $
+# $Id: Plugins.tcl,v 1.19 2005-09-19 06:37:21 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -124,6 +124,7 @@ namespace eval ::Plugins:: {
 	QuickTimeTcl       {            macosx    windows} 
 	snack              {windows     unix}
 	Img                {windows     unix}
+	tkpng              {macosx      windows     unix}
     }
     array set helpers2Platform {xanim unix} 
     
@@ -168,24 +169,25 @@ proc ::Plugins::Init { } {
     }
     
     # Init the "standard" (internal and application) plugins.
-    ::Plugins::InitTk
-    ::Plugins::InitQuickTimeTcl
-    ::Plugins::InitSnack
-    ::Plugins::InitImg
-    ::Plugins::InitXanim
+    InitTk
+    InitQuickTimeTcl
+    InitSnack
+    InitImg
+    InitTkPNG
+    InitXanim
     
     # Load all "external" plugins.
     set pluginDir [file join $this(path) plugins]
-    ::Plugins::LoadPluginDirectory $pluginDir
+    LoadPluginDirectory $pluginDir
     
     # Load all packages and plugins we can.
-    ::Plugins::CompileAndLoadPackages
+    CompileAndLoadPackages
     
     # Set up various arrays used internally.
-    ::Plugins::PostProcessInfo
+    PostProcessInfo
     
     # This must be done after all plugins identified and loaded.
-    ::Plugins::MakeTypeListDialogOption
+    MakeTypeListDialogOption
     
     set inited 1
 }
@@ -228,10 +230,10 @@ proc ::Plugins::InitQuickTimeTcl { } {
     set plugin(QuickTimeTcl,trpt,video) http
     
     # Define any 16x16 icon to spice up the UI.
-    set plugin(QuickTimeTcl,icon,16) [image create photo -format gif -file \
-      [file join $this(imagePath) qtlogo16.gif]]
+    set plugin(QuickTimeTcl,icon,16) [image create photo -format png -file \
+      [file join $this(imagePath) quicktime16.png]]
     set plugin(QuickTimeTcl,icon,12) [image create photo -format gif -file \
-      [file join $this(imagePath) qtlogo12.gif]]
+      [file join $this(imagePath) quicktime12.gif]]
     
     # We must list supported MIME types for each package.
     # For QuickTime:
@@ -295,6 +297,22 @@ proc ::Plugins::InitImg { } {
       image/x-tiff\
     }
     set plugin(Img,mimes) $supportedMimeTypes(Img)
+}
+
+proc ::Plugins::InitTkPNG { } {
+    variable plugin
+    variable supportedMimeTypes
+    variable packages2Platform
+    
+    set plugin(tkpng,pack) "tkpng"
+    set plugin(tkpng,type) "internal"
+    set plugin(tkpng,desc) "Adds png image support."
+    set plugin(tkpng,platform) $packages2Platform(tkpng)
+    set plugin(tkpng,importProc) ::Import::DrawImage
+    set supportedMimeTypes(tkpng) {
+	image/png           image/x-png
+    }
+    set plugin(tkpng,mimes) $supportedMimeTypes(tkpng)
 }
 
 #--- xanim ---------------------------------------------------------------------

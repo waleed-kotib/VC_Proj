@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.64 2005-09-08 12:52:35 matben Exp $
+# $Id: Disco.tcl,v 1.65 2005-09-19 06:37:21 matben Exp $
+
+package require jlib::disco
 
 package provide Disco 1.0
 

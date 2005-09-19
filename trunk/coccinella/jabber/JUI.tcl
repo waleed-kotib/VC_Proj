@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.84 2005-08-14 07:10:51 matben Exp $
+# $Id: JUI.tcl,v 1.85 2005-09-19 06:37:21 matben Exp $
 
 package provide JUI 1.0
 
@@ -30,14 +30,14 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.inboxDisImage               inboxDis        widgetDefault
     option add *JMain.inboxLetterImage            inboxLetter     widgetDefault
     option add *JMain.inboxLetterDisImage         inboxLetterDis  widgetDefault
-    option add *JMain.newuserImage                newuser         widgetDefault
-    option add *JMain.newuserDisImage             newuserDis      widgetDefault
+    option add *JMain.adduserImage                adduser         widgetDefault
+    option add *JMain.adduserDisImage             adduserDis      widgetDefault
     option add *JMain.stopImage                   stop            widgetDefault
     option add *JMain.stopDisImage                stopDis         widgetDefault
-    option add *JMain.roster16Image               roster16        widgetDefault
-    option add *JMain.roster16DisImage            roster16Dis     widgetDefault
-    option add *JMain.browser16Image              browser16       widgetDefault
-    option add *JMain.browser16DisImage           browser16Dis    widgetDefault
+    option add *JMain.roster16Image               family16        widgetDefault
+    option add *JMain.roster16DisImage            family16Dis     widgetDefault
+    option add *JMain.browser16Image              run16           widgetDefault
+    option add *JMain.browser16DisImage           run16Dis        widgetDefault
 
     # Top header image if any.
     option add *JMain.headImage                   ""              widgetDefault
@@ -296,8 +296,8 @@ proc ::Jabber::UI::Build {w} {
     set iconInboxLettDis [::Theme::GetImage [option get $w inboxLetterDisImage {}]]
     set iconInbox       [::Theme::GetImage [option get $w inboxImage {}]]
     set iconInboxDis    [::Theme::GetImage [option get $w inboxDisImage {}]]
-    set iconNewUser     [::Theme::GetImage [option get $w newuserImage {}]]
-    set iconNewUserDis  [::Theme::GetImage [option get $w newuserDisImage {}]]
+    set iconAddUser     [::Theme::GetImage [option get $w adduserImage {}]]
+    set iconAddUserDis  [::Theme::GetImage [option get $w adduserDisImage {}]]
     set iconStop        [::Theme::GetImage [option get $w stopImage {}]]
     set iconStopDis     [::Theme::GetImage [option get $w stopDisImage {}]]
 
@@ -329,7 +329,7 @@ proc ::Jabber::UI::Build {w} {
 	  -command [list ::MailBox::ShowHide -visible 1]
     }
     $wtray newbutton newuser -text [mc Contact] \
-      -image $iconNewUser -disabledimage $iconNewUserDis  \
+      -image $iconAddUser -disabledimage $iconAddUserDis  \
       -command ::Jabber::User::NewDlg -state disabled
 
     ::hooks::run buildJMainButtonTrayHook $wtray
@@ -502,12 +502,16 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
         
     switch -- $mailboxstate {
 	empty {
-	    set im [::Theme::GetImage [option get $w inboxImage {}]]
-	    $jwapp(wtray) buttonconfigure inbox -image $im
+	    set im  [::Theme::GetImage [option get $w inboxImage {}]]
+	    set imd [::Theme::GetImage [option get $w inboxDisImage {}]]
+	    $jwapp(wtray) buttonconfigure inbox  \
+	      -image $im -disabledimage $imd
 	}
 	nonempty {
-	    set im [::Theme::GetImage [option get $w inboxLetterImage {}]]
-	    $jwapp(wtray) buttonconfigure inbox -image $im
+	    set im  [::Theme::GetImage [option get $w inboxLetterImage {}]]
+	    set imd [::Theme::GetImage [option get $w inboxLetterDisImage {}]]
+	    $jwapp(wtray) buttonconfigure inbox  \
+	      -image $im -disabledimage $imd
 	}
     }
 }
