@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.34 2005-08-29 12:39:37 matben Exp $
+# $Id: Emoticons.tcl,v 1.35 2005-09-19 06:37:21 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -578,7 +578,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     
     tuscrollbar $wfr.ysc -orient vertical -command [list $wfr.t  yview]
     text $wfr.t -yscrollcommand [list $wfr.ysc set] -width 20 -height 14 \
-      -highlightthickness 0
+      -highlightthickness 0 -bd 0
     
     grid  $wfr.t   $wfr.ysc  -sticky ns
     grid  $wfr.t   -sticky news

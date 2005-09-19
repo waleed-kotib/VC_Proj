@@ -17,6 +17,9 @@ Typically you'll have a path .../Coccinella/resources/
 
 There are several levels of options that can be set.
 
+IMPORTANT: with the introduction of the tile package much of this
+           information is OBSOLETE!
+
 1) Tk's standard widget resources are set the usual way.
 Examples:
 *background:	      #aea485
@@ -65,11 +68,8 @@ Some images have also been hardcoded into the sources, and they
 will be obtained from there if not found in the above directory
 hierarchy.
 
-8) If you require anything that is not GIFs, say PNG, then you must
-specify all these extra file suffixes in the theme rdb file as:
-*themeImageSuffixes:       .png
-Be sure you coordinate this with the paragraph below since GIF is the
-only format supported by the core Tk.
+8) PNG image format is supported via the extra tkpng package which is
+required. GIF support is in Tk core.
 
 9) Finally, if your theme have any requirements these should be put
 in a file named ${themeName}CanLoad.tcl which must return 1 if the

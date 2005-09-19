@@ -1,0 +1,5 @@
+! This resource file just points to the old original icon set.
+!
+! Directory where to get icons 
+*themeImageDir:                     original
+

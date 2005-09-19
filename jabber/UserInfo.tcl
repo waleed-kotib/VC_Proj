@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.8 2005-09-08 12:52:35 matben Exp $
+# $Id: UserInfo.tcl,v 1.9 2005-09-19 06:37:21 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -93,7 +93,7 @@ proc ::UserInfo::Get {jid {node ""}} {
 	    lappend opts -node $node
 	}
 	set discoCB [list [namespace current]::DiscoCB $token]
-	eval {$jstate(jlib) disco send_get items $jid $discoCB} $opts
+	eval {$jstate(jlib) disco send_get info $jid $discoCB} $opts
 	incr priv(ncount)
     }
     

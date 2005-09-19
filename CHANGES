@@ -9,7 +9,8 @@ Coccinella-0.95.10 (0509??):
 
 	- server connections using http possible; http proxy added
 	- added the tkpng package; png support now required
-	-
+	- new icons from Everaldo
+	- file transfer using si/bytestreams/ibb/file-transfer protocol
 
 Coccinella-0.95.9 (050821):
 

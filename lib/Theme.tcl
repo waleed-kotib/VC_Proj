@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.23 2005-09-08 12:52:36 matben Exp $
+# $Id: Theme.tcl,v 1.24 2005-09-19 06:37:21 matben Exp $
 
 package provide Theme 1.0
 
@@ -90,7 +90,7 @@ proc ::Theme::Init { } {
     if {$themeImageSuffixes ne ""} {
 	set this(themeImageSuffixes) $themeImageSuffixes
     }
-    set allImageSuffixes [concat .gif .png $themeImageSuffixes]
+    set allImageSuffixes [concat .png .gif $themeImageSuffixes]
 
     # Make all images used for widgets that doesn't use the Theme package.
     PreLoadImages
@@ -246,10 +246,7 @@ proc ::Theme::PreLoadImages { } {
 # ::Theme::GetImage --
 # 
 #       Searches for a gif image in a set of directories.
-#       
 #       Returns empty if not found, else the internal tk image name.
-#       
-#       Must have method to get .png images etc.
 #       
 # Arguments:
 #       name      name of image file without suffix
@@ -287,10 +284,10 @@ proc ::Theme::GetImage {name args} {
 	    foreach suff [concat $allImageSuffixes $argsArr(-suffixes)] {
 		set f [file join $dir ${name}${suff}]
 		if {[file exists $f]} {
-		    if {[string equal $suff .gif]} {
-			image create photo $nsname -file $f -format gif
-		    } elseif {[string equal $suff .png]} {
+		    if {[string equal $suff .png]} {
 			image create photo $nsname -file $f -format png
+		    } elseif {[string equal $suff .gif]} {
+			image create photo $nsname -file $f -format gif
 		    } else {
 			image create photo $nsname -file $f
 		    }

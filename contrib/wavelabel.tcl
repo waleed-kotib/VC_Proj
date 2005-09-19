@@ -6,7 +6,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: wavelabel.tcl,v 1.8 2005-08-18 09:52:07 matben Exp $
+# $Id: wavelabel.tcl,v 1.9 2005-09-19 06:37:20 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -503,7 +503,7 @@ proc ::wavelabel::StartImage {w} {
     upvar ::wavelabel::${w}::priv    priv
     
     # Check if not already started.
-    if {[info exists priv(killid)]} {
+    if {[info exists priv(afterid)]} {
 	return
     }
     
@@ -514,7 +514,7 @@ proc ::wavelabel::StartImage {w} {
     set priv(id)  $id
     set priv(x)   0
     set priv(dir) 1
-    set priv(killid) [after $stat(wait) [list ::wavelabel::AnimateImage $w]]
+    set priv(afterid) [after $stat(wait) [list ::wavelabel::AnimateImage $w]]
 }
 
 proc ::wavelabel::StartStep {w} {
@@ -569,7 +569,7 @@ proc ::wavelabel::StartStep {w} {
     $c scale tstepleft 0 0 -1 1
     $c move tstepleft -$priv(xtot) 0
     puts "bbox tstepright=[$c bbox tstepright], bbox tstepleft=[$c bbox tstepleft]"
-    set priv(killid) [after $stat(swait) [list ::wavelabel::AnimateStep $w]]
+    set priv(afterid) [after $stat(swait) [list ::wavelabel::AnimateStep $w]]
 }
 
 proc ::wavelabel::AnimateImage {w} {
@@ -586,7 +586,7 @@ proc ::wavelabel::AnimateImage {w} {
 	set priv(dir) 1
     }
     $widgets(canvas) move twave $deltax 0
-    set priv(killid) [after $stat(wait) [list ::wavelabel::AnimateImage $w]]
+    set priv(afterid) [after $stat(wait) [list ::wavelabel::AnimateImage $w]]
 }
 
 proc ::wavelabel::AnimateStep {w} {
@@ -640,7 +640,7 @@ proc ::wavelabel::AnimateStep {w} {
 	$c raise tstepright
 	set priv(right) 1
     }    
-    set priv(killid) [after $stat(swait) [list ::wavelabel::AnimateStep $w]]
+    set priv(afterid) [after $stat(swait) [list ::wavelabel::AnimateStep $w]]
 }
 
 # ::wavelabel::Stop --
@@ -662,9 +662,9 @@ proc ::wavelabel::Stop {w} {
     if {$stat(debug) > 1} {
 	puts "::wavelabel::Stop w=$w"
     }
-    if {[info exists priv(killid)]} {
-	catch {after cancel $priv(killid)}
-	unset priv(killid)
+    if {[info exists priv(afterid)]} {
+	catch {after cancel $priv(afterid)}
+	unset priv(afterid)
     }
     switch -- $options(-type) {
 	image {
@@ -702,8 +702,8 @@ proc ::wavelabel::DestroyHandler {w} {
     upvar ::wavelabel::${w}::options options
     upvar ::wavelabel::${w}::priv    priv
  
-    if {[info exists priv(killerId)]} {
-	catch {after cancel $priv(killerId)}
+    if {[info exists priv(afterid)]} {
+	catch {after cancel $priv(afterid)}
     }
     if {$options(-textvariable) != ""} {
 	uplevel #0 [list trace remove variable $options(-textvariable) write \

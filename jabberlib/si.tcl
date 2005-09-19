@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.8 2005-09-08 12:52:36 matben Exp $
+# $Id: si.tcl,v 1.9 2005-09-19 06:37:21 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -456,8 +456,17 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
     
     # Invoke registered handler for this profile.
     set respCmd [list [namespace current]::profile_response $jlibname $sid]
-    eval $prof($profile,open) [list $jlibname $sid $jid $iqChild $respCmd]
-
+    set rc [catch {
+	eval $prof($profile,open) [list $jlibname $sid $jid $iqChild $respCmd]
+    }]
+    if {$rc == 1} {
+	# error
+	return 0
+    } elseif {$rc == 3 || $rc == 4} {
+	# break or continue
+	return 0
+    } 
+    
     return 1
 }
 

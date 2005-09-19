@@ -5,10 +5,11 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.96 2005-08-28 15:15:05 matben Exp $
+# $Id: UI.tcl,v 1.97 2005-09-19 06:37:21 matben Exp $
 
 package require entrycomp
 package require alertbox
+package require ui::dialog
 
 package provide UI 1.0
 
@@ -21,6 +22,13 @@ namespace eval ::UI:: {
     # Icons
     option add *buttonOKImage            buttonok       widgetDefault
     option add *buttonCancelImage        buttoncancel   widgetDefault
+    
+    option add *info64Image              info64         widgetDefault
+    option add *error64Image             error64        widgetDefault
+    option add *warning64Image           warning64      widgetDefault
+    option add *question64Image          question64     widgetDefault
+
+    option add *badgeImage               Coccinella     widgetDefault
     
     variable wThatUseMainMenu {}
 
@@ -39,6 +47,14 @@ namespace eval ::UI:: {
 	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQiMMgjqw2H3nqE
 	3h3xWaEICgRhjBi6FgMpvDEpwuCBg3sVAQA7
     }]
+    
+    # Dialog images.
+    foreach name {info error warning question} {
+	set im [::Theme::GetImage [option get . ${name}64Image {}]]
+	ui::dialog::setimage $name $im
+    }
+    set im [::Theme::GetImage [option get . badgeImage {}]]
+    ui::dialog::setbadge $im
 }
 
 proc ::UI::InitHook { } {
@@ -221,6 +237,7 @@ proc ::UI::InitDlgs { } {
 	jhist           .jhist
 	jprofiles       .jprofiles
 	joobs           .joobs
+	jftrans         .jftrans
 	jerrdlg         .jerrdlg
 	jwbinbox        .jwbinbox
 	jprivacy        .jprivacy

@@ -4,7 +4,7 @@
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.8 2005-08-29 12:57:18 matben Exp $
+# $Id: jlibhttp.tcl,v 1.9 2005-09-19 06:37:21 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -46,7 +46,7 @@
 package require jlib
 package require http 2.4
 package require base64
-package require sha1pure
+package require sha1
 
 package provide jlib::http 0.1
 
@@ -187,7 +187,7 @@ proc jlib::http::NewKeySequence {seed len} {
 	
 	# It seems that it is expected to have sha1 in binary format;
 	# get from hex
-	set hex [::sha1pure::sha1 $prevkey]
+	set hex [::sha1::sha1 $prevkey]
 	set key [::base64::encode [binary format H* $hex]]
 	lappend keys $key
 	set prevkey $key

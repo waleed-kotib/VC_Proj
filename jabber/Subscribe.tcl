@@ -5,15 +5,15 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.28 2005-08-26 15:02:34 matben Exp $
+# $Id: Subscribe.tcl,v 1.29 2005-09-19 06:37:21 matben Exp $
 
 package provide Subscribe 1.0
 
 namespace eval ::Subscribe:: {
 
     # Use option database for customization.
-    option add *JSubscribe.newuserImage           newuser         widgetDefault
-    option add *JSubscribe.newuserDisImage        newuserDis      widgetDefault
+    option add *JSubscribe.adduserImage           adduser         widgetDefault
+    option add *JSubscribe.adduserDisImage        adduserDis      widgetDefault
 
     
     # Define all hooks for preference settings.
@@ -71,8 +71,8 @@ proc ::Subscribe::NewDlg {jid args} {
 	::UI::SetWindowPosition $w $wDlgs(jsubsc)
     }
   
-    set im   [::Theme::GetImage [option get $w newuserImage {}]]
-    set imd  [::Theme::GetImage [option get $w newuserDisImage {}]]
+    set im   [::Theme::GetImage [option get $w adduserImage {}]]
+    set imd  [::Theme::GetImage [option get $w adduserDisImage {}]]
 
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]

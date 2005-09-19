@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.3 2005-08-29 07:38:37 matben Exp $
+# $Id: Proxy.tcl,v 1.4 2005-09-19 06:37:21 matben Exp $
  
 package require autoproxy
 
@@ -143,10 +143,10 @@ proc ::Proxy::BuildPage {wpage} {
     
     grid  $wprx.msg      -            -sticky w
     grid  x              $wprx.use    -sticky w
-    grid  $wprx.lserv    $wprx.eserv
-    grid  $wprx.lport    $wprx.eport
-    grid  $wprx.luser    $wprx.euser
-    grid  $wprx.lpass    $wprx.epass
+    grid  $wprx.lserv    $wprx.eserv  -pady 1
+    grid  $wprx.lport    $wprx.eport  -pady 1
+    grid  $wprx.luser    $wprx.euser  -pady 1
+    grid  $wprx.lpass    $wprx.epass  -pady 1
     grid  $wprx.lnop     -            -sticky w
     grid  $wprx.noproxy  -            -sticky ew -pady 1
     

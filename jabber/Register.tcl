@@ -5,14 +5,14 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.37 2005-08-26 15:02:34 matben Exp $
+# $Id: Register.tcl,v 1.38 2005-09-19 06:37:21 matben Exp $
 
 package provide Register 1.0
 
 namespace eval ::Register:: {
 
-    option add *JRegister.registerImage         newuser         widgetDefault
-    option add *JRegister.registerDisImage      newuserDis      widgetDefault
+    option add *JRegister.registerImage         register         widgetDefault
+    option add *JRegister.registerDisImage      registerDis      widgetDefault
 
     variable server
     variable username
@@ -458,7 +458,9 @@ proc ::RegisterEx::New {args} {
     global  this wDlgs
     
     variable uid
-    upvar ::Jabber::jprefs jprefs    
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Debug 2 "::RegisterEx::New args=$args"
     
     array set argsArr $args
     
@@ -476,7 +478,7 @@ proc ::RegisterEx::New {args} {
 	}
     }
     if {[info exists state(password)]} {
-	set state(password2) $password
+	set state(password2) $state(password)
     }
     set state(w)        $w
     set state(finished) -1
@@ -819,6 +821,7 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
     foreach tag {username password} {
 	if {[info exists data($tag)]} {
 	    set str "[mc [string totitle $tag]]:"
+	    set state(elem,$tag) ""
 	    ttk::label $wfr.l$tag -text $str -anchor e
 	    if {$tag eq "username"} {
 		ttk::entry $wfr.e$tag  -textvariable $token\(elem,$tag) \
@@ -834,6 +837,7 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
 	    grid  $wfr.e$tag  -sticky ew
 	    if {$tag eq "password"} {
 		set str "[mc {Retype password}]:"
+		set state(elem,${tag}2) ""
 		ttk::label $wfr.l2$tag -text $str -anchor e
 		ttk::entry $wfr.e2$tag -textvariable $token\(elem,${tag}2) \
 		  -show {*} -validate key  \
@@ -852,6 +856,7 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
     
     foreach {tag chdata} [array get data] {
 	set str "[mc [string totitle $tag]]:"
+	set state(elem,$tag) ""
 	ttk::label $wfr.l$tag -text $str -anchor e
 	ttk::entry $wfr.e$tag -textvariable $token\(elem,$tag)
 	grid  $wfr.l$tag  $wfr.e$tag  -sticky e -pady 2
@@ -908,9 +913,9 @@ proc ::RegisterEx::SendRegister {token} {
     }
     
     # We need to do it the crude way.
-    $jstate(jlib) send_iq "set"  \
-      [list [wrapper::createtag "query" \
-      -attrlist {xmlns jabber:iq:register} -subtags $sub]] \
+    set queryElem [wrapper::createtag "query" \
+      -attrlist {xmlns jabber:iq:register} -subtags $sub]
+    $jstate(jlib) send_iq "set" [list $queryElem] \
       -to $state(server) \
       -command [list [namespace current]::SendRegisterCB $token]
 }

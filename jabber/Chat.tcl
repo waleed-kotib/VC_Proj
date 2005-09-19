@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.121 2005-08-29 12:39:37 matben Exp $
+# $Id: Chat.tcl,v 1.122 2005-09-19 06:37:21 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -298,7 +298,7 @@ proc ::Chat::StartThread {jid args} {
 	}
     } else {
 	set key "[pid].[clock seconds].$jstate(mejid)"
-	set threadID [::sha1pure::sha1 $key]
+	set threadID [::sha1::sha1 $key]
     }
     
     if {!$havedlg} {
@@ -382,7 +382,7 @@ proc ::Chat::GotMsg {body args} {
 	if {$chattoken == ""} {
 	    
 	    # Need to create a new thread ID.
-	    set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
+	    set threadID [::sha1::sha1 "$jstate(mejid)[clock seconds]"]
 	} else {
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
@@ -1014,6 +1014,17 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     if {$cprefs(usexevents)} {
 	bind $wtextsnd <KeyPress>  \
 	  [list +[namespace current]::KeyPressEvent $chattoken %A]
+	bind $wtextsnd <Alt-KeyPress>     {# nothing}
+	bind $wtextsnd <Meta-KeyPress>    {# nothing}
+	bind $wtextsnd <Control-KeyPress> {# nothing}
+	bind $wtextsnd <Escape>           {# nothing}
+	bind $wtextsnd <Return>           {# nothing}
+	bind $wtextsnd <KP_Enter>         {# nothing}
+	bind $wtextsnd <Tab>              {# nothing}
+	if {[string equal [tk windowingsystem] "aqua"]} {
+		bind $wtextsnd <Command-KeyPress> {# nothing}
+	}
+
     }
     set chatstate(wthread)  $wthread
     set chatstate(wpane)    $wpane
@@ -1725,9 +1736,11 @@ proc ::Chat::SendFile {dlgtoken} {
     set chattoken [GetActiveChatToken $dlgtoken]
     variable $chattoken
     upvar 0 $chattoken chatstate
+    
+    ::FTrans::Send $chatstate(fromjid)
 
-    jlib::splitjid $chatstate(fromjid) jid2 res
-    ::OOB::BuildSet $jid2
+    #jlib::splitjid $chatstate(fromjid) jid2 res
+    #::OOB::BuildSet $jid2
 }
 
 proc ::Chat::Settings {dlgtoken} {

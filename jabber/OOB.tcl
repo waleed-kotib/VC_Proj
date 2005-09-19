@@ -5,7 +5,10 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.51 2005-09-02 17:06:25 matben Exp $
+# $Id: OOB.tcl,v 1.52 2005-09-19 06:37:21 matben Exp $
+
+# NOTE: Parts if this code is obsolete (the send part) but the receiving
+#       part is still retained for backwards compatibility.
 
 package require uriencode
 

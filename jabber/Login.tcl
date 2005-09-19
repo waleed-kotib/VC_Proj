@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.68 2005-08-29 07:38:37 matben Exp $
+# $Id: Login.tcl,v 1.69 2005-09-19 06:37:21 matben Exp $
 
 package provide Login 1.0
 
@@ -1003,7 +1003,7 @@ proc ::Login::Authorize {server username resource password cmd args} {
 	if {$argsArr(-streamid) == ""} {
 	    return -code error "missing -streamid for -digest"
 	}
-	set digestedPw [::sha1pure::sha1 $state(streamid)${password}]
+	set digestedPw [::sha1::sha1 $state(streamid)${password}]
 	$jstate(jlib) send_auth $username $resource   \
 	  [list [namespace current]::AuthorizeCB $token] -digest $digestedPw
     } else {
