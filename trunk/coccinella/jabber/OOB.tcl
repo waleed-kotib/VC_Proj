@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.52 2005-09-19 06:37:21 matben Exp $
+# $Id: OOB.tcl,v 1.53 2005-09-19 13:30:57 matben Exp $
 
 # NOTE: Parts if this code is obsolete (the send part) but the receiving
 #       part is still retained for backwards compatibility.
@@ -341,7 +341,6 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
 	set id $locals(id)
 	incr locals(id)
     }
-    set desc [mc None]
     foreach child [wrapper::getchildren $subiq] {
 	set tag  [wrapper::gettag $child]
 	set $tag [wrapper::getcdata $child]
@@ -353,8 +352,14 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
     }
     set tail [file tail [::Utils::GetFilePathFromUrl $url]]
     set tailDec [uriencode::decodefile $tail]
+    
+    set str ""
+    if {[info exists desc]} {
+	set str " [mc Description]: $desc"
+    }
+    set msg [mc jamessoobask $from $tailDec $str]
     set ans [::UI::MessageBox -title [mc {Get File}] -icon info  \
-      -type yesno -default yes -message [mc jamessoobask $from $tailDec $desc]]
+      -type yesno -default yes -message $msg]
     if {$ans == "no"} {	
 	ReturnError $from $id $subiq 406
 	return $ishandled

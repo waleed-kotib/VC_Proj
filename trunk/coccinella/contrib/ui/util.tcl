@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: util.tcl,v 1.1 2005-09-19 06:37:20 matben Exp $
+# $Id: util.tcl,v 1.2 2005-09-19 13:30:57 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -29,7 +29,7 @@ namespace eval ui {
 	    set size 13
 	    set small 11
 
-	    font configure DlgDefaultFont -family $family -size $size
+	    font configure DlgDefaultFont -family $family -size $size -weight bold
 	    font configure DlgSmallFont   -family $family -size $small
 	}
 	win32 {
@@ -52,6 +52,9 @@ namespace eval ui {
 	    }
 	    set size -12
 	    set small -10
+
+	    font configure DlgDefaultFont -family $family -size $size
+	    font configure DlgSmallFont   -family $family -size $small
 	}
     }    
 

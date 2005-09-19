@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.49 2005-08-26 15:02:34 matben Exp $
+# $Id: Utils.tcl,v 1.50 2005-09-19 13:30:57 matben Exp $
 
 package provide Utils 1.0
 
@@ -340,6 +340,19 @@ proc ::Utils::SmartClockFormat {secs args} {
 
 proc ::Utils::IsToday {secs} {
     return [expr ($secs - [clock scan "today 00:00"])/(60*60*24) >= 0 ? 1 : 0]
+}
+
+proc ::Utils::FormatBytes {bytes} {
+    
+    if {$bytes < 1000} {
+	set str "$bytes bytes"
+    } elseif {$bytes < 1000000} {
+	set str "[format %.1f [expr $bytes/1000.0] ]Kb"
+    } else {
+	set str "[format %.1f [expr $bytes/1000000.0] ]Mb"
+    }
+
+    return $str
 }
 
 proc ::Utils::UnixGetWebBrowser { } {

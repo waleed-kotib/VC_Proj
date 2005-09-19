@@ -139,6 +139,7 @@
 ::msgcat::mcset de Settings	Einstellungen
 ::msgcat::mcset de Shortcut	Abkürzung
 ::msgcat::mcset de Shortcuts	Abkürzungen
+#::msgcat::mcset de Size
 ::msgcat::mcset de Sounds	Klänge
 ::msgcat::mcset de Specifications	Spezifikationen
 ::msgcat::mcset de Speech	Sprache
@@ -691,7 +692,7 @@
 ::msgcat::mcset de jamessoobok		{Dateiübertragung erfolgreich}
 ::msgcat::mcset de jamessoobok2         {Dateiübertragung von %s nach "%s" war erfolgreich}
 ::msgcat::mcset de jamessoobnourl	{Als von Benutzer "%s" eine Datei abgerufen werden sollte, konnten wir dafür keine Url bekommen.}
-::msgcat::mcset de jamessoobask		{Benutzer "%s" stellt Ihnen die Datei %s zur Verfügung. Beschreibung: %s. Abrufen?}
+::msgcat::mcset de jamessoobask		{Benutzer "%s" stellt Ihnen die Datei %s zur Verfügung. %s Abrufen?}
 ::msgcat::mcset de jamessoobbad		{Die von "%s" erhaltene Url war fehlerhaft. Url: "%s"}
 ::msgcat::mcset de jamessoonnohttp	{Die von "%s" erhaltene Url benutzt nicht das http-Protokoll, sondern %s, was nicht unterstützt wird.}
 ::msgcat::mcset de jamessoobfailopen	{Fehler beim Öffnen der Datei %s}

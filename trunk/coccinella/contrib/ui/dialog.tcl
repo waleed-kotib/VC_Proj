@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.1 2005-09-19 06:37:20 matben Exp $
+# $Id: dialog.tcl,v 1.2 2005-09-19 13:30:57 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -29,7 +29,7 @@ namespace eval ui::dialog {
     
     switch -- [tk windowingsystem] {
 	aqua {
-	    option add *Dialog.f.padding           {24 15 24 20}  widgetDefault
+	    option add *Dialog.f.padding           {20 15 20 16}  widgetDefault
 	    option add *Dialog.f.t.message.padding { 0  0  0  6}  widgetDefault
 	    option add *Dialog.f.t.detail.padding  { 0  0  0  8}  widgetDefault
 	    option add *Dialog.f.t.icon.padding    { 0  0 16  0}  widgetDefault
@@ -236,11 +236,12 @@ snit::widget ui::dialog::widget {
 	install detail  using ttk::label $top.detail  -anchor w -justify left
 	
 	# Trick to let individual options override -type ones.
+	set dlgtype ok
 	if {[set idx [lsearch $args -type]] >= 0} {
 	    set dlgtype [lindex $args [incr idx]]
-	    if {[info exists dialogTypes($dlgtype)]} {
-		array set options $dialogTypes($dlgtype)
-	    }
+	}
+	if {[info exists dialogTypes($dlgtype)]} {
+	    array set options $dialogTypes($dlgtype)
 	}
 	$self configurelist $args	
 	

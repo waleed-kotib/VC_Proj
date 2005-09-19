@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.1 2005-09-19 06:37:21 matben Exp $
+# $Id: FTrans.tcl,v 1.2 2005-09-19 13:30:57 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -158,12 +158,17 @@ snit::widget ::FTrans::SendDialog {
 	bind $win <Return> [list $self OK]
 	bind $win <Escape> [list $self Destroy]
 	after idle [list $self WrapLength]
-	#bind $win <Configure> [subst {if {"%W" eq "$win"} {$self WrapLength}}]
 	
 	if {$havednd} {
 	    $self InitDnD $frm.efile
 	}
 	return
+    }
+    
+    destructor {
+	if {[string length $options(-geovariable)]} {
+	    ui::SaveGeometry $win $options(-geovariable)
+	}
     }
     
     method WrapLength {} {
@@ -192,9 +197,9 @@ snit::widget ::FTrans::SendDialog {
     }
     
     method InitDnD {w} {
-	dnd bindtarget $w text/uri-list <Drop>      {$self DnDDrop  %W %D %T}
-	dnd bindtarget $w text/uri-list <DragEnter> {$self DnDEnter %W %A %D %T}
-	dnd bindtarget $w text/uri-list <DragLeave> {$self DnDLeave %W %D %T}
+	dnd bindtarget $w text/uri-list <Drop>      [list $self DnDDrop  %W %D %T]
+	dnd bindtarget $w text/uri-list <DragEnter> [list $self DnDEnter %W %A %D %T]
+	dnd bindtarget $w text/uri-list <DragLeave> [list $self DnDLeave %W %D %T]
     }
 
     method DnDDrop {w data dndtype} {
@@ -208,7 +213,6 @@ snit::widget ::FTrans::SendDialog {
 	set fileName $f
     }
 
-    # @@@ There can be problems with this one since returns stuff...
     method DnDEnter {w action data dndtype} {
 	focus $w
 	set act "none"
@@ -447,12 +451,6 @@ proc ::FTrans::SetHandler {jlibname jid name size cmd args} {
     
     ::Debug 2 "---> ::FTrans::SetHandler (t): jid=$jid, name=$name, size=$size, cmd=$cmd, $args"
 
-    array set opts {
-	-mime   application/octet-stream
-	-desc   ""
-    }
-    array set opts $args    
-
     # Initialize the state variable, an array, that keeps is the storage.
     set token [namespace current]::[incr uid]
     variable $token
@@ -466,13 +464,16 @@ proc ::FTrans::SetHandler {jlibname jid name size cmd args} {
     foreach {key value} $args {
 	set state($key) $value
     }
+    set str " [mc Size]: [::Utils::FormatBytes $size]"
+    if {[info exists state(-desc)]} {
+	append str " [mc Description]: $state(-desc)."
+    }
+    set msg [mc jamessoobask $jid $name $str]
     
     # Nonmodal message dialog.
-    ui::dialog [ui::autoname]  \
-      -title [mc {Get File}] -icon question  \
-      -type yesno -default yes  \
-      -command [list [namespace current]::SetHandlerAnswer $token] \
-      -message [mc jamessoobask $jid $name $opts(-desc)]
+    ui::dialog $state(w) -title [mc {Get File}] -icon question  \
+      -type yesno -default yes -message $msg                    \
+      -command [list [namespace current]::SetHandlerAnswer $token]
 }
 
 proc ::FTrans::SetHandlerAnswer {token wdlg answer} {
@@ -482,13 +483,15 @@ proc ::FTrans::SetHandlerAnswer {token wdlg answer} {
     
     destroy $wdlg
     
+    set name $state(name)
+    set cmd  $state(cmd)
+
     if {$answer} {
-	set name $state(name)
-	set cmd  $state(cmd)
 	set userDir [::Utils::GetDirIfExist $prefs(userPath)]
 	set fileName [tk_getSaveFile -title [mc {Save File}] \
 	  -initialfile $name -initialdir $userDir]
 	if {$fileName ne ""} {
+	    set prefs(userPath) [file dirname $fileName]
 	    set fd [open $fileName w]
 	    
 	    set state(fileName) $fileName
@@ -503,7 +506,7 @@ proc ::FTrans::SetHandlerAnswer {token wdlg answer} {
 	    unset -nocomplain state
 	}
     } else {
-	eval $cmd $ans
+	eval $cmd $answer
 	unset -nocomplain state
     }
 }
