@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #
-# $Id: PrefUtils.tcl,v 1.2 2005-08-26 15:02:34 matben Exp $
+# $Id: PrefUtils.tcl,v 1.3 2005-09-19 13:30:57 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -37,12 +37,14 @@ package provide PrefUtils 1.0
 namespace eval ::PrefUtils:: {
     
     variable priNameToNum
-    array set priNameToNum {0 0 20 20 40 40 60 60 80 80 100 100   \
-      factoryDefault 20    \
-      appDefault     40    \
-      userDefault    60    \
-      interactive    80    \
-      absolute 100}
+    array set priNameToNum {
+	0 0 20 20 40 40 60 60 80 80 100 100
+	factoryDefault 20
+	appDefault     40
+	userDefault    60
+	interactive    80
+	absolute      100
+    }
 }
 
 # PrefUtils::Init --
@@ -87,9 +89,8 @@ proc ::PrefUtils::Init { } {
 #
 # Arguments:
 #       thePrefs  a list of lists where each sublist defines an item in the
-#                 following way:  
-#                    {theVarName itsResourceName itsHardCodedDefaultValue
-#                    thePriority}.
+#                 following way: 
+#                 {theVarName itsResourceName itsHardCodedDefaultValue priority}
 #                        
 # Results:
 #       none
@@ -206,10 +207,9 @@ proc ::PrefUtils::SaveToFile { } {
 	    }
 	    puts $fid [format "%-24s\t%s" *${resName}: [array get var]]	    
 	} else {
-	    if {[string equal $var $defVal]} {
-		continue
+	    if {![string equal $var $defVal]} {
+		puts $fid [format "%-24s\t%s" *${resName}: $var]
 	    }
-	    puts $fid [format "%-24s\t%s" *${resName}: $var]
 	}
     }
     close $fid
@@ -217,9 +217,6 @@ proc ::PrefUtils::SaveToFile { } {
 	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
 	  -icon error
 	return
-    }
-    if {[string equal $this(platform) "macintosh"]} {
-	file attributes $this(userPrefsFilePath) -type pref
     }
 }
 
@@ -283,12 +280,13 @@ proc ::PrefUtils::ResetToUserDefaults { } {
 # PrefUtils::SetUserPreferences --
 #
 #       Set defaults in the option database for widget classes.
-#       First, on all platforms...
 #       Set the user preferences from the preferences file if they are there,
 #       else take the hardcoded defaults.
 #       'thePrefs': a list of lists where each sublist defines an item in the
-#       following way:  {theVarName itsResourceName itsHardCodedDefaultValue
-#                 {thePriority 20}}.
+#       following way:  
+#       
+#         {theVarName itsResourceName itsHardCodedDefaultValue {priority 20}}.
+#         
 # Note: it may prove useful to have the versions numbers as the first elements!
 
 proc ::PrefUtils::SetUserPreferences { } {
@@ -297,19 +295,19 @@ proc ::PrefUtils::SetUserPreferences { } {
     ::Debug 2 "::PrefUtils::SetUserPreferences"
     
     ::PrefUtils::Add [list  \
-      [list this(vers,major)       this_majorVers        $this(vers,major)       absolute] \
-      [list this(vers,minor)       this_minorVers        $this(vers,minor)       absolute] \
+      [list this(vers,full)        this_fullVers         $this(vers,full)        absolute] \
+      [list this(vers,previous)    this_previousVers     $this(vers,previous)    userDefault] \
       [list prefs(remotePort)      prefs_remotePort      $prefs(remotePort)]     \
       [list prefs(postscriptOpts)  prefs_postscriptOpts  $prefs(postscriptOpts)] \
       [list prefs(firstLaunch)     prefs_firstLaunch     $prefs(firstLaunch)     userDefault] \
       [list prefs(unixPrintCmd)    prefs_unixPrintCmd    $prefs(unixPrintCmd)]   \
       [list prefs(webBrowser)      prefs_webBrowser      $prefs(webBrowser)]     \
-      [list prefs(userPath)        prefs_userPath        $prefs(userPath)]        \
+      [list prefs(userPath)        prefs_userPath        $prefs(userPath)]       \
       [list prefs(winGeom)         prefs_winGeom         $prefs(winGeom)]        \
       [list prefs(paneGeom)        prefs_paneGeom        $prefs(paneGeom)]       \
       [list prefs(sashPos)         prefs_sashPos         $prefs(sashPos)]        \
-      ]    
-            
+      ]
+                
     # Map list of win geoms into an array.
     foreach {win geom} $prefs(winGeom) {
 	set prefs(winGeom,$win) $geom

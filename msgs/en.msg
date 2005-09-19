@@ -136,6 +136,7 @@
 ::msgcat::mcset en Settings
 ::msgcat::mcset en Shortcut
 ::msgcat::mcset en Shortcuts
+::msgcat::mcset en Size
 ::msgcat::mcset en Sounds
 ::msgcat::mcset en Specifications
 ::msgcat::mcset en Speech
@@ -683,7 +684,7 @@
 ::msgcat::mcset en jamessoobok		{File transfer succesful}
 ::msgcat::mcset en jamessoobok2         {File transfer of %s to "%s" went ok}
 ::msgcat::mcset en jamessoobnourl	{When user "%s" wanted us to fetch a file, we did not receive an url to get it from.}
-::msgcat::mcset en jamessoobask		{The user "%s" makes the file at %s available for you. Description: %s. Do you want it?}
+::msgcat::mcset en jamessoobask		{The user "%s" makes the file at %s available for you. %s Do you want it?}
 ::msgcat::mcset en jamessoobbad		{The url we got from "%s" was not wellformed. url: "%s"}
 ::msgcat::mcset en jamessoonnohttp	{The url we got from "%s" did not use the http protocol, but instead %s which is unsupported.}
 ::msgcat::mcset en jamessoobfailopen	{Failed opening file %s}

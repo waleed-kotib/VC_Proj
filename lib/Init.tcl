@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.21 2005-09-08 12:52:36 matben Exp $
+# $Id: Init.tcl,v 1.22 2005-09-19 13:30:57 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -204,6 +204,9 @@ proc ::Init::SetThisVersion { } {
     set this(vers,minor)   95
     set this(vers,release) 10
     set this(vers,full) $this(vers,major).$this(vers,minor).$this(vers,release)
+
+    # This is used only to track upgrades.
+    set this(vers,previous) $this(vers,full)
 }
 
 proc ::Init::SetThisEmbedded { } {

@@ -138,6 +138,7 @@
 ::msgcat::mcset pl Settings	Ustawienia
 ::msgcat::mcset pl Shortcut	Skrót
 ::msgcat::mcset pl Shortcuts	Skróty
+#::msgcat::mcset pl Size
 ::msgcat::mcset pl Sounds	Dźwięki
 ::msgcat::mcset pl Specifications	Specyfikacje
 ::msgcat::mcset pl Speech	Mowa
@@ -685,7 +686,7 @@
 ::msgcat::mcset pl jamessoobok		{Plik przesłany prawidłowo}
 ::msgcat::mcset pl jamessoobok2         {Pomyślna przesyłka pliku %s do "%s"}
 ::msgcat::mcset pl jamessoobnourl	{Chociaż "%s" chciał(a), abyś odebrał(a) plik - jednak nie odebrano URL-a miejsca pobrania.}
-::msgcat::mcset pl jamessoobask		{Użytkownik "%s" udostępnia Ci plik pod adresem: %s. Opis: %s. Chcesz pobrać?}
+::msgcat::mcset pl jamessoobask		{Użytkownik "%s" udostępnia Ci plik pod adresem: %s. %s Chcesz pobrać?}
 ::msgcat::mcset pl jamessoobbad		{Adres URL przekazany przez "%s" ma błędną postać. URL: "%s"}
 ::msgcat::mcset pl jamessoonnohttp	{Wprawdzie URL przekazany przez "%s" nie korzysta z protokołu HTTP, a jedynie z %s - który nie może być użyty.}
 ::msgcat::mcset pl jamessoobfailopen	{Błąd otwarcia pliku %s}

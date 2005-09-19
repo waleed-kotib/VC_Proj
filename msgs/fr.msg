@@ -138,6 +138,7 @@
 ::msgcat::mcset fr Settings		{Paramètres}
 ::msgcat::mcset fr Shortcut		{Raccourci}
 ::msgcat::mcset fr Shortcuts		{Raccourcis}
+#::msgcat::mcset fr Size
 ::msgcat::mcset fr Sounds		{Sons}
 ::msgcat::mcset fr Specifications	{Spécifications}
 ::msgcat::mcset fr Speech		{Dialoguer}
@@ -696,7 +697,7 @@
 ::msgcat::mcset fr jamessoobok		{Transfert de fichiers effectué.}
 ::msgcat::mcset fr jamessoobok2         {Transfert de %s à %s effectué.}
 ::msgcat::mcset fr jamessoobnourl	{Lors de la demande de téléchargement effectuée par, aucune URL n'a été spécifiée.}
-::msgcat::mcset fr jamessoobask		{L'utilisateur %s à mis à votre disposition un fichier sur %s. Description : %s. Voulez-vous la télécharger ?}
+::msgcat::mcset fr jamessoobask		{L'utilisateur %s à mis à votre disposition un fichier sur %s. %s Voulez-vous la télécharger ?}
 ::msgcat::mcset fr jamessoobbad		{L'URL de "%s" n'est pas correcte. (URL : "%s").}
 ::msgcat::mcset fr jamessoonnohttp	{L'URL de "%s" n'utilise pas le protocole "HTTP", mais "%s" (non supporté).}
 ::msgcat::mcset fr jamessoobfailopen	{L'ouverture de "%s" a échoué.}

@@ -12,9 +12,8 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.122 2005-09-19 06:37:20 matben Exp $	
+# $Id: Coccinella.tcl,v 1.123 2005-09-19 13:30:57 matben Exp $	
 
-	
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
 

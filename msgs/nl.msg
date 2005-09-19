@@ -139,6 +139,7 @@
 ::msgcat::mcset nl Settings		{Instellingen}
 ::msgcat::mcset nl Shortcut		{Snelkoppeling}
 ::msgcat::mcset nl Shortcuts		{Snelkoppelingen}
+#::msgcat::mcset nl Size
 ::msgcat::mcset nl Sounds		{Geluiden}
 ::msgcat::mcset nl Specifications	{Specificaties}
 ::msgcat::mcset nl Speech		{Spraak}
@@ -690,7 +691,7 @@
 ::msgcat::mcset nl jamessoobok		{Bestandsoverdracht voltooid}
 ::msgcat::mcset nl jamessoobok2         {Bestandsoverdracht van %s naar "%s" is voltooid}
 ::msgcat::mcset nl jamessoobnourl	{Wanneer "%s" ons een bestand wilde laten downloaden, ontvingen we geen URL waar we het van konden downloaden.}
-::msgcat::mcset nl jamessoobask		{"%s" stelt het bestand op %s beschikbaar voor u. Beschrijving: %s. Wilt u het downloaden?}
+::msgcat::mcset nl jamessoobask		{"%s" stelt het bestand op %s beschikbaar voor u. %s Wilt u het downloaden?}
 ::msgcat::mcset nl jamessoobbad		{De URL van "%s" is niet correct. URL: "%s"}
 ::msgcat::mcset nl jamessoonnohttp	{De URL van "%s" maakt geen gebruik van het HTTP protocol, maar in plaats daarvan het niet ondersteunde %s.}
 ::msgcat::mcset nl jamessoobfailopen	{Openen van bestand %s mislukte}

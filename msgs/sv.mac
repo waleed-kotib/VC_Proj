@@ -135,6 +135,7 @@
 ::msgcat::mcset sv Settings             {Ställ in}
 ::msgcat::mcset sv Shortcut             {Genväg}
 ::msgcat::mcset sv Shortcuts            {Genvägar}
+::msgcat::mcset sv Size                 {Storlek}
 ::msgcat::mcset sv Specifications	{Specifikation}
 ::msgcat::mcset sv Sounds               {Ljud}
 ::msgcat::mcset sv Speech               {Tal}
@@ -683,7 +684,7 @@ Den ska vara av typen 'username@jabber.org'.}
 ::msgcat::mcset sv jamessoobok		{Filöverföringen lyckad!}
 ::msgcat::mcset sv jamessoobok2         {Filöverföringen av %s till "%s" lyckad!}
 ::msgcat::mcset sv jamessoobnourl	{När användaren "%s" gjorde en fil tillgänglig så saknades url:en.}
-::msgcat::mcset sv jamessoobask		{Användaren "%s" gör filen %s tillgänglig för dig. Beskrivning: %s. Vill du ha den?}
+::msgcat::mcset sv jamessoobask		{Användaren "%s" gör filen %s tillgänglig för dig. %s Vill du ha den?}
 ::msgcat::mcset sv jamessoobbad		{Url:en som vi fick från "%s" har ej korrekt form. Url: "%s"}
 ::msgcat::mcset sv jamessoonnohttp	{Url:en som vi fick från "%s" använder inte HTTP protokollet men istället %s som ej stöds.}
 ::msgcat::mcset sv jamessoobfailopen	{Misslyckades med att öppna filen %s}

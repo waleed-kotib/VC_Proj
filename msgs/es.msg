@@ -139,6 +139,7 @@
 ::msgcat::mcset es Settings		{Opciones}
 ::msgcat::mcset es Shortcut		{Atajo}
 ::msgcat::mcset es Shortcuts		{Atajos}
+#::msgcat::mcset es Size
 ::msgcat::mcset es Sounds		{Sonidos}
 ::msgcat::mcset es Specifications	{Especificaciones}
 ::msgcat::mcset es Speech		{Dialogar}
@@ -698,7 +699,7 @@
 ::msgcat::mcset es jamessoobok		{Transferencia de archivos realizada.}
 ::msgcat::mcset es jamessoobok2         {Transferencia de %s a %s realizada.}
 ::msgcat::mcset es jamessoobnourl	{Para solicitud de descarga efectuada ninguna URL ha sido especificada.}
-::msgcat::mcset es jamessoobask		{El usuario %s à mis à uso disposition un archivo sobre %s. Description : %s. Desea la descargar ?}
+::msgcat::mcset es jamessoobask		{El usuario %s à mis à uso disposition un archivo sobre %s. %s Desea la descargar ?}
 ::msgcat::mcset es jamessoobbad		{La URL de "%s" no es correcta. (URL : "%s").}
 ::msgcat::mcset es jamessoonnohttp	{La URL de "%s" no utiliza el protocolo "HTTP", pero "%s" (no soportado).}
 ::msgcat::mcset es jamessoobfailopen	{La apertura de "%s" ha fallado.}

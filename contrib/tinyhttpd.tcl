@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.27 2005-08-26 15:02:34 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.28 2005-09-19 13:30:57 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -932,7 +932,8 @@ proc ::tinyhttpd::CopyStart {s token} {
     upvar 0 $token state    
     variable priv
     
-    Debug 6 "CopyStart::"
+    #Debug 6 "CopyStart::"
+
     if {$state(haverange) && [string is integer $state(range,end)]} {
 	set offset [tell $state(fd)]
 	if {[expr {$offset + $state(chunk)}] > $state(range,end)} {
@@ -963,7 +964,7 @@ proc ::tinyhttpd::CopyDone {token bytes {error {}}} {
     variable timing
     upvar 0 $token state
 
-    Debug 6 "CopyDone::"
+    #Debug 6 "CopyDone::"
 
     set s  $state(s)
     set fd $state(fd)

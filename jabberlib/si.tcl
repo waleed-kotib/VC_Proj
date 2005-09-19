@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.9 2005-09-19 06:37:21 matben Exp $
+# $Id: si.tcl,v 1.10 2005-09-19 13:30:57 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -113,7 +113,7 @@ namespace eval jlib::si {
 proc jlib::si::registertransport {name ns priority openProc sendProc closeProc} {
 
     variable trpt    
-    puts "jlib::si::registertransport (i)"
+    #puts "jlib::si::registertransport (i)"
     
     lappend trpt(list) [list $name $priority]
     set trpt(list) [lsort -unique -index 1 $trpt(list)]
@@ -141,7 +141,7 @@ proc jlib::si::registertransport {name ns priority openProc sendProc closeProc} 
 proc jlib::si::registerprofile {profile openProc readProc closeProc} {
     
     variable prof
-    puts "jlib::si::registerprofile (t)"
+    #puts "jlib::si::registerprofile (t)"
     
     set prof($profile,open)  $openProc
     set prof($profile,read)  $readProc
@@ -155,7 +155,7 @@ proc jlib::si::registerprofile {profile openProc readProc closeProc} {
 proc jlib::si::init {jlibname args} {
 
     variable xmlns
-    puts "jlib::si::init"
+    #puts "jlib::si::init"
 
     # Keep different state arrays for initiator (i) and receiver (r).
     namespace eval ${jlibname}::si {
@@ -167,7 +167,7 @@ proc jlib::si::init {jlibname args} {
 
 proc jlib::si::cmdproc {jlibname cmd args} {
     
-    puts "jlib::si::cmdproc jlibname=$jlibname, cmd='$cmd', args='$args'"
+    #puts "jlib::si::cmdproc jlibname=$jlibname, cmd='$cmd', args='$args'"
 
     # Which command? Just dispatch the command to the right procedure.
     return [eval {$cmd $jlibname} $args]
@@ -186,7 +186,7 @@ proc jlib::si::cmdproc {jlibname cmd args} {
 
 proc jlib::si::send_set {jlibname jid sid mime profile profileElem cmd args} {
     
-    puts "jlib::si::send_set (i)"
+    #puts "jlib::si::send_set (i)"
     
     variable xmlns
     variable trpt
@@ -233,7 +233,7 @@ proc jlib::si::send_set {jlibname jid sid mime profile profileElem cmd args} {
 
 proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
     
-    puts "jlib::si::send_set_cb (i)"
+    #puts "jlib::si::send_set_cb (i)"
     
     variable xmlns
     variable trpt
@@ -284,7 +284,7 @@ proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
 proc jlib::si::transport_open_cb {jlibname sid type iqChild} {
     
     upvar ${jlibname}::si::istate istate    
-    puts "jlib::si::transport_open_cb (i)"
+    #puts "jlib::si::transport_open_cb (i)"
     
     # Just report this to the relevant profile.
     eval $istate($sid,openCmd) [list $jlibname $type $sid $iqChild]
@@ -298,7 +298,7 @@ proc jlib::si::send_close {jlibname sid cmd} {
 
     variable trpt
     upvar ${jlibname}::si::istate istate
-    puts "jlib::si::send_close (i)"
+    #puts "jlib::si::send_close (i)"
     
     set istate($sid,closeCmd) $cmd
     set stream $istate($sid,stream)
@@ -308,7 +308,7 @@ proc jlib::si::send_close {jlibname sid cmd} {
 proc jlib::si::transport_close_cb {jlibname sid type iqChild} {
     
     upvar ${jlibname}::si::istate istate
-    puts "jlib::si::transport_close_cb (i)"
+    #puts "jlib::si::transport_close_cb (i)"
     
     # Just report this to the relevant profile.
     eval $istate($sid,closeCmd) [list $jlibname $type $sid $iqChild]
@@ -340,7 +340,7 @@ proc jlib::si::send_data {jlibname sid data cmd} {
     
     variable trpt
     upvar ${jlibname}::si::istate istate
-    puts "jlib::si::send_data (i)"
+    #puts "jlib::si::send_data (i)"
     
     set istate($sid,sendCmd) $cmd
     set stream $istate($sid,stream)
@@ -355,7 +355,7 @@ proc jlib::si::send_data {jlibname sid data cmd} {
 proc jlib::si::transport_send_data_error_cb {jlibname sid} {
     
     upvar ${jlibname}::si::istate istate
-    puts "jlib::si::transport_send_data_error_cb (i)"
+    #puts "jlib::si::transport_send_data_error_cb (i)"
         
     eval $istate($sid,sendCmd) [list $jlibname $sid]
 }
@@ -363,7 +363,7 @@ proc jlib::si::transport_send_data_error_cb {jlibname sid} {
 proc jlib::si::ifree {jlibname sid} {
     
     upvar ${jlibname}::si::istate istate
-    puts "jlib::si::ifree (i) sid=$sid"
+    #puts "jlib::si::ifree (i) sid=$sid"
 
     array unset istate $sid,*
 }
@@ -385,7 +385,7 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
     variable prof
     upvar ${jlibname}::si::tstate tstate
     
-    puts "jlib::si::handle_set (t)"
+    #puts "jlib::si::handle_set (t)"
     
     array set iqattr $args
     
@@ -480,7 +480,7 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
 
 proc jlib::si::profile_response {jlibname sid type profileElem args} {
     
-    puts "jlib::si::profile_response (t) type=$type"
+    #puts "jlib::si::profile_response (t) type=$type"
     
     variable xmlns
     upvar ${jlibname}::si::tstate tstate
@@ -531,7 +531,7 @@ proc jlib::si::profile_response {jlibname sid type profileElem args} {
 proc jlib::si::reset {jlibname sid} {
     
     upvar ${jlibname}::si::tstate tstate
-    puts "jlib::si::reset (t)"
+    #puts "jlib::si::reset (t)"
     
     # @@@ Tell transport we are resetting???
     # Brute force.
@@ -564,7 +564,7 @@ proc jlib::si::stream_recv {jlibname sid data} {
     
     variable prof
     upvar ${jlibname}::si::tstate tstate
-    puts "jlib::si::stream_recv (t)"
+    #puts "jlib::si::stream_recv (t)"
     
     # Each stream should check that we exist before calling us!
     set profile $tstate($sid,profile)
@@ -580,7 +580,7 @@ proc jlib::si::stream_closed {jlibname sid} {
     
     variable prof
     upvar ${jlibname}::si::tstate tstate
-    puts "jlib::si::stream_closed (t)"
+    #puts "jlib::si::stream_closed (t)"
     
     # Each stream should check that we exist before calling us!
     set profile $tstate($sid,profile)
@@ -596,7 +596,7 @@ proc jlib::si::stream_error {jlibname sid errmsg} {
     
     variable prof
     upvar ${jlibname}::si::tstate tstate
-    puts "jlib::si::stream_error (t)"
+    #puts "jlib::si::stream_error (t)"
     
     set profile $tstate($sid,profile)
     eval $prof($profile,close) [list $jlibname $sid $errmsg]
@@ -609,7 +609,7 @@ proc jlib::si::stream_error {jlibname sid errmsg} {
 
 proc jlib::si::send_error {jlibname jid id sid errcode errtype stanza {extraElem {}}} {
     
-    puts "jlib::si::send_error"
+    #puts "jlib::si::send_error"
 
     jlib::send_iq_error $jlibname $jid $id $errcode $errtype $stanza $extraElem
     tfree $jlibname $sid
@@ -618,7 +618,7 @@ proc jlib::si::send_error {jlibname jid id sid errcode errtype stanza {extraElem
 proc jlib::si::tfree {jlibname sid} {
     
     upvar ${jlibname}::si::tstate tstate
-    puts "jlib::si::tfree (t)"
+    #puts "jlib::si::tfree (t)"
 
     array unset tstate $sid,*
 }
