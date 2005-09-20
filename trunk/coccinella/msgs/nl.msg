@@ -139,7 +139,7 @@
 ::msgcat::mcset nl Settings		{Instellingen}
 ::msgcat::mcset nl Shortcut		{Snelkoppeling}
 ::msgcat::mcset nl Shortcuts		{Snelkoppelingen}
-#::msgcat::mcset nl Size
+::msgcat::mcset nl Size			{Grootte}
 ::msgcat::mcset nl Sounds		{Geluiden}
 ::msgcat::mcset nl Specifications	{Specificaties}
 ::msgcat::mcset nl Speech		{Spraak}
