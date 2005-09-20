@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.79 2005-08-29 12:39:37 matben Exp $
+# $Id: Preferences.tcl,v 1.80 2005-09-20 14:09:51 matben Exp $
  
 package require mnotebook
 package require tree
@@ -39,6 +39,82 @@ namespace eval ::Preferences:: {
     option add *Preferences*TEntry.font         CociSmallFont       widgetDefault
     #option add *Preferences*TScale.style        Small.TScale        widgetDefault
     
+}
+
+# Preferences::SetMiscPrefs --
+#
+#       Set defaults in the option database for widget classes.
+#       Set the user preferences from the preferences file if they are there,
+#       else take the hardcoded defaults.
+#       'prefsList': a list of lists where each sublist defines an item in the
+#       following way:  
+#       
+#         {theVarName itsResourceName itsHardCodedDefaultValue {priority 20}}.
+#         
+# Note: it may prove useful to have the versions numbers as the first elements!
+
+proc ::Preferences::SetMiscPrefs { } {
+    global  prefs this
+    
+    ::Debug 2 "::Preferences::SetMiscPrefs"
+    
+    ::PrefUtils::Add [list  \
+      [list prefs(remotePort)      prefs_remotePort      $prefs(remotePort)]     \
+      [list prefs(postscriptOpts)  prefs_postscriptOpts  $prefs(postscriptOpts)] \
+      [list prefs(firstLaunch)     prefs_firstLaunch     $prefs(firstLaunch)     userDefault] \
+      [list prefs(unixPrintCmd)    prefs_unixPrintCmd    $prefs(unixPrintCmd)]   \
+      [list prefs(webBrowser)      prefs_webBrowser      $prefs(webBrowser)]     \
+      [list prefs(userPath)        prefs_userPath        $prefs(userPath)]       \
+      [list prefs(winGeom)         prefs_winGeom         $prefs(winGeom)]        \
+      [list prefs(paneGeom)        prefs_paneGeom        $prefs(paneGeom)]       \
+      [list prefs(sashPos)         prefs_sashPos         $prefs(sashPos)]        \
+      ]
+		
+    set prefs(wasFirstLaunch) 0
+    if {$prefs(firstLaunch)} {
+	set prefs(wasFirstLaunch) 1
+    }    
+    # Map list of win geoms into an array.
+    foreach {win geom} $prefs(winGeom) {
+	set prefs(winGeom,$win) $geom
+    }
+    foreach {win pos} $prefs(paneGeom) {
+	set prefs(paneGeom,$win) $pos
+    }
+    foreach {win pos} $prefs(sashPos) {
+	set prefs(sashPos,$win) $pos
+    }
+    
+    # This is used only to track upgrades.
+    ::PrefUtils::AddMustSave [list  \
+      [list this(vers,previous)    this_previousVers     $this(vers,previous)    userDefault] \
+      ]
+    
+    set this(vers,old)      $this(vers,previous)
+    set this(vers,previous) $this(vers,full)
+}
+
+proc ::Preferences::Upgraded { } {
+    global  this
+    
+    set vcomp [package vcompare $this(vers,old) $this(vers,full)]
+    return [expr {$vcomp < 0 ? 1 : 0}]
+}
+
+proc ::Preferences::UpgradedFromVersion {version} {
+    global  this
+    
+    if {[Upgraded] && [package vcompare $version $this(vers,old)] <= 0} {
+	return 1
+    } else {
+	return 0
+    }
+}
+
+proc ::Preferences::FirstLaunch { } {
+    global  prefs
+    
+    return $prefs(wasFirstLaunch)
 }
 
 proc ::Preferences::QuitAppHook { } {

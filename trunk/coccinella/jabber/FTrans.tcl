@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.2 2005-09-19 13:30:57 matben Exp $
+# $Id: FTrans.tcl,v 1.3 2005-09-20 14:09:51 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -79,11 +79,10 @@ snit::widget ::FTrans::SendDialog {
 
 	if {[tk windowingsystem] eq "aqua"} {
 	    ::tk::unsupported::MacWindowStyle style $win document closeBox
-	}
-	wm title $win $options(-title)
-	if {[tk windowingsystem] ne "aqua"} {
+	} else {
 	    $win configure -menu ""
 	}
+	wm title $win $options(-title)
 
 	set im   [::Theme::GetImage $options(-image)]
 	set imbg [::Theme::GetImage $options(-imagebg)]
@@ -533,7 +532,11 @@ proc ::FTrans::TProgress {token jlibname sid total bytes} {
 	ui::progress::toplevel $w -text $str  \
 	  -cancelcommand [list [namespace current]::TCancel $jlibname $sid]
     }
-    update idletasks
+    if {[string equal $::tcl_platform(platform) "windows"]} {
+	update
+    } else {
+	update idletasks
+    }
 }
 
 proc ::FTrans::TCancel {jlibname sid} {

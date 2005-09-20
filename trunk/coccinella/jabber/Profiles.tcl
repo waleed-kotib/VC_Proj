@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.46 2005-09-02 17:06:25 matben Exp $
+# $Id: Profiles.tcl,v 1.47 2005-09-20 14:09:51 matben Exp $
 
 package provide Profiles 1.0
 
@@ -53,12 +53,15 @@ proc ::Profiles::InitHook { } {
     ::PrefUtils::Add [list  \
       [list ::Profiles::profiles   profiles          $profiles   userDefault] \
       [list ::Profiles::selected   selected_profile  $selected   userDefault]]
-    
-    # Google Talk persistent?
-    if {[lsearch -glob $profiles "gmail.com *"] < 0} {
-	lappend profiles {Google Talk} {gmail.com You from_gmail_your_account  \
-	  -ip talk.google.com -port 5223 -ssl 1 -digest 0}
-    }	
+        
+    # Google Talk profile?
+    if {[::Preferences::UpgradedFromVersion 0.95.10]  \
+      && [lsearch -glob $profiles "gmail.com *"] < 0} {
+	lappend profiles {Google Talk} {
+	    gmail.com You from_gmail_your_account
+	    -ip talk.google.com -port 5223 -ssl 1 -digest 0
+	}	
+    }
     
     # Sanity check.
     SanityCheck

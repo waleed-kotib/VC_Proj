@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #
-# $Id: PrefUtils.tcl,v 1.3 2005-09-19 13:30:57 matben Exp $
+# $Id: PrefUtils.tcl,v 1.4 2005-09-20 14:09:51 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -58,8 +58,12 @@ namespace eval ::PrefUtils:: {
 #       updates the internal option database.
 
 proc ::PrefUtils::Init { } {
-    global  this
+    global  this prefs
     
+    set prefs(master,default)  {}
+    set prefs(master,mustSave) {}
+    set prefs(master)          {}
+
     set prefsFilePath $this(userPrefsFilePath)
     set old $this(oldPrefsFilePath)
     
@@ -88,35 +92,46 @@ proc ::PrefUtils::Init { } {
 #       Take care of the priority for each variable.
 #
 # Arguments:
-#       thePrefs  a list of lists where each sublist defines an item in the
+#       prefsList a list of lists where each sublist defines an item in the
 #                 following way: 
 #                 {theVarName itsResourceName itsHardCodedDefaultValue priority}
 #                        
 # Results:
 #       none
 
-proc ::PrefUtils::Add {thePrefs} {
+proc ::PrefUtils::Add {prefsList} {
+    AddToMaster $prefsList
+}
+
+proc ::PrefUtils::AddMustSave {prefsList} {
+    AddToMaster $prefsList mustSave
+}
+
+proc ::PrefUtils::AddToMaster {prefsList {key ""}} {
     global  prefs
     
     variable priNameToNum
-
-    set isOldPrefFile 0
     
-    foreach item $thePrefs {
+    foreach item $prefsList {
 	foreach {varName resName defaultValue} $item break
 	
 	# The default priority for hardcoded values are 20 (factoryDefault).
 	if {[llength $item] >= 4} {
-	    set varPriority $priNameToNum([lindex $item 3])
+	    set priority $priNameToNum([lindex $item 3])
 	} else {
-	    set varPriority 20
+	    set priority 20
 	}
-	lappend prefs(master)   \
-	  [list $varName $resName $defaultValue $varPriority]
+	if {$key eq ""} {
+	    lappend prefs(master,default)  \
+	      [list $varName $resName $defaultValue $priority]
+	} else {
+	    lappend prefs(master,$key)  \
+	      [list $varName $resName $defaultValue $priority]
+	}
 	
 	# Override options that should be write only:
 	# for instance, version numbers.
-	if {$varPriority <= 60} {
+	if {$priority <= 60} {
 	    set value [GetValue $varName $resName $defaultValue]
 	} else {
 	    set value $defaultValue
@@ -131,7 +146,10 @@ proc ::PrefUtils::Add {thePrefs} {
 	} else {
 	    set var $value
 	}
-    }   
+    }
+    
+    # Keep syncd.
+    set prefs(master) [concat $prefs(master,default) $prefs(master,mustSave)]
 }
 
 # PrefUtils::GetValue --
@@ -149,17 +167,16 @@ proc ::PrefUtils::Add {thePrefs} {
 #       a value for the preference with the given name. 
 
 proc ::PrefUtils::GetValue {varName resName defValue} {
-    upvar #0 varName theVar
     
-    set theVar [option get . $resName {}]
+    set value [option get . $resName {}]
     
     # If not there {} then take the itsHardCodedDefaultValue.
-    if {$theVar == {}} {
-	set theVar $defValue
+    if {$value == {}} {
+	set value $defValue
     }
-    return $theVar
+    return $value
 }
-  
+
 # PrefUtils::SaveToFile --
 # 
 #       Saves the preferences to a file. Preferences must be stored in
@@ -193,30 +210,37 @@ proc ::PrefUtils::SaveToFile { } {
     puts $fid "!   The data written at: [clock format [clock seconds]]\n!"
     
     # Only preferences indicated in the master copy are saved.
-    foreach item $prefs(master) {
-	lassign $item varName resName defVal
-	
-	# All names must be fully qualified. Therefore #0.
-	upvar #0 $varName var
-	
-	# Treat arrays specially.
-	if {[string match "*_array" $resName]} {
-	    array set tmpArr $defVal
-	    if {[arraysequal $varName tmpArr]} {
-		continue
-	    }
-	    puts $fid [format "%-24s\t%s" *${resName}: [array get var]]	    
-	} else {
-	    if {![string equal $var $defVal]} {
-		puts $fid [format "%-24s\t%s" *${resName}: $var]
-	    }
-	}
+    foreach item $prefs(master,default) {
+	PutsItem $item $fid 0
+    }
+    foreach item $prefs(master,mustSave) {
+	PutsItem $item $fid 1
     }
     close $fid
     if {[catch {file rename -force $tmpFile $this(userPrefsFilePath)} msg]} {
 	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
 	  -icon error
 	return
+    }
+}
+
+proc ::PrefUtils::PutsItem {item fid ignoreDefault} {
+    
+    lassign $item varName resName defVal
+    
+    # All names must be fully qualified. Therefore #0.
+    upvar #0 $varName var
+    
+    # Treat arrays specially.
+    if {[string match "*_array" $resName]} {
+	array set tmpArr $defVal
+	if {$ignoreDefault || ![arraysequal $varName tmpArr]} {
+	    puts $fid [format "%-24s\t%s" *${resName}: [array get var]]	    
+	}
+    } else {
+	if {$ignoreDefault || ![string equal $var $defVal]} {
+	    puts $fid [format "%-24s\t%s" *${resName}: $var]
+	}
     }
 }
 
@@ -269,55 +293,13 @@ proc ::PrefUtils::ResetToUserDefaults { } {
     global  prefs
 	
     # Need to make a temporary storage in order not to duplicate items.
-    set thePrefs $prefs(master)
-    set prefs(master) {}
+    set defaultList $prefs(master,default)
+    set mustSaveList $prefs(master,mustSave)
     
     # Read the user option database file once again.
     Init
-    Add $thePrefs
-}
-
-# PrefUtils::SetUserPreferences --
-#
-#       Set defaults in the option database for widget classes.
-#       Set the user preferences from the preferences file if they are there,
-#       else take the hardcoded defaults.
-#       'thePrefs': a list of lists where each sublist defines an item in the
-#       following way:  
-#       
-#         {theVarName itsResourceName itsHardCodedDefaultValue {priority 20}}.
-#         
-# Note: it may prove useful to have the versions numbers as the first elements!
-
-proc ::PrefUtils::SetUserPreferences { } {
-    global  prefs this
-    
-    ::Debug 2 "::PrefUtils::SetUserPreferences"
-    
-    ::PrefUtils::Add [list  \
-      [list this(vers,full)        this_fullVers         $this(vers,full)        absolute] \
-      [list this(vers,previous)    this_previousVers     $this(vers,previous)    userDefault] \
-      [list prefs(remotePort)      prefs_remotePort      $prefs(remotePort)]     \
-      [list prefs(postscriptOpts)  prefs_postscriptOpts  $prefs(postscriptOpts)] \
-      [list prefs(firstLaunch)     prefs_firstLaunch     $prefs(firstLaunch)     userDefault] \
-      [list prefs(unixPrintCmd)    prefs_unixPrintCmd    $prefs(unixPrintCmd)]   \
-      [list prefs(webBrowser)      prefs_webBrowser      $prefs(webBrowser)]     \
-      [list prefs(userPath)        prefs_userPath        $prefs(userPath)]       \
-      [list prefs(winGeom)         prefs_winGeom         $prefs(winGeom)]        \
-      [list prefs(paneGeom)        prefs_paneGeom        $prefs(paneGeom)]       \
-      [list prefs(sashPos)         prefs_sashPos         $prefs(sashPos)]        \
-      ]
-                
-    # Map list of win geoms into an array.
-    foreach {win geom} $prefs(winGeom) {
-	set prefs(winGeom,$win) $geom
-    }
-    foreach {win pos} $prefs(paneGeom) {
-	set prefs(paneGeom,$win) $pos
-    }
-    foreach {win pos} $prefs(sashPos) {
-	set prefs(sashPos,$win) $pos
-    }
+    Add $defaultList
+    AddMustSave $mustSaveList
 }
 
 # PrefUtils::ParseCommandLineOptions --

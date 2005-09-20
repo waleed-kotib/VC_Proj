@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.28 2005-08-28 13:37:03 matben Exp $
+# $Id: JPrefs.tcl,v 1.29 2005-09-20 14:09:51 matben Exp $
+
+package require ui::fontselector
 
 package provide JPrefs 1.0
 
@@ -489,15 +491,26 @@ proc ::JPrefs::BuildCustomPage {page} {
 proc ::JPrefs::PickFont { } {
     variable tmpJPrefs
     
-    if {[string length $tmpJPrefs(chatFont)]} {
-	set opts [list -defaultfont CociSmallFont -initialfont $tmpJPrefs(chatFont)]
-    } else {
-	set opts [list -defaultfont CociSmallFont -initialfont CociSmallFont]
+    set opts {
+	-defaultfont CociSmallFont
+	-geovariable prefs(winGeom,jfontsel)
+	-command     ::JPrefs::PickFontCommand
     }
+    if {[string length $tmpJPrefs(chatFont)]} {
+	lappend opts -selectfont $tmpJPrefs(chatFont)
+    } else {
+	lappend opts -selectfont CociSmallFont
+    }
+    set m [::UI::GetMainMenu]
+    lappend opts -menu $m
+    set w [eval ui::fontselector [ui::autoname] $opts]
+    ::UI::SetMenuAcceleratorBinds $w $m
+    $w grab
+}
+
+proc ::JPrefs::PickFontCommand {{theFont ""}} {
+    variable tmpJPrefs
     
-    # Check if theFont is the default font.
-    # 'chatFont' empty means that default font should be used.
-    set theFont [eval {::fontselection::fontselection .mnb} $opts]
     if {[llength $theFont]} {
 	if {[::Utils::FontEqual $theFont CociSmallFont]} {
 	    set tmpJPrefs(chatFont) ""

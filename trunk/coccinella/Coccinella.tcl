@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.123 2005-09-19 13:30:57 matben Exp $	
+# $Id: Coccinella.tcl,v 1.124 2005-09-20 14:09:50 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -184,14 +184,12 @@ set packages(generic) {
     hooks
     tileutils
     undo
+    utils
 }
 set packages(uibase) {
     balloonhelp
-    combobox
-    fontselection
     tablelist
     Pane
-    ProgressWindow
     ttoolbar
 }
 set packages(application) {
@@ -242,11 +240,6 @@ package require Jabber
 FactoryDefaults
 ::Jabber::FactoryDefaults
 
-# Set the user preferences from the preferences file if they are there,
-# else take the hardcoded defaults.
-::Splash::SetMsg [mc splashprefs]
-::PrefUtils::SetUserPreferences
-
 # To provide code to be run before loading componenets.
 ::Debug 2 "--> earlyInitHook"
 ::hooks::run earlyInitHook
@@ -255,6 +248,10 @@ FactoryDefaults
 ::Debug 2 "++> component::load"
 component::lappend_auto_path $this(componentPath)
 component::load
+
+# Set the user preferences from the preferences file.
+::Splash::SetMsg [mc splashprefs]
+::Preferences::SetMiscPrefs
 
 # Components that need to add their own preferences need to be registered here.
 ::Debug 2 "--> prefsInitHook"
