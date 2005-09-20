@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: GetFileIface.tcl,v 1.8 2005-08-17 14:26:51 matben Exp $
+# $Id: GetFileIface.tcl,v 1.9 2005-09-20 14:09:51 matben Exp $
 
 package require getfile
 package require uriencode
@@ -481,7 +481,7 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
 
 	# Update the progress window.
 	set percent [expr 100.0 * $current/($total + 1.0)]
-	$getstate(wprog) configure -percent $percent   \
+	$getstate(wprog) configuredelayed -percent $percent   \
 	  -text2 $msg2 -text3 $msg3
     } else {
 	
@@ -489,9 +489,10 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
 	::Debug 2 "::GetFileIface::UpdateProgress  create ProgWin"
 
 	set str "[mc {Writing file}]: $getstate(filetail)"
-	::ProgressWindow::ProgressWindow $getstate(wprog)  \
-	  -text $str -text2 $msg2 -text3 $msg3 \
-	  -cancelcmd [list [namespace current]::CancelCmd $gettoken]
+	ui::progress::toplevel $getstate(wprog)  \
+	  -text $str -text2 $msg2 -text3 $msg3   \
+	  -menu [::UI::GetMainMenu]              \
+	  -cancelcommand [list [namespace current]::CancelCmd $gettoken]
     }
 }
 

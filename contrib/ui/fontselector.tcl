@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: fontselector.tcl,v 1.1 2005-09-19 06:37:20 matben Exp $
+# $Id: fontselector.tcl,v 1.2 2005-09-20 14:09:51 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -81,6 +81,8 @@ snit::widget ui::fontselector::widget {
 	wm withdraw $win
 	if {[tk windowingsystem] eq "aqua"} {
 	    ::tk::unsupported::MacWindowStyle style $win document closeBox
+	} else {
+	    $win configure -menu ""
 	}
 	wm title $win $options(-title)
 
@@ -165,7 +167,6 @@ snit::widget ui::fontselector::widget {
 	bind $win      <Escape>          [list $self Cancel]
 
 	wm resizable $win 0 0
-	wm protocol  $win WM_DELETE_WINDOW [list $self Cancel]
 	
 	if {[llength $options(-selectfont)]} {
 	    array set farr [font actual $options(-selectfont)]
@@ -191,20 +192,26 @@ snit::widget ui::fontselector::widget {
 	return
     }
     
+    destructor {
+	$self Cancel
+    }
+    
     # Private methods:
 	
     method OnConfigDefaultFont {option value} {
-	if {$value == {}} {
-	    $wdefault state {disabled}
-	} else {
-	    $wdefault state {!disabled}
+	if {[info exists wdefault]} {
+	    if {$value == {}} {
+		$wdefault state {disabled}
+	    } else {
+		$wdefault state {!disabled}
+	    }
 	}
 	set options($option) $value
     }
     
     method OnConfigText {option value} {
-	set options($option) $value
 	$self Select
+	set options($option) $value
     }
     
     method OnConfigTitle {option value} {

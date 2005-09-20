@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: util.tcl,v 1.2 2005-09-19 13:30:57 matben Exp $
+# $Id: util.tcl,v 1.3 2005-09-20 14:09:51 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -29,7 +29,7 @@ namespace eval ui {
 	    set size 13
 	    set small 11
 
-	    font configure DlgDefaultFont -family $family -size $size -weight bold
+	    font configure DlgDefaultFont -family $family -size $size
 	    font configure DlgSmallFont   -family $family -size $small
 	}
 	win32 {
@@ -214,6 +214,11 @@ proc ui::GetToplevels {wclass} {
 }
 
 proc ui::Grab {win} {
+    grab $win
+    tkwait window $win
+}
+
+proc ui::GrabNEW {win} {
     grab $win
     set idxlist [MenubarDisable $win]
     set mb [$win cget -menu]

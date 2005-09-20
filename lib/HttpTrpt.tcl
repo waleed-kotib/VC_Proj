@@ -1,17 +1,17 @@
 #  HttpTrpt.tcl ---
 #  
 #      This file is part of The Coccinella application. 
-#      It is a wrapper for httpex, timing, and ProgressWindow to isolate
+#      It is a wrapper for httpex, timing, and ui::progress to isolate
 #      the application from the details.
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: HttpTrpt.tcl,v 1.5 2005-08-26 15:02:34 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.6 2005-09-20 14:09:51 matben Exp $
 
 package require httpex
 package require timing
 package require uriencode
-package require ProgressWindow
+package require ui::progress
 
 package provide HttpTrpt 1.0
 
@@ -144,8 +144,9 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
     if {$state(first)} {
 	if {$state(-dialog) && ![winfo exists $w]} {
 	    set str "[mc {Writing file}]: $state(fileTail)"
-	    ::ProgressWindow::ProgressWindow $w -text $str \
-	      -cancelcmd [list [namespace current]::CancelBt $token]
+	    ui::progress::toplevel $w -text $str \
+	      -menu [::UI::GetMainMenu]          \
+	      -cancelcommand [list [namespace current]::CancelBt $token]
 	    set needupdate 1
 	}
 	if {$state(-progressmessage) != {}} {
@@ -162,7 +163,7 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 	if {$state(-dialog)} {
 	    set msg3 "[mc Rate]: $timsg"	
 	    set percent [expr 100.0 * $current/($total + 0.001)]
-	    $w configure -percent $percent -text3 $msg3
+	    $w configuredelayed -percent $percent -text2 $msg3
 	    set needupdate 1
 	}
 	if {$state(-progressmessage) != {}} {

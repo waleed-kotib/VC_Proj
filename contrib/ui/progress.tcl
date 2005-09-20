@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: progress.tcl,v 1.1 2005-09-19 06:37:20 matben Exp $
+# $Id: progress.tcl,v 1.2 2005-09-20 14:09:51 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -15,7 +15,7 @@ package provide ui::progress 0.1
 
 namespace eval ui::progress {
        
-    style default ProgressFrame.TButton -font TkTooltipFont
+    style default ProgressFrame.TButton -font DlgSmallFont
 
     option add *ProgressWindow.title   [::msgcat::mc Progress]    widgetDefault
 
@@ -115,7 +115,8 @@ snit::widget ui::progress::toplevel {
     hulltype toplevel
     widgetclass ProgressWindow
 
-    delegate option * to frm except {-type -title}
+    delegate option -menu to hull
+    delegate option * to frm except {-menu -type -title}
     delegate method * to frm
 
     option -type
@@ -129,6 +130,8 @@ snit::widget ui::progress::toplevel {
 	if {[tk windowingsystem] eq "aqua"} {
 	    ::tk::unsupported::MacWindowStyle style $win document \
 	      {collapseBox verticalZoom}
+	} else {
+	    $win configure -menu ""
 	}
 	wm title $win $options(-title)
 	
