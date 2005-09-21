@@ -5,11 +5,11 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.66 2005-08-29 07:38:37 matben Exp $
+# $Id: NewMsg.tcl,v 1.67 2005-09-21 09:53:23 matben Exp $
 
-package require entrycomp
+package require ui::entryex
+
 package provide NewMsg 1.0
-
 
 namespace eval ::NewMsg:: {
     global this
@@ -470,7 +470,8 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     pack  $wfr.f$n.la -side right -fill both -expand 1
     
     set wentry $wfr.addr$n
-    ::entrycomp::entrycomptk $wentry $jidlist -bd 0 -highlightthickness 0 \
+    ui::entryex $wentry -type tk  \
+      -library $jidlist -bd 0 -highlightthickness 0 \
       -textvariable [namespace current]::locals($w,addr$n) -state disabled \
       -bg $bg2 -fg $fg2 -disabledbackground $bg4
     

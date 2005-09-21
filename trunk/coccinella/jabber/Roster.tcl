@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.132 2005-09-19 06:37:21 matben Exp $
+# $Id: Roster.tcl,v 1.133 2005-09-21 09:53:23 matben Exp $
 
 package provide Roster 1.0
 
@@ -118,10 +118,6 @@ namespace eval ::Roster:: {
 	} {}
 	command     mRefreshRoster {}                 {::Roster::Refresh} {}
     }  
-    # mDirStatus     user               {::Roster::DirectedPresenceDlg $jid}
-    # mLastLogin/Activity user          {::Jabber::GetLast $jid}
-    # mvCard         user               {::VCard::Fetch other $jid}
-    # mVersion       {user available}   {::Jabber::GetVersion $jid3}
 
     # Transports.
     set popMenuDefs(roster,trpt,def) {
@@ -195,7 +191,11 @@ proc ::Roster::GetDisplayName {jid} {
 proc ::Roster::MapShowToText {show} {
     variable mapShowElemToText
     
-    return $mapShowElemToText($show)
+    if {[info exists mapShowElemToText($show)]} {
+	return $mapShowElemToText($show)
+    } else {
+	return $show
+    }
 }
 
 # Roster::Show --

@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: entryex.tcl,v 1.1 2005-09-19 06:37:20 matben Exp $
+# $Id: entryex.tcl,v 1.2 2005-09-21 09:53:23 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -51,11 +51,14 @@ snit::widgetadaptor ui::entryex::widget {
     delegate method * to hull
     
     option -library {}
-    option -type    -default ttk -configuremethod SetType
+    option -type    -default ttk ;#-configuremethod SetType
 
     
     constructor {args} {
-	set type $options(-type)
+	set type "ttk"
+	if {[set idx [lsearch $args "-type"]] >= 0} {
+	    set type [lindex $args [incr idx]]
+	}
 	if {![regexp {^(tk|ttk)$} $type]} {
 	    return -code error "style must be one of: tk, ttk"
 	}

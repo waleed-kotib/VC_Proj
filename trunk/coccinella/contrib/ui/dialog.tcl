@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.2 2005-09-19 13:30:57 matben Exp $
+# $Id: dialog.tcl,v 1.3 2005-09-21 09:53:23 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -382,6 +382,10 @@ snit::widget ui::dialog::widget {
 	    lower $client	;# so it's first in keyboard traversal order
 	}
 	return $client 
+    }
+
+    method grab {} {
+	ui::Grab $win
     }
 }
 

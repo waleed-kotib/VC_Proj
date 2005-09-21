@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.112 2005-09-08 12:52:35 matben Exp $
+# $Id: GroupChat.tcl,v 1.113 2005-09-21 09:53:23 matben Exp $
 
 package require History
 
@@ -122,7 +122,17 @@ namespace eval ::GroupChat:: {
 	mUserInfo      user      {::UserInfo::Get $jid}
 	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
     }    
-    # mIgnore        user      {::GroupChat::Ignore $jid}
+    
+    if {0} {
+	set popMenuDefs(groupchat,def) {
+	    command   mMessage       user      {::NewMsg::Build -to $jid}   {}
+	    command   mChat          user      {::Chat::StartThread $jid}   {}
+	    command   mSendFile      user      {::OOB::BuildSet $jid}       {}
+	    command   mUserInfo      user      {::UserInfo::Get $jid}       {}
+	    command   mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid} {}
+	    check     mIgnore        user      {::GroupChat::Ignore $jid}   {}
+	}    
+    }
     
     variable userRoleToStr
     set userRoleToStr(moderator)   [mc Moderators]

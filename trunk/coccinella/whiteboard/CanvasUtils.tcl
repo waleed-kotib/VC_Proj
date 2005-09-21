@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasUtils.tcl,v 1.35 2005-09-19 06:37:21 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.36 2005-09-21 09:53:23 matben Exp $
 
 package require sha1
 package require can2svg
@@ -2106,6 +2106,16 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
 		%W xview scroll [expr {- (%D / 120) * 4}] units
 	    }
 	}
+    }
+    
+    bind Whiteboard <<Cut>> {
+	::CanvasCCP::CutCopyPasteCmd cut
+    }
+    bind Whiteboard <<Copy>> {
+	::CanvasCCP::CutCopyPasteCmd copy
+    }
+    bind Whiteboard <<Paste>> {
+	::CanvasCCP::CutCopyPasteCmd paste
     }
 
     # WhiteboardPoint

@@ -5,10 +5,9 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.45 2005-08-18 09:52:07 matben Exp $
+# $Id: Whiteboard.tcl,v 1.46 2005-09-21 09:53:23 matben Exp $
 
 package require anigif
-package require entrycomp
 package require moviecontroller
 package require uriencode
 package require CanvasDraw
@@ -471,9 +470,9 @@ proc ::WB::InitMenuDefs { } {
 	{command     mUndo             {::CanvasCmd::Undo $w}             normal   Z}
 	{command     mRedo             {::CanvasCmd::Redo $w}             normal   {}}
 	{separator}
-	{command     mCut              {::UI::CutCopyPasteCmd cut}           disabled X}
-	{command     mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
-	{command     mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
+	{command     mCut              {::UI::CutCopyPasteCmd cut}        disabled X}
+	{command     mCopy             {::UI::CutCopyPasteCmd copy}       disabled C}
+	{command     mPaste            {::UI::CutCopyPasteCmd paste}      disabled V}
 	{command     mAll              {::CanvasCmd::SelectAll $w}        normal   A}
 	{command     mEraseAll         {::CanvasCmd::DoEraseAll $w}       normal   {}}
 	{separator}
@@ -2479,7 +2478,7 @@ proc ::WB::FixMenusWhenCopy {wevent} {
 
     set w [winfo toplevel $wevent]
     upvar ::WB::${w}::opts opts
-
+    
     if {$opts(-state) eq "normal"} {
 	::UI::MenuMethod $w.menu.edit entryconfigure mPaste -state normal
     } else {

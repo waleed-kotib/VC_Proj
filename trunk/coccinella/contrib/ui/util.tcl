@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: util.tcl,v 1.3 2005-09-20 14:09:51 matben Exp $
+# $Id: util.tcl,v 1.4 2005-09-21 09:53:23 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -21,6 +21,7 @@ namespace eval ui {
     variable dlg ._ui_dlg
     
     catch {font create DlgDefaultFont}
+    catch {font create DlgBoldFont}
     catch {font create DlgSmallFont}
     
     switch -- [tk windowingsystem] {
@@ -30,6 +31,7 @@ namespace eval ui {
 	    set small 11
 
 	    font configure DlgDefaultFont -family $family -size $size
+	    font configure DlgBoldFont    -family $family -size $size -weight bold
 	    font configure DlgSmallFont   -family $family -size $small
 	}
 	win32 {
@@ -42,6 +44,7 @@ namespace eval ui {
 	    set small 8
 
 	    font configure DlgDefaultFont -family $family -size $size
+	    font configure DlgBoldFont    -family $family -size $size -weight bold
 	    font configure DlgSmallFont   -family $family -size $small
 	}
 	x11 {
@@ -54,10 +57,10 @@ namespace eval ui {
 	    set small -10
 
 	    font configure DlgDefaultFont -family $family -size $size
+	    font configure DlgBoldFont    -family $family -size $size -weight bold
 	    font configure DlgSmallFont   -family $family -size $small
 	}
     }    
-
 }
 
 proc ui::autoname {} {

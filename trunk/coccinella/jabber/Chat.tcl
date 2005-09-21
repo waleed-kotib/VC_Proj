@@ -5,9 +5,9 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.122 2005-09-19 06:37:21 matben Exp $
+# $Id: Chat.tcl,v 1.123 2005-09-21 09:53:23 matben Exp $
 
-package require entrycomp
+package require ui::entryex
 package require uriencode
 
 package provide Chat 1.0
@@ -188,7 +188,7 @@ proc ::Chat::StartThreadDlg {args} {
     set jidlist [::Jabber::RosterCmd getusers -type available]
     ttk::label $frmid.luser -text "[mc {Jabber user ID}]:"  \
       -anchor e
-    ::entrycomp::entrycomp $frmid.euser $jidlist -width 26    \
+    ui::entryex $frmid.euser -library $jidlist -width 26  \
       -textvariable [namespace current]::user
 
     grid  $frmid.luser  $frmid.euser  -sticky e -padx 2
