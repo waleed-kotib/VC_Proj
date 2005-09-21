@@ -11,6 +11,7 @@ Coccinella-0.95.10 (0509??):
 	- added the tkpng package; png support now required
 	- new icons from Everaldo
 	- file transfer using si/bytestreams/ibb/file-transfer protocol
+	- notification using bouncing dock icon on MacOSX
 
 Coccinella-0.95.9 (050821):
 

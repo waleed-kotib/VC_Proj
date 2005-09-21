@@ -17,7 +17,7 @@ component::attempt URIRegistry  [file join $dir URIRegistry.tcl] ::URIRegistry::
 component::attempt VoIP         [file join $dir VoIP.tcl]        ::VoIP::Init
 
 # Problem to determine if app hidden or not!
-#component::attempt CarbonNotification [file join $dir CarbonNotification.tcl] ::CarbonNotification::Init
+component::attempt CarbonNotification [file join $dir CarbonNotification.tcl] ::CarbonNotification::Init
 
 # This is just an example plugin. Uncomment to test.
 # component::attempt ComponentExample [file join $dir ComponentExample.tcl] ::ComponentExample::Init

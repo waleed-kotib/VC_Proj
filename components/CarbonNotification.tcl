@@ -3,14 +3,11 @@
 #       Demo of some of the functionality for components.
 #       This is just a first sketch.
 #       
-# $Id: CarbonNotification.tcl,v 1.5 2005-08-14 08:37:51 matben Exp $
+# $Id: CarbonNotification.tcl,v 1.6 2005-09-21 09:53:23 matben Exp $
 
-namespace eval ::CarbonNotification:: {
-    
-}
+namespace eval ::CarbonNotification:: { }
 
 proc ::CarbonNotification::Init { } {
-    global  this
     
     if {[tk windowingsystem] ne "aqua"} {
 	return
@@ -22,9 +19,10 @@ proc ::CarbonNotification::Init { } {
       "Provides the bouncing dock icon on Mac OS X."
 
     # Add event hooks.
-    ::hooks::register newMessageHook          [list [namespace current]::EventHook]
-    ::hooks::register newChatMessageHook      [list [namespace current]::EventHook]
-    ::hooks::register newChatThreadHook       [list [namespace current]::EventHook]
+    ::hooks::register newMessageHook      [list [namespace current]::EventHook]
+    ::hooks::register newChatMessageHook  [list [namespace current]::EventHook]
+    ::hooks::register newChatThreadHook   [list [namespace current]::EventHook]
+    ::hooks::register newMessageBox       [list [namespace current]::EventHook]
 }
 
 proc ::CarbonNotification::EventHook {args} {    

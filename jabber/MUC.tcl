@@ -7,9 +7,9 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.64 2005-09-08 12:52:35 matben Exp $
+# $Id: MUC.tcl,v 1.65 2005-09-21 09:53:23 matben Exp $
 
-package require entrycomp
+package require ui::entryex
 package require muc
 
 package provide MUC 1.0
@@ -640,7 +640,7 @@ proc ::MUC::Invite {roomjid} {
     pack $wmid -side top -fill x -expand 1
     
     ttk::label $wmid.la -text "[mc Invite] JID:"
-    ::entrycomp::entrycomp $wmid.ejid $jidlist -textvariable $token\(jid)
+    ui::entryex $wmid.ejid -library $jidlist -textvariable $token\(jid)
     ttk::label $wmid.lre -text "[mc Reason]:"
     ttk::entry $wmid.ere -textvariable $token\(reason)
     

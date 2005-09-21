@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.72 2005-09-08 12:52:35 matben Exp $
+# $Id: MailBox.tcl,v 1.73 2005-09-21 09:53:23 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -47,22 +47,6 @@ namespace eval ::MailBox:: {
     option add *MailBox*wbIcon13Image         wbIcon13         widgetDefault
 
     # Standard widgets.
-    if {0} {
-	option add *MailBox.frall.borderWidth          1                50
-	option add *MailBox.frall.relief               raised           50
-	option add *MailBox*top.padX                   0                50
-	option add *MailBox*top.padY                   0                50
-	option add *MailBox*divt.borderWidth           2                50
-	option add *MailBox*divt.height                2                50
-	option add *MailBox*divt.relief                sunken           50
-	option add *MailBox*mid.padX                   4                50
-	option add *MailBox*mid.padY                   4                50
-	
-	option add *MailBox*frpane.borderWidth         1                50
-	option add *MailBox*frpane.relief              sunken           50
-	option add *MailBox*frmsg.text.borderWidth     1                50
-	option add *MailBox*frmsg.text.relief          sunken           50
-    }
     if {[tk windowingsystem] eq "aqua"} {
 	option add *MailBox*mid.padding                {12 10 12 18}    50
     } else {
@@ -340,15 +324,15 @@ proc ::MailBox::Build {args} {
     # Frame to serve as container for the pane geometry manager.
     # D =
     frame $wmid.ff -bd 1 -relief sunken
-    pack $wmid.ff -side top -fill both -expand 1
+    pack  $wmid.ff -side top -fill both -expand 1
 
     # Pane geometry manager.
-    set frpane $wmid.ff.frpane
-    ttk::paned $frpane -orient vertical
-    pack $frpane -side top -fill both -expand 1    
+    set wpane $wmid.ff.pane
+    ttk::paned $wpane -orient vertical
+    pack $wpane -side top -fill both -expand 1
     
     # The actual mailbox list as a tablelist.
-    set wfrmbox $frpane.frmbox
+    set wfrmbox $wpane.frmbox
     frame $wfrmbox
     set wtbl    $wfrmbox.tbl
     set wysctbl $wfrmbox.ysc
@@ -391,7 +375,7 @@ proc ::MailBox::Build {args} {
     }
     
     # Display message in a text widget.
-    set wfrmsg $frpane.frmsg    
+    set wfrmsg $wpane.frmsg    
     set wtextmsg $wfrmsg.text
     set wyscmsg  $wfrmsg.ysc
     frame $wfrmsg
@@ -407,15 +391,16 @@ proc ::MailBox::Build {args} {
     grid columnconfigure $wfrmsg 0 -weight 1
     grid rowconfigure $wfrmsg 0 -weight 1
     
-    $frpane add $wfrmbox -weight 1
-    $frpane add $wfrmsg -weight 1
+    $wpane add $wfrmbox -weight 1
+    $wpane add $wfrmsg -weight 1
     
     set locals(wfrmbox)  $wfrmbox
     set locals(wtbl)     $wtbl
     set locals(wtextmsg) $wtextmsg
+    set locals(wpane)  $wpane
         
     ::UI::SetWindowGeometry $w
-    after 10 [list ::UI::SetSashPos $w $frpane]
+    after 10 [list ::UI::SetSashPos $w $wpane]
     wm minsize $w 300 260
     wm maxsize $w 1200 1000
     
@@ -423,7 +408,7 @@ proc ::MailBox::Build {args} {
     if {!$locals(hooksInited)} {
 	set locals(hooksInited) 1
 	::hooks::register quitAppHook [list ::UI::SaveWinGeom $w]
-	::hooks::register quitAppHook [list ::UI::SaveSashPos $w $frpane]
+	::hooks::register quitAppHook [list ::UI::SaveSashPos $w $wpane]
     }
     
     # Grab and focus.
@@ -1559,16 +1544,5 @@ proc ::MailBox::QuitHook { } {
     }
 }
 
-proc ::MailBox::CloseDlg {w} {
-    global  prefs wDlgs
-
-    variable locals
-    upvar ::Jabber::jstate jstate
-
-    set jstate(inboxVis) 0
-    ::UI::SaveWinGeom $w
-    ::UI::SavePanePos $wDlgs(jinbox) $locals(wfrmbox)
-    catch {destroy $w}
-}
 
 #-------------------------------------------------------------------------------

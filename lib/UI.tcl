@@ -5,11 +5,11 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.97 2005-09-19 06:37:21 matben Exp $
+# $Id: UI.tcl,v 1.98 2005-09-21 09:53:23 matben Exp $
 
-package require entrycomp
 package require alertbox
 package require ui::dialog
+package require ui::entryex
 
 package provide UI 1.0
 
@@ -810,27 +810,6 @@ proc ::UI::SaveWinGeomUseSize {key geom} {
     global  prefs
     
     set prefs(winGeom,$key) $geom
-}
-
-# UI::SavePanePos --
-#
-#       Same for pane positions.
-
-proc ::UI::SavePanePos {key wpaned {orient horizontal}} {
-    global  prefs
-    
-    if {[winfo exists $wpaned]} {
-	array set infoArr [::pane::pane info $wpaned]
-	if {[string equal $orient "horizontal"]} {
-	    set prefs(paneGeom,$key)   \
-	      [list $infoArr(-relheight) [expr 1.0 - $infoArr(-relheight)]]
-	} else {
-	    
-	    # Vertical
-	    set prefs(paneGeom,$key)   \
-	      [list $infoArr(-relwidth) [expr 1.0 - $infoArr(-relwidth)]]
-	}
-    }
 }
 
 proc ::UI::SaveSashPos {key w} {
