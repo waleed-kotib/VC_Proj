@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.133 2005-09-21 09:53:23 matben Exp $
+# $Id: Roster.tcl,v 1.134 2005-09-22 06:49:11 matben Exp $
 
 package provide Roster 1.0
 
@@ -40,9 +40,7 @@ namespace eval ::Roster:: {
     option add *Roster.stat.f.padY          2               50
     
     option add *Roster.padding              4               50
-    
-    
-    
+        
     # Specials.
     option add *Roster.backgroundImage      sky             widgetDefault
     option add *Roster*Tree*dirImage        ""              widgetDefault
@@ -314,6 +312,7 @@ proc ::Roster::Build {w} {
 
     tuscrollbar $wxsc -command [list $wtree xview] -orient horizontal
     tuscrollbar $wysc -command [list $wtree yview] -orient vertical
+
     grid  $wtree  -row 0 -column 0 -sticky news
     grid  $wysc   -row 0 -column 1 -sticky ns
     grid  $wxsc   -row 1 -column 0 -sticky ew
@@ -552,7 +551,6 @@ proc ::Roster::RegisterPopupEntry {menuSpec} {
 #       popup menu displayed
 
 proc ::Roster::DoPopup {jid3 clicked status group x y} {
-    global  wDlgs this
     variable popMenuDefs
     variable wtree
     
@@ -583,12 +581,6 @@ proc ::Roster::DoPopup {jid3 clicked status group x y} {
     set X [expr [winfo rootx $wtree] + $x]
     set Y [expr [winfo rooty $wtree] + $y]
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
-    
-    # Mac bug... (else can't post menu while already posted if toplevel...)
-    if {[string equal "macintosh" $this(platform)]} {
-	catch {destroy $m}
-	update
-    }
 }
 
 # Roster::BuildMenu --
@@ -605,8 +597,7 @@ proc ::Roster::BuildMenu {m menuDef jid3 clicked status group} {
     }
     set i 0
     
-    foreach {op item type cmd opts} $menuDef {
-	
+    foreach {op item type cmd opts} $menuDef {	
 	set locname [mc $item]
 
 	switch -- $op {
@@ -624,8 +615,6 @@ proc ::Roster::BuildMenu {m menuDef jid3 clicked status group} {
 	    }
 	    check {
 		set cmd [eval list $cmd]
-		#puts "\t cmd=$cmd, opts=$opts"
-		#puts "\t showOffline=$::Jabber::jprefs(rost,showOffline)"
 		eval {$m add checkbutton -label $locname -command [list after 40 $cmd]  \
 		  -state disabled} $opts
 	    }
@@ -634,7 +623,7 @@ proc ::Roster::BuildMenu {m menuDef jid3 clicked status group} {
 		continue
 	    }
 	    cascade {
-		set mt [menu ${m}.sub${i} -tearoff 0]
+		set mt [menu $m.sub$i -tearoff 0]
 		eval {$m add cascade -label $locname -menu $mt -state disabled} $opts
 		BuildMenu $mt $cmd $jid3 $clicked $status $group
 		incr i
@@ -648,7 +637,7 @@ proc ::Roster::BuildMenu {m menuDef jid3 clicked status group} {
 	# We use the 'type' and 'clicked' lists to set the state.
 	if {[listintersectnonempty $type $clicked]} {
 	    set state normal
-	} elseif {$type == ""} {
+	} elseif {$type eq ""} {
 	    set state normal
 	} else {
 	    set state disabled
@@ -656,11 +645,11 @@ proc ::Roster::BuildMenu {m menuDef jid3 clicked status group} {
 	
 	# If any available/unavailable these must also be fulfilled.
 	if {[lsearch $type available] >= 0} {
-	    if {$status != "available"} {
+	    if {$status ne "available"} {
 		set state disabled
 	    }
 	} elseif {[lsearch $type unavailable] >= 0} {
-	    if {$status != "unavailable"} {
+	    if {$status ne "unavailable"} {
 		set state disabled
 	    }
 	}

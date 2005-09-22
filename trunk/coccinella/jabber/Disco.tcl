@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.65 2005-09-19 06:37:21 matben Exp $
+# $Id: Disco.tcl,v 1.66 2005-09-22 06:49:11 matben Exp $
 
 package require jlib::disco
 
@@ -32,9 +32,9 @@ namespace eval ::Disco:: {
     option add *Disco.padding               4               50
     
     # Specials.
+    option add *Disco.backgroundImage       exec            widgetDefault
     option add *Disco.waveImage             wave            widgetDefault
-    option add *Disco.fontStyleMixed        0               widgetDefault
-    
+    option add *Disco.fontStyleMixed        0               widgetDefault    
     
     # Used for discoing ourselves using a node hierarchy.
     variable debugNodes 0
@@ -670,6 +670,7 @@ proc ::Disco::Build {w} {
     set wwave   $w.wa
 
     # D = -padx 0 -pady 0
+    set bgImage   [::Theme::GetImage [option get $w backgroundImage {}]]
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
     ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
       -type image -image $waveImage
@@ -685,6 +686,7 @@ proc ::Disco::Build {w} {
       [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -row 0 -column 1 -sticky ns]]  \
+      -backgroundimage ""                       \
       -selectcommand [namespace current]::SelectCmd    \
       -closecommand [namespace current]::CloseTreeCmd  \
       -opencommand [namespace current]::OpenTreeCmd   \
