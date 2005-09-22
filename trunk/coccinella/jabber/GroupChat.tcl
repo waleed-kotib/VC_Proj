@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.114 2005-09-22 06:49:11 matben Exp $
+# $Id: GroupChat.tcl,v 1.115 2005-09-22 13:41:43 matben Exp $
 
 package require History
 
@@ -117,23 +117,13 @@ namespace eval ::GroupChat:: {
 
     variable popMenuDefs
     set popMenuDefs(groupchat,def) {
-	mMessage       user      {::NewMsg::Build -to $jid}
-	mChat          user      {::Chat::StartThread $jid}
-	mSendFile      user      {::OOB::BuildSet $jid}
-	mUserInfo      user      {::UserInfo::Get $jid}
-	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
-    }    
-    
-    if {1} {
-	set popMenuDefs(groupchat,def) {
-	    command   mMessage       user      {::NewMsg::Build -to $jid}   {}
-	    command   mChat          user      {::Chat::StartThread $jid}   {}
-	    command   mSendFile      user      {::FTrans::Send $jid}        {}
-	    command   mUserInfo      user      {::UserInfo::Get $jid}       {}
-	    command   mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid} {}
-	    check     mIgnore        user      {::GroupChat::Ignore $token $jid}   {
-		-variable $token\(ignore,$jid)
-	    }
+	command   mMessage       user      {::NewMsg::Build -to $jid}   {}
+	command   mChat          user      {::Chat::StartThread $jid}   {}
+	command   mSendFile      user      {::FTrans::Send $jid}        {}
+	command   mUserInfo      user      {::UserInfo::Get $jid}       {}
+	command   mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid} {}
+	check     mIgnore        user      {::GroupChat::Ignore $token $jid} {
+	    -variable $token\(ignore,$jid)
 	}    
     }
     

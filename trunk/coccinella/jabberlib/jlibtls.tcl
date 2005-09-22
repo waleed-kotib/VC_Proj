@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.5 2005-02-16 14:26:46 matben Exp $
+# $Id: jlibtls.tcl,v 1.6 2005-09-22 13:41:43 matben Exp $
 
 package require tls
 
@@ -113,7 +113,7 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
 
     # The tls package resets the encoding to: -encoding binary
     fconfigure $sock -encoding utf-8
-    eval $lib(transportsend) {$xml}
+    jlib::sendraw $jlibname $xml
 
     # Must be careful so this is not triggered by a reset or something...
     trace add variable ${jlibname}::locals(features) write \

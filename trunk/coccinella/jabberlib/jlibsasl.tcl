@@ -6,20 +6,10 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.15 2005-08-14 07:13:18 matben Exp $
+# $Id: jlibsasl.tcl,v 1.16 2005-09-22 13:41:43 matben Exp $
 
-# We need to be flexible here since can have cyrus based sasl or our 
-# own special pure tcl saslmd5.
-
-if {0 && ![catch {package require sasl 1.0}]} {
-    set ::_saslpack cyrussasl
-} elseif {0 && ![catch {package require saslclient 1.1}]} {
-    set ::_saslpack cyrussasl
-} elseif {![catch {package require saslmd5}]} {
-    set ::_saslpack saslmd5
-} else {
-    return -code error "no sasl package found"
-}
+package require saslmd5
+set ::_saslpack saslmd5
 
 package provide jlibsasl 1.0
 
@@ -379,7 +369,7 @@ proc jlib::sasl_success {jlibname tag xmllist} {
       xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppxmlns(stream)'\
       to='$locals(server)' xml:lang='[getlang]' version='1.0'>"
 
-    eval $lib(transportsend) {$xml}
+    jlib::sendraw $jlibname $xml
     
     # Must be careful so this is not triggered by a reset or something...
     trace add variable ${jlibname}::locals(features) write \

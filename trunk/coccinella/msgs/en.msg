@@ -339,6 +339,7 @@
 ::msgcat::mcset en mShow         	{Show}
 ::msgcat::mcset en mOffline         	{Offline}
 ::msgcat::mcset en mTransports         	{Transports}
+::msgcat::mcset en mIgnore         	{Ignore}
 
 
 # Short texts only. Use english text as database key.
