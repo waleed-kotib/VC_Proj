@@ -12,6 +12,7 @@ Coccinella-0.95.10 (0509??):
 	- new icons from Everaldo
 	- file transfer using si/bytestreams/ibb/file-transfer protocol
 	- notification using bouncing dock icon on MacOSX
+	- ignore menu option in groupchat
 
 Coccinella-0.95.9 (050821):
 

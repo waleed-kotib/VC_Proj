@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.3 2005-09-20 14:09:51 matben Exp $
+# $Id: FTrans.tcl,v 1.4 2005-09-22 06:49:11 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -59,6 +59,7 @@ snit::widget ::FTrans::SendDialog {
     variable description ""
     variable sendButton
     variable status      ""
+    variable afterid     ""
 
     option -command      -default ::FTrans::Nop
     option -geovariable
@@ -156,7 +157,7 @@ snit::widget ::FTrans::SendDialog {
 
 	bind $win <Return> [list $self OK]
 	bind $win <Escape> [list $self Destroy]
-	after idle [list $self WrapLength]
+	set afterid [after idle [list $self WrapLength]]
 	
 	if {$havednd} {
 	    $self InitDnD $frm.efile
@@ -165,12 +166,16 @@ snit::widget ::FTrans::SendDialog {
     }
     
     destructor {
+	if {$afterid ne ""} {
+	    after cancel $afterid
+	}
 	if {[string length $options(-geovariable)]} {
 	    ui::SaveGeometry $win $options(-geovariable)
 	}
     }
     
     method WrapLength {} {
+	set afterid ""
 	update idletasks
 	set pad  [$win.f.f cget -padding]
 	set padx [expr {[lindex $pad 0] + [lindex $pad 2]}]

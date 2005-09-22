@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.113 2005-09-21 09:53:23 matben Exp $
+# $Id: GroupChat.tcl,v 1.114 2005-09-22 06:49:11 matben Exp $
 
 package require History
 
@@ -48,6 +48,7 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*printImage           print            widgetDefault
     option add *GroupChat*printDisImage        printDis         widgetDefault
 
+    # Text displays.
     option add *GroupChat*mePreForeground      red              widgetDefault
     option add *GroupChat*mePreBackground      ""               widgetDefault
     option add *GroupChat*mePreFont            ""               widgetDefault                                     
@@ -71,6 +72,7 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*userForeground       ""               widgetDefault
     option add *GroupChat*userBackground       ""               widgetDefault
     option add *GroupChat*userFont             ""               widgetDefault
+    option add *GroupChat*userIgnore           red              widgetDefault
     
     option add *GroupChat*Tree.background      white            50
 
@@ -99,9 +101,8 @@ namespace eval ::GroupChat:: {
     option add *GroupChat.padding              {12  0 12  0}   50
     option add *GroupChat*active.padding       {1}             50
     option add *GroupChat*TMenubutton.padding  {1}             50
-    option add *GroupChat*top.padding          {0   0 0   8}   50
+    option add *GroupChat*top.padding          { 0  0  0  8}   50
     option add *GroupChat*bot.padding          { 0  8  0  0}   50
-
     
     # Local stuff
     variable enteruid 0
@@ -123,14 +124,16 @@ namespace eval ::GroupChat:: {
 	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
     }    
     
-    if {0} {
+    if {1} {
 	set popMenuDefs(groupchat,def) {
 	    command   mMessage       user      {::NewMsg::Build -to $jid}   {}
 	    command   mChat          user      {::Chat::StartThread $jid}   {}
-	    command   mSendFile      user      {::OOB::BuildSet $jid}       {}
+	    command   mSendFile      user      {::FTrans::Send $jid}        {}
 	    command   mUserInfo      user      {::UserInfo::Get $jid}       {}
 	    command   mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid} {}
-	    check     mIgnore        user      {::GroupChat::Ignore $jid}   {}
+	    check     mIgnore        user      {::GroupChat::Ignore $token $jid}   {
+		-variable $token\(ignore,$jid)
+	    }
 	}    
     }
     
@@ -649,10 +652,14 @@ proc ::GroupChat::GotMsg {body args} {
     variable $token
     upvar 0 $token state
     
+    # We may get a history from users not in the room anymore.
+    if {[info exists state(ignore,$from)] && $state(ignore,$from)} {
+	return
+    }
     if {[info exists argsArr(-subject)]} {
 	set state(subject) $argsArr(-subject)
     }
-    if {[string length $body] > 0} {
+    if {[string length $body]} {
 
 	# And put message in window.
 	eval {InsertMessage $token $from $body} $args
@@ -703,6 +710,7 @@ proc ::GroupChat::Build {roomjid args} {
     set state(status)           "available"
     set state(oldStatus)        "available"
     set state(got1stmsg)        0
+    set state(ignore,$roomjid)  0
     if {$jprefs(chatActiveRet)} {
 	set state(active) 1
     } else {
@@ -715,7 +723,6 @@ proc ::GroupChat::Build {roomjid args} {
       -closecommand ::GroupChat::CloseHook
     
     # Not sure how old-style groupchat works here???
-    #set roomName [$jstate(browse) getname $roomjid]
     set roomName [$jstate(jlib) service name $roomjid]
     
     if {[llength $roomName]} {
@@ -900,15 +907,16 @@ proc ::GroupChat::Build {roomjid args} {
     
     # Users list.
     frame $wfrusers
+    set popupCmd [list [namespace current]::Popup $token]
     tuscrollbar $wyscusers -orient vertical -command [list $wusers yview]
     ::tree::tree $wusers -width 120 -height 100 -silent 1 -scrollwidth 400 \
       -treecolor "" -styleicons "" -indention 0 -pyjamascolor "" -xmargin 2 \
       -yscrollcommand [list ::UI::ScrollSet $wyscusers \
       [list grid $wyscusers -row 0 -column 1 -sticky ns]] \
-      -eventlist [list [list <<ButtonPopup>> [namespace current]::Popup]]
+      -eventlist [list [list <<ButtonPopup>> $popupCmd]]
 
     if {[string match "mac*" $this(platform)]} {
-	$wusers configure -buttonpresscommand [namespace current]::Popup
+	$wusers configure -buttonpresscommand $popupCmd
     }
 
     grid  $wusers     -column 0 -row 0 -sticky news
@@ -1407,7 +1415,7 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
 
     # If we haven't a window for this thread, make one!
     set token [GetTokenFrom roomjid $roomjid]
-    if {$token == ""} {
+    if {$token eq ""} {
 	set token [eval {Build $roomjid} $args]
     }       
     variable $token
@@ -1419,7 +1427,7 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
     jlib::splitjid $jid3 jid2 resource
     
     # If we got a browse push with a <user>, assume is available.
-    if {$presence == ""} {
+    if {$presence eq ""} {
 	set presence available
     }
     
@@ -1432,18 +1440,17 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
 	set showStatus "subnone"
     }
     
-    # Remove any "old" line first. Image takes one character's space.
     set wusers $state(wusers)
     
     # Old-style groupchat and browser compatibility layer.
     set nick [$jstate(jlib) service nick $jid3]
     set icon [eval {::Roster::GetPresenceIcon $jid3 $presence} $args]
-        
+            
     # Cover both a "flat" users list and muc's with the roles 
     # moderator, participant, and visitor.
     set role [GetRoleFromJid $jid3]
-    if {$role == ""} {
-	$wusers newitem $jid3 -text $nick -image $icon -tags [list $jid3]
+    if {$role eq ""} {
+	set v $jid3
     } else {
 	if {![$wusers isitem $role]} {
 	    $wusers newitem $role -text $userRoleToStr($role) -dir 1 \
@@ -1452,8 +1459,13 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
 		$wusers raiseitem $role
 	    }
 	}
-	$wusers newitem [list $role $jid3] -text $nick -image $icon  \
-	  -tags [list $jid3]
+	set v [list $role $jid3]
+    }
+    if {[$wusers isitem $v]} {
+	$wusers itemconfigure $v -text $nick -image $icon
+    } else {
+	set state(ignore,$jid3) 0
+	$wusers newitem $v -text $nick -image $icon -tags [list $jid3]
     }
 }
 
@@ -1494,29 +1506,6 @@ proc ::GroupChat::RegisterPopupEntry {menuSpec} {
     set popMenuDefs(groupchat,def) [concat $popMenuDefs(groupchat,def) $menuSpec]
 }
 
-proc ::GroupChat::PopupTimer {token jid3 x y} {
-    variable $token
-    upvar 0 $token state
-    upvar ::Jabber::jstate jstate
-
-    ::Debug 2 "::GroupChat::PopupTimer jid3=$jid3"
-
-    # Set timer for this callback.
-    if {[info exists state(afterid)]} {
-	catch {after cancel $state(afterid)}
-    }
-    set w $state(wusers)
-    set state(afterid) [after 1000  \
-      [list [namespace current]::Popup $w $jid3 $x $y]]
-}
-
-proc ::GroupChat::PopupTimerCancel {token} {
-    variable $token
-    upvar 0 $token state
-
-    catch {after cancel $state(afterid)}
-}
-
 # GroupChat::Popup --
 #
 #       Handle popup menu in groupchat dialog.
@@ -1528,7 +1517,7 @@ proc ::GroupChat::PopupTimerCancel {token} {
 # Results:
 #       popup menu displayed
 
-proc ::GroupChat::Popup {w v x y} {
+proc ::GroupChat::Popup {token w v x y} {
     global  wDlgs this
     
     variable popMenuDefs
@@ -1539,22 +1528,19 @@ proc ::GroupChat::Popup {w v x y} {
     # The last element of $v is either a jid, (a namespace,) 
     # a header in roster, a group, or an agents xml tag.
     # The variables name 'jid' is a misnomer.
-    # Find also type of thing clicked, 'typeClicked'.
+    # Find also type of thing clicked, 'clicked'.
     
-    set typeClicked ""
+    set clicked ""
     
     set jid [lindex $v end]
     set jid3 $jid
     if {[regexp {^[^@]+@[^@]+(/.*)?$} $jid match res]} {
-	set typeClicked user
+	set clicked user
     }
     if {$jid == ""} {
-	set typeClicked ""	
-    }
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
-    
-    ::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
+	set clicked ""	
+    }    
+    ::Debug 2 "\t jid=$jid, clicked=$clicked"
     
     # Mads Linden's workaround for menu post problem on mac:
     # all in menubutton commands i add "after 40 the_command"
@@ -1573,58 +1559,90 @@ proc ::GroupChat::Popup {w v x y} {
     catch {destroy $m}
     menu $m -tearoff 0
     
-    foreach {item type cmd} $popMenuDefs(groupchat,def) {
-	if {[string index $cmd 0] == "@"} {
-	    set mt [menu ${m}.sub${i} -tearoff 0]
-	    set locname [mc $item]
-	    $m add cascade -label $locname -menu $mt -state disabled
-	    eval [string range $cmd 1 end] $mt
-	    incr i
-	} elseif {[string equal $item "separator"]} {
-	    $m add separator
-	    continue
-	} else {
-	    
-	    # Substitute the jid arguments. Preserve list structure!
-	    set cmd [eval list $cmd]
-	    set locname [mc $item]
-	    $m add command -label $locname -command [list after 40 $cmd]  \
-	      -state disabled
-	}
-	
-	# If a menu should be enabled even if not connected do it here.
-	
-	if {![::Jabber::IsConnected]} {
-	    continue
-	}
-	if {[string equal $type "any"]} {
-	    $m entryconfigure $locname -state normal
-	    continue
-	}
-	
-	# State of menu entry. We use the 'type' and 'typeClicked' to sort
-	# out which capabilities to offer for the clicked item.
-	set state disabled
-	
-	# We skip whiteboarding here since does not know if Coccinella.
-	if {($type == "user") && ($typeClicked == "user")} {
-	    set state normal
-	}
-	if {[string equal $state "normal"]} {
-	    $m entryconfigure $locname -state normal
-	}
-    }   
+    BuildMenu $token $m $popMenuDefs(groupchat,def) $jid3 $clicked
     
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
     
     # Post popup menu.
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
+}
+
+proc ::GroupChat::BuildMenu {token m menuDef jid3 clicked} {
     
-    # Mac bug... (else can't post menu while already posted if toplevel...)
-    if {[string equal "macintosh" $this(platform)]} {
-	catch {destroy $m}
-	update
+    set jid $jid3
+    set i 0
+
+    foreach {op item type cmd opts} $menuDef {	
+	set locname [mc $item]
+	set opts [subst $opts]
+	puts "$op $item $type $opts"
+
+	switch -- $op {
+	    command {
+    
+		# Substitute the jid arguments. Preserve list structure!
+		set cmd [eval list $cmd]
+		eval {$m add command -label $locname -command [list after 40 $cmd]  \
+		  -state disabled} $opts
+	    }
+	    radio {
+		set cmd [eval list $cmd]
+		eval {$m add radiobutton -label $locname -command [list after 40 $cmd]  \
+		  -state disabled} $opts
+	    }
+	    check {
+		set cmd [eval list $cmd]
+		eval {$m add checkbutton -label $locname -command [list after 40 $cmd]  \
+		  -state disabled} $opts
+	    }
+	    separator {
+		$m add separator
+		continue
+	    }
+	    cascade {
+		set mt [menu $m.sub$i -tearoff 0]
+		eval {$m add cascade -label $locname -menu $mt -state disabled} $opts
+		BuildMenu $mt $cmd $jid3 $clicked $status $group
+		incr i
+	    }
+	}
+	if {![::Jabber::IsConnected] && ([lsearch $type always] < 0)} {
+	    continue
+	}
+	
+	# State of menu entry. 
+	# We use the 'type' and 'clicked' lists to set the state.
+	if {[listintersectnonempty $type $clicked]} {
+	    set state normal
+	} elseif {$type eq ""} {
+	    set state normal
+	} else {
+	    set state disabled
+	}
+	if {[string equal $state "normal"]} {
+	    $m entryconfigure $locname -state normal
+	}
+    }
+}
+
+proc ::GroupChat::Ignore {token jid3} {
+    variable $token
+    upvar 0 $token state
+    
+    if {$state(ignore,$jid3)} {
+	set fg [option get $state(w) userIgnore {}]
+    } else {
+	set fg [option get $state(w) userForeground {}]
+    }
+    puts "::GroupChat::Ignore jid3=$jid3, fg=$fg"
+    set wusers $state(wusers)
+    set items [$wusers find withtag $jid3]
+    puts "wusers=$wusers, items=$items"
+    foreach item $items {
+	$wusers itemconfigure $item -foreground $fg
     }
 }
 
@@ -1645,6 +1663,7 @@ proc ::GroupChat::RemoveUser {roomjid jid3} {
     foreach item $items {
 	$wusers delitem $item
     }
+    unset -nocomplain state(ignore,$jid3)
 }
 
 proc ::GroupChat::BuildHistory {token} {
