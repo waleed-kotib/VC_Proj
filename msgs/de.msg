@@ -343,6 +343,7 @@
 ::msgcat::mcset de mLoginTrpt     	{Beim Transport anmelden}
 ::msgcat::mcset de mLogoutTrpt     	{Beim Transport abmelden}
 ::msgcat::mcset de mRemoveContact  	{Kontakt entfernen...}
+#::msgcat::mcset de mIgnore         	{Ignore}
 
 
 

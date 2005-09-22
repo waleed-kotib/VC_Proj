@@ -341,6 +341,7 @@
 ::msgcat::mcset pl mShow		Pokaż
 ::msgcat::mcset pl mOffline		Nieobecny
 ::msgcat::mcset pl mTransports		Transporty
+#::msgcat::mcset pl mIgnore         	{Ignore}
 
 
 # Short texts only. Use english text as database key.

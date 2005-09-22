@@ -342,6 +342,7 @@
 ::msgcat::mcset fr mShow 		{Montrer}
 ::msgcat::mcset fr mOffline		{Déconnecté}
 ::msgcat::mcset fr mTransports		{Transports}
+#::msgcat::mcset fr mIgnore         	{Ignore}
 
 
 

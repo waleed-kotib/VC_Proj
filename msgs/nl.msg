@@ -343,6 +343,7 @@
 ::msgcat::mcset nl mShow		{Laten zien}
 ::msgcat::mcset nl mOffline		{Offline contactpersonen}
 ::msgcat::mcset nl mTransports		{Transporten}
+#::msgcat::mcset nl mIgnore         	{Ignore}
 
 
 

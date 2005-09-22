@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.66 2005-09-22 06:49:11 matben Exp $
+# $Id: Disco.tcl,v 1.67 2005-09-22 13:41:43 matben Exp $
 
 package require jlib::disco
 
@@ -32,7 +32,7 @@ namespace eval ::Disco:: {
     option add *Disco.padding               4               50
     
     # Specials.
-    option add *Disco.backgroundImage       exec            widgetDefault
+    option add *Disco.backgroundImage       cociexec        widgetDefault
     option add *Disco.waveImage             wave            widgetDefault
     option add *Disco.fontStyleMixed        0               widgetDefault    
     
@@ -686,7 +686,7 @@ proc ::Disco::Build {w} {
       [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -row 0 -column 1 -sticky ns]]  \
-      -backgroundimage ""                       \
+      -backgroundimage $bgImage                       \
       -selectcommand [namespace current]::SelectCmd    \
       -closecommand [namespace current]::CloseTreeCmd  \
       -opencommand [namespace current]::OpenTreeCmd   \

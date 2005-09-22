@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.13 2005-08-14 07:10:51 matben Exp $
+# $Id: Rosticons.tcl,v 1.14 2005-09-22 13:41:43 matben Exp $
 
 package provide Rosticons 1.0
 
@@ -124,7 +124,8 @@ proc ::Rosticons::Get {statuskey} {
     
     #::Debug 4 "::Rosticons::Get-------statuskey=$statuskey"
     
-    foreach {type sub} [split $statuskey /] break
+    set statuskey [string tolower $statuskey]
+    lassign [split $statuskey /] type sub
     set sub [string map {available online unavailable offline} $sub]
     set suborig $sub
     

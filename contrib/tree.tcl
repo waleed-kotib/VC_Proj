@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.52 2005-09-19 06:37:20 matben Exp $
+# $Id: tree.tcl,v 1.53 2005-09-22 13:41:42 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -740,7 +740,7 @@ proc ::tree::ConfigureCallback {w} {
     upvar ::tree::${w}::options options
     
     if {[string length $options(-backgroundimage)] > 0} {
-	::tree::DrawBackgroundImage $w
+	DrawBackgroundImage $w
     }
 }
 
@@ -1706,13 +1706,6 @@ proc ::tree::Build {w} {
 
     $can delete all
     
-    if {[string length $options(-backgroundimage)] > 0} {
-	DrawBackgroundImage $w
-    } else {
-	
-	# Just a dummy tag for the display list.
-	$can create line 0 0 1 0 -fill $options(-background) -tags {tbgim ticon}
-    }
     unset -nocomplain state(pending)
     array unset state v:*
     
@@ -1740,6 +1733,15 @@ proc ::tree::Build {w} {
 	set wbbox $options(-width)
     }
     $can configure -scrollregion [concat 0 0 $wbbox $hbbox]
+
+    # We need to know the scrollregion befor drawing background image.
+    if {[string length $options(-backgroundimage)] > 0} {
+	DrawBackgroundImage $w
+    } else {	
+	# Just a dummy tag for the display list.
+	$can create line 0 0 1 0 -fill $options(-background) -tags {tbgim ticon}
+    }
+
     DrawSelection $w
 }
 
@@ -1752,20 +1754,26 @@ proc ::tree::DrawBackgroundImage {w} {
     upvar ::tree::${w}::options options
     upvar ::tree::${w}::widgets widgets
 
-    set can $widgets(canvas)    
-    set imwidth  [image width $options(-backgroundimage)]
-    set imheight [image height $options(-backgroundimage)]
-    set wwidth   [winfo width $can]
-    set wheight  [winfo height $can]
-    set cwidth $options(-scrollwidth)
-    set cheight $options(-height)
-    set cwidth  [expr {$wwidth > $cwidth} ? $wwidth : $cwidth]
-    set cheight [expr {$wheight > $cheight} ? $wheight : $cheight]
+    set can $widgets(canvas)
+    set im  $options(-backgroundimage)
+    set imW [image width $im]
+    set imH [image height $im]
+    set W   [winfo width $can]
+    set H   [winfo height $can]
+    set box [$can cget -scrollregion]
+    set sW  [lindex $box 2]
+    set sH  [lindex $box 3]
+    set W [expr {$W > $sW} ? $W : $sW]
+    set H [expr {$H > $sH} ? $H : $sH]
 
-    for {set x 0} {$x < $cwidth} {incr x $imwidth} {
-	for {set y 0} {$y < $cheight} {incr y $imheight} {
-	    $can create image $x $y -anchor nw  \
-	      -image $options(-backgroundimage) -tags tbgim
+    set cW $options(-scrollwidth)
+    set cH $options(-height)
+    set cW [expr {$W > $cW} ? $W : $cW]
+    set cH [expr {$H > $cH} ? $H : $cH]
+
+    for {set x 0} {$x < $cW} {incr x $imW} {
+	for {set y 0} {$y < $cH} {incr y $imH} {
+	    $can create image $x $y -anchor nw -image $im -tags tbgim
 	}
     }
     $can lower tbgim

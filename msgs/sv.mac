@@ -339,6 +339,7 @@
 ::msgcat::mcset sv mShow         	{Visa}
 ::msgcat::mcset sv mOffline         	{Ej tillgängliga}
 ::msgcat::mcset sv mTransports         	{Transporter}
+::msgcat::mcset sv mIgnore         	{Ignorera}
 
 
 

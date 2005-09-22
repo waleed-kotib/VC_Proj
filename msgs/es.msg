@@ -342,6 +342,7 @@
 ::msgcat::mcset es mLoginTrpt     	{Conectarse a un servidor de transporte}
 ::msgcat::mcset es mLogoutTrpt     	{Desconectarse de un servidor de transporte}
 ::msgcat::mcset es mRemoveContact  	{Borrar el contacto...}
+#::msgcat::mcset es mIgnore         	{Ignore}
 
 
 
