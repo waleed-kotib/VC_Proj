@@ -7,16 +7,16 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.65 2005-09-21 09:53:23 matben Exp $
+# $Id: MUC.tcl,v 1.66 2005-09-23 07:33:35 matben Exp $
 
+package require jlib::muc
 package require ui::entryex
-package require muc
 
 package provide MUC 1.0
 
 namespace eval ::MUC:: {
       
-    ::hooks::register jabberInitHook     ::MUC::Init
+    ::hooks::register jabberInitHook     ::MUC::JabberInitHook
     
     # Local stuff
     variable dlguid 0
@@ -79,12 +79,10 @@ namespace eval ::MUC:: {
 }
 
 
-proc ::MUC::Init {jlibName} {
+proc ::MUC::JabberInitHook {jlibName} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
    
-    set jstate(muc) [jlib::muc::new $jlibName]
-
     $jstate(jlib) message_register * $xmppxmlns(muc,user) ::MUC::MUCMessage
 }
 
@@ -453,14 +451,14 @@ proc ::MUC::DoEnter {token} {
     upvar 0 $token enter
     upvar ::Jabber::jstate jstate
     
-    if {($enter(roomname) == "") || ($enter(nickname) == "")} {
+    if {($enter(roomname) eq "") || ($enter(nickname) eq "")} {
 	::UI::MessageBox -type ok -icon error  \
 	  -message "We require that all fields are nonempty"
 	return
     }
     set roomJid [jlib::jidmap $enter(roomname)@$enter(server)]
     set opts {}
-    if {$enter(password) != ""} {
+    if {$enter(password) ne ""} {
 	lappend opts -password $enter(password)
     }
     
@@ -469,7 +467,7 @@ proc ::MUC::DoEnter {token} {
     set capsElem  [::Jabber::CreateCapsPresElement]
     lappend opts -extras [list $cocciElem $capsElem]
     
-    eval {$jstate(muc) enter $roomJid $enter(nickname) -command \
+    eval {$jstate(jlib) muc enter $roomJid $enter(nickname) -command \
       [list [namespace current]::EnterCallback $token]} $opts
     set enter(finished) 1
 }
@@ -481,14 +479,14 @@ proc ::MUC::DoEnter {token} {
 #       is needed for entering room.
 #
 # Arguments:
-#       mucname 
+#       jlibname 
 #       type    presence typ attribute, 'available' etc.
 #       args    -from, -id, -to, -x ...
 #       
 # Results:
 #       None.
 
-proc ::MUC::EnterCallback {token mucname type args} {
+proc ::MUC::EnterCallback {token jlibname type args} {
     variable $token
     upvar 0 $token enter
     
@@ -498,7 +496,7 @@ proc ::MUC::EnterCallback {token mucname type args} {
     jlib::splitjid $argsArr(-from) roomjid res
     set retry 0
     
-    if {$type == "error"} {
+    if {$type eq "error"} {
 	set errcode ???
 	set errmsg ""
 	if {[info exists argsArr(-error)]} {
@@ -513,7 +511,7 @@ proc ::MUC::EnterCallback {token mucname type args} {
 		      $errmsg Do you want to retry?"
 		    set ans [::UI::MessageBox -type yesno -icon error  \
 		      -message $msg]
-		    if {$ans == "yes"} {
+		    if {$ans eq "yes"} {
 			set retry 1
 			eval {BuildEnter} $enter(args)
 		    }
@@ -565,7 +563,7 @@ proc ::MUC::EnterRoom {roomjid nick args} {
 	    }
 	}
     }
-    eval {$jstate(muc) enter $roomjid $nick -command \
+    eval {$jstate(jlib) muc enter $roomjid $nick -command \
       [list [namespace current]::EnterCallback $token]} $opts
 }
 
@@ -710,10 +708,10 @@ proc ::MUC::DoInvite {token} {
     InviteCloseCmd $token $invite(w)
     
     set opts [list -command [list [namespace current]::InviteCB $token]]
-    if {$reason != ""} {
+    if {$reason ne ""} {
 	set opts [list -reason $reason]
     }
-    eval {$jstate(muc) invite $roomjid $jid} $opts
+    eval {$jstate(jlib) muc invite $roomjid $jid} $opts
     set invite(finished) 1
 }
 
@@ -723,7 +721,7 @@ proc ::MUC::InviteCB {token jlibname type args} {
     
     array set argsArr $args
     
-    if {$type == "error"} {
+    if {$type eq "error"} {
 	set msg "Invitation to $invite(jid) to join room $invite(roomjid) failed."
 	if {[info exists argsArr(-error)]} {
 	    set errcode [lindex $argsArr(-error) 0]
@@ -785,7 +783,7 @@ proc ::MUC::MUCMessage {jlibname xmlns msgElem args} {
 	append msg " Do you want to join right away?"
 	set ans [::UI::MessageBox -icon info -type yesno -title "Invitation" \
 	  -message $msg]
-	if {$ans == "yes"} {
+	if {$ans eq "yes"} {
 	    eval {BuildEnter -roomjid $from} $opts
 	}
     }
@@ -825,13 +823,13 @@ proc ::MUC::BuildInfo {roomjid} {
     set w $wDlgs(jmucinfo)[incr dlguid]
 
     set roomName [$jstate(jlib) service name $roomjid]
-    if {$roomName == ""} {
+    if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y
     }
 
     set locals($roomjid,w) $w
     set locals($w,roomjid) $roomjid
-    set locals($roomjid,mynick) [$jstate(muc) mynick $roomjid]
+    set locals($roomjid,mynick) [$jstate(jlib) muc mynick $roomjid]
     set locals($roomjid,myrole) none
     set locals($roomjid,myaff) none
 
@@ -1182,19 +1180,14 @@ proc ::MUC::GrantRevoke {roomjid which type} {
       ::UI::MegaDlgMsgAndEntry} [subst $dlgDefs($which,$type)] \
       {"Reason:" reason [mc Cancel] [mc OK]}]
     set opts {}
-    if {$reason != ""} {
+    if {$reason ne ""} {
 	set opts [list -reason $reason]
     }
 
-    if {$ans == "ok"} {
-	if {[catch {
-	    eval {$jstate(muc) $actionDefs($which,$type,cmd) $roomjid  \
-	      $nick $actionDefs($which,$type,what)  \
-	      -command [list [namespace current]::IQCallback $roomjid]} $opts
-	} err]} {
-	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
-	      -message "Network error ocurred: $err"
-	}
+    if {$ans eq "ok"} {
+	eval {$jstate(jlib) muc $actionDefs($which,$type,cmd) $roomjid  \
+	  $nick $actionDefs($which,$type,what)  \
+	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
 }
 
@@ -1218,18 +1211,13 @@ proc ::MUC::Kick {roomjid} {
       "Reason:"  \
       reason [mc Cancel] [mc OK]]
     set opts {}
-    if {$reason != ""} {
+    if {$reason ne ""} {
 	set opts [list -reason $reason]
     }
     
-    if {$ans == "ok"} {
-	if {[catch {
-	    eval {$jstate(muc) setrole $roomjid $nick "none" \
-	      -command [list [namespace current]::IQCallback $roomjid]} $opts
-	} err]} {
-	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
-	      -message "Network error ocurred: $err"
-	}
+    if {$ans eq "ok"} {
+	eval {$jstate(jlib) muc setrole $roomjid $nick "none" \
+	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
 }
 
@@ -1253,18 +1241,13 @@ proc ::MUC::Ban {roomjid} {
       "Reason:"  \
       reason [mc Cancel] [mc OK]]
     set opts {}
-    if {$reason != ""} {
+    if {$reason ne ""} {
 	set opts [list -reason $reason]
     }
     
-    if {$ans == "ok"} {
-	if {[catch {
-	    eval {$jstate(muc) setaffiliation $roomjid $nick "outcast" \
-	      -command [list [namespace current]::IQCallback $roomjid]} $opts
-	} err]} {
-	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
-	      -message "Network error ocurred: $err"
-	}
+    if {$ans eq "ok"} {
+	eval {$jstate(jlib) muc setaffiliation $roomjid $nick "outcast" \
+	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
 }
 
@@ -1323,7 +1306,7 @@ proc ::MUC::EditListBuild {roomjid type} {
     set titleType [string totitle $type]
     set tblwidth [expr 10 + 12 * [llength $setListDefs($type)]]
     set roomName [$jstate(jlib) service name $roomjid]
-    if {$roomName == ""} {
+    if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y
     }
     
@@ -1504,12 +1487,8 @@ proc ::MUC::EditListBuild {roomjid type} {
     # Now, go and get it!
     $wsearrows start
     set state(callid) [incr editcalluid]
-    if {[catch {
-	$jstate(muc) $getact $roomjid $what \
-	  [list [namespace current]::EditListGetCB $token $state(callid)]
-    } err]} {
-	$wsearrows stop
-    }      
+    $jstate(jlib) muc $getact $roomjid $what \
+      [list [namespace current]::EditListGetCB $token $state(callid)]
     
     # Wait here for a button press.
     tkwait variable $token\(finished)
@@ -1549,7 +1528,7 @@ proc ::MUC::EditListCancel {token} {
     set state(finished) 0
 }
 
-proc ::MUC::EditListGetCB {token callid mucname type subiq} {
+proc ::MUC::EditListGetCB {token callid jlibname type subiq} {
     variable $token
     upvar 0 $token state
 
@@ -1572,7 +1551,7 @@ proc ::MUC::EditListGetCB {token callid mucname type subiq} {
     }
     
     $wsearrows stop
-    if {$type == "error"} {
+    if {$type eq "error"} {
 	::UI::MessageBox -type ok -icon error -message $subiq
 	return
     }
@@ -1804,7 +1783,7 @@ proc ::MUC::EditListSet {token} {
 
     
     
-    eval {$jstate(muc) $setact $roomjid xxx \
+    eval {$jstate(jlib) muc $setact $roomjid xxx \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
 }
     
@@ -1871,13 +1850,8 @@ proc ::MUC::RoomConfig {roomjid} {
         
     # Now, go and get it!
     $wsearrows start
-    if {[catch {
-	$jstate(muc) getroom $roomjid  \
-	  [list [namespace current]::ConfigGetCB $roomjid]
-    }]} {
-	$wsearrows stop
-	::UI::MessageBox
-    }   
+    $jstate(jlib) muc getroom $roomjid  \
+      [list [namespace current]::ConfigGetCB $roomjid]
     
     # Grab and focus.
     set oldFocus [focus]
@@ -1907,11 +1881,11 @@ proc ::MUC::CancelConfig {roomjid w} {
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
 
-    catch {$jstate(muc) setroom $roomjid cancel}
+    $jstate(jlib) muc setroom $roomjid cancel
     destroy $w
 }
 
-proc ::MUC::ConfigGetCB {roomjid mucname type subiq} {
+proc ::MUC::ConfigGetCB {roomjid jlibname type subiq} {
     variable wscrollframe
     variable wsearrows
     variable wbtok
@@ -1919,13 +1893,14 @@ proc ::MUC::ConfigGetCB {roomjid mucname type subiq} {
     variable formtoken
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
-
-    puts "::MUC::ConfigGetCB---------------"
-    puts $subiq
     
+    if {![winfo exists $wsearrows]} {
+	return
+    }
     $wsearrows stop
     
     if {$type eq "error"} {
+	destroy [winfo toplevel $wscrollframe]
 	lassign $subiq errcode errmsg
 	::UI::MessageBox -icon error -type ok -title [mc Error] -message $errmsg
     } else {
@@ -1946,20 +1921,14 @@ proc ::MUC::DoRoomConfig {roomjid w} {
 
     set subelements [::JForms::GetXML $formtoken]
     
-    if {[catch {
-	$jstate(muc) setroom $roomjid submit -form $subelements \
-	  -command [list [namespace current]::RoomConfigResult $roomjid]
-    }]} {
-	::UI::MessageBox -type ok -icon error -title "Network Error" \
-	  -message "Network error ocurred: $err"
-	return
-    }
+    $jstate(jlib) muc setroom $roomjid submit -form $subelements \
+      -command [list [namespace current]::RoomConfigResult $roomjid]
     destroy $w
 }
 
-proc ::MUC::RoomConfigResult {roomjid mucname type subiq} {
+proc ::MUC::RoomConfigResult {roomjid jlibname type subiq} {
 
-    if {$type == "error"} {
+    if {$type eq "error"} {
 	regexp {^([^@]+)@.*} $roomjid match roomName
 	::UI::MessageBox -type ok -icon error  \
 	  -message "We failed trying to configurate room \"$roomName\".\
@@ -1986,14 +1955,9 @@ proc ::MUC::SetNick {roomjid} {
     puts "ans=$ans, nickname=$nickname"
     
     # Perhaps check that characters are valid?
-    if {($ans == "ok") && ($nickname != "")} {
-	if {[catch {
-	    $jstate(muc) setnick $roomjid $nickname \
-	      -command [list [namespace current]::PresCallback $roomjid]
-	} err]} {
-	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
-	      -message "Network error ocurred: $err"
-	}
+    if {($ans eq "ok") && ($nickname ne "")} {
+	$jstate(jlib) muc setnick $roomjid $nickname \
+	  -command [list [namespace current]::PresCallback $roomjid]
     }
     return $ans
 }
@@ -2017,7 +1981,7 @@ proc ::MUC::Destroy {roomjid} {
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::MUC::DestroyCloseCmd
     set roomName [$jstate(jlib) service name $roomjid]
-    if {$roomName == ""} {
+    if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y
     }
     wm title $w "Destroy Room: $roomName"
@@ -2086,15 +2050,15 @@ proc ::MUC::Destroy {roomjid} {
     catch {focus $oldFocus}
 
     set opts {}
-    if {$destroyreason != ""} {
+    if {$destroyreason ne ""} {
 	set opts [list -reason $destroyreason]
     }
-    if {$destroyjid != ""} {
+    if {$destroyjid ne ""} {
 	set opts [list -alternativejid $destroyjid]
     }
 
     if {$findestroy > 0} {
-	eval {$jstate(muc) destroy $roomjid  \
+	eval {$jstate(jlib) muc destroy $roomjid  \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
     return [expr {($findestroy <= 0) ? "cancel" : "ok"}]
@@ -2112,9 +2076,9 @@ proc ::MUC::DestroyCloseCmd {wclose} {
 # 
 #       Generic callbacks when setting things via <iq/> or <presence/>
 
-proc ::MUC::IQCallback {roomjid mucname type subiq} {
+proc ::MUC::IQCallback {roomjid jlibname type subiq} {
     
-    if {$type == "error"} {
+    if {$type eq "error"} {
     	regexp {^([^@]+)@.*} $roomjid match roomName
     	set msg "We received an error when interaction with the room\
     	\"$roomName\": $subiq"
@@ -2123,9 +2087,9 @@ proc ::MUC::IQCallback {roomjid mucname type subiq} {
 }
 
 
-proc ::MUC::PresCallback {roomjid mucname type args} {
+proc ::MUC::PresCallback {roomjid jlibname type args} {
     
-    if {$type == "error"} {
+    if {$type eq "error"} {
     	set errcode ???
     	set errmsg ""
     	if {[info exists argsArr(-error)]} {

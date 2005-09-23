@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.109 2005-09-22 13:41:43 matben Exp $
+# $Id: jabberlib.tcl,v 1.110 2005-09-23 07:33:35 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -150,53 +150,12 @@
 #   the what equal to the last namespace specifier.
 #   'args' is a list of '-key value' pairs.
 #      
-############################# CHANGES ##########################################
-#
-#       0.*      by Kerem HADIMLI and Todd Bradley
-#       1.0a1    complete rewrite, and first release by Mats Bengtsson
-#       1.0a2    minor additions and fixes
-#       1.0a3    added vCard, '-cmd' to 'connect', private_get/set
-#       1.0b1    few bugfixes, added browse_get, agent_get
-#       1.0b2    type attribute in send_message wrong
-#       1.0b3    added support for conferencing, many rewrites
-#       1.0b4    added time, last, version
-#       1.0b5    added better error catching
-#       1.0b6    added config and auto away support
-#       1.0b7    fixed bug in send_message for x elements
-#       1.0b8    fixed bug in send_iq if xmldata empty
-#	1.0b9    added configurable transport layer, incompatible change
-#		     of 'connect' command
-#                placed debug printouts in one proc; access function for debug
-#                added caching of agent(s) stuff
-#                added a 'service' subcommand
-#                added the old groupchat interface
-#                added a 'conference' subcommand, removed conf_* methods
-#                added -streamnamespace option
-#                completely reworked client callback structure
-#                'register_remove' is now an iq-set command, new 'to' argument
-#       1.0b10   fixed a number of problems with groupchat-conference compatibility,
-#                added presence callback
-#       1.0b11   changed 'browse_get' command 
-#                added 'mystatus' command, added 'setgroupchatpriority',
-#                'setgroupchatprotocol' and reworked all groupchat protocol
-#                dispatching.
-#       030523   added 'getagent' and 'haveagent' commands.
-#       030611   added 'setroomprotocol' command and modified service dispatching
-#       030705   jlib::new generates self token
-#       030726   made browse object optional, jlib::new api changed!
-#       031022   added iq_get and iq_set methods
-#       031101   added 'service gettransportjids' and 'gettype'
-#       031107   added 'getrecipientjid' command
-#       040111   new iq callback mechanism 'iq_register'
-#       
-#       04*      started with 2.0 version; 
-#                removed all browse stuff, added presence_register, muc as a
-#                standalone component, jlibname now always fully qualified,
-#                connect -> openstream, disconnect -> closestream
-#                
-#       050201  all network errors handled via client command (clientcmd)
-#               individual commands shall never throw network errors!
-#       050215  reworked autoaway; api changes!
+#   TODO:
+#      Rewrite from scratch and deliver complete iq, message, and presence
+#      elements to callbacks. Callbacks then get attributes like 'from' etc
+#      using accessor functions.
+#      
+#-------------------------------------------------------------------------------
 
 package require wrapper
 package require roster
@@ -361,9 +320,7 @@ proc jlib::new {rostername clientcmd args} {
     }
     
     # Verify options.
-    if {[catch {eval verify_options $jlibname $args} msg]} {
-	return -code error $msg
-    }
+    eval verify_options $jlibname $args
     
     if {!$statics(inited)} {
 	init
@@ -890,7 +847,7 @@ proc jlib::openstream {jlibname server args} {
 	  xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppxmlns(stream)'\
 	  xml:lang='[getlang]' to='$server'$optattr>"
 
-	uplevel #0 $lib(transport,send) [list $jlibname $xml]
+	sendraw $jlibname $xml
     } err]} {
 	
 	# The socket probably was never connected,
@@ -919,7 +876,7 @@ proc jlib::closestream {jlibname} {
     upvar ${jlibname}::lib lib
 
     set xml "</stream:stream>"
-    catch {uplevel #0 $lib(transport,send) [list $jlibname $xml]}
+    sendraw $jlibname $xml
     kill $jlibname
 }
 
@@ -1393,6 +1350,9 @@ proc jlib::presence_handler {jlibname xmldata} {
 	    
 	    switch -- $ctag {
 		status - priority - show {
+		    if {$ctag eq "show"} {
+			set cchdata [string tolower $cchdata]
+		    }
 		    lappend params $ctag $cchdata
 		    lappend arglist -$ctag $cchdata
 		}

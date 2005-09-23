@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.3 2005-09-21 09:53:23 matben Exp $
+# $Id: dialog.tcl,v 1.4 2005-09-23 07:33:35 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -200,6 +200,7 @@ snit::widget ui::dialog::widget {
     option -icon                      \
       -default info                   \
       -validatemethod ValidateIcon
+    option -badge       1
     
     typeconstructor {
 
@@ -252,7 +253,7 @@ snit::widget ui::dialog::widget {
 	set wraplength [$top.message cget -wraplength]
 	
 	set icon $options(-icon)
-	if {[info exists images($icon,badge)]} {
+	if {$options(-badge) && [info exists images($icon,badge)]} {
 	    set im $images($icon,badge)
 	} else {
 	    set im $images($icon)

@@ -6,7 +6,7 @@
 #       
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.19 2005-09-08 12:52:36 matben Exp $
+# $Id: service.tcl,v 1.20 2005-09-23 07:33:35 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -208,11 +208,6 @@ proc jlib::service::setgroupchatprotocol {jlibname jid prot} {
 	    }
 	}
 	muc {
-	    if {!$serv(browse)} {
-		# This must be changed when disco is coming...
-		return -code error \
-		  "there is no browse object associated with this jlib"
-	    }    
 	    if {![$serv(browse,name) hasnamespace $jid  \
 	      "http://jabber.org/protocol/muc"]} {
 		return -code error \
@@ -550,7 +545,7 @@ proc jlib::service::isroom {jlibname jid} {
 	set isroom [$jlibname disco isroom $jid]
     }
     if {!$isroom && $serv(muc)} {
-	set isroom [$serv(muc,name) isroom $jid]
+	set isroom [$jlibname muc isroom $jid]
     }
     if {!$isroom} {
 	set isroom [jlib::groupchat::isroom $jlibname $jid]
@@ -598,22 +593,16 @@ proc jlib::service::nick {jlibname jid} {
 	gc-1.0 {
 	    
 	    # Old-style groupchat just has /nick.
-	    if {[regexp {^[^@]+@[^@/]+/(.+)$} $jid match nick]} {
-		
-		# Else we just use the username. (If room for instance)
-	    } elseif {![regexp {^([^@]+)@[^@/]+$} $jid match nick]} {
-		set nick $jid
+	    # Else we just use the username. (If room for instance)
+	    jlib::splitjidex $jid node domain nick
+	    if {$nick eq ""} {
+		set nick $node
 	    }
 	}
 	muc {
 	    
 	    # The MUC conference method: nick is always the resource part. 
-	    # Rooms lack the */res.
-	    if {![regexp {^[^@]+@[^@/]+/(.+)$} $jid match nick]} {
-		if {![regexp {^([^@]+)@.+} $jid match nick]} {
-		    set nick $jid
-		}
-	    }
+	    jlib::splitjid $jid x nick
 	}	
 	conference {
 	    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
@@ -662,7 +651,7 @@ proc jlib::service::hashandnick {jlibname room} {
 	} 
 	muc {
 	    if {$serv(muc)} {
-		set nick [$serv(muc,name) mynick $room]
+		set nick [$jlibname muc mynick $room]
 		set hashandnick [list ${room}/${nick} $nick]   
 	    }
 	} 
@@ -691,7 +680,7 @@ proc jlib::service::allroomsin {jlibname} {
       [[namespace parent]::muc::allroomsin $jlibname] \
       [[namespace parent]::conference::allroomsin $jlibname]]
     if {$serv(muc)} {
-	set roomList [concat $roomList [$serv(muc,name) allroomsin]]
+	set roomList [concat $roomList [$jlibname muc allroomsin]]
     }
     return [lsort -unique $roomList]
 }
@@ -716,7 +705,7 @@ proc jlib::service::roomparticipants {jlibname room} {
 	    set everyone [[namespace parent]::groupchat::participants $jlibname $room]
 	} 
 	muc {
-	    set everyone [$serv(muc,name) participants $room]
+	    set everyone [$jlibname muc participants $room]
 	}
 	conference {
 	    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
@@ -744,7 +733,7 @@ proc jlib::service::exitroom {jlibname room} {
 	    [namespace parent]::groupchat::exit $jlibname $room
 	}
 	muc {
-	    $serv(muc,name) exit $room
+	    $jlibname muc exit $room
 	}
 	conference {
 	    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.124 2005-09-20 14:09:50 matben Exp $	
+# $Id: Coccinella.tcl,v 1.125 2005-09-23 07:33:35 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -189,8 +189,9 @@ set packages(generic) {
 set packages(uibase) {
     balloonhelp
     tablelist
-    Pane
     ttoolbar
+    ui::util
+    ui::dialog
 }
 set packages(application) {
     Dialogs
