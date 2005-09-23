@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.142 2005-09-19 06:37:21 matben Exp $
+# $Id: Jabber.tcl,v 1.143 2005-09-23 14:27:10 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -579,6 +579,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
     array set argsArr $args
     
     set from $argsArr(-from)
+    set body $argsArr(-body)
         
     switch -- $type {
 	error {
@@ -587,27 +588,26 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 	    # body element. In that case the body element shall not be processed.
 	    if {[info exists argsArr(-error)]} {
 		set errcode [lindex $argsArr(-error) 0]
-		set errmsg [lindex $argsArr(-error) 1]
-		
-		::UI::MessageBox -title [mc Error] \
-		  -message [mc jamesserrsend $argsArr(-from) $errcode $errmsg] \
+		set errmsg  [lindex $argsArr(-error) 1]		
+		ui::dialog [ui::autoname] -title [mc Error] \
+		  -message [mc jamesserrsend $from $errcode $errmsg] \
 		  -icon error -type ok		
 	    }
 	    eval {::hooks::run newErrorMessageHook} $args
 	}
 	chat {
-	    eval {::hooks::run newChatMessageHook $argsArr(-body)} $args
+	    eval {::hooks::run newChatMessageHook $body} $args
 	}
 	groupchat {
-	    eval {::hooks::run newGroupChatMessageHook $argsArr(-body)} $args
+	    eval {::hooks::run newGroupChatMessageHook $body} $args
 	}
 	headline {
-	    eval {::hooks::run newHeadlineMessageHook $argsArr(-body)} $args
+	    eval {::hooks::run newHeadlineMessageHook $body} $args
 	}
 	default {
 	    
 	    # Normal message. Handles whiteboard stuff as well.
-	    eval {::hooks::run newMessageHook $argsArr(-body)} $args
+	    eval {::hooks::run newMessageHook $body} $args
 	}
     }
 }
@@ -2050,12 +2050,8 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 		
 	# Make sure the new password is stored in our profiles.
 	set name [::Profiles::FindProfileNameFromJID $jstate(mejid)]
-	if {$name != ""} {
-	    set spec [::Profiles::GetProfile $name]
-	    if {[llength $spec] > 0} {
-		lset spec 2 $password
-		eval {::Profiles::Set {}} $spec
-	    }
+	if {$name ne ""} {
+	    ::Profiles::SetWithKey $name password $password
 	}
 	::UI::MessageBox -title [mc {New Password}] -icon info -type ok \
 	  -message [mc jamesspasswdok]

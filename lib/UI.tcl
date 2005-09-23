@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.98 2005-09-21 09:53:23 matben Exp $
+# $Id: UI.tcl,v 1.99 2005-09-23 14:27:10 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -29,6 +29,7 @@ namespace eval ::UI:: {
     option add *question64Image          question64     widgetDefault
 
     option add *badgeImage               Coccinella     widgetDefault
+    option add *applicationImage         coccinella64   widgetDefault
     
     variable wThatUseMainMenu {}
 
@@ -53,8 +54,9 @@ namespace eval ::UI:: {
 	set im [::Theme::GetImage [option get . ${name}64Image {}]]
 	ui::dialog::setimage $name $im
     }
-    set im [::Theme::GetImage [option get . badgeImage {}]]
-    ui::dialog::setbadge $im
+    ui::dialog::setbadge [::Theme::GetImage [option get . badgeImage {}]]
+    set im [::Theme::GetImage [option get . applicationImage {}]]
+    ui::dialog::setimage coccinella $im
 }
 
 proc ::UI::InitHook { } {

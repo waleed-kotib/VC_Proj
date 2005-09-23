@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.26 2005-09-23 07:33:35 matben Exp $
+# $Id: muc.tcl,v 1.27 2005-09-23 14:27:10 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -297,8 +297,6 @@ proc jlib::muc::setrole {jlibname roomjid nick role args} {
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
-		#lappend opts -command  \
-		 # [list [namespace current]::invoke_callback $mucname $value]
 		lappend opts -command [concat $value $jlibname]
 	    }
 	    -reason {
@@ -337,8 +335,6 @@ proc jlib::muc::setaffiliation {jlibname roomjid nick affiliation args} {
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
-		#lappend opts -command  \
-		#  [list [namespace current]::invoke_callback $mucname $value]
 		lappend opts -command [concat $value $jlibname]
 	    }
 	    -reason {
@@ -501,8 +497,6 @@ proc jlib::muc::setroom {jlibname roomjid type args} {
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
-		#lappend opts -command  \
-		#  [list [namespace current]::invoke_callback $mucname $value]
 		lappend opts -command [concat $value $jlibname]
 	    }
 	    -form {
@@ -543,8 +537,6 @@ proc jlib::muc::destroy {jlibname roomjid args} {
 	
 	switch -- $name {
 	    -command {
-		#lappend opts -command  \
-		 # [list [namespace current]::invoke_callback $mucname $value]
 		lappend opts -command [concat $value $jlibname]
 	    }
 	    -reason {
