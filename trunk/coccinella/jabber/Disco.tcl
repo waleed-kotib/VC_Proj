@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.67 2005-09-22 13:41:43 matben Exp $
+# $Id: Disco.tcl,v 1.68 2005-09-23 07:33:35 matben Exp $
 
 package require jlib::disco
 
@@ -122,8 +122,7 @@ namespace eval ::Disco:: {
 proc ::Disco::InitHook { } {
     upvar ::Jabber::jprefs jprefs
 
-    set jprefs(disco,tmpServers) {}
-    
+    set jprefs(disco,tmpServers) {}    
 }
 
 proc ::Disco::NewJlibHook {jlibName} {

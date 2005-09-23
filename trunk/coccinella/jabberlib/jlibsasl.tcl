@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.16 2005-09-22 13:41:43 matben Exp $
+# $Id: jlibsasl.tcl,v 1.17 2005-09-23 07:33:35 matben Exp $
 
 package require saslmd5
 set ::_saslpack saslmd5
@@ -369,7 +369,7 @@ proc jlib::sasl_success {jlibname tag xmllist} {
       xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppxmlns(stream)'\
       to='$locals(server)' xml:lang='[getlang]' version='1.0'>"
 
-    jlib::sendraw $jlibname $xml
+    sendraw $jlibname $xml
     
     # Must be careful so this is not triggered by a reset or something...
     trace add variable ${jlibname}::locals(features) write \

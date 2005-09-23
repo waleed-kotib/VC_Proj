@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.25 2005-09-08 12:52:36 matben Exp $
+# $Id: muc.tcl,v 1.26 2005-09-23 07:33:35 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -20,58 +20,61 @@
 #	see below for instance command options
 #	
 #   INSTANCE COMMANDS
-#      mucName allroomsin
-#      mucName create roomjid nick callback ?-extras?
-#      mucName destroy roomjid ?-command, -reason, alternativejid?
-#      mucName enter roomjid nick ?-command, -extras, -password?
-#      mucName exit roomjid
-#      mucName getaffiliation roomjid affiliation callback
-#      mucName getrole roomjid role callback
-#      mucName getroom roomjid callback
-#      mucName invite roomjid jid ?-reason?
-#      mucName isroom jid
-#      mucName mynick roomjid
-#      mucName participants roomjid
-#      mucName setaffiliation roomjid nick affiliation ?-command, -reason?
-#      mucName setnick roomjid nick ?-command?
-#      mucName setrole roomjid nick role ?-command, -reason?
-#      mucName setroom roomjid type ?-command, -form?
+#      jlibname muc allroomsin
+#      jlibname muc create roomjid nick callback ?-extras?
+#      jlibname muc destroy roomjid ?-command, -reason, alternativejid?
+#      jlibname muc enter roomjid nick ?-command, -extras, -password?
+#      jlibname muc exit roomjid
+#      jlibname muc getaffiliation roomjid affiliation callback
+#      jlibname muc getrole roomjid role callback
+#      jlibname muc getroom roomjid callback
+#      jlibname muc invite roomjid jid ?-reason?
+#      jlibname muc isroom jid
+#      jlibname muc mynick roomjid
+#      jlibname muc participants roomjid
+#      jlibname muc setaffiliation roomjid nick affiliation ?-command, -reason?
+#      jlibname muc setnick roomjid nick ?-command?
+#      jlibname muc setrole roomjid nick role ?-command, -reason?
+#      jlibname muc setroom roomjid type ?-command, -form?
 #      
 ############################# CHANGES ##########################################
 #
 #       0.1         first version
 #       0.2         rewritten as a standalone component
+#       0.3         ensamble command
+#       
+# 050913 INCOMPATIBLE CHANGE! complete reorganization using ensamble command.
 
 package require jlib
 package require jlib::disco
 
-package provide muc 0.2
-package provide jlib::muc 0.2
+package provide jlib::muc 0.3
 
 namespace eval jlib::muc {
     
     # Globals same for all instances of this jlib.
     variable debug 0
-
-    # Running number.
-    variable uid 0
     
-    variable xmlnsmuc 
-    array set xmlnsmuc {
-	""              "http://jabber.org/protocol/muc"
+    variable xmlns 
+    array set xmlns {
+	"muc"           "http://jabber.org/protocol/muc"
 	"admin"         "http://jabber.org/protocol/muc#admin"
 	"owner"         "http://jabber.org/protocol/muc#owner"
 	"user"          "http://jabber.org/protocol/muc#user"
     }
-    
-    jlib::disco::registerfeature $xmlnsmuc()
-    
+
     variable muc
     set muc(affiliationExp) {(owner|admin|member|outcast|none)}
-    set muc(roleExp) {(moderator|participant|visitor|none)}
+    set muc(roleExp)        {(moderator|participant|visitor|none)}
+    
+    jlib::disco::registerfeature $xmlns(muc)
+    
+    jlib::ensamble_register muc    \
+      [namespace current]::init    \
+      [namespace current]::cmdproc
 }
 
-# jlib::muc::new --
+# jlib::muc::init --
 # 
 #       Creates a new instance of a muc object.
 #       
@@ -82,46 +85,25 @@ namespace eval jlib::muc {
 # Results:
 #       namespaced instance command
 
-proc jlib::muc::new {jlibname args} {
+proc jlib::muc::init {jlibname args} {
     
-    variable uid
-    variable muc2jlib
-
-    # Generate unique command token for this browse instance.
-    # Fully qualified!
-    set mucname [namespace current]::[incr uid]
-
-    Debug 2 "muc::new jlibname=$jlibname, mucname=$mucname"
+    Debug 2 "jlib::muc::init jlibname=$jlibname"
       
     # Instance specific namespace.
-    namespace eval $mucname {
+    namespace eval ${jlibname}::muc {
 	variable cache
 	variable rooms
     }
-    upvar ${mucname}::cache cache
-    upvar ${mucname}::rooms rooms
-
-    foreach {key value} $args {
-	switch -- $key {
-	    default {
-		return -code error "unrecognized option \"$key\" for muc::new"
-	    }
-	}
-    }
-    set muc2jlib($mucname) $jlibname
-
-    # Register service.
-    $jlibname service register muc $mucname
-        
-    # Create the actual muc instance procedure.
-    proc $mucname {cmd args}   \
-      "eval jlib::muc::CommandProc {$mucname} \$cmd \$args"
+    upvar ${jlibname}::muc::cache cache
+    upvar ${jlibname}::muc::rooms rooms
     
-    return $mucname
+    # Register service.
+    $jlibname service register muc muc
+            
+    return
 }
 
-
-# jlib::muc::CommandProc --
+# jlib::muc::cmdproc --
 #
 #       Just dispatches the command to the right procedure.
 #
@@ -133,13 +115,13 @@ proc jlib::muc::new {jlibname args} {
 # Results:
 #       from the individual command if any.
 
-proc jlib::muc::CommandProc {mucname cmd args} {
+proc jlib::muc::cmdproc {jlibname cmd args} {
     
     # Which sub command? Just dispatch the command to the right procedure.
-    return [eval {$cmd $mucname} $args]
+    return [eval {$cmd $jlibname} $args]
 }
 
-# jlib::muc::invoke_callback --
+# jlib::muc::invoke_callback --    ?????????????
 # 
 # 
 
@@ -153,7 +135,7 @@ proc jlib::muc::invoke_callback {mucname cmd type subiq} {
 #       Enter room.
 #       
 # Arguments:
-#       mucname    name of jabberlib instance.
+#       jlibname    name of jabberlib instance.
 #       roomjiid
 #       nick        nick name
 #       args        ?-command callbackProc?
@@ -163,21 +145,20 @@ proc jlib::muc::invoke_callback {mucname cmd type subiq} {
 # Results:
 #       none.
 
-proc jlib::muc::enter {mucname roomjid nick args} {
+proc jlib::muc::enter {jlibname roomjid nick args} {
 
-    variable muc2jlib
-    variable xmlnsmuc
-    upvar ${mucname}::cache cache
-    upvar ${mucname}::rooms rooms
+    variable xmlns
+    upvar ${jlibname}::muc::cache cache
+    upvar ${jlibname}::muc::rooms rooms
     
-    set jlibname $muc2jlib($mucname)
     set xsub {}
     set extras {}
+    set cmd {}
     foreach {name value} $args {
 	
 	switch -- $name {
 	    -command {
-		set cache($roomjid,entercb) $value
+		set cmd $value
 	    }
 	    -extras {
 		set extras $value
@@ -191,11 +172,11 @@ proc jlib::muc::enter {mucname roomjid nick args} {
 	    }
 	}
     }
-    set jid ${roomjid}/${nick}
+    set jid $roomjid/$nick
     set xelem [wrapper::createtag "x" -subtags $xsub \
-      -attrlist [list xmlns $xmlnsmuc()]]
+      -attrlist [list xmlns $xmlns(muc)]]
     $jlibname send_presence -to $jid -xlist [list $xelem] -extras $extras \
-      -command [list [namespace current]::parse_enter $mucname $roomjid]
+      -command [list [namespace current]::parse_enter $roomjid $cmd]
     set cache($roomjid,mynick) $nick
     set rooms($roomjid) 1
     $jlibname service setroomprotocol $roomjid "muc"
@@ -206,25 +187,21 @@ proc jlib::muc::enter {mucname roomjid nick args} {
 #       Callback when entering room to make sure there are no error.
 # 
 # Arguments:
-#       mucname
-#       
 #       jlibname 
 #       type    presence typ attribute, 'available', 'error', etc.
 #       args    -from, -id, -to, -x ...
 
-proc jlib::muc::parse_enter {mucname roomjid jlibname type args} {
+proc jlib::muc::parse_enter {roomjid cmd jlibname type args} {
 
-    upvar ${mucname}::cache cache
+    upvar ${jlibname}::muc::cache cache
 
     if {[string equal $type "error"]} {
 	unset -nocomplain cache($roomjid,mynick)
     } else {
 	set cache($roomjid,inside) 1
     }
-    if {[info exists cache($roomjid,entercb)]} {
-	set cbproc $cache($roomjid,entercb)
-	unset -nocomplain cache($roomjid,entercb)
-	uplevel #0 $cbproc $mucname $type $args
+    if {$cmd ne ""} {
+	uplevel #0 $cmd $jlibname $type $args
     }
 }
 
@@ -232,15 +209,13 @@ proc jlib::muc::parse_enter {mucname roomjid jlibname type args} {
 # 
 #       Exit room.
 
-proc jlib::muc::exit {mucname roomjid} {
+proc jlib::muc::exit {jlibname roomjid} {
 
-    variable muc2jlib
-    upvar ${mucname}::cache cache
+    upvar ${jlibname}::muc::cache cache
 
-    set jlibname $muc2jlib($mucname)
     set rostername [$jlibname getrostername]
     if {[info exists cache($roomjid,mynick)]} {
-	set jid ${roomjid}/$cache($roomjid,mynick)
+	set jid $roomjid/$cache($roomjid,mynick)
 	$jlibname send_presence -to $jid -type "unavailable"
 	unset -nocomplain cache($roomjid,mynick)
     }
@@ -252,12 +227,10 @@ proc jlib::muc::exit {mucname roomjid} {
 # 
 #       Set new nick name for room.
 
-proc jlib::muc::setnick {mucname roomjid nick args} {
+proc jlib::muc::setnick {jlibname roomjid nick args} {
 
-    variable muc2jlib
-    upvar ${mucname}::cache cache
+    upvar ${jlibname}::muc::cache cache
     
-    set jlibname $muc2jlib($mucname)
     set opts {}
     foreach {name value} $args {
 	switch -- $name {
@@ -269,7 +242,7 @@ proc jlib::muc::setnick {mucname roomjid nick args} {
 	    }
 	}
     }
-    set jid ${roomjid}/${nick}
+    set jid $roomjid/$nick
     eval {$jlibname send_presence -to $jid} $opts
     set cache($roomjid,mynick) $nick
 }
@@ -278,12 +251,10 @@ proc jlib::muc::setnick {mucname roomjid nick args} {
 # 
 # 
 
-proc jlib::muc::invite {mucname roomjid jid args} {
+proc jlib::muc::invite {jlibname roomjid jid args} {
     
-    variable muc2jlib
-    variable xmlnsmuc
+    variable xmlns
 
-    set jlibname $muc2jlib($mucname)
     set opts {}
     set children {}
     foreach {name value} $args {
@@ -303,8 +274,9 @@ proc jlib::muc::invite {mucname roomjid jid args} {
     set invite [list [wrapper::createtag "invite"  \
       -attrlist [list to $jid] -subtags $children]]
     
-    set xelem [wrapper::createtag "x" -subtags $invite  \
-      -attrlist [list xmlns $xmlnsmuc(user)]]
+    set xelem [wrapper::createtag "x"     \
+      -attrlist [list xmlns $xmlns(user)] \
+      -subtags $invite]
     eval {$jlibname send_message $roomjid -xlist [list $xelem]} $opts
 }
 
@@ -312,23 +284,22 @@ proc jlib::muc::invite {mucname roomjid jid args} {
 # 
 # 
 
-proc jlib::muc::setrole {mucname roomjid nick role args} {
+proc jlib::muc::setrole {jlibname roomjid nick role args} {
 
-    variable muc2jlib
     variable muc
-    variable xmlnsmuc
+    variable xmlns
     
     if {![regexp $muc(roleExp) $role]} {
 	return -code error "Unrecognized role \"$role\""
     }
-    set jlibname $muc2jlib($mucname)
     set opts {}
     set subitem {}
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
-		lappend opts -command  \
-		  [list [namespace current]::invoke_callback $mucname $value]
+		#lappend opts -command  \
+		 # [list [namespace current]::invoke_callback $mucname $value]
+		lappend opts -command [concat $value $jlibname]
 	    }
 	    -reason {
 		set subitem [list [wrapper::createtag "reason" -chdata $value]]
@@ -339,11 +310,13 @@ proc jlib::muc::setrole {mucname roomjid nick role args} {
 	}
     }
     
-    set subelements [list [wrapper::createtag "item" -subtags $subitem \
-      -attrlist [list nick $nick role $role]]]
+    set subelements [list [wrapper::createtag "item"  \
+      -attrlist [list nick $nick role $role]  \
+      -subtags $subitem]]
     
     set xmllist [wrapper::createtag "query" \
-      -attrlist [list xmlns $xmlnsmuc(admin)] -subtags $subelements]
+      -attrlist [list xmlns $xmlns(admin)]  \
+      -subtags $subelements]
     eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
@@ -351,23 +324,22 @@ proc jlib::muc::setrole {mucname roomjid nick role args} {
 # 
 # 
 
-proc jlib::muc::setaffiliation {mucname roomjid nick affiliation args} {
+proc jlib::muc::setaffiliation {jlibname roomjid nick affiliation args} {
 
-    variable muc2jlib
     variable muc
-    variable xmlnsmuc
+    variable xmlns
     
     if {![regexp $muc(affiliationExp) $affiliation]} {
 	return -code error "Unrecognized affiliation \"$affiliation\""
     }
-    set jlibname $muc2jlib($mucname)
     set opts {}
     set subitem {}
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
-		lappend opts -command  \
-		  [list [namespace current]::invoke_callback $mucname $value]
+		#lappend opts -command  \
+		#  [list [namespace current]::invoke_callback $mucname $value]
+		lappend opts -command [concat $value $jlibname]
 	    }
 	    -reason {
 		set subitem [list [wrapper::createtag "reason" -chdata $value]]
@@ -380,18 +352,19 @@ proc jlib::muc::setaffiliation {mucname roomjid nick affiliation args} {
 
     switch -- $affiliation {
     	owner {
-    	    set xmlns $xmlnsmuc(owner)
+    	    set ns $xmlns(owner)
     	}
     	default {
-    	    set xmlns $xmlnsmuc(admin)
+    	    set ns $xmlns(admin)
     	}
     }
     
-    set subelements [list [wrapper::createtag "item" -subtags $subitem \
-      -attrlist [list nick $nick affiliation $affiliation]]]
+    set subelements [list [wrapper::createtag "item"  \
+      -attrlist [list nick $nick affiliation $affiliation] \
+      -subtags $subitem]]
     
     set xmllist [wrapper::createtag "query" \
-      -attrlist [list xmlns $xmlns] -subtags $subelements]
+      -attrlist [list xmlns $ns] -subtags $subelements]
     eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
@@ -399,55 +372,52 @@ proc jlib::muc::setaffiliation {mucname roomjid nick affiliation args} {
 # 
 # 
 
-proc jlib::muc::getrole {mucname roomjid role callback} {
+proc jlib::muc::getrole {jlibname roomjid role callback} {
 
-    variable muc2jlib
     variable muc
-    variable xmlnsmuc
+    variable xmlns
     
     if {![regexp $muc(roleExp) $role]} {
 	return -code error "Unrecognized role \"$role\""
     }
-    set jlibname $muc2jlib($mucname)
     set subelements [list [wrapper::createtag "item" \
       -attrlist [list role $role]]]
     
-    set xmllist [wrapper::createtag "query" -subtags $subelements \
-      -attrlist [list xmlns $xmlnsmuc(admin)]]
+    set xmllist [wrapper::createtag "query" \
+      -attrlist [list xmlns $xmlns(admin)]  \
+      -subtags $subelements]
     $jlibname send_iq "get" [list $xmllist] -to $roomjid \
-      -command [list [namespace current]::invoke_callback $mucname $callback]
+      -command [concat $callback $jlibname]
 }
 
 # jlib::muc::getaffiliation --
 # 
 # 
 
-proc jlib::muc::getaffiliation {mucname roomjid affiliation callback} {
+proc jlib::muc::getaffiliation {jlibname roomjid affiliation callback} {
 
-    variable muc2jlib
     variable muc
-    variable xmlnsmuc
+    variable xmlns
     
     if {![regexp $muc(affiliationExp) $affiliation]} {
 	return -code error "Unrecognized role \"$affiliation\""
     }
-    set jlibname $muc2jlib($mucname)
     set subelements [list [wrapper::createtag "item" \
       -attrlist [list affiliation $affiliation]]]
 
     switch -- $affiliation {
     	owner - admin {
-    	    set xmlns $xmlnsmuc(owner)
+    	    set ns $xmlns(owner)
     	}
     	default {
-    	    set xmlns $xmlnsmuc(admin)
+    	    set ns $xmlns(admin)
     	}
     }
     
-    set xmllist [wrapper::createtag "query" -subtags $subelements \
-      -attrlist [list xmlns $xmlns]]
+    set xmllist [wrapper::createtag "query" \
+      -attrlist [list xmlns $ns] -subtags $subelements]
     $jlibname send_iq "get" [list $xmllist] -to $roomjid \
-      -command [list [namespace current]::invoke_callback $mucname $callback]
+      -command [concat $callback $jlibname]
 }
 
 # jlib::muc::create --
@@ -455,23 +425,21 @@ proc jlib::muc::getaffiliation {mucname roomjid affiliation callback} {
 #       The first thing to do when creating a room.
 #       
 # Arguments:
-#       mucname    name of jabberlib instance.
+#       jlibname    name of jabberlib instance.
 #       roomjiid
 #       nick        nick name
-#       callback    callbackProc
+#       command     callbackProc
 #       args        ?-extras list of xmllist?
 #       
 # Results:
 #       none.
 
-proc jlib::muc::create {mucname roomjid nick callback args} {
+proc jlib::muc::create {jlibname roomjid nick command args} {
 
-    variable muc2jlib
-    variable xmlnsmuc
-    upvar ${mucname}::cache cache
-    upvar ${mucname}::rooms rooms
+    variable xmlns
+    upvar ${jlibname}::muc::cache cache
+    upvar ${jlibname}::muc::rooms rooms
 
-    set jlibname $muc2jlib($mucname)
     set extras {}
     foreach {name value} $args {
 	
@@ -484,33 +452,27 @@ proc jlib::muc::create {mucname roomjid nick callback args} {
 	    }
 	}
     }
-    set jid ${roomjid}/${nick}
-    set cache($roomjid,createcb) $callback
-    set xelem [wrapper::createtag "x" -attrlist [list xmlns $xmlnsmuc()]]
+    set jid $roomjid/$nick
+    set xelem [wrapper::createtag "x" -attrlist [list xmlns $xmlns(muc)]]
     $jlibname send_presence  \
-      -to $jid  \
-      -command [list [namespace current]::parse_create $mucname $roomjid]  \
-      -xlist [list $xelem]  \
-      -extras $extras
+      -to $jid  -xlist [list $xelem]  -extras $extras  \
+      -command [list [namespace current]::parse_create $roomjid $command]
     set cache($roomjid,mynick) $nick
     set rooms($roomjid) 1
     $jlibname service setroomprotocol $roomjid "muc"
 }
 
-proc jlib::muc::parse_create {mucname roomjid jlibname type args} {
+proc jlib::muc::parse_create {roomjid cmd jlibname type args} {
 
-    variable muc2jlib
-    upvar ${mucname}::cache cache
+    upvar ${jlibname}::muc::cache cache
 
     if {[string equal $type "error"]} {
 	unset -nocomplain cache($roomjid,mynick)
     } else {
 	set cache($roomjid,inside) 1
     }
-    if {[info exists cache($roomjid,createcb)]} {
-	set cbproc $cache($roomjid,createcb)
-	unset -nocomplain cache($roomjid,createcb)
-	uplevel #0 $cbproc $mucname $type $args
+    if {$cmd ne ""} {
+	uplevel #0 $cmd $jlibname $type $args
     }
 }
 
@@ -520,7 +482,7 @@ proc jlib::muc::parse_create {mucname roomjid jlibname type args} {
 #       omitted.
 #       
 # Arguments:
-#       mucname     name of muc instance.
+#       jlibname     name of muc instance.
 #       roomjid     the rooms jid.
 #       type        typically 'submit' or 'cancel'.
 #       args:        
@@ -530,19 +492,18 @@ proc jlib::muc::parse_create {mucname roomjid jlibname type args} {
 # Results:
 #       None.
 
-proc jlib::muc::setroom {mucname roomjid type args} {
+proc jlib::muc::setroom {jlibname roomjid type args} {
 
-    variable muc2jlib
-    variable xmlnsmuc
+    variable xmlns
 
-    set jlibname $muc2jlib($mucname)
     set opts {}
     set subelements {}
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
-		lappend opts -command  \
-		  [list [namespace current]::invoke_callback $mucname $value]
+		#lappend opts -command  \
+		#  [list [namespace current]::invoke_callback $mucname $value]
+		lappend opts -command [concat $value $jlibname]
 	    }
 	    -form {
 		set xelem $value
@@ -557,7 +518,7 @@ proc jlib::muc::setroom {mucname roomjid type args} {
 	  -attrlist [list xmlns "jabber:x:data" type $type]]]
     }
     set xmllist [wrapper::createtag "query" -subtags $xelem \
-      -attrlist [list xmlns $xmlnsmuc(owner)]]
+      -attrlist [list xmlns $xmlns(owner)]]
     eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
@@ -565,26 +526,26 @@ proc jlib::muc::setroom {mucname roomjid type args} {
 # 
 # 
 # Arguments:
-#       mucname     name of muc instance.
+#       jlibname     name of muc instance.
 #       roomjid     the rooms jid.
 #       args        -command, -reason, alternativejid.
 #       
 # Results:
 #       None.
 
-proc jlib::muc::destroy {mucname roomjid args} {
+proc jlib::muc::destroy {jlibname roomjid args} {
 
-    variable muc2jlib
-    variable xmlnsmuc
+    variable xmlns
 
-    set jlibname $muc2jlib($mucname)
     set opts {}
     set subelements {}
     foreach {name value} $args {
+	
 	switch -- $name {
 	    -command {
-		lappend opts -command  \
-		  [list [namespace current]::invoke_callback $mucname $value]
+		#lappend opts -command  \
+		 # [list [namespace current]::invoke_callback $mucname $value]
+		lappend opts -command [concat $value $jlibname]
 	    }
 	    -reason {
 		lappend subelements [wrapper::createtag "reason" \
@@ -604,7 +565,7 @@ proc jlib::muc::destroy {mucname roomjid args} {
       -attrlist [list jid $roomjid]]
 
     set xmllist [wrapper::createtag "query" -subtags [list $destroyelem] \
-      -attrlist [list xmlns $xmlnsmuc(owner)]]
+      -attrlist [list xmlns $xmlns(owner)]]
     eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
@@ -612,25 +573,23 @@ proc jlib::muc::destroy {mucname roomjid args} {
 # 
 # 
 
-proc jlib::muc::getroom {mucname roomjid callback} {
+proc jlib::muc::getroom {jlibname roomjid callback} {
 
-    variable muc2jlib
-    variable xmlnsmuc
+    variable xmlns
 
-    set jlibname $muc2jlib($mucname)
     set xmllist [wrapper::createtag "query" \
-      -attrlist [list xmlns $xmlnsmuc(owner)]]
+      -attrlist [list xmlns $xmlns(owner)]]
     $jlibname send_iq "get" [list $xmllist] -to $roomjid  \
-      -command [list [namespace current]::invoke_callback $mucname $callback]
+      -command [concat $callback $jlibname]
 }
 
 # jlib::muc::mynick --
 # 
 #       Returns own nick name for room, or empty if not there.
 
-proc jlib::muc::mynick {mucname roomjid} {
+proc jlib::muc::mynick {jlibname roomjid} {
 
-    upvar ${mucname}::cache cache
+    upvar ${jlibname}::muc::cache cache
     
     if {[info exists cache($roomjid,mynick)]} {
 	return $cache($roomjid,mynick)
@@ -643,9 +602,9 @@ proc jlib::muc::mynick {mucname roomjid} {
 # 
 #       Returns a list of all room jid's we are inside.
 
-proc jlib::muc::allroomsin {mucname} {
+proc jlib::muc::allroomsin {jlibname} {
 
-    upvar ${mucname}::cache cache
+    upvar ${jlibname}::muc::cache cache
     
     set roomList {}
     foreach key [array names cache "*,inside"] {
@@ -655,9 +614,9 @@ proc jlib::muc::allroomsin {mucname} {
     return $roomList
 }
 
-proc jlib::muc::isroom {mucname jid} {
+proc jlib::muc::isroom {jlibname jid} {
     
-    upvar ${mucname}::rooms rooms
+    upvar ${jlibname}::muc::rooms rooms
     
     if {[info exists rooms($jid)]} {
 	return 1
@@ -670,20 +629,18 @@ proc jlib::muc::isroom {mucname jid} {
 #
 #
 
-proc jlib::muc::participants {mucname roomjid} {
+proc jlib::muc::participants {jlibname roomjid} {
 
-    variable muc2jlib
-    upvar ${mucname}::cache cache
+    upvar ${jlibname}::muc::cache cache
     
-    set jlibname $muc2jlib($mucname)
     set rostername [[namespace parent]::getrostername $jlibname]
     set everyone {}
 
     # The rosters presence elements should give us all info we need.
     foreach userAttr [$rostername getpresence $roomjid -type available] {
-	unset -nocomplain attrArr
-	array set attrArr $userAttr
-	lappend everyone ${roomjid}/$attrArr(-resource)
+	unset -nocomplain attr
+	array set attr $userAttr
+	lappend everyone $roomjid/$attr(-resource)
     }
     return $everyone
 }
