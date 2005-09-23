@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.110 2005-09-23 07:33:35 matben Exp $
+# $Id: jabberlib.tcl,v 1.111 2005-09-23 14:27:10 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1209,16 +1209,15 @@ proc jlib::message_handler {jlibname xmldata} {
     
     # Make an argument list ('-key value' pairs) suitable for callbacks.
     # Make variables of the attributes.
-    set arglist {}
     foreach {key value} [array get attrArr] {
-	lappend arglist -$key $value
+	set opts(-$key) $value
     }
     set ishandled 0
     
     switch -- $type {
 	error {
 	    set errspec [getstanzaerrorspec $xmldata]
-	    lappend arglist -error $errspec
+	    set opts(-error) $errspec
 	}
     }
    
@@ -1233,7 +1232,10 @@ proc jlib::message_handler {jlibname xmldata} {
 	
 	switch -- $ctag {
 	    body - subject - thread {
-		lappend arglist -$ctag $cchdata
+		set opts(-$ctag) $cchdata
+	    }
+	    error {
+		# handled above
 	    }
 	    default {
 		lappend elem(-$ctag) $child
@@ -1242,6 +1244,7 @@ proc jlib::message_handler {jlibname xmldata} {
 	}
     }
     set xmlnsList [lsort -unique $xmlnsList]	
+    set arglist [array get opts]
     
     # Invoke any registered handler for this particular message.
     set iscallback 0
@@ -1259,7 +1262,7 @@ proc jlib::message_handler {jlibname xmldata} {
 
     # Invoke any registered message handlers for this type and xmlns.
     if {[array exists elem]} {
-	set arglist [concat $arglist [array get elem]]
+	set arglist [concat [array get opts] [array get elem]]
 	foreach xmlns $xmlnsList {
 	    set ishandled [eval {
 		message_run_hook $jlibname $type $xmlns $xmldata} $arglist]
@@ -1268,7 +1271,7 @@ proc jlib::message_handler {jlibname xmldata} {
 	    }
 	}
     }
-    if {!$iscallback && [string equal $ishandled "0"]} {	
+    if {!$iscallback && [string equal $ishandled "0"]} {
     
 	# Invoke callback to client.
 	if {[string length $opts(-messagecommand)]} {
@@ -1709,6 +1712,12 @@ proc jlib::stream_reset {jlibname} {
 #     <error code='401'/>
 #     <query ...>...</query>
 #   </iq>
+#   
+#   or:
+#   <message type='error' ...>
+#       ...
+#       <error code='403'>Forbidden</error>
+#   </message>
 
 proc jlib::getstanzaerrorspec {stanza} {
     

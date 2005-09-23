@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.124 2005-09-23 07:45:48 matben Exp $
+# $Id: Chat.tcl,v 1.125 2005-09-23 14:27:10 matben Exp $
 
 package require ui::entryex
 package require uriencode
@@ -262,7 +262,7 @@ proc ::Chat::DoStart {w} {
     ::UI::SaveWinGeom $w
     set finished 1
     destroy $w
-    if {$ans == "yes"} {
+    if {$ans eq "yes"} {
 	StartThread $user
     }
 }
@@ -292,7 +292,7 @@ proc ::Chat::StartThread {jid args} {
 	
 	# Do we already have a dialog with this thread?
 	set chattoken [GetTokenFrom chat threadid $threadID]
-	if {$chattoken != ""} {
+	if {$chattoken ne ""} {
 	    set havedlg 1
 	    upvar 0 $chattoken chatstate
 	}
@@ -304,7 +304,7 @@ proc ::Chat::StartThread {jid args} {
     if {!$havedlg} {
 	if {$jprefs(chat,tabbedui)} {
 	    set dlgtoken [GetFirstDlgToken]
-	    if {$dlgtoken == ""} {
+	    if {$dlgtoken eq ""} {
 		set dlgtoken [eval {Build $threadID -from $jid} $args]
 		set chattoken [GetTokenFrom chat threadid $threadID]
 
@@ -379,7 +379,7 @@ proc ::Chat::GotMsg {body args} {
 	# Try to find a reasonable fallback for clients that fail here (Psi).
 	# Find if we have registered any chat for this jid 2/3.
 	set chattoken [GetTokenFrom chat jid ${mjid2}*]
-	if {$chattoken == ""} {
+	if {$chattoken eq ""} {
 	    
 	    # Need to create a new thread ID.
 	    set threadID [::sha1::sha1 "$jstate(mejid)[clock seconds]"]
@@ -394,14 +394,14 @@ proc ::Chat::GotMsg {body args} {
     # At this stage we have a threadID.
     # We may not yet have a dialog and/or page for this thread. Make them.
     set newdlg 0
-    if {$chattoken == ""} {
-	if {$body == ""} {
+    if {$chattoken eq ""} {
+	if {$body eq ""} {
 	    # Junk
 	    return
 	} else {
 	    if {$jprefs(chat,tabbedui)} {
 		set dlgtoken [GetFirstDlgToken]
-		if {$dlgtoken == ""} {
+		if {$dlgtoken eq ""} {
 		    set dlgtoken [eval {Build $threadID} $args]
 		    set chattoken [GetActiveChatToken $dlgtoken]
 		} else {
@@ -445,7 +445,7 @@ proc ::Chat::GotMsg {body args} {
     set opts {}
     if {[info exists argsArr(-x)]} {
 	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
-	if {$tm != ""} {
+	if {$tm ne ""} {
 	    set secs [clock scan $tm -gmt 1]
 	    lappend opts -secs $secs
 	}
@@ -464,7 +464,7 @@ proc ::Chat::GotMsg {body args} {
 	} $opts
     }
     
-    if {$body != ""} {
+    if {$body ne ""} {
 	
 	# Put in chat window.
 	eval {InsertMessage $chattoken you $body} $opts
@@ -485,7 +485,7 @@ proc ::Chat::GotMsg {body args} {
     }
     
     # Handle the situation if other end is just invisible and still online.
-    if {$chatstate(state) == "disabled"} {
+    if {$chatstate(state) eq "disabled"} {
 	SetState $chattoken normal
 	set icon [::Roster::GetPresenceIcon $jid invisible]
 	$chatstate(wpresimage) configure -image $icon
@@ -504,7 +504,7 @@ proc ::Chat::GotNormalMsg {body args} {
     upvar ::Jabber::jprefs jprefs
         
     # Whiteboard messages are handled elsewhere. A guard:
-    if {$jprefs(chat,normalAsChat) && ($body != "")} {
+    if {$jprefs(chat,normalAsChat) && ($body ne "")} {
 	
 	::Debug 2 "::Chat::GotNormalMsg args='$args'"
 	eval {GotMsg $body} $args
@@ -516,7 +516,7 @@ proc ::Chat::GotNormalMsg {body args} {
     set mjid2 [jlib::jidmap $jid2]
     set chattoken [GetTokenFrom chat jid ${mjid2}*]
     
-    if {($chattoken != "") && [info exists argsArr(-x)]} {
+    if {($chattoken ne "") && [info exists argsArr(-x)]} {
 	eval {XEventHandleAnyXElem $chattoken $argsArr(-x)} $args
     }
 }
@@ -547,7 +547,7 @@ proc ::Chat::InsertMessage {chattoken whom body args} {
 		set myjid [::Jabber::GetMyJid]
 	    }
 	    jlib::splitjidex $myjid node host res
-	    if {$node == ""} {
+	    if {$node eq ""} {
 		set name $host
 	    } else {
 		set name $node
@@ -577,7 +577,7 @@ proc ::Chat::InsertMessage {chattoken whom body args} {
     } else {
 	set clockFormat [option get $w clockFormatNotToday {}]
     }
-    if {$clockFormat != ""} {
+    if {$clockFormat ne ""} {
 	set theTime [clock format $secs -format $clockFormat]
 	set prefix "\[$theTime\] "
     } else {
@@ -669,7 +669,7 @@ proc ::Chat::InsertHistory {chattoken {which thread} {detail ""}} {
 	}
 	array set tmp $msg($i)
 
-	if {$tmp(-time) != ""} {
+	if {$tmp(-time) ne ""} {
 	    set secs [clock scan $tmp(-time)]
 	} else {
 	    set secs ""
@@ -991,7 +991,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     $wpane add $wtxt -weight 1
     $wpane add $wtxtsnd -weight 1
 
-    if {$jprefs(chatFont) != ""} {
+    if {$jprefs(chatFont) ne ""} {
 	$wtextsnd configure -font $jprefs(chatFont)
     }
     if {[info exists argsArr(-message)]} {
@@ -1224,7 +1224,7 @@ proc ::Chat::ClosePageCmd {dlgtoken} {
     upvar 0 $dlgtoken dlgstate
     
     set chattoken [GetActiveChatToken $dlgtoken]
-    if {$chattoken != ""} {	
+    if {$chattoken ne ""} {	
 	CloseThread $chattoken
     }
 }
@@ -1399,7 +1399,7 @@ proc ::Chat::SmileyCmd {chattoken im key} {
 proc ::Chat::CloseHook {wclose} {
 
     set dlgtoken [GetTokenFrom dlg w $wclose]
-    if {$dlgtoken != ""} {
+    if {$dlgtoken ne ""} {
 	Close $dlgtoken
     }
     return
@@ -1472,7 +1472,7 @@ proc ::Chat::BuildSavedDialogs { } {
 	set jid  [lindex $spec 0]
 	set opts [lindex $spec 1 end]
 	set chattoken [GetTokenFrom chat jid ${jid}*]
-	if {$chattoken == ""} {
+	if {$chattoken eq ""} {
 	    set chattoken [StartThread $jid]
 	    InsertHistory $chattoken last $jprefs(chat,histLen)
 	}
@@ -1569,7 +1569,7 @@ proc ::Chat::SetFont {theFont} {
 	set w $chatstate(w)
 	if {[winfo exists $w]} {
 	    ConfigureTextTags $w $chatstate(wtext)
-	    if {$jprefs(chatFont) == ""} {
+	    if {$jprefs(chatFont) eq ""} {
 		
 		# This should be the font set throught the option database.
 		$chatstate(wtextsnd) configure -font \
@@ -1670,7 +1670,7 @@ proc ::Chat::Send {dlgtoken} {
     # There might by smiley icons in the text widget. Parse them to text.
     set allText [::Text::TransformToPureText $wtextsnd]
     set allText [string trimright $allText]
-    if {$allText == ""} {
+    if {$allText eq ""} {
 	return
     }
     
@@ -1827,7 +1827,7 @@ proc ::Chat::PresenceHook {jid type args} {
 	    # There have been complaints about this...
 	    #SetState $chattoken disabled
 	}
-	if {$icon != ""} {
+	if {$icon ne ""} {
 	    $chatstate(wpresimage) configure -image $icon
 	}
 	
@@ -1848,7 +1848,7 @@ proc ::Chat::HaveChat {jid} {
     jlib::splitjid $jid jid2 res
     set mjid2 [jlib::jidmap $jid2]
     set chattoken [GetTokenFrom chat jid ${mjid2}*]
-    if {$chattoken != ""} {
+    if {$chattoken ne ""} {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
@@ -1975,7 +1975,7 @@ proc ::Chat::Close {dlgtoken} {
 	set ans [::UI::MessageBox -icon info -parent $w -type yesno \
 	  -message [mc jamesschatclose]]
     }
-    if {$ans == "yes"} {
+    if {$ans eq "yes"} {
 	set chattoken [GetActiveChatToken $dlgtoken]
 	variable $chattoken
 	upvar 0 $chattoken chatstate
@@ -2007,9 +2007,9 @@ proc ::Chat::GetFirstSashPos { } {
     global  wDlgs
     
     set win [::UI::GetFirstPrefixedToplevel $wDlgs(jchat)]
-    if {$win != ""} {
+    if {$win ne ""} {
 	set dlgtoken [GetTokenFrom dlg w $win]
-	if {$dlgtoken != ""} {
+	if {$dlgtoken ne ""} {
 	    set chattoken [GetActiveChatToken $dlgtoken]
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
@@ -2038,7 +2038,7 @@ proc ::Chat::XEventHandleAnyXElem {chattoken xElem args} {
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
 
-	    if {$argsArr(-type) == "chat"} {
+	    if {$argsArr(-type) eq "chat"} {
 		set chatstate(xevent,type) chat
 	    } else {
 		set chatstate(xevent,type) normal
@@ -2070,7 +2070,7 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
     ::Debug 6 "::Chat::XEventRecv \
       msgid=$msgid, composeElem=$composeElem, idElem=$idElem"
     
-    if {($msgid != "") && ($composeElem != {}) && ($idElem == {})} {
+    if {($msgid ne "") && ($composeElem != {}) && ($idElem == {})} {
 	
 	# 1) Request for event notification
 	set chatstate(xevent,msgid) $msgid
@@ -2080,7 +2080,7 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
 	# 2) Notification of message composing
 	jlib::splitjid $chatstate(jid) jid2 res
 	set name [::Jabber::RosterCmd getname $jid2]
-	if {$name == ""} {
+	if {$name eq ""} {
 	    if {[::Jabber::JlibCmd service isroom $jid2]} {
 		set name [::Jabber::JlibCmd service nick $chatstate(jid)]
 
@@ -2114,20 +2114,26 @@ proc ::Chat::KeyPressEvent {chattoken char} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     variable cprefs
+    upvar ::Jabber::jstate jstate
 
     ::Debug 6 "::Chat::KeyPressEvent chattoken=$chattoken, char=$char"
     
-    if {$char == ""} {
+    if {$char eq ""} {
 	return
     }
     if {[info exists chatstate(xevent,afterid)]} {
 	after cancel $chatstate(xevent,afterid)
 	unset chatstate(xevent,afterid)
     }
-    if {[info exists chatstate(xevent,msgid)] && ($chatstate(xevent,status) == "")} {
-	XEventSendCompose $chattoken
+    jlib::splitjid $chatstate(jid) user res
+    if {[$jstate(roster) isavailable $user] && ($chatstate(state) eq "normal")} {
+
+	if {[info exists chatstate(xevent,msgid)]  \
+	  && ($chatstate(xevent,status) eq "")} {
+	    XEventSendCompose $chattoken
+	}
     }
-    if {$chatstate(xevent,status) == "composing"} {
+    if {$chatstate(xevent,status) eq "composing"} {
 	set chatstate(xevent,afterid) [after $cprefs(xeventsmillis) \
 	  [list [namespace current]::XEventSendCancelCompose $chattoken]]
     }
@@ -2140,9 +2146,6 @@ proc ::Chat::XEventSendCompose {chattoken} {
 
     ::Debug 2 "::Chat::XEventSendCompose chattoken=$chattoken"
     
-    if {$chatstate(state) != "normal"} {
-	return
-    }
     set chatstate(xevent,status) "composing"
 
     # Pick the id of the most recent event request and skip any previous.
@@ -2150,7 +2153,7 @@ proc ::Chat::XEventSendCompose {chattoken} {
     set chatstate(xevent,msgidlist) [lindex $chatstate(xevent,msgidlist) end]
     set chatstate(xevent,composeid) $id
     set opts {}
-    if {$chatstate(xevent,type) == "chat"} {
+    if {$chatstate(xevent,type) eq "chat"} {
 	set opts [list -thread $chatstate(threadid) -type chat]
     }
     
@@ -2166,6 +2169,7 @@ proc ::Chat::XEventSendCompose {chattoken} {
 proc ::Chat::XEventSendCancelCompose {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
+    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Chat::XEventSendCancelCompose chattoken=$chattoken"
 
@@ -2173,24 +2177,28 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
     if {![info exists chatstate]} {
 	return
     }
-    if {$chatstate(state) != "normal"} {
+    if {$chatstate(state) ne "normal"} {
 	return
     }
     if {![::Jabber::IsConnected]} {
+	return
+    }
+    jlib::splitjid $chatstate(jid) user res
+    if {![$jstate(roster) isavailable $user]} {
 	return
     }
     if {[info exists chatstate(xevent,afterid)]} {
 	after cancel $chatstate(xevent,afterid)
 	unset chatstate(xevent,afterid)
     }
-    if {$chatstate(xevent,status) == ""} {
+    if {$chatstate(xevent,status) eq ""} {
 	return
     }
     set id $chatstate(xevent,composeid)
     set chatstate(xevent,status) ""
     set chatstate(xevent,composeid) ""
     set opts {}
-    if {$chatstate(xevent,type) == "chat"} {
+    if {$chatstate(xevent,type) eq "chat"} {
 	set opts [list -thread $chatstate(threadid) -type chat]
     }
 

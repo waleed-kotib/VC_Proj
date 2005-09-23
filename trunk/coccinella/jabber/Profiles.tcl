@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.47 2005-09-20 14:09:51 matben Exp $
+# $Id: Profiles.tcl,v 1.48 2005-09-23 14:27:10 matben Exp $
 
 package provide Profiles 1.0
 
@@ -145,6 +145,25 @@ proc ::Profiles::Set {name server username password args} {
     return
 }
 
+proc ::Profiles::SetWithKey {name key value} {
+    variable profiles
+        
+    array set profArr $profiles
+    set allNames [GetAllNames]
+    if {[lsearch $allNames $name] < 0} {
+	return -code error "nonexisting profile name $name"
+    }
+    array set idx {server 0 username 1 password 2}
+    if {[info exists idx($key)]} {
+	lset profArr($name) $idx($key) $value
+    } else {
+	array set opts [lrange $profArr($name) 3 end]
+	set opts($key) $value
+	set profArr($name) [concat [lrange $profArr($name) 0 2] [array get opts]]
+    }
+    set profiles [array get profArr]
+    return
+}
 
 proc ::Profiles::Remove {name} {
     variable profiles

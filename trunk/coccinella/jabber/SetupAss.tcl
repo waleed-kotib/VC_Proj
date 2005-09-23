@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.31 2005-09-19 06:37:21 matben Exp $
+# $Id: SetupAss.tcl,v 1.32 2005-09-23 14:27:10 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -255,7 +255,7 @@ proc ::Jabber::SetupAss::DoFinish {w} {
 	
 	# Save as a shortcut and default server only if not called 
 	# ::RegisterEx::New which already done this
-	::Profiles::Set {} $server $username $password home
+	::Profiles::Set {} $server $username $password
     }
     
     # Load any new message catalog.

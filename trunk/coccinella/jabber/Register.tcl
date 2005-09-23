@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.38 2005-09-19 06:37:21 matben Exp $
+# $Id: Register.tcl,v 1.39 2005-09-23 14:27:10 matben Exp $
 
 package provide Register 1.0
 
@@ -338,7 +338,7 @@ proc ::Register::SendRegisterCB {jlibName type theQuery} {
     } else {
 
 	# Save to our jserver variable. Create a new profile.
-	::Profiles::Set "" $server $username $password
+	::Profiles::Set {} $server $username $password
     }
     if {$jprefs(logonWhenRegister)} {
 	
@@ -950,7 +950,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
     } else {
 	
 	# Save to our jserver variable. Create a new profile.
-	::Profiles::Set "" $server $username $password
+	::Profiles::Set {} $server $username $password
 
 	if {$jprefs(logonWhenRegister)} {
 	    
