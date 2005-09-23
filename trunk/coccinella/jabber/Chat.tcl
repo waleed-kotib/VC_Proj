@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.123 2005-09-21 09:53:23 matben Exp $
+# $Id: Chat.tcl,v 1.124 2005-09-23 07:45:48 matben Exp $
 
 package require ui::entryex
 package require uriencode
@@ -1003,11 +1003,6 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     
     after 10 [list ::UI::SetSashPos $w $wpane]
     
-    bind $wtextsnd <Return>  \
-      [list [namespace current]::ReturnKeyPress $chattoken]    
-    bind $wtextsnd <$this(modkey)-Return> \
-      [list [namespace current]::CommandReturnKeyPress $chattoken]
-    
     focus $wtextsnd
    
     # jabber:x:event
@@ -1018,14 +1013,17 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 	bind $wtextsnd <Meta-KeyPress>    {# nothing}
 	bind $wtextsnd <Control-KeyPress> {# nothing}
 	bind $wtextsnd <Escape>           {# nothing}
-	bind $wtextsnd <Return>           {# nothing}
 	bind $wtextsnd <KP_Enter>         {# nothing}
 	bind $wtextsnd <Tab>              {# nothing}
 	if {[string equal [tk windowingsystem] "aqua"]} {
 		bind $wtextsnd <Command-KeyPress> {# nothing}
 	}
-
     }
+    bind $wtextsnd <Return>  \
+      [list [namespace current]::ReturnKeyPress $chattoken]    
+    bind $wtextsnd <$this(modkey)-Return> \
+      [list [namespace current]::CommandReturnKeyPress $chattoken]
+    
     set chatstate(wthread)  $wthread
     set chatstate(wpane)    $wpane
     set chatstate(wtext)    $wtext
