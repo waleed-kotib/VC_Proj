@@ -899,6 +899,7 @@ kan ha speciella krav.}
 ::msgcat::mcset sv jaupdatenewver {Den ny versionen är: %s}
 ::msgcat::mcset sv jaupdateremind {Påminn mig inte om detta fler gånger}
 ::msgcat::mcset sv jasettopic   {Sätt nytt ämne för detta gruppsamtal.}
+::msgcat::mcset sv jasettopic2  {Sätt nytt ämne för detta gruppsamtal.}
 ::msgcat::mcset sv jadirpresmsg {Skicka riktad närvaro till "%s".}
 ::msgcat::mcset sv jatlsnegot   {Förhandlar om TLS säkerhet...}
 ::msgcat::mcset sv jamucentermsg {Skriv in ditt kortnamn och tryck på Enter för att gå in i rummet. Du kan "browsa" för att få alla tillgängliga rum för en tjänst.\

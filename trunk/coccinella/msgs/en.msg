@@ -668,7 +668,7 @@
 ::msgcat::mcset en jamessaddrmiss	{You need to fill in at least one valid address}
 ::msgcat::mcset en jamesschatclose	{If you close this chat window you also loose the complete conversation. Do you actually like to close?}
 ::msgcat::mcset en jamessnogroupchat	{We could not recognize any service that provides groupchat}
-::msgcat::mcset en jamessgcnoroomname   {You must provide a roomname.}
+::msgcat::mcset en jamessgcnoroomname   {You must provide a room name.}
 ::msgcat::mcset en jamessgcnoroomnick   {You must provide a nickname.}
 ::msgcat::mcset en jamessinroommiss	{We require that all fields are nonempty before entering room}
 ::msgcat::mcset en jamesswarnexitroom	{Do you actually like to exit the room "%s" ?}
@@ -894,6 +894,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jaupdatenewver {The new version is: %s}
 ::msgcat::mcset en jaupdateremind {Don't remind me about this anymore}
 ::msgcat::mcset en jasettopic   {Set new topic for this groupchat.}
+::msgcat::mcset en jasettopic2  {Set new topic for this room.}
 ::msgcat::mcset en jadirpresmsg {Send directed presence to the user "%s".}
 ::msgcat::mcset en jatlsnegot   {Negotiating TLS security...}
 ::msgcat::mcset en jamucentermsg {Enter your nick name and press Enter to go into the room. You may Browse to get the available rooms for the specific service.	Members only room may require a password.}

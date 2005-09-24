@@ -931,6 +931,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jaupdatenewver {La nueva versión es : %s}
 ::msgcat::mcset es jaupdateremind {No recordarme esto}
 ::msgcat::mcset es jasettopic   {Introduzca un nueva tema para este grupo de chat}
+#::msgcat::mcset es jasettopic2  {Set new topic for this room.}
 ::msgcat::mcset es jadirpresmsg {Enviar el estado deseado al usuario "%s".}
 ::msgcat::mcset es jatlsnegot   {Seguridad TLS...}
 
