@@ -571,7 +571,6 @@
 ::msgcat::mcset de {Version Info}         {Versions-Info}
 ::msgcat::mcset de {Whiteboard fonts}     {Schriften Zeichenfläche}
 ::msgcat::mcset de {Writing file}         {Schreibe Datei}
-::msgcat::mcset de {Groupchat presence change} {Gruppenchat: Anwesenheitswechsel}
 
 
 # Splash screen:
@@ -906,6 +905,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jaupdatenewver {Die neue Version ist: %s}
 ::msgcat::mcset de jaupdateremind {Bitte nicht mehr daran erinnern}
 ::msgcat::mcset de jasettopic   {Neues Thema für diesen Gruppen-Chat setzen.}
+#::msgcat::mcset de jasettopic2  {Set new topic for this room.}
 ::msgcat::mcset de jadirpresmsg {Spezielle Anwesenheit an Benutzer "%s" senden.}
 ::msgcat::mcset de jatlsnegot   {TLS-Sicherheit aushandeln ...}
 ::msgcat::mcset de jamucentermsg {Spitznamen eingeben und Enter drücken, um den Raum zu betreten. Sie können blättern, um die verfügbaren Räume für diesen Dienst zu sehen. Räume nur für Mitglieder können ein Passwort erfordern.}

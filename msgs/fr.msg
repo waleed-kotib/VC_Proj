@@ -909,6 +909,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jaupdatenewver {La nouvelle version est : %s}
 ::msgcat::mcset fr jaupdateremind {Ne plus me rappeler cela}
 ::msgcat::mcset fr jasettopic   {Mettre un nouveau thème pour ce groupe de discussion}
+#::msgcat::mcset fr jasettopic2  {Set new topic for this room.}
 ::msgcat::mcset fr jadirpresmsg {Envoyer le statut désiré à l'utilisateur "%s".}
 ::msgcat::mcset fr jatlsnegot   {Sécurisation TLS...}
 ::msgcat::mcset fr jamucentermsg {Tapez votre pseudo et appuyez sur Entrée pour entrer dans le salon. Vous pouvez Parcourir pour trouver la liste des salons chaque service. Les salons privés peuvent vous demander un mot de passe.}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.116 2005-09-24 10:31:23 matben Exp $
+# $Id: GroupChat.tcl,v 1.117 2005-09-24 14:21:58 matben Exp $
 
 package require History
 
@@ -1106,7 +1106,7 @@ proc ::GroupChat::SetTopic {token} {
     set roomjid $state(roomjid)
     set ans [::UI::MegaDlgMsgAndEntry  \
       [mc {Set New Topic}]  \
-      [mc jasettopic]  \
+      [mc jasettopic2]  \
       "[mc {New Topic}]:"  \
       topic [mc Cancel] [mc OK]]
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.125 2005-09-23 14:27:10 matben Exp $
+# $Id: Chat.tcl,v 1.126 2005-09-24 14:21:58 matben Exp $
 
 package require ui::entryex
 package require uriencode
@@ -1432,6 +1432,7 @@ proc ::Chat::LogoutHook { } {
 	    set chatstate(presence) unavailable
 	}
     }
+    SaveDialogs
     return
 }
 
@@ -1454,7 +1455,7 @@ proc ::Chat::BuildSavedDialogs { } {
     variable cprefs
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-
+    
     if {!$jprefs(rememberDialogs)} {
 	return
     }
@@ -1482,7 +1483,7 @@ proc ::Chat::BuildSavedDialogs { } {
 proc ::Chat::SaveDialogs { } {
     variable cprefs
     upvar ::Jabber::jprefs jprefs
-
+    
     if {!$jprefs(rememberDialogs)} {
 	return
     }
@@ -1491,12 +1492,13 @@ proc ::Chat::SaveDialogs { } {
     }
     set mejidmap $cprefs(lastmejid)
     array set dlgArr $jprefs(chat,dialogs)
+    array unset dlgArr [ESCglobs $mejidmap]
 
     foreach chattoken [GetTokenList chat] {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
-	set dlgArr($mejidmap) [list $chatstate(jid2)]
+	lappend dlgArr($mejidmap) [list $chatstate(jid2)]
     }
     set jprefs(chat,dialogs) [array get dlgArr]
 }

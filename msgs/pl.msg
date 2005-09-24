@@ -896,6 +896,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jaupdatenewver {Nowa wersja to: %s}
 ::msgcat::mcset pl jaupdateremind {Więcej nie zawracaj mi tym głowy}
 ::msgcat::mcset pl jasettopic   {Podaj nowy temat niniejszej konferencji.}
+#::msgcat::mcset pl jasettopic2  {Set new topic for this room.}
 ::msgcat::mcset pl jadirpresmsg {Zaprezentuj "status indywidualnie dobrany" użytkownikowi "%s".}
 ::msgcat::mcset pl jatlsnegot   {Negocjuję szyfrowanie TLS...}
 ::msgcat::mcset pl jamucentermsg {Aby wejść do pokoju, podaj swój pseudonim i naciśnij <Enter>. Z pomocą przeglądarki ("Zasoby") można uzyskać listę dostępnych pokoi. Pokoje "tylko dla zaproszonych" mogą wymagać hasła.}
