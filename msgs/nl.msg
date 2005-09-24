@@ -418,7 +418,6 @@
 ::msgcat::mcset nl {Get File Error}		{Bestandsfout ophalen}
 ::msgcat::mcset nl {Get vCard}			{vCard ophalen}
 ::msgcat::mcset nl {Getting available rooms...} {De aanwezige chatruimtes worden opgezocht...}
-::msgcat::mcset nl {Groupchat in room}		{Gesprek in chatruimte}
 ::msgcat::mcset nl {Groupchat presence change}	{Wijziging van aanwezigheid in chatruimte}
 ::msgcat::mcset nl {Groupchat-1.0 (fallback)}	{Groupchat-1.0 (terugvalling)}
 ::msgcat::mcset nl {Handled By}			{Behandeld door}
@@ -700,7 +699,6 @@
 ::msgcat::mcset nl jamessoobtimeout	{Tijdslimiet overschreden tijdens het ophalen van een bestand via HTTP}
 ::msgcat::mcset nl jamessooberr406      {%s weigerde het bestand %s te ontvangen.}
 ::msgcat::mcset nl jamessooberr404      {Er deed zich een fout voor tijdens het verzenden van bestand %s naar %s. De foutcode is %s en de foutmelding: %s}
-::msgcat::mcset nl jamessnogchat	{Er werd geen dienst voor chatruimtes gevonden}
 ::msgcat::mcset nl jamesserrinboxopen	{Openen van Postvak in-bestand %s tijdens het proberen op te slaan mislukte.}
 ::msgcat::mcset nl jamesserrinboxread	{Er is een fout opgetreden tijdens het proberen te lezen van het Jabber message box bestand "%s": %s}
 ::msgcat::mcset nl jamesschatclose	{Als u dit venster sluit dan verliest u de volledige conversatie. Wilt u het werkelijk sluiten?}

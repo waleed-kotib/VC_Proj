@@ -413,7 +413,6 @@
 ::msgcat::mcset en {Get File Error}
 ::msgcat::mcset en {Get vCard}
 ::msgcat::mcset en {Getting available rooms...}
-::msgcat::mcset en {Groupchat in room}
 ::msgcat::mcset en {Groupchat presence change}
 ::msgcat::mcset en {Groupchat-1.0 (fallback)}
 ::msgcat::mcset en {Handled By}
@@ -695,7 +694,6 @@
 ::msgcat::mcset en jamessooberr406      {The user %s rejected to accept the file %s.}
 ::msgcat::mcset en jamessooberr404      {Got an error when trying to send the file %s to %s. The code was %s, and error message: %s}
 
-::msgcat::mcset en jamessnogchat	{We could not recognize any service that provides groupchat}
 ::msgcat::mcset en jamesserrinboxopen	{Failed open the inbox file %s when trying to save it.}
 ::msgcat::mcset en jamesserrinboxread	{Got an error when trying to read the Jabber message box file "%s": %s}
 ::msgcat::mcset en jamesschatclose	{If you close this chat window you also loose the complete conversation. Do you actually like to close?}

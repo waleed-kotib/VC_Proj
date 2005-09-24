@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.27 2005-09-19 06:37:21 matben Exp $
+# $Id: disco.tcl,v 1.28 2005-09-24 10:31:23 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -396,8 +396,8 @@ proc jlib::disco::parse_get_items {jlibname from subiq} {
 	    } else {
 		set xcase 1
 		set items($jid,$node,pnode) $pnode
-		set items($jid,$node,pnodes) [concat $items($jid,$pnode,pnodes) \
-		  [list $pnode]]
+		set items($jid,$node,pnodes)  \
+		  [concat $items($from,$pnode,pnodes) [list $pnode]]
 	    }
 	}
 	if {$xcase == 2} {
