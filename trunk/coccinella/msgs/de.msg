@@ -418,7 +418,6 @@
 ::msgcat::mcset de {Get File Error}       {Fehler Dateiabruf}
 ::msgcat::mcset de {Get vCard}            {vCard abrufen}
 ::msgcat::mcset de {Getting available rooms...} {Verfügbare Räume abrufen}
-::msgcat::mcset de {Groupchat in room}    {Gruppen-Chat in Raum}
 ::msgcat::mcset de {Groupchat presence change} {Gruppenchat: Anwesenheitswechsel}
 ::msgcat::mcset de {Groupchat-1.0 (fallback)}  {Groupchat-1.0 (Ausweichmöglichkeit)}
 ::msgcat::mcset de {Handled By}           {verwaltet von}
@@ -703,7 +702,6 @@
 ::msgcat::mcset de jamessooberr406      {Benutzer %s verweigerte die Annahme der Datei %s.}
 ::msgcat::mcset de jamessooberr404      {Fehler beim Versuch, die Datei %s an %s zu senden. Fehlercode war %s, Fehlernachricht: %s}
 
-::msgcat::mcset de jamessnogchat	{Wir konnten keinen Server finden, der groupchat bietet.}
 ::msgcat::mcset de jamesserrinboxopen	{Fehler beim Öffnen der Postdatei %s zur Sicherhung.}
 ::msgcat::mcset de jamesserrinboxread	{Fehler beim Versuch, die Jabber-Postdatei zu lesen "%s": %s}
 ::msgcat::mcset de jamesschatclose	{Wenn Sie dieses Chatfenster schliessen, verlieren Sie die gesamte Konversation. Wollen Sie wirklich schliessen?}

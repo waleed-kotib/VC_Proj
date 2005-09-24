@@ -417,7 +417,6 @@
 ::msgcat::mcset es {Get File Error}		{Error durante recepción del archivo}
 ::msgcat::mcset es {Get vCard}			{Ver la tarjeta}
 # ::msgcat::mcset es {Getting available rooms...} {}
-::msgcat::mcset es {Groupchat in room}		{Agrupar el chat en la sala}
 # ::msgcat::mcset es {Groupchat presence change} {}
 ::msgcat::mcset es {Groupchat-1.0 (fallback)}	{Groupchat 1.0 (fallback)}
 ::msgcat::mcset es {Handled By}			{Manejado por}
@@ -712,7 +711,6 @@
 ::msgcat::mcset es jamessooberr404      {Got an error when trying to send the file %s to %s. The code was %s, and error message: %s}
 # translate!!!!
 
-::msgcat::mcset es jamessnogchat	{Ningún servicio propuesto para la sala es reconocido.}
 ::msgcat::mcset es jamesserrinboxopen	{Error de la apertura del correo entrante %s durante la copia de seguridad.}
 ::msgcat::mcset es jamesserrinboxread	{Error durante la lectura del mensaje en el diálogo Jabber "%s" : %s}
 ::msgcat::mcset es jamesschatclose	{Si cierra esta ventana, perderá toda la conversation. ¿Desea continuar?}

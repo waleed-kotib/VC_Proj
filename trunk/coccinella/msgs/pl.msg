@@ -415,7 +415,6 @@
 ::msgcat::mcset pl {Get File Error}       {Błąd pobierania}
 ::msgcat::mcset pl {Get vCard}            {Pobierz wizytówkę}
 ::msgcat::mcset pl {Getting available rooms...} {Wykrywam dostępne pokoje...}
-::msgcat::mcset pl {Groupchat in room}   {Konferencja w pokoju}
 ::msgcat::mcset pl {Groupchat presence change} {Zmiana statusu "czatownika"}
 ::msgcat::mcset pl {Groupchat-1.0 (fallback)}  {Groupchat-1.0 ("fallback")}
 ::msgcat::mcset pl {Handled By}           {Zarządzana przez}
@@ -697,7 +696,6 @@
 ::msgcat::mcset pl jamessooberr406      {Użytkownik %s odmówił przyjęcia pliku %s.}
 ::msgcat::mcset pl jamessooberr404      {Nieudana próba przesłania pliku %s do %s. Kod błędu: %s - informacja: %s}
 
-::msgcat::mcset pl jamessnogchat	{Nie znaleziono żadnego serwisu umożliwiającego konferencję}
 ::msgcat::mcset pl jamesserrinboxopen	{Nieudana próba zapisu zawartości skrzynki do pliku %s.}
 ::msgcat::mcset pl jamesserrinboxread	{Błąd podczas próby wczytania pliku z zawartością skrzynki: "%s": %s}
 ::msgcat::mcset pl jamesschatclose	{Zamykając okno rozmowy utracisz całą jej treść - na pewno chcesz je zamknąć?}

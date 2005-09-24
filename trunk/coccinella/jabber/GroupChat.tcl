@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.115 2005-09-22 13:41:43 matben Exp $
+# $Id: GroupChat.tcl,v 1.116 2005-09-24 10:31:23 matben Exp $
 
 package require History
 
@@ -379,7 +379,7 @@ proc ::GroupChat::BuildEnter {args} {
     ::Debug 2 "\t service getjidsfor groupchat: '$chatservers'"
     
     if {$chatservers == {}} {
-	::UI::MessageBox -icon error -message [mc jamessnogchat]
+	::UI::MessageBox -icon error -message [mc jamessnogroupchat]
 	return
     }
 

@@ -417,7 +417,6 @@
 ::msgcat::mcset fr {Get File Error}		{Erreur lors de la réception du fichier}
 ::msgcat::mcset fr {Get vCard}			{Voir la carte de visite}
 ::msgcat::mcset fr {Getting available rooms...}	{Réception des salons disponibles...}
-::msgcat::mcset fr {Groupchat in room}		{Grouper la discussion et le salon}
 ::msgcat::mcset fr {Groupchat-1.0 (fallback)}	{Groupchat 1.0 (fallback)}
 ::msgcat::mcset fr {Handled By}			{Géré par}
 ::msgcat::mcset fr {History length}		{Longueur de l'historique}
@@ -706,7 +705,6 @@
 ::msgcat::mcset fr jamessoobtimeout	{Temps écoulé lors de l'accession au fichier via HTTP}
 ::msgcat::mcset fr jamessooberr406      {L'utilisateur %s a refusé le fichier %s.}
 ::msgcat::mcset fr jamessooberr404      {Erreur lors de l'envoi du fichier %s à %s. Le code était %s, et le message d'erreur "%s"}
-::msgcat::mcset fr jamessnogchat	{Aucun service proposé par le salon n'est reconnu.}
 ::msgcat::mcset fr jamesserrinboxopen	{Erreur de l'ouverture du courrier entrant %s lors de la sauvegarde.}
 ::msgcat::mcset fr jamesserrinboxread	{Erreur lors de la lecture du message dans la boîte Jabber "%s" : %s}
 ::msgcat::mcset fr jamesschatclose	{Si vous fermez cette fenêtre, vous perdrez toute la conversation. Voulez-vous continuer ?}

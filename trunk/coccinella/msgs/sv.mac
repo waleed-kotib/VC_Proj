@@ -693,7 +693,6 @@ Den ska vara av typen 'username@jabber.org'.}
 ::msgcat::mcset sv jamessoobtimeout	{Vi fick timeout när skaffade fil över HTTP.}
 ::msgcat::mcset sv jamessooberr406      {Användaren %s nekade att ta emot filen %s.}
 ::msgcat::mcset sv jamessooberr404      {Fick ett fel när försökte skicka filen %s till %s. Felkod %s och meddelande %s}
-::msgcat::mcset sv jamessnogchat	{Vi hittade ingen tjänst som stöder gruppsamtal}
 ::msgcat::mcset sv jamesserrinboxopen	{Misslyckades med att öppna filen %s för inkorgen.}
 ::msgcat::mcset sv jamesserrinboxread	{Fick ett fel när försökte att läsa Jabber inkorgs filen "%s": %s}
 ::msgcat::mcset sv jamesschatclose	{Om du stänger det här fönstret så förlorar du också hela konversationen. Vill du verkligen stänga fönstret?}
