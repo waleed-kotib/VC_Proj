@@ -5,10 +5,13 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.126 2005-09-24 14:21:58 matben Exp $
+# $Id: Chat.tcl,v 1.127 2005-09-26 11:59:16 matben Exp $
 
 package require ui::entryex
+package require ui::optionmenu
 package require uriencode
+package require colorutils
+package require History
 
 package provide Chat 1.0
 
@@ -107,12 +110,12 @@ namespace eval ::Chat:: {
     } else {
 	option add *Chat*TNotebook.padding         {8 8 8 8}        50
     }
-    option add *ChatThread*pane.borderWidth     1               50
-    option add *ChatThread*pane.relief          sunken          50
-    option add *ChatThread*frtxt.text.borderWidth     1                50
-    option add *ChatThread*frtxt.text.relief          sunken           50
-    option add *ChatThread*frtxtsnd.text.borderWidth  1                50
-    option add *ChatThread*frtxtsnd.text.relief       sunken           50
+    option add *ChatThread*pane.borderWidth           1             50
+    option add *ChatThread*pane.relief                sunken        50
+    option add *ChatThread*frtxt.text.borderWidth     1             50
+    option add *ChatThread*frtxt.text.relief          sunken        50
+    option add *ChatThread*frtxtsnd.text.borderWidth  1             50
+    option add *ChatThread*frtxtsnd.text.relief       sunken        50
     
     option add *ChatThread.padding              {12  0 12  0}   50
     option add *ChatThread*active.padding       {1}             50
@@ -297,8 +300,7 @@ proc ::Chat::StartThread {jid args} {
 	    upvar 0 $chattoken chatstate
 	}
     } else {
-	set key "[pid].[clock seconds].$jstate(mejid)"
-	set threadID [::sha1::sha1 $key]
+	set threadID [jlib::generateuuid]
     }
     
     if {!$havedlg} {
@@ -336,7 +338,7 @@ proc ::Chat::StartThread {jid args} {
 	set chatstate(fromjid) $jid2
     }
     SetTitle $chattoken
-    
+        
     return $chattoken
 }
 
@@ -435,9 +437,10 @@ proc ::Chat::GotMsg {body args} {
     # If new chat dialog check to see if we have got a thread history to insert.
     if {$newdlg} {
 	if {[info exists argsArr(-thread)]} {
-	    InsertHistory $chattoken
+	    InsertHistory $chattoken -thread 1
 	} else {
-	    InsertHistory $chattoken last $jprefs(chat,histLen)
+	    InsertHistory $chattoken -last $jprefs(chat,histLen)  \
+	      -maxage $jprefs(chat,histAge)
 	}
     }
     set w $dlgstate(w)
@@ -460,7 +463,7 @@ proc ::Chat::GotMsg {body args} {
 	set chatstate(subject) $argsArr(-subject)
 	set chatstate(lastsubject) $chatstate(subject)
 	eval {
-	    InsertMessage $chattoken systext "Subject: $chatstate(subject)\n"
+	    InsertMessage $chattoken sys "Subject: $chatstate(subject)"
 	} $opts
     }
     
@@ -525,19 +528,23 @@ proc ::Chat::GotNormalMsg {body args} {
 # 
 #       Puts message in text chat window.
 #       
+# Arguments:
+#       spec    {me|you|sys ?history?}
+#       body
 #       args:   -secs seconds
 #               -jidfrom jid
 
-proc ::Chat::InsertMessage {chattoken whom body args} {
+proc ::Chat::InsertMessage {chattoken spec body args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
     array set argsArr $args
     
-    set w     $chatstate(w)
-    set wtext $chatstate(wtext)
-    set jid   $chatstate(jid)
-    
+    set w       $chatstate(w)
+    set wtext   $chatstate(wtext)
+    set jid     $chatstate(jid)
+    set whom    [lindex $spec 0]
+    set history [expr {[lsearch $spec "history"] >= 0 ? 1 : 0}]
         
     switch -- $whom {
 	me {
@@ -589,26 +596,32 @@ proc ::Chat::InsertMessage {chattoken whom body args} {
 	    append prefix "<$name>"
 	}
 	sys {
+	    # empty
 	}
+    }
+    set htag ""
+    if {$history} {
+	set htag -history
     }
     $wtext configure -state normal
     
     switch -- $whom {
 	me {
-	    $wtext insert end $prefix mepre
-	    $wtext insert end "   " metext
-	    ::Text::ParseMsg chat $jid $wtext $body metext
+	    $wtext insert end $prefix mepre$htag
+	    $wtext insert end "   " metext$htag
+	    ::Text::ParseMsg chat $jid $wtext $body metext$htag
 	    $wtext insert end \n
 	}
 	you {
-	    $wtext insert end $prefix youpre
-	    $wtext insert end "   " youtext
-	    ::Text::ParseMsg chat $jid $wtext $body youtext
+	    $wtext insert end $prefix youpre$htag
+	    $wtext insert end "   " youtext$htag
+	    ::Text::ParseMsg chat $jid $wtext $body youtext$htag
 	    $wtext insert end \n
 	}
 	sys {
-	    $wtext insert end $prefix syspre
-	    $wtext insert end $body systext
+	    $wtext insert end $prefix syspre$htag
+	    $wtext insert end $body systext$htag
+	    #$wtext insert end \n
 	}
     }
 
@@ -620,12 +633,23 @@ proc ::Chat::InsertMessage {chattoken whom body args} {
 # 
 #       Find any matching history record and insert into dialog.
 
-proc ::Chat::InsertHistory {chattoken {which thread} {detail ""}} {
+proc ::Chat::InsertHistory {chattoken args} {
     global  prefs this
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    ::Debug 2 "::Chat::InsertHistory which=$which, detail=$detail"
+    ::Debug 2 "::Chat::InsertHistory $args"
+    
+    array set opts {
+	-last      -1
+	-maxage     0
+	-thread     0
+    }
+    array set opts $args
+    
+    if {$opts(-last) == 0} {
+	return
+    }
     
     # First find any matching history file.
     set jid2 $chatstate(jid2)
@@ -636,31 +660,27 @@ proc ::Chat::InsertHistory {chattoken {which thread} {detail ""}} {
     
     array set msg [::History::ReadMessageFile $jid2]
     set names [lsort -integer [array names msg]]
-    set keys {}
+    set keys $names
 
-    switch -- $which {
-	thread {	
-	    # Collect all matching threads.	
-	    foreach i $names {
-		array unset tmp
-		array set tmp $msg($i)
-		if {[info exists tmp(-thread)] && \
-		  [string equal $tmp(-thread) $threadID]} {
-		    lappend keys $i
-		}
-	    }
-	}
-	all {
-	    # All.
-	    set keys $names
-	}
-	last {
-	    # Last number
-	    if {[string is integer -strict $detail]} {
-		set keys [lrange $names end-$detail end]
+    # Start with the complete message history and limit using the options.
+    if {$opts(-thread)} {
+	
+	# Collect all matching threads.	
+	set keys {}
+	foreach i $names {
+	    array unset tmp
+	    array set tmp $msg($i)
+	    if {[info exists tmp(-thread)] && \
+	      [string equal $tmp(-thread) $threadID]} {
+		lappend keys $i
 	    }
 	}
     }
+    if {$opts(-last) >= 0} {
+	set keys [lrange $names end-$opts(-last) end]
+    }
+    set now [clock seconds]
+    set maxage $opts(-maxage)
     
     foreach i $keys {
 	array unset tmp
@@ -671,6 +691,11 @@ proc ::Chat::InsertHistory {chattoken {which thread} {detail ""}} {
 
 	if {$tmp(-time) ne ""} {
 	    set secs [clock scan $tmp(-time)]
+	    if {$maxage} {
+		if {[expr {$now - $secs}] > $maxage} {
+		    continue
+		}
+	    }
 	} else {
 	    set secs ""
 	}
@@ -679,7 +704,8 @@ proc ::Chat::InsertHistory {chattoken {which thread} {detail ""}} {
 	} else {
 	    set whom me
 	}
-	InsertMessage $chattoken $whom $tmp(-body) -secs $secs \
+	set spec [list $whom history]
+	InsertMessage $chattoken $spec $tmp(-body) -secs $secs \
 	  -jidfrom $tmp(-name)
     }
 }
@@ -796,7 +822,8 @@ proc ::Chat::Build {threadID args} {
     
     # Use an extra frame that contains everything thread specific.
     set chattoken [eval {
-	BuildThreadWidget $dlgtoken $wthread $threadID} $args]
+	BuildThreadWidget $dlgtoken $wthread $threadID
+    } $args]
     pack $wthread -in $wcont -fill both -expand 1
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -1475,7 +1502,7 @@ proc ::Chat::BuildSavedDialogs { } {
 	set chattoken [GetTokenFrom chat jid ${jid}*]
 	if {$chattoken eq ""} {
 	    set chattoken [StartThread $jid]
-	    InsertHistory $chattoken last $jprefs(chat,histLen)
+	    InsertHistory $chattoken -last $jprefs(chat,histLen)
 	}
     }
 }
@@ -1492,8 +1519,9 @@ proc ::Chat::SaveDialogs { } {
     }
     set mejidmap $cprefs(lastmejid)
     array set dlgArr $jprefs(chat,dialogs)
-    array unset dlgArr [ESCglobs $mejidmap]
-
+    #array unset dlgArr [ESCglobs $mejidmap]
+    unset -nocomplain dlgArr($mejidmap)
+    
     foreach chattoken [GetTokenList chat] {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
@@ -1518,12 +1546,13 @@ proc ::Chat::ConfigureTextTags {w wtext} {
 	set chatFont [option get $wtext font Font]
     }
     set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
+    set foreground [$wtext cget -foreground]
 
     foreach tag $alltags {
-	set opts($tag) [list -spacing1 $space]
+	set opts($tag) [list -spacing1 $space -foreground $foreground]
     }
     foreach spec $chatOptions {
-	foreach {tag optName resName resClass} $spec break
+	lassign $spec tag optName resName resClass
 	set value [option get $w $resName $resClass]
 	if {[string equal $optName "-font"]} {
 	    
@@ -1544,8 +1573,18 @@ proc ::Chat::ConfigureTextTags {w wtext} {
     lappend opts(youtext)  -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(systext)  -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(histhead) -spacing1 4 -spacing3 4 -lmargin1 20 -lmargin2 20
+
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
+    }
+    
+    # History tags.
+    foreach tag $alltags {
+	set htag ${tag}-history
+	array unset arr
+	array set arr $opts($tag)
+	set arr(-foreground) [::colorutils::getlighter $arr(-foreground)]
+	eval {$wtext tag configure $htag} [array get arr]
     }
 }
 
@@ -1687,7 +1726,7 @@ proc ::Chat::Send {dlgtoken} {
     set opts {}
     if {![string equal $chatstate(subject) $chatstate(lastsubject)]} {
 	lappend opts -subject $chatstate(subject)
-	InsertMessage $chattoken sys "Subject: $chatstate(subject)\n"
+	InsertMessage $chattoken sys "Subject: $chatstate(subject)"
     }
     set chatstate(lastsubject) $chatstate(subject)
     
@@ -2239,12 +2278,14 @@ proc ::Chat::InitPrefsHook { } {
     set jprefs(inbox2click)   "newwin"
     set jprefs(chat,normalAsChat) 0
     set jprefs(chat,histLen)      10
+    set jprefs(chat,histAge)      0
     
     ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(showMsgNewWin) jprefs_showMsgNewWin $jprefs(showMsgNewWin)]  \
       [list ::Jabber::jprefs(inbox2click)   jprefs_inbox2click   $jprefs(inbox2click)]  \
       [list ::Jabber::jprefs(chat,normalAsChat)   jprefs_chatnormalAsChat   $jprefs(chat,normalAsChat)]  \
       [list ::Jabber::jprefs(chat,histLen)  jprefs_chathistLen   $jprefs(chat,histLen)]  \
+      [list ::Jabber::jprefs(chat,histAge)  jprefs_chathistAge   $jprefs(chat,histAge)]  \
       [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)] \
       ]    
 }
@@ -2263,7 +2304,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
     
     foreach key {
 	chatActiveRet showMsgNewWin inbox2click chat,normalAsChat
-	chat,histLen
+	chat,histLen chat,histAge
     } {
 	set tmpJPrefs($key) $jprefs($key)
     }
@@ -2297,18 +2338,31 @@ proc ::Chat::BuildPrefsPage {wpage} {
     ttk::label $wca.lhist -text "[mc {History length}]:"
     spinbox $wca.shist -width 4 -from 0 -increment 5 -to 1000 -state readonly \
       -textvariable [namespace current]::tmpJPrefs(chat,histLen)
-
-    grid  $wca.active  -  -sticky w
-    grid  $wca.newwin  -  -sticky w
-    grid  $wca.normal  -  -sticky w
-    grid  $wca.sep     -  -sticky ew -pady 6
-    grid  $wca.lmb2    -  -sticky w
-    grid  $wca.rb2new  -  -sticky w
-    grid  $wca.rb2re   -  -sticky w
-    grid  $wca.sep2    -  -sticky ew -pady 6
-    grid  $wca.lhist   $wca.shist  -sticky w
+    ttk::label $wca.lage -text "not older than:"
+    set mb $wca.mbage
+    set menuDef [list                \
+	[mc "Ten seconds"]       10  \
+	[mc "One minute"]        60  \
+	[mc "Ten minutes"]      600  \
+	[mc "One hour"]        3600  \
+	[mc "No restriction"]     0  \
+    ]
+    ui::optionmenu $mb -menulist $menuDef -direction flush \
+      -variable [namespace current]::tmpJPrefs(chat,histAge)
+    $mb set $tmpJPrefs(chat,histAge)
+    
+    grid  $wca.active  -  -  -  -sticky w
+    grid  $wca.newwin  -  -  -  -sticky w
+    grid  $wca.normal  -  -  -  -sticky w
+    grid  $wca.sep     -  -  -  -sticky ew -pady 6
+    grid  $wca.lmb2    -  -  -  -sticky w
+    grid  $wca.rb2new  -  -  -  -sticky w
+    grid  $wca.rb2re   -  -  -  -sticky w
+    grid  $wca.sep2    -  -  -  -sticky ew -pady 6
+    grid  $wca.lhist   $wca.shist  $wca.lage  $wca.mbage  -sticky w
     
     grid columnconfigure $wca 1 -weight 1
+    grid columnconfigure $wca 3 -minsize [$mb maxwidth]
 
     pack  $wca  -side top -fill x
 }

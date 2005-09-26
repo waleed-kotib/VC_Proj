@@ -5,13 +5,12 @@
 #
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.32 2005-09-23 14:27:10 matben Exp $
+# $Id: SetupAss.tcl,v 1.33 2005-09-26 11:59:16 matben Exp $
 
 package require wizard
 package require chasearrows
 package require http 2.3
 package require tinydom
-package require tablelist
 
 package provide SetupAss 1.0
 

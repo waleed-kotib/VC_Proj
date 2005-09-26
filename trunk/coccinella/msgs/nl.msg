@@ -898,8 +898,8 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jaupdatepri	{Dit is update %s}
 ::msgcat::mcset nl jaupdatenewver {De nieuwe versie is: %s}
 ::msgcat::mcset nl jaupdateremind {Deze boodschap niet meer tonen}
-::msgcat::mcset nl jasettopic   {Nieuw onderwerp instellen voor deze chatruimte.}
-#::msgcat::mcset nl jasettopic2  {Set new topic for this room.}
+# remove-- ::msgcat::mcset nl jasettopic   {Nieuw onderwerp instellen voor deze chatruimte.}
+# new-- ::msgcat::mcset nl jasettopic2  {Set new topic for this room.}
 ::msgcat::mcset nl jadirpresmsg {Voorgeschreven aanwezigheid verzenden naar "%s".}
 ::msgcat::mcset nl jatlsnegot   {Bezig met het tot stand brengen van een met TLS beveiligde verbinding...}
 ::msgcat::mcset nl jamucentermsg {Voer een bijnaam in en druk op de knop "Betreden" om een chatruimte te betreden. U kunt met de knop "Browse" een lijst van chatruimtes verkrijgen op de geselecteerde server. Voor sommige chatruimtes hebt u een wachtwoord nodig.}

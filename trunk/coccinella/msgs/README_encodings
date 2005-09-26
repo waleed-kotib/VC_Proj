@@ -53,10 +53,6 @@ set fddst [open $dst "w"]
 fconfigure $fddst -encoding utf-8
 puts $fddst $txt
 close $fddst
-if {$::tcl_platform(platform) == "macintosh"} {
-    set creator [file attributes $src -creator]
-    file attributes $dst -creator $creator
-}
 
 ........................................................................
 

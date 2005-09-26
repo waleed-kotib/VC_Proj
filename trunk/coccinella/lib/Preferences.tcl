@@ -5,11 +5,10 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.80 2005-09-20 14:09:51 matben Exp $
+# $Id: Preferences.tcl,v 1.81 2005-09-26 11:59:16 matben Exp $
  
 package require mnotebook
 package require tree
-package require tablelist
 package require combobox
 
 package provide Preferences 1.0
