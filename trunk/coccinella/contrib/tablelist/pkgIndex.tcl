@@ -14,14 +14,14 @@ if {[string compare $::tcl_platform(platform) "macintosh"] == 0} {
 }
 
 foreach package {Tablelist tablelist} {
-    package ifneeded $package 4.0 "
+    package ifneeded $package 4.1 "
 	[list source [file join $dir tablelistPublic.tcl]]
 	[list source [file join $dir tablelist.tcl]]
     "
 }
 
 foreach package {Tablelist_tile tablelist_tile} {
-    package ifneeded $package 4.0 "
+    package ifneeded $package 4.1 "
 	[list source [file join $dir tablelistPublic.tcl]]
 	[list source [file join $dir tablelist_tile.tcl]]
     "

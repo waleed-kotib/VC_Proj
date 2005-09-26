@@ -1,5 +1,73 @@
-What is new in Tablelist 4.0?
+What is new in Tablelist 4.1?
 -----------------------------
+
+1.  Significantly extended the tile support in the Tablelist_tile
+    package:  Header labels now look and behave like the column
+    headings of treeview widgets, and over a dozen configuration
+    options have theme-specific default values (thanks to Paul
+    Obermeier for his excellent "poImgview" application, which helped
+    me a lot during this work, as well as to Georgios Petasis for his
+    Qt-related hints).
+
+2.  Header labels containing the mouse cursor are now set into active
+    state.  Their appearance is controlled in the Tablelist package by
+    the new configuration options "-labelactivebackground" and
+    "-labelactiveforeground", while the Tablelist_tile package uses
+    theme-specific background and foreground colors for the active and
+    pressed states of the labels.
+
+3.  New configuration option "-arrowstyle", specifying the flat or
+    sunken relief and the dimensions of the arrow indicating the
+    sorting order.  This option has windowing system- and theme-
+    specific default values.
+
+4.  New configuration option "-protecttitlecolumns", used to protect
+    the title column boundary from being crossed when moving a column
+    interactively (thanks to Schelte Bron for his proposal).
+
+5.  New configuration option "-spacing", specifying additional space to
+    provide above and below each tablelist row (thanks to Sebastien
+    Barre for his proposal).
+
+6.  New column configuration option "-stretchable", complementing the
+    global "-stretch" option (thanks to Sebastien Barre for his
+    proposal).
+
+7.  New row configuration option "-name", whose value can also be used
+    as a row index and as the first component of a cell index (thanks
+    to John Kozura for his proposal).
+
+8.  New cell configuration option "-windowdestroy", specifying a script
+    to be invoked when a window embedded into the cell is destroyed
+    (thanks to Sebastien Barre for his proposal).
+
+9.  New "imagelabelpath" subcommand (thanks to Schelte Bron for his
+    proposal).
+
+10. Keyboard navigation during interactive cell editing now works on
+    Mac OS X Aqua, too.
+
+11. Restored the support for Tcl/Tk versions earlier than 8.3, by
+    cleaning up the handling of the "-titlecolumns" option (thanks to
+    Andreas Flach and Brian O'Hagan for their bug reports).
+
+12. Restored the support for Tcl/Tk versions earlier than 8.0.4, which
+    has been broken since release 3.5, due to the use of the
+    <MouseWheel> event, introduced in Tk 8.0.4 (thanks to Brian O'Hagan
+    for his valuable contribution).
+
+13. Worked around a peculiarity of the text widget's "dump -window"
+    command (thanks to Greg Reynolds for his bug-fix).
+
+14. Fixed a binding-related bug in "extended" selection mode (thanks to
+    David Mattinson for his bug-fix).
+
+15. Numerous further improvements and minor bug fixes (thanks to
+    Schelte Bron, Patrick Fradin, Silas Justiniano, and Uwe Koloska for
+    their bug reports and valuable contributions).
+
+What was new in Tablelist 4.0?
+------------------------------
 
 1.  Support for the tile entry, combobox, and checkbutton widgets for
     interactive cell editing (thanks to Miguel Bagnon, Andy Black,
