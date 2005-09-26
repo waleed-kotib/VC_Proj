@@ -148,7 +148,7 @@ namespace eval tablelist {
 	# Define some bindings for the binding tag TablelistEdit that
 	# propagate the mousewheel events to the tablelist's body
 	#
-	if {[string compare $::tk_patchLevel "8.0.4"] >= 0} {
+	catch {
 	    bind TablelistEdit <MouseWheel> {
 		if {![tablelist::isComboTopMapped %W]} {
 		    tablelist::genMouseWheelEvent \
@@ -1092,13 +1092,26 @@ proc tablelist::createTileCheckbutton {w args} {
 	}
 
 	tileqt {
-	    switch [tile::theme::tileqt::currentThemeName] {
-		Keramik -
-		ThinKeramik { set height 16 }
-		default     { set height [winfo reqheight $w] }
+	    switch -- [string tolower [tile::theme::tileqt::currentThemeName]] {
+		acqua {
+		    [winfo parent $w] configure -width 17 -height 18
+		    place $w -x -1 -y -2
+		}
+		kde_xp {
+		    [winfo parent $w] configure -width 13 -height 13
+		    place $w -x 0
+		}
+		keramik -
+		thinkeramik {
+		    [winfo parent $w] configure -width 16 -height 16
+		    place $w -x 0
+		}
+		default {
+		    set height [winfo reqheight $w]
+		    [winfo parent $w] configure -width $height -height $height
+		    place $w -x 0
+		}
 	    }
-	    [winfo parent $w] configure -width $height -height $height
-	    place $w -x 0
 	}
 
 	winnative -
@@ -1203,7 +1216,7 @@ proc tablelist::editcellSubCmd {win row col restore {cmd ""} {charPos -1}} {
     catch {$w configure -highlightthickness 0}
     set class [winfo class $w]
     set isMentry [expr {[string compare $class "Mentry"] == 0}]
-    set isCheckbtn [regexp {^T?Checkbutton$} $class]
+    set isCheckbtn [string match "*Checkbutton" $class]
     set alignment [lindex $data(colList) [expr {2*$col + 1}]]
     if {!$isMentry} {
 	catch {$w configure -justify $alignment}
@@ -1359,6 +1372,7 @@ proc tablelist::editcellSubCmd {win row col restore {cmd ""} {charPos -1}} {
 	}
 	incr pixels $data($col-delta)
 	adjustEditWindow $win $pixels
+	update idletasks
     }
 
     adjustSepsWhenIdle $win
@@ -1391,22 +1405,25 @@ proc tablelist::canceleditingSubCmd win {
 		[list $win $row $col $data(origEditText)]
     }
 
-    destroy $data(bodyFr)
-    set item [lindex $data(itemList) $row]
-    set key [lindex $item end]
-    if {[info exists data($key-$col-window)]} {
-	doCellConfig $row $col $win -window $data($key-$col-window)
-    } elseif {[info exists data($key-$col-image)]} {
-	doCellConfig $row $col $win -image $data($key-$col-image)
+    if {[winfo exists $data(bodyFr)]} {
+	destroy $data(bodyFr)
+	set item [lindex $data(itemList) $row]
+	set key [lindex $item end]
+	if {[info exists data($key-$col-window)]} {
+	    doCellConfig $row $col $win -window $data($key-$col-window)
+	} elseif {[info exists data($key-$col-image)]} {
+	    doCellConfig $row $col $win -image $data($key-$col-image)
+	}
+	doCellConfig $row $col $win -text [lindex $item $col]
     }
-    doCellConfig $row $col $win -text [lindex $item $col]
+
     focus $data(body)
     set data(canceled) 1
+    event generate $win <<TablelistCellRestored>>
 
     adjustSepsWhenIdle $win
     adjustElidedTextWhenIdle $win
     updateImgLabelsWhenIdle $win
-    event generate $win <<TablelistCellRestored>>
     return ""
 }
 
@@ -1435,7 +1452,7 @@ proc tablelist::finisheditingSubCmd win {
     set w $data(bodyFrEd)
     set class [winfo class $w]
     set isMentry [expr {[string compare $class "Mentry"] == 0}]
-    set isCheckbtn [regexp {^T?Checkbutton$} $class]
+    set isCheckbtn [string match "*Checkbutton" $class]
     if {$isMentry} {
 	set text [$w getstring]
     } elseif {$isCheckbtn} {
@@ -1465,29 +1482,40 @@ proc tablelist::finisheditingSubCmd win {
     # statement or within the command specified by the -editendcommand option)
     #
     if {$data(rejected)} {
-	seecellSubCmd $win $row $col
-	if {!$isMentry} {
-	    focus $data(editFocus)
+	if {[winfo exists $data(bodyFr)]} {
+	    seecellSubCmd $win $row $col
+	    if {!$isMentry} {
+		focus $data(editFocus)
+	    }
+	} else {
+	    focus $data(body)
 	}
-	set data(rejected) 0
-	return 0
-    } else {
-	destroy $data(bodyFr)
-	set key [lindex $item end]
-	if {[info exists data($key-$col-window)]} {
-	    doCellConfig $row $col $win -window $data($key-$col-window)
-	} elseif {[info exists data($key-$col-image)]} {
-	    doCellConfig $row $col $win -image $data($key-$col-image)
-	}
-	doCellConfig $row $col $win -text $text
-	focus $data(body)
 
-	adjustSepsWhenIdle $win
-	adjustElidedTextWhenIdle $win
-	updateImgLabelsWhenIdle $win
+	set data(rejected) 0
+	set result 0
+    } else {
+	if {[winfo exists $data(bodyFr)]} {
+	    destroy $data(bodyFr)
+	    set key [lindex $item end]
+	    if {[info exists data($key-$col-window)]} {
+		doCellConfig $row $col $win -window $data($key-$col-window)
+	    } elseif {[info exists data($key-$col-image)]} {
+		doCellConfig $row $col $win -image $data($key-$col-image)
+	    }
+	    doCellConfig $row $col $win -text $text
+	    set result 1
+	} else {
+	    set result 0
+	}
+
+	focus $data(body)
 	event generate $win <<TablelistCellUpdated>>
-	return 1
     }
+
+    adjustSepsWhenIdle $win
+    adjustElidedTextWhenIdle $win
+    updateImgLabelsWhenIdle $win
+    return $result
 }
 
 #------------------------------------------------------------------------------
@@ -1645,7 +1673,7 @@ proc tablelist::saveEditData win {
     set entry $data(editFocus)
     set class [winfo class $w]
     set isMentry [expr {[string compare $class "Mentry"] == 0}]
-    set isCheckbtn [regexp {^T?Checkbutton$} $class]
+    set isCheckbtn [string match "*Checkbutton" $class]
 
     #
     # Miscellaneous data
@@ -1722,7 +1750,7 @@ proc tablelist::restoreEditData win {
     set entry $data(editFocus)
     set class [winfo class $w]
     set isMentry [expr {[string compare $class "Mentry"] == 0}]
-    set isCheckbtn [regexp {^T?Checkbutton$} $class]
+    set isCheckbtn [string match "*Checkbutton" $class]
     set isIncrDateTimeWidget [regexp {^(Date.+|Time.+)$} $class]
 
     #

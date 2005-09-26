@@ -80,8 +80,8 @@ How to get it?
 --------------
 
 Tablelist is available for free download from the same URL as Wcb.  The
-distribution file is "tablelist4.0.tar.gz" for UNIX and
-"tablelist4_0.zip" for Windows.  These files contain the same
+distribution file is "tablelist4.1.tar.gz" for UNIX and
+"tablelist4_1.zip" for Windows.  These files contain the same
 information, except for the additional carriage return character
 preceding the linefeed at the end of each line in the text files for
 Windows.
@@ -96,22 +96,23 @@ locations of these library directories are given by the "tcl_library"
 and "tk_library" variables, respectively.
 
 To install Tablelist on UNIX, "cd" to the desired directory and unpack
-the distribution file "tablelist4.0.tar.gz":
+the distribution file "tablelist4.1.tar.gz":
 
-    gunzip -c tablelist4.0.tar.gz | tar -xf -
+    gunzip -c tablelist4.1.tar.gz | tar -xf -
 
-This command will create a directory named "tablelist4.0", with the
+This command will create a directory named "tablelist4.1", with the
 subdirectories "demos", "doc", "images", and "scripts".
 
 On Windows, use WinZip or some other program capable of unpacking the
-distribution file "tablelist4_0.zip" into the directory "tablelist4.0",
+distribution file "tablelist4_1.zip" into the directory "tablelist4.1",
 with the subdirectories "demos", "doc", "images", and "scripts".
 
-Note that the directory "images" and the file "tablelistEdit.tcl" in
-the "scripts" directory are only needed for applications making use of
-interactive cell editing.  Similarly, the file "tablelistMove.tcl" in
-the same directory is only needed for applications invoking the "move"
-or "movecolumn" tablelist command.
+Note that the file "tablelistEdit.tcl" in the "scripts" directory is
+only needed for applications making use of interactive cell editing.
+Similarly, the file "tablelistMove.tcl" in the same directory is only
+required for scripts invoking the "move" or "movecolumn" tablelist
+command.  Finally, the file "tablelistThemes.tcl" is only needed for
+applications using the package Tablelist_tile (see next section).
 
 Next, you should check the exact version number of your Tcl/Tk
 distribution, given by the "tcl_patchLevel" and "tk_patchLevel"

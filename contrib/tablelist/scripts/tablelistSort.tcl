@@ -154,7 +154,7 @@ proc tablelist::sortSubCmd {win col order} {
 	#
 	set data(arrowCol) $col
 	configCanvas $win
-	drawArrows $win
+	raiseArrow $win
 
 	#
 	# Make sure the arrow will fit into the column
