@@ -893,7 +893,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jaupdatepri	{This update is %s}
 ::msgcat::mcset en jaupdatenewver {The new version is: %s}
 ::msgcat::mcset en jaupdateremind {Don't remind me about this anymore}
-::msgcat::mcset en jasettopic   {Set new topic for this groupchat.}
+# remove-- ::msgcat::mcset en jasettopic   {Set new topic for this groupchat.}
 ::msgcat::mcset en jasettopic2  {Set new topic for this room.}
 ::msgcat::mcset en jadirpresmsg {Send directed presence to the user "%s".}
 ::msgcat::mcset en jatlsnegot   {Negotiating TLS security...}

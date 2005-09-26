@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.99 2005-09-23 14:27:10 matben Exp $
+# $Id: UI.tcl,v 1.100 2005-09-26 11:59:16 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -29,6 +29,7 @@ namespace eval ::UI:: {
     option add *question64Image          question64     widgetDefault
 
     option add *badgeImage               Coccinella     widgetDefault
+    #option add *badgeImage               coccinella64   widgetDefault
     option add *applicationImage         coccinella64   widgetDefault
     
     variable wThatUseMainMenu {}
@@ -371,7 +372,7 @@ proc ::UI::IsAppInFront { } {
     set isfront 0
     set wfocus [focus]
     foreach w [wm stackorder .] {
-	#puts "w=$w, state=[wm state $w], wfocus=$wfocus"
+	puts "w=$w, state=[wm state $w], wfocus=$wfocus"
 	if {[string equal [wm state $w] "normal"]} {
 	    if {($wfocus ne "") && [string equal [winfo toplevel $wfocus] $w]} {
 		set isfront 1
@@ -379,7 +380,7 @@ proc ::UI::IsAppInFront { } {
 	    }
 	}
     }
-    #puts "isfront=$isfront"
+    puts "isfront=$isfront"
     return $isfront
 }
 

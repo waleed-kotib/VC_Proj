@@ -12,10 +12,10 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.126 2005-09-24 14:21:58 matben Exp $	
+# $Id: Coccinella.tcl,v 1.127 2005-09-26 11:59:16 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
-set debugLevel 4
+set debugLevel 0
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -188,7 +188,7 @@ set packages(generic) {
 }
 set packages(uibase) {
     balloonhelp
-    tablelist
+    Tablelist_tile
     ttoolbar
     ui::util
     ui::dialog
