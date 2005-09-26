@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.134 2005-09-22 06:49:11 matben Exp $
+# $Id: Roster.tcl,v 1.135 2005-09-26 14:43:47 matben Exp $
 
 package provide Roster 1.0
 
@@ -834,19 +834,21 @@ proc ::Roster::SetItem {jid args} {
     
     if {$doAdd} {
     
-	# We get a sublist for each resource. IMPORTANT!
-	# Add all resources for this jid?
+	# Add only the one with highest priority.
 	jlib::splitjid $jid jid2 res
-	set presenceList [$jstate(roster) getpresence $jid2]
-	::Debug 2 "\t presenceList=$presenceList"
-	
-	foreach pres $presenceList {
-	    unset -nocomplain presArr
-	    array set presArr $pres
-	    
-	    # Put in our roster tree.
-	    eval {TreeNewItem $jid $presArr(-type)} $args $pres
+	set res [$jstate(roster) gethighestresource $jid2]
+	if {$res ne ""} {
+	    set jid3 $jid2/$res
+	} else {
+	    set jid3 $jid2
 	}
+	set pres [lindex [$jstate(roster) getpresence $jid3] 0]
+	set type [$jstate(roster) gettype $jid3]
+
+	::Debug 2 "\t type=$type, pres=$pres"
+	
+	# Put in our roster tree.
+	eval {TreeNewItem $jid $type} $args $pres
     }
     TreeRemoveEmpty
 }

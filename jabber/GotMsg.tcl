@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.41 2005-08-14 07:10:51 matben Exp $
+# $Id: GotMsg.tcl,v 1.42 2005-09-26 14:43:47 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -52,8 +52,9 @@ proc ::GotMsg::GotMsg {id} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "GotMsg::GotMsg id=$id"
-    set w $wDlgs(jgotmsg)
     
+    set w $wDlgs(jgotmsg)
+        
     # Queue up this message or show right away?
     if {[winfo exists $w]} {
 	$wbtnext state {!disabled}

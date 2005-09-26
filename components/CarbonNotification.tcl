@@ -3,7 +3,7 @@
 #       Demo of some of the functionality for components.
 #       This is just a first sketch.
 #       
-# $Id: CarbonNotification.tcl,v 1.6 2005-09-21 09:53:23 matben Exp $
+# $Id: CarbonNotification.tcl,v 1.7 2005-09-26 14:43:47 matben Exp $
 
 namespace eval ::CarbonNotification:: { }
 
@@ -27,6 +27,11 @@ proc ::CarbonNotification::Init { } {
 
 proc ::CarbonNotification::EventHook {args} {    
 
+    after idle ::CarbonNotification::IdleCall
+}
+
+proc ::CarbonNotification::IdleCall {} {
+    
     # Notify only if in background.
     if {![::UI::IsAppInFront]} {
 	tclCarbonNotification 1 ""

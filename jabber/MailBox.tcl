@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.73 2005-09-21 09:53:23 matben Exp $
+# $Id: MailBox.tcl,v 1.74 2005-09-26 14:43:47 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -61,7 +61,7 @@ namespace eval ::MailBox:: {
     ::hooks::register initHook        ::MailBox::Init
     ::hooks::register prefsInitHook   ::MailBox::InitPrefsHook
     ::hooks::register launchFinalHook ::MailBox::LaunchHook
-    ::hooks::register newMessageHook  ::MailBox::GotMsg
+    ::hooks::register newMessageHook  ::MailBox::MessageHook    10
     ::hooks::register jabberInitHook  ::MailBox::InitHandler
     ::hooks::register quitAppHook     ::MailBox::QuitHook
 
@@ -629,7 +629,7 @@ proc ::MailBox::MarkMsgAsRead {uid} {
     }
 }
 
-# MailBox::GotMsg --
+# MailBox::MessageHook --
 #
 #       Called when we get an incoming message. Stores the message.
 #       Should never be called for whiteboard messages.
@@ -641,7 +641,7 @@ proc ::MailBox::MarkMsgAsRead {uid} {
 # Results:
 #       updates UI.
 
-proc ::MailBox::GotMsg {bodytxt args} {
+proc ::MailBox::MessageHook {bodytxt args} {
     global  prefs
 
     variable locals
@@ -650,17 +650,17 @@ proc ::MailBox::GotMsg {bodytxt args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::MailBox::GotMsg args='$args'"
+    ::Debug 2 "::MailBox::MessageHook bodytxt='$bodytxt', args='$args'"
+
+    array set argsArr $args
     
     # Ignore messages with empty body and subject. 
     # They are probably not for display.
-    if {$bodytxt == ""} {
-	array set argsArr $args
-	if {[info exists argsArr(-subject)]} {
-	    if {$argsArr(-subject) == ""} {
-		return
-	    }
-	} else {
+    if {$bodytxt eq ""} {
+	if {![info exists argsArr(-subject)]} {
+	    return
+	}
+	if {$argsArr(-subject) eq ""} {
 	    return
 	}
     }
@@ -692,7 +692,8 @@ proc ::MailBox::GotMsg {bodytxt args} {
     ::Jabber::UI::MailBoxState nonempty
     
     # Any separate window.
-    if {$jprefs(showMsgNewWin)} {
+    # @@@ as hook instead
+    if {$jprefs(showMsgNewWin) && ($bodytxt ne "")} {
 	::GotMsg::GotMsg $uidmsg
     }
 }
@@ -787,7 +788,7 @@ proc ::MailBox::HandleSVGWBMessage {jlibname xmlns msgElem args} {
 proc ::MailBox::MakeMessageList {body args} {
     variable locals
     variable uidmsg
-    
+        
     array set argsArr {
 	-from unknown -subject {}
     }
