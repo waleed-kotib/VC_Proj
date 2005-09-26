@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.111 2005-09-23 14:27:10 matben Exp $
+# $Id: jabberlib.tcl,v 1.112 2005-09-26 14:43:47 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1210,14 +1210,14 @@ proc jlib::message_handler {jlibname xmldata} {
     # Make an argument list ('-key value' pairs) suitable for callbacks.
     # Make variables of the attributes.
     foreach {key value} [array get attrArr] {
-	set opts(-$key) $value
+	set vopts(-$key) $value
     }
     set ishandled 0
     
     switch -- $type {
 	error {
 	    set errspec [getstanzaerrorspec $xmldata]
-	    set opts(-error) $errspec
+	    set vopts(-error) $errspec
 	}
     }
    
@@ -1232,7 +1232,7 @@ proc jlib::message_handler {jlibname xmldata} {
 	
 	switch -- $ctag {
 	    body - subject - thread {
-		set opts(-$ctag) $cchdata
+		set vopts(-$ctag) $cchdata
 	    }
 	    error {
 		# handled above
@@ -1244,7 +1244,7 @@ proc jlib::message_handler {jlibname xmldata} {
 	}
     }
     set xmlnsList [lsort -unique $xmlnsList]	
-    set arglist [array get opts]
+    set arglist [array get vopts]
     
     # Invoke any registered handler for this particular message.
     set iscallback 0
@@ -1262,7 +1262,7 @@ proc jlib::message_handler {jlibname xmldata} {
 
     # Invoke any registered message handlers for this type and xmlns.
     if {[array exists elem]} {
-	set arglist [concat [array get opts] [array get elem]]
+	set arglist [concat [array get vopts] [array get elem]]
 	foreach xmlns $xmlnsList {
 	    set ishandled [eval {
 		message_run_hook $jlibname $type $xmlns $xmldata} $arglist]

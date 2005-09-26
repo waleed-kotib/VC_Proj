@@ -4,7 +4,7 @@
 #       background.
 #       This is just a first sketch.
 #       
-# $Id: Notifier.tcl,v 1.3 2005-08-14 08:37:51 matben Exp $
+# $Id: Notifier.tcl,v 1.4 2005-09-26 14:43:47 matben Exp $
 
 namespace eval ::Notifier:: {
     
@@ -69,6 +69,7 @@ proc ::Notifier::OOBSetHook {from subiq args} {
 proc ::Notifier::DisplayMsg {str} {
     upvar ::Jabber::jprefs jprefs
     
+    # @@@ ::UI::IsAppInFront is not reliable...
     if {$jprefs(notifier,state) && ![::UI::IsAppInFront]} {
 	::notebox::addmsg $str
     }

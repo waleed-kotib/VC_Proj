@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.100 2005-09-26 11:59:16 matben Exp $
+# $Id: UI.tcl,v 1.101 2005-09-26 14:43:47 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -365,6 +365,11 @@ proc ::UI::GetScreenSize { } {
     return [list [winfo vrootwidth .] [winfo vrootheight .]]
 }
 
+# UI::IsAppInFront --
+# 
+#       Tells if application is frontmost (active).
+#       [focus] is not reliable so it is better called after idle.
+
 proc ::UI::IsAppInFront { } {
     
     # The 'wm stackorder' is not reliable in sorting windows!
@@ -372,7 +377,6 @@ proc ::UI::IsAppInFront { } {
     set isfront 0
     set wfocus [focus]
     foreach w [wm stackorder .] {
-	puts "w=$w, state=[wm state $w], wfocus=$wfocus"
 	if {[string equal [wm state $w] "normal"]} {
 	    if {($wfocus ne "") && [string equal [winfo toplevel $wfocus] $w]} {
 		set isfront 1
@@ -380,7 +384,6 @@ proc ::UI::IsAppInFront { } {
 	    }
 	}
     }
-    puts "isfront=$isfront"
     return $isfront
 }
 
