@@ -471,13 +471,11 @@
 ::msgcat::mcset en {No Available}
 ::msgcat::mcset en {No Inbox}
 ::msgcat::mcset en {No Printing}
+::msgcat::mcset en {No Restriction}
 ::msgcat::mcset en {Not Available}
 ::msgcat::mcset en {Not available}
 ::msgcat::mcset en {Not Connected}
 ::msgcat::mcset en {Once per session}
-::msgcat::mcset en {One hour} 
-::msgcat::mcset en {One day} 
-::msgcat::mcset en {One week} 
 ::msgcat::mcset en {Open Canvas}
 ::msgcat::mcset en {Open Failed}
 ::msgcat::mcset en {Open Helpfile}
@@ -566,6 +564,14 @@
 ::msgcat::mcset en {Version Info}
 ::msgcat::mcset en {Whiteboard fonts}
 ::msgcat::mcset en {Writing file}
+
+# Time intervals.
+::msgcat::mcset en {Ten seconds}
+::msgcat::mcset en {One minute}
+::msgcat::mcset en {Ten minutes}
+::msgcat::mcset en {One hour} 
+::msgcat::mcset en {One day} 
+::msgcat::mcset en {One week} 
 
 
 # Splash screen:

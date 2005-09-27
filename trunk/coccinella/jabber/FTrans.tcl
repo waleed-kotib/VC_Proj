@@ -5,12 +5,11 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.4 2005-09-22 06:49:11 matben Exp $
+# $Id: FTrans.tcl,v 1.5 2005-09-27 13:31:34 matben Exp $
 
 package require snit 1.0
 package require uriencode
 package require jlib::ftrans
-package require ui::util
 package require ui::progress
 package require ui::dialog
 
@@ -18,6 +17,9 @@ package provide FTrans 1.0
 
 namespace eval ::FTrans {
 
+    ::hooks::register prefsInitHook          ::FTrans::InitPrefsHook
+    ::hooks::register jabberInitHook         ::FTrans::JabberInitHook
+    
     set title [mc {Send File}]
         
     option add *FTrans.title                 $title           widgetDefault
@@ -34,6 +36,22 @@ namespace eval ::FTrans {
     
     # Handler for incoming file-transfer requests (set).
     jlib::ftrans::registerhandler ::FTrans::SetHandler
+}
+
+proc ::FTrans::InitPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+	
+    set jprefs(bytestreams,port) 8237
+    
+    ::PrefUtils::Add [list  \
+      [list ::Jabber::jprefs(bytestreams,port) jprefs_bytestreams_port $jprefs(bytestreams,port)]  \
+      ]    
+}
+
+proc ::FTrans::JabberInitHook {jlibname} {
+    upvar ::Jabber::jprefs jprefs
+    
+    $jlibname bytestreams configure -port $jprefs(bytestreams,port)
 }
 
 #... Initiator (sender) section ................................................

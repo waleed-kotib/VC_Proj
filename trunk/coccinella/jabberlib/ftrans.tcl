@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.9 2005-09-19 13:30:57 matben Exp $
+# $Id: ftrans.tcl,v 1.10 2005-09-27 13:31:35 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -299,6 +299,9 @@ proc jlib::ftrans::close_cb {jlibname type sid subiq} {
     #puts "jlib::ftrans::close_cb (i)"
 
     uplevel #0 $istate($sid,cmd) [list $jlibname $type $sid $subiq]
+            
+    # There could be situations, a transfer manager, where we want to keep
+    # this information.
     ifree $jlibname $sid
 }
 
@@ -332,7 +335,7 @@ proc jlib::ftrans::initiatorinfo {jlibname} {
 	    set name [string map [list $sid, ""] $key]
 	    lappend opts $name $value
 	}
-	lappend tList $opts
+	lappend iList $opts
     }
     return $iList
 }
