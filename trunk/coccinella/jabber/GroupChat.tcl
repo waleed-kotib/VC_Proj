@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.118 2005-09-27 13:31:34 matben Exp $
+# $Id: GroupChat.tcl,v 1.119 2005-09-27 15:02:04 matben Exp $
 
 package require History
 
@@ -710,6 +710,11 @@ proc ::GroupChat::Build {roomjid args} {
     set state(oldStatus)        "available"
     set state(got1stmsg)        0
     set state(ignore,$roomjid)  0
+    
+    set ancient [expr {[clock clicks -milliseconds] - 1000}]
+    foreach whom {me you sys} {
+	set state(last,$whom) $ancient
+    }
     if {$jprefs(chatActiveRet)} {
 	set state(active) 1
     } else {
@@ -1022,6 +1027,7 @@ proc ::GroupChat::InsertMessage {token from body args} {
     if {$secs == ""} {
 	set secs [clock seconds]
     }
+    set state(last,$whom) [clock clicks -milliseconds]
     if {[::Utils::IsToday $secs]} {
 	set clockFormat [option get $w clockFormat {}]
     } else {
@@ -1255,7 +1261,6 @@ proc ::GroupChat::GetTokenList { } {
 proc ::GroupChat::PresenceHook {jid presence args} {
     
     upvar ::Jabber::jstate jstate
-    variable show2String
     
     ::Debug 2 "::GroupChat::PresenceHook jid=$jid, presence=$presence, args='$args'"
     
@@ -1319,12 +1324,10 @@ proc ::GroupChat::PresenceHook {jid presence args} {
 	# This should only be called if not the room does it.
 	set token [GetTokenFrom roomjid $jid2]
 	if {$token ne ""} {
-	    set nick [::Jabber::JlibCmd service nick $jid3]	
-	    set show $presence
-	    if {[info exists argsArr(-show)]} {
-		set show $argsArr(-show)
-	    }
-	    InsertMessage $token $jid2 "${nick}: $show2String($show)"
+	    set cmd [concat \
+	      [list ::GroupChat::InsertPresenceChange $token $presence $jid3] \
+	      $args]
+	    after 200 $cmd
 	}
 	
 	# When kicked etc. from a MUC room...
@@ -1349,6 +1352,29 @@ proc ::GroupChat::PresenceHook {jid presence args} {
 		}
 	    }
 	}
+    }
+}
+
+proc ::GroupChat::InsertPresenceChange {token presence jid3 args} {
+    variable $token
+    upvar 0 $token state
+    variable show2String
+    
+    array set argsArr $args
+    
+    if {[info exists state(w)] && [winfo exists $state(w)]} {
+	
+	# Some services send out presence changes automatically.
+	set ms [clock clicks -milliseconds]
+	if {[expr {$ms - $state(last,sys) < 400}]} {
+	    return
+	}
+	set nick [::Jabber::JlibCmd service nick $jid3]	
+	set show $presence
+	if {[info exists argsArr(-show)]} {
+	    set show $argsArr(-show)
+	}
+	InsertMessage $token $state(roomjid) "${nick}: $show2String($show)"
     }
 }
 
