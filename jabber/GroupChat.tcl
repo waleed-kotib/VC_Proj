@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.117 2005-09-24 14:21:58 matben Exp $
+# $Id: GroupChat.tcl,v 1.118 2005-09-27 13:31:34 matben Exp $
 
 package require History
 
@@ -132,6 +132,15 @@ namespace eval ::GroupChat:: {
     set userRoleToStr(none)        [mc None]
     set userRoleToStr(participant) [mc Participants]
     set userRoleToStr(visitor)     [mc Visitors]
+    
+    variable show2String
+    set show2String(available)   [mc available]
+    set show2String(away)        [mc away]
+    set show2String(chat)        [mc chat]
+    set show2String(dnd)         [mc {do not disturb}]
+    set show2String(xa)          [mc {extended away}]
+    set show2String(invisible)   [mc invisible]
+    set show2String(unavailable) [mc {not available}]
 }
 
 proc ::GroupChat::QuitAppHook { } {
@@ -981,24 +990,28 @@ proc ::GroupChat::InsertMessage {token from body args} {
     variable $token
     upvar 0 $token state
     
+    array set argsArr $args
+
     set w       $state(w)
     set wtext   $state(wtext)
     set roomjid $state(roomjid)
-    array set argsArr $args
-    
-    # Old-style groupchat and browser compatibility layer.
-    set nick [::Jabber::JlibCmd service nick $from]
-    
+        
     # This can be room name or nick name.
-    foreach {meRoomJid mynick}  \
-      [::Jabber::JlibCmd service hashandnick $roomjid] break
-    if {[string equal $meRoomJid $from]} {
+    lassign [::Jabber::JlibCmd service hashandnick $roomjid] myroomjid mynick
+    if {[string equal $myroomjid $from]} {
 	set whom me
     } elseif {[string equal $roomjid $from]} {
 	set whom sys
     } else {
 	set whom they
     }    
+    set nick ""
+    
+    switch -- $whom {
+	me - you {
+	    set nick [::Jabber::JlibCmd service nick $from]	    
+	}
+    }
     set secs ""
     if {[info exists argsArr(-x)]} {
 	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
@@ -1020,7 +1033,9 @@ proc ::GroupChat::InsertMessage {token from body args} {
     } else {
 	set prefix ""
     }
-    append prefix "<$nick>"
+    if {$nick ne ""} {
+	append prefix "<$nick>"
+    }
     
     $wtext configure -state normal
     $wtext insert end $prefix ${whom}pre
@@ -1240,6 +1255,7 @@ proc ::GroupChat::GetTokenList { } {
 proc ::GroupChat::PresenceHook {jid presence args} {
     
     upvar ::Jabber::jstate jstate
+    variable show2String
     
     ::Debug 2 "::GroupChat::PresenceHook jid=$jid, presence=$presence, args='$args'"
     
@@ -1272,7 +1288,7 @@ proc ::GroupChat::PresenceHook {jid presence args} {
     
     # @@@ BAD heuristics!
     set isinvite 0
-    if {$istrpt && !$inroom && $isconf && ($presence == "available")} {
+    if {$istrpt && !$inroom && $isconf && ($presence eq "available")} {
 	set isinvite 1
     }
     ::Debug 4 "\t conferences=$conferences"
@@ -1298,6 +1314,17 @@ proc ::GroupChat::PresenceHook {jid presence args} {
 	    eval {SetUser $roomjid $jid3 $presence} $args
 	} elseif {[string equal $presence "unavailable"]} {
 	    RemoveUser $roomjid $jid3
+	}
+	
+	# This should only be called if not the room does it.
+	set token [GetTokenFrom roomjid $jid2]
+	if {$token ne ""} {
+	    set nick [::Jabber::JlibCmd service nick $jid3]	
+	    set show $presence
+	    if {[info exists argsArr(-show)]} {
+		set show $argsArr(-show)
+	    }
+	    InsertMessage $token $jid2 "${nick}: $show2String($show)"
 	}
 	
 	# When kicked etc. from a MUC room...
@@ -1677,7 +1704,7 @@ proc ::GroupChat::Save {token} {
     
     if {[string length $ans]} {
 	set allText [::Text::TransformToPureText $wtext]
-	foreach {meRoomJid mynick}  \
+	foreach {myroomjid mynick}  \
 	  [::Jabber::JlibCmd service hashandnick $roomjid] break
 	set fd [open $ans w]
 	fconfigure $fd -encoding utf-8

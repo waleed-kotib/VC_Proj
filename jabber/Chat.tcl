@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.127 2005-09-26 11:59:16 matben Exp $
+# $Id: Chat.tcl,v 1.128 2005-09-27 13:31:34 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2345,7 +2345,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
 	[mc "One minute"]        60  \
 	[mc "Ten minutes"]      600  \
 	[mc "One hour"]        3600  \
-	[mc "No restriction"]     0  \
+	[mc "No Restriction"]     0  \
     ]
     ui::optionmenu $mb -menulist $menuDef -direction flush \
       -variable [namespace current]::tmpJPrefs(chat,histAge)

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.11 2005-09-19 13:30:57 matben Exp $
+# $Id: bytestreams.tcl,v 1.12 2005-09-27 13:31:35 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -37,7 +37,7 @@ namespace eval jlib::bytestreams {
 
     variable xmlns
     set xmlns(bs)  "http://jabber.org/protocol/bytestreams"
-    
+        
     jlib::ensamble_register bytestreams  \
       [namespace current]::init          \
       [namespace current]::cmdproc
@@ -64,6 +64,15 @@ proc jlib::bytestreams::init {jlibname args} {
     namespace eval ${jlibname}::bytestreams {
 	variable istate
 	variable tstate
+
+	# Mapper from SOCKS5 hash to sid.
+	variable hash2sid
+	
+	# Independent of sid variables.
+	variable static
+	
+	# Server port 0 says that arbitrary port can be chosen.
+	set static(-port) 0
     }
 
     # Register some standard iq handlers that is handled internally.
@@ -80,6 +89,26 @@ proc jlib::bytestreams::cmdproc {jlibname cmd args} {
     return [eval {$cmd $jlibname} $args]
 }
 
+proc jlib::bytestreams::configure {jlibname args} {
+    
+    upvar ${jlibname}::bytestreams::static static
+
+    foreach {key value} $args {
+	
+	switch -- $key {
+	    -port {
+		if {![string is integer -strict $value]} {
+		    return -code error "port must be integer number"
+		}
+		set static(-port) $value
+	    }
+	    default {
+		return -code error "unknown option \"$key\""
+	    }
+	}
+    }
+}
+
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 # These are all functions to use by a initiator (sender).
@@ -91,16 +120,24 @@ proc jlib::bytestreams::cmdproc {jlibname cmd args} {
 proc jlib::bytestreams::si_open {jlibname jid sid args} {
     
     upvar ${jlibname}::bytestreams::istate istate
+    upvar ${jlibname}::bytestreams::static static
+    upvar ${jlibname}::bytestreams::hash2sid hash2sid
     #puts "jlib::bytestreams::si_open (i)"
     
     set istate($sid,jid) $jid
     
-    s5i_server $jlibname $sid $jid
+    if {![info exists static(sock)]} {
+	s5i_server $jlibname
+    }
     
+    set ip    [jlib::getip $jlibname]
     set myjid [jlib::myjid $jlibname]
-    set ip    $istate($sid,ip)
-    set port  $istate($sid,sport)
-    set host  [list $myjid -host $ip -port $port]
+    set hash  [::sha1::sha1 ${sid}${myjid}${jid}]
+    
+    set istate($sid,ip)    $ip
+    set istate($sid,hash)  $hash
+    set hash2sid($hash)    $sid
+    set host [list $myjid -host $ip -port $static(port)]
     
     set si_open_cb [list [namespace current]::si_open_cb $jlibname $sid]
     initiate $jlibname $jid $sid $si_open_cb -streamhost $host
@@ -143,29 +180,23 @@ proc jlib::bytestreams::ifinish {jlibname sid} {
     upvar ${jlibname}::bytestreams::istate istate
     #puts "jlib::bytestreams::ifinish (i)"
     
-    # Close both sockets!
+    # Close socket.
     catch {close $istate($sid,sock)}
-    catch {close $istate($sid,ssock)}
     ifree $jlibname $sid
 }
 
 #--- Generic initiator code ----------------------------------------------------
 
-proc jlib::bytestreams::s5i_server {jlibname sid jid} {
+proc jlib::bytestreams::s5i_server {jlibname} {
     
-    upvar ${jlibname}::bytestreams::istate istate
+    upvar ${jlibname}::bytestreams::static static
     #puts "jlib::bytestreams::s5i_server (i)"
     
-    set sock [socket -server [list [namespace current]::s5i_accept $jlibname $sid] 0]
-    lassign [fconfigure $sock -sockname] addr hostname port
-    set ip    [jlib::getip $jlibname]
-    set myjid [jlib::myjid $jlibname]
-    set hash  [::sha1::sha1 ${sid}${myjid}${jid}]
-    
-    set istate($sid,ip)    $ip
-    set istate($sid,sport) $port
-    set istate($sid,hash)  $hash
-    set istate($sid,ssock) $sock
+    # Note the difference between static(-port) and static(port) !
+    set connectProc [list [namespace current]::s5i_accept $jlibname]
+    set sock [socket -server $connectProc $static(-port)]
+    set static(sock) $sock
+    set static(port) [lindex [fconfigure $sock -sockname] 2]
 }
 
 # jlib::bytestreams::initiate --
@@ -208,25 +239,26 @@ proc jlib::bytestreams::initiate {jlibname to sid cmd args} {
 # jlib::bytestreams::s5i_accept --
 # 
 #       The server socket callback when connected.
+#       We keep a single server socket for all transfers and distinguish
+#       them when they do the SOCKS5 authentication using the mapping
+#       hash (sha1 sid+jid+myjid)  -> sid
 
-proc jlib::bytestreams::s5i_accept {jlibname sid sock addr port} {
+proc jlib::bytestreams::s5i_accept {jlibname sock addr port} {
 
-    upvar ${jlibname}::bytestreams::istate istate
     #puts "jlib::bytestreams::s5_accept (i)"
     
-    set istate($sid,sock) $sock
+    #set istate($sid,sock) $sock
     fconfigure $sock -translation binary -blocking 0
 
     fileevent $sock readable \
-      [list [namespace current]::s5i_read_methods $jlibname $sid]
+      [list [namespace current]::s5i_read_methods $jlibname $sock]
 }
 
-proc jlib::bytestreams::s5i_read_methods {jlibname sid} {
+proc jlib::bytestreams::s5i_read_methods {jlibname sock} {
    
-    upvar ${jlibname}::bytestreams::istate istate
     #puts "jlib::bytestreams::s5i_read_methods (i)"   
     
-    set sock $istate($sid,sock)
+    #set sock $istate($sid,sock)
     fileevent $sock readable {}
     if {[catch {read $sock} data] || [eof $sock]} {
 	catch {close $sock}
@@ -251,15 +283,16 @@ proc jlib::bytestreams::s5i_read_methods {jlibname sid} {
 	return
     }
     fileevent $sock readable \
-      [list [namespace current]::s5i_read_auth $jlibname $sid]
+      [list [namespace current]::s5i_read_auth $jlibname $sock]
 }
 
-proc jlib::bytestreams::s5i_read_auth {jlibname sid} {
+proc jlib::bytestreams::s5i_read_auth {jlibname sock} {
     
     upvar ${jlibname}::bytestreams::istate istate
+    upvar ${jlibname}::bytestreams::hash2sid hash2sid
     #puts "jlib::bytestreams::s5i_read_auth (i)"
 
-    set sock $istate($sid,sock)
+    #set sock $istate($sid,sock)
     fileevent $sock readable {}
     if {[catch {read $sock} data] || [eof $sock]} {
 	catch {close $sock}
@@ -278,8 +311,11 @@ proc jlib::bytestreams::s5i_read_auth {jlibname sid} {
     }
     
     binary scan $data @5a${len} hash
-
-    if {[string equal $istate($sid,hash) $hash]} {
+    
+    # At this stage we are in a position to find the sid.
+    if {[info exists hash2sid($hash)]} {
+	set sid $hash2sid($hash)
+	set istate($sid,sock) $sock
 	set reply [string replace $data 1 1 \x00]
 	puts -nonewline $sock $reply
 	flush $sock

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.143 2005-09-23 14:27:10 matben Exp $
+# $Id: Jabber.tcl,v 1.144 2005-09-27 13:31:34 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -272,9 +272,9 @@ proc ::Jabber::FactoryDefaults { } {
     variable jserver
     
     # Network.
-    set jprefs(port) 5222
+    set jprefs(port)    5222
     set jprefs(sslport) 5223
-    set jprefs(usessl) 0
+    set jprefs(usessl)  0
     
     # Protocol parts
     set jprefs(useSVGT) 0
