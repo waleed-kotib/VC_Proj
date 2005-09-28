@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.119 2005-09-27 15:02:04 matben Exp $
+# $Id: GroupChat.tcl,v 1.120 2005-09-28 13:50:23 matben Exp $
 
 package require History
 
@@ -212,7 +212,6 @@ proc ::GroupChat::HaveOrigConference {{service ""}} {
 
 proc ::GroupChat::HaveMUC {{jid ""}} {
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
     upvar ::Jabber::xmppxmlns xmppxmlns
 
     set ans 0
@@ -254,17 +253,25 @@ proc ::GroupChat::HaveMUC {{jid ""}} {
 #       "cancel" or "enter".
 
 proc ::GroupChat::EnterOrCreate {what args} {
-    upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
+
+    ::Debug 2 "::GroupChat::EnterOrCreate what=$what, args='$args'"
+    
+    set roomjid  ""
+    set service  ""
+    set protocol ""
+    set ans      "cancel"
     
     array set argsArr $args
-    set roomjid ""
-    set service ""
     if {[info exists argsArr(-roomjid)]} {
 	set roomjid $argsArr(-roomjid)
 	jlib::splitjidex $roomjid node service res
     } elseif {[info exists argsArr(-server)]} {
 	set service $argsArr(-server)
+    }
+    set haveroomjid 0
+    if {$roomjid ne ""} {
+	set haveroomjid 1
     }
 
     if {[info exists argsArr(-protocol)]} {
@@ -272,17 +279,10 @@ proc ::GroupChat::EnterOrCreate {what args} {
     } else {
 	
 	# Preferred groupchat protocol (gc-1.0|muc).
-	# Use 'gc-1.0' as fallback.
-	set protocol "gc-1.0"
-	
 	# Consistency checking.
 	if {![regexp {(gc-1.0|muc)} $jprefs(prefgchatproto)]} {
 	    set jprefs(prefgchatproto) muc
 	}
-	
-	::Debug 2 "::GroupChat::EnterOrCreate prefgchatproto=$jprefs(prefgchatproto) \
-	  what=$what, roomjid=$roomjid, service=$service, args='$args'"
-	
 	switch -- $jprefs(prefgchatproto) {
 	    gc-1.0 {
 		set protocol "gc-1.0"
@@ -290,22 +290,21 @@ proc ::GroupChat::EnterOrCreate {what args} {
 	    muc {
 		if {[HaveMUC $service]} {
 		    set protocol "muc"
-		} elseif {[HaveOrigConference $service]} {
-		    set protocol "conference"
 		}
 	    }
 	}
     }
+    
     ::Debug 2 "\t protocol=$protocol"
     
     switch -glob -- $what,$protocol {
 	*,gc-1.0 {
 	    set ans [eval {BuildEnter} $args]
 	}
-	enter,conference {
+	OUTDATED-enter,conference {
 	    set ans [eval {::Conference::BuildEnter} $args]
 	}
-	create,conference {
+	OUTDATED-create,conference {
 	    set ans [eval {::Conference::BuildCreate} $args]
 	}
 	enter,muc {
@@ -314,11 +313,17 @@ proc ::GroupChat::EnterOrCreate {what args} {
 	create,muc {
 	    set ans [eval {::Conference::BuildCreate} $args]
 	}
+	enter,* {
+	    
+	    # This is typically a service on a nondiscovered server.
+	    set ans [eval {::MUC::BuildEnter} $args]
+	}	    
 	default {
-	    # error
+	    ::ui::dialog -icon error -message [mc jamessnogroupchat]
 	}
     }    
     
+    # @@@ BAD only used in JWB.
     return $ans
 }
 
@@ -330,7 +335,7 @@ proc ::GroupChat::EnterHook {roomjid protocol} {
     
     # If we are using the 'conference' protocol we must browse
     # the room to get the participants.
-    if {$protocol == "conference"} {
+    if {$protocol eq "conference"} {
 	::Browse::Get $roomjid
     }
 }
@@ -710,6 +715,7 @@ proc ::GroupChat::Build {roomjid args} {
     set state(oldStatus)        "available"
     set state(got1stmsg)        0
     set state(ignore,$roomjid)  0
+    set state(afterids)         {}
     
     set ancient [expr {[clock clicks -milliseconds] - 1000}]
     foreach whom {me you sys} {
@@ -1258,6 +1264,10 @@ proc ::GroupChat::GetTokenList { } {
 # Results:
 #       groupchat member list updated.
 
+# @@@ Much better to register for presence info for room only.
+#     Register for room jid and any member.
+#     Register directly with jabberlib somehow and not via application hooks.
+
 proc ::GroupChat::PresenceHook {jid presence args} {
     
     upvar ::Jabber::jstate jstate
@@ -1321,13 +1331,12 @@ proc ::GroupChat::PresenceHook {jid presence args} {
 	    RemoveUser $roomjid $jid3
 	}
 	
-	# This should only be called if not the room does it.
 	set token [GetTokenFrom roomjid $jid2]
 	if {$token ne ""} {
 	    set cmd [concat \
 	      [list ::GroupChat::InsertPresenceChange $token $presence $jid3] \
 	      $args]
-	    after 200 $cmd
+	    lappend state(afterids) [after 200 $cmd]
 	}
 	
 	# When kicked etc. from a MUC room...
@@ -1365,6 +1374,7 @@ proc ::GroupChat::InsertPresenceChange {token presence jid3 args} {
     if {[info exists state(w)] && [winfo exists $state(w)]} {
 	
 	# Some services send out presence changes automatically.
+	# This should only be called if not the room does it.
 	set ms [clock clicks -milliseconds]
 	if {[expr {$ms - $state(last,sys) < 400}]} {
 	    return
@@ -1818,13 +1828,21 @@ proc ::GroupChat::Close {token} {
 	::UI::SaveSashPos groupchatDlgVert $state(wpanev)
 	::UI::SaveSashPos groupchatDlgHori $state(wpaneh)
 	destroy $state(w)
-	
-	# Array cleanup?
-	unset state
+	Free $token
     }
     
     # Make sure any associated whiteboard is closed as well.
     # ::hooks::run groupchatExitRoomHook $roomjid
+}
+
+proc ::GroupChat::Free {token} {
+    variable $token
+    upvar 0 $token state
+     
+    foreach id $state(afterids) {
+	after cancel $id
+    }
+    unset state
 }
 
 # GroupChat::LogoutHook --

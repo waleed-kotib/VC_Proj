@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.112 2005-09-26 14:43:47 matben Exp $
+# $Id: jabberlib.tcl,v 1.113 2005-09-28 13:50:23 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2079,7 +2079,7 @@ proc jlib::parse_search_set {jlibname cmd type subiq} {
 # 
 #       Handler for registered iq callbacks.
 #       
-#       We could think of a more general mechanism here!!!!
+#       @@@ We could think of a more general mechanism here!!!!
 #       1) Using -type, -xmlns, -from etc.
 
 proc jlib::iq_register {jlibname type xmlns func {seq 50}} {
@@ -2167,6 +2167,9 @@ proc jlib::message_run_hook {jlibname type xmlns msgElem args} {
 # jlib::presence_register --
 # 
 #       Handler for registered presence callbacks.
+#       
+#       @@@ We should be able to register for certain jid's
+#           sucj as rooms and members using wildcards.
 
 proc jlib::presence_register {jlibname type func {seq 50}} {
     
