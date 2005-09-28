@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.66 2005-09-23 07:33:35 matben Exp $
+# $Id: MUC.tcl,v 1.67 2005-09-28 13:50:23 matben Exp $
 
 package require jlib::muc
 package require ui::entryex
@@ -111,24 +111,30 @@ proc ::MUC::BuildEnter {args} {
     }
     array set argsArr $args
 
-    #set confServers [$jstate(browse) getservicesforns  \
-    #  "http://jabber.org/protocol/muc"]
+    set service ""
+    if {[info exists argsArr(-roomjid)]} {
+	set roomjid $argsArr(-roomjid)
+	jlib::splitjidex $roomjid node service res
+    } elseif {[info exists argsArr(-server)]} {
+	set service $argsArr(-server)
+    }
+
     # We should only get services that provides muc!
-    set confServers {}
+    set services {}
     set allConfServ [$jstate(jlib) service getconferences]
     foreach serv $allConfServ {
 	if {[$jstate(jlib) service hasfeature $serv $xmppxmlns(muc)]} {
-	    lappend confServers $serv
+	    lappend services $serv
 	}
     }
 
-    ::Debug 2 "::MUC::BuildEnter confServers='$confServers'; allConfServ=$allConfServ"
+    ::Debug 2 "::MUC::BuildEnter services='$services'; allConfServ=$allConfServ"
 
-    if {$confServers == {}} {
-	::UI::MessageBox -type ok -icon error -title "No Conference"  \
+    # Verify that any service given also support muc.
+    if {($service ne "") && ([lsearch $services $service] < 0)} {
+	::ui::dialog -type ok -icon error -title "No Conference"  \
 	  -message "Failed to find any multi user chat service component"
 	return
-	set confServers junk
     }
 
     # State variable to collect instance specific variables.
@@ -178,15 +184,16 @@ proc ::MUC::BuildEnter {args} {
     ttk::label $frmid.lserv -text "[mc {Conference server}]:" 
     
     # First menubutton: servers. (trace below)
-    set wpopupserver $frmid.eserv
-    eval {ttk::optionmenu $wpopupserver $token\(server)} $confServers
+    set wserver $frmid.eserv
+    ttk::::combobox $wserver -width 16 -textvariable $token\(server) \
+      -values $services
     ttk::label $frmid.lroom -text "[mc {Room name}]:"
     
     # Find the default conferencing server.
     if {[info exists argsArr(-server)]} {
 	set enter(server) $argsArr(-server)
-    } elseif {[llength $confServers]} {
-	set enter(server) [lindex $confServers 0]
+    } elseif {[llength $services]} {
+	set enter(server) [lindex $services 0]
     }
     set enter(server-state) normal
     set enter(room-state)   normal
@@ -194,33 +201,33 @@ proc ::MUC::BuildEnter {args} {
 
     # Second menubutton: rooms for above server. Fill in below.
     # Combobox since we sometimes want to enter room manually.
-    set wpopuproom     $frmid.eroom
-    set wbrowse        $frmid.browse
-    set wsearrows      $frmid.st.arr
-    set wstatus        $frmid.st.stat
+    set wroom     $frmid.eroom
+    set wbrowse   $frmid.browse
+    set warrows   $frmid.st.arr
+    set wstatus   $frmid.st.stat
     
-    ttk::::combobox $wpopuproom -width -20 -textvariable $token\(roomname)
+    ttk::::combobox $wroom -textvariable $token\(roomname)
     ttk::button $wbrowse -text [mc Browse] \
       -command [list [namespace current]::Browse $token]    
     ttk::label $frmid.lnick -text "[mc {Nick name}]:"
-    ttk::entry $frmid.enick -textvariable $token\(nickname) -width 24
+    ttk::entry $frmid.enick -textvariable $token\(nickname)
     ttk::label $frmid.lpass -text "[mc Password]:"
-    ttk::entry $frmid.epass -textvariable $token\(password) -show {*} -validate key \
-      -validatecommand {::Jabber::ValidatePasswordStr %S}
+    ttk::entry $frmid.epass -textvariable $token\(password)  \
+      -show {*} -validate key -validatecommand {::Jabber::ValidatePasswordStr %S}
    
     # Busy arrows and status message.
     ttk::frame $frmid.st
-    pack [::chasearrows::chasearrows $wsearrows -size 16] \
+    pack [::chasearrows::chasearrows $warrows -size 16] \
       -side left -padx 5 -pady 0
     ttk::label $wstatus -textvariable $token\(status)
     pack $wstatus -side left -padx 5
     
-    grid  $frmid.lserv    $wpopupserver  $wbrowse  -sticky e -pady 2
-    grid  $frmid.lroom    $wpopuproom    -  -sticky e -padx 2 -pady 2
+    grid  $frmid.lserv    $wserver       $wbrowse  -sticky e -pady 2
+    grid  $frmid.lroom    $wroom         -  -sticky e -pady 2
     grid  $frmid.lnick    $frmid.enick   -  -sticky e -pady 2
     grid  $frmid.lpass    $frmid.epass   -  -sticky e -pady 2
     grid  $frmid.st       -              -  -sticky w -pady 2
-    grid  $wpopupserver   $wpopuproom    $frmid.enick  $frmid.epass  -sticky ew
+    grid  $wserver   $wroom    $frmid.enick  $frmid.epass  -sticky ew
     grid  $wbrowse  -padx 10
     grid columnconfigure $frmid 1 -weight 1
 
@@ -228,13 +235,13 @@ proc ::MUC::BuildEnter {args} {
 	jlib::splitjidex $argsArr(-roomjid) enter(roomname) enter(server) z
 	set enter(server-state) disabled
 	set enter(room-state)   disabled
-	$wpopupserver state {disabled}
-	$wpopuproom   state {disabled}
+	$wserver state {disabled}
+	$wroom   state {disabled}
     }
     if {[info exists argsArr(-server)]} {
 	set enter(server) $argsArr(-server)
 	set enter(server-state) disabled
-	$wpopupserver state {disabled}
+	$wserver state {disabled}
     }
     if {[info exists argsArr(-command)]} {
 	set enter(-command) $argsArr(-command)
@@ -250,9 +257,9 @@ proc ::MUC::BuildEnter {args} {
        
     # Button part.
     set frbot $wbox.b
-    set wbtenter  $frbot.btok
+    set wenter  $frbot.btok
     ttk::frame $frbot
-    ttk::button $wbtenter -text [mc Enter] \
+    ttk::button $wenter -text [mc Enter] \
       -default active -command [list [namespace current]::DoEnter $token]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelEnter $token]
@@ -266,14 +273,14 @@ proc ::MUC::BuildEnter {args} {
     }
     pack $frbot -side bottom -fill x
 
-    set enter(status)       "  "
-    set enter(wpopupserver) $wpopupserver
-    set enter(wpopuproom)   $wpopuproom
-    set enter(wsearrows)    $wsearrows
-    set enter(wbtenter)     $wbtenter
+    set enter(status)  ""
+    set enter(wserver) $wserver
+    set enter(wroom)   $wroom
+    set enter(warrows) $warrows
+    set enter(wenter)  $wenter
     set enter(wbrowse) $wbrowse
     
-    if {$enter(-autobrowse) && [string equal $enter(room-state) "normal"]} {
+    if {$enter(-autobrowse) && ($enter(room-state) eq "normal")} {
 
 	# Get a freash list each time.
 	BusyEnterDlgIncr $token
@@ -281,14 +288,12 @@ proc ::MUC::BuildEnter {args} {
 	$jstate(jlib) service send_getchildren $enter(server)  \
 	  [list [namespace current]::GetRoomsCB $token]
     }
-    if {[string equal $enter(room-state) "normal"]} {
-	trace variable $token\(server) w  \
-	  [list [namespace current]::ConfigRoomList $token]
-    }
 
     wm resizable $w 0 0
 
-    bind $w <Return> [list $wbtenter invoke]
+    bind $w <Return> [list $wenter invoke]
+    bind $wserver <<ComboboxSelected>>  \
+      [list [namespace current]::ConfigRoomList $token]
     
     set oldFocus [focus]
     if {[info exists argsArr(-roomjid)]} {
@@ -310,8 +315,7 @@ proc ::MUC::BuildEnter {args} {
     tkwait variable $token\(finished)
     
     catch {focus $oldFocus}
-    trace vdelete $token\(server) w  \
-      [list [namespace current]::ConfigRoomList $token]
+
     set finished $enter(finished)
     ::UI::SaveWinGeom $wDlgs(jmucenter) $w
     catch {destroy $enter(w)}
@@ -354,7 +358,7 @@ proc ::MUC::Browse {token} {
 #       When a conference server is picked in the server combobox, the 
 #       room combobox must get the available rooms for this particular server.
 
-proc ::MUC::ConfigRoomList {token name junk1 junk2} {    
+proc ::MUC::ConfigRoomList {token} {    
     variable $token
     upvar 0 $token enter
     upvar ::Jabber::jstate jstate
@@ -368,7 +372,7 @@ proc ::MUC::ConfigRoomList {token name junk1 junk2} {
 	if {$enter(-autobrowse)} {
 	    Browse $token
 	} else {
-	    $enter(wpopuproom) configure -values {}
+	    $enter(wroom) configure -values {}
 	    set enter(roomname) ""
 	}
     }
@@ -382,21 +386,23 @@ proc ::MUC::FillRoomList {token} {
     ::Debug 4 "::MUC::FillRoomList"
     
     set roomList {}
-    if {[string length $enter(server)] > 0} {
+    if {[string length $enter(server)]} {
 	set allRooms [$jstate(jlib) service childs $enter(server)]
-	foreach roomJid $allRooms {
-	    regexp {([^@]+)@.+} $roomJid match room
-	    lappend roomList $room
+	foreach roomjid $allRooms {
+	    set idx [string first "@" $roomjid]
+	    if {$idx > 0} {
+		lappend roomList [string range $roomjid 0 [incr idx -1]]
+	    }
 	}
     }
-    if {[llength $roomList] == 0} {
-	::UI::MessageBox -type ok -icon error -title "No Rooms"  \
-	  -message "Failed to find any rooms at $enter(server)"
+    if {![llength $roomList]} {
+	::ui::dialog -type ok -icon error -title "No Rooms"  \
+	  -message [mc jamessnorooms $enter(server)]
 	return
     }
     
     set roomList [lsort $roomList]
-    $enter(wpopuproom) configure -values $roomList
+    $enter(wroom) configure -values $roomList
     set enter(roomname) [lindex $roomList 0]
 }
 
@@ -408,25 +414,27 @@ proc ::MUC::BusyEnterDlgIncr {token {num 1}} {
     
     if {$enter(statuscount) > 0} {
 	set enter(status) [mc {Getting available rooms...}]
-	$enter(wsearrows) start
-	$enter(wpopupserver) state {disabled}
-	$enter(wpopuproom)   state {disabled}
-	$enter(wbtenter)     state {disabled}
+	$enter(warrows) start
+	$enter(wserver) state {disabled}
+	$enter(wroom)   state {disabled}
+	$enter(wenter)  state {disabled}
     } else {
 	set enter(statuscount) 0
 	set enter(status) ""
-	$enter(wsearrows) stop
+	$enter(warrows) stop
 	if {[string equal $enter(server-state) "normal"]} {
-	    $enter(wpopupserver) state {!disabled}
+	    $enter(wserver) state {!disabled}
 	}
 	if {[string equal $enter(room-state) "normal"]} {
-	    $enter(wpopuproom)   state {!disabled}
+	    $enter(wroom)   state {!disabled}
 	}
-	$enter(wbtenter)     state {!disabled}
+	$enter(wenter)     state {!disabled}
     }
 }
 
 proc ::MUC::GetRoomsCB {token browsename type jid subiq args} {
+    variable $token
+    upvar 0 $token enter
     
     ::Debug 4 "::MUC::GetRoomsCB type=$type, jid=$jid"
     
@@ -434,16 +442,18 @@ proc ::MUC::GetRoomsCB {token browsename type jid subiq args} {
     if {![info exists $token]} {
 	return
     }
+    BusyEnterDlgIncr $token -1
     
     switch -- $type {
 	error {
-	    # ???
+	    ::ui::dialog -type ok -icon error -title [mc Error]  \
+	      -message [mc jamessnorooms $enter(server)]  \
+	      -detail [lindex $subiq 1]
 	}
 	result - ok {
 	    FillRoomList $token
 	}
     }
-    BusyEnterDlgIncr $token -1
 }
 
 proc ::MUC::DoEnter {token} {
@@ -453,7 +463,7 @@ proc ::MUC::DoEnter {token} {
     
     if {($enter(roomname) eq "") || ($enter(nickname) eq "")} {
 	::UI::MessageBox -type ok -icon error  \
-	  -message "We require that all fields are nonempty"
+	  -message [mc jamessinroommiss]
 	return
     }
     set roomJid [jlib::jidmap $enter(roomname)@$enter(server)]
@@ -1403,7 +1413,7 @@ proc ::MUC::EditListBuild {roomjid type} {
     
     # Button part.
     set frbot     $wbox.b
-    set wsearrows $frbot.arr
+    set warrows   $frbot.arr
     set wbtok     $frbot.btok
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
@@ -1435,7 +1445,7 @@ proc ::MUC::EditListBuild {roomjid type} {
     
     # Cache local variables.
     set state(wtbl)        $wtbl
-    set state(wsearrows)   $wsearrows
+    set state(warrows)     $warrows
     set state(wbtok)       $wbtok  
     set state(type)        $type
     set state(wbtadd)      $wbtadd
@@ -1485,7 +1495,7 @@ proc ::MUC::EditListBuild {roomjid type} {
     set state(setact) $setact
     
     # Now, go and get it!
-    $wsearrows start
+    $warrows start
     set state(callid) [incr editcalluid]
     $jstate(jlib) muc $getact $roomjid $what \
       [list [namespace current]::EditListGetCB $token $state(callid)]
@@ -1536,7 +1546,7 @@ proc ::MUC::EditListGetCB {token callid jlibname type subiq} {
 
     set type      $state(type)
     set wtbl      $state(wtbl)
-    set wsearrows $state(wsearrows)
+    set warrows   $state(warrows)
     set wbtok     $state(wbtok)
     set wbtadd    $state(wbtadd)
     set wbtedit   $state(wbtedit)
@@ -1546,11 +1556,11 @@ proc ::MUC::EditListGetCB {token callid jlibname type subiq} {
     if {$callid != $state(callid)} {
 	return
     }
-    if {![winfo exists $wsearrows]} {
+    if {![winfo exists $warrows]} {
 	return
     }
     
-    $wsearrows stop
+    $warrows stop
     if {$type eq "error"} {
 	::UI::MessageBox -type ok -icon error -message $subiq
 	return
@@ -1594,7 +1604,7 @@ proc ::MUC::FillEditList {token} {
     variable setListDefs
 
     set wtbl      $state(wtbl)
-    set wsearrows $state(wsearrows)
+    set warrows   $state(warrows)
     set wbtok     $state(wbtok)
     set type      $state(type)
     
@@ -1800,7 +1810,7 @@ proc ::MUC::RoomConfig {roomjid} {
     global  this wDlgs
     
     variable wscrollframe
-    variable wsearrows
+    variable warrows
     variable wbtok
     variable dlguid
     upvar [namespace current]::${roomjid}::locals locals
@@ -1821,7 +1831,7 @@ proc ::MUC::RoomConfig {roomjid} {
 
     # Button part.
     set frbot     $wbox.b
-    set wsearrows $frbot.arr
+    set warrows   $frbot.arr
     set wbtok     $frbot.btok
     set wbtcancel $frbot.btcancel
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
@@ -1829,7 +1839,7 @@ proc ::MUC::RoomConfig {roomjid} {
       -command [list [namespace current]::DoRoomConfig $roomjid $w]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelConfig $roomjid $w]
-    ::chasearrows::chasearrows $wsearrows -size 16
+    ::chasearrows::chasearrows $warrows -size 16
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btok -side right
@@ -1838,7 +1848,7 @@ proc ::MUC::RoomConfig {roomjid} {
 	pack $frbot.btcancel -side right
 	pack $frbot.btok -side right -padx $padx
     }
-    pack $wsearrows -side left
+    pack $warrows -side left
     pack $frbot -side bottom -fill x
     
     $frbot.btok state {disabled}
@@ -1849,7 +1859,7 @@ proc ::MUC::RoomConfig {roomjid} {
     pack $wscrollframe
         
     # Now, go and get it!
-    $wsearrows start
+    $warrows start
     $jstate(jlib) muc getroom $roomjid  \
       [list [namespace current]::ConfigGetCB $roomjid]
     
@@ -1887,17 +1897,17 @@ proc ::MUC::CancelConfig {roomjid w} {
 
 proc ::MUC::ConfigGetCB {roomjid jlibname type subiq} {
     variable wscrollframe
-    variable wsearrows
+    variable warrows
     variable wbtok
     variable wform
     variable formtoken
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
     
-    if {![winfo exists $wsearrows]} {
+    if {![winfo exists $warrows]} {
 	return
     }
-    $wsearrows stop
+    $warrows stop
     
     if {$type eq "error"} {
 	destroy [winfo toplevel $wscrollframe]

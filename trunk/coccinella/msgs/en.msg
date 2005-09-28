@@ -725,7 +725,7 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en jamessstarttls-nofeature     {The server "%s" has no support for TLS.}
 ::msgcat::mcset en jamessstarttls-failure       {TLS negotiating with server "%s" failed.}
 ::msgcat::mcset en jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
-
+::msgcat::mcset en jamessnorooms                {Failed to find any rooms at %s.}
 
 
 ::msgcat::mcset en openquicktime		{Open QuickTime live stream}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.74 2005-09-26 14:43:47 matben Exp $
+# $Id: MailBox.tcl,v 1.75 2005-09-28 13:50:23 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -421,8 +421,9 @@ proc ::MailBox::Build {args} {
     # Special bindings for the tablelist.
     set body [$wtbl bodypath]
     bind $body <Button-1> {+ focus %W}
-    bind $body <Double-1> [list [namespace current]::DoubleClickMsg]
-    bind $wtbl <<ListboxSelect>> [list [namespace current]::SelectMsg]
+    bind $body <Double-1>           [namespace current]::DoubleClickMsg
+    bind $body <KeyPress-BackSpace> [namespace current]::TrashMsg
+    bind $wtbl <<ListboxSelect>>    [namespace current]::SelectMsg
     
     LabelCommand $wtbl $colindex(secs)
     

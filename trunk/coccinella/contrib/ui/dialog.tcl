@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.4 2005-09-23 07:33:35 matben Exp $
+# $Id: dialog.tcl,v 1.5 2005-09-28 13:50:23 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -171,7 +171,16 @@ proc ui::dialog::BadgeImage {image} {
 
 proc ui::dialog::Nop {args} { }
 
-interp alias {} ui::dialog {} ui::dialog::widget
+proc ui::dialog {args} {
+ 
+    if {![llength $args] || [string match "-*" [lindex $args 0]]} {
+	set w [autoname]
+    } else {
+	set w [lindex $args 0]
+	set args [lrange $args 1 end]
+    }
+    return [eval {ui::dialog::widget $w} $args]
+}
 
 snit::widget ui::dialog::widget {
     hulltype toplevel

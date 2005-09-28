@@ -718,6 +718,7 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv jamessstarttls-nofeature     {Servern "%s" saknar stöd för TLS.}
 ::msgcat::mcset sv jamessstarttls-failure        {TLS förhandling med servern "%s" misslyckades.}
 ::msgcat::mcset sv jamessgcinvite               {Du har blivit inbjuden till en gruppchatt %s av %s. Vill du delta?}
+::msgcat::mcset sv jamessnorooms                {Hittade inga rum hos %s.}
 
 
 
