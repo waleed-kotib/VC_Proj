@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.144 2005-09-27 13:31:34 matben Exp $
+# $Id: Jabber.tcl,v 1.145 2005-10-02 12:44:41 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -758,16 +758,14 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		    append msg " Status message: $argsArr(-status)"
 		}
 		::UI::MessageBox -title [mc {Subscription Failed}]  \
-		  -icon info -type ok  \
-		  -message $msg
+		  -icon info -type ok -message $msg
 		if {$jprefs(rost,rmIfUnsub)} {
 		    
 		    # Remove completely from our roster.
 		    $jstate(jlib) roster_remove $from ::Roster::PushProc
 		}
 	    } else {		
-		::UI::MessageBox -title [mc Unsubscribed]  \
-		  -icon info -type ok  \
+		::UI::MessageBox -title [mc Unsubscribed] -icon info -type ok \
 		  -message [mc jamessunsubscribed $from]
 	    }
 	}

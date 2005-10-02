@@ -5,9 +5,12 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.120 2005-09-28 13:50:23 matben Exp $
+# $Id: GroupChat.tcl,v 1.121 2005-10-02 12:44:41 matben Exp $
 
+package require Enter
 package require History
+package require Bookmarks
+package require colorutils
 
 package provide GroupChat 1.0
 
@@ -225,7 +228,7 @@ proc ::GroupChat::HaveMUC {{jid ""}} {
     } else {
 	
 	# We must query the service, not the room, for browse to work.
-	jlib::splitjidex $jid node service res
+	jlib::splitjidex $jid node service -
 	if {$service != ""} {
 	    if {[$jstate(jlib) service hasfeature $service $xmppxmlns(muc)]} {
 		set ans 1
@@ -257,21 +260,15 @@ proc ::GroupChat::EnterOrCreate {what args} {
 
     ::Debug 2 "::GroupChat::EnterOrCreate what=$what, args='$args'"
     
-    set roomjid  ""
     set service  ""
-    set protocol ""
     set ans      "cancel"
     
     array set argsArr $args
     if {[info exists argsArr(-roomjid)]} {
 	set roomjid $argsArr(-roomjid)
-	jlib::splitjidex $roomjid node service res
+	jlib::splitjidex $roomjid node service -
     } elseif {[info exists argsArr(-server)]} {
 	set service $argsArr(-server)
-    }
-    set haveroomjid 0
-    if {$roomjid ne ""} {
-	set haveroomjid 1
     }
 
     if {[info exists argsArr(-protocol)]} {
@@ -281,16 +278,12 @@ proc ::GroupChat::EnterOrCreate {what args} {
 	# Preferred groupchat protocol (gc-1.0|muc).
 	# Consistency checking.
 	if {![regexp {(gc-1.0|muc)} $jprefs(prefgchatproto)]} {
-	    set jprefs(prefgchatproto) muc
+	    set jprefs(prefgchatproto) "muc"
 	}
-	switch -- $jprefs(prefgchatproto) {
-	    gc-1.0 {
+	set protocol $jprefs(prefgchatproto)
+	if {$service ne ""} {
+	    if {($protocol eq "muc") && ![HaveMUC $service]} {
 		set protocol "gc-1.0"
-	    }
-	    muc {
-		if {[HaveMUC $service]} {
-		    set protocol "muc"
-		}
 	    }
 	}
     }
@@ -298,6 +291,19 @@ proc ::GroupChat::EnterOrCreate {what args} {
     ::Debug 2 "\t protocol=$protocol"
     
     switch -glob -- $what,$protocol {
+	enter,* {
+	    set ans [eval {::Enter::Build $protocol} $args]
+	}
+	create,gc-1.0 {
+	    set ans [eval {BuildEnter} $args]
+	}
+	create,muc {
+	    # @@@ This should go in a new place...
+	    set ans [eval {::Conference::BuildCreate} $args]
+	}
+	xxxxx {
+	    ##### OUTDATED #####
+	}
 	*,gc-1.0 {
 	    set ans [eval {BuildEnter} $args]
 	}
@@ -308,15 +314,14 @@ proc ::GroupChat::EnterOrCreate {what args} {
 	    set ans [eval {::Conference::BuildCreate} $args]
 	}
 	enter,muc {
-	    set ans [eval {::MUC::BuildEnter} $args]
-	}
-	create,muc {
-	    set ans [eval {::Conference::BuildCreate} $args]
+	    #set ans [eval {::MUC::BuildEnter} $args]
+	    set ans [eval {::Enter::Build $protocol} $args]
 	}
 	enter,* {
 	    
 	    # This is typically a service on a nondiscovered server.
-	    set ans [eval {::MUC::BuildEnter} $args]
+	    #set ans [eval {::MUC::BuildEnter} $args]
+	    set ans [eval {::Enter::Build $protocol} $args]
 	}	    
 	default {
 	    ::ui::dialog -icon error -message [mc jamessnogroupchat]
@@ -375,7 +380,7 @@ proc ::GroupChat::SetProtocol {roomjid inprotocol} {
 #       which shall be used when not server is being browsed.
 #       
 # Arguments:
-#       args        -server, -roomjid, -autoget, -nickname
+#       args        -server, -roomjid, -nickname
 #       
 # Results:
 #       "cancel" or "enter".
@@ -392,7 +397,7 @@ proc ::GroupChat::BuildEnter {args} {
     ::Debug 2 "::GroupChat::BuildEnter args='$args'"
     ::Debug 2 "\t service getjidsfor groupchat: '$chatservers'"
     
-    if {$chatservers == {}} {
+    if {0 && $chatservers == {}} {
 	::UI::MessageBox -icon error -message [mc jamessnogroupchat]
 	return
     }
@@ -717,7 +722,7 @@ proc ::GroupChat::Build {roomjid args} {
     set state(ignore,$roomjid)  0
     set state(afterids)         {}
     
-    set ancient [expr {[clock clicks -milliseconds] - 1000}]
+    set ancient [expr {[clock clicks -milliseconds] - 1000000}]
     foreach whom {me you sys} {
 	set state(last,$whom) $ancient
     }
@@ -823,14 +828,26 @@ proc ::GroupChat::Build {roomjid args} {
       -default active -command [list [namespace current]::Send $token]
     ttk::button $wbot.btcancel -text [mc Exit]  \
       -command [list [namespace current]::Exit $token]
-    ::Emoticons::MenuButton $wbot.smile -text $wtextsend
-    ::Jabber::Status::Button $wbot.stat \
-      $token\(status) -command [list [namespace current]::StatusCmd $token] 
-    ::Jabber::Status::ConfigButton $wbot.stat available
-    ttk::checkbutton $wbot.active -style Toolbutton \
-      -image [::Theme::GetImage return] \
+    
+    set wgroup $wbot.grp
+    ttk::frame $wgroup
+    ttk::checkbutton $wgroup.active -style Toolbutton \
+      -image [::Theme::GetImage return]               \
       -command [list [namespace current]::ActiveCmd $token] \
       -variable $token\(active)
+    ::Jabber::Status::Button $wgroup.stat \
+      $token\(status) -command [list [namespace current]::StatusCmd $token] 
+    ::Jabber::Status::ConfigButton $wgroup.stat available
+    ::Emoticons::MenuButton $wgroup.smile -text $wtextsend
+    ttk::button $wgroup.bmark -style Toolbutton  \
+      -image [::Theme::GetImage bookmarkAdd]     \
+      -command [list [namespace current]::SetBookmark $token]
+    
+    grid  $wgroup.active  $wgroup.stat  $wgroup.smile  $wgroup.bmark  \
+      -padx 1 -sticky news
+    foreach c {0 1 2 3} {
+	grid columnconfigure $wgroup $c -uniform g -weight 1
+    }
     
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -840,15 +857,14 @@ proc ::GroupChat::Build {roomjid args} {
 	pack $wbot.btcancel -side right
 	pack $wbot.btok -side right -padx $padx
     }
-    pack  $wbot.active  -side left -fill y -padx 4
-    pack  $wbot.stat    -side left -fill y -padx 4
-    pack  $wbot.smile   -side left -fill y -padx 4    
-    pack  $wbot  -side bottom -fill x
+    pack  $wgroup -side left
+    pack  $wbot   -side bottom -fill x
         
     set wbtsend   $wbot.btok
     set wbtstatus $wbot.stat    
 
-    ::balloonhelp::balloonforwindow $wbot.active [mc jaactiveret]
+    ::balloonhelp::balloonforwindow $wgroup.active [mc jaactiveret]
+    ::balloonhelp::balloonforwindow $wgroup.bmark  [mc {Bookmark this room}]
 
     # Header fields.
     ttk::frame $wtop
@@ -870,7 +886,7 @@ proc ::GroupChat::Build {roomjid args} {
     set wbtsubject $wtop.btp
     set wbtnick    $wtop.bni
 
-    if {!( [info exists protocol($roomjid)] && ($protocol($roomjid) == "muc") )} {
+    if {!( [info exists protocol($roomjid)] && ($protocol($roomjid) eq "muc") )} {
 	$wbtnick state {disabled}
 	$wtray buttonconfigure invite -state disabled
 	$wtray buttonconfigure info   -state disabled
@@ -1023,11 +1039,13 @@ proc ::GroupChat::InsertMessage {token from body args} {
 	    set nick [::Jabber::JlibCmd service nick $from]	    
 	}
     }
+    set history 0
     set secs ""
     if {[info exists argsArr(-x)]} {
 	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
 	if {$tm != ""} {
 	    set secs [clock scan $tm -gmt 1]
+	    set history 1
 	}
     }
     if {$secs == ""} {
@@ -1048,11 +1066,15 @@ proc ::GroupChat::InsertMessage {token from body args} {
     if {$nick ne ""} {
 	append prefix "<$nick>"
     }
+    set htag ""
+    if {$history} {
+	set htag -history
+    }
     
     $wtext configure -state normal
-    $wtext insert end $prefix ${whom}pre
+    $wtext insert end $prefix ${whom}pre${htag}
     
-    ::Text::ParseMsg groupchat $from $wtext "  $body" ${whom}text
+    ::Text::ParseMsg groupchat $from $wtext "  $body" ${whom}text${htag}
     $wtext insert end \n
     
     $wtext configure -state disabled
@@ -1102,8 +1124,9 @@ proc ::GroupChat::ConfigureTextTags {w wtext} {
 	set chatFont $jprefs(chatFont)
 	set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
     }
+    set foreground [$wtext cget -foreground]
     foreach tag $alltags {
-	set opts($tag) [list -spacing1 $space]
+	set opts($tag) [list -spacing1 $space -foreground $foreground]
     }
     foreach spec $groupChatOptions {
 	foreach {tag optName resName resClass} $spec break
@@ -1119,8 +1142,18 @@ proc ::GroupChat::ConfigureTextTags {w wtext} {
     lappend opts(theytext) -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(systext)  -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(histhead) -spacing1 4 -spacing3 4 -lmargin1 20 -lmargin2 20
+
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
+    }
+    
+    # History tags.
+    foreach tag $alltags {
+	set htag ${tag}-history
+	array unset arr
+	array set arr $opts($tag)
+	set arr(-foreground) [::colorutils::getlighter $arr(-foreground)]
+	eval {$wtext tag configure $htag} [array get arr]
     }
 }
 
@@ -1170,6 +1203,14 @@ proc ::GroupChat::Send {token} {
     # Clear send.
     $wtextsend delete 1.0 end
     set state(hot1stmsg) 1
+}
+
+proc ::GroupChat::SetBookmark {token} {
+    variable $token
+    upvar 0 $token state
+    
+    # @@@ TODO
+
 }
 
 proc ::GroupChat::ActiveCmd {token} {
@@ -1630,8 +1671,7 @@ proc ::GroupChat::BuildMenu {token m menuDef jid3 clicked} {
 
     foreach {op item type cmd opts} $menuDef {	
 	set locname [mc $item]
-	set opts [subst $opts]
-	puts "$op $item $type $opts"
+	set opts [eval list $opts]
 
 	switch -- $op {
 	    command {
@@ -1888,6 +1928,61 @@ proc ::GroupChat::GetFirstPanePos { } {
     }
 }
 
+# GroupChat::SetBookmark --
+# 
+#       Bookmarks stored as:
+#         {{name jid nick} {name jid nick} ...}
+
+proc ::GroupChat::SetBookmark {token} {
+    variable $token
+    upvar 0 $token state
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+    
+    set jid $state(roomjid)
+    set name [$jstate(jlib) service name $jid]
+    if {$name eq ""} {
+	set name $jid
+    }
+    lassign [$jstate(jlib) service hashandnick $jid] myroomjid nick
+    
+    # Add only if not there already.
+    foreach bmark $jprefs(gchat,bookmarks) {
+	if {[lindex $bmark 1] eq $jid} {
+	    return
+	}
+    }
+    lappend jprefs(gchat,bookmarks) [list $name $jid $nick]
+}
+
+proc ::GroupChat::EditBookmarks { } {
+    global  wDlgs
+    
+    set dlg $wDlgs(jgcbmark)
+    if {[winfo exists $dlg]} {
+	raise $dlg
+	return
+    }
+    set m [::UI::GetMainMenu]
+    set columns [list 0 [mc Bookmark] 0 [mc Address] 0 [mc Nickname]]
+    ::Bookmarks::Dialog $dlg ::Jabber::jprefs(gchat,bookmarks)  \
+      -menu $m -geovariable prefs(winGeom,$dlg) -columns $columns
+    ::UI::SetMenuAcceleratorBinds $dlg $m
+}
+
+proc ::GroupChat::BuildBmarkMenu {m cmd} {
+    upvar ::Jabber::jprefs jprefs
+   
+    menu $m -tearoff 0
+
+    foreach bmark $jprefs(gchat,bookmarks) {
+	lassign $bmark name jid nick
+	set mcmd [concat $cmd [list $name $jid $nick]]
+	$m add command -label $name -command $mcmd
+    }
+    return $m
+}
+
 # Prefs page ...................................................................
 
 proc ::GroupChat::InitPrefsHook { } {
@@ -1896,12 +1991,14 @@ proc ::GroupChat::InitPrefsHook { } {
     # Defaults...    
     # Preferred groupchat protocol (gc-1.0|muc).
     # 'muc' uses 'conference' as fallback.
-    set jprefs(prefgchatproto) "muc"
-    set jprefs(defnick)        ""
+    set jprefs(prefgchatproto)  "muc"
+    set jprefs(defnick)         ""
+    set jprefs(gchat,bookmarks) {}
 	
     ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(prefgchatproto)   jprefs_prefgchatproto    $jprefs(prefgchatproto)]  \
       [list ::Jabber::jprefs(defnick)          jprefs_defnick           $jprefs(defnick)]  \
+      [list ::Jabber::jprefs(gchat,bookmarks)  jprefs_gchat_bookmarks   $jprefs(gchat,bookmarks)]  \
       ]   
 }
 

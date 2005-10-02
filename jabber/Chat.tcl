@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.128 2005-09-27 13:31:34 matben Exp $
+# $Id: Chat.tcl,v 1.129 2005-10-02 12:44:41 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1637,7 +1637,7 @@ proc ::Chat::ActiveCmd {chattoken} {
 # 
 #       inactive mode: 
 #       Ret: word-wrap
-#       Ctrl+Ret: send messgae
+#       Ctrl+Ret: send message
 #
 #       active mode:
 #       Ret: send message
@@ -2340,16 +2340,15 @@ proc ::Chat::BuildPrefsPage {wpage} {
       -textvariable [namespace current]::tmpJPrefs(chat,histLen)
     ttk::label $wca.lage -text "not older than:"
     set mb $wca.mbage
-    set menuDef [list                \
-	[mc "Ten seconds"]       10  \
-	[mc "One minute"]        60  \
-	[mc "Ten minutes"]      600  \
-	[mc "One hour"]        3600  \
-	[mc "No Restriction"]     0  \
+    set menuDef [list                       \
+	[list [mc "Ten seconds"]     -value 10]    \
+	[list [mc "One minute"]      -value 60]    \
+	[list [mc "Ten minutes"]     -value 600]   \
+	[list [mc "One hour"]        -value 3600]  \
+	[list [mc "No Restriction"]  -value 0]     \
     ]
     ui::optionmenu $mb -menulist $menuDef -direction flush \
       -variable [namespace current]::tmpJPrefs(chat,histAge)
-    $mb set $tmpJPrefs(chat,histAge)
     
     grid  $wca.active  -  -  -  -sticky w
     grid  $wca.newwin  -  -  -  -sticky w

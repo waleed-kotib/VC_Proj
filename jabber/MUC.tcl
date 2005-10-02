@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.67 2005-09-28 13:50:23 matben Exp $
+# $Id: MUC.tcl,v 1.68 2005-10-02 12:44:41 matben Exp $
 
 package require jlib::muc
 package require ui::entryex
@@ -132,8 +132,8 @@ proc ::MUC::BuildEnter {args} {
 
     # Verify that any service given also support muc.
     if {($service ne "") && ([lsearch $services $service] < 0)} {
-	::ui::dialog -type ok -icon error -title "No Conference"  \
-	  -message "Failed to find any multi user chat service component"
+	::ui::dialog -type ok -icon error -title [mc Error]  \
+	  -message [mc jamessnogroupchat]
 	return
     }
 
@@ -181,13 +181,17 @@ proc ::MUC::BuildEnter {args} {
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
-    ttk::label $frmid.lserv -text "[mc {Conference server}]:" 
-    
-    # First menubutton: servers. (trace below)
     set wserver $frmid.eserv
+    set wbrowse   $frmid.browse
+    set wbmark  $frmid.bmark
+    
+    ttk::label $frmid.lserv -text "[mc {Conference server}]:" 
     ttk::::combobox $wserver -width 16 -textvariable $token\(server) \
       -values $services
-    ttk::label $frmid.lroom -text "[mc {Room name}]:"
+    ttk::button $wbrowse -text [mc Browse] \
+      -command [list [namespace current]::Browse $token]
+    ttk::button $wbmark -style Popupbutton  \
+      -command [list [namespace current]::BmarkPopup $token]
     
     # Find the default conferencing server.
     if {[info exists argsArr(-server)]} {
@@ -202,13 +206,11 @@ proc ::MUC::BuildEnter {args} {
     # Second menubutton: rooms for above server. Fill in below.
     # Combobox since we sometimes want to enter room manually.
     set wroom     $frmid.eroom
-    set wbrowse   $frmid.browse
     set warrows   $frmid.st.arr
     set wstatus   $frmid.st.stat
     
+    ttk::label $frmid.lroom -text "[mc {Room name}]:"
     ttk::::combobox $wroom -textvariable $token\(roomname)
-    ttk::button $wbrowse -text [mc Browse] \
-      -command [list [namespace current]::Browse $token]    
     ttk::label $frmid.lnick -text "[mc {Nick name}]:"
     ttk::entry $frmid.enick -textvariable $token\(nickname)
     ttk::label $frmid.lpass -text "[mc Password]:"
@@ -222,7 +224,7 @@ proc ::MUC::BuildEnter {args} {
     ttk::label $wstatus -textvariable $token\(status)
     pack $wstatus -side left -padx 5
     
-    grid  $frmid.lserv    $wserver       $wbrowse  -sticky e -pady 2
+    grid  $frmid.lserv    $wserver       $wbrowse  $wbmark  -sticky e -pady 2
     grid  $frmid.lroom    $wroom         -  -sticky e -pady 2
     grid  $frmid.lnick    $frmid.enick   -  -sticky e -pady 2
     grid  $frmid.lpass    $frmid.epass   -  -sticky e -pady 2
@@ -279,6 +281,7 @@ proc ::MUC::BuildEnter {args} {
     set enter(warrows) $warrows
     set enter(wenter)  $wenter
     set enter(wbrowse) $wbrowse
+    set enter(wbmark)  $wbmark
     
     if {$enter(-autobrowse) && ($enter(room-state) eq "normal")} {
 
@@ -294,7 +297,9 @@ proc ::MUC::BuildEnter {args} {
     bind $w <Return> [list $wenter invoke]
     bind $wserver <<ComboboxSelected>>  \
       [list [namespace current]::ConfigRoomList $token]
-    
+
+    ::balloonhelp::balloonforwindow $wbmark [mc Bookmarks]
+
     set oldFocus [focus]
     if {[info exists argsArr(-roomjid)]} {
     	focus $frmid.enick
@@ -341,6 +346,30 @@ proc ::MUC::EnterCloseCmd {token wclose} {
 
     ::UI::SaveWinGeom $wDlgs(jmucenter) $wclose
     set enter(finished) 0
+}
+
+proc ::MUC::BmarkPopup {token} {
+    variable $token
+    upvar 0 $token enter
+    
+    set w $enter(wbmark)
+    set m $w.menu
+    if {![winfo exists $m]} {
+	::GroupChat::BuildBmarkMenu $m [list ::MUC::BmarkCmd $token]
+    }
+    set x [expr [winfo rootx $w]]
+    set y [expr {[winfo rooty $w] + [winfo height $w]}]
+    tk_popup $m $x $y
+}
+
+proc ::MUC::BmarkCmd {token name jid nick} {
+    variable $token
+    upvar 0 $token enter
+
+    jlib::splitjidex $jid node domain res
+    set enter(server)   $domain
+    set enter(roomname) $node
+    set enter(nickname) $nick
 }
 
 proc ::MUC::Browse {token} {
@@ -514,7 +543,7 @@ proc ::MUC::EnterCallback {token jlibname type args} {
 	    set errmsg  [lindex $argsArr(-error) 1]
 	    
 	    switch -- $errcode {
-		401 {
+		401 - not-authorized {
 		    
 		    # Password required.
 		    set msg "Error when entering room \"$roomjid\":\
@@ -560,7 +589,7 @@ proc ::MUC::EnterRoom {roomjid nick args} {
 
     set enter(nickname) $nick
     set enter(args) [concat $args -roomjid $roomjid -nickname $nick]
-    jlib::splitjidex $roomjid enter(roomname) enter(server) z
+    jlib::splitjidex $roomjid enter(roomname) enter(server) -
 
     set opts {}
     foreach {key value} $args {

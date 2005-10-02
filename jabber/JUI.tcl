@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.85 2005-09-19 06:37:21 matben Exp $
+# $Id: JUI.tcl,v 1.86 2005-10-02 12:44:41 matben Exp $
 
 package provide JUI 1.0
 
@@ -129,11 +129,12 @@ proc ::Jabber::UI::Init { } {
 	{separator}
 	{command     mSendMessage   {::NewMsg::Build}         disabled M}
 	{command     mChat          {::Chat::StartThreadDlg}  disabled T}
-	{cascade     mStatus        {}                                disabled {} {} {}}
+	{cascade     mStatus        {}                                  disabled {} {} {}}
 	{separator}
-	{command     mEnterRoom     {::GroupChat::EnterOrCreate enter} disabled R}
-	{cascade     mExitRoom      {}                                disabled {} {} {}}
+	{command     mEnterRoom     {::GroupChat::EnterOrCreate enter}  disabled R}
+	{cascade     mExitRoom      {}                                  disabled {} {} {}}
 	{command     mCreateRoom    {::GroupChat::EnterOrCreate create} disabled {}}
+	{command     mEditBookmarks {::GroupChat::EditBookmarks}        normal   {}}
 	{separator}
 	{command     mvCard         {::VCard::Fetch own}              disabled {}}
 	{separator}

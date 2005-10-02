@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.68 2005-09-23 07:33:35 matben Exp $
+# $Id: Disco.tcl,v 1.69 2005-10-02 12:44:41 matben Exp $
 
 package require jlib::disco
 
@@ -127,7 +127,7 @@ proc ::Disco::InitHook { } {
 
 proc ::Disco::NewJlibHook {jlibName} {
 	    
-    $jlibName disco registerhandler ::Disco::Command
+    $jlibName disco registerhandler ::Disco::Handler
 }
 
 proc ::Disco::LoginHook { } {
@@ -165,9 +165,21 @@ proc ::Disco::HaveTree { } {
     }
 }
 
-proc ::Disco::DiscoServer {server} {
+# Disco::DiscoServer --
+# 
+#       Disco for both items and info for a server.
+#
+# Arguments:
+#       jid         The jid to discover.
+#       args:   -command
+#       
+# Results:
+#       callback scheduled.
+
+proc ::Disco::DiscoServer {server args} {
     
-    GetItems $server
+    # It should be enough to get one report.
+    eval {GetItems $server} $args
     GetInfo  $server
 }
 
@@ -177,53 +189,107 @@ proc ::Disco::DiscoServer {server} {
 #
 # Arguments:
 #       jid         The jid to discover.
+#       args:   -node
+#               -command
 #       
 # Results:
 #       callback scheduled.
 
-proc ::Disco::GetInfo {jid {node ""}} {    
+proc ::Disco::GetInfo {jid args} {    
     upvar ::Jabber::jstate jstate
         
     # Discover info for this entity.
-    set opts {}
-    if {$node != ""} {
-	lappend opts -node $node
+    array set arr {
+	-node       ""
+	-command    ""
     }
-    eval {$jstate(jlib) disco send_get info $jid [namespace current]::InfoCB} $opts
+    array set arr $args
+    set opts {}
+    if {$arr(-node) != ""} {
+	lappend opts -node $arr(-node)
+    }
+    set cmdCB [list [namespace current]::InfoCB $arr(-command)]
+    eval {$jstate(jlib) disco send_get info $jid $cmdCB} $opts
 }
 
-proc ::Disco::GetItems {jid {node ""}} {    
+proc ::Disco::GetItems {jid args} {    
     upvar ::Jabber::jstate jstate
     
     # Discover items for this entity.
+    array set arr {
+	-node       ""
+	-command    ""
+    }
+    array set arr $args
     set opts {}
-    if {$node != ""} {
-	lappend opts -node $node
+    if {$arr(-node) != ""} {
+	lappend opts -node $arr(-node)
     }
-    eval {$jstate(jlib) disco send_get items $jid [namespace current]::ItemsCB} $opts
+    set cmdCB [list [namespace current]::ItemsCB $arr(-command)]
+    eval {$jstate(jlib) disco send_get items $jid $cmdCB} $opts
 }
 
-# Disco::Command --
-# 
-#       Registered callback for incoming (async) get requests from other
-#       entities.
-
-proc ::Disco::Command {jlibname discotype from subiq args} {
+proc ::Disco::InfoCB {cmd jlibname type from subiq args} {
+    variable wtree
     upvar ::Jabber::jstate jstate
-
-    ::Debug 2 "::Disco::Command discotype=$discotype, from=$from"
-
-    if {[string equal $discotype "info"]} {
-	eval {ParseGetInfo $from $subiq} $args
-    } elseif {[string equal $discotype "items"]} {
-	eval {ParseGetItems $from $subiq} $args
+     
+    set from [jlib::jidmap $from]
+    set node [wrapper::getattribute $subiq node]
+   
+    ::Debug 2 "::Disco::InfoCB type=$type, from=$from, node=$node"
+    
+    if {[string equal $type "error"]} {
+	::Jabber::AddErrorLog $from "([lindex $subiq 0]) [lindex $subiq 1]"
+	AddServerErrorCheck $from
+    } else {
+	
+	# The info contains the name attribute (optional) which may
+	# need to be set since we get items before name.
+	# 
+	# BUT the items element may also have a name attribute???
+	if {![winfo exists $wtree]} {
+	    return
+	}
+	set ppv     [$jstate(jlib) disco parents2 $from $node]
+	set item    [list $from $node]
+	set vstruct [concat $ppv [list $item]]
+	set cattype [lindex [$jstate(jlib) disco types $from $node] 0]
+	
+	if {[$wtree isitem $vstruct]} {
+	    set icon [::Servicons::Get $cattype]
+	    set opts {}	    
+	    set name [$jstate(jlib) disco name $from $node]
+	    if {$name != ""} {
+		lappend opts -text $name
+	    }
+	    if {$icon != ""} {
+		lappend opts -image $icon
+	    }
+	    if {$node != ""} {
+		lappend opts -dir [IsBranchNode $from $node]
+	    }
+	    if {$opts != {}} {
+		eval {$wtree itemconfigure $vstruct} $opts
+	    }
+	    set treectag [$wtree itemconfigure $vstruct -canvastags]
+	    MakeBalloonHelp $from $node $treectag
+	    SetDirItemUsingCategory $vstruct
+	}
+	
+	# Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
+	# and general (discoInfoHook) hooks.
+	set ct [split $cattype /]
+	set hookName [string totitle [lindex $ct 0]][string totitle [lindex $ct 1]]
+	
+	eval {::hooks::run discoInfo${hookName}Hook $type $from $subiq} $args
+	eval {::hooks::run discoInfoHook $type $from $subiq} $args
     }
-        
-    # Tell jlib's iq-handler that we handled the event.
-    return 1
+    if {$cmd ne ""} {
+	eval $cmd [list $type $from $subiq] $args
+    }
 }
 
-proc ::Disco::ItemsCB {jlibname type from subiq args} {
+proc ::Disco::ItemsCB {cmd jlibname type from subiq args} {
     variable tstate
     variable wwave
     variable discoInfoLimit
@@ -290,11 +356,11 @@ proc ::Disco::ItemsCB {jlibname type from subiq args} {
 	    set cjid  [lindex $cent 0]
 	    set cnode [lindex $cent 1]
 	    if {[llength $vstruct] == 1} {
-		GetInfo $cjid $cnode
+		GetInfo $cjid -node $cnode
 	    } elseif {$clen < $discoInfoLimit} {
-		GetInfo $cjid $cnode
+		GetInfo $cjid -node $cnode
 	    } elseif {($cnode ne "") && ($clen < $discoInfoLimit)} {
-		GetInfo $cjid $cnode
+		GetInfo $cjid -node $cnode
 	    }
 	}
 	if {[jlib::jidequal $from $jserver(this)] && ($pnode == "")} {
@@ -303,63 +369,30 @@ proc ::Disco::ItemsCB {jlibname type from subiq args} {
     }
     
     eval {::hooks::run discoItemsHook $type $from $subiq} $args
+
+    if {$cmd ne ""} {
+	eval $cmd [list $type $from $subiq] $args
+    }
 }
 
-proc ::Disco::InfoCB {jlibname type from subiq args} {
-    variable wtree
+# Disco::Handler --
+# 
+#       Registered callback for incoming (async) get requests from other
+#       entities.
+
+proc ::Disco::Handler {jlibname discotype from subiq args} {
     upvar ::Jabber::jstate jstate
-     
-    set from [jlib::jidmap $from]
-    set node [wrapper::getattribute $subiq node]
-   
-    ::Debug 2 "::Disco::InfoCB type=$type, from=$from, node=$node"
-    
-    if {[string equal $type "error"]} {
-	::Jabber::AddErrorLog $from $subiq
-	AddServerErrorCheck $from
-    } else {
-	
-	# The info contains the name attribute (optional) which may
-	# need to be set since we get items before name.
-	# 
-	# BUT the items element may also have a name attribute???
-	if {![winfo exists $wtree]} {
-	    return
-	}
-	set ppv     [$jstate(jlib) disco parents2 $from $node]
-	set item    [list $from $node]
-	set vstruct [concat $ppv [list $item]]
-	set cattype [lindex [$jstate(jlib) disco types $from $node] 0]
-	
-	if {[$wtree isitem $vstruct]} {
-	    set icon [::Servicons::Get $cattype]
-	    set opts {}	    
-	    set name [$jstate(jlib) disco name $from $node]
-	    if {$name != ""} {
-		lappend opts -text $name
-	    }
-	    if {$icon != ""} {
-		lappend opts -image $icon
-	    }
-	    if {$node != ""} {
-		lappend opts -dir [IsBranchNode $from $node]
-	    }
-	    if {$opts != {}} {
-		eval {$wtree itemconfigure $vstruct} $opts
-	    }
-	    set treectag [$wtree itemconfigure $vstruct -canvastags]
-	    MakeBalloonHelp $from $node $treectag
-	    SetDirItemUsingCategory $vstruct
-	}
-	
-	# Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
-	# and general (discoInfoHook) hooks.
-	set ct [split $cattype /]
-	set hookName [string totitle [lindex $ct 0]][string totitle [lindex $ct 1]]
-	
-	eval {::hooks::run discoInfo${hookName}Hook $type $from $subiq} $args
-	eval {::hooks::run discoInfoHook $type $from $subiq} $args
+
+    ::Debug 2 "::Disco::Handler discotype=$discotype, from=$from"
+
+    if {[string equal $discotype "info"]} {
+	eval {ParseGetInfo $from $subiq} $args
+    } elseif {[string equal $discotype "items"]} {
+	eval {ParseGetItems $from $subiq} $args
     }
+	
+    # Tell jlib's iq-handler that we handled the event.
+    return 1
 }
 
 proc ::Disco::SetDirItemUsingCategory {vstruct} {
@@ -901,7 +934,7 @@ proc ::Disco::OpenTreeCmd {w vstruct} {
 	    $wwave animate 1
 	    
 	    # Discover services available.
-	    GetItems $jid $node
+	    GetItems $jid -node $node
 	} elseif {[llength [$wtree children $vstruct]] == 0} {
 	    
 	    # An item may have been discoed but not from here.
@@ -1082,8 +1115,8 @@ proc ::Disco::Refresh {jid {node ""}} {
 	# Disco once more, let callback manage rest.
 	set tstate(run,$vstruct) 1
 	$wwave animate 1
-	GetInfo  $jid $node
-	GetItems $jid $node
+	GetInfo  $jid -node $node
+	GetItems $jid -node $node
     }
 }
 
@@ -1190,7 +1223,7 @@ proc ::Disco::AutoDiscoCmd {jlibname type from subiq args} {
     
     switch -- $type {
 	error {
-	    ::Jabber::AddErrorLog $from "Failed disco: $subiq"
+	    ::Jabber::AddErrorLog $from "([lindex $subiq 0]) [lindex $subiq 1]"
 	}
 	result - ok {
 	    if {[$jstate(jlib) disco hasfeature $coccixmlns(whiteboard) $from] || \
@@ -1460,7 +1493,7 @@ proc ::Disco::AddServerDo {w} {
     
     destroy $w
     if {$addservervar != ""} {
-	DiscoServer $addservervar
+	DiscoServer $addservervar -command ::Disco::AddServerCB
 	if {$permdiscovar} {
 	    lappend jprefs(disco,autoServers) $addservervar
 	    set jprefs(disco,autoServers) \
@@ -1470,6 +1503,15 @@ proc ::Disco::AddServerDo {w} {
 	    set jprefs(disco,tmpServers) \
 	      [lsort -unique $jprefs(disco,tmpServers)]
 	}
+    }
+}
+
+proc ::Disco::AddServerCB {type from subiq args} {
+    
+    if {$type eq "error"} {
+	ui::dialog -icon error -title [mc Error] \
+	  -message "We failed discovering the server $from ." \
+	  -detail [lindex $subiq 1]
     }
 }
 

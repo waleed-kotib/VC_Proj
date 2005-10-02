@@ -1798,7 +1798,10 @@ proc tablelist::cellselectionSubCmd {win opt firstRow firstCol \
 #------------------------------------------------------------------------------
 proc tablelist::containingSubCmd {win y} {
     upvar ::tablelist::ns${win}::data data
-
+    
+    if {$data(itemCount) == 0} {
+	return -1
+    }
     set row [rowIndex $win @0,$y 0]
 
     set w $data(body)
