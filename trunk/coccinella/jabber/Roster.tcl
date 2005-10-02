@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.135 2005-09-26 14:43:47 matben Exp $
+# $Id: Roster.tcl,v 1.136 2005-10-02 12:44:41 matben Exp $
 
 package provide Roster 1.0
 
@@ -599,6 +599,8 @@ proc ::Roster::BuildMenu {m menuDef jid3 clicked status group} {
     
     foreach {op item type cmd opts} $menuDef {	
 	set locname [mc $item]
+	# If need sudstitutions in opts:
+	#set opts [eval list $opts]
 
 	switch -- $op {
 	    command {
@@ -1349,7 +1351,7 @@ proc ::Roster::TreeInit {w} {
     upvar ::Jabber::jprefs jprefs
     
     set rootOpts [list  \
-      -background   [option get $w rootBackground {}] \
+      -background   [option get $w rootBackground {}]   \
       -backgroundbd [option get $w rootBackgroundBd {}] \
       -foreground   [option get $w rootForeground {}]]
 

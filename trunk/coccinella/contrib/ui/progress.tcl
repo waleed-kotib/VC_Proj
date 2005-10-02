@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: progress.tcl,v 1.2 2005-09-20 14:09:51 matben Exp $
+# $Id: progress.tcl,v 1.3 2005-10-02 12:44:41 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -45,9 +45,12 @@ snit::widget ui::progress::container {
     widgetclass ProgressMulti
 
     variable uid 0
+    variable children {}
+    variable wbase
     
     option -geovariable
     option -title        -configuremethod OnConfigTitle
+    option -style        -default plain
     
     constructor {args} {
 	$self configurelist $args
@@ -59,7 +62,16 @@ snit::widget ui::progress::container {
 	wm withdraw $win
 	if {[string length $options(-geovariable)]} {
 	    ui::PositionWindow $win $options(-geovariable)
-	}	
+	}
+	if {$options(-style) eq "tray"} {
+	    ttk::frame $win.f -padding 10
+	    frame $win.f.f -bd 1 -relief sunken
+	    pack $win.f   -expand 1 -fill both
+	    pack $win.f.f -expand 1 -fill both
+	    set wbase $win.f.f
+	} else {
+	    set wbase $win
+	}
 	return
     }
     
@@ -73,35 +85,45 @@ snit::widget ui::progress::container {
     # Public methods:
     
     method add {args} {
-	if {![llength [grid slaves $win]]} {
-	    set wframe $win.p[incr uid]
+	if {$children == {}} {
+	    set wframe $wbase.p[incr uid]
 	    eval {ui::progress::frame $wframe} $args	
 	    grid  $wframe   -sticky ew
 	} else {
-	    set wframe $win.p[incr uid]
-	    set wsep   $win.s$uid
+	    set name p[incr uid]
+	    set wframe $wbase.$name
+	    set wsep   $wbase.s$name
 	    ttk::separator $wsep -orient horizontal
 	    eval {ui::progress::frame $wframe} $args	
 	    grid  $wsep    -sticky ew
 	    grid  $wframe  -sticky ew
 	}
-	if {[llength [grid slaves $win]] == 1} {
+	if {$children == {}} {
 	    after idle [list wm deiconify $win]
 	}
+	lappend children $wframe
 	return $wframe
     }
     
-    method remove {wframe} {
-	set wtop [winfo toplevel $wframe]
-	set num [string range [lindex [split $wframe .] end] 1 end]
-	set wsep $wtop.s$num
-	if {[winfo exists $wframe]} {
-	    destroy $wframe
+    method delete {wframe} {
+	if {[lsearch $children $wframe] < 0} {
+	    return -code error "bad window path name \"$wframe\""
 	}
+	set name [winfo name $wframe]
+	set parent [winfo parent $wframe]
+	set wsep $parent.s$name
+	destroy $wframe
+	puts "name=$name, parent=$parent, wsep=$wsep"
 	if {[winfo exists $wsep]} {
+	    puts "\t destroy wsep"
 	    destroy $wsep
 	}
-	if {![llength [grid slaves $wtop]]} {
+	
+	# If we delete the top frame we must also delete separator *below*.
+	puts "\t slaves=[grid slaves $wbase -row 0 -column 0]"
+	
+	set children [lsearch -all -not -inline $children $wframe]
+	if {$children == {}} {
 	    wm withdraw $win
 	}
     }
@@ -115,11 +137,10 @@ snit::widget ui::progress::toplevel {
     hulltype toplevel
     widgetclass ProgressWindow
 
+    delegate option * to frm except {-menu -title}
     delegate option -menu to hull
-    delegate option * to frm except {-menu -type -title}
     delegate method * to frm
 
-    option -type
     option -geovariable
     option -title
     
@@ -141,6 +162,13 @@ snit::widget ui::progress::toplevel {
 	}	
 	return
     }
+}
+
+# @@@ supposed to ba  akind of base class for progress frames.
+
+snit::type ui::progress::base {
+    
+    
 }
 
 # ui::progress::frame --
@@ -172,8 +200,9 @@ snit::widgetadaptor ui::progress::frame {
     option -percent -default 0              \
       -configuremethod OnConfigSetPercent   \
       -validatemethod  ValidPercent
+    option -type
 	    
-    constructor {args} {
+    constructor {args} {	
 	installhull using ttk::frame -class ProgressFrame
 	
 	install lbl  using ttk::label  $win.lbl
@@ -253,6 +282,14 @@ snit::widgetadaptor ui::progress::frame {
     method configuredelayed {args} {
 	array set configDelayed $args
     }
+}
+
+if {0} {
+    package require ui::progress
+    
+    ui::progress::toplevel .p1 -percent 66
+    ui::progress::toplevel .p2 -percent 44 -type tk
+    
 }
 
 #-------------------------------------------------------------------------------

@@ -8,6 +8,7 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
+package ifneeded Bookmarks 1.0 [list source [file join $dir Bookmarks.tcl]]
 package ifneeded Dialogs 1.0 [list source [file join $dir Dialogs.tcl]]
 package ifneeded EditDialogs 1.0 [list source [file join $dir EditDialogs.tcl]]
 package ifneeded FactoryDefaults 1.0 [list source [file join $dir SetFactoryDefaults.tcl]]

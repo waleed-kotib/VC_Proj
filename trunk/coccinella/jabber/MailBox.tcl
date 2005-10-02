@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.75 2005-09-28 13:50:23 matben Exp $
+# $Id: MailBox.tcl,v 1.76 2005-10-02 12:44:41 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -392,7 +392,7 @@ proc ::MailBox::Build {args} {
     grid rowconfigure $wfrmsg 0 -weight 1
     
     $wpane add $wfrmbox -weight 1
-    $wpane add $wfrmsg -weight 1
+    $wpane add $wfrmsg  -weight 1
     
     set locals(wfrmbox)  $wfrmbox
     set locals(wtbl)     $wtbl
@@ -419,10 +419,10 @@ proc ::MailBox::Build {args} {
     #$wtextmsg bind <Key> break
 
     # Special bindings for the tablelist.
-    set body [$wtbl bodypath]
-    bind $body <Button-1> {+ focus %W}
-    bind $body <Double-1>           [namespace current]::DoubleClickMsg
-    bind $body <KeyPress-BackSpace> [namespace current]::TrashMsg
+    set tag [$wtbl bodytag]
+    bind $tag  <Button-1> {+ focus %W}
+    bind $tag  <Double-1>           [namespace current]::DoubleClickMsg
+    bind $tag  <KeyPress-BackSpace> [namespace current]::TrashMsg
     bind $wtbl <<ListboxSelect>>    [namespace current]::SelectMsg
     
     LabelCommand $wtbl $colindex(secs)

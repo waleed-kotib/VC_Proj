@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.1 2005-08-14 06:56:45 matben Exp $
+# $Id: tileutils.tcl,v 1.2 2005-10-02 12:44:41 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -24,6 +24,15 @@ foreach name [tile::availableThemes] {
 	}
 	style default Headlabel \
 	  -font CociLargeFont -padding {20 6 20 6} -anchor w -space 12
+	
+	style layout Popupbutton {
+	    Popupbutton.border -children {
+		Popupbutton.padding -children {
+		    Popupbutton.Combobox.downarrow
+		}
+	    }
+	}
+	style default Popupbutton -padding 6
 	
 	style default Small.TCheckbutton -font CociSmallFont
 	style default Small.TRadiobutton -font CociSmallFont

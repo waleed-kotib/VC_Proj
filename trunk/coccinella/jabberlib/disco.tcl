@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.28 2005-09-24 10:31:23 matben Exp $
+# $Id: disco.tcl,v 1.29 2005-10-02 12:44:41 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -76,6 +76,9 @@
 #            ...
 #            
 # 050910 INCOMPATIBLE CHANGE! complete reorganization using ensamble command.
+# 
+# @@@ While parent -> child is uniquely defined parent <- child is NOT!
+#     I have made a fundamentally wrong assumption. REMOVE!!!
 
 package require jlib
 
@@ -1093,6 +1096,13 @@ proc jlib::disco::ResetJid {jlibname jid} {
 	    set parents $items($jid,parents)
 	}
 	
+	if {[info exists items($jid,,parent2)]} {
+	    set parent2 $items($jid,,parent2)
+	}
+	if {[info exists items($jid,,parents2)]} {
+	    set parents2 $items($jid,,parents2)
+	}
+
 	array unset items [jlib::ESC $jid],*
 	array unset info  [jlib::ESC $jid],*
 	array unset rooms [jlib::ESC $jid],*
@@ -1104,7 +1114,14 @@ proc jlib::disco::ResetJid {jlibname jid} {
 	if {[info exists parents]} {
 	    set items($jid,parents) $parents
 	}
-	
+
+	if {[info exists parent2]} {
+	    set items($jid,,parent2) $parent2
+	}
+	if {[info exists parents2]} {
+	    set items($jid,,parents2) $parents2
+	}
+
 	# Rest.
 	foreach {key value} [array get info "*,typelist"] {
 	    set info($key) [lsearch -all -not -inline -exact $value $jid]

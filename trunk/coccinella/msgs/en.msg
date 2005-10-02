@@ -21,6 +21,8 @@
 ::msgcat::mcset en Block
 ::msgcat::mcset en Blockers
 ::msgcat::mcset en Blocking
+::msgcat::mcset en Bookmark
+::msgcat::mcset en Bookmarks
 ::msgcat::mcset en Browser
 ::msgcat::mcset en Both
 ::msgcat::mcset en Buffering
@@ -317,6 +319,7 @@
 ::msgcat::mcset en mTakeSnapShot        {Take Snapshot}
 ::msgcat::mcset en mTimeCode            {Timecode}
 ::msgcat::mcset en mUserInfo            {User Info...}
+::msgcat::mcset en mEditBookmarks       {Edit Bookmarks...}
 
 # Popups
 ::msgcat::mcset en mMessage     	{Message...}
@@ -452,6 +455,7 @@
 ::msgcat::mcset en {Network Error}
 ::msgcat::mcset en {Network Setup}
 ::msgcat::mcset en {New Account}
+::msgcat::mcset en {New bookmark}
 ::msgcat::mcset en {New chat message}
 ::msgcat::mcset en {New chat thread}
 ::msgcat::mcset en {New Color}

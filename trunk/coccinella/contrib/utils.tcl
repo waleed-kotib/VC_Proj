@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: utils.tcl,v 1.1 2005-09-20 14:09:51 matben Exp $
+# $Id: utils.tcl,v 1.2 2005-10-02 12:44:41 matben Exp $
 
 package provide utils 1.0
     
@@ -89,7 +89,27 @@ proc listintersectnonempty {alist blist} {
     }
     return 0
 }
-    
+
+# fromoptionlist --
+# 
+#       This command plucks an option value from a list of options and their 
+#       values. listName must be the name of a variable containing such a list; 
+#       name is the name of the specific option. It looks for option in the 
+#       option list. If it is found, it and its value are removed from the 
+#       list, and the value is returned. If option doesn't appear in the list,
+#       then the value is returned. 
+
+proc fromoptionlist {listName name {value ""}} {
+    upvar $listName listValue
+   
+    if {[set idx [lsearch $listValue $name]] >= 0} {
+	set idx2 [expr {$idx+1}]
+	set value [lindex $listValue $idx2]
+	uplevel set $listName [list [lreplace $listValue $idx $idx2]]
+    }
+    return $value
+}
+
 # ESCglobs --
 #
 #	array get and array unset accepts glob characters. These need to be

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.101 2005-09-26 14:43:47 matben Exp $
+# $Id: UI.tcl,v 1.102 2005-10-02 12:44:41 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -247,6 +247,7 @@ proc ::UI::InitDlgs { } {
 	jdirpres        .jdirpres
 	jdisaddserv     .jdisaddserv
 	juserinfo       .juserinfo
+	jgcbmark        .jgcbmark
     }
 }
 

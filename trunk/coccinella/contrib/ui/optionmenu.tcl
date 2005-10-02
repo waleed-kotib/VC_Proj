@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.1 2005-09-26 11:59:16 matben Exp $
+# $Id: optionmenu.tcl,v 1.2 2005-10-02 12:44:41 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -35,25 +35,32 @@ snit::widgetadaptor ui::optionmenu::widget {
     option -variable
     
     constructor {args} {
+	from args -textvariable
 	installhull using ttk::menubutton
-	if {[set idx [lsearch $args -textvariable]] >= 0} {
-	    set args [lreplace $args $idx [expr {$idx+1}]]]
-	}
 	$self configurelist $args
 	
 	set m $win.menu
 	menu $m -tearoff 0
 	set maxLen 0
-	set menuVar [lindex $options(-menulist) 0]
-	foreach {str value} $options(-menulist) {
+	set menuVar [lindex $options(-menulist) 0 0]
+
+	foreach mdef $options(-menulist) {
+	    array unset opts
+	    set str [lindex $mdef 0]
+	    set value $str
+	    array set opts [lrange $mdef 1 end]
+	    if {[info exists opts(-value)]} {
+		set value $opts(-value)
+	    }
 	    set map($str) $value
 	    set imap($value) $str
+	    unset -nocomplain opts(-value)
 	    if {[set len [string length $str]] > $maxLen} {
 		set maxLen $len
 		set longest $str
 	    }
-	    $m add radiobutton -label $str -variable [myvar menuVar] \
-	      -command [list $self Command]
+	    eval {$m add radiobutton -label $str -variable [myvar menuVar] \
+	      -command [list $self Command]} [array get opts]
 	}
 	$win configure -textvariable [myvar menuVar] -menu $m
 	return
@@ -91,11 +98,11 @@ snit::widgetadaptor ui::optionmenu::widget {
 if {0} {
     package require ui::optionmenu
     set menuDef {
-	"Ten seconds"       10
-	"One minute"        60
-	"Ten minutes"      600
-	"One hour"        3600
-	"No restriction"     0
+	{"Ten seconds"     -value 10}
+	{"One minute"      -value 60}
+	{"Ten minutes"     -value 600}
+	{"One hour"        -value 3600}
+	{"No restriction"  -value 0}
     }
     proc Cmd {} {puts "Cmd var=$::var"}
 

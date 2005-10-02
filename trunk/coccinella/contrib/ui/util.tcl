@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: util.tcl,v 1.4 2005-09-21 09:53:23 matben Exp $
+# $Id: util.tcl,v 1.5 2005-10-02 12:44:41 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -102,7 +102,7 @@ proc ui::SetGeometry {win geoVar} {
 
 proc ui::SetGeometryEx {win geoVar wclass {part "geo"}} {
     variable geoRE
-
+    
     # Create variable if not exists.
     if {![uplevel #0 [list info exists $geoVar]]} {
 	uplevel #0 [list set $geoVar ""]

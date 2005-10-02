@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: entryex.tcl,v 1.2 2005-09-21 09:53:23 matben Exp $
+# $Id: entryex.tcl,v 1.3 2005-10-02 12:44:41 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -55,10 +55,7 @@ snit::widgetadaptor ui::entryex::widget {
 
     
     constructor {args} {
-	set type "ttk"
-	if {[set idx [lsearch $args "-type"]] >= 0} {
-	    set type [lindex $args [incr idx]]
-	}
+	set type [from args -type "ttk"]
 	if {![regexp {^(tk|ttk)$} $type]} {
 	    return -code error "style must be one of: tk, ttk"
 	}
