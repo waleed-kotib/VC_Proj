@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.122 2005-10-03 12:49:55 matben Exp $
+# $Id: GroupChat.tcl,v 1.123 2005-10-03 13:22:17 matben Exp $
 
 package require Enter
 package require History
@@ -1033,7 +1033,7 @@ proc ::GroupChat::InsertMessage {token from body args} {
     set nick ""
     
     switch -- $whom {
-	me - you {
+	me - they {
 	    set nick [::Jabber::JlibCmd service nick $from]	    
 	}
     }
