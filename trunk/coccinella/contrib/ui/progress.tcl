@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: progress.tcl,v 1.3 2005-10-02 12:44:41 matben Exp $
+# $Id: progress.tcl,v 1.4 2005-10-03 12:49:55 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -15,23 +15,36 @@ package provide ui::progress 0.1
 
 namespace eval ui::progress {
        
-    style default ProgressFrame.TButton -font DlgSmallFont
+    style default TProgressFrame.TButton -font DlgSmallFont
 
-    option add *ProgressWindow.title   [::msgcat::mc Progress]    widgetDefault
+    option add *ProgressWindow.title   [::msgcat::mc Progress]     widgetDefault
 
-    option add *ProgressFrame.font     DlgDefaultFont             widgetDefault
-    option add *ProgressFrame.font2    DlgSmallFont               widgetDefault
-    option add *ProgressFrame.font3    DlgSmallFont               widgetDefault 
-    option add *ProgressFrame.length   200                        widgetDefault
-    option add *ProgressFrame.text     [::msgcat::mc Progress]    widgetDefault
-    option add *ProgressFrame.buttonstyle  ProgressFrame.TButton  widgetDefault
+    option add *TProgressFrame.font     DlgDefaultFont             widgetDefault
+    option add *TProgressFrame.font2    DlgSmallFont               widgetDefault
+    option add *TProgressFrame.font3    DlgSmallFont               widgetDefault 
+    option add *TProgressFrame.length   200                        widgetDefault
+    option add *TProgressFrame.text     [::msgcat::mc Progress]    widgetDefault
+    option add *TProgressFrame*TButton.style TProgressFrame.TButton widgetDefault
+
+    option add *ProgressFrame.font      DlgDefaultFont             widgetDefault
+    option add *ProgressFrame.font2     DlgSmallFont               widgetDefault
+    option add *ProgressFrame.font3     DlgSmallFont               widgetDefault 
+    option add *ProgressFrame.length    200                        widgetDefault
+    option add *ProgressFrame.text      [::msgcat::mc Progress]    widgetDefault
+    option add *ProgressFrame*Button.font DlgSmallFont             widgetDefault
 
     switch -- [tk windowingsystem] {
 	aqua {
-	    option add *ProgressFrame.padding       {14 4}        widgetDefault
+	    option add *TProgressFrame.padding       {14 4}        widgetDefault
+
+	    option add *ProgressFrame.padX           14            widgetDefault
+	    option add *ProgressFrame.padY            4            widgetDefault
 	}
 	default {
-	    option add *ProgressFrame.padding       {10 4}        widgetDefault
+	    option add *TProgressFrame.padding       {10 4}        widgetDefault
+
+	    option add *ProgressFrame.padX           10            widgetDefault
+	    option add *ProgressFrame.padY            4            widgetDefault
 	}
     }
 }
@@ -113,20 +126,36 @@ snit::widget ui::progress::container {
 	set parent [winfo parent $wframe]
 	set wsep $parent.s$name
 	destroy $wframe
-	puts "name=$name, parent=$parent, wsep=$wsep"
 	if {[winfo exists $wsep]} {
-	    puts "\t destroy wsep"
 	    destroy $wsep
 	}
 	
 	# If we delete the top frame we must also delete separator *below*.
-	puts "\t slaves=[grid slaves $wbase -row 0 -column 0]"
-	
+	set min 100000
+	foreach slave [grid slaves $wbase] {
+	    array set opts [grid info $slave]
+	    if {$opts(-row) < $min} {
+		set min $opts(-row)
+		set mslave $slave
+	    }
+	}
+	if {[info exists mslave]} {
+	    if {[winfo class $mslave] eq "TSeparator"} {
+		destroy $mslave
+	    }
+	}
 	set children [lsearch -all -not -inline $children $wframe]
 	if {$children == {}} {
 	    wm withdraw $win
 	}
     }
+}
+
+if {0} {
+    ui::progress::container .m -style tray
+    .m add -percent 22
+    .m add -percent 55
+    .m add -percent 88    
 }
 
 # ui::progress::toplevel --
@@ -137,15 +166,17 @@ snit::widget ui::progress::toplevel {
     hulltype toplevel
     widgetclass ProgressWindow
 
-    delegate option * to frm except {-menu -title}
+    delegate option * to frm except {-menu -title -style}
     delegate option -menu to hull
     delegate method * to frm
 
     option -geovariable
+    option -style "ttk"
     option -title
     
     constructor {args} {
-	install frm using ui::progress::frame $win.frm
+	set style [from args -style "ttk"]
+	install frm using ui::progress::frame $win.frm -style $style
 
 	$self configurelist $args
 	if {[tk windowingsystem] eq "aqua"} {
@@ -164,11 +195,11 @@ snit::widget ui::progress::toplevel {
     }
 }
 
-# @@@ supposed to ba  akind of base class for progress frames.
-
-snit::type ui::progress::base {
-    
-    
+if {0} {
+    option add *ProgressFrame*background  white
+    toplevel .t
+    ui::progress::frame .t.t -style tk -percent 66
+    pack .t.t
 }
 
 # ui::progress::frame --
@@ -184,7 +215,7 @@ snit::widgetadaptor ui::progress::frame {
     variable configDelayed
     
     # @@@ Could add full option specs.
-    delegate option -padding to hull
+    #delegate option -padding to hull
     delegate option -font    to lbl
     delegate option -text    to lbl
     delegate option -font2   to lbl2 as -font
@@ -192,7 +223,7 @@ snit::widgetadaptor ui::progress::frame {
     delegate option -font3   to lbl3 as -font
     delegate option -text3   to lbl3 as -text
     delegate option -length  to prg
-    delegate option -buttonstyle   to bt  as -style
+    #delegate option -buttonstyle   to bt  as -style
     delegate option -cancelcommand to bt  as -command
 
     option -pausecommand                    \
@@ -200,11 +231,29 @@ snit::widgetadaptor ui::progress::frame {
     option -percent -default 0              \
       -configuremethod OnConfigSetPercent   \
       -validatemethod  ValidPercent
-    option -type
+    option -style -default "ttk"
 	    
     constructor {args} {	
-	installhull using ttk::frame -class ProgressFrame
-	
+	set style [from args -style "ttk"]
+	if {$style eq "ttk"} {
+	    installhull using ttk::frame -class TProgressFrame
+	    eval {$self TtkConstructor} $args
+	} elseif {$style eq "tk"} {
+	    installhull using frame -class ProgressFrame
+	    eval {$self TkConstructor} $args
+	} else {
+	    return -code error "unrecognized -style \"$style\""
+	}	
+	if {$heartbeat} {
+	    if {[llength [ui::progress::frame info instances]] == 1} {
+		set heartbeatid [after $heartbeat [mytypemethod Beat]]
+	    }
+	}		
+	$self configurelist $args
+	return
+    }
+    
+    method TtkConstructor {args} {
 	install lbl  using ttk::label  $win.lbl
 	install lbl2 using ttk::label  $win.lbl2
 	install lbl3 using ttk::label  $win.lbl3
@@ -217,15 +266,21 @@ snit::widgetadaptor ui::progress::frame {
 	grid  $win.lbl2  -        -pady 0 -sticky w
 	grid  $win.lbl3  -        -pady 0 -sticky w
 	grid columnconfigure $win 0 -weight 1
-	
-	if {$heartbeat} {
-	    if {[llength [ui::progress::frame info instances]] == 1} {
-		set heartbeatid [after $heartbeat [mytypemethod Beat]]
-	    }
-	}
-		
-	$self configurelist $args
-	return
+    }
+    
+    method TkConstructor {args} {
+	install lbl  using label  $win.lbl
+	install lbl2 using label  $win.lbl2
+	install lbl3 using label  $win.lbl3
+	install bt   using button $win.bt   -text [::msgcat::mc Cancel]
+	install prg  using ttk::progressbar $win.prg  \
+	  -orient horizontal -maximum 100
+
+	grid  $win.lbl   -        -pady 4 -sticky w
+	grid  $win.prg   $win.bt  -padx 4 -pady 0
+	grid  $win.lbl2  -        -pady 0 -sticky w
+	grid  $win.lbl3  -        -pady 0 -sticky w
+	grid columnconfigure $win 0 -weight 1
     }
         
     typemethod Beat {} {
@@ -288,7 +343,7 @@ if {0} {
     package require ui::progress
     
     ui::progress::toplevel .p1 -percent 66
-    ui::progress::toplevel .p2 -percent 44 -type tk
+    ui::progress::toplevel .p2 -percent 44 -style tk
     
 }
 

@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.5 2005-09-28 13:50:23 matben Exp $
+# $Id: dialog.tcl,v 1.6 2005-10-03 12:49:55 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -81,20 +81,20 @@ if {0} {
     set im [image create photo -file $f]
     ui::dialog::setbadge $im
     
-    ui::dialog .d -message "These two must be able to call before any dialog instance created." \
+    ui::dialog -message "These two must be able to call before any dialog instance created." \
       -detail "These two must be able to call before any dialog instance created."
-    ui::dialog .d2 -message "These two must be able to call before any dialog instance created." \
+    ui::dialog -message "These two must be able to call before any dialog instance created." \
       -detail "These two must be able to call before any dialog instance created." \
       -icon error -buttons {yes no cancel} -default yes
-    ui::dialog .d3 -message "These two must be able to call before any dialog instance created." \
+    ui::dialog -message "These two must be able to call before any dialog instance created." \
       -detail "These two must be able to call before any dialog instance created." \
-      -icon error -type yesnocancel
+      -icon error -type yesnocancel -modal 1
 
     proc cmd {w bt} {
 	destroy $w
 	tk_getSaveFile
     }
-    ui::dialog .d4 -message "Check destroy from -command" -command cmd
+    ui::dialog -message "Check destroy from -command" -command cmd
 }
 
 # These two must be able to call before any dialog instance created.
@@ -210,6 +210,7 @@ snit::widget ui::dialog::widget {
       -default info                   \
       -validatemethod ValidateIcon
     option -badge       1
+    option -modal       0
     
     typeconstructor {
 
@@ -256,7 +257,11 @@ snit::widget ui::dialog::widget {
 	$self configurelist $args	
 	
 	if {[tk windowingsystem] eq "aqua"} {
-	    ::tk::unsupported::MacWindowStyle style $win document none
+	    if {$options(-modal)} {
+		::tk::unsupported::MacWindowStyle style $win moveableModal none
+	    } else {
+		::tk::unsupported::MacWindowStyle style $win document closeBox
+	    }
 	}
 	wm title $win $options(-title)
 	set wraplength [$top.message cget -wraplength]
@@ -317,10 +322,14 @@ snit::widget ui::dialog::widget {
 	pack $f
 	pack $top    -side top
 	pack $bottom -side bottom -anchor [option get $win buttonAnchor {}]
-	
+
 	if {[string length $options(-geovariable)]} {
 	    ui::PositionWindow $win $options(-geovariable)
 	}	
+	if {$options(-modal)} {
+	    # This doesn't work because we are destroyed after grab is released!
+	    #ui::Grab $win
+	}
 	return
     }
     

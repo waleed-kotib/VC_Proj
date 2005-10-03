@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.121 2005-10-02 12:44:41 matben Exp $
+# $Id: GroupChat.tcl,v 1.122 2005-10-03 12:49:55 matben Exp $
 
 package require Enter
 package require History
@@ -314,13 +314,11 @@ proc ::GroupChat::EnterOrCreate {what args} {
 	    set ans [eval {::Conference::BuildCreate} $args]
 	}
 	enter,muc {
-	    #set ans [eval {::MUC::BuildEnter} $args]
 	    set ans [eval {::Enter::Build $protocol} $args]
 	}
 	enter,* {
 	    
 	    # This is typically a service on a nondiscovered server.
-	    #set ans [eval {::MUC::BuildEnter} $args]
 	    set ans [eval {::Enter::Build $protocol} $args]
 	}	    
 	default {
