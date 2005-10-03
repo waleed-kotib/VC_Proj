@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Enter.tcl,v 1.1 2005-10-02 12:44:41 matben Exp $
+# $Id: Enter.tcl,v 1.2 2005-10-03 12:49:55 matben Exp $
 
 package provide Enter 1.0
 
@@ -179,7 +179,7 @@ proc ::Enter::Build {protocol args} {
     set wenter  $frbot.btok
     ttk::frame $frbot
     ttk::button $wenter -text [mc Enter] \
-      -default active -command [list [namespace current]::PrepDoEnter $token]
+      -default active -command [list [namespace current]::PrepPrepDoEnter $token]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelEnter $token]
     set padx [option get . buttonPadX {}]
@@ -435,9 +435,26 @@ proc ::Enter::BusyEnterDlgIncr {token {num 1}} {
     }
 }
 
+# Enter::PrepPrepDoEnter --
+# 
+#       Just checks that we have got nick & room name, and then calls PrepDoEnter.
+
+proc ::Enter::PrepPrepDoEnter {token} {
+    variable $token
+    upvar 0 $token state
+    
+    ::Debug 4 "::Enter::PrepPrepDoEnter"
+
+    if {($state(roomname) eq "") || ($state(nickname) eq "")} {
+	::UI::MessageBox -type ok -icon error -message [mc jamessinroommiss]
+    } else {
+	PrepDoEnter $token
+    }
+}
+
 # Enter::PrepDoEnter --
 # 
-#       Prepare enetring a room. We may need to check if disco is supported
+#       Prepare entering a room. We may need to check if disco is supported
 #       before trying entering via "muc".
 
 proc ::Enter::PrepDoEnter {token} {
@@ -446,12 +463,7 @@ proc ::Enter::PrepDoEnter {token} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
     
-    ::Debug 4 "::Enter::PrepDoEnter"
-
-    if {($state(roomname) eq "") || ($state(nickname) eq "")} {
-	::UI::MessageBox -type ok -icon error -message [mc jamessinroommiss]
-	return
-    }
+    ::Debug 4 ""
 
     set roomjid [jlib::jidmap $state(roomname)@$state(server)]
     set service $state(server)
@@ -574,7 +586,8 @@ proc ::Enter::MUCCallback {token jlibname type args} {
 		      -message $msg]
 		    if {$ans eq "yes"} {
 			set retry 1
-			eval {Build} $state(args)
+			Build "muc" -roomjid $state(roomjid)  \
+			  -nickname $state(nickname)
 		    }
 		}
 		default {
@@ -626,34 +639,46 @@ proc ::Enter::GCCallback {token jlibname type args} {
 # Enter::EnterRoom --
 # 
 #       Programmatic way to enter a room.
+#       
+# Arguments:
+#       roomjid
+#       nick
+#       args:
+#           -protocol    (gc-1.0 | muc) Protocol to use. If muc and it fails
+#                        we use gc-1.0 as a fallback.
+#           -command     tclProc
+#           -password
+#       
+# Results:
+#       "cancel" or "enter".
 
 proc ::Enter::EnterRoom {roomjid nick args} {
     variable uid
-    upvar ::Jabber::jstate jstate
     
     # State variable to collect instance specific variables.
     set token [namespace current]::[incr uid]
     variable $token
     upvar 0 $token state
 
+    set state(roomjid)  $roomjid
     set state(nickname) $nick
-    set state(args) [concat $args -roomjid $roomjid -nickname $nick]
+    set state(password) ""
+    set state(protocol) "muc"
+    set state(args)     $args
     jlib::splitjidex $roomjid state(roomname) state(server) -
 
-    set opts {}
     foreach {key value} $args {
 	
 	switch -- $key {
-	    -command {
-		set state(-command) $value
-	    }
 	    -password {
-		lappend opts $key $value
+		set state(password) $value
+	    }
+	    default {
+		set state($key) $value
 	    }
 	}
     }
-    eval {$jstate(jlib) muc enter $roomjid $nick -command \
-      [list [namespace current]::MUCCallback $token]} $opts
+    PrepDoEnter $token
 }
 
 proc ::Enter::DialogExists {token} {    

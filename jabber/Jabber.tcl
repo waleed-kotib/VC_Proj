@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.145 2005-10-02 12:44:41 matben Exp $
+# $Id: Jabber.tcl,v 1.146 2005-10-03 12:49:55 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -496,7 +496,7 @@ proc ::Jabber::Init { } {
     # Add the three element callbacks.
     lappend opts  \
       -iqcommand       ::Jabber::IqCallback       \
-      -messagecommand  ::Jabber::MessageCallback  \
+      -messagecommand  ::Jabber::MessageHandler   \
       -presencecommand ::Jabber::PresenceCallback
 
     # Make an instance of jabberlib and fill in our roster object.
@@ -556,7 +556,7 @@ proc ::Jabber::IqCallback {jlibName type args} {
     return $stat
 }
 
-# ::Jabber::MessageCallback --
+# ::Jabber::MessageHandler --
 #
 #       Registered callback proc for <message> elements.
 #       Not all messages may be delivered here; some may be intersected by
@@ -569,11 +569,11 @@ proc ::Jabber::IqCallback {jlibName type args} {
 # Results:
 #       none.
 
-proc ::Jabber::MessageCallback {jlibName type args} {    
+proc ::Jabber::MessageHandler {jlibName type args} {    
     variable jstate
     variable jprefs
     
-    ::Debug 2 "::Jabber::MessageCallback type=$type"
+    ::Debug 2 "::Jabber::MessageHandler type=$type"
     
     array set argsArr {-body ""}
     array set argsArr $args
@@ -605,6 +605,10 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 	    eval {::hooks::run newHeadlineMessageHook $body} $args
 	}
 	default {
+	    
+	    # @@@ In order to uniquely trace messages we could add an uid
+	    #     that is used in the MailBox and GotMsg.
+	    # eval {::hooks::run newMessageHook $body [jlib::generateuuid]} $args
 	    
 	    # Normal message. Handles whiteboard stuff as well.
 	    eval {::hooks::run newMessageHook $body} $args

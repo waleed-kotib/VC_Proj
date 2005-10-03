@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.113 2005-09-28 13:50:23 matben Exp $
+# $Id: jabberlib.tcl,v 1.114 2005-10-03 12:49:55 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2833,7 +2833,10 @@ proc jlib::sendraw {jlibname xml} {
     
     upvar ${jlibname}::lib lib
 
-    $lib(transport,send) $jlibname $xml
+    # We may use this call in exceptions, before socket was connected.
+    if {[info exists lib(transport,send)]} {
+	$lib(transport,send) $jlibname $xml
+    }
 }
 
 # jlib::mystatus --

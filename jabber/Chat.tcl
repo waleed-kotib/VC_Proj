@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.129 2005-10-02 12:44:41 matben Exp $
+# $Id: Chat.tcl,v 1.130 2005-10-03 12:49:55 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -873,7 +873,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    lappend dlgstate(chattokens) $chattoken
+    lappend dlgstate(chattokens)    $chattoken
     lappend dlgstate(recentctokens) $chattoken
 
     # -from is sometimes a 3-tier jid /resource included.
@@ -903,6 +903,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(xevent,status)    ""
     set chatstate(xevent,msgidlist) ""
     set chatstate(xevent,type)      chat
+    set chatstate(nhiddenmsgs)      0
     if {[info exists argsArr(-subject)]} {
 	set chatstate(subject) $argsArr(-subject)
     }
@@ -1270,6 +1271,11 @@ proc ::Chat::TabChanged {dlgtoken} {
     set wpage [GetNotebookWpageFromIndex $wnb [$wnb index current]]
     set chattoken $dlgstate(wpage2token,$wpage)
 
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    set chatstate(nhiddenmsgs) 0
+
     SetThreadState $dlgtoken $chattoken
     SetFocus $dlgtoken $chattoken
     
@@ -1306,7 +1312,8 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
 	SetState $chattoken disabled
     }
     if {[winfo exists $dlgstate(wnb)]} {
-	$dlgstate(wnb) tab $chatstate(wpage) -image ""
+	$dlgstate(wnb) tab $chatstate(wpage) -image ""  \
+	  -text $chatstate(displayname)
     }
     SetTitle $chattoken
     
@@ -1406,8 +1413,12 @@ proc ::Chat::TabAlert {chattoken args} {
 	
 	# Show only if not current page.
 	if {[GetActiveChatToken $dlgtoken] != $chattoken} {
+	    incr chatstate(nhiddenmsgs)
+	    set postfix " ($chatstate(nhiddenmsgs))"
+	    set name $chatstate(displayname)
+	    append name " " "($chatstate(nhiddenmsgs))"
 	    set icon [::Theme::GetImage [option get $w tabAlertImage {}]]
-	    $wnb tab $chatstate(wpage) -image $icon
+	    $wnb tab $chatstate(wpage) -image $icon -text $name
 	}
     }
 }
