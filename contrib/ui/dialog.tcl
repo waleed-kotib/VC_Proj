@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.6 2005-10-03 12:49:55 matben Exp $
+# $Id: dialog.tcl,v 1.7 2005-10-04 13:56:35 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -247,10 +247,7 @@ snit::widget ui::dialog::widget {
 	install detail  using ttk::label $top.detail  -anchor w -justify left
 	
 	# Trick to let individual options override -type ones.
-	set dlgtype ok
-	if {[set idx [lsearch $args -type]] >= 0} {
-	    set dlgtype [lindex $args [incr idx]]
-	}
+	set dlgtype [from args -type ok]
 	if {[info exists dialogTypes($dlgtype)]} {
 	    array set options $dialogTypes($dlgtype)
 	}
