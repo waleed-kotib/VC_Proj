@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: progress.tcl,v 1.5 2005-10-04 13:02:53 matben Exp $
+# $Id: progress.tcl,v 1.6 2005-10-04 13:56:35 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -166,7 +166,7 @@ snit::widget ui::progress::toplevel {
     hulltype toplevel
     widgetclass ProgressWindow
 
-    delegate option * to frm except {-menu -title -style}
+    delegate option * to frm except {-menu -title -style -type}
     delegate option -menu to hull
     delegate method * to frm
 
@@ -176,7 +176,9 @@ snit::widget ui::progress::toplevel {
     
     constructor {args} {
 	set style [from args -style "ttk"]
-	install frm using ui::progress::frame $win.frm -style $style
+	set type  [from args -type ""]
+	install frm using ui::progress::frame $win.frm -style $style  \
+	  -type $type
 
 	$self configurelist $args
 	if {[tk windowingsystem] eq "aqua"} {
@@ -240,17 +242,18 @@ snit::widgetadaptor ui::progress::frame {
     option -style -default "ttk"
     option -buttonstyle -default ""
     option -padding     -default ""
-    option -padx        -default 0
-    option -pady        -default 0
+    option -padx        -default ""
+    option -pady        -default ""
     option -showtext3   -default 1
     option -type        -default ""
 	    
     typeconstructor {
 	StockDialog ""
-	StockDialog compact -padding {6 2} -padx 6 -pady 0
+	StockDialog compact -padding {6 2} -padx 6 -pady 0 -showtext3 0  \
+	  -font DlgSmallFont
     }
     
-    constructor {args} {	
+    constructor {args} {
 	set style [from args -style "ttk"]
 	if {$style eq "ttk"} {
 	    installhull using ttk::frame -class TProgressFrame
@@ -266,9 +269,16 @@ snit::widgetadaptor ui::progress::frame {
 		set heartbeatid [after $heartbeat [mytypemethod Beat]]
 	    }
 	}		
+
+	# Trick to let individual options override -type ones.
+	set type [from args -type ""]
+	if {[info exists dialogTypes($type)]} {
+	    array set options $dialogTypes($type)
+	} else {
+	    return -code error "unrecognized -type \"$type\""
+	}
 	$self configurelist $args
-	parray options
-	
+		
 	# Option postfixes.
 	if {$style eq "ttk"} {
 	    if {$options(-padding) ne ""} {
@@ -276,6 +286,13 @@ snit::widgetadaptor ui::progress::frame {
 	    }
 	    if {$options(-buttonstyle) ne ""} {
 		$win.bt configure -style $options(-buttonstyle)
+	    }
+	} elseif {$style eq "tk"} {
+	    if {$options(-padx) ne ""} {
+		$win configure -padx $options(-padx)
+	    }
+	    if {$options(-pady) ne ""} {
+		$win configure -pady $options(-pady)
 	    }
 	}
 	$self Grid
@@ -303,6 +320,9 @@ snit::widgetadaptor ui::progress::frame {
     
     method Grid {} {
 	set pady $options(-pady)
+	if {$pady eq ""} {
+	    set pady 4
+	}
 	
 	grid  $win.lbl   -        -pady $pady -sticky w
 	grid  $win.prg   $win.bt  -padx 4 -pady 0
