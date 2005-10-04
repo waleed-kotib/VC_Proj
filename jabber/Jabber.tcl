@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.146 2005-10-03 12:49:55 matben Exp $
+# $Id: Jabber.tcl,v 1.147 2005-10-04 13:02:53 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -1039,18 +1039,19 @@ proc ::Jabber::DoCloseClientConnection {args} {
     array set argsArr [list -status $jprefs(logoutStatus)]    
     array set argsArr $args
     
-    # Send unavailable information. Silently in case we got network error.
-    set opts {}
-    if {[string length $argsArr(-status)] > 0} {
-	lappend opts -status $argsArr(-status)
+    # Send unavailable information.
+    if {[$jstate(jlib) isinstream]} {
+	set opts {}
+	if {[string length $argsArr(-status)] > 0} {
+	    lappend opts -status $argsArr(-status)
+	}
+	eval {$jstate(jlib) send_presence -type unavailable} $opts
+	
+	# Do the actual closing.
+	#       There is a potential problem if called from within a xml parser 
+	#       callback which makes the subsequent parsing to fail. (after idle?)
+	after idle $jstate(jlib) closestream
     }
-    eval {$jstate(jlib) send_presence -type unavailable} $opts
-        
-    # Do the actual closing.
-    #       There is a potential problem if called from within a xml parser 
-    #       callback which makes the subsequent parsing to fail. (after idle?)
-    after idle $jstate(jlib) closestream
-    
     SetClosedState
 }
 
@@ -1090,8 +1091,8 @@ proc ::Jabber::EndSession { } {
     variable jserver
     variable jprefs
 
-    # Send unavailable information. Silently in case we got network error.
-    if {[::Jabber::IsConnected]} {
+    # Send unavailable information. Silently in case we got a network error.
+    if {[$jstate(jlib) isinstream]} {
 	set opts {}
 	if {[string length $jprefs(logoutStatus)] > 0} {
 	    lappend opts -status $jprefs(logoutStatus)

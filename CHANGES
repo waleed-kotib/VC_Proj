@@ -13,6 +13,8 @@ Coccinella-0.95.10 (0509??):
 	- file transfer using si/bytestreams/ibb/file-transfer protocol
 	- notification using bouncing dock icon on MacOSX
 	- ignore menu option in groupchat
+	- number of unread chat messages shown in tabs
+	- historic chat messages in lighter color
 
 Coccinella-0.95.9 (050821):
 

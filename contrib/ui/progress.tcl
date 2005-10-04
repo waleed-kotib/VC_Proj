@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: progress.tcl,v 1.4 2005-10-03 12:49:55 matben Exp $
+# $Id: progress.tcl,v 1.5 2005-10-04 13:02:53 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -63,7 +63,7 @@ snit::widget ui::progress::container {
     
     option -geovariable
     option -title        -configuremethod OnConfigTitle
-    option -style        -default plain
+    option -framestyle   -default plain
     
     constructor {args} {
 	$self configurelist $args
@@ -76,7 +76,7 @@ snit::widget ui::progress::container {
 	if {[string length $options(-geovariable)]} {
 	    ui::PositionWindow $win $options(-geovariable)
 	}
-	if {$options(-style) eq "tray"} {
+	if {$options(-framestyle) eq "tray"} {
 	    ttk::frame $win.f -padding 10
 	    frame $win.f.f -bd 1 -relief sunken
 	    pack $win.f   -expand 1 -fill both
@@ -152,7 +152,7 @@ snit::widget ui::progress::container {
 }
 
 if {0} {
-    ui::progress::container .m -style tray
+    ui::progress::container .m -framestyle tray
     .m add -percent 22
     .m add -percent 55
     .m add -percent 88    
@@ -196,6 +196,12 @@ snit::widget ui::progress::toplevel {
 }
 
 if {0} {
+    ui::progress::toplevel .p1 -percent 66
+    ui::progress::toplevel .p2 -percent 44 -style tk
+    
+}
+
+if {0} {
     option add *ProgressFrame*background  white
     toplevel .t
     ui::progress::frame .t.t -style tk -percent 66
@@ -211,11 +217,11 @@ snit::widgetadaptor ui::progress::frame {
     # If > 0 it is timer millisecs.
     typevariable heartbeat 1000
     typevariable heartbeatid
+    typevariable dialogTypes	;# map -type => list of dialog options
         
     variable configDelayed
     
     # @@@ Could add full option specs.
-    #delegate option -padding to hull
     delegate option -font    to lbl
     delegate option -text    to lbl
     delegate option -font2   to lbl2 as -font
@@ -223,16 +229,27 @@ snit::widgetadaptor ui::progress::frame {
     delegate option -font3   to lbl3 as -font
     delegate option -text3   to lbl3 as -text
     delegate option -length  to prg
-    #delegate option -buttonstyle   to bt  as -style
-    delegate option -cancelcommand to bt  as -command
+    delegate option -cancelcommand to bt as -command
 
+    option -background  -default ""
     option -pausecommand                    \
       -configuremethod OnConfigPauseCmd
     option -percent -default 0              \
       -configuremethod OnConfigSetPercent   \
       -validatemethod  ValidPercent
     option -style -default "ttk"
+    option -buttonstyle -default ""
+    option -padding     -default ""
+    option -padx        -default 0
+    option -pady        -default 0
+    option -showtext3   -default 1
+    option -type        -default ""
 	    
+    typeconstructor {
+	StockDialog ""
+	StockDialog compact -padding {6 2} -padx 6 -pady 0
+    }
+    
     constructor {args} {	
 	set style [from args -style "ttk"]
 	if {$style eq "ttk"} {
@@ -250,6 +267,19 @@ snit::widgetadaptor ui::progress::frame {
 	    }
 	}		
 	$self configurelist $args
+	parray options
+	
+	# Option postfixes.
+	if {$style eq "ttk"} {
+	    if {$options(-padding) ne ""} {
+		$win configure -padding $options(-padding)
+	    }
+	    if {$options(-buttonstyle) ne ""} {
+		$win.bt configure -style $options(-buttonstyle)
+	    }
+	}
+	$self Grid
+
 	return
     }
     
@@ -260,12 +290,6 @@ snit::widgetadaptor ui::progress::frame {
 	install bt   using ttk::button $win.bt   -text [::msgcat::mc Cancel]
 	install prg  using ttk::progressbar $win.prg  \
 	  -orient horizontal -maximum 100
-
-	grid  $win.lbl   -        -pady 4 -sticky w
-	grid  $win.prg   $win.bt  -padx 4 -pady 0
-	grid  $win.lbl2  -        -pady 0 -sticky w
-	grid  $win.lbl3  -        -pady 0 -sticky w
-	grid columnconfigure $win 0 -weight 1
     }
     
     method TkConstructor {args} {
@@ -275,12 +299,24 @@ snit::widgetadaptor ui::progress::frame {
 	install bt   using button $win.bt   -text [::msgcat::mc Cancel]
 	install prg  using ttk::progressbar $win.prg  \
 	  -orient horizontal -maximum 100
-
-	grid  $win.lbl   -        -pady 4 -sticky w
+    }
+    
+    method Grid {} {
+	set pady $options(-pady)
+	
+	grid  $win.lbl   -        -pady $pady -sticky w
 	grid  $win.prg   $win.bt  -padx 4 -pady 0
 	grid  $win.lbl2  -        -pady 0 -sticky w
-	grid  $win.lbl3  -        -pady 0 -sticky w
+	if {$options(-showtext3)} {
+	    grid  $win.lbl3  -        -pady 0 -sticky w
+	}
 	grid columnconfigure $win 0 -weight 1
+    }
+
+    # StockDialog -- define new dialog type.
+    #
+    proc StockDialog {dlgtype args} {
+	set dialogTypes($dlgtype) $args
     }
         
     typemethod Beat {} {
@@ -337,14 +373,6 @@ snit::widgetadaptor ui::progress::frame {
     method configuredelayed {args} {
 	array set configDelayed $args
     }
-}
-
-if {0} {
-    package require ui::progress
-    
-    ui::progress::toplevel .p1 -percent 66
-    ui::progress::toplevel .p2 -percent 44 -style tk
-    
 }
 
 #-------------------------------------------------------------------------------
