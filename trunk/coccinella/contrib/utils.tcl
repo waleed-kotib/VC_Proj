@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: utils.tcl,v 1.2 2005-10-02 12:44:41 matben Exp $
+# $Id: utils.tcl,v 1.3 2005-10-04 13:02:53 matben Exp $
 
 package provide utils 1.0
     
@@ -89,6 +89,12 @@ proc listintersectnonempty {alist blist} {
     }
     return 0
 }
+
+# @@@ TODO: advanced list logic
+# 
+# type = {{user | wb} & available & junk}
+# compare with an arbitrary list where at least one of the element
+# must fulfill the logic implied by 'type', say {user unavailable} (=0)
 
 # fromoptionlist --
 # 

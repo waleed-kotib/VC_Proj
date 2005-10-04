@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.18 2005-09-04 16:58:56 matben Exp $
+# $Id: wrapper.tcl,v 1.19 2005-10-04 13:02:53 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -165,7 +165,11 @@ proc wrapper::new {streamstartcmd streamendcmd parsecmd errorcmd} {
     
     # Level 1 is the main tag, <stream:stream>, and level 2
     # is the command tag, such as <message>. We don't handle level 1 xmldata.
-    set wrapper($id,tree,2) {}        
+    set wrapper($id,tree,2) {}   
+    
+    set wrapper($id,refcount) 0
+    set wrapper($id,stack) ""
+
     return $id
 }
 
@@ -185,20 +189,8 @@ proc wrapper::parse {id xml} {
 
     # This is not as innocent as it looks; the 'tcl' parser proc is created in
     # the creators namespace (wrapper::), but the 'expat' parser ???
-    set parser $wrapper($id,parser)
-    parsereentrant $parser $xml
-    return {}
-}
-
-# Reentrant xml parser wrapper. This ought to go in the parser!
-
-namespace eval wrapper {
-
-    # A reference counter for reentries.
-    variable refcount 0
-    
-    # Stack for xml.
-    variable stack ""
+    parsereentrant $id $xml
+    return
 }
 
 # wrapper::parsereentrant --
@@ -214,29 +206,30 @@ namespace eval wrapper {
 # Results:
 #       none.
 
-proc wrapper::parsereentrant {p xml} {
-    variable refcount
-    variable stack
+proc wrapper::parsereentrant {id xml} {
+    variable wrapper
+
+    set p $wrapper($id,parser)   
+    set refcount [incr wrapper($id,refcount)]
     
-    incr refcount
     if {$refcount == 1} {
 	
 	# This is the main entry: do parse original xml.
 	$p parse $xml
 	
 	# Parse everything on the stack (until empty?).
-	while {[string length $stack] > 0} {
-	    set tmpstack $stack
-	    set stack ""
-	    $p parse $tmpstack
+	while {[string length $wrapper($id,stack)] > 0} {
+	    set tmp $wrapper($id,stack)
+	    set wrapper($id,stack) ""
+	    $p parse $tmp
 	}
     } else {
 	
 	# Reentry, put on stack for delayed execution.
-	append stack $xml
+	append wrapper($id,stack) $xml
     }
-    incr refcount -1
-    return {}
+    incr wrapper($id,refcount) -1
+    return
 }
 
 # wrapper::elementstart --
@@ -343,7 +336,7 @@ proc wrapper::elementend {id tagname args} {
 	    
 	    # We've got an end tag of a command tag, and it's time to
 	    # deliver our parse tree to the registered callback proc.
-	    uplevel #0 "$wrapper($id,parsecmd) [list $wrapper($id,tree,2)]"
+	    uplevel #0 $wrapper($id,parsecmd) [list $wrapper($id,tree,2)]
 	}
     }
 }
@@ -472,6 +465,9 @@ proc wrapper::reset {id} {
     set wrapper($id,level) 0
     set wrapper($id,levelonetag) {}
     set wrapper($id,tree,2) {}  
+
+    set wrapper($id,refcount) 0
+    set wrapper($id,stack) ""
 }
 
 # wrapper::xmlerror --
@@ -492,13 +488,8 @@ proc wrapper::xmlerror {id args} {
     if {$debug > 1} {
 	puts "wrapper::xmlerror id=$id, args='$args'"
     }
-
-    # Resets the wrapper and XML parser to be prepared for a fresh new document.
-    #reset $id
-    #uplevel #0 $wrapper($id,errorcmd) [list $args] ????
     uplevel #0 $wrapper($id,errorcmd) $args
-    #reset $id
-    return -code error {Fatal XML error}
+    return
 }
 
 # wrapper::createxml --

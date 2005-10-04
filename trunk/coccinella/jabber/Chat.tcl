@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.131 2005-10-04 06:24:51 matben Exp $
+# $Id: Chat.tcl,v 1.132 2005-10-04 13:02:53 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -624,8 +624,8 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	}
 	sys {
 	    $wtext insert end $prefix syspre$htag
-	    $wtext insert end $body systext$htag
-	    #$wtext insert end \n
+	    $wtext insert end [string trimright $body] systext$htag
+	    $wtext insert end \n
 	}
     }
 

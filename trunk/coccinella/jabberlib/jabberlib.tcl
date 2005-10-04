@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.114 2005-10-03 12:49:55 matben Exp $
+# $Id: jabberlib.tcl,v 1.115 2005-10-04 13:02:53 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -150,10 +150,11 @@
 #   the what equal to the last namespace specifier.
 #   'args' is a list of '-key value' pairs.
 #      
-#   TODO:
-#      Rewrite from scratch and deliver complete iq, message, and presence
+#   @@@ TODO:
+#      1) Rewrite from scratch and deliver complete iq, message, and presence
 #      elements to callbacks. Callbacks then get attributes like 'from' etc
 #      using accessor functions.
+#      2) Roster as an ensamble command, just like disco, muc etc.
 #      
 #-------------------------------------------------------------------------------
 
@@ -476,8 +477,6 @@ proc jlib::ensamble_deregister {name} {
 proc jlib::cmdproc {jlibname cmd args} {
     variable ensamble
     
-    Debug 5 "jlib::cmdproc: jlibname=$jlibname, cmd='$cmd', args='$args'"
-
     # Which command? Just dispatch the command to the right procedure.
     if {[info exists ensamble($cmd,cmd)]} {
 	return [uplevel #0 $ensamble($cmd,cmd) $jlibname $args]
@@ -717,8 +716,6 @@ proc jlib::resetsocket {jlibname} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
 
-    ::Debug 2 "jlib::resetsocket"
-    
     catch {close $lib(sock)}
     catch {after cancel $locals(aliveid)}
 }
@@ -745,18 +742,18 @@ proc jlib::recvsocket {jlibname} {
     }
     
     # Read what we've got.
-    if {[catch {read $lib(sock)} temp]} {
+    if {[catch {read $lib(sock)} data]} {
 	kill $jlibname
 
 	# We need to call clientcmd here since async event.
 	uplevel #0 $lib(clientcmd) [list $jlibname networkerror]	  
 	return
     }
-    Debug 2 "RECV: $temp"
+    Debug 2 "RECV: $data"
     
     # Feed the XML parser. When the end of a command element tag is reached,
     # we get a callback to 'jlib::dispatcher'.
-    wrapper::parse $lib(wrap) $temp
+    wrapper::parse $lib(wrap) $data
 }
 
 # jlib::ipsocket --
@@ -862,6 +859,8 @@ proc jlib::openstream {jlibname server args} {
 # jlib::closestream --
 #
 #       Closes the stream down, closes socket, and resets internal variables.
+#       It should handle the complete shutdown of our connection and state.
+#       
 #       There is a potential problem if called from within a xml parser 
 #       callback which makes the subsequent parsing to fail. (after idle?)
 #
@@ -875,8 +874,13 @@ proc jlib::closestream {jlibname} {
 
     upvar ${jlibname}::lib lib
 
-    set xml "</stream:stream>"
-    sendraw $jlibname $xml
+    Debug 4 "jlib::closestream"
+    
+    if {$lib(isinstream)} {
+	set xml "</stream:stream>"
+	sendraw $jlibname $xml
+	set lib(isinstream) 0
+    }
     kill $jlibname
 }
 
@@ -887,6 +891,8 @@ proc jlib::closestream {jlibname} {
 proc jlib::reporterror {jlibname err {msg ""}} {
     
     upvar ${jlibname}::lib lib
+    
+    Debug 4 "jlib::reporterror"
 
     kill $jlibname
     uplevel #0 $lib(clientcmd) [list $jlibname $err -errormsg $msg]
@@ -899,7 +905,10 @@ proc jlib::reporterror {jlibname err {msg ""}} {
 proc jlib::kill {jlibname} {
     
     upvar ${jlibname}::lib lib
+    
+    Debug 4 "jlib::kill"
 
+    # Close socket typically.
     catch {uplevel #0 $lib(transport,reset) $jlibname}
     reset $jlibname
     
@@ -919,6 +928,17 @@ proc jlib::getip {jlibname} {
     return [$lib(transport,ip) $jlibname]
 }
 
+# jlib::isinstream --
+# 
+#       Utility to help us closing down a stream.
+
+proc jlib::isinstream {jlibname} {
+    
+    upvar ${jlibname}::lib lib
+
+    return $lib(isinstream)
+}
+
 # jlib::dispatcher --
 #
 #       Just dispatches the xml to any of the iq, message, or presence handlers,
@@ -932,9 +952,7 @@ proc jlib::getip {jlibname} {
 #       none.
 
 proc jlib::dispatcher {jlibname xmldata} {
-    
-    Debug 5 "jlib::dispatcher jlibname=$jlibname, xmldata=$xmldata"
-    
+        
     # Which method?
     set tag [wrapper::gettag $xmldata]
     
@@ -1487,32 +1505,6 @@ proc jlib::get_features {jlibname name {name2 ""}} {
     return $ans
 }
 
-# jlib::error_handler --
-# 
-#       Callback when receiving an stream:error element. According to xmpp-core
-#       this is an unrecoverable error (4.7.1) and the stream MUST be closed
-#       and the TCP connection also be closed.
-#       
-#       jabberd 1.4.3: <stream:error>Disconnected</stream:error>
-
-proc jlib::error_handler {jlibname xmllist} {
-
-    upvar ${jlibname}::lib lib
-    variable xmppxmlns
-    
-    closestream $jlibname
-    
-    # Be sure to reset the wrapper, which implicitly resets the XML parser.
-    wrapper::reset $lib(wrap)
-    if {[llength [wrapper::getchildren $xmllist]]} {
-	set errspec [getstreamerrorspec $xmllist]
-    } else {
-	set errspec [list unknown [wrapper::getcdata $xmllist]]
-    }
-    set errmsg [lindex $errspec 1]
-    uplevel #0 $lib(clientcmd) [list $jlibname streamerror -errormsg $errmsg]
-}
-
 # jlib::got_stream --
 #
 #       Callback when we have parsed the initial root element.
@@ -1529,7 +1521,7 @@ proc jlib::got_stream {jlibname args} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
 
-    Debug 3 "jlib::got_stream jlibname=$jlibname, args='$args'"
+    Debug 4 "jlib::got_stream jlibname=$jlibname, args='$args'"
     
     # Cache stream attributes.
     foreach {name value} $args {
@@ -1589,11 +1581,60 @@ proc jlib::end_of_parse {jlibname} {
 
     upvar ${jlibname}::lib lib
 
-    Debug 3 "jlib::end_of_parse jlibname=$jlibname"
+    Debug 4 "jlib::end_of_parse jlibname=$jlibname"
     
     catch {eval $lib(transport,reset) $jlibname}
     uplevel #0 $lib(clientcmd) [list $jlibname disconnect]
     reset $jlibname
+}
+
+# jlib::error_handler --
+# 
+#       Callback when receiving an stream:error element. According to xmpp-core
+#       this is an unrecoverable error (4.7.1) and the stream MUST be closed
+#       and the TCP connection also be closed.
+#       
+#       jabberd 1.4.3: <stream:error>Disconnected</stream:error>
+#       jabberd 1.4.4: 
+#       <stream:error>
+#           <xml-not-well-formed xmlns='urn:ietf:params:xml:ns:xmpp-streams'/>
+#       </stream:error>
+#   </stream:stream>
+
+proc jlib::error_handler {jlibname xmllist} {
+
+    upvar ${jlibname}::lib lib
+    variable xmppxmlns
+    
+    Debug 4 "jlib::error_handler"
+    
+    # This should handle all internal stuff.
+    closestream $jlibname
+    
+    if {[llength [wrapper::getchildren $xmllist]]} {
+	set errspec [getstreamerrorspec $xmllist]
+    } else {
+	set errspec [list unknown [wrapper::getcdata $xmllist]]
+    }
+    set errmsg [lindex $errspec 1]
+    uplevel #0 $lib(clientcmd) [list $jlibname streamerror -errormsg $errmsg]
+}
+
+proc jlib::error_handlerBU {jlibname xmllist} {
+
+    upvar ${jlibname}::lib lib
+    variable xmppxmlns
+    
+    closestream $jlibname
+    
+    # Be sure to reset the wrapper, which implicitly resets the XML parser.
+    wrapper::reset $lib(wrap)
+    if {[llength [wrapper::getchildren $xmllist]]} {
+	set errspec [getstreamerrorspec $xmllist]
+    } else {
+	set errspec [list unknown [wrapper::getcdata $xmllist]]
+    }
+    uplevel #0 $lib(clientcmd) [list $jlibname streamerror -errormsg $errspec]
 }
 
 # jlib::xmlerror --
@@ -1610,9 +1651,21 @@ proc jlib::xmlerror {jlibname args} {
 
     upvar ${jlibname}::lib lib
 
-    Debug 3 "jlib::xmlerror jlibname=$jlibname, args='$args'"
+    Debug 4 "jlib::xmlerror jlibname=$jlibname, args='$args'"
     
-    catch {eval $lib(transport,reset) $jlibname}
+    # This should handle all internal stuff.
+    closestream $jlibname
+
+    uplevel #0 $lib(clientcmd) [list $jlibname xmlerror -errormsg $args]
+}
+
+proc jlib::xmlerrorBU {jlibname args} {
+
+    upvar ${jlibname}::lib lib
+
+    Debug 4 "jlib::xmlerror jlibname=$jlibname, args='$args'"
+    
+    catch {eval $lib(transport,reset)}
     uplevel #0 $lib(clientcmd) [list $jlibname xmlerror -errormsg $args]
     reset $jlibname
 }
@@ -1636,7 +1689,7 @@ proc jlib::reset {jlibname} {
     upvar ${jlibname}::locals locals
     variable statics
     
-    Debug 3 "jlib::reset"
+    Debug 4 "jlib::reset"
     
     cancel_auto_away $jlibname
     
@@ -1654,7 +1707,7 @@ proc jlib::reset {jlibname} {
     init_inst $jlibname
 
     set lib(isinstream) 0
-    set lib(state)      "reset"
+    set lib(state) "reset"
 
     stream_reset $jlibname
     if {[havesasl]} {
@@ -2833,10 +2886,7 @@ proc jlib::sendraw {jlibname xml} {
     
     upvar ${jlibname}::lib lib
 
-    # We may use this call in exceptions, before socket was connected.
-    if {[info exists lib(transport,send)]} {
-	$lib(transport,send) $jlibname $xml
-    }
+    $lib(transport,send) $jlibname $xml
 }
 
 # jlib::mystatus --
