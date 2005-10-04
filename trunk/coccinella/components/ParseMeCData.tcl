@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ParseMeCData.tcl,v 1.1 2005-08-14 08:37:51 matben Exp $
+# $Id: ParseMeCData.tcl,v 1.2 2005-10-04 06:24:26 matben Exp $
 
 namespace eval ::ParseMeCData:: {
     
@@ -17,7 +17,7 @@ proc ::ParseMeCData::Init { } {
     component::register ParseMeCData "Provides /me parsing in messages."
 
     # Add event hooks.
-    ::hooks::register textParseWordHook [list [namespace current]::ParseWordHook]
+    ::hooks::register textParseWordHook [namespace current]::ParseWordHook
 }
 
 proc ::ParseMeCData::ParseWordHook {type jid w word tagList} {
@@ -30,10 +30,15 @@ proc ::ParseMeCData::ParseWordHook {type jid w word tagList} {
 		jlib::splitjid $jid roomjid nick
 	    }
 	    chat {
-		jlib::splitjid $jid nick x
+		jlib::splitjid $jid jid2 res
+		if {[::Jabber::JlibCmd service isroom $jid2]} {
+		    set nick $jid
+		} else {
+		    set nick $jid2
+		}
 	    }
 	    default {
-		jlib::splitjid $jid nick x
+		jlib::splitjid $jid nick -
 	    }
 	}
 	set wd [string map [list "/me" "* $nick"] $word]

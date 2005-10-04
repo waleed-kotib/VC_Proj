@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.130 2005-10-03 12:49:55 matben Exp $
+# $Id: Chat.tcl,v 1.131 2005-10-04 06:24:51 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -556,8 +556,10 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	    jlib::splitjidex $myjid node host res
 	    if {$node eq ""} {
 		set name $host
+		set from $host
 	    } else {
 		set name $node
+		set from ${node}@${host}
 	    }
 	}
 	you {
@@ -569,8 +571,10 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	    jlib::splitjid $youjid jid2 res
 	    if {[::Jabber::JlibCmd service isroom $jid2]} {
 		set name [::Jabber::JlibCmd service nick $jid]
+		set from $jid2/$name
 	    } else {
 		set name $chatstate(displayname)
+		set from $jid2
 	    }
 	}
     }
@@ -609,13 +613,13 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	me {
 	    $wtext insert end $prefix mepre$htag
 	    $wtext insert end "   " metext$htag
-	    ::Text::ParseMsg chat $jid $wtext $body metext$htag
+	    ::Text::ParseMsg chat $from $wtext $body metext$htag
 	    $wtext insert end \n
 	}
 	you {
 	    $wtext insert end $prefix youpre$htag
 	    $wtext insert end "   " youtext$htag
-	    ::Text::ParseMsg chat $jid $wtext $body youtext$htag
+	    ::Text::ParseMsg chat $from $wtext $body youtext$htag
 	    $wtext insert end \n
 	}
 	sys {
