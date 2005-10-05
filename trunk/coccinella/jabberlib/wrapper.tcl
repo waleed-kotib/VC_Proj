@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.19 2005-10-04 13:02:53 matben Exp $
+# $Id: wrapper.tcl,v 1.20 2005-10-05 12:19:15 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -208,7 +208,7 @@ proc wrapper::parse {id xml} {
 
 proc wrapper::parsereentrant {id xml} {
     variable wrapper
-
+    
     set p $wrapper($id,parser)   
     set refcount [incr wrapper($id,refcount)]
     
@@ -228,7 +228,12 @@ proc wrapper::parsereentrant {id xml} {
 	# Reentry, put on stack for delayed execution.
 	append wrapper($id,stack) $xml
     }
+    
+    # If we was reset from callback 'refcount' can have been reset to 0.
     incr wrapper($id,refcount) -1
+    if {$wrapper($id,refcount) < 0} {
+	set wrapper($id,refcount) 0
+    }
     return
 }
 
@@ -433,7 +438,7 @@ proc wrapper::reset {id} {
     }
     
     # Unfortunately it also removes all our callbacks and options.
-    if {$wrapper($id,class) == "expat"} {
+    if {$wrapper($id,class) eq "expat"} {
 	$wrapper($id,parser) configure   \
 	  -final 0    \
 	  -reportempty 1   \
