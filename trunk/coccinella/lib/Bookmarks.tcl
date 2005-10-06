@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Bookmarks.tcl,v 1.1 2005-10-02 12:44:41 matben Exp $
+# $Id: Bookmarks.tcl,v 1.2 2005-10-06 14:41:28 matben Exp $
 
 package require snit 1.0
 package require ui::util
@@ -36,6 +36,8 @@ snit::widget ::Bookmarks::Dialog {
     variable tmpList
     variable wtablelist
     variable wnew
+    variable wsave
+    variable wrun
 
     option -command      -default ::Bookmarks::Nop
     option -geovariable
@@ -95,6 +97,7 @@ snit::widget ::Bookmarks::Dialog {
 	ttk::frame $bot -padding [option get . okcancelTopPadding {}]
 	ttk::button $bot.save -text [mc Save] -default active  \
 	  -command [list $self Save]
+	::chasearrows::chasearrows $bot.run -size 16
 	ttk::button $bot.cancel -text [mc Cancel]  \
 	  -command [list $self Destroy]
 	ttk::button $bot.new -text [mc New]  \
@@ -108,10 +111,12 @@ snit::widget ::Bookmarks::Dialog {
 	    pack $bot.save   -side right -padx $padx
 	}
 	pack $bot.new -side left
+	pack $bot.run -side left -padx 8
 	pack $bot -side bottom -fill x
 	
 	set wsave $bot.save
 	set wnew  $bot.new
+	set wrun  $bot.run
 	
 	if {[string length $options(-geovariable)]} {
 	    ui::SetClassGeometry $win $options(-geovariable) "Bookmarks"
@@ -154,14 +159,7 @@ snit::widget ::Bookmarks::Dialog {
     }
         
     method Save {} {
-	if {$options(-command) ne ""} {
-	    set rc [catch {$options(-command)} result]
-	    if {$rc == 1} {
-		return -code $rc -errorinfo $::errorInfo -errorcode $::errorCode $result
-	    } elseif {$rc == 3 || $rc == 4} {
-		return
-	    } 
-	}
+	$wtablelist finishediting
 	
 	# Trim empty rows.
 	set tmp {}
@@ -172,6 +170,15 @@ snit::widget ::Bookmarks::Dialog {
 	set tmpList [lsearch -all -not -inline $tmpList $tmp]
 	
 	uplevel #0 [list set $bookmarksVar $tmpList]
+
+	if {$options(-command) ne ""} {
+	    set rc [catch {$options(-command)} result]
+	    if {$rc == 1} {
+		return -code $rc -errorinfo $::errorInfo -errorcode $::errorCode $result
+	    } elseif {$rc == 3 || $rc == 4} {
+		return
+	    } 
+	}
 	$self Destroy
     }
     
@@ -195,6 +202,14 @@ snit::widget ::Bookmarks::Dialog {
 	    #$wtablelist
 	} else {
 	    
+	}
+    }
+    
+    method wait {{bool 1}} {
+	if {$bool} {
+	    $wrun start
+	} else {
+	    $wrun stop
 	}
     }
 

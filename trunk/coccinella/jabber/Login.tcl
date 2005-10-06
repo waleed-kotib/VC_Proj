@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.69 2005-09-19 06:37:21 matben Exp $
+# $Id: Login.tcl,v 1.70 2005-10-06 14:41:28 matben Exp $
 
 package provide Login 1.0
 
@@ -392,7 +392,7 @@ proc ::Login::DoLogin {} {
 	      -message [mc jamessnamemissing $name]
 	    return
 	}
-	if {$name == "password"} {
+	if {$name eq "password"} {
 	    continue
 	}
 	
@@ -412,6 +412,16 @@ proc ::Login::DoLogin {} {
 	    return
 	}
     }
+
+    # Verify http url if any.
+    if {[info exists moreOpts(http)] && $moreOpts(http)} {
+	if {![::Utils::IsWellformedUrl $moreOpts(httpurl)]} {
+	    ::UI::MessageBox -icon error -type ok \
+	      -message "The url \"$moreOpts(httpurl)\" is invalid."
+	    return
+	}
+    }
+    
     set finished 1
     Close $wtoplevel
     

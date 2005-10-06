@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.86 2005-10-02 12:44:41 matben Exp $
+# $Id: JUI.tcl,v 1.87 2005-10-06 14:41:27 matben Exp $
 
 package provide JUI 1.0
 
@@ -134,7 +134,7 @@ proc ::Jabber::UI::Init { } {
 	{command     mEnterRoom     {::GroupChat::EnterOrCreate enter}  disabled R}
 	{cascade     mExitRoom      {}                                  disabled {} {} {}}
 	{command     mCreateRoom    {::GroupChat::EnterOrCreate create} disabled {}}
-	{command     mEditBookmarks {::GroupChat::EditBookmarks}        normal   {}}
+	{command     mEditBookmarks {::GroupChat::EditBookmarks}        disabled {}}
 	{separator}
 	{command     mvCard         {::VCard::Fetch own}              disabled {}}
 	{separator}
@@ -685,6 +685,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mEnterRoom -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mExitRoom -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mCreateRoom -state normal
+	    ::UI::MenuMethod $wmj entryconfigure mEditBookmarks -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mRemoveAccount -state normal
 	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state disabled
@@ -711,6 +712,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mEnterRoom -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mExitRoom -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mCreateRoom -state disabled
+	    ::UI::MenuMethod $wmj entryconfigure mEditBookmarks -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mRemoveAccount -state disabled
 	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state normal

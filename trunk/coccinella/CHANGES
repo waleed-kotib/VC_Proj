@@ -11,10 +11,11 @@ Coccinella-0.95.10 (0509??):
 	- added the tkpng package; png support now required
 	- new icons from Everaldo
 	- file transfer using si/bytestreams/ibb/file-transfer protocol
-	- notification using bouncing dock icon on MacOSX
+	- notification using bouncing dock icon on Mac OS X
 	- ignore menu option in groupchat
-	- number of unread chat messages shown in tabs
+	- number of unread chat messages shown in tabs and title
 	- historic chat messages in lighter color
+	- support for conference bookmarks according to JEP-0048
 
 Coccinella-0.95.9 (050821):
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.123 2005-10-03 13:22:17 matben Exp $
+# $Id: GroupChat.tcl,v 1.124 2005-10-06 14:41:27 matben Exp $
 
 package require Enter
 package require History
@@ -839,7 +839,7 @@ proc ::GroupChat::Build {roomjid args} {
     ::Emoticons::MenuButton $wgroup.smile -text $wtextsend
     ttk::button $wgroup.bmark -style Toolbutton  \
       -image [::Theme::GetImage bookmarkAdd]     \
-      -command [list [namespace current]::SetBookmark $token]
+      -command [list [namespace current]::BookmarkRoom $token]
     
     grid  $wgroup.active  $wgroup.stat  $wgroup.smile  $wgroup.bmark  \
       -padx 1 -sticky news
@@ -1201,14 +1201,6 @@ proc ::GroupChat::Send {token} {
     # Clear send.
     $wtextsend delete 1.0 end
     set state(hot1stmsg) 1
-}
-
-proc ::GroupChat::SetBookmark {token} {
-    variable $token
-    upvar 0 $token state
-    
-    # @@@ TODO
-
 }
 
 proc ::GroupChat::ActiveCmd {token} {
@@ -1926,15 +1918,96 @@ proc ::GroupChat::GetFirstPanePos { } {
     }
 }
 
-# GroupChat::SetBookmark --
+# --- Support for JEP-0048 ---
 # 
-#       Bookmarks stored as:
-#         {{name jid nick} {name jid nick} ...}
+# @@@ Perhaps this should be in a separate file?
+# 
+#       Note that a user can be connected with multiple resources which
+#       means that we cannot rely that the bookmarks are always in sync.
+#       We therefore makes some assumptions when they must be obtained:
+#         1) login
+#         2) when edit them
+#         
+#       @@@ There is a potential problem if other types of bookmarks (url) 
+#           are influenced
+# 
+# <xs:element name='conference'>
+#    <xs:complexType>
+#      <xs:sequence>
+#        <xs:element name='nick' type='xs:string' minOccurs='0'/>
+#        <xs:element name='password' type='xs:string' minOccurs='0'/>
+#      </xs:sequence>
+#      <xs:attribute name='autojoin' type='xs:boolean' use='optional' default='false'/>
+#      <xs:attribute name='jid' type='xs:string' use='required'/>
+#      <xs:attribute name='name' type='xs:string' use='required'/>
+#    </xs:complexType>
+#  </xs:element> 
 
-proc ::GroupChat::SetBookmark {token} {
+namespace eval ::GroupChat:: {
+    
+    # Bookmarks stored as {{name jid ?-nick . -password . -autojoin .?} ...}
+    variable bookmarks {}
+
+    ::hooks::register loginHook  ::GroupChat::BookmarkLoginHook
+    ::hooks::register logoutHook ::GroupChat::BookmarkLogoutHook
+}
+
+proc ::GroupChat::BookmarkLoginHook { } {
+    
+    BookmarkSendGet [namespace current]::BookmarkExtractFromCB
+}
+
+proc ::GroupChat::BookmarkLogoutHook { } {
+    variable bookmarks
+    
+    set bookmarks {}
+}
+
+proc ::GroupChat::BookmarkGet { } {
+    variable bookmarks
+    
+    return $bookmarks
+}
+
+proc ::GroupChat::BookmarkExtractFromCB {type queryElem args} {
+
+    if {$type eq "result"} {
+	BookmarkExtractFromElem $queryElem
+    }
+}
+
+proc ::GroupChat::BookmarkExtractFromElem {queryElem} {
+    variable bookmarks
+    
+    set bookmarks {}
+    set storageElem  \
+      [wrapper::getfirstchild $queryElem "storage" "storage:bookmarks"]
+    set confElems [wrapper::getchildswithtag $storageElem "conference"]
+    foreach elem $confElems {
+	array unset bmarr
+	array set bmarr [list name "" jid ""]
+	array set bmarr [wrapper::getattrlist $elem]
+	set bmark [list $bmarr(name) $bmarr(jid)]
+	set nickElem [wrapper::getfirstchildwithtag $elem "nick"]
+	if {$nickElem ne ""} {
+	    lappend bmark -nick [wrapper::getcdata $nickElem]
+	}
+	set passElem [wrapper::getfirstchildwithtag $elem "password"]
+	if {$passElem ne ""} {
+	    lappend bmark -password [wrapper::getcdata $passElem]
+	}
+	lappend bookmarks $bmark
+    }    
+    return $bookmarks
+}
+
+# GroupChat::BookmarkRoom --
+# 
+
+proc ::GroupChat::BookmarkRoom {token} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jprefs jprefs
+    variable bookmarks
     upvar ::Jabber::jstate jstate
     
     set jid $state(roomjid)
@@ -1944,17 +2017,71 @@ proc ::GroupChat::SetBookmark {token} {
     }
     lassign [$jstate(jlib) service hashandnick $jid] myroomjid nick
     
-    # Add only if not there already.
-    foreach bmark $jprefs(gchat,bookmarks) {
-	if {[lindex $bmark 1] eq $jid} {
+    # Add only if name not there already.
+    foreach bmark $bookmarks {
+	if {[lindex $bmark 0] eq $name} {
 	    return
 	}
     }
-    lappend jprefs(gchat,bookmarks) [list $name $jid $nick]
+    lappend bookmarks [list $name $jid -nick $nick]
+}
+
+# GroupChat::BookmarkSendSet --
+# 
+#       Store the complete 'bookmarks' state on server.
+
+proc ::GroupChat::BookmarkSendSet { } {
+    variable bookmarks
+    upvar ::Jabber::jstate jstate
+    
+    set confElems {}
+    foreach bmark $bookmarks {
+	set name [lindex $bmark 0]
+	set jid  [lindex $bmark 1]
+	set opts [lrange $bmark 2 end]	
+	set attrs [list jid $jid name $name]
+	set elems {}
+	foreach {key value} $opts {
+	    
+	    switch -- $key {
+		-nick - -password {
+		    lappend elems [string trimleft $key -] $value
+		}
+		-autojoin {
+		    lappend attrs autojoin $value
+		}
+	    }
+	}
+	set confChilds {}
+	foreach {tag value} $elems {
+	    lappend confChilds [wrapper::createtag $tag -chdata $value]
+	}
+	set confElem [wrapper::createtag "conference"  \
+	  -attrlist $attrs -subtags $confChilds]
+	lappend confElems $confElem
+    }
+    set storageElem [wrapper::createtag "storage"  \
+      -attrlist [list xmlns "storage:bookmarks"] -subtags $confElems]
+    set queryElem [wrapper::createtag "query"  \
+      -attrlist [list xmlns "jabber:iq:private"] -subtags [list $storageElem]]
+    
+    $jstate(jlib) send_iq set [list $queryElem]
+}
+
+proc ::GroupChat::BookmarkSendGet {callback} {
+    upvar ::Jabber::jstate jstate
+    
+    set storageElem [wrapper::createtag "storage"  \
+      -attrlist [list xmlns storage:bookmarks]]
+    set queryElem [wrapper::createtag "query"  \
+      -attrlist [list xmlns "jabber:iq:private"] -subtags [list $storageElem]]
+
+    $jstate(jlib) send_iq get [list $queryElem] -command $callback
 }
 
 proc ::GroupChat::EditBookmarks { } {
     global  wDlgs
+    variable bookmarksVar
     
     set dlg $wDlgs(jgcbmark)
     if {[winfo exists $dlg]} {
@@ -1962,20 +2089,105 @@ proc ::GroupChat::EditBookmarks { } {
 	return
     }
     set m [::UI::GetMainMenu]
-    set columns [list 0 [mc Bookmark] 0 [mc Address] 0 [mc Nickname]]
-    ::Bookmarks::Dialog $dlg ::Jabber::jprefs(gchat,bookmarks)  \
-      -menu $m -geovariable prefs(winGeom,$dlg) -columns $columns
+    set columns [list  \
+      0 [mc Bookmark] 0 [mc Address]  \
+      0 [mc Nickname] 0 [mc Password]]
+
+    set bookmarksVar {}
+    ::Bookmarks::Dialog $dlg [namespace current]::bookmarksVar  \
+      -menu $m -geovariable prefs(winGeom,$dlg) -columns $columns  \
+      -command [namespace current]::BookmarksDlgSave
     ::UI::SetMenuAcceleratorBinds $dlg $m
+    
+    $dlg state disabled
+    $dlg wait
+    
+    BookmarkSendGet [namespace current]::BookmarkSendGetCB
 }
 
-proc ::GroupChat::BuildBmarkMenu {m cmd} {
+proc ::GroupChat::BookmarkSendGetCB {type queryElem args} {
+    global  wDlgs
+    variable bookmarks
+        
+    set dlg $wDlgs(jgcbmark)
+    if {![winfo exists $dlg]} {
+	return
+    }
+    
+    if {$type eq "error"} {
+	::UI::MessageBox -type ok -icon [mc Error]  \
+	  -message "Failed to obtain conference bookmarks: [lindex $queryElem 1]"
+	destroy $dlg
+    } else {
+	$dlg state {!disabled}
+	$dlg wait 0
+    
+	# Extract the relevant 'conference' elements.
+	set bookmarks [BookmarkExtractFromElem $queryElem]
+	set flat [BookmarkToFlat $bookmarks]
+	foreach row $flat {
+	    $dlg add $row
+	}
+    }
+}
+
+proc ::GroupChat::BookmarksDlgSave { } {
+    variable bookmarks
+    variable bookmarksVar
+    	
+    set bookmarks [BookmarkFlatToBookmarks $bookmarksVar]
+    BookmarkSendSet
+    
+    # Let other components that depend on this a chance to update themselves.
+    ::hooks::run groupchatBookmarksSet
+}
+
+# GroupChat::BookmarkToFlat --
+# 
+#       Translate internal 'bookmarks' list into {{name jid nick pass} ...}
+
+proc ::GroupChat::BookmarkToFlat {bookmarks} {
+
+    set flat {}
+    foreach bmark $bookmarks {
+	array set opts [list -nick "" -password ""]
+	array set opts [lrange $bmark 2 end]	
+	set row [lrange $bmark 0 1]
+	lappend row $opts(-nick) $opts(-password)
+	lappend flat $row
+    }
+    return $flat
+}
+
+proc ::GroupChat::BookmarkFlatToBookmarks {flat} {
+    
+    set bookmarks {}
+    foreach row $flat {
+	set bmark [lrange $row 0 1]
+	set nick     [lindex $row 2]
+	set password [lindex $row 3]
+	if {$nick ne ""} {
+	    lappend bmark -nick $nick
+	}
+	if {$password ne ""} {
+	    lappend bmark -password $password
+	}
+	lappend bookmarks $bmark
+    }
+    return $bookmarks
+}
+
+proc ::GroupChat::BookmarkBuildMenu {m cmd} {
+    variable bookmarks
     upvar ::Jabber::jprefs jprefs
    
     menu $m -tearoff 0
 
-    foreach bmark $jprefs(gchat,bookmarks) {
-	lassign $bmark name jid nick
-	set mcmd [concat $cmd [list $name $jid $nick]]
+    foreach bmark $bookmarks {
+	set name [lindex $bmark 0]
+	set jid  [lindex $bmark 1]
+	set opts [lrange $bmark 2 end]	
+	set mcmd [concat $cmd [list $name $jid $opts]]
 	$m add command -label $name -command $mcmd
     }
     return $m
@@ -1991,6 +2203,8 @@ proc ::GroupChat::InitPrefsHook { } {
     # 'muc' uses 'conference' as fallback.
     set jprefs(prefgchatproto)  "muc"
     set jprefs(defnick)         ""
+    
+    # Unused but keep it if we want client stored bookmarks.
     set jprefs(gchat,bookmarks) {}
 	
     ::PrefUtils::Add [list  \

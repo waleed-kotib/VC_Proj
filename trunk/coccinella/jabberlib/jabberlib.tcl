@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.115 2005-10-04 13:02:53 matben Exp $
+# $Id: jabberlib.tcl,v 1.116 2005-10-06 14:41:28 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -812,6 +812,9 @@ proc jlib::openstream {jlibname server args} {
     array set argsArr $args
     set locals(server) $server
     set locals(last) [clock seconds]
+    
+    # Make sure we start with a clean state.
+    wrapper::reset $lib(wrap)
 
     # Register a <stream> callback proc.
     if {[info exists argsArr(-cmd)] && [llength $argsArr(-cmd)]} {

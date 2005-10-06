@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.132 2005-10-04 13:02:53 matben Exp $
+# $Id: Chat.tcl,v 1.133 2005-10-06 14:41:27 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -482,6 +482,13 @@ proc ::Chat::GotMsg {body args} {
 	 -tag you
 	eval {TabAlert $chattoken} $args
 	XEventCancel $chattoken
+	    
+	# Put an extra (*) in the windows title if not in focus.
+	if {([set wfocus [focus]] eq "") ||  \
+	  ([winfo toplevel $wfocus] ne $dlgstate(w))} {
+	    incr dlgstate(nhiddenmsgs)
+	    SetTitle [GetActiveChatToken $dlgtoken]
+	}
     }
     if {$dlgstate(got1stMsg) == 0} {
 	set dlgstate(got1stMsg) 1
@@ -748,6 +755,7 @@ proc ::Chat::Build {threadID args} {
     set dlgstate(uid)         0
     set dlgstate(got1stMsg)   0
     set dlgstate(recentctokens) {}
+    set dlgstate(nhiddenmsgs) 0
     
     # Toplevel with class Chat.
     ::UI::Toplevel $w -class Chat \
@@ -841,6 +849,8 @@ proc ::Chat::Build {threadID args} {
 
     wm minsize $w [expr {$shortBtWidth < 220} ? 220 : $shortBtWidth] 320
     wm maxsize $w 800 2000
+
+    bind $w <FocusIn> [list [namespace current]::FocusIn $dlgtoken]
     
     focus $w
     return $dlgtoken
@@ -1079,10 +1089,25 @@ proc ::Chat::SetTitle {chattoken} {
     if {$chatstate(displayname) ne $chatstate(fromjid)} {
 	append str " ($chatstate(fromjid))"
     }
+
+    # Put an extra (*) in the windows title if not in focus.
+    set dlgtoken $chatstate(dlgtoken)
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+
+    if {$dlgstate(nhiddenmsgs) > 0} {
+	set wfocus [focus]
+	set n $dlgstate(nhiddenmsgs)
+	if {$wfocus eq ""} {
+	    append str " ($n)"
+	} elseif {[winfo toplevel $wfocus] ne $chatstate(w)} {
+	    append str " ($n)"
+	}
+    }
     wm title $chatstate(w) $str
 }
 
-# ::Chat::NewPage, ... --
+# Chat::NewPage, ... --
 # 
 #       Several procs to handle the tabbed interface; creates and deletes
 #       notebook and pages.
@@ -1425,6 +1450,14 @@ proc ::Chat::TabAlert {chattoken args} {
 	    $wnb tab $chatstate(wpage) -image $icon -text $name
 	}
     }
+}
+
+proc ::Chat::FocusIn {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    set dlgstate(nhiddenmsgs) 0
+    SetTitle [GetActiveChatToken $dlgtoken]
 }
 
 proc ::Chat::SmileyCmd {chattoken im key} {

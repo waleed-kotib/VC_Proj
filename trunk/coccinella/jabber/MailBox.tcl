@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.76 2005-10-02 12:44:41 matben Exp $
+# $Id: MailBox.tcl,v 1.77 2005-10-06 14:41:28 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -338,8 +338,8 @@ proc ::MailBox::Build {args} {
     set wysctbl $wfrmbox.ysc
 
     # Columns: {iswb subject from secs(H) date isread(H) uidmsg(H)}
-    set columns [list \
-      0 {} 16 [mc Subject] 16 [mc From] 0 {} 0 [mc Date] 0 {} 0 {}]
+    set columns  \
+      [list 0 {} 16 [mc Subject] 16 [mc From] 0 {} 0 [mc Date] 0 {} 0 {}]
     tuscrollbar $wysctbl -orient vertical -command [list $wtbl yview]
     tablelist::tablelist $wtbl -columns $columns  \
       -yscrollcommand [list ::UI::ScrollSet $wysctbl \
