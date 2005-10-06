@@ -4,7 +4,7 @@
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.9 2005-09-19 06:37:21 matben Exp $
+# $Id: jlibhttp.tcl,v 1.10 2005-10-06 14:41:28 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -99,7 +99,7 @@ proc jlib::http::new {jlibname url args} {
 	polldownfactor         1.2
     }
     if {![regexp -nocase {^(([^:]*)://)?([^/:]+)(:([0-9]+))?(/.*)?$} $url \
-      x prefix proto host y port filepath]} {
+      - prefix proto host - port filepath]} {
 	return -code error "the url \"$url\" is not valid"
     }
     set opts(url)  $url

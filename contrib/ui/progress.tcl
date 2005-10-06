@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: progress.tcl,v 1.6 2005-10-04 13:56:35 matben Exp $
+# $Id: progress.tcl,v 1.7 2005-10-06 14:41:27 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -156,6 +156,11 @@ if {0} {
     .m add -percent 22
     .m add -percent 55
     .m add -percent 88    
+
+    ui::progress::container .m -framestyle tray
+    .m add -percent 22 -style tk -background white -type compact
+    .m add -percent 55 -style tk -background lightblue -type compact
+    .m add -percent 88 -style tk -background white -type compact
 }
 
 # ui::progress::toplevel --
@@ -166,7 +171,7 @@ snit::widget ui::progress::toplevel {
     hulltype toplevel
     widgetclass ProgressWindow
 
-    delegate option * to frm except {-menu -title -style -type}
+    delegate option * to frm except {-menu -title -style -type -background}
     delegate option -menu to hull
     delegate method * to frm
 
@@ -175,10 +180,11 @@ snit::widget ui::progress::toplevel {
     option -title
     
     constructor {args} {
-	set style [from args -style "ttk"]
-	set type  [from args -type ""]
+	set style      [from args -style "ttk"]
+	set type       [from args -type ""]
+	set background [from args -background ""]
 	install frm using ui::progress::frame $win.frm -style $style  \
-	  -type $type
+	  -type $type -background $background
 
 	$self configurelist $args
 	if {[tk windowingsystem] eq "aqua"} {
@@ -198,8 +204,8 @@ snit::widget ui::progress::toplevel {
 }
 
 if {0} {
-    ui::progress::toplevel .p1 -percent 66
-    ui::progress::toplevel .p2 -percent 44 -style tk
+    ui::progress::toplevel .p1 -percent 66 -type compact
+    ui::progress::toplevel .p2 -percent 44 -style tk -background white
     
 }
 
@@ -213,6 +219,9 @@ if {0} {
 # ui::progress::frame --
 # 
 #       Megawidget progress frame.
+#       
+#       @@@ not everything works! Work in progress!
+#           two separate widgets using common object for scheduling
 
 snit::widgetadaptor ui::progress::frame {
 	
@@ -249,11 +258,14 @@ snit::widgetadaptor ui::progress::frame {
 	    
     typeconstructor {
 	StockDialog ""
-	StockDialog compact -padding {6 2} -padx 6 -pady 0 -showtext3 0  \
+	StockDialog compact -padding {6 2} -padx 4 -pady 0 -showtext3 0  \
 	  -font DlgSmallFont
     }
     
     constructor {args} {
+	#puts "args=$args"
+	#parray options
+	
 	set style [from args -style "ttk"]
 	if {$style eq "ttk"} {
 	    installhull using ttk::frame -class TProgressFrame
@@ -263,7 +275,7 @@ snit::widgetadaptor ui::progress::frame {
 	    eval {$self TkConstructor} $args
 	} else {
 	    return -code error "unrecognized -style \"$style\""
-	}	
+	}
 	if {$heartbeat} {
 	    if {[llength [ui::progress::frame info instances]] == 1} {
 		set heartbeatid [after $heartbeat [mytypemethod Beat]]
@@ -273,30 +285,21 @@ snit::widgetadaptor ui::progress::frame {
 	# Trick to let individual options override -type ones.
 	set type [from args -type ""]
 	if {[info exists dialogTypes($type)]} {
-	    array set options $dialogTypes($type)
+	    array set opts $dialogTypes($type)
 	} else {
 	    return -code error "unrecognized -type \"$type\""
 	}
-	$self configurelist $args
+	set opts(-style) $style
+	set opts(-type)  $type
+	array set opts $args
+	$self configurelist [array get opts]
+	
+	#puts "--------------"
+	#parray options
 		
 	# Option postfixes.
-	if {$style eq "ttk"} {
-	    if {$options(-padding) ne ""} {
-		$win configure -padding $options(-padding)
-	    }
-	    if {$options(-buttonstyle) ne ""} {
-		$win.bt configure -style $options(-buttonstyle)
-	    }
-	} elseif {$style eq "tk"} {
-	    if {$options(-padx) ne ""} {
-		$win configure -padx $options(-padx)
-	    }
-	    if {$options(-pady) ne ""} {
-		$win configure -pady $options(-pady)
-	    }
-	}
+	$self Configure
 	$self Grid
-
 	return
     }
     
@@ -316,6 +319,16 @@ snit::widgetadaptor ui::progress::frame {
 	install bt   using button $win.bt   -text [::msgcat::mc Cancel]
 	install prg  using ttk::progressbar $win.prg  \
 	  -orient horizontal -maximum 100
+    }
+    
+    method Configure {} {
+	set style $options(-style)
+	set bg    $options(-background)
+	if {($style eq "tk") && ($bg ne "")} {
+	    foreach w [list $win $win.lbl $win.lbl2 $win.lbl3 $win.bt] {
+		$w configure -background $bg
+	    }
+	}
     }
     
     method Grid {} {

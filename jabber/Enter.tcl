@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Enter.tcl,v 1.2 2005-10-03 12:49:55 matben Exp $
+# $Id: Enter.tcl,v 1.3 2005-10-06 14:41:27 matben Exp $
 
 package provide Enter 1.0
 
@@ -312,21 +312,28 @@ proc ::Enter::BmarkPopup {token} {
     set w $state(wbmark)
     set m $w.menu
     if {![winfo exists $m]} {
-	::GroupChat::BuildBmarkMenu $m [list [namespace current]::BmarkCmd $token]
+	::GroupChat::BookmarkBuildMenu $m  \
+	  [list [namespace current]::BmarkCmd $token]
     }
     set x [winfo rootx $w]
     set y [expr {[winfo rooty $w] + [winfo height $w]}]
     tk_popup $m $x $y
 }
 
-proc ::Enter::BmarkCmd {token name jid nick} {
+proc ::Enter::BmarkCmd {token name jid opts} {
     variable $token
     upvar 0 $token state
-
+    
+    array set optsArr $opts
     jlib::splitjidex $jid node domain -
     set state(server)   $domain
     set state(roomname) $node
-    set state(nickname) $nick
+    if {[info exists optsArr(-nick)]} {
+	set state(nickname) $optsArr(-nick)
+    }
+    if {[info exists optsArr(-password)]} {
+	set state(password) $optsArr(-password)
+    }
 }
 
 proc ::Enter::Browse {token} {

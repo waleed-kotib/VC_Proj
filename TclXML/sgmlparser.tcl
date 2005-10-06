@@ -32,7 +32,7 @@
 # liability for all claims, expenses, losses, damages and costs any user may
 # incur as a result of using, copying or modifying the Software.
 #
-# $Id: sgmlparser.tcl,v 1.5 2005-04-25 07:40:03 matben Exp $
+# $Id: sgmlparser.tcl,v 1.6 2005-10-06 14:41:27 matben Exp $
 
 package require sgml 1.8
 
@@ -754,7 +754,7 @@ proc sgml::parseEvent {sgml args} {
 	
 	# Mats: we could have been reset from any of the callbacks!
 	if {![info exists state(haveDocElement)]} {
-	    return {}
+	    return
 	}
 
 	# Process character data
