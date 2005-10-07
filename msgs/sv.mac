@@ -854,6 +854,7 @@ Om du väljer att blockera en grupp så måste denna finnas i din roster.}
 ::msgcat::mcset sv prefwbscroll  {Du kan öka storleken utöver standardstorleken %sx%s}
 ::msgcat::mcset sv prefssbts     {Visa Nästa och Föregående knappar}
 ::msgcat::mcset sv prefssresize  {Anpassa fönsterstorleken automatiskt för att passa bild}
+::msgcat::mcset sv jagcsyncpres  {Synkronisera gruppchat med användarens närvaro}
 
 
 

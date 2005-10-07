@@ -918,6 +918,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jaactiveret  {If checked Return sends message else use Ctrl/Cmd-Return}
 ::msgcat::mcset en jainvitegchat {Invite a user for groupchat in room %s}
 ::msgcat::mcset en jaxformreq   {Labels with (*) are required}
+::msgcat::mcset en jagcsyncpres {Synchronize chatroom with user presence}
 
    
 # Setup assistant:

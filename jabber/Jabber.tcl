@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.147 2005-10-04 13:02:53 matben Exp $
+# $Id: Jabber.tcl,v 1.148 2005-10-07 06:51:16 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -1225,7 +1225,7 @@ proc ::Jabber::SetStatus {type args} {
     
     # This way clients get the info necessary for file transports.
     # Necessary for each status change since internal cache cleared.
-    if {$type != "unavailable"} {
+    if {$type ne "unavailable"} {
 	set cocciElem [CreateCoccinellaPresElement]
 	set capsElem  [CreateCapsPresElement]
 	lappend argsArr(-extras) $cocciElem $capsElem
