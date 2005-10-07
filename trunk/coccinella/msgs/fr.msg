@@ -25,6 +25,8 @@
 ::msgcat::mcset fr Blocking		{Bloquant}
 ::msgcat::mcset fr Browser		{Navigateur}
 ::msgcat::mcset fr Both			{Les deux}
+# ::msgcat::mcset fr Bookmark
+# ::msgcat::mcset fr Bookmarks
 ::msgcat::mcset fr Buffering		{Mise en cache}
 ::msgcat::mcset fr Cancel		{Annuler}
 ::msgcat::mcset fr Change		{Changer}
@@ -343,6 +345,7 @@
 ::msgcat::mcset fr mOffline		{Déconnecté}
 ::msgcat::mcset fr mTransports		{Transports}
 #::msgcat::mcset fr mIgnore         	{Ignore}
+# ::msgcat::mcset fr mEditBookmarks {Edit Bookmarks...}
 
 
 
@@ -371,6 +374,7 @@
 ::msgcat::mcset fr {Away status}		{Statut "Absent"}
 ::msgcat::mcset fr {Basic Info}			{Informations de bases}
 ::msgcat::mcset fr {Block JID}			{Bloquage JID}
+# ::msgcat::mcset fr {Bookmark this room}
 ::msgcat::mcset fr {Built in server port}	{Port du serveur interne}
 ::msgcat::mcset fr {Cache folder}		{Répertoire du cache}
 ::msgcat::mcset fr {Canvas Size}		{Taille du dessin}
@@ -422,6 +426,7 @@
 ::msgcat::mcset fr {History length}		{Longueur de l'historique}
 ::msgcat::mcset fr {Host name}			{Nom de domaine}
 ::msgcat::mcset fr {HTTP port}			{Port HTTP}
+# ::msgcat::mcset fr {Import Iconset...}
 ::msgcat::mcset fr {Import using}		{Importer en utilisant...}
 ::msgcat::mcset fr {Import/Remove fonts}	{Importer/Supprimer polices}
 ::msgcat::mcset fr {Incoming Message}		{Message entrant}
@@ -455,6 +460,7 @@
 ::msgcat::mcset fr {Network Error}		{Erreur de Réseau}
 ::msgcat::mcset fr {Network Setup}		{Configuration du réseau}
 ::msgcat::mcset fr {New Account}		{&Nouvel utilisateur}
+# ::msgcat::mcset fr {New bookmark}
 ::msgcat::mcset fr {New chat message}		{Nouveau message dans la discussion}
 ::msgcat::mcset fr {New chat thread}		{Nouvelle discussion}
 ::msgcat::mcset fr {New Color}			{Nouvelle couleur}
@@ -474,13 +480,12 @@
 ::msgcat::mcset fr {No Available}		{Aucun disponible}
 ::msgcat::mcset fr {No Inbox}			{Pas de message entrant}
 ::msgcat::mcset fr {No Printing}		{Pas d'impression}
+# ::msgcat::mcset fr {No Restriction}
 ::msgcat::mcset fr {Not Available}		{Indisponible}
 ::msgcat::mcset fr {Not available}		{Indisponible}
 ::msgcat::mcset fr {Not Connected}		{Déconnecté}
+# ::msgcat::mcset fr {Not older than}
 ::msgcat::mcset fr {Once per session}		{Une fois par session}
-::msgcat::mcset fr {One hour} 			{Une heure}
-::msgcat::mcset fr {One day} 			{Un jour}
-::msgcat::mcset fr {One week}	 		{Une semaine}
 ::msgcat::mcset fr {Open Canvas}		{Ouvrir dessin}
 ::msgcat::mcset fr {Open Failed}		{Échec de l'ouverture}
 ::msgcat::mcset fr {Open Helpfile}		{Ouvrir le fichier d'aide}
@@ -493,6 +498,7 @@
 ::msgcat::mcset fr {Personal URL}		{URL personnelle}
 ::msgcat::mcset fr {Pick Directory}		{Choisir un dossier}
 ::msgcat::mcset fr {Pick File}			{Choisir un fichier}
+# ::msgcat::mcset fr {Pick skin}
 ::msgcat::mcset fr {Plugin Info}		{Infos sur le plugin}
 ::msgcat::mcset fr {Plugin Control}		{Contrôle du plugin}
 ::msgcat::mcset fr {Port number}		{Numéro de port}
@@ -534,6 +540,7 @@
 ::msgcat::mcset fr {Set New Nickname}		{Appliquer le nouveau pseudo}
 ::msgcat::mcset fr {Set New Topic}		{Appliquer le nouveau sujet}
 ::msgcat::mcset fr {Set Status}			{Changer le statut}
+# ::msgcat::mcset fr {Set windows opacity}
 ::msgcat::mcset fr {Settings Panels}		{Panneau de configuration}
 ::msgcat::mcset fr {Setup Assistant}		{Assistant de configuration}
 ::msgcat::mcset fr {Slide Show}			{Diaporama}
@@ -570,6 +577,15 @@
 ::msgcat::mcset fr {Whiteboard fonts}		{Polices du tableau}
 ::msgcat::mcset fr {Writing file}		{Écriture du fichier}
 ::msgcat::mcset fr {Groupchat presence change}	{Changement de statut sur un salon}
+
+# Time intervals.
+# ::msgcat::mcset fr {Ten seconds}
+# ::msgcat::mcset fr {One minute}
+# ::msgcat::mcset fr {Ten minutes}
+::msgcat::mcset fr {One hour} 			{Une heure}
+::msgcat::mcset fr {One day} 			{Un jour}
+::msgcat::mcset fr {One week}	 		{Une semaine}
+
 
 
 # Écran de démarrage :
@@ -732,6 +748,7 @@
 ::msgcat::mcset fr jamessstarttls-nofeature     {Le serveur "%s" ne supporte pas le TLS.}
 ::msgcat::mcset fr jamessstarttls-failure       {Erreur lors de la sécurisation TLS avec le serveur "%s".}
 ::msgcat::mcset fr jamessgcinvite               {Vous avez été invité dans le salon %s par %s. Voulez-vous y aller ?}
+# ::msgcat::mcset fr jamessnorooms {Failed to find any rooms at %s.}
 
 
 
@@ -919,10 +936,11 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jauserinnote {Ajouter vos notes personnelles sur cet utilisateur}
 ::msgcat::mcset fr jaregisterex {Indiquez le nom du serveur Jabber sur lequel vous voulez vous enregistrer. Cliquez ensuite su le bouton Recevoir pour obtenir les informations d'inscription. Remplissez ces informations et inscrivez-vous.}
 ::msgcat::mcset fr jaloginjid   {Entrez votre adresse ("joey@myjabb.org" par exemple) ou choisissez un profil. Vous devez déjà avoir un compte sur ce serveur.}
-::msgcat::mcset fr jaxformreq   {Paramètres avec (*) requis}
 ::msgcat::mcset fr jaregalready {Vous êtes déjà inscrit à ce service. Voici vos paramètres actuels d'inscription.}
 ::msgcat::mcset fr jaactiveret {Si coché, la touche Entrée envoie les messages ; sinon Ctrl/Cmd-Entrée}
 ::msgcat::mcset fr jainvitegchat {Inviter un utilisateur à discuter dans le salon %s}
+::msgcat::mcset fr jaxformreq   {Paramètres avec (*) requis}
+# ::msgcat::mcset fr jagcsyncpres {Synchronize chatroom with user presence}
 
 
 # Assistant de configuration :
