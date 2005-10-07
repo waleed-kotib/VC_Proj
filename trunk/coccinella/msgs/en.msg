@@ -370,6 +370,7 @@
 ::msgcat::mcset en {Away status}
 ::msgcat::mcset en {Basic Info}
 ::msgcat::mcset en {Block JID}
+::msgcat::mcset en {Bookmark this room}
 ::msgcat::mcset en {Built in server port}
 ::msgcat::mcset en {Cache folder}
 ::msgcat::mcset en {Canvas Size}
@@ -422,6 +423,7 @@
 ::msgcat::mcset en {History length}
 ::msgcat::mcset en {Host name}
 ::msgcat::mcset en {HTTP port}
+::msgcat::mcset en {Import Iconset...}
 ::msgcat::mcset en {Import using}
 ::msgcat::mcset en {Import/Remove fonts}
 ::msgcat::mcset en {Incoming Message}
@@ -479,6 +481,7 @@
 ::msgcat::mcset en {Not Available}
 ::msgcat::mcset en {Not available}
 ::msgcat::mcset en {Not Connected}
+::msgcat::mcset en {Not older than}
 ::msgcat::mcset en {Once per session}
 ::msgcat::mcset en {Open Canvas}
 ::msgcat::mcset en {Open Failed}
@@ -492,6 +495,7 @@
 ::msgcat::mcset en {Personal URL}
 ::msgcat::mcset en {Pick Directory}
 ::msgcat::mcset en {Pick File}
+::msgcat::mcset en {Pick skin}
 ::msgcat::mcset en {Plugin Info}
 ::msgcat::mcset en {Plugin Control}
 ::msgcat::mcset en {Port number}
@@ -533,6 +537,7 @@
 ::msgcat::mcset en {Set New Nickname}
 ::msgcat::mcset en {Set New Topic}
 ::msgcat::mcset en {Set Status}
+::msgcat::mcset en {Set windows opacity}
 ::msgcat::mcset en {Settings Panels}
 ::msgcat::mcset en {Setup Assistant}
 ::msgcat::mcset en {Slide Show}

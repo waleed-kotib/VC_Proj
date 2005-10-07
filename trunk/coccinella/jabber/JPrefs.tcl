@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.29 2005-09-20 14:09:51 matben Exp $
+# $Id: JPrefs.tcl,v 1.30 2005-10-07 08:45:43 matben Exp $
 
 package require ui::fontselector
 
@@ -382,7 +382,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     set wskin $wap.skin
     set wmenu $wskin.b.m
     ttk::frame $wskin
-    ttk::label $wskin.l -text "Pick skin:"
+    ttk::label $wskin.l -text "[mc {Pick skin}]:"
     ttk::menubutton $wskin.b -textvariable ::tile::currentTheme \
       -menu $wmenu -direction flush
     menu $wmenu -tearoff 0
@@ -406,7 +406,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	set haveOpacity 1
 	set wop $wap.op
 	ttk::frame $wop
-	ttk::label $wop.l -text "Set windows opacity:"
+	ttk::label $wop.l -text "[mc {Set windows opacity}]:"
 	ttk::scale $wop.s -orient horizontal -from 50 -to 100 \
 	  -variable [namespace current]::tmpPrefs(opacity) \
 	  -value $tmpPrefs(opacity) -font CociSmallFont

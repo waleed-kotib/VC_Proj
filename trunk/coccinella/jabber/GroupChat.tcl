@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.125 2005-10-07 06:51:16 matben Exp $
+# $Id: GroupChat.tcl,v 1.126 2005-10-07 08:45:43 matben Exp $
 
 package require Enter
 package require History
@@ -829,7 +829,8 @@ proc ::GroupChat::Build {roomjid args} {
       -command [list [namespace current]::Exit $token]
     
     set wgroup    $wbot.grp
-    set wbtstatus $wgroup.stat    
+    set wbtstatus $wgroup.stat
+    set wbtbmark  $wgroup.bmark
 
     ttk::frame $wgroup
     ttk::checkbutton $wgroup.active -style Toolbutton \
@@ -960,6 +961,7 @@ proc ::GroupChat::Build {roomjid args} {
     set state(wbtnick)    $wbtnick
     set state(wbtsubject) $wbtsubject
     set state(wbtstatus)  $wbtstatus
+    set state(wbtbmark)   $wbtbmark
     set state(wtext)      $wtext
     set state(wtextsend)  $wtextsend
     set state(wusers)     $wusers
@@ -1086,15 +1088,17 @@ proc ::GroupChat::InsertMessage {token from body args} {
       -type groupchat -name $nick -time $dateISO -body $body -tag $whom
 }
 
-proc ::GroupChat::SetState {token theState} {
+proc ::GroupChat::SetState {token _state} {
     variable $token
     upvar 0 $token state
 
-    $state(wtray) buttonconfigure send   -state $theState
-    $state(wtray) buttonconfigure invite -state $theState
-    $state(wtray) buttonconfigure info   -state $theState
-    $state(wbtsubject) configure -state $theState
-    $state(wbtsend)    configure -state $theState
+    $state(wtray) buttonconfigure send   -state $_state
+    $state(wtray) buttonconfigure invite -state $_state
+    $state(wtray) buttonconfigure info   -state $_state
+    $state(wbtsubject) configure -state $_state
+    $state(wbtsend)    configure -state $_state
+    $state(wbtstatus)  configure -state $_state
+    $state(wbtbmark)   configure -state $_state
 }
 
 proc ::GroupChat::CloseHook {wclose} {
@@ -2047,6 +2051,10 @@ proc ::GroupChat::BookmarkRoom {token} {
 	}
     }
     lappend bookmarks [list $name $jid -nick $nick]
+    
+    # We assume here that we already have the complete bookmark list from
+    # the login hook.
+    BookmarkSendSet
 }
 
 # GroupChat::BookmarkSendSet --

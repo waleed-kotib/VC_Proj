@@ -371,6 +371,7 @@
 ::msgcat::mcset sv {Away status}           {Frånvarande status}
 ::msgcat::mcset sv {Basic Info}		   {Basinfo}
 ::msgcat::mcset sv {Block JID}             {Blockera JID}
+::msgcat::mcset sv {Bookmark this room}    {Sätt bokmärke på rummet}
 ::msgcat::mcset sv {Built in server port}  {Inbyggd server port}
 ::msgcat::mcset sv {Cache folder}          {Filminnesmapp}
 ::msgcat::mcset sv {Canvas Size}           {Dukstorlek}
@@ -423,6 +424,7 @@
 ::msgcat::mcset sv {History length}        {Historielängd}
 ::msgcat::mcset sv {Host name}		   {Värdnamn}
 ::msgcat::mcset sv {HTTP port}             {HTTP port}
+::msgcat::mcset sv {Import Iconset...}     {Importera ikonsamling...}
 ::msgcat::mcset sv {Import using}          {Importera med}
 ::msgcat::mcset sv {Import/Remove fonts}   {Importera/Tag bort typsnitt}
 ::msgcat::mcset sv {Incoming Message}	   {Inkommande meddelande}
@@ -480,6 +482,7 @@
 ::msgcat::mcset sv {Not Available}	   {Ej tillgängligt}
 ::msgcat::mcset sv {Not available}	   {Ej tillgängligt}
 ::msgcat::mcset sv {Not Connected}	   {Ej ansluten}
+::msgcat::mcset sv {Not older than}        {Ej äldre än}
 ::msgcat::mcset sv {Once per session}      {En gång per start}
 ::msgcat::mcset sv {Open Canvas}           {Öppna canvas}
 ::msgcat::mcset sv {Open Failed}	   {Öppna misslyckades}
@@ -493,6 +496,7 @@
 ::msgcat::mcset sv {Personal URL}	   {Privat URL}
 ::msgcat::mcset sv {Pick Directory}        {Välj mapp}
 ::msgcat::mcset sv {Pick File}		   {Välj fil}
+::msgcat::mcset sv {Pick skin}             {Välj skinn}
 ::msgcat::mcset sv {Plugin Control}        {Plugin kontroll}
 ::msgcat::mcset sv {Plugin Info}           {Plugin info}
 ::msgcat::mcset sv {Port number}	   {Portnummer}
@@ -534,6 +538,7 @@
 ::msgcat::mcset sv {Set New Nickname}      {Sätt nytt kortnamn}
 ::msgcat::mcset sv {Set New Topic}         {Sätt nytt ämne}
 ::msgcat::mcset sv {Set Status}            {Sätt status}
+::msgcat::mcset sv {Set windows opacity}   {Sätt fönstrens genomskinlighet}
 ::msgcat::mcset sv {Settings Panels}       {Inställningspaneler}
 ::msgcat::mcset sv {Setup Assistant}	   {Inställningsassistent}
 ::msgcat::mcset sv {Slide Show}            {Bildvisning}
@@ -854,7 +859,6 @@ Om du väljer att blockera en grupp så måste denna finnas i din roster.}
 ::msgcat::mcset sv prefwbscroll  {Du kan öka storleken utöver standardstorleken %sx%s}
 ::msgcat::mcset sv prefssbts     {Visa Nästa och Föregående knappar}
 ::msgcat::mcset sv prefssresize  {Anpassa fönsterstorleken automatiskt för att passa bild}
-::msgcat::mcset sv jagcsyncpres  {Synkronisera gruppchat med användarens närvaro}
 
 
 
@@ -927,6 +931,7 @@ Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jaactiveret  {Om kryssad så skickar Retur annars använd Ctrl/Cmd-Retur}
 ::msgcat::mcset sv jainvitegchat {Bjud in användare till gruppchatt i rum %s}
 ::msgcat::mcset sv jaxformreq   {Fält med (*) är obligatoriska}
+::msgcat::mcset sv jagcsyncpres {Synkronisera gruppchat med användarens närvaro}
 
 
 

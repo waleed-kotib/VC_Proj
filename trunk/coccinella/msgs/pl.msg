@@ -23,6 +23,8 @@
 ::msgcat::mcset pl Block	Zablokuj
 ::msgcat::mcset pl Blockers	Zablokować
 ::msgcat::mcset pl Blocking	Zabolokowany
+# ::msgcat::mcset pl Bookmark
+# ::msgcat::mcset pl Bookmarks
 ::msgcat::mcset pl Browser	Zasoby
 ::msgcat::mcset pl Both		obustronna
 ::msgcat::mcset pl Buffering	buforowanie
@@ -319,6 +321,7 @@
 ::msgcat::mcset pl mTakeSnapShot        {Zrób "zdjęcie"}
 ::msgcat::mcset pl mTimeCode            {Czas wł./wył.}
 ::msgcat::mcset pl mUserInfo            {Dane użytkownika...}
+# ::msgcat::mcset pl mEditBookmarks {Edit Bookmarks...}
 
 # Popups
 ::msgcat::mcset pl mMessage     	{Wiadomość...}
@@ -369,6 +372,7 @@
 ::msgcat::mcset pl {Away status}          {Opis statusu "zaraz wracam"}
 ::msgcat::mcset pl {Basic Info}           {Informacje podstawowe}
 ::msgcat::mcset pl {Block JID}            {Zablokuj JID}
+# ::msgcat::mcset pl {Bookmark this room}
 ::msgcat::mcset pl {Built in server port} {Domyślny port serwera}
 ::msgcat::mcset pl {Cache folder}         {Katalog buforowy}
 ::msgcat::mcset pl {Canvas Size}          {Rozmiar tła ("płótna") rysunku}
@@ -421,6 +425,7 @@
 ::msgcat::mcset pl {History length} {Rozmiar dziennika}
 ::msgcat::mcset pl {Host name}            {Nazwa komputera}
 ::msgcat::mcset pl {HTTP port}            {port HTTP}
+# ::msgcat::mcset pl {Import Iconset...}
 ::msgcat::mcset pl {Import using}         {Importuj poprzez}
 ::msgcat::mcset pl {Import/Remove fonts}  {Dodaj/usuń kroje czcionek}
 ::msgcat::mcset pl {Incoming Message}     {Wiadomość nadchodzi}
@@ -454,6 +459,7 @@
 ::msgcat::mcset pl {Network Error}        {Problem w sieci}
 ::msgcat::mcset pl {Network Setup}        {Ustawienia sieci}
 ::msgcat::mcset pl {New Account}          {Nowe konto}
+# ::msgcat::mcset pl {New bookmark}
 ::msgcat::mcset pl {New chat message}     {"Odezwanie się" rozmówcy}
 ::msgcat::mcset pl {New chat thread}      {Rozpoczęcie nowej rozmowy}
 ::msgcat::mcset pl {New Color}            {Nowy kolor}
@@ -473,13 +479,12 @@
 ::msgcat::mcset pl {No Available}         {Brak dostępności}
 ::msgcat::mcset pl {No Inbox}             {Brak skrzynki}
 ::msgcat::mcset pl {No Printing}          {Bez drukowania}
+# ::msgcat::mcset pl {No Restriction}
 ::msgcat::mcset pl {Not Available}        {Brak}
 ::msgcat::mcset pl {Not available}        {brak}
 ::msgcat::mcset pl {Not Connected}        {Brak połączenia}
+# ::msgcat::mcset pl {Not older than}
 ::msgcat::mcset pl {Once per session}     {Raz w ciągu sesji}
-::msgcat::mcset pl {One hour}             {Godzina}
-::msgcat::mcset pl {One day}              {Dzień}
-::msgcat::mcset pl {One week}             {Tydzień}
 ::msgcat::mcset pl {Open Canvas}          {Wczytaj tło ("płótno")}
 ::msgcat::mcset pl {Open Failed}          {Wczytanie nieudane}
 ::msgcat::mcset pl {Open Helpfile}        {Wczytaj plik pomocy}
@@ -492,6 +497,7 @@
 ::msgcat::mcset pl {Personal URL}         {Własny URL}
 ::msgcat::mcset pl {Pick Directory}       {Wskaż katalog}
 ::msgcat::mcset pl {Pick File}            {Wskaż plik}
+# ::msgcat::mcset pl {Pick skin}
 ::msgcat::mcset pl {Plugin Info}          {Informacje o wtyczce}
 ::msgcat::mcset pl {Plugin Control}       {Sterowanie wtyczką}
 ::msgcat::mcset pl {Port number}          {Numer portu}
@@ -533,6 +539,7 @@
 ::msgcat::mcset pl {Set New Nickname}     {Ustaw nowy pseudonim}
 ::msgcat::mcset pl {Set New Topic}        {Ustaw nowy temat}
 ::msgcat::mcset pl {Set Status}           {Ustaw status}
+# ::msgcat::mcset pl {Set windows opacity}
 ::msgcat::mcset pl {Settings Panels}      {Panele ustawień}
 ::msgcat::mcset pl {Setup Assistant}      {Asystent ustawień}
 ::msgcat::mcset pl {Slide Show}           {Prezentacja}
@@ -568,6 +575,15 @@
 ::msgcat::mcset pl {Version Info}         {Dane wersji}
 ::msgcat::mcset pl {Whiteboard fonts}     {Czcionki Tablicy}
 ::msgcat::mcset pl {Writing file}         {Zapis pliku}
+
+
+# Time intervals.
+# ::msgcat::mcset pl {Ten seconds}
+# ::msgcat::mcset pl {One minute}
+# ::msgcat::mcset pl {Ten minutes}
+::msgcat::mcset pl {One hour}             {Godzina}
+::msgcat::mcset pl {One day}              {Dzień}
+::msgcat::mcset pl {One week}             {Tydzień}
 
 
 # Splash screen:
@@ -670,8 +686,8 @@
 ::msgcat::mcset pl jamessaddrmiss	{Wpisz przynajmniej jeden prawidłowy adres}
 ::msgcat::mcset pl jamesschatclose	{Zamykając okno rozmowy utracisz całą jej treść - na pewno chcesz je zamknąć?}
 ::msgcat::mcset pl jamessnogroupchat	{Nie znaleziono żadnego serwisu umożliwiającego konferencje}
-::msgcat::mcset en jamessgcnoroomname   {Należy podać nazwę pokoju.}
-::msgcat::mcset en jamessgcnoroomnick   {Należy podać pseudonim.}
+::msgcat::mcset pl jamessgcnoroomname   {Należy podać nazwę pokoju.}
+::msgcat::mcset pl jamessgcnoroomnick   {Należy podać pseudonim.}
 ::msgcat::mcset pl jamessinroommiss	{Przed wejściem do pokoju należy wypełnić wszystkie pola}
 ::msgcat::mcset pl jamesswarnexitroom	{Faktycznie chcesz opuścić pokój "%s" ?}
 ::msgcat::mcset pl jamesserrbrowse	{Błąd w trakcie przeszukiwania "%s": %s}
@@ -721,6 +737,7 @@ Otrzymałeś autoryzację od %s: %s.}
 ::msgcat::mcset pl jamessstarttls-nofeature     {Brak możliwości skorzystania z TLS na serwerze "%s".}
 ::msgcat::mcset pl jamessstarttls-failure       {Nieudana negocjacja TLS z serwerem "%s".}
 ::msgcat::mcset pl jamessgcinvite               {Masz zaproszenie do wzięcia udziału w konferencji %s (od %s). Przyłączysz się?}
+# ::msgcat::mcset pl jamessnorooms {Failed to find any rooms at %s.}
 
 
 
@@ -906,11 +923,11 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jauserinnote {Możesz o tym użytkowniku napisać coś "od siebie"}
 ::msgcat::mcset pl jaregisterex {Podaj nazwę serwera Jabbera, gdzie zamierzasz się zarejestrować, po czym kliknij przycisk "Pobierz", aby pobrać formularz rejestracyjny. Wypełnij go, aby móc dokonać rejestracji.}
 ::msgcat::mcset pl jaloginjid   {Podaj swój JID w postaci "joey@myjabb.org", lub wybierz profil - zakłada się, że masz już wcześniej założone konto na wskazanym serwerze.}
-::msgcat::mcset pl jaxformreq   {Wymaga się etykiet zawierających znak (*)}
 ::msgcat::mcset pl jaregalready {Wygląda na to, że rejestracji dokonano już uprzednio - oto bieżące ustawienia Twoich danych rejestracyjnych.}
 ::msgcat::mcset pl jaactiveret {Zaznaczenie tej opcji powoduje, że naciśnięcie Enter/Return wysyła wiadomość - w przeciwnym wypadku użyj Ctrl/Cmd-Return}
 ::msgcat::mcset pl jainvitegchat {Zaproś użytkownika do udziału w konferencji w pokoju %s}
-
+::msgcat::mcset pl jaxformreq   {Wymaga się etykiet zawierających znak (*)}
+# ::msgcat::mcset pl jagcsyncpres {Synchronize chatroom with user presence}
 
 
 # Setup assistant:

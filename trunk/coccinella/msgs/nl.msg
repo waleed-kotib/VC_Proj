@@ -375,6 +375,7 @@
 ::msgcat::mcset nl {Away status}		{Afwezig-aanwezigheid}
 ::msgcat::mcset nl {Basic Info}			{Basisinfo}
 ::msgcat::mcset nl {Block JID}			{Jabber ID blokkeren}
+# ::msgcat::mcset nl {Bookmark this room}
 ::msgcat::mcset nl {Built in server port}	{Poort van ingebouwde server}
 ::msgcat::mcset nl {Cache folder}		{Cachemap}
 ::msgcat::mcset nl {Canvas Size}		{Grootte van doek}
@@ -427,6 +428,7 @@
 ::msgcat::mcset nl {History length}		{Lengte van geschiedenis}
 ::msgcat::mcset nl {Host name}			{Hostnaam}
 ::msgcat::mcset nl {HTTP port}			{HTTP-poort}
+# ::msgcat::mcset nl {Import Iconset...}
 ::msgcat::mcset nl {Import using}		{Importeer gebruik makend van}
 ::msgcat::mcset nl {Import/Remove fonts}	{Lettertypes importeren/verwijderen}
 ::msgcat::mcset nl {Incoming Message}		{Inkomend bericht}
@@ -484,6 +486,7 @@
 ::msgcat::mcset nl {Not Available}		{Niet beschikbaar}
 ::msgcat::mcset nl {Not available}		{Niet beschikbaar}
 ::msgcat::mcset nl {Not Connected}		{Niet verbonden}
+# ::msgcat::mcset nl {Not older than}
 ::msgcat::mcset nl {Once per session}		{Eén keer per sessie}
 ::msgcat::mcset nl {Open Canvas}		{Doek openen}
 ::msgcat::mcset nl {Open Failed}		{Openen mislukte}
@@ -497,6 +500,7 @@
 ::msgcat::mcset nl {Personal URL}		{Persoonlijke URL}
 ::msgcat::mcset nl {Pick Directory}		{Map kiezen}
 ::msgcat::mcset nl {Pick File}			{Bestand kiezen}
+# ::msgcat::mcset nl {Pick skin}
 ::msgcat::mcset nl {Plugin Info}		{Plugin info}
 ::msgcat::mcset nl {Plugin Control}		{Plugincontrole}
 ::msgcat::mcset nl {Port number}		{Poortnummer}
@@ -538,6 +542,7 @@
 ::msgcat::mcset nl {Set New Nickname}		{Nieuwe bijnaam instellen}
 ::msgcat::mcset nl {Set New Topic}		{Nieuw onderwerp instellen}
 ::msgcat::mcset nl {Set Status}			{Aanwezigheid instellen}
+# ::msgcat::mcset nl {Set windows opacity}
 ::msgcat::mcset nl {Settings Panels}		{Instellingen}
 ::msgcat::mcset nl {Setup Assistant}		{Installatieassistent}
 ::msgcat::mcset nl {Slide Show}			{Diavoorstelling}
@@ -575,9 +580,9 @@
 ::msgcat::mcset nl {Writing file}		{Bezig met wegschrijven bestand}
 
 # Time intervals.
-::msgcat::mcset en {Ten seconds}		{Tien seconden}
-::msgcat::mcset en {One minute}			{Eén minuut}
-::msgcat::mcset en {Ten minutes}		{Tien minuten}
+::msgcat::mcset nl {Ten seconds}		{Tien seconden}
+::msgcat::mcset nl {One minute}			{Eén minuut}
+::msgcat::mcset nl {Ten minutes}		{Tien minuten}
 ::msgcat::mcset nl {One hour} 			{Eén uur}
 ::msgcat::mcset nl {One day} 			{Eén dag}
 ::msgcat::mcset nl {One week}	 		{Eén week}
@@ -735,6 +740,10 @@
 ::msgcat::mcset nl jamessstarttls-nofeature     {Server "%s" ondersteunt TLS niet.}
 ::msgcat::mcset nl jamessstarttls-failure       {Beveiligd verbinden via TLS met server "%s" is mislukt.}
 ::msgcat::mcset nl jamessgcinvite               {U werd uigenodigd op de chatruimte %s door %s. Wenst u deze ruimte te betreden?}
+# ::msgcat::mcset nl jamessnorooms {Failed to find any rooms at %s.}
+
+
+
 ::msgcat::mcset nl openquicktime		{QuickTime live stream openen}
 ::msgcat::mcset nl writeurl			{Voer een URL in of kies een snelkoppeling:}
 ::msgcat::mcset nl openquicktimeurlmsg		{Open een URL die een SDP-bestand bevat met extensie .mov voor het verzenden van een QuickTime realtime live streaming.\
@@ -917,10 +926,11 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jauserinnote {Uw persoonlijke opmerkingen over deze contactpersoon kunt u hier bewaren}
 ::msgcat::mcset nl jaregisterex {Voer de naam van de Jabber-server in waarop u een account wilt aanmaken. Druk vervolgens op de knop "Ophalen" om de gewenste registratiegegevens af te halen. Voer de nodige gegevens in en registreer.}
 ::msgcat::mcset nl jaloginjid   {Voer uw Jabber ID in, in de vorm "joey@myjabb.org" of kies een profiel. U beschikt normaal al over een account op deze server.}
-::msgcat::mcset nl jaxformreq   {Labels met (*) zijn verplicht.}
 ::msgcat::mcset nl jaregalready {U bent al geregistreerd op deze dienst. Dit zijn uw huidige instellingen van uw registratie.}
 ::msgcat::mcset nl jaactiveret {De enter-toets zal het bericht verzenden wanneer dit is aangevinkt. Anders moet u ctrl/cmd + enter gebruiken.}
 ::msgcat::mcset nl jainvitegchat {Een contactpersoon uitnodigen op chatruimte %s}
+::msgcat::mcset nl jaxformreq   {Labels met (*) zijn verplicht.}
+# ::msgcat::mcset nl jagcsyncpres {Synchronize chatroom with user presence}
 
 
 # Setup assistant:
