@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.133 2005-10-06 14:41:27 matben Exp $
+# $Id: Chat.tcl,v 1.134 2005-10-07 08:45:43 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2386,7 +2386,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
     ttk::label $wca.lhist -text "[mc {History length}]:"
     spinbox $wca.shist -width 4 -from 0 -increment 5 -to 1000 -state readonly \
       -textvariable [namespace current]::tmpJPrefs(chat,histLen)
-    ttk::label $wca.lage -text "not older than:"
+    ttk::label $wca.lage -text "[mc {Not older than}]:"
     set mb $wca.mbage
     set menuDef [list                       \
 	[list [mc "Ten seconds"]     -value 10]    \
