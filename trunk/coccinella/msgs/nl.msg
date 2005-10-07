@@ -500,7 +500,7 @@
 ::msgcat::mcset nl {Personal URL}		{Persoonlijke URL}
 ::msgcat::mcset nl {Pick Directory}		{Map kiezen}
 ::msgcat::mcset nl {Pick File}			{Bestand kiezen}
-::msgcat::mcset nl {Pick skin}			{Thema kiezen}
+::msgcat::mcset nl {Pick skin}			{Stijl kiezen}
 ::msgcat::mcset nl {Plugin Info}		{Plugin info}
 ::msgcat::mcset nl {Plugin Control}		{Plugincontrole}
 ::msgcat::mcset nl {Port number}		{Poortnummer}
@@ -845,7 +845,7 @@
 ::msgcat::mcset nl prefnatip     {Volgend IP-adres aan de buitenwereld geven (nodig in NAT-omgeving)}
 ::msgcat::mcset nl prefmucconf   {Multi-User-Chat protocol met Conference protocol als backup}
 ::msgcat::mcset nl prefrostbgim  {Achtergrondafbeelding (gif) in roster gebruiken}
-::msgcat::mcset nl preftheme     {Kies een thema. Dit vereist het herstarten van Coccinella.}
+::msgcat::mcset nl preftheme     {Thema kiezen (dit vereist het herstarten van Coccinella)}
 ::msgcat::mcset nl prefplugctrl  {U kunt elk pakket deselecteren waarvan u het laden wilt verhinderen. U moet Coccinella herstarten voordat de wijzigingen worden doorgevoerd.}
 ::msgcat::mcset nl prefchactret  {Altijd actieve <enter> in chatvenster gebruiken}
 ::msgcat::mcset nl prefchnormal  {Normale berichten als chatberichten behandelen}
