@@ -24,6 +24,8 @@
 ::msgcat::mcset de Block  	Blockieren
 ::msgcat::mcset de Blockers	Sperren
 ::msgcat::mcset de Blocking	gesperrt
+# ::msgcat::mcset de Bookmark
+# ::msgcat::mcset de Bookmarks
 ::msgcat::mcset de Browser	Browser
 ::msgcat::mcset de Both		beide
 ::msgcat::mcset de Buffering	puffern
@@ -344,6 +346,7 @@
 ::msgcat::mcset de mLogoutTrpt     	{Beim Transport abmelden}
 ::msgcat::mcset de mRemoveContact  	{Kontakt entfernen...}
 #::msgcat::mcset de mIgnore         	{Ignore}
+# ::msgcat::mcset de mEditBookmarks {Edit Bookmarks...}
 
 
 
@@ -424,6 +427,7 @@
 ::msgcat::mcset de {History length}       {Verlaufs-Umfang}
 ::msgcat::mcset de {Host name}            {Host-Name}
 ::msgcat::mcset de {HTTP port}            {HTTP-Port:}
+# ::msgcat::mcset de {Import Iconset...}
 ::msgcat::mcset de {Import using}         {Import mittels}
 ::msgcat::mcset de {Import/Remove fonts}  {Schriften einfügen/entfernen}
 ::msgcat::mcset de {Incoming Message}     {Eingehende Nachricht}
@@ -457,6 +461,7 @@
 ::msgcat::mcset de {Network Error}        {Netzwerk-Fehler}
 ::msgcat::mcset de {Network Setup}        {Netzwerk-Einrichtung}
 ::msgcat::mcset de {New Account}          {Neues Konto}
+# ::msgcat::mcset de {New bookmark}
 ::msgcat::mcset de {New chat message}     {Neue Chat-Nachricht}
 ::msgcat::mcset de {New chat thread}      {Neues Chat-Thema}
 ::msgcat::mcset de {New Color}            {Neue Farbe}
@@ -476,13 +481,12 @@
 ::msgcat::mcset de {No Available} 	  {Nicht verfügbar}
 ::msgcat::mcset de {No Inbox}             {Kein Eingangsfach}
 ::msgcat::mcset de {No Printing}          {Kein Druck}
+# ::msgcat::mcset de {No Restriction}
 ::msgcat::mcset de {Not Available}        {Nicht verfügbar}
 ::msgcat::mcset de {Not available}        {nicht verfügbar}
 ::msgcat::mcset de {Not Connected}        {Nicht verbunden}
+# ::msgcat::mcset de {Not older than}
 ::msgcat::mcset de {Once per session}     {Einmal pro Sitzung}
-::msgcat::mcset de {One hour}             {Eine Stunde} 
-::msgcat::mcset de {One day}              {Ein Tag} 
-::msgcat::mcset de {One week}             {Eine Woche} 
 ::msgcat::mcset de {Open Canvas}          {Zeichenfläche öffnen}
 ::msgcat::mcset de {Open Failed}          {Fehler bei Öffnen}
 ::msgcat::mcset de {Open Helpfile}        {Hilfedatei öffnen}
@@ -495,6 +499,7 @@
 ::msgcat::mcset de {Personal URL}         {Private URL}
 ::msgcat::mcset de {Pick Directory}       {Verzeichnis wählen}
 ::msgcat::mcset de {Pick File}            {Datei wählen}
+# ::msgcat::mcset de {Pick skin}
 ::msgcat::mcset de {Plugin Info}          {Informationen zu Erweiterungen}
 ::msgcat::mcset de {Plugin Control}       {Steuerung der Erweiterungen}
 ::msgcat::mcset de {Port number}          {Port-Nummer}
@@ -536,6 +541,7 @@
 ::msgcat::mcset de {Set New Nickname}     {Neuen Spitznamen setzen}
 ::msgcat::mcset de {Set New Topic}        {Neues Thema setzen}
 ::msgcat::mcset de {Set Status}           {Status setzen}
+# ::msgcat::mcset de {Set windows opacity}
 ::msgcat::mcset de {Settings Panels}      {Einrichtungs-Dialog}
 ::msgcat::mcset de {Setup Assistant}      {Einrichtungs-Assistent}
 ::msgcat::mcset de {Slide Show}		  {Präsentation}
@@ -571,6 +577,14 @@
 ::msgcat::mcset de {Version Info}         {Versions-Info}
 ::msgcat::mcset de {Whiteboard fonts}     {Schriften Zeichenfläche}
 ::msgcat::mcset de {Writing file}         {Schreibe Datei}
+
+# Time intervals.
+# ::msgcat::mcset de {Ten seconds} {}
+# ::msgcat::mcset de {One minute} {}
+# ::msgcat::mcset de {Ten minutes} {}
+::msgcat::mcset de {One hour}             {Eine Stunde} 
+::msgcat::mcset de {One day}              {Ein Tag} 
+::msgcat::mcset de {One week}             {Eine Woche} 
 
 
 # Splash screen:
@@ -726,8 +740,8 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de jamessfailedsubsc            {Anmeldung bei %s nicht möglich. Der Benutzer verweigerte die Anmeldung.}
 ::msgcat::mcset de jamessstarttls-nofeature     {Der Server "%s" bietet keine Unterstützung für TLS.}
 ::msgcat::mcset de jamessstarttls-failure        {TLS-Aushandlung mit Server "%s" fehlerhaft.}
-
 ::msgcat::mcset de jamessgcinvite               {Sie wurden zum Gruppen-Chat in Raum %s von %s eingeladen. Möchten Sie teilnehmen?}
+# ::msgcat::mcset de jamessnorooms {Failed to find any rooms at %s.}
 
 
 
@@ -915,11 +929,11 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jauserinnote {Ihre persönlichen Notizen über diesen Benutzer hinzufügen}
 ::msgcat::mcset de jaregisterex {Tragen Sie die Jabber-Server, bei denen Sie sich registrieren möchten. Drücken Sie dann die Abrufschaltfläche, um die gewünschten Registrierungsinformationen zu erhalten. Geben Sie diese Informationen ein und registrieren Sie sich.}
 ::msgcat::mcset de jaloginjid   {Geben Sie Ihr JID als "joey@myjabb.org" ein oder wählen Sie Profil. Sie sollten bereits ein Konto bei diesem Server haben.}
-::msgcat::mcset de jaxformreq   {Marken mit (*) sind erforderlich}
 ::msgcat::mcset de jaregalready {Sie sind bereits bei diesem Dienst registriert. Dies sind die derzeitigen Einstellungen Ihrer Registrierungs-Parameter.}
 ::msgcat::mcset de jaactiveret {Wenn aktiviert, sendet Return Nachrichten, sonst benutzen Sie bitte Strg/-Return}
 ::msgcat::mcset de jainvitegchat {Laden Sie einen Anwender zum Gruppen-Chat im Raum %s ein}
-
+::msgcat::mcset de jaxformreq   {Marken mit (*) sind erforderlich}
+# ::msgcat::mcset de jagcsyncpres {Synchronize chatroom with user presence}
 
 
 # Setup assistant:

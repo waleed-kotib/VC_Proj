@@ -25,6 +25,8 @@
 ::msgcat::mcset es Blockers		{Bloqueadores}
 ::msgcat::mcset es Blocking		{Bloqueando}
 ::msgcat::mcset es Browser		{Navigador}
+# ::msgcat::mcset es Bookmark
+# ::msgcat::mcset es Bookmarks
 ::msgcat::mcset es Both			{Ambos}
 ::msgcat::mcset es Buffering		{Buffer}
 ::msgcat::mcset es Cancel		{Cancelar}
@@ -343,6 +345,7 @@
 ::msgcat::mcset es mLogoutTrpt     	{Desconectarse de un servidor de transporte}
 ::msgcat::mcset es mRemoveContact  	{Borrar el contacto...}
 #::msgcat::mcset es mIgnore         	{Ignore}
+# ::msgcat::mcset es mEditBookmarks {Edit Bookmarks...}
 
 
 
@@ -371,6 +374,7 @@
 ::msgcat::mcset es {Away status}		{Estado "Alejado"}
 ::msgcat::mcset es {Basic Info}			{Información básica}
 ::msgcat::mcset es {Block JID}			{Bloqueo JID}
+# ::msgcat::mcset es {Bookmark this room}
 ::msgcat::mcset es {Built in server port}	{Puerto del servidor interno}
 ::msgcat::mcset es {Cache folder}		{Directorio de caché}
 #::msgcat::mcset es {Canvas Size} {}
@@ -423,6 +427,7 @@
 # ::msgcat::mcset es {History length} {}
 ::msgcat::mcset es {Host name}			{Nombre de dominio}
 ::msgcat::mcset es {HTTP port}			{Puerto HTTP}
+# ::msgcat::mcset es {Import Iconset...}
 ::msgcat::mcset es {Import using}		{Importar usando...}
 ::msgcat::mcset es {Import/Remove fonts}	{Importar/Borrar fuentes}
 ::msgcat::mcset es {Incoming Message}		{Mesnage entrante}
@@ -457,6 +462,7 @@
 ::msgcat::mcset es {Network Error}		{Error de Red}
 ::msgcat::mcset es {Network Setup}		{Configuración de red}
 ::msgcat::mcset es {New Account}		{Nuevo usuario}
+# ::msgcat::mcset es {New bookmark}
 ::msgcat::mcset es {New chat message}		{Nuevo mensaje en el chat}
 ::msgcat::mcset es {New chat thread}		{Nuevo chat}
 ::msgcat::mcset es {New Color}			{Nuevo color}
@@ -495,6 +501,7 @@
 ::msgcat::mcset es {Personal URL}		{URL personal}
 ::msgcat::mcset es {Pick Directory}		{Elegir un directorio}
 ::msgcat::mcset es {Pick File}			{Elegir un archivo}
+# ::msgcat::mcset es {Pick skin}
 ::msgcat::mcset es {Plugin Info}		{Información sobre el plugin}
 ::msgcat::mcset es {Plugin Control}		{Control del plugin}
 ::msgcat::mcset es {Port number}		{Número de puerto}
@@ -536,6 +543,7 @@
 #::msgcat::mcset es {Set New Nickname} {}
 ::msgcat::mcset es {Set New Topic}		{Elegir nuevo tópico}
 ::msgcat::mcset es {Set Status}			{Elegir estado}
+# ::msgcat::mcset es {Set windows opacity} {}
 ::msgcat::mcset es {Settings Panels}		{Paneles de configuración}
 ::msgcat::mcset es {Setup Assistant}		{Asistente de configuración}
 ::msgcat::mcset es {Slide Show}			{Presentación}
@@ -572,6 +580,15 @@
 ::msgcat::mcset es {Whiteboard fonts}		{Fuentes de la pizarra}
 ::msgcat::mcset es {Writing file}		{Écriture del archivo}
 #::msgcat::mcset en {Groupchat presence change}
+
+# Time intervals.
+# ::msgcat::mcset es {Ten seconds} {}
+# ::msgcat::mcset es {One minute} {}
+# ::msgcat::mcset es {Ten minutes} {}
+::msgcat::mcset es {One hour} 			{Una hora}
+::msgcat::mcset es {One day} 			{Un día}
+::msgcat::mcset es {One week}	 		{Una semana}
+
 
 
 # Écran de arranque :
@@ -740,8 +757,9 @@
 
 #--- Translate ---
 ::msgcat::mcset es jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
-::msgcat::mcset es jamessgcnoroomname {You must provide a roomname.}
-::msgcat::mcset es jamessgcnoroomnick {You must provide a nickname.}
+::msgcat::mcset es jamessgcnoroomname           {You must provide a roomname.}
+::msgcat::mcset es jamessgcnoroomnick           {You must provide a nickname.}
+::msgcat::mcset es jamessnorooms                {Failed to find any rooms at %s.}
 #--- Translate ---
 
 
@@ -947,6 +965,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jaactiveret {If checked Return sends message else use Ctrl/Cmd-Return}
 ::msgcat::mcset es jainvitegchat {Invite a user for groupchat in room %s}
 ::msgcat::mcset es jaxformreq   {Labels with (*) are required}
+::msgcat::mcset es jagcsyncpres {Synchronize chatroom with user presence}
 #--- Translate ---
 
 
