@@ -930,7 +930,7 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jaactiveret {De enter-toets zal het bericht verzenden wanneer dit is aangevinkt. Anders moet u ctrl/cmd + enter gebruiken.}
 ::msgcat::mcset nl jainvitegchat {Een contactpersoon uitnodigen op chatruimte %s}
 ::msgcat::mcset nl jaxformreq   {Labels met (*) zijn verplicht.}
-::msgcat::mcset nl jagcsyncpres {Aanwezigheid voor chatruimte synchronizeren met globale aanwezigheid}
+::msgcat::mcset nl jagcsyncpres {Aanwezigheid van chatruimtes synchronizeren met de globale aanwezigheid}
 
 
 # Setup assistant:
