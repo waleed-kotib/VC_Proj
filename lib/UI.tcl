@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.102 2005-10-02 12:44:41 matben Exp $
+# $Id: UI.tcl,v 1.103 2005-10-08 07:13:25 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -95,6 +95,9 @@ proc ::UI::InitCommonBinds { } {
     
     # A mechanism to set -state of cut/copy/paste. Not robust!!!
     # All selections are not detected (shift <- -> etc).
+    # 
+    # @@@ Shall be replaced with -postcommand for each window type.
+    # 
     # Entry copy/paste.
     bind Entry <FocusIn>         {+ ::UI::FixMenusWhenSelection %W }
     bind Entry <ButtonRelease-1> {+ ::UI::FixMenusWhenSelection %W }
@@ -923,6 +926,8 @@ proc ::UI::GetPrefixedToplevels {wprefix} {
       [lsearch -all -inline -glob [winfo children .] ${wprefix}*]]
 }
 
+# @@@ All this menu code is a total mess!!! Perhaps a snidget?
+
 # UI::NewMenu --
 # 
 #       Creates a new menu from a previously defined menu definition list.
@@ -975,6 +980,7 @@ proc ::UI::BuildMenu {w wmenu label menuDef state args} {
     variable mapWmenuToWtop
     variable cachedMenuSpec
         
+    # -postcommand
     set m [menu $wmenu -tearoff 0]
     set wparent [winfo parent $wmenu]
     
@@ -1067,6 +1073,12 @@ proc ::UI::GetMenu {w label1 {label2 ""}} {
     variable menuNameToWmenu
 
     return $menuNameToWmenu($w,$label1,$label2)
+}
+
+proc ::UI::GetMenuKeyToIndex {wmenu key} {
+    variable menuKeyToIndex
+
+    return $menuKeyToIndex($wmenu,$key)
 }
 
 proc ::UI::FreeMenu {w} {
@@ -1949,6 +1961,9 @@ proc ::UI::ParseWMGeometry {wmgeom} {
     regexp {([0-9]+)x([0-9]+)\+(\-?[0-9]+)\+(\-?[0-9]+)} $wmgeom m w h x y
     return [list $w $h $x $y]
 }
+
+# This is to a large extent OBSOLETE!!!
+# Handled via -postcommand instead
 
 # UI::FixMenusWhenSelection --
 # 

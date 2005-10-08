@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasDraw.tcl,v 1.13 2005-08-14 08:37:52 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.14 2005-10-08 07:13:25 matben Exp $
 
 #-- TAGS -----------------------------------------------------------------------
 #  
@@ -2539,10 +2539,7 @@ proc ::CanvasDraw::MarkBbox {wcan shift {which current}} {
     }    
     SelectItem $wcan $which
     focus $wcan
-    
-    # Enable cut and paste etc.
-    ::UI::FixMenusWhenSelection $wcan
-    
+        
     # Testing..
     selection own -command [list ::CanvasDraw::LostSelection $w] $wcan
 }
@@ -2567,9 +2564,6 @@ proc ::CanvasDraw::DeselectItem {wcan which} {
     set id [$wcan find withtag $which]
     $wcan delete tbbox&&id:${id}
     $wcan dtag $id selected
-
-    # menus
-    ::UI::FixMenusWhenSelection $wcan
 }
 
 proc ::CanvasDraw::DeleteSelection {wcan which} {
