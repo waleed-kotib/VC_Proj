@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.46 2005-09-21 09:53:23 matben Exp $
+# $Id: Whiteboard.tcl,v 1.47 2005-10-08 07:13:25 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -1836,7 +1836,10 @@ proc ::WB::BuildWhiteboardMenus {w} {
     
     # Use a function for this to dynamically build this menu if needed.
     ::WB::BuildFontMenu $w $prefs(canvasFonts)    
-	
+
+    $wmenu.edit configure -postcommand  \
+      [list ::WB::EditPostCommand $w $wmenu.edit]
+
     # End menus; place the menubar.
     if {$prefs(haveMenus)} {
 	$w configure -menu $wmenu
@@ -2425,6 +2428,169 @@ proc ::WB::SetScrollregion {w swidth sheight} {
     $wapp(can) configure -scrollregion [list 0 0 $swidth $sheight]
 }
 
+# WB::EditPostCommand --
+# 
+#       Post command for edit menu.
+#       
+# Arguments:
+#       w           toplevel widget path
+#       wmenu       the edit menu
+#
+# Results:
+
+proc ::WB::EditPostCommand {w wmenu} {
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::opts opts
+    
+    set wfocus [focus]
+    set haveFocus 0
+    set haveSelection 0
+    set normal 0
+    if {$opts(-state) eq "normal"} {
+	set normal 1
+    }
+    if {$wfocus ne ""} {
+	set wclass [winfo class $wfocus]
+	if {[lsearch {Canvas Entry Text TEntry} $wclass] >= 0} {
+	    set haveFocus 1
+	}
+	switch -- $wclass {
+	    Entry - TEntry {
+		set haveSelection [$wfocus selection present]
+	    }
+	    Text {
+		if {![catch {$wfocus get sel.first sel.last} data]} {
+		    if {$data ne ""} {
+			set haveSelection 1
+		    }
+		}
+	    }
+	    Canvas {
+		set wcan $wapp(can)
+		if {[$wcan find withtag selected] != {}} {
+		    set haveSelection 1
+		} elseif {[$wcan select item] != {}} {
+		    set haveSelection 1
+		}
+	    }
+	}
+    }
+    
+    # Cut, copy and paste menu entries.
+    if {$normal && $haveSelection} {
+	::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
+	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal    
+    } else {
+	::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mCopy -state disabled    
+    }
+    if {[catch {selection get -sel CLIPBOARD} str]} {
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
+    } elseif {$normal && $haveFocus && ($str ne "")} {
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state normal
+    } else {
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
+    }
+    if {$wclass eq "Canvas"} {
+	EditPostCommandCanvas $w $wmenu
+    }
+    
+    # Workaround for mac bug.
+    update idletasks
+}
+
+# WB::EditPostCommandCanvas --
+# 
+#       Supposed to set the specific whiteboard edit menu entries.
+#       Cut, copy and paste handled elsewhere.
+
+proc ::WB::EditPostCommandCanvas {w wmenu} {
+    upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::opts opts
+
+    set wcan $wapp(can)
+    set normal 0
+    if {$opts(-state) eq "normal"} {
+	set normal 1
+    }
+    set selected [$wcan find withtag selected]
+    set len [llength $selected]
+    set haveFlip 0
+    set haveImage 0
+    set haveText 0
+    set haveResize 1
+    set flip 0
+    set resize 0
+    set resizeImage 0
+    
+    foreach id $selected {
+	switch -- [$wcan type $id] {
+	    line - polygon {
+		set haveFlip 1
+		set haveResize 1
+	    }
+	    rectangle - oval {
+		set haveResize 1
+	    }
+	    image {
+		set haveImage 1
+	    }
+	    text {
+		set haveText 1
+	    }
+	}
+    }
+    if {$len == 1} {
+	if {$haveImage} {
+	    set resizeImage 1
+	}
+	if {$haveFlip} {
+	    set flip 1
+	}
+    }
+    if {$haveResize && !$haveImage && !$haveText} {
+	set resize 1
+    }
+    #puts "len=$len, haveFlip=$haveFlip, haveImage=$haveImage, haveText=$haveText"
+    #puts "haveResize=$haveResize, flip=$flip, resize=$resize, resizeImage=$resizeImage,"
+
+    if {!$len || !$normal} {
+	
+	# There is no selection in the canvas or whiteboard disabled.
+	::UI::MenuMethod $wmenu entryconfigure mInspectItem -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mRaise -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mLower -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mLarger -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mSmaller -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mFlip -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mImageLarger -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mImageSmaller -state disabled    
+    } else {	
+	::UI::MenuMethod $wmenu entryconfigure mInspectItem -state normal
+	::UI::MenuMethod $wmenu entryconfigure mRaise -state normal
+	::UI::MenuMethod $wmenu entryconfigure mLower -state normal
+	if {$flip} {
+	    ::UI::MenuMethod $wmenu entryconfigure mFlip -state normal
+	} else {
+	    ::UI::MenuMethod $wmenu entryconfigure mFlip -state disabled
+	}
+	if {$resizeImage} {
+	    ::UI::MenuMethod $wmenu entryconfigure mImageLarger -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mImageSmaller -state normal
+	} else {
+	    ::UI::MenuMethod $wmenu entryconfigure mImageLarger -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mImageSmaller -state disabled
+	}	
+	if {$resize} {
+	    ::UI::MenuMethod $wmenu entryconfigure mLarger -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mSmaller -state normal
+	} else {
+	    ::UI::MenuMethod $wmenu entryconfigure mLarger -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mSmaller -state disabled
+	}
+    }
+}
+
 # WB::GetFocus --
 #
 #       Check clipboard and activate corresponding menus.    
@@ -2444,28 +2610,9 @@ proc ::WB::GetFocus {w wevent} {
     Debug 3 "GetFocus:: w=$w, wevent=$wevent"
     
     SetFrameItemBinds $w [GetButtonState $w]
-    
-    # Can't see why this should happen?
-    set medit $w.menu.edit
-    if {![winfo exists $medit]} {
-	return
-    }
-    
-    # Check the clipboard or selection.
-    if {[catch {selection get -selection CLIPBOARD} sel]} {
-	::UI::MenuMethod $medit entryconfigure mPaste -state disabled
-    } elseif {($sel ne "") && ($opts(-state) eq "normal")} {
-	::UI::MenuMethod $medit entryconfigure mPaste -state normal
-    }
-    
-    # If any selected items canvas. Text items ???
-    if {[llength [$wapp(can) find withtag selected]] > 0} {
-	::UI::MenuMethod $medit entryconfigure mCut -state normal
-	::UI::MenuMethod $medit entryconfigure mCopy -state normal
-    }
 }
 
-# WB::FixMenusWhenCopy --
+# WB::FixMenusWhenCopy --     OBSOLETE ???
 # 
 #       Sets the correct state for menus and buttons when copy something.
 #       
@@ -2479,10 +2626,12 @@ proc ::WB::FixMenusWhenCopy {wevent} {
     set w [winfo toplevel $wevent]
     upvar ::WB::${w}::opts opts
     
-    if {$opts(-state) eq "normal"} {
-	::UI::MenuMethod $w.menu.edit entryconfigure mPaste -state normal
-    } else {
-	::UI::MenuMethod $w.menu.edit entryconfigure mPaste -state disabled
+    if {0} {
+	if {$opts(-state) eq "normal"} {
+	    ::UI::MenuMethod $w.menu.edit entryconfigure mPaste -state normal
+	} else {
+	    ::UI::MenuMethod $w.menu.edit entryconfigure mPaste -state disabled
+	}
     }
         
     ::hooks::run whiteboardFixMenusWhenHook $w "copy"

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasText.tcl,v 1.9 2005-09-19 06:37:21 matben Exp $
+# $Id: CanvasText.tcl,v 1.10 2005-10-08 07:13:25 matben Exp $
 
 package require sha1
 
@@ -634,9 +634,6 @@ proc ::CanvasText::Drag {wcan x y} {
     if {[string match "mac*" $this(platform)]} {
 	#$wcan focus
     }
-    
-    # menus
-    ::UI::FixMenusWhenSelection $wcan
 }
 
 # ::CanvasText::SelectWord --
@@ -669,9 +666,6 @@ proc ::CanvasText::SelectWord {wcan x y} {
     # Find the boundaries of the word and select word.
     $wcan select from   $id [string wordstart $txt $ind]
     $wcan select adjust $id [expr [string wordend $txt $ind] - 1]
-    
-    # menus
-    ::UI::FixMenusWhenSelection $wcan
 }
 
 # ::CanvasText::NewLine --

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.87 2005-10-06 14:41:27 matben Exp $
+# $Id: JUI.tcl,v 1.88 2005-10-08 07:13:25 matben Exp $
 
 package provide JUI 1.0
 
@@ -271,6 +271,9 @@ proc ::Jabber::UI::Build {w} {
     ::UI::NewMenu $w $wmenu.jabber  mJabber   $menuDefs(rost,jabber) normal
     ::UI::NewMenu $w $wmenu.info    mInfo     $menuDefs(rost,info)   normal
     $w configure -menu $wmenu
+    
+    $wmenu.edit configure -postcommand  \
+      [list ::Jabber::UI::EditPostCommand $wmenu.edit]
     
     # Global frame.
     set wall $w.frall
@@ -625,6 +628,48 @@ proc ::Jabber::UI::MergeMenuDefs { } {
 	set menuDefs($key) [eval {linsert $menuDefs($key)  \
 	  $menuDefsInsertInd($key)} $extraMenuDefs($key)]
     }
+}
+
+proc ::Jabber::UI::EditPostCommand {wmenu} {
+    
+    set wfocus [focus]
+    set haveFocus 0
+    set haveSelection 0
+    if {$wfocus ne ""} {
+	set wclass [winfo class $wfocus]
+	if {[lsearch {Entry Text TEntry} $wclass] >= 0} {
+	    set haveFocus 1
+	}
+	switch -- $wclass {
+	    Entry - TEntry {
+		set haveSelection [$wfocus selection present]
+	    }
+	    Text {
+		if {![catch {$wfocus get sel.first sel.last} data]} {
+		    if {$data ne ""} {
+			set haveSelection 1
+		    }
+		}
+	    }
+	}
+    }    
+    if {$haveSelection} {
+	::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
+	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal    
+    } else {
+	::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mCopy -state disabled    
+    }
+    if {[catch {selection get -sel CLIPBOARD} str]} {
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
+    } elseif {$haveFocus && ($str ne "")} {
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state normal
+    } else {
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
+    }
+    
+    # Workaround for mac bug.
+    update idletasks
 }
 
 # Jabber::UI::FixUIWhen --

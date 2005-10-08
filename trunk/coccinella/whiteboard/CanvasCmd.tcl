@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.9 2005-08-14 08:37:52 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.10 2005-10-08 07:13:25 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -51,9 +51,6 @@ proc ::CanvasCmd::DeselectAll {w} {
     set wcan [::WB::GetCanvasFromWtop $w]
     $wcan delete withtag tbbox
     $wcan dtag all selected
-    
-    # menus
-    ::UI::FixMenusWhenSelection $wcan
 }
 
 # CanvasCmd::RaiseOrLowerItems --

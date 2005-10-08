@@ -5,12 +5,22 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: ItemInspector.tcl,v 1.5 2005-08-14 08:37:52 matben Exp $
+# $Id: ItemInspector.tcl,v 1.6 2005-10-08 07:13:25 matben Exp $
 
 package provide ItemInspector 1.0
 
 namespace eval ::ItemInspector::  {
     
+    option add *ItemInspector*Menu.font           CociSmallFont       widgetDefault
+
+    option add *ItemInspector*TLabel.style        Small.TLabel        widgetDefault
+    option add *ItemInspector*TLabelframe.style   Small.TLabelframe   widgetDefault
+    option add *ItemInspector*TMenubutton.style   Small.TMenubutton   widgetDefault
+    option add *ItemInspector*TRadiobutton.style  Small.TRadiobutton  widgetDefault
+    option add *ItemInspector*TCheckbutton.style  Small.TCheckbutton  widgetDefault
+    option add *ItemInspector*TEntry.style        Small.TEntry        widgetDefault
+    option add *ItemInspector*TEntry.font         CociSmallFont       widgetDefault
+
     # Only the main procedure is exported.
     namespace export ItemInspector
     
@@ -170,7 +180,8 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     if {[lsearch [$wcan gettags $utag] "frame"] >= 0}  {
 	#return
     }	
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+    ::UI::Toplevel $w -class ItemInspector  \
+      -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Item Inspector}
@@ -179,15 +190,16 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     set typWidth 24
         
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    set w1 $w.frall.fr1
-    labelframe $w1 -text {Item Options}
-    pack $w1 -padx 8 -pady 4
+    ttk::frame $w.frall -padding [option get . dialogPadding {}]
+    pack  $w.frall  -fill both -expand 1
 
+    set w1 $w.frall.fr1
+    ttk::labelframe $w1 -padding [option get . groupSmallPadding {}]  \
+      -text [mc {Item Options}]
+    pack $w1
+    
     # Overall frame for whole container.
-    set frtot [frame $w1.frin]
-    pack $frtot -padx 10 -pady 10
+    set frtot $w1
     
     # List available options of the option menus.
     array set menuOpts {
@@ -216,9 +228,9 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     set state(type,value) $itemType
     set wlabel $frtot.l$line
     set wentry $frtot.e$line
-    label $wlabel -text "Item type:"
-    entry $wentry -width $typWidth -textvariable $token\(type)
-    $wentry configure -state disabled
+    ttk::label $wlabel -text "Item type:"
+    ttk::entry $wentry -width $typWidth -textvariable $token\(type)
+    $wentry state {disabled}
     grid  $wlabel  $wentry  -padx 2 -pady 1
     grid  $wlabel  -sticky e
     grid  $wentry  -sticky ew
@@ -232,9 +244,9 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     incr line
     set wlabel $frtot.l$line
     set wentry $frtot.e$line
-    label $wlabel -text "Coordinates:"
-    entry $wentry -width $typWidth -textvariable $token\(coords)
-    $wentry configure -state disabled
+    ttk::label $wlabel -text "Coordinates:"
+    ttk::entry $wentry -width $typWidth -textvariable $token\(coords)
+    $wentry state {disabled}
     grid  $wlabel  $wentry  -padx 2 -pady 1
     grid  $wlabel  -sticky e
     grid  $wentry  -sticky ew
@@ -284,7 +296,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 	    regsub -all "\r" $oneliner $nl_ oneliner
 	    set val $oneliner
 	}
-	label $frtot.l$line -text [string totitle "$opname:"]
+	ttk::label $frtot.l$line -text [string totitle "$opname:"]
 	
 	# Intercept options for nontext output.
 	switch -exact -- $op {
@@ -299,10 +311,9 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 		set wmb    $frtot.menu$line
 		set wentry $frtot.ente$line
 		set wMenu [eval {
-		    tk_optionMenu $wmb $token\($op)
+		    ttk::optionmenu $wmb $token\($op)
 		} $menuOpts($opname)]
-		$wmb configure -highlightthickness 0 -foreground black
-		entry $wentry -width 4 -state disabled
+		entry $wentry -width 4 -state disabled -highlightthickness 0
 		if {$val ne ""} {
 		    set rgb8 {}
 		    # winfo rgb . white -> 65535 65535 65535
@@ -319,7 +330,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 		    bind $wentry <Double-Button-1>   \
 		      [list [namespace current]::ChooseItemColor $wentry]
 		} else {
-		    $wmb configure -state disabled
+		    $wmb state {disabled}
 		}
 		set state($op,w) $wentry
 		set state($op,value) $val
@@ -327,8 +338,8 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 	    -tags             -
 	    -image            {
 		set wentry $frtot.e$line
-		entry $wentry -width $typWidth -textvariable $token\($op)
-		$wentry configure -state disabled
+		ttk::entry $wentry -width $typWidth -textvariable $token\($op)
+		$wentry state {disabled}
 		set state($op) $val
 		set state($op,w) $wentry
 		
@@ -366,10 +377,10 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 		}
 		set wmb $frtot.e$line
 		set wMenu [eval {
-		    tk_optionMenu $wmb $token\($op)
+		    ttk::optionmenu $wmb $token\($op)
 		} $menuOpts($opname)]
 		if {$canvasState eq "disabled"} {
-		    $wmb configure -state disabled
+		    $wmb state {disabled}
 		}
 		$wmb configure -highlightthickness 0
 		set state($op,w) $wmb
@@ -378,9 +389,9 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 		
 		# Just an editable text entry widget.
 		set wentry $frtot.e$line
-		entry $wentry -width $typWidth -textvariable $token\($op)
+		ttk::entry $wentry -width $typWidth -textvariable $token\($op)
 		if {$canvasState eq "disabled"} {
-		    $wentry configure -state disabled
+		    $wentry state {disabled}
 		}
 		set state($op) $val
 		set state($op,w) $wentry
@@ -393,7 +404,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     
     incr line
     set lockCmd [list [namespace current]::LockCmd $token]
-    checkbutton $frtot.lock$line -text "Lock this item from being edited" \
+    ttk::checkbutton $frtot.lock$line -text "Lock this item from being edited" \
       -variable $token\(locked) -command $lockCmd
     grid  x  $frtot.lock$line  -sticky w
     set state(locked) 0
@@ -403,17 +414,25 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     set state(locked,value) $state(locked)
     
     # Button part.
-    set frbot [frame $w.frall.frbot]
-    set saveCmd [list [namespace current]::Configure $token]
+    set saveCmd   [list [namespace current]::Configure $token]
     set cancelCmd [list [namespace current]::Cancel $token]
-    button $frbot.btsave   -text [mc Save]   -command $saveCmd -default active
-    button $frbot.btcancel -text [mc Cancel] -command $cancelCmd
-    pack $frbot.btsave   -side right -padx 5 -pady 5
-    pack $frbot.btcancel -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot $w.frall.frbot
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btsave -text [mc Save] -default active \
+      -command $saveCmd
+    ttk::button $frbot.btcancel -text [mc Cancel] -command $cancelCmd
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btsave -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btsave -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
     
     if {$canvasState eq "disabled"} {
-	$frbot.btsave configure -state disabled
+	$frbot.btsave state {disabled}
     }
     set state(wbtsave) $frbot.btsave
     
@@ -430,9 +449,9 @@ proc ::ItemInspector::LockCmd {token} {
     # We have the possibility here to disable the Save button. Good or Bad?
     if {0} {
 	if {$state(locked)} {
-	    $state(wbtsave) configure -state disabled
+	    $state(wbtsave) state {disabled}
 	} else {
-	    $state(wbtsave) configure -state normal
+	    $state(wbtsave) state {!disabled}
 	}
     }
 }
@@ -672,7 +691,8 @@ proc ::ItemInspector::Movie {wtoplevel winfr args} {
 	set state(utag) $utag
     }
     
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+    ::UI::Toplevel $w -class ItemInspector  \
+      -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}  \
       -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Movie Inspector}
@@ -693,15 +713,16 @@ proc ::ItemInspector::Movie {wtoplevel winfr args} {
     set state(type)  $type
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
+    ttk::frame $w.frall -padding [option get . dialogPadding {}]
+    pack  $w.frall  -fill both -expand 1
+
     set w1 $w.frall.fr1
-    labelframe $w1 -text {Movie Options}
-    pack $w1 -fill x -padx 8 -pady 4
+    ttk::labelframe $w1 -padding [option get . groupSmallPadding {}]  \
+      -text [mc {Movie Options}]
+    pack $w1
     
     # Overall frame for whole container.
-    set frtot [frame $w1.frin]
-    pack $frtot -padx 10 -pady 10
+    set frtot $w1
     
     # Loop over all options.
     set i 0
@@ -719,7 +740,7 @@ proc ::ItemInspector::Movie {wtoplevel winfr args} {
 	set state($op,isbool) 0
 	lappend state(allopts) $op
 	incr i
-	label $frtot.l$i -text [string totitle "$opname:"]
+	ttk::label $frtot.l$i -text [string totitle "$opname:"]
 	
 	switch -- $op {
 	    -controller     - 
@@ -730,18 +751,17 @@ proc ::ItemInspector::Movie {wtoplevel winfr args} {
 	    -palindromeloopstate {
 		set wmb $frtot.e$i
 		set state($op) $boolShort2Full($val)
-		set wMenu [tk_optionMenu $wmb $token\($op) true false]
+		set wMenu [ttk::optionmenu $wmb $token\($op) true false]
 		if {$canvasState eq "disabled"} {
-		    $wmb configure -state disabled
+		    $wmb state disabled
 		}
-		$wmb configure -highlightthickness 0
 		set state($op,value) $state($op)
 		set state($op,w) $wmb
 		set state($op,isbool) 1
 	    }
 	    default {
 		set wentry $frtot.e$i
-		entry $wentry -width $typWidth -textvariable $token\($op)
+		ttk::entry $wentry -width $typWidth -textvariable $token\($op)
 
 		switch -- $op {
 		    -file - -url {
@@ -760,16 +780,24 @@ proc ::ItemInspector::Movie {wtoplevel winfr args} {
 	grid  $frtot.l$i  -sticky e
 	grid  $frtot.e$i  -sticky ew
     }
-    
+  
     # Button part.
-    set frbot [frame $w.frall.frbot]
-    set saveCmd [list [namespace current]::MovieConfigure $token]
+    set saveCmd   [list [namespace current]::MovieConfigure $token]
     set cancelCmd [list [namespace current]::Cancel $token]
-    button $frbot.btsave   -text [mc Save]   -command $saveCmd -default active
-    button $frbot.btcancel -text [mc Cancel] -command $cancelCmd
-    pack $frbot.btsave   -side right -padx 5 -pady 5
-    pack $frbot.btcancel -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot $w.frall.frbot
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btsave -text [mc Save] -default active \
+      -command $saveCmd
+    ttk::button $frbot.btcancel -text [mc Cancel] -command $cancelCmd
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btsave -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btsave -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btsave invoke]
@@ -841,22 +869,24 @@ proc ::ItemInspector::Broken {wtoplevel itemid args} {
     }
     set state(utag) $utag
 
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+    ::UI::Toplevel $w -class ItemInspector  \
+      -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Item Inspector}
     bind $wcan <Destroy> [list +[namespace current]::Cancel $token]
             
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
+    ttk::frame $w.frall -padding [option get . dialogPadding {}]
+    pack  $w.frall  -fill both -expand 1
+
     set w1 $w.frall.fr1
-    labelframe $w1 -text {Broken Image}
-    pack $w1 -fill x -padx 8 -pady 4
+    ttk::labelframe $w1 -padding [option get . groupSmallPadding {}]  \
+      -text [mc {Broken Image}]
+    pack $w1
     
     # Overall frame for whole container.
-    set fr [frame $w1.fr]
-    pack $fr -padx 10 -pady 10
+    set fr $w1
     
     # Get any cached info for this id.
     set itemcget [::CanvasUtils::ItemCGet $wtoplevel $itemid]
@@ -865,8 +895,8 @@ proc ::ItemInspector::Broken {wtoplevel itemid args} {
 	if {$key eq "-optlist"} {
 	    foreach {optkey optvalue} $value {
 		set name [string totitle [string trimright $optkey :]]
-		label $fr.l$i -text $name
-		label $fr.v$i -text $optvalue
+		ttk::label $fr.l$i -text $name
+		ttk::label $fr.v$i -text $optvalue
 		grid  $fr.l$i  $fr.v$i
 		grid  $fr.l$i  -sticky e
 		grid  $fr.v$i  -sticky w
@@ -874,8 +904,8 @@ proc ::ItemInspector::Broken {wtoplevel itemid args} {
 	    }
 	} else {
 	    set name [string totitle [string trimleft $key -]]
-	    label $fr.l$i -text $name
-	    label $fr.v$i -text $value
+	    ttk::label $fr.l$i -text $name
+	    ttk::label $fr.v$i -text $value
 	    grid  $fr.l$i  $fr.v$i
 	    grid  $fr.l$i  -sticky e
 	    grid  $fr.v$i  -sticky w
@@ -884,10 +914,11 @@ proc ::ItemInspector::Broken {wtoplevel itemid args} {
     }
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    button $frbot.btok -text [mc OK] -command [list destroy $w]
-    pack $frbot.btok -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot $w.frall.frbot
+    ttk::frame $w.frall.frbot
+    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w]
+    pack $frbot.btok -side right
+    pack $frbot -side top -fill both -expand 1
         
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
