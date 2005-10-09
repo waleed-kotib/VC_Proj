@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.88 2005-10-08 07:13:25 matben Exp $
+# $Id: JUI.tcl,v 1.89 2005-10-09 12:36:46 matben Exp $
 
 package provide JUI 1.0
 
@@ -267,13 +267,12 @@ proc ::Jabber::UI::Build {w} {
     ::UI::NewMenu $w $wmenu.file    mFile     $menuDefs(rost,file)  normal
     if {[tk windowingsystem] eq "aqua"} {
 	::UI::NewMenu $w $wmenu.edit  mEdit   $menuDefs(rost,edit)   normal
+	$wmenu.edit configure -postcommand  \
+	  [list ::Jabber::UI::EditPostCommand $wmenu.edit]
     }
     ::UI::NewMenu $w $wmenu.jabber  mJabber   $menuDefs(rost,jabber) normal
     ::UI::NewMenu $w $wmenu.info    mInfo     $menuDefs(rost,info)   normal
-    $w configure -menu $wmenu
-    
-    $wmenu.edit configure -postcommand  \
-      [list ::Jabber::UI::EditPostCommand $wmenu.edit]
+    $w configure -menu $wmenu    
     
     # Global frame.
     set wall $w.frall
