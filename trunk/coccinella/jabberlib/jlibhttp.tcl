@@ -4,7 +4,7 @@
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.10 2005-10-06 14:41:28 matben Exp $
+# $Id: jlibhttp.tcl,v 1.11 2005-10-09 09:34:53 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -91,7 +91,7 @@ proc jlib::http::new {jlibname url args} {
 	-proxypasswd            ""
 	-resendinterval      20000
 	-timeout                 0
-	-usekeys                 0
+	-usekeys                 1
 	header                  ""
 	proxyheader             ""
 	url                     ""
@@ -204,8 +204,6 @@ proc jlib::http::transportinit {jlibname} {
     upvar ${jlibname}::http::priv priv
     upvar ${jlibname}::http::opts opts
     
-    #puts "jlib::http::transportinit"
-
     InitState $jlibname
 }
 
@@ -217,8 +215,6 @@ proc jlib::http::transportreset {jlibname} {
 
     upvar ${jlibname}::http::priv priv
     
-    #puts "jlib::http::transportreset"
-
     # Stop polling and resends.
     if {[string length $priv(afterid)]} {
 	catch {after cancel $priv(afterid)}
@@ -265,39 +261,50 @@ proc jlib::http::send {jlibname xml} {
     
     # If no post scheduled we shall post right away.
     if {![string length $priv(afterid)]} {
-	#puts "\t post right away"
 	Post $jlibname
     } else {
 	
-	#        now (case A)         now (case B)
-	#           |                    |
-	#  ---------------------------------------------------> time
-	#   |                 ->|                       ->|
-	# last post            min                       max
+	# Else post as soon as possible.
+	PostASAP $jlibname
+    }
+}
+
+# jlib::http::PostASAP --
+# 
+#       Make a post as soon as possible without taking 'minpollms' as the
+#       constraint. If we have waited longer than 'minpollms' post right away,
+#       else reschedule if necessary to post at 'minpollms'.
+
+proc jlib::http::PostASAP {jlibname} {
+    
+    upvar ${jlibname}::http::priv priv
+    upvar ${jlibname}::http::opts opts
+
+    Debug 2 "jlib::http::PostASAP"
+    
+    #        now (case A)         now (case B)
+    #           |                    |
+    #  ---------------------------------------------------> time
+    #   |                 ->|                       ->|
+    # last post            min                       max
+    
+    # We shall always use '-minpollms' when there is something to send.
+    set nowms [clock clicks -milliseconds]
+    set minms [expr {$priv(lastpostms) + $opts(-minpollms)}]
+    if {$nowms < $minms} {
 	
-	# We shall always use '-minpollms' when there is something to send.
-	set nowms [clock clicks -milliseconds]
-	set minms [expr {$priv(lastpostms) + $opts(-minpollms)}]
-	if {$nowms < $minms} {
-	    
-	    #puts "\t case A"
-	    
-	    # Case A:
-	    # If next post is scheduled after min, then repost at min instead.
-	    if {$priv(nextpostms) > $minms} {
-		#puts "\t reschedule post"
-		set afterms [expr {$minms - $nowms}]
-		SchedulePost $jlibname $afterms
-	    }
-	} else {
-	    #puts "\t case B"
-	    
-	    # Case B:
-	    # We have already waited longer than '-minpollms'.
-	    after cancel $priv(afterid)
-	    set priv(afterid) ""
-	    Post $jlibname
+	# Case A:
+	# If next post is scheduled after min, then repost at min instead.
+	if {$priv(nextpostms) > $minms} {
+	    SchedulePost $jlibname minpollms
 	}
+    } else {
+	
+	# Case B:
+	# We have already waited longer than '-minpollms'.
+	after cancel $priv(afterid)
+	set priv(afterid) ""
+	Post $jlibname
     }
 }
 
@@ -305,13 +312,31 @@ proc jlib::http::send {jlibname xml} {
 # 
 #       Schedule a post as a timer event.
 
-proc jlib::http::SchedulePost {jlibname afterms} {
+proc jlib::http::SchedulePost {jlibname when} {
     
     upvar ${jlibname}::http::priv priv
+    upvar ${jlibname}::http::opts opts
 
-    Debug 2 "jlib::http::SchedulePost afterms=$afterms"
+    Debug 2 "jlib::http::SchedulePost when=$when"
 
     set nowms [clock clicks -milliseconds]
+
+    switch -- $when {
+	minpollms {
+	    set minms [expr {$priv(lastpostms) + $opts(-minpollms)}]
+	    set afterms [expr {$minms - $nowms}]
+	}
+	maxpollms {
+	    set maxms [expr {$priv(lastpostms) + $opts(-maxpollms)}]
+	    set afterms [expr {$maxms - $nowms}]
+	}
+	default {
+	    set afterms $when
+	}
+    }
+    if {$afterms < 0} {
+	set afterms 0
+    }
     set priv(afterms)    $afterms
     set priv(nextpostms) [expr {$nowms + $afterms}]
     set priv(postms)     [expr {$priv(nextpostms) - $priv(lastpostms)}]
@@ -408,9 +433,11 @@ proc jlib::http::PostXML {jlibname xml} {
 	set priv(token) $token
 
 	# Reschedule next post unless 'reset'.
-	# @@@ Reschedule from Response instead!
+	# Always keep a scheduled post at 'maxpollms' (or something else),
+	# and let any subsequent events reschedule if at an earlier time.
 	if {[string equal $priv(state) "instream"]} {
-	    SchedulePost $jlibname $opts(-maxpollms)
+	    #SchedulePost $jlibname $opts(-maxpollms)
+	    SchedulePost $jlibname maxpollms
 	}
     }
 }
@@ -529,6 +556,11 @@ proc jlib::http::Response {jlibname token} {
 	    if {[string length $body] > 2} {
 		[namespace parent]::recv $jlibname $body
 	    }
+	    
+	    # Reschedule at minpollms.
+	    if {[string length $body] > 2} {
+		PostASAP $jlibname
+	    }	    
 	}
 	default {
 	    Error $jlibname $status [::http::error $token]
