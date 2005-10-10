@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.126 2005-10-07 08:45:43 matben Exp $
+# $Id: GroupChat.tcl,v 1.127 2005-10-10 12:58:05 matben Exp $
 
 package require Enter
 package require History
@@ -1347,7 +1347,9 @@ proc ::GroupChat::PresenceHook {jid presence args} {
     ::Debug 4 "\t allroomsin=$allroomsin"
     ::Debug 4 "\t inroom=$inroom, isconf=$isconf, isroom=$isroom, istrpt=$istrpt"
     
-    if {$isinvite} {
+    # @@@ This one just gives us problems:
+    # RECV: <presence from='msn.jabber.dk' to='matben@jabber.dk'/>
+    if {0 && $isinvite} {
 	
 	# This seems to be a kind of invitation for a groupchat.
 	set str [mc jamessgcinvite $jid2 $argsArr(-from)]

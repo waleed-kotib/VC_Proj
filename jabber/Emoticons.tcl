@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements handling and parsing of emoticons (smileys).
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.35 2005-09-19 06:37:21 matben Exp $
+# $Id: Emoticons.tcl,v 1.36 2005-10-10 12:58:05 matben Exp $
 
 package provide Emoticons 1.0
 
