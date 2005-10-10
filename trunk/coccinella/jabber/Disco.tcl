@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.69 2005-10-02 12:44:41 matben Exp $
+# $Id: Disco.tcl,v 1.70 2005-10-10 12:58:05 matben Exp $
 
 package require jlib::disco
 
@@ -205,7 +205,7 @@ proc ::Disco::GetInfo {jid args} {
     }
     array set arr $args
     set opts {}
-    if {$arr(-node) != ""} {
+    if {$arr(-node) ne ""} {
 	lappend opts -node $arr(-node)
     }
     set cmdCB [list [namespace current]::InfoCB $arr(-command)]
@@ -222,7 +222,7 @@ proc ::Disco::GetItems {jid args} {
     }
     array set arr $args
     set opts {}
-    if {$arr(-node) != ""} {
+    if {$arr(-node) ne ""} {
 	lappend opts -node $arr(-node)
     }
     set cmdCB [list [namespace current]::ItemsCB $arr(-command)]
@@ -259,13 +259,13 @@ proc ::Disco::InfoCB {cmd jlibname type from subiq args} {
 	    set icon [::Servicons::Get $cattype]
 	    set opts {}	    
 	    set name [$jstate(jlib) disco name $from $node]
-	    if {$name != ""} {
+	    if {$name ne ""} {
 		lappend opts -text $name
 	    }
-	    if {$icon != ""} {
+	    if {$icon ne ""} {
 		lappend opts -image $icon
 	    }
-	    if {$node != ""} {
+	    if {$node ne ""} {
 		lappend opts -dir [IsBranchNode $from $node]
 	    }
 	    if {$opts != {}} {
@@ -363,7 +363,7 @@ proc ::Disco::ItemsCB {cmd jlibname type from subiq args} {
 		GetInfo $cjid -node $cnode
 	    }
 	}
-	if {[jlib::jidequal $from $jserver(this)] && ($pnode == "")} {
+	if {[jlib::jidequal $from $jserver(this)] && ($pnode eq "")} {
 	    AutoDiscoServers
 	}
     }
@@ -410,7 +410,7 @@ proc ::Disco::SetDirItemUsingCategory {vstruct} {
 proc ::Disco::IsBranchCategory {jid {node ""}} {
     
     set isdir 0
-    if {$node == ""} {
+    if {$node eq ""} {
 	if {[IsJidBranchCategory $jid]} {
 	    set isdir 1
 	}
@@ -499,7 +499,7 @@ proc ::Disco::ParseGetInfo {from subiq args} {
     # support at least the 'http://jabber.org/protocol/disco#info' feature; 
     # however, an entity is not required to return a result...
 
-    if {$node == ""} {
+    if {$node eq ""} {
 	    
 	# No node. Adding private namespaces.
 	set vars [concat  \
@@ -540,13 +540,13 @@ proc ::Disco::ParseGetInfo {from subiq args} {
     
     # If still no hit see if node matches...
     if {!$found && $debugNodes} {
-	if {$node == "A"} {
+	if {$node eq "A"} {
 	    set subtags [list [wrapper::createtag "identity" -attrlist  \
 	      [list category hierarchy type leaf]]]
 	    lappend subtags [wrapper::createtag "feature" \
 	      -attrlist [list var $xmppxmlns(disco,info)]]
 	    set found 1
-	} elseif {$node == "B"} {
+	} elseif {$node eq "B"} {
 	    set subtags [list [wrapper::createtag "identity" -attrlist  \
 	      [list category hierarchy type branch]]]
 	    lappend subtags [wrapper::createtag "feature" \
@@ -563,7 +563,7 @@ proc ::Disco::ParseGetInfo {from subiq args} {
 	  -attrlist [list xmlns urn:ietf:xml:params:ns:xmpp-stanzas]]]]]
 	set type "error"
     }
-    if {$node == ""} {
+    if {$node eq ""} {
 	set attr [list xmlns $xmlns(info)]
     } else {
 	set attr [list xmlns $xmlns(info) node $node]
@@ -604,7 +604,7 @@ proc ::Disco::ParseGetItems {from subiq args} {
     set node [wrapper::getattribute $subiq node]
     
     # Support for caps (JEP-0115).
-    if {$node == ""} {
+    if {$node eq ""} {
 	set type "result"
 	set found 1
 	if {[info exists argsArr(-to)]} {
@@ -816,7 +816,7 @@ proc ::Disco::Popup {w vstruct x y} {
     if {[lsearch -glob $categoryList "user/*"] >= 0} {
 	lappend clicked user
     }
-    if {$username != ""} {
+    if {$username ne ""} {
 	if {[$jstate(jlib) disco isroom $jid]} {
 	    lappend clicked room
 	} else {
@@ -845,7 +845,7 @@ proc ::Disco::Popup {w vstruct x y} {
     menu $m -tearoff 0
     
     foreach {item type cmd} $popMenuDefs(disco,def) {
-	if {[string index $cmd 0] == "@"} {
+	if {[string index $cmd 0] eq "@"} {
 	    set mt [menu ${m}.sub${i} -tearoff 0]
 	    set locname [mc $item]
 	    $m add cascade -label $locname -menu $mt -state disabled
@@ -873,7 +873,7 @@ proc ::Disco::Popup {w vstruct x y} {
 	# We use the 'type' and 'clicked' lists to set the state.
 	if {[listintersectnonempty $type $clicked]} {
 	    set state normal
-	} elseif {$type == ""} {
+	} elseif {$type eq ""} {
 	    set state normal
 	} else {
 	    set state disabled
@@ -990,9 +990,10 @@ proc ::Disco::AddToTree {vstruct} {
     }
     
     # If this is a tree root element add only if a discoed server.
-    if {($pjid == "") && ($pnode == "")} {
-	set all [concat $jprefs(disco,tmpServers) [list $jserver(this)]]
-	if {[lsearch -exact $all $jid] == -1} {
+    if {($pjid eq "") && ($pnode eq "")} {
+	set all [concat $jprefs(disco,tmpServers) $jprefs(disco,autoServers)]
+	lappend all $jserver(this)
+	if {[lsearch -exact $all $jid] < 0} {
 	    return
 	}
     }    
@@ -1022,8 +1023,8 @@ proc ::Disco::AddToTree {vstruct} {
 	    set icon [::Roster::GetPresenceIconFromJid $jid]
 	} else {
 	    set name [$jstate(jlib) disco name $jid $node]
-	    if {$name == ""} {
-		if {$node == ""} {
+	    if {$name eq ""} {
+		if {$node eq ""} {
 		    set name $jid
 		} else {
 		    set name $node
@@ -1036,10 +1037,10 @@ proc ::Disco::AddToTree {vstruct} {
 	if {[option get $wdisco fontStyleMixed {}]} {
 	    if {[llength $vstruct] <= 2} {
 		set fontstyle bold
-	    } elseif {$isdir && ($node == "")} {
+	    } elseif {$isdir && ($node eq "")} {
 		set fontstyle bold
 	    }
-	    if {$node != ""} {
+	    if {$node ne ""} {
 		set fontstyle normal
 	    }
 	}
@@ -1048,7 +1049,7 @@ proc ::Disco::AddToTree {vstruct} {
 	    set isopen 1
 	}
 	set treectag item[incr treeuid]
-	if {$node == ""} {
+	if {$node eq ""} {
 	    set tags [list jid $jid]
 	} else {
 	    set tags [list node $jid $node]
@@ -1085,7 +1086,7 @@ proc ::Disco::MakeBalloonHelp {jid node treectag} {
 	set jidtxt "[string range $jid 0 28]..."
     }
     set msg "jid: $jidtxt"
-    if {$node != ""} {
+    if {$node ne ""} {
 	append msg "\nnode: $node"
     }
     set types [$jstate(jlib) disco types $jid $node]
@@ -1210,7 +1211,7 @@ proc ::Disco::AutoDisco {jid presence args} {
     ::Debug 4 "::Disco::AutoDisco jid=$jid, type=$type"
 
     # We may not yet have discoed this (empty).
-    if {($type == "") || ($type == "service/jabber")} {		
+    if {($type eq "") || ($type eq "service/jabber")} {		
 	$jstate(jlib) disco send_get info $jid [namespace current]::AutoDiscoCmd
     }
 }
@@ -1244,7 +1245,7 @@ proc ::Disco::InfoCmd {jid {node ""}} {
 	InfoResultCB result $jid $xmllist
     } else {
 	set opts {}
-	if {$node != ""} {
+	if {$node ne ""} {
 	    lappend opts -node $node
 	}
 	eval {
@@ -1275,7 +1276,7 @@ proc ::Disco::InfoResultCB {type jid subiq args} {
     upvar ::Jabber::jstate jstate
 
     set node [wrapper::getattribute $subiq node]
-    if {$node == ""} {
+    if {$node eq ""} {
 	set txt $jid
     } else {
 	set txt "$jid, node $node"
@@ -1323,7 +1324,7 @@ proc ::Disco::BuildInfoPage {win jid {node ""}} {
     upvar ::Jabber::nsToText nsToText
     upvar ::Jabber::jstate jstate
     
-    if {$node == ""} {
+    if {$node eq ""} {
 	set str $jid
     } else {
 	set str "$jid, node $node"
@@ -1492,7 +1493,7 @@ proc ::Disco::AddServerDo {w} {
     variable permdiscovar
     
     destroy $w
-    if {$addservervar != ""} {
+    if {$addservervar ne ""} {
 	DiscoServer $addservervar -command ::Disco::AddServerCB
 	if {$permdiscovar} {
 	    lappend jprefs(disco,autoServers) $addservervar

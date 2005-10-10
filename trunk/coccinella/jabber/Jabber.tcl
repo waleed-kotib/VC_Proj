@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.148 2005-10-07 06:51:16 matben Exp $
+# $Id: Jabber.tcl,v 1.149 2005-10-10 12:58:05 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -1090,6 +1090,11 @@ proc ::Jabber::EndSession { } {
     variable jstate
     variable jserver
     variable jprefs
+    
+    # This protects against previous p2p setup. BAD!
+    if {![::Jabber::IsConnected]} {
+	return
+    }
 
     # Send unavailable information. Silently in case we got a network error.
     if {[$jstate(jlib) isinstream]} {
