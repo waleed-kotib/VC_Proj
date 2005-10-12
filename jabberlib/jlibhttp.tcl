@@ -4,7 +4,7 @@
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.11 2005-10-09 09:34:53 matben Exp $
+# $Id: jlibhttp.tcl,v 1.12 2005-10-12 06:59:17 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -90,7 +90,7 @@ proc jlib::http::new {jlibname url args} {
 	-proxyusername          ""
 	-proxypasswd            ""
 	-resendinterval      20000
-	-timeout                 0
+	-timeout             30000
 	-usekeys                 1
 	header                  ""
 	proxyheader             ""
