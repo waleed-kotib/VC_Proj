@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.20 2005-10-05 12:19:15 matben Exp $
+# $Id: wrapper.tcl,v 1.21 2005-10-12 06:59:17 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -514,6 +514,7 @@ proc wrapper::createxml {xmllist} {
         
     # Extract the XML data items.
     foreach {tag attrlist isempty chdata childlist} $xmllist {break}
+    set attrlist [xmlcrypt $attrlist]
     set rawxml "<$tag"
     foreach {attr value} $attrlist {
 	append rawxml " ${attr}='${value}'"
