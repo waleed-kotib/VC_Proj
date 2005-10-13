@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.36 2005-09-26 14:43:47 matben Exp $
+# $Id: roster.tcl,v 1.37 2005-10-13 14:41:26 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -1180,7 +1180,7 @@ proc roster::wasavailable {rostName jid} {
 
 proc roster::gettype {rostName jid} {
     
-    upvar ${rostName}::rostArr rostArr
+    upvar ${rostName}::presArr presArr
        
     set jid [jlib::jidmap $jid]    
 
