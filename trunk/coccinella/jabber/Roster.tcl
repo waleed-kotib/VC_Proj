@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.136 2005-10-02 12:44:41 matben Exp $
+# $Id: Roster.tcl,v 1.137 2005-10-13 14:42:02 matben Exp $
 
 package provide Roster 1.0
 
@@ -839,18 +839,10 @@ proc ::Roster::SetItem {jid args} {
 	# Add only the one with highest priority.
 	jlib::splitjid $jid jid2 res
 	set res [$jstate(roster) gethighestresource $jid2]
-	if {$res ne ""} {
-	    set jid3 $jid2/$res
-	} else {
-	    set jid3 $jid2
-	}
-	set pres [lindex [$jstate(roster) getpresence $jid3] 0]
-	set type [$jstate(roster) gettype $jid3]
-
-	::Debug 2 "\t type=$type, pres=$pres"
+	array set pres [$jstate(roster) getpresence $jid2 -resource $res]
 	
 	# Put in our roster tree.
-	eval {TreeNewItem $jid $type} $args $pres
+	eval {TreeNewItem $jid $pres(-type)} $args [array get pres]
     }
     TreeRemoveEmpty
 }
