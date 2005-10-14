@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasUtils.tcl,v 1.36 2005-09-21 09:53:23 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.37 2005-10-14 06:36:51 matben Exp $
 
 package require sha1
 package require can2svg
@@ -238,14 +238,14 @@ proc ::CanvasUtils::Init { } {
 proc ::CanvasUtils::Command {w cmd {where all}} {
     
     set wcan [::WB::GetCanvasFromWtop $w]
+    
+    # Make drawing in own canvas.
     if {[string equal $where "all"] || [string equal $where "local"]} {
-	
-	# Make drawing in own canvas.
         eval {$wcan} $cmd
     }
+    
+    # This call just invokes any registered drawing hook.
     if {![string equal $where "local"]} {
-	
-	# This call just invokes any registered drawing hook.
 	::WB::SendMessageList $w [list $cmd]
     }
 }
@@ -253,6 +253,9 @@ proc ::CanvasUtils::Command {w cmd {where all}} {
 # CanvasUtils::CommandList --
 #
 #       Gives an opportunity to have a list of commands to be executed.
+#       
+# Arguments:
+#       w       toplevel widget path
 
 proc ::CanvasUtils::CommandList {w cmdList {where all}} {
     
@@ -264,6 +267,9 @@ proc ::CanvasUtils::CommandList {w cmdList {where all}} {
 # CanvasUtils::CommandExList --
 #
 #       Makes it possible to have different commands local and remote.
+#       
+# Arguments:
+#       w       toplevel widget path
 
 proc ::CanvasUtils::CommandExList {w cmdExList} {
     
@@ -502,6 +508,7 @@ proc ::CanvasUtils::FindIdFromOverlapping {c x y type} {
 #       to exist except for the 'create' method.
 #   
 # Arguments:
+#       w           toplevel widget path
 #       cmd         a canvas command without pathName.
 #       
 # Results:
@@ -517,18 +524,18 @@ proc ::CanvasUtils::GetUndoCommand {w cmd} {
 	    set utag [lindex $cmd 1]
 	    set tag [lindex $cmd 3]
 	    set canUndo [list dtag $utag $tag]
-	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
+	    set undo [list ::CanvasUtils::Command $w $canUndo]	
 	}
 	coords {
 	    set utag [lindex $cmd 1]
 	    set canUndo [concat [list coords $utag] [$wcan coords $utag]]
-	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
+	    set undo [list ::CanvasUtils::Command $w $canUndo]	
 	}
 	create {
 	    set utag [GetUtagFromCreateCmd $cmd]
 	    if {$utag ne ""} {
 		set canUndo [list delete $utag]
-		set undo [list ::CanvasUtils::Command $wcan $canUndo]	
+		set undo [list ::CanvasUtils::Command $w $canUndo]	
 	    }
 	}
 	dchars {
@@ -538,7 +545,7 @@ proc ::CanvasUtils::GetUndoCommand {w cmd} {
 	    set thetext [$wcan itemcget $utag -text]
 	    set str [string range $thetext $ind $ilast]
 	    set canUndo [list insert $utag $ind $str]
-	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
+	    set undo [list ::CanvasUtils::Command $w $canUndo]	
 	}
 	delete {
 	    set utag [lindex $cmd 1]
@@ -554,7 +561,7 @@ proc ::CanvasUtils::GetUndoCommand {w cmd} {
 		    } else {
 			set stackCmd [GetStackingCmd $wcan $utag]
 			set canUndoList [list $line $stackCmd]
-			set undo [list ::CanvasUtils::CommandList $wcan $canUndoList]	
+			set undo [list ::CanvasUtils::CommandList $w $canUndoList]	
 		    }
 		}
 		default {
@@ -563,7 +570,7 @@ proc ::CanvasUtils::GetUndoCommand {w cmd} {
 		    set createCmd [concat [list create $type] $co $opts]
 		    set stackCmd [GetStackingCmd $wcan $utag]
 		    set canUndoList [list $createCmd $stackCmd]
-		    set undo [list ::CanvasUtils::CommandList $wcan $canUndoList]	
+		    set undo [list ::CanvasUtils::CommandList $w $canUndoList]	
 		}
 	    }
 	}
@@ -571,22 +578,22 @@ proc ::CanvasUtils::GetUndoCommand {w cmd} {
 	    set utag [lindex $cmd 1]
 	    set tag [lindex $cmd 2]
 	    set canUndo [list addtag $tag withtag $utag]
-	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
+	    set undo [list ::CanvasUtils::Command $w $canUndo]	
 	}
 	insert {
 	    foreach {dum utag ind str} $cmd break
 	    set canUndo [list dchars $utag $ind [expr $ind + [string length $str]]]
-	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
+	    set undo [list ::CanvasUtils::Command $w $canUndo]	
 	}
 	move {
 	    foreach {dum utag dx dy} $cmd break
 	    set canUndo [list move $utag [expr -$dx] [expr -$dy]]
-	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
+	    set undo [list ::CanvasUtils::Command $w $canUndo]	
 	}
 	lower - raise {
 	    set utag [lindex $cmd 1]
 	    set canUndo [GetStackingCmd $wcan $utag]
-	    set undo [list ::CanvasUtils::Command $wcan $canUndo]	
+	    set undo [list ::CanvasUtils::Command $w $canUndo]	
 	}
     }
     return $undo
@@ -1228,6 +1235,34 @@ proc ::CanvasUtils::DeleteTag {wcan id tag} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $w] $undo $redo
+}
+
+# CanvasUtils::DuplicateItem --
+# 
+#       Makes a simple copy of an item without any utag.
+
+proc ::CanvasUtils::DuplicateItem {wcan id args} {
+    
+    array set arr $args
+    set type [$wcan type $id]
+    set cmd [list $wcan create $type [$wcan coords $id]]
+    foreach spec [$wcan itemconfigure $id] {
+	set name  [lindex $spec 0]
+	set value [lindex $spec 4]
+	if {[info exists arr($name)]} {
+	    lappend cmd $name $arr($name)
+	} else {
+	    switch -- $name {
+		-tag {
+		    lappend cmd -tag [list std $type]
+		}
+		default {
+		    lappend cmd $name $value
+		}
+	    }
+	}
+    }
+    return $cmd
 }
 
 proc ::CanvasUtils::IsLocked {wcan id} {

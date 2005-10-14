@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: ItemInspector.tcl,v 1.6 2005-10-08 07:13:25 matben Exp $
+# $Id: ItemInspector.tcl,v 1.7 2005-10-14 06:36:51 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -231,7 +231,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     ttk::label $wlabel -text "Item type:"
     ttk::entry $wentry -width $typWidth -textvariable $token\(type)
     $wentry state {disabled}
-    grid  $wlabel  $wentry  -padx 2 -pady 1
+    grid  $wlabel  $wentry  -padx 2 -pady 2
     grid  $wlabel  -sticky e
     grid  $wentry  -sticky ew
     set state(type,w) $wentry
@@ -247,7 +247,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     ttk::label $wlabel -text "Coordinates:"
     ttk::entry $wentry -width $typWidth -textvariable $token\(coords)
     $wentry state {disabled}
-    grid  $wlabel  $wentry  -padx 2 -pady 1
+    grid  $wlabel  $wentry  -padx 2 -pady 2
     grid  $wlabel  -sticky e
     grid  $wentry  -sticky ew
     set state(coords,w) $wentry
@@ -397,7 +397,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 		set state($op,w) $wentry
 	    }
 	}
-	grid  $frtot.l$line  $frtot.e$line  -padx 2 -pady 0
+	grid  $frtot.l$line  $frtot.e$line  -padx 2 -pady 2
 	grid  $frtot.l$line  -sticky e
 	grid  $frtot.e$line  -sticky ew
     }
@@ -776,7 +776,7 @@ proc ::ItemInspector::Movie {wtoplevel winfr args} {
 		set state($op,w) $wentry
 	    }
 	}
-	grid  $frtot.l$i  $frtot.e$i  -padx 2 -pady 0
+	grid  $frtot.l$i  $frtot.e$i  -padx 2 -pady 2
 	grid  $frtot.l$i  -sticky e
 	grid  $frtot.e$i  -sticky ew
     }
@@ -897,7 +897,7 @@ proc ::ItemInspector::Broken {wtoplevel itemid args} {
 		set name [string totitle [string trimright $optkey :]]
 		ttk::label $fr.l$i -text $name
 		ttk::label $fr.v$i -text $optvalue
-		grid  $fr.l$i  $fr.v$i
+		grid  $fr.l$i  $fr.v$i  -pady 2
 		grid  $fr.l$i  -sticky e
 		grid  $fr.v$i  -sticky w
 		incr i
@@ -906,7 +906,7 @@ proc ::ItemInspector::Broken {wtoplevel itemid args} {
 	    set name [string totitle [string trimleft $key -]]
 	    ttk::label $fr.l$i -text $name
 	    ttk::label $fr.v$i -text $value
-	    grid  $fr.l$i  $fr.v$i
+	    grid  $fr.l$i  $fr.v$i  -pady 2
 	    grid  $fr.l$i  -sticky e
 	    grid  $fr.v$i  -sticky w
 	    incr i
