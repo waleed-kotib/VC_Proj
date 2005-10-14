@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.48 2005-10-14 08:03:02 matben Exp $
+# $Id: Whiteboard.tcl,v 1.49 2005-10-14 12:59:44 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -654,6 +654,7 @@ proc ::WB::InitMenuDefs { } {
 	{command   mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
     }
     
+    # Used only on mac until the -postcommand bug fixed.
     set menuDefs(main,items) [::WB::MakeItemMenuDef $this(itemPath)]
     set altItemsMenuDefs     [::WB::MakeItemMenuDef $this(altItemPath)]
     if {[llength $altItemsMenuDefs]} {
@@ -666,7 +667,7 @@ proc ::WB::InitMenuDefs { } {
     set menuDefsInsertInd(main,file)   [expr [llength $menuDefs(main,file)]-2]
     set menuDefsInsertInd(main,edit)   [expr [llength $menuDefs(main,edit)]]
     set menuDefsInsertInd(main,prefs)  [expr [llength $menuDefs(main,prefs)]]
-    set menuDefsInsertInd(main,items)  [expr [llength $menuDefs(main,items)]]
+    set menuDefsInsertInd(main,items)  end
     set menuDefsInsertInd(main,info)   [expr [llength $menuDefs(main,info)]-2]
 }
 
@@ -1825,7 +1826,13 @@ proc ::WB::BuildWhiteboardMenus {w} {
     ::UI::NewMenu $w $wmenu.file   mFile        $menuDefs(main,file)  $opts(-state)
     ::UI::NewMenu $w $wmenu.edit   mEdit        $menuDefs(main,edit)  $opts(-state)
     ::UI::NewMenu $w $wmenu.prefs  mPreferences $menuDefs(main,prefs) $opts(-state)
-    ::UI::NewMenu $w $wmenu.items  mLibrary     $menuDefs(main,items) $opts(-state)
+    if {[tk windowingsystem] eq "aqua"} {
+	::UI::NewMenu $w $wmenu.items  mLibrary $menuDefs(main,items) $opts(-state)
+    } else {
+	::UI::NewMenu $w $wmenu.items  mLibrary {} $opts(-state)
+	$wmenu.items configure -postcommand  \
+	  [list ::WB::BuildItemsMenu $w $wmenu.items]
+    }
     
     # Plugin menus if any.
     ::UI::BuildPublicMenus $w $wmenu
@@ -2643,6 +2650,7 @@ proc ::WB::FixMenusWhenCopy {wevent} {
 # WB::MakeItemMenuDef --
 # 
 #       Makes a menuDefs list recursively for canvas files.
+#       Only for mac until -postcommand bug fixed.
 
 proc ::WB::MakeItemMenuDef {dir} {
     
@@ -2671,9 +2679,31 @@ proc ::WB::MakeItemMenuDef {dir} {
     return $mdef
 }
 
-proc ::WB::AddItemMenu {dir} {
+# WB::BuildItemsMenu, AddItemsMenu --
+# 
+#       Builds items (library) menu dynamically from -postcommand.
+
+proc ::WB::BuildItemsMenu {w m} {
+    global  this
     
-    set mdef {}
+    foreach msub [winfo children $m] {
+	destroy $msub
+    }
+    $m delete 0 end
+ 
+    AddItemsMenu $w $m $this(itemPath)
+    if {[HaveAnyCanFiles $this(altItemPath)]} {
+	$m add separator
+	AddItemsMenu $w $m $this(altItemPath)
+    }
+    
+    # Workaround for mac bug. Still doesn't work for submenus.
+    update idletasks
+}
+
+proc ::WB::AddItemsMenu {w m dir} {
+    
+    set n 0
     foreach f [glob -nocomplain -directory $dir *] {
 	
 	# Sort out directories we shouldn't search.
@@ -2682,20 +2712,32 @@ proc ::WB::AddItemMenu {dir} {
 		continue
 	    }
 	}
-	if {[file isdirectory $f]} {
-	    set submdef [AddItemMenu $f]
+	if {[file isdirectory $f] && [HaveAnyCanFiles $f]} {
+	    set msub $m.$n
+	    menu $msub -tearoff 0
+	    set nsub [AddItemsMenu $w $msub $f]
 	    set name [file tail $f]
-	    if {[llength $submdef]} {
-		lappend mdef [list cascade $name {} normal {} {} $submdef]
-	    }
+	    $m add cascade -label $name -menu $msub
 	} elseif {[string equal [file extension $f] ".can"]} {
 	    set name [file rootname [file tail $f]]
-	    set cmd {::CanvasFile::DrawCanvasItemFromFile $w}
-	    lappend cmd $f
-	    lappend mdef [list command $name $cmd normal {}]
+	    set cmd [list ::CanvasFile::DrawCanvasItemFromFile $w $f]
+	    $m add command -label $name -command $cmd
+	}
+	incr n
+    }
+    return $n
+}
+
+proc ::WB::HaveAnyCanFiles {dir} {
+    
+    foreach f [glob -nocomplain -directory $dir *] {
+	if {[file isdirectory $f]} {
+	    return [HaveAnyCanFiles $f]
+	} elseif {[string equal [file extension $f] ".can"]} {
+	    return 1
 	}
     }
-    return $mdef
+    return 0
 }
 
 # WB::BuildFontMenu ---
