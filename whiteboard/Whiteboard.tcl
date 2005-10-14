@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.47 2005-10-08 07:13:25 matben Exp $
+# $Id: Whiteboard.tcl,v 1.48 2005-10-14 08:03:02 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -1439,9 +1439,11 @@ proc ::WB::SetItemBinds {w btName} {
 	macintosh - macosx {
 	    $wcan bind std <Control-ButtonRelease-1> {
 		::CanvasDraw::CancelBox %W
+		::CanvasDraw::CancelPoly %W
 	    }
 	    $wcan bind std <Control-B1-Motion> {
 		::CanvasDraw::CancelBox %W
+		::CanvasDraw::CancelPoly %W
 	    }
 	}
     }
@@ -1717,6 +1719,7 @@ proc ::WB::GenericNonTextBindings {w} {
     
     # Various bindings.
     bind $wcan <BackSpace> [list ::CanvasDraw::DeleteSelected $wcan]
+    bind $wcan <Delete>    [list ::CanvasDraw::DeleteSelected $wcan]
     bind $wcan <Control-d> [list ::CanvasDraw::DeleteSelected $wcan]
 }
 
@@ -2654,6 +2657,33 @@ proc ::WB::MakeItemMenuDef {dir} {
 	}
 	if {[file isdirectory $f]} {
 	    set submdef [MakeItemMenuDef $f]
+	    set name [file tail $f]
+	    if {[llength $submdef]} {
+		lappend mdef [list cascade $name {} normal {} {} $submdef]
+	    }
+	} elseif {[string equal [file extension $f] ".can"]} {
+	    set name [file rootname [file tail $f]]
+	    set cmd {::CanvasFile::DrawCanvasItemFromFile $w}
+	    lappend cmd $f
+	    lappend mdef [list command $name $cmd normal {}]
+	}
+    }
+    return $mdef
+}
+
+proc ::WB::AddItemMenu {dir} {
+    
+    set mdef {}
+    foreach f [glob -nocomplain -directory $dir *] {
+	
+	# Sort out directories we shouldn't search.
+	switch -- [string tolower [file tail $f]] {
+	    . - resource.frk - cvs {
+		continue
+	    }
+	}
+	if {[file isdirectory $f]} {
+	    set submdef [AddItemMenu $f]
 	    set name [file tail $f]
 	    if {[llength $submdef]} {
 		lappend mdef [list cascade $name {} normal {} {} $submdef]
