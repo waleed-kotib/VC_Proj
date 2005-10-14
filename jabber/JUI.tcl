@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.89 2005-10-09 12:36:46 matben Exp $
+# $Id: JUI.tcl,v 1.90 2005-10-14 06:53:02 matben Exp $
 
 package provide JUI 1.0
 
@@ -17,8 +17,6 @@ namespace eval ::Jabber::UI:: {
     ::hooks::register loginHook              ::Jabber::UI::LoginCmd
     ::hooks::register logoutHook             ::Jabber::UI::LogoutHook
     ::hooks::register setPresenceHook        ::Jabber::UI::SetPresenceHook
-    ::hooks::register groupchatEnterRoomHook ::Jabber::UI::EnterRoomHook
-    ::hooks::register groupchatExitRoomHook  ::Jabber::UI::ExitRoomHook
 
     # Use option database for customization.
     # Shortcut buttons.
@@ -132,7 +130,6 @@ proc ::Jabber::UI::Init { } {
 	{cascade     mStatus        {}                                  disabled {} {} {}}
 	{separator}
 	{command     mEnterRoom     {::GroupChat::EnterOrCreate enter}  disabled R}
-	{cascade     mExitRoom      {}                                  disabled {} {} {}}
 	{command     mCreateRoom    {::GroupChat::EnterOrCreate create} disabled {}}
 	{command     mEditBookmarks {::GroupChat::EditBookmarks}        disabled {}}
 	{separator}
@@ -140,6 +137,7 @@ proc ::Jabber::UI::Init { } {
 	{separator}
 	{command     mRemoveAccount {::Register::Remove}      disabled {}}	
     }
+    #{cascade     mExitRoom      {}                                  disabled {} {} {}}
     if {[string match "mac*" $this(platform)]} {
 	set menuDefs(rost,info) {    
 	    {command     mSetupAssistant {
@@ -536,46 +534,6 @@ proc ::Jabber::UI::WhenSetStatus {type} {
     ::Jabber::Status::Configure $jwapp(mystatus) $type
 }
 
-proc ::Jabber::UI::EnterRoomHook {roomJid protocol} {
-    
-    GroupChat enter $roomJid
-}
-
-proc ::Jabber::UI::ExitRoomHook {roomJid} {
-    
-    GroupChat exit $roomJid
-}
-
-# Jabber::UI::GroupChat --
-# 
-#       Updates UI when enter/exit groupchat room.
-#       
-# Arguments:
-#       what        any of 'enter' or 'exit'.
-#       roomJid
-#       
-# Results:
-#       None.
-
-proc ::Jabber::UI::GroupChat {what roomJid} {
-    variable jwapp
-    
-    set wmenu $jwapp(wmenu)
-    set wmjexit ${wmenu}.jabber.mexitroom
-
-    ::Debug 4 "::Jabber::UI::GroupChat what=$what, roomJid=$roomJid"
-
-    switch $what {
-	enter {
-	    $wmjexit add command -label $roomJid  \
-	      -command [list ::GroupChat::ExitRoom $roomJid]	    
-	}
-	exit {
-	    catch {$wmjexit delete $roomJid}	    
-	}
-    }
-}
-
 # Jabber::UI::RegisterPopupEntry --
 # 
 #       Lets plugins/components register their own menu entry.
@@ -727,7 +685,6 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mStatus -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mvCard -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mEnterRoom -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mExitRoom -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mCreateRoom -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mEditBookmarks -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state normal
@@ -754,7 +711,6 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mStatus -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mvCard -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mEnterRoom -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mExitRoom -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mCreateRoom -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mEditBookmarks -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state disabled
