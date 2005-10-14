@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasDraw.tcl,v 1.15 2005-10-14 06:36:51 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.16 2005-10-14 12:59:44 matben Exp $
 
 #-- TAGS -----------------------------------------------------------------------
 #  
@@ -1599,9 +1599,9 @@ proc ::CanvasDraw::PolyDrag {wcan x y {shift 0}} {
 #       none
 
 proc ::CanvasDraw::FinalizePoly {wcan x y} {
-    global  prefs
-    
+    global  prefs    
     variable thePoly
+
     set w [winfo toplevel $wcan]
     array set state [::WB::GetStateArray $w]
 
@@ -1638,15 +1638,14 @@ proc ::CanvasDraw::FinalizePoly {wcan x y} {
 	append coords $thePoly($i) " "
     }
     $wcan delete _polylines
-    if {$state(fill) == 0} {
-	set theFill [list -fill {}]
+    set extras {}
+    if {$state(fill)} {
+	lappend extras -fill $state(fgCol)
     } else {
-	set theFill [list -fill $state(fgCol)]
+	lappend extras -fill {}
     }
     if {$prefs(haveDash)} {
-	set extras [list -dash $state(dash)]
-    } else {
-	set extras {}
+	lappend extras -dash $state(dash)
     }
     set utag [::CanvasUtils::NewUtag]
     if {$isClosed} {
@@ -1654,7 +1653,7 @@ proc ::CanvasDraw::FinalizePoly {wcan x y} {
 	# This is a (closed) polygon.
 	set tags [list std polygon $utag]
 	set cmd [list create polygon $coords -tags $tags  \
-	  -outline $state(fgCol) $theFill -width $state(penThick)  \
+	  -outline $state(fgCol) -width $state(penThick)  \
 	  -smooth $state(smooth)]
 	set cmd [concat $cmd $extras]
     } else {
@@ -1671,6 +1670,12 @@ proc ::CanvasDraw::FinalizePoly {wcan x y} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $w] $undo $redo
+    unset -nocomplain thePoly
+}
+
+proc ::CanvasDraw::CancelPoly {wcan} {
+    variable thePoly
+
     unset -nocomplain thePoly
 }
 
