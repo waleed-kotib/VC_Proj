@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.91 2005-10-15 07:03:35 matben Exp $
+# $Id: JUI.tcl,v 1.92 2005-10-15 09:58:03 matben Exp $
 
 package provide JUI 1.0
 
@@ -630,9 +630,13 @@ proc ::Jabber::UI::EditPostCommand {wmenu} {
 	    }
 	}
     }    
+    
+    # Cut, copy and paste menu entries.
     if {$haveSelection} {
 	if {$editable} {
 	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
+	} else {
+	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
 	}
 	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal    
     } else {
