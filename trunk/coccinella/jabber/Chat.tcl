@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.134 2005-10-07 08:45:43 matben Exp $
+# $Id: Chat.tcl,v 1.135 2005-10-15 07:03:35 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2389,11 +2389,11 @@ proc ::Chat::BuildPrefsPage {wpage} {
     ttk::label $wca.lage -text "[mc {Not older than}]:"
     set mb $wca.mbage
     set menuDef [list                       \
-	[list [mc "Ten seconds"]     -value 10]    \
-	[list [mc "One minute"]      -value 60]    \
-	[list [mc "Ten minutes"]     -value 600]   \
-	[list [mc "One hour"]        -value 3600]  \
-	[list [mc "No Restriction"]  -value 0]     \
+	[list [mc {Ten seconds}]     -value 10]    \
+	[list [mc {One minute}]      -value 60]    \
+	[list [mc {Ten minutes}]     -value 600]   \
+	[list [mc {One hour}]        -value 3600]  \
+	[list [mc {No Restriction}]  -value 0]     \
     ]
     ui::optionmenu $mb -menulist $menuDef -direction flush \
       -variable [namespace current]::tmpJPrefs(chat,histAge)

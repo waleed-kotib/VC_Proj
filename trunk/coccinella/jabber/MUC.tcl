@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.69 2005-10-03 12:49:55 matben Exp $
+# $Id: MUC.tcl,v 1.70 2005-10-15 07:03:35 matben Exp $
 
 package require jlib::muc
 package require ui::entryex
@@ -1467,11 +1467,10 @@ proc ::MUC::SetNick {roomjid} {
     
     set nickname ""
     set ans [::UI::MegaDlgMsgAndEntry  \
-      [mc "Set New Nickname"]  \
-      [mc "Select a new nickname"]  \
+      [mc {Set New Nickname}]  \
+      [mc {Select a new nickname}]  \
       "[mc {New Nickname}]:"  \
       nickname [mc Cancel] [mc OK]]
-    puts "ans=$ans, nickname=$nickname"
     
     # Perhaps check that characters are valid?
     if {($ans eq "ok") && ($nickname ne "")} {
