@@ -8,6 +8,11 @@ editor producing utf-8 text, you need to translate it using
 the utf-8 encoding. If you don't you'll se a number of '?'
 for your national characters.
 
+This directory also contains an 'extract.tcl' script written by
+Vincent Ricard which extracts all translatable text strings from the sources
+and compares them with an existing catalog. I'm not completely sure
+how this works, seems to be missing dynamic strings like [mc $name] etc.
+
 Instructions:
 
 1.   Copy the en.msg file to a file name describing your language code
@@ -32,7 +37,6 @@ command on unix/linux, or use an editor that handles utf-8.
 may use the small script at the end of this file.
 
 Now try it...
-
 
 Use the following code to do this:
 
