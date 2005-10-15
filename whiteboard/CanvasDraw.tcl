@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasDraw.tcl,v 1.16 2005-10-14 12:59:44 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.17 2005-10-15 07:03:35 matben Exp $
 
 #-- TAGS -----------------------------------------------------------------------
 #  
@@ -1918,7 +1918,11 @@ proc ::CanvasDraw::FinalizeStroke {wcan x y {brush 0}} {
     if {![info exists stroke(N)]} {
 	return
     }
-    set coords [StrokePostProcess $wcan]
+    if {$prefs(wb,strokePost)} {
+	set coords [StrokePostProcess $wcan]
+    } else {
+	set coords [StrokeGetCoords $wcan]
+    }
     $wcan delete segments
     if {[llength $coords] <= 2} {
 	return
@@ -1933,10 +1937,15 @@ proc ::CanvasDraw::FinalizeStroke {wcan x y {brush 0}} {
     } else {
 	set extras {}
     }
+    if {$prefs(wb,strokePost)} {
+	set smooth $state(smooth)
+    } else {
+	set smooth 0
+    }
     set utag [::CanvasUtils::NewUtag]
     set cmd [list create line $coords  \
       -tags [list std line $utag] -joinstyle round  \
-      -smooth $state(smooth) -fill $state(fgCol) -width $thick]
+      -smooth $smooth -fill $state(fgCol) -width $thick]
     set cmd [concat $cmd $extras]
     set undocmd [list delete $utag]
     set redo [list ::CanvasUtils::Command $w $cmd]
@@ -1954,6 +1963,20 @@ proc ::CanvasDraw::FinalizeStroke {wcan x y {brush 0}} {
 proc ::CanvasDraw::StrokePostProcess {wcan} {    
     variable stroke
     
+    set coords [StrokeGetCoords $wcan]
+    
+    # Next pass: remove points that are close to each other.
+    set coords [StripClosePoints $coords 6]
+    
+    # Next pass: remove points that gives a too small radius or points
+    # lying on a straight line.
+    set coords [StripExtremeRadius $coords 6 10000]
+    return $coords
+}
+
+proc ::CanvasDraw::StrokeGetCoords {wcan} {
+    variable stroke
+    
     set coords $stroke(0)
     
     # First pass: remove duplicates if any. Seems not to be the case!
@@ -1962,13 +1985,6 @@ proc ::CanvasDraw::StrokePostProcess {wcan} {
 	    set coords [concat $coords $stroke([expr {$i+1}])]
 	}
     }
-    
-    # Next pass: remove points that are close to each other.
-    set coords [StripClosePoints $coords 6]
-    
-    # Next pass: remove points that gives a too small radius or points
-    # lying on a straight line.
-    set coords [StripExtremeRadius $coords 6 10000]
     return $coords
 }
 

@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: HttpTrpt.tcl,v 1.6 2005-09-20 14:09:51 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.7 2005-10-15 07:03:35 matben Exp $
 
 package require httpex
 package require timing
@@ -213,18 +213,18 @@ proc ::HttpTrpt::Cmd {token httptoken} {
 	    set eicon info
 	}
 	error {
-	    set etitle [mc "File transport error"]
+	    set etitle [mc {File transport error}]
 	    set msg [mc httptrpterror $state(fileTail) $httperr]
 	    set eicon error
 	}
 	eof {
-	    set etitle [mc "File transport error"]
+	    set etitle [mc {File transport error}]
 	    set msg [mc httptrpteof]
 	    set eicon error
 	}
 	ok {
 	    if {$ncode != 200} {
-		set etitle [mc "File transport error"]
+		set etitle [mc {File transport error}]
 		set txt [httpex::ncodetotext $ncode]
 		set msg [mc httptrptnon200 $state(fileTail) $ncode $txt]
 		set eicon error

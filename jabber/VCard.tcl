@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.32 2005-08-26 15:02:34 matben Exp $
+# $Id: VCard.tcl,v 1.33 2005-10-15 07:03:35 matben Exp $
 
 package provide VCard 1.0
 
@@ -278,7 +278,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     
     grid  $pbi.enick  $pbi.eemail  $pbi.ejid  -sticky news -columnspan 2
     
-    $pbi.ejid state {disabled}
+    $pbi.ejid state {readonly}
         
     # Description part.
     set wdesctxt $pbi.tdes
@@ -286,15 +286,15 @@ proc ::VCard::Pages {nbframe etoken type} {
 
     set wdesctxt $pbi.fde.t
     set wdysc    $pbi.fde.y
-    #frame $pbi.fde -borderwidth 1 -relief sunken
-    frame $pbi.fde
-    text $wdesctxt -height 8 -wrap word -width 20 -bd 1 -relief sunken \
+    frame $pbi.fde -bd 1 -relief sunken
+    #frame $pbi.fde
+    text $wdesctxt -height 8 -wrap word -width 20 -bd 0 -relief sunken \
       -yscrollcommand [list $wdysc set]
     tuscrollbar $wdysc -orient vertical -command [list $wdesctxt yview]
     pack $wdysc   -side right -fill y
     pack $wdesctxt -fill both -expand 1
 
-    grid  $pbi.ldes  -sticky w -pady 2
+    grid  $pbi.ldes  -sticky w  -pady 2
     grid  $pbi.fde   -sticky ew -columnspan 3
             
     # Personal Info page -------------------------------------------------------
@@ -432,12 +432,12 @@ proc ::VCard::Pages {nbframe etoken type} {
         grid  $pbw.l$tag  $pbw.e$tag  -sticky e -pady 2
     }
 
-    # If not our card, disable all entries.
+    # If not our card, all entries readonly.
     if {$type eq "other"} {
         foreach wpar [list $pbi $pbp $pbh $pbw $pbptop $pbpmid] {
             foreach win [winfo children $wpar] {
                 if {[winfo class $win] == "TEntry"} {
-                    $win state {disabled}
+                    $win state {readonly}
                 }
             }
         }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.56 2005-09-21 09:53:23 matben Exp $
+# $Id: JWB.tcl,v 1.57 2005-10-15 07:03:35 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -437,8 +437,7 @@ proc ::Jabber::WB::BuildEntryHook {w wclass wcomm} {
     ttk::label $wframe.ljid -style Small.TLabel \
       -text "[mc {Jabber ID}]:" -padding {16 4 4 4}
     ui::entryex $wframe.ejid -font CociSmallFont  \
-      -library $jidlist -relief sunken \
-      -textvariable [namespace current]::jwbstate($w,jid)
+      -library $jidlist -textvariable [namespace current]::jwbstate($w,jid)
     ttk::checkbutton $wframe.to -style Small.TCheckbutton \
       -text [mc {Send Live}] \
       -variable [namespace current]::jwbstate($w,send)

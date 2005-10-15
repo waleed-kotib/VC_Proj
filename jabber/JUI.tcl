@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.90 2005-10-14 06:53:02 matben Exp $
+# $Id: JUI.tcl,v 1.91 2005-10-15 07:03:35 matben Exp $
 
 package provide JUI 1.0
 
@@ -589,17 +589,34 @@ proc ::Jabber::UI::MergeMenuDefs { } {
 
 proc ::Jabber::UI::EditPostCommand {wmenu} {
     
+    # @@@ The situation with a ttk::entry in readonly state is not understood.
+    # @@@ Not sure focus is needed for selections.
     set wfocus [focus]
     set haveFocus 0
     set haveSelection 0
+    set editable 1
+    
     if {$wfocus ne ""} {
 	set wclass [winfo class $wfocus]
 	if {[lsearch {Entry Text TEntry} $wclass] >= 0} {
 	    set haveFocus 1
 	}
+
 	switch -- $wclass {
-	    Entry - TEntry {
+	    TEntry {
 		set haveSelection [$wfocus selection present]
+		set state [$wfocus state]
+		if {[lsearch $state disabled] >= 0} {
+		    set editable 0
+		} elseif {[lsearch $state readonly] >= 0} {
+		    set editable 0
+		}
+	    }
+	    Entry {
+		set haveSelection [$wfocus selection present]
+		if {[$wfocus cget -state] eq "disabled"} {
+		    set editable 0
+		}
 	    }
 	    Text {
 		if {![catch {$wfocus get sel.first sel.last} data]} {
@@ -607,11 +624,16 @@ proc ::Jabber::UI::EditPostCommand {wmenu} {
 			set haveSelection 1
 		    }
 		}
+		if {[$wfocus cget -state] eq "disabled"} {
+		    set editable 0
+		}
 	    }
 	}
     }    
     if {$haveSelection} {
-	::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
+	if {$editable} {
+	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
+	}
 	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal    
     } else {
 	::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
@@ -619,7 +641,7 @@ proc ::Jabber::UI::EditPostCommand {wmenu} {
     }
     if {[catch {selection get -sel CLIPBOARD} str]} {
 	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
-    } elseif {$haveFocus && ($str ne "")} {
+    } elseif {$editable && $haveFocus && ($str ne "")} {
 	::UI::MenuMethod $wmenu entryconfigure mPaste -state normal
     } else {
 	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.7 2005-08-14 08:37:52 matben Exp $
+# $Id: WBPrefs.tcl,v 1.8 2005-10-15 07:03:35 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -37,6 +37,8 @@ proc ::WBPrefs::InitPrefsHook { } {
     # Only manipulate own items?
     set prefs(privacy) 0
     
+    set prefs(wb,strokePost) 1
+    
     # All MIME type stuff... The problem is that they are all arrays... 
     # Invented the ..._array resource specifier!    
     # We should have used accesor functions and not direct access to internal
@@ -44,9 +46,10 @@ proc ::WBPrefs::InitPrefsHook { } {
     # 
     ::PrefUtils::Add [list  \
       [list prefs(canScrollWidth)  prefs_canScrollWidth  $prefs(canScrollWidth)]  \
-      [list prefs(canScrollHeight) prefs_canScrollHeight $prefs(canScrollHeight)]  \
-      [list prefs(canvasFonts)     prefs_canvasFonts     $prefs(canvasFonts)]  \
-      [list prefs(privacy)         prefs_privacy         $prefs(privacy)]      \
+      [list prefs(canScrollHeight) prefs_canScrollHeight $prefs(canScrollHeight)] \
+      [list prefs(canvasFonts)     prefs_canvasFonts     $prefs(canvasFonts)]   \
+      [list prefs(privacy)         prefs_privacy         $prefs(privacy)]       \
+      [list prefs(wb,strokePost)   prefs_wb_strokePost   $prefs(wb,strokePost)] \
     ]
 }
 
@@ -77,6 +80,7 @@ proc ::WBPrefs::BuildWhiteboardPage {page} {
     
     set tmpPrefs(canScrollWidth)  $prefs(canScrollWidth)
     set tmpPrefs(canScrollHeight) $prefs(canScrollHeight)
+    set tmpPrefs(wb,strokePost)   $prefs(wb,strokePost)
     
     set wc $page.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
@@ -100,12 +104,17 @@ proc ::WBPrefs::BuildWhiteboardPage {page} {
       -textvariable [namespace current]::tmpPrefs(canScrollWidth)
     ttk::entry $afr.height -font CociSmallFont \
       -width 6 \
-      -textvariable [namespace current]::tmpPrefs(canScrollHeight)
+      -textvariable [namespace current]::tmpPrefs(canScrollHeight)  
     
     grid  $afr.w   $afr.width   -pady 2
     grid  $afr.h   $afr.height  -pady 2
     grid  $afr.w  -padx 2 -sticky e
     grid  $afr.h  -padx 2 -sticky e
+
+    ttk::checkbutton $wc.spost -text "Smooth freehand strokes"  \
+      -variable [namespace current]::tmpPrefs(wb,strokePost)
+
+    pack  $wc.spost  -side top -anchor w -pady 6
 }
 
 # Fonts Page ...................................................................
