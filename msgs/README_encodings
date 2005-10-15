@@ -30,6 +30,7 @@ Save your file as 'fr.sys', for instance.
 3.  Utf-8 encode the file using the script below. Now you pick a file
 name 'fr.msg' if French, for instance. Alternatively, use the 'iconv'
 command on unix/linux, or use an editor that handles utf-8.
+The 'iconv' utility on unix/linux is an alternative.
 
 4.  You new language catalog should now be loaded automatically.
 
