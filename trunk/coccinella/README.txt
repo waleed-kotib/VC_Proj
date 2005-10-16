@@ -142,6 +142,13 @@ Known Bugs:
     * There are numerous "details" that need to be fixed. After all, it is an 
       alpha quality software!
 
+    * If you run from sources: some versions of the ActiveState distro (8.4.10->)
+      have problems with the Img package which can cause a startup crash.
+      The solutions is to trash /usr/local/ActiveState/lib/Img. These versions
+      may also create problems with the emoticon sets. If this happens try to
+      run the single file executable tclkit for your platform instead, see:
+      http://coccinella.sf.net for a link.
+
     As always, the code needs cleaning and restructuring.  If you want to see
     what is happening "inside" you may set the debug level to a nonzero value.
     You set this either in the source file Coccinella.tcl, or specified
@@ -166,7 +173,8 @@ Distribution:
 
     It is distributed under the standard GPL license.
     (c) Copyright by Mats Bengtsson (1999-2005).
-    Buttons are stolen from Gimp and slightly changed (Thank You!).
+    Whiteboard tool buttons are stolen from Gimp and slightly changed (Thank You!).
+    Other graphics elements, see README-Crystal-icons.
 
 Home:
 
@@ -195,4 +203,4 @@ Who:
 
     MADE IN SWEDEN
 
-#-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.5 2005-09-27 13:31:34 matben Exp $
+# $Id: FTrans.tcl,v 1.6 2005-10-16 09:51:31 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -537,7 +537,7 @@ proc ::FTrans::TProgress {token jlibname sid total bytes} {
     variable $token
     upvar 0 $token state
     
-    ::Debug 2 "---> ::FTrans::TProgress total=$total, bytes=$bytes"
+    ::Debug 6 "---> ::FTrans::TProgress total=$total, bytes=$bytes"
 
     # Cache timing info.
     ::timing::setbytes $sid $bytes
