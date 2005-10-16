@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.7 2005-10-04 13:56:35 matben Exp $
+# $Id: dialog.tcl,v 1.8 2005-10-16 09:49:38 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -81,15 +81,18 @@ if {0} {
     set im [image create photo -file $f]
     ui::dialog::setbadge $im
     
+    set w .t22
     ui::dialog -message "These two must be able to call before any dialog instance created." \
       -detail "These two must be able to call before any dialog instance created."
     ui::dialog -message "These two must be able to call before any dialog instance created." \
       -detail "These two must be able to call before any dialog instance created." \
       -icon error -buttons {yes no cancel} -default yes
-    ui::dialog -message "These two must be able to call before any dialog instance created." \
+    ui::dialog $w -message "These two must be able to call before any dialog instance created." \
       -detail "These two must be able to call before any dialog instance created." \
       -icon error -type yesnocancel -modal 1
-
+    set fr [$w clientframe]
+    pack [ttk::checkbutton $fr.c -text "Elvis has left the building"] -side left
+    
     proc cmd {w bt} {
 	destroy $w
 	tk_getSaveFile
