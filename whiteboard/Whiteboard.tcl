@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.49 2005-10-14 12:59:44 matben Exp $
+# $Id: Whiteboard.tcl,v 1.50 2005-10-16 09:51:31 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -2455,9 +2455,9 @@ proc ::WB::EditPostCommand {w wmenu} {
     set wfocus [focus]
     set haveFocus 0
     set haveSelection 0
-    set normal 0
+    set editable 0
     if {$opts(-state) eq "normal"} {
-	set normal 1
+	set editable 1
     }
     if {$wfocus ne ""} {
 	set wclass [winfo class $wfocus]
@@ -2465,14 +2465,29 @@ proc ::WB::EditPostCommand {w wmenu} {
 	    set haveFocus 1
 	}
 	switch -- $wclass {
-	    Entry - TEntry {
+	    TEntry {
 		set haveSelection [$wfocus selection present]
+		set state [$wfocus state]
+		if {[lsearch $state disabled] >= 0} {
+		    set editable 0
+		} elseif {[lsearch $state readonly] >= 0} {
+		    set editable 0
+		}
+	    }
+	    Entry {
+		set haveSelection [$wfocus selection present]
+		if {[$wfocus cget -state] eq "disabled"} {
+		    set editable 0
+		}
 	    }
 	    Text {
 		if {![catch {$wfocus get sel.first sel.last} data]} {
 		    if {$data ne ""} {
 			set haveSelection 1
 		    }
+		}
+		if {[$wfocus cget -state] eq "disabled"} {
+		    set editable 0
 		}
 	    }
 	    Canvas {
@@ -2487,8 +2502,12 @@ proc ::WB::EditPostCommand {w wmenu} {
     }
     
     # Cut, copy and paste menu entries.
-    if {$normal && $haveSelection} {
-	::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
+    if {$haveSelection} {
+	if {$editable} {
+	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
+	} else {
+	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
+	}
 	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal    
     } else {
 	::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
@@ -2496,7 +2515,7 @@ proc ::WB::EditPostCommand {w wmenu} {
     }
     if {[catch {selection get -sel CLIPBOARD} str]} {
 	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
-    } elseif {$normal && $haveFocus && ($str ne "")} {
+    } elseif {$editable && $haveFocus && ($str ne "")} {
 	::UI::MenuMethod $wmenu entryconfigure mPaste -state normal
     } else {
 	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
