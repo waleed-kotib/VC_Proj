@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: progress.tcl,v 1.7 2005-10-06 14:41:27 matben Exp $
+# $Id: progress.tcl,v 1.8 2005-10-16 09:49:38 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -22,15 +22,23 @@ namespace eval ui::progress {
     option add *TProgressFrame.font     DlgDefaultFont             widgetDefault
     option add *TProgressFrame.font2    DlgSmallFont               widgetDefault
     option add *TProgressFrame.font3    DlgSmallFont               widgetDefault 
+    option add *TProgressFrame.lbl.wrapLength   300                widgetDefault
+    option add *TProgressFrame.lbl2.wrapLength  300                widgetDefault
+    option add *TProgressFrame.lbl3.wrapLength  300                widgetDefault
     option add *TProgressFrame.length   200                        widgetDefault
     option add *TProgressFrame.text     [::msgcat::mc Progress]    widgetDefault
+    option add *TProgressFrame*TLabel.justify   left               widgetDefault
     option add *TProgressFrame*TButton.style TProgressFrame.TButton widgetDefault
 
     option add *ProgressFrame.font      DlgDefaultFont             widgetDefault
     option add *ProgressFrame.font2     DlgSmallFont               widgetDefault
     option add *ProgressFrame.font3     DlgSmallFont               widgetDefault 
+    option add *ProgressFrame.lbl.wrapLength   300                 widgetDefault
+    option add *ProgressFrame.lbl2.wrapLength  300                 widgetDefault
+    option add *ProgressFrame.lbl3.wrapLength  300                 widgetDefault
     option add *ProgressFrame.length    200                        widgetDefault
     option add *ProgressFrame.text      [::msgcat::mc Progress]    widgetDefault
+    option add *TProgressFrame*Label.justify   left                widgetDefault
     option add *ProgressFrame*Button.font DlgSmallFont             widgetDefault
 
     switch -- [tk windowingsystem] {
@@ -241,7 +249,7 @@ snit::widgetadaptor ui::progress::frame {
     delegate option -text3   to lbl3 as -text
     delegate option -length  to prg
     delegate option -cancelcommand to bt as -command
-
+    
     option -background  -default ""
     option -pausecommand                    \
       -configuremethod OnConfigPauseCmd
@@ -262,10 +270,7 @@ snit::widgetadaptor ui::progress::frame {
 	  -font DlgSmallFont
     }
     
-    constructor {args} {
-	#puts "args=$args"
-	#parray options
-	
+    constructor {args} {	
 	set style [from args -style "ttk"]
 	if {$style eq "ttk"} {
 	    installhull using ttk::frame -class TProgressFrame
@@ -293,9 +298,6 @@ snit::widgetadaptor ui::progress::frame {
 	set opts(-type)  $type
 	array set opts $args
 	$self configurelist [array get opts]
-	
-	#puts "--------------"
-	#parray options
 		
 	# Option postfixes.
 	$self Configure
@@ -343,6 +345,7 @@ snit::widgetadaptor ui::progress::frame {
 	if {$options(-showtext3)} {
 	    grid  $win.lbl3  -        -pady 0 -sticky w
 	}
+	grid  $win.prg  -sticky ew
 	grid columnconfigure $win 0 -weight 1
     }
 
