@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.24 2005-10-16 09:51:31 matben Exp $
+# $Id: Init.tcl,v 1.25 2005-10-17 12:50:45 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -285,11 +285,21 @@ proc ::Init::Msgcat { } {
 	    ::msgcat::mclocale en
 	}
 	set locale [::msgcat::mclocale]
+	
+	# Avoid the mac encoding problems by rejecting certain locales.
+	if {[tk windowingsystem] eq "aqua"} {
+	    if {[regexp {ru} $locale]} {
+		set locale en
+		::msgcat::mclocale en
+	    }
+	}
     } else {
 	set locale $prefs(messageLocale)
 	::msgcat::mclocale $locale
     }
+
     set this(systemLocale) $locale
+    set lang [lindex [split [file rootname $locale] _] 0]
     set langs [glob -nocomplain -tails -directory $this(msgcatPath) *.msg]
     set havecat 0
     foreach f $langs {
@@ -302,9 +312,21 @@ proc ::Init::Msgcat { } {
     if {!$havecat} {
 	::msgcat::mclocale en
     }
-
+    
+    # Seems to be needed for tclkits?
+    if {$lang eq "ru"} {
+	switch -- [tk windowingsystem] {
+	    win32 {
+		encoding system cp1251
+	    }
+	    x11 {
+		encoding system koi8-r
+	    }
+	}
+    }
+    
     # Test here if you want a particular message catalog (en, nl, de, fr, sv,...).
-    #::msgcat::mclocale ru
+    #::msgcat::mclocale pl
     uplevel #0 [list ::msgcat::mcload $this(msgcatPath)]
 
     # This is a method to override default messages with custom ones for each
