@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.70 2005-10-10 12:58:05 matben Exp $
+# $Id: Disco.tcl,v 1.71 2005-10-22 14:26:21 matben Exp $
 
 package require jlib::disco
 
@@ -896,6 +896,10 @@ proc ::Disco::Popup {w vstruct x y} {
 	catch {destroy $m}
 	update
     }
+}
+
+proc ::Disco::Selection {T} {
+    # empty
 }
 
 proc ::Disco::SelectCmd {w v} {

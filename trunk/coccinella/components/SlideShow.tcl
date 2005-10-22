@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.15 2005-09-19 06:37:20 matben Exp $
+#       $Id: SlideShow.tcl,v 1.16 2005-10-22 14:26:21 matben Exp $
 
 package require undo
 
@@ -219,10 +219,10 @@ proc ::SlideShow::BuildPrefsHook {wtree nbframe} {
     global  prefs
     variable tmpPrefs
 
-    if {![$wtree isitem Whiteboard]} {
-	$wtree newitem {Whiteboard} -text [mc Whiteboard]
+    if {![::Preferences::HaveTableItem Whiteboard]} {
+	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
     }
-    $wtree newitem {Whiteboard {SlideShow}} -text [mc {Slide Show}]
+    ::Preferences::NewTableItem {Whiteboard {SlideShow}} [mc {Slide Show}]
     set wpage [$nbframe page {SlideShow}]    
     
     set wc $wpage.c

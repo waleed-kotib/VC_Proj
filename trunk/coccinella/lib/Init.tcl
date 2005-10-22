@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.25 2005-10-17 12:50:45 matben Exp $
+# $Id: Init.tcl,v 1.26 2005-10-22 14:26:21 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -202,7 +202,7 @@ proc ::Init::SetThisVersion { } {
     # default file, never read.
     set this(vers,major)    0
     set this(vers,minor)   95
-    set this(vers,release) 10
+    set this(vers,release) 11
     set this(vers,full) $this(vers,major).$this(vers,minor).$this(vers,release)
 
     # This is used only to track upgrades.
@@ -421,6 +421,15 @@ proc ::Init::LoadPackages { } {
 	      -message "This application requires the tile package to work! $::errorInfo"
 	    exit
 	}
+    }
+    
+    # treectrl is required.
+    ::Splash::SetMsg "[mc splashlook] treectrl..."
+    set ::treectrl_library [file join $this(binLibPath) treectrl]
+    if {[catch {package require treectrl 2.1} msg]} {
+	tk_messageBox -icon error \
+	  -message "This application requires the treectrl widget to work! $::errorInfo"
+	exit
     }
     
     # tkpng is required for the gui.

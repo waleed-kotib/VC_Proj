@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Plugins.tcl,v 1.19 2005-09-19 06:37:21 matben Exp $
+# $Id: Plugins.tcl,v 1.20 2005-10-22 14:26:21 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1302,10 +1302,10 @@ proc ::Plugins::InitPrefsHook { } {
 
 proc ::Plugins::BuildPrefsHook {wtree nbframe} {
     
-    if {![$wtree isitem Whiteboard]} {
-	$wtree newitem {Whiteboard} -text [mc Whiteboard]
+    if {![::Preferences::HaveTableItem Whiteboard]} {
+	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
     }
-    $wtree newitem {Whiteboard Plugins2} -text [mc Plugins]
+    ::Preferences::NewTableItem {Whiteboard Plugins2} [mc Plugins]
 
     set wpage [$nbframe page Plugins2]
     ::Plugins::BuildPrefsPage $wpage
@@ -1326,7 +1326,7 @@ proc ::Plugins::BuildPrefsPage {page} {
       -padding [option get . groupSmallPadding {}]
     pack  $pbl  -side top -anchor w
     
-    ttk::label $pbl.lhead -wraplength 300 -anchor w -justify left \
+    ttk::label $pbl.lhead -wraplength 300 -justify left \
       -text [mc prefplugctrl] -padding {0 0 0 4}
     pack $pbl.lhead -side top -anchor w
         
@@ -1341,7 +1341,7 @@ proc ::Plugins::BuildPrefsPage {page} {
 	set icon [GetIconForPackage $plug 12]
 
 	ttk::label $pfr.i$i -image $icon
-	ttk::checkbutton $pfr.c$i -anchor w -text $plug  \
+	ttk::checkbutton $pfr.c$i -text $plug  \
 	  -variable [namespace current]::tmpPrefPlugins($plug)
 	grid  $pfr.i$i  $pfr.c$i  -sticky w  -padx 4
 	incr i

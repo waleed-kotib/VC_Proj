@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.23 2005-08-18 09:52:07 matben Exp $
+# $Id: P2P.tcl,v 1.24 2005-10-22 14:26:21 matben Exp $
 
 package provide P2P 1.0
 
@@ -1044,7 +1044,7 @@ proc ::P2P::Prefs::InitPrefsHook { } {
 
 proc ::P2P::Prefs::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {General Shortcuts} -text [mc Shortcuts]
+    ::Preferences::NewTableItem {General Shortcuts} [mc Shortcuts]
     
     set wpage [$nbframe page {Shortcuts}]    
     ::P2P::Prefs::BuildPrefsPage $wpage

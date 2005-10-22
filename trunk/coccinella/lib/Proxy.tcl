@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.4 2005-09-19 06:37:21 matben Exp $
+# $Id: Proxy.tcl,v 1.5 2005-10-22 14:26:21 matben Exp $
  
 package require autoproxy
 
@@ -90,7 +90,7 @@ proc ::Proxy::AutoProxyConfig { } {
 
 proc ::Proxy::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {General {Proxy Setup}} -text [mc {Proxy Setup}]
+    ::Preferences::NewTableItem {General {Proxy Setup}} [mc {Proxy Setup}]
     
     set wpage [$nbframe page {Proxy Setup}]    
     ::Proxy::BuildPage $wpage

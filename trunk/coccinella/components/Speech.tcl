@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Speech.tcl,v 1.7 2005-08-14 08:37:51 matben Exp $
+# $Id: Speech.tcl,v 1.8 2005-10-22 14:26:21 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -239,7 +239,8 @@ proc ::Speech::BuildPrefsHook {wtree nbframe} {
     variable sprefs
     
     if {$sprefs(haveSpeech)} {
-	$wtree newitem {General {Speech}} -text [mc {Speech}]
+	::Preferences::NewTableItem {General {Speech}} [mc {Speech}]
+
 	set wpage [$nbframe page {Speech}]    
 	::Speech::BuildPrefsPage $wpage
     }

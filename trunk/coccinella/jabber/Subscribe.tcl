@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.29 2005-09-19 06:37:21 matben Exp $
+# $Id: Subscribe.tcl,v 1.30 2005-10-22 14:26:21 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -272,7 +272,7 @@ proc ::Subscribe::InitPrefsHook { } {
 
 proc ::Subscribe::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber Subscriptions} -text [mc Subscriptions]
+    ::Preferences::NewTableItem {Jabber Subscriptions} [mc Subscriptions]
     
     # Subscriptions page ---------------------------------------------------
     set wpage [$nbframe page {Subscriptions}]

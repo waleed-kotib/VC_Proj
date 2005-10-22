@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.137 2005-10-13 14:42:02 matben Exp $
+# $Id: Roster.tcl,v 1.138 2005-10-22 14:26:21 matben Exp $
 
 package provide Roster 1.0
 
@@ -2019,7 +2019,7 @@ proc ::Roster::InitPrefsHook { } {
 
 proc ::Roster::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber Roster} -text [mc Roster]
+    ::Preferences::NewTableItem {Jabber Roster} [mc Roster]
         
     # Roster page ----------------------------------------------------------
     set wpage [$nbframe page {Roster}]

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.33 2005-10-15 07:03:35 matben Exp $
+# $Id: VCard.tcl,v 1.34 2005-10-22 14:26:21 matben Exp $
 
 package provide VCard 1.0
 
@@ -357,7 +357,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     set wp2 $wbot.2
     frame $wp2 -bd 1 -relief sunken -bg white \
       -padx 4 -pady 4 -height 64 -width 64
-    ttk::label $wp2.l -bd 0 -compound image
+    ttk::label $wp2.l -compound image
     
     pack  $wp2 -side left
     grid  $wp2.l  -sticky news

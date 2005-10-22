@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.8 2005-10-15 07:03:35 matben Exp $
+# $Id: WBPrefs.tcl,v 1.9 2005-10-22 14:26:21 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -55,12 +55,11 @@ proc ::WBPrefs::InitPrefsHook { } {
 
 proc ::WBPrefs::BuildPrefsHook {wtree nbframe} {
     
-    if {![$wtree isitem Whiteboard]} {
-	$wtree newitem {Whiteboard} -text [mc Whiteboard]
+    if {![::Preferences::HaveTableItem Whiteboard]} {
+	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
     }
-    
-    $wtree newitem {Whiteboard {Edit Fonts}} -text [mc {Edit Fonts}]
-    $wtree newitem {Whiteboard Privacy} -text [mc Privacy]
+    ::Preferences::NewTableItem {Whiteboard {Edit Fonts}} [mc {Edit Fonts}]
+    ::Preferences::NewTableItem {Whiteboard Privacy} [mc Privacy]
     
     set wpage [$nbframe page {Whiteboard}]
     BuildWhiteboardPage $wpage
@@ -324,7 +323,7 @@ proc ::WBPrefs::BuildPagePrivacy {page} {
     pack $wpr -side top
     
     ttk::label $wpr.msg -text [mc prefpriv] -wraplength 340 -justify left
-    ttk::checkbutton $wpr.only -anchor w -text [mc Privacy]  \
+    ttk::checkbutton $wpr.only -text [mc Privacy]  \
       -variable [namespace current]::tmpPrefs(privacy)
     
     grid  $wpr.msg   -sticky w

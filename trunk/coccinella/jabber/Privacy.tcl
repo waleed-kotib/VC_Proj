@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.14 2005-09-19 06:37:21 matben Exp $
+# $Id: Privacy.tcl,v 1.15 2005-10-22 14:26:21 matben Exp $
 
 package provide Privacy 1.0
 
@@ -45,7 +45,7 @@ proc ::Privacy::InitPrefsHook { } {
 
 proc ::Privacy::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber Filter} -text [mc Filter]
+    ::Preferences::NewTableItem {Jabber Filter} [mc Filter]
     
     # Blockers page --------------------------------------------------------
     set wpage [$nbframe page {Filter}]    
