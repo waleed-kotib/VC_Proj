@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.103 2005-10-08 07:13:25 matben Exp $
+# $Id: UI.tcl,v 1.104 2005-10-22 14:26:21 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -14,6 +14,7 @@ package require ui::entryex
 package provide UI 1.0
 
 namespace eval ::UI:: {
+    global  this
 
     # Add all event hooks.
     #::hooks::register initHook               ::UI::InitHook
@@ -58,6 +59,12 @@ namespace eval ::UI:: {
     ui::dialog::setbadge [::Theme::GetImage [option get . badgeImage {}]]
     set im [::Theme::GetImage [option get . applicationImage {}]]
     ui::dialog::setimage coccinella $im
+    
+    # System colors.
+    set wtmp [listbox ._tmp_listbox]
+    set this(sysHighlight)     [$wtmp	cget -selectbackground]
+    set this(sysHighlightText) [$wtmp cget -selectforeground]
+    destroy $wtmp
 }
 
 proc ::UI::InitHook { } {

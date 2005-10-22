@@ -39,6 +39,7 @@
 *Tablelist.highlightThickness:      3
 *Tablelist.BorderWidth:             1              
 *Tree.background:                   white
+*TreeCtrl.showLines:                0
 
 !
 !

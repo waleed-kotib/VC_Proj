@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.82 2005-09-27 13:31:35 matben Exp $
+# $Id: Preferences.tcl,v 1.83 2005-10-22 14:26:21 matben Exp $
  
 package require mnotebook
 package require tree
@@ -145,6 +145,7 @@ proc ::Preferences::Build {args} {
     variable finished
     variable nbframe
     variable lastPage
+    variable tableName2Item
     
     array set argsArr $args
 
@@ -182,29 +183,30 @@ proc ::Preferences::Build {args} {
     set frtree $wcont.t.frtree
     frame $frtree
     pack  $frtree -fill both -expand 1 -side left
-    
-    # Set a width in the label to act as a spacer when scrollbar is unpacked.
-    frame $frtree.fl -relief raised -bd 1
-    ttk::label $frtree.fl.l -text [mc {Settings Panels}] -width 24
-    pack $frtree.fl -side top -fill x
-    pack $frtree.fl.l
-    
+        
     set wtree $frtree.t
-    ::tree::tree $wtree -width 100 -height 300 -indention 0 \
-      -yscrollcommand [list ::UI::ScrollSet $frtree.sby \
-      [list pack $frtree.sby -side right -fill y]]  \
-      -selectcommand ::Preferences::SelectCmd   \
-      -doubleclickcommand {} \
-      -showrootbutton 1 -indention 0 -xmargin 6
-    #  -showrootbutton 1 -indention {0 10} -xmargin {0 8}
-    tuscrollbar $frtree.sby -orient vertical -command [list $wtree yview]
+    set wysc  $frtree.sby
+    set T $wtree
+    TreeCtrl $wtree $wysc
+    tuscrollbar $wysc -orient vertical -command [list $wtree yview]
     
     pack $wtree -side left -fill both -expand 1
-    pack $frtree.sby -side right -fill y
+    pack $wysc  -side right -fill y
     
     # Fill tree.
-    $wtree newitem {General} -text [mc General]
-    $wtree newitem {Jabber}
+    set item [$T item create -button 1]
+    $T item style set $item cTree styText cTag styText
+    $T item text $item cTree [mc General] cTag [list General]
+    $T item lastchild root $item
+
+    set tableName2Item(General) $item
+    
+    set item [$T item create -button 1]
+    $T item style set $item cTree styText cTag styText
+    $T item text $item cTree [mc Jabber] cTag [list Jabber]
+    $T item lastchild root $item
+
+    set tableName2Item(Jabber) $item
     
     # The notebook and its pages.
     set nbframe [::mnotebook::mnotebook $wcont.nb -borderwidth 1 -relief sunken]
@@ -246,14 +248,91 @@ proc ::Preferences::Build {args} {
     
     # Which page to be in front?
     if {[info exists argsArr(-page)]} {
-	$wtree setselection $argsArr(-page)
-    } elseif {[llength $lastPage]} {
-	$wtree setselection $lastPage
-    }    
+	set selectPage $argsArr(-page)
+    } elseif {$lastPage ne ""} {
+	set selectPage $lastPage
+    } else {
+	set selectPage {General}
+    }
+    if {[info exists tableName2Item($selectPage)]} {
+	$T selection add $tableName2Item($selectPage)
+    }
+    
     wm deiconify $w
     
     # Grab and focus.
     focus $w
+}
+
+proc ::Preferences::TreeCtrl {T wysc} {
+    global  this
+    
+    treectrl $T -usetheme 1 -selectmode single  \
+      -showroot 0 -showrootbutton 0 -showbuttons 1  \
+      -yscrollcommand [list ::UI::ScrollSet $wysc \
+      [list pack $wysc -side right -fill y]]  \
+      -borderwidth 0 -highlightthickness 0 -indent 0 -width 140
+
+    # This is a dummy option.
+    set stripeBackground [option get $T stripeBackground {}]
+    set stripes [list $stripeBackground {}]
+    set bd [option get $T columnBorderWidth {}]
+
+    $T column create -text [mc {Settings Panels}] -tag cTree  \
+      -itembackground $stripes -resize 0 -expand 1 -borderwidth $bd
+    $T column create -tag cTag -visible 0
+    $T configure -treecolumn cTree
+
+    set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
+    $T element create eText text -lines 1
+    $T element create eSelect rect -fill $fill -open e -showfocus 1
+
+    set S [$T style create styText]
+    $T style elements $S {eSelect eText}
+    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
+    $T style layout $S eSelect -union {eText} -iexpand nes -ipadx {2 0}
+
+    $T notify bind $T <Selection> [list [namespace current]::Selection %T]
+}
+
+proc ::Preferences::NewTableItem {spec name} {
+    variable wtree
+    variable tableName2Item
+    
+    set T $wtree
+    
+    set item [$T item create]
+    $T item style set $item cTree styText cTag styText
+    $T item text $item cTree $name cTag $spec
+
+    set n [llength $spec]
+    if {$n == 1} {
+	$T item configure $item -button 1
+	$T item lastchild root $item
+    } else {
+	set root [lindex $spec 0]
+	set ritem $tableName2Item($root)
+	$T item lastchild $ritem $item
+    }
+    set tableName2Item($spec) $item
+    
+    return $item
+}
+
+proc ::Preferences::GetTableItem {name} {
+    variable tableName2Item
+
+    return $tableName2Item($name)
+}
+
+proc ::Preferences::HaveTableItem {name} {
+    variable tableName2Item
+
+    if {[info exists tableName2Item($name)]} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 # Preferences::ResetToFactoryDefaults --
@@ -399,11 +478,16 @@ proc ::Preferences::Cancel { } {
 proc ::Preferences::CleanUp { } {
     variable wtoplevel
     variable wtree
+    variable tableName2Item
     
     # Which page to be in front next time?
-    set lastPage [$wtree getselection]
-    
+    set T $wtree
+    set item [$T selection get]
+    if {[llength $item] == 1} {
+	set lastPage [$T item element cget $item cTag eText -text]
+    }
     ::UI::SaveWinGeom $wtoplevel
+    unset -nocomplain tableName2Item
 }
 
 # Preferences::HasChanged --
@@ -423,6 +507,21 @@ proc ::Preferences::NeedRestart { } {
     set needRestart 1
 }
 
+proc ::Preferences::Selection {T} {
+    variable nbframe
+
+    if {[$T selection count] != 1} {
+	return
+    }
+    set item [$T selection get]
+    set tag  [$T item element cget $item cTag eText -text]
+    set page [lindex $tag end]
+    
+    if {[$nbframe exists $page]} {
+	$nbframe displaypage $page
+    }
+}
+
 # Preferences::SelectCmd --
 #
 #       Callback when selecting item in tree.
@@ -435,9 +534,8 @@ proc ::Preferences::NeedRestart { } {
 #       new page displayed
 
 proc ::Preferences::SelectCmd {w v} {
-
     variable nbframe
-
+    
     if {[llength $v] && ([$w itemconfigure $v -dir] == 0)} {
 	#$nbframe displaypage [lindex $v end]
     }    

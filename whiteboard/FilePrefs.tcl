@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.7 2005-08-14 08:37:52 matben Exp $
+# $Id: FilePrefs.tcl,v 1.8 2005-10-22 14:26:21 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -59,11 +59,11 @@ proc ::FilePrefs::InitPrefsHook { } {
 
 proc ::FilePrefs::BuildPrefsHook {wtree nbframe} {
     
-    if {![$wtree isitem Whiteboard]} {
-	$wtree newitem {Whiteboard} -text [mc Whiteboard]
+    if {![::Preferences::HaveTableItem Whiteboard]} {
+	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
     }
-    $wtree newitem {Whiteboard {File Mappings}} -text [mc {File Mappings}]
-    
+    ::Preferences::NewTableItem {Whiteboard {File Mappings}} [mc {File Mappings}]
+
     # File Mappings ------------------------------------------------------------
     set wpage [$nbframe page {File Mappings}]    
     ::FilePrefs::BuildPage $wpage

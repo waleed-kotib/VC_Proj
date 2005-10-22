@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.18 2005-08-14 08:37:51 matben Exp $
+# $Id: Sounds.tcl,v 1.19 2005-10-22 14:26:21 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -414,8 +414,7 @@ proc ::Sounds::BuildPrefsHook {wtree nbframe} {
     variable priv
     
     if {$priv(canPlay)} {
-	$wtree newitem {General Sounds} -text [mc {Sounds}]
-
+	::Preferences::NewTableItem {General Sounds} [mc {Sounds}]
 	set wpage [$nbframe page {Sounds}]    
 	BuildPrefsPage $wpage
     }
@@ -485,8 +484,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     ttk::frame $fvol
     ttk::label $fvol.l -text "[mc Volume]:"
     ttk::scale $fvol.v -orient horizontal -from 0 -to 100 \
-      -variable [namespace current]::tmpPrefs(volume) -value $tmpPrefs(volume) \
-      -font CociSmallFont
+      -variable [namespace current]::tmpPrefs(volume) -value $tmpPrefs(volume)
 
     pack  $fvol.l  -side left -padx 4
     pack  $fvol.v  -side left -padx 4

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.127 2005-10-10 12:58:05 matben Exp $
+# $Id: GroupChat.tcl,v 1.128 2005-10-22 14:26:21 matben Exp $
 
 package require Enter
 package require History
@@ -2251,7 +2251,7 @@ proc ::GroupChat::InitPrefsHook { } {
 
 proc ::GroupChat::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber Conference} -text [mc Conference]
+    ::Preferences::NewTableItem {Jabber Conference} [mc Conference]
     
     # Conference page ------------------------------------------------------
     set wpage [$nbframe page {Conference}]

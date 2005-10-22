@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.77 2005-10-06 14:41:28 matben Exp $
+# $Id: MailBox.tcl,v 1.78 2005-10-22 14:26:21 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -41,8 +41,8 @@ namespace eval ::MailBox:: {
     option add *MailBox*trashImage            trash            widgetDefault
     option add *MailBox*trashDisImage         trashDis         widgetDefault
 
-    option add *MailBox*readMsgImage          readMsg          widgetDefault
-    option add *MailBox*unreadMsgImage        unreadMsg        widgetDefault
+    option add *MailBox*readMsgImage          eyeGray16        widgetDefault
+    option add *MailBox*unreadMsgImage        eyeBlue16        widgetDefault
     option add *MailBox*wbIcon11Image         wbIcon11         widgetDefault
     option add *MailBox*wbIcon13Image         wbIcon13         widgetDefault
 
@@ -78,7 +78,7 @@ namespace eval ::MailBox:: {
     # Running id for incoming messages; never reused.
     variable uidmsg 1000
     
-    variable tableUid2Key
+    variable tableUid2Item
 
     # The actual mailbox content.
     # Content: {subject from date isread uidmsg message ?-key value ...?}
@@ -93,20 +93,6 @@ namespace eval ::MailBox:: {
 	message     5
 	opts        6
     }
-    
-    # Keep a level of abstraction between column index and name.
-    # Columns: {iswb subject from secs(H) date isread(H) uidmsg(H)}
-    #    H=hidden
-    variable colindex
-    array set colindex {
-	iswb      0
-	subject   1
-	from      2
-	secs      3
-	date      4
-	isread    5
-	uidmsg    6
-    }
 }
 
 # MailBox::Init --
@@ -120,15 +106,6 @@ proc ::MailBox::Init { } {
     TranslateAnyVer1ToCurrentVer
     
     # Icons for the mailbox.
-    set icons(readMsg) [image create photo -data {
-	R0lGODdhDgAKAKIAAP/////xsOjboMzMzHNzc2NjzjExYwAAACwAAAAADgAK
-	AAADJli6vFMhyinMm1NVAkPzxdZhkhh9kUmWBie8cLwZdG3XxEDsfM8nADs=
-    }]
-    set icons(unreadMsg) [image create photo -data {
-	R0lGODdhDgAKALMAAP/////xsOjboMzMzIHzeXNzc2Njzj7oGzXHFzExYwAA
-	AAAAAAAAAAAAAAAAAAAAACwAAAAADgAKAAAENtBIcpC8cpgQKOKgkGicB0pi
-	QazUUQVoUhhu/YXyZoNcugUvXsAnKBqPqYRyyVwWBoWodCqNAAA7
-    }]
     set icons(wbIcon11) [image create photo -data {
 	R0lGODlhEQALALMAANnZ2U9PT////wrXAKGhocbK/wAV/+Pl/zlK/46X/3F9
 	//8cRf/G0P+quf8ALv///yH5BAEAAAAALAAAAAARAAsAAARmMMhJawABCinh
@@ -233,7 +210,6 @@ proc ::MailBox::Build {args} {
     global  this prefs wDlgs
     
     variable locals  
-    variable colindex
     variable mailbox
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -281,11 +257,10 @@ proc ::MailBox::Build {args} {
       [option get $w wbIcon11Image {}] ::MailBox::icons]
     set locals(iconWb13)       [::Theme::GetImageFromExisting \
       [option get $w wbIcon13Image {}] ::MailBox::icons]
-    set locals(iconReadMsg)    [::Theme::GetImageFromExisting \
-      [option get $w readMsgImage {}] ::MailBox::icons]
-    set locals(iconUnreadMsg)  [::Theme::GetImageFromExisting \
-      [option get $w unreadMsgImage {}] ::MailBox::icons]
-    
+
+    set locals(iconReadMsg)   [::Theme::GetImage [option get $w readMsgImage {}]]
+    set locals(iconUnreadMsg) [::Theme::GetImage [option get $w unreadMsgImage {}]]
+
     set wtray $w.frall.tray
     ::ttoolbar::ttoolbar $wtray
     pack $wtray -side top -fill x
@@ -336,32 +311,9 @@ proc ::MailBox::Build {args} {
     frame $wfrmbox
     set wtbl    $wfrmbox.tbl
     set wysctbl $wfrmbox.ysc
-
-    # Columns: {iswb subject from secs(H) date isread(H) uidmsg(H)}
-    set columns  \
-      [list 0 {} 16 [mc Subject] 16 [mc From] 0 {} 0 [mc Date] 0 {} 0 {}]
-    tuscrollbar $wysctbl -orient vertical -command [list $wtbl yview]
-    tablelist::tablelist $wtbl -columns $columns  \
-      -yscrollcommand [list ::UI::ScrollSet $wysctbl \
-      [list grid $wysctbl -column 1 -row 0 -sticky ns]] \
-      -labelcommand [namespace current]::LabelCommand  \
-      -stretch all -width 60 -selectmode extended
-    # Pressed -labelbackground #8c8c8c
-    $wtbl columnconfigure $colindex(iswb) \
-      -labelimage $locals(iconWb13)  \
-      -resizable 0 -align center -showarrow 0
-    $wtbl columnconfigure $colindex(date) \
-      -sortmode command  \
-      -sortcommand [namespace current]::SortTimeColumn
-    
-    # The -formatcommand gives an infinite loop :-(
-    # -formatcommand [namespace current]::FormatDateCmd
-    $wtbl columnconfigure $colindex(secs)   -hide 1
-    $wtbl columnconfigure $colindex(isread) -hide 1
-    $wtbl columnconfigure $colindex(uidmsg) -hide 1
-    foreach {key value} [array get colindex] {
-	$wtbl columnconfigure $value -name $key
-    }
+	
+    tuscrollbar $wysctbl -orient vertical -command [list $wtbl yview]	
+    TreeCtrl $wtbl $wysctbl
     
     grid  $wtbl     -column 0 -row 0 -sticky news
     grid  $wysctbl  -column 1 -row 0 -sticky ns
@@ -417,26 +369,91 @@ proc ::MailBox::Build {args} {
     # Make selection available in text widget but not editable!
     # Seems to stop the tablelist from getting focus???
     #$wtextmsg bind <Key> break
-
-    # Special bindings for the tablelist.
-    set tag [$wtbl bodytag]
-    bind $tag  <Button-1> {+ focus %W}
-    bind $tag  <Double-1>           [namespace current]::DoubleClickMsg
-    bind $tag  <KeyPress-BackSpace> [namespace current]::TrashMsg
-    bind $wtbl <<ListboxSelect>>    [namespace current]::SelectMsg
     
-    LabelCommand $wtbl $colindex(secs)
+    # Default sorting.
+    HeaderCmd $wtbl cDate
     
     set locals(updateDateid) [after $locals(updateDatems) \
       [list [namespace current]::UpdateDateAndTime $wtbl]]
 }
 
+# MailBox::TreeCtrl --
+# 
+#       Build and configure a treectrl widget.
 
-proc ::MailBox::CloseHook {wclose} {
+proc ::MailBox::TreeCtrl {T wysc} {
+    global  this
+    variable locals  
+    variable sortColumn
     
-    set result ""
-    ShowHide -visible 0
-    return stop
+    treectrl $T -usetheme 1 -selectmode extended  \
+      -showroot 0 -showrootbutton 0 -showbuttons 0 -showlines 0  \
+      -yscrollcommand [list ::UI::ScrollSet $wysc \
+      [list grid $wysc -column 1 -row 0 -sticky ns]]  \
+      -borderwidth 0 -highlightthickness 0
+        
+    # This is a dummy option.
+    set stripeBackground [option get $T stripeBackground {}]
+    set stripes [list $stripeBackground {}]
+    set bd [option get $T columnBorderWidth {}]
+
+    $T column create -tag cWhiteboard -image $locals(iconWb13)  \
+      -itembackground $stripes -resize 0 -borderwidth $bd
+    $T column create -tag cSubject -expand 1 -text [mc Subject] \
+      -itembackground $stripes -button 1 -borderwidth $bd
+    $T column create -tag cFrom    -expand 1 -text [mc From]    \
+      -itembackground $stripes -button 1 -squeeze 1 -borderwidth $bd
+    $T column create -tag cDate    -expand 1 -text [mc Date]    \
+      -itembackground $stripes -button 1 -arrow up -borderwidth $bd
+    $T column create -tag cSecs -visible 0
+    $T column create -tag cRead -visible 0
+    $T column create -tag cUid  -visible 0
+
+    # State for a read message
+    $T state define read
+
+    # State for an unread message.
+    $T state define unread
+
+    set fill    [list $this(sysHighlight) {selected focus} gray {selected !focus}]
+    set suImage [list $locals(iconReadMsg) {read} $locals(iconUnreadMsg) {unread}]
+    set suFont  [list CociSmallFont read CociSmallBoldFont unread]
+    
+    $T element create eBorder rect -open nw -outline gray -outlinewidth 1 \
+      -fill $fill -showfocus 1
+    $T element create eText     text -lines 1 -font $suFont
+    $T element create eImageEye image -image $suImage
+    $T element create eImageWb  image
+    
+    set S [$T style create styText]
+    $T style elements $S {eBorder eText}
+    $T style layout $S eBorder -detach yes -iexpand xy
+    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
+    
+    set S [$T style create styImage]
+    $T style elements $S {eBorder eImageWb}
+    $T style layout $S eBorder -detach yes -iexpand xy
+    $T style layout $S eImageWb -padx 4 -squeeze x -expand ns
+
+    set S [$T style create stySubject]
+    $T style elements $S {eBorder eImageEye eText}
+    $T style layout $S eBorder -detach yes -iexpand xy
+    $T style layout $S eImageEye -padx 4 -squeeze x -expand ns
+    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
+
+    set S [$T style create styTag]
+    $T style elements $S {eText}
+    
+    $T configure -defaultstyle {styImage stySubject styText styText  \
+      styTag styTag styTag}
+
+    $T notify install <Header-invoke>
+    $T notify bind $T <Header-invoke> [list [namespace current]::HeaderCmd %T %C]
+    $T notify bind $T <Selection> [list [namespace current]::Selection %T]
+    bind $T <Double-1>            [list [namespace current]::DoubleClickMsg %W]
+    bind $T <KeyPress-BackSpace>  [namespace current]::TrashMsg
+    
+    set sortColumn 0
 }
 
 # MailBox::InsertRow --
@@ -446,12 +463,10 @@ proc ::MailBox::CloseHook {wclose} {
 proc ::MailBox::InsertRow {wtbl row i} {
     
     variable mailboxindex
-    variable colindex
     variable locals
-    variable tableUid2Key
+    variable tableUid2Item
     
     # row:   {subject from date isread uidmsg message ?-key value ...?}
-    # item:  {iswb subject from secs(H) date isread(H) uidmsg(H)}
     
     # Does this message contain a whiteboard message?
     set haswb 0
@@ -469,52 +484,186 @@ proc ::MailBox::InsertRow {wtbl row i} {
     set date    [lindex $row $mailboxindex(date)]
     set isread  [lindex $row $mailboxindex(isread)]
     set uidmsg  [lindex $row $mailboxindex(uidmsg)]
-    set secs      [clock scan $date]
-    set smartdate [::Utils::SmartClockFormat $secs]
+    set secs    [clock scan $date]
+    set smartdate [::Utils::SmartClockFormat $secs -showsecs 0]
+
+    set T $wtbl
+    set item [$T item create]
+    $T item text $item  \
+      cSubject $subject cFrom $from   cDate $smartdate  \
+      cSecs    $secs    cRead $isread cUid  $uidmsg
+    $T item lastchild root $item
     
-    set item [list {} $subject $from $secs $smartdate $isread $uidmsg]
-    
-    $wtbl insert end $item
-    set tableUid2Key($uidmsg) [$wtbl getkeys end]
     if {$haswb} {
-	$wtbl cellconfigure "${i},$colindex(iswb)" -image $locals(iconWb11)
+	$T item element configure $item cWhiteboard eImageWb -image $locals(iconWb11)
     }
-    set colsub $colindex(subject)
-    if {[lindex $item $colindex(isread)] == 0} {
-	$wtbl rowconfigure $i -font CociSmallBoldFont
-	$wtbl cellconfigure "${i},${colsub}" -image $locals(iconUnreadMsg)
+    if {$isread} {
+	$T item state set $item read
     } else {
-	$wtbl rowconfigure $i -font CociSmallFont
-	$wtbl cellconfigure "${i},${colsub}" -image $locals(iconReadMsg)
+	$T item state set $item unread
+    }
+    set tableUid2Item($uidmsg) $item
+}
+
+# MailBox::Selection --
+# 
+#       Callback for treectrl <Selection>
+       
+proc ::MailBox::Selection {T} {
+    variable locals
+    variable mailbox
+    
+    set wtextmsg $locals(wtextmsg)
+    set wtbl     $locals(wtbl)
+    set w        $locals(w)
+    set wtray    $locals(wtray)
+    
+    set n [$T selection count]
+
+    if {$n == 0} {
+	$wtray buttonconfigure reply   -state disabled
+	$wtray buttonconfigure forward -state disabled
+	$wtray buttonconfigure save    -state disabled
+	$wtray buttonconfigure print   -state disabled
+	$wtray buttonconfigure trash   -state disabled
+	MsgDisplayClear
+    } elseif {$n == 1} {
+	set item [$T selection get]
+	set jid3 [$T item element cget $item cFrom eText -text]
+	set uid  [$T item element cget $item cUid  eText -text]
+	jlib::splitjid $jid3 jid2 res
+		
+	# Mark as read.
+	MarkMsgAsRead $uid
+	DisplayMsg $uid
+	
+	# Configure buttons.
+	$wtray buttonconfigure reply   -state normal
+	$wtray buttonconfigure forward -state normal
+	$wtray buttonconfigure save    -state normal
+	$wtray buttonconfigure print   -state normal
+	$wtray buttonconfigure trash   -state normal
+	
+	# If any whiteboard stuff in message...
+	set uidcan [GetCanvasHexUID $uid]
+	set svgElem [GetAnySVGElements $mailbox($uid)]
+
+	::Debug 2 "::MailBox::Selection  uidcan=$uidcan, svgElem='$svgElem'"
+	 
+	# The "raw" protocol stores the canvas in a separate file indicated by
+	# the -canvasuid key in the message list.
+	# The SVG protocol stores the complete x element in the mailbox 
+	# -x listOfElements
+	
+	# The "raw" protocol.
+	if {[string length $uidcan] > 0} {	
+	    DisplayRawMessage $jid3 $uidcan
+	} elseif {[llength $svgElem]} {
+	    DisplayXElementSVG $jid3 $svgElem
+	}
+    } else {
+	
+	# If multiple selected items.
+	$wtray buttonconfigure reply   -state disabled
+	$wtray buttonconfigure forward -state disabled
+	$wtray buttonconfigure save    -state disabled
+	$wtray buttonconfigure print   -state disabled
+	MsgDisplayClear
     }
 }
 
-proc ::MailBox::FormatDateCmd {secs} {
+proc ::MailBox::HeaderCmd {T C} {
+    variable sortColumn
+        
+    if {[$T column compare $C == $sortColumn]} {
+	if {[$T column cget $sortColumn -arrow] eq "down"} {
+	    set order -increasing
+	    set arrow up
+	} else {
+	    set order -decreasing
+	    set arrow down
+	}
+    } else {
+	if {[$T column cget $sortColumn -arrow] eq "down"} {
+	    set order -decreasing
+	    set arrow down
+	} else {
+	    set order -increasing
+	    set arrow up
+	}
+	$T column configure $sortColumn -arrow none
+	set sortColumn $C
+    }
+    $T column configure $C -arrow $arrow
     
-    set displaytime [::MailBox::FormatDateCmd $secs]
-    return [::MailBox::FormatDateCmd $secs]
+    switch [$T column cget $C -tag] {
+	cDate {
+	    set cmd [list [namespace current]::SortDate $T]
+	    $T item sort root $order -column $C -command $cmd
+	}
+	default {
+	    $T item sort root $order -column $C -dictionary
+	}
+    }
+    return
 }
 
-proc ::MailBox::UpdateDateAndTime {wtbl} {
+proc ::MailBox::SortDate {T item1 item2} {
+    
+    set secs1 [$T item element cget $item1 cSecs eText -text]
+    set secs2 [$T item element cget $item2 cSecs eText -text]
+    
+    if {$secs1 > $secs2} {
+	return 1
+    } elseif {$secs1 == $secs2} {
+	return 0
+    } else {
+	return -1
+    }
+}
+
+proc ::MailBox::UpdateDateAndTime {T} {
     
     variable mailbox
-    variable colindex
     variable mailboxindex
     variable locals
     
-    # Loop through the dates of all messages and update.
-    set size [$wtbl size]
-    for {set ind 0} {$ind < $size} {incr ind} {
-	set uidmsg [lindex [$wtbl get $ind] $colindex(uidmsg)]
-	set secs [clock scan [lindex $mailbox($uidmsg) $mailboxindex(date)]]
-	set smartdate [::Utils::SmartClockFormat $secs]
-	set cell $ind,$colindex(date)
-	$wtbl cellconfigure $cell -text $smartdate
+    foreach item [$T item children root] {
+	set uid  [$T item element cget $item cUid eText -text]
+	set secs [$T item element cget $item cSecs eText -text]
+	set smartdate [::Utils::SmartClockFormat $secs -showsecs 0]
+	$T item element configure $item cDate eText -text $smartdate
     }
     
     # Reschedule ourselves.
     set locals(updateDateid) [after $locals(updateDatems) \
-      [list [namespace current]::UpdateDateAndTime $wtbl]]
+      [list [namespace current]::UpdateDateAndTime $T]]
+}
+
+proc ::MailBox::MarkMsgAsRead {uid} {
+    global  wDlgs
+    variable mailbox
+    variable mailboxindex
+    variable locals
+    variable tableUid2Item
+    
+    if {[lindex $mailbox($uid) $mailboxindex(isread)] == 0} {
+	lset mailbox($uid) $mailboxindex(isread) 1
+	
+	if {[winfo exists $wDlgs(jinbox)]} {
+	    set T $locals(wtbl)
+	    set item $tableUid2Item($uid)
+	    $T item state set $item read
+	}
+	set locals(haveEdits) 1
+    }
+}
+
+proc ::MailBox::CloseHook {wclose} {
+    
+    set result ""
+    ShowHide -visible 0
+    return stop
 }
 
 proc ::MailBox::GetToplevel { } {    
@@ -603,31 +752,6 @@ proc ::MailBox::GetCanvasHexUID {id} {
 	}
     }
     return $ans
-}
-
-proc ::MailBox::MarkMsgAsRead {uid} {
-    global  wDlgs
-    variable mailbox
-    variable mailboxindex
-    variable colindex
-    variable locals
-    variable tableUid2Key
-    
-    if {[lindex $mailbox($uid) $mailboxindex(isread)] == 0} {
-	lset mailbox($uid) $mailboxindex(isread) 1
-	
-	if {[winfo exists $wDlgs(jinbox)]} {
-	    set colsub $colindex(subject)
-	    set wtbl $locals(wtbl)
-	    
-	    # Map uid to row (item) index.
-	    set key $tableUid2Key($uid)
-	    set item [$wtbl index k${key}]
-	    $wtbl rowconfigure $item -font CociSmallFont
-	    $wtbl cellconfigure "${item},${colsub}" -image $locals(iconReadMsg)
-	}
-	set locals(haveEdits) 1
-    }
 }
 
 # MailBox::MessageHook --
@@ -836,44 +960,38 @@ proc ::MailBox::PutMessageInInbox {row} {
     }
 }
 
-proc ::MailBox::SaveMsg { } {
-    global  this
-    
-    variable colindex
+proc ::MailBox::SaveMsg { } {    
     variable locals
     
     set wtextmsg $locals(wtextmsg)
-    set wtbl $locals(wtbl)
+    set T $locals(wtbl)
     
     # Need selected line here.
-    set item [$wtbl curselection]
-    if {[string length $item] == 0} {
+    if {[$T selection count] != 1} {
 	return
     }
-    set row [$wtbl get $item]
-    set from [lindex $row $colindex(from)]
+    set item [$T selection get]
+    set from [$T item element cget $item cFrom eText -text]
     jlib::splitjid $from jid2 res
-    set ans [tk_getSaveFile -title {Save message} -initialfile ${jid2}.txt]
-    if {[string length $ans] > 0} {
+    
+    set ans [tk_getSaveFile -title {Save message} -initialfile $jid2.txt]
+    if {[string length $ans]} {
 	if {[catch {open $ans w} fd]} {
 	    ::UI::MessageBox -title {Open Failed} -parent $wtbl -type ok \
 	      -message "Failed opening file [file tail $ans]: $fd"
 	    return
 	}
 	#fconfigure $fd -encoding utf-8
-	set subject [lindex $row $colindex(subject)]
-	set time [lindex $row $colindex(secs)]
-	set time [clock format [clock scan $time]]
+	set subject [$T item element cget $item cSubject eText -text]
+	set secs    [$T item element cget $item cSecs eText -text]
+	set date [::Utils::SmartClockFormat $secs -showsecs 0]
 	set maxw 14
 	puts $fd [format "%-*s %s" $maxw "From:" $from]
 	puts $fd [format "%-*s %s" $maxw "Subject:" $subject]
-	puts $fd [format "%-*s %s" $maxw "Time:" $time]
+	puts $fd [format "%-*s %s" $maxw "Time:" $date]
 	puts $fd "\n"
 	puts $fd [::Text::TransformToPureText $wtextmsg]
 	close $fd
-	if {[string equal $this(platform) "macintosh"]} {
-	    file attributes $ans -type TEXT -creator ttxt
-	}
     }
 }
 
@@ -882,123 +1000,45 @@ proc ::MailBox::TrashMsg { } {
     
     variable locals
     variable mailbox
-    variable colindex
     
     set locals(haveEdits) 1
-
-    # Need selected line here.
-    set wtbl  $locals(wtbl)
-    set items [$wtbl curselection]
-    set w     $locals(w)
-    set wtray $locals(wtray)
-    set lastitem [lindex $items end]
-    if {[llength $items] == 0} {
+    set T $locals(wtbl)
+    
+    if {![$T selection count]} {
 	return
     }
-    set last [expr [$wtbl size] - 1]
+    set items [$T selection get]
+    set select [$T item id "root lastchild"]
     
-    # Careful, delete in reversed order!
-    foreach item [lsort -integer -decreasing $items] {
-	set id [lindex [$wtbl get $item] $colindex(uidmsg)]
-	set uid [GetCanvasHexUID $id]
-	if {[string length $uid] > 0} {
-	    set fileName ${uid}.can
+    foreach item $items {
+	set uid  [$T item element cget $item cUid eText -text]
+	set cuid [GetCanvasHexUID $uid]
+	if {$cuid ne ""} {
+	    set fileName $cuid.can
 	    set filePath [file join $this(inboxCanvasPath) $fileName]
 	    catch {file delete $filePath}
 	}
-	unset mailbox($id)
-	$wtbl delete $item
-    }
-    
-    # Make new selection if not empty.
-    if {[$wtbl size] > 0} {
-	if {$lastitem == $last} {
-	    set sel [expr [$wtbl size] - 1]
-	} else {
-	    set sel [expr $lastitem + 1 - [llength $items]]
+	unset mailbox($uid)
+	set select [$T item id "$item below"]
+	if {$select eq ""} {
+	    set select [$T item id "$item above"]
 	}
-	$wtbl selection set $sel
-	SelectMsg 
-    } else {
-	$wtray buttonconfigure reply -state disabled
+	$T item delete $item
+    }
+
+    # Make new selection if not empty. Root item included!
+    if {[$T item count] == 1} {
+	set wtray $locals(wtray)
+
+	$wtray buttonconfigure reply   -state disabled
 	$wtray buttonconfigure forward -state disabled
-	$wtray buttonconfigure save -state disabled
-	$wtray buttonconfigure print -state disabled
-	$wtray buttonconfigure trash -state disabled
+	$wtray buttonconfigure save    -state disabled
+	$wtray buttonconfigure print   -state disabled
+	$wtray buttonconfigure trash   -state disabled
 	MsgDisplayClear
 	::Jabber::UI::MailBoxState empty
-    }
-}
-
-# MailBox::SelectMsg --
-# 
-#       Executed when selecting a message in the inbox.
-#       Handles display of message, whiteboard, etc.
-#       
-#    mailbox(uid) = {subject from date isread uid message ?-key value ...?}
-
-proc ::MailBox::SelectMsg { } {
-    global  prefs wDlgs
-
-    variable locals
-    variable mailbox
-    variable mailboxindex
-    variable colindex
-    upvar ::Jabber::jstate jstate
-    
-    set wtextmsg $locals(wtextmsg)
-    set wtbl     $locals(wtbl)
-    set w        $locals(w)
-    set wtray    $locals(wtray)
-    set item     [$wtbl curselection]
-    if {[llength $item] == 0} {
-	return
-    } elseif {[llength $item] > 1} {
-	
-	# If multiple selected items.
-	$wtray buttonconfigure reply -state disabled
-	$wtray buttonconfigure forward -state disabled
-	$wtray buttonconfigure save -state disabled
-	$wtray buttonconfigure print -state disabled
-	MsgDisplayClear
-	return
-    }
-    set row [$wtbl get $item]
-    set uid [lindex $row $colindex(uidmsg)]
-    
-    # 2-tier jid.
-    #set jid2 [lindex $row $colindex(from)]
-        
-    # 3-tier jid.
-    set jid3 [lindex $mailbox($uid) $mailboxindex(from)]
-    jlib::splitjid $jid3 jid2 res
-
-    # Mark as read.
-    MarkMsgAsRead $uid
-    DisplayMsg $uid
-    
-    # Configure buttons.
-    $wtray buttonconfigure reply   -state normal
-    $wtray buttonconfigure forward -state normal
-    $wtray buttonconfigure save    -state normal
-    $wtray buttonconfigure print   -state normal
-    $wtray buttonconfigure trash   -state normal
-    
-    # If any whiteboard stuff in message...
-    set uidcan [GetCanvasHexUID $uid]
-    set svgElem [GetAnySVGElements $mailbox($uid)]
-    ::Debug 2 "::MailBox::SelectMsg  uidcan=$uidcan, svgElem='$svgElem'"
-     
-    # The "raw" protocol stores the canvas in a separate file indicated by
-    # the -canvasuid key in the message list.
-    # The SVG protocol stores the complete x element in the mailbox 
-    # -x listOfElements
-    
-    # The "raw" protocol.
-    if {[string length $uidcan] > 0} {	
-	DisplayRawMessage $jid3 $uidcan
-    } elseif {[llength $svgElem]} {
-	DisplayXElementSVG $jid3 $svgElem
+    } elseif {$select ne ""} {
+	$T selection add $select
     }
 }
 
@@ -1097,67 +1137,32 @@ proc ::MailBox::MakeWhiteboard {jid2} {
     return $w
 }
 
-proc ::MailBox::DoubleClickMsg { } {
+proc ::MailBox::DoubleClickMsg {T} {
     variable locals
     variable mailbox
     variable mailboxindex
-    variable colindex
     upvar ::Jabber::jprefs jprefs
-    
-    set wtbl $locals(wtbl)
-    set item [$wtbl curselection]
-    if {[string length $item] == 0} {
+        
+    if {[$T selection count] != 1} {
 	return
     }
-    set row [$wtbl get $item]
-    set id [lindex $row $colindex(uidmsg)]
+    set item [$T selection get]
+    set uid  [$T item element cget $item cUid eText -text]
 
     # We shall have the original, unparsed, text here.
-    set body    [lindex $mailbox($id) $mailboxindex(message)]
-    set subject [lindex $mailbox($id) $mailboxindex(subject)]
-    set to      [lindex $mailbox($id) $mailboxindex(from)]
-    set date    [lindex $mailbox($id) $mailboxindex(date)]
+    set body    [lindex $mailbox($uid) $mailboxindex(message)]
+    set subject [lindex $mailbox($uid) $mailboxindex(subject)]
+    set to      [lindex $mailbox($uid) $mailboxindex(from)]
+    set date    [lindex $mailbox($uid) $mailboxindex(date)]
     
     if {[string equal $jprefs(inbox2click) "newwin"]} {
-	::GotMsg::GotMsg $id
+	::GotMsg::GotMsg $uid
     } elseif {[string equal $jprefs(inbox2click) "reply"]} {
 	if {![regexp -nocase {^ *re:} $subject]} {
 	    set subject "Re: $subject"
 	}	
 	::NewMsg::Build -to $to -subject $subject  \
 	  -quotemessage $body -time $date
-    }
-}
-
-proc ::MailBox::LabelCommand {w column} {
-    variable locals    
-    
-    tablelist::sortByColumn $w $column
-}
-
-proc ::MailBox::SortTimeColumn {tm1 tm2} {
-    variable locals
-    
-    if {0} {
-	# when -formatcommand is used.
-	if {$tm1 > $tm2} {
-	    return 1
-	} elseif {$tm1 == $tm2} {
-	    return 0
-	} else {
-	    return -1
-	}    
-    }
-
-    # 'clock scan' shall take care of formats like 'today' etc.
-    set long1 [clock scan $tm1]
-    set long2 [clock scan $tm2]
-    if {$long1 > $long2} {
-	return 1
-    } elseif {$long1 == $long2} {
-	return 0
-    } else {
-	return -1
     }
 }
 
@@ -1198,22 +1203,20 @@ proc ::MailBox::ReplyTo { } {
     variable locals
     variable mailbox
     variable mailboxindex
-    variable colindex
     upvar ::Jabber::jstate jstate
     
-    set wtbl $locals(wtbl)
-    set item [$wtbl curselection]
-    if {[string length $item] == 0} {
+    set T $locals(wtbl)
+    if {[$T selection count] != 1} {
 	return
     }
-    set row [$wtbl get $item]
-    set id [lindex $row $colindex(uidmsg)]
+    set item [$T selection get]
+    set uid  [$T item element cget $item cUid eText -text]
 
     # We shall have the original, unparsed, text here.
-    set subject [lindex $mailbox($id) $mailboxindex(subject)]
-    set from    [lindex $mailbox($id) $mailboxindex(from)]
-    set date    [lindex $mailbox($id) $mailboxindex(date)]
-    set body    [lindex $mailbox($id) $mailboxindex(message)]
+    set subject [lindex $mailbox($uid) $mailboxindex(subject)]
+    set from    [lindex $mailbox($uid) $mailboxindex(from)]
+    set date    [lindex $mailbox($uid) $mailboxindex(date)]
+    set body    [lindex $mailbox($uid) $mailboxindex(message)]
     
     set to [::Jabber::JlibCmd getrecipientjid $from]
     if {![regexp -nocase {^ *re:} $subject]} {
@@ -1227,21 +1230,19 @@ proc ::MailBox::ForwardTo { } {
     variable locals
     variable mailbox
     variable mailboxindex
-    variable colindex
     
-    set wtbl $locals(wtbl)
-    set item [$wtbl curselection]
-    if {[string length $item] == 0} {
+    set T $locals(wtbl)
+    if {[$T selection count] != 1} {
 	return
     }
-    set row [$wtbl get $item]
-    set id [lindex $row $colindex(uidmsg)]
+    set item [$T selection get]
+    set uid  [$T item element cget $item cUid eText -text]
 
     # We shall have the original, unparsed, text here.
-    set subject [lindex $mailbox($id) $mailboxindex(subject)]
-    set from    [lindex $mailbox($id) $mailboxindex(from)]
-    set date    [lindex $mailbox($id) $mailboxindex(date)]
-    set body    [lindex $mailbox($id) $mailboxindex(message)]
+    set subject [lindex $mailbox($uid) $mailboxindex(subject)]
+    set from    [lindex $mailbox($uid) $mailboxindex(from)]
+    set date    [lindex $mailbox($uid) $mailboxindex(date)]
+    set body    [lindex $mailbox($uid) $mailboxindex(message)]
 
     set subject "Forwarded: $subject"
     ::NewMsg::Build -subject $subject -forwardmessage $body -time $date

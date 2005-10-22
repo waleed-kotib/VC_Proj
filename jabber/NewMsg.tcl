@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.67 2005-09-21 09:53:23 matben Exp $
+# $Id: NewMsg.tcl,v 1.68 2005-10-22 14:26:21 matben Exp $
 
 package require ui::entryex
 
@@ -334,7 +334,7 @@ proc ::NewMsg::Build {args} {
     ttk::frame $frsub
     pack  $frsub -side top -fill x
     ttk::label $frsub.lsub -style Small.TLabel \
-      -text "[mc Subject]:" -anchor e -takefocus 0 -padx 2
+      -text "[mc Subject]:" -anchor e -takefocus 0 -padding {2 0}
     ttk::entry $wsubject -font CociSmallFont \
       -textvariable [namespace current]::locals($w,subject)
     pack  $frsub.lsub -side left

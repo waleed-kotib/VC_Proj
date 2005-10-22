@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.48 2005-09-23 14:27:10 matben Exp $
+# $Id: Profiles.tcl,v 1.49 2005-10-22 14:26:21 matben Exp $
 
 package provide Profiles 1.0
 
@@ -366,7 +366,7 @@ proc ::Profiles::ImportFromJserver { } {
 
 proc ::Profiles::BuildHook {wtree nbframe} {
     
-    $wtree newitem {Jabber {User Profiles}} -text [mc {User Profiles}]
+    ::Preferences::NewTableItem {Jabber {User Profiles}} [mc {User Profiles}]
 
     set wpage [$nbframe page {User Profiles}]    
     BuildPage $wpage

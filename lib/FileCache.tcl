@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.22 2005-08-14 07:17:55 matben Exp $
+# $Id: FileCache.tcl,v 1.23 2005-10-22 14:26:21 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -582,10 +582,10 @@ proc ::FileCache::InitPrefsHook { } {
 
 proc ::FileCache::BuildPrefsHook {wtree nbframe} {
     
-    if {![$wtree isitem Whiteboard]} {
-	$wtree newitem {Whiteboard} -text [mc Whiteboard]
+    if {![::Preferences::HaveTableItem Whiteboard]} {
+	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
     }
-    $wtree newitem {Whiteboard {File Cache}} -text [mc {File Cache}]
+    ::Preferences::NewTableItem {Whiteboard {File Cache}} [mc {File Cache}]
 
     set wpage [$nbframe page {File Cache}]    
     ::FileCache::BuildPage $wpage
@@ -619,7 +619,7 @@ proc ::FileCache::BuildPage {page} {
     ttk::entry $frca.emb \
       -width 6 -textvariable [namespace current]::tmpPrefs(mbsize)
     ttk::label $frca.mb -text [mc {MBytes}]
-    ttk::button $frca.bt -padx 12 -text [mc {Clear Disk Cache Now}] \
+    ttk::button $frca.bt -text [mc {Clear Disk Cache Now}] \
       -command [namespace current]::ClearCache
     
     pack  $frca.dsk  $frca.emb  $frca.mb  $frca.bt  -side left
@@ -627,7 +627,7 @@ proc ::FileCache::BuildPage {page} {
     set frfo $pca.fo
     pack [ttk::frame $frfo] -pady 2
     pack [ttk::label $frfo.fo -text "[mc {Cache folder}]:"] -side left
-    pack [ttk::button $frfo.bt -padx 6 -text "[mc {Choose}]..." \
+    pack [ttk::button $frfo.bt -text "[mc {Choose}]..." \
       -command [namespace current]::SetCachePath]  \
       -side right 
         

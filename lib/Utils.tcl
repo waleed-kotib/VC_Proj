@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.51 2005-09-20 14:09:51 matben Exp $
+# $Id: Utils.tcl,v 1.52 2005-10-22 14:26:21 matben Exp $
 
 package provide Utils 1.0
 
@@ -135,6 +135,9 @@ proc ::Utils::GetDomainNameFromUrl {url} {
 # Arguments:
 #       secs        Number of seconds since system defined time.
 #                   This must be local time.
+#       args:   -detail
+#               -weekdays
+#               -showsecs
 #       
 # Results:
 #       nice time string that still can be used by 'clock scan'
@@ -144,6 +147,7 @@ proc ::Utils::SmartClockFormat {secs args} {
     array set opts {
 	-weekdays 0
 	-detail   0
+	-showsecs 1
     }
     array set opts $args
     
@@ -173,11 +177,17 @@ proc ::Utils::SmartClockFormat {secs args} {
 	    set date [clock format $secs -format "%y-%m-%d"]
 	}
     }
+    if {$opts(-showsecs)} {
+	set fmt "%H:%M:%S"
+    } else {
+	set fmt "%H:%M"
+    }
+
     if {$opts(-detail) && ($days == 0)} {
 	set now [clock seconds]
 	set minutes [expr ($now - $secs)/60]
 	if {$minutes == 0} {
-	    set time [clock format $secs -format "%H:%M:%S"]
+	    set time [clock format $secs -format $fmt]
 	} elseif {$minutes == 1} {
 	    set time "one minute ago"
 	} elseif {$minutes == 2} {
@@ -187,10 +197,10 @@ proc ::Utils::SmartClockFormat {secs args} {
 	} elseif {$minutes < 60} {
 	    set time "$minutes minutes ago"
 	} else {
-	    set time [clock format $secs -format "%H:%M:%S"]
+	    set time [clock format $secs -format $fmt]
 	}
     } else {	
-	set time [clock format $secs -format "%H:%M:%S"]
+	set time [clock format $secs -format $fmt]
     }
     return "$date $time"
 }

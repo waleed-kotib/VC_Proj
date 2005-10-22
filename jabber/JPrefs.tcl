@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.30 2005-10-07 08:45:43 matben Exp $
+# $Id: JPrefs.tcl,v 1.31 2005-10-22 14:26:21 matben Exp $
 
 package require ui::fontselector
 
@@ -135,10 +135,9 @@ proc ::JPrefs::InitPrefsHook { } {
 
 proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber {Auto Away}} -text [mc {Auto Away}]
-    #$wtree newitem {Jabber {Personal Info}} -text [mc {Personal Info}]
-    $wtree newitem {Jabber Appearance} -text [mc Appearance]
-    $wtree newitem {Jabber Customization} -text [mc Customization]
+    ::Preferences::NewTableItem {Jabber {Auto Away}} [mc {Auto Away}]
+    ::Preferences::NewTableItem {Jabber Appearance} [mc Appearance]
+    ::Preferences::NewTableItem {Jabber Customization} [mc Customization]
 
     # Auto Away page -------------------------------------------------------
     set wpage [$nbframe page {Auto Away}]
@@ -184,15 +183,13 @@ proc ::JPrefs::BuildAutoAwayPage {page} {
     ttk::label $waa.lab -text [mc prefaaset]
 
     ttk::frame $waf
-    ttk::checkbutton $waf.lminaw -anchor w \
-      -text [mc prefminaw]  \
+    ttk::checkbutton $waf.lminaw -text [mc prefminaw]  \
       -variable [namespace current]::tmpJPrefs(autoaway)
     ttk::entry $waf.eminaw -font CociSmallFont  \
       -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
       -textvariable [namespace current]::tmpJPrefs(awaymin)
-    ttk::checkbutton $waf.lminxa -anchor w \
-      -text [mc prefminea]  \
+    ttk::checkbutton $waf.lminxa -text [mc prefminea]  \
       -variable [namespace current]::tmpJPrefs(xautoaway)
     ttk::entry $waf.eminxa -font CociSmallFont \
       -width 3  \
@@ -361,16 +358,17 @@ proc ::JPrefs::BuildAppearancePage {page} {
     ttk::checkbutton $wap.bgim -text [mc prefrostbgim] \
       -variable [namespace current]::tmpJPrefs(rost,useBgImage)
     ttk::button $wap.bgpick -text "[mc {Pick}]..."  \
-      -command [list [namespace current]::PickBgImage rost] -font CociSmallFont
+      -command [list [namespace current]::PickBgImage rost] -style Small.TButton
     ttk::button $wap.bgdefk -text [mc {Default}]  \
-      -command [list [namespace current]::DefaultBgImage rost] -font CociSmallFont
+      -command [list [namespace current]::DefaultBgImage rost] -style Small.TButton
 	    
     # Chat font.
     ttk::label  $wap.lfont -text [mc prefcufont]
-    ttk::button $wap.btfont -text "[mc Pick]..." -font CociSmallFont \
+    ttk::button $wap.btfont -text "[mc Pick]..." -style Small.TButton \
       -command [namespace current]::PickFont
     ttk::button $wap.dfont -text [mc {Default}]  \
-      -command [list set [namespace current]::tmpJprefs(chatFont) ""] -font CociSmallFont
+      -command [list set [namespace current]::tmpJprefs(chatFont) ""]  \
+      -style Small.TButton
 
     set wthe $wap.the
     ttk::frame $wthe
@@ -409,7 +407,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	ttk::label $wop.l -text "[mc {Set windows opacity}]:"
 	ttk::scale $wop.s -orient horizontal -from 50 -to 100 \
 	  -variable [namespace current]::tmpPrefs(opacity) \
-	  -value $tmpPrefs(opacity) -font CociSmallFont
+	  -value $tmpPrefs(opacity)
 
 	grid  $wop.l  $wop.s
     }

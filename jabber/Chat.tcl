@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.135 2005-10-15 07:03:35 matben Exp $
+# $Id: Chat.tcl,v 1.136 2005-10-22 14:26:21 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -956,7 +956,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     
     # D =
     ttk::label $wtop.l -style Small.TLabel \
-      -text "[mc Subject]:" -padx 4
+      -text "[mc Subject]:" -padding {4 0}
     ttk::entry $wtop.e -font CociSmallFont \
       -textvariable $chattoken\(subject)
     ttk::frame $wtop.p1 -width 8
@@ -2340,7 +2340,7 @@ proc ::Chat::InitPrefsHook { } {
 
 proc ::Chat::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber Chat} -text [mc Chat]
+    ::Preferences::NewTableItem {Jabber Chat} [mc Chat]
     
     set wpage [$nbframe page {Chat}]    
     ::Chat::BuildPrefsPage $wpage

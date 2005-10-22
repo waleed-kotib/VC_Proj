@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.50 2005-10-16 09:51:31 matben Exp $
+# $Id: Whiteboard.tcl,v 1.51 2005-10-22 14:26:21 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -2162,8 +2162,8 @@ proc ::WB::CreateColorSelector {w} {
     label $wfg   -image $wbicons(bwrect) -bd 0 -width 34 -height 24 -bg $fg
     label $wbg1  -image $wbicons(bwrect) -bd 0 -width 14 -height 12 -bg $bg
     label $wbg2  -image $wbicons(bwrect) -bd 0 -width 34 -height 12 -bg $bg
-    ttk::label $wbw   -image $wbicons(colorSelBW)   -width 12 -height 12
-    ttk::label $wswap -image $wbicons(colorSelSwap) -width 12 -height 12
+    ttk::label $wbw   -image $wbicons(colorSelBW)
+    ttk::label $wswap -image $wbicons(colorSelSwap)
     
     # The ttk::label seems to put an extra 2 pixel border. @@@ BAD
     set off 2

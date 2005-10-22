@@ -87,6 +87,14 @@
 *Tablelist.labelBorderWidth:         1
 *Tablelist.stripeBackground:         #dedeff
 *Tablelist.background:               white
+
+! some of these are dummies just to set column options etc.
+!
+*TreeCtrl.background:                white
+*TreeCtrl.Font:                      CociSmallFont
+*TreeCtrl.stripeBackground:          #dedeff
+*TreeCtrl.columnBorderWidth:         1
+
 *TToolbar.TLabel.font:               CociSmallFont
 *WaveLabel.background:               #cecece
 

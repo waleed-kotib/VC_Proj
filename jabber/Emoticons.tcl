@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.36 2005-10-10 12:58:05 matben Exp $
+# $Id: Emoticons.tcl,v 1.37 2005-10-22 14:26:21 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -540,7 +540,7 @@ proc  ::Emoticons::InitPrefsHook { } {
 
 proc ::Emoticons::BuildPrefsHook {wtree nbframe} {
 
-    $wtree newitem {Jabber Emoticons} -text [mc {Emoticons}]
+    ::Preferences::NewTableItem {Jabber Emoticons} [mc {Emoticons}]
     
     set wpage [$nbframe page {Emoticons}]    
     BuildPrefsPage $wpage
