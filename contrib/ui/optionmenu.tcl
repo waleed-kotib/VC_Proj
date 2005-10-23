@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.2 2005-10-02 12:44:41 matben Exp $
+# $Id: optionmenu.tcl,v 1.3 2005-10-23 13:40:21 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -88,10 +88,18 @@ snit::widgetadaptor ui::optionmenu::widget {
     }
     
     method maxwidth {} {
-	set W [winfo reqwidth $win]
-	set len  [font measure [$win cget -font] $menuVar]
-	set mlen [font measure [$win cget -font] $longest]
-	return [expr {$W - $len + $mlen + 8}]
+	if {0} {
+	    # This doesn't work in tile 0.7.1 since -font gone.
+	    set W [winfo reqwidth $win]
+	    set len  [font measure [$win cget -font] $menuVar]
+	    set mlen [font measure [$win cget -font] $longest]
+	}
+	
+	# Ugly!
+	ttk::menubutton $win._tmp -text $longest
+	set W [winfo reqwidth $win._tmp]
+	destroy $win._tmp
+	return [expr {$W + 8}]
     }
 }
 

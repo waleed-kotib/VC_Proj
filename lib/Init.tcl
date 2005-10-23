@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.26 2005-10-22 14:26:21 matben Exp $
+# $Id: Init.tcl,v 1.27 2005-10-23 13:40:21 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -416,7 +416,13 @@ proc ::Init::LoadPackages { } {
 	::Splash::SetMsg "[mc splashlook] tile..."
 	namespace eval ::tile {}
 	set ::tile::library [file join $this(binLibPath) tile]
-	if {[catch {uplevel #0 {package require tile 0.6}} msg]} {
+	
+	# Starting with tile 0.7.1 compatibility options are gone. Avoid!
+	# Note that -exact 0.6 wont work since it needs patch level (0.6.5).
+	set versions [package versions tile]
+	set version [lsearch -inline -glob $versions {0.6.*}]
+	
+	if {[catch {uplevel #0 [list package require -exact tile $version]} msg]} {
 	    tk_messageBox -icon error \
 	      -message "This application requires the tile package to work! $::errorInfo"
 	    exit
