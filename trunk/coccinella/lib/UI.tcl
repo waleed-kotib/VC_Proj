@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.104 2005-10-22 14:26:21 matben Exp $
+# $Id: UI.tcl,v 1.105 2005-10-23 13:40:22 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -38,18 +38,42 @@ namespace eval ::UI:: {
     # components stuff.
     variable menuSpecPublic
     set menuSpecPublic(wpaths) {}
+    
+    variable icons
 
     # The mac look-alike triangles.
-    set ::UI::icons(mactriangleopen) [image create photo -data {
+    set icons(mactriangleopen) [image create photo -data {
 	R0lGODlhCwALAPMAAP///97e3s7O/729vZyc/4yMjGNjzgAAAAAAAAAAAAAA
 	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQgMMhJq7316M1P
 	OEIoEkchHURKGOUwoWubsYVryZiNVREAOw==
     }]
-    set ::UI::icons(mactriangleclosed) [image create photo -data {
+    set icons(mactriangleclosed) [image create photo -data {
 	R0lGODlhCwALAPMAAP///97e3s7O/729vZyc/4yMjGNjzgAAAAAAAAAAAAAA
 	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQiMMgjqw2H3nqE
 	3h3xWaEICgRhjBi6FgMpvDEpwuCBg3sVAQA7
     }]
+    
+    # Aqua gray arrows.
+    set icons(openAqua) [image create photo -data {
+	R0lGODlhCQAJAPMAMf///62trZycnJSUlIyMjISEhHNzcwAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAJAAkAAAQccJhJzZB1DlBy
+	AUCQBSBHfSVApSBhECxoxKCQRgA7
+    }]
+    set icons(closeAqua) [image create photo -data {
+	R0lGODlhCQAJAPMAMf///62trZycnJSUlIyMjISEhHNzcwAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAJAAkAAAQacAxAKzCmBHtx
+	tp5HUGEolMbYYQWYbZbEUREAOw==
+    }]
+    
+    switch -- [tk windowingsystem] {
+	aqua {
+	    set imstate [list $icons(closeAqua) open $icons(openAqua)]
+	    option add TreeCtrl.buttonImage $imstate widgetDefault
+	}
+	default {
+	    
+	}
+    }
     
     # Dialog images.
     foreach name {info error warning question} {

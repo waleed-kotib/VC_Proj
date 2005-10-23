@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.83 2005-10-22 14:26:21 matben Exp $
+# $Id: Preferences.tcl,v 1.84 2005-10-23 13:40:22 matben Exp $
  
 package require mnotebook
 package require tree
@@ -285,12 +285,13 @@ proc ::Preferences::TreeCtrl {T wysc} {
 
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     $T element create eText text -lines 1
-    $T element create eSelect rect -fill $fill -open e -showfocus 1
+    $T element create eBorder rect -open nw -outline gray -outlinewidth 1 \
+      -fill $fill -showfocus 1
 
     set S [$T style create styText]
-    $T style elements $S {eSelect eText}
+    $T style elements $S {eBorder eText}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
-    $T style layout $S eSelect -union {eText} -iexpand nes -ipadx {2 0}
+    $T style layout $S eBorder -detach yes -iexpand xy -indent 0
 
     $T notify bind $T <Selection> [list [namespace current]::Selection %T]
 }
