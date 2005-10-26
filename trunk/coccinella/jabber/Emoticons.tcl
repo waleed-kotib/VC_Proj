@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.37 2005-10-22 14:26:21 matben Exp $
+# $Id: Emoticons.tcl,v 1.38 2005-10-26 14:38:34 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -17,7 +17,6 @@ namespace eval ::Emoticons:: {
     ::hooks::register prefsSaveHook          ::Emoticons::SavePrefsHook
     ::hooks::register prefsCancelHook        ::Emoticons::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Emoticons::UserDefaultsHook
-
     ::hooks::register initHook               ::Emoticons::Init
 
     variable priv
@@ -568,15 +567,19 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     
     ttk::label $wc.l -text [mc preficonsel]
     pack  $wc.l  -side top -anchor w -pady 4
-    set wiconsetmenu [eval {
-	ttk::optionmenu $wc.mb [namespace current]::tmpSet} $allSets]
 
     set wfr $wc.fr
-    ttk::labelframe $wfr -labelwidget $wc.mb \
+    ttk::labelframe $wfr \
       -padding [option get . groupSmallPadding {}]
     pack $wfr -side top -anchor w -fill both -expand 1
     
-    tuscrollbar $wfr.ysc -orient vertical -command [list $wfr.t  yview]
+    set wmb $wfr.mb
+    set wiconsetmenu [eval {
+	ttk::optionmenu $wmb [namespace current]::tmpSet
+    } $allSets]
+    $wfr configure -labelwidget $wmb
+    
+    tuscrollbar $wfr.ysc -orient vertical -command [list $wfr.t yview]
     text $wfr.t -yscrollcommand [list $wfr.ysc set] -width 20 -height 14 \
       -highlightthickness 0 -bd 0
     

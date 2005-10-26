@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.19 2005-10-22 14:26:21 matben Exp $
+# $Id: Sounds.tcl,v 1.20 2005-10-26 14:38:34 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -95,7 +95,6 @@ proc ::Sounds::InitEventHooks { } {
     ::hooks::register prefsSaveHook          ::Sounds::SavePrefsHook
     ::hooks::register prefsCancelHook        ::Sounds::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Sounds::UserDefaultsHook
-
     ::hooks::register launchFinalHook        ::Sounds::InitHook
 }
 
@@ -483,15 +482,17 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     set fvol $walrt.fvol
     ttk::frame $fvol
     ttk::label $fvol.l -text "[mc Volume]:"
-    ttk::scale $fvol.v -orient horizontal -from 0 -to 100 \
-      -variable [namespace current]::tmpPrefs(volume) -value $tmpPrefs(volume)
+    #ttk::scale $fvol.v -orient horizontal -from 0 -to 100 \
+    #  -variable [namespace current]::tmpPrefs(volume) -value $tmpPrefs(volume)
 
     pack  $fvol.l  -side left -padx 4
-    pack  $fvol.v  -side left -padx 4
+    #pack  $fvol.v  -side left -padx 4
     pack  $fvol  -side top -pady 4 -anchor [option get . dialogAnchor {}]
 
     ttk::button $walrt.midi -text "MIDI Player" -command ::Sounds::MidiPlayer
     pack  $walrt.midi -pady 4
+    
+    bind $wpage <Destroy> {+::Sounds::Free}
 }
 
 proc ::Sounds::MidiPlayer { } {
@@ -655,6 +656,12 @@ proc ::Sounds::GetAllSets { } {
 	}
     }  
     return $allsets
+}
+
+proc ::Sounds::Free { } {
+    variable tmpPrefs
+    
+    unset -nocomplain tmpPrefs
 }
 
 #-------------------------------------------------------------------------------

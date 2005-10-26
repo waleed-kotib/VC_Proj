@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.78 2005-10-22 14:26:21 matben Exp $
+# $Id: MailBox.tcl,v 1.79 2005-10-26 14:38:34 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -56,7 +56,7 @@ namespace eval ::MailBox:: {
     option add *MailBox*mid.ff.relief              raised           50
     option add *MailBox*frmsg.text.borderWidth     1                50
     option add *MailBox*frmsg.text.relief          sunken           50
-    
+
     # Add some hooks...
     ::hooks::register initHook        ::MailBox::Init
     ::hooks::register prefsInitHook   ::MailBox::InitPrefsHook
@@ -419,7 +419,7 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set suImage [list $locals(iconReadMsg) {read} $locals(iconUnreadMsg) {unread}]
     set suFont  [list CociSmallFont read CociSmallBoldFont unread]
     
-    $T element create eBorder rect -open nw -outline gray -outlinewidth 1 \
+    $T element create eBorder rect -open new -outline gray -outlinewidth 1 \
       -fill $fill -showfocus 1
     $T element create eText     text -lines 1 -font $suFont
     $T element create eImageEye image -image $suImage

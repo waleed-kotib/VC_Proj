@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.105 2005-10-23 13:40:22 matben Exp $
+# $Id: UI.tcl,v 1.106 2005-10-26 14:38:34 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -65,13 +65,24 @@ namespace eval ::UI:: {
 	tp5HUGEolMbYYQWYbZbEUREAOw==
     }]
     
+    # WinXP lool-alikes +- signs.
+    set icons(openPM) [image create photo -data {
+	R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
+	AAADHUi1XAowgiUjrYKavXOBQSh4YzkuAkEMrKI0C5EAADs=
+    }]    
+    set icons(closePM) [image create photo -data {
+	R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
+	AAADIEi1XAowghVNpNACQY33XAEFRiCEp2Cki0AQQ6wozUIkADs=
+    }]
+    
     switch -- [tk windowingsystem] {
 	aqua {
-	    set imstate [list $icons(closeAqua) open $icons(openAqua)]
-	    option add TreeCtrl.buttonImage $imstate widgetDefault
+	    set imstate [list $icons(openAqua) open $icons(closeAqua) {}]
+	    option add *TreeCtrl.buttonImage $imstate widgetDefault
 	}
-	default {
-	    
+	x11 {
+	    set imstate [list $icons(openPM) open $icons(closePM) {}]
+	    option add *TreeCtrl.buttonImage $imstate widgetDefault
 	}
     }
     
@@ -2160,7 +2171,6 @@ proc ::UI::MacFocusFixEditMenu {w wmenu wfocus} {
     if {$w != $wfocus} {
 	return
     }
-    ::Debug 6 "MacFocusFixEditMenu: w=$w, wmenu=$wmenu, wfocus=$wfocus"
     
     # The <FocusIn> events are sent in order, from toplevel and down
     # to the actual window with focus.

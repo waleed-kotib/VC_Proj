@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.49 2005-10-22 14:26:21 matben Exp $
+# $Id: Profiles.tcl,v 1.50 2005-10-26 14:38:34 matben Exp $
 
 package provide Profiles 1.0
 
@@ -17,7 +17,6 @@ namespace eval ::Profiles:: {
     ::hooks::register prefsSaveHook          ::Profiles::SaveHook
     ::hooks::register prefsCancelHook        ::Profiles::CancelHook
     ::hooks::register prefsUserDefaultsHook  ::Profiles::UserDefaultsHook
-    
     #::hooks::register initHook               ::Profiles::ImportIfNecessary
     
     option add *JProfiles*TLabel.style        Small.TLabel        widgetDefault

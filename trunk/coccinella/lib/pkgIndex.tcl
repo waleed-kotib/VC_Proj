@@ -15,6 +15,7 @@ package ifneeded FactoryDefaults 1.0 [list source [file join $dir SetFactoryDefa
 package ifneeded FileCache 1.0 [list source [file join $dir FileCache.tcl]]
 package ifneeded Httpd 1.0 [list source [file join $dir Httpd.tcl]]
 package ifneeded HttpTrpt 1.0 [list source [file join $dir HttpTrpt.tcl]]
+package ifneeded ITree 1.0 [list source [file join $dir ITree.tcl]]
 package ifneeded Network 1.0 [list source [file join $dir Network.tcl]]
 package ifneeded P2P 1.0 [list source [file join $dir P2P.tcl]]
 package ifneeded P2PNet 1.0 [list source [file join $dir P2PNet.tcl]]
