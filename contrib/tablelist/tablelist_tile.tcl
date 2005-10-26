@@ -7,7 +7,6 @@
 package require Tcl  8.4
 package require Tk   8.4
 package require tile 0.6
-#package require -exact tile [lsearch -inline -glob [package versions tile] {0.6.*}]
 
 package provide Tablelist_tile $tablelist::version
 package provide tablelist_tile $tablelist::version

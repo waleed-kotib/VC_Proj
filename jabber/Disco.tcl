@@ -3,11 +3,12 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Disco application part.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.71 2005-10-22 14:26:21 matben Exp $
+# $Id: Disco.tcl,v 1.72 2005-10-26 14:38:34 matben Exp $
 
 package require jlib::disco
+package require ITree
 
 package provide Disco 1.0
 
@@ -104,7 +105,7 @@ namespace eval ::Disco:: {
 	}
 	mUnregister    register     {::Register::Remove $jid}
 	separator      {}           {}
-	mRefresh       jid          {::Disco::Refresh $jid}
+	mRefresh       jid          {::Disco::Refresh $vstruct}
 	mAddServer     {}           {::Disco::AddServerDlg}
     }
 
@@ -255,7 +256,7 @@ proc ::Disco::InfoCB {cmd jlibname type from subiq args} {
 	set vstruct [concat $ppv [list $item]]
 	set cattype [lindex [$jstate(jlib) disco types $from $node] 0]
 	
-	if {[$wtree isitem $vstruct]} {
+	if {[::ITree::IsItem $wtree $vstruct]} {
 	    set icon [::Servicons::Get $cattype]
 	    set opts {}	    
 	    set name [$jstate(jlib) disco name $from $node]
@@ -266,13 +267,13 @@ proc ::Disco::InfoCB {cmd jlibname type from subiq args} {
 		lappend opts -image $icon
 	    }
 	    if {$node ne ""} {
-		lappend opts -dir [IsBranchNode $from $node]
+		lappend opts -button [IsBranchNode $from $node]
 	    }
 	    if {$opts != {}} {
-		eval {$wtree itemconfigure $vstruct} $opts
+		eval {::ITree::ItemConfigure $wtree $vstruct} $opts
 	    }
-	    set treectag [$wtree itemconfigure $vstruct -canvastags]
-	    MakeBalloonHelp $from $node $treectag
+	    # set treectag [$wtree itemconfigure $vstruct -canvastags]
+	    # MakeBalloonHelp $from $node $treectag
 	    SetDirItemUsingCategory $vstruct
 	}
 	
@@ -345,7 +346,7 @@ proc ::Disco::ItemsCB {cmd jlibname type from subiq args} {
 	$wwave animate -1
 
 	# We add the jid+node corresponding to the subiq element.
-	AddToTree $vstruct
+	TreeItem $vstruct
 	
 	# Get info:
 	# We disco servers jid 'items+info', and disco its childrens 'info'.
@@ -403,7 +404,7 @@ proc ::Disco::SetDirItemUsingCategory {vstruct} {
     set node [lindex $vstruct end 1]
 
     if {[IsBranchCategory $jid $node]} {
-	$wtree itemconfigure $vstruct -dir 1 -sortcommand {lsort -dictionary}
+	::ITree::ItemConfigure $wtree $vstruct -button 1
     }
 }
 
@@ -650,6 +651,14 @@ proc ::Disco::ParseGetItems {from subiq args} {
 
 # UI parts .....................................................................
     
+#  Each item is represented by a structure 'v' or 'vstruct':
+#       
+#       v = {item item ...}  with item = {jid node}
+#       
+#  Since a tuple {jid node} is not unique; it can appear in several places
+#  in the disco tree, we MUST keep the complete tree structure for an item
+#  in order to uniquely identify it in the tree.
+
 proc ::Disco::NewPage { } {
     variable wtab
     
@@ -709,24 +718,19 @@ proc ::Disco::Build {w} {
     pack $wwave -side bottom -fill x -padx 8 -pady 2
     
     # D = -border 1 -relief sunken
+    set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
     frame $wbox
     pack  $wbox -side top -fill both -expand 1
     tuscrollbar $wxsc -command [list $wtree xview] -orient horizontal
     tuscrollbar $wysc -command [list $wtree yview] -orient vertical
-    ::tree::tree $wtree -width 180 -height 100 -silent 1 -scrollwidth 400 \
-      -xscrollcommand [list ::UI::ScrollSet $wxsc \
-      [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
-      -yscrollcommand [list ::UI::ScrollSet $wysc \
-      [list grid $wysc -row 0 -column 1 -sticky ns]]  \
-      -backgroundimage $bgImage                       \
-      -selectcommand [namespace current]::SelectCmd    \
-      -closecommand [namespace current]::CloseTreeCmd  \
-      -opencommand [namespace current]::OpenTreeCmd   \
-      -eventlist [list [list <<ButtonPopup>> [namespace current]::Popup]]
-
-    if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand [namespace current]::Popup
-    }
+    ::ITree::New $wtree $wxsc $wysc   \
+      -selection   ::Disco::Selection     \
+      -open        ::Disco::OpenTreeCmd   \
+      -close       ::Disco::CloseTreeCmd  \
+      -buttonpress ::Disco::Popup         \
+      -buttonpopup ::Disco::Popup         \
+      -backgroundimage $bgimage
+    
     grid  $wtree  -row 0 -column 0 -sticky news
     grid  $wysc   -row 0 -column 1 -sticky ns
     grid  $wxsc   -row 1 -column 0 -sticky ew
@@ -782,7 +786,7 @@ proc ::Disco::Popup {w vstruct x y} {
     variable popMenuDefs
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Disco::Popup w=$w, vstruct='$vstruct', x=$x, y=$y"
+    ::Debug 2 "::Disco::Popup w=$w, vstruct='$vstruct'"
         
     set jid  [lindex $vstruct end 0]
     set node [lindex $vstruct end 1]
@@ -898,12 +902,8 @@ proc ::Disco::Popup {w vstruct x y} {
     }
 }
 
-proc ::Disco::Selection {T} {
+proc ::Disco::Selection {T v} {
     # empty
-}
-
-proc ::Disco::SelectCmd {w v} {
-    
 }
 
 # Disco::OpenTreeCmd --
@@ -939,11 +939,11 @@ proc ::Disco::OpenTreeCmd {w vstruct} {
 	    
 	    # Discover services available.
 	    GetItems $jid -node $node
-	} elseif {[llength [$wtree children $vstruct]] == 0} {
+	} elseif {[::ITree::Children $wtree $vstruct] == {}} {
 	    
 	    # An item may have been discoed but not from here.
 	    foreach item [$jstate(jlib) disco childs2 $jid $node] {
-		AddToTree [concat $vstruct [list $item]]
+		TreeItem [concat $vstruct [list $item]]
 	    }
 	}
 	
@@ -962,7 +962,7 @@ proc ::Disco::CloseTreeCmd {w vstruct} {
     }
 }
 
-# Disco::AddToTree --
+# Disco::TreeItem --
 #
 #       Fills tree with content. Calls itself recursively.
 #
@@ -970,7 +970,7 @@ proc ::Disco::CloseTreeCmd {w vstruct} {
 #       vstruct     {{jid node} {jid node} ...}
 #
 
-proc ::Disco::AddToTree {vstruct} {    
+proc ::Disco::TreeItem {vstruct} {    
     variable wtree    
     variable wdisco
     variable treeuid
@@ -979,7 +979,7 @@ proc ::Disco::AddToTree {vstruct} {
     upvar ::Jabber::jserver jserver
     
     # We disco servers jid 'items+info', and disco its childrens 'info'.    
-    ::Debug 4 "::Disco::AddToTree vstruct='$vstruct'"
+    ::Debug 4 "::Disco::TreeItem vstruct='$vstruct'"
     
     set jid   [lindex $vstruct end 0]
     set node  [lindex $vstruct end 1]
@@ -1001,9 +1001,17 @@ proc ::Disco::AddToTree {vstruct} {
 	    return
 	}
     }    
+
+    set cattype [lindex [$jstate(jlib) disco types $jid $node] 0]
+    set isconference 0
+    if {[lindex [split $cattype /] 0] eq "conference"} {
+	set isconference 1
+    }
+    jlib::splitjid $jid jid2 res
+    set isroom [$jstate(jlib) disco isroom $jid2]
     
     # Do not create if exists which preserves -open.
-    if {![$wtree isitem $vstruct]} {
+    if {![::ITree::IsItem $wtree $vstruct]} {
 	
 	# Ad-hoc way to figure out if dir or not. Use the category attribute.
 	# <identity category='server' type='im' name='ejabberd'/>
@@ -1013,15 +1021,14 @@ proc ::Disco::AddToTree {vstruct} {
 	    set isdir [IsBranchCategory $jid $node]
 	}
 	
-	# jid that are children of node is never a dir
+	# jid that are children of node is never a dir (?)
 	if {($pnode ne "") && ($jid ne $pjid)} {
 	    set isdir 0
 	}
 	
 	# Display text string. Room participants with their nicknames.
-	jlib::splitjid $jid jid2 res
 	set icon ""
-	if {[$jstate(jlib) disco isroom $jid2] && [string length $res]} {
+	if {$isroom && [string length $res]} {
 	    set name [$jstate(jlib) service nick $jid]
 	    set isdir 0
 	    set icon [::Roster::GetPresenceIconFromJid $jid]
@@ -1034,39 +1041,19 @@ proc ::Disco::AddToTree {vstruct} {
 		    set name $node
 		}
 	    }
-	}
-	
-	# Make the first two levels, server and its children bold, rest normal style.
-	set fontstyle normal
-	if {[option get $wdisco fontStyleMixed {}]} {
-	    if {[llength $vstruct] <= 2} {
-		set fontstyle bold
-	    } elseif {$isdir && ($node eq "")} {
-		set fontstyle bold
-	    }
-	    if {$node ne ""} {
-		set fontstyle normal
-	    }
-	}
+	    set icon [::Servicons::Get $cattype]
+	}	    
 	set isopen 0
 	if {[llength $vstruct] == 1} {
 	    set isopen 1
 	}
-	set treectag item[incr treeuid]
-	if {$node eq ""} {
-	    set tags [list jid $jid]
-	} else {
-	    set tags [list node $jid $node]
-	}
-	set opts [list -text $name -tags $tags -fontstyle $fontstyle \
-	  -dir $isdir -image $icon -open $isopen -canvastags $treectag]
-	if {$isdir && ([llength $vstruct] >= 2)} {
-	    lappend opts -sortcommand {lsort -dictionary}
-	}
-	eval {$wtree newitem $vstruct} $opts
+	# set treectag item[incr treeuid]
+	set opts [list -text $name -button $isdir -image $icon -open $isopen]
+	set item [eval {::ITree::Item $wtree $vstruct} $opts]
 	
 	# Balloon.
-	MakeBalloonHelp $jid $node $treectag
+	#MakeBalloonHelp $jid $node $treectag
+	MakeBalloonHelp $jid $node $item
     }
     
     # Add all child or node elements as well.
@@ -1077,8 +1064,17 @@ proc ::Disco::AddToTree {vstruct} {
     
     foreach c $cstructs {
 	set cv [concat $vstruct [list $c]]
-	AddToTree $cv
-    }	    
+	TreeItem $cv
+    }
+    
+    # Sort after all childrens have been added.
+    # Which items should be sorted by default? 
+    # So far only the rooms and participants.
+    if {[llength $cstructs]} {
+	if {$isconference || $isroom} {
+	    ::ITree::Sort $wtree $vstruct -increasing -dictionary
+	}
+    }
 }
 
 proc ::Disco::MakeBalloonHelp {jid node treectag} {
@@ -1097,32 +1093,31 @@ proc ::Disco::MakeBalloonHelp {jid node treectag} {
     if {$types != {}} {
 	append msg "\ntype: $types"
     }
-    ::balloonhelp::balloonfortree $wtree $treectag $msg
+    #::balloonhelp::balloonfortree $wtree $treectag $msg
 }
 
-proc ::Disco::Refresh {jid {node ""}} {    
+proc ::Disco::Refresh {vstruct} {    
     variable wtree
     variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Disco::Refresh jid=$jid, node=$node"
+    ::Debug 2 "::Disco::Refresh vstruct=$vstruct"
 	
+    set jid  [lindex $vstruct end 0]
+    set node [lindex $vstruct end 1]
+
     # Clear internal state of the disco object for this jid.
     $jstate(jlib) disco reset $jid
     
-    # Remove all children of this jid from disco tree.
-    # @@@ take node into account
-    set vstruct [lindex [$wtree find withtag $jid] 0]
-    if {$vstruct != {}} {
-	$wtree delitem $vstruct -childsonly 1
-    
-	# Disco once more, let callback manage rest.
-	set tstate(run,$vstruct) 1
-	$wwave animate 1
-	GetInfo  $jid -node $node
-	GetItems $jid -node $node
-    }
+    # Remove all children of this 'vstruct' from disco tree.
+    ::ITree::DeleteChildren $wtree $vstruct
+	
+    # Disco once more, let callback manage rest.
+    set tstate(run,$vstruct) 1
+    $wwave animate 1
+    GetInfo  $jid -node $node
+    GetItems $jid -node $node
 }
 
 proc ::Disco::Clear { } {    
@@ -1161,8 +1156,8 @@ proc ::Disco::PresenceHook {jid presence args} {
 	} $presList]
 	set item [list $jid3 {}]
 	set vstruct [concat [$jstate(jlib) disco parents2 $jid3] [list $item]]
-	if {[$wtree isitem $vstruct]} {
-	    $wtree itemconfigure $vstruct -image $icon
+	if {[::ITree::IsItem $wtree $vstruct]} {
+	    ::ITree::ItemConfigure $wtree $vstruct -image $icon
 	}
     }
 }
@@ -1430,7 +1425,7 @@ proc ::Disco::AddServerDlg { } {
     ttk::entry $wfr.e -textvariable [namespace current]::addservervar \
       -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
     ttk::checkbutton $wfr.ch -style Small.TCheckbutton \
-      -anchor w -text [mc {Add permanently}] \
+      -text [mc {Add permanently}] \
       -variable [namespace current]::permdiscovar
 
     grid  $wfr.l  $wfr.e   -padx 2 -pady 2
@@ -1443,7 +1438,7 @@ proc ::Disco::AddServerDlg { } {
       -padding [option get . notebookPageSmallPadding {}]
     pack $wfr2 -side top -fill x -pady 4
     ttk::label $wfr2.l -style Small.TLabel \
-      -wraplength [expr $width-10] -anchor w -justify left\
+      -wraplength [expr $width-10] -justify left\
       -text [mc jadisrmall]
     ttk::button $wfr2.b -style Small.TButton \
       -text [mc Remove] -command [namespace current]::AddServerNone

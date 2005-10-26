@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.77 2005-08-14 07:10:51 matben Exp $
+# $Id: Browse.tcl,v 1.78 2005-10-26 14:38:34 matben Exp $
 
 package provide Browse 1.0
 
@@ -463,53 +463,6 @@ proc ::Browse::ErrorProc {silent browseName type jid errlist} {
     }
 }
 
-
-proc ::Browse::Show {w} {    
-    upvar ::Jabber::jstate jstate
-
-    if {$jstate(browseVis)} {
-	if {[winfo exists $w]} {
-	    wm deiconify $w
-	} else {
-	    BuildToplevel $w
-	}
-    } else {
-	wm withdraw $w
-    }
-}
-
-proc ::Browse::BuildToplevel {w} {
-    global  prefs
-
-    variable wtop
-
-    if {[winfo exists $w]} {
-	return
-    }
-    set wtop $w
-    
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
-    wm title $w {Jabber Browser}
-    
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
-    
-    ttk::label $w.frall.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 300 -justify left \
-      -text "Services that are available on each Jabber server listed."
-    ttk::label $w.frall.msg2 -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 300 -justify left \
-      -text "Open to display its properties"
-    pack $w.frall.msg $w.frall.msg2 -side top -fill x -padx 4 -pady 2
-
-    # And the real stuff.
-    pack [Build $w.frall.br] -side top -fill both -expand 1
-    
-    wm minsize $w 180 260
-    wm maxsize $w 420 2000
-}
-
 proc ::Browse::NewPage { } {
     variable wtab
     
@@ -764,8 +717,7 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::nsToText nsToText
     
-    ::Debug 6 "::Browse::AddToTree parentsJidList='$parentsJidList', jid=$jid"
-
+    
     # Verify that parent tree item really exists!
     if {![$wtree isitem $parentsJidList]} {
 	return

@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.16 2005-10-22 14:26:21 matben Exp $
+#       $Id: SlideShow.tcl,v 1.17 2005-10-26 14:38:34 matben Exp $
 
 package require undo
 
@@ -35,7 +35,6 @@ proc ::SlideShow::Load { } {
     ::hooks::register prefsCancelHook                ::SlideShow::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook          ::SlideShow::UserDefaultsHook
     ::hooks::register prefsDestroyHook               ::SlideShow::DestroyPrefsHook
-
     ::hooks::register initHook                       ::SlideShow::InitHook
     ::hooks::register whiteboardBuildButtonTrayHook  ::SlideShow::BuildButtonsHook
     ::hooks::register whiteboardCloseHook            ::SlideShow::CloseHook
@@ -45,55 +44,7 @@ proc ::SlideShow::Load { } {
     component::register SlideShow  \
       "Slide show for the whiteboard. It starts from an image and automatically\
       saves any edits to canvas file when changing page."
-    
-    if {0} {
-    # GIF
-    set priv(imnext) [image create photo -data {
-    R0lGODlhIAAgAPYAMfLy8vHx8fEF5PDw8O/v7+bm5uPj4+Dg4NTU1NPT09DQ
-    0M/Pz87Ozs3NzcvLy8rKysnJycjIyMfHx8bGxsXFxcTExMPDw8LCwsHBwcDA
-    wL+/v76+vr29vby8vLu7u7q6urm5ubi4uLe3t7a2trW1tbS0tLOzs7KysrGx
-    sbCwsK+vr66urq2traysrKurq6qqqqmpqaioqKenp6WlpaSkpKOjo6GhoZ6e
-    np2dnZycnJqampiYmJeXl5aWlpWVlZOTk5GRkZCQkI2NjYmJiYaGhoSEhIOD
-    g4KCgoCAgH5+fnx8fAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAIA
-    LAAAAAAgACAAAAf/gAKCg4SFhoeIiYqLjBgeHBaMkiQeFxQTExcaICSShyMV
-    DAoLDhETFBYYGx2dngIgGwoJDRYeIiS4IyAeHiGwkiMUCQoWIiXHyMgjIyS+
-    iyEUCA0dydXVKCIaihqzH9bfxyctI4kiCgrUxybg1Sky5IYZwhbJRko07Oow
-    rYUkDA3GkBlhAQMJi3wqbIgwxIFYtYElTNwYcgKciRr8BFUI5aFakYPhhOQA
-    JyPjKwkOAiIjAhLZCiMrrL3oMYHQCAkRSFQj0sKaCRwjk7XwgcGmhAk6k30E
-    hwBDMhc/ig4CUYFCUmRFYlbrEOBBtRdBag7CgKHCiIdaj404UOBstRnwmAh1
-    wACi2hEVyBQM2PDNRI6FhUZo6JgMCV4KACCwUwHEgyEPGzxcLZGkAwEE+Uoo
-    RCQChMoSOAxM/sYiiONDGj6MzlwixQ4QikiAQFGRdescIaQmkt0ixbp8LHaE
-    0MZohAgZL1T8TmYiYRAQGVxlwGWjRgwXLVy8mJEDiIgPrghJJqGDh48f3juL
-    DV/IQocPHzawn0+/PqFAADs=
-    }]
-     
-    # GIF
-    set priv(imprevious) [image create photo -data {
-    R0lGODlhIAAgAPYAMfLy8vHx8fEF5PDw8O/v7+bm5uPj4+Dg4NTU1NPT09DQ
-    0M/Pz87Ozs3NzcvLy8rKysnJycjIyMfHx8bGxsXFxcTExMPDw8LCwsHBwcDA
-    wL+/v76+vr29vby8vLu7u7q6urm5ubi4uLe3t7a2trW1tbS0tLOzs7KysrGx
-    sbCwsK+vr66urq2traysrKurq6qqqqmpqaioqKenp6WlpaSkpKOjo6GhoZ6e
-    np2dnZycnJqampiYmJeXl5aWlpWVlZOTk5GRkZCQkI2NjYmJiYaGhoSEhIOD
-    g4KCgoCAgH5+fnx8fAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAIA
-    LAAAAAAgACAAAAf/gAKCg4SFhoeIiYqLjBgeHBaMkiQeFxQTExcaICSShyMV
-    DAoLDhETFBYYGx2dngIgGwoJDRYeIiS4IyAeHiGwkiMUCQoWIiXHyMgjIyS+
-    iyEUCA0dydXVKCIaihqzH9bfxyctI4kiCgrU4MgmySky5IYZwhbqxzRKRskm
-    MK2FJAwNjIFjgQQGi3zJVNgQYYgDMXAnhtxgd7CaiRr9BFUI5eFbDiEnkLEo
-    Yk1GxlcSHAhEtsLIimosiFh70WMCoRESIpBIlgMHu2otZAL1geGmhAk7j2FA
-    MJBkNRc/ig4CUYFC0mMPAqRLtsJpshdBbA7CgKHCiGojChw4yxJhshnwlwh1
-    wADi24YBCpCpOGIxB8NCIzR0BAcBAIUSKpBUUwHEgyEPGzxc/YaAQIck1RYi
-    EgFiJTgSBnAkYxHE8SENHybXQ5ZiBwhFJECgCLn6WIocIaQmit0ixU91LHaE
-    0MZohAgZL1T8XqcwCIgMrjLgslEjhosWLl7MyAFExAdXhCST0MHDx4/unMWC
-    L2Shw4cPG9bLn0+fUCAAOw==
-    }]
-    }
-    
+        
     # PNG
     set priv(imnext) [image create photo -data {
     iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/

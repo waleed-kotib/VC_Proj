@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.84 2005-10-23 13:40:22 matben Exp $
+# $Id: Preferences.tcl,v 1.85 2005-10-26 14:38:34 matben Exp $
  
 package require mnotebook
 package require tree
@@ -180,9 +180,13 @@ proc ::Preferences::Build {args} {
     # Tree frame with scrollbars.
     frame $wcont.t -relief sunken -bd 1
     pack  $wcont.t -fill y -side left -padx 4 -pady 4
+
     set frtree $wcont.t.frtree
     frame $frtree
     pack  $frtree -fill both -expand 1 -side left
+    
+    # Padding to avoid resizing.
+    pack [frame $frtree.pad -width 150 -height 0] -side top
         
     set wtree $frtree.t
     set wysc  $frtree.sby
@@ -285,7 +289,7 @@ proc ::Preferences::TreeCtrl {T wysc} {
 
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     $T element create eText text -lines 1
-    $T element create eBorder rect -open nw -outline gray -outlinewidth 1 \
+    $T element create eBorder rect -open new -outline gray -outlinewidth 1 \
       -fill $fill -showfocus 1
 
     set S [$T style create styText]
@@ -294,11 +298,14 @@ proc ::Preferences::TreeCtrl {T wysc} {
     $T style layout $S eBorder -detach yes -iexpand xy -indent 0
 
     $T notify bind $T <Selection> [list [namespace current]::Selection %T]
+    bind $T <Destroy>             [list +[namespace current]::OnDestroy %W]
 }
 
 proc ::Preferences::NewTableItem {spec name} {
     variable wtree
     variable tableName2Item
+    
+    ::Debug 6 "::Preferences::NewTableItem $spec"
     
     set T $wtree
     
@@ -320,12 +327,6 @@ proc ::Preferences::NewTableItem {spec name} {
     return $item
 }
 
-proc ::Preferences::GetTableItem {name} {
-    variable tableName2Item
-
-    return $tableName2Item($name)
-}
-
 proc ::Preferences::HaveTableItem {name} {
     variable tableName2Item
 
@@ -334,6 +335,12 @@ proc ::Preferences::HaveTableItem {name} {
     } else {
 	return 0
     }
+}
+
+proc ::Preferences::OnDestroy {T} {
+    variable tableName2Item
+
+    unset -nocomplain tableName2Item
 }
 
 # Preferences::ResetToFactoryDefaults --

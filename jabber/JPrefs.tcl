@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.31 2005-10-22 14:26:21 matben Exp $
+# $Id: JPrefs.tcl,v 1.32 2005-10-26 14:38:34 matben Exp $
 
 package require ui::fontselector
 
@@ -134,19 +134,16 @@ proc ::JPrefs::InitPrefsHook { } {
 }
 
 proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
-    
+        
     ::Preferences::NewTableItem {Jabber {Auto Away}} [mc {Auto Away}]
     ::Preferences::NewTableItem {Jabber Appearance} [mc Appearance]
     ::Preferences::NewTableItem {Jabber Customization} [mc Customization]
-
+    
     # Auto Away page -------------------------------------------------------
     set wpage [$nbframe page {Auto Away}]
+    
     ::JPrefs::BuildAutoAwayPage $wpage
-
-    # Personal Info page ---------------------------------------------------
-    #set wpage [$nbframe page {Personal Info}]    
-    #::JPrefs::BuildPersInfoPage $wpage
-	    
+ 	    
     # Appearance page -------------------------------------------------------
     set wpage [$nbframe page {Appearance}]    
     ::JPrefs::BuildAppearancePage $wpage
@@ -235,39 +232,6 @@ proc ::JPrefs::BuildAutoAwayPage {page} {
 
     pack  $waa  -side top -fill x -anchor $anchor
     pack  $wlo  -side top -fill x -anchor $anchor -pady 12
-}
-
-proc ::JPrefs::BuildPersInfoPage {wpage} {
-    upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
-    
-    set ppers ${wpage}.fr
-    labelframe $ppers -text [mc {Personal Information}]
-    pack $ppers -side top -anchor w -padx 8 -pady 4
-
-    ttk::label $ppers.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc prefpers]
-    grid $ppers.msg -columnspan 2 -sticky w
-    
-    label $ppers.first -text "[mc {First name}]:"
-    label $ppers.last -text "[mc {Last name}]:"
-    label $ppers.nick -text "[mc {Nick name}]:"
-    label $ppers.email -text "[mc {Email address}]:"
-    label $ppers.address -text "[mc {Address}]:"
-    label $ppers.city -text "[mc {City}]:"
-    label $ppers.state -text "[mc {State}]:"
-    label $ppers.phone -text "[mc {Phone}]:"
-    label $ppers.url -text "[mc {Url of homepage}]:"
-    
-    set row 1
-    foreach name $jprefs(iqRegisterElem) {
-	set tmpJPrefs(iq:register,$name) $jprefs(iq:register,$name)
-	entry $ppers.ent$name -width 30    \
-	  -textvariable "[namespace current]::tmpJPrefs(iq:register,$name)"
-	grid $ppers.$name -column 0 -row $row -sticky e
-	grid $ppers.ent$name -column 1 -row $row -sticky ew 
-	incr row
-    }    
 }
 
 # JPrefs::UpdateAutoAwaySettings --
@@ -400,7 +364,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     # Window opacities if exists.
     array set wmopts [wm attributes .]
     set haveOpacity 0
-    if {[info exists wmopts(-alpha)]} {
+    if {0 && [info exists wmopts(-alpha)]} {
 	set haveOpacity 1
 	set wop $wap.op
 	ttk::frame $wop
@@ -618,9 +582,11 @@ proc ::JPrefs::UserDefaultsHook { } {
 }
 
 proc ::JPrefs::DestroyPrefsHook { } {
+    variable tmpPrefs
     variable tmpJPrefs
 
-    unset tmpJPrefs
+    unset -nocomplain tmpPrefs
+    unset -nocomplain tmpJPrefs
 }
 
 #-------------------------------------------------------------------------------

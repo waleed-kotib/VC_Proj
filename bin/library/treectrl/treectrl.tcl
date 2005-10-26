@@ -1,4 +1,4 @@
-# RCS: @(#) $Id: treectrl.tcl,v 1.1 2005-10-22 14:26:21 matben Exp $
+# RCS: @(#) $Id: treectrl.tcl,v 1.2 2005-10-26 14:38:34 matben Exp $
 
 bind TreeCtrl <Motion> {
     TreeCtrl::CursorCheck %W %x %y
@@ -169,11 +169,7 @@ if {$tcl_platform(platform) eq "windows"} {
 # someone could use the "event generate" command to produce one
 # on other platforms.
 
-bind TreeCtrl <MouseWheel> {
-    %W yview scroll [expr {- (%D / 120) * 4}] units
-}
-
-if {[string equal "unix" $tcl_platform(platform)]} {
+if {[string equal "x11" [tk windowingsystem]]} {
     # Support for mousewheels on Linux/Unix commonly comes through mapping
     # the wheel to the extended buttons.  If you have a mousewheel, find
     # Linux configuration info at:
@@ -187,6 +183,14 @@ if {[string equal "unix" $tcl_platform(platform)]} {
 	if {!$tk_strictMotif} {
 	    %W yview scroll 5 units
 	}
+    }
+} elseif {[string equal [tk windowingsystem] "aqua"]} {
+    bind TreeCtrl <MouseWheel> {
+	%W yview scroll [expr {- (%D)}] units
+    }
+} else {
+    bind TreeCtrl <MouseWheel> {
+	%W yview scroll [expr {- (%D / 120) * 4}] units
     }
 }
 

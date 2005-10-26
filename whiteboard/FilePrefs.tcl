@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.8 2005-10-22 14:26:21 matben Exp $
+# $Id: FilePrefs.tcl,v 1.9 2005-10-26 14:38:34 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -18,7 +18,7 @@ namespace eval ::FilePrefs:: {
     ::hooks::register prefsSaveHook          ::FilePrefs::SavePrefsHook
     ::hooks::register prefsCancelHook        ::FilePrefs::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::FilePrefs::UserDefaultsHook
-    
+
     option add *FilePrefsSet*Menu.font           CociSmallFont       widgetDefault
 
     option add *FilePrefsSet*TLabel.style        Small.TLabel        widgetDefault
@@ -77,12 +77,17 @@ proc ::FilePrefs::BuildPage {page} {
     variable tmpMime2SuffixList
     variable tmpMimeTypeDoWhat
     variable tmpPrefMimeType2Package
-    variable wmclist
+    variable wtable
+    variable wbuttons
 	
     # Work only on copies of list of MIME types in case user presses the 
     # Cancel button. The MIME type works as a key in our database
     # (arrays) of various features.
 
+    unset -nocomplain  \
+      tmpMime2Description tmpMimeTypeIsText tmpMime2SuffixList  \
+      tmpMimeTypeDoWhat tmpPrefMimeType2Package
+    
     array set tmpMime2Description     [::Types::GetDescriptionArr]
     array set tmpMimeTypeIsText       [::Types::GetIsMimeTextArr]
     array set tmpMime2SuffixList      [::Types::GetSuffixListArr]
@@ -99,68 +104,194 @@ proc ::FilePrefs::BuildPage {page} {
       -padding [option get . groupSmallPadding {}]
     pack $wlc -side top
         
-    # Make the multi column listbox. 
-    # Keep an invisible index column with index as a tag.
-    set colDef [list 0 [mc Description] 0 [mc {Handled By}] 0 ""]
-    set wmclist $wlc.mclist
+    # Make the multi column listbox using treectrl. 
+    set wtable $wlc.tree
+    set wysc   $wlc.vsb
+    tuscrollbar $wysc -orient vertical -command [list $wtable yview]
+    TreeCtrl $wtable $wysc
     
-    tablelist::tablelist $wmclist  \
-      -columns $colDef -yscrollcommand [list $wlc.vsb set]  \
-      -labelcommand tablelist::sortByColumn  \
-      -stretch all -width 42 -height 12
-    $wmclist columnconfigure 2 -hide 1
-
-    tuscrollbar $wlc.vsb -orient vertical -command [list $wmclist yview]
-    
-    grid  $wmclist  -column 0 -row 0 -sticky news
+    grid  $wtable   -column 0 -row 0 -sticky news
     grid  $wlc.vsb  -column 1 -row 0 -sticky ns
     grid columnconfigure $wlc 0 -weight 1
     grid rowconfigure $wlc 0 -weight 1
 	
     # Insert all MIME types.
-    set i 0
     foreach mime [::Types::GetAllMime] {
+	set desc   [::Types::GetDescriptionForMime $mime]
 	set doWhat [::Plugins::GetDoWhatForMime $mime]
 	set icon   [::Plugins::GetIconForPackage $doWhat 12]
-	set desc   [::Types::GetDescriptionForMime $mime]
-	if {![regexp {(unavailable|reject|save|ask)} $doWhat] && ($icon ne "")} {
-	    $wmclist insert end [list " $desc" $doWhat $mime]
-	    $wmclist cellconfigure "$i,1" -image $icon
-	} else {
-	    $wmclist insert end [list " $desc" "     $doWhat" $mime]
-	}
-	incr i
+	InsertRow $wtable $mime $desc $doWhat $icon
     }    
     
     # Add, Change, and Remove buttons.
-    set wbot $wlc.bot
-    ttk::frame $wbot
-    grid $wbot -row 1 -column 0 -columnspan 2 -sticky news
+    set wbuttons $wlc.bot
+    ttk::frame $wbuttons
+    grid $wbuttons -row 1 -column 0 -columnspan 2 -sticky news
     
-    ttk::button $wbot.rem -text [mc Delete]  \
-      -command [list [namespace current]::DeleteAssociation $wmclist]
-    ttk::button $wbot.change -text "[mc Edit]..."  \
-      -command [list [namespace current]::Inspect $wDlgs(fileAssoc) edit $wmclist]
-    ttk::button $wbot.add -text "[mc New]..."  \
-      -command [list [namespace current]::Inspect .setass new $wmclist -1]
+    ttk::button $wbuttons.rem -text [mc Delete]  \
+      -command [namespace current]::DeleteAssociation
+    ttk::button $wbuttons.edit -text "[mc Edit]..."  \
+      -command [list [namespace current]::OnInspect edit]
+    ttk::button $wbuttons.new -text "[mc New]..."  \
+      -command [list [namespace current]::OnInspect new]
 
-    pack  $wbot.rem  $wbot.change  $wbot.add  -side right -padx 10 -pady 5 \
+    pack  $wbuttons.rem  $wbuttons.edit  $wbuttons.new  -side right -padx 10 -pady 5 \
       -fill x -expand 1
     
-    $wbot.rem    state {disabled}
-    $wbot.change state {disabled}
+    $wbuttons.rem  state {disabled}
+    $wbuttons.edit state {disabled}
     
-    # Special bindings for the tablelist.
-    set body [$wmclist bodypath]
-    bind $body <Button-1> {+ focus %W}
-    bind $body <Double-1> [list $wbot.change invoke]
-    bind $wmclist <<ListboxSelect>> [list [namespace current]::Select $wbot]
+    bind $page <Destroy> {+::FilePrefs::Free}
 }
 
-proc ::FilePrefs::Select {wbot} {
+proc ::FilePrefs::TreeCtrl {T wysc} {
+    global  this
+    variable sortColumn
+    
+    treectrl $T -usetheme 1 -selectmode browse  \
+      -showroot 0 -showrootbutton 0 -showbuttons 0 -showlines 0  \
+      -yscrollcommand [list $wysc set]  \
+      -borderwidth 0 -highlightthickness 0
+    
+    # This is a dummy option.
+    set stripeBackground [option get $T stripeBackground {}]
+    set stripes [list $stripeBackground {}]
+    set bd [option get $T columnBorderWidth {}]
 
-    $wbot.rem state !disabled
-    $wbot.change state !disabled
+    $T column create -tag cDescription -text [mc Description] \
+      -itembackground $stripes -expand 1 -squeeze 1 -borderwidth $bd
+    $T column create -tag cHandled -text [mc {Handled By}] \
+      -itembackground $stripes -expand 1 -squeeze 1 -borderwidth $bd
+    $T column create -tag cMime -visible 0
+
+    set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
+
+    $T element create eBorder rect -open new -outline gray -outlinewidth 1 \
+      -fill $fill -showfocus 1
+    $T element create eText   text -lines 1 -font CociSmallFont
+    $T element create eImage  image
+
+    set S [$T style create styText]
+    $T style elements $S {eBorder eText}
+    $T style layout $S eBorder -detach yes -iexpand xy
+    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
+    
+    set S [$T style create styImageText]
+    $T style elements $S {eBorder eImage eText}
+    $T style layout $S eBorder -detach yes -iexpand xy
+    $T style layout $S eImage -padx 4 -squeeze x -expand ns -minwidth 16
+
+    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
+
+    set S [$T style create styMime]
+    $T style elements $S {eText}
+
+    $T configure -defaultstyle {styText styImageText styMime}
+
+    $T notify install <Header-invoke>
+    $T notify bind $T <Header-invoke> [list [namespace current]::HeaderCmd %T %C]
+    $T notify bind $T <Selection> [list [namespace current]::Selection %T]
+    bind $T <Double-1>            [list [namespace current]::Double-1 %W]
+    bind $T <Destroy>             [list +[namespace current]::OnDestroy %W]
+
+    set sortColumn 0
+}
+
+proc ::FilePrefs::InsertRow {T mime desc doWhat icon} {
+    variable tableMime2Item
+         
+    set item [$T item create]
+    $T item text $item cDescription $desc cHandled $doWhat cMime $mime
+    $T item lastchild root $item
+    if {[regexp {(unavailable|reject|save|ask)} $doWhat]} {
+	set icon ""
+    }
+    $T item element configure $item cHandled eImage -image $icon
+    set tableMime2Item($mime) $item
+    return $item
+}
+
+proc ::FilePrefs::SetTableForMime {T mime desc doWhat icon} {
+    variable tableMime2Item
+
+    if {[info exists tableMime2Item($mime)]} {
+	set item $tableMime2Item($mime)
+	$T item text $item cDescription $desc cHandled $doWhat cMime $mime
+	if {![regexp {(unavailable|reject|save|ask)} $doWhat]} {
+	    $T item element configure $item cHandled eImage -image $icon
+	}
+	$T selection add $item
+    } else {
+	set item [InsertRow $T $mime $desc $doWhat $icon]
+	$T see $item
+    }
+}
+
+proc ::FilePrefs::HeaderCmd {T C} {
+    variable sortColumn
+	
+    if {[$T column compare $C == $sortColumn]} {
+	if {[$T column cget $sortColumn -arrow] eq "down"} {
+	    set order -increasing
+	    set arrow up
+	} else {
+	    set order -decreasing
+	    set arrow down
+	}
+    } else {
+	if {[$T column cget $sortColumn -arrow] eq "down"} {
+	    set order -decreasing
+	    set arrow down
+	} else {
+	    set order -increasing
+	    set arrow up
+	}
+	$T column configure $sortColumn -arrow none
+	set sortColumn $C
+    }
+    $T column configure $C -arrow $arrow
+    $T item sort root $order -column $C -dictionary
+}
+
+proc ::FilePrefs::Selection {T} {
+    variable wbuttons
+    
+    if {[$T selection count] == 1} {
+	$wbuttons.rem  state !disabled
+	$wbuttons.edit state !disabled
+    } else {
+	$wbuttons.rem  state disabled
+	$wbuttons.edit state disabled
+    }
+}
+
+proc ::FilePrefs::Double-1 {T} {
+    variable wbuttons
+    
+    $wbuttons.edit invoke
+}
+
+proc ::FilePrefs::OnInspect {what} {
+    global  wDlgs
+    variable wtable
+    
+    set T $wtable
+    
+    if {$what eq "edit"} {
+	if {[$T selection count] == 1} {
+	    set item [$T selection get]
+	    set mime [$T item element cget $item cMime eText -text]
+	    Inspect $wDlgs(fileAssoc) edit $mime
+	}
+    } elseif {$what eq "new"} {
+	Inspect $wDlgs(fileAssoc) new
+    }
+}
+
+proc ::FilePrefs::OnDestroy {T} {
+    variable tableMime2Item
+    
+    unset tableMime2Item
 }
 
 # ::FilePrefs::DeleteAssociation --
@@ -168,34 +299,30 @@ proc ::FilePrefs::Select {wbot} {
 #       Deletes an MIME association.
 #
 # Arguments:
-#       wmclist  the multi column listbox widget path.
-#       indSel   the index of the one to remove.
+#       None.
+#       
 # Results:
 #       None.
 
-proc ::FilePrefs::DeleteAssociation {wmclist {indSel {}}} {
-    
+proc ::FilePrefs::DeleteAssociation { } {
+    variable wtable
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList
     variable tmpPrefMimeType2Package
 
-    if {$indSel eq ""} {
-	set indSel [$wmclist curselection]
-	if {$indSel eq ""} {
-	    return
-	}
+    set T $wtable
+    if {[$T selection count] != 1} {
+	return
     }
-    foreach {name pack mime} [lrange [$wmclist get $indSel] 0 2] break
-    $wmclist delete $indSel
+    set item [$T selection get]
+    set mime [$T item element cget $item cMime eText -text]
+    $T item delete $item
     unset -nocomplain \
       tmpMime2Description($mime) \
       tmpMimeTypeIsText($mime) \
       tmpMime2SuffixList($mime) \
       tmpPrefMimeType2Package($mime)
-    
-    # Select the next one
-    $wmclist selection set $indSel
 }    
 
 # ::FilePrefs::SaveAssociations --
@@ -204,6 +331,7 @@ proc ::FilePrefs::DeleteAssociation {wmclist {indSel {}}} {
 #       and sets them to the actual arrays, tmp...(MIME).
 #
 # Arguments:
+#       None.
 #       
 # Results:
 #       None.
@@ -232,15 +360,13 @@ proc ::FilePrefs::SaveAssociations { } {
 #
 # Arguments:
 #       w       the toplevel widget path.
-#       doWhat  is "edit" if we want to change an association, or "new" if...
-#       wlist   the listbox widget path in the "FileAssociations" dialog.
-#       indSel  the index of the selected item in 'wlist'.
+#       what  is "edit" if we want to change an association, or "new" if...
 #       
 # Results:
 #       Dialog is displayed.
 
-proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
-    global  prefs this
+proc ::FilePrefs::Inspect {w what {mime ""}} {
+    global  prefs this wDlgs
     
     variable textVarDesc
     variable textVarMime
@@ -264,9 +390,7 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
 	raise $w
 	return
     }
-    if {[string length $indSel] == 0} {
-	set indSel [$wlist curselection]
-    }
+
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} -class FilePrefsSet
     wm title $w [mc {Inspect Associations}]
@@ -274,17 +398,11 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
 
     set finishedInspect -1
     
-    if {$doWhat eq "edit"} {
-	if {$indSel < 0} {
-	    error {::FilePrefs::Inspect called with illegal index}
-	}
-	
-	# Find the corresponding MIME type.
-	foreach {name pack mime} [lrange [$wlist get $indSel] 0 2] break
-	set textVarMime $mime
-	set textVarDesc $tmpMime2Description($mime)
+    if {$what eq "edit"} {
+	set textVarMime   $mime
+	set textVarDesc   $tmpMime2Description($mime)
 	set textVarSuffix $tmpMime2SuffixList($mime)
-	set codingVar $tmpMimeTypeIsText($mime)
+	set codingVar     $tmpMimeTypeIsText($mime)
 	
 	# Map to the correct radiobutton alternative.
 	switch -- $tmpMimeTypeDoWhat($mime) {
@@ -309,10 +427,10 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
 	    set packageList None
 	    set packageVar None
 	}
-    } elseif {$doWhat eq "new"} {
-	set textVarMime {}
-	set textVarDesc {}
-	set textVarSuffix {}
+    } elseif {$what eq "new"} {
+	set textVarMime   ""
+	set textVarDesc   ""
+	set textVarSuffix ""
 	set codingVar 0
 	set receiveVar reject
 	set packageVar None
@@ -347,7 +465,7 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
     grid  $wty.x3  $wty.x4  -sticky e -pady 2
     grid  $wty.x5  $wty.x6  -sticky e -pady 2
         
-    if {$doWhat eq "edit"} {
+    if {$what eq "edit"} {
 	$wty.x2 state {disabled}
 	$wty.x4 state {disabled}
     }
@@ -373,9 +491,9 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
       -variable [namespace current]::receiveVar -value ask
     ttk::frame $wha.fc
     ttk::label $wha.fc.l -text "[mc {File coding}]:"
-    ttk::radiobutton $wha.fc.t -text [mc {As text}] -anchor w  \
+    ttk::radiobutton $wha.fc.t -text [mc {As text}]  \
       -variable [namespace current]::codingVar -value 1
-    ttk::radiobutton $wha.fc.b -text [mc Binary] -anchor w   \
+    ttk::radiobutton $wha.fc.b -text [mc Binary]  \
       -variable [namespace current]::codingVar -value 0
     
     grid  $wha.x1  -         -sticky w
@@ -390,11 +508,11 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
     # If we dont have any registered packages for this MIME, disable this
     # option.
     
-    if {($doWhat eq "edit") && ($packageList eq "None")} {
+    if {($what eq "edit") && ($packageList eq "None")} {
 	$wha.x3  state {disabled}
 	$wha.x3m state {disabled}
     }
-    if {$doWhat eq "new"} {
+    if {$what eq "new"} {
 	$wha.x3 state {disabled}
     }
     
@@ -403,7 +521,7 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
     ttk::frame $frbot
     ttk::button $frbot.btok -style TButton \
       -text [mc Save] -default active  \
-      -command [list [namespace current]::SaveThisAss $wlist $indSel]
+      -command [namespace current]::SaveThisAss
     ttk::button $frbot.btcancel -style TButton \
       -text [mc Cancel]  \
       -command [list set [namespace current]::finishedInspect 0]
@@ -431,13 +549,14 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
 #       Saves the association for one specific MIME type.
 #
 # Arguments:
-#       wlist   the listbox widget path in the "FileAssociations" dialog.
-#       indSel  the index of the selected item in 'wlist'. -1 if new.
+#       None.
 #       
 # Results:
 #       Modifies the tmp... variables for one MIME type.
 
-proc ::FilePrefs::SaveThisAss {wlist indSel} {
+proc ::FilePrefs::SaveThisAss { } {
+    
+    variable wtable
     
     # Variables for entries etc.
     variable textVarDesc
@@ -455,17 +574,21 @@ proc ::FilePrefs::SaveThisAss {wlist indSel} {
     variable tmpMimeTypeDoWhat
     variable tmpPrefMimeType2Package
 
+    set mime $textVarMime
+    set desc $textVarDesc
+    set suff $textVarSuffix
+
     # Check that no fields are empty.
-    if {($textVarDesc eq "") || ($textVarMime eq "") || ($textVarSuffix eq "")} {
+    if {($desc eq "") || ($mime eq "") || ($suff eq "")} {
 	::UI::MessageBox -title [mc Error] -icon error -type ok  \
 	  -message [mc messfieldsmissing]
 	return
     }
     
     # Put this specific MIME type associations in the tmp arrays.
-    set tmpMime2Description($textVarMime) $textVarDesc
+    set tmpMime2Description($mime) $desc
     if {$packageVar eq "None"} {
-	set tmpPrefMimeType2Package($textVarMime) ""
+	set tmpPrefMimeType2Package($mime) ""
     }
     
     # Map from the correct radiobutton alternative.
@@ -473,52 +596,31 @@ proc ::FilePrefs::SaveThisAss {wlist indSel} {
 	reject {
 	    
 	    # This maps either to an actual "reject" or to "unavailable".
-	    if {[llength $tmpPrefMimeType2Package($textVarMime)]} {
-		set tmpMimeTypeDoWhat($textVarMime) reject		
+	    if {[llength $tmpPrefMimeType2Package($mime)]} {
+		set doWhat reject		
 	    } else {
-		set tmpMimeTypeDoWhat($textVarMime) unavailable
+		set doWhat unavailable
 	    }
 	}
 	save - ask {
-	    set tmpMimeTypeDoWhat($textVarMime) $receiveVar
+	    set doWhat $receiveVar
 	}
 	default {
 	    
 	    # Should be a package.
-	    set tmpMimeTypeDoWhat($textVarMime) $packageVar
-	    set tmpPrefMimeType2Package($textVarMime) $packageVar
+	    set doWhat $packageVar
+	    set tmpPrefMimeType2Package($mime) $packageVar
 	}
     }
-    set tmpMimeTypeIsText($textVarMime) $codingVar
-    set tmpMime2SuffixList($textVarMime) $textVarSuffix
+    set tmpMimeTypeDoWhat($mime)  $doWhat
+    set tmpMimeTypeIsText($mime)  $codingVar
+    set tmpMime2SuffixList($mime) $suff
     
     # Need to update the Mime type list in the "File Association" dialog.
-    
-    if {$indSel == -1} {
-
-	# New association.
-	set indInsert end
-    } else {
-	
-	# Delete old, add new below.
-	$wlist delete $indSel
-	set indInsert $indSel
-    }	
-	
-    set doWhat $tmpMimeTypeDoWhat($textVarMime)
     set icon [::Plugins::GetIconForPackage $doWhat 12]
-    if {![regexp {(unavailable|reject|save|ask)} $doWhat] && ($icon ne "")} {
-	$wlist insert $indInsert [list " $tmpMime2Description($textVarMime)" \
-	  $doWhat $textVarMime]
-	$wlist cellconfigure "$indInsert,1" -image $icon
-    } else {
-	$wlist insert $indInsert [list " $tmpMime2Description($textVarMime)" \
-	  "     $doWhat" $textVarMime]
-    }
-    if {$indSel >= 0} {
-	$wlist selection set $indSel
-    } 
-    set w [winfo toplevel $wlist]
+    SetTableForMime $wtable $mime $desc $doWhat $icon
+      
+    set w [winfo toplevel $wtable]
     ::UI::SaveWinGeom $w
     set finishedInspect 1
 }
@@ -577,6 +679,18 @@ proc ::FilePrefs::UserDefaultsHook { } {
     array set tmpMime2SuffixList      [::Types::GetSuffixListArr]
     array set tmpMimeTypeDoWhat       [::Plugins::GetDoWhatForMimeArr]
     array set tmpPrefMimeType2Package [::Plugins::GetPreferredPackageArr]
+}
+
+proc ::FilePrefs::Free { } {
+    variable tmpMime2Description
+    variable tmpMimeTypeIsText
+    variable tmpMime2SuffixList
+    variable tmpMimeTypeDoWhat
+    variable tmpPrefMimeType2Package
+    
+    unset -nocomplain  \
+      tmpMime2Description tmpMimeTypeIsText tmpMime2SuffixList  \
+      tmpMimeTypeDoWhat tmpPrefMimeType2Package
 }
     
 #-------------------------------------------------------------------------------

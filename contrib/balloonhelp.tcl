@@ -5,7 +5,7 @@
 #  Code idee from Harrison & McLennan
 #  This source file is distributed under the BSD license.
 #  
-# $Id: balloonhelp.tcl,v 1.15 2005-08-14 06:56:45 matben Exp $
+# $Id: balloonhelp.tcl,v 1.16 2005-10-26 14:38:34 matben Exp $
 
 package provide balloonhelp 1.0
 
@@ -26,28 +26,14 @@ namespace eval ::balloonhelp:: {
     option add *Balloonhelp.justify               left      widgetDefault
     option add *Balloonhelp.millisecs             1200      widgetDefault
     
-    # We use a variable 'locals(platform)' that is more convenient for Mac OS X.
-    switch -- $::tcl_platform(platform) {
-	unix {
-	    set locals(platform) $::tcl_platform(platform)
-	    if {[package vcompare [info tclversion] 8.3] == 1} {	
-		if {[string equal [tk windowingsystem] "aqua"]} {
-		    set locals(platform) "macosx"
-		}
-	    }
+    switch -- [tk windowingsystem] {
+	x11 {
+	    option add *Balloonhelp.font {Helvetica -10} widgetDefault
 	}
-	windows - macintosh {
-	    set locals(platform) $::tcl_platform(platform)
-	}
-    }
-    switch -- $locals(platform) {
-	unix {
-	    option add *Balloonhelp.font {Helvetica 10} widgetDefault
-	}
-	windows {
+	win32 {
 	    option add *Balloonhelp.font {Arial 8} widgetDefault
 	}
-	macintosh - macosx {
+	aqua {
 	    option add *Balloonhelp.font {Geneva 9} widgetDefault
 	}
     }
@@ -77,28 +63,14 @@ proc ::balloonhelp::Build { } {
 
     pack [label $w.info -bg $bg -fg $fg -wraplength $wrap -justify $just]  \
       -side left -fill y
-    if {[string equal $locals(platform) "macintosh"]} {
-	pack [frame $w.pad -bg $bg -width 12] -side right
-    }
+
     wm overrideredirect $w 1
     wm transient $w
     wm withdraw  $w
     wm resizable $w 0 0 
     
-    switch -- $locals(platform) {
-	macintosh {
-	    #documentProc, dBoxProc, plainDBox, altDBoxProc, movableDBoxProc, 
-	    #zoomDocProc, rDocProc, floatProc, floatZoomProc, ->floatSideProc, 
-	    #or floatSideZoomProc
-	    if {[package vcompare [info tclversion] 8.3] == 1} {
-		::tk::unsupported::MacWindowStyle style $w floatSideProc
-	    } else {
-		unsupported1 style $w floatSideProc
-	    }
-	}
-	macosx {
-	    tk::unsupported::MacWindowStyle style $w help none
-	}
+    if {[tk windowingsystem] eq "aqua"} {
+	tk::unsupported::MacWindowStyle style $w help none
     }
 }
 
@@ -135,6 +107,7 @@ proc ::balloonhelp::balloonforwindow {win msg args} {
     bind $win <Enter>    {+::balloonhelp::Pending %W "window" }
     bind $win <Leave>    {+::balloonhelp::Cancel %W }
     bind $win <Button-1> {+::balloonhelp::Cancel %W }
+    bind $win <Destroy>  {+::balloonhelp::Free %W }
 }
 
 proc ::balloonhelp::balloonforcanvas {win itemid msg args} {
@@ -152,6 +125,7 @@ proc ::balloonhelp::balloonforcanvas {win itemid msg args} {
       [list ::balloonhelp::Pending %W "canvas" -x %X -y %Y -itemid $subItemId]
     $win bind $itemid <Leave> [list ::balloonhelp::Cancel %W]
     $win bind $itemid <Button-1> {+ ::balloonhelp::Cancel %W}
+    bind $win <Destroy>  {+::balloonhelp::Free %W }
 }
 
 proc ::balloonhelp::balloonfortree {win itemid msg args} {
@@ -177,6 +151,7 @@ proc ::balloonhelp::balloonfortext {win tag msg args} {
       [list ::balloonhelp::Pending %W "text" -x %X -y %Y -tag $subTag]
     $win tag bind $tag <Leave> [list ::balloonhelp::Cancel %W]
     $win tag bind $tag <Button-1> {+ ::balloonhelp::Cancel %W}
+    bind $win <Destroy>  {+::balloonhelp::Free %W }
 }
 
 #       args:  ?-key value ...?
@@ -306,6 +281,13 @@ proc ::balloonhelp::SetPosition {x y} {
 	wm geometry $w "+${x}+${y}"
 	update idletasks
     }
+}
+
+proc ::balloonhelp::Free {win} {
+    
+    variable locals
+
+    array unset locals ${win}*
 }
 
 proc ::balloonhelp::Debug {num str} {
