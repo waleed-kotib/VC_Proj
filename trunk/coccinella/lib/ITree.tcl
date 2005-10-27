@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.1 2005-10-26 14:38:34 matben Exp $
+# $Id: ITree.tcl,v 1.2 2005-10-27 07:52:10 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -287,8 +287,8 @@ proc ::ITree::UnsetTags {T item} {
 
 proc ::ITree::DeleteChildren {T v} {
     
-    foreach item [Children $T $v] {
-	DeleteItem $T $v
+    foreach vchild [Children $T $v] {
+	DeleteItem $T $vchild
     }
 }
 
