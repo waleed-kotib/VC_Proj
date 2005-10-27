@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.79 2005-10-26 14:38:34 matben Exp $
+# $Id: MailBox.tcl,v 1.80 2005-10-27 10:08:37 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -43,8 +43,8 @@ namespace eval ::MailBox:: {
 
     option add *MailBox*readMsgImage          eyeGray16        widgetDefault
     option add *MailBox*unreadMsgImage        eyeBlue16        widgetDefault
-    option add *MailBox*wbIcon11Image         wbIcon11         widgetDefault
-    option add *MailBox*wbIcon13Image         wbIcon13         widgetDefault
+    option add *MailBox*whiteboard12Image     whiteboard12     widgetDefault
+    option add *MailBox*whiteboard16Image     whiteboard16     widgetDefault
 
     # Standard widgets.
     if {[tk windowingsystem] eq "aqua"} {
@@ -58,12 +58,13 @@ namespace eval ::MailBox:: {
     option add *MailBox*frmsg.text.relief          sunken           50
 
     # Add some hooks...
-    ::hooks::register initHook        ::MailBox::Init
-    ::hooks::register prefsInitHook   ::MailBox::InitPrefsHook
-    ::hooks::register launchFinalHook ::MailBox::LaunchHook
-    ::hooks::register newMessageHook  ::MailBox::MessageHook    10
-    ::hooks::register jabberInitHook  ::MailBox::InitHandler
-    ::hooks::register quitAppHook     ::MailBox::QuitHook
+    ::hooks::register initHook            ::MailBox::Init
+    ::hooks::register prefsInitHook       ::MailBox::InitPrefsHook
+    ::hooks::register launchFinalHook     ::MailBox::LaunchHook
+    ::hooks::register newMessageHook      ::MailBox::MessageHook    10
+    ::hooks::register jabberInitHook      ::MailBox::InitHandler
+    ::hooks::register quitAppHook         ::MailBox::QuitHook
+    ::hooks::register displayMessageHook  ::MailBox::DisplayMessageHook
 
     variable locals
     
@@ -104,21 +105,6 @@ proc ::MailBox::Init { } {
     variable icons
    
     TranslateAnyVer1ToCurrentVer
-    
-    # Icons for the mailbox.
-    set icons(wbIcon11) [image create photo -data {
-	R0lGODlhEQALALMAANnZ2U9PT////wrXAKGhocbK/wAV/+Pl/zlK/46X/3F9
-	//8cRf/G0P+quf8ALv///yH5BAEAAAAALAAAAAARAAsAAARmMMhJawABCinh
-	kFIIIQIJQhQDzxBCDCGECCQIKJBJQwgxhBAiQBJEMQrBIeVaTAQSBFIHmiOE
-	WK0tEUgo0ByBkhDCCeFEgCQgJURCQojVGlwikACNnEIIthYTgcAgJ62BAEjk
-	pJVEADs=
-    }]
-    set icons(wbIcon13) [image create photo -data {
-	R0lGODdhFQANALMAAP/////n5/9ze/9CQv8IEOfn/8bO/621/5ycnHN7/zlK
-	/wC9AAAQ/wAAAAAAAAAAACwAAAAAFQANAAAEWrDJSWtFDejN+27YZjAHt5wL
-	B2aaopAbmn4hMBYH7NGskmi5kiYwIAwCgJWNUdgkGBuBACBNhnyb4IawtWaY
-	QJ2GO/YCGGi0MDqtKnccohG5stgtiLx+z+8jIgA7	
-    }]
     
     set locals(inited) 1
 }
@@ -252,12 +238,9 @@ proc ::MailBox::Build {args} {
     set iconTrash      [::Theme::GetImage [option get $w trashImage {}]]
     set iconTrashDis   [::Theme::GetImage [option get $w trashDisImage {}]]
 
-    # Since several of these are so frequently used, cache them!
-    set locals(iconWb11)       [::Theme::GetImageFromExisting \
-      [option get $w wbIcon11Image {}] ::MailBox::icons]
-    set locals(iconWb13)       [::Theme::GetImageFromExisting \
-      [option get $w wbIcon13Image {}] ::MailBox::icons]
-
+    set locals(iconWB12) [::Theme::GetImage [option get $w whiteboard12Image {}]]
+    set locals(iconWB16) [::Theme::GetImage [option get $w whiteboard16Image {}]]
+    
     set locals(iconReadMsg)   [::Theme::GetImage [option get $w readMsgImage {}]]
     set locals(iconUnreadMsg) [::Theme::GetImage [option get $w unreadMsgImage {}]]
 
@@ -397,7 +380,7 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set stripes [list $stripeBackground {}]
     set bd [option get $T columnBorderWidth {}]
 
-    $T column create -tag cWhiteboard -image $locals(iconWb13)  \
+    $T column create -tag cWhiteboard -image $locals(iconWB16)  \
       -itembackground $stripes -resize 0 -borderwidth $bd
     $T column create -tag cSubject -expand 1 -text [mc Subject] \
       -itembackground $stripes -button 1 -borderwidth $bd
@@ -495,7 +478,8 @@ proc ::MailBox::InsertRow {wtbl row i} {
     $T item lastchild root $item
     
     if {$haswb} {
-	$T item element configure $item cWhiteboard eImageWb -image $locals(iconWb11)
+	$T item element configure $item cWhiteboard eImageWb  \
+	  -image $locals(iconWB12)
     }
     if {$isread} {
 	$T item state set $item read
@@ -533,8 +517,6 @@ proc ::MailBox::Selection {T} {
 	set uid  [$T item element cget $item cUid  eText -text]
 	jlib::splitjid $jid3 jid2 res
 		
-	# Mark as read.
-	MarkMsgAsRead $uid
 	DisplayMsg $uid
 	
 	# Configure buttons.
@@ -638,6 +620,14 @@ proc ::MailBox::UpdateDateAndTime {T} {
     # Reschedule ourselves.
     set locals(updateDateid) [after $locals(updateDatems) \
       [list [namespace current]::UpdateDateAndTime $T]]
+}
+
+proc ::MailBox::DisplayMessageHook {body args} {
+
+    array set argsArr $args
+    if {[info exists argsArr(-msgid)]} {
+	MarkMsgAsRead $argsArr(-msgid)
+    }
 }
 
 proc ::MailBox::MarkMsgAsRead {uid} {
@@ -1195,7 +1185,8 @@ proc ::MailBox::DisplayMsg {id} {
     $wtextmsg insert end \n
     $wtextmsg configure -state disabled
     
-    set opts [list -subject $subject -from $from -time $date]
+    # This hook triggers 'MarkMsgAsRead'.
+    set opts [list -subject $subject -from $from -time $date -msgid $id]
     eval {::hooks::run displayMessageHook $body} $opts
 }
 
