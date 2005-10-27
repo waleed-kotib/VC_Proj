@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.42 2005-09-26 14:43:47 matben Exp $
+# $Id: GotMsg.tcl,v 1.43 2005-10-27 10:08:37 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -92,7 +92,6 @@ proc ::GotMsg::Show {thisMsgId} {
     Build
     
     set msgIdDisplay $thisMsgId
-    ::MailBox::MarkMsgAsRead $thisMsgId
     
     set subject [::MailBox::Get $thisMsgId subject]
     set jid     [::MailBox::Get $thisMsgId from]
@@ -139,7 +138,7 @@ proc ::GotMsg::Show {thisMsgId} {
     }
     
     # Run display message hook (speech).
-    set opts [list -subject $subject -from $jid -time $date]
+    set opts [list -subject $subject -from $jid -time $date -msgid $thisMsgId]
     eval {::hooks::run displayMessageHook $body} $opts
 }
 
