@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.21 2005-09-02 17:06:25 matben Exp $
+# $Id: JForms.tcl,v 1.22 2005-10-27 12:35:31 matben Exp $
 # 
 #      Updated to version 2.5 of JEP-0004
 #  
@@ -882,7 +882,7 @@ proc ::JForms::GetXDataForm {token} {
 
 		# Perhaps we should verify that this is a proper jid
 		# before returning form.
-		set subtags [GetXDataMultiForm $token $var]
+		set subtags [GetXDataTextMultiForm $token $var]
 	    }
 	    hidden {
 		
@@ -896,7 +896,7 @@ proc ::JForms::GetXDataForm {token} {
 	    }
 	}
 	if {$subtags != {}} {
-	    lappend xmllist [wrapper::createtag field -attrlist [list var $var] \
+	    lappend xmllist [wrapper::createtag field -attrlist [list type $type var $var] \
 	      -subtags $subtags]
 	}
     }
@@ -1166,9 +1166,9 @@ if {0} {
 	query {xmlns jabber:iq:search} 0 {} {
 	    {instructions {} 0 {U hebt een x:data compatibele client nodig om te kunnen zoeken} {}} 
 	    {x {type form xmlns jabber:x:data} 0 {} {
-		{title {} 0 {Gebruikers zoeken in vjud.l4l.be} {}} 
+		{title {} 0 {Gebruikers zoeken in vjud.l4l.be} {}}
 		{instructions {} 0 {Vul de velden in om te zoeken naar Jabbergebruikers op deze server} {}} 
-		{field {label Gebruiker var user type text-single} 1 {} {}} 
+		{field {label Gebruiker var user type text-single} 1 {} {}}
 		{field {label {Volledige naam} var fn type text-single} 1 {} {}} 
 		{field {label Naam var given type text-single} 1 {} {}} 
 		{field {label Tussennaam var middle type text-single} 1 {} {}} 
@@ -1179,7 +1179,9 @@ if {0} {
 		{field {label Plaats var locality type text-single} 1 {} {}} 
 		{field {label E-mail var email type text-single} 1 {} {}} 
 		{field {label Organisatie var orgname type text-single} 1 {} {}} 
-		{field {label Afdeling var orgunit type text-single} 1 {} {}}}
+		{field {label Afdeling var orgunit type text-single} 1 {} {}}
+		{field {label JIDs var jmulti type jid-multi} 1 {} {}}
+	    }
 	    }
 	}
     }
