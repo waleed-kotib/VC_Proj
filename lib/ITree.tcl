@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.3 2005-10-28 06:48:41 matben Exp $
+# $Id: ITree.tcl,v 1.4 2005-10-28 12:56:26 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -271,6 +271,19 @@ proc ::ITree::Sort {T v args} {
 	set item $tag2Item($T,$v)
 	eval {$T item sort $item -column cTree} $args
     }    
+}
+
+proc ::ITree::FindEndItems {T vend} {
+    variable tag2Item
+
+    set vlist {}
+    foreach {key item} [array get tag2Item $T,*] {
+	set v [string map [list "$T," ""] $key]
+	if {[lindex $v end] eq $vend} {
+	    lappend vlist $v
+	}
+    }
+    return $vlist
 }
 
 proc ::ITree::DeleteItem {T v} {
