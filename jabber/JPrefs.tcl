@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.32 2005-10-26 14:38:34 matben Exp $
+# $Id: JPrefs.tcl,v 1.33 2005-10-28 15:08:57 matben Exp $
 
 package require ui::fontselector
 
@@ -364,7 +364,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     # Window opacities if exists.
     array set wmopts [wm attributes .]
     set haveOpacity 0
-    if {0 && [info exists wmopts(-alpha)]} {
+    if {[info exists wmopts(-alpha)]} {
 	set haveOpacity 1
 	set wop $wap.op
 	ttk::frame $wop

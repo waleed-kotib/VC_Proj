@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.79 2005-10-28 12:56:26 matben Exp $
+# $Id: Browse.tcl,v 1.80 2005-10-28 15:08:57 matben Exp $
 
 package require ITree
 
@@ -1121,11 +1121,12 @@ proc ::Browse::InfoResultCB {browseName type jid subiq args} {
     wm title $w "Browse Info: $jid"
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
+    ttk::frame $w.frall -padding [option get . dialogPadding {}]
+    pack $w.frall -fill both -expand 1
+
     set wtext $w.frall.t
     set iconInfo [::Theme::GetImage info]
-    label $w.frall.l -text "Description of services provided by $jid" \
+    ttk::label $w.frall.l -text "Description of services provided by $jid" \
       -justify left -image $iconInfo -compound left
     text $wtext -wrap word -width 60 -bg gray80 \
       -tabs {180} -spacing1 3 -spacing3 2 -bd 0
@@ -1134,6 +1135,7 @@ proc ::Browse::InfoResultCB {browseName type jid subiq args} {
     
     $wtext tag configure head -background gray70
     $wtext insert end "XML namespace\tDescription\n" head
+
     set n 1
     foreach c [wrapper::getchildren $subiq] {
 	if {[wrapper::gettag $c] == "ns"} {
@@ -1153,11 +1155,12 @@ proc ::Browse::InfoResultCB {browseName type jid subiq args} {
     $wtext configure -height $n
 
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btadd -text [mc Close] \
-      -command [list destroy $w]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    set frbot $w.frall.frbot
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Close] \
+      -command [list destroy $w]
+    pack $frbot.btok -side right
+    pack $frbot -fill x -expand 1
 	
     wm resizable $w 0 0	
 }
