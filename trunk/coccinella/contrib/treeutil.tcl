@@ -6,13 +6,20 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: treeutil.tcl,v 1.1 2005-10-27 10:08:37 matben Exp $
+#  $Id: treeutil.tcl,v 1.2 2005-10-28 06:48:41 matben Exp $
 
 # USAGE:
 # 
 #       ::treeutil::bind widgetPath item ?type? ?script?
 #       
 #       where 'type' is <Enter> or <Leave>.
+#       Substitutions in script:
+#         %T    treectrl widget path
+#         %C    column index
+#         %I    item id
+#         %x    widget x coordinate
+#         %y    widget y coordinate
+#         %E    element name
 
 package provide treeutil 1.0
 
@@ -26,27 +33,40 @@ namespace eval ::treeutil {
 # 
 #       Public interface.
 
-proc ::treeutil::bind {w item {type ""} {cmd ""}} {
+proc ::treeutil::bind {w item args} {
     variable state
     variable events
-    
+        
     if {[winfo class $w] ne "TreeCtrl"} {
 	return -code error "window must be a treectrl"
     }
+    set len [llength $args]
+    if {$len > 2} {
+	return -code error "usage: ::treeutil::bind w item ?type? ?script?"
+    }
     set ans {}
     set item [$w item id $item]
-    if {$type eq ""} {
+    if {$len == 0} {
 	foreach e $events {
 	    if {[info exists state($w,$item,$e)]} {
 		lappend ans $e
 	    }
 	}
-    } elseif {$cmd eq ""} {
+    } elseif {$len == 1} {
+	set type [lindex $args 0]
 	if {[info exists state($w,$item,$type)]} {
 	    set ans $state($w,$item,$type)
 	}
     } else {
-	lappend state($w,$item,$type) $cmd
+	set type [lindex $args 0]
+	set cmd  [lindex $args 1]
+	if {$cmd eq ""} {
+	    unset -nocomplain state($w,$item,$type)
+	} elseif {[string index $cmd 0] eq "+"} {
+	    lappend state($w,$item,$type) [string trimleft $cmd "+"]
+	} else {
+	    set state($w,$item,$type) [list $cmd]
+	}
 	if {![info exists state($w,init)]} {
 	    Init $w
 	    set state($w,init) 1
@@ -96,7 +116,9 @@ proc ::treeutil::Generate {w x y item type {id ""}} {
     
     if {[info exists state($w,$item,$type)]} {
 	array set aid {column "" elem "" line "" button ""}
-	array set aid $id
+	if {[llength $id] == 6} {
+	    array set aid $id
+	}
 	set map [list %T $w %x $x %y $y %I $item %C $aid(column) %E $aid(elem)]
 	foreach cmd $state($w,$item,$type) {
 	    uplevel #0 [string map $map $cmd]

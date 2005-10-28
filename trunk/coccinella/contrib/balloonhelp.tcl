@@ -5,7 +5,9 @@
 #  Code idee from Harrison & McLennan
 #  This source file is distributed under the BSD license.
 #  
-# $Id: balloonhelp.tcl,v 1.16 2005-10-26 14:38:34 matben Exp $
+# $Id: balloonhelp.tcl,v 1.17 2005-10-28 06:48:41 matben Exp $
+
+package require treeutil
 
 package provide balloonhelp 1.0
 
@@ -106,7 +108,7 @@ proc ::balloonhelp::balloonforwindow {win msg args} {
     # Perhaps we shall have "+" for all bindings to not interfere...
     bind $win <Enter>    {+::balloonhelp::Pending %W "window" }
     bind $win <Leave>    {+::balloonhelp::Cancel %W }
-    bind $win <Button-1> {+::balloonhelp::Cancel %W }
+    bind $win <Button>   {+::balloonhelp::Cancel %W }
     bind $win <Destroy>  {+::balloonhelp::Free %W }
 }
 
@@ -124,7 +126,22 @@ proc ::balloonhelp::balloonforcanvas {win itemid msg args} {
     $win bind $itemid <Enter>  \
       [list ::balloonhelp::Pending %W "canvas" -x %X -y %Y -itemid $subItemId]
     $win bind $itemid <Leave> [list ::balloonhelp::Cancel %W]
-    $win bind $itemid <Button-1> {+ ::balloonhelp::Cancel %W}
+    $win bind $itemid <Button> {+ ::balloonhelp::Cancel %W}
+    bind $win <Destroy>  {+::balloonhelp::Free %W }
+}
+
+proc ::balloonhelp::treectrl {win item msg args} {
+
+    variable locals  
+
+    Init
+    set locals($win,$item) $msg
+    set locals($win,args) $args
+
+    ::treeutil::bind $win $item <Enter>  \
+      {+::balloonhelp::Pending %T "treectrl" -x %x -y %y -item %I}
+    ::treeutil::bind $win $item <Leave> {+::balloonhelp::Cancel %T }    
+    bind $win <Button>   {+::balloonhelp::Cancel %W }
     bind $win <Destroy>  {+::balloonhelp::Free %W }
 }
 
@@ -149,9 +166,9 @@ proc ::balloonhelp::balloonfortext {win tag msg args} {
 
     $win tag bind $tag <Enter>  \
       [list ::balloonhelp::Pending %W "text" -x %X -y %Y -tag $subTag]
-    $win tag bind $tag <Leave> [list ::balloonhelp::Cancel %W]
-    $win tag bind $tag <Button-1> {+ ::balloonhelp::Cancel %W}
-    bind $win <Destroy>  {+::balloonhelp::Free %W }
+    $win tag bind $tag <Leave>  { ::balloonhelp::Cancel %W }
+    $win tag bind $tag <Button> {+::balloonhelp::Cancel %W }
+    bind $win <Destroy> {+::balloonhelp::Free %W }
 }
 
 #       args:  ?-key value ...?
@@ -159,6 +176,7 @@ proc ::balloonhelp::balloonfortext {win tag msg args} {
 #                   -y        root y coordinate
 #                   -tag      tag for text windows
 #                   -itemid   item id for canvas item
+#                   -item     item for treectrl
 
 proc ::balloonhelp::Pending {win type args} {
 
@@ -167,7 +185,7 @@ proc ::balloonhelp::Pending {win type args} {
     foreach {key value} $args {
 	set locals($win,[string trimleft $key -]) $value
     }
-    ::balloonhelp::Cancel $win
+    Cancel $win
     set locals(pending)  \
       [after $locals(millisecs) [list ::balloonhelp::Show $win $type]]
 }
@@ -176,6 +194,7 @@ proc ::balloonhelp::Cancel {win} {
     
     variable locals    
     Debug 2 "::balloonhelp::Cancel"
+    
     if {[info exists locals(pending)]} {
 	after cancel $locals(pending)
 	unset locals(pending)
@@ -201,6 +220,7 @@ proc ::balloonhelp::Show {win type} {
 	set locals(focus) [focus]
     }
     set exists 0
+    set msg ""
     
     if {$locals(active)} {
 	
@@ -247,8 +267,20 @@ proc ::balloonhelp::Show {win type} {
 		if {[winfo exists $win]} {
 		    set exists 1
 		    set msg $locals($win)
-		    set x [expr [winfo rootx $win] + 10]
-		    set y [expr [winfo rooty $win] + [winfo height $win]]
+		    set x [expr {[winfo rootx $win] + 10}]
+		    set y [expr {[winfo rooty $win] + [winfo height $win]}]
+		}
+	    }
+	    treectrl {
+		set item [$win item id $locals($win,item)]
+		if {$item ne ""} {
+		    set exists 1
+		    set bbox [$win item bbox $item]
+		    set x $locals($win,x)
+		    set y [lindex $bbox 3]
+		    set x [expr {[winfo rootx $win] + $x}]
+		    set y [expr {[winfo rooty $win] + $y}]
+		    set msg $locals($win,$item)
 		}
 	    }
 	}
@@ -287,6 +319,7 @@ proc ::balloonhelp::Free {win} {
     
     variable locals
 
+    Cancel $win
     array unset locals ${win}*
 }
 

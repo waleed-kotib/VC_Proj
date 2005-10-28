@@ -4,10 +4,10 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: progress.tcl,v 1.8 2005-10-16 09:49:38 matben Exp $
+# $Id: progress.tcl,v 1.9 2005-10-28 06:48:41 matben Exp $
 
 package require snit 1.0
-package require tile
+package require tile 0.7
 package require msgcat
 package require ui::util
 
@@ -15,7 +15,7 @@ package provide ui::progress 0.1
 
 namespace eval ui::progress {
        
-    style default TProgressFrame.TButton -font DlgSmallFont
+    style configure TProgressFrame.TButton -font DlgSmallFont
 
     option add *ProgressWindow.title   [::msgcat::mc Progress]     widgetDefault
 

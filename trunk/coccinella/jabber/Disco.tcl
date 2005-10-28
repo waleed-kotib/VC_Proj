@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.72 2005-10-26 14:38:34 matben Exp $
+# $Id: Disco.tcl,v 1.73 2005-10-28 06:48:41 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -272,8 +272,7 @@ proc ::Disco::InfoCB {cmd jlibname type from subiq args} {
 	    if {$opts != {}} {
 		eval {::ITree::ItemConfigure $wtree $vstruct} $opts
 	    }
-	    # set treectag [$wtree itemconfigure $vstruct -canvastags]
-	    # MakeBalloonHelp $from $node $treectag
+	    MakeBalloonHelp $vstruct
 	    SetDirItemUsingCategory $vstruct
 	}
 	
@@ -1052,8 +1051,7 @@ proc ::Disco::TreeItem {vstruct} {
 	set item [eval {::ITree::Item $wtree $vstruct} $opts]
 	
 	# Balloon.
-	#MakeBalloonHelp $jid $node $treectag
-	MakeBalloonHelp $jid $node $item
+	MakeBalloonHelp $vstruct
     }
     
     # Add all child or node elements as well.
@@ -1077,10 +1075,13 @@ proc ::Disco::TreeItem {vstruct} {
     }
 }
 
-proc ::Disco::MakeBalloonHelp {jid node treectag} {
+proc ::Disco::MakeBalloonHelp {vstruct} {
     variable wtree    
     upvar ::Jabber::jstate jstate
     
+    set jid  [lindex $vstruct end 0]
+    set node [lindex $vstruct end 1]
+
     set jidtxt $jid
     if {[string length $jid] > 30} {
 	set jidtxt "[string range $jid 0 28]..."
@@ -1093,7 +1094,8 @@ proc ::Disco::MakeBalloonHelp {jid node treectag} {
     if {$types != {}} {
 	append msg "\ntype: $types"
     }
-    #::balloonhelp::balloonfortree $wtree $treectag $msg
+    set item [::ITree::GetItem $wtree $vstruct]
+    ::balloonhelp::treectrl $wtree $item $msg
 }
 
 proc ::Disco::Refresh {vstruct} {    
