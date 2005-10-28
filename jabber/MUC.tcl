@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.70 2005-10-15 07:03:35 matben Exp $
+# $Id: MUC.tcl,v 1.71 2005-10-28 06:48:41 matben Exp $
 
 package require jlib::muc
 package require ui::entryex
@@ -410,8 +410,9 @@ proc ::MUC::BuildInfo {roomjid} {
       -columns $columns -stretch all -selectmode single  \
       -yscrollcommand [list $wysc set] -width 36 -height 8
     tuscrollbar $wysc -orient vertical -command [list $wtbl yview]
-    ttk::button $frtab.ref -text [mc Refresh] -font CociSmallFont -command  \
-      [list [namespace current]::Refresh $roomjid]
+    ttk::button $frtab.ref -style Small.TButton  \
+      -text [mc Refresh]  \
+      -command [list [namespace current]::Refresh $roomjid]
 
     grid  $wtbl       $wysc  -sticky news
     grid  $frtab.ref  x      -sticky e -pady 2
@@ -495,11 +496,11 @@ proc ::MUC::BuildInfo {roomjid} {
     }
 
     # Collect various widget paths.
-    set locals(wtbl) $wtbl
-    set locals(wlist) $wlist
-    set locals(wgrant) $wgrant
+    set locals(wtbl)    $wtbl
+    set locals(wlist)   $wlist
+    set locals(wgrant)  $wgrant
     set locals(wrevoke) $wrevoke
-    set locals(wother) $wother
+    set locals(wother)  $wother
     
     SetButtonsState $roomjid  \
       $locals($roomjid,myrole) $locals($roomjid,myaff) 
@@ -585,11 +586,11 @@ proc ::MUC::SetButtonsState {roomjid role affiliation} {
     variable enabledBtRoleList
     upvar [namespace current]::${roomjid}::locals locals
     
-    set wtbl $locals(wtbl)
-    set wlist $locals(wlist)
-    set wgrant $locals(wgrant)
+    set wtbl    $locals(wtbl)
+    set wlist   $locals(wlist)
+    set wgrant  $locals(wgrant)
     set wrevoke $locals(wrevoke)
-    set wother $locals(wother)
+    set wother  $locals(wother)
     
     DisableAll $roomjid
 
@@ -1256,13 +1257,16 @@ proc ::MUC::EditListReset {token} {
 
 # MUC::EditListSet --
 # 
-#       Set (send) the dited list to the muc service.
+#       Set (send) the edited list to the muc service.
 
 proc ::MUC::EditListSet {token} {
     variable $token
     upvar 0 $token state
     variable setListDefs
     upvar ::Jabber::jstate jstate
+    
+    tk_messageBox -icon error -message "Not yet implemented. Sorry!"
+    return
 
     # Original and present content of tablelist.
     set origlist $state(origlistvar)

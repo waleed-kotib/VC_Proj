@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.80 2005-10-27 10:08:37 matben Exp $
+# $Id: MailBox.tcl,v 1.81 2005-10-28 06:48:41 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -800,9 +800,10 @@ proc ::MailBox::MessageHook {bodytxt args} {
         
     # Show in mailbox. Sorting?
     set w [GetToplevel]
-    if {$w != ""} {
-	InsertRow $locals(wtbl) $mailbox($uidmsg) end
-	$locals(wtbl) see end
+    if {$w ne ""} {
+	set wtbl $locals(wtbl)
+	InsertRow $wtbl $mailbox($uidmsg) end
+	$wtbl see end
     }
     ::Jabber::UI::MailBoxState nonempty
     
@@ -846,8 +847,9 @@ proc ::MailBox::HandleRawWBMessage {jlibname xmlns msgElem args} {
     # Show in mailbox.
     set w [GetToplevel]
     if {$w != ""} {
-	InsertRow $locals(wtbl) $mailbox($uidmsg) end
-	$locals(wtbl) see end
+	set wtbl $locals(wtbl)
+	InsertRow $wtbl $mailbox($uidmsg) end
+	$wtbl see end
     }
     ::Jabber::UI::MailBoxState nonempty
     
@@ -889,8 +891,9 @@ proc ::MailBox::HandleSVGWBMessage {jlibname xmlns msgElem args} {
     # Show in mailbox.
     set w [GetToplevel]
     if {$w != ""} {
-	InsertRow $locals(wtbl) $mailbox($uidmsg) end
-	$locals(wtbl) see end
+	set wtbl $locals(wtbl)
+	InsertRow $wtbl $mailbox($uidmsg) end
+	$wtbl see end
     }
     ::Jabber::UI::MailBoxState nonempty
     

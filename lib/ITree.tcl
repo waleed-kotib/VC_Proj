@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.2 2005-10-27 07:52:10 matben Exp $
+# $Id: ITree.tcl,v 1.3 2005-10-28 06:48:41 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -206,15 +206,25 @@ proc ::ITree::Item {T v args} {
 proc ::ITree::IsItem {T v} {
     variable tag2Item
     
+    set ans 0
     if {[info exists tag2Item($T,$v)]} {
 	if {[$T item id $tag2Item($T,$v)] ne ""} {
-	    return 1
-	} else {
-	    return 0
+	    set ans 1
 	}
-    } else {
-	return 0
     }
+    return $ans
+}
+
+proc ::ITree::GetItem {T v} {
+    variable tag2Item
+    
+    set item ""
+    if {[info exists tag2Item($T,$v)]} {
+	if {[$T item id $tag2Item($T,$v)] ne ""} {
+	    set item $tag2Item($T,$v)
+	}
+    }
+    return $item
 }
 
 proc ::ITree::ItemConfigure {T v args} {

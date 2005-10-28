@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.2 2005-10-02 12:44:41 matben Exp $
+# $Id: tileutils.tcl,v 1.3 2005-10-28 06:48:41 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -22,7 +22,7 @@ foreach name [tile::availableThemes] {
 		}
 	    }
 	}
-	style default Headlabel \
+	style configure Headlabel \
 	  -font CociLargeFont -padding {20 6 20 6} -anchor w -space 12
 	
 	style layout Popupbutton {
@@ -32,31 +32,31 @@ foreach name [tile::availableThemes] {
 		}
 	    }
 	}
-	style default Popupbutton -padding 6
+	style configure Popupbutton -padding 6
 	
-	style default Small.TCheckbutton -font CociSmallFont
-	style default Small.TRadiobutton -font CociSmallFont
-	style default Small.TMenubutton  -font CociSmallFont
-	style default Small.TLabel       -font CociSmallFont
-	style default Small.TLabelframe  -font CociSmallFont
-	style default Small.TButton      -font CociSmallFont
-	style default Small.TEntry       -font CociSmallFont
-	style default Small.TNotebook    -font CociSmallFont
-	style default Small.TCombobox    -font CociSmallFont
-	style default Small.TScale       -font CociSmallFont
-	style default Small.Horizontal.TScale  -font CociSmallFont
-	style default Small.Vertical.TScale    -font CociSmallFont
+	style configure Small.TCheckbutton -font CociSmallFont
+	style configure Small.TRadiobutton -font CociSmallFont
+	style configure Small.TMenubutton  -font CociSmallFont
+	style configure Small.TLabel       -font CociSmallFont
+	style configure Small.TLabelframe  -font CociSmallFont
+	style configure Small.TButton      -font CociSmallFont
+	style configure Small.TEntry       -font CociSmallFont
+	style configure Small.TNotebook    -font CociSmallFont
+	style configure Small.TCombobox    -font CociSmallFont
+	style configure Small.TScale       -font CociSmallFont
+	style configure Small.Horizontal.TScale  -font CociSmallFont
+	style configure Small.Vertical.TScale    -font CociSmallFont
 	
-	style default Small.Toolbutton   -font CociSmallFont
-	style default Small.TNotebook.Tab  -font CociSmallFont
-	style default Small.Tab          -font CociSmallFont
+	style configure Small.Toolbutton   -font CociSmallFont
+	style configure Small.TNotebook.Tab  -font CociSmallFont
+	style configure Small.Tab          -font CociSmallFont
 	
 	if {$name eq "clam"} {
-	    style default Small.TButton       \
+	    style configure Small.TButton       \
 	      -font CociSmallFont             \
 	      -padding {5 1}                  \
 	      -width -9
-	    style default Small.TMenubutton   \
+	    style configure Small.TMenubutton   \
 	      -font CociSmallFont             \
 	      -padding {5 1}                  \
 	      -width -9
