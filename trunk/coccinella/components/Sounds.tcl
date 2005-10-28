@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.20 2005-10-26 14:38:34 matben Exp $
+# $Id: Sounds.tcl,v 1.21 2005-10-28 15:08:57 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -482,11 +482,11 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     set fvol $walrt.fvol
     ttk::frame $fvol
     ttk::label $fvol.l -text "[mc Volume]:"
-    #ttk::scale $fvol.v -orient horizontal -from 0 -to 100 \
-    #  -variable [namespace current]::tmpPrefs(volume) -value $tmpPrefs(volume)
+    ttk::scale $fvol.v -orient horizontal -from 0 -to 100 \
+      -variable [namespace current]::tmpPrefs(volume) -value $tmpPrefs(volume)
 
     pack  $fvol.l  -side left -padx 4
-    #pack  $fvol.v  -side left -padx 4
+    pack  $fvol.v  -side left -padx 4
     pack  $fvol  -side top -pady 4 -anchor [option get . dialogAnchor {}]
 
     ttk::button $walrt.midi -text "MIDI Player" -command ::Sounds::MidiPlayer

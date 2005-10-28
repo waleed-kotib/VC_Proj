@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.37 2005-08-14 07:10:51 matben Exp $
+# $Id: Agents.tcl,v 1.38 2005-10-28 15:08:57 matben Exp $
 
 package provide Agents 1.0
 
@@ -15,6 +15,7 @@ namespace eval ::Agents:: {
     ::hooks::register logoutHook     ::Agents::LogoutHook
 
     option add *Agent.waveImage            wave           widgetDefault
+    option add *Agent.backgroundImage      cociexec       widgetDefault
 
     # Standard widgets and standard options.
     option add *Agent.padding              4               50
@@ -121,7 +122,7 @@ proc ::Agents::GetAgent {parentJid jid args} {
 # Agents::AgentsCallback --
 #
 #       Fills in agent tree with the info from this response via calls
-#       to 'AddAgentToTree'.
+#       to 'TreeItem'.
 #       Makes a get jabber:iq:agent to all <agent> elements from agents get.
 #       
 # Arguments:
@@ -135,7 +136,6 @@ proc ::Agents::AgentsCallback {jid jlibName type subiq} {
 
     variable wagents
     variable wtree
-    variable wtreecanvas
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
@@ -156,9 +156,10 @@ proc ::Agents::AgentsCallback {jid jlibName type subiq} {
 	    # It is at this stage we are confident that an Agents page is needed.
 	    NewPage
 	    
-	    $wtree newitem $jid -dir 1 -open 1 -tags $jid
+	    #$wtree newitem $jid -dir 1 -open 1 -tags $jid
+	    set item [::ITree::Item $wtree $jid -button 1 -open 1]
 	    set bmsg "jid: $jid"
-	    ::balloonhelp::balloonforcanvas $wtreecanvas $jid $bmsg	    
+	    ::balloonhelp::treectrl $wtree $item $bmsg	    
 	    
 	    # Loop through all <agent> elements and:
 	    # 1) fill in what we've got so far.
@@ -184,7 +185,7 @@ proc ::Agents::AgentsCallback {jid jlibName type subiq} {
 		}
 		
 		# Fill in tree items.
-		AddAgentToTree $jid $jidAgent $subAgent
+		TreeItem $jid $jidAgent $subAgent
 		GetAgent $jid $jidAgent -silent 1
 	    }
 	}
@@ -208,7 +209,6 @@ proc ::Agents::GetAgentCallback {parentJid jid silent jlibName type subiq} {
     variable wagents
     variable wtree
     variable wwave
-    variable wtreecanvas
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
@@ -231,31 +231,28 @@ proc ::Agents::GetAgentCallback {parentJid jid silent jlibName type subiq} {
 	result - ok {
 	
 	    # Fill in tree.
-	    AddAgentToTree $parentJid $jid  \
-	      [wrapper::getchildren $subiq]
+	    TreeItem $parentJid $jid [wrapper::getchildren $subiq]
 	}
     }
 }
 
-# Agents::AddAgentToTree --
+# Agents::TreeItem --
 #
 #
 
-proc ::Agents::AddAgentToTree {parentJid jid subAgent} {
+proc ::Agents::TreeItem {parentJid jid subAgent} {
     
     variable wtree
-    variable wtreecanvas
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Debug 4 "::Agents::AddAgentToTree parentJid=$parentJid,\
-      jid=$jid, subAgent='$subAgent'"
+    ::Debug 4 "::Agents::TreeItem parentJid=$parentJid, jid=$jid"
     	
     # Loop through the subelement to see what we've got.
     foreach elem $subAgent {
-	set tag [lindex $elem 0]
-	set agentSubArr($tag) [lindex $elem 3]
+	set tag [wrapper::gettag $elem]
+	set agentSubArr($tag) [wrapper::getcdata $elem]
     }
     if {[lsearch [concat $jserver(this) $jprefs(agentsServers)] $jid] < 0} {
 	set isServer 0
@@ -264,7 +261,7 @@ proc ::Agents::AddAgentToTree {parentJid jid subAgent} {
     }
     if {$isServer} {	
 	if {[info exists agentSubArr(name)]} {
-	    $wtree itemconfigure $jid -text $agentSubArr(name)
+	    ::ITree::ItemConfigure $wtree $jid -text $agentSubArr(name)
 	}
     } else {
 	if {[string length $parentJid] > 0} {
@@ -276,20 +273,20 @@ proc ::Agents::AddAgentToTree {parentJid jid subAgent} {
 	if {[info exists agentSubArr(name)]} {
 	    set txt $agentSubArr(name)
 	}
-	$wtree newitem $v -dir 1 -open 1 -text $txt -tags $jid
+	set item [::ITree::Item $wtree $v -button 1 -open 1 -text $txt]
 	set bmsg "jid: $jid"
 	
 	foreach tag [array names agentSubArr] {
 	    switch -- $tag {
 		register - search - groupchat {
-		    $wtree newitem [concat $v $tag]
+		    ::ITree::Item $wtree [concat $v $tag] -text $tag
 		}
 		service {
-		    $wtree newitem [concat $v $tag]  \
+		    ::ITree::Item $wtree [concat $v $tag]  \
 		      -text "service: $agentSubArr($tag)"
 		}
 		transport {
-		    $wtree newitem [concat $v $tag]  \
+		    ::ITree::Item $wtree [concat $v $tag]  \
 		      -text $agentSubArr($tag)
 		} 
 		description {
@@ -299,11 +296,11 @@ proc ::Agents::AddAgentToTree {parentJid jid subAgent} {
 		    # nothing
 		} 
 		default {
-		    $wtree newitem [concat $v $tag]
+		    ::ITree::Item $wtree [concat $v $tag] -text $tag
 		}
 	    }
 	}
-	::balloonhelp::balloonforcanvas $wtreecanvas $jid $bmsg	    
+	::balloonhelp::treectrl $wtree $item $bmsg	    
     }
 }
 
@@ -340,7 +337,6 @@ proc ::Agents::Build {w args} {
 
     variable wagents
     variable wtree
-    variable wtreecanvas
     variable wwave
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -367,22 +363,16 @@ proc ::Agents::Build {w args} {
     frame $wbox
     pack  $wbox -side top -fill both -expand 1
 
+    set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
+
     tuscrollbar $wxsc -orient horizontal -command [list $wtree xview]
     tuscrollbar $wysc -orient vertical -command [list $wtree yview]
-    ::tree::tree $wtree -width 100 -height 100 -silent 1  \
-      -scrollwidth 400 \
-      -xscrollcommand [list ::UI::ScrollSet $wxsc \
-      [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
-      -yscrollcommand [list ::UI::ScrollSet $wysc \
-      [list grid $wysc -row 0 -column 1 -sticky ns]]  \
-      -selectcommand ::Agents::SelectCmd   \
-      -opencommand ::Agents::OpenTreeCmd  \
-      -eventlist [list [list <<ButtonPopup>> [namespace current]::Popup]]
-
-    if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand [namespace current]::Popup
-    }
-    set wtreecanvas [$wtree getcanvas]
+    ::ITree::New $wtree $wxsc $wysc   \
+      -selection   ::Agents::Selection     \
+      -open        ::Agents::OpenTreeCmd   \
+      -buttonpress ::Agents::Popup         \
+      -buttonpopup ::Agents::Popup         \
+      -backgroundimage $bgimage
 
     grid  $wtree  -row 0 -column 0 -sticky news
     grid  $wysc   -row 0 -column 1 -sticky ns
@@ -393,19 +383,18 @@ proc ::Agents::Build {w args} {
     return $w
 }
 
-# Agents::SelectCmd --
+# Agents::Selection --
 #
 #
 # Arguments:
-#       w           tree widget
+#       T           tree widget
 #       v           tree item path
 #       
 # Results:
 #       .
 
-proc ::Agents::SelectCmd {w v} {
-    
-    
+proc ::Agents::Selection {T v} {
+    # empty
 }
 
 # Agents::OpenTreeCmd --
@@ -422,9 +411,7 @@ proc ::Agents::SelectCmd {w v} {
 #       .
 
 proc ::Agents::OpenTreeCmd {w v} {
-    
-    
-    
+    # empty
 }
     
 proc ::Agents::RegisterPopupEntry {menuSpec} {
@@ -462,16 +449,17 @@ proc ::Agents::Popup {w v x y} {
     
     set jid [lindex $v end]
     set jid3 $jid
-    set childs [$w children $v]
+    set childs [::ITree::Children $w $v]
     if {[regexp {(register|search|groupchat)} $jid match service]} {
 	set typeClicked $service
 	set jid [lindex $v end-1]
-    } elseif {$jid != ""} {
+    } elseif {$jid ne ""} {
 	set typeClicked jid
     }
     set services {}
     foreach c $childs {
-	if {[regexp {(register|search|groupchat)} $c match service]} {
+	set tag [lindex $c end]
+	if {[regexp {(register|search|groupchat)} $tag match service]} {
 	    lappend services $service
 	}
     }
