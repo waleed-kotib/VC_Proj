@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.73 2005-10-28 06:48:41 matben Exp $
+# $Id: Disco.tcl,v 1.74 2005-10-28 12:56:26 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -717,9 +717,11 @@ proc ::Disco::Build {w} {
     pack $wwave -side bottom -fill x -padx 8 -pady 2
     
     # D = -border 1 -relief sunken
-    set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
     frame $wbox
     pack  $wbox -side top -fill both -expand 1
+
+    set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
+
     tuscrollbar $wxsc -command [list $wtree xview] -orient horizontal
     tuscrollbar $wysc -command [list $wtree yview] -orient vertical
     ::ITree::New $wtree $wxsc $wysc   \
@@ -955,6 +957,7 @@ proc ::Disco::CloseTreeCmd {w vstruct} {
     variable tstate
     
     ::Debug 2 "::Disco::CloseTreeCmd vstruct=$vstruct"
+
     if {[info exists tstate(run,$vstruct)]} {
 	unset tstate(run,$vstruct)
 	$wwave animate -1
@@ -1046,9 +1049,8 @@ proc ::Disco::TreeItem {vstruct} {
 	if {[llength $vstruct] == 1} {
 	    set isopen 1
 	}
-	# set treectag item[incr treeuid]
 	set opts [list -text $name -button $isdir -image $icon -open $isopen]
-	set item [eval {::ITree::Item $wtree $vstruct} $opts]
+	eval {::ITree::Item $wtree $vstruct} $opts
 	
 	# Balloon.
 	MakeBalloonHelp $vstruct

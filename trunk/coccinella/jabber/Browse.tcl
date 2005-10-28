@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.78 2005-10-26 14:38:34 matben Exp $
+# $Id: Browse.tcl,v 1.79 2005-10-28 12:56:26 matben Exp $
+
+package require ITree
 
 package provide Browse 1.0
 
@@ -19,6 +21,7 @@ namespace eval ::Browse:: {
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
     option add *Browse.waveImage            wave            widgetDefault
+    option add *Browse.backgroundImage      cociexec        widgetDefault
 
     # Standard widgets and standard options.
     option add *Browse.padding              4               50
@@ -32,11 +35,6 @@ namespace eval ::Browse:: {
     
     variable dlguid 0
     
-    # Use a unique canvas tag in the tree widget for each jid put there.
-    # This is needed for the balloons that need a real canvas tag, and that
-    # we can't use jid's for this since they may contain special chars (!)!
-    variable treeuid 0
-
     # Template for the browse popup menu.
     variable popMenuDefs
 
@@ -74,7 +72,7 @@ namespace eval ::Browse:: {
 	}
 	mUnregister    register  {::Register::Remove $jid}
 	separator      {}        {}
-	mRefresh       jid       {::Browse::Refresh $jid}
+	mRefresh       jid       {::Browse::Refresh $v}
 	mAddServer     {}        {::Browse::AddServer}
     }
 }
@@ -303,7 +301,7 @@ proc ::Browse::Callback {browseName type from subiq} {
 		  Contact the system administrator of $jserver(this)."
 		return
 	    }
-	    AddToTree $parents $jid $subiq 1
+	    TreeItem $parents $jid $subiq 1
 	    
 	    # If we have a conference (groupchat) window.
 	    DispatchUsers $jid $subiq
@@ -416,7 +414,6 @@ proc ::Browse::DispatchUsers {jid subiq} {
 proc ::Browse::ErrorProc {silent browseName type jid errlist} {
     variable tstate
     variable wwave
-    variable wtree
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -521,21 +518,18 @@ proc ::Browse::Build {w} {
     frame $wbox
     pack  $wbox -side top -fill both -expand 1
 
+    set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
+
     tuscrollbar $wxsc -command [list $wtree xview] -orient horizontal
     tuscrollbar $wysc -command [list $wtree yview] -orient vertical
-    ::tree::tree $wtree -width 100 -height 100 -silent 1 -scrollwidth 400 \
-      -xscrollcommand [list ::UI::ScrollSet $wxsc \
-      [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
-      -yscrollcommand [list ::UI::ScrollSet $wysc \
-      [list grid $wysc -row 0 -column 1 -sticky ns]]  \
-      -selectcommand [namespace current]::SelectCmd   \
-      -closecommand [namespace current]::CloseTreeCmd  \
-      -opencommand [namespace current]::OpenTreeCmd  \
-      -eventlist [list [list <<ButtonPopup>> [namespace current]::Popup]]
+    ::ITree::New $wtree $wxsc $wysc   \
+      -selection   ::Browse::Selection     \
+      -open        ::Browse::OpenTreeCmd   \
+      -close       ::Browse::CloseTreeCmd  \
+      -buttonpress ::Browse::Popup         \
+      -buttonpopup ::Browse::Popup         \
+      -backgroundimage $bgimage
 
-    if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand [namespace current]::Popup
-    }
     grid  $wtree  -row 0 -column 0 -sticky news
     grid  $wysc   -row 0 -column 1 -sticky ns
     grid  $wxsc   -row 1 -column 0 -sticky ew
@@ -700,27 +694,30 @@ proc ::Browse::Popup {w v x y} {
     }
 }
 
-# Browse::AddToTree --
+# Browse::TreeItem --
 #
 #       Fills tree with content. Calls itself recursively.
 #
 # Arguments:
-#       parentsJidList: 
+#       pjidList: 
 #       jid:        the jid of the first element in xmllist.
 #                   if empty then get it from the attributes instead.
 #       xmllist:    xml list starting after the <iq> tag.
 
-proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {    
+proc ::Browse::TreeItem {pjidList jid xmllist {browsedjid 0}} {    
     variable wtree
-    variable treeuid
     variable typeIcon
-    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jstate  jstate
+    upvar ::Jabber::jprefs  jprefs
+    upvar ::Jabber::jserver jserver
     upvar ::Jabber::nsToText nsToText
-    
-    
-    # Verify that parent tree item really exists!
-    if {![$wtree isitem $parentsJidList]} {
-	return
+        
+    # If this is a tree root element add only if a browsed server.
+    if {$pjidList eq ""} {
+	set all [concat $jprefs(browseServers) [list $jserver(this)]]
+	if {[lsearch -exact $all $jid] < 0} {
+	    return
+	}
     }
     
     set category [wrapper::gettag $xmllist]
@@ -728,7 +725,6 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     if {[string equal $category "item"] && [info exists attrArr(category)]} {
 	set category $attrArr(category)
     }
-    set treectag item[incr treeuid]
     
     switch -exact -- $category {
 	ns {
@@ -737,20 +733,26 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 	default {
     
 	    # If the 'jid' is empty we get it from our attributes!
-	    if {[string length $jid] == 0} {
+	    if {$jid eq ""} {
 		set jid $attrArr(jid)
 	    }
-	    set jidList [concat $parentsJidList $jid]
-	    set allChildren [wrapper::getchildren $xmllist]
+	    set jidList [concat $pjidList $jid]
+	    set children [wrapper::getchildren $xmllist]
+	    set isdir 0
+	    set isopen 0
+	    if {$pjidList eq ""} {
+		set isdir 1
+		set isopen 1
+	    }
 	    
-	    ::Debug 6 "\t jidList='$jidList'"
+	    ::Debug 4 "\t category=$category, jidList='$jidList'"
 	    
 	    if {[info exists attrArr(type)] && \
 	      [string equal $attrArr(type) "remove"]} {
 		
 		# Remove this jid from tree widget.
-		foreach v [$wtree find withtag $jid] {
-		    $wtree delitem $v
+		foreach v [::ITree::FindEndItems $wtree $jid] {
+		    ::ITree::DeleteItem $wtree $v
 		}
 	    } else {
 		
@@ -760,13 +762,6 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 		    set txt $attrArr(name)
 		} elseif {[regexp {^([^@]+)@.*} $jid match user]} {
 		    set txt $user
-		}
-		set openParent 0
-		
-		# Make the first two levels, server and its children bold, rest normal style.
-		set style normal
-		if {[llength $jidList] <= 2} {
-		    set style bold
 		}
 		set cattype [$jstate(browse) gettype $jid]
 		
@@ -788,29 +783,28 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 			    } $presList]
 			}
 			
-			set icon [::Roster::GetPresenceIcon $jid \
-			  "available"]
-			
-			$wtree newitem $jidList -dir 0 -text $txt \
-			  -image $icon -tags [list $jid] -canvastags $treectag
+			set icon [::Roster::GetPresenceIcon $jid "available"]			
+			::ITree::Item $wtree $jidList -button 0 -text $txt \
+			  -image $icon
 		    } else {
-			$wtree newitem $jidList -text $txt -tags [list $jid] \
-			  -canvastags $treectag
+			::ITree::Item $wtree $jidList -text $txt
 		    }
 		} elseif {[string equal $category "service"]} {
 		    set icon  ""
 		    if {[info exists typeIcon($cattype)]} {
 			set icon $typeIcon($cattype)
 		    }
-		    $wtree newitem $jidList -text $txt -tags [list $jid] \
-		      -fontstyle $style -canvastags $treectag -image $icon
+		    if {![::ITree::IsItem $wtree $jidList]} {
+			::ITree::Item $wtree $jidList -button $isdir -text $txt \
+			  -image $icon -open $isopen
+		    }
 		} else {
 		    
 		    # This is a service, transport, room, etc.
 		    # Do not create if exists which preserves -open.
-		    if {![$wtree isitem $jidList]} {
-			$wtree newitem $jidList -dir 1 -open 0 -text $txt \
-			  -tags [list $jid] -canvastags $treectag
+		    if {![::ITree::IsItem $wtree $jidList]} {
+			::ITree::Item $wtree $jidList -button 1 -text $txt \
+			  -open 0
 		    }
 		}
 
@@ -820,12 +814,13 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 		    set jidtxt "[string range $jid 0 28]..."
 		}
 		set msg "jid: $jidtxt\ntype: $typesubtype"
-		::balloonhelp::balloonfortree $wtree $treectag $msg
+		set item [::ITree::GetItem $wtree $jidList]
+		::balloonhelp::treectrl $wtree $item $msg
 	    }
 	    
 	    # If any child elements, call ourself recursively.
-	    foreach child $allChildren {
-		AddToTree $jidList {} $child
+	    foreach child $children {
+		TreeItem $jidList {} $child
 	    }
 	}
     }
@@ -867,15 +862,15 @@ proc ::Browse::PresenceHook {jid type args} {
 	    set jidhash ${jid}/$argsArr(-resource)
 	    set parentList [$jstate(browse) getparents $jidhash]
 	    set jidList [concat $parentList [list $jidhash]]
-	    if {![$wtree isitem $jidList]} {
+	    if {![::ITree::IsItem $wtree $jidList]} {
 		return
 	    }
-	    if {$type == "available"} {
+	    if {$type eq "available"} {
 		
 		# Add first if not there?    
 		set icon [eval {::Roster::GetPresenceIcon $jidhash $type} $args]
-		$wtree itemconfigure $jidList -image $icon
-	    } elseif {$type == "unavailable"} {
+		::ITree::ItemConfigure $wtree $jidList -image $icon
+	    } elseif {$type eq "unavailable"} {
 		
 	    }
 	}
@@ -885,18 +880,18 @@ proc ::Browse::PresenceHook {jid type args} {
     }
 }
 
-# Browse::SelectCmd --
+# Browse::Selection --
 #
 #
 # Arguments:
-#       w           tree widget
+#       T           tree widget
 #       v           tree item path
 #       
 # Results:
 #       .
 
-proc ::Browse::SelectCmd {w v} {
-    
+proc ::Browse::Selection {T v} {
+    # empty
 }
 
 # Browse::OpenTreeCmd --
@@ -931,10 +926,10 @@ proc ::Browse::OpenTreeCmd {w v} {
 	    
 	    # Browse services available.
 	    Get $jid
-	} elseif {[llength [$wtree children $v]] == 0} {
+	} elseif {[::ITree::Children $wtree $v] == {}} {
 	    set xmllist [$jstate(browse) get $jid]
 	    foreach child [wrapper::getchildren $xmllist] {
-		AddToTree $v {} $child
+		TreeItem $v {} $child
 	    }
 	}
     }    
@@ -952,41 +947,26 @@ proc ::Browse::CloseTreeCmd {w v} {
     }
 }
 
-proc ::Browse::Refresh {jid} {    
+proc ::Browse::Refresh {v} {    
     variable wtree
     variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Browse::Refresh jid=$jid"
+    ::Debug 2 "::Browse::Refresh v=$v"
+    
+    set jid [lindex $v end]
         
     # Clear internal state of the browse object for this jid.
     $jstate(browse) clear $jid
     
     # Remove all children of this jid from browse tree.
-    foreach v [$wtree find withtag $jid] {
-	$wtree delitem $v -childsonly 1
-    }
+    ::ITree::DeleteChildren $wtree $v
     
     # Browse once more, let callback manage rest.
     set tstate(run,$jid) 1
     $wwave animate 1
     Get $jid
-}
-
-# Browse::ClearRoom --
-#
-#       Removes all users from room, typically on exit. Not sure of this one...
-
-proc ::Browse::ClearRoom {roomJid} {    
-    variable wtree    
-    upvar ::Jabber::jstate jstate
-
-    set parentList [$jstate(browse) getparents $roomJid]
-    set jidList "$parentList $roomJid"
-    foreach v [$wtree find withtag $roomJid] {
-	$wtree delitem $v -childsonly 1
-    }
 }
 
 proc ::Browse::Clear { } {    
@@ -1090,7 +1070,7 @@ proc ::Browse::DoAddServer {w} {
     }
     
     # Verify that we doesn't have it already.
-    if {[$wtree isitem $addserver]} {
+    if {[::ITree::IsItem $wtree $addserver]} {
 	::UI::MessageBox -type ok -icon info  \
 	  -message {We have this server already on our list}
 	return
