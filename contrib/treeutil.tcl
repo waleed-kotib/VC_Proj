@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: treeutil.tcl,v 1.2 2005-10-28 06:48:41 matben Exp $
+#  $Id: treeutil.tcl,v 1.3 2005-11-02 12:54:09 matben Exp $
 
 # USAGE:
 # 
@@ -78,10 +78,12 @@ proc ::treeutil::bind {w item args} {
 proc ::treeutil::Init {w} {
     variable state
     
-    ::bind $w <Motion>  [list +::treeutil::Track %W %x %y]
-    ::bind $w <Enter>   [list +::treeutil::Track %W %x %y]
-    ::bind $w <Leave>   [list +::treeutil::Track %W %x %y]
-    ::bind $w <Destroy> [list +::treeutil::Free %W]
+    ::bind $w <Motion>  {+::treeutil::Track %W %x %y }
+    ::bind $w <Enter>   {+::treeutil::Track %W %x %y }
+    ::bind $w <Leave>   {+::treeutil::Track %W %x %y }
+    ::bind $w <Destroy> {+::treeutil::OnDestroy %W }
+    $w notify bind $w <ItemDelete> {+::treeutil::OnItemDelete %T %i }
+    
     set state($w,item) -1
 }
     
@@ -126,7 +128,15 @@ proc ::treeutil::Generate {w x y item type {id ""}} {
     }
 }
 
-proc ::treeutil::Free {w} {
+proc ::treeutil::OnItemDelete {w items} {
+    variable state
+    
+    foreach item $items {
+	array unset state $w,$item,*
+    }
+}
+
+proc ::treeutil::OnDestroy {w} {
     variable state
     
     array unset state $w,*

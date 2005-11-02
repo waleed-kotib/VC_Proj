@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasDraw.tcl,v 1.17 2005-10-15 07:03:35 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.18 2005-11-02 12:54:09 matben Exp $
 
 #-- TAGS -----------------------------------------------------------------------
 #  
@@ -1116,7 +1116,7 @@ proc ::CanvasDraw::BoxDrag {wcan x y shift type {mark 0}} {
     
     # If 'shift' constrain to square or circle.
     if {$shift} {
-	set box [ConstrainedBoxDrag $theBox($wcan,anchor) $x $y $type]
+	set box [eval ConstrainedBoxDrag $theBox($wcan,anchor) {$x $y $type}]
 	set boxOrig [lrange $box 0 1]
 	set x [lindex $box 2]
 	set y [lindex $box 3]

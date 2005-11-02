@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.85 2005-10-26 14:38:34 matben Exp $
+# $Id: Preferences.tcl,v 1.86 2005-11-02 12:54:09 matben Exp $
  
 package require mnotebook
 package require tree
@@ -125,6 +125,7 @@ proc ::Preferences::QuitAppHook { } {
 proc ::Preferences::Show {{page {}}} {
     global  wDlgs
     variable wtree
+    variable tableName2Item
     
     set w $wDlgs(prefs)
     if {[winfo exists $w]} {
@@ -132,8 +133,11 @@ proc ::Preferences::Show {{page {}}} {
     } else {
 	Build
     }
-    if {[string length $page]} {
-	$wtree setselection $page
+    if {$page ne ""} {
+	if {[info exists tableName2Item($page)]} {
+	    $wtree selection clear all
+	    $wtree selection add $tableName2Item($page)
+	}
     }
 }
 
@@ -301,28 +305,28 @@ proc ::Preferences::TreeCtrl {T wysc} {
     bind $T <Destroy>             [list +[namespace current]::OnDestroy %W]
 }
 
-proc ::Preferences::NewTableItem {spec name} {
+proc ::Preferences::NewTableItem {name text} {
     variable wtree
     variable tableName2Item
     
-    ::Debug 6 "::Preferences::NewTableItem $spec"
+    ::Debug 6 "::Preferences::NewTableItem $name"
     
     set T $wtree
     
     set item [$T item create]
     $T item style set $item cTree styText cTag styText
-    $T item text $item cTree $name cTag $spec
+    $T item text $item cTree $text cTag $name
 
-    set n [llength $spec]
+    set n [llength $name]
     if {$n == 1} {
 	$T item configure $item -button 1
 	$T item lastchild root $item
     } else {
-	set root [lindex $spec 0]
+	set root [lindex $name 0]
 	set ritem $tableName2Item($root)
 	$T item lastchild $ritem $item
     }
-    set tableName2Item($spec) $item
+    set tableName2Item($name) $item
     
     return $item
 }

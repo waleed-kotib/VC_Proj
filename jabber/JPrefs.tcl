@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.33 2005-10-28 15:08:57 matben Exp $
+# $Id: JPrefs.tcl,v 1.34 2005-11-02 12:54:09 matben Exp $
 
 package require ui::fontselector
 
@@ -532,6 +532,14 @@ proc ::JPrefs::SavePrefsHook { } {
     if {$prefs(opacity) != $tmpPrefs(opacity)} {
 	SetOpacity $tmpPrefs(opacity)
     }
+
+    # Roster background image: change only if needed.
+    set newBackground 0
+    if {($jprefs(rost,useBgImage) != $tmpJPrefs(rost,useBgImage)) || \
+      ($jprefs(rost,bgImagePath) != $tmpJPrefs(rost,bgImagePath))} {
+	set newBackground 1
+    }
+    
     array set jprefs [array get tmpJPrefs]
     array set prefs  [array get tmpPrefs]
     
@@ -539,9 +547,9 @@ proc ::JPrefs::SavePrefsHook { } {
     ::JPrefs::UpdateAutoAwaySettings    
 
     # Roster background image.
-    ::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
-      $tmpJPrefs(rost,bgImagePath)
-    
+    if {$newBackground} {
+	::RosterTree::SetBackgroundImage
+    }
     ::Chat::SetFont $jprefs(chatFont)
 }
 
