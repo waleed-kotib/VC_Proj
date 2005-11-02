@@ -343,6 +343,9 @@
 ::msgcat::mcset en mOffline         	{Offline}
 ::msgcat::mcset en mTransports         	{Transports}
 ::msgcat::mcset en mIgnore         	{Ignore}
+::msgcat::mcset en mSort         	{Sort}
+::msgcat::mcset en mIncreasing         	{Increasing}
+::msgcat::mcset en mDecreasing         	{Decreasing}
 
 
 # Short texts only. Use english text as database key.

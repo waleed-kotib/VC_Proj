@@ -5,7 +5,7 @@
 #  Code idee from Harrison & McLennan
 #  This source file is distributed under the BSD license.
 #  
-# $Id: balloonhelp.tcl,v 1.17 2005-10-28 06:48:41 matben Exp $
+# $Id: balloonhelp.tcl,v 1.18 2005-11-02 12:54:09 matben Exp $
 
 package require treeutil
 
@@ -15,6 +15,7 @@ namespace eval ::balloonhelp:: {
     
     variable locals
     variable debug 0
+    variable w .balloonhelp
     
     set locals(active) 1
     set locals(initted) 0
@@ -26,7 +27,7 @@ namespace eval ::balloonhelp:: {
     option add *Balloonhelp.foreground            black     widgetDefault
     option add *Balloonhelp.wrapLength            180       widgetDefault
     option add *Balloonhelp.justify               left      widgetDefault
-    option add *Balloonhelp.millisecs             1200      widgetDefault
+    option add *Balloonhelp.millisecs             2000      widgetDefault
     
     switch -- [tk windowingsystem] {
 	x11 {
@@ -43,20 +44,21 @@ namespace eval ::balloonhelp:: {
 
 proc ::balloonhelp::Init { } {
     
+    variable w
     variable locals
 
     if {!$locals(initted)} {
 	Build
-	set locals(millisecs) [option get .balloonhelp millisecs {}]
+	set locals(millisecs) [option get $w millisecs {}]
 	set locals(initted) 1
     }
 }
 
 proc ::balloonhelp::Build { } {
     
+    variable w
     variable locals
     
-    set w .balloonhelp
     toplevel $w -class Balloonhelp -bd 0 -relief flat
     set bg   [option get $w background {}]
     set fg   [option get $w foreground {}]
@@ -192,6 +194,7 @@ proc ::balloonhelp::Pending {win type args} {
 
 proc ::balloonhelp::Cancel {win} {
     
+    variable w
     variable locals    
     Debug 2 "::balloonhelp::Cancel"
     
@@ -199,25 +202,26 @@ proc ::balloonhelp::Cancel {win} {
 	after cancel $locals(pending)
 	unset locals(pending)
     }
-    if {[winfo exists .balloonhelp]} {
-	wm withdraw .balloonhelp
+    if {[winfo exists $w]} {
+	wm withdraw $w
     }
-    if {[info exists locals(focus)] && ($locals(focus) != ".balloonhelp")} {
+    if {[info exists locals(focus)] && ($locals(focus) ne $w)} {
 	# catch {focus $locals(focus)}
     }
 }
 
 proc ::balloonhelp::Show {win type} {
     
+    variable w
     variable locals    
 
     if {![winfo exists $win]} {
 	unset -nocomplain locals(pending)
 	return
     }
-    set w .balloonhelp
-    if {[focus] != $w} {
-	set locals(focus) [focus]
+    set wfocus [focus]
+    if {$wfocus ne $w} {
+	set locals(focus) $wfocus
     }
     set exists 0
     set msg ""
@@ -297,7 +301,8 @@ proc ::balloonhelp::Show {win type} {
 
 proc ::balloonhelp::SetPosition {x y} {
     
-    set w .balloonhelp
+    variable w
+
     if {[winfo exists $w]} {
 	set width  [winfo reqwidth $w]
 	set height [winfo reqheight $w]

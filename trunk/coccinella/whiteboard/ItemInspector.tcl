@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: ItemInspector.tcl,v 1.7 2005-10-14 06:36:51 matben Exp $
+# $Id: ItemInspector.tcl,v 1.8 2005-11-02 12:54:09 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -382,7 +382,6 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 		if {$canvasState eq "disabled"} {
 		    $wmb state {disabled}
 		}
-		$wmb configure -highlightthickness 0
 		set state($op,w) $wmb
 	    } 
 	    default  {

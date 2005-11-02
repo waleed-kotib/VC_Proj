@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.4 2005-10-28 12:56:26 matben Exp $
+# $Id: ITree.tcl,v 1.5 2005-11-02 12:54:09 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -16,7 +16,7 @@
 
 package provide ITree 1.0
 
-namespace eval ::ITree:: {
+namespace eval ::ITree {
 
     variable buttonPressMillis 1000
     variable tag2Item
@@ -129,6 +129,7 @@ proc ::ITree::ButtonRelease {T x y} {
     
     if {[info exists buttonAfterId]} {
 	catch {after cancel $buttonAfterId}
+	unset buttonAfterId
     }
 }
 
@@ -197,9 +198,7 @@ proc ::ITree::Item {T v args} {
 
     $T item element configure $item cTag eText -text $v
     eval {ItemConfigure $T $v} $args
-        
-    # $T notify bind <Enter>
-    
+            
     return $item
 }
 

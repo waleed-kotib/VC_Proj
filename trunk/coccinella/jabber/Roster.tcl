@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.138 2005-10-22 14:26:21 matben Exp $
+# $Id: Roster.tcl,v 1.139 2005-11-02 12:54:09 matben Exp $
+
+package require RosterTree
 
 package provide Roster 1.0
 
@@ -42,12 +44,6 @@ namespace eval ::Roster:: {
     option add *Roster.padding              4               50
         
     # Specials.
-    option add *Roster.backgroundImage      sky             widgetDefault
-    option add *Roster*Tree*dirImage        ""              widgetDefault
-    option add *Roster*Tree*onlineImage     lightbulbon     widgetDefault
-    option add *Roster*Tree*offlineImage    lightbulboff    widgetDefault
-    option add *Roster*Tree*trptImage       block           widgetDefault
-    option add *Roster*Tree*groupImage      ""              widgetDefault
     option add *Roster*rootBackground       ""              widgetDefault
     option add *Roster*rootBackgroundBd     0               widgetDefault
     option add *Roster*rootForeground       ""              widgetDefault
@@ -86,13 +82,6 @@ namespace eval ::Roster:: {
       xa              [mc mExtendedAway]  \
       invisible       [mc mInvisible]     \
       unavailable     [mc mNotAvailable]]
-
-    variable mcHead
-    array set mcHead [list \
-      available     [mc Online]         \
-      unavailable   [mc Offline]        \
-      transports    [mc Transports]     \
-      pending       [mc {Subscription Pending}]]
     
     # Template for the roster popup menu.
     variable popMenuDefs
@@ -113,6 +102,11 @@ namespace eval ::Roster:: {
 	cascade     mShow          {}                 {
 	    check     mOffline     {}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
 	    check     mTransports  {}     {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)}
+	    check     mBackgroundImage {} {::Roster::BackgroundImage} {-variable ::Jabber::jprefs(rost,useBgImage)}
+	} {}
+	cascade     mSort          {}                 {
+	    radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value +1}
+	    radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -1}
 	} {}
 	command     mRefreshRoster {}                 {::Roster::Refresh} {}
     }  
@@ -127,6 +121,7 @@ namespace eval ::Roster:: {
 	command     mLoginTrpt     {trpt unavailable} {::Roster::LoginTrpt $jid3}     {}
 	command     mLogoutTrpt    {trpt available}   {::Roster::LogoutTrpt $jid3}    {}
 	separator   {}             {}                 {} {}
+	command     mUnregister    {trpt}             {::Register::Remove $jid3}      {}
 	command     mRefreshRoster {}                 {::Roster::Refresh}             {}
     }  
 
@@ -299,16 +294,18 @@ proc ::Roster::Build {w} {
     set wtree   $wbox.tree
     set wwave   $w.wa
     
-    # D = -border 1 -relief sunken
-    frame $wbox
-    pack  $wbox -side top -fill both -expand 1
-    
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
     ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
       -type image -image $waveImage
     pack $wwave -side bottom -fill x -padx 8 -pady 2
     
-    TreeNew $w $wtree $wxsc $wysc
+    # D = -border 1 -relief sunken
+    frame $wbox
+    pack  $wbox -side top -fill both -expand 1
+    
+    ::RosterTree::New $wtree $wxsc $wysc
+    ::RosterTree::Configure $wtree
+    ::RosterTree::Init
 
     tuscrollbar $wxsc -command [list $wtree xview] -orient horizontal
     tuscrollbar $wysc -command [list $wtree yview] -orient vertical
@@ -318,10 +315,7 @@ proc ::Roster::Build {w} {
     grid  $wxsc   -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure    $wbox 0 -weight 1
-    
-    # Add root tree dirs.
-    TreeInit $w
-    
+        
     return $w
 }
 
@@ -329,6 +323,17 @@ proc ::Roster::GetWtree { } {
     variable wtree
     
     return $wtree
+}
+
+proc ::Roster::BackgroundImage { } {
+    upvar ::Jabber::jprefs jprefs
+    
+    if {$jprefs(rost,useBgImage)} {
+	set image [::RosterTree::BackgroundImage]
+    } else {
+	set image ""
+    }
+    ::RosterTree::ConfigBgImage $image
 }
 
 proc ::Roster::Animate {{step 1}} {
@@ -391,11 +396,11 @@ proc ::Roster::LogoutHook { } {
     # Here?
     $jstate(roster) reset
     
-    TreeGetClosedItems
+    ::RosterTree::GetClosed
 
     # Clear roster and browse windows.
     if {$jprefs(rost,clrLogout)} {
-	TreeClear
+	::RosterTree::Clear
     }
 }
 
@@ -403,39 +408,7 @@ proc ::Roster::QuitHook { } {
     variable wtree    
     
     if {[info exists wtree] && [winfo exists $wtree]} {
-	TreeGetClosedItems
-    }
-}
-
-proc ::Roster::SetBackgroundImage {useBgImage bgImagePath} {
-    upvar ::Jabber::jprefs jprefs
-    variable wtree    
-    variable wroster
-    
-    if {[winfo exists $wtree]} {
-	
-	# Change only if needed.
-	if {($jprefs(rost,useBgImage) != $useBgImage) || \
-	  ($jprefs(rost,bgImagePath) != $bgImagePath)} {
-	    
-	    if {$useBgImage} {
-		set bgImage ""
-		if {[file exists $bgImagePath]} {
-		    if {[catch {
-			set bgImage [image create photo -file $bgImagePath]
-		    }]} {
-			set bgImage ""
-		    }
-		}
-		if {$bgImage == ""} {
-		    # Default and fallback..
-		    set bgImage [::Theme::GetImage [option get $wroster backgroundImage {}]]
-		}
-	    } else {
-		set bgImage ""
-	    }
-	    TreeConfigBgImage $bgImage
-	}
+	::RosterTree::GetClosed
     }
 }
 
@@ -448,11 +421,22 @@ proc ::Roster::CloseDlg {w} {
 proc ::Roster::Refresh { } {
     variable wwave
 
-    TreeGetClosedItems
+    ::RosterTree::GetClosed
     
     # Get my roster.
     ::Jabber::JlibCmd roster_get [namespace current]::PushProc
     $wwave animate 1
+}
+
+proc ::Roster::Sort {{item root}} {
+    upvar ::Jabber::jprefs jprefs
+	
+    if {$jprefs(rost,sort) == 1} {
+	set order -increasing
+    } else {
+	set order -decreasing
+    }
+    ::RosterTree::Sort $item $order
 }
 
 # Roster::SendRemove --
@@ -476,35 +460,6 @@ proc ::Roster::SendRemove {jidrm} {
       -message [mc jamesswarnremove] -icon warning -type yesno -default no]
     if {[string equal $ans "yes"]} {
 	$jstate(jlib) roster_remove $jid [namespace current]::PushProc
-    }
-}
-
-# Roster::SelectCmd --
-#
-#       Callback when selecting roster item in tree.
-#
-# Arguments:
-#       w           tree widget
-#       v           tree item path
-#       
-# Results:
-#       button states set set.
-
-proc ::Roster::SelectCmd {w v} {    
-    variable btedit
-    variable btremove
-    variable selItem
-    
-    # Not used
-    return
-    
-    set selItem $v
-    if {[llength $v] && ([$w itemconfigure $v -dir] == 0)} {
-	$btedit   configure -state normal
-	$btremove configure -state normal
-    } else {
-	$btedit   configure -state disabled
-	$btremove configure -state disabled
     }
 }
     
@@ -682,8 +637,7 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "--roster-> rostName=$rostName, what=$what, jid=$jid, \
-      args='$args'"
+    ::Debug 2 "---roster-> what=$what, jid=$jid, args='$args'"
 
     # Extract the args list as an array.
     array set attrArr $args
@@ -744,19 +698,19 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    # Must remove all resources, and jid2 if no resources.
     	    set resList [$jstate(roster) getresources $jid]
 	    foreach res $resList {
-		TreeDeleteItem ${jid}/${res}
+		::RosterTree::ItemDelete $jid/$res
 	    }
-	    if {$resList == ""} {
-		TreeDeleteItem $jid
+	    if {$resList == {}} {
+		::RosterTree::ItemDelete $jid
 	    }
-	    TreeRemoveEmpty
+	    ::RosterTree::DeleteEmpty
 	}
 	set {
 	    eval {SetItem $jid} $args
 	}
 	enterroster {
 	    set jstate(inroster) 1
-	    TreeClear
+	    ::RosterTree::Clear
 	}
 	exitroster {
 	    set jstate(inroster) 0
@@ -769,7 +723,8 @@ proc ::Roster::RePopulateTree {w} {
     variable wtree
     upvar ::Jabber::jstate jstate
     
-    TreeInit $w
+    ::RosterTree::GetClosed
+    ::RosterTree::Init
     
     foreach jid [$jstate(roster) getusers] {
 	eval {SetItem $jid} [$jstate(roster) getrosteritem $jid]
@@ -780,12 +735,10 @@ proc ::Roster::ExitRoster { } {
     variable wwave
     variable timer
 
+    Sort
     ::Jabber::UI::SetStatusMessage [mc jarostupdate]
     $wwave animate -1
     set timer(exitroster,secs) [clock seconds]
-    
-    # Should perhaps fix the directories of the tree widget, such as
-    # appending (#items) for each headline.
 }
 
 # Roster::SetItem --
@@ -817,10 +770,10 @@ proc ::Roster::SetItem {jid args} {
     if {!$jstate(inroster)} {
     	set resList [$jstate(roster) getresources $jid]
 	foreach res $resList {
-	    TreeDeleteItem ${jid}/${res}
+	    ::RosterTree::ItemDelete $jid/$res
 	}
-	if {$resList == ""} {
-	    TreeDeleteItem $jid
+	if {$resList eq ""} {
+	    ::RosterTree::ItemDelete $jid
 	}
     }
     
@@ -828,9 +781,10 @@ proc ::Roster::SetItem {jid args} {
     if {!$jprefs(rost,allowSubNone)} {
 	
 	# Do not add items with subscription='none'.
-	set ind [lsearch $args "-subscription"]
-	if {($ind >= 0) && [string equal [lindex $args [expr $ind+1]] "none"]} {
-	    set doAdd 0
+	if {[set idx [lsearch $args "-subscription"]] >= 0} {
+	    if {[string equal [lindex $args [incr idx]] "none"]} {
+		set doAdd 0
+	    }
 	}
     }
     
@@ -842,9 +796,9 @@ proc ::Roster::SetItem {jid args} {
 	array set pres [$jstate(roster) getpresence $jid2 -resource $res]
 	
 	# Put in our roster tree.
-	eval {TreeNewItem $jid $pres(-type)} $args [array get pres]
+	eval {::RosterTree::Item $jid $pres(-type)} $args [array get pres]
     }
-    TreeRemoveEmpty
+    ::RosterTree::DeleteEmpty
 }
 
 # Roster::Presence --
@@ -886,8 +840,11 @@ proc ::Roster::Presence {jid presence args} {
     }
     
     # First remove if there, then add in the right tree dir.
-    TreeDeleteItem $jid
-    
+    ::RosterTree::ItemDelete $jid
+
+    set treePres $presence
+    set item ""
+
     # Put in our roster tree.
     if {[string equal $presence "unsubscribed"]} {
 	set treePres "unavailable"
@@ -897,10 +854,9 @@ proc ::Roster::Presence {jid presence args} {
 	    # Think this is already been made from our presence callback proc.
 	    #$jstate(jlib) roster_remove $jid ::Roster::PushProc
 	} else {
-	    eval {TreeNewItem $jid2 $treePres} $itemAttr $args
+	    set item [eval {::RosterTree::Item $jid2 $treePres} $itemAttr $args]
 	}
     } elseif {[string equal $presence "unavailable"]} {
-	set treePres $presence
 	
 	# XMPP specifies that an 'unavailable' element is sent *after* 
 	# we've got an subscription='remove' element. Skip it!
@@ -914,13 +870,17 @@ proc ::Roster::Presence {jid presence args} {
 	# Add only if no other jid2/* available.
 	set isavailable [$jstate(roster) isavailable $jid2]
 	if {!$isavailable} {
-	    eval {TreeNewItem $jid2 $treePres} $itemAttr $args
+	    set item [eval {::RosterTree::Item $jid2 $treePres} $itemAttr $args]
 	}
     } elseif {[string equal $presence "available"]} {
-	set treePres $presence
-	eval {TreeNewItem $jid2 $treePres} $itemAttr $args
+	set item [eval {::RosterTree::Item $jid2 $treePres} $itemAttr $args]
     }
-    TreeRemoveEmpty
+    ::RosterTree::DeleteEmpty
+    
+    # This minimizes the cost of sorting.
+    if {$item ne ""} {
+	::Roster::Sort [::RosterTree::GetParent $item]
+    }
     
     # We set timed messages for presences only if significantly after login.
     if {[expr [clock seconds] - $timer(exitroster,secs)] > $timer(pres,secs)} {
@@ -940,7 +900,8 @@ proc ::Roster::SetCoccinella {jid} {
     
     set mjid [jlib::jidmap $jid]
     set icon [GetPresenceIconFromJid $jid]
-    TreeSetImageForJid $mjid $icon
+    set tag [list user $mjid]
+    ::RosterTree::ConfigureWithTag $tag image $icon
 }
 
 # Roster::IsCoccinella --
@@ -969,43 +930,6 @@ proc ::Roster::IsCoccinella {jid3} {
 	}
     }
     return $ans
-}
-
-proc ::Roster::BalloonMsg {jidx presence treectag args} {
-    variable wtree    
-    variable mapShowElemToText
-    upvar ::Jabber::jstate jstate
-
-    array set argsArr $args
-    
-    # Design the balloon help window message.
-    set msg $jidx
-    if {[info exists argsArr(-show)]} {
-	set show $argsArr(-show)
-    } else {
-	set show $presence
-    }
-    if {[info exists mapShowElemToText($show)]} {
-	append msg "\n" $mapShowElemToText($show)
-    } else {
-	append msg "\n" $show
-    }
-
-    if {[string equal $presence "available"]} {
-	set delay [$jstate(roster) getx $jidx "jabber:x:delay"]
-	if {$delay != ""} {
-	    
-	    # An ISO 8601 point-in-time specification. clock works!
-	    set stamp [wrapper::getattribute $delay stamp]
-	    set tstr [::Utils::SmartClockFormat [clock scan $stamp -gmt 1]]
-	    append msg "\n" "Online since: $tstr"
-	}
-    }
-    if {[info exists argsArr(-status)] && ($argsArr(-status) != "")} {
-	append msg "\n" $argsArr(-status)
-    }
-    
-    ::balloonhelp::balloonfortree $wtree $treectag $msg
 }
 
 # Roster::SetUIWhen --
@@ -1246,7 +1170,9 @@ proc ::Roster::BrowseSetHook {from subiq} {
     
     # Fix icons of foreign IM systems.
     if {$jprefs(rost,haveIMsysIcons)} {
-	TreePostProcess browse $from
+	if {![jlib::jidequal $from $jserver(this)]} {
+	    ::RosterTree::PostProcess browse $from
+	}
     }
 }
 
@@ -1254,588 +1180,17 @@ proc ::Roster::DiscoInfoHook {type from subiq args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    if {$type == "error"} {
-	return
-    }
-    if {$jprefs(rost,haveIMsysIcons)} {
-	TreePostProcess disco $from
-    }
-}
-
-proc ::Roster::ConfigureIcon {v} {
-
-}
-
-#--- Collection of tree functions ----------------------------------------------
-
-# not complete!
-
-proc ::Roster::TreeNew {w wtree wxsc wysc} {
-    global  this
-    upvar ::Jabber::jprefs jprefs
-    
-    set opts {}
-    if {$jprefs(rost,useBgImage)} {
-	
-	# Create background image if nonstandard.
-	set bgImage ""
-	if {[file exists $jprefs(rost,bgImagePath)]} {
-	    if {[catch {
-		set bgImage [image create photo -file $jprefs(rost,bgImagePath)]
-	    }]} {
-		set bgImage ""
-	    }
-	}
-	if {$bgImage == ""} {
-	    # Default and fallback..
-	    set bgImage [::Theme::GetImage [option get $w backgroundImage {}]]
-	}
-	if {$bgImage != ""} {
-	    lappend opts -backgroundimage $bgImage
-	}
-    }
-    
-    # Various ways of sorting items.
-    #lappend opts -sortcommand {lsort -dictionary}
-    lappend opts -sortcommand2 [list ::Roster::SortDirsFirst $wtree]
-    
-    set xscCmd [list ::UI::ScrollSet $wxsc \
-      [list grid $wxsc -row 1 -column 0 -sticky ew]]
-    set yscCmd [list ::UI::ScrollSet $wysc \
-      [list grid $wysc -row 0 -column 1 -sticky ns]]
-    
-    eval {
-	::tree::tree $wtree -width 100 -height 100 -silent 1  \
-	  -sortlevels {0} -scrollwidth 400  \
-	  -xscrollcommand $xscCmd  \
-	  -yscrollcommand $yscCmd  \
-	  -selectcommand [namespace current]::SelectCmd   \
-	  -doubleclickcommand [namespace current]::TreeDoubleClickCmd  \
-	  -eventlist [list [list <<ButtonPopup>> [namespace current]::TreePopup]]
-    } $opts
-    
-    if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand [namespace current]::TreePopup
-    }
-}
-
-proc ::Roster::SortDirsFirst {w vdir items} {
-    
-    return [lsort -command [list ::Roster::SortCmd $w $vdir] $items]
-}
-
-proc ::Roster::SortCmd {w vdir item1 item2} {
-    
-    set isdir1 [$w itemconfigure [concat $vdir [list $item1]] -dir]
-    set isdir2 [$w itemconfigure [concat $vdir [list $item2]] -dir]
-    if {$isdir1 && !$isdir2} {
-	return -1
-    } elseif {!$isdir1 && $isdir2} {
-	return +1
-    } else {
-	return [string compare $item1 $item2]
-    }
-}
-
-proc ::Roster::TreeInit {w} {
-    variable wtree
-    variable mcHead
-    upvar ::Jabber::jprefs jprefs
-    
-    set rootOpts [list  \
-      -background   [option get $w rootBackground {}]   \
-      -backgroundbd [option get $w rootBackgroundBd {}] \
-      -foreground   [option get $w rootForeground {}]]
-
-    set dirImage     [::Theme::GetImage [option get $wtree dirImage {}]]
-    set onlineImage  [::Theme::GetImage [option get $wtree onlineImage {}]]
-    set offlineImage [::Theme::GetImage [option get $wtree offlineImage {}]]
-
-    set opts {}
-    if {!$jprefs(rost,showOffline)} {
-	lappend opts -showrootbutton 0 -indention {6 16 20} -xmargin {0 6 10}
-    } else {
-	set indention [lindex [$wtree configure -indention] 3]
-	set xmargin   [lindex [$wtree configure -xmargin] 3]
-	lappend opts -showrootbutton 1 -indention $indention -xmargin $xmargin
-    }
-    eval {$wtree configure} $opts
-    $wtree delitem {}
-    
-    set isopen 1
-    if {[lsearch $jprefs(rost,closedItems) available] >= 0} {
-	set isopen 0
-    }
-    eval {$wtree newitem [list available] -dir 1 -open $isopen \
-      -text $mcHead(available) -tags head -image $onlineImage} $rootOpts
-    if {$jprefs(rost,showOffline)} {
-	set isopen 1
-	if {[lsearch $jprefs(rost,closedItems) unavailable] >= 0} {
-	    set isopen 0
-	}
-	eval {$wtree newitem [list unavailable] -dir 1 -open $isopen \
-	  -text $mcHead(unavailable) -tags head -image $offlineImage} $rootOpts
-    }
-}
-
-# Roster::TreeNewItem --
-#
-#       Sets the jid in the correct place in our roster tree.
-#       Online users shall be put with full 3-tier jid.
-#       Offline and other are stored with 2-tier jid with no resource.
-#
-# Arguments:
-#       jid         2-tier jid, or 3-tier for icq etc.
-#       presence    "available" or "unavailable"
-#       args        list of '-key value' pairs of presence and roster
-#                   attributes.
-#       
-# Results:
-#       roster tree updated.
-
-proc ::Roster::TreeNewItem {jid presence args} {    
-    variable wtree    
-    variable treeuid
-    variable mapShowElemToText
-    variable mcHead
-    upvar ::Jabber::jstate  jstate
-    upvar ::Jabber::jserver jserver
-    upvar ::Jabber::jprefs  jprefs
-    
-    ::Debug 3 "::Roster::TreeNewItem jid=$jid, presence=$presence, args='$args'"
-
-    if {![regexp $presence {(available|unavailable)}]} {
-	return
-    }
-    if {!$jprefs(rost,showOffline) && ($presence == "unavailable")} {
-	return
-    }
-    array set argsArr $args
-    
-    jlib::splitjid $jid jid2 res
-
-    # Format item:
-    #  - If 'name' attribute, use this, else
-    #  - if user belongs to login server, use only prefix, else
-    #  - show complete 2-tier jid
-    # If resource add it within parenthesis '(presence)' but only if Online.
-    # 
-    # For Online users, the tree item must be a 3-tier jid with resource 
-    # since a user may be logged in from more than one resource.
-    # Note that some (icq) transports have 3-tier items that are unavailable!
-    
-    set server [jlib::jidmap $jserver(this)]
-
-    set jidx $jid
-    set jid3 $jid
-    if {[info exists argsArr(-resource)] && ($argsArr(-resource) != "")} {
-	set jid3 ${jid2}/$argsArr(-resource)
-	if {[string equal $presence "available"]} {
-	    set appstr " ($argsArr(-resource))"
-	    set jidx ${jid2}/$argsArr(-resource)
-	}
-    }
-    set mjid [jlib::jidmap $jidx]
-    ::Debug 5 "\t jidx=$jidx"
-
-    set istrpt [IsTransportHeuristics $jid3]
-    if {$istrpt && !$jprefs(rost,showTrpts)} {
-	return
-    }
-
-    # Make display text (itemstr).
-    if {$istrpt} {
-	set itemstr $jid3
-	if {[info exists argsArr(-show)]} {
-	    set show $argsArr(-show)
-	    if {[info exists mapShowElemToText($show)]} {
-		append itemstr " " "($mapShowElemToText($show))"
-	    } else {
-		append itemstr " " "($show)"
-	    }
-	} elseif {[info exists argsArr(-status)]} {
-	    append itemstr " " "($argsArr(-status))"
-	}
-    } else {
-	if {[info exists argsArr(-name)] && ($argsArr(-name) != "")} {
-	    set itemstr $argsArr(-name)
-	} elseif {[regexp "^(\[^@\]+)@${server}" $jid match user]} {
-	    set itemstr $user
-	} else {
-	    set itemstr $jid2
-	}
-	if {[info exists appstr]} {
-	    append itemstr $appstr
-	}
-    }
-    set treectag item[incr treeuid]    
-    set itemOpts   [list -text $itemstr -canvastags $treectag]    
-    set icon       [eval {GetPresenceIcon $jidx $presence} $args]
-    set groupImage [::Theme::GetImage [option get $wtree groupImage {}]]
-    set vdir       {}
-    
-    if {$istrpt} {
-	
-	# Transports are treated specially.
-	if {![$wtree isitem [list transports]]} {
-	    set im [::Theme::GetImage [option get $wtree trptImage {}]]
-	    set vdir [list transports]
-	    $wtree newitem $vdir -tags {head trpt} -dir 1 -image $im \
-	      -text $mcHead(transports)
-	}
-	set tags [list trpt $jid3]
-	eval {$wtree newitem [list transports $jid3] -image $icon -tags $tags} \
-	  $itemOpts
-    } elseif {[info exists argsArr(-ask)] &&  \
-      [string equal $argsArr(-ask) "subscribe"]} {
-	
-	# If we have an ask attribute, put in Pending tree dir.
-	# Make it if not already exists.
-	if {![$wtree isitem [list pending]]} {
-	    set vdir [list pending]
-	    $wtree newitem $vdir -tags head -dir 1 -text $mcHead(pending)
-	}
-	set tags [list user $mjid]
-	eval {$wtree newitem [list pending $jid] -image $icon -tags $tags} \
-	  $itemOpts
-    } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) != "")} {
-	
-	# Add jid for each group.
-	foreach grp $argsArr(-groups) {
+    if {$type ne "error"} {
+	if {$jprefs(rost,haveIMsysIcons)} {
+	    set types [$jstate(jlib) disco types $from]
 	    
-	    # Make group if not exists already.
-	    set childs [$wtree children [list $presence]]
-	    if {[lsearch -exact $childs $grp] < 0} {
-		set vdir [list $presence $grp]
-		$wtree newitem $vdir -dir 1 -tags group -image $groupImage
-	    }
-	    set tags [list user $mjid]
-	    eval {$wtree newitem [list $presence $grp $jidx] -image $icon \
-	      -tags $tags} $itemOpts
-	}
-    } else {
-	
-	# No groups associated with this item.
-	set tags [list user $mjid]
-	eval {$wtree newitem [list $presence $jidx] -image $icon -tags $tags} \
-	  $itemOpts
-    }
-    
-    # If we created a directory and that is on the closed item list.
-    if {$vdir != {}} {
-	if {[lsearch $jprefs(rost,closedItems) $vdir] >= 0} {
-	    $wtree itemconfigure $vdir -open 0
-	}
-    }
-    
-    # Design the balloon help window message.
-    eval {BalloonMsg $jidx $presence $treectag} $args
-}
-
-# Roster::TreeDeleteItem --
-#
-#       Removes a jid item from all groups in the tree.
-#
-# Arguments:
-#       jid         can be 2-tier or 3-tier jid!
-#       
-# Results:
-#       updates tree.
-
-proc ::Roster::TreeDeleteItem {jid} {    
-    variable wtree    
-    
-    ::Debug 2 "::Roster::TreeDeleteItem, jid=$jid"
-    
-    # If have 3-tier jid:
-    #    presence = 'available'   => remove jid2 + jid3
-    #    presence = 'unavailable' => remove jid2 + jid3
-    # Else if 2-tier jid:  => remove jid2
-    
-    jlib::splitjid $jid jid2 res
-    set mjid2 [jlib::jidmap $jid2]
-
-    foreach v [$wtree find withtag $mjid2] {
-	$wtree delitem $v
-	
-	# Remove dirs if empty?
-	set vparent [lrange $v 0 end-1]
-	if {[llength $v] == 3} {
-	    if {[llength [$wtree children $vparent]] == 0} {
-		$wtree delitem [lrange $v 0 1]
-	    }
-	}
-    }
-    if {[string length $res] > 0} {
-	
-	# We've got a 3-tier jid.
-	set jid3 $jid
-	set mjid3 [jlib::jidmap $jid]
-	foreach v [$wtree find withtag $mjid3] {
-	    $wtree delitem $v
-	    set vparent [lrange $v 0 end-1]
-	    if {[llength $v] == 3} {
-		if {[llength [$wtree children $vparent]] == 0} {
-		    $wtree delitem [lrange $v 0 1]
-		}
+	    # Only the gateways have custom icons.
+	    if {[lsearch -glob $types gateway/*] >= 0} {
+		::RosterTree::PostProcess disco $from
 	    }
 	}
     }
 }
-
-
-proc ::Roster::TreeSetImageForJid {mjid icon} {
-    variable wtree    
-    
-    foreach v [$wtree find withtag $mjid] {
-	$wtree itemconfigure $v -image $icon
-    }
-}
-
-# Roster::TreePostProcess --
-# 
-#       This is necessary to get icons for foreign IM systems set correctly.
-#       Usually we get the roster before we've got browse/agents/disco 
-#       info, so we cannot know if an item is an ICQ etc. when putting it
-#       into the roster.
-#       
-#       Browse and disco return this information differently:
-#         browse:  from=login server
-#         disco:   from=each specific component
-#         
-# Arguments:
-#       method      "browse" or "disco"
-#       
-# Results:
-#       none.
-
-proc ::Roster::TreePostProcess {method from} {
-    variable wtree    
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
-    
-    if {[string equal $method "browse"]} {
-	if {![jlib::jidequal $from $jserver(this)]} {
-	    return
-	}
-	set matchHost 0
-    } else {
-	set matchHost 1	
-    }
-    ::Debug 5 "::Roster::TreePostProcess $from"
-    
-    set server [jlib::jidmap $jserver(this)]
-
-    foreach v [$wtree find withtag all] {
-	set tags [$wtree itemconfigure $v -tags]
-	if {$tags == ""} {
-	    continue
-	}
-	if {([lsearch $tags head] >= 0) || ([lsearch $tags group] >= 0)} {
-	    continue
-	}
-	set jid [lindex $v end]
-	set mjid [jlib::jidmap $jid]
-	jlib::splitjidex $mjid username host res
-	
-	# Only relevant jid's. Must have full jid here!
-	# Exclude jid's that belong to our login jabber server.
-	if {![string equal $server $host]} {
-	    
-	    # Browse always, disco only if from=host.
-	    if {!$matchHost || [string equal $from $host]} {
-		set icon [GetPresenceIconFromJid $jid]
-		if {[string length $icon]} {
-		    $wtree itemconfigure $v -image $icon
-		}
-	    }
-	}	
-    }   
-}
-
-# Roster::TreePopup --
-#
-#       Handle popup menu in roster.
-#       
-# Arguments:
-#       w           widget that issued the command: tree or text
-#       v           for the tree widget it is the item path, 
-#                   for text the jidhash.
-#       
-# Results:
-#       popup menu displayed
-
-proc ::Roster::TreePopup {w v x y} {
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::Roster::Popup w=$w, v='$v'"
-    
-    # This is either 'available', 'unavailable', 'transports', or 'pending'.
-    set status [lindex $v 0]
-
-    # The last element of 'v' can be a head, group, or a user (jid).
-    set item [lindex $v end]
-
-    set clicked {}
-    if {[llength $v]} {
-	set tags [$w itemconfigure $v -tags]
-    } else {
-	set tags ""
-    }
-    
-    # The commands require a number of variables to be defined:
-    #       jid, jid3, group, clicked...
-    # 
-    # These may be lists of jid's if not an individual user was clicked.
-    # We use jid3 for the actual content even if only jid2, 
-    # and strip off any resource parts for jid (jid2).
-    set jid3 {}
-    set group {}
-    if {[lsearch $tags user] >= 0} {
-	set jid3 $item
-	lappend clicked user
-	if {[IsCoccinella $jid3]} {
-	    lappend clicked wb
-	}
-    } elseif {[lsearch $tags head] >= 0} {
-	if {[lsearch $tags trpt] >= 0} {
-	    # empty
-	} else {
-	    lappend clicked head
-	    set jid3 [TreeGetAllUsersInItem $w $v]
-	}
-    } elseif {[lsearch $tags group] >= 0} {
-	lappend clicked group
-	set jid3 [TreeGetAllUsersInItem $w $v]
-	set group $item
-    } elseif {[lsearch $tags trpt] >= 0} {
-	lappend clicked trpt
-	set jid3 $item
-	# Transports in own directory.
-	if {[$jstate(roster) isavailable $jid3]} {
-	    set status available
-	} else {
-	    set status unavailable
-	}
-    }
-
-    DoPopup $jid3 $clicked $status $group $x $y
-}
-
-proc ::Roster::TreeGetAllUsersInItem {w v} {
-    
-    set jid3 {}
-    foreach u [$w children $v] {
-	set ipath [concat $v [list $u]]
-	set cList [$w children $ipath]
-	foreach c $cList {
-	    set iipath [concat $ipath [list $c]]
-	    if {[lsearch [$w itemconfigure $iipath -tags] user] >= 0} {
-		lappend jid3 $c
-	    }
-	} 
-	if {$cList == {}} {
-	    if {[lsearch [$w itemconfigure $ipath -tags] user] >= 0} {
-		lappend jid3 $u
-	    }
-	}
-    }
-    return $jid3
-}
-
-# Roster::TreeDoubleClickCmd --
-#
-#       Callback when double clicking roster item in tree.
-#
-# Arguments:
-#       w           tree widget
-#       v           tree item path
-#       
-# Results:
-#       button states set set.
-
-proc ::Roster::TreeDoubleClickCmd {w v} {
-    upvar ::Jabber::jprefs jprefs
-
-    if {[llength $v] && ([$w itemconfigure $v -dir] == 0)} {
-	
-	# According to XMPP def sect. 4.1, we should use user@domain when
-	# initiating a new chat or sending a new message that is not a reply.
-	set jid [lindex $v end]
-	jlib::splitjid $jid jid2 res
-	if {[string equal $jprefs(rost,dblClk) "normal"]} {
-	    ::NewMsg::Build -to $jid2
-	} else {
-	    
-	    # We let Chat handle this internally.
-	    ::Chat::StartThread $jid
-	}
-    }    
-}
-
-# Roster::TreeRemoveEmpty --
-# 
-#       Cleanup empty pending and transports dirs.
-
-proc ::Roster::TreeRemoveEmpty { } {
-    variable wtree    
-    
-    foreach key {pending transports} {
-	if {[$wtree isitem [list $key]] && \
-	  [llength [$wtree children [list $key]]] == 0} {
-	    $wtree delitem [list $key]
-	}
-    }
-}
-
-# Roster::TreeGetClosedItems --
-# 
-#       Keep track of all closed tree items. Default is all open.
-
-proc ::Roster::TreeGetClosedItems { } {
-    variable wtree        
-    upvar ::Jabber::jprefs jprefs
-    
-    set vlist {}
-    foreach v [$wtree find withtag all] {
-	if {[$wtree itemconfigure $v -dir]} {
-	    if {![$wtree itemconfigure $v -open]} {
-		lappend vlist $v
-	    }
-	}
-    }
-    set jprefs(rost,closedItems) $vlist
-}
-
-proc ::Roster::TreeConfigBgImage {bgImage} {
-    variable wtree
-    
-    $wtree configure -backgroundimage $bgImage
-}
-
-# Roster::TreeClear --
-#
-#       Clears the complete tree from all jid's and all groups.
-#
-# Arguments:
-#       
-# Results:
-#       clears tree.
-
-proc ::Roster::TreeClear { } {    
-    variable wtree    
-
-    ::Debug 2 "::Roster::TreeClear"
-    
-    foreach v [$wtree find withtag head] {
-	$wtree delitem $v -childsonly 1
-    }
-    catch {
-	$wtree delitem [list pending]
-	$wtree delitem [list transports]
-    }
-}
-
 
 #--- Transport utilities -------------------------------------------------------
 
@@ -1959,7 +1314,7 @@ proc ::Roster::IsTransport {jid} {
     # in the roster, but where we get the 2-tier part. Get 3-tier jid.
     set transport 0
     if {![catch {jlib::splitjidex $jid node host res}]} {
-	if {([lsearch [GetAllTransportJids] $host] >= 0) && ($node == "")} {    
+	if {([lsearch [GetAllTransportJids] $host] >= 0) && ($node eq "")} {    
 	    set transport 1
 	}
     }    
@@ -1975,7 +1330,7 @@ proc ::Roster::IsTransportHeuristics {jid} {
     # Others, like MSN, have a jid = msn.jabber.ccc.de.
     set transport 0
     if {![catch {jlib::splitjidex $jid node host res}]} {
-	if {($node == "") && ($res == "registered")} {
+	if {($node eq "") && ($res eq "registered")} {
 	    set transport 1
 	}
     }
@@ -1983,6 +1338,33 @@ proc ::Roster::IsTransportHeuristics {jid} {
 	set transport [IsTransport $jid]
     }
     return $transport
+}
+
+proc ::Roster::GetUsersWithSameHost {jid} {
+    upvar ::Jabber::jstate jstate
+
+    set jidlist {}
+    jlib::splitjidex $jid - host -
+
+    foreach ujid [$jstate(roster) getusers] {
+	jlib::splitjidex $ujid - uhost -
+	if {$host eq $uhost} {
+	    lappend jidlist $ujid
+	}
+    }
+    return $jidlist
+}
+
+proc ::Roster::RemoveUsers {jidlist} {
+    upvar ::Jabber::jstate jstate
+
+    foreach jid $jidlist {
+	$jstate(jlib) roster_remove $jid ::Roster::Noop
+    }
+}
+
+proc ::Roster::Noop {args} {
+    # empty
 }
 
 # Prefs page ...................................................................
@@ -1997,6 +1379,7 @@ proc ::Roster::InitPrefsHook { } {
     set jprefs(rost,dblClk)         normal
     set jprefs(rost,showOffline)    1
     set jprefs(rost,showTrpts)      1
+    set jprefs(rost,sort)          +1
 
     # Show special icons for foreign IM systems?
     set jprefs(rost,haveIMsysIcons) 1

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.29 2005-10-02 12:44:41 matben Exp $
+# $Id: disco.tcl,v 1.30 2005-11-02 12:54:09 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -669,17 +669,17 @@ proc jlib::disco::getjidsforfeature {jlibname feature} {
 #       
 # Arguments:
 #       jlibname:     name of existing jabberlib instance
-#       catpattern:   a global pattern of jid type/subtype (gateway/*).
+#       pattern:      a global pattern of jid type/subtype (gateway/*).
 #
 # Results:
 #       List of jid's matching the type pattern. nodes???
 
-proc jlib::disco::getjidsforcategory {jlibname catpattern} {
+proc jlib::disco::getjidsforcategory {jlibname pattern} {
     
     upvar ${jlibname}::disco::info info
     
     set jidlist {}    
-    foreach {key jids} [array get info "${catpattern},typelist"] {
+    foreach {key jids} [array get info "$pattern,typelist"] {
 	set jidlist [concat $jidlist $jids]
     }
     return $jidlist
@@ -691,17 +691,17 @@ proc jlib::disco::getjidsforcategory {jlibname catpattern} {
 #       
 # Arguments:
 #       jlibname:     name of existing jabberlib instance
-#       catpattern:   a global pattern of jid type/subtype (gateway/*).
+#       pattern:      a global pattern of jid type/subtype (gateway/*).
 #
 # Results:
 #       List of types matching the category/type pattern.
 
-proc jlib::disco::getallcategories {jlibname catpattern} {    
+proc jlib::disco::getallcategories {jlibname pattern} {    
     
     upvar ${jlibname}::disco::info info
     
     set ans {}
-    foreach {key catlist} [array get info *,cattypes] {
+    foreach {key catlist} [array get info "$pattern,cattypes"] {
 	lappend ans $catlist
     }
     return [lsort -unique $ans]

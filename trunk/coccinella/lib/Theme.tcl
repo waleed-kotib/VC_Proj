@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.24 2005-09-19 06:37:21 matben Exp $
+# $Id: Theme.tcl,v 1.25 2005-11-02 12:54:09 matben Exp $
 
 package provide Theme 1.0
 
@@ -272,7 +272,7 @@ proc ::Theme::GetImage {name args} {
     if {$argsArr(-keepname)} {
 	set nsname $name
     } else {
-	set nsname ::_img::${name}
+	set nsname ::_img::$name
     }
     set ans ""
 	

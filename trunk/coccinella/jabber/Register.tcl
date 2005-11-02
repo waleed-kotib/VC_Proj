@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.39 2005-09-23 14:27:10 matben Exp $
+# $Id: Register.tcl,v 1.40 2005-11-02 12:54:09 matben Exp $
 
 package provide Register 1.0
 
@@ -380,7 +380,7 @@ proc ::Register::AuthorizeCB {type msg} {
 
 # Register::Remove --
 #
-#       Removes an existing user account from your login server.
+#       Removes an existing user account from your login server or any jid.
 #
 # Arguments:
 #       jid:        Optional, defaults to login server
@@ -396,31 +396,50 @@ proc ::Register::Remove {{jid {}}} {
     ::Debug 2 "::Register::Remove jid=$jid"
     
     set ans "yes"
-    if {$jid == ""} {
+    if {$jid eq ""} {
 	set jid $jserver(this)
 	set ans [::UI::MessageBox -icon warning -title [mc Unregister] \
 	  -type yesno -default no -message [mc jamessremoveaccount]]
+    } else {
+	set jidlist [::Roster::GetUsersWithSameHost $jid]
+	if {[llength $jidlist]} {
+	    set msg "You are about to unregister a transport with a number\
+	      of dependent users. Do you want to remove these users as well (Yes),\
+	      keep them (No), or cancel the whole thing (Cancel)."
+	    set ans [::UI::MessageBox -icon warning -title [mc Unregister] \
+	      -type yesnocancel -default no -message $msg]
+	    if {$ans eq "cancel"} {
+		return
+	    } elseif {$ans eq "yes"} {
+		::Roster::RemoveUsers $jidlist
+	    }
+	}
     }
-    if {$ans == "yes"} {
+    
+    if {$ans eq "yes"} {
 	
 	# Do we need to obtain a key for this???
 	$jstate(jlib) register_remove $jid  \
 	  [list ::Register::RemoveCallback $jid]
 	
 	# Remove also from our profile if our login account.
-	if {$jid == $jserver(this)} {
+	if {$jid eq $jserver(this)} {
 	    set profile [::Profiles::FindProfileNameFromJID $jstate(mejid)]
-	    if {$profile != ""} {
+	    if {$profile ne ""} {
 		::Profiles::Remove $profile
 	    }
 	}
     }
 }
 
+proc ::Register::Noop {args} {
+    # empty
+}
+
 proc ::Register::RemoveCallback {jid jlibName type theQuery} {
     
     if {[string equal $type "error"]} {
-	foreach {errcode errmsg} $theQuery break
+	lassign $theQuery errcode errmsg
 	::UI::MessageBox -icon error -title [mc Unregister] -type ok  \
 	  -message [mc jamesserrunreg $jid $errcode $errmsg]
     } else {
