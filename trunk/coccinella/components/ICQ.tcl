@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.6 2005-02-09 14:30:27 matben Exp $
+# $Id: ICQ.tcl,v 1.7 2005-11-04 15:14:55 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -41,7 +41,7 @@ proc ::ICQ::DiscoInfoHook {type from subiq args} {
     ::Debug 4 "::ICQ::DiscoInfoHook"
     
     set cattype [lindex [::Jabber::DiscoCmd types $from] 0]
-    if {$cattype == "gateway/icq"} {
+    if {$cattype eq "gateway/icq"} {
 	InvestigateRoster
     }
 }
@@ -56,17 +56,13 @@ proc ::ICQ::InvestigateRoster { } {
     ::Debug 4 "::ICQ::InvestigateRoster icqHosts=$icqHosts"
 
     # We must loop through all roster items to search for ICQ users.
-    foreach v [$wtree find withtag all] {
-	set tags [$wtree itemconfigure $v -tags]
-	if {[lsearch $tags user] < 0} {
-	    continue
-	}
-	set jid [lindex $v end]
+
+    foreach jid [::Jabber::RosterCmd getusers] {
 	set mjid [jlib::jidmap $jid]
 	jlib::splitjidex $mjid node host res
 	
 	# Not a user.
-	if {$node == ""} {
+	if {$node eq ""} {
 	    continue
 	}
 	
@@ -81,7 +77,7 @@ proc ::ICQ::InvestigateRoster { } {
 	}
 	if {[lsearch -exact $icqHosts $host] >= 0} {
 	    set name [::Jabber::RosterCmd getname $mjid]
-	    if {$name == ""} {
+	    if {$name eq ""} {
 		
 		# Get vCard
 		::Jabber::JlibCmd vcard_get $jid \
@@ -96,13 +92,13 @@ proc ::ICQ::VCardGetCB {from jlibName type subiq} {
     
     ::Debug 4 "::ICQ::VCardGetCB from=$from, type=$type"
 
-    if {$type == "error"} {
+    if {$type eq "error"} {
 	::Jabber::AddErrorLog $from "Failed getting vCard: [lindex $subiq 1]"
     } else {
 	set name [::Jabber::RosterCmd getname $from]
 	
 	# Do not override any previous roster name (?)
-	if {$name == ""} {
+	if {$name eq ""} {
 
 	    # Find any NICKNAME element.
 	    set nickElem [lindex [wrapper::getchildswithtag $subiq "NICKNAME"] 0]

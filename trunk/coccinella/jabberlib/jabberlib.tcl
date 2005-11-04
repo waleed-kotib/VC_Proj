@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.116 2005-10-06 14:41:28 matben Exp $
+# $Id: jabberlib.tcl,v 1.117 2005-11-04 15:14:55 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1342,6 +1342,7 @@ proc jlib::presence_handler {jlibname xmldata} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::prescmd prescmd
     upvar ${jlibname}::opts opts
+    upvar ${jlibname}::locals locals
     
     # Extract the command level XML data items.
     set attrlist  [wrapper::getattrlist $xmldata]
@@ -1352,6 +1353,7 @@ proc jlib::presence_handler {jlibname xmldata} {
     # Make variables of the attributes.
     set arglist {}
     set type "available"
+    set from $locals(server)
     foreach {attrkey attrval} $attrlist {
 	set $attrkey $attrval
 	lappend arglist -$attrkey $attrval
@@ -1459,7 +1461,7 @@ proc jlib::features_handler {jlibname xmllist} {
 		if {[wrapper::getattr $attr xmlns] eq $xmppxmlns(sasl)} {
 		    foreach mechelem $children {
 			wrapper::splitxml $mechelem mtag mattr mchdata mchild
-			if {$mtag == "mechanism"} {
+			if {$mtag eq "mechanism"} {
 			    lappend mechanisms $mchdata
 			}
 		    }
@@ -1472,7 +1474,7 @@ proc jlib::features_handler {jlibname xmllist} {
 		if {[wrapper::getattr $attr xmlns] eq $xmppxmlns(tls)} {
 		    set locals(features,starttls) 1
 		    set childs [wrapper::getchildswithtag $xmllist required]
-		    if {$childs != ""} {
+		    if {$childs ne ""} {
 			set locals(features,starttls,required) 1
 		    }
 		}
@@ -1496,7 +1498,7 @@ proc jlib::get_features {jlibname name {name2 ""}} {
     upvar ${jlibname}::locals locals
 
     set ans ""
-    if {$name2 != ""} {
+    if {$name2 ne ""} {
 	if {[info exists locals(features,$name,$name2)]} {
 	    set ans $locals(features,$name,$name2)
 	}
@@ -1857,12 +1859,12 @@ proc jlib::geterrspecfromerror {errelem kind} {
     set errmsg  "Unknown"
 
     if {[string is integer -strict $errcode]} {
-	if {$cchdata != ""} {
+	if {$cchdata ne ""} {
 	    set errmsg $cchdata
 	} elseif {[info exists errCodeToText($errcode)]} {
 	    set errmsg $errCodeToText($errcode)
 	}
-    } elseif {$cchdata != ""} {
+    } elseif {$cchdata ne ""} {
 	
 	# Old jabber way.
 	set errmsg $cchdata
@@ -1892,12 +1894,12 @@ proc jlib::geterrspecfromerror {errelem kind} {
 	}
     }
     if {[info exists errstr]} {
-	if {$errmsg != ""} {
+	if {$errmsg ne ""} {
 	    append errmsg ". "
 	}
 	append errmsg $errstr
     }
-    if {$errmsg == ""} {
+    if {$errmsg eq ""} {
 	set errmsg "Unknown"
     }
     return [list $errcode $errmsg]
@@ -3371,8 +3373,6 @@ proc jlib::roster_get {jlibname cmd args} {
 
     array set argsArr $args  
     
-    # Perhaps we should clear our roster object here?
-    
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns jabber:iq:roster}]
     send_iq $jlibname "get" [list $xmllist] -command   \
@@ -3424,7 +3424,7 @@ proc jlib::roster_set {jlibname jid cmd args} {
     }
     set subdata {}
     foreach group $groups {
-    	if {$group != ""} {
+    	if {$group ne ""} {
 	    lappend subdata [wrapper::createtag "group" -chdata $group]
 	}
     }
@@ -3814,7 +3814,7 @@ proc jlib::splitjidex {jid nodeVar domainVar resourceVar} {
 	uplevel 1 [list set $nodeVar $node]
 	uplevel 1 [list set $domainVar $domain]
 	uplevel 1 [list set $resourceVar $res]
-    } elseif {$jid == ""} {
+    } elseif {$jid eq ""} {
 	uplevel 1 [list set $nodeVar $node]
 	uplevel 1 [list set $domainVar $domain]
 	uplevel 1 [list set $resourceVar $res]
@@ -3831,10 +3831,10 @@ proc jlib::splitjidex {jid nodeVar domainVar resourceVar} {
 proc jlib::joinjid {node domain resource} {
     
     set jid $domain
-    if {$node != ""} {
+    if {$node ne ""} {
 	set jid ${node}@${jid}
     }
-    if {$resource != ""} {
+    if {$resource ne ""} {
 	set jid ${jid}/${resource}
     }
     return $jid
@@ -3856,13 +3856,13 @@ proc jlib::jidequal {jid1 jid2} {
 
 proc jlib::jidvalidate {jid} {
     
-    if {$jid == ""} {
+    if {$jid eq ""} {
 	return 0
     } elseif {[catch {splitjidex $jid node name resource} ans]} {
 	return 0
     }
     foreach what {node name resource} {
-	if {$what != ""} {
+	if {$what ne ""} {
 	    if {[catch {${what}prep [set $what]} ans]} {
 		return 0
 	    }
@@ -3958,7 +3958,7 @@ proc jlib::resourceprep {resource} {
 
 proc jlib::jidmap {jid} {
     
-    if {$jid == ""} {
+    if {$jid eq ""} {
 	return
     }
     # Guard against spurious spaces.
@@ -3978,7 +3978,7 @@ proc jlib::jidmap {jid} {
 
 proc jlib::jidprep {jid} {
     
-    if {$jid == ""} {
+    if {$jid eq ""} {
 	return
     }
     if {[catch {splitjidex $jid node domain resource} res]} {

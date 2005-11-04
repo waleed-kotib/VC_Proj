@@ -10,7 +10,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  BSD license
 #  
-# $Id: saslmd5.tcl,v 1.6 2005-08-26 15:02:34 matben Exp $
+# $Id: saslmd5.tcl,v 1.7 2005-11-04 15:14:55 matben Exp $
 
 package require base64
 package require md5 2.0
@@ -389,17 +389,17 @@ proc saslmd5::process_challenge {token challenge} {
     set secret     ${user_lat1}:${realm_lat1}:${pass_lat1}
     set secretmd5  [::md5::md5 $secret]
     set A1         ${secretmd5}:${nonce}:${cnonce}
-    if {$authzid != ""} {
+    if {$authzid ne ""} {
 	append A1 :${authzid}
     }
     set A2         AUTHENTICATE:${diguri}
-    if {$qop != "auth"} {
+    if {$qop ne "auth"} {
 	append A2 ":00000000000000000000000000000000"
     }
     set HA1        [string tolower [::md5::md5 -hex $A1]]
     set HA2        [string tolower [::md5::md5 -hex $A2]]
     set KD         ${HA1}:${nonce}
-    if {$qop != ""} {
+    if {$qop ne ""} {
 	append KD :${nc}:${cnonce}:${qop}:${HA2}
     }
     set response   [string tolower [::md5::md5 -hex $KD]]
@@ -417,7 +417,7 @@ proc saslmd5::process_challenge {token challenge} {
     append output ",qop=\"$qop\""
     append output ",response=\"$response\""
     append output ",charset=\"utf-8\""
-    if {$authzid != ""} {
+    if {$authzid ne ""} {
 	append output ",authzid=\"$authzid\""
     }
     return $output
@@ -438,7 +438,7 @@ proc saslmd5::parse_challenge {str} {
 	if {$n == -1} break
 	set key [string range $str $idx [expr $n-1]]
 	set idx [expr $n+1]
-	if {[string index $str $idx] == "\""} {
+	if {[string index $str $idx] eq "\""} {
 	    incr idx
 	    set n [string first "\"" $str $idx]
 	    if {$n == -1} break
@@ -455,7 +455,7 @@ proc saslmd5::parse_challenge {str} {
 	    }
 	}
 	lappend challenge $key $value
-	if {[string index $str $idx] != ","} break
+	if {[string index $str $idx] ne ","} break
 	incr idx
     }
     return $challenge

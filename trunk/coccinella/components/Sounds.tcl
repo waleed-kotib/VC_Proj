@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.21 2005-10-28 15:08:57 matben Exp $
+# $Id: Sounds.tcl,v 1.22 2005-11-04 15:14:55 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -147,7 +147,7 @@ proc ::Sounds::LoadSoundSet {soundSet} {
     array set sound [array get soundIndex]
     
     # Search for given sound set.
-    if {$soundSet == ""} {
+    if {$soundSet eq ""} {
 	set path $this(soundsPath)
     } else {
 	set path [file join $this(soundsPath) $soundSet]
@@ -288,7 +288,7 @@ proc ::Sounds::PlayMIDI {fileName} {
     set cmd  [lindex $sprefs(midiCmd) 0]
     set opts [lrange $sprefs(midiCmd) 1 end]
     set mcmd [auto_execok $cmd]
-    if {$mcmd != ""} {
+    if {$mcmd ne ""} {
 	catch {exec $mcmd $opts $fileName &}
     }
 }
@@ -434,7 +434,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     foreach name $allSounds {
 	set tmpPrefs($name) $sprefs($name)
     }
-    if {$sprefs(soundSet) == ""} {
+    if {$sprefs(soundSet) eq ""} {
 	set tmpPrefs(soundSet) [mc Default]
     } else {
 	set tmpPrefs(soundSet) $sprefs(soundSet)
@@ -586,7 +586,7 @@ proc ::Sounds::SavePrefsHook { } {
     }
     if {$priv(QuickTimeTcl)} {
 	foreach wmovie [winfo children $wqtframe] {
-	    if {[winfo class $wmovie] == "Movie"} {
+	    if {[winfo class $wmovie] eq "Movie"} {
 		$wmovie configure -volume [expr {int($sprefs(volume) * 2.55)}]
 	    }
 	}

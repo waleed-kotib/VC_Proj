@@ -11,7 +11,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.6 2005-08-31 09:51:59 matben Exp $
+# $Id: caps.tcl,v 1.7 2005-11-04 15:14:55 matben Exp $
 
 # UNFINISHED!!!
 #      
@@ -73,7 +73,7 @@ proc jlib::caps::presence_cb {jlibname jid type args} {
     upvar ${jlibname}::caps::capsjids capsjids
     
     set disco [jlib::service::get $jlibname disco]
-    if {$disco == ""} {
+    if {$disco eq ""} {
 	return
     }
     #puts "==================jlib::caps::presence_cb jid=$jid, type=$type, $args"
@@ -128,7 +128,7 @@ proc jlib::caps::disco_cb {jlibname disconame type from subiq args} {
     set node [wrapper::getattribute $subiq node]
     #puts "++++++++++++++++++++++++type=$type, from=$from, node=$node, $subiq, $args"
     
-    if {$type == "error"} {
+    if {$type eq "error"} {
 	foreach {capsxmlns ver} [split $node #] {break}
 	array unset discoed *,$capsxmlns,$ver
     } else {

@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.10 2005-08-14 08:37:51 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.11 2005-11-04 15:14:55 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -417,12 +417,12 @@ proc ::BuddyPounce::StateToPrefs {token} {
 			lappend actlist soundfile:$state($ekey,soundfile)
 		    }
 		    msg {
-			if {$state($ekey,msg,subject) != ""} {
+			if {$state($ekey,msg,subject) ne ""} {
 			    lappend actlist subject:$state($ekey,msg,subject)
 			}
 			set body [$state($ekey,msg,wtext) get 1.0 "end -1 char"]
 			regsub -all "\n" $body {\\n} body
-			if {$body != ""} {
+			if {$body ne ""} {
 			    lappend actlist body:$body
 			}
 		    }
@@ -571,14 +571,14 @@ proc ::BuddyPounce::Event {from eventkey args} {
 	    sound {
 		set soundfile [lsearch -inline -glob $actions soundfile:*]
 		set tail [string map {soundfile: ""} $soundfile]
-		if {$tail != ""} {
+		if {$tail ne ""} {
 		    PlaySound $tail
 		}
 	    }
 	    chat {			
 		# If already have chat.
 		set w [::Chat::HaveChat $jid]
-		if {$w != ""} {
+		if {$w ne ""} {
 		    raise $w
 		} else {
 		    ::Chat::StartThread $from
@@ -588,11 +588,11 @@ proc ::BuddyPounce::Event {from eventkey args} {
 		set subject [mc {Auto Reply}]
 		set body "Insert your message!"
 		set subjectopt [lsearch -inline -glob $actions subject:*]
-		if {$subjectopt != ""} {
+		if {$subjectopt ne ""} {
 		    set subject [string map {subject: ""} $subjectopt]
 		}
 		set bodyopt [lsearch -inline -glob $actions body:*]
-		if {$bodyopt != ""} {
+		if {$bodyopt ne ""} {
 		    set body [string map {body: ""} $bodyopt]
 		    set body [subst -nocommands -novariables $body]
 		}

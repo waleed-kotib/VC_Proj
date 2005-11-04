@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: AutoUpdate.tcl,v 1.12 2005-08-14 08:37:51 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.13 2005-11-04 15:14:55 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -94,7 +94,7 @@ proc ::AutoUpdate::Command {token} {
     
     ::Debug 2 "::AutoUpdate::Command status=$status"
     
-    if {$status == "ok"} {
+    if {$status eq "ok"} {
 	    
 	# Get and parse xml.
 	set xml [::http::data $token]   

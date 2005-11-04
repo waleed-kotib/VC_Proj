@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.34 2005-10-22 14:26:21 matben Exp $
+# $Id: VCard.tcl,v 1.35 2005-11-04 15:14:55 matben Exp $
 
 package provide VCard 1.0
 
@@ -36,7 +36,7 @@ proc ::VCard::Fetch {type {jid {}}} {
     global  wDlgs
     variable uid
 
-    if {$type == "own"} {
+    if {$type eq "own"} {
 	
 	# We must use the 2-tier jid here!
         set jid3 [::Jabber::GetMyJid]
