@@ -6,7 +6,7 @@
 #       
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.20 2005-09-23 07:33:35 matben Exp $
+# $Id: service.tcl,v 1.21 2005-11-04 15:14:55 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -463,7 +463,7 @@ proc jlib::service::gettransportjids {jlibname what} {
 
     # Agent service if any.
     foreach key [array names agent "*,service"] {
-	if {[string equal $agent($key) $what] || ($what == "*")} {
+	if {[string equal $agent($key) $what] || ($what eq "*")} {
 	    lappend jids [string map {,service ""} $key]
 	}
     }
@@ -585,7 +585,7 @@ proc jlib::service::nick {jlibname jid} {
 	#return -code error "Does not know which protocol to use in $room"
     }
     set nick $res
-    if {$res == ""} {
+    if {$res eq ""} {
 	set nick $jid
     }
     

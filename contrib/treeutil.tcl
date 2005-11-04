@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: treeutil.tcl,v 1.3 2005-11-02 12:54:09 matben Exp $
+#  $Id: treeutil.tcl,v 1.4 2005-11-04 15:14:55 matben Exp $
 
 # USAGE:
 # 
@@ -24,7 +24,6 @@
 package provide treeutil 1.0
 
 namespace eval ::treeutil {
-
 
     variable events {<Enter> <Leave>}
 }
@@ -78,15 +77,14 @@ proc ::treeutil::bind {w item args} {
 proc ::treeutil::Init {w} {
     variable state
     
-    ::bind $w <Motion>  {+::treeutil::Track %W %x %y }
-    ::bind $w <Enter>   {+::treeutil::Track %W %x %y }
-    ::bind $w <Leave>   {+::treeutil::Track %W %x %y }
-    ::bind $w <Destroy> {+::treeutil::OnDestroy %W }
+    ::bind $w <Motion>   {+::treeutil::Track %W %x %y }
+    ::bind $w <Enter>    {+::treeutil::Track %W %x %y }
+    ::bind $w <Leave>    {+::treeutil::Track %W %x %y }
+    ::bind $w <Destroy>  {+::treeutil::OnDestroy %W }
     $w notify bind $w <ItemDelete> {+::treeutil::OnItemDelete %T %i }
     
     set state($w,item) -1
-}
-    
+}    
     
 proc ::treeutil::Track {w x y} {
     variable state
@@ -114,7 +112,7 @@ proc ::treeutil::Track {w x y} {
 proc ::treeutil::Generate {w x y item type {id ""}} {
     variable state
     
-    # puts "Generate $item $type"
+    #puts "Generate $item $type"
     
     if {[info exists state($w,$item,$type)]} {
 	array set aid {column "" elem "" line "" button ""}

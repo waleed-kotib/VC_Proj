@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.17 2005-10-26 14:38:34 matben Exp $
+#       $Id: SlideShow.tcl,v 1.18 2005-11-04 15:14:55 matben Exp $
 
 package require undo
 
@@ -259,7 +259,7 @@ proc ::SlideShow::PickFolder {w} {
     }
     set ans [eval {
 	tk_chooseDirectory -mustexist 1 -title [mc {Slide Show Folder}]} $opts]
-    if {$ans != ""} {
+    if {$ans ne ""} {
 	
 	# Check first if any useful content?
 	set priv($w,dir) $ans

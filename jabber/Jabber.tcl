@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.149 2005-10-10 12:58:05 matben Exp $
+# $Id: Jabber.tcl,v 1.150 2005-11-04 15:14:55 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -27,6 +27,7 @@ package require jlib::si
 package require jlib::bytestreams
 package require jlib::ibb
 package require jlib::ftrans
+package require jlib::vcard
 
 # We should have some component mechanism that lets packages load themselves.
 package require Agents
@@ -81,10 +82,8 @@ namespace eval ::Jabber:: {
     set jstate(mejidmap) ""
     set jstate(meres)    ""
     
-    #set jstate(alljid) {}   not implemented yet...
     set jstate(sock) {}
     set jstate(ipNum) {}
-    set jstate(inroster) 0
     
     # This is our own status (presence/show).
     set jstate(status) "unavailable"
@@ -408,7 +407,7 @@ proc ::Jabber::GetMyJid {{roomjid {}}} {
     variable jstate
 
     set jid ""
-    if {$roomjid == ""} {
+    if {$roomjid eq ""} {
 	set jid $jstate(mejidres)
     } else {
 	if {[$jstate(jlib) service isroom $roomjid]} {
@@ -698,7 +697,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 			eval {::Subscribe::NewDlg $from} $args
 		    }
 		}
-		if {$msg != ""} {
+		if {$msg ne ""} {
 		    ::UI::MessageBox -title [mc Info] -icon info -type ok \
 		      -message $msg
 		}
@@ -744,7 +743,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		    set ans [::UI::MessageBox -title [mc Unsubscribed]  \
 		      -icon question -type yesno -default yes \
 		      -message [mc jamessunsubask $from $from]]
-		    if {$ans == "yes"} {
+		    if {$ans eq "yes"} {
 			$jstate(jlib) roster_remove $from \
 			  ::Roster::PushProc
 		    }
@@ -756,7 +755,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    # If we fail to subscribe someone due to a technical reason we
 	    # have sunscription='none'
 	    set sub [$jstate(roster) getsubscription $from]
-	    if {$sub == "none"} {
+	    if {$sub eq "none"} {
 		set msg [mc jamessfailedsubsc $from]
 		if {[info exists argsArr(-status)]} {
 		    append msg " Status message: $argsArr(-status)"
@@ -887,7 +886,7 @@ proc ::Jabber::AutoAway {} {
     set tm [clock format [clock seconds] -format "%H:%M:%S"]
     set ans [::UI::MessageBox -icon info -type yesno -default yes \
       -message [mc jamessautoawayset $tm]]
-    if {$ans == "yes"} {
+    if {$ans eq "yes"} {
 	::Jabber::SetStatus available
     }
 }
@@ -902,12 +901,12 @@ proc ::Jabber::DebugCmd { } {
     variable jstate
     
     if {$jstate(debugCmd)} {
-	if {$this(platform) == "windows" || [string match "mac*" $this(platform)]} {
+	if {$this(platform) eq "windows" || [string match "mac*" $this(platform)]} {
 	    console show
 	}
 	jlib::setdebug 2
     } else {
-	if {$this(platform) == "windows" || [string match "mac*" $this(platform)]} {
+	if {$this(platform) eq "windows" || [string match "mac*" $this(platform)]} {
 	    console hide
 	}
 	jlib::setdebug 0
@@ -1289,7 +1288,7 @@ proc ::Jabber::SetStatus {type args} {
 	} else {
 	    set toServer 1
 	}
-	if {$toServer && ($type == "unavailable")} {
+	if {$toServer && ($type eq "unavailable")} {
 	    after idle $jstate(jlib) closestream	    
 	    SetClosedState
 	}
@@ -1592,14 +1591,14 @@ proc ::Jabber::GetLastString {jid subiq} {
     } else {
 	set secs [expr [clock seconds] - $attrArr(seconds)]
 	set uptime [clock format $secs -format "%a %b %d %H:%M:%S %Y"]
-	if {[wrapper::getcdata $subiq] != ""} {
+	if {[wrapper::getcdata $subiq] ne ""} {
 	    set msg "The message: [wrapper::getcdata $subiq]"
 	} else {
 	    set msg ""
 	}
 	
 	# Time interpreted differently for different jid types.
-	if {$jid != ""} {
+	if {$jid ne ""} {
 	    if {[regexp {^[^@]+@[^/]+/.*$} $jid match]} {
 		set msg1 [mc jamesstimeused $jid]
 	    } elseif {[regexp {^.+@[^/]+$} $jid match]} {
@@ -1796,7 +1795,7 @@ proc ::Jabber::CacheGroupchatType {confjid jlibname type subiq} {
 		
     # This is a VERY rude ad hoc method of figuring out if the
     # server has a conference component.
-    if {($name == "conference") && ($version != "1.0") && ($version != "1.1")} {
+    if {($name eq "conference") && ($version ne "1.0") && ($version ne "1.1")} {
 	set jstate(conference,$confjid) 1
 	set jstate(groupchatprotocol,$confjid) "conference"
     } elseif {[string match -nocase "*mu*" $name]} {

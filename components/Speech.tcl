@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Speech.tcl,v 1.8 2005-10-22 14:26:21 matben Exp $
+# $Id: Speech.tcl,v 1.9 2005-11-04 15:14:55 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -80,25 +80,25 @@ proc ::Speech::Verify { } {
     variable sprefs
     
     # Voices consistency check.
-    if {$sprefs(package) == "TclSpeech"} {
+    if {$sprefs(package) eq "TclSpeech"} {
 	set voices [speech::speakers]
 	if {([lsearch $voices $sprefs(voiceUs)] < 0) || \
-	  ($sprefs(voiceUs) == "")} {
+	  ($sprefs(voiceUs) eq "")} {
 	    set sprefs(voiceUs) Victoria
 	}
 	if {([lsearch $voices $sprefs(voiceOther)] < 0) || \
-	  ($sprefs(voiceOther) == "")} {
+	  ($sprefs(voiceOther) eq "")} {
 	    set sprefs(voiceOther) Zarvox
 	}
     }
-    if {$sprefs(package) == "MSSpeech"} {
+    if {$sprefs(package) eq "MSSpeech"} {
 	set voices [::MSSpeech::GetVoices]
 	if {([lsearch $voices $sprefs(voiceUs)] < 0) || \
-	  ($sprefs(voiceUs) == "")} {
+	  ($sprefs(voiceUs) eq "")} {
 	    set sprefs(voiceUs) [lindex $voices 0]
 	}
 	if {([lsearch $voices $sprefs(voiceOther)] < 0) || \
-	  ($sprefs(voiceOther) == "")} {
+	  ($sprefs(voiceOther) eq "")} {
 	    set sprefs(voiceOther) [lindex $voices 1]
 	}
     }
@@ -119,7 +119,7 @@ proc ::Speech::SpeakMessage {type body args} {
 	    if {$sprefs(speakMsg)} {
 		set txt " "
 		if {[info exists argsArr(-subject)] && \
-		  ($argsArr(-subject) != "")} {
+		  ($argsArr(-subject) ne "")} {
 		    append txt "Subject is $argsArr(-subject). "
 		}
 		append txt $body
@@ -169,7 +169,7 @@ proc ::Speech::SpeakWBText {who str} {
 	    set voice $sprefs(voiceOther)
 	}
     }
-    if {$sprefs(speakWBText) && [string match *${punct}* $str] && ($str != "")} {
+    if {$sprefs(speakWBText) && [string match *${punct}* $str] && ($str ne "")} {
 	::Speech::Speak $str $voice
     }
 }

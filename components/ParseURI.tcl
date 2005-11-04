@@ -7,7 +7,7 @@
 #       Most recent reference at the time of writing:
 #       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
 # 
-# $Id: ParseURI.tcl,v 1.23 2005-10-03 12:49:54 matben Exp $
+# $Id: ParseURI.tcl,v 1.24 2005-11-04 15:14:55 matben Exp $
 
 package require uriencode
 
@@ -96,15 +96,15 @@ proc ::ParseURI::Parse {args} {
 	set profname $state(profname)
 	set password [::Profiles::Get $profname password]
 	set ans "ok"
-	if {$password == ""} {
+	if {$password eq ""} {
 	    set ans [::UI::MegaDlgMsgAndEntry  \
 	      [mc {Password}] [mc enterpassword $state(jid)] "[mc Password]:" \
 	      password [mc Cancel] [mc OK] -show {*}]
 	}
-	if {$ans == "ok"} {
+	if {$ans eq "ok"} {
 	    set node [::Profiles::Get $profname node]
 	    array set optsArr [::Profiles::Get $profname options]
-	    if {[info exists optsArr(-resource)] && ($optsArr(-resource) != "")} {
+	    if {[info exists optsArr(-resource)] && ($optsArr(-resource) ne "")} {
 		set res $optsArr(-resource)
 	    } else {
 		set res "coccinella"
@@ -134,7 +134,7 @@ proc ::ParseURI::Parse {args} {
 proc ::ParseURI::LoginCB {token logtoken status {errmsg ""}} {
     
     ::Login::ShowAnyMessageBox $logtoken $status $errmsg
-    if {$status == "ok"} {
+    if {$status eq "ok"} {
 	ProcessURI $token
     }
 }
@@ -266,13 +266,13 @@ proc ::ParseURI::HandleGroupchat {token} {
     
     # We require a nick name (resource part).
     set nick $state(resource)
-    if {$nick == ""} {
+    if {$nick eq ""} {
 	set ans [::UI::MegaDlgMsgAndEntry  \
 	  [mc {Nick name}] \
 	  "Please enter your desired nick name for the room $state(jid2)" \
 	  "[mc {Nick name}]:" \
 	  nick [mc Cancel] [mc OK]]
-	if {($ans != "ok") || ($nick == "")} {
+	if {($ans ne "ok") || ($nick eq "")} {
 	    return
 	}
     }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.74 2005-10-28 12:56:26 matben Exp $
+# $Id: Disco.tcl,v 1.75 2005-11-04 15:14:55 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -1147,7 +1147,6 @@ proc ::Disco::PresenceHook {jid presence args} {
 	set res $argsArr(-resource)
     }
     set jid3 $jid2/$res
-    eval {TryIdentifyCoccinella $jid3 $presence} $args
 
     if {![info exists wtree] || ![winfo exists $wtree]} {
 	return
@@ -1166,28 +1165,6 @@ proc ::Disco::PresenceHook {jid presence args} {
     }
 }
 
-# We should do this using the 'node' attribute of the caps element instead.
-# This is made in ::Roster::IsCoccinella instead.
-
-proc ::Disco::TryIdentifyCoccinella {jid3 presence args} {
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::coccixmlns coccixmlns
-    
-    # Trigger only if unavailable before.
-    if {[string equal $presence "available"]} {
-	set coccielem  \
-	  [$jstate(roster) getextras $jid3 $coccixmlns(servers)]
-	if {$coccielem == {}} {
-	    if {![::Roster::IsTransportHeuristics $jid3]} {
-		if {![$jstate(jlib) disco isdiscoed items $jid3] && \
-		  ![$jstate(roster) wasavailable $jid3]} {
-		    eval {AutoDisco $jid3 $presence} $args
-		}
-	    }
-	}
-    }	
-}
-
 # In the future we should use disco to get ip address instead of the
 # 'coccinella' element sent with presence. Therefore it is placed here.
 
@@ -1202,40 +1179,6 @@ proc ::Disco::GetCoccinellaIP {jid3} {
 	set ip [wrapper::getcdata [lindex $ipElements 0]]
     }
     return $ip
-}
-
-proc ::Disco::AutoDisco {jid presence args} {
-    upvar ::Jabber::jstate jstate
-    
-    # Disco only potential Coccinella (all jabber) clients.
-    jlib::splitjidex $jid node host x
-    set type [lindex [$jstate(jlib) disco types $host] 0]
-    
-    ::Debug 4 "::Disco::AutoDisco jid=$jid, type=$type"
-
-    # We may not yet have discoed this (empty).
-    if {($type eq "") || ($type eq "service/jabber")} {		
-	$jstate(jlib) disco send_get info $jid [namespace current]::AutoDiscoCmd
-    }
-}
-
-proc ::Disco::AutoDiscoCmd {jlibname type from subiq args} {
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::coccixmlns coccixmlns    
-    
-    ::Debug 4 "::Disco::AutoDiscoCmd type=$type, from=$from"
-    
-    switch -- $type {
-	error {
-	    ::Jabber::AddErrorLog $from "([lindex $subiq 0]) [lindex $subiq 1]"
-	}
-	result - ok {
-	    if {[$jstate(jlib) disco hasfeature $coccixmlns(whiteboard) $from] || \
-	      [$jstate(jlib) disco hasfeature $coccixmlns(coccinella) $from]} {
-		::Roster::SetCoccinella $from
-	    }
-	}
-    }
 }
 
 proc ::Disco::InfoCmd {jid {node ""}} {

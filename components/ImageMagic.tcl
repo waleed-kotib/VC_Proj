@@ -6,7 +6,7 @@
 # 
 # Unix/Linux only.
 #
-# $Id: ImageMagic.tcl,v 1.6 2005-08-14 08:37:51 matben Exp $
+# $Id: ImageMagic.tcl,v 1.7 2005-11-04 15:14:55 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -59,13 +59,13 @@ proc ::ImageMagic::ImportWindowSnapShot {w} {
     set ans [::ImageMagic::BuildDialog .imagic]
     update
     
-    if {$ans == "1"} {
+    if {$ans eq "1"} {
 	set tmpfile [::tfileutils::tempfile $this(tmpPath) imagemagic]
 	append tmpfile .$imageType
 	exec $importcmd $tmpfile
 	set optList [list -coords [::CanvasUtils::NewImportAnchor $wcan]]
 	set errMsg [::Import::DoImport $wcan $optList -file $tmpfile]
-	if {$errMsg == ""} {
+	if {$errMsg eq ""} {
 	    lappend tmpfiles $tmpfile
 	} else {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
@@ -159,7 +159,7 @@ proc ::ImageMagic::ClearImportFiles {wcan} {
     
     variable tmpfiles
 
-    if {$prefs(incomingFilePath) == "" || [string match {*[*?]*} $prefs(incomingFilePath)]} {
+    if {$prefs(incomingFilePath) eq "" || [string match {*[*?]*} $prefs(incomingFilePath)]} {
 	set msg "Dangerous in-box path name '$prefs(incomingFilePath)'"
 	::UI::MessageBox -message $msg -icon warning
 	return
@@ -174,7 +174,7 @@ proc ::ImageMagic::ClearImportFiles {wcan} {
     }
     set msg "Click OK to remove files :\n[join $all_files \n]"
     set ans [::UI::MessageBox -message $msg -type okcancel -icon warning]
-    if {"$ans" == "ok"} {
+    if {"$ans" eq "ok"} {
 	foreach file $all_files {
 	    file delete $file
 	}

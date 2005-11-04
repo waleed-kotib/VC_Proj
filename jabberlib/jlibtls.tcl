@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.7 2005-09-23 07:33:35 matben Exp $
+# $Id: jlibtls.tcl,v 1.8 2005-11-04 15:14:55 matben Exp $
 
 package require tls
 
@@ -156,7 +156,7 @@ proc jlib::tls_finish {jlibname {errcode ""} {msg ""}} {
     element_deregister $jlibname failure [namespace current]::tls_failure
     element_deregister $jlibname proceed [namespace current]::tls_proceed
     
-    if {$errcode != ""} {
+    if {$errcode ne ""} {
 	uplevel #0 $locals(tls,cmd) $jlibname [list error [list $errcode $msg]]
     } else {
 	uplevel #0 $locals(tls,cmd) $jlibname [list result {}]

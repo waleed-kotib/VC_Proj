@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.30 2005-11-02 12:54:09 matben Exp $
+# $Id: disco.tcl,v 1.31 2005-11-04 15:14:55 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -370,10 +370,10 @@ proc jlib::disco::parse_get_items {jlibname from subiq} {
 	# Parents--->
 	# Case (2) above is particularly problematic since an entity jid's
 	# position in the disco tree is not unique.
-	if {$node == ""} {
+	if {$node eq ""} {
 	    
 	    # This is a jid.
-	    if {$pnode == ""} {
+	    if {$pnode eq ""} {
 
 		# case (0):
 		set xcase 0
@@ -392,7 +392,7 @@ proc jlib::disco::parse_get_items {jlibname from subiq} {
 	    
 	    # This is a node. case (1) or (3):
 	    # Init if the first one.
-	    if {$pnode == ""} {
+	    if {$pnode eq ""} {
 		set xcase 3
 		set items($jid,$node,pnode) {}
 		set items($jid,$node,pnodes) {}
@@ -739,7 +739,7 @@ proc jlib::disco::isroomOLD {jlibname jid} {
 
     # Use the form of the jid to get the service.
     jlib::splitjidex $jid node service res
-    if {($node != "") && ($service != "") && ($res == "")} {
+    if {($node ne "") && ($service ne "") && ($res eq "")} {
 	if {[lsearch -exact $info(conferences) $service] >= 0} {
 	    return 1
 	} else {
@@ -786,7 +786,7 @@ proc jlib::disco::childrenlist {jlibname jid {node ""}} {
 
     set jid [jlib::jidmap $jid]
     set clist {}
-    if {$node == ""} {
+    if {$node eq ""} {
 	if {[info exists items($jid,,children)]} {
 	    set clist $items($jid,,children)
 	}
@@ -920,7 +920,7 @@ proc jlib::disco::parentitemslist {jlibname jid {node ""}} {
     set jid [jlib::jidmap $jid]
     if {[info exists items($jid,parents)]} {
 	set plist $items($jid,parents)
-	if {$node != ""} {
+	if {$node ne ""} {
 	    lappend plist $jid
 	    
 	    # The echo component messes up the jid's and therefore this check.
@@ -941,7 +941,7 @@ proc jlib::disco::parentitemslist {jlibname jid {node ""}} {
 proc jlib::disco::getflatlist {jlibname jid {node ""}} {
     
     set plist [parentitemslist $jlibname $jid $node]
-    if {$node == ""} {
+    if {$node eq ""} {
 	set v [concat $plist [list $jid]]
     } else {
 	set v [concat $plist [list $node]]
@@ -962,7 +962,7 @@ proc jlib::disco::flatentitylist {jlibname elist} {
     foreach item $elist {
 	set jid  [lindex $item 0]
 	set node [lindex $item 1]
-	if {$node != ""} {
+	if {$node ne ""} {
 	    lappend flat $node
 	} else {
 	    lappend flat $jid

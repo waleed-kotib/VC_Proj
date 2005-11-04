@@ -2,7 +2,7 @@
 # 
 #       Interface for launching Gnome Meeting.
 #
-# $Id: GMeeting.tcl,v 1.8 2005-08-14 08:37:51 matben Exp $
+# $Id: GMeeting.tcl,v 1.9 2005-11-04 15:14:55 matben Exp $
 
 namespace eval ::GMeeting:: {
     
@@ -69,7 +69,7 @@ proc ::GMeeting::RosterCmd {jid} {
     }
     set cmd [lindex [auto_execok gnomemeeting] 0]
     set ip [::Disco::GetCoccinellaIP $jid]
-    if {$ip == ""} {
+    if {$ip eq ""} {
 	tk_messageBox -type ok -icon error -title Error \
 	  -message "We failed to identify any ip address for \"$jid\""
 	return

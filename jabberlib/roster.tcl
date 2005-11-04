@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.37 2005-10-13 14:41:26 matben Exp $
+# $Id: roster.tcl,v 1.38 2005-11-04 15:14:55 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -402,7 +402,7 @@ proc roster::clearpresence {rostName {jidpattern ""}} {
 
     Debug 2 "roster::clearpresence $rostName '$jidpattern'"
 
-    if {$jidpattern == ""} {
+    if {$jidpattern eq ""} {
 	unset -nocomplain presArr
     } else {
 	array unset presArr $jidpattern
@@ -713,7 +713,7 @@ proc roster::getpresence {rostName jid args} {
     }
     
     # It may happen that there is no roster item for this jid (groupchat).
-    if {![info exists presArr($jid,res)] || ($presArr($jid,res) == "")} {
+    if {![info exists presArr($jid,res)] || ($presArr($jid,res) eq "")} {
 	if {[info exists argsArr(-type)] &&  \
 	  [string equal $argsArr(-type) "available"]} {
 	    return {}
@@ -735,7 +735,7 @@ proc roster::getpresence {rostName jid args} {
 	    return [list -resource $resource -type unavailable]
 	}
 	set result [list -resource $resource]
-	if {$resource == ""} {
+	if {$resource eq ""} {
 	    set jid3 $jid
 	} else {
 	    set jid3 $jid/$resource
@@ -755,7 +755,7 @@ proc roster::getpresence {rostName jid args} {
 	# Be sure to handle empty resources as well: '1234@icq.host'
 	foreach res $presArr($jid,res) {
 	    set thisRes [list -resource $res]
-	    if {$res == ""} {
+	    if {$res eq ""} {
 		set jid3 $jid
 	    } else {
 		set jid3 $jid/$res
@@ -799,7 +799,7 @@ proc roster::getpresence2 {rostName jid args} {
     jlib::splitjid $mjid jid2 resource
     set result {}
     
-    if {$resource == ""} {
+    if {$resource eq ""} {
 	
 	# 2-tier jid. Match any resource.
 	set arrlist [concat [array get presArr2 [jlib::ESC $mjid],jid] \
@@ -959,7 +959,7 @@ proc roster::getresources {rostName jid args} {
 	    foreach res $presArr($jid,res) {
 
 		# Be sure to handle empty resources as well: '1234@icq.host'
-		if {$res== ""} {
+		if {$res eq ""} {
 		    set jid3 $jid
 		} else {
 		    set jid3 $jid/$res
@@ -1016,7 +1016,7 @@ proc roster::gethighestresource {rostName jid} {
 	foreach res $presArr($jid,res) {
 
 	    # Be sure to handle empty resources as well: '1234@icq.host'
-	    if {$res== ""} {
+	    if {$res eq ""} {
 		set jid3 $jid
 	    } else {
 		set jid3 $jid/$res

@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.17 2005-09-23 07:33:35 matben Exp $
+# $Id: jlibsasl.tcl,v 1.18 2005-11-04 15:14:55 matben Exp $
 
 package require saslmd5
 set ::_saslpack saslmd5
@@ -17,7 +17,7 @@ package provide jlibsasl 1.0
 namespace eval jlib {
     variable cyrussasl 
     
-    if {$::_saslpack == "cyrussasl"} {
+    if {$::_saslpack eq "cyrussasl"} {
 	set cyrussasl 1
     } else {
 	set cyrussasl 0
@@ -96,7 +96,7 @@ proc jlib::sasl_features {jlibname tag xmllist} {
     
     # Verify that sasl is supported before going on.
     set features [get_features $jlibname "mechanisms"]
-    if {$features == ""} {
+    if {$features eq ""} {
 	set msg "no sasl mechanisms announced by the server"
 	sasl_final $jlibname error [list {} $msg]
     } else {
@@ -331,7 +331,7 @@ proc jlib::sasl_failure {jlibname tag xmllist} {
     if {[wrapper::getattribute $xmllist xmlns] == $xmppxmlns(sasl)} {
 	set errelem [lindex [wrapper::getchildren $xmllist] 0]
 	#puts "\t errelem=$errelem"
-	if {$errelem == ""} {
+	if {$errelem eq ""} {
 	    set errmsg "not-authorized"
 	} else {
 	    set errtag [wrapper::gettag $errelem]

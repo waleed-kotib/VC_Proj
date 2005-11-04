@@ -3,7 +3,7 @@
 #       Testing snack streaming audio over http.
 #       This is just a first sketch.
 #       
-# $Id: VoIP.tcl,v 1.3 2005-03-02 13:49:40 matben Exp $
+# $Id: VoIP.tcl,v 1.4 2005-11-04 15:14:55 matben Exp $
 
 # TODO:
 #   use caps to announce feature in more detail.
@@ -168,7 +168,7 @@ proc ::VoIP::Busy { } {
 
     if {[snack::audio active]} {
 	return 1
-    } elseif {$state(status) != ""} {
+    } elseif {$state(status) ne ""} {
 	return 1
     } else {
 	return 0
@@ -183,7 +183,7 @@ proc ::VoIP::Call {jid} {
     
     puts "::VoIP::Call jid=$jid"
     
-    if {$state(status) != ""} {
+    if {$state(status) ne ""} {
 	return -code error "cannot make a call while active"
     }
     set state(jid)    $jid
@@ -203,7 +203,7 @@ proc ::VoIP::CallCB {type subiq args} {
     
     puts "::VoIP::CallCB type=$type, subiq=$subiq"
 
-    if {$type == "error"} {
+    if {$type eq "error"} {
 	::UI::MessageBox -title [mc Error] -icon error \
 	  -message "We failed to make a call to $state(jid)"
 	# close down...
@@ -289,7 +289,7 @@ proc ::VoIP::HandleCall {from url opts} {
     set state(status) "pending"
     set ans [::UI::MessageBox -title [mc Error] -icon info -type yesno \
       -message "$state(jid) is calling you. Do you want to answer?"]
-    if {$ans == "no"} {
+    if {$ans eq "no"} {
 	set state(status) ""
     } else {
 	set state(status) "answer"
