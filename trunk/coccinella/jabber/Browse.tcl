@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.80 2005-10-28 15:08:57 matben Exp $
+# $Id: Browse.tcl,v 1.81 2005-11-05 11:37:25 matben Exp $
 
 package require ITree
 
@@ -24,7 +24,7 @@ namespace eval ::Browse:: {
     option add *Browse.backgroundImage      cociexec        widgetDefault
 
     # Standard widgets and standard options.
-    option add *Browse.padding              4               50
+    option add *Browse.padding              2               50
     option add *Browse*box.borderWidth      1               50
     option add *Browse*box.relief           sunken          50
 

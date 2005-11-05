@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.7 2005-11-04 15:14:55 matben Exp $
+# $Id: ICQ.tcl,v 1.8 2005-11-05 11:37:25 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -80,7 +80,7 @@ proc ::ICQ::InvestigateRoster { } {
 	    if {$name eq ""} {
 		
 		# Get vCard
-		::Jabber::JlibCmd vcard_get $jid \
+		::Jabber::JlibCmd vcard send_get $jid \
 		  [list [namespace current]::VCardGetCB $jid]
 	    }
 	}	

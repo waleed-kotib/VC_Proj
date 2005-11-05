@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.1 2005-11-04 15:14:55 matben Exp $
+# $Id: RosterPlain.tcl,v 1.2 2005-11-05 11:37:25 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -70,6 +70,7 @@ proc ::RosterPlain::Configure {_T} {
     if {[$T cget -backgroundimage] eq ""} {
 	set outline gray
     }
+    set minH 16
 
     # Two columns: 
     #   0) the tree 
@@ -90,32 +91,32 @@ proc ::RosterPlain::Configure {_T} {
     set S [$T style create styHead]
     $T style elements $S {eBorder eImage eText}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady 1
+    $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styFolder]
     $T style elements $S {eBorder eImage eText}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady 1
+    $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styUnavailable]
     $T style elements $S {eBorder eImage eText}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady 1
+    $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styAvailable]
     $T style elements $S {eBorder eImage eAltImage eText}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady 1
+    $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
     $T style layout $S eAltImage -expand ns -ipady 2
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styTransport]
     $T style elements $S {eBorder eImage eText}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady 1
+    $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styTag]

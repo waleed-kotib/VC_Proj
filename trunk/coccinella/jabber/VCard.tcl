@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.35 2005-11-04 15:14:55 matben Exp $
+# $Id: VCard.tcl,v 1.36 2005-11-05 11:37:25 matben Exp $
 
 package provide VCard 1.0
 
@@ -57,13 +57,13 @@ proc ::VCard::Fetch {type {jid {}}} {
     
     # We should query the server for this and then fill in.
     ::Jabber::UI::SetStatusMessage [mc vcardget $jid]
-    ::Jabber::JlibCmd vcard_get $jid  \
+    ::Jabber::JlibCmd vcard send_get $jid  \
       [list [namespace current]::FetchCallback $token]
 }
 
 # VCard::FetchCallback --
 #
-#       This is our callback from the 'vcard_get' procedure.
+#       This is our callback from the 'vcard send_get' procedure.
 
 proc ::VCard::FetchCallback {token jlibName result theQuery} {
     
@@ -229,7 +229,7 @@ proc ::VCard::Build {token} {
     }
     pack $frbot -side bottom -fill x
     
-    tile::notebook::enableTraversal $wnb
+    ttk::notebook::enableTraversal $wnb
     wm resizable $w 0 0
     focus $w
 }
@@ -625,7 +625,7 @@ proc ::VCard::SetVCard {token}  {
 	    lappend argList -$key $value
 	}
     }
-    eval {::Jabber::JlibCmd vcard_set ::VCard::SetVCardCallback} $argList
+    eval {::Jabber::JlibCmd vcard send_set ::VCard::SetVCardCallback} $argList
     Close $token
 }
 
@@ -660,7 +660,7 @@ proc ::VCard::Close {token} {
 
 # VCard::SetVCardCallback --
 #
-#       This is our callback from the 'vcard_set' procedure.
+#       This is our callback from the 'vcard send_set' procedure.
 
 proc ::VCard::SetVCardCallback {jlibName type theQuery} {
 

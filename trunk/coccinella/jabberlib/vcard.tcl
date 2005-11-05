@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: vcard.tcl,v 1.1 2005-11-04 15:14:55 matben Exp $
+# $Id: vcard.tcl,v 1.2 2005-11-05 11:37:25 matben Exp $
 
 package require jlib
 
@@ -38,6 +38,8 @@ proc jlib::vcard::init {jlibname args} {
 	variable state
     }
     upvar ${jlibname}::vcard::state state
+    
+    set state(cache) 1
     
     return
 }
@@ -75,10 +77,10 @@ proc jlib::vcard::cmdproc {jlibname cmd args} {
 proc jlib::vcard::send_get {jlibname to cmd} {
     upvar ${jlibname}::vcard::state state
 
-    set state(pending,$to)
+    set state(pending,$to) 1
     set attrlist [list xmlns vcard-temp]    
     set xmllist [wrapper::createtag "vCard" -attrlist $attrlist]
-    send_iq $jlibname "get" [list $xmllist] -to $to -command   \
+    jlib::send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::send_get_cb $jlibname $to $cmd]
     
     return
@@ -92,7 +94,9 @@ proc jlib::vcard::send_get_cb {jlibname jid cmd type subiq} {
     upvar ${jlibname}::vcard::state state
     
     unset -nocomplain state(pending,$jid)
-    set state(cache,$jid) $subiq
+    if {$state(cache)} {
+	set state(cache,$jid) $subiq
+    }
     invoke_stacked $jlibname $jid $type $subiq
     
     uplevel #0 $cmd [list $jlibname $type $subiq]
@@ -247,12 +251,26 @@ proc jlib::vcard::send_set {jlibname cmd args} {
     
     set xmllist [wrapper::createtag vCard -attrlist $attrlist \
       -subtags $subelem]
-    send_iq $jlibname "set" [list $xmllist] -command \
-      [list [namespace current]::invoke_iq_callback?????? $jlibname $cmd]    
+    jlib::send_iq $jlibname "set" [list $xmllist] -command \
+      [list [namespace current]::send_set_cb $jlibname $cmd]    
     return
 }
 
-proc jlib::vcard::clear {{jid ""}} {
+proc jlib::vcard::send_set_cb {jlibname cmd type subiq args} {
+    
+    uplevel #0 $cmd [list $jlibname $type $subiq]
+}
+
+proc jlib::vcard::cache {jlibname args} {
+    upvar ${jlibname}::vcard::state state
+    
+    if {[llength $args] == 1} {
+	set state(cache) [lindex $args 0]
+    }
+    return $state(cache)
+}
+
+proc jlib::vcard::clear {jlibname {jid ""}} {
     upvar ${jlibname}::vcard::state state
     
     if {$jid eq ""} {

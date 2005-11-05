@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.51 2005-10-22 14:26:21 matben Exp $
+# $Id: Whiteboard.tcl,v 1.52 2005-11-05 11:37:25 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -2122,7 +2122,7 @@ proc ::WB::CreateAllButtons {w} {
 		# Handle bindings to popup options.
 		if {[string match "mac*" $this(platform)]} {
 		    bind $wlabel <Button-1>        \
-		      [list +[namespace current]::StartTimerToToolPopup $w %W $name]
+		      +[list [namespace current]::StartTimerToToolPopup $w %W $name]
 		    bind $wlabel <ButtonRelease-1> \
 		      [namespace current]::StopTimerToToolPopup
 		}

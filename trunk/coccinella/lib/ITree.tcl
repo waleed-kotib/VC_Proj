@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.5 2005-11-02 12:54:09 matben Exp $
+# $Id: ITree.tcl,v 1.6 2005-11-05 11:37:25 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -58,8 +58,8 @@ proc ::ITree::New {T wxsc wysc args} {
  
     set S [$T style create styStd]
     $T style elements $S {eBorder eImage eText}
-    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
-    $T style layout $S eImage -expand ns -ipady 2
+    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2 -minheight 16
+    $T style layout $S eImage -expand ns -ipady 2 -minheight 16
     $T style layout $S eBorder -detach yes -iexpand xy -indent 0
 
     set S [$T style create styTag]

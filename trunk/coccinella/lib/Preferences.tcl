@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.86 2005-11-02 12:54:09 matben Exp $
+# $Id: Preferences.tcl,v 1.87 2005-11-05 11:37:25 matben Exp $
  
 package require mnotebook
 package require tree
@@ -301,8 +301,8 @@ proc ::Preferences::TreeCtrl {T wysc} {
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
     $T style layout $S eBorder -detach yes -iexpand xy -indent 0
 
-    $T notify bind $T <Selection> [list [namespace current]::Selection %T]
-    bind $T <Destroy>             [list +[namespace current]::OnDestroy %W]
+    $T notify bind $T <Selection>  [list [namespace current]::Selection %T]
+    bind $T <Destroy>             +[list [namespace current]::OnDestroy %W]
 }
 
 proc ::Preferences::NewTableItem {name text} {

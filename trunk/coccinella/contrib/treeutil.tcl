@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: treeutil.tcl,v 1.4 2005-11-04 15:14:55 matben Exp $
+#  $Id: treeutil.tcl,v 1.5 2005-11-05 11:37:25 matben Exp $
 
 # USAGE:
 # 
@@ -81,6 +81,13 @@ proc ::treeutil::Init {w} {
     ::bind $w <Enter>    {+::treeutil::Track %W %x %y }
     ::bind $w <Leave>    {+::treeutil::Track %W %x %y }
     ::bind $w <Destroy>  {+::treeutil::OnDestroy %W }
+    
+    # We could think of a <FocusOut> event also but the macs floating window
+    # takes focus which makes this useless for tooltip windows.
+    
+    # Scrolling may move items without moving the mouse.
+    #$w notify bind $w <Scroll-x>   {+::treeutil::Track %T %x %y }
+    #$w notify bind $w <Scroll-y>   {+::treeutil::Track %T %x %y }
     $w notify bind $w <ItemDelete> {+::treeutil::OnItemDelete %T %i }
     
     set state($w,item) -1

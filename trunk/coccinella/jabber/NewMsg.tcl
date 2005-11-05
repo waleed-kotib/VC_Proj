@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.68 2005-10-22 14:26:21 matben Exp $
+# $Id: NewMsg.tcl,v 1.69 2005-11-05 11:37:25 matben Exp $
 
 package require ui::entryex
 
@@ -484,7 +484,7 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     
     bind $wentry <Button-1>   [list ::NewMsg::ButtonInAddr $w $wfr $n]
     bind $wentry <Tab>        [list ::NewMsg::TabInAddr $w $wfr $n]
-    bind $wentry <BackSpace>  [list +::NewMsg::BackSpaceInAddr $w $wfr $n]
+    bind $wentry <BackSpace> +[list ::NewMsg::BackSpaceInAddr $w $wfr $n]
     bind $wentry <Return>     [list ::NewMsg::ReturnInAddr $w $wfr $n]
     bind $wentry <Key-Up>     [list ::NewMsg::KeyUpDown -1 $w $wfr $n]
     bind $wentry <Key-Down>   [list ::NewMsg::KeyUpDown 1 $w $wfr $n]

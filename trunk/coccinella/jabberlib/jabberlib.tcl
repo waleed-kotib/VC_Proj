@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.117 2005-11-04 15:14:55 matben Exp $
+# $Id: jabberlib.tcl,v 1.118 2005-11-05 11:37:25 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -115,8 +115,6 @@
 #      jlibName setsockettransport socket
 #      jlibName state
 #      jlibName transport
-#      jlibName vcard_get to cmd
-#      jlibName vcard_set cmd ?args?
 #      
 #  o using the experimental 'conference' protocol:  OUTDATED!
 #      jlibName conference get_enter room cmd
@@ -1092,6 +1090,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    if {!$setus && [info exists id] && [info exists iqcmd($id)]} {
 		
 		# @@@ TODO: add attrArr to callback.
+		# BETTER: deliver complete xml!
 		uplevel #0 $iqcmd($id) [list result $subiq]
 		        
 		#uplevel #0 $iqcmd($id) [list result $subiq] $arglist
@@ -3092,135 +3091,6 @@ proc jlib::have_agent {jlibname jid} {
     } else {
 	return 0
     }
-}
-
-# jlib::vcard_get --
-#
-#       It implements the 'jabber:iq:vcard-temp' get method.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       to:
-#       cmd:        client command to be executed at the iq "result" element.
-#       
-# Results:
-#       none.
-
-proc jlib::vcard_get {jlibname to cmd} {
-
-    set attrlist [list xmlns vcard-temp]    
-    set xmllist [wrapper::createtag "vCard" -attrlist $attrlist]
-    send_iq $jlibname "get" [list $xmllist] -to $to -command   \
-      [list [namespace current]::invoke_iq_callback $jlibname $cmd]
-    return
-}
-
-# jlib::vcard_set --
-#
-#       Sends our vCard to the server. Internally we use all lower case
-#       but the spec (JEP-0054) says that all tags be all upper case.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       cmd:        client command to be executed at the iq "result" element.
-#       args:       All keys are named so that the element hierarchy becomes
-#                   vcardElement_subElement_subsubElement ... and so on;
-#                   all lower case.
-#                   
-# Results:
-#       none.
-
-proc jlib::vcard_set {jlibname cmd args} {
-
-    set attrlist [list xmlns vcard-temp]    
-    
-    # Form all the sub elements by inspecting the -key.
-    array set arr $args
-    set subelem {}
-    set subsubelem {}
-    
-    # All "sub" elements with no children.
-    foreach tag {fn nickname bday url title role desc} {
-	if {[info exists arr(-$tag)]} {
-	    lappend subelem [wrapper::createtag [string toupper $tag] \
-	      -chdata $arr(-$tag)]
-	}
-    }
-    if {[info exists arr(-email_internet_pref)]} {
-	set elem {}
-	lappend elem [wrapper::createtag "INTERNET"]
-	lappend elem [wrapper::createtag "PREF"]
-	lappend subelem [wrapper::createtag "EMAIL" \
-	  -chdata $arr(-email_internet_pref) -subtags $elem]
-    }
-    if {[info exists arr(-email_internet)]} {
-	foreach email $arr(-email_internet) {
-	    set elem {}
-	    lappend elem [wrapper::createtag "INTERNET"]
-	    lappend subelem [wrapper::createtag "EMAIL" \
-	      -chdata $email -subtags $elem]
-	}
-    }
-    
-    # All "subsub" elements.
-    foreach tag {n org} {
-	set elem {}
-	foreach key [array names arr "-${tag}_*"] {
-	    regexp -- "-${tag}_(.+)" $key match sub
-	    lappend elem [wrapper::createtag [string toupper $sub] \
-	      -chdata $arr($key)]
-	}
-    
-	# Insert subsub elements where they belong.
-	if {[llength $elem]} {
-	    lappend subelem [wrapper::createtag [string toupper $tag] \
-	      -subtags $elem]
-	}
-    }
-    
-    # The <adr><home/>, <adr><work/> sub elements.
-    foreach tag {adr_home adr_work} {
-	regexp -- {([^_]+)_(.+)} $tag match head sub
-	set elem [list [wrapper::createtag [string toupper $sub]]]
-	set haveThisTag 0
-	foreach key [array names arr "-${tag}_*"] {
-	    set haveThisTag 1
-	    regexp -- "-${tag}_(.+)" $key match sub
-	    lappend elem [wrapper::createtag [string toupper $sub] \
-	      -chdata $arr($key)]
-	}		
-	if {$haveThisTag} {
-	    lappend subelem [wrapper::createtag [string toupper $head] \
-	      -subtags $elem]
-	}
-    }	
-    
-    # The <tel> sub elements.
-    foreach tag [array names arr "-tel_*"] {
-	if {[regexp -- {-tel_([^_]+)_([^_]+)} $tag match second third]} {
-	    set elem {}
-	    lappend elem [wrapper::createtag [string toupper $second]]
-	    lappend elem [wrapper::createtag [string toupper $third]]
-	    lappend subelem [wrapper::createtag "TEL" -chdata $arr($tag) \
-	      -subtags $elem]
-	}
-    }
-    
-    # The <photo> sub elements.
-    if {[info exists arr(-photo_binval)]} {
-	set elem {}
-	lappend elem [wrapper::createtag "BINVAL" -chdata $arr(-photo_binval)]
-	if {[info exists arr(-photo_type)]} {
-	    lappend elem [wrapper::createtag "TYPE" -chdata $arr(-photo_type)]
-	}
-	lappend subelem [wrapper::createtag "PHOTO" -subtags $elem]
-    }
-    
-    set xmllist [wrapper::createtag vCard -attrlist $attrlist \
-      -subtags $subelem]
-    send_iq $jlibname "set" [list $xmllist] -command \
-      [list [namespace current]::invoke_iq_callback $jlibname $cmd]    
-    return
 }
 
 # jlib::get_last --

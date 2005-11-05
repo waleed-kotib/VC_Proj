@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.136 2005-10-22 14:26:21 matben Exp $
+# $Id: Chat.tcl,v 1.137 2005-11-05 11:37:25 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1050,7 +1050,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     # jabber:x:event
     if {$cprefs(usexevents)} {
 	bind $wtextsnd <KeyPress>  \
-	  [list +[namespace current]::KeyPressEvent $chattoken %A]
+	  +[list [namespace current]::KeyPressEvent $chattoken %A]
 	bind $wtextsnd <Alt-KeyPress>     {# nothing}
 	bind $wtextsnd <Meta-KeyPress>    {# nothing}
 	bind $wtextsnd <Control-KeyPress> {# nothing}
@@ -1173,7 +1173,7 @@ proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
     ttk::notebook $wnb
     bind $wnb <<NotebookTabChanged>> \
       [list [namespace current]::TabChanged $dlgtoken]
-    tile::notebook::enableTraversal $wnb
+    ttk::notebook::enableTraversal $wnb
     pack $wnb -in $wcont -fill both -expand true -side right
 
     set wpage $wnb.p[incr dlgstate(uid)]
