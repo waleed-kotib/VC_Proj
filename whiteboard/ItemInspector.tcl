@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: ItemInspector.tcl,v 1.8 2005-11-02 12:54:09 matben Exp $
+# $Id: ItemInspector.tcl,v 1.9 2005-11-05 11:37:25 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -185,7 +185,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
       -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Item Inspector}
-    bind $wcan <Destroy> [list +[namespace current]::Cancel $token]
+    bind $wcan <Destroy> +[list [namespace current]::Cancel $token]
     
     set typWidth 24
         
@@ -695,8 +695,8 @@ proc ::ItemInspector::Movie {wtoplevel winfr args} {
       -macclass {document closeBox}  \
       -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Movie Inspector}
-    bind $wcan  <Destroy> [list +[namespace current]::Cancel $token]
-    bind $winfr <Destroy> [list +[namespace current]::Cancel $token]
+    bind $wcan  <Destroy> +[list [namespace current]::Cancel $token]
+    bind $winfr <Destroy> +[list [namespace current]::Cancel $token]
     
     set typWidth 24
     
@@ -873,7 +873,7 @@ proc ::ItemInspector::Broken {wtoplevel itemid args} {
       -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Item Inspector}
-    bind $wcan <Destroy> [list +[namespace current]::Cancel $token]
+    bind $wcan <Destroy> +[list [namespace current]::Cancel $token]
             
     # Global frame.
     ttk::frame $w.frall -padding [option get . dialogPadding {}]

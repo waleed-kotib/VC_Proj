@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.92 2005-10-15 09:58:03 matben Exp $
+# $Id: JUI.tcl,v 1.93 2005-11-05 11:37:25 matben Exp $
 
 package provide JUI 1.0
 
@@ -368,13 +368,12 @@ proc ::Jabber::UI::Build {w} {
     
     # Make the notebook pages.
     # Start with the Roster page -----------------------------------------------
-    set ro $nbframe.ro
-    frame $ro
+    set wtab $nbframe.ro
     set imSpec [list $iconRoster disabled $iconRosterDis background $iconRosterDis]
-    $nbframe add $ro -compound left -text [mc Contacts] -image $imSpec
-    pack [::Roster::Build $ro.ro] -fill both -expand 1
+    ::Roster::Build $wtab
+    $nbframe add $wtab -compound left -text [mc Contacts] -image $imSpec
 
-    set jwapp(rostertab) $ro
+    set jwapp(rostertab) $wtab
     
     # Build only Browser and/or Agents page when needed.
     set minWidth [expr $shortBtWidth > 200 ? $shortBtWidth : 200]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.140 2005-11-04 15:14:55 matben Exp $
+# $Id: Roster.tcl,v 1.141 2005-11-05 11:37:25 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -33,14 +33,10 @@ namespace eval ::Roster:: {
     # Standard widgets and standard options.
     option add *Roster.borderWidth          0               50
     option add *Roster.relief               flat            50
-    option add *Roster.pad.padX             4               50
-    option add *Roster.pad.padY             4               50
     option add *Roster*box.borderWidth      1               50
     option add *Roster*box.relief           sunken          50
-    option add *Roster.stat.f.padX          8               50
-    option add *Roster.stat.f.padY          2               50
     
-    option add *Roster.padding              4               50
+    option add *Roster.padding              2               50
         
     # Specials.
     option add *Roster*rootBackground       ""              widgetDefault
@@ -48,8 +44,7 @@ namespace eval ::Roster:: {
     option add *Roster*rootForeground       ""              widgetDefault
     option add *Roster.waveImage            wave            widgetDefault
 
-    variable wtree    
-    variable servtxt
+    variable wtree -
     
     # A unique running identifier.
     variable uid 0
@@ -271,10 +266,6 @@ proc ::Roster::Build {w} {
     global  this wDlgs prefs
         
     variable wtree    
-    variable servtxt
-    variable btedit
-    variable btremove
-    variable btrefresh
     variable wroster
     variable wwave
     upvar ::Jabber::jprefs jprefs
@@ -375,20 +366,17 @@ proc ::Roster::SetPresenceMessage {jid presence args} {
 #       The login hook command.
 
 proc ::Roster::LoginCmd { } {
+    upvar ::Jabber::jstate jstate
     
-    ::Jabber::JlibCmd roster_get ::Roster::PushProc
+    $jstate(jlib) roster_get ::Roster::PushProc
 
     set server [::Jabber::GetServerJid]
-    set ::Roster::servtxt $server
-    SetUIWhen "connect"
 }
 
 proc ::Roster::LogoutHook { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-    
-    SetUIWhen "disconnect"
-    
+        
     # Here?
     $jstate(roster) reset
     
@@ -921,36 +909,6 @@ proc ::Roster::IsCoccinella {jid3} {
 	}
     }
     return $ans
-}
-
-# Roster::SetUIWhen --
-#
-#       Update the roster buttons etc to reflect the current state.
-#
-# Arguments:
-#       what        any of "connect", "disconnect"
-#
-
-proc ::Roster::SetUIWhen {what} {    
-    variable btedit
-    variable btremove
-    variable btrefresh
-    variable servtxt
-
-    # outdated
-    return
-    
-    switch -- $what {
-	connect {
-	    $btrefresh configure -state normal
-	}
-	disconnect {
-	    set servtxt {not connected}
-	    $btedit    configure -state disabled
-	    $btremove  configure -state disabled
-	    $btrefresh configure -state disabled
-	}
-    }
 }
 
 proc ::Roster::GetPresenceIconFromKey {key} {

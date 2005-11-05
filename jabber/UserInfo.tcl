@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.9 2005-09-19 06:37:21 matben Exp $
+# $Id: UserInfo.tcl,v 1.10 2005-11-05 11:37:25 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -68,9 +68,9 @@ proc ::UserInfo::Get {jid {node ""}} {
 
     # vCard
     if {$room} {
-	$jstate(jlib) vcard_get $jid [list [namespace current]::VCardCB $token]
+	$jstate(jlib) vcard send_get $jid [list [namespace current]::VCardCB $token]
     } else {
-	$jstate(jlib) vcard_get $jid2 [list [namespace current]::VCardCB $token]
+	$jstate(jlib) vcard send_get $jid2 [list [namespace current]::VCardCB $token]
     }
     incr priv(ncount)
     

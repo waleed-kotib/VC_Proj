@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.9 2005-10-26 14:38:34 matben Exp $
+# $Id: FilePrefs.tcl,v 1.10 2005-11-05 11:37:25 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -190,9 +190,9 @@ proc ::FilePrefs::TreeCtrl {T wysc} {
 
     $T notify install <Header-invoke>
     $T notify bind $T <Header-invoke> [list [namespace current]::HeaderCmd %T %C]
-    $T notify bind $T <Selection> [list [namespace current]::Selection %T]
-    bind $T <Double-1>            [list [namespace current]::Double-1 %W]
-    bind $T <Destroy>             [list +[namespace current]::OnDestroy %W]
+    $T notify bind $T <Selection>  [list [namespace current]::Selection %T]
+    bind $T <Double-1>             [list [namespace current]::Double-1 %W]
+    bind $T <Destroy>             +[list [namespace current]::OnDestroy %W]
 
     set sortColumn 0
 }

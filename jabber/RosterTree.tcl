@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.2 2005-11-04 15:14:55 matben Exp $
+# $Id: RosterTree.tcl,v 1.3 2005-11-05 11:37:25 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -425,6 +425,9 @@ proc ::RosterTree::DeleteItemAndTag {item} {
     set idx [lsearch $items $item]
     if {$idx >= 0} {
 	set tag2items($tag) [lreplace $items $idx $idx]
+    }
+    if {$tag2items($tag) == {}} {
+	unset tag2items($tag)
     }
     
     # And finally delete ourselves.

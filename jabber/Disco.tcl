@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.75 2005-11-04 15:14:55 matben Exp $
+# $Id: Disco.tcl,v 1.76 2005-11-05 11:37:25 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -23,14 +23,10 @@ namespace eval ::Disco:: {
     # Standard widgets and standard options.
     option add *Disco.borderWidth           0               50
     option add *Disco.relief                flat            50
-    option add *Disco.pad.padX              4               50
-    option add *Disco.pad.padY              4               50
     option add *Disco*box.borderWidth       1               50
     option add *Disco*box.relief            sunken          50
-    option add *Disco.stat.f.padX           8               50
-    option add *Disco.stat.f.padY           2               50
 
-    option add *Disco.padding               4               50
+    option add *Disco.padding               2               50
     
     # Specials.
     option add *Disco.backgroundImage       cociexec        widgetDefault
@@ -691,7 +687,6 @@ proc ::Disco::Build {w} {
     variable wtop
     variable wwave
     variable wdisco
-    variable btaddserv
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs

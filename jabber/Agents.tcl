@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.38 2005-10-28 15:08:57 matben Exp $
+# $Id: Agents.tcl,v 1.39 2005-11-05 11:37:25 matben Exp $
 
 package provide Agents 1.0
 
@@ -18,7 +18,7 @@ namespace eval ::Agents:: {
     option add *Agent.backgroundImage      cociexec       widgetDefault
 
     # Standard widgets and standard options.
-    option add *Agent.padding              4               50
+    option add *Agent.padding              2               50
     option add *Agent*box.borderWidth      1               50
     option add *Agent*box.relief           sunken          50
 
