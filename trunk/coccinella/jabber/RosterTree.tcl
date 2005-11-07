@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.3 2005-11-05 11:37:25 matben Exp $
+# $Id: RosterTree.tcl,v 1.4 2005-11-07 09:00:57 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -39,6 +39,13 @@ namespace eval ::RosterTree {
     
     variable buttonPressMillis 1000
 
+    # Head titles.
+    variable mcHead
+    array set mcHead [list \
+      available     [mc Online]         \
+      unavailable   [mc Offline]        \
+      transport     [mc Transports]     \
+      pending       [mc {Subscription Pending}]]
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -104,7 +111,7 @@ proc ::RosterTree::StyleCreateItem {jid presence args} {
     variable plugin
     
     set name $plugin(selected)
-    eval {$plugin($name,createItem) $jid $presence} $args
+    return [eval {$plugin($name,createItem) $jid $presence} $args]
 }
 
 proc ::RosterTree::StyleDeleteItem {jid} {
@@ -115,6 +122,20 @@ proc ::RosterTree::StyleDeleteItem {jid} {
 }
     
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# RosterTree::LoadStyle --
+# 
+#       Organizes everything to change roster style on the fly.
+
+proc ::RosterTree::LoadStyle {name} {
+    variable T
+    
+    Free
+    SetStyle $name
+    StyleConfigure $T
+    ::Roster::RepopulateTree    
+}
+
 
 # RosterTree::New --
 # 
@@ -195,17 +216,20 @@ proc ::RosterTree::ConfigBgImage {image} {
 
 proc ::RosterTree::Selection {} {
     variable T
-    
+
+    #empty
 }
 
 proc ::RosterTree::OpenTreeCmd {item} {
     variable T
     
+    #empty
 }
 
 proc ::RosterTree::CloseTreeCmd {item} {
     variable T
     
+    #empty
 }
 
 proc ::RosterTree::ButtonPress {x y} {
@@ -371,6 +395,11 @@ proc ::RosterTree::CreateWithTag {tag parent} {
     variable tag2items
     
     set item [$T item create -parent $parent]
+    
+    # Handle the hidden cTag column.
+    $T item style set $item cTag styTag
+    $T item element configure $item cTag eText -text $tag
+    
     lappend tag2items($tag) $item
 
     return $item
@@ -496,6 +525,175 @@ proc ::RosterTree::OnDestroy {} {
 
 # ---------------------------------------------------------------------------- #
 
+# Support code for roster styles ...
+
+# RosterTree::CreateItemBase --
+# 
+#       Helper function for roster styles for creating items.
+#       It creates the necessary items in the right places but doesn't
+#       configure them with styles and elements (except for tag).
+#       Online users shall be put with full 3-tier jid.
+#       Offline and other are stored with 2-tier jid with no resource.
+#       
+# Arguments:
+#       jid         as reported by the presence
+#                   if from roster element any nonempty resource is appended
+#       presence    "available" or "unavailable"
+#       args        list of '-key value' pairs of presence and roster
+#                   attributes.
+#       
+# Results:
+#       a list {item tag ?item tag? ...}
+
+proc ::RosterTree::CreateItemBase {jid presence args} {    
+    variable T
+    upvar ::Jabber::jstate  jstate
+    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jprefs  jprefs
+    
+    ::Debug 4 "::RosterTree::CreateItemBase jid=$jid, presence=$presence, args='$args'"
+
+    if {![regexp $presence {(available|unavailable)}]} {
+	return
+    }
+    if {!$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
+	return
+    }
+    set istrpt [::Roster::IsTransportHeuristics $jid]
+    if {$istrpt && !$jprefs(rost,showTrpts)} {
+	return
+    }
+    array set argsArr $args
+    set itemTagList {}
+
+    # For Online users, the tree item must be a 3-tier jid with resource 
+    # since a user may be logged in from more than one resource.
+    # Note that some (icq) transports have 3-tier items that are unavailable!
+    
+    # jid2 is always without a resource
+    # jid3 is as reported
+    # jidx is as jid3 if available else jid2
+    
+    jlib::splitjid $jid jid2 res
+    
+    set jid3 $jid
+    set jidx $jid
+    if {$presence eq "available"} {
+	set jidx $jid
+    } else {
+	set jidx $jid2
+    }    
+    set mjid [jlib::jidmap $jidx]
+    
+    # Keep track of any dirs created.
+    set dirtags {}
+	
+    if {$istrpt} {
+	
+	# Transports:
+	set ptag [list head transport]
+	set pitem [FindWithTag $ptag]
+	if {$pitem eq ""} {
+	    set pitem [CreateWithTag $ptag root]
+	    $T item configure $pitem -button 1
+	    lappend dirtags $ptag
+	    lappend itemTagList $pitem $ptag
+	}
+	set tag [list transport $jid3]
+	set item [CreateWithTag $tag $pitem]
+	lappend itemTagList $item $tag 
+    } elseif {[info exists argsArr(-ask)] && ($argsArr(-ask) eq "subscribe")} {
+	
+	# Pending:
+	set ptag [list head pending]
+	set pitem [FindWithTag $ptag]
+	if {$pitem eq ""} {
+	    set pitem [CreateWithTag $ptag root]
+	    $T item configure $pitem -button 1
+	    lappend dirtags $ptag
+	    lappend itemTagList $pitem $ptag
+	}
+	set tag [list pending $mjid]
+	set item [CreateWithTag $tag $pitem]
+	lappend itemTagList $item $tag 
+    } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) ne "")} {
+	
+	# Group(s):
+	foreach group $argsArr(-groups) {
+	    
+	    # Make group if not exists already.
+	    set ptag [list group $group $presence]
+	    set pitem [FindWithTag $ptag]
+	    if {$pitem eq ""} {
+		set pptag [list head $presence]
+		set ppitem [FindWithTag $pptag]
+		set pitem [CreateWithTag $ptag $ppitem]
+		$T item configure $pitem -button 1
+		lappend dirtags $ptag
+		lappend itemTagList $pitem $ptag
+	    }
+	    set tag [list jid $mjid]
+	    set item [CreateWithTag $tag $pitem]
+	}
+	lappend itemTagList $item $tag 
+    } else {
+	
+	# No groups associated with this item.
+	set tag  [list jid $mjid]
+	set ptag [list head $presence]
+	set pitem [FindWithTag $ptag]
+	set item [CreateWithTag $tag $pitem]
+	lappend itemTagList $item $tag 
+    }
+    
+    # If we created a directory and that is on the closed item list.
+    # Default is to have -open.
+    foreach dtag $dirtags {
+	if {[lsearch $jprefs(rost,closedItems) $dtag] >= 0} {	    
+	    set citem [FindWithTag $dtag]
+	    $T item collapse $citem
+	}
+    }
+        
+    # @@@ wrong if several groups.
+    return $itemTagList
+}
+
+# RosterTree::DeleteItemBase --
+# 
+#       Complement to 'CreateItemBase' above when deleting an item associated
+#       with a jid.
+
+proc ::RosterTree::DeleteItemBase {jid} {
+    
+    ::Debug 2 "::RosterTree::DeleteItemBase, jid=$jid"
+    
+    # If have 3-tier jid:
+    #    presence = 'available'   => remove jid2 + jid3
+    #    presence = 'unavailable' => remove jid2 + jid3
+    # Else if 2-tier jid:  => remove jid2
+
+    jlib::splitjid $jid jid2 res
+    set mjid2 [jlib::jidmap $jid2]
+    
+    set tag [list jid $mjid2]
+    DeleteWithTag $tag
+    if {$res ne ""} {
+	set mjid3 [jlib::jidmap $jid]
+	DeleteWithTag [list jid $mjid3]
+    }
+    
+    # Pending and transports.
+    DeleteWithTag [list pending $jid]
+    DeleteWithTag [list transport $jid]
+}
+
+proc ::RosterTree::MCHead {str} {
+    variable mcHead
+
+    return $mcHead($str)
+}
+
 # RosterTree::MakeDisplayText --
 # 
 #       Make a standard display text.
@@ -505,7 +703,16 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
 
     array set argsArr $args
     
-    # Make display text (itemstr).
+    # Format item:
+    #  - If 'name' attribute, use this, else
+    #  - if user belongs to login server, use only prefix, else
+    #  - show complete 2-tier jid
+    # If resource add it within parenthesis '(presence)' but only if Online.
+    # 
+    # For Online users, the tree item must be a 3-tier jid with resource 
+    # since a user may be logged in from more than one resource.
+    # Note that some (icq) transports have 3-tier items that are unavailable!
+
     set istrpt [::Roster::IsTransportHeuristics $jid]
     set server $jserver(this)
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.141 2005-11-05 11:37:25 matben Exp $
+# $Id: Roster.tcl,v 1.142 2005-11-07 09:00:57 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -700,7 +700,7 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
     }
 }
 
-proc ::Roster::RePopulateTree {w} {
+proc ::Roster::RepopulateTree { } {
     variable wtree
     upvar ::Jabber::jstate jstate
     
@@ -710,6 +710,7 @@ proc ::Roster::RePopulateTree {w} {
     foreach jid [$jstate(roster) getusers] {
 	eval {SetItem $jid} [$jstate(roster) getrosteritem $jid]
     }
+    Sort
 }
 
 proc ::Roster::ExitRoster { } {
@@ -833,7 +834,7 @@ proc ::Roster::Presence {jid presence args} {
     ::RosterTree::StyleDeleteItem $jid
 
     set treePres $presence
-    set item ""
+    set items {}
 
     # Put in our roster tree.
     if {[string equal $presence "unsubscribed"]} {
@@ -844,7 +845,7 @@ proc ::Roster::Presence {jid presence args} {
 	    # Think this is already been made from our presence callback proc.
 	    #$jstate(jlib) roster_remove $jid ::Roster::PushProc
 	} else {
-	    set item [eval {
+	    set items [eval {
 		::RosterTree::StyleCreateItem $jid $treePres
 	    } $itemAttr $args]
 	}
@@ -862,19 +863,19 @@ proc ::Roster::Presence {jid presence args} {
 	# Add only if no other jid2/* available.
 	set isavailable [$jstate(roster) isavailable $jid2]
 	if {!$isavailable} {
-	    set item [eval {
+	    set items [eval {
 		::RosterTree::StyleCreateItem $jid $treePres
 	    } $itemAttr $args]
 	}
     } elseif {[string equal $presence "available"]} {
-	set item [eval {
+	set items [eval {
 	    ::RosterTree::StyleCreateItem $jid $treePres
 	} $itemAttr $args]
     }
     
     # This minimizes the cost of sorting.
-    if {$item ne ""} {
-	Sort [::RosterTree::GetParent $item]
+    if {$items ne {}} {
+	Sort [::RosterTree::GetParent [lindex $items end]]
     }
     
     # We set timed messages for presences only if significantly after login.
@@ -1095,17 +1096,15 @@ proc ::Roster::LogoutTrpt {jid3} {
 }
 
 proc ::Roster::ShowOffline {} {
-    variable wroster
 
     # Need to repopulate the roster?
-    RePopulateTree $wroster
+    RepopulateTree
 }
 
 proc ::Roster::ShowTransports {} {
-    variable wroster
     
     # Need to repopulate the roster?
-    RePopulateTree $wroster
+    RepopulateTree
 }
 
 #--- Transport utilities -------------------------------------------------------
@@ -1371,12 +1370,11 @@ proc ::Roster::BuildPageRoster {page} {
 proc ::Roster::SavePrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
-    variable wroster
     
     # Need to repopulate the roster?
     if {$jprefs(rost,showOffline) != $tmpJPrefs(rost,showOffline)} {
 	set jprefs(rost,showOffline) $tmpJPrefs(rost,showOffline)
-	RePopulateTree $wroster
+	RepopulateTree
     }
     array set jprefs [array get tmpJPrefs]
     unset tmpJPrefs

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.2 2005-11-05 11:37:25 matben Exp $
+# $Id: RosterPlain.tcl,v 1.3 2005-11-07 09:00:57 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -23,19 +23,8 @@ package require RosterTree
 
 package provide RosterPlain 1.0
 
-namespace eval ::RosterTree {}
-
 namespace eval ::RosterPlain {
-    
-    # Head titles.
-    variable mcHead
-    array set mcHead [list \
-      available     [mc Online]         \
-      unavailable   [mc Offline]        \
-      transport     [mc Transports]     \
-      pending       [mc {Subscription Pending}]]
-    
-    
+        
     # Register this style.
     ::RosterTree::RegisterStyle plain Plain   \
       ::RosterPlain::Configure   \
@@ -110,7 +99,7 @@ proc ::RosterPlain::Configure {_T} {
     $T style elements $S {eBorder eImage eAltImage eText}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
     $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
-    $T style layout $S eAltImage -expand ns -ipady 2
+    $T style layout $S eAltImage -expand ns -ipady 1
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styTransport]
@@ -134,7 +123,6 @@ proc ::RosterPlain::Configure {_T} {
 
 proc ::RosterPlain::Init { } {
     variable T
-    variable mcHead
     upvar ::Jabber::jprefs jprefs
 	
     set onlineImage  [::Theme::GetImage [option get $T onlineImage {}]]
@@ -145,7 +133,8 @@ proc ::RosterPlain::Init { } {
     
     # Available:
     set tag [list head available]
-    set item [CreateWithTag $tag styHead $mcHead(available) $onlineImage root]
+    set text [::RosterTree::MCHead available]
+    set item [CreateWithTag $tag styHead $text $onlineImage root]
     if {$jprefs(rost,showOffline)} {
 	$T item configure $item -button 1
     }
@@ -156,7 +145,8 @@ proc ::RosterPlain::Init { } {
     # Unavailable:
     if {$jprefs(rost,showOffline)} {
 	set tag [list head unavailable]
-	set item [CreateWithTag $tag styHead $mcHead(unavailable) $offlineImage root]
+	set text [::RosterTree::MCHead unavailable]
+	set item [CreateWithTag $tag styHead $text $offlineImage root]
 	$T item configure $item -button 1
 	if {[lsearch $jprefs(rost,closedItems) $tag] >= 0} {
 	    $T item collapse $item
@@ -166,9 +156,8 @@ proc ::RosterPlain::Init { } {
 
 # RosterPlain::CreateItem --
 #
-#       Sets the jid in the correct place in our roster tree.
-#       Online users shall be put with full 3-tier jid.
-#       Offline and other are stored with 2-tier jid with no resource.
+#       Uses 'CreateItemBase' to get a list of items with tags and then 
+#       configures each of them according to our style.
 #
 # Arguments:
 #       jid         as reported by the presence
@@ -182,35 +171,18 @@ proc ::RosterPlain::Init { } {
 
 proc ::RosterPlain::CreateItem {jid presence args} {    
     variable T
-    variable mcHead
-    upvar ::Jabber::jstate  jstate
-    upvar ::Jabber::jserver jserver
-    upvar ::Jabber::jprefs  jprefs
-    
-    ::Debug 4 "::RosterPlain::CreateItem jid=$jid, presence=$presence, args='$args'"
 
-    if {![regexp $presence {(available|unavailable)}]} {
-	return
+    array set styleMap {
+	available    styAvailable 
+	unavailable  styUnavailable
     }
-    if {!$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
-	return
+    array set headImageMap {
+	available   onlineImage
+	unavailable offlineImage
+	transport   trptImage
+	pending     ""
     }
-    set istrpt [::Roster::IsTransportHeuristics $jid]
-    if {$istrpt && !$jprefs(rost,showTrpts)} {
-	return
-    }
-    array set argsArr $args
 
-    # Format item:
-    #  - If 'name' attribute, use this, else
-    #  - if user belongs to login server, use only prefix, else
-    #  - show complete 2-tier jid
-    # If resource add it within parenthesis '(presence)' but only if Online.
-    # 
-    # For Online users, the tree item must be a 3-tier jid with resource 
-    # since a user may be logged in from more than one resource.
-    # Note that some (icq) transports have 3-tier items that are unavailable!
-    
     # jid2 is always without a resource
     # jid3 is as reported
     # jidx is as jid3 if available else jid2
@@ -224,84 +196,63 @@ proc ::RosterPlain::CreateItem {jid presence args} {
     } else {
 	set jidx $jid2
     }    
-    set mjid [jlib::jidmap $jidx]
+    
+    # Defaults:
+    set jtext  [eval {MakeDisplayText $jid $presence} $args]
+    set jimage [eval {GetPresenceIcon $jidx $presence} $args]
+    set items  {}
+    set jitems {}
+    
+    # Creates a list {item tag ?item tag? ...} for items.
+    set itemTagList [eval {::RosterTree::CreateItemBase $jid $presence} $args]
 
-    # Make display text (itemstr).
-    set itemstr [eval {MakeDisplayText $jid $presence} $args]
-    set icon [eval {::Roster::GetPresenceIcon $jidx $presence} $args]
-    array set styleMap [list available styAvailable unavailable styUnavailable]
-    
-    # Keep track of any dirs created.
-    set dirtags {}
+    foreach {item tag} $itemTagList {
+	set tag0 [lindex $tag 0]
+	set tag1 [lindex $tag 1]
+	set text $jtext
+	set image $jimage
+	lappend items $item
 	
-    if {$istrpt} {
-	
-	# Transports:
-	set ptag [list head transport]
-	set pitem [FindWithTag $ptag]
-	if {$pitem eq ""} {
-	    set im [::Theme::GetImage [option get $T trptImage {}]]
-	    set pitem [CreateWithTag $ptag styHead $mcHead(transport) $im root]
-	    $T item configure $pitem -button 1
-	    lappend dirtags $ptag
-	}
-	set tag [list transport $jid3]
-	set item [CreateWithTag $tag styTransport $itemstr $icon $pitem]
-    } elseif {[info exists argsArr(-ask)] && ($argsArr(-ask) eq "subscribe")} {
-	
-	# Pending:
-	set ptag [list head pending]
-	set pitem [FindWithTag $ptag]
-	if {$pitem eq ""} {
-	    set im ""
-	    set pitem [CreateWithTag $ptag styHead $mcHead(pending) $im root]
-	    $T item configure $pitem -button 1
-	    lappend dirtags $ptag
-	}
-	set tag [list pending $mjid]
-	set item [CreateWithTag $tag styUnavailable $itemstr $icon $pitem]
-    } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) ne "")} {
-	
-	# Group(s):
-	foreach group $argsArr(-groups) {
-	    
-	    # Make group if not exists already.
-	    set ptag [list group $group $presence]
-	    set pitem [FindWithTag $ptag]
-	    if {$pitem eq ""} {
-		set groupImage [::Theme::GetImage [option get $T groupImage {}]]
-		set pptag [list head $presence]
-		set ppitem [FindWithTag $pptag]
-		set pitem [CreateWithTag $ptag styFolder $group $groupImage $ppitem]
-		$T item configure $pitem -button 1
-		lappend dirtags $ptag
+	switch -- $tag0 {
+	    jid {
+		set style $styleMap($presence)
+		lappend jitems $item
 	    }
-	    set tag [list jid $mjid]
-	    set item [CreateWithTag $tag $styleMap($presence) $itemstr $icon $pitem]
+	    group {
+		set style styFolder
+		set text  $tag1
+		set image [::Theme::GetImage [option get $T groupImage {}]]
+	    }
+	    head {
+		set style styHead
+		set rsrcName $headImageMap($tag1)
+		set text  [::RosterTree::MCHead $tag1]
+		set image [::Theme::GetImage [option get $T $rsrcName {}]]
+
+	    }
+	    pending {
+		set style styUnavailable
+	    }
+	    transport {
+		set style styTransport
+	    }
 	}
-    } else {
-	
-	# No groups associated with this item.
-	set tag  [list jid $mjid]
-	set ptag [list head $presence]
-	set pitem [FindWithTag $ptag]
-	set item [CreateWithTag $tag $styleMap($presence) $itemstr $icon $pitem]
-    }
-    
-    # If we created a directory and that is on the closed item list.
-    # Default is to have -open.
-    foreach dtag $dirtags {
-	if {[lsearch $jprefs(rost,closedItems) $dtag] >= 0} {	    
-	    set citem [FindWithTag $dtag]
-	    $T item collapse $citem
-	}
+	ConfigureItem $item $style $text $image
     }
     
     # Design the balloon help window message.
-    eval {Balloon $jidx $presence $item} $args
+    foreach item $jitems {
+	eval {Balloon $jidx $presence $item} $args
+    }
+    return $items
+}
+
+proc ::RosterPlain::ConfigureItem {item style text image} {
+    variable T
     
-    # @@@ wrong if several groups.
-    return $item
+    $T item style set $item cTree $style
+    $T item element configure $item  \
+      cTree eText -text $text + eImage -image $image    
 }
 
 # RosterPlain::DeleteItem --
@@ -313,25 +264,9 @@ proc ::RosterPlain::DeleteItem {jid} {
  
     ::Debug 2 "::RosterPlain::DeleteItem, jid=$jid"
     
-    # If have 3-tier jid:
-    #    presence = 'available'   => remove jid2 + jid3
-    #    presence = 'unavailable' => remove jid2 + jid3
-    # Else if 2-tier jid:  => remove jid2
-
-    jlib::splitjid $jid jid2 res
-    set mjid2 [jlib::jidmap $jid2]
+    # Sibling of '::RosterTree::CreateItemBase'.
+    ::RosterTree::DeleteItemBase $jid
     
-    set tag [list jid $mjid2]
-    DeleteWithTag $tag
-    if {$res ne ""} {
-	set mjid3 [jlib::jidmap $jid]
-	DeleteWithTag [list jid $mjid3]
-    }
-    
-    # Pending and transports.
-    DeleteWithTag [list pending $jid]
-    DeleteWithTag [list transport $jid]
-
     # Delete any empty leftovers.
     ::RosterTree::DeleteEmptyGroups
     ::RosterTree::DeleteEmptyPendTrpt
@@ -344,14 +279,13 @@ proc ::RosterPlain::DeleteItem {jid} {
 proc ::RosterPlain::CreateWithTag {tag style text image parent} {
     variable T
     
-    # Base class constructor.
+    # Base class constructor. Handles the cTag column and tag.
     set item [::RosterTree::CreateWithTag $tag $parent]
     
-    $T item style set $item cTree $style cTag styTag
+    $T item style set $item cTree $style
     $T item element configure $item  \
-      cTree eText -text $text + eImage -image $image , \
-      cTag  eText -text $tag
-    
+      cTree eText -text $text + eImage -image $image
+
     return $item
 }
 
@@ -364,17 +298,22 @@ proc ::RosterPlain::DeleteWithTag {tag} {
 }
 
 proc ::RosterPlain::FindWithTag {tag} {    
-    
     return [::RosterTree::FindWithTag $tag]
 }
 
 proc ::RosterPlain::MakeDisplayText {jid presence args} {
-    
     return [eval {::RosterTree::MakeDisplayText $jid $presence} $args]
 }
 
-proc ::RosterPlain::Balloon {jid presence item args} {
-    
+proc ::RosterPlain::GetPresenceIcon {jid presence args} {
+    return [eval {::Roster::GetPresenceIcon $jid $presence} $args]
+}
+
+proc ::RosterPlain::GetPresenceIconFromJid {jid} {
+    return [::Roster::GetPresenceIconFromJid $jid]
+}
+
+proc ::RosterPlain::Balloon {jid presence item args} {    
     eval {::RosterTree::Balloon $jid $presence $item} $args
 }
 
@@ -451,25 +390,34 @@ proc ::RosterPlain::DiscoInfoHook {type from subiq args} {
 #       none.
 
 proc ::RosterPlain::PostProcess {method from} {
-    variable T    
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
     
+    ::Debug 4 "::RosterPlain::PostProcess $from"
+
     if {[string equal $method "browse"]} {
 	set matchHost 0
+	PostProcessItem $from $matchHost root
     } elseif {[string equal $method "disco"]} {
-	set matchHost 1	
-    }
-    ::Debug 4 "::RosterPlain::PostProcess $from"
+	PostProcessFromHost $from
+    }    
+}
+
+proc ::RosterPlain::PostProcessFromHost {from} {
+    variable T    
     
-    PostProcessItem $from $matchHost root
+    set jids [::Roster::GetUsersWithSameHost $from]
+    foreach jid $jids {
+	set tag [list jid $jid]
+	foreach item [FindWithTag $tag] {
+	    set icon [GetPresenceIconFromJid $jid]
+	    if {$icon ne ""} {
+		$T item image $item cTree $icon
+	    }
+	}
+    }
 }
 
 proc ::RosterPlain::PostProcessItem {from matchHost item} {
     variable T    
-    upvar ::Jabber::jserver jserver
-    
-    set server $jserver(this)
     
     if {[$T item numchildren $item]} {
 	foreach citem [$T item children $item] {
@@ -481,11 +429,11 @@ proc ::RosterPlain::PostProcessItem {from matchHost item} {
 	if {($tag0 eq "transport") || ($tag0 eq "jid")} {
 	    set jid [lindex $tags 1]
 	    jlib::splitjidex $jid username host res
-
+	    
 	    # Consider only relevant jid's:
 	    # Browse always, disco only if from == host.
 	    if {!$matchHost || [string equal $from $host]} {
-		set icon [::Roster::GetPresenceIconFromJid $jid]
+		set icon [GetPresenceIconFromJid $jid]
 		if {$icon ne ""} {
 		    $T item image $item cTree $icon
 		}
