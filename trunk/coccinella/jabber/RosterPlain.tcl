@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.3 2005-11-07 09:00:57 matben Exp $
+# $Id: RosterPlain.tcl,v 1.4 2005-11-09 09:02:38 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -290,10 +290,6 @@ proc ::RosterPlain::CreateWithTag {tag style text image parent} {
 }
 
 proc ::RosterPlain::DeleteWithTag {tag} {
-    
-    # If we have anything to cleanup we place it here.
-    # --> style specific cleanup
-    # Base class destructor.
     return [::RosterTree::DeleteWithTag $tag]
 }
 

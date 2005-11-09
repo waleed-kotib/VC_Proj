@@ -18,6 +18,7 @@ component::attempt VoIP         [file join $dir VoIP.tcl]        ::VoIP::Init
 
 # Problem to determine if app hidden or not!
 component::attempt CarbonNotification [file join $dir CarbonNotification.tcl] ::CarbonNotification::Init
+component::attempt Growl              [file join $dir Growl.tcl]              ::Growl::Init
 
 # This is just an example plugin. Uncomment to test.
 # component::attempt ComponentExample [file join $dir ComponentExample.tcl] ::ComponentExample::Init

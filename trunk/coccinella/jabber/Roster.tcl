@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.142 2005-11-07 09:00:57 matben Exp $
+# $Id: Roster.tcl,v 1.143 2005-11-09 09:02:38 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -100,6 +100,7 @@ namespace eval ::Roster:: {
 	    radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value +1}
 	    radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -1}
 	} {}
+	cascade     mStyle         {}                 {} {}
 	command     mRefreshRoster {}                 {::Roster::Refresh} {}
     }  
 
@@ -181,6 +182,26 @@ proc ::Roster::MapShowToText {show} {
     } else {
 	return $show
     }
+}
+
+proc ::Roster::OnlineSince {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    set delay [$jstate(roster) getx $jid "jabber:x:delay"]
+    if {$delay ne ""} {
+	
+	# An ISO 8601 point-in-time specification. clock works!
+	set stamp [wrapper::getattribute $delay stamp]
+	set time [::Utils::SmartClockFormat [clock scan $stamp -gmt 1] -showsecs 0]
+    } else {
+	set secs [$jstate(roster) getpresencesecs $jid]
+	if {$secs ne ""} {
+	    set time [::Utils::SmartClockFormat $secs -showsecs 0]
+	} else {
+	    set time ""
+	}
+    }
+    return $time
 }
 
 # Roster::Show --

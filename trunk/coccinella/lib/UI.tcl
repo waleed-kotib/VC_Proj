@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.106 2005-10-26 14:38:34 matben Exp $
+# $Id: UI.tcl,v 1.107 2005-11-09 09:02:38 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1084,6 +1084,7 @@ proc ::UI::BuildMenu {w wmenu label menuDef state args} {
 		# substituted! Be sure they are all in here.
 
 		set cmd [subst -nocommands $cmd]
+		#set cmd [eval list $cmd]
 		if {[string length $accel]} {
 		    lappend mopts -accelerator ${mod}+${accel}
 

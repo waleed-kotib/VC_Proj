@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.38 2005-11-04 15:14:55 matben Exp $
+# $Id: roster.tcl,v 1.39 2005-11-09 09:02:38 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -44,6 +44,9 @@
 #                                     http://jabber.org/protocol/ stripped off
 #                  
 #       oldpresArr                  : As presArr but any previous state.
+#       
+#       state($jid,*)               : Keeps other info not directly related
+#                                     to roster or presence elements.
 #                                      
 ############################# USAGE ############################################
 #
@@ -435,6 +438,7 @@ proc roster::setpresence {rostName jid type args} {
     upvar ${rostName}::presArr presArr
     upvar ${rostName}::oldpresArr oldpresArr
     upvar ${rostName}::options options
+    upvar ${rostName}::state state
     
     Debug 2 "roster::setpresence rostName=$rostName, jid='$jid', \
       type='$type', args='$args'"
@@ -450,6 +454,12 @@ proc roster::setpresence {rostName jid type args} {
 	set argList [list -type $type]
     } else {
 	
+	# Set secs only if unavailable before.
+	if {![info exists presArr($mjid,type)]  \
+	  || ($presArr($mjid,type) eq "unavailable")} {
+	    set state($mjid,secs) [clock seconds]
+	}
+	
 	# Keep cache of any old state.
         # Note special handling of * for array unset - prefix with \\ to quote.
 	array unset oldpresArr [jlib::ESC $mjid],*
@@ -464,9 +474,9 @@ proc roster::setpresence {rostName jid type args} {
 	# Add to list of resources.
 	set presArr($mjid2,res) [lsort -unique [lappend presArr($mjid2,res) \
 	  $resource]]
-	
+
 	set presArr($mjid,type) $type
-	
+		
 	foreach {name value} $args {
 	    set par [string trimleft $name "-"]
 	    
@@ -495,7 +505,7 @@ proc roster::setpresence {rostName jid type args} {
 	    }
 	}
     }
-    return {}
+    return
 }
 
 # roster::invokecommand --
@@ -1277,6 +1287,18 @@ proc roster::getcapsattr {rostName jid attrname} {
 	set attr [wrapper::getattribute $cElem $attrname]
     }
     return $attr
+}
+
+proc roster::getpresencesecs {rostName jid} {
+    
+    upvar ${rostName}::state state
+
+    set jid [jlib::jidmap $jid]
+    if {[info exists state($jid,secs)]} {
+	return $state($jid,secs)
+    } else {
+	return ""
+    }
 }
 
 proc roster::Debug {num str} {
