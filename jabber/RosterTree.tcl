@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.4 2005-11-07 09:00:57 matben Exp $
+# $Id: RosterTree.tcl,v 1.5 2005-11-09 09:02:38 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -161,6 +161,13 @@ proc ::RosterTree::New {_T wxsc wysc} {
     bind $T <Double-1>        { ::RosterTree::DoubleClick %x %y }        
     bind $T <<ButtonPopup>>   { ::RosterTree::Popup %x %y }
     bind $T <Destroy>         {+::RosterTree::OnDestroy }
+    
+    $T notify bind RosterTreeTag <ItemDelete> {
+	foreach item %i {
+	    ::RosterTree::RemoveTags $item
+	} 
+    }
+    bindtags $T [concat RosterTreeTag [bindtags $T]]
 }
 
 # RosterTree::Free --
@@ -411,42 +418,18 @@ proc ::RosterTree::DeleteWithTag {tag} {
     
     if {[info exists tag2items($tag)]} {
 	foreach item $tag2items($tag) {
-    
-	    # Delete any actual children recursively using item.
-	    foreach child [$T item children $item] {
-		DeleteItemAndTag $child
-	    }
-
-	    # Delete the actual item(s).
 	    $T item delete $item
 	}    
-	unset tag2items($tag)
     }
 }
 
-proc ::RosterTree::DeleteChildrenOfTag {tag} {
+# RosterTree::RemoveTags --
+# 
+#       Callback for <ItemDelete> events used to cleanup the tag2items array.
+
+proc ::RosterTree::RemoveTags {item} {
     variable T
     variable tag2items
-
-    if {[info exists tag2items($tag)]} {
-	foreach item $tag2items($tag) {
-    
-	    # Delete any actual children recursively using item.
-	    foreach child [$T item children $item] {
-		DeleteItemAndTag $child
-	    }
-	}    
-    }
-}
-
-proc ::RosterTree::DeleteItemAndTag {item} {
-    variable T
-    variable tag2items
-    
-    # Call ourselves recursively to delete children as well.
-    foreach child [$T item children $item] {
-	DeleteItemAndTag $child
-    }
     
     # We must delete all 'tag2items' that may point to us.
     set tag [$T item element cget $item cTag eText -text]
@@ -458,9 +441,67 @@ proc ::RosterTree::DeleteItemAndTag {item} {
     if {$tag2items($tag) == {}} {
 	unset tag2items($tag)
     }
+}
+
+# Some old code...
+if {0} {
+    proc ::RosterTree::DeleteWithTagBU {tag} {
+	variable T
+	variable tag2items
+	
+	if {[info exists tag2items($tag)]} {
+	    foreach item $tag2items($tag) {
+		
+		# Delete any actual children recursively using item.
+		foreach child [$T item children $item] {
+		    DeleteItemAndTagBU $child
+		}
+		
+		# Delete the actual item(s).
+		$T item delete $item
+	    }    
+	    unset tag2items($tag)
+	}
+    }
     
-    # And finally delete ourselves.
-    $T item delete $item
+    proc ::RosterTree::DeleteChildrenOfTagBU {tag} {
+	variable T
+	variable tag2items
+	
+	if {[info exists tag2items($tag)]} {
+	    foreach item $tag2items($tag) {
+		
+		# Delete any actual children recursively using item.
+		foreach child [$T item children $item] {
+		    DeleteItemAndTagBU $child
+		}
+	    }    
+	}
+    }
+    
+    proc ::RosterTree::DeleteItemAndTagBU {item} {
+	variable T
+	variable tag2items
+	
+	# Call ourselves recursively to delete children as well.
+	foreach child [$T item children $item] {
+	    DeleteItemAndTagBU $child
+	}
+	
+	# We must delete all 'tag2items' that may point to us.
+	set tag [$T item element cget $item cTag eText -text]
+	set items $tag2items($tag)
+	set idx [lsearch $items $item]
+	if {$idx >= 0} {
+	    set tag2items($tag) [lreplace $items $idx $idx]
+	}
+	if {$tag2items($tag) == {}} {
+	    unset tag2items($tag)
+	}
+	
+	# And finally delete ourselves.
+	$T item delete $item
+    }
 }
 
 proc ::RosterTree::FindWithTag {tag} {
@@ -758,7 +799,7 @@ proc ::RosterTree::Balloon {jid presence item args} {
 
     if {[string equal $presence "available"]} {
 	set delay [$jstate(roster) getx $jid "jabber:x:delay"]
-	if {$delay != ""} {
+	if {$delay ne ""} {
 	    
 	    # An ISO 8601 point-in-time specification. clock works!
 	    set stamp [wrapper::getattribute $delay stamp]
@@ -766,7 +807,7 @@ proc ::RosterTree::Balloon {jid presence item args} {
 	    append msg "\n" "Online since: $tstr"
 	}
     }
-    if {[info exists argsArr(-status)] && ($argsArr(-status) != "")} {
+    if {[info exists argsArr(-status)] && ($argsArr(-status) ne "")} {
 	append msg "\n" $argsArr(-status)
     }
     
@@ -846,7 +887,8 @@ proc ::RosterTree::DeleteEmptyGroups {} {
     
     foreach item [FindWithFirstTag group] {
 	if {[$T item numchildren $item] == 0} {
-	    DeleteItemAndTag $item
+	    $T item delete $item
+
 	}
     }
 }
@@ -863,7 +905,7 @@ proc ::RosterTree::DeleteEmptyPendTrpt {} {
 	set item [FindWithTag $tag]
 	if {$item ne ""} {
 	    if {[$T item numchildren $item] == 0} {
-		DeleteWithTag $tag
+		$T item delete $item
 	    }
 	}
     }

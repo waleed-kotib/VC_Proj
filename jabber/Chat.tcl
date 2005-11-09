@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.137 2005-11-05 11:37:25 matben Exp $
+# $Id: Chat.tcl,v 1.138 2005-11-09 09:02:38 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -21,7 +21,7 @@ namespace eval ::Chat:: {
     
     # Add all event hooks.
     ::hooks::register quitAppHook                ::Chat::QuitHook
-    ::hooks::register newChatMessageHook         ::Chat::GotMsg
+    ::hooks::register newChatMessageHook         ::Chat::GotMsg         20
     ::hooks::register newMessageHook             ::Chat::GotNormalMsg
     ::hooks::register presenceHook               ::Chat::PresenceHook
     ::hooks::register loginHook                  ::Chat::LoginHook
