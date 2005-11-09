@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.1 2005-11-09 09:02:38 matben Exp $
+# $Id: Growl.tcl,v 1.2 2005-11-09 10:22:37 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -58,6 +58,12 @@ proc ::Growl::PresenceHook {jid type args} {
     
     # Notify only if in background.
     if {![::UI::IsAppInFront]} {
+	
+	# If we have a 'delay' this is presence sent when we login.
+	set delay [::Jabber::RosterCmd getx $jid "jabber:x:delay"]
+	if {$delay ne ""} {
+	    return
+	}
 	array set argsArr $args
 	set show $type
 	if {[info exists argsArr(-show)]} {
