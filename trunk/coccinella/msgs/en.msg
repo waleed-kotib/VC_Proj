@@ -346,6 +346,7 @@
 ::msgcat::mcset en mSort         	{Sort}
 ::msgcat::mcset en mIncreasing         	{Increasing}
 ::msgcat::mcset en mDecreasing         	{Decreasing}
+::msgcat::mcset en mStyle         	{Style}
 
 
 # Short texts only. Use english text as database key.

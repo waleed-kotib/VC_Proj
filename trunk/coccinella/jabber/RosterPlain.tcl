@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.4 2005-11-09 09:02:38 matben Exp $
+# $Id: RosterPlain.tcl,v 1.5 2005-11-10 12:57:03 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -73,19 +73,22 @@ proc ::RosterPlain::Configure {_T} {
     $T element create eImage image
     $T element create eAltImage image
     $T element create eText text -lines 1
+    $T element create eTextNum text -lines 1 -fill blue
     $T element create eBorder rect -open new -outline $outline -outlinewidth 1 \
       -fill $fill -showfocus 1
  
     # Styles collecting the elements.
     set S [$T style create styHead]
-    $T style elements $S {eBorder eImage eText}
+    $T style elements $S {eBorder eImage eText eTextNum}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
+    $T style layout $S eTextNum -padx 4 -squeeze x -expand ns -ipady 1
     $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styFolder]
-    $T style elements $S {eBorder eImage eText}
+    $T style elements $S {eBorder eImage eText eTextNum}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
+    $T style layout $S eTextNum -padx 4 -squeeze x -expand ns -ipady 1
     $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
@@ -240,6 +243,27 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 	ConfigureItem $item $style $text $image
     }
     
+    # Configure number of available/unavailable users.
+    foreach type {
+	available unavailable transport pending
+    } itype {
+	jid jid transport pending
+    } {
+	set tag [list head $type]
+	set item [::RosterTree::FindWithTag $tag]
+	if {$item ne ""} {
+	    set all [::RosterTree::FindAllWithTagInItem $item $itype]
+	    set n [llength $all]
+	    $T item element configure $item cTree eTextNum -text "($n)"
+	}
+    }
+    
+    # Update any groups.
+    foreach item [::RosterTree::FindWithFirstTag group] {
+	set n [llength [$T item children $item]]
+	$T item element configure $item cTree eTextNum -text "($n)"
+    }
+
     # Design the balloon help window message.
     foreach item $jitems {
 	eval {Balloon $jidx $presence $item} $args
@@ -270,6 +294,18 @@ proc ::RosterPlain::DeleteItem {jid} {
     # Delete any empty leftovers.
     ::RosterTree::DeleteEmptyGroups
     ::RosterTree::DeleteEmptyPendTrpt
+}
+
+proc ::RosterPlain::CreateItemFromJID {jid} {    
+    upvar ::Jabber::jstate jstate
+    
+    jlib::splitjid $jid jid2 res
+    set pres [$jstate(roster) getpresence $jid2 -resource $res]
+    set rost [$jstate(roster) getrosteritem $jid2]
+    array set opts $pres
+    array set opts $rost
+
+    return [eval {CreateItem $jid $opts(-type)} [array get opts]]
 }
 
 #
@@ -393,20 +429,29 @@ proc ::RosterPlain::PostProcess {method from} {
 	set matchHost 0
 	PostProcessItem $from $matchHost root
     } elseif {[string equal $method "disco"]} {
-	PostProcessFromHost $from
+	PostProcessDiscoInfo $from
     }    
 }
 
-proc ::RosterPlain::PostProcessFromHost {from} {
-    variable T    
-    
+proc ::RosterPlain::PostProcessDiscoInfo {from} {
+    variable T
+        
     set jids [::Roster::GetUsersWithSameHost $from]
     foreach jid $jids {
 	set tag [list jid $jid]
 	foreach item [FindWithTag $tag] {
+	    
+	    # Need to identify any associated transport and place it
+	    # in the transport if not there.
 	    set icon [GetPresenceIconFromJid $jid]
-	    if {$icon ne ""} {
-		$T item image $item cTree $icon
+	    set istrpt [::Roster::IsTransportHeuristics $jid]
+	    if {$istrpt} {
+		$T item delete $item
+		CreateItemFromJID $jid
+	    } else {
+		if {$icon ne ""} {
+		    $T item image $item cTree $icon
+		}
 	    }
 	}
     }

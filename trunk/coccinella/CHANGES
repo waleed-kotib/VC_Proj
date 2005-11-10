@@ -5,7 +5,13 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.95.10 (0510??):
+Coccinella-0.95.11 (0512??):
+
+        - added support for Growl on mac
+	- using treectrl in a number of places
+	- the roster tree component based with different styles
+
+Coccinella-0.95.10 (051018):
 
 	- server connections using http possible; http proxy added
 	- added the tkpng package; png support now required

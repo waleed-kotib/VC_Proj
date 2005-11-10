@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.39 2005-11-09 09:02:38 matben Exp $
+# $Id: roster.tcl,v 1.40 2005-11-10 12:57:03 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -63,6 +63,7 @@
 #      none
 #      
 #   INSTANCE COMMANDS
+#      rostName availablesince jid
 #      rostName clearpresence ?jidpattern?
 #      rostName enterroster
 #      rostName exitroster
@@ -74,6 +75,7 @@
 #      rostName getresources jid
 #      rostName gethighestresource jid
 #      rostName getrosteritem jid
+#      rostName getstatus jid
 #      rostName getsubscription jid
 #      rostName getusers ?-type available|unavailable?
 #      rostName getx jid xmlns
@@ -1201,6 +1203,19 @@ proc roster::gettype {rostName jid} {
     }
 }
 
+proc roster::getstatus {rostName jid} {
+      
+    upvar ${rostName}::presArr presArr
+       
+    set jid [jlib::jidmap $jid]    
+
+    if {[info exists presArr($jid,status)]} {
+	return $presArr($jid,status)
+    } else {
+	return ""
+    }
+}
+
 # roster::getx --
 #
 #       Returns the xml list for this jid's x element with given xml namespace.
@@ -1219,8 +1234,6 @@ proc roster::getx {rostName jid xmlns} {
 
     upvar ${rostName}::presArr presArr
    
-    Debug 2 "roster::getx rostName=$rostName, jid='$jid', xmlns=$xmlns"
-
     set jid [jlib::jidmap $jid]
     if {[info exists presArr($jid,x,$xmlns)]} {
 	return $presArr($jid,x,$xmlns)
@@ -1287,6 +1300,30 @@ proc roster::getcapsattr {rostName jid attrname} {
 	set attr [wrapper::getattribute $cElem $attrname]
     }
     return $attr
+}
+
+# roster::availablesince --
+# 
+#       Not sure exactly how delay elements are updated when new status set.
+
+proc roster::availablesince {rostName jid} {
+    
+    upvar ${rostName}::presArr presArr
+    upvar ${rostName}::state state
+
+    set jid [jlib::jidmap $jid]
+    set xmlns "jabber:x:delay"
+    if {[info exists presArr($jid,x,$xmlns)]} {
+	 
+	 # An ISO 8601 point-in-time specification. clock works!
+	 set stamp [wrapper::getattribute $presArr($jid,x,$xmlns) stamp]
+	 set time [clock scan $stamp -gmt 1]
+     } elseif {[info exists state($jid,secs)]} {
+	 set time $state($jid,secs)
+     } else {
+	 set time ""
+     }
+     return $time
 }
 
 proc roster::getpresencesecs {rostName jid} {
