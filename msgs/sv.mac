@@ -343,9 +343,10 @@
 ::msgcat::mcset sv mOffline         	{Ej tillgängliga}
 ::msgcat::mcset sv mTransports         	{Transporter}
 ::msgcat::mcset sv mIgnore         	{Ignorera}
-::msgcat::mcset en mSort         	{Sortera}
-::msgcat::mcset en mIncreasing         	{Ökande}
-::msgcat::mcset en mDecreasing         	{Minskande}
+::msgcat::mcset sv mSort         	{Sortera}
+::msgcat::mcset sv mIncreasing         	{Ökande}
+::msgcat::mcset sv mDecreasing         	{Minskande}
+::msgcat::mcset sv mStyle         	{Stil}
 
 
 

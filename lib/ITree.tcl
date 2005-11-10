@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.6 2005-11-05 11:37:25 matben Exp $
+# $Id: ITree.tcl,v 1.7 2005-11-10 12:57:03 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -19,7 +19,7 @@ package provide ITree 1.0
 namespace eval ::ITree {
 
     variable buttonPressMillis 1000
-    variable tag2Item
+    variable tag2item
     variable options
 }
 
@@ -75,6 +75,14 @@ proc ::ITree::New {T wxsc wysc args} {
     bind $T <Double-1>        { ::ITree::DoubleClick %W %x %y }        
     bind $T <<ButtonPopup>>   { ::ITree::Popup %W %x %y }
     bind $T <Destroy>         {+::ITree::OnDestroy %W }
+    
+    # This automatically cleans up the tag array.
+    $T notify bind RosterTreeTag <ItemDelete> {
+	foreach item %i {
+	    ::ITree::UnsetTags %T $item
+	} 
+    }
+    bindtags $T [concat RosterTreeTag [bindtags $T]]
 }
 
 proc ::ITree::Selection {T} {
@@ -181,7 +189,7 @@ proc ::ITree::DoPopup {T x y command} {
 }
 
 proc ::ITree::Item {T v args} {
-    variable tag2Item
+    variable tag2item
         
     set isopen 0
     if {[set idx [lsearch $args -open]] >= 0} {
@@ -190,11 +198,11 @@ proc ::ITree::Item {T v args} {
     set parent root
     if {[llength $v] > 1} {
 	set parentv [lrange $v 0 end-1]
-	set parent $tag2Item($T,$parentv)
+	set parent $tag2item($T,$parentv)
 	
     }
     set item [$T item create -open $isopen -parent $parent]
-    set tag2Item($T,$v) $item
+    set tag2item($T,$v) $item
 
     $T item element configure $item cTag eText -text $v
     eval {ItemConfigure $T $v} $args
@@ -203,11 +211,11 @@ proc ::ITree::Item {T v args} {
 }
 
 proc ::ITree::IsItem {T v} {
-    variable tag2Item
+    variable tag2item
     
     set ans 0
-    if {[info exists tag2Item($T,$v)]} {
-	if {[$T item id $tag2Item($T,$v)] ne ""} {
+    if {[info exists tag2item($T,$v)]} {
+	if {[$T item id $tag2item($T,$v)] ne ""} {
 	    set ans 1
 	}
     }
@@ -215,22 +223,22 @@ proc ::ITree::IsItem {T v} {
 }
 
 proc ::ITree::GetItem {T v} {
-    variable tag2Item
+    variable tag2item
     
     set item ""
-    if {[info exists tag2Item($T,$v)]} {
-	if {[$T item id $tag2Item($T,$v)] ne ""} {
-	    set item $tag2Item($T,$v)
+    if {[info exists tag2item($T,$v)]} {
+	if {[$T item id $tag2item($T,$v)] ne ""} {
+	    set item $tag2item($T,$v)
 	}
     }
     return $item
 }
 
 proc ::ITree::ItemConfigure {T v args} {
-    variable tag2Item
+    variable tag2item
     
-    if {[info exists tag2Item($T,$v)]} {
-	set item $tag2Item($T,$v)
+    if {[info exists tag2item($T,$v)]} {
+	set item $tag2item($T,$v)
 	
 	# Dispatch to the right element.
 	foreach {key value} $args {
@@ -251,11 +259,11 @@ proc ::ITree::ItemConfigure {T v args} {
 }
 
 proc ::ITree::Children {T v} {
-    variable tag2Item
+    variable tag2item
     
     set vchilds {}
-    if {[info exists tag2Item($T,$v)]} {
-	set citems [$T item children $tag2Item($T,$v)]
+    if {[info exists tag2item($T,$v)]} {
+	set citems [$T item children $tag2item($T,$v)]
 	foreach item $citems {
 	    lappend vchilds [$T item element cget $item cTag eText -text]
 	}
@@ -264,19 +272,19 @@ proc ::ITree::Children {T v} {
 }
 
 proc ::ITree::Sort {T v args} {
-    variable tag2Item
+    variable tag2item
     
-    if {[info exists tag2Item($T,$v)]} {
-	set item $tag2Item($T,$v)
+    if {[info exists tag2item($T,$v)]} {
+	set item $tag2item($T,$v)
 	eval {$T item sort $item -column cTree} $args
     }    
 }
 
 proc ::ITree::FindEndItems {T vend} {
-    variable tag2Item
+    variable tag2item
 
     set vlist {}
-    foreach {key item} [array get tag2Item $T,*] {
+    foreach {key item} [array get tag2item $T,*] {
 	set v [string map [list "$T," ""] $key]
 	if {[lindex $v end] eq $vend} {
 	    lappend vlist $v
@@ -286,25 +294,19 @@ proc ::ITree::FindEndItems {T vend} {
 }
 
 proc ::ITree::DeleteItem {T v} {
-    variable tag2Item
+    variable tag2item
     
-    if {[info exists tag2Item($T,$v)]} {
-	set item $tag2Item($T,$v)
-	UnsetTags $T $item	
+    if {[info exists tag2item($T,$v)]} {
+	set item $tag2item($T,$v)
 	$T item delete $item
     }    
 }
 
 proc ::ITree::UnsetTags {T item} {
-    variable tag2Item
-    
-    # Must do this recursively.
-    set children [$T item children $item]
-    foreach citem $children {
-	UnsetTags $T $citem
-    }
+    variable tag2item
+
     set v [$T item element cget $item cTag eText -text]
-    unset -nocomplain tag2Item($T,$v)    
+    unset -nocomplain tag2item($T,$v)    
 }
 
 proc ::ITree::DeleteChildren {T v} {
@@ -316,9 +318,9 @@ proc ::ITree::DeleteChildren {T v} {
 
 proc ::ITree::OnDestroy {T} {
     variable options
-    variable tag2Item
+    variable tag2item
     
     array unset options $T,*
-    array unset tag2Item $T,*
+    array unset tag2item $T,*
 }
 

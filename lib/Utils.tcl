@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.52 2005-10-22 14:26:21 matben Exp $
+# $Id: Utils.tcl,v 1.53 2005-11-10 12:57:03 matben Exp $
 
 package provide Utils 1.0
 
@@ -148,8 +148,12 @@ proc ::Utils::SmartClockFormat {secs args} {
 	-weekdays 0
 	-detail   0
 	-showsecs 1
+	-today    0
     }
     array set opts $args
+    if {$secs eq ""} {
+	return
+    }
     
     # 'days': 0=today, -1=yesterday etc.
     set secs00 [clock scan "today 00:00"]
@@ -160,7 +164,11 @@ proc ::Utils::SmartClockFormat {secs args} {
 	    set date "tomorrow"
 	}
 	^0$ {
-	    set date "today"
+	    if {$opts(-today)} {
+		set date "today"
+	    } else {
+		set date ""
+	    }
 	}
 	^-1$ {
 	    set date "yesterday"
@@ -202,7 +210,7 @@ proc ::Utils::SmartClockFormat {secs args} {
     } else {	
 	set time [clock format $secs -format $fmt]
     }
-    return "$date $time"
+    return [string trim "$date $time"]
 }
 
 proc ::Utils::IsToday {secs} {

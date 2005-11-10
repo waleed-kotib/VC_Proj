@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.10 2005-08-16 12:22:34 matben Exp $
+# $Id: Taskbar.tcl,v 1.11 2005-11-10 12:57:03 matben Exp $
 
 namespace eval ::Taskbar:: {
     
@@ -105,7 +105,7 @@ proc ::Taskbar::InitHook { } {
     set i 0
     foreach {item cmd} $menuDef {
 	if {[string index $cmd 0] == "@"} {
-	    set mt [menu $m.sub${i} -tearoff 0]
+	    set mt [menu $m.sub$i -tearoff 0]
 	    $m add cascade -label [mc $item] -menu $mt
 	    eval [string range $cmd 1 end] $mt
 	    incr i

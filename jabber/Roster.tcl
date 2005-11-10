@@ -5,10 +5,11 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.143 2005-11-09 09:02:38 matben Exp $
+# $Id: Roster.tcl,v 1.144 2005-11-10 12:57:03 matben Exp $
 
 package require RosterTree
 package require RosterPlain
+package require RosterTwo
 
 package provide Roster 1.0
 
@@ -100,7 +101,7 @@ namespace eval ::Roster:: {
 	    radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value +1}
 	    radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -1}
 	} {}
-	cascade     mStyle         {}                 {} {}
+	cascade     mStyle         {}                 {@::Roster::StyleMenu} {}
 	command     mRefreshRoster {}                 {::Roster::Refresh} {}
     }  
 
@@ -182,26 +183,6 @@ proc ::Roster::MapShowToText {show} {
     } else {
 	return $show
     }
-}
-
-proc ::Roster::OnlineSince {jid} {
-    upvar ::Jabber::jstate jstate
-    
-    set delay [$jstate(roster) getx $jid "jabber:x:delay"]
-    if {$delay ne ""} {
-	
-	# An ISO 8601 point-in-time specification. clock works!
-	set stamp [wrapper::getattribute $delay stamp]
-	set time [::Utils::SmartClockFormat [clock scan $stamp -gmt 1] -showsecs 0]
-    } else {
-	set secs [$jstate(roster) getpresencesecs $jid]
-	if {$secs ne ""} {
-	    set time [::Utils::SmartClockFormat $secs -showsecs 0]
-	} else {
-	    set time ""
-	}
-    }
-    return $time
 }
 
 # Roster::Show --
@@ -584,7 +565,11 @@ proc ::Roster::BuildMenu {m menuDef jid3 clicked status group} {
 	    cascade {
 		set mt [menu $m.sub$i -tearoff 0]
 		eval {$m add cascade -label $locname -menu $mt -state disabled} $opts
-		BuildMenu $mt $cmd $jid3 $clicked $status $group
+		if {[string index $cmd 0] == "@"} {
+		    eval [string range $cmd 1 end] $mt
+		} else {
+		    BuildMenu $mt $cmd $jid3 $clicked $status $group
+		}		
 		incr i
 	    }
 	}
@@ -615,6 +600,17 @@ proc ::Roster::BuildMenu {m menuDef jid3 clicked status group} {
 	if {[string equal $state "normal"]} {
 	    $m entryconfigure $locname -state normal
 	}
+    }
+}
+
+proc ::Roster::StyleMenu {m} {
+    variable styleName
+    
+    set styleName [::RosterTree::GetStyle]
+    foreach {name label} [::RosterTree::GetAllStyles] {
+	$m add radiobutton -label $label  \
+	  -variable ::Roster::styleName -value $name  \
+	  -command [list ::RosterTree::LoadStyle $name]
     }
 }
 
