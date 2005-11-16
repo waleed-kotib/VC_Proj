@@ -5,12 +5,13 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.7 2005-11-16 08:52:03 matben Exp $
+# $Id: Status.tcl,v 1.8 2005-11-16 13:30:15 matben Exp $
 
 package provide Status 1.0
 
 namespace eval ::Jabber::Status:: {
 
+    ::hooks::register rosterIconsChangedHook    ::Jabber::Status::RosticonsHook
     
     # Mappings from <show> element to displayable text and vice versa.
     # chat away xa dnd
@@ -109,7 +110,8 @@ proc ::Jabber::Status::Configure {w status} {
 
 proc ::Jabber::Status::Button {w varName args} {
     upvar $varName status
-    
+    variable menuBuild
+        
     set argsArr(-command) {}
     array set argsArr $args
 
@@ -118,9 +120,13 @@ proc ::Jabber::Status::Button {w varName args} {
       -compound image -image [::Rosticons::Get status/$status]
     ConfigButton $w $status
     menu $wmenu -tearoff 0
-    BuildGenPresenceMenu $wmenu -variable $varName -command  \
-      [list [namespace current]::ButtonCmd $w $varName $argsArr(-command)]
+    set menuBuild($w) [list  \
+      BuildGenPresenceMenu $wmenu -variable $varName  \
+      -command [list [namespace current]::ButtonCmd $w $varName $argsArr(-command)]]
+    eval $menuBuild($w)
     $w configure -menu $wmenu
+    
+    bind $w <Destroy> {+::Jabber::Status::Free %W}
 
     return $w
 }
@@ -157,13 +163,19 @@ proc ::Jabber::Status::PostMenu {wmenu x y} {
 proc ::Jabber::Status::MenuButton {w varName args} {
     upvar $varName status
     variable mapShowElemToText
+    variable menuBuild
 
     menubutton $w -indicatoron 1 -menu $w.menu  \
       -relief raised -bd 2 -highlightthickness 2 -anchor c -direction flush
     menu $w.menu -tearoff 0
-    BuildGenPresenceMenu $w.menu -variable $varName  \
-      -command [list [namespace current]::MenuButtonCmd $w $varName]
+    set menuBuild($w) [list  \
+      BuildGenPresenceMenu $w.menu -variable $varName  \
+      -command [list [namespace current]::MenuButtonCmd $w $varName]]
+    eval $menuBuild($w)
     $w configure -text $mapShowElemToText($status)
+
+    bind $w <Destroy> {+::Jabber::Status::Free %W}
+
     return $w
 }
 
@@ -188,6 +200,7 @@ proc ::Jabber::Status::MenuButtonCmd {w varName} {
 
 proc ::Jabber::Status::Label {w varName args} {
     upvar $varName status
+    variable menuBuild
     
     set argsArr(-command) {}
     array set argsArr $args
@@ -198,8 +211,13 @@ proc ::Jabber::Status::Label {w varName args} {
     ConfigLabel $w $status
     set wmenu $w.menu
     menu $wmenu -tearoff 0
-    BuildGenPresenceMenu $wmenu -variable $varName -command  \
-      [list [namespace current]::LabelCmd $w $varName $cmd]
+    set menuBuild($w) [list  \
+      BuildGenPresenceMenu $wmenu -variable $varName -command  \
+      [list [namespace current]::LabelCmd $w $varName $cmd]]
+    eval $menuBuild($w)
+    
+    bind $w <Destroy> {+::Jabber::Status::Free %W}
+
     return $w
 }
 
@@ -317,6 +335,25 @@ proc ::Jabber::Status::BuildStatusMenuDef { } {
       {command mAttachMessage {::Jabber::SetStatusWithMessage}  normal {}}
     
     return $statMenuDef
+}
+
+proc ::Jabber::Status::RosticonsHook { } {
+    variable menuBuild
+    
+    foreach w [array names menuBuild] {
+	
+	# Note that we cannot configure the status image since we don't
+	# know which status (login or room etc.).
+	destroy $w.menu
+	menu $w.menu -tearoff 0
+	eval $menuBuild($w)
+    }
+}
+
+proc ::Jabber::Status::Free {w} {
+    variable menuBuild
+    
+    unset -nocomplain menuBuild($w)
 }
 
 #-------------------------------------------------------------------------------

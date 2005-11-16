@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.15 2005-11-16 08:52:03 matben Exp $
+# $Id: Rosticons.tcl,v 1.16 2005-11-16 13:30:15 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -487,7 +487,7 @@ proc ::Rosticons::PFillTree {T} {
     
     foreach type $types {
 	set wcheck $T.[incr i]
-	checkbutton $wcheck -bg white \
+	checkbutton $wcheck -bg white -highlightthickness 0 \
 	  -variable [namespace current]::ptmp(use,$type)
 	if {($type eq "status" ) || ($type eq "XXXapplication")} {
 	    $wcheck configure -state disabled
@@ -508,7 +508,7 @@ proc ::Rosticons::PFillTree {T} {
 	
 	foreach name $names {
 	    set wradio $T.[incr i]
-	    radiobutton $wradio -bg white \
+	    radiobutton $wradio -bg white -highlightthickness 0 \
 	      -variable [namespace current]::ptmp(name,$type)  \
 	      -value $name
 	    
@@ -581,7 +581,11 @@ proc ::Rosticons::SavePrefsHook {} {
 
     foreach type $state(types) {
 	if {$jprefs(rost,icons,$type) ne $ptmp(name,$type)} {
-	    SetFromTmp $type $ptmp(name,$type)
+	    set name $ptmp(name,$type)
+	    if {![info exists state(loaded,$type,$name)]} {
+		LoadTmpIconSet $type $name
+	    }
+	    SetFromTmp $type $name
 	}
 	set jprefs(rost,icons,use,$type) $ptmp(use,$type)
 	set jprefs(rost,icons,$type)     $ptmp(name,$type)
