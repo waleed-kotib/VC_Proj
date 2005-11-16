@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.138 2005-11-09 09:02:38 matben Exp $
+# $Id: Chat.tcl,v 1.139 2005-11-16 08:52:03 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -768,7 +768,7 @@ proc ::Chat::Build {threadID args} {
     # Widget paths.
     set wtray       $w.frall.tray
     set wcont       $w.frall.cc        ;# container frame for wthread or wnb
-    set wthread     $w.frall.fthr
+    set wthread     $w.frall.fthr      ;# the chat thread widget container
     set wnb         $w.frall.nb        ;# tabbed notebook
     set dlgstate(wtray)      $wtray
     set dlgstate(wcont)      $wcont
@@ -1162,7 +1162,7 @@ proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    # Repack the WBCanvas in notebook page.
+    # Repack the  in notebook page.
     set wnb     $dlgstate(wnb)
     set wcont   $dlgstate(wcont)
     set wthread $chatstate(wthread)
@@ -1200,7 +1200,7 @@ proc ::Chat::MakeNewPage {dlgtoken threadID args} {
     ttk::frame $wpage
     $wnb add $wpage -sticky news -text $dispname -compound left
 
-    # We must make thye new page a sibling of the notebook in order to be
+    # We must make the new page a sibling of the notebook in order to be
     # able to reparent it when notebook gons.
     set wthread $dlgstate(wthread)[incr uidpage]
     set chattoken [eval {

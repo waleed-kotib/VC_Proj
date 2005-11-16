@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.31 2005-11-04 15:14:55 matben Exp $
+# $Id: disco.tcl,v 1.32 2005-11-16 08:52:03 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -19,10 +19,11 @@
 #	
 #   INSTANCE COMMANDS
 #      jlibname disco children jid
-#      jlibname disco send_get discotype jid callbackProc ?-opt value ...?
+#      jlibname disco send_get discotype jid cmd ?-opt value ...?
 #      jlibname disco isdiscoed discotype jid ?node?
 #      jlibname disco get discotype key jid ?node?
 #      jlibname disco getallcategories pattern
+#      jlibname disco get_async discotype jid cmd ?-node node?
 #      jlibname disco getconferences
 #      jlibname disco getflatlist jid ?node?
 #      jlibname disco getjidsforcategory pattern
@@ -132,6 +133,7 @@ proc jlib::disco::init {jlibname args} {
 	variable info
 	variable rooms
 	variable handler
+	variable state
     }
     upvar ${jlibname}::disco::items items
     upvar ${jlibname}::disco::info  info
@@ -217,36 +219,85 @@ proc jlib::disco::registerhandler {jlibname cmdProc} {
 proc jlib::disco::send_get {jlibname type jid cmd args} {
     
     variable xmlns
+    upvar ${jlibname}::disco::state state
     
-    array set argsArr $args
+    set jid [jlib::jidmap $jid]
+    set node ""
     set opts {}
-    if {[info exists argsArr(-node)]} {
-	lappend opts -node $argsArr(-node)
+    if {[set idx [lsearch $args -node]] >= 0} {
+	set node [lindex $args [incr idx]]
+	set opts [list -node $node]
     }
+    set state(pending,$type,$jid,$node) 1
     
     eval {$jlibname iq_get $xmlns($type) -to $jid  \
-      -command [list [namespace current]::parse_get $type $jid $cmd]} $opts
+      -command [list [namespace current]::send_get_cb $type $jid $cmd]} $opts
 }
 
-# jlib::disco::parse_get --
+# jlib::disco::get_async --
+# 
+#       Do disco async using 'cmd' callback. 
+#       If cached it is returned directly using 'cmd', if pending the cmd
+#       is invoked when getting result, else we do a send_get.
+
+proc jlib::disco::get_async {jlibname type jid cmd args} {
+
+    upvar ${jlibname}::disco::items items
+    upvar ${jlibname}::disco::info  info
+    upvar ${jlibname}::disco::state state
+
+    set jid [jlib::jidmap $jid]
+    set node ""
+    set opts {}
+    if {[set idx [lsearch $args -node]] >= 0} {
+	set node [lindex $args [incr idx]]
+	set opts [list -node $node]
+    }
+    set var ${type}($jid,$node,xml)
+    if {[info exists $var]} {
+	set xml [set $var]
+	set etype [wrapper::getattribute $xml type]
+
+	# Errors are reported specially!
+	# @@@ BAD!!!
+	if {$etype eq "error"} {
+	    set xml [lindex [wrapper::getchildren $xml] 0]
+	}
+	uplevel #0 $cmd [list $jlibname $etype $jid $xml]
+    } elseif {[info exists state(pending,$type,$jid,$node)]} {
+	lappend state(invoke,$type,$jid,$node) $cmd
+    } else {
+	eval {send_get $jlibname $type $jid $cmd} $opts
+    }
+    return
+}
+
+# jlib::disco::send_get_cb --
 # 
 #       Fills in the internal state arrays, and invokes any callback.
 
-proc jlib::disco::parse_get {discotype from cmd jlibname type subiq args} {
+proc jlib::disco::send_get_cb {ditype from cmd jlibname type subiq args} {
     
     upvar ${jlibname}::disco::items items
     upvar ${jlibname}::disco::info  info
-
+    upvar ${jlibname}::disco::state state
+    
     # We need to use both jid and any node for addressing since
     # each item may have identical jid's but different node's.
 
     # Do STRINGPREP.
     set from [jlib::jidmap $from]
+    set node [wrapper::getattribute $subiq "node"]
+
+    unset -nocomplain state(pending,$ditype,$from,$node)
     
     if {[string equal $type "error"]} {
-	# Empty.
+
+	# Cache xml for later retrieval.
+	set var ${ditype}($from,$node,xml)
+	set $var [eval {getfulliq $type $subiq} $args]
     } else {
-	switch -- $discotype {
+	switch -- $ditype {
 	    items {
 		parse_get_items $jlibname $from $subiq
 	    }
@@ -255,9 +306,35 @@ proc jlib::disco::parse_get {discotype from cmd jlibname type subiq args} {
 	    }
 	}
     }
+    invoke_stacked $jlibname $ditype $type $from $subiq
     
     # Invoke callback for this get.
     uplevel #0 $cmd [list $jlibname $type $from $subiq] $args
+}
+
+proc jlib::disco::invoke_stacked {jlibname ditype type jid subiq} {
+    
+    upvar ${jlibname}::disco::state state
+    
+    set node [wrapper::getattribute $subiq "node"]
+    if {[info exists state(invoke,$ditype,$jid,$node)]} {
+	foreach cmd $state(invoke,$ditype,$jid,$node) {
+	    uplevel #0 $cmd [list $jlibname $type $jid $subiq]
+	}
+	unset -nocomplain state(invoke,$ditype,$jid,$node)
+    }
+}
+
+proc jlib::disco::getfulliq {type subiq args} {
+    
+    # Errors are reported specially!
+    # @@@ BAD!!!
+    # If error subiq is just a two element list {errtag text}
+    set attr [list type $type]
+    foreach {key value} $args {
+	lappend attr [string trimleft $key "-"] $value
+    }
+    return [wrapper::createtag iq -attrlist $attr -subtags [list $subiq]]
 }
 
 # jlib::disco::parse_get_items --
@@ -318,7 +395,7 @@ proc jlib::disco::parse_get_items {jlibname from subiq} {
     set pnode [wrapper::getattribute $subiq "node"]
     set pitem [list $from $pnode]
     
-    set items($from,$pnode,xml) $subiq
+    set items($from,$pnode,xml) [getfulliq result $subiq]
     unset -nocomplain items($from,$pnode,children) items($from,$pnode,nodes)
     unset -nocomplain items($from,$pnode,childs2)
     
@@ -441,7 +518,7 @@ proc jlib::disco::parse_get_info {jlibname from subiq} {
     set node [wrapper::getattribute $subiq "node"]
 
     array unset info [jlib::ESC $from],[jlib::ESC $node],*
-    set info($from,$node,xml) $subiq
+    set info($from,$node,xml) [getfulliq result $subiq]
     set isconference 0
     
     foreach c [wrapper::getchildren $subiq] {

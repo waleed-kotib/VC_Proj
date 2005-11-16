@@ -3,12 +3,11 @@
 #      This file is part of The Coccinella application. 
 #      It implements handling and parsing of service (disco) icons.
 #      
-#      @@@ There is a lot of duplicated code Servicons/Rosticons/Emoticons.
-#          Find better way!
-#      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Servicons.tcl,v 1.2 2005-08-26 15:02:34 matben Exp $
+# $Id: Servicons.tcl,v 1.3 2005-11-16 08:52:03 matben Exp $
+
+package require Icondef
 
 package provide Servicons 1.0
 
@@ -33,12 +32,9 @@ namespace eval ::Servicons:: {
 }
 
 proc ::Servicons::InitPrefsHook { } {
-    
-    variable priv
     upvar ::Jabber::jprefs jprefs
 
-    set jprefs(serv,iconSet)  "default"
-    
+    set jprefs(serv,iconSet)  "default"    
 }
 
 proc ::Servicons::Init { } {
@@ -124,6 +120,8 @@ proc ::Servicons::Get {key} {
     variable priv
     variable alias
 
+    # @@@ For gateways we could use a rosticon instead to get the sets match
+    
     if {[info exists alias($key)]} {
 	set key $alias($key)
     }
@@ -164,169 +162,36 @@ proc ::Servicons::GetAllSets { } {
     }
     return $setList
 }
-
-# Servicons::GetPrefSetPathExists --
-# 
-#       Gets the full path to our servicons file/folder.
-#       Verifies that it exists and that can be mounted if zip archive.
-
-proc ::Servicons::GetPrefSetPathExists { } {
-    global  this
-    variable priv
-    upvar ::Jabber::jprefs jprefs
-
-    # Start with the failsafe set.
-    set path [file join $this(serviconsPath) $priv(defaultSet)]
     
-    foreach dir [list $this(serviconsPath) $this(altServiconsPath)] {
-	set f [file join $dir $jprefs(serv,iconSet)]
-	set fjisp ${f}.jisp
-	if {[file exists $f]} {
-	    set path $f
-	    break
-	} elseif {[file exists $fjisp] && $priv(havezip)} {
-	    set path $fjisp
-	    break
-	}
-    }
-    set jprefs(serv,iconSet) [file rootname [file tail $path]]
-    return $path
-}
-    
-proc ::Servicons::LoadTmpIconSet {path} {
-    
+proc ::Servicons::LoadTmpIconSet {path} {    
     variable state
-    variable priv
-    
-    # The dir variable points to the (virtual) directory containing it all.
-    set dir $path
-    set name [file rootname [file tail $path]]
-    
-    if {[string equal [file extension $path] ".jisp"]} {
-	if {$priv(havezip)} {
-	    set mountpath [file join [file dirname $path] $name]
-	    if {[catch {
-		set fdzip [vfs::zip::Mount $path $mountpath]
-	    } err]} {
-		return -code error $err
-	    }
-	    
-	    # We cannot be sure of that the name of the archive is identical 
-	    # with the name of the original directory.
-	    set zipdir [lindex [glob -nocomplain -directory $mountpath *] 0]
-	    set dir $zipdir
-	} else {
-	    return -code error "cannot read jisp archive without vfs::zip"
-	}
-    }
-    set icondefPath [file join $dir icondef.xml]
-    if {![file isfile $icondefPath]} {
-	return -code error "missing icondef.xml file in archive"
-    }
-    set fd [open $icondefPath]
-    fconfigure $fd -encoding utf-8
-    set xmldata [read $fd]
-    close $fd
-        
-    # Parse data.
-    ParseIconDef $name $dir $xmldata
-    
-    if {[info exists mountpath]} {
-	vfs::zip::Unmount $fdzip $mountpath
-    }
-    set state($name,loaded) 1
-}
-
-proc ::Servicons::ParseIconDef {name dir xmldata} {
-
-    set token [tinydom::parse $xmldata]
-    set xmllist [tinydom::documentElement $token]
-    
-    foreach elem [tinydom::children $xmllist] {
-	
-	switch -- [tinydom::tagname $elem] {
-	    meta {
-		ParseMeta $name $dir $elem
-	    }
-	    icon {
-		ParseIcon $name $dir $elem
-	    }
-	}
-    }
-    tinydom::cleanup $token
-}
-
-proc ::Servicons::ParseMeta {name dir xmllist} {
     variable meta
-    
-    array unset meta $name,*
-    foreach elem [tinydom::children $xmllist] {
-	set tag [tinydom::tagname $elem]
-	lappend meta($name,$tag) [tinydom::chdata $elem]
-    }
-}
-
-proc ::Servicons::ParseIcon {name dir xmllist} {
-    global  this
-    
     variable tmpicons
     variable tmpiconsInv
     variable priv
+    variable mdata
+    variable idata
 
-    set mime ""
-    
-    foreach elem [tinydom::children $xmllist] {
-	set tag [tinydom::tagname $elem]
-	
-	switch -- $tag {
-	    x {
-		set key [tinydom::chdata $elem]
-	    }
-	    data {
-		# base64 coded image data
-		set data [tinydom::chdata $elem]
-		array set attr [tinydom::attrlist $elem]
-		set mime $attr(mime)
-	    }
-	    object {
-		set object [tinydom::chdata $elem]
-		array set attr [tinydom::attrlist $elem]
-		set mime $attr(mime)
-	    }
-	}
+    set name [::Icondef::Load $path  \
+      [namespace current]::idata     \
+      [namespace current]::mdata]
+
+    array unset meta $name,*
+    foreach {key value} [array get mdata] {
+	set meta($name,$key) $value
     }
     
-    switch -- $mime {
-	image/gif {
-	    if {[info exists data]} {
-		set im [image create photo -format gif -data $data]
-	    } else {
-		set im [image create photo -format gif  \
-		  -file [file join $dir $object]]
-	    }
-	    set tmpicons($name,$key) $im
-	}
-	image/png {
-	    # We should not rely on base64 data here since QuickTimeTcl 
-	    # doesn't handle it.
-	    if {[info exists object]} {
-		
-		# If we rely on QuickTimeTcl here we cannot be in vfs.
-		set f [file join $dir $object]
-		if {$priv(needtmp)} {
-		    set tmp [::tfileutils::tempfile $this(tmpPath) [file rootname $object]]
-		    append tmp [file extension $object]
-		    file copy -force $f $tmp
-		    set f $tmp
-		}
-		set im [eval {image create photo -file $f} $priv(pngformat)]
-		set tmpicons($name,$key) $im
-	    }
-	}
-    }
-    if {[info exists im]} {
-	set tmpiconsInv($name,$im) $key
-    }
+    array unset tmpicons    $name,*
+    array unset tmpiconsInv $name,*
+
+    foreach {typesubtype image} [array get idata] {
+	set tmpicons($name,$typesubtype) $image
+	set tmpiconsInv($name,$image)    $typesubtype
+    }    
+    set state($name,loaded) 1
+
+    unset -nocomplain mdata
+    unset -nocomplain idata
 }
 
 proc ::Servicons::SetFromTmp {name} {

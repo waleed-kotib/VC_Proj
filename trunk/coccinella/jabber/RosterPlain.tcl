@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.5 2005-11-10 12:57:03 matben Exp $
+# $Id: RosterPlain.tcl,v 1.6 2005-11-16 08:52:03 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -59,7 +59,11 @@ proc ::RosterPlain::Configure {_T} {
     if {[$T cget -backgroundimage] eq ""} {
 	set outline gray
     }
-    set minH 16
+    set minH 17
+    
+    # One pixel from the top border line and two pixels below since border
+    # is drawn inside.
+    set ipy {1 2}
 
     # Two columns: 
     #   0) the tree 
@@ -82,33 +86,33 @@ proc ::RosterPlain::Configure {_T} {
     $T style elements $S {eBorder eImage eText eTextNum}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
     $T style layout $S eTextNum -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
+    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styFolder]
     $T style elements $S {eBorder eImage eText eTextNum}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
     $T style layout $S eTextNum -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
+    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styUnavailable]
     $T style elements $S {eBorder eImage eText}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
+    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styAvailable]
     $T style elements $S {eBorder eImage eAltImage eText}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
+    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
     $T style layout $S eAltImage -expand ns -ipady 1
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styTransport]
     $T style elements $S {eBorder eImage eText}
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady 1 -minheight $minH
+    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styTag]
@@ -127,12 +131,12 @@ proc ::RosterPlain::Configure {_T} {
 proc ::RosterPlain::Init { } {
     variable T
     upvar ::Jabber::jprefs jprefs
-	
-    set onlineImage  [::Theme::GetImage [option get $T onlineImage {}]]
-    set offlineImage [::Theme::GetImage [option get $T offlineImage {}]]
-
+    
     $T item delete all
     ::RosterTree::FreeTags
+    
+    set onlineImage  [::Rosticons::Get application/online]
+    set offlineImage [::Rosticons::Get application/offline]
     
     # Available:
     set tag [list head available]
@@ -179,12 +183,6 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 	available    styAvailable 
 	unavailable  styUnavailable
     }
-    array set headImageMap {
-	available   onlineImage
-	unavailable offlineImage
-	transport   trptImage
-	pending     ""
-    }
 
     # jid2 is always without a resource
     # jid3 is as reported
@@ -224,14 +222,12 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 	    group {
 		set style styFolder
 		set text  $tag1
-		set image [::Theme::GetImage [option get $T groupImage {}]]
+		set image [::Rosticons::Get application/group-$presence]
 	    }
 	    head {
 		set style styHead
-		set rsrcName $headImageMap($tag1)
 		set text  [::RosterTree::MCHead $tag1]
-		set image [::Theme::GetImage [option get $T $rsrcName {}]]
-
+		set image [::Rosticons::Get application/$tag1]
 	    }
 	    pending {
 		set style styUnavailable
@@ -352,6 +348,10 @@ proc ::RosterPlain::Balloon {jid presence item args} {
 proc ::RosterPlain::TreeConfigureHook {args} {
     variable T
     
+    if {[::RosterTree::GetStyle] ne "plain"} {
+	return
+    }
+
     set outline white
     if {[$T cget -backgroundimage] eq ""} {
 	set outline gray
@@ -369,7 +369,6 @@ proc ::RosterPlain::TreeConfigureHook {args} {
 #       possible to set icons of foreign IM users.
 
 proc ::RosterPlain::BrowseSetHook {from subiq} {
-    upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
     
     if {[::RosterTree::GetStyle] ne "plain"} {
@@ -377,15 +376,12 @@ proc ::RosterPlain::BrowseSetHook {from subiq} {
     }
     
     # Fix icons of foreign IM systems.
-    if {$jprefs(rost,haveIMsysIcons)} {
-	if {![jlib::jidequal $from $jserver(this)]} {
-	    PostProcess browse $from
-	}
+    if {![jlib::jidequal $from $jserver(this)]} {
+	PostProcess browse $from
     }
 }
 
 proc ::RosterPlain::DiscoInfoHook {type from subiq args} {
-    upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
     if {[::RosterTree::GetStyle] ne "plain"} {
@@ -393,13 +389,11 @@ proc ::RosterPlain::DiscoInfoHook {type from subiq args} {
     }
 
     if {$type ne "error"} {
-	if {$jprefs(rost,haveIMsysIcons)} {
-	    set types [$jstate(jlib) disco types $from]
-	    
-	    # Only the gateways have custom icons.
-	    if {[lsearch -glob $types gateway/*] >= 0} {
-		PostProcess disco $from
-	    }
+	set types [$jstate(jlib) disco types $from]
+	
+	# Only the gateways have custom icons.
+	if {[lsearch -glob $types gateway/*] >= 0} {
+	    PostProcess disco $from
 	}
     }
 }

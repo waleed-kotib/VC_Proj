@@ -5,7 +5,27 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.14 2005-09-22 13:41:43 matben Exp $
+# $Id: Rosticons.tcl,v 1.15 2005-11-16 08:52:03 matben Exp $
+
+#  Directory structure: Each key that defines an icon is 'type/subtype'.
+#  Each iconset must contain only one type and be placed in the directory
+#  roster/'type'/. 
+#
+#   roster/        aim/
+#          application/
+#             gadugadu/
+#                  icq/
+#                  msn/
+#                 smtp/
+#               status/
+#           whiteboard/
+#                yahoo/
+#                
+#  The 'status' type is the usual jabber icons. The 'application' type is 
+#  special since it sets the other icons used in the roster tree.
+#  Each group must have a default dir or default.jisp archive.
+
+package require Icondef
 
 package provide Rosticons 1.0
 
@@ -13,30 +33,18 @@ namespace eval ::Rosticons:: {
 
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Rosticons::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Rosticons::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Rosticons::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Rosticons::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Rosticons::UserDefaultsHook
 
     # Other init hooks depend on us!
     ::hooks::register initHook               ::Rosticons::Init    20
 
     variable priv
     set priv(defaultSet) "default"
-    set priv(alltypes)   {}
-}
+    set priv(types) {aim application gadugadu icq msn smtp status whiteboard yahoo}
 
-proc ::Rosticons::InitPrefsHook { } {
-    
-    variable priv
-    upvar ::Jabber::jprefs jprefs
-
-    set jprefs(rost,iconSet)     "default"
-    set jprefs(rost,haveWBicons) 1
-    
-    # Do NOT store the complete path!
-    ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(rost,haveWBicons) jprefs_rost_haveWBicons $jprefs(rost,haveWBicons)] \
-      [list ::Jabber::jprefs(rost,iconSet) jprefs_rost_iconSet $jprefs(rost,iconSet)]]
-
-    set jprefs(rost,iconSet)     "default"
-    set jprefs(rost,haveWBicons) 1
 }
 
 proc ::Rosticons::Init { } {
@@ -67,44 +75,105 @@ proc ::Rosticons::Init { } {
     } else {
 	set priv(havezip) 0
     }
-
-    # Cache stuff we need later.
-    set priv(havepng)      [::Plugins::HaveImporterForMime image/png]
-    set priv(QuickTimeTcl) [::Plugins::HavePackage QuickTimeTcl]
-    set priv(Img)          [::Plugins::HavePackage Img]
-    if {$priv(Img)} {
-	set priv(needtmp)   0
-	set priv(pngformat) [list -format png]
-    } else {
-	set priv(needtmp)   1
-	set priv(pngformat) {}
-    }
-
-    set allSets [GetAllSets]
-    ::Debug 4 "\t allSets=$allSets"
     
-    # The default set.
-    LoadTmpIconSet $state(default,path)
-    SetFromTmp default
-
-    # Any other set.
-    if {![string equal $jprefs(rost,iconSet) $priv(defaultSet)]} {
-	if {[lsearch -exact $allSets $jprefs(rost,iconSet)] >= 0} {
-	    set name $jprefs(rost,iconSet)  
-	    LoadTmpIconSet $state($name,path)
-	    SetFromTmp $name
+    # Investigates all sets available per 'type' and 'name' but doesn't
+    # process anything.
+    GetAllTypeSets
+    
+    # Treat each 'type' in turn. Verify that exists. 'default' as fallback.
+    foreach type $state(types) {
+	set name $jprefs(rost,icons,$type)
+	if {![info exists state(path,$type,$name)]} {
+	    set name "default"
 	}
+	LoadTmpIconSet $type $name
+	SetFromTmp $type $name
     }
+
 }
 
 proc ::Rosticons::Exists {key} {
-    variable rosticons
+    variable icons
     
-    if {[info exists rosticons($key)]} {
+    if {[info exists icons($key)]} {
 	return 1
     } else {
 	return 0
     }
+}
+
+proc ::Rosticons::GetTypes { } {
+    variable state
+   
+    return $state(types)
+}
+
+# Rosticons::GetAllTypeSets --
+# 
+#       Info stored in 'state' array as:
+#       
+#       state(name,$type,$name) name
+#       state(type,$type,$name) type
+#       state(path,$type,$name) path
+#       
+#       state(names,$type) listOfNames
+#       state(types)       listOfTypes
+#       
+#       type is typically:
+#       aim application gadugadu icq msn status whiteboard yahoo
+
+proc ::Rosticons::GetAllTypeSets { } {
+    global  this
+    variable priv
+    variable state
+    
+    array unset state name,*
+    array unset state path,*
+    array unset state type,*
+    array unset state names,*
+    array unset state types
+    
+    foreach path [list $this(rosticonsPath) $this(altRosticonsPath)] {
+	foreach tdir [glob -nocomplain -type d -directory $path *] {
+	    set type [file tail $tdir]
+	    if {$type eq "CVS"} {
+		continue
+	    }
+	    
+	    # For each type dir find all sets for this type.
+	    foreach f [glob -nocomplain -directory $tdir *] {
+		set name [file tail $f]
+		set name [file rootname $name]
+		if {[string equal [file extension $f] ".jisp"] && $priv(havezip)} {
+		    set state(name,$type,$name) $name
+		    set state(type,$type,$name) $type
+		    set state(path,$type,$name) $f
+		} elseif {[file isdirectory $f]} {
+		    if {[file exists [file join $f icondef.xml]]} {
+			set state(name,$type,$name) $name
+			set state(type,$type,$name) $type
+			set state(path,$type,$name) $f
+		    }
+		}
+	    }
+	}
+    }
+    
+    # Compile info.
+    # 1) get all types:
+    set state(types) {}
+    foreach {key type} [array get state type,*] {
+	lappend state(types) $type
+    }
+    set state(types) [lsort -unique $state(types)]
+
+    # 2) get all names for each type:
+    foreach type $state(types) {
+	foreach {key name} [array get state name,$type,*] {
+	    lappend state(names,$type) $name
+	}
+    }
+    return $state(types)
 }
 
 # ::Rosticons::Get --
@@ -113,277 +182,458 @@ proc ::Rosticons::Exists {key} {
 #       
 # Arguments:
 #       statuskey       type/subtype, ex: status/online, icq/xa, whiteboard/dnd
+#                       application/* are special
 #       
 # Results:
 #       a valid image.
 
 proc ::Rosticons::Get {statuskey} {
-    variable rosticons
-    variable priv
+    variable icons
+    variable state
     upvar ::Jabber::jprefs jprefs
-    
-    #::Debug 4 "::Rosticons::Get-------statuskey=$statuskey"
-    
+        
     set statuskey [string tolower $statuskey]
     lassign [split $statuskey /] type sub
     set sub [string map {available online unavailable offline} $sub]
     set suborig $sub
     
-    # Do we want foreign IM icons?
-    if {!$jprefs(rost,haveIMsysIcons)} {
-	if {![string equal $type "status"] && \
-	  ![string equal $type "whiteboard"]} {
-	    set type "status"
-	}
-    }
-    if {!$jprefs(rost,haveWBicons)} {
-	set type [string map {whiteboard status} $type]
-    }
-    set key $type/$sub
-    if {[info exists rosticons($key)]} {
-	return $rosticons($key)
-    }
-    
-    # See if we can match the 'type'.
-    if {[lsearch -exact $priv(alltypes) $type] == -1} {
-	return $rosticons(status/$suborig)
-    }
-    
-    # First try to find a fallback for the sub part.
-    set sub [string map {invisible offline} $sub]
-    set sub [string map {chat online} $sub]
-    set key $type/$sub
-    if {[info exists rosticons($key)]} {
-	return $rosticons($key)
-    }
-    set sub [string map {xa away} $sub]
-    set sub [string map {dnd away} $sub]
-    set key $type/$sub
-    if {[info exists rosticons($key)]} {
-	return $rosticons($key)
-    }
-    set sub [string map {away online} $sub]
-    set key $type/$sub
-    if {[info exists rosticons($key)]} {
-	return $rosticons($key)
-    }
-    
-    # If still not matched select type=status which must be there.
-    return $rosticons(status/$suborig)
-}
-
-proc ::Rosticons::GetTypes { } {
-    variable priv
-   
-    return $priv(alltypes)
-}
-
-proc ::Rosticons::GetAllSets { } {
-    global  this
-    variable priv
-    variable state
-    
-    set setList {}
-    foreach path [list $this(rosticonsPath) $this(altRosticonsPath)] {
-	foreach f [glob -nocomplain -directory $path *] {
-	    set name [file tail $f]
-	    set name [file rootname $name]
-	    if {[string equal [file extension $f] ".jisp"] && $priv(havezip)} {
-		lappend setList $name
-		set state($name,path) $f
-	    } elseif {[file isdirectory $f]} {
-		if {[file exists [file join $f icondef.xml]]} {
-		    lappend setList $name
-		    set state($name,path) $f
+    if {$type eq "application"} {
+	if {$jprefs(rost,icons,use,$type)} {
+	    set key $type/$sub
+	    if {[info exists icons($key)]} {
+		return $icons($key)
+	    } else {
+		set sub [string map {group-online group} $sub]
+		set sub [string map {group-offline group} $sub]
+		set key $type/$sub
+		if {[info exists icons($key)]} {
+		    return $icons($key)
+		} else {
+		    return ""
 		}
 	    }
+	} else {
+	    return ""
 	}
+    } else {
+	if {![info exists jprefs(rost,icons,use,$type)]} {
+	    set type status
+	}
+
+	# Check if this type is active. Use 'status' as fallback.
+	if {!$jprefs(rost,icons,use,$type)} {
+	    set type status
+	}
+	
+	set key $type/$sub
+	if {[info exists icons($key)]} {
+	    return $icons($key)
+	}
+	
+	# See if we can match the 'type'. Use 'status' as fallback.
+	if {[lsearch -exact $state(types) $type] == -1} {
+	    set type status
+	}
+	
+	# First try to find a fallback for the sub part.
+	set sub [string map {invisible offline} $sub]
+	set sub [string map {ask offline} $sub]
+	set sub [string map {chat online} $sub]
+	set key $type/$sub
+	if {[info exists icons($key)]} {
+	    return $icons($key)
+	}
+	set sub [string map {xa away} $sub]
+	set sub [string map {dnd away} $sub]
+	set key $type/$sub
+	if {[info exists icons($key)]} {
+	    return $icons($key)
+	}
+	set sub [string map {away online} $sub]
+	set key $type/$sub
+	if {[info exists icons($key)]} {
+	    return $icons($key)
+	}
+	
+	# If still not matched select type=status which must be there.
+	return $icons(status/$suborig)
     }
-    return $setList
+}
+    
+# Rosticons::LoadTmpIconSet --
+# 
+#       Loads an iconset with specified 'type' and 'name' and creates all images.
+
+proc ::Rosticons::LoadTmpIconSet {type name} {
+    variable state
+    variable meta
+    variable tmpicons
+    variable tmpiconsInv
+    variable mdata
+    variable idata
+    
+    set path $state(path,$type,$name)
+        
+    set name [::Icondef::Load $path  \
+      [namespace current]::idata     \
+      [namespace current]::mdata]
+    
+    array unset meta $name,*
+    foreach {key value} [array get mdata] {
+	set meta($name,$key) $value
+    }
+    
+    array unset tmpicons    $name,$type/*
+    array unset tmpiconsInv $name,$type/*
+
+    foreach {typesubtype image} [array get idata] {
+	set tmpicons($name,$typesubtype) $image
+	set tmpiconsInv($name,$image)    $typesubtype
+    }
+    set state(loaded,$type,$name) 1
+
+    unset -nocomplain mdata
+    unset -nocomplain idata
 }
 
-# Rosticons::GetPrefSetPathExists --
+# Rosticons::SetFromTmp --
 # 
-#       Gets the full path to our rosticons file/folder.
-#       Verifies that it exists and that can be mounted if zip archive.
+#       Sets the specified iconset. It just copies the relevant array elements
+#       from 'tmpicons' to 'icons'.
 
-proc ::Rosticons::GetPrefSetPathExists { } {
-    global  this
+proc ::Rosticons::SetFromTmp {type name} {
+    variable tmpicons
+    variable icons
+    variable iconsInv
+    variable priv
+        
+    foreach {key image} [array get tmpicons "$name,$type/*"] {
+	set typesubtype [lindex [split $key ,] 1]
+	set icons($typesubtype) $image
+	set iconsInv($image)    $typesubtype
+    }
+}
+
+# Preference hooks -------------------------------------------------------------
+
+proc ::Rosticons::InitPrefsHook { } {
+    
     variable priv
     upvar ::Jabber::jprefs jprefs
 
-    # Start with the failsafe set.
-    set path [file join $this(rosticonsPath) $priv(defaultSet)]
+    set jprefs(rost,haveWBicons) 1
     
-    foreach dir [list $this(rosticonsPath) $this(altRosticonsPath)] {
-	set f [file join $dir $jprefs(rost,iconSet)]
-	set fjisp ${f}.jisp
-	if {[file exists $f]} {
-	    set path $f
-	    break
-	} elseif {[file exists $fjisp] && $priv(havezip)} {
-	    set path $fjisp
-	    break
-	}
+    # @@@ Find all types dynamically...
+    # Do NOT store the complete path!
+    set plist {}
+    foreach type $priv(types) {
+	set jprefs(rost,icons,$type) "default"
+	set name  ::Jabber::jprefs(rost,icons,$type)
+	set rsrc  jprefs_rost_icons_$type
+	set value $jprefs(rost,icons,$type)
+	lappend plist [list $name $rsrc $value]
+
+	set jprefs(rost,icons,use,$type) 1
+	set name  ::Jabber::jprefs(rost,icons,use,$type)
+	set rsrc  jprefs_rost_icons_use_$type
+	set value $jprefs(rost,icons,use,$type)
+	lappend plist [list $name $rsrc $value]
     }
-    set jprefs(rost,iconSet) [file rootname [file tail $path]]
-    return $path
+    
+    ::PrefUtils::Add $plist
 }
+
+proc ::Rosticons::BuildPrefsHook {wtree nbframe} {
     
-proc ::Rosticons::LoadTmpIconSet {path} {
+    ::Preferences::NewTableItem {Jabber Rosticons} [mc {Rosticons}]
     
-    variable state
-    variable priv
+    set wpage [$nbframe page {Rosticons}]    
+    BuildPrefsPage $wpage
+}
+
+proc ::Rosticons::BuildPrefsPage {wpage} {
+    variable wselect
+    variable wshow
+    variable tag2item
+
+    set wc $wpage.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -fill both -expand 1 \
+      -anchor [option get . dialogAnchor {}]
     
-    # The dir variable points to the (virtual) directory containing it all.
-    set dir $path
-    set name [file rootname [file tail $path]]
+    set box $wc.b
+    ttk::frame $wc.b
+    pack $box -side top
     
-    if {[string equal [file extension $path] ".jisp"]} {
-	if {$priv(havezip)} {
-	    set mountpath [file join [file dirname $path] $name]
-	    if {[catch {
-		set fdzip [vfs::zip::Mount $path $mountpath]
-	    } err]} {
-		return -code error $err
-	    }
-	    
-	    # We cannot be sure of that the name of the archive is identical 
-	    # with the name of the original directory.
-	    set zipdir [lindex [glob -nocomplain -directory $mountpath *] 0]
-	    set dir $zipdir
-	} else {
-	    return -code error "cannot read jisp archive without vfs::zip"
-	}
-    }
-    set icondefPath [file join $dir icondef.xml]
-    if {![file isfile $icondefPath]} {
-	return -code error "missing icondef.xml file in archive"
-    }
-    set fd [open $icondefPath]
-    fconfigure $fd -encoding utf-8
-    set xmldata [read $fd]
-    close $fd
+    # Style selection tree:
+    set lbox $box.l
+    set wysc    $lbox.ysc
+    set wselect $lbox.t    
+
+    frame $lbox -relief sunken -bd 1    
+    
+    tuscrollbar $wysc -orient vertical -command [list $wselect yview]
+    PTreeSelect $wselect $wysc
+
+    grid  $wselect  -row 0 -column 0 -sticky news
+    grid  $wysc     -row 0 -column 1 -sticky ns
+    grid columnconfigure $lbox 0 -weight 1   
+    
+    PFillTree $wselect
+
+    # Show iconset tree:
+    set rbox $box.r
+    set wysc  $rbox.ysc
+    set wshow $rbox.t    
+
+    frame $rbox -relief sunken -bd 1    
+    
+    tuscrollbar $wysc -orient vertical -command [list $wselect yview]
+    PTreeShow $wshow $wysc
+
+    grid  $wshow  -row 0 -column 0 -sticky news
+    grid  $wysc   -row 0 -column 1 -sticky ns
+    grid columnconfigure $rbox 0 -weight 1   
         
-    # Parse data.
-    ParseIconDef $name $dir $xmldata
+    set msg $box.msg
+    ttk::label $msg -text "Select iconsets to be used for each group.\
+      Each group may be deselected."
+
+    grid  $lbox  x  $rbox  -sticky ew
+    grid  $msg   -  -      -sticky w -pady 4
+    grid columnconfigure $box 1 -minsize 12
     
-    if {[info exists mountpath]} {
-	vfs::zip::Unmount $fdzip $mountpath
-    }
-    set state($name,loaded) 1
+    $wselect selection add $tag2item(status)
+    
+    bind $wpage <Destroy> [namespace current]::PFree
 }
 
-proc ::Rosticons::ParseIconDef {name dir xmldata} {
-
-    set token [tinydom::parse $xmldata]
-    set xmllist [tinydom::documentElement $token]
-    
-    foreach elem [tinydom::children $xmllist] {
-	
-	switch -- [tinydom::tagname $elem] {
-	    meta {
-		ParseMeta $name $dir $elem
-	    }
-	    icon {
-		ParseIcon $name $dir $elem
-	    }
-	}
-    }
-    tinydom::cleanup $token
-}
-
-proc ::Rosticons::ParseMeta {name dir xmllist} {
-    variable meta
-    
-    array unset meta $name,*
-    foreach elem [tinydom::children $xmllist] {
-	set tag [tinydom::tagname $elem]
-	lappend meta($name,$tag) [tinydom::chdata $elem]
-    }
-}
-
-proc ::Rosticons::ParseIcon {name dir xmllist} {
+proc ::Rosticons::PTreeSelect {T wysc} {
     global  this
     
-    variable tmpicons
-    variable tmpiconsInv
-    variable priv
+    treectrl $T -usetheme 1 -selectmode single  \
+      -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 0  \
+      -borderwidth 0 -highlightthickness 0 -indent 10 \
+      -yscrollcommand [list $wysc set]
+    
+    #  -yscrollcommand [list ::UI::ScrollSet $wysc     \
+    #  [list grid $wysc -row 0 -column 1 -sticky ns]]
+   
+    # This is a dummy option.
+    set stripeBackground [option get $T stripeBackground {}]
+    set stripes [list $stripeBackground {}]
+    set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
+    set bd [option get $T columnBorderWidth {}]
 
-    set mime ""
+    $T column create -tag cButton -resize 0 -borderwidth $bd -squeeze 1
+    $T column create -tag cTree   -resize 0 -borderwidth $bd -expand 1
+    $T column create -tag cTag -visible 0
+    $T configure -treecolumn cTree
+
+    $T element create eText text -lines 1
+    $T element create eButton window
+    $T element create eBorder rect -open new -outline white -outlinewidth 1 \
+      -fill $fill -showfocus 1
+
+    set S [$T style create styButton]
+    $T style elements $S {eBorder eButton}
+    $T style layout $S eButton
+    $T style layout $S eBorder -detach yes -iexpand xy -indent 0
+
+    set S [$T style create styStd]
+    $T style elements $S {eBorder eText}
+    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
+    $T style layout $S eBorder -detach yes -iexpand xy -indent 0
+
+    set S [$T style create styTag]
+    $T style elements $S {eText}
+
+    $T configure -defaultstyle {styButton styStd styTag}
+
+    $T notify bind $T <Selection>      { ::Rosticons::POnSelect %T }
+}
+
+proc ::Rosticons::POnSelect {T} {
+    variable ptmp
     
-    foreach elem [tinydom::children $xmllist] {
-	set tag [tinydom::tagname $elem]
-	
-	switch -- $tag {
-	    x {
-		set key [tinydom::chdata $elem]
-	    }
-	    data {
-		# base64 coded image data
-		set data [tinydom::chdata $elem]
-		array set attr [tinydom::attrlist $elem]
-		set mime $attr(mime)
-	    }
-	    object {
-		set object [tinydom::chdata $elem]
-		array set attr [tinydom::attrlist $elem]
-		set mime $attr(mime)
-	    }
+    set item [$T selection get]
+    if {[llength $item] == 1} {
+	set tag [$T item element cget $item cTag eText -text]
+	if {[llength $tag] == 1} {
+	    set type $tag
+	    set name $ptmp(name,$type)
+	    PFillKeyImageTree $type $name   
+	} elseif {[llength $tag] == 2} {
+	    lassign $tag type name
+	    PFillKeyImageTree $type $name   
 	}
-    }
-    
-    switch -- $mime {
-	image/gif {
-	    if {[info exists data]} {
-		set im [image create photo -format gif -data $data]
-	    } else {
-		set im [image create photo -format gif  \
-		  -file [file join $dir $object]]
-	    }
-	    set tmpicons($name,$key) $im
-	}
-	image/png {
-	    # We should not rely on base64 data here since QuickTimeTcl 
-	    # doesn't handle it.
-	    if {[info exists object]} {
-		
-		# If we rely on QuickTimeTcl here we cannot be in vfs.
-		set f [file join $dir $object]
-		if {$priv(needtmp)} {
-		    set tmp [::tfileutils::tempfile $this(tmpPath) [file rootname $object]]
-		    append tmp [file extension $object]
-		    file copy -force $f $tmp
-		    set f $tmp
-		}
-		set im [eval {image create photo -file $f} $priv(pngformat)]
-		set tmpicons($name,$key) $im
-	    }
-	}
-    }
-    if {[info exists im]} {
-	set tmpiconsInv($name,$im) $key
     }
 }
 
-proc ::Rosticons::SetFromTmp {name} {
-    variable tmpicons
-    variable tmpiconsInv
-    variable rosticons
-    variable rosticonsInv
-    variable priv
+proc ::Rosticons::PFillTree {T} {    
+    variable state
+    variable ptmp
+    variable tag2item
+    upvar ::Jabber::jprefs jprefs
     
-    set types {}
-    
-    foreach ind [array names tmpiconsInv $name,*] {
-	set im [string map [list "$name," ""] $ind]
-	set key $tmpiconsInv($ind)
-	set rosticons($key) $im
-	set rosticonsInv($im) $tmpiconsInv($ind)
-	foreach {type sub} [split $key /] break
-	lappend types $type
+    foreach type $state(types) {
+	set ptmp(use,$type) $jprefs(rost,icons,use,$type)
+	set ptmp(name,$type) $jprefs(rost,icons,$type)
     }
-    set priv(alltypes) [lsort -unique [concat $priv(alltypes) $types]]
+    
+    set i 0
+    set types [lsearch -all -inline -not $state(types) "status"]
+    set types [linsert $types 0 "status"]
+    
+    foreach type $types {
+	set wcheck $T.[incr i]
+	checkbutton $wcheck -bg white \
+	  -variable [namespace current]::ptmp(use,$type)
+	if {($type eq "status" ) || ($type eq "XXXapplication")} {
+	    $wcheck configure -state disabled
+	}
+	if {$type eq "status"} {
+	    set typeName "Jabber"
+	} else {
+	    set typeName [::Roster::GetNameFromTrpt $type]
+	}
+	set pitem [$T item create -open 1 -button 1 -parent root]
+	$T item element configure $pitem cButton eButton -window $wcheck
+	$T item element configure $pitem cTree eText -text $typeName \
+	  -font CociSmallBoldFont
+	$T item element configure $pitem cTag eText -text $type	
+	set tag2item($type) $pitem
+	
+	set names $state(names,$type)
+	
+	foreach name $names {
+	    set wradio $T.[incr i]
+	    radiobutton $wradio -bg white \
+	      -variable [namespace current]::ptmp(name,$type)  \
+	      -value $name
+	    
+	    set tag [list $type $name]
+	    set item [$T item create -parent $pitem]
+	    $T item element configure $item cButton eButton -window $wradio
+	    $T item element configure $item cTree eText -text $name
+	    $T item element configure $item cTag eText -text $tag
+	    set tag2item($tag) $item
+	}
+	if {[llength $names] == 1} {
+	    $wradio configure -state disabled
+	}
+    }    
+}
+
+proc ::Rosticons::PTreeShow {T wysc} {
+    
+    treectrl $T -usetheme 1  \
+      -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 1  \
+      -borderwidth 0 -highlightthickness 0 -indent 10  \
+      -yscrollcommand [list $wysc set]
+      #-yscrollcommand [list ::UI::ScrollSet $wysc     \
+      #[list grid $wysc -row 0 -column 1 -sticky ns]]  \
+    
+    $T column create -tag cKey   -text [mc Key] -expand 1 -squeeze 1
+    $T column create -tag cImage -text [mc Icon] -expand 1 -justify center
+
+    $T element create eText text -lines 1
+    $T element create eImage image
+
+    set S [$T style create styText]
+    $T style elements $S {eText}
+    $T style layout $S eText -padx 6 -pady 2
+
+    set S [$T style create styImage]
+    $T style elements $S {eImage}
+    $T style layout $S eImage -padx 6 -pady 2 -expand ew
+
+    $T configure -defaultstyle {styText styImage}
+}
+
+proc ::Rosticons::PFillKeyImageTree {type name} {
+    variable wselect
+    variable wshow
+    variable tmpicons
+    variable state
+    
+    if {![info exists state(loaded,$type,$name)]} {
+	LoadTmpIconSet $type $name
+    }
+    set T $wshow
+    $T item delete all
+    
+    foreach {key image} [array get tmpicons $name,$type/*] {
+	set item [$T item create -parent root]
+	set typesubtype [lindex [split $key ,] 1]
+	$T item element configure $item cKey eText -text $typesubtype
+	$T item element configure $item cImage eImage -image $image
+    }
+    
+}
+
+proc ::Rosticons::SavePrefsHook {} {
+    variable ptmp
+    variable state
+    upvar ::Jabber::jprefs jprefs
+    
+    set changed [PChanged]
+
+    foreach type $state(types) {
+	if {$jprefs(rost,icons,$type) ne $ptmp(name,$type)} {
+	    SetFromTmp $type $ptmp(name,$type)
+	}
+	set jprefs(rost,icons,use,$type) $ptmp(use,$type)
+	set jprefs(rost,icons,$type)     $ptmp(name,$type)
+    }
+    if {$changed} {
+	::Roster::RepopulateTree
+	::hooks::run rosterIconsChangedHook
+    }
+}
+
+proc ::Rosticons::CancelPrefsHook {} {
+    variable ptmp
+    variable state
+    upvar ::Jabber::jprefs jprefs
+    
+    if {[PChanged]} {
+	::Preferences::HasChanged
+    }
+}
+
+proc ::Rosticons::PChanged {} {
+    variable ptmp
+    variable state
+    upvar ::Jabber::jprefs jprefs
+    
+    set changed 0
+    foreach type $state(types) {
+	if {$jprefs(rost,icons,use,$type) != $ptmp(use,$type)} {
+	    set changed 1
+	    break
+	}
+	if {$jprefs(rost,icons,$type) ne $ptmp(name,$type)} {
+	    set changed 1
+	    break
+	}
+    }
+    return $changed
+}
+
+proc ::Rosticons::UserDefaultsHook {} {
+    variable ptmp
+    upvar ::Jabber::jprefs jprefs
+
+    # @@@ TODO
+}
+
+proc ::Rosticons::PFree {} {
+    variable ptmp
+    variable tag2item
+    
+    unset -nocomplain ptmp
+    unset -nocomplain tag2item
 }
 
 #-------------------------------------------------------------------------------

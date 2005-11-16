@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.107 2005-11-09 09:02:38 matben Exp $
+# $Id: UI.tcl,v 1.108 2005-11-16 08:52:05 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -527,7 +527,7 @@ proc ::UI::Toplevel {w args} {
     if {[info exists argsArr(-closecommand)]} {
 	set topcache($w,-closecommand) $argsArr(-closecommand)
     }
-    if {[string equal $this(platform) "macosx"]} {
+    if {[tk windowingsystem] eq "aqua"} {
 	if {$argsArr(-usemacmainmenu)} {
 	    lappend opts -menu [GetMainMenu]
 	}

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.150 2005-11-04 15:14:55 matben Exp $
+# $Id: Jabber.tcl,v 1.151 2005-11-16 08:52:03 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -1419,9 +1419,9 @@ proc ::Jabber::SetStatusWithMessage { } {
 
     foreach val {available chat away xa dnd invisible} {
 	ttk::radiobutton $wtop.$val -style Small.TRadiobutton \
-	  -compound left -text [mc jastat${val}]  \
+	  -compound left -text [mc jastat${val}]          \
 	  -image [::Roster::GetPresenceIconFromKey $val]  \
-	  -variable [namespace current]::show -value $val  \
+	  -variable [namespace current]::show -value $val \
 	  -command [namespace current]::StatusMsgRadioCmd
 	grid  $wtop.$val  -sticky w
     }

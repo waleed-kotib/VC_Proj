@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.6 2005-08-14 07:10:51 matben Exp $
+# $Id: Status.tcl,v 1.7 2005-11-16 08:52:03 matben Exp $
 
 package provide Status 1.0
 
@@ -266,7 +266,7 @@ proc ::Jabber::Status::BuildGenPresenceMenu {mt args} {
 	    $mt add separator
 	} else {
 	    set opts {}
-	    if {![string match "mac*" $this(platform)]} {
+	    if {[tk windowingsystem] ne "aqua"} {
 		set opts [list -compound left \
 		  -image [::Rosticons::Get status/$name]]
 	    }
