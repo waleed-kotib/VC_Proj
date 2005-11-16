@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.118 2005-11-05 11:37:25 matben Exp $
+# $Id: jabberlib.tcl,v 1.119 2005-11-16 08:52:03 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1104,6 +1104,8 @@ proc jlib::iq_handler {jlibname xmldata} {
 	error {
 	    set errspec [getstanzaerrorspec $xmldata]
 	    if {[info exists id] && [info exists iqcmd($id)]} {
+		
+		# @@@ Having a separate form of error callbacks is really BAD!!!
 		uplevel #0 $iqcmd($id) [list error $errspec]
 		
 		#uplevel #0 $iqcmd($id) [list error $xmldata]
@@ -1624,23 +1626,6 @@ proc jlib::error_handler {jlibname xmllist} {
     uplevel #0 $lib(clientcmd) [list $jlibname streamerror -errormsg $errmsg]
 }
 
-proc jlib::error_handlerBU {jlibname xmllist} {
-
-    upvar ${jlibname}::lib lib
-    variable xmppxmlns
-    
-    closestream $jlibname
-    
-    # Be sure to reset the wrapper, which implicitly resets the XML parser.
-    wrapper::reset $lib(wrap)
-    if {[llength [wrapper::getchildren $xmllist]]} {
-	set errspec [getstreamerrorspec $xmllist]
-    } else {
-	set errspec [list unknown [wrapper::getcdata $xmllist]]
-    }
-    uplevel #0 $lib(clientcmd) [list $jlibname streamerror -errormsg $errspec]
-}
-
 # jlib::xmlerror --
 #
 #       Callback when we receive an XML error from the wrapper (parser).
@@ -1661,17 +1646,6 @@ proc jlib::xmlerror {jlibname args} {
     closestream $jlibname
 
     uplevel #0 $lib(clientcmd) [list $jlibname xmlerror -errormsg $args]
-}
-
-proc jlib::xmlerrorBU {jlibname args} {
-
-    upvar ${jlibname}::lib lib
-
-    Debug 4 "jlib::xmlerror jlibname=$jlibname, args='$args'"
-    
-    catch {eval $lib(transport,reset)}
-    uplevel #0 $lib(clientcmd) [list $jlibname xmlerror -errormsg $args]
-    reset $jlibname
 }
 
 # jlib::reset --

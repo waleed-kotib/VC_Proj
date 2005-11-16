@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Dialogs.tcl,v 1.61 2005-09-19 06:37:21 matben Exp $
+# $Id: Dialogs.tcl,v 1.62 2005-11-16 08:52:04 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -975,7 +975,7 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox}
+    ::UI::Toplevel $w -macstyle documentProc -macclass {floating {closeBox}}
     if {[string match "mac*" $this(platform)]} {
 	wm transient $w
     } else {

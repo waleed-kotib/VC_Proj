@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Splash.tcl,v 1.11 2005-08-14 07:17:55 matben Exp $
+# $Id: Splash.tcl,v 1.12 2005-11-16 08:52:05 matben Exp $
    
 package provide Splash 1.0
 
@@ -57,7 +57,7 @@ proc ::Splash::SplashScreen { } {
     }
     toplevel $w -class Splash
     if {[tk windowingsystem] eq "aqua"} {
-	::tk::unsupported::MacWindowStyle style $w document {closeBox}
+	::tk::unsupported::MacWindowStyle style $w floating {closeBox}
     } else {
 	wm transient $w
     }

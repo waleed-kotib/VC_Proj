@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.1 2005-11-10 12:57:03 matben Exp $
+# $Id: RosterTwo.tcl,v 1.2 2005-11-16 08:52:03 matben Exp $
 
 package require RosterTree
 
@@ -96,7 +96,7 @@ proc ::RosterTwo::Init { } {
 	
     $T item delete all
     ::RosterTree::FreeTags
-    
+
     # Available:
     set item [CreateHeadItem available]
     if {!$jprefs(rost,showOffline)} {
@@ -113,18 +113,10 @@ proc ::RosterTwo::CreateHeadItem {type} {
     variable T
     upvar ::Jabber::jprefs jprefs
     
-    array set headImageMap {
-	available   onlineImage
-	unavailable offlineImage
-	transport   trptImage
-	pending     ""
-    }
-
     set tag [list head $type]
     set text [::RosterTree::MCHead $type]
     set text2 "No users"
-    set rsrcName $headImageMap($type)
-    set image [::Theme::GetImage [option get $T $rsrcName {}]]
+    set image [::Rosticons::Get application/$type]
     set item [CreateWithTag $tag styStd $text $text2 $image root]
     if {[lsearch $jprefs(rost,closedItems) $tag] >= 0} {
 	$T item collapse $item
@@ -153,13 +145,6 @@ proc ::RosterTwo::CreateHeadItem {type} {
 proc ::RosterTwo::CreateItem {jid presence args} {    
     upvar ::Jabber::jstate jstate
     variable T
-
-    array set headImageMap {
-	available   onlineImage
-	unavailable offlineImage
-	transport   trptImage
-	pending     ""
-    }
 
     # jid2 is always without a resource
     # jid3 is as reported
@@ -213,13 +198,12 @@ proc ::RosterTwo::CreateItem {jid presence args} {
 	    group {
 		set style styStd
 		set text  $tag1
-		set image [::Theme::GetImage [option get $T groupImage {}]]
+		set image [::Rosticons::Get application/group-$presence]
 	    }
 	    head {
 		set style styStd
 		set text  [::RosterTree::MCHead $tag1]
-		set rsrcName $headImageMap($tag1)
-		set image [::Theme::GetImage [option get $T $rsrcName {}]]
+		set image [::Rosticons::Get application/$tag1]
 	    }
 	    pending {
 		set style styStd
@@ -334,6 +318,10 @@ proc ::RosterTwo::Balloon {jid presence item args} {
 proc ::RosterTwo::TreeConfigureHook {args} {
     variable T
     
+    if {[::RosterTree::GetStyle] ne "two"} {
+	return
+    }
+
     set outline white
     if {[$T cget -backgroundimage] eq ""} {
 	set outline gray
@@ -346,7 +334,6 @@ proc ::RosterTwo::TreeConfigureHook {args} {
 #
 
 proc ::RosterTwo::DiscoInfoHook {type from subiq args} {
-    upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
     if {[::RosterTree::GetStyle] ne "two"} {
@@ -354,13 +341,11 @@ proc ::RosterTwo::DiscoInfoHook {type from subiq args} {
     }
 
     if {$type ne "error"} {
-	if {$jprefs(rost,haveIMsysIcons)} {
-	    set types [$jstate(jlib) disco types $from]
-	    
-	    # Only the gateways have custom icons.
-	    if {[lsearch -glob $types gateway/*] >= 0} {
-		PostProcess disco $from
-	    }
+	set types [$jstate(jlib) disco types $from]
+	
+	# Only the gateways have custom icons.
+	if {[lsearch -glob $types gateway/*] >= 0} {
+	    PostProcess disco $from
 	}
     }
 }

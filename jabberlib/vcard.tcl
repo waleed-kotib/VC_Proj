@@ -5,7 +5,24 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: vcard.tcl,v 1.2 2005-11-05 11:37:25 matben Exp $
+# $Id: vcard.tcl,v 1.3 2005-11-16 08:52:04 matben Exp $
+# 
+############################# USAGE ############################################
+#
+#   NAME
+#      disco - convenience command library for the disco part of XMPP.
+#      
+#   SYNOPSIS
+#      jlib::vcard::init jlibName ?-opt value ...?
+#	
+#   INSTANCE COMMANDS
+#      jlibname vcard send_get jid callbackProc
+#      jlibname vcard send_set jid callbackProc
+#      jlibname vcard get_async jid callbackProc
+#      jlibname vcard has_cache jid
+#      jlibname vcard get_cache jid
+#      
+################################################################################
 
 package require jlib
 

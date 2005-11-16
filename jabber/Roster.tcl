@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.144 2005-11-10 12:57:03 matben Exp $
+# $Id: Roster.tcl,v 1.145 2005-11-16 08:52:03 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -960,7 +960,6 @@ proc ::Roster::GetPresenceIconFromJid {jid} {
 #       If presence is to make sense, the jid shall be a 3-tier jid.
 
 proc ::Roster::GetPresenceIcon {jid presence args} {    
-    upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
@@ -985,19 +984,17 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     
     # Foreign IM systems.
     set foreign 0
-    if {$jprefs(rost,haveIMsysIcons)} {
-	jlib::splitjidex $jid user host res
-	if {![string equal $host $jserver(this)]} {
+    jlib::splitjidex $jid user host res
+    if {![string equal $host $jserver(this)]} {
 	
-	    # If empty we have likely not yet browsed etc.
-	    set cattype [$jstate(jlib) service gettype $host]
-	    set subtype [lindex [split $cattype /] 1]
-	    if {[lsearch -exact [::Rosticons::GetTypes] $subtype] >= 0} {
-		set itype $subtype
-		set foreign 1
-	    }
+	# If empty we have likely not yet browsed etc.
+	set cattype [$jstate(jlib) service gettype $host]
+	set subtype [lindex [split $cattype /] 1]
+	if {[lsearch -exact [::Rosticons::GetTypes] $subtype] >= 0} {
+	    set itype $subtype
+	    set foreign 1
 	}
-    }   
+    }
     
     # If whiteboard:
     if {!$foreign && ($presence eq "available") && [IsCoccinella $jid]} {
@@ -1146,6 +1143,7 @@ namespace eval ::Roster:: {
 	msn         {MSN}
 	yahoo       {Yahoo}
 	irc         {IRC}
+	gadugadu    {Gadu-Gadu}
 	x-gadugadu  {Gadu-Gadu}
     }
     variable nameToTrpt {
@@ -1312,9 +1310,6 @@ proc ::Roster::InitPrefsHook { } {
     set jprefs(rost,showOffline)    1
     set jprefs(rost,showTrpts)      1
     set jprefs(rost,sort)          +1
-
-    # Show special icons for foreign IM systems?
-    set jprefs(rost,haveIMsysIcons) 1
     
     # Keep track of all closed tree items. Default is all open.
     set jprefs(rost,closedItems) {}
@@ -1324,7 +1319,6 @@ proc ::Roster::InitPrefsHook { } {
       [list ::Jabber::jprefs(rost,dblClk)      jprefs_rost_dblClk       $jprefs(rost,dblClk)]  \
       [list ::Jabber::jprefs(rost,rmIfUnsub)   jprefs_rost_rmIfUnsub    $jprefs(rost,rmIfUnsub)]  \
       [list ::Jabber::jprefs(rost,allowSubNone) jprefs_rost_allowSubNone $jprefs(rost,allowSubNone)]  \
-      [list ::Jabber::jprefs(rost,haveIMsysIcons)   jprefs_rost_haveIMsysIcons    $jprefs(rost,haveIMsysIcons)]  \
       [list ::Jabber::jprefs(rost,showOffline) jprefs_rost_showOffline  $jprefs(rost,showOffline)]  \
       [list ::Jabber::jprefs(rost,showTrpts)   jprefs_rost_showTrpts    $jprefs(rost,showTrpts)]  \
       [list ::Jabber::jprefs(rost,closedItems) jprefs_rost_closedItems  $jprefs(rost,closedItems)]  \
@@ -1346,8 +1340,7 @@ proc ::Roster::BuildPageRoster {page} {
     variable tmpJPrefs
     
     foreach key {
-	rmIfUnsub allowSubNone clrLogout dblClk haveIMsysIcons 
-	showOffline showTrpts
+	rmIfUnsub allowSubNone clrLogout dblClk showOffline showTrpts
     } {
 	set tmpJPrefs(rost,$key) $jprefs(rost,$key)
     }
@@ -1365,8 +1358,6 @@ proc ::Roster::BuildPageRoster {page} {
     ttk::checkbutton $wc.dblclk -text [mc prefrochat] \
       -variable [namespace current]::tmpJPrefs(rost,dblClk)  \
       -onvalue chat -offvalue normal
-    ttk::checkbutton $wc.sysicons -text [mc prefrosysicons] \
-      -variable [namespace current]::tmpJPrefs(rost,haveIMsysIcons)    
     ttk::checkbutton $wc.hideoff -text [mc prefrohideoff] \
       -variable [namespace current]::tmpJPrefs(rost,showOffline) \
       -onvalue 0 -offvalue 1
@@ -1378,7 +1369,6 @@ proc ::Roster::BuildPageRoster {page} {
     grid  $wc.allsubno   -sticky w
     grid  $wc.clrout     -sticky w
     grid  $wc.dblclk     -sticky w
-    grid  $wc.sysicons   -sticky w
     grid  $wc.hideoff    -sticky w
     grid  $wc.rmifunsub  -sticky w
     grid  $wc.hidetrpt   -sticky w    

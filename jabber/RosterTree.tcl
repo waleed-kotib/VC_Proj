@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.6 2005-11-10 12:57:03 matben Exp $
+# $Id: RosterTree.tcl,v 1.7 2005-11-16 08:52:03 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -16,8 +16,8 @@
 # 
 #   tags:
 #     {head available/unavailable/transport/pending}
-#     {jid $jid}                                  <- not unique !
-#     {group $group $presence}                    <- note
+#     {jid $jid}                      <- not unique if belongs to many groups!
+#     {group $group $presence}        <- note
 #     {transport $jid}
 #     {pending $jid}
 
@@ -457,67 +457,6 @@ proc ::RosterTree::RemoveTags {item} {
     }
     if {$tag2items($tag) == {}} {
 	unset tag2items($tag)
-    }
-}
-
-# Some old code...
-if {0} {
-    proc ::RosterTree::DeleteWithTagBU {tag} {
-	variable T
-	variable tag2items
-	
-	if {[info exists tag2items($tag)]} {
-	    foreach item $tag2items($tag) {
-		
-		# Delete any actual children recursively using item.
-		foreach child [$T item children $item] {
-		    DeleteItemAndTagBU $child
-		}
-		
-		# Delete the actual item(s).
-		$T item delete $item
-	    }    
-	    unset tag2items($tag)
-	}
-    }
-    
-    proc ::RosterTree::DeleteChildrenOfTagBU {tag} {
-	variable T
-	variable tag2items
-	
-	if {[info exists tag2items($tag)]} {
-	    foreach item $tag2items($tag) {
-		
-		# Delete any actual children recursively using item.
-		foreach child [$T item children $item] {
-		    DeleteItemAndTagBU $child
-		}
-	    }    
-	}
-    }
-    
-    proc ::RosterTree::DeleteItemAndTagBU {item} {
-	variable T
-	variable tag2items
-	
-	# Call ourselves recursively to delete children as well.
-	foreach child [$T item children $item] {
-	    DeleteItemAndTagBU $child
-	}
-	
-	# We must delete all 'tag2items' that may point to us.
-	set tag [$T item element cget $item cTag eText -text]
-	set items $tag2items($tag)
-	set idx [lsearch $items $item]
-	if {$idx >= 0} {
-	    set tag2items($tag) [lreplace $items $idx $idx]
-	}
-	if {$tag2items($tag) == {}} {
-	    unset tag2items($tag)
-	}
-	
-	# And finally delete ourselves.
-	$T item delete $item
     }
 }
 

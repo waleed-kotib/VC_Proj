@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.93 2005-11-05 11:37:25 matben Exp $
+# $Id: JUI.tcl,v 1.94 2005-11-16 08:52:03 matben Exp $
 
 package provide JUI 1.0
 
@@ -17,6 +17,7 @@ namespace eval ::Jabber::UI:: {
     ::hooks::register loginHook              ::Jabber::UI::LoginCmd
     ::hooks::register logoutHook             ::Jabber::UI::LogoutHook
     ::hooks::register setPresenceHook        ::Jabber::UI::SetPresenceHook
+    ::hooks::register rosterIconsChangedHook ::Jabber::UI::RosterIconsChangedHook
 
     # Use option database for customization.
     # Shortcut buttons.
@@ -251,6 +252,7 @@ proc ::Jabber::UI::Build {w} {
     set jwapp(wmenu) $wmenu
     menu $wmenu -tearoff 0
     if {[string match "mac*" $this(platform)]} {
+	# @@@ discard when -postcommand implemented
 	bind $w <FocusIn>  +[list ::UI::MacFocusFixEditMenu $w $wmenu %W]
 	bind $w <FocusOut> +[list ::UI::MacFocusFixEditMenu $w $wmenu %W]
     }    
@@ -273,7 +275,7 @@ proc ::Jabber::UI::Build {w} {
     $w configure -menu $wmenu    
     
     # Global frame.
-    set wall $w.frall
+    set wall $w.f
     ttk::frame $wall
     pack $wall -fill both -expand 1
     
@@ -428,6 +430,14 @@ proc ::Jabber::UI::SetPresenceHook {type args} {
     if {[jlib::jidequal $jserver(this) $argsArr(-to)]} {
 	WhenSetStatus $type
     }
+}
+
+proc ::Jabber::UI::RosterIconsChangedHook { } {
+    variable jwapp
+    upvar ::Jabber::jstate jstate
+    
+    set status $jstate(status)
+    $jwapp(mystatus) configure -image [::Rosticons::Get status/$status]
 }
 
 # Jabber::UI::LoginCmd --

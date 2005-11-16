@@ -8,8 +8,9 @@ Not to mention all bugfixes and rewrites.
 Coccinella-0.95.11 (0512??):
 
         - added support for Growl on mac
-	- using treectrl in a number of places
+	- using treectrl widget in a number of places
 	- the roster tree component based with different styles
+	- support for multiple roster iconsets
 
 Coccinella-0.95.10 (051018):
 
