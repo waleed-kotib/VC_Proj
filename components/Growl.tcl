@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.2 2005-11-09 10:22:37 matben Exp $
+# $Id: Growl.tcl,v 1.3 2005-11-16 14:07:00 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -33,12 +33,18 @@ proc ::Growl::Init { } {
 proc ::Growl::ChatMessageHook {body args} {    
     variable cociFile
     
+    if {$body eq ""} {
+	return
+    }
     array set argsArr $args
 
     # -from is a 3-tier jid /resource included.
     set jid $argsArr(-from)
     jlib::splitjid $jid jid2 -
-
+    
+    if {[::Chat::HaveChat $jid]} {
+	return
+    }
     set title "Message From: $jid2"
     
     # Not sure if only new subjects should be added.
