@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.43 2005-10-27 10:08:37 matben Exp $
+# $Id: GotMsg.tcl,v 1.44 2005-11-18 07:52:32 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -106,9 +106,9 @@ proc ::GotMsg::Show {thisMsgId} {
     jlib::splitjid $jid jid2 res
     
     # Use nick name.
-    set displayName [$jstate(roster) getname $jid2]
-    if {[string length $displayName]} {
-	set username "${username} <${jid}>"
+    set rname [$jstate(roster) getname $jid2]
+    if {[string length $rname]} {
+	set username "$rname <${jid}>"
     } else {
 	set username $jid
     }

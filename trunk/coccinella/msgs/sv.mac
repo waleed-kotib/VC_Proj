@@ -347,6 +347,8 @@
 ::msgcat::mcset sv mIncreasing         	{Ökande}
 ::msgcat::mcset sv mDecreasing         	{Minskande}
 ::msgcat::mcset sv mStyle         	{Stil}
+::msgcat::mcset sv mToolbar         	{Verktygsfält}
+::msgcat::mcset sv mNotebook         	{Tabbar}
 
 
 

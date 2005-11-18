@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.81 2005-10-28 06:48:41 matben Exp $
+# $Id: MailBox.tcl,v 1.82 2005-11-18 07:52:32 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -244,31 +244,31 @@ proc ::MailBox::Build {args} {
     set locals(iconReadMsg)   [::Theme::GetImage [option get $w readMsgImage {}]]
     set locals(iconUnreadMsg) [::Theme::GetImage [option get $w unreadMsgImage {}]]
 
-    set wtray $w.frall.tray
-    ::ttoolbar::ttoolbar $wtray
-    pack $wtray -side top -fill x
-    set locals(wtray) $wtray
+    set wtbar $w.frall.tbar
+    ::ttoolbar::ttoolbar $wtbar
+    pack $wtbar -side top -fill x
+    set locals(wtbar) $wtbar
 
-    $wtray newbutton new  \
+    $wtbar newbutton new  \
       -text [mc New] -image $iconNew -disabledimage $iconNewDis  \
       -command ::NewMsg::Build
-    $wtray newbutton reply  \
+    $wtbar newbutton reply  \
       -text [mc Reply] -image $iconReply -disabledimage $iconReplyDis  \
       -command ::MailBox::ReplyTo -state disabled
-    $wtray newbutton forward  \
+    $wtbar newbutton forward  \
       -text [mc Forward] -image $iconForward -disabledimage $iconForwardDis  \
       -command ::MailBox::ForwardTo -state disabled
-    $wtray newbutton save  \
+    $wtbar newbutton save  \
       -text [mc Save] -image $iconSave -disabledimage $iconSaveDis  \
       -command ::MailBox::SaveMsg -state disabled
-    $wtray newbutton print  \
+    $wtbar newbutton print  \
       -text [mc Print] -image $iconPrint -disabledimage $iconPrintDis  \
       -command ::MailBox::DoPrint -state disabled
-    $wtray newbutton trash  \
+    $wtbar newbutton trash  \
       -text [mc Trash] -image $iconTrash -disabledimage $iconTrashDis  \
       -command ::MailBox::TrashMsg -state disabled
     
-    ::hooks::run buildMailBoxButtonTrayHook $wtray
+    ::hooks::run buildMailBoxButtonTrayHook $wtbar
 
     # D = 
     ttk::separator $w.frall.divt -orient horizontal
@@ -500,16 +500,16 @@ proc ::MailBox::Selection {T} {
     set wtextmsg $locals(wtextmsg)
     set wtbl     $locals(wtbl)
     set w        $locals(w)
-    set wtray    $locals(wtray)
+    set wtbar    $locals(wtbar)
     
     set n [$T selection count]
 
     if {$n == 0} {
-	$wtray buttonconfigure reply   -state disabled
-	$wtray buttonconfigure forward -state disabled
-	$wtray buttonconfigure save    -state disabled
-	$wtray buttonconfigure print   -state disabled
-	$wtray buttonconfigure trash   -state disabled
+	$wtbar buttonconfigure reply   -state disabled
+	$wtbar buttonconfigure forward -state disabled
+	$wtbar buttonconfigure save    -state disabled
+	$wtbar buttonconfigure print   -state disabled
+	$wtbar buttonconfigure trash   -state disabled
 	MsgDisplayClear
     } elseif {$n == 1} {
 	set item [$T selection get]
@@ -520,11 +520,11 @@ proc ::MailBox::Selection {T} {
 	DisplayMsg $uid
 	
 	# Configure buttons.
-	$wtray buttonconfigure reply   -state normal
-	$wtray buttonconfigure forward -state normal
-	$wtray buttonconfigure save    -state normal
-	$wtray buttonconfigure print   -state normal
-	$wtray buttonconfigure trash   -state normal
+	$wtbar buttonconfigure reply   -state normal
+	$wtbar buttonconfigure forward -state normal
+	$wtbar buttonconfigure save    -state normal
+	$wtbar buttonconfigure print   -state normal
+	$wtbar buttonconfigure trash   -state normal
 	
 	# If any whiteboard stuff in message...
 	set uidcan [GetCanvasHexUID $uid]
@@ -546,10 +546,10 @@ proc ::MailBox::Selection {T} {
     } else {
 	
 	# If multiple selected items.
-	$wtray buttonconfigure reply   -state disabled
-	$wtray buttonconfigure forward -state disabled
-	$wtray buttonconfigure save    -state disabled
-	$wtray buttonconfigure print   -state disabled
+	$wtbar buttonconfigure reply   -state disabled
+	$wtbar buttonconfigure forward -state disabled
+	$wtbar buttonconfigure save    -state disabled
+	$wtbar buttonconfigure print   -state disabled
 	MsgDisplayClear
     }
 }
@@ -579,6 +579,9 @@ proc ::MailBox::HeaderCmd {T C} {
     $T column configure $C -arrow $arrow
     
     switch [$T column cget $C -tag] {
+	cWhiteboard {
+	    # empty
+	}
 	cDate {
 	    set cmd [list [namespace current]::SortDate $T]
 	    $T item sort root $order -column $C -command $cmd
@@ -1021,13 +1024,13 @@ proc ::MailBox::TrashMsg { } {
 
     # Make new selection if not empty. Root item included!
     if {[$T item count] == 1} {
-	set wtray $locals(wtray)
+	set wtbar $locals(wtbar)
 
-	$wtray buttonconfigure reply   -state disabled
-	$wtray buttonconfigure forward -state disabled
-	$wtray buttonconfigure save    -state disabled
-	$wtray buttonconfigure print   -state disabled
-	$wtray buttonconfigure trash   -state disabled
+	$wtbar buttonconfigure reply   -state disabled
+	$wtbar buttonconfigure forward -state disabled
+	$wtbar buttonconfigure save    -state disabled
+	$wtbar buttonconfigure print   -state disabled
+	$wtbar buttonconfigure trash   -state disabled
 	MsgDisplayClear
 	::Jabber::UI::MailBoxState empty
     } elseif {$select ne ""} {

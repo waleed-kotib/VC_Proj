@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.108 2005-11-16 08:52:05 matben Exp $
+# $Id: UI.tcl,v 1.109 2005-11-18 07:52:33 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -431,6 +431,18 @@ proc ::UI::IsAppInFront { } {
 	}
     }
     return $isfront
+}
+
+proc ::UI::IsToplevelActive {w} {
+    
+    set front 0
+    set wfocus [focus]
+    if {[string equal [wm state $w] "normal"]} {
+	if {($wfocus ne "") && [string equal [winfo toplevel $wfocus] $w]} {
+	    set front 1
+	}
+    }
+    return $front
 }
 
 # UI::MessageBox --

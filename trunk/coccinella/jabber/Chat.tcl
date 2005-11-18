@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.139 2005-11-16 08:52:03 matben Exp $
+# $Id: Chat.tcl,v 1.140 2005-11-18 07:52:32 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1271,7 +1271,7 @@ proc ::Chat::MoveThreadFromPage {dlgtoken chattoken} {
 
     pack forget $wthread
     destroy $wnb
-    pack $wthread -in $wcont -fill both -expand true
+    pack $wthread -in $wcont -fill both -expand 1
     
     SetThreadState $dlgtoken $chattoken
 }
