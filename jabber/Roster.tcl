@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.145 2005-11-16 08:52:03 matben Exp $
+# $Id: Roster.tcl,v 1.146 2005-11-18 07:52:32 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -37,7 +37,7 @@ namespace eval ::Roster:: {
     option add *Roster*box.borderWidth      1               50
     option add *Roster*box.relief           sunken          50
     
-    option add *Roster.padding              2               50
+    option add *Roster.padding              4               50
         
     # Specials.
     option add *Roster*rootBackground       ""              widgetDefault

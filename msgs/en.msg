@@ -347,6 +347,8 @@
 ::msgcat::mcset en mIncreasing         	{Increasing}
 ::msgcat::mcset en mDecreasing         	{Decreasing}
 ::msgcat::mcset en mStyle         	{Style}
+::msgcat::mcset en mToolbar         	{Toolbar}
+::msgcat::mcset en mNotebook         	{Notebook}
 
 
 # Short texts only. Use english text as database key.

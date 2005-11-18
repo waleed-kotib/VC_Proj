@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.7 2005-11-16 08:52:03 matben Exp $
+# $Id: RosterTree.tcl,v 1.8 2005-11-18 07:52:32 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -152,7 +152,8 @@ proc ::RosterTree::New {_T wxsc wysc} {
       [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
       -yscrollcommand [list ::UI::ScrollSet $wysc     \
       [list grid $wysc -row 0 -column 1 -sticky ns]]  \
-      -borderwidth 0 -highlightthickness 0
+      -borderwidth 0 -highlightthickness 0            \
+      -height 0 -width 0
     
     $T configure -backgroundimage [BackgroundImage]
 

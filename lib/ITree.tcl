@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.7 2005-11-10 12:57:03 matben Exp $
+# $Id: ITree.tcl,v 1.8 2005-11-18 07:52:32 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -39,7 +39,8 @@ proc ::ITree::New {T wxsc wysc args} {
       -yscrollcommand [list ::UI::ScrollSet $wysc     \
       [list grid $wysc -row 0 -column 1 -sticky ns]]  \
       -backgroundimage $options($T,-backgroundimage)  \
-      -borderwidth 0 -highlightthickness 0
+      -borderwidth 0 -highlightthickness 0            \
+      -height 0 -width 0
     
     # This is a dummy option.
     set stripeBackground [option get $T stripeBackground {}]
