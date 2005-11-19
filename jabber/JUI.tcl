@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.95 2005-11-18 07:52:32 matben Exp $
+# $Id: JUI.tcl,v 1.96 2005-11-19 11:35:41 matben Exp $
 
 package provide JUI 1.0
 
@@ -123,7 +123,9 @@ proc ::Jabber::UI::Init { } {
 	    {check   mToolbar       {::Jabber::UI::ToggleToolbar}     normal   {} 
 	    {-variable ::Jabber::UI::state(show,toolbar)}}
 	    {check   mNotebook      {::Jabber::UI::ToggleNotebook}    normal   {} 
-	    {-variable ::Jabber::UI::state(show,notebook)}}}
+	    {-variable ::Jabber::UI::state(show,notebook)}}
+	    {check   mMinimal       {::Jabber::UI::ToggleMinimal}     normal   {} 
+	    {-variable ::Jabber::UI::state(show,minimal)}} }
 	}
 	{separator}
 	{command     mRemoveAccount {::Register::Remove}      disabled {}}	
@@ -246,7 +248,7 @@ proc ::Jabber::UI::Build {w} {
 	bind $w <FocusIn>  +[list ::UI::MacFocusFixEditMenu $w $wmenu %W]
 	bind $w <FocusOut> +[list ::UI::MacFocusFixEditMenu $w $wmenu %W]
     }    
-    if {[string match "mac*" $this(platform)] && $prefs(haveMenus)} {
+    if {([tk windowingsystem] eq "aqua") && $prefs(haveMenus)} {
 	set haveAppleMenu 1
     } else {
 	set haveAppleMenu 0
@@ -261,7 +263,7 @@ proc ::Jabber::UI::Build {w} {
 	  -postcommand [list ::Jabber::UI::EditPostCommand $wmenu.edit]
     }
     ::UI::NewMenu $w $wmenu.jabber  mJabber   $menuDefs(rost,jabber) normal
-    $wmenu.edit configure  \
+    $wmenu.jabber configure  \
       -postcommand [list ::Jabber::UI::JabberPostCommand $wmenu.jabber]
     ::UI::NewMenu $w $wmenu.info    mInfo     $menuDefs(rost,info)   normal
     $w configure -menu $wmenu    
@@ -299,7 +301,8 @@ proc ::Jabber::UI::Build {w} {
     ttk::separator $wall.sep -orient horizontal
     pack $wall.sep -side top -fill x
 
-    # Status frame.
+    # Status frame. 
+    # Need two frames so we can pack resize icon in the corner.
     set wbot $wall.bot
     ttk::frame $wbot
     pack $wbot -side bottom -fill x
@@ -307,15 +310,19 @@ proc ::Jabber::UI::Build {w} {
 	ttk::label $wbot.size -compound image -image $iconResize
 	pack  $wbot.size -side right -anchor s
     }
-    ttk::frame $wbot.f
-    pack $wbot.f -fill x
+    
+    set wfstat $wbot.f
+    ttk::frame $wfstat
+    pack $wfstat -fill x
   
+    set wstatcont $wfstat.cont
     set statusStyle  [option get $w statusWidgetStyle {}]
-    ::Jabber::Status::Widget $wbot.f.bst $statusStyle \
-      ::Jabber::jstate(status) -command ::Jabber::SetStatus    
-    ttk::label $wbot.f.l -style Small.TLabel \
+    ::Jabber::Status::Widget $wfstat.bst $statusStyle \
+      ::Jabber::jstate(status) -command ::Jabber::SetStatus
+    ttk::frame $wfstat.cont
+    ttk::label $wfstat.l -style Small.TLabel \
       -textvariable ::Jabber::jstate(mejid)
-    pack  $wbot.f.bst  $wbot.f.l  -side left
+    pack  $wfstat.bst  $wfstat.cont  $wfstat.l  -side left
 
     # Notebook.
     set wnb $wall.nb
@@ -339,8 +346,9 @@ proc ::Jabber::UI::Build {w} {
     set jwapp(tsep)      $wall.sep
     set jwapp(notebook)  $wnb
     set jwapp(roster)    $wroster
-    set jwapp(mystatus)  $wbot.f.bst
-    set jwapp(myjid)     $wbot.f.l
+    set jwapp(mystatus)  $wfstat.bst
+    set jwapp(myjid)     $wfstat.l
+    set jwapp(statcont)  $wstatcont
     
     set minW [expr $trayMinW > 200 ? $trayMinW : 200]
     wm geometry $w ${minW}x360
@@ -441,13 +449,50 @@ proc ::Jabber::UI::ToggleNotebook { } {
     }
 }
 
+proc ::Jabber::UI::ToggleMinimal { } {
+    variable jwapp
+
+    if {[::Roster::StyleGet] eq "normal"} {
+	::Roster::StyleMinimal
+    } else {
+	::Roster::StyleNormal	
+    }
+}
+
+# Jabber::UI::AddAlternativeStatusImage --
+# 
+#       API for adding alternative status images.
+#       Each instance is specified by a unique key.
+
+proc ::Jabber::UI::AddAlternativeStatusImage {key image} {
+    variable jwapp
+    variable altImageKeyArr
+    
+    set wstatus $jwapp(statcont)
+    if {[info exists altImageKeyArr($key)]} {
+	set win $altImageKeyArr($key)
+	if {$image eq ""} {
+	    destroy $altImageKeyArr($key)
+	    unset altImageKeyArr($key)
+	} else {
+	    $altImageKeyArr($key) configure -image $image
+	}
+    } else {
+	set win $wstatus.$key
+	set altImageKeyArr($key) $win
+	ttk::label $win -image $image
+	pack $win -side left -padx 2 -pady 2
+    }
+    return $win
+}
+
 proc ::Jabber::UI::CloseHook {wclose} {    
     variable jwapp
     
     set result ""
     if {[info exists jwapp(jmain)]} {
 	set ans [::UserActions::DoQuit -warning 1]
-	if {$ans == "no"} {
+	if {$ans eq "no"} {
 	    set result stop
 	}
     }   
@@ -721,6 +766,11 @@ proc ::Jabber::UI::JabberPostCommand {wmenu} {
 	    set state(show,notebook) 1
 	} else {
 	    set state(show,notebook) 0
+	}
+	if {[::Roster::StyleGet] eq "minimal"} {
+	    set state(show,minimal) 1
+	} else {
+	    set state(show,minimal) 0
 	}
     } else {
 	::UI::MenuMethod $wmenu entryconfigure mShow -state disabled

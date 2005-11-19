@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.52 2005-11-05 11:37:25 matben Exp $
+# $Id: Whiteboard.tcl,v 1.53 2005-11-19 11:35:41 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -308,6 +308,9 @@ proc ::WB::Init {} {
     
     # Defines canvas binding tags suitable for each tool.
     ::CanvasUtils::DefineWhiteboardBindtags
+    
+    # Bindtags instead of binding to toplevel.
+    bind WhiteboardToplevel <Destroy> {+::WB::Free %W}
 }
 
 # WB::InitIcons --
@@ -695,8 +698,8 @@ proc ::WB::NewWhiteboard {args} {
     global wDlgs
     variable uidmain
     
-    set w [::WB::GetNewToplevelPath]
-    eval {::WB::BuildWhiteboard $w} $args
+    set w [GetNewToplevelPath]
+    eval {BuildWhiteboard $w} $args
     return $w
 }
 
@@ -822,7 +825,7 @@ proc ::WB::BuildWhiteboard {w args} {
     
     # Build the header for the actual network setup. This is where we
     # may have mode specific parts, p2p, jabber...
-    ::hooks::run whiteboardBuildEntryHook $w $w $wcomm
+    ::hooks::run whiteboardBuildEntryHook $w $wcomm
     
     ttk::separator $w.tsep -orient horizontal
     pack  $w.tsep  -side top -fill x
@@ -870,6 +873,10 @@ proc ::WB::BuildWhiteboard {w args} {
     GetFocus $w $w
     bind $w         <FocusIn>  [list [namespace current]::GetFocus $w %W]
     bind $wapp(can) <Button-1> [list focus $wapp(can)]
+
+    if {[lsearch [bindtags $w] WhiteboardToplevel] < 0} {
+	bindtags $w [linsert [bindtags $w] 0 WhiteboardToplevel]
+    }
         
     if {$opts(-usewingeom)} {
 	::UI::SetWindowGeometry $w
@@ -895,6 +902,7 @@ proc ::WB::BuildWhiteboard {w args} {
     if {[info exists opts(-file)]} {
 	::CanvasFile::DrawCanvasItemFromFile $w $opts(-file)
     }
+    
     ::hooks::run whiteboardPostBuildHook $w
 }
 
@@ -1030,7 +1038,7 @@ proc ::WB::CloseWhiteboard {w} {
 
 # WB::DestroyMain --
 # 
-#       Destroys toplevel whiteboard and cleans up.
+#       Destroys toplevel whiteboard. Free cleans up.
 
 proc ::WB::DestroyMain {w} {
     global  prefs
@@ -1049,13 +1057,13 @@ proc ::WB::DestroyMain {w} {
     SaveWhiteboardState $w
 
     catch {destroy $w}    
-    unset opts
-    unset wapp
+    #unset opts
+    #unset wapp
     
     # We could do some cleanup here.
-    GarbageImages $w
-    ::CanvasUtils::ItemFree $w
-    ::UI::FreeMenu $w
+    #GarbageImages $w
+    #::CanvasUtils::ItemFree $w
+    #::UI::FreeMenu $w
 }
 
 # WB::CreateImageForWtop --
@@ -3048,6 +3056,22 @@ proc ::WB::GetRegisteredHandlers { } {
     variable handler
 
     return [array get handler]
+}
+
+# ::WB::Free --
+# 
+#       Destroy handler only for cleanup.
+
+proc ::WB::Free {w} {
+        
+    Debug 2 "::WB::Free w=$w"
+	    
+    # We could do some cleanup here.
+    GarbageImages $w
+    ::CanvasUtils::ItemFree $w
+    ::UI::FreeMenu $w
+    
+    namespace delete ::WB::${w}
 }
 
 #-------------------------------------------------------------------------------

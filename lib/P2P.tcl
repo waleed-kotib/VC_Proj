@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.24 2005-10-22 14:26:21 matben Exp $
+# $Id: P2P.tcl,v 1.25 2005-11-19 11:35:41 matben Exp $
 
 package provide P2P 1.0
 
@@ -153,15 +153,15 @@ proc ::P2P::BuildButtonsHook {wtray} {
 # 
 #       Build the p2p specific part of the whiteboard.
 
-proc ::P2P::BuildEntryHook {w wclass wcomm} {
+proc ::P2P::BuildEntryHook {w wcomm} {
     global  prefs
     variable nEnt
     variable wp2p
       
     set nEnt($w) 0
   
-    set contactOffImage [::Theme::GetImage [option get $wclass contactOffImage {}]]
-    set contactOnImage  [::Theme::GetImage [option get $wclass contactOnImage {}]]
+    set contactOffImage [::Theme::GetImage [option get $w contactOffImage {}]]
+    set contactOnImage  [::Theme::GetImage [option get $w contactOnImage {}]]
 
     set fr $wcomm.f
     frame $fr
@@ -174,7 +174,7 @@ proc ::P2P::BuildEntryHook {w wclass wcomm} {
     ttk::frame $fr.pad
     pack  $fr.pad  -side right -fill both -expand 1
     
-    set wp2p($w,wclass) $wclass
+    set wp2p($w,w)      $w
     set wp2p($w,wfr)    $fr
     set wp2p($w,wgrid)  $wgrid
     
