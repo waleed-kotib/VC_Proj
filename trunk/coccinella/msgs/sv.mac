@@ -319,6 +319,9 @@
 ::msgcat::mcset sv mTimeCode            {Tidskod}
 ::msgcat::mcset sv mUserInfo            {Kontaktinfo...}
 ::msgcat::mcset sv mEditBookmarks       {Redigera bokmärken...}
+::msgcat::mcset sv mToolbar         	{Verktygsfält}
+::msgcat::mcset sv mNotebook         	{Tabbar}
+::msgcat::mcset sv mMinimal         	{Minimal}
 
 
 # Popups
@@ -347,8 +350,6 @@
 ::msgcat::mcset sv mIncreasing         	{Ökande}
 ::msgcat::mcset sv mDecreasing         	{Minskande}
 ::msgcat::mcset sv mStyle         	{Stil}
-::msgcat::mcset sv mToolbar         	{Verktygsfält}
-::msgcat::mcset sv mNotebook         	{Tabbar}
 
 
 

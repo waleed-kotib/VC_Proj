@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.119 2005-11-16 08:52:03 matben Exp $
+# $Id: jabberlib.tcl,v 1.120 2005-11-19 11:35:41 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1244,7 +1244,7 @@ proc jlib::message_handler {jlibname xmldata} {
     }
    
     # Extract the message sub-elements.
-    # @@@ really bad solution...
+    # @@@ really bad solution... Deliver full element instead
     set xmlnsList  {}
     foreach child $childlist {
 	

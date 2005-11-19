@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.57 2005-10-15 07:03:35 matben Exp $
+# $Id: JWB.tcl,v 1.58 2005-11-19 11:35:41 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -50,9 +50,6 @@ proc ::Jabber::WB::Init {jlibName} {
     ::hooks::register whiteboardConfigureHook      ::Jabber::WB::Configure
     ::hooks::register serverPutRequestHook         ::Jabber::WB::HandlePutRequest
     ::hooks::register presenceHook                 ::Jabber::WB::PresenceHook
-
-    #       OUTDATED!!!
-    ::hooks::register autobrowsedCoccinellaHook    ::Jabber::WB::AutoBrowseHook
     
     ::hooks::register loginHook                    ::Jabber::WB::LoginHook
     ::hooks::register logoutHook                   ::Jabber::WB::LogoutHook
@@ -164,6 +161,8 @@ proc ::Jabber::WB::InitUI { } {
 	set menuDefsFile [linsert $menuDefsFile $ind $mdef]
     }
     ::WB::SetMenuDefs file $menuDefsFile
+    
+    bind WhiteboardToplevel <Destroy> {+::Jabber::WB::Free %W}
 
     set initted 1
 }
@@ -209,7 +208,7 @@ proc ::Jabber::WB::NewWhiteboard {args} {
     }
     eval {::WB::BuildWhiteboard $w} $restargs
     
-    if {[info exists argsArr(-state)] && ($argsArr(-state) == "disabled")} {
+    if {[info exists argsArr(-state)] && ($argsArr(-state) eq "disabled")} {
 	$jwbstate($w,wjid)  state {disabled}
 	$jwbstate($w,wsend) state {disabled}
     }
@@ -294,7 +293,7 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 	if {!$force && ([lsearch $inrooms $jid] < 0)} {
 	    set ans [::GroupChat::EnterOrCreate enter -roomjid $jid \
 	      -autoget 1]
-	    if {$ans == "cancel"} {
+	    if {$ans eq "cancel"} {
 		Free $w
 		return
 	    }
@@ -376,7 +375,7 @@ proc ::Jabber::WB::PreBuildHook {w args} {
     }
     if {!$initted} {
 	InitUI
-    }    
+    }
 }
 
 proc ::Jabber::WB::PostBuildHook {w} {
@@ -384,7 +383,7 @@ proc ::Jabber::WB::PostBuildHook {w} {
        
     ::Debug 4 "::Jabber::WB::PostBuildHook w=$w"
     
-    if {$jwbstate($w,state) == "disabled"} {
+    if {$jwbstate($w,state) eq "disabled"} {
 	$jwbstate($w,wjid)  state {disabled}
 	$jwbstate($w,wsend) state {disabled}
     }
@@ -409,18 +408,15 @@ proc ::Jabber::WB::EnterRoomHook {roomjid protocol} {
 # 
 #       Build the jabber specific part of the whiteboard.
 
-proc ::Jabber::WB::BuildEntryHook {w wclass wcomm} {
+proc ::Jabber::WB::BuildEntryHook {w wcomm} {
     variable jwbstate
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::WB::BuildEntryHook wcomm=$wcomm"
 	
-    set contactOffImage [::Theme::GetImage \
-      [option get $wclass contactOffImage {}]]
-    set contactOnImage  [::Theme::GetImage \
-      [option get $wclass contactOnImage {}]]
-    set iconResize      [::Theme::GetImage \
-      [option get $wclass resizeHandleImage {}]]
+    set contactOffImage [::Theme::GetImage [option get $w contactOffImage {}]]
+    set contactOnImage  [::Theme::GetImage [option get $w contactOnImage {}]]
+    set iconResize      [::Theme::GetImage [option get $w resizeHandleImage {}]]
 
     set jidlist [$jstate(roster) getusers]
     
@@ -454,7 +450,7 @@ proc ::Jabber::WB::BuildEntryHook {w wclass wcomm} {
     pack  $wframe.ejid  -side right -fill x -expand true
      
     # Cache widgets paths.
-    set jwbstate($w,wclass)    $wclass
+    set jwbstate($w,w)         $w
     set jwbstate($w,wframe)    $wframe
     set jwbstate($w,wfrja)     $wframe
     set jwbstate($w,wjid)      $wframe.ejid
@@ -507,14 +503,16 @@ proc ::Jabber::WB::SetStateFromType {w} {
 proc ::Jabber::WB::SetNetworkState {w what} {
     variable jwbstate
     
-    set wclass   $jwbstate($w,wclass)
+    if {![info exists jwbstate($w,w)]} {
+	return
+    }
     set wcontact $jwbstate($w,wcontact)
     array set optsArr [::WB::ConfigureMain $w]
     
     switch -- $what {
 	login {
 	    set server [::Jabber::GetServerJid]
-	    if {$jwbstate($w,jid) == ""} {
+	    if {$jwbstate($w,jid) eq ""} {
 		set jwbstate($w,jid) "@${server}"
 	    }
 	    
@@ -523,14 +521,14 @@ proc ::Jabber::WB::SetNetworkState {w what} {
 		    #$jwbstate($w,wsend) configure -state normal
 		}
 		default {
-		    if {$optsArr(-state) == "normal"} {
+		    if {$optsArr(-state) eq "normal"} {
 			set wtray [::WB::GetButtonTray $w]
 			$wtray buttonconfigure send -state normal
 		    }
 		}
 	    }
 	    set contactOnImage  [::Theme::GetImage \
-	      [option get $wclass contactOnImage {}]]
+	      [option get $w contactOnImage {}]]
 	    after 400 [list $wcontact configure -image $contactOnImage]
 	}
 	logout {
@@ -538,7 +536,7 @@ proc ::Jabber::WB::SetNetworkState {w what} {
 	    $wtray buttonconfigure send -state disabled
 	    $jwbstate($w,wsend) state {disabled}
 	    set contactOffImage [::Theme::GetImage \
-	       [option get $wclass contactOffImage {}]]
+	       [option get $w contactOffImage {}]]
 	     after 400 [list $wcontact configure -image $contactOffImage]
 	}
     }
@@ -617,7 +615,7 @@ proc ::Jabber::WB::CloseHook {w} {
 	chat {
 	    set ans [::UI::MessageBox -icon info -parent $w -type yesno \
 	      -message [mc jamesswbchatlost]]
-	    if {$ans != "yes"} {
+	    if {$ans ne "yes"} {
 		return stop
 	    }
 	}
@@ -625,7 +623,7 @@ proc ::Jabber::WB::CloseHook {w} {
 	    
 	    # Everything handled from Jabber::GroupChat
 	    set ans [::GroupChat::ExitRoom $jwbstate($w,jid)]
-	    if {$ans != "yes"} {
+	    if {$ans ne "yes"} {
 		return stop
 	    }
 	}
@@ -633,16 +631,14 @@ proc ::Jabber::WB::CloseHook {w} {
 	    # empty
 	}
     }
-    Free $w
 }
 
 proc ::Jabber::WB::ExitRoomHook {roomJid} {
     variable jwbstate
     
     set w [GetWtopFromMessage groupchat $roomJid]
-    if {$w != ""} {
+    if {$w ne ""} {
 	::WB::CloseWhiteboard $w
-	Free $w
     }
 }
 
@@ -908,7 +904,7 @@ proc ::Jabber::WB::DoSendCanvas {w} {
 	      or other similar entities, this user will not get them unless\
 	      you happen to be online while this message is being read.\
 	      Do you want to send it anyway?"]
-	    if {$ans == "no"} {
+	    if {$ans eq "no"} {
 		return
 	    }
 	}
@@ -1040,7 +1036,7 @@ proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns msgElem args} {
     # Need to have the actual canvas before doing svg -> canvas translation.
     # This is a duplicate; fix later...
     set w [eval {GetWtopFromMessage chat $argsArr(-from)} $args]
-    if {$w == ""} {
+    if {$w eq ""} {
 	set w [eval {NewWhiteboardTo $argsArr(-from)} $args]
     }
     
@@ -1070,7 +1066,7 @@ proc ::Jabber::WB::HandleSVGWBGroupchatMessage {jlibname xmlns msgElem args} {
 	# Need to have the actual canvas before doing svg -> canvas translation.
 	# This is a duplicate; fix later...
 	set w [GetWtopFromMessage groupchat $roomjid]
-	if {$w == ""} {
+	if {$w eq ""} {
 	    set w [eval {NewWhiteboardTo $roomjid -force 1} $args]
 	}
 	
@@ -1243,7 +1239,7 @@ proc ::Jabber::WB::HandleNonCanvasCmds {type cmdList args} {
 			chat - groupchat {
 			    set w [eval {GetWtopFromMessage \
 			      $type $argsArr(-from)} $args]
-			    if {$w == ""} {
+			    if {$w eq ""} {
 				continue
 				set w [eval {
 				    NewWhiteboardTo $argsArr(-from)} $args]
@@ -1264,7 +1260,7 @@ proc ::Jabber::WB::HandleNonCanvasCmds {type cmdList args} {
 			      $type $argsArr(-from)} $args]
 			}
 		    }
-		    if {$w != ""} {
+		    if {$w ne ""} {
 			set w [::WB::GetCanvasFromWtop $w]
 			set code [catch {
 			    uplevel #0 $handler($prefix) [list $w $type $cmd] $args
@@ -1312,7 +1308,7 @@ proc ::Jabber::WB::ChatMsg {cmdList args} {
     
     # This one returns empty if not exists.
     set w [eval {GetWtopFromMessage chat $argsArr(-from)} $args]
-    if {$w == ""} {
+    if {$w eq ""} {
 	set w [eval {NewWhiteboardTo $argsArr(-from)} $args]
     }
     foreach line $cmdList {
@@ -1330,7 +1326,7 @@ proc ::Jabber::WB::GroupchatMsg {cmdList args} {
     # the room.
     jlib::splitjid $argsArr(-from) roomjid resource
     set w [GetWtopFromMessage groupchat $roomjid]
-    if {$w == ""} {
+    if {$w eq ""} {
 	set w [eval {NewWhiteboardTo $roomjid -force 1} $args]
     }
 
@@ -1342,6 +1338,8 @@ proc ::Jabber::WB::GroupchatMsg {cmdList args} {
 proc ::Jabber::WB::Free {w} {
     variable jwbstate
     variable delayed
+    
+    ::Debug 2 "::Jabber::WB::Free"
     
     catch {
 	unset -nocomplain jwbstate($jwbstate($w,thread),thread,w) \
@@ -1371,7 +1369,7 @@ proc ::Jabber::WB::GetIPnumber {jid {cmd {}}} {
     ::Debug 2 "::Jabber::WB::GetIPnumber:: jid=$jid, cmd='$cmd'"
     
     set getid $ipCache(getid)
-    if {$cmd != ""} {
+    if {$cmd ne ""} {
 	set ipCache(cmd,$getid) $cmd
     }
     set mjid [jlib::jidmap $jid]
@@ -1447,14 +1445,14 @@ proc ::Jabber::WB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
     #  }}
     ::Debug 2 "::Jabber::WB::GetCoccinellaServersCallback"
 
-    if {$type == "error"} {
+    if {$type eq "error"} {
 	return
     }
     set mjid3 [jlib::jidmap $jid3]
     set ipElements [wrapper::getchildswithtag $subiq ip]
     set ip [wrapper::getcdata [lindex $ipElements 0]]
     set ipCache(ip,$mjid3) $ip
-    if {$cmd != ""} {
+    if {$cmd ne ""} {
 	eval $cmd
     }
     unset -nocomplain ipCache(req,$mjid3)
@@ -1495,32 +1493,6 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
 	    }
 	}
     }
-}
-
-# Jabber::WB::AutoBrowseHook --
-# 
-#       Gets called when we have identified a Coccinella user using
-#       browsing. Query for its ip address.
-#       
-#       OUTDATED!!!
-
-proc ::Jabber::WB::AutoBrowseHook {jid} {
-    variable ipCache
-    upvar ::Jabber::jprefs jprefs
-
-    ::Debug 2 "::Jabber::WB::AutoBrowseHook jid=$jid"
-    
-    # Shall we query for its ip address right away?
-    # Get only if not yet requested.
-    set mjid [jlib::jidmap $jid]
-    if {$jprefs(preGetIP) && ![info exists ipCache(ip,$mjid)] && \
-      ![info exists ipCache(req,$mjid)]} {
-	if {$jprefs(getIPraw)} {
-	    GetIPnumber $jid
-	} else {
-	    GetCoccinellaServers $jid
-	}
-    }    
 }
 
 # Jabber::WB::PutFileOrScheduleHook --
@@ -1598,7 +1570,7 @@ proc ::Jabber::WB::PutFileOrScheduleHook {w fileName opts} {
 	    
 	    # Else put to resource with highest priority.
 	    set res [$jstate(roster) gethighestresource $tojid]
-	    if {$res == ""} {
+	    if {$res eq ""} {
 		
 		# This is someone we haven't got presence from.
 		set allJid3 $tojid
@@ -1727,7 +1699,7 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 	chat {
 	    set w [eval {GetWtopFromMessage chat \
 	      $optArr(-from)} $opts]
-	    if {$w == ""} {
+	    if {$w eq ""} {
 		set w [NewWhiteboardTo $optArr(-from)  \
 		  -thread $optArr(-thread)]
 	    }
@@ -1739,7 +1711,7 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 		  "The jid we got \"$optArr(-from)\" was not well-formed!"
 	    }
 	    set w [GetWtopFromMessage groupchat $optArr(-from)]
-	    if {$w == ""} {
+	    if {$w eq ""} {
 		set w [NewWhiteboardTo $roomjid -force 1]
 	    }
 	}
@@ -1805,7 +1777,7 @@ proc ::Jabber::WB::GetWtopFromMessage {type jid args} {
      }
      
      # Verify that toplevel actually exists.
-     if {$w != ""} {
+     if {$w ne ""} {
 	 if {![winfo exists $w]} {
 	     set w ""
 	 }
@@ -1846,7 +1818,7 @@ proc ::Jabber::WB::DispatchToImporter {mime opts args} {
 	if {[::Plugins::HaveImporterForMime $mime]} {
 	    set wcan [::WB::GetCanvasFromWtop $w]
 	    set errMsg [eval {::Import::DoImport $wcan $opts} $args]
-	    if {$errMsg != ""} {
+	    if {$errMsg ne ""} {
 		::UI::MessageBox -title [mc Error] -icon error -type ok \
 		  -message "Failed importing: $errMsg" \
 		  -parent [winfo toplevel $wcan]

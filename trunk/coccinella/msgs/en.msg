@@ -320,6 +320,9 @@
 ::msgcat::mcset en mTimeCode            {Timecode}
 ::msgcat::mcset en mUserInfo            {User Info...}
 ::msgcat::mcset en mEditBookmarks       {Edit Bookmarks...}
+::msgcat::mcset en mToolbar         	{Toolbar}
+::msgcat::mcset en mNotebook         	{Notebook}
+::msgcat::mcset en mMinimal         	{Minimal}
 
 # Popups
 ::msgcat::mcset en mMessage     	{Message...}
@@ -347,8 +350,6 @@
 ::msgcat::mcset en mIncreasing         	{Increasing}
 ::msgcat::mcset en mDecreasing         	{Decreasing}
 ::msgcat::mcset en mStyle         	{Style}
-::msgcat::mcset en mToolbar         	{Toolbar}
-::msgcat::mcset en mNotebook         	{Notebook}
 
 
 # Short texts only. Use english text as database key.

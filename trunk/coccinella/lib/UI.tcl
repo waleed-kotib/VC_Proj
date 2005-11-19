@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.109 2005-11-18 07:52:33 matben Exp $
+# $Id: UI.tcl,v 1.110 2005-11-19 11:35:41 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1095,6 +1095,7 @@ proc ::UI::BuildMenu {w wmenu label menuDef state args} {
 		# All variables (and commands) in menuDef's cmd shall be 
 		# substituted! Be sure they are all in here.
 
+		# @@@ BUG [ 1340712 ] Ex90 Error when trying to start New whiteboard 
 		set cmd [subst -nocommands $cmd]
 		#set cmd [eval list $cmd]
 		if {[string length $accel]} {

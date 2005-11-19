@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.146 2005-11-18 07:52:32 matben Exp $
+# $Id: Roster.tcl,v 1.147 2005-11-19 11:35:41 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -269,7 +269,9 @@ proc ::Roster::Build {w} {
         
     variable wtree    
     variable wroster
+    variable wbox
     variable wwave
+    variable rstyle
     upvar ::Jabber::jprefs jprefs
         
     # The frame of class Roster.
@@ -282,6 +284,7 @@ proc ::Roster::Build {w} {
     set wysc    $wbox.ysc
     set wtree   $wbox.tree
     set wwave   $w.wa
+    set rstyle  "normal"
     
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
     ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
@@ -306,6 +309,38 @@ proc ::Roster::Build {w} {
     grid rowconfigure    $wbox 0 -weight 1
         
     return $w
+}
+
+proc ::Roster::StyleMinimal { } {
+    variable wroster
+    variable wbox
+    variable wwave
+    variable rstyle
+    
+    $wroster configure -padding {0 4}
+    $wbox configure -bd 0
+    pack forget $wwave
+    set rstyle "minimal"
+}
+
+proc ::Roster::StyleNormal { } {
+    variable wroster
+    variable wbox
+    variable wwave
+    variable rstyle
+    
+    set padding [option get $wroster padding {}]
+    $wroster configure -padding $padding
+    set bd [option get $wbox borderWidth {}]
+    $wbox configure -bd $bd
+    pack $wwave -side bottom -fill x -padx 8 -pady 2
+    set rstyle "normal"
+}
+
+proc ::Roster::StyleGet { } {
+    variable rstyle
+
+    return $rstyle
 }
 
 proc ::Roster::GetWtree { } {
