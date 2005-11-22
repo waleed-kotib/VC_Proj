@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.2 2005-11-16 08:52:03 matben Exp $
+# $Id: RosterTwo.tcl,v 1.3 2005-11-22 07:44:12 matben Exp $
 
 package require RosterTree
 
@@ -18,7 +18,8 @@ namespace eval ::RosterTwo {
       ::RosterTwo::Configure   \
       ::RosterTwo::Init        \
       ::RosterTwo::CreateItem  \
-      ::RosterTwo::DeleteItem
+      ::RosterTwo::DeleteItem  \
+      ::RosterTwo::SetItemAlternative
         
     # Only if this style is in use!!!
     # These are needed to handle foreign IM systems.
@@ -276,6 +277,12 @@ proc ::RosterTwo::CreateItemFromJID {jid} {
     array set opts $rost
 
     return [eval {CreateItem $jid $opts(-type)} [array get opts]]
+}
+
+proc ::RosterTwo::SetItemAlternative {jid key type image} {
+    
+    # @@@ TODO
+    return
 }
 
 #

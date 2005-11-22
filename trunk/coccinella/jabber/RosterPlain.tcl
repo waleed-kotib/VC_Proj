@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.6 2005-11-16 08:52:03 matben Exp $
+# $Id: RosterPlain.tcl,v 1.7 2005-11-22 07:44:12 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -30,7 +30,8 @@ namespace eval ::RosterPlain {
       ::RosterPlain::Configure   \
       ::RosterPlain::Init        \
       ::RosterPlain::CreateItem  \
-      ::RosterPlain::DeleteItem
+      ::RosterPlain::DeleteItem  \
+      ::RosterPlain::SetItemAlternative
     
     # This is the basic style used as fallback.
     ::RosterTree::SetStyle plain
@@ -96,17 +97,18 @@ proc ::RosterPlain::Configure {_T} {
     $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
-    set S [$T style create styUnavailable]
-    $T style elements $S {eBorder eImage eText}
-    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
-    $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
-
     set S [$T style create styAvailable]
     $T style elements $S {eBorder eImage eAltImage eText}
-    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
+    $T style layout $S eText -padx 2 -squeeze x -expand ns -ipady 1
     $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
-    $T style layout $S eAltImage -expand ns -ipady 1
+    $T style layout $S eAltImage -expand ns -padx 2 -ipady 1
+    $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
+
+    set S [$T style create styUnavailable]
+    $T style elements $S {eBorder eImage eAltImage eText}
+    $T style layout $S eText -padx 2 -squeeze x -expand ns -ipady 1
+    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
+    $T style layout $S eAltImage -expand ns -padx 2 -ipady 1
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styTransport]
@@ -246,7 +248,7 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 	jid jid transport pending
     } {
 	set tag [list head $type]
-	set item [::RosterTree::FindWithTag $tag]
+	set item [FindWithTag $tag]
 	if {$item ne ""} {
 	    set all [::RosterTree::FindAllWithTagInItem $item $itype]
 	    set n [llength $all]
@@ -302,6 +304,41 @@ proc ::RosterPlain::CreateItemFromJID {jid} {
     array set opts $rost
 
     return [eval {CreateItem $jid $opts(-type)} [array get opts]]
+}
+
+proc ::RosterPlain::SetItemAlternative {jid key type value} {
+
+    switch -- $type {
+	image {
+	    return [SetAltImage $jid $key $value]
+	}
+	text {
+	    # @@@ TODO
+	    return -code error "not implemented"
+	}
+    }
+}
+
+# @@@ multiple keys TODO
+proc ::RosterPlain::SetAltImage {jid key image} {
+    variable T
+    variable altKeyElemArr
+    
+    # altKeyElemArr maps ($key,image|text) -> element name
+    
+    set mjid [jlib::jidmap $jid]
+    set tag [list jid $mjid]
+    set item [FindWithTag $tag]
+    
+    if {[info exists altKeyElemArr($key,image)]} {
+	set elem $altKeyElemArr($key,image)
+    } else {
+	set elem eAltImage
+	set altKeyElemArr($key,image) eAltImage
+    }    
+    $T item element configure $item cTree $elem -image $image  
+
+    return [list $T $item cTree eAltImage]
 }
 
 #

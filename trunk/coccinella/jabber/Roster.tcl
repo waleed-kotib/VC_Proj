@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.147 2005-11-19 11:35:41 matben Exp $
+# $Id: Roster.tcl,v 1.148 2005-11-22 07:44:12 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -44,7 +44,8 @@ namespace eval ::Roster:: {
     option add *Roster*rootBackgroundBd     0               widgetDefault
     option add *Roster*rootForeground       ""              widgetDefault
     option add *Roster.waveImage            wave            widgetDefault
-
+    option add *Roster.minimalPadding       {0 4}           widgetDefault
+    
     variable wtree -
     
     # A unique running identifier.
@@ -317,7 +318,7 @@ proc ::Roster::StyleMinimal { } {
     variable wwave
     variable rstyle
     
-    $wroster configure -padding {0 4}
+    $wroster configure -padding [option get $wroster minimalPadding {}]
     $wbox configure -bd 0
     pack forget $wwave
     set rstyle "minimal"
