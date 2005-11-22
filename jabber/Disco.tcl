@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.76 2005-11-05 11:37:25 matben Exp $
+# $Id: Disco.tcl,v 1.77 2005-11-22 07:44:12 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -16,7 +16,7 @@ namespace eval ::Disco:: {
 
     ::hooks::register initHook           ::Disco::InitHook
     ::hooks::register jabberInitHook     ::Disco::NewJlibHook
-    ::hooks::register loginHook          ::Disco::LoginHook
+    ::hooks::register loginHook          ::Disco::LoginHook     20
     ::hooks::register logoutHook         ::Disco::LogoutHook
     ::hooks::register presenceHook       ::Disco::PresenceHook
 
@@ -126,6 +126,10 @@ proc ::Disco::NewJlibHook {jlibName} {
 	    
     $jlibName disco registerhandler ::Disco::Handler
 }
+
+# Disco::LoginHook --
+# 
+#       This must be before most other login hooks, at least other doing disco.
 
 proc ::Disco::LoginHook { } {
     upvar ::Jabber::jprefs jprefs

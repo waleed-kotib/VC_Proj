@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.16 2005-11-16 13:30:15 matben Exp $
+# $Id: Rosticons.tcl,v 1.17 2005-11-22 07:44:12 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -43,7 +43,10 @@ namespace eval ::Rosticons:: {
 
     variable priv
     set priv(defaultSet) "default"
-    set priv(types) {aim application gadugadu icq msn smtp status whiteboard yahoo}
+    set priv(types) {
+	aim application gadugadu icq msn phone smtp status 
+	whiteboard yahoo
+    }
 
 }
 
@@ -182,7 +185,7 @@ proc ::Rosticons::GetAllTypeSets { } {
 #       
 # Arguments:
 #       statuskey       type/subtype, ex: status/online, icq/xa, whiteboard/dnd
-#                       application/* are special
+#                       application/* and phone/* are special
 #       
 # Results:
 #       a valid image.
@@ -211,6 +214,16 @@ proc ::Rosticons::Get {statuskey} {
 		} else {
 		    return ""
 		}
+	    }
+	} else {
+	    return ""
+	}
+    } elseif {$type eq "phone"} {
+	if {$jprefs(rost,icons,use,$type)} {
+	    if {[info exists icons($statuskey)]} {
+		return $icons($statuskey)
+	    } else {
+		return ""
 	    }
 	} else {
 	    return ""
@@ -330,13 +343,13 @@ proc ::Rosticons::InitPrefsHook { } {
 	set jprefs(rost,icons,$type) "default"
 	set name  ::Jabber::jprefs(rost,icons,$type)
 	set rsrc  jprefs_rost_icons_$type
-	set value $jprefs(rost,icons,$type)
+	set value [set $name]
 	lappend plist [list $name $rsrc $value]
 
 	set jprefs(rost,icons,use,$type) 1
 	set name  ::Jabber::jprefs(rost,icons,use,$type)
 	set rsrc  jprefs_rost_icons_use_$type
-	set value $jprefs(rost,icons,use,$type)
+	set value [set $name]
 	lappend plist [list $name $rsrc $value]
     }
     

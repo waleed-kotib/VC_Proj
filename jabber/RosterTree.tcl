@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.8 2005-11-18 07:52:32 matben Exp $
+# $Id: RosterTree.tcl,v 1.9 2005-11-22 07:44:12 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -59,7 +59,8 @@ namespace eval ::RosterTree {
 }
 
 proc ::RosterTree::RegisterStyle {
-    name label configProc initProc createItemProc deleteItemProc} {
+    name label configProc initProc 
+    createItemProc deleteItemProc setItemAltProc} {
 	
     variable plugin
     
@@ -69,6 +70,7 @@ proc ::RosterTree::RegisterStyle {
     set plugin($name,init)       $initProc
     set plugin($name,createItem) $createItemProc
     set plugin($name,deleteItem) $deleteItemProc
+    set plugin($name,setItemAlt) $setItemAltProc
 }
 
 proc ::RosterTree::SetStyle {name} {
@@ -119,6 +121,26 @@ proc ::RosterTree::StyleDeleteItem {jid} {
     
     set name $plugin(selected)
     $plugin($name,deleteItem) $jid
+}
+
+# RosterTree::StyleSetItemAlternative --
+# 
+#       Sets an alternative image or text for the specified jid.
+#       
+# Arguments:
+#       jid
+#       key         a unique token that specifies a set of images or texts
+#       type        text or image
+#       value       the text or the image to set, or empty if unset
+#       
+# Results:
+#       list {treeCtrlWidget item columnTag elementName}
+
+proc ::RosterTree::StyleSetItemAlternative {jid key type value} {
+    variable plugin
+    
+    set name $plugin(selected)
+    return [$plugin($name,setItemAlt) $jid $key $type $value]
 }
     
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

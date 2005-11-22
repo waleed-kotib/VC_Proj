@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.96 2005-11-19 11:35:41 matben Exp $
+# $Id: JUI.tcl,v 1.97 2005-11-22 07:44:12 matben Exp $
 
 package provide JUI 1.0
 
@@ -18,6 +18,7 @@ namespace eval ::Jabber::UI:: {
     ::hooks::register logoutHook             ::Jabber::UI::LogoutHook
     ::hooks::register setPresenceHook        ::Jabber::UI::SetPresenceHook
     ::hooks::register rosterIconsChangedHook ::Jabber::UI::RosterIconsChangedHook
+    ::hooks::register prefsInitHook          ::Jabber::UI::InitPrefsHook
 
     # Use option database for customization.
     # Shortcut buttons.
@@ -358,6 +359,16 @@ proc ::Jabber::UI::Build {w} {
     
     ::hooks::run jabberBuildMain
     
+    # Handle the prefs "Show" state.
+    if {!$jprefs(ui,main,show,toolbar)} {
+	HideToolbar
+    }
+    if {!$jprefs(ui,main,show,notebook)} {
+	RosterMoveFromPage
+    }
+    if {$jprefs(ui,main,show,minimal)} {
+	ToggleMinimal
+    }
     return $w
 }
 
@@ -400,19 +411,23 @@ proc ::Jabber::UI::BuildToolbar {w wtbar} {
 
 proc ::Jabber::UI::RosterMoveFromPage { } {
     variable jwapp
+    upvar ::Jabber::jprefs jprefs
     
     pack forget $jwapp(roster)
     pack forget $jwapp(notebook)
     pack $jwapp(roster) -side bottom -fill both -expand 1
+    set jprefs(ui,main,show,notebook) 0
 }
 
 proc ::Jabber::UI::RosterMoveToPage { } {
     variable jwapp
+    upvar ::Jabber::jprefs jprefs
     
     pack forget $jwapp(roster)
     pack $jwapp(notebook) -side bottom -fill both -expand 1
     pack $jwapp(roster) -in $jwapp(notebook).cont -fill both -expand 1
     raise $jwapp(roster)
+    set jprefs(ui,main,show,notebook) 1
 }
 
 proc ::Jabber::UI::GetMainWindow { } {
@@ -429,14 +444,31 @@ proc ::Jabber::UI::GetMainMenu { } {
 
 proc ::Jabber::UI::ToggleToolbar { } {
     variable jwapp
+    upvar ::Jabber::jprefs jprefs
     
     if {[winfo ismapped $jwapp(wtbar)]} {
-	pack forget $jwapp(wtbar)
-	pack forget $jwapp(tsep)
+	HideToolbar
     } else {
-	pack $jwapp(wtbar) -side top -fill x
-	pack $jwapp(tsep)  -side top -fill x
+	ShowToolbar
     }
+}
+
+proc ::Jabber::UI::HideToolbar { } {
+    variable jwapp
+    upvar ::Jabber::jprefs jprefs
+    
+    pack forget $jwapp(wtbar)
+    pack forget $jwapp(tsep)
+    set jprefs(ui,main,show,toolbar) 0
+}
+
+proc ::Jabber::UI::ShowToolbar { } {
+    variable jwapp
+    upvar ::Jabber::jprefs jprefs
+    
+    pack $jwapp(wtbar) -side top -fill x
+    pack $jwapp(tsep)  -side top -fill x
+    set jprefs(ui,main,show,toolbar) 1
 }
 
 proc ::Jabber::UI::ToggleNotebook { } {
@@ -451,20 +483,30 @@ proc ::Jabber::UI::ToggleNotebook { } {
 
 proc ::Jabber::UI::ToggleMinimal { } {
     variable jwapp
+    upvar ::Jabber::jprefs jprefs
 
     if {[::Roster::StyleGet] eq "normal"} {
 	::Roster::StyleMinimal
+	set jprefs(ui,main,show,minimal) 1
     } else {
 	::Roster::StyleNormal	
+	set jprefs(ui,main,show,minimal) 0
     }
 }
 
-# Jabber::UI::AddAlternativeStatusImage --
+# Jabber::UI::SetAlternativeStatusImage --
 # 
 #       API for adding alternative status images.
 #       Each instance is specified by a unique key.
+#       
+# Arguments:
+#       key         unique key to identify this instance; used for widget path
+#       image       the image to add or modify
+#       
+# Results:
+#       the label widget added or modified
 
-proc ::Jabber::UI::AddAlternativeStatusImage {key image} {
+proc ::Jabber::UI::SetAlternativeStatusImage {key image} {
     variable jwapp
     variable altImageKeyArr
     
@@ -474,10 +516,11 @@ proc ::Jabber::UI::AddAlternativeStatusImage {key image} {
 	if {$image eq ""} {
 	    destroy $altImageKeyArr($key)
 	    unset altImageKeyArr($key)
+	    $wstatus configure -width 1
 	} else {
 	    $altImageKeyArr($key) configure -image $image
 	}
-    } else {
+    } elseif {$image ne ""} {
 	set win $wstatus.$key
 	set altImageKeyArr($key) $win
 	ttk::label $win -image $image
@@ -869,6 +912,23 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state normal
 	}
     }
+}
+
+proc ::Jabber::UI::InitPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+
+    set jprefs(ui,main,show,toolbar)  1
+    set jprefs(ui,main,show,notebook) 1
+    set jprefs(ui,main,show,minimal)  0
+    
+    set plist {}
+    foreach key {toolbar notebook minimal} {
+	set name ::Jabber::jprefs(ui,main,show,$key)
+	set rsrc jprefs_ui_main_show_$key
+	set val  [set $name]
+	lappend plist [list $name $rsrc $val]
+    }
+    ::PrefUtils::Add $plist
 }
 
 #-------------------------------------------------------------------------------
