@@ -2,7 +2,7 @@
 # 
 #       JivePhone bindings for the jive server and Asterisk.
 #       
-# $Id: JivePhone.tcl,v 1.2 2005-11-22 07:44:12 matben Exp $
+# $Id: JivePhone.tcl,v 1.3 2005-11-23 11:15:51 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -149,10 +149,63 @@ proc ::JivePhone::MessageHook {body args} {
 }
 
 proc ::JivePhone::BuildDialer {w} {
+    variable phoneNumber
     
-    
-    # @@@ TODO
+    ::UI::Toplevel $w -class PhoneDialer \
+      -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
+      -closecommand [namespace current]::Close
+    wm title $w [mc {Dial Phone}]
 
+    ::UI::SetWindowPosition $w
+    set phoneNumber ""
+
+    # Global frame.
+    ttk::frame $w.f
+    pack  $w.f  -fill x
+				 
+    ttk::label $w.f.head -style Headlabel \
+      -text [mc {Dial Phone}]
+    pack  $w.f.head  -side top -fill both -expand 1
+
+    ttk::separator $w.f.s -orient horizontal
+    pack  $w.f.s  -side top -fill x
+
+    set wbox $w.f.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack  $wbox  -fill both -expand 1
+    
+    set box $wbox.b
+    ttk::frame $box
+    pack $box -side bottom -fill x
+    
+    ttk::label $box.l -text "[mc Number]:"
+    ttk::entry $box.e -textvariable [namespace current]::phoneNumber  \
+      -width 18
+    ttk::button $box.dial -text [mc Dial]  \
+      -command [list [namespace current]::Dial $w]
+    
+    grid  $box.l  $box.e  $box.dial -padx 1 -pady 4
+ 
+    
+    wm resizable $w 0 0
+}
+
+proc ::JivePhone::CloseDialer {w} {
+    
+    ::UI::SaveWinGeom $w   
+}
+
+proc ::JivePhone::Dial {w} {
+    variable phoneNumber
+    variable xmlns
+    
+    set extensionElem [wrapper::createtag "extension" -chdata $phoneNumber]
+    set phoneElem [wrapper::createtag "phone-action"      \
+      -attrlist [list xmlns $xmlns(jivephone) type DIAL]  \
+      -subtags [list $extensionElem]]
+    
+    ::Jabber::JlibCmd send_presence -extras [list $phoneElem]
+    destroy $w
 }
 
 #-------------------------------------------------------------------------------

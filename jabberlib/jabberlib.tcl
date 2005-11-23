@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.120 2005-11-19 11:35:41 matben Exp $
+# $Id: jabberlib.tcl,v 1.121 2005-11-23 11:15:51 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1234,6 +1234,9 @@ proc jlib::message_handler {jlibname xmldata} {
     foreach {key value} [array get attrArr] {
 	set vopts(-$key) $value
     }
+    
+    # This helps callbacks to adapt to using full element as argument.
+    set vopts(-xmldata) $xmldata
     set ishandled 0
     
     switch -- $type {
@@ -1359,7 +1362,10 @@ proc jlib::presence_handler {jlibname xmldata} {
 	set $attrkey $attrval
 	lappend arglist -$attrkey $attrval
     }
-    
+
+    # This helps callbacks to adapt to using full element as argument.
+    lappend arglist -xmldata $xmldata
+
     # Check first if this is an error element (from conferencing?).
     if {[string equal $type "error"]} {
 	set errspec [getstanzaerrorspec $xmldata]

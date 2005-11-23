@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.40 2005-11-10 12:57:03 matben Exp $
+# $Id: roster.tcl,v 1.41 2005-11-23 11:15:51 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -302,7 +302,7 @@ proc roster::removeitem {rostName jid} {
     # Be sure to unset all, also jid3 entries!
     array unset presArr [jlib::ESC $mjid]*
     array unset oldpresArr [jlib::ESC $mjid]*
-    return {}
+    return
 }
 
 # roster::ClearRoster --
@@ -462,6 +462,8 @@ proc roster::setpresence {rostName jid type args} {
 	    set state($mjid,secs) [clock seconds]
 	}
 	
+	# @@@ It is a bit unclear which elements are persistant.	
+	
 	# Keep cache of any old state.
         # Note special handling of * for array unset - prefix with \\ to quote.
 	array unset oldpresArr [jlib::ESC $mjid],*
@@ -588,7 +590,7 @@ proc roster::setpresence2 {rostName jid type args} {
 	    }
 	}
     }
-    return {}
+    return
 }
 
 # roster::getrosteritem --
@@ -891,7 +893,7 @@ proc roster::getname {rostName jid} {
     if {[info exists rostArr($jid,name)]} {
 	return $rostArr($jid,name)
     } else {
-	return {}
+	return ""
     }
 }
 
@@ -938,7 +940,7 @@ proc roster::getask {rostName jid} {
     if {[info exists rostArr($jid,ask)]} {
 	return $rostArr($jid,ask)
     } else {
-	return {}
+	return ""
     }
 }
 
@@ -985,7 +987,7 @@ proc roster::getresources {rostName jid args} {
 	    return $presArr($jid,res)
 	}
     } else {
-	return {}
+	return ""
     }
 }
 

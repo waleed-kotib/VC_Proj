@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasDraw.tcl,v 1.18 2005-11-02 12:54:09 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.19 2005-11-23 11:15:51 matben Exp $
 
 #-- TAGS -----------------------------------------------------------------------
 #  
@@ -719,7 +719,7 @@ proc ::CanvasDraw::DoMoveFrame {wcan wframe x y} {
     # Fix x and y.
     set x [$wcan canvasx [expr {[winfo x $wframe] + $x}]]
     set y [$wcan canvasx [expr {[winfo y $wframe] + $y}]]
-    lassign [ToScroll $wcan _selectedwindow $xDragWin(baseX) $xDragWin(baseY) $x $y] x y
+    lassign [ToScroll $wcan _moveframe $xDragFrame(baseX) $xDragFrame(baseY) $x $y] x y
 
     # Moving a frame window item (_ghostrect).
     $wcan move _ghostrect \
