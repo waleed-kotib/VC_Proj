@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.28 2005-10-26 14:38:34 matben Exp $
+# $Id: Init.tcl,v 1.29 2005-11-23 11:15:51 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -119,7 +119,10 @@ proc ::Init::SetThis {thisScript} {
     # This is where the "Batteries Included" binaries go. Empty if non.
     if {$this(platform) eq "unix"} {
 	set machine $tcl_platform(machine)
-	if {[regexp {[2-9]86} $tcl_platform(machine) match]} {
+	if {[regexp {[2-9]86} $tcl_platform(machine)]} {
+	    set machine "i686"
+	} elseif {[regexp {.86_64} $tcl_platform(machine)]} {
+	    # x86_64
 	    set machine "i686"
 	}
 	set machineSpecPath [file join $tcl_platform(os) $machine]
@@ -405,11 +408,16 @@ proc ::Init::TempDir {} {
 }
 
 proc ::Init::LoadPackages { } {
-    global  this
+    global  this auto_path
     
+    # Take precautions and load only our own tile, treectrl.
+    # Side effects??? It fools statically linked tile in tclkits
+    #set autoPath $auto_path
+    #set auto_path [list $this(binLibPath) $this(binPath)]
+        
     # tile may be statically linked (Windows).
     if {[lsearch -exact [info loaded] {{} tile}] >= 0} {
-	package require tile 0.6
+	package require tile 0.7
     } else {
     
 	# We must be sure script libraries for tile come from us (tcl_findLibrary).
@@ -431,6 +439,8 @@ proc ::Init::LoadPackages { } {
 	  -message "This application requires the treectrl widget to work! $::errorInfo"
 	exit
     }
+    
+    #set auto_path $autoPath
     
     # tkpng is required for the gui.
     ::Splash::SetMsg "[mc splashlook] tkpng..."
