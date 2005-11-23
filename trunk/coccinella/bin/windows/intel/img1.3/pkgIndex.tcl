@@ -1,6 +1,6 @@
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded zlibtcl 1.0 [list load [file join $dir zlibtcl10.dll]]
 
@@ -13,7 +13,7 @@ package ifneeded zlibtcl 1.0 [string map [list @dir@ $dir] \
 }
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded pngtcl 1.0 [list load [file join $dir pngtcl10.dll]]
 
@@ -26,7 +26,7 @@ package ifneeded pngtcl 1.0 [string map [list @dir@ $dir] \
 }
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded tifftcl 1.0 [list load [file join $dir tifftcl10.dll]]
 
@@ -39,7 +39,7 @@ package ifneeded tifftcl 1.0 [string map [list @dir@ $dir] \
 }
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded jpegtcl 1.0 [list load [file join $dir jpegtcl10.dll]]
 
@@ -52,7 +52,7 @@ package ifneeded jpegtcl 1.0 [string map [list @dir@ $dir] \
 }
 # -*- tcl -*- Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded img::base 1.3 [list load [file join $dir tkimg13.dll]]
 
@@ -78,8 +78,7 @@ package ifneeded Img   1.3 {
     package require img::xpm
     package require img::ps
     package require img::jpeg
-    # [ 1294387 ] pngtcl 1.2.6 crashes 
-    #package require img::png
+    package require img::png
     package require img::tiff
     package require img::bmp
     package require img::ppm
@@ -90,81 +89,81 @@ package ifneeded Img   1.3 {
 }
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::bmp" 1.3 [list load [file join $dir tkimgbmp13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::gif" 1.3 [list load [file join $dir tkimggif13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::ico" 1.3 [list load [file join $dir tkimgico13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::jpeg" 1.3 [list load [file join $dir tkimgjpeg13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::pcx" 1.3 [list load [file join $dir tkimgpcx13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::pixmap" 1.3 [list load [file join $dir tkimgpixmap13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::png" 1.3 [list load [file join $dir tkimgpng13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::ppm" 1.3 [list load [file join $dir tkimgppm13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::ps" 1.3 [list load [file join $dir tkimgps13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::sgi" 1.3 [list load [file join $dir tkimgsgi13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::sun" 1.3 [list load [file join $dir tkimgsun13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::tga" 1.3 [list load [file join $dir tkimgtga13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::tiff" 1.3 [list load [file join $dir tkimgtiff13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::window" 1.3 [list load [file join $dir tkimgwindow13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::xbm" 1.3 [list load [file join $dir tkimgxbm13.dll]]
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.2 2005-11-23 11:15:51 matben Exp $
+# $Id: pkgIndex.tcl,v 1.3 2005-11-23 12:54:00 matben Exp $
 
 package ifneeded "img::xpm" 1.3 [list load [file join $dir tkimgxpm13.dll]]
