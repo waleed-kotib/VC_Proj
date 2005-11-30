@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: fontselector.tcl,v 1.3 2005-11-30 08:32:00 matben Exp $
+# $Id: fontselector.tcl,v 1.4 2005-11-30 14:57:05 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -70,7 +70,7 @@ snit::widget ui::fontselector::widget {
 
     typeconstructor {
 	# Do this only once since expensive!
-	set families [font families]
+	set families [lsort [font families]]
     }
     
     constructor {args} {
