@@ -2,7 +2,7 @@
 # 
 #       JivePhone bindings for the jive server and Asterisk.
 #       
-# $Id: JivePhone.tcl,v 1.5 2005-11-30 12:56:05 matben Exp $
+# $Id: JivePhone.tcl,v 1.6 2005-11-30 15:02:08 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -148,9 +148,10 @@ proc ::JivePhone::MessageHook {body args} {
 	  "phone-event"]
 	if {$elem != {}} {
 	    set status [wrapper::getattribute $elem "status"]
-	    set image [::Rosticons::Get [string tolower phone/$status]]
-	    set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
-	
+	    if {$status ne ""} {
+		set image [::Rosticons::Get [string tolower phone/$status]]
+		set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
+	    }
 	}
     }
     return
