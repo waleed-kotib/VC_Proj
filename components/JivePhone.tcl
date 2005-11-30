@@ -2,7 +2,7 @@
 # 
 #       JivePhone bindings for the jive server and Asterisk.
 #       
-# $Id: JivePhone.tcl,v 1.4 2005-11-30 08:32:00 matben Exp $
+# $Id: JivePhone.tcl,v 1.5 2005-11-30 12:56:05 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -31,7 +31,7 @@ proc ::JivePhone::Init { } {
     variable xmlns
     set xmlns(jivephone) "http://jivesoftware.com/xmlns/phone"
     
-    variable statuses {RING DIALED ON_PHONE HANG_UP}
+    variable statuses {AVAILABLE RING DIALED ON_PHONE HANG_UP}
     variable state
     array set state {
 	phoneserver     0
@@ -47,7 +47,7 @@ proc ::JivePhone::LoginHook { } {
 proc ::JivePhone::OnDiscoServer {jlibname type from subiq args} {
     variable state
     
-    #puts "::JivePhone::OnDiscoServer"
+    Debug "::JivePhone::OnDiscoServer"
     
     # See comments above what my opinion is...
     if {$type eq "result"} {
@@ -80,7 +80,7 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
     variable xmlns
     variable state
     
-    #puts "::JivePhone::OnDiscoUserNode"
+    Debug "::JivePhone::OnDiscoUserNode"
     
     if {$type eq "result"} {
 	set node [wrapper::getattribute $subiq "node"]
@@ -110,17 +110,23 @@ proc ::JivePhone::LogoutHook { } {
 proc ::JivePhone::PresenceHook {jid type args} {
     variable xmlns
 
-    #puts "::JivePhone::PresenceHook $args"
+    Debug "::JivePhone::PresenceHook jid=$jid, type=$type, $args"
+    
+    if {$type ne "available"} {
+	return
+    }
 
     array set argsArr $args
-    if {[info exists argsArr(-extras)]} {
-	set elems [wrapper::getnamespacefromchilds $argsArr(-extras)  \
+    if {[info exists argsArr(-xmldata)]} {
+	set xmldata $argsArr(-xmldata)
+	set elems [wrapper::getchildswithtagandxmlns $xmldata  \
 	  phone-status $xmlns(jivephone)]
 	if {$elems ne ""} {
+	    set from [wrapper::getattribute $xmldata from]
 	    set elem [lindex $elems 0]
 	    set status [wrapper::getattribute $elem "status"]
 	    set image [::Rosticons::Get [string tolower phone/$status]]
-	    ::RosterTree::StyleSetItemAlternative $jid jivephone image $image
+	    ::RosterTree::StyleSetItemAlternative $from jivephone image $image
 	}
     }
     return
@@ -134,16 +140,18 @@ proc ::JivePhone::PresenceHook {jid type args} {
 proc ::JivePhone::MessageHook {body args} {    
     variable xmlns
 
-    #puts "::JivePhone::MessageHook $args"
+    Debug "::JivePhone::MessageHook $args"
     
     array set argsArr $args
-
-    if {[info exists argsArr(-phone-event)]} {
-	set elem [lindex $argsArr(-phone-event) 0]
-	set status [wrapper::getattribute $elem "status"]
-	set image [::Rosticons::Get [string tolower phone/$status]]
-	set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
+    if {[info exists argsArr(-xmldata)]} {
+	set elem [wrapper::getfirstchildwithtag $argsArr(-xmldata)  \
+	  "phone-event"]
+	if {$elem != {}} {
+	    set status [wrapper::getattribute $elem "status"]
+	    set image [::Rosticons::Get [string tolower phone/$status]]
+	    set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
 	
+	}
     }
     return
 }
@@ -206,6 +214,13 @@ proc ::JivePhone::Dial {w} {
     
     ::Jabber::JlibCmd send_presence -extras [list $phoneElem]
     destroy $w
+}
+
+proc ::JivePhone::Debug {msg} {
+    
+    if {0} {
+	puts "-------- $msg"
+    }
 }
 
 #-------------------------------------------------------------------------------
