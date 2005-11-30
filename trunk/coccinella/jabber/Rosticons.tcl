@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.17 2005-11-22 07:44:12 matben Exp $
+# $Id: Rosticons.tcl,v 1.18 2005-11-30 08:32:00 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -208,6 +208,8 @@ proc ::Rosticons::Get {statuskey} {
 	    } else {
 		set sub [string map {group-online group} $sub]
 		set sub [string map {group-offline group} $sub]
+		set sub [string map {folder-open folder} $sub]
+		set sub [string map {folder-closed folder} $sub]
 		set key $type/$sub
 		if {[info exists icons($key)]} {
 		    return $icons($key)
@@ -385,7 +387,7 @@ proc ::Rosticons::BuildPrefsPage {wpage} {
 
     frame $lbox -relief sunken -bd 1    
     
-    tuscrollbar $wysc -orient vertical -command [list $wselect yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wselect yview]
     PTreeSelect $wselect $wysc
 
     grid  $wselect  -row 0 -column 0 -sticky news
@@ -401,7 +403,7 @@ proc ::Rosticons::BuildPrefsPage {wpage} {
 
     frame $rbox -relief sunken -bd 1    
     
-    tuscrollbar $wysc -orient vertical -command [list $wselect yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wselect yview]
     PTreeShow $wshow $wysc
 
     grid  $wshow  -row 0 -column 0 -sticky news

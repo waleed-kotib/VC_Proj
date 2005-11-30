@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.29 2005-11-23 11:15:51 matben Exp $
+# $Id: Init.tcl,v 1.30 2005-11-30 08:32:00 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -96,6 +96,8 @@ proc ::Init::SetThis {thisScript} {
     set this(altServiconsPath)  [file join $this(prefsPath) iconsets service]
     set this(inboxFile)         [file join $this(prefsPath) Inbox.tcl]
     set this(notesFile)         [file join $this(prefsPath) Notes.tcl]
+    set this(avatarPath)        [file join $this(imagePath) avatar]
+    set this(altAvatarPath)     [file join $this(altImagePath) avatar]
     set this(httpdRootPath)     $this(path)
     # Need to rework this...
     if {0 && [info exists starkit::topdir]} {
@@ -121,7 +123,7 @@ proc ::Init::SetThis {thisScript} {
 	set machine $tcl_platform(machine)
 	if {[regexp {[2-9]86} $tcl_platform(machine)]} {
 	    set machine "i686"
-	} elseif {[regexp {.86_64} $tcl_platform(machine)]} {
+	} elseif {$tcl_platform(machine) eq "x86_64"} {
 	    # x86_64
 	    set machine "i686"
 	}

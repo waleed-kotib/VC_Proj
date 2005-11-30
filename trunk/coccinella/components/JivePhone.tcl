@@ -2,7 +2,7 @@
 # 
 #       JivePhone bindings for the jive server and Asterisk.
 #       
-# $Id: JivePhone.tcl,v 1.3 2005-11-23 11:15:51 matben Exp $
+# $Id: JivePhone.tcl,v 1.4 2005-11-30 08:32:00 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -47,7 +47,7 @@ proc ::JivePhone::LoginHook { } {
 proc ::JivePhone::OnDiscoServer {jlibname type from subiq args} {
     variable state
     
-    puts "::JivePhone::OnDiscoServer"
+    #puts "::JivePhone::OnDiscoServer"
     
     # See comments above what my opinion is...
     if {$type eq "result"} {
@@ -80,7 +80,7 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
     variable xmlns
     variable state
     
-    puts "::JivePhone::OnDiscoUserNode"
+    #puts "::JivePhone::OnDiscoUserNode"
     
     if {$type eq "result"} {
 	set node [wrapper::getattribute $subiq "node"]
@@ -110,7 +110,7 @@ proc ::JivePhone::LogoutHook { } {
 proc ::JivePhone::PresenceHook {jid type args} {
     variable xmlns
 
-    puts "::JivePhone::PresenceHook $args"
+    #puts "::JivePhone::PresenceHook $args"
 
     array set argsArr $args
     if {[info exists argsArr(-extras)]} {
@@ -134,7 +134,7 @@ proc ::JivePhone::PresenceHook {jid type args} {
 proc ::JivePhone::MessageHook {body args} {    
     variable xmlns
 
-    puts "::JivePhone::MessageHook $args"
+    #puts "::JivePhone::MessageHook $args"
     
     array set argsArr $args
 

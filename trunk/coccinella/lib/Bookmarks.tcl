@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Bookmarks.tcl,v 1.2 2005-10-06 14:41:28 matben Exp $
+# $Id: Bookmarks.tcl,v 1.3 2005-11-30 08:32:00 matben Exp $
 
 package require snit 1.0
 package require ui::util
@@ -68,7 +68,7 @@ snit::widget ::Bookmarks::Dialog {
 	set wtb $wfb.t
 	set wtablelist $wtb
 	
-	tuscrollbar $wsc -orient vertical -command [list $wtb yview]
+	ttk::scrollbar $wsc -orient vertical -command [list $wtb yview]
 	tablelist::tablelist $wtb -columns $options(-columns)  \
 	  -listvariable [myvar tmpList] -stretch all           \
 	  -yscrollcommand [list $wsc set] -width 48 -bd 0

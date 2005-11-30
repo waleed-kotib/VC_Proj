@@ -1,21 +1,22 @@
 # Version: 2
-create rectangle 14.0 594.0 581.0 673.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/189832592 rectangle std} -width 2.0
-create rectangle 15.0 359.0 582.0 478.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/189832590 rectangle std} -width 2.0
-create rectangle 15.0 490.0 583.0 583.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/189832591 rectangle std} -width 2.0
-create rectangle 16.0 241.0 583.0 346.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/189832568 rectangle std} -width 2.0
-create rectangle 16.0 124.0 583.0 229.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/189832569 rectangle std} -width 2.0
-create text 30.0 131.0 -anchor nw -font {Math1 5 normal} -tags {*/189832570 std text} -text abcdefghijklmnopqrstuvwxyz
-create text 28.0 161.0 -anchor nw -font {Math1 5 normal} -tags {*/189832571 std text} -text ABCDEFGHIJKLMNOPQRSTUVWXYZ
-create rectangle 16.0 40.0 583.0 113.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/189832572 rectangle std} -width 2.0
-create text 31.0 189.0 -anchor nw -font {Math1 5 normal} -tags {*/189832573 std text} -text ›ç∂éƒªﬁ’‘œπ•®ß†ü‹≈µ÷
-create text 35.0 252.0 -anchor nw -font {Math3 5 normal} -tags {*/189832574 std text} -text abcdefghijklmnopqrstuvwxyz
-create text 35.0 283.0 -anchor nw -font {Math3 5 normal} -tags {*/189832575 std text} -text ABCDEFGHIJKLMNOPQRSTUVWXYZ
-create text 35.0 313.0 -anchor nw -font {Math3 5 normal} -tags {*/189832576 std text} -text ›ç∂éƒ¸˛ı√ªﬁ’‘œπ•®ß†ü‹Ω≈µ÷
-create text 45.0 371.0 -anchor nw -font {Math2 3 normal} -tags {*/189832578 std text} -text {A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  P  Q  R  S  T  U  V  W -  . & ,   1  2  3  }
-create text 32.0 603.0 -anchor nw -font {Math4 5 normal} -tags {*/189832580 std text} -text {wxyz1234567890 + åä -.,'}
-create text 30.0 630.0 -anchor nw -font {Math4 5 normal} -tags {*/189832581 std text} -text {B C EFGHIJKLMNOPQRSTUVW}
-create text 29.0 78.0 -anchor nw -font {Math5 5 normal} -tags {*/189832582 std text} -text abcdefghijklmnopqrstuvwxyz
-create text 29.0 50.0 -anchor nw -font {Math5 5 normal} -tags {*/189832583 std text} -text ABCDEFGHIJKLMNOPQRSTUVWXYZ
-create text 25.0 11.0 -anchor nw -font {Helvetica 3 normal} -tags {*/189832584 std text} -text {Mathematica fonts. Requires that you have these fonts installed.}
-create text 35.0 502.0 -anchor nw -font {Math2 4 normal} -tags {*/189832586 std text} -text {ª    ™    œ  π    ™   ©    ®   ´    ¨    ‚›  Ω ü  }
-create text 44.0 409.0 -anchor nw -font {Math2 4 normal} -tags {*/189832589 std text} -text {8 9 :  ;   ? > = <  µ  ≤  √   ß  •   †   £  [  _  ] }
+create rectangle 13.0 612.0 580.0 691.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/208554821 rectangle std} -width 2.0
+create rectangle 14.0 377.0 581.0 496.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/208554822 rectangle std} -width 2.0
+create rectangle 14.0 508.0 582.0 601.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/208554823 rectangle std} -width 2.0
+create rectangle 15.0 259.0 582.0 364.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/208554824 rectangle std} -width 2.0
+create rectangle 15.0 142.0 582.0 247.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/208554825 rectangle std} -width 2.0
+create text 29.0 149.0 -anchor nw -font {Math1 5 normal} -tags {*/208554826 std text} -text abcdefghijklmnopqrstuvwxyz
+create text 27.0 179.0 -anchor nw -font {Math1 5 normal} -tags {*/208554827 std text} -text ABCDEFGHIJKLMNOPQRSTUVWXYZ
+create rectangle 15.0 58.0 582.0 131.0 -disabledwidth 0 -fill #d2d2d2 -outline #949494 -tags {*/208554828 rectangle std} -width 2.0
+create text 30.0 207.0 -anchor nw -font {Math1 5 normal} -tags {*/208554829 std text} -text ›ç∂éƒªﬁ’‘œπ•®ß†ü‹≈µ÷
+create text 34.0 270.0 -anchor nw -font {Math3 5 normal} -tags {*/208554830 std text} -text abcdefghijklmnopqrstuvwxyz
+create text 34.0 301.0 -anchor nw -font {Math3 5 normal} -tags {*/208554831 std text} -text ABCDEFGHIJKLMNOPQRSTUVWXYZ
+create text 34.0 331.0 -anchor nw -font {Math3 5 normal} -tags {*/208554832 std text} -text ›ç∂éƒ¸˛ı√ªﬁ’‘œπ•®ß†ü‹Ω≈µ÷
+create text 44.0 389.0 -anchor nw -font {Math2 3 normal} -tags {*/208554833 std text} -text {A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  P  Q  R  S  T  U  V  W -  . & ,   1  2  3  }
+create text 31.0 621.0 -anchor nw -font {Math4 5 normal} -tags {*/208554834 std text} -text {wxyz1234567890 + åä -.,'}
+create text 29.0 648.0 -anchor nw -font {Math4 5 normal} -tags {*/208554835 std text} -text {B C EFGHIJKLMNOPQRSTUVW}
+create text 28.0 96.0 -anchor nw -font {Math5 5 normal} -tags {*/208554836 std text} -text abcdefghijklmnopqrstuvwxyz
+create text 28.0 68.0 -anchor nw -font {Math5 5 normal} -tags {*/208554837 std text} -text ABCDEFGHIJKLMNOPQRSTUVWXYZ
+create text 25.0 11.0 -anchor nw -font {Helvetica 3 normal} -tags {*/208554838 std text} -text {Mathematica fonts. Requires that you have these fonts installed.}
+create text 34.0 520.0 -anchor nw -font {Math2 4 normal} -tags {*/208554839 std text} -text {ª    ™    œ  π    ™   ©    ®   ´    ¨    ‚›  Ω ü  }
+create text 43.0 427.0 -anchor nw -font {Math2 4 normal} -tags {*/208554840 std text} -text {8 9 :  ;   ? > = <  µ  ≤  √   ß  •   †   £  [  _  ] }
+create text 28.0 30.0 -anchor nw -font {Helvetica 2 normal} -tags {*/208554841 std text} -text http://www.wolfram.com/products/mathreader/

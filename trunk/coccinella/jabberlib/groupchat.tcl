@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: groupchat.tcl,v 1.5 2005-09-08 12:52:36 matben Exp $
+# $Id: groupchat.tcl,v 1.6 2005-11-30 08:32:00 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -57,7 +57,7 @@ proc jlib::groupchat::enter {jlibname room nick args} {
     upvar ${jlibname}::groupchat::rooms rooms
     
     set room [string tolower $room]
-    set jid ${room}/${nick}
+    set jid $room/$nick
     eval {[namespace parent]::send_presence $jlibname -to $jid} $args
     set gchat($room,mynick) $nick
     
@@ -77,12 +77,10 @@ proc jlib::groupchat::exit {jlibname room} {
     set room [string tolower $room]
     if {[info exists gchat($room,mynick)]} {
 	set nick $gchat($room,mynick)
-    } else {
-	return -code error "Unknown nick name for room \"$room\""
+	set jid $room/$nick
+	[namespace parent]::send_presence $jlibname -to $jid -type "unavailable"
+	unset -nocomplain gchat($room,mynick)
     }
-    set jid ${room}/${nick}
-    [namespace parent]::send_presence $jlibname -to $jid -type "unavailable"
-    unset gchat($room,mynick)
     set ind [lsearch -exact $gchat(allroomsin) $room]
     if {$ind >= 0} {
 	set gchat(allroomsin) [lreplace $gchat(allroomsin) $ind $ind]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.44 2005-11-18 07:52:32 matben Exp $
+# $Id: GotMsg.tcl,v 1.45 2005-11-30 08:32:00 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -257,7 +257,7 @@ proc ::GotMsg::Build { } {
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns]]
     $wtext tag configure normal
-    tuscrollbar $wysc -orient vertical -command [list $wtext yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
 
     grid  $wtext  -column 0 -row 0 -sticky news
     grid  $wysc   -column 1 -row 0 -sticky ns

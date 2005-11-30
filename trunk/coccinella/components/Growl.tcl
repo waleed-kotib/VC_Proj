@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.4 2005-11-23 12:54:00 matben Exp $
+# $Id: Growl.tcl,v 1.5 2005-11-30 08:32:00 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -42,7 +42,7 @@ proc ::Growl::ChatMessageHook {body args} {
     set jid $argsArr(-from)
     jlib::splitjid $jid jid2 -
     
-    if {[::Chat::HaveChat $jid] eq ""} {
+    if {[::Chat::HaveChat $jid]} {
 	return
     }
     set title "Message From: $jid2"

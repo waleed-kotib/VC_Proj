@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.10 2005-11-05 11:37:25 matben Exp $
+# $Id: FilePrefs.tcl,v 1.11 2005-11-30 08:32:00 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -107,7 +107,7 @@ proc ::FilePrefs::BuildPage {page} {
     # Make the multi column listbox using treectrl. 
     set wtable $wlc.tree
     set wysc   $wlc.vsb
-    tuscrollbar $wysc -orient vertical -command [list $wtable yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtable yview]
     TreeCtrl $wtable $wysc
     
     grid  $wtable   -column 0 -row 0 -sticky news

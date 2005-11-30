@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.25 2005-11-19 11:35:41 matben Exp $
+# $Id: P2P.tcl,v 1.26 2005-11-30 08:32:00 matben Exp $
 
 package provide P2P 1.0
 
@@ -1088,7 +1088,7 @@ proc ::P2P::Prefs::BuildPrefsPage {wpage} {
     listbox $wlbox -height 10 -width 18   \
       -listvar [namespace current]::shortListVar \
       -yscrollcommand [list $wsb set] -selectmode extended
-    tuscrollbar $wsb -command [list $wlbox yview]
+    ttk::scrollbar $wsb -command [list $wlbox yview]
     pack  $wlbox  -side left -fill both
     pack  $wsb    -side left -fill both
     pack  $frlist -side left

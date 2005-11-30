@@ -4,10 +4,15 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.3 2005-10-28 06:48:41 matben Exp $
+# $Id: tileutils.tcl,v 1.4 2005-11-30 08:32:00 matben Exp $
 #
 
 package provide tileutils 0.1
+
+
+if {[tk windowingsystem] eq "aqua"} {
+    interp alias {} ttk::scrollbar {} scrollbar
+}
 
 # These should be collected in a separate theme specific file.
     
@@ -52,24 +57,20 @@ foreach name [tile::availableThemes] {
 	style configure Small.Tab          -font CociSmallFont
 	
 	if {$name eq "clam"} {
-	    style configure Small.TButton       \
+	    style configure TButton           \
+	      -width -9 -padding {5 3}
+	    style configure TMenubutton       \
+	      -width -9 -padding {5 3}
+	    style configure Small.TButton     \
 	      -font CociSmallFont             \
 	      -padding {5 1}                  \
 	      -width -9
-	    style configure Small.TMenubutton   \
+	    style configure Small.TMenubutton \
 	      -font CociSmallFont             \
 	      -padding {5 1}                  \
 	      -width -9
 	}
     }    
-}
-
-proc tuscrollbar {w args} {
-    if {[tk windowingsystem] eq "aqua"} {
-	return [eval {scrollbar $w} $args]
-    } else {
-	return [eval {ttk::scrollbar $w} $args]
-    }
 }
 
 # ttk::optionmenu --

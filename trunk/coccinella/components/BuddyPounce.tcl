@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.11 2005-11-04 15:14:55 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.12 2005-11-30 08:32:00 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -577,7 +577,7 @@ proc ::BuddyPounce::Event {from eventkey args} {
 	    }
 	    chat {			
 		# If already have chat.
-		set w [::Chat::HaveChat $jid]
+		set w [::Chat::GetWindow $jid]
 		if {$w ne ""} {
 		    raise $w
 		} else {

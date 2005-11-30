@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.36 2005-11-05 11:37:25 matben Exp $
+# $Id: VCard.tcl,v 1.37 2005-11-30 08:32:00 matben Exp $
 
 package provide VCard 1.0
 
@@ -290,7 +290,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     #frame $pbi.fde
     text $wdesctxt -height 8 -wrap word -width 20 -bd 0 -relief sunken \
       -yscrollcommand [list $wdysc set]
-    tuscrollbar $wdysc -orient vertical -command [list $wdesctxt yview]
+    ttk::scrollbar $wdysc -orient vertical -command [list $wdesctxt yview]
     pack $wdysc   -side right -fill y
     pack $wdesctxt -fill both -expand 1
 

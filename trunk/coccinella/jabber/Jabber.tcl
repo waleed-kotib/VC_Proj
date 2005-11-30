@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.151 2005-11-16 08:52:03 matben Exp $
+# $Id: Jabber.tcl,v 1.152 2005-11-30 08:32:00 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -959,7 +959,8 @@ proc ::Jabber::ErrorLogDlg { } {
 
     text $wtext -height 12 -width 48 -wrap word -bd 0 \
       -highlightthickness 0 -yscrollcommand [list $wysc set]
-    tuscrollbar $wysc -orient vertical -command [list $wtext yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
+    
     grid  $wtext  -column 0 -row 0 -sticky news
     grid  $wysc   -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxt 0 -weight 1

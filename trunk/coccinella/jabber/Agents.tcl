@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.39 2005-11-05 11:37:25 matben Exp $
+# $Id: Agents.tcl,v 1.40 2005-11-30 08:32:00 matben Exp $
 
 package provide Agents 1.0
 
@@ -365,8 +365,8 @@ proc ::Agents::Build {w args} {
 
     set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
 
-    tuscrollbar $wxsc -orient horizontal -command [list $wtree xview]
-    tuscrollbar $wysc -orient vertical -command [list $wtree yview]
+    ttk::scrollbar $wxsc -orient horizontal -command [list $wtree xview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtree yview]
     ::ITree::New $wtree $wxsc $wysc   \
       -selection   ::Agents::Selection     \
       -open        ::Agents::OpenTreeCmd   \

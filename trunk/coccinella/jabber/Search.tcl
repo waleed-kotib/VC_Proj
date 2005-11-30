@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.20 2005-08-14 07:10:51 matben Exp $
+# $Id: Search.tcl,v 1.21 2005-11-30 08:32:00 matben Exp $
 
 package provide Search 1.0
 
@@ -159,8 +159,8 @@ proc ::Search::Build {args} {
       -xscrollcommand [list $wxsc set] -yscrollcommand [list $wysc set]  \
       -width 60 -height 20
     
-    tuscrollbar $wysc -command [list $wtb yview] -orient vertical
-    tuscrollbar $wxsc -command [list $wtb xview] -orient horizontal
+    ttk::scrollbar $wysc -command [list $wtb yview] -orient vertical
+    ttk::scrollbar $wxsc -command [list $wtb xview] -orient horizontal
     grid  $wtb   $wysc  -sticky news
     grid  $wxsc  -      -sticky ew
     grid rowconfigure $frsearch 0 -weight 1

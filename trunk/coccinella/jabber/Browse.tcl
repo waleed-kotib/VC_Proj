@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.81 2005-11-05 11:37:25 matben Exp $
+# $Id: Browse.tcl,v 1.82 2005-11-30 08:32:00 matben Exp $
 
 package require ITree
 
@@ -520,8 +520,8 @@ proc ::Browse::Build {w} {
 
     set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
 
-    tuscrollbar $wxsc -command [list $wtree xview] -orient horizontal
-    tuscrollbar $wysc -command [list $wtree yview] -orient vertical
+    ttk::scrollbar $wxsc -command [list $wtree xview] -orient horizontal
+    ttk::scrollbar $wysc -command [list $wtree yview] -orient vertical
     ::ITree::New $wtree $wxsc $wysc   \
       -selection   ::Browse::Selection     \
       -open        ::Browse::OpenTreeCmd   \

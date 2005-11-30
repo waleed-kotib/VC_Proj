@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.3 2005-11-22 07:44:12 matben Exp $
+# $Id: RosterTwo.tcl,v 1.4 2005-11-30 08:32:00 matben Exp $
 
 package require RosterTree
 
@@ -57,7 +57,7 @@ proc ::RosterTwo::Configure {_T} {
     #   1) hidden for tags
     $T column create -tag cTree -itembackground $stripes -resize 0 -expand 1
     $T column create -tag cTag -visible 0
-    $T configure -treecolumn cTree
+    $T configure -treecolumn cTree -showheader 0
 
     # The elements.
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.82 2005-11-18 07:52:32 matben Exp $
+# $Id: MailBox.tcl,v 1.83 2005-11-30 08:32:00 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -52,10 +52,8 @@ namespace eval ::MailBox:: {
     } else {
 	option add *MailBox*mid.padding                {10  8 10  8}    50
     }
-    option add *MailBox*mid.ff.borderWidth         1                50
-    option add *MailBox*mid.ff.relief              raised           50
-    option add *MailBox*frmsg.text.borderWidth     1                50
-    option add *MailBox*frmsg.text.relief          sunken           50
+    option add *MailBox*Text.borderWidth           0                50
+    option add *MailBox*Text.relief                flat             50
 
     # Add some hooks...
     ::hooks::register initHook            ::MailBox::Init
@@ -281,7 +279,7 @@ proc ::MailBox::Build {args} {
 
     # Frame to serve as container for the pane geometry manager.
     # D =
-    frame $wmid.ff -bd 1 -relief sunken
+    frame $wmid.ff -bd 0 -highlightthickness 0
     pack  $wmid.ff -side top -fill both -expand 1
 
     # Pane geometry manager.
@@ -289,13 +287,13 @@ proc ::MailBox::Build {args} {
     ttk::paned $wpane -orient vertical
     pack $wpane -side top -fill both -expand 1
     
-    # The actual mailbox list as a tablelist.
+    # The actual mailbox list as a treectrl.
     set wfrmbox $wpane.frmbox
-    frame $wfrmbox
+    frame $wfrmbox -bd 1 -relief sunken
     set wtbl    $wfrmbox.tbl
     set wysctbl $wfrmbox.ysc
 	
-    tuscrollbar $wysctbl -orient vertical -command [list $wtbl yview]	
+    ttk::scrollbar $wysctbl -orient vertical -command [list $wtbl yview]	
     TreeCtrl $wtbl $wysctbl
     
     grid  $wtbl     -column 0 -row 0 -sticky news
@@ -313,13 +311,13 @@ proc ::MailBox::Build {args} {
     set wfrmsg $wpane.frmsg    
     set wtextmsg $wfrmsg.text
     set wyscmsg  $wfrmsg.ysc
-    frame $wfrmsg
+    frame $wfrmsg -bd 1 -relief sunken
     text $wtextmsg -height 4 -width 1 -wrap word \
       -yscrollcommand [list ::UI::ScrollSet $wyscmsg \
       [list grid $wyscmsg -column 1 -row 0 -sticky ns]] \
       -state disabled
     $wtextmsg tag configure normal
-    tuscrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
+    ttk::scrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
 
     grid  $wtextmsg  -column 0 -row 0 -sticky news
     grid  $wyscmsg   -column 1 -row 0 -sticky ns
@@ -373,8 +371,14 @@ proc ::MailBox::TreeCtrl {T wysc} {
       -showroot 0 -showrootbutton 0 -showbuttons 0 -showlines 0  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns]]  \
-      -borderwidth 0 -highlightthickness 0
-        
+      -borderwidth 0 -highlightthickness 0        
+
+    # State for a read message
+    $T state define read
+
+    # State for an unread message.
+    $T state define unread
+
     # This is a dummy option.
     set stripeBackground [option get $T stripeBackground {}]
     set stripes [list $stripeBackground {}]
@@ -392,19 +396,14 @@ proc ::MailBox::TreeCtrl {T wysc} {
     $T column create -tag cRead -visible 0
     $T column create -tag cUid  -visible 0
 
-    # State for a read message
-    $T state define read
-
-    # State for an unread message.
-    $T state define unread
-
     set fill    [list $this(sysHighlight) {selected focus} gray {selected !focus}]
+    set fillT   {white {selected focus} black {selected !focus}}
     set suImage [list $locals(iconReadMsg) {read} $locals(iconUnreadMsg) {unread}]
     set suFont  [list CociSmallFont read CociSmallBoldFont unread]
     
     $T element create eBorder rect -open new -outline gray -outlinewidth 1 \
       -fill $fill -showfocus 1
-    $T element create eText     text -lines 1 -font $suFont
+    $T element create eText     text -lines 1 -font $suFont -fill $fillT
     $T element create eImageEye image -image $suImage
     $T element create eImageWb  image
     

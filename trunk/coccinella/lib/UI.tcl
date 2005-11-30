@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.110 2005-11-19 11:35:41 matben Exp $
+# $Id: UI.tcl,v 1.111 2005-11-30 08:32:00 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -739,7 +739,7 @@ proc ::UI::ScrollFrame {w args} {
     array set opts $args
     
     frame $w -class Scrollframe -bd $opts(-bd) -relief $opts(-relief)
-    tuscrollbar $w.ysc -command [list $w.can yview]
+    ttk::scrollbar $w.ysc -command [list $w.can yview]
     if {$opts(-width)} {
 	set cwidth [expr {$opts(-width) - $opts(-bd) - [winfo reqwidth $w.ysc]}]
 	canvas $w.can -yscrollcommand [list $w.ysc set] -highlightthickness 0 \

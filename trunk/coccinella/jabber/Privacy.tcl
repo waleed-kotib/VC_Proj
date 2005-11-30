@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.15 2005-10-22 14:26:21 matben Exp $
+# $Id: Privacy.tcl,v 1.16 2005-11-30 08:32:00 matben Exp $
 
 package provide Privacy 1.0
 
@@ -106,7 +106,7 @@ proc ::Privacy::BuildPrefsPage {page} {
     set iline 0
    
     frame $wlabfr -borderwidth 0
-    tuscrollbar $wysc -orient vertical -command [list $wtable yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtable yview]
     text $wtable -width 32 -height 8 -borderwidth 0 -exportselection 0 \
       -highlightthickness 0 -state disabled -yscrollcommand [list $wysc set] \
       -insertwidth 0 -padx 0 -pady 0 -state normal -takefocus 0 -wrap none

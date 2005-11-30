@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.9 2005-11-22 07:44:12 matben Exp $
+# $Id: RosterTree.tcl,v 1.10 2005-11-30 08:32:00 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -30,13 +30,8 @@ namespace eval ::RosterTree {
 
     # Fake:
     option add *Roster*TreeCtrl.rosterImage     sky             widgetDefault
-    option add *Roster*TreeCtrl.dirImage        ""              widgetDefault
-    option add *Roster*TreeCtrl.onlineImage     lightbulbon     widgetDefault
-    option add *Roster*TreeCtrl.offlineImage    lightbulboff    widgetDefault
-    option add *Roster*TreeCtrl.trptImage       block           widgetDefault
-    option add *Roster*TreeCtrl.groupImage      folder16        widgetDefault
 
-    
+    # @@@ Should get this from a global reaource.
     variable buttonPressMillis 1000
 
     # Head titles.
@@ -71,6 +66,12 @@ proc ::RosterTree::RegisterStyle {
     set plugin($name,createItem) $createItemProc
     set plugin($name,deleteItem) $deleteItemProc
     set plugin($name,setItemAlt) $setItemAltProc
+}
+
+proc ::RosterTree::RegisterStyleSort {name sortProc} {    
+    variable plugin
+    
+    set plugin($name,sortProc) $sortProc
 }
 
 proc ::RosterTree::SetStyle {name} {
@@ -192,6 +193,12 @@ proc ::RosterTree::New {_T wxsc wysc} {
 	} 
     }
     bindtags $T [concat RosterTreeTag [bindtags $T]]
+}
+
+proc ::RosterTree::DBOptions {rosterStyle} {
+    variable T
+    
+    ::treeutil::setdboptions $T [::Roster::GetRosterWindow] $rosterStyle
 }
 
 # RosterTree::Free --
@@ -329,7 +336,7 @@ proc ::RosterTree::Popup {x y} {
     set tags    {}
     set clicked {}
     set status  {}
-    set jid3    {}
+    set jidlist {}
     set group   {}
 
     set id [$T identify $x $y]
@@ -360,6 +367,7 @@ proc ::RosterTree::Popup {x y} {
 	jid {
 	    lappend clicked user
 	    set jid3 [lindex $tags 1]
+	    set jidlist [list $jid3]
 	    if {[::Roster::IsCoccinella $jid3]} {
 		lappend clicked wb
 	    }
@@ -367,21 +375,25 @@ proc ::RosterTree::Popup {x y} {
 	group {
 	    lappend clicked group
 	    set group [lindex $tags 1]
-	    set jid3 [FindAllJIDInItem $item]
+	    set jidlist [FindAllJIDInItem $item]
 	}
 	head {
 	    if {[regexp {(available|unavailable)} [lindex $tags 1]]} {
 		lappend clicked head
-		set jid3 [FindAllJIDInItem $item]
+		set jidlist [FindAllJIDInItem $item]
 	    }
 	}
 	pending {
 	    # @@@ empty ???
 	    set status unavailable
+	    lappend clicked user
+	    set jid3 [lindex $tags 1]
+	    set jidlist [list $jid3]
 	}
 	transport {
 	    lappend clicked trpt
 	    set jid3 [lindex $tags 1]
+	    set jidlist [list $jid3]
 	    # Transports in own directory.
 	    if {[$jstate(roster) isavailable $jid3]} {
 		set status available
@@ -391,7 +403,7 @@ proc ::RosterTree::Popup {x y} {
 	}
     }
     
-    ::Roster::DoPopup $jid3 $clicked $status $group $x $y
+    ::Roster::DoPopup $jidlist $clicked $status $group $x $y
 }
 
 proc ::RosterTree::FindAllJIDInItem {item} {
@@ -834,8 +846,19 @@ proc ::RosterTree::GetParent {item} {
 }
 
 proc ::RosterTree::Sort {item {order -increasing}} {
+    variable plugin
+
+    set name $plugin(selected)
+    if {[info exists plugin($name,sortProc)]} {
+	$plugin($name,sortProc) $item $order
+    } else {
+	SortDefault $item $order
+    }
+}
+
+proc ::RosterTree::SortDefault {item order} {
     variable T    
-        
+    
     foreach citem [$T item children $item] {
 	if {[$T item numchildren $citem]} {
 	    Sort $citem $order

@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: fontselector.tcl,v 1.2 2005-09-20 14:09:51 matben Exp $
+# $Id: fontselector.tcl,v 1.3 2005-11-30 08:32:00 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -102,7 +102,7 @@ snit::widget ui::fontselector::widget {
 	listbox $wlistbox -width 28 -height 10  \
 	  -yscrollcommand [list $ysc set]  \
 	  -listvariable [mytypevar families]
-	scrollbar $ysc -orient vertical -command [list $wlistbox yview]
+	ttk::scrollbar $ysc -orient vertical -command [list $wlistbox yview]
 	pack  $wlistbox  $ysc  -side left -fill y
 	
 	# Font size, weight etc.
