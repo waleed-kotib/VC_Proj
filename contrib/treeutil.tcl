@@ -6,13 +6,13 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: treeutil.tcl,v 1.5 2005-11-05 11:37:25 matben Exp $
+#  $Id: treeutil.tcl,v 1.6 2005-11-30 08:32:00 matben Exp $
 
 # USAGE:
 # 
 #       ::treeutil::bind widgetPath item ?type? ?script?
 #       
-#       where 'type' is <Enter> or <Leave>.
+#       where 'type' is <Enter> , <Leave> or <ButtonPress-1>.
 #       Substitutions in script:
 #         %T    treectrl widget path
 #         %C    column index
@@ -20,12 +20,14 @@
 #         %x    widget x coordinate
 #         %y    widget y coordinate
 #         %E    element name
+#         
+#       ::treeutil::setdboptions widgetPath classWidget prefix
 
 package provide treeutil 1.0
 
 namespace eval ::treeutil {
 
-    variable events {<Enter> <Leave>}
+    variable events {<Enter> <Leave> <ButtonPress-1>}
 }
 
 # treeutil::bind --
@@ -77,10 +79,15 @@ proc ::treeutil::bind {w item args} {
 proc ::treeutil::Init {w} {
     variable state
     
-    ::bind $w <Motion>   {+::treeutil::Track %W %x %y }
-    ::bind $w <Enter>    {+::treeutil::Track %W %x %y }
-    ::bind $w <Leave>    {+::treeutil::Track %W %x %y }
-    ::bind $w <Destroy>  {+::treeutil::OnDestroy %W }
+    set btags [bindtags $w]
+    if {[lsearch $btags TreeUtil] < 0} {
+	bindtags $w [linsert $btags 1 TreeUtil]
+    }
+    ::bind TreeUtil <Motion>         { ::treeutil::Track %W %x %y }
+    ::bind TreeUtil <Enter>          { ::treeutil::Track %W %x %y }
+    ::bind TreeUtil <Leave>          { ::treeutil::Track %W %x %y }
+    ::bind TreeUtil <ButtonPress-1>  { ::treeutil::OnButtonPress1 %W %x %y }
+    ::bind TreeUtil <Destroy>        { ::treeutil::OnDestroy %W }
     
     # We could think of a <FocusOut> event also but the macs floating window
     # takes focus which makes this useless for tooltip windows.
@@ -108,7 +115,7 @@ proc ::treeutil::Track {w x y} {
 	    Generate $w $x $y $item <Enter> $id
 	    set state($w,item) $item
 	}
-    } elseif {$id eq ""} {
+    } elseif {([lindex $id 0] eq "header") || ($id eq "")} {
 	if {$prev != -1} {
 	    Generate $w $x $y $prev <Leave>
 	}
@@ -119,7 +126,7 @@ proc ::treeutil::Track {w x y} {
 proc ::treeutil::Generate {w x y item type {id ""}} {
     variable state
     
-    #puts "Generate $item $type"
+    #puts "Generate item=$item, type=$type, id=$id"
     
     if {[info exists state($w,$item,$type)]} {
 	array set aid {column "" elem "" line "" button ""}
@@ -129,6 +136,18 @@ proc ::treeutil::Generate {w x y item type {id ""}} {
 	set map [list %T $w %x $x %y $y %I $item %C $aid(column) %E $aid(elem)]
 	foreach cmd $state($w,$item,$type) {
 	    uplevel #0 [string map $map $cmd]
+	}
+    }
+}
+
+proc ::treeutil::OnButtonPress1 {w x y} {
+    variable state
+    
+    set id [$w identify $x $y]
+    if {[lindex $id 0] eq "item"} {
+	set item [lindex $id 1]
+	if {[llength $id] == 6} {
+	    Generate $w $x $y $item <ButtonPress-1>
 	}
     }
 }
@@ -153,5 +172,52 @@ if {0} {
     set item 1
     ::treeutil::bind $T $item <Enter> {puts "Enter %I C=%C E=%E x=%x y=%y"}
     ::treeutil::bind $T $item <Leave> {puts "Leave %I"}    
+}
+
+
+# treeutil::setdboptions --
+# 
+#       Configure elements and styles from option database.
+#       We use a specific format for the database resource names: 
+#         element options:    prefix:elementName-option
+#         style options:      prefix:styleName:elementName-option
+
+proc ::treeutil::setdboptions {w wclass prefix} {
+    
+    # Element options:
+    foreach ename [$w element names] {
+	set eopts {}
+	#puts "ename=$ename"
+	foreach ospec [$w element configure $ename] {
+	    set oname  [lindex $ospec 0]
+	    set dvalue [lindex $ospec 3]
+	    set value  [lindex $ospec 4]
+	    set dbname ${prefix}:${ename}${oname}	    
+	    set dbvalue [option get $wclass $dbname {}]
+	    if {($dbvalue ne "") && ($value ne $dbvalue)} {
+		lappend eopts $oname $dbvalue
+	    }
+	}
+	#puts "\t eopts=$eopts"
+	eval {$w element configure $ename} $eopts
+    }
+    
+    # Style layout options:
+    foreach style [$w style names] {
+	#puts "style=$style"
+	foreach ename [$w style elements $style] {
+	    #puts "\t ename=$ename"
+	    set sopts {}
+	    foreach {key value} [$w style layout $style $ename] {
+		set dbname ${prefix}:${style}:${ename}${key}
+		set dbvalue [option get $wclass $dbname {}]
+		if {($dbvalue ne "") && ($value ne $dbvalue)} {
+		    lappend sopts $key $dbvalue
+		}
+	    }
+	    #puts "\t\t sopts=$sopts"
+	    eval {$w style layout $style $ename} $sopts
+	}
+    }
 }
 

@@ -72,6 +72,8 @@
 *Text.Font:                          CociSmallFont
 *Text.highlightBackground:           white
 *Text.highlightThickness:            2
+*TreeCtrl.background:                white
+*TreeCtrl.Font:                      CociSmallFont
 
 ! contributed widgets
 !
@@ -90,8 +92,6 @@
 
 ! some of these are dummies just to set column options etc.
 !
-*TreeCtrl.background:                white
-*TreeCtrl.Font:                      CociSmallFont
 *TreeCtrl.stripeBackground:          #dedeff
 *TreeCtrl.columnBorderWidth:         1
 

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.71 2005-10-28 06:48:41 matben Exp $
+# $Id: MUC.tcl,v 1.72 2005-11-30 08:32:00 matben Exp $
 
 package require jlib::muc
 package require ui::entryex
@@ -409,7 +409,7 @@ proc ::MUC::BuildInfo {roomjid} {
     tablelist::tablelist $wtbl  \
       -columns $columns -stretch all -selectmode single  \
       -yscrollcommand [list $wysc set] -width 36 -height 8
-    tuscrollbar $wysc -orient vertical -command [list $wtbl yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtbl yview]
     ttk::button $frtab.ref -style Small.TButton  \
       -text [mc Refresh]  \
       -command [list [namespace current]::Refresh $roomjid]
@@ -864,7 +864,7 @@ proc ::MUC::EditListBuild {roomjid type} {
       -yscrollcommand [list $wysc set]  \
       -editendcommand [list [namespace current]::VerifyEditEntry $token] \
       -listvariable $token\(listvar)
-    tuscrollbar $wysc -orient vertical -command [list $wtbl yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtbl yview]
 
     grid  $wtbl  $wysc  -sticky news
     grid columnconfigure $frtab 0 -weight 1

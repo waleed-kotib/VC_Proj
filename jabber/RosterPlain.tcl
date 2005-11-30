@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.7 2005-11-22 07:44:12 matben Exp $
+# $Id: RosterPlain.tcl,v 1.8 2005-11-30 08:32:00 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -25,6 +25,8 @@ package provide RosterPlain 1.0
 
 namespace eval ::RosterPlain {
         
+    variable rosterStyle "plain"
+
     # Register this style.
     ::RosterTree::RegisterStyle plain Plain   \
       ::RosterPlain::Configure   \
@@ -41,6 +43,56 @@ namespace eval ::RosterPlain {
     ::hooks::register  browseSetHook        ::RosterPlain::BrowseSetHook
     ::hooks::register  discoInfoHook        ::RosterPlain::DiscoInfoHook
     ::hooks::register  rosterTreeConfigure  ::RosterPlain::TreeConfigureHook
+
+    variable initedDB 0
+}
+
+proc ::RosterPlain::InitDB { } {
+    global this
+    variable initedDB
+
+    # Use option database for customization. 
+    # We use a specific format: 
+    #   element options:    rosterStyle:elementName-option
+    #   style options:      rosterStyle:styleName:elementName-option
+
+    set fillT {white {selected focus} black {selected !focus}}
+    set fillB [list $this(sysHighlight) {selected focus} gray {selected !focus}]
+
+    # Element options:
+    option add *Roster.plain:eText-fill               $fillT            widgetDefault
+    option add *Roster.plain:eNumText-fill            blue              widgetDefault
+    option add *Roster.plain:eBorder-outline          white             widgetDefault
+    option add *Roster.plain:eBorder-outlinewidth     1                 widgetDefault
+    option add *Roster.plain:eBorder-fill             $fillB            widgetDefault
+
+    # If no background image:
+    option add *Roster.plain:eBorder-outline:nbg      gray              widgetDefault
+    option add *Roster.plain:eBorder-outlinewidth:nbg 0                 widgetDefault
+    
+    # Style layout options:
+    option add *Roster.plain:styHead:eText-padx       2                 widgetDefault
+    option add *Roster.plain:styHead:eNumText-padx    4                 widgetDefault
+    option add *Roster.plain:styHead:eImage-padx      2                 widgetDefault
+    option add *Roster.plain:styHead:eImage-pady      {1 2}             widgetDefault
+
+    option add *Roster.plain:styFolder:eText-padx     2                 widgetDefault
+    option add *Roster.plain:styFolder:eNumText-padx  4                 widgetDefault
+    option add *Roster.plain:styFolder:eImage-padx    2                 widgetDefault
+    option add *Roster.plain:styFolder:eImage-pady    {1 2}             widgetDefault
+    
+    option add *Roster.plain:styAvailable:eText-padx     2              widgetDefault
+    option add *Roster.plain:styAvailable:eImage-pady    {1 2}          widgetDefault
+    option add *Roster.plain:styAvailable:eAltImage-padx 2              widgetDefault
+
+    option add *Roster.plain:styUnavailable:eText-padx     2            widgetDefault
+    option add *Roster.plain:styUnavailable:eImage-pady    {1 2}        widgetDefault
+    option add *Roster.plain:styUnavailable:eAltImage-padx 2            widgetDefault
+
+    option add *Roster.plain:styTransport:eText-padx       4            widgetDefault
+    option add *Roster.plain:styTransport:eImage-pady      {1 2}        widgetDefault
+
+    set initedDB 1
 }
 
 # RosterPlain::Configure --
@@ -50,9 +102,15 @@ namespace eval ::RosterPlain {
 proc ::RosterPlain::Configure {_T} {
     global  this
     variable T
+    variable initedDB
+    variable rosterStyle
     
     set T $_T
     
+    if {!$initedDB} {
+	InitDB
+    }
+
     # This is a dummy option.
     set stripeBackground [option get $T stripeBackground {}]
     set stripes [list $stripeBackground {}]
@@ -71,50 +129,49 @@ proc ::RosterPlain::Configure {_T} {
     #   1) hidden for tags
     $T column create -tag cTree -itembackground $stripes -resize 0 -expand 1
     $T column create -tag cTag -visible 0
-    $T configure -treecolumn cTree
+    $T configure -treecolumn cTree -showheader 0
 
     # The elements.
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     $T element create eImage image
     $T element create eAltImage image
     $T element create eText text -lines 1
-    $T element create eTextNum text -lines 1 -fill blue
-    $T element create eBorder rect -open new -outline $outline -outlinewidth 1 \
-      -fill $fill -showfocus 1
+    $T element create eNumText text -lines 1
+    $T element create eBorder rect -open new -showfocus 1
  
     # Styles collecting the elements.
     set S [$T style create styHead]
-    $T style elements $S {eBorder eImage eText eTextNum}
-    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eTextNum -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
-    $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
+    $T style elements $S {eBorder eImage eText eNumText}
+    $T style layout $S eText    -squeeze x -expand ns
+    $T style layout $S eNumText -expand ns
+    $T style layout $S eImage   -expand ns -minheight $minH
+    $T style layout $S eBorder  -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styFolder]
-    $T style elements $S {eBorder eImage eText eTextNum}
-    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eTextNum -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
-    $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
+    $T style elements $S {eBorder eImage eText eNumText}
+    $T style layout $S eText    -squeeze x -expand ns
+    $T style layout $S eNumText -expand ns
+    $T style layout $S eImage   -expand ns -minheight $minH
+    $T style layout $S eBorder  -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styAvailable]
     $T style elements $S {eBorder eImage eAltImage eText}
-    $T style layout $S eText -padx 2 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
-    $T style layout $S eAltImage -expand ns -padx 2 -ipady 1
-    $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
+    $T style layout $S eText     -squeeze x -expand ns
+    $T style layout $S eImage    -expand ns -minheight $minH
+    $T style layout $S eAltImage -expand ns
+    $T style layout $S eBorder   -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styUnavailable]
     $T style elements $S {eBorder eImage eAltImage eText}
-    $T style layout $S eText -padx 2 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
-    $T style layout $S eAltImage -expand ns -padx 2 -ipady 1
-    $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
+    $T style layout $S eText     -squeeze x -expand ns
+    $T style layout $S eImage    -expand ns -minheight $minH
+    $T style layout $S eAltImage -expand ns
+    $T style layout $S eBorder   -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styTransport]
     $T style elements $S {eBorder eImage eText}
-    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 1
-    $T style layout $S eImage -expand ns -ipady $ipy -minheight $minH
+    $T style layout $S eText  -squeeze x -expand ns
+    $T style layout $S eImage -expand ns -minheight $minH
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styTag]
@@ -123,6 +180,8 @@ proc ::RosterPlain::Configure {_T} {
     $T notify bind $T <Selection>      { ::RosterTree::Selection }
     $T notify bind $T <Expand-after>   { ::RosterTree::OpenTreeCmd %I }
     $T notify bind $T <Collapse-after> { ::RosterTree::CloseTreeCmd %I }
+
+    ::RosterTree::DBOptions $rosterStyle
 }
 
 # RosterPlain::Init --
@@ -252,14 +311,14 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 	if {$item ne ""} {
 	    set all [::RosterTree::FindAllWithTagInItem $item $itype]
 	    set n [llength $all]
-	    $T item element configure $item cTree eTextNum -text "($n)"
+	    $T item element configure $item cTree eNumText -text "($n)"
 	}
     }
     
     # Update any groups.
     foreach item [::RosterTree::FindWithFirstTag group] {
 	set n [llength [$T item children $item]]
-	$T item element configure $item cTree eTextNum -text "($n)"
+	$T item element configure $item cTree eNumText -text "($n)"
     }
 
     # Design the balloon help window message.
@@ -384,16 +443,26 @@ proc ::RosterPlain::Balloon {jid presence item args} {
 
 proc ::RosterPlain::TreeConfigureHook {args} {
     variable T
+    variable rosterStyle
     
-    if {[::RosterTree::GetStyle] ne "plain"} {
+    if {[::RosterTree::GetStyle] ne $rosterStyle} {
 	return
     }
-
-    set outline white
+    set wclass [::Roster::GetRosterWindow]
+    set ename eBorder
+    set eopts {}
     if {[$T cget -backgroundimage] eq ""} {
-	set outline gray
+	set postfix ":nbg"
+    } else {
+	set postfix ""
     }
-    $T element configure eBorder -outline $outline    
+    foreach oname {-outline -outlinewidth} {
+	set dbname ${rosterStyle}:${ename}${oname}${postfix}	    
+	set dbvalue [option get $wclass $dbname {}]
+	lappend eopts $oname $dbvalue
+    }
+
+    eval {$T element configure eBorder} $eopts
 }
 
 #
@@ -406,9 +475,10 @@ proc ::RosterPlain::TreeConfigureHook {args} {
 #       possible to set icons of foreign IM users.
 
 proc ::RosterPlain::BrowseSetHook {from subiq} {
+    variable rosterStyle
     upvar ::Jabber::jserver jserver
     
-    if {[::RosterTree::GetStyle] ne "plain"} {
+    if {[::RosterTree::GetStyle] ne $rosterStyle} {
 	return
     }
     
@@ -419,9 +489,10 @@ proc ::RosterPlain::BrowseSetHook {from subiq} {
 }
 
 proc ::RosterPlain::DiscoInfoHook {type from subiq args} {
+    variable rosterStyle
     upvar ::Jabber::jstate jstate
     
-    if {[::RosterTree::GetStyle] ne "plain"} {
+    if {[::RosterTree::GetStyle] ne $rosterStyle} {
 	return
     }
 

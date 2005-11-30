@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.10 2005-11-05 11:37:25 matben Exp $
+# $Id: UserInfo.tcl,v 1.11 2005-11-30 08:32:00 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -373,7 +373,7 @@ proc ::UserInfo::NotesPage {token} {
     
     set wtext $wpage.t
     set wysc  $wpage.s
-    tuscrollbar $wysc -orient vertical -command [list $wtext yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
     text $wtext -wrap word -width 40 -height 12 -bd 1 -relief sunken \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list pack $wysc  -side right -fill y]]

@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.33 2005-09-26 11:59:16 matben Exp $
+# $Id: SetupAss.tcl,v 1.34 2005-11-30 08:32:00 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -326,7 +326,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
       -columns [list 16 Address 30 Name]  \
       -yscrollcommand [list $wysc set] -stretch all \
       -width 70 -height 16
-    tuscrollbar $wysc -orient vertical -command [list $wtbl yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtbl yview]
 
     grid  $wtbl  $wysc  -sticky news
     grid columnconfigure $wtbfr 0 -weight 1

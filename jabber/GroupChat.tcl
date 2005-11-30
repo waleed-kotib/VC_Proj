@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.128 2005-10-22 14:26:21 matben Exp $
+# $Id: GroupChat.tcl,v 1.129 2005-11-30 08:32:00 matben Exp $
 
 package require Enter
 package require History
@@ -72,14 +72,7 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*histHeadFont         ""               widgetDefault
     option add *GroupChat*clockFormat          "%H:%M"          widgetDefault
     option add *GroupChat*clockFormatNotToday  "%b %d %H:%M"    widgetDefault
-
-    option add *GroupChat*userForeground       ""               widgetDefault
-    option add *GroupChat*userBackground       ""               widgetDefault
-    option add *GroupChat*userFont             ""               widgetDefault
-    option add *GroupChat*userIgnore           red              widgetDefault
     
-    option add *GroupChat*Tree.background      white            50
-
     # List of: {tagName optionName resourceName resourceClass}
     variable groupChatOptions {
 	{mepre       -foreground          mePreForeground       Foreground}
@@ -102,6 +95,8 @@ namespace eval ::GroupChat:: {
     }
     
     # Standard wigets.
+    option add *GroupChat*Text.borderWidth     0               50
+    option add *GroupChat*Text.relief          flat            50
     option add *GroupChat.padding              {12  0 12  0}   50
     option add *GroupChat*active.padding       {1}             50
     option add *GroupChat*TMenubutton.padding  {1}             50
@@ -137,6 +132,14 @@ namespace eval ::GroupChat:: {
     set userRoleToStr(participant) [mc Participants]
     set userRoleToStr(visitor)     [mc Visitors]
     
+    variable userRoleSortOrder
+    array set userRoleSortOrder {
+	moderator   0
+	participant 1
+	visitor     2
+	none        3
+    }
+    
     variable show2String
     set show2String(available)   [mc available]
     set show2String(away)        [mc away]
@@ -145,6 +148,9 @@ namespace eval ::GroupChat:: {
     set show2String(xa)          [mc {extended away}]
     set show2String(invisible)   [mc invisible]
     set show2String(unavailable) [mc {not available}]
+
+    # @@@ Should get this from a global reaource.
+    variable buttonPressMillis 1000
 }
 
 proc ::GroupChat::QuitAppHook { } {
@@ -772,7 +778,7 @@ proc ::GroupChat::Build {roomjid args} {
         
     set wtext       $wfrchat.text
     set wysc        $wfrchat.ysc
-    set wusers      $wfrusers.text
+    set wusers      $wfrusers.tree
     set wyscusers   $wfrusers.ysc
     
     # Shortcut button part.
@@ -894,7 +900,7 @@ proc ::GroupChat::Build {roomjid args} {
     }
     
     # Main frame for panes.
-    frame $wmid -height 250 -width 300 -relief sunken -bd 1
+    frame $wmid -height 250 -width 300
     pack  $wmid -side top -fill both -expand 1
 
     # Pane geometry manager.
@@ -902,12 +908,11 @@ proc ::GroupChat::Build {roomjid args} {
     pack $wpanev -side top -fill both -expand 1    
 
     # Text send.
-    frame $wfrsend -height 100 -width 300
+    frame $wfrsend -height 100 -width 300 -bd 1 -relief sunken
     text  $wtextsend -height 4 -width 1 -font CociSmallFont -wrap word \
-      -borderwidth 1 -relief sunken -yscrollcommand \
-      [list ::UI::ScrollSet $wyscsend \
+      -yscrollcommand [list ::UI::ScrollSet $wyscsend \
       [list grid $wyscsend -column 1 -row 0 -sticky ns]]
-    tuscrollbar $wyscsend -orient vertical -command [list $wtextsend yview]
+    ttk::scrollbar $wyscsend -orient vertical -command [list $wtextsend yview]
 
     grid  $wtextsend  -column 0 -row 0 -sticky news
     grid  $wyscsend   -column 1 -row 0 -sticky ns
@@ -920,12 +925,12 @@ proc ::GroupChat::Build {roomjid args} {
     $wpanev add $wfrsend -weight 1
     
     # Chat text widget.
-    frame $wfrchat
-    text  $wtext -height 12 -width 50 -font CociSmallFont -state disabled  \
-      -borderwidth 1 -relief sunken -wrap word -cursor {}  \
+    frame $wfrchat -bd 1 -relief sunken
+    text  $wtext -height 12 -width 40 -font CociSmallFont -state disabled  \
+      -wrap word -cursor {}  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns -padx 2]]
-    tuscrollbar $wysc -orient vertical -command [list $wtext yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
  
     grid  $wtext  -column 0 -row 0 -sticky news
     grid  $wysc   -column 1 -row 0 -sticky ns -padx 2
@@ -933,25 +938,16 @@ proc ::GroupChat::Build {roomjid args} {
     grid rowconfigure    $wfrchat 0 -weight 1
     
     # Users list.
-    frame $wfrusers
-    set popupCmd [list [namespace current]::Popup $token]
-    tuscrollbar $wyscusers -orient vertical -command [list $wusers yview]
-    ::tree::tree $wusers -width 120 -height 100 -silent 1 -scrollwidth 400 \
-      -treecolor "" -styleicons "" -indention 0 -pyjamascolor "" -xmargin 2 \
-      -yscrollcommand [list ::UI::ScrollSet $wyscusers \
-      [list grid $wyscusers -row 0 -column 1 -sticky ns]] \
-      -eventlist [list [list <<ButtonPopup>> $popupCmd]]
-
-    if {[string match "mac*" $this(platform)]} {
-	$wusers configure -buttonpresscommand $popupCmd
-    }
+    frame $wfrusers -bd 1 -relief sunken
+    ttk::scrollbar $wyscusers -orient vertical -command [list $wusers yview]
+    Tree $token $w $wusers $wyscusers
 
     grid  $wusers     -column 0 -row 0 -sticky news
     grid  $wyscusers  -column 1 -row 0 -sticky ns -padx 2
     grid columnconfigure $wfrusers 0 -weight 1
     grid rowconfigure    $wfrusers 0 -weight 1
     
-    $wpaneh add $wfrchat -weight 1
+    $wpaneh add $wfrchat  -weight 1
     $wpaneh add $wfrusers -weight 1
     
     # The tags.
@@ -980,6 +976,7 @@ proc ::GroupChat::Build {roomjid args} {
     }
     ::UI::SetSashPos groupchatDlgVert $wpanev
     ::UI::SetSashPos groupchatDlgHori $wpaneh
+    
     wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
     wm maxsize $w 800 2000
 
@@ -989,8 +986,289 @@ proc ::GroupChat::Build {roomjid args} {
       [list [namespace current]::CommandReturnKeyPress $token]
     
     focus $w
+    set tag TopTag$w
+    bindtags $w [concat $tag [bindtags $w]]
+    bind $tag <Destroy> [list ::GroupChat::OnDestroy $token]
+    
     return $token
 }
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+#   Functions to handle the treectrl widget.
+#   It isolates some details to the rest of the code.
+#   
+#   An invisible column stores tags for each item:
+#       {role $role}
+#           {jid $jid}
+#           {jid $jid}
+#           ...
+
+namespace eval ::GroupChat {
+
+    variable initedTreeDB 0
+}
+
+proc ::GroupChat::TreeInitDB { } {
+    global  this
+    variable initedTreeDB
+    
+    # Use option database for customization. 
+    # We use a specific format: 
+    #   element options:    prefix:elementName-option
+    #   style options:      prefix:styleName:elementName-option
+
+    set fillT {
+	white {selected focus !ignore} 
+	black {selected !focus !ignore} 
+	red   {ignore}
+    }
+    set fillB [list $this(sysHighlight) {selected focus} gray {selected !focus}]
+    
+    # Element options:
+    option add *GroupChat.utree:eText-font         CociSmallFont           widgetDefault
+    option add *GroupChat.utree:eText-fill         $fillT                  widgetDefault
+    option add *GroupChat.utree:eRoleText-font     CociSmallBoldFont       widgetDefault
+    option add *GroupChat.utree:eRoleText-fill     $fillT                  widgetDefault
+    option add *GroupChat.utree:eBorder-fill       $fillB                  widgetDefault
+
+    
+    # Style layout options:
+    option add *GroupChat.utree:styUser:eText-padx       2                 widgetDefault
+    option add *GroupChat.utree:styUser:eText-pady       2                 widgetDefault
+    option add *GroupChat.utree:styUser:eImage-padx      2                 widgetDefault
+    option add *GroupChat.utree:styUser:eImage-pady      2                 widgetDefault
+
+    option add *GroupChat.utree:styRole:eRoleText-padx       2             widgetDefault
+    option add *GroupChat.utree:styRole:eRoleText-pady       2             widgetDefault
+    option add *GroupChat.utree:styRole:eRoleImage-padx      2             widgetDefault
+    option add *GroupChat.utree:styRole:eRoleImage-pady      2             widgetDefault
+
+    set initedTreeDB 1
+}
+
+proc ::GroupChat::Tree {token w T wysc} {
+    global this
+    variable initedTreeDB
+
+    if {!$initedTreeDB} {
+	TreeInitDB
+    }
+    
+    treectrl $T -usetheme 1 -selectmode extended  \
+      -showroot 0 -showrootbutton 0 -showbuttons 0 -showheader 0  \
+      -yscrollcommand [list ::UI::ScrollSet $wysc     \
+      [list grid $wysc -row 0 -column 1 -sticky ns]]  \
+      -borderwidth 0 -highlightthickness 0            \
+      -height 0 -width 20
+
+    # State for ignore.
+    $T state define ignore
+    
+    # The columns.
+    $T column create -tag cTree -resize 0 -expand 1
+    $T column create -tag cTag  -visible 0
+    
+    # The elements.
+    $T element create eImage       image
+    $T element create eText        text
+    $T element create eRoleImage   image
+    $T element create eRoleText    text
+    $T element create eBorder      rect  -open new -showfocus 1
+
+    # Styles collecting the elements.
+    set S [$T style create styUser]
+    $T style elements $S {eBorder eImage eText}
+    $T style layout $S eImage  -expand ns
+    $T style layout $S eText   -squeeze x -expand ns
+    $T style layout $S eBorder -detach 1 -iexpand xy
+
+    set S [$T style create styRole]
+    $T style elements $S {eBorder eRoleImage eRoleText}
+    $T style layout $S eRoleImage -expand ns
+    $T style layout $S eRoleText  -squeeze x -expand ns
+    $T style layout $S eBorder    -detach 1 -iexpand xy
+
+    set S [$T style create styTag]
+    $T style elements $S {eText}
+
+    $T configure -defaultstyle {{} styTag}
+
+    # This automatically cleans up the tag array.
+    $T notify bind UsersTreeTag <ItemDelete> {
+	foreach item %i {
+	    ::GroupChat::TreeUnsetTags %T $item
+	} 
+    }
+    bindtags $T [concat UsersTreeTag [bindtags $T]]
+    
+    bind UsersTreeTag <Button-1>        { ::GroupChat::TreeButtonPress %W %x %y }        
+    bind UsersTreeTag <ButtonRelease-1> { ::GroupChat::TreeButtonRelease %W %x %y }        
+    bind UsersTreeTag <<ButtonPopup>>   [list ::GroupChat::TreePopup $token %W %x %y ]
+    bind UsersTreeTag <Destroy>         {+::GroupChat::TreeOnDestroy %W }
+    
+    ::treeutil::setdboptions $T $w utree
+}
+
+proc ::GroupChat::TreeButtonPress {T x y} {
+    variable buttonAfterId
+    variable buttonPressMillis
+
+    if {[tk windowingsystem] eq "aqua"} {
+	if {[info exists buttonAfterId]} {
+	    catch {after cancel $buttonAfterId}
+	}
+	set cmd [list ::GroupChat::TreePopup $T $x $y]
+	set buttonAfterId [after $buttonPressMillis $cmd]
+    }
+}
+
+proc ::GroupChat::TreeButtonRelease {T x y} {
+    variable buttonAfterId
+    
+    if {[info exists buttonAfterId]} {
+	catch {after cancel $buttonAfterId}
+	unset buttonAfterId
+    }    
+}
+
+proc ::GroupChat::TreePopup {token T x y} {
+    variable tag2item
+
+    set id [$T identify $x $y]
+    if {[lindex $id 0] eq "item"} {
+	set item [lindex $id 1]
+	set tag [$T item element cget $item cTag eText -text]
+    } else {
+	set tag {}
+    }
+    Popup $token $T $tag $x $y
+}
+
+proc ::GroupChat::TreeOnDestroy {T} {
+    variable tag2item
+    
+    array unset tag2item $T,*
+}
+
+proc ::GroupChat::TreeCreateUserItem {token jid3 presence args} {
+    variable $token
+    upvar 0 $token state
+    variable userRoleToStr
+    upvar ::Jabber::jstate jstate
+    
+    set T $state(wusers)
+    
+    # Cover both a "flat" users list and muc's with the roles 
+    # moderator, participant, and visitor.
+    set role [GetRoleFromJid $jid3]
+    if {$role eq ""} {
+	set pitem root
+    } else {
+	set ptag [list role $role]
+	set pitem [TreeFindWithTag $T $ptag]
+	if {$pitem eq ""} {
+	    set pitem [TreeCreateWithTag $T $ptag root]
+	    set text $userRoleToStr($role)
+	    $T item style set $pitem cTree styRole
+	    $T item element configure $pitem cTree eRoleText -text $text
+	    $T item sort root -command [list ::GroupChat::TreeSortRoleCmd $T]
+	}
+    }
+    set tag [list jid $jid3]
+    set item [TreeFindWithTag $T $tag]
+    if {$item eq ""} {
+	set item [TreeCreateWithTag $T $tag $pitem]
+	$T item style set $item cTree styUser
+    }
+    set text [$jstate(jlib) service nick $jid3]
+    set image [eval {::Roster::GetPresenceIcon $jid3 $presence} $args]
+    $T item element configure $item cTree  \
+      eText -text $text + eImage -image $image
+}
+
+proc ::GroupChat::TreeSortRoleCmd {T item1 item2} {
+    variable userRoleSortOrder
+
+    set tag1 [$T item element cget $item1 cTag eText -text]
+    set tag2 [$T item element cget $item2 cTag eText -text]
+    if {([lindex $tag1 0] eq "role") && ([lindex $tag2 0] eq "role")} {
+	set role1 [lindex $tag1 1]
+	set role2 [lindex $tag2 1]
+	if {$userRoleSortOrder($role1) < $userRoleSortOrder($role2)} {
+	    return -1
+	} elseif {$userRoleSortOrder($role1) > $userRoleSortOrder($role2)} {
+	    return 1
+	} else {
+	    return 0
+	}
+    } else {
+	return 0
+    }
+}
+
+proc ::GroupChat::TreeCreateWithTag {T tag parent} {
+    variable tag2item
+    
+    set item [$T item create -parent $parent]
+    
+    # Handle the hidden cTag column.
+    $T item style set $item cTag styTag
+    $T item element configure $item cTag eText -text $tag
+    
+    set tag2item($T,$tag) $item
+
+    return $item
+}
+
+proc ::GroupChat::TreeFindWithTag {T tag} {
+    variable tag2item
+    
+    if {[info exists tag2item($T,$tag)]} {
+	return $tag2item($T,$tag)
+    } else {
+	return {}
+    }
+}
+
+proc ::GroupChat::TreeSetIgnoreState {T jid3 {prefix ""}} {
+    variable tag2item
+    
+    set tag [list jid $jid3]
+    if {[info exists tag2item($T,$tag)]} {
+	set item $tag2item($T,$tag)
+	$T item state set $item ${prefix}ignore
+    }
+}
+
+proc ::GroupChat::TreeRemoveUser {token jid3} {
+    variable $token
+    upvar 0 $token state
+    
+    set T $state(wusers)
+    set tag [list jid $jid3]
+    TreeDeleteItem $T $tag
+
+    unset -nocomplain state(ignore,$jid3)
+}
+
+proc ::GroupChat::TreeDeleteItem {T tag} {
+    variable tag2item
+    
+    if {[info exists tag2item($T,$tag)]} {
+	set item $tag2item($T,$tag)
+	$T item delete $item
+    }    
+}
+
+proc ::GroupChat::TreeUnsetTags {T item} {
+    variable tag2item
+
+    set tag [$T item element cget $item cTag eText -text]
+    unset -nocomplain tag2item($T,$tag)    
+}
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 proc ::GroupChat::StatusCmd {token status} {
     variable $token
@@ -1315,7 +1593,7 @@ proc ::GroupChat::PresenceHook {jid presence args} {
     set jid2 $jid
     set jid3 $jid
     if {[info exists argsArr(-resource)]} {
-	set jid3 ${jid2}/$argsArr(-resource)
+	set jid3 $jid2/$argsArr(-resource)
     }
     jlib::splitjidex $jid3 node service res
     
@@ -1512,53 +1790,17 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
     }       
     variable $token
     upvar 0 $token state
-    
-    # Get the hex string to use as tag. 
-    # In old-style groupchat this is the nick name which should be unique
-    # within this room aswell.
-    jlib::splitjid $jid3 jid2 resource
-    
+        
     # If we got a browse push with a <user>, assume is available.
     if {$presence eq ""} {
 	set presence available
-    }
+    }    
     
-    # Any show attribute?
-    set showStatus $presence
-    if {[info exists argsArr(-show)] && ($argsArr(-show) ne "")} {
-	set showStatus $argsArr(-show)
-    } elseif {[info exists argsArr(-subscription)] &&   \
-      [string equal $argsArr(-subscription) "none"]} {
-	set showStatus "subnone"
-    }
-    
-    set wusers $state(wusers)
-    
-    # Old-style groupchat and browser compatibility layer.
-    set nick [$jstate(jlib) service nick $jid3]
-    set icon [eval {::Roster::GetPresenceIcon $jid3 $presence} $args]
-            
-    # Cover both a "flat" users list and muc's with the roles 
-    # moderator, participant, and visitor.
-    set role [GetRoleFromJid $jid3]
-    if {$role eq ""} {
-	set v $jid3
-    } else {
-	if {![$wusers isitem $role]} {
-	    $wusers newitem $role -text $userRoleToStr($role) -dir 1 \
-	      -sortcommand {lsort -dictionary}
-	    if {[string equal $role "moderator"]} {
-		$wusers raiseitem $role
-	    }
-	}
-	set v [list $role $jid3]
-    }
-    if {[$wusers isitem $v]} {
-	$wusers itemconfigure $v -text $nick -image $icon
-    } else {
+    # Don't forget to init the ignore state.
+    if {![info exists state(ignore,$jid3)]} {
 	set state(ignore,$jid3) 0
-	$wusers newitem $v -text $nick -image $icon -tags [list $jid3]
     }
+    eval {TreeCreateUserItem $token $jid3 $presence} $args
 }
 
 proc ::GroupChat::GetRoleFromJid {jid3} {
@@ -1603,35 +1845,27 @@ proc ::GroupChat::RegisterPopupEntry {menuSpec} {
 #       Handle popup menu in groupchat dialog.
 #       
 # Arguments:
-#       w           widget that issued the command: tree or text
-#       v           for the tree widget it is the item path
+#       w           widgetPath of treectrl
 #       
 # Results:
 #       popup menu displayed
 
-proc ::GroupChat::Popup {token w v x y} {
+proc ::GroupChat::Popup {token w tag x y} {
     global  wDlgs this
     
     variable popMenuDefs
     upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::GroupChat::Popup w=$w, v='$v', x=$x, y=$y"
-    
-    # The last element of $v is either a jid, (a namespace,) 
-    # a header in roster, a group, or an agents xml tag.
-    # The variables name 'jid' is a misnomer.
-    # Find also type of thing clicked, 'clicked'.
-    
+            
     set clicked ""
-    
-    set jid [lindex $v end]
-    set jid3 $jid
-    if {[regexp {^[^@]+@[^@]+(/.*)?$} $jid match res]} {
+    set jid ""
+    if {[lindex $tag 0] eq "role"} {
+	set clicked role
+    } elseif {[lindex $tag 0] eq "jid"} {
 	set clicked user
+	set jid [lindex $tag 1]
     }
-    if {$jid eq ""} {
-	set clicked ""	
-    }    
+    set jid3 $jid
+
     ::Debug 2 "\t jid=$jid, clicked=$clicked"
     
     # Mads Linden's workaround for menu post problem on mac:
@@ -1647,7 +1881,6 @@ proc ::GroupChat::Popup {token w v x y} {
     
     # Make the appropriate menu.
     set m $jstate(wpopup,groupchat)
-    set i 0
     catch {destroy $m}
     menu $m -tearoff 0
     
@@ -1723,15 +1956,11 @@ proc ::GroupChat::Ignore {token jid3} {
     variable $token
     upvar 0 $token state
     
+    set T $state(wusers)
     if {$state(ignore,$jid3)} {
-	set fg [option get $state(w) userIgnore {}]
+	TreeSetIgnoreState $T $jid3
     } else {
-	set fg [option get $state(w) userForeground {}]
-    }
-    set wusers $state(wusers)
-    set items [$wusers find withtag $jid3]
-    foreach item $items {
-	$wusers itemconfigure $item -foreground $fg
+	TreeSetIgnoreState $T $jid3 !
     }
 }
 
@@ -1741,18 +1970,9 @@ proc ::GroupChat::RemoveUser {roomjid jid3} {
     
     set roomjid [jlib::jidmap $roomjid]
     set token [GetTokenFrom roomjid $roomjid]
-    if {$token eq ""} {
-	return
+    if {$token ne ""} {
+	TreeRemoveUser $token $jid3
     }
-    variable $token
-    upvar 0 $token state
-    
-    set wusers $state(wusers)
-    set items [$wusers find withtag $jid3]
-    foreach item $items {
-	$wusers delitem $item
-    }
-    unset -nocomplain state(ignore,$jid3)
 }
 
 proc ::GroupChat::BuildHistory {token} {
@@ -1886,8 +2106,8 @@ proc ::GroupChat::Close {token} {
 	::UI::SaveWinGeom $wDlgs(jgc) $state(w)
 	::UI::SaveSashPos groupchatDlgVert $state(wpanev)
 	::UI::SaveSashPos groupchatDlgHori $state(wpaneh)
-	destroy $state(w)
 	Free $token
+	destroy $state(w)
     }
     
     # Make sure any associated whiteboard is closed as well.
@@ -1901,7 +2121,6 @@ proc ::GroupChat::Free {token} {
     foreach id $state(afterids) {
 	after cancel $id
     }
-    unset state
 }
 
 # GroupChat::LogoutHook --
@@ -1909,10 +2128,8 @@ proc ::GroupChat::Free {token} {
 #       Sets logged out status on all groupchats, that is, disable all buttons.
 
 proc ::GroupChat::LogoutHook { } {    
-    upvar ::Jabber::jstate jstate
 
-    set tokenList [GetTokenList]
-    foreach token $tokenList {
+    foreach token [GetTokenList] {
 	variable $token
 	upvar 0 $token state
 
@@ -1922,10 +2139,8 @@ proc ::GroupChat::LogoutHook { } {
 }
 
 proc ::GroupChat::LoginHook { } {    
-    upvar ::Jabber::jstate jstate
 
-    set tokenList [GetTokenList]
-    foreach token $tokenList {
+    foreach token [GetTokenList] {
 	variable $token
 	upvar 0 $token state
 
@@ -1945,6 +2160,11 @@ proc ::GroupChat::GetFirstPanePos { } {
 	::UI::SaveSashPos groupchatDlgVert $state(wpanev)
 	::UI::SaveSashPos groupchatDlgHori $state(wpaneh)
     }
+}
+
+proc ::GroupChat::OnDestroy {token} {
+    
+    unset -nocomplain $token
 }
 
 # --- Support for JEP-0048 ---

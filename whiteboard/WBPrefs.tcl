@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.9 2005-10-22 14:26:21 matben Exp $
+# $Id: WBPrefs.tcl,v 1.10 2005-11-30 08:32:00 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -150,7 +150,7 @@ proc ::WBPrefs::BuildFontsPage {page} {
     # System fonts.
     listbox $wlbsys -width 18 -height 10  \
       -yscrollcommand [list $wc.fr1.sc set]
-    tuscrollbar $wc.fr1.sc -orient vertical   \
+    ttk::scrollbar $wc.fr1.sc -orient vertical   \
       -command [list $wc.fr1.lb yview]
     pack $wc.fr1.lb $wc.fr1.sc -side left -fill y
     
@@ -180,7 +180,7 @@ proc ::WBPrefs::BuildFontsPage {page} {
     # Whiteboard fonts.
     listbox $wlbwb -width 18 -height 10  \
       -yscrollcommand [list $wc.fr3.sc set]
-    tuscrollbar $wc.fr3.sc -orient vertical   \
+    ttk::scrollbar $wc.fr3.sc -orient vertical   \
       -command [list $wc.fr3.lb yview]
     pack $wlbwb $wc.fr3.sc -side left -fill y
     eval $wlbwb insert 0 $prefs(canvasFonts)

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.77 2005-11-22 07:44:12 matben Exp $
+# $Id: Disco.tcl,v 1.78 2005-11-30 08:32:00 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -721,8 +721,8 @@ proc ::Disco::Build {w} {
 
     set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
 
-    tuscrollbar $wxsc -command [list $wtree xview] -orient horizontal
-    tuscrollbar $wysc -command [list $wtree yview] -orient vertical
+    ttk::scrollbar $wxsc -command [list $wtree xview] -orient horizontal
+    ttk::scrollbar $wysc -command [list $wtree yview] -orient vertical
     ::ITree::New $wtree $wxsc $wysc   \
       -selection   ::Disco::Selection     \
       -open        ::Disco::OpenTreeCmd   \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Dialogs.tcl,v 1.62 2005-11-16 08:52:04 matben Exp $
+# $Id: Dialogs.tcl,v 1.63 2005-11-30 08:32:00 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -148,7 +148,7 @@ proc ::Dialogs::InfoOnPlugins { } {
     set xtab2 90
     set wtxt $fbox.txt
     set wysc $fbox.ysc
-    tuscrollbar $wysc -orient vertical -command [list $wtxt yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtxt yview]
     text $wtxt -yscrollcommand [list $wysc set] -highlightthickness 0  \
       -bg white -wrap word -width 50 -height 30  \
       -exportselection 1 -tabs [list $xtab1 right $xtab2 left]
@@ -251,7 +251,7 @@ proc ::Dialogs::InfoComponents { } {
 
     set wtxt $tbox.txt
     set wysc $tbox.ysc
-    tuscrollbar $wysc -orient vertical -command [list $wtxt yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtxt yview]
     text $wtxt -yscrollcommand [list $wysc set] -highlightthickness 0 -bd 0 \
       -bg white -wrap word -width 50 -height 16 -exportselection 1
 

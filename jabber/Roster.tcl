@@ -5,11 +5,12 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.148 2005-11-22 07:44:12 matben Exp $
+# $Id: Roster.tcl,v 1.149 2005-11-30 08:32:00 matben Exp $
 
 package require RosterTree
 package require RosterPlain
 package require RosterTwo
+package require RosterAvatar
 
 package provide Roster 1.0
 
@@ -40,11 +41,11 @@ namespace eval ::Roster:: {
     option add *Roster.padding              4               50
         
     # Specials.
-    option add *Roster*rootBackground       ""              widgetDefault
-    option add *Roster*rootBackgroundBd     0               widgetDefault
-    option add *Roster*rootForeground       ""              widgetDefault
+    #option add *Roster*rootBackground       ""              widgetDefault
+    #option add *Roster*rootBackgroundBd     0               widgetDefault
+    #option add *Roster*rootForeground       ""              widgetDefault
     option add *Roster.waveImage            wave            widgetDefault
-    option add *Roster.minimalPadding       {0 4}           widgetDefault
+    option add *Roster.minimalPadding       {0 6}           widgetDefault
     
     variable wtree -
     
@@ -82,10 +83,10 @@ namespace eval ::Roster:: {
     
     # General.
     set popMenuDefs(roster,def) {
-	command     mMessage       {head group user}  {::NewMsg::Build -to $jid}          {}
+	command     mMessage       {head group user}  {::NewMsg::Build -to $jid -tolist $jidlist} {}
 	command     mChat          {user available}   {::Chat::StartThread $jid3}         {}
 	command     mWhiteboard    {wb available}     {::Jabber::WB::NewWhiteboardTo $jid3} {}
-	command     mSendFile      user               {::FTrans::Send $jid3}             {}
+	command     mSendFile      {user available}   {::FTrans::Send $jid3}             {}
 	separator   {}             {}                 {} {}
 	command     mAddNewUser    {}                 {::Jabber::User::NewDlg}            {}
 	command     mEditUser      user               {::Jabber::User::EditDlg $jid}      {}
@@ -300,8 +301,8 @@ proc ::Roster::Build {w} {
     ::RosterTree::StyleConfigure $wtree
     ::RosterTree::StyleInit
 
-    tuscrollbar $wxsc -command [list $wtree xview] -orient horizontal
-    tuscrollbar $wysc -command [list $wtree yview] -orient vertical
+    ttk::scrollbar $wxsc -command [list $wtree xview] -orient horizontal
+    ttk::scrollbar $wysc -command [list $wtree yview] -orient vertical
 
     grid  $wtree  -row 0 -column 0 -sticky news
     grid  $wysc   -row 0 -column 1 -sticky ns
@@ -342,6 +343,12 @@ proc ::Roster::StyleGet { } {
     variable rstyle
 
     return $rstyle
+}
+
+proc ::Roster::GetRosterWindow { } {
+    variable wroster
+    
+    return $wroster
 }
 
 proc ::Roster::GetWtree { } {
@@ -516,7 +523,7 @@ proc ::Roster::RegisterPopupEntry {menuSpec} {
 #       Handle popup menu in roster.
 #       
 # Arguments:
-#       jid3        this is a list of actual jid's, can be any form
+#       jidlist     this is a list of actual jid's, can be any form
 #       clicked
 #       status      'available', 'unavailable', 'transports', or 'pending'
 #       group       name of group if any
@@ -524,13 +531,13 @@ proc ::Roster::RegisterPopupEntry {menuSpec} {
 # Results:
 #       popup menu displayed
 
-proc ::Roster::DoPopup {jid3 clicked status group x y} {
+proc ::Roster::DoPopup {jidlist clicked status group x y} {
     variable popMenuDefs
     variable wtree
     
     upvar ::Jabber::jstate jstate
         
-    ::Debug 2 "::Roster::DoPopup jid3=$jid3, clicked=$clicked, status=$status"
+    ::Debug 2 "::Roster::DoPopup jidlist=$jidlist, clicked=$clicked, status=$status"
         
     # Make the appropriate menu.
     set m $jstate(wpopup,roster)
@@ -546,7 +553,7 @@ proc ::Roster::DoPopup {jid3 clicked status group x y} {
     }
     
     # We build menus using this proc to be able to make cascades.
-    BuildMenu $m $menuDef $jid3 $clicked $status $group
+    BuildMenu $m $menuDef $jidlist $clicked $status $group
         
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
@@ -561,14 +568,20 @@ proc ::Roster::DoPopup {jid3 clicked status group x y} {
 # 
 #       Build popup menu recursively if necessary.
 
-proc ::Roster::BuildMenu {m menuDef jid3 clicked status group} {
+proc ::Roster::BuildMenu {m menuDef _jidlist clicked status group} {
     
-    # Make jid (jid2) of all jid3.
-    set jid {}
-    foreach u $jid3 {
-	jlib::splitjid $u jid2 res
-	lappend jid $jid2
+    # We always get a list of jids, typically with only one element.
+    set jid3 [lindex $_jidlist 0]
+    jlib::splitjid $jid3 jid2 -
+    set jid $jid2
+
+    # The jidlist is expected to be with no resource part.
+    set jidlist {}
+    foreach u $_jidlist {
+	jlib::splitjid $u jid2 -
+	lappend jidlist $jid2
     }
+    
     set i 0
     
     foreach {op item type cmd opts} $menuDef {	
@@ -604,7 +617,7 @@ proc ::Roster::BuildMenu {m menuDef jid3 clicked status group} {
 		if {[string index $cmd 0] == "@"} {
 		    eval [string range $cmd 1 end] $mt
 		} else {
-		    BuildMenu $mt $cmd $jid3 $clicked $status $group
+		    BuildMenu $mt $cmd $_jidlist $clicked $status $group
 		}		
 		incr i
 	    }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.87 2005-11-05 11:37:25 matben Exp $
+# $Id: Preferences.tcl,v 1.88 2005-11-30 08:32:00 matben Exp $
  
 package require mnotebook
 package require tree
@@ -196,7 +196,7 @@ proc ::Preferences::Build {args} {
     set wysc  $frtree.sby
     set T $wtree
     TreeCtrl $wtree $wysc
-    tuscrollbar $wysc -orient vertical -command [list $wtree yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtree yview]
     
     pack $wtree -side left -fill both -expand 1
     pack $wysc  -side right -fill y

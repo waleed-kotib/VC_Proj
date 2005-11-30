@@ -46,6 +46,8 @@
 *Tablelist.background:               white
 *Tablelist.labelBackground:          #ece9d8
 *WaveLabel.background:               #ece9d8
+*TreeCtrl.showLines:                 0
+
 
 ! specific megawidgets
 !

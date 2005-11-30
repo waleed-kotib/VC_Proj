@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.53 2005-11-19 11:35:41 matben Exp $
+# $Id: Whiteboard.tcl,v 1.54 2005-11-30 08:32:00 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -930,8 +930,8 @@ proc ::WB::NewCanvas {w args} {
       -relief raised -bd 0 -background $bg -highlightbackground $bg \
       -scrollregion [list 0 0 $prefs(canScrollWidth) $prefs(canScrollHeight)]  \
       -xscrollcommand [list $wxsc set] -yscrollcommand [list $wysc set]	
-    tuscrollbar $wxsc -command [list $wcan xview] -orient horizontal
-    tuscrollbar $wysc -command [list $wcan yview] -orient vertical
+    ttk::scrollbar $wxsc -command [list $wcan xview] -orient horizontal
+    ttk::scrollbar $wysc -command [list $wcan yview] -orient vertical
     
     grid  $wcan  -row 0 -column 0 -sticky news -padx 0 -pady 0
     grid  $wysc  -row 0 -column 1 -sticky ns

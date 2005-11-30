@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.38 2005-10-26 14:38:34 matben Exp $
+# $Id: Emoticons.tcl,v 1.39 2005-11-30 08:32:00 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -579,7 +579,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     } $allSets]
     $wfr configure -labelwidget $wmb
     
-    tuscrollbar $wfr.ysc -orient vertical -command [list $wfr.t yview]
+    ttk::scrollbar $wfr.ysc -orient vertical -command [list $wfr.t yview]
     text $wfr.t -yscrollcommand [list $wfr.ysc set] -width 20 -height 14 \
       -highlightthickness 0 -bd 0
     

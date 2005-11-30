@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.69 2005-11-05 11:37:25 matben Exp $
+# $Id: NewMsg.tcl,v 1.70 2005-11-30 08:32:00 matben Exp $
 
 package require ui::entryex
 
@@ -152,8 +152,8 @@ proc ::NewMsg::InitMultiAddress {wmulti} {
 #       The standard send message dialog.
 #
 # Arguments:
-#       args   ?-to jidlist -subject theSubject -quotemessage msg -time time
-#              -forwardmessage msg -message msg?
+#       args   ?-to jid -subject theSubject -quotemessage msg -time time
+#              -forwardmessage msg -message msg -tolist jidlist?
 #       
 # Results:
 #       shows window.
@@ -180,6 +180,7 @@ proc ::NewMsg::Build {args} {
     }
     array set opts {
 	-to             ""
+	-tolist         ""
 	-subject        ""
 	-quotemessage   ""
 	-forwardmessage ""
@@ -298,7 +299,7 @@ proc ::NewMsg::Build {args} {
     set   fradd $wbox.fradd
     frame $fradd
     pack $fradd -side top -fill x 
-    tuscrollbar $fradd.ysc -command [list $fradd.can yview]
+    ttk::scrollbar $fradd.ysc -command [list $fradd.can yview]
     pack $fradd.ysc -side right -fill y
     set waddcan $fradd.can
     canvas $waddcan -bd 0 -highlightthickness 1 \
@@ -343,13 +344,12 @@ proc ::NewMsg::Build {args} {
     pack  [ttk::frame $frsub.space] -side right
     
     # Text.
-    frame $wtxt
+    frame $wtxt -bd 1 -relief sunken
     pack  $wtxt -side top -fill both -expand 1
     text $wtext -height 8 -width 48 -wrap word \
-      -borderwidth 1 -relief sunken  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns]]
-    tuscrollbar $wysc -orient vertical -command [list $wtext yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
     grid  $wtext  -column 0 -row 0 -sticky news
     grid  $wysc   -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxt 0 -weight 1
@@ -405,17 +405,24 @@ $opts(-forwardmessage)"
     focus $waddr.addr1
     
     # We need to fill in addresses after the geometry handling!
-    if {[llength $opts(-to)]} {
-	after 200 [list ::NewMsg::FillInAddresses $w $opts(-to)]
+    if {[llength $opts(-tolist)]} {
+	set jidlist $opts(-tolist)
+    } elseif {$opts(-to) ne ""} {
+	set jidlist [list $opts(-to)]
+    } else {
+	set jidlist {}
+    }
+    if {[llength $jidlist]} {
+	after 200 [list ::NewMsg::FillInAddresses $w $jidlist]
     }
 }
 
-proc ::NewMsg::FillInAddresses {w to} {
+proc ::NewMsg::FillInAddresses {w jidlist} {
     variable locals
     variable transportDefs
     upvar ::Jabber::jstate jstate
     
-    # If -to option. This can have jid's with and without any resource.
+    # If -tolist option. This can have jid's with and without any resource.
     # Be careful to treat this according to the XMPP spec!
 
     foreach {key value} [array get locals servicejid,*] {
@@ -424,7 +431,7 @@ proc ::NewMsg::FillInAddresses {w to} {
     }
     set waddr $locals($w,wfrport)
     set n 1
-    foreach jid $to {
+    foreach jid $jidlist {
 	if {$n > 4} {
 	    NewAddrLine $w $waddr $n
 	}

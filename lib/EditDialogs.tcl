@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: EditDialogs.tcl,v 1.15 2005-08-14 07:17:55 matben Exp $
+# $Id: EditDialogs.tcl,v 1.16 2005-11-30 08:32:00 matben Exp $
 
 package provide EditDialogs 1.0
 
@@ -94,7 +94,7 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
 	lappend edshort "  $ele"
     }
     eval {$wlbox insert 0} $edshort
-    tuscrollbar $wsb -command [list $wlbox yview]
+    ttk::scrollbar $wsb -command [list $wlbox yview]
     pack  $wlbox  -side left -fill both
     pack  $wsb    -side left -fill y
     

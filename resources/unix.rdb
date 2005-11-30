@@ -31,7 +31,7 @@
 *Scrollbar.borderWidth:              1
 *Scrollbar.width:                    12
 *Scrollbar.troughColor:              #bdbdbd
-*Text.highlightBackground:           #dcdad5
+!*Text.highlightBackground:           #dcdad5
 
 ! contributed widgets
 !

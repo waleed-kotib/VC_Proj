@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.22 2005-10-27 12:35:31 matben Exp $
+# $Id: JForms.tcl,v 1.23 2005-11-30 08:32:00 matben Exp $
 # 
 #      Updated to version 2.5 of JEP-0004
 #  
@@ -522,7 +522,7 @@ proc ::JForms::NewTextMulti {token elem} {
     set wtxt $wfr.txt
     set wsc  $wfr.sc
     text $wtxt -height 3 -wrap word -yscrollcommand [list $wsc set] -width 20
-    tuscrollbar $wsc -orient vertical -command [list $wtxt yview]
+    ttk::scrollbar $wsc -orient vertical -command [list $wtxt yview]
     foreach str $defValueList {
 	$wtxt insert end $str
 	$wtxt insert end "\n"
@@ -640,7 +640,7 @@ proc ::JForms::NewListMulti {token elem} {
     set wsc $wfr.sc
     listbox $wlb -height 4 -selectmode multiple  \
       -yscrollcommand [list $wsc set] -listvar $token\(labelList,$var)
-    tuscrollbar $wsc -orient vertical -command [list $wlb yview]
+    ttk::scrollbar $wsc -orient vertical -command [list $wlb yview]
 
     grid  $wlb  -column 0 -row 0 -sticky news
     grid  $wsc  -column 1 -row 0 -sticky ns
@@ -690,7 +690,7 @@ proc ::JForms::NewJidMulti {token elem} {
     set wtxt $wfr.txt
     set wsc  $wfr.sc
     text $wtxt -height 3 -wrap word -yscrollcommand [list $wsc set] -width 20
-    tuscrollbar $wsc -orient vertical -command [list $wtxt yview]
+    ttk::scrollbar $wsc -orient vertical -command [list $wtxt yview]
 
     grid  $wtxt  -column 0 -row 0 -sticky news
     grid  $wsc   -column 1 -row 0 -sticky ns

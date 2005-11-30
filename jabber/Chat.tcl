@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.140 2005-11-18 07:52:32 matben Exp $
+# $Id: Chat.tcl,v 1.141 2005-11-30 08:32:00 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -110,13 +110,11 @@ namespace eval ::Chat:: {
     } else {
 	option add *Chat*TNotebook.padding         {8 8 8 8}        50
     }
-    option add *ChatThread*pane.borderWidth           1             50
+    option add *ChatThread*pane.borderWidth           0             50
     option add *ChatThread*pane.relief                sunken        50
-    option add *ChatThread*frtxt.text.borderWidth     1             50
-    option add *ChatThread*frtxt.text.relief          sunken        50
-    option add *ChatThread*frtxtsnd.text.borderWidth  1             50
-    option add *ChatThread*frtxtsnd.text.relief       sunken        50
-    
+    option add *ChatThread*Text.borderWidth           0             50
+    option add *ChatThread*Text.relief                flat          50
+
     option add *ChatThread.padding              {12  0 12  0}   50
     option add *ChatThread*active.padding       {1}             50
     option add *ChatThread*TMenubutton.padding  {1}             50
@@ -980,10 +978,10 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     ttk::label $wnotifier -style Small.TLabel \
       -textvariable $chattoken\(notifier) \
       -padding {10 0} -compound left -anchor w
-    pack  $wbot        -side bottom -anchor w -fill x
-    pack  $wbot.active -side left -fill y -padx 4
-    pack  $wsmile      -side left -fill y -padx 4
-    pack  $wnotifier   -side left         -padx 4
+    pack  $wbot         -side bottom -anchor w -fill x
+    pack  $wbot.active  -side left -fill y -padx 4
+    pack  $wsmile       -side left -fill y -padx 4
+    pack  $wnotifier    -side left         -padx 4
     
     ::balloonhelp::balloonforwindow $wbot.active [mc jaactiveret]
 
@@ -998,7 +996,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 
     # Frame to serve as container for the pane geometry manager.
     # D =
-    frame $wmid -bd 1 -relief sunken
+    frame $wmid
     pack  $wmid -side top -fill both -expand 1
 
     # Pane geometry manager.
@@ -1006,11 +1004,12 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     pack $wpane -side top -fill both -expand 1    
 
     # Text chat dialog.
-    frame $wtxt	
+    frame $wtxt	-bd 1 -relief sunken
     text $wtext -height 12 -width 1 -state disabled -cursor {} -wrap word  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns]]
-    tuscrollbar $wysc -orient vertical -command [list $wtext yview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
+    
     grid  $wtext  -column 0 -row 0 -sticky news
     grid  $wysc   -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxt 0 -weight 1
@@ -1020,11 +1019,12 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     ConfigureTextTags $w $wtext
 
     # Text send.
-    frame $wtxtsnd
+    frame $wtxtsnd -bd 1 -relief sunken
     text  $wtextsnd -height 4 -width 1 -wrap word \
       -yscrollcommand [list ::UI::ScrollSet $wyscsnd \
       [list grid $wyscsnd -column 1 -row 0 -sticky ns]]
-    tuscrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
+    ttk::scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
+    
     grid  $wtextsnd  -column 0 -row 0 -sticky news
     grid  $wyscsnd   -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxtsnd 0 -weight 1
@@ -1928,11 +1928,11 @@ proc ::Chat::PresenceHook {jid type args} {
     }
 }
 
-# Chat::HaveChat --
+# Chat::GetWindow --
 # 
 #       Returns toplevel window if have chat, else empty.
 
-proc ::Chat::HaveChat {jid} {
+proc ::Chat::GetWindow {jid} {
 
     jlib::splitjid $jid jid2 res
     set mjid2 [jlib::jidmap $jid2]
@@ -1948,6 +1948,15 @@ proc ::Chat::HaveChat {jid} {
 	}
     } else {
 	return
+    }
+}
+
+proc ::Chat::HaveChat {jid} {
+ 
+    if {[GetWindow $jid] eq ""} {
+	return 0
+    } else {
+	return 1
     }
 }
 
