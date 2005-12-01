@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.121 2005-11-23 11:15:51 matben Exp $
+# $Id: jabberlib.tcl,v 1.122 2005-12-01 13:50:28 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -32,7 +32,7 @@
 #	                             packet of $id is received.
 #
 # locals:
-#       locals(server)             : The server domain name or ip number
+#       locals(server)             : The servers logical name (streams 'from')
 #       locals(username)
 #       locals(myjid)
 #       locals(myjid2)
@@ -84,6 +84,7 @@
 #      jlibName get_features name
 #      jlibName get_last to cmd
 #      jlibName get_time to cmd
+#      jlibName getserver
 #      jlibName get_version to cmd
 #      jlibName getagent jid
 #      jlibName getrecipientjid jid
@@ -808,6 +809,9 @@ proc jlib::openstream {jlibname server args} {
     variable xmppxmlns
 
     array set argsArr $args
+    
+    # The server 'to' attribute is only temporary until we have either a 
+    # confirmation or a redirection (alias) in received streams 'from' attribute.
     set locals(server) $server
     set locals(last) [clock seconds]
     
@@ -927,6 +931,18 @@ proc jlib::getip {jlibname} {
     upvar ${jlibname}::lib lib
 
     return [$lib(transport,ip) $jlibname]
+}
+
+# jlib::getserver --
+# 
+#       Is the received streams 'from' attribute which is the logical host.
+#       This is normally identical to the 'to' attribute but not always.
+
+proc jlib::getserver {jlibname} {
+    
+    upvar ${jlibname}::locals locals 
+
+    return $locals(server)
 }
 
 # jlib::isinstream --
@@ -1539,6 +1555,12 @@ proc jlib::got_stream {jlibname args} {
     foreach {name value} $args {
 	set locals(streamattr,$name) $value
     }
+    
+    # The streams 'from' attribute has the "last word" on the servers name.
+    if {[info exists locals(streamattr,from)]} {
+	set locals(server) $locals(streamattr,from)
+    }
+
     uplevel #0 $lib(clientcmd) [list $jlibname connect]
     schedule_auto_away $jlibname
     
