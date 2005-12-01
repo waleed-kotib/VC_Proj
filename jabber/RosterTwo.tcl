@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.4 2005-11-30 08:32:00 matben Exp $
+# $Id: RosterTwo.tcl,v 1.5 2005-12-01 07:59:19 matben Exp $
 
 package require RosterTree
 
@@ -181,7 +181,7 @@ proc ::RosterTwo::CreateItem {jid presence args} {
 	set tag0 [lindex $tag 0]
 	set tag1 [lindex $tag 1]
 	set text  $jtext
-	set text2 ""
+	set text2 "No status message"
 	set image $jimage
 	lappend items $item
 	
@@ -190,9 +190,14 @@ proc ::RosterTwo::CreateItem {jid presence args} {
 		set style styStd
 		if {$presence eq "available"} {
 		    set time [::Utils::SmartClockFormat $since -showsecs 0]
-		    append text2 "($time) $status"
+		    set text2 "($time)"
+		    if {$status ne ""} {
+			append text2 " $status"
+		    }
 		} else {
-		    set text2 "Status: $status"
+		    if {$status ne ""} {
+			set text2 "Status: $status"
+		    }
 		}
 		lappend jitems $item
 	    }
