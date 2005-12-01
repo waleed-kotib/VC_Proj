@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: treeutil.tcl,v 1.6 2005-11-30 08:32:00 matben Exp $
+#  $Id: treeutil.tcl,v 1.7 2005-12-01 13:50:28 matben Exp $
 
 # USAGE:
 # 
@@ -93,11 +93,18 @@ proc ::treeutil::Init {w} {
     # takes focus which makes this useless for tooltip windows.
     
     # Scrolling may move items without moving the mouse.
-    #$w notify bind $w <Scroll-x>   {+::treeutil::Track %T %x %y }
-    #$w notify bind $w <Scroll-y>   {+::treeutil::Track %T %x %y }
-    $w notify bind $w <ItemDelete> {+::treeutil::OnItemDelete %T %i }
+    # @@@ Many more things affect this!
+    $w notify bind $w <Scroll-x>        {+::treeutil::Generic %T }
+    $w notify bind $w <Scroll-y>        {+::treeutil::Generic %T }
+    $w notify bind $w <Expand-after>    {+::treeutil::Generic %T }
+    $w notify bind $w <Collapse-after>  {+::treeutil::Generic %T }
+    $w notify bind $w <ItemDelete>      {+::treeutil::Generic %T }
+    
+    $w notify bind $w <ItemDelete>      {+::treeutil::OnItemDelete %T %i }
     
     set state($w,item) -1
+    set state($w,x)    -1
+    set state($w,y)    -1
 }    
     
 proc ::treeutil::Track {w x y} {
@@ -121,6 +128,14 @@ proc ::treeutil::Track {w x y} {
 	}
 	set state($w,item) -1
     }
+    set state($w,x) $x
+    set state($w,y) $y
+}
+
+proc ::treeutil::Generic {w} {
+    variable state
+    
+    Track $w $state($w,x) $state($w,y)
 }
 
 proc ::treeutil::Generate {w x y item type {id ""}} {
@@ -166,21 +181,21 @@ proc ::treeutil::OnDestroy {w} {
     array unset state $w,*
 }
 
-if {0} {
-    # Test.
-    set T .jmain.frall.fnb.di.box.tree
-    set item 1
-    ::treeutil::bind $T $item <Enter> {puts "Enter %I C=%C E=%E x=%x y=%y"}
-    ::treeutil::bind $T $item <Leave> {puts "Leave %I"}    
-}
-
-
 # treeutil::setdboptions --
 # 
 #       Configure elements and styles from option database.
 #       We use a specific format for the database resource names: 
 #         element options:    prefix:elementName-option
 #         style options:      prefix:styleName:elementName-option
+#         
+# Arguments:
+#       w           treectrl widgetPath
+#       wclass      widgetPath
+#       prefix
+#       
+# Results:
+#       configures treectrl elements and layouts
+
 
 proc ::treeutil::setdboptions {w wclass prefix} {
     

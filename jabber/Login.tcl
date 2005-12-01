@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.70 2005-10-06 14:41:28 matben Exp $
+# $Id: Login.tcl,v 1.71 2005-12-01 13:50:28 matben Exp $
 
 package provide Login 1.0
 
@@ -1064,7 +1064,9 @@ proc ::Login::AuthorizeCB {token jlibName type theQuery} {
 	::Debug 4 "\t this(ipnum)=$ip"
 	
 	# Ourself. Do JIDPREP? So far only on the domain name.
-	set server               [jlib::jidmap $server]
+	# MUST handle situations with redirection (server alias)!
+	#set server               [jlib::jidmap $server]
+	set server               [jlib::jidmap [$jstate(jlib) getserver]]
 	set jstate(mejid)        [jlib::joinjid $username $server ""]
 	set jstate(meres)        $resource
 	set jstate(mejidres)     [jlib::joinjid $username $server $resource]

@@ -2,7 +2,7 @@
 # 
 #       JivePhone bindings for the jive server and Asterisk.
 #       
-# $Id: JivePhone.tcl,v 1.7 2005-12-01 07:33:35 matben Exp $
+# $Id: JivePhone.tcl,v 1.8 2005-12-01 13:50:28 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -52,10 +52,14 @@ proc ::JivePhone::OnDiscoServer {jlibname type from subiq args} {
     # See comments above what my opinion is...
     if {$type eq "result"} {
 	set childs [::Jabber::JlibCmd disco children $from]
-	foreach elem $childs {
-	    if {[wrapper::getattribute $elem name] eq "phone"} {
+	foreach service $childs {
+	    set name [::Jabber::JlibCmd disco name $service]
+	    
+	    Debug "\t service=$service, name=$name"
+
+	    if {$name eq "phone"} {
 		set state(phoneserver) 1
-		set state(service) [wrapper::getattribute $elem jid]
+		set state(service) $service
 		break
 	    }
 	}
