@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.25 2005-11-02 12:54:09 matben Exp $
+# $Id: Theme.tcl,v 1.26 2005-12-01 07:59:19 matben Exp $
 
 package provide Theme 1.0
 
@@ -49,6 +49,15 @@ proc ::Theme::Init { } {
     if {[file exists $f]} {
 	option readfile $f startupFile
     }
+    
+    # My RH9 KDE system has some weird X rdb settings somewhere. Fix.
+    if {[tk windowingsystem] eq "x11"} {
+	option add *Listbox.background    white     60
+	option add *Menu.background       "#dcdad5" 60
+	option add *Text.background       white     60
+	option add *TreeCtrl.background   white     60
+    }
+    
     set f [file join $this(resourcePath) $prefs(themeName).rdb]
     if {[file exists $f]} {
 	option readfile $f userDefault
