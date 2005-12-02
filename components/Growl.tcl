@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.5 2005-11-30 08:32:00 matben Exp $
+# $Id: Growl.tcl,v 1.6 2005-12-02 09:01:21 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -23,11 +23,12 @@ proc ::Growl::Init { } {
     # There are some nice 64x64 error & info icons as well.
     set cociFile [file join $this(imagePath) Coccinella.png]
     
-    growl register Coccinella "newMessage changeStatus" $cociFile
+    growl register Coccinella "newMessage changeStatus phoneRings" $cociFile
     
     # Add event hooks.
     ::hooks::register newChatMessageHook  ::Growl::ChatMessageHook
     ::hooks::register presenceHook        ::Growl::PresenceHook
+    ::hooks::register jivePhoneEvent      ::Growl::JivePhoneEventHook
 }
 
 proc ::Growl::ChatMessageHook {body args} {    
@@ -88,6 +89,16 @@ proc ::Growl::PresenceHook {jid type args} {
 	    append msg "\n$status"
 	}
 	growl post changeStatus $title $msg $cociFile
+    }
+}
+
+proc ::Growl::JivePhoneEventHook {status args} {
+    variable cociFile
+    
+    if {$status eq "RING"} {
+	set title "Ring, ring..."
+	set msg "Phone is ringing"
+	growl post phoneRings $title $msg $cociFile
     }
 }
 

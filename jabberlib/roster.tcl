@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.41 2005-11-23 11:15:51 matben Exp $
+# $Id: roster.tcl,v 1.42 2005-12-02 09:01:21 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -82,6 +82,7 @@
 #      rostName getextras jid xmlns
 #      rostName isavailable jid
 #      rostName isitem jid
+#      rostName haveroster
 #      rostName removeitem jid
 #      rostName reset
 #      rostName setpresence jid type ?-option value -option ...?
@@ -110,18 +111,8 @@
 #                    -groups        (optional)
 #                    -ask           (optional)
 #      
-############################# CHANGES ##########################################
-#
-#       1.0a1    first release by Mats Bengtsson
-#       1.0a2    clear roster and presence array before receiving such elements
-#       1.0a3    added reset, isavailable, getresources, and getsubscription 
-#       1.0b1    added gethighestresource command
-#                changed setpresence arguments
-#       1.0b2    changed storage of x elements, added getx command.
-#       030602   added clearpresence command.
-#       030702   added -type option to getusers command.
-#       030703   removed rostName from roster::roster
-#       040514   does STRINGPREP on all jids
+################################################################################
+
 
 package provide roster 1.0
 
@@ -169,9 +160,9 @@ proc roster::roster {clientCmd args} {
 	variable rostArr
 	variable presArr
 	variable options
+	variable priv
 	
-	array set rostArr {}
-	array set presArr {}
+	set priv(haveroster) 0
     }
     
     # Set simpler variable names.
@@ -204,6 +195,12 @@ proc roster::CommandProc {rostName cmd args} {
     
     # Which command? Just dispatch the command to the right procedure.
     return [eval {$cmd $rostName} $args]
+}
+
+proc roster::haveroster {rostName} {
+    upvar ${rostName}::priv priv
+    
+    return $priv(haveroster)
 }
 
 # roster::setrosteritem --
@@ -261,7 +258,7 @@ proc roster::setrosteritem {rostName jid args} {
     if {[string length $options(cmd)]} {
 	uplevel #0 $options(cmd) [list $rostName set $jid] $args
     }
-    return {}
+    return
 }
 
 # roster::removeitem --
@@ -336,7 +333,7 @@ proc roster::ClearRoster {rostName} {
     if {[string length $options(cmd)]} {
 	uplevel #0 $options(cmd) [list $rostName enterroster]
     }
-    return {}
+    return
 }
 
 # roster::enterroster --
@@ -367,7 +364,10 @@ proc roster::enterroster {rostName} {
 proc roster::exitroster {rostName} {    
 
     upvar ${rostName}::options options
+    upvar ${rostName}::priv    priv
 
+    set priv(haveroster) 1
+    
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
 	uplevel #0 $options(cmd) [list $rostName exitroster]
@@ -383,9 +383,11 @@ proc roster::reset {rostName} {
 
     upvar ${rostName}::rostArr rostArr
     upvar ${rostName}::presArr presArr
+    upvar ${rostName}::priv    priv
     
     unset -nocomplain rostArr presArr
     set rostArr(groups) {}
+    set priv(haveroster) 0
 }
 
 # roster::clearpresence --

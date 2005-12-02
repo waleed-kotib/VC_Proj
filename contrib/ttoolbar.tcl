@@ -6,7 +6,7 @@
 #  Copyright (c) 2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.1 2005-08-14 06:56:45 matben Exp $
+# $Id: ttoolbar.tcl,v 1.2 2005-12-02 09:01:21 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -92,7 +92,7 @@ proc ::ttoolbar::Init { } {
     option add *TToolbar.TLabel.font         TkDefaultFont  widgetDefault
     
     # This allows us to clean up some things when we go away.
-    bind TToolbar <Destroy> { ::ttoolbar::DestroyHandler %W }
+    bind TToolbar <Destroy> {+::ttoolbar::DestroyHandler %W }
     
     set this(inited) 1
 }

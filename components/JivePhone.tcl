@@ -2,7 +2,7 @@
 # 
 #       JivePhone bindings for the jive server and Asterisk.
 #       
-# $Id: JivePhone.tcl,v 1.9 2005-12-01 15:24:23 matben Exp $
+# $Id: JivePhone.tcl,v 1.10 2005-12-02 09:01:21 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -31,6 +31,10 @@ proc ::JivePhone::Init { } {
     variable xmlns
     set xmlns(jivephone) "http://jivesoftware.com/xmlns/phone"
     
+    # Note the difference!
+    variable feature
+    set feature(jivephone) "http://jivesoftware.com/phone"
+    
     variable statuses {AVAILABLE RING DIALED ON_PHONE HANG_UP}
     variable state
     array set state {
@@ -48,7 +52,7 @@ proc ::JivePhone::OnDiscoServer {jlibname type from subiq args} {
     variable state
     
     Debug "::JivePhone::OnDiscoServer"
-    
+        
     # See comments above what my opinion is...
     if {$type eq "result"} {
 	set childs [::Jabber::JlibCmd disco children $from]
@@ -69,13 +73,32 @@ proc ::JivePhone::OnDiscoServer {jlibname type from subiq args} {
 	# @@@ It is a bit unclear if we shall disco the phone service with
 	# the username as each node.
 	
-	set users [::Jabber::RosterCmd getusers]
-	foreach jid $users {
-	    jlib::splitjidex $jid node domain -	
-	    if {[::Jabber::GetServerJid] eq $domain} {
-		::Jabber::JlibCmd disco get_async info $state(service)  \
-		  ::JivePhone::OnDiscoUserNode -node $node
-	    }
+	# We may not yet have obtained the roster. Sync issue!
+	if {[::Jabber::RosterCmd haveroster]} {
+	    DiscoForUsers
+	} else {
+	    ::hooks::register rosterExit ::JivePhone::RosterHook
+	}
+    }
+}
+
+proc ::JivePhone::RosterHook {} {
+        
+    Debug "::JivePhone::RosterHook"
+    ::hooks::deregister rosterExit ::JivePhone::RosterHook
+    DiscoForUsers
+}
+
+proc ::JivePhone::DiscoForUsers {} {
+    variable state
+    
+    Debug "::JivePhone::DiscoForUsers"
+    set users [::Jabber::RosterCmd getusers]
+    foreach jid $users {
+	jlib::splitjidex $jid node domain -	
+	if {[::Jabber::GetServerJid] eq $domain} {
+	    ::Jabber::JlibCmd disco get_async info $state(service)  \
+	      ::JivePhone::OnDiscoUserNode -node $node
 	}
     }
 }
@@ -83,18 +106,26 @@ proc ::JivePhone::OnDiscoServer {jlibname type from subiq args} {
 proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
     variable xmlns
     variable state
+    variable feature
     
     Debug "::JivePhone::OnDiscoUserNode"
     
     if {$type eq "result"} {
 	set node [wrapper::getattribute $subiq "node"]
-	set havePhone [::Jabber::JlibCmd disco hasfeature $xmlns(jivephone)  \
+	set havePhone [::Jabber::JlibCmd disco hasfeature $feature(jivephone)  \
 	  $from $node]
+	#puts "\t from=$from, node=$node, havePhone=$havePhone"
 	if {$havePhone} {
 	
 	    # @@@ What now?
+	    # @@@ But if we've already got phone presence?
+
+	    # Really stupid! It assumes user exist on login server.
+	    set server [::Jabber::JlibCmd getserver]
+	    set jid [jlib::joinjid $node $server ""]
+	    #puts "\t jid=$jid"
 	    
-	    set image [::Rosticons::Get [string tolower phone/HANG_UP]]
+	    set image [::Rosticons::Get [string tolower phone/available]]
 	    ::RosterTree::StyleSetItemAlternative $jid jivephone image $image
 	}
     }
@@ -134,6 +165,8 @@ proc ::JivePhone::PresenceHook {jid type args} {
 	    }
 	    set image [::Rosticons::Get [string tolower phone/$status]]
 	    ::RosterTree::StyleSetItemAlternative $from jivephone image $image
+	    
+	    eval {::hooks::run jivePhonePresence $from $type} $args
 	}
     }
     return
@@ -169,6 +202,9 @@ proc ::JivePhone::MessageHook {body args} {
 	    if {$status == "RING" || $status == "DIALED"} {
 		
 	    }
+	    bind $win <Button-1> [list ::JivePhone::BuildDialer .dial]
+
+	    eval {::hooks::run jivePhoneEvent $status} $args
 	}
     }
     return
@@ -208,11 +244,11 @@ proc ::JivePhone::BuildDialer {w} {
     ttk::entry $box.e -textvariable [namespace current]::phoneNumber  \
       -width 18
     ttk::button $box.dial -text [mc Dial]  \
-      -command [list [namespace current]::Dial $w]
+      -command [list [namespace current]::OnDial $w]
     
     grid  $box.l  $box.e  $box.dial -padx 1 -pady 4
  
-    
+    focus $box.e
     wm resizable $w 0 0
 }
 
@@ -221,17 +257,31 @@ proc ::JivePhone::CloseDialer {w} {
     ::UI::SaveWinGeom $w   
 }
 
-proc ::JivePhone::Dial {w} {
+proc ::JivePhone::OnDial {w} {
     variable phoneNumber
     variable xmlns
+    variable state
     
+    if {!$state(phoneserver)} {
+	return
+    }
     set extensionElem [wrapper::createtag "extension" -chdata $phoneNumber]
     set phoneElem [wrapper::createtag "phone-action"      \
       -attrlist [list xmlns $xmlns(jivephone) type DIAL]  \
       -subtags [list $extensionElem]]
     
-    ::Jabber::JlibCmd send_presence -extras [list $phoneElem]
+    ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
+      -to $state(service) -command [list ::JivePhone::DialCB $phoneNumber]
+    
     destroy $w
+}
+
+proc ::JivePhone::DialCB {phoneNumber type subiq} {
+    
+    if {$type eq "error"} {
+	ui::dialog -icon error -type ok -message "Failed calling $phoneNumber" \
+	  -detail $subiq
+    }
 }
 
 proc ::JivePhone::Debug {msg} {
