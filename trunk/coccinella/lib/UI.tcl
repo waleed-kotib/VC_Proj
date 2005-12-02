@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.111 2005-11-30 08:32:00 matben Exp $
+# $Id: UI.tcl,v 1.112 2005-12-02 09:01:21 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -452,6 +452,7 @@ proc ::UI::IsToplevelActive {w} {
 proc ::UI::MessageBox {args} {
     
     eval {::hooks::run newMessageBox} $args
+    
     array set argsArr $args
     if {[info exists argsArr(-message)]} {
 	set argsArr(-message) [FormatTextForMessageBox $argsArr(-message)]

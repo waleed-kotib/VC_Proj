@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.149 2005-11-30 08:32:00 matben Exp $
+# $Id: Roster.tcl,v 1.150 2005-12-02 09:01:21 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -54,7 +54,7 @@ namespace eval ::Roster:: {
     
     # Keep track of when in roster callback.
     variable inroster 0
-        
+
     # Mappings from <show> element to displayable text and vice versa.
     # chat away xa dnd
     variable mapShowTextToElem
@@ -757,11 +757,13 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	}
 	enterroster {
 	    set inroster 1
-	    ::RosterTree::StyleInit
+	    ::RosterTree::StyleInit	    
+	    ::hooks::run rosterEnter
 	}
 	exitroster {
 	    set inroster 0
 	    ExitRoster
+	    ::hooks::run rosterExit
 	}
     }
 }
