@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.6 2005-12-02 09:01:21 matben Exp $
+# $Id: Growl.tcl,v 1.7 2005-12-04 16:18:36 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -92,12 +92,12 @@ proc ::Growl::PresenceHook {jid type args} {
     }
 }
 
-proc ::Growl::JivePhoneEventHook {status args} {
+proc ::Growl::JivePhoneEventHook {type cid args} {
     variable cociFile
     
-    if {$status eq "RING"} {
+    if {$type eq "RING"} {
 	set title "Ring, ring..."
-	set msg "Phone is ringing"
+	set msg "Phone is ringing from $cid"
 	growl post phoneRings $title $msg $cociFile
     }
 }
