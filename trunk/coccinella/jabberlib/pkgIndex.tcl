@@ -22,6 +22,7 @@ package ifneeded streamerror 1.0 [list source [file join $dir streamerror.tcl]]
 package ifneeded tinydom 0.1  [list source [file join $dir tinydom.tcl]]
 package ifneeded wrapper 1.0  [list source [file join $dir wrapper.tcl]]
 
+package ifneeded jlib::avatar      0.1 [list source [file join $dir avatar.tcl]]
 package ifneeded jlib::bytestreams 0.1 [list source [file join $dir bytestreams.tcl]]
 package ifneeded jlib::caps        0.1 [list source [file join $dir caps.tcl]]
 package ifneeded jlib::disco       0.1 [list source [file join $dir disco.tcl]]

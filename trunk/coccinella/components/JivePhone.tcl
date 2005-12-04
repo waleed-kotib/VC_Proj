@@ -2,7 +2,7 @@
 # 
 #       JivePhone bindings for the jive server and Asterisk.
 #       
-# $Id: JivePhone.tcl,v 1.10 2005-12-02 09:01:21 matben Exp $
+# $Id: JivePhone.tcl,v 1.11 2005-12-04 13:29:11 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -14,6 +14,9 @@
 #      when obtaining info if a particular user has support for this.
 #      This seems wrong since only a specific instance of a user specified
 #      by an additional resource can have specific features.
+
+#    I could imagine a dialer as a tab page, but then we need nice buttons.
+#
 
 namespace eval ::JivePhone:: { }
 
@@ -125,8 +128,16 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
 	    set jid [jlib::joinjid $node $server ""]
 	    #puts "\t jid=$jid"
 	    
-	    set image [::Rosticons::Get [string tolower phone/available]]
-	    ::RosterTree::StyleSetItemAlternative $jid jivephone image $image
+	    # Attempt to set icon only if this user is unavailable since
+	    # we do not have the full jid!
+	    # This way we shouldn't interfere with phone presence.
+	    # We could use [roster isavailable $jid] instead.
+
+	    set item [::RosterTree::FindWithTag [list jid $jid]]
+	    if {$item ne ""} {
+		set image [::Rosticons::Get [string tolower phone/available]]
+		::RosterTree::StyleSetItemAlternative $jid jivephone image $image
+	    }
 	}
     }
 }
@@ -192,6 +203,7 @@ proc ::JivePhone::MessageHook {body args} {
 		set status available
 	    }
 	    set cidElem [wrapper::getfirstchildwithtag $elem callerID]
+	    set cid ""
 	    if {$cidElem != {}} {
 		set cid [wrapper::getcdata $cidElem]
 	    }
@@ -205,11 +217,23 @@ proc ::JivePhone::MessageHook {body args} {
 	    bind $win <Button-1> [list ::JivePhone::BuildDialer .dial]
 
 	    eval {::hooks::run jivePhoneEvent $status} $args
+	    
+	    # Provide a default notifier?
+	    if {[hooks::info jivePhoneEvent] eq {}} {
+		set title "Ring, ring..."
+		set msg "Phone is ringing from $cid"
+		ui::dialog -icon info -type ok -title $title  \
+		  -message $msg
+	    }
 	}
     }
     return
 }
 
+# JivePhone::BuildDialer --
+# 
+#       A toplevel dialer.
+       
 proc ::JivePhone::BuildDialer {w} {
     variable phoneNumber
     
@@ -286,7 +310,7 @@ proc ::JivePhone::DialCB {phoneNumber type subiq} {
 
 proc ::JivePhone::Debug {msg} {
     
-    if {0} {
+    if {1} {
 	puts "-------- $msg"
     }
 }

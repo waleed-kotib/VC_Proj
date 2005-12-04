@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.42 2005-10-02 12:44:41 matben Exp $
+# $Id: Conference.tcl,v 1.43 2005-12-04 13:29:11 matben Exp $
 
 package provide Conference 1.0
 
@@ -725,11 +725,8 @@ proc ::Conference::SendCreateGet {token} {
 	#     
 	# Thus the "Get" operation takes two steps.
 
-	set cocciElem [::Jabber::CreateCoccinellaPresElement]
-	set capsElem  [::Jabber::CreateCapsPresElement]
 	$jstate(jlib) muc create $roomjid $state(nickname)  \
-	  [list [namespace current]::CreateMUCCB $token]  \
-	  -extras [list $cocciElem $capsElem]
+	  [list [namespace current]::CreateMUCCB $token]
     } else {
 	
 	# Conference:

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.16 2005-09-19 13:30:57 matben Exp $
+# $Id: ibb.tcl,v 1.17 2005-12-04 13:29:11 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -82,8 +82,8 @@ proc jlib::ibb::init {jlibname args} {
     array set opts $args
     
     # Each base64 byte takes 6 bits; need to translate to binary bytes.
-    set priv(binblock) [expr {(6 * $opts(-block-size))/8}]
-    set priv(binblock) [expr {6 * ($priv(binblock)/6)}]
+    set binblock [expr {(6 * $opts(-block-size))/8}]
+    set priv(binblock) [expr {6 * ($binblock/6)}]
     
     # Register some standard iq handlers that is handled internally.
     $jlibname iq_register    set $xmlns(ibb) [namespace current]::handle_set
@@ -114,7 +114,7 @@ proc jlib::ibb::InitOnce { } {
 #       Just dispatches the command to the right procedure.
 #
 # Arguments:
-#       jlibname:   the instance of this ibb.
+#       jlibname:   the instance of this jlib.
 #       cmd:        
 #       args:       all args to the cmd procedure.
 #       

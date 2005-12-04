@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.12 2005-09-27 13:31:35 matben Exp $
+# $Id: bytestreams.tcl,v 1.13 2005-12-04 13:29:11 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -28,6 +28,7 @@
 package require jlib
 package require jlib::disco
 package require sha1      ;# tcllib                           
+package require jlib::si
                           
 package provide jlib::bytestreams 0.1
 
