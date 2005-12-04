@@ -2,7 +2,7 @@
 # 
 #       JivePhone bindings for the jive server and Asterisk.
 #       
-# $Id: JivePhone.tcl,v 1.11 2005-12-04 13:29:11 matben Exp $
+# $Id: JivePhone.tcl,v 1.12 2005-12-04 16:18:36 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -42,6 +42,7 @@ proc ::JivePhone::Init { } {
     variable state
     array set state {
 	phoneserver     0
+	win             .dial
     }
 }
 
@@ -190,6 +191,7 @@ proc ::JivePhone::PresenceHook {jid type args} {
 
 proc ::JivePhone::MessageHook {body args} {    
     variable xmlns
+    variable callID
 
     Debug "::JivePhone::MessageHook $args"
     
@@ -203,22 +205,29 @@ proc ::JivePhone::MessageHook {body args} {
 		set status available
 	    }
 	    set cidElem [wrapper::getfirstchildwithtag $elem callerID]
-	    set cid ""
 	    if {$cidElem != {}} {
 		set cid [wrapper::getcdata $cidElem]
+	    } else {
+		set cid [mc {Unknown}]
 	    }
 	    set image [::Rosticons::Get [string tolower phone/$status]]
 	    set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
 	    
-	    # @@@ What to do more?
-	    if {$status == "RING" || $status == "DIALED"} {
-		
-	    }
-	    bind $win <Button-1> [list ::JivePhone::BuildDialer .dial]
+	    set type [wrapper::getattribute $elem "type"]
 
-	    eval {::hooks::run jivePhoneEvent $status} $args
+	    # @@@ What to do more?
+	    if {$type == "RING" } {
+		set callID [wrapper::getattribute $elem "callID"]
+		bind $win <Button-1> [list ::JivePhone::DoDial "FORWARD"]
+		eval {::hooks::run jivePhoneEvent $type $cid} $args
+	    }
+	    if {$type == "HANG_UP"} {
+		bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
+		eval {::hooks::run jivePhoneEvent $type $cid} $args
+	    }
 	    
 	    # Provide a default notifier?
+	    # @@@ Add a timeout to ui::dialog !
 	    if {[hooks::info jivePhoneEvent] eq {}} {
 		set title "Ring, ring..."
 		set msg "Phone is ringing from $cid"
@@ -230,17 +239,46 @@ proc ::JivePhone::MessageHook {body args} {
     return
 }
 
+# JivePhone::DoDial --
+# 
+#       type: FORWARD | DIAL
+
+proc ::JivePhone::DoDial {type {jid ""}} {
+    variable state
+    variable phoneNumber
+    
+    set win $state(win)
+    if {$jid eq ""} {
+	BuildDialer $win $type
+    } else {
+	jlib::splitjidex $jid node domain -
+	if {[::Jabber::GetServerJid] eq $domain} {
+	    set phoneNumber ""
+	    OnDial $win $type $jid
+	} else {
+	    BuildDialer $win $type
+	}
+    }
+}
+
 # JivePhone::BuildDialer --
 # 
 #       A toplevel dialer.
        
-proc ::JivePhone::BuildDialer {w} {
+proc ::JivePhone::BuildDialer {w type} {
+    variable state
     variable phoneNumber
     
+    # Make sure only single instance of this dialog.
+    if {[winfo exists $state(win)]} {
+	raise $state(win)
+	return
+    }
+
     ::UI::Toplevel $w -class PhoneDialer \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace current]::Close
-    wm title $w [mc {Dial Phone}]
+    wm title $w [mc {Dialer}]
 
     ::UI::SetWindowPosition $w
     set phoneNumber ""
@@ -249,8 +287,7 @@ proc ::JivePhone::BuildDialer {w} {
     ttk::frame $w.f
     pack  $w.f  -fill x
 				 
-    ttk::label $w.f.head -style Headlabel \
-      -text [mc {Dial Phone}]
+    ttk::label $w.f.head -style Headlabel -text [mc {Phone}]
     pack  $w.f.head  -side top -fill both -expand 1
 
     ttk::separator $w.f.s -orient horizontal
@@ -268,7 +305,7 @@ proc ::JivePhone::BuildDialer {w} {
     ttk::entry $box.e -textvariable [namespace current]::phoneNumber  \
       -width 18
     ttk::button $box.dial -text [mc Dial]  \
-      -command [list [namespace current]::OnDial $w]
+      -command [list [namespace current]::OnDial $w $type]
     
     grid  $box.l  $box.e  $box.dial -padx 1 -pady 4
  
@@ -281,36 +318,60 @@ proc ::JivePhone::CloseDialer {w} {
     ::UI::SaveWinGeom $w   
 }
 
-proc ::JivePhone::OnDial {w} {
+proc ::JivePhone::OnDial {w type {jid ""}} {
     variable phoneNumber
     variable xmlns
     variable state
+    variable callID
+    
+    Debug "::JivePhone::OnDial w=$w, type=$type, phoneNumber=$phoneNumber"
     
     if {!$state(phoneserver)} {
 	return
     }
-    set extensionElem [wrapper::createtag "extension" -chdata $phoneNumber]
-    set phoneElem [wrapper::createtag "phone-action"      \
-      -attrlist [list xmlns $xmlns(jivephone) type DIAL]  \
-      -subtags [list $extensionElem]]
+
+    if {$jid ne ""} {
+	set dnid $jid
+	set extensionElem [wrapper::createtag "jid" -chdata $jid]
+    } elseif {$phoneNumber ne ""} {
+	set extensionElem [wrapper::createtag "extension" -chdata $phoneNumber]
+	set dnid $phoneNumber
+    } else {
+	Debug "\t return"
+	return
+    }
     
+    if {$type eq "DIAL"} {
+	set command "DIAL"
+	set phoneElem [wrapper::createtag "phone-action"      \
+	  -attrlist [list xmlns $xmlns(jivephone) type $command]  \
+	  -subtags [list $extensionElem]]
+    } else {
+	set command "FORWARD"
+	set phoneElem [wrapper::createtag "phone-action"      \
+	  -attrlist [list xmlns $xmlns(jivephone) id $callID type $command]  \
+	  -subtags [list $extensionElem]]
+    }
+
     ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
-      -to $state(service) -command [list ::JivePhone::DialCB $phoneNumber]
-    
+      -to $state(service) -command [list ::JivePhone::DialCB $dnid]
+
+    eval {::hooks::run jivePhoneEvent $command $dnid}
+
     destroy $w
 }
 
-proc ::JivePhone::DialCB {phoneNumber type subiq} {
+proc ::JivePhone::DialCB {dnid type subiq args} {
     
     if {$type eq "error"} {
-	ui::dialog -icon error -type ok -message "Failed calling $phoneNumber" \
+	ui::dialog -icon error -type ok -message "Failed calling $dnid" \
 	  -detail $subiq
     }
 }
 
 proc ::JivePhone::Debug {msg} {
     
-    if {1} {
+    if {0} {
 	puts "-------- $msg"
     }
 }
