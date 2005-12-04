@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.152 2005-11-30 08:32:00 matben Exp $
+# $Id: Jabber.tcl,v 1.153 2005-12-04 13:29:11 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -21,12 +21,13 @@ package require wavelabel
 # jlib components shall be declared here, or later.
 package require jlib
 package require roster
-package require jlib::disco
-package require jlib::http
-package require jlib::si
+package require jlib::avatar
 package require jlib::bytestreams
-package require jlib::ibb
+package require jlib::disco
 package require jlib::ftrans
+package require jlib::http
+package require jlib::ibb
+package require jlib::si
 package require jlib::vcard
 
 # We should have some component mechanism that lets packages load themselves.
@@ -499,16 +500,17 @@ proc ::Jabber::Init { } {
       -presencecommand ::Jabber::PresenceCallback
 
     # Make an instance of jabberlib and fill in our roster object.
-    set jstate(jlib) [eval {
+    set jlibname [eval {
 	::jlib::new $jstate(roster) ::Jabber::ClientProc
     } $opts]
+    set jstate(jlib) $jlibname
 
     # Register handlers for various iq elements.
-    $jstate(jlib) iq_register get jabber:iq:version    ::Jabber::ParseGetVersion
-    $jstate(jlib) iq_register get $coccixmlns(servers) ::Jabber::ParseGetServers
+    $jlibname iq_register get jabber:iq:version    ::Jabber::ParseGetVersion
+    $jlibname iq_register get $coccixmlns(servers) ::Jabber::ParseGetServers
     
     # Set the priority order of groupchat protocols.
-    $jstate(jlib) service setgroupchatpriority  \
+    $jlibname service setgroupchatpriority  \
       [list $jprefs(prefgchatproto) "gc-1.0"]
     
     if {[string equal $prefs(protocol) "jabber"]} {
@@ -527,11 +529,16 @@ proc ::Jabber::Init { } {
       -attrlist [list var $coccixmlns(servers)]]
     lappend subtags [wrapper::createtag "feature" \
       -attrlist [list var jabber:iq:oob]]
-    ::Jabber::RegisterCapsExtKey ftrans $subtags
+
+    RegisterCapsExtKey ftrans $subtags
     
     # Stuff that need an instance of jabberlib register here.
     ::Debug 4 "--> jabberInitHook"
-    ::hooks::run jabberInitHook $jstate(jlib)
+    ::hooks::run jabberInitHook $jlibname
+    
+    # Register extra presence elements.
+    $jlibname register_presence_stanza [CreateCapsPresElement] -type available
+    $jlibname register_presence_stanza [CreateCoccinellaPresElement] -type available
 }
 
 # ::Jabber::IqCallback --
@@ -1228,13 +1235,6 @@ proc ::Jabber::SetStatus {type args} {
 	}
     }
     
-    # This way clients get the info necessary for file transports.
-    # Necessary for each status change since internal cache cleared.
-    if {$type ne "unavailable"} {
-	set cocciElem [CreateCoccinellaPresElement]
-	set capsElem  [CreateCapsPresElement]
-	lappend argsArr(-extras) $cocciElem $capsElem
-    }
     set presArgs {}
     foreach {key value} [array get argsArr] {
 	

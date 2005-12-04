@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Enter.tcl,v 1.3 2005-10-06 14:41:27 matben Exp $
+# $Id: Enter.tcl,v 1.4 2005-12-04 13:29:11 matben Exp $
 
 package provide Enter 1.0
 
@@ -531,11 +531,6 @@ proc ::Enter::DoEnter {token} {
     if {$state(password) ne ""} {
 	lappend opts -password $state(password)
     }
-    
-    # We announce that we are a Coccinella here and let others know ip etc.
-    set cocciElem [::Jabber::CreateCoccinellaPresElement]
-    set capsElem  [::Jabber::CreateCapsPresElement]
-    lappend opts -extras [list $cocciElem $capsElem]
     
     # We must figure out which protocol to use, muc or gc-1.0?
     switch -- $state(protocol) {

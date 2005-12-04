@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.123 2005-12-02 09:01:21 matben Exp $
+# $Id: jabberlib.tcl,v 1.124 2005-12-04 13:29:11 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -88,6 +88,7 @@
 #      jlibName get_version to cmd
 #      jlibName getagent jid
 #      jlibName getrecipientjid jid
+#      jlibName get_registered_presence_stanzas ?tag? ?xmlns?
 #      jlibName haveagent jid
 #      jlibName iq_get xmlns ?-to, -command, -sublists?
 #      jlibName iq_set xmlns ?-to, -command, -sublists?
@@ -100,6 +101,7 @@
 #      jlibName registertransport name initProc sendProc resetProc ipProc
 #      jlibName register_set username password cmd ?args?
 #      jlibName register_get cmd ?args?
+#      jlibName register_presence_stanza elem
 #      jlibName register_remove to cmd ?args?
 #      jlibName resetstream
 #      jlibName roster_get cmd
@@ -116,6 +118,7 @@
 #      jlibName setsockettransport socket
 #      jlibName state
 #      jlibName transport
+#      jlibName unregister_presence_stanza tag xmlns
 #      
 #  o using the experimental 'conference' protocol:  OUTDATED!
 #      jlibName conference get_enter room cmd
@@ -232,6 +235,10 @@ namespace eval jlib {
 	invisible       6
 	unavailable     7
     }
+    
+    if {![llength [info commands lassign]]} {
+	proc lassign {vals args} {uplevel 1 [list foreach $args $vals break] }
+    }
 }
 
 proc jlib::getxmlns {name} {
@@ -295,6 +302,7 @@ proc jlib::new {rostername clientcmd args} {
 	variable agent
 	# Cache for the 'conference' subcommand.
 	variable conf
+	variable pres
     }
             
     # Set simpler variable names.
@@ -365,7 +373,8 @@ proc jlib::new {rostername clientcmd args} {
     
     # Init ensamble commands.
     foreach name $ensamble(names) {
-	uplevel #0 $ensamble($name,init) $jlibname $args
+	uplevel #0 $ensamble($name,init) $jlibname
+	#uplevel #0 $ensamble($name,init) $jlibname $args
     }
     
     return $jlibname
@@ -509,7 +518,6 @@ proc jlib::config {jlibname args} {
     variable ensamble
     upvar ${jlibname}::opts opts
     
-    array set argsArr $args
     set options [lsort [array names opts -*]]
     set usage [join $options ", "]
     if {[llength $args] == 0} {
@@ -529,6 +537,7 @@ proc jlib::config {jlibname args} {
 	    return -code error "Unknown option $flag, must be: $usage"
 	}
     } else {
+	array set argsArr $args
 	
 	# Reschedule auto away only if changed. Before setting new opts!
 	if {[info exists argsArr(-autoawaymins)] &&  \
@@ -549,10 +558,11 @@ proc jlib::config {jlibname args} {
     }
     
     # Let components configure themselves.
+    # @@@ It is better to let components handle this???
     foreach ename [array names ensamble] {
 	set ecmd ${ename}::configure
 	if {[llength [info commands $ecmd]]} {
-	    uplevel #0 $ecmd $jlibname $args
+	    #uplevel #0 $ecmd $jlibname $args
 	}
     }
 
@@ -1036,6 +1046,9 @@ proc jlib::iq_handler {jlibname xmldata} {
 	set $key $value
 	lappend arglist -$key $value
     }
+    
+    # This helps callbacks to adapt to using full element as argument.
+    lappend arglist -xmldata $xmldata
     
     # The 'type' attribute must exist! Else we return silently.
     if {![info exists type]} {	
@@ -2228,7 +2241,7 @@ proc jlib::message_run_hook {jlibname type xmlns msgElem args} {
 #       Handler for registered presence callbacks.
 #       
 #       @@@ We should be able to register for certain jid's
-#           sucj as rooms and members using wildcards.
+#           such as rooms and members using wildcards.
 
 proc jlib::presence_register {jlibname type func {seq 50}} {
     
@@ -2271,6 +2284,72 @@ proc jlib::presence_deregister {jlibname type func} {
     if {$ind >= 0} {
 	set preshook($type) [lreplace $preshook($type) $ind $ind]
     }
+}
+
+# jlib::presence_ex_register --
+# 
+#       Set extended presence callbacks which can be triggered for
+#       various attributes and elements.
+#       
+# Arguments:
+#       jlibname:   the instance of this jlib.
+#       func:       tclProc        
+#       args:       -type     type and from must match the presence element
+#                   -from     attributes
+#                   -tag      tag and xmlns must coexist in the same element
+#                   -xmlns    for a valid match
+#                   -seq      priority 0-100 (D=50)
+#       
+# Results:
+#       none.
+
+proc jlib::presence_ex_register {jlibname func args} {
+    
+    upvar ${jlibname}::expreshook expreshook
+
+    # An empty value means match any.
+    set type  ""
+    set from  ""
+    set tag   ""
+    set xmlns ""
+    set seq   50
+    foreach {key value} $args {
+	set name [string trimleft $key -]
+	set $name $value
+    }
+    set pkey "$type,$from,$tag,$xmlns"
+    lappend expreshook($pkey) [list $func $seq]
+    set expreshook($pkey)  \
+      [lsort -integer -index 1 [lsort -unique $expreshook($pkey)]]
+}
+
+proc jlib::presence_ex_run_hook {jlibname xmldata} {
+
+    upvar ${jlibname}::expreshook expreshook
+
+    set type [wrapper::getattribute $xmldata type]
+    set from [wrapper::getattribute $xmldata from]
+    
+    
+    
+    set tagxmlns {}
+    foreach c [wrapper::getchildren $xmldata] {
+	set xmlns [wrapper::getattribute $c xmlns]
+	lappend tagxmlns [list [wrapper::gettag $c] $xmlns]
+	
+    }
+    
+    array get expreshook $type,*
+
+    
+    set ishandled 0
+    
+    if {[info exists expreshook($type)]} {
+
+	
+    }
+    
+    return $ishandled
 }
 
 # jlib::element_register --
@@ -2674,18 +2753,15 @@ proc jlib::search_get {jlibname to cmd} {
 
 proc jlib::search_set {jlibname to cmd args} {
 
+    set argsarr(-subtags) {}
     array set argsarr $args
 
-    if {[info exists argsarr(-subtags)]} {
-	set xmllist [wrapper::createtag "query"  \
-	  -attrlist {xmlns jabber:iq:search}   \
-	  -subtags $argsarr(-subtags)]
-    } else {
-	set xmllist [wrapper::createtag "query"  \
-	  -attrlist {xmlns jabber:iq:search}]
-    }
+    set xmllist [wrapper::createtag "query"  \
+      -attrlist {xmlns jabber:iq:search}   \
+      -subtags $argsarr(-subtags)]
     send_iq $jlibname "set" [list $xmllist] -to $to -command  \
       [list [namespace current]::parse_search_set $jlibname $cmd]
+
     return
 }
 
@@ -2804,12 +2880,14 @@ proc jlib::send_presence {jlibname args} {
     upvar ${jlibname}::locals locals
     upvar ${jlibname}::opts opts
     upvar ${jlibname}::prescmd prescmd
+    upvar ${jlibname}::pres pres
     
     Debug 3 "jlib::send_presence args='$args'"
     
     set attrlist {}
     set children {}
     set type "available"
+    set directed 0
     array set argsArr $args
     
     foreach {key value} $args {
@@ -2824,8 +2902,16 @@ proc jlib::send_presence {jlibname args} {
 		    return -code error "Is not valid presence type: \"$type\""
 		}
 	    }
-	    from - to {
+	    from {
+		# Should never happen!
 		lappend attrlist $par $value
+	    }
+	    to {
+		# Presence to server (undirected) shall not contain a to.
+		if {$value ne $locals(server)} {
+		    lappend attrlist $par $value
+		    set directed 1
+		}
 	    }
 	    xlist - extras {
 		foreach xchild $value {
@@ -2842,12 +2928,21 @@ proc jlib::send_presence {jlibname args} {
 	    }
 	}
     }
+    
+    # Assemble our registered presence stanzas. Only for undirected?
+    foreach {key elem} [array get pres "stanza,*,"] {
+	lappend children $elem
+    }
+    foreach {key elem} [array get pres "stanza,*,$type"] {
+	lappend children $elem
+    }
+    
     set xmllist [wrapper::createtag "presence" -attrlist $attrlist  \
       -subtags $children]
     
     # Any of {available away dnd invisible unavailable}
     # Must be destined to login server (by default).
-    if {![info exists argsArr(-to)] || ($argsArr(-to) eq $locals(server))} {
+    if {!$directed} {
 	set locals(status) $type
 	if {[info exists argsArr(-show)]} {
 	    set locals(status) $argsArr(-show)
@@ -2858,9 +2953,59 @@ proc jlib::send_presence {jlibname args} {
     return
 }
 
+# jlib::register_presence_stanza, ... --
+# 
+#       Each presence element we send to the server (undirected) must contain
+#       the complete state. This is a way to add custom presence stanzas
+#       to our internal presence state to send each time we set our presence 
+#       with the server (undirected presence).
+#       They are stored by tag, xmlns, and an optional type attribute.
+#       
+# Arguments:
+#       jlibname:   the instance of this jlib
+#       elem:       xml element
+#       args        -type  available | unavailable | ...
+
+proc jlib::register_presence_stanza {jlibname elem args} {
+
+    upvar ${jlibname}::pres pres
+
+    set aargs(-type) ""
+    array set aargs $args
+    set type $aargs(-type)
+    
+    set tag   [wrapper::gettag $elem]
+    set xmlns [wrapper::getattribute $elem xmlns]
+    set pres(stanza,$tag,$xmlns,$type) $elem
+}
+
+proc jlib::unregister_presence_stanza {jlibname tag xmlns} {
+    
+    upvar ${jlibname}::pres pres
+    
+    array unset pres "stanza,$tag,$xmlns,*"
+}
+
+proc jlib::get_registered_presence_stanzas {jlibname {tag *} {xmlns *}} {
+    
+    upvar ${jlibname}::pres pres
+    
+    set stanzas {}
+    foreach key [array names pres -glob stanza,$tag,$xmlns,*] {
+	lassign [split $key ,] - t x type
+	set spec [list $t $x $pres($key)]
+	if {$type ne ""} {
+	    lappend spec -type $type
+	}
+	lappend stanzas $spec
+    }
+    return $stanzas
+}
+
 # jlib::send --
 # 
 #       Sends general xml using a xmllist.
+#       Never throws error. Network errors reported via callback.
 
 proc jlib::send {jlibname xmllist} {
     

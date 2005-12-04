@@ -5,7 +5,7 @@
 #       
 #       Code idea from Alexey Shchepin, (and Vince Darley) Many Thanks!
 #       
-# $Id: hooks.tcl,v 1.6 2005-08-26 15:02:34 matben Exp $
+# $Id: hooks.tcl,v 1.7 2005-12-04 13:29:11 matben Exp $
 
 package provide hooks 1.0
 
@@ -92,7 +92,7 @@ proc hooks::anyregistered {hook} {
 proc hooks::info {{hook ""}} {
     variable $hook
     
-    if {$hook == ""} {
+    if {$hook eq ""} {
 	set all {}
 	foreach h [::info vars [namespace current]::?*] {
 	    set name [string map {::hooks:: ""} $h]
