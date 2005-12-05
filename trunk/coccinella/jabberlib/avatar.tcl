@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: avatar.tcl,v 1.1 2005-12-04 13:29:11 matben Exp $
+# $Id: avatar.tcl,v 1.2 2005-12-05 15:20:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -76,9 +76,11 @@ proc jlib::avatar::init {jlibname args} {
     }
     eval {configure $jlibname} $args
     
-    # Register some standard iq handlers that is handled internally.
+    # Register some standard iq handlers that are handled internally.
     $jlibname iq_register get $xmlns(iq-avatar) [namespace current]::iq_handler
-  
+    $jlibname presence_register_ex [namespace current]::presence_handler  \
+      -tag x -xmlns $xmlns(x-avatar)
+    
     return
 }
 
@@ -225,6 +227,18 @@ proc jlib::avatar::iq_handler {jlibname from queryElem args} {
     }
 }
 
+proc jlib::avatar::presence_handler {jlibname xmldata} {
+    variable xmlns
+    upvar ${jlibname}::avatar::state state
+    
+    set elems [wrapper::getchildswithtagandxmlns $xmldata x $xmlns(x-avatar)]
+    if {[llength $elems]} {
+	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] hash]
+	set hash [wrapper::getcdata $hashElem]
+    
+    }
+}
+
 #+++ Second part deals with getting other avatars ------------------------------
 
 proc jlib::avatar::get_data {jlibname jid2} {
@@ -252,6 +266,16 @@ proc jlib::avatar::have_data {jlibname jid2} {
     
     if {[info exists state($jid2,data)]} {
 	return 1
+    } else {
+	return 0
+    }
+}
+
+proc jlib::avatar::uptodate {jlibname jid2} {
+    upvar ${jlibname}::avatar::state state
+
+    if {[info exists state($jid2,uptodate)]} {
+	return $state($jid2,uptodate)
     } else {
 	return 0
     }

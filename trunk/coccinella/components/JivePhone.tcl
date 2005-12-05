@@ -2,7 +2,9 @@
 # 
 #       JivePhone bindings for the jive server and Asterisk.
 #       
-# $Id: JivePhone.tcl,v 1.12 2005-12-04 16:18:36 matben Exp $
+#       Contributions and testing by Antonio Cano damas
+#       
+# $Id: JivePhone.tcl,v 1.13 2005-12-05 15:20:32 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -42,8 +44,16 @@ proc ::JivePhone::Init { } {
     variable state
     array set state {
 	phoneserver     0
+	setui           0
 	win             .dial
     }
+
+    variable menuDef
+    set menuDef {
+	command  mCall     {user available} {::JivePhone::DialJID $jid "DIAL"} {}
+	command  mForward  {user available} {::JivePhone::DialJID $jid "FORWARD"} {}
+    }
+
 }
 
 proc ::JivePhone::LoginHook { } {
@@ -98,6 +108,10 @@ proc ::JivePhone::DiscoForUsers {} {
     
     Debug "::JivePhone::DiscoForUsers"
     set users [::Jabber::RosterCmd getusers]
+    
+    # We add ourselves to this list to figure out if we've got a jive phone.
+    lappend users [::Jabber::JlibCmd getthis myjid2]
+    
     foreach jid $users {
 	jlib::splitjidex $jid node domain -	
 	if {[::Jabber::GetServerJid] eq $domain} {
@@ -129,18 +143,42 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
 	    set jid [jlib::joinjid $node $server ""]
 	    #puts "\t jid=$jid"
 	    
-	    # Attempt to set icon only if this user is unavailable since
-	    # we do not have the full jid!
-	    # This way we shouldn't interfere with phone presence.
-	    # We could use [roster isavailable $jid] instead.
-
-	    set item [::RosterTree::FindWithTag [list jid $jid]]
-	    if {$item ne ""} {
-		set image [::Rosticons::Get [string tolower phone/available]]
-		::RosterTree::StyleSetItemAlternative $jid jivephone image $image
+	    # Since we added ourselves to the list take action if have phone.
+	    set myjid2 [::Jabber::JlibCmd getthis myjid2]
+	    if {[jlib::jidequal $jid $myjid2]} {
+		WeHavePhone
+	    } else {
+	    
+		# Attempt to set icon only if this user is unavailable since
+		# we do not have the full jid!
+		# This way we shouldn't interfere with phone presence.
+		# We could use [roster isavailable $jid] instead.
+		
+		set item [::RosterTree::FindWithTag [list jid $jid]]
+		if {$item ne ""} {
+		    set image [::Rosticons::Get [string tolower phone/available]]
+		    ::RosterTree::StyleSetItemAlternative $jid jivephone  \
+		      image $image
+		}
 	    }
 	}
     }
+}
+
+proc ::JivePhone::WeHavePhone { } {
+    variable state
+    variable menuDef
+    
+    if {$state(setui)} {
+	return
+    }
+    ::Jabber::UI::RegisterPopupEntry roster $menuDef
+    
+    set image [::Rosticons::Get [string tolower phone/available]]
+    set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
+    bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
+    
+    set state(setui) 1
 }
 
 proc ::JivePhone::LogoutHook { } {
@@ -148,6 +186,7 @@ proc ::JivePhone::LogoutHook { } {
     
     unset -nocomplain state
     set state(phoneserver) 0
+    set state(setui) 0
 }
 
 # JivePhone::PresenceHook --
@@ -191,6 +230,7 @@ proc ::JivePhone::PresenceHook {jid type args} {
 
 proc ::JivePhone::MessageHook {body args} {    
     variable xmlns
+    variable state
     variable callID
 
     Debug "::JivePhone::MessageHook $args"
@@ -270,14 +310,14 @@ proc ::JivePhone::BuildDialer {w type} {
     variable phoneNumber
     
     # Make sure only single instance of this dialog.
-    if {[winfo exists $state(win)]} {
-	raise $state(win)
+    if {[winfo exists $w]} {
+	raise $w
 	return
     }
 
     ::UI::Toplevel $w -class PhoneDialer \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
-      -closecommand [namespace current]::Close
+      -closecommand [namespace current]::CloseDialer
     wm title $w [mc {Dialer}]
 
     ::UI::SetWindowPosition $w
@@ -343,15 +383,13 @@ proc ::JivePhone::OnDial {w type {jid ""}} {
     
     if {$type eq "DIAL"} {
 	set command "DIAL"
-	set phoneElem [wrapper::createtag "phone-action"      \
-	  -attrlist [list xmlns $xmlns(jivephone) type $command]  \
-	  -subtags [list $extensionElem]]
+	set attr [list xmlns $xmlns(jivephone) type $command]
     } else {
 	set command "FORWARD"
-	set phoneElem [wrapper::createtag "phone-action"      \
-	  -attrlist [list xmlns $xmlns(jivephone) id $callID type $command]  \
-	  -subtags [list $extensionElem]]
+	set attr [list xmlns $xmlns(jivephone) id $callID type $command]
     }
+    set phoneElem [wrapper::createtag "phone-action"  \
+      -attrlist $attr -subtags [list $extensionElem]]
 
     ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
       -to $state(service) -command [list ::JivePhone::DialCB $dnid]
@@ -359,6 +397,32 @@ proc ::JivePhone::OnDial {w type {jid ""}} {
     eval {::hooks::run jivePhoneEvent $command $dnid}
 
     destroy $w
+}
+
+proc ::JivePhone::DialJID {jid type} {
+    variable state
+    variable xmlns
+    
+    if {!$state(phoneserver)} {
+	return
+    }
+    set extensionElem [wrapper::createtag "jid" -chdata $jid]
+
+    if {$type eq "DIAL"} {
+	set command "DIAL"
+	set attr [list xmlns $xmlns(jivephone) type $command]
+    } else {
+	# @@@ Where comes callID from?
+	set command "FORWARD"
+	set attr [list xmlns $xmlns(jivephone) id $callID type $command]
+    }
+    set phoneElem [wrapper::createtag "phone-action"  \
+      -attrlist $attr -subtags [list $extensionElem]]
+
+    ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
+      -to $state(service) -command [list ::JivePhone::DialCB $jid]
+
+    eval {::hooks::run jivePhoneEvent $command $jid}    
 }
 
 proc ::JivePhone::DialCB {dnid type subiq args} {

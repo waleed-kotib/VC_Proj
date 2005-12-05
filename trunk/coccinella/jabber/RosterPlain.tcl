@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.8 2005-11-30 08:32:00 matben Exp $
+# $Id: RosterPlain.tcl,v 1.9 2005-12-05 15:20:32 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -343,7 +343,7 @@ proc ::RosterPlain::ConfigureItem {item style text image} {
 
 proc ::RosterPlain::DeleteItem {jid} {
  
-    ::Debug 2 "::RosterPlain::DeleteItem, jid=$jid"
+    ::Debug 5 "::RosterPlain::DeleteItem, jid=$jid"
     
     # Sibling of '::RosterTree::CreateItemBase'.
     ::RosterTree::DeleteItemBase $jid
@@ -525,7 +525,7 @@ proc ::RosterPlain::DiscoInfoHook {type from subiq args} {
 
 proc ::RosterPlain::PostProcess {method from} {
     
-    ::Debug 4 "::RosterPlain::PostProcess $from"
+    ::Debug 5 "::RosterPlain::PostProcess $from"
 
     if {[string equal $method "browse"]} {
 	set matchHost 0

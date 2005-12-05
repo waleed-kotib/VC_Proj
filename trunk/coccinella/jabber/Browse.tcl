@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.82 2005-11-30 08:32:00 matben Exp $
+# $Id: Browse.tcl,v 1.83 2005-12-05 15:20:32 matben Exp $
 
 package require ITree
 
@@ -844,7 +844,11 @@ proc ::Browse::PresenceHook {jid type args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::coccixmlns coccixmlns
 
-    ::Debug 2 "::Browse::PresenceHook jid=$jid, type=$type, args='$args'"
+    ::Debug 2 "::Browse::PresenceHook jid=$jid, type=$type"
+    
+    if {![winfo exists $wtree]} {
+	return
+    }
 
     array set argsArr $args
     set jid3 $jid
@@ -855,10 +859,6 @@ proc ::Browse::PresenceHook {jid type args} {
 
     if {[$jstate(jlib) service isroom $jid]} {
 	if {[HaveBrowseTree $jid]} {
-	    
-	    if {![winfo exists $wtree]} {
-		return
-	    }
 	    set jidhash ${jid}/$argsArr(-resource)
 	    set parentList [$jstate(browse) getparents $jidhash]
 	    set jidList [concat $parentList [list $jidhash]]

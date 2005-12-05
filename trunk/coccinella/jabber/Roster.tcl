@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.150 2005-12-02 09:01:21 matben Exp $
+# $Id: Roster.tcl,v 1.151 2005-12-05 15:20:32 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -877,7 +877,7 @@ proc ::Roster::Presence {jid presence args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Roster::Presence jid=$jid, presence=$presence, args='$args'"
+    ::Debug 2 "::Roster::Presence jid=$jid, presence=$presence"
     array set argsArr $args
 
     # All presence have a 3-tier jid as 'from' attribute:

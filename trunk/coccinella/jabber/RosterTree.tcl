@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.10 2005-11-30 08:32:00 matben Exp $
+# $Id: RosterTree.tcl,v 1.11 2005-12-05 15:20:32 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -583,7 +583,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs  jprefs
     
-    ::Debug 4 "::RosterTree::CreateItemBase jid=$jid, presence=$presence, args='$args'"
+    ::Debug 5 "::RosterTree::CreateItemBase jid=$jid, presence=$presence, args='$args'"
 
     if {![regexp $presence {(available|unavailable)}]} {
 	return
@@ -706,7 +706,7 @@ proc ::RosterTree::CreateItemWithParent {jid type} {
 
 proc ::RosterTree::DeleteItemBase {jid} {
     
-    ::Debug 2 "::RosterTree::DeleteItemBase, jid=$jid"
+    ::Debug 5 "::RosterTree::DeleteItemBase, jid=$jid"
     
     # If have 3-tier jid:
     #    presence = 'available'   => remove jid2 + jid3
