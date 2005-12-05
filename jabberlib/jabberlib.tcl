@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.124 2005-12-04 13:29:11 matben Exp $
+# $Id: jabberlib.tcl,v 1.125 2005-12-05 15:20:32 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1054,10 +1054,10 @@ proc jlib::iq_handler {jlibname xmldata} {
     if {![info exists type]} {	
 	return
     }
-    if {![info exists from]} {
-	set afrom ""
-    } else {
+    if {[info exists from]} {
 	set afrom $from
+    } else {
+	set afrom $locals(server)
     }
     
     # @@@ The child must be a single <query> element (or any namespaced element).
@@ -1475,6 +1475,7 @@ proc jlib::presence_handler {jlibname xmldata} {
     #     registered with 'presence_register'
 
     eval {presence_run_hook $jlibname $from $type} $arglist
+    presence_ex_run_hook $jlibname $xmldata
 }
 
 # jlib::features_handler --
@@ -2280,22 +2281,33 @@ proc jlib::presence_deregister {jlibname type func} {
     
     upvar ${jlibname}::preshook preshook
     
-    set ind [lsearch -glob $preshook($type) "$func *"]
-    if {$ind >= 0} {
-	set preshook($type) [lreplace $preshook($type) $ind $ind]
+    if {[info exists preshook($type)]} {
+	set idx [lsearch -glob $preshook($type) "$func *"]
+	if {$idx >= 0} {
+	    set preshook($type) [lreplace $preshook($type) $idx $idx]
+	}
     }
 }
 
-# jlib::presence_ex_register --
+# jlib::presence_register_ex --
 # 
 #       Set extended presence callbacks which can be triggered for
 #       various attributes and elements.
+#       
+#       The internal storage consists of two parts:
+#       1) attributes; stored as array keys using wildcards (*)
+#       2) elements  : stored as a -tag .. -xmlns .. list
+#       
+#       expreshook($type,$from,$from2) {{{-key value ...} tclProc seq} {...} ...}
+#       
+#       These are matched separately but not independently.
 #       
 # Arguments:
 #       jlibname:   the instance of this jlib.
 #       func:       tclProc        
 #       args:       -type     type and from must match the presence element
 #                   -from     attributes
+#                   -from2    match the bare from jid
 #                   -tag      tag and xmlns must coexist in the same element
 #                   -xmlns    for a valid match
 #                   -seq      priority 0-100 (D=50)
@@ -2303,53 +2315,159 @@ proc jlib::presence_deregister {jlibname type func} {
 # Results:
 #       none.
 
-proc jlib::presence_ex_register {jlibname func args} {
+proc jlib::presence_register_ex {jlibname func args} {
     
     upvar ${jlibname}::expreshook expreshook
 
-    # An empty value means match any.
-    set type  ""
-    set from  ""
-    set tag   ""
-    set xmlns ""
+    set type  "*"
+    set from  "*"
+    set from2 "*"
     set seq   50
+    set spec  {}
+
     foreach {key value} $args {
-	set name [string trimleft $key -]
-	set $name $value
+	switch -- $key {
+	    -from - -from2 {
+		set name [string trimleft $key "-"]
+		set $name [ESC $value]
+	    }
+	    -type {
+		set type $value
+	    }
+	    -tag - -xmlns {
+		lappend spec $key $value
+	    }
+	}
     }
-    set pkey "$type,$from,$tag,$xmlns"
-    lappend expreshook($pkey) [list $func $seq]
-    set expreshook($pkey)  \
-      [lsort -integer -index 1 [lsort -unique $expreshook($pkey)]]
+    set pat "$type,$from,$from2"
+    lappend expreshook($pat) [list $spec $func $seq]
+    set expreshook($pat)  \
+      [lsort -integer -index 2 [lsort -unique $expreshook($pat)]]  
 }
 
 proc jlib::presence_ex_run_hook {jlibname xmldata} {
 
     upvar ${jlibname}::expreshook expreshook
+    upvar ${jlibname}::locals locals
 
     set type [wrapper::getattribute $xmldata type]
     set from [wrapper::getattribute $xmldata from]
+    if {$type eq ""} {
+	set type "available"
+    }
+    if {$from eq ""} {
+	set from $locals(server)
+    }
+    jlib::splitjid $from from2 -
+    set pkey "$type,$from,$from2"
     
+    #puts "\t pkey=$pkey"
     
+    # Make matching in two steps, attributes and elements.
+    # First the attributes.
+    set matched {}
+    foreach {pat value} [array get expreshook] {
+	#puts "\t pat=$pat"
+	if {[string match $pat $pkey]} {
+	    
+	    foreach spec $value {
+		#puts "\t\t spec=$spec"
     
-    set tagxmlns {}
-    foreach c [wrapper::getchildren $xmldata] {
-	set xmlns [wrapper::getattribute $c xmlns]
-	lappend tagxmlns [list [wrapper::gettag $c] $xmlns]
-	
+		# Match attributes only if opts empty.
+		if {[lindex $spec 0] eq {}} {
+		    set func [lindex $spec 1]
+		    set code [catch {
+			uplevel #0 $func [list $jlibname $xmldata]
+		    } ans]
+		    if {$code} {
+			bgerror "preshook $func failed: $code\n$::errorInfo"
+		    }
+		} else {
+		    
+		    # Collect all callbacks that match the attributes and have
+		    # a nonempty element spec.
+		    lappend matched $spec
+		}
+	    }
+	}
     }
     
-    array get expreshook $type,*
+    # Now try match the elements with the ones that matched the attributes.
+    if {[llength $matched]} {
+	
+	# Start by collecting all tags and xmlns we have in 'xmldata'.
+	set tagxmlns {}
+	foreach c [wrapper::getchildren $xmldata] {
+	    set xmlns [wrapper::getattribute $c xmlns]
+	    lappend tagxmlns [list [wrapper::gettag $c] $xmlns]	    
+	}
+	#puts "\t matched=$matched"
+	#puts "\t tagxmlns=$tagxmlns"
 
-    
-    set ishandled 0
-    
-    if {[info exists expreshook($type)]} {
+	foreach spec $matched {
+	    #puts "\t spec=$spec"
+	    array set opts {-tag * -xmlns *}
+	    array set opts [lindex $spec 0]
+	    set olist [list $opts(-tag) $opts(-xmlns)]
+	    #puts "\t olist=$olist"	
+	    set idx [lsearch -glob $tagxmlns $olist]
+	    if {$idx >= 0} {
+		set func [lindex $spec 1]
+		set code [catch {
+		    uplevel #0 $func [list $jlibname $xmldata]
+		} ans]
+		if {$code} {
+		    bgerror "preshook $func failed: $code\n$::errorInfo"
+		}
+	    }
+	}
+    }
+}
 
+proc jlib::presence_deregister_ex {jlibname func args} {
+    
+    upvar ${jlibname}::expreshook expreshook
+    
+    set type  "*"
+    set from  "*"
+    set from2 "*"
+    set seq   50
+    set spec  {}
+
+    foreach {key value} $args {
+	switch -- $key {
+	    -from - -from2 {
+		set name [string trimleft $key "-"]
+		set $name [jlib::ESC $value]
+	    }
+	    -type {
+		set type $value
+	    }
+	    -tag - -xmlns {
+		lappend spec $key $value
+	    }
+	}
+    }
+    set pat "$type,$from,$from2"
+    if {[info exists expreshook($pat)]} {
+	# @@@ TODO
+	set idx [lsearch -glob $expreshook($pat) "$func *"]
+	if {$idx >= 0} {
+	    set expreshook($type) [lreplace $expreshook($type) $idx $idx]
+	}
+	
 	
     }
-    
-    return $ishandled
+}
+
+if {0} {
+    proc cb {args} {puts "-+-+-+-+ $args"}
+    proc cx {args} {puts "xxxxxxxx $args"}
+    jlib::jlib1 presence_register_ex cb -type available
+    jlib::jlib1 presence_register_ex cb -type available -from2 matben2@localhost
+    jlib::jlib1 presence_register_ex cx -type available -tag x
+    jlib::jlib1 presence_register_ex cx -type available -tag x -xmlns jabber:x:avatar
+    parray ::jlib::jlib1::expreshook
 }
 
 # jlib::element_register --

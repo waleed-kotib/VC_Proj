@@ -350,6 +350,8 @@
 ::msgcat::mcset en mIncreasing         	{Increasing}
 ::msgcat::mcset en mDecreasing         	{Decreasing}
 ::msgcat::mcset en mStyle         	{Style}
+::msgcat::mcset en mCall         	{Call}
+::msgcat::mcset en mForward         	{Forward}
 
 
 # Short texts only. Use english text as database key.

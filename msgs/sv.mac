@@ -350,6 +350,8 @@
 ::msgcat::mcset sv mIncreasing         	{…kande}
 ::msgcat::mcset sv mDecreasing         	{Minskande}
 ::msgcat::mcset sv mStyle         	{Stil}
+::msgcat::mcset sv mCall         	{Ring}
+::msgcat::mcset sv mForward         	{Vidarekoppla}
 
 
 
