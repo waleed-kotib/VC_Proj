@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.98 2005-11-30 08:32:00 matben Exp $
+# $Id: JUI.tcl,v 1.99 2005-12-06 15:31:38 matben Exp $
 
 package provide JUI 1.0
 
@@ -73,6 +73,8 @@ namespace eval ::Jabber::UI:: {
     # Collection of useful and common widget paths.
     variable jwapp
     variable inited 0
+    
+    set jwapp(w) -
 }
 
 
@@ -185,8 +187,18 @@ proc ::Jabber::UI::Init { } {
     
     # We should do this for all menus eventaully.
     ::UI::PruneMenusUsingOptsDB mInfo menuDefs(rost,info) menuDefsInsertInd(rost,info)
-}
 
+    # Defines which menus to use; names and labels.
+    variable menuBarDef
+    set menuBarDef {
+	file    mFile
+	jabber  mJabber
+	info    mInfo
+    }
+    if {[tk windowingsystem] eq "aqua"} {
+	set menuBarDef [linsert $menuBarDef 2 edit mEdit]
+    }
+}
 
 proc ::Jabber::UI::Show {w args} {
     upvar ::Jabber::jstate jstate
@@ -222,6 +234,7 @@ proc ::Jabber::UI::Build {w} {
     
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
+    variable menuBarDef
     variable menuDefs
     variable jwapp
     variable inited
@@ -235,10 +248,8 @@ proc ::Jabber::UI::Build {w} {
       -macstyle documentProc -closecommand ::Jabber::UI::CloseHook
     wm title $w $prefs(theAppName)
     ::UI::SetWindowGeometry $w
+    set jwapp(w)     $w
     set jwapp(jmain) $w
-
-    # Build minimal menu for Jabber stuff.
-    MergeMenuDefs
     
     # Make main menus.
     set wmenu $w.menu
@@ -250,23 +261,17 @@ proc ::Jabber::UI::Build {w} {
 	bind $w <FocusOut> +[list ::UI::MacFocusFixEditMenu $w $wmenu %W]
     }    
     if {([tk windowingsystem] eq "aqua") && $prefs(haveMenus)} {
-	set haveAppleMenu 1
-    } else {
-	set haveAppleMenu 0
-    }
-    if {$haveAppleMenu} {
 	::UI::BuildAppleMenu $w $wmenu.apple normal
+    }    
+    foreach {name mLabel} $menuBarDef {
+	BuildMenu $name
     }
-    ::UI::NewMenu $w $wmenu.file    mFile     $menuDefs(rost,file)  normal
     if {[tk windowingsystem] eq "aqua"} {
-	::UI::NewMenu $w $wmenu.edit  mEdit   $menuDefs(rost,edit)   normal
 	$wmenu.edit configure  \
 	  -postcommand [list ::Jabber::UI::EditPostCommand $wmenu.edit]
     }
-    ::UI::NewMenu $w $wmenu.jabber  mJabber   $menuDefs(rost,jabber) normal
     $wmenu.jabber configure  \
       -postcommand [list ::Jabber::UI::JabberPostCommand $wmenu.jabber]
-    ::UI::NewMenu $w $wmenu.info    mInfo     $menuDefs(rost,info)   normal
     $w configure -menu $wmenu    
     
     # Global frame.
@@ -407,6 +412,26 @@ proc ::Jabber::UI::BuildToolbar {w wtbar} {
     ::hooks::run buildJMainButtonTrayHook $wtbar
 
     return $wtbar
+}
+
+proc ::Jabber::UI::BuildMenu {name} {
+    variable menuBarDef
+    variable menuDefs
+    variable menuDefsInsertInd
+    variable extraMenuDefs
+    variable jwapp
+
+    set w     $jwapp(w)
+    set wmenu $jwapp(wmenu)
+    
+    array set mLabel $menuBarDef
+    set menuMerged $menuDefs(rost,$name)
+    if {[info exists extraMenuDefs(rost,$name)]} {
+	set menuMerged [eval {
+	    linsert $menuMerged $menuDefsInsertInd(rost,$name)
+	} $extraMenuDefs(rost,$name)]
+    }
+    ::UI::NewMenu $w $wmenu.$name  $mLabel($name)  $menuMerged  normal
 }
 
 proc ::Jabber::UI::RosterMoveFromPage { } {
@@ -697,7 +722,8 @@ proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
 # 
 #       Lets plugins/components register their own menu entry.
 
-proc ::Jabber::UI::RegisterMenuEntry {mtail menuSpec} {
+proc ::Jabber::UI::RegisterMenuEntry {name menuSpec} {
+    variable jwapp
     
     # Keeps track of all registered menu entries.
     variable extraMenuDefs
@@ -705,22 +731,39 @@ proc ::Jabber::UI::RegisterMenuEntry {mtail menuSpec} {
     # Add these entries in a section above the bottom section.
     # Add separator to section component entries.
     
-    if {![info exists extraMenuDefs(rost,$mtail)]} {
+    if {![info exists extraMenuDefs(rost,$name)]} {
 
 	# Add separator if this is the first addon entry.
-	set extraMenuDefs(rost,$mtail) {separator}
+	set extraMenuDefs(rost,$name) {separator}
     }
-    lappend extraMenuDefs(rost,$mtail) $menuSpec
+    lappend extraMenuDefs(rost,$name) $menuSpec
+    
+    # If already built menu need to rebuild it.
+    if {[winfo exists $jwapp(w)]} {
+	BuildMenu $name
+    }
 }
 
-proc ::Jabber::UI::MergeMenuDefs { } {
-    variable menuDefs
-    variable menuDefsInsertInd
+proc ::Jabber::UI::DeRegisterMenuEntry {name mLabel} {
+    variable jwapp
     variable extraMenuDefs
     
-    foreach key [array names extraMenuDefs] {
-	set menuDefs($key) [eval {linsert $menuDefs($key)  \
-	  $menuDefsInsertInd($key)} $extraMenuDefs($key)]
+    set ind 0
+    if {[info exists extraMenuDefs(rost,$name)]} {
+	set v $extraMenuDefs(rost,$name)
+	foreach mdef $v {
+	    set idx [lsearch $mdef $mLabel]
+	    if {$idx == 1} {
+		set extraMenuDefs(rost,$name) [lreplace $v $ind $ind]
+		
+		# If already built menu need to rebuild it.
+		if {[winfo exists $jwapp(w)]} {
+		    BuildMenu $name
+		}
+		break
+	    }
+	    incr ind
+	}	
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.151 2005-12-05 15:20:32 matben Exp $
+# $Id: Roster.tcl,v 1.152 2005-12-06 15:31:38 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -516,6 +516,34 @@ proc ::Roster::RegisterPopupEntry {menuSpec} {
     set popMenuDefs(roster,def) \
       [concat [lrange $v 0 [expr $ind-1]] $menuSpec [lrange $v $ind end]]
     set regPopMenuSpec [concat $regPopMenuSpec $menuSpec]
+}
+
+proc ::Roster::DeRegisterPopupEntry {mLabel} {
+    variable popMenuDefs
+    variable regPopMenuSpec
+    
+    if {[info exists regPopMenuSpec]} {
+	
+	# First remove from the 'regPopMenuSpec' list.
+	set idx [lsearch $regPopMenuSpec $mLabel]
+	set rem [expr {$idx % 5}]
+	if {$idx > 0 && $rem == 1} {
+	    set midx [expr {$idx/5}]
+	    set i0 [expr {5 * $midx}]
+	    set i1 [expr {$i0 + 4}]
+	    set regPopMenuSpec [lreplace $regPopMenuSpec $i0 $i1]	    
+	}
+	
+	# Then remove from 'popMenuDefs'.
+	set v $popMenuDefs(roster,def)
+	set idx [lsearch $v $mLabel]
+	if {$idx > 0 && $rem == 1} {
+	    set midx [expr {$idx/5}]
+	    set i0 [expr {5 * $midx}]
+	    set i1 [expr {$i0 + 4}]
+	    set popMenuDefs(roster,def) [lreplace $v $i0 $i1]	    
+	}
+    }
 }
 
 # Roster::DoPopup --
