@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.112 2005-12-02 09:01:21 matben Exp $
+# $Id: UI.tcl,v 1.113 2005-12-06 15:31:39 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1035,8 +1035,15 @@ proc ::UI::BuildMenu {w wmenu label menuDef state args} {
     variable mapWmenuToWtop
     variable cachedMenuSpec
         
-    # -postcommand
-    set m [menu $wmenu -tearoff 0]
+    # This is also used to rebuild an existing menu.
+    if {[winfo exists $wmenu]} {
+	$wmenu delete 0 end
+	set m $wmenu
+	set exists 1
+    } else {
+	set m [menu $wmenu -tearoff 0]
+	set exists 0
+    }
     set wparent [winfo parent $wmenu]
     
     foreach {optName value} $args {
@@ -1045,7 +1052,7 @@ proc ::UI::BuildMenu {w wmenu label menuDef state args} {
     }
 
     # A trick to make this work for popup menus, which do not have a Menu parent.
-    if {[string equal [winfo class $wparent] "Menu"]} {
+    if {!$exists && [string equal [winfo class $wparent] "Menu"]} {
 	$wparent add cascade -label [mc $label] -menu $m
     }
     

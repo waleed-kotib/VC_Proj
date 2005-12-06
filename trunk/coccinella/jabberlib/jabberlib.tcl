@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.125 2005-12-05 15:20:32 matben Exp $
+# $Id: jabberlib.tcl,v 1.126 2005-12-06 15:31:39 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2323,7 +2323,6 @@ proc jlib::presence_register_ex {jlibname func args} {
     set from  "*"
     set from2 "*"
     set seq   50
-    set spec  {}
 
     foreach {key value} $args {
 	switch -- $key {
@@ -2335,12 +2334,18 @@ proc jlib::presence_register_ex {jlibname func args} {
 		set type $value
 	    }
 	    -tag - -xmlns {
-		lappend spec $key $value
+		set aopts($key) $value
 	    }
 	}
     }
     set pat "$type,$from,$from2"
-    lappend expreshook($pat) [list $spec $func $seq]
+    
+    # The 'opts' must be ordered.
+    set opts {}
+    foreach key [array names aopts] {
+	lappend opts $key $aopts($key)
+    }
+    lappend expreshook($pat) [list $opts $func $seq]
     set expreshook($pat)  \
       [lsort -integer -index 2 [lsort -unique $expreshook($pat)]]  
 }
@@ -2408,6 +2413,8 @@ proc jlib::presence_ex_run_hook {jlibname xmldata} {
 	    #puts "\t spec=$spec"
 	    array set opts {-tag * -xmlns *}
 	    array set opts [lindex $spec 0]
+
+	    # The 'olist' must be ordered.
 	    set olist [list $opts(-tag) $opts(-xmlns)]
 	    #puts "\t olist=$olist"	
 	    set idx [lsearch -glob $tagxmlns $olist]

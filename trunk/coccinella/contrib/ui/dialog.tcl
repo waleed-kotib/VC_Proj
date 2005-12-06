@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.8 2005-10-16 09:49:38 matben Exp $
+# $Id: dialog.tcl,v 1.9 2005-12-06 15:31:38 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -98,6 +98,8 @@ if {0} {
 	tk_getSaveFile
     }
     ui::dialog -message "Check destroy from -command" -command cmd
+    ui::dialog -message "Check timeout for auto destruction"  \
+      -timeout 4000 -buttons {}
 }
 
 # These two must be able to call before any dialog instance created.
@@ -191,8 +193,11 @@ snit::widget ui::dialog::widget {
     
     typevariable dialogTypes	;# map -type => list of dialog options
     typevariable buttonOptions	;# map button name => list of button options
-
+    typevariable wmalpha       0
+    
     variable client
+    variable timeoutID
+    variable fadeoutID
     
     delegate option -message to message as -text
     delegate option -detail  to detail  as -text
@@ -208,12 +213,12 @@ snit::widget ui::dialog::widget {
     option -buttons     {ok}
     option -default     {}
     option -cancel      {}
-    option -default     {}
     option -icon                      \
       -default info                   \
       -validatemethod ValidateIcon
     option -badge       1
     option -modal       0
+    option -timeout     {}
     
     typeconstructor {
 
@@ -237,6 +242,13 @@ snit::widget ui::dialog::widget {
 	  -icon question -buttons {yes no}
 	StockDialog yesnocancel \
 	  -icon question -buttons {yes no cancel} -cancel cancel
+	
+	array set wmArr [wm attributes .]
+	if {[info exists wmArr(-alpha)]} {
+	    set wmalpha 1
+	} else {
+	    set wmalpha 0
+	}
     }
 
     constructor {args} {
@@ -308,6 +320,9 @@ snit::widget ui::dialog::widget {
 		grid columnconfigure $bottom $column -minsize $padx
 	    }
 	}
+	if {$buttons eq {}} {
+	    set options(-default) ""
+	}
 
 	if {$options(-default) ne ""} {
 	    bind $win <KeyPress-Return> \
@@ -330,10 +345,19 @@ snit::widget ui::dialog::widget {
 	    # This doesn't work because we are destroyed after grab is released!
 	    #ui::Grab $win
 	}
+	if {$options(-timeout) ne ""} {
+	    set timeoutID [after $options(-timeout) [list $self Timeout]]
+	}
 	return
     }
     
     destructor {
+	if {[info exists timeoutID]} {
+	    after cancel $timeoutID
+	}
+	if {[info exists fadeoutID]} {
+	    after cancel $fadeoutID
+	}
 	if {$options(-cancel) ne ""} {
 	    $self Done $options(-cancel)
 	}
@@ -370,6 +394,24 @@ snit::widget ui::dialog::widget {
 	if {![info exists images($value)]} {
 	    set valid [join $images(names) ", "]
 	    return -code error "unrecognized icon $value, must be one of $valid"
+	}
+    }
+    
+    method Timeout {} {
+	unset -nocomplain timeoutID
+	if {$wmalpha} {
+	    $self FadeOut {0.95 0.9 0.85 0.8 0.75 0.7 0.65 0.6 0.55 0.5 0.4 0.3 0.2}
+	} else {
+	    $self Dismiss
+	}
+    }
+    
+    method FadeOut {fades} {
+	if {[llength $fades]} {
+	    wm attributes $win -alpha [lindex $fades 0]
+	    set fadeoutID [after 120 [list $self FadeOut [lrange $fades 1 end]]]
+	} else {
+	    $self Dismiss
 	}
     }
 	

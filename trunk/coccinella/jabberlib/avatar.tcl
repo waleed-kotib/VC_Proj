@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: avatar.tcl,v 1.2 2005-12-05 15:20:32 matben Exp $
+# $Id: avatar.tcl,v 1.3 2005-12-06 15:31:39 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -163,8 +163,8 @@ proc jlib::avatar::set_data {jlibname data mime} {
     set state(user64)   [::base64::encode $data]
     
     set hashElem [wrapper::createtag hash -chdata $state(userhash)]
-    set xElem [wrapper::createtag x  \
-      -attrlist [list xmlns $xmlns(x-avatar)]  \
+    set xElem [wrapper::createtag x           \
+      -attrlist [list xmlns $xmlns(x-avatar)] \
       -subtags [list $hashElem]]
 
     $jlibname register_presence_stanza $xElem
@@ -183,7 +183,7 @@ proc jlib::avatar::store {jlibname cmd} {
     
     puts "jlib::avatar::store"
 
-    set dataElem [wrapper::createtag data    \
+    set dataElem [wrapper::createtag data        \
       -attrlist [list mimetype $state(usermime)] \
       -chdata $state(user64)]
 

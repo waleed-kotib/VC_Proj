@@ -4,7 +4,7 @@
 #       
 #       Contributions and testing by Antonio Cano damas
 #       
-# $Id: JivePhone.tcl,v 1.13 2005-12-05 15:20:32 matben Exp $
+# $Id: JivePhone.tcl,v 1.14 2005-12-06 15:31:38 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -48,11 +48,15 @@ proc ::JivePhone::Init { } {
 	win             .dial
     }
 
-    variable menuDef
-    set menuDef {
+    variable popMenuDef
+    set popMenuDef {
 	command  mCall     {user available} {::JivePhone::DialJID $jid "DIAL"} {}
 	command  mForward  {user available} {::JivePhone::DialJID $jid "FORWARD"} {}
     }
+
+    variable menuDef
+    set menuDef  \
+      {command  mCall     {::JivePhone::DoDial "DIAL"}    normal {}}
 
 }
 
@@ -167,22 +171,28 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
 
 proc ::JivePhone::WeHavePhone { } {
     variable state
+    variable popMenuDef
     variable menuDef
     
     if {$state(setui)} {
 	return
     }
-    ::Jabber::UI::RegisterPopupEntry roster $menuDef
+    ::Jabber::UI::RegisterPopupEntry roster $popMenuDef
+    #::Jabber::UI::RegisterMenuEntry  jabber $menuDef
     
     set image [::Rosticons::Get [string tolower phone/available]]
     set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
     bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
+    ::balloonhelp::balloonforwindow $win "Make a call"
     
     set state(setui) 1
 }
 
 proc ::JivePhone::LogoutHook { } {
     variable state
+    
+    ::Roster::DeRegisterPopupEntry mCall
+    ::Roster::DeRegisterPopupEntry mForward
     
     unset -nocomplain state
     set state(phoneserver) 0
@@ -267,12 +277,11 @@ proc ::JivePhone::MessageHook {body args} {
 	    }
 	    
 	    # Provide a default notifier?
-	    # @@@ Add a timeout to ui::dialog !
 	    if {[hooks::info jivePhoneEvent] eq {}} {
 		set title "Ring, ring..."
 		set msg "Phone is ringing from $cid"
-		ui::dialog -icon info -type ok -title $title  \
-		  -message $msg
+		ui::dialog -icon info -buttons {} -title $title  \
+		  -message $msg -timeout 4000
 	    }
 	}
     }
