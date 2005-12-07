@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.99 2005-12-06 15:31:38 matben Exp $
+# $Id: JUI.tcl,v 1.100 2005-12-07 13:31:33 matben Exp $
 
 package provide JUI 1.0
 
@@ -266,6 +266,10 @@ proc ::Jabber::UI::Build {w} {
     foreach {name mLabel} $menuBarDef {
 	BuildMenu $name
     }
+    
+    # Note that in 8.0 on Macintosh and Windows, all commands in a menu systems
+    # are executed before any are posted. This is due to the limitations in the 
+    # individual platforms' menu managers.
     if {[tk windowingsystem] eq "aqua"} {
 	$wmenu.edit configure  \
 	  -postcommand [list ::Jabber::UI::EditPostCommand $wmenu.edit]
@@ -775,7 +779,7 @@ proc ::Jabber::UI::EditPostCommand {wmenu} {
     set haveFocus 0
     set haveSelection 0
     set editable 1
-    
+        
     if {$wfocus ne ""} {
 	set wclass [winfo class $wfocus]
 	if {[lsearch {Entry Text TEntry} $wclass] >= 0} {
@@ -830,7 +834,9 @@ proc ::Jabber::UI::EditPostCommand {wmenu} {
     } else {
 	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
     }
-    
+
+    ::hooks::run menuPostCommand edit $wmenu
+
     # Workaround for mac bug.
     update idletasks
 }
@@ -839,7 +845,7 @@ proc ::Jabber::UI::JabberPostCommand {wmenu} {
     global wDlgs
     variable state
     variable jwapp
-    
+        
     # For aqua we must do this only for .jmain
     if {[::UI::IsToplevelActive $wDlgs(jmain)]} {
 	::UI::MenuMethod $wmenu entryconfigure mShow -state normal
@@ -861,6 +867,8 @@ proc ::Jabber::UI::JabberPostCommand {wmenu} {
     } else {
 	::UI::MenuMethod $wmenu entryconfigure mShow -state disabled
     }
+    
+    ::hooks::run menuPostCommand jabber $wmenu
     
     # Workaround for mac bug.
     update idletasks
