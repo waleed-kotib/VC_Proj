@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.113 2005-12-06 15:31:39 matben Exp $
+# $Id: UI.tcl,v 1.114 2005-12-07 13:31:33 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1018,7 +1018,7 @@ proc ::UI::NewMenu {w wmenu label menuSpec state args} {
 # Arguments:
 #       w           toplevel window
 #       wmenu       the menus widget path name (".menu.file" etc.).
-#       label       its label.
+#       mLabel      its mLabel.
 #       menuDef     a hierarchical list that defines the menu content.
 #                   {{type name cmd state accelerator opts} {{...} {...} ...}}
 #       state       'normal' or 'disabled'.
@@ -1027,18 +1027,27 @@ proc ::UI::NewMenu {w wmenu label menuSpec state args} {
 # Results:
 #       $wmenu
 
-proc ::UI::BuildMenu {w wmenu label menuDef state args} {
+proc ::UI::BuildMenu {w wmenu mLabel menuDef state args} {
     global  this wDlgs prefs
 
     variable menuKeyToIndex
     variable menuNameToWmenu
     variable mapWmenuToWtop
     variable cachedMenuSpec
-        
+            
     # This is also used to rebuild an existing menu.
     if {[winfo exists $wmenu]} {
+	
+	# The toplevel cascades must not be deleted since this changes
+	# their relative order.
+	# Also must be sure to delete any child cascades so they are added
+	# back properly below.
 	$wmenu delete 0 end
+	foreach mchild [winfo children $wmenu] {
+	    destroy $mchild
+	}
 	set m $wmenu
+	array unset menuKeyToIndex  $wmenu,*
 	set exists 1
     } else {
 	set m [menu $wmenu -tearoff 0]
@@ -1053,16 +1062,16 @@ proc ::UI::BuildMenu {w wmenu label menuDef state args} {
 
     # A trick to make this work for popup menus, which do not have a Menu parent.
     if {!$exists && [string equal [winfo class $wparent] "Menu"]} {
-	$wparent add cascade -label [mc $label] -menu $m
+	$wparent add cascade -label [mc $mLabel] -menu $m
     }
     
     # If we don't have a menubar, for instance, if embedded toplevel.
     # Only for the toplevel menubar.
     if {[string equal $wparent ".menu"] &&  \
       [string equal [winfo class $wparent] "Frame"]} {
-	label ${wmenu}la -text [mc $label]
-	pack ${wmenu}la -side left -padx 4
-	bind ${wmenu}la <Button-1> [list ::UI::DoTopMenuPopup %W $wmenu]
+	label ${wmenu}la -text [mc $mLabel]
+	pack  ${wmenu}la -side left -padx 4
+	bind  ${wmenu}la <Button-1> [list ::UI::DoTopMenuPopup %W $wmenu]
     }
     
     set mod $this(modkey)
@@ -1077,7 +1086,7 @@ proc ::UI::BuildMenu {w wmenu label menuDef state args} {
 		set locname [mc $name]
 	    }
 	    set menuKeyToIndex($wmenu,$name) $i
-	    set menuNameToWmenu($w,$label,$name) $wmenu
+	    set menuNameToWmenu($w,$mLabel,$name) $wmenu
 	    set ampersand [string first & $locname]
 	    if {$ampersand != -1} {
 		regsub -all & $locname "" locname
@@ -1143,6 +1152,12 @@ proc ::UI::GetMenuKeyToIndex {wmenu key} {
     variable menuKeyToIndex
 
     return $menuKeyToIndex($wmenu,$key)
+}
+
+proc ::UI::HaveMenuEntry {wmenu mLabel} {
+    variable menuKeyToIndex
+
+    return [info exists menuKeyToIndex($wmenu,$mLabel)]
 }
 
 proc ::UI::FreeMenu {w} {

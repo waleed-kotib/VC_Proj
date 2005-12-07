@@ -4,7 +4,7 @@
 #       
 #       Contributions and testing by Antonio Cano damas
 #       
-# $Id: JivePhone.tcl,v 1.14 2005-12-06 15:31:38 matben Exp $
+# $Id: JivePhone.tcl,v 1.15 2005-12-07 13:31:33 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -28,10 +28,11 @@ proc ::JivePhone::Init { } {
       "Provides support for the VoIP notification in the jive server"
         
     # Add event hooks.
-    ::hooks::register presenceHook    ::JivePhone::PresenceHook
-    ::hooks::register newMessageHook  ::JivePhone::MessageHook
-    ::hooks::register loginHook       ::JivePhone::LoginHook
-    ::hooks::register logoutHook      ::JivePhone::LogoutHook
+    ::hooks::register presenceHook          ::JivePhone::PresenceHook
+    ::hooks::register newMessageHook        ::JivePhone::MessageHook
+    ::hooks::register loginHook             ::JivePhone::LoginHook
+    ::hooks::register logoutHook            ::JivePhone::LogoutHook
+    ::hooks::register rosterPostCommandHook ::JivePhone::RosterPostCommandHook
     
     variable xmlns
     set xmlns(jivephone) "http://jivesoftware.com/xmlns/phone"
@@ -41,12 +42,6 @@ proc ::JivePhone::Init { } {
     set feature(jivephone) "http://jivesoftware.com/phone"
     
     variable statuses {AVAILABLE RING DIALED ON_PHONE HANG_UP}
-    variable state
-    array set state {
-	phoneserver     0
-	setui           0
-	win             .dial
-    }
 
     variable popMenuDef
     set popMenuDef {
@@ -58,6 +53,18 @@ proc ::JivePhone::Init { } {
     set menuDef  \
       {command  mCall     {::JivePhone::DoDial "DIAL"}    normal {}}
 
+    InitState
+}
+
+proc ::JivePhone::InitState { } {
+    variable state
+    
+    array set state {
+	phoneserver     0
+	setui           0
+	win             .dial
+	wstatus         -
+    }
 }
 
 proc ::JivePhone::LoginHook { } {
@@ -147,6 +154,9 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
 	    set jid [jlib::joinjid $node $server ""]
 	    #puts "\t jid=$jid"
 	    
+	    # Cache this info.
+	    set state(phone,$jid)
+	    
 	    # Since we added ourselves to the list take action if have phone.
 	    set myjid2 [::Jabber::JlibCmd getthis myjid2]
 	    if {[jlib::jidequal $jid $myjid2]} {
@@ -178,14 +188,15 @@ proc ::JivePhone::WeHavePhone { } {
 	return
     }
     ::Jabber::UI::RegisterPopupEntry roster $popMenuDef
-    #::Jabber::UI::RegisterMenuEntry  jabber $menuDef
+    ::Jabber::UI::RegisterMenuEntry  jabber $menuDef
     
     set image [::Rosticons::Get [string tolower phone/available]]
     set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
     bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
     ::balloonhelp::balloonforwindow $win "Make a call"
     
-    set state(setui) 1
+    set state(wstatus) $win
+    set state(setui)   1
 }
 
 proc ::JivePhone::LogoutHook { } {
@@ -193,10 +204,13 @@ proc ::JivePhone::LogoutHook { } {
     
     ::Roster::DeRegisterPopupEntry mCall
     ::Roster::DeRegisterPopupEntry mForward
+    ::Jabber::UI::DeRegisterMenuEntry jabber mCall
     
+    if {[winfo exists $state(wstatus)]} {
+	destroy $state(wstatus)
+    }
     unset -nocomplain state
-    set state(phoneserver) 0
-    set state(setui) 0
+    InitState
 }
 
 # JivePhone::PresenceHook --
@@ -205,6 +219,7 @@ proc ::JivePhone::LogoutHook { } {
 
 proc ::JivePhone::PresenceHook {jid type args} {
     variable xmlns
+    variable state
 
     Debug "::JivePhone::PresenceHook jid=$jid, type=$type, $args"
     
@@ -224,6 +239,11 @@ proc ::JivePhone::PresenceHook {jid type args} {
 	    if {$status eq ""} {
 		set status available
 	    }
+	    # Cache this info. 
+	    # @@@ How do we get unavailable status?
+	    # Must check for "normal" presence info.
+	    set state(status,$from) $status
+
 	    set image [::Rosticons::Get [string tolower phone/$status]]
 	    ::RosterTree::StyleSetItemAlternative $from jivephone image $image
 	    
@@ -286,6 +306,37 @@ proc ::JivePhone::MessageHook {body args} {
 	}
     }
     return
+}
+
+proc ::JivePhone::RosterPostCommandHook {wmenu jidlist clicked status} {
+    variable state
+    
+    set jid3 [lindex $jidlist 0]
+    jlib::splitjid $jid3 jid2 -
+    set jid $jid2
+    
+    Debug "RosterPostCommandHook $jidlist $clicked $status"
+
+    if {$clicked ne "user"} {
+	return
+    }
+    if {$status ne "available"} {
+	return
+    }
+    if {[info exists state(phone,$jid]} {	
+	if {[info exists state(status,$jid)]} {
+	    
+	    switch -- $state(status,$jid3) {
+		AVAILABLE - HANG_UP {
+		    ::Roster::SetMenuEntryState $wmenu mCall normal
+		}
+		XXXX {
+		    # @@@ ???
+		    ::Roster::SetMenuEntryState $wmenu mForward normal
+		}
+	    }
+	}
+    }
 }
 
 # JivePhone::DoDial --

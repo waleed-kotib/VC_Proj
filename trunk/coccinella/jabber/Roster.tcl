@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.152 2005-12-06 15:31:38 matben Exp $
+# $Id: Roster.tcl,v 1.153 2005-12-07 13:31:33 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -564,6 +564,9 @@ proc ::Roster::DoPopup {jidlist clicked status group x y} {
     variable wtree
     
     upvar ::Jabber::jstate jstate
+    
+    # Keep a temporary array that maps from mLabel to menu index.
+    variable tmpMenuIndex
         
     ::Debug 2 "::Roster::DoPopup jidlist=$jidlist, clicked=$clicked, status=$status"
         
@@ -582,7 +585,10 @@ proc ::Roster::DoPopup {jidlist clicked status group x y} {
     
     # We build menus using this proc to be able to make cascades.
     BuildMenu $m $menuDef $jidlist $clicked $status $group
-        
+    
+    ::hooks::run rosterPostCommandHook $m $jidlist $clicked $status  
+    array unset tmpMenuIndex
+
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
     
@@ -597,6 +603,7 @@ proc ::Roster::DoPopup {jidlist clicked status group x y} {
 #       Build popup menu recursively if necessary.
 
 proc ::Roster::BuildMenu {m menuDef _jidlist clicked status group} {
+    variable tmpMenuIndex
     
     # We always get a list of jids, typically with only one element.
     set jid3 [lindex $_jidlist 0]
@@ -611,6 +618,7 @@ proc ::Roster::BuildMenu {m menuDef _jidlist clicked status group} {
     }
     
     set i 0
+    set idx 0
     
     foreach {op item type cmd opts} $menuDef {	
 	set locname [mc $item]
@@ -648,8 +656,14 @@ proc ::Roster::BuildMenu {m menuDef _jidlist clicked status group} {
 		    BuildMenu $mt $cmd $_jidlist $clicked $status $group
 		}		
 		incr i
+	    } 
+	    default {
+		return -code error "the op $op should never happen!"
 	    }
 	}
+	set tmpMenuIndex($item) $idx
+	incr idx
+	
 	if {![::Jabber::IsConnected] && ([lsearch $type always] < 0)} {
 	    continue
 	}
@@ -677,6 +691,15 @@ proc ::Roster::BuildMenu {m menuDef _jidlist clicked status group} {
 	if {[string equal $state "normal"]} {
 	    $m entryconfigure $locname -state normal
 	}
+    }
+}
+
+proc ::Roster::SetMenuEntryState {m mLabel state} {
+    variable tmpMenuIndex
+    
+    if {[info exists tmpMenuIndex($mLabel)]} {
+	set idx $tmpMenuIndex($mLabel)
+	$m entryconfigure $idx -state $state
     }
 }
 
