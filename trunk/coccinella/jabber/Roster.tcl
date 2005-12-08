@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.153 2005-12-07 13:31:33 matben Exp $
+# $Id: Roster.tcl,v 1.154 2005-12-08 09:35:49 matben Exp $
 
 package require RosterTree
 package require RosterPlain
