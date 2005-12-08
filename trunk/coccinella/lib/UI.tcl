@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.114 2005-12-07 13:31:33 matben Exp $
+# $Id: UI.tcl,v 1.115 2005-12-08 09:36:55 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -895,6 +895,11 @@ proc ::UI::SetWindowPosition {w {key ""}} {
 
 	# We shall verify that the window is not put offscreen.
 	lassign [ParseWMGeometry $prefs(winGeom,$key)] width height x y
+
+	# Protect for corrupted prefs.
+	if {$width < 20}  {set width 20}
+	if {$height < 20} {set height 20}
+
 	KeepOnScreen $w x y $width $height
 	wm geometry $w +${x}+${y}
     }
@@ -910,6 +915,11 @@ proc ::UI::SetWindowGeometry {w {key ""}} {
 
 	# We shall verify that the window is not put offscreen.
 	lassign [ParseWMGeometry $prefs(winGeom,$key)] width height x y
+
+	# Protect for corrupted prefs.
+	if {$width < 20}  {set width 20}
+	if {$height < 20} {set height 20}
+
 	KeepOnScreen $w x y $width $height
 	wm geometry $w ${width}x${height}+${x}+${y}
     }
