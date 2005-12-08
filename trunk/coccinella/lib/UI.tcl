@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.115 2005-12-08 09:36:55 matben Exp $
+# $Id: UI.tcl,v 1.116 2005-12-08 15:28:04 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -856,7 +856,13 @@ proc ::UI::SaveWinGeom {key {w ""}} {
 	set w $key
     }
     if {[winfo exists $w]} {
-	set prefs(winGeom,$key) [wm geometry $w]
+	
+	# If a bug somewhere we may get  1x1+563+158  which shall never be saved!
+	set geom [wm geometry $w]
+	lassign [ParseWMGeometry $geom] width height x y
+	if {$width > 1 && $height > 1} {
+	    set prefs(winGeom,$key) $geom
+	}
     }
 }
 
@@ -2047,7 +2053,7 @@ proc ::UI::NewPrint {w cmd} {
 #       list {width height x y}
 
 proc ::UI::ParseWMGeometry {wmgeom} {
-    regexp {([0-9]+)x([0-9]+)\+(\-?[0-9]+)\+(\-?[0-9]+)} $wmgeom m w h x y
+    regexp {([0-9]+)x([0-9]+)\+(\-?[0-9]+)\+(\-?[0-9]+)} $wmgeom - w h x y
     return [list $w $h $x $y]
 }
 

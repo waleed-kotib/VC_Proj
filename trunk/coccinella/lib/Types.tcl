@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.14 2005-08-26 15:02:34 matben Exp $
+# $Id: Types.tcl,v 1.15 2005-12-08 15:28:04 matben Exp $
 
 package provide Types 1.0
 
@@ -379,7 +379,10 @@ proc ::Types::GetMimeTypeForFileName {fileName} {
 	set mime [GetMimeTypeForMacFile $fileName]
     } else {
 	if {[info exists suff2MimeList($fext)]} {
+	    
+	    # Remove any extra ../x-..
 	    set mime [lindex $suff2MimeList($fext) 0]
+	    set mime [regsub {x-} $mime {}]
 	} else {
 	    set mime application/octet-stream
 	}
