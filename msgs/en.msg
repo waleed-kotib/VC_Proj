@@ -351,7 +351,7 @@
 ::msgcat::mcset en mDecreasing         	{Decreasing}
 ::msgcat::mcset en mStyle         	{Style}
 ::msgcat::mcset en mCall         	{Call}
-::msgcat::mcset en mForward         	{Forward}
+::msgcat::mcset en mForward         	{Forward Call}
 
 
 # Short texts only. Use english text as database key.
@@ -380,6 +380,7 @@
 ::msgcat::mcset en {Basic Info}
 ::msgcat::mcset en {Block JID}
 ::msgcat::mcset en {Bookmark this room}
+::msgcat::mcset en {Buddy Pouncing}
 ::msgcat::mcset en {Built in server port}
 ::msgcat::mcset en {Cache folder}
 ::msgcat::mcset en {Canvas Size}
@@ -986,5 +987,15 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en putfinished	    {Finished putting file "%s" to %s.}
 ::msgcat::mcset en putneterr	    {Network error when putting to %s.}
 
+# These are specific for phones (VoIP)
+::msgcat::mcset en phoneMakeCall           {Make a call}
+::msgcat::mcset en phoneMakeForward        {Forward current call to...}
+::msgcat::mcset en phoneRing               {Ring, ring...}
+::msgcat::mcset en phoneRingFrom           {Phone is ringing from %s}
+::msgcat::mcset en phoneFailedCalling      {Failed calling %s}
+::msgcat::mcset en phoneDial               {Dial}
+::msgcat::mcset en phoneNumber             {Number}
+::msgcat::mcset en phoneDialerCall         {Call to...}
+::msgcat::mcset en phoneDialerForward      {Forward to...}
 
 # END --------------------------------------------------------------------------
