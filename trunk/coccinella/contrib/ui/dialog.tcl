@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.10 2005-12-07 13:31:33 matben Exp $
+# $Id: dialog.tcl,v 1.11 2005-12-08 09:34:18 matben Exp $
 
 package require snit 1.0
 package require tile
