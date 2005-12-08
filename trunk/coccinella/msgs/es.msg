@@ -321,10 +321,11 @@
 ::msgcat::mcset es mBugReport           {Informar de un fallo...}
 #::msgcat::mcset es mTakeSnapShot        {Take Snapshot}
 #::msgcat::mcset es mTimeCode            {Timecode}
-#::msgcat::mcset es mUserInfo            {User Info...}
-# ::msgcat::mcset es mShow Show
-# ::msgcat::mcset es mOffline Offline
-# ::msgcat::mcset es mTransports Transports
+#::msgcat::mcset es mShow Show
+#::msgcat::mcset es mOffline Offline
+#::msgcat::mcset es mTransports Transports
+::msgcat::mcset es mUserInfo            {Informacion del usuario}
+::msgcat::mcset es mEditBookmarks       {Editar favoritos}
 
 # Popups.
 ::msgcat::mcset es mMessage     	{Mensage...}
@@ -345,7 +346,17 @@
 ::msgcat::mcset es mLogoutTrpt     	{Desconectarse de un servidor de transporte}
 ::msgcat::mcset es mRemoveContact  	{Borrar el contacto...}
 #::msgcat::mcset es mIgnore         	{Ignore}
-# ::msgcat::mcset es mEditBookmarks {Edit Bookmarks...}
+::msgcat::mcset es mShow                {Visualizacion}
+::msgcat::mcset es mOffline             {Desconectado}
+::msgcat::mcset es mTransports          {Transportes de otras redes}
+::msgcat::mcset es mSort                {Ordenar}
+::msgcat::mcset es mBackgroundImage     {Imagen de fondo}
+::msgcat::mcset es mIncreasing          {Ascendente}
+::msgcat::mcset es mDecreasing          {Descendente}
+::msgcat::mcset es mStyle               {Estilo de vista}
+::msgcat::mcset es mCall                {Llamar a...}
+::msgcat::mcset es mForward             {Deviar la llamada actual a...}
+
 
 
 
@@ -375,6 +386,7 @@
 ::msgcat::mcset es {Basic Info}			{Información básica}
 ::msgcat::mcset es {Block JID}			{Bloqueo JID}
 # ::msgcat::mcset es {Bookmark this room}
+::msgcat::mcset es {Buddy Pouncing}             {Alertas}
 ::msgcat::mcset es {Built in server port}	{Puerto del servidor interno}
 ::msgcat::mcset es {Cache folder}		{Directorio de caché}
 #::msgcat::mcset es {Canvas Size} {}
@@ -1022,6 +1034,18 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es putended        {La transferencia de %s ha terminado inesperadamente.}
 ::msgcat::mcset es putfinished     {El archivo "%s" de %s ha sido recibido.}
 ::msgcat::mcset es putneterr       {Error de transferencia durante la recepción de %s.}
+
+
+# These are specific for phones (VoIP)
+::msgcat::mcset es phoneMakeCall       {Llamar a...}
+::msgcat::mcset es phoneMakeForward    {Desviar la llamada actual a...}
+::msgcat::mcset es phoneRing           {Ring, ring ...}
+::msgcat::mcset es phoneRingFrom       {Le esta llamando %s}
+::msgcat::mcset es phoneFailedCalling  {No se pudo llamar a %s}
+::msgcat::mcset es phoneDial           {Marcar}
+::msgcat::mcset es phoneNumber         {Numero}
+::msgcat::mcset es phoneDialerCall     {Llamar a...}
+::msgcat::mcset es phoneDialerForward  {Desviar a...}
 
 # END --------------------------------------------------------------------------
 
