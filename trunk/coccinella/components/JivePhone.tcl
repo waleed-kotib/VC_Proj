@@ -4,7 +4,7 @@
 #       
 #       Contributions and testing by Antonio Cano damas
 #       
-# $Id: JivePhone.tcl,v 1.15 2005-12-07 13:31:33 matben Exp $
+# $Id: JivePhone.tcl,v 1.16 2005-12-08 09:32:20 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -44,8 +44,10 @@ proc ::JivePhone::Init { } {
     variable statuses {AVAILABLE RING DIALED ON_PHONE HANG_UP}
 
     variable popMenuDef
-    set popMenuDef {
+    set popMenuDef(call) {
 	command  mCall     {user available} {::JivePhone::DialJID $jid "DIAL"} {}
+    }
+    set popMenuDef(forward) {
 	command  mForward  {user available} {::JivePhone::DialJID $jid "FORWARD"} {}
     }
 
@@ -143,7 +145,9 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
 	set node [wrapper::getattribute $subiq "node"]
 	set havePhone [::Jabber::JlibCmd disco hasfeature $feature(jivephone)  \
 	  $from $node]
-	#puts "\t from=$from, node=$node, havePhone=$havePhone"
+
+	Debug "\t from=$from, node=$node, havePhone=$havePhone"
+
 	if {$havePhone} {
 	
 	    # @@@ What now?
@@ -187,13 +191,13 @@ proc ::JivePhone::WeHavePhone { } {
     if {$state(setui)} {
 	return
     }
-    ::Jabber::UI::RegisterPopupEntry roster $popMenuDef
+    ::Jabber::UI::RegisterPopupEntry roster $popMenuDef(call)
     ::Jabber::UI::RegisterMenuEntry  jabber $menuDef
     
     set image [::Rosticons::Get [string tolower phone/available]]
     set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
     bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
-    ::balloonhelp::balloonforwindow $win "Make a call"
+    ::balloonhelp::balloonforwindow $win [mc phoneMakeCall]
     
     set state(wstatus) $win
     set state(setui)   1
@@ -260,6 +264,7 @@ proc ::JivePhone::PresenceHook {jid type args} {
 
 proc ::JivePhone::MessageHook {body args} {    
     variable xmlns
+    variable popMenuDef
     variable state
     variable callID
 
@@ -288,18 +293,25 @@ proc ::JivePhone::MessageHook {body args} {
 	    # @@@ What to do more?
 	    if {$type == "RING" } {
 		set callID [wrapper::getattribute $elem "callID"]
+
+		::Jabber::UI::RegisterPopupEntry roster $popMenuDef(forward)
+
 		bind $win <Button-1> [list ::JivePhone::DoDial "FORWARD"]
+		::balloonhelp::balloonforwindow $win [mc phoneMakeForward]
 		eval {::hooks::run jivePhoneEvent $type $cid} $args
 	    }
 	    if {$type == "HANG_UP"} {
+		::Roster::DeRegisterPopupEntry mForward
+
 		bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
+		::balloonhelp::balloonforwindow $win [mc phoneMakeCall]
 		eval {::hooks::run jivePhoneEvent $type $cid} $args
 	    }
 	    
 	    # Provide a default notifier?
 	    if {[hooks::info jivePhoneEvent] eq {}} {
-		set title "Ring, ring..."
-		set msg "Phone is ringing from $cid"
+		set title [mc phoneRing]
+		set msg [mc phoneRingFrom $cid]
 		ui::dialog -icon info -buttons {} -title $title  \
 		  -message $msg -timeout 4000
 	    }
@@ -378,7 +390,12 @@ proc ::JivePhone::BuildDialer {w type} {
     ::UI::Toplevel $w -class PhoneDialer \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace current]::CloseDialer
-    wm title $w [mc {Dialer}]
+
+    if {$type eq "DIAL"} {
+	wm title $w [mc phoneDialerCall]
+    } else {
+	wm title $w [mc phoneDialerForward]
+    }
 
     ::UI::SetWindowPosition $w
     set phoneNumber ""
@@ -401,10 +418,10 @@ proc ::JivePhone::BuildDialer {w type} {
     ttk::frame $box
     pack $box -side bottom -fill x
     
-    ttk::label $box.l -text "[mc Number]:"
+    ttk::label $box.l -text "[mc phoneNumber]:"
     ttk::entry $box.e -textvariable [namespace current]::phoneNumber  \
       -width 18
-    ttk::button $box.dial -text [mc Dial]  \
+    ttk::button $box.dial -text [mc phoneDial]  \
       -command [list [namespace current]::OnDial $w $type]
     
     grid  $box.l  $box.e  $box.dial -padx 1 -pady 4
@@ -488,7 +505,7 @@ proc ::JivePhone::DialJID {jid type} {
 proc ::JivePhone::DialCB {dnid type subiq args} {
     
     if {$type eq "error"} {
-	ui::dialog -icon error -type ok -message "Failed calling $dnid" \
+	ui::dialog -icon error -type ok -message [mc phoneFailedCalling $dnid] \
 	  -detail $subiq
     }
 }
