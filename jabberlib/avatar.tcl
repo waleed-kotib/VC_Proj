@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: avatar.tcl,v 1.3 2005-12-06 15:31:39 matben Exp $
+# $Id: avatar.tcl,v 1.4 2005-12-08 15:28:03 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -20,11 +20,14 @@
 #   OPTIONS
 #      -announce   0|1
 #      -share      0|1
+#      -command    tclProc
 #	
 #   INSTANCE COMMANDS
 #      jlibName avatar configure ?-key value...?
 #      jlibName avatar set_data data mime
+#      jlibName avatar unset_data
 #      jlibName avatar store command
+#      jlibName avatar store_remove command
 #      jlibName avatar get_async jid command
 #      jlibName avatar send_get jid command
 #      jlibName avatar send_get_storage jid command
@@ -33,6 +36,8 @@
 #      jlibName avatar have_data jid2
 #      
 #   Note that all internal storage refers to bare (2-tier) jids!
+#   No automatic presence or server storage is made when reconfiguring or
+#   changing own avatar. This is up to the client layer to do.
 #      
 ################################################################################
 
@@ -55,6 +60,7 @@ namespace eval jlib::avatar {
       [namespace current]::init    \
       [namespace current]::cmdproc
         
+    jlib::register_reset [namespace current]::reset
     jlib::disco::registerfeature $xmlns(iq-avatar)
 }
 
@@ -62,17 +68,22 @@ proc jlib::avatar::init {jlibname args} {
 
     variable xmlns
 
-    # Instance specific arrays.
+    # Instance specific arrays:
+    #   avatar stores our own avatar
+    #   state stores other avatars
     namespace eval ${jlibname}::avatar {
+	variable avatar
 	variable state
 	variable options
     }
+    upvar ${jlibname}::avatar::avatar  avatar
     upvar ${jlibname}::avatar::state   state
     upvar ${jlibname}::avatar::options options
 
     array set options {
 	-announce   0
 	-share      0
+	-command    ""
     }
     eval {configure $jlibname} $args
     
@@ -82,6 +93,13 @@ proc jlib::avatar::init {jlibname args} {
       -tag x -xmlns $xmlns(x-avatar)
     
     return
+}
+
+proc jlib::avatar::reset {jlibname} {
+    upvar ${jlibname}::avatar::state state
+    
+    # Do not unset our own avatar.
+    unset -nocomplain state
 }
 
 # jlib::avatar::cmdproc --
@@ -125,11 +143,19 @@ proc jlib::avatar::configure {jlibname args} {
 	    return -code error "Unknown option $flag, must be: $usage"
 	}
     } else {
+	array set oldopts [array get options]
 	foreach {flag value} $args {
 	    if {[regexp -- $pat $flag]} {
 		set options($flag) $value		
 	    } else {
 		return -code error "Unknown option $flag, must be: $usage"
+	    }
+	}
+	if {$options(-announce) != $oldopts(-announce)} {
+	    if {$options(-announce)} {
+		# @@@ ???
+	    } else {
+		$jlibname unregister_presence_stanza x $xmlns(x-avatar)
 	    }
 	}
     }
@@ -151,23 +177,47 @@ proc jlib::avatar::configure {jlibname args} {
 
 proc jlib::avatar::set_data {jlibname data mime} {
     variable xmlns
-    upvar ${jlibname}::avatar::state   state
+    upvar ${jlibname}::avatar::avatar  avatar
     upvar ${jlibname}::avatar::options options
 
     set options(-announce) 1
     set options(-share)    1
     
-    set state(userdata) $data
-    set state(usermime) $mime
-    set state(userhash) [::sha1::sha1 $data]
-    set state(user64)   [::base64::encode $data]
+    if {[info exists avatar(hash)]} {
+	set oldHash $avatar(hash)
+    } else {
+	set oldHash ""
+    }
+    set avatar(data)   $data
+    set avatar(mime)   $mime
+    set avatar(hash)   [::sha1::sha1 $data]
+    set avatar(base64) [::base64::encode $data]
     
-    set hashElem [wrapper::createtag hash -chdata $state(userhash)]
+    set hashElem [wrapper::createtag hash -chdata $avatar(hash)]
     set xElem [wrapper::createtag x           \
       -attrlist [list xmlns $xmlns(x-avatar)] \
       -subtags [list $hashElem]]
 
+    $jlibname unregister_presence_stanza x $xmlns(x-avatar)
     $jlibname register_presence_stanza $xElem
+
+    return
+}
+
+# jlib::avatar::unset_data --
+# 
+#       Unsets our avatar and does not ahre it anymore
+
+proc jlib::avatar::unset_data {jlibname} {
+    variable xmlns
+    upvar ${jlibname}::avatar::avatar  avatar
+    upvar ${jlibname}::avatar::options options
+
+    unset -nocomplain avatar
+    set options(-announce) 0
+    set options(-share)    0
+    
+    $jlibname unregister_presence_stanza x $xmlns(x-avatar)
     
     return
 }
@@ -179,17 +229,28 @@ proc jlib::avatar::set_data {jlibname data mime} {
 
 proc jlib::avatar::store {jlibname cmd} {
     variable xmlns
-    upvar ${jlibname}::avatar::state state
+    upvar ${jlibname}::avatar::avatar avatar
     
     puts "jlib::avatar::store"
 
+    if {![array exists avatar]} {
+	return -code error "no avatar set"
+    }
     set dataElem [wrapper::createtag data        \
-      -attrlist [list mimetype $state(usermime)] \
-      -chdata $state(user64)]
+      -attrlist [list mimetype $avatar(mime)] \
+      -chdata $avatar(base64)]
 
     set jid2 [$jlibname getthis myjid2]
     $jlibname iq_set $xmlns(storage)  \
       -to $jid2 -command $cmd -sublists [list $dataElem]
+}
+
+proc jlib::avatar::store_remove {jlibname cmd} {
+    variable xmlns
+    
+    set jid2 [$jlibname getthis myjid2]
+    $jlibname iq_set $xmlns(storage)  \
+      -to $jid2 -command $cmd   
 }
 
 # jlib::avatar::iq_handler --
@@ -198,8 +259,8 @@ proc jlib::avatar::store {jlibname cmd} {
 
 proc jlib::avatar::iq_handler {jlibname from queryElem args} {
     variable xmlns
-    upvar ${jlibname}::avatar::state   state
     upvar ${jlibname}::avatar::options options
+    upvar ${jlibname}::avatar::avatar  avatar
 
     puts "jlib::avatar::iq_handler from=$from, queryElem=$queryElem, args=$args"
 
@@ -214,8 +275,8 @@ proc jlib::avatar::iq_handler {jlibname from queryElem args} {
     
     if {$options(-share)} {
 	set dataElem [wrapper::createtag data    \
-	  -attrlist [list mimetype $state(usermime)] \
-	  -chdata $state(user64)]
+	  -attrlist [list mimetype $avatar(mime)] \
+	  -chdata $avatar(base64)]
 	set qElem [wrapper::createtag query  \
 	  -attrlist [list xmlns $xmlns(iq-avatar)]  \
 	  -subtags [list $dataElem]]
@@ -224,18 +285,6 @@ proc jlib::avatar::iq_handler {jlibname from queryElem args} {
     } else {
 	$jlibname send_iq_error $from $id 404 cancel service-unavailable
 	return 1
-    }
-}
-
-proc jlib::avatar::presence_handler {jlibname xmldata} {
-    variable xmlns
-    upvar ${jlibname}::avatar::state state
-    
-    set elems [wrapper::getchildswithtagandxmlns $xmldata x $xmlns(x-avatar)]
-    if {[llength $elems]} {
-	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] hash]
-	set hash [wrapper::getcdata $hashElem]
-    
     }
 }
 
@@ -268,6 +317,28 @@ proc jlib::avatar::have_data {jlibname jid2} {
 	return 1
     } else {
 	return 0
+    }
+}
+
+proc jlib::avatar::presence_handler {jlibname xmldata} {
+    variable xmlns
+    upvar ${jlibname}::avatar::state   state
+    upvar ${jlibname}::avatar::options options
+    
+    set elems [wrapper::getchildswithtagandxmlns $xmldata x $xmlns(x-avatar)]
+    if {[llength $elems]} {
+	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] hash]
+	set hash [wrapper::getcdata $hashElem]
+	set from [wrapper::getattribute $xmldata from]
+	jlib::splitjid $from jid2 -
+	
+	if {![info exists state($jid2,hash)] || ($hash ne $state($jid2,hash))} {
+	    set state($jid2,hash) $hash
+	    set state($jid2,uptodate) 0
+	    if {[string length $options(-command)]} {
+		uplevel #0 $options(-command) $from
+	    }
+	}
     }
 }
 

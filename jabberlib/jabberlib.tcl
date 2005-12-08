@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.126 2005-12-06 15:31:39 matben Exp $
+# $Id: jabberlib.tcl,v 1.127 2005-12-08 15:28:03 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -184,6 +184,7 @@ namespace eval jlib {
     set statics(inited) 0
     set statics(presenceTypeExp)  \
       {(available|unavailable|subscribe|unsubscribe|subscribed|unsubscribed|invisible)}
+    set statics(resetCmds) {}
     
     variable version 1.0
     
@@ -468,6 +469,12 @@ proc jlib::ensamble_deregister {name} {
     
     set ensamble(names) [lsearch -all -not -inline $ensamble(names) $name]
     array unset ensamble ${name},*
+}
+
+proc jlib::register_reset {cmd} {
+    variable statics
+    
+    lappend statics(resetCmds) $cmd
 }
 
 # jlib::cmdproc --
@@ -1735,6 +1742,11 @@ proc jlib::reset {jlibname} {
     }
     if {[havetls]} {
 	tls_reset $jlibname
+    }
+    
+    # Execute any register reset commands.
+    foreach cmd $statics(resetCmds) {
+	uplevel #0 $cmd $jlibname
     }
 }
 

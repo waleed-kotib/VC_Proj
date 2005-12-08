@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.153 2005-12-04 13:29:11 matben Exp $
+# $Id: Jabber.tcl,v 1.154 2005-12-08 15:28:03 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -21,7 +21,6 @@ package require wavelabel
 # jlib components shall be declared here, or later.
 package require jlib
 package require roster
-package require jlib::avatar
 package require jlib::bytestreams
 package require jlib::disco
 package require jlib::ftrans
@@ -32,6 +31,7 @@ package require jlib::vcard
 
 # We should have some component mechanism that lets packages load themselves.
 package require Agents
+package require Avatar
 package require Browse
 package require Chat
 package require Conference

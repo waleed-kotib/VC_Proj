@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.141 2005-11-30 08:32:00 matben Exp $
+# $Id: Chat.tcl,v 1.142 2005-12-08 15:28:03 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -844,7 +844,7 @@ proc ::Chat::Build {threadID args} {
     }
     SetTitle $chattoken
     SetThreadState $dlgtoken $chattoken
-
+    
     wm minsize $w [expr {$shortBtWidth < 220} ? 220 : $shortBtWidth] 320
     wm maxsize $w 800 2000
 

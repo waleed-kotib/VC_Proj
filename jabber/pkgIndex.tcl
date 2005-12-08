@@ -9,6 +9,7 @@
 # full path name of this file's directory.
 
 package ifneeded Agents 1.0 [list source [file join $dir Agents.tcl]]
+package ifneeded Avatar 1.0 [list source [file join $dir Avatar.tcl]]
 package ifneeded Browse 1.0 [list source [file join $dir Browse.tcl]]
 package ifneeded Chat 1.0 [list source [file join $dir Chat.tcl]]
 package ifneeded Conference 1.0 [list source [file join $dir Conference.tcl]]
