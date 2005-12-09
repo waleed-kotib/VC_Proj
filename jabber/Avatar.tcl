@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.1 2005-12-08 15:28:03 matben Exp $
+# $Id: Avatar.tcl,v 1.2 2005-12-09 13:24:21 matben Exp $
 
 package require jlib::avatar
 
@@ -56,7 +56,7 @@ proc ::Avatar::Load {fileName} {
     # If we configure while online need to update our presence info and
     # store the data with the server.
     if {[$jlib isinstream]} {
-	$jlib send_presence
+	$jlib send_presence -keep 1
 	$jlib avatar store ::Avatar::Callback
     }
 }
@@ -72,7 +72,9 @@ proc ::Avatar::Remove { } {
     $jlib avatar unset_data
     
     if {[$jlib isinstream]} {
-	$jlib send_presence
+	set xElem [wrapper::createtag x  \
+	  -attrlist [list xmlns "jabber:x:avatar"]]
+	$jlib send_presence -xlist [list $xElem] -keep 1
 	$jlib avatar store_remove ::Avatar::Callback
     }    
 }

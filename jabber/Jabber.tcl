@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.154 2005-12-08 15:28:03 matben Exp $
+# $Id: Jabber.tcl,v 1.155 2005-12-09 13:24:21 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -423,6 +423,8 @@ proc ::Jabber::GetMyStatus { } {
     variable jstate
     
     return $jstate(status)
+    
+    # Alternative: [$jstate(jlib) mypresence]
 }
 
 proc ::Jabber::JlibCmd {args} {
@@ -894,7 +896,7 @@ proc ::Jabber::AutoAway {} {
     set ans [::UI::MessageBox -icon info -type yesno -default yes \
       -message [mc jamessautoawayset $tm]]
     if {$ans eq "yes"} {
-	::Jabber::SetStatus available
+	SetStatus available
     }
 }
 
@@ -1266,33 +1268,24 @@ proc ::Jabber::SetStatus {type args} {
 	set jstate(status) $type
     }
     
-    # Trap network errors.
     # It is somewhat unclear here if we should have a type attribute
     # when sending initial presence, see XMPP 5.1.
-    if {[catch {	
-	eval {$jstate(jlib) send_presence} $presArgs
-    } err]} {
+    eval {$jstate(jlib) send_presence} $presArgs
 	
-	# Close down?	
-	DoCloseClientConnection
-	::UI::MessageBox -title [mc Error] -icon error -type ok -message $err
-    } else {
-	
-	eval {::hooks::run setPresenceHook $type} $args
-	
-	# Do we target a room or the server itself?
-	set toServer 0
-	if {[info exists argsArr(-to)]} {
-	    if {[jlib::jidequal $jserver(this) $argsArr(-to)]} {
-		set toServer 1
-	    }
-	} else {
+    eval {::hooks::run setPresenceHook $type} $args
+    
+    # Do we target a room or the server itself?
+    set toServer 0
+    if {[info exists argsArr(-to)]} {
+	if {[jlib::jidequal $jserver(this) $argsArr(-to)]} {
 	    set toServer 1
 	}
-	if {$toServer && ($type eq "unavailable")} {
-	    after idle $jstate(jlib) closestream	    
-	    SetClosedState
-	}
+    } else {
+	set toServer 1
+    }
+    if {$toServer && ($type eq "unavailable")} {
+	after idle $jstate(jlib) closestream	    
+	SetClosedState
     }
 }
 
@@ -1390,7 +1383,6 @@ proc ::Jabber::SetStatusWithMessage { } {
     variable finishedStat
     variable show
     variable wtext
-    variable clearStatusMsg
     variable jprefs
     variable jstate
 
@@ -1423,7 +1415,7 @@ proc ::Jabber::SetStatusWithMessage { } {
 	  -compound left -text [mc jastat${val}]          \
 	  -image [::Roster::GetPresenceIconFromKey $val]  \
 	  -variable [namespace current]::show -value $val \
-	  -command [namespace current]::StatusMsgRadioCmd
+	  -command [list [namespace current]::StatusMsgRadioCmd $w]
 	grid  $wtop.$val  -sticky w
     }
     
@@ -1439,11 +1431,10 @@ proc ::Jabber::SetStatusWithMessage { } {
     text $wtext -height 4 -width 36 -wrap word -bd 1 -relief sunken
     pack $wtext -expand 1 -fill both
     
-    ttk::checkbutton $wbox.clear -style Small.TCheckbutton \
-      -text "Clear status message if empty" \
-      -variable [namespace current]::clearStatusMsg
-    pack $wbox.clear -side top -anchor w
-    
+    # Any existing presence status?
+    set status [::Jabber::JlibCmd mypresencestatus]
+    $wtext insert end $status
+        
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
@@ -1477,10 +1468,18 @@ proc ::Jabber::SetStatusWithMessage { } {
     return [expr {($finishedStat <= 0) ? "cancel" : "set"}]
 }
 
-proc ::Jabber::StatusMsgRadioCmd { } {
-    
-    
-    
+proc ::Jabber::StatusMsgRadioCmd {w} {
+    variable jprefs
+    variable show
+    variable wtext
+
+    # We could have an option here to set default status message if any.
+    if {0} {
+	if {$jprefs(statusMsg,bool,$show) && ($jprefs(statusMsg,msg,$show) ne "")} {
+	    $wtext delete 1.0 end
+	    $wtext insert end $jprefs(statusMsg,msg,$show)
+	}
+    }
 }
 
 proc ::Jabber::SetStatusCancel {w} {    
@@ -1494,16 +1493,9 @@ proc ::Jabber::BtSetStatus {w} {
     variable finishedStat
     variable show
     variable wtext
-    variable clearStatusMsg
-    variable jstate
     
-    set opts {}
-    set allText [string trim [$wtext get 1.0 end]]
-    if {$allText ne ""} {
-	lappend opts -status $allText
-    } elseif {$clearStatusMsg} {
-	lappend opts -status ""
-    }
+    set text [string trim [$wtext get 1.0 end]]
+    set opts [list -status $text]
     
     # Set present status.
     eval {SetStatus $show} $opts

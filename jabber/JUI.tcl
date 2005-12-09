@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.101 2005-12-08 09:35:49 matben Exp $
+# $Id: JUI.tcl,v 1.102 2005-12-09 13:24:21 matben Exp $
 
 package provide JUI 1.0
 
@@ -331,8 +331,9 @@ proc ::Jabber::UI::Build {w} {
       ::Jabber::jstate(status) -command ::Jabber::SetStatus
     ttk::frame $wfstat.cont
     ttk::label $wfstat.l -style Small.TLabel \
-      -textvariable ::Jabber::jstate(mejid)
+      -textvariable ::Jabber::jstate(mejid) -anchor w
     pack  $wfstat.bst  $wfstat.cont  $wfstat.l  -side left
+    pack  $wfstat.l  -fill x -expand 1
 
     # Notebook.
     set wnb $wall.nb

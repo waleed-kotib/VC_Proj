@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: avatar.tcl,v 1.4 2005-12-08 15:28:03 matben Exp $
+# $Id: avatar.tcl,v 1.5 2005-12-09 13:24:21 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -206,7 +206,7 @@ proc jlib::avatar::set_data {jlibname data mime} {
 
 # jlib::avatar::unset_data --
 # 
-#       Unsets our avatar and does not ahre it anymore
+#       Unsets our avatar and does not share it anymore
 
 proc jlib::avatar::unset_data {jlibname} {
     variable xmlns
