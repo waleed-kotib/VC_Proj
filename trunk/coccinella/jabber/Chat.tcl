@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.142 2005-12-08 15:28:03 matben Exp $
+# $Id: Chat.tcl,v 1.143 2005-12-09 13:24:21 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -54,7 +54,7 @@ namespace eval ::Chat:: {
     option add *Chat*printDisImage        printDis              widgetDefault
 
     option add *Chat*notifierImage        notifier              widgetDefault    
-    option add *Chat*tabAlertImage        lightbulbon           widgetDefault    
+    option add *Chat*tabAlertImage        ktip                  widgetDefault    
 
     option add *Chat*tabCloseImage        closebutton           widgetDefault    
     option add *Chat*tabCloseActiveImage  closebuttonActive     widgetDefault    

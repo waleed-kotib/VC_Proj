@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.127 2005-12-08 15:28:03 matben Exp $
+# $Id: jabberlib.tcl,v 1.128 2005-12-09 13:24:21 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -95,7 +95,7 @@
 #      jlibName iq_register type xmlns cmd
 #      jlibName message_register xmlns cmd
 #      jlibName myjid
-#      jlibName mystatus
+#      jlibName mypresence
 #      jlibName oob_set to cmd url ?args?
 #      jlibName presence_register type cmd
 #      jlibName registertransport name initProc sendProc resetProc ipProc
@@ -412,6 +412,7 @@ proc jlib::init_inst {jlibname} {
     
     # Any of {available chat away xa dnd invisible unavailable}
     set locals(status)        "unavailable"
+    set locals(pres,type)     "unavailable"
     set locals(myjid)         ""
     set locals(trigAutoAway)  1
     set locals(server)        ""
@@ -2996,12 +2997,14 @@ proc jlib::send_message {jlibname to args} {
 # 
 #       jlibname:   the instance of this jlib.
 #       args:
-#           -to     the jabber id of the recepient.
+#           -keep   0|1 (D=0) we may keep the present 'status' and 'show'
+#                   elements for undirected presence
+#           -to     the JID of the recepient.
 #           -from   should never be set by client!
 #           -type   one of 'available', 'unavailable', 'subscribe', 
 #                   'unsubscribe', 'subscribed', 'unsubscribed', 'invisible'.
 #           -status
-#           -priority
+#           -priority  persistant option if undirected presence
 #           -show
 #           -xlist
 #           -extras
@@ -3023,15 +3026,48 @@ proc jlib::send_presence {jlibname args} {
     
     set attrlist {}
     set children {}
-    set type "available"
     set directed 0
+    set keep     0
+    set type "available"
     array set argsArr $args
     
     foreach {key value} $args {
 	set par [string trimleft $key -]
 	
-	switch -- $par {
-	    type {
+	switch -- $key {
+	    -command {
+		lappend attrlist "id" $prescmd(uid)
+		set prescmd($prescmd(uid)) $value
+		incr prescmd(uid)
+	    }
+	    -extras - -xlist {
+		foreach xchild $value {
+		    lappend children $xchild
+		}
+	    }
+	    -from {
+		# Should never happen!
+		lappend attrlist $par $value
+	    }
+	    -keep {
+		set keep $value
+	    }
+	    -priority - -show {
+		lappend children [wrapper::createtag $par -chdata $value]
+	    }
+	    -status {
+		if {$value ne ""} {
+		    lappend children [wrapper::createtag $par -chdata $value]
+		}
+	    }
+	    -to {
+		# Presence to server (undirected) shall not contain a to.
+		if {$value ne $locals(server)} {
+		    lappend attrlist $par $value
+		    set directed 1
+		}
+	    }
+	    -type {
 		set type $value
 		if {[regexp $statics(presenceTypeExp) $type]} {
 		    lappend attrlist $par $type
@@ -3039,30 +3075,47 @@ proc jlib::send_presence {jlibname args} {
 		    return -code error "Is not valid presence type: \"$type\""
 		}
 	    }
-	    from {
-		# Should never happen!
-		lappend attrlist $par $value
-	    }
-	    to {
-		# Presence to server (undirected) shall not contain a to.
-		if {$value ne $locals(server)} {
-		    lappend attrlist $par $value
-		    set directed 1
-		}
-	    }
-	    xlist - extras {
-		foreach xchild $value {
-		    lappend children $xchild
-		}
-	    }
-	    command {
-		lappend attrlist "id" $prescmd(uid)
-		set prescmd($prescmd(uid)) $value
-		incr prescmd(uid)
-	    }
 	    default {
-		lappend children [wrapper::createtag $par -chdata $value]
+		return -code error "unrecognized option \"$value\""
 	    }
+	}
+    }
+    
+    # Must be destined to login server (by default).
+    if {!$directed} {
+	
+	# Each and every presence stanza MUST contain the complete presence
+	# state of the client. As a convinience we cache previous states and
+	# may use them if not set explicitly:
+	#    1.  <show/>
+	#    2.  <status/>
+	#    3.  <priority/>  Always reused if cached
+	
+	foreach name {show status} {
+	    if {[info exists argsArr(-$name)]} {
+		set locals(pres,$name) $argsArr(-$name)
+	    } elseif {[info exists locals(pres,$name)]} {
+		if {$keep} {
+		    lappend children [wrapper::createtag $name  \
+		      -chdata $locals(pres,$name)]
+		} else {
+		    unset -nocomplain locals(pres,$name)
+		}
+	    }
+	}
+	if {[info exists argsArr(-priority)]} {
+	    set locals(pres,priority) $argsArr(-priority)
+	} elseif {[info exists locals(pres,priority)]} {
+	    lappend children [wrapper::createtag "priority"  \
+	      -chdata $locals(pres,priority)]
+	}
+
+	set locals(pres,type) $type
+
+	set locals(status) $type
+	if {[info exists argsArr(-show)]} {
+	    set locals(status) $argsArr(-show)
+	    set locals(pres,show) $argsArr(-show)
 	}
     }
     
@@ -3074,19 +3127,10 @@ proc jlib::send_presence {jlibname args} {
 	lappend children $elem
     }
     
-    set xmllist [wrapper::createtag "presence" -attrlist $attrlist  \
+    set xmllist [wrapper::createtag "presence" -attrlist $attrlist \
       -subtags $children]
-    
-    # Any of {available away dnd invisible unavailable}
-    # Must be destined to login server (by default).
-    if {!$directed} {
-	set locals(status) $type
-	if {[info exists argsArr(-show)]} {
-	    set locals(status) $argsArr(-show)
-	}
-    }
-    
     send $jlibname $xmllist
+    
     return
 }
 
@@ -3177,16 +3221,31 @@ proc jlib::sendraw {jlibname xml} {
     $lib(transport,send) $jlibname $xml
 }
 
-# jlib::mystatus --
+# jlib::mypresence --
 # 
 #       Returns any of {available away xa chat dnd invisible unavailable}
 #       for our status with the login server.
 
-proc jlib::mystatus {jlibname} {
+proc jlib::mypresence {jlibname} {
 
     upvar ${jlibname}::locals locals
     
-    return $locals(status)
+    if {[info exists locals(pres,show)]} {
+	return $locals(pres,show)
+    } else {
+	return $locals(pres,type)
+    }
+}
+
+proc jlib::mypresencestatus {jlibname} {
+
+    upvar ${jlibname}::locals locals
+    
+    if {[info exists locals(pres,status)]} {
+	return $locals(pres,status)
+    } else {
+	return ""
+    }
 }
 
 # jlib::myjid --
