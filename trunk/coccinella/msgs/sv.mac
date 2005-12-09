@@ -381,6 +381,7 @@
 ::msgcat::mcset sv {Basic Info}		   {Basinfo}
 ::msgcat::mcset sv {Block JID}             {Blockera JID}
 ::msgcat::mcset sv {Bookmark this room}    {Sätt bokmärke på rummet}
+::msgcat::mcset sv {Buddy Pouncing}        {Buddy pouncing}
 ::msgcat::mcset sv {Built in server port}  {Inbyggd server port}
 ::msgcat::mcset sv {Cache folder}          {Filminnesmapp}
 ::msgcat::mcset sv {Canvas Size}           {Dukstorlek}
@@ -996,6 +997,17 @@ En sak till, var snäll mot nyckelpigan ;-)}
 ::msgcat::mcset sv putended	    {Överföringen till %s slutade innan färdig.}
 ::msgcat::mcset sv putfinished	    {Klar med överföringen av "%s" till %s.}
 ::msgcat::mcset sv putneterr	    {Nätverksfel vid överföring till %s.}
+
+# These are specific for phones (VoIP)
+::msgcat::mcset sv phoneMakeCall    {Ring up}
+::msgcat::mcset sv phoneMakeForward {Vidarebefordra nuvarande samtal till...}
+::msgcat::mcset sv phoneRing        {Ring, ring...}
+::msgcat::mcset sv phoneRingFrom    {Telefonen ringer från %s}
+::msgcat::mcset sv phoneFailedCalling {Misslyckades ringa %s}
+::msgcat::mcset sv phoneDial        {Ring}
+::msgcat::mcset sv phoneNumber      {Nummer}
+::msgcat::mcset sv phoneDialerCall  {Ring upp...}
+::msgcat::mcset sv phoneDialerForward {Vidarebefordra till...}
 
 
 # END --------------------------------------------------------------------------
