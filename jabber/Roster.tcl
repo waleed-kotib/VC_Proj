@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.155 2005-12-08 15:28:03 matben Exp $
+# $Id: Roster.tcl,v 1.156 2005-12-13 13:57:52 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -1463,6 +1463,9 @@ proc ::Roster::BuildPageRoster {page} {
     ttk::checkbutton $wc.hidetrpt -text [mc prefrohidetrpt] \
       -variable [namespace current]::tmpJPrefs(rost,showTrpts) \
       -onvalue 0 -offvalue 1
+    
+    # My avatar.
+    ::Avatar::PrefsFrame $wc.ava
 
     grid  $wc.rmifunsub  -sticky w
     grid  $wc.allsubno   -sticky w
@@ -1470,12 +1473,17 @@ proc ::Roster::BuildPageRoster {page} {
     grid  $wc.dblclk     -sticky w
     grid  $wc.hideoff    -sticky w
     grid  $wc.rmifunsub  -sticky w
-    grid  $wc.hidetrpt   -sticky w    
+    grid  $wc.hidetrpt   -sticky w
+    
+    grid  $wc.ava        -sticky ew -pady 4
+    
 }
 
 proc ::Roster::SavePrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
+    
+    ::Avatar::PrefsSave
     
     # Need to repopulate the roster?
     if {$jprefs(rost,showOffline) != $tmpJPrefs(rost,showOffline)} {
@@ -1496,6 +1504,8 @@ proc ::Roster::CancelPrefsHook { } {
 	    break
 	}
     }
+    
+    ::Avatar::PrefsCancel
 }
 
 proc ::Roster::UserDefaultsHook { } {

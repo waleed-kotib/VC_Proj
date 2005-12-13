@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.1 2005-11-30 08:32:00 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.2 2005-12-13 13:57:52 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -20,6 +20,7 @@
 #   coccinellas etc.
 
 package require RosterTree
+package require Avatar
 
 package provide RosterAvatar 1.0
 
@@ -389,7 +390,33 @@ proc ::RosterAvatar::Init { } {
     
     $T item delete all
     ::RosterTree::FreeTags
+ 
+    ::Avatar::Configure -autoget 1 -command ::RosterAvatar::AvatarCmd
     
+    # @@@ We shall get avatars for all users.
+    
+}
+
+proc ::RosterAvatar::AvatarCmd {jid2} {
+    
+    SetAvatarImage $jid2
+}
+
+proc ::RosterAvatar::SetAvatarImage {jid2} {
+    variable T
+	
+    set res [::Jabber::RosterCmd gethighestresource $jid2]
+    if {$res ne ""} {
+	set jid3 $jid2/$res
+    } else {
+	set jid3 $jid2
+    }
+    set tag [list jid $jid3]
+    set item [FindWithTag $tag]
+    if {$item ne ""} {
+	set image [::Avatar::GetPhoto $jid2]
+	$T item element configure $item cTree eAvatarImage -image $image  
+    }
 }
 
 # RosterAvatar::CreateItem --
@@ -411,7 +438,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     variable T
     variable jidStatus
     variable rosterStyle
-    upvar ::Jabber::jprefs  jprefs
+    upvar ::Jabber::jprefs jprefs
 
     if {![regexp $presence {(available|unavailable)}]} {
 	return

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: avatar.tcl,v 1.5 2005-12-09 13:24:21 matben Exp $
+# $Id: avatar.tcl,v 1.6 2005-12-13 13:57:52 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -21,6 +21,7 @@
 #      -announce   0|1
 #      -share      0|1
 #      -command    tclProc
+#      -cache      0|1
 #	
 #   INSTANCE COMMANDS
 #      jlibName avatar configure ?-key value...?
@@ -36,6 +37,7 @@
 #      jlibName avatar have_data jid2
 #      
 #   Note that all internal storage refers to bare (2-tier) jids!
+#   @@@ It is unclear if this is correct. Perhaps the full jids shall be used.
 #   No automatic presence or server storage is made when reconfiguring or
 #   changing own avatar. This is up to the client layer to do.
 #      
@@ -83,6 +85,7 @@ proc jlib::avatar::init {jlibname args} {
     array set options {
 	-announce   0
 	-share      0
+	-cache      0
 	-command    ""
     }
     eval {configure $jlibname} $args
@@ -97,9 +100,12 @@ proc jlib::avatar::init {jlibname args} {
 
 proc jlib::avatar::reset {jlibname} {
     upvar ${jlibname}::avatar::state state
-    
+    upvar ${jlibname}::avatar::options options
+
     # Do not unset our own avatar.
-    unset -nocomplain state
+    if {!$options(-cache)} {
+	unset -nocomplain state
+    }
 }
 
 # jlib::avatar::cmdproc --
@@ -202,6 +208,12 @@ proc jlib::avatar::set_data {jlibname data mime} {
     $jlibname register_presence_stanza $xElem
 
     return
+}
+
+proc jlib::avatar::get_my_data {jlibname what} {
+    upvar ${jlibname}::avatar::avatar avatar
+    
+    return $avatar($what)
 }
 
 # jlib::avatar::unset_data --
@@ -320,6 +332,9 @@ proc jlib::avatar::have_data {jlibname jid2} {
     }
 }
 
+# jlib::avatar::presence_handler --
+# 
+
 proc jlib::avatar::presence_handler {jlibname xmldata} {
     variable xmlns
     upvar ${jlibname}::avatar::state   state
@@ -352,10 +367,32 @@ proc jlib::avatar::uptodate {jlibname jid2} {
     }
 }
 
+# jlib::avatar::get_async --
+# 
+#       The economical way of obtaining a users avatar.
+#       If uptodate no query made, else it sends at most one query per user
+#       to get the avatar.
+
 proc jlib::avatar::get_async {jlibname jid cmd} {
     upvar ${jlibname}::avatar::state state
     
-    # @@@ TODO
+    jlib::splitjid $jid jid2 -
+    if {[uptodate $jlibname $jid2]} {
+	uplevel #0 $cmd [list result $jid2]
+    } elseif {[info exists state($jid2,pending)]} {
+	lappend state($jid2,invoke) $cmd
+    } else {
+	send_get $jlibname $jid  \
+	  [list [namespace current]::get_async_cb $jlibname $jid2 $cmd]
+    }
+}
+
+proc jlib::avatar::get_async_cb {jlibname jid2 cmd type subiq args} {
+    upvar ${jlibname}::avatar::state state
+    
+    puts "jlib::avatar::get_async_cb type=$type"
+    
+    uplevel #0 $cmd [list $type $jid2]
 }
 
 # jlib::avatar::send_get --
@@ -367,6 +404,8 @@ proc jlib::avatar::send_get {jlibname jid cmd} {
     variable xmlns
     upvar ${jlibname}::avatar::state state
     
+    jlib::splitjid $jid jid2 -
+    set state($jid2,pending) 1
     $jlibname iq_get $xmlns(iq-avatar) -to $jid  \
       -command [list [namespace current]::send_get_cb $jid $cmd]    
 }
@@ -378,13 +417,15 @@ proc jlib::avatar::send_get_cb {jid cmd jlibname type subiq args} {
     puts "jlib::avatar::send_get_cb type=$type, subiq=$subiq, args=$args"
     
     jlib::splitjid $jid jid2 -
+    unset -nocomplain state($jid2,pending)
     if {$type eq "error"} {
 	
 	# JEP-0008: "If the first method fails, the second method that should
 	# be attempted by sending a request to the server..."
 	send_get_storage $jlibname $jid2 $cmd
     } elseif {$type eq "result"} {
-	SetDataFromQueryElem $jlibname $jid2 $subiq $xmlns(iq-avatar)
+	set ok [SetDataFromQueryElem $jlibname $jid2 $subiq $xmlns(iq-avatar)]
+	invoke_stacked $jlibname $type $jid2
 	uplevel #0 $cmd [list $type $subiq] $args
     }
 }
@@ -393,10 +434,16 @@ proc jlib::avatar::send_get_cb {jid cmd jlibname type subiq args} {
 # 
 #       Extracts and sets internal avtar storage for the BARE jid
 #       from a query element.
+#       
+# Results:
+#       1 if there was data to store, 0 else.
 
 proc jlib::avatar::SetDataFromQueryElem {jlibname jid2 queryElem ns} {
     upvar ${jlibname}::avatar::state state
     
+    # Data may be empty from xmlns='storage:client:avatar' !
+
+    set ans 0
     if {[wrapper::getattribute $queryElem xmlns] eq $ns} {
 	set dataElem [wrapper::getfirstchildwithtag $queryElem data]
 	if {$dataElem ne ""} {
@@ -406,17 +453,23 @@ proc jlib::avatar::SetDataFromQueryElem {jlibname jid2 queryElem ns} {
 
 	    # @@@ catch to be failsafe!
 	    set data [wrapper::getcdata $dataElem]
-	    set state($jid2,data) [::base64::decode $data]
-	    set state($jid2,uptodate) 1
+	    if {[string length $data]} {
+		set state($jid2,data) $data
+		set state($jid2,uptodate) 1
+		set ans 1
+	    }
 	}
-    }    
+    }
+    return $ans
 }
 
 proc jlib::avatar::send_get_storage {jlibname jid2 cmd} {
     variable xmlns
+    upvar ${jlibname}::avatar::state state
     
     puts "jlib::avatar::send_get_storage jid2=$jid2"
     
+    set state($jid2,pending) 1
     $jlibname iq_get $xmlns(storage) -to $jid2  \
       -command [list [namespace current]::send_get_storage_cb $jid2 $cmd]    
 }
@@ -426,11 +479,24 @@ proc jlib::avatar::send_get_storage_cb {jid2 cmd jlibname type subiq args} {
     upvar ${jlibname}::avatar::state state
 
     puts "jlib::avatar::send_get_storage_cb type=$type"
-    
+
+    unset -nocomplain state($jid2,pending)
     if {$type eq "result"} {
-	SetDataFromQueryElem $jlibname $jid2 $subiq $xmlns(storage)
+	set ok [SetDataFromQueryElem $jlibname $jid2 $subiq $xmlns(storage)]
     }
+    invoke_stacked $jlibname $type $jid2
     uplevel #0 $cmd [list $type $subiq] $args
+}
+
+proc jlib::avatar::invoke_stacked {jlibname type jid2} {
+    upvar ${jlibname}::avatar::state state
+    
+    if {[info exists state($jid2,invoke)]} {
+	foreach cmd $state($jid2,invoke) {
+	    uplevel #0 $cmd [list $jlibname $type $jid2]
+	}
+	unset -nocomplain state($jid2,invoke)
+    }
 }
 
 if {0} {

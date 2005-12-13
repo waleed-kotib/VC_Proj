@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.88 2005-11-30 08:32:00 matben Exp $
+# $Id: Preferences.tcl,v 1.89 2005-12-13 13:57:52 matben Exp $
  
 package require mnotebook
 package require tree
@@ -285,6 +285,7 @@ proc ::Preferences::TreeCtrl {T wysc} {
     set stripeBackground [option get $T stripeBackground {}]
     set stripes [list $stripeBackground {}]
     set bd [option get $T columnBorderWidth {}]
+    set fillT {white {selected focus} black {selected !focus}}
 
     $T column create -text [mc {Settings Panels}] -tag cTree  \
       -itembackground $stripes -resize 0 -expand 1 -borderwidth $bd
@@ -292,7 +293,7 @@ proc ::Preferences::TreeCtrl {T wysc} {
     $T configure -treecolumn cTree
 
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
-    $T element create eText text -lines 1
+    $T element create eText text -lines 1 -fill $fillT
     $T element create eBorder rect -open new -outline gray -outlinewidth 1 \
       -fill $fill -showfocus 1
 
@@ -506,6 +507,8 @@ proc ::Preferences::CleanUp { } {
 # 
 #       Used for components to tell us that something changed with their
 #       internal preferences.
+#       
+#       @@@ We could add an option text explaining what was changed.
 
 proc ::Preferences::HasChanged { } {
     variable changed
