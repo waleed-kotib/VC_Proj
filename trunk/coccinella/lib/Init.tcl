@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.30 2005-11-30 08:32:00 matben Exp $
+# $Id: Init.tcl,v 1.31 2005-12-13 13:57:52 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -97,8 +97,12 @@ proc ::Init::SetThis {thisScript} {
     set this(inboxFile)         [file join $this(prefsPath) Inbox.tcl]
     set this(notesFile)         [file join $this(prefsPath) Notes.tcl]
     set this(avatarPath)        [file join $this(imagePath) avatar]
+    set this(prefsAvatarPath)   [file join $this(prefsPath) avatar]
+    set this(myAvatarPath)      [file join $this(prefsPath) avatar my]
+    set this(cacheAvatarPath)   [file join $this(prefsPath) avatar cache]
     set this(altAvatarPath)     [file join $this(altImagePath) avatar]
     set this(httpdRootPath)     $this(path)
+
     # Need to rework this...
     if {0 && [info exists starkit::topdir]} {
 	set this(httpdRootPath)     $starkit::topdir
@@ -235,6 +239,8 @@ proc ::Init::MakeDirs { } {
 	prefsPath
 	inboxCanvasPath
 	historyPath
+	prefsAvatarPath
+	myAvatarPath
 	altItemPath
 	altEmoticonsPath
 	altRosticonsPath

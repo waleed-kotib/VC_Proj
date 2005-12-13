@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.4 2005-11-30 08:32:00 matben Exp $
+# $Id: tileutils.tcl,v 1.5 2005-12-13 13:57:52 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -17,6 +17,10 @@ if {[tk windowingsystem] eq "aqua"} {
 # These should be collected in a separate theme specific file.
     
 foreach name [tile::availableThemes] {
+    
+    if {[catch {package require tile::theme::$name}]} {
+	continue
+    }
     
     style theme settings $name {
 	

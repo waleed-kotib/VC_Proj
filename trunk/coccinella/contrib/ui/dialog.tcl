@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.11 2005-12-08 09:34:18 matben Exp $
+# $Id: dialog.tcl,v 1.12 2005-12-13 13:57:52 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -409,7 +409,7 @@ snit::widget ui::dialog::widget {
     method FadeOut {fades} {
 	if {[llength $fades]} {
 	    wm attributes $win -alpha [lindex $fades 0]
-	    set fadeoutID [after 100 [list $self FadeOut [lrange $fades 1 end]]]
+	    set fadeoutID [after 80 [list $self FadeOut [lrange $fades 1 end]]]
 	} else {
 	    $self Dismiss
 	}

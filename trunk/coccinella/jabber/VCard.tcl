@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.37 2005-11-30 08:32:00 matben Exp $
+# $Id: VCard.tcl,v 1.38 2005-12-13 13:57:52 matben Exp $
 
 package provide VCard 1.0
 
@@ -343,7 +343,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     ttk::frame $wp1
     pack $wp1 -side left -padx 4 -fill y -expand 1
 
-    ttk::label $wp1.l -text "Users avatar:"
+    ttk::label $wp1.l -text "Users Avatar:"
     ttk::button $wp1.b -text "Select Photo"  \
       -command [list ::VCard::SelectPhoto $etoken]
     ttk::button $wp1.br -text "Remove Photo" \
@@ -356,7 +356,7 @@ proc ::VCard::Pages {nbframe etoken type} {
 
     set wp2 $wbot.2
     frame $wp2 -bd 1 -relief sunken -bg white \
-      -padx 4 -pady 4 -height 64 -width 64
+      -padx 2 -pady 2 -height 64 -width 64
     ttk::label $wp2.l -compound image
     
     pack  $wp2 -side left
