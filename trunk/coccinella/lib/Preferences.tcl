@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.89 2005-12-13 13:57:52 matben Exp $
+# $Id: Preferences.tcl,v 1.90 2005-12-17 12:15:50 matben Exp $
  
 package require mnotebook
 package require tree
@@ -285,10 +285,12 @@ proc ::Preferences::TreeCtrl {T wysc} {
     set stripeBackground [option get $T stripeBackground {}]
     set stripes [list $stripeBackground {}]
     set bd [option get $T columnBorderWidth {}]
+    set bg [option get $T columnBackground {}]
     set fillT {white {selected focus} black {selected !focus}}
 
     $T column create -text [mc {Settings Panels}] -tag cTree  \
-      -itembackground $stripes -resize 0 -expand 1 -borderwidth $bd
+      -itembackground $stripes -resize 0 -expand 1 -borderwidth $bd  \
+      -background $bg
     $T column create -tag cTag -visible 0
     $T configure -treecolumn cTree
 

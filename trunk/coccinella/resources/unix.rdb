@@ -33,6 +33,8 @@
 *Scrollbar.troughColor:              #bdbdbd
 !*Text.highlightBackground:           #dcdad5
 
+*TreeCtrl.columnBackground:          #dcdad5
+
 ! contributed widgets
 !
 *ChaseArrows.background:             #dcdad5

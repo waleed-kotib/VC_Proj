@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.18 2005-11-30 08:32:00 matben Exp $
+# $Id: Rosticons.tcl,v 1.19 2005-12-17 12:15:50 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -439,9 +439,12 @@ proc ::Rosticons::PTreeSelect {T wysc} {
     set stripes [list $stripeBackground {}]
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     set bd [option get $T columnBorderWidth {}]
+    set bg [option get $T columnBackground {}]
 
-    $T column create -tag cButton -resize 0 -borderwidth $bd -squeeze 1
-    $T column create -tag cTree   -resize 0 -borderwidth $bd -expand 1
+    $T column create -tag cButton -resize 0 -borderwidth $bd  \
+      -background $bg -squeeze 1
+    $T column create -tag cTree   -resize 0 -borderwidth $bd  \
+      -background $bg -expand 1
     $T column create -tag cTag -visible 0
     $T configure -treecolumn cTree
 
@@ -548,9 +551,14 @@ proc ::Rosticons::PTreeShow {T wysc} {
       -yscrollcommand [list $wysc set]
       #-yscrollcommand [list ::UI::ScrollSet $wysc     \
       #[list grid $wysc -row 0 -column 1 -sticky ns]]  \
-    
-    $T column create -tag cKey   -text [mc Key] -expand 1 -squeeze 1
-    $T column create -tag cImage -text [mc Icon] -expand 1 -justify center
+ 
+    set bd [option get $T columnBorderWidth {}]
+    set bg [option get $T columnBackground {}]
+   
+    $T column create -tag cKey   -text [mc Key] -expand 1 -squeeze 1  \
+      -borderwidth $bd -background $bg
+    $T column create -tag cImage -text [mc Icon] -expand 1 -justify center  \
+      -borderwidth $bd -background $bg
 
     $T element create eText text -lines 1
     $T element create eImage image
