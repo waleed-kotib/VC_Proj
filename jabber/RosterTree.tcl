@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.11 2005-12-05 15:20:32 matben Exp $
+# $Id: RosterTree.tcl,v 1.12 2005-12-17 09:48:41 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -51,21 +51,23 @@ namespace eval ::RosterTree {
     variable plugin
 
     set plugin(selected) ""
+    set plugin(previous) ""
 }
 
 proc ::RosterTree::RegisterStyle {
-    name label configProc initProc 
+    name label configProc initProc deleteProc
     createItemProc deleteItemProc setItemAltProc} {
 	
     variable plugin
     
-    set plugin($name,name)       $name
-    set plugin($name,label)      $label
-    set plugin($name,config)     $configProc
-    set plugin($name,init)       $initProc
-    set plugin($name,createItem) $createItemProc
-    set plugin($name,deleteItem) $deleteItemProc
-    set plugin($name,setItemAlt) $setItemAltProc
+    set plugin($name,name)        $name
+    set plugin($name,label)       $label
+    set plugin($name,config)      $configProc
+    set plugin($name,init)        $initProc
+    set plugin($name,delete)      $deleteProc
+    set plugin($name,createItem)  $createItemProc
+    set plugin($name,deleteItem)  $deleteItemProc
+    set plugin($name,setItemAlt)  $setItemAltProc
 }
 
 proc ::RosterTree::RegisterStyleSort {name sortProc} {    
@@ -76,7 +78,8 @@ proc ::RosterTree::RegisterStyleSort {name sortProc} {
 
 proc ::RosterTree::SetStyle {name} {
     variable plugin
-    
+
+    set plugin(previous) $plugin(selected)
     set plugin(selected) $name
 }
 
@@ -84,6 +87,12 @@ proc ::RosterTree::GetStyle {} {
     variable plugin
     
     return $plugin(selected)
+}
+
+proc ::RosterTree::GetPreviousStyle {} {
+    variable plugin
+    
+    return $plugin(previous)
 }
 
 proc ::RosterTree::GetAllStyles {} {
@@ -108,6 +117,12 @@ proc ::RosterTree::StyleInit {} {
     
     set name $plugin(selected)
     $plugin($name,init)
+}
+
+proc ::RosterTree::StyleDelete {name} {
+    variable plugin
+    
+    $plugin($name,delete)
 }
 
 proc ::RosterTree::StyleCreateItem {jid presence args} {
@@ -152,13 +167,17 @@ proc ::RosterTree::StyleSetItemAlternative {jid key type value} {
 
 proc ::RosterTree::LoadStyle {name} {
     variable T
-    
+
     Free
     SetStyle $name
     StyleConfigure $T
     ::Roster::RepopulateTree    
-}
 
+    set previous [GetPreviousStyle]
+    if {$previous ne ""} {
+	StyleDelete $previous
+    }
+}
 
 # RosterTree::New --
 # 
@@ -333,6 +352,8 @@ proc ::RosterTree::Popup {x y} {
     variable T
     upvar ::Jabber::jstate jstate
     
+    ::Debug 2 "::RosterTree::Popup"
+    
     set tags    {}
     set clicked {}
     set status  {}
@@ -343,16 +364,21 @@ proc ::RosterTree::Popup {x y} {
     if {[lindex $id 0] eq "item"} {
 	set item [lindex $id 1]
 	set tags [$T item element cget $item cTag eText -text]
-	set ancestors [$T item ancestors $item]
-	if {[llength $ancestors] == 1} {
-	    set headItem $item
-	} else {
-	    set headItem [lindex $ancestors end-1]	    
-	}
-	set headTag [$T item element cget $headItem cTag eText -text]
+	set mtag [lindex $tags 0]
 
-	# status: 'available', 'unavailable', 'transport', or 'pending'
-	set status [lindex $headTag 1]	
+	switch -- $mtag {
+	    pending - transport {
+		set status $mtag
+	    }
+	    jid {
+		set jid [lindex $tags 1]
+		if {[$jstate(roster) isavailable $jid]} {
+		    set status available
+		} else {
+		    set status unavailable
+		}
+	    }
+	}
     }
     
     # The commands require a number of variables to be defined:

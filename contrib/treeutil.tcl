@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: treeutil.tcl,v 1.7 2005-12-01 13:50:28 matben Exp $
+#  $Id: treeutil.tcl,v 1.8 2005-12-17 09:48:41 matben Exp $
 
 # USAGE:
 # 
@@ -184,7 +184,8 @@ proc ::treeutil::OnDestroy {w} {
 # treeutil::setdboptions --
 # 
 #       Configure elements and styles from option database.
-#       We use a specific format for the database resource names: 
+#       We use a specific format for the database resource names:
+#       
 #         element options:    prefix:elementName-option
 #         style options:      prefix:styleName:elementName-option
 #         
@@ -202,7 +203,6 @@ proc ::treeutil::setdboptions {w wclass prefix} {
     # Element options:
     foreach ename [$w element names] {
 	set eopts {}
-	#puts "ename=$ename"
 	foreach ospec [$w element configure $ename] {
 	    set oname  [lindex $ospec 0]
 	    set dvalue [lindex $ospec 3]
@@ -213,15 +213,12 @@ proc ::treeutil::setdboptions {w wclass prefix} {
 		lappend eopts $oname $dbvalue
 	    }
 	}
-	#puts "\t eopts=$eopts"
 	eval {$w element configure $ename} $eopts
     }
     
     # Style layout options:
     foreach style [$w style names] {
-	#puts "style=$style"
 	foreach ename [$w style elements $style] {
-	    #puts "\t ename=$ename"
 	    set sopts {}
 	    foreach {key value} [$w style layout $style $ename] {
 		set dbname ${prefix}:${style}:${ename}${key}
@@ -230,7 +227,6 @@ proc ::treeutil::setdboptions {w wclass prefix} {
 		    lappend sopts $key $dbvalue
 		}
 	    }
-	    #puts "\t\t sopts=$sopts"
 	    eval {$w style layout $style $ename} $sopts
 	}
     }

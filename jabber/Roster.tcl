@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.156 2005-12-13 13:57:52 matben Exp $
+# $Id: Roster.tcl,v 1.157 2005-12-17 09:48:41 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -91,16 +91,16 @@ namespace eval ::Roster:: {
 	command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
 	command     mRemoveContact user               {::Roster::SendRemove $jid}         {}
 	separator   {}             {}                 {} {}
-	cascade     mShow          {}                 {
-	    check     mOffline     {}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
-	    check     mTransports  {}     {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)}
-	    check     mBackgroundImage {} {::Roster::BackgroundImage} {-variable ::Jabber::jprefs(rost,useBgImage)}
+	cascade     mShow          {normal}           {
+	    check     mOffline     {normal}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
+	    check     mTransports  {normal}     {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)}
+	    check     mBackgroundImage {normal} {::Roster::BackgroundImage} {-variable ::Jabber::jprefs(rost,useBgImage)}
 	} {}
 	cascade     mSort          {}                 {
 	    radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value +1}
 	    radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -1}
 	} {}
-	cascade     mStyle         {}                 {@::Roster::StyleMenu} {}
+	cascade     mStyle         {normal}           {@::Roster::StyleMenu} {}
 	command     mRefreshRoster {}                 {::Roster::Refresh} {}
     }  
 
@@ -455,6 +455,16 @@ proc ::Roster::Refresh { } {
     $wwave animate 1
 }
 
+# Doing 'after idle' is not perfect since it is executed after the items have
+# been drawn.
+
+proc ::Roster::SortIdle {item} {
+    variable sortID
+        
+    unset -nocomplain sortID
+    Sort $item
+}
+
 proc ::Roster::Sort {{item root}} {
     upvar ::Jabber::jprefs jprefs
 	
@@ -661,28 +671,32 @@ proc ::Roster::BuildMenu {m menuDef _jidlist clicked status group} {
 	set tmpMenuIndex($item) $idx
 	incr idx
 	
-	if {![::Jabber::IsConnected] && ([lsearch $type always] < 0)} {
-	    continue
-	}
-	
-	# State of menu entry. 
-	# We use the 'type' and 'clicked' lists to set the state.
-	if {[listintersectnonempty $type $clicked]} {
-	    set state normal
-	} elseif {$type eq ""} {
+	if {$type eq "normal"} {
 	    set state normal
 	} else {
-	    set state disabled
-	}
-	
-	# If any available/unavailable these must also be fulfilled.
-	if {[lsearch $type available] >= 0} {
-	    if {$status ne "available"} {
+	    if {![::Jabber::IsConnected] && ([lsearch $type always] < 0)} {
+		continue
+	    }
+	    
+	    # State of menu entry. 
+	    # We use the 'type' and 'clicked' lists to set the state.
+	    if {[listintersectnonempty $type $clicked]} {
+		set state normal
+	    } elseif {$type eq ""} {
+		set state normal
+	    } else {
 		set state disabled
 	    }
-	} elseif {[lsearch $type unavailable] >= 0} {
-	    if {$status ne "unavailable"} {
-		set state disabled
+	    
+	    # If any available/unavailable these must also be fulfilled.
+	    if {[lsearch $type available] >= 0} {
+		if {$status ne "available"} {
+		    set state disabled
+		}
+	    } elseif {[lsearch $type unavailable] >= 0} {
+		if {$status ne "unavailable"} {
+		    set state disabled
+		}
 	    }
 	}
 	if {[string equal $state "normal"]} {
@@ -858,6 +872,7 @@ proc ::Roster::SetItem {jid args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     variable inroster
+    variable sortID
 
     ::Debug 2 "::Roster::SetItem jid=$jid, args='$args'"
     
@@ -903,8 +918,10 @@ proc ::Roster::SetItem {jid args} {
 	    ::RosterTree::StyleCreateItem $jid $pres(-type)
 	} $args [array get pres]]
 	
-	# @@@ ???
-	#Sort [::RosterTree::GetParent $item]
+	if {!$inroster && ![info exists sortID]} {
+	    set pitem [::RosterTree::GetParent $item]
+	    set sortID [after idle [namespace current]::SortIdle $pitem]
+       }
     }
 }
 
@@ -922,6 +939,7 @@ proc ::Roster::SetItem {jid args} {
 
 proc ::Roster::Presence {jid presence args} {
     variable timer
+    variable sortID
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
@@ -990,8 +1008,9 @@ proc ::Roster::Presence {jid presence args} {
     }
     
     # This minimizes the cost of sorting.
-    if {$items ne {}} {
-	Sort [::RosterTree::GetParent [lindex $items end]]
+    if {$items ne {} && ![info exists sortID]} {
+	set pitem [::RosterTree::GetParent [lindex $items end]]
+	set sortID [after idle [namespace current]::SortIdle $pitem]
     }
     
     # We set timed messages for presences only if significantly after login.

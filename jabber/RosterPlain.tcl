@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.9 2005-12-05 15:20:32 matben Exp $
+# $Id: RosterPlain.tcl,v 1.10 2005-12-17 09:48:41 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -31,6 +31,7 @@ namespace eval ::RosterPlain {
     ::RosterTree::RegisterStyle plain Plain   \
       ::RosterPlain::Configure   \
       ::RosterPlain::Init        \
+      ::RosterPlain::Delete      \
       ::RosterPlain::CreateItem  \
       ::RosterPlain::DeleteItem  \
       ::RosterPlain::SetItemAlternative
@@ -221,6 +222,8 @@ proc ::RosterPlain::Init { } {
 	}
     }
 }
+
+proc ::RosterPlain::Delete { } { }
 
 # RosterPlain::CreateItem --
 #

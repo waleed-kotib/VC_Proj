@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.5 2005-12-01 07:59:19 matben Exp $
+# $Id: RosterTwo.tcl,v 1.6 2005-12-17 09:48:41 matben Exp $
 
 package require RosterTree
 
@@ -17,6 +17,7 @@ namespace eval ::RosterTwo {
     ::RosterTree::RegisterStyle two "Two Line"   \
       ::RosterTwo::Configure   \
       ::RosterTwo::Init        \
+      ::RosterTwo::Delete      \
       ::RosterTwo::CreateItem  \
       ::RosterTwo::DeleteItem  \
       ::RosterTwo::SetItemAlternative
@@ -109,6 +110,8 @@ proc ::RosterTwo::Init { } {
 	set item [CreateHeadItem unavailable]
     }
 }
+
+proc ::RosterTwo::Delete { } { }
 
 proc ::RosterTwo::CreateHeadItem {type} {
     variable T

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: avatar.tcl,v 1.6 2005-12-13 13:57:52 matben Exp $
+# $Id: avatar.tcl,v 1.7 2005-12-17 09:48:41 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -38,6 +38,8 @@
 #      
 #   Note that all internal storage refers to bare (2-tier) jids!
 #   @@@ It is unclear if this is correct. Perhaps the full jids shall be used.
+#   The problem is with JEP-0008 mixing jid2 with jid3.  
+#   
 #   No automatic presence or server storage is made when reconfiguring or
 #   changing own avatar. This is up to the client layer to do.
 #      
@@ -243,8 +245,6 @@ proc jlib::avatar::store {jlibname cmd} {
     variable xmlns
     upvar ${jlibname}::avatar::avatar avatar
     
-    puts "jlib::avatar::store"
-
     if {![array exists avatar]} {
 	return -code error "no avatar set"
     }
@@ -273,8 +273,6 @@ proc jlib::avatar::iq_handler {jlibname from queryElem args} {
     variable xmlns
     upvar ${jlibname}::avatar::options options
     upvar ${jlibname}::avatar::avatar  avatar
-
-    puts "jlib::avatar::iq_handler from=$from, queryElem=$queryElem, args=$args"
 
     array set argsArr $args
     if {[info exists argsArr(-xmldata)]} {
@@ -332,8 +330,22 @@ proc jlib::avatar::have_data {jlibname jid2} {
     }
 }
 
+proc jlib::avatar::get_hash {jlibname jid2} {
+    upvar ${jlibname}::avatar::state state
+    
+    if {[info exists state($jid2,hash)]} {
+	return $state($jid2,hash)
+    } else {
+	return ""
+    }
+}
+
 # jlib::avatar::presence_handler --
 # 
+#       Caches incoming <x xmlns='jabber:x:avatar'> presence elements.
+#       "To disable the avatar, the avatar-generating user's client will send 
+#        a presence packet with the jabber:x:avatar namespace but with no hash 
+#        information"
 
 proc jlib::avatar::presence_handler {jlibname xmldata} {
     variable xmlns
@@ -345,11 +357,18 @@ proc jlib::avatar::presence_handler {jlibname xmldata} {
 	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] hash]
 	set hash [wrapper::getcdata $hashElem]
 	set from [wrapper::getattribute $xmldata from]
+
 	jlib::splitjid $from jid2 -
 	
+	# hash can be empty.
 	if {![info exists state($jid2,hash)] || ($hash ne $state($jid2,hash))} {
 	    set state($jid2,hash) $hash
-	    set state($jid2,uptodate) 0
+	    set state($jid2,jid3) $from
+	    if {$hash eq ""} {
+		set state($jid2,uptodate) 1
+	    } else {
+		set state($jid2,uptodate) 0
+	    }
 	    if {[string length $options(-command)]} {
 		uplevel #0 $options(-command) $from
 	    }
@@ -389,9 +408,7 @@ proc jlib::avatar::get_async {jlibname jid cmd} {
 
 proc jlib::avatar::get_async_cb {jlibname jid2 cmd type subiq args} {
     upvar ${jlibname}::avatar::state state
-    
-    puts "jlib::avatar::get_async_cb type=$type"
-    
+        
     uplevel #0 $cmd [list $type $jid2]
 }
 
@@ -404,6 +421,8 @@ proc jlib::avatar::send_get {jlibname jid cmd} {
     variable xmlns
     upvar ${jlibname}::avatar::state state
     
+    debug "jlib::avatar::send_get jid=$jid"
+    
     jlib::splitjid $jid jid2 -
     set state($jid2,pending) 1
     $jlibname iq_get $xmlns(iq-avatar) -to $jid  \
@@ -413,11 +432,12 @@ proc jlib::avatar::send_get {jlibname jid cmd} {
 proc jlib::avatar::send_get_cb {jid cmd jlibname type subiq args} {
     variable xmlns
     upvar ${jlibname}::avatar::state state
-    
-    puts "jlib::avatar::send_get_cb type=$type, subiq=$subiq, args=$args"
+        
+    debug "jlib::avatar::send_get_cb jid=$jid"
     
     jlib::splitjid $jid jid2 -
     unset -nocomplain state($jid2,pending)
+
     if {$type eq "error"} {
 	
 	# JEP-0008: "If the first method fails, the second method that should
@@ -451,7 +471,8 @@ proc jlib::avatar::SetDataFromQueryElem {jlibname jid2 queryElem ns} {
 	    # Mime type can be empty.
 	    set state($jid2,mime) [wrapper::getattribute $dataElem mimetype]
 
-	    # @@@ catch to be failsafe!
+	    # We keep data in base64 format. This seems to be ok for image 
+	    # handlers.
 	    set data [wrapper::getcdata $dataElem]
 	    if {[string length $data]} {
 		set state($jid2,data) $data
@@ -467,7 +488,7 @@ proc jlib::avatar::send_get_storage {jlibname jid2 cmd} {
     variable xmlns
     upvar ${jlibname}::avatar::state state
     
-    puts "jlib::avatar::send_get_storage jid2=$jid2"
+    debug "jlib::avatar::send_get_storage jid2=$jid2"
     
     set state($jid2,pending) 1
     $jlibname iq_get $xmlns(storage) -to $jid2  \
@@ -478,7 +499,7 @@ proc jlib::avatar::send_get_storage_cb {jid2 cmd jlibname type subiq args} {
     variable xmlns
     upvar ${jlibname}::avatar::state state
 
-    puts "jlib::avatar::send_get_storage_cb type=$type"
+    debug "jlib::avatar::send_get_storage_cb type=$type"
 
     unset -nocomplain state($jid2,pending)
     if {$type eq "result"} {
@@ -499,6 +520,39 @@ proc jlib::avatar::invoke_stacked {jlibname type jid2} {
     }
 }
 
+proc jlib::avatar::get_full_jid {jlibname jid2} {
+    upvar ${jlibname}::avatar::state state
+
+    debug "jlib::avatar::get_full_jid $jid2"
+    return $state($jid2,jid3)
+}
+
+# jlib::avatar::get_all_avatar_jids --
+# 
+#       Gets a list of all jids with avatar support.
+#       @@@ Exclude the ones with empty hash (disabled)?
+#       Actually, everyone that has sent us a presence jabber:x:avatar element.
+
+proc jlib::avatar::get_all_avatar_jids {jlibname} {
+    upvar ${jlibname}::avatar::state state
+    
+    debug "jlib::avatar::get_all_avatar_jids"
+    
+    set jids {}
+    set len [string length ",hash"]
+    foreach key [array names state *,hash] {
+	set jid2 [string range $key 0 end-$len]
+	lappend jids $jid2
+    }
+    return $jids
+}
+
+proc jlib::avatar::debug {msg} {
+    if {0} {
+	puts "\t $msg"
+    }
+}
+
 if {0} {
     # Test.
     set f "/Users/matben/Desktop/glaze/32x32/apps/clanbomber.png"
@@ -515,8 +569,6 @@ if {0} {
     $jlib avatar store cb
     $jlib avatar send_get [$jlib getthis myjid] cb
     $jlib avatar send_get_storage [$jlib getthis myjid2] cb
-    
-
 }
 
 #-------------------------------------------------------------------------------
