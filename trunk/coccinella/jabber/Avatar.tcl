@@ -2,10 +2,12 @@
 #  
 #       This is part of The Coccinella application.
 #       It provides an application interface to the jlib avatar package.
+#       While the 'avatar' package handles the actual image data, this package
+#       keeps an image in sync with avatar image data.
 #       
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.3 2005-12-13 13:57:52 matben Exp $
+# $Id: Avatar.tcl,v 1.4 2005-12-17 09:48:41 matben Exp $
 
 # @@@ Issues:
 #     1) shall we keep cache of users avatars between sessions to save bandwidth?
@@ -22,6 +24,7 @@ namespace eval ::Avatar:: {
     ::hooks::register  prefsInitHook   ::Avatar::InitPrefsHook
     ::hooks::register  jabberInitHook  ::Avatar::JabberInitHook
     ::hooks::register  loginHook       ::Avatar::LoginHook
+    ::hooks::register  logoutHook      ::Avatar::LogoutHook
         
     # Array 'photo' contains our internal storage for users images.
     variable photo
@@ -38,6 +41,7 @@ namespace eval ::Avatar:: {
     array set options {
 	-active     0
 	-autoget    0
+	-cache      1
 	-command    ""
     }
     
@@ -58,7 +62,7 @@ proc ::Avatar::Configure {args} {
     variable options
     upvar ::Jabber::jstate jstate
     
-    Debug "::Avatar::Configure"
+    Debug "::Avatar::Configure $args"
     
     set jlib $jstate(jlib)
     
@@ -67,20 +71,27 @@ proc ::Avatar::Configure {args} {
     } elseif {[llength $args] == 1} {
 	return $options($args)
     } else {
+	set aopts {}
 	foreach {key value} $args {
 	    switch -- $key {
+		-cache {
+		    lappend aopts -cache $value
+		}
 		-command {
 		    if {$value ne ""} {
-			$jlib avatar configure -command ::Avatar::UpdateHash
+			lappend aopts -command ::Avatar::OnNewHash
 		    } else {
-			$jlib avatar configure -command ""
+			lappend aopts -command ""
 		    }
 		}
 	    }
 	    set options($key) $value
 	}
+	eval {$jlib avatar configure} $aopts
     }
 }
+
+# These hooks deal with sharing (announcing) our own avatar.
 
 proc ::Avatar::InitHook { } {
     variable aprefs
@@ -125,6 +136,14 @@ proc ::Avatar::LoginHook { } {
     # @@@ Perhaps this shall be done from 'avatar' instead ?
     if {$aprefs(share) && [file isfile $aprefs(fileName)]} {
 	$jlib avatar store ::Avatar::SetCB
+    }
+}
+
+proc ::Avatar::LogoutHook { } {
+    variable options
+    
+    if {!$options(-cache)} {
+	FreeAllPhotos
     }
 }
 
@@ -186,7 +205,7 @@ proc ::Avatar::SetMyPhoto {name} {
     if {![info exists myphoto(image)]} {
 	set myphoto(image) [image create photo]
     }
-    $myphoto(image) copy $name    
+    $myphoto(image) copy $name -compositingrule set
 }
 
 proc ::Avatar::GetMyPhoto { } {
@@ -320,14 +339,43 @@ proc ::Avatar::SetCB {jlibname type queryElem} {
 # We reuse images for a jid to get them automatically displayed wherever they
 # are being used.
 
-proc ::Avatar::UpdateHash {jid} {
+# Avatar::OnNewHash --
+# 
+#       Callback when we get a new or updated hash. 
+#       If user disables avatar hash is empty.
+
+proc ::Avatar::OnNewHash {jid} {
+    variable photo
     variable options
     upvar ::Jabber::jstate jstate
     
-    Debug "::Avatar::UpdateHash jid=$jid"
+    Debug "::Avatar::OnNewHash jid=$jid"
+    
+    jlib::splitjid $jid jid2 -
+    set jlib $jstate(jlib)
+    set hash [$jlib avatar get_hash $jid2]
+    if {$hash eq ""} {
+	if {$options(-command) ne ""} {
+	    $options(-command) remove $jid2
+	}
+	FreePhotos $jid
+    } else {
+	if {$options(-autoget)} {
+	    $jlib avatar get_async $jid ::Avatar::GetAsyncCB
+	}
+    }
+}
+
+proc ::Avatar::GetAll { } {
+    variable photo
+    upvar ::Jabber::jstate jstate
+    
+    Debug "::Avatar::GetAll"
     
     set jlib $jstate(jlib)    
-    if {$options(-autoget)} {
+
+    foreach jid2 [$jlib avatar get_all_avatar_jids] {
+	set jid [$jlib avatar get_full_jid $jid2]
 	$jlib avatar get_async $jid ::Avatar::GetAsyncCB
     }
 }
@@ -338,86 +386,273 @@ proc ::Avatar::GetAsyncCB {type jid2} {
     upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::GetAsyncCB jid2=$jid2, type=$type"
-    
-    set jlib $jstate(jlib)
-    
+        
     if {$type eq "error"} {
-	::Jabber::AddErrorLog $jid $queryElem
-	return
-    }
-    
-    # Data may be empty from xmlns='storage:client:avatar' !
-    set data [$jlib avatar get_data $jid2]
-    if {[string bytelength $data]} {
-	SetPhoto $jid2 $data
+	GetVCardPhoto $jid2
     } else {
-	
-	# Alternatives? vCard?
-	
+    
+	# Data may be empty from xmlns='storage:client:avatar' !
+	set jlib $jstate(jlib)
+	set data [$jlib avatar get_data $jid2]
+	if {[string bytelength $data]} {
+	    SetPhoto $jid2 $data
+	} else {
+	    GetVCardPhoto $jid2
+	}
     }
 }
 
+# Avatar::GetVCardPhoto --
+#
+#       Support for vCard based avatars as JEP-0153 is TODO.
+#       This method is more sane compared to iq-based avatars since it is
+#       based on bare jids and thus not client instance specific.
+#       Therefore it also handles offline users.
+#       
+#       This shall have some jlib support since it involves presence element:
+#       
+#         <x xmlns='vcard-temp:x:update'>
+#             <photo>sha1-hash-of-image</photo>
+#         </x> 
+
+proc ::Avatar::GetVCardPhoto {jid2} {
+    
+    # @@@ TODO
+
+}
+    
 # Avatar::SetPhoto --
 # 
 #       Create new photo if not exists and updates the image with the data.
-#       Only if we create a new image the command is invoked.
+#       Any -command is invoked notifying the event.
+#       
+#       photo(jid,orig) is always the original photo. The size can change if
+#                       user updates the avatar with a different size.
+#       photo(jid,32)   are photos with respective max size.
+#       photo(jid,48)
+#       photo(jid,64)   
 
 proc ::Avatar::SetPhoto {jid2 data} {
     variable photo
     variable options
 
-    set isnew 0
-    set isnew 1
-    if {![info exists photo(image,$jid2)]} {
-	set photo(image,$jid2) [image create photo]
-	set isnew 1
+    Debug "::Avatar::SetPhoto jid2=$jid2"
+    
+    set type put
+    if {![info exists photo($jid2,orig)]} {
+	set photo($jid2,orig) [image create photo]
+	set type create
     }
     
-    # Be silent? Do we need to decode?
+    # Be silent!
     if {![catch {
-	$photo(image,$jid2) put [::base64::decode $data]
+	PutPhoto $jid2 $data
     } err]} {
-	if {$isnew && $options(-command) ne ""} {
-	    $options(-command) $jid2
+	if {$options(-command) ne ""} {
+	    $options(-command) $type $jid2
 	}
     } else {
 	Debug $err
     }
 }
 
+proc ::Avatar::PutPhoto {jid2 data} {
+    variable photo
+    variable sizes
+    
+    set orig $photo($jid2,orig)
+    $orig put $data
+    
+    # We must update all photos of all sizes for this jid.
+    foreach size $sizes {
+	if {[info exists photo($jid2,$size)]} {
+	    set name $photo($jid2,$size)
+	    if {[image inuse $name]} {
+		set tmp [CreateScaledPhoto $orig $size]
+		$name copy $tmp -compositingrule set
+		image delete tmp
+	    } else {
+		
+		# @@@ Not sure if this is smart.
+		image delete $name
+		unset photo($jid2,$size)
+	    }
+	}
+    }
+}
+
 proc ::Avatar::GetPhoto {jid2} {
     variable photo
     
-    if {[info exists photo(image,$jid2)]} {
-	return $photo(image,$jid2)
+    if {[info exists photo($jid2,orig)]} {
+	return $photo($jid2,orig)
     } else {
 	return ""
     }
 }
 
-proc ::Avatar::HavePhoto {jid2} {
+# Avatar::GetPhotoOfSize --
+# 
+#       Return a photo with max size 'size'. 'size' must be one of the
+#       supported sizes: 32, 48, or 64.
+#       @@@ We may duplicate the original image if it happens to be of
+#       the requested size.
+
+proc ::Avatar::GetPhotoOfSize {jid2 size} {
     variable photo
     
-    return [info exists photo(image,$jid2)]
+    if {![info exists photo($jid2,orig)]} {
+	return ""
+    } elseif {[info exists photo($jid2,$size)]} {
+	return $photo($jid2,$size)
+    } else {
+	
+	# Is not there, create!
+	set name $photo($jid2,orig)
+	set new [CreateScaledPhoto $name $size]
+	set photo($jid2,$size) $new
+	return $new
+    }
+}
+
+proc ::Avatar::HavePhoto {jid2} {
+    variable photo
+    upvar ::Jabber::jstate jstate
+        
+    set jlib $jstate(jlib)
+    if {[$jlib avatar have_data $jid2] && [info exists photo($jid2,orig)]} {
+	return 1
+    } else {
+	return 0
+    }
+}
+
+proc ::Avatar::FreePhotos {jid} {
+    variable photo
+    variable sizes
+    
+    set images {}
+    foreach size [concat orig $sizes] {
+	if {[info exists photo($jid,$size)]} {
+	    lappend images $photo($jid,$size)
+	}
+    }
+    
+    # The original image name is duplicated.
+    if {[llength $images]} {
+	eval {image delete} [lsort -unique $images]
+    }
+    array unset photo "[jlib::ESC $jid],*"
+}
+
+proc ::Avatar::FreeAllPhotos { } {
+    variable photo
+
+    set images {}
+    foreach {key image} [array get photo] {
+	lappend images $image
+    }
+    if {[llength $images]} {
+	eval {image delete} $images
+    }
+    unset -nocomplain photo
 }
 
 #--- Utilities -----------------------------------------------------------------
 
-proc ::Avatar::ScalePhoto2->1 {name} {
+# These always scale down an image.
+
+# Avatar::CreateScaledPhoto --
+# 
+#       If image with 'name' is smaller or equal 'size' then just return 'name',
+#       else create a new scaled one that is smaller or equal to 'size'.
+
+proc ::Avatar::CreateScaledPhoto {name size} {
+    
+    set width  [image width $name]
+    set height [image height $name]
+    set max [expr {$width > $height ? $width : $height}]
+    
+    # We never scale up an image, only scale down.
+    if {$size >= $max} {
+	set new [image create photo]
+	$new copy $name -compositingrule set
+	return $new
+    } else {
+	lassign [GetScaleMN $max $size] M N
+	return [ScalePhotoN->M $name $N $M]
+    }
+}
+
+proc ::Avatar::ScalePhotoN->M {name N M} {
     
     set new [image create photo]
-    $new copy $name -subsample 2
+    if {$M == 1} {
+	$new copy $name -subsample $N -compositingrule set
+    } else {
+	set tmp [image create photo]
+	$tmp copy $name -zoom $M -compositingrule set
+	$new copy $tmp -subsample $N -compositingrule set
+	image delete $tmp
+    }
     return $new
 }
 
-proc ::Avatar::ScalePhoto4->3 {name} {
+# Avatar::GetScaleMN --
+# 
+#       Get scale rational number that scales from 'from' pixels to smaller or 
+#       equal to 'to' pixels.
+
+proc ::Avatar::GetScaleMN {from to} {
+    variable scaleTable
+
+    if {![info exists scaleTable]} {
+	MakeScaleTable
+    }
     
-    set tmp [image create photo]
-    set new [image create photo]
-    $tmp copy $name -zoom 3
-    $new copy $tmp -subsample 4
-    image delete $tmp
-    return $new
+    # If requires smaller scale factor than min (1/8):
+    set M [lindex $scaleTable {end 0}]
+    set N [lindex $scaleTable {end 1}]
+    if {[expr {$M*$from > $N*$to}]} {
+	set M 1
+	set N [expr {int(double($from)/double($to) + 1)}]
+    } elseif {$from == $to} {
+	set M 1
+	set N 1
+    } else {
+	foreach r $scaleTable {
+	    set N [lindex $r 0]
+	    set M [lindex $r 1]
+	    if {[expr {$N*$from <= $M*$to}]} {
+		break
+	    }
+	}
+    }
+    return [list $N $M]
+}
+
+proc ::Avatar::MakeScaleTable { } {
+    variable scaleTable
+    
+    # {{numerator denominator} ...}
+    set r \
+      {{1 2} {1 3} {1 4} {1 5} {1 6} {1 7} {1 8}
+             {2 3}       {2 5}       {2 7}
+	           {3 4} {3 5}       {3 7} {3 8}
+		         {4 5}       {4 7}  
+			       {5 6} {5 7} {5 8}
+			             {6 7}
+				           {7 8}}
+
+    # Sort in decreasing order!
+    set scaleTable [lsort -decreasing -command ::Avatar::MakeScaleTableCmd $r]
+}
+
+proc ::Avatar::MakeScaleTableCmd {f1 f2} {
+    
+    set r1 [expr {double([lindex $f1 0])/double([lindex $f1 1])}]
+    set r2 [expr {double([lindex $f2 0])/double([lindex $f2 1])}]
+    return [expr {$r1 > $r2 ? 1 : -1}]
 }
 
 #--- Preference UI -------------------------------------------------------------
@@ -476,7 +711,7 @@ proc ::Avatar::PrefsFrame {win} {
     set me [GetMyPhoto]
     if {$me ne ""} {
 	set tmpphoto [image create photo]
-	$tmpphoto copy $me
+	$tmpphoto copy $me -compositingrule set
 	$wphoto configure -image $tmpphoto
     } else {
 	$wshare state {disabled}
@@ -509,7 +744,7 @@ proc ::Avatar::PrefsFile { } {
 	    if {![info exists tmpphoto]} {
 		set tmpphoto [image create photo]
 	    }
-	    $tmpphoto copy $me
+	    $tmpphoto copy $me -compositingrule set
 	    set tmpprefs(fileName) $fileName
 	    set tmpprefs(editedPhoto) 1
 	    $wshare state {!disabled}
@@ -542,7 +777,6 @@ proc ::Avatar::PrefsSave { } {
     set aprefs(share) $tmpprefs(share)
 
     Debug "::Avatar::PrefsSave editedShare=$editedShare"
-    #parray tmpprefs
 
     # Two things: my photo and share.
     # My photo:
@@ -650,7 +884,6 @@ if {0} {
     }
     ::Avatar::Load $f
     ::Avatar::Configure -autoget 1 -command ::Avatar::TestCmd
-    
 }
 
 

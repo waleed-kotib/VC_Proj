@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.2 2005-12-13 13:57:52 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.3 2005-12-17 09:48:41 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -32,6 +32,7 @@ namespace eval ::RosterAvatar {
     ::RosterTree::RegisterStyle avatar Avatar  \
       ::RosterAvatar::Configure   \
       ::RosterAvatar::Init        \
+      ::RosterAvatar::Delete      \
       ::RosterAvatar::CreateItem  \
       ::RosterAvatar::DeleteItem  \
       ::RosterAvatar::SetItemAlternative
@@ -50,13 +51,13 @@ namespace eval ::RosterAvatar {
     
     variable statusOrder
     array set statusOrder {
-	chat        0
-	available   1
-	away        2
-	xa          3
-	dnd         4
-	invisible   5
-	unavailable 6
+	chat          0
+	available     1
+	away          2
+	xa            3
+	dnd           4
+	invisible     5
+	unavailable   6
     }
 }
 
@@ -80,6 +81,7 @@ proc ::RosterAvatar::InitDB { } {
     set underlineFont [eval font create [array get uFont]]
 
     set fillT {white {selected focus} black {selected !focus}}
+    set fillZ {white {selected focus} "#535353"  {}}
     set fillM {blue {mouseover}} 
     set fontU [list $underlineFont {mouseover}]
     set fillF [concat $fillT $fillM]
@@ -109,7 +111,7 @@ proc ::RosterAvatar::InitDB { } {
     option add *Roster.avatar:eOnText-font            CociDefaultFont   widgetDefault
     option add *Roster.avatar:eOnText-fill            $fillT            widgetDefault
     option add *Roster.avatar:eOffText-font           CociDefaultFont   widgetDefault
-    option add *Roster.avatar:eOffText-fill           $fillT            widgetDefault
+    option add *Roster.avatar:eOffText-fill           $fillZ            widgetDefault
     option add *Roster.avatar:eBorder-outline         white             widgetDefault
     option add *Roster.avatar:eBorder-outlinewidth    1                 widgetDefault
     option add *Roster.avatar:eBorder-fill            $fillB            widgetDefault
@@ -163,6 +165,7 @@ proc ::RosterAvatar::Configure {_T} {
     # This is a dummy option.
     set stripeBackground [option get $T stripeBackground {}]
     set stripes [list $stripeBackground {}]
+    set minW $avatarSize
     set minH $avatarSize
     set bd [option get $T columnBorderWidth {}]
 
@@ -209,7 +212,7 @@ proc ::RosterAvatar::Configure {_T} {
     $T style elements $S {eBorder eIndent eAvBorder eAvatarImage eAltImage eOnText}
     $T style layout $S eBorder      -detach 1 -iexpand xy
     $T style layout $S eAvBorder    -union {eAvatarImage}
-    $T style layout $S eAvatarImage -expand ns -minheight $minH
+    $T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
     $T style layout $S eAltImage    -expand ns
     $T style layout $S eOnText      -squeeze x -expand ns
 
@@ -217,7 +220,7 @@ proc ::RosterAvatar::Configure {_T} {
     $T style elements $S {eBorder eIndent eAvBorder eAvatarImage eAltImage eOffText}
     $T style layout $S eBorder      -detach 1 -iexpand xy
     $T style layout $S eAvBorder    -union {eAvatarImage}
-    $T style layout $S eAvatarImage -expand ns -minheight $minH
+    $T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
     $T style layout $S eAltImage    -expand ns
     $T style layout $S eOffText     -squeeze x -expand ns
 
@@ -250,6 +253,12 @@ proc ::RosterAvatar::Configure {_T} {
     set sortColumn cTree
 
     ::RosterTree::DBOptions $rosterStyle
+
+ 
+    ::Avatar::Configure -autoget 1 -command ::RosterAvatar::OnAvatarPhoto
+    
+    # We shall get avatars for all users.
+    ::Avatar::GetAll
 }
 
 proc ::RosterAvatar::Sort {item order} {
@@ -261,7 +270,7 @@ proc ::RosterAvatar::Sort {item order} {
 	-decreasing   down
     }
     
-    if {$item eq "root"} {
+    if {[$T item compare $item == "root"]} {
 	$T column configure $sortColumn -arrow $arrowMap($order)
 	SortColumn $sortColumn $order
     }
@@ -387,36 +396,63 @@ proc ::RosterAvatar::SortStatus {item1 item2} {
 proc ::RosterAvatar::Init { } {
     variable T
     upvar ::Jabber::jprefs jprefs
-    
+        
     $T item delete all
     ::RosterTree::FreeTags
- 
-    ::Avatar::Configure -autoget 1 -command ::RosterAvatar::AvatarCmd
-    
-    # @@@ We shall get avatars for all users.
-    
 }
 
-proc ::RosterAvatar::AvatarCmd {jid2} {
+# RosterAvatar::OnAvatarPhoto --
+# 
+#       Callback from Avatar when there is a new image or the image has been
+#       removed.
+
+proc ::RosterAvatar::OnAvatarPhoto {type jid2} {
     
-    SetAvatarImage $jid2
+    puts "::RosterAvatar::OnAvatarPhoto type=$type, jid2=$jid2"
+
+    SetAvatarImage $type $jid2
 }
 
-proc ::RosterAvatar::SetAvatarImage {jid2} {
+proc ::RosterAvatar::SetAvatarImage {type jid2} {
     variable T
+    variable avatar
+    variable avatarSize
+    
+    puts "::RosterAvatar::SetAvatarImage jid2=$jid2"
 	
-    set res [::Jabber::RosterCmd gethighestresource $jid2]
-    if {$res ne ""} {
-	set jid3 $jid2/$res
-    } else {
-	set jid3 $jid2
-    }
-    set tag [list jid $jid3]
+    # @@@ Not the best solution...
+    # The problem is with JEP-0008 mixing jid2 with jid3.
+    set jid [::Jabber::JlibCmd avatar get_full_jid $jid2]
+    set tag [list jid $jid]
     set item [FindWithTag $tag]
     if {$item ne ""} {
-	set image [::Avatar::GetPhoto $jid2]
-	$T item element configure $item cTree eAvatarImage -image $image  
+	
+	switch -- $type {
+	    create - put {
+		set image [::Avatar::GetPhotoOfSize $jid2 $avatarSize]
+		$T item element configure $item cTree eAvatarImage  \
+		  -image $image
+
+		# @@@ We get problems with this since only the _element_ is
+		#     configured with an image to start with.
+		#     
+		#set im [$T item element cget $item cTree eAvatarImage -image]
+		#if {$im ne $image} {
+		#    $T item element configure $item cTree eAvatarImage  \
+		#      -image $image
+		#}
+	    }
+	    remove {
+		$T item element configure $item cTree eAvatarImage  \
+		  -image $avatar(default)
+	    }
+	}
     }
+}
+
+proc ::RosterAvatar::Delete { } {
+    
+    ::Avatar::Configure -autoget 0 -command ""
 }
 
 # RosterAvatar::CreateItem --
@@ -499,6 +535,12 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     set jidStatus($mjid) $status
     set item [CreateWithTag $tag $style $elem $jtext $jimage root]
     lappend items $item
+    
+    if {$presence eq "available"} {
+	if {[::Avatar::HavePhoto $jid2]} {
+	    SetAvatarImage put $jid2
+	}
+    }
 
     if {($type eq "transport") || ($type eq "pending")} {
 	set ptag [list head $type]
