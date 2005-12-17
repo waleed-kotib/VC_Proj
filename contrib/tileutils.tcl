@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.6 2005-12-17 09:48:41 matben Exp $
+# $Id: tileutils.tcl,v 1.7 2005-12-17 12:15:50 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -174,8 +174,9 @@ proc tileutils::TreeCtrlThemeChanged {win} {
     if {[info exists style(-background)]} {
 	if {[winfo class $win] eq "TreeCtrl"} {
 	    set color $style(-background)
-	    foreach C [$win columns list -visible] {
-		$win column configure $C -bg $color
+	    foreach C [$win column list -visible] {
+		$win column configure $C -background $color
+		option add *TreeCtrl.columnBackground $color widgetDefault
 	    }
 	}
     }

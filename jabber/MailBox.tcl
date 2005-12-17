@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.83 2005-11-30 08:32:00 matben Exp $
+# $Id: MailBox.tcl,v 1.84 2005-12-17 12:15:50 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -383,15 +383,18 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set stripeBackground [option get $T stripeBackground {}]
     set stripes [list $stripeBackground {}]
     set bd [option get $T columnBorderWidth {}]
+    set bg [option get $T columnBackground {}]
 
     $T column create -tag cWhiteboard -image $locals(iconWB16)  \
-      -itembackground $stripes -resize 0 -borderwidth $bd
+      -itembackground $stripes -resize 0 -borderwidth $bd -background $bg
     $T column create -tag cSubject -expand 1 -text [mc Subject] \
-      -itembackground $stripes -button 1 -borderwidth $bd
+      -itembackground $stripes -button 1 -borderwidth $bd -background $bg
     $T column create -tag cFrom    -expand 1 -text [mc From]    \
-      -itembackground $stripes -button 1 -squeeze 1 -borderwidth $bd
+      -itembackground $stripes -button 1 -squeeze 1 -borderwidth $bd  \
+      -background $bg
     $T column create -tag cDate    -expand 1 -text [mc Date]    \
-      -itembackground $stripes -button 1 -arrow up -borderwidth $bd
+      -itembackground $stripes -button 1 -arrow up -borderwidth $bd  \
+      -background $bg
     $T column create -tag cSecs -visible 0
     $T column create -tag cRead -visible 0
     $T column create -tag cUid  -visible 0

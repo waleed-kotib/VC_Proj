@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.3 2005-12-17 09:48:41 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.4 2005-12-17 12:15:50 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -168,6 +168,7 @@ proc ::RosterAvatar::Configure {_T} {
     set minW $avatarSize
     set minH $avatarSize
     set bd [option get $T columnBorderWidth {}]
+    set bg [option get $T columnBackground {}]
 
     # Three columns: 
     #   0) status
@@ -175,10 +176,11 @@ proc ::RosterAvatar::Configure {_T} {
     #   2) hidden for tags
     $T column create -tag cStatus  \
       -itembackground $stripes -resize 0 -minwidth 32 -button 1  \
-      -borderwidth $bd
+      -borderwidth $bd -background $bg
     $T column create -tag cTree    \
       -itembackground $stripes -resize 0 -expand 1 \
-      -text [mc {Contact Name}] -button 1 -arrow up -borderwidth $bd
+      -text [mc {Contact Name}] -button 1 -arrow up -borderwidth $bd \
+      -background $bg
     $T column create -tag cTag     \
       -visible 0
     $T configure -showheader 1

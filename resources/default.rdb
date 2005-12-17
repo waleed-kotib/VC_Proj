@@ -94,6 +94,7 @@
 !
 *TreeCtrl.stripeBackground:          #dedeff
 *TreeCtrl.columnBorderWidth:         1
+*TreeCtrl.columnBackground:          #dedede
 
 *TToolbar.TLabel.font:               CociSmallFont
 *WaveLabel.background:               #cecece

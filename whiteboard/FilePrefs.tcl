@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.11 2005-11-30 08:32:00 matben Exp $
+# $Id: FilePrefs.tcl,v 1.12 2005-12-17 12:15:50 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -157,11 +157,14 @@ proc ::FilePrefs::TreeCtrl {T wysc} {
     set stripeBackground [option get $T stripeBackground {}]
     set stripes [list $stripeBackground {}]
     set bd [option get $T columnBorderWidth {}]
+    set bg [option get $T columnBackground {}]
 
     $T column create -tag cDescription -text [mc Description] \
-      -itembackground $stripes -expand 1 -squeeze 1 -borderwidth $bd
+      -itembackground $stripes -expand 1 -squeeze 1 -borderwidth $bd \
+      -background $bg
     $T column create -tag cHandled -text [mc {Handled By}] \
-      -itembackground $stripes -expand 1 -squeeze 1 -borderwidth $bd
+      -itembackground $stripes -expand 1 -squeeze 1 -borderwidth $bd \
+      -background $bg
     $T column create -tag cMime -visible 0
 
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
