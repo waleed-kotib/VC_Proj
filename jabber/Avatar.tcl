@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.4 2005-12-17 09:48:41 matben Exp $
+# $Id: Avatar.tcl,v 1.5 2005-12-17 15:31:40 matben Exp $
 
 # @@@ Issues:
 #     1) shall we keep cache of users avatars between sessions to save bandwidth?
@@ -205,7 +205,8 @@ proc ::Avatar::SetMyPhoto {name} {
     if {![info exists myphoto(image)]} {
 	set myphoto(image) [image create photo]
     }
-    $myphoto(image) copy $name -compositingrule set
+    $myphoto(image) blank
+    $myphoto(image) copy $name
 }
 
 proc ::Avatar::GetMyPhoto { } {
@@ -469,7 +470,7 @@ proc ::Avatar::PutPhoto {jid2 data} {
 	    set name $photo($jid2,$size)
 	    if {[image inuse $name]} {
 		set tmp [CreateScaledPhoto $orig $size]
-		$name copy $tmp -compositingrule set
+		$name copy $tmp
 		image delete tmp
 	    } else {
 		
@@ -576,7 +577,7 @@ proc ::Avatar::CreateScaledPhoto {name size} {
     # We never scale up an image, only scale down.
     if {$size >= $max} {
 	set new [image create photo]
-	$new copy $name -compositingrule set
+	$new copy $name
 	return $new
     } else {
 	lassign [GetScaleMN $max $size] M N
@@ -588,11 +589,11 @@ proc ::Avatar::ScalePhotoN->M {name N M} {
     
     set new [image create photo]
     if {$M == 1} {
-	$new copy $name -subsample $N -compositingrule set
+	$new copy $name -subsample $N
     } else {
 	set tmp [image create photo]
-	$tmp copy $name -zoom $M -compositingrule set
-	$new copy $tmp -subsample $N -compositingrule set
+	$tmp copy $name -zoom $M
+	$new copy $tmp -subsample $N
 	image delete $tmp
     }
     return $new
@@ -711,7 +712,7 @@ proc ::Avatar::PrefsFrame {win} {
     set me [GetMyPhoto]
     if {$me ne ""} {
 	set tmpphoto [image create photo]
-	$tmpphoto copy $me -compositingrule set
+	$tmpphoto copy $me
 	$wphoto configure -image $tmpphoto
     } else {
 	$wshare state {disabled}
@@ -744,7 +745,8 @@ proc ::Avatar::PrefsFile { } {
 	    if {![info exists tmpphoto]} {
 		set tmpphoto [image create photo]
 	    }
-	    $tmpphoto copy $me -compositingrule set
+	    $tmpphoto blank
+	    $tmpphoto copy $me
 	    set tmpprefs(fileName) $fileName
 	    set tmpprefs(editedPhoto) 1
 	    $wshare state {!disabled}
