@@ -1,10 +1,10 @@
-# JivePhone.tcl --
+#agents JivePhone.tcl --
 # 
 #       JivePhone bindings for the jive server and Asterisk.
 #       
 #       Contributions and testing by Antonio Cano damas
 #       
-# $Id: JivePhone.tcl,v 1.16 2005-12-08 09:32:20 matben Exp $
+# $Id: JivePhone.tcl,v 1.17 2005-12-18 09:17:19 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -33,6 +33,7 @@ proc ::JivePhone::Init { } {
     ::hooks::register loginHook             ::JivePhone::LoginHook
     ::hooks::register logoutHook            ::JivePhone::LogoutHook
     ::hooks::register rosterPostCommandHook ::JivePhone::RosterPostCommandHook
+
     
     variable xmlns
     set xmlns(jivephone) "http://jivesoftware.com/xmlns/phone"
@@ -43,17 +44,33 @@ proc ::JivePhone::Init { } {
     
     variable statuses {AVAILABLE RING DIALED ON_PHONE HANG_UP}
 
+
+    #--------------- Variables Uses For PopUP Menus -------------------------
     variable popMenuDef
     set popMenuDef(call) {
 	command  mCall     {user available} {::JivePhone::DialJID $jid "DIAL"} {}
     }
     set popMenuDef(forward) {
-	command  mForward  {user available} {::JivePhone::DialJID $jid "FORWARD"} {}
+	command  mForward  {user available} {::JivePhone::DialJID  $jid "FORWARD"} {}
     }
 
     variable menuDef
     set menuDef  \
       {command  mCall     {::JivePhone::DoDial "DIAL"}    normal {}}
+
+
+    #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------
+    variable wtab -
+    variable abline
+
+    set popMenuDef(addressbook,def) {
+        mCall          jid       {::JivePhone::DialExtension $jid "DIAL"}
+        separator      {}        {}
+        mNewAB         jid       {::JivePhone::NewAddressbookDlg}
+        mModifyAB      jid       {::JivePhone::ModifyAddressbookDlg  $jid}
+        mRemoveAB      jid       {::JivePhone::RemoveAddressbookDlg  $jid}
+    }
+
 
     InitState
 }
@@ -66,9 +83,16 @@ proc ::JivePhone::InitState { } {
 	setui           0
 	win             .dial
 	wstatus         -
+	phone		-
+        abphonename     -
+        abphonenumber   -
     }
 }
 
+
+#----------------------------------------------------------------------------
+#-------------------- JEP Messages Function Handlers ------------------------
+#----------------------------------------------------------------------------
 proc ::JivePhone::LoginHook { } {
     
     set server [::Jabber::GetServerJid]
@@ -159,8 +183,8 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
 	    #puts "\t jid=$jid"
 	    
 	    # Cache this info.
-	    set state(phone,$jid)
-	    
+	    #set state(phone,$jid)
+
 	    # Since we added ourselves to the list take action if have phone.
 	    set myjid2 [::Jabber::JlibCmd getthis myjid2]
 	    if {[jlib::jidequal $jid $myjid2]} {
@@ -187,7 +211,8 @@ proc ::JivePhone::WeHavePhone { } {
     variable state
     variable popMenuDef
     variable menuDef
-    
+
+    NewPage    
     if {$state(setui)} {
 	return
     }
@@ -201,11 +226,14 @@ proc ::JivePhone::WeHavePhone { } {
     
     set state(wstatus) $win
     set state(setui)   1
+
 }
 
 proc ::JivePhone::LogoutHook { } {
     variable state
-    
+    variable wtab
+    variable abline
+
     ::Roster::DeRegisterPopupEntry mCall
     ::Roster::DeRegisterPopupEntry mForward
     ::Jabber::UI::DeRegisterMenuEntry jabber mCall
@@ -214,6 +242,12 @@ proc ::JivePhone::LogoutHook { } {
 	destroy $state(wstatus)
     }
     unset -nocomplain state
+
+    destroy $wtab
+    if { [info exists abline] } {
+        unset abline
+    }
+
     InitState
 }
 
@@ -250,7 +284,6 @@ proc ::JivePhone::PresenceHook {jid type args} {
 
 	    set image [::Rosticons::Get [string tolower phone/$status]]
 	    ::RosterTree::StyleSetItemAlternative $from jivephone image $image
-	    
 	    eval {::hooks::run jivePhonePresence $from $type} $args
 	}
     }
@@ -351,6 +384,12 @@ proc ::JivePhone::RosterPostCommandHook {wmenu jidlist clicked status} {
     }
 }
 
+#-----------------------------------------------------------------------
+#------------------------ JivePhone Dialer Window ----------------------
+#---------------------- (Dial/Forward - Extension/Jid) -----------------
+#-----------------------------------------------------------------------
+
+
 # JivePhone::DoDial --
 # 
 #       type: FORWARD | DIAL
@@ -435,6 +474,10 @@ proc ::JivePhone::CloseDialer {w} {
     ::UI::SaveWinGeom $w   
 }
 
+#-------------------------------------------------------------------------
+#------------------- JivePhone Send IQ Actions ---------------------------
+#-------------------------------------------------------------------------
+
 proc ::JivePhone::OnDial {w type {jid ""}} {
     variable phoneNumber
     variable xmlns
@@ -479,7 +522,7 @@ proc ::JivePhone::OnDial {w type {jid ""}} {
 proc ::JivePhone::DialJID {jid type} {
     variable state
     variable xmlns
-    
+   
     if {!$state(phoneserver)} {
 	return
     }
@@ -502,12 +545,510 @@ proc ::JivePhone::DialJID {jid type} {
     eval {::hooks::run jivePhoneEvent $command $jid}    
 }
 
+proc ::JivePhone::DialExtension {extension type} {
+    variable state
+    variable xmlns
+
+    if {!$state(phoneserver)} {
+        return
+    }
+    set extensionElem [wrapper::createtag "extension" -chdata $extension]
+
+    if {$type eq "DIAL"} {
+        set command "DIAL"
+        set attr [list xmlns $xmlns(jivephone) type $command]
+    } else {
+        # @@@ Where comes callID from?
+        set command "FORWARD"
+        set attr [list xmlns $xmlns(jivephone) id $callID type $command]
+    }
+    set phoneElem [wrapper::createtag "phone-action"  \
+      -attrlist $attr -subtags [list $extensionElem]]
+
+    ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
+      -to $state(service) -command [list ::JivePhone::DialCB $extension]
+
+    eval {::hooks::run jivePhoneEvent $command $extension}
+}
+
 proc ::JivePhone::DialCB {dnid type subiq args} {
     
     if {$type eq "error"} {
 	ui::dialog -icon error -type ok -message [mc phoneFailedCalling $dnid] \
 	  -detail $subiq
     }
+}
+
+
+#---------------------------------------------------------------------------
+#------------------- JivePhone Addressbook SpeedDial Tab -------------------
+#---------------------------------------------------------------------------
+
+proc ::JivePhone::NewPage { } {
+    variable wtab
+
+    set wnb [::Jabber::UI::GetNotebook]
+    set wtab $wnb.ab
+    if {![winfo exists $wtab]} {
+        set im [::Theme::GetImage \
+          [option get [winfo toplevel $wnb] browser16Image {}]]
+        set imd [::Theme::GetImage \
+          [option get [winfo toplevel $wnb] browser16DisImage {}]]
+        set imSpec [list $im disabled $imd background $imd]
+        Build $wtab
+        $wnb add $wtab -text [mc AddressBook] -image $imSpec -compound left
+    }
+}
+
+# JivePhone::Build --
+#
+#       This is supposed to create a frame which is pretty object like,
+#       and handles most stuff internally without intervention.
+#
+# Arguments:
+#       w           frame for everything
+#       args
+#
+# Results:
+#       w
+
+proc ::JivePhone::Build {w args} {
+    global  prefs this
+
+    variable waddressbook
+    variable wtree
+    variable wwave
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jprefs jprefs
+    variable abline
+
+    ::Debug 2 "::JivePhone::Build w=$w"
+    set jstate(wpopup,addressbook)    .jpopupab
+    set waddressbook $w
+    set wwave   $w.fs
+    set wbox    $w.box
+    set wtree   $wbox.tree
+    set wxsc    $wbox.xsc
+    set wysc    $wbox.ysc
+
+    # The frame.
+    ttk::frame $w -class AddressBook 
+
+#    set waveImage [::Theme::GetImage [option get $w waveImage {}]]
+#    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
+#      -type image -image $waveImage
+#    pack $wwave -side bottom -fill x -padx 8 -pady 2
+   
+    # D = -border 1 -relief sunken
+    frame $wbox
+    pack  $wbox -side top -fill both -expand 1
+
+    set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
+    ttk::scrollbar $wxsc -orient horizontal -command [list $wtree xview]
+    ttk::scrollbar $wysc -orient vertical -command [list $wtree yview]
+
+    ::ITree::New $wtree $wxsc $wysc   \
+      -buttonpress ::JivePhone::Popup         \
+      -buttonpopup ::JivePhone::Popup         \
+      -backgroundimage $bgimage
+
+    grid  $wtree  -row 0 -column 0 -sticky news
+    grid  $wysc   -row 0 -column 1 -sticky ns
+    grid  $wxsc   -row 1 -column 0 -sticky ew
+    grid columnconfigure $wbox 0 -weight 1
+    grid rowconfigure $wbox 0 -weight 1
+
+    #--------- Load Entries of AddressBook into NewPage Tab ---------
+    LoadEntries
+
+    foreach {name phone} $abline {
+        set opts {-text "$name ($phone)"}
+        if {$name ne ""} {
+           lappend opts -text "$name ($phone)"
+           eval {::ITree::Item $wtree $phone} $opts
+        }
+    }
+    return $w
+}
+
+proc ::JivePhone::LoadEntries {} {
+    variable abline
+    set hFile [open "/Users/antonio/Desktop/coccinella/addressbook.csv" "r"]
+
+    while {[eof $hFile] <= 0} {
+       gets $hFile line
+       set temp [split $line ":"]
+       foreach i $temp {
+           lappend abline $i
+       }
+    }
+
+    close $hFile
+}
+
+# JivePhone::Popup --
+#
+#       Handle popup menus in JivePhone, typically from right-clicking.
+#
+# Arguments:
+#       w           widget that issued the command: tree or text
+#       v           for the tree widget it is the item path,
+#                   for text the jidhash.
+#
+# Results:
+#       popup menu displayed
+
+proc ::JivePhone::Popup {w v x y} {
+    global  wDlgs this
+    variable popMenuDef
+
+    upvar ::Jabber::jstate jstate
+
+    ::Debug 2 "::JivePhone::Popup w=$w, v='$v', x=$x, y=$y"
+
+    # The last element of $v is either a jid, (a namespace,)
+    # a header in roster, a group, or an agents xml tag.
+    # The variables name 'jid' is a misnomer.
+    # Find also type of thing clicked, 'typeClicked'.
+
+    set typeClicked ""
+
+    set jid [lindex $v end]
+    set jid3 $jid
+    set childs [::ITree::Children $w $v]
+
+    if {$jid ne ""} {
+        set typeClicked jid
+    }
+
+    if {[string length $jid] == 0} {
+        set typeClicked ""     
+    }
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
+
+    ::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
+
+    # Mads Linden's workaround for menu post problem on mac:
+    # all in menubutton commands i add "after 40 the_command"
+    # this way i can never have to posting error.
+    # it is important after the tk_popup f.ex to
+    #
+    # destroy .mb
+    # update
+    #
+    # this way the .mb is destroyd before the next window comes up, thats how I
+    # got around this.
+
+    # Make the appropriate menu.
+    set m $jstate(wpopup,addressbook)
+    set i 0
+    catch {destroy $m}
+    menu $m -tearoff 0
+
+    foreach {item type cmd} $popMenuDef(addressbook,def) {
+        if {[string index $cmd 0] == "@"} {
+            set mt [menu ${m}.sub${i} -tearoff 0]
+            set locname [mc $item]
+            $m add cascade -label $locname -menu $mt -state disabled
+            eval [string range $cmd 1 end] $mt
+            incr i
+        } elseif {[string equal $item "separator"]} {
+            $m add separator
+            continue
+        } else {
+
+            # Substitute the jid arguments. Preserve list structure!
+            set cmd [eval list $cmd]
+            set locname [mc $item]
+            $m add command -label $locname -command [list after 40 $cmd]  \
+              -state disabled
+        }
+
+        # If a menu should be enabled even if not connected do it here.
+
+        if {![::Jabber::IsConnected]} {
+            continue
+        }
+        if {[string equal $type "any"]} {
+            $m entryconfigure $locname -state normal
+            continue
+        }
+
+        # State of menu entry. We use the 'type' and 'typeClicked' to sort
+        # out which capabilities to offer for the clicked item.
+        set state disabled
+
+	if {[string equal $item "mNewAB"]} {
+	    set state normal
+	}
+
+        if {[string equal $type $typeClicked]} {
+            set state normal
+        } 
+        if {[string equal $state "normal"]} {
+            $m entryconfigure $locname -state normal
+        }
+    }  
+
+    # This one is needed on the mac so the menu is built before it is posted.
+    update idletasks
+
+    # Post popup menu.
+    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]
+
+    # Mac bug... (else can't post menu while already posted if toplevel...)
+    if {[string equal "macintosh" $this(platform)]} {
+        catch {destroy $m}
+        update
+    }
+}
+
+proc ::JivePhone::RemoveAddressbookDlg {jid} {
+    variable abline
+    variable wtree
+
+    set index [lsearch -exact $abline $jid]
+
+    set tmp [lreplace $abline [expr $index-1] $index]
+    set abline $tmp
+
+    eval {::ITree::DeleteItem $wtree $jid} 
+
+    SaveEntries
+
+}
+
+
+proc ::JivePhone::NewAddressbookDlg {} {
+    global  this wDlgs
+
+    variable abName
+    variable abPhoneNumber
+
+    set abName ""
+    set abPhoneNumber ""
+
+    set w ".nadbdlg" 
+    ::UI::Toplevel $w \
+      -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
+      -closecommand [namespace current]::CloseCmd
+    wm title $w [mc {newAddressbookDlg}]
+
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
+    if {$nwin == 1} {
+        ::UI::SetWindowPosition $w ".nadbdlg" 
+    }
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+   
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc newAddressbook ]
+    pack $wbox.msg -side top -anchor w
+
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
+
+    ttk::label $frmid.lname -text "[mc {abName}]:"
+    ttk::entry $frmid.ename -textvariable [namespace current]::abName
+
+    ttk::label $frmid.lphone -text "[mc {abPhone}]:"
+    ttk::entry $frmid.ephone -textvariable [namespace current]::abPhoneNumber
+
+    grid  $frmid.lname    $frmid.ename        -  -sticky e -pady 2
+    grid  $frmid.lphone    $frmid.ephone   -  -sticky e -pady 2
+    grid  $frmid.ephone  $frmid.ename  -sticky ew
+    grid columnconfigure $frmid 1 -weight 1
+
+    # Button part.
+    set frbot $wbox.b
+    set wenter  $frbot.btok
+    ttk::frame $frbot
+    ttk::button $wenter -text [mc Enter] \
+      -default active -command [list [namespace current]::addItemAddressBook $w]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::CancelEnter $w]
+
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+        pack $frbot.btok -side right
+        pack $frbot.btcancel -side right -padx $padx
+    } else {
+        pack $frbot.btcancel -side right
+        pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
+
+    wm resizable $w 0 0
+
+    bind $w <Return> [list $wenter invoke]
+
+    # Trick to resize the labels wraplength.
+    set script [format {
+        update idletasks
+        %s configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $wbox.msg $w]   
+    after idle $script
+}
+
+proc ::JivePhone::ModifyAddressbookDlg {jid} {
+    global  this wDlgs
+
+    variable abName
+    variable abPhoneNumber
+    variable abline
+
+    #Get Entry data from abline list
+    set index [lsearch -exact $abline $jid]
+    set abName [lindex $abline [expr $index-1]]
+    set abPhoneNumber [lindex $abline [expr $index]]
+    set oldPhoneNumber $abPhoneNumber
+
+    set w ".madbdlg"
+    ::UI::Toplevel $w \
+      -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
+      -closecommand [namespace current]::CloseCmd
+    wm title $w [mc {modifyAddressbookDlg}]
+
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
+    if {$nwin == 1} {
+        ::UI::SetWindowPosition $w ".madbdlg"
+    }
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc modifyAddressbook ]
+    pack $wbox.msg -side top -anchor w
+
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
+
+    ttk::label $frmid.lname -text "[mc {abName}]:"
+    ttk::entry $frmid.ename -textvariable [namespace current]::abName
+
+    ttk::label $frmid.lphone -text "[mc {abPhone}]:"
+    ttk::entry $frmid.ephone -textvariable [namespace current]::abPhoneNumber
+
+    grid  $frmid.lname    $frmid.ename        -  -sticky e -pady 2
+    grid  $frmid.lphone    $frmid.ephone   -  -sticky e -pady 2
+    grid  $frmid.ephone  $frmid.ename  -sticky ew
+    grid columnconfigure $frmid 1 -weight 1
+
+    # Button part.
+    set frbot $wbox.b
+    set wenter  $frbot.btok
+    ttk::frame $frbot
+    ttk::button $wenter -text [mc Enter] \
+      -default active -command [list [namespace current]::modifyItemAddressBook $w $oldPhoneNumber]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::CancelEnter $w]
+
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+        pack $frbot.btok -side right
+        pack $frbot.btcancel -side right -padx $padx
+    } else {
+        pack $frbot.btcancel -side right
+        pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
+
+    wm resizable $w 0 0
+
+    bind $w <Return> [list $wenter invoke]
+
+    # Trick to resize the labels wraplength.
+    set script [format {
+        update idletasks
+        %s configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $wbox.msg $w]
+    after idle $script
+}
+
+
+proc ::JivePhone::addItemAddressBook {w} {
+    variable abName
+    variable abPhoneNumber
+    variable abline
+    variable wtree
+
+    if { $abName ne "" && $abPhoneNumber ne ""} {
+        lappend abline $abName
+        lappend abline $abPhoneNumber
+
+        set opts {-text "$abName ($abPhoneNumber)"}
+        eval {::ITree::Item $wtree $abPhoneNumber} $opts
+        SaveEntries 
+ 
+        ::UI::SaveWinGeom $w
+        destroy $w    
+    }
+}
+
+proc ::JivePhone::modifyItemAddressBook {w oldPhoneNumber} {
+    variable abName
+    variable abPhoneNumber
+    variable abline
+    variable wtree
+
+    if { $abName ne "" && $abPhoneNumber ne "" } {
+        #---------- Updates Memory Addressbook -----------------
+        set index [lsearch -exact $abline $oldPhoneNumber]
+
+        set tmp [lreplace $abline [expr $index-1] $index $abName $abPhoneNumber]
+        set abline $tmp
+
+        #----- Updates GUI ---------
+        eval {::ITree::DeleteItem $wtree $oldPhoneNumber}
+        set opts {-text "$abName ($abPhoneNumber)"}
+        eval {::ITree::Item $wtree $abPhoneNumber} $opts
+
+        #----- Updates Database -------
+        SaveEntries
+
+        ::UI::SaveWinGeom $w
+        destroy $w
+    }
+}
+
+proc ::JivePhone::CancelEnter {w} {
+
+    ::UI::SaveWinGeom $w
+    destroy $w
+}
+
+proc ::JivePhone::CloseCmd {w} {
+
+    ::UI::SaveWinGeom $w
+}
+
+proc ::JivePhone::SaveEntries {} {
+    variable abline
+    set hFile [open "/Users/antonio/Desktop/coccinella/addressbook.csv" "w"]
+
+    foreach {name phonenumber} $abline {
+       if {$name ne ""} {
+           puts $hFile "$name:$phonenumber"
+       }
+    }
+
+    close $hFile
 }
 
 proc ::JivePhone::Debug {msg} {
