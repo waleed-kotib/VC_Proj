@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.7 2005-12-17 12:15:50 matben Exp $
+# $Id: tileutils.tcl,v 1.8 2005-12-18 08:40:41 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -15,8 +15,56 @@ if {[tk windowingsystem] eq "aqua"} {
 }
 
 namespace eval ::tileutils {
-    # See below for init code.
+    
+    # See below for more init code.
+    
+    # Since menus are not yet themed we use this code to detect when a new theme
+    # is selected, and recolors them. Non themed widgets only.
+
+    if {[lsearch [bindtags .] ThemeChanged] < 0} {
+	bindtags . [linsert [bindtags .] 1 ThemeChanged]
+    }
+    bind ThemeChanged <<ThemeChanged>> { tileutils::ThemeChanged }
+    if {[tk windowingsystem] eq "x11"} {
+	bind TreeCtrl <<ThemeChanged>> { tileutils::TreeCtrlThemeChanged %W }
+    }
+    if {[tk windowingsystem] ne "aqua"} {
+	bind Menu <<ThemeChanged>> { tileutils::MenuThemeChanged %W }
+    }
 }
+
+proc tileutils::ThemeChanged {} {
+    
+    array set style [style configure .]    
+    if {[info exists style(-background)]} {
+	set color $style(-background)
+	option add *Menu.background $color startupFile
+	option add *TreeCtrl.columnBackground $color startupFile
+    }
+}
+
+proc tileutils::MenuThemeChanged {win} {
+
+    array set style [style configure .]    
+    if {[info exists style(-background)]} {
+	if {[winfo class $win] eq "Menu"} {
+	    set color $style(-background)
+	    $win configure -bg $color
+	}
+    }
+}
+
+proc tileutils::TreeCtrlThemeChanged {win} {
+    
+    array set style [style configure .]    
+    if {[info exists style(-background)]} {
+	if {[winfo class $win] eq "TreeCtrl"} {
+	    treeutil::configurecolumns $win -background $style(-background)
+	}
+    }
+}
+   
+# These should be collected in a separate theme specific file.
 
 proc tileutils::configstyles {name} {
 
@@ -136,8 +184,6 @@ if {0} {
     pack .t.l1 .t.l2 .t.l3 .t.l4 .t.l5 .t.e1 .t.e2 -padx 20 -pady 10
 }
 
-	    
-# These should be collected in a separate theme specific file.
     
 foreach name [tile::availableThemes] {
     
@@ -146,40 +192,6 @@ foreach name [tile::availableThemes] {
 	continue
     }
     tileutils::configstyles $name
-}
-
-# Since menus are not yet themed we use this code to detect when a new theme
-# is selected, and recolors them. X11 only.
-
-if {[tk windowingsystem] eq "x11"} {
-    bind Menu     <<ThemeChanged>> { tileutils::MenuThemeChanged %W }
-    bind TreeCtrl <<ThemeChanged>> { tileutils::TreeCtrlThemeChanged %W }
-}
-
-proc tileutils::MenuThemeChanged {win} {
-
-    array set style [style configure .]    
-    if {[info exists style(-background)]} {
-	if {[winfo class $win] eq "Menu"} {
-	    set color $style(-background)
-	    $win configure -bg $color
-	    option add *Menu.background $color widgetDefault
-	}
-    }
-}
-
-proc tileutils::TreeCtrlThemeChanged {win} {
-    
-    array set style [style configure .]    
-    if {[info exists style(-background)]} {
-	if {[winfo class $win] eq "TreeCtrl"} {
-	    set color $style(-background)
-	    foreach C [$win column list -visible] {
-		$win column configure $C -background $color
-		option add *TreeCtrl.columnBackground $color widgetDefault
-	    }
-	}
-    }
 }
 
 # ttk::optionmenu --

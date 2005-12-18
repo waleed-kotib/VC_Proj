@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.5 2005-12-17 15:31:40 matben Exp $
+# $Id: Avatar.tcl,v 1.6 2005-12-18 08:40:41 matben Exp $
 
 # @@@ Issues:
 #     1) shall we keep cache of users avatars between sessions to save bandwidth?
@@ -471,7 +471,7 @@ proc ::Avatar::PutPhoto {jid2 data} {
 	    if {[image inuse $name]} {
 		set tmp [CreateScaledPhoto $orig $size]
 		$name copy $tmp
-		image delete tmp
+		image delete $tmp
 	    } else {
 		
 		# @@@ Not sure if this is smart.
@@ -872,7 +872,7 @@ proc ::Avatar::PrefsDnDLeave {w data type} {
 
 proc ::Avatar::Debug {text} {
     if {0} {
-	puts $text
+	puts "\t $text"
     }
 }
 

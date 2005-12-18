@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: treeutil.tcl,v 1.8 2005-12-17 09:48:41 matben Exp $
+#  $Id: treeutil.tcl,v 1.9 2005-12-18 08:40:41 matben Exp $
 
 # USAGE:
 # 
@@ -34,7 +34,7 @@ namespace eval ::treeutil {
 # 
 #       Public interface.
 
-proc ::treeutil::bind {w item args} {
+proc treeutil::bind {w item args} {
     variable state
     variable events
         
@@ -76,7 +76,7 @@ proc ::treeutil::bind {w item args} {
     return $ans
 }
 
-proc ::treeutil::Init {w} {
+proc treeutil::Init {w} {
     variable state
     
     set btags [bindtags $w]
@@ -107,7 +107,7 @@ proc ::treeutil::Init {w} {
     set state($w,y)    -1
 }    
     
-proc ::treeutil::Track {w x y} {
+proc treeutil::Track {w x y} {
     variable state
 
     set id [$w identify $x $y]
@@ -132,13 +132,13 @@ proc ::treeutil::Track {w x y} {
     set state($w,y) $y
 }
 
-proc ::treeutil::Generic {w} {
+proc treeutil::Generic {w} {
     variable state
     
     Track $w $state($w,x) $state($w,y)
 }
 
-proc ::treeutil::Generate {w x y item type {id ""}} {
+proc treeutil::Generate {w x y item type {id ""}} {
     variable state
     
     #puts "Generate item=$item, type=$type, id=$id"
@@ -155,7 +155,7 @@ proc ::treeutil::Generate {w x y item type {id ""}} {
     }
 }
 
-proc ::treeutil::OnButtonPress1 {w x y} {
+proc treeutil::OnButtonPress1 {w x y} {
     variable state
     
     set id [$w identify $x $y]
@@ -167,7 +167,7 @@ proc ::treeutil::OnButtonPress1 {w x y} {
     }
 }
 
-proc ::treeutil::OnItemDelete {w items} {
+proc treeutil::OnItemDelete {w items} {
     variable state
     
     foreach item $items {
@@ -175,7 +175,7 @@ proc ::treeutil::OnItemDelete {w items} {
     }
 }
 
-proc ::treeutil::OnDestroy {w} {
+proc treeutil::OnDestroy {w} {
     variable state
     
     array unset state $w,*
@@ -198,7 +198,7 @@ proc ::treeutil::OnDestroy {w} {
 #       configures treectrl elements and layouts
 
 
-proc ::treeutil::setdboptions {w wclass prefix} {
+proc treeutil::setdboptions {w wclass prefix} {
     
     # Element options:
     foreach ename [$w element names] {
@@ -231,4 +231,12 @@ proc ::treeutil::setdboptions {w wclass prefix} {
 	}
     }
 }
+
+proc treeutil::configurecolumns {w args} {
+    
+    foreach C [$w column list -visible] {
+	eval {$w column configure $C} $args
+    }
+}
+
 
