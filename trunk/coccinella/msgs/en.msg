@@ -998,4 +998,15 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en phoneDialerCall         {Call to...}
 ::msgcat::mcset en phoneDialerForward      {Forward to...}
 
+::msgcat::mcset en AddressBook		{Address Book}
+::msgcat::mcset en newAddressbookDlg	{New address book}
+::msgcat::mcset en newAddressbook       {New address book}
+::msgcat::mcset en abName		{Name}
+::msgcat::mcset en abPhone		{Phone number}
+::msgcat::mcset en modifyAddressbookDlg {Modify address book}
+::msgcat::mcset en modifyAddressbook	{Modify address book}
+::msgcat::mcset en mNewAB		{New}
+::msgcat::mcset en mModifyAB		{Modify}
+::msgcat::mcset en mRemoveAB		{Remove}
+
 # END --------------------------------------------------------------------------

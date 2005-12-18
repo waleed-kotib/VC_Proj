@@ -1047,5 +1047,16 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es phoneDialerCall     {Llamar a...}
 ::msgcat::mcset es phoneDialerForward  {Desviar a...}
 
+::msgcat::mcset es AddressBook		{Marcado rapido}
+::msgcat::mcset es newAddressbookDlg	{Nuevo telefono de marcado rapido}
+::msgcat::mcset es newAddressbook       {Nuevo telefono de marcado rapido}
+::msgcat::mcset es abName		{Nombre}
+::msgcat::mcset es abPhone		{Numero de telefono}
+::msgcat::mcset es modifyAddressbookDlg {Modificar telefono de marcado rapido}
+::msgcat::mcset es modifyAddressbook	{Modificar telefono de marcado rapido}
+::msgcat::mcset es mNewAB		{Agregar}
+::msgcat::mcset es mModifyAB		{Modificar}
+::msgcat::mcset es mRemoveAB		{Eliminar}
+
 # END --------------------------------------------------------------------------
 

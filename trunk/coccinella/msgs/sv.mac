@@ -1009,5 +1009,15 @@ En sak till, var snäll mot nyckelpigan ;-)}
 ::msgcat::mcset sv phoneDialerCall  {Ring upp...}
 ::msgcat::mcset sv phoneDialerForward {Vidarebefordra till...}
 
+::msgcat::mcset sv AddressBook		{Adressbok}
+::msgcat::mcset sv newAddressbookDlg	{Ny adressbok}
+::msgcat::mcset sv newAddressbook       {Ny adressbok}
+::msgcat::mcset sv abName		{Namn}
+::msgcat::mcset sv abPhone		{Telefonnummer}
+::msgcat::mcset sv modifyAddressbookDlg {Ändra adressboken}
+::msgcat::mcset sv modifyAddressbook	{Ändra adressboken}
+::msgcat::mcset sv mNewAB		{Ny}
+::msgcat::mcset sv mModifyAB		{Ändra}
+::msgcat::mcset sv mRemoveAB		{Ta bort}
 
 # END --------------------------------------------------------------------------
