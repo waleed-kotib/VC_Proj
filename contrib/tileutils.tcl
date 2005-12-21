@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.8 2005-12-18 08:40:41 matben Exp $
+# $Id: tileutils.tcl,v 1.9 2005-12-21 16:30:00 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -67,6 +67,7 @@ proc tileutils::TreeCtrlThemeChanged {win} {
 # These should be collected in a separate theme specific file.
 
 proc tileutils::configstyles {name} {
+    variable tiles
 
     style theme settings $name {
 	
@@ -121,71 +122,91 @@ proc tileutils::configstyles {name} {
 	      -width -9
 	}
 	
-	if {0 && $name eq "aqua"} {
-	    set image [image create photo -file /Users/matben/Desktop/sunken.png]
-	    
-	    # This looks fine if placed in a gray background gray70 to gray80
-	    style layout Sunken.TLabel {
-		Sunken.background -children {
-		    Sunken.padding -children {
-			Sunken.label
-		    }
-		}
-	    }	    
-	    style element create Sunken.background image $image \
-	      -border {4 4 4 4} -padding {6 3} -sticky news
-	    style configure Sunken.TLabel -foregeound white
-	    style map       Sunken.TLabel  \
-	      -foreground {{background} "#dedede" {!background} white}
-	    style configure Small.Sunken.TLabel -font CociSmallFont
-	    
-	    style layout Sunken.TEntry {
-		Sunken.background -sticky news -children {
-		    Entry.padding -sticky news -children {
-			Entry.textarea -sticky news
-		    }
+	# My custom styles.
+	style layout Sunken.TLabel {
+	    Sunken.background -children {
+		Sunken.padding -children {
+		    Sunken.label
 		}
 	    }
-	    style map Sunken.TEntry  \
-	      -foreground {{background} "#dedede" {!background} white}
-	    style configure Small.Sunken.TEntry -font CociSmallFont
-
+	}	    
+	style element create Sunken.background image $tiles(sunken) \
+	  -border {4 4 4 4} -padding {6 3} -sticky news	    
+	
+	style configure Sunken.TLabel -foregeound white
+	style map       Sunken.TLabel  \
+	  -foreground {{background} "#dedede" {!background} white}
+	style configure Small.Sunken.TLabel -font CociSmallFont
+	
+	style element create SunkenWhite.background image $tiles(sunkenWhite) \
+	  -border {4 4 4 4} -padding {6 3} -sticky news	    
+	
+	style layout Sunken.TEntry {
+	    SunkenWhite.background -sticky news -children {
+		Entry.padding -sticky news -children {
+		    Entry.textarea -sticky news
+		}
+	    }
 	}
+	style map Sunken.TEntry  \
+	  -foreground {{background} "#363636" {} black}
+	style configure Small.Sunken.TEntry -font CociSmallFont
+	
     }    
 }
 
-if {0} {
-    toplevel .t -bg gray78
+proc tileutils::LoadImages {imgdir {patterns {*.gif}}} {
+    variable tiles
     
+    foreach file [eval {glob -nocomplain -directory $imgdir} $patterns] {
+	set name [file tail [file rootname $file]]
+	if {![info exists tiles($name)]} {
+	    set tiles($name) [image create photo -file $file]
+	}
+    }
+}
+
+
+if {0} {
+    toplevel .t
+    set w .t.f
+    if {1} {
+	pack [ttk::frame .t.f] -expand 1 -fill both
+    } else {
+	pack [frame .t.f -bg gray80] -expand 1 -fill both
+    }    
     set f "/Users/matben/Graphics/Crystal Clear/16x16/apps/clock.png"
     set name [image create photo -file $f]
-    ttk::label .t.l1 -style Sunken.TLabel  \
+    ttk::label $w.l1 -style Sunken.TLabel  \
       -text "Mats Bengtsson" -image $name -compound right
 
     set f "/Users/matben/Graphics/Crystal Clear/16x16/apps/mac.png"
     set name [image create photo -file $f]
-    ttk::label .t.l2 -style Small.Sunken.TLabel  \
+    ttk::label $w.l2 -style Small.Sunken.TLabel  \
       -text "I love my Macintosh" -image $name -compound left
 
     set f "/Users/matben/Graphics/Crystal Clear/16x16/apps/bell.png"
     set name [image create photo -file $f]
-    ttk::label .t.l3 -style Sunken.TLabel  \
+    ttk::label $w.l3 -style Sunken.TLabel  \
       -text "Mats Bengtsson" -image $name -compound right -font CociLargeFont
     
-    ttk::label .t.l4 -style Sunken.TLabel  \
+    ttk::label $w.l4 -style Sunken.TLabel  \
       -text "Plain no padding: glMXq"
 
-    ttk::label .t.l5 -style Sunken.TLabel  \
+    ttk::label $w.l5 -style Sunken.TLabel  \
       -text "With -padding {20 6}" -padding {20 6}
     
-    ttk::entry .t.e1 -style Sunken.TEntry
-    ttk::entry .t.e2 -style Small.Sunken.TEntry -font CociSmallFont
+    ttk::entry $w.e1 -style Sunken.TEntry
+    ttk::entry $w.e2 -style Small.Sunken.TEntry -font CociSmallFont
 
-    pack .t.l1 .t.l2 .t.l3 .t.l4 .t.l5 .t.e1 .t.e2 -padx 20 -pady 10
+    pack $w.l1 $w.l2 $w.l3 $w.l4 $w.l5 $w.e1 $w.e2 -padx 20 -pady 10
 }
 
     
 foreach name [tile::availableThemes] {
+    
+    set dir [file join [file dirname [info script]] tiles]
+    tileutils::LoadImages $dir {*.gif *.png}
     
     # @@@ We could be more economical here and load theme only when needed.
     if {[catch {package require tile::theme::$name}]} {
