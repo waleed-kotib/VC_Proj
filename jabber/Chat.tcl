@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.143 2005-12-09 13:24:21 matben Exp $
+# $Id: Chat.tcl,v 1.144 2005-12-22 11:32:06 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -133,6 +133,9 @@ namespace eval ::Chat:: {
     variable uiddlg  0
     variable uidchat 0
     variable uidpage 0
+
+    # Bindtags instead of binding to toplevel.
+    bind ChatToplevel <Destroy> {+::Chat::OnDestroyToplevel %W}
 }
 
 # Chat::StartThreadDlg --
@@ -850,6 +853,11 @@ proc ::Chat::Build {threadID args} {
 
     bind $w <FocusIn> [list [namespace current]::FocusIn $dlgtoken]
     
+    # For toplevel binds.
+    if {[lsearch [bindtags $w] ChatToplevel] < 0} {
+	bindtags $w [linsert [bindtags $w] 0 ChatToplevel]
+    }
+    
     focus $w
     return $dlgtoken
 }
@@ -1075,10 +1083,20 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(wsmile)   $wsmile
     set chatstate(wpresimage) $wpresimage
     
+    bind $wthread <Destroy> +[list ::Chat::OnDestroyThread $chattoken]
+    
     # ?
     after idle [list raise [winfo toplevel $wthread]]
     
     return $chattoken
+}
+
+proc ::Chat::OnDestroyThread {chattoken} {
+    
+    Debug 4 "::Chat::OnDestroyThread chattoken=$chattoken"
+    # For some strange reason [info vars ..] seem to find nonexisting variables.
+    unset $chattoken
+    array unset $chattoken    
 }
 
 proc ::Chat::SetTitle {chattoken} {
@@ -1241,10 +1259,10 @@ proc ::Chat::DeletePage {chattoken} {
     unset dlgstate(wpage2token,$wpage)
     
     # Delete the actual widget.
-    destroy $chatstate(wthread)
     set dlgstate(chattokens)  \
       [lsearch -all -inline -not $dlgstate(chattokens) $chattoken]
-    unset chatstate
+    destroy $chatstate(wthread)
+    #unset chatstate
     
     # If only a single page left then reparent and delete notebook.
     if {[llength $dlgstate(chattokens)] == 1} {
@@ -1361,14 +1379,17 @@ proc ::Chat::SetFocus {dlgtoken chattoken} {
 
     variable $chattoken
     upvar 0 $chattoken chatstate
-    
+        
     # Try remember any previous focus on previous page.
+    # Important: the page must still exist! Else we get wrong token list.
     if {[llength dlgstate(recentctokens)]} {
 	set ctoken [lindex $dlgstate(recentctokens) end]
 	variable $ctoken
 	upvar 0 $ctoken cstate
-	set cstate(focus) [focus]
-	#puts "\t cstate(focus)=$cstate(focus)"
+	if {[info exists cstate(w)]} {
+	    set cstate(focus) [focus]
+	    #puts "\t ctoken=$ctoken, cstate(focus)=$cstate(focus)"
+	}
     }
     if {[info exists chatstate(focus)]} {
 	#puts "\t exists chatstate(focus)=$chatstate(focus)"
@@ -2048,13 +2069,20 @@ proc ::Chat::GetFirstDlgToken { } {
 
 proc ::Chat::GetTokenList {type} {
     
+    # For some strange reason [info vars] reports non existing arrays.
     set nskey [namespace current]::$type
-    return [concat  \
+    set tokens {}
+    foreach token [concat  \
       [info vars ${nskey}\[0-9\]] \
       [info vars ${nskey}\[0-9\]\[0-9\]] \
       [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]] \
       [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]] \
-      [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]]
+      [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]] {
+	if {[array exists $token]} {
+	    lappend tokens $token   
+	}
+    }
+    return $tokens
 }
 
 # Chat::Close --
@@ -2068,6 +2096,7 @@ proc ::Chat::Close {dlgtoken} {
     upvar 0 $dlgtoken dlgstate    
     
     ::Debug 2 "::Chat::Close: dlgtoken=$dlgtoken"
+    
     set ans "yes"
     if {0} {
 	set ans [::UI::MessageBox -icon info -parent $w -type yesno \
@@ -2080,18 +2109,29 @@ proc ::Chat::Close {dlgtoken} {
 
 	::UI::SaveWinGeom $wDlgs(jchat) $dlgstate(w)
 	::UI::SaveSashPos $wDlgs(jchat) $chatstate(wpane)
-	destroy $dlgstate(w)
 	
 	foreach chattoken $dlgstate(chattokens) {
 	    XEventSendCancelCompose $chattoken
 	}
-	Free $dlgtoken
+	destroy $dlgstate(w)
+	#Free $dlgtoken
     }
+}
+
+proc ::Chat::OnDestroyToplevel {w} {
+    
+    Debug 4 "::Chat::OnDestroyToplevel $w"
+    set dlgtoken [GetTokenFrom dlg w $w]
+    if {$dlgtoken ne ""} {
+	unset $dlgtoken
+    }    
 }
 
 proc ::Chat::Free {dlgtoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate 
+    
+    Debug 4 "::Chat::Free dlgtoken=$dlgtoken"
     
     foreach chattoken $dlgstate(chattokens) {
 	variable $chattoken
