@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.38 2005-12-13 13:57:52 matben Exp $
+# $Id: VCard.tcl,v 1.39 2005-12-22 16:09:32 matben Exp $
 
 package provide VCard 1.0
 
@@ -298,7 +298,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     grid  $pbi.fde   -sticky ew -columnspan 3
             
     # Personal Info page -------------------------------------------------------
-
+    
     $nbframe add [ttk::frame $nbframe.fp] -text [mc {Personal Info}] -sticky news
 
     set pbp $nbframe.fp.f
@@ -315,9 +315,23 @@ proc ::VCard::Pages {nbframe etoken type} {
         Birthday          bday
     } {
 	ttk::label $wtop.l$tag -text "[mc $name]:"
-	ttk::entry $wtop.e$tag -width 28 -textvariable $etoken\($tag)
+	if {$tag eq "url" && $type ne "own"} {
+	    if {[info exists elem(url)]} {
+		set url $elem(url)
+	    } else {
+		set url ""
+	    }
+	    ttk::button $wtop.e$tag -style Url -class TUrl  \
+	      -text $url -command [list ::Text::UrlButton $url]
+	} else {
+	    ttk::entry $wtop.e$tag -width 28 -textvariable $etoken\($tag)
+	}
         grid  $wtop.l$tag  $wtop.e$tag -sticky e -pady 2
-	grid  $wtop.e$tag  -sticky ew
+	if {[winfo class $wtop.e$tag] eq "TEntry"} {
+	    grid  $wtop.e$tag  -sticky ew
+	} else {
+	    grid  $wtop.e$tag  -sticky w	    
+	}
     }
     ttk::label $wtop.frmt -style Small.TLabel -text [mc {Format mm/dd/yyyy}]
     grid  x  $wtop.frmt  -sticky w
