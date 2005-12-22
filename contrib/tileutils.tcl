@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.9 2005-12-21 16:30:00 matben Exp $
+# $Id: tileutils.tcl,v 1.10 2005-12-22 16:09:32 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -68,6 +68,7 @@ proc tileutils::TreeCtrlThemeChanged {win} {
 
 proc tileutils::configstyles {name} {
     variable tiles
+    variable fonts
 
     style theme settings $name {
 	
@@ -123,6 +124,8 @@ proc tileutils::configstyles {name} {
 	}
 	
 	# My custom styles.
+	# 
+	# Sunken label:
 	style layout Sunken.TLabel {
 	    Sunken.background -children {
 		Sunken.padding -children {
@@ -138,6 +141,7 @@ proc tileutils::configstyles {name} {
 	  -foreground {{background} "#dedede" {!background} white}
 	style configure Small.Sunken.TLabel -font CociSmallFont
 	
+	# Sunken entry:
 	style element create SunkenWhite.background image $tiles(sunkenWhite) \
 	  -border {4 4 4 4} -padding {6 3} -sticky news	    
 	
@@ -152,8 +156,24 @@ proc tileutils::configstyles {name} {
 	  -foreground {{background} "#363636" {} black}
 	style configure Small.Sunken.TEntry -font CociSmallFont
 	
+	# Url clickable link:
+	style layout Url {
+	    Url.background -children {
+		Url.padding -children {
+		    Url.label
+		}
+	    }
+	}	    
+	style configure Url  \
+	  -padding 2 -relief flat -font $fonts(underlineDefault) -foreground blue
+	style map Url -foreground [list active red]
+	style configure Small.Url -font $fonts(underlineSmall)
     }    
 }
+
+# tileutils::LoadImages --
+# 
+#       Create all images in a directory of the specified patterns.
 
 proc tileutils::LoadImages {imgdir {patterns {*.gif}}} {
     variable tiles
@@ -166,6 +186,28 @@ proc tileutils::LoadImages {imgdir {patterns {*.gif}}} {
     }
 }
 
+# tileutils::MakeFonts --
+# 
+#       Create fonts useful in certain styles from the named ones.
+
+proc tileutils::MakeFonts {} {
+    variable fonts
+    
+    # Underline default font.
+    set underlineDefault [font create]
+    array set opts [font configure CociDefaultFont]
+    set opts(-underline) 1
+    eval {font configure $underlineDefault} [array get opts]
+    set fonts(underlineDefault) $underlineDefault
+
+    # Underline small font.
+    set underlineSmall [font create]
+    array set opts [font configure CociSmallFont]
+    set opts(-underline) 1
+    eval {font configure $underlineSmall} [array get opts]
+    set fonts(underlineSmall) $underlineSmall    
+    
+}
 
 if {0} {
     toplevel .t
@@ -198,8 +240,14 @@ if {0} {
     
     ttk::entry $w.e1 -style Sunken.TEntry
     ttk::entry $w.e2 -style Small.Sunken.TEntry -font CociSmallFont
+    
+    proc cmd {args} {puts xxxxxxxx}
+    ttk::button $w.b1 -style Url -text www.home.se -command cmd
+    ttk::button $w.b2 -style Small.Url -text www.smallhome.se -class TUrl \
+      -command cmd
 
-    pack $w.l1 $w.l2 $w.l3 $w.l4 $w.l5 $w.e1 $w.e2 -padx 20 -pady 10
+    pack $w.l1 $w.l2 $w.l3 $w.l4 $w.l5 $w.e1 $w.e2 $w.b1 $w.b2 \
+      -padx 20 -pady 10
 }
 
     
@@ -207,12 +255,19 @@ foreach name [tile::availableThemes] {
     
     set dir [file join [file dirname [info script]] tiles]
     tileutils::LoadImages $dir {*.gif *.png}
+    tileutils::MakeFonts
     
     # @@@ We could be more economical here and load theme only when needed.
     if {[catch {package require tile::theme::$name}]} {
 	continue
     }
     tileutils::configstyles $name
+    
+    # Tiles button bindings must be duplicated.
+    tile::CopyBindings TButton TUrl
+    bind TUrl <Enter>	   {+%W configure -cursor hand2 }
+    bind TUrl <Leave>	   {+%W configure -cursor arrow }
+    
 }
 
 # ttk::optionmenu --

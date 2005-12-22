@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.128 2005-12-09 13:24:21 matben Exp $
+# $Id: jabberlib.tcl,v 1.129 2005-12-22 16:09:32 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -4017,6 +4017,9 @@ proc jlib::splitjid {jid jid2Var resourceVar} {
 # 
 #       Split a jid into the parts: jid = [ node "@" ] domain [ "/" resource ]
 #       Possibly empty. Doesn't check for valid content, only the form.
+#       
+#       RFC3920 3.1:
+#            jid             = [ node "@" ] domain [ "/" resource ]
 
 proc jlib::splitjidex {jid nodeVar domainVar resourceVar} {
     
@@ -4034,6 +4037,35 @@ proc jlib::splitjidex {jid nodeVar domainVar resourceVar} {
     } else {
 	return -code error "not valid jid form"
     }
+}
+
+# Alternative?
+proc jlib::splitjidex2 {jid nodeVar domainVar resourceVar} {
+    
+    set node   ""
+    set domain ""
+    set res    ""
+    
+    # Node part:
+    set idx [string first @ $jid]
+    if {$idx > 0} {
+	set node [string range $jid 0 [expr {$idx-1}]]
+	set jid [string range $jid [expr {$idx+1}] end]
+    }
+
+    # Resource part:
+    set idx [string first / $jid]
+    if {$idx > 0} {
+	set res [string range $jid [expr {$idx+1}] end]
+	set jid [string range $jid 0 [expr {$idx-1}]]
+    }
+    
+    # Domain part is what remains:
+    set domain $jid
+    
+    uplevel 1 [list set $nodeVar $node]
+    uplevel 1 [list set $domainVar $domain]
+    uplevel 1 [list set $resourceVar $res]
 }
 
 # jlib::joinjid --
@@ -4176,9 +4208,7 @@ proc jlib::jidmap {jid} {
     }
     # Guard against spurious spaces.
     set jid [string trim $jid]
-    if {[catch {splitjidex $jid node domain resource} res]} {
-	return -code error $res
-    }
+    splitjidex $jid node domain resource
     return [joinjid [nodemap $node] [namemap $domain] [resourcemap $resource]]
 }
 
@@ -4194,16 +4224,10 @@ proc jlib::jidprep {jid} {
     if {$jid eq ""} {
 	return
     }
-    if {[catch {splitjidex $jid node domain resource} res]} {
-	return -code error $res
-    }
-    if {[catch {
-	set node     [nodeprep $node]
-	set domain   [nameprep $domain]
-	set resource [resourceprep $resource]
-    } err]} {
-	return -code error $err
-    }
+    splitjidex $jid node domain resource
+    set node     [nodeprep $node]
+    set domain   [nameprep $domain]
+    set resource [resourceprep $resource]
     return [joinjid $node $domain $resource]
 }
 
