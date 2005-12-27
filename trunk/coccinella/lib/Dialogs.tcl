@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Dialogs.tcl,v 1.63 2005-11-30 08:32:00 matben Exp $
+# $Id: Dialogs.tcl,v 1.64 2005-12-27 14:53:55 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -264,9 +264,11 @@ proc ::Dialogs::InfoComponents { } {
       -spacing1 6 -spacing3 6
     $wtxt tag configure tline -font {Helvetica -1} -background black
     
-    foreach {name str} $compList {
+    foreach comp $compList {
+	set name [lindex $comp 0]
+	set text [lindex $comp 1]
 	$wtxt insert end "$name\n" ttitle
-	$wtxt insert end "$str\n" ttxt
+	$wtxt insert end "$text\n" ttxt
     }
     $wtxt configure -state disabled
     bind $w <Return> [list $frbot.btok invoke]

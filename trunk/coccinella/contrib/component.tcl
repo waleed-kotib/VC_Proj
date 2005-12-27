@@ -2,7 +2,7 @@
 # 
 #       Provides a structure for code components.
 #       
-# $Id: component.tcl,v 1.6 2004-06-17 13:24:17 matben Exp $
+# $Id: component.tcl,v 1.7 2005-12-27 14:53:55 matben Exp $
 
 package provide component 1.0
 
@@ -47,9 +47,9 @@ proc component::getall { } {
     set ans {}
     foreach {key value} [array get priv *,name] {
 	set name $priv($key)
-	lappend ans $name $priv($name,str)
+	lappend ans [list $name $priv($name,str)]
     }
-    return $ans
+    return [lsort -index 0 $ans]
 }
 
 # component::load --

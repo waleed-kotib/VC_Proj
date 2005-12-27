@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.129 2005-12-22 16:09:32 matben Exp $
+# $Id: jabberlib.tcl,v 1.130 2005-12-27 14:53:55 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -4001,13 +4001,13 @@ namespace eval jlib {
 
 proc jlib::splitjid {jid jid2Var resourceVar} {
     
-    set ind [string first / $jid]
-    if {$ind == -1} {
+    set idx [string first / $jid]
+    if {$idx == -1} {
 	uplevel 1 [list set $jid2Var $jid]
 	uplevel 1 [list set $resourceVar {}]
     } else {
-	set jid2 [string range $jid 0 [expr $ind - 1]]
-	set res [string range $jid [expr $ind + 1] end]
+	set jid2 [string range $jid 0 [expr {$idx - 1}]]
+	set res [string range $jid [expr {$idx + 1}] end]
 	uplevel 1 [list set $jid2Var $jid2]
 	uplevel 1 [list set $resourceVar $res]
     }
@@ -4022,25 +4022,6 @@ proc jlib::splitjid {jid jid2Var resourceVar} {
 #            jid             = [ node "@" ] domain [ "/" resource ]
 
 proc jlib::splitjidex {jid nodeVar domainVar resourceVar} {
-    
-    set node   ""
-    set domain ""
-    set res    ""
-    if {[regexp {^(([^@]+)@)?([^ /@]+)(/(.*))?$} $jid m x node domain y res]} {
-	uplevel 1 [list set $nodeVar $node]
-	uplevel 1 [list set $domainVar $domain]
-	uplevel 1 [list set $resourceVar $res]
-    } elseif {$jid eq ""} {
-	uplevel 1 [list set $nodeVar $node]
-	uplevel 1 [list set $domainVar $domain]
-	uplevel 1 [list set $resourceVar $res]
-    } else {
-	return -code error "not valid jid form"
-    }
-}
-
-# Alternative?
-proc jlib::splitjidex2 {jid nodeVar domainVar resourceVar} {
     
     set node   ""
     set domain ""
@@ -4066,6 +4047,24 @@ proc jlib::splitjidex2 {jid nodeVar domainVar resourceVar} {
     uplevel 1 [list set $nodeVar $node]
     uplevel 1 [list set $domainVar $domain]
     uplevel 1 [list set $resourceVar $res]
+}
+
+proc jlib::splitjidexBU {jid nodeVar domainVar resourceVar} {
+    
+    set node   ""
+    set domain ""
+    set res    ""
+    if {[regexp {^(([^@]+)@)?([^ /@]+)(/(.*))?$} $jid m x node domain y res]} {
+	uplevel 1 [list set $nodeVar $node]
+	uplevel 1 [list set $domainVar $domain]
+	uplevel 1 [list set $resourceVar $res]
+    } elseif {$jid eq ""} {
+	uplevel 1 [list set $nodeVar $node]
+	uplevel 1 [list set $domainVar $domain]
+	uplevel 1 [list set $resourceVar $res]
+    } else {
+	return -code error "not valid jid form"
+    }
 }
 
 # jlib::joinjid --

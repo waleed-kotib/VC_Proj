@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.39 2005-12-22 16:09:32 matben Exp $
+# $Id: VCard.tcl,v 1.40 2005-12-27 14:53:55 matben Exp $
 
 package provide VCard 1.0
 
@@ -355,29 +355,28 @@ proc ::VCard::Pages {nbframe etoken type} {
 
     set wp1 $wbot.1
     ttk::frame $wp1
-    pack $wp1 -side left -padx 4 -fill y -expand 1
+    pack $wp1 -side left -padx 4 -fill y
 
-    ttk::label $wp1.l -text "Users Avatar:"
-    ttk::button $wp1.b -text "Select Photo"  \
+    ttk::label $wp1.l -text "[mc {Users Avatar}]:"
+    ttk::button $wp1.b -text [mc {Select Photo}]  \
       -command [list ::VCard::SelectPhoto $etoken]
-    ttk::button $wp1.br -text "Remove Photo" \
+    ttk::button $wp1.br -text [mc {Remove Photo}] \
       -command [list ::VCard::DeletePhoto $etoken]
-    
+        
     grid  $wp1.l   -sticky ne
     grid  $wp1.b   -sticky se -pady 8
     grid  $wp1.br  -sticky se
     grid rowconfigure $wp1 0 -weight 1
 
     set wp2 $wbot.2
-    frame $wp2 -bd 1 -relief sunken -bg white \
-      -padx 2 -pady 2 -height 64 -width 64
-    ttk::label $wp2.l -compound image
+    frame $wp2
+    ttk::label $wp2.l -style Sunken.TLabel -compound image
     
     pack  $wp2 -side left
     grid  $wp2.l  -sticky news
     grid columnconfigure $wp2 0 -minsize [expr {2*4 + 2*4 + 64}]
     grid rowconfigure    $wp2 0 -minsize [expr {2*4 + 2*4 + 64}]
-        
+
     set pbptop $wtop
     set pbpmid $wmid
     set wbtphoto $wp1.b
@@ -519,7 +518,6 @@ proc ::VCard::DnDEnter {etoken w action data type} {
     set act "none"
     set f [lindex $data 0]
     if {[VerifyPhotoFile $f]} {
-	$w configure -bg gray50
 	set act $action
     }
     return $act
@@ -527,7 +525,7 @@ proc ::VCard::DnDEnter {etoken w action data type} {
 
 proc ::VCard::DnDLeave {etoken w data type} {
     
-    $w configure -bg white
+    # empty
 }
 
 proc ::VCard::VerifyPhotoFile {f} {

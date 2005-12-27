@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.10 2005-12-22 16:09:32 matben Exp $
+# $Id: tileutils.tcl,v 1.11 2005-12-27 14:53:55 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -245,9 +245,16 @@ if {0} {
     ttk::button $w.b1 -style Url -text www.home.se -command cmd
     ttk::button $w.b2 -style Small.Url -text www.smallhome.se -class TUrl \
       -command cmd
+    
+    frame $w.f
+    ttk::label $w.f.l -style Sunken.TLabel -compound image -image $name
+    grid  $w.f.l  -sticky news
+    grid columnconfigure $w.f 0 -minsize [expr {2*4 + 2*4 + 64}]
+    grid rowconfigure    $w.f 0 -minsize [expr {2*4 + 2*4 + 64}]
 
-    pack $w.l1 $w.l2 $w.l3 $w.l4 $w.l5 $w.e1 $w.e2 $w.b1 $w.b2 \
+    pack $w.l1 $w.l2 $w.l3 $w.l4 $w.l5 $w.e1 $w.e2 $w.b1 $w.b2 $w.f \
       -padx 20 -pady 10
+    
 }
 
     

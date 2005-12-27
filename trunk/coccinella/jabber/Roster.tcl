@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.157 2005-12-17 09:48:41 matben Exp $
+# $Id: Roster.tcl,v 1.158 2005-12-27 14:53:55 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -460,9 +460,12 @@ proc ::Roster::Refresh { } {
 
 proc ::Roster::SortIdle {item} {
     variable sortID
+    variable wtree
         
     unset -nocomplain sortID
-    Sort $item
+    if {[$wtree item id $item] ne ""} {
+	Sort $item
+    }
 }
 
 proc ::Roster::Sort {{item root}} {
@@ -914,12 +917,12 @@ proc ::Roster::SetItem {jid args} {
 	}
 	
 	# Put in our roster tree. Append any resource if available.
-	set item [eval {
+	set items [eval {
 	    ::RosterTree::StyleCreateItem $jid $pres(-type)
 	} $args [array get pres]]
 	
-	if {!$inroster && ![info exists sortID]} {
-	    set pitem [::RosterTree::GetParent $item]
+	if {!$inroster && ![info exists sortID] && [llength $items]} {
+	    set pitem [::RosterTree::GetParent [lindex $items end]]
 	    set sortID [after idle [namespace current]::SortIdle $pitem]
        }
     }
