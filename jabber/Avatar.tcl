@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.6 2005-12-18 08:40:41 matben Exp $
+# $Id: Avatar.tcl,v 1.7 2005-12-27 14:53:55 matben Exp $
 
 # @@@ Issues:
 #     1) shall we keep cache of users avatars between sessions to save bandwidth?
@@ -101,7 +101,7 @@ proc ::Avatar::InitHook { } {
     set fileName [GetMyAvatarFile]
     if {[file isfile $fileName]} {
 	set aprefs(fileName) $fileName
-	if {[CreatePhoto $fileName name]} {
+	if {[CreateAndVerifyPhoto $fileName name]} {
 	    SetMyPhoto $name
 	}   
     }
@@ -153,48 +153,69 @@ proc ::Avatar::Load {fileName} {
     
     Debug "::Avatar::Load"
     
-    if {[CreatePhoto $fileName name]} {
+    if {[CreateAndVerifyPhoto $fileName name]} {
 	SetMyPhoto $name
 	SaveFile $fileName
 	ShareImage $fileName
     }
 }
 
-# Avatar::CreatePhoto --
+# Avatar::CreateAndVerifyPhoto --
 # 
 # 
 
+proc ::Avatar::CreateAndVerifyPhoto {fileName nameVar} {
+    upvar $nameVar name
+    
+    Debug "::Avatar::CreateAndVerifyPhoto"
+    
+    set ans [VerifyPhotoFile $fileName]
+    if {![lindex $ans 0]} {
+	set msg [lindex $ans 1]
+	::UI::MessageBox -message $msg -icon error -title [mc Error]
+    } else {
+	if {[catch {set name [image create photo -file $fileName]}]} {
+	    return 0
+	} else {
+	    return 1
+	}
+    }
+}
+
 proc ::Avatar::CreatePhoto {fileName nameVar} {
     upvar $nameVar name
+    
+    return [catch {set name [image create photo -file $fileName]}]
+}
+
+proc ::Avatar::VerifyPhotoFile {fileName} {
     variable sizes
+
+    Debug "::Avatar::VerifyPhotoFile"
     
-    Debug "::Avatar::CreatePhoto"
-    
-    # Some error handling:
     set mime [::Types::GetMimeTypeForFileName $fileName]
     if {[lsearch {image/gif image/png} $mime] < 0} {
 	set msg "Our avatar shall be either a PNG or a GIF file."
-	::UI::MessageBox -message $msg -icon error -title [mc Error]
-	return 0
+	return [list 0 $msg]
     }
 	
     # Make sure it is an image.
-    if {[catch {set name [image create photo -file $fileName]}]} {
+    if {[catch {set tmp [image create photo -file $fileName]}]} {
 	set msg "Failed to create an image from [file tail $fileName]"
-	::UI::MessageBox -message $msg -icon error -title [mc Error]
-	return 0
+	return [list 0 $msg]
     }
     
     # For the time being we limit sizes to 32, 48, or 64.
-    set width  [image width $name]
-    set height [image height $name]
+    set width  [image width $tmp]
+    set height [image height $tmp]
     if {($width != $height) || ([lsearch $sizes $width] < 0)} {
 	set msg "We require that the avatar be square of size [join $sizes {, }]"
-	::UI::MessageBox -message $msg -icon error -title [mc Error]
-	image delete $name
-	return 0
+	set ans [list 0 $msg]
+    } else {
+	set ans 1
     }
-    return 1
+    image delete $tmp
+    return $ans
 }
 
 proc ::Avatar::SetMyPhoto {name} {
@@ -661,9 +682,18 @@ proc ::Avatar::MakeScaleTableCmd {f1 f2} {
 proc ::Avatar::PrefsFrame {win} {
     variable aprefs
     variable tmpprefs
+    #variable tmpphoto
     variable wphoto
     variable wshare
+    variable haveDND
     
+    if {![info exists haveDND]} {
+	set haveDND 0
+	if {![catch {package require tkdnd}]} {
+	    set haveDND 1
+	}
+    }
+
     set tmpprefs(share) $aprefs(share)
     set tmpprefs(fileName) [GetMyAvatarFile]
     set tmpprefs(editedPhoto) 0
@@ -679,9 +709,8 @@ proc ::Avatar::PrefsFrame {win} {
     ttk::frame $win.fr
     
     set wava $wfr.ava
-    frame $wava -bd 1 -relief sunken -bg white \
-      -padx 2 -pady 2 -height 64 -width 64
-    ttk::label $wava.l -compound image
+    frame $wava
+    ttk::label $wava.l -style Sunken.TLabel -compound image
     
     grid  $wava.l  -sticky news
     grid columnconfigure $wava 0 -minsize [expr {2*4 + 2*4 + 64}]
@@ -718,7 +747,11 @@ proc ::Avatar::PrefsFrame {win} {
 	$wshare state {disabled}
     }
     bind $win <Destroy> ::Avatar::PrefsFree
-    
+
+    if {$haveDND} {
+	PrefsInitDnD $wava
+    }       
+
     return $win
 }
 
@@ -740,7 +773,7 @@ proc ::Avatar::PrefsFile { } {
     lset types 0 1 $suffs
     set fileName [tk_getOpenFile -title "Pick image file" -filetypes $types]
     if {$fileName ne ""} {
-	if {[CreatePhoto $fileName me]} {
+	if {[CreateAndVerifyPhoto $fileName me]} {
 	    $wphoto configure -image $me
 	    if {![info exists tmpphoto]} {
 		set tmpphoto [image create photo]
@@ -831,8 +864,7 @@ proc ::Avatar::PrefsFree { } {
 
 # DnD support:   @@@ TODO
 
-proc ::Avatar::PrefsInitDnD { } {
-    
+proc ::Avatar::PrefsInitDnD {win} {
     
     dnd bindtarget $win text/uri-list <Drop>      \
       [list [namespace current]::DnDDrop %W %D %T]   
@@ -859,7 +891,6 @@ proc ::Avatar::PrefsDnDEnter {w action data type} {
     set act "none"
     set f [lindex $data 0]
     if {[VerifyPhotoFile $f]} {
-	$w configure -bg gray50
 	set act $action
     }
     return $act
@@ -867,7 +898,7 @@ proc ::Avatar::PrefsDnDEnter {w action data type} {
 
 proc ::Avatar::PrefsDnDLeave {w data type} {
     
-    $w configure -bg white
+    # empty
 }
 
 proc ::Avatar::Debug {text} {

@@ -10,6 +10,7 @@ component::attempt ImageMagic   [file join $dir ImageMagic.tcl]  ::ImageMagic::I
 component::attempt JivePhone    [file join $dir JivePhone.tcl]   ::JivePhone::Init
 component::attempt Notifier     [file join $dir Notifier.tcl]    ::Notifier::Init
 component::attempt ParseMeCData [file join $dir ParseMeCData.tcl] ::ParseMeCData::Init
+component::attempt ParseStyledText [file join $dir ParseStyledText.tcl] ::ParseStyledText::Init
 component::attempt ParseURI     [file join $dir ParseURI.tcl]    ::ParseURI::Init
 component::attempt SlideShow    [file join $dir SlideShow.tcl]   ::SlideShow::Load  
 component::attempt Sounds       [file join $dir Sounds.tcl]      ::Sounds::Load    
