@@ -9,6 +9,7 @@ component::attempt ICQ          [file join $dir ICQ.tcl]         ::ICQ::Init
 component::attempt ImageMagic   [file join $dir ImageMagic.tcl]  ::ImageMagic::Init
 component::attempt JivePhone    [file join $dir JivePhone.tcl]   ::JivePhone::Init
 component::attempt Notifier     [file join $dir Notifier.tcl]    ::Notifier::Init
+component::attempt NotifyCall   [file join $dir NotifyCall.tcl]  ::NotifyCall::Init
 component::attempt ParseMeCData [file join $dir ParseMeCData.tcl] ::ParseMeCData::Init
 component::attempt ParseStyledText [file join $dir ParseStyledText.tcl] ::ParseStyledText::Init
 component::attempt ParseURI     [file join $dir ParseURI.tcl]    ::ParseURI::Init

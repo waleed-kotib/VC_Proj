@@ -1058,5 +1058,10 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es mModifyAB		{Modificar}
 ::msgcat::mcset es mRemoveAB		{Eliminar}
 
+::msgcat::mcset es notifyCall           {Llamada entrante}
+::msgcat::mcset es inboundCall          {Le esta llamando}
+::msgcat::mcset es callHungUp           {Rechazar llamada}
+::msgcat::mcset es callVM               {Desviar a buzon de voz}
+
 # END --------------------------------------------------------------------------
 

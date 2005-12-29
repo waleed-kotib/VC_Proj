@@ -934,6 +934,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jainvitegchat {Invite a user for groupchat in room %s}
 ::msgcat::mcset en jaxformreq   {Labels with (*) are required}
 ::msgcat::mcset en jagcsyncpres {Synchronize chatroom with user presence}
+::msgcat::mcset en jaloginuser  {Enter your username and password to login.}
 
    
 # Setup assistant:
@@ -1008,5 +1009,10 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en mNewAB		{New}
 ::msgcat::mcset en mModifyAB		{Modify}
 ::msgcat::mcset en mRemoveAB		{Remove}
+
+::msgcat::mcset en notifyCall           {Notify call}
+::msgcat::mcset en inboundCall          {Inbound call}
+::msgcat::mcset en callHungUp           {Hung up}
+::msgcat::mcset en callVM               {Call VM?}
 
 # END --------------------------------------------------------------------------
