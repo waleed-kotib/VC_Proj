@@ -4,7 +4,7 @@
 #       
 #       Contributions and testing by Antonio Cano damas
 #       
-# $Id: JivePhone.tcl,v 1.17 2005-12-18 09:17:19 matben Exp $
+# $Id: JivePhone.tcl,v 1.18 2005-12-29 09:05:16 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -34,6 +34,7 @@ proc ::JivePhone::Init { } {
     ::hooks::register logoutHook            ::JivePhone::LogoutHook
     ::hooks::register rosterPostCommandHook ::JivePhone::RosterPostCommandHook
 
+    ::hooks::register buildChatButtonTrayHook      ::JivePhone::buildChatButtonTrayHook
     
     variable xmlns
     set xmlns(jivephone) "http://jivesoftware.com/xmlns/phone"
@@ -331,23 +332,24 @@ proc ::JivePhone::MessageHook {body args} {
 
 		bind $win <Button-1> [list ::JivePhone::DoDial "FORWARD"]
 		::balloonhelp::balloonforwindow $win [mc phoneMakeForward]
-		eval {::hooks::run jivePhoneEvent $type $cid} $args
+		eval {::hooks::run jivePhoneEvent $type $cid $callID} $args
 	    }
 	    if {$type == "HANG_UP"} {
 		::Roster::DeRegisterPopupEntry mForward
 
 		bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
 		::balloonhelp::balloonforwindow $win [mc phoneMakeCall]
-		eval {::hooks::run jivePhoneEvent $type $cid} $args
+		eval {::hooks::run jivePhoneEvent $type $cid ""} $args
 	    }
 	    
 	    # Provide a default notifier?
-	    if {[hooks::info jivePhoneEvent] eq {}} {
-		set title [mc phoneRing]
-		set msg [mc phoneRingFrom $cid]
-		ui::dialog -icon info -buttons {} -title $title  \
-		  -message $msg -timeout 4000
-	    }
+#	    if {[hooks::info jivePhoneEvent] eq {}} {
+#		NotifyCall::InboundCall{ $cid }
+#		set title [mc phoneRing]
+#		set msg [mc phoneRingFrom $cid]
+#		ui::dialog -icon info -buttons {} -title $title  \
+#		  -message $msg -timeout 4000
+#	    }
 	}
     }
     return
@@ -514,12 +516,12 @@ proc ::JivePhone::OnDial {w type {jid ""}} {
     ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
       -to $state(service) -command [list ::JivePhone::DialCB $dnid]
 
-    eval {::hooks::run jivePhoneEvent $command $dnid}
+    eval {::hooks::run jivePhoneEvent $command $dnid $callID}
 
     destroy $w
 }
 
-proc ::JivePhone::DialJID {jid type} {
+proc ::JivePhone::DialJID {jid type {callID ""}} {
     variable state
     variable xmlns
    
@@ -542,10 +544,10 @@ proc ::JivePhone::DialJID {jid type} {
     ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
       -to $state(service) -command [list ::JivePhone::DialCB $jid]
 
-    eval {::hooks::run jivePhoneEvent $command $jid}    
+    eval {::hooks::run jivePhoneEvent $command $jid $callID}    
 }
 
-proc ::JivePhone::DialExtension {extension type} {
+proc ::JivePhone::DialExtension {extension type {callID ""}} {
     variable state
     variable xmlns
 
@@ -562,13 +564,14 @@ proc ::JivePhone::DialExtension {extension type} {
         set command "FORWARD"
         set attr [list xmlns $xmlns(jivephone) id $callID type $command]
     }
+
     set phoneElem [wrapper::createtag "phone-action"  \
       -attrlist $attr -subtags [list $extensionElem]]
 
     ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
       -to $state(service) -command [list ::JivePhone::DialCB $extension]
 
-    eval {::hooks::run jivePhoneEvent $command $extension}
+    eval {::hooks::run jivePhoneEvent $command $extension $callID}
 }
 
 proc ::JivePhone::DialCB {dnid type subiq args} {
@@ -661,12 +664,13 @@ proc ::JivePhone::Build {w args} {
 
     #--------- Load Entries of AddressBook into NewPage Tab ---------
     LoadEntries
-
-    foreach {name phone} $abline {
-        set opts {-text "$name ($phone)"}
-        if {$name ne ""} {
-           lappend opts -text "$name ($phone)"
-           eval {::ITree::Item $wtree $phone} $opts
+    if { $abline ne "" } {
+        foreach {name phone} $abline {
+            set opts {-text "$name ($phone)"}
+            if {$name ne ""} {
+               lappend opts -text "$name ($phone)"
+               eval {::ITree::Item $wtree $phone} $opts
+            }
         }
     }
     return $w
@@ -674,17 +678,26 @@ proc ::JivePhone::Build {w args} {
 
 proc ::JivePhone::LoadEntries {} {
     variable abline
-    set hFile [open "/Users/antonio/Desktop/coccinella/addressbook.csv" "r"]
+    global  prefs this
+    
+    # @@@ Mats
+    #set fileName "$this(prefsPath)/addressbook.csv"
+    set fileName [file join $this(prefsPath) addressbook.csv]
 
-    while {[eof $hFile] <= 0} {
-       gets $hFile line
-       set temp [split $line ":"]
-       foreach i $temp {
-           lappend abline $i
-       }
+    if { [ file exists $fileName ] } {
+        set hFile [open $fileName "r"]
+        while {[eof $hFile] <= 0} {
+           gets $hFile line
+           set temp [split $line ":"]
+           foreach i $temp {
+               lappend abline $i
+           }
+        }
+
+        close $hFile
+    } else {
+        set abline ""
     }
-
-    close $hFile
 }
 
 # JivePhone::Popup --
@@ -1040,7 +1053,10 @@ proc ::JivePhone::CloseCmd {w} {
 
 proc ::JivePhone::SaveEntries {} {
     variable abline
-    set hFile [open "/Users/antonio/Desktop/coccinella/addressbook.csv" "w"]
+    global  prefs this
+
+    # @@@ Mats
+    set hFile [open [file join $this(prefsPath) addressbook.csv] "w"]
 
     foreach {name phonenumber} $abline {
        if {$name ne ""} {
@@ -1056,6 +1072,45 @@ proc ::JivePhone::Debug {msg} {
     if {0} {
 	puts "-------- $msg"
     }
+}
+
+proc ::JivePhone::buildChatButtonTrayHook {wtray dlgtoken args} {
+    global  this prefs wDlgs
+    variable state
+
+    if { $state(phoneserver) == 1 } {
+	# @@@ Mats
+	if {0} {
+	    set dlgtokenLength [string length $dlgtoken]
+	    set dlgtokenUid [string first "g" $dlgtoken ]
+	    set dlgtokenFirst [expr $dlgtokenUid+1]
+	    set uiddlg [string range $dlgtoken $dlgtokenFirst $dlgtokenLength]
+	    set w $wDlgs(jchat)${uiddlg}
+	}
+	variable $dlgtoken
+	upvar 0 $dlgtoken dlgstate
+
+	set w $dlgstate(w)
+	
+        option add *Chat*callImage           call                 widgetDefault
+        option add *Chat*callDisImage        callDis              widgetDefault
+        set iconCall       [::Theme::GetImage [option get $w callImage {}]]
+        set iconCallDis    [::Theme::GetImage [option get $w callDisImage {}]]
+
+        $wtray newbutton call  \
+          -text [mc phoneMakeCall] -image $iconCall  \
+          -disabledimage $iconCallDis   \
+          -command [list [namespace current]::chatCall $dlgtoken]
+    }
+}
+
+proc ::JivePhone::chatCall {dlgtoken} {
+    set chattoken [::Chat::GetActiveChatToken $dlgtoken]
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    set jid $chatstate(fromjid)
+
+    DialJID $jid "DIAL"
 }
 
 #-------------------------------------------------------------------------------

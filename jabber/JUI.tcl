@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.102 2005-12-09 13:24:21 matben Exp $
+# $Id: JUI.tcl,v 1.103 2005-12-29 09:05:16 matben Exp $
 
 package provide JUI 1.0
 
@@ -69,6 +69,9 @@ namespace eval ::Jabber::UI:: {
     if {[tk windowingsystem] eq "x11"} {
 	option add *JMain.Menu.borderWidth        0               50
     }
+    
+    # Configurations:
+    set ::config(ui,menu,mNewAccount) 1
     
     # Collection of useful and common widget paths.
     variable jwapp
@@ -186,6 +189,7 @@ proc ::Jabber::UI::Init { } {
     set inited 1
     
     # We should do this for all menus eventaully.
+    # @@@ BAD!
     ::UI::PruneMenusUsingOptsDB mInfo menuDefs(rost,info) menuDefsInsertInd(rost,info)
 
     # Defines which menus to use; names and labels.

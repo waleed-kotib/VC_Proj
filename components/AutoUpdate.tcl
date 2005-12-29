@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: AutoUpdate.tcl,v 1.13 2005-11-04 15:14:55 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.14 2005-12-29 09:05:16 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -16,7 +16,8 @@ namespace eval ::AutoUpdate:: {
     set url "http://coccinella.sourceforge.net/updates/update_en.xml"
     #set url "http://coccinella.sourceforge.net/updates/update_test.xml"
 
-    option add *autoupdateURL            $url                  widgetDefault
+    set ::config(autoupdate,do)  1
+    set ::config(autoupdate,url) $url
 
     variable newVersion 1.0
 }
@@ -49,21 +50,21 @@ proc ::AutoUpdate::InitPrefsHook { } {
 }
 
 proc ::AutoUpdate::LaunchHook { } {
-    global  prefs this
+    global  prefs this config
     
-    if {!$prefs(doneAutoUpdate) &&  \
+    if {$config(autoupdate,do) && !$prefs(doneAutoUpdate) &&  \
       ([package vcompare $this(vers,full) $prefs(lastAutoUpdateVersion)] > 0)} {
 	after 10000 ::AutoUpdate::Get 
     }
 }
 
 proc ::AutoUpdate::Get {args} {
-    global  this prefs
+    global  this prefs config
     variable opts
     
     ::Debug 2 "::AutoUpdate::Get"
     
-    set url [option get . autoupdateURL {}]
+    set url $config(autoupdate,url)
     array set opts {
 	-silent 1
     }

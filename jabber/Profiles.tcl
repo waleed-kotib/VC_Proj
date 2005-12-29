@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.50 2005-10-26 14:38:34 matben Exp $
+# $Id: Profiles.tcl,v 1.51 2005-12-29 09:05:16 matben Exp $
 
 package provide Profiles 1.0
 
@@ -36,6 +36,14 @@ namespace eval ::Profiles:: {
     
     # Profile name of selected profile.
     variable selected
+    
+    # Configurations:
+    # This is a way to hardcode some or all of the profile. Same format.
+    # Public APIs must cope with this. Typically only Get functions.
+    # If 'do' then there MUST be valid values in config array.
+    set ::config(profiles,do) 0
+    set ::config(profiles,profiles) {}
+    set ::config(profiles,selected) {}
     
     variable debug 0
 }
@@ -226,9 +234,14 @@ proc ::Profiles::FindProfileNameFromJID {jid} {
 }
 
 proc ::Profiles::GetList { } {
+    global  config
     variable profiles
- 
-    return $profiles
+    
+    if {$config(profiles,do)} {
+	return $config(profiles,profiles)
+    } else {
+	return $profiles
+    }
 }
 
 proc ::Profiles::Get {name key} {
@@ -270,13 +283,19 @@ proc ::Profiles::GetProfile {name} {
 }
 
 proc ::Profiles::GetSelectedName { } {
+    global  config
     variable selected
- 
-    set all [GetAllNames]
-    if {[lsearch -exact $all $selected] < 0} {
-	set selected [lindex $all 0]
-    }
-    return $selected
+
+    if {$config(profiles,do)} {
+	set tmp $config(profiles,selected)
+    } else {
+	set all [GetAllNames]
+	if {[lsearch -exact $all $selected] < 0} {
+	    set selected [lindex $all 0]
+	}
+	set tmp $selected
+    }    
+    return $tmp
 }
 
 proc ::Profiles::SetSelectedName {name} {
@@ -290,10 +309,17 @@ proc ::Profiles::SetSelectedName {name} {
 #       Utlity function to get a list of the names of all profiles. Sorted!
 
 proc ::Profiles::GetAllNames { } {
+    global  config
     variable profiles
+    
+    if {$config(profiles,do)} {
+	set tmp $config(profiles,profiles)
+    } else {
+	set tmp $profiles
+    }
 
     set names {}
-    foreach {name spec} $profiles {
+    foreach {name spec} $tmp {
 	lappend names $name
     }    
     return [lsort -dictionary $names]

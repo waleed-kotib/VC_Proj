@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.31 2005-12-13 13:57:52 matben Exp $
+# $Id: Init.tcl,v 1.32 2005-12-29 09:05:16 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -486,6 +486,23 @@ proc ::Init::LoadPackages { } {
 
     # Not ready for this yet.
     set this(package,Thread) 0
+}
+
+# Init::Config --
+# 
+#       Sets any 'config' array entries.
+#       The config array shall be used for hardcoded configuration settings
+#       that can be overriden only at build time by adding a config.tcl file
+#       in resources/. 
+#       array set config {-junk "The Junk" ...}
+
+proc ::Init::Config { } {
+    global  this config
+    
+    set f [file join $this(resourcePath) config.tcl]
+    if {[file exists $f]} {
+	source $f
+    }
 }
 
 proc ::Init::SetHostname { } {
