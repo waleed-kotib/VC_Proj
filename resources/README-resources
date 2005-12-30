@@ -38,7 +38,7 @@ Use them as:
 respective sources for this. One example:
 *Chat*youPreBackground:        green
 
-5) Most icons may also be customized. Place your gif images
+5) Most icons may also be customized. Place your gif or png images
 in their own directory inside the images/ directory of the
 sources. Give this directory a name that associates to the 
 theme name. Specify this directory in your themes rdb file as:

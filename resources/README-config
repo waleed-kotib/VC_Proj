@@ -1,0 +1,18 @@
+
+README-config
+
+There are several layers of customization.
+At the top there are the user prefs saved to the preference file.
+And then there are resources stored in the resource database. 
+See README-resources. These are mainly for setting things associated with
+the widgets, fonts and such.
+
+At the bottom there are hardcoded options stored in the global 'config'
+array. These defaults are set within in each package that uses them.
+They can be overriden by any resources/config.tcl file. Normally there
+is no such file, but it can be put there at build time. This allows for
+custom builds that change "lower-level" details of how the application
+works and looks.
+
+The resources/configExample.tcl is an example config file that shows
+some of the possible customization.

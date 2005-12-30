@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.116 2005-12-08 15:28:04 matben Exp $
+# $Id: UI.tcl,v 1.117 2005-12-30 14:45:12 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -100,6 +100,9 @@ namespace eval ::UI:: {
     set this(sysHighlight)     [$wtmp	cget -selectbackground]
     set this(sysHighlightText) [$wtmp cget -selectforeground]
     destroy $wtmp
+    
+    # Hardcoded configurations.
+    set ::config(ui,pruneMenus) {}
 }
 
 proc ::UI::InitHook { } {
@@ -1215,7 +1218,8 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
     
     # Be silent about nonexistent entries?
     if {![info exists menuKeyToIndex($wmenu,$key)]} {
-	#return
+	::Debug 2 "::UI::MenuMethod missing menuKeyToIndex($wmenu,$key)"
+	return
     }
     
     # Need to cache the complete menuSpec's since needed in MenuMethod.
@@ -1383,11 +1387,11 @@ proc ::UI::DoTopMenuPopup {w wmenu} {
     }
 }
 
-# UI::PruneMenusUsingOptsDB --
+# UI::PruneMenusFromConfig --
 #
 #       A method to remove specific menu entries from 'menuDefs' and
-#       'menuDefsInsertInd' using an entry in the options database:
-#       *pruneMenyEntries:   mInfo {mDebug mCoccinellaHome}
+#       'menuDefsInsertInd' using an entry in the 'config' array:
+#       config(ui,pruneMenus):   mInfo {mDebug mCoccinellaHome}
 #
 # Arguments:
 #       name            the menus key label, mJabber, mEdit etc.
@@ -1397,24 +1401,26 @@ proc ::UI::DoTopMenuPopup {w wmenu} {
 # Results:
 #       None
 
-proc ::UI::PruneMenusUsingOptsDB {name menuDefVar menuInsertIndVar} {
+proc ::UI::PruneMenusFromConfig {name menuDefVar menuInsertIndVar} {
+    global  config
     upvar $menuDefVar menuDef
     upvar $menuInsertIndVar menuInsertInd
     
-    array set pruneArr [option get . pruneMenuEntries {}]
+    array set pruneArr $config(ui,pruneMenus)
     
-    ::Debug 4 "::UI::PruneMenusUsingOptsDB name=$name, prune=[array get pruneArr]"
+    ::Debug 4 "::UI::PruneMenusFromConfig name=$name, prune=[array get pruneArr]"
     
     if {[info exists pruneArr($name)]} {
     
 	# Take each in turn and find any matching index.
-	foreach mlabel $pruneArr($name) {
-	    set ind [lsearch -glob $menuDef *${mlabel}*]
-	    if {$ind >= 0} {
-		set menuDef [lreplace $menuDef $ind $ind]
+	foreach mLabel $pruneArr($name) {
+	    set idx [lsearch -glob $menuDef *${mLabel}*]
+	    puts "\t mLabel=$mLabel, idx=$idx"
+	    if {$idx >= 0} {
+		set menuDef [lreplace $menuDef $idx $idx]
 		
 		# If 'ind' before 'menuInsertIndVar' then adjust.
-		if {$ind < $menuInsertInd} {
+		if {$idx < $menuInsertInd} {
 		    incr menuInsertInd -1
 		}
 	    }
@@ -1438,8 +1444,7 @@ proc ::UI::AlertBoxInit { } {
     variable alertInit 
     variable alertArgs
     
-    set havepng [::Plugins::HaveImporterForMime image/png]
-    if {$havepng} {
+    if {[::Plugins::HaveImporterForMime image/png]} {
 	set alertArgs [list -image  \
 	  [::Theme::GetImage [option get . alertImage {}] -suffixes .png]]
     }

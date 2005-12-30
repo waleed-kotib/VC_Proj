@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.72 2005-12-29 09:05:16 matben Exp $
+# $Id: Login.tcl,v 1.73 2005-12-30 14:45:12 matben Exp $
 
 package provide Login 1.0
 
@@ -32,12 +32,7 @@ namespace eval ::Login:: {
     set ::config(login,style) "jid"  ;# jid | username | parts
     set ::config(login,more)     1
     set ::config(login,profiles) 1
-    
-    if {0} {
-	set ::config(login,style) "username"
-	set ::config(login,more)     0
-	set ::config(login,profiles) 0
-    }
+    set ::config(login,autosave) 0
 }
 
 # Login::Dlg --
@@ -386,6 +381,7 @@ proc ::Login::DoLogin {} {
 
     variable wtoplevel
     variable finished
+    variable profile
     variable server
     variable username
     variable password
@@ -442,17 +438,24 @@ proc ::Login::DoLogin {} {
 	}
     }
     
-    set finished 1
-    Close $wtoplevel
-    
     set opts {}
     foreach {key value} [array get moreOpts] {
 	lappend opts -$key $value
     }
+    
+    # Should login settings be automatically saved to profile.
+    if {$config(login,autosave)} {
+	eval {::Profiles::Set $profile $server $username $password} $opts
+    }
+
     # ssl vs. tls naming conflict.
     if {$moreOpts(ssl)} {
 	lappend opts -tls 1
     }
+    
+    set finished 1
+    Close $wtoplevel
+
     eval {HighLogin $server $username $resource $password \
       [namespace current]::LoginCallback} $opts
 }
