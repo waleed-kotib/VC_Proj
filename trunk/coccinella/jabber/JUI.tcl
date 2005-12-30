@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.103 2005-12-29 09:05:16 matben Exp $
+# $Id: JUI.tcl,v 1.104 2005-12-30 14:45:12 matben Exp $
 
 package provide JUI 1.0
 
@@ -71,8 +71,10 @@ namespace eval ::Jabber::UI:: {
     }
     
     # Configurations:
-    set ::config(ui,menu,mNewAccount) 1
-    
+    set ::config(url,home) "http://hem.fyristorg.com/matben/"
+    set ::config(url,bugs)  \
+      "http://sourceforge.net/tracker/?group_id=68334&atid=520863"
+        
     # Collection of useful and common widget paths.
     variable jwapp
     variable inited 0
@@ -189,9 +191,9 @@ proc ::Jabber::UI::Init { } {
     set inited 1
     
     # We should do this for all menus eventaully.
-    # @@@ BAD!
-    ::UI::PruneMenusUsingOptsDB mInfo menuDefs(rost,info) menuDefsInsertInd(rost,info)
-
+    ::UI::PruneMenusFromConfig mJabber menuDefs(rost,jabber) menuDefsInsertInd(rost,jabber)
+    ::UI::PruneMenusFromConfig mInfo menuDefs(rost,info) menuDefsInsertInd(rost,info)
+    
     # Defines which menus to use; names and labels.
     variable menuBarDef
     set menuBarDef {
@@ -631,14 +633,15 @@ proc ::Jabber::UI::GetRosterWmenu { } {
 }
 
 proc ::Jabber::UI::OpenCoccinellaURL { } {
+    global  config
     
-    ::Utils::OpenURLInBrowser "http://hem.fyristorg.com/matben/"
+    ::Utils::OpenURLInBrowser $config(url,home)
 }
 
 proc ::Jabber::UI::OpenBugURL { } {
+    global  config
     
-    ::Utils::OpenURLInBrowser  \
-      "http://sourceforge.net/tracker/?group_id=68334&atid=520863"
+    ::Utils::OpenURLInBrowser $config(url,bugs)
 }
 
 proc ::Jabber::UI::StopConnect { } {

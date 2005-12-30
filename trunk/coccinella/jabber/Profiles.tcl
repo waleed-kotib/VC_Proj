@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.51 2005-12-29 09:05:16 matben Exp $
+# $Id: Profiles.tcl,v 1.52 2005-12-30 14:45:12 matben Exp $
 
 package provide Profiles 1.0
 
@@ -39,18 +39,29 @@ namespace eval ::Profiles:: {
     
     # Configurations:
     # This is a way to hardcode some or all of the profile. Same format.
-    # Public APIs must cope with this. Typically only Get functions.
+    # Public APIs must cope with this. Both Get and Set functions.
     # If 'do' then there MUST be valid values in config array.
     set ::config(profiles,do) 0
     set ::config(profiles,profiles) {}
     set ::config(profiles,selected) {}
+    set ::config(profiles,prefspanel) 1
+    
+    # The 'config' array shall never be written to, and since not all elements
+    # of the profile are fixed, we need an additional profile that is written
+    # to the prefs file. It must furthermore not interfere with the other 
+    # 'profile'. Same format.
+    variable cprofiles
+    variable cselected    
     
     variable debug 0
 }
 
 proc ::Profiles::InitHook { } {
+    global config
     variable profiles
     variable selected
+    variable cprofiles
+    variable cselected
     
     set profiles {jabber.org {jabber.org myUsername myPassword}}
     lappend profiles {Google Talk} {gmail.com You from_gmail_your_account  \
@@ -70,6 +81,13 @@ proc ::Profiles::InitHook { } {
 	}	
     }
     
+    set cprofiles $config(profiles,profiles)
+    set cselected $config(profiles,selected)
+
+    ::PrefUtils::Add [list  \
+      [list ::Profiles::cprofiles   cprofiles          $cprofiles   userDefault] \
+      [list ::Profiles::cselected   selected_cprofile  $cselected   userDefault]]
+
     # Sanity check.
     SanityCheck
 }
@@ -82,26 +100,37 @@ proc ::Profiles::InitHook { } {
 
 
 proc ::Profiles::SanityCheck { } {
+    global  config
     variable profiles
     variable selected
-
-    # Verify that 'selected' exists in 'profiles'.
+    variable cprofiles
+    variable cselected
+    
     set all [GetAllNames]
-    if {[lsearch -exact $all $selected] < 0} {
-	set selected [lindex $all 0]
-    }
-    array set arr $profiles
-    foreach {name spec} $profiles {
-	# Incomplete
-	if {[llength $spec] < 3} {
-	    unset -nocomplain arr($name)
+
+    if {$config(profiles,do)} {
+	if {$cselected eq ""} {
+	    set cselected [lindex $all 0]
 	}
-	# Odd number opts are corrupt. Skip these.
-	if {[expr {[llength [lrange $spec 3 end]] % 2}] == 1} {
-	    set arr($name) [lrange $spec 0 2]
+    } else {
+
+	# Verify that 'selected' exists in 'profiles'.
+	if {[lsearch -exact $all $selected] < 0} {
+	    set selected [lindex $all 0]
 	}
+	array set arr $profiles
+	foreach {name spec} $profiles {
+	    # Incomplete
+	    if {[llength $spec] < 3} {
+		unset -nocomplain arr($name)
+	    }
+	    # Odd number opts are corrupt. Skip these.
+	    if {[expr {[llength [lrange $spec 3 end]] % 2}] == 1} {
+		set arr($name) [lrange $spec 0 2]
+	    }
+	}
+	set profiles [array get arr]
     }
-    set profiles [array get arr]
 }
 
 # Profiles::Set --
@@ -119,9 +148,12 @@ proc ::Profiles::SanityCheck { } {
 # Results:
 #       none.
 
-proc ::Profiles::Set {name server username password args} {    
+proc ::Profiles::Set {name server username password args} {
+    global  config
     variable profiles
     variable selected
+    variable cprofiles
+    variable cselected
     
     ::Debug 2 "::Profiles::Set: name=$name, s=$server, u=$username, p=$password, '$args'"
 
@@ -129,7 +161,7 @@ proc ::Profiles::Set {name server username password args} {
     set allNames [GetAllNames]
     
     # Create a new unique profile name.
-    if {[string length $name] == 0} {
+    if {![string length $name]} {
 	set name $server
 
 	# Make sure that 'profile' is unique.
@@ -143,17 +175,79 @@ proc ::Profiles::Set {name server username password args} {
 	    }
 	}
     }
-    set profArr($name) [concat [list $server $username $password] $args]
-    set profiles [array get profArr]
-    set selected $name
+    set opts [FilterOpts $args]
+    
+    if {$config(profiles,do)} {
+	set prof [eval {
+	    FilterConfigProfile $name $server $username $password} $opts]
+	if {$prof ne {}} {
+	    set profArr($name) $prof
+	    set cprofiles [array get profArr]
+	    #set cselected $name
+	}
+    } else {
+	set profArr($name) [concat [list $server $username $password] $opts]
+	set profiles [array get profArr]
+	set selected $name
+    }
     
     # Keep them sorted.
     SortProfileList
     return
 }
 
+# Profiles::FilterOpts --
+# 
+#       Filter out options that are different from defaults.
+
+proc ::Profiles::FilterOpts {server args} {
+    
+    array set dopts [GetDefaultOpts $server]
+    foreach {key value} $args {
+	if {![string equal $dopts($key) $value]} {
+	    set opts($key) $value
+	}
+    }
+    return [array get opts]
+}
+
+# Profiles::FilterConfigProfile --
+# 
+#       Return the profile preserving any config settings.
+#       Must only be called when using 'config' profiles.
+#       Returns empty if name does not exist.
+
+proc ::Profiles::FilterConfigProfile {name server username password args} {
+    global  config
+    
+    # We must NEVER overwrite any values that exist in the 'config' array.
+    array set cprofArr $config(profiles,profiles)
+    if {[info exists cprofArr($name)]} {
+	set prof {}
+	set sup [lrange $cprofArr($name) 0 2]	
+	foreach val [list $server $username $password] cval $sup {
+	    if {$cval ne ""} {
+		lappend prof $cval
+	    } else {
+		lappend prof $val
+	    }
+	}
+	array set copts [lrange $cprofArr($name) 3 end]
+	foreach {key value} $args {
+	    if {![info exists copts($key)]} {
+		lappend prof $key $value
+	    }
+	}
+	return $prof
+    } else {
+	return {}
+    }
+}
+
 proc ::Profiles::SetWithKey {name key value} {
+    global  config
     variable profiles
+    variable cprofiles
         
     array set profArr $profiles
     set allNames [GetAllNames]
@@ -168,7 +262,15 @@ proc ::Profiles::SetWithKey {name key value} {
 	set opts($key) $value
 	set profArr($name) [concat [lrange $profArr($name) 0 2] [array get opts]]
     }
-    set profiles [array get profArr]
+    if {$config(profiles,do)} {
+	set prof [eval {FilterConfigProfile $name} $profArr($name)
+	if {$prof ne {}} {
+	    set profArr($name) $prof
+	    set cprofiles [array get profArr]
+	}
+    } else {    
+	set profiles [array get profArr]
+    }
     return
 }
 
@@ -236,20 +338,29 @@ proc ::Profiles::FindProfileNameFromJID {jid} {
 proc ::Profiles::GetList { } {
     global  config
     variable profiles
+    variable cprofiles
     
     if {$config(profiles,do)} {
-	return $config(profiles,profiles)
+	return $cprofiles
     } else {
 	return $profiles
     }
 }
 
 proc ::Profiles::Get {name key} {
+    global  config
     variable profiles
+    variable cprofiles
     
-    set ind [lsearch -exact $profiles $name]
+    if {$config(profiles,do)} {
+	set prof $cprofiles
+    } else {
+	set prof $profiles
+    }
+
+    set ind [lsearch -exact $prof $name]
     if {$ind >= 0} {
-	set spec [lindex $profiles [incr ind]]
+	set spec [lindex $prof [incr ind]]
 	
 	switch -- $key {
 	    domain {
@@ -262,7 +373,7 @@ proc ::Profiles::Get {name key} {
 		return [lindex $spec 2]
 	    }
 	    options {
-		return [lrange [lindex $profiles $ind] 3 end]
+		return [lrange [lindex $prof $ind] 3 end]
 	    }
 	}
     } else {
@@ -271,37 +382,52 @@ proc ::Profiles::Get {name key} {
 }
 
 proc ::Profiles::GetProfile {name} {
+    global  config
     variable profiles
+    variable cprofiles
  
-    array set profArr $profiles
+    if {$config(profiles,do)} {
+	set prof $cprofiles
+    } else {
+	set prof $profiles
+    }
+
+    array set profArr $prof
     if {[info exists profArr($name)]} {
 	return $profArr($name)
     } else {
 	return
     }
-    return $profiles
 }
 
 proc ::Profiles::GetSelectedName { } {
     global  config
     variable selected
+    variable cselected
 
     if {$config(profiles,do)} {
-	set tmp $config(profiles,selected)
+	set prof $cselected
     } else {
 	set all [GetAllNames]
 	if {[lsearch -exact $all $selected] < 0} {
 	    set selected [lindex $all 0]
 	}
-	set tmp $selected
+	set prof $selected
     }    
-    return $tmp
+    return $prof
 }
 
 proc ::Profiles::SetSelectedName {name} {
+    global  config
     variable selected
+    variable cselected
     
-    set selected $name
+    if {$config(profiles,do)} {
+	# @@@ Not sure of this...
+	set cselected $name
+    } else {
+	set selected $name
+    }
 }
 
 # Profiles::GetAllNames --
@@ -311,15 +437,16 @@ proc ::Profiles::SetSelectedName {name} {
 proc ::Profiles::GetAllNames { } {
     global  config
     variable profiles
+    variable cprofiles
     
     if {$config(profiles,do)} {
-	set tmp $config(profiles,profiles)
+	set prof $cprofiles
     } else {
-	set tmp $profiles
+	set prof $profiles
     }
 
     set names {}
-    foreach {name spec} $tmp {
+    foreach {name spec} $prof {
 	lappend names $name
     }    
     return [lsort -dictionary $names]
@@ -330,16 +457,27 @@ proc ::Profiles::GetAllNames { } {
 #       Just sorts the profiles list using names only.
 
 proc ::Profiles::SortProfileList { } {
+    global  config
     variable profiles
+    variable cprofiles
 
+    if {$config(profiles,do)} {
+	set prof $cprofiles
+    } else {
+	set prof $profiles
+    }
     set tmp {}
-    array set profArr $profiles
+    array set profArr $prof
     foreach name [GetAllNames] {
 	set noopts [lrange $profArr($name) 0 2]
 	set opts [SortOptsList [lrange $profArr($name) 3 end]]
 	lappend tmp $name [concat $noopts $opts]
     }
-    set profiles $tmp
+    if {$config(profiles,do)} {
+	set cprofiles $tmp
+    } else {
+	set profiles $tmp
+    }
 }
 
 proc ::Profiles::SortOptsList {opts} {
@@ -387,14 +525,61 @@ proc ::Profiles::ImportFromJserver { } {
     set selected $jserver(profile,selected)
 }
 
+# Profiles::GetDefaultOpts --
+# 
+#       Return a default -key value list of the default options.
+
+proc ::Profiles::GetDefaultOpts {server} {
+    global  prefs this
+    upvar ::Jabber::jprefs jprefs
+    variable defaultOpts
+    
+    if {![info exists defaultOpts]} {
+	array set defaultOpts {
+	    -digest         1
+	    -invisible      0
+	    -ip             ""
+	    -priority       0
+	    -http           0
+	    -httpurl        ""
+	    -minpollsecs    4
+	}
+	set defaultOpts(-port) $jprefs(port)
+	set defaultOpts(-ssl)  $jprefs(usessl)
+	if {!$this(package,tls)} {
+	    set defaultOpts(-ssl) 0
+	}
+	set defaultOpts(-sasl) 0
+	if {[catch {package require jlibsasl}]} {
+	    set defaultOpts(-sasl) 0
+	}
+    }
+    set defaultOpts(-httpurl) [GetDefaultHttpUrl $server]
+    return [array get defaultOpts]
+}
+
+proc ::Profiles::GetDefaultHttpUrl {server} {
+    
+    return "http://${server}:5280/http-poll/"
+}
+
+proc ::Profiles::GetDefaultOptValue {name server} {
+    
+    array set arr [GetDefaultOpts $server]
+    return $arr(-$name)
+}
+
 # User Profiles Page ...........................................................
 
 proc ::Profiles::BuildHook {wtree nbframe} {
+    global  config
     
-    ::Preferences::NewTableItem {Jabber {User Profiles}} [mc {User Profiles}]
-
-    set wpage [$nbframe page {User Profiles}]    
-    BuildPage $wpage
+    if {$config(profiles,prefspanel)} {
+	::Preferences::NewTableItem {Jabber {User Profiles}} [mc {User Profiles}]
+	
+	set wpage [$nbframe page {User Profiles}]    
+	BuildPage $wpage
+    }
 }
 
 proc ::Profiles::BuildPage {page} {
@@ -645,7 +830,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     
     # Set defaults.
     NotebookSetDefaults $token ""
-
+    
     # Let components ad their own stuff here.
     ::hooks::run profileBuildTabNotebook $w $token
     
@@ -656,77 +841,14 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     return $w
 }
 
-namespace eval ::Profiles:: {
-    
-    variable initedDefaultOptions 0
-}
-
 proc ::Profiles::NotebookSetDefaults {token server} {
     variable $token
     upvar 0 $token state
-    variable defaultOptionsArr
-    variable initedDefaultOptions
-    
-    Debug 2 "::Profiles::NotebookSetDefaults"
 
-    if {!$initedDefaultOptions} {
-	InitDefaultOptions
+    foreach {key value} [GetDefaultOpts $server] {
+	set name [string trimleft $key "-"]
+	set state($name) $value
     }
-    array set state [array get defaultOptionsArr]
-    set state(httpurl) [GetDefaultHttpUrl $server]
-}
-
-proc ::Profiles::InitDefaultOptions { } {
-    global  prefs this
-    variable initedDefaultOptions
-    variable defaultOptionsArr
-    upvar ::Jabber::jprefs jprefs
-    
-    Debug 2 "::Profiles::InitDefaultOptions"
- 
-    array set defaultOptionsArr {
-	digest      1
-	invisible   0
-	ip          ""
-	priority    0
-	http        0
-	httpurl     ""
-	minpollsecs 4
-    }
-    set defaultOptionsArr(port) $jprefs(port)
-    set defaultOptionsArr(ssl)  $jprefs(usessl)
-    if {!$this(package,tls)} {
-	set defaultOptionsArr(ssl) 0
-    }
-    set defaultOptionsArr(sasl) 0
-    if {[catch {package require jlibsasl}]} {
-	set defaultOptionsArr(sasl) 0
-    }
-    set initedDefaultOptions 1
-}
-
-proc ::Profiles::GetDefaultOptionValue {name server} {
-    variable initedDefaultOptions
-    variable defaultOptionsArr
-    
-    if {!$initedDefaultOptions} {
-	InitDefaultOptions
-    }
-    
-    switch -- $name {
-	httpurl {
-	    set value [GetDefaultHttpUrl $server]
-	}
-	default {
-	    set value $defaultOptionsArr($name)
-	}
-    }
-    return $value
-}
-
-proc ::Profiles::GetDefaultHttpUrl {server} {
-    
-    return "http://${server}:5280/http-poll/"
 }
 
 # Profiles::MakeTmpProfArr --
@@ -854,12 +976,11 @@ proc ::Profiles::SaveCurrentToTmp {profName} {
 	    
 	    # Cleanup any old entries. Save only if different from default.
 	    unset -nocomplain tmpProfArr($profName,-$key)
-	    set dvalue [GetDefaultOptionValue $key $server]
+	    set dvalue [GetDefaultOptValue $key $server]
 	    if {![string equal $moreOpts($key) $dvalue]} {
 		set tmpProfArr($profName,-$key) $moreOpts($key)
 	    }
 	}
-	#parray tmpProfArr $profName,-*
 	set tmpSelected $profName  
     }
 }
@@ -996,15 +1117,18 @@ proc  ::Profiles::DestroyHandler { } {
 #       Invoked from the Save button.
 
 proc ::Profiles::SaveHook { } {
+    global  config
     variable profiles
     variable selected
     variable tmpSelected
 
-    set profiles [GetTmpProfiles]
-    set selected $tmpSelected
-    
-    # Update the Login dialog if any.
-    ::Login::LoadProfiles
+    if {$config(profiles,prefspanel)} {
+	set profiles [GetTmpProfiles]
+	set selected $tmpSelected
+	
+	# Update the Login dialog if any.
+	::Login::LoadProfiles
+    }
 }
 
 proc ::Profiles::GetTmpProfiles { } {
@@ -1037,7 +1161,7 @@ proc ::Profiles::GetTmpProfiles { } {
 		default {
 	
 		    # Save only if different from default.
-		    set dvalue [GetDefaultOptionValue $optname $s]
+		    set dvalue [GetDefaultOptValue $optname $s]
 		    if {![string equal $value $dvalue]} {
 			lappend plist -$optname $value
 		    }
@@ -1050,33 +1174,40 @@ proc ::Profiles::GetTmpProfiles { } {
 }
 
 proc ::Profiles::CancelHook { } {
+    global  config
     variable profiles
     variable selected
     variable tmpProfArr
     variable tmpSelected
     
-    # Detect any changes.
-    if {![string equal $selected $tmpSelected]} {
-	::Preferences::HasChanged
-	return
-    }
-    set tmpProfiles [GetTmpProfiles]
-    array set profArr $profiles
-    array set tmpArr $tmpProfiles
-    if {![arraysequal tmpArr profArr]} {
-	::Preferences::HasChanged
+    if {$config(profiles,prefspanel)} {
+
+	# Detect any changes.
+	if {![string equal $selected $tmpSelected]} {
+	    ::Preferences::HasChanged
+	    return
+	}
+	set tmpProfiles [GetTmpProfiles]
+	array set profArr $profiles
+	array set tmpArr $tmpProfiles
+	if {![arraysequal tmpArr profArr]} {
+	    ::Preferences::HasChanged
+	}
     }
 }
 
 proc ::Profiles::UserDefaultsHook { } {
+    global  config
     variable selected
     variable tmpSelected
     variable profile
     
-    MakeTmpProfArr
-    set tmpSelected $selected
-    set profile $selected
-    SetCmd $selected
+    if {$config(profiles,prefspanel)} {
+	MakeTmpProfArr
+	set tmpSelected $selected
+	set profile $selected
+	SetCmd $selected
+    }
 }
 
 # Profiles::BuildDialog --
