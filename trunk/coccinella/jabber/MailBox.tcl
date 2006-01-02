@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.84 2005-12-17 12:15:50 matben Exp $
+# $Id: MailBox.tcl,v 1.85 2006-01-02 15:17:09 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -333,7 +333,9 @@ proc ::MailBox::Build {args} {
     set locals(wpane)  $wpane
         
     ::UI::SetWindowGeometry $w
-    after 10 [list ::UI::SetSashPos $w $wpane]
+    
+    # sashpos unreliable
+    #after 10 [list ::UI::SetSashPos $w $wpane]
     wm minsize $w 300 260
     wm maxsize $w 1200 1000
     

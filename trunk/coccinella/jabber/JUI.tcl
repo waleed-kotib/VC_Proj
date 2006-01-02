@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.104 2005-12-30 14:45:12 matben Exp $
+# $Id: JUI.tcl,v 1.105 2006-01-02 15:17:09 matben Exp $
 
 package provide JUI 1.0
 
@@ -64,6 +64,7 @@ namespace eval ::Jabber::UI:: {
 	}
     }
     option add *JMain*TMenubutton.padding         {1}             50
+    option add *JMain*me.style                    Small.Sunken.TLabel 50
 
     # Special for X11 menus to look ok.
     if {[tk windowingsystem] eq "x11"} {
@@ -336,11 +337,13 @@ proc ::Jabber::UI::Build {w} {
     ::Jabber::Status::Widget $wfstat.bst $statusStyle \
       ::Jabber::jstate(status) -command ::Jabber::SetStatus
     ttk::frame $wfstat.cont
-    ttk::label $wfstat.l -style Small.TLabel \
-      -textvariable ::Jabber::jstate(mejid) -anchor w
-    pack  $wfstat.bst  $wfstat.cont  $wfstat.l  -side left
-    pack  $wfstat.l  -fill x -expand 1
-
+    ttk::label $wfstat.me -textvariable ::Jabber::jstate(mejid) -anchor w
+    pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
+    pack  $wfstat.me  -fill x -expand 1
+    if {[tk windowingsystem] eq "aqua"} {
+	pack $wfstat.me -padx 6
+    }
+    
     # Notebook.
     set wnb $wall.nb
     ttk::notebook $wnb
@@ -364,7 +367,7 @@ proc ::Jabber::UI::Build {w} {
     set jwapp(notebook)  $wnb
     set jwapp(roster)    $wroster
     set jwapp(mystatus)  $wfstat.bst
-    set jwapp(myjid)     $wfstat.l
+    set jwapp(myjid)     $wfstat.me
     set jwapp(statcont)  $wstatcont
     
     set minW [expr $trayMinW > 200 ? $trayMinW : 200]
