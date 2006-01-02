@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.117 2005-12-30 14:45:12 matben Exp $
+# $Id: UI.tcl,v 1.118 2006-01-02 15:17:09 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -567,6 +567,8 @@ proc ::UI::Toplevel {w args} {
 	if {$argsArr(-usemacmainmenu)} {
 	    SetMenuAcceleratorBinds $w [GetMainMenu]
 	}
+	# Unreliable!!!
+	# ::UI::SetAquaProxyIcon $w
     } else {
 	bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w]
     }
@@ -585,6 +587,16 @@ proc ::UI::Toplevel {w args} {
     ::hooks::run newToplevelWindowHook $w
     
     return $w
+}
+
+# Unreliable!!!
+proc ::UI::SetAquaProxyIcon {w} {
+    
+    set f [info nameofexecutable]
+    if {$f ne ""} {
+	set path [eval file join [lrange [file split $f] 0 end-3]]
+	wm attributes $w -titlepath $path -modified 0
+    }
 }
 
 # UI::DoCloseWindow --
@@ -1415,7 +1427,7 @@ proc ::UI::PruneMenusFromConfig {name menuDefVar menuInsertIndVar} {
 	# Take each in turn and find any matching index.
 	foreach mLabel $pruneArr($name) {
 	    set idx [lsearch -glob $menuDef *${mLabel}*]
-	    puts "\t mLabel=$mLabel, idx=$idx"
+	    #puts "\t mLabel=$mLabel, idx=$idx"
 	    if {$idx >= 0} {
 		set menuDef [lreplace $menuDef $idx $idx]
 		
