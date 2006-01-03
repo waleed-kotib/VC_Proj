@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.32 2005-12-29 09:05:16 matben Exp $
+# $Id: Init.tcl,v 1.33 2006-01-03 13:22:20 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -75,7 +75,7 @@ proc ::Init::SetThis {thisScript} {
     set this(resourcePath)      [file join $this(path) resources]
     set this(altResourcePath)   [file join $this(prefsPath) resources]
     set this(postPrefsPath)     [file join $this(resourcePath) post]
-    set this(postPrefsFile)     [file join $this(postPrefsPath) prefs]
+    set this(postPrefsFile)     [file join $this(postPrefsPath) prefs.rdb]
     set this(soundsPath)        [file join $this(path) sounds]
     set this(altSoundsPath)     [file join $this(prefsPath) sounds]  
     set this(basThemePrefsFile) [file join $this(resourcePath) post theme.rdb]

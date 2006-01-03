@@ -2,13 +2,10 @@
 README-post
 
 Files in this folder are used to override any user resource settings.
-There are currently two files that are recognized here:
+There are currently only one file that is recognized here:
 
-prefs       Preference settings in this file override any user prefs.
-
-theme.rdb   This is for overriding the theme settings and various things
-            that are needed early in the startup process. An example could
-            look like:
+prefs.rdb    Preference settings in this file override any user prefs.
+             An example could look like:
 
 *appName:                   YAKKER
 *theAppName:         	    YAKKER
@@ -17,4 +14,3 @@ theme.rdb   This is for overriding the theme settings and various things
 *Splash.showMinor:          0
 *Splash.showCopyright:      1
 *Splash.copyrightY:         220
-*pruneMenuEntries:          mInfo {mDebug mCoccinellaHome}
