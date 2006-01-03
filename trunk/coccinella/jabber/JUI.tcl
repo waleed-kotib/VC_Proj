@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.105 2006-01-02 15:17:09 matben Exp $
+# $Id: JUI.tcl,v 1.106 2006-01-03 13:22:17 matben Exp $
 
 package provide JUI 1.0
 
@@ -64,7 +64,7 @@ namespace eval ::Jabber::UI:: {
 	}
     }
     option add *JMain*TMenubutton.padding         {1}             50
-    option add *JMain*me.style                    Small.Sunken.TLabel 50
+    option add *JMain*me.style                    Small.Sunken.TLabel startupFile
 
     # Special for X11 menus to look ok.
     if {[tk windowingsystem] eq "x11"} {
