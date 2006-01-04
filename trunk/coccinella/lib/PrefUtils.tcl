@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #
-# $Id: PrefUtils.tcl,v 1.4 2005-09-20 14:09:51 matben Exp $
+# $Id: PrefUtils.tcl,v 1.5 2006-01-04 11:02:40 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -67,6 +67,14 @@ proc ::PrefUtils::Init { } {
     set prefsFilePath $this(userPrefsFilePath)
     set old $this(oldPrefsFilePath)
     
+    
+    # Pre prefs file if any. Lower priority!
+    if {[file exists $this(prePrefsFile)]} {
+	catch {option readfile $this(prePrefsFile) startupFile} err
+    }
+    set appName    [option get . appName {}]
+    set theAppName [option get . theAppName {}]
+
     if {[file exists $prefsFilePath]} {
 	if {[catch {option readfile $prefsFilePath} err]} {
 	    tk_messageBox -type ok -icon error \

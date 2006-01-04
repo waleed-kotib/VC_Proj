@@ -8,11 +8,11 @@
 #       It controls the startup sequence and therefore needs a number
 #       of code files/images to be succesful.
 #      
-#  Copyright (c) 1999-2005  Mats Bengtsson
+#  Copyright (c) 1999-2006  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.130 2005-12-29 09:05:16 matben Exp $	
+# $Id: Coccinella.tcl,v 1.131 2006-01-04 11:02:37 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -156,7 +156,7 @@ package require Theme
 # Find our language and load message catalog.
 ::Init::Msgcat
 
-if {[string equal $this(platform) "windows"]} {
+if {[tk windowingsystem] eq "windows"} {
     wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
 }
 

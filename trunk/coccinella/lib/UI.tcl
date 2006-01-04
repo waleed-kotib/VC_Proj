@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.118 2006-01-02 15:17:09 matben Exp $
+# $Id: UI.tcl,v 1.119 2006-01-04 11:02:40 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1408,15 +1408,13 @@ proc ::UI::DoTopMenuPopup {w wmenu} {
 # Arguments:
 #       name            the menus key label, mJabber, mEdit etc.
 #       menuDefVar      *name* if the menuDef variable.
-#       menuInsertIndVar  *name* if the index variable.
 #       
 # Results:
 #       None
 
-proc ::UI::PruneMenusFromConfig {name menuDefVar menuInsertIndVar} {
+proc ::UI::PruneMenusFromConfig {name menuDefVar} {
     global  config
     upvar $menuDefVar menuDef
-    upvar $menuInsertIndVar menuInsertInd
     
     array set pruneArr $config(ui,pruneMenus)
     
@@ -1427,14 +1425,8 @@ proc ::UI::PruneMenusFromConfig {name menuDefVar menuInsertIndVar} {
 	# Take each in turn and find any matching index.
 	foreach mLabel $pruneArr($name) {
 	    set idx [lsearch -glob $menuDef *${mLabel}*]
-	    #puts "\t mLabel=$mLabel, idx=$idx"
 	    if {$idx >= 0} {
 		set menuDef [lreplace $menuDef $idx $idx]
-		
-		# If 'ind' before 'menuInsertIndVar' then adjust.
-		if {$idx < $menuInsertInd} {
-		    incr menuInsertInd -1
-		}
 	    }
 	}
     }

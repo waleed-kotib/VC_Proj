@@ -1,8 +1,9 @@
 
-README-post
+README-pre
 
-Files in this folder are used to override any user resource settings.
-See also resources/pre/README-pre.
+Files in this folder are used to override hardcode preference values.
+They are loaded with lower priority than the usual prefs file.
+See also resources/post/README-post.
 There are currently only one file that is recognized here:
 
 prefs.rdb    Preference settings in this file override any user prefs.
