@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: utils.tcl,v 1.3 2005-10-04 13:02:53 matben Exp $
+# $Id: utils.tcl,v 1.4 2006-01-04 11:02:37 matben Exp $
 
 package provide utils 1.0
     
@@ -88,6 +88,37 @@ proc listintersectnonempty {alist blist} {
 	}
     }
     return 0
+}
+
+# lsearchsublists --
+# 
+#       Search sublists instead. Very incomplete!
+#       Note: returns empty if non found.
+
+proc lsearchsublists {args} {
+    
+    if {[llength $args] < 2} {
+	return -code error "Usage: lsearchsublists ?options? list pattern"
+    }
+    set pattern [lindex $args end]
+    set list    [lindex $args end-1]
+    set options [lrange $args 0 end-2]
+    
+    set idx0 0
+    set idx1 -1
+    foreach elem $list {
+	set idx1 [eval [concat lsearch $options [list $elem $pattern]]]
+	if {$idx1 >= 0} {
+	    break
+	} else {
+	    incr idx0
+	}
+    }
+    if {$idx1 < 0} {
+	return
+    } else {
+	return [list $idx0 $idx1]
+    }
 }
 
 # @@@ TODO: advanced list logic

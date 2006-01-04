@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.54 2005-11-30 08:32:00 matben Exp $
+# $Id: Whiteboard.tcl,v 1.55 2006-01-04 11:02:40 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -667,11 +667,15 @@ proc ::WB::InitMenuDefs { } {
     
     # When registering new menu entries they shall be added at:
     variable menuDefsInsertInd
-    set menuDefsInsertInd(main,file)   [expr [llength $menuDefs(main,file)]-2]
-    set menuDefsInsertInd(main,edit)   [expr [llength $menuDefs(main,edit)]]
-    set menuDefsInsertInd(main,prefs)  [expr [llength $menuDefs(main,prefs)]]
-    set menuDefsInsertInd(main,items)  end
-    set menuDefsInsertInd(main,info)   [expr [llength $menuDefs(main,info)]-2]
+
+    # Let components register their menus *after* the last separator.
+    foreach name {file edit prefs items info} {
+	set idx [lindex [lsearch -all $menuDefs(main,$name) separator] end]
+	if {$idx < 0} {
+	    set idx [llength $menuDefs(main,$name)]
+	}
+	set menuDefsInsertInd(main,$name) $idx
+    }
 }
 
 proc ::WB::QuitAppHook { } {

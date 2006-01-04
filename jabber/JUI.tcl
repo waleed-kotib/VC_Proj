@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.106 2006-01-03 13:22:17 matben Exp $
+# $Id: JUI.tcl,v 1.107 2006-01-04 11:02:40 matben Exp $
 
 package provide JUI 1.0
 
@@ -95,7 +95,7 @@ proc ::Jabber::UI::Init { } {
 	set menuDefs(rost,file) {
 	    {command   mNewWhiteboard      {::Jabber::WB::NewWhiteboard}  normal   N}
 	    {command   mCloseWindow        {::UI::DoCloseWindow}          normal   W}
-	    {command   mPreferences...     {::Preferences::Build}         normal   {}}
+	    {command   mPreferences        {::Preferences::Build}         normal   {}}
 	    {separator}
 	    {command   mQuit               {::UserActions::DoQuit}        normal   Q}
 	}
@@ -178,22 +178,21 @@ proc ::Jabber::UI::Init { } {
 	{command   mPaste            {::UI::CutCopyPasteCmd paste}    disabled V}
     }
     
+    # We should do this for all menus eventaully.
+    ::UI::PruneMenusFromConfig mJabber menuDefs(rost,jabber)
+    ::UI::PruneMenusFromConfig mInfo   menuDefs(rost,info)
+        
     # When registering new menu entries they shall be added at:
     variable menuDefsInsertInd
 
-    set menuDefsInsertInd(rost,file)   [expr [llength $menuDefs(rost,file)]-2]
-    set menuDefsInsertInd(rost,edit)   [expr [llength $menuDefs(rost,edit)]]
-    set menuDefsInsertInd(rost,jabber) [expr [llength $menuDefs(rost,jabber)]-2]
-    if {[string match "mac*" $this(platform)]} {
-	set menuDefsInsertInd(rost,info)   [expr [llength $menuDefs(rost,info)]-3]
-    } else {
-	set menuDefsInsertInd(rost,info)   [expr [llength $menuDefs(rost,info)]-4]
+    # Let components register their menus *after* the last separator.
+    foreach name {file edit jabber info} {
+	set idx [lindex [lsearch -all $menuDefs(rost,$name) separator] end]
+	if {$idx < 0} {
+	    set idx [llength $menuDefs(rost,$name)]
+	}
+	set menuDefsInsertInd(rost,$name) $idx
     }
-    set inited 1
-    
-    # We should do this for all menus eventaully.
-    ::UI::PruneMenusFromConfig mJabber menuDefs(rost,jabber) menuDefsInsertInd(rost,jabber)
-    ::UI::PruneMenusFromConfig mInfo menuDefs(rost,info) menuDefsInsertInd(rost,info)
     
     # Defines which menus to use; names and labels.
     variable menuBarDef
@@ -205,6 +204,7 @@ proc ::Jabber::UI::Init { } {
     if {[tk windowingsystem] eq "aqua"} {
 	set menuBarDef [linsert $menuBarDef 2 edit mEdit]
     }
+    set inited 1
 }
 
 proc ::Jabber::UI::Show {w args} {

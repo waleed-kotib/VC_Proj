@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.33 2006-01-03 13:22:20 matben Exp $
+# $Id: Init.tcl,v 1.34 2006-01-04 11:02:40 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -74,6 +74,8 @@ proc ::Init::SetThis {thisScript} {
     set this(altImagePath)      [file join $this(prefsPath) images]
     set this(resourcePath)      [file join $this(path) resources]
     set this(altResourcePath)   [file join $this(prefsPath) resources]
+    set this(prePrefsPath)      [file join $this(resourcePath) pre]
+    set this(prePrefsFile)      [file join $this(prePrefsPath) prefs.rdb]
     set this(postPrefsPath)     [file join $this(resourcePath) post]
     set this(postPrefsFile)     [file join $this(postPrefsPath) prefs.rdb]
     set this(soundsPath)        [file join $this(path) sounds]
@@ -337,7 +339,7 @@ proc ::Init::Msgcat { } {
     }
     
     # Test here if you want a particular message catalog (en, nl, de, fr, sv,...).
-    #::msgcat::mclocale pl
+    #::msgcat::mclocale dk
     uplevel #0 [list ::msgcat::mcload $this(msgcatPath)]
 
     # This is a method to override default messages with custom ones for each
