@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.34 2005-11-30 08:32:00 matben Exp $
+# $Id: SetupAss.tcl,v 1.35 2006-01-05 15:06:16 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -28,10 +28,13 @@ namespace eval ::Jabber::SetupAss::  {
     set profile [::Profiles::GetSelectedName]
     set spec [::Profiles::GetProfile $profile]
     set server [lindex $spec 0]
+    
+    # We could be much more general here...
+    set ::config(setupass,page,server) 1
 }
 
 proc ::Jabber::SetupAss::SetupAss { } {
-    global  this prefs wDlgs
+    global  this prefs wDlgs config
     
     variable finished
     variable locale
@@ -103,25 +106,27 @@ proc ::Jabber::SetupAss::SetupAss { } {
     lappend wrapthese $plang.fr.msg1
     
     # Server.
-    set p2 [$su newpage "server" -headtext [mc {Jabber Server}]]
-    ttk::frame $p2.fr -padding [option get . notebookPagePadding {}]
-    ttk::label $p2.fr.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -text [mc suservmsg]
-    ttk::button $p2.fr.bt -text [mc Get] \
-      -command [list [namespace current]::ServersDlg .jsuserv]
-    ttk::label $p2.fr.msg2 -style Small.TLabel \
-      -wraplength 260 -justify left -text "Get list of public and open Jabber servers"
-    ttk::label $p2.fr.la -text "[mc Server]:"
-    ttk::entry $p2.fr.serv -width 28 -textvariable ${ns}::server \
-      -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
+    if {$config(setupass,page,server)} {
+	set p2 [$su newpage "server" -headtext [mc {Jabber Server}]]
+	ttk::frame $p2.fr -padding [option get . notebookPagePadding {}]
+	ttk::label $p2.fr.msg1 -style Small.TLabel \
+	  -wraplength 260 -justify left -text [mc suservmsg]
+	ttk::button $p2.fr.bt -text [mc Get] \
+	  -command [list [namespace current]::ServersDlg .jsuserv]
+	ttk::label $p2.fr.msg2 -style Small.TLabel \
+	  -wraplength 260 -justify left -text "Get list of public and open Jabber servers"
+	ttk::label $p2.fr.la -text "[mc Server]:"
+	ttk::entry $p2.fr.serv -width 28 -textvariable ${ns}::server \
+	  -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
+	
+	grid  $p2.fr.msg1  -            -sticky nw -pady 4
+	grid  $p2.fr.bt    $p2.fr.msg2  -sticky ew -pady 4
+	grid  $p2.fr.la    $p2.fr.serv  -sticky e -pady 4
+	pack  $p2.fr -side top -fill x
+	
+	lappend wrapthese $p2.fr.msg1
+    }
     
-    grid  $p2.fr.msg1  -            -sticky nw -pady 4
-    grid  $p2.fr.bt    $p2.fr.msg2  -sticky ew -pady 4
-    grid  $p2.fr.la    $p2.fr.serv  -sticky e -pady 4
-    pack  $p2.fr -side top -fill x
-
-    lappend wrapthese $p2.fr.msg1
-
     # Username & Password.
     set p3 [$su newpage "username" -headtext [mc {Username & Password}]]
     ttk::frame $p3.fr -padding [option get . notebookPagePadding {}]

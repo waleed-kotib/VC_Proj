@@ -5,7 +5,7 @@
 #  Code idee from Harrison & McLennan
 #  This source file is distributed under the BSD license.
 #  
-# $Id: balloonhelp.tcl,v 1.18 2005-11-02 12:54:09 matben Exp $
+# $Id: balloonhelp.tcl,v 1.19 2006-01-05 15:06:16 matben Exp $
 
 package require treeutil
 
@@ -19,6 +19,8 @@ namespace eval ::balloonhelp:: {
     
     set locals(active) 1
     set locals(initted) 0
+    set locals(fadeout) {0.95 0.9 0.85 0.8 0.75 0.7 0.65 0.6 0.55 0.5 0.4 0.3 0.2}
+    set locals(fadeout) {0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2}
 
     # Java style popup: light blue schemata: bg=#D8E1F4, bd=#4A6EBC
     # Standard: light yellow: bg=#FFFF9F
@@ -28,6 +30,7 @@ namespace eval ::balloonhelp:: {
     option add *Balloonhelp.wrapLength            180       widgetDefault
     option add *Balloonhelp.justify               left      widgetDefault
     option add *Balloonhelp.millisecs             2000      widgetDefault
+    option add *Balloonhelp.timeout               0         widgetDefault
     
     switch -- [tk windowingsystem] {
 	x11 {
@@ -50,6 +53,7 @@ proc ::balloonhelp::Init { } {
     if {!$locals(initted)} {
 	Build
 	set locals(millisecs) [option get $w millisecs {}]
+	set locals(timeout)   [option get $w timeout {}]
 	set locals(initted) 1
     }
 }
@@ -76,6 +80,13 @@ proc ::balloonhelp::Build { } {
     if {[tk windowingsystem] eq "aqua"} {
 	tk::unsupported::MacWindowStyle style $w help none
     }
+
+    array set wmArr [wm attributes $w]
+    if {[info exists wmArr(-alpha)]} {
+	set locals(alpha) 1
+    } else {
+	set locals(alpha) 0
+    }
 }
 
 proc ::balloonhelp::configure {args} {
@@ -95,6 +106,9 @@ proc ::balloonhelp::configure {args} {
 	    }
 	    -mil* {
 		set locals(millisecs) $value
+	    }
+	    -time* {
+		set locals(timeout) $value
 	    }
 	}
     }
@@ -202,6 +216,14 @@ proc ::balloonhelp::Cancel {win} {
 	after cancel $locals(pending)
 	unset locals(pending)
     }
+    if {[info exists locals(timeoutID)]} {
+	after cancel $locals(timeoutID)
+	unset locals(timeoutID)
+    }
+    if {[info exists locals(fadeoutID)]} {
+	after cancel $locals(fadeoutID)
+	unset locals(fadeoutID)
+    }
     if {[winfo exists $w]} {
 	wm withdraw $w
     }
@@ -210,10 +232,37 @@ proc ::balloonhelp::Cancel {win} {
     }
 }
 
+proc ::balloonhelp::Timeout {win} {
+    variable locals    
+    
+    Debug 2 "::balloonhelp::Timeout"
+    
+    if {$locals(alpha)} {
+	Fadeout $win $locals(fadeout)
+    } else {
+	Cancel $win
+    }
+}
+
+proc ::balloonhelp::Fadeout {win fades} {
+    variable w
+    variable locals    
+
+    if {[llength $fades]} {
+	wm attributes $w -alpha [lindex $fades 0]
+	set locals(fadeoutID)  \
+	  [after 80 [list ::balloonhelp::Fadeout $win [lrange $fades 1 end]]]
+    } else {
+	Cancel $win
+    }
+}
+
 proc ::balloonhelp::Show {win type} {
     
     variable w
-    variable locals    
+    variable locals
+    
+    Debug 2 "::balloonhelp::Show"
 
     if {![winfo exists $win]} {
 	unset -nocomplain locals(pending)
@@ -294,6 +343,13 @@ proc ::balloonhelp::Show {win type} {
 	    SetPosition $x $y
 	    wm deiconify $w
 	    raise $w
+	    if {$locals(alpha)} {
+		wm attributes $w -alpha 1.0
+	    }
+	}
+	if {$locals(timeout)} {
+	    set locals(timeoutID)  \
+	      [after $locals(timeout) [list ::balloonhelp::Timeout $win]]
 	}
     }
     unset -nocomplain locals(pending)

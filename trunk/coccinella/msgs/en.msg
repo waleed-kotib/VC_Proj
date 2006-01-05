@@ -934,9 +934,11 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jainvitegchat {Invite a user for groupchat in room %s}
 ::msgcat::mcset en jaxformreq   {Labels with (*) are required}
 ::msgcat::mcset en jagcsyncpres {Synchronize chatroom with user presence}
-::msgcat::mcset en jaloginuser  {Enter your username and password to login.}
-
+::msgcat::mcset en jaloginuser  {Enter your username and password to login to %s.}
+::msgcat::mcset en jaregnewwith {Do you want to register a new account with %s.}
+::msgcat::mcset en jaregisterexserv {Register with the service %s. You may need to press the Get button if not registration info obtained automatically.}
    
+
 # Setup assistant:
 ::msgcat::mcset en suintro1 	{This is a setup assistant to help you fill in the necessary things that is needed for a new or an existing account on a Jabber server.}
 ::msgcat::mcset en suintro2 	{If you are going to run in peer-to-peer mode, you just set this in the Preferences panel, and relaunch the Coccinella.}

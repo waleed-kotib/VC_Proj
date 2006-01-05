@@ -4,15 +4,19 @@
 #
 
 array set config {
-    login,style         "username"
-    login,more          1
-    login,profiles      0
-    login,autosave      1
-    autoupdate,do       1
-    autoupdate,url      "http://coccinella.sourceforge.net/updates/update_en.xml"
-    profiles,do         1
-    profiles,profiles   {evaal {localhost "" ""}}
-    profiles,selected   evaal
-    profiles,prefspanel 0
-    ui,pruneMenus       {mInfo {mDebug mCoccinellaHome} mJabber {mNewAccount}}
+    login,style             "username"
+    login,more              1
+    login,profiles          0
+    login,autosave          1
+    login,autoregister      0
+    autoupdate,do           1
+    autoupdate,url          "http://coccinella.sourceforge.net/updates/update_en.xml"
+    profiles,do             1
+    profiles,profiles       {evaal {localhost "" ""}}
+    profiles,selected       evaal
+    profiles,prefspanel     0
+    registerex,server       ""
+    registerex,autoget      0
+    setupass,page,server    1
+    ui,pruneMenus           {mInfo {mDebug mCoccinellaHome} mJabber {mNewAccount}}
 }

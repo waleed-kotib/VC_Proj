@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.52 2005-12-30 14:45:12 matben Exp $
+# $Id: Profiles.tcl,v 1.53 2006-01-05 15:06:16 matben Exp $
 
 package provide Profiles 1.0
 
@@ -157,7 +157,11 @@ proc ::Profiles::Set {name server username password args} {
     
     ::Debug 2 "::Profiles::Set: name=$name, s=$server, u=$username, p=$password, '$args'"
 
-    array set profArr $profiles
+    if {$config(profiles,do)} {
+	array set profArr $cprofiles
+    } else {
+	array set profArr $profiles
+    }
     set allNames [GetAllNames]
     
     # Create a new unique profile name.
@@ -219,6 +223,8 @@ proc ::Profiles::FilterOpts {server args} {
 
 proc ::Profiles::FilterConfigProfile {name server username password args} {
     global  config
+    
+    Debug 2 "::Profiles::FilterConfigProfile $name $server $username $password $args"
     
     # We must NEVER overwrite any values that exist in the 'config' array.
     array set cprofArr $config(profiles,profiles)
@@ -460,6 +466,8 @@ proc ::Profiles::SortProfileList { } {
     global  config
     variable profiles
     variable cprofiles
+    
+    Debug 2 "::Profiles::SortProfileList"
 
     if {$config(profiles,do)} {
 	set prof $cprofiles
@@ -731,7 +739,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     upvar 0 $token state
     variable defaultOptionsArr
     
-    Debug 2 "::Profiles::NotebookOptionWidget"
+    Debug 2 "::Profiles::NotebookOptionWidget w=$w, token=$token"
     
     # Tabbed notebook for more options.
     ttk::notebook $w -style Small.TNotebook -padding {4}
@@ -831,12 +839,28 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     # Set defaults.
     NotebookSetDefaults $token ""
     
+    # Collect all widget paths. Note the trick to get the array name!
+    variable $w
+    upvar 0 $w wstate
+    
+    set wstate(digest)        $wlog.cdig
+    set wstate(priority)      $wlog.sp
+    set wstate(invisible)     $wlog.cinv
+    set wstate(ip)            $wcon.eip
+    set wstate(port)          $wcon.eport
+    set wstate(ssl)           $wcon.cssl
+    set wstate(sasl)          $wcon.csasl
+    set wstate(http)          $whttp.http
+    set wstate(httpurl)       $whttp.u.eurl    
+    
     # Let components ad their own stuff here.
     ::hooks::run profileBuildTabNotebook $w $token
     
     # The components should set their defaults in the hook, which we
     # need to read out here.
     array set defaultOptionsArr [array get state]
+    
+    bind $w <Destroy> {+::Profiles::NotebookOnDestroy %W }
     
     return $w
 }
@@ -849,6 +873,32 @@ proc ::Profiles::NotebookSetDefaults {token server} {
 	set name [string trimleft $key "-"]
 	set state($name) $value
     }
+}
+
+proc ::Profiles::NotebookSetState {w args} {
+    variable $w
+    upvar 0 $w wstate
+
+    foreach {key value} $args {
+	set name [string trimleft $key "-"]
+	$wstate($name) state $value
+    }
+}
+
+
+proc ::Profiles::NotebookSetAllNormal {w} {
+    variable $w
+    upvar 0 $w wstate
+
+    foreach {key value} [array get wstate] {
+	$wstate($key) state {!disabled}
+    }
+}
+
+proc ::Profiles::NotebookOnDestroy {w} {
+    variable $w
+    
+    unset -nocomplain $w
 }
 
 # Profiles::MakeTmpProfArr --

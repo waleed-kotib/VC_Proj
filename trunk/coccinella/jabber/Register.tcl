@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.40 2005-11-02 12:54:09 matben Exp $
+# $Id: Register.tcl,v 1.41 2006-01-05 15:06:16 matben Exp $
 
 package provide Register 1.0
 
@@ -471,18 +471,34 @@ namespace eval ::RegisterEx:: {
 	url             "URL to web page describing the user"
 	date            "Some date (e.g., birth date, hire date, sign-up date)"
     }
+    
+    set ::config(registerex,server)  ""
+    set ::config(registerex,autoget) 0
 }
 
+# RegisterEx::New --
+# 
+#       Register with server using iq-get.
+#       It shall ONLY be used to do in-band registration of new accounts,
+#       NOT for general service registration! 
+#       
+# Arguments:
+#       args:   -server
+#               -username
+#               -password
+#               -autoget
+#       
+# Results:
+#       none
+
 proc ::RegisterEx::New {args} {
-    global  this wDlgs
+    global  this wDlgs config
     
     variable uid
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::RegisterEx::New args=$args"
-    
-    array set argsArr $args
-    
+        
     # State variable to collect instance specific variables.
     set token [namespace current]::[incr uid]
     variable $token
@@ -490,18 +506,24 @@ proc ::RegisterEx::New {args} {
 	
     set w $wDlgs(jreg)[incr uid]
 
-    array set argsArr $args
-    foreach name {server username password} {
-	if {[info exists argsArr(-$name)]} {
-	    set state($name) $argsArr(-$name)
-	}
-    }
-    if {[info exists state(password)]} {
-	set state(password2) $state(password)
-    }
     set state(w)        $w
-    set state(finished) -1
-    set state(server)   ""
+    array set state {
+	finished  -1
+	-autoget   0
+	-server    ""
+    }
+    array set state $args
+    
+    # Let any config override any options.
+    if {$config(registerex,server) ne ""} {
+	set state(-server) $config(registerex,server)
+    }
+    if {$config(registerex,autoget)} {
+	set state(-autoget) $config(registerex,autoget)
+    }
+    if {[info exists state(-password)]} {
+	set state(-password2) $state(-password)
+    }
 
     ::UI::Toplevel $w -class JRegister \
       -macstyle documentProc -usemacmainmenu 1 \
@@ -532,9 +554,13 @@ proc ::RegisterEx::New {args} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack  $wbox  -fill both -expand 1
 
+    if {$state(-server) ne ""} {
+	set str [mc jaregisterexserv $state(-server)]
+    } else {
+	set str [mc jaregisterex]
+    }
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 320 -justify left -anchor w \
-      -text [mc jaregisterex]
+      -padding {0 0 0 6} -wraplength 320 -justify left -anchor w -text $str
     pack  $wbox.msg  -side top -fill x
     
     # Entries etc.
@@ -544,7 +570,7 @@ proc ::RegisterEx::New {args} {
 
     ttk::label $frmid.lserv -text "[mc {Jabber server}]:" -anchor e
     ttk::entry $frmid.eserv -width 22    \
-      -textvariable $token\(server) -validate key  \
+      -textvariable $token\(-server) -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
 	
     grid  $frmid.lserv  $frmid.eserv  -sticky e -pady 0
@@ -610,6 +636,13 @@ proc ::RegisterEx::New {args} {
     set oldFocus [focus]
     focus $frmid.eserv
     ::UI::Grab $w
+    
+    if {$state(-server) ne ""} {
+	$state(wserv) state {disabled}
+    }
+    if {$state(-autoget)} {
+	$state(wbtok) invoke
+    }
     
     # Wait here for a button press and window to be destroyed.
     tkwait variable $token\(finished)
@@ -702,15 +735,15 @@ proc ::RegisterEx::Get {token} {
     ::Jabber::UI::StartStopAnimatedWave 0
     
     # Verify.
-    if {$state(server) == ""} {
+    if {$state(-server) eq ""} {
 	::UI::MessageBox -type ok -icon error  \
 	  -message [mc jamessregnoserver]
 	return
     }	
     # This is just to check the validity!
-    if {[catch {jlib::nameprep $state(server)} err]} {
+    if {[catch {jlib::nameprep $state(-server)} err]} {
 	::UI::MessageBox -icon error -type ok \
-	  -message [mc jamessillegalchar "server" $state(server)]
+	  -message [mc jamessillegalchar "server" $state(-server)]
 	return
     }
     SetState $token disabled
@@ -728,7 +761,7 @@ proc ::RegisterEx::Get {token} {
     }
 
     # Asks for a socket to the server.
-    eval {::Login::Connect $state(server) \
+    eval {::Login::Connect $state(-server) \
       [list [namespace current]::ConnectCB $token]} $opts
 
 }
@@ -746,17 +779,17 @@ proc ::RegisterEx::ConnectCB {token status msg} {
 	error {
 	    NotBusy $token
 	    ::UI::MessageBox -icon error -type ok \
-	      -message [mc jamessnosocket $state(server) $msg]
+	      -message [mc jamessnosocket $state(-server) $msg]
 	}
 	timeout {
 	    NotBusy $token
 	    ::UI::MessageBox -icon error -type ok \
-	      -message [mc jamesstimeoutserver $state(server)]
+	      -message [mc jamesstimeoutserver $state(-server)]
 	}
 	default {
 	    # Go ahead...
 	    if {[catch {
-		::Login::InitStream $state(server) \
+		::Login::InitStream $state(-server) \
 		  [list [namespace current]::StreamCB $token]
 	    } err]} {
 		NotBusy $token
@@ -785,7 +818,7 @@ proc ::RegisterEx::StreamCB {token args} {
 
     # Send get register.
     $jstate(jlib) register_get [list [namespace current]::GetCB $token] \
-      -to $state(server)
+      -to $state(-server)
 }
 
 proc ::RegisterEx::GetCB {token jlibName type iqchild} {    
@@ -840,7 +873,11 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
     foreach tag {username password} {
 	if {[info exists data($tag)]} {
 	    set str "[mc [string totitle $tag]]:"
-	    set state(elem,$tag) ""
+	    if {[info exists state(-$tag)]} {
+		set state(elem,$tag) $state(-$tag)		
+	    } else {
+		set state(elem,$tag) ""
+	    }
 	    ttk::label $wfr.l$tag -text $str -anchor e
 	    if {$tag eq "username"} {
 		ttk::entry $wfr.e$tag  -textvariable $token\(elem,$tag) \
@@ -863,6 +900,9 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
 		  -validatecommand {::Jabber::ValidatePasswordStr %S}
 		grid  $wfr.l2$tag  $wfr.e2$tag  -sticky e -pady 2
 		grid  $wfr.e2$tag  -sticky ew
+	    }
+	    if {[info exists state(-$tag)]} {
+		$wfr.e$tag state {disabled}
 	    }
 	    if {[info exists help($tag)]} {
 		::balloonhelp::balloonforwindow $wfr.l$tag $help($tag)
@@ -935,7 +975,7 @@ proc ::RegisterEx::SendRegister {token} {
     set queryElem [wrapper::createtag "query" \
       -attrlist {xmlns jabber:iq:register} -subtags $sub]
     $jstate(jlib) send_iq "set" [list $queryElem] \
-      -to $state(server) \
+      -to $state(-server) \
       -command [list [namespace current]::SendRegisterCB $token]
 }
 
@@ -951,7 +991,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
     if {![info exists state]} {
 	return
     }
-    set server   $state(server)
+    set server   $state(-server)
     set username $state(elem,username)
     set password $state(elem,password)
 

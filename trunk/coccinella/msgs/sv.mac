@@ -942,7 +942,9 @@ Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jainvitegchat {Bjud in användare till gruppchatt i rum %s}
 ::msgcat::mcset sv jaxformreq   {Fält med (*) är obligatoriska}
 ::msgcat::mcset sv jagcsyncpres {Synkronisera gruppchat med användarens närvaro}
-::msgcat::mcset sv jaloginuser  {Skriv in ditt användarnamn och lösenord för att logga in.}
+::msgcat::mcset sv jaloginuser  {Skriv in ditt användarnamn och lösenord för att logga in på %s.}
+::msgcat::mcset sv jaregnewwith {Önskar du registrera ett nytt konto hos %s.}
+::msgcat::mcset sv jaregisterexserv {Registrera hos tjänsten %s. Du behöver kanske trycka på Hämta om inte registrerings info hämtas automatiskt.}
 
 
 
