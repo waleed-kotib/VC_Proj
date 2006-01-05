@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.73 2005-12-30 14:45:12 matben Exp $
+# $Id: Login.tcl,v 1.74 2006-01-05 15:06:16 matben Exp $
 
 package provide Login 1.0
 
@@ -30,9 +30,10 @@ namespace eval ::Login:: {
     
     # Config settings.
     set ::config(login,style) "jid"  ;# jid | username | parts
-    set ::config(login,more)     1
-    set ::config(login,profiles) 1
-    set ::config(login,autosave) 0
+    set ::config(login,more)         1
+    set ::config(login,profiles)     1
+    set ::config(login,autosave)     0
+    set ::config(login,autoregister) 0
 }
 
 # Login::Dlg --
@@ -100,7 +101,8 @@ proc ::Login::Dlg { } {
     } elseif {$config(login,style) eq "parts"} {
 	set str [mc jalogin]
     } elseif {$config(login,style) eq "username"} {
-	set str [mc jaloginuser]
+	set domain [::Profiles::Get [::Profiles::GetSelectedName] domain]
+	set str [mc jaloginuser $domain]
     }
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 300 -justify left -text $str
@@ -115,8 +117,6 @@ proc ::Login::Dlg { } {
     set wpopup $frmid.popup
         
     set wpopupMenu [ttk::optionmenu $wpopup [namespace current]::menuVar {}]
-    
-    LoadProfiles
 
     # Depending on 'config(login,style)' not all get mapped.
     ttk::label $frmid.ljid -text "[mc {Jabber ID}]:" -anchor e
@@ -210,6 +210,8 @@ proc ::Login::Dlg { } {
     }
     pack $frbot -side bottom -fill x
     
+    LoadProfiles
+    
     # Necessary to trace the popup menu variable.
     trace variable [namespace current]::menuVar w  \
       [namespace current]::TraceMenuVar
@@ -262,7 +264,7 @@ proc ::Login::LoadProfiles { } {
 }
 
 proc ::Login::TraceMenuVar {name key op} {
-    global  prefs this
+    global  prefs this config
     
     variable profile
     variable server
@@ -288,9 +290,14 @@ proc ::Login::TraceMenuVar {name key op} {
 	}
     }
     set resource $tmpProfArr($profile,-resource)
-    set jid      [jlib::joinjid $username $server $resource]
+    set jid [jlib::joinjid $username $server $resource]
     if {!$this(package,tls)} {
 	set moreOpts(ssl) 0
+    }
+    
+    if {0} {
+	::Profiles::NotebookSetAllNormal $w
+	
     }
 }
 
@@ -472,6 +479,7 @@ proc ::Login::LoginCallback {token status {errmsg ""}} {
 #       Show message box if necessary.
 
 proc ::Login::ShowAnyMessageBox {token status {errmsg ""}} {
+    global  config
     variable $token
     upvar 0 $token state
     
@@ -502,8 +510,21 @@ proc ::Login::ShowAnyMessageBox {token status {errmsg ""}} {
 	    set str $errmsg
 	}
     }
-    if {$str != ""} {
-	::UI::MessageBox -icon error -type ok -message $str
+    if {$str ne ""} {
+	set type ok
+	set default ok
+	
+	# Do only try register new account if authorization failed.
+	if {$status eq "authfail" && $config(login,autoregister)} {
+	    append str " " [mc jaregnewwith $state(server)]
+	    set type yesno
+	    set default no
+	}
+	set ans [::UI::MessageBox -icon error -type $type -default $default \
+	  -message $str]
+	if {$ans eq "yes"} {
+	    ::RegisterEx::New -server $state(server) -autoget 1
+	}
     }
 }
 

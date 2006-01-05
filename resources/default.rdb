@@ -78,6 +78,7 @@
 ! contributed widgets
 !
 *Balloonhelp.background:             #ffff9f
+*Balloonhelp.timeout:                4000
 *ChaseArrows.background:             #dedede
 *Combobox.background:                white
 *Combobox.Font:                      CociSmallFont

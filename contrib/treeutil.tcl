@@ -4,9 +4,9 @@
 #       
 #  Copyright (c) 2005
 #  
-#  This source file is distributed under the BSD license.
+#  This source file is distributed under BSD-style license.
 #  
-#  $Id: treeutil.tcl,v 1.9 2005-12-18 08:40:41 matben Exp $
+#  $Id: treeutil.tcl,v 1.10 2006-01-05 15:06:16 matben Exp $
 
 # USAGE:
 # 
@@ -140,9 +140,7 @@ proc treeutil::Generic {w} {
 
 proc treeutil::Generate {w x y item type {id ""}} {
     variable state
-    
-    #puts "Generate item=$item, type=$type, id=$id"
-    
+        
     if {[info exists state($w,$item,$type)]} {
 	array set aid {column "" elem "" line "" button ""}
 	if {[llength $id] == 6} {
