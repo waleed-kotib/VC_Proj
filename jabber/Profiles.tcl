@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.53 2006-01-05 15:06:16 matben Exp $
+# $Id: Profiles.tcl,v 1.54 2006-01-06 10:36:04 matben Exp $
 
 package provide Profiles 1.0
 
@@ -109,9 +109,19 @@ proc ::Profiles::SanityCheck { } {
     set all [GetAllNames]
 
     if {$config(profiles,do)} {
+	
+	# We shall verify that the 'config' array is consistent with 'cprofiles'.
 	if {$cselected eq ""} {
 	    set cselected [lindex $all 0]
 	}
+	array set arr $cprofiles
+	foreach {name spec} $cprofiles {
+	    set prof [eval {FilterConfigProfile $name} $spec]
+	    if {$prof ne {}} {
+		set arr($name) $prof
+	    }
+	}
+	set cprofiles [array get arr]
     } else {
 
 	# Verify that 'selected' exists in 'profiles'.
@@ -339,6 +349,27 @@ proc ::Profiles::FindProfileNameFromJID {jid} {
 	}
     }
     return $profilename
+}
+
+# Profiles::DoConfig --
+# 
+#       Do we use the (partly) hardcoded profiles?
+
+proc ::Profiles::DoConfig { } {
+    global  config
+    
+    return $config(profiles,do)
+}
+
+proc ::Profiles::GetConfigProfile {name} {
+    global  config
+    
+    array set profArr $config(profiles,profiles)
+    if {[info exists profArr($name)]} {
+	return $profArr($name)
+    } else {
+	return
+    }
 }
 
 proc ::Profiles::GetList { } {
@@ -607,6 +638,7 @@ proc ::Profiles::BuildPage {page} {
     variable tmpProfArr
     variable tmpSelected
     variable wpage $page
+    variable wtabnb
     
     # Make temp array for servers. Be sure they are sorted first.
     SortProfileList
@@ -878,20 +910,51 @@ proc ::Profiles::NotebookSetDefaults {token server} {
 proc ::Profiles::NotebookSetState {w args} {
     variable $w
     upvar 0 $w wstate
-
+    
+    set map {!disabled normal}
+    
     foreach {key value} $args {
 	set name [string trimleft $key "-"]
-	$wstate($name) state $value
+	set widget $wstate($name)
+
+	switch -glob -- [winfo class $widget] {
+	    T* {
+		$widget state $value
+	    }
+	    default {
+		$widget configure -state [string map $map $value]
+	    }
+	}
     }
 }
-
 
 proc ::Profiles::NotebookSetAllNormal {w} {
     variable $w
     upvar 0 $w wstate
 
-    foreach {key value} [array get wstate] {
-	$wstate($key) state {!disabled}
+    foreach {key widget} [array get wstate] {
+
+	switch -glob -- [winfo class $widget] {
+	    T* {
+		$widget state {!disabled}
+	    }
+	    default {
+		$widget configure -state normal
+	    }
+	}
+    }
+}
+
+proc ::Profiles::NotebookSetAnyConfigState {w name} {
+    
+    # Disable every option set by any config.
+    if {[DoConfig]} {
+	NotebookSetAllNormal $w
+	set sopts {}
+	foreach {key value} [lrange [GetConfigProfile $name] 3 end] {
+	    lappend sopts $key disabled
+	}
+	eval {NotebookSetState $w} $sopts
     }
 }
 
@@ -976,6 +1039,7 @@ proc ::Profiles::SetCurrentFromTmp {profName} {
     variable password
     variable resource
     variable moreOpts
+    variable wtabnb
 
     Debug 2 "::Profiles::SetCurrentFromTmp profName=$profName"
     
@@ -996,6 +1060,8 @@ proc ::Profiles::SetCurrentFromTmp {profName} {
 	}
     }
     set tmpSelected $profName  
+    
+    NotebookSetAnyConfigState $wtabnb $profName
 }
 
 proc ::Profiles::SaveCurrentToTmp {profName} {

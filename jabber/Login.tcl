@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.74 2006-01-05 15:06:16 matben Exp $
+# $Id: Login.tcl,v 1.75 2006-01-06 10:36:04 matben Exp $
 
 package provide Login 1.0
 
@@ -59,6 +59,7 @@ proc ::Login::Dlg { } {
     variable wtri
     variable wtrilab
     variable wfrmore
+    variable wtabnb
     variable wpopupMenu
     variable tmpProfArr
     upvar ::Jabber::jprefs jprefs
@@ -275,6 +276,7 @@ proc ::Login::TraceMenuVar {name key op} {
     variable menuVar
     variable tmpProfArr
     variable moreOpts
+    variable wtabnb
     
     set profile  [set $name]
     set server   $tmpProfArr($profile,server)
@@ -294,11 +296,7 @@ proc ::Login::TraceMenuVar {name key op} {
     if {!$this(package,tls)} {
 	set moreOpts(ssl) 0
     }
-    
-    if {0} {
-	::Profiles::NotebookSetAllNormal $w
-	
-    }
+    ::Profiles::NotebookSetAnyConfigState $wtabnb $profile
 }
 
 proc ::Login::GetNormalSize {w} {
