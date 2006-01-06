@@ -352,6 +352,7 @@
 ::msgcat::mcset en mStyle         	{Style}
 ::msgcat::mcset en mCall         	{Call}
 ::msgcat::mcset en mForward         	{Forward Call}
+::msgcat::mcset en mBackgroundImage     {Background Image}
 
 
 # Short texts only. Use english text as database key.

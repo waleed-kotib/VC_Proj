@@ -352,6 +352,7 @@
 ::msgcat::mcset sv mStyle         	{Stil}
 ::msgcat::mcset sv mCall         	{Ring}
 ::msgcat::mcset sv mForward         	{Vidarekoppla}
+::msgcat::mcset sv mBackgroundImage     {Bakgrundsbild}
 
 
 
