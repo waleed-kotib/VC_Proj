@@ -2,7 +2,7 @@
 # 
 # Copyright (c) 2006 Antonio Cano damas     
 #  
-# $Id: iax.tcl,v 1.1 2006-01-02 15:17:09 matben Exp $
+# $Id: iax.tcl,v 1.2 2006-01-07 14:54:37 matben Exp $
 
 namespace eval ::iaxClient:: { }
 
@@ -62,8 +62,14 @@ proc ::iaxClient::LoadPrefs { } {
 
 proc ::iaxClient::LogoutHook { } {
     variable prefsPhone
+    variable wtab
     
     iaxclient::unregister $prefsPhone(registerid)
+    if {[winfo exists $wtab]} {
+	set wnb [::Jabber::UI::GetNotebook]
+	$wnb forget $wtab
+	destroy $wtab
+    }
 }
 
 proc ::iaxClient::LoginHook { } {
@@ -170,10 +176,10 @@ proc ::iaxClient::Build {w args} {
       -command [list [namespace current]::hangup $wbox]
 
     ttk::scale $wbox.inputLevel -orient horizontal -length 100 -from 0 -to 100 \
-      -command [::iaxClient::setInputLevel $wbox]
+      -command [list ::iaxClient::setInputLevel $wbox]
 
     ttk::scale $wbox.outputLevel -orient horizontal -length 100 -from 0 -to 100 \
-      -command [::iaxClient::setOutputLevel $wbox]
+      -command [list ::iaxClient::setOutputLevel $wbox]
 
     grid $wbox.e -row 0 -column 2 -sticky news
     grid $wbox.line1 -row 1 -column 1 -sticky news
