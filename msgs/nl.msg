@@ -36,7 +36,7 @@
 ::msgcat::mcset nl City			{Stad}
 ::msgcat::mcset nl Clear		{Leegmaken}
 ::msgcat::mcset nl Client		{Chatprogramma}
-::msgcat::mcset nl Close		{Sluiten}
+::msgcat::mcset nl Close		{Annuleren}
 ::msgcat::mcset nl Conference		{Chatruimte}
 ::msgcat::mcset nl Connect		{Aanmelden}
 ::msgcat::mcset nl Connection		{Verbinding}
@@ -50,7 +50,7 @@
 ::msgcat::mcset nl Delete		{Verwijderen}
 ::msgcat::mcset nl Deny			{Weigeren}
 ::msgcat::mcset nl Department		{Afdeling}
-::msgcat::mcset nl Description		{Beschrijving}
+::msgcat::mcset nl Description		{Notities}
 ::msgcat::mcset nl Drawing		{Tekening}
 ::msgcat::mcset nl Document		{Document}
 ::msgcat::mcset nl Done			{Klaar}
@@ -73,7 +73,7 @@
 ::msgcat::mcset nl Handling		{Behandeling}
 ::msgcat::mcset nl Height		{Hoogte}
 ::msgcat::mcset nl History		{Geschiedenis}
-::msgcat::mcset nl Home			{Start}
+::msgcat::mcset nl Home			{Thuis}
 ::msgcat::mcset nl Image		{Afbeelding}
 ::msgcat::mcset nl Import		{Importeren}
 ::msgcat::mcset nl Inbox		{Postvak in}
@@ -89,7 +89,7 @@
 ::msgcat::mcset nl More			{Meer}
 ::msgcat::mcset nl Name			{Naam}
 ::msgcat::mcset nl Never		{Nooit}
-::msgcat::mcset nl New			{Nieuw}
+::msgcat::mcset nl New			{Aanmaken}
 ::msgcat::mcset nl Next			{Volgende}
 ::msgcat::mcset nl Nick			{Bijnaam}
 ::msgcat::mcset nl Nickname		{Bijnaam}
@@ -145,8 +145,8 @@
 ::msgcat::mcset nl Sounds		{Geluiden}
 ::msgcat::mcset nl Specifications	{Specificaties}
 ::msgcat::mcset nl Speech		{Spraak}
-::msgcat::mcset nl State		{Staat}
-::msgcat::mcset nl State/Region		{Staat/Regio/Provincie}
+::msgcat::mcset nl State		{Provincie}
+::msgcat::mcset nl State/Region		{Provincie}
 ::msgcat::mcset nl Stop			{Stoppen}
 ::msgcat::mcset nl Subject		{Onderwerp}
 ::msgcat::mcset nl Subscribe		{Inschrijven}
@@ -156,7 +156,7 @@
 ::msgcat::mcset nl Text			{Tekst}
 ::msgcat::mcset nl Time			{Tijd}
 ::msgcat::mcset nl Timeout		{Tijdslimiet overschreden}
-::msgcat::mcset nl Title		{Titel}
+::msgcat::mcset nl Title		{Functie}
 ::msgcat::mcset nl To			{Aan}
 ::msgcat::mcset nl Topic		{Onderwerp}
 ::msgcat::mcset nl Transports		{Transporten}
@@ -210,12 +210,12 @@
 ::msgcat::mcset nl mAboutQuickTimeTcl	{Over QuickTimeTcl...}
 ::msgcat::mcset nl mWelcome     	{Welkom}
 ::msgcat::mcset nl mNew			{Nieuw}
-::msgcat::mcset nl mNewWhiteboard	{&Nieuw whiteboard}
+::msgcat::mcset nl mNewWhiteboard	{Nieuw whiteboard}
 ::msgcat::mcset nl mOpenConnection	{Verbinding &openen...}
 ::msgcat::mcset nl mCloseWindow		{Venster &sluiten}
 ::msgcat::mcset nl mStartServer		{Server starten}
 ::msgcat::mcset nl mOpenImage/Movie	{&Afbeelding/film openen...}
-::msgcat::mcset nl mOpenURLStream	{URL stream openen...}
+::msgcat::mcset nl mOpenURLStream	{URL-stream openen...}
 ::msgcat::mcset nl mPutCanvas		{Doek plaatsen}
 ::msgcat::mcset nl mGetCanvas		{Doek ophalen...}
 ::msgcat::mcset nl mPutFile		{Bestand plaatsen...}
@@ -227,7 +227,7 @@
 ::msgcat::mcset nl mSaveImageAs         {Afbeelding opslaan als...}
 ::msgcat::mcset nl mPageSetup		{Pagina-instellingen...}
 ::msgcat::mcset nl mPrintCanvas		{Doek afdrukken...}
-::msgcat::mcset nl mQuit		{&Afsluiten}
+::msgcat::mcset nl mQuit		{Afsluiten}
 ::msgcat::mcset nl mAll			{&Alles selecteren}
 ::msgcat::mcset nl mEraseAll		{Alles uitwissen}
 ::msgcat::mcset nl mUndo		{Ongedaan maken}
@@ -280,7 +280,7 @@
 ::msgcat::mcset nl mMessageInbox	{Postvak in}
 ::msgcat::mcset nl mSearch		{Zoeken...}
 ::msgcat::mcset nl mAddNewUser		{Nieuwe contactpersoon toevoegen...}
-::msgcat::mcset nl mSendMessage		{&Bericht verzenden...}
+::msgcat::mcset nl mSendMessage		{Bericht verzenden...}
 ::msgcat::mcset nl mChat		{Chat}
 ::msgcat::mcset nl mStatus		{Aanwezigheid}
 ::msgcat::mcset nl mDirStatus           {Voorgeschreven aanwezigheid}
@@ -294,7 +294,7 @@
 ::msgcat::mcset nl mEnterRoom		{Chatruimte betreden...}
 ::msgcat::mcset nl mExitRoom		{Chatruimte verlaten}
 ::msgcat::mcset nl mCreateRoom		{Chatruimte aanmaken...}
-::msgcat::mcset nl mvCard		{vCard...}
+::msgcat::mcset nl mvCard		{Persoonlijke info...}
 ::msgcat::mcset nl mRemoveAccount	{Account verwijderen}
 ::msgcat::mcset nl mErrorLog		{Error log...}
 ::msgcat::mcset nl mDebug		{Debug}
@@ -323,9 +323,9 @@
 ::msgcat::mcset nl mTimeCode            {Tijdcode}
 ::msgcat::mcset nl mUserInfo            {Info over contactpersoon...}
 ::msgcat::mcset nl mEditBookmarks       {Bladwijzers bewerken...}
-#::msgcat::mcset nl mToolbar         	{Toolbar}
-#::msgcat::mcset nl mNotebook         	{Notebook}
-#::msgcat::mcset nl mMinimal         	{Minimal}
+::msgcat::mcset nl mToolbar         	{Werkbalk}
+::msgcat::mcset nl mNotebook         	{Laptop}
+::msgcat::mcset nl mMinimal         	{Minimaal}
 
 
 # Popups
@@ -350,13 +350,13 @@
 ::msgcat::mcset nl mOffline		{Offline contactpersonen}
 ::msgcat::mcset nl mTransports		{Transporten}
 ::msgcat::mcset nl mIgnore         	{Negeren}
-#::msgcat::mcset nl mSort         	{Sort}
-#::msgcat::mcset nl mIncreasing         	{Increasing}
-#::msgcat::mcset nl mDecreasing         	{Decreasing}
-#::msgcat::mcset nl mStyle         	{Style}
-#::msgcat::mcset nl mCall         	{Call}
-#::msgcat::mcset nl mForward         	{Forward Call}
-#::msgcat::mcset nl mBackgroundImage     {Background Image}
+::msgcat::mcset nl mSort         	{Sorteren}
+::msgcat::mcset nl mIncreasing         	{A-Z}
+::msgcat::mcset nl mDecreasing         	{Z-A}
+::msgcat::mcset nl mStyle         	{Stijl}
+::msgcat::mcset nl mCall         	{Telefoneer}
+::msgcat::mcset nl mForward         	{Telefoongesprek omleiden}
+::msgcat::mcset nl mBackgroundImage     {Achtergrondafbeelding}
 
 
 
@@ -368,7 +368,7 @@
 ::msgcat::mcset nl {About %s}                   {Over %s}
 ::msgcat::mcset nl {Active <Return>}		{Actieve <enter>}
 ::msgcat::mcset nl {Add New User}		{Nieuwe contactpersoon toevoegen}
-::msgcat::mcset nl {Add permanently}		{Permanent toevoegen}
+::msgcat::mcset nl {Add permanently}		{Permanent}
 ::msgcat::mcset nl {Add Server}			{Server toevoegen}
 ::msgcat::mcset nl {Add Shortcut}		{Snelkoppeling toevoegen}
 ::msgcat::mcset nl {Address 1}			{Adres 1}
@@ -377,7 +377,7 @@
 ::msgcat::mcset nl {Advanced Configuration}	{Geavanceerde configuratie}
 ::msgcat::mcset nl {Alert sounds}		{Alarmgeluiden}
 ::msgcat::mcset nl {As text}			{Als tekst}
-::msgcat::mcset nl {Ask each time}		{Elke keer om bevestiging vragen}
+::msgcat::mcset nl {Ask each time}		{Altijd om bevestiging vragen}
 ::msgcat::mcset nl {Auto Away}			{Automatisch afwezig}
 ::msgcat::mcset nl {Auto Connect}		{Automatisch aanmelden}
 ::msgcat::mcset nl {Auto-accept}		{Automatisch accepteren}
@@ -386,21 +386,21 @@
 ::msgcat::mcset nl {Basic Info}			{Basisinfo}
 ::msgcat::mcset nl {Block JID}			{Jabber ID blokkeren}
 ::msgcat::mcset nl {Bookmark this room}		{Bladwijzer toevoegen}
-#::msgcat::mcset nl {Buddy Pouncing}
+::msgcat::mcset nl {Buddy Pouncing}		{Notificaties}
 ::msgcat::mcset nl {Built in server port}	{Poort van ingebouwde server}
 ::msgcat::mcset nl {Cache folder}		{Cachemap}
 ::msgcat::mcset nl {Canvas Size}		{Grootte van doek}
 ::msgcat::mcset nl {Chat History}		{Geschiedenis}
 ::msgcat::mcset nl {Chat With}			{Chat met}
-::msgcat::mcset nl {Clear Disk Cache Now}	{Wis schijfcache nu}
-::msgcat::mcset nl {Company Name}		{Bedrijfsnaam}
+::msgcat::mcset nl {Clear Disk Cache Now}	{Wis schijfcache}
+::msgcat::mcset nl {Company Name}		{Bedrijf}
 ::msgcat::mcset nl {Component Info}		{Informatie over componenten}
 ::msgcat::mcset nl {Conference server}		{Conferentieserver}
 ::msgcat::mcset nl {Contact Type}		{IM-netwerk}
 ::msgcat::mcset nl {Create Room}		{Chatruimte aanmaken}
 ::msgcat::mcset nl {Default group}		{Standaard groep}
 ::msgcat::mcset nl {Default Logout Status}	{Standaard afmeldaanwezigheid}
-::msgcat::mcset nl {Default status descriptions} {Standaard aanwezigheidsbeschrijvingen}
+::msgcat::mcset nl {Default status descriptions} {Standaardberichten bij aanwezigheid}
 ::msgcat::mcset nl {Delete Rule}		{Regel verwijderen}
 ::msgcat::mcset nl {Disk Cache}			{Schijfcache}
 ::msgcat::mcset nl {Different Passwords}        {Verschillende wachtwoorden}
@@ -415,7 +415,7 @@
 ::msgcat::mcset nl {Empty Fields}		{Lege velden}
 ::msgcat::mcset nl {Enter/Create Room}		{Chatruimte aanmaken}
 ::msgcat::mcset nl {Enter Room}			{Chatruimte betreden}
-::msgcat::mcset nl {Every time}			{Elke keer}
+::msgcat::mcset nl {Every time}			{Altijd}
 ::msgcat::mcset nl {Extended Away status}	{Langdurig afwezig}
 ::msgcat::mcset nl {Factory Settings}		{Fabrieksinstellingen}
 ::msgcat::mcset nl {Fatal Error}		{Fatale fout}
@@ -428,10 +428,10 @@
 ::msgcat::mcset nl {First name}			{Voornaam}
 ::msgcat::mcset nl {Font size}			{Lettergrootte}
 ::msgcat::mcset nl {Font weight}		{Schrijfwijze lettertype}
-::msgcat::mcset nl {Format mm/dd/yyyy}		{Formaat mm/dd/jjjj}
+::msgcat::mcset nl {Format mm/dd/yyyy}		{Formaat: mm/dd/jjjj}
 ::msgcat::mcset nl {Get File}			{Bestand ophalen}
 ::msgcat::mcset nl {Get File Error}		{Bestandsfout ophalen}
-::msgcat::mcset nl {Get vCard}			{vCard ophalen}
+::msgcat::mcset nl {Get vCard}			{Info over contactpersoon ophalen}
 ::msgcat::mcset nl {Getting available rooms...} {De aanwezige chatruimtes worden opgezocht...}
 ::msgcat::mcset nl {Groupchat presence change}	{Wijziging van aanwezigheid in chatruimte}
 ::msgcat::mcset nl {Groupchat-1.0 (fallback)}	{Groupchat-1.0 (terugvalling)}
@@ -464,8 +464,8 @@
 ::msgcat::mcset nl {Local Time}			{Lokale tijd}
 ::msgcat::mcset nl {Logout With Message}        {Met &bericht afmelden}
 ::msgcat::mcset nl {Logged out}           	{Afgemeld}
-::msgcat::mcset nl {Login as invisible}		{Als onzichtbaar aanmelden}
-::msgcat::mcset nl {Mailbox Error}		{Mailbox fout}
+::msgcat::mcset nl {Login as invisible}		{Onzichtbaar aanmelden}
+::msgcat::mcset nl {Mailbox Error}		{Fout met Postvak In}
 ::msgcat::mcset nl {MIME type}			{Bestandstype}
 ::msgcat::mcset nl {Multi Connect}		{Multi connecteren}
 ::msgcat::mcset nl {My Status}			{Mijn aanwezigheid}
@@ -486,8 +486,8 @@
 ::msgcat::mcset nl {New shortcut}		{Nieuwe snelkoppeling}
 ::msgcat::mcset nl {New User}			{Nieuwe contactpersoon}
 ::msgcat::mcset nl {New Version}		{Nieuwe versie}
-::msgcat::mcset nl {My vCard}			{Mijn vCard}
-::msgcat::mcset nl {NAT Address}		{NAT adres}
+::msgcat::mcset nl {My vCard}			{Mijn persoonlijke info}
+::msgcat::mcset nl {NAT Address}		{NAT-adres}
 ::msgcat::mcset nl {Nick name}			{Bijnaam}
 ::msgcat::mcset nl {No Address}			{Geen adres}
 ::msgcat::mcset nl {No Available}		{Niet beschikbaar}
@@ -508,27 +508,27 @@
 ::msgcat::mcset nl {Peer-to-Peer}		{Peer-to-peer}
 ::msgcat::mcset nl {Personal Info}		{Persoonlijke gegevens}
 ::msgcat::mcset nl {Personal Information}	{Persoonelijke gegevens}
-::msgcat::mcset nl {Personal URL}		{Persoonlijke URL}
+::msgcat::mcset nl {Personal URL}		{Website}
 ::msgcat::mcset nl {Pick Directory}		{Map kiezen}
 ::msgcat::mcset nl {Pick File}			{Bestand kiezen}
 ::msgcat::mcset nl {Pick skin}			{Stijl kiezen}
 ::msgcat::mcset nl {Plugin Info}		{Plugin info}
 ::msgcat::mcset nl {Plugin Control}		{Plugincontrole}
-::msgcat::mcset nl {Port number}		{Poortnummer}
+::msgcat::mcset nl {Port number}		{Poort}
 ::msgcat::mcset nl {Postal Code}		{Postnummer}
 ::msgcat::mcset nl {Preferred Protocol}		{Geprefereerd protocol}
-::msgcat::mcset nl {Presence Error}		{Fout inzake aanwezigheid}
+::msgcat::mcset nl {Presence Error}		{Fout met aanwezigheid}
 ::msgcat::mcset nl {Privacy List}		{Privacylijst}
 ::msgcat::mcset nl {Profile Name}         	{Profielnaam}
 ::msgcat::mcset nl {Proxy Setup}		{Proxy instellen}
 ::msgcat::mcset nl {Put File Error}		{Bestandsplaatsingsfout}
 ::msgcat::mcset nl {Put Image/Movie}		{Afbeelding/film plaatsen}
-::msgcat::mcset nl {Reject receive}		{Ontvangen weigeren}
+::msgcat::mcset nl {Reject receive}		{Ontvangst weigeren}
 ::msgcat::mcset nl {Request To User}		{Aanvraag aan contactpersoon}
-::msgcat::mcset nl {Retype password}		{Herhaal het wachtwoord}
+::msgcat::mcset nl {Retype password}		{Wachtwoord herhalen}
 ::msgcat::mcset nl {Revert Panel}		{Paneel omkeren}
-::msgcat::mcset nl {Register New Account}	{Nieuwe account registreren}
-::msgcat::mcset nl {Register Now}		{Nu registreren}
+::msgcat::mcset nl {Register New Account}	{Nieuwe account aanmaken}
+::msgcat::mcset nl {Register Now}		{Nieuwe account aanmaken}
 ::msgcat::mcset nl {Register Service}		{Dienst registreren}
 ::msgcat::mcset nl {Remove Item}		{Contactpersoon verwijderen}
 ::msgcat::mcset nl {Room name}			{Chatruimte}
@@ -548,7 +548,7 @@
 ::msgcat::mcset nl {Send File}			{Bestand verzenden}
 ::msgcat::mcset nl {Send Live}			{Live verzenden}
 ::msgcat::mcset nl {Server Info}		{Servergegevens}
-::msgcat::mcset nl {Service server}		{Server van dienst}
+::msgcat::mcset nl {Service server}		{Dienst}
 ::msgcat::mcset nl {Set Directed Presence} 	{Voorgeschreven aanwezigheid instellen}
 ::msgcat::mcset nl {Set New Nickname}		{Nieuwe bijnaam instellen}
 ::msgcat::mcset nl {Set New Topic}		{Nieuw onderwerp instellen}
@@ -560,7 +560,7 @@
 ::msgcat::mcset nl {Slide Show Folder}		{Map voor diavoorstelling}
 ::msgcat::mcset nl {Software Update}		{Software bijwerken}
 ::msgcat::mcset nl {Sounds & Speech}		{Geluiden & spraak}
-::msgcat::mcset nl {Start Chat}			{Chat starten}
+::msgcat::mcset nl {Start Chat}			{Chatsessie starten}
 ::msgcat::mcset nl {Status message}		{Bericht bij aanwezigheid}
 ::msgcat::mcset nl {Status when logging out}	{Aanwezigheid bij afmelden}
 ::msgcat::mcset nl {Subscription Failed}	{Inschrijven mislukte}
@@ -568,8 +568,8 @@
 ::msgcat::mcset nl {Synthetic speech}		{Synthetische spraak}
 ::msgcat::mcset nl {System fonts}		{Systeemlettertypes}
 ::msgcat::mcset nl {Take Snapshot}		{Schermafdruk maken}
-::msgcat::mcset nl {Tel (voice)}		{Tel}
-::msgcat::mcset nl {Tel (fax)}			{Tel (fax)}
+::msgcat::mcset nl {Tel (voice)}		{Telefoon}
+::msgcat::mcset nl {Tel (fax)}			{Fax}
 ::msgcat::mcset nl {This IP number}		{Dit IP-nummer}
 ::msgcat::mcset nl {Thread started}		{Draad gestart}
 ::msgcat::mcset nl {To/from JID}		{Naar/van Jabber ID}
@@ -578,14 +578,14 @@
 ::msgcat::mcset nl {Type of File}		{Bestandstype}
 ::msgcat::mcset nl {Unknown: Prompt user}	{Onbekend: vraag gebruiker}
 ::msgcat::mcset nl {Url of homepage}		{URL van homepage}
-::msgcat::mcset nl {Use SSL for security}	{Beveiligd verbinden met SSL}
+::msgcat::mcset nl {Use SSL for security}	{Met SSL beveiligen}
 ::msgcat::mcset nl {User is}			{Contactpersoon is}
 ::msgcat::mcset nl {User is offline}		{Contactpersoon is offline}
 ::msgcat::mcset nl {User is online}		{Contactpersoon is online}
 ::msgcat::mcset nl {User Profiles}		{Gebruikersprofielen}
 ::msgcat::mcset nl {User's status changed}	{Aanwezigheid van contactpersoon wijzigde}
 ::msgcat::mcset nl {Username & Password}	{Gebruikersnaam & wachtwoord}
-::msgcat::mcset nl {vCard Info}			{vCard info}
+::msgcat::mcset nl {vCard Info}			{Info over contactpersoon}
 ::msgcat::mcset nl {Version Info}		{Versiegegevens}
 ::msgcat::mcset nl {Whiteboard fonts}		{Whiteboard lettertypes}
 ::msgcat::mcset nl {Writing file}		{Bezig met wegschrijven bestand}
@@ -599,15 +599,15 @@
 ::msgcat::mcset nl {One week}	 		{Eén week}
 
 # Splash screen:
-::msgcat::mcset nl splashsource 	{Tcl-code opzoeken...}
+::msgcat::mcset nl splashsource 	{Tcl-code laden...}
 ::msgcat::mcset nl splashload 		{Tcl-pakketten laden...}
 ::msgcat::mcset nl splashloadsha1 	{Pakket sha1 laden...}
-::msgcat::mcset nl splashsourcejabb 	{Jabber-code opzoeken...}
+::msgcat::mcset nl splashsourcejabb 	{Jabber-code laden...}
 ::msgcat::mcset nl splashhost 		{Hostnaam zoeken...}
 ::msgcat::mcset nl splashinit 		{Initializeren...}
 ::msgcat::mcset nl splashprefs 		{Voorkeuren lezen en instellen...}
 ::msgcat::mcset nl splashbuildmenu	{Menus opbouwen...}
-::msgcat::mcset nl splashbuild 		{Gebruikersomgeving opbouwen...}
+::msgcat::mcset nl splashbuild 		{Interface opbouwen...}
 ::msgcat::mcset nl splashlook 		{Kijken naar}
 
 
@@ -629,7 +629,7 @@
 ::msgcat::mcset nl messfactorydefaults	{Wilt u werkelijk het merendeel van uw aanpassingen verwijderen?}
 ::msgcat::mcset nl messremoveprofile	{Wilt u werkelijk dit profiel verwijderen? Tijdens deze handeling wordt er geen actie ondernomen om uw account te verwijderen.}
 ::msgcat::mcset nl messfillserveruser	{U moet minstens server, naam en gebruikersnaam opgeven.}
-::msgcat::mcset nl messprofinuse	{Dit profiel is reeds in gebruik. Wilt u het overschrijven?}
+::msgcat::mcset nl messprofinuse	{Dit profiel is al in gebruik. Wilt u het overschrijven?}
 ::msgcat::mcset nl messblockbadjid	{Jabber ID "%s" is niet juist gevormd. Wilt u hem opnieuw toevoegen?}
 ::msgcat::mcset nl messfieldsmissing	{Een of meerdere velden ontbreken. Probeer opnieuw of annuleer.}
 ::msgcat::mcset nl messrmstandardfonts	{De standaardlettertypes, Times, Helvetica, en Courier mogen niet verwijderd worden}
@@ -640,10 +640,10 @@
 ::msgcat::mcset nl messprintnoextension	{Een noodzakelijk TCL-pakket is niet beschikbaar :-(}
 ::msgcat::mcset nl messdoquit?		{Wilt u werkelijk afsluiten?}
 ::msgcat::mcset nl messsuassfillin	{Vul eerst alle velden in!}
-::msgcat::mcset nl messsuassclose	{Bent u zeker dat u de setup assistent wilt sluiten? U kunt hem later op elk moment starten vanaf het menu.}
+::msgcat::mcset nl messsuassclose	{Wilt u de installatieassistent afsluiten? U kunt hem later op elk moment starten vanaf het menu.}
 ::msgcat::mcset nl messprotocolch	{U hebt het netwerktype gewijzigd. Dit vereist dat u Coccinella herstart voordat de wijzigingen worden doorgevoerd. Wilt u werkelijk verder gaan?}
-::msgcat::mcset nl messpasswddifferent  {De wachtwoorden komen niet overeen. Probeer alstublieft opnieuw.}
-::msgcat::mcset nl messaupdatelatest    {U hebt reeds de laatste versie (%s)}
+::msgcat::mcset nl messpasswddifferent  {De wachtwoorden komen niet overeen. Probeer opnieuw.}
+::msgcat::mcset nl messaupdatelatest    {U hebt al de laatste versie (%s)}
 ::msgcat::mcset nl messprefsrestart     {Eén of meerdere van deze instellingen vereisen een herstart van Coccinella voordat ze in gebruik worden genomen.}
 
 
@@ -655,9 +655,9 @@
 ::msgcat::mcset nl jamessunsubpres	{%s verwijderde uw autorisatie.}
 ::msgcat::mcset nl jamessunsubask	{%s verwijderde u uit zijn roster. Wilt u %s verwijderen uit uw roster?}
 ::msgcat::mcset nl jamessunsubscribed	{U bent verwijderd uit %s's roster.}
-::msgcat::mcset nl jamesserrpres	{Er deed zich een fout inzake aanwezigheid voor. De foutcode is %s met als foutmelding: %s}
-::msgcat::mcset nl jamessautoaccepted	{U hebt zonet automatisch een autorisatieaanvraag van %s aanvaard.}
-::msgcat::mcset nl jamessautoreject	{U hebt zonet automatisch een autorisatieaanvraag van %s geweigerd.}
+::msgcat::mcset nl jamesserrpres	{Er deed zich een fout met aanwezigheid voor. De foutcode is %s met als foutmelding: %s}
+::msgcat::mcset nl jamessautoaccepted	{U aanvaarde zonet automatisch een autorisatieaanvraag van %s.}
+::msgcat::mcset nl jamessautoreject	{U weigerde zonet automatisch een autorisatieaanvraag van %s.}
 ::msgcat::mcset nl jamessautosubs	{U bent zonet automatisch geautoriseerd voor de aanwezigheid van %s.}
 
 
@@ -666,7 +666,7 @@
 ::msgcat::mcset nl jamesserrgetpublic	{Fout ontvangen bij ophalen van de publiek toegankelijke gegevens van %s. De foutcode is %s met als foutmelding: %s}
 ::msgcat::mcset nl jamesserrlastactive	{Fout ontvangen bij het opvragen bij %s voor laatste activiteit. De fout was: %s}
 ::msgcat::mcset nl jamesserrnotimeinfo	{De client/dienst %s verzende geen tijdsinformatie terug.}
-::msgcat::mcset nl jamesstimeused	{Tijd sinds client "%s" het laatst actief in gebruik was: }
+::msgcat::mcset nl jamesstimeused	{Tijd sinds client "%s" het laatst actief was: }
 ::msgcat::mcset nl jamesstimeconn	{Tijd verstreken sinds "%s" de laatste keer online was: }
 ::msgcat::mcset nl jamesstimeservstart	{Tijd verstreken sinds de server "%s" gestart is: }
 ::msgcat::mcset nl jamessuptime		{De uptime (van diensten) of de laatste activiteit van de contactpersoon bedraagt: }
@@ -679,16 +679,16 @@
   terug wilt toevoegen. Wilt u toch verder gaan?}
 ::msgcat::mcset nl jamessillegalchar	{Ongeldig(e) teken(s) in %s: "%s"!}
 ::msgcat::mcset nl jamessbadjid		{Jabber ID "%s" is niet goed gevormd. Wilt u toch verder gaan?}
-::msgcat::mcset nl jamessalreadyinrost	{Jabber ID "%s" is reeds in uw roster. Wilt u toch verder gaan?}
+::msgcat::mcset nl jamessalreadyinrost	{Jabber ID "%s" is al in uw roster. Wilt u toch verder gaan?}
 ::msgcat::mcset nl jamessfailsetnick	{Er deed zich een fout voor tijdens het instellen van de bijnaam of de groep van contactpersoon "%s". De foutcode is %s met als foutmelding: %s}
 ::msgcat::mcset nl jamessnamemissing	{De %s is afwezig of is te kort!}
 ::msgcat::mcset nl jamessnosocket	{Kan socket naar server "%s" niet creëren. Misschien werkt de netwerkverbinding niet of is de server onbereikbaar. Foutmelding: %s}
 ::msgcat::mcset nl jamesstimeoutserver	{Tijdslimiet overschreden tijdens het wachten op antwoord van server "%s".}
-::msgcat::mcset nl jamessregisterok	{Registratie op server "%s" is gelukt. U moet nu enkel nog aanmelden met de juist opgegeven gebruikersnaam en wachtwoord.}
+::msgcat::mcset nl jamessregisterok	{Uw account op server "%s" is aangemaakt. U moet nu enkel nog aanmelden met de juist opgegeven gebruikersnaam en wachtwoord.}
 ::msgcat::mcset nl jamessremoveaccount	{U staat op het punt om uw account van deze server te verwijderen. Deze handeling kan niet ongedaan gemaakt worden. Wilt u werkelijk verder gaan?}
-::msgcat::mcset nl jamesserrunreg	{Er deed zich een fout voor tijdens het proberen de registratie van "%s" ongedaan te maken. Foutcode %s met als foutmelding %s}
-::msgcat::mcset nl jamessokunreg	{Uw registratie op "%s" is nu ongedaan gemaakt.}
-::msgcat::mcset nl jamesspasswddiff	{De wachtwoorden komen niet overeen. Controleer opnieuw alstublieft.}
+::msgcat::mcset nl jamesserrunreg	{Er deed zich een fout voor tijdens het verwijderen van uw account op "%s". Foutcode %s met als foutmelding %s}
+::msgcat::mcset nl jamessokunreg	{Uw account op "%s" is verwijderd.}
+::msgcat::mcset nl jamesspasswddiff	{De wachtwoorden komen niet overeen. Probeer opnieuw.}
 ::msgcat::mcset nl jamesspasswderr	{Instellen van nieuw wachtwoord mislukte met de foutcode %s met als foutmelding: "%s"}
 ::msgcat::mcset nl jamesspasswdok	{Het nieuwe wachtwoord is met succes ingesteld.}
 ::msgcat::mcset nl jamessregnoserver	{Het is vereist dat de server is ingesteld.}
@@ -697,7 +697,7 @@
 ::msgcat::mcset nl jamessokreg		{Registratie met dienst "%s" is gelukt.}
 ::msgcat::mcset nl jamessinvalidjid	{De Jabber ID is niet juist gevormd. Verzeker u er van dat het veld onderaan het whiteboard een geldig adres bevat voordat u verder gaat. (bv: 'gebruikersnaam@jabber.org').}
 ::msgcat::mcset nl jamessnotconnected	{Kan niet verzenden: er is geen verbinding met een server}
-::msgcat::mcset nl jamessaddrmiss	{U moet minstens één geldig adres invullen}
+::msgcat::mcset nl jamessaddrmiss	{U moet minstens één geldig adres invoeren}
 ::msgcat::mcset nl jamesschatclose	{Als u dit venster sluit, dan verliest u ook de volledige conversatie. Wilt u het werkelijk sluiten?}
 ::msgcat::mcset nl jamessnogroupchat	{Er werd geen dienst voor chatruimtes gevonden}
 ::msgcat::mcset nl jamessgcnoroomname   {U moet een chatruimte opgeven.}
@@ -733,24 +733,24 @@
 ::msgcat::mcset nl jamesssavemsg	{Wilt u dit bericht opslaan?}
 ::msgcat::mcset nl jamessskipsendq	{Adres "%s" is niet correct. Wilt u het overslaan en verzenden naar de anderen?}
 ::msgcat::mcset nl jamessillformresend	{Adres "%s" is niet correct. Corrigeer het en verzend het daarna opnieuw.}
-::msgcat::mcset nl jamesslogin409	{Aanmelden mislukte met foutcode %s omdat deze gebruikersnaam reeds in gebruik is op deze server.\
-  Als u die gebruikersnaam registreerde, probeer dan met de gegevens van die account aan te melden.}
+::msgcat::mcset nl jamesslogin409	{Aanmelden mislukte met foutcode %s omdat deze gebruikersnaam al in gebruik is op deze server.\
+  Als u die gebruikersnaam aangemaakt hebt, probeer dan met de gegevens van uw account aan te melden.}
 ::msgcat::mcset nl jamessloginerr	{Aanmelden mislukte met foutcode %s met als foutmelding: %s}
-::msgcat::mcset nl jamessaddforeign	        {Een contactpersoon op een niet-Jabber IM-netwerk toevoegen, vereist dat u reeds een account hebt op dit netwerk en dat\
-  u deze account gebruikt hebt om te registreren met het overeenkomstige transport %s. Wilt u dit nu doen?}
-::msgcat::mcset nl jamessowntrpt	        {Dit is uw eigen account op %s die ageert als een serverdienst die berichten naar dat IM-netwerk transporteert.\
+::msgcat::mcset nl jamessaddforeign	        {Een contactpersoon op een niet-Jabber IM-netwerk toevoegen, vereist dat u al een account hebt op dit netwerk en dat\
+  u deze account gebruikt hebt om te registreren met het overeenkomstige transport %s. Wilt u nu registreren?}
+::msgcat::mcset nl jamessowntrpt	        {Dit is uw account op %s die ageert als een dienst die berichten naar dat IM-netwerk transporteert.\
   Het is vereist dat deze in uw roster aanwezig is. U hebt een autorisatie voor %s: %s.}
 ::msgcat::mcset nl jamesswbchatlost	        {De volledige conversatie zal verloren gaan wanneer u dit whiteboard sluit. Wilt u werkelijk deze conversatie beëindigen?}
 ::msgcat::mcset nl jamesschatoffline            {Deze contactpersoon is niet meer online waardoor het bericht niet is verzonden.}
 ::msgcat::mcset nl jamessregloginok             {U bent nu geregistreerd en automatisch aangemeld als "%s"}
-::msgcat::mcset nl jamessregerrinuse            {De registratie mislukte omdat deze gebruikersnaam reeds in gebruik is door een andere gebruiker. Als u deze gebruiker bent,\
+::msgcat::mcset nl jamessregerrinuse            {Uw account kon niet worden aangemaakt omdat de gebruikersnaam al in gebruik is door iemand anders. Als dit toch uw account is,\
   probeer dan opnieuw aan te melden. Foutmelding: %s}
 ::msgcat::mcset nl jamessregerr                 {De registratie mislukte met foutmelding: %s}
 ::msgcat::mcset nl jamesstrptsubsc              {Uw geregistreerde account op de dienst %s zal in uw roster geplaatst worden om te dienen als transport voor die dienst.}
 ::msgcat::mcset nl jamessfailedsubsc            {Inschrijving op %s mislukte omdat de contactpersoon weigerde.}
 ::msgcat::mcset nl jamessstarttls-nofeature     {Server "%s" ondersteunt TLS niet.}
-::msgcat::mcset nl jamessstarttls-failure       {Beveiligd verbinden via TLS met server "%s" is mislukt.}
-::msgcat::mcset nl jamessgcinvite               {U werd uigenodigd op de chatruimte %s door %s. Wenst u deze ruimte te betreden?}
+::msgcat::mcset nl jamessstarttls-failure       {Beveiligd verbinden via TLS met server "%s" mislukte.}
+::msgcat::mcset nl jamessgcinvite               {U werd uitgenodigd op de chatruimte %s door %s. Wenst u deze chatruimte te betreden?}
 ::msgcat::mcset nl jamessnorooms                {Kon geen enkele chatruimte vinden op %s.}
 
 
@@ -797,7 +797,7 @@
 ::msgcat::mcset nl prefnetjabb  {Het Jabber-serversysteem. Uitgebreide gebruikersbeheer met vensters via het menu Jabber. Dit gebruikt een op XML gebaseerd protocol.}
 ::msgcat::mcset nl prefnetmulti {Automatisch met alle clients in dit netwerk verbinden wanneer er met één verbonden wordt.}
 ::msgcat::mcset nl prefnetadv   {Een client draait normaal twee verschillende servers, de ingebouwde server die altijd aanwezig is bij peer-to-peer, en een HTTP-server.\
-  De Jabber-server verwijst normaal naar een server op afstand die meestal poort 5222 gebruikt. Onderstaande poortnummers worden pas gebruikt na een herstart van Coccinella.}
+  De Jabber-server verwijst normaal naar een server op afstand die meestal poort 5222 gebruikt. Onderstaande poorten worden pas gebruikt na een herstart van Coccinella.}
 ::msgcat::mcset nl prefsounsynwb {Laat de tekst in het whiteboard uitspreken door een synthetische stem}
 ::msgcat::mcset nl prefsounsynno {Laat de tekst in normale berichten uitspreken door een synthetische stem}
 ::msgcat::mcset nl prefsounsynch {Laat de tekst tijdens chat uitspreken door een synthetische stem}
@@ -853,7 +853,7 @@
 ::msgcat::mcset nl preffilecache {De cache wordt gebruikt om lokale kopieën van bestanden van andere contactpersonen te bewaren. Dit vermindert de vereiste tijd.\
   De grootte van de lokale schijfcache wordt gelimiteerd door de instellingen hieronder.}
 ::msgcat::mcset nl prefcachecmp  {Bestand in cache vergelijken met bestand op afstand}
-::msgcat::mcset nl prefnatip     {Volgend IP-adres aan de buitenwereld geven (nodig in NAT-omgeving)}
+::msgcat::mcset nl prefnatip     {IP-adres of domeinnaam voor de buitenwereld:}
 ::msgcat::mcset nl prefmucconf   {Multi-User-Chat protocol met Conference protocol als backup}
 ::msgcat::mcset nl prefrostbgim  {Achtergrondafbeelding (gif) in roster gebruiken}
 ::msgcat::mcset nl preftheme     {Thema kiezen (dit vereist het herstarten van Coccinella)}
@@ -862,7 +862,7 @@
 ::msgcat::mcset nl prefchnormal  {Normale berichten als chatberichten behandelen}
 ::msgcat::mcset nl prefprofname  {Voer de gewenste naam voor het gebruikersprofiel in}
 ::msgcat::mcset nl prefstabui    {Laptopinterface met tabbladen aanzetten}
-::msgcat::mcset nl prefsusesasl  {Authenticatie met SASL doen}
+::msgcat::mcset nl prefsusesasl  {Met SASL authenticeren}
 ::msgcat::mcset nl prefprivmsg {Elke gebruiker kan een zelf te kiezen aantal lijsten beheren. Alleen de actieve of standaardlijst beïnvloedt het verwerken van berichten. Een actieve lijst beïnvloedt enkel de huidige sessie. De standaardlijst wordt gebruikt indien er geen actieve lijst is.}
 ::msgcat::mcset nl prefprivunav {Filteropties zijn offline niet beschikbaar}
 ::msgcat::mcset nl prefprivnotex {Filteropties zijn op deze server niet beschikbaar}
@@ -891,7 +891,7 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl janewpass    {Stel nieuw wachtwoord in voor:}
 ::msgcat::mcset nl jasubwant    {"%s" wilt u toevoegen aan zijn roster.}
 ::msgcat::mcset nl jasubopts    {Kies uit de onderstaande opties. Het opgeven van een bijnaam en groep is optioneel.}
-::msgcat::mcset nl jasubgetvcard {vCard van deze persoon bekijken}
+::msgcat::mcset nl jasubgetvcard {Info over contactpersoon bekijken}
 ::msgcat::mcset nl jasubsndmsg  {Bericht naar deze persoon verzenden:}
 ::msgcat::mcset nl jasuballow   {"%s" toelaten om mijn aanwezigheid te zien}
 ::msgcat::mcset nl jasubadd     {"%s" toevoegen aan mijn roster}
@@ -900,7 +900,7 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jarostset	{Stel bijnaam en groep van "%s" in. Deze gegevens kunnen later nog altijd ingesteld of gewijzigd worden.}
 ::msgcat::mcset nl jarostsub	{Deze contactpersoon autoriseren}
 ::msgcat::mcset nl jarostunsub	{Autorisatie van deze contactpersoon verwijderen}
-::msgcat::mcset nl jasearch	{Contactpersoon met de gekozen dienst zoeken. Druk op "Ophalen" als u een nieuw formulier wilt invullen.}
+::msgcat::mcset nl jasearch	{Contactpersoon met de gekozen dienst zoeken. Druk op de knop "Ophalen" als u een nieuw formulier wilt invullen.}
 ::msgcat::mcset nl jasearchwait	{Druk nu op ontvangen}
 ::msgcat::mcset nl jaservclosed	{Verbinding met server verbroken.}
 ::msgcat::mcset nl jarostupdate {Het roster is up to date}
@@ -910,12 +910,12 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jaerrlogin	{Aanmelden op %s mislukte: %s}
 ::msgcat::mcset nl jaauthok	{Autorisatie met server "%s" is gelukt. Bezig met ophalen van roster...}
 ::msgcat::mcset nl jagchatmsg	{Kies een dienst voor chatruimtes, selecteer een chatruimte en geef uw naam en bijnaam op}
-::msgcat::mcset nl jacreateroom	{Selecteer een dienst voor chatruimtes en voer eventueel een chatruimte in. Druk dan op "Ophalen" om de specificatie voor het aanmaken van de gewenste\
+::msgcat::mcset nl jacreateroom	{Selecteer een dienst voor chatruimtes en voer eventueel een chatruimte in. Druk dan op de knop "Ophalen" om de specificatie voor het aanmaken van de gewenste\
   chatruimte af te halen (elke server kan verschillende vereisten hebben).}
 ::msgcat::mcset nl jawaitserver	{Bezig met wachten op server...}
-::msgcat::mcset nl jaregmsg	{Registratie voor een specifieke dienst op deze server. Als u al geregistreerd bent, dan kunt u hiermee uw persoonlijke gegevens publiceren.}
+::msgcat::mcset nl jaregmsg	{Als u al geregistreerd bent op deze dienst, dan kunt u hier uw persoonlijke info publiceren.}
 ::msgcat::mcset nl jastatavailable {Beschikbaar}
-::msgcat::mcset nl jastatchat	{Beschikbaar om te chatten: beschikbaar voor onmiddelijk contact}
+::msgcat::mcset nl jastatchat	{Beschikbaar om te chatten}
 ::msgcat::mcset nl jastataway	{Afwezig: online, maar momenteel afwezig}
 ::msgcat::mcset nl jastatxa	{Langdurig afwezig: online, maar tijdelijk inactief}
 ::msgcat::mcset nl jastatdnd	{Niet storen}
@@ -932,44 +932,43 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jatlsnegot   {Bezig met beveiligd verbinden via TLS...}
 ::msgcat::mcset nl jamucentermsg {Voer een bijnaam in en druk op de knop "Betreden" om een chatruimte te betreden. U kunt met de knop "Browse" een lijst van chatruimtes ophalen op de geselecteerde server. Voor sommige chatruimtes hebt u een wachtwoord nodig.}
 ::msgcat::mcset nl jainmsgshow {Inkomende berichten in dit venster laten zien}
-::msgcat::mcset nl jadisaddserv {Hiermee kunt u een server toevoegen. U kunt een server permanent toevoegen waardoor die dan steeds in de lijst verschijnt. Bij de server waarop u aanmeldt is dit altijd het geval.}
-::msgcat::mcset nl jadisrmall {Alle permanente servers uit de lijst verwijderen.}
-::msgcat::mcset nl jauserinnote {Uw persoonlijke opmerkingen over deze contactpersoon kunt u hier bewaren}
-::msgcat::mcset nl jaregisterex {Voer de naam van de Jabber-server in waarop u een account wilt aanmaken. Druk vervolgens op de knop "Ophalen" om de gewenste registratiegegevens af te halen. Voer de nodige gegevens in en registreer.}
+::msgcat::mcset nl jadisaddserv {Hier kunt u een server al dan niet permanent aan de lijst toevoegen. De server van uw account is altijd zichtbaar.}
+::msgcat::mcset nl jadisrmall {Permanente servers uit de lijst verwijderen.}
+::msgcat::mcset nl jauserinnote {Uw persoonlijke notities over deze contactpersoon kunt u hier bewaren.}
+::msgcat::mcset nl jaregisterex {Voer de naam in van de Jabber-server waarop u een account wilt aanmaken. Druk daarna op de knop "Ophalen" om de vereiste gegevens op te halen. Voer de gevraagde gegevens in en maak de account aan.}
 ::msgcat::mcset nl jaloginjid   {Voer uw Jabber ID in, in de vorm "joey@myjabb.org" of kies een profiel. U beschikt normaal al over een account op deze server.}
 ::msgcat::mcset nl jaregalready {U bent al geregistreerd op deze dienst. Dit zijn uw huidige instellingen van uw registratie.}
 ::msgcat::mcset nl jaactiveret {De enter-toets zal het bericht verzenden wanneer dit is aangevinkt. Anders moet u ctrl/cmd + enter gebruiken.}
 ::msgcat::mcset nl jainvitegchat {Een contactpersoon uitnodigen op chatruimte %s}
 ::msgcat::mcset nl jaxformreq   {Labels met (*) zijn verplicht.}
 ::msgcat::mcset nl jagcsyncpres {Aanwezigheid van chatruimtes synchronizeren met de globale aanwezigheid}
-#::msgcat::mcset nl jaloginuser  {Enter your username and password to login to %s.}
-#::msgcat::mcset nl jaregnewwith {Do you want to register a new account with %s.}
-#::msgcat::mcset nl jaregisterexserv {Register with the service %s. You may need to press the Get button if not registration info obtained automatically.}
+::msgcat::mcset nl jaloginuser  {Voer uw gebruikersnaam en wachtwoord in om aan te melden op %s.}
+::msgcat::mcset nl jaregnewwith {Wilt u een nieuwe account aanmaken op %s?}
+::msgcat::mcset nl jaregisterexserv {Registreer op de dienst %s. U moet misschien op de knop "Ophalen" drukken als de nodige gegevens niet vanzelf worden opgehaald.}
 
 
 # Setup assistant:
-::msgcat::mcset nl suintro1 	{Dit is een installatieassistent om u te helpen bij het invullen van de vereiste gegevens voor een nieuwe of bestaande account op een Jabber-server.}
+::msgcat::mcset nl suintro1 	{Deze assistent helpt u bij het instellen van een nieuwe of bestaande Jabber-account.}
 ::msgcat::mcset nl suintro2 	{Als u van plan bent in peer-to-peer modus te werken dan moet u dit instellen bij "Voorkeuren" en daarna Coccinella herstarten.}
-::msgcat::mcset nl suintro3 	{U kunt op elk moment op "Vorige" klikken om terug te gaan. Volg de instructies op elke pagina op en druk op "Volgende" tot u alle pagina's hebt doorlopen.}
-::msgcat::mcset nl sulang       {Kies een taal. Als u de taal wijzigt dan moet u Coccinella herstarten voor de hele interface in die taal is.}
-::msgcat::mcset nl suservmsg	{Vul de naam van de Jabber-server in waar u een account op wilt hebben. Als u al een account hebt op een Jabber-server, vul dan de naam in van die server. (bv: "jabber.org")}
-::msgcat::mcset nl suusermsg	{Vul uw gebruikersnaam en wachtwoord in. De gebruikersnaam mag nog niet bestaan op de gespecificeerde server, tenzij u er al een account op hebt.\
-  Als de gebruikersnaam reeds in gebruik is door iemand anders, dan zal dit gemeld worden wanneer u probeert te registreren.}
-::msgcat::mcset nl suregmsg	{Wilt u een nieuwe account registreren? Om te registreren moet u verbonden zijn met een netwerk (let op een eventuele firewall!).}
-::msgcat::mcset nl sufinmsg	{Meer is het niet. Als de registratie gelukt is dan hoeft u enkel nog op Aanmelden te klikken. Wees tenslotte ook lief tegen het insect ;-)}
-::msgcat::mcset nl suheadtxt	{Coccinella Installatieassistent}
+::msgcat::mcset nl suintro3 	{U kunt op elk moment op de knop "Vorige" klikken om terug te gaan. Druk op de knop "Volgende" om naar de volgende stap te gaan.}
+::msgcat::mcset nl sulang       {Kies uw taal. U moet Coccinella herstarten voor de hele interface aangepast is aan de gekozen taal.}
+::msgcat::mcset nl suservmsg	{Voer de naam van de Jabber-server in waar u een account op wilt aanmaken. Als u al een account hebt op een Jabber-server, voer dan de naam in van die server. (bv: "jabber.org")}
+::msgcat::mcset nl suusermsg	{Voer uw gebruikersnaam en wachtwoord in. De gebruikersnaam mag nog niet bestaan op de gekozen server, tenzij u er al een account op hebt.\
+  Als de gebruikersnaam al in gebruik is door iemand anders, dan zal dit gemeld worden wanneer u probeert te registreren.}
+::msgcat::mcset nl suregmsg	{Druk op onderstaande knop als u een nieuwe account wilt aanmaken. Om te registreren moet u verbonden zijn met het internet (let op een eventuele firewall!).}
+::msgcat::mcset nl sufinmsg	{Veel chatplezier! Wees lief voor het insect ;-)}
+::msgcat::mcset nl suheadtxt	{Coccinella's installatieassistent}
 
 
 
-::msgcat::mcset nl vcardget	{vCard van %s ophalen. Bezig met wachten op antwoord van de server...}
-::msgcat::mcset nl vcarderrget	{Fout tijdens ophalen van vCard. Het resultaat was: %s}
-::msgcat::mcset nl vcardrec	{vCard-gegevens ontvangen.}
+::msgcat::mcset nl vcardget	{Info over %s ophalen. Bezig met wachten op antwoord van de server...}
+::msgcat::mcset nl vcarderrget	{Fout tijdens ophalen van info over contactpersoon. De foutmelding is: %s}
+::msgcat::mcset nl vcardrec	{Info over contactpersoon ontvangen.}
 
 
 
 ::msgcat::mcset nl autoupdatenot        {Automatische controle voor updates uitschakelen}
-::msgcat::mcset nl oobmsg               {Laat %s een bestand via de ingebouwde\
-server downloaden. Een beschrijving is optioneel.}
+::msgcat::mcset nl oobmsg               {Verzend een bestand naar %s. Een beschrijving is optioneel.}
 ::msgcat::mcset nl chatcompreply        {%s stelt momenteel een antwoord op}
 
 # Get file
@@ -999,30 +998,30 @@ server downloaden. Een beschrijving is optioneel.}
 ::msgcat::mcset nl putneterr       {Netwerkfout tijdens plaatsen op %s.}
 
 # These are specific for phones (VoIP)
-#::msgcat::mcset nl phoneMakeCall           {Make a call}
-#::msgcat::mcset nl phoneMakeForward        {Forward current call to...}
-#::msgcat::mcset nl phoneRing               {Ring, ring...}
-#::msgcat::mcset nl phoneRingFrom           {Phone is ringing from %s}
-#::msgcat::mcset nl phoneFailedCalling      {Failed calling %s}
-#::msgcat::mcset nl phoneDial               {Dial}
-#::msgcat::mcset nl phoneNumber             {Number}
-#::msgcat::mcset nl phoneDialerCall         {Call to...}
-#::msgcat::mcset nl phoneDialerForward      {Forward to...}
+::msgcat::mcset nl phoneMakeCall           {Telefoneer}
+::msgcat::mcset nl phoneMakeForward        {Huidig telefoongesprek omleiden naar...}
+::msgcat::mcset nl phoneRing               {Ring, ring...}
+::msgcat::mcset nl phoneRingFrom           {Inkomend telefoongesprek van %s}
+::msgcat::mcset nl phoneFailedCalling      {Telefoneren naar %s mislukte}
+::msgcat::mcset nl phoneDial               {Telefoneren}
+::msgcat::mcset nl phoneNumber             {Nummer}
+::msgcat::mcset nl phoneDialerCall         {Telefoneren naar...}
+::msgcat::mcset nl phoneDialerForward      {Omleiden naar...}
 
-#::msgcat::mcset nl AddressBook		{Address Book}
-#::msgcat::mcset nl newAddressbookDlg	{New address book}
-#::msgcat::mcset nl newAddressbook       {New address book}
-#::msgcat::mcset nl abName		{Name}
-#::msgcat::mcset nl abPhone		{Phone number}
-#::msgcat::mcset nl modifyAddressbookDlg {Modify address book}
-#::msgcat::mcset nl modifyAddressbook	{Modify address book}
-#::msgcat::mcset nl mNewAB		{New}
-#::msgcat::mcset nl mModifyAB		{Modify}
-#::msgcat::mcset nl mRemoveAB		{Remove}
+::msgcat::mcset nl AddressBook		{Adresboek}
+::msgcat::mcset nl newAddressbookDlg	{Nieuw adresboek}
+::msgcat::mcset nl newAddressbook       {Nieuw adresboek}
+::msgcat::mcset nl abName		{Naam}
+::msgcat::mcset nl abPhone		{Telefoonnummer}
+::msgcat::mcset nl modifyAddressbookDlg {Adresboek wijzigen}
+::msgcat::mcset nl modifyAddressbook	{Adresboek wijzigen}
+::msgcat::mcset nl mNewAB		{Nieuw}
+::msgcat::mcset nl mModifyAB		{Wijzigen}
+::msgcat::mcset nl mRemoveAB		{Verwijderen}
 
-#::msgcat::mcset nl notifyCall           {Notify call}
-#::msgcat::mcset nl inboundCall          {Inbound call}
-#::msgcat::mcset nl callHungUp           {Hung up}
-#::msgcat::mcset nl callVM               {Call VM?}
+::msgcat::mcset nl notifyCall           {Telefoongesprek melden}
+::msgcat::mcset nl inboundCall          {Inkomend telefoongesprek}
+::msgcat::mcset nl callHungUp           {Ophangen}
+::msgcat::mcset nl callVM               {Wilt u naar VM telefoneren?}
 
 # END --------------------------------------------------------------------------
