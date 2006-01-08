@@ -1024,4 +1024,9 @@ En sak till, var snäll mot nyckelpigan ;-)}
 ::msgcat::mcset sv mModifyAB		{Ändra}
 ::msgcat::mcset sv mRemoveAB		{Ta bort}
 
+::msgcat::mcset sv notifyCall           {Notify call}
+::msgcat::mcset sv inboundCall          {Inbound call}
+::msgcat::mcset sv callHungUp           {Lägg på}
+::msgcat::mcset sv callVM               {Call VM?}
+
 # END --------------------------------------------------------------------------

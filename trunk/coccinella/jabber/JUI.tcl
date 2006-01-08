@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.107 2006-01-04 11:02:40 matben Exp $
+# $Id: JUI.tcl,v 1.108 2006-01-08 14:02:14 matben Exp $
 
 package provide JUI 1.0
 
@@ -142,9 +142,7 @@ proc ::Jabber::UI::Init { } {
 
     if {[tk windowingsystem] eq "aqua"} {
 	set menuDefs(rost,info) {    
-	    {command     mSetupAssistant {
-		package require SetupAss; ::Jabber::SetupAss::SetupAss
-	    }                             normal {}}
+	    {command     mSetupAssistant {::Jabber::SetupAss::SetupAss}  normal {}}
 	    {command     mComponents    {::Dialogs::InfoComponents}   normal   {}}
 	    {command     mErrorLog      {::Jabber::ErrorLogDlg}       normal   {}}
 	    {checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \
@@ -339,7 +337,7 @@ proc ::Jabber::UI::Build {w} {
     ttk::frame $wfstat.cont
     ttk::label $wfstat.me -textvariable ::Jabber::jstate(mejid) -anchor w
     pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
-    pack  $wfstat.me  -fill x -expand 1
+    pack  $wfstat.me  -fill x -expand 1 -padx 2 -pady 2
     if {[tk windowingsystem] eq "aqua"} {
 	pack $wfstat.me -padx 6
     }

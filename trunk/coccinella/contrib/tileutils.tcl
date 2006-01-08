@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.11 2005-12-27 14:53:55 matben Exp $
+# $Id: tileutils.tcl,v 1.12 2006-01-08 14:02:14 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -181,7 +181,18 @@ proc tileutils::LoadImages {imgdir {patterns {*.gif}}} {
     foreach file [eval {glob -nocomplain -directory $imgdir} $patterns] {
 	set name [file tail [file rootname $file]]
 	if {![info exists tiles($name)]} {
-	    set tiles($name) [image create photo -file $file]
+	    set ext [file extension $file]
+	    
+	    switch -- $ext {
+		.gif - .png {
+		    set format [string trimleft $ext "."]
+		    set tiles($name) [image create photo -file $file \
+		      -format $format]
+		}
+		default {
+		    set tiles($name) [image create photo -file $file]
+		}
+	    }
 	}
     }
 }
@@ -209,60 +220,11 @@ proc tileutils::MakeFonts {} {
     
 }
 
-if {0} {
-    toplevel .t
-    set w .t.f
-    if {1} {
-	pack [ttk::frame .t.f] -expand 1 -fill both
-    } else {
-	pack [frame .t.f -bg gray80] -expand 1 -fill both
-    }    
-    set f "/Users/matben/Graphics/Crystal Clear/16x16/apps/clock.png"
-    set name [image create photo -file $f]
-    ttk::label $w.l1 -style Sunken.TLabel  \
-      -text "Mats Bengtsson" -image $name -compound right
-
-    set f "/Users/matben/Graphics/Crystal Clear/16x16/apps/mac.png"
-    set name [image create photo -file $f]
-    ttk::label $w.l2 -style Small.Sunken.TLabel  \
-      -text "I love my Macintosh" -image $name -compound left
-
-    set f "/Users/matben/Graphics/Crystal Clear/16x16/apps/bell.png"
-    set name [image create photo -file $f]
-    ttk::label $w.l3 -style Sunken.TLabel  \
-      -text "Mats Bengtsson" -image $name -compound right -font CociLargeFont
-    
-    ttk::label $w.l4 -style Sunken.TLabel  \
-      -text "Plain no padding: glMXq"
-
-    ttk::label $w.l5 -style Sunken.TLabel  \
-      -text "With -padding {20 6}" -padding {20 6}
-    
-    ttk::entry $w.e1 -style Sunken.TEntry
-    ttk::entry $w.e2 -style Small.Sunken.TEntry -font CociSmallFont
-    
-    proc cmd {args} {puts xxxxxxxx}
-    ttk::button $w.b1 -style Url -text www.home.se -command cmd
-    ttk::button $w.b2 -style Small.Url -text www.smallhome.se -class TUrl \
-      -command cmd
-    
-    frame $w.f
-    ttk::label $w.f.l -style Sunken.TLabel -compound image -image $name
-    grid  $w.f.l  -sticky news
-    grid columnconfigure $w.f 0 -minsize [expr {2*4 + 2*4 + 64}]
-    grid rowconfigure    $w.f 0 -minsize [expr {2*4 + 2*4 + 64}]
-
-    pack $w.l1 $w.l2 $w.l3 $w.l4 $w.l5 $w.e1 $w.e2 $w.b1 $w.b2 $w.f \
-      -padx 20 -pady 10
-    
-}
-
+set dir [file join [file dirname [info script]] tiles]
+tileutils::LoadImages $dir {*.gif *.png}
+tileutils::MakeFonts
     
 foreach name [tile::availableThemes] {
-    
-    set dir [file join [file dirname [info script]] tiles]
-    tileutils::LoadImages $dir {*.gif *.png}
-    tileutils::MakeFonts
     
     # @@@ We could be more economical here and load theme only when needed.
     if {[catch {package require tile::theme::$name}]} {
@@ -318,6 +280,54 @@ proc tuoptionmenu {w varName firstValue args} {
     } else {
 	return [eval {ttk::optionmenu $w $varName $firstValue} $args]
     }
+}
+
+if {0} {
+    toplevel .t
+    set w .t.f
+    if {1} {
+	pack [ttk::frame .t.f] -expand 1 -fill both
+    } else {
+	pack [frame .t.f -bg gray80] -expand 1 -fill both
+    }    
+    set f "/Users/matben/Graphics/Crystal Clear/16x16/apps/clock.png"
+    set name [image create photo -file $f]
+    ttk::label $w.l1 -style Sunken.TLabel  \
+      -text "Mats Bengtsson" -image $name -compound right
+
+    set f "/Users/matben/Graphics/Crystal Clear/16x16/apps/mac.png"
+    set name [image create photo -file $f]
+    ttk::label $w.l2 -style Small.Sunken.TLabel  \
+      -text "I love my Macintosh" -image $name -compound left
+
+    set f "/Users/matben/Graphics/Crystal Clear/16x16/apps/bell.png"
+    set name [image create photo -file $f]
+    ttk::label $w.l3 -style Sunken.TLabel  \
+      -text "Mats Bengtsson" -image $name -compound right -font CociLargeFont
+    
+    ttk::label $w.l4 -style Sunken.TLabel  \
+      -text "Plain no padding: glMXq"
+
+    ttk::label $w.l5 -style Sunken.TLabel  \
+      -text "With -padding {20 6}" -padding {20 6}
+    
+    ttk::entry $w.e1 -style Sunken.TEntry
+    ttk::entry $w.e2 -style Small.Sunken.TEntry -font CociSmallFont
+    
+    proc cmd {args} {puts xxxxxxxx}
+    ttk::button $w.b1 -style Url -text www.home.se -command cmd
+    ttk::button $w.b2 -style Small.Url -text www.smallhome.se -class TUrl \
+      -command cmd
+    
+    frame $w.f
+    ttk::label $w.f.l -style Sunken.TLabel -compound image -image $name
+    grid  $w.f.l  -sticky news
+    grid columnconfigure $w.f 0 -minsize [expr {2*4 + 2*4 + 64}]
+    grid rowconfigure    $w.f 0 -minsize [expr {2*4 + 2*4 + 64}]
+
+    pack $w.l1 $w.l2 $w.l3 $w.l4 $w.l5 $w.e1 $w.e2 $w.b1 $w.b2 $w.f \
+      -padx 20 -pady 10
+    
 }
 
 #-------------------------------------------------------------------------------

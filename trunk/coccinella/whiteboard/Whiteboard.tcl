@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.55 2006-01-04 11:02:40 matben Exp $
+# $Id: Whiteboard.tcl,v 1.56 2006-01-08 14:02:21 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -628,6 +628,8 @@ proc ::WB::InitMenuDefs { } {
 	} else {
 	    set f $fen
 	}
+	# Important to protect any $ since we do 'subst'.
+	set f [string map {$ \\$} $f]
 	lappend infoDefs [list \
 	  command m${name} [list ::Dialogs::Canvas $f -title $name] normal {}]
     }
@@ -658,8 +660,8 @@ proc ::WB::InitMenuDefs { } {
     }
     
     # Used only on mac until the -postcommand bug fixed.
-    set menuDefs(main,items) [::WB::MakeItemMenuDef $this(itemPath)]
-    set altItemsMenuDefs     [::WB::MakeItemMenuDef $this(altItemPath)]
+    set menuDefs(main,items) [MakeItemMenuDef $this(itemPath)]
+    set altItemsMenuDefs     [MakeItemMenuDef $this(altItemPath)]
     if {[llength $altItemsMenuDefs]} {
 	lappend menuDefs(main,items) {separator}
 	set menuDefs(main,items) [concat $menuDefs(main,items) $altItemsMenuDefs]
@@ -2703,7 +2705,9 @@ proc ::WB::MakeItemMenuDef {dir} {
 	} elseif {[string equal [file extension $f] ".can"]} {
 	    set name [file rootname [file tail $f]]
 	    set cmd {::CanvasFile::DrawCanvasItemFromFile $w}
-	    lappend cmd $f
+
+	    # Important to protect any $ since we do 'subst'.
+	    lappend cmd [string map {$ \\$} $f]
 	    lappend mdef [list command $name $cmd normal {}]
 	}
     }

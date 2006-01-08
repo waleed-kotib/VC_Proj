@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.119 2006-01-04 11:02:40 matben Exp $
+# $Id: UI.tcl,v 1.120 2006-01-08 14:02:14 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1143,15 +1143,15 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef state args} {
 		# All variables (and commands) in menuDef's cmd shall be 
 		# substituted! Be sure they are all in here.
 
-		# @@@ BUG [ 1340712 ] Ex90 Error when trying to start New whiteboard 
+		# BUG: [ 1340712 ] Ex90 Error when trying to start New whiteboard 
+		# FIX: protect menuDefs [string map {$ \\$} $f]
+		# @@@ No spaces allowed in variables!
 		set cmd [subst -nocommands $cmd]
-		#set cmd [eval list $cmd]
 		if {[string length $accel]} {
 		    lappend mopts -accelerator ${mod}+${accel}
 
 		    # Cut, Copy & Paste handled by widgets internally!
-		    if {![string equal $this(platform) "macintosh"] \
-		      && ![regexp {(X|C|V)} $accel]} {
+		    if {![regexp {(X|C|V)} $accel]} {
 			set key [string map {< less > greater}  \
 			  [string tolower $accel]]
 			

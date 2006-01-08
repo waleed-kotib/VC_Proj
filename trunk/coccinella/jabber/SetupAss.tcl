@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.35 2006-01-05 15:06:16 matben Exp $
+# $Id: SetupAss.tcl,v 1.36 2006-01-08 14:02:14 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -19,15 +19,11 @@ namespace eval ::Jabber::SetupAss::  {
     variable server
     variable haveRegistered 0
     variable finished 0
+    variable inited 0
 
     # Icons
     option add *SetupAss*assistantImage       assistant        widgetDefault
     option add *SetupAss*assistantDisImage    assistantDis     widgetDefault
-
-    # Make the selected (first) server the default one.
-    set profile [::Profiles::GetSelectedName]
-    set spec [::Profiles::GetProfile $profile]
-    set server [lindex $spec 0]
     
     # We could be much more general here...
     set ::config(setupass,page,server) 1
@@ -37,11 +33,20 @@ proc ::Jabber::SetupAss::SetupAss { } {
     global  this prefs wDlgs config
     
     variable finished
+    variable inited
     variable locale
     variable username  ""
     variable password  ""
     variable password2 ""
 
+    if {!$inited} {
+    
+	# Make the selected (first) server the default one.
+	set profile [::Profiles::GetSelectedName]
+	set spec [::Profiles::GetProfile $profile]
+	set server [lindex $spec 0]
+	set inited 1
+    }
     set w $wDlgs(setupass)
     if {[winfo exists $w]} {
 	return
