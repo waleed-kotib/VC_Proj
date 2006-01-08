@@ -323,6 +323,9 @@
 ::msgcat::mcset nl mTimeCode            {Tijdcode}
 ::msgcat::mcset nl mUserInfo            {Info over contactpersoon...}
 ::msgcat::mcset nl mEditBookmarks       {Bladwijzers bewerken...}
+#::msgcat::mcset nl mToolbar         	{Toolbar}
+#::msgcat::mcset nl mNotebook         	{Notebook}
+#::msgcat::mcset nl mMinimal         	{Minimal}
 
 
 # Popups
@@ -347,6 +350,13 @@
 ::msgcat::mcset nl mOffline		{Offline contactpersonen}
 ::msgcat::mcset nl mTransports		{Transporten}
 ::msgcat::mcset nl mIgnore         	{Negeren}
+#::msgcat::mcset nl mSort         	{Sort}
+#::msgcat::mcset nl mIncreasing         	{Increasing}
+#::msgcat::mcset nl mDecreasing         	{Decreasing}
+#::msgcat::mcset nl mStyle         	{Style}
+#::msgcat::mcset nl mCall         	{Call}
+#::msgcat::mcset nl mForward         	{Forward Call}
+#::msgcat::mcset nl mBackgroundImage     {Background Image}
 
 
 
@@ -376,6 +386,7 @@
 ::msgcat::mcset nl {Basic Info}			{Basisinfo}
 ::msgcat::mcset nl {Block JID}			{Jabber ID blokkeren}
 ::msgcat::mcset nl {Bookmark this room}		{Bladwijzer toevoegen}
+#::msgcat::mcset nl {Buddy Pouncing}
 ::msgcat::mcset nl {Built in server port}	{Poort van ingebouwde server}
 ::msgcat::mcset nl {Cache folder}		{Cachemap}
 ::msgcat::mcset nl {Canvas Size}		{Grootte van doek}
@@ -931,6 +942,9 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jainvitegchat {Een contactpersoon uitnodigen op chatruimte %s}
 ::msgcat::mcset nl jaxformreq   {Labels met (*) zijn verplicht.}
 ::msgcat::mcset nl jagcsyncpres {Aanwezigheid van chatruimtes synchronizeren met de globale aanwezigheid}
+#::msgcat::mcset nl jaloginuser  {Enter your username and password to login to %s.}
+#::msgcat::mcset nl jaregnewwith {Do you want to register a new account with %s.}
+#::msgcat::mcset nl jaregisterexserv {Register with the service %s. You may need to press the Get button if not registration info obtained automatically.}
 
 
 # Setup assistant:
@@ -983,5 +997,32 @@ server downloaden. Een beschrijving is optioneel.}
 ::msgcat::mcset nl putended        {Verzenden naar %s is te vroeg gestopt.}
 ::msgcat::mcset nl putfinished     {Plaatsen van bestand "%s" naar %s werd beëindigd.}
 ::msgcat::mcset nl putneterr       {Netwerkfout tijdens plaatsen op %s.}
+
+# These are specific for phones (VoIP)
+#::msgcat::mcset nl phoneMakeCall           {Make a call}
+#::msgcat::mcset nl phoneMakeForward        {Forward current call to...}
+#::msgcat::mcset nl phoneRing               {Ring, ring...}
+#::msgcat::mcset nl phoneRingFrom           {Phone is ringing from %s}
+#::msgcat::mcset nl phoneFailedCalling      {Failed calling %s}
+#::msgcat::mcset nl phoneDial               {Dial}
+#::msgcat::mcset nl phoneNumber             {Number}
+#::msgcat::mcset nl phoneDialerCall         {Call to...}
+#::msgcat::mcset nl phoneDialerForward      {Forward to...}
+
+#::msgcat::mcset nl AddressBook		{Address Book}
+#::msgcat::mcset nl newAddressbookDlg	{New address book}
+#::msgcat::mcset nl newAddressbook       {New address book}
+#::msgcat::mcset nl abName		{Name}
+#::msgcat::mcset nl abPhone		{Phone number}
+#::msgcat::mcset nl modifyAddressbookDlg {Modify address book}
+#::msgcat::mcset nl modifyAddressbook	{Modify address book}
+#::msgcat::mcset nl mNewAB		{New}
+#::msgcat::mcset nl mModifyAB		{Modify}
+#::msgcat::mcset nl mRemoveAB		{Remove}
+
+#::msgcat::mcset nl notifyCall           {Notify call}
+#::msgcat::mcset nl inboundCall          {Inbound call}
+#::msgcat::mcset nl callHungUp           {Hung up}
+#::msgcat::mcset nl callVM               {Call VM?}
 
 # END --------------------------------------------------------------------------
