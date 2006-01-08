@@ -10,8 +10,9 @@ proc ::NotifyCall::Init { } {
     component::register NotifyCall  \
       "Provides support for Incoming Calls Dialog"
 
-    ::hooks::register jivePhoneEvent      ::NotifyCall::JivePhoneEventHook
-        
+    ::hooks::register jivePhoneEvent		::NotifyCall::JivePhoneEventHook
+    ::hooks::register IAXPhoneEvent		::NotifyCall::IAXPhoneEventHook
+
     #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------
     InitState
 }
@@ -20,13 +21,7 @@ proc ::NotifyCall::InitState { } {
     variable state
     
     array set state {
-	phoneserver     0
-	setui           0
 	win             .notify
-	wstatus         -
-	phone		-
-        abphonename     -
-        abphonenumber   -
     }
 }
 
@@ -39,13 +34,13 @@ proc ::NotifyCall::InitState { } {
 # NotifyCall::InboundCall  --
 # 
 
-proc ::NotifyCall::InboundCall { {phoneNumber ""} callID} {
+proc ::NotifyCall::InboundCall { {phoneNumber ""} } {
     variable state
   
     set win $state(win)
 
     if { $phoneNumber ne "" } { 
-        BuildDialer $win $phoneNumber $callID
+        BuildDialer $win $phoneNumber 
     }
 }
 
@@ -53,7 +48,7 @@ proc ::NotifyCall::InboundCall { {phoneNumber ""} callID} {
 # 
 #       A toplevel dialer.
        
-proc ::NotifyCall::BuildDialer {w phoneNumber callID} {
+proc ::NotifyCall::BuildDialer {w phoneNumber } {
     variable state
 
     # Make sure only single instance of this dialog.
@@ -62,13 +57,18 @@ proc ::NotifyCall::BuildDialer {w phoneNumber callID} {
 	return
     }
 
-    ::UI::Toplevel $w -class PhoneDialer \
+puts "$w Comprueba $phoneNumber ----"
+
+    ::UI::Toplevel $w -class PhoneNotify \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
-      -closecommand [namespace current]::CloseDialer
+      -closecommand ::NotifyCall::CloseDialer
+
+puts "$w Comprueba $phoneNumber ----"
 
     wm title $w [mc notifyCall]
 
     ::UI::SetWindowPosition $w
+
 
     # Global frame.
     ttk::frame $w.f
@@ -94,10 +94,10 @@ proc ::NotifyCall::BuildDialer {w phoneNumber callID} {
 
 
     ttk::button $box.hungup -text [mc callHungUp]  \
-      -command [list [namespace current]::HungUp $w $callID]
+      -command [list [namespace current]::HungUp $w ]
 
     ttk::button $box.vm  -text [mc callVM]  \
-      -command [list [namespace current]::HungUp $w $callID]
+      -command [list [namespace current]::HungUp $w ]
 
 #    grid  $box.l  $box.e  $box.dial -padx 1 -pady 4
  
@@ -105,30 +105,45 @@ proc ::NotifyCall::BuildDialer {w phoneNumber callID} {
 
     focus $box.hungup
     wm resizable $w 0 0
+
+puts "Comprueba $phoneNumber ----"
 }
 
 proc ::NotifyCall::CloseDialer {w} {
     
-    ::UI::SaveWinGeom $w   
+#    ::UI::SaveWinGeom $w   
 }
 
-proc ::NotifyCall::HungUp {w callID} {
+proc ::NotifyCall::HungUp {w } {
 
-    eval {::JivePhone::DialExtension "666" "FORWARD" $callID}
+    eval {::JivePhone::DialExtension "666" "FORWARD"}
 
     destroy $w
 }
 
-proc ::NotifyCall::JivePhoneEventHook {type cid callID args} {
+proc ::NotifyCall::JivePhoneEventHook {type cid args} {
     variable cociFile
     variable state
 
     set win $state(win)
-
     if {$type eq "RING"} {
-        InboundCall $cid $callID
+        InboundCall $cid 
     } else {
-        destroy $win
+        if {[winfo exists $win]} {
+            destroy $win
+        }
     }
 }
 
+proc ::NotifyCall::IAXPhoneEventHook {type cid args} {
+    variable state
+
+    set win $state(win)
+    if {$type eq "RING"} {
+        InboundCall $cid
+    } else {
+        if {[winfo exists $win]} {
+            destroy $win
+        }
+    }
+}
