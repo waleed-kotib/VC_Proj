@@ -598,6 +598,30 @@
 ::msgcat::mcset nl {One day} 			{Eén dag}
 ::msgcat::mcset nl {One week}	 		{Eén week}
 
+# Language names.
+#::msgcat::mcset nl {Danish} 
+#::msgcat::mcset nl {Dutch} 
+#::msgcat::mcset nl {English} 
+#::msgcat::mcset nl {French} 
+#::msgcat::mcset nl {German} 
+#::msgcat::mcset nl {Polish} 
+#::msgcat::mcset nl {Russian} 
+#::msgcat::mcset nl {Spanish} 
+#::msgcat::mcset nl {Swedish} 
+
+# Same languge names but with their native names.
+# See the other catalogs to get these.
+::msgcat::mcset nl nativeDanish     Dansk
+#::msgcat::mcset nl nativeDutch 
+::msgcat::mcset nl nativeEnglish    English
+#::msgcat::mcset nl nativeFrench 
+::msgcat::mcset nl nativeGerman     Deutsch
+#::msgcat::mcset nl nativePolish 
+#::msgcat::mcset nl nativeRussian 
+#::msgcat::mcset nl nativeSpanish 
+::msgcat::mcset nl nativeSwedish    Svenska 
+
+
 # Splash screen:
 ::msgcat::mcset nl splashsource 	{Tcl-code laden...}
 ::msgcat::mcset nl splashload 		{Tcl-pakketten laden...}
