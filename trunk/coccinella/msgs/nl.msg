@@ -916,8 +916,8 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jaregmsg	{Als u al geregistreerd bent op deze dienst, dan kunt u hier uw persoonlijke info publiceren.}
 ::msgcat::mcset nl jastatavailable {Beschikbaar}
 ::msgcat::mcset nl jastatchat	{Beschikbaar om te chatten}
-::msgcat::mcset nl jastataway	{Afwezig: online, maar momenteel afwezig}
-::msgcat::mcset nl jastatxa	{Langdurig afwezig: online, maar tijdelijk inactief}
+::msgcat::mcset nl jastataway	{Afwezig}
+::msgcat::mcset nl jastatxa	{Langdurig afwezig}
 ::msgcat::mcset nl jastatdnd	{Niet storen}
 ::msgcat::mcset nl jastatinvisible {Onzichtbaar}
 ::msgcat::mcset nl javersinfo	{Versiegegevens van %s}
