@@ -599,26 +599,26 @@
 ::msgcat::mcset nl {One week}	 		{Eén week}
 
 # Language names.
-#::msgcat::mcset nl {Danish} 
-#::msgcat::mcset nl {Dutch} 
-#::msgcat::mcset nl {English} 
-#::msgcat::mcset nl {French} 
-#::msgcat::mcset nl {German} 
-#::msgcat::mcset nl {Polish} 
-#::msgcat::mcset nl {Russian} 
-#::msgcat::mcset nl {Spanish} 
-#::msgcat::mcset nl {Swedish} 
+::msgcat::mcset nl {Danish} 			{Deens}
+::msgcat::mcset nl {Dutch} 			{Nederlands}
+::msgcat::mcset nl {English} 			{Engels}
+::msgcat::mcset nl {French} 			{Frans}
+::msgcat::mcset nl {German} 			{Duits}
+::msgcat::mcset nl {Polish} 			{Pools}
+::msgcat::mcset nl {Russian} 			{Russisch}
+::msgcat::mcset nl {Spanish} 			{Spaans}
+::msgcat::mcset nl {Swedish} 			{Zweeds}
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
 ::msgcat::mcset nl nativeDanish     Dansk
-#::msgcat::mcset nl nativeDutch 
+::msgcat::mcset nl nativeDutch      Nederlands
 ::msgcat::mcset nl nativeEnglish    English
-#::msgcat::mcset nl nativeFrench 
+::msgcat::mcset nl nativeFrench     Français
 ::msgcat::mcset nl nativeGerman     Deutsch
 #::msgcat::mcset nl nativePolish 
 #::msgcat::mcset nl nativeRussian 
-#::msgcat::mcset nl nativeSpanish 
+::msgcat::mcset nl nativeSpanish   Castellano
 ::msgcat::mcset nl nativeSwedish    Svenska 
 
 
