@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: wizard.tcl,v 1.8 2005-09-19 06:37:20 matben Exp $
+# $Id: wizard.tcl,v 1.9 2006-01-10 08:46:46 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -101,7 +101,7 @@ proc ::wizard::Init { } {
     # The legal widget commands. These are actually the Notebook commands.
     set widgetCommands {cget configure deletepage displaypage newpage}
 
-    option add *Wizard.background          #ffffff      widgetDefault
+    option add *Wizard.background          "#ffffff"    widgetDefault
     option add *Wizard.closeCommand        {}           widgetDefault
     option add *Wizard.finishCommand       {}           widgetDefault
     option add *Wizard.nextPageCommand     {}           widgetDefault
@@ -161,6 +161,7 @@ proc ::wizard::wizard {w args} {
     set widgets(btframe)    $w.btframe
     set widgets(btforward)  $w.btframe.fwd
     set widgets(btbackward) $w.btframe.bwd
+    set widgets(btcancel)   $w.btframe.can
     
     # Necessary to remove the original frame procedure from the global
     # namespace into our own.
@@ -212,17 +213,21 @@ proc ::wizard::wizard {w args} {
     ttk::separator $w.div2
     pack $w.div2 -side top -fill x
     ttk::frame $widgets(btframe) -padding [option get . okcancelPadding {}]
-    ttk::button $widgets(btforward) -text [::msgcat::mc Next] \
+    ttk::button $widgets(btforward) -text "[::msgcat::mc Next] >" \
       -command [list [namespace current]::ForwardCmd $w] -width -8
-    ttk::button $widgets(btbackward) -text [::msgcat::mc Close] \
+    ttk::button $widgets(btbackward) -text "< [::msgcat::mc Back]" \
       -command [list [namespace current]::BackwardCmd $w] -width -8
+    ttk::button $widgets(btcancel) -text [::msgcat::mc Cancel] \
+      -command [list [namespace current]::CloseCmd $w] -width -8
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $widgets(btforward) -side right
 	pack $widgets(btbackward) -side right -padx $padx
+	pack $widgets(btcancel) -side right
     } else {
-	pack $widgets(btbackward) -side right
+	pack $widgets(btcancel) -side right
 	pack $widgets(btforward) -side right -padx $padx
+	pack $widgets(btbackward) -side right
     }
     pack $widgets(btframe) -side top -fill x
     
@@ -372,7 +377,7 @@ proc ::wizard::Configure {w args} {
     if {$redraw} {
 	Refresh $w
     }
-    return {}
+    return
 }
 
 # wizard::NewPage --
@@ -440,7 +445,7 @@ proc ::wizard::DeletePage {w name} {
 	    set suInfo(pending) $id
 	}
     }
-    return {}
+    return
 }
 
 # wizard::Refresh --
@@ -550,19 +555,15 @@ proc ::wizard::Display {w name} {
     
     # Configure the buttons.
     if {$ind == 0} {
-	$widgets(btbackward) configure -text [::msgcat::mc Close]  \
-	  -command $options(-closecommand)
-	$widgets(btforward) configure -text [::msgcat::mc Next]  \
-	  -command [list [namespace current]::ForwardCmd $w]
+	$widgets(btbackward) state {disabled}
     } else {
-	$widgets(btbackward) configure -text [::msgcat::mc Previous]  \
-	  -command [list [namespace current]::BackwardCmd $w]
+	$widgets(btbackward) state {!disabled}
     } 
     if {$ind == $lastInd} {
 	$widgets(btforward) configure -text [::msgcat::mc Finish]   \
 	  -command $options(-finishcommand)
     } else {
-	$widgets(btforward) configure -text [::msgcat::mc Next]	\
+	$widgets(btforward) configure -text "[::msgcat::mc Next] >" \
 	  -command [list [namespace current]::ForwardCmd $w]
     }
     
@@ -572,6 +573,13 @@ proc ::wizard::Display {w name} {
     # Set notebook page.
     $widgets(nbframe) displaypage $name
     set suInfo(current) $name
+}
+
+proc ::wizard::CloseCmd {w} {
+    
+    upvar ::wizard::${w}::options options
+
+    uplevel #0 $options(-closecommand)
 }
 
 # wizard::DestroyHandler --
