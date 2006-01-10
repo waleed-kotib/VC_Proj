@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.7 2005-12-27 14:53:55 matben Exp $
+# $Id: Avatar.tcl,v 1.8 2006-01-10 08:38:37 matben Exp $
 
 # @@@ Issues:
 #     1) shall we keep cache of users avatars between sessions to save bandwidth?
@@ -701,7 +701,7 @@ proc ::Avatar::PrefsFrame {win} {
     ttk::frame $win
     ttk::label $win.title -text [mc {My Avatar}]
     ttk::separator $win.sep -orient horizontal
-    ttk::checkbutton $win.share -text "Share this avatar with other users"  \
+    ttk::checkbutton $win.share -text [mc prefsavashare]  \
       -variable [namespace current]::tmpprefs(share)
     # ttk::checkbutton $win.vcard -text "Use this image also for the vCard photo"
     

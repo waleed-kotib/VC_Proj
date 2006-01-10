@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.36 2006-01-08 14:02:14 matben Exp $
+# $Id: SetupAss.tcl,v 1.37 2006-01-10 08:38:37 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -35,9 +35,12 @@ proc ::Jabber::SetupAss::SetupAss { } {
     variable finished
     variable inited
     variable locale
+    variable localeStr
+    variable server    ""
     variable username  ""
     variable password  ""
     variable password2 ""
+    variable langCode2Str
 
     if {!$inited} {
     
@@ -47,6 +50,7 @@ proc ::Jabber::SetupAss::SetupAss { } {
 	set server [lindex $spec 0]
 	set inited 1
     }
+    set pady 2
     set w $wDlgs(setupass)
     if {[winfo exists $w]} {
 	return
@@ -90,22 +94,57 @@ proc ::Jabber::SetupAss::SetupAss { } {
     ttk::label $plang.fr.msg1 -style Small.TLabel \
       -wraplength 260 -justify left -text [mc sulang]
 
+    # Add entries here for new message catalogs.
+    array set code2Name {
+	da {Danish} 
+	nl {Dutch} 
+	en {English} 
+	fr {French} 
+	de {German} 
+	pl {Polish} 
+	ru {Russian} 
+	es {Spanish} 
+	sv {Swedish} 
+    }
     set langs {}
     foreach f [glob -nocomplain -tails -directory $this(msgcatPath) *.msg] {
-	lappend langs [file rootname $f]
+	set code [file rootname $f]
+	if {[info exists code2Name($code)]} {
+	    set name $code2Name($code)
+	    set key native${name}
+	    set str [mc $key]
+	    if {$str eq $key} {
+		# Fallback.
+		set str $name
+	    }
+	} else {
+	    set str $code
+	}
+	lappend langs $str
+	set langCode2Str($code) $str
     }
-    eval {ttk::optionmenu $plang.fr.pop [namespace current]::locale} $langs
-    if {$prefs(messageLocale) == ""} {
+    set wmb $plang.fr.pop
+    ttk::menubutton $wmb -textvariable [namespace current]::localeStr  \
+      -menu $wmb.menu -direction flush
+    menu $wmb.menu -tearoff 0
+    foreach {code str} [array get langCode2Str] {
+	$wmb.menu add radiobutton -label $str -value $code  \
+	  -variable [namespace current]::locale  \
+	  -command [namespace current]::LangCmd
+    }
+    
+    if {$prefs(messageLocale) eq ""} {
 	set locale [lindex [split [::msgcat::mclocale] _] 0]
     } else {
 	set locale $prefs(messageLocale)
     }
-    ttk::button $plang.fr.def -text [mc Default] -command \
-      [namespace current]::DefaultLang
+    set localeStr $langCode2Str($locale)
+    ttk::button $plang.fr.def -text [mc Default]  \
+      -command [namespace current]::DefaultLang
     
-    pack  $plang.fr.msg1  -side top -anchor w -pady 4
-    pack  $plang.fr.pop   -side top -anchor w -pady 4
-    pack  $plang.fr.def   -side top -anchor w -pady 4
+    pack  $plang.fr.msg1  -side top -anchor w -pady $pady
+    pack  $plang.fr.pop   -side top -anchor w -pady $pady
+    pack  $plang.fr.def   -side top -anchor w -pady $pady
     pack  $plang.fr       -side top -fill x
     
     lappend wrapthese $plang.fr.msg1
@@ -113,48 +152,55 @@ proc ::Jabber::SetupAss::SetupAss { } {
     # Server.
     if {$config(setupass,page,server)} {
 	set p2 [$su newpage "server" -headtext [mc {Jabber Server}]]
-	ttk::frame $p2.fr -padding [option get . notebookPagePadding {}]
-	ttk::label $p2.fr.msg1 -style Small.TLabel \
+	set fr2 $p2.fr
+	ttk::frame $fr2 -padding [option get . notebookPagePadding {}]
+	ttk::label $fr2.msg1 -style Small.TLabel \
 	  -wraplength 260 -justify left -text [mc suservmsg]
-	ttk::button $p2.fr.bt -text [mc Get] \
+	ttk::button $fr2.bt -text [mc Get] \
 	  -command [list [namespace current]::ServersDlg .jsuserv]
-	ttk::label $p2.fr.msg2 -style Small.TLabel \
-	  -wraplength 260 -justify left -text "Get list of public and open Jabber servers"
-	ttk::label $p2.fr.la -text "[mc Server]:"
-	ttk::entry $p2.fr.serv -width 28 -textvariable ${ns}::server \
+	ttk::label $fr2.msg2 -style Small.TLabel \
+	  -wraplength 260 -justify left -text [mc supubserv]
+	ttk::label $fr2.la -text "[mc Server]:"
+	ttk::entry $fr2.serv -width 28 -textvariable ${ns}::server \
 	  -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
 	
-	grid  $p2.fr.msg1  -            -sticky nw -pady 4
-	grid  $p2.fr.bt    $p2.fr.msg2  -sticky ew -pady 4
-	grid  $p2.fr.la    $p2.fr.serv  -sticky e -pady 4
-	pack  $p2.fr -side top -fill x
+	grid  $fr2.msg1  -          -sticky nw -pady $pady
+	grid  $fr2.bt    $fr2.msg2  -sticky ew -pady $pady
+	grid  $fr2.la    $fr2.serv  -sticky e  -pady $pady
+	grid  $fr2.serv  -sticky ew
+	pack  $fr2 -side top -fill x
 	
-	lappend wrapthese $p2.fr.msg1
+	lappend wrapthese $fr2.msg1
     }
     
     # Username & Password.
     set p3 [$su newpage "username" -headtext [mc {Username & Password}]]
+    set fr3 $p3.fr
     ttk::frame $p3.fr -padding [option get . notebookPagePadding {}]
-    ttk::label $p3.fr.msg1 -style Small.TLabel \
+    ttk::label $fr3.msg1 -style Small.TLabel \
       -wraplength 260 -justify left -text [mc suusermsg]
-    ttk::label $p3.fr.lan  -text "[mc Username]:"
-    ttk::label $p3.fr.lap  -text "[mc Password]:"
-    ttk::label $p3.fr.lap2 -text "[mc {Retype password}]:"
-    ttk::entry $p3.fr.name -textvariable ${ns}::username \
+    ttk::label $fr3.srv  -text "[mc Server]:"
+    ttk::label $fr3.srv2 -textvariable ${ns}::server
+    ttk::label $fr3.lan  -text "[mc Username]:"
+    ttk::label $fr3.lap  -text "[mc Password]:"
+    ttk::label $fr3.lap2 -text "[mc {Retype password}]:"
+    ttk::entry $fr3.name -textvariable ${ns}::username \
        -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
-    ttk::entry $p3.fr.pass -textvariable ${ns}::password -show {*} \
+    ttk::entry $fr3.pass -textvariable ${ns}::password -show {*} \
       -validate key -validatecommand {::Jabber::ValidatePasswordStr %S}
-    ttk::entry $p3.fr.pass2 -textvariable ${ns}::password2 -show {*} \
+    ttk::entry $fr3.pass2 -textvariable ${ns}::password2 -show {*} \
       -validate key -validatecommand {::Jabber::ValidatePasswordStr %S} 
      
-    grid  $p3.fr.msg1  -             -pady 4 -sticky w
-    grid  $p3.fr.lan   $p3.fr.name   -pady 4 -sticky e
-    grid  $p3.fr.lap   $p3.fr.pass   -pady 4 -sticky e
-    grid  $p3.fr.lap2  $p3.fr.pass2  -pady 4 -sticky e
-    grid  $p3.fr.name  $p3.fr.pass  $p3.fr.pass2  -sticky ew
+    grid  $fr3.msg1  -           -pady $pady -sticky w
+    grid  $fr3.srv   $fr3.srv2   -pady $pady -sticky e
+    grid  $fr3.lan   $fr3.name   -pady $pady -sticky e
+    grid  $fr3.lap   $fr3.pass   -pady $pady -sticky e
+    grid  $fr3.lap2  $fr3.pass2  -pady $pady -sticky e
+    grid  $fr3.name  $fr3.pass  $fr3.pass2  -sticky ew
+    grid  $fr3.srv2  -sticky w
     pack  $p3.fr -side top -fill x
 
-    lappend wrapthese $p3.fr.msg1
+    lappend wrapthese $fr3.msg1
 
     # Register?
     set p4 [$su newpage "register" -headtext [mc Register]]
@@ -164,7 +210,7 @@ proc ::Jabber::SetupAss::SetupAss { } {
     ttk::button $p4.fr.btreg -text "[mc {Register Now}]... "  \
       -command [namespace current]::DoRegister
 
-    grid  $p4.fr.msg1   -pady 4 -sticky w
+    grid  $p4.fr.msg1   -pady $pady -sticky w
     grid  $p4.fr.btreg  -pady 8
     pack  $p4.fr -side top -fill x
 
@@ -197,7 +243,16 @@ proc ::Jabber::SetupAss::SetupAss { } {
     after idle $script
 }
 
+proc ::Jabber::SetupAss::LangCmd { } {
+    variable locale
+    variable localeStr
+    variable langCode2Str
+        
+    set localeStr $langCode2Str($locale)
+}
+
 proc ::Jabber::SetupAss::NextPage {w page} {
+    variable server
     variable username
     variable password
     variable password2
@@ -205,15 +260,22 @@ proc ::Jabber::SetupAss::NextPage {w page} {
     # Verify that it is ok before showing the next page.
     switch -- $page {
 	username {
-	    if {($username == "") || ($password == "")} {
+	    if {($username eq "") || ($password eq "")} {
 		::UI::MessageBox -icon error -title [mc {Empty Fields}] \
 		  -message [mc messsuassfillin] -parent $w
 		return -code 3
-	    } elseif {$password != $password2} {
+	    } elseif {$password ne $password2} {
 		::UI::MessageBox -icon error -title [mc {Different Passwords}] \
 		  -message [mc messpasswddifferent] -parent $w
 		set password ""
 		set password2 ""
+		return -code 3
+	    }
+	}
+	server {
+	    if {$server eq ""} {
+		::UI::MessageBox -icon error -title [mc Error] \
+		  -message [mc suservmsg] -parent $w
 		return -code 3
 	    }
 	}
@@ -246,7 +308,7 @@ proc ::Jabber::SetupAss::DoRegister { } {
     variable password
     variable haveRegistered
 
-    ::Register::NewDlg -server $server  \
+    ::RegisterEx::New -autoget 1 -server $server  \
       -username $username -password $password
     set haveRegistered 1
 }
@@ -324,7 +386,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     # List of servers.
     ttk::label $wbox.msg  \
       -padding {0 0 0 6} -wraplength 300 -justify left \
-      -text "List of open Jabber servers:"
+      -text "[mc suservlist]:"
     pack $wbox.msg -side top -anchor w
 
     set wtbfr $wbox.wtbfr
@@ -333,7 +395,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     frame $wtbfr -borderwidth 1 -relief sunken
     pack $wtbfr -side top -fill both -expand 1
     tablelist::tablelist $wtbl \
-      -columns [list 16 Address 30 Name]  \
+      -columns [list 16 [mc Address] 30 [mc Name]]  \
       -yscrollcommand [list $wysc set] -stretch all \
       -width 70 -height 16
     ttk::scrollbar $wysc -orient vertical -command [list $wtbl yview]

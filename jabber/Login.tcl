@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.75 2006-01-06 10:36:04 matben Exp $
+# $Id: Login.tcl,v 1.76 2006-01-10 08:38:37 matben Exp $
 
 package provide Login 1.0
 
@@ -481,7 +481,7 @@ proc ::Login::ShowAnyMessageBox {token status {errmsg ""}} {
     variable $token
     upvar 0 $token state
     
-    ::Debug 2 "::Login::DoLoginHighCB status=$status errmsg=$errmsg"
+    ::Debug 2 "::Login::ShowAnyMessageBox status=$status errmsg=$errmsg"
     
     set str ""
     
