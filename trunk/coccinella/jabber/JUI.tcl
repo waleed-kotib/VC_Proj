@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.108 2006-01-08 14:02:14 matben Exp $
+# $Id: JUI.tcl,v 1.109 2006-01-10 08:38:37 matben Exp $
 
 package provide JUI 1.0
 
@@ -337,7 +337,7 @@ proc ::Jabber::UI::Build {w} {
     ttk::frame $wfstat.cont
     ttk::label $wfstat.me -textvariable ::Jabber::jstate(mejid) -anchor w
     pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
-    pack  $wfstat.me  -fill x -expand 1 -padx 2 -pady 2
+    pack  $wfstat.me  -fill x -expand 1 -padx 2 -pady 4
     if {[tk windowingsystem] eq "aqua"} {
 	pack $wfstat.me -padx 6
     }

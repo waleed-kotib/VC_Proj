@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.41 2006-01-05 15:06:16 matben Exp $
+# $Id: Register.tcl,v 1.42 2006-01-10 08:38:37 matben Exp $
 
 package provide Register 1.0
 
@@ -111,7 +111,7 @@ proc ::Register::NewDlg {args} {
       -variable [namespace current]::ssl \
       -command [namespace current]::SSLCmd
     ttk::label $frmid.lport -style Small.TLabel \
-      -text "[mc {Port number}]:" -anchor e
+      -text "[mc {Port}]:" -anchor e
     ttk::entry $frmid.eport -style Small.TEntry -width 6   \
       -textvariable [namespace current]::port -validate key  \
       -validatecommand {::Register::ValidatePortNumber %S}  \
@@ -132,7 +132,7 @@ proc ::Register::NewDlg {args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc New] -default active \
+    ttk::button $frbot.btok -text [mc Register] -default active \
       -command [list [namespace current]::OK $w]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $w]
@@ -845,7 +845,7 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
 	return
     } 
     
-    $state(wbtok) configure -state normal -text [mc New] \
+    $state(wbtok) configure -state normal -text [mc Register] \
       -command [list [namespace current]::SendRegister $token]
     
     # Extract registration tags.
@@ -893,13 +893,20 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
 	    grid  $wfr.e$tag  -sticky ew
 	    if {$tag eq "password"} {
 		set str "[mc {Retype password}]:"
-		set state(elem,${tag}2) ""
+		if {[info exists state(-password)]} {
+		    set state(elem,${tag}2) $state(-password)
+		} else {
+		    set state(elem,${tag}2) ""
+		}
 		ttk::label $wfr.l2$tag -text $str -anchor e
 		ttk::entry $wfr.e2$tag -textvariable $token\(elem,${tag}2) \
 		  -show {*} -validate key  \
 		  -validatecommand {::Jabber::ValidatePasswordStr %S}
 		grid  $wfr.l2$tag  $wfr.e2$tag  -sticky e -pady 2
 		grid  $wfr.e2$tag  -sticky ew
+		if {[info exists state(-password)]} {
+		    $wfr.e2$tag state {disabled}
+		}
 	    }
 	    if {[info exists state(-$tag)]} {
 		$wfr.e$tag state {disabled}
