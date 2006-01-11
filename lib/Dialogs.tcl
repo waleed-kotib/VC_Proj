@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Dialogs.tcl,v 1.64 2005-12-27 14:53:55 matben Exp $
+# $Id: Dialogs.tcl,v 1.65 2006-01-11 13:25:48 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -724,7 +724,7 @@ proc ::Dialogs::ShowInfoClients { } {
 	label $fr.b2 -text "[lindex $peername 1]"
 	label $fr.c1 -text "User name:" -font CociSmallBoldFont
 	label $fr.c2 -text [::P2PNet::GetValueFromIP $ip user]
-	label $fr.d1 -text "Port number:" -font CociSmallBoldFont
+	label $fr.d1 -text "Port:" -font CociSmallBoldFont
 	label $fr.d2 -text [::P2PNet::GetValueFromIP $ip servPort]
 	label $fr.e1 -text "Buffering:" -font CociSmallBoldFont
 	label $fr.e2 -text "$buff"
@@ -810,7 +810,7 @@ proc ::Dialogs::ShowInfoServer { } {
     ttk::label $fr.a1 -text "[mc {This IP number}]:"
     ttk::label $fr.b1 -text "[mc {Host name}]:"
     ttk::label $fr.c1 -text "[mc Username]:"
-    ttk::label $fr.d1 -text "[mc {Port number}]:"
+    ttk::label $fr.d1 -text "[mc Port]:"
     ttk::label $fr.e1 -text "[mc Buffering]:"
     ttk::label $fr.f1 -text "[mc Blocking]:"
     ttk::label $fr.g1 -text "[mc {Is safe}]:"

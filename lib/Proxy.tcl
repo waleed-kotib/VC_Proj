@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.5 2005-10-22 14:26:21 matben Exp $
+# $Id: Proxy.tcl,v 1.6 2006-01-11 13:25:48 matben Exp $
  
 package require autoproxy
 
@@ -122,8 +122,7 @@ proc ::Proxy::BuildPage {wpage} {
       -padding [option get . groupSmallPadding {}]
     
     ttk::label $wprx.msg -wraplength 300 -justify left \
-      -text "Usage of the Http proxy is determined\
-      by each profile settings. File transfers wont work if you use Http proxy!"
+      -text [mc prefproxymsg]
     
     ttk::checkbutton $wprx.use -text [mc {Use proxy}]  \
       -command [namespace code SetUseProxyState]  \
@@ -138,7 +137,7 @@ proc ::Proxy::BuildPage {wpage} {
     ttk::entry $wprx.epass -textvariable [namespace current]::tmpPrefs(proxy_pass)
   
     set wnoproxy $wprx.noproxy
-    ttk::label $wprx.lnop -text [mc {Exclude addresses (* as wildcard)}]:
+    ttk::label $wprx.lnop -text [mc prefproxyexc]:
     text $wprx.noproxy -font CociSmallFont -height 4 -width 24 -bd 1 -relief sunken
     
     grid  $wprx.msg      -            -sticky w
