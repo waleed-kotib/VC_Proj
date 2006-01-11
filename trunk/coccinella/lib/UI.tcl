@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.120 2006-01-08 14:02:14 matben Exp $
+# $Id: UI.tcl,v 1.121 2006-01-11 13:25:48 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -471,7 +471,7 @@ proc ::UI::MessageBox {args} {
 proc ::UI::FormatTextForMessageBox {txt {width ""}} {
     global  prefs
 
-    if {[string equal $::tcl_platform(platform) "windows"]} {
+    if {[tk windowingsystem] eq "windows"} {
 
 	# Insert newlines to force line breaks.
 	if {[string length $width] == 0} {
@@ -490,6 +490,11 @@ proc ::UI::FormatTextForMessageBox {txt {width ""}} {
 	}
 	append newtxt [string trim [string range $txt $first end]]
 	return $newtxt
+    } elseif {[tk windowingsystem] eq "x11"} {
+	if {[string length $txt] < 32} {
+	    append txt "             "
+	}
+	return $txt
     } else {
 	return $txt
     }
