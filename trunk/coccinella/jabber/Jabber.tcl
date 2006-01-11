@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.155 2005-12-09 13:24:21 matben Exp $
+# $Id: Jabber.tcl,v 1.156 2006-01-11 13:24:54 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -42,6 +42,7 @@ package require GotMsg
 package require GroupChat
 package require JForms
 package require JPrefs
+package require JPubServers
 package require JUI
 package require JUser
 package require JWB

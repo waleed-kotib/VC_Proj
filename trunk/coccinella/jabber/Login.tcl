@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.76 2006-01-10 08:38:37 matben Exp $
+# $Id: Login.tcl,v 1.77 2006-01-11 13:24:54 matben Exp $
 
 package provide Login 1.0
 
@@ -123,7 +123,7 @@ proc ::Login::Dlg { } {
     ttk::label $frmid.ljid -text "[mc {Jabber ID}]:" -anchor e
     ttk::entry $frmid.ejid -width 22    \
       -textvariable [namespace current]::jid
-    ttk::label $frmid.lserv -text "[mc {Jabber server}]:" -anchor e
+    ttk::label $frmid.lserv -text "[mc {Jabber Server}]:" -anchor e
     ttk::entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}

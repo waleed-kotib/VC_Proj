@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.42 2006-01-10 08:38:37 matben Exp $
+# $Id: Register.tcl,v 1.43 2006-01-11 13:24:54 matben Exp $
 
 package provide Register 1.0
 
@@ -89,7 +89,7 @@ proc ::Register::NewDlg {args} {
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
-    ttk::label $frmid.lserv -text "[mc {Jabber server}]:" -anchor e
+    ttk::label $frmid.lserv -text "[mc {Jabber Server}]:" -anchor e
     ttk::entry $frmid.eserv  \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
@@ -474,6 +474,9 @@ namespace eval ::RegisterEx:: {
     
     set ::config(registerex,server)  ""
     set ::config(registerex,autoget) 0
+    
+    # Allow only a single instance of this dialog.
+    variable win $::wDlgs(jreg)_ibr
 }
 
 # RegisterEx::New --
@@ -495,18 +498,24 @@ proc ::RegisterEx::New {args} {
     global  this wDlgs config
     
     variable uid
+    variable win
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::RegisterEx::New args=$args"
+    
+    if {[winfo exists $win]} {
+	raise $win
+	return
+    }
         
     # State variable to collect instance specific variables.
     set token [namespace current]::[incr uid]
     variable $token
     upvar 0 $token state
 	
-    set w $wDlgs(jreg)[incr uid]
-
-    set state(w)        $w
+    #set w $wDlgs(jreg)[incr uid]
+    set w $win
+    set state(w) $w
     array set state {
 	finished  -1
 	-autoget   0
@@ -568,7 +577,7 @@ proc ::RegisterEx::New {args} {
     ttk::frame $frmid
     pack  $frmid  -side top -fill both -expand 1
 
-    ttk::label $frmid.lserv -text "[mc {Jabber server}]:" -anchor e
+    ttk::label $frmid.lserv -text "[mc {Jabber Server}]:" -anchor e
     ttk::entry $frmid.eserv -width 22    \
       -textvariable $token\(-server) -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
@@ -656,6 +665,22 @@ proc ::RegisterEx::New {args} {
     catch {destroy $state(w)}
     Free $token
 }
+
+# Not used for the moment due to the grab stuff.
+
+proc ::RegisterEx::BrowseServers {token} {
+    
+    ::JPubServers::New [list [namespace current]::ServersCmd $token]
+}
+
+proc ::RegisterEx::ServersCmd {token _server} {
+    variable $token
+    upvar 0 $token state
+    
+    set state(-server) $_server
+}
+
+#---
 
 proc ::RegisterEx::Cancel {token} {
     variable $token

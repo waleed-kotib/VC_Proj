@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.58 2005-11-19 11:35:41 matben Exp $
+# $Id: JWB.tcl,v 1.59 2006-01-11 13:24:54 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -313,9 +313,9 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 	}
 	set name [$jstate(roster) getname $jid]
 	if {[string length $name]} {
-	    set title "Chat with $name"
+	    set title "[mc {Chat With}] $name"
 	} else {
-	    set title "Chat with $jid"
+	    set title "[mc {Chat With}] $jid"
 	}	
 	set argsArr(-title)  $title
 	set argsArr(-type)   chat

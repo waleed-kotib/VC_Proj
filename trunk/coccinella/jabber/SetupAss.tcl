@@ -3,14 +3,15 @@
 #       Uses the wizard package to build a setup assistant for the
 #       Coccinella. 
 #
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.37 2006-01-10 08:38:37 matben Exp $
+# $Id: SetupAss.tcl,v 1.38 2006-01-11 13:24:54 matben Exp $
 
 package require wizard
 package require chasearrows
 package require http 2.3
 package require tinydom
+package require JPubServers
 
 package provide SetupAss 1.0
 
@@ -338,219 +339,14 @@ proc ::Jabber::SetupAss::DoFinish {w} {
 }
 
 proc ::Jabber::SetupAss::ServersDlg {w} {
-    global  this prefs
 
+    ::JPubServers::New [namespace current]::ServersCmd
+}
+
+proc ::Jabber::SetupAss::ServersCmd {_server} {
     variable server
-    variable finishedServ 0
-    variable warrows
-    variable servStatVar
-    variable wbservbt
-    variable wtbl
-    variable rowcurrent ""
-
-    ::Debug 2 "::Jabber::SetupAss::ServersDlg w=$w"
     
-    if {[winfo exists $w]} {
-	raise $w
-	return
-    }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w {Public Jabber Servers}
-    
-    # Global frame.
-    ttk::frame $w.frall
-    pack $w.frall -fill both -expand 1
-    
-    set wbox $w.frall.f
-    ttk::frame $wbox -padding [option get . dialogPadding {}]
-    pack $wbox -fill both -expand 1
-
-    # Button part.
-    set frbot    $wbox.b
-    set wbservbt $frbot.btok
-    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Set] -default active \
-      -state disabled -command [list [namespace current]::ServSet $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::ServCancel $w]
-    set padx [option get . buttonPadX {}]
-    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
-	pack $frbot.btok -side right
-	pack $frbot.btcancel -side right -padx $padx
-    } else {
-	pack $frbot.btcancel -side right
-	pack $frbot.btok -side right -padx $padx
-    }
-    pack $frbot -side bottom -fill x
-    
-    # List of servers.
-    ttk::label $wbox.msg  \
-      -padding {0 0 0 6} -wraplength 300 -justify left \
-      -text "[mc suservlist]:"
-    pack $wbox.msg -side top -anchor w
-
-    set wtbfr $wbox.wtbfr
-    set wysc  $wtbfr.ysc
-    set wtbl  $wtbfr.wtbl
-    frame $wtbfr -borderwidth 1 -relief sunken
-    pack $wtbfr -side top -fill both -expand 1
-    tablelist::tablelist $wtbl \
-      -columns [list 16 [mc Address] 30 [mc Name]]  \
-      -yscrollcommand [list $wysc set] -stretch all \
-      -width 70 -height 16
-    ttk::scrollbar $wysc -orient vertical -command [list $wtbl yview]
-
-    grid  $wtbl  $wysc  -sticky news
-    grid columnconfigure $wtbfr 0 -weight 1
-    grid rowconfigure $wtbfr 0 -weight 1
-
-    # Chasing arrows and status message.
-    ttk::frame $wbox.frarr
-    pack $wbox.frarr -side top -anchor w
-    set warrows $wbox.frarr.arr
-    ::chasearrows::chasearrows $warrows -size 16
-    pack $warrows -side left -padx 5 -pady 5
-    ttk::label $wbox.frarr.msg  \
-      -textvariable [namespace current]::servStatVar
-    pack $wbox.frarr.msg -side left
-    set servStatVar ""
-
-    bind $w <Return> {}
-    bind $wtbl <<ListboxSelect>> [list [namespace current]::ServSelect]
-    
-    # Grab and focus.
-    set oldFocus [focus]
-    focus $w
-    catch {grab $w}
-    
-    # HTTP get xml list of servers.
-    set url $::Jabber::jprefs(urlServersList)
-    if {[catch {
-	::httpex::get $url -progress [namespace current]::ServProgress  \
-	  -command [list [namespace current]::ServCommand $w] \
-	  -timeout $prefs(timeoutMillis)
-    } token]} {
-	destroy $w
-	::UI::MessageBox -title [mc Error] -icon error -type ok  \
-	  -message "Failed to obtain list of open Jabber servers from\
-	  \"$url\": $token"
-	return
-    } else {
-	set servStatVar "Getting server list from $url"
-	$warrows start
-    }
-    upvar #0 $token state
-    
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
-    
-    catch {grab release $w}
-    catch {focus $oldFocus}
-    if {$finishedServ} {
-	if {$rowcurrent != ""} {
-	    set server [lindex $rowcurrent 0]
-	}
-    }
-}
-
-proc ::Jabber::SetupAss::ServSet {w} {
-    variable finishedServ
-
-    set finishedServ 1
-    destroy $w
-}
-
-proc ::Jabber::SetupAss::ServCancel {w} {
-    variable finishedServ
-
-    set finishedServ 0
-    destroy $w
-}
-
-proc ::Jabber::SetupAss::ServSelect { } {
-    variable wbservbt
-    variable rowcurrent
-    variable wtbl
-
-    $wbservbt state {!disabled}
-    set ind [$wtbl curselection]
-    if {$ind != ""} {
-	set rowcurrent [$wtbl get $ind]
-    }
-}
-
-proc ::Jabber::SetupAss::ServProgress {token total current} {
-       
-    # Empty.
-}
-
-proc ::Jabber::SetupAss::ServCommand {w token} {
-    upvar #0 $token state
-    upvar ::Jabber::jstate jstate
-    variable warrows
-    variable servStatVar
-    variable publicServerList
-    variable wtbl
-
-    ::Debug 2 "::Jabber::SetupAss::ServCommand [::httpex::state $token]"
-    
-    if {![winfo exists $w]} {
-	return
-    }
-    if {[::httpex::state $token] != "final"} {
-	return
-    }
-    set servStatVar ""
-    $warrows stop
-    
-    # Investigate 'state' for any exceptions.
-    set status [::httpex::status $token]
-    
-    ::Debug 2 "\ttoken=$token status=$status"
-    
-    switch -- $status {
-	timeout {
-	    ::UI::MessageBox -title [mc Timeout] -icon info -type ok \
-	      -message "Timeout while waiting for response."
-	}
-	error {
-	    ::UI::MessageBox -title "File transport error" -icon error -type ok \
-	      -message "File transport error when getting server list:\
-	      [::httpex::error $token]"
-	}
-	eof {
-	    ::UI::MessageBox -title "File transport error" -icon error -type ok \
-	      -message "The server closed the socket without replying."	   
-	}
-	reset {
-	    # Did this ourself?
-	}
-	ok {
-	    
-	    # Get and parse xml.
-	    set xml [::httpex::data $token]    
-	    set token [tinydom::parse $xml]
-	    set xmllist [tinydom::documentElement $token]
-	    set publicServerList {}
-	    
-	    foreach elem [tinydom::children $xmllist] {
-		switch -- [tinydom::tagname $elem] {
-		    item {
-			unset -nocomplain attrArr
-			array set attrArr [tinydom::attrlist $elem]
-			lappend publicServerList  \
-			  [list $attrArr(jid) $attrArr(name)]
-		    }
-		}
-	    }
-
-	    $wtbl insertlist end $publicServerList
-	}
-    }
-    ::httpex::cleanup $token
-    if {$status != "ok"} {
-	catch {destroy $w}
-    }
+    set server $_server
 }
 
 #-------------------------------------------------------------------------------

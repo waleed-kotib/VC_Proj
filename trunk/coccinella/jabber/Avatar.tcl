@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.8 2006-01-10 08:38:37 matben Exp $
+# $Id: Avatar.tcl,v 1.9 2006-01-11 13:24:53 matben Exp $
 
 # @@@ Issues:
 #     1) shall we keep cache of users avatars between sessions to save bandwidth?
@@ -701,7 +701,7 @@ proc ::Avatar::PrefsFrame {win} {
     ttk::frame $win
     ttk::label $win.title -text [mc {My Avatar}]
     ttk::separator $win.sep -orient horizontal
-    ttk::checkbutton $win.share -text [mc prefsavashare]  \
+    ttk::checkbutton $win.share -text [mc prefavashare]  \
       -variable [namespace current]::tmpprefs(share)
     # ttk::checkbutton $win.vcard -text "Use this image also for the vCard photo"
     
@@ -710,7 +710,12 @@ proc ::Avatar::PrefsFrame {win} {
     
     set wava $wfr.ava
     frame $wava
-    ttk::label $wava.l -style Sunken.TLabel -compound image
+    # Bug in 8.4.1 but ok in 8.4.9
+    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
+	label $wava.l -relief sunken -bd 1 -bg white
+    } else {
+	ttk::label $wava.l -style Sunken.TLabel -compound image
+    }
     
     grid  $wava.l  -sticky news
     grid columnconfigure $wava 0 -minsize [expr {2*4 + 2*4 + 64}]
