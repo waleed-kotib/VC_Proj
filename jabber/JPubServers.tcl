@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: JPubServers.tcl,v 1.1 2006-01-10 13:48:28 matben Exp $
+# $Id: JPubServers.tcl,v 1.2 2006-01-11 13:24:54 matben Exp $
 
 package require chasearrows
 package require httpex
@@ -39,7 +39,7 @@ proc ::JPubServers::Build {w {command ""}} {
     upvar 0 $w state
 
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w {Public Jabber Servers}
+    wm title $w [mc {Public Jabber Servers}]
     
     # Global frame.
     ttk::frame $w.frall

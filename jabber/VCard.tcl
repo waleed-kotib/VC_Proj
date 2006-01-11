@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.40 2005-12-27 14:53:55 matben Exp $
+# $Id: VCard.tcl,v 1.41 2006-01-11 13:24:54 matben Exp $
 
 package provide VCard 1.0
 
@@ -370,7 +370,12 @@ proc ::VCard::Pages {nbframe etoken type} {
 
     set wp2 $wbot.2
     frame $wp2
-    ttk::label $wp2.l -style Sunken.TLabel -compound image
+    # Bug in 8.4.1 but ok in 8.4.9
+    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
+	label $wp2.l -relief sunken -bd 1 -bg white
+    } else {
+	ttk::label $wp2.l -style Sunken.TLabel -compound image
+    }
     
     pack  $wp2 -side left
     grid  $wp2.l  -sticky news

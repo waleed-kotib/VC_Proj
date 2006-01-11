@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.144 2005-12-22 11:32:06 matben Exp $
+# $Id: Chat.tcl,v 1.145 2006-01-11 13:24:53 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -174,7 +174,7 @@ proc ::Chat::StartThreadDlg {args} {
     pack $w.frall -fill both -expand 1
     
     ttk::label $w.frall.head -style Headlabel \
-      -text [mc {Chat with}] -compound left
+      -text [mc {Chat With}] -compound left
     pack $w.frall.head -side top -fill both -expand 1
 
     ttk::separator $w.frall.s -orient horizontal

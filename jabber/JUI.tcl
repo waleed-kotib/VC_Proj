@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.109 2006-01-10 08:38:37 matben Exp $
+# $Id: JUI.tcl,v 1.110 2006-01-11 13:24:54 matben Exp $
 
 package provide JUI 1.0
 
@@ -64,8 +64,14 @@ namespace eval ::Jabber::UI:: {
 	}
     }
     option add *JMain*TMenubutton.padding         {1}             50
-    option add *JMain*me.style                    Small.Sunken.TLabel startupFile
 
+    # Bug in 8.4.1 but ok in 8.4.9
+    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
+	option add *JMain*me.style              Small.TLabel startupFile
+    } else {
+	option add *JMain*me.style              Small.Sunken.TLabel startupFile
+    }
+    
     # Special for X11 menus to look ok.
     if {[tk windowingsystem] eq "x11"} {
 	option add *JMain.Menu.borderWidth        0               50
@@ -571,8 +577,7 @@ proc ::Jabber::UI::CloseHook {wclose} {
     
     set result ""
     if {[info exists jwapp(jmain)]} {
-	set ans [::UserActions::DoQuit -warning 1]
-	if {$ans eq "no"} {
+	if {![::UserActions::DoQuit -warning 1]} {
 	    set result stop
 	}
     }   

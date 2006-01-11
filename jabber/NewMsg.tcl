@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.70 2005-11-30 08:32:00 matben Exp $
+# $Id: NewMsg.tcl,v 1.71 2006-01-11 13:24:54 matben Exp $
 
 package require ui::entryex
 
@@ -41,6 +41,8 @@ namespace eval ::NewMsg:: {
     }
     option add *NewMsg*frsub.padding              {12  4 12  4}   50
     option add *NewMsg*TMenubutton.padding        {1}             50
+    option add *NewMsg*Text.borderWidth           0               50
+    option add *NewMsg*Text.relief                flat            50
 
     option add *JMultiAddress.background    #999999         50
 
