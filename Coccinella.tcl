@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.132 2006-01-08 14:02:14 matben Exp $	
+# $Id: Coccinella.tcl,v 1.133 2006-01-11 13:23:25 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -227,6 +227,7 @@ switch -- $this(platform) {
 	package require WindowsUtils
     }
 }
+::UI::InitDlgs
 
 # The Jabber stuff. 
 # @@@ Should jabber code be loaded at all if p2p?
@@ -235,7 +236,6 @@ package require Jabber
 
 # Define MIME types etc.
 ::Types::Init
-::UI::InitDlgs
 
 # Standard (factory) preferences are set here.
 # These are the hardcoded, application default, values, and can be
