@@ -101,8 +101,10 @@ Translations:
     German:     Hermann J. Beckers
     Dutch:      Sander Devrieze
     French:     Guillaume Ayoub
-    Spanish:    Nestor Diaz
+    Spanish:    Nestor Diaz & Antonio Cano damas
     Polish:     Zbigniew Baniewski
+    Danish:     Mogens Pedersen
+    Russian:    Gescheit
 
 Bug Reports:
 

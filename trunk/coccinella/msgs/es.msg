@@ -591,7 +591,7 @@
 ::msgcat::mcset es {Version Info}		{Información de la version}
 ::msgcat::mcset es {Whiteboard fonts}		{Fuentes de la pizarra}
 ::msgcat::mcset es {Writing file}		{Écriture del archivo}
-#::msgcat::mcset en {Groupchat presence change}
+#::msgcat::mcset es {Groupchat presence change}
 
 # Time intervals.
 # ::msgcat::mcset es {Ten seconds} {}
@@ -601,6 +601,28 @@
 ::msgcat::mcset es {One day} 			{Un día}
 ::msgcat::mcset es {One week}	 		{Una semana}
 
+# Language names.
+#::msgcat::mcset es {Danish} 
+#::msgcat::mcset es {Dutch} 
+#::msgcat::mcset es {English} 
+#::msgcat::mcset es {French} 
+#::msgcat::mcset es {German} 
+#::msgcat::mcset es {Polish} 
+#::msgcat::mcset es {Russian} 
+#::msgcat::mcset es {Spanish} 
+#::msgcat::mcset es {Swedish} 
+
+# Same languge names but with their native names.
+# See the other catalogs to get these.
+::msgcat::mcset es nativeDanish     Dansk
+::msgcat::mcset es nativeDutch      Nederlands
+::msgcat::mcset es nativeEnglish    English
+::msgcat::mcset es nativeFrench     Français
+::msgcat::mcset es nativeGerman     Deutsch
+::msgcat::mcset es nativePolish 
+::msgcat::mcset es nativeRussian 
+::msgcat::mcset es nativeSpanish    Castellano
+::msgcat::mcset es nativeSwedish    Svenska 
 
 
 # Écran de arranque :
@@ -711,8 +733,8 @@
 ::msgcat::mcset es jamesschatclose	{Si cierra esta ventana, perderá la conversación en curso. ¿Desea cerrar de todas maneras?}
 ::msgcat::mcset es jamessnogroupchat	{No se reconoce ningún servicio de grupo de chat.}
 #--- translate
-::msgcat::mcset en jamessgcnoroomname   {You must provide a roomname.}
-::msgcat::mcset en jamessgcnoroomnick   {You must provide a nickname.}
+::msgcat::mcset es jamessgcnoroomname   {You must provide a roomname.}
+::msgcat::mcset es jamessgcnoroomnick   {You must provide a nickname.}
 #
 ::msgcat::mcset es jamessinroommiss	{Todos los campos ser cumplimentados antes de entrar en la sala.}
 ::msgcat::mcset es jamesswarnexitroom	{Desea salir de la sala %s ?}
@@ -906,6 +928,9 @@ además de las fuentes estándar (Times, Helvetica o Courier), Aseguresé que ha
 ::msgcat::mcset es prefwbscroll {You may set a larger size than the default %sx%s}
 ::msgcat::mcset es prefssbts {Show next and previous buttons}
 ::msgcat::mcset es prefssresize {Resize canvas automatically to fit image}
+::msgcat::mcset es prefavashare {Share this avatar with other users}
+::msgcat::mcset es prefproxymsg {Usage of the Http proxy is determined by each profile settings. File transfers wont work if you use Http proxy!}
+::msgcat::mcset es prefproxyexc {Exclude addresses (* as wildcard)}
 #--- Translate ---
 
 
@@ -978,6 +1003,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jainvitegchat {Invite a user for groupchat in room %s}
 ::msgcat::mcset es jaxformreq   {Labels with (*) are required}
 ::msgcat::mcset es jagcsyncpres {Synchronize chatroom with user presence}
+::msgcat::mcset es jaloginuser  {Enter your username and password to login to %s.}
+::msgcat::mcset es jaregnewwith {Do you want to register a new account with %s.}
+::msgcat::mcset es jaregisterexserv {Register with the service %s. You may need to press the Get button if not registration info obtained automatically.}
 #--- Translate ---
 
 
@@ -996,6 +1024,10 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es sufinmsg	{¡Es todo! Quoi qu'il en soit, soyez gentil con l'insecte ;-)}
 ::msgcat::mcset es suheadtxt	{Asistente de configuración de Coccinella}
 
+#--- Translate ---
+::msgcat::mcset es supubserv {Get list of public and open Jabber servers}
+::msgcat::mcset es suservlist {List of open Jabber servers}
+#--- Translate ---
 
 
 ::msgcat::mcset es vcardget	{Cargando de la tarjeta del usuario %s.. Esperando de la respuesta del servidor...}
