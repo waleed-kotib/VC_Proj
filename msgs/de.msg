@@ -944,8 +944,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de suusermsg	{Geben Sie Benutzername und Passwort ein. Wenn Sie noch nicht registriert sind, darf der Benutzername noch nicht existieren.\
   Wenn der Name bereits von jemand benutzt wird, erhalten Sie bei der Registrierung einen Hinweis darüber.}
 ::msgcat::mcset de suregmsg	{Möchten Sie Ihr Konto nun registrieren, wenn es ein Neueintrag ist? Sie müssen dazu (ohne Firewall) bereits mit einem Netzwerk verbunden sein.}
-::msgcat::mcset de sufinmsg	{Das ist alles. Wenn die Registrierung erfolgreich wahr, müssen Sie nur die Schaltfläche "Verbinden" drücken oder das Jabber/Anmelden-Menü wählen.\
-  Seien Sie nett zu Coccinella ;-)}
+::msgcat::mcset de sufinmsg	{Das ist alles. Seien Sie nett zu Coccinella ;-)}
 ::msgcat::mcset de suheadtxt	{Coccinella Einrichtungs-Assistent}
 
 
