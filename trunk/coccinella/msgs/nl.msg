@@ -19,6 +19,7 @@
 ::msgcat::mcset nl Apply		{Toepassen}
 ::msgcat::mcset nl Available		{Beschikbaar}
 ::msgcat::mcset nl Away			{Afwezig}
+# ::msgcat::mcset nl Back               {}
 ::msgcat::mcset nl Binary		{Binair}
 ::msgcat::mcset nl Birthday		{Geboortedatum}
 ::msgcat::mcset nl Block		{Blokkeren}
@@ -55,6 +56,7 @@
 ::msgcat::mcset nl Document		{Document}
 ::msgcat::mcset nl Done			{Klaar}
 ::msgcat::mcset nl Edit			{Bewerken}
+# ::msgcat::mcset nl Email              {}
 ::msgcat::mcset nl Enter		{Betreden}
 ::msgcat::mcset nl Error		{Fout}
 ::msgcat::mcset nl Exit			{Sluiten}
@@ -79,6 +81,7 @@
 ::msgcat::mcset nl Inbox		{Postvak in}
 ::msgcat::mcset nl Info			{Info}
 ::msgcat::mcset nl Invite		{Uitnodigen}
+# ::msgcat::mcset nl Language           {}
 ::msgcat::mcset nl Last			{Laatste}
 ::msgcat::mcset nl Less			{Minder}
 ::msgcat::mcset nl Login		{Aanmelden}
@@ -396,6 +399,7 @@
 ::msgcat::mcset nl {Company Name}		{Bedrijf}
 ::msgcat::mcset nl {Component Info}		{Componenten}
 ::msgcat::mcset nl {Conference server}		{Dienst}
+# ::msgcat::mcset nl {Connect using HTTP}       {}
 ::msgcat::mcset nl {Contact Type}		{IM-netwerk}
 ::msgcat::mcset nl {Create Room}		{Chatruimte aanmaken}
 ::msgcat::mcset nl {Default group}		{Standaard groep}
@@ -468,6 +472,7 @@
 ::msgcat::mcset nl {Mailbox Error}		{Fout met Postvak In}
 ::msgcat::mcset nl {MIME type}			{Bestandstype}
 ::msgcat::mcset nl {Multi Connect}		{Multi connecteren}
+# ::msgcat::mcset nl {My Avatar}                {}
 ::msgcat::mcset nl {My Status}			{Mijn aanwezigheid}
 ::msgcat::mcset nl {Name of list}		{Lijstnaam}
 ::msgcat::mcset nl {Network Error}		{Netwerkfout}
@@ -521,6 +526,7 @@
 ::msgcat::mcset nl {Privacy List}		{Privacylijst}
 ::msgcat::mcset nl {Profile Name}         	{Profielnaam}
 ::msgcat::mcset nl {Proxy Setup}		{Proxy instellen}
+# ::msgcat::mcset nl {Public Jabber Servers}    {}
 ::msgcat::mcset nl {Put File Error}		{Bestandsplaatsingsfout}
 ::msgcat::mcset nl {Put Image/Movie}		{Afbeelding/film plaatsen}
 ::msgcat::mcset nl {Reject receive}		{Ontvangst weigeren}
@@ -531,6 +537,7 @@
 ::msgcat::mcset nl {Register Now}		{Nieuwe account aanmaken}
 ::msgcat::mcset nl {Register Service}		{Dienst registreren}
 ::msgcat::mcset nl {Remove Item}		{Contactpersoon verwijderen}
+# ::msgcat::mcset nl {Remove Photo}             {}
 ::msgcat::mcset nl {Room name}			{Chatruimte}
 ::msgcat::mcset nl {Room name (optional)}	{Chatruimte (optioneel)}
 ::msgcat::mcset nl {Roster & Services}		{Roster & diensten}
@@ -545,6 +552,7 @@
 ::msgcat::mcset nl {Search Specifications}	{Specificaties zoeken}
 ::msgcat::mcset nl {Select a new nickname}	{Nieuwe bijnaam selecteren}
 ::msgcat::mcset nl {Select Font}		{Lettertype selecteren}
+# ::msgcat::mcset nl {Select Photo}             {}
 ::msgcat::mcset nl {Send File}			{Bestand verzenden}
 ::msgcat::mcset nl {Send Live}			{Live verzenden}
 ::msgcat::mcset nl {Server Info}		{Servergegevens}
@@ -578,11 +586,13 @@
 ::msgcat::mcset nl {Type of File}		{Bestandstype}
 ::msgcat::mcset nl {Unknown: Prompt user}	{Onbekend: vraag gebruiker}
 ::msgcat::mcset nl {Url of homepage}		{Adres van website}
+# ::msgcat::mcset nl {Use proxy}                {}
 ::msgcat::mcset nl {Use SSL for security}	{Met SSL beveiligen}
 ::msgcat::mcset nl {User is}			{Contactpersoon is}
 ::msgcat::mcset nl {User is offline}		{Contactpersoon is offline}
 ::msgcat::mcset nl {User is online}		{Contactpersoon is online}
 ::msgcat::mcset nl {User Profiles}		{Gebruikersprofielen}
+# ::msgcat::mcset nl {Users Avatar}             {}
 ::msgcat::mcset nl {User's status changed}	{Aanwezigheid van contactpersoon wijzigde}
 ::msgcat::mcset nl {Username & Password}	{Gebruikersnaam & wachtwoord}
 ::msgcat::mcset nl {vCard Info}			{Info over contactpersoon}
@@ -898,6 +908,9 @@
 ::msgcat::mcset nl prefwbscroll {U kunt een grotere waarde instellen dan de standaardgrootte %sx%s}
 ::msgcat::mcset nl prefssbts {Volgende en vorige knoppen laten zien}
 ::msgcat::mcset nl prefssresize {Doek automatisch aanpassen aan afbeeldingsgrootte}
+# ::msgcat::mcset nl prefavashare {Share this avatar with other users}
+# ::msgcat::mcset nl prefproxymsg {Usage of the Http proxy is determined by each profile settings. File transfers wont work if you use Http proxy!}
+# ::msgcat::mcset nl prefproxyexc {Exclude addresses (* as wildcard)}
 
 
 
@@ -981,6 +994,8 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl suregmsg	{Druk op onderstaande knop als u een nieuwe account wilt aanmaken. Om te registreren moet u verbonden zijn met het internet (let op een eventuele firewall!).}
 ::msgcat::mcset nl sufinmsg	{Veel chatplezier! Wees lief voor het insect ;-)}
 ::msgcat::mcset nl suheadtxt	{Coccinella's installatieassistent}
+# ::msgcat::mcset nl supubserv {Get list of public and open Jabber servers}
+# ::msgcat::mcset nl suservlist {List of open Jabber servers}
 
 
 

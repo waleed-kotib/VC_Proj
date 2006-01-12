@@ -16,6 +16,7 @@
 ::msgcat::mcset en Apply
 ::msgcat::mcset en Available
 ::msgcat::mcset en Away
+::msgcat::mcset en Back
 ::msgcat::mcset en Binary
 ::msgcat::mcset en Birthday
 ::msgcat::mcset en Block
@@ -52,6 +53,7 @@
 ::msgcat::mcset en Document
 ::msgcat::mcset en Done
 ::msgcat::mcset en Edit
+::msgcat::mcset en Email
 ::msgcat::mcset en Enter
 ::msgcat::mcset en Error
 ::msgcat::mcset en Exit
@@ -76,6 +78,7 @@
 ::msgcat::mcset en Inbox
 ::msgcat::mcset en Info
 ::msgcat::mcset en Invite
+::msgcat::mcset en Language
 ::msgcat::mcset en Last
 ::msgcat::mcset en Less
 ::msgcat::mcset en Login
@@ -391,6 +394,7 @@
 ::msgcat::mcset en {Company Name}
 ::msgcat::mcset en {Component Info}
 ::msgcat::mcset en {Conference server}
+::msgcat::mcset en {Connect using HTTP}
 ::msgcat::mcset en {Contact Type}
 ::msgcat::mcset en {Create Room}
 ::msgcat::mcset en {Default group}
@@ -463,6 +467,7 @@
 ::msgcat::mcset en {Mailbox Error}
 ::msgcat::mcset en {MIME type}
 ::msgcat::mcset en {Multi Connect}
+::msgcat::mcset en {My Avatar}
 ::msgcat::mcset en {My Status}
 ::msgcat::mcset en {Name of list}
 ::msgcat::mcset en {Network Error}
@@ -516,6 +521,7 @@
 ::msgcat::mcset en {Privacy List}
 ::msgcat::mcset en {Profile Name}
 ::msgcat::mcset en {Proxy Setup}
+::msgcat::mcset en {Public Jabber Servers}
 ::msgcat::mcset en {Put File Error}
 ::msgcat::mcset en {Put Image/Movie}
 ::msgcat::mcset en {Reject receive}
@@ -526,6 +532,7 @@
 ::msgcat::mcset en {Register Now}
 ::msgcat::mcset en {Register Service}
 ::msgcat::mcset en {Remove Item}
+::msgcat::mcset en {Remove Photo}
 ::msgcat::mcset en {Room name}
 ::msgcat::mcset en {Room name (optional)}
 ::msgcat::mcset en {Roster & Services}
@@ -540,6 +547,7 @@
 ::msgcat::mcset en {Search Specifications}
 ::msgcat::mcset en {Select a new nickname}
 ::msgcat::mcset en {Select Font}
+::msgcat::mcset en {Select Photo}
 ::msgcat::mcset en {Send File}
 ::msgcat::mcset en {Send Live}
 ::msgcat::mcset en {Server Info}
@@ -573,12 +581,14 @@
 ::msgcat::mcset en {Type of File}
 ::msgcat::mcset en {Unknown: Prompt user}
 ::msgcat::mcset en {Url of homepage}
+::msgcat::mcset en {Use proxy}
 ::msgcat::mcset en {Use SSL for security}
 ::msgcat::mcset en {User is}
 ::msgcat::mcset en {User is offline}
 ::msgcat::mcset en {User is online}
 ::msgcat::mcset en {User Profiles}
 ::msgcat::mcset en {User's status changed}
+::msgcat::mcset en {Users Avatar}
 ::msgcat::mcset en {Username & Password}
 ::msgcat::mcset en {vCard Info}
 ::msgcat::mcset en {Version Info}
@@ -592,6 +602,29 @@
 ::msgcat::mcset en {One hour} 
 ::msgcat::mcset en {One day} 
 ::msgcat::mcset en {One week} 
+
+# Language names.
+::msgcat::mcset en {Danish} 
+::msgcat::mcset en {Dutch} 
+::msgcat::mcset en {English} 
+::msgcat::mcset en {French} 
+::msgcat::mcset en {German} 
+::msgcat::mcset en {Polish} 
+::msgcat::mcset en {Russian} 
+::msgcat::mcset en {Spanish} 
+::msgcat::mcset en {Swedish} 
+
+# Same languge names but with their native names.
+# See the other catalogs to get these.
+::msgcat::mcset en nativeDanish     Dansk
+::msgcat::mcset en nativeDutch      Nederlands
+::msgcat::mcset en nativeEnglish    English
+::msgcat::mcset en nativeFrench     Français
+::msgcat::mcset en nativeGerman     Deutsch
+::msgcat::mcset en nativePolish 
+::msgcat::mcset en nativeRussian 
+::msgcat::mcset en nativeSpanish    Castellano
+::msgcat::mcset en nativeSwedish    Svenska 
 
 
 # Splash screen:
@@ -865,6 +898,9 @@ this font installed on their system.}
 ::msgcat::mcset en prefwbscroll  {You may set a larger size than the default %sx%s}
 ::msgcat::mcset en prefssbts     {Show next and previous buttons}
 ::msgcat::mcset en prefssresize  {Resize canvas automatically to fit image}
+::msgcat::mcset en prefavashare {Share this avatar with other users}
+::msgcat::mcset en prefproxymsg  {Usage of the Http proxy is determined by each profile settings. File transfers wont work if you use Http proxy!}
+::msgcat::mcset en prefproxyexc  {Exclude addresses (* as wildcard)}
 
 
 
@@ -950,8 +986,10 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en suusermsg	{Fill in your username and password. The username must not exist at the specified server, unless you are already registered.\
   If the username is already in use by another, you will receive a note about this when trying to register.}
 ::msgcat::mcset en suregmsg	{Do you want to register your account now if it is a new one? You must already be connected to a network (without firewall) to register.}
-::msgcat::mcset en sufinmsg	{That's all. If the registration was succesful, you only have to press the Connect button, or select the Jabber/Login menu. Also, be nice to the bug ;-)}
+::msgcat::mcset en sufinmsg	{That's all. Also, be nice to the bug ;-)}
 ::msgcat::mcset en suheadtxt	{Coccinella Setup Assistant}
+::msgcat::mcset en supubserv	{Get list of public and open Jabber servers}
+::msgcat::mcset en suservlist	{List of open Jabber servers}
 
 
 

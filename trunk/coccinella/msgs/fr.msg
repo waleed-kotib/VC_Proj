@@ -953,8 +953,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr suusermsg	{Indiquez votre nom d'utilisateur et votre mot de passe. Le nom d'utilisateur ne doit pas être utilisé par quelqu'un d'autre sur le serveur spécifié.\
   Si c'est le cas, vous recevrez un message vous l'indiquant lorsque vous tenterez de vous enregistrer.}
 ::msgcat::mcset fr suregmsg	{Voulez-vous enregistrer votre compte maintenant (si c'est un nouveau compte) ? Vous devez être connecté au réseau (sans firewall).}
-::msgcat::mcset fr sufinmsg	{C'est tout ! Si l'enregistrement a fonctionné, il ne vous reste qu'à cliquer sur "Se connecter", ou à choisir le menu Jabber/Connexion.\
-  Quoi qu'il en soit, soyez gentil avec l'insecte ;-)}
+::msgcat::mcset fr sufinmsg	{C'est tout ! Quoi qu'il en soit, soyez gentil avec l'insecte ;-)}
 ::msgcat::mcset fr suheadtxt	{Assistant de configuration de Coccinella}
 
 

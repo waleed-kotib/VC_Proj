@@ -15,6 +15,7 @@
 ::msgcat::mcset sv Apply		{Använd}
 ::msgcat::mcset sv Available		{Tillgänglig}
 ::msgcat::mcset sv Away			{Borta}
+::msgcat::mcset sv Back                 {Tillbaka}
 ::msgcat::mcset sv Binary               {Binärt}
 ::msgcat::mcset sv Birthday		{Födelsedag}
 ::msgcat::mcset sv Block                {Blockera}
@@ -51,6 +52,7 @@
 ::msgcat::mcset sv Done			{Färdig}
 ::msgcat::mcset sv Drawing              {Rita}
 ::msgcat::mcset sv Edit 		{Redigera}
+::msgcat::mcset sv Email                {Epost}
 ::msgcat::mcset sv Enter                {Enter}
 ::msgcat::mcset sv Error 		{Fel}
 ::msgcat::mcset sv Exit                 {Exit}
@@ -75,6 +77,7 @@
 ::msgcat::mcset sv Inbox                {Inkorg}
 ::msgcat::mcset sv Info 		{Info}
 ::msgcat::mcset sv Invite               {Bjud in}
+::msgcat::mcset sv Language             {Språk}
 ::msgcat::mcset sv Last                 {Sista}
 ::msgcat::mcset sv Less                 {Färre}
 ::msgcat::mcset sv Login 		{Logga in}
@@ -392,6 +395,7 @@
 ::msgcat::mcset sv {Company Name}	   {Företag}
 ::msgcat::mcset sv {Component Info}        {Komponentinfo}
 ::msgcat::mcset sv {Conference server}	   {Konferanstjänst}
+::msgcat::mcset sv {Connect using HTTP}    {Anslut över HTTP}
 ::msgcat::mcset sv {Contact Type}          {Kontakttyp}
 ::msgcat::mcset sv {Create Room}	   {Skapa rum}
 ::msgcat::mcset sv {Default group}         {Standard grupp}
@@ -464,6 +468,7 @@
 ::msgcat::mcset sv {Mailbox Error}	   {Inkorgsfel}
 ::msgcat::mcset sv {MIME type}             {MIME typ}
 ::msgcat::mcset sv {Multi Connect}         {Multipelanslut}
+::msgcat::mcset sv {My Avatar}             {Min avatar}
 ::msgcat::mcset sv {My Status}		   {Min status}
 ::msgcat::mcset sv {Name of list}          {Listnamn}
 ::msgcat::mcset sv {Network Error}         {Nätverksfel}
@@ -517,6 +522,7 @@
 ::msgcat::mcset sv {Privacy List}          {Integritetslista}
 ::msgcat::mcset sv {Profile Name}          {Profil namn}
 ::msgcat::mcset sv {Proxy Setup}           {Proxyinställning}
+::msgcat::mcset sv {Public Jabber Servers} {Offentliga Jabber servrar}
 ::msgcat::mcset sv {Put File Error}        {Felektighet vid filöverföring}
 ::msgcat::mcset sv {Put Image/Movie}       {Skicka bild/film}
 ::msgcat::mcset sv {Reject receive}        {Neka mottagande}
@@ -527,6 +533,7 @@
 ::msgcat::mcset sv {Register Now}	   {Registrera nu}
 ::msgcat::mcset sv {Register Service}	   {Registrera tjänst}
 ::msgcat::mcset sv {Remove Item}	   {Tag bort användare}
+::msgcat::mcset sv {Remove Photo}          {Tag bort foto}
 ::msgcat::mcset sv {Room name}		   {Rumsnamn}
 ::msgcat::mcset sv {Room name (optional)}  {Rumsnamn (valfritt)}
 ::msgcat::mcset sv {Roster & Services}     {Roster & Services}
@@ -541,6 +548,7 @@
 ::msgcat::mcset sv {Search Specifications} {Sökspecifikation}
 ::msgcat::mcset sv {Select a new nickname} {Välj ett nytt kortnamn}
 ::msgcat::mcset sv {Select Font}           {Välj typsnitt}
+::msgcat::mcset sv {Select Photo}          {Välj foto}
 ::msgcat::mcset sv {Send File}             {Skicka fil}
 ::msgcat::mcset sv {Send Live}             {Skicka lajv}
 ::msgcat::mcset sv {Server Info}           {Server info}
@@ -574,12 +582,14 @@
 ::msgcat::mcset sv {Type of File}          {Filtyp}
 ::msgcat::mcset sv {Unknown: Prompt user}  {Okänt: Fråga användare}
 ::msgcat::mcset sv {Url of homepage}       {Url till hemsidan}
+::msgcat::mcset sv {Use proxy}             {Använd proxy}
 ::msgcat::mcset sv {Use SSL for security}  {Använd SSL för säkerhet}
 ::msgcat::mcset sv {User is}		   {Användare är}
 ::msgcat::mcset sv {User is offline}       {Användare är borta}
 ::msgcat::mcset sv {User is online}        {Användare är tillgänglig}
 ::msgcat::mcset sv {User Profiles}         {Användarprofiler}
 ::msgcat::mcset sv {User's status changed} {Användares status ändrad}
+::msgcat::mcset sv {Users Avatar}          {Användarens avatar}
 ::msgcat::mcset sv {Username & Password}   {Användarnamn & lösenord}
 ::msgcat::mcset sv {vCard Info}		   {vCard Info}
 ::msgcat::mcset sv {Version Info}	   {Versions info}
@@ -594,6 +604,30 @@
 ::msgcat::mcset sv {One hour}              {En timme}
 ::msgcat::mcset sv {One day}               {En dag}
 ::msgcat::mcset sv {One week}              {En vecka}
+
+# Language names.
+::msgcat::mcset sv {Danish}     Danska
+::msgcat::mcset sv {Dutch}      Holländska
+::msgcat::mcset sv {English}    Engelska
+::msgcat::mcset sv {French}     Franska
+::msgcat::mcset sv {German}     Tyska
+::msgcat::mcset sv {Polish}     Polska
+::msgcat::mcset sv {Russian}    Ryska
+::msgcat::mcset sv {Spanish}    Spanska
+::msgcat::mcset sv {Swedish}    Svenska
+
+# Same languge names but with their native names.
+# See the other catalogs to get these.
+::msgcat::mcset sv nativeDanish     Dansk
+::msgcat::mcset sv nativeDutch      Nederlands
+::msgcat::mcset sv nativeEnglish    English
+::msgcat::mcset sv nativeFrench     
+::msgcat::mcset sv nativeGerman     Deutsch
+::msgcat::mcset sv nativePolish 
+::msgcat::mcset sv nativeRussian 
+::msgcat::mcset sv nativeSpanish    Castellano
+::msgcat::mcset sv nativeSwedish    Svenska 
+
 
 
 
@@ -870,8 +904,9 @@ Om du väljer att blockera en grupp så måste denna finnas i din roster.}
 ::msgcat::mcset sv prefwbscroll  {Du kan öka storleken utöver standardstorleken %sx%s}
 ::msgcat::mcset sv prefssbts     {Visa Nästa och Föregående knappar}
 ::msgcat::mcset sv prefssresize  {Anpassa fönsterstorleken automatiskt för att passa bild}
-
-
+::msgcat::mcset sv prefavashare {Dela den här avataren med andra}
+::msgcat::mcset sv prefproxymsg  {Användandet av Http proxy bestäms av varje profil. Filöverföringar fungerar inte för Http proxy}
+::msgcat::mcset sv prefproxyexc  {Uteslut följande adresser (* som jokertecken)}
 
 
 
@@ -960,9 +995,10 @@ Ett typiskt namn är "jabber.org".}
 ::msgcat::mcset sv suusermsg	{Fyll i ditt användarnamn och lösenord. Användarnamnet får ej finnas tidigare på angiven server om du nu inte redan har ditt konto där.\
 Om användarnamnet är upptaget så får du ett meddelande om detta när du registrerar kontot.}
 ::msgcat::mcset sv suregmsg	{Vill du registrera ditt konto omedelbart om det är ett nytt konto? Du måste vara nätverksansluten (utan brandvägg) för att kunna registrera dig.}
-::msgcat::mcset sv sufinmsg	{Det var det hela. Om registreringen lyckades så behöver du nu endast trycka på Anslut knappen eller välja Jabber/Anslut menyn.\
-En sak till, var snäll mot nyckelpigan ;-)}
+::msgcat::mcset sv sufinmsg	{Det var det hela. En sak till, var snäll mot nyckelpigan ;-)}
 ::msgcat::mcset sv suheadtxt	{Coccinella inställningsassistent}
+::msgcat::mcset sv supubserv    {Hämta lista på offentliga och öppna Jabber servrar}
+::msgcat::mcset sv suservlist   {Lista på öppna Jabber servrar}
 
 
 

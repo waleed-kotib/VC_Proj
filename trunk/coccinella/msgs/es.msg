@@ -993,8 +993,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es suusermsg	{Indique su nombre de usuario y su contraseña. El nombre de usuario no puede estar siendo utilizado por otro usuario en el servidor elegido.\
   Si este es el caso, obtendrá un mensaje indicando lorsque vous tenterez de registrarse.}
 ::msgcat::mcset es suregmsg	{Desea registrar su cuenta ahora (si es una nueva cuenta)? Deberá estar conectado a la red (sin cortafuegos).}
-::msgcat::mcset es sufinmsg	{¡Es todo! Si el registro ha funcionado, no queda más que hacer click sobre "Conectarse", o elegir en el menu Jabber/Conexión.\
-  Quoi qu'il en soit, soyez gentil con l'insecte ;-)}
+::msgcat::mcset es sufinmsg	{¡Es todo! Quoi qu'il en soit, soyez gentil con l'insecte ;-)}
 ::msgcat::mcset es suheadtxt	{Asistente de configuración de Coccinella}
 
 

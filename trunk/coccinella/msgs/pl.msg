@@ -939,7 +939,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl suusermsg	{Wpisz nazwę użytkownika ("login") i hasło. Nazwa ta nie może być w użyciu na wskazanym serwerze - chyba, że chodzi o Twoje konto, wcześniej już założone.\
   Jeśli zaś tej nazwy używa już ktoś inny, zostaniesz o tym poinformowany w trakcie próby założenia konta.}
 ::msgcat::mcset pl suregmsg	{Jeśli podana nazwa zostanie rozpoznana jako "nieużywana" - czy chcesz założyć nowe konto? Aby móc konto założyć, musisz uprzednio podłączyć się do sieci, usuwając ew. blokady połączenia z serwerem Jabbera.}
-::msgcat::mcset pl sufinmsg	{To wszystko. Jeśli rejestracja przebiegła pomyślnie, musisz tylko kliknąć przycisk "Zaloguj", albo wybrać "Zaloguj się" z menu "Jabber". Aha, i pamiętaj: bądź miły dla Biedroneczki... ;-)}
+::msgcat::mcset pl sufinmsg	{To wszystko. Aha, i pamiętaj: bądź miły dla Biedroneczki... ;-)}
 ::msgcat::mcset pl suheadtxt	{Pomocnik Konfiguracyjny Coccinelli}
 
 
