@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Import.tcl,v 1.22 2005-08-26 15:02:34 matben Exp $
+# $Id: Import.tcl,v 1.23 2006-01-12 11:03:17 matben Exp $
 
 package require http
 package require httpex
@@ -1332,7 +1332,10 @@ proc ::Import::HttpGetQuickTimeTcl {w url opts args} {
 	catch {destroy $wfr}
 	return
     }
-    ::WB::SetStatusMessage $w "Opening $url"    
+    ::WB::SetStatusMessage $w "Opening $url"
+    
+    # Be sure to return empty here!
+    return
 }
 
 # Import::QuickTimeTclCallback --

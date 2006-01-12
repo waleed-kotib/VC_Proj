@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.43 2005-12-04 13:29:11 matben Exp $
+# $Id: Conference.tcl,v 1.44 2006-01-12 11:03:17 matben Exp $
 
 package provide Conference 1.0
 
@@ -511,7 +511,10 @@ proc ::Conference::BuildCreate {args} {
     
     # Find the default conferencing server.
     if {[info exists argsArr(-server)]} {
-	set state(server) $argsArr(-server)
+	
+	# Bes ure to get domain part only!
+	jlib::splitjidex $argsArr(-server) - domain -
+	set state(server) $domain
 	$frtop.eserv state {disabled}
     } else {
 	set state(server) [lindex $serviceList 0]
