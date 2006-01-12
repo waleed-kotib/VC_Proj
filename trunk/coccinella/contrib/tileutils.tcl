@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.12 2006-01-08 14:02:14 matben Exp $
+# $Id: tileutils.tcl,v 1.13 2006-01-12 14:16:15 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -121,6 +121,9 @@ proc tileutils::configstyles {name} {
 	      -font CociSmallFont             \
 	      -padding {5 1}                  \
 	      -width -9
+	} elseif {$name eq "xpnative"} {
+	    style configure TCheckbutton -padding {2}
+	    style configure TRadiobutton -padding {2}
 	}
 	
 	# My custom styles.
