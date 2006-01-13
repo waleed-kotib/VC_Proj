@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: UserActions.tcl,v 1.44 2005-08-18 09:52:07 matben Exp $
+# $Id: UserActions.tcl,v 1.45 2006-01-13 13:23:12 matben Exp $
 
 package provide UserActions 1.0
 
@@ -129,7 +129,11 @@ proc ::UserActions::DoQuit {args} {
 	}
     }
     
-    # Run all quit hooks.
+    # Run all quit hooks. 
+    # Give components a chance to act before session ends.
+    ::hooks::run preQuitAppHook
+    
+    # Here we end the session if any.
     ::hooks::run quitAppHook
     
     # If we used 'Edit/Revert To/Application Defaults' be sure to reset...
