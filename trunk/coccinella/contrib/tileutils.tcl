@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.13 2006-01-12 14:16:15 matben Exp $
+# $Id: tileutils.tcl,v 1.14 2006-01-13 13:23:12 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -121,7 +121,10 @@ proc tileutils::configstyles {name} {
 	      -font CociSmallFont             \
 	      -padding {5 1}                  \
 	      -width -9
-	} elseif {$name eq "xpnative"} {
+	} 
+	
+	# @@@ These shall be removed when library/tile is updated!
+	if {[package vcompare $::tile::version 0.7.3] >= 0} {
 	    style configure TCheckbutton -padding {2}
 	    style configure TRadiobutton -padding {2}
 	}

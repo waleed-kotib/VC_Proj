@@ -5,14 +5,14 @@
 #
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: NotifyOnline.tcl,v 1.1 2006-01-13 08:55:11 matben Exp $
+# $Id: NotifyOnline.tcl,v 1.2 2006-01-13 13:23:12 matben Exp $
 
 package require http
 
 namespace eval ::NotifyOnline:: {
     
     # So far only logout (and quit).
-    set url "http://chat.evaal.com/logout_jb.php"
+    set url "http://www.evaal.com/index.php"
 
     set ::config(notifyonline,do)  0
     set ::config(notifyonline,url) $url
@@ -72,7 +72,8 @@ proc ::NotifyOnline::PostLogout {args} {
     
     set url $config(notifyonline,url)
     set jid [::Jabber::GetMyJid]
-    set query [::http::formatQuery user $jid]
+    #set query [::http::formatQuery user $jid]
+    set query [::http::formatQuery act expert]
     
     # Can't currently not fo this async during quit.
     catch {

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.156 2006-01-11 13:24:54 matben Exp $
+# $Id: Jabber.tcl,v 1.157 2006-01-13 13:23:12 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -437,6 +437,7 @@ proc ::Jabber::JlibCmd {args} {
 proc ::Jabber::IsConnected { } {
     variable jserver
 
+    # @@@ Switch to: jlib::isinstream
     return [expr [string length $jserver(this)] == 0 ? 0 : 1]
 }
 
