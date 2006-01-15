@@ -7,6 +7,8 @@ namespace eval ::NotifyCall:: { }
 
 proc ::NotifyCall::Init { } {
     
+    return
+    
     component::register NotifyCall  \
       "Provides support for Incoming Calls Dialog"
 

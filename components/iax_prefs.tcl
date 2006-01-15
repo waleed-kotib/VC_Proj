@@ -2,12 +2,14 @@
 # 
 #       iaxClient phone UI
 #       
-# $Id: iax_prefs.tcl,v 1.1 2006-01-13 13:23:12 matben Exp $
+# $Id: iax_prefs.tcl,v 1.2 2006-01-15 07:55:02 matben Exp $
 namespace eval ::iaxClientPrefs:: { }
 
 proc ::iaxClientPrefs::Init { } {
     global  this    
 
+    return
+    
     if {[catch {package require iaxclient}]} {
 	return
     }
