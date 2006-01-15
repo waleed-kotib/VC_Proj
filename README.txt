@@ -56,17 +56,12 @@ The Jabber system:
 
 Installation:
 
-    * Starting with version 0.94.5, no installation whatsoever is needed.
-      Just unzip and double click.
+    * No installation whatsoever is needed. Just unzip and double click.
 
     * If you want to run from sources the simplest is to get a tclkit from
       http://www.equi4.com/pub/tk/downloads.html, 8.4.6 or later. A complete
       Tcl/Tk installation can be obtained from http://tcl.activestate.com.
       Be sure to have at least 8.4.6 for Coccinella 0.95.9 or later.
-
-    It is necessary to have access to a unique server port on remote 
-    machines, so it can be problematic if you are behind a firewall.  
-    Firewalls are not dealt with at all at this stage.
 
 Testing:
 
@@ -74,7 +69,7 @@ Testing:
     from being bug free*.  The current releases get tested on Mac OS X 10.2,
     Linux RH 9, Windows 2000, and Windows XP. 
 
-    I would judge this as an alpha quality application, not beta, which is 
+    I would judge this as a beta quality application, which is 
     reflected in the version number ( < 1.0). No instabilities are known, 
     however.
 
@@ -134,7 +129,6 @@ Known Bugs:
       delete this file:
           Unix/Linux       ~/.coccinella/whiteboard
 	  Windows          .../Coccinella/WBPREFS.TXT     (search for it)
-	  Mac OS 8/9       :Program Preferences:Coccinella:Whiteboard Prefs
 	  Mac OS X         ~/Library/Preferences/Coccinella/Whiteboard Prefs
 
     * Printer support is still in its infacy. You may export the canvas to
@@ -156,13 +150,13 @@ Known Bugs:
     You set this either in the source file Coccinella.tcl, or specified
     at the command line as:
 
-    set argv "-debugLevel 3"
+    set argv "-debugLevel 4"
 
     and launch it. You need to have the source distribution and a Tcl/Tk
     installation to do this.
     As an alternative on mac and windows, pick the Jabber/Debug menu, and do:
 
-    set debugLevel 3
+    set debugLevel 4
 
 
 XML/SVG:
