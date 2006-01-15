@@ -5,7 +5,7 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.95.11 (0601??):
+Coccinella-0.95.11 (060115):
 
         - added support for Growl on mac
 	- using treectrl widget in a number of places
