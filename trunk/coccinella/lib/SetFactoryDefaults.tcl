@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.47 2005-08-14 07:17:55 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.48 2006-02-03 07:17:17 matben Exp $
 
 package provide FactoryDefaults 1.0
 
@@ -136,6 +136,7 @@ proc FactoryDefaults { } {
     
     # Various constants.
     set kPI 3.14159265359
+    set kPI 3.141592653
     set kRad2Grad [expr 180.0/$kPI]
     set kGrad2Rad [expr $kPI/180.0]
     set kTan225   [expr tan($kPI/8.0)]

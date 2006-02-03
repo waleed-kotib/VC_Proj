@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.12 2005-12-17 09:48:41 matben Exp $
+# $Id: RosterTree.tcl,v 1.13 2006-02-03 07:17:17 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -327,11 +327,10 @@ proc ::RosterTree::DoubleClick {x y} {
 	if {[lindex $tags 0] eq "jid"} {
 	    set jid [lindex $tags 1]
 	    jlib::splitjid $jid jid2 res
-	    
-	    
+	    	    
 	    if {[string equal $jprefs(rost,dblClk) "normal"]} {
 		::NewMsg::Build -to $jid2
-	    } else {
+	    } elseif {[string equal $jprefs(rost,dblClk) "chat"]} {
 		if {[$jstate(roster) isavailable $jid]} {
 		    
 		    # We let Chat handle this internally.

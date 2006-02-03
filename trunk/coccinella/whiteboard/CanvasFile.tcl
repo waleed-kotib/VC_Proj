@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: CanvasFile.tcl,v 1.22 2005-08-26 15:02:34 matben Exp $
+# $Id: CanvasFile.tcl,v 1.23 2006-02-03 07:17:17 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -591,6 +591,10 @@ proc ::CanvasFile::SaveAsDlg {w} {
     set fileName [SaveCanvasFileDlg $w]
     if {$fileName ne ""} {
 	set state(fileName) $fileName
+    }
+    set title [wm title $w]
+    if {[string first " : " $title] < 0} {
+	wm title $w "$title : [file tail $fileName]"
     }
 }
 
