@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: JPubServers.tcl,v 1.2 2006-01-11 13:24:54 matben Exp $
+# $Id: JPubServers.tcl,v 1.3 2006-02-03 07:17:17 matben Exp $
 
 package require chasearrows
 package require httpex
@@ -36,7 +36,7 @@ proc ::JPubServers::Build {w {command ""}} {
 	return
     }
     variable $w
-    upvar 0 $w state
+    upvar #0 $w state
 
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [mc {Public Jabber Servers}]
@@ -135,7 +135,7 @@ proc ::JPubServers::Build {w {command ""}} {
 
 proc ::JPubServers::Set {w} {
     variable $w
-    upvar 0 $w state
+    upvar #0 $w state
 
     set ind [$state(wtbl) curselection]
     if {$ind ne ""} {
@@ -155,7 +155,7 @@ proc ::JPubServers::Cancel {w} {
 
 proc ::JPubServers::Select {w} {
     variable $w
-    upvar 0 $w state
+    upvar #0 $w state
 
     $state(wset) state {!disabled}
 }
@@ -166,7 +166,7 @@ proc ::JPubServers::HttpProgress {w token total current} {
 
 proc ::JPubServers::HttpCommand {w token} {
     variable $w
-    upvar 0 $w state
+    upvar #0 $w state
 
     ::Debug 2 "::JPubServers::HttpCommand [::httpex::state $token]"
     
@@ -235,7 +235,7 @@ proc ::JPubServers::HttpCommand {w token} {
 
 proc ::JPubServers::OnDestroyToplevel {w} {    
     variable $w
-    upvar 0 $w state
+    upvar #0 $w state
     
     unset -nocomplain state
 }

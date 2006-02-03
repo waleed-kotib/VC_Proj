@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.158 2005-12-27 14:53:55 matben Exp $
+# $Id: Roster.tcl,v 1.159 2006-02-03 07:17:17 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -1427,7 +1427,7 @@ proc ::Roster::InitPrefsHook { } {
     set jprefs(rost,rmIfUnsub)      1
     set jprefs(rost,allowSubNone)   1
     set jprefs(rost,clrLogout)      1
-    set jprefs(rost,dblClk)         normal
+    set jprefs(rost,dblClk)         chat
     set jprefs(rost,showOffline)    1
     set jprefs(rost,showTrpts)      1
     set jprefs(rost,sort)          +1
