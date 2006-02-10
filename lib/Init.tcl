@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.35 2006-02-03 07:17:17 matben Exp $
+# $Id: Init.tcl,v 1.36 2006-02-10 15:40:50 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -280,6 +280,9 @@ proc ::Init::SetAutoPath { } {
     
     # Add the jabber directory which provides client specific jabber stuffs. 
     lappend auto_path [file join $this(path) jabber]
+    
+    # Add the components directory since we may have packages used by components.
+    lappend auto_path [file join $this(path) components]
     
     # Do we need TclXML. This is in its own app specific dir.
     # Perhaps there can be a conflict if there is already an TclXML

@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.10 2005-10-08 07:13:25 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.11 2006-02-10 15:40:50 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -104,7 +104,8 @@ proc ::CanvasCmd::RaiseOrLowerItems {w {what raise}} {
 #       color dialog shown.
 
 proc ::CanvasCmd::SetCanvasBgColor {w} {
-    global  prefs state
+    global  prefs
+    upvar ::WB::${w}::state state
 	
     set wcan [::WB::GetCanvasFromWtop $w]
     set prevCol $state(bgColCan)

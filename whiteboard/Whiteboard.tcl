@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.56 2006-01-08 14:02:21 matben Exp $
+# $Id: Whiteboard.tcl,v 1.57 2006-02-10 15:40:50 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -194,7 +194,7 @@ proc ::WB::InitPrefsHook { } {
     set state(visToolbar) 1
     
     # Bg color for canvas.
-    set state(bgColCan) #dedede
+    set state(bgColCan) white
     
     # fg and bg colors set in color selector; bgCol always white.
     set state(fgCol) black
@@ -1134,7 +1134,6 @@ proc ::WB::GarbageImages {w} {
 # 
 
 proc ::WB::SaveWhiteboardState {w} {
-
     upvar ::WB::${w}::wapp wapp
       
     # Read back instance specific 'state' into generic 'state'.

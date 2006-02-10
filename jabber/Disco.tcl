@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.78 2005-11-30 08:32:00 matben Exp $
+# $Id: Disco.tcl,v 1.79 2006-02-10 15:40:50 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -25,7 +25,6 @@ namespace eval ::Disco:: {
     option add *Disco.relief                flat            50
     option add *Disco*box.borderWidth       1               50
     option add *Disco*box.relief            sunken          50
-
     option add *Disco.padding               2               50
     
     # Specials.
@@ -664,12 +663,12 @@ proc ::Disco::NewPage { } {
     set wnb [::Jabber::UI::GetNotebook]
     set wtab $wnb.di
     if {![winfo exists $wtab]} {
+	Build $wtab
 	set im [::Theme::GetImage \
 	  [option get [winfo toplevel $wnb] browser16Image {}]]
 	set imd [::Theme::GetImage \
 	  [option get [winfo toplevel $wnb] browser16DisImage {}]]
 	set imSpec [list $im disabled $imd background $imd]
-	Build $wtab
 	$wnb add $wtab -text [mc Disco] -image $imSpec -compound left
     }
 }

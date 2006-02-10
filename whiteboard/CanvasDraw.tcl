@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. It implements the
 #      drawings commands associated with the tools.
 #      
-#  Copyright (c) 2000-2005  Mats Bengtsson
+#  Copyright (c) 2000-2006  Mats Bengtsson
 #  
-# $Id: CanvasDraw.tcl,v 1.19 2005-11-23 11:15:51 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.20 2006-02-10 15:40:50 matben Exp $
 
 #-- TAGS -----------------------------------------------------------------------
 #  
@@ -1639,11 +1639,6 @@ proc ::CanvasDraw::FinalizePoly {wcan x y} {
     }
     $wcan delete _polylines
     set extras {}
-    if {$state(fill)} {
-	lappend extras -fill $state(fgCol)
-    } else {
-	lappend extras -fill {}
-    }
     if {$prefs(haveDash)} {
 	lappend extras -dash $state(dash)
     }
@@ -1651,6 +1646,11 @@ proc ::CanvasDraw::FinalizePoly {wcan x y} {
     if {$isClosed} {
 	
 	# This is a (closed) polygon.
+	if {$state(fill)} {
+	    lappend extras -fill $state(fgCol)
+	} else {
+	    lappend extras -fill {}
+	}
 	set tags [list std polygon $utag]
 	set cmd [list create polygon $coords -tags $tags  \
 	  -outline $state(fgCol) -width $state(penThick)  \

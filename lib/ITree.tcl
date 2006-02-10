@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.8 2005-11-18 07:52:32 matben Exp $
+# $Id: ITree.tcl,v 1.9 2006-02-10 15:40:50 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -31,7 +31,9 @@ proc ::ITree::New {T wxsc wysc args} {
     foreach {key value} $args {
 	set options($T,$key) $value
     }
-    
+    set fillT {white {selected focus} black {selected !focus}}
+    set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
+
     treectrl $T -usetheme 1 -selectmode extended  \
       -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 0  \
       -xscrollcommand [list ::UI::ScrollSet $wxsc     \
@@ -51,9 +53,8 @@ proc ::ITree::New {T wxsc wysc args} {
     $T column create -tag cTag -visible 0
     $T configure -treecolumn cTree
 
-    set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     $T element create eImage image
-    $T element create eText text -lines 1
+    $T element create eText text -lines 1 -fill $fillT
     $T element create eBorder rect -open new -outline white -outlinewidth 1 \
       -fill $fill -showfocus 1
  

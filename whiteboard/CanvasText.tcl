@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasText.tcl,v 1.10 2005-10-08 07:13:25 matben Exp $
+# $Id: CanvasText.tcl,v 1.11 2006-02-10 15:40:50 matben Exp $
 
 package require sha1
 
@@ -24,12 +24,14 @@ namespace eval ::CanvasText:: {
 proc ::CanvasText::Init {wcan} {
     
     namespace eval [namespace current]::${wcan} {
-	set buffer(str) ""
+	set buffer(str)  ""
+	set buffer(text) ""
     }
-    bind $wcan <Destroy> [list [namespace current]::Free %W]
+    # @@@ window destroyed before this!
+    bind $wcan <Destroy> [list [namespace current]::OnDestroy %W]
 }
 
-proc ::CanvasText::Free {wcan} {
+proc ::CanvasText::OnDestroy {wcan} {
     
     EvalBufferedText $wcan
     
@@ -288,7 +290,7 @@ proc ::CanvasText::Insert {wcan char} {
     }
     set w [winfo toplevel $wcan]
     
-    # Find the 'itno'.
+    # Find the 'utag'.
     set utag [::CanvasUtils::GetUtag $wcan focus]
     if {$utag eq "" || $char eq ""}	 {
 	Debug 4 "Insert:: utag == {}"
@@ -336,6 +338,7 @@ proc ::CanvasText::Insert {wcan char} {
 	    set buffer(utag) $utag
 	}
 	append buffer(str) $oneliner
+	set buffer(text) [$wcan itemcget $utag -text]
 	
 	if {[string match *${punct}* $char]} {
 	    EvalBufferedText $wcan
@@ -680,7 +683,7 @@ proc ::CanvasText::SelectWord {wcan x y} {
 #       none
 
 proc ::CanvasText::NewLine {wcan} {
-    global  prefs
+    global  prefs fontPoints2Size
     
     set nl_ "\\n"
     set w [winfo toplevel $wcan]
@@ -696,14 +699,53 @@ proc ::CanvasText::NewLine {wcan} {
 	EvalBufferedText $wcan
     }
     set ind [$wcan index [$wcan focus] insert]
-    set cmdlocal [list insert $utag $ind \n]
-    set cmdremote [list insert $utag $ind $nl_]
-    set undocmd [list dchars $utag $ind]
-    set redo [list ::CanvasUtils::CommandExList $w  \
-      [list [list $cmdlocal local] [list $cmdremote remote]]]
-    set undo [list ::CanvasUtils::Command $w $undocmd]
+    if {$prefs(wb,nlNewText)} {
+	set str [$wcan itemcget $utag -text]
+	set right [string range $str $ind end]
+	set cmds {}
+	set undocmds {}
+	if {$right ne ""} {
+	    lappend cmds [list [list dchars $utag $ind end] all]
+	    lappend undocmds [list insert $utag end $right]
+	}
+	
+	array set opts [::CanvasUtils::GetItemOpts $wcan $utag]
+	set utagNew [::CanvasUtils::NewUtag]
+	set opts(-tags) [list std text $utagNew]
+	set opts(-text) $right
+	lassign [$wcan bbox $utag] x1 y1 x2 y2
+	array set fmetrics [font metrics $opts(-font)]
+	set y [expr {$y2 + $fmetrics(-descent)}]
+	
+	# Local command.
+	set cmd [concat create text $x1 $y [array get opts]]
+	#puts "local: cmd=$cmd"
+	lappend cmds [list $cmd local]
+	
+	# Remote command.
+	set size [lindex $opts(-font) 1]
+	lset opts(-font) 1 $fontPoints2Size($size)
+	set cmd [concat create text $x1 $y [array get opts]]
+	#puts "remote: cmd=$cmd"
+	lappend cmds [list $cmd remote]
+	lappend undocmds [list delete $utagNew]
+	set redo [list ::CanvasUtils::CommandExList $w $cmds]
+	set undo [list ::CanvasUtils::CommandList $w $undocmds]
+      } else {
+	set cmdlocal [list insert $utag $ind \n]
+	set cmdremote [list insert $utag $ind $nl_]
+	set undocmd [list dchars $utag $ind]	
+	set redo [list ::CanvasUtils::CommandExList $w  \
+	  [list [list $cmdlocal local] [list $cmdremote remote]]]
+	set undo [list ::CanvasUtils::Command $w $undocmd]
+    }
+
     eval $redo
     undo::add [::WB::GetUndoToken $w] $undo $redo
+
+    if {$prefs(wb,nlNewText)} {
+	$wcan focus $utagNew
+    }
 }
 
 # ::CanvasText::Delete --
@@ -813,6 +855,7 @@ proc ::CanvasText::ScheduleTextBuffer {wcan} {
 #
 #       This is the proc where buffered text are sent to clients.
 #       Buffer emptied.
+#       Can be called *after* widget is destroyed!
 #       
 # Arguments:
 #       wcan   the canvas widget.
@@ -830,13 +873,13 @@ proc ::CanvasText::EvalBufferedText {wcan} {
     }
     
     # Run all registered hooks like speech.
+    # @@@ This is not good since it repeates the complete string.
     if {[info exists buffer(utag)] && [string length $buffer(str)]} {
-	set str [$wcan itemcget $buffer(utag) -text]
-	::hooks::run whiteboardTextInsertHook me $str
+	::hooks::run whiteboardTextInsertHook me $buffer(text)
     }
     
     if {[string length $buffer(str)]} {
-	set w [winfo toplevel $wcan]
+	set w [lindex [split $wcan .] 0]
 	::WB::SendMessageList $w  \
 	  [list [list insert $buffer(utag) $buffer(ind) $buffer(str)]]
     }    

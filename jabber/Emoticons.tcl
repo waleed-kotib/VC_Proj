@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.39 2005-11-30 08:32:00 matben Exp $
+# $Id: Emoticons.tcl,v 1.40 2006-02-10 15:40:50 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -400,7 +400,7 @@ proc ::Emoticons::MenuButton {w args} {
 	}
     }
     set wmenu $w.m
-    ttk::menubutton $w -style Toolbutton \
+    ttk::menubutton $w -style MiniMenubutton \
       -compound image -image $btim
     
     eval {BuildMenu $wmenu} $args

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.129 2005-11-30 08:32:00 matben Exp $
+# $Id: GroupChat.tcl,v 1.130 2006-02-10 15:40:50 matben Exp $
 
 package require Enter
 package require History
@@ -1105,6 +1105,7 @@ proc ::GroupChat::Tree {token w T wysc} {
     bind UsersTreeTag <Button-1>        { ::GroupChat::TreeButtonPress %W %x %y }        
     bind UsersTreeTag <ButtonRelease-1> { ::GroupChat::TreeButtonRelease %W %x %y }        
     bind UsersTreeTag <<ButtonPopup>>   [list ::GroupChat::TreePopup $token %W %x %y ]
+    bind UsersTreeTag <Double-1>        { ::GroupChat::DoubleClick %W %x %y }        
     bind UsersTreeTag <Destroy>         {+::GroupChat::TreeOnDestroy %W }
     
     ::treeutil::setdboptions $T $w utree
@@ -1143,6 +1144,24 @@ proc ::GroupChat::TreePopup {token T x y} {
 	set tag {}
     }
     Popup $token $T $tag $x $y
+}
+
+proc ::GroupChat::DoubleClick {T x y} {
+    upvar ::Jabber::jprefs jprefs
+
+    set id [$T identify $x $y]
+    if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
+	set item [lindex $id 1]
+	set tags [$T item element cget $item cTag eText -text]
+	if {[lindex $tags 0] eq "jid"} {
+	    set jid [lindex $tags 1]		    
+	    if {[string equal $jprefs(rost,dblClk) "normal"]} {
+		::NewMsg::Build -to $jid
+	    } elseif {[string equal $jprefs(rost,dblClk) "chat"]} {
+		::Chat::StartThread $jid
+	    }
+	}
+    }   
 }
 
 proc ::GroupChat::TreeOnDestroy {T} {
@@ -2163,7 +2182,7 @@ proc ::GroupChat::GetFirstPanePos { } {
 }
 
 proc ::GroupChat::OnDestroy {token} {
-    
+
     unset -nocomplain $token
 }
 

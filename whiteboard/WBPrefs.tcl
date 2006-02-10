@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.10 2005-11-30 08:32:00 matben Exp $
+# $Id: WBPrefs.tcl,v 1.11 2006-02-10 15:40:50 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -38,6 +38,7 @@ proc ::WBPrefs::InitPrefsHook { } {
     set prefs(privacy) 0
     
     set prefs(wb,strokePost) 1
+    set prefs(wb,nlNewText)  0
     
     # All MIME type stuff... The problem is that they are all arrays... 
     # Invented the ..._array resource specifier!    
@@ -50,6 +51,7 @@ proc ::WBPrefs::InitPrefsHook { } {
       [list prefs(canvasFonts)     prefs_canvasFonts     $prefs(canvasFonts)]   \
       [list prefs(privacy)         prefs_privacy         $prefs(privacy)]       \
       [list prefs(wb,strokePost)   prefs_wb_strokePost   $prefs(wb,strokePost)] \
+      [list prefs(wb,nlNewText)    prefs_wb_nlNewText    $prefs(wb,nlNewText)] \
     ]
 }
 
@@ -80,6 +82,7 @@ proc ::WBPrefs::BuildWhiteboardPage {page} {
     set tmpPrefs(canScrollWidth)  $prefs(canScrollWidth)
     set tmpPrefs(canScrollHeight) $prefs(canScrollHeight)
     set tmpPrefs(wb,strokePost)   $prefs(wb,strokePost)
+    set tmpPrefs(wb,nlNewText)    $prefs(wb,nlNewText)
     
     set wc $page.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
@@ -112,8 +115,10 @@ proc ::WBPrefs::BuildWhiteboardPage {page} {
 
     ttk::checkbutton $wc.spost -text "Smooth freehand strokes"  \
       -variable [namespace current]::tmpPrefs(wb,strokePost)
+    ttk::checkbutton $wc.nlnew -text "Make new text item for each line"  \
+      -variable [namespace current]::tmpPrefs(wb,nlNewText)
 
-    pack  $wc.spost  -side top -anchor w -pady 6
+    pack  $wc.spost  $wc.nlnew  -side top -anchor w
 }
 
 # Fonts Page ...................................................................

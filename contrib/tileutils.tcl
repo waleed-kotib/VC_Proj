@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.14 2006-01-13 13:23:12 matben Exp $
+# $Id: tileutils.tcl,v 1.15 2006-02-10 15:40:50 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -174,7 +174,53 @@ proc tileutils::configstyles {name} {
 	  -padding 2 -relief flat -font $fonts(underlineDefault) -foreground blue
 	style map Url -foreground [list active red]
 	style configure Small.Url -font $fonts(underlineSmall)
+	
+	# This is a toolbutton style menubutton with a small downarrow.
+	style layout MiniMenubutton {
+	    Toolbutton.border -sticky nswe -children {
+		Toolbutton.padding -sticky nswe -children {
+		    MiniMenubutton.indicator -side right
+		    Toolbutton.label -sticky nswe
+		}
+	    }
+	}
+	style element create MiniMenubutton.indicator image $tiles(downArrow) \
+	  -sticky e -padding {6 2}
+	style configure MiniMenubutton -padding 6
+	
+	
+	# Test------------------
+	style layout BorderFrame {
+	    BorderFrame.border -sticky nswe
+	}
+	style configure BorderFrame  \
+	  -relief solid -borderwidth 1 -background gray50
+
     }    
+}
+
+if {0} {
+    toplevel .t2
+    pack [ttk::frame .t2.f -padding 10]
+    pack [ttk::frame .t2.f.f -style BorderFrame -padding 10]
+    pack [ttk::label .t2.f.f.l -text Mats]
+
+    style layout TFrame
+    Frame.border -sticky nswe
+    
+    style element names
+    separator Toolbar.background Combobox.field Progressbar.track 
+    Button.button Treeheading.cell Notebook.tab Scale.trough vseparator 
+    background Scale.slider hseparator Combobox.downarrow Menubutton.button 
+    Checkbutton.button Entry.field Radiobutton.button Toolbutton.border 
+    Notebook.client Labelframe.border
+    
+    style element options Frame.border
+    element Frame.border not found
+    style element options border
+    element border not found
+   
+    
 }
 
 # tileutils::LoadImages --
