@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: chasearrows.tcl,v 1.7 2005-08-18 09:52:07 matben Exp $
+# $Id: chasearrows.tcl,v 1.8 2006-02-10 15:40:50 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -46,7 +46,7 @@ namespace eval ::chasearrows:: {
     
     set widgetGlobals(debug) 0
     set widgetGlobals(timeStep) 150
-    set widgetGlobals(rotStep) [expr 3.14159/8]
+    set widgetGlobals(rotStep) [expr {3.14159/8}]
 }
 
 # ::chasearrows::Init --
@@ -116,9 +116,9 @@ proc ::chasearrows::InitDrawingStuff { } {
 
     # Drawing stuff for the arrows.
     set pi 3.14159
-    set div [expr $pi/8]
-    set step [expr $pi/8]
-    set phiend [expr 3*$pi/4 + 0.001]
+    set div [expr {$pi/8.0}]
+    set step [expr {$pi/8.0}]
+    set phiend [expr {3*$pi/4.0 + 0.001}]
     set thetaDelta $widgetGlobals(rotStep)
     foreach size {16 32} {
 	set ind -1
@@ -129,15 +129,15 @@ proc ::chasearrows::InitDrawingStuff { } {
 	    set a 16
 	    set r 12
 	}
-	for {set theta 0.0} {$theta < $pi} {set theta [expr $theta + $thetaDelta]} {
+	for {set theta 0.0} {$theta < $pi} {set theta [expr {$theta + $thetaDelta}]} {
 	    incr ind
 	    set lineCoords {}
 	    for {set i 0} {$i < 2} {incr i} {
 		set co {}
-		for {set phi 0.0} {$phi <= $phiend} {set phi [expr $phi + $div]} {
+		for {set phi 0.0} {$phi <= $phiend} {set phi [expr {$phi + $div}]} {
 		    lappend co   \
-		      [expr $a + $r*cos($phi + $i*$pi + $theta)]  \
-		      [expr $a + $r*sin($phi + $i*$pi + $theta)]
+		      [expr {$a + $r*cos($phi + $i*$pi + $theta)}]  \
+		      [expr {$a + $r*sin($phi + $i*$pi + $theta)}]
 		}
 		lappend lineCoords $co
 	    }

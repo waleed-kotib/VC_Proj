@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasUtils.tcl,v 1.37 2005-10-14 06:36:51 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.38 2006-02-10 15:40:50 matben Exp $
 
 package require sha1
 package require can2svg
@@ -238,6 +238,8 @@ proc ::CanvasUtils::Init { } {
 proc ::CanvasUtils::Command {w cmd {where all}} {
     
     set wcan [::WB::GetCanvasFromWtop $w]
+    
+    #puts "-------- where=$where $cmd"
     
     # Make drawing in own canvas.
     if {[string equal $where "all"] || [string equal $where "local"]} {

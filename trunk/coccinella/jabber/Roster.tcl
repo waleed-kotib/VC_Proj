@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.159 2006-02-03 07:17:17 matben Exp $
+# $Id: Roster.tcl,v 1.160 2006-02-10 15:40:50 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -42,7 +42,7 @@ namespace eval ::Roster:: {
         
     # Specials.
     option add *Roster.waveImage            wave            widgetDefault
-    option add *Roster.minimalPadding       {0 6}           widgetDefault
+    option add *Roster.minimalPadding       {0}             widgetDefault
     
     variable wtree -
     

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.8 2005-11-16 13:30:15 matben Exp $
+# $Id: Status.tcl,v 1.9 2006-02-10 15:40:50 matben Exp $
 
 package provide Status 1.0
 
@@ -116,7 +116,9 @@ proc ::Jabber::Status::Button {w varName args} {
     array set argsArr $args
 
     set wmenu $w.menu
-    ttk::menubutton $w -style Toolbutton \
+    #ttk::menubutton $w -style Toolbutton \
+    #  -compound image -image [::Rosticons::Get status/$status]
+    ttk::menubutton $w -style MiniMenubutton \
       -compound image -image [::Rosticons::Get status/$status]
     ConfigButton $w $status
     menu $wmenu -tearoff 0

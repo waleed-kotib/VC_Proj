@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.110 2006-01-11 13:24:54 matben Exp $
+# $Id: JUI.tcl,v 1.111 2006-02-10 15:40:50 matben Exp $
 
 package provide JUI 1.0
 
@@ -55,12 +55,12 @@ namespace eval ::Jabber::UI:: {
     # Standard widgets.
     switch -- [tk windowingsystem] {
 	aqua - x11 {
-	    option add *JMain*TNotebook.padding   {8}             50
-	    option add *JMain*bot.f.padding       {8 0 8 4}       50
+	    option add *JMain*TNotebook.padding   {8 8 8 4}       50
+	    option add *JMain*bot.f.padding       {8 6 8 4}       50
 	}
 	default {
 	    option add *JMain*TNotebook.padding   {4 4 4 2}       50
-	    option add *JMain*bot.f.padding       {8 0 8 0}       50
+	    option add *JMain*bot.f.padding       {8 4 8 0}       50
 	}
     }
     option add *JMain*TMenubutton.padding         {1}             50
@@ -355,7 +355,7 @@ proc ::Jabber::UI::Build {w} {
     
     # Make the Roster page -----------------------------------------------
     
-    # Each notbook page must be a direct child of the notebook and we therefore
+    # Each notebook page must be a direct child of the notebook and we therefore
     # need to have a container frame which the roster is packed -in.
     set wroster $wall.ro
     set wrostco $wnb.cont
