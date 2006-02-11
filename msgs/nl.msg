@@ -400,7 +400,7 @@
 ::msgcat::mcset nl {Component Info}		{Componenten}
 ::msgcat::mcset nl {Conference server}		{Dienst}
 ::msgcat::mcset nl {Connect using HTTP}		{Via HTTP verbinden}
-::msgcat::mcset nl {Contact Type}		{IM-netwerk}
+::msgcat::mcset nl {Contact Type}		{Netwerk}
 ::msgcat::mcset nl {Create Room}		{Chatruimte aanmaken}
 ::msgcat::mcset nl {Default group}		{Standaard groep}
 ::msgcat::mcset nl {Default Logout Status}	{Standaard afmeldaanwezigheid}
@@ -560,7 +560,7 @@
 ::msgcat::mcset nl {Set Directed Presence} 	{Voorgeschreven aanwezigheid instellen}
 ::msgcat::mcset nl {Set New Nickname}		{Nieuwe bijnaam instellen}
 ::msgcat::mcset nl {Set New Topic}		{Nieuw onderwerp instellen}
-::msgcat::mcset nl {Set Status}			{Aanwezigheid instellen}
+::msgcat::mcset nl {Set Status}			{Aanwezigheid}
 ::msgcat::mcset nl {Set windows opacity}	{Ondoorzichtigheid van vensters instellen}
 ::msgcat::mcset nl {Settings Panels}		{Instellingen}
 ::msgcat::mcset nl {Setup Assistant}		{Installatieassistent}
@@ -569,7 +569,7 @@
 ::msgcat::mcset nl {Software Update}		{Software bijwerken}
 ::msgcat::mcset nl {Sounds & Speech}		{Geluiden & spraak}
 ::msgcat::mcset nl {Start Chat}			{Chatsessie starten}
-::msgcat::mcset nl {Status message}		{Bericht bij aanwezigheid}
+::msgcat::mcset nl {Status message}		{Bericht}
 ::msgcat::mcset nl {Status when logging out}	{Aanwezigheid bij afmelden}
 ::msgcat::mcset nl {Subscription Failed}	{Inschrijven mislukte}
 ::msgcat::mcset nl {Subscription Pending}	{Wachtend op inschrijving}
@@ -932,9 +932,9 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jasubsndmsg  {Bericht naar deze persoon verzenden:}
 ::msgcat::mcset nl jasuballow   {"%s" toelaten om mijn aanwezigheid te zien}
 ::msgcat::mcset nl jasubadd     {"%s" toevoegen aan mijn roster}
-::msgcat::mcset nl jarostadd	{Bijnaam en groep mogen steeds gewijzigd worden. Om een contactpersoon op een ander IM-netwerk te kunnen toevoegen,\
-  moet u eerst een account hebben op dat netwerk en moet u die accountgegevens gebruiken wanneer u registreert op het Jabber-transport in kwestie.}
-::msgcat::mcset nl jarostset	{Stel bijnaam en groep van "%s" in. Deze gegevens kunnen later nog altijd ingesteld of gewijzigd worden.}
+::msgcat::mcset nl jarostadd	{Bijnaam en groep zijn optioneel. Een contactpersoon op een ander netwerk kunt u pas toevoegen\
+  als u een account hebt op dat netwerk en als u geregistreerd bent op een Jabber-transport voor dat netwerk.}
+::msgcat::mcset nl jarostset	{Stel de bijnaam en de groep van "%s" in. Deze gegevens kunnen later nog altijd ingesteld of gewijzigd worden.}
 ::msgcat::mcset nl jarostsub	{Deze contactpersoon autoriseren}
 ::msgcat::mcset nl jarostunsub	{Autorisatie van deze contactpersoon verwijderen}
 ::msgcat::mcset nl jasearch	{Contactpersoon met de gekozen dienst zoeken. Druk op de knop "Ophalen" als u een nieuw formulier wilt invullen.}
@@ -951,28 +951,28 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jawaitserver	{Bezig met wachten op server...}
 ::msgcat::mcset nl jaregmsg	{Als u al geregistreerd bent op deze dienst, dan kunt u hier uw persoonlijke info publiceren.}
 ::msgcat::mcset nl jastatavailable {Beschikbaar}
-::msgcat::mcset nl jastatchat	{Beschikbaar om te chatten}
+::msgcat::mcset nl jastatchat	{Chat}
 ::msgcat::mcset nl jastataway	{Afwezig}
 ::msgcat::mcset nl jastatxa	{Langdurig afwezig}
 ::msgcat::mcset nl jastatdnd	{Niet storen}
 ::msgcat::mcset nl jastatinvisible {Onzichtbaar}
 ::msgcat::mcset nl javersinfo	{Versiegegevens van %s}
 ::msgcat::mcset nl jabrowseaddserver	{Geef het adres van de server die u wilt toevoegen aan de lijst met diensten (bv: "jabber.org").}
-::msgcat::mcset nl jaupdatemsg	{Er is een nieuwe versie van Coccinella beschikbaar.}
+::msgcat::mcset nl jaupdatemsg	{Er is een nieuwe versie van Coccinella.}
 ::msgcat::mcset nl jaupdatevers	{De huidige versie is: %s}
 ::msgcat::mcset nl jaupdatepri	{Dit is update %s}
 ::msgcat::mcset nl jaupdatenewver {De nieuwe versie is: %s}
 ::msgcat::mcset nl jaupdateremind {Dit bericht niet meer tonen}
-::msgcat::mcset nl jasettopic2  {Stel nieuw onderwerp in voor deze chatruimte.}
+::msgcat::mcset nl jasettopic2  {Stel een nieuw onderwerp in voor deze chatruimte.}
 ::msgcat::mcset nl jadirpresmsg {Voorgeschreven aanwezigheid verzenden naar "%s".}
 ::msgcat::mcset nl jatlsnegot   {Bezig met beveiligd verbinden via TLS...}
-::msgcat::mcset nl jamucentermsg {Voer een bijnaam in en druk op de knop "Betreden" om een chatruimte te betreden. U kunt met de knop "Browse" een lijst van chatruimtes ophalen op de geselecteerde server. Voor sommige chatruimtes hebt u een wachtwoord nodig.}
+::msgcat::mcset nl jamucentermsg {Kies een dienst voor chatruimtes, een chatruimte, een bijnaam en eventueel een wachtwoord indien nodig. Druk dan op de knop "Betreden". Met de knop "Browse" kunt u zien welke chatruimtes er bestaan op de gekozen dienst.}
 ::msgcat::mcset nl jainmsgshow {Inkomende berichten in dit venster laten zien}
 ::msgcat::mcset nl jadisaddserv {Hier kunt u een server al dan niet permanent aan de lijst toevoegen. De server van uw account is altijd zichtbaar.}
 ::msgcat::mcset nl jadisrmall {Permanente servers uit de lijst verwijderen.}
 ::msgcat::mcset nl jauserinnote {Uw persoonlijke notities over deze contactpersoon kunt u hier bewaren.}
-::msgcat::mcset nl jaregisterex {Voer de naam in van de Jabber-server waarop u een account wilt aanmaken. Druk daarna op de knop "Ophalen" om de vereiste gegevens op te halen. Voer de gevraagde gegevens in en maak de account aan.}
-::msgcat::mcset nl jaloginjid   {Voer uw Jabber ID in, in de vorm "joey@myjabb.org" of kies een profiel. U beschikt normaal al over een account op deze server.}
+::msgcat::mcset nl jaregisterex {Voer de naam in van de Jabber-server waarop u een account wilt aanmaken. Druk dan op de knop "Ophalen" om de vereiste gegevens op te halen. Voer de gevraagde gegevens in en maak de account aan.}
+::msgcat::mcset nl jaloginjid   {Voer uw Jabber ID in, in de vorm "jantje@voorbeeld.org" of kies een profiel. U beschikt normaal al over een account op deze server.}
 ::msgcat::mcset nl jaregalready {U bent al geregistreerd op deze dienst. Dit zijn uw huidige instellingen van uw registratie.}
 ::msgcat::mcset nl jaactiveret {De enter-toets zal het bericht verzenden wanneer dit is aangevinkt. Anders moet u ctrl/cmd + enter gebruiken.}
 ::msgcat::mcset nl jainvitegchat {Een contactpersoon uitnodigen op chatruimte %s}
