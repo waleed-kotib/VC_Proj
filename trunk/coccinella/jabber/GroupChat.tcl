@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.130 2006-02-10 15:40:50 matben Exp $
+# $Id: GroupChat.tcl,v 1.131 2006-02-12 07:23:32 matben Exp $
 
 package require Enter
 package require History
@@ -843,18 +843,22 @@ proc ::GroupChat::Build {roomjid args} {
       -image [::Theme::GetImage return]               \
       -command [list [namespace current]::ActiveCmd $token] \
       -variable $token\(active)
+    ttk::button $wgroup.bmark -style Toolbutton  \
+      -image [::Theme::GetImage bookmarkAdd]     \
+      -command [list [namespace current]::BookmarkRoom $token]
+
     ::Jabber::Status::Button $wgroup.stat \
       $token\(status) -command [list [namespace current]::StatusCmd $token] 
     ::Jabber::Status::ConfigButton $wgroup.stat available
     ::Emoticons::MenuButton $wgroup.smile -text $wtextsend
-    ttk::button $wgroup.bmark -style Toolbutton  \
-      -image [::Theme::GetImage bookmarkAdd]     \
-      -command [list [namespace current]::BookmarkRoom $token]
     
-    grid  $wgroup.active  $wgroup.stat  $wgroup.smile  $wgroup.bmark  \
+    grid  $wgroup.active  $wgroup.bmark  $wgroup.stat  $wgroup.smile  \
       -padx 1 -sticky news
-    foreach c {0 1 2 3} {
-	grid columnconfigure $wgroup $c -uniform g -weight 1
+    foreach c {0 1} {
+	grid columnconfigure $wgroup $c -uniform bt -weight 1
+    }
+    foreach c {2 3} {
+	grid columnconfigure $wgroup $c -uniform mb -weight 1
     }
     
     set padx [option get . buttonPadX {}]
