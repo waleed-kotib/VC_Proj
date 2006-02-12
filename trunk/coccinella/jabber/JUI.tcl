@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.111 2006-02-10 15:40:50 matben Exp $
+# $Id: JUI.tcl,v 1.112 2006-02-12 16:19:52 matben Exp $
 
 package provide JUI 1.0
 
@@ -256,7 +256,8 @@ proc ::Jabber::UI::Build {w} {
 	Init
     }
     ::UI::Toplevel $w -class JMain \
-      -macstyle documentProc -closecommand ::Jabber::UI::CloseHook
+      -macstyle documentProc -closecommand ::Jabber::UI::CloseHook  \
+      -allowclose 0
     wm title $w $prefs(theAppName)
     ::UI::SetWindowGeometry $w
     set jwapp(w)     $w

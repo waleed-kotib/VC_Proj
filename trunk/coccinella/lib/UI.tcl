@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.121 2006-01-11 13:25:48 matben Exp $
+# $Id: UI.tcl,v 1.122 2006-02-12 16:19:52 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -518,6 +518,7 @@ namespace eval ::UI:: {
 # Arguments:
 #       w
 #       args:
+#       -allowclose 0|1
 #       -class  
 #       -closecommand
 #       -macstyle:
@@ -538,6 +539,7 @@ proc ::UI::Toplevel {w args} {
     variable topcache
     
     array set argsArr {
+	-allowclose       1
 	-usemacmainmenu   0
     }
     array set argsArr $args
@@ -560,8 +562,9 @@ proc ::UI::Toplevel {w args} {
     # We direct all close events through DoCloseWindow so things can
     # be handled from there.
     wm protocol $w WM_DELETE_WINDOW [list ::UI::DoCloseWindow $w]
-    bind $w <Escape> [list destroy $w]
-    
+    if {$argsArr(-allowclose)} {
+	bind $w <Escape> [list destroy $w]
+    }
     if {[tk windowingsystem] eq "aqua"} {
 	if {[info exists argsArr(-macclass)]} {
 	    eval {::tk::unsupported::MacWindowStyle style $w}  \
@@ -575,7 +578,9 @@ proc ::UI::Toplevel {w args} {
 	# Unreliable!!!
 	# ::UI::SetAquaProxyIcon $w
     } else {
-	bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w]
+	if {$argsArr(-allowclose)} {
+	    bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w]
+	}
     }
     if {$prefs(opacity) != 100} {
 	array set attr [wm attributes $w]
