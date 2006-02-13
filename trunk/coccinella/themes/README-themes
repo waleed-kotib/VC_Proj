@@ -1,0 +1,110 @@
+
+README-themes
+-------------
+
+There are two completely different mechanisms that control the
+visual appearence of this application:
+
+ o The tile package that draws all widgets, such as buttons etc.
+   Tile works with themes but in this context we usually denote
+   these themes as skins or as tile themes.
+
+ o The application defined theme engine that controls which
+   icons to use, and some resources that are used by the widgets.
+   Do not confuse the application themes with tile themes.
+
+We only focus on the application themes, the last item, here.
+
+
+Images
+------
+
+Images are the most important thing determined by a theme.
+They are normally found in the applications images folder:
+
+    coccinella/images/
+
+but may be placed in specific places used by standalone components:
+
+    coccinella/components/Phone/images/
+
+A theme, apart from the application default, can be placed either
+internally in the application tree, or as a user defined theme
+in the preference folder. A theme is distinguished by its name, which
+is also the name of the folder containing the complete directory tree.
+Examples:
+
+    coccinella/themes/Cool/
+    prefsFolder/themes/Green/
+
+A theme directory tree replicates the application tree structure with the
+images or resources that are going to be replaced. For instance, if a
+"Cool" theme shall replace one or several images it can define the
+content in the following folders:
+
+    Cool/images/
+    Cool/components/Phone/images/
+
+When the application asks for an image it may define a sub path (subPath)
+where the image shall be searched for. This sub path defaults to "images".
+The search order for an image in the "Cool" theme is:
+
+    coccinella/themes/Cool/subPath/
+    prefsPath/themes/Cool/subPath/
+
+If not found in any of these the
+
+    coccinella/subPath/
+
+is used as a final fallback. Examples are:
+
+    coccinella/themes/Cool/images/login.png
+    prefsFolder/themes/Cool/components/Phone/images/b0.png
+
+For the moment the image formats must be either GIF or PNG.
+
+
+Resources
+---------
+
+The second part that influences the applications appearence that belong
+to the application theme specification is the resources. Some features
+of widgets and several application specific layout stuff is encoded
+as resources using the built in option database for resources.
+
+The default resources are found in
+  
+    coccinella/resources/
+
+The default.rdb file always sets some reasonable values. After that the 
+platform specific rdb file is read.
+
+A theme may override any resource settings by adding its own resource files in
+
+    themes/themeName/resources/
+
+using the predefined resource file names, like:
+
+themes/themeName/resources/default.rdb
+
+Most visual appearence are now set via the tile theme engine but some are
+still used, see specific docs for these. For the application specific
+resources you need to search the sources for something like:
+
+option add *Chat*mePreForeground      red
+
+In the resource files they show up as:
+
+*MailBox*Tablelist.labelBackground:        #dd1111
+
+Many images have a resource name associated with it. If you keep the filename 
+the same as in the original distro, the image will be automatically used. 
+You may also pick a different name, but then you must specify a new value for 
+the resource that is also the file name. Examplevise:
+
+*JMain.connectImage:       imageMyConnect
+
+where the 'imageMyConnect.png' file is inside the themes image directory.
+
+
+That's it!
