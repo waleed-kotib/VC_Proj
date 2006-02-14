@@ -2,9 +2,9 @@
 #
 #       Some utitilty procedures useful when theming widgets and UI.
 #       
-#  Copyright (c) 2003-2005  Mats Bengtsson
+#  Copyright (c) 2003-2006  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.26 2005-12-01 07:59:19 matben Exp $
+# $Id: Theme.tcl,v 1.27 2006-02-14 08:05:13 matben Exp $
 
 package provide Theme 1.0
 
@@ -25,7 +25,6 @@ namespace eval ::Theme:: {
 
 proc ::Theme::Init { } {
     global  this prefs
-    variable allImageSuffixes
         
     # Handle theme name and locale from prefs file.
     NameAndLocalePrefs
@@ -58,52 +57,19 @@ proc ::Theme::Init { } {
 	option add *TreeCtrl.background   white     60
     }
     
-    set f [file join $this(resourcePath) $prefs(themeName).rdb]
-    if {[file exists $f]} {
-	option readfile $f userDefault
-    }
-    set f [file join $this(altResourcePath) $prefs(themeName).rdb]
-    if {[file exists $f]} {
-	option readfile $f userDefault
-    }
-
-    # Search for image files in this order:
-    # 1) altImagePath/themeImageDir
-    # 2) imagePath/themeImageDir
-    # 3) imagePath/platformName
-    # 4) imagePath
-    set this(imagePathList) {}
-    set themeDir [option get . themeImageDir {}]
-    if {$themeDir ne ""} {
-	set dir [file join $this(altImagePath) $themeDir]
-	if {[file isdirectory $dir]} {
-	    lappend this(imagePathList) $dir
-	}
-	set dir [file join $this(imagePath) $themeDir]
-	if {[file isdirectory $dir]} {
-	    lappend this(imagePathList) $dir
+    # Any theme specific resource files.
+    foreach dir [list $this(themesPath) $this(altThemesPath)] {
+	set rdir [file join $dir $this(resources)]
+	if {[file isdirectory $rdir]} {
+	    option readfile [file join $rdir default.rdb] userDefault
+	    set f [file join $rdir $this(platform).rdb]
+	    if {[file exists $f]} {
+		option readfile $f userDefault
+	    }
+	    break
 	}
     }
-    lappend this(imagePathList)  \
-      [file join $this(imagePath) $this(platform)] $this(imagePath)
-
-    # Figure out if additional image formats needed.
-    set themeImageSuffixes [option get . themeImageSuffixes {}]
-    if {$themeImageSuffixes ne ""} {
-	set ind [lsearch $themeImageSuffixes .gif]
-	if {$ind >= 0} {
-	    set themeImageSuffixes [lreplace $themeImageSuffixes $ind $ind]
-	}
-    }
-    set this(themeImageSuffixes) ""
-    if {$themeImageSuffixes ne ""} {
-	set this(themeImageSuffixes) $themeImageSuffixes
-    }
-    set allImageSuffixes [concat .png .gif $themeImageSuffixes]
-
-    # Make all images used for widgets that doesn't use the Theme package.
-    PreLoadImages
-
+	
     # Any named fonts from any resource file must be constructed.
     PostProcessFontDefs
 }
@@ -209,109 +175,139 @@ proc ::Theme::NameAndLocalePrefs { } {
     if {$theAppName ne ""} {
 	set prefs(theAppName) $theAppName
     }
-    if {![CanLoadTheme $prefs(themeName)]} {
-	set prefs(themeName) ""
+    
+    # Check here that the theme folder still exists.
+    set dir [file join $this(themesPath) $prefs(themeName)]
+    if {![file isdirectory $dir]} {
+	set dir [file join $this(altThemesPath) $prefs(themeName)]
+	if {![file isdirectory $dir]} {
+	    set prefs(themeName) ""
+	}
     }
 }
 
-proc ::Theme::CanLoadTheme {themeName} {
-    global  this
-    
-    set ans 1
-    set f [file join $this(resourcePath) ${themeName}CanLoad.tcl]
-    if {[file exists $f]} {
-	set ans [source $f]
-    }
-    return $ans
-}
+# ::Theme::GetAllAvailable --
+# 
+#       Finds all available themes.
 
 proc ::Theme::GetAllAvailable { } {
     global  this
     
-    # Perhaps we should exclude 'default' and all platform specific ones?
-    set allrsrc {}
-    foreach f [glob -nocomplain -tails -directory $this(resourcePath) *.rdb] {
-	set themeName [file rootname $f]
-	if {[CanLoadTheme $themeName]} {
-	    lappend allrsrc $themeName
+    set allThemes {}
+    foreach dir [list $this(themesPath) $this(altThemesPath)] {
+	foreach name [glob -nocomplain -tails -types d -directory $dir *] {
+	    switch -- $name {
+		CVS {
+		    # empty
+		}
+		default {
+		    lappend allThemes $name
+		}
+	    }
 	}
-    }  
-    foreach f [glob -nocomplain -tails -directory $this(altResourcePath) *.rdb] {
-	set themeName [file rootname $f]
-	if {[CanLoadTheme $themeName]} {
-	    lappend allrsrc $themeName
-	}
-    }  
-    return $allrsrc
-}
-
-proc ::Theme::PreLoadImages { } {
-    
-    foreach name [option get . themePreloadImages {}] {
-	GetImage $name -keepname 1
     }
+    return $allThemes
 }
 
 # ::Theme::GetImage --
 # 
-#       Searches for a gif image in a set of directories.
-#       Returns empty if not found, else the internal tk image name.
+#       Searches for an image file in a number of places in a well defined way:
+#       
+#         if themeName nonempty search any of these two:
+#             coccinella/themes/themeName/subPath/
+#             prefsPath/themes/themeName/subPath/
+#           
+#         but this is always searched and is our fallback:
+#             coccinella/subPath/
+#       
+#       where subPath defaults to 'images'.
+#       Only PNGs and GIFs are searched for, in that order. 
 #       
 # Arguments:
 #       name      name of image file without suffix
-#       args:
-#            -keepname
-#            -suffixes
+#       subPath   sub path where to search, defaults to images
 #       
 # Results:
-#       empty or image name.
+#       empty if not found, else the internal tk image name.
 
-proc ::Theme::GetImage {name args} {
-    global  this
-    variable allImageSuffixes
+namespace eval ::Theme {
     
-    array set argsArr {
-	-keepname 0
-	-suffixes {}
-    }
-    array set argsArr $args    
+    variable iuid -1
+    variable subPathMap
+}
+
+proc ::Theme::GetImage {name {subPath ""}} {
+    global  prefs this
+    variable subPathMap
+    variable iuid
     
-    # It is recommended to create images in an own namespace since they 
-    # may silently overwrite any existing command!
-    if {$argsArr(-keepname)} {
-	set nsname $name
-    } else {
-	set nsname ::_img::$name
+    if {$subPath eq ""} {
+	set subPath $this(images)
     }
+
+    # We avoid name collisions by creating a unique integer number
+    # for each subPath and use this when designing the image name.
+    # This keeps names much shorter.
+    if {![info exists subPathMap($subPath)]} {
+	set subPathMap($subPath) [incr iuid]
+    }
+    set nsname ::_img::$subPathMap($subPath)_$name
     set ans ""
-	
+    
     # Create only if not there already.
     if {[lsearch [image names] $nsname] == -1} {
+	set theme $prefs(themeName)
 	
-	# Search dirs in order.
-	foreach dir $this(imagePathList) {
-	    foreach suff [concat $allImageSuffixes $argsArr(-suffixes)] {
-		set f [file join $dir ${name}${suff}]
+	# Build up a list of search paths.
+	set paths {}
+	if {$theme ne ""} {
+	    set dir [file join $this(themesPath) $theme]
+	    if {[file isdirectory $dir]} {
+		lappend paths [file join $dir $subPath]
+	    } else {
+		set dir [file join $this(altThemesPath) $theme]
+		if {[file isdirectory $dir]} {
+		    lappend paths [file join $dir $subPath]
+		}
+	    }
+	}
+	
+	# This MUST always be searched for last since it is our fallback.
+	lappend paths [file join $this(path) $subPath]
+	
+	set found 0
+	foreach path $paths {
+	    foreach fmt {png gif} {
+		set f [file join $path ${name}.${fmt}]
 		if {[file exists $f]} {
-		    if {[string equal $suff .png]} {
-			image create photo $nsname -file $f -format png
-		    } elseif {[string equal $suff .gif]} {
-			image create photo $nsname -file $f -format gif
-		    } else {
-			image create photo $nsname -file $f
-		    }
+		    image create photo $nsname -file $f -format $fmt
 		    set ans $nsname
+		    set found 1
 		    break
 		}
 	    }
-	    if {$ans ne ""} {
-		break
-	    }
+	    if {$found} break
 	}
     } else {
 	set ans $nsname
     }
     return $ans
+}
+
+# ::Theme::GetImageWithNameEx--
+# 
+#       As GetImage above but keeps the image name 'name'.
+
+proc ::Theme::GetImageWithNameEx {name {subPath ""}} {
+
+    set imname [GetImage $name $subPath]
+    if {$imname ne ""} {
+	image create photo $name
+	$name copy $imname
+	image delete $imname
+	set imname $name
+    }
+    return $imname
 }
 
 # ::Theme::GetImageFromExisting --

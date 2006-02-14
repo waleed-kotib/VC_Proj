@@ -1,79 +1,54 @@
 
 README-resources
 
-Most of the apperance of widgets, such as colors and fonts, is set
-via the built in option database for resources.
-These instructions assume you have the sources available, or that
-you run Mac OS X and has "opened" the application by control clicking it.
+There are two kinds of options that are set using resources:
+
+ o Widget options look for values in the resource data base unless
+   they have been hardcoded in the application sources.
+
+ o There are application specific resources that control the more
+   "high level" parts of the user interface.
 
 The default.rdb file always sets some reasonable values.
-After that the platform specific rdb file is read.
-If the theme is set in the prefs file, the themeName.rdb
-file is read. This is first searched for inside the sources and then 
-in the alternative user directory. You find this directory
-by using the Jabber/Debug menu command, and write
-puts $this(altResourcePath)
-Typically you'll have a path .../Coccinella/resources/
+After that the platform specific rdb file is read. Typical name is macosx.rdb.
+If a specific application theme is set, resources are also searched for
+in its resource folder. An example:
 
-There are several levels of options that can be set.
+    themes/Cool/resources/default.rdb
 
-IMPORTANT: with the introduction of the tile package much of this
-           information is OBSOLETE!
+using the same rules, first default, then platform specific.
 
-1) Tk's standard widget resources are set the usual way.
-Examples:
-*background:	      #aea485
-*Button.background:   red
+Widget specific options can be specified in several more or less generic ways.
+See the Tk and tile docs for complete descriptions. Below are listed the levels
+of resources that can be specified:
+
+1) Tk's  and tile standard widget resources:
+
+*Canvas.background:  #dedede
 
 2) Specific megawidget resources are set using, for instance:
-*Tablelist.background:             #aa2222
+
+*Tablelist.background:  #aa2222
 
 3) There are several application specific classes that can be
 used when specifying resources. They are:
-Whiteboard, JMain, MailBox, Chat, GroupChat, NewMsg, Splash...
-Use them as:
-*MailBox*Tablelist.labelBackground:        #dd1111
+Whiteboard, JMain, MailBox, Chat, GroupChat, NewMsg, Splash... 
+Search the sources.
+
+*MailBox*Tablelist.labelBackground:  #dd1111
 
 4) Some of these also have specific resource names, see the
 respective sources for this. One example:
-*Chat*youPreBackground:        green
 
-5) Most icons may also be customized. Place your gif or png images
-in their own directory inside the images/ directory of the
-sources. Give this directory a name that associates to the 
-theme name. Specify this directory in your themes rdb file as:
-*themeImageDir:                     galileolinux
+*Chat*youPreBackground:  green
 
-As an alternative you may create your image directory inside your
-preferences directory, which you find by using the Jabber/Debug 
-menu command, and write 
-puts $this(altImagePath)
-Typically you'll have a path .../Coccinella/images/MyTheme/
-
-6) Each image has a resource name associated with it. If you keep
+5) Each image has a resource name associated with it. If you keep
 the filename the same as in the original distro, the image
 will be automatically used. You may also pick a different
 name, but then you must specify a new value for the resource
 that is also the file name. Examplevise:
-*JMain.connectImage:       imageMyConnect
-where the 'imageMyConnect.gif' file is inside the themes image directory.
 
-7) Images are searched for in this order:
-   o the images/themeImageDir, in this case images/galileolinux
-   o then images/platformName where the platformName is any of
-     unix, windows, macintosh, or macosx
-   o lastly, in images/
-
-Some images have also been hardcoded into the sources, and they
-will be obtained from there if not found in the above directory
-hierarchy.
-
-8) PNG image format is supported via the extra tkpng package which is
-required. GIF support is in Tk core.
-
-9) Finally, if your theme have any requirements these should be put
-in a file named ${themeName}CanLoad.tcl which must return 1 if the
-theme resources can be loaded on the system and 0 if not.
+*JMain.connectImage:  imageMyConnect
 
 
-That's it!
+See also themes/README-themes for more info on customization.

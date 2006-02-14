@@ -7,306 +7,303 @@ Not to mention all bugfixes and rewrites.
 
 Coccinella-0.95.12 (0603??):
 
+ o new application theme engine
 
 
 Coccinella-0.95.11 (060115):
 
-        - added support for Growl on mac
-	- using treectrl widget in a number of places
-	- the roster tree component based with different styles
-	- an avatar roster style
-	- support for multiple roster iconsets
-	- main window configurable toolbar/notebook UI
-	- extensive build configuration possible
-	- integrated Jive/Asterisk phone presence status
+ o added support for Growl on mac
+ o using treectrl widget in a number of places
+ o the roster tree component based with different styles
+ o an avatar roster style
+ o support for multiple roster iconsets
+ o main window configurable toolbar/notebook UI
+ o extensive build configuration possible
+ o integrated Jive/Asterisk phone presence status
 
 Coccinella-0.95.10 (051018):
 
-	- server connections using http possible; http proxy added
-	- added the tkpng package; png support now required
-	- new icons from Everaldo
-	- file transfer using si/bytestreams/ibb/file-transfer protocol
-	- notification using bouncing dock icon on Mac OS X
-	- ignore menu option in groupchat
-	- number of unread chat messages shown in tabs and title
-	- historic chat messages in lighter color
-	- support for conference bookmarks according to JEP-0048
-	- whiteboard actions are now constrained to the actual scroll region
+ o server connections using http possible; http proxy added
+ o added the tkpng package; png support now required
+ o new icons from Everaldo
+ o file transfer using si/bytestreams/ibb/file-transfer protocol
+ o notification using bouncing dock icon on Mac OS X
+ o ignore menu option in groupchat
+ o number of unread chat messages shown in tabs and title
+ o historic chat messages in lighter color
+ o support for conference bookmarks according to JEP-0048
+ o whiteboard actions are now constrained to the actual scroll region
 
 Coccinella-0.95.9 (050821):
 
-	- completely rewritten user interface with new theming engine (tile)
-	- vCard avatar
+ o completely rewritten user interface with new theming engine (tile)
+ o vCard avatar
 
 Coccinella-0.95.8 (050620):
 
-	- reworked the registration process
+ o reworked the registration process
 
 Coccinella-0.95.7 (050429):
 
-	- added canvas locking mechanism
+ o added canvas locking mechanism
 
 Coccinella-0.95.6 (050425):
 
-	- added PLAIN sasl mechanism
-	- updated QuickTime support which fixed an instabilty problem
-          and an audio problem on Windows
-	- fixed snapshot bug
+ o added PLAIN sasl mechanism
+ o updated QuickTime support which fixed an instabilty problem
+   and an audio problem on Windows
+ o fixed snapshot bug
 
 Coccinella-0.95.5 (050311):
 
-        - added support for kprinter on unix
-	- status changes displayed in roster
-	- roster remembers which dir items opened/closed
-	- can hide offline/transports in roster
-	- added a keepalive mechansism to guard against aggresive routers
+ o added support for kprinter on unix
+ o status changes displayed in roster
+ o roster remembers which dir items opened/closed
+ o can hide offline/transports in roster
+ o added a keepalive mechansism to guard against aggresive routers
 
 
 Coccinella-0.95.4 (050126):
 
-        - critical bug in one of the message catalogs
+ o critical bug in one of the message catalogs
 
 
 Coccinella-0.95.3 (050125):
 
-        - minor bugfixes
-	- added add server feature to disco
+ o minor bugfixes
+ o added add server feature to disco
 
 
 Coccinella-0.95.2 (041217): 	Short summary --
 
-        - each page, roster, disco, browser, agents, now have their own status
-	  widget
-	- extended buddy pouncing
-	- added automatic login option
-	- improved smiley/url text parsing which is 20 times faster
-	- reworked layoyt of tree widget
-	- muc chatrooms now show users role
-	- httpd can mount directories; using css for 404 and dir listings
-	- the cache should now remember files between launches
-	- bindings to Gnome Meeting on unix
+ o each page, roster, disco, browser, agents, now have their own status widget
+ o extended buddy pouncing
+ o added automatic login option
+ o improved smiley/url text parsing which is 20 times faster
+ o reworked layoyt of tree widget
+ o muc chatrooms now show users role
+ o httpd can mount directories; using css for 404 and dir listings
+ o the cache should now remember files between launches
+ o bindings to Gnome Meeting on unix
 
 
 Coccinella-0.95.1 (040930): 	Short summary --
 
-	- SASL authentication
-	- Reworked several dialogs (new user, edit user, subscription)
-	- Reworked how transports are displayed and handled
+ o SASL authentication
+ o Reworked several dialogs (new user, edit user, subscription)
+ o Reworked how transports are displayed and handled
 
 
 Coccinella-0.95.0 (040904): 	Short summary --
 
-        - tabbed chat dialog
-	- auto hide scrollbars
-	- new info menu
-	- reworked the profile settings dialog
-	- reorganized prefs panels
-	- improved notebook interface for smoother refresh
-	- added the possibility to use ssl when registering new account
-	- now automatically login after registration
-	- buddy pouncing as a component
-	- reworked incoming message dialog
-	- extra options for profiles now in tabbed notebook
-	- Itcl interface for applets accessing whiteboard functions
-	- Itcl runtime environment for applets
-	- mechanism to add custom protocol
-	- card game applet as a first example of runtime and custom protocol
-	- slide show component
-	- xmpp uri parser
-	- restricted to single instance on Windows
-	- synced playback for QuickTime
-	- using disco as default in place of browse
+ o tabbed chat dialog
+ o auto hide scrollbars
+ o new info menu
+ o reworked the profile settings dialog
+ o reorganized prefs panels
+ o improved notebook interface for smoother refresh
+ o added the possibility to use ssl when registering new account
+ o now automatically login after registration
+ o buddy pouncing as a component
+ o reworked incoming message dialog
+ o extra options for profiles now in tabbed notebook
+ o Itcl interface for applets accessing whiteboard functions
+ o Itcl runtime environment for applets
+ o mechanism to add custom protocol
+ o card game applet as a first example of runtime and custom protocol
+ o slide show component
+ o xmpp uri parser
+ o restricted to single instance on Windows
+ o synced playback for QuickTime
+ o using disco as default in place of browse
 
 
 Coccinella-0.94.11 (040601): 	Short summary --
 
-        - internal ip not always set correctly which made transfers fail
+ o internal ip not always set correctly which made transfers fail
 
 
 Coccinella-0.94.10 (040528): 	Short summary --
 
-        - STRINGPREP fixes in roster, browse, disco,...
-	- minor fixes for XMPP (ejabberd and jabberd2)
+ o STRINGPREP fixes in roster, browse, disco,...
+ o minor fixes for XMPP (ejabberd and jabberd2)
 
 
 Coccinella-0.94.9 (04????): 	Short summary --
 
-        - prepared for using xml/svg for all whiteboard stuff
-	- major internal code reorganizations to separate whiteboard code
-          from rest and be independent of protocols
-	- reworked the groupchat dialog from scratch
-	- major restructure of all browse code
-	- added support for emoticon sets
-	- added disco support
-	- new component mechanism for plugins
-	- removed all addons stuff, and moved to plugins
-	- windows taskbar
-	- added privacy/filter support
+ o prepared for using xml/svg for all whiteboard stuff
+ o major internal code reorganizations to separate whiteboard code from 
+   rest and be independent of protocols
+ o reworked the groupchat dialog from scratch
+ o major restructure of all browse code
+ o added support for emoticon sets
+ o added disco support
+ o new component mechanism for plugins
+ o removed all addons stuff, and moved to plugins
+ o windows taskbar
+ o added privacy/filter support
 
 
 Coccinella-0.94.8 (040305): 	Short summary --
 
-        - fixed critical bugs in p2p startup
-        - fixed bug when auto away
-        - added SVG importer
+ o fixed critical bugs in p2p startup
+ o fixed bug when auto away
+ o added SVG importer
 
 
 Coccinella-0.94.7 (040228): 	Short summary --
 
-	- separating actual whiteboard code from rest.
-	- uses resource database for everything, also images
-	- chat dialog rewritten; new buttons, jabber:x:event support
-	- using a hooks mechanism to handle callbacks in a more
-	  modular way
-  	- user profiles rewritten from scratch
-	- alert sounds part rewritten; added a few more sound events;
-          added possiblity to use sound sets
-	- reworked tabbed notebook interface
-	- added support for tkdnd (drag and drop) in the whiteboard for
-          linux/unix and windows
+ o separating actual whiteboard code from rest.
+ o uses resource database for everything, also images
+ o chat dialog rewritten; new buttons, jabber:x:event support
+ o using a hooks mechanism to handle callbacks in a more way
+ o user profiles rewritten from scratch
+ o alert sounds part rewritten; added a few more sound events;
+   added possiblity to use sound sets
+ o reworked tabbed notebook interface
+ o added support for tkdnd (drag and drop) in the whiteboard for
+   linux/unix and windows
 
 
 Coccinella-0.94.6 (03????): 	Short summary --
 
-	- internal http server in its own thread if available
-	- better redo/undo functionality
-	- fixed stacking inconsistencies when sharing images
-	- background image in tree widget (roster)
-	- better handling of event sounds
-	- new addon structure for extensions
-	- fixed cut/copy/paste menus on macs
-	- files transported were not always cached, now fixed
-	- incoming files will now have there file names encoded to
-	  avoid name conflicts
-	- added games item with chess as a first example
-	- added (primitive) printing support for Mac OS X
-	- sorted out how to handle 2/3-tier jids in chats and messages
-	- reworked button tray into a mega widget
+ o internal http server in its own thread if available
+ o better redo/undo functionality
+ o fixed stacking inconsistencies when sharing images
+ o background image in tree widget (roster)
+ o better handling of event sounds
+ o new addon structure for extensions
+ o fixed cut/copy/paste menus on macs
+ o files transported were not always cached, now fixed
+ o incoming files will now have there file names encoded to avoid name conflicts
+ o added games item with chess as a first example
+ o added (primitive) printing support for Mac OS X
+ o sorted out how to handle 2/3-tier jids in chats and messages
+ o reworked button tray into a mega widget
 
 
 Coccinella-0.94.5 (0309??): 	Short summary --
 
-	- jid completion entry
-	- setup assistant with free servers info dialog
-	- fixed really nasty bug where the ip number was not set correctly
- 	  on systems with multiple network interfaces, typically when 
-	  using ppp
-        - removed smoothness option, added smooth operation of polygons
-	- added auto update mechanism
-	- added chat history dialog
-	- reworked internals of the inbox, new file format
-	- plugin control preference panel
-	- much improved feedback with "broken image"
-	- better handling of passive http transports
-	- changed name of main file to Coccinella.tcl
+ o jid completion entry
+ o setup assistant with free servers info dialog
+ o fixed really nasty bug where the ip number was not set correctly
+   on systems with multiple network interfaces, typically when using ppp
+ o removed smoothness option, added smooth operation of polygons
+ o added auto update mechanism
+ o added chat history dialog
+ o reworked internals of the inbox, new file format
+ o plugin control preference panel
+ o much improved feedback with "broken image"
+ o better handling of passive http transports
+ o changed name of main file to Coccinella.tcl
 
 
 Whiteboard-0.94.4 (030616): 	Short summary --
 
-	- all jabber UI elements moved from whiteboard window to roster window
-	- get side of file transport rewritten from scratch
-	- MUC support at client level
-	- a plugin structure for the whiteboard
+ o all jabber UI elements moved from whiteboard window to roster window
+ o get side of file transport rewritten from scratch
+ o MUC support at client level
+ o a plugin structure for the whiteboard
 
 
 Whiteboard-0.94.3 (0301??): 	Short summary --
 
-	- whiteboards now multiinstance for jabber; send single whiteboard
-	  messages, each chat and groupchat in separate whiteboards
-	- uses full 3-tier jid in roster now
-	- auto browse users to detect if coccinellas, set icon in roster
-	- updated balloon info in roster
-	- many rewrites
-	- really many bugfixes...
+ o whiteboards now multiinstance for jabber; send single whiteboard
+   messages, each chat and groupchat in separate whiteboards
+ o uses full 3-tier jid in roster now
+ o auto browse users to detect if coccinellas, set icon in roster
+ o updated balloon info in roster
+ o many rewrites
+ o really many bugfixes...
 
 
 Whiteboard-0.94.2 (02????): 	Short summary --
 
-	- undo/redo method of canvas
-	- localization (language adaption) introduced via message catalogs
-	- new directory structure for prefs and inbox
-	- changed GUI for jabber with persistant address fields
-	- changed canvas file format, reads old, writes new
-	- debug console for jabber I/O
-	- numerous rewrites and bugfixes
+ o undo/redo method of canvas
+ o localization (language adaption) introduced via message catalogs
+ o new directory structure for prefs and inbox
+ o changed GUI for jabber with persistant address fields
+ o changed canvas file format, reads old, writes new
+ o debug console for jabber I/O
+ o numerous rewrites and bugfixes
 
 
 Whiteboard-0.94.1 (02????): 	Short summary --
 
-	- complete rewrite of the put side of the peer-to-peer file transfer
-	- roster and browser (or agents) in tabbed window
-	- use agents as fallback if no browsing
-	- added old groupchat protocol in case
-	- auto speech bubble from popup
-	- smart tool button popups
-	- new file cache database
-	- modified image handling which makes image copy & paste incompatible
-	  with earlier versions
-	- now saves inbox between sessions
-	- SSL now works with jabber server
-	- fixed really nasty bug in the xml parser
-	- numerous rewrites and bugfixes
+ o complete rewrite of the put side of the peer-to-peer file transfer
+ o roster and browser (or agents) in tabbed window
+ o use agents as fallback if no browsing
+ o added old groupchat protocol in case
+ o auto speech bubble from popup
+ o smart tool button popups
+ o new file cache database
+ o modified image handling which makes image copy & paste incompatible
+   with earlier versions
+ o now saves inbox between sessions
+ o SSL now works with jabber server
+ o fixed really nasty bug in the xml parser
+ o numerous rewrites and bugfixes
 
 
 Whiteboard-0.94 (02????): 	Short summary --
 
-	- new inbox and other dialogs for message handling
-	- printing support, expat parser, ssl, MS Speech on Windows
-	- reorganized code so that the whiteboard toplevel is more
-	  objectified to allow multiple instances
-	- large code rewrites for better organization
-	- parsing smileys and http links in jabber dialogs
-	- changed jabber xml namespace to coccinella:wb ,
-	  which makes it incompatible with 0.93!
-	- scrollbars for canvas in whiteboard, no synced window sizes
-	- QuickTime movies streamed via http if possible
+ o new inbox and other dialogs for message handling
+ o printing support, expat parser, ssl, MS Speech on Windows
+ o reorganized code so that the whiteboard toplevel is more
+   objectified to allow multiple instances
+ o large code rewrites for better organization
+ o parsing smileys and http links in jabber dialogs
+ o changed jabber xml namespace to coccinella:wb ,
+   which makes it incompatible with 0.93!
+ o scrollbars for canvas in whiteboard, no synced window sizes
+ o QuickTime movies streamed via http if possible
 
 
 Whiteboard-0.93.1 (02????): 	Short summary --
 	
-	- minor bugfixes and error checks
-	- added prefs(stripJabber) option
-	- fixed return -code in TclXML's ElementClose
-	- fixed registration bug when resetting xml parser
-	- restricted sending to ill formed jid's (@jabber.org)
+ o minor bugfixes and error checks
+ o added prefs(stripJabber) option
+ o fixed return -code in TclXML's ElementClose
+ o fixed registration bug when resetting xml parser
+ o restricted sending to ill formed jid's (@jabber.org)
 
 
 Whiteboard-0.93 (020127): 	Short summary --
 
-	- adapting to the jabber XML IM server system
-	- preferences are now collected in one window
-	- code base more than doubled compared to 0.92...
+ o adapting to the jabber XML IM server system
+ o preferences are now collected in one window
+ o code base more than doubled compared to 0.92...
 
 
 Whiteboard-0.92 (001128): 	Short summary --
 
-	- new tiny http server
-	- is now running on Windows (98)
-	- serves streaming media to QuickTime from the TinyHttpd server
-	- all nontransparent gifs now Mime encoded in the scripts
-	- much of the code now as packages instead of source'ed directly
-	- new centralized network via a reflector server
-	- flash free window updates
-	- handles new dashed options of canvas
-	- new supported extensions: Img, snack, tkprint
-	- working menu accelerators
-	- movie controller widget with bindings to snack sound objects
-	- many code rewrites, bug fixes, and enhancements
+ o new tiny http server
+ o is now running on Windows (98)
+ o serves streaming media to QuickTime from the TinyHttpd server
+ o all nontransparent gifs now Mime encoded in the scripts
+ o much of the code now as packages instead of source'ed directly
+ o new centralized network via a reflector server
+ o flash free window updates
+ o handles new dashed options of canvas
+ o new supported extensions: Img, snack, tkprint
+ o working menu accelerators
+ o movie controller widget with bindings to snack sound objects
+ o many code rewrites, bug fixes, and enhancements
 
 
 Whiteboard-0.91 (000517): 	Short summary --
 
-	- new tools, arc item and rotate
-	- collapsable shortcut toolbar
-	- splash screen
-	- items menu for pre made items
-	- put/get operations rewritten with new protocol
-	- safety check in server
-	- support for the xanim application on unix/linux
-	- systematic use of mime types for handling multimedia imports
-	- systematic handling of extensions
-	- font import mechanism for using chinese and other multibyte fonts
-	- many code rewrites, bug fixes, and enhancements
+ o new tools, arc item and rotate
+ o collapsable shortcut toolbar
+ o splash screen
+ o items menu for pre made items
+ o put/get operations rewritten with new protocol
+ o safety check in server
+ o support for the xanim application on unix/linux
+ o systematic use of mime types for handling multimedia imports
+ o systematic handling of extensions
+ o font import mechanism for using chinese and other multibyte fonts
+ o many code rewrites, bug fixes, and enhancements
 
 
 Whiteboard-0.90 (991201): 	First official release.

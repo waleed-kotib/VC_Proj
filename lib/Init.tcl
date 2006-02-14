@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.36 2006-02-10 15:40:50 matben Exp $
+# $Id: Init.tcl,v 1.37 2006-02-14 08:05:13 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -70,10 +70,10 @@ proc ::Init::SetThis {thisScript} {
     if {[info exists starkit::topdir]} {
 	set this(appPath) [file dirname [info nameofexecutable]]
     }
+    set this(images)            images
+    set this(resources)         resources
     set this(imagePath)         [file join $this(path) images]
-    set this(altImagePath)      [file join $this(prefsPath) images]
     set this(resourcePath)      [file join $this(path) resources]
-    set this(altResourcePath)   [file join $this(prefsPath) resources]
     set this(prePrefsPath)      [file join $this(resourcePath) pre]
     set this(prePrefsFile)      [file join $this(prePrefsPath) prefs.rdb]
     set this(postPrefsPath)     [file join $this(resourcePath) post]
@@ -102,7 +102,8 @@ proc ::Init::SetThis {thisScript} {
     set this(prefsAvatarPath)   [file join $this(prefsPath) avatar]
     set this(myAvatarPath)      [file join $this(prefsPath) avatar my]
     set this(cacheAvatarPath)   [file join $this(prefsPath) avatar cache]
-    set this(altAvatarPath)     [file join $this(altImagePath) avatar]
+    set this(themesPath)        [file join $this(path) themes]
+    set this(altThemesPath)     [file join $this(prefsPath) themes]
     set this(httpdRootPath)     $this(path)
 
     # Need to rework this...
@@ -247,6 +248,7 @@ proc ::Init::MakeDirs { } {
 	altEmoticonsPath
 	altRosticonsPath
 	altServiconsPath
+	altThemesPath
     } {
 	if {[file isfile $this($name)]} {
 	    file delete -force $this($name)
