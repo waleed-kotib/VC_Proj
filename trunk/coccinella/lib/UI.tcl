@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.122 2006-02-12 16:19:52 matben Exp $
+# $Id: UI.tcl,v 1.123 2006-02-14 08:05:13 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -130,9 +130,9 @@ proc ::UI::Init {} {
     
     # Standard button icons. 
     # Special solution to be able to set image via the option database.
-    ::Theme::GetImage [option get . buttonOKImage {}] -keepname 1
-    ::Theme::GetImage [option get . buttonCancelImage {}] -keepname 1    
-    ::Theme::GetImage [option get . buttonTrayImage {}] -keepname 1    
+    ::Theme::GetImageWithNameEx [option get . buttonOKImage {}]
+    ::Theme::GetImageWithNameEx [option get . buttonCancelImage {}]
+    ::Theme::GetImageWithNameEx [option get . buttonTrayImage {}]
 }
 
 proc ::UI::InitCommonBinds { } {
@@ -1458,10 +1458,8 @@ proc ::UI::AlertBoxInit { } {
     variable alertInit 
     variable alertArgs
     
-    if {[::Plugins::HaveImporterForMime image/png]} {
-	set alertArgs [list -image  \
-	  [::Theme::GetImage [option get . alertImage {}] -suffixes .png]]
-    }
+    set alertArgs  \
+      [list -image [::Theme::GetImage [option get . alertImage {}]]]
     set alertInit 1
 }
 

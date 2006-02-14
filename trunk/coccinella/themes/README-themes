@@ -49,17 +49,19 @@ When the application asks for an image it may define a sub path (subPath)
 where the image shall be searched for. This sub path defaults to "images".
 The search order for an image in the "Cool" theme is:
 
-    coccinella/themes/Cool/subPath/
-    prefsPath/themes/Cool/subPath/
+    coccinella/themes/Cool/subPath/     <-- if folder exists
+    prefsPath/themes/Cool/subPath/      <-- if folder exists
 
 If not found in any of these the
 
     coccinella/subPath/
 
-is used as a final fallback. Examples are:
+is used as a final fallback. As an example consider the search order for an
+image 'login' (we assume png format) in the 'Cool' theme:
 
-    coccinella/themes/Cool/images/login.png
-    prefsFolder/themes/Cool/components/Phone/images/b0.png
+    coccinella/themes/Cool/images/login.png     <-- if folder exists
+    prefsFolder/themes/Cool/images/login.png    <-- if folder exists
+    coccinella/images/login.png
 
 For the moment the image formats must be either GIF or PNG.
 

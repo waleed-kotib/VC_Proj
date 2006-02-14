@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.57 2006-02-10 15:40:50 matben Exp $
+# $Id: Whiteboard.tcl,v 1.58 2006-02-14 08:05:13 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -357,18 +357,16 @@ proc ::WB::CreateToolImages { } {
     variable iconsPreloaded
     variable btName2No
     
-    set dir [file join $this(imagePath) tools]
+    set subPath [file join $this(images) tools]
     
     # Actual tools.
     foreach name [array names btName2No] {
-	set iconsPreloaded($name) [image create photo \
-	  -format gif -file [file join $dir ${name}.gif]]
+	set iconsPreloaded($name) [::Theme::GetImage $name $subPath]
     }
     
     # Color selector.
     foreach name {colorSelector colorSelBW colorSelSwap} {
-	set iconsPreloaded($name) [image create photo \
-	  -format gif -file [file join $dir ${name}.gif]]
+	set iconsPreloaded($name) [::Theme::GetImage $name $subPath]
     }
 }
 
