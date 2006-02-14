@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.13 2006-02-03 07:17:17 matben Exp $
+# $Id: RosterTree.tcl,v 1.14 2006-02-14 11:09:29 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -341,6 +341,17 @@ proc ::RosterTree::DoubleClick {x y} {
 	    }
 	}
     }
+}
+
+proc ::RosterTree::GetSelected { } {
+    variable T
+    
+    set selected {}
+    foreach item [$T selection get] {
+	set tag [$T item element cget $item cTag eText -text]
+	lappend selected $tag
+    }
+    return $selected
 }
 
 # RosterTree::Popup --

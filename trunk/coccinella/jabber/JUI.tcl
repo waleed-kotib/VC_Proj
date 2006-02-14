@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.112 2006-02-12 16:19:52 matben Exp $
+# $Id: JUI.tcl,v 1.113 2006-02-14 11:09:29 matben Exp $
 
 package provide JUI 1.0
 
@@ -34,6 +34,8 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.adduserDisImage             adduserDis      widgetDefault
     option add *JMain.stopImage                   stop            widgetDefault
     option add *JMain.stopDisImage                stopDis         widgetDefault
+    option add *JMain.chatImage                   newmsg          widgetDefault
+    option add *JMain.chatDisImage                newmsgDis       widgetDefault
     option add *JMain.roster16Image               family16        widgetDefault
     option add *JMain.roster16DisImage            family16Dis     widgetDefault
     option add *JMain.browser16Image              run16           widgetDefault
@@ -409,6 +411,8 @@ proc ::Jabber::UI::BuildToolbar {w wtbar} {
     set iconAddUserDis    [::Theme::GetImage [option get $w adduserDisImage {}]]
     set iconStop          [::Theme::GetImage [option get $w stopImage {}]]
     set iconStopDis       [::Theme::GetImage [option get $w stopDisImage {}]]
+    set iconChat          [::Theme::GetImage [option get $w chatImage {}]]
+    set iconChatDis       [::Theme::GetImage [option get $w chatDisImage {}]]
     
     ::ttoolbar::ttoolbar $wtbar
     
@@ -427,6 +431,9 @@ proc ::Jabber::UI::BuildToolbar {w wtbar} {
     $wtbar newbutton newuser -text [mc Contact] \
       -image $iconAddUser -disabledimage $iconAddUserDis  \
       -command ::Jabber::User::NewDlg -state disabled
+    $wtbar newbutton chat -text [mc Chat] \
+      -image $iconChat -disabledimage $iconChatDis  \
+      -command ::Chat::OnToolbutton -state disabled
 
     ::hooks::run buildJMainButtonTrayHook $wtbar
 
@@ -933,6 +940,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	      -image $connectedImage -disabledimage $connectedDisImage \
 	      -command ::Jabber::LoginLogout
 	    $wtbar buttonconfigure newuser -state normal
+	    $wtbar buttonconfigure chat -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label [mc mLogout] -state normal
@@ -959,6 +967,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	      -image $iconConnect -disabledimage $iconConnectDis \
 	      -command ::Jabber::LoginLogout
 	    $wtbar buttonconfigure newuser -state disabled
+	    $wtbar buttonconfigure chat -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label [mc mLogin] -state normal

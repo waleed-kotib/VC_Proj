@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.145 2006-01-11 13:24:53 matben Exp $
+# $Id: Chat.tcl,v 1.146 2006-02-14 11:09:29 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -138,6 +138,25 @@ namespace eval ::Chat:: {
     bind ChatToplevel <Destroy> {+::Chat::OnDestroyToplevel %W}
 }
 
+# Chat::OnToolbutton --
+# 
+#       Toolbar button command.
+
+proc ::Chat::OnToolbutton { } {
+    
+    set tags [::RosterTree::GetSelected]
+    if {[llength $tags]} {
+	foreach tag $tags {
+	    lassign $tag mtag jid
+	    if {$mtag eq "jid"} {
+		StartThreadDlg -jid $jid
+	    }
+	}
+    } else {
+	StartThreadDlg
+    }
+}
+
 # Chat::StartThreadDlg --
 #
 #       Start a chat, ask for user in dialog.
@@ -158,6 +177,7 @@ proc ::Chat::StartThreadDlg {args} {
 
     ::Debug 2 "::Chat::StartThreadDlg args='$args'"
 
+    array set argsArr $args
     set w $wDlgs(jstartchat)
     if {[winfo exists $w]} {
 	raise $w
@@ -217,6 +237,10 @@ proc ::Chat::StartThreadDlg {args} {
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
+    
+    if {[info exists argsArr(-jid)]} {
+	set user $argsArr(-jid)
+    }
     
     # Grab and focus.
     set oldFocus [focus]
