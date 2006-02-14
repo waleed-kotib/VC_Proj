@@ -1,9 +1,0 @@
-! test... Crystal just an example
-!
-
-*Tree.treeColor:                     
-*Roster*Tree.background:             white
-*Roster.backgroundImage:
-*Roster*Tree.styleIcons:             crystal
-*Roster*Tree*onlineImage: 
-*Roster*Tree*offlineImage:
