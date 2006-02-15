@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements chat type of UI for jabber.
 #      
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.146 2006-02-14 11:09:29 matben Exp $
+# $Id: Chat.tcl,v 1.147 2006-02-15 08:12:21 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -746,6 +746,22 @@ proc ::Chat::InsertHistory {chattoken args} {
     }
 }
 
+namespace eval ::Chat {
+    
+    variable buildInited 0
+    variable havednd 0
+}
+
+proc ::Chat::BuildInit {} {
+    variable buildInited
+    variable havednd
+    
+    if {![catch {package require tkdnd}]} {
+	set havednd 1
+    }       
+    set buildInited 1
+}
+
 # Chat::Build --
 #
 #       Builds the chat dialog.
@@ -762,10 +778,15 @@ proc ::Chat::Build {threadID args} {
     
     variable uiddlg
     variable cprefs
+    variable buildInited
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Chat::Build threadID=$threadID, args='$args'"
+    
+    if {!$buildInited} {
+	BuildInit
+    }
 
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -905,6 +926,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 
     variable uidchat
     variable cprefs
+    variable havednd
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
@@ -1097,6 +1119,9 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
       [list [namespace current]::ReturnKeyPress $chattoken]    
     bind $wtextsnd <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $chattoken]
+    if {$havednd} {
+	InitDnD $chattoken $wtextsnd
+    }
     
     set chatstate(wthread)  $wthread
     set chatstate(wpane)    $wpane
@@ -1113,6 +1138,42 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     after idle [list raise [winfo toplevel $wthread]]
     
     return $chattoken
+}
+
+proc InitDnD {chattoken win} {
+    
+    dnd bindtarget $win text/uri-list <Drop>      \
+     [list ::Chat::DnDDrop $chattoken %W %D %T]
+    dnd bindtarget $win text/uri-list <DragEnter> \
+     [list ::Chat::DnDEnter $chattoken %W %A %D %T]
+    dnd bindtarget $win text/uri-list <DragLeave> \
+     [list ::Chat::DnDLeave $chattoken %W %D %T]
+}
+
+proc ::Chat::DnDDrop {chattoken win data dndtype} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    puts "$win $data $dndtype"
+    # Take only first file.
+    set f [lindex $data 0]
+	
+    # Strip off any file:// prefix.
+    set f [string map {file:// ""} $f]
+    set f [uriencode::decodefile $f]
+
+    ::FTrans::Send $chatstate(jid) -filename $f
+}
+
+proc ::Chat::DnDEnter {chattoken win action data dndtype} {
+    puts "$win $action $data $dndtype"
+    focus $win
+    set act "none"
+    return $act
+}
+
+proc ::Chat::DnDLeave {chattoken win data dndtype} {	
+    focus [winfo toplevel $win] 
 }
 
 proc ::Chat::OnDestroyThread {chattoken} {
