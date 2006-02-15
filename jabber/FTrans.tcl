@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.6 2005-10-16 09:51:31 matben Exp $
+# $Id: FTrans.tcl,v 1.7 2006-02-15 08:12:21 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -85,6 +85,7 @@ snit::widget ::FTrans::SendDialog {
     option {-image   sendFileImage    Image}
     option {-imagebg sendFileDisImage Image}
     option -title -configuremethod OnConfigTitle
+    option -filename
     
     typeconstructor {
 	if {![catch {package require tkdnd}]} {
@@ -172,6 +173,7 @@ snit::widget ::FTrans::SendDialog {
 	if {[string length $options(-geovariable)]} {
 	    ui::PositionClassWindow $win $options(-geovariable) "FTrans"
 	}
+	set fileName $options(-filename)
 
 	bind $win <Return> [list $self OK]
 	bind $win <Escape> [list $self Destroy]
@@ -283,7 +285,7 @@ proc ::FTrans::Nop {args} { }
 # 
 #       Initiator function. Must be 3-tier jid.
 
-proc ::FTrans::Send {jid} {
+proc ::FTrans::Send {jid args} {
     variable xmlns
     upvar ::Jabber::jstate jstate
 
@@ -294,10 +296,10 @@ proc ::FTrans::Send {jid} {
 	      -type ok -icon error -title [mc {Error}]  \
 	      -message "We couldn't see that $jid supports file transfer."
 	} else {
-	    Build $jid
+	    eval {Build $jid} $args
 	}
     } else {
-	set w [Build $jid]
+	set w [eval {Build $jid} $args]
 	$w state disabled
 	$w status "Waiting for disco result..."
 	set discoCB [list [namespace current]::DiscoCB $w]
@@ -305,16 +307,16 @@ proc ::FTrans::Send {jid} {
     }
 }
 
-proc ::FTrans::Build {jid} {
+proc ::FTrans::Build {jid args} {
     global  wDlgs
     variable uid
     
     set dlg $wDlgs(jftrans)
     set w   $dlg[incr uid]
     set m   [::UI::GetMainMenu]
-    SendDialog $w $jid  \
+    eval {SendDialog $w $jid  \
       -command [namespace current]::DoSend  \
-      -menu $m -geovariable prefs(winGeom,$dlg)
+      -menu $m -geovariable prefs(winGeom,$dlg)} $args
     ::UI::SetMenuAcceleratorBinds $w $m
 
     return $w
