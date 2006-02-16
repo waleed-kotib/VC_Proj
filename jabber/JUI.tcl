@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.113 2006-02-14 11:09:29 matben Exp $
+# $Id: JUI.tcl,v 1.114 2006-02-16 10:59:56 matben Exp $
 
 package provide JUI 1.0
 
@@ -19,6 +19,7 @@ namespace eval ::Jabber::UI:: {
     ::hooks::register setPresenceHook        ::Jabber::UI::SetPresenceHook
     ::hooks::register rosterIconsChangedHook ::Jabber::UI::RosterIconsChangedHook
     ::hooks::register prefsInitHook          ::Jabber::UI::InitPrefsHook
+    ::hooks::register rosterTreeSelectionHook  ::Jabber::UI::RosterSelectionHook
 
     # Use option database for customization.
     # Shortcut buttons.
@@ -128,7 +129,7 @@ proc ::Jabber::UI::Init { } {
 	{command     mAddNewUser    {::Jabber::User::NewDlg}       disabled {}}
 	{separator}
 	{command     mSendMessage   {::NewMsg::Build}         disabled M}
-	{command     mChat          {::Chat::StartThreadDlg}  disabled T}
+	{command     mChat          {::Chat::OnMenu}          disabled T}
 	{cascade     mStatus        {}                                  disabled {} {} {}}
 	{separator}
 	{command     mEnterRoom     {::GroupChat::EnterOrCreate enter}  disabled R}
@@ -433,7 +434,7 @@ proc ::Jabber::UI::BuildToolbar {w wtbar} {
       -command ::Jabber::User::NewDlg -state disabled
     $wtbar newbutton chat -text [mc Chat] \
       -image $iconChat -disabledimage $iconChatDis  \
-      -command ::Chat::OnToolbutton -state disabled
+      -command ::Chat::OnToolButton -state disabled
 
     ::hooks::run buildJMainButtonTrayHook $wtbar
 
@@ -616,6 +617,23 @@ proc ::Jabber::UI::RosterIconsChangedHook { } {
     
     set status $jstate(status)
     $jwapp(mystatus) configure -image [::Rosticons::Get status/$status]
+}
+
+proc ::Jabber::UI::RosterSelectionHook { } {
+    variable jwapp
+    
+    set wtbar $jwapp(wtbar)
+    set state disabled
+    set tags [::RosterTree::GetSelected]
+    if {[llength $tags] == 1} {
+	lassign [lindex $tags 0] mtag jid
+	if {$mtag eq "jid"} {
+	    if {[::Jabber::RosterCmd isavailable $jid]} {
+		set state normal
+	    }
+	}
+    }
+    $wtbar buttonconfigure chat -state $state    
 }
 
 # Jabber::UI::LoginCmd --
@@ -940,7 +958,6 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	      -image $connectedImage -disabledimage $connectedDisImage \
 	      -command ::Jabber::LoginLogout
 	    $wtbar buttonconfigure newuser -state normal
-	    $wtbar buttonconfigure chat -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label [mc mLogout] -state normal
@@ -967,7 +984,6 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	      -image $iconConnect -disabledimage $iconConnectDis \
 	      -command ::Jabber::LoginLogout
 	    $wtbar buttonconfigure newuser -state disabled
-	    $wtbar buttonconfigure chat -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label [mc mLogin] -state normal
