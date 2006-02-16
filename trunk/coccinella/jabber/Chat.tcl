@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.147 2006-02-15 08:12:21 matben Exp $
+# $Id: Chat.tcl,v 1.148 2006-02-16 10:59:56 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -138,11 +138,35 @@ namespace eval ::Chat:: {
     bind ChatToplevel <Destroy> {+::Chat::OnDestroyToplevel %W}
 }
 
-# Chat::OnToolbutton --
+# Chat::OnToolButton --
 # 
 #       Toolbar button command.
 
-proc ::Chat::OnToolbutton { } {
+proc ::Chat::OnToolButton { } {
+    
+    set tags [::RosterTree::GetSelected]
+    switch -- [llength $tags] {
+	0 {
+	    StartThreadDlg	    
+	}
+	1 {
+	    lassign [lindex $tags 0] mtag jid
+	    if {$mtag eq "jid"} {
+		if {[::Jabber::RosterCmd isavailable $jid]} {
+		    jlib::splitjid $jid jid2 res
+		    StartThread $jid2
+		} else {
+		    StartThreadDlg -jid $jid
+		}
+	    }
+	}
+	default {
+	    StartThreadDlg	    
+	}
+    }
+}
+
+proc ::Chat::OnMenu { } {
     
     set tags [::RosterTree::GetSelected]
     if {[llength $tags]} {

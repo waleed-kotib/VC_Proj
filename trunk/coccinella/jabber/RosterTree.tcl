@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.14 2006-02-14 11:09:29 matben Exp $
+# $Id: RosterTree.tcl,v 1.15 2006-02-16 10:59:56 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -205,6 +205,8 @@ proc ::RosterTree::New {_T wxsc wysc} {
     bind $T <<ButtonPopup>>   { ::RosterTree::Popup %x %y }
     bind $T <Destroy>         {+::RosterTree::OnDestroy }
     
+    $T notify bind $T <Selection> {+::RosterTree::Selection }
+    
     # This automatically cleans up the tag array.
     $T notify bind RosterTreeTag <ItemDelete> {
 	foreach item %i {
@@ -274,7 +276,7 @@ proc ::RosterTree::ConfigBgImage {image} {
 proc ::RosterTree::Selection {} {
     variable T
 
-    #empty
+    ::hooks::run rosterTreeSelectionHook
 }
 
 proc ::RosterTree::OpenTreeCmd {item} {
