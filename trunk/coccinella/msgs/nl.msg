@@ -275,7 +275,7 @@
 ::msgcat::mcset nl mNewAccount		{Nieuwe account...}
 ::msgcat::mcset nl mLogin		{Aanmelden...}
 ::msgcat::mcset nl mLogout		{Afmelden}
-::msgcat::mcset nl mLogoutWith          {Met &bericht afmelden...}
+::msgcat::mcset nl mLogoutWith          {Met bericht afmelden...}
 ::msgcat::mcset nl mHideMain            {Hoofdvenster verbergen}
 ::msgcat::mcset nl mShowMain            {Hoofdvenster laten zien}
 ::msgcat::mcset nl mPassword		{&Wachtwoord...}
