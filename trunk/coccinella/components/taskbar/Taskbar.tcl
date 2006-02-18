@@ -5,33 +5,71 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.11 2005-11-10 12:57:03 matben Exp $
+# $Id: Taskbar.tcl,v 1.12 2006-02-18 14:05:26 matben Exp $
 
 namespace eval ::Taskbar:: {
     
     variable icon ""
-    variable wmenu .tskbrpop
+    variable wmenu
+    variable wtray .tskbar
     variable wtearoff ""
     variable iconFile coccinella.ico
+    
+    array set wmenu {
+	win32   .tskbrpop
+	x11     .tskbar.pop
+    }
 }
 
 proc ::Taskbar::Load { } {
     global  tcl_platform prefs this
-    variable icon
-    variable iconFile
     
     ::Debug 2 "::Taskbar::Load"
     
-    if {[tk windowingsystem] ne "win32"} {
-	return 0
-    }
     if {![string equal $prefs(protocol) "jabber"]} {
 	return 0
     }
+
+    switch -- [tk windowingsystem] {
+	win32 {
+	    if {![WinInit]} {
+		return 0
+	    }
+	}
+	x11 {
+	    if {![X11Init]} {
+		return 0
+	    }
+	}
+	default {
+	    return 0
+	}
+    }
+        
+    component::register Taskbar  \
+      "Makes the taskbar icon on Windows and X11 which is handy as a shortcut."
+    
+    # Add all event hooks.
+    ::hooks::register initHook           ::Taskbar::InitHook
+    ::hooks::register quitAppHook        ::Taskbar::QuitAppHook
+    ::hooks::register setPresenceHook    ::Taskbar::SetPresenceHook
+    ::hooks::register loginHook          ::Taskbar::LoginHook
+    ::hooks::register logoutHook         ::Taskbar::LogoutHook
+    ::hooks::register preCloseWindowHook ::Taskbar::CloseHook        20
+    ::hooks::register jabberBuildMain    ::Taskbar::BuildMainHook
+    
+    return 1
+}
+
+proc ::Taskbar::WinInit { } {
+    global  this
+    variable icon
+    variable iconFile
+    
     if {[catch {package require Winico}]} {
 	return 0
     }
-    
+
     # We have a hardcoded file path for the ico file. (option database?)
     # The Winico is pretty buggy! Need to cd to avoid path troubles!
     set oldDir [pwd]
@@ -52,25 +90,27 @@ proc ::Taskbar::Load { } {
 	return 0
     }
     cd $oldDir
-    component::register Taskbar  \
-      "Makes the taskbar icon on Windows which is handy as a shortcut."
-    
-    # Add all event hooks.
-    ::hooks::register initHook           ::Taskbar::InitHook
-    ::hooks::register quitAppHook        ::Taskbar::QuitAppHook
-    ::hooks::register setPresenceHook    ::Taskbar::SetPresenceHook
-    ::hooks::register loginHook          ::Taskbar::LoginHook
-    ::hooks::register logoutHook         ::Taskbar::LogoutHook
-    ::hooks::register preCloseWindowHook ::Taskbar::CloseHook        20
-    ::hooks::register jabberBuildMain    ::Taskbar::BuildMainHook
-    
+
     set status    [::Jabber::GetMyStatus]
     set statusStr [::Roster::MapShowToText $status]
     set str [encoding convertto "$prefs(theAppName) - $statusStr"]
 
     winico taskbar add $icon \
-      -callback [list [namespace current]::Cmd %m %X %Y] -text $str
+      -callback [list [namespace current]::WinCmd %m %X %Y] -text $str
+    
+    return 1
+}
 
+proc ::Taskbar::X11Init { } {
+    variable wtray
+    
+    if {[catch {package require tktray}]} {
+	return 0
+    }
+    ::tktray::icon $wtray -image [::Theme::GetImage coccinella32]
+
+    bind $wtray <1> { ::Taskbar::X11Cmd %X %Y }
+    
     return 1
 }
 
@@ -84,7 +124,7 @@ proc ::Taskbar::InitHook { } {
     variable wmenu
      
     # Build popup menu.
-    set m $wmenu
+    set m $wmenu([tk windowingsystem])
     menu $m -tearoff 1 -postcommand [list [namespace current]::Post $m] \
       -tearoffcommand [namespace current]::TearOff -title $prefs(theAppName)
     
@@ -117,7 +157,7 @@ proc ::Taskbar::InitHook { } {
     }
 }
 
-proc ::Taskbar::Cmd {event x y} {
+proc ::Taskbar::WinCmd {event x y} {
     variable wmenu
     
     switch -- $event {
@@ -133,9 +173,15 @@ proc ::Taskbar::Cmd {event x y} {
 	    }
 	}
 	WM_RBUTTONUP {
-	    tk_popup $wmenu [expr $x - 40] [expr $y] [$wmenu index end]
+	    tk_popup $wmenu(win32) [expr {$x - 40}] [expr $y] [$wmenu(win32) index end]
 	}
     }
+}
+
+proc ::Taskbar::X11Cmd {x y} {
+    variable wmenu
+    
+    tk_popup $wmenu(x11) [expr $x] [expr {$y - 20}] [$wmenu(x11) index end]
 }
 
 proc ::Taskbar::Post {m} {
@@ -153,7 +199,7 @@ proc ::Taskbar::Post {m} {
     
     # {available away chat dnd xa invisible unavailable}
     set status [::Jabber::GetMyStatus]
-    if {$status == "unavailable"} {
+    if {$status eq "unavailable"} {
 	set state0 disabled
 	set state3 normal
     } else {
@@ -241,10 +287,12 @@ proc ::Taskbar::SetPresenceHook {type args} {
     variable icon
        
     # This can be used to update any specific icon in taskbar.
-   if {$icon != ""} {
-	set statusStr [::Roster::MapShowToText [::Jabber::GetMyStatus]]
-	set str [encoding convertto "$prefs(theAppName) - $statusStr"]
-	winico taskbar modify $icon -text $str
+    if {[tk windowingsystem] eq "win32"} {
+	if {$icon != ""} {
+	    set statusStr [::Roster::MapShowToText [::Jabber::GetMyStatus]]
+	    set str [encoding convertto "$prefs(theAppName) - $statusStr"]
+	    winico taskbar modify $icon -text $str
+	}
     }
 }
 
@@ -261,8 +309,10 @@ proc ::Taskbar::CloseHook {wclose} {
 proc ::Taskbar::QuitAppHook { } {
     variable icon
     
-    if {$icon != ""} {
-	winico taskbar delete $icon
+    if {[tk windowingsystem] eq "win32"} {
+	if {$icon != ""} {
+	    winico taskbar delete $icon
+	}
     }
 }
 
