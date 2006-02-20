@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.12 2006-02-18 14:05:26 matben Exp $
+# $Id: Taskbar.tcl,v 1.13 2006-02-20 10:39:52 matben Exp $
+
+package require balloonhelp
 
 namespace eval ::Taskbar:: {
     
@@ -102,15 +104,22 @@ proc ::Taskbar::WinInit { } {
 }
 
 proc ::Taskbar::X11Init { } {
+    global  prefs
     variable wtray
     
     if {[catch {package require tktray}]} {
 	return 0
     }
-    ::tktray::icon $wtray -image [::Theme::GetImage coccinella32]
+    ::tktray::icon $wtray -image [::Theme::GetImage coccinella22]
 
-    bind $wtray <1> { ::Taskbar::X11Cmd %X %Y }
-    
+    bind $wtray <ButtonRelease-1> { ::Taskbar::X11Cmd %X %Y }
+    bind $wtray <Button-3>        { ::Taskbar::X11Popup %X %Y }
+
+    set status    [::Jabber::GetMyStatus]
+    set statusStr [::Roster::MapShowToText $status]
+    set str "$prefs(theAppName) - $statusStr"
+    ::balloonhelp::balloonforwindow $wtray $str
+
     return 1
 }
 
@@ -144,7 +153,7 @@ proc ::Taskbar::InitHook { } {
     
     set i 0
     foreach {item cmd} $menuDef {
-	if {[string index $cmd 0] == "@"} {
+	if {[string index $cmd 0] eq "@"} {
 	    set mt [menu $m.sub$i -tearoff 0]
 	    $m add cascade -label [mc $item] -menu $mt
 	    eval [string range $cmd 1 end] $mt
@@ -162,15 +171,7 @@ proc ::Taskbar::WinCmd {event x y} {
     
     switch -- $event {
 	WM_LBUTTONUP {
-	    
-	    switch -- [wm state [::UI::GetMainWindow]] {
-		zoomed - normal  {
-		    ::UI::WithdrawAllToplevels
-		}
-		default {
-		    ::UI::ShowAllToplevels
-		}
-	    }
+	    ToggleVisibility
 	}
 	WM_RBUTTONUP {
 	    tk_popup $wmenu(win32) [expr {$x - 40}] [expr $y] [$wmenu(win32) index end]
@@ -179,9 +180,25 @@ proc ::Taskbar::WinCmd {event x y} {
 }
 
 proc ::Taskbar::X11Cmd {x y} {
+    ToggleVisibility
+}
+
+proc ::Taskbar::X11Popup {x y} {
     variable wmenu
     
     tk_popup $wmenu(x11) [expr $x] [expr {$y - 20}] [$wmenu(x11) index end]
+}
+
+proc ::Taskbar::ToggleVisibility {} {
+    
+    switch -- [wm state [::UI::GetMainWindow]] {
+	zoomed - normal  {
+	    ::UI::WithdrawAllToplevels
+	}
+	default {
+	    ::UI::ShowAllToplevels
+	}
+    }
 }
 
 proc ::Taskbar::Post {m} {
@@ -287,11 +304,17 @@ proc ::Taskbar::SetPresenceHook {type args} {
     variable icon
        
     # This can be used to update any specific icon in taskbar.
-    if {[tk windowingsystem] eq "win32"} {
-	if {$icon != ""} {
+    switch -- [tk windowingsystem] {
+	win32 {
+	    if {$icon != ""} {
+		set statusStr [::Roster::MapShowToText [::Jabber::GetMyStatus]]
+		set str [encoding convertto "$prefs(theAppName) - $statusStr"]
+		winico taskbar modify $icon -text $str
+	    }
+	}
+	x11 {
 	    set statusStr [::Roster::MapShowToText [::Jabber::GetMyStatus]]
-	    set str [encoding convertto "$prefs(theAppName) - $statusStr"]
-	    winico taskbar modify $icon -text $str
+	    set str "$prefs(theAppName) - $statusStr"
 	}
     }
 }
