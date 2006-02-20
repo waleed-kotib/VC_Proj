@@ -5,7 +5,7 @@
 #  Code idee from Harrison & McLennan
 #  This source file is distributed under the BSD license.
 #  
-# $Id: balloonhelp.tcl,v 1.19 2006-01-05 15:06:16 matben Exp $
+# $Id: balloonhelp.tcl,v 1.20 2006-02-20 10:39:52 matben Exp $
 
 package require treeutil
 
@@ -320,8 +320,18 @@ proc ::balloonhelp::Show {win type} {
 		if {[winfo exists $win]} {
 		    set exists 1
 		    set msg $locals($win)
-		    set x [expr {[winfo rootx $win] + 10}]
-		    set y [expr {[winfo rooty $win] + [winfo height $win]}]
+		    if {[winfo class $win] eq "TrayIcon"} {
+			set bbox [$win bbox]
+			if {$bbox ne ""} {
+			    set x [expr {[lindex $bbox 0] - 10}]
+			    set y [expr {[lindex $bbox 1] - 20}]
+			} else {
+			    set exists 0
+			}
+		    } else {
+			set x [expr {[winfo rootx $win] + 10}]
+			set y [expr {[winfo rooty $win] + [winfo height $win]}]
+		    }
 		}
 	    }
 	    treectrl {
