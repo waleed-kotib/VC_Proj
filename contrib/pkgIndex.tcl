@@ -10,7 +10,7 @@
 
 package ifneeded alertbox 1.0 [list source [file join $dir alertbox.tcl]]
 package ifneeded anigif 1.4 [list source [file join $dir anigif.tcl]]
-package ifneeded autoproxy 1.2 [list source [file join $dir autoproxy.tcl]]
+package ifneeded autoproxy 1.2.1 [list source [file join $dir autoproxy.tcl]]
 package ifneeded balloonhelp 1.0 [list source [file join $dir balloonhelp.tcl]]
 package ifneeded base64 1.0 [list source [file join $dir base64.tcl]]
 package ifneeded can2svg 0.3 [list source [file join $dir can2svg.tcl]]

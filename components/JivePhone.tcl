@@ -4,7 +4,7 @@
 #       
 #       Contributions and testing by Antonio Cano damas
 #       
-# $Id: JivePhone.tcl,v 1.18 2005-12-29 09:05:16 matben Exp $
+# $Id: JivePhone.tcl,v 1.19 2006-02-21 08:40:59 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -238,6 +238,7 @@ proc ::JivePhone::LogoutHook { } {
     ::Roster::DeRegisterPopupEntry mCall
     ::Roster::DeRegisterPopupEntry mForward
     ::Jabber::UI::DeRegisterMenuEntry jabber mCall
+    ::Jabber::UI::RemoveAlternativeStatusImage jivephone
     
     if {[winfo exists $state(wstatus)]} {
 	destroy $state(wstatus)
@@ -306,8 +307,7 @@ proc ::JivePhone::MessageHook {body args} {
     
     array set argsArr $args
     if {[info exists argsArr(-xmldata)]} {
-	set elem [wrapper::getfirstchildwithtag $argsArr(-xmldata)  \
-	  "phone-event"]
+	set elem [wrapper::getfirstchildwithtag $argsArr(-xmldata) "phone-event"]
 	if {$elem != {}} {
 	    set status [wrapper::getattribute $elem "status"]
 	    if {$status eq ""} {
@@ -320,21 +320,20 @@ proc ::JivePhone::MessageHook {body args} {
 		set cid [mc {Unknown}]
 	    }
 	    set image [::Rosticons::Get [string tolower phone/$status]]
-	    set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
 	    
+	    set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
 	    set type [wrapper::getattribute $elem "type"]
 
 	    # @@@ What to do more?
-	    if {$type == "RING" } {
+	    if {$type eq "RING" } {
 		set callID [wrapper::getattribute $elem "callID"]
 
 		::Jabber::UI::RegisterPopupEntry roster $popMenuDef(forward)
-
 		bind $win <Button-1> [list ::JivePhone::DoDial "FORWARD"]
 		::balloonhelp::balloonforwindow $win [mc phoneMakeForward]
 		eval {::hooks::run jivePhoneEvent $type $cid $callID} $args
 	    }
-	    if {$type == "HANG_UP"} {
+	    if {$type eq "HANG_UP"} {
 		::Roster::DeRegisterPopupEntry mForward
 
 		bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]

@@ -4,12 +4,10 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.157 2006-01-13 13:23:12 matben Exp $
+# $Id: Jabber.tcl,v 1.158 2006-02-21 08:40:59 matben Exp $
 
 package require balloonhelp
-package require browse
 package require chasearrows
-package require combobox
 package require http 2.3
 package require sha1
 package require tinyfileutils
@@ -21,6 +19,7 @@ package require wavelabel
 # jlib components shall be declared here, or later.
 package require jlib
 package require roster
+package require browse
 package require jlib::bytestreams
 package require jlib::disco
 package require jlib::ftrans
