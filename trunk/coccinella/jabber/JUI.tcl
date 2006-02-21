@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.114 2006-02-16 10:59:56 matben Exp $
+# $Id: JUI.tcl,v 1.115 2006-02-21 08:40:59 matben Exp $
 
 package provide JUI 1.0
 
@@ -548,7 +548,7 @@ proc ::Jabber::UI::ToggleMinimal { } {
 
 # Jabber::UI::SetAlternativeStatusImage --
 # 
-#       API for adding alternative status images.
+#       APIs for handling alternative status images.
 #       Each instance is specified by a unique key.
 #       
 # Arguments:
@@ -560,26 +560,60 @@ proc ::Jabber::UI::ToggleMinimal { } {
 
 proc ::Jabber::UI::SetAlternativeStatusImage {key image} {
     variable jwapp
-    variable altImageKeyArr
+    variable altImageKeyToWin
     
     set wstatus $jwapp(statcont)
-    if {[info exists altImageKeyArr($key)]} {
-	set win $altImageKeyArr($key)
-	if {$image eq ""} {
-	    destroy $altImageKeyArr($key)
-	    unset altImageKeyArr($key)
-	    $wstatus configure -width 1
-	} else {
-	    $altImageKeyArr($key) configure -image $image
-	}
-    } elseif {$image ne ""} {
+    if {[info exists altImageKeyToWin($key)]} {
+	
+	# Configure existing status image.
+	set win $altImageKeyToWin($key)
+	$altImageKeyToWin($key) configure -image $image
+    } else {
+	
+	# Create new.
 	set win $wstatus.$key
-	set altImageKeyArr($key) $win
+	set altImageKeyToWin($key) $win
 	ttk::label $win -image $image
 	pack $win -side left -padx 2 -pady 2
     }
     return $win
 }
+
+proc ::Jabber::UI::GetAlternativeStatusImage {key} {
+    variable altImageKeyToWin
+
+    if {[info exists altImageKeyToWin($key)]} {
+	return [$altImageKeyToWin($key) cget -image]
+    } else {
+	return ""
+    }
+}
+
+proc ::Jabber::UI::HaveAlternativeStatusImage {key} {
+    variable altImageKeyToWin
+
+    if {[info exists altImageKeyToWin($key)]} {
+	return 1
+    } else {
+	return 0
+    }
+}
+
+proc ::Jabber::UI::RemoveAlternativeStatusImage {key} {
+    variable jwapp
+    variable altImageKeyToWin
+    
+    if {[info exists altImageKeyToWin($key)]} {
+	destroy $altImageKeyToWin($key)
+	unset altImageKeyToWin($key)
+	set wstatus $jwapp(statcont)
+	
+	# We want the container to resume its previous space but this seems needed.
+	$wstatus configure -width 1
+    }    
+}
+
+#...............................................................................
 
 proc ::Jabber::UI::CloseHook {wclose} {    
     variable jwapp
