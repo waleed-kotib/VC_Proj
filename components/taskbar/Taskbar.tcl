@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.14 2006-02-22 08:04:27 matben Exp $
+# $Id: Taskbar.tcl,v 1.15 2006-02-22 14:16:43 matben Exp $
 
 package require balloonhelp
 
@@ -17,9 +17,13 @@ namespace eval ::Taskbar:: {
     variable wtearoff ""
     variable iconFile coccinella.ico
     
-    array set wmenu {
-	win32   .tskbrpop
-	x11     .tskbar.pop
+    switch -- [tk windowingsystem] {
+	win32 {
+	    set wmenu .tskbrpop
+	}
+	x11 {
+	    set wmenu .tskbar.pop
+	}
     }
 }
 
@@ -93,8 +97,7 @@ proc ::Taskbar::WinInit { } {
     }
     cd $oldDir
 
-    set status    [::Jabber::GetMyStatus]
-    set statusStr [::Roster::MapShowToText $status]
+    set statusStr [::Roster::MapShowToText [::Jabber::GetMyStatus]]
     set str [encoding convertto "$prefs(theAppName) - $statusStr"]
 
     winico taskbar add $icon \
@@ -116,8 +119,7 @@ proc ::Taskbar::X11Init { } {
     bind $wtray <Button-3>        { ::Taskbar::X11Popup %X %Y }
     bind $wtray <Configure>       { ::Taskbar::X11Configure %w %h }
 
-    set status    [::Jabber::GetMyStatus]
-    set statusStr [::Roster::MapShowToText $status]
+    set statusStr [::Roster::MapShowToText [::Jabber::GetMyStatus]]
     set str "$prefs(theAppName) - $statusStr"
     ::balloonhelp::balloonforwindow $wtray $str
 
@@ -132,36 +134,41 @@ proc ::Taskbar::BuildMainHook { } {
 proc ::Taskbar::InitHook { } {
     global  prefs this
     variable wmenu
+    variable menuIndex
      
     # Build popup menu.
-    set m $wmenu([tk windowingsystem])
+    set m $wmenu
     menu $m -tearoff 1 -postcommand [list [namespace current]::Post $m] \
       -tearoffcommand [namespace current]::TearOff -title $prefs(theAppName)
     
     set subPath [file join $this(images) 16]
+    set COCI [::Theme::GetImage coccinella $subPath]
     set INFO [::Theme::GetImage info $subPath]
     set SET  [::Theme::GetImage settings $subPath]
     set MSG  [::Theme::GetImage newmsg $subPath]
+    set ADD  [::Theme::GetImage adduser $subPath]
     set EXIT [::Theme::GetImage exit $subPath]
     
     set menuDef {
-	{cascade  mStatus         @::Jabber::Status::BuildMenu         }
-	{command  mHideMain       ::Taskbar::HideMain                  }
-	{command  mShowMain       ::Taskbar::ShowMain                  }
-	{command  mSendMessage    ::NewMsg::Build         {-image @MSG -compound left}}
-	{command  mPreferences    ::Preferences::Build    {-image @SET -compound left}}
+	{command  mAboutCoccinella  ::Splash::SplashScreen  {-image @COCI -compound left}}
+	{cascade  mStatus           @::Jabber::Status::BuildMenu         }
+	{command  mHideMain         ::Taskbar::HideMain                  }
+	{command  mSendMessage      ::NewMsg::Build         {-image @MSG -compound left}}
+	{command  mPreferences      ::Preferences::Build    {-image @SET -compound left}}
+	{command  mAddNewUser       ::Jabber::User::NewDlg  {-image @ADD -compound left}}
 	{cascade  mInfo  {
-	    {command     mAboutCoccinella  ::Splash::SplashScreen           }
-	    {command     mCoccinellaHome   ::Jabber::UI::OpenCoccinellaURL  }
-	    {command     mBugReport        ::Jabber::UI::OpenBugURL         }
+	    {command  mCoccinellaHome   ::Jabber::UI::OpenCoccinellaURL}
+	    {command  mBugReport        ::Jabber::UI::OpenBugURL       }
 	    } {-image @INFO -compound left}
 	}
 	{separator}
-	{command  mQuit           ::UserActions::DoQuit  {-image @EXIT -compound left}}
+	{command  mQuit             ::UserActions::DoQuit  {-image @EXIT -compound left}}
     }
     set menuDef [string map [list  \
-      @INFO $INFO  @SET $SET  @MSG $MSG  @EXIT $EXIT] $menuDef]
-    ::AMenu::Build $m $menuDef    
+      @COCI $COCI  @ADD $ADD  @INFO $INFO  @SET $SET  @MSG $MSG  @EXIT $EXIT] $menuDef]
+    
+    ::AMenu::Build $m $menuDef
+    array set menuIndex [::AMenu::GetMenuIndexArray $m]
 }
 
 proc ::Taskbar::WinCmd {event x y} {
@@ -172,7 +179,7 @@ proc ::Taskbar::WinCmd {event x y} {
 	    ToggleVisibility
 	}
 	WM_RBUTTONUP {
-	    tk_popup $wmenu(win32) [expr {$x - 40}] [expr $y] [$wmenu(win32) index end]
+	    tk_popup $wmenu [expr {$x - 40}] [expr $y] [$wmenu index end]
 	}
     }
 }
@@ -193,7 +200,7 @@ proc ::Taskbar::X11Cmd {x y} {
 proc ::Taskbar::X11Popup {x y} {
     variable wmenu
     
-    tk_popup $wmenu(x11) [expr $x] [expr {$y - 20}] [$wmenu(x11) index end]
+    tk_popup $wmenu [expr $x] [expr {$y - 20}] [$wmenu index end]
 }
 
 proc ::Taskbar::ToggleVisibility {} {
@@ -230,9 +237,10 @@ proc ::Taskbar::Post {m} {
 	set state0 normal
 	set state3 disabled
     }
-    $m entryconfigure [$m index [mc mShowMain]] -state $state1
-    $m entryconfigure [$m index [mc mHideMain]] -state $state2  
+    #$m entryconfigure [$m index [mc mShowMain]] -state $state1
+    #$m entryconfigure [$m index [mc mHideMain]] -state $state2  
     $m entryconfigure [$m index [mc mSendMessage]] -state $state0 
+    $m entryconfigure [$m index [mc mAddNewUser]] -state $state0
 }
 
 proc ::Taskbar::TearOff {wm wt} {
@@ -257,8 +265,8 @@ proc ::Taskbar::LoginHook { } {
     
     if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
 	set m $wtearoff
-	$m entryconfigure [$m index [mc mStatus]] -state normal
-	$m entryconfigure [$m index [mc mSendMessage]] -state normal 
+	$m entryconfigure [$m index [mc mSendMessage]] -state normal
+	$m entryconfigure [$m index [mc mAddNewUser]] -state normal
     }
 }
 
@@ -267,40 +275,45 @@ proc ::Taskbar::LogoutHook { } {
 
     if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
 	set m $wtearoff
-	$m entryconfigure [$m index [mc mStatus]] -state disabled
 	$m entryconfigure [$m index [mc mSendMessage]] -state disabled 
+	$m entryconfigure [$m index [mc mAddNewUser]] -state disabled
     }
 }
 
 proc ::Taskbar::Update {w} {
     variable wtearoff
+    variable wmenu
+    variable menuIndex
 
-    if {[winfo toplevel $w] != $w} {
+    if {[winfo toplevel $w] ne $w} {
 	return
     }
-    if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
+    set m $wmenu
 	
-	switch -- [wm state [::UI::GetMainWindow]] {
-	    zoomed - normal {
-		set state1 disabled
-		set state2 normal
-	    }
-	    default {
-		set state1 normal
-		set state2 disabled
-	    }
+    switch -- [wm state [::UI::GetMainWindow]] {
+	zoomed - normal {
+	    set state1 disabled
+	    set state2 normal
+	    $m entryconfigure $menuIndex(mHideMain)  \
+	      -label [mc mHideMain] -command ::Taskbar::HideMain
 	}
-	set m $wtearoff
-	$m entryconfigure [$m index [mc mShowMain]] -state $state1
-	$m entryconfigure [$m index [mc mHideMain]] -state $state2  
-    }    
+	default {
+	    set state1 normal
+	    set state2 disabled
+	    $m entryconfigure $menuIndex(mHideMain)  \
+	      -label [mc mShowMain] -command ::Taskbar::ShowMain
+	}
+    }
+    #$m entryconfigure [$m index [mc mShowMain]] -state $state1
+    #$m entryconfigure [$m index [mc mHideMain]] -state $state2  
 }
 
 proc ::Taskbar::SetPresenceHook {type args} {
     global  prefs
     variable icon
     variable wtray
-       
+    variable wmenu
+     
     # This can be used to update any specific icon in taskbar.
     switch -- [tk windowingsystem] {
 	win32 {
@@ -316,6 +329,9 @@ proc ::Taskbar::SetPresenceHook {type args} {
 	    ::balloonhelp::balloonforwindow $wtray $str
 	}
     }
+    set m $wmenu
+    set opts [list -compound left -image [::Roster::GetMyPresenceIcon]]
+    eval {::AMenu::EntryConfigure $m [$m index [mc mStatus]]} $opts
 }
 
 proc ::Taskbar::CloseHook {wclose} {
@@ -332,7 +348,7 @@ proc ::Taskbar::QuitAppHook { } {
     variable icon
     
     if {[tk windowingsystem] eq "win32"} {
-	if {$icon != ""} {
+	if {$icon ne ""} {
 	    winico taskbar delete $icon
 	}
     }
