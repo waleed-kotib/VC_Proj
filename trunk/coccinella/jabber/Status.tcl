@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.10 2006-02-22 08:04:27 matben Exp $
+# $Id: Status.tcl,v 1.11 2006-02-22 14:16:44 matben Exp $
 
 package provide Status 1.0
 
@@ -312,14 +312,16 @@ proc ::Jabber::Status::BuildGenPresenceMenu {mt args} {
 proc ::Jabber::Status::PostCmd {m} {
     variable mapShowTextToElem
     
-    set status [::Jabber::GetMyStatus]
-    if {$status eq "unavailable"} {
-	foreach name [array names mapShowTextToElem] {
-	    $m entryconfigure [$m index $name] -state disabled
-	}
-	$m entryconfigure [$m index [mc mAttachMessage]] -state disabled
-	$m entryconfigure [$m index [mc mAvailable]] -state normal
+    if {[::Jabber::GetMyStatus] eq "unavailable"} {
+	set state disabled
+    } else {
+	set state normal
     }
+    foreach name [array names mapShowTextToElem] {
+	$m entryconfigure [$m index $name] -state $state
+    }
+    $m entryconfigure [$m index [mc mAttachMessage]] -state $state
+    $m entryconfigure [$m index [mc mAvailable]] -state normal
 }
 
 # Jabber::Status::BuildStatusMenuDef --
