@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.13 2006-02-20 10:39:52 matben Exp $
+# $Id: Taskbar.tcl,v 1.14 2006-02-22 08:04:27 matben Exp $
 
 package require balloonhelp
 
@@ -110,10 +110,11 @@ proc ::Taskbar::X11Init { } {
     if {[catch {package require tktray}]} {
 	return 0
     }
-    ::tktray::icon $wtray -image [::Theme::GetImage coccinella22]
+    ::tktray::icon $wtray -image [::Theme::GetImage coccinella32]
 
     bind $wtray <ButtonRelease-1> { ::Taskbar::X11Cmd %X %Y }
     bind $wtray <Button-3>        { ::Taskbar::X11Popup %X %Y }
+    bind $wtray <Configure>       { ::Taskbar::X11Configure %w %h }
 
     set status    [::Jabber::GetMyStatus]
     set statusStr [::Roster::MapShowToText $status]
@@ -129,7 +130,7 @@ proc ::Taskbar::BuildMainHook { } {
 }
 
 proc ::Taskbar::InitHook { } {
-    global  prefs
+    global  prefs this
     variable wmenu
      
     # Build popup menu.
@@ -137,33 +138,30 @@ proc ::Taskbar::InitHook { } {
     menu $m -tearoff 1 -postcommand [list [namespace current]::Post $m] \
       -tearoffcommand [namespace current]::TearOff -title $prefs(theAppName)
     
-    set menuDef {
-	mAboutCoccinella     {::Splash::SplashScreen}
-	separator            {}
-	mStatus              @::Jabber::Status::BuildMenu
-	mLogin               ::Login::Dlg
-	mLogout              ::Jabber::DoCloseClientConnection
-	mLogoutWith          ::Jabber::Logout::WithStatus
-	mHideMain            ::Taskbar::HideMain
-	mShowMain            ::Taskbar::ShowMain
-	mSendMessage         ::NewMsg::Build
-	separator            {}
-	mQuit                ::UserActions::DoQuit
-    }
+    set subPath [file join $this(images) 16]
+    set INFO [::Theme::GetImage info $subPath]
+    set SET  [::Theme::GetImage settings $subPath]
+    set MSG  [::Theme::GetImage newmsg $subPath]
+    set EXIT [::Theme::GetImage exit $subPath]
     
-    set i 0
-    foreach {item cmd} $menuDef {
-	if {[string index $cmd 0] eq "@"} {
-	    set mt [menu $m.sub$i -tearoff 0]
-	    $m add cascade -label [mc $item] -menu $mt
-	    eval [string range $cmd 1 end] $mt
-	    incr i
-	} elseif {[string equal $item "separator"]} {
-	    $m add separator
-	} else {
-	    $m add command -label [mc $item] -command $cmd
+    set menuDef {
+	{cascade  mStatus         @::Jabber::Status::BuildMenu         }
+	{command  mHideMain       ::Taskbar::HideMain                  }
+	{command  mShowMain       ::Taskbar::ShowMain                  }
+	{command  mSendMessage    ::NewMsg::Build         {-image @MSG -compound left}}
+	{command  mPreferences    ::Preferences::Build    {-image @SET -compound left}}
+	{cascade  mInfo  {
+	    {command     mAboutCoccinella  ::Splash::SplashScreen           }
+	    {command     mCoccinellaHome   ::Jabber::UI::OpenCoccinellaURL  }
+	    {command     mBugReport        ::Jabber::UI::OpenBugURL         }
+	    } {-image @INFO -compound left}
 	}
+	{separator}
+	{command  mQuit           ::UserActions::DoQuit  {-image @EXIT -compound left}}
     }
+    set menuDef [string map [list  \
+      @INFO $INFO  @SET $SET  @MSG $MSG  @EXIT $EXIT] $menuDef]
+    ::AMenu::Build $m $menuDef    
 }
 
 proc ::Taskbar::WinCmd {event x y} {
@@ -176,6 +174,15 @@ proc ::Taskbar::WinCmd {event x y} {
 	WM_RBUTTONUP {
 	    tk_popup $wmenu(win32) [expr {$x - 40}] [expr $y] [$wmenu(win32) index end]
 	}
+    }
+}
+proc ::Taskbar::X11Configure {width height} {
+    variable wtray
+    
+    #puts "::Taskbar::X11Configure $width $height"
+    
+    if {$width < 32 || $height < 32} {
+	$wtray configure -image [::Theme::GetImage coccinella22]
     }
 }
 
@@ -223,10 +230,6 @@ proc ::Taskbar::Post {m} {
 	set state0 normal
 	set state3 disabled
     }
-    $m entryconfigure [$m index [mc mStatus]] -state $state0
-    $m entryconfigure [$m index [mc mLogin]] -state $state3
-    $m entryconfigure [$m index [mc mLogout]] -state $state0
-    $m entryconfigure [$m index [mc mLogoutWith]] -state $state0
     $m entryconfigure [$m index [mc mShowMain]] -state $state1
     $m entryconfigure [$m index [mc mHideMain]] -state $state2  
     $m entryconfigure [$m index [mc mSendMessage]] -state $state0 
@@ -255,9 +258,6 @@ proc ::Taskbar::LoginHook { } {
     if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
 	set m $wtearoff
 	$m entryconfigure [$m index [mc mStatus]] -state normal
-	$m entryconfigure [$m index [mc mLogin]] -state disabled
-	$m entryconfigure [$m index [mc mLogout]] -state normal
-	$m entryconfigure [$m index [mc mLogoutWith]] -state normal
 	$m entryconfigure [$m index [mc mSendMessage]] -state normal 
     }
 }
@@ -268,9 +268,6 @@ proc ::Taskbar::LogoutHook { } {
     if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
 	set m $wtearoff
 	$m entryconfigure [$m index [mc mStatus]] -state disabled
-	$m entryconfigure [$m index [mc mLogin]] -state normal
-	$m entryconfigure [$m index [mc mLogout]] -state disabled
-	$m entryconfigure [$m index [mc mLogoutWith]] -state disabled
 	$m entryconfigure [$m index [mc mSendMessage]] -state disabled 
     }
 }
@@ -302,6 +299,7 @@ proc ::Taskbar::Update {w} {
 proc ::Taskbar::SetPresenceHook {type args} {
     global  prefs
     variable icon
+    variable wtray
        
     # This can be used to update any specific icon in taskbar.
     switch -- [tk windowingsystem] {
@@ -315,6 +313,7 @@ proc ::Taskbar::SetPresenceHook {type args} {
 	x11 {
 	    set statusStr [::Roster::MapShowToText [::Jabber::GetMyStatus]]
 	    set str "$prefs(theAppName) - $statusStr"
+	    ::balloonhelp::balloonforwindow $wtray $str
 	}
     }
 }
