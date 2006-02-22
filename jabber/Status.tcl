@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.9 2006-02-10 15:40:50 matben Exp $
+# $Id: Status.tcl,v 1.10 2006-02-22 08:04:27 matben Exp $
 
 package provide Status 1.0
 
@@ -154,6 +154,9 @@ proc ::Jabber::Status::ConfigButton {w status} {
 
 proc ::Jabber::Status::PostMenu {wmenu x y} {
     
+    # This one is needed on the mac so the menu is built before it is posted.
+    update idletasks
+
     tk_popup $wmenu [expr int($x)] [expr int($y)]
 }
 
@@ -262,13 +265,18 @@ proc ::Jabber::Status::BuildMenu {mt} {
 
     set varName ::Jabber::jstate(status)
     BuildGenPresenceMenu $mt -variable $varName \
-      -command [list [namespace current]::MenuCmd $varName]      
+      -command [list [namespace current]::MenuCmd $varName]
+    $mt configure -postcommand [list [namespace current]::PostCmd $mt]
 }
 
 proc ::Jabber::Status::MenuCmd {varName} {
     upvar $varName status
     
-    ::Jabber::SetStatus $status
+    if {[::Jabber::IsConnected]} {
+	::Jabber::SetStatus $status
+    } else {
+	::Login::Dlg
+    }
 }
 
 # Jabber::Status::BuildGenPresenceMenu --
@@ -298,6 +306,20 @@ proc ::Jabber::Status::BuildGenPresenceMenu {mt args} {
     $mt add separator
     $mt add command -label [mc mAttachMessage] \
       -command ::Jabber::SetStatusWithMessage
+    $mt configure -postcommand [list [namespace current]::PostCmd $mt]
+}
+
+proc ::Jabber::Status::PostCmd {m} {
+    variable mapShowTextToElem
+    
+    set status [::Jabber::GetMyStatus]
+    if {$status eq "unavailable"} {
+	foreach name [array names mapShowTextToElem] {
+	    $m entryconfigure [$m index $name] -state disabled
+	}
+	$m entryconfigure [$m index [mc mAttachMessage]] -state disabled
+	$m entryconfigure [$m index [mc mAvailable]] -state normal
+    }
 }
 
 # Jabber::Status::BuildStatusMenuDef --

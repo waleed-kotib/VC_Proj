@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.77 2006-01-11 13:24:54 matben Exp $
+# $Id: Login.tcl,v 1.78 2006-02-22 08:04:27 matben Exp $
 
 package provide Login 1.0
 
@@ -561,12 +561,12 @@ proc ::Login::LaunchHook { } {
     set profname [::Profiles::GetSelectedName]
     set password [::Profiles::Get $profname password]
     set ans "ok"
-    if {$password == ""} {
+    if {$password eq ""} {
 	set ans [::UI::MegaDlgMsgAndEntry  \
 	  [mc {Password}] [mc enterpassword $state(jid)] "[mc Password]:" \
 	  password [mc Cancel] [mc OK] -show {*}]
     }
-    if {$ans == "ok"} {
+    if {$ans eq "ok"} {
 	set domain [::Profiles::Get $profname domain]
 	set node   [::Profiles::Get $profname node]
 	set opts   [::Profiles::Get $profname options]
