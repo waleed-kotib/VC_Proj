@@ -211,7 +211,7 @@
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset ru mFile		{Файл}
 ::msgcat::mcset ru mEdit		{Правка}
-::msgcat::mcset ru mPreferences		{Настройки}
+::msgcat::mcset ru mPreferences		{Настройки...}
 ::msgcat::mcset ru mJabber		{Жаббер}
 ::msgcat::mcset ru mItems		{Элементы}
 ::msgcat::mcset ru mLibrary		{Библиотеки}

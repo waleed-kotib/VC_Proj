@@ -197,7 +197,7 @@
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset en mFile		{File}
 ::msgcat::mcset en mEdit		{Edit}
-::msgcat::mcset en mPreferences		{Preferences}
+::msgcat::mcset en mPreferences		{Preferences...}
 ::msgcat::mcset en mJabber		{Jabber}
 ::msgcat::mcset en mItems		{Items}
 ::msgcat::mcset en mLibrary		{Library}

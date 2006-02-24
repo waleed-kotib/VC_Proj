@@ -197,7 +197,7 @@
 # Titulos de todos los menués ; concatenados con 'm' para la clave de la base de datos.
 ::msgcat::mcset es mFile		{Archivo}
 ::msgcat::mcset es mEdit		{Editar}
-::msgcat::mcset es mPreferences		{Preferencias}
+::msgcat::mcset es mPreferences		{Preferencias...}
 ::msgcat::mcset es mJabber		{Jabber}
 ::msgcat::mcset es mItems		{Elementos}
 ::msgcat::mcset es mLibrary		{Biblioteca}

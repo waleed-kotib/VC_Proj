@@ -196,7 +196,7 @@
 # Titres de tous les menus ; concaténés avec 'm' pour la clé de la base de données.
 ::msgcat::mcset fr mFile		{Fichier}
 ::msgcat::mcset fr mEdit		{Édition}
-::msgcat::mcset fr mPreferences		{Préférences}
+::msgcat::mcset fr mPreferences		{Préférences...}
 ::msgcat::mcset fr mJabber		{Jabber}
 ::msgcat::mcset fr mItems		{Outils}
 ::msgcat::mcset fr mLibrary		{Bibliothèques}
