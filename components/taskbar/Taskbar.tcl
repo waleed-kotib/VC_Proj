@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.15 2006-02-22 14:16:43 matben Exp $
+# $Id: Taskbar.tcl,v 1.16 2006-02-24 07:17:56 matben Exp $
 
 package require balloonhelp
 
@@ -150,13 +150,13 @@ proc ::Taskbar::InitHook { } {
     set EXIT [::Theme::GetImage exit $subPath]
     
     set menuDef {
-	{command  mAboutCoccinella  ::Splash::SplashScreen  {-image @COCI -compound left}}
 	{cascade  mStatus           @::Jabber::Status::BuildMenu         }
 	{command  mHideMain         ::Taskbar::HideMain                  }
 	{command  mSendMessage      ::NewMsg::Build         {-image @MSG -compound left}}
 	{command  mPreferences      ::Preferences::Build    {-image @SET -compound left}}
 	{command  mAddNewUser       ::Jabber::User::NewDlg  {-image @ADD -compound left}}
 	{cascade  mInfo  {
+	    {command  mAboutCoccinella  ::Splash::SplashScreen  {-image @COCI -compound left}}
 	    {command  mCoccinellaHome   ::Jabber::UI::OpenCoccinellaURL}
 	    {command  mBugReport        ::Jabber::UI::OpenBugURL       }
 	    } {-image @INFO -compound left}
