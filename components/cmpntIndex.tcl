@@ -19,9 +19,10 @@ component::attempt Speech       [file join $dir Speech.tcl]      ::Speech::Load
 component::attempt URIRegistry  [file join $dir URIRegistry.tcl] ::URIRegistry::Init
 component::attempt VoIP         [file join $dir VoIP.tcl]        ::VoIP::Init
 
-# Problem to determine if app hidden or not!
-component::attempt CarbonNotification [file join $dir CarbonNotification.tcl] ::CarbonNotification::Init
-component::attempt Growl              [file join $dir Growl.tcl]              ::Growl::Init
+if {[tk windowingsystem] eq "aqua"} {
+    component::attempt Carbon       [file join $dir Carbon.tcl]      ::Carbon::Init
+    component::attempt Growl        [file join $dir Growl.tcl]       ::Growl::Init
+}
 
 # This is just an example plugin. Uncomment to test.
 # component::attempt ComponentExample [file join $dir ComponentExample.tcl] ::ComponentExample::Init
