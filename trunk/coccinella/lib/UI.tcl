@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.123 2006-02-14 08:05:13 matben Exp $
+# $Id: UI.tcl,v 1.124 2006-02-25 08:11:13 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -594,12 +594,47 @@ proc ::UI::Toplevel {w args} {
     if {[tk windowingsystem] eq "aqua"} {
 	bind $w <$this(modkey)-Key-q> { ::UserActions::DoQuit -warning 1 }
     }
+    
+    # We only want to bind to the actual toplevel window. Check in handlers.
+    # @@@ This is not the most reliable way to get application activate events.
+    bind $w <FocusIn>  +[list ::UI::OnFocusIn %W $w]
+    bind $w <FocusOut> +[list ::UI::OnFocusOut %W $w]
     ::hooks::run newToplevelWindowHook $w
     
     return $w
 }
 
-# Unreliable!!!
+namespace eval ::UI {
+    
+    variable appInFront 1
+}
+
+proc ::UI::OnFocusIn {win w} {
+    variable appInFront
+    
+    if {$win eq $w} {
+	if {!$appInFront} {
+	    set appInFront 1
+	    ::hooks::run appInFrontHook
+	}
+    }
+}
+
+proc ::UI::OnFocusOut {win w} {
+    variable appInFront
+    
+    # We must check focus after idle.
+    if {$win eq $w} {
+	after idle {
+	    if {[focus] eq ""} {
+		set ::UI::appInFront 0
+		::hooks::run appInBackgroundHook
+	    }
+	}
+    }
+}
+
+# @@@ Unreliable!!!
 proc ::UI::SetAquaProxyIcon {w} {
     
     set f [info nameofexecutable]

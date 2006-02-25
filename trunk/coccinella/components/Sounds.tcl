@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.22 2005-11-04 15:14:55 matben Exp $
+# $Id: Sounds.tcl,v 1.23 2006-02-25 08:11:13 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -592,7 +592,7 @@ proc ::Sounds::SavePrefsHook { } {
 	}
     }
     if {$priv(snack)} {
-	snack::audio play_gain $sprefs(volume)
+	snack::audio play_gain [expr int($sprefs(volume))]
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.115 2006-02-21 08:40:59 matben Exp $
+# $Id: JUI.tcl,v 1.116 2006-02-25 08:11:13 matben Exp $
 
 package provide JUI 1.0
 
@@ -343,7 +343,7 @@ proc ::Jabber::UI::Build {w} {
     set wstatcont $wfstat.cont
     set statusStyle  [option get $w statusWidgetStyle {}]
     ::Jabber::Status::Widget $wfstat.bst $statusStyle \
-      ::Jabber::jstate(status) -command ::Jabber::SetStatus
+      ::Jabber::jstate(status) -command ::Jabber::UI::StatusCmd
     ttk::frame $wfstat.cont
     ttk::label $wfstat.me -textvariable ::Jabber::jstate(mejid) -anchor w
     pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
@@ -397,6 +397,16 @@ proc ::Jabber::UI::Build {w} {
 	ToggleMinimal
     }
     return $w
+}
+
+proc ::Jabber::UI::StatusCmd {status} {
+    
+    # @@@ Could perhaps be moved to Status.
+    if {[::Jabber::IsConnected]} {
+	::Jabber::SetStatus $status
+    } else {
+	::Login::Dlg
+    }
 }
 
 proc ::Jabber::UI::BuildToolbar {w wtbar} {

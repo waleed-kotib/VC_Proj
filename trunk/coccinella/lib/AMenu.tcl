@@ -7,13 +7,28 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AMenu.tcl,v 1.2 2006-02-22 14:16:44 matben Exp $
+# $Id: AMenu.tcl,v 1.3 2006-02-25 08:11:13 matben Exp $
 
 package provide AMenu 1.0
 
 namespace eval ::AMenu { 
 
 }
+
+# AMenu::Build --
+# 
+#       High level utility for handling menus.
+#       We use the 'name' for the menu entry index which is the untranslated
+#       key, typically mLabel etc.
+#       
+# Arguments:
+#       m         menu widget path; must exist
+#       menuDef   a list of lines:
+#                   {type name command ?{-key value..}?}
+#                 name: always the key that is used for msgcat::mc
+#       
+# Results:
+#       menu widget path
 
 proc ::AMenu::Build {m menuDef} {
     variable menuIndex
@@ -94,7 +109,8 @@ proc ::AMenu::GetMenuIndexArray {m} {
     return $alist
 }
 
-proc ::AMenu::EntryConfigure {m index args} {
+proc ::AMenu::EntryConfigure {m mLabel args} {
+    variable menuIndex
     
     if {[tk windowingsystem] eq "aqua"} {
 	set idx [lsearch $args -image]
@@ -102,7 +118,18 @@ proc ::AMenu::EntryConfigure {m index args} {
 	    set args [lreplace $args $idx [expr {$idx+1}]]
 	}
     }
+    set index $menuIndex($m,$mLabel)
     eval {$m entryconfigure $index} $args
+}
+
+proc ::AMenu::EntryExists {m mLabel} {
+    variable menuIndex
+
+    if {[info exists menuIndex($m,$mLabel)]} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 proc ::AMenu::Free {m} {

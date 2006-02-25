@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.11 2006-02-22 14:16:44 matben Exp $
+# $Id: Status.tcl,v 1.12 2006-02-25 08:11:13 matben Exp $
 
 package provide Status 1.0
 
@@ -145,10 +145,13 @@ proc ::Jabber::Status::ButtonCmd {w varName cmd} {
 proc ::Jabber::Status::ConfigButton {w status} {
     
     $w configure -image [::Rosticons::Get status/$status]
-    if {[string equal $status "unavailable"]} {
-	$w state {disabled}
-    } else {
-	$w state {!disabled}
+    # @@@ groupchat ?
+    if {0} {
+	if {[string equal $status "unavailable"]} {
+	    $w state {disabled}
+	} else {
+	    $w state {!disabled}
+	}
     }
 }
 
