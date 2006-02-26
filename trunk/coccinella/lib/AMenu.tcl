@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AMenu.tcl,v 1.3 2006-02-25 08:11:13 matben Exp $
+# $Id: AMenu.tcl,v 1.4 2006-02-26 10:35:33 matben Exp $
 
 package provide AMenu 1.0
 
@@ -108,6 +108,20 @@ proc ::AMenu::GetMenuIndexArray {m} {
     }
     return $alist
 }
+
+# AMenu::EntryConfigure --
+# 
+#       As 'menuWidget entryconfigure index ?-keu value...?'
+#       but using mLabel as index instead.
+#       
+# Arguments:
+#       m         menu widget path
+#       mLabel
+#       args
+#           
+#       
+# Results:
+#       menu widget path
 
 proc ::AMenu::EntryConfigure {m mLabel args} {
     variable menuIndex
