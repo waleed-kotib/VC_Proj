@@ -5,7 +5,7 @@
 #  Code idee from Harrison & McLennan
 #  This source file is distributed under the BSD license.
 #  
-# $Id: balloonhelp.tcl,v 1.20 2006-02-20 10:39:52 matben Exp $
+# $Id: balloonhelp.tcl,v 1.21 2006-02-26 10:35:33 matben Exp $
 
 package require treeutil
 
@@ -274,6 +274,7 @@ proc ::balloonhelp::Show {win type} {
     }
     set exists 0
     set msg ""
+    set bbox {}
     
     if {$locals(active)} {
 	
@@ -350,7 +351,7 @@ proc ::balloonhelp::Show {win type} {
 	if {$exists} {
 	    eval {$w.info configure -text $msg} $locals($win,args)
 	    update idletasks
-	    SetPosition $x $y
+	    SetPosition $x $y $bbox
 	    wm deiconify $w
 	    raise $w
 	    if {$locals(alpha)} {
@@ -365,23 +366,46 @@ proc ::balloonhelp::Show {win type} {
     unset -nocomplain locals(pending)
 }
 
-proc ::balloonhelp::SetPosition {x y} {
+# SetPosition --
+# 
+#       Be sure to position the help window outside the bbox but inside the screen.
+
+proc ::balloonhelp::SetPosition {x y bbox} {
     
     variable w
 
     if {[winfo exists $w]} {
 	set width  [winfo reqwidth $w]
 	set height [winfo reqheight $w]
+	set screenwidth  [winfo screenwidth $w]
+	set screenheight [winfo screenheight $w]
 	
-	if {$x + $width > [winfo screenwidth $w]} {
-	    set x [expr {$x - 10 - $width}]
+	if {$bbox eq {}} {
+	    if {$x + $width > $screenwidth} {
+		set x [expr {$x - 10 - $width}]
+	    }
+	    if {$x < 0} { set x 0 }
+	    if {$y + $height > $screenheight} {
+		set y [expr {$y - 10 - $height}]
+	    }
+	    if {$y < 0} { set y 0 }
+	} else {
+	    #puts "SetPosition x=$x, y=$y, bbox=$bbox"
+	    
+	    # Deal with x and y independently.
+	    if {$x < 0} {
+		set x [expr {[lindex $bbox 2] + 4}]
+	    } elseif {[expr {$x + $width}] > $screenwidth} {
+		set x [expr {[lindex $bbox 0] - $width - 4}]
+	    }
+	    if {$y < 0} {
+		set y [expr {[lindex $bbox 3] + 4}]
+	    } elseif {[expr {$y + $height}] > $screenheight} {
+		set y [expr {[lindex $bbox 1] - $height - 4}]
+	    }
+	    #puts "\t x=$x, y=$y"
 	}
-	if {$x < 0} { set x 0 }
-	if {$y + $height > [winfo screenheight $w]} {
-	    set y [expr {$y - 10 - $height}]
-	}
-	if {$y < 0} { set y 0 }
-	wm geometry $w "+${x}+${y}"
+	wm geometry $w +${x}+${y}
 	update idletasks
     }
 }

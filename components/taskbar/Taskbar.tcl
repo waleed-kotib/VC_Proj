@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.16 2006-02-24 07:17:56 matben Exp $
+# $Id: Taskbar.tcl,v 1.17 2006-02-26 10:35:33 matben Exp $
 
 package require balloonhelp
 
@@ -148,9 +148,10 @@ proc ::Taskbar::InitHook { } {
     set MSG  [::Theme::GetImage newmsg $subPath]
     set ADD  [::Theme::GetImage adduser $subPath]
     set EXIT [::Theme::GetImage exit $subPath]
+    set STAT [::Roster::GetMyPresenceIcon]
     
     set menuDef {
-	{cascade  mStatus           @::Jabber::Status::BuildMenu         }
+	{cascade  mStatus           @::Jabber::Status::BuildMenu  {-image @STAT -compound left}}
 	{command  mHideMain         ::Taskbar::HideMain                  }
 	{command  mSendMessage      ::NewMsg::Build         {-image @MSG -compound left}}
 	{command  mPreferences      ::Preferences::Build    {-image @SET -compound left}}
@@ -165,7 +166,8 @@ proc ::Taskbar::InitHook { } {
 	{command  mQuit             ::UserActions::DoQuit  {-image @EXIT -compound left}}
     }
     set menuDef [string map [list  \
-      @COCI $COCI  @ADD $ADD  @INFO $INFO  @SET $SET  @MSG $MSG  @EXIT $EXIT] $menuDef]
+      @STAT $STAT  @COCI $COCI  @ADD $ADD  @INFO $INFO  @SET $SET  \
+      @MSG  $MSG   @EXIT $EXIT] $menuDef]
     
     ::AMenu::Build $m $menuDef
     array set menuIndex [::AMenu::GetMenuIndexArray $m]
@@ -185,9 +187,7 @@ proc ::Taskbar::WinCmd {event x y} {
 }
 proc ::Taskbar::X11Configure {width height} {
     variable wtray
-    
-    #puts "::Taskbar::X11Configure $width $height"
-    
+        
     if {$width < 32 || $height < 32} {
 	$wtray configure -image [::Theme::GetImage coccinella22]
     }
@@ -237,8 +237,6 @@ proc ::Taskbar::Post {m} {
 	set state0 normal
 	set state3 disabled
     }
-    #$m entryconfigure [$m index [mc mShowMain]] -state $state1
-    #$m entryconfigure [$m index [mc mHideMain]] -state $state2  
     $m entryconfigure [$m index [mc mSendMessage]] -state $state0 
     $m entryconfigure [$m index [mc mAddNewUser]] -state $state0
 }
@@ -304,8 +302,6 @@ proc ::Taskbar::Update {w} {
 	      -label [mc mShowMain] -command ::Taskbar::ShowMain
 	}
     }
-    #$m entryconfigure [$m index [mc mShowMain]] -state $state1
-    #$m entryconfigure [$m index [mc mHideMain]] -state $state2  
 }
 
 proc ::Taskbar::SetPresenceHook {type args} {
@@ -331,7 +327,7 @@ proc ::Taskbar::SetPresenceHook {type args} {
     }
     set m $wmenu
     set opts [list -compound left -image [::Roster::GetMyPresenceIcon]]
-    eval {::AMenu::EntryConfigure $m [$m index [mc mStatus]]} $opts
+    eval {::AMenu::EntryConfigure $m mStatus} $opts
 }
 
 proc ::Taskbar::CloseHook {wclose} {
