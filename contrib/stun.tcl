@@ -10,9 +10,11 @@
 #  Copyright (c) 2006  Mats Bengtsson
 #  BSD-style License
 #  
-# $Id: stun.tcl,v 1.1 2006-03-02 07:05:50 matben Exp $
+# $Id: stun.tcl,v 1.2 2006-03-02 13:43:56 matben Exp $
 
 # USAGE:
+# 
+#       Initiate a request to a STUN server:
 # 
 #       stun::request hostname ?-option value...?
 #       
@@ -28,11 +30,16 @@
 #       with a token identifier. Else it waits for the response and
 #       returns a list {status ?-key value...?}
 #       
+#       Reset an async request:
+#       
+#       stun::reset token
+#       
+#       
 #  Known STUN host: stun.fwdnet.net
 
 package require udp
 
-package provide stun 0.2
+package provide stun 0.1
 
 namespace eval ::stun {
 
@@ -155,12 +162,16 @@ proc stun::request {host args} {
     set state(id)     $id
     set state(host)   $host
     set state(errmsg) ""
+    set state(status) ""
     foreach {key value} [array get opts] {
 	set state(opts,$key) $value
     }
 
-    # @@@ Do we need to catch this?
-    puts -nonewline $s $data 
+    # Send the request.
+    if {[catch {puts -nonewline $s $data} err]} {
+	unset state
+	return -code error $err
+    }
     if {$opts(-command) eq ""} {
 	set state(wait) 0
 	vwait $token\(wait)
@@ -171,15 +182,19 @@ proc stun::request {host args} {
 }
 
 proc stun::reset {token} {
+    variable $token
+    upvar 0 $token state
     
-    
+    #puts "stun::reset"
+    set state(status) reset
+    End $token
 }
 
 proc stun::Response {token} {
     variable $token
     upvar 0 $token state
     
-    puts "stun::Event"
+    #puts "stun::Event"
     if {[info exists state(afterid)]} {
 	after cancel $state(afterid)
     }
@@ -190,7 +205,7 @@ proc stun::Response {token} {
 	End $token "transaction id different"
     } else {
 	set name [GetTypeName $type]
-	puts "name=$name, len=$len"
+	#puts "name=$name, len=$len"
 	if {$name ne "BindResponseMsg"} {
 	    End $token "we expected a BindResponseMsg but got $name"
 	} else {
@@ -205,8 +220,10 @@ proc stun::End {token {errmsg ""}} {
     variable $token
     upvar 0 $token state
    
+    #puts "stun::End errmsg=$errmsg"
     if {$errmsg ne ""} {
 	set state(errmsg) $errmsg
+	set state(status) error
     }
     if {$state(opts,-command) eq ""} {
 	# This triggers the vwait above.
@@ -224,21 +241,29 @@ proc stun::End {token {errmsg ""}} {
 # Results:
 #       a list {status -key value ...}
 
-proc stun::Finalize {token {status "ok"}} {
+proc stun::Finalize {token} {
     variable $token
     upvar 0 $token state
     
+    #puts "stun::Finalize"
     close $state(s)
     if {[info exists state(afterid)]} {
 	after cancel $state(afterid)
+    }
+    if {$state(status) eq ""} {
+	set status ok
+    } else {
+	set status $state(status)
     }
     if {$state(errmsg) ne ""} {
 	set status error
     }
     if {$status eq "ok"} {
 	set res [ResultList $token]
-    } else {
+    } elseif {$state(errmsg) ne ""} {
 	set res [list -errmsg $state(errmsg)]
+    } else {
+	set res {}
     }
     set state(status) $status
     if {$state(opts,-command) ne ""} {
@@ -246,6 +271,22 @@ proc stun::Finalize {token {status "ok"}} {
     }
     unset state
     return [concat $status $res]
+}
+
+# stun::ResultList --
+# 
+#       Uses the state array to make the result as a -key value list.
+
+proc stun::ResultList {token} {
+    variable $token
+    upvar 0 $token state
+    
+    set ans {}
+    set addr [lindex $state(MappedAddress) 0]
+    set port [lindex $state(MappedAddress) 1]
+    lappend ans -address $addr -port $port
+    lappend ans -myport $state(-myport)
+    return $ans
 }
 
 # stun::NewID --
@@ -289,13 +330,15 @@ proc stun::DecodeAttributes {attr} {
     
     while {[string length $attr]} {
 	binary scan $attr SS type len
+	
+	# To get the unsigned values.
 	set type [expr {$type & 0xFFFF}]
 	set len  [expr {$len & 0xFFFF}]
 	set name [GetAttrName $type]
 	
 	# Strip off the 16 bit type and 16 bit length; 4 bytes.
 	set attr [string range $attr 4 end]
-	puts "\t name=$name, len=$len"
+	#puts "\t name=$name, len=$len"
 	
 	switch -- $name {
 	    MappedAddress - ChangedAddress - ResponseAddress -
@@ -305,7 +348,7 @@ proc stun::DecodeAttributes {attr} {
 		# address is unsigned 32 bit int
 		binary scan $attr xcSI family port addr
 		if {[expr {$ipv4 != $family}]} {
-		    puts "not ipv4 address family"
+		    End $token "not ipv4 address family"
 		}
 		set port [expr {$port & 0xFFFF}]
 		set addr [expr {$addr & 0xFFFFFFFF}]
@@ -330,12 +373,15 @@ proc stun::DecodeAttributes {attr} {
 		# Must be last attribute.
 		# The HMAC will be 20 bytes. 
 		# The text used as input to HMAC is the STUN message.
-		binary scan $attr a* hmac
-		set hmac [string range $attr 0 19]
+		binary scan $attr a20 hmac
 		lappend ans $name $hmac
 	    }
 	    ErrorCode {
-		binary scan $attr x2cc class number 
+		set rlen [expr {$len-4}]
+		binary scan $attr x2cca${rlen} class number reason
+		set class [expr {$class & 0xFF}]
+		set number [expr {$number & 0xFF}]
+		
 		
 	    }
 	    UnknownAttribute {
@@ -392,22 +438,6 @@ proc stun::GetTypeName {type} {
 	}
     }
     return $name
-}
-
-# stun::ResultList --
-# 
-#       Uses the state array to make the result as a -key value list.
-
-proc stun::ResultList {token} {
-    variable $token
-    upvar 0 $token state
-    
-    set ans {}
-    set addr [lindex $state(MappedAddress) 0]
-    set port [lindex $state(MappedAddress) 1]
-    lappend ans -address $addr -port $port
-    lappend ans -myport $state(-myport)
-    return $ans
 }
 
 proc stun::NATType {token} {
