@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.42 2005-12-02 09:01:21 matben Exp $
+# $Id: roster.tcl,v 1.43 2006-03-02 07:05:51 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -999,7 +999,7 @@ proc roster::getmatchingjids2 {rostName jid args} {
     
     set jidlist {}
     set arrlist [concat [array get presArr2 [jlib::ESC $mjid],jid] \
-                     [array get presArr2 [jlib::ESC $mjid]/*,jid]]
+      [array get presArr2 [jlib::ESC $mjid]/*,jid]]
     foreach {key value} $arrlist {
 	lappend jidlist $value
     }

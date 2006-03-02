@@ -23,6 +23,14 @@ proc ::ComponentExample::Init { } {
     ::Jabber::UI::RegisterMenuEntry file $menuspec
     ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
     
+    
+    set xmlnsj "http://jabber.org/protocol/jingle"
+    set subtags [list [wrapper::createtag "feature" \
+	  -attrlist [list var $xmlnsj]]]
+    ::Jabber::RegisterCapsExtKey jingle $subtags
+    ::Jabber::AddClientXmlns $xmlnsj
+
+    
     component::register ComponentExample  \
       "This is justa dummy example of the component mechanism."
 }

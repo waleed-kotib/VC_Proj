@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.148 2006-02-16 10:59:56 matben Exp $
+# $Id: Chat.tcl,v 1.149 2006-03-02 07:05:50 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -386,6 +386,7 @@ proc ::Chat::StartThread {jid args} {
     } else {
 	set chatstate(fromjid) $jid2
     }
+    set chatstate(jid3) $jid
     SetTitle $chattoken
         
     return $chattoken
@@ -1538,6 +1539,24 @@ proc ::Chat::SetState {chattoken state} {
     $chatstate(wsubject) configure -state $state
     $chatstate(wsmile)   configure -state $state
     set chatstate(state) $state
+}
+
+# Chat::GetDlgTokenValue, GetChatTokenValue --
+# 
+#       Outside code shall use these to get array values.
+
+proc ::Chat::GetDlgTokenValue {dlgtoken key} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    return $dlgstate($key)
+}
+
+proc ::Chat::GetChatTokenValue {chattoken key} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    return $chatstate($key)
 }
 
 # Chat::GetActiveChatToken --
