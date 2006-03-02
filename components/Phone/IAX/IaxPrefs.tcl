@@ -1,32 +1,25 @@
-# iaxClient.tcl --
+# IaxPrefs.tcl --
 # 
 #       iaxClient phone UI
 #       
-# $Id: iax_prefs.tcl,v 1.2 2006-01-15 07:55:02 matben Exp $
-namespace eval ::iaxClientPrefs:: { }
+#  Copyright (c) 2006 Antonio Cano damas
+#  
+# $Id: IaxPrefs.tcl,v 1.1 2006-03-02 07:05:50 matben Exp $
 
-proc ::iaxClientPrefs::Init { } {
-    global  this    
+package provide IaxPrefs 0.1
 
-    return
-    
-    if {[catch {package require iaxclient}]} {
-	return
-    }
+namespace eval ::IaxPrefs {
 
-    component::register iaxClientPrefs  \
-      "Provides iaxClient Phone Preferences"
-
-    ::hooks::register prefsInitHook                  ::iaxClientPrefs::InitPrefsHook
-    ::hooks::register prefsBuildHook                 ::iaxClientPrefs::BuildPrefsHook
-    ::hooks::register prefsSaveHook                  ::iaxClientPrefs::SavePrefsHook
-    ::hooks::register prefsCancelHook                ::iaxClientPrefs::CancelPrefsHook
-    ::hooks::register prefsUserDefaultsHook          ::iaxClientPrefs::UserDefaultsHook
-    ::hooks::register prefsDestroyHook               ::iaxClientPrefs::DestroyPrefsHook
+    ::hooks::register prefsInitHook             ::IaxPrefs::InitPrefsHook
+    ::hooks::register prefsBuildHook            ::IaxPrefs::BuildPrefsHook
+    ::hooks::register prefsSaveHook             ::IaxPrefs::SavePrefsHook
+    ::hooks::register prefsCancelHook           ::IaxPrefs::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook     ::IaxPrefs::UserDefaultsHook
+    ::hooks::register prefsDestroyHook          ::IaxPrefs::DestroyPrefsHook
 }
 
 ################## Preferences Stuff ###################
-proc ::iaxClientPrefs::InitPrefsHook { } {
+proc ::IaxPrefs::InitPrefsHook { } {
     global  prefs
 
     set prefs(iaxPhone,user) ""
@@ -37,11 +30,11 @@ proc ::iaxClientPrefs::InitPrefsHook { } {
     set prefs(iaxPhone,codec) ""
     set prefs(iaxPhone,inputDevices) ""
     set prefs(iaxPhone,outputDevices) ""
-    set prefs(iaxPhone,agc) ""
-    set prefs(iaxPhone,aagc) ""
-    set prefs(iaxPhone,noise) ""
-    set prefs(iaxPhone,comfort) ""
-    set prefs(iaxPhone,echo) ""
+    set prefs(iaxPhone,agc) 0
+    set prefs(iaxPhone,aagc) 0
+    set prefs(iaxPhone,noise) 0
+    set prefs(iaxPhone,comfort) 0
+#    set prefs(iaxPhone,echo) 0
 
     ::PrefUtils::Add [list  \
       [list prefs(iaxPhone,user) prefs_iaxPhone_user $prefs(iaxPhone,user)] \
@@ -51,20 +44,20 @@ proc ::iaxClientPrefs::InitPrefsHook { } {
       [list prefs(iaxPhone,cidname) prefs_iaxPhone_cidname $prefs(iaxPhone,cidname)] \
       [list prefs(iaxPhone,codec) prefs_iaxPhone_codec $prefs(iaxPhone,codec)] \
       [list prefs(iaxPhone,inputDevices) prefs_iaxPhone_inputDevices $prefs(iaxPhone,inputDevices)] \
-      [list prefs(iaxPhone,outputDevices))     prefs_iaxPhone_outputDevices     $prefs(iaxPhone,outputDevices)] \
+      [list prefs(iaxPhone,outputDevices)     prefs_iaxPhone_outputDevices     $prefs(iaxPhone,outputDevices)] \
      [list prefs(iaxPhone,agc) prefs_iaxPhone_agc $prefs(iaxPhone,agc)] \
       [list prefs(iaxPhone,aagc) prefs_iaxPhone_aagc $prefs(iaxPhone,aagc)] \
       [list prefs(iaxPhone,noise) prefs_iaxPhone_noise $prefs(iaxPhone,noise)] \
-      [list prefs(iaxPhone,comfort) prefs_iaxPhone_comfort $prefs(iaxPhone,comfort)] \
-      [list prefs(iaxPhone,echo) prefs_iaxPhone_echo $prefs(iaxPhone,echo)] ] 
+      [list prefs(iaxPhone,comfort) prefs_iaxPhone_comfort $prefs(iaxPhone,comfort)] ]
+#      [list prefs(iaxPhone,echo) prefs_iaxPhone_echo $prefs(iaxPhone,echo)] ] 
 
 }
 
-proc ::iaxClientPrefs::BuildPrefsHook {wtree nbframe} {
+proc ::IaxPrefs::BuildPrefsHook {wtree nbframe} {
     global  prefs
     variable tmpPrefs
 
-    if {![::Preferences::HaveTableItem iaxPhone]} {
+    if {![::Preferences::HaveTableItem {iaxPhone}]} {
         ::Preferences::NewTableItem {iaxPhone} [mc iaxPhone]
     }
     ::Preferences::NewTableItem {iaxPhone Devices} [mc Devices]
@@ -91,7 +84,7 @@ proc ::iaxClientPrefs::BuildPrefsHook {wtree nbframe} {
     BuildCodecsPage $wpage
 }
 
-proc ::iaxClientPrefs::BuildIaxPage { page } {
+proc ::IaxPrefs::BuildIaxPage { page } {
     global  prefs
     variable tmpPrefs
     set wc $page.i
@@ -99,7 +92,7 @@ proc ::iaxClientPrefs::BuildIaxPage { page } {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
     set lfr $wc.fr
-    ttk::labelframe $lfr -text [mc {iaxPhone Account}] \
+    ttk::labelframe $lfr -text [mc {iaxPhoneAccount}] \
       -padding [option get . groupSmallPadding {}]
     pack $lfr -side top -anchor w
 
@@ -131,7 +124,7 @@ proc ::iaxClientPrefs::BuildIaxPage { page } {
     grid  $lfr.lcidname $lfr.cidname  -sticky w
 }
 
-proc ::iaxClientPrefs::BuildDevicesPage { page } {
+proc ::IaxPrefs::BuildDevicesPage { page } {
     global  prefs
     variable tmpPrefs
 
@@ -147,20 +140,28 @@ proc ::iaxClientPrefs::BuildDevicesPage { page } {
     set tmpPrefs(iaxPhone,inputDevices) $prefs(iaxPhone,inputDevices)
     set tmpPrefs(iaxPhone,outputDevices) $prefs(iaxPhone,outputDevices)
 
+    set listInputDevices [iaxclient::devices "input"]
+    foreach {device} $listInputDevices {
+        lappend inputDevices [lindex $device 0]
+    } 
     ttk::label $lfr.linputDev -text "[mc iaxPhoneInputDev]:"
     ttk::combobox $lfr.input_dev \
-      -textvariable [namespace current]::tmpPrefs(iaxPhone,inputDevices) -values [iaxclient::devices "input"] 
+      -textvariable [namespace current]::tmpPrefs(iaxPhone,inputDevices) -values $inputDevices
 
+    set listOutputDevices [iaxclient::devices "output"]
+    foreach {device}  $listOutputDevices {
+        lappend outputDevices [lindex $device 0]
+    }
     ttk::label $lfr.loutputDev -text "[mc iaxPhoneOutputDev]:"
     ttk::combobox $lfr.output_dev \
-      -textvariable [namespace current]::tmpPrefs(iaxPhone,outputDevices) -values [iaxclient::devices "output"]
-
+      -textvariable [namespace current]::tmpPrefs(iaxPhone,outputDevices) -values $outputDevices
+    
     grid  $lfr.linputDev $lfr.input_dev   -sticky w
     grid  $lfr.loutputDev $lfr.output_dev    -sticky w
 
 }
 
-proc ::iaxClientPrefs::BuildFiltersPage { page } {
+proc ::IaxPrefs::BuildFiltersPage { page } {
     global  prefs
     variable tmpPrefs
 
@@ -177,36 +178,36 @@ proc ::iaxClientPrefs::BuildFiltersPage { page } {
     set tmpPrefs(iaxPhone,aagc) $prefs(iaxPhone,aagc)
     set tmpPrefs(iaxPhone,noise) $prefs(iaxPhone,noise)
     set tmpPrefs(iaxPhone,comfort) $prefs(iaxPhone,comfort)
-    set tmpPrefs(iaxPhone,echo) $prefs(iaxPhone,echo)
+#    set tmpPrefs(iaxPhone,echo) $prefs(iaxPhone,echo)
 
     ttk::label $lfr.lagc -text "[mc iaxPhoneAGC]:"
-    ttk::checkbutton $lfr.agc -text [mc AGC]  \
+    ttk::checkbutton $lfr.agc   \
       -variable [namespace current]::tmpPrefs(iaxPhone,agc)
 
     ttk::label $lfr.laagc -text "[mc iaxPhoneAAGC]:"
-    ttk::checkbutton $lfr.aagc -text [mc AAGC]  \
+    ttk::checkbutton $lfr.aagc  \
       -variable [namespace current]::tmpPrefs(iaxPhone,aagc)
 
     ttk::label $lfr.lnoise -text "[mc iaxPhoneNoise]:"
-    ttk::checkbutton $lfr.noise -text [mc Noise]  \
+    ttk::checkbutton $lfr.noise  \
       -variable [namespace current]::tmpPrefs(iaxPhone,noise)
 
     ttk::label $lfr.lcomfort -text "[mc iaxPhoneComfort]:"
-    ttk::checkbutton $lfr.comfort -text [mc Comfort]  \
+    ttk::checkbutton $lfr.comfort   \
       -variable [namespace current]::tmpPrefs(iaxPhone,comfort)
 
-    ttk::label $lfr.lecho -text "[mc iaxPhoneEcho]:"
-    ttk::checkbutton $lfr.echo -text [mc Echo]  \
-      -variable [namespace current]::tmpPrefs(iaxPhone,echo)
+#    ttk::label $lfr.lecho -text "[mc iaxPhoneEcho]:"
+#    ttk::checkbutton $lfr.echo -text [mc Echo]  \
+#      -variable [namespace current]::tmpPrefs(iaxPhone,echo)
 
     grid  $lfr.lagc $lfr.agc   -sticky w
     grid  $lfr.laagc $lfr.aagc    -sticky w
     grid  $lfr.lnoise $lfr.noise   -sticky w
     grid  $lfr.lcomfort $lfr.comfort    -sticky w
-    grid  $lfr.lecho $lfr.echo   -sticky w
+#    grid  $lfr.lecho $lfr.echo   -sticky w
 }
 
-proc ::iaxClientPrefs::BuildCodecsPage { page } {
+proc ::IaxPrefs::BuildCodecsPage { page } {
     global  prefs
     variable tmpPrefs
 
@@ -223,10 +224,10 @@ proc ::iaxClientPrefs::BuildCodecsPage { page } {
 
     ttk::label $lfr.lcodec -text "[mc iaxPhoneCodec]:"
 
-    ttk::radiobutton $lfr.codeca -text "[mc aLaw]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "a" 
-    ttk::radiobutton $lfr.codecu -text "[mc uLaw]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "u"
-    ttk::radiobutton $lfr.codecg -text "[mc GSM]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "g"
-    ttk::radiobutton $lfr.codeci -text "[mc iLBC]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "i"
+    ttk::radiobutton $lfr.codeca -text "[mc aLaw]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "ALAW" 
+    ttk::radiobutton $lfr.codecu -text "[mc uLaw]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "ULAW"
+    ttk::radiobutton $lfr.codecg -text "[mc GSM]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "GSM"
+    ttk::radiobutton $lfr.codeci -text "[mc iLBC]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "ILBC"
 
     grid  $lfr.lcodec -sticky w
     grid  $lfr.codeca -sticky w
@@ -235,7 +236,7 @@ proc ::iaxClientPrefs::BuildCodecsPage { page } {
     grid  $lfr.codeci -sticky w
 }
 
-proc ::iaxClientPrefs::SavePrefsHook { } {
+proc ::IaxPrefs::SavePrefsHook { } {
     global  prefs
     variable tmpPrefs
 
@@ -251,12 +252,12 @@ proc ::iaxClientPrefs::SavePrefsHook { } {
     set prefs(iaxPhone,aagc) $tmpPrefs(iaxPhone,aagc)
     set prefs(iaxPhone,noise) $tmpPrefs(iaxPhone,noise)
     set prefs(iaxPhone,comfort) $tmpPrefs(iaxPhone,comfort)
-    set prefs(iaxPhone,echo) $tmpPrefs(iaxPhone,echo)
+#    set prefs(iaxPhone,echo) $tmpPrefs(iaxPhone,echo)
 
-    eval {::hooks::run iaxClientReload} 
+    ::Iax::Reload
 }
 
-proc ::iaxClientPrefs::CancelPrefsHook { } {
+proc ::IaxPrefs::CancelPrefsHook { } {
     global  prefs
     variable tmpPrefs
 
@@ -264,11 +265,9 @@ proc ::iaxClientPrefs::CancelPrefsHook { } {
     if {![string equal $prefs($key) $tmpPrefs($key)]} {
         ::Preferences::HasChanged
     }
-
-
 }
 
-proc ::iaxClientPrefs::UserDefaultsHook { } {
+proc ::IaxPrefs::UserDefaultsHook { } {
     global  prefs
     variable tmpPrefs
 
@@ -284,26 +283,11 @@ proc ::iaxClientPrefs::UserDefaultsHook { } {
     set tmpPrefs(iaxPhone,aagc) $prefs(iaxPhone,aagc)
     set tmpPrefs(iaxPhone,noise) $prefs(iaxPhone,noise)
     set tmpPrefs(iaxPhone,comfort) $prefs(iaxPhone,comfort)
-    set tmpPrefs(iaxPhone,echo) $prefs(iaxPhone,echo)
+#    set tmpPrefs(iaxPhone,echo) $prefs(iaxPhone,echo)
 }
 
-proc ::iaxClientPrefs::DestroyPrefsHook { } {
+proc ::IaxPrefs::DestroyPrefsHook { } {
     variable tmpPrefs
 
     unset -nocomplain tmpPrefs
 }
-
-
-############## TO-DO ##################
-# Basic features:
-# 2. Separate AddressBook from JivePhone and add last dialed numbers into the AddressBook
-# 3. Show missed calls into a Chat Window
-# 4. On incoming calls change the buttons Dial to Accept and Hangup to Reject
-#
-# Advanced features:
-# 6. Makes UI nicer, using custom widgets.
-# 7. Use the Netstats callback for adjusting options
-#
-# Known bugs and errors:
-# 1. From Callback functions there are problems setting state of widgets.
-# ..... A lot of Debug work

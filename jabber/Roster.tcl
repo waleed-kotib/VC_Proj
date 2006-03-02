@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.160 2006-02-10 15:40:50 matben Exp $
+# $Id: Roster.tcl,v 1.161 2006-03-02 07:05:50 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -628,7 +628,6 @@ proc ::Roster::BuildMenu {m menuDef _jidlist clicked status group} {
     }
     
     set i 0
-    set idx 0
     
     foreach {op item type cmd opts} $menuDef {	
 	set locname [mc $item]
@@ -671,8 +670,7 @@ proc ::Roster::BuildMenu {m menuDef _jidlist clicked status group} {
 		return -code error "the op $op should never happen!"
 	    }
 	}
-	set tmpMenuIndex($item) $idx
-	incr idx
+	set tmpMenuIndex($item) [$m index $locname]
 	
 	if {$type eq "normal"} {
 	    set state normal
