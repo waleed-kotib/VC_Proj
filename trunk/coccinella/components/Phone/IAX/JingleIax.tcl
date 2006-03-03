@@ -71,13 +71,12 @@ proc ::JingleIAX::Init { } {
     #---------------  Other Variables and States ------------------
     variable state
     array set state {
-        phoneserver     0
-        setui           0
         remoteIP        127.0.0.1
-        remoteIAXPort   4569
+        remoteIAXPort   0
         localIP         127.0.0.1
-        localAXPort     4569
+        localIAXPort     0
     }
+
     variable contacts
 }
 
@@ -85,17 +84,32 @@ proc ::JingleIAX::InitState {} {
     variable state
     global this
 
-    #---- Initialize ------
-    if {[catch {array set stunInfo [stun::get stun.fwdnet.net]} err]} {
-	# @@@ What shall we do in this situation?
-	puts "---> catch stun::get stun.fwdnet.net : $err"
-	return
+    set tempPort $state(localIAXPort)
+    if { $tempPort == 0 } {
+        set tempPort [::Iax::CmdProc getport]
     }
-    set state(remoteIP)  $stunInfo(-address)
-    set state(remoteIAXPort) [::Iax::CmdProc getport]
 
-    set state(localIP) $this(internalIPnum)
-    set state(localIAXPort) $state(remoteIAXPort) 
+    set state(remoteIAXPort) $tempPort 
+    set state(localIAXPort) $tempPort
+
+
+    set state(localIP) $this(ipnum)
+    #---- Gets Public IP  ------
+    if {[catch {array set stunInfo [::stun::request stun.fwdnet.net -command ::JingleIAX::StunCB]} err]} {
+        # @@@ What shall we do in this situation?
+        puts "---> catch stun::get stun.fwdnet.net : $err"
+        return
+    }
+
+}
+
+proc ::JingleIAX::StunCB {args} {
+    variable state
+    array set arrArgs $args
+
+    if [info exists arrArgs(-address)] {
+        set state(remoteIP)  $arrArgs(-address)
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -106,10 +120,17 @@ proc ::JingleIAX::LoginHook { } {
     variable popMenuDef  
     variable xmlns
 
+#    set state(remoteIP) 127.0.0.1
+#    set state(localIP) 127.0.0.1
+#    set state(localIAXPort) 0
+#    set state(remoteIAXPort) 0
+
+    InitState
+
     ::Jabber::UI::RegisterPopupEntry roster $popMenuDef(call) 
 
     #---- Register handlers for Jingle iq elements.
-    ::Jabber::JlibCmd iq_register set    $xmlns     ::JingleIAX::SessionAccept
+    ::Jabber::JlibCmd iq_register set    $xmlns     ::JingleIAX::IQHandler
 }
 
 proc ::JingleIAX::PresenceHook {jid type args} {
@@ -128,11 +149,9 @@ proc ::JingleIAX::PresenceHook {jid type args} {
 }
 
 proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
-    variable xmlns
-    variable state
-    variable feature
     variable contacts
-    
+    variable feature
+
     Debug "::JingleIAX::OnDiscoUserNode"
  
     #-------- If the JID has Jingle support cache
@@ -147,8 +166,6 @@ proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
             set contacts($from,jingle) "true"
 	}
     }
-    puts "Setting $from --> $contacts($from,jingle)"
-
 }
 
 proc ::JingleIAX::LogoutHook { } {
@@ -157,13 +174,12 @@ proc ::JingleIAX::LogoutHook { } {
     ::Roster::DeRegisterPopupEntry mCall
     ::Jabber::UI::RemoveAlternativeStatusImage JingleIAX
     
-    unset -nocomplain state
+#    unset -nocomplain state
 }
 
 # Active/Disable the popupMenu if user is online or offline
 
 proc ::JingleIAX::RosterPostCommandHook {wmenu jidlist clicked status} {
-    variable state
     variable contacts
     variable popMenuDef
 
@@ -188,7 +204,6 @@ proc ::JingleIAX::RosterPostCommandHook {wmenu jidlist clicked status} {
 #-------------------------------------------------------------------------
 
 proc ::JingleIAX::SessionInitiate {jid} {
-    variable state
     variable xmlns
     variable xmlnsTransportIAX
     variable xmlnsMediaAudio
@@ -208,13 +223,14 @@ proc ::JingleIAX::SessionInitiate {jid} {
       -attrlist $attr -subtags [list $mediaElemAudio $transportElem]]
 
     ::Jabber::JlibCmd send_iq set [list $jingleElem]  \
-      -to $jid -command [list ::JingleIAX::SessionInitiateReply]
+      -to $jid -command [list ::JingleIAX::SessionPending]
 
 }
 
 
-proc ::JingleIAX::SessionAccept {jlib from subiq args} {
+proc ::JingleIAX::IQHandler {jlib from subiq args} {
     array set argsArr $args
+    variable state
 
     if {[info exists argsArr(-xmldata)]} {
         set jingle [wrapper::getfirstchildwithtag $argsArr(-xmldata) "jingle"]
@@ -223,20 +239,23 @@ proc ::JingleIAX::SessionAccept {jlib from subiq args} {
 
 	    #---- Jingle Initiation
             if { $action eq "initiate"} {
-                SessionAcceptInitiate $jlib $from $jingle $argsArr(-id)
+                SessionInitiateIncoming $jlib $from $jingle $argsArr(-id)
             }
 
-	    #---- Jingle Info (Extended Presence)
-            if { $action eq "info" } {
-                SessionAcceptInfo $jlib $from $jingle
+	    #---- Jingle Media Info (Extended Presence)
+            if { $action eq "media-info" } {
+                MediaIncomingInfo $jlib $from $jingle
+            }
+
+	    #---- Jingle Transport Accept
+            if {$action eq "transport-accept"} {
+                TransportIncomingAccept $jlib $from $jingle $argsArr(-id)
             }
         }
     }
 }
 
-proc ::JingleIAX::SessionAcceptInfo {jlib from jingle args} {
-    variable xmlns
-    variable xmlnsTransportIAX
+proc ::JingleIAX::MediaIncomingInfo {jlib from jingle args} {
     variable xmlnsMediaAudio
 
     set state [wrapper::getfirstchildwithxmlns $jingle $xmlnsMediaAudio]
@@ -255,7 +274,7 @@ proc ::JingleIAX::SessionAcceptInfo {jlib from jingle args} {
     } 
 }
 
-proc ::JingleIAX::SessionAcceptInitiate {jlib from jingle id} {
+proc ::JingleIAX::SessionInitiateIncoming {jlib from jingle id} {
     variable state
     variable xmlns
     variable xmlnsTransportIAX
@@ -283,52 +302,57 @@ proc ::JingleIAX::SessionAcceptInitiate {jlib from jingle id} {
             return
         }
 
-        # -------- Transport Supported ------------------- 
-        set myjid [::Jabber::JlibCmd getthis myjid]
-        set transportElemSecure  [wrapper::createtag "secure" -chdata "no"]
-        set transportElemLocalLocation    [wrapper::createtag location -attrlist [list type local ip $state(localIP)  port  $state(localIAXPort)] ]
-        set transportElemRemoteLocation   [wrapper::createtag location -attrlist [list type remote ip $state(remoteIP) port  $state(remoteIAXPort)]]
-
-        set transportElem [wrapper::createtag transport \
-            -attrlist [list xmlns $xmlnsTransportIAX version 2] \
-            -subtags  [list $transportElemLocalLocation \
-                            $transportElemRemoteLocation \
-                            $transportElemSecure ] ]
-
-	# @@@ This is wrong. Shall get sid from xml.
-	set uid [jlib::generateuuid]
-        set attr [list xmlns $xmlns action "accept" initiator $myjid sid $uid]
-        set jingleElem [wrapper::createtag jingle  \
-              -attrlist $attr \
-              -subtags [list $transportElem]]
-
-         #------ JEP-0166 , has to be an iq type set with action=accept
-         ::Jabber::JlibCmd send_iq result [list $jingleElem] -to $from -id $id
+        ::Jabber::JlibCmd send_iq result {} -to $from -id $id
+        TransportAccept $from $id
     } 
 }
 
-proc ::JingleIAX::SessionInitiateReply {type subiq args} {
+proc ::JingleIAX::TransportAccept { from id} {
+    variable state
+    variable xmlns
+    variable xmlnsTransportIAX
 
+    # -------- Transport Supported ------------------- 
+    set myjid [::Jabber::JlibCmd getthis myjid]
+    set transportElemSecure  [wrapper::createtag "secure" -chdata "no"]
+    set transportElemLocalCandidate    [wrapper::createtag candidate -attrlist [list name local ip $state(localIP)  port  $state(localIAXPort)] ]
+    set transportElemRemoteCandidate   [wrapper::createtag candidate -attrlist [list name remote ip $state(remoteIP) port  $state(remoteIAXPort)]]
+
+    set transportElem [wrapper::createtag transport \
+        -attrlist [list xmlns $xmlnsTransportIAX version 2] \
+        -subtags  [list $transportElemLocalCandidate \
+                        $transportElemRemoteCandidate \
+                        $transportElemSecure ] ]
+
+    # @@@ This is wrong. Shall get sid from xml.
+    set uid [jlib::generateuuid]
+    set attr [list xmlns $xmlns action "transport-accept" initiator $myjid sid $uid]
+    set jingleElem [wrapper::createtag jingle  \
+          -attrlist $attr \
+          -subtags [list $transportElem]]
+
+     ::Jabber::JlibCmd send_iq set [list $jingleElem] -to $from -id $id
+
+}
+
+proc ::JingleIAX::SessionPending {type subiq args} {
     #--------- Comes an Error from Initiate --------
     if { ($type eq "error") || ($type eq "cancel")} {
 	ui::dialog -icon error -type ok -message [mc phoneFailedCalling] \
 	  -detail $subiq
     }
-
-    #--------- Comes an Accept from Initiate --------
-    if {$type eq "result"} {
-	::JingleIAX::SessionAcceptAck $subiq
-    }
 }
 
-proc ::JingleIAX::SessionAcceptAck {args} {
-    variable xmlnsTransportIAX
+proc ::JingleIAX::TransportIncomingAccept {jlib from jingle id} {
     variable state
+    variable xmlnsTransportIAX
 
     # Extract the command level XML data items.     
-    set jingle [wrapper::gettag $args]
-    set calledname [wrapper::getattribute $jingle initiator]
+    #set jingle [wrapper::gettag $args]
 
+    set transport [wrapper::getfirstchildwithtag $jingle "description"]
+    set calledname [wrapper::getattribute $jingle initiator]
+    
     if { $jingle != {} } {
         set transport [wrapper::getfirstchildwithtag $jingle "transport"]
 
@@ -342,13 +366,13 @@ proc ::JingleIAX::SessionAcceptAck {args} {
                 return
             }
 
-            set locationList [wrapper::getchildswithtag $transport location]
-            if {$locationList != {}} {
-                foreach location $locationList {
-                    set type [wrapper::getattribute $location type]
-                    if {$type ne ""} {
-                            set locationDescription($type,ip) [wrapper::getattribute $location ip]
-                            set locationDescription($type,port) [wrapper::getattribute $location port]
+            set candidateList [wrapper::getchildswithtag $transport candidate]
+            if {$candidateList != {}} {
+                foreach candidate $candidateList {
+                    set name [wrapper::getattribute $candidate name]
+                    if {$name ne ""} {
+                            set candidateDescription($name,ip) [wrapper::getattribute $candidate ip]
+                            set candidateDescription($name,port) [wrapper::getattribute $candidate port]
                     } else {
                         ::Jabber::JlibCmd send_iq_error $from $id 404 cancel bad-request
                         return
@@ -381,15 +405,15 @@ proc ::JingleIAX::SessionAcceptAck {args} {
             } else {
                 set password ""
             }
-
             #-------- At This moment we know how to call the Peer ------------
-            #------ 1/ Discover what location to use, local or remote --------
+            #------ 1/ Discover what candidate to use, local or remote --------
             #------------- 2/ Give control to Phone Component ----------------
-            set ip   $locationDescription(remote,ip)
-            set port $locationDescription(remote,port)
+            set ip   $candidateDescription(remote,ip)
+            set port $candidateDescription(remote,port)
+
             if {$ip eq $state(remoteIP)} {
-                set ip   $locationDescription(local,ip)
-                set port $locationDescription(local,port)
+                set ip   $candidateDescription(local,ip)
+                set port $candidateDescription(local,port)
             }
 
             ::Phone::DialJingle $ip $port $calledname [::Jabber::JlibCmd getthis myjid] $user $password
@@ -410,8 +434,10 @@ proc ::JingleIAX::SendInfo {state} {
     #---- Send Info to all the contacts on the roster that has support for Jingle ----
     if {[info exists listJID] } {
         foreach jid $listJID {
-            if { $contacts($jid,jingle) eq "true" } {
-                ::JingleIAX::SetIqInfo $jid $state 
+            if {[info exists contacts($jid,jingle)] } {
+                if { $contacts($jid,jingle) eq "true" } {
+                    ::JingleIAX::SetIqInfo $jid $state 
+                }
             }
        }
     }
@@ -427,7 +453,7 @@ proc ::JingleIAX::SetIqInfo {jid state} {
         -attrlist [list xmlns $xmlnsMediaAudio] ]
 
     set uid [jlib::generateuuid]
-    set attr [list xmlns $xmlns action "info" initiator $myjid sid $uid]
+    set attr [list xmlns $xmlns action "media-info" initiator $myjid sid $uid]
     set jingleElem [wrapper::createtag "jingle"  \
       -attrlist $attr -subtags [list $infoElem]]
 
@@ -455,8 +481,10 @@ proc ::JingleIAX::ChatCall {dlgtoken} {
     set chattoken [::Chat::GetActiveChatToken $dlgtoken]
     set jid [::Chat::GetChatTokenValue $chattoken jid3]
 
-    if { $contacts($jid,jingle) eq "true" } {
-        ::JingleIAX::SessionInitiate $jid
+    if {[info exists contacts($jid,jingle)] } {
+        if { $contacts($jid,jingle) eq "true" } {
+            ::JingleIAX::SessionInitiate $jid
+        }
     }
 }
 
