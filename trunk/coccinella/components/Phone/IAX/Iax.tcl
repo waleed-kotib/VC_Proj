@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.1 2006-03-02 07:05:50 matben Exp $
+# $Id: Iax.tcl,v 1.2 2006-03-03 12:39:59 antoniofcano Exp $
 
 namespace eval ::Iax { }
 
@@ -16,6 +16,7 @@ proc ::Iax::Init { } {
     if {![component::exists Phone]} {
 	return
     }
+
     if {[catch {package require iaxclient}]} {
 	return
     }
@@ -177,10 +178,15 @@ proc ::Iax::NotifyText { type callno textmessage args} {
 proc ::Iax::NotifyRegister {id reply msgcount} {
     variable iaxPrefs
 
+    if { $reply eq "timeout" } {
+        ::Phone::HidePhone
+    }
+
     if { $reply eq "ack"} {
 	set iaxPrefs(registerid) $id
+        ::Phone::ShowPhone
+        ::Phone::UpdateRegister $id $reply $msgcount
     }
-    ::Phone::UpdateRegister $id $reply $msgcount
 }
 
 proc ::Iax::NotifyState {callNo state codec remote remote_name args} {
@@ -238,6 +244,8 @@ proc ::Iax::DialJingle {peer {line ""} {subject ""} {user ""} {password ""}} {
 	set callNo $line
     }
 
+    set callNo 1 
+
     #---- Peer String: IP[:Port]/extension
     #---- Dial Peer String: [user[:password]@]peer
     set userDef ""
@@ -266,6 +274,8 @@ proc ::Iax::Dial {phonenumber {line ""} {subject ""}} {
     } else {
 	set callNo $line
     }
+
+    set callNo 1 
  
     iaxclient::dial "$iaxPrefs(user):$iaxPrefs(password)@$iaxPrefs(host)/$phonenumber" $callNo
     if { $subject ne "" } {
