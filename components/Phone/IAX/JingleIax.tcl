@@ -32,7 +32,7 @@ proc ::JingleIAX::Init { } {
     ::hooks::register logoutHook            ::JingleIAX::LogoutHook
     ::hooks::register presenceHook          ::JingleIAX::PresenceHook
 
-    ::hooks::register phoneChangeState      ::JingleIAX::SendInfo
+    ::hooks::register phoneChangeState      ::JingleIAX::SendMediaInfo
     ::hooks::register rosterPostCommandHook ::JingleIAX::RosterPostCommandHook
 
     ::hooks::register buildChatButtonTrayHook  ::JingleIAX::BuildChatButtonTrayHook
@@ -164,6 +164,7 @@ proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
 
 	if {$haveJingle} {
             set contacts($from,jingle) "true"
+            SetIqMediaInfo $from, "available"
 	}
     }
 }
@@ -422,28 +423,24 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle id} {
 }
 
 #-------------------------------------------------------------------------
-#----------------------- Jingle Session Info -----------------------------
-# @@@@@@@	STILL NOT WELL DEFINED INTO JINGLE SESSION 0166/ Use MediaAudio instead (0167)
+#----------------------- Jingle Media Info -------------------------------
+#---------------------- (Extended Presence) ------------------------------
 #-------------------------------------------------------------------------
 
-proc ::JingleIAX::SendInfo {state} {
+proc ::JingleIAX::SendMediaInfo {state} {
     variable contacts
 
-    set listJID [::Jabber::RosterCmd getusers]
-
     #---- Send Info to all the contacts on the roster that has support for Jingle ----
-    if {[info exists listJID] } {
-        foreach jid $listJID {
-            if {[info exists contacts($jid,jingle)] } {
-                if { $contacts($jid,jingle) eq "true" } {
-                    ::JingleIAX::SetIqInfo $jid $state 
-                }
-            }
-       }
+    set myjid [::Jabber::JlibCmd getthis myjid]
+
+    foreach {key jingle} [array get contacts *,jingle] {
+        if { ($jingle eq "true") && ($key ne $myjid) } {
+            ::JingleIAX::SetIqMediaInfo $key $state 
+        }
     }
 }
 
-proc ::JingleIAX::SetIqInfo {jid state} {
+proc ::JingleIAX::SetIqMediaInfo {jid state} {
     variable xmlns
     variable xmlnsMediaAudio
 
