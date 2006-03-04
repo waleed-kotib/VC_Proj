@@ -95,19 +95,15 @@ proc ::JingleIAX::InitState {} {
 
     set state(localIP) $this(ipnum)
     #---- Gets Public IP  ------
-    if {[catch {array set stunInfo [::stun::request stun.fwdnet.net -command ::JingleIAX::StunCB]} err]} {
-        # @@@ What shall we do in this situation?
-        puts "---> catch stun::get stun.fwdnet.net : $err"
-        return
-    }
+    ::stun::request stun.fwdnet.net -command ::JingleIAX::StunCB
 
 }
 
-proc ::JingleIAX::StunCB {args} {
+proc ::JingleIAX::StunCB {token status args} {
     variable state
     array set arrArgs $args
 
-    if [info exists arrArgs(-address)] {
+    if {$status eq "ok" && [info exists arrArgs(-address)]} {
         set state(remoteIP)  $arrArgs(-address)
     }
 }
