@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AMenu.tcl,v 1.4 2006-02-26 10:35:33 matben Exp $
+# $Id: AMenu.tcl,v 1.5 2006-03-04 14:07:49 matben Exp $
 
 package provide AMenu 1.0
 
@@ -52,7 +52,14 @@ proc ::AMenu::Build {m menuDef} {
 	}	
 	set lname [mc $name]
 	set opts [eval list $opts]
-	
+
+	# Parse any "&" in name to -underline.
+	set ampersand [string first & $lname]
+	if {$ampersand != -1} {
+	    regsub -all & $lname "" lname
+	    lappend opts -underline $ampersand
+	}
+
 	switch -glob -- $op {
 	    command {
 		eval {$m add command -label $lname  \

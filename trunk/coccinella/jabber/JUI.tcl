@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.116 2006-02-25 08:11:13 matben Exp $
+# $Id: JUI.tcl,v 1.117 2006-03-04 14:07:49 matben Exp $
 
 package provide JUI 1.0
 
@@ -46,8 +46,6 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.headImage                   ""              widgetDefault
     option add *JMain.head.borderWidth            0               50 
     option add *JMain.head.relief                 flat            50
-
-    option add *JMain.statusWidgetStyle           button          50
 
     # Other icons.
     option add *JMain.contactOffImage             contactOff      widgetDefault
@@ -341,9 +339,7 @@ proc ::Jabber::UI::Build {w} {
     pack $wfstat -fill x
   
     set wstatcont $wfstat.cont
-    set statusStyle  [option get $w statusWidgetStyle {}]
-    ::Jabber::Status::Widget $wfstat.bst $statusStyle \
-      ::Jabber::jstate(status) -command ::Jabber::UI::StatusCmd
+    ::Jabber::Status::MainButton $wfstat.bst ::Jabber::jstate(status)
     ttk::frame $wfstat.cont
     ttk::label $wfstat.me -textvariable ::Jabber::jstate(mejid) -anchor w
     pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
@@ -646,13 +642,8 @@ proc ::Jabber::UI::QuitHook { } {
 }
 
 proc ::Jabber::UI::SetPresenceHook {type args} {
-    upvar ::Jabber::jserver jserver
     
-    array set argsArr [list -to $jserver(this)]
-    array set argsArr $args
-    if {[jlib::jidequal $jserver(this) $argsArr(-to)]} {
-	WhenSetStatus $type
-    }
+    # empty for the moment
 }
 
 proc ::Jabber::UI::RosterIconsChangedHook { } {
@@ -696,7 +687,6 @@ proc ::Jabber::UI::LogoutHook { } {
     
     SetStatusMessage [mc {Logged out}]
     FixUIWhen "disconnect"
-    WhenSetStatus "unavailable"
     
     # Be sure to kill the wave; could end up here when failing to connect.
     StartStopAnimatedWave 0
@@ -765,23 +755,6 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
 	      -image $im -disabledimage $imd
 	}
     }
-}
-
-# Jabber::UI::WhenSetStatus --
-#
-#       Updates UI when set own presence status information.
-#       
-# Arguments:
-#       type        any of 'available', 'unavailable', 'invisible',
-#                   'away', 'dnd', 'xa'.
-#       
-# Results:
-#       None.
-
-proc ::Jabber::UI::WhenSetStatus {type} {
-    variable jwapp
-	
-    ::Jabber::Status::Configure $jwapp(mystatus) $type
 }
 
 # Jabber::UI::RegisterPopupEntry --

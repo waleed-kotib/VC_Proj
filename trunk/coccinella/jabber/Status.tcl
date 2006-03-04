@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements various UI parts for setting status (presence).
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.12 2006-02-25 08:11:13 matben Exp $
+# $Id: Status.tcl,v 1.13 2006-03-04 14:07:49 matben Exp $
 
 package provide Status 1.0
 
@@ -18,7 +18,7 @@ namespace eval ::Jabber::Status:: {
     variable mapShowTextToElem
     variable mapShowElemToText
     
-    array set mapShowTextToElem [list \
+    array set mapShowTextToElem [list  \
       [mc mAvailable]       available  \
       [mc mAway]            away       \
       [mc mChat]            chat       \
@@ -26,7 +26,7 @@ namespace eval ::Jabber::Status:: {
       [mc mExtendedAway]    xa         \
       [mc mInvisible]       invisible  \
       [mc mNotAvailable]    unavailable]
-    array set mapShowElemToText [list \
+    array set mapShowElemToText [list     \
       available       [mc mAvailable]     \
       away            [mc mAway]          \
       chat            [mc mChat]          \
@@ -65,40 +65,83 @@ proc ::Jabber::Status::GetStatusTextArray { } {
     return [array get mapShowElemToText]
 }
 
-proc ::Jabber::Status::Widget {w style varName args} {
+# Jabber::Status::MainButton --
+# 
+#       Make a status menu button for login status only.
+
+proc ::Jabber::Status::MainButton {w statusVar} {
+    upvar $statusVar status
     
-    switch -- $style {
-	button {
-	    eval {Button $w $varName} $args
-	}
-	label {
-	    eval {Label $w $varName} $args
-	}
-	menubutton {
-	    eval {MenuButton $w $varName} $args
-	}
-    }
+    # We cannot use jstate(status) directly here due to the special use
+    # of the "available" entry for login.
+    set menuVar [namespace current]::menuVar($w)
+    set $menuVar $status
+    Button $w $menuVar -command [list [namespace current]::MainCmd $w]
+
+    trace add variable $statusVar write [list [namespace current]::MainTrace $w]
+    bind $w <Destroy> {+::Jabber::Status::MainFree %W}
+
     return $w
 }
 
-proc ::Jabber::Status::Configure {w status} {
+proc ::Jabber::Status::MainCmd {w status} {
     
-    switch -- [winfo class $w] {
-	TButton {
-	    ConfigButton $w $status
-	}
-	TLabel {
-	    ConfigLabel $w $status
-	}
-	TMenubutton {
-	    ConfigButton $w $status
-	}
+    if {[::Jabber::IsConnected]} {
+	::Jabber::SetStatus $status
+    } else {
+
+	# Status "available" is special since used for login.
+	set menuVar [namespace current]::menuVar($w)
+	set $menuVar "unavailable"
+	::Login::Dlg
     }
+}
+
+proc ::Jabber::Status::MainTrace {w varName index op} {
+    upvar $varName var
+    
+    # This is just to sync the menuVar after the statusVar.
+    set value $var($index)
+    set menuVar [namespace current]::menuVar($w)
+    set $menuVar $value
+}
+
+proc ::Jabber::Status::MainFree {w} {
+
+    set menuVar [namespace current]::menuVar($w)
+    unset -nocomplain $menuVar
+}
+
+# Jabber::Status::BuildMainMenu --
+#
+#       Builds a main status menu only. Hardcoded variable jstate(status).
+
+proc ::Jabber::Status::BuildMainMenu {mt} {
+    
+    set statusVar ::Jabber::jstate(status)
+    upvar $statusVar status
+
+    set menuVar [namespace current]::menuVar($mt)
+    set $menuVar $status
+    BuildGenericMenu $mt -variable $menuVar \
+      -command [list [namespace current]::MainMenuCmd $mt $menuVar]   
+
+    trace add variable $statusVar write  \
+      [list [namespace current]::MainTrace $mt]
+    bind $mt <Destroy> {+::Jabber::Status::MainFree %W}
+
+    return $mt
+}
+
+proc ::Jabber::Status::MainMenuCmd {mt varName} {
+    upvar $varName status
+    MainCmd $mt $status
 }
 
 # ::Jabber::Status::Button --
 # 
 #       A few functions to build a megawidget status menu button.
+#       This shall work independent of situation; login status or room status.
 #       
 # Arguments:
 #       w
@@ -110,24 +153,22 @@ proc ::Jabber::Status::Configure {w status} {
 
 proc ::Jabber::Status::Button {w varName args} {
     upvar $varName status
-    variable menuBuild
+    variable menuBuildCmd
         
     set argsArr(-command) {}
     array set argsArr $args
 
     set wmenu $w.menu
-    #ttk::menubutton $w -style Toolbutton \
-    #  -compound image -image [::Rosticons::Get status/$status]
-    ttk::menubutton $w -style MiniMenubutton \
+    ttk::menubutton $w -style MiniMenubutton  \
       -compound image -image [::Rosticons::Get status/$status]
-    ConfigButton $w $status
+    ConfigImage $w $status
     menu $wmenu -tearoff 0
-    set menuBuild($w) [list  \
-      BuildGenPresenceMenu $wmenu -variable $varName  \
+    set menuBuildCmd($w) [list BuildGenericMenu $wmenu -variable $varName  \
       -command [list [namespace current]::ButtonCmd $w $varName $argsArr(-command)]]
-    eval $menuBuild($w)
+    eval $menuBuildCmd($w)
     $w configure -menu $wmenu
     
+    trace add variable $varName write [list [namespace current]::Trace $w]
     bind $w <Destroy> {+::Jabber::Status::Free %W}
 
     return $w
@@ -136,22 +177,33 @@ proc ::Jabber::Status::Button {w varName args} {
 proc ::Jabber::Status::ButtonCmd {w varName cmd} {
     upvar $varName status
 	
-    ConfigButton $w $status
     if {$cmd != {}} {
 	uplevel #0 $cmd $status
     }
 }
 
-proc ::Jabber::Status::ConfigButton {w status} {
+proc ::Jabber::Status::Trace {w varName index op} {
+    upvar $varName var
     
-    $w configure -image [::Rosticons::Get status/$status]
-    # @@@ groupchat ?
-    if {0} {
-	if {[string equal $status "unavailable"]} {
-	    $w state {disabled}
-	} else {
-	    $w state {!disabled}
-	}
+    if {$index eq ""} {
+	set status $var
+    } else {
+	set status $var($index)
+    }
+    if {[winfo exists $w]} {
+	ConfigImage $w $status
+    }
+}
+
+proc ::Jabber::Status::ConfigImage {w status} {
+        
+    # Status "available" is special since used for login.
+    # You have to set the state for the button itself yourself since
+    # this varies with usage.
+    if {($status eq "available") && ![::Jabber::IsConnected]} {
+	# empty
+    } else {
+	$w configure -image [::Rosticons::Get status/$status]
     }
 }
 
@@ -163,130 +215,11 @@ proc ::Jabber::Status::PostMenu {wmenu x y} {
     tk_popup $wmenu [expr int($x)] [expr int($y)]
 }
 
-# Jabber::Status::MenuButton --
+# Jabber::Status::BuildGenericMenu --
 # 
-#       Makes a menubutton for status that does no action. It only sets
-#       the varName.
+#       Builds a generic status menu.
 
-proc ::Jabber::Status::MenuButton {w varName args} {
-    upvar $varName status
-    variable mapShowElemToText
-    variable menuBuild
-
-    menubutton $w -indicatoron 1 -menu $w.menu  \
-      -relief raised -bd 2 -highlightthickness 2 -anchor c -direction flush
-    menu $w.menu -tearoff 0
-    set menuBuild($w) [list  \
-      BuildGenPresenceMenu $w.menu -variable $varName  \
-      -command [list [namespace current]::MenuButtonCmd $w $varName]]
-    eval $menuBuild($w)
-    $w configure -text $mapShowElemToText($status)
-
-    bind $w <Destroy> {+::Jabber::Status::Free %W}
-
-    return $w
-}
-
-proc ::Jabber::Status::MenuButtonCmd {w varName} {
-    upvar $varName status
-    variable mapShowElemToText
-    
-    $w configure -text $mapShowElemToText($status)
-}
-
-# ::Jabber::Status::Label --
-# 
-#       A few functions to build a megawidget status menu button.
-#       
-# Arguments:
-#       w
-#       varName
-#       args:     -command procName + label options
-#       
-# Results:
-#       widget path.
-
-proc ::Jabber::Status::Label {w varName args} {
-    upvar $varName status
-    variable menuBuild
-    
-    set argsArr(-command) {}
-    array set argsArr $args
-    set cmd $argsArr(-command)
-    unset argsArr(-command)
-
-    eval {ttk::label $w} [array get argsArr]
-    ConfigLabel $w $status
-    set wmenu $w.menu
-    menu $wmenu -tearoff 0
-    set menuBuild($w) [list  \
-      BuildGenPresenceMenu $wmenu -variable $varName -command  \
-      [list [namespace current]::LabelCmd $w $varName $cmd]]
-    eval $menuBuild($w)
-    
-    bind $w <Destroy> {+::Jabber::Status::Free %W}
-
-    return $w
-}
-
-proc ::Jabber::Status::LabelCmd {w varName cmd} {
-    upvar $varName status
-	
-    ConfigLabel $w $status
-    if {$cmd != {}} {
-	uplevel #0 $cmd $status
-    }
-}
-
-proc ::Jabber::Status::ConfigLabel {w status} {
-    variable mapShowElemToText
-    
-    $w configure -text "$mapShowElemToText($status) "
-    
-    #$w configure -image [::Rosticons::Get status/$type]
-    if {[string equal $status "unavailable"]} {
-	#$w configure -state disabled
-	bind $w <Button-1> {}
-    } else {
-	$w configure -state normal
-	bind $w <Button-1> \
-	  [list [namespace current]::PostMenu $w.menu %X %Y]
-    }
-}
-
-# Jabber::Status::BuildMenu --
-# 
-#       Adds all presence menu entries to menu.
-#       
-# Arguments:
-#       mt          menu widget
-#       
-# Results:
-#       none.
-
-proc ::Jabber::Status::BuildMenu {mt} {
-
-    set varName ::Jabber::jstate(status)
-    BuildGenPresenceMenu $mt -variable $varName \
-      -command [list [namespace current]::MenuCmd $varName]
-    $mt configure -postcommand [list [namespace current]::PostCmd $mt]
-}
-
-proc ::Jabber::Status::MenuCmd {varName} {
-    upvar $varName status
-    
-    if {[::Jabber::IsConnected]} {
-	::Jabber::SetStatus $status
-    } else {
-	::Login::Dlg
-    }
-}
-
-# Jabber::Status::BuildGenPresenceMenu --
-# 
-#       As above but a more general form.
-
-proc ::Jabber::Status::BuildGenPresenceMenu {mt args} {
+proc ::Jabber::Status::BuildGenericMenu {mt args} {
     global  this
     variable mapShowElemToText
     
@@ -324,12 +257,33 @@ proc ::Jabber::Status::PostCmd {m} {
 	$m entryconfigure [$m index $name] -state $state
     }
     $m entryconfigure [$m index [mc mAttachMessage]] -state $state
+
+    # This wont work for rooms why the menu shall never be posted while offline.
     $m entryconfigure [$m index [mc mAvailable]] -state normal
+}
+
+proc ::Jabber::Status::RosticonsHook { } {
+    variable menuBuildCmd
+    
+    foreach w [array names menuBuildCmd] {
+	
+	# Note that we cannot configure the status image since we don't
+	# know which status (login or room etc.).
+	destroy $w.menu
+	menu $w.menu -tearoff 0
+	eval $menuBuildCmd($w)
+    }
+}
+
+proc ::Jabber::Status::Free {w} {
+    variable menuBuildCmd
+    
+    unset -nocomplain menuBuildCmd($w)
 }
 
 # Jabber::Status::BuildStatusMenuDef --
 # 
-#       Builds a menuDef list for the status menu.
+#       Builds a menuDef list for the main status menu.
 #       
 # Arguments:
 #       
@@ -364,25 +318,6 @@ proc ::Jabber::Status::BuildStatusMenuDef { } {
       {command mAttachMessage {::Jabber::SetStatusWithMessage}  normal {}}
     
     return $statMenuDef
-}
-
-proc ::Jabber::Status::RosticonsHook { } {
-    variable menuBuild
-    
-    foreach w [array names menuBuild] {
-	
-	# Note that we cannot configure the status image since we don't
-	# know which status (login or room etc.).
-	destroy $w.menu
-	menu $w.menu -tearoff 0
-	eval $menuBuild($w)
-    }
-}
-
-proc ::Jabber::Status::Free {w} {
-    variable menuBuild
-    
-    unset -nocomplain menuBuild($w)
 }
 
 #-------------------------------------------------------------------------------

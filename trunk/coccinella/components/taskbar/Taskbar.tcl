@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.18 2006-02-26 14:45:31 matben Exp $
+# $Id: Taskbar.tcl,v 1.19 2006-03-04 14:07:48 matben Exp $
 
 package require balloonhelp
 
@@ -151,7 +151,7 @@ proc ::Taskbar::InitHook { } {
     set STAT [::Roster::GetMyPresenceIcon]
     
     set menuDef {
-	{cascade  mStatus           @::Jabber::Status::BuildMenu  {-image @STAT -compound left}}
+	{cascade  mStatus           @::Jabber::Status::BuildMainMenu  {-image @STAT -compound left}}
 	{command  mHideMain         ::Taskbar::HideMain                  }
 	{command  mSendMessage      ::NewMsg::Build         {-image @MSG -compound left}}
 	{command  mPreferences      ::Preferences::Build    {-image @SET -compound left}}

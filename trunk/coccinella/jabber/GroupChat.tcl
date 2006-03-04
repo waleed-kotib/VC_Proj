@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.131 2006-02-12 07:23:32 matben Exp $
+# $Id: GroupChat.tcl,v 1.132 2006-03-04 14:07:49 matben Exp $
 
 package require Enter
 package require History
@@ -849,7 +849,7 @@ proc ::GroupChat::Build {roomjid args} {
 
     ::Jabber::Status::Button $wgroup.stat \
       $token\(status) -command [list [namespace current]::StatusCmd $token] 
-    ::Jabber::Status::ConfigButton $wgroup.stat available
+    ::Jabber::Status::ConfigImage $wgroup.stat available
     ::Emoticons::MenuButton $wgroup.smile -text $wtextsend
     
     grid  $wgroup.active  $wgroup.bmark  $wgroup.stat  $wgroup.smile  \
@@ -2060,7 +2060,7 @@ proc ::GroupChat::StatusSyncHook {status args} {
 	    ::Jabber::SetStatus $status -to $state(roomjid)
 	    set state(status)    $status
 	    set state(oldStatus) $status
-	    ::Jabber::Status::ConfigButton $state(wbtstatus) $status
+	    #::Jabber::Status::ConfigImage $state(wbtstatus) $status
 	}
     }
 }
@@ -2534,7 +2534,8 @@ proc ::GroupChat::BuildPageConf {page} {
     ttk::entry $wnick.e \
       -textvariable [namespace current]::tmpJPrefs(defnick)
     pack $wnick.l $wnick.e -side left
-    pack $wnick -side top -anchor w -pady 8
+    pack $wnick.e -fill x
+    pack $wnick -side top -anchor w -pady 8 -fill x
     
     ttk::checkbutton $wc.sync -text [mc jagcsyncpres]  \
       -variable [namespace current]::tmpJPrefs(gchat,syncPres)	      

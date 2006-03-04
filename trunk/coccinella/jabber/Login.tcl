@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.78 2006-02-22 08:04:27 matben Exp $
+# $Id: Login.tcl,v 1.79 2006-03-04 14:07:49 matben Exp $
 
 package provide Login 1.0
 
@@ -817,7 +817,7 @@ proc ::Login::HighFinish {token {err ""} {msg ""}} {
    
     ::Jabber::UI::SetStatusMessage ""
     ::Jabber::UI::StartStopAnimatedWave 0
-    if {$err == ""} {
+    if {$err eq ""} {
 	uplevel #0 $state(cmd) $token ok
     } else {
 	::Jabber::UI::FixUIWhen "disconnect"
