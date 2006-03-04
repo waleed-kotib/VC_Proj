@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Debug.tcl,v 1.2 2005-03-02 13:49:41 matben Exp $
+# $Id: Debug.tcl,v 1.3 2006-03-04 14:07:49 matben Exp $
 
 # If no debug printouts, no console.
 if {$debugLevel == 0} {
@@ -45,8 +45,8 @@ if {0} {
 	puts "$name1 $name2 $op"
 	CallTrace 4
     }
-    namespace eval ::WB:: {}
-    trace add variable ::WB::menuDefs(main,file) write TraceVar
 
-    trace add variable ::Login::pending write TraceVar
+    # Add variable to trace here.
+    namespace eval ::Jabber {}
+    trace add variable ::Jabber::jstate(status) write TraceVar
 }

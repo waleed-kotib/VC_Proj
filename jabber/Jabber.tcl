@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.158 2006-02-21 08:40:59 matben Exp $
+# $Id: Jabber.tcl,v 1.159 2006-03-04 14:07:49 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1222,6 +1222,8 @@ proc ::Jabber::SetStatus {type args} {
     variable jstate
     variable jserver
     variable jprefs
+    
+    ::Debug 4 "::Jabber::SetStatus type=$type, args=$args"
     
     array set argsArr {
 	-notype         0

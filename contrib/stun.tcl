@@ -10,7 +10,7 @@
 #  Copyright (c) 2006  Mats Bengtsson
 #  BSD-style License
 #  
-# $Id: stun.tcl,v 1.2 2006-03-02 13:43:56 matben Exp $
+# $Id: stun.tcl,v 1.3 2006-03-04 14:07:49 matben Exp $
 
 # USAGE:
 # 
@@ -36,6 +36,8 @@
 #       
 #       
 #  Known STUN host: stun.fwdnet.net
+#  
+#  To debug just uncomment the puts.
 
 package require udp
 
@@ -161,6 +163,7 @@ proc stun::request {host args} {
     set state(s)      $s
     set state(id)     $id
     set state(host)   $host
+    set state(type)   "request"
     set state(errmsg) ""
     set state(status) ""
     foreach {key value} [array get opts] {
@@ -211,6 +214,13 @@ proc stun::Response {token} {
 	} else {
 	    set attr [string range $data 20 end]
 	    array set state [DecodeAttributes $attr]
+	    
+	    # Do some primitive error checking.
+	    if {$state(type) eq "request"} {
+		if {![info exists state(MappedAddress)]} {
+		    End $token "missing MappedAddress attribute"
+		}
+	    }
 	}
     }
     End $token
