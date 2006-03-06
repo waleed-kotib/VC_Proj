@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #       
-# $Id: AddressBook.tcl,v 1.1 2006-03-02 07:05:50 matben Exp $
+# $Id: AddressBook.tcl,v 1.2 2006-03-06 17:48:27 antoniofcano Exp $
 
 namespace eval ::AddressBook:: { }
 
@@ -73,8 +73,9 @@ proc ::AddressBook::NewPage {} {
     set wtab $wnb.ab
     if {![winfo exists $wtab]} {
         Build $wtab
-	set im  [::Theme::GetImage [option get $wtab addressBook16Image {}]]
-	set imd [::Theme::GetImage [option get $wtab addressBook16DisImage {}]]
+	set subPath [file join components Phone images]
+	set im  [::Theme::GetImage [option get $wtab addressBook16Image {}] $subPath]
+	set imd [::Theme::GetImage [option get $wtab addressBook16DisImage {}] $subPath]
 	set imSpec [list $im disabled $imd background $imd]
         $wnb add $wtab -text [mc AddressBook] -image $imSpec -compound image
     }
@@ -134,8 +135,9 @@ proc ::AddressBook::Build {w args} {
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure $wbox 0 -weight 1
 
+    set subPath    [file join components Phone images addressbook]
 
-    set iconImage  [::Rosticons::Get phone/addressbook]
+    set iconImage  [::Theme::GetImage addressbook $subPath]
     set opts {-text AddressBook -button 1 -image $iconImage -open 1}
     eval {::ITree::Item $wtree "AddressBook"} $opts
 
@@ -154,15 +156,15 @@ proc ::AddressBook::Build {w args} {
     }
 
     #--------- Include Logs Categories ---------
-    set iconImage  [::Rosticons::Get phone/received]
+    set iconImage  [::Theme::GetImage received $subPath]
     set opts {-text Received -button 1 -image $iconImage -open 1}
     eval {::ITree::Item $wtree "Received"} $opts
 
-    set iconImage  [::Rosticons::Get phone/called]
+    set iconImage  [::Theme::GetImage called $subPath]
     set opts {-text Called -button 1 -image $iconImage -open 1}
     eval {::ITree::Item $wtree "Called"} $opts
 
-    set iconImage  [::Rosticons::Get phone/missed]
+    set iconImage  [::Theme::GetImage missed $subPath]
     set opts {-text Missed -button 1 -image $iconImage -open 1}
     eval {::ITree::Item $wtree "Missed"} $opts
     
@@ -608,15 +610,28 @@ proc ::AddressBook::TransferExtension {phonenumber} {
 ################################################
 
 proc ::AddressBook::TalkingState {args} {
+    variable wtab
     variable popMenuDef
-    #Add Popup menu Transfer. The transfer should be active When the call is active (TalkingState).
-    ::AddressBook::RegisterPopupEntry $popMenuDef(forward)
+
+#    $wtab entryconfigure $popMenuDef(call)  \
+#      -label [mc mForward] -command {::AddressBook::TransferExtension $phone}
+
+#    $wtab entryconfigure $popMenuDef(redial)  \
+#      -label [mc mForward] -command {::AddressBook::TransferExtension $phone}
 }
 
 proc ::AddressBook::NormalState {args} {
+    variable wtab
     variable popMenuDef
-    #Remove Popup menu Transfer. The transfer should be disabled When the call is free (NormalState).
-    ::AddressBook::DeRegisterPopupEntry $popMenuDef(forward)
+
+#    $wtab entryconfigure $popMenuDef(addressbook,def)  \
+#      -label [mc mCall] -command {::AddressBook::DialExtension $phone}
+
+#    $wtab entryconfigure $popMenuDef(call)  \
+#      -label [mc mCall] -command {::AddressBook::DialExtension $phone}
+
+#    $wtab entryconfigure $popMenuDef(redial)  \
+#      -label [mc mRedial] -command {::AddressBook::DialExtension $phone}
 }
 
 proc ::AddressBook::ReceivedCall {callNo remote remote_name} {
@@ -686,50 +701,6 @@ proc ::AddressBook::Search {phonenumber} {
 proc ::AddressBook::Debug {msg} {
     if {0} {
 	puts "-------- $msg"
-    }
-}
-
-
-# Roster::RegisterPopupEntry --
-# 
-#       Components or plugins can add their own menu entries here.
-
-proc ::AddressBook::RegisterPopupEntry {menuSpec} {
-    variable popMenuDef
-    
-    # Keeps track of all registered menu entries.
-    variable regPopMenuSpec
-    
-    # Add new entry just before the last separator
-    lappend popMenuDef(addressbook,def) separator {} {}
-    lappend popMenuDef(addressbook,def) $menuSpec
-    lappend regPopMenuSpec $menuSpec
-}
-
-proc ::AddressBook::DeRegisterPopupEntry {mLabel} {
-    variable popMenuDef
-    variable regPopMenuSpec
-    
-    if {[info exists regPopMenuSpec]} {
-	# First remove from the 'regPopMenuSpec' list.
-	set idx [lsearch $regPopMenuSpec $mLabel]
-	set rem [expr {$idx % 5}]
-	if {$idx > 0 && $rem == 1} {
-	    set midx [expr {$idx/5}]
-	    set i0 [expr {5 * $midx}]
-	    set i1 [expr {$i0 + 4}]
-	    set regPopMenuSpec [lreplace $regPopMenuSpec $i0 $i1]	    
-	}
-	
-	# Then remove from 'popMenuDefs'.
-	set v $popMenuDef(addressbook,def)
-	set idx [lsearch $v $mLabel]
-	if {$idx > 0 && $rem == 1} {
-	    set midx [expr {$idx/5}]
-	    set i0 [expr {5 * $midx}]
-	    set i1 [expr {$i0 + 4}]
-	    set popMenuDef(addressbook,def) [lreplace $v $i0 $i1]	    
-	}
     }
 }
 
