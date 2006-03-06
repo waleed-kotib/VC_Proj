@@ -19,14 +19,12 @@ proc ::NotifyCall::Init { } {
 }
 
 proc ::NotifyCall::InitState { } {
-    variable state
+    variable  state
     
-    array set state {
-	win             .notify
-    }
+    set state(win) .notify
 
-    set state(old:microphone) 0
-    set state(old:speaker) 0
+    set state(old:microphone) 50
+    set state(old:speaker) 50
     set state(cmicrophone) 1
     set state(cspeaker) 1
     set state(microphone) 50
@@ -37,7 +35,6 @@ proc ::NotifyCall::InitState { } {
 #-----------------------------------------------------------------------
 #--------------------------- Notify Call Window ------------------------
 #-----------------------------------------------------------------------
-
 
 # NotifyCall::InboundCall  --
 # 
@@ -130,24 +127,26 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber } {
     #--- Button info, is available only for Jingle Calls ---
     if { $res ne "" } {
         set subPath [file join components Phone timages]
+
         set images(microphone) [::Theme::GetImage microphone $subPath]
-        set images(speaker) [::Theme::GetImage speaker $subPath]
         ttk::frame $box.mic
         ttk::scale $box.mic.s -orient horizontal -from 0 -to 100 \
-          -variable $state(microphone) -command [list ::NotifyCall::MicCmd $w] -length 60
+          -variable [list ::NotifyCall::state(microphone)] -command [list ::NotifyCall::MicCmd $w] -length 60
         ttk::checkbutton $box.mic.l -style Toolbutton  \
-          -variable $state(cmicrophone) -image $images(microphone)  \
+          -variable [list ::NotifyCall::state(cmicrophone)] -image $images(microphone)  \
           -onvalue 0 -offvalue 1 -padding {1}  \
           -command [list ::NotifyCall::Mute $w microphone]  -state disabled
+
         pack  $box.mic.l  $box.mic.s  -side top
         pack $box.mic.s -padx 4
 
-    
+
+        set images(speaker) [::Theme::GetImage speaker $subPath]    
         ttk::frame $box.spk
         ttk::scale $box.spk.s -orient horizontal -from 0 -to 100 \
-          -variable $state(speaker) -command [list ::NotifyCall::SpkCmd $w] -length 60
+          -variable [list ::NotifyCall::state(speaker)] -command [list ::NotifyCall::SpkCmd $w] -length 60
         ttk::checkbutton $box.spk.l -style Toolbutton  \
-          -variable $state(cspeaker) -image $images(speaker)  \
+          -variable [list ::NotifyCall::state(cspeaker)] -image $images(speaker)  \
           -onvalue 0 -offvalue 1 -padding {1}  \
           -command [list ::NotifyCall::Mute $w speaker] -state disabled
         pack  $box.spk.l  $box.spk.s  -side top
@@ -201,8 +200,8 @@ proc ::NotifyCall::MicCmd {w level} {
 }
 
 proc ::NotifyCall::SpkCmd {w level} {
-    variable state
-    
+    variable state    
+
     if {$level != $state(old:speaker)} {
 	::Phone::SetOutputLevel [expr {100 - $level}]        
     }
@@ -212,8 +211,12 @@ proc ::NotifyCall::SpkCmd {w level} {
 proc ::NotifyCall::Mute {w type} {
     variable state
    
+    if { $state(c$type) == 1 } {
+        set state($type) 0
+    } else {
+        set state($type) $state(old:$type)
+    }
     ::Phone::Mute $type $state(c$type)
-    set state(c$type) [expr !$state(c$type)]
 }
 #-----------------------------------------------------------------------
 #------------------------ Notify Call Event Hooks ----------------------
