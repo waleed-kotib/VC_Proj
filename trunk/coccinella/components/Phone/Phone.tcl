@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.2 2006-03-03 12:39:59 antoniofcano Exp $
+# $Id: Phone.tcl,v 1.3 2006-03-07 17:47:58 antoniofcano Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -495,6 +495,7 @@ proc ::Phone::DialJingle  { ipPeer portPeer calledName callerName {user ""} {pas
         set subject "Jingle Call"
     }
 
+    ::hooks::run phoneNotifyOutgoingCall $calledName
     CommandPhone dialjingle $phoneNumberInput $statePhone(activeLine) $subject $user $password
         
     set statePhone(fromStateLine0) "Dial"
