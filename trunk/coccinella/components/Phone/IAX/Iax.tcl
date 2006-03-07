@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.2 2006-03-03 12:39:59 antoniofcano Exp $
+# $Id: Iax.tcl,v 1.3 2006-03-07 18:22:08 antoniofcano Exp $
 
 namespace eval ::Iax { }
 
@@ -138,18 +138,8 @@ proc ::Iax::DeleteProc {} {
 
 proc ::Iax::Register {} {
     variable iaxPrefs
-    
-    iaxclient::register $iaxPrefs(user) $iaxPrefs(password) $iaxPrefs(host)
-    iaxclient::callerid $iaxPrefs(cidname) $iaxPrefs(cidnum)
-    if {$iaxPrefs(codec) ne ""} {
-	iaxclient::formats $iaxPrefs(codec)
-    }
-
-#    IncomingRing.Init( 880, 960, 16000, 48000, 10);
-#    OutgoingTone.Init( 440, 480, 16000, 48000, 10);
-#    IntercomTone.Init( 440, 960,  6000,  6000,  1);
-
-    iaxclient::toneinit 880 960 16000 48000 10
+   
+    set iaxPrefs(registerid) [iaxclient::register $iaxPrefs(user) $iaxPrefs(password) $iaxPrefs(host)]
 
     ## This is tricky, when we got two iaxclient instances in the same box 
     ## the second one has the port 0
@@ -178,12 +168,11 @@ proc ::Iax::NotifyText { type callno textmessage args} {
 proc ::Iax::NotifyRegister {id reply msgcount} {
     variable iaxPrefs
 
-    if { $reply eq "timeout" } {
+    if { ($iaxPrefs(registerid) == $id) && ($reply eq "timeout") } {
         ::Phone::HidePhone
     }
 
     if { $reply eq "ack"} {
-	set iaxPrefs(registerid) $id
         ::Phone::ShowPhone
         ::Phone::UpdateRegister $id $reply $msgcount
     }
@@ -354,6 +343,18 @@ proc ::Iax::LoadPrefs {} {
 	    iaxclient::setdevices input $iaxPrefs(inputDevices)
 	}
     }
+
+    iaxclient::callerid $iaxPrefs(cidname) $iaxPrefs(cidnum)
+    if {$iaxPrefs(codec) ne ""} {
+        iaxclient::formats $iaxPrefs(codec)
+    }
+
+#    IncomingRing.Init( 880, 960, 16000, 48000, 10);
+#    OutgoingTone.Init( 440, 480, 16000, 48000, 10);
+#    IntercomTone.Init( 440, 960,  6000,  6000,  1);
+
+    iaxclient::toneinit 880 960 16000 48000 10
+
 }
 
 proc ::Iax::Reload {} {
