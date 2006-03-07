@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.3 2006-03-07 17:47:58 antoniofcano Exp $
+# $Id: Phone.tcl,v 1.4 2006-03-07 18:22:08 antoniofcano Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -187,14 +187,13 @@ proc ::Phone::LoginHook {} {
 
     if {[GetPhone] ne ""} {
 	LoadPrefs
-        NewPage
     }
 
 }
 
 proc ::Phone::ShowPhone {} {
     if {[GetPhone] ne ""} {
-#        NewPage
+        NewPage
     }
 }
 
@@ -202,15 +201,15 @@ proc ::Phone::HidePhone {} {
     variable statePhone
     variable wphone
 
-#    if {[GetPhone] ne ""} {
-#        CommandPhone unregister
+    if {[GetPhone] ne ""} {
+        CommandPhone unregister
    
-#        if {[winfo exists $wphone]} {
-#            set wnb [::Jabber::UI::GetNotebook]
-#            $wnb forget $wphone
-#            destroy $wphone
-#        }
-#    }
+        if {[winfo exists $wphone]} {
+            set wnb [::Jabber::UI::GetNotebook]
+            $wnb forget $wphone
+            destroy $wphone
+        }
+    }
 }
 
 ##################################################
