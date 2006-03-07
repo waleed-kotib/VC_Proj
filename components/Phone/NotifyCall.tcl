@@ -10,6 +10,7 @@ proc ::NotifyCall::Init { } {
     component::register NotifyCall  \
       "Provides support for Incoming Calls Dialog"
 
+    ::hooks::register phoneNotifyOutgoingCall         ::NotifyCall::OutgoingEventHook
     ::hooks::register phoneNotifyIncomingCall         ::NotifyCall::IncomingEventHook
     ::hooks::register phoneNotifyNormalState          ::NotifyCall::HangupEventHook
     ::hooks::register phoneNotifyTalkingState         ::NotifyCall::TalkingEventHook
@@ -45,7 +46,20 @@ proc ::NotifyCall::InboundCall { {line ""} {phoneNumber ""} } {
     set win $state(win)
 
     if { $phoneNumber ne "" } { 
-        BuildDialer $win $line $phoneNumber 
+        BuildDialer $win $line $phoneNumber "in"
+    }
+}
+
+# NotifyCall::OutboundCall  --
+#
+
+proc ::NotifyCall::OutboundCall { {line ""} {phoneNumber ""} } {
+    variable state
+
+    set win $state(win)
+
+    if { $phoneNumber ne "" } {
+        BuildDialer $win $line $phoneNumber "out"
     }
 }
 
@@ -53,7 +67,7 @@ proc ::NotifyCall::InboundCall { {line ""} {phoneNumber ""} } {
 # 
 #       A toplevel dialer.
        
-proc ::NotifyCall::BuildDialer {w line phoneNumber } {
+proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
     variable state
 
     # Make sure only single instance of this dialog.
@@ -66,7 +80,11 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber } {
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::NotifyCall::CloseDialer
 
-    wm title $w [mc notifyCall]
+    if { $type eq "in" } {
+        wm title $w [mc notifyCall]
+    } else {
+        wm title $w [mc outCall]
+    }
 
     ::UI::SetWindowPosition $w
 
@@ -74,8 +92,13 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber } {
     # Global frame.
     ttk::frame $w.f
     pack  $w.f  -fill x
-				 
-    ttk::label $w.f.head -style Headlabel -text "[mc {inboundCall}]:"
+				
+    if { $type eq "in" } {
+        set msgHead [mc {inboundCall}]:
+    } else {
+        set msgHead [mc {outboundCall}]:
+    } 
+    ttk::label $w.f.head -style Headlabel -text "$msgHead"
     pack  $w.f.head  -side top -fill both -expand 1
 
     ttk::separator $w.f.s -orient horizontal
@@ -116,13 +139,16 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber } {
 #      -width 18
 
 
-    ttk::button $box.answer -text [mc callAnswer]  \
-      -command [list [namespace current]::Answer $w $line]
+    if { $type eq "in" } {
+        ttk::button $box.answer -text [mc callAnswer]  \
+          -command [list [namespace current]::Answer $w $line]
+        grid $box.answer -padx 1 -pady 4
+    }
 
     ttk::button $box.hungup -text [mc callHungUp]  \
       -command [list [namespace current]::HungUp $w $line]
  
-    grid $box.answer $box.hungup -padx 1 -pady 4
+    grid $box.hungup -padx 1 -pady 4
 
     #--- Button info, is available only for Jingle Calls ---
     if { $res ne "" } {
@@ -238,6 +264,13 @@ proc ::NotifyCall::IncomingEventHook {callNo remote remote_name} {
     set phoneNumberInput $remote_name
     InboundCall $callNo  "$phoneNameInput ($phoneNumberInput)"
 }
+
+proc ::NotifyCall::OutgoingEventHook {remote_name} {
+
+    set phoneNameInput $remote_name
+    OutboundCall 1  "$phoneNameInput"
+}
+
 
 proc ::NotifyCall::HangupEventHook {args} {
     variable state
