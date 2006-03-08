@@ -9,5 +9,6 @@
 # full path name of this file's directory.
 
 package ifneeded IaxPrefs 0.1 [list source [file join $dir IaxPrefs.tcl]]
+package ifneeded JingleIax 0.1 [list source [file join $dir JingleIax.tcl]]
 
 

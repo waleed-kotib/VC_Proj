@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.3 2006-03-07 18:22:08 antoniofcano Exp $
+# $Id: Iax.tcl,v 1.4 2006-03-08 13:46:37 matben Exp $
 
 namespace eval ::Iax { }
 
@@ -16,12 +16,13 @@ proc ::Iax::Init { } {
     if {![component::exists Phone]} {
 	return
     }
-
     if {[catch {package require iaxclient}]} {
 	return
     }
-
     if {[catch {package require IaxPrefs}]} {
+	return
+    }
+    if {[catch {package require JingleIax}]} {
 	return
     }
     component::register IAX "Provides the iax client softphone."
@@ -35,11 +36,9 @@ proc ::Iax::Init { } {
         cidnum       ""
         codecs       ""
     }
-
     
     ::Phone::RegisterPhone iax "IAX Phone"  \
       ::Iax::InitProc ::Iax::CmdProc ::Iax::DeleteProc
-
 
     # Setting up Callbacks functions.
     iaxclient::notify <State>         [namespace current]::NotifyState
@@ -50,7 +49,8 @@ proc ::Iax::Init { } {
     
     # @@@ temporary
     ::Phone::SetPhone iax
-
+    
+    ::JingleIAX::Init
 }
 
 proc ::Iax::InitProc {} {
