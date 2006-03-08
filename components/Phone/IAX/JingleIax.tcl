@@ -1,11 +1,17 @@
 # JingleIax.tcl --
 # 
-#       JingleIAX Component, binding for the IAX transport over Jingle 
+#       JingleIAX package, binding for the IAX transport over Jingle 
 #       
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id
+# $Id: JingleIax.tcl,v 1.5 2006-03-08 13:46:37 matben Exp $
+
+if {[catch {package require stun}]} {
+    return
+}
+
+package provide JingleIax 0.1
 
 namespace eval ::JingleIAX:: { }
 
@@ -16,13 +22,6 @@ proc ::JingleIAX::Init { } {
     variable feature
     variable featureMediaAudio
     variable featureTransportIAX
-
-    if {[catch {package require stun}]} {
-        return
-    }
-
-    component::register JingleIAX  \
-      "Provides support for the VoIP P2P using IAX over Jingle"
 
     option add *Chat*callImage           call                 widgetDefault
     option add *Chat*callDisImage        callDis              widgetDefault
@@ -74,7 +73,8 @@ proc ::JingleIAX::Init { } {
         remoteIP        127.0.0.1
         remoteIAXPort   0
         localIP         127.0.0.1
-        localIAXPort     0
+        localIAXPort    0
+	sid             ""
     }
 
     variable contacts
@@ -160,7 +160,7 @@ proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
 
 	if {$haveJingle} {
             set contacts($from,jingle) "true"
-            SetIqMediaInfo $from, "available"
+            SetIqMediaInfo $from "available"
 	}
     }
 }
@@ -201,6 +201,7 @@ proc ::JingleIAX::RosterPostCommandHook {wmenu jidlist clicked status} {
 #-------------------------------------------------------------------------
 
 proc ::JingleIAX::SessionInitiate {jid} {
+    variable state
     variable xmlns
     variable xmlnsTransportIAX
     variable xmlnsMediaAudio
@@ -213,11 +214,12 @@ proc ::JingleIAX::SessionInitiate {jid} {
     set mediaElemAudio [wrapper::createtag "description" \
       -attrlist [list xmlns $xmlnsMediaAudio] ]
 
-    ##### sid has to be a random string?????
-    set uid [jlib::generateuuid]
-    set attr [list xmlns $xmlns action "initiate" initiator $myjid sid $uid]
+    # Make (pseudo) unique uid.
+    set sid [jlib::generateuuid]
+    set attr [list xmlns $xmlns action "initiate" initiator $myjid sid $sid]
     set jingleElem [wrapper::createtag "jingle"  \
       -attrlist $attr -subtags [list $mediaElemAudio $transportElem]]
+    set state(sid) $sid
 
     ::Jabber::JlibCmd send_iq set [list $jingleElem]  \
       -to $jid -command [list ::JingleIAX::SessionPending]
@@ -277,6 +279,9 @@ proc ::JingleIAX::SessionInitiateIncoming {jlib from jingle id} {
     variable xmlnsTransportIAX
     variable xmlnsMediaAudio
 
+    set sid [wrapper::getattribute $jingle sid]
+    set state(sid) $sid
+
     set media [wrapper::getfirstchildwithtag $jingle "description"]
     if {$media  != {}} {
         set mediaType [wrapper::getattribute $media xmlns]
@@ -300,11 +305,11 @@ proc ::JingleIAX::SessionInitiateIncoming {jlib from jingle id} {
         }
 
         ::Jabber::JlibCmd send_iq result {} -to $from -id $id
-        TransportAccept $from $id
+        TransportAccept $from $id $jingle
     } 
 }
 
-proc ::JingleIAX::TransportAccept { from id} {
+proc ::JingleIAX::TransportAccept {from id jingle} {
     variable state
     variable xmlns
     variable xmlnsTransportIAX
@@ -321,9 +326,8 @@ proc ::JingleIAX::TransportAccept { from id} {
                         $transportElemRemoteCandidate \
                         $transportElemSecure ] ]
 
-    # @@@ This is wrong. Shall get sid from xml.
-    set uid [jlib::generateuuid]
-    set attr [list xmlns $xmlns action "transport-accept" initiator $myjid sid $uid]
+    set sid [wrapper::getattribute $jingle sid]
+    set attr [list xmlns $xmlns action "transport-accept" initiator $myjid sid $sid]
     set jingleElem [wrapper::createtag jingle  \
           -attrlist $attr \
           -subtags [list $transportElem]]
@@ -430,23 +434,29 @@ proc ::JingleIAX::SendMediaInfo {state} {
     set myjid [::Jabber::JlibCmd getthis myjid]
 
     foreach {key jingle} [array get contacts *,jingle] {
-        if { ($jingle eq "true") && ($key ne $myjid) } {
-            ::JingleIAX::SetIqMediaInfo $key $state 
+        if {$jingle eq "true"} {
+	    
+	    # @@@ We should have a smarter storage for contacts.
+	    set jid [string map {,jingle ""} $key]
+	    if {$jid ne $myjid} {
+		SetIqMediaInfo $key $state 
+	    }
         }
     }
 }
 
-proc ::JingleIAX::SetIqMediaInfo {jid state} {
+proc ::JingleIAX::SetIqMediaInfo {jid mediaState} {
+    variable state
     variable xmlns
     variable xmlnsMediaAudio
 
     set myjid [::Jabber::JlibCmd getthis myjid]
 
-    set infoElem [wrapper::createtag $state \
-        -attrlist [list xmlns $xmlnsMediaAudio] ]
+    set infoElem [wrapper::createtag $mediaState \
+      -attrlist [list xmlns $xmlnsMediaAudio] ]
 
-    set uid [jlib::generateuuid]
-    set attr [list xmlns $xmlns action "media-info" initiator $myjid sid $uid]
+    set sid $state(sid)
+    set attr [list xmlns $xmlns action "media-info" initiator $myjid sid $sid]
     set jingleElem [wrapper::createtag "jingle"  \
       -attrlist $attr -subtags [list $infoElem]]
 
@@ -476,7 +486,7 @@ proc ::JingleIAX::ChatCall {dlgtoken} {
 
     if {[info exists contacts($jid,jingle)] } {
         if { $contacts($jid,jingle) eq "true" } {
-            ::JingleIAX::SessionInitiate $jid
+	    SessionInitiate $jid
         }
     }
 }
