@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.14 2006-01-03 13:22:19 matben Exp $
+# $Id: bytestreams.tcl,v 1.15 2006-03-09 10:40:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -39,16 +39,14 @@ namespace eval jlib::bytestreams {
     variable xmlns
     set xmlns(bs)  "http://jabber.org/protocol/bytestreams"
         
-    jlib::ensamble_register bytestreams  \
-      [namespace current]::init          \
-      [namespace current]::cmdproc
-
     jlib::si::registertransport $xmlns(bs) $xmlns(bs) 40  \
       [namespace current]::si_open   \
       [namespace current]::si_send   \
       [namespace current]::si_close    
     
     jlib::disco::registerfeature $xmlns(bs)
+
+    # Note: jlib::ensamble_register is last in this file!
 }
 
 # jlib::bytestreams::init --
@@ -757,6 +755,15 @@ proc jlib::bytestreams::activate {jlibname to sid targetjid args} {
       -subtags [list $activateElem]]
 
     eval {$jlibname send_iq "set" [list $xmllist] -to $to} $opts
+}
+
+# We have to do it here since need the initProc befor doing this.
+
+namespace eval jlib::bytestreams {
+	
+    jlib::ensamble_register bytestreams  \
+      [namespace current]::init          \
+      [namespace current]::cmdproc
 }
 
 #-------------------------------------------------------------------------------

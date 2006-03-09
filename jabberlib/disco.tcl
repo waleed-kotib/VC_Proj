@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.32 2005-11-16 08:52:03 matben Exp $
+# $Id: disco.tcl,v 1.33 2006-03-09 10:40:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -107,9 +107,7 @@ namespace eval jlib::disco {
     variable features
     set features $xmlns(disco)
 
-    jlib::ensamble_register disco  \
-      [namespace current]::init    \
-      [namespace current]::cmdproc
+    # Note: jlib::ensamble_register is last in this file!
 }
 
 # jlib::disco::init --
@@ -1214,6 +1212,15 @@ proc jlib::disco::Debug {num str} {
     if {$num <= $debug} {
 	puts $str
     }
+}
+
+# We have to do it here since need the initProc befor doing this.
+
+namespace eval jlib::disco {
+    
+    jlib::ensamble_register disco  \
+      [namespace current]::init    \
+      [namespace current]::cmdproc
 }
 
 #-------------------------------------------------------------------------------

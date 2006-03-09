@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: avatar.tcl,v 1.7 2005-12-17 09:48:41 matben Exp $
+# $Id: avatar.tcl,v 1.8 2006-03-09 10:40:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -66,6 +66,8 @@ namespace eval jlib::avatar {
         
     jlib::register_reset [namespace current]::reset
     jlib::disco::registerfeature $xmlns(iq-avatar)
+
+    # Note: jlib::ensamble_register is last in this file!
 }
 
 proc jlib::avatar::init {jlibname args} {
@@ -551,6 +553,15 @@ proc jlib::avatar::debug {msg} {
     if {0} {
 	puts "\t $msg"
     }
+}
+
+# We have to do it here since need the initProc befor doing this.
+
+namespace eval jlib::avatar {
+
+    jlib::ensamble_register avatar \
+      [namespace current]::init    \
+      [namespace current]::cmdproc
 }
 
 if {0} {
