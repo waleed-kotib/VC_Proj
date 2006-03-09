@@ -10,7 +10,7 @@
 #  Copyright (c) 2006  Mats Bengtsson
 #  BSD-style License
 #  
-# $Id: stun.tcl,v 1.3 2006-03-04 14:07:49 matben Exp $
+# $Id: stun.tcl,v 1.4 2006-03-09 14:52:37 matben Exp $
 
 # USAGE:
 # 
@@ -26,7 +26,7 @@
 #           -port       host port number
 #           -timeout    milliseconds
 #           
-#       If -command is specified it is returned almost immedeately
+#       If -command is specified it is returned almost immediately
 #       with a token identifier. Else it waits for the response and
 #       returns a list {status ?-key value...?}
 #       
