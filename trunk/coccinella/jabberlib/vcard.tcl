@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: vcard.tcl,v 1.3 2005-11-16 08:52:04 matben Exp $
+# $Id: vcard.tcl,v 1.4 2006-03-09 10:40:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -30,9 +30,7 @@ package provide jlib::vcard 0.1
 
 namespace eval jlib::vcard {
 
-    jlib::ensamble_register vcard  \
-      [namespace current]::init    \
-      [namespace current]::cmdproc
+    # Note: jlib::ensamble_register is last in this file!
 }
 
 # jlib::vcard::init --
@@ -295,6 +293,15 @@ proc jlib::vcard::clear {jlibname {jid ""}} {
     } else {
 	array unset state "cache,[jlib::ESC $jid]"
     }
+}
+
+# We have to do it here since need the initProc befor doing this.
+
+namespace eval jlib::vcard {
+
+    jlib::ensamble_register vcard  \
+      [namespace current]::init    \
+      [namespace current]::cmdproc
 }
 
 

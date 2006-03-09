@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.131 2006-03-02 07:05:50 matben Exp $
+# $Id: jabberlib.tcl,v 1.132 2006-03-09 10:40:32 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -153,9 +153,11 @@
 #   'args' is a list of '-key value' pairs.
 #      
 #   @@@ TODO:
+#   
 #      1) Rewrite from scratch and deliver complete iq, message, and presence
 #      elements to callbacks. Callbacks then get attributes like 'from' etc
 #      using accessor functions.
+#      
 #      2) Roster as an ensamble command, just like disco, muc etc.
 #      
 #-------------------------------------------------------------------------------
@@ -166,6 +168,7 @@ package require service
 package require stanzaerror
 package require streamerror
 package require groupchat
+package require jlib::util
 
 package provide jlib 2.0
 
@@ -194,7 +197,6 @@ namespace eval jlib {
     # Let jlib components register themselves for subcommands, ensamble,
     # so that they can be invoked by: jlibname subcommand ...
     variable ensamble
-    set ensamble(names) {}
     
     # Some common xmpp xml namespaces.
     variable xmppxmlns
@@ -237,6 +239,7 @@ namespace eval jlib {
 	unavailable     7
     }
     
+    # Standin for a 8.5 feature.
     if {![llength [info commands lassign]]} {
 	proc lassign {vals args} {uplevel 1 [list foreach $args $vals break] }
     }
@@ -373,9 +376,8 @@ proc jlib::new {rostername clientcmd args} {
     service::init $jlibname
     
     # Init ensamble commands.
-    foreach name $ensamble(names) {
+    foreach {- name} [array get ensamble *,name] {
 	uplevel #0 $ensamble($name,init) $jlibname
-	#uplevel #0 $ensamble($name,init) $jlibname $args
     }
     
     return $jlibname
@@ -458,17 +460,24 @@ proc jlib::havetls { } {
 #       This is then used as: 'jlibName subCmd ...'
 
 proc jlib::ensamble_register {name initProc cmdProc} {
+    variable statics
     variable ensamble
     
-    set ensamble(names) [lsort -unique [concat $ensamble(names) $name]]
+    set ensamble($name,name) $name
     set ensamble($name,init) $initProc
     set ensamble($name,cmd)  $cmdProc
+    
+    # Must call the initProc for already existing jlib instances.
+    if {$statics(inited)} {
+	foreach jlibname [namespace children ::jlib jlib*] {
+	    uplevel #0 $initProc $jlibname
+	}
+    }
 }
 
 proc jlib::ensamble_deregister {name} {
     variable ensamble
     
-    set ensamble(names) [lsearch -all -not -inline $ensamble(names) $name]
     array unset ensamble ${name},*
 }
 

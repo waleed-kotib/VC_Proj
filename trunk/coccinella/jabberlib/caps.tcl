@@ -11,7 +11,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.7 2005-11-04 15:14:55 matben Exp $
+# $Id: caps.tcl,v 1.8 2006-03-09 10:40:32 matben Exp $
 
 # UNFINISHED!!!
 #      
@@ -23,9 +23,7 @@ package provide jlib::caps 0.1
 
 namespace eval jlib::caps {
 
-    jlib::ensamble_register caps  \
-      [namespace current]::init   \
-      [namespace current]::cmdproc
+    # Note: jlib::ensamble_register is last in this file!
 }
 
 proc jlib::caps::init {jlibname args} {
@@ -168,6 +166,15 @@ proc jlib::caps::free {jlibname} {
 
     jlib::presence_deregister $jlibname available   [namespace current]::presence_cb
     jlib::presence_deregister $jlibname unavailable [namespace current]::unavail_cb
+}
+
+# We have to do it here since need the initProc befor doing this.
+
+namespace eval jlib::caps {
+
+    jlib::ensamble_register caps  \
+      [namespace current]::init   \
+      [namespace current]::cmdproc
 }
 
 

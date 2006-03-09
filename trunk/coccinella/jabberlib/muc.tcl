@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.27 2005-09-23 14:27:10 matben Exp $
+# $Id: muc.tcl,v 1.28 2006-03-09 10:40:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -69,9 +69,7 @@ namespace eval jlib::muc {
     
     jlib::disco::registerfeature $xmlns(muc)
     
-    jlib::ensamble_register muc    \
-      [namespace current]::init    \
-      [namespace current]::cmdproc
+    # Note: jlib::ensamble_register is last in this file!
 }
 
 # jlib::muc::init --
@@ -642,6 +640,15 @@ proc jlib::muc::Debug {num str} {
     if {$num <= $debug} {
 	puts $str
     }
+}
+
+# We have to do it here since need the initProc befor doing this.
+
+namespace eval jlib::muc {
+    
+    jlib::ensamble_register muc    \
+      [namespace current]::init    \
+      [namespace current]::cmdproc
 }
 
 #-------------------------------------------------------------------------------

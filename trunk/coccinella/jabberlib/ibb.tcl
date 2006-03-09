@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.17 2005-12-04 13:29:11 matben Exp $
+# $Id: ibb.tcl,v 1.18 2006-03-09 10:40:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -39,16 +39,14 @@ namespace eval jlib::ibb {
     set xmlns(ibb) "http://jabber.org/protocol/ibb"
     set xmlns(amp) "http://jabber.org/protocol/amp"
 
-    jlib::ensamble_register ibb   \
-      [namespace current]::init   \
-      [namespace current]::cmdproc
-    
     jlib::si::registertransport $xmlns(ibb) $xmlns(ibb) 80  \
       [namespace current]::si_open   \
       [namespace current]::si_send   \
       [namespace current]::si_close
     
     jlib::disco::registerfeature $xmlns(ibb)
+
+    # Note: jlib::ensamble_register is last in this file!
 }
 
 # jlib::ibb::init --
@@ -426,6 +424,15 @@ proc jlib::ibb::tfree {jlibname sid} {
     #puts "jlib::ibb::tfree (t)"   
 
     array unset tstate $sid,*
+}
+
+# We have to do it here since need the initProc befor doing this.
+
+namespace eval jlib::ibb {
+
+    jlib::ensamble_register ibb   \
+      [namespace current]::init   \
+      [namespace current]::cmdproc
 }
 
 #-------------------------------------------------------------------------------

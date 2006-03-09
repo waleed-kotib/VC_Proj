@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.10 2005-09-27 13:31:35 matben Exp $
+# $Id: ftrans.tcl,v 1.11 2006-03-09 10:40:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -38,11 +38,7 @@ namespace eval jlib::ftrans {
 
     variable xmlns
     set xmlns(ftrans) "http://jabber.org/protocol/si/profile/file-transfer"
-        
-    jlib::ensamble_register filetransfer  \
-      [namespace current]::init           \
-      [namespace current]::cmdproc
-    
+            
     # Our target handlers.
     jlib::si::registerprofile $xmlns(ftrans)  \
       [namespace current]::open_handler       \
@@ -50,6 +46,8 @@ namespace eval jlib::ftrans {
       [namespace current]::close_handler
     
     jlib::disco::registerfeature $xmlns(ftrans)
+
+    # Note: jlib::ensamble_register is last in this file!
 }
 
 # jlib::ftrans::registerhandler --
@@ -591,6 +589,15 @@ proc jlib::ftrans::tfree {jlibname sid} {
     #puts "jlib::ftrans::tfree (t) sid=$sid"
 
     array unset tstate $sid,*    
+}
+
+# We have to do it here since need the initProc befor doing this.
+
+namespace eval jlib::ftrans {
+	
+    jlib::ensamble_register filetransfer  \
+      [namespace current]::init           \
+      [namespace current]::cmdproc
 }
 
 #-------------------------------------------------------------------------------

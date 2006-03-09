@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.5 2005-08-31 09:51:59 matben Exp $
+# $Id: pubsub.tcl,v 1.6 2006-03-09 10:40:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -33,9 +33,6 @@ package provide jlib::pubsub 0.1
 
 namespace eval jlib::pubsub {
     
-    jlib::ensamble_register pubsub  \
-      [namespace current]::init     \
-      [namespace current]::cmdproc
 }
 
 proc jlib::pubsub::init {jlibname} {
@@ -292,5 +289,11 @@ proc jlib::pubsub::unsubscribe {jlibname jid node subscribejid subid args} {
     eval {jlib::send_iq $jlibname set $xmllist} $opts $args
 }
 
+namespace eval jlib::pubsub {
+    
+    jlib::ensamble_register pubsub  \
+      [namespace current]::init     \
+      [namespace current]::cmdproc
+}
 
 
