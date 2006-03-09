@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.16 2006-03-09 14:52:37 matben Exp $
+# $Id: tileutils.tcl,v 1.17 2006-03-09 15:00:54 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -29,7 +29,8 @@ namespace eval ::tileutils {
 	bind TreeCtrl <<ThemeChanged>> { tileutils::TreeCtrlThemeChanged %W }
     }
     if {[tk windowingsystem] ne "aqua"} {
-	bind Menu <<ThemeChanged>> { tileutils::MenuThemeChanged %W }
+	bind Menu      <<ThemeChanged>> { tileutils::MenuThemeChanged %W }
+	bind WaveLabel <<ThemeChanged>> { tileutils::WaveLabelThemeChanged %W }
     }
 }
 
@@ -52,6 +53,17 @@ proc tileutils::MenuThemeChanged {win} {
 	if {[winfo class $win] eq "Menu"} {
 	    set color $style(-background)
 	    $win configure -bg $color
+	}
+    }
+}
+
+proc tileutils::WaveLabelThemeChanged {win} {
+
+    array set style [style configure .]    
+    if {[info exists style(-background)]} {
+	if {[winfo class $win] eq "WaveLabel"} {
+	    set color $style(-background)
+	    $win configure -background $color
 	}
     }
 }
