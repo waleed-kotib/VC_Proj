@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.15 2006-02-10 15:40:50 matben Exp $
+# $Id: tileutils.tcl,v 1.16 2006-03-09 14:52:37 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -38,8 +38,10 @@ proc tileutils::ThemeChanged {} {
     array set style [style configure .]    
     if {[info exists style(-background)]} {
 	set color $style(-background)
-	option add *Menu.background $color startupFile
-	option add *TreeCtrl.columnBackground $color startupFile
+	option add *ChaseArrows.background      $color startupFile
+	option add *Menu.background             $color startupFile
+	option add *TreeCtrl.columnBackground   $color startupFile
+	option add *WaveLabel.columnBackground  $color startupFile
     }
 }
 

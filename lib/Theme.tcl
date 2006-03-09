@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2006  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.27 2006-02-14 08:05:13 matben Exp $
+# $Id: Theme.tcl,v 1.28 2006-03-09 14:52:37 matben Exp $
 
 package provide Theme 1.0
 
@@ -51,10 +51,12 @@ proc ::Theme::Init { } {
     
     # My RH9 KDE system has some weird X rdb settings somewhere. Fix.
     if {[tk windowingsystem] eq "x11"} {
-	option add *Listbox.background    white     60
-	option add *Menu.background       "#dcdad5" 60
-	option add *Text.background       white     60
-	option add *TreeCtrl.background   white     60
+	option add *ChaseArrows.background    "#dcdad5" 60
+	option add *Listbox.background        white     60
+	option add *Menu.background           "#dcdad5" 60
+	option add *Text.background           white     60
+	option add *TreeCtrl.background       white     60
+	option add *WaveLabel.background      "#dcdad5" 60
     }
     
     # Any theme specific resource files.
