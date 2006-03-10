@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.117 2006-03-04 14:07:49 matben Exp $
+# $Id: JUI.tcl,v 1.118 2006-03-10 15:39:33 matben Exp $
 
 package provide JUI 1.0
 
@@ -259,7 +259,7 @@ proc ::Jabber::UI::Build {w} {
     ::UI::Toplevel $w -class JMain \
       -macstyle documentProc -closecommand ::Jabber::UI::CloseHook  \
       -allowclose 0
-    wm title $w $prefs(theAppName)
+    wm title $w $prefs(appName)
     ::UI::SetWindowGeometry $w
     set jwapp(w)     $w
     set jwapp(jmain) $w
@@ -341,7 +341,7 @@ proc ::Jabber::UI::Build {w} {
     set wstatcont $wfstat.cont
     ::Jabber::Status::MainButton $wfstat.bst ::Jabber::jstate(status)
     ttk::frame $wfstat.cont
-    ttk::label $wfstat.me -textvariable ::Jabber::jstate(mejid) -anchor w
+    ttk::label $wfstat.me -textvariable ::Jabber::jstate(mejidres) -anchor w
     pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
     pack  $wfstat.me  -fill x -expand 1 -padx 2 -pady 4
     if {[tk windowingsystem] eq "aqua"} {
@@ -363,7 +363,8 @@ proc ::Jabber::UI::Build {w} {
     frame $wrostco
 
     set imSpec [list $iconRoster disabled $iconRosterDis background $iconRosterDis]
-    $wnb add $wrostco -compound left -text [mc Contacts] -image $imSpec -sticky news
+    $wnb add $wrostco -compound left -text [mc Contacts] -image $imSpec  \
+      -sticky news
     pack $wroster -in $wnb.cont -fill both -expand 1
 
     set jwapp(wtbar)     $wtbar
@@ -388,9 +389,6 @@ proc ::Jabber::UI::Build {w} {
     }
     if {!$jprefs(ui,main,show,notebook)} {
 	RosterMoveFromPage
-    }
-    if {$jprefs(ui,main,show,minimal)} {
-	ToggleMinimal
     }
     return $w
 }
@@ -502,13 +500,14 @@ proc ::Jabber::UI::GetMainMenu { } {
 
 proc ::Jabber::UI::ToggleToolbar { } {
     variable jwapp
-    upvar ::Jabber::jprefs jprefs
+    variable state
     
     if {[winfo ismapped $jwapp(wtbar)]} {
 	HideToolbar
     } else {
 	ShowToolbar
     }
+    ::hooks::run uiMainToggleToolbar $state(show,toolbar)
 }
 
 proc ::Jabber::UI::HideToolbar { } {
@@ -531,25 +530,24 @@ proc ::Jabber::UI::ShowToolbar { } {
 
 proc ::Jabber::UI::ToggleNotebook { } {
     variable jwapp
+    variable state
     
     if {[winfo ismapped $jwapp(notebook)]} {
 	RosterMoveFromPage
     } else {
 	RosterMoveToPage
     }
+    ::hooks::run uiMainToggleNotebook $state(show,notebook)
 }
 
 proc ::Jabber::UI::ToggleMinimal { } {
     variable jwapp
+    variable state
     upvar ::Jabber::jprefs jprefs
 
-    if {[::Roster::StyleGet] eq "normal"} {
-	::Roster::StyleMinimal
-	set jprefs(ui,main,show,minimal) 1
-    } else {
-	::Roster::StyleNormal	
-	set jprefs(ui,main,show,minimal) 0
-    }
+    # Handle via hooks since we can't know which tab pages we have.
+    set jprefs(ui,main,show,minimal) $state(show,minimal)
+    ::hooks::run uiMainToggleMinimal $state(show,minimal)
 }
 
 # Jabber::UI::SetAlternativeStatusImage --
