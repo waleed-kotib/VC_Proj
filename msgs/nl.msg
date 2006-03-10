@@ -1062,4 +1062,20 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl callHungUp           {Ophangen}
 ::msgcat::mcset nl callVM               {Wilt u naar VM telefoneren?}
 
+# Fore some of these generic names could be used?
+::msgcat::mcset en iaxPhone             {IAX-telefoon}
+::msgcat::mcset en iaxPhoneAccount      {IAX-account}
+::msgcat::mcset en iaxPhoneUser         {Gebruiker}
+::msgcat::mcset en iaxPhonePassword     {Wachtwoord}
+::msgcat::mcset en iaxPhoneHost         {Server}
+::msgcat::mcset en iaxPhoneCidNum       {Cid-nummer}
+::msgcat::mcset en iaxPhoneCidName      {Cid-naam}
+::msgcat::mcset en iaxPhoneInputDev     {Invoerapparaat}
+::msgcat::mcset en iaxPhoneOutputDev    {Uitvoerapparaat}
+::msgcat::mcset en iaxPhoneAGC          {AGC}
+::msgcat::mcset en iaxPhoneAAGC         {AAGC}
+::msgcat::mcset en iaxPhoneNoise        {Ruis}
+::msgcat::mcset en iaxPhoneComfort      {Comfort}
+::msgcat::mcset en iaxPhoneCodec        {Codec}
+
 # END --------------------------------------------------------------------------
