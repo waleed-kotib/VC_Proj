@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.90 2005-12-17 12:15:50 matben Exp $
+# $Id: Preferences.tcl,v 1.91 2006-03-10 15:39:33 matben Exp $
  
 package require mnotebook
 package require tree
@@ -33,8 +33,11 @@ namespace eval ::Preferences:: {
     option add *Preferences*TMenubutton.style   Small.TMenubutton   widgetDefault
     option add *Preferences*TRadiobutton.style  Small.TRadiobutton  widgetDefault
     option add *Preferences*TCheckbutton.style  Small.TCheckbutton  widgetDefault
+    option add *Preferences*TCombobox.style     Small.TCombobox     widgetDefault
+    option add *Preferences*TCombobox.font      CociSmallFont       widgetDefault
     option add *Preferences*TEntry.style        Small.TEntry        widgetDefault
-    option add *Preferences*TEntry.font         CociSmallFont       widgetDefault
+    option add *Preferences*TEntry.font         CociSmallFont       widgetDefault    
+    
     #option add *Preferences*TScale.style        Small.TScale        widgetDefault
     
 }

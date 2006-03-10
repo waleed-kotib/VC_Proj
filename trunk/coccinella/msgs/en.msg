@@ -1056,4 +1056,20 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en callHungUp           {Hung up}
 ::msgcat::mcset en callVM               {Call VM?}
 
+# Fore some of these generic names could be used?
+::msgcat::mcset en iaxPhone             {IAX Phone}
+::msgcat::mcset en iaxPhoneAccount      {IAX Account}
+::msgcat::mcset en iaxPhoneUser         {User}
+::msgcat::mcset en iaxPhonePassword     {Password}
+::msgcat::mcset en iaxPhoneHost         {Host}
+::msgcat::mcset en iaxPhoneCidNum       {Cid Number}
+::msgcat::mcset en iaxPhoneCidName      {Cid Name}
+::msgcat::mcset en iaxPhoneInputDev     {Input Device}
+::msgcat::mcset en iaxPhoneOutputDev    {Output Device}
+::msgcat::mcset en iaxPhoneAGC          {AGC}
+::msgcat::mcset en iaxPhoneAAGC         {AAGC}
+::msgcat::mcset en iaxPhoneNoise        {Noise}
+::msgcat::mcset en iaxPhoneComfort      {Comfort}
+::msgcat::mcset en iaxPhoneCodec        {Codec}
+
 # END --------------------------------------------------------------------------

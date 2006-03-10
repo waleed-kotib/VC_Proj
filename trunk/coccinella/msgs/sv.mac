@@ -1065,4 +1065,20 @@ Om användarnamnet är upptaget så får du ett meddelande om detta när du registrer
 ::msgcat::mcset sv callHungUp           {Lägg på}
 ::msgcat::mcset sv callVM               {Call VM?}
 
+# Fore some of these generic names could be used?
+::msgcat::mcset sv iaxPhone             {IAX Phone}
+::msgcat::mcset sv iaxPhoneAccount      {IAX Account}
+::msgcat::mcset sv iaxPhoneUser         {User}
+::msgcat::mcset sv iaxPhonePassword     {Password}
+::msgcat::mcset sv iaxPhoneHost         {Host}
+::msgcat::mcset sv iaxPhoneCidNum       {Cid Number}
+::msgcat::mcset sv iaxPhoneCidName      {Cid Name}
+::msgcat::mcset sv iaxPhoneInputDev     {Input Device}
+::msgcat::mcset sv iaxPhoneOutputDev    {Output Device}
+::msgcat::mcset sv iaxPhoneAGC          {AGC}
+::msgcat::mcset sv iaxPhoneAAGC         {AAGC}
+::msgcat::mcset sv iaxPhoneNoise        {Noise}
+::msgcat::mcset sv iaxPhoneComfort      {Comfort}
+::msgcat::mcset sv iaxPhoneCodec        {Codec}
+
 # END --------------------------------------------------------------------------

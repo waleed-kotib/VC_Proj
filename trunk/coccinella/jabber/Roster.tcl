@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.162 2006-03-04 14:07:49 matben Exp $
+# $Id: Roster.tcl,v 1.163 2006-03-10 15:39:33 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -21,6 +21,7 @@ namespace eval ::Roster:: {
     ::hooks::register loginHook              ::Roster::LoginCmd
     ::hooks::register logoutHook             ::Roster::LogoutHook
     ::hooks::register quitAppHook            ::Roster::QuitHook
+    ::hooks::register uiMainToggleMinimal    ::Roster::ToggleMinimalHook
     
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Roster::InitPrefsHook
@@ -264,7 +265,7 @@ proc ::Roster::BuildToplevel {w} {
 #       w
 
 proc ::Roster::Build {w} {
-    global  this wDlgs prefs
+    global  this prefs
         
     variable wtree    
     variable wroster
@@ -307,7 +308,24 @@ proc ::Roster::Build {w} {
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure    $wbox 0 -weight 1
         
+    # Handle the prefs "Show" state.
+    if {$jprefs(ui,main,show,minimal)} {
+	StyleMinimal
+    }
     return $w
+}
+
+proc ::Roster::ToggleMinimalHook {minimal} {
+    variable wroster
+    variable rstyle
+    
+    if {[winfo exists $wroster]} {
+	if {$minimal && ($rstyle eq "normal")} {
+	    StyleMinimal
+	} elseif {!$minimal && ($rstyle eq "minimal")} {
+	    StyleNormal
+	}
+    }
 }
 
 proc ::Roster::StyleMinimal { } {

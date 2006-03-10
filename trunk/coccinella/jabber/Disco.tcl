@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.79 2006-02-10 15:40:50 matben Exp $
+# $Id: Disco.tcl,v 1.80 2006-03-10 15:39:33 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -14,23 +14,25 @@ package provide Disco 1.0
 
 namespace eval ::Disco:: {
 
-    ::hooks::register initHook           ::Disco::InitHook
-    ::hooks::register jabberInitHook     ::Disco::NewJlibHook
-    ::hooks::register loginHook          ::Disco::LoginHook     20
-    ::hooks::register logoutHook         ::Disco::LogoutHook
-    ::hooks::register presenceHook       ::Disco::PresenceHook
-
+    ::hooks::register initHook             ::Disco::InitHook
+    ::hooks::register jabberInitHook       ::Disco::NewJlibHook
+    ::hooks::register loginHook            ::Disco::LoginHook     20
+    ::hooks::register logoutHook           ::Disco::LogoutHook
+    ::hooks::register presenceHook         ::Disco::PresenceHook
+    ::hooks::register uiMainToggleMinimal  ::Disco::ToggleMinimalHook
+    
     # Standard widgets and standard options.
     option add *Disco.borderWidth           0               50
     option add *Disco.relief                flat            50
     option add *Disco*box.borderWidth       1               50
     option add *Disco*box.relief            sunken          50
-    option add *Disco.padding               2               50
+    option add *Disco.padding               4               50
     
     # Specials.
     option add *Disco.backgroundImage       cociexec        widgetDefault
     option add *Disco.waveImage             wave            widgetDefault
     option add *Disco.fontStyleMixed        0               widgetDefault    
+    option add *Disco.minimalPadding        {0}             widgetDefault
     
     # Used for discoing ourselves using a node hierarchy.
     variable debugNodes 0
@@ -113,6 +115,7 @@ namespace eval ::Disco:: {
     
     variable wtab -
     variable wtree -
+    variable wdisco -
 }
 
 proc ::Disco::InitHook { } {
@@ -669,7 +672,9 @@ proc ::Disco::NewPage { } {
 	set imd [::Theme::GetImage \
 	  [option get [winfo toplevel $wnb] browser16DisImage {}]]
 	set imSpec [list $im disabled $imd background $imd]
-	$wnb add $wtab -text [mc Disco] -image $imSpec -compound left
+	# This seems to pick up *Disco.padding ?
+	$wnb add $wtab -text [mc Disco] -image $imSpec -compound left  \
+	  -sticky news -padding 0
     }
 }
 
@@ -687,14 +692,11 @@ proc ::Disco::Build {w} {
     global  this prefs
     
     variable wtree
-    variable wtop
     variable wwave
     variable wdisco
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
+    variable wbox
+    variable dstyle
     upvar ::Jabber::jprefs jprefs
-    
-    ::Debug 2 "::Disco::Build"
     
     # The frame of class Disco.
     ttk::frame $w -class Disco
@@ -706,6 +708,7 @@ proc ::Disco::Build {w} {
     set wysc    $wbox.ysc
     set wtree   $wbox.tree
     set wwave   $w.wa
+    set dstyle  "normal"
 
     # D = -padx 0 -pady 0
     set bgImage   [::Theme::GetImage [option get $w backgroundImage {}]]
@@ -735,10 +738,59 @@ proc ::Disco::Build {w} {
     grid  $wxsc   -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure    $wbox 0 -weight 1
-	    
+
+    # Handle the prefs "Show" state.
+    if {$jprefs(ui,main,show,minimal)} {
+	StyleMinimal
+    }
     return $w
 }
+
+proc ::Disco::ToggleMinimalHook {minimal} {
+    variable wdisco
+    variable dstyle
     
+    if {[winfo exists $wdisco]} {
+	if {$minimal && ($dstyle eq "normal")} {
+	    StyleMinimal
+	} elseif {!$minimal && ($dstyle eq "minimal")} {
+	    StyleNormal
+	}
+    }
+}
+
+proc ::Disco::StyleMinimal { } {
+    variable wdisco
+    variable wbox
+    variable wwave
+    variable dstyle
+    
+    $wdisco configure -padding [option get $wdisco minimalPadding {}]
+    $wbox configure -bd 0
+    pack forget $wwave
+    set dstyle "minimal"
+}
+
+proc ::Disco::StyleNormal { } {
+    variable wdisco
+    variable wbox
+    variable wwave
+    variable dstyle
+    
+    set padding [option get $wdisco padding {}]
+    $wdisco configure -padding $padding
+    set bd [option get $wbox borderWidth {}]
+    $wbox configure -bd $bd
+    pack $wwave -side bottom -fill x -padx 8 -pady 2
+    set dstyle "normal"
+}
+
+proc ::Disco::StyleGet { } {
+    variable dstyle
+
+    return $dstyle
+}
+
 # Disco::RegisterPopupEntry --
 # 
 #       Components or plugins can add their own menu entries here.
