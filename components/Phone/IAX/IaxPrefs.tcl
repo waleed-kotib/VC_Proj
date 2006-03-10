@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: IaxPrefs.tcl,v 1.1 2006-03-02 07:05:50 matben Exp $
+# $Id: IaxPrefs.tcl,v 1.2 2006-03-10 15:34:46 matben Exp $
 
 package provide IaxPrefs 0.1
 
@@ -36,254 +36,229 @@ proc ::IaxPrefs::InitPrefsHook { } {
     set prefs(iaxPhone,comfort) 0
 #    set prefs(iaxPhone,echo) 0
 
-    ::PrefUtils::Add [list  \
-      [list prefs(iaxPhone,user) prefs_iaxPhone_user $prefs(iaxPhone,user)] \
-      [list prefs(iaxPhone,password) prefs_iaxPhone_password $prefs(iaxPhone,password)] \
-      [list prefs(iaxPhone,host) prefs_iaxPhone_host $prefs(iaxPhone,host)] \
-      [list prefs(iaxPhone,cidnum) prefs_iaxPhone_cidnum $prefs(iaxPhone,cidnum)] \
-      [list prefs(iaxPhone,cidname) prefs_iaxPhone_cidname $prefs(iaxPhone,cidname)] \
-      [list prefs(iaxPhone,codec) prefs_iaxPhone_codec $prefs(iaxPhone,codec)] \
-      [list prefs(iaxPhone,inputDevices) prefs_iaxPhone_inputDevices $prefs(iaxPhone,inputDevices)] \
-      [list prefs(iaxPhone,outputDevices)     prefs_iaxPhone_outputDevices     $prefs(iaxPhone,outputDevices)] \
-     [list prefs(iaxPhone,agc) prefs_iaxPhone_agc $prefs(iaxPhone,agc)] \
-      [list prefs(iaxPhone,aagc) prefs_iaxPhone_aagc $prefs(iaxPhone,aagc)] \
-      [list prefs(iaxPhone,noise) prefs_iaxPhone_noise $prefs(iaxPhone,noise)] \
-      [list prefs(iaxPhone,comfort) prefs_iaxPhone_comfort $prefs(iaxPhone,comfort)] ]
-#      [list prefs(iaxPhone,echo) prefs_iaxPhone_echo $prefs(iaxPhone,echo)] ] 
+    variable allKeys 
+    set allKeys {user password host cidnum cidname codec  \
+      inputDevices outputDevices agc aagc noise comfort}
+    # echo
 
+    set plist {}
+    foreach key $allKeys {
+	set name prefs(iaxPhone,$key)
+	set rsrc prefs_iaxPhone_$key
+	set val  [set $name]
+	lappend plist [list $name $rsrc $val]
+    }
+    ::PrefUtils::Add $plist
 }
 
 proc ::IaxPrefs::BuildPrefsHook {wtree nbframe} {
     global  prefs
     variable tmpPrefs
 
-    if {![::Preferences::HaveTableItem {iaxPhone}]} {
-        ::Preferences::NewTableItem {iaxPhone} [mc iaxPhone]
+    if {![::Preferences::HaveTableItem {phone}]} {
+        ::Preferences::NewTableItem {phone} [mc Phone]
     }
-    ::Preferences::NewTableItem {iaxPhone Devices} [mc Devices]
-    ::Preferences::NewTableItem {iaxPhone Filters} [mc Filters]
-    ::Preferences::NewTableItem {iaxPhone Codecs} [mc Codecs]
+    ::Preferences::NewTableItem {phone iax} [mc iaxPhone]
 
-    set wpage [$nbframe page {iaxPhone}]
-    BuildIaxPage $wpage
+    set wpage [$nbframe page {iax}]
+    BuildPage $wpage
  
-    # Edit Account page ----------------------------------------------------------
-#    set wpage [$nbframe page {Account}]
-#    BuildAccountPage $wpage
-   
-    # Devices page -------------------------------------------------------------
-    set wpage [$nbframe page {Devices}]
-    BuildDevicesPage $wpage
-
-    # Filters page -------------------------------------------------------------
-    set wpage [$nbframe page {Filters}]
-    BuildFiltersPage $wpage
-
-    # Codecs page -------------------------------------------------------------
-    set wpage [$nbframe page {Codecs}]
-    BuildCodecsPage $wpage
 }
 
-proc ::IaxPrefs::BuildIaxPage { page } {
+proc ::IaxPrefs::BuildPage {page} {
     global  prefs
     variable tmpPrefs
+    
+    set padding [option get . notebookPageSmallPadding {}]
+    
     set wc $page.i
-    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
-    pack $wc -side top -anchor [option get . dialogAnchor {}]
+    ttk::frame $wc -padding $padding
+    pack $wc -side top -anchor [option get . dialogAnchor {}]    
+    
+    set waccount $wc.ac
+    AccountFrame $waccount
 
-    set lfr $wc.fr
-    ttk::labelframe $lfr -text [mc {iaxPhoneAccount}] \
-      -padding [option get . groupSmallPadding {}]
-    pack $lfr -side top -anchor w
+    set wnb $wc.nb
+    ttk::notebook $wnb -padding {8 12 8 8}
 
-    set tmpPrefs(iaxPhone,user) $prefs(iaxPhone,user) 
-    set tmpPrefs(iaxPhone,password)  $prefs(iaxPhone,password)
-    set tmpPrefs(iaxPhone,host) $prefs(iaxPhone,host)
-    set tmpPrefs(iaxPhone,cidnum) $prefs(iaxPhone,cidnum)
-    set tmpPrefs(iaxPhone,cidname) $prefs(iaxPhone,cidname) 
-
-    ttk::label $lfr.luser -text "[mc iaxPhoneUser]:"
-    ttk::entry $lfr.user -textvariable [namespace current]::tmpPrefs(iaxPhone,user)
-
-    ttk::label $lfr.lpassword -text "[mc iaxPhonePassword]:"
-    ttk::entry $lfr.password -textvariable [namespace current]::tmpPrefs(iaxPhone,password)
-
-    ttk::label $lfr.lhost -text "[mc iaxPhoneHost]:"
-    ttk::entry $lfr.host -textvariable [namespace current]::tmpPrefs(iaxPhone,host)
-
-    ttk::label $lfr.lcidnum -text "[mc iaxPhoneCidNum]:"
-    ttk::entry $lfr.cidnum -textvariable [namespace current]::tmpPrefs(iaxPhone,cidnum)
-
-    ttk::label $lfr.lcidname -text "[mc iaxPhoneCidName]:"
-    ttk::entry $lfr.cidname -textvariable [namespace current]::tmpPrefs(iaxPhone,cidname)
-
-    grid  $lfr.luser $lfr.user    -sticky w
-    grid  $lfr.lpassword  $lfr.password -sticky w
-    grid  $lfr.lhost  $lfr.host    -sticky w
-    grid  $lfr.lcidnum $lfr.cidnum    -sticky w
-    grid  $lfr.lcidname $lfr.cidname  -sticky w
+    grid  $waccount  -sticky ew -padx 8
+    grid  $wnb       -sticky ew
+    
+    $wnb add [DevicesFrame $wnb.de] -padding $padding -text [mc Devices]
+    $wnb add [FiltersFrame $wnb.fi] -padding $padding -text [mc Filters]
+    $wnb add [CodecsFrame  $wnb.co] -padding $padding -text [mc Codecs]
 }
 
-proc ::IaxPrefs::BuildDevicesPage { page } {
+proc ::IaxPrefs::AccountFrame {win} {
     global  prefs
     variable tmpPrefs
 
-    set wc $page.d
-    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
-    pack $wc -side top -anchor [option get . dialogAnchor {}]
-
-    set lfr $wc.fr
-    ttk::labelframe $lfr -text [mc {Devices}] \
+    ttk::labelframe $win -text [mc iaxPhoneAccount] \
       -padding [option get . groupSmallPadding {}]
-    pack $lfr -side top -anchor w
+    pack $win -side top -anchor w
 
-    set tmpPrefs(iaxPhone,inputDevices) $prefs(iaxPhone,inputDevices)
-    set tmpPrefs(iaxPhone,outputDevices) $prefs(iaxPhone,outputDevices)
+    set tmpPrefs(user) $prefs(iaxPhone,user) 
+    set tmpPrefs(password)  $prefs(iaxPhone,password)
+    set tmpPrefs(host) $prefs(iaxPhone,host)
+    set tmpPrefs(cidnum) $prefs(iaxPhone,cidnum)
+    set tmpPrefs(cidname) $prefs(iaxPhone,cidname) 
 
-    set listInputDevices [iaxclient::devices "input"]
+    ttk::label $win.luser -text "[mc iaxPhoneUser]:"
+    ttk::entry $win.user -textvariable [namespace current]::tmpPrefs(user)
+
+    ttk::label $win.lpassword -text "[mc iaxPhonePassword]:"
+    ttk::entry $win.password -textvariable [namespace current]::tmpPrefs(password)
+
+    ttk::label $win.lhost -text "[mc iaxPhoneHost]:"
+    ttk::entry $win.host -textvariable [namespace current]::tmpPrefs(host)
+
+    ttk::label $win.lcidnum -text "[mc iaxPhoneCidNum]:"
+    ttk::entry $win.cidnum -textvariable [namespace current]::tmpPrefs(cidnum)
+
+    ttk::label $win.lcidname -text "[mc iaxPhoneCidName]:"
+    ttk::entry $win.cidname -textvariable [namespace current]::tmpPrefs(cidname)
+
+    grid  $win.luser      $win.user      -sticky e -pady 2
+    grid  $win.lpassword  $win.password  -sticky e -pady 2
+    grid  $win.lhost      $win.host      -sticky e -pady 2
+    grid  $win.lcidnum    $win.cidnum    -sticky e -pady 2
+    grid  $win.lcidname   $win.cidname   -sticky e -pady 2
+    
+    return $win
+}
+
+proc ::IaxPrefs::DevicesFrame {win} {
+    global  prefs
+    variable tmpPrefs
+
+    ttk::frame $win -padding [option get . groupSmallPadding {}]
+    pack $win -side top -anchor w
+
+    set tmpPrefs(inputDevices)  $prefs(iaxPhone,inputDevices)
+    set tmpPrefs(outputDevices) $prefs(iaxPhone,outputDevices)
+
+    set listInputDevices [iaxclient::devices input]
     foreach {device} $listInputDevices {
         lappend inputDevices [lindex $device 0]
     } 
-    ttk::label $lfr.linputDev -text "[mc iaxPhoneInputDev]:"
-    ttk::combobox $lfr.input_dev \
-      -textvariable [namespace current]::tmpPrefs(iaxPhone,inputDevices) -values $inputDevices
+    ttk::label $win.linputDev -text "[mc iaxPhoneInputDev]:"
+    ttk::combobox $win.input_dev -state readonly  \
+      -textvariable [namespace current]::tmpPrefs(inputDevices) -values $inputDevices
 
-    set listOutputDevices [iaxclient::devices "output"]
+    set listOutputDevices [iaxclient::devices output]
     foreach {device}  $listOutputDevices {
         lappend outputDevices [lindex $device 0]
     }
-    ttk::label $lfr.loutputDev -text "[mc iaxPhoneOutputDev]:"
-    ttk::combobox $lfr.output_dev \
-      -textvariable [namespace current]::tmpPrefs(iaxPhone,outputDevices) -values $outputDevices
+    ttk::label $win.loutputDev -text "[mc iaxPhoneOutputDev]:"
+    ttk::combobox $win.output_dev -state readonly  \
+      -textvariable [namespace current]::tmpPrefs(outputDevices)  \
+      -values $outputDevices
     
-    grid  $lfr.linputDev $lfr.input_dev   -sticky w
-    grid  $lfr.loutputDev $lfr.output_dev    -sticky w
-
+    grid  $win.linputDev   $win.input_dev   -sticky e -pady 2
+    grid  $win.loutputDev  $win.output_dev  -sticky e -pady 2
+    
+    return $win
 }
 
-proc ::IaxPrefs::BuildFiltersPage { page } {
+proc ::IaxPrefs::FiltersFrame {win} {
     global  prefs
     variable tmpPrefs
 
-    set wc $page.f
-    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
-    pack $wc -side top -anchor [option get . dialogAnchor {}]
+    ttk::frame $win -padding [option get . groupSmallPadding {}]
+    pack $win -side top -anchor w
 
-    set lfr $wc.fr
-    ttk::labelframe $lfr -text [mc {Filters}] \
-      -padding [option get . groupSmallPadding {}]
-    pack $lfr -side top -anchor w
+    set tmpPrefs(agc) $prefs(iaxPhone,agc)
+    set tmpPrefs(aagc) $prefs(iaxPhone,aagc)
+    set tmpPrefs(noise) $prefs(iaxPhone,noise)
+    set tmpPrefs(comfort) $prefs(iaxPhone,comfort)
+#    set tmpPrefs(echo) $prefs(iaxPhone,echo)
 
-    set tmpPrefs(iaxPhone,agc) $prefs(iaxPhone,agc)
-    set tmpPrefs(iaxPhone,aagc) $prefs(iaxPhone,aagc)
-    set tmpPrefs(iaxPhone,noise) $prefs(iaxPhone,noise)
-    set tmpPrefs(iaxPhone,comfort) $prefs(iaxPhone,comfort)
-#    set tmpPrefs(iaxPhone,echo) $prefs(iaxPhone,echo)
+    ttk::label $win.lagc -text "[mc iaxPhoneAGC]:"
+    ttk::checkbutton $win.agc   \
+      -variable [namespace current]::tmpPrefs(agc)
 
-    ttk::label $lfr.lagc -text "[mc iaxPhoneAGC]:"
-    ttk::checkbutton $lfr.agc   \
-      -variable [namespace current]::tmpPrefs(iaxPhone,agc)
+    ttk::label $win.laagc -text "[mc iaxPhoneAAGC]:"
+    ttk::checkbutton $win.aagc  \
+      -variable [namespace current]::tmpPrefs(aagc)
 
-    ttk::label $lfr.laagc -text "[mc iaxPhoneAAGC]:"
-    ttk::checkbutton $lfr.aagc  \
-      -variable [namespace current]::tmpPrefs(iaxPhone,aagc)
+    ttk::label $win.lnoise -text "[mc iaxPhoneNoise]:"
+    ttk::checkbutton $win.noise  \
+      -variable [namespace current]::tmpPrefs(noise)
 
-    ttk::label $lfr.lnoise -text "[mc iaxPhoneNoise]:"
-    ttk::checkbutton $lfr.noise  \
-      -variable [namespace current]::tmpPrefs(iaxPhone,noise)
+    ttk::label $win.lcomfort -text "[mc iaxPhoneComfort]:"
+    ttk::checkbutton $win.comfort   \
+      -variable [namespace current]::tmpPrefs(comfort)
 
-    ttk::label $lfr.lcomfort -text "[mc iaxPhoneComfort]:"
-    ttk::checkbutton $lfr.comfort   \
-      -variable [namespace current]::tmpPrefs(iaxPhone,comfort)
+#    ttk::label $win.lecho -text "[mc iaxPhoneEcho]:"
+#    ttk::checkbutton $win.echo -text [mc Echo]  \
+#      -variable [namespace current]::tmpPrefs(echo)
 
-#    ttk::label $lfr.lecho -text "[mc iaxPhoneEcho]:"
-#    ttk::checkbutton $lfr.echo -text [mc Echo]  \
-#      -variable [namespace current]::tmpPrefs(iaxPhone,echo)
-
-    grid  $lfr.lagc $lfr.agc   -sticky w
-    grid  $lfr.laagc $lfr.aagc    -sticky w
-    grid  $lfr.lnoise $lfr.noise   -sticky w
-    grid  $lfr.lcomfort $lfr.comfort    -sticky w
-#    grid  $lfr.lecho $lfr.echo   -sticky w
+    grid  $win.lagc      $win.agc      -sticky e
+    grid  $win.laagc     $win.aagc     -sticky e
+    grid  $win.lnoise    $win.noise    -sticky e
+    grid  $win.lcomfort  $win.comfort  -sticky e
+#    grid  $win.lecho $win.echo   -sticky w
+    
+    return $win
 }
 
-proc ::IaxPrefs::BuildCodecsPage { page } {
+proc ::IaxPrefs::CodecsFrame {win} {
     global  prefs
     variable tmpPrefs
 
-    set wc $page.c
-    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
-    pack $wc -side top -anchor [option get . dialogAnchor {}]
+    ttk::frame $win -padding [option get . groupSmallPadding {}]
+    pack $win -side top -anchor w
 
-    set lfr $wc.fr
-    ttk::labelframe $lfr -text [mc {Codecs}] \
-      -padding [option get . groupSmallPadding {}]
-    pack $lfr -side top -anchor w
+    set tmpPrefs(codec) $prefs(iaxPhone,codec)
 
-    set tmpPrefs(iaxPhone,codec) $prefs(iaxPhone,codec)
+    ttk::label $win.lcodec -text "[mc iaxPhoneCodec]:"
 
-    ttk::label $lfr.lcodec -text "[mc iaxPhoneCodec]:"
+    ttk::radiobutton $win.codeca -text "aLaw" -variable [namespace current]::tmpPrefs(codec) -value "ALAW" 
+    ttk::radiobutton $win.codecu -text "uLaw" -variable [namespace current]::tmpPrefs(codec) -value "ULAW"
+    ttk::radiobutton $win.codecg -text "GSM" -variable [namespace current]::tmpPrefs(codec) -value "GSM"
+    ttk::radiobutton $win.codeci -text "iLBC" -variable [namespace current]::tmpPrefs(codec) -value "ILBC"
 
-    ttk::radiobutton $lfr.codeca -text "[mc aLaw]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "ALAW" 
-    ttk::radiobutton $lfr.codecu -text "[mc uLaw]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "ULAW"
-    ttk::radiobutton $lfr.codecg -text "[mc GSM]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "GSM"
-    ttk::radiobutton $lfr.codeci -text "[mc iLBC]" -variable [namespace current]::tmpPrefs(iaxPhone,codec) -value "ILBC"
-
-    grid  $lfr.lcodec -sticky w
-    grid  $lfr.codeca -sticky w
-    grid  $lfr.codecu -sticky w
-    grid  $lfr.codecg -sticky w
-    grid  $lfr.codeci -sticky w
+    # If you add more codecs use a new column.
+    grid  $win.lcodec  $win.codeca  -sticky w
+    grid  x            $win.codecu  -sticky w
+    grid  x            $win.codecg  -sticky w
+    grid  x            $win.codeci  -sticky w
+    grid $win.lcodec -padx 4
+    return $win
 }
 
 proc ::IaxPrefs::SavePrefsHook { } {
     global  prefs
     variable tmpPrefs
+    variable allKeys 
 
-    set prefs(iaxPhone,user) $tmpPrefs(iaxPhone,user)
-    set prefs(iaxPhone,password)  $tmpPrefs(iaxPhone,password)
-    set prefs(iaxPhone,host) $tmpPrefs(iaxPhone,host)
-    set prefs(iaxPhone,cidnum) $tmpPrefs(iaxPhone,cidnum)
-    set prefs(iaxPhone,cidname) $tmpPrefs(iaxPhone,cidname)
-    set prefs(iaxPhone,codec) $tmpPrefs(iaxPhone,codec)
-    set prefs(iaxPhone,inputDevices) $tmpPrefs(iaxPhone,inputDevices)
-    set prefs(iaxPhone,outputDevices) $tmpPrefs(iaxPhone,outputDevices)
-    set prefs(iaxPhone,agc) $tmpPrefs(iaxPhone,agc)
-    set prefs(iaxPhone,aagc) $tmpPrefs(iaxPhone,aagc)
-    set prefs(iaxPhone,noise) $tmpPrefs(iaxPhone,noise)
-    set prefs(iaxPhone,comfort) $tmpPrefs(iaxPhone,comfort)
-#    set prefs(iaxPhone,echo) $tmpPrefs(iaxPhone,echo)
-
+    foreach key $allKeys {
+	set prefs(iaxPhone,$key) $tmpPrefs($key)
+    }
     ::Iax::Reload
 }
 
 proc ::IaxPrefs::CancelPrefsHook { } {
     global  prefs
     variable tmpPrefs
+    variable allKeys 
 
-    set key iaxPhone,user
-    if {![string equal $prefs($key) $tmpPrefs($key)]} {
-        ::Preferences::HasChanged
+    foreach key $allKeys {
+	if {![string equal $prefs(iaxPhone,$key) $tmpPrefs($key)]} {
+	    ::Preferences::HasChanged
+	    break
+	}
     }
 }
 
 proc ::IaxPrefs::UserDefaultsHook { } {
     global  prefs
     variable tmpPrefs
+    variable allKeys 
 
-    set tmpPrefs(iaxPhone,user) $prefs(iaxPhone,user)
-    set tmpPrefs(iaxPhone,password)  $prefs(iaxPhone,password)
-    set tmpPrefs(iaxPhone,host) $prefs(iaxPhone,host)
-    set tmpPrefs(iaxPhone,cidnum) $prefs(iaxPhone,cidnum)
-    set tmpPrefs(iaxPhone,cidname) $prefs(iaxPhone,cidname)
-    set tmpPrefs(iaxPhone,codec) $prefs(iaxPhone,codec)
-    set tmpPrefs(iaxPhone,inputDevices) $prefs(iaxPhone,inputDevices)
-    set tmpPrefs(iaxPhone,outputDevices) $prefs(iaxPhone,outputDevices)
-    set tmpPrefs(iaxPhone,agc) $prefs(iaxPhone,agc)
-    set tmpPrefs(iaxPhone,aagc) $prefs(iaxPhone,aagc)
-    set tmpPrefs(iaxPhone,noise) $prefs(iaxPhone,noise)
-    set tmpPrefs(iaxPhone,comfort) $prefs(iaxPhone,comfort)
-#    set tmpPrefs(iaxPhone,echo) $prefs(iaxPhone,echo)
+    foreach key $allKeys {
+	set tmpPrefs($key) $prefs(iaxPhone,$key)
+    }
 }
 
 proc ::IaxPrefs::DestroyPrefsHook { } {
