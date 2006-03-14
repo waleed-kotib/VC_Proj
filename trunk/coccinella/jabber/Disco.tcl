@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Disco application part.
 #      
-#  Copyright (c) 2004-2005  Mats Bengtsson
+#  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.80 2006-03-10 15:39:33 matben Exp $
+# $Id: Disco.tcl,v 1.81 2006-03-14 07:18:58 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -21,13 +21,16 @@ namespace eval ::Disco:: {
     ::hooks::register presenceHook         ::Disco::PresenceHook
     ::hooks::register uiMainToggleMinimal  ::Disco::ToggleMinimalHook
     
+    # Define all hooks for preference settings.
+    ::hooks::register prefsInitHook        ::Disco::InitPrefsHook
+
     # Standard widgets and standard options.
     option add *Disco.borderWidth           0               50
     option add *Disco.relief                flat            50
     option add *Disco*box.borderWidth       1               50
     option add *Disco*box.relief            sunken          50
     option add *Disco.padding               4               50
-    
+
     # Specials.
     option add *Disco.backgroundImage       cociexec        widgetDefault
     option add *Disco.waveImage             wave            widgetDefault
@@ -70,6 +73,36 @@ namespace eval ::Disco:: {
     # Template for the browse popup menu.
     variable popMenuDefs
 
+    set popMenuDefs(disco,def) {
+	{command    mMessage       {::NewMsg::Build -to $jid} }
+	{command    mChat          {::Chat::StartThread $jid} }
+	{command    mWhiteboard    {::Jabber::WB::NewWhiteboardTo $jid} }
+	{command    mEnterRoom     {
+	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
+	} }
+	{command    mCreateRoom    {
+	    ::GroupChat::EnterOrCreate create -server $jid
+	} }
+	{separator}
+	{command    mInfo          {::UserInfo::Get $jid $node} }
+	{separator}
+	{command    mSearch        {
+	    ::Search::Build -server $jid -autoget 1
+	} }
+	{command    mRegister      {
+	    ::GenRegister::NewDlg -server $jid -autoget 1
+	} }
+	{command    mUnregister    {::Register::Remove $jid} }
+	{separator}
+	{cascade    mShow          {
+	    {check  mBackgroundImage  {::Disco::SetBackgroundImage} {
+		-variable ::Jabber::jprefs(disco,useBgImage)
+	    } }
+	} }
+	{command    mRefresh       {::Disco::Refresh $vstruct} }
+	{command    mAddServer     {::Disco::AddServerDlg}     }
+    }
+
     # List the features of that each menu entry can handle:
     #   conference: groupchat service, not room
     #   room:       groupchat room
@@ -82,29 +115,26 @@ namespace eval ::Disco:: {
     
     # This does not work if nodes. The limitation is in the protocol.
 
-    set popMenuDefs(disco,def) {
-	mMessage       user         {::NewMsg::Build -to $jid}
-	mChat          user         {::Chat::StartThread $jid}
-	mWhiteboard    {wb room}    {::Jabber::WB::NewWhiteboardTo $jid}
-	mEnterRoom     room         {
-	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
-	}
-	mCreateRoom    conference   {::GroupChat::EnterOrCreate create \
-	  -server $jid}
-	separator      {}           {}
-	mInfo          jid          {::UserInfo::Get $jid $node}
-	separator      {}           {}
-	mSearch        search       {
-	    ::Search::Build -server $jid -autoget 1
-	}
-	mRegister      register     {
-	    ::GenRegister::NewDlg -server $jid -autoget 1
-	}
-	mUnregister    register     {::Register::Remove $jid}
-	separator      {}           {}
-	mRefresh       jid          {::Disco::Refresh $vstruct}
-	mAddServer     {}           {::Disco::AddServerDlg}
+    set popMenuDefs(disco,type) {
+	{mMessage       {user}          }
+	{mChat          {user}          }
+	{mWhiteboard    {wb room}       }
+	{mEnterRoom     {room}          }
+	{mCreateRoom    {conference}    }
+	{mInfo          {jid}           }
+	{mSearch        {search}        }
+	{mRegister      {register}      }
+	{mUnregister    {register}      }
+	{mShow          {normal}     {
+	    {mBackgroundImage  {normal} }
+	}}
+	{mRefresh       {jid}           }
+	{mAddServer     {}              }
     }
+
+    # Keeps track of all registered menu entries.
+    variable regPopMenuDef {}
+    variable regPopMenuType {}
 
     variable dlguid 0
 
@@ -116,6 +146,25 @@ namespace eval ::Disco:: {
     variable wtab -
     variable wtree -
     variable wdisco -
+}
+
+proc ::Disco::InitPrefsHook {} {
+    upvar ::Jabber::jprefs jprefs
+    
+    # The disco background image is partly controlled by option database.
+    # @@@ The bgImagePath is unused. We should make a more flexible and
+    #     generic way to change image similar to desktop images;
+    #     A new dialog where you can choose from a selection of images
+    #     all contained inside the prefs dir.
+    #     If a new image is added, it is copied there. The default image
+    #     shall always be there. Possibility to select: "Don't show image".
+    set jprefs(disco,useBgImage)     1
+    set jprefs(disco,bgImagePath)    ""
+
+    ::PrefUtils::Add [list  \
+      [list ::Jabber::jprefs(disco,useBgImage)   jprefs_disco_useBgImage   $jprefs(disco,useBgImage)]  \
+      [list ::Jabber::jprefs(disco,bgImagePath)  jprefs_disco_bgImagePath  $jprefs(disco,bgImagePath)] \
+      ]
 }
 
 proc ::Disco::InitHook { } {
@@ -338,11 +387,6 @@ proc ::Disco::ItemsCB {cmd jlibname type from subiq args} {
 	set pitem   [list $from $pnode]
 	set vstruct [concat $ppv [list $pitem]]
 	
-	#puts "\t pnode=$pnode"
-	#puts "\t ppv=$ppv"
-	#puts "\t vstruct=$vstruct"
-	#parray ${jlibname}::disco::items
-
 	unset -nocomplain tstate(run,$vstruct)
 	$wwave animate -1
 
@@ -711,7 +755,6 @@ proc ::Disco::Build {w} {
     set dstyle  "normal"
 
     # D = -padx 0 -pady 0
-    set bgImage   [::Theme::GetImage [option get $w backgroundImage {}]]
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
     ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
       -type image -image $waveImage
@@ -721,8 +764,6 @@ proc ::Disco::Build {w} {
     frame $wbox
     pack  $wbox -side top -fill both -expand 1
 
-    set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
-
     ttk::scrollbar $wxsc -command [list $wtree xview] -orient horizontal
     ttk::scrollbar $wysc -command [list $wtree yview] -orient vertical
     ::ITree::New $wtree $wxsc $wysc   \
@@ -730,9 +771,10 @@ proc ::Disco::Build {w} {
       -open        ::Disco::OpenTreeCmd   \
       -close       ::Disco::CloseTreeCmd  \
       -buttonpress ::Disco::Popup         \
-      -buttonpopup ::Disco::Popup         \
-      -backgroundimage $bgimage
+      -buttonpopup ::Disco::Popup
     
+    SetBackgroundImage
+
     grid  $wtree  -row 0 -column 0 -sticky news
     grid  $wysc   -row 0 -column 1 -sticky ns
     grid  $wxsc   -row 1 -column 0 -sticky ew
@@ -791,33 +833,55 @@ proc ::Disco::StyleGet { } {
     return $dstyle
 }
 
+proc ::Disco::SetBackgroundImage { } {
+    upvar ::Jabber::jprefs jprefs
+    variable wtree
+    variable wdisco
+    
+    if {$jprefs(disco,useBgImage)} {
+	set image [::Theme::GetImage [option get $wdisco backgroundImage {}]]
+    } else {
+	set image ""
+    }
+    $wtree configure -backgroundimage $image
+}
+
 # Disco::RegisterPopupEntry --
 # 
 #       Components or plugins can add their own menu entries here.
 
-proc ::Disco::RegisterPopupEntry {menuSpec} {
-    variable popMenuDefs
+proc ::Disco::RegisterPopupEntry {menuDef menuType} {
+    variable regPopMenuDef
+    variable regPopMenuType
     
-    # Keeps track of all registered menu entries.
-    variable regPopMenuSpec
+    set regPopMenuDef  [concat $regPopMenuDef $menuDef]
+    set regPopMenuType [concat $regPopMenuType $menuType]
+}
+
+proc ::Disco::UnRegisterPopupEntry {name} {
+    variable regPopMenuDef
+    variable regPopMenuType
     
-    # Index of last separator.
-    set ind [lindex [lsearch -all $popMenuDefs(disco,def) "separator"] end]
-    if {![info exists regPopMenuSpec]} {
-	
-	# Add separator if this is the first addon entry.
-	incr ind 3
-	set popMenuDefs(disco,def) [linsert $popMenuDefs(disco,def)  \
-	  $ind {separator} {} {}]
-	set regPopMenuSpec {}
-	set ind [lindex [lsearch -all $popMenuDefs(disco,def) "separator"] end]
+    set idx [lsearch -glob $regPopMenuDef "* $name *"]
+    if {$idx >= 0} {
+	set regPopMenuDef [lreplace $regPopMenuDef $idx $idx]
     }
-    
-    # Add new entry just before the last separator
-    set v $popMenuDefs(disco,def)
-    set popMenuDefs(disco,def) [concat [lrange $v 0 [expr $ind-1]] $menuSpec \
-      [lrange $v $ind end]]
-    set regPopMenuSpec [concat $regPopMenuSpec $menuSpec]
+    set idx [lsearch -glob $regPopMenuType "$name *"]
+    if {$idx >= 0} {
+	set regPopMenuType [lreplace $regPopMenuType $idx $idx]
+    }
+}
+
+if {0} {
+    # test
+    set menuDef {
+	{command "Hej och HŒ" {puts skit}}
+	{command "Nej och GŒ" {puts piss}}
+    }
+    set menuType {
+	{"Hej och HŒ"  {jid}}
+    }
+    ::Disco::RegisterPopupEntry $menuDef $menuType
 }
 
 # Disco::Popup --
@@ -832,9 +896,9 @@ proc ::Disco::RegisterPopupEntry {menuSpec} {
 #       popup menu displayed
 
 proc ::Disco::Popup {w vstruct x y} {
-    global  wDlgs this
-    
     variable popMenuDefs
+    variable regPopMenuDef
+    variable regPopMenuType
     upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Disco::Popup w=$w, vstruct='$vstruct'"
@@ -892,51 +956,30 @@ proc ::Disco::Popup {w vstruct x y} {
     }
     
     ::Debug 2 "\t clicked=$clicked"
-        
+    
+    # Insert any registered popip menu entries.
+    set mDef  $popMenuDefs(disco,def)
+    set mType $popMenuDefs(disco,type)
+    if {[llength $regPopMenuDef]} {
+	set idx [lindex [lsearch -glob -all $mDef {sep*}] end]
+	if {$idx eq ""} {
+	    set idx end
+	}
+	foreach line $regPopMenuDef {
+	    set mDef [linsert $mDef $idx $line]
+	}
+	set mDef [linsert $mDef $idx {separator}]
+    }
+    foreach line $regPopMenuType {
+	lappend mType $line
+    }
+    
     # Make the appropriate menu.
     set m $jstate(wpopup,disco)
-    set i 0
     catch {destroy $m}
-    menu $m -tearoff 0
+    menu $m -tearoff 0 -postcommand [list ::Disco::PostMenuCmd $m $mType $clicked]
     
-    foreach {item type cmd} $popMenuDefs(disco,def) {
-	if {[string index $cmd 0] eq "@"} {
-	    set mt [menu ${m}.sub${i} -tearoff 0]
-	    set locname [mc $item]
-	    $m add cascade -label $locname -menu $mt -state disabled
-	    eval [string range $cmd 1 end] $mt
-	    incr i
-	} elseif {[string equal $item "separator"]} {
-	    $m add separator
-	    continue
-	} else {
-	    
-	    # Substitute the jid arguments. Preserve list structure!
-	    set cmd [eval list $cmd]
-	    set locname [mc $item]
-	    $m add command -label $locname -command [list after 40 $cmd]  \
-	      -state disabled
-	}
-	
-	# If a menu should be enabled even if not connected do it here.
-	
-	if {![::Jabber::IsConnected]} {
-	    continue
-	}
-	
-	# State of menu entry. 
-	# We use the 'type' and 'clicked' lists to set the state.
-	if {[listintersectnonempty $type $clicked]} {
-	    set state normal
-	} elseif {$type eq ""} {
-	    set state normal
-	} else {
-	    set state disabled
-	}
-	if {[string equal $state "normal"]} {
-	    $m entryconfigure $locname -state normal
-	}
-    }   
+    ::AMenu::Build $m $mDef -varlist [list jid $jid node $node vstruct $vstruct]
     
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
@@ -945,11 +988,33 @@ proc ::Disco::Popup {w vstruct x y} {
     set X [expr [winfo rootx $w] + $x]
     set Y [expr [winfo rooty $w] + $y]
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
-    
-    # Mac bug... (else can't post menu while already posted if toplevel...)
-    if {[string equal "macintosh" $this(platform)]} {
-	catch {destroy $m}
-	update
+}
+
+proc ::Disco::PostMenuCmd {m mType clicked} {
+    variable menuIndex
+
+    foreach mspec $mType {
+	lassign $mspec name type subType
+
+	# State of menu entry. 
+	# We use the 'type' and 'clicked' lists to set the state.
+	if {[listintersectnonempty $type $clicked]} {
+	    set state normal
+	} elseif {$type eq "normal"} {
+	    set state normal
+	} elseif {$type eq ""} {
+	    set state normal
+	} else {
+	    set state disabled
+	}
+	set midx [::AMenu::GetMenuIndex $m $name]
+	if {[string equal $state "disabled"]} {
+	    $m entryconfigure $midx -state disabled
+	}
+	if {[llength $subType]} {
+	    set mt [$m entrycget $midx -menu]
+	    PostMenuCmd $mt $subType $clicked
+	}
     }
 }
 

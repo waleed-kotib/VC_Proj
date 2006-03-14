@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the roster tree using treectrl.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.15 2006-02-16 10:59:56 matben Exp $
+# $Id: RosterTree.tcl,v 1.16 2006-03-14 07:18:59 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
