@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AMenu.tcl,v 1.5 2006-03-04 14:07:49 matben Exp $
+# $Id: AMenu.tcl,v 1.6 2006-03-14 07:18:59 matben Exp $
 
 package provide AMenu 1.0
 
@@ -26,23 +26,26 @@ namespace eval ::AMenu {
 #       menuDef   a list of lines:
 #                   {type name command ?{-key value..}?}
 #                 name: always the key that is used for msgcat::mc
+#       args    -varlist   list of {name value ...} which sets variables used
+#                          for substitutions in command and options
 #       
 # Results:
 #       menu widget path
 
-proc ::AMenu::Build {m menuDef} {
+proc ::AMenu::Build {m menuDef args} {
     variable menuIndex
     
-    set i 0
+    array set aArr {-varlist {}}
+    array set aArr $args
+    foreach {key value} $aArr(-varlist) {
+	set $key $value
+    }
     set isub 0
     
     bind $m <Destroy> {+::AMenu::Free %W }
     
     foreach line $menuDef {
-	set op   [lindex $line 0]
-	set name [lindex $line 1]
-	set cmd  [lindex $line 2]
-	set opts [lindex $line 3]
+	lassign $line op name cmd opts
 	
 	if {[tk windowingsystem] eq "aqua"} {
 	    set idx [lsearch $opts -image]
@@ -61,22 +64,22 @@ proc ::AMenu::Build {m menuDef} {
 	}
 
 	switch -glob -- $op {
-	    command {
-		eval {$m add command -label $lname  \
-		  -command [list after 40 $cmd]} $opts
+	    com* {
+		set cmd [list after 40 [eval list $cmd]]
+		eval {$m add command -label $lname -command $cmd} $opts
 	    }
-	    radio* {
-		eval {$m add radiobutton -label $lname  \
-		  -command [list after 40 $cmd]} $opts
+	    rad* {
+		set cmd [list after 40 [eval list $cmd]]
+		eval {$m add radiobutton -label $lname -command $cmd} $opts
 	    }
-	    check* {
-		eval {$m add checkbutton -label $lname  \
-		  -command [list after 40 $cmd]} $opts
+	    che* {
+		set cmd [list after 40 [eval list $cmd]]
+		eval {$m add checkbutton -label $lname -command $cmd} $opts
 	    }
 	    sep* {
 		$m add separator
 	    }
-	    cascade {
+	    cas* {
 		set mt [menu $m.sub$isub -tearoff 0]
 		eval {$m add cascade -label $lname -menu $mt} $opts
 		if {[string index $cmd 0] eq "@"} {
@@ -90,7 +93,6 @@ proc ::AMenu::Build {m menuDef} {
 	if {$name ne ""} {
 	    set menuIndex($m,$name) [$m index $lname]
 	}
-	incr i
     }
     return $m
 }

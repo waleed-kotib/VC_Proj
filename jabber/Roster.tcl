@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Roster GUI part.
 #      
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.163 2006-03-10 15:39:33 matben Exp $
+# $Id: Roster.tcl,v 1.164 2006-03-14 07:18:59 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -87,10 +87,10 @@ namespace eval ::Roster:: {
 	command     mSendFile      {user available}   {::FTrans::Send $jid3}             {}
 	separator   {}             {}                 {} {}
 	command     mAddNewUser    {}                 {::Jabber::User::NewDlg}            {}
-	command     mEditUser      user               {::Jabber::User::EditDlg $jid}      {}
-	command     mUserInfo      user               {::UserInfo::Get $jid3}             {}
+	command     mEditUser      {user}             {::Jabber::User::EditDlg $jid}      {}
+	command     mUserInfo      {user}             {::UserInfo::Get $jid3}             {}
 	command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
-	command     mRemoveContact user               {::Roster::SendRemove $jid}         {}
+	command     mRemoveContact {user}             {::Roster::SendRemove $jid}         {}
 	separator   {}             {}                 {} {}
 	cascade     mShow          {normal}           {
 	    check     mOffline     {normal}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
@@ -107,22 +107,17 @@ namespace eval ::Roster:: {
 
     # Transports.
     set popMenuDefs(roster,trpt,def) {
-	command     mLastLogin/Activity user          {::Jabber::GetLast $jid}        {}
-	command     mvCard         user               {::VCard::Fetch other $jid}     {}
+	command     mLastLogin/Activity {user}        {::Jabber::GetLast $jid}        {}
+	command     mvCard         {user}             {::VCard::Fetch other $jid}     {}
 	command     mAddNewUser    {}                 {::Jabber::User::NewDlg}        {}
-	command     mEditUser      user               {::Jabber::User::EditDlg $jid}  {}
-	command     mVersion       user               {::Jabber::GetVersion $jid3}    {}
+	command     mEditUser      {user}             {::Jabber::User::EditDlg $jid}  {}
+	command     mVersion       {user}             {::Jabber::GetVersion $jid3}    {}
 	command     mLoginTrpt     {trpt unavailable} {::Roster::LoginTrpt $jid3}     {}
 	command     mLogoutTrpt    {trpt available}   {::Roster::LogoutTrpt $jid3}    {}
 	separator   {}             {}                 {} {}
 	command     mUnregister    {trpt}             {::Register::Remove $jid3}      {}
 	command     mRefreshRoster {}                 {::Roster::Refresh}             {}
     }  
-
-    # Can't run our http server on macs :-(
-    if {[string equal $this(platform) "macintosh"]} {
-	set popMenuDefs(roster,def) [lreplace $popMenuDefs(roster,def) 9 11]
-    }
     
     # Various time values.
     variable timer
@@ -619,7 +614,7 @@ proc ::Roster::DoPopup {jidlist clicked status group x y} {
 
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
-    
+        
     # Post popup menu.
     set X [expr [winfo rootx $wtree] + $x]
     set Y [expr [winfo rooty $wtree] + $y]
@@ -677,7 +672,7 @@ proc ::Roster::BuildMenu {m menuDef _jidlist clicked status group} {
 	    cascade {
 		set mt [menu $m.sub$i -tearoff 0]
 		eval {$m add cascade -label $locname -menu $mt -state disabled} $opts
-		if {[string index $cmd 0] == "@"} {
+		if {[string index $cmd 0] eq "@"} {
 		    eval [string range $cmd 1 end] $mt
 		} else {
 		    BuildMenu $mt $cmd $_jidlist $clicked $status $group

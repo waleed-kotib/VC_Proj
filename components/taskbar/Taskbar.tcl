@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.19 2006-03-04 14:07:48 matben Exp $
+# $Id: Taskbar.tcl,v 1.20 2006-03-14 07:18:58 matben Exp $
 
 package require balloonhelp
 
@@ -204,10 +204,11 @@ proc ::Taskbar::X11Popup {x y} {
     # Try to figure out if top or bottom.
     set bbox [$wtray bbox]
     set ybot [expr {[lindex $bbox 3] + [winfo reqheight $wmenu]}]
-    if {$ybot > [winfo reqheight $wmenu]} {
-	tk_popup $wmenu [expr $x] [expr {[lindex $bbox 3] + 10}] [$wmenu index 0]
+    set H [$wmenu yposition 1]
+    if {$ybot > [winfo screenheight $wtray]} {
+	tk_popup $wmenu $x [expr {[lindex $bbox 1] - $H}] [$wmenu index end]
     } else {
-	tk_popup $wmenu [expr $x] [expr {[lindex $bbox 1] - 10}] [$wmenu index end]
+	tk_popup $wmenu $x [expr {[lindex $bbox 3] + 4}]
     }
 }
 
