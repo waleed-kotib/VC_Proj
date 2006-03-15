@@ -1,11 +1,11 @@
- # JingleIax.tcl --
+# JingleIax.tcl --
 # 
 #       JingleIAX package, binding for the IAX transport over Jingle 
 #       
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.6 2006-03-15 13:44:29 matben Exp $
+# $Id: JingleIax.tcl,v 1.7 2006-03-15 22:17:28 antoniofcano Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -114,7 +114,6 @@ proc ::JingleIAX::LoginHook { } {
     InitState
 
     ::Jabber::UI::RegisterPopupEntry roster $popMenuDef(call) 
-    ::Jabber::JlibCmd send_presence -show available -status "jingle-available"
 }
 
 proc ::JingleIAX::LogoutHook { } {
@@ -289,7 +288,6 @@ proc ::JingleIAX::PresenceHook {jid type args} {
     variable contacts   
 
     Debug "::JingleIAX::PresenceHook"
-
     array set argsArr $args
 
     #------- Set jingle status icon  ---------
@@ -317,11 +315,11 @@ proc ::JingleIAX::PresenceHook {jid type args} {
 
 proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
     variable contacts
+    variable state
 
     Debug "::JingleIAX::OnDiscoUserNode"
  
     #-------- If the JID has Jingle support cache
-    set contacts($from,jingle) "false"
     if {$type eq "result"} {
 	set node [wrapper::getattribute $subiq "node"]
         set feature "http://jabber.org/protocol/jingle"
@@ -330,8 +328,16 @@ proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
 	Debug "\t from=$from, node=$node, havePhone=$haveJingle"
 
 	if {$haveJingle} {
-            set contacts($from,jingle) "true"
-	}
+            if { ![info exists contacts($from,jingle)] } {
+                #---- Cache the new Jingle Contact -------
+                set contacts($from,jingle) "true"
+
+                #----- Sends our Jingle Presence for the new available contact --------
+                ::Jabber::JlibCmd send_presence -show available -status "jingle-available"
+            }
+	} 
+    } else {
+        set contacts($from,jingle) "false"
     }
 }
 
