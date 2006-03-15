@@ -5,13 +5,14 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.95.12 (0603??):
+Coccinella-0.95.12 (0604??):
 
  o new application theme engine
  o systray support on X11 (linux)
  o features on MacOSX: overlay number of received messages in dock;
    logouts on sleep and power down
  o status shortcut can be used to login
+ o auto join option for groupchat bookmarks
 
 Coccinella-0.95.11 (060115):
 
