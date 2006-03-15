@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.134 2006-03-15 13:22:06 matben Exp $
+# $Id: GroupChat.tcl,v 1.135 2006-03-15 13:56:49 matben Exp $
 
 package require Enter
 package require History
@@ -1596,12 +1596,21 @@ proc ::GroupChat::GetTokenFrom {key pattern} {
 proc ::GroupChat::GetTokenList { } {
     
     set ns [namespace current]
-    return [concat  \
+    set tvars [concat  \
       [info vars ${ns}::\[0-9\]] \
       [info vars ${ns}::\[0-9\]\[0-9\]] \
       [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]] \
       [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]\[0-9\]] \
       [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]]
+
+    # We need to check array size becaus also empty arrays are reported.
+    set tokens {}
+    foreach token $tvars {
+	if {[array size $token]} {
+	    lappend tokens $token
+	}
+    }
+    return $tokens
 }
 
 # GroupChat::Presence --
