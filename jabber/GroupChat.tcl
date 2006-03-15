@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.132 2006-03-04 14:07:49 matben Exp $
+# $Id: GroupChat.tcl,v 1.133 2006-03-15 07:35:34 matben Exp $
 
 package require Enter
 package require History
@@ -113,6 +113,9 @@ namespace eval ::GroupChat:: {
     # Local preferences.
     variable cprefs
     set cprefs(lastActiveRet) 0
+    
+    # Keep track of if we have made autojoin when getting bookmarks.
+    variable autojoinDone 0
 
     variable popMenuDefs
     set popMenuDefs(groupchat,def) {
@@ -2151,6 +2154,9 @@ proc ::GroupChat::Free {token} {
 #       Sets logged out status on all groupchats, that is, disable all buttons.
 
 proc ::GroupChat::LogoutHook { } {    
+    variable autojoinDone
+
+    set autojoinDone 0
 
     foreach token [GetTokenList] {
 	variable $token
@@ -2162,7 +2168,7 @@ proc ::GroupChat::LogoutHook { } {
 }
 
 proc ::GroupChat::LoginHook { } {    
-
+    
     foreach token [GetTokenList] {
 	variable $token
 	upvar 0 $token state
@@ -2245,6 +2251,7 @@ proc ::GroupChat::BookmarkExtractFromCB {type queryElem args} {
 
     if {$type eq "result"} {
 	BookmarkExtractFromElem $queryElem
+	DoAnyAutoJoin
     }
 }
 
@@ -2267,6 +2274,9 @@ proc ::GroupChat::BookmarkExtractFromElem {queryElem} {
 	set passElem [wrapper::getfirstchildwithtag $elem "password"]
 	if {$passElem ne ""} {
 	    lappend bmark -password [wrapper::getcdata $passElem]
+	}
+	if {[info exists bmarr(autojoin)]} {
+	    lappend bmark -autojoin $bmarr(autojoin)
 	}
 	lappend bookmarks $bmark
     }    
@@ -2367,7 +2377,8 @@ proc ::GroupChat::EditBookmarks { } {
     set m [::UI::GetMainMenu]
     set columns [list  \
       0 [mc Bookmark] 0 [mc Address]  \
-      0 [mc Nickname] 0 [mc Password]]
+      0 [mc Nickname] 0 [mc Password] \
+      0 [mc Autojoin]]
 
     set bookmarksVar {}
     ::Bookmarks::Dialog $dlg [namespace current]::bookmarksVar  \
@@ -2375,6 +2386,7 @@ proc ::GroupChat::EditBookmarks { } {
       -command [namespace current]::BookmarksDlgSave
     ::UI::SetMenuAcceleratorBinds $dlg $m
     
+    $dlg boolean 4
     $dlg state disabled
     $dlg wait
     
@@ -2426,10 +2438,10 @@ proc ::GroupChat::BookmarkToFlat {bookmarks} {
 
     set flat {}
     foreach bmark $bookmarks {
-	array set opts [list -nick "" -password ""]
+	array set opts [list -nick "" -password "" -autojoin 0]
 	array set opts [lrange $bmark 2 end]	
 	set row [lrange $bmark 0 1]
-	lappend row $opts(-nick) $opts(-password)
+	lappend row $opts(-nick) $opts(-password) $opts(-autojoin)
 	lappend flat $row
     }
     return $flat
@@ -2442,11 +2454,15 @@ proc ::GroupChat::BookmarkFlatToBookmarks {flat} {
 	set bmark [lrange $row 0 1]
 	set nick     [lindex $row 2]
 	set password [lindex $row 3]
+	set autojoin [lindex $row 4]
 	if {$nick ne ""} {
 	    lappend bmark -nick $nick
 	}
 	if {$password ne ""} {
 	    lappend bmark -password $password
+	}
+	if {$autojoin} {
+	    lappend bmark -autojoin $autojoin
 	}
 	lappend bookmarks $bmark
     }
@@ -2467,6 +2483,41 @@ proc ::GroupChat::BookmarkBuildMenu {m cmd} {
 	$m add command -label $name -command $mcmd
     }
     return $m
+}
+
+proc ::GroupChat::DoAnyAutoJoin {} {
+    variable autojoinDone
+    variable bookmarks
+
+    if {!$autojoinDone} {
+	foreach bmark $bookmarks {
+	    array unset opts
+	    set name [lindex $bmark 0]
+	    set jid  [lindex $bmark 1]
+	    array set opts [lrange $bmark 2 end]	
+	    if {[info exists opts(-autojoin)] && $opts(-autojoin)} {
+		if {[info exists opts(-nick)]} {
+		    set nick $opts(-nick)
+		} else {
+		    jlib::splitjidex [::Jabber::JlibCmd myjid] nick - -
+		}
+		set eopts [list -command ::GroupChat::BookmarkAutoJoinCB]
+		if {[info exists opts(-password)]} {
+		    lappend eopts -password $opts(-password)
+		}
+		lappend eopts -protocol muc
+		::Debug 4 "::GroupChat::DoAnyAutoJoin jid=$jid, nick=$nick $eopts"
+		eval {::Enter::EnterRoom $jid $nick} $eopts
+	    }
+	}
+    }
+    set autojoinDone 1
+}
+
+proc ::GroupChat::BookmarkAutoJoinCB {args} {
+    
+    ::Debug 4 "::GroupChat::BookmarkAutoJoinCB $args"
+    # anything ?
 }
 
 # Prefs page ...................................................................

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Bookmarks.tcl,v 1.3 2005-11-30 08:32:00 matben Exp $
+# $Id: Bookmarks.tcl,v 1.4 2006-03-15 07:35:35 matben Exp $
 
 package require snit 1.0
 package require ui::util
@@ -22,7 +22,7 @@ namespace eval ::Bookmarks {
 
 # Bookmarks::Dialog --
 #
-#       Megawidget send file dialog.
+#       Megawidget bookmarks dialog.
 
 snit::widget ::Bookmarks::Dialog {
     hulltype toplevel
@@ -34,6 +34,8 @@ snit::widget ::Bookmarks::Dialog {
     
     variable bookmarksVar
     variable tmpList
+    variable boolColumns
+    variable boolVar
     variable wtablelist
     variable wnew
     variable wsave
@@ -83,6 +85,10 @@ snit::widget ::Bookmarks::Dialog {
 	    for {set c 0} {$c < $ncol} {incr c} {
 		$wtb columnconfigure $c -editable 1
 	    }
+	}
+	set rowCount [$wtb size]
+	for {set row 0} {$row < $rowCount} {incr row} {
+	    $self BooleanColumnsForRow $row
 	}
 	
 	grid  $wtb  -column 0 -row 0 -sticky news
@@ -169,6 +175,13 @@ snit::widget ::Bookmarks::Dialog {
 	}
 	set tmpList [lsearch -all -not -inline $tmpList $tmp]
 	
+	# Any booleans.
+	foreach {key value} [array get boolVar] {
+	    #puts "\t key=$key, value=$value"
+	    foreach {row col} [split $key ,] break
+	    lset tmpList $row $col $value
+	}
+	
 	uplevel #0 [list set $bookmarksVar $tmpList]
 
 	if {$options(-command) ne ""} {
@@ -180,6 +193,31 @@ snit::widget ::Bookmarks::Dialog {
 	    } 
 	}
 	$self Destroy
+    }
+        
+    method BooleanColumnsForRow {row} {
+	#puts "BooleanColumnsForRow row=$row"
+	foreach c $boolColumns {
+	    $wtablelist cellconfigure $row,$c  \
+	      -window [list $self MakeCheckbutton]
+	}
+    }
+    
+    method SetCheckbuttonForRow {row} {
+	#puts "SetCheckbuttonForRow row=$row"
+	foreach col $boolColumns {
+	    set boolVar($row,$col) [lindex $tmpList $row $col]
+	    lset tmpList $row $col ""
+	    $wtablelist cellconfigure $row,$col -editable 0
+	}	    
+	#puts "tmpList=$tmpList"
+	#parray boolVar
+    }
+
+    method MakeCheckbutton {tbl row col w} {
+	#puts "MakeCheckbutton $tbl $row $col $w"
+	checkbutton $w -highlightthickness 0 -padx 0 -pady 0 -bg white  \
+	  -variable [myvar boolVar($row,$col)]
     }
     
     method Destroy {} {
@@ -193,6 +231,11 @@ snit::widget ::Bookmarks::Dialog {
 
     method add {row} {
 	lappend tmpList $row
+	set ridx [expr {[llength $tmpList]-1}]
+	if {[llength $boolColumns]} {
+	    $self BooleanColumnsForRow $ridx
+	    $self SetCheckbuttonForRow $ridx
+	}
     }
     
     method state {state} {
@@ -203,6 +246,10 @@ snit::widget ::Bookmarks::Dialog {
 	} else {
 	    
 	}
+    }
+    
+    method boolean {column} {
+	lappend boolColumns $column
     }
     
     method wait {{bool 1}} {
