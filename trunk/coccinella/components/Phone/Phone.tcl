@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.4 2006-03-07 18:22:08 antoniofcano Exp $
+# $Id: Phone.tcl,v 1.5 2006-03-15 13:44:28 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -140,6 +140,7 @@ proc ::Phone::LoadPrefs { } {
     #Values for onhold -> no, hold, mute
     #Values for status -> returned by ::protocol:: library
     array set statePhone {
+        registered          0
         activeLine          0
         onholdLine0         no
         statusLine0         free
@@ -291,8 +292,12 @@ proc ::Phone::UpdateRegister {id reply msgcount} {
     
     # Registration Ok, start game
     if { $reply eq "ack"} {
-        SetNormalState
+        if {$state(registered) == 0} {
+            SetNormalState
+            set state(registered) 1
+        }
     }
+
 }
 
 ##################################################
