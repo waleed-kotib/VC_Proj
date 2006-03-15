@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.133 2006-03-15 07:35:34 matben Exp $
+# $Id: GroupChat.tcl,v 1.134 2006-03-15 13:22:06 matben Exp $
 
 package require Enter
 package require History
@@ -119,16 +119,28 @@ namespace eval ::GroupChat:: {
 
     variable popMenuDefs
     set popMenuDefs(groupchat,def) {
-	command   mMessage       user      {::NewMsg::Build -to $jid}   {}
-	command   mChat          user      {::Chat::StartThread $jid}   {}
-	command   mSendFile      user      {::FTrans::Send $jid}        {}
-	command   mUserInfo      user      {::UserInfo::Get $jid}       {}
-	command   mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid} {}
-	check     mIgnore        user      {::GroupChat::Ignore $token $jid} {
+	{command   mMessage       {::NewMsg::Build -to $jid}    }
+	{command   mChat          {::Chat::StartThread $jid}    }
+	{command   mSendFile      {::FTrans::Send $jid}         }
+	{command   mUserInfo      {::UserInfo::Get $jid}        }
+	{command   mWhiteboard    {::Jabber::WB::NewWhiteboardTo $jid} }
+	{check     mIgnore        {::GroupChat::Ignore $token $jid} {
 	    -variable $token\(ignore,$jid)
-	}    
+	}}
     }
-    
+    set popMenuDefs(groupchat,type) {
+	{mMessage       user        }
+	{mChat          user        }
+	{mSendFile      user        }
+	{mUserInfo      user        }
+	{mWhiteboard    wb          }
+	{mIgnore        user        }
+    }
+
+    # Keeps track of all registered menu entries.
+    variable regPopMenuDef {}
+    variable regPopMenuType {}
+
     variable userRoleToStr
     set userRoleToStr(moderator)   [mc Moderators]
     set userRoleToStr(none)        [mc None]
@@ -1860,10 +1872,30 @@ proc ::GroupChat::GetAnyRoleFromXElem {xelem} {
     return $role
 }
     
-proc ::GroupChat::RegisterPopupEntry {menuSpec} {
-    variable popMenuDefs
+# GroupChat::RegisterPopupEntry --
+# 
+#       Components or plugins can add their own menu entries here.
+
+proc ::GroupChat::RegisterPopupEntry {menuDef menuType} {
+    variable regPopMenuDef
+    variable regPopMenuType
     
-    set popMenuDefs(groupchat,def) [concat $popMenuDefs(groupchat,def) $menuSpec]
+    set regPopMenuDef  [concat $regPopMenuDef $menuDef]
+    set regPopMenuType [concat $regPopMenuType $menuType]
+}
+
+proc ::Disco::UnRegisterPopupEntry {name} {
+    variable regPopMenuDef
+    variable regPopMenuType
+    
+    set idx [lsearch -glob $regPopMenuDef "* $name *"]
+    if {$idx >= 0} {
+	set regPopMenuDef [lreplace $regPopMenuDef $idx $idx]
+    }
+    set idx [lsearch -glob $regPopMenuType "$name *"]
+    if {$idx >= 0} {
+	set regPopMenuType [lreplace $regPopMenuType $idx $idx]
+    }
 }
 
 # GroupChat::Popup --
@@ -1880,6 +1912,8 @@ proc ::GroupChat::Popup {token w tag x y} {
     global  wDlgs this
     
     variable popMenuDefs
+    variable regPopMenuDef
+    variable regPopMenuType
     upvar ::Jabber::jstate jstate
             
     set clicked ""
@@ -1890,27 +1924,33 @@ proc ::GroupChat::Popup {token w tag x y} {
 	set clicked user
 	set jid [lindex $tag 1]
     }
-    set jid3 $jid
 
     ::Debug 2 "\t jid=$jid, clicked=$clicked"
-    
-    # Mads Linden's workaround for menu post problem on mac:
-    # all in menubutton commands i add "after 40 the_command"
-    # this way i can never have to posting error.
-    # it is important after the tk_popup f.ex to
-    #
-    # destroy .mb
-    # update
-    #
-    # this way the .mb is destroyd before the next window comes up, thats how I
-    # got around this.
-    
+        
+    # Insert any registered popup menu entries.
+    set mDef  $popMenuDefs(groupchat,def)
+    set mType $popMenuDefs(groupchat,type)
+    if {[llength $regPopMenuDef]} {
+	set idx [lindex [lsearch -glob -all $mDef {sep*}] end]
+	if {$idx eq ""} {
+	    set idx end
+	}
+	foreach line $regPopMenuDef {
+	    set mDef [linsert $mDef $idx $line]
+	}
+	set mDef [linsert $mDef $idx {separator}]
+    }
+    foreach line $regPopMenuType {
+	lappend mType $line
+    }
+
     # Make the appropriate menu.
     set m $jstate(wpopup,groupchat)
     catch {destroy $m}
-    menu $m -tearoff 0
+    menu $m -tearoff 0  \
+      -postcommand [list ::GroupChat::PostMenuCmd $m $mType $clicked]
     
-    BuildMenu $token $m $popMenuDefs(groupchat,def) $jid3 $clicked
+    ::AMenu::Build $m $mDef -varlist [list jid $jid token $token]
     
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
@@ -1921,59 +1961,36 @@ proc ::GroupChat::Popup {token w tag x y} {
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
 }
 
-proc ::GroupChat::BuildMenu {token m menuDef jid3 clicked} {
+proc ::GroupChat::PostMenuCmd {m mType clicked} {
     
-    set jid $jid3
-    set i 0
-
-    foreach {op item type cmd opts} $menuDef {	
-	set locname [mc $item]
-	set opts [eval list $opts]
-
-	switch -- $op {
-	    command {
+    set online [::Jabber::IsConnected]
+    ::hooks::run groupchatUserPostCommandHook $m $clicked  
     
-		# Substitute the jid arguments. Preserve list structure!
-		set cmd [eval list $cmd]
-		eval {$m add command -label $locname -command [list after 40 $cmd]  \
-		  -state disabled} $opts
-	    }
-	    radio {
-		set cmd [eval list $cmd]
-		eval {$m add radiobutton -label $locname -command [list after 40 $cmd]  \
-		  -state disabled} $opts
-	    }
-	    check {
-		set cmd [eval list $cmd]
-		eval {$m add checkbutton -label $locname -command [list after 40 $cmd]  \
-		  -state disabled} $opts
-	    }
-	    separator {
-		$m add separator
-		continue
-	    }
-	    cascade {
-		set mt [menu $m.sub$i -tearoff 0]
-		eval {$m add cascade -label $locname -menu $mt -state disabled} $opts
-		BuildMenu $mt $cmd $jid3 $clicked $status $group
-		incr i
-	    }
-	}
-	if {![::Jabber::IsConnected] && ([lsearch $type always] < 0)} {
-	    continue
-	}
+    foreach mspec $mType {
+	lassign $mspec name type subType
 	
 	# State of menu entry. 
 	# We use the 'type' and 'clicked' lists to set the state.
-	if {[listintersectnonempty $type $clicked]} {
+	if {$type eq "normal"} {
 	    set state normal
-	} elseif {$type eq ""} {
-	    set state normal
+	} elseif {$online} {
+	    if {[listintersectnonempty $type $clicked]} {
+		set state normal
+	    } elseif {$type eq ""} {
+		set state normal
+	    } else {
+		set state disabled
+	    }
 	} else {
 	    set state disabled
 	}
-	if {[string equal $state "normal"]} {
-	    $m entryconfigure $locname -state normal
+	set midx [::AMenu::GetMenuIndex $m $name]
+	if {[string equal $state "disabled"]} {
+	    $m entryconfigure $midx -state disabled
+	}
+	if {[llength $subType]} {
+	    set mt [$m entrycget $midx -menu]
+	    PostMenuCmd $mt $subType $clicked
 	}
     }
 }
