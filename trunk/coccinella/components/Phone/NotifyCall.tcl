@@ -244,6 +244,23 @@ proc ::NotifyCall::Mute {w type} {
     }
     ::Phone::Mute $type $state(c$type)
 }
+
+proc ::NotifyCall::TimeUpdate {time} {
+    variable state
+
+    #What to do when user is talking
+    #set win $state(win)
+    #set wbox .notify.l
+
+    #ttk::separator $wbox.s4 -orient horizontal
+    #pack  $wbox.s4  -side top -fill x
+        
+    #ttk::label $wbox.lcd -text "[mc callDuration]:  $time"
+    #pack  $wbox.lcd  -side bottom -fill x
+
+
+    puts "Update Time: $time"
+}
 #-----------------------------------------------------------------------
 #------------------------ Notify Call Event Hooks ----------------------
 #-----------------------------------------------------------------------

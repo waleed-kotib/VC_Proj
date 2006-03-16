@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.5 2006-03-15 13:44:28 matben Exp $
+# $Id: Phone.tcl,v 1.6 2006-03-16 19:33:13 antoniofcano Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -239,10 +239,17 @@ proc ::Phone::IncomingCall {callNo remote remote_name} {
 
         set statePhone(receivedDate0) [clock seconds]
 
-        ::TPhone::Number $wphone $remote
+        if {$wphone ne "-"} {
+            ::TPhone::Number $wphone $remote
+        }
 
         set initLength 0
-        ::TPhone::TimeUpdate $wphone [clock format [expr $initLength - 3600] -format %X]
+        if {$wphone ne "-"} {
+            ::TPhone::TimeUpdate $wphone [clock format [expr $initLength - 3600] -format %X]
+        } else {
+            ::NotifyCall::TimeUpdate [clock format [expr $initLength - 3600] -format %X]
+        }
+
 	::AddressBook::ReceivedCall $callNo $remote $statePhone(nameLine0)
 
         ::hooks::run phoneNotifyIncomingCall $callNo $remote $statePhone(nameLine0)
@@ -261,8 +268,11 @@ proc ::Phone::UpdateState {callNo state} {
 
 proc ::Phone::UpdateText {callno textmessage} {
     variable wphone
-    
-    ::TPhone::SetSubject $wphone $textmessage
+
+    if {$wphone ne "-"} {
+        ::TPhone::SetSubject $wphone $textmessage
+    }
+
     ::NotifyCall::SubjectEventHook $textmessage
 }
 
@@ -274,7 +284,11 @@ proc ::Phone::UpdateLevels {args} {
     if { $statePhone(initDate0) >= 0 } {
         set tempDate [clock seconds]
         set statePhone(callLength0) [expr $tempDate - $statePhone(initDate0)]
-        ::TPhone::TimeUpdate $wphone [clock format [expr $statePhone(callLength0) - 3600] -format %X]
+        if {$wphone ne "-"} {
+            ::TPhone::TimeUpdate $wphone [clock format [expr $statePhone(callLength0) - 3600] -format %X]
+        } else {
+            ::NotifyCall::TimeUpdate [clock format [expr $statePhone(callLength0) - 3600] -format %X]
+        }
     }
 }
 
@@ -443,7 +457,9 @@ proc ::Phone::UpdateDisplay {text} {
     variable phoneNumberInput
 
     set phoneNumberInput $text
-    ::TPhone::Number $wphone $text
+    if {$wphone ne "-"} {
+        ::TPhone::Number $wphone $text
+    }
 }
 
 proc ::Phone::Touch {{key ""} {alt_key ""}} {
@@ -494,7 +510,10 @@ proc ::Phone::DialJingle  { ipPeer portPeer calledName callerName {user ""} {pas
     set statePhone(numberLine$activeLine) $phoneNumberInput
     set statePhone(onholdLine$activeLine) "no"
 
-    set subject [::TPhone::GetSubject $wphone]
+    set subject ""
+    if {$wphone ne "-"} {
+        set subject [::TPhone::GetSubject $wphone]
+    }
     if {$subject eq ""} {
         set subject "Jingle Call"
     }
@@ -589,8 +608,9 @@ proc ::Phone::SetInputLevel {args} {
     set inputLevel [expr double($args)/double(100)]
     CommandPhone inputlevel $inputLevel
     set statePhone(inputVolume0) $inputLevel
-
-    ::TPhone::Volume $wphone microphone $args
+    if {$wphone ne "-"} {
+        ::TPhone::Volume $wphone microphone $args
+    }
 }
 
 proc ::Phone::SetOutputLevel {args} {
@@ -600,8 +620,10 @@ proc ::Phone::SetOutputLevel {args} {
     set outputLevel [expr double($args)/double(100)]
     CommandPhone outputlevel $outputLevel
     set statePhone(outputVolume0) $outputLevel
-    
-    ::TPhone::Volume $wphone speaker $args
+
+    if {$wphone ne "-"} {
+        ::TPhone::Volume $wphone speaker $args
+    }
 }
 
 proc ::Phone::TransferTo {w} {
@@ -674,7 +696,10 @@ proc ::Phone::SetNormalState {{noCall ""}} {
     
     ::hooks::run phoneNotifyNormalState
     ::AddressBook::NormalState
-    ::TPhone::SetSubject $wphone ""
+
+    if {$wphone ne "-"} {
+        ::TPhone::SetSubject $wphone ""
+    }
 
     ####### Initialize State Machine information #########
     set statePhone(nameLine0)       ""
@@ -687,10 +712,12 @@ proc ::Phone::SetNormalState {{noCall ""}} {
     set statePhone(onholdLine0)     "no"
     
     ########## Sets Widget Buttons State ######################    
-    ::TPhone::State $wphone  "call"      {!disabled}
-    ::TPhone::State $wphone  "backspace" {!disabled} 
-    ::TPhone::State $wphone  "hangup"    {disabled}
-    ::TPhone::State $wphone  "transfer"  {disabled}
+    if {$wphone ne "-"} {
+        ::TPhone::State $wphone  "call"      {!disabled}
+        ::TPhone::State $wphone  "backspace" {!disabled} 
+        ::TPhone::State $wphone  "hangup"    {disabled}
+        ::TPhone::State $wphone  "transfer"  {disabled}
+    }
 
     ::hooks::run phoneChangeState "available"
 }
@@ -699,10 +726,12 @@ proc ::Phone::SetDialState {} {
     variable wphone
 
     ########## Sets Widgets State ######################    
-    ::TPhone::State $wphone  "hangup"    {!disabled}
-    ::TPhone::State $wphone  "call"      {disabled}
-    ::TPhone::State $wphone  "transfer"  {disabled}
-    ::TPhone::State $wphone  "backspace" {disabled}
+    if {$wphone ne "-"} {
+        ::TPhone::State $wphone  "hangup"    {!disabled}
+        ::TPhone::State $wphone  "call"      {disabled}
+        ::TPhone::State $wphone  "transfer"  {disabled}
+        ::TPhone::State $wphone  "backspace" {disabled}
+    }
 
     ::hooks::run phoneChangeState "ring"
 }
@@ -713,11 +742,13 @@ proc ::Phone::SetTalkingState {{noCall ""} } {
     
     set statePhone(initDate0)  [clock seconds]
 
-    ::TPhone::State $wphone  "hangup"    {!disabled}
-    ::TPhone::State $wphone  "transfer"  {!disabled}
-    ::TPhone::State $wphone  "call"      {disabled}
-    ::TPhone::State $wphone  "backspace" {disabled}
- 
+    if {$wphone ne "-"} {
+        ::TPhone::State $wphone  "hangup"    {!disabled}
+        ::TPhone::State $wphone  "transfer"  {!disabled}
+        ::TPhone::State $wphone  "call"      {disabled}
+        ::TPhone::State $wphone  "backspace" {disabled}
+    }
+
     ::AddressBook::TalkingState
 
     ::hooks::run phoneChangeState "on_phone"
@@ -727,10 +758,12 @@ proc ::Phone::SetIncomingState { {noCall ""}} {
     variable statePhone
     variable wphone
 
-    ::TPhone::State $wphone  "hangup"    {!disabled}
-    ::TPhone::State $wphone  "call"      {!disabled}
-    ::TPhone::State $wphone  "transfer"  {disabled}
-    ::TPhone::State $wphone  "backspace" {disabled}   
+    if {$wphone ne "-"} {
+        ::TPhone::State $wphone  "hangup"    {!disabled}
+        ::TPhone::State $wphone  "call"      {!disabled}
+        ::TPhone::State $wphone  "transfer"  {disabled}
+        ::TPhone::State $wphone  "backspace" {disabled}   
+    }
 
     ::hooks::run phoneChangeState "ring" 
 }
