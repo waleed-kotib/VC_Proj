@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.149 2006-03-02 07:05:50 matben Exp $
+# $Id: Chat.tcl,v 1.150 2006-03-19 08:17:38 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2498,7 +2498,7 @@ proc ::Chat::BuildHistoryForJid {jid} {
 proc ::Chat::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     	
-    set jprefs(chatActiveRet) 0
+    set jprefs(chatActiveRet) 1
     set jprefs(showMsgNewWin) 1
     set jprefs(inbox2click)   "newwin"
     set jprefs(chat,normalAsChat) 0
