@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.55 2006-01-11 13:24:54 matben Exp $
+# $Id: Profiles.tcl,v 1.56 2006-03-20 14:37:17 matben Exp $
 
 package provide Profiles 1.0
 
@@ -32,6 +32,26 @@ namespace eval ::Profiles:: {
     # Internal storage:
     #   {name1 {server1 username1 password1 ?-key value ...?}
     #    name2 {server2 username2 password2 ?-key value ...?} ... }
+    #    
+    #    Options:
+    #           -digest     0|1
+    #           -http       0|1
+    #           -httpurl
+    #           -invisible  0|1
+    #           -ip
+    #           -priority
+    #           -sasl       0|1
+    #           -tls        0|1
+    #           -tlsmethod  ssl|tls
+    #           
+    #           Note the naming convention for tlsmethod!
+    #            ssl        using direct tls socket connection
+    #                       it corresponds to the original jabber method
+    #            tls        in stream tls negotiation, xmpp compliant
+    #           
+    #       SASL cannot be used at the same time as -tls & -tlsmethod ssl
+    #       If we get this conflict we pick -tls & -tlsmethod ssl. Wrong?
+
     variable profiles
     
     # Profile name of selected profile.
@@ -65,7 +85,7 @@ proc ::Profiles::InitHook { } {
     
     set profiles {jabber.org {jabber.org myUsername myPassword}}
     lappend profiles {Google Talk} {gmail.com You from_gmail_your_account  \
-      -ip talk.google.com -port 5223 -ssl 1 -digest 0}
+      -ip talk.google.com -port 5223 -tls 1 -tlsmethod ssl -digest 0}
     set selected [lindex $profiles 0]
 
     ::PrefUtils::Add [list  \
@@ -77,7 +97,7 @@ proc ::Profiles::InitHook { } {
       && [lsearch -glob $profiles "gmail.com *"] < 0} {
 	lappend profiles {Google Talk} {
 	    gmail.com You from_gmail_your_account
-	    -ip talk.google.com -port 5223 -ssl 1 -digest 0
+	    -ip talk.google.com -port 5223 -tls 1 -tlsmethod ssl -digest 0
 	}	
     }
     
@@ -90,6 +110,9 @@ proc ::Profiles::InitHook { } {
 
     # Sanity check.
     SanityCheck
+    
+    # Translate any old -ssl switch.
+    TranslateAnySSLOption
 }
 
 # Profiles::SanityCheck --
@@ -143,6 +166,34 @@ proc ::Profiles::SanityCheck { } {
     }
 }
 
+# Profiles::TranslateAnySSLOption --
+# 
+#       Any old -ssl switch must be reinterpreted if -sasl = 0:
+#         -ssl & !-sasl => -tls + -tlsmethod ssl
+
+proc ::Profiles::TranslateAnySSLOption { } {
+    variable profiles
+    
+    array set arr $profiles
+    foreach {name spec} $profiles {
+	array unset opts
+	array set opts [lrange $spec 3 end]
+	if {[info exists opts(-ssl)] && $opts(-ssl)} {
+	    set sasl 0
+	    if {[info exists opts(-sasl)]} {
+		set sasl $opts(-sasl)
+	    }
+	    if {!$sasl} {
+		set opts(-tls) 1
+		set opts(-tlsmethod) "ssl"
+	    }
+	}
+	unset -nocomplain opts(-ssl)
+	set arr($name) [concat [lrange $spec 0 2] [array get opts]]
+    }
+    set profiles [array get arr]
+}
+
 # Profiles::Set --
 #
 #       Sets or replaces a user profile.
@@ -153,7 +204,7 @@ proc ::Profiles::SanityCheck { } {
 #       server      Jabber server name.
 #       username
 #       password
-#       args:       -resource, -ssl, -priority, -invisible, -ip, -scramble, ...
+#       args:       -resource, -tls, -priority, -invisible, -ip, -scramble, ...
 #       
 # Results:
 #       none.
@@ -582,13 +633,16 @@ proc ::Profiles::GetDefaultOpts {server} {
 	    -http           0
 	    -httpurl        ""
 	    -minpollsecs    4
+	    -tls            0
+	    -tlsmethod      tls
+	    -sasl           0
 	}
 	set defaultOpts(-port) $jprefs(port)
-	set defaultOpts(-ssl)  $jprefs(usessl)
+	set defaultOpts(-tls)  $jprefs(usessl)
 	if {!$this(package,tls)} {
-	    set defaultOpts(-ssl) 0
+	    set defaultOpts(-tls) 0
+	    set defaultOpts(-tlsmethod) tls
 	}
-	set defaultOpts(-sasl) 0
 	if {[catch {package require jlibsasl}]} {
 	    set defaultOpts(-sasl) 0
 	}
@@ -815,25 +869,31 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::entry $wcon.eport -font CociSmallFont \
       -textvariable $token\(port) -width 6 -validate key  \
       -validatecommand {::Register::ValidatePortNumber %S}
-    ttk::checkbutton $wcon.cssl -style Small.TCheckbutton \
-      -text [mc {Use SSL for security}] \
-      -variable $token\(ssl)   
-    ttk::checkbutton $wcon.csasl -style Small.TCheckbutton \
-      -text [mc prefsusesasl] -variable $token\(sasl)   
+        
+    set wse $wcon.se
+    ttk::frame $wcon.se
+    ttk::checkbutton $wse.tls -style Small.TCheckbutton  \
+      -text "Use Secure Connection" -variable $token\(tls)  \
+      -command [list ::Profiles::NotebookSecCmd $w]
+    ttk::radiobutton $wse.mtls -style Small.TRadiobutton  \
+      -text "Use TLS in stream (default)" -variable $token\(tlsmethod) -value tls \
+      -command [list ::Profiles::NotebookTLSCmd $w]
+    ttk::radiobutton $wse.mssl -style Small.TRadiobutton  \
+      -text "Use TLS on separate port" -variable $token\(tlsmethod) -value ssl \
+      -command [list ::Profiles::NotebookTLSCmd $w]
+    ttk::checkbutton $wse.sasl -style Small.TCheckbutton \
+      -text [mc prefsusesasl] -variable $token\(sasl)
+    
+    grid  $wse.tls     -          -sticky w
+    grid  x            $wse.mtls  -sticky w
+    grid  x            $wse.mssl  -sticky w
+    grid  $wse.sasl    -          -sticky w
+    grid columnconfigure $wse 0 -minsize 24
     
     grid  $wcon.lip    $wcon.eip    -sticky e -pady 1
     grid  $wcon.lport  $wcon.eport  -sticky e -pady 1
-    grid  x            $wcon.cssl   -sticky w
-    grid  x            $wcon.csasl  -sticky w
-    
-    grid  $wcon.eip  $wcon.eport  -sticky w
-
-    if {!$this(package,tls)} {
-	$wcon.cssl state {disabled}
-    }
-    if {![jlib::havesasl]} {
-	$wcon.csasl state {disabled}
-    }
+    grid  $wcon.se     -            -sticky ew -pady 1    
+    grid $wcon.eip $wcon.eport  -sticky w
 
     # HTTP
     $w add [ttk::frame $w.http] -text [mc {HTTP}] -sticky news
@@ -868,9 +928,6 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     #grid  $whttp.lpoll   $whttp.spoll  -sticky w  -pady 1
     grid columnconfigure $whttp 1 -weight 1
     
-    # Set defaults.
-    NotebookSetDefaults $token ""
-    
     # Collect all widget paths. Note the trick to get the array name!
     variable $w
     upvar 0 $w wstate
@@ -880,10 +937,21 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     set wstate(invisible)     $wlog.cinv
     set wstate(ip)            $wcon.eip
     set wstate(port)          $wcon.eport
-    set wstate(ssl)           $wcon.cssl
-    set wstate(sasl)          $wcon.csasl
+    set wstate(mssl)          $wse.mssl
+    set wstate(mtls)          $wse.mtls
+    set wstate(sasl)          $wse.sasl
     set wstate(http)          $whttp.http
     set wstate(httpurl)       $whttp.u.eurl    
+    
+    set wstate(token)         $token
+
+    if {!$this(package,tls)} {
+	$wse.tls state {disabled}
+    }
+
+    # Set defaults.
+    NotebookSetDefaults $token ""
+    NotebookDefaultWidgetStates $w
     
     # Let components ad their own stuff here.
     ::hooks::run profileBuildTabNotebook $w $token
@@ -895,6 +963,56 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     bind $w <Destroy> {+::Profiles::NotebookOnDestroy %W }
     
     return $w
+}
+
+proc ::Profiles::NotebookDefaultWidgetStates {w} {
+    NotebookSecCmd $w
+    NotebookTLSCmd $w
+}
+
+proc ::Profiles::NotebookSecCmd {w} {
+    variable $w
+    upvar 0 $w wstate
+
+    set token $wstate(token)
+    variable $token
+    upvar 0 $token state
+
+    # Only if TLS we shall set SASL state.
+    if {$state(tls)} {
+	$wstate(mssl)  state {!disabled}
+	$wstate(mtls)  state {!disabled}
+    } else {
+	$wstate(mssl)  state {disabled}
+	$wstate(mtls)  state {disabled}
+	if {[jlib::havesasl]} {
+	    $wstate(sasl) state {!disabled}
+	} else {
+	    $wstate(sasl) state {disabled}
+	}
+    }
+}
+
+proc ::Profiles::NotebookTLSCmd {w} {
+    variable $w
+    upvar 0 $w wstate
+
+    set token $wstate(token)
+    variable $token
+    upvar 0 $token state
+    
+    # Only if TLS we shall set SASL state.
+    if {$state(tls)} {
+	if {$state(tlsmethod) eq "ssl"} {
+	    $wstate(sasl) state {disabled}
+	} else {
+	    if {[jlib::havesasl]} {
+		$wstate(sasl) state {!disabled}
+	    } else {
+		$wstate(sasl) state {disabled}
+	    }
+	}
+    }
 }
 
 proc ::Profiles::NotebookSetDefaults {token server} {
@@ -1062,6 +1180,7 @@ proc ::Profiles::SetCurrentFromTmp {profName} {
     set tmpSelected $profName  
     
     NotebookSetAnyConfigState $wtabnb $profName
+    NotebookDefaultWidgetStates $wtabnb
 }
 
 proc ::Profiles::SaveCurrentToTmp {profName} {

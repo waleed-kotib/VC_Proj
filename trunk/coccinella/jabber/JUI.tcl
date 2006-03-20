@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.118 2006-03-10 15:39:33 matben Exp $
+# $Id: JUI.tcl,v 1.119 2006-03-20 14:37:17 matben Exp $
 
 package provide JUI 1.0
 
@@ -767,9 +767,6 @@ proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
 	}
 	browse {
 	    ::Browse::RegisterPopupEntry $menuSpec	    
-	}
-	groupchat {
-	    ::GroupChat::RegisterPopupEntry $menuSpec	    
 	}
 	roster {
 	    ::Roster::RegisterPopupEntry $menuSpec	    
