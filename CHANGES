@@ -13,6 +13,7 @@ Coccinella-0.95.12 (0604??):
    logouts on sleep and power down
  o status shortcut can be used to login
  o auto join option for groupchat bookmarks
+ o reworked the details of TLS/SSL/SASL connection methods
 
 Coccinella-0.95.11 (060115):
 

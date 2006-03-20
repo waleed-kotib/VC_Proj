@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.81 2006-03-14 07:18:58 matben Exp $
+# $Id: Disco.tcl,v 1.82 2006-03-20 14:37:17 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -957,7 +957,7 @@ proc ::Disco::Popup {w vstruct x y} {
     
     ::Debug 2 "\t clicked=$clicked"
     
-    # Insert any registered popip menu entries.
+    # Insert any registered popup menu entries.
     set mDef  $popMenuDefs(disco,def)
     set mType $popMenuDefs(disco,type)
     if {[llength $regPopMenuDef]} {
@@ -977,7 +977,8 @@ proc ::Disco::Popup {w vstruct x y} {
     # Make the appropriate menu.
     set m $jstate(wpopup,disco)
     catch {destroy $m}
-    menu $m -tearoff 0 -postcommand [list ::Disco::PostMenuCmd $m $mType $clicked]
+    menu $m -tearoff 0  \
+      -postcommand [list ::Disco::PostMenuCmd $m $mType $clicked]
     
     ::AMenu::Build $m $mDef -varlist [list jid $jid node $node vstruct $vstruct]
     
@@ -991,16 +992,17 @@ proc ::Disco::Popup {w vstruct x y} {
 }
 
 proc ::Disco::PostMenuCmd {m mType clicked} {
-    variable menuIndex
+
+    ::hooks::run discoPostCommandHook $m $clicked  
 
     foreach mspec $mType {
 	lassign $mspec name type subType
 
 	# State of menu entry. 
 	# We use the 'type' and 'clicked' lists to set the state.
-	if {[listintersectnonempty $type $clicked]} {
+	if {$type eq "normal"} {
 	    set state normal
-	} elseif {$type eq "normal"} {
+	} elseif {[listintersectnonempty $type $clicked]} {
 	    set state normal
 	} elseif {$type eq ""} {
 	    set state normal

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.18 2005-08-26 15:02:34 matben Exp $
+# $Id: Network.tcl,v 1.19 2006-03-20 14:37:18 matben Exp $
 
 package provide Network 1.0
 
@@ -27,7 +27,9 @@ namespace eval ::Network:: {
 #       cmd         Specific callback proc for this open operation.
 #                   'cmd {sock ip port status {msg {}}}'
 #       args        -timeout secs,
-#                   -tls     boolean 
+#                   -ssl     boolean 
+#                            Must not be mixed up with -tls which has a special
+#                            meaning in XMPP
 #       
 # Results:
 #       only via the callback cmd.
@@ -43,10 +45,10 @@ proc ::Network::Open {nameOrIP port cmd args} {
     }
     array set opts {
 	-timeout 0
-	-tls     0
+	-ssl     0
     }
     array set opts $args
-    if {$opts(-tls)} {
+    if {$opts(-ssl)} {
 	set socketCmd {::tls::socket -request 0 -require 0}
     } else {
 	set socketCmd socket
@@ -73,7 +75,7 @@ proc ::Network::Open {nameOrIP port cmd args} {
     # If open socket in async mode, need to wait for fileevent.
     fileevent $sock writable   \
       [list [namespace current]::WhenSocketOpensInits $sock $nameOrIP  \
-      $port $cmd $opts(-tls)]
+      $port $cmd $opts(-ssl)]
     
     # Set up timer event for timeouts.
     if {$opts(-timeout) > 0} {

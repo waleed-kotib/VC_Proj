@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.8 2005-11-04 15:14:55 matben Exp $
+# $Id: jlibtls.tcl,v 1.9 2006-03-20 14:37:17 matben Exp $
 
 package require tls
 
@@ -119,7 +119,7 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
     trace add variable ${jlibname}::locals(features) write \
       [list [namespace current]::tls_features_write_2nd $jlibname]
     
-    return {}
+    return
 }
 
 proc jlib::tls_features_write_2nd {jlibname name1 name2 op} {
@@ -144,7 +144,7 @@ proc jlib::tls_failure {jlibname tag xmllist} {
     } else {
 	tls_finish $jlibname startls-failure "tls failed for an unknown reason"
     }
-    return {}
+    return
 }
 
 proc jlib::tls_finish {jlibname {errcode ""} {msg ""}} {
