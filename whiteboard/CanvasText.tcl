@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasText.tcl,v 1.11 2006-02-10 15:40:50 matben Exp $
+# $Id: CanvasText.tcl,v 1.12 2006-03-20 11:03:53 matben Exp $
 
 package require sha1
 
@@ -879,7 +879,7 @@ proc ::CanvasText::EvalBufferedText {wcan} {
     }
     
     if {[string length $buffer(str)]} {
-	set w [lindex [split $wcan .] 0]
+	set w ".[lindex [split $wcan .] 1]"
 	::WB::SendMessageList $w  \
 	  [list [list insert $buffer(utag) $buffer(ind) $buffer(str)]]
     }    
