@@ -281,7 +281,7 @@
 ::msgcat::mcset es mMessageInbox	{Mensajes}
 ::msgcat::mcset es mSearch		{Busca&r...}
 ::msgcat::mcset es mAddNewUser		{Añadir un nuevo usuario...}
-::msgcat::mcset es mSendMessage		{En&viar un mensaje...}
+::msgcat::mcset es mSendMessage		{Enviar un mensaje...}
 ::msgcat::mcset es mChat		{Chat}
 ::msgcat::mcset es mStatus		{Estado}
 ::msgcat::mcset es mDirStatus           {Estado deseado}
