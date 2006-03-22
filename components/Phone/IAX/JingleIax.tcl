@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.7 2006-03-15 22:17:28 antoniofcano Exp $
+# $Id: JingleIax.tcl,v 1.8 2006-03-22 20:27:04 antoniofcano Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -221,7 +221,7 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
     # Extract the command level XML data items.     
     #set jingle [wrapper::gettag $args]
 
-    set calledname [wrapper::getattribute $jingle initiator]    
+    #set calledname [wrapper::getattribute $jingle initiator]   
     set transport [wrapper::getfirstchildwithtag $jingle "transport"]
 
     if {$transport != {}} { 
@@ -277,7 +277,7 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
             set port $candidateDescription(local,port)
         }
 
-        ::Phone::DialJingle $ip $port $calledname [::Jabber::JlibCmd getthis myjid] $user $password
+        ::Phone::DialJingle $ip $port $from [::Jabber::JlibCmd getthis myjid] $user $password
     }
 }
 
@@ -291,16 +291,19 @@ proc ::JingleIAX::PresenceHook {jid type args} {
     array set argsArr $args
 
     #------- Set jingle status icon  ---------
-    if { [info exists argsArr(-status)] } {
+    set isJID [string first "@" $argsArr(-from)]
+    if { [info exists argsArr(-status)] && $isJID > 0 } {
         set jingleStatusIndex [string first - $argsArr(-status)]
         set jingleType        [string range $argsArr(-status) 0 [expr $jingleStatusIndex-1]]
         set jingleStatus      [string range $argsArr(-status) [expr $jingleStatusIndex+1] [expr [string length $argsArr(-status)] - 1] ]
-        
+
         #------- Status spected to come in jingle-xxxxxx format, this is tricky 
         #------- correct way maybe using some tag <jingle status='xxxx'/> into presence xml info
-        if { $jingleType eq "jingle" } {
-            set image [::Rosticons::Get [string tolower phone/$jingleStatus]]
-            ::RosterTree::StyleSetItemAlternative $argsArr(-from) jivephone image $image
+        if {[::Jabber::RosterCmd haveroster]} {
+            if { $jingleType eq "jingle" } {
+                set image [::Rosticons::Get [string tolower phone/$jingleStatus]]
+                ::RosterTree::StyleSetItemAlternative $argsArr(-from) jivephone image $image
+            }
         }
     }
 
