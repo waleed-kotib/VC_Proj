@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.8 2006-03-22 20:27:04 antoniofcano Exp $
+# $Id: JingleIax.tcl,v 1.9 2006-03-22 21:22:49 antoniofcano Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -192,14 +192,20 @@ proc ::JingleIAX::SessionInitiateIncoming {jlib from jingle sid id} {
 
 proc ::JingleIAX::TransportAccept {jlib from} {
     variable state
+    global prefs
 
     # -------- Transport Supported ------------------- 
     set transportElemLocalCandidate    [wrapper::createtag candidate -attrlist [list name local ip $state(localIP)  port  $state(localIAXPort)] ]
     set transportElempublicCandidate   [wrapper::createtag candidate -attrlist [list name public ip $state(publicIP) port  $state(publicIAXPort)]]
 
+    set transportElemCustomCandidate ""
+    if { $prefs(NATip) ne "" } {
+        set transportElemCustomCandidate   [wrapper::createtag candidate -attrlist [list name custom ip $prefs(NATip)  port  $state(publicIAXPort)]]
+    }
+
     set transportElem [wrapper::createtag "transport" \
       -attrlist [list xmlns "http://jabber.org/protocol/jingle/transport/iax" version 2] \
-      -subtags [list $transportElemLocalCandidate $transportElempublicCandidate]]
+      -subtags [list $transportElemLocalCandidate $transportElempublicCandidate $transportElemCustomCandidate]]
 
     ::Jabber::JlibCmd jingle send_set $state(sid) "transport-accept" {}  \
       [list $transportElem ]
@@ -267,16 +273,23 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
             set password ""
         }
         #-------- At This moment we know how to call the Peer ------------
-        #------ 1/ Discover what candidate to use, local or public --------
+        #------ 1/ Discover what candidate to use: custom, local or public --------
         #------------- 2/ Give control to Phone Component ----------------
-        set ip   $candidateDescription(public,ip)
-        set port $candidateDescription(public,port)
+       
 
-        if {$ip eq $state(publicIP)} {
-            set ip   $candidateDescription(local,ip)
-            set port $candidateDescription(local,port)
+        if { [info exists candidateDescription(custom,ip)] } { 
+            set ip   $candidateDescription(custom,ip)
+            set port $candidateDescription(custom,port)
+        } else {
+            set ip   $candidateDescription(public,ip)
+            set port $candidateDescription(public,port)
+
+            if {$ip eq $state(publicIP)} {
+                set ip   $candidateDescription(local,ip)
+                set port $candidateDescription(local,port)
+            }
         }
-
+puts "Va a llamar con $ip, $port"
         ::Phone::DialJingle $ip $port $from [::Jabber::JlibCmd getthis myjid] $user $password
     }
 }
