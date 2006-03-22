@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.6 2006-03-16 19:33:13 antoniofcano Exp $
+# $Id: Phone.tcl,v 1.7 2006-03-22 20:27:03 antoniofcano Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -246,9 +246,8 @@ proc ::Phone::IncomingCall {callNo remote remote_name} {
         set initLength 0
         if {$wphone ne "-"} {
             ::TPhone::TimeUpdate $wphone [clock format [expr $initLength - 3600] -format %X]
-        } else {
-            ::NotifyCall::TimeUpdate [clock format [expr $initLength - 3600] -format %X]
-        }
+        } 
+        ::NotifyCall::TimeUpdate [clock format [expr $initLength - 3600] -format %X]
 
 	::AddressBook::ReceivedCall $callNo $remote $statePhone(nameLine0)
 
@@ -286,9 +285,8 @@ proc ::Phone::UpdateLevels {args} {
         set statePhone(callLength0) [expr $tempDate - $statePhone(initDate0)]
         if {$wphone ne "-"} {
             ::TPhone::TimeUpdate $wphone [clock format [expr $statePhone(callLength0) - 3600] -format %X]
-        } else {
-            ::NotifyCall::TimeUpdate [clock format [expr $statePhone(callLength0) - 3600] -format %X]
         }
+        ::NotifyCall::TimeUpdate [clock format [expr $statePhone(callLength0) - 3600] -format %X]
     }
 }
 
@@ -518,6 +516,7 @@ proc ::Phone::DialJingle  { ipPeer portPeer calledName callerName {user ""} {pas
         set subject "Jingle Call"
     }
 
+puts "Llamando.... $calledName por $callerName"
     ::hooks::run phoneNotifyOutgoingCall $calledName
     CommandPhone dialjingle $phoneNumberInput $statePhone(activeLine) $subject $user $password
         
