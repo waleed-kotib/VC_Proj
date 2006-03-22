@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.80 2006-03-20 14:37:17 matben Exp $
+# $Id: Login.tcl,v 1.81 2006-03-22 14:09:29 matben Exp $
 
 package provide Login 1.0
 
@@ -608,23 +608,21 @@ proc ::Login::AutoLoginCB {logtoken status {errmsg ""}} {
 #           -invisible  0|1
 #           -ip
 #           -priority
-#           -sasl       0|1
-#           -tls        0|1
-#           -tlsmethod  ssl|tls
+#           -secure     0|1
+#           -method     ssl|tlssasl|sasl
 #           
-#           Note the naming convention for tlsmethod!
+#           Note the naming convention for -method!
 #            ssl        using direct tls socket connection
 #                       it corresponds to the original jabber method
-#            tls        in stream tls negotiation, xmpp compliant
-#           
-#       SASL cannot be used at the same time as -tls & -tlsmethod ssl
-#       If we get this conflict we pick -tls & -tlsmethod ssl. Wrong?
+#            tlssasl    in stream tls negotiation + sasl, xmpp compliant
+#                       XMPP requires sasl after starttls!
+#            sasl       only sasl authentization
 #       
 # Results:
 #       Callback initiated.
 
 proc ::Login::HighLogin {server username resource password cmd args} {
-    global  prefs
+    global  prefs this
     variable uid
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
@@ -633,15 +631,25 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     
     array set argsArr {
 	-digest         1
-	-http           0
 	-invisible      0
+	-ip             ""
 	-priority       0
-	-sasl           0
-	-tls            0
-	-tlsmethod      tls
+	-http           0
+	-httpurl        ""
+	-minpollsecs    4
+	-secure         0
+	-method         sasl
     }
-    set argsArr(-port) $jprefs(port)
     array set argsArr $args
+    
+    # If secure and ssl different default port (5223).
+    if {![info exists argsArr(-port)]} {
+	if {$argsArr(-secure) && ($argsArr(-method) eq "ssl")} {
+	    set argsArr(-port) $jprefs(sslport)
+	} else {
+	    set argsArr(-port) $jprefs(port)
+	}
+    }
     if {$resource eq ""} {
 	set resource "coccinella"
     }
@@ -661,9 +669,25 @@ proc ::Login::HighLogin {server username resource password cmd args} {
 	set state($key) $value
     }
     
-    # Resolve the conflict between old SSL and SASL.
-    if {$state(-tls) && ($state(-tlsmethod) eq "ssl")} {
-	set state(-sasl) 0
+    # Have some fallbacks here (or throw an error?).
+    if {$state(-secure)} {
+	if {$state(-method) eq "sasl"} {
+	   if {[catch {package require jlibsasl}]} {
+	       set state(-secure) 0
+	   }
+       }
+       if {!$this(package,tls)} {
+	   if {($state(-method) eq "ssl") || ($state(-method) eq "tlssasl")} {
+	       set state(-secure) 0
+	   }
+       }
+    }
+    
+    # Any stream version. XMPP requires 1.0.
+    if {$state(-secure)} {
+	if {($state(-method) eq "sasl") || ($state(-method) eq "tlssasl")} {
+	    set state(version) 1.0
+	}
     }
 
     # Make a network connection.
@@ -686,11 +710,8 @@ proc ::Login::HighConnectCB {token status msg} {
 	}
 	default {
 	    set opts {}
-	    if {$state(-sasl)} {
-		lappend opts -sasl 1
-	    }
-	    if {$state(-tls)} {
-		lappend opts -tls 1
+	    if {[info exists state(version)]} {
+		lappend opts -version $state(version)
 	    }
 	    set callback [list [namespace current]::HighInitStreamCB $token]
 	    if {[catch {
@@ -724,13 +745,25 @@ proc ::Login::HighInitStreamCB {token args} {
 		set version1 1
 	    }
 	}
+	
 	set starttls 0
-	if {$state(-tls) && ($state(-tlsmethod) eq "tls")} {
-	    set starttls 1
+	set startsasl 0
+	set needsasl 0
+	if {$state(-secure)} {
+	    switch -- $state(-method) {
+		tlssasl {
+		    set starttls 1
+		    set needsasl 1
+		}
+		sasl {
+		    set startsasl 1
+		    set needsasl 1
+		}
+	    }
 	}
 	
 	# We will get a bunch of errors later anyway. So don't stop here.
-	if {$state(-sasl) && !$version1} {
+	if {$needsasl && !$version1} {
 	    ::Jabber::AddErrorLog $state(server)  \
 	      "SASL authentization failed since server does not support version=1.0"
 	}
@@ -749,7 +782,7 @@ proc ::Login::HighInitStreamCB {token args} {
 	    set callback [list [namespace current]::HighAuthorizeCB $token]
 	    Authorize $state(server) $state(username) $state(resource) \
 	      $state(password) $callback \
-	      -streamid $argsArr(id) -digest $state(-digest) -sasl $state(-sasl)
+	      -streamid $argsArr(id) -digest $state(-digest) -sasl $startsasl
 	}    
     }    
 }
@@ -770,10 +803,16 @@ proc ::Login::HighStartTlsCB {token type args} {
 	    HighFinish $token missingid \
 	      "no id for digest in receiving <stream>"
 	} else {
+	    
+	    # XMPP Core:
+	    # 
+	    # 12. If the TLS negotiation is successful, the initiating entity MUST
+	    #     continue with SASL negotiation.
+
+	    set callback [list [namespace current]::HighAuthorizeCB $token]
 	    Authorize $state(server) $state(username) $state(resource) \
-	      $state(password) \
-	      [list [namespace current]::HighAuthorizeCB $token] \
-	      -streamid $id -digest $state(-digest) -sasl $state(-sasl)
+	      $state(password) $callback   \
+	      -streamid $id -digest $state(-digest) -sasl 1
 	}
     }
 }
@@ -844,8 +883,8 @@ proc ::Login::HighFinish {token {err ""} {msg ""}} {
 #       cmd         callback command when socket connected
 #       args  -ip
 #             -port
-#             -tls  0|1
-#             -tlsmethod
+#             -secure  0|1
+#             -method  ssl|tlssasl|sasl
 #             -http 0|1
 #             ...
 #       
@@ -862,8 +901,8 @@ proc ::Login::Connect {server cmd args} {
         
     array set argsArr {
 	-ip         ""
-	-tls        0
-	-tlsmethod  tls
+	-secure     0
+	-method     sasl
 	-http       0
 	-httpurl    ""
     }
@@ -876,32 +915,34 @@ proc ::Login::Connect {server cmd args} {
     ::Jabber::UI::FixUIWhen "connectinit"
     set pending 1
     update idletasks
-
-    # Async socket open with callback.
+    
+    # If secure and ssl different default port (5223).
     if {[info exists argsArr(-port)]} {
 	set port $argsArr(-port)
     } else {
-	set port $jprefs(port)
+	if {$argsArr(-secure) && ($argsArr(-method) eq "ssl")} {
+	    set port $jprefs(sslport)
+	} else {
+	    set port $jprefs(port)
+	}
     }
-    
     if {$argsArr(-ip) eq ""} {
 	set host $server
     } else {
 	set host $argsArr(-ip)
     }
     
-    # The "old" jabber protocol uses a designated port number for ssl
-    # connections. 
     # In xmpp tls negotiating is made in stream using the standard port.
     set ssl 0
-    if {$argsArr(-tls) && ($argsArr(-tlsmethod) eq "ssl")} {
+    if {$argsArr(-secure) && ($argsArr(-method) eq "ssl")} {
 	set ssl 1
     }
     
     # Open socket unless we are using a http proxy.
     if {!$argsArr(-http)} {
-	::Network::Open $host $port [list [namespace current]::ConnectCB $cmd] \
-	  -timeout $prefs(timeoutSecs) -ssl $ssl
+	set callback [list [namespace current]::ConnectCB $cmd]
+	::Network::Open $host $port $callback -timeout $prefs(timeoutSecs)  \
+	  -ssl $ssl
     } else {
 	
 	# Perhaps it gives a better structure to have this elsewhere?
@@ -948,8 +989,7 @@ proc ::Login::ConnectCB {cmd sock ip port status {msg {}}} {
 # Arguments:
 #       server      host
 #       cmd         callback command
-#       args        -sasl
-#                   -tls
+#       args        -version 1.0
 #       
 # Results:
 #       Callback initiated.
@@ -959,19 +999,11 @@ proc ::Login::InitStream {server cmd args} {
     upvar ::Jabber::jstate jstate
     
     ::Jabber::UI::SetStatusMessage [mc jawaitxml $server]
-    set version 0
-    foreach {key value} $args {
-	switch -- $key {
-	    -sasl - -tls {
-		set version 1
-		break
-	    }
-	}
-    }
     set opts {}
-    if {$version} {
-	lappend opts -version 1.0
-    }	
+    array set argsArr $args
+    if {[info exists argsArr(-version)]} {
+	lappend opts -version $argsArr(-version)
+    }
     
     # Initiate a new stream. We should wait for the server <stream>.
     if {[catch {
@@ -1024,9 +1056,9 @@ proc ::Login::StartTlsCB {cmd jlibName type args} {
 #       password
 #       cmd         callback command
 #       args:
-#           -digest  0|1
+#           -digest     0|1
 #           -streamid 
-#           -sasl
+#           -sasl       0|1
 #       
 # Results:
 #       Callback initiated.

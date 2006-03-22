@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.9 2006-01-11 13:24:53 matben Exp $
+# $Id: Avatar.tcl,v 1.10 2006-03-22 14:09:29 matben Exp $
 
 # @@@ Issues:
 #     1) shall we keep cache of users avatars between sessions to save bandwidth?
@@ -388,6 +388,22 @@ proc ::Avatar::OnNewHash {jid} {
     }
 }
 
+# Avatar::GetAsyncIfExists --
+# 
+#       Can be called to get a specific avatar. Notified via hook. Bad?
+
+proc ::Avatar::GetAsyncIfExists {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    set jlib $jstate(jlib)
+    jlib::splitjid $jid jid2 -
+    set hash [$jlib avatar get_hash $jid2]
+    if {$hash ne ""} {
+	set jid [$jlib avatar get_full_jid $jid2]
+	$jlib avatar get_async $jid ::Avatar::GetAsyncCB   
+    }
+}
+
 proc ::Avatar::GetAll { } {
     variable photo
     upvar ::Jabber::jstate jstate
@@ -410,6 +426,8 @@ proc ::Avatar::GetAsyncCB {type jid2} {
     Debug "::Avatar::GetAsyncCB jid2=$jid2, type=$type"
         
     if {$type eq "error"} {
+	
+	# Fallback.
 	GetVCardPhoto $jid2
     } else {
     
@@ -476,6 +494,8 @@ proc ::Avatar::SetPhoto {jid2 data} {
     } else {
 	Debug $err
     }
+    
+    ::hooks::run avatarNewPhotoHook $jid2
 }
 
 proc ::Avatar::PutPhoto {jid2 data} {

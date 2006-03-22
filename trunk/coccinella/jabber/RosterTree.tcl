@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.16 2006-03-14 07:18:59 matben Exp $
+# $Id: RosterTree.tcl,v 1.17 2006-03-22 14:09:29 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -50,8 +50,11 @@ namespace eval ::RosterTree {
 namespace eval ::RosterTree {
     variable plugin
 
-    set plugin(selected) ""
+    set plugin(selected) "plain"
     set plugin(previous) ""
+
+    ::PrefUtils::Add [list  \
+      [list ::RosterTree::plugin(selected)  rosterTree_selected  $plugin(selected)]]
 }
 
 proc ::RosterTree::RegisterStyle {

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.56 2006-03-20 14:37:17 matben Exp $
+# $Id: Profiles.tcl,v 1.57 2006-03-22 14:09:29 matben Exp $
 
 package provide Profiles 1.0
 
@@ -40,18 +40,16 @@ namespace eval ::Profiles:: {
     #           -invisible  0|1
     #           -ip
     #           -priority
-    #           -sasl       0|1
-    #           -tls        0|1
-    #           -tlsmethod  ssl|tls
+    #           -secure     0|1
+    #           -method     ssl|tlssasl|sasl
     #           
-    #           Note the naming convention for tlsmethod!
+    #           Note the naming convention for -method!
     #            ssl        using direct tls socket connection
     #                       it corresponds to the original jabber method
-    #            tls        in stream tls negotiation, xmpp compliant
-    #           
-    #       SASL cannot be used at the same time as -tls & -tlsmethod ssl
-    #       If we get this conflict we pick -tls & -tlsmethod ssl. Wrong?
-
+    #            tlssasl    in stream tls negotiation + sasl, xmpp compliant
+    #                       XMPP requires sasl after starttls!
+    #            sasl       only sasl authentization
+ 
     variable profiles
     
     # Profile name of selected profile.
@@ -85,7 +83,7 @@ proc ::Profiles::InitHook { } {
     
     set profiles {jabber.org {jabber.org myUsername myPassword}}
     lappend profiles {Google Talk} {gmail.com You from_gmail_your_account  \
-      -ip talk.google.com -port 5223 -tls 1 -tlsmethod ssl -digest 0}
+      -ip talk.google.com -port 5223 -secure 1 -method ssl -digest 0}
     set selected [lindex $profiles 0]
 
     ::PrefUtils::Add [list  \
@@ -97,7 +95,7 @@ proc ::Profiles::InitHook { } {
       && [lsearch -glob $profiles "gmail.com *"] < 0} {
 	lappend profiles {Google Talk} {
 	    gmail.com You from_gmail_your_account
-	    -ip talk.google.com -port 5223 -tls 1 -tlsmethod ssl -digest 0
+	    -ip talk.google.com -port 5223 -secure 1 -method ssl -digest 0
 	}	
     }
     
@@ -111,8 +109,8 @@ proc ::Profiles::InitHook { } {
     # Sanity check.
     SanityCheck
     
-    # Translate any old -ssl switch.
-    TranslateAnySSLOption
+    # Translate any old -ssl & -sasl switches.
+    TranslateAnySSLSASLOptions
 }
 
 # Profiles::SanityCheck --
@@ -166,30 +164,57 @@ proc ::Profiles::SanityCheck { } {
     }
 }
 
-# Profiles::TranslateAnySSLOption --
+# Profiles::TranslateAnySSLSASLOptions --
 # 
-#       Any old -ssl switch must be reinterpreted if -sasl = 0:
-#         -ssl & !-sasl => -tls + -tlsmethod ssl
+#       Translate any old -ssl and -sasl switches to the new ones 
+#       -secure 0|1 and -method sasl|tlssasl|ssl according to this map:
+#       
+#       ---------------------------------
+#       | -ssl  -sasl | -secure -method |
+#       ---------------------------------
+#       |   0      0  |    0       -    |
+#       |   1      0  |    1      ssl   |
+#       |   0      1  |    1     sasl   |
+#       |   1      1  |    1    tlssasl |
+#       ---------------------------------
 
-proc ::Profiles::TranslateAnySSLOption { } {
+proc ::Profiles::TranslateAnySSLSASLOptions { } {
     variable profiles
     
+    array set mapMethod {
+	0,0   sasl
+	1,0   ssl
+	0,1   sasl
+	1,1   tlssasl
+    }
     array set arr $profiles
     foreach {name spec} $profiles {
-	array unset opts
+	set server [lindex $spec 0]
+	array unset opts	
 	array set opts [lrange $spec 3 end]
-	if {[info exists opts(-ssl)] && $opts(-ssl)} {
-	    set sasl 0
-	    if {[info exists opts(-sasl)]} {
-		set sasl $opts(-sasl)
-	    }
-	    if {!$sasl} {
-		set opts(-tls) 1
-		set opts(-tlsmethod) "ssl"
-	    }
+	set ssl 0
+	set sasl 0
+	set anyOld 0
+	if {[info exists opts(-ssl)]} {
+	    set ssl $opts(-ssl)
+	    set anyOld 1
 	}
-	unset -nocomplain opts(-ssl)
-	set arr($name) [concat [lrange $spec 0 2] [array get opts]]
+	if {[info exists opts(-sasl)]} {
+	    set sasl $opts(-sasl)
+	    set anyOld 1
+	}
+	#puts "\t name=$name, spec=$spec, anyOld=$anyOld"
+	if {$anyOld} {
+	    if {$ssl || $sasl} {
+		set opts(-secure) 1
+	    } else {
+		set opts(-secure) 0
+	    }
+	    set opts(-method) $mapMethod($ssl,$sasl)
+	    unset -nocomplain opts(-ssl) opts(-sasl)
+	    set lopts [eval {FilterOpts $server} [array get opts]]
+	    set arr($name) [concat [lrange $spec 0 2] $lopts]
+	}
     }
     set profiles [array get arr]
 }
@@ -240,7 +265,7 @@ proc ::Profiles::Set {name server username password args} {
 	    }
 	}
     }
-    set opts [FilterOpts $args]
+    set opts [eval {FilterOpts $server} $args]
     
     if {$config(profiles,do)} {
 	set prof [eval {
@@ -626,6 +651,7 @@ proc ::Profiles::GetDefaultOpts {server} {
     
     if {![info exists defaultOpts]} {
 	array set defaultOpts {
+	    -resource       ""
 	    -digest         1
 	    -invisible      0
 	    -ip             ""
@@ -633,18 +659,16 @@ proc ::Profiles::GetDefaultOpts {server} {
 	    -http           0
 	    -httpurl        ""
 	    -minpollsecs    4
-	    -tls            0
-	    -tlsmethod      tls
-	    -sasl           0
+	    -secure         0
+	    -method         sasl
 	}
 	set defaultOpts(-port) $jprefs(port)
-	set defaultOpts(-tls)  $jprefs(usessl)
 	if {!$this(package,tls)} {
-	    set defaultOpts(-tls) 0
-	    set defaultOpts(-tlsmethod) tls
+	    set defaultOpts(-secure) 0
+	    set defaultOpts(-method) sasl
 	}
 	if {[catch {package require jlibsasl}]} {
-	    set defaultOpts(-sasl) 0
+	    set defaultOpts(-secure) 0
 	}
     }
     set defaultOpts(-httpurl) [GetDefaultHttpUrl $server]
@@ -873,21 +897,22 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     set wse $wcon.se
     ttk::frame $wcon.se
     ttk::checkbutton $wse.tls -style Small.TCheckbutton  \
-      -text "Use Secure Connection" -variable $token\(tls)  \
+      -text "Use Secure Connection" -variable $token\(secure)  \
       -command [list ::Profiles::NotebookSecCmd $w]
+    ttk::radiobutton $wse.sasl -style Small.TRadiobutton  \
+      -text [mc prefsusesasl]  \
+      -variable $token\(method) -value sasl
     ttk::radiobutton $wse.mtls -style Small.TRadiobutton  \
-      -text "Use TLS in stream (default)" -variable $token\(tlsmethod) -value tls \
-      -command [list ::Profiles::NotebookTLSCmd $w]
+      -text "Use TLS and SASL authentization"  \
+      -variable $token\(method) -value tlssasl
     ttk::radiobutton $wse.mssl -style Small.TRadiobutton  \
-      -text "Use TLS on separate port" -variable $token\(tlsmethod) -value ssl \
-      -command [list ::Profiles::NotebookTLSCmd $w]
-    ttk::checkbutton $wse.sasl -style Small.TCheckbutton \
-      -text [mc prefsusesasl] -variable $token\(sasl)
+      -text "Use TLS on separate port (old)"  \
+      -variable $token\(method) -value ssl
     
     grid  $wse.tls     -          -sticky w
+    grid  x            $wse.sasl  -sticky w
     grid  x            $wse.mtls  -sticky w
     grid  x            $wse.mssl  -sticky w
-    grid  $wse.sasl    -          -sticky w
     grid columnconfigure $wse 0 -minsize 24
     
     grid  $wcon.lip    $wcon.eip    -sticky e -pady 1
@@ -967,7 +992,6 @@ proc ::Profiles::NotebookOptionWidget {w token} {
 
 proc ::Profiles::NotebookDefaultWidgetStates {w} {
     NotebookSecCmd $w
-    NotebookTLSCmd $w
 }
 
 proc ::Profiles::NotebookSecCmd {w} {
@@ -978,40 +1002,18 @@ proc ::Profiles::NotebookSecCmd {w} {
     variable $token
     upvar 0 $token state
 
-    # Only if TLS we shall set SASL state.
-    if {$state(tls)} {
+    if {$state(secure)} {
 	$wstate(mssl)  state {!disabled}
 	$wstate(mtls)  state {!disabled}
-    } else {
-	$wstate(mssl)  state {disabled}
-	$wstate(mtls)  state {disabled}
 	if {[jlib::havesasl]} {
 	    $wstate(sasl) state {!disabled}
 	} else {
 	    $wstate(sasl) state {disabled}
 	}
-    }
-}
-
-proc ::Profiles::NotebookTLSCmd {w} {
-    variable $w
-    upvar 0 $w wstate
-
-    set token $wstate(token)
-    variable $token
-    upvar 0 $token state
-    
-    # Only if TLS we shall set SASL state.
-    if {$state(tls)} {
-	if {$state(tlsmethod) eq "ssl"} {
-	    $wstate(sasl) state {disabled}
-	} else {
-	    if {[jlib::havesasl]} {
-		$wstate(sasl) state {!disabled}
-	    } else {
-		$wstate(sasl) state {disabled}
-	    }
-	}
+    } else {
+	$wstate(mssl)  state {disabled}
+	$wstate(mtls)  state {disabled}
+	$wstate(sasl) state {disabled}
     }
 }
 
