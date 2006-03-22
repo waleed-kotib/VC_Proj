@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.10 2005-12-17 09:48:41 matben Exp $
+# $Id: RosterPlain.tcl,v 1.11 2006-03-22 14:09:29 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -37,7 +37,7 @@ namespace eval ::RosterPlain {
       ::RosterPlain::SetItemAlternative
     
     # This is the basic style used as fallback.
-    ::RosterTree::SetStyle plain
+    #::RosterTree::SetStyle plain
     
     # Only if this style is in use!!!
     # These are needed to handle foreign IM systems.

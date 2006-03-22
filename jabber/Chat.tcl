@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.150 2006-03-19 08:17:38 matben Exp $
+# $Id: Chat.tcl,v 1.151 2006-03-22 14:09:29 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -26,6 +26,8 @@ namespace eval ::Chat:: {
     ::hooks::register presenceHook               ::Chat::PresenceHook
     ::hooks::register loginHook                  ::Chat::LoginHook
     ::hooks::register logoutHook                 ::Chat::LogoutHook
+
+    ::hooks::register avatarNewPhotoHook         ::Chat::AvatarNewPhotoHook
 
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Chat::InitPrefsHook
@@ -265,7 +267,7 @@ proc ::Chat::StartThreadDlg {args} {
     if {[info exists argsArr(-jid)]} {
 	set user $argsArr(-jid)
     }
-    
+
     # Grab and focus.
     set oldFocus [focus]
     focus $frmid.euser
@@ -378,7 +380,7 @@ proc ::Chat::StartThread {jid args} {
 	    eval {Build $threadID -from $jid} $args
 	}
     }
-    
+  
     # Since we initated this thread need to set recipient to jid2 unless room.
     jlib::splitjid $jid jid2 res
     if {[::Jabber::JlibCmd service isroom $jid2]} {
@@ -388,7 +390,7 @@ proc ::Chat::StartThread {jid args} {
     }
     set chatstate(jid3) $jid
     SetTitle $chattoken
-        
+      
     return $chattoken
 }
 
@@ -837,11 +839,15 @@ proc ::Chat::Build {threadID args} {
     pack $w.frall -fill both -expand 1
     
     # Widget paths.
-    set wtray       $w.frall.tray
+    set wtop        $w.frall.top
+    set wtray       $w.frall.top.tray
+    set wavatar     $w.frall.top.ava
     set wcont       $w.frall.cc        ;# container frame for wthread or wnb
     set wthread     $w.frall.fthr      ;# the chat thread widget container
     set wnb         $w.frall.nb        ;# tabbed notebook
+    set dlgstate(wtop)       $wtop
     set dlgstate(wtray)      $wtray
+    set dlgstate(wavatar)    $wavatar
     set dlgstate(wcont)      $wcont
     set dlgstate(wthread)    $wthread
     set dlgstate(wnb)        $wnb
@@ -862,8 +868,21 @@ proc ::Chat::Build {threadID args} {
     set iconNotifier    [::Theme::GetImage [option get $w notifierImage {}]]
     set dlgstate(iconNotifier) $iconNotifier
 
+    ttk::frame $wtop
+    pack $wtop -side top -fill x
+    
+    # Bug in 8.4.1 but ok in 8.4.9
+    # We create the avatar widget but map it in SetAnyAvatar.
+    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
+	label $wavatar -relief sunken -bd 1 -bg white
+    } else {
+	ttk::label $wavatar -style Sunken.TLabel -compound image
+    }
+
     ::ttoolbar::ttoolbar $wtray
-    pack $wtray -side top -fill x
+    grid  $wtray  x  
+    grid $wtray -sticky nws
+    grid columnconfigure $wtop 0 -weight 1
 
     $wtray newbutton send  \
       -text [mc Send] -image $iconSend  \
@@ -1057,6 +1076,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     ttk::label $wnotifier -style Small.TLabel \
       -textvariable $chattoken\(notifier) \
       -padding {10 0} -compound left -anchor w
+
     pack  $wbot         -side bottom -anchor w -fill x
     pack  $wbot.active  -side left -fill y -padx 4
     pack  $wsmile       -side left -fill y -padx 4
@@ -1158,6 +1178,9 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(wpresimage) $wpresimage
     
     bind $wthread <Destroy> +[list ::Chat::OnDestroyThread $chattoken]
+
+    ::Avatar::GetAsyncIfExists $jid2
+    SetAnyAvatar $chattoken
     
     # ?
     after idle [list raise [winfo toplevel $wthread]]
@@ -1233,6 +1256,37 @@ proc ::Chat::SetTitle {chattoken} {
 	}
     }
     wm title $chatstate(w) $str
+}
+
+proc ::Chat::SetAnyAvatar {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set dlgtoken $chatstate(dlgtoken)
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+
+    set wavatar $dlgstate(wavatar)
+    set avatar [::Avatar::GetPhotoOfSize $chatstate(jid2) 32]
+    if {$avatar eq ""} {
+	grid forget $wavatar
+    } else {
+
+	# Make sure it is mapped
+	grid  $wavatar  -column 1 -row 0 -padx 10 -pady 4
+	$wavatar configure -image $avatar
+    }    
+}
+
+# Chat::AvatarNewPhotoHook --
+# 
+#       Gets called when ANY avatar is updated or created.
+
+proc ::Chat::AvatarNewPhotoHook {jid2} {
+    
+    foreach chattoken [GetAllTokensFrom chat jid2 ${jid2}*] {
+	SetAnyAvatar $chattoken
+    }    
 }
 
 # Chat::NewPage, ... --
@@ -1335,7 +1389,7 @@ proc ::Chat::MakeNewPage {dlgtoken threadID args} {
 	BuildThreadWidget $dlgtoken $wthread $threadID
     } $args]
     pack $wthread -in $wpage -fill both -expand true
-    
+
     variable $chattoken
     upvar 0 $chattoken chatstate
     set chatstate(wpage) $wpage
@@ -1473,7 +1527,7 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
 	  -text $chatstate(displayname)
     }
     SetTitle $chattoken
-    
+    SetAnyAvatar $chattoken
     SetState $chattoken normal
 }
 

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.17 2006-03-09 15:00:54 matben Exp $
+# $Id: tileutils.tcl,v 1.18 2006-03-22 14:09:29 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -147,9 +147,9 @@ proc tileutils::configstyles {name} {
 	# 
 	# Sunken label:
 	style layout Sunken.TLabel {
-	    Sunken.background -children {
-		Sunken.padding -children {
-		    Sunken.label
+	    Sunken.background -sticky news -children {
+		Sunken.padding -sticky news -children {
+		    Sunken.label -sticky news
 		}
 	    }
 	}	    
