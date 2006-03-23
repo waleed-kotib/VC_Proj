@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.151 2006-03-22 14:09:29 matben Exp $
+# $Id: Chat.tcl,v 1.152 2006-03-23 08:09:26 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1678,9 +1678,10 @@ proc ::Chat::CloseHook {wclose} {
 
     set dlgtoken [GetTokenFrom dlg w $wclose]
     if {$dlgtoken ne ""} {
-	Close $dlgtoken
+	return [Close $dlgtoken]
+    } else {
+	return
     }
-    return
 }
 
 proc ::Chat::LoginHook { } {
@@ -2289,14 +2290,36 @@ proc ::Chat::Close {dlgtoken} {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
-	::UI::SaveWinGeom $wDlgs(jchat) $dlgstate(w)
+	# Do we want to close each tab or complete window?
+	set closetab 1
 	::UI::SaveSashPos $wDlgs(jchat) $chatstate(wpane)
-	
-	foreach chattoken $dlgstate(chattokens) {
-	    XEventSendCancelCompose $chattoken
+	set chattokens $dlgstate(chattokens)
+
+	# User pressed windows close button.
+	if {[::UI::GetCloseWindowType] eq "wm"} {
+	    set closetab 0
 	}
-	destroy $dlgstate(w)
-	#Free $dlgtoken
+	if {$closetab} {
+	    if {[llength $chattokens] >= 2} {
+		XEventSendCancelCompose $chattoken
+		CloseThread $chattoken
+		set closetoplevel 0
+	    } else {
+		set closetoplevel 1
+	    }
+	} else {
+	    set closetoplevel 1
+	}
+	if {$closetoplevel} {
+	    ::UI::SaveWinGeom $wDlgs(jchat) $dlgstate(w)
+	    foreach chattoken $chattokens {
+		XEventSendCancelCompose $chattoken
+	    }
+	    destroy $dlgstate(w)
+	    return
+	} else {
+	    return "stop"
+	}
     }
 }
 
