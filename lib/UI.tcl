@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.124 2006-02-25 08:11:13 matben Exp $
+# $Id: UI.tcl,v 1.125 2006-03-23 08:09:26 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -561,7 +561,7 @@ proc ::UI::Toplevel {w args} {
         
     # We direct all close events through DoCloseWindow so things can
     # be handled from there.
-    wm protocol $w WM_DELETE_WINDOW [list ::UI::DoCloseWindow $w]
+    wm protocol $w WM_DELETE_WINDOW [list ::UI::DoCloseWindow $w "wm"]
     if {$argsArr(-allowclose)} {
 	bind $w <Escape> [list destroy $w]
     }
@@ -579,7 +579,9 @@ proc ::UI::Toplevel {w args} {
 	# ::UI::SetAquaProxyIcon $w
     } else {
 	if {$argsArr(-allowclose)} {
-	    bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w]
+	    
+	    # Application defined virtual event.
+	    bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w "command"]
 	}
     }
     if {$prefs(opacity) != 100} {
@@ -599,6 +601,7 @@ proc ::UI::Toplevel {w args} {
     # @@@ This is not the most reliable way to get application activate events.
     bind $w <FocusIn>  +[list ::UI::OnFocusIn %W $w]
     bind $w <FocusOut> +[list ::UI::OnFocusOut %W $w]
+    bind $w <Destroy>  +[list ::UI::OnDestroy %W $w]
     ::hooks::run newToplevelWindowHook $w
     
     return $w
@@ -607,6 +610,7 @@ proc ::UI::Toplevel {w args} {
 namespace eval ::UI {
     
     variable appInFront 1
+    variable closeType -
 }
 
 proc ::UI::OnFocusIn {win w} {
@@ -634,6 +638,14 @@ proc ::UI::OnFocusOut {win w} {
     }
 }
 
+proc ::UI::OnDestroy {win w} {
+    variable topcache
+    
+    if {$win eq $w} {
+	array unset topcache $w,*
+    }
+}
+
 # @@@ Unreliable!!!
 proc ::UI::SetAquaProxyIcon {w} {
     
@@ -648,18 +660,27 @@ proc ::UI::SetAquaProxyIcon {w} {
 #
 #       Take special actions before a window is closed.
 #       
-#       Notes: There are three ways to close a window:
+#       Notes: There are four ways to close a window:
 #       1) from the menus Close Window command
 #       2) using the menu keyboard shortcut command/control-w
-#       3) clicking the windows close button
+#       3) using the <<CloseWindow>> virtual event
+#       4) clicking the windows close button
 #       
 #       If any cleanup etc. is necessary all three must execute the same code.
 #       In case where window must not be destroyed a hook must be registered
 #       that returns stop.
+#       
 #       Default behaviour when no hook registered is to destroy window.
+#       
+# Arguments:
+#       wevent
+#       type:
+#         command:    menu action or accelerator keys
+#         wm:         window manager; user pressed windows close button.
 
-proc ::UI::DoCloseWindow {{wevent ""}} {
+proc ::UI::DoCloseWindow {{wevent ""} {type "command"}} {
     variable topcache
+    variable closeType $type
     
     set w ""
     if {$wevent eq ""} {
@@ -672,7 +693,7 @@ proc ::UI::DoCloseWindow {{wevent ""}} {
     }
     if {$w ne ""} {
 
-	Debug 2 "::UI::DoCloseWindow winfo class $w=[winfo class $w]"
+	Debug 2 "::UI::DoCloseWindow winfo class $w=[winfo class $w], type=$type"
 
 	# Give components a chance to intersect destruction. (Win taskbar)
 	set result [::hooks::run preCloseWindowHook $w]    
@@ -686,16 +707,25 @@ proc ::UI::DoCloseWindow {{wevent ""}} {
 		return
 	    }
 	    catch {destroy $w}
-	    array unset topcache $w,*
 	}
     
 	# Run hooks. Only the one corresponding to the $w needs to act!
 	set result [::hooks::run closeWindowHook $w]    
 	if {![string equal $result "stop"]} {
 	    catch {destroy $w}
-	    array unset topcache $w,*
 	}
     }
+}
+
+# UI::GetCloseWindowType --
+# 
+#       There are situations where we want to know why a window is getting closed:
+#         command:    menu action or accelerator keys
+#         wm:         window manager; user pressed windows close button.
+
+proc ::UI::GetCloseWindowType {} {
+    variable closeType
+    return $closeType
 }
 
 # UI::GetAllToplevels --

@@ -15,6 +15,7 @@ Coccinella-0.95.12 (0604??):
  o auto join option for groupchat bookmarks
  o reworked the details of TLS/SSL/SASL connection methods
  o avatar in chat dialogs
+ o in tabbed chat dialog close commands only close tab
 
 Coccinella-0.95.11 (060115):
 
