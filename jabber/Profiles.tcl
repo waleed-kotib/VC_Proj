@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.57 2006-03-22 14:09:29 matben Exp $
+# $Id: Profiles.tcl,v 1.58 2006-03-23 15:25:11 matben Exp $
 
 package provide Profiles 1.0
 
@@ -294,7 +294,7 @@ proc ::Profiles::FilterOpts {server args} {
     
     array set dopts [GetDefaultOpts $server]
     foreach {key value} $args {
-	if {![string equal $dopts($key) $value]} {
+	if {[info exists dopts($key)] && ![string equal $dopts($key) $value]} {
 	    set opts($key) $value
 	}
     }
@@ -649,6 +649,7 @@ proc ::Profiles::GetDefaultOpts {server} {
     upvar ::Jabber::jprefs jprefs
     variable defaultOpts
     
+    # We MUST list all available options here!
     if {![info exists defaultOpts]} {
 	array set defaultOpts {
 	    -resource       ""
