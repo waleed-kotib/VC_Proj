@@ -73,7 +73,9 @@
 ::msgcat::mcset es Group		{Grupo}
 ::msgcat::mcset es Groupchat            {Grupo de chat}
 ::msgcat::mcset es Handling		{Ergonomia}
-#::msgcat::mcset es Height {}
+#Descomentado
+::msgcat::mcset es Height 		{Altura}
+#Descomentado
 ::msgcat::mcset es History		{Historial}
 ::msgcat::mcset es Home			{Inicio}
 #::msgcat::mcset es Image {}
@@ -110,7 +112,7 @@
 # ::msgcat::mcset es Pause
 ::msgcat::mcset es Pick			{Elegir}
 ::msgcat::mcset es Phone		{Teléfono}
-::msgcat::mcset es Play			{Jugar}
+::msgcat::mcset es Play			{Escuchar}
 ::msgcat::mcset es Plugins		{Plugins}
 ::msgcat::mcset es Port			{Puerto}
 ::msgcat::mcset es Preferences		{Preferencias}
@@ -173,7 +175,9 @@
 ::msgcat::mcset es Warning		{Atención}
 ::msgcat::mcset es Welcome              {Bienvenido}
 ::msgcat::mcset es Whiteboard		{Pizarra}
-#::msgcat::mcset es Width {}
+#Descomentado
+::msgcat::mcset es Width 		{Anchura}
+#Descomentado
 ::msgcat::mcset es Work			{Trabajo}
 ::msgcat::mcset es Yes			{Sí}
 ::msgcat::mcset es yes			{sí}
@@ -199,7 +203,7 @@
 # Titulos de todos los menués ; concatenados con 'm' para la clave de la base de datos.
 ::msgcat::mcset es mFile		{Archivo}
 ::msgcat::mcset es mEdit		{Editar}
-::msgcat::mcset es mPreferences		{Preferencias}
+::msgcat::mcset es mPreferences		{Preferencias...}
 ::msgcat::mcset es mJabber		{Jabber}
 ::msgcat::mcset es mItems		{Elementos}
 ::msgcat::mcset es mLibrary		{Biblioteca}
@@ -282,7 +286,7 @@
 ::msgcat::mcset es mMessageInbox	{Mensajes}
 ::msgcat::mcset es mSearch		{Busca&r...}
 ::msgcat::mcset es mAddNewUser		{Añadir un nuevo usuario...}
-::msgcat::mcset es mSendMessage		{Enviar un mensaje...}
+::msgcat::mcset es mSendMessage		{En&viar un mensaje...}
 ::msgcat::mcset es mChat		{Chat}
 ::msgcat::mcset es mStatus		{Estado}
 ::msgcat::mcset es mDirStatus           {Estado deseado}
@@ -471,6 +475,7 @@
 ::msgcat::mcset es {Mailbox Error}		{Error de buzón}
 ::msgcat::mcset es {MIME type}			{Tipo MIME}
 ::msgcat::mcset es {Multi Connect}		{Conexiones múltiples}
+::msgcat::mcset es {My Avatar}			{Avatar}
 ::msgcat::mcset es {My Status}			{Mi estado}
 #::msgcat::mcset es {Name of list} {}
 ::msgcat::mcset es {Network Error}		{Error de Red}
@@ -515,7 +520,9 @@
 ::msgcat::mcset es {Personal URL}		{URL personal}
 ::msgcat::mcset es {Pick Directory}		{Elegir un directorio}
 ::msgcat::mcset es {Pick File}			{Elegir un archivo}
-# ::msgcat::mcset es {Pick skin}
+# Descomentado
+ ::msgcat::mcset es {Pick skin}			{Seleccionar tema}
+# Descomentado
 ::msgcat::mcset es {Plugin Info}		{Información sobre el plugin}
 ::msgcat::mcset es {Plugin Control}		{Control del plugin}
 ::msgcat::mcset es {Port number}		{Número de puerto}
@@ -557,7 +564,9 @@
 #::msgcat::mcset es {Set New Nickname} {}
 ::msgcat::mcset es {Set New Topic}		{Elegir nuevo tópico}
 ::msgcat::mcset es {Set Status}			{Elegir estado}
-# ::msgcat::mcset es {Set windows opacity} {}
+# Descomentado
+::msgcat::mcset es {Set windows opacity} 	{Establecer la transparencia}
+# Descomentado
 ::msgcat::mcset es {Settings Panels}		{Paneles de configuración}
 ::msgcat::mcset es {Setup Assistant}		{Asistente de configuración}
 ::msgcat::mcset es {Slide Show}			{Presentación}
@@ -874,7 +883,9 @@
 ::msgcat::mcset es prefcuagent   {Siempre utilizar el método de los agentes}
 ::msgcat::mcset es prefcuupdate  {Buscar automáticamente actualizaciones de Coccinella}
 
-::msgcat::mcset es prefcuremdlgs {Recordar los dialogos abiertos entre sesiones}
+#--- Translate ---
+::msgcat::mcset es prefcuremdlgs {Rcordar los dialogos abiertos entre sesiones}
+#--- Translate ---
 
 ::msgcat::mcset es preffmhelp    {Plugins de ayuda para los tipos de archivos}
 ::msgcat::mcset es preffmsave    {"guardar en disco" en el directorio entrante}
@@ -973,12 +984,14 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jadirpresmsg {Enviar el estado deseado al usuario "%s".}
 ::msgcat::mcset es jatlsnegot   {Seguridad TLS...}
 
+#--- Translate ---
 ::msgcat::mcset es jamucentermsg {Introduzca su usuario y pulse la tecla "Intro" para acceder a la sala de chat. Puede buscar para ver las salas de chat disponibles en el servicio. Solo las salas restringidas necesitan contraseñia.}
 ::msgcat::mcset es jainmsgshow {Mostrar los mensajes entrantes en esta ventana}
 ::msgcat::mcset es jadisaddserv {Encuentra otros servicios o salas de chat en el servidor. Puede añadir otro servidor de forma permanente para que posteriormente activado de forma automática.El servidor al que se accede de forma automatica mostrará todos los servicios.}
 ::msgcat::mcset es jadisrmall {Borrar todos los servidores que han sido automaticamente encontrados.}
 ::msgcat::mcset es jauserinnote {Agregue sus notas personales acerca de este usuario}
 ::msgcat::mcset es jaregisterex {Complete el nombre de los servidores Jabber con los que desea registrar. Pulse el botón "Get" para recibir la información de registro. Complete la información y finalice el registro.}
+#--- Translate ---
 
 ::msgcat::mcset es jaloginjid   {Introduzca su jid con el formato "joey@myjabb.org", o seleccione un perfil. Debe de tener una cuenta en el servidor.}
 ::msgcat::mcset es jaregalready {Esta registrado en este servicio. Su configuracion actual en el servicio.}
@@ -1079,22 +1092,24 @@ namespace eval ::EditShortcuts:: {
 # Fore some of these generic names could be used?
 ::msgcat::mcset es iaxPhone             {IAX Phone}
 ::msgcat::mcset es iaxPhoneAccount      {IAX Account}
-::msgcat::mcset es iaxPhoneUser         {User}
-::msgcat::mcset es iaxPhonePassword     {Password}
-::msgcat::mcset es iaxPhoneHost         {Host}
-::msgcat::mcset es iaxPhoneCidNum       {Cid Number}
-::msgcat::mcset es iaxPhoneCidName      {Cid Name}
-::msgcat::mcset es iaxPhoneInputDev     {Input Device}
-::msgcat::mcset es iaxPhoneOutputDev    {Output Device}
+::msgcat::mcset es iaxPhoneUser         {Usuario}
+::msgcat::mcset es iaxPhonePassword     {Contraseña}
+::msgcat::mcset es iaxPhoneHost         {Servidor}
+::msgcat::mcset es iaxPhoneCidNum       {Número del Cid (Identificador de llamada)}
+::msgcat::mcset es iaxPhoneCidName      {Nombre del Cid}
+::msgcat::mcset es iaxPhoneInputDev     {Dispositivo de entrada}
+::msgcat::mcset es iaxPhoneOutputDev    {Dispositivo de salida}
 ::msgcat::mcset es iaxPhoneAGC          {AGC}
 ::msgcat::mcset es iaxPhoneAAGC         {AAGC}
-::msgcat::mcset es iaxPhoneNoise        {Noise}
+::msgcat::mcset es iaxPhoneNoise        {Ruido}
 ::msgcat::mcset es iaxPhoneComfort      {Comfort}
 ::msgcat::mcset es iaxPhoneCodec        {Codec}
 
 ::msgcat::mcset es mToolbar		{Barra de herramientas}
 ::msgcat::mcset es mNotebook		{Pestañas}
 ::msgcat::mcset es mMinimal		{Reducido}
+
+
 
 # END --------------------------------------------------------------------------
 
