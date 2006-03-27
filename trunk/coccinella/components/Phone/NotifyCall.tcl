@@ -152,36 +152,35 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
         grid $box.answer -column 1 -row 4 -padx 1 -pady 4
     }
 
+    set subPath [file join components Phone timages]
+
+    set images(microphone) [::Theme::GetImage microphone $subPath]
+    ttk::frame $box.mic
+    ttk::scale $box.mic.s -orient horizontal -from 0 -to 100 \
+      -variable [list ::NotifyCall::state(microphone)] -command [list ::NotifyCall::MicCmd $w] -length 60
+    ttk::checkbutton $box.mic.l -style Toolbutton  \
+      -variable [list ::NotifyCall::state(cmicrophone)] -image $images(microphone)  \
+      -onvalue 0 -offvalue 1 -padding {1}  \
+      -command [list ::NotifyCall::Mute $w microphone]  -state disabled
+    grid $box.mic.l  $box.mic.s
+
+    set images(speaker) [::Theme::GetImage speaker $subPath]    
+    ttk::frame $box.spk
+    ttk::scale $box.spk.s -orient horizontal -from 0 -to 100 \
+      -variable [list ::NotifyCall::state(speaker)] -command [list ::NotifyCall::SpkCmd $w] -length 60
+    ttk::checkbutton $box.spk.l -style Toolbutton  \
+      -variable [list ::NotifyCall::state(cspeaker)] -image $images(speaker)  \
+      -onvalue 0 -offvalue 1 -padding {1}  \
+      -command [list ::NotifyCall::Mute $w speaker] -state disabled
+    grid $box.spk.l  $box.spk.s 
+
+    grid $box.mic $box.spk -padx 4
+    grid $box.mic -column 0 -row 5 -sticky w
+    grid $box.spk -column 1 -row 5 -sticky e
+    grid columnconfigure $box 1 -weight 1
+
     #--- Button info, is available only for Jingle Calls ---
     if { $res ne "" } {
-        set subPath [file join components Phone timages]
-
-        set images(microphone) [::Theme::GetImage microphone $subPath]
-        ttk::frame $box.mic
-        ttk::scale $box.mic.s -orient horizontal -from 0 -to 100 \
-          -variable [list ::NotifyCall::state(microphone)] -command [list ::NotifyCall::MicCmd $w] -length 60
-        ttk::checkbutton $box.mic.l -style Toolbutton  \
-          -variable [list ::NotifyCall::state(cmicrophone)] -image $images(microphone)  \
-          -onvalue 0 -offvalue 1 -padding {1}  \
-          -command [list ::NotifyCall::Mute $w microphone]  -state disabled
-        grid $box.mic.l  $box.mic.s
-
-        set images(speaker) [::Theme::GetImage speaker $subPath]    
-        ttk::frame $box.spk
-        ttk::scale $box.spk.s -orient horizontal -from 0 -to 100 \
-          -variable [list ::NotifyCall::state(speaker)] -command [list ::NotifyCall::SpkCmd $w] -length 60
-        ttk::checkbutton $box.spk.l -style Toolbutton  \
-          -variable [list ::NotifyCall::state(cspeaker)] -image $images(speaker)  \
-          -onvalue 0 -offvalue 1 -padding {1}  \
-          -command [list ::NotifyCall::Mute $w speaker] -state disabled
-        grid $box.spk.l  $box.spk.s 
-
-        grid $box.mic $box.spk -padx 4
-        grid $box.mic -column 0 -row 5 -sticky w
-        grid $box.spk -column 1 -row 5 -sticky e
-        grid columnconfigure $box 1 -weight 1
-
-
         ttk::button $box.info -text [mc callInfo]  \
           -command [list [namespace current]::CallInfo $w $phoneNumber]
         grid $box.info -row 6 -padx 1 
@@ -218,7 +217,7 @@ proc ::NotifyCall::MicCmd {w level} {
     variable state
     
     if {$level != $state(old:microphone)} {
-	::Phone::SetInputLevel [expr {100 - $level}]
+	::Phone::SetInputLevel $level
     }
     set state(old:microphone) $level
 }
@@ -227,7 +226,7 @@ proc ::NotifyCall::SpkCmd {w level} {
     variable state    
 
     if {$level != $state(old:speaker)} {
-	::Phone::SetOutputLevel [expr {100 - $level}]        
+	::Phone::SetOutputLevel $level        
     }
     set state(old:speaker) $level
 }
@@ -298,7 +297,6 @@ proc ::NotifyCall::HangupEventHook {args} {
 
 proc ::NotifyCall::TalkingEventHook {args} {
     variable state
-
     #What to do when user is talking
     set win $state(win)
     set wbox $win.f.f.b
