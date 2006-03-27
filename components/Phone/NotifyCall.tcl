@@ -15,6 +15,8 @@ proc ::NotifyCall::Init { } {
     ::hooks::register phoneNotifyNormalState          ::NotifyCall::HangupEventHook
     ::hooks::register phoneNotifyTalkingState         ::NotifyCall::TalkingEventHook
 
+    ::hooks::register avatarNewPhotoHook         ::NotifyCall::AvatarNewPhotoHook
+
     #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------
     InitState
 }
@@ -91,64 +93,64 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
 
     # Global frame.
     ttk::frame $w.f
-    pack  $w.f  -fill x
-				
+    grid $w.f  -sticky we
+
+    #---------  Window Head information -------------
     if { $type eq "in" } {
         set msgHead [mc {inboundCall}]:
     } else {
         set msgHead [mc {outboundCall}]:
     } 
     ttk::label $w.f.head -style Headlabel -text "$msgHead"
-    pack  $w.f.head  -side top -fill both -expand 1
+    grid $w.f.head -column 0 -row 0 -columnspan 2 
 
     ttk::separator $w.f.s -orient horizontal
-    pack  $w.f.s  -side top -fill x
+    grid $w.f.s -column 0 -row 1 -sticky ew -pady 4 -columnspan 2
 
     ttk::label $w.f.phoneNumber -style Headlabel -text "$phoneNumber"
-    pack $w.f.phoneNumber  -side top -fill both -expand 1
+    grid $w.f.phoneNumber -column 0 -row 2 
 
-    #---- Gets Avatar from Incoming Number -----
+    #------- Only Incoming from Jingle (jid and res)  has Avatar -----------
     jlib::splitjid $phoneNumber jid2 res
     if { $res ne "" } {
-        set avatar [::Avatar::GetPhoto $jid2]
-        if { $avatar ne "" } {
-            set width  [image width $avatar]
-            set height [image height $avatar]
-            canvas $w.f.avatar -width $width -height $height  \
-              -highlightthickness 3 -bd 0 -highlightbackground gray87  \
-              -insertwidth 0 -bg gray87
-            $w.f.avatar create image 3 3 -anchor nw -image $avatar
-
-            pack  $w.f.avatar  -side top -fill both -expand 1
+        #---- Gets Avatar from Incoming Number -----
+        # Bug in 8.4.1 but ok in 8.4.9
+        if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
+            label $w.f.avatar -relief sunken -bd 1 -bg white
+        } else {
+            ttk::label $w.f.avatar -style Sunken.TLabel -compound image
         }
+
+        ::Avatar::GetAsyncIfExists $jid2
+        ::NotifyCall::AvatarNewPhotoHook $jid2
     }
 
     ttk::separator $w.f.s2 -orient horizontal
-    pack  $w.f.s2  -side top -fill x
+    grid $w.f.s2 -column 0 -row 3 -sticky ew -pady 4 -columnspan 2
 
+    #--------- Control Buttons -----------
     set wbox $w.f.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
-    pack  $wbox  -fill both -expand 1
+    grid $wbox  -sticky nswe 
     
     set box $wbox.b
     ttk::frame $box
-    pack $box -side bottom -fill x
+    grid $box -sticky we
     
 #    ttk::label $box.l -text "[mc phoneNumber]:"
 #    ttk::entry $box.e -textvariable [namespace current]::phoneNumber  \
 #      -width 18
 
+    ttk::button $box.hungup -text [mc callHungUp]  \
+      -command [list [namespace current]::HungUp $w $line]
+ 
+    grid $box.hungup -column 0 -row 4 -padx 1 -pady 4
 
     if { $type eq "in" } {
         ttk::button $box.answer -text [mc callAnswer]  \
           -command [list [namespace current]::Answer $w $line]
-        grid $box.answer -padx 1 -pady 4
+        grid $box.answer -column 1 -row 4 -padx 1 -pady 4
     }
-
-    ttk::button $box.hungup -text [mc callHungUp]  \
-      -command [list [namespace current]::HungUp $w $line]
- 
-    grid $box.hungup -padx 1 -pady 4
 
     #--- Button info, is available only for Jingle Calls ---
     if { $res ne "" } {
@@ -162,10 +164,7 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
           -variable [list ::NotifyCall::state(cmicrophone)] -image $images(microphone)  \
           -onvalue 0 -offvalue 1 -padding {1}  \
           -command [list ::NotifyCall::Mute $w microphone]  -state disabled
-
-        pack  $box.mic.l  $box.mic.s  -side top
-        pack $box.mic.s -padx 4
-
+        grid $box.mic.l  $box.mic.s
 
         set images(speaker) [::Theme::GetImage speaker $subPath]    
         ttk::frame $box.spk
@@ -175,18 +174,17 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
           -variable [list ::NotifyCall::state(cspeaker)] -image $images(speaker)  \
           -onvalue 0 -offvalue 1 -padding {1}  \
           -command [list ::NotifyCall::Mute $w speaker] -state disabled
-        pack  $box.spk.l  $box.spk.s  -side top
-        pack $box.spk.s -padx 4
+        grid $box.spk.l  $box.spk.s 
 
-        grid  $box.mic $box.spk -padx 4
-        grid $box.mic -sticky w
-        grid $box.spk -sticky e
+        grid $box.mic $box.spk -padx 4
+        grid $box.mic -column 0 -row 5 -sticky w
+        grid $box.spk -column 1 -row 5 -sticky e
         grid columnconfigure $box 1 -weight 1
 
 
         ttk::button $box.info -text [mc callInfo]  \
           -command [list [namespace current]::CallInfo $w $phoneNumber]
-        grid $box.info -padx 1 -pady 4
+        grid $box.info -row 6 -padx 1 
     }
     focus $box.hungup
     wm resizable $w 0 0
@@ -259,7 +257,7 @@ proc ::NotifyCall::TimeUpdate {time} {
     #pack  $wbox.lcd  -side bottom -fill x
 
 
-    puts "Update Time: $time"
+#    puts "Update Time: $time"
 }
 #-----------------------------------------------------------------------
 #------------------------ Notify Call Event Hooks ----------------------
@@ -308,4 +306,21 @@ proc ::NotifyCall::TalkingEventHook {args} {
     $wbox.answer configure -state disabled
     $wbox.mic.l  configure -state enabled
     $wbox.spk.l  configure -state enabled
+}
+
+proc ::NotifyCall::AvatarNewPhotoHook {jid2} {
+    variable state
+
+    set w $state(win)
+    if {[winfo exists $w]} {
+        set avatar [::Avatar::GetPhotoOfSize $jid2 64]
+
+        if {$avatar eq ""} {
+            grid forget $w.f.avatar
+        } else {
+            # Make sure it is mapped
+            grid $w.f.avatar -row 2 -column 1 -padx 4
+            $w.f.avatar configure -image $avatar
+        }
+    }
 }

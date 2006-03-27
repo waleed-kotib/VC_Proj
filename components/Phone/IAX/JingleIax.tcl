@@ -5,11 +5,12 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.9 2006-03-22 21:22:49 antoniofcano Exp $
+# $Id: JingleIax.tcl,v 1.10 2006-03-27 10:06:49 antoniofcano Exp $
 
 if {[catch {package require stun}]} {
     return
 }
+
 if {[catch {package require jlib::jingle}]} {
     return
 }
@@ -289,7 +290,6 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
                 set port $candidateDescription(local,port)
             }
         }
-puts "Va a llamar con $ip, $port"
         ::Phone::DialJingle $ip $port $from [::Jabber::JlibCmd getthis myjid] $user $password
     }
 }
@@ -389,8 +389,7 @@ proc ::JingleIAX::BuildChatButtonTrayHook {wtray dlgtoken args} {
 proc ::JingleIAX::ChatCall {dlgtoken} {
     variable contacts
     set chattoken [::Chat::GetActiveChatToken $dlgtoken]
-    set jid [::Chat::GetChatTokenValue $chattoken jid3]
-
+    set jid [::Chat::GetChatTokenValue $chattoken jid]
     if {[info exists contacts($jid,jingle)] } {
         if { $contacts($jid,jingle) eq "true" } {
 	    SessionInitiate $jid
