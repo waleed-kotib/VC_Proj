@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.119 2006-03-20 14:37:17 matben Exp $
+# $Id: JUI.tcl,v 1.120 2006-03-28 08:12:12 matben Exp $
 
 package provide JUI 1.0
 
@@ -102,7 +102,7 @@ proc ::Jabber::UI::Init { } {
 	set menuDefs(rost,file) {
 	    {command   mNewWhiteboard      {::Jabber::WB::NewWhiteboard}  normal   N}
 	    {command   mCloseWindow        {::UI::DoCloseWindow}          normal   W}
-	    {command   mPreferences        {::Preferences::Build}         normal   {}}
+	    {command   mPreferences...     {::Preferences::Build}         normal   {}}
 	    {separator}
 	    {command   mQuit               {::UserActions::DoQuit}        normal   Q}
 	}

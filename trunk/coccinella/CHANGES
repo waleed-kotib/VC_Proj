@@ -16,6 +16,7 @@ Coccinella-0.95.12 (0604??):
  o reworked the details of TLS/SSL/SASL connection methods
  o avatar in chat dialogs
  o in tabbed chat dialog close commands only close tab
+ o added switch for storing prefs on usb stick etc.
 
 Coccinella-0.95.11 (060115):
 

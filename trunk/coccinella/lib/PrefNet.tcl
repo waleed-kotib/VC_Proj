@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: PrefNet.tcl,v 1.2 2005-10-22 14:26:21 matben Exp $
+# $Id: PrefNet.tcl,v 1.3 2006-03-28 08:12:12 matben Exp $
  
 package provide PrefNet 1.0
 
@@ -45,6 +45,9 @@ proc ::PrefNet::InitPrefsHook { } {
 
 proc ::PrefNet::BuildPrefsHook {wtree nbframe} {
     
+    if {![::Preferences::HaveTableItem General]} {
+	::Preferences::NewTableItem {General} [mc General]
+    }
     ::Preferences::NewTableItem {General {Network Setup}} [mc {Network Setup}]
     set wpage [$nbframe page {Network Setup}]
     BuildPage $wpage
