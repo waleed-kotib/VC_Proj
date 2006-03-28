@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.152 2006-03-23 08:09:26 matben Exp $
+# $Id: Chat.tcl,v 1.153 2006-03-28 14:12:10 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -592,12 +592,17 @@ proc ::Chat::GotNormalMsg {body args} {
 #       body
 #       args:   -secs seconds
 #               -jidfrom jid
+#               -where end|1.0
 
 proc ::Chat::InsertMessage {chattoken spec body args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
+    array set argsArr {
+	-where end
+    }
     array set argsArr $args
+    set where $argsArr(-where)
     
     set w       $chatstate(w)
     set wtext   $chatstate(wtext)
@@ -1325,14 +1330,10 @@ proc ::Chat::DrawCloseButton {dlgtoken} {
     set im       [::Theme::GetImage [option get $w tabCloseImage {}]]
     set imactive [::Theme::GetImage [option get $w tabCloseActiveImage {}]]
     set wclose $dlgstate(wnb).close
-    ttk::label $wclose  \
-      -image [list $im active $imactive] -compound image
+    ttk::button $wclose -style Plain.TButton  \
+      -image [list $im active $imactive] -compound image  \
+      -command [list [namespace current]::ClosePageCmd $dlgtoken]
     place $wclose -anchor ne -relx 1.0 -x -6 -y 6
-
-    bind $wclose <Enter> {+%W state active }
-    bind $wclose <Leave> {+%W state !active }
-    bind  $wclose <ButtonPress-1> \
-      [list [namespace current]::ClosePageCmd $dlgtoken]
 
     ::balloonhelp::balloonforwindow $wclose [mc {Close page}]
     set dlgstate(wclose) $wclose

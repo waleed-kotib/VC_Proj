@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.23 2006-02-25 08:11:13 matben Exp $
+# $Id: Sounds.tcl,v 1.24 2006-03-28 14:12:10 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -489,7 +489,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     pack  $fvol.v  -side left -padx 4
     pack  $fvol  -side top -pady 4 -anchor [option get . dialogAnchor {}]
 
-    ttk::button $walrt.midi -text "MIDI Player" -command ::Sounds::MidiPlayer
+    ttk::button $walrt.midi -text [mc {MIDI Player}] -command ::Sounds::MidiPlayer
     pack  $walrt.midi -pady 4
     
     bind $wpage <Destroy> {+::Sounds::Free}

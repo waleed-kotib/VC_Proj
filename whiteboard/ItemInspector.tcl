@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: ItemInspector.tcl,v 1.10 2006-03-28 08:12:12 matben Exp $
+# $Id: ItemInspector.tcl,v 1.11 2006-03-28 14:12:11 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -184,7 +184,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
       -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token]
-    wm title $w {Item Inspector}
+    wm title $w [mc {Item Inspector}]
     bind $wcan <Destroy> +[list [namespace current]::Cancel $token]
     
     set typWidth 24
@@ -228,7 +228,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     set state(type,value) $itemType
     set wlabel $frtot.l$line
     set wentry $frtot.e$line
-    ttk::label $wlabel -text "Item type:"
+    ttk::label $wlabel -text "[mc {Item type}]:"
     ttk::entry $wentry -width $typWidth -textvariable $token\(type)
     $wentry state {disabled}
     grid  $wlabel  $wentry  -padx 2 -pady 2
@@ -244,7 +244,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     incr line
     set wlabel $frtot.l$line
     set wentry $frtot.e$line
-    ttk::label $wlabel -text "Coordinates:"
+    ttk::label $wlabel -text "[mc {Coordinates}]:"
     ttk::entry $wentry -width $typWidth -textvariable $token\(coords)
     $wentry state {disabled}
     grid  $wlabel  $wentry  -padx 2 -pady 2
@@ -403,7 +403,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     
     incr line
     set lockCmd [list [namespace current]::LockCmd $token]
-    ttk::checkbutton $frtot.lock$line -text "Lock this item from being edited" \
+    ttk::checkbutton $frtot.lock$line -text [mc {Lock this item from being edited}] \
       -variable $token\(locked) -command $lockCmd
     grid  x  $frtot.lock$line  -sticky w
     set state(locked) 0
@@ -491,7 +491,7 @@ proc ::ItemInspector::Configure {token} {
     set utag $state(utag)
     set type $state(type)
     set wcan $state(wcan)
-            
+        
     # Loop through all options. Assemble a configure list.
     set allNewOpts {}
     foreach op $state(allopts) {

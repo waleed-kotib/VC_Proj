@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.58 2006-03-23 15:25:11 matben Exp $
+# $Id: Profiles.tcl,v 1.59 2006-03-28 14:12:11 matben Exp $
 
 package provide Profiles 1.0
 
@@ -898,16 +898,16 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     set wse $wcon.se
     ttk::frame $wcon.se
     ttk::checkbutton $wse.tls -style Small.TCheckbutton  \
-      -text "Use Secure Connection" -variable $token\(secure)  \
+      -text [mc {Use Secure Connection}] -variable $token\(secure)  \
       -command [list ::Profiles::NotebookSecCmd $w]
     ttk::radiobutton $wse.sasl -style Small.TRadiobutton  \
       -text [mc prefsusesasl]  \
       -variable $token\(method) -value sasl
     ttk::radiobutton $wse.mtls -style Small.TRadiobutton  \
-      -text "Use TLS and SASL authentization"  \
+      -text [mc {Use TLS and SASL authentization}]  \
       -variable $token\(method) -value tlssasl
     ttk::radiobutton $wse.mssl -style Small.TRadiobutton  \
-      -text "Use TLS on separate port (old)"  \
+      -text [mc {Use TLS on separate port (old)}]  \
       -variable $token\(method) -value ssl
     
     grid  $wse.tls     -          -sticky w

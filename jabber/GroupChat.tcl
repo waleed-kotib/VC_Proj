@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.135 2006-03-15 13:56:49 matben Exp $
+# $Id: GroupChat.tcl,v 1.136 2006-03-28 14:12:11 matben Exp $
 
 package require Enter
 package require History
@@ -2607,7 +2607,7 @@ proc ::GroupChat::BuildPageConf {page} {
     
     set wnick $wc.n
     ttk::frame $wnick
-    ttk::label $wnick.l -text "Default nickname:"
+    ttk::label $wnick.l -text "[mc {Default Nickname}]:"
     ttk::entry $wnick.e \
       -textvariable [namespace current]::tmpJPrefs(defnick)
     pack $wnick.l $wnick.e -side left

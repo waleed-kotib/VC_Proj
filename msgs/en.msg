@@ -40,6 +40,7 @@
 ::msgcat::mcset en Connection
 ::msgcat::mcset en Contact
 ::msgcat::mcset en Contacts
+::msgcat::mcset en Coordinates
 ::msgcat::mcset en Country
 ::msgcat::mcset en Create
 ::msgcat::mcset en Customization
@@ -145,6 +146,7 @@
 ::msgcat::mcset en Sounds
 ::msgcat::mcset en Specifications
 ::msgcat::mcset en Speech
+::msgcat::mcset en Standard
 ::msgcat::mcset en State
 ::msgcat::mcset en State/Region
 ::msgcat::mcset en Stop
@@ -399,6 +401,7 @@
 ::msgcat::mcset en {Create Room}
 ::msgcat::mcset en {Default group}
 ::msgcat::mcset en {Default Logout Status}
+::msgcat::mcset en {Default Nickname}
 ::msgcat::mcset en {Default status descriptions}
 ::msgcat::mcset en {Delete Rule}
 ::msgcat::mcset en {Disk Cache}
@@ -438,6 +441,7 @@
 ::msgcat::mcset en {History length}
 ::msgcat::mcset en {Host name}
 ::msgcat::mcset en {HTTP port}
+::msgcat::mcset en {>>Import>>}
 ::msgcat::mcset en {Import Iconset...}
 ::msgcat::mcset en {Import using}
 ::msgcat::mcset en {Import/Remove fonts}
@@ -450,6 +454,8 @@
 ::msgcat::mcset en {Is connected}
 ::msgcat::mcset en {Is safe}
 ::msgcat::mcset en {Is server up}
+::msgcat::mcset en {Item Inspector}
+::msgcat::mcset en {Item Type}
 ::msgcat::mcset en {Jabber address}
 ::msgcat::mcset en {Jabber Client}
 ::msgcat::mcset en {Jabber Server}
@@ -461,10 +467,13 @@
 ::msgcat::mcset en {Last name}
 ::msgcat::mcset en {Launch time}
 ::msgcat::mcset en {Local Time}
+::msgcat::mcset en {Lock this item from being edited}
 ::msgcat::mcset en {Logout With Message}
 ::msgcat::mcset en {Logged out}
 ::msgcat::mcset en {Login as invisible}
 ::msgcat::mcset en {Mailbox Error}
+::msgcat::mcset en {Make new text item for each line}
+::msgcat::mcset en {MIDI Player}
 ::msgcat::mcset en {MIME type}
 ::msgcat::mcset en {Multi Connect}
 ::msgcat::mcset en {My Avatar}
@@ -561,6 +570,7 @@
 ::msgcat::mcset en {Setup Assistant}
 ::msgcat::mcset en {Slide Show}
 ::msgcat::mcset en {Slide Show Folder}
+::msgcat::mcset en {Smooth freehand strokes}
 ::msgcat::mcset en {Software Update}
 ::msgcat::mcset en {Sounds & Speech}
 ::msgcat::mcset en {Start Chat}
@@ -582,7 +592,10 @@
 ::msgcat::mcset en {Unknown: Prompt user}
 ::msgcat::mcset en {Url of homepage}
 ::msgcat::mcset en {Use proxy}
+::msgcat::mcset en {Use Secure Connection}
 ::msgcat::mcset en {Use SSL for security}
+::msgcat::mcset en {Use TLS and SASL authentization}
+::msgcat::mcset en {Use TLS on separate port (old)}
 ::msgcat::mcset en {User is}
 ::msgcat::mcset en {User is offline}
 ::msgcat::mcset en {User is online}

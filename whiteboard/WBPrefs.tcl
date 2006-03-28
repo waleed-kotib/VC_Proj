@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.11 2006-02-10 15:40:50 matben Exp $
+# $Id: WBPrefs.tcl,v 1.12 2006-03-28 14:12:11 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -113,9 +113,9 @@ proc ::WBPrefs::BuildWhiteboardPage {page} {
     grid  $afr.w  -padx 2 -sticky e
     grid  $afr.h  -padx 2 -sticky e
 
-    ttk::checkbutton $wc.spost -text "Smooth freehand strokes"  \
+    ttk::checkbutton $wc.spost -text [mc {Smooth freehand strokes}]  \
       -variable [namespace current]::tmpPrefs(wb,strokePost)
-    ttk::checkbutton $wc.nlnew -text "Make new text item for each line"  \
+    ttk::checkbutton $wc.nlnew -text [mc {Make new text item for each line}]  \
       -variable [namespace current]::tmpPrefs(wb,nlNewText)
 
     pack  $wc.spost  $wc.nlnew  -side top -anchor w
@@ -168,13 +168,13 @@ proc ::WBPrefs::BuildFontsPage {page} {
     # Mid buttons.
     set btimport $wc.fr2.imp
     set btremove $wc.fr2.rm
-    ttk::button $btimport -text {>>Import>>} \
+    ttk::button $btimport -text [mc {>>Import>>}] \
       -command "[namespace current]::PushBtImport  \
       \[$wlbsys curselection] $wlbsys $wlbwb"
     ttk::button $btremove -text [mc Remove]  \
       -command "[namespace current]::PushBtRemove  \
       \[$wlbwb curselection] $wlbwb"
-    ttk::button $wc.fr2.std -text {Standard}    \
+    ttk::button $wc.fr2.std -text [mc {Standard}]    \
       -command [list [namespace current]::PushBtStandard $wlbwb]
     
     pack  $btimport  $btremove  $wc.fr2.std  -padx 1 -pady 6 -fill x

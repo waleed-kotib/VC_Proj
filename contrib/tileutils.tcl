@@ -2,9 +2,9 @@
 #  
 #      This file contains handy support code for the tile package.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.19 2006-03-28 09:39:21 matben Exp $
+# $Id: tileutils.tcl,v 1.20 2006-03-28 14:12:10 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -202,6 +202,17 @@ proc tileutils::configstyles {name} {
 	  -sticky e -padding {6 2}
 	style configure MiniMenubutton -padding 6
 	
+	# Just a very basic button with image and/or text.
+	style layout Plain.TButton {
+	    Plain.border -children {
+		Plain.padding -children {
+		    Plain.label -side left
+		}
+	    }
+	}
+	style configure Plain.TButton  \
+	  -padding {0} -borderwidth 0 -relief flat
+
 	
 	# Test------------------
 	style layout BorderFrame {
