@@ -902,7 +902,11 @@ this font installed on their system.}
 ::msgcat::mcset en prefproxymsg  {Usage of the Http proxy is determined by each profile settings. File transfers wont work if you use Http proxy!}
 ::msgcat::mcset en prefproxyexc  {Exclude addresses (* as wildcard)}
 
-
+::msgcat::mcset en prefdrivesame {Always store user preferences on same drive as program}
+::msgcat::mcset en prefdriwsame  {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible.\
+  Do you want to continue?}
+::msgcat::mcset en prefdriwdef   {You have chosen to store your preferences in the default place. Unless you also remove or move your personal settings at "%s"\
+  it will automatically be used the next time you launch Coccinella. Do you want them removed now?}
 
 
 # EditShortcuts namespace:

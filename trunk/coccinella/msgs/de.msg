@@ -867,6 +867,13 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de prefssbts {Zeige "nächste"- und "vorherige"-Schaltflächen}
 ::msgcat::mcset de prefssresize {Zeichenfläche automatisch für das Bild anpassen}
 
+#--- Translate!
+::msgcat::mcset de prefdrivesame {Always store user preferences on same drive as program}
+::msgcat::mcset de prefdriwsame  {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible.\
+  Do you want to continue?}
+::msgcat::mcset de prefdriwdef   {You have chosen to store your preferences in the default place. Unless you also remove or move your personal settings at "%s"\
+  it will automatically be used the next time you launch Coccinella. Do you want them removed now?}
+#---
 
 
 # EditShortcuts namespace:
