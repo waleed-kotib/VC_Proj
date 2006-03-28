@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.18 2006-03-22 14:09:29 matben Exp $
+# $Id: tileutils.tcl,v 1.19 2006-03-28 09:39:21 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -211,30 +211,6 @@ proc tileutils::configstyles {name} {
 	  -relief solid -borderwidth 1 -background gray50
 
     }    
-}
-
-if {0} {
-    toplevel .t2
-    pack [ttk::frame .t2.f -padding 10]
-    pack [ttk::frame .t2.f.f -style BorderFrame -padding 10]
-    pack [ttk::label .t2.f.f.l -text Mats]
-
-    style layout TFrame
-    Frame.border -sticky nswe
-    
-    style element names
-    separator Toolbar.background Combobox.field Progressbar.track 
-    Button.button Treeheading.cell Notebook.tab Scale.trough vseparator 
-    background Scale.slider hseparator Combobox.downarrow Menubutton.button 
-    Checkbutton.button Entry.field Radiobutton.button Toolbutton.border 
-    Notebook.client Labelframe.border
-    
-    style element options Frame.border
-    element Frame.border not found
-    style element options border
-    element border not found
-   
-    
 }
 
 # tileutils::LoadImages --
