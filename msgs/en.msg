@@ -401,7 +401,7 @@
 ::msgcat::mcset en {Create Room}
 ::msgcat::mcset en {Default group}
 ::msgcat::mcset en {Default Logout Status}
-::msgcat::mcset en {Default Nickname}
+::msgcat::mcset en {Default nickname}
 ::msgcat::mcset en {Default status descriptions}
 ::msgcat::mcset en {Delete Rule}
 ::msgcat::mcset en {Disk Cache}
@@ -991,7 +991,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jaloginuser  {Enter your username and password to login to %s.}
 ::msgcat::mcset en jaregnewwith {Do you want to register a new account with %s.}
 ::msgcat::mcset en jaregisterexserv {Register with the service %s. You may need to press the Get button if not registration info obtained automatically.}
-   
+::msgcat::mcset en jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
 
 # Setup assistant:
 ::msgcat::mcset en suintro1 	{This is a setup assistant to help you fill in the necessary things that is needed for a new or an existing account on a Jabber server.}

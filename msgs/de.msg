@@ -941,6 +941,10 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jaxformreq   {Marken mit (*) sind erforderlich}
 ::msgcat::mcset de jagcsyncpres {Chat-Raum mit Benutzer-Anwesenheit synchronisieren}
 
+#--- Translate ---
+::msgcat::mcset de jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
+#--- Translate ---
+
 # Setup assistant:
 ::msgcat::mcset de suintro1 	{Dies ist ein Assistent, der Ihnen beim Eingeben der Daten hilft, die für ein neues oder bestehendes Konto auf einem Jabber-Server erforderlich sind.}
 ::msgcat::mcset de suintro2 	{Wenn Sie im "Peer-to-Peer"-Modus arbeiten wollen, geben Sie das einfach im Einstellungsdialog an und starten Coccinella erneut.}
