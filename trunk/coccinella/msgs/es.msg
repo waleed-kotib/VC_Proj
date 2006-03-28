@@ -993,15 +993,12 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jadirpresmsg {Enviar el estado deseado al usuario "%s".}
 ::msgcat::mcset es jatlsnegot   {Seguridad TLS...}
 
-#--- Translate ---
 ::msgcat::mcset es jamucentermsg {Introduzca su usuario y pulse la tecla "Intro" para acceder a la sala de chat. Puede buscar para ver las salas de chat disponibles en el servicio. Solo las salas restringidas necesitan contraseñia.}
 ::msgcat::mcset es jainmsgshow {Mostrar los mensajes entrantes en esta ventana}
 ::msgcat::mcset es jadisaddserv {Encuentra otros servicios o salas de chat en el servidor. Puede añadir otro servidor de forma permanente para que posteriormente activado de forma automática.El servidor al que se accede de forma automatica mostrará todos los servicios.}
 ::msgcat::mcset es jadisrmall {Borrar todos los servidores que han sido automaticamente encontrados.}
 ::msgcat::mcset es jauserinnote {Agregue sus notas personales acerca de este usuario}
 ::msgcat::mcset es jaregisterex {Complete el nombre de los servidores Jabber con los que desea registrar. Pulse el botón "Get" para recibir la información de registro. Complete la información y finalice el registro.}
-#--- Translate ---
-
 ::msgcat::mcset es jaloginjid   {Introduzca su jid con el formato "joey@myjabb.org", o seleccione un perfil. Debe de tener una cuenta en el servidor.}
 ::msgcat::mcset es jaregalready {Esta registrado en este servicio. Su configuracion actual en el servicio.}
 ::msgcat::mcset es jaactiveret {Si esta activo la 'Tecla Enter' enviara los mensajes, sino use la combinacion de teclas Ctrl/Cmd-Return}
@@ -1012,6 +1009,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jaregnewwith {Desea registrar una cuenta nueva en %s.}
 ::msgcat::mcset es jaregisterexserv {Registro con el servicio %s. Debe pulsar el boton 'Obtener' si la informacion de registro no llega de forma automatica.}
 
+#--- Translate ---
+::msgcat::mcset es jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
+#--- Translate ---
 
 
 

@@ -1006,6 +1006,10 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset ru jasettopic2			{Установить тему для этой комнаты.}
 ::msgcat::mcset ru jagcsyncpres		{Синхронизировать комнатуc с присутствием пользователя}
 
+#--- Translate ---
+::msgcat::mcset ru jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
+#--- Translate ---
+
    
 # Setup assistant:
 ::msgcat::mcset ru suintro1 	{This is a setup assistant to help you fill in the necessary things that is needed for a new or an existing account on a Jabber server.}

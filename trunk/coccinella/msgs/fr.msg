@@ -948,6 +948,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jaxformreq   {Paramètres avec (*) requis}
 ::msgcat::mcset fr jagcsyncpres {Mettre à jour la liste des personnes sur le salon}
 
+#--- Translate ---
+::msgcat::mcset fr jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
+#--- Translate ---
 
 # Assistant de configuration :
 ::msgcat::mcset fr suintro1 	{Bienvenue sur l'assistant de configuration qui vous aidera à remplir les informations nécessaires pour un ancien ou nouveau compte sur un serveur Jabber.}

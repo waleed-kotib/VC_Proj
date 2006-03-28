@@ -935,6 +935,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jaxformreq   {Wymaga się etykiet zawierających znak (*)}
 ::msgcat::mcset pl jagcsyncpres {Synchronizacja pokoju z obecnością użytkownika}
 
+#--- Translate ---
+::msgcat::mcset pl jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
+#--- Translate ---
 
 # Setup assistant:
 ::msgcat::mcset pl suintro1 	{Pomocnik Konfiguracyjny (Asystent Ustawień) pomoże dokonać wpisów niezbędnych w celu założenia nowego konta Jabberowego, lub korzystania z już istniejącego.}

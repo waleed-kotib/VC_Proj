@@ -989,6 +989,9 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jaregnewwith {Wilt u een nieuwe account aanmaken op %s?}
 ::msgcat::mcset nl jaregisterexserv {Registreer op de dienst %s. U moet misschien op de knop "Ophalen" drukken als de nodige gegevens niet vanzelf worden opgehaald.}
 
+#--- Translate ---
+::msgcat::mcset nl jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
+#--- Translate ---
 
 # Setup assistant:
 ::msgcat::mcset nl suintro1 	{Deze assistent helpt u bij het instellen van een nieuwe of bestaande Jabber-account.}

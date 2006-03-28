@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.20 2006-03-28 14:12:11 matben Exp $
+# $Id: Rosticons.tcl,v 1.21 2006-03-28 14:42:44 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -411,8 +411,7 @@ proc ::Rosticons::BuildPrefsPage {wpage} {
     grid columnconfigure $rbox 0 -weight 1   
         
     set msg $box.msg
-    ttk::label $msg -text [mc {Select iconsets to be used for each group.\
-      Each group may be deselected.}]
+    ttk::label $msg -text [mc jaseliconset]
 
     grid  $lbox  x  $rbox  -sticky ew
     grid  $msg   -  -      -sticky w -pady 4
