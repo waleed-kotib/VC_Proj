@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.20 2006-03-14 07:18:58 matben Exp $
+# $Id: Taskbar.tcl,v 1.21 2006-03-28 08:12:12 matben Exp $
 
 package require balloonhelp
 
@@ -68,7 +68,7 @@ proc ::Taskbar::Load { } {
 }
 
 proc ::Taskbar::WinInit { } {
-    global  this
+    global  this prefs
     variable icon
     variable iconFile
     
@@ -154,7 +154,7 @@ proc ::Taskbar::InitHook { } {
 	{cascade  mStatus           @::Jabber::Status::BuildMainMenu  {-image @STAT -compound left}}
 	{command  mHideMain         ::Taskbar::HideMain                  }
 	{command  mSendMessage      ::NewMsg::Build         {-image @MSG -compound left}}
-	{command  mPreferences      ::Preferences::Build    {-image @SET -compound left}}
+	{command  mPreferences...   ::Preferences::Build    {-image @SET -compound left}}
 	{command  mAddNewUser       ::Jabber::User::NewDlg  {-image @ADD -compound left}}
 	{cascade  mInfo  {
 	    {command  mAboutCoccinella  ::Splash::SplashScreen  {-image @COCI -compound left}}

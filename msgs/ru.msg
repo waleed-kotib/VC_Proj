@@ -925,6 +925,13 @@ If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup
 ::msgcat::mcset ru prefssbts     {Показывать кнопки назад и вперед}
 ::msgcat::mcset ru prefssresize  {Менять размеры холста автоматическиa в соответствии размерам изображения}
 
+#--- Translate!
+::msgcat::mcset ru prefdrivesame {Always store user preferences on same drive as program}
+::msgcat::mcset ru prefdriwsame  {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible.\
+  Do you want to continue?}
+::msgcat::mcset ru prefdriwdef   {You have chosen to store your preferences in the default place. Unless you also remove or move your personal settings at "%s"\
+  it will automatically be used the next time you launch Coccinella. Do you want them removed now?}
+#---
 
 
 

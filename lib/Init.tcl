@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.37 2006-02-14 08:05:13 matben Exp $
+# $Id: Init.tcl,v 1.38 2006-03-28 08:12:12 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -62,6 +62,10 @@ proc ::Init::SetThis {thisScript} {
 	    }
 	}
     }
+    
+    # If we store the prefs file on a removable drive, use this folder name:
+    #    F:\CoccinellaPrefs  etc.  
+    set this(prefsDriverDir) "CoccinellaPrefs"
     
     # Collect paths in 'this' array.
     set this(script)            $thisScript
@@ -156,35 +160,31 @@ proc ::Init::SetThis {thisScript} {
     switch -- $this(platform) {
 	unix {
 	    set this(modkey) Control
+	    set this(prefsName) "whiteboard"
 	    
 	    # On a central installation need to have local dirs for write access.
 	    set this(userPrefsFilePath)  \
-	      [file nativename [file join $this(prefsPath) whiteboard]]
+	      [file nativename [file join $this(prefsPath) $this(prefsName)]]
 	    set this(oldPrefsFilePath) [file nativename ~/.whiteboard]
 	    set this(inboxCanvasPath)  \
 	      [file nativename [file join $this(prefsPath) canvases]]
 	    set this(historyPath)  \
 	      [file nativename [file join $this(prefsPath) history]]
 	}
-	macintosh {
-	    set this(modkey) Command
-	    set this(userPrefsFilePath)  \
-	      [file join $this(prefsPath) "Whiteboard Prefs"]
-	    set this(oldPrefsFilePath) [file join $::env(PREF_FOLDER) "Whiteboard Prefs"]
-	    set this(inboxCanvasPath) [file join $this(prefsPath) Canvases]
-	    set this(historyPath) [file join $this(prefsPath) History]
-	}
 	macosx {
 	    set this(modkey) Command
+	    set this(prefsName) "Whiteboard Prefs"
 	    set this(userPrefsFilePath)  \
-	      [file join $this(prefsPath) "Whiteboard Prefs"]
+	      [file join $this(prefsPath) $this(prefsName)]
 	    set this(oldPrefsFilePath) $this(userPrefsFilePath)
 	    set this(inboxCanvasPath) [file join $this(prefsPath) Canvases]
 	    set this(historyPath) [file join $this(prefsPath) History]
 	}
 	windows {
 	    set this(modkey) Control
-	    set this(userPrefsFilePath) [file join $this(prefsPath) "WBPREFS.TXT"]
+	    set this(prefsName) "WBPREFS.TXT"
+	    set this(userPrefsFilePath)  \
+	      [file join $this(prefsPath) $this(prefsName)]
 	    set this(oldPrefsFilePath) [file join C: "WBPREFS.TXT"]
 	    set this(inboxCanvasPath) [file join $this(prefsPath) Canvases]
 	    set this(historyPath) [file join $this(prefsPath) History]

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.134 2006-02-22 08:04:27 matben Exp $	
+# $Id: Coccinella.tcl,v 1.135 2006-03-28 08:12:12 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -203,6 +203,7 @@ set packages(application) {
     Network
     Plugins
     Preferences
+    PrefGeneral
     PrefNet
     Proxy
     SetupAss

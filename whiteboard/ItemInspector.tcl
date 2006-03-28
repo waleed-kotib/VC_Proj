@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: ItemInspector.tcl,v 1.9 2005-11-05 11:37:25 matben Exp $
+# $Id: ItemInspector.tcl,v 1.10 2006-03-28 08:12:12 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -491,7 +491,7 @@ proc ::ItemInspector::Configure {token} {
     set utag $state(utag)
     set type $state(type)
     set wcan $state(wcan)
-        
+            
     # Loop through all options. Assemble a configure list.
     set allNewOpts {}
     foreach op $state(allopts) {
@@ -560,8 +560,6 @@ proc ::ItemInspector::Configure {token} {
 	    -outlinestipple   {	    
 		if {[string equal $newVal "none"]}  {
 		    set newVal {}
-		} else  {
-		    set newVal $newOpt
 		}
 	    }
 	    default           {

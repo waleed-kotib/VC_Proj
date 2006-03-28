@@ -912,6 +912,13 @@
 ::msgcat::mcset nl prefproxymsg {Het gebruik van een HTTP-proxy wordt opgeslagen in de instellingen van elk profiel. Bestandsoverdracht werkt niet als u HTTP-proxy gebruikt!}
 ::msgcat::mcset nl prefproxyexc {Adressen uitsluiten (gebruik het sterretje (*) als jokerteken)}
 
+#--- Translate!
+::msgcat::mcset nl prefdrivesame {Always store user preferences on same drive as program}
+::msgcat::mcset nl prefdriwsame  {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible.\
+  Do you want to continue?}
+::msgcat::mcset nl prefdriwdef   {You have chosen to store your preferences in the default place. Unless you also remove or move your personal settings at "%s"\
+  it will automatically be used the next time you launch Coccinella. Do you want them removed now?}
+#---
 
 
 # EditShortcuts namespace:

@@ -929,6 +929,15 @@ además de las fuentes estándar (Times, Helvetica o Courier), Aseguresé que ha
 ::msgcat::mcset es prefproxymsg {El uso de un Proxy Http es determinado por cada perfil. La transferencia de archivos no funcionara si usted esta usando un proxyHttp!}
 ::msgcat::mcset es prefproxyexc {Excluir direcciones (* como comodin)}
 
+
+#--- Translate!
+::msgcat::mcset es prefdrivesame {Always store user preferences on same drive as program}
+::msgcat::mcset es prefdriwsame  {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible.\
+  Do you want to continue?}
+::msgcat::mcset es prefdriwdef   {You have chosen to store your preferences in the default place. Unless you also remove or move your personal settings at "%s"\
+  it will automatically be used the next time you launch Coccinella. Do you want them removed now?}
+#---
+
 # Espace EditShortcuts :
 namespace eval ::EditShortcuts:: {
 	::msgcat::mcset es shortip       {Completar la dirección IP o el nombre}
