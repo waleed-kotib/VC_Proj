@@ -387,8 +387,8 @@ status, or if you receive a message etc. Pick events using the tabs below.}		{С
 room. Yiur role and affiliation determines your privilege to act.
 Further role restrictions may exist depending on specific room 
 configuration.}			{Блин}
-::msgcat::mcset ru {Item inspector}		{Инспектор}
-::msgcat::mcset ru {Item type}		{Тип}
+::msgcat::mcset ru {Item Inspector}		{Инспектор}
+::msgcat::mcset ru {Item Type}		{Тип}
 ::msgcat::mcset ru {Coordinates}		{Координаты}
 ::msgcat::mcset ru {Fill}				{Закраска}
 ::msgcat::mcset ru {Outline}			{Обводка}

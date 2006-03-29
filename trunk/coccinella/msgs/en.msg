@@ -178,11 +178,72 @@
 ::msgcat::mcset en Yes
 ::msgcat::mcset en yes
 
-# dashes.
-::msgcat::mcset en none
-::msgcat::mcset en dotted
-::msgcat::mcset en dash-dotted
-::msgcat::mcset en dashed
+# Canvas item options, names and values.
+# Names:
+::msgcat::mcset en anchor           Anchor
+::msgcat::mcset en arrow            Arrow
+::msgcat::mcset en arrowshape       {Arrow Shape}
+::msgcat::mcset en capstyle         {Cap Style}
+::msgcat::mcset en coordinates      Coordinates
+::msgcat::mcset en dash             Dash
+::msgcat::mcset en file             File
+::msgcat::mcset en fill             Fill
+::msgcat::mcset en fontfamily       {Font Familiy}
+::msgcat::mcset en fontsize         {Font Size}
+::msgcat::mcset en fontweight       {Font Weight}
+::msgcat::mcset en image            Image
+::msgcat::mcset en joinstyle        {Join Style}
+::msgcat::mcset en justify          Justify
+::msgcat::mcset en outline          Outline
+::msgcat::mcset en outlinestipple   {Outline Stipple}
+::msgcat::mcset en smooth           Smooth
+::msgcat::mcset en stipple          Stipple
+::msgcat::mcset en tags             Tags
+::msgcat::mcset en text             Text
+::msgcat::mcset en width            Width
+
+# Values (see item inspector to see what they mean):
+# anchor
+::msgcat::mcset en n          N
+::msgcat::mcset en ne         NE
+::msgcat::mcset en e          E
+::msgcat::mcset en se         SE
+::msgcat::mcset en s          S
+::msgcat::mcset en sw         SW
+::msgcat::mcset en w          W
+::msgcat::mcset en nw         NW
+::msgcat::mcset en center     Center
+# arrow
+::msgcat::mcset en last             Last
+::msgcat::mcset en first            First
+::msgcat::mcset en both             Both
+
+::msgcat::mcset en transparent      Transparent
+::msgcat::mcset en gray75           {Gray 75%}
+::msgcat::mcset en gray50           {Gray 50%}
+::msgcat::mcset en gray25           {Gray 25%}
+::msgcat::mcset en gray12           {Gray 12%}
+
+::msgcat::mcset en round            Round
+::msgcat::mcset en miter            Miter
+::msgcat::mcset en bevel            Bevel
+::msgcat::mcset en butt             Butt
+::msgcat::mcset en projecting       Projecting
+
+::msgcat::mcset en normal           Normal
+::msgcat::mcset en bold             Bold
+::msgcat::mcset en italic           Italic
+
+::msgcat::mcset en left             Left
+::msgcat::mcset en right            Right
+::msgcat::mcset en false            False
+::msgcat::mcset en true             True
+
+::msgcat::mcset en none             None
+::msgcat::mcset en dotted           Dotted
+::msgcat::mcset en dash-dotted      Dash-dotted
+::msgcat::mcset en dashed           Dashed
+
 
 # Status messages.
 ::msgcat::mcset en available
@@ -455,6 +516,7 @@
 ::msgcat::mcset en {Is safe}
 ::msgcat::mcset en {Is server up}
 ::msgcat::mcset en {Item Inspector}
+::msgcat::mcset en {Item Options}
 ::msgcat::mcset en {Item Type}
 ::msgcat::mcset en {Jabber address}
 ::msgcat::mcset en {Jabber Client}
@@ -467,7 +529,6 @@
 ::msgcat::mcset en {Last name}
 ::msgcat::mcset en {Launch time}
 ::msgcat::mcset en {Local Time}
-::msgcat::mcset en {Lock this item from being edited}
 ::msgcat::mcset en {Logout With Message}
 ::msgcat::mcset en {Logged out}
 ::msgcat::mcset en {Login as invisible}
@@ -800,6 +861,7 @@ You have a subscription for %s: %s.}
 Alternatively, use your web browser to find the SDP file for a live transmission, download it on disk and open it is an ordinary movie.}
 ::msgcat::mcset en printunixcmd                 {Shell print command, edit if desired}
 ::msgcat::mcset en enterpassword                {Enter the password for your account "%s"}
+::msgcat::mcset en wblockitem                   {Lock this item from being edited}
 
 
 

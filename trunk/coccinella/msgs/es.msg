@@ -182,11 +182,77 @@
 ::msgcat::mcset es Yes			{Sí}
 ::msgcat::mcset es yes			{sí}
 
-# Trazos.
+#--- Translate ------------------
+
+# Canvas item options, names and values.
+# Names:
+::msgcat::mcset es anchor           Anchor
+::msgcat::mcset es arrow            Arrow
+::msgcat::mcset es arrowshape       {Arrow Shape}
+::msgcat::mcset es capstyle         {Cap Style}
+::msgcat::mcset es coordinates      Coordinates
+::msgcat::mcset es dash             Dash
+::msgcat::mcset es file             File
+::msgcat::mcset es fill             Fill
+::msgcat::mcset es fontfamily       {Font Familiy}
+::msgcat::mcset es fontsize         {Font Size}
+::msgcat::mcset es fontweight       {Font Weight}
+::msgcat::mcset es image            Image
+::msgcat::mcset es joinstyle        {Join Style}
+::msgcat::mcset es justify          Justify
+::msgcat::mcset es outline          Outline
+::msgcat::mcset es outlinestipple   {Outline Stipple}
+::msgcat::mcset es smooth           Smooth
+::msgcat::mcset es stipple          Stipple
+::msgcat::mcset es tags             Tags
+::msgcat::mcset es text             Text
+::msgcat::mcset es width            Width
+
+# Values (see item inspector to see what they mean):
+# anchor
+::msgcat::mcset es n          N
+::msgcat::mcset es ne         NE
+::msgcat::mcset es e          E
+::msgcat::mcset es se         SE
+::msgcat::mcset es s          S
+::msgcat::mcset es sw         SW
+::msgcat::mcset es w          W
+::msgcat::mcset es nw         NW
+::msgcat::mcset es center     Center
+# arrow
+::msgcat::mcset es last             Last
+::msgcat::mcset es first            First
+::msgcat::mcset es both             Both
+
+::msgcat::mcset es transparent      Transparent
+::msgcat::mcset es gray75           {Gray 75%}
+::msgcat::mcset es gray50           {Gray 50%}
+::msgcat::mcset es gray25           {Gray 25%}
+::msgcat::mcset es gray12           {Gray 12%}
+
+::msgcat::mcset es round            Round
+::msgcat::mcset es miter            Miter
+::msgcat::mcset es bevel            Bevel
+::msgcat::mcset es butt             Butt
+::msgcat::mcset es projecting       Projecting
+
+::msgcat::mcset es normal           Normal
+::msgcat::mcset es bold             Bold
+::msgcat::mcset es italic           Italic
+
+::msgcat::mcset es left             Left
+::msgcat::mcset es right            Right
+::msgcat::mcset es false            False
+::msgcat::mcset es true             True
+
+# End Translate ----------------
+
 ::msgcat::mcset es none			{Ninguno}
 ::msgcat::mcset es dotted		{Punteado}
 ::msgcat::mcset es dash-dotted		{Guiones-puntos}
 ::msgcat::mcset es dashed		{Guiones}
+
+
 
 # Status messages.
 ::msgcat::mcset es available            {disponible}
@@ -807,6 +873,10 @@
 ::msgcat::mcset es printunixcmd                 {Comando de imprimir, puede cambiarlo si es necesario}
 ::msgcat::mcset es enterpassword                {Introducir la contraseña para la cuenta "%s"}
 
+#--- Translate
+::msgcat::mcset es wblockitem                   {Lock this item from being edited}
+#---
+
 ::msgcat::mcset es httptrptok                   {Fin de la descarga del archivo %s}
 ::msgcat::mcset es httptrpterror                {Error de transferencia durante la descarga del archivo %s : %s}
 ::msgcat::mcset es httptrpteof                  {El servidor ha terminado la conexión sin respuesta.}
@@ -882,10 +952,8 @@
 ::msgcat::mcset es prefcubrowse  {Explorar los servicios si el método está disponible}
 ::msgcat::mcset es prefcuagent   {Siempre utilizar el método de los agentes}
 ::msgcat::mcset es prefcuupdate  {Buscar automáticamente actualizaciones de Coccinella}
-
-#--- Translate ---
 ::msgcat::mcset es prefcuremdlgs {Rcordar los dialogos abiertos entre sesiones}
-#--- Translate ---
+
 
 ::msgcat::mcset es preffmhelp    {Plugins de ayuda para los tipos de archivos}
 ::msgcat::mcset es preffmsave    {"guardar en disco" en el directorio entrante}

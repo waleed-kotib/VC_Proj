@@ -175,11 +175,73 @@
 ::msgcat::mcset sv Yes 			{Ja}
 ::msgcat::mcset sv yes 			{ja}
 
-# dashes.
-::msgcat::mcset sv none                 {Ingen}
-::msgcat::mcset sv dotted               {Prickad}
-::msgcat::mcset sv dash-dotted          {Streck-prickad}
-::msgcat::mcset sv dashed               {Streckad}
+
+# Canvas item options, names and values.
+# Names:
+::msgcat::mcset sv anchor           Ankare
+::msgcat::mcset sv arrow            Pil
+::msgcat::mcset sv arrowshape       Pilstil
+::msgcat::mcset sv capstyle         Ändstil
+::msgcat::mcset sv coordinates      Koordinater
+::msgcat::mcset sv dash             Streckning
+::msgcat::mcset sv file             Fil
+::msgcat::mcset sv fill             Fyll
+::msgcat::mcset sv fontfamily       Typsnittsfamilj
+::msgcat::mcset sv fontsize         Typsnittsstorlek
+::msgcat::mcset sv fontweight       Typsnittsvikt
+::msgcat::mcset sv image            Bild
+::msgcat::mcset sv joinstyle        Förbindningsstil
+::msgcat::mcset sv justify          Justera
+::msgcat::mcset sv outline          Kant
+::msgcat::mcset sv outlinestipple   Kantstyppling
+::msgcat::mcset sv smooth           Utjämna
+::msgcat::mcset sv stipple          Styppla
+::msgcat::mcset sv tags             Taggar
+::msgcat::mcset sv text             Text
+::msgcat::mcset sv width            Bredd
+
+# Values (see item inspector to see what they mean):
+# anchor
+::msgcat::mcset sv n          N
+::msgcat::mcset sv ne         NO
+::msgcat::mcset sv e          O
+::msgcat::mcset sv se         SO
+::msgcat::mcset sv s          S
+::msgcat::mcset sv sw         SV
+::msgcat::mcset sv w          V
+::msgcat::mcset sv nw         NV
+::msgcat::mcset sv center     Centrerad
+# arrow
+::msgcat::mcset sv last             Sista
+::msgcat::mcset sv first            Första
+::msgcat::mcset sv both             Båda
+
+::msgcat::mcset sv transparent      Transparent
+::msgcat::mcset sv gray75           {Grå 75%}
+::msgcat::mcset sv gray50           {Grå 50%}
+::msgcat::mcset sv gray25           {Grå 25%}
+::msgcat::mcset sv gray12           {Grå 12%}
+
+::msgcat::mcset sv round            Rund
+::msgcat::mcset sv miter            Spetsig
+::msgcat::mcset sv bevel            Avkapad
+::msgcat::mcset sv butt             Avkapad
+::msgcat::mcset sv projecting       Kantig
+
+::msgcat::mcset sv normal           Normal
+::msgcat::mcset sv bold             Fet
+::msgcat::mcset sv italic           Lutande
+
+::msgcat::mcset sv left             Vänster
+::msgcat::mcset sv right            Höger
+::msgcat::mcset sv false            Av
+::msgcat::mcset sv true             På
+
+::msgcat::mcset sv none             Ingen
+::msgcat::mcset sv dotted           Prickad
+::msgcat::mcset sv dash-dotted      Streck-prickad
+::msgcat::mcset sv dashed           Streckad
+
 
 # Status messages.
 ::msgcat::mcset sv available		{tillgänglig}
@@ -451,6 +513,9 @@
 ::msgcat::mcset sv {Is connected}          {Är uppkopplad}
 ::msgcat::mcset sv {Is safe}		   {Är säker}
 ::msgcat::mcset sv {Is server up}	   {Är servern igång}
+::msgcat::mcset sv {Item Inspector}        {Objektinspektör}
+::msgcat::mcset sv {Item Options}          {Objektinställningar}
+::msgcat::mcset sv {Item Type}             {Objekttyp}
 ::msgcat::mcset sv {Jabber address}	   {Jabber adress}
 ::msgcat::mcset sv {Jabber Client}         {Jabberklient}
 ::msgcat::mcset sv {Jabber Server}         {Jabberserver}
@@ -791,6 +856,7 @@ Som alternativ använd en webbläsare för att hitta en SDP fil, ladda ner den till
 ::msgcat::mcset sv jabrowseaddserver		{Skriv in JID:n för servern du önskar lägga till till listan av tjänster, till exempel "jabber.org".}
 ::msgcat::mcset sv printunixcmd                 {Kommando för utskrift; redigera om nödvändigt}
 ::msgcat::mcset sv enterpassword                {Skriv in lösenordet for ditt konto "%s"}
+::msgcat::mcset sv wblockitem                   {Lås objektet för redigering}
 
 
 ::msgcat::mcset sv httptrptok                   {Klar med hämtningen av %s}

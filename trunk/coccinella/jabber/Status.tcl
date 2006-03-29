@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.13 2006-03-04 14:07:49 matben Exp $
+# $Id: Status.tcl,v 1.14 2006-03-29 10:03:47 matben Exp $
 
 package provide Status 1.0
 
@@ -278,6 +278,7 @@ proc ::Jabber::Status::RosticonsHook { } {
 proc ::Jabber::Status::Free {w} {
     variable menuBuildCmd
     
+    trace remove variable $statusVar write [list [namespace current]::MainTrace $w]
     unset -nocomplain menuBuildCmd($w)
 }
 
