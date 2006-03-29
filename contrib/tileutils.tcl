@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.20 2006-03-28 14:12:10 matben Exp $
+# $Id: tileutils.tcl,v 1.21 2006-03-29 10:03:47 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -321,6 +321,62 @@ proc ttk::optionmenu {w varName firstValue args} {
 	$w.menu add radiobutton -label $i -variable $varName
     }
     return $w.menu
+}
+
+# ttk::optionmenuex --
+# 
+# As above but with values and labels separated as:
+#       value label value label ...
+
+proc ttk::optionmenuex {w varName args} {
+    upvar #0 $varName var    
+
+    variable $w
+    upvar #0 $w state
+
+    if {[expr [llength $args] % 2 == 1]} {
+	return -code "args must have an even number of elements"
+    }
+    set state(varName) $varName
+    if {![info exists var]} {
+	set var [lindex $args 0]
+    }
+    ttk::menubutton $w -menu $w.menu -direction flush
+    menu $w.menu -tearoff 0
+    foreach {value lab} $args {
+	set state(label,$value) $lab
+	$w.menu add radiobutton -label $lab -value $value -variable $varName
+    }
+    set str [lindex $args 1]
+    if {[info exists state(label,$var)]} {
+	set str $state(label,$var)
+    }
+    $w configure -text $str
+    trace add variable $varName write [list ttk::optionmenuexTrace $w]
+    bind $w <Destroy> {+ttk::optionmenuexFree %W}
+    return $w.menu
+}
+
+proc ttk::optionmenuexTrace {w varName index op} {
+    upvar $varName var
+
+    variable $w
+    upvar #0 $w state
+    
+    if {$index eq ""} {
+	set val $var
+    } else {
+	set val $var($index)
+    }
+    $w configure -text $state(label,$val)
+}
+
+proc ttk::optionmenuexFree {w} {
+    variable $w
+    upvar #0 $w state
+    
+    trace remove variable $state(varName) write [list ttk::optionmenuexTrace $w]
+    unset -nocomplain state
 }
 
 # @@@ Not yet working since methods are different.

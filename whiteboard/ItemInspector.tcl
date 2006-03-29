@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. It lets the user 
 #      inspect and configure item options in the canvas.
 #      
-#  Copyright (c) 1999-2005  Mats Bengtsson
+#  Copyright (c) 1999-2006  Mats Bengtsson
 #  
-# $Id: ItemInspector.tcl,v 1.11 2006-03-28 14:12:11 matben Exp $
+# $Id: ItemInspector.tcl,v 1.12 2006-03-29 10:03:49 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -219,8 +219,17 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 	outline           {transparent fill}
     }
     set menuOpts(fontfamily) $prefs(canvasFonts)
-    set state(allopts) {}
     
+    foreach {key values} [array get menuOpts] {
+	set exlist {}
+	foreach value $values {
+	    lappend exlist $value [mc $value]
+	}
+	set menuOptsEx($key) $exlist
+    }
+
+    set state(allopts) {}
+
     # Item type.
     set line 0
     set itemType [$wcan type $itemid]
@@ -228,7 +237,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     set state(type,value) $itemType
     set wlabel $frtot.l$line
     set wentry $frtot.e$line
-    ttk::label $wlabel -text "[mc {Item type}]:"
+    ttk::label $wlabel -text "[mc {Item Type}]:"
     ttk::entry $wentry -width $typWidth -textvariable $token\(type)
     $wentry state {disabled}
     grid  $wlabel  $wentry  -padx 2 -pady 2
@@ -244,7 +253,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     incr line
     set wlabel $frtot.l$line
     set wentry $frtot.e$line
-    ttk::label $wlabel -text "[mc {Coordinates}]:"
+    ttk::label $wlabel -text "[mc coordinates]:"
     ttk::entry $wentry -width $typWidth -textvariable $token\(coords)
     $wentry state {disabled}
     grid  $wlabel  $wentry  -padx 2 -pady 2
@@ -296,7 +305,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 	    regsub -all "\r" $oneliner $nl_ oneliner
 	    set val $oneliner
 	}
-	ttk::label $frtot.l$line -text [string totitle "$opname:"]
+	ttk::label $frtot.l$line -text "[mc $opname]:"
 	
 	# Intercept options for nontext output.
 	switch -exact -- $op {
@@ -311,8 +320,8 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 		set wmb    $frtot.menu$line
 		set wentry $frtot.ente$line
 		set wMenu [eval {
-		    ttk::optionmenu $wmb $token\($op)
-		} $menuOpts($opname)]
+		    ttk::optionmenuex $wmb $token\($op)
+		} $menuOptsEx($opname)]
 		entry $wentry -width 4 -state disabled -highlightthickness 0
 		if {$val ne ""} {
 		    set rgb8 {}
@@ -377,8 +386,8 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 		}
 		set wmb $frtot.e$line
 		set wMenu [eval {
-		    ttk::optionmenu $wmb $token\($op)
-		} $menuOpts($opname)]
+		    ttk::optionmenuex $wmb $token\($op)
+		} $menuOptsEx($opname)]
 		if {$canvasState eq "disabled"} {
 		    $wmb state {disabled}
 		}
@@ -403,7 +412,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
     
     incr line
     set lockCmd [list [namespace current]::LockCmd $token]
-    ttk::checkbutton $frtot.lock$line -text [mc {Lock this item from being edited}] \
+    ttk::checkbutton $frtot.lock$line -text [mc wblockitem] \
       -variable $token\(locked) -command $lockCmd
     grid  x  $frtot.lock$line  -sticky w
     set state(locked) 0
@@ -747,8 +756,9 @@ proc ::ItemInspector::Movie {wtoplevel winfr args} {
 	    -mcedit         - 
 	    -palindromeloopstate {
 		set wmb $frtot.e$i
-		set state($op) $boolShort2Full($val)
-		set wMenu [ttk::optionmenu $wmb $token\($op) true false]
+		set state($op) $val
+		set wMenu [ttk::optionmenuex $wmb $token\($op)  \
+		  1 [mc true] 0 [mc false]]
 		if {$canvasState eq "disabled"} {
 		    $wmb state disabled
 		}
@@ -817,9 +827,6 @@ proc ::ItemInspector::MovieConfigure {token} {
 	set opname [string trimleft $op "-"]
 	set oldVal $state($op,value)
 	set newVal $state($op)
-	if {$state($op,isbool)} {
-	    set optVal $boolFull2Short($newVal)
-	} else {
 	    set optVal $newVal
 	}
 		
