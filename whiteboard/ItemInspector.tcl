@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2006  Mats Bengtsson
 #  
-# $Id: ItemInspector.tcl,v 1.12 2006-03-29 10:03:49 matben Exp $
+# $Id: ItemInspector.tcl,v 1.13 2006-03-29 13:09:26 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -827,8 +827,7 @@ proc ::ItemInspector::MovieConfigure {token} {
 	set opname [string trimleft $op "-"]
 	set oldVal $state($op,value)
 	set newVal $state($op)
-	    set optVal $newVal
-	}
+	set optVal $newVal
 		
 	# If new different from old, reconfigure.
 	if {![string equal $oldVal $newVal]}  {
