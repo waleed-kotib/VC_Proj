@@ -670,7 +670,7 @@
 ::msgcat::mcset nl messprefschanged	{De voorkeuren zijn gewijzigd. Wilt u werkelijk annuleren?}
 ::msgcat::mcset nl messerrpreffile	{Fout bij openen van bestand %s.}
 ::msgcat::mcset nl messfailserver	{Kan serversocket niet starten. Misschien bent u niet verbonden met de server.}
-::msgcat::mcset nl messopenhelpfile	{U staat op het punt om een helpbestand te openen in het doek en zodoende de huidige zaken uit te wissen. Wilt u dit werkelijk doen?}
+::msgcat::mcset nl messopenhelpfile	{U wenst een helpbestand te openen in het doek waardoor de huidige inhoud uitgewist zal worden. Wilt u dit werkelijk verder gaan?}
 ::msgcat::mcset nl messprintnoextension	{Een noodzakelijk TCL-pakket is niet beschikbaar :-(}
 ::msgcat::mcset nl messdoquit?		{Wilt u werkelijk afsluiten?}
 ::msgcat::mcset nl messsuassfillin	{Vul eerst alle velden in!}
@@ -911,14 +911,11 @@
 ::msgcat::mcset nl prefavashare {Deze avatar met anderen delen}
 ::msgcat::mcset nl prefproxymsg {Het gebruik van een HTTP-proxy wordt opgeslagen in de instellingen van elk profiel. Bestandsoverdracht werkt niet als u HTTP-proxy gebruikt!}
 ::msgcat::mcset nl prefproxyexc {Adressen uitsluiten (gebruik het sterretje (*) als jokerteken)}
-
-#--- Translate!
-::msgcat::mcset nl prefdrivesame {Always store user preferences on same drive as program}
-::msgcat::mcset nl prefdriwsame  {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible.\
-  Do you want to continue?}
-::msgcat::mcset nl prefdriwdef   {You have chosen to store your preferences in the default place. Unless you also remove or move your personal settings at "%s"\
-  it will automatically be used the next time you launch Coccinella. Do you want them removed now?}
-#---
+::msgcat::mcset nl prefdrivesame {Voorkeuren altijd bewaren op dezelfde schijf als het programma}
+::msgcat::mcset nl prefdriwsame  {U koos om uw voorkeuren te bewaren op dezelfde schijf als het programma. Als deze schijf niet verwijderbaar is dan kunnen uw persoonlijke instellingen zichtbaar zijn voor anderen.\
+  Wilt u werkelijk verder gaan?}
+::msgcat::mcset nl prefdriwdef   {U koos om uw voorkeuren te bewaren op de standaardplaats. Tenzij u ook uw persoonlijke instellingen op "%s" verwijdert of verplaatst,\
+  zullen ze automatisch gebruikt worden wanneer u de volgende keer Coccinella opstart. Wilt u ze werkelijk verwijderen?}
 
 
 # EditShortcuts namespace:
@@ -988,10 +985,7 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jaloginuser  {Voer uw gebruikersnaam en wachtwoord in om aan te melden op %s.}
 ::msgcat::mcset nl jaregnewwith {Wilt u een nieuwe account aanmaken op %s?}
 ::msgcat::mcset nl jaregisterexserv {Registreer op de dienst %s. U moet misschien op de knop "Ophalen" drukken als de nodige gegevens niet vanzelf worden opgehaald.}
-
-#--- Translate ---
-::msgcat::mcset nl jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
-#--- Translate ---
+::msgcat::mcset nl jaseliconset {Emoticonsets selecteren die gebruikt moeten worden voor elke groep. Bij elke groep kan de selectie ongedaan gemaakt worden.}
 
 # Setup assistant:
 ::msgcat::mcset nl suintro1 	{Deze assistent helpt u bij het instellen van een nieuwe of bestaande Jabber-account.}
