@@ -812,8 +812,15 @@
  a su lista de contactos}
 ::msgcat::mcset es jamessconnbroken	{La conexión se ha interrumpido inesperadamente}
 ::msgcat::mcset es jamessautoawayset 	{El estado "Alejado automático" ha sido enviado a %s. Desea de nuevo aparecer como "Disponible" ?}
+
+#--- Translate!
+::msgcat::mcset es jamesserrgetpublic	{Received an error when getting the public data from %s. The error code is %s with error message: %s}
+::msgcat::mcset es jamesserrlastactive	{We received an error when quering %s for last activity. The error was: %s}
+# There are some problems here with %s
 ::msgcat::mcset es jamesserrgetpublic	{Error durante la solicitud de datos públicos de %s, el código de error es %s (%s)}
 ::msgcat::mcset es jamesserrlastactive	{Error durante la solicitud de la última actividad de %s, el código de error es %s (%s)}
+#---End Translate
+
 ::msgcat::mcset es jamesserrnotimeinfo	{El cliente/servicio %s no ha devuelto la información del tiempo.}
 ::msgcat::mcset es jamesstimeused	{Tiempo transcurrido desde la última actividad de %s : }
 ::msgcat::mcset es jamesstimeconn	{Tiempo transcurrido desde la última conexión de %s : }
