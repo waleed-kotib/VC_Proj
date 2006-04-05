@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the group chat GUI part.
 #      
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.137 2006-03-28 14:42:44 matben Exp $
+# $Id: GroupChat.tcl,v 1.138 2006-04-05 07:46:22 matben Exp $
 
 package require Enter
 package require History
@@ -25,7 +25,6 @@ namespace eval ::GroupChat:: {
     ::hooks::register quitAppHook             ::GroupChat::GetFirstPanePos
     ::hooks::register newGroupChatMessageHook ::GroupChat::GotMsg
     ::hooks::register newMessageHook          ::GroupChat::NormalMsgHook
-    ::hooks::register loginHook               ::GroupChat::LoginHook
     ::hooks::register logoutHook              ::GroupChat::LogoutHook
     ::hooks::register presenceHook            ::GroupChat::PresenceHook
     ::hooks::register setPresenceHook         ::GroupChat::StatusSyncHook
@@ -52,6 +51,10 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*printImage           print            widgetDefault
     option add *GroupChat*printDisImage        printDis         widgetDefault
 
+    option add *GroupChat*tabAlertImage        ktip               widgetDefault    
+    option add *GroupChat*tabCloseImage        closebutton        widgetDefault    
+    option add *GroupChat*tabCloseActiveImage  closebuttonActive  widgetDefault    
+
     # Text displays.
     option add *GroupChat*mePreForeground      red              widgetDefault
     option add *GroupChat*mePreBackground      ""               widgetDefault
@@ -65,8 +68,8 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*theyTextForeground   ""               widgetDefault
     option add *GroupChat*theyTextBackground   ""               widgetDefault
     option add *GroupChat*theyTextFont         ""               widgetDefault
-    option add *GroupChat*sysPreForeground     #26b412          widgetDefault
-    option add *GroupChat*sysTextForeground    #26b412          widgetDefault
+    option add *GroupChat*sysPreForeground     "#26b412"        widgetDefault
+    option add *GroupChat*sysTextForeground    "#26b412"        widgetDefault
     option add *GroupChat*histHeadForeground   ""               widgetDefault
     option add *GroupChat*histHeadBackground   gray80           widgetDefault
     option add *GroupChat*histHeadFont         ""               widgetDefault
@@ -95,20 +98,27 @@ namespace eval ::GroupChat:: {
     }
     
     # Standard wigets.
-    option add *GroupChat*Text.borderWidth     0               50
-    option add *GroupChat*Text.relief          flat            50
-    option add *GroupChat.padding              {12  0 12  0}   50
-    option add *GroupChat*active.padding       {1}             50
-    option add *GroupChat*TMenubutton.padding  {1}             50
-    option add *GroupChat*top.padding          { 0  0  0  8}   50
-    option add *GroupChat*bot.padding          { 0  8  0  0}   50
+    if {[tk windowingsystem] eq "aqua"} {
+	option add *GroupChat*TNotebook.padding       {8 8 8 18}       50
+    } else {
+	option add *GroupChat*TNotebook.padding       {8 8 8 8}        50
+    }
+    option add *GroupChatRoom*Text.borderWidth     0               50
+    option add *GroupChatRoom*Text.relief          flat            50
+    option add *GroupChatRoom.padding              {12  0 12  0}   50
+    option add *GroupChatRoom*active.padding       {1}             50
+    option add *GroupChatRoom*TMenubutton.padding  {1}             50
+    option add *GroupChatRoom*top.padding          {12  8 12  8}   50
+    option add *GroupChatRoom*bot.padding          { 0  6  0  6}   50
     
     # Local stuff
     variable enteruid 0
     variable dlguid 0
 
-    # Running number for groupchat thread token.
-    variable uid 0
+    # Running numbers for tokens.
+    variable uiddlg  0
+    variable uidchat 0
+    variable uidpage 0
 
     # Local preferences.
     variable cprefs
@@ -124,8 +134,8 @@ namespace eval ::GroupChat:: {
 	{command   mSendFile      {::FTrans::Send $jid}         }
 	{command   mUserInfo      {::UserInfo::Get $jid}        }
 	{command   mWhiteboard    {::Jabber::WB::NewWhiteboardTo $jid} }
-	{check     mIgnore        {::GroupChat::Ignore $token $jid} {
-	    -variable $token\(ignore,$jid)
+	{check     mIgnore        {::GroupChat::Ignore $chattoken $jid} {
+	    -variable $chattoken\(ignore,$jid)
 	}}
     }
     set popMenuDefs(groupchat,type) {
@@ -357,40 +367,34 @@ proc ::GroupChat::EnterHook {roomjid protocol} {
     ::Debug 2 "::GroupChat::EnterHook roomjid=$roomjid $protocol"
     
     SetProtocol $roomjid $protocol
-    
-    # If we are using the 'conference' protocol we must browse
-    # the room to get the participants.
-    if {$protocol eq "conference"} {
-	::Browse::Get $roomjid
-    }
 }
 
 # GroupChat::SetProtocol --
 # 
 #       Cache groupchat protocol in use for specific room.
 
-proc ::GroupChat::SetProtocol {roomjid inprotocol} {
+proc ::GroupChat::SetProtocol {roomjid _protocol} {
     
     variable protocol
 
-    ::Debug 2 "::GroupChat::SetProtocol $roomjid $inprotocol"
+    ::Debug 2 "::GroupChat::SetProtocol +++++++++ $roomjid $_protocol"
     set roomjid [jlib::jidmap $roomjid]
     
     # We need a separate cache for this since the room may not yet exist.
-    set protocol($roomjid) $inprotocol
+    set protocol($roomjid) $_protocol
     
-    set token [GetTokenFrom roomjid $roomjid]
-    if {$token eq ""} {
+    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    if {$chattoken eq ""} {
 	return
     }
-    variable $token
-    upvar 0 $token state
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
-    if {$inprotocol eq "muc"} {
-	set wtray           $state(wtray)
+    if {$_protocol eq "muc"} {
+	set wtray $chatstate(wtray)
 	$wtray buttonconfigure invite -state normal
 	$wtray buttonconfigure info   -state normal
-	$state(wbtnick)   configure -state normal
+	$chatstate(wbtnick) configure -state normal
     }
 }
 
@@ -642,6 +646,33 @@ proc ::GroupChat::NormalMsgHook {body args} {
     }
 }
 
+# GroupChat::NewChat --
+# 
+#       Takes a room JID and handles building of dialog and chat room stuff.
+#       @@@ Add more code here...
+#       
+# Results:
+#       chattoken
+
+proc ::GroupChat::NewChat {roomjid args} {
+    upvar ::Jabber::jprefs jprefs
+    
+    if {$jprefs(chat,tabbedui)} {
+	set dlgtoken [GetFirstDlgToken]
+	if {$dlgtoken eq ""} {
+	    set dlgtoken [eval {Build $roomjid} $args]
+	    set chattoken [GetTokenFrom chat roomjid $roomjid]
+	} else {
+	    set chattoken [NewPage $dlgtoken $roomjid]
+	}
+    } else {
+	set dlgtoken [eval {Build $roomjid} $args]
+	set chattoken [GetActiveChatToken $dlgtoken]
+    }
+    
+    return $chattoken
+}
+
 # GroupChat::GotMsg --
 #
 #       Just got a group chat message. Fill in message in existing dialog.
@@ -674,25 +705,36 @@ proc ::GroupChat::GotMsg {body args} {
     jlib::splitjid $from roomjid res
         
     # If we haven't a window for this roomjid, make one!
-    set token [GetTokenFrom roomjid $roomjid]
-    if {$token eq ""} {
-	set token [eval {Build $roomjid} $args]
+    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    if {$chattoken eq ""} {
+	set chattoken [eval {NewChat $roomjid} $args]
     }
-    variable $token
-    upvar 0 $token state
-    
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    set dlgtoken $chatstate(dlgtoken)
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+
     # We may get a history from users not in the room anymore.
-    if {[info exists state(ignore,$from)] && $state(ignore,$from)} {
+    if {[info exists chatstate(ignore,$from)] && $chatstate(ignore,$from)} {
 	return
     }
     if {[info exists argsArr(-subject)]} {
-	set state(subject) $argsArr(-subject)
+	set chatstate(subject) $argsArr(-subject)
     }
-    if {[string length $body]} {
+    if {$body ne ""} {
 
 	# And put message in window.
-	eval {InsertMessage $token $from $body} $args
-	set state(got1stmsg) 1
+	eval {InsertMessage $chattoken $from $body} $args
+	eval {TabAlert $chattoken} $args
+	    
+	# Put an extra (*) in the windows title if not in focus.
+	if {([set wfocus [focus]] eq "") ||  \
+	  ([winfo toplevel $wfocus] ne $dlgstate(w))} {
+	    incr dlgstate(nhiddenmsgs)
+	    SetTitle [GetActiveChatToken $dlgtoken]
+	}
 	
 	# Run display hooks (speech).
 	eval {::hooks::run displayGroupChatMessageHook $body} $args
@@ -701,8 +743,7 @@ proc ::GroupChat::GotMsg {body args} {
 
 # GroupChat::Build --
 #
-#       Builds the group chat dialog. Independently on protocol 'gc-1.0',
-#       'conference', or 'muc'.
+#       Builds the group chat dialog.
 #
 # Arguments:
 #       roomjid     The roomname@server
@@ -712,11 +753,10 @@ proc ::GroupChat::GotMsg {body args} {
 #       shows window, returns token.
 
 proc ::GroupChat::Build {roomjid args} {
-    global  this prefs wDlgs
+    global  prefs wDlgs
     
     variable protocol
-    variable groupChatOptions
-    variable uid
+    variable uiddlg
     variable cprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -725,77 +765,42 @@ proc ::GroupChat::Build {roomjid args} {
 
     # Initialize the state variable, an array, that keeps is the storage.
     
-    set token [namespace current]::[incr uid]
-    variable $token
-    upvar 0 $token state
+    set dlgtoken [namespace current]::dlg[incr uiddlg]
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
 
     # Make unique toplevel name.
-    set w $wDlgs(jgc)[incr uid]
+    set w $wDlgs(jgc)$uiddlg
     array set argsArr $args
 
-    set state(w)                $w
-    set state(roomjid)          $roomjid
-    set state(subject)          ""
-    set state(status)           "available"
-    set state(oldStatus)        "available"
-    set state(got1stmsg)        0
-    set state(ignore,$roomjid)  0
-    set state(afterids)         {}
-    
-    set ancient [expr {[clock clicks -milliseconds] - 1000000}]
-    foreach whom {me you sys} {
-	set state(last,$whom) $ancient
-    }
-    if {$jprefs(chatActiveRet)} {
-	set state(active) 1
-    } else {
-	set state(active)       $cprefs(lastActiveRet)
-    }
-    
+    set dlgstate(w)             $w
+    set dlgstate(uid)           0
+    set dlgstate(nhiddenmsgs)   0
+        
     # Toplevel of class GroupChat.
     ::UI::Toplevel $w -class GroupChat \
-      -usemacmainmenu 1 -macstyle documentProc \
-      -closecommand ::GroupChat::CloseHook
-    
-    # Not sure how old-style groupchat works here???
-    set roomName [$jstate(jlib) service name $roomjid]
-    
-    if {[llength $roomName]} {
-	set tittxt $roomName
-    } else {
-	set tittxt $roomjid
-    }
-    wm title $w "[mc Groupchat]: $tittxt"
-    
-    foreach {optName optClass} $groupChatOptions {
-	set $optName [option get $w $optName $optClass]
-    }
+      -usemacmainmenu 1 -macstyle documentProc  \
+      -closecommand ::GroupChat::CloseCmd
     
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
-    
-    # Widget paths.
-    set wtray       $w.frall.tray
-    set wbox        $w.frall.f
-    set wtop        $wbox.top
-    set wbot        $wbox.bot
-    set wmid        $wbox.m
-    
-    set wpanev      $wmid.pv
-    set wfrsend     $wpanev.bot
-    set wtextsend   $wfrsend.text
-    set wyscsend    $wfrsend.ysc
-    
-    set wpaneh      $wpanev.top
-    set wfrchat     $wpaneh.left
-    set wfrusers    $wpaneh.right
         
-    set wtext       $wfrchat.text
-    set wysc        $wfrchat.ysc
-    set wusers      $wfrusers.tree
-    set wyscusers   $wfrusers.ysc
-    
+    # Widget paths.
+    set wtop        $w.frall.top
+    set wtray       $w.frall.top.tray
+    set wcont       $w.frall.cc        ;# container frame for wroom or wnb
+    set wroom       $w.frall.room      ;# the chat room widget container
+    set wnb         $w.frall.nb        ;# tabbed notebook
+    set dlgstate(wtop)       $wtop
+    set dlgstate(wtray)      $wtray
+    set dlgstate(wcont)      $wcont
+    set dlgstate(wroom)      $wroom
+    set dlgstate(wnb)        $wnb
+
+    ttk::frame $wtop
+    pack $wtop -side top -fill x
+        
     # Shortcut button part.
     set iconSend        [::Theme::GetImage [option get $w sendImage {}]]
     set iconSendDis     [::Theme::GetImage [option get $w sendDisImage {}]]
@@ -815,39 +820,157 @@ proc ::GroupChat::Build {roomjid args} {
 
     $wtray newbutton send -text [mc Send] \
       -image $iconSend -disabledimage $iconSendDis    \
-      -command [list [namespace current]::Send $token]
+      -command [list [namespace current]::Send $dlgtoken]
     $wtray newbutton save -text [mc Save] \
       -image $iconSave -disabledimage $iconSaveDis    \
-       -command [list [namespace current]::Save $token]
+       -command [list [namespace current]::Save $dlgtoken]
     $wtray newbutton history -text [mc History] \
       -image $iconHistory -disabledimage $iconHistoryDis \
-      -command [list [namespace current]::BuildHistory $token]
+      -command [list [namespace current]::BuildHistory $dlgtoken]
     $wtray newbutton invite -text [mc Invite] \
       -image $iconInvite -disabledimage $iconInviteDis  \
-      -command [list ::MUC::Invite $roomjid]
+      -command [list [namespace current]::Invite $dlgtoken]
     $wtray newbutton info -text [mc Info] \
       -image $iconInfo -disabledimage $iconInfoDis    \
-      -command [list ::MUC::BuildInfo $roomjid]
+      -command [list [namespace current]::Info $dlgtoken]
     $wtray newbutton print -text [mc Print] \
       -image $iconPrint -disabledimage $iconPrintDis   \
-      -command [list [namespace current]::Print $token]
+      -command [list [namespace current]::Print $dlgtoken]
     
     ::hooks::run buildGroupChatButtonTrayHook $wtray $roomjid
     
     set shortBtWidth [expr [$wtray minwidth] + 8]
 
+    # Top separator.
     ttk::separator $w.frall.divt -orient horizontal
     pack $w.frall.divt -side top -fill x
     
-    ttk::frame $wbox -padding [option get . dialogSmallPadding {}]
-    pack $wbox -fill both -expand 1
+    # Having the frame with room frame as a sibling makes it possible
+    # to pack it in a different place.
+    ttk::frame $wcont
+    pack $wcont -side top -fill both -expand 1
+    
+    # Use an extra frame that contains everything room specific.
+    set chattoken [eval {
+	BuildRoomWidget $dlgtoken $wroom $roomjid
+    } $args]
+    pack $wroom -in $wcont -fill both -expand 1
+
+    if {!( [info exists protocol($roomjid)] && ($protocol($roomjid) eq "muc") )} {
+	$wtray buttonconfigure invite -state disabled
+	$wtray buttonconfigure info   -state disabled
+    }
+    
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jgc)]]
+    if {$nwin == 1} {
+	::UI::SetWindowGeometry $w $wDlgs(jgc)
+    }
+    SetTitle $chattoken
+    
+    wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
+    wm maxsize $w 800 2000
+    
+    focus $w
+    set tag TopTag$w
+    bindtags $w [concat $tag [bindtags $w]]
+    bind $tag <Destroy> +[list ::GroupChat::OnDestroyDlg $dlgtoken]
+    
+    return $dlgtoken
+}
+
+# GroupChat::BuildRoomWidget --
+# 
+#       Builds page with all room specific ui parts.
+#       
+# Arguments:
+#       dlgtoken    topwindow token
+#       wroom       megawidget frame
+#       roomjid
+#       args
+#       
+# Results:
+#       chattoken
+
+proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid args} {
+    global  this
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+
+    variable uidchat
+    variable cprefs
+
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Debug 2 "::GroupChat::BuildRoomWidget, roomjid=$roomjid, args=$args"
+    array set argsArr $args
+
+    # Initialize the state variable, an array, that keeps is the storage.
+    
+    set chattoken [namespace current]::chat[incr uidchat]
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    lappend dlgstate(chattokens)    $chattoken
+    lappend dlgstate(recentctokens) $chattoken
+    
+    # Widget paths.
+    set wtop        $wroom.top
+    set wbot        $wroom.bot
+    set wmid        $wroom.mid
+    
+    set wpanev      $wroom.mid.pv
+    set wfrsend     $wroom.mid.pv.b
+    set wtextsend   $wroom.mid.pv.b.text
+    set wyscsend    $wroom.mid.pv.b.ysc
+    
+    set wpaneh      $wroom.mid.pv.t
+    set wfrchat     $wroom.mid.pv.l
+    set wfrusers    $wroom.mid.pv.r
+	
+    set wtext       $wroom.mid.pv.l.text
+    set wysc        $wroom.mid.pv.l.ysc
+    set wusers      $wroom.mid.pv.r.tree
+    set wyscusers   $wroom.mid.pv.r.ysc
+    
+    set chatstate(wroom)        $wroom
+    set chatstate(roomjid)      $roomjid
+    set chatstate(dlgtoken)     $dlgtoken
+    set chatstate(roomName)     [$jstate(jlib) service name $roomjid]
+    set chatstate(subject)      ""
+    set chatstate(status)       "available"
+    set chatstate(oldStatus)    "available"
+    set chatstate(ignore,$roomjid)  0
+    set chatstate(afterids)     {}
+    set chatstate(nhiddenmsgs)  0
+    
+    # For the tabs and title etc.
+    if {$chatstate(roomName) ne ""} {
+	set chatstate(displayName) $chatstate(roomName)
+    } else {
+	set chatstate(displayName) $roomjid
+    }
+    set chatstate(wtext)        $wtext
+    set chatstate(wtextsend)    $wtextsend
+    set chatstate(wusers)       $wusers
+    set chatstate(wpanev)       $wpanev
+    set chatstate(wpaneh)       $wpaneh
+
+    set chatstate(active)       $cprefs(lastActiveRet)
+	
+    # Use an extra frame that contains everything room specific.
+    ttk::frame $wroom -class GroupChatRoom
+#      -padding [option get . dialogSmallPadding {}]
+    
+    set w [winfo toplevel $wroom]
+    set chatstate(w) $w    
 
     # Button part.
     ttk::frame $wbot
     ttk::button $wbot.btok -text [mc Send]  \
-      -default active -command [list [namespace current]::Send $token]
+      -default active -command [list [namespace current]::Send $dlgtoken]
     ttk::button $wbot.btcancel -text [mc Exit]  \
-      -command [list [namespace current]::Exit $token]
+      -command [list [namespace current]::ExitAndClose $chattoken]
     
     set wgroup    $wbot.grp
     set wbtstatus $wgroup.stat
@@ -856,14 +979,14 @@ proc ::GroupChat::Build {roomjid args} {
     ttk::frame $wgroup
     ttk::checkbutton $wgroup.active -style Toolbutton \
       -image [::Theme::GetImage return]               \
-      -command [list [namespace current]::ActiveCmd $token] \
-      -variable $token\(active)
+      -command [list [namespace current]::ActiveCmd $chattoken] \
+      -variable $chattoken\(active)
     ttk::button $wgroup.bmark -style Toolbutton  \
       -image [::Theme::GetImage bookmarkAdd]     \
-      -command [list [namespace current]::BookmarkRoom $token]
+      -command [list [namespace current]::BookmarkRoom $chattoken]
 
-    ::Jabber::Status::Button $wgroup.stat \
-      $token\(status) -command [list [namespace current]::StatusCmd $token] 
+    ::Jabber::Status::Button $wgroup.stat $chattoken\(status)   \
+      -command [list [namespace current]::StatusCmd $chattoken] 
     ::Jabber::Status::ConfigImage $wgroup.stat available
     ::Emoticons::MenuButton $wgroup.smile -text $wtextsend
     
@@ -886,8 +1009,8 @@ proc ::GroupChat::Build {roomjid args} {
     }
     pack  $wgroup -side left
     pack  $wbot   -side bottom -fill x
-        
-    set wbtsend   $wbot.btok
+	
+    set wbtsend $wbot.btok
 
     ::balloonhelp::balloonforwindow $wgroup.active [mc jaactiveret]
     ::balloonhelp::balloonforwindow $wgroup.bmark  [mc {Bookmark this room}]
@@ -898,9 +1021,9 @@ proc ::GroupChat::Build {roomjid args} {
 
     ttk::button $wtop.btp -style Small.TButton \
       -text "[mc Topic]:" \
-      -command [list [namespace current]::SetTopic $token]
+      -command [list [namespace current]::SetTopic $chattoken]
     ttk::entry $wtop.etp -font CociSmallFont \
-      -textvariable $token\(subject) -state disabled
+      -textvariable $dlgtoken\(subject) -state disabled
     ttk::button $wtop.bni -style Small.TButton \
       -text "[mc {Nick name}]..."  \
       -command [list ::MUC::SetNick $roomjid]
@@ -914,8 +1037,6 @@ proc ::GroupChat::Build {roomjid args} {
 
     if {!( [info exists protocol($roomjid)] && ($protocol($roomjid) eq "muc") )} {
 	$wbtnick state {disabled}
-	$wtray buttonconfigure invite -state disabled
-	$wtray buttonconfigure info   -state disabled
     }
     
     # Main frame for panes.
@@ -927,8 +1048,8 @@ proc ::GroupChat::Build {roomjid args} {
     pack $wpanev -side top -fill both -expand 1    
 
     # Text send.
-    frame $wfrsend -height 100 -width 300 -bd 1 -relief sunken
-    text  $wtextsend -height 4 -width 1 -font CociSmallFont -wrap word \
+    frame $wfrsend -height 40 -width 300 -bd 1 -relief sunken
+    text  $wtextsend -height 2 -width 1 -font CociSmallFont -wrap word \
       -yscrollcommand [list ::UI::ScrollSet $wyscsend \
       [list grid $wyscsend -column 1 -row 0 -sticky ns]]
     ttk::scrollbar $wyscsend -orient vertical -command [list $wtextsend yview]
@@ -959,7 +1080,7 @@ proc ::GroupChat::Build {roomjid args} {
     # Users list.
     frame $wfrusers -bd 1 -relief sunken
     ttk::scrollbar $wyscusers -orient vertical -command [list $wusers yview]
-    Tree $token $w $wusers $wyscusers
+    Tree $chattoken $w $wusers $wyscusers
 
     grid  $wusers     -column 0 -row 0 -sticky news
     grid  $wyscusers  -column 1 -row 0 -sticky ns -padx 2
@@ -971,45 +1092,528 @@ proc ::GroupChat::Build {roomjid args} {
     
     # The tags.
     ConfigureTextTags $w $wtext
-        
-    set state(wtray)      $wtray
-    set state(wbtnick)    $wbtnick
-    set state(wbtsubject) $wbtsubject
-    set state(wbtstatus)  $wbtstatus
-    set state(wbtbmark)   $wbtbmark
-    set state(wtext)      $wtext
-    set state(wtextsend)  $wtextsend
-    set state(wusers)     $wusers
-    set state(wbtsend)    $wbtsend
-    set state(wpanev)     $wpanev
-    set state(wpaneh)     $wpaneh
+	
+    set chatstate(wbtsend)      $wbtsend
+    set chatstate(wbtnick)      $wbtnick
+    set chatstate(wbtsubject)   $wbtsubject
+    set chatstate(wbtstatus)    $wbtstatus
+    set chatstate(wbtbmark)     $wbtbmark
     
-    if {$state(active)} {
-	ActiveCmd $token
+    set ancient [expr {[clock clicks -milliseconds] - 1000000}]
+    foreach whom {me you sys} {
+	set chatstate(last,$whom) $ancient
     }
-    AddUsers $token
+
+    if {$jprefs(chatActiveRet)} {
+	set chatstate(active) 1
+    } else {
+	set chatstate(active) $cprefs(lastActiveRet)
+    }
+    if {$chatstate(active)} {
+	ActiveCmd $chattoken
+    }
+    AddUsers $chattoken
         
-    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jgc)]]
-    if {$nwin == 1} {
-	::UI::SetWindowGeometry $w $wDlgs(jgc)
-    }
     ::UI::SetSashPos groupchatDlgVert $wpanev
     ::UI::SetSashPos groupchatDlgHori $wpaneh
     
-    wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
-    wm maxsize $w 800 2000
-
     bind $wtextsend <Return> \
-      [list [namespace current]::ReturnKeyPress $token]
+      [list [namespace current]::ReturnKeyPress $chattoken]
     bind $wtextsend <$this(modkey)-Return> \
-      [list [namespace current]::CommandReturnKeyPress $token]
+      [list [namespace current]::CommandReturnKeyPress $chattoken]
+    bind $wroom <Destroy> +[list ::GroupChat::OnDestroyChat $chattoken]
     
-    focus $w
-    set tag TopTag$w
-    bindtags $w [concat $tag [bindtags $w]]
-    bind $tag <Destroy> [list ::GroupChat::OnDestroy $token]
+    return $chattoken
+}
+
+proc ::GroupChat::OnDestroyDlg {dlgtoken} {
+
+    unset -nocomplain $dlgtoken
+}
+
+proc ::GroupChat::OnDestroyChat {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
+    foreach id $chatstate(afterids) {
+	after cancel $id
+    }
+    unset -nocomplain $chattoken
+}
+
+# GroupChat::NewPage, ... --
+# 
+#       Several procs to handle the tabbed interface; creates and deletes
+#       notebook and pages.
+
+proc ::GroupChat::NewPage {dlgtoken roomjid args} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    upvar ::Jabber::jprefs jprefs
+	
+    # If no notebook, move chat widget to first notebook page.
+    if {[string equal [winfo class [pack slaves $dlgstate(wcont)]] "GroupChatRoom"]} {
+	set wroom $dlgstate(wroom)
+	set chattoken [lindex $dlgstate(chattokens) 0]
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+
+	# Repack the GroupChatRoom in notebook page.
+	MoveRoomToPage $dlgtoken $chattoken
+	DrawCloseButton $dlgtoken
+    } 
+
+    # Make fresh page with chat widget.
+    set chattoken [eval {MakeNewPage $dlgtoken $roomjid} $args]
+    return $chattoken
+}
+
+proc ::GroupChat::DrawCloseButton {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    # Close button (exp). 
+    set w $dlgstate(w)
+    set im       [::Theme::GetImage [option get $w tabCloseImage {}]]
+    set imactive [::Theme::GetImage [option get $w tabCloseActiveImage {}]]
+    set wclose $dlgstate(wnb).close
+    ttk::button $wclose -style Plain.TButton  \
+      -image [list $im active $imactive] -compound image  \
+      -command [list [namespace current]::ClosePageCmd $dlgtoken]
+    place $wclose -anchor ne -relx 1.0 -x -6 -y 6
+
+    ::balloonhelp::balloonforwindow $wclose [mc {Close page}]
+    set dlgstate(wclose) $wclose
+}
+
+proc ::GroupChat::MoveRoomToPage {dlgtoken chattoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    # Repack the  in notebook page.
+    set wnb      $dlgstate(wnb)
+    set wcont    $dlgstate(wcont)
+    set wroom    $chatstate(wroom)
+    set dispname $chatstate(displayName)
+    
+    pack forget $wroom
+
+    ttk::notebook $wnb
+    bind $wnb <<NotebookTabChanged>> \
+      [list [namespace current]::TabChanged $dlgtoken]
+    ttk::notebook::enableTraversal $wnb
+    pack $wnb -in $wcont -fill both -expand true -side right
+
+    set wpage $wnb.p[incr dlgstate(uid)]
+    ttk::frame $wpage
+    $wnb add $wpage -sticky news -text $dispname -compound left
+    pack $wroom -in $wpage -fill both -expand true -side right
+    raise $wroom
+    
+    set chatstate(wpage) $wpage
+    set dlgstate(wpage2token,$wpage) $chattoken
+}
+
+proc ::GroupChat::MakeNewPage {dlgtoken roomjid args} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    variable uidpage
+    array set argsArr $args
+	
+    # Make fresh page with chat widget.
+    set wnb $dlgstate(wnb)
+    set wpage $wnb.p[incr dlgstate(uid)]
+    ttk::frame $wpage
+    $wnb add $wpage -sticky news -compound left
+
+    # We must make the new page a sibling of the notebook in order to be
+    # able to reparent it when notebook gons.
+    set wroom $dlgstate(wroom)[incr uidpage]
+    set chattoken [eval {
+	BuildRoomWidget $dlgtoken $wroom $roomjid
+    } $args]
+    pack $wroom -in $wpage -fill both -expand true
+
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    $wnb tab $wpage -text $chatstate(displayName)
+    set chatstate(wpage) $wpage
+    set dlgstate(wpage2token,$wpage) $chattoken
+    
+    return $chattoken
+}
+
+proc ::GroupChat::DeletePage {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set dlgtoken $chatstate(dlgtoken)
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    set wpage $chatstate(wpage)
+    $dlgstate(wnb) forget $wpage
+    unset dlgstate(wpage2token,$wpage)
+    
+    # Delete the actual widget.
+    set dlgstate(chattokens)  \
+      [lsearch -all -inline -not $dlgstate(chattokens) $chattoken]
+    destroy $chatstate(wroom)
+    
+    # If only a single page left then reparent and delete notebook.
+    if {[llength $dlgstate(chattokens)] == 1} {
+	set chattoken [lindex $dlgstate(chattokens) 0]
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+
+	MoveThreadFromPage $dlgtoken $chattoken
+    }
+}
+
+proc ::GroupChat::MoveThreadFromPage {dlgtoken chattoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set wnb     $dlgstate(wnb)
+    set wcont   $dlgstate(wcont)
+    set wroom   $chatstate(wroom)
+    
+    # This seems necessary on mac in order to not get a blank page.
+    update idletasks
+
+    pack forget $wroom
+    destroy $wnb
+    pack $wroom -in $wcont -fill both -expand 1
+    
+    SetRoomState $dlgtoken $chattoken
+}
+
+proc ::GroupChat::ClosePageCmd {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    set chattoken [GetActiveChatToken $dlgtoken]
+    if {$chattoken ne ""} {	
+	ExitAndClose $chattoken
+    }
+}
+
+# GroupChat::SelectPage --
+# 
+#       Make page frontmost.
+
+proc ::GroupChat::SelectPage {chattoken} {    
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set dlgtoken $chatstate(dlgtoken)
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    if {[winfo exists $dlgstate(wnb)]} {
+	$dlgstate(wnb) select $chatstate(wpage)
+    }
+}
+
+# GroupChat::TabChanged --
+# 
+#       Callback command from notebook widget when selecting new tab.
+
+proc ::GroupChat::TabChanged {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    Debug 2 "::GroupChat::TabChanged"
+
+    set wnb $dlgstate(wnb)
+    set wpage [GetNotebookWpageFromIndex $wnb [$wnb index current]]
+    set chattoken $dlgstate(wpage2token,$wpage)
+
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    set chatstate(nhiddenmsgs) 0
+
+    SetRoomState $dlgtoken $chattoken
+    SetFocus $dlgtoken $chattoken
+    
+    lappend dlgstate(recentctokens) $chattoken
+    set dlgstate(recentctokens) [lrange $dlgstate(recentctokens) end-1 end]
+}
+
+proc ::GroupChat::GetNotebookWpageFromIndex {wnb index} {
+    
+    set wpage ""
+    foreach w [$wnb tabs] {
+	if {[$wnb index $w] == $index} {
+	    set wpage $w
+	    break
+	}
+    }
+    return $wpage
+}
+
+proc ::GroupChat::SetRoomState {dlgtoken chattoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    #puts "::GroupChat::SetRoomState $dlgtoken $chattoken"
+    
+    if {[winfo exists $dlgstate(wnb)]} {
+	$dlgstate(wnb) tab $chatstate(wpage) -image ""  \
+	  -text $chatstate(displayName)
+    }
+    SetTitle $chattoken
+    if {[::Jabber::IsConnected]} {
+	SetState $chattoken normal
+    } else {
+	SetState $chattoken disabled
+    }
+}
+
+# GroupChat::SetState --
+# 
+#       Set state of complete dialog to normal or disabled.
+
+proc ::GroupChat::SetState {chattoken _state} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    #puts "::GroupChat::SetState $chattoken $_state"
+    
+    set dlgtoken $chatstate(dlgtoken)
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate    
+
+    foreach name {send invite info} {
+	$dlgstate(wtray) buttonconfigure $name -state $_state 
+    }
+    $chatstate(wbtsubject) configure -state $_state
+    $chatstate(wbtnick)    configure -state $_state
+    $chatstate(wbtsend)    configure -state $_state
+    $chatstate(wbtstatus)  configure -state $_state
+    $chatstate(wbtbmark)   configure -state $_state
+    $chatstate(wtextsend)  configure -state $_state
+}
+
+# GroupChat::SetFocus --
+# 
+#       When selecting a new page we must move focus along.
+#       This does not work reliable on MacOSX.
+
+proc ::GroupChat::SetFocus {dlgtoken chattoken} {
+    global  this
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    
+    # @@@ TODO
+}
+
+proc ::GroupChat::SetTitle {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    set name    $chatstate(roomName)
+    set roomjid $chatstate(roomjid)
+    if {$name ne ""} {
+	set str "[mc Groupchat]: $name"
+    } else {
+	set str "[mc Groupchat]: $roomjid"
+    }
+
+    # Put an extra (*) in the windows title if not in focus.
+    set dlgtoken $chatstate(dlgtoken)
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+
+    if {$dlgstate(nhiddenmsgs) > 0} {
+	set wfocus [focus]
+	set n $dlgstate(nhiddenmsgs)
+	if {$wfocus eq ""} {
+	    append str " ($n)"
+	} elseif {[winfo toplevel $wfocus] ne $chatstate(w)} {
+	    append str " ($n)"
+	}
+    }
+    wm title $chatstate(w) $str
+}
+
+proc ::GroupChat::TabAlert {chattoken args} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set dlgtoken $chatstate(dlgtoken)
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    if {[winfo exists $dlgstate(wnb)]} {
+	set w       $dlgstate(w)
+	set wnb     $dlgstate(wnb)
+	
+	# Show only if not current page.
+	if {[GetActiveChatToken $dlgtoken] != $chattoken} {
+	    incr chatstate(nhiddenmsgs)
+	    set postfix " ($chatstate(nhiddenmsgs))"
+	    set name $chatstate(displayName)
+	    append name " " "($chatstate(nhiddenmsgs))"
+	    set icon [::Theme::GetImage [option get $w tabAlertImage {}]]
+	    $wnb tab $chatstate(wpage) -image $icon -text $name
+	}
+    }
+}
+
+# GroupChat::GetDlgTokenValue, GetChatTokenValue --
+# 
+#       Outside code shall use these to get array values.
+
+proc ::GroupChat::GetDlgTokenValue {dlgtoken key} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    return $dlgstate($key)
+}
+
+proc ::GroupChat::GetChatTokenValue {chattoken key} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    return $chatstate($key)
+}
+
+# GroupChat::GetActiveChatToken --
+# 
+#       Returns the chattoken corresponding to the frontmost room.
+
+proc ::GroupChat::GetActiveChatToken {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    if {[winfo exists $dlgstate(wnb)]} {
+	set wnb $dlgstate(wnb)
+	set wpage [GetNotebookWpageFromIndex $wnb [$wnb index current]]
+	set chattoken $dlgstate(wpage2token,$wpage)
+    } else {
+	set chattoken [lindex $dlgstate(chattokens) 0]
+    }
+    return $chattoken
+}
+
+# GroupChat::GetTokenFrom --
+# 
+#       Try to get the token state array from any stored key.
+#       Only one token is returned if any.
+#       
+# Arguments:
+#       type        'dlg' or 'chat'
+#       key         w, jid, roomjid etc...
+#       pattern     glob matching
+#       
+# Results:
+#       token or empty if not found.
+
+proc ::GroupChat::GetTokenFrom {type key pattern} {
+    
+    # Search all tokens for this key into state array.
+    foreach token [GetTokenList $type] {
+	
+	switch -- $type {
+	    dlg {
+		variable $token
+		upvar 0 $token xstate
+	    }
+	    chat {
+		variable $token
+		upvar 0 $token xstate
+	    }
+	}
+	
+	if {[info exists xstate($key)] && [string match $pattern $xstate($key)]} {
+	    return $token
+	}
+    }
+    return
+}
+
+# GroupChat::GetAllTokensFrom --
+# 
+#       As above but all tokens.
+
+proc ::GroupChat::GetAllTokensFrom {type key pattern} {
+    
+    set alltokens {}
+    
+    # Search all tokens for this key into state array.
+    foreach token [GetTokenList $type] {
+	
+	switch -- $type {
+	    dlg {
+		variable $token
+		upvar 0 $token xstate
+	    }
+	    chat {
+		variable $token
+		upvar 0 $token xstate
+	    }
+	}
+	
+	if {[info exists xstate($key)] && [string match $pattern $xstate($key)]} {
+	    lappend alltokens $token
+	}
+    }
+    return $alltokens
+}
+
+proc ::GroupChat::GetFirstDlgToken { } {
+ 
+    set token ""
+    set dlgtokens [GetTokenList dlg]
+    foreach dlgtoken $dlgtokens {
+	variable $dlgtoken
+	upvar 0 $dlgtoken dlgstate    
+	
+	if {[winfo exists $dlgstate(w)]} {
+	    set token $dlgtoken
+	    break
+	}
+    }
     return $token
+}
+
+# GroupChat::GetTokenList --
+# 
+# Arguments:
+#       type        'dlg' or 'chat'
+
+proc ::GroupChat::GetTokenList {type} {
+    
+    # For some strange reason [info vars] reports non existing arrays.
+    set nskey [namespace current]::$type
+    set tokens {}
+    foreach token [concat  \
+      [info vars ${nskey}\[0-9\]] \
+      [info vars ${nskey}\[0-9\]\[0-9\]] \
+      [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]] \
+      [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]] \
+      [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]] {
+
+	# We need to check array size becaus also empty arrays are reported.
+	if {[array size $token]} {
+	    lappend tokens $token
+	}
+    }
+    return $tokens
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1066,7 +1670,7 @@ proc ::GroupChat::TreeInitDB { } {
     set initedTreeDB 1
 }
 
-proc ::GroupChat::Tree {token w T wysc} {
+proc ::GroupChat::Tree {chattoken w T wysc} {
     global this
     variable initedTreeDB
 
@@ -1121,16 +1725,16 @@ proc ::GroupChat::Tree {token w T wysc} {
     }
     bindtags $T [concat UsersTreeTag [bindtags $T]]
     
-    bind UsersTreeTag <Button-1>        { ::GroupChat::TreeButtonPress %W %x %y }        
+    bind UsersTreeTag <Button-1>        [list ::GroupChat::TreeButtonPress $chattoken %W %x %y ]
     bind UsersTreeTag <ButtonRelease-1> { ::GroupChat::TreeButtonRelease %W %x %y }        
-    bind UsersTreeTag <<ButtonPopup>>   [list ::GroupChat::TreePopup $token %W %x %y ]
+    bind UsersTreeTag <<ButtonPopup>>   [list ::GroupChat::TreePopup $chattoken %W %x %y ]
     bind UsersTreeTag <Double-1>        { ::GroupChat::DoubleClick %W %x %y }        
     bind UsersTreeTag <Destroy>         {+::GroupChat::TreeOnDestroy %W }
     
     ::treeutil::setdboptions $T $w utree
 }
 
-proc ::GroupChat::TreeButtonPress {T x y} {
+proc ::GroupChat::TreeButtonPress {chattoken T x y} {
     variable buttonAfterId
     variable buttonPressMillis
 
@@ -1138,7 +1742,7 @@ proc ::GroupChat::TreeButtonPress {T x y} {
 	if {[info exists buttonAfterId]} {
 	    catch {after cancel $buttonAfterId}
 	}
-	set cmd [list ::GroupChat::TreePopup $T $x $y]
+	set cmd [list ::GroupChat::TreePopup $chattoken $T $x $y]
 	set buttonAfterId [after $buttonPressMillis $cmd]
     }
 }
@@ -1152,7 +1756,7 @@ proc ::GroupChat::TreeButtonRelease {T x y} {
     }    
 }
 
-proc ::GroupChat::TreePopup {token T x y} {
+proc ::GroupChat::TreePopup {chattoken T x y} {
     variable tag2item
 
     set id [$T identify $x $y]
@@ -1162,7 +1766,7 @@ proc ::GroupChat::TreePopup {token T x y} {
     } else {
 	set tag {}
     }
-    Popup $token $T $tag $x $y
+    Popup $chattoken $T $tag $x $y
 }
 
 proc ::GroupChat::DoubleClick {T x y} {
@@ -1189,13 +1793,13 @@ proc ::GroupChat::TreeOnDestroy {T} {
     array unset tag2item $T,*
 }
 
-proc ::GroupChat::TreeCreateUserItem {token jid3 presence args} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::TreeCreateUserItem {chattoken jid3 presence args} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     variable userRoleToStr
     upvar ::Jabber::jstate jstate
     
-    set T $state(wusers)
+    set T $chatstate(wusers)
     
     # Cover both a "flat" users list and muc's with the roles 
     # moderator, participant, and visitor.
@@ -1279,15 +1883,15 @@ proc ::GroupChat::TreeSetIgnoreState {T jid3 {prefix ""}} {
     }
 }
 
-proc ::GroupChat::TreeRemoveUser {token jid3} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::TreeRemoveUser {chattoken jid3} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
-    set T $state(wusers)
+    set T $chatstate(wusers)
     set tag [list jid $jid3]
     TreeDeleteItem $T $tag
 
-    unset -nocomplain state(ignore,$jid3)
+    unset -nocomplain chatstate(ignore,$jid3)
 }
 
 proc ::GroupChat::TreeDeleteItem {T tag} {
@@ -1308,22 +1912,22 @@ proc ::GroupChat::TreeUnsetTags {T item} {
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-proc ::GroupChat::StatusCmd {token status} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::StatusCmd {chattoken status} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
 
     ::Debug 2 "::GroupChat::StatusCmd status=$status"
 
     if {$status eq "unavailable"} {
-	set ans [Exit $token]
+	set ans [ExitAndClose $chattoken]
 	if {$ans eq "no"} {
-	    set state(status) $state(oldStatus)
+	    set chatstate(status) $chatstate(oldStatus)
 	}
     } else {
     
 	# Send our status.
-	::Jabber::SetStatus $status -to $state(roomjid)
-	set state(oldStatus) $status
+	::Jabber::SetStatus $status -to $chatstate(roomjid)
+	set chatstate(oldStatus) $status
     }
 }
 
@@ -1331,15 +1935,15 @@ proc ::GroupChat::StatusCmd {token status} {
 # 
 #       Puts message in text groupchat window.
 
-proc ::GroupChat::InsertMessage {token from body args} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::InsertMessage {chattoken from body args} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
     array set argsArr $args
 
-    set w       $state(w)
-    set wtext   $state(wtext)
-    set roomjid $state(roomjid)
+    set w       $chatstate(w)
+    set wtext   $chatstate(wtext)
+    set roomjid $chatstate(roomjid)
         
     # This can be room name or nick name.
     lassign [::Jabber::JlibCmd service hashandnick $roomjid] myroomjid mynick
@@ -1369,7 +1973,7 @@ proc ::GroupChat::InsertMessage {token from body args} {
     if {$secs eq ""} {
 	set secs [clock seconds]
     }
-    set state(last,$whom) [clock clicks -milliseconds]
+    set chatstate(last,$whom) [clock clicks -milliseconds]
     if {[::Utils::IsToday $secs]} {
 	set clockFormat [option get $w clockFormat {}]
     } else {
@@ -1404,31 +2008,164 @@ proc ::GroupChat::InsertMessage {token from body args} {
       -type groupchat -name $nick -time $dateISO -body $body -tag $whom
 }
 
-proc ::GroupChat::SetState {token _state} {
-    variable $token
-    upvar 0 $token state
+# GroupChat::CloseCmd --
+# 
+#       This gets called from toplevels -closecommand 
 
-    $state(wtray) buttonconfigure send   -state $_state
-    $state(wtray) buttonconfigure invite -state $_state
-    $state(wtray) buttonconfigure info   -state $_state
-    $state(wbtsubject) configure -state $_state
-    $state(wbtsend)    configure -state $_state
-    $state(wbtstatus)  configure -state $_state
-    $state(wbtbmark)   configure -state $_state
+proc ::GroupChat::CloseCmd {wclose} {
+    global  wDlgs
+
+    #puts "::GroupChat::CloseCmd $wclose"
+    
+    set dlgtoken [GetTokenFrom dlg w $wclose]
+    if {$dlgtoken ne ""} {
+	variable $dlgtoken
+	upvar 0 $dlgtoken dlgstate    
+
+	set chattoken [GetActiveChatToken $dlgtoken]
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+
+	# Do we want to close each tab or complete window?
+	set closetab 1
+	set chattokens $dlgstate(chattokens)
+	::UI::SaveSashPos groupchatDlgVert $chatstate(wpanev)
+	::UI::SaveSashPos groupchatDlgHori $chatstate(wpaneh)
+
+	# User pressed windows close button.
+	if {[::UI::GetCloseWindowType] eq "wm"} {
+	    set closetab 0
+	}
+	
+	# All rooms need an explicit Exit, but tab only needs CloseRoomPage.
+	if {$closetab} {
+	    if {[llength $chattokens] >= 2} {
+		Exit $chattoken
+		CloseRoomPage $chattoken
+		set closetoplevel 0
+	    } else {
+		set closetoplevel 1
+	    }
+	} else {
+	    set closetoplevel 1
+	}
+	if {$closetoplevel} {
+	    ::UI::SaveWinGeom $wDlgs(jgc) $dlgstate(w)
+	    foreach chattoken $chattokens {
+		Exit $chattoken
+	    }
+	} else {
+	    # Since we only want to close a tab.
+	    return "stop"
+	}
+    } else {
+	return
+    }
 }
 
-proc ::GroupChat::CloseHook {wclose} {
+proc ::GroupChat::CloseRoomPage {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+        
+    set dlgtoken $chatstate(dlgtoken)
+    DeletePage $chattoken
+    set newchattoken [GetActiveChatToken $dlgtoken]
+
+    # Set state of new page.
+    SetRoomState $dlgtoken $newchattoken
+}
+
+# GroupChat::ExitAndClose --
+#
+#       Handles both protocol and ui parts for closing a room.
+#       
+# Arguments:
+#       roomjid
+#       
+# Results:
+#       yes/no if actually exited or not.
+
+proc ::GroupChat::ExitAndClose {chattoken} {
+    global  wDlgs
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
-    set result ""
-    set token [GetTokenFrom w $wclose]
-    if {$token ne ""} {
-	set w $wclose
-	set ans [Exit $token]
-	if {$ans eq "no"} {
-	    set result stop
+    #puts "::GroupChat::ExitAndClose $chattoken"
+        
+    set ans "yes"
+    if {[::Jabber::IsConnected]} {
+	if {0} {
+	    # This could be optional.
+	    set ans [ExitWarn $chattoken]
 	}
-    }  
-    return $result
+	if {$ans eq "yes"} {
+	    Exit $chattoken
+	} else {
+	    return $ans
+	}
+    } 
+    
+    # Do we want to close each tab or complete window?
+    set dlgtoken $chatstate(dlgtoken)
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate    
+
+    set chattokens $dlgstate(chattokens)
+    
+    if {[llength $chattokens] >= 2} {
+	::UI::SaveSashPos groupchatDlgVert $chatstate(wpanev)
+	::UI::SaveSashPos groupchatDlgHori $chatstate(wpaneh)
+	CloseRoomPage $chattoken
+    } else {
+	::UI::SaveWinGeom $wDlgs(jgc) $dlgstate(w)
+	destroy $dlgstate(w)
+    }
+    return $ans
+}
+
+proc ::GroupChat::ExitWarn {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    if {[info exists chatstate(w)] && [winfo exists $chatstate(w)]} {
+	set opts [list -parent $chatstate(w)]
+    } else {
+	set opts ""
+    }
+    set roomjid $chatstate(roomjid)
+    return [eval {::UI::MessageBox -icon warning -type yesno  \
+      -message [mc jamesswarnexitroom $roomjid]} $opts]
+}
+
+# GroupChat::Exit --
+# 
+#       Handles the protocol part of exiting room.
+
+proc ::GroupChat::Exit {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    upvar ::Jabber::jstate jstate
+
+    #puts "::GroupChat::Exit $chattoken"
+
+    if {[::Jabber::IsConnected]} {
+	set roomjid $chatstate(roomjid)
+	$jstate(jlib) service exitroom $roomjid
+	::hooks::run groupchatExitRoomHook $roomjid
+    }
+}
+
+# GroupChat::ExitRoomJID --
+# 
+#       Just a wrapper for Exit.
+
+proc ::GroupChat::ExitRoomJID {roomjid} {
+
+    set roomjid [jlib::jidmap $roomjid]
+    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    if {$chattoken ne ""} {
+	ExitAndClose $chattoken
+    }
 }
 
 proc ::GroupChat::ConfigureTextTags {w wtext} {
@@ -1477,17 +2214,18 @@ proc ::GroupChat::ConfigureTextTags {w wtext} {
     }
 }
 
-proc ::GroupChat::SetTopic {token} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::SetTopic {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     upvar ::Jabber::jstate jstate
     
-    set topic   $state(subject)
-    set roomjid $state(roomjid)
+    set topic   $chatstate(subject)
+    set roomjid $chatstate(roomjid)
+    
     set ans [::UI::MegaDlgMsgAndEntry  \
-      [mc {Set New Topic}]  \
-      [mc jasettopic2]  \
-      "[mc {New Topic}]:"  \
+      [mc {Set New Topic}]             \
+      [mc jasettopic2]                 \
+      "[mc {New Topic}]:"              \
       topic [mc Cancel] [mc OK]]
 
     if {($ans eq "ok") && ($topic ne "")} {
@@ -1497,11 +2235,7 @@ proc ::GroupChat::SetTopic {token} {
     return $ans
 }
 
-proc ::GroupChat::Send {token} {
-    global  prefs
-    variable $token
-    upvar 0 $token state
-    upvar ::Jabber::jstate jstate
+proc ::GroupChat::Send {dlgtoken} {
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
@@ -1509,8 +2243,15 @@ proc ::GroupChat::Send {token} {
 	  -message [mc jamessnotconnected]
 	return
     }
-    set wtextsend $state(wtextsend)
-    set roomjid  $state(roomjid)
+    SendChat [GetActiveChatToken $dlgtoken]
+}
+
+proc ::GroupChat::SendChat {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    set wtextsend $chatstate(wtextsend)
+    set roomjid   $chatstate(roomjid)
 
     # Get text to send. Strip off any ending newlines from Return.
     # There might by smiley icons in the text widget. Parse them to text.
@@ -1522,16 +2263,16 @@ proc ::GroupChat::Send {token} {
     
     # Clear send.
     $wtextsend delete 1.0 end
-    set state(hot1stmsg) 1
+    set chatstate(hot1stmsg) 1
 }
 
-proc ::GroupChat::ActiveCmd {token} {
+proc ::GroupChat::ActiveCmd {chattoken} {
     variable cprefs
-    variable $token
-    upvar 0 $token state
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
     # Remember last setting.
-    set cprefs(lastActiveRet) $state(active)
+    set cprefs(lastActiveRet) $chatstate(active)
 }
 
 # Suggestion from marc@bruenink.de.
@@ -1544,73 +2285,28 @@ proc ::GroupChat::ActiveCmd {token} {
 #       Ret: send message
 #       Ctrl+Ret: word-wrap
 
-proc ::GroupChat::ReturnKeyPress {token} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::ReturnKeyPress {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
 
-    if {$state(active)} {
-	Send $token
+    if {$chatstate(active)} {
+	SendChat $chattoken
 	
 	# Stop the actual return to be inserted.
 	return -code break
     }
 }
 
-proc ::GroupChat::CommandReturnKeyPress {token} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::CommandReturnKeyPress {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
-    if {!$state(active)} {
-	Send $token
+    if {!$chatstate(active)} {
+	SendChat $chattoken
 	
 	# Stop further handling in Text.
 	return -code break
     }
-}
-
-# GroupChat::GetTokenFrom --
-# 
-#       Try to get the token state array from any stored key.
-#       
-# Arguments:
-#       key         w, jid, roomjid etc...
-#       pattern     glob matching
-#       
-# Results:
-#       token or empty if not found.
-
-proc ::GroupChat::GetTokenFrom {key pattern} {
-    
-    # Search all tokens for this key into state array.
-    foreach token [GetTokenList] {
-	variable $token
-	upvar 0 $token state
-	
-	if {[info exists state($key)] && [string match $pattern $state($key)]} {
-	    return $token
-	}
-    }
-    return
-}
-
-proc ::GroupChat::GetTokenList { } {
-    
-    set ns [namespace current]
-    set tvars [concat  \
-      [info vars ${ns}::\[0-9\]] \
-      [info vars ${ns}::\[0-9\]\[0-9\]] \
-      [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]] \
-      [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]\[0-9\]] \
-      [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]]
-
-    # We need to check array size becaus also empty arrays are reported.
-    set tokens {}
-    foreach token $tvars {
-	if {[array size $token]} {
-	    lappend tokens $token
-	}
-    }
-    return $tokens
 }
 
 # GroupChat::Presence --
@@ -1695,12 +2391,12 @@ proc ::GroupChat::PresenceHook {jid presence args} {
 	    RemoveUser $roomjid $jid3
 	}
 	
-	set token [GetTokenFrom roomjid $jid2]
-	if {$token ne ""} {
+	set chattoken [GetTokenFrom chat roomjid $jid2]
+	if {$chattoken ne ""} {
 	    set cmd [concat \
-	      [list ::GroupChat::InsertPresenceChange $token $presence $jid3] \
+	      [list ::GroupChat::InsertPresenceChange $chattoken $presence $jid3] \
 	      $args]
-	    lappend state(afterids) [after 200 $cmd]
+	    lappend chatstate(afterids) [after 200 $cmd]
 	}
 	
 	# When kicked etc. from a MUC room...
@@ -1728,19 +2424,19 @@ proc ::GroupChat::PresenceHook {jid presence args} {
     }
 }
 
-proc ::GroupChat::InsertPresenceChange {token presence jid3 args} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::InsertPresenceChange {chattoken presence jid3 args} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     variable show2String
     
     array set argsArr $args
     
-    if {[info exists state(w)] && [winfo exists $state(w)]} {
+    if {[info exists chatstate(w)] && [winfo exists $chatstate(w)]} {
 	
 	# Some services send out presence changes automatically.
 	# This should only be called if not the room does it.
 	set ms [clock clicks -milliseconds]
-	if {[expr {$ms - $state(last,sys) < 400}]} {
+	if {[expr {$ms - $chatstate(last,sys) < 400}]} {
 	    return
 	}
 	set nick [::Jabber::JlibCmd service nick $jid3]	
@@ -1748,7 +2444,7 @@ proc ::GroupChat::InsertPresenceChange {token presence jid3 args} {
 	if {[info exists argsArr(-show)]} {
 	    set show $argsArr(-show)
 	}
-	InsertMessage $token $state(roomjid) "${nick}: $show2String($show)"
+	InsertMessage $chattoken $chatstate(roomjid) "${nick}: $show2String($show)"
     }
 }
 
@@ -1782,13 +2478,13 @@ proc ::GroupChat::BrowseUser {userXmlList} {
     }
 }
 
-proc ::GroupChat::AddUsers {token} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::AddUsers {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
     upvar ::Jabber::jstate jstate
     
-    set roomjid $state(roomjid)
+    set roomjid $chatstate(roomjid)
     
     set presenceList [$jstate(roster) getpresence $roomjid -type available]
     foreach pres $presenceList {
@@ -1831,12 +2527,12 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
     set jid3    [jlib::jidmap $jid3]
 
     # If we haven't a window for this thread, make one!
-    set token [GetTokenFrom roomjid $roomjid]
-    if {$token eq ""} {
-	set token [eval {Build $roomjid} $args]
+    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    if {$chattoken eq ""} {
+	set chattoken [eval {NewChat $roomjid} $args]
     }       
-    variable $token
-    upvar 0 $token state
+    variable $chattoken
+    upvar 0 $chattoken chatstate
         
     # If we got a browse push with a <user>, assume is available.
     if {$presence eq ""} {
@@ -1844,10 +2540,10 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
     }    
     
     # Don't forget to init the ignore state.
-    if {![info exists state(ignore,$jid3)]} {
-	set state(ignore,$jid3) 0
+    if {![info exists chatstate(ignore,$jid3)]} {
+	set chatstate(ignore,$jid3) 0
     }
-    eval {TreeCreateUserItem $token $jid3 $presence} $args
+    eval {TreeCreateUserItem $chattoken $jid3 $presence} $args
 }
 
 proc ::GroupChat::GetRoleFromJid {jid3} {
@@ -1917,7 +2613,7 @@ proc ::Disco::UnRegisterPopupEntry {name} {
 # Results:
 #       popup menu displayed
 
-proc ::GroupChat::Popup {token w tag x y} {
+proc ::GroupChat::Popup {chattoken w tag x y} {
     global  wDlgs this
     
     variable popMenuDefs
@@ -1959,7 +2655,7 @@ proc ::GroupChat::Popup {token w tag x y} {
     menu $m -tearoff 0  \
       -postcommand [list ::GroupChat::PostMenuCmd $m $mType $clicked]
     
-    ::AMenu::Build $m $mDef -varlist [list jid $jid token $token]
+    ::AMenu::Build $m $mDef -varlist [list jid $jid chattoken $chattoken]
     
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
@@ -2004,12 +2700,12 @@ proc ::GroupChat::PostMenuCmd {m mType clicked} {
     }
 }
 
-proc ::GroupChat::Ignore {token jid3} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::Ignore {chattoken jid3} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
-    set T $state(wusers)
-    if {$state(ignore,$jid3)} {
+    set T $chatstate(wusers)
+    if {$chatstate(ignore,$jid3)} {
 	TreeSetIgnoreState $T $jid3
     } else {
 	TreeSetIgnoreState $T $jid3 !
@@ -2021,27 +2717,30 @@ proc ::GroupChat::RemoveUser {roomjid jid3} {
     ::Debug 4 "::GroupChat::RemoveUser roomjid=$roomjid, jid3=$jid3"
     
     set roomjid [jlib::jidmap $roomjid]
-    set token [GetTokenFrom roomjid $roomjid]
-    if {$token ne ""} {
-	TreeRemoveUser $token $jid3
+    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    if {$chattoken ne ""} {
+	TreeRemoveUser $chattoken $jid3
     }
 }
 
-proc ::GroupChat::BuildHistory {token} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::BuildHistory {dlgtoken} {
 
-    ::History::BuildHistory $state(roomjid) groupchat -class GroupChat  \
+    set chattoken [GetActiveChatToken $dlgtoken]
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    ::History::BuildHistory $chatstate(roomjid) groupchat -class GroupChat  \
       -tagscommand ::GroupChat::ConfigureTextTags
 }
 
-proc ::GroupChat::Save {token} {
-    global  this
-    variable $token
-    upvar 0 $token state
-    
-    set wtext   $state(wtext)
-    set roomjid $state(roomjid)
+proc ::GroupChat::Save {dlgtoken} {
+
+    set chattoken [GetActiveChatToken $dlgtoken]
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    set wtext   $chatstate(wtext)
+    set roomjid $chatstate(roomjid)
     
     set ans [tk_getSaveFile -title [mc Save] \
       -initialfile "Groupchat ${roomjid}.txt"]
@@ -2058,17 +2757,34 @@ proc ::GroupChat::Save {token} {
 	puts $fd "\n"
 	puts $fd $allText	
 	close $fd
-	if {[string equal $this(platform) "macintosh"]} {
-	    file attributes $ans -type TEXT -creator ttxt
-	}
     }
 }
 
-proc ::GroupChat::Print {token} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::Invite {dlgtoken} {
     
-    ::UserActions::DoPrintText $state(wtext) 
+    set chattoken [GetActiveChatToken $dlgtoken]
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    ::MUC::Invite $chatstate(roomjid)
+}
+
+proc ::GroupChat::Info {dlgtoken} {
+    
+    set chattoken [GetActiveChatToken $dlgtoken]
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    ::MUC::BuildInfo $chatstate(roomjid)
+}
+
+proc ::GroupChat::Print {dlgtoken} {
+
+    set chattoken [GetActiveChatToken $dlgtoken]
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    ::UserActions::DoPrintText $chatstate(wtext) 
 }
 
 proc ::GroupChat::StatusSyncHook {status args} {
@@ -2081,97 +2797,16 @@ proc ::GroupChat::StatusSyncHook {status args} {
     array set argsArr $args
 
     if {$jprefs(gchat,syncPres) && ![info exists argsArr(-to)]} {
-	foreach token [GetTokenList] {
-	    variable $token
-	    upvar 0 $token state
+	foreach chattoken [GetTokenList chat] {
+	    variable $chattoken
+	    upvar 0 $chattoken chatstate
 	    
 	    # Send our status.
 	    ::Jabber::SetStatus $status -to $state(roomjid)
-	    set state(status)    $status
-	    set state(oldStatus) $status
+	    set chatstate(status)    $status
+	    set chatstate(oldStatus) $status
 	    #::Jabber::Status::ConfigImage $state(wbtstatus) $status
 	}
-    }
-}
-
-proc ::GroupChat::ExitRoom {roomjid} {
-
-    set roomjid [jlib::jidmap $roomjid]
-    set token [GetTokenFrom roomjid $roomjid]
-    if {$token ne ""} {
-	Exit $token
-    }
-}
-
-# GroupChat::Exit --
-#
-#       Ask if wants to exit room. If then calls GroupChat::Close to do it.
-#       
-# Arguments:
-#       roomjid
-#       
-# Results:
-#       yes/no if actually exited or not.
-
-proc ::GroupChat::Exit {token} {
-    variable $token
-    upvar 0 $token state
-    upvar ::Jabber::jstate jstate
-
-    set roomjid $state(roomjid)
-    
-    if {[info exists state(w)] && [winfo exists $state(w)]} {
-	set opts [list -parent $state(w)]
-    } else {
-	set opts ""
-    }
-    
-    set ans "yes"
-    if {[::Jabber::IsConnected]} {
-	if {0} {
-	    set ans [eval {::UI::MessageBox -icon warning -type yesno  \
-	      -message [mc jamesswarnexitroom $roomjid]} $opts]
-	}
-	if {$ans eq "yes"} {
-	    Close $token
-	    $jstate(jlib) service exitroom $roomjid
-	    ::hooks::run groupchatExitRoomHook $roomjid
-	}
-    } else {
-	Close $token
-    }
-    return $ans
-}
-
-# GroupChat::Close --
-#
-#       Handles the closing of a groupchat. Both text and whiteboard dialogs.
-
-proc ::GroupChat::Close {token} {
-    global  wDlgs
-    variable $token
-    upvar 0 $token state
-    
-    set roomjid $state(roomjid)
-
-    if {[info exists state(w)] && [winfo exists $state(w)]} {
-	::UI::SaveWinGeom $wDlgs(jgc) $state(w)
-	::UI::SaveSashPos groupchatDlgVert $state(wpanev)
-	::UI::SaveSashPos groupchatDlgHori $state(wpaneh)
-	Free $token
-	destroy $state(w)
-    }
-    
-    # Make sure any associated whiteboard is closed as well.
-    # ::hooks::run groupchatExitRoomHook $roomjid
-}
-
-proc ::GroupChat::Free {token} {
-    variable $token
-    upvar 0 $token state
-     
-    foreach id $state(afterids) {
-	after cancel $id
     }
 }
 
@@ -2184,22 +2819,12 @@ proc ::GroupChat::LogoutHook { } {
 
     set autojoinDone 0
 
-    foreach token [GetTokenList] {
-	variable $token
-	upvar 0 $token state
+    foreach chattoken [GetTokenList chat] {
+	variable $chattoken
+	upvar 0 $chattoken chatstate
 
-	SetState $token disabled
-	::hooks::run groupchatExitRoomHook $state(roomjid)
-    }
-}
-
-proc ::GroupChat::LoginHook { } {    
-    
-    foreach token [GetTokenList] {
-	variable $token
-	upvar 0 $token state
-
-	SetState $token normal
+	SetState $chattoken disabled
+	::hooks::run groupchatExitRoomHook $chatstate(roomjid)
     }
 }
 
@@ -2207,19 +2832,14 @@ proc ::GroupChat::GetFirstPanePos { } {
     global  wDlgs
     
     set win [::UI::GetFirstPrefixedToplevel $wDlgs(jgc)]
-    set token [GetTokenFrom w $win]
-    if {$token ne ""} {
-	variable $token
-	upvar 0 $token state
+    set chattoken [GetTokenFrom chat w $win]
+    if {$chattoken ne ""} {
+	variable $chattoken
+	upvar 0 $chattoken chatstate
 
-	::UI::SaveSashPos groupchatDlgVert $state(wpanev)
-	::UI::SaveSashPos groupchatDlgHori $state(wpaneh)
+	::UI::SaveSashPos groupchatDlgVert $chatstate(wpanev)
+	::UI::SaveSashPos groupchatDlgHori $chatstate(wpaneh)
     }
-}
-
-proc ::GroupChat::OnDestroy {token} {
-
-    unset -nocomplain $token
 }
 
 # --- Support for JEP-0048 ---
@@ -2312,18 +2932,18 @@ proc ::GroupChat::BookmarkExtractFromElem {queryElem} {
 # GroupChat::BookmarkRoom --
 # 
 
-proc ::GroupChat::BookmarkRoom {token} {
-    variable $token
-    upvar 0 $token state
+proc ::GroupChat::BookmarkRoom {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     variable bookmarks
     upvar ::Jabber::jstate jstate
     
-    set jid $state(roomjid)
-    set name [$jstate(jlib) service name $jid]
+    set roomjid $chatstate(roomjid)
+    set name [$jstate(jlib) service name $roomjid]
     if {$name eq ""} {
-	set name $jid
+	set name $roomjid
     }
-    lassign [$jstate(jlib) service hashandnick $jid] myroomjid nick
+    lassign [$jstate(jlib) service hashandnick $roomjid] myroomjid nick
     
     # Add only if name not there already.
     foreach bmark $bookmarks {
@@ -2331,7 +2951,7 @@ proc ::GroupChat::BookmarkRoom {token} {
 	    return
 	}
     }
-    lappend bookmarks [list $name $jid -nick $nick]
+    lappend bookmarks [list $name $roomjid -nick $nick]
     
     # We assume here that we already have the complete bookmark list from
     # the login hook.

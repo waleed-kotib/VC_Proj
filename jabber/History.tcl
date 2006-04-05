@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.11 2005-11-30 08:32:00 matben Exp $
+# $Id: History.tcl,v 1.12 2006-04-05 07:46:22 matben Exp $
 
 package require uriencode
 
@@ -242,13 +242,18 @@ proc ::History::BuildHistory {jid dlgtype args} {
 proc ::History::ReadMessageFile {jid} {
     global  this
     
-    set path [file join $this(historyPath) [uriencode::quote $jid]] 
+    set fileName [file join $this(historyPath) [uriencode::quote $jid]] 
+    return [ReadMessageFromFile $fileName $jid]
+}
+
+proc ::History::ReadMessageFromFile {fileName jid} {
+    
     set uidstart 1000
     set uid $uidstart
     incr uidstart
     
     # Read.
-    source $path
+    source $fileName
 
     set uidstop $uid
     for {set i $uidstart} {$i <= $uidstop} {incr i} {
@@ -260,11 +265,22 @@ proc ::History::ReadMessageFile {jid} {
 proc ::History::HaveMessageFile {jid} {
     global  this
     
-    set path [file join $this(historyPath) [uriencode::quote $jid]] 
-    if {[file exists $path]} {
+    set fileName [file join $this(historyPath) [uriencode::quote $jid]] 
+    if {[file exists $fileName]} {
 	return 1
     } else {
 	return 0
+    }
+}
+
+proc ::History::GetMessageFile {jid} {
+    global  this
+    
+    set fileName [file join $this(historyPath) [uriencode::quote $jid]] 
+    if {[file exists $fileName]} {
+	return $fileName
+    } else {
+	return ""
     }
 }
 

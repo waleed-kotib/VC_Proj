@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.14 2006-03-29 10:03:47 matben Exp $
+# $Id: Status.tcl,v 1.15 2006-04-05 07:46:22 matben Exp $
 
 package provide Status 1.0
 
@@ -79,7 +79,7 @@ proc ::Jabber::Status::MainButton {w statusVar} {
     Button $w $menuVar -command [list [namespace current]::MainCmd $w]
 
     trace add variable $statusVar write [list [namespace current]::MainTrace $w]
-    bind $w <Destroy> {+::Jabber::Status::MainFree %W}
+    bind $w <Destroy> +[list ::Jabber::Status::MainFree %W $statusVar]
 
     return $w
 }
@@ -106,8 +106,9 @@ proc ::Jabber::Status::MainTrace {w varName index op} {
     set $menuVar $value
 }
 
-proc ::Jabber::Status::MainFree {w} {
+proc ::Jabber::Status::MainFree {w statusVar} {
 
+    trace remove variable $statusVar write [list [namespace current]::MainTrace $w]
     set menuVar [namespace current]::menuVar($w)
     unset -nocomplain $menuVar
 }
@@ -128,7 +129,7 @@ proc ::Jabber::Status::BuildMainMenu {mt} {
 
     trace add variable $statusVar write  \
       [list [namespace current]::MainTrace $mt]
-    bind $mt <Destroy> {+::Jabber::Status::MainFree %W}
+    bind $mt <Destroy> +[list ::Jabber::Status::MainFree %W $statusVar]
 
     return $mt
 }
@@ -169,7 +170,7 @@ proc ::Jabber::Status::Button {w varName args} {
     $w configure -menu $wmenu
     
     trace add variable $varName write [list [namespace current]::Trace $w]
-    bind $w <Destroy> {+::Jabber::Status::Free %W}
+    bind $w <Destroy> +[list ::Jabber::Status::Free %W $varName]
 
     return $w
 }
@@ -275,10 +276,10 @@ proc ::Jabber::Status::RosticonsHook { } {
     }
 }
 
-proc ::Jabber::Status::Free {w} {
+proc ::Jabber::Status::Free {w varName} {
     variable menuBuildCmd
     
-    trace remove variable $statusVar write [list [namespace current]::MainTrace $w]
+    trace remove variable $varName write [list [namespace current]::Trace $w]
     unset -nocomplain menuBuildCmd($w)
 }
 

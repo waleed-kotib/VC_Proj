@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.3 2005-10-23 13:40:21 matben Exp $
+# $Id: optionmenu.tcl,v 1.4 2006-04-05 07:46:22 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -61,6 +61,12 @@ snit::widgetadaptor ui::optionmenu::widget {
 	    }
 	    eval {$m add radiobutton -label $str -variable [myvar menuVar] \
 	      -command [list $self Command]} [array get opts]
+	}
+	
+	# If the variable have exists must set our own menuVar.
+	if {[info exists $options(-variable)]} {
+	    set value [set $options(-variable)]
+	    set menuVar $imap($value)
 	}
 	$win configure -textvariable [myvar menuVar] -menu $m
 	return
