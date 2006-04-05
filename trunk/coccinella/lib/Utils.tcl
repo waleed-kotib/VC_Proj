@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.53 2005-11-10 12:57:03 matben Exp $
+# $Id: Utils.tcl,v 1.54 2006-04-05 07:46:22 matben Exp $
 
 package provide Utils 1.0
 
@@ -496,7 +496,8 @@ proc ::Text::ParseMsg {type jid w str tagList} {
 	}
 	
 	# Insert the whitespace after word.
-	$w insert end $space $tagList
+	#$w insert end $space $tagList
+	$w insert insert $space $tagList
     }
     
     # And the final word.
@@ -521,7 +522,8 @@ proc ::Text::ParseWord {w word tagList} {
     if {[::Emoticons::Exists $word]} {
 	::Emoticons::Make $w $word
     } elseif {![ParseUrl $w $word]} {
-	$w insert end $word $tagList
+	#$w insert end $word $tagList
+	$w insert insert $word $tagList
     }
 }
 
@@ -547,7 +549,8 @@ proc ::Text::ParseUrl {w word} {
 	  [list ::Text::UrlEnter $w $urltag $activefg]
 	$w tag bind $urltag <Any-Leave>  \
 	  [list ::Text::UrlLeave $w $urltag $urlfg]
-	$w insert end $word $urltag
+	#$w insert end $word $urltag
+	$w insert insert $word $urltag
 	incr idurl
 	return 1
     } else {
@@ -598,7 +601,8 @@ proc ::Text::InsertURL {w str url tag} {
       [list ::Text::UrlEnter $w $urltag $activefg]
     $w tag bind $urltag <Any-Leave>  \
       [list ::Text::UrlLeave $w $urltag $urlfg]
-    $w insert end $str [list $tag $urltag]
+    #$w insert end $str [list $tag $urltag]
+    $w insert insert $str [list $tag $urltag]
     incr idurl
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.38 2006-03-28 08:12:12 matben Exp $
+# $Id: Init.tcl,v 1.39 2006-04-05 07:46:22 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -402,9 +402,6 @@ proc ::Init::TempDir {} {
     switch $tcl_platform(platform) {
 	windows {
 	    lappend attempdirs "C:\\TEMP" "C:\\TMP" "\\TEMP" "\\TMP"
-	}
-	macintosh {
-	    set tmpdir $env(TRASH_FOLDER)  ;# a better place?
 	}
 	default {
 	    lappend attempdirs [file join / tmp] \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.40 2006-02-10 15:40:50 matben Exp $
+# $Id: Emoticons.tcl,v 1.41 2006-04-05 07:46:22 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -94,7 +94,8 @@ proc ::Emoticons::Make {w word} {
     variable smiley
     
     if {[info exists smiley($word)]} {
-	$w image create end -image $smiley($word) -name $word
+	#$w image create end -image $smiley($word) -name $word
+	$w image create insert -image $smiley($word) -name $word
     }
 }
 

@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #       
-# $Id: AddressBook.tcl,v 1.2 2006-03-06 17:48:27 antoniofcano Exp $
+# $Id: AddressBook.tcl,v 1.3 2006-04-05 07:46:21 matben Exp $
 
 namespace eval ::AddressBook:: { }
 
@@ -30,8 +30,8 @@ proc ::AddressBook::Init { } {
     option add *AddressBook*box.relief            sunken          50
     option add *AddressBook.padding               2               50
 
-    option add *AddressBook.addressBook16Image      history16     widgetDefault
-    option add *AddressBook.addressBook16DisImage   historyDis16  widgetDefault
+    option add *AddressBook.addressBook16Image      history       widgetDefault
+    option add *AddressBook.addressBook16DisImage   historyDis    widgetDefault
 }
 
 
@@ -73,7 +73,7 @@ proc ::AddressBook::NewPage {} {
     set wtab $wnb.ab
     if {![winfo exists $wtab]} {
         Build $wtab
-	set subPath [file join components Phone images]
+	set subPath [file join images 16]
 	set im  [::Theme::GetImage [option get $wtab addressBook16Image {}] $subPath]
 	set imd [::Theme::GetImage [option get $wtab addressBook16DisImage {}] $subPath]
 	set imSpec [list $im disabled $imd background $imd]

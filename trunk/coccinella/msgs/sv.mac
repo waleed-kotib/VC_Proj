@@ -1052,6 +1052,7 @@ Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jaregnewwith {Önskar du registrera ett nytt konto hos %s.}
 ::msgcat::mcset sv jaregisterexserv {Registrera hos tjänsten %s. Du behöver kanske trycka på Hämta om inte registrerings info hämtas automatiskt.}
 ::msgcat::mcset sv jaseliconset {Välj ikonsammling för varje grupp. Varje grupp kan väljas bort.}
+::msgcat::mcset sv jachathist   {Visa eller göm chatt historiken}
 
 
 
