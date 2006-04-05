@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: util.tcl,v 1.5 2005-10-02 12:44:41 matben Exp $
+# $Id: util.tcl,v 1.6 2006-04-05 14:16:45 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -256,6 +256,48 @@ proc ui::MenubarNormal {mb idxlist} {
 	    }
 	}	
     }
+}
+
+# ui::EntryInsert --
+# 
+#       Private method to ui::entryex and ui::comboboxex. 
+#       Needed since 'break' is not propagated internally in snit!
+
+proc ui::EntryInsert {win s} {
+    if {![string length $s]} {
+	return
+    }
+    catch {$win delete sel.first sel.last}
+    set str [$win get]
+    set insert [expr {[$win index insert] + 1}]
+    set white [string range $str 0 $insert]
+    append white $s
+    $win insert insert $s
+    
+    set library [$win cget -library]
+    set type    [$win cget -type]
+    
+    # Find matches in 'library'. Protect glob characters.
+    set white [string map {* \\* ? \\? [ \\[ ] \\] \\ \\\\} $white]
+    set mlist [lsearch -glob -inline -all $library ${white}*]
+    if {[llength $mlist]} {
+	set mstr [lindex $mlist 0]
+	$win delete 0 end
+	$win insert insert $mstr
+	$win selection range $insert end
+	$win icursor $insert
+    } else {
+	#$win delete $insert end
+    }    
+    if {$type eq "tk"} {
+	::tk::EntrySeeInsert $win
+    } else {
+	tile::entry::See $win insert
+    }
+    
+    # Stop class handler from executing, else we get double characters.
+    # @@@ Problem: this also stops handlers bound to the toplevel bindtag!!!!!
+    return -code break
 }
 
 #-------------------------------------------------------------------------------
