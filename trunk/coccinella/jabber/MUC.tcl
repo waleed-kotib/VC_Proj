@@ -7,10 +7,10 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.72 2005-11-30 08:32:00 matben Exp $
+# $Id: MUC.tcl,v 1.73 2006-04-05 14:16:45 matben Exp $
 
 package require jlib::muc
-package require ui::entryex
+package require ui::comboboxex
 
 package provide MUC 1.0
 
@@ -157,12 +157,14 @@ proc ::MUC::Invite {roomjid} {
     pack $wmid -side top -fill x -expand 1
     
     ttk::label $wmid.la -text "[mc Invite] JID:"
-    ui::entryex $wmid.ejid -library $jidlist -textvariable $token\(jid)
+    ui::comboboxex $wmid.ejid -library $jidlist -textvariable $token\(jid)  \
+      -values $jidlist
     ttk::label $wmid.lre -text "[mc Reason]:"
     ttk::entry $wmid.ere -textvariable $token\(reason)
     
     grid  $wmid.la   $wmid.ejid  -sticky e -padx 2 -pady 2
     grid  $wmid.lre  $wmid.ere   -sticky e -padx 2 -pady 2
+    grid $wmid.ejid $wmid.ere -sticky ew
     
     # Button part.
     set frbot $wbox.b
