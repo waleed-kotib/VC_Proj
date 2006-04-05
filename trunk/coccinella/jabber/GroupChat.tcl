@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.138 2006-04-05 07:46:22 matben Exp $
+# $Id: GroupChat.tcl,v 1.139 2006-04-05 09:48:25 matben Exp $
 
 package require Enter
 package require History
@@ -15,7 +15,7 @@ package require colorutils
 package provide GroupChat 1.0
 
 # Provides dialog for old-style gc-1.0 groupchat but the rest should work for 
-# both groupchat and conference protocols.
+# any protocol.
 
 
 namespace eval ::GroupChat:: {
@@ -373,8 +373,7 @@ proc ::GroupChat::EnterHook {roomjid protocol} {
 # 
 #       Cache groupchat protocol in use for specific room.
 
-proc ::GroupChat::SetProtocol {roomjid _protocol} {
-    
+proc ::GroupChat::SetProtocol {roomjid _protocol} {    
     variable protocol
 
     ::Debug 2 "::GroupChat::SetProtocol +++++++++ $roomjid $_protocol"
@@ -722,6 +721,8 @@ proc ::GroupChat::GotMsg {body args} {
     }
     if {[info exists argsArr(-subject)]} {
 	set chatstate(subject) $argsArr(-subject)
+	set str "[mc Subject]: $chatstate(subject)"
+	eval {InsertMessage $chattoken $from $str} $args
     }
     if {$body ne ""} {
 
@@ -898,6 +899,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid args} {
 
     variable uidchat
     variable cprefs
+    variable protocol
 
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -1023,7 +1025,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid args} {
       -text "[mc Topic]:" \
       -command [list [namespace current]::SetTopic $chattoken]
     ttk::entry $wtop.etp -font CociSmallFont \
-      -textvariable $dlgtoken\(subject) -state disabled
+      -textvariable $chattoken\(subject) -state disabled
     ttk::button $wtop.bni -style Small.TButton \
       -text "[mc {Nick name}]..."  \
       -command [list ::MUC::SetNick $roomjid]
@@ -1365,7 +1367,7 @@ proc ::GroupChat::SetRoomState {dlgtoken chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    #puts "::GroupChat::SetRoomState $dlgtoken $chattoken"
+    puts "::GroupChat::SetRoomState $dlgtoken $chattoken"
     
     if {[winfo exists $dlgstate(wnb)]} {
 	$dlgstate(wnb) tab $chatstate(wpage) -image ""  \
@@ -1387,7 +1389,7 @@ proc ::GroupChat::SetState {chattoken _state} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    #puts "::GroupChat::SetState $chattoken $_state"
+    puts "::GroupChat::SetState $chattoken $_state"
     
     set dlgtoken $chatstate(dlgtoken)
     variable $dlgtoken
