@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.139 2006-04-05 09:48:25 matben Exp $
+# $Id: GroupChat.tcl,v 1.140 2006-04-05 12:31:26 matben Exp $
 
 package require Enter
 package require History
@@ -386,11 +386,16 @@ proc ::GroupChat::SetProtocol {roomjid _protocol} {
     if {$chattoken eq ""} {
 	return
     }
-    variable $chattoken
-    upvar 0 $chattoken chatstate
     
     if {$_protocol eq "muc"} {
-	set wtray $chatstate(wtray)
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+
+	set dlgtoken $chatstate(dlgtoken)
+	variable $dlgtoken
+	upvar 0 $dlgtoken dlgstate
+
+	set wtray $dlgstate(wtray)
 	$wtray buttonconfigure invite -state normal
 	$wtray buttonconfigure info   -state normal
 	$chatstate(wbtnick) configure -state normal
@@ -870,7 +875,9 @@ proc ::GroupChat::Build {roomjid args} {
     
     wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
     wm maxsize $w 800 2000
-    
+
+    bind $w <FocusIn> [list [namespace current]::FocusIn $dlgtoken]
+
     focus $w
     set tag TopTag$w
     bindtags $w [concat $tag [bindtags $w]]
@@ -1474,6 +1481,14 @@ proc ::GroupChat::TabAlert {chattoken args} {
 	    $wnb tab $chatstate(wpage) -image $icon -text $name
 	}
     }
+}
+
+proc ::GroupChat::FocusIn {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    set dlgstate(nhiddenmsgs) 0
+    SetTitle [GetActiveChatToken $dlgtoken]
 }
 
 # GroupChat::GetDlgTokenValue, GetChatTokenValue --

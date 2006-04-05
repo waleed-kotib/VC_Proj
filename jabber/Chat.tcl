@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.154 2006-04-05 07:46:22 matben Exp $
+# $Id: Chat.tcl,v 1.155 2006-04-05 12:31:24 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -501,7 +501,7 @@ proc ::Chat::GotMsg {body args} {
 	set chatstate(subject) $argsArr(-subject)
 	set chatstate(lastsubject) $chatstate(subject)
 	eval {
-	    InsertMessage $chattoken sys "Subject: $chatstate(subject)"
+	    InsertMessage $chattoken sys "[mc Subject]: $chatstate(subject)"
 	} $opts
     }
     
@@ -689,13 +689,19 @@ proc ::Chat::MakeAndInsertHistory {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
+    # If chatting with a room member we must use jid3.
     set jid2 $chatstate(jid2)
-
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	set jidH $chatstate(jid)	
+    } else {
+	set jidH $jid2	
+    }
+    
     # We MUST take a snaphot of our history before first message to avoid
     # any duplicates.
-    if {[::History::HaveMessageFile $jid2]} {
+    if {[::History::HaveMessageFile $jidH]} {
 	set histfile [::tfileutils::tempfile $this(tmpPath) ""]
-	file copy -force [::History::GetMessageFile $jid2] $histfile
+	file copy -force [::History::GetMessageFile $jidH] $histfile
 	set chatstate(historyfile) $histfile
 	HistoryCmd $chattoken
     }
@@ -729,8 +735,15 @@ proc ::Chat::InsertHistory {chattoken args} {
     set jid2     $chatstate(jid2)
     set wtext    $chatstate(wtext)
     set threadID $chatstate(threadid)
-    
-    array set msg [::History::ReadMessageFromFile $chatstate(historyfile) $jid2]
+
+    # If chatting with a room member we must use jid3.
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	set jidH $chatstate(jid)	
+    } else {
+	set jidH $jid2	
+    }
+
+    array set msg [::History::ReadMessageFromFile $chatstate(historyfile) $jidH]
     set names [lsort -integer [array names msg]]
     set keys $names
 
