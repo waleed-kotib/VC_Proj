@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.120 2006-03-28 08:12:12 matben Exp $
+# $Id: JUI.tcl,v 1.121 2006-04-06 12:47:40 matben Exp $
 
 package provide JUI 1.0
 
@@ -323,7 +323,7 @@ proc ::Jabber::UI::Build {w} {
 
     ttk::separator $wall.sep -orient horizontal
     pack $wall.sep -side top -fill x
-
+    
     # Status frame. 
     # Need two frames so we can pack resize icon in the corner.
     set wbot $wall.bot
