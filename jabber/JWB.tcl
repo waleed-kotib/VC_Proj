@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.60 2006-04-05 07:46:22 matben Exp $
+# $Id: JWB.tcl,v 1.61 2006-04-06 07:28:31 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1006,7 +1006,7 @@ proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns msgElem args} {
     # Don't do anything if we haven't entered the room using whiteboard.
     set mjid [jlib::jidmap $argsArr(-from)]
     jlib::splitjid $mjid roomjid res
-    if {[HaveGroupchatWhiteboard $roomjid]} {
+    if {[HaveWhiteboard $roomjid]} {
 	
 	# Do not duplicate ourselves!
 	if {![::Jabber::IsMyGroupchatJid $argsArr(-from)]} {
@@ -1061,7 +1061,7 @@ proc ::Jabber::WB::HandleSVGWBGroupchatMessage {jlibname xmlns msgElem args} {
     # Don't do anything if we haven't entered the room using whiteboard.
     set mjid [jlib::jidmap $argsArr(-from)]
     jlib::splitjid $mjid roomjid res
-    if {[HaveGroupchatWhiteboard $roomjid]} {
+    if {[HaveWhiteboard $roomjid]} {
 
 	# Need to have the actual canvas before doing svg -> canvas translation.
 	# This is a duplicate; fix later...
@@ -1723,10 +1723,10 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
     return $w
 }
 
-proc ::Jabber::WB::HaveGroupchatWhiteboard {roomjid} {
+proc ::Jabber::WB::HaveWhiteboard {jid} {
     variable jwbstate
     
-    if {[info exists jwbstate($roomjid,jid,w)]} {
+    if {[info exists jwbstate($jid,jid,w)]} {
 	return 1
     } else {
 	return 0

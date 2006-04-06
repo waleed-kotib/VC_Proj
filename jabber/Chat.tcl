@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.155 2006-04-05 12:31:24 matben Exp $
+# $Id: Chat.tcl,v 1.156 2006-04-06 07:28:31 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -54,6 +54,8 @@ namespace eval ::Chat:: {
     option add *Chat*settingsDisImage     settingsDis           widgetDefault
     option add *Chat*printImage           print                 widgetDefault
     option add *Chat*printDisImage        printDis              widgetDefault
+    option add *Chat*whiteboardImage      whiteboard            widgetDefault
+    option add *Chat*whiteboardDisImage   whiteboardDis         widgetDefault
 
     option add *Chat*notifierImage        notifier              widgetDefault    
     option add *Chat*tabAlertImage        ktip                  widgetDefault    
@@ -370,7 +372,6 @@ proc ::Chat::StartThread {jid args} {
     } else {
 	set chatstate(fromjid) $jid2
     }
-    set chatstate(jid3) $jid
 
     return $chattoken
 }
@@ -892,6 +893,9 @@ proc ::Chat::Build {threadID args} {
     set iconSettingsDis [::Theme::GetImage [option get $w settingsDisImage {}]]
     set iconPrint       [::Theme::GetImage [option get $w printImage {}]]
     set iconPrintDis    [::Theme::GetImage [option get $w printDisImage {}]]
+    set iconWB          [::Theme::GetImage [option get $w whiteboardImage {}]]
+    set iconWBDis       [::Theme::GetImage [option get $w whiteboardDisImage {}]]
+
     set iconNotifier    [::Theme::GetImage [option get $w notifierImage {}]]
     set dlgstate(iconNotifier) $iconNotifier
     
@@ -909,7 +913,7 @@ proc ::Chat::Build {threadID args} {
     grid columnconfigure $wtop 0 -weight 1
 
     $wtray newbutton send  \
-      -text [mc Send] -image $iconSend  \
+      -text [mc Send] -image $iconSend   \
       -disabledimage $iconSendDis    \
       -command [list [namespace current]::Send $dlgtoken]
     $wtray newbutton sendfile \
@@ -932,6 +936,10 @@ proc ::Chat::Build {threadID args} {
       -text [mc Print] -image $iconPrint  \
       -disabledimage $iconPrintDis   \
       -command [list [namespace current]::Print $dlgtoken]
+    $wtray newbutton whiteboard  \
+      -text [mc Whiteboard] -image $iconWB  \
+      -disabledimage $iconWBDis   \
+      -command [list [namespace current]::Whiteboard $dlgtoken]
     
     ::hooks::run buildChatButtonTrayHook $wtray $dlgtoken
     
@@ -1597,9 +1605,13 @@ proc ::Chat::SetState {chattoken state} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate    
     
+    set wtray $dlgstate(wtray)
     foreach name {send sendfile} {
-	$dlgstate(wtray) buttonconfigure $name -state $state 
+	$wtray buttonconfigure $name -state $state 
     }
+    if {![::Roster::IsCoccinella $chatstate(jid)]} {
+	$wtray buttonconfigure whiteboard -state disabled
+    }	
     $chatstate(wtextsnd) configure -state $state
     $chatstate(wsubject) configure -state $state
     $chatstate(wsmile)   configure -state $state
@@ -2103,6 +2115,18 @@ proc ::Chat::Print {dlgtoken} {
     upvar 0 $chattoken chatstate
 
     ::UserActions::DoPrintText $chatstate(wtext)
+}
+
+proc ::Chat::Whiteboard {dlgtoken} {
+    
+    set chattoken [GetActiveChatToken $dlgtoken]
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    set jid $chatstate(jid)
+    if {![::Jabber::WB::HaveWhiteboard $jid]} {
+	::Jabber::WB::NewWhiteboardTo $jid -type chat
+    }
 }
 
 proc ::Chat::Save {dlgtoken} {
