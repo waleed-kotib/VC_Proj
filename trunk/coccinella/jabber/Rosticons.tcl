@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements handling and parsing of roster icons.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.21 2006-03-28 14:42:44 matben Exp $
+# $Id: Rosticons.tcl,v 1.22 2006-04-06 12:47:40 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -24,6 +24,8 @@
 #  The 'status' type is the usual jabber icons. The 'application' type is 
 #  special since it sets the other icons used in the roster tree.
 #  Each group must have a default dir or default.jisp archive.
+#  The set named 'default' is a fallback set. The actual default set is
+#  defined in the 'defaultSet' array.
 
 package require Icondef
 
@@ -40,14 +42,23 @@ namespace eval ::Rosticons:: {
 
     # Other init hooks depend on us!
     ::hooks::register initHook               ::Rosticons::Init    20
-
-    variable priv
-    set priv(defaultSet) "default"
-    set priv(types) {
-	aim application gadugadu icq msn phone smtp status 
-	whiteboard yahoo
+    
+    variable defaultSet
+    array set defaultSet {
+	aim             "Crystal"
+	application     "Crystal"
+	gadugadu        "default"
+	icq             "Crystal"
+	msn             "Crystal"
+	phone           "default"
+	smtp            "default"
+	status          "Crystal"
+	whiteboard      "default"
+	yahoo           "Crystal"
     }
 
+    variable priv
+    set priv(types) [array names defaultSet]
 }
 
 proc ::Rosticons::Init { } {
@@ -334,6 +345,7 @@ proc ::Rosticons::SetFromTmp {type name} {
 proc ::Rosticons::InitPrefsHook { } {
     
     variable priv
+    variable defaultSet
     upvar ::Jabber::jprefs jprefs
 
     set jprefs(rost,haveWBicons) 1
@@ -342,7 +354,7 @@ proc ::Rosticons::InitPrefsHook { } {
     # Do NOT store the complete path!
     set plist {}
     foreach type $priv(types) {
-	set jprefs(rost,icons,$type) "default"
+	set jprefs(rost,icons,$type) $defaultSet($type)
 	set name  ::Jabber::jprefs(rost,icons,$type)
 	set rsrc  jprefs_rost_icons_$type
 	set value [set $name]
