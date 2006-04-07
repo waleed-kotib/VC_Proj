@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.11 2006-03-22 14:09:29 matben Exp $
+# $Id: RosterPlain.tcl,v 1.12 2006-04-07 14:08:28 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -512,7 +512,7 @@ proc ::RosterPlain::DiscoInfoHook {type from subiq args} {
 # RosterPlain::PostProcess --
 # 
 #       This is necessary to get icons for foreign IM systems set correctly.
-#       Usually we get the roster before we've got browse/agents/disco 
+#       Usually we get the roster before we've got disco 
 #       info, so we cannot know if an item is an ICQ etc. when putting it
 #       into the roster.
 #       

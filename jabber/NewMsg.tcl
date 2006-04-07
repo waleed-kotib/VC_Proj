@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.71 2006-01-11 13:24:54 matben Exp $
+# $Id: NewMsg.tcl,v 1.72 2006-04-07 14:08:28 matben Exp $
 
 package require ui::entryex
 
@@ -115,10 +115,9 @@ proc ::NewMsg::InitEach { } {
     
     ::Debug 2 "NewMsg::InitEach"
     
-    # We must be indenpendent of method; agent, browse, disco.
     set trpts {}
     foreach subtype [lsort [array names transportDefs]] {
-	set jids [$jstate(jlib) service gettransportjids $subtype]
+	set jids [$jstate(jlib) disco getjidsforcategory "gateway/$subtype"]
 	if {[llength $jids]} {
 	    lappend trpts $subtype
 	    set locals(servicejid,$subtype) [lindex $jids 0]

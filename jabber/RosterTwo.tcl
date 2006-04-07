@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.6 2005-12-17 09:48:41 matben Exp $
+# $Id: RosterTwo.tcl,v 1.7 2006-04-07 14:08:28 matben Exp $
 
 package require RosterTree
 
@@ -368,7 +368,7 @@ proc ::RosterTwo::DiscoInfoHook {type from subiq args} {
 # RosterTwo::PostProcess --
 # 
 #       This is necessary to get icons for foreign IM systems set correctly.
-#       Usually we get the roster before we've got browse/agents/disco 
+#       Usually we get the roster before we've got disco 
 #       info, so we cannot know if an item is an ICQ etc. when putting it
 #       into the roster.
 #       

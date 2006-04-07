@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.140 2006-04-05 12:31:26 matben Exp $
+# $Id: GroupChat.tcl,v 1.141 2006-04-07 14:08:27 matben Exp $
 
 package require Enter
 package require History
@@ -194,7 +194,7 @@ proc ::GroupChat::AllConference { } {
     upvar ::Jabber::jstate jstate
 
     set anyNonConf 0
-    foreach jid [$jstate(jlib) service getjidsfor "groupchat"] {
+    foreach jid [$jstate(jlib) disco getconferences] {
 	if {[info exists jstate(conference,$jid)] &&  \
 	  ($jstate(conference,$jid) == 0)} {
 	    set anyNonConf 1
@@ -251,9 +251,9 @@ proc ::GroupChat::HaveMUC {{jid ""}} {
 
     set ans 0
     if {$jid eq ""} {
-	set allConfServ [$jstate(jlib) service getconferences]
+	set allConfServ [$jstate(jlib) disco getconferences]
 	foreach serv $allConfServ {
-	    if {[$jstate(jlib) service hasfeature $serv $xmppxmlns(muc)]} {
+	    if {[$jstate(jlib) disco hasfeature $xmppxmlns(muc) $serv]} {
 		set ans 1
 	    }
 	}
@@ -262,7 +262,7 @@ proc ::GroupChat::HaveMUC {{jid ""}} {
 	# We must query the service, not the room, for browse to work.
 	jlib::splitjidex $jid node service -
 	if {$service ne ""} {
-	    if {[$jstate(jlib) service hasfeature $service $xmppxmlns(muc)]} {
+	    if {[$jstate(jlib) disco hasfeature $xmppxmlns(muc) $service]} {
 		set ans 1
 	    }
 	}
@@ -421,9 +421,8 @@ proc ::GroupChat::BuildEnter {args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
 
-    set chatservers [$jstate(jlib) service getjidsfor "groupchat"]
-    ::Debug 2 "::GroupChat::BuildEnter args='$args'"
-    ::Debug 2 "\t service getjidsfor groupchat: '$chatservers'"
+    set chatservers [$jstate(jlib) disco getconferences]
+    ::Debug 2 "::GroupChat::BuildEnter chatservers=$chatservers args='$args'"
     
     if {0 && $chatservers == {}} {
 	::UI::MessageBox -icon error -message [mc jamessnogroupchat]
@@ -945,7 +944,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid args} {
     set chatstate(wroom)        $wroom
     set chatstate(roomjid)      $roomjid
     set chatstate(dlgtoken)     $dlgtoken
-    set chatstate(roomName)     [$jstate(jlib) service name $roomjid]
+    set chatstate(roomName)     [$jstate(jlib) disco name $roomjid]
     set chatstate(subject)      ""
     set chatstate(status)       "available"
     set chatstate(oldStatus)    "available"
@@ -2369,7 +2368,7 @@ proc ::GroupChat::PresenceHook {jid presence args} {
     #     to='matben@jabber.ccc.de'/>
     #     
     # Note that a conference service may also be a gateway!
-    set conferences [$jstate(jlib) service getconferences]
+    set conferences [$jstate(jlib) disco getconferences]
     set allroomsin  [$jstate(jlib) service allroomsin]
     set inroom [expr [lsearch $allroomsin $jid2] < 0 ? 0 : 1]
     set isconf [expr [lsearch $conferences $service] < 0 ? 0 : 1]
@@ -2956,7 +2955,7 @@ proc ::GroupChat::BookmarkRoom {chattoken} {
     upvar ::Jabber::jstate jstate
     
     set roomjid $chatstate(roomjid)
-    set name [$jstate(jlib) service name $roomjid]
+    set name [$jstate(jlib) disco name $roomjid]
     if {$name eq ""} {
 	set name $roomjid
     }

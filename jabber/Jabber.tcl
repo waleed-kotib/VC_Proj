@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.159 2006-03-04 14:07:49 matben Exp $
+# $Id: Jabber.tcl,v 1.160 2006-04-07 14:08:28 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -29,7 +29,6 @@ package require jlib::si
 package require jlib::vcard
 
 # We should have some component mechanism that lets packages load themselves.
-package require Agents
 package require Avatar
 package require Browse
 package require Chat
@@ -102,7 +101,6 @@ namespace eval ::Jabber:: {
     set jstate(wpopup,roster)    .jpopupro
     set jstate(wpopup,browse)    .jpopupbr
     set jstate(wpopup,groupchat) .jpopupgc
-    set jstate(wpopup,agents)    .jpopupag
     
     # Keep noncritical error text here.
     set jerror {}
@@ -657,7 +655,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    # We must be indenpendent of method; agent, browse, disco
 	    # The icq transports gives us subscribe from icq.host/registered
 	    
-	    set jidtype [$jstate(jlib) service gettype $jid2]
+	    set jidtype [lindex [$jstate(jlib) disco types $jid2] 0]
 	    
 	    ::Debug 4 "\t jidtype=$jidtype"
 	    

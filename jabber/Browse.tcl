@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.83 2005-12-05 15:20:32 matben Exp $
+# $Id: Browse.tcl,v 1.84 2006-04-07 14:08:27 matben Exp $
 
 package require ITree
 
@@ -13,10 +13,10 @@ package provide Browse 1.0
 
 namespace eval ::Browse:: {
 
-    ::hooks::register jabberInitHook     ::Browse::NewJlibHook
-    ::hooks::register loginHook          ::Browse::LoginCmd
-    ::hooks::register logoutHook         ::Browse::LogoutHook
-    ::hooks::register presenceHook       ::Browse::PresenceHook
+    #::hooks::register jabberInitHook     ::Browse::NewJlibHook
+    #::hooks::register loginHook          ::Browse::LoginCmd
+    #::hooks::register logoutHook         ::Browse::LogoutHook
+    #::hooks::register presenceHook       ::Browse::PresenceHook
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
@@ -437,7 +437,7 @@ proc ::Browse::ErrorProc {silent browseName type jid errlist} {
 
 	switch -- $jprefs(serviceMethod) {
 	    disco {
-		::Agents::GetAll
+		#::Agents::GetAll
 	    }
 	    browse {
 		::Disco::DiscoServer $jserver(this)

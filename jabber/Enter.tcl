@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Enter.tcl,v 1.4 2005-12-04 13:29:11 matben Exp $
+# $Id: Enter.tcl,v 1.5 2006-04-07 14:08:27 matben Exp $
 
 package provide Enter 1.0
 
@@ -48,7 +48,7 @@ proc ::Enter::Build {protocol args} {
     } elseif {[info exists argsArr(-server)]} {
 	set service $argsArr(-server)
     }
-    set services [$jstate(jlib) service getconferences]
+    set services [$jstate(jlib) disco getconferences]
 
     ::Debug 2 "::Enter::Build services='$services'"
 
@@ -209,7 +209,7 @@ proc ::Enter::Build {protocol args} {
 	# Get a freash list each time.
 	BusyEnterDlgIncr $token
 	update idletasks
-	$jstate(jlib) service send_getchildren $state(server)  \
+	$jstate(jlib) disco send_get items $state(server)  \
 	  [list [namespace current]::GetRoomsCB $token]
     }
 
@@ -342,7 +342,7 @@ proc ::Enter::Browse {token} {
     upvar ::Jabber::jstate jstate
        
     BusyEnterDlgIncr $token
-    $jstate(jlib) service send_getchildren $state(server)  \
+    $jstate(jlib) disco send_get items $state(server)  \
       [list [namespace current]::GetRoomsCB $token]
 }
 
@@ -384,7 +384,8 @@ proc ::Enter::ConfigRoomList {token} {
     ::Debug 4 "::Enter::ConfigRoomList"
 
     # Fill in room list if exist else get.    
-    if {[$jstate(jlib) service isinvestigated $state(server)]} {
+    # @@@ Replace with 'disco get_async'
+    if {[$jstate(jlib) disco isdiscoed items $state(server)]} {
 	FillRoomList $token
     } else {
 	if {$state(-autobrowse)} {
@@ -405,7 +406,7 @@ proc ::Enter::FillRoomList {token} {
     
     set roomList {}
     if {[string length $state(server)]} {
-	set allRooms [$jstate(jlib) service childs $state(server)]
+	set allRooms [$jstate(jlib) disco children $state(server)]
 	foreach roomjid $allRooms {
 	    set idx [string first "@" $roomjid]
 	    if {$idx > 0} {
@@ -477,7 +478,7 @@ proc ::Enter::PrepDoEnter {token} {
     set state(roomjid) $roomjid
     
     if {$state(protocol) eq "muc"} {
-	set hasmuc [$jstate(jlib) service hasfeature $service $xmppxmlns(muc)]
+	set hasmuc [$jstate(jlib) disco hasfeature $xmppxmlns(muc) $service]
 	if {$hasmuc} {
 	    DoEnter $token
 	} else {

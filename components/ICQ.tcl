@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.8 2005-11-05 11:37:25 matben Exp $
+# $Id: ICQ.tcl,v 1.9 2006-04-07 14:08:26 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -51,7 +51,7 @@ proc ::ICQ::InvestigateRoster { } {
     
     set wtree  [::Roster::GetWtree]
     set server [::Jabber::GetServerJid]
-    set icqHosts [::Jabber::JlibCmd service gettransportjids "icq"]
+    set icqHosts [::Jabber::JlibCmd disco getjidsforcategory "gateway/icq"]
     
     ::Debug 4 "::ICQ::InvestigateRoster icqHosts=$icqHosts"
 

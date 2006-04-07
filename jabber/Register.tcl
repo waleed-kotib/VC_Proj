@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.43 2006-01-11 13:24:54 matben Exp $
+# $Id: Register.tcl,v 1.44 2006-04-07 14:08:28 matben Exp $
 
 package provide Register 1.0
 
@@ -1170,7 +1170,7 @@ proc ::GenRegister::NewDlg {args} {
     ttk::label $frserv.lserv -text "[mc {Service server}]:"
     
     # Get all (browsed) services that support registration.
-    set regServers [$jstate(jlib) service getjidsfor "register"]
+    set regServers [$jstate(jlib) disco getjidsforfeature "jabber:iq:register"]
     set wcomboserver $frserv.eserv
     ttk::combobox $wcomboserver -state readonly  \
       -textvariable $token\(server) -values $regServers
@@ -1436,7 +1436,7 @@ proc ::GenRegister::Simple {w args} {
     ttk::frame $wmid
     pack $wmid -side top -fill both -expand 1
     
-    set regServers [::Jabber::JlibCmd service getjidsfor "register"]
+    set regServers [::Jabber::JlibCmd disco getjidsforfeature "jabber:iq:register"]
 
     ttk::label $wmid.lserv -text "[mc {Service server}]:"
     ttk::combobox $wmid.combo -state readonly  \
