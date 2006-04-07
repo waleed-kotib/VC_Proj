@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.33 2006-03-09 10:40:32 matben Exp $
+# $Id: disco.tcl,v 1.34 2006-04-07 14:08:28 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -786,7 +786,7 @@ proc jlib::disco::getconferences {jlibname} {
     
     upvar ${jlibname}::disco::info info
 
-    return $info(conferences)
+    return [lsort -unique $info(conferences)]
 }
 
 # jlib::disco::isroom --

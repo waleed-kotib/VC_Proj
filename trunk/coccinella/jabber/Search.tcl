@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.21 2005-11-30 08:32:00 matben Exp $
+# $Id: Search.tcl,v 1.22 2006-04-07 14:08:28 matben Exp $
 
 package provide Search 1.0
 
@@ -103,7 +103,7 @@ proc ::Search::Build {args} {
     pack $wleft.foob -side bottom -fill x
     
     # Get all (browsed) services that support search.
-    set searchServ [::Jabber::JlibCmd service getjidsfor "search"]
+    set searchServ [::Jabber::JlibCmd disco getjidsforfeature "jabber:iq:search"]
     set wcomboserver $frtop.eserv
     set wbtget       $frtop.btget
     ttk::label    $frtop.lserv -text "[mc {Search Service}]:"

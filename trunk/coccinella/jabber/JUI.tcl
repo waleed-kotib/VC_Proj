@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.121 2006-04-06 12:47:40 matben Exp $
+# $Id: JUI.tcl,v 1.122 2006-04-07 14:08:28 matben Exp $
 
 package provide JUI 1.0
 
@@ -232,8 +232,8 @@ proc ::Jabber::UI::Show {w args} {
 
 # Jabber::UI::Build --
 #
-#       A combination tabbed window with roster/agents/browser...
-#       Must be persistant since roster/browser etc. are built once.
+#       A combination tabbed window with roster/disco...
+#       Must be persistant since roster/disco etc. are built once.
 #       
 # Arguments:
 #       w           toplevel path
@@ -763,10 +763,10 @@ proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
     
     switch -- $which {
 	agents {
-	    ::Agents::RegisterPopupEntry $menuSpec
+	    #::Agents::RegisterPopupEntry $menuSpec
 	}
 	browse {
-	    ::Browse::RegisterPopupEntry $menuSpec	    
+	    #::Browse::RegisterPopupEntry $menuSpec	    
 	}
 	roster {
 	    ::Roster::RegisterPopupEntry $menuSpec	    

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.73 2006-04-05 14:16:45 matben Exp $
+# $Id: MUC.tcl,v 1.74 2006-04-07 14:08:28 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -343,7 +343,7 @@ proc ::MUC::BuildInfo {roomjid} {
     }    
     set w $wDlgs(jmucinfo)[incr dlguid]
 
-    set roomName [$jstate(jlib) service name $roomjid]
+    set roomName [$jstate(jlib) disco name $roomjid]
     if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y
     }
@@ -827,7 +827,7 @@ proc ::MUC::EditListBuild {roomjid type} {
 
     set titleType [string totitle $type]
     set tblwidth [expr 10 + 12 * [llength $setListDefs($type)]]
-    set roomName [$jstate(jlib) service name $roomjid]
+    set roomName [$jstate(jlib) disco name $roomjid]
     if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y
     }
@@ -1504,7 +1504,7 @@ proc ::MUC::Destroy {roomjid} {
     ::UI::Toplevel $w \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::MUC::DestroyCloseCmd
-    set roomName [$jstate(jlib) service name $roomjid]
+    set roomName [$jstate(jlib) disco name $roomjid]
     if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y
     }

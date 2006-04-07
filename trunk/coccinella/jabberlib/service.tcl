@@ -6,7 +6,7 @@
 #       
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.21 2005-11-04 15:14:55 matben Exp $
+# $Id: service.tcl,v 1.22 2006-04-07 14:08:28 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -19,19 +19,12 @@
 #      
 #   INSTANCE COMMANDS
 #      jlibName service allroomsin
-#      jlibName service childs jid
 #      jlibName service exitroom room
 #      jlibName service isroom jid
-#      jlibName service getjidsfor aservice
-#      jlibName service gettransportjids aservice
-#      jlibName service gettype jid
 #      jlibName service hashandnick jid
-#      jlibName service hasfeature jid feature (xmlns)
 #      jlibName service nick jid
-#      jlibName service parent jid
 #      jlibName service register type name
 #      jlibName service roomparticipants room
-#      jlibName service send_getchildren jid cmd
 #      jlibName service setgroupchatpriority priorityList
 #      jlibName service setgroupchatprotocol jid protocol
 #      jlibName service setroomprotocol jid protocol
@@ -126,18 +119,6 @@ proc jlib::service::get {jlibname type} {
     }
 }
 
-proc jlib::service::send_getchildren {jlibname jid cmd} {
-    
-    upvar ${jlibname}::serv serv
-    upvar ${jlibname}::locals locals
-
-    # We must have a way to figure out which method to use!!!
-    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
-	$serv(browse,name) send_get $jid $cmd
-    } elseif {$serv(disco) && [$jlibname disco isdiscoed items $locals(server)]} {
-	$jlibname disco send_get items $jid $cmd
-    }
-}
 
 #-------------------------------------------------------------------------------
 #
@@ -194,17 +175,6 @@ proc jlib::service::setgroupchatprotocol {jlibname jid prot} {
 	    if {![info exists agent($jid,groupchat)]} {
 		return -code error  \
 		  "No groupchat agent registered for \"$jid\""
-	    }
-	}
-	conference {
-	    if {!$serv(browse)} {
-		return -code error \
-		  "there is no browse object associated with this jlib"
-	    }    
-	    set confServicesJids [$serv(browse,name) getconferenceservers]
-	    if {[lsearch -exact $confServicesJids $jid] < 0} {
-		return -code error \
-		  "The jid $jid does not know of any \"conference\" service"
 	    }
 	}
 	muc {
@@ -268,261 +238,6 @@ proc jlib::service::setroomprotocol {jlibname roomjid protocol} {
     set serv(roomprot,$roomjid) $protocol
 }
 
-proc jlib::service::isinvestigated {jlibname jid} {
-    
-    upvar ${jlibname}::serv serv
-
-    # Try to gather only positive results!
-    set ans 0
-    if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
-	set ans 1
-    } elseif {$serv(disco) && [$jlibname disco isdiscoed items $jid]} {
-	set ans 1
-    }
-    return $ans
-}
-   
-proc jlib::service::parent {jlibname jid} {    
-
-    upvar ${jlibname}::agent agent
-    upvar ${jlibname}::serv serv
-
-    # ???
-    if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
-	return [$serv(browse,name) getparentjid $jid]
-    } elseif {$serv(disco) && [$jlibname disco isdiscoed items $jid]} {
-	return [$jlibname disco parent $jid]
-    } else {
-	set jid [jlib::jidmap $jid]
-	if {[info exists agent($jid,parent)]} {
-	    return $agent($jid,parent)
-	} else {
-	    return -code error "Parent of \"$jid\" cannot be found"
-	}
-    }
-}
-
-proc jlib::service::childs {jlibname jid} {    
-
-    upvar ${jlibname}::agent agent
-    upvar ${jlibname}::serv serv
-
-    # ???
-    if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
-	return [$serv(browse,name) getchilds $jid]
-    } elseif {$serv(disco) && [$jlibname disco isdiscoed items $jid]} {
-	return [$jlibname disco children $jid]
-    } else {
-	set jid [jlib::jidmap $jid]
-	if {[info exists agent($jid,childs)]} {
-	    set agent($jid,childs) [lsort -unique $agent($jid,childs)]
-	    return $agent($jid,childs)
-	} else {
-	    return -code error "Childs of \"$jid\" cannot be found"
-	}
-    }
-}
-
-# jlib::service::getjidsfor --
-#
-#       Return a list of jid's that support any of "search", "register",
-#       "groupchat". Queries sent to both browser and agent.
-#       
-#       Problems with groupchat <--> conference Howto?
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       what:       "groupchat", "conference", "muc", "register", "search".
-#       
-# Results:
-#       list of jids supporting this service, possibly empty.
-
-proc jlib::service::getjidsfor {jlibname what} {
-
-    variable services
-    upvar ${jlibname}::agent agent
-    upvar ${jlibname}::serv serv
-    
-    if {[lsearch $services $what] < 0} {
-	return -code error "\"$what\" is not a recognized service"
-    }
-    set jids {}
-    
-    # Browse service if any.
-    if {$serv(browse)} {
-	set browseNS [$serv(browse,name) getservicesforns jabber:iq:${what}]
-	if {[llength $browseNS]} {
-	    set jids $browseNS
-	}
-	
-	switch -- $what {
-	    groupchat {
-		
-		# These server components support 'groupchat 1.0' as well.
-		# The 'jabber:iq:conference' seems to be lacking in many jabber.xml.
-		# Use 'getconferenceservers' as fallback.
-		set jids [concat $jids \
-		  [$serv(browse,name) getservicesforns jabber:iq:conference]]	    
-		set jids [concat $jids [$serv(browse,name) getconferenceservers]]
-		set jids [concat $jids [$serv(browse,name) getservicesforns  \
-		  "http://jabber.org/protocol/muc"]]
-	    }
-	    muc {
-		set jids [concat $jids [$serv(browse,name) getservicesforns  \
-		  "http://jabber.org/protocol/muc"]]
-	    }
-	}
-    }
-    
-    # Disco
-    if {$serv(disco)} {
-	set jidsdi [$jlibname disco getjidsforfeature jabber:iq:${what}]
-	
-	switch -- $what {
-	    groupchat - muc {
-		
-		# Rooms also return muc as feature; skip these!
-		#set jidsdi [concat $jidsdi [$serv(disco,name) getjidsforfeature \
-		#  "http://jabber.org/protocol/muc"]]
-		
-		set jidsdi [concat $jidsdi [$jlibname disco getconferences]]
-	    }
-	}
-	set jids [concat $jids $jidsdi]
-    }       
-    
-    # Agent service if any.
-    if {[info exists agent($what)] && [llength $agent($what)]} {
-	set agent($what) [lsort -unique $agent($what)]
-	set jids [concat $agent($what) $jids]
-    }
-    return [lsort -unique $jids]
-}
-
-proc jlib::service::getconferences {jlibname} {
-    
-    upvar ${jlibname}::serv serv
-
-    # Try to gather only positive results!
-    set jids {}
-    if {$serv(browse)} {
-	set jids [$serv(browse,name) getconferenceservers]
-    }
-    if {$serv(disco)} {
-	set jids [concat $jids [$jlibname disco getconferences]]
-    }
-    return [lsort -unique $jids]
-}
-
-proc jlib::service::hasfeature {jlibname jid xmlns} {
-
-    upvar ${jlibname}::serv serv
-
-    # Try to gather only positive results!
-    set ans 0
-    if {$serv(browse)} {
-	set ans [$serv(browse,name) hasnamespace $jid $xmlns]
-    } 
-    if {!$ans && $serv(disco) && [$jlibname disco isdiscoed info $jid]} {
-	set ans [$jlibname disco hasfeature $xmlns $jid]
-    }
-    return $ans
-}
-
-# jlib::service::gettransportjids --
-#
-#       Return a list of jid's that support a specific transport.
-#       Queries sent to both browser and agent.
-#       
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       what:       "*", "jabber", "icq", "msn", "yahoo", "aim",...
-#       
-# Results:
-#       list of jids supporting this service, possibly empty.
-
-proc jlib::service::gettransportjids {jlibname what} {
-
-    upvar ${jlibname}::agent agent
-    upvar ${jlibname}::serv serv
-
-    set jids {}
-    
-    # Browse service if any.
-    if {$serv(browse)} {
-	set jids [concat $jids \
-	  [$serv(browse,name) getalljidfortypes "service/$what"]]
-    }
-    if {$serv(disco)} {
-	
-	# The Jabber registrar defines the type/subtype for all
-	# categories. The actual server is "server/im".
-	set jids [concat $jids \
-	  [$jlibname disco getjidsforcategory "gateway/$what"]]
-    }
-
-    # Agent service if any.
-    foreach key [array names agent "*,service"] {
-	if {[string equal $agent($key) $what] || ($what eq "*")} {
-	    lappend jids [string map {,service ""} $key]
-	}
-    }
-    return [lsort -unique $jids]
-}
-
-# jlib::service::gettype --
-# 
-#       Returns the 'type/subtype' for this jid if any.
-#       
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       jid:
-#       
-# Results:
-#       type/subtype, possibly empty.
-
-proc jlib::service::gettype {jlibname jid} {
-
-    upvar ${jlibname}::agent agent
-    upvar ${jlibname}::serv serv
-
-    set type ""
-    
-    # Browse service if any. Returns 'service/icq' etc.
-    if {$serv(browse)} {
-	set type [$serv(browse,name) gettype $jid]
-    }
-    if {$serv(disco) && [$jlibname disco isdiscoed info $jid]} {
-	set type [lindex [$jlibname disco types $jid] 0]
-    }
-    set jid [jlib::jidmap $jid]
-    if {[info exists agent($jid,service)]} {
-	set type "service/$agent($jid,service)"
-    }
-    return $type
-}
-
-# jlib::service::name --
-# 
-#       Return any name attribute for jid.
-
-proc jlib::service::name {jlibname jid} {    
-
-    upvar ${jlibname}::serv serv
-    upvar ${jlibname}::lib lib
-    
-    # Check if domain name supports the 'groupchat' service.
-    set name ""
-    # ????????
-    if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
-	set name [$serv(browse,name) getname $jid]
-    }
-    if {$serv(disco) && [$jlibname disco isdiscoed info $jid]} {
-	set name [$jlibname disco name $jid]
-    }
-    return $name
-}
-
 # jlib::service::isroom --
 # 
 #       Try to figure out if the jid is a room.
@@ -531,7 +246,6 @@ proc jlib::service::name {jlibname jid} {
 
 proc jlib::service::isroom {jlibname jid} {    
 
-    upvar ${jlibname}::agent agent
     upvar ${jlibname}::serv serv
     upvar ${jlibname}::locals locals
     
@@ -549,11 +263,6 @@ proc jlib::service::isroom {jlibname jid} {
     }
     if {!$isroom} {
 	set isroom [jlib::groupchat::isroom $jlibname $jid]
-    }
-    if {!$isroom && [regexp {^[^@]+@([^@ ]+)$} $jid match domain]} {
-	if {[info exists agent($domain,groupchat)]} {
-	    set isroom 1
-	}
     }
     return $isroom
 }
@@ -604,14 +313,6 @@ proc jlib::service::nick {jlibname jid} {
 	    # The MUC conference method: nick is always the resource part. 
 	    jlib::splitjid $jid x nick
 	}	
-	conference {
-	    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
-		
-		# Assume that if the login server is browsed we also should query
-		# the browse object.
-		set nick [$serv(browse,name) getname $jid]
-	    }
-	}
     }
     return $nick
 }
@@ -655,12 +356,6 @@ proc jlib::service::hashandnick {jlibname room} {
 		set hashandnick [list ${room}/${nick} $nick]   
 	    }
 	} 
-	conference {
-	    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
-		set hashandnick  \
-		  [[namespace parent]::conference::hashandnick $jlibname $room]
-	    }
-	}
     }
     
     return $hashandnick
@@ -707,11 +402,6 @@ proc jlib::service::roomparticipants {jlibname room} {
 	muc {
 	    set everyone [$jlibname muc participants $room]
 	}
-	conference {
-	    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
-		set everyone [$serv(browse,name) getchilds $room]
-	    }
-	}
     }
     return $everyone
 }
@@ -734,11 +424,6 @@ proc jlib::service::exitroom {jlibname room} {
 	}
 	muc {
 	    $jlibname muc exit $room
-	}
-	conference {
-	    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
-		[namespace parent]::conference::exit $jlibname $room
-	    }
 	}
     }
 }

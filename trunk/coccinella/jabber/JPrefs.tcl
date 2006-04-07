@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.34 2005-11-02 12:54:09 matben Exp $
+# $Id: JPrefs.tcl,v 1.35 2006-04-07 14:08:27 matben Exp $
 
 package require ui::fontselector
 
@@ -42,9 +42,6 @@ proc ::JPrefs::InitPrefsHook { } {
     # Save inbox when quit?
     set jprefs(inboxSave) 0
     
-    # Service discovery method: "disco", "agents" or "browse"
-    #set jprefs(serviceMethod) "browse"
-    set jprefs(serviceMethod) "disco"
     set jprefs(autoLogin) 0
     
     # List of additional servers to automatically disco.
@@ -93,17 +90,12 @@ proc ::JPrefs::InitPrefsHook { } {
     }
     ::PrefUtils::Add $jprefsRegList
     
-    # We add 'serviceMethod' with a 'serviceMethod2' key so we ignore any 
-    # existing installations. This is our new default. 
-    # Change back in the future.
-
     ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $jprefs(chatFont)]  \
       [list ::Jabber::jprefs(chat,tabbedui)    jprefs_chat_tabbedui     $jprefs(chat,tabbedui)]  \
       [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $jprefs(inboxSave)]  \
       [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
       [list ::Jabber::jprefs(rost,bgImagePath) jprefs_rost_bgImagePath  $jprefs(rost,bgImagePath)]  \
-      [list ::Jabber::jprefs(serviceMethod)    jprefs_serviceMethod2    $jprefs(serviceMethod)]  \
       [list ::Jabber::jprefs(autoLogin)        jprefs_autoLogin         $jprefs(autoLogin)]  \
       [list ::Jabber::jprefs(disco,autoServers)  jprefs_disco_autoServers  $jprefs(disco,autoServers)]  \
       [list ::Jabber::jprefs(rememberDialogs)  jprefs_rememberDialogs   $jprefs(rememberDialogs)]  \
@@ -397,7 +389,7 @@ proc ::JPrefs::BuildCustomPage {page} {
     variable tmpPrefs
     upvar ::Jabber::jprefs jprefs
         
-    foreach key {inboxSave rost,useBgImage rost,bgImagePath serviceMethod \
+    foreach key {inboxSave rost,useBgImage rost,bgImagePath  \
       autoLogin notifier,state rememberDialogs} {
 	if {[info exists jprefs($key)]} {
 	    set tmpJPrefs($key) $jprefs($key)
@@ -422,18 +414,6 @@ proc ::JPrefs::BuildCustomPage {page} {
 	ttk::checkbutton $wcu.not -text  "Show notfier window" \
 	  -variable [namespace current]::tmpJPrefs(notifier,state)
     }
-    ttk::separator $wcu.sep -orient horizontal    
-    
-    ttk::label $wcu.lserv -text [mc prefcudisc]
-    ttk::radiobutton $wcu.disco  \
-      -text [mc {Disco method}]  \
-      -variable [namespace current]::tmpJPrefs(serviceMethod) -value "disco"
-    ttk::radiobutton $wcu.browse   \
-      -text [mc prefcubrowse]  \
-      -variable [namespace current]::tmpJPrefs(serviceMethod) -value "browse"
-    ttk::radiobutton $wcu.agents  \
-      -text [mc prefcuagent] -value "agents" \
-      -variable [namespace current]::tmpJPrefs(serviceMethod)
     
     grid  $wcu.savein  -sticky w
     grid  $wcu.log     -sticky w
@@ -441,11 +421,6 @@ proc ::JPrefs::BuildCustomPage {page} {
     if {[string equal $this(platform) "windows"]} {
 	grid  $wcu.not  -sticky w
     }
-    grid  $wcu.sep    -sticky ew -pady 6
-    grid  $wcu.lserv  -sticky w
-    grid  $wcu.disco  -sticky w
-    grid  $wcu.browse -sticky w
-    grid  $wcu.agents -sticky w
     
     pack  $wcu  -side top -fill x
 }

@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.44 2006-01-12 11:03:17 matben Exp $
+# $Id: Conference.tcl,v 1.45 2006-04-07 14:08:27 matben Exp $
 
 package provide Conference 1.0
 
@@ -232,7 +232,7 @@ proc ::Conference::ConfigRoomList {token name junk1 junk2} {
 	FillRoomList $token
     } else {
 	BusyEnterDlgIncr $token
-	$jstate(jlib) service send_getchildren $state(server)  \
+	$jstate(jlib) disco send_get items $state(server)  \
 	  [list [namespace current]::GetRoomsCB $token]
     }
 }
@@ -246,7 +246,7 @@ proc ::Conference::FillRoomList {token} {
     
     set roomList {}
     if {[string length $state(server)] > 0} {
-	set allRooms [$jstate(jlib) service childs $state(server)]
+	set allRooms [$jstate(jlib) disco children $state(server)]
 	foreach roomjid $allRooms {
 	    jlib::splitjidex $roomjid room x x
 	    lappend roomList $room
@@ -460,7 +460,7 @@ proc ::Conference::BuildCreate {args} {
     set state(w)              $w
     set state(wraplength)     300
     
-    set confServers [$jstate(jlib) service getconferences]
+    set confServers [$jstate(jlib) disco getconferences]
     if {$confServers == {}} {
 	set serviceList [list [mc {No Available}]]
     } else {
@@ -617,7 +617,7 @@ proc ::Conference::CreateSetState {token} {
     upvar ::Jabber::xmppxmlns xmppxmlns
      
     if {$jprefs(prefgchatproto) == "muc"} {
-	set muc [$jstate(jlib) service hasfeature $state(server) $xmppxmlns(muc)]
+	set muc [$jstate(jlib) disco hasfeature $xmppxmlns(muc) $state(server)]
 	set state(usemuc) $muc
 	if {$muc} {
 	    $state(wbtcreate) state {!disabled}
@@ -667,7 +667,7 @@ proc ::Conference::CreateGet {token} {
     # Figure out if 'conference' or 'muc' protocol.
     if {$jprefs(prefgchatproto) eq "muc"} {
 	set state(usemuc)  \
-	  [$jstate(jlib) service hasfeature $state(server) $xmppxmlns(muc)]
+	  [$jstate(jlib) disco hasfeature $xmppxmlns(muc) $state(server)]
     } else {
 	set state(usemuc) 0
     }

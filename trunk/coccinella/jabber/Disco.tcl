@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.82 2006-03-20 14:37:17 matben Exp $
+# $Id: Disco.tcl,v 1.83 2006-04-07 14:08:27 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -186,13 +186,8 @@ proc ::Disco::LoginHook { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
     
-    # Get the services for all our servers on the list. Depends on our settings:
-    # If disco fails must use "browse" or "agents" as a fallback.
-    #
     # We disco servers jid 'items+info', and disco its childrens 'info'.
-    if {[string equal $jprefs(serviceMethod) "disco"]} {
-	DiscoServer $jserver(this)
-    }
+    DiscoServer $jserver(this)
 }
 
 proc ::Disco::LogoutHook { } {
@@ -354,18 +349,7 @@ proc ::Disco::ItemsCB {cmd jlibname type from subiq args} {
     
     if {[string equal $type "error"]} {
 	
-	# As a fallback we use the agents/browse method instead.
-	if {[jlib::jidequal $from $jserver(this)]} {
-	    
-	    switch -- $jprefs(serviceMethod) {
-		disco {
-		    ::Browse::GetAll
-		}
-		browse {
-		    ::Agents::GetAll
-		}
-	    }
-	}
+	# We have no fallback.
 	::Jabber::AddErrorLog $from "Failed disco $from"
 	AddServerErrorCheck $from
 	catch {$wwave animate -1}

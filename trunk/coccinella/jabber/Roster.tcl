@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.164 2006-03-14 07:18:59 matben Exp $
+# $Id: Roster.tcl,v 1.165 2006-04-07 14:08:28 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -1120,7 +1120,7 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     if {![string equal $host $jserver(this)]} {
 	
 	# If empty we have likely not yet browsed etc.
-	set cattype [$jstate(jlib) service gettype $host]
+	set cattype [lindex [$jstate(jlib) disco types $host] 0]
 	set subtype [lindex [split $cattype /] 1]
 	if {[lsearch -exact [::Rosticons::GetTypes] $subtype] >= 0} {
 	    set itype $subtype
@@ -1328,8 +1328,8 @@ proc ::Roster::GetAllTransportJids { } {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     
-    set alltrpts [$jstate(jlib) service gettransportjids *]
-    set jabbjids [$jstate(jlib) service gettransportjids jabber]
+    set alltrpts [$jstate(jlib) disco getjidsforcategory "gateway/*"]
+    set jabbjids [$jstate(jlib) disco getjidsforcategory "gateway/jabber"]
     
     # Exclude jabber services and login server.
     foreach jid $jabbjids {
@@ -1346,10 +1346,9 @@ proc ::Roster::GetTransportNames {token} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
-    # We must be indenpendent of method; agent, browse, disco
     set trpts {}
     foreach subtype $allTransports {
-	set jids [$jstate(jlib) service gettransportjids $subtype]
+	set jids [$jstate(jlib) disco getjidsforcategory "gateway/$subtype"]
 	if {[llength $jids]} {
 	    lappend trpts $subtype
 	    set state(servicejid,$subtype) [lindex $jids 0]

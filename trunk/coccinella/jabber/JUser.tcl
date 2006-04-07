@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.15 2005-09-19 06:37:21 matben Exp $
+# $Id: JUser.tcl,v 1.16 2006-04-07 14:08:28 matben Exp $
 
 package provide JUser 1.0
 
@@ -356,7 +356,7 @@ proc ::Jabber::User::EditTransportDlg {jid} {
     }
     set subscription [$jstate(roster) getsubscription $jid3]
     jlib::splitjidex $jid node host x
-    set trpttype [$jstate(jlib) service gettype $host]
+    set trpttype [lindex [$jstate(jlib) disco types $host] 0]
     set subtype [lindex [split $trpttype /] 1]
     set typename [::Roster::GetNameFromTrpt $subtype]
     set msg [mc jamessowntrpt $typename $jid3 $subscription]
@@ -438,7 +438,7 @@ proc ::Jabber::User::EditUserDlg {jid} {
     set state(unsubscribe) $unsubscribe
     if {$istransport} {
 	jlib::splitjidex $jid node host res
-	set trpttype [$jstate(jlib) service gettype $host]
+	set trpttype [lindex [$jstate(jlib) disco types $host] 0]
 	set subtype [lindex [split $trpttype /] 1]
 	set msg [mc jamessowntrpt $subtype $jid $subscription]
     } else {
