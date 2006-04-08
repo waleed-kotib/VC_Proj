@@ -1,18 +1,16 @@
 # service.tcl --
 #
-#       This is an abstraction layer for two things; the agent/browse/disco
-#       protocols, and for the groupchat protocols gc-1.0/conference/muc.
+#       This is an abstraction layer for groupchat protocols gc-1.0/muc.
 #       All except disco/muc are EOL!
 #       
-#  Copyright (c) 2004-2005  Mats Bengtsson
+#  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.23 2006-04-08 07:02:48 matben Exp $
+# $Id: service.tcl,v 1.24 2006-04-08 11:02:13 matben Exp $
 # 
 ############################# USAGE ############################################
 #
 #   NAME
-#      service - protocol independent methods for groupchats/conference/muc,
-#                agents/browse/disco
+#      service - protocol independent methods for groupchats/muc
 #                
 #   SYNOPSIS
 #      jlib::service::init jlibName
@@ -35,7 +33,7 @@
 #	serv(gcProtoPriority)      : The groupchat protocol priority list.                             
 #	                             
 #       serv(gcprot,$jid)          : Map a groupchat service jid to protocol:
-#       	                     (gc-1.0|conference|muc)
+#       	                     (gc-1.0|muc)
 #
 #       serv(prefgcprot,$jid)      : Stores preferred groupchat protocol that
 #                                    overrides the priority list.
@@ -50,15 +48,14 @@ namespace eval jlib { }
 
 namespace eval jlib::service {
     
-    # This is an abstraction layer for two things; the agent/browse/(disco?)
-    # protocols, and for the groupchat protocols gc-1.0/conference/muc.
+    # This is an abstraction layer for the groupchat protocols gc-1.0/muc.
     
     # Cache the following services in particular.
     variable services {search register groupchat conference muc}    
 
     # Maintain a priority list of groupchat protocols in decreasing priority.
-    # Entries must match: ( gc-1.0 | conference | muc )
-    variable groupchatTypeExp {(gc-1.0|conference|muc)}
+    # Entries must match: ( gc-1.0 | muc )
+    variable groupchatTypeExp {(gc-1.0|muc)}
 }
 
 proc jlib::service {jlibname cmd args} {
@@ -74,8 +71,6 @@ proc jlib::service::init {jlibname} {
 
     # Init defaults.
     array set serv {
-	agent    1
-	browse   0
 	disco    0
 	muc      0
     }
@@ -192,9 +187,6 @@ proc jlib::service::isroom {jlibname jid} {
     # Check if domain name supports the 'groupchat' service.
     # disco uses explicit children of conference, and muc cache
     set isroom 0
-    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
-	set isroom [$serv(browse,name) isroom $jid]
-    }
     if {!$isroom && $serv(disco) && [$jlibname disco isdiscoed info $locals(server)]} {
 	set isroom [$jlibname disco isroom $jid]
     }
@@ -312,8 +304,7 @@ proc jlib::service::allroomsin {jlibname} {
     upvar ${jlibname}::serv serv
 
     set roomList [concat $gchat(allroomsin) \
-      [[namespace parent]::muc::allroomsin $jlibname] \
-      [[namespace parent]::conference::allroomsin $jlibname]]
+      [[namespace parent]::muc::allroomsin $jlibname]]
     if {$serv(muc)} {
 	set roomList [concat $roomList [$jlibname muc allroomsin]]
     }
