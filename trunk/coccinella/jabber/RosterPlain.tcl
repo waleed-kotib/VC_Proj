@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.12 2006-04-07 14:08:28 matben Exp $
+# $Id: RosterPlain.tcl,v 1.13 2006-04-08 07:02:48 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -41,7 +41,6 @@ namespace eval ::RosterPlain {
     
     # Only if this style is in use!!!
     # These are needed to handle foreign IM systems.
-    ::hooks::register  browseSetHook        ::RosterPlain::BrowseSetHook
     ::hooks::register  discoInfoHook        ::RosterPlain::DiscoInfoHook
     ::hooks::register  rosterTreeConfigure  ::RosterPlain::TreeConfigureHook
 
@@ -472,24 +471,10 @@ proc ::RosterPlain::TreeConfigureHook {args} {
 # Handle foreign IM system icons.
 #
 
-# RosterPlain::BrowseSetHook, DiscoInfoHook --
+# RosterPlain::DiscoInfoHook --
 # 
 #       It is first when we have obtained either browse or disco info it is
 #       possible to set icons of foreign IM users.
-
-proc ::RosterPlain::BrowseSetHook {from subiq} {
-    variable rosterStyle
-    upvar ::Jabber::jserver jserver
-    
-    if {[::RosterTree::GetStyle] ne $rosterStyle} {
-	return
-    }
-    
-    # Fix icons of foreign IM systems.
-    if {![jlib::jidequal $from $jserver(this)]} {
-	PostProcess browse $from
-    }
-}
 
 proc ::RosterPlain::DiscoInfoHook {type from subiq args} {
     variable rosterStyle

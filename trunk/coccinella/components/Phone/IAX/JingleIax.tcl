@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.10 2006-03-27 10:06:49 antoniofcano Exp $
+# $Id: JingleIax.tcl,v 1.11 2006-04-08 07:02:48 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -114,7 +114,7 @@ proc ::JingleIAX::LoginHook { } {
 
     InitState
 
-    ::Jabber::UI::RegisterPopupEntry roster $popMenuDef(call) 
+    ::Roster::RegisterPopupEntry $popMenuDef(call) 
 }
 
 proc ::JingleIAX::LogoutHook { } {

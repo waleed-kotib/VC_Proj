@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.160 2006-04-07 14:08:28 matben Exp $
+# $Id: Jabber.tcl,v 1.161 2006-04-08 07:02:48 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -19,7 +19,6 @@ package require wavelabel
 # jlib components shall be declared here, or later.
 package require jlib
 package require roster
-package require browse
 package require jlib::bytestreams
 package require jlib::disco
 package require jlib::ftrans
@@ -30,9 +29,8 @@ package require jlib::vcard
 
 # We should have some component mechanism that lets packages load themselves.
 package require Avatar
-package require Browse
 package require Chat
-package require Conference
+package require Create
 package require Disco
 package require Emoticons
 package require FTrans
@@ -438,7 +436,7 @@ proc ::Jabber::IsConnected { } {
     return [expr [string length $jserver(this)] == 0 ? 0 : 1]
 }
 
-# Jabber::RosterCmd, BrowseCmd --
+# Jabber::RosterCmd --
 # 
 #       Access functions for invoking these commands from the outside.
 
@@ -446,12 +444,6 @@ proc ::Jabber::RosterCmd {args}  {
     variable jstate
     
     eval {$jstate(roster)} $args
-}
-
-proc ::Jabber::BrowseCmd {args}  {
-    variable jstate
-    
-    eval {$jstate(browse)} $args
 }
 
 proc ::Jabber::DiscoCmd {args}  {
@@ -509,11 +501,7 @@ proc ::Jabber::Init { } {
     # Register handlers for various iq elements.
     $jlibname iq_register get jabber:iq:version    ::Jabber::ParseGetVersion
     $jlibname iq_register get $coccixmlns(servers) ::Jabber::ParseGetServers
-    
-    # Set the priority order of groupchat protocols.
-    $jlibname service setgroupchatpriority  \
-      [list $jprefs(prefgchatproto) "gc-1.0"]
-    
+        
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Jabber::UI::Show $wDlgs(jmain)
 	set jstate(haveJabberUI) 1

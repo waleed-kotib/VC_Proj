@@ -4,7 +4,7 @@
 #       
 #       Contributions and testing by Antonio Cano damas
 #       
-# $Id: JivePhone.tcl,v 1.19 2006-02-21 08:40:59 matben Exp $
+# $Id: JivePhone.tcl,v 1.20 2006-04-08 07:02:48 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -217,7 +217,7 @@ proc ::JivePhone::WeHavePhone { } {
     if {$state(setui)} {
 	return
     }
-    ::Jabber::UI::RegisterPopupEntry roster $popMenuDef(call)
+    ::Roster::RegisterPopupEntry $popMenuDef(call)
     ::Jabber::UI::RegisterMenuEntry  jabber $menuDef
     
     set image [::Rosticons::Get [string tolower phone/available]]
@@ -328,7 +328,7 @@ proc ::JivePhone::MessageHook {body args} {
 	    if {$type eq "RING" } {
 		set callID [wrapper::getattribute $elem "callID"]
 
-		::Jabber::UI::RegisterPopupEntry roster $popMenuDef(forward)
+		::Roster::RegisterPopupEntry $popMenuDef(forward)
 		bind $win <Button-1> [list ::JivePhone::DoDial "FORWARD"]
 		::balloonhelp::balloonforwindow $win [mc phoneMakeForward]
 		eval {::hooks::run jivePhoneEvent $type $cid $callID} $args

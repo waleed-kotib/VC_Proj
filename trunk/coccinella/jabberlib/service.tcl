@@ -6,7 +6,7 @@
 #       
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.22 2006-04-07 14:08:28 matben Exp $
+# $Id: service.tcl,v 1.23 2006-04-08 07:02:48 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -25,8 +25,6 @@
 #      jlibName service nick jid
 #      jlibName service register type name
 #      jlibName service roomparticipants room
-#      jlibName service setgroupchatpriority priorityList
-#      jlibName service setgroupchatprotocol jid protocol
 #      jlibName service setroomprotocol jid protocol
 #      jlibName service unregister type name
 # 
@@ -83,8 +81,8 @@ proc jlib::service::init {jlibname} {
     }
 	    
     # Maintain a priority list of groupchat protocols in decreasing priority.
-    # Entries must match: ( gc-1.0 | conference | muc )
-    set serv(gcProtoPriority) {muc conference gc-1.0}
+    # Entries must match: ( gc-1.0 | muc )
+    set serv(gcProtoPriority) {muc gc-1.0}
 }
 
 # jlib::service::register --
@@ -129,64 +127,6 @@ proc jlib::service::get {jlibname type} {
 
 # Needs some more verification before using it for a dispatcher.
 
-# jlib::service::setgroupchatpriority --
-# 
-#       Sets the list if groupchat protocols in decreasing priority.
-#       The list contains elements 'gc-1.0', 'conference', 'muc',
-#       describing which to pick if multiple options.
-
-proc jlib::service::setgroupchatpriority {jlibname priorityList} {
-
-    variable groupchatTypeExp
-    upvar ${jlibname}::serv serv
-
-    foreach prot $priorityList {
-	if {![regexp $groupchatTypeExp $prot]} {
-	    return -code error "Unrecognized groupchat type \"$prot\""
-	}
-    }
-    set serv(gcProtoPriority) $priorityList
-}
-
-# jlib::service::setgroupchatprotocol --
-# 
-#       Explicitly picks a groupchat protocol to use for a groupchat service.
-#       
-# Arguments:
-#       jlibname
-#       jid
-#       prot        any of 'gc-1.0', 'conference', 'muc'.
-#
-# Results:
-#       None.
-
-proc jlib::service::setgroupchatprotocol {jlibname jid prot} {
-
-    variable groupchatTypeExp
-    upvar ${jlibname}::agent agent
-    upvar ${jlibname}::serv serv
-
-    set jid [jlib::jidmap $jid]
-    if {![regexp $groupchatTypeExp $prot]} {
-	return -code error "Unrecognized groupchat type \"$prot\""
-    }
-    switch -- $prot {
-	gc-1.0 {
-	    if {![info exists agent($jid,groupchat)]} {
-		return -code error  \
-		  "No groupchat agent registered for \"$jid\""
-	    }
-	}
-	muc {
-	    if {![$serv(browse,name) hasnamespace $jid  \
-	      "http://jabber.org/protocol/muc"]} {
-		return -code error \
-		  "The jid \"$jid\" does not know of any \"muc\" service"
-	    }
-	}
-    }
-    set serv(prefgcprot,$jid) $prot
-}
 
 # jlib::service::registergcprotocol --
 # 
