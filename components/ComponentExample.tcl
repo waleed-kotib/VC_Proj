@@ -21,7 +21,7 @@ proc ::ComponentExample::Init { } {
     ::UI::Public::RegisterMenuEntry file $menuspec
     ::Jabber::UI::RegisterMenuEntry jabber $menuspec
     ::Jabber::UI::RegisterMenuEntry file $menuspec
-    ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
+    ::Roster::RegisterPopupEntry $popMenuSpec
     
     
     set xmlnsj "http://jabber.org/protocol/jingle"

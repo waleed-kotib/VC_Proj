@@ -19,6 +19,7 @@ Coccinella-0.95.12 (0604??):
  o added switch for storing prefs on usb stick etc.
  o toggle chat history
  o tabbed groupchats
+ o removed all old agents/browse/conference code
 
 Coccinella-0.95.11 (060115):
 

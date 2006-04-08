@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.122 2006-04-07 14:08:28 matben Exp $
+# $Id: JUI.tcl,v 1.123 2006-04-08 07:02:48 matben Exp $
 
 package provide JUI 1.0
 
@@ -751,25 +751,6 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
 	    set imd [::Theme::GetImage [option get $w inboxLetterDisImage {}]]
 	    $jwapp(wtbar) buttonconfigure inbox  \
 	      -image $im -disabledimage $imd
-	}
-    }
-}
-
-# Jabber::UI::RegisterPopupEntry --
-# 
-#       Lets plugins/components register their own menu entry.
-
-proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
-    
-    switch -- $which {
-	agents {
-	    #::Agents::RegisterPopupEntry $menuSpec
-	}
-	browse {
-	    #::Browse::RegisterPopupEntry $menuSpec	    
-	}
-	roster {
-	    ::Roster::RegisterPopupEntry $menuSpec	    
 	}
     }
 }

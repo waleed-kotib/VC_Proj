@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.9 2006-04-07 14:08:26 matben Exp $
+# $Id: ICQ.tcl,v 1.10 2006-04-08 07:02:48 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -14,7 +14,6 @@ proc ::ICQ::Init { } {
     ::Debug 2 "::ICQ::Init"
     
     # Add all hooks we need.
-    ::hooks::register browseSetHook          ::ICQ::BrowseSetHook
     ::hooks::register discoInfoHook          ::ICQ::DiscoInfoHook
     ::hooks::register logoutHook             ::ICQ::LogoutHook
     
@@ -23,17 +22,6 @@ proc ::ICQ::Init { } {
 
     # Cache for vCard nickname.
     variable vcardnick
-}
-
-
-proc ::ICQ::BrowseSetHook {from subiq} {
-
-    ::Debug 4 "::ICQ::BrowseSetHook from=$from"
-
-    set server [::Jabber::GetServerJid]
-    if {[jlib::jidequal $from $server]} {
-	InvestigateRoster
-    }
 }
 
 proc ::ICQ::DiscoInfoHook {type from subiq args} {

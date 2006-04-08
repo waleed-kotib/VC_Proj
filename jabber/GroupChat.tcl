@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.141 2006-04-07 14:08:27 matben Exp $
+# $Id: GroupChat.tcl,v 1.142 2006-04-08 07:02:48 matben Exp $
 
 package require Enter
 package require History
@@ -184,60 +184,6 @@ proc ::GroupChat::QuitAppHook { } {
     ::UI::SaveWinPrefixGeom $wDlgs(jgc)
 }
 
-# GroupChat::AllConference --
-#
-#       Returns 1 only if all services that provided groupchat also support
-#       the 'jabber:iq:conference' protocol. This is implicitly obtained
-#       by obtaining version number for the conference component. UGLY!!!
-
-proc ::GroupChat::AllConference { } {
-    upvar ::Jabber::jstate jstate
-
-    set anyNonConf 0
-    foreach jid [$jstate(jlib) disco getconferences] {
-	if {[info exists jstate(conference,$jid)] &&  \
-	  ($jstate(conference,$jid) == 0)} {
-	    set anyNonConf 1
-	    break
-	}
-    }
-    if {$anyNonConf} {
-	return 0
-    } else {
-	return 1
-    }
-}
-
-# GroupChat::HaveOrigConference --
-#
-#       Ad hoc method for finding out if possible to use the original
-#       jabber:iq:conference method. Requires jabber:iq:browse
-
-proc ::GroupChat::HaveOrigConference {{service ""}} {
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
-
-    set ans 0
-    if {$service eq ""} {
-	if {[::Browse::HaveBrowseTree $jserver(this)] && [AllConference]} {
-	    set ans 1
-	}
-    } else {
-	
-	# Require that conference service browsed and that we have the
-	# original jabber:iq:conference
-	if {[info exists jstate(browse)]} {
-	    if {[$jstate(browse) isbrowsed $service]} {
-		if {[info exists jstate(conference,$service)] && \
-		  $jstate(conference,$service)} {
-		    set ans 1
-		}
-	    }
-	}
-    }
-    return $ans
-}
-
 # GroupChat::HaveMUC --
 # 
 #       Should perhaps be in jlib service part.
@@ -274,11 +220,8 @@ proc ::GroupChat::HaveMUC {{jid ""}} {
 
 # GroupChat::EnterOrCreate --
 #
-#       Dispatch entering or creating a room to either 'groupchat' (gc-1.0), 
-#       'conference', or 'muc' methods depending on preferences.
-#       The 'conference' method requires jabber:iq:browse and 
-#       jabber:iq:conference.
-#       The 'muc' method uses either jabber:iq:browse or disco.
+#       Dispatch entering or creating a room to either 'groupchat' (gc-1.0)
+#       or 'muc' methods.
 #       
 # Arguments:
 #       what        'enter' or 'create'
@@ -306,13 +249,7 @@ proc ::GroupChat::EnterOrCreate {what args} {
     if {[info exists argsArr(-protocol)]} {
 	set protocol $argsArr(-protocol)
     } else {
-	
-	# Preferred groupchat protocol (gc-1.0|muc).
-	# Consistency checking.
-	if {![regexp {(gc-1.0|muc)} $jprefs(prefgchatproto)]} {
-	    set jprefs(prefgchatproto) "muc"
-	}
-	set protocol $jprefs(prefgchatproto)
+	set protocol "muc"
 	if {$service ne ""} {
 	    if {($protocol eq "muc") && ![HaveMUC $service]} {
 		set protocol "gc-1.0"
@@ -330,29 +267,8 @@ proc ::GroupChat::EnterOrCreate {what args} {
 	    set ans [eval {BuildEnter} $args]
 	}
 	create,muc {
-	    # @@@ This should go in a new place...
-	    set ans [eval {::Conference::BuildCreate} $args]
+	    set ans [eval {::Create::Build} $args]
 	}
-	xxxxx {
-	    ##### OUTDATED #####
-	}
-	*,gc-1.0 {
-	    set ans [eval {BuildEnter} $args]
-	}
-	OUTDATED-enter,conference {
-	    set ans [eval {::Conference::BuildEnter} $args]
-	}
-	OUTDATED-create,conference {
-	    set ans [eval {::Conference::BuildCreate} $args]
-	}
-	enter,muc {
-	    set ans [eval {::Enter::Build $protocol} $args]
-	}
-	enter,* {
-	    
-	    # This is typically a service on a nondiscovered server.
-	    set ans [eval {::Enter::Build $protocol} $args]
-	}	    
 	default {
 	    ::ui::dialog -icon error -message [mc jamessnogroupchat]
 	}
@@ -2464,36 +2380,6 @@ proc ::GroupChat::InsertPresenceChange {chattoken presence jid3 args} {
     }
 }
 
-# GroupChat::BrowseUser --
-#
-#       This is a <user> element. Gets called for each <user> element
-#       in the jabber:iq:browse set or result iq element.
-#       Only called if have conference/browse stuff for this service.
-
-proc ::GroupChat::BrowseUser {userXmlList} {
-    
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::GroupChat::BrowseUser userXmlList='$userXmlList'"
-
-    array set argsArr [lindex $userXmlList 1]
-    
-    # Direct it to the correct room. 
-    set jid $argsArr(jid)
-    set parentList [$jstate(browse) getparents $jid]
-    set parent [lindex $parentList end]
-    
-    # Do something only if joined that room.
-    if {[$jstate(jlib) service isroom $parent] &&  \
-      ([lsearch [$jstate(jlib) conference allroomsin] $parent] >= 0)} {
-	if {[info exists argsArr(type)] && [string equal $argsArr(type) "remove"]} {
-	    RemoveUser $parent $jid
-	} else {
-	    SetUser $parent $jid {}
-	}
-    }
-}
-
 proc ::GroupChat::AddUsers {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -3188,9 +3074,6 @@ proc ::GroupChat::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     
     # Defaults...    
-    # Preferred groupchat protocol (gc-1.0|muc).
-    # 'muc' uses 'conference' as fallback.
-    set jprefs(prefgchatproto)  "muc"
     set jprefs(defnick)         ""
     set jprefs(gchat,syncPres)  0
     
@@ -3198,7 +3081,6 @@ proc ::GroupChat::InitPrefsHook { } {
     set jprefs(gchat,bookmarks) {}
 	
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(prefgchatproto)   jprefs_prefgchatproto    $jprefs(prefgchatproto)]  \
       [list ::Jabber::jprefs(defnick)          jprefs_defnick           $jprefs(defnick)]  \
       [list ::Jabber::jprefs(gchat,syncPres)   jprefs_gchat_syncPres    $jprefs(gchat,syncPres)]  \
       [list ::Jabber::jprefs(gchat,bookmarks)  jprefs_gchat_bookmarks   $jprefs(gchat,bookmarks)]  \
@@ -3218,7 +3100,6 @@ proc ::GroupChat::BuildPageConf {page} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
-    set tmpJPrefs(prefgchatproto) $jprefs(prefgchatproto)
     set tmpJPrefs(gchat,syncPres) $jprefs(gchat,syncPres)
     set tmpJPrefs(defnick)        $jprefs(defnick)
     
@@ -3226,20 +3107,6 @@ proc ::GroupChat::BuildPageConf {page} {
     set wc $page.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
-
-    set wpp $wc.fr
-    ttk::labelframe $wpp -text [mc {Preferred Protocol}] \
-      -padding [option get . groupSmallPadding {}]
-    pack  $wpp  -side top -anchor w
-    
-    foreach  \
-      val { gc-1.0                     muc }         \
-      txt { {Groupchat-1.0 (fallback)} prefmucconf } {
-	set wrad $wpp.[string map {. ""} $val]
-	ttk::radiobutton $wrad -text [mc $txt] -value $val  \
-	  -variable [namespace current]::tmpJPrefs(prefgchatproto)	      
-	grid $wrad -sticky w
-    }
     
     set wnick $wc.n
     ttk::frame $wnick

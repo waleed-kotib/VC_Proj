@@ -7,7 +7,7 @@
 #       Most recent reference at the time of writing:
 #       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
 # 
-# $Id: ParseURI.tcl,v 1.24 2005-11-04 15:14:55 matben Exp $
+# $Id: ParseURI.tcl,v 1.25 2006-04-08 07:02:48 matben Exp $
 
 package require uriencode
 
@@ -217,31 +217,16 @@ proc ::ParseURI::DoGroupchat {token} {
     jlib::splitjidex $state(jid) roomname service res
     set state(service) $service
 
-    set state(browsecmd) [list ::ParseURI::BrowseSetHook $token]
     set state(discocmd)  [list ::ParseURI::DiscoInfoHook $token]
 
     # We should check if we've got info before setting up the hooks.
     if {[$jstate(jlib) disco isdiscoed info $service]} {
 	DiscoInfoHook $token result $service {}
-    } elseif {[$jstate(browse) isbrowsed $service]} {
-	BrowseSetHook $token $service {}
     } else {    
 	
 	# These must be one shot hooks.
-	::hooks::register browseSetHook  $state(browsecmd)
 	::hooks::register discoInfoHook  $state(discocmd)
     }
-}
-
-proc ::ParseURI::BrowseSetHook {token from subiq} {
-    variable $token
-    upvar 0 $token state
-    
-    set server [::Jabber::GetServerJid]
-    if {![jlib::jidequal $from $server]} {
-	return
-    }
-    HandleGroupchat $token
 }
 
 proc ::ParseURI::DiscoInfoHook {token type from subiq args} {
@@ -258,7 +243,6 @@ proc ::ParseURI::HandleGroupchat {token} {
     variable $token
     upvar 0 $token state
     
-    ::hooks::deregister  browseSetHook  $state(browsecmd)
     ::hooks::deregister  discoInfoHook  $state(discocmd)
     
     ::Debug 2 "::ParseURI::HandleGroupchat................"

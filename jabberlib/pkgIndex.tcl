@@ -8,7 +8,6 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded browse         2.0 [list source [file join $dir browse.tcl]]
 package ifneeded groupchat      1.0 [list source [file join $dir groupchat.tcl]]
 package ifneeded jlib           2.0 [list source [file join $dir jabberlib.tcl]]
 package ifneeded jlib::http     0.1 [list source [file join $dir jlibhttp.tcl]]

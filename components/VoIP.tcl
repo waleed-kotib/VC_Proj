@@ -3,7 +3,7 @@
 #       Testing snack streaming audio over http.
 #       This is just a first sketch.
 #       
-# $Id: VoIP.tcl,v 1.4 2005-11-04 15:14:55 matben Exp $
+# $Id: VoIP.tcl,v 1.5 2006-04-08 07:02:48 matben Exp $
 
 # TODO:
 #   use caps to announce feature in more detail.
@@ -57,7 +57,7 @@ proc ::VoIP::InitHook { } {
 
     # Roster popup.
     set popMenuSpec [list "VoIP..." {user available} {::VoIP::RosterCmd $jid3}]
-    ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
+    ::Roster::RegisterPopupEntry $popMenuSpec
 
     # Register our cgibin handler.
     ::tinyhttpd::registercgicommand  $oggfile  [namespace current]::Cgibin

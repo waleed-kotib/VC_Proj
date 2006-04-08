@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.12 2005-11-30 08:32:00 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.13 2006-04-08 07:02:47 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -31,7 +31,7 @@ proc ::BuddyPounce::Init { } {
     set popMenuSpec {
 	command {Buddy Pouncing} {group user} {::BuddyPounce::Build $clicked $jid $group} {}
     }
-    ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
+    ::Roster::RegisterPopupEntry $popMenuSpec
     
     component::register BuddyPounce  \
       "Buddy pouncing enables you to make various things happen when\

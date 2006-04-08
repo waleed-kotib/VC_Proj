@@ -2,7 +2,7 @@
 # 
 #       Interface for launching Gnome Meeting.
 #
-# $Id: GMeeting.tcl,v 1.9 2005-11-04 15:14:55 matben Exp $
+# $Id: GMeeting.tcl,v 1.10 2006-04-08 07:02:48 matben Exp $
 
 namespace eval ::GMeeting:: {
     
@@ -40,7 +40,7 @@ proc ::GMeeting::Init { } {
       [list command "Gnome Meeting..." user {::GMeeting::RosterCmd $jid3} {}]
         
     #::Jabber::UI::RegisterMenuEntry jabber $menuspec
-    ::Jabber::UI::RegisterPopupEntry roster $menuSpec
+    ::Roster::RegisterPopupEntry $menuSpec
     ::Jabber::RegisterCapsExtKey voip_h323  $subtags(h323)
     ::Jabber::RegisterCapsExtKey voip_sip   $subtags(sip)
     ::Jabber::RegisterCapsExtKey voipgm2    $subtags(callto)
