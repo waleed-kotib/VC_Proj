@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.161 2006-04-08 07:02:48 matben Exp $
+# $Id: Jabber.tcl,v 1.162 2006-04-08 11:02:54 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -285,13 +285,7 @@ proc ::Jabber::FactoryDefaults { } {
     # Get ip addresses through <iq> element.
     # Switch off the raw stuff in later version.
     set jprefs(getIPraw) 0
-    
-    # Automatically browse users with resource?
-    set jprefs(autoBrowseUsers) 1
-    
-    # Automatically browse conference items?
-    set jprefs(autoBrowseConference) 0
-    
+            
     # Dialog pane positions.
     set prefs(paneGeom,$wDlgs(jchat))    {0.75 0.25}
     set prefs(paneGeom,$wDlgs(jinbox))   {0.5 0.5}

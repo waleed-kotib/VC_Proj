@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.156 2006-04-06 07:28:31 matben Exp $
+# $Id: Chat.tcl,v 1.157 2006-04-08 11:02:53 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -42,6 +42,9 @@ namespace eval ::Chat:: {
     # widgetDefault.
 
     # Icons
+    option add *StartChat.chatImage       newmsg                widgetDefault
+    option add *StartChat.chatDisImage    newmsgDis             widgetDefault
+
     option add *Chat*sendImage            send                  widgetDefault
     option add *Chat*sendDisImage         sendDis               widgetDefault
     option add *Chat*sendFileImage        sendfile              widgetDefault
@@ -213,8 +216,8 @@ proc ::Chat::StartThreadDlg {args} {
 	return
     }
     
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
+    ::UI::Toplevel $w -class StartChat  \
+      -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox}
     wm title $w [mc {Start Chat}]
     ::UI::SetWindowPosition $w
        
@@ -222,8 +225,12 @@ proc ::Chat::StartThreadDlg {args} {
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
     
+    set im  [::Theme::GetImage [option get $w chatImage {}]]
+    set imd [::Theme::GetImage [option get $w chatDisImage {}]]
+
     ttk::label $w.frall.head -style Headlabel \
-      -text [mc {Chat With}] -compound left
+      -text [mc {Chat With}] -compound left   \
+      -image [list $im background $imd]
     pack $w.frall.head -side top -fill both -expand 1
 
     ttk::separator $w.frall.s -orient horizontal
