@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.132 2006-03-09 10:40:32 matben Exp $
+# $Id: jabberlib.tcl,v 1.133 2006-04-08 11:02:13 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -73,8 +73,6 @@
 #	-autodiscocaps        0|1 should presence caps elements be auto discoed
 #	
 #   INSTANCE COMMANDS
-#      jlibName agent_get to cmd
-#      jlibName agents_get to cmd
 #      jlibName config ?args?
 #      jlibName openstream server ?args?
 #      jlibName closestream
@@ -86,10 +84,8 @@
 #      jlibName get_time to cmd
 #      jlibName getserver
 #      jlibName get_version to cmd
-#      jlibName getagent jid
 #      jlibName getrecipientjid jid
 #      jlibName get_registered_presence_stanzas ?tag? ?xmlns?
-#      jlibName haveagent jid
 #      jlibName iq_get xmlns ?-to, -command, -sublists?
 #      jlibName iq_set xmlns ?-to, -command, -sublists?
 #      jlibName iq_register type xmlns cmd
@@ -119,18 +115,6 @@
 #      jlibName state
 #      jlibName transport
 #      jlibName unregister_presence_stanza tag xmlns
-#      
-#  o using the experimental 'conference' protocol:  OUTDATED!
-#      jlibName conference get_enter room cmd
-#      jlibName conference set_enter room subelements cmd
-#      jlibName conference get_create server cmd
-#      jlibName conference set_create room subelements cmd
-#      jlibName conference delete room cmd
-#      jlibName conference exit room
-#      jlibName conference set_user room name jid cmd
-#      jlibName conference hashandnick room
-#      jlibName conference roomname room
-#      jlibName conference allroomsin
 #      
 #      
 #   The callbacks given for any of the '-iqcommand', '-messagecommand', 
@@ -258,9 +242,6 @@ proc jlib::getxmlns {name} {
     }
 }
 
-# Collects the 'conference' subcommand.
-namespace eval jlib::conference { }
-
 # jlib::new --
 #
 #       This creates a new instance jlib interpreter.
@@ -303,9 +284,6 @@ proc jlib::new {rostername clientcmd args} {
 	variable msghook
 	variable preshook
 	variable opts
-	variable agent
-	# Cache for the 'conference' subcommand.
-	variable conf
 	variable pres
     }
             
@@ -315,7 +293,6 @@ proc jlib::new {rostername clientcmd args} {
     upvar ${jlibname}::prescmd  prescmd
     upvar ${jlibname}::msgcmd   msgcmd
     upvar ${jlibname}::opts     opts
-    upvar ${jlibname}::conf     conf
     upvar ${jlibname}::locals   locals
     
     array set opts {
@@ -356,8 +333,7 @@ proc jlib::new {rostername clientcmd args} {
     
     init_inst $jlibname
             
-    # Init conference and groupchat state.
-    set conf(allroomsin) {}
+    # Init groupchat state.
     groupchat::init $jlibname
         
     # Register some standard iq handlers that are handled internally.
@@ -1722,7 +1698,6 @@ proc jlib::reset {jlibname} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::iqcmd iqcmd
     upvar ${jlibname}::prescmd prescmd
-    upvar ${jlibname}::agent agent
     upvar ${jlibname}::locals locals
     variable statics
     
@@ -1738,7 +1713,6 @@ proc jlib::reset {jlibname} {
     unset -nocomplain prescmd
     set prescmd(uid) $num
     
-    unset -nocomplain agent    
     unset -nocomplain locals
     
     init_inst $jlibname
@@ -3298,153 +3272,6 @@ proc jlib::oob_set {jlibname to cmd url args} {
     return
 }
 
-# jlib::agent_get --
-#
-#       It implements the 'jabber:iq:agent' get method.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       to:         the *server's* name! (users.jabber.org, for instance)
-#       cmd:        client command to be executed at the iq "result" element.
-#       
-# Results:
-#       none.
-
-proc jlib::agent_get {jlibname to cmd} {
-
-    set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:agent}]
-    send_iq $jlibname "get" [list $xmllist] -to $to -command   \
-      [list [namespace current]::parse_agent_get $jlibname $to $cmd]
-    return
-}
-
-proc jlib::agents_get {jlibname to cmd} {
-
-    set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:agents}]
-    send_iq $jlibname "get" [list $xmllist] -to $to -command   \
-      [list [namespace current]::parse_agents_get $jlibname $to $cmd]
-    return
-}
-
-# parse_agent_get, parse_agents_get --
-#
-#       Callbacks for the agent(s) methods. Caches agent information,
-#       and makes registered client callback.
-#       
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       jid:        the 'to' attribute of our agent(s) request.
-#       cmd:        client command to be executed.
-#       
-# Results:
-#       none.
-
-proc jlib::parse_agent_get {jlibname jid cmd type subiq} {
-
-    upvar ${jlibname}::lib lib
-    upvar ${jlibname}::agent agent
-    upvar [namespace current]::service::services services
-
-    Debug 3 "jlib::parse_agent_get jid=$jid, cmd=$cmd, type=$type, subiq=$subiq"
-
-    switch -- $type {
-	error {
-	    uplevel #0 $cmd [list $jlibname error $subiq]
-	} 
-	default {
-     
-	    # Loop through the subelement to see what we've got.
-	    foreach elem [wrapper::getchildren $subiq] {
-		set tag [wrapper::gettag $elem]
-		set agent($jid,$tag) [wrapper::getcdata $elem]
-		if {[lsearch $services $tag] >= 0} {
-		    lappend agent($tag) $jid
-		}
-		if {[string equal $tag "groupchat"]} {
-		    [namespace current]::service::registergcprotocol  \
-		      $jlibname $jid "gc-1.0"
-		}
-	    }    
-	    uplevel #0 $cmd [list $jlibname $type $subiq]
-	}
-    }
-}
-
-proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
-
-    upvar ${jlibname}::locals locals
-    upvar ${jlibname}::agent agent
-    upvar [namespace current]::service::services services
-
-    Debug 3 "jlib::parse_agents_get jid=$jid, cmd=$cmd, type=$type, subiq=$subiq"
-
-    switch -- $type {
-	error {
-	    uplevel #0 $cmd [list $jlibname error $subiq]
-	} 
-	default {
-	    
-	    # Be sure that the login jabber server is the root.
-	    if {[string equal $locals(server) $jid]} {
-		set agent($jid,parent) {}
-	    }
-	    # ???
-	    set agent($jid,parent) {}
-	    
-	    # Cache the agents info we've got.
-	    foreach agentElem [wrapper::getchildren $subiq] {
-		if {![string equal [wrapper::gettag $agentElem] "agent"]} {
-		    continue
-		}
-		set jidAgent [wrapper::getattribute $agentElem jid]
-		set subAgent [wrapper::getchildren $agentElem]
-		
-		# Loop through the subelement to see what we've got.
-		foreach elem $subAgent {
-		    set tag [wrapper::gettag $elem]
-		    set agent($jidAgent,$tag) [wrapper::getcdata $elem]
-		    if {[lsearch $services $tag] >= 0} {
-			lappend agent($tag) $jidAgent
-		    }
-		    if {[string equal $tag "groupchat"]} {
-			[namespace current]::service::registergcprotocol  \
-			  $jlibname $jid "gc-1.0"
-		    }
-		}
-		set agent($jidAgent,parent) $jid
-		lappend agent($jid,childs) $jidAgent	
-	    }
-	    uplevel #0 $cmd [list $jlibname $type $subiq]
-	}
-    }
-}
-
-# jlib::getagent --
-# 
-#       Accessor function for the agent stuff.
-
-proc jlib::getagent {jlibname jid} {
-
-    upvar ${jlibname}::agent agent
-
-    if {[info exists agent($jid,parent)]} {
-	return [array get agent [jlib::ESC $jid],*]
-    } else {
-	return
-    }
-}
-
-proc jlib::have_agent {jlibname jid} {
-
-    upvar ${jlibname}::agent agent
-
-    if {[info exists agent($jid,parent)]} {
-	return 1
-    } else {
-	return 0
-    }
-}
-
 # jlib::get_last --
 #
 #       Query the 'last' of 'to' using 'jabber:iq:last' get.
@@ -4327,232 +4154,6 @@ proc jlib::Debug {num str} {
 	}
 	puts $str
     }
-}
-
-#--- namespace jlib::conference ------------------------------------------------
-
-# jlib::conference --
-#
-#       Provides API's for the conference protocol using jabber:iq:conference.
-
-proc jlib::conference {jlibname cmd args} {
-    
-    # Which command? Just dispatch the command to the right procedure.
-    if {[catch {
-	eval {[namespace current]::conference::$cmd $jlibname} $args
-    } ans]} {
-	return -code error $ans
-    }
-    return $ans
-}
-
-# jlib::conference::get_enter, set_enter --
-#
-#       Request conference enter room, and do enter room.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       to:         'roomname@conference.jabber.org' typically.
-#       subelements xml list
-#       cmd:        callback command for iq result element.
-#       
-# Results:
-#       none.
-
-proc jlib::conference::get_enter {jlibname room cmd} {
-
-    [namespace parent]::Debug 3 "jlib::conference::get_enter room=$room, cmd=$cmd"
-    
-    set xmllist [wrapper::createtag "enter"  \
-      -attrlist {xmlns jabber:iq:conference}]
-    [namespace parent]::send_iq $jlibname "get" [list $xmllist] -to $room -command  \
-      [list [namespace parent]::invoke_iq_callback $jlibname $cmd]
-    [namespace parent]::service::setroomprotocol $jlibname $room "conference"
-    return
-}
-
-proc jlib::conference::set_enter {jlibname room subelements cmd} {
-
-    [namespace parent]::send_presence $jlibname -to $room
-    [namespace parent]::send_iq $jlibname "set"  \
-      [list [wrapper::createtag "enter" -attrlist {xmlns jabber:iq:conference} \
-      -subtags $subelements]] -to $room -command  \
-      [list [namespace current]::parse_set_enter $jlibname $room $cmd]
-    return
-}
-
-# jlib::conference::parse_set_enter --
-#
-#       Callback for 'set_enter' and 'set_create'. 
-#       Cache useful info to unburden client.
-#       
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       jid:        the jid we browsed.
-#       cmd:        for callback to client.
-#       type:       "ok" or "error"
-#       subiq:
-
-proc jlib::conference::parse_set_enter {jlibname room cmd type subiq} {    
-
-    upvar ${jlibname}::conf conf
-
-    [namespace parent]::Debug 3 "jlib::conference::parse_set_enter room=$room, cmd='$cmd', type=$type, subiq='$subiq'"
-    
-    if {[string equal $type "error"]} {
-	uplevel #0 $cmd [list $jlibname error $subiq]
-    } else {
-	
-	# Cache useful info:    
-	# This should be something like:
-	# <query><id>myroom@server/7y3jy7f03</id><nick/>snuffie<nick><query/>
-	# Use it to cache own room jid.
-	foreach child [wrapper::getchildren $subiq] {
-	    set tagName [wrapper::gettag $child]
-	    set value [wrapper::getcdata $child]
-	    set $tagName $value
-	}
-	if {[info exists id] && [info exists nick]} {
-	    set conf($room,hashandnick) [list $id $nick]
-	}
-	if {[info exists name]} {
-	    set conf($room,roomname) $name
-	}
-	lappend conf(allroomsin) $room
-	
-	# And finally let client know.
-	uplevel #0 $cmd [list $jlibname $type $subiq]
-    }
-}
-
-# jlib::conference::get_create, set_create --
-#
-#       Request conference creation of room.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       to:        'conference.jabber.org' typically.
-#       cmd:        callback command for iq result element.
-#       
-# Results:
-#       none.
-
-proc jlib::conference::get_create {jlibname to cmd} {
-
-    [namespace parent]::Debug 3 "jlib::conference::get_create cmd=$cmd, to=$to"
-    
-    [namespace parent]::send_presence $jlibname -to $to
-    set xmllist [wrapper::createtag "create"   \
-      -attrlist {xmlns jabber:iq:conference}]
-    [namespace parent]::send_iq $jlibname "get" [list $xmllist] -to $to -command   \
-      [list [namespace parent]::invoke_iq_callback $jlibname $cmd]
-}
-
-proc jlib::conference::set_create {jlibname room subelements cmd} {
-
-    # We use the same callback as 'set_enter'.
-    [namespace parent]::send_presence $jlibname -to $room
-    [namespace parent]::send_iq $jlibname "set"  \
-      [list [wrapper::createtag "create" -attrlist {xmlns jabber:iq:conference} \
-      -subtags $subelements]] -to $room -command  \
-      [list [namespace current]::parse_set_enter $jlibname $room $cmd]
-    [namespace parent]::service::setroomprotocol $jlibname $room "conference"
-    return
-}
-
-# jlib::conference::delete --
-#
-#       Delete conference room.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       room:       'roomname@conference.jabber.org' typically.
-#       cmd:        callback command for iq result element.
-#       
-# Results:
-#       none.
-
-proc jlib::conference::delete {jlibname room cmd} {
-
-    set xmllist [wrapper::createtag {delete}  \
-      -attrlist {xmlns jabber:iq:conference}]
-    [namespace parent]::send_iq $jlibname "set" [list $xmllist] -to $room -command  \
-      [list [namespace parent]::invoke_iq_callback $jlibname $cmd]
-    return
-}
-
-proc jlib::conference::exit {jlibname room} {
-
-    upvar ${jlibname}::conf conf
-    upvar ${jlibname}::lib lib
-
-    [namespace parent]::send_presence $jlibname -to $room -type unavailable
-    set ind [lsearch -exact $conf(allroomsin) $room]
-    if {$ind >= 0} {
-	set conf(allroomsin) [lreplace $conf(allroomsin) $ind $ind]
-    }
-    $lib(rostername) clearpresence "${room}*"
-    return
-}
-
-# jlib::conference::set_user --
-#
-#       Set user's nick name in conference room.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       room:       'roomname@conference.jabber.org' typically.
-#       name:       nick name.
-#       jid:        'roomname@conference.jabber.org/key' typically.
-#       cmd:        callback command for iq result element.
-#       
-# Results:
-#       none.
-
-proc jlib::conference::set_user {jlibname room name jid cmd} {
-
-    [namespace parent]::Debug 3 "jlib::conference::set_user cmd=$cmd, room=$room"
-    
-    set subelem [wrapper::createtag "user"  \
-      -attrlist [list name $name jid $jid]]
-    set xmllist [wrapper::createtag "conference"  \
-      -attrlist {xmlns jabber:iq:browse} -subtags $subelem]
-    [namespace parent]::send_iq $jlibname "set" [list $xmllist] -to $room -command  \
-      [list [namespace parent]::invoke_iq_callback $jlibname $cmd]
-}
-
-# jlib::conference::hashandnick --
-#
-#       Returns list {kitchen@conf.athlon.se/63264ba6724.. mynickname}
-
-proc jlib::conference::hashandnick {jlibname room} {
-
-    upvar ${jlibname}::conf conf
-
-    if {[info exists conf($room,hashandnick)]} {
-	return $conf($room,hashandnick)
-    } else {
-	return -code error "Unknown room \"$room\""
-    }
-}
-
-proc jlib::conference::roomname {jlibname room} {
-
-    upvar ${jlibname}::conf conf
-
-    if {[info exists conf($room,roomname)]} {
-	return $conf($room,roomname)
-    } else {
-	return -code error "Unknown room \"$room\""
-    }
-}
-
-proc jlib::conference::allroomsin {jlibname} {
-
-    upvar ${jlibname}::conf conf
-    
-    set conf(allroomsin) [lsort -unique $conf(allroomsin)]
-    return $conf(allroomsin)
 }
 
 #-------------------------------------------------------------------------------

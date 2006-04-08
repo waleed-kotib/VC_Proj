@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.34 2006-04-07 14:08:28 matben Exp $
+# $Id: disco.tcl,v 1.35 2006-04-08 11:02:13 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -573,9 +573,6 @@ proc jlib::disco::parse_get_info {jlibname from subiq} {
 		    switch -- $feature {
 			"http://jabber.org/protocol/muc" {
 			    $jlibname service registergcprotocol $from "muc"
-			}
-			"jabber:iq:conference" {
-			    $jlibname service registergcprotocol $from "conference"
 			}
 			"gc-1.0" {
 			    $jlibname service registergcprotocol $from "gc-1.0"
