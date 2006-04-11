@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.157 2006-04-08 11:02:53 matben Exp $
+# $Id: Chat.tcl,v 1.158 2006-04-11 12:14:58 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -248,7 +248,7 @@ proc ::Chat::StartThreadDlg {args} {
     set jidlist [::Jabber::RosterCmd getusers -type available]
     ttk::label $frmid.luser -text "[mc {Jabber user ID}]:"  \
       -anchor e
-    ui::entryex $frmid.euser -library $jidlist -width 26  \
+    ui::comboboxex $frmid.euser -library $jidlist -width 26  \
       -textvariable [namespace current]::user
 
     grid  $frmid.luser  $frmid.euser  -sticky e -padx 2

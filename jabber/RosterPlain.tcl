@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.13 2006-04-08 07:02:48 matben Exp $
+# $Id: RosterPlain.tcl,v 1.14 2006-04-11 12:14:58 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -204,6 +204,9 @@ proc ::RosterPlain::Init { } {
     set text [::RosterTree::MCHead available]
     set item [CreateWithTag $tag styHead $text $onlineImage root]
     if {$jprefs(rost,showOffline)} {
+	$T item configure $item -button 1
+    } else {
+	# Requested that button still shown.
 	$T item configure $item -button 1
     }
     if {[lsearch $jprefs(rost,closedItems) $tag] >= 0} {

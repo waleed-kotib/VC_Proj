@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.5 2006-04-07 14:08:28 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.6 2006-04-11 12:14:58 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -310,21 +310,26 @@ proc ::RosterAvatar::SortColumn {C order} {
 
     # Keep transports and pending always at the end.
     set opts {}
-    foreach type {transport pending} {
-	set tag [list head $type]
-	set item [FindWithTag $tag]
-	if {$item ne ""} {
-	    $T item lastchild root $item
-	    set last [list $item above]
-	    set ancestors [$T item ancestors [list $item above]]
-	    if {[llength $ancestors] > 1} {
-		set last [lindex $ancestors end-1]
+    
+    # Be sure to have transport & pending last.
+    # Shall only test this if not alone.
+    if {[$T item numchildren root] > 1} {
+	foreach type {transport pending} {
+	    set tag [list head $type]
+	    set item [FindWithTag $tag]
+	    if {$item ne ""} {		
+		$T item lastchild root $item
+		set last [list $item above]
+		set ancestors [$T item ancestors [list $item above]]
+		if {[llength $ancestors] > 1} {
+		    set last [lindex $ancestors end-1]
+		}
+		set opts [list -last $last]
 	    }
-	    set opts [list -last $last]
 	}
     }
     
-    switch [$T column cget $C -tag] {
+    switch -- [$T column cget $C -tag] {
 	cTree {
 	    eval {$T item sort root $order -column $C} $opts
 	}
