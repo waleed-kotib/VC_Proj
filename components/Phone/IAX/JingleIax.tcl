@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.11 2006-04-08 07:02:48 matben Exp $
+# $Id: JingleIax.tcl,v 1.12 2006-04-11 12:45:23 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -20,15 +20,13 @@ package provide JingleIax 0.1
 namespace eval ::JingleIAX:: { }
 
 proc ::JingleIAX::Init { } {
-    variable xmlnsTransportIAX
-    variable xmlnsMediaAudio
-
-    set xmlnsTransportIAX     "http://jabber.org/protocol/jingle/transport/iax"
-    set xmlnsMediaAudio       "http://jabber.org/protocol/jingle/media/audio"
-
-
+    
     option add *Chat*callImage           call                 widgetDefault
     option add *Chat*callDisImage        callDis              widgetDefault
+    
+    variable xmlns
+    set xmlns(transport)  "http://jabber.org/protocol/jingle/transport/iax"
+    set xmlns(media)      "http://jabber.org/protocol/jingle/media/audio"    
 
     # Add event hooks.
     ::hooks::register loginHook             ::JingleIAX::LoginHook
@@ -62,9 +60,9 @@ proc ::JingleIAX::Init { } {
     variable mediaElemAudio
 
     set transportElem [wrapper::createtag "transport" \
-      -attrlist [list xmlns $xmlnsTransportIAX version 2 secure no] ]
+      -attrlist [list xmlns $xmlns(transport) version 2 secure no] ]
     set mediaElemAudio [wrapper::createtag "description" \
-      -attrlist [list xmlns $xmlnsMediaAudio] ]
+      -attrlist [list xmlns $xmlns(media)] ]
 
     jlib::jingle::register iax 50  \
       [list $mediaElemAudio] [list $transportElem] ::JingleIAX::IQHandler
@@ -157,6 +155,8 @@ proc ::JingleIAX::SessionInitiate {jid} {
     variable transportElem
     variable mediaElemAudio
     variable myjid
+    
+    Debug "::JingleIAX::SessionInitiate $jid"
 
     set state(sid) [::Jabber::JlibCmd jingle initiate iax $jid  \
       [list $mediaElemAudio] [list $transportElem] ::JingleIAX::SessionPending]
@@ -167,6 +167,8 @@ proc ::JingleIAX::IQHandler {jlib _jelem args} {
     array set argsArr $args
     variable state
 
+    Debug "::JingleIAX::IQHandler jelem=$_jelem, args=$args"
+    
     array set argsArr $args
     set id $argsArr(-id)
     set sid    [wrapper::getattribute $_jelem sid]
@@ -185,6 +187,7 @@ proc ::JingleIAX::IQHandler {jlib _jelem args} {
 proc ::JingleIAX::SessionInitiateIncoming {jlib from jingle sid id} {
     variable state
 
+    Debug "::JingleIAX::SessionInitiateIncoming from=$from, jingle=$jingle, sid=$sid, id=$id"
     ::Jabber::JlibCmd send_iq result {} -to $from -id $id
     set state(sid) $sid
     TransportAccept $jlib $from
@@ -193,20 +196,27 @@ proc ::JingleIAX::SessionInitiateIncoming {jlib from jingle sid id} {
 
 proc ::JingleIAX::TransportAccept {jlib from} {
     variable state
+    variable xmlns
     global prefs
 
-    # -------- Transport Supported ------------------- 
-    set transportElemLocalCandidate    [wrapper::createtag candidate -attrlist [list name local ip $state(localIP)  port  $state(localIAXPort)] ]
-    set transportElempublicCandidate   [wrapper::createtag candidate -attrlist [list name public ip $state(publicIP) port  $state(publicIAXPort)]]
+    Debug "::JingleIAX::TransportAccept from=$from"
 
-    set transportElemCustomCandidate ""
-    if { $prefs(NATip) ne "" } {
-        set transportElemCustomCandidate   [wrapper::createtag candidate -attrlist [list name custom ip $prefs(NATip)  port  $state(publicIAXPort)]]
+    # -------- Transports Supported ------------------- 
+    set locAttr [list name local  ip $state(localIP)  port $state(localIAXPort)]
+    set pubAttr [list name public ip $state(publicIP) port $state(publicIAXPort)]
+    set localElem  [wrapper::createtag "candidate" -attrlist $locAttr]
+    set publicElem [wrapper::createtag "candidate" -attrlist $pubAttr]
+
+    set candidateElems [list $localElem $publicElem]
+    if {$prefs(NATip) ne ""} {
+	set cusAttr [list name custom ip $prefs(NATip) port $state(publicIAXPort)]
+	set customElem [wrapper::createtag "candidate" -attrlist $cusAttr]
+	lappend candidateElems $customElem
     }
 
     set transportElem [wrapper::createtag "transport" \
-      -attrlist [list xmlns "http://jabber.org/protocol/jingle/transport/iax" version 2] \
-      -subtags [list $transportElemLocalCandidate $transportElempublicCandidate $transportElemCustomCandidate]]
+      -attrlist [list xmlns $xmlns(transport) version 2] \
+      -subtags $candidateElems]
 
     ::Jabber::JlibCmd jingle send_set $state(sid) "transport-accept" {}  \
       [list $transportElem ]
@@ -214,6 +224,8 @@ proc ::JingleIAX::TransportAccept {jlib from} {
 }
 
 proc ::JingleIAX::SessionPending {type subiq args} {
+    
+    Debug "::JingleIAX::SessionPending"
     #--------- Comes an Error from Initiate --------
     if { ($type eq "error") || ($type eq "cancel")} {
 	ui::dialog -icon error -type ok -message [mc phoneFailedCalling] \
@@ -223,21 +235,22 @@ proc ::JingleIAX::SessionPending {type subiq args} {
 
 proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
     variable state
-    variable xmlnsTransportIAX
+    variable xmlns
 
+    Debug "::JingleIAX::TransportIncomingAccept"
     # Extract the command level XML data items.     
     #set jingle [wrapper::gettag $args]
 
     #set calledname [wrapper::getattribute $jingle initiator]   
     set transport [wrapper::getfirstchildwithtag $jingle "transport"]
 
-    if {$transport != {}} { 
+    if {$transport ne {}} { 
         # We have to test if the Transport and version are supported
         set transportType [wrapper::getattribute $transport xmlns]
         set version [wrapper::getattribute $transport version]
         set secure [wrapper::getattribute $transport secure]
 
-        if { ($transportType ne $xmlnsTransportIAX) && ($version ne 2) } {
+        if { ($transportType ne $xmlns(transport)) && ($version ne 2) } {
             ::Jabber::JlibCmd send_iq_error $from $id 404 cancel service-unavailable {feature-not-implemented unsuported-transport}
             return
         }
@@ -262,13 +275,13 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
         # ------------- User and Password, returned by Asterisk PBX node -------------
         # ------- Are OPTIONAL
         set userElem [wrapper::getfirstchildwithtag $transport user]
-        if {$userElem != {}} {
+        if {$userElem ne {}} {
             set user [wrapper::getcdata $userElem]
         } else {
             set user ""
         }
         set pwdElem [wrapper::getfirstchildwithtag $transport password]
-        if {$pwdElem != {}} {
+        if {$pwdElem ne {}} {
             set password [wrapper::getcdata $pwdElem]
         } else {
             set password ""
@@ -399,7 +412,7 @@ proc ::JingleIAX::ChatCall {dlgtoken} {
 
 proc ::JingleIAX::Debug {msg} {
 
-    if {0} {
+    if {1} {
         puts "-------- $msg"
     }
 }
