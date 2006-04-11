@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jingle.tcl,v 1.1 2006-03-09 10:40:32 matben Exp $
+# $Id: jingle.tcl,v 1.2 2006-04-11 12:46:02 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -286,6 +286,8 @@ proc jlib::jingle::cmdproc {jlibname cmd args} {
 proc jlib::jingle::send_set {jlibname sid action cmd {elems {}}} {
     variable verifyState
     
+    puts "jlib::jingle::send_set sid=$sid, action=$action, cmd=$cmd"
+    
     # Be sure to set the internal state as well.
     set state [set_state $jlibname $sid $action]
     if {$verifyState && $state eq ""} {
@@ -303,6 +305,8 @@ proc jlib::jingle::send_set {jlibname sid action cmd {elems {}}} {
 proc jlib::jingle::do_send_set {jlibname sid action cmd {elems {}}} {
     variable jxmlns
     upvar ${jlibname}::jingle::session  session
+    
+    puts "jlib::jingle::do_send_set sid=$sid, action=$action, cmd=$cmd"
     
     set jid       $session($sid,jid)
     set initiator $session($sid,initiator)
@@ -340,6 +344,7 @@ proc jlib::jingle::set_state {jlibname sid action} {
     variable transportMap
     upvar ${jlibname}::jingle::session  session
 
+    puts "jlib::jingle::set_state"
     # Since we are a state machine we must check that the requested state
     # change is consistent.
     if {$action eq "session-initiate"} {
@@ -594,6 +599,7 @@ proc jlib::jingle::initiate_handler {jlibname sid id jelem args} {
 proc jlib::jingle::send_error {jlibname jid id stanza} {
     variable jxmlns
     
+    puts "jlib::jingle::send_error"
     # @@@ Not sure about the details here.
     set elem [wrapper::createtag $stanza  \
       -attrlist [list xmlns $jxmlns(errors)]]
