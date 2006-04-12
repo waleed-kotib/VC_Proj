@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.16 2006-04-07 14:08:28 matben Exp $
+# $Id: JUser.tcl,v 1.17 2006-04-12 12:45:15 matben Exp $
 
 package provide JUser 1.0
 
@@ -209,12 +209,12 @@ proc ::Jabber::User::DoAdd {token} {
 	
 	    # If this requires a transport component we must be registered.
 	    set transport [lsearch -inline -regexp $allUsers "^${host}.*"]
-	    if {$transport == "" } {
+	    if {$transport eq "" } {
 		
 		# Seems we are not registered.
 		set ans [::UI::MessageBox -type yesno -icon error \
 		  -parent $state(w) -message [mc jamessaddforeign $host]]
-		if {$ans == "yes"} {
+		if {$ans eq "yes"} {
 		    ::GenRegister::NewDlg -server $host -autoget 1
 		    return
 		} else {
@@ -228,7 +228,7 @@ proc ::Jabber::User::DoAdd {token} {
     if {[string length $name]} {
 	lappend opts -name $name
     }
-    if {($group != "None") && ($group != "")} {
+    if {($group ne "None") && ($group ne "")} {
 	lappend opts -groups [list $group]
     }
     
@@ -286,7 +286,7 @@ proc ::Jabber::User::PresError {jlibName type args} {
 	  "We received an error when (un)subscribing to $argsArr(-from).\
 	  The error is: $errmsg ($errcode).\
 	  Do you want to remove it from your roster?"]
-	if {$ans == "yes"} {
+	if {$ans eq "yes"} {
 	    $jstate(jlib) roster_remove $argsArr(-from) [namespace current]::PushProc
 	}
     }
@@ -349,7 +349,7 @@ proc ::Jabber::User::EditTransportDlg {jid} {
     
     # We get jid2 here. For transports we need the full jid!
     set res [lindex [$jstate(roster) getresources $jid] 0]
-    if {$res == ""} {
+    if {$res eq ""} {
 	set jid3 $jid
     } else {
 	set jid3 $jid/$res
@@ -423,7 +423,7 @@ proc ::Jabber::User::EditUserDlg {jid} {
     set group [lindex $groups 0]
 
     # We need at least one entry here even if no groups.
-    if {$groups == {}} {
+    if {$groups eq {}} {
 	set groups "None"
     }
 
@@ -604,7 +604,7 @@ proc ::Jabber::User::DoEdit {token} {
 	}
     }
     set groups [lsort -unique $groups]
-    if {$groups != $origgroups} {
+    if {$groups ne $origgroups} {
 	lappend opts -groups $groups
     }
     eval {$jstate(jlib) roster_set $jid   \
