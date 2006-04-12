@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.17 2006-04-12 12:45:15 matben Exp $
+# $Id: JUser.tcl,v 1.18 2006-04-12 12:52:12 matben Exp $
 
 package provide JUser 1.0
 
@@ -212,12 +212,12 @@ proc ::Jabber::User::DoAdd {token} {
 	    if {$transport eq "" } {
 		
 		# Seems we are not registered.
-		set ans [::UI::MessageBox -type yesno -icon error \
+		set ans [::UI::MessageBox -type yesnocancel -icon error \
 		  -parent $state(w) -message [mc jamessaddforeign $host]]
 		if {$ans eq "yes"} {
 		    ::GenRegister::NewDlg -server $host -autoget 1
 		    return
-		} else {
+		} elseif {$ans eq "cancel"} {
 		    return
 		}
 	    }
