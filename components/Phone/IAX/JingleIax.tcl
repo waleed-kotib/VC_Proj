@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.14 2006-04-12 13:12:22 matben Exp $
+# $Id: JingleIax.tcl,v 1.15 2006-04-12 14:32:56 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -25,8 +25,9 @@ proc ::JingleIAX::Init { } {
     option add *Chat*callDisImage        callDis              widgetDefault
     
     variable xmlns
-    set xmlns(transport)  "http://jabber.org/protocol/jingle/transport/iax"
+    set xmlns(jingle)     "http://jabber.org/protocol/jingle/"
     set xmlns(media)      "http://jabber.org/protocol/jingle/media/audio"    
+    set xmlns(transport)  "http://jabber.org/protocol/jingle/transport/iax"
 
     # Add event hooks.
     ::hooks::register loginHook             ::JingleIAX::LoginHook
@@ -389,21 +390,22 @@ proc ::JingleIAX::PresenceHook {jid type args} {
     if { ![info exists contacts($jid,jingle)] } {
         # Try to Disco if user support Jingle??????
 	jlib::splitjidex $jid node domain -
-        array set arrArgs $args
-        ::Jabber::JlibCmd disco send_get info $from ::JingleIAX::OnDiscoUserNode
+        ::Jabber::JlibCmd disco get_async info $from ::JingleIAX::OnDiscoUserNode
+        #::Jabber::JlibCmd disco send_get info $from ::JingleIAX::OnDiscoUserNode
     }
 }
 
 proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
     variable contacts
     variable state
+    variable xmlns
 
     Debug "::JingleIAX::OnDiscoUserNode"
  
     #-------- If the JID has Jingle support cache
     if {$type eq "result"} {
 	set node [wrapper::getattribute $subiq "node"]
-        set feature "http://jabber.org/protocol/jingle"
+        set feature $xmlns(jingle)
 	set haveJingle [::Jabber::JlibCmd disco hasfeature $feature $from $node]
 
 	Debug "\t from=$from, node=$node, haveJingle=$haveJingle"
