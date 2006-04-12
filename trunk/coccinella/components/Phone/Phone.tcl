@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.7 2006-03-22 20:27:03 antoniofcano Exp $
+# $Id: Phone.tcl,v 1.8 2006-04-12 07:05:16 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -493,6 +493,8 @@ proc ::Phone::DialJingle  { ipPeer portPeer calledName callerName {user ""} {pas
     variable phoneNumberInput
     variable wphone 
     
+    ::Debug 4 "::Phone::DialJingle ipPeer=$ipPeer,portPeer=$portPeer,calledName=$calledName"
+    
     #---- Set Caller and Called Identification ------
     ::Phone::UpdateDisplay $calledName
     CommandPhone callerid "Jingle" $callerName
@@ -516,7 +518,6 @@ proc ::Phone::DialJingle  { ipPeer portPeer calledName callerName {user ""} {pas
         set subject "Jingle Call"
     }
 
-puts "Llamando.... $calledName por $callerName"
     ::hooks::run phoneNotifyOutgoingCall $calledName
     CommandPhone dialjingle $phoneNumberInput $statePhone(activeLine) $subject $user $password
         

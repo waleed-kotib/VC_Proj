@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.4 2006-03-08 13:46:37 matben Exp $
+# $Id: Iax.tcl,v 1.5 2006-04-12 07:05:16 matben Exp $
 
 namespace eval ::Iax { }
 
@@ -39,6 +39,7 @@ proc ::Iax::Init { } {
     
     ::Phone::RegisterPhone iax "IAX Phone"  \
       ::Iax::InitProc ::Iax::CmdProc ::Iax::DeleteProc
+    #::Jabber::RegisterCapsExtKey iax
 
     # Setting up Callbacks functions.
     iaxclient::notify <State>         [namespace current]::NotifyState
@@ -59,6 +60,8 @@ proc ::Iax::InitProc {} {
 
 proc ::Iax::CmdProc {type args} {
     variable iaxPrefs
+    
+    ::Debug 4 "::Iax::CmdProc type=$type, args=$args"
     
     set value [lindex $args 0]
 
@@ -168,6 +171,8 @@ proc ::Iax::NotifyText { type callno textmessage args} {
 proc ::Iax::NotifyRegister {id reply msgcount} {
     variable iaxPrefs
 
+    ::Debug 4 "::Iax::NotifyRegister"
+    
     if { ($iaxPrefs(registerid) == $id) && ($reply eq "timeout") } {
         ::Phone::HidePhone
     }
@@ -181,6 +186,8 @@ proc ::Iax::NotifyRegister {id reply msgcount} {
 proc ::Iax::NotifyState {callNo state codec remote remote_name args} {
     set statePhone $state
 
+    ::Debug 4 "::Iax::NotifyState state=$state"
+    
     ::Phone::UpdateState $callNo $state
 
     #----------------------------------------------------------------------
@@ -215,6 +222,7 @@ proc ::Iax::NotifyState {callNo state codec remote remote_name args} {
 #---------------------------------------------------------------------------
 #------------------------------- Protocol Actions --------------------------
 #---------------------------------------------------------------------------
+
 proc ::Iax::CallerID { {cidname ""} {cidnum ""} } {
     variable iaxPrefs
 
@@ -224,9 +232,12 @@ proc ::Iax::CallerID { {cidname ""} {cidnum ""} } {
         iaxclient::callerid $cidname $cidnum
     }
 }
+
 proc ::Iax::DialJingle {peer {line ""} {subject ""} {user ""} {password ""}} {
     variable iaxPrefs
 
+    ::Debug 4 "::Iax::DialJingle peer=$peer"
+    
     if {$line eq ""} {
 	set callNo 1 
     } else {
@@ -249,6 +260,7 @@ proc ::Iax::DialJingle {peer {line ""} {subject ""} {user ""} {password ""}} {
     }
 
     #----- Dial Peer -------
+    ::Debug 4 "iaxclient::dial $userDef$peer $callNo"
     iaxclient::dial "$userDef$peer" $callNo
     if { $subject ne "" } {
 	iaxclient::sendtext $subject
@@ -258,14 +270,16 @@ proc ::Iax::DialJingle {peer {line ""} {subject ""} {user ""} {password ""}} {
 proc ::Iax::Dial {phonenumber {line ""} {subject ""}} {
     variable iaxPrefs
 
+    ::Debug 4 "::Iax::Dialphonenumber=$phonenumber "
+    
     if {$line eq ""} {
 	set callNo 1 
     } else {
 	set callNo $line
     }
-
     set callNo 1 
  
+    ::Debug 4 "iaxclient::dial ..."
     iaxclient::dial "$iaxPrefs(user):$iaxPrefs(password)@$iaxPrefs(host)/$phonenumber" $callNo
     if { $subject ne "" } {
 	iaxclient::sendtext $subject
