@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.13 2006-04-12 07:05:16 matben Exp $
+# $Id: JingleIax.tcl,v 1.14 2006-04-12 13:12:22 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -245,6 +245,7 @@ proc ::JingleIAX::AcceptCB {args} {
 proc ::JingleIAX::SessionPending {type subiq args} {
     
     Debug "::JingleIAX::SessionPending"
+    
     #--------- Comes an Error from Initiate --------
     if { ($type eq "error") || ($type eq "cancel")} {
 	
@@ -254,6 +255,10 @@ proc ::JingleIAX::SessionPending {type subiq args} {
 	  -detail $subiq
     }
 }
+
+# JingleIAX::TransportIncomingAccept --
+# 
+#       Handles incoming 'transport-accept' actions from the jingle handler.
 
 proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
     variable state
@@ -268,34 +273,37 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
     set transport [wrapper::getfirstchildwithtag $jingle "transport"]
 
     if {$transport ne {}} { 
-        # We have to test if the Transport and version are supported
+
+	# We have to test if the Transport and version are supported
         set transportType [wrapper::getattribute $transport xmlns]
         set version [wrapper::getattribute $transport version]
         set secure [wrapper::getattribute $transport secure]
 
         if { ($transportType ne $xmlns(transport)) && ($version ne 2) } {
             ::Jabber::JlibCmd send_iq_error $from $id 404 cancel service-unavailable {feature-not-implemented unsuported-transport}
+	    # @@@ Cleanup?
             return
         }
 
         set candidateList [wrapper::getchildswithtag $transport candidate]
-        if {$candidateList ne {}} {
-            foreach candidate $candidateList {
-                set name [wrapper::getattribute $candidate name]
-                if {$name ne ""} {
-                    set candidateDescription($name,ip) [wrapper::getattribute $candidate ip]
-                    set candidateDescription($name,port) [wrapper::getattribute $candidate port]
-                } else {
-                    ::Jabber::JlibCmd send_iq_error $from $id 404 cancel bad-request
-                    return
-                }
-            }
-        } else {
-            ::Jabber::JlibCmd send_iq_error $from $id 404 cancel bad-request
-            return
-        }
-
-        # ------------- User and Password, returned by Asterisk PBX node -------------
+        if {$candidateList eq {}} {
+	    ::Jabber::JlibCmd send_iq_error $from $id 404 cancel bad-request
+	    # @@@ Cleanup?
+	    return
+	}
+	foreach candidate $candidateList {
+	    set name [wrapper::getattribute $candidate name]
+	    if {$name ne ""} {
+		set candidateDescription($name,ip) [wrapper::getattribute $candidate ip]
+		set candidateDescription($name,port) [wrapper::getattribute $candidate port]
+	    } else {
+		::Jabber::JlibCmd send_iq_error $from $id 404 cancel bad-request
+		# @@@ Cleanup?
+		return
+	    }
+	}
+	
+        # ------------- User and Password, returned by Asterisk PBX node -------
         # ------- Are OPTIONAL
         set userElem [wrapper::getfirstchildwithtag $transport user]
         if {$userElem ne {}} {
@@ -309,23 +317,39 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
         } else {
             set password ""
         }
+	
         #-------- At This moment we know how to call the Peer ------------
-        #------ 1/ Discover what candidate to use: custom, local or public --------
+        #------ 1/ Discover what candidate to use: custom, local or public
         #------------- 2/ Give control to Phone Component ----------------
        
-
-        if { [info exists candidateDescription(custom,ip)] } { 
-            set ip   $candidateDescription(custom,ip)
-            set port $candidateDescription(custom,port)
-        } else {
-            set ip   $candidateDescription(public,ip)
-            set port $candidateDescription(public,port)
-
-            if {$ip eq $state(publicIP)} {
-                set ip   $candidateDescription(local,ip)
-                set port $candidateDescription(local,port)
-            }
-        }
+	# Backup:
+	if {0} {
+	    if { [info exists candidateDescription(custom,ip)] } { 
+		set ip   $candidateDescription(custom,ip)
+		set port $candidateDescription(custom,port)
+	    } else {
+		set ip   $candidateDescription(public,ip)
+		set port $candidateDescription(public,port)
+		
+		if {$ip eq $state(publicIP)} {
+		    set ip   $candidateDescription(local,ip)
+		    set port $candidateDescription(local,port)
+		}
+	    }
+	}
+	
+	# Search the candidates in priority order.
+	foreach name {custom public local} {
+	    if {[info exists candidateDescription($name,ip)]} { 
+		set ip   $candidateDescription($name,ip)
+		set port $candidateDescription($name,port)
+		break
+	    }
+	}
+	if {$ip eq $state(publicIP)} {
+	    set ip   $candidateDescription(local,ip)
+	    set port $candidateDescription(local,port)
+	}
 	
 	Debug "\t ::Phone::DialJingle ip=$ip, port=$port"
 	set myjid [::Jabber::JlibCmd getthis myjid]
@@ -336,6 +360,7 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
 #-------------------------------------------------------------------------
 #---------------------- (Extended Presence) ------------------------------
 #-------------------------------------------------------------------------
+
 proc ::JingleIAX::PresenceHook {jid type args} {
     variable contacts   
 
