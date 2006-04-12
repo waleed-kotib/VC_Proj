@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.12 2006-04-11 12:45:23 matben Exp $
+# $Id: JingleIax.tcl,v 1.13 2006-04-12 07:05:16 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -132,7 +132,7 @@ proc ::JingleIAX::RosterPostCommandHook {wmenu jidlist clicked status} {
 
     set jid [lindex $jidlist 0]
 
-    Debug "RosterPostCommandHook $jidlist $clicked $status"
+    Debug "RosterPostCommandHook jidlist=$jidlist, clicked=$clicked, status=$status"
 
     ::Roster::SetMenuEntryState $wmenu mCall disabled
     if {$status ne "available"} {
@@ -162,12 +162,15 @@ proc ::JingleIAX::SessionInitiate {jid} {
       [list $mediaElemAudio] [list $transportElem] ::JingleIAX::SessionPending]
 }
 
+# JingleIAX::IQHandler --
+# 
+#       This is our registered jingle handler.
 
 proc ::JingleIAX::IQHandler {jlib _jelem args} {
     array set argsArr $args
     variable state
 
-    Debug "::JingleIAX::IQHandler jelem=$_jelem, args=$args"
+    Debug "::JingleIAX::IQHandler"
     
     array set argsArr $args
     set id $argsArr(-id)
@@ -187,7 +190,7 @@ proc ::JingleIAX::IQHandler {jlib _jelem args} {
 proc ::JingleIAX::SessionInitiateIncoming {jlib from jingle sid id} {
     variable state
 
-    Debug "::JingleIAX::SessionInitiateIncoming from=$from, jingle=$jingle, sid=$sid, id=$id"
+    Debug "::JingleIAX::SessionInitiateIncoming from=$from, sid=$sid, id=$id"
     ::Jabber::JlibCmd send_iq result {} -to $from -id $id
     set state(sid) $sid
     TransportAccept $jlib $from
@@ -202,12 +205,16 @@ proc ::JingleIAX::TransportAccept {jlib from} {
     Debug "::JingleIAX::TransportAccept from=$from"
 
     # -------- Transports Supported ------------------- 
-    set locAttr [list name local  ip $state(localIP)  port $state(localIAXPort)]
-    set pubAttr [list name public ip $state(publicIP) port $state(publicIAXPort)]
+    set locAttr [list name local ip $state(localIP) port $state(localIAXPort)]
     set localElem  [wrapper::createtag "candidate" -attrlist $locAttr]
-    set publicElem [wrapper::createtag "candidate" -attrlist $pubAttr]
+    set candidateElems [list $localElem]
 
-    set candidateElems [list $localElem $publicElem]
+    # Add only the public candidate if we've got a stun answer.
+    if {$state(publicIP) ne "127.0.0.1"} {
+	set pubAttr [list name public ip $state(publicIP) port $state(publicIAXPort)]
+	set publicElem [wrapper::createtag "candidate" -attrlist $pubAttr]
+	lappend candidateElems $publicElem
+    }
     if {$prefs(NATip) ne ""} {
 	set cusAttr [list name custom ip $prefs(NATip) port $state(publicIAXPort)]
 	set customElem [wrapper::createtag "candidate" -attrlist $cusAttr]
@@ -218,16 +225,31 @@ proc ::JingleIAX::TransportAccept {jlib from} {
       -attrlist [list xmlns $xmlns(transport) version 2] \
       -subtags $candidateElems]
 
-    ::Jabber::JlibCmd jingle send_set $state(sid) "transport-accept" {}  \
-      [list $transportElem ]
-    ::Jabber::JlibCmd jingle send_set $state(sid) "session-accept" {}
+    ::Jabber::JlibCmd jingle send_set $state(sid) "transport-accept"  \
+      ::JingleIAX::AcceptCB [list $transportElem ]
+    ::Jabber::JlibCmd jingle send_set $state(sid) "session-accept"    \
+      ::JingleIAX::AcceptCB
 }
+
+proc ::JingleIAX::AcceptCB {args} {
+    
+    # Empty.
+}
+
+# JingleIAX::SessionPending --
+#
+#       This is the callback from 'SessionInitiate'.
+#       We normally expect a single 'result' element but need to cancel
+#       the call if an error.
 
 proc ::JingleIAX::SessionPending {type subiq args} {
     
     Debug "::JingleIAX::SessionPending"
     #--------- Comes an Error from Initiate --------
     if { ($type eq "error") || ($type eq "cancel")} {
+	
+	# @@@ Cleanup!
+
 	ui::dialog -icon error -type ok -message [mc phoneFailedCalling] \
 	  -detail $subiq
     }
@@ -238,6 +260,7 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
     variable xmlns
 
     Debug "::JingleIAX::TransportIncomingAccept"
+
     # Extract the command level XML data items.     
     #set jingle [wrapper::gettag $args]
 
@@ -256,7 +279,7 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
         }
 
         set candidateList [wrapper::getchildswithtag $transport candidate]
-        if {$candidateList != {}} {
+        if {$candidateList ne {}} {
             foreach candidate $candidateList {
                 set name [wrapper::getattribute $candidate name]
                 if {$name ne ""} {
@@ -303,7 +326,10 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
                 set port $candidateDescription(local,port)
             }
         }
-        ::Phone::DialJingle $ip $port $from [::Jabber::JlibCmd getthis myjid] $user $password
+	
+	Debug "\t ::Phone::DialJingle ip=$ip, port=$port"
+	set myjid [::Jabber::JlibCmd getthis myjid]
+        ::Phone::DialJingle $ip $port $from $myjid $user $password
     }
 }
 
@@ -315,9 +341,10 @@ proc ::JingleIAX::PresenceHook {jid type args} {
 
     Debug "::JingleIAX::PresenceHook"
     array set argsArr $args
+    set from $argsArr(-from)
 
     #------- Set jingle status icon  ---------
-    set isJID [string first "@" $argsArr(-from)]
+    set isJID [string first "@" $from]
     if { [info exists argsArr(-status)] && $isJID > 0 } {
         set jingleStatusIndex [string first - $argsArr(-status)]
         set jingleType        [string range $argsArr(-status) 0 [expr $jingleStatusIndex-1]]
@@ -328,7 +355,7 @@ proc ::JingleIAX::PresenceHook {jid type args} {
         if {[::Jabber::RosterCmd haveroster]} {
             if { $jingleType eq "jingle" } {
                 set image [::Rosticons::Get [string tolower phone/$jingleStatus]]
-                ::RosterTree::StyleSetItemAlternative $argsArr(-from) jivephone image $image
+                ::RosterTree::StyleSetItemAlternative $from jivephone image $image
             }
         }
     }
@@ -338,7 +365,7 @@ proc ::JingleIAX::PresenceHook {jid type args} {
         # Try to Disco if user support Jingle??????
 	jlib::splitjidex $jid node domain -
         array set arrArgs $args
-        eval {::Jabber::JlibCmd disco send_get info $arrArgs(-from) ::JingleIAX::OnDiscoUserNode}
+        ::Jabber::JlibCmd disco send_get info $from ::JingleIAX::OnDiscoUserNode
     }
 }
 
@@ -354,7 +381,7 @@ proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
         set feature "http://jabber.org/protocol/jingle"
 	set haveJingle [::Jabber::JlibCmd disco hasfeature $feature $from $node]
 
-	Debug "\t from=$from, node=$node, havePhone=$haveJingle"
+	Debug "\t from=$from, node=$node, haveJingle=$haveJingle"
 
 	if {$haveJingle} {
             if { ![info exists contacts($from,jingle)] } {
@@ -362,7 +389,7 @@ proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
                 set contacts($from,jingle) "true"
 
                 #----- Sends our Jingle Presence for the new available contact --------
-                ::Jabber::JlibCmd send_presence -show available -status "jingle-available"
+		::Jabber::SetStatus available -status "jingle-available"
             }
 	} 
     } else {
@@ -374,13 +401,15 @@ proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
 proc ::JingleIAX::SendJinglePresence {state} {
     variable contacts
 
+    Debug "::JingleIAX::SendJinglePresence state=$state"
+
     #---- Send Info to all the contacts on the roster that Jingle Extended Presence ----
     if { $state ne "available" } {
         set show "dnd"
     } else {
         set show "available"
     }
-    ::Jabber::JlibCmd send_presence -show $show -status "jingle-$state"
+    ::Jabber::SetStatus $show -status "jingle-$state"
 }
 
 #-------------------------------------------------------------------------
@@ -411,7 +440,6 @@ proc ::JingleIAX::ChatCall {dlgtoken} {
 }
 
 proc ::JingleIAX::Debug {msg} {
-
     if {1} {
         puts "-------- $msg"
     }
