@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.15 2006-04-12 14:32:56 matben Exp $
+# $Id: JingleIax.tcl,v 1.16 2006-04-13 10:45:05 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -67,6 +67,13 @@ proc ::JingleIAX::Init { } {
 
     jlib::jingle::register iax 50  \
       [list $mediaElemAudio] [list $transportElem] ::JingleIAX::IQHandler
+
+    # Caps specific iax stuff.
+    set subtags [list [wrapper::createtag "identity"  \
+      -attrlist [list category hierarchy type leaf name "IAX Phone"]]]
+    lappend subtags [wrapper::createtag "feature" \
+      -attrlist [list var $xmlns(transport)]]
+    ::Jabber::RegisterCapsExtKey iax $subtags
 
     variable contacts
 }
@@ -141,7 +148,7 @@ proc ::JingleIAX::RosterPostCommandHook {wmenu jidlist clicked status} {
     }
 
     if { [info exists contacts($jid,jingle)] } {
-        if { $contacts($jid,jingle) eq "true"} {
+        if { $contacts($jid,jingle) } {
             ::Roster::SetMenuEntryState $wmenu mCall normal
         }
     }
@@ -198,6 +205,10 @@ proc ::JingleIAX::SessionInitiateIncoming {jlib from jingle sid id} {
 
 }
 
+# JingleIAX::TransportAccept --
+# 
+#       This formulates our response to an incoming 'session-initiate' action.
+
 proc ::JingleIAX::TransportAccept {jlib from} {
     variable state
     variable xmlns
@@ -216,6 +227,8 @@ proc ::JingleIAX::TransportAccept {jlib from} {
 	set publicElem [wrapper::createtag "candidate" -attrlist $pubAttr]
 	lappend candidateElems $publicElem
     }
+    
+    # Add only the hardcoded custom ip if nonempty.
     if {$prefs(NATip) ne ""} {
 	set cusAttr [list name custom ip $prefs(NATip) port $state(publicIAXPort)]
 	set customElem [wrapper::createtag "candidate" -attrlist $cusAttr]
@@ -365,11 +378,14 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
 proc ::JingleIAX::PresenceHook {jid type args} {
     variable contacts   
 
-    Debug "::JingleIAX::PresenceHook"
+    Debug "::JingleIAX::PresenceHook jid=$jid, type=$type"
+
     array set argsArr $args
     set from $argsArr(-from)
 
     #------- Set jingle status icon  ---------
+    #
+    # @@@ BAD !!!!!!!!!!!!!!!!!!!!!!!!
     set isJID [string first "@" $from]
     if { [info exists argsArr(-status)] && $isJID > 0 } {
         set jingleStatusIndex [string first - $argsArr(-status)]
@@ -400,7 +416,7 @@ proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
     variable state
     variable xmlns
 
-    Debug "::JingleIAX::OnDiscoUserNode"
+    Debug "::JingleIAX::OnDiscoUserNode type=$type, from=$from, subiq=$subiq"
  
     #-------- If the JID has Jingle support cache
     if {$type eq "result"} {
@@ -413,14 +429,15 @@ proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
 	if {$haveJingle} {
             if { ![info exists contacts($from,jingle)] } {
                 #---- Cache the new Jingle Contact -------
-                set contacts($from,jingle) "true"
+                set contacts($from,jingle) 1
 
                 #----- Sends our Jingle Presence for the new available contact --------
+		# @@@ Shall we use directed presence here???
 		::Jabber::SetStatus available -status "jingle-available"
             }
 	} 
     } else {
-        set contacts($from,jingle) "false"
+        set contacts($from,jingle) 0
     }
 }
 
@@ -460,7 +477,7 @@ proc ::JingleIAX::ChatCall {dlgtoken} {
     set chattoken [::Chat::GetActiveChatToken $dlgtoken]
     set jid [::Chat::GetChatTokenValue $chattoken jid]
     if {[info exists contacts($jid,jingle)] } {
-        if { $contacts($jid,jingle) eq "true" } {
+        if { $contacts($jid,jingle) } {
 	    SessionInitiate $jid
         }
     }

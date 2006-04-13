@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: HttpTrpt.tcl,v 1.7 2005-10-15 07:03:35 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.8 2006-04-13 10:45:05 matben Exp $
 
 package require httpex
 package require timing
@@ -18,7 +18,7 @@ package provide HttpTrpt 1.0
 namespace eval ::HttpTrpt:: {
 
     variable uid 0
-    variable wbase .htrpt[format %x [clock clicks]]
+    variable wbase .htrpt[clock clicks]
 }
 
 # HttpTrpt::Get --

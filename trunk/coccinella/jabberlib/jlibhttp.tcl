@@ -4,7 +4,7 @@
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.12 2005-10-12 06:59:17 matben Exp $
+# $Id: jlibhttp.tcl,v 1.13 2006-04-13 10:45:05 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -124,9 +124,6 @@ proc jlib::http::new {jlibname url args} {
     # Initialize.
     InitState $jlibname
 
-    set seed [expr {abs([pid]+[clock clicks]%100000)}]
-    expr {srand(int($seed))}
-
     $jlibname registertransport "http"    \
       [namespace current]::transportinit  \
       [namespace current]::send           \
@@ -173,8 +170,8 @@ proc jlib::http::BuildProxyHeader {proxyusername proxypasswd} {
 }
 
 proc jlib::http::NewSeed { } {
-    
-    set num [expr {int(10000000 * rand())}]
+    set MAX_INT 0x7FFFFFFF    
+    set num [expr {int($MAX_INT*rand())}]
     return [format %0x $num]
 }
 

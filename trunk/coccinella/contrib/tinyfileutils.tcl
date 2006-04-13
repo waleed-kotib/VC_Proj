@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: tinyfileutils.tcl,v 1.6 2005-08-14 06:56:45 matben Exp $
+# $Id: tinyfileutils.tcl,v 1.7 2006-04-13 10:45:05 matben Exp $
 
 package provide tinyfileutils 1.0
 
@@ -211,7 +211,7 @@ proc ::tfileutils::tempfile {tmpdir prefix} {
 	set newname $prefix
 	for {set j 0} {$j < $nrand_chars} {incr j} {
 	    append newname [string index $chars \
-	      [expr {([clock clicks] ^ $mypid) % 62}]]
+	      [expr {([string range [clock clicks] end-9 end] ^ $mypid) % 62}]]
 	}
 	set newname [file join $tmpdir $newname]
 	if {[file exists $newname]} {

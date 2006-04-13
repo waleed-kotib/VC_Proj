@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.134 2006-04-12 07:04:14 matben Exp $
+# $Id: jabberlib.tcl,v 1.135 2006-04-13 10:45:05 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -4139,8 +4139,8 @@ proc jlib::setdebug {args} {
 
 proc jlib::generateuuid {} {
     set MAX_INT 0x7FFFFFFF
-    set hex1 [format {%x} [clock clicks]]
-    set hex2 [format {%x} [expr int($MAX_INT*rand())]]
+    set hex1 [format {%x} [string range [clock clicks] end-9 end]]
+    set hex2 [format {%x} [expr {int($MAX_INT*rand())}]]
     return $hex1-$hex2
 }
 

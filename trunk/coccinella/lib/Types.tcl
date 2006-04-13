@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.15 2005-12-08 15:28:04 matben Exp $
+# $Id: Types.tcl,v 1.16 2006-04-13 10:45:05 matben Exp $
 
 package provide Types 1.0
 
@@ -73,6 +73,7 @@ namespace eval ::Types:: {
 	text/html            {.html .htm}
 	text/richtext        {.rtx}
 	text/xml             {.xml}
+	text/css             {.css}
 	video/quicktime      {.mov  .qt}
 	video/mpeg4          {.mp4}
 	video/x-msvideo      {.avi}
@@ -136,6 +137,7 @@ namespace eval ::Types:: {
 	text/xml             {Extensible Markup Language}
 	text/richtext        {Rich Text Format}
 	text/html            {Hypertext Markup Language}
+	text/css             {Cascading Style Sheet}
 	video/quicktime      {QuickTime Video}
 	video/mpeg4          {MPEG 4 Video}
 	video/x-dv           {DV Video}

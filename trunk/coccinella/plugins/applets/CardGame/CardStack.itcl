@@ -3,7 +3,7 @@
 #       Supposed to handle cardstacks. It doesn't handle any display things,
 #       and not any user interaction or interface stuff.
 # 
-# $Id: CardStack.itcl,v 1.5 2005-06-21 08:15:35 matben Exp $
+# $Id: CardStack.itcl,v 1.6 2006-04-13 10:45:05 matben Exp $
 
 class CardStack {
         
@@ -229,8 +229,7 @@ body CardStack::MakeTopmost {card} {
 }
 
 body CardStack::InitRand {} {    
-    set seed [expr {abs([pid]+[clock clicks]%100000)}]
-    expr {srand(int($seed))}
+    # empty
 }
 
 body CardStack::UnifRand {x} {    
