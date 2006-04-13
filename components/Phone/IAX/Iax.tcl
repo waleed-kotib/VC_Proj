@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.5 2006-04-12 07:05:16 matben Exp $
+# $Id: Iax.tcl,v 1.6 2006-04-13 05:37:55 matben Exp $
 
 namespace eval ::Iax { }
 
@@ -260,7 +260,7 @@ proc ::Iax::DialJingle {peer {line ""} {subject ""} {user ""} {password ""}} {
     }
 
     #----- Dial Peer -------
-    ::Debug 4 "iaxclient::dial $userDef$peer $callNo"
+    ::Debug 4 "\t iaxclient::dial $userDef$peer $callNo"
     iaxclient::dial "$userDef$peer" $callNo
     if { $subject ne "" } {
 	iaxclient::sendtext $subject
@@ -270,7 +270,7 @@ proc ::Iax::DialJingle {peer {line ""} {subject ""} {user ""} {password ""}} {
 proc ::Iax::Dial {phonenumber {line ""} {subject ""}} {
     variable iaxPrefs
 
-    ::Debug 4 "::Iax::Dialphonenumber=$phonenumber "
+    ::Debug 4 "::Iax::Dial phonenumber=$phonenumber "
     
     if {$line eq ""} {
 	set callNo 1 
@@ -279,7 +279,7 @@ proc ::Iax::Dial {phonenumber {line ""} {subject ""}} {
     }
     set callNo 1 
  
-    ::Debug 4 "iaxclient::dial ..."
+    ::Debug 4 "\t iaxclient::dial ..."
     iaxclient::dial "$iaxPrefs(user):$iaxPrefs(password)@$iaxPrefs(host)/$phonenumber" $callNo
     if { $subject ne "" } {
 	iaxclient::sendtext $subject
