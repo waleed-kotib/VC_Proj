@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.83 2006-04-07 14:08:27 matben Exp $
+# $Id: Disco.tcl,v 1.84 2006-04-13 10:45:05 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -533,8 +533,7 @@ proc ::Disco::ParseGetInfo {from subiq args} {
 	    
 	# No node. Adding private namespaces.
 	set vars [concat  \
-	  [jlib::disco::getregisteredfeatures]  \
-	  [::Jabber::GetClientXmlnsList]]
+	  [jlib::disco::getregisteredfeatures] [::Jabber::GetClientXmlnsList]]
 	set subtags [list [wrapper::createtag "identity" -attrlist  \
 	  [list category client type pc name Coccinella]]]
 	lappend subtags [wrapper::createtag "feature" \

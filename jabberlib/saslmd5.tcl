@@ -10,7 +10,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  BSD license
 #  
-# $Id: saslmd5.tcl,v 1.7 2005-11-04 15:14:55 matben Exp $
+# $Id: saslmd5.tcl,v 1.8 2006-04-13 10:45:05 matben Exp $
 
 package require base64
 package require md5 2.0
@@ -25,8 +25,6 @@ namespace eval saslmd5 {
     variable needed {username authzid pass realm}
     variable uid 0
     
-    set seed [expr {abs([pid]+[clock clicks]%100000)}]
-    expr {srand(int($seed))}
 }
 
 # "static" methods.

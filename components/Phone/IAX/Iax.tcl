@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.6 2006-04-13 05:37:55 matben Exp $
+# $Id: Iax.tcl,v 1.7 2006-04-13 10:45:05 matben Exp $
 
 namespace eval ::Iax { }
 
@@ -39,8 +39,7 @@ proc ::Iax::Init { } {
     
     ::Phone::RegisterPhone iax "IAX Phone"  \
       ::Iax::InitProc ::Iax::CmdProc ::Iax::DeleteProc
-    #::Jabber::RegisterCapsExtKey iax
-
+    
     # Setting up Callbacks functions.
     iaxclient::notify <State>         [namespace current]::NotifyState
     iaxclient::notify <Registration>  [namespace current]::NotifyRegister
@@ -171,7 +170,7 @@ proc ::Iax::NotifyText { type callno textmessage args} {
 proc ::Iax::NotifyRegister {id reply msgcount} {
     variable iaxPrefs
 
-    ::Debug 4 "::Iax::NotifyRegister"
+    ::Debug 4 "::Iax::NotifyRegister id=$id, reply=$reply"
     
     if { ($iaxPrefs(registerid) == $id) && ($reply eq "timeout") } {
         ::Phone::HidePhone

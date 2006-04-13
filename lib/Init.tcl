@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.39 2006-04-05 07:46:22 matben Exp $
+# $Id: Init.tcl,v 1.40 2006-04-13 10:45:05 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -123,7 +123,9 @@ proc ::Init::SetThis {thisScript} {
     set this(ipnum) $this(internalIPnum) 
     
     # Need a tmp directory, typically in a StarKit when QuickTime movies are opened.
-    set tail "coccinella[pid][format %x [clock clicks]]"
+    set MAX_INT 0x7FFFFFFF
+    set hex [format {%x} [expr int($MAX_INT*rand())]]
+    set tail coccinella[pid]-$hex
     set this(tmpPath) [file join [TempDir] $tail]
     if {![file isdirectory $this(tmpPath)]} {
 	file mkdir $this(tmpPath)

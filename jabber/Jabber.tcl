@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.162 2006-04-08 11:02:54 matben Exp $
+# $Id: Jabber.tcl,v 1.163 2006-04-13 10:45:05 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -504,8 +504,8 @@ proc ::Jabber::Init { } {
     # Register file transport mechanism used when responding to a disco info
     # request to the specified node.
     # In a component based system this should be done by the transport component.
-    set subtags [list [wrapper::createtag "identity" -attrlist  \
-      [list category hierarchy type leaf name "File transfer"]]]
+    set subtags [list [wrapper::createtag "identity"  \
+      -attrlist [list category hierarchy type leaf name "File transfer"]]]
     lappend subtags [wrapper::createtag "feature" \
       -attrlist [list var $xmppxmlns(disco,info)]]
     lappend subtags [wrapper::createtag "feature" \

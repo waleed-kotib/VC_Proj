@@ -5,7 +5,7 @@
 #  Copyright (c) 2004
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: notebox.tcl,v 1.1 2004-12-01 15:15:41 matben Exp $
+#  $Id: notebox.tcl,v 1.2 2006-04-13 10:45:05 matben Exp $
 
 package provide notebox 1.0
 
@@ -47,7 +47,9 @@ namespace eval ::notebox:: {
 	    option add *Notebox.font {Geneva 9} widgetDefault
 	}
     }
-    set w .notebox[format %x [clock clicks]]
+    set MAX_INT 0x7FFFFFFF
+    set hex [format {%x} [expr {int($MAX_INT*rand())}]]
+    set w .notebox$hex
     set this(w) $w
     set this(uid) 0
     set this(x) [expr [winfo screenwidth .] - 30]
