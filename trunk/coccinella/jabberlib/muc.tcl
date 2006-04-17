@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.29 2006-04-17 13:23:38 matben Exp $
+# $Id: muc.tcl,v 1.30 2006-04-17 15:08:42 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -505,13 +505,15 @@ proc jlib::muc::setroom {jlibname roomjid type args} {
 	    }
 	}
     }
-    if {[llength $xelem] == 0} {
-	set xelem [list [wrapper::createtag "x"  \
-	  -attrlist [list xmlns "jabber:x:data" type $type]]]
+    if {[info exists xelem]} {
+        if {[llength $xelem] == 0} {
+   	    set xelem [list [wrapper::createtag "x"  \
+	      -attrlist [list xmlns "jabber:x:data" type $type]]]
+        }
+        set xmllist [wrapper::createtag "query" -subtags $xelem \
+          -attrlist [list xmlns $xmlns(owner)]]
+        eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
     }
-    set xmllist [wrapper::createtag "query" -subtags $xelem \
-      -attrlist [list xmlns $xmlns(owner)]]
-    eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
 # jlib::muc::destroy --
@@ -642,7 +644,7 @@ proc jlib::muc::Debug {num str} {
     }
 }
 
-# We have to do it here since need the initProc before doing this.
+# We have to do it here since need the initProc befor doing this.
 
 namespace eval jlib::muc {
     
