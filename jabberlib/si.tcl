@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.11 2006-03-09 10:40:32 matben Exp $
+# $Id: si.tcl,v 1.12 2006-04-17 13:23:38 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -621,7 +621,7 @@ proc jlib::si::tfree {jlibname sid} {
     array unset tstate $sid,*
 }
 
-# We have to do it here since need the initProc befor doing this.
+# We have to do it here since need the initProc before doing this.
 
 namespace eval jlib::si {
     

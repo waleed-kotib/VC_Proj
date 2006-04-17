@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.43 2006-03-02 07:05:51 matben Exp $
+# $Id: roster.tcl,v 1.44 2006-04-17 13:23:38 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -463,8 +463,6 @@ proc roster::setpresence {rostName jid type args} {
 	  || ($presArr($mjid,type) eq "unavailable")} {
 	    set state($mjid,secs) [clock seconds]
 	}
-	
-	# @@@ It is a bit unclear which elements are persistant.	
 	
 	# Keep cache of any old state.
         # Note special handling of * for array unset - prefix with \\ to quote.
@@ -1304,6 +1302,15 @@ proc roster::getcapsattr {rostName jid attrname} {
 	set attr [wrapper::getattribute $cElem $attrname]
     }
     return $attr
+}
+
+proc roster::havecaps {rostName jid} {
+    
+    upvar jlib::jxmlns jxmlns
+    upvar ${rostName}::presArr presArr
+
+    set xmlnscaps $jxmlns(caps)
+    return [info exists presArr($jid,extras,$xmlnscaps)]
 }
 
 # roster::availablesince --

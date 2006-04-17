@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: vcard.tcl,v 1.4 2006-03-09 10:40:32 matben Exp $
+# $Id: vcard.tcl,v 1.5 2006-04-17 13:23:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -295,7 +295,7 @@ proc jlib::vcard::clear {jlibname {jid ""}} {
     }
 }
 
-# We have to do it here since need the initProc befor doing this.
+# We have to do it here since need the initProc before doing this.
 
 namespace eval jlib::vcard {
 

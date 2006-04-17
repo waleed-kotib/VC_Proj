@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.28 2006-03-09 10:40:32 matben Exp $
+# $Id: muc.tcl,v 1.29 2006-04-17 13:23:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -642,7 +642,7 @@ proc jlib::muc::Debug {num str} {
     }
 }
 
-# We have to do it here since need the initProc befor doing this.
+# We have to do it here since need the initProc before doing this.
 
 namespace eval jlib::muc {
     

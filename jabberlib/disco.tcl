@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.35 2006-04-08 11:02:13 matben Exp $
+# $Id: disco.tcl,v 1.36 2006-04-17 13:23:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -98,9 +98,9 @@ namespace eval jlib::disco {
     # Common xml namespaces.
     variable xmlns
     array set xmlns {
-	disco           "http://jabber.org/protocol/disco"
-	items           "http://jabber.org/protocol/disco#items"
-	info            "http://jabber.org/protocol/disco#info"
+	disco   "http://jabber.org/protocol/disco"
+	items   "http://jabber.org/protocol/disco#items"
+	info    "http://jabber.org/protocol/disco#info"
     }
     
     # Components register their feature elements for disco/info.
@@ -1211,7 +1211,7 @@ proc jlib::disco::Debug {num str} {
     }
 }
 
-# We have to do it here since need the initProc befor doing this.
+# We have to do it here since need the initProc before doing this.
 
 namespace eval jlib::disco {
     

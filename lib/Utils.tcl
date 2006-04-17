@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.54 2006-04-05 07:46:22 matben Exp $
+# $Id: Utils.tcl,v 1.55 2006-04-17 13:23:38 matben Exp $
 
 package provide Utils 1.0
 
@@ -399,6 +399,56 @@ proc ::Utils::ImageFromData {data {mime ""}} {
 	    return
 	}
     }
+}
+
+# Utils::LanguageMenubutton --
+# 
+#       Make a language menubutton selector.
+
+proc ::Utils::LanguageMenubutton {w varName args} {
+    global  this prefs
+    
+    # Add entries here for new message catalogs.
+    array set code2Name {
+	da {Danish} 
+	nl {Dutch} 
+	en {English} 
+	fr {French} 
+	de {German} 
+	pl {Polish} 
+	ru {Russian} 
+	es {Spanish} 
+	sv {Swedish} 
+    }
+    set langs {}
+    foreach f [glob -nocomplain -tails -directory $this(msgcatPath) *.msg] {
+	set code [file rootname $f]
+	if {[info exists code2Name($code)]} {
+	    set name $code2Name($code)
+	    set key native${name}
+	    set str [mc $key]
+	    if {$str eq $key} {
+		# Fallback.
+		set str $name
+	    }
+	} else {
+	    set str $code
+	}
+	lappend langs $str
+	set langCode2Str($code) $str
+    }
+    if {$prefs(messageLocale) eq ""} {
+	set $varName [lindex [split [::msgcat::mclocale] _] 0]
+    } else {
+	set $varName $prefs(messageLocale)
+    }
+    set menuDef {}
+    foreach {code str} [array get langCode2Str] {
+	lappend menuDef [list $str -value $code]
+    }
+    ui::optionmenu $w -menulist $menuDef -direction flush -variable $varName
+
+    return $w
 }
 
 #--- Animation -----------------------------------------------------------------
