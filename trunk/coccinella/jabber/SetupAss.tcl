@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.38 2006-01-11 13:24:54 matben Exp $
+# $Id: SetupAss.tcl,v 1.39 2006-04-17 13:23:38 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -36,12 +36,10 @@ proc ::Jabber::SetupAss::SetupAss { } {
     variable finished
     variable inited
     variable locale
-    variable localeStr
     variable server    ""
     variable username  ""
     variable password  ""
     variable password2 ""
-    variable langCode2Str
 
     if {!$inited} {
     
@@ -94,52 +92,7 @@ proc ::Jabber::SetupAss::SetupAss { } {
     ttk::frame $plang.fr -padding [option get . notebookPagePadding {}]
     ttk::label $plang.fr.msg1 -style Small.TLabel \
       -wraplength 260 -justify left -text [mc sulang]
-
-    # Add entries here for new message catalogs.
-    array set code2Name {
-	da {Danish} 
-	nl {Dutch} 
-	en {English} 
-	fr {French} 
-	de {German} 
-	pl {Polish} 
-	ru {Russian} 
-	es {Spanish} 
-	sv {Swedish} 
-    }
-    set langs {}
-    foreach f [glob -nocomplain -tails -directory $this(msgcatPath) *.msg] {
-	set code [file rootname $f]
-	if {[info exists code2Name($code)]} {
-	    set name $code2Name($code)
-	    set key native${name}
-	    set str [mc $key]
-	    if {$str eq $key} {
-		# Fallback.
-		set str $name
-	    }
-	} else {
-	    set str $code
-	}
-	lappend langs $str
-	set langCode2Str($code) $str
-    }
-    set wmb $plang.fr.pop
-    ttk::menubutton $wmb -textvariable [namespace current]::localeStr  \
-      -menu $wmb.menu -direction flush
-    menu $wmb.menu -tearoff 0
-    foreach {code str} [array get langCode2Str] {
-	$wmb.menu add radiobutton -label $str -value $code  \
-	  -variable [namespace current]::locale  \
-	  -command [namespace current]::LangCmd
-    }
-    
-    if {$prefs(messageLocale) eq ""} {
-	set locale [lindex [split [::msgcat::mclocale] _] 0]
-    } else {
-	set locale $prefs(messageLocale)
-    }
-    set localeStr $langCode2Str($locale)
+    ::Utils::LanguageMenubutton $plang.fr.pop [namespace current]::locale
     ttk::button $plang.fr.def -text [mc Default]  \
       -command [namespace current]::DefaultLang
     
@@ -242,14 +195,6 @@ proc ::Jabber::SetupAss::SetupAss { } {
 	}
     } $wrapthese $w]    
     after idle $script
-}
-
-proc ::Jabber::SetupAss::LangCmd { } {
-    variable locale
-    variable localeStr
-    variable langCode2Str
-        
-    set localeStr $langCode2Str($locale)
 }
 
 proc ::Jabber::SetupAss::NextPage {w page} {

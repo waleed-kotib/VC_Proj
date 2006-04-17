@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.135 2006-04-13 10:45:05 matben Exp $
+# $Id: jabberlib.tcl,v 1.136 2006-04-17 13:23:38 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -221,11 +221,6 @@ namespace eval jlib {
 	dnd             5
 	invisible       6
 	unavailable     7
-    }
-    
-    # Standin for a 8.5 feature.
-    if {![llength [info commands lassign]]} {
-	proc lassign {vals args} {uplevel 1 [list foreach $args $vals break] }
     }
 }
 
@@ -3124,6 +3119,8 @@ proc jlib::send_presence {jlibname args} {
 #       to our internal presence state to send each time we set our presence 
 #       with the server (undirected presence).
 #       They are stored by tag, xmlns, and an optional type attribute.
+#       Any existing presence stanza with identical tag/xmlns/type will 
+#       be replaced.
 #       
 # Arguments:
 #       jlibname:   the instance of this jlib

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.84 2006-04-13 10:45:05 matben Exp $
+# $Id: Disco.tcl,v 1.85 2006-04-17 13:23:38 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -548,8 +548,8 @@ proc ::Disco::ParseGetInfo {from subiq args} {
 	# Return version number.
 	set subtags [list [wrapper::createtag "identity" -attrlist  \
 	  [list category hierarchy type leaf name "Version"]]]
-	lappend subtags [wrapper::createtag "feature" \
-	  -attrlist [list var $xmppxmlns(disco,info)]]
+	#lappend subtags [wrapper::createtag "feature" \
+	 # -attrlist [list var $xmppxmlns(disco,info)]]
 	# version number ???
 	lappend subtags [wrapper::createtag "feature" \
 	  -attrlist [list var "jabber:iq:version"]]

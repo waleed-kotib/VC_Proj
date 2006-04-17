@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.163 2006-04-13 10:45:05 matben Exp $
+# $Id: Jabber.tcl,v 1.164 2006-04-17 13:23:38 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -20,6 +20,7 @@ package require wavelabel
 package require jlib
 package require roster
 package require jlib::bytestreams
+package require jlib::caps
 package require jlib::disco
 package require jlib::ftrans
 package require jlib::http
@@ -1272,6 +1273,18 @@ proc ::Jabber::SetStatus {type args} {
     }
 }
 
+# Jabber::SyncStatus --
+# 
+#       Synchronize the presence we have. 
+#       This is useful if we happen to change a custom presence x element,
+#       for instance, our phone status.
+
+proc ::Jabber::SyncStatus { } {
+    variable jstate
+    
+    SetStatus $jstate(status)
+}
+
 # Jabber::CreateCoccinellaPresElement --
 # 
 #       Used when sending inital presence. This way clients get the info
@@ -1298,8 +1311,6 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
     set subelem [list  \
       [wrapper::createtag ip -chdata $ip -attrlist $attrputget]  \
       [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
-    #set xmllist [wrapper::createtag coccinella -subtags $subelem \
-    #  -attrlist [list xmlns $coccixmlns(servers) ver $this(vers,full)]]
 
     # Switch to x-element.
     set xmllist [wrapper::createtag x -subtags $subelem \

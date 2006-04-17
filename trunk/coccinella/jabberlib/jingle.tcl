@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jingle.tcl,v 1.2 2006-04-11 12:46:02 matben Exp $
+# $Id: jingle.tcl,v 1.3 2006-04-17 13:23:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -637,7 +637,7 @@ proc jlib::jingle::free {jlibname sid} {
     array unset session   $sid,*
 }
 
-# We have to do it here since need the initProc befor doing this.
+# We have to do it here since need the initProc before doing this.
 
 namespace eval jlib::jingle {
 

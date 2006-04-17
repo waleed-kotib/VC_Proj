@@ -5,11 +5,16 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: util.tcl,v 1.1 2006-03-09 10:40:32 matben Exp $
+# $Id: util.tcl,v 1.2 2006-04-17 13:23:38 matben Exp $
 
 package provide jlib::util 0.1
 
-namespace eval jlib::util { }
+namespace eval jlib::util {}
+
+# Standin for a 8.5 feature.
+if {![llength [info commands lassign]]} {
+    proc lassign {vals args} {uplevel 1 [list foreach $args $vals break] }
+}
 
 # jlib::util::lintersect --
 # 
@@ -25,3 +30,15 @@ proc jlib::util::lintersect {list1 list2} {
     return $lans
 }
 
+# jlib::util::lprune --
+# 
+#       Removes element from list, silently.
+
+proc jlib::util::lprune {listName elem} {
+    upvar $listName listValue    
+    set idx [lsearch $listValue $elem]
+    if {$idx >= 0} {
+	uplevel set $listName [list [lreplace $listValue $idx $idx]]
+    }
+    return
+}

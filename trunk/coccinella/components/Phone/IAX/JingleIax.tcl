@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.16 2006-04-13 10:45:05 matben Exp $
+# $Id: JingleIax.tcl,v 1.17 2006-04-17 13:23:38 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -30,6 +30,7 @@ proc ::JingleIAX::Init { } {
     set xmlns(transport)  "http://jabber.org/protocol/jingle/transport/iax"
 
     # Add event hooks.
+    ::hooks::register jabberInitHook        ::JingleIAX::JabberInitHook
     ::hooks::register loginHook             ::JingleIAX::LoginHook
     ::hooks::register logoutHook            ::JingleIAX::LogoutHook
     ::hooks::register presenceHook          ::JingleIAX::PresenceHook
@@ -78,32 +79,24 @@ proc ::JingleIAX::Init { } {
     variable contacts
 }
 
-proc ::JingleIAX::InitState {} {
-    global this
-    variable state
+# JingleIAX::JabberInitHook --
+# 
+#       Gets called for each new jlib instance.
+#       Do jlib instance specific stuff here.
 
-    set tempPort $state(localIAXPort)
-    if { $tempPort == 0 } {
-        set tempPort [::Iax::CmdProc getport]
-    }
+proc ::JingleIAX::JabberInitHook {jlib} {
+    
+    # @@@ Subject for experimentation!
+    # Add an: 	  
+    #   <x xmlns='http://jabber.org/protocol/jingle/media/audio' type='available'/>
 
-    set state(publicIAXPort) $tempPort 
-    set state(localIAXPort)  $tempPort
-
-
-    set state(localIP) $this(ipnum)
-    #---- Gets Public IP  ------
-    ::stun::request stun.fwdnet.net -command ::JingleIAX::StunCB
-
+    $jlib register_presence_stanza [GetXPresence available] -type available
 }
 
-proc ::JingleIAX::StunCB {token status args} {
-    variable state
-    array set arrArgs $args
-
-    if {$status eq "ok" && [info exists arrArgs(-address)]} {
-        set state(publicIP)  $arrArgs(-address)
-    }
+proc ::JingleIAX::GetXPresence {type} {
+    variable xmlns
+    
+    return [wrapper::createtag x -attrlist [list xmlns $xmlns(media) type $type]]
 }
 
 #----------------------------------------------------------------------------
@@ -113,14 +106,35 @@ proc ::JingleIAX::StunCB {token status args} {
 proc ::JingleIAX::LoginHook { } {
     variable popMenuDef  
 
-#    set state(publicIP) 127.0.0.1
-#    set state(localIP) 127.0.0.1
-#    set state(localIAXPort) 0
-#    set state(publicIAXPort) 0
-
     InitState
-
     ::Roster::RegisterPopupEntry $popMenuDef(call) 
+}
+
+proc ::JingleIAX::InitState {} {
+    global this
+    variable state
+
+    set tempPort $state(localIAXPort)
+    if { $tempPort == 0 } {
+	set tempPort [::Iax::CmdProc getport]
+    }
+
+    set state(publicIAXPort) $tempPort 
+    set state(localIAXPort)  $tempPort
+
+
+    set state(localIP) $this(ipnum)
+    #---- Gets Public IP  ------
+    ::stun::request stun.fwdnet.net -command ::JingleIAX::StunCB
+}
+
+proc ::JingleIAX::StunCB {token status args} {
+    variable state
+    array set arrArgs $args
+
+    if {$status eq "ok" && [info exists arrArgs(-address)]} {
+	set state(publicIP)  $arrArgs(-address)
+    }
 }
 
 proc ::JingleIAX::LogoutHook { } {
@@ -195,14 +209,18 @@ proc ::JingleIAX::IQHandler {jlib _jelem args} {
     }
 }
 
+# JingleIAX::SessionInitiateIncoming --
+# 
+#       Handler for a 'session-initiate' action.
+
 proc ::JingleIAX::SessionInitiateIncoming {jlib from jingle sid id} {
     variable state
 
     Debug "::JingleIAX::SessionInitiateIncoming from=$from, sid=$sid, id=$id"
+
     ::Jabber::JlibCmd send_iq result {} -to $from -id $id
     set state(sid) $sid
     TransportAccept $jlib $from
-
 }
 
 # JingleIAX::TransportAccept --
@@ -353,6 +371,7 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
 	}
 	
 	# Search the candidates in priority order.
+	# @@@ We should provide a list of candidates to ::Phone::DialJingle.
 	foreach name {custom public local} {
 	    if {[info exists candidateDescription($name,ip)]} { 
 		set ip   $candidateDescription($name,ip)
@@ -360,11 +379,14 @@ proc ::JingleIAX::TransportIncomingAccept {jlib from jingle sid id} {
 		break
 	    }
 	}
+	
+	# Antonio, what does this? Add comment.
 	if {$ip eq $state(publicIP)} {
 	    set ip   $candidateDescription(local,ip)
 	    set port $candidateDescription(local,port)
-	}
-	
+	}	
+
+	# @@@ We should provide a list of candidates to ::Phone::DialJingle.
 	Debug "\t ::Phone::DialJingle ip=$ip, port=$port"
 	set myjid [::Jabber::JlibCmd getthis myjid]
         ::Phone::DialJingle $ip $port $from $myjid $user $password
@@ -441,6 +463,9 @@ proc ::JingleIAX::OnDiscoUserNode {jlibname type from subiq args} {
     }
 }
 
+# JingleIAX::SendJinglePresence --
+# 
+#       Sends our phone presence type using x-element.
 
 proc ::JingleIAX::SendJinglePresence {state} {
     variable contacts
@@ -448,12 +473,18 @@ proc ::JingleIAX::SendJinglePresence {state} {
     Debug "::JingleIAX::SendJinglePresence state=$state"
 
     #---- Send Info to all the contacts on the roster that Jingle Extended Presence ----
-    if { $state ne "available" } {
-        set show "dnd"
-    } else {
-        set show "available"
+    # Backup:
+    if {0} {
+	if { $state ne "available" } {
+	    set show "dnd"
+	} else {
+	    set show "available"
+	}
     }
-    ::Jabber::SetStatus $show -status "jingle-$state"
+    ::Jabber::JlibCmd register_presence_stanza [GetXPresence $state]  \
+      -type available
+    ::Jabber::SyncStatus
+    #::Jabber::SetStatus $show -status "jingle-$state"
 }
 
 #-------------------------------------------------------------------------
@@ -462,9 +493,10 @@ proc ::JingleIAX::SendJinglePresence {state} {
 
 proc ::JingleIAX::BuildChatButtonTrayHook {wtray dlgtoken args} {
 
-    set w [::Chat::GetDlgTokenValue $dlgtoken w]	
-    set iconCall    [::Theme::GetImage [option get $w callImage {}]]
-    set iconCallDis [::Theme::GetImage [option get $w callDisImage {}]]
+    set w [::Chat::GetDlgTokenValue $dlgtoken w]
+    set subPath [file join components Phone images]
+    set iconCall    [::Theme::GetImage [option get $w callImage {}] $subPath]
+    set iconCallDis [::Theme::GetImage [option get $w callDisImage {}] $subPath]
 
     $wtray newbutton call  \
       -text [mc phoneMakeCall] -image $iconCall  \

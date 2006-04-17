@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: avatar.tcl,v 1.8 2006-03-09 10:40:32 matben Exp $
+# $Id: avatar.tcl,v 1.9 2006-04-17 13:23:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -555,7 +555,7 @@ proc jlib::avatar::debug {msg} {
     }
 }
 
-# We have to do it here since need the initProc befor doing this.
+# We have to do it here since need the initProc before doing this.
 
 namespace eval jlib::avatar {
 
