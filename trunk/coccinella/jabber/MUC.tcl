@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.74 2006-04-07 14:08:28 matben Exp $
+# $Id: MUC.tcl,v 1.75 2006-04-17 15:08:18 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -357,7 +357,7 @@ proc ::MUC::BuildInfo {roomjid} {
     ::UI::Toplevel $w -class JMUCInfo \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace current]::InfoCloseHook
-    wm title $w "Info Room: $roomName"
+    wm title $w "[mc {Info Room}]: $roomName"
     
     set im   [::Theme::GetImage [option get $w infoImage {}]]
     set imd  [::Theme::GetImage [option get $w infoDisImage {}]]
@@ -367,7 +367,7 @@ proc ::MUC::BuildInfo {roomjid} {
     pack $w.frall -fill both -expand 1
     
     ttk::label $w.frall.head -style Headlabel \
-      -text "Info Room" -compound left \
+      -text [mc {Info Room}] -compound left \
       -image [list $im background $imd]
     pack $w.frall.head -side top -anchor w
 
@@ -382,6 +382,8 @@ proc ::MUC::BuildInfo {roomjid} {
       room. Your role and affiliation determines your privilege to act.\
       Further restrictions may exist depending on specific room\
       configuration."
+
+    set msg [mc InfoRoomDesc]
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 12} -wraplength 300 -justify left -text $msg
     pack $wbox.msg -side top -anchor w
@@ -406,7 +408,7 @@ proc ::MUC::BuildInfo {roomjid} {
     set wtbl  $frtab.tb
     ttk::frame $frtab
     pack $frtab -side top
-    set columns [list 0 Nickname 0 Role 0 Affiliation]
+    set columns [list 0 [mc Nickname] 0 [mc Role] 0 [mc Affiliation]]
     
     tablelist::tablelist $wtbl  \
       -columns $columns -stretch all -selectmode single  \
@@ -437,7 +439,7 @@ proc ::MUC::BuildInfo {roomjid} {
         
     # Grant buttons ---
     set wgrant $frgrantrevoke.grant
-    ttk::labelframe $wgrant -text "Grant:" \
+    ttk::labelframe $wgrant -text "[mc Grant]:" \
       -padding [option get . groupSmallPadding {}]
     
     foreach txt {Voice Member Moderator Admin Owner} {
@@ -449,7 +451,7 @@ proc ::MUC::BuildInfo {roomjid} {
     
     # Revoke buttons ---
     set wrevoke $frgrantrevoke.rev
-    ttk::labelframe $wrevoke -text "Revoke:" \
+    ttk::labelframe $wrevoke -text "[mc Revoke]:" \
       -padding [option get . groupSmallPadding {}]
     
     foreach txt {Voice Member Moderator Admin Owner} {
@@ -470,13 +472,13 @@ proc ::MUC::BuildInfo {roomjid} {
     ttk::frame $wother
     pack $wother -side top
 
-    ttk::button $wother.btkick -text "Kick Participant"  \
+    ttk::button $wother.btkick -text [mc {Kick Participant}]  \
       -command [list [namespace current]::Kick $roomjid]
-    ttk::button $wother.btban -text "Ban Participant"  \
+    ttk::button $wother.btban -text [mc {Ban Participant}]  \
       -command [list [namespace current]::Ban $roomjid]
-    ttk::button $wother.btconf -text "Configure Room"  \
+    ttk::button $wother.btconf -text [mc {Configure Room}]  \
       -command [list [namespace current]::RoomConfig $roomjid]
-    ttk::button $wother.btdest -text "Destroy Room"  \
+    ttk::button $wother.btdest -text [mc {Destroy Room}]  \
       -command [list [namespace current]::Destroy $roomjid]
 
     grid  $wother.btkick  -sticky ew -pady 4
@@ -486,13 +488,13 @@ proc ::MUC::BuildInfo {roomjid} {
     
     # Edit lists ---
     set wlist $frmid.lists
-    ttk::labelframe $wlist -text "Edit Lists:" \
+    ttk::labelframe $wlist -text "[mc {Edit Lists}]:" \
       -padding [option get . groupSmallPadding {}]
     pack $wlist -side top -pady 8
 
     foreach txt {Voice Ban Member Moderator Admin Owner} {
 	set stxt [string tolower $txt]	
-	ttk::button $wlist.bt$stxt -text "$txt..."  \
+	ttk::button $wlist.bt$stxt -text "[mc $txt]..."  \
 	  -command [list [namespace current]::EditListBuild $roomjid $stxt]
 	grid  $wlist.bt$stxt  -sticky ew -pady 4
     }
@@ -547,7 +549,7 @@ proc ::MUC::FillTable {roomjid} {
 		break
 	    }
 	}
-	$wtbl insert end [list $res $role $aff]
+	$wtbl insert end [list $res [mc $role] [mc $aff]]
 	if {[string equal $res $mynick]} {
 	    set locals($roomjid,myaff)  $aff
 	    set locals($roomjid,myrole) $role
@@ -1334,7 +1336,7 @@ proc ::MUC::RoomConfig {roomjid} {
     set w $wDlgs(jmuccfg)[incr dlguid]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} -class MUCConfig
-    wm title $w "Configure Room"
+    wm title $w [mc {Configure Room}]
     
     # Global frame.
     ttk::frame $w.frall

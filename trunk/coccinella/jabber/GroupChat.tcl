@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.142 2006-04-08 07:02:48 matben Exp $
+# $Id: GroupChat.tcl,v 1.143 2006-04-17 15:08:18 matben Exp $
 
 package require Enter
 package require History
@@ -2649,12 +2649,11 @@ proc ::GroupChat::Save {dlgtoken} {
     
     if {[string length $ans]} {
 	set allText [::Text::TransformToPureText $wtext]
-	foreach {myroomjid mynick}  \
-	  [::Jabber::JlibCmd service hashandnick $roomjid] break
+	lassign [::Jabber::JlibCmd service hashandnick $roomjid] myroomjid mynick
 	set fd [open $ans w]
 	fconfigure $fd -encoding utf-8
 	puts $fd "Groupchat in:\t$roomjid"
-	puts $fd "Subject:     \t$state(subject)"
+	puts $fd "Subject:     \t$chatstate(subject)"
 	puts $fd "My nick:     \t$mynick"
 	puts $fd "\n"
 	puts $fd $allText	
@@ -2704,10 +2703,10 @@ proc ::GroupChat::StatusSyncHook {status args} {
 	    upvar 0 $chattoken chatstate
 	    
 	    # Send our status.
-	    ::Jabber::SetStatus $status -to $state(roomjid)
+	    ::Jabber::SetStatus $status -to $chatstate(roomjid)
 	    set chatstate(status)    $status
 	    set chatstate(oldStatus) $status
-	    #::Jabber::Status::ConfigImage $state(wbtstatus) $status
+	    #::Jabber::Status::ConfigImage $chatstate(wbtstatus) $status
 	}
     }
 }
