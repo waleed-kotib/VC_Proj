@@ -79,7 +79,7 @@
 ::msgcat::mcset nl Image		{Afbeelding}
 ::msgcat::mcset nl Import		{Importeren}
 ::msgcat::mcset nl Inbox		{Postvak in}
-::msgcat::mcset nl Info			{Info}
+::msgcat::mcset nl Info			{Instellen}
 ::msgcat::mcset nl Invite		{Uitnodigen}
 ::msgcat::mcset nl Language		{Taal}
 ::msgcat::mcset nl Last			{Laatste}
@@ -648,7 +648,7 @@
 # Messages for tk_messageBox:
 ::msgcat::mcset nl messfailedhttp	{Starten van interne HTTP-server mislukte: %s}
 ::msgcat::mcset nl messinfoscript	{Omwille van de 'info script' bug op uw Mac, moet u expliciet de 'Whiteboard-%s' map in het volgende venster selecteren.}
-::msgcat::mcset nl messfailedsock	{Kan socket naar server niet creëren. Misschien werkt het netwerk niet of heeft de server problemen. De foutcode is: %s}
+::msgcat::mcset nl messfailedsock	{Kan socket naar server niet aanmaken. Misschien werkt het netwerk niet of heeft de server problemen. De foutcode is: %s}
 ::msgcat::mcset nl messeofconnect	{Er liep iets mis tijdens het verbinden. Fout: eof ontvangen.}
 ::msgcat::mcset nl messfailconnect	{Er liep iets mis tijdens het verbinden met %s}
 ::msgcat::mcset nl messtimeout		{Tijdslimiet overschreden na het proberen te verbinden.}
@@ -716,7 +716,7 @@
 ::msgcat::mcset nl jamessalreadyinrost	{Jabber ID "%s" is al in uw roster. Wilt u toch verder gaan?}
 ::msgcat::mcset nl jamessfailsetnick	{Er deed zich een fout voor tijdens het instellen van de bijnaam of de groep van contactpersoon "%s". De foutcode is %s met als foutmelding: %s}
 ::msgcat::mcset nl jamessnamemissing	{De %s is afwezig of is te kort!}
-::msgcat::mcset nl jamessnosocket	{Kan socket naar server "%s" niet creëren. Misschien werkt de netwerkverbinding niet of is de server onbereikbaar. Foutmelding: %s}
+::msgcat::mcset nl jamessnosocket	{Kan socket naar server "%s" niet aanmaken. Misschien werkt de netwerkverbinding niet of is de server onbereikbaar. Foutmelding: %s}
 ::msgcat::mcset nl jamesstimeoutserver	{Tijdslimiet overschreden tijdens het wachten op antwoord van server "%s".}
 ::msgcat::mcset nl jamessregisterok	{Uw account op server "%s" is aangemaakt. U moet nu enkel nog aanmelden met de juist opgegeven gebruikersnaam en wachtwoord.}
 ::msgcat::mcset nl jamessremoveaccount	{Wilt u werkelijk uw account verwijderen? Deze handeling kan niet ongedaan gemaakt worden.}
@@ -1081,3 +1081,25 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset en iaxPhoneCodec        {Codec}
 
 # END --------------------------------------------------------------------------
+::msgcat::mcset nl {Info Room} 		{Chatruimte instellen}
+::msgcat::mcset nl {InfoRoomDesc}       {Hier kunt u de chatruimte instellen. Rol en affiliatie zijn bepalend voor uw privileges.}
+::msgcat::mcset nl Role			{Rol}
+::msgcat::mcset nl Affiliation		{Afilliatie}
+::msgcat::mcset nl {Kick Participant}	{Deelnemer kicken}
+::msgcat::mcset nl {Ban Participant}	{Deelnemer verbannen}
+::msgcat::mcset nl {Configure Room}	{Chatruimte instellen}
+::msgcat::mcset nl {Destroy Room}	{Chatruimte verwijderen}
+::msgcat::mcset nl {Edit Lists}		{Lijsten bewerken}
+::msgcat::mcset nl Refresh		{Verversen}
+::msgcat::mcset nl Grant		{Verlenen van}
+::msgcat::mcset nl Revoke		{Intrekken van}
+::msgcat::mcset nl Voice		{Medezeggenschap}
+::msgcat::mcset nl Member		{Lidmaatschap}
+::msgcat::mcset nl Moderator		{Moderatorprivileges}
+::msgcat::mcset nl Admin		{Beheerdersprivileges}
+::msgcat::mcset nl Owner		{Eigenaarsprivileges}
+::msgcat::mcset nl voice                {Medezeggenschap}
+::msgcat::mcset nl member               {Lidmaatschap}
+::msgcat::mcset nl moderator            {Moderatorprivileges}
+::msgcat::mcset nl admin                {Beheerdersprivileges}
+::msgcat::mcset nl owner                {Eigenaarschapsprivileges}
