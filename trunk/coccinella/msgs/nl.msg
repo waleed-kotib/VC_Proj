@@ -1082,7 +1082,7 @@ Wilt u ze niet opslaan?}
 
 # END --------------------------------------------------------------------------
 ::msgcat::mcset nl {Info Room} 		{Chatruimte instellen}
-::msgcat::mcset nl {InfoRoomDesc}       {Hier kunt u de chatruimte instellen. Rol en affiliatie zijn bepalend voor uw privileges.}
+::msgcat::mcset nl {InfoRoomDesc}       {Hier kunt u de chatruimte instellen. Rol en affiliatie bepalen uw privileges.}
 ::msgcat::mcset nl Role			{Rol}
 ::msgcat::mcset nl Affiliation		{Afilliatie}
 ::msgcat::mcset nl {Kick Participant}	{Deelnemer kicken}
