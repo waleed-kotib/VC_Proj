@@ -85,7 +85,7 @@
 #Descomentado
 ::msgcat::mcset es Import		{Importar}
 ::msgcat::mcset es Inbox		{Mensajes}
-::msgcat::mcset es Info			{Info}
+::msgcat::mcset es Info			{Información}
 ::msgcat::mcset es Invite		{Invitar}
 ::msgcat::mcset es Last			{Último}
 ::msgcat::mcset es Less			{Menos}
@@ -102,7 +102,7 @@
 ::msgcat::mcset es New			{Nuevo}
 ::msgcat::mcset es Next			{Siguiente}
 #::msgcat::mcset es Nick 		{}
-#::msgcat::mcset es Nickname {}
+::msgcat::mcset es Nickname 		{Miembro}
 ::msgcat::mcset es No			{No}
 ::msgcat::mcset es no			{no}
 ::msgcat::mcset es None			{Ninguno}
@@ -135,7 +135,7 @@
 ::msgcat::mcset es Progress		{Progreso}
 ::msgcat::mcset es Quit?		{Abandonar?}
 ::msgcat::mcset es Quote		{Citar}
-# ::msgcat::mcset es Reason {}
+::msgcat::mcset es Reason               {Motivo}
 ::msgcat::mcset es Register		{Registrarse}
 ::msgcat::mcset es Remaining		{Restante}
 ::msgcat::mcset es Remove		{Borrar}
@@ -1258,4 +1258,28 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es {Broken Image}	{Imagen rota}
 
 # END --------------------------------------------------------------------------
-
+::msgcat::mcset es {Info Room} 		{Información Sala}
+::msgcat::mcset es {InfoRoomDesc}       {This dialog makes available a number of options and actions for a\
+      room. Your role and affiliation determines your privilege to act.\
+      Further restrictions may exist depending on specific room\
+      configuration.}
+::msgcat::mcset es Role			{Rol}
+::msgcat::mcset es Affiliation		{Afiliación}
+::msgcat::mcset es {Kick Participant}	{Echar al participante}
+::msgcat::mcset es {Ban Participant}	{Prohibir la entrada al participante}
+::msgcat::mcset es {Configure Room}	{Configurar sala}
+::msgcat::mcset es {Destroy Room}	{Eliminar sala}
+::msgcat::mcset es {Edit Lists}		{Editar Listas}
+::msgcat::mcset es Refresh		{Refrescar}
+::msgcat::mcset es Grant		{Dar permisos}
+::msgcat::mcset es Revoke		{Quitar permisos}
+::msgcat::mcset es Voice		{Voz}
+::msgcat::mcset es Member		{Miembro}
+::msgcat::mcset es Moderator		{Moderador}
+::msgcat::mcset es Admin		{Administrador}
+::msgcat::mcset es Owner		{Propietario}
+::msgcat::mcset es voice                {voz}
+::msgcat::mcset es member               {miembro}
+::msgcat::mcset es moderator            {moderador}
+::msgcat::mcset es admin                {administrador}
+::msgcat::mcset es owner                {propietario}
