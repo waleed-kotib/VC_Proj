@@ -19,7 +19,7 @@
 #  
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.9 2006-04-17 13:23:38 matben Exp $
+# $Id: caps.tcl,v 1.10 2006-04-18 07:39:50 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -68,100 +68,6 @@ proc jlib::caps::cmdproc {jlibname cmd args} {
     
     # Just dispatch the command to the right procedure.
     return [eval {$cmd $jlibname} $args]
-}
-
-# jlib::caps::disco_verX --
-# 
-#       Disco#info request for client#version 
-#       
-#       <iq type='get' to='randomuser1@capulet.com/resource'>
-#           <query xmlns='http://jabber.org/protocol/disco#info'
-#               node='http://exodus.jabberstudio.org/caps#0.9'/>
-#       </iq> 
-# 
-#       We MUST have got a presence caps element for this user.
-#       
-#       The client that received the annotated presence sends a disco#info 
-#       request to exactly one of the users that sent a particular presenece
-#       element caps combination of node and ver.
-
-proc jlib::caps::disco_verX {jlibname jid cmd} {
-    upvar ${jlibname}::caps::state state
-    
-    set roster [jlib::getrostername $jlibname]
-    set node [$roster getcapsattr $jid node]
-    set ver  [$roster getcapsattr $jid ver]
-    
-    puts "+++jlib::caps::disco_ver jid=$jid, node=$node, ver=$ver"
-    
-    # There are three situations here:
-    #   1) if we have cached this info just return it
-    #   2) if pending disco for node+ver then just add to stack to be invoked
-    #   3) else need to disco
-    # This is all done per node+ver in contrast to 'disco get_async' jid+node
-
-    set key ver,$node,$ver
-    
-    if {[info exists state(subiq,$key)]} {
-	uplevel #0 $cmd [list $jlibname result $jid $state(subiq,$key)]
-    } elseif {[info exists state(pending,$key)]} {
-	lappend state(invoke,$key) $cmd
-    } else {
-	
-	# Mark that we have a pending node+ver request and add command to list.
-	set state(pending,$key) 1
-	lappend state(get,$key) $jid
-	lappend state(invoke,$key) $cmd
-	
-	# It should be safe to use 'disco get_async' here.
-	# Need to provide node+ver for error recovery.
-	set cb [list [namespace current]::disco_ver_cb $node $ver]
-	$jlibname disco get_async info $jid $cb -node ${node}#${ver}
-    }
-}
-
-# jlib::caps::disco_ver_cbX --
-# 
-#       Callback for 'disco get_async'.
-#       We must take care of a situation where the jid went unavailable,
-#       or otherwise returns an error, and try to use another jid.
-
-proc jlib::caps::disco_ver_cb {node ver jlibname type from subiq args} {
-    upvar ${jlibname}::caps::state state
-
-    puts "+++jlib::caps::disco_ver_cb node=$node, ver=$ver, type=$type, from=$from"
-
-    set key ver,$node,$ver
-
-    if {$type eq "error"} {
-    
-	# Try to find another jid with this node+ver instead that has not
-	# been previously tried.
-	foreach nextjid $state(jids,ver,$node,$ver) {
-	    if {[lsearch $state(get,ver,$node,$ver) $nextjid] < 0} {
-		lappend state(get,ver,$node,$ver) $nextjid
-		set cb [list [namespace current]::disco_ver_cb $node $ver]
-		$jlibname disco get_async info $nextjid $cb -node ${node}#${ver}
-		return
-	    }
-	}
-	
-	# We end up here when there are no more jids to ask.
-    }
-    set jid [jlib::jidmap $from]
-    
-    # Cache the returned element to be reused for all node+ver combinations.
-    set state(subiq,ver,$node,$ver) $subiq
-    unset -nocomplain state(pending,ver,$node,$ver)
-    
-    # Invoke all stacked requests including the the first one.
-    if {[info exists state(invoke,ver,$node,$ver)]} {
-	foreach cmd $state(invoke,ver,$node,$ver) {
-	    uplevel #0 $cmd [list $jlibname $type $jid $subiq] $args
-	}
-	unset -nocomplain state(invoke,ver,$node,$ver)
-	unset -nocomplain state(get,ver,$node,$ver)
-    }
 }
 
 # jlib::caps::disco_ver --
@@ -299,6 +205,8 @@ proc jlib::caps::avail_cb {jlibname jid type args} {
     set ver  [$roster getcapsattr $jid ver]
     set ext  [$roster getcapsattr $jid ext]
     
+    puts "+++ jlib::caps::avail_cb $jid, node=$node"
+    
     # Skip if client have not a caps presence element.
     if {$node eq ""} {
 	return
@@ -329,6 +237,11 @@ proc jlib::caps::unavail_cb {jlibname jid type args} {
     upvar ${jlibname}::caps::state state
 
     set jid [jlib::jidmap $jid]
+    
+    # JID may not have caps.
+    if {![info exists state(jid,$jid,node)]} {
+	return
+    }
     set node $state(jid,$jid,node)
     set ver  $state(jid,$jid,ver)
     set ext  $state(jid,$jid,ext)
