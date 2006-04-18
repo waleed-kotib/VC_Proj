@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jingle.tcl,v 1.3 2006-04-17 13:23:38 matben Exp $
+# $Id: jingle.tcl,v 1.4 2006-04-18 14:01:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -575,7 +575,7 @@ proc jlib::jingle::initiate_handler {jlibname sid id jelem args} {
 	if {!$anymedia} {
 	    send_error $jlibname $jid $id unsupported-media
 	} elseif {!$anytransport} {
-	    send_error $jlibname $jid $id unsupported-transport
+	    send_error $jlibname $jid $id unsupported-transports
 	} else {
 	    # It is the actual combination media/transport that is unsupported.
 	    send_error $jlibname $jid $id unsupported-media
@@ -601,6 +601,9 @@ proc jlib::jingle::send_error {jlibname jid id stanza} {
     
     puts "jlib::jingle::send_error"
     # @@@ Not sure about the details here.
+    # We must add an extra error element:
+    #   <unsupported-transports 
+    #       xmlns='http://jabber.org/protocol/jingle#errors'/>
     set elem [wrapper::createtag $stanza  \
       -attrlist [list xmlns $jxmlns(errors)]]
     jlib::send_iq_error $jlibname $jid $id 404 cancel bad-request $elem
