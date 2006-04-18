@@ -19,7 +19,7 @@
 #  
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.10 2006-04-18 07:39:50 matben Exp $
+# $Id: caps.tcl,v 1.11 2006-04-18 14:01:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -226,6 +226,8 @@ proc jlib::caps::avail_cb {jlibname jid type args} {
 	lappend state(jids,ext,$node,$e) $jid
 	set state(jids,ext,$node,$e) [lsort -unique $state(jids,ext,$node,$e)]
     }
+
+    return 0
 }
 
 # jlib::caps::unavail_cb --
@@ -260,6 +262,8 @@ proc jlib::caps::unavail_cb {jlibname jid type args} {
 	}    
     }
     array unset state jid,[jlib::ESC $jid],*
+
+    return 0
 }
 
 proc jlib::caps::reset {jlibname} {

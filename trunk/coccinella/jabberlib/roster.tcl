@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.44 2006-04-17 13:23:38 matben Exp $
+# $Id: roster.tcl,v 1.45 2006-04-18 14:01:27 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -1228,6 +1228,7 @@ proc roster::getstatus {rostName jid} {
 #       jid:        any jid
 #       xmlns:      the (mandatory) xmlns specifier. Any prefix
 #                   http://jabber.org/protocol/ must be stripped off.
+#                   @@@ BAD!!!!
 #       
 # Results:
 #       xml list or empty.
