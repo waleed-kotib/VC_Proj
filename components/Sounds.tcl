@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.24 2006-03-28 14:12:10 matben Exp $
+# $Id: Sounds.tcl,v 1.25 2006-04-18 09:32:05 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -492,7 +492,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     ttk::button $walrt.midi -text [mc {MIDI Player}] -command ::Sounds::MidiPlayer
     pack  $walrt.midi -pady 4
     
-    bind $wpage <Destroy> {+::Sounds::Free}
+    bind $wpage <Destroy> {+::Sounds::PrefsFree}
 }
 
 proc ::Sounds::MidiPlayer { } {
@@ -658,7 +658,7 @@ proc ::Sounds::GetAllSets { } {
     return $allsets
 }
 
-proc ::Sounds::Free { } {
+proc ::Sounds::PrefsFree { } {
     variable tmpPrefs
     
     unset -nocomplain tmpPrefs
