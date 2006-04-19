@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.18 2006-04-18 14:01:27 matben Exp $
+# $Id: JingleIax.tcl,v 1.19 2006-04-19 07:52:54 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -227,10 +227,10 @@ proc ::JingleIAX::IQHandler {jlib jelem args} {
 
     switch -- $action {
         "session-initiate" {
-             SessionInitiateHandler $jlib $from $jelem $sid $id
+             SessionInitiateHandler $from $jelem $sid $id
         }   
         "transport-accept" {
-	    TransportAcceptHandler $jlib $from $jelem $sid $id
+	    TransportAcceptHandler $from $jelem $sid $id
         }
 	"session-terminate" {
 	    # SessionTerminateHandler
@@ -242,14 +242,23 @@ proc ::JingleIAX::IQHandler {jlib jelem args} {
 # 
 #       Handler for a 'session-initiate' action.
 
-proc ::JingleIAX::SessionInitiateHandler {jlib from jingle sid id} {
+proc ::JingleIAX::SessionInitiateHandler {from jingle sid id} {
     variable state
 
     Debug "::JingleIAX::SessionInitiateHandler from=$from, sid=$sid, id=$id"
 
+    # JEP-0166: In order to decline the session initiation request, the target 
+    # entity MUST acknowledge receipt of the session initiation request, then 
+    # terminate the session.
+
     ::Jabber::JlibCmd send_iq result {} -to $from -id $id
-    set state(sid) $sid
-    TransportAccept $jlib $from
+    if {[iaxclient::state] eq "free"} {
+	set state(sid) $sid
+	TransportAccept $jlib $from
+    } else {
+	::Jabber::JlibCmd jingle send_set $sid "terminate-session"  \
+	  ::JingleIAX::EmptyCB
+    }
 }
 
 # JingleIAX::TransportAccept --
@@ -287,12 +296,12 @@ proc ::JingleIAX::TransportAccept {jlib from} {
       -subtags $candidateElems]
 
     ::Jabber::JlibCmd jingle send_set $state(sid) "transport-accept"  \
-      ::JingleIAX::AcceptCB [list $transportElem ]
+      ::JingleIAX::EmptyCB [list $transportElem ]
     ::Jabber::JlibCmd jingle send_set $state(sid) "session-accept"    \
-      ::JingleIAX::AcceptCB
+      ::JingleIAX::EmptyCB
 }
 
-proc ::JingleIAX::AcceptCB {args} {
+proc ::JingleIAX::EmptyCB {args} {
     
     # Empty.
 }
@@ -301,7 +310,7 @@ proc ::JingleIAX::AcceptCB {args} {
 # 
 #       Handles incoming 'transport-accept' actions from the jingle handler.
 
-proc ::JingleIAX::TransportAcceptHandler {jlib from jingle sid id} {
+proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
     variable state
     variable xmlns
 
