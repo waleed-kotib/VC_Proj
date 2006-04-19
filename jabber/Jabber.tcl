@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.164 2006-04-17 13:23:38 matben Exp $
+# $Id: Jabber.tcl,v 1.165 2006-04-19 07:53:44 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1282,7 +1282,8 @@ proc ::Jabber::SetStatus {type args} {
 proc ::Jabber::SyncStatus { } {
     variable jstate
     
-    SetStatus $jstate(status)
+    # We need to add -status to preserve it.
+    SetStatus [$jstate(jlib) mypresence] -status [$jstate(jlib) mypresencestatus]
 }
 
 # Jabber::CreateCoccinellaPresElement --
