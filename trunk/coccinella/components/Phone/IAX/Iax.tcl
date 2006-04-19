@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.7 2006-04-13 10:45:05 matben Exp $
+# $Id: Iax.tcl,v 1.8 2006-04-19 07:52:54 matben Exp $
 
 namespace eval ::Iax { }
 
@@ -81,6 +81,9 @@ proc ::Iax::CmdProc {type args} {
         callerid {
             eval CallerID $args
         }
+	getport {
+	    return [iaxclient::getport]
+	}
 	hangup {
 	    iaxclient::hangup
 	    ::Phone::SetTalkingState
@@ -89,18 +92,23 @@ proc ::Iax::CmdProc {type args} {
 	    #iaxclient::hold $value
 	}
 	inputlevel {
-	    set iaxPrefs(micVolume) $value
+	    #set iaxPrefs(micVolume) $value
 	    iaxclient::level input $value 
 	}
+	loadprefs {
+	    eval LoadPrefs $args
+	}
 	outputlevel {
-	    set iaxPrefs(spkVolume) $value
+	    #set iaxPrefs(spkVolume) $value
 	    iaxclient::level output $value 
 	}
 	getinputlevel {
-	    return $iaxPrefs(micVolume)
+	    return [iaxclient::level input]
+	    #return $iaxPrefs(micVolume)
 	}
 	getoutputlevel {
-	    return $iaxPrefs(spkVolume)
+	    return [iaxclient::level output]
+	    #return $iaxPrefs(spkVolume)
 	}	
 	playtone {
 	    iaxclient::playtone $value 
@@ -125,12 +133,6 @@ proc ::Iax::CmdProc {type args} {
 		iaxclient::unregister $iaxPrefs(registerid)
 	    }
 	}
-	loadprefs {
-	    eval LoadPrefs $args
-	}
-        getport {
-            return [iaxclient::getport]
-        }
     }
 }
 
@@ -336,8 +338,9 @@ proc ::Iax::LoadPrefs {} {
 
     iaxclient::applyfilters $iaxPrefs(agc) $iaxPrefs(aagc) $iaxPrefs(comfort) $iaxPrefs(noise) $iaxPrefs(echo)
 
-    set iaxPrefs(micVolume) [expr double(30)/double(100)]
-    set iaxPrefs(spkVolume) [expr double(30)/double(100)]
+    # These shall never be set like this but instead obtained from the system.
+    #set iaxPrefs(micVolume) [expr double(30)/double(100)]
+    #set iaxPrefs(spkVolume) [expr double(30)/double(100)]
 
     set iaxPrefs(outputDevices)		""
     set listOutputDevices [iaxclient::devices output]
