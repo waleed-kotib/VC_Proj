@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.8 2006-04-12 07:05:16 matben Exp $
+# $Id: Phone.tcl,v 1.9 2006-04-20 14:15:03 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -19,8 +19,11 @@
 #              /
 #	Phone ------- IAX/iax
 #	  |    \
-#        TPhone \
-#        AdBook  \--- Jive/JivePhone
+#         |     \
+#         |      \--- Jive/JivePhone
+#	 TPhone
+#	 AdBook
+#	 NotifyCall
 #	      
 #   Each softphone registers with the Phone and gets the necessary callbacks
 #   from the registered procedures. Hooks shall not be used for communications
@@ -30,7 +33,6 @@
 #   directly.
 #   
 #   TODO: - how to handle '::hooks::run protocol*' ?
-#         - do we need the '::hooks::run phone*' ?
 #         - search for @@@ to see where question marks are
 
 namespace eval ::Phone {
@@ -48,12 +50,17 @@ proc ::Phone::Init { } {
     if {[catch {package require TPhone}]} {
 	return
     }
+    if {[catch {package require NotifyCall}]} {
+	return
+    }
 
     component::register Phone "Provides protocol abstraction for softphones."
     
     # This seems necessary since the 'package require' only searches two
     # directory levels?
     lappend ::auto_path $scriptPath
+    
+    ::NotifyCall::Init
     
     variable wphone -
 
@@ -71,6 +78,10 @@ proc ::Phone::Init { } {
     option add *Phone.phone16DisImage           phone16Dis       widgetDefault
 }
 
+# These procedures handle registration, administration, and dispatching to
+# softphone components.
+#...............................................................................
+
 proc ::Phone::RegisterPhone {name label initProc cmdProc deleteProc} {	
     variable phone
     
@@ -84,6 +95,7 @@ proc ::Phone::RegisterPhone {name label initProc cmdProc deleteProc} {
 proc ::Phone::SetPhone {name} {
     variable phone
 
+    # @@@ Call initProc ?
     set phone(previous) $phone(selected)
     set phone(selected) $name
 }
@@ -117,6 +129,10 @@ proc ::Phone::InitPhone {} {
     $phone($name,init)
 }
 
+# Phone::CommandPhone --
+# 
+#       Dispatches a command to the selected softphone.
+
 proc ::Phone::CommandPhone {args} {
     variable phone
     
@@ -133,7 +149,8 @@ proc ::Phone::DeletePhone {name} {
     $phone($name,delete)
 }
 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#...............................................................................
+
 proc ::Phone::LoadPrefs { } {
     variable statePhone
     
@@ -216,9 +233,13 @@ proc ::Phone::HidePhone {} {
 ##################################################
 # Protocol Call Events
 ##################################################
+
 proc ::Phone::IncomingCall {callNo remote remote_name} {
    variable statePhone
    variable wphone
+   variable phoneNumberInput
+   
+   ::Debug 4 "::Phone::IncomingCall $callNo $remote $remote_name"
 
     # For the moment the phone just have one line
     if { $callNo == 0 } {
@@ -235,25 +256,26 @@ proc ::Phone::IncomingCall {callNo remote remote_name} {
 	    set statePhone(nameLine0) $remote_name
 	}
 
-        set [namespace current]::phoneNumberInput "$remote"
+        set phoneNumberInput $remote
 
         set statePhone(receivedDate0) [clock seconds]
 
-        if {$wphone ne "-"} {
+	if {[winfo exists $wphone]} {
             ::TPhone::Number $wphone $remote
         }
 
         set initLength 0
-        if {$wphone ne "-"} {
+	if {[winfo exists $wphone]} {
             ::TPhone::TimeUpdate $wphone [clock format [expr $initLength - 3600] -format %X]
         } 
+	
         ::NotifyCall::TimeUpdate [clock format [expr $initLength - 3600] -format %X]
-
+	::NotifyCall::IncomingEvent $callNo $remote $statePhone(nameLine0)
 	::AddressBook::ReceivedCall $callNo $remote $statePhone(nameLine0)
+	SetIncomingState
 
-        ::hooks::run phoneNotifyIncomingCall $callNo $remote $statePhone(nameLine0)
+	::hooks::run phoneNotifyIncomingCall $callNo $remote $statePhone(nameLine0)
 
-        SetIncomingState
     } else {
         puts "No more than one line, Reject"
    }
@@ -268,11 +290,11 @@ proc ::Phone::UpdateState {callNo state} {
 proc ::Phone::UpdateText {callno textmessage} {
     variable wphone
 
-    if {$wphone ne "-"} {
+    if {[winfo exists $wphone]} {
         ::TPhone::SetSubject $wphone $textmessage
     }
 
-    ::NotifyCall::SubjectEventHook $textmessage
+    ::NotifyCall::SubjectEvent $textmessage
 }
 
 proc ::Phone::UpdateLevels {args} {
@@ -283,7 +305,7 @@ proc ::Phone::UpdateLevels {args} {
     if { $statePhone(initDate0) >= 0 } {
         set tempDate [clock seconds]
         set statePhone(callLength0) [expr $tempDate - $statePhone(initDate0)]
-        if {$wphone ne "-"} {
+	if {[winfo exists $wphone]} {
             ::TPhone::TimeUpdate $wphone [clock format [expr $statePhone(callLength0) - 3600] -format %X]
         }
         ::NotifyCall::TimeUpdate [clock format [expr $statePhone(callLength0) - 3600] -format %X]
@@ -398,6 +420,10 @@ proc ::Phone::CloseCmd {w} {
     ::UI::SaveWinGeom $w
 }
 
+# Phone::Actions --
+# 
+#       This is the callback function for the TPhone megawidget.
+# 
 ##################################################
 # Phone Actions:
 #    - Actions
@@ -455,7 +481,7 @@ proc ::Phone::UpdateDisplay {text} {
     variable phoneNumberInput
 
     set phoneNumberInput $text
-    if {$wphone ne "-"} {
+    if {[winfo exists $wphone]} {
         ::TPhone::Number $wphone $text
     }
 }
@@ -511,15 +537,17 @@ proc ::Phone::DialJingle  { ipPeer portPeer calledName callerName {user ""} {pas
     set statePhone(onholdLine$activeLine) "no"
 
     set subject ""
-    if {$wphone ne "-"} {
+    if {[winfo exists $wphone]} {
         set subject [::TPhone::GetSubject $wphone]
     }
     if {$subject eq ""} {
         set subject "Jingle Call"
     }
 
-    ::hooks::run phoneNotifyOutgoingCall $calledName
+    ::NotifyCall::OutgoingEvent $calledName
     CommandPhone dialjingle $phoneNumberInput $statePhone(activeLine) $subject $user $password
+    
+    ::hooks::run phoneNotifyOutgoingCall $calledName
         
     set statePhone(fromStateLine0) "Dial"
     set statePhone(initDate0)  [clock seconds]
@@ -529,10 +557,14 @@ proc ::Phone::DialJingle  { ipPeer portPeer calledName callerName {user ""} {pas
 }
 
 proc ::Phone::Answer {} {
-    set activeLine 0
 
+    ::Debug 4 "::Phone::Answer"
+    
+    set activeLine 0
     CommandPhone answer $activeLine
-    eval {hooks::run phoneNotifyTalkingState}
+    SetTalkingState
+
+    hooks::run phoneNotifyTalkingState
 }
 
 proc ::Phone::Dial {} {
@@ -546,7 +578,9 @@ proc ::Phone::Dial {} {
 
     if { [lsearch $statePhone(statusLine0) "ringing"] >= 0 } {
 	CommandPhone answer $activeLine
-	eval {hooks::run phoneNotifyTalkingState}
+	::NotifyCall::TalkingEvent
+	
+	hooks::run phoneNotifyTalkingState
     } else {
 	set subject [::TPhone::GetSubject $wphone]
 
@@ -569,7 +603,6 @@ proc ::Phone::Hangup {{callNo ""}} {
 	CommandPhone changeline $statePhone(activeLine)
 	CommandPhone hangup
     }
-    
     SetNormalState
 }
 
@@ -601,14 +634,16 @@ proc ::Phone::Mute {type onoff} {
     }
 }
 
+# Set/get audio levels. Note the rescaling of 100.
+
 proc ::Phone::SetInputLevel {args} {
     variable statePhone
     variable wphone
 
-    set inputLevel [expr double($args)/double(100)]
+    set inputLevel [expr double($args)/100.0]
     CommandPhone inputlevel $inputLevel
     set statePhone(inputVolume0) $inputLevel
-    if {$wphone ne "-"} {
+    if {[winfo exists $wphone]} {
         ::TPhone::Volume $wphone microphone $args
     }
 }
@@ -617,13 +652,21 @@ proc ::Phone::SetOutputLevel {args} {
     variable statePhone
     variable wphone
 
-    set outputLevel [expr double($args)/double(100)]
+    set outputLevel [expr double($args)/100.0]
     CommandPhone outputlevel $outputLevel
     set statePhone(outputVolume0) $outputLevel
 
-    if {$wphone ne "-"} {
+    if {[winfo exists $wphone]} {
         ::TPhone::Volume $wphone speaker $args
     }
+}
+
+proc ::Phone::GetInputLevel {} {
+    return [expr {100.0*[CommandPhone getinputlevel]}]
+}
+
+proc ::Phone::GetOutputLevel {} {
+    return [expr {100.0*[CommandPhone getoutputlevel]}]
 }
 
 proc ::Phone::TransferTo {w} {
@@ -673,6 +716,8 @@ proc ::Phone::SetNormalState {{noCall ""}} {
     variable statePhone
     variable wphone
     
+    ::Debug 4 "::Phone::SetNormalState"
+    
     ###### Update Calls Logs (NormalState stands for Free or Hangup state too) ###########
     if { [info exists statePhone(fromStateLine0)] } {
         if { $statePhone(fromStateLine0) ne ""} {
@@ -694,10 +739,12 @@ proc ::Phone::SetNormalState {{noCall ""}} {
         }
     }
     
-    ::hooks::run phoneNotifyNormalState
     ::AddressBook::NormalState
+    ::NotifyCall::HangupEvent
 
-    if {$wphone ne "-"} {
+    ::hooks::run phoneNotifyNormalState
+
+    if {[winfo exists $wphone]} {
         ::TPhone::SetSubject $wphone ""
     }
 
@@ -712,7 +759,7 @@ proc ::Phone::SetNormalState {{noCall ""}} {
     set statePhone(onholdLine0)     "no"
     
     ########## Sets Widget Buttons State ######################    
-    if {$wphone ne "-"} {
+    if {[winfo exists $wphone]} {
         ::TPhone::State $wphone  "call"      {!disabled}
         ::TPhone::State $wphone  "backspace" {!disabled} 
         ::TPhone::State $wphone  "hangup"    {disabled}
@@ -724,9 +771,11 @@ proc ::Phone::SetNormalState {{noCall ""}} {
 
 proc ::Phone::SetDialState {} {
     variable wphone
+    
+    ::Debug 4 "::Phone::SetDialState"
 
     ########## Sets Widgets State ######################    
-    if {$wphone ne "-"} {
+    if {[winfo exists $wphone]} {
         ::TPhone::State $wphone  "hangup"    {!disabled}
         ::TPhone::State $wphone  "call"      {disabled}
         ::TPhone::State $wphone  "transfer"  {disabled}
@@ -740,9 +789,11 @@ proc ::Phone::SetTalkingState {{noCall ""} } {
     variable statePhone
     variable wphone
     
+    ::Debug 4 "::Phone::SetTalkingState"
+    
     set statePhone(initDate0)  [clock seconds]
 
-    if {$wphone ne "-"} {
+    if {[winfo exists $wphone]} {
         ::TPhone::State $wphone  "hangup"    {!disabled}
         ::TPhone::State $wphone  "transfer"  {!disabled}
         ::TPhone::State $wphone  "call"      {disabled}
@@ -758,7 +809,9 @@ proc ::Phone::SetIncomingState { {noCall ""}} {
     variable statePhone
     variable wphone
 
-    if {$wphone ne "-"} {
+    ::Debug 4 "::Phone::SetIncomingState"
+    
+    if {[winfo exists $wphone]} {
         ::TPhone::State $wphone  "hangup"    {!disabled}
         ::TPhone::State $wphone  "call"      {!disabled}
         ::TPhone::State $wphone  "transfer"  {disabled}

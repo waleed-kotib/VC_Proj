@@ -1,11 +1,17 @@
 # Iax.tcl --
 # 
 #       Phone component for the iax client.
+#       It must handle things on two levels:
+#         o the iaxclient library; transport level
+#         o the Jingle protocol; signalling level
+#         
+#       Initiating is started on the protocol level (jingle) and first when
+#       that is established the transport (iaxclient) is invoked.
 #       
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.8 2006-04-19 07:52:54 matben Exp $
+# $Id: Iax.tcl,v 1.9 2006-04-20 14:15:03 matben Exp $
 
 namespace eval ::Iax { }
 
@@ -54,8 +60,13 @@ proc ::Iax::Init { } {
 }
 
 proc ::Iax::InitProc {} {
-    
+    # Empty.
 }
+
+# Iax::CmdProc --
+# 
+#       This is our registered command procedure that gets invoked from the
+#       Phone component.
 
 proc ::Iax::CmdProc {type args} {
     variable iaxPrefs
@@ -67,7 +78,7 @@ proc ::Iax::CmdProc {type args} {
     switch -- $type {
 	answer {
 	    iaxclient::answer $value
-	    ::Phone::SetTalkingState
+	    #::Phone::SetTalkingState
 	}
 	changeline {
 	    iaxclient::changeline $value
@@ -85,30 +96,28 @@ proc ::Iax::CmdProc {type args} {
 	    return [iaxclient::getport]
 	}
 	hangup {
+	    
+	    # Handle both transport and protocol levels.
 	    iaxclient::hangup
-	    ::Phone::SetTalkingState
+	    ::JingleIAX::SessionTerminate	    
 	}
 	hold {
 	    #iaxclient::hold $value
 	}
 	inputlevel {
-	    #set iaxPrefs(micVolume) $value
 	    iaxclient::level input $value 
 	}
 	loadprefs {
 	    eval LoadPrefs $args
 	}
 	outputlevel {
-	    #set iaxPrefs(spkVolume) $value
 	    iaxclient::level output $value 
 	}
 	getinputlevel {
 	    return [iaxclient::level input]
-	    #return $iaxPrefs(micVolume)
 	}
 	getoutputlevel {
 	    return [iaxclient::level output]
-	    #return $iaxPrefs(spkVolume)
 	}	
 	playtone {
 	    iaxclient::playtone $value 
@@ -185,36 +194,36 @@ proc ::Iax::NotifyRegister {id reply msgcount} {
 }
 
 proc ::Iax::NotifyState {callNo state codec remote remote_name args} {
-    set statePhone $state
 
     ::Debug 4 "::Iax::NotifyState state=$state"
     
+    # Do this to be able to do string comparisons on list.
+    set state [lsort $state]
     ::Phone::UpdateState $callNo $state
 
     #----------------------------------------------------------------------
     #------------ Sending Outgoing/Incoming Calls actions -----------------
     #----------------------------------------------------------------------
     #----- Originate Outgoing Call
-    if { $statePhone eq "active outgoing ringing" } {
+    if { $state eq [list active outgoing ringing] } {
 	iaxclient::ringstart 0
     }
 
     # Connect Peers Right (Outgoing & Incoming calls)
-    if { [lsearch $statePhone "complete"] >= 0 } {
+    if { [lsearch $state "complete"] >= 0 } {
 	::Phone::SetTalkingState $callNo
 	iaxclient::ringstop
-
     }
 
     #----- Incoming Call Notify
-    if { $statePhone eq "active ringing" } {
+    if { $state eq [list active ringing] } {
 	::Phone::IncomingCall $callNo $remote $remote_name
 	iaxclient::ringstart 1
     }
 
     #----- Connection free (incoming & outgoing) Or ChangeLine,
     #--------- IAXClient sometimes return free state for a changeline action
-    if { $statePhone eq "free" || $statePhone eq "selected"  } {
+    if { $state eq "free" || $state eq "selected"  } {
 	::Phone::SetNormalState $callNo
 	iaxclient::ringstop
     } 
@@ -288,10 +297,9 @@ proc ::Iax::Dial {phonenumber {line ""} {subject ""}} {
 }
 
 proc ::Iax::LoadPrefs {} {
-    variable iaxPrefs
     global prefs
+    variable iaxPrefs
     
-    #Values for mic/spkVolume from 0 to 99
     set iaxPrefs(user)			$prefs(iaxPhone,user)
     set iaxPrefs(password)		$prefs(iaxPhone,password)
     set iaxPrefs(host)	 	        $prefs(iaxPhone,host) 
@@ -338,10 +346,6 @@ proc ::Iax::LoadPrefs {} {
 
     iaxclient::applyfilters $iaxPrefs(agc) $iaxPrefs(aagc) $iaxPrefs(comfort) $iaxPrefs(noise) $iaxPrefs(echo)
 
-    # These shall never be set like this but instead obtained from the system.
-    #set iaxPrefs(micVolume) [expr double(30)/double(100)]
-    #set iaxPrefs(spkVolume) [expr double(30)/double(100)]
-
     set iaxPrefs(outputDevices)		""
     set listOutputDevices [iaxclient::devices output]
     foreach {device} $listOutputDevices {
@@ -365,12 +369,7 @@ proc ::Iax::LoadPrefs {} {
         iaxclient::formats $iaxPrefs(codec)
     }
 
-#    IncomingRing.Init( 880, 960, 16000, 48000, 10);
-#    OutgoingTone.Init( 440, 480, 16000, 48000, 10);
-#    IntercomTone.Init( 440, 960,  6000,  6000,  1);
-
     iaxclient::toneinit 880 960 16000 48000 10
-
 }
 
 proc ::Iax::Reload {} {
