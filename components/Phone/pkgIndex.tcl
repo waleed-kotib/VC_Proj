@@ -8,6 +8,7 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded TPhone 0.1 [list source [file join $dir TPhone.tcl]]
+package ifneeded NotifyCall 0.1 [list source [file join $dir NotifyCall.tcl]]
+package ifneeded TPhone     0.1 [list source [file join $dir TPhone.tcl]]
 
 

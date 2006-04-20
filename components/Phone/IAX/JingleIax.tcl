@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.19 2006-04-19 07:52:54 matben Exp $
+# $Id: JingleIax.tcl,v 1.20 2006-04-20 14:15:03 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -34,7 +34,9 @@ proc ::JingleIAX::Init { } {
     ::hooks::register loginHook             ::JingleIAX::LoginHook
     ::hooks::register logoutHook            ::JingleIAX::LogoutHook
     ::hooks::register presenceHook          ::JingleIAX::PresenceHook
+
     ::hooks::register phoneChangeState      ::JingleIAX::SendJinglePresence
+
     ::hooks::register rosterPostCommandHook ::JingleIAX::RosterPostCommandHook
     ::hooks::register buildChatButtonTrayHook  ::JingleIAX::BuildChatButtonTrayHook
 
@@ -204,7 +206,9 @@ proc ::JingleIAX::SessionInitiateCB {type subiq args} {
 proc ::JingleIAX::SessionTerminate {} {
     variable state
 
-    
+    ::Jabber::JlibCmd jingle send_set $state(sid) "session-terminate"  \
+      ::JingleIAX::EmptyCB
+    set state(sid) ""
 }
 
 # Target (handlers).............................................................
@@ -233,7 +237,7 @@ proc ::JingleIAX::IQHandler {jlib jelem args} {
 	    TransportAcceptHandler $from $jelem $sid $id
         }
 	"session-terminate" {
-	    # SessionTerminateHandler
+	    SessionTerminateHandler $from $jelem $sid $id
 	}
     }
 }
@@ -254,7 +258,7 @@ proc ::JingleIAX::SessionInitiateHandler {from jingle sid id} {
     ::Jabber::JlibCmd send_iq result {} -to $from -id $id
     if {[iaxclient::state] eq "free"} {
 	set state(sid) $sid
-	TransportAccept $jlib $from
+	TransportAccept $from
     } else {
 	::Jabber::JlibCmd jingle send_set $sid "terminate-session"  \
 	  ::JingleIAX::EmptyCB
@@ -265,7 +269,7 @@ proc ::JingleIAX::SessionInitiateHandler {from jingle sid id} {
 # 
 #       This formulates our response to an incoming 'session-initiate' action.
 
-proc ::JingleIAX::TransportAccept {jlib from} {
+proc ::JingleIAX::TransportAccept {from} {
     global prefs
     variable state
     variable xmlns
@@ -391,6 +395,13 @@ proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
 	set myjid [::Jabber::JlibCmd getthis myjid]
         ::Phone::DialJingle $ip $port $from $myjid $user $password
     }
+}
+
+proc ::JingleIAX::SessionTerminateHandler {from jingle sid id} {
+    
+    Debug "::JingleIAX::SessionTerminateHandler from=$from"
+    
+    # empty so far
 }
 
 #-------------------------------------------------------------------------

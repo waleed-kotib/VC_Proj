@@ -1,39 +1,36 @@
-#agents NotifyCall.tcl --
+# NotifyCall.tcl --
 # 
-#       NotifyCall is an Dialog Window with Inbound calls notifications 
+#       NotifyCall is an Dialog Window with Inbound and Outbound call
+#       notifications.
 #       
+#  Copyright (c) 2006 Antonio Cano Damas
+#  
+# $Id: NotifyCall.tcl,v 1.8 2006-04-20 14:15:03 matben Exp $
 
-namespace eval ::NotifyCall:: { }
+package provide NotifyCall 0.1
+
+namespace eval ::NotifyCall { }
 
 proc ::NotifyCall::Init { } {
     
-    component::register NotifyCall  \
-      "Provides support for Incoming Calls Dialog"
+    ::hooks::register  avatarNewPhotoHook       ::NotifyCall::AvatarNewPhotoHook
 
-    ::hooks::register phoneNotifyOutgoingCall         ::NotifyCall::OutgoingEventHook
-    ::hooks::register phoneNotifyIncomingCall         ::NotifyCall::IncomingEventHook
-    ::hooks::register phoneNotifyNormalState          ::NotifyCall::HangupEventHook
-    ::hooks::register phoneNotifyTalkingState         ::NotifyCall::TalkingEventHook
-
-    ::hooks::register avatarNewPhotoHook         ::NotifyCall::AvatarNewPhotoHook
-
-    #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------
     InitState
 }
 
 proc ::NotifyCall::InitState { } {
     variable  state
     
-    set state(win) .notify
+    set state(win) .notifycall
 
+    # Variables used for the widgets. Levels only temporary.
+    set state(cmicrophone)    1
+    set state(cspeaker)       1
+    set state(microphone)     50
+    set state(speaker)        50
     set state(old:microphone) 50
-    set state(old:speaker) 50
-    set state(cmicrophone) 1
-    set state(cspeaker) 1
-    set state(microphone) 50
-    set state(speaker) 50
+    set state(old:speaker)    50
 }
-
 
 #-----------------------------------------------------------------------
 #--------------------------- Notify Call Window ------------------------
@@ -67,7 +64,7 @@ proc ::NotifyCall::OutboundCall { {line ""} {phoneNumber ""} } {
 
 # NotifyCall::BuildDialer --
 # 
-#       A toplevel dialer.
+#       Dialog for incoming and outgoing calls.
        
 proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
     variable state
@@ -77,7 +74,9 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
 	raise $w
 	return
     }
-
+    set state(microphone) [::Phone::GetInputLevel]
+    set state(speaker)    [::Phone::GetOutputLevel]
+    
     ::UI::Toplevel $w -class PhoneNotify \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::NotifyCall::CloseDialer
@@ -90,7 +89,6 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
 
     ::UI::SetWindowPosition $w
 
-
     # Global frame.
     ttk::frame $w.f
     grid $w.f  -sticky we
@@ -101,13 +99,13 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
     } else {
         set msgHead [mc {outboundCall}]:
     } 
-    ttk::label $w.f.head -style Headlabel -text "$msgHead"
+    ttk::label $w.f.head -style Headlabel -text $msgHead
     grid $w.f.head -column 0 -row 0 -columnspan 2 
 
     ttk::separator $w.f.s -orient horizontal
     grid $w.f.s -column 0 -row 1 -sticky ew -pady 4 -columnspan 2
 
-    ttk::label $w.f.phoneNumber -style Headlabel -text "$phoneNumber"
+    ttk::label $w.f.phoneNumber -style Headlabel -text $phoneNumber
     grid $w.f.phoneNumber -column 0 -row 2 
 
     #------- Only Incoming from Jingle (jid and res)  has Avatar -----------
@@ -157,7 +155,8 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
     set images(microphone) [::Theme::GetImage microphone $subPath]
     ttk::frame $box.mic
     ttk::scale $box.mic.s -orient horizontal -from 0 -to 100 \
-      -variable [list ::NotifyCall::state(microphone)] -command [list ::NotifyCall::MicCmd $w] -length 60
+      -variable [list ::NotifyCall::state(microphone)]  \
+      -command [list ::NotifyCall::MicCmd $w] -length 60
     ttk::checkbutton $box.mic.l -style Toolbutton  \
       -variable [list ::NotifyCall::state(cmicrophone)] -image $images(microphone)  \
       -onvalue 0 -offvalue 1 -padding {1}  \
@@ -204,6 +203,9 @@ proc ::NotifyCall::Answer  {w line} {
 }
 
 proc ::NotifyCall::HungUp {w line} {
+    
+    ::Debug 4 "::NotifyCall::HungUp"
+    
     ::Phone::Hangup $line
     destroy $w
 }
@@ -258,35 +260,31 @@ proc ::NotifyCall::TimeUpdate {time} {
 
 #    puts "Update Time: $time"
 }
-#-----------------------------------------------------------------------
-#------------------------ Notify Call Event Hooks ----------------------
-#-----------------------------------------------------------------------
 
-proc ::NotifyCall::SubjectEventHook {textmessage} {
-    variable cociFile
+# These are the interfaces that the Phone component calls.......................
 
-#Adding the Subject from Caller
+proc ::NotifyCall::SubjectEvent {textmessage} {
 
+    # Adding the Subject from Caller
 
-#
 }
 
-proc ::NotifyCall::IncomingEventHook {callNo remote remote_name} {
-    variable cociFile
+proc ::NotifyCall::IncomingEvent {callNo remote remote_name} {
 
+    ::Debug 4 "::NotifyCall::IncomingEvent $callNo $remote $remote_name"
+    
     set phoneNameInput $remote
     set phoneNumberInput $remote_name
     InboundCall $callNo  "$phoneNameInput ($phoneNumberInput)"
 }
 
-proc ::NotifyCall::OutgoingEventHook {remote_name} {
+proc ::NotifyCall::OutgoingEvent {remote_name} {
 
     set phoneNameInput $remote_name
-    OutboundCall 1  "$phoneNameInput"
+    OutboundCall 1 $phoneNameInput
 }
 
-
-proc ::NotifyCall::HangupEventHook {args} {
+proc ::NotifyCall::HangupEvent {args} {
     variable state
 
    set win $state(win)
@@ -295,9 +293,10 @@ proc ::NotifyCall::HangupEventHook {args} {
    }
 }
 
-proc ::NotifyCall::TalkingEventHook {args} {
+proc ::NotifyCall::TalkingEvent {args} {
     variable state
-    #What to do when user is talking
+    
+    # What to do when user is talking
     set win $state(win)
     set wbox $win.f.f.b
 
