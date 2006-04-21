@@ -11,7 +11,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.10 2006-04-21 08:19:04 antoniofcano Exp $
+# $Id: Iax.tcl,v 1.11 2006-04-21 12:34:14 matben Exp $
 
 namespace eval ::Iax { }
 
@@ -57,6 +57,11 @@ proc ::Iax::Init { } {
     ::Phone::SetPhone iax
     
     ::JingleIAX::Init
+
+    # Keep track of internal iaxclient state to be able to detect changes.
+    variable iaxstate
+    set iaxstate(old) "free"
+    set iaxstate(now) "free"
 }
 
 proc ::Iax::InitProc {} {
@@ -80,6 +85,9 @@ proc ::Iax::CmdProc {type args} {
 	    iaxclient::answer $value
 	    #::Phone::SetTalkingState
 	}
+	callerid {
+	    eval CallerID $args
+	}
 	changeline {
 	    iaxclient::changeline $value
 	}
@@ -89,9 +97,12 @@ proc ::Iax::CmdProc {type args} {
 	dialjingle {
 	    eval DialJingle $args
 	}
-        callerid {
-            eval CallerID $args
-        }
+	getinputlevel {
+	    return [iaxclient::level input]
+	}
+	getoutputlevel {
+	    return [iaxclient::level output]
+	}	
 	getport {
 	    return [iaxclient::getport]
 	}
@@ -99,7 +110,8 @@ proc ::Iax::CmdProc {type args} {
 	    iaxclient::hangup
 	}
         hangupjingle {
-            # Handle both transport and protocol levels.
+
+	    # Handle both transport and protocol levels.
             iaxclient::hangup
             ::JingleIAX::SessionTerminate
         }
@@ -115,12 +127,6 @@ proc ::Iax::CmdProc {type args} {
 	outputlevel {
 	    iaxclient::level output $value 
 	}
-	getinputlevel {
-	    return [iaxclient::level input]
-	}
-	getoutputlevel {
-	    return [iaxclient::level output]
-	}	
 	playtone {
 	    iaxclient::playtone $value 
 	}
@@ -132,6 +138,9 @@ proc ::Iax::CmdProc {type args} {
 	}
 	sendtone {
 	    iaxclient::sendtone $value
+	}
+	state {
+	    eval ::JingleIAX::SendJinglePresence $args
 	}
 	transfer {
 	    iaxclient::transfer $value
@@ -167,6 +176,8 @@ proc ::Iax::Register {} {
 #---------------------------------------------------------------------------
 
 proc ::Iax::NotifyLevels {args} {
+    
+    # @@@ I don't know what this notifier does.
     ::Phone::UpdateLevels $args
 }
 
@@ -195,12 +206,30 @@ proc ::Iax::NotifyRegister {id reply msgcount} {
     }
 }
 
-proc ::Iax::NotifyState {callNo state codec remote remote_name args} {
+# Iax::NotifyState --
+# 
+#       Callback when the iaxclient state changes.
+#       This controls the phone state and all state changes such as extended
+#       presence originate from here.
+#       The Phone component then delegates the state change to the selected
+#       softphone component (us).
 
-    ::Debug 4 "::Iax::NotifyState state=$state"
+proc ::Iax::NotifyState {callNo state codec remote remote_name args} {
+    variable iaxstate
+
+    ::Debug 4 "::Iax::NotifyState state=$state, old=$iaxstate(now)"
     
-    # Do this to be able to do string comparisons on list.
+    # Do this to be able to do string comparisons on lists.
     set state [lsort $state]
+
+    # Push the state change on our internal cache.
+    set iaxstate(old) $iaxstate(now)
+    set iaxstate(now) $state
+    
+    # Skip non changes which we get from changeline actions.
+    if {$state eq $iaxstate(old)} {
+	return
+    }
     ::Phone::UpdateState $callNo $state
 
     #----------------------------------------------------------------------
@@ -211,7 +240,7 @@ proc ::Iax::NotifyState {callNo state codec remote remote_name args} {
 	iaxclient::ringstart 0
     }
 
-    # Connect Peers Right (Outgoing & Incoming calls)
+    # Connect Peers Right (Outgoing & Incoming calls).
     if { [lsearch $state "complete"] >= 0 } {
 	::Phone::SetTalkingState $callNo
 	iaxclient::ringstop
