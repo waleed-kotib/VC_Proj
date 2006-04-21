@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.12 2006-04-21 12:34:14 matben Exp $
+# $Id: Phone.tcl,v 1.13 2006-04-21 14:11:13 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -574,9 +574,10 @@ proc ::Phone::Answer {} {
     
     set activeLine 0
     CommandPhone answer $activeLine
-    SetTalkingState
 
     hooks::run phoneNotifyTalkingState
+
+    # IAX gets a notifier 'active complete' event which calls 'SetTalkingState'.
 }
 
 proc ::Phone::Dial {} {
@@ -731,6 +732,9 @@ proc ::Phone::TransferTo {w} {
 
 # These functions control all state changes and calls the selected softphone 
 # component which is responsible for protocol stuff.
+# 
+# Note: try to call these only from the selected softphone to avoid
+#       duplicate presence elements.
 # 
 # States: Normal, Dial, Talking, Incoming.
 
