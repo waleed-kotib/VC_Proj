@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.10 2006-04-21 08:08:08 antoniofcano Exp $
+# $Id: Phone.tcl,v 1.11 2006-04-21 08:19:04 antoniofcano Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -452,6 +452,9 @@ proc ::Phone::Actions { type args } {
             hangup {
                 Hangup
             }
+            hangupjingle {
+                Hangup
+            }
             mute {
                 set which [lindex $args 0]
                 set onoff [lindex $args 1]
@@ -597,6 +600,18 @@ proc ::Phone::Dial {} {
 	::AddressBook::Called $phoneNumberInput
         SetDialState
     }
+}
+
+proc ::Phone::HangupJingle {{callNo ""}} {
+    variable statePhone
+
+    if { [lsearch $statePhone(statusLine0) "ringing"] >= 0 } {
+        CommandPhone reject $statePhone(activeLine)
+    } else {
+        CommandPhone changeline $statePhone(activeLine)
+        CommandPhone hangupjingle
+    }
+    SetNormalState
 }
 
 proc ::Phone::Hangup {{callNo ""}} {
