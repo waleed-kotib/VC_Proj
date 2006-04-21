@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.165 2006-04-07 14:08:28 matben Exp $
+# $Id: Roster.tcl,v 1.166 2006-04-21 14:12:22 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -1094,6 +1094,7 @@ proc ::Roster::GetPresenceIconFromJid {jid} {
 proc ::Roster::GetPresenceIcon {jid presence args} {    
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jprefs jprefs
     
     array set argsArr $args
     
@@ -1129,7 +1130,8 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     }
     
     # If whiteboard:
-    if {!$foreign && ($presence eq "available") && [IsCoccinella $jid]} {
+    if {!$foreign && $jprefs(rost,useWBrosticon) &&  \
+      ($presence eq "available") && [IsCoccinella $jid]} {
 	set itype "whiteboard"
     }
     
@@ -1441,6 +1443,8 @@ proc ::Roster::InitPrefsHook { } {
     set jprefs(rost,showOffline)    1
     set jprefs(rost,showTrpts)      1
     set jprefs(rost,sort)          +1
+    
+    set jprefs(rost,useWBrosticon)  1
     
     # Keep track of all closed tree items. Default is all open.
     set jprefs(rost,closedItems) {}
