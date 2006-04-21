@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: NotifyCall.tcl,v 1.8 2006-04-20 14:15:03 matben Exp $
+# $Id: NotifyCall.tcl,v 1.9 2006-04-21 08:19:04 antoniofcano Exp $
 
 package provide NotifyCall 0.1
 
@@ -30,6 +30,7 @@ proc ::NotifyCall::InitState { } {
     set state(speaker)        50
     set state(old:microphone) 50
     set state(old:speaker)    50
+    set state(type)           -
 }
 
 #-----------------------------------------------------------------------
@@ -74,6 +75,9 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
 	raise $w
 	return
     }
+
+    set state(type) "pbx"
+
     set state(microphone) [::Phone::GetInputLevel]
     set state(speaker)    [::Phone::GetOutputLevel]
     
@@ -111,6 +115,8 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
     #------- Only Incoming from Jingle (jid and res)  has Avatar -----------
     jlib::splitjid $phoneNumber jid2 res
     if { $res ne "" } {
+        set state(type) "jingle"
+
         #---- Gets Avatar from Incoming Number -----
         # Bug in 8.4.1 but ok in 8.4.9
         if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
@@ -203,10 +209,15 @@ proc ::NotifyCall::Answer  {w line} {
 }
 
 proc ::NotifyCall::HungUp {w line} {
-    
+    variable state
+ 
     ::Debug 4 "::NotifyCall::HungUp"
-    
-    ::Phone::Hangup $line
+
+    if { $state(type) eq "pbx" } {    
+        ::Phone::Hangup $line
+    } else {
+        ::Phone::HangupJingle $line
+    }
     destroy $w
 }
 

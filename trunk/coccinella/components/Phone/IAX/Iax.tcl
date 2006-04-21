@@ -11,7 +11,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.9 2006-04-20 14:15:03 matben Exp $
+# $Id: Iax.tcl,v 1.10 2006-04-21 08:19:04 antoniofcano Exp $
 
 namespace eval ::Iax { }
 
@@ -96,11 +96,13 @@ proc ::Iax::CmdProc {type args} {
 	    return [iaxclient::getport]
 	}
 	hangup {
-	    
-	    # Handle both transport and protocol levels.
 	    iaxclient::hangup
-	    ::JingleIAX::SessionTerminate	    
 	}
+        hangupjingle {
+            # Handle both transport and protocol levels.
+            iaxclient::hangup
+            ::JingleIAX::SessionTerminate
+        }
 	hold {
 	    #iaxclient::hold $value
 	}
