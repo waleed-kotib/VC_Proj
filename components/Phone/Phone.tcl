@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.9 2006-04-20 14:15:03 matben Exp $
+# $Id: Phone.tcl,v 1.10 2006-04-21 08:08:08 antoniofcano Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -69,7 +69,12 @@ proc ::Phone::Init { } {
     variable state -
 
     ::hooks::register loginHook             ::Phone::LoginHook
-    ::hooks::register logoutHook            ::Phone::LogoutHook
+# @@@ The Phone could be registered into a PBX, 
+# in that case it is independant of the Jabber network.
+# At this moment logoutHook only hide the Phone widget wich is wrong 
+# because the reason for hide the widget is when Asterisk (Or other PBX) 
+# says that the phone isn't registered.
+#    ::hooks::register logoutHook            ::Phone::LogoutHook
     ::hooks::register launchFinalHook       ::Phone::LoginHook
 
     #option add *Phone.phone16Image              call16           widgetDefault
