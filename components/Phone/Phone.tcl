@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.11 2006-04-21 08:19:04 antoniofcano Exp $
+# $Id: Phone.tcl,v 1.12 2006-04-21 12:34:14 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -69,12 +69,12 @@ proc ::Phone::Init { } {
     variable state -
 
     ::hooks::register loginHook             ::Phone::LoginHook
-# @@@ The Phone could be registered into a PBX, 
-# in that case it is independant of the Jabber network.
-# At this moment logoutHook only hide the Phone widget wich is wrong 
-# because the reason for hide the widget is when Asterisk (Or other PBX) 
-# says that the phone isn't registered.
-#    ::hooks::register logoutHook            ::Phone::LogoutHook
+    # @@@ The Phone could be registered into a PBX, 
+    # in that case it is independant of the Jabber network.
+    # At this moment logoutHook only hide the Phone widget wich is wrong 
+    # because the reason for hide the widget is when Asterisk (Or other PBX) 
+    # says that the phone isn't registered.
+    #    ::hooks::register logoutHook            ::Phone::LogoutHook
     ::hooks::register launchFinalHook       ::Phone::LoginHook
 
     #option add *Phone.phone16Image              call16           widgetDefault
@@ -271,10 +271,12 @@ proc ::Phone::IncomingCall {callNo remote remote_name} {
 
         set initLength 0
 	if {[winfo exists $wphone]} {
-            ::TPhone::TimeUpdate $wphone [clock format [expr $initLength - 3600] -format %X]
+	    ::TPhone::TimeUpdate $wphone  \
+	      [clock format [expr {$initLength - 3600}] -format %X]
         } 
 	
-        ::NotifyCall::TimeUpdate [clock format [expr $initLength - 3600] -format %X]
+	::NotifyCall::TimeUpdate  \
+	  [clock format [expr {$initLength - 3600}] -format %X]
 	::NotifyCall::IncomingEvent $callNo $remote $statePhone(nameLine0)
 	::AddressBook::ReceivedCall $callNo $remote $statePhone(nameLine0)
 	SetIncomingState
@@ -311,9 +313,11 @@ proc ::Phone::UpdateLevels {args} {
         set tempDate [clock seconds]
         set statePhone(callLength0) [expr $tempDate - $statePhone(initDate0)]
 	if {[winfo exists $wphone]} {
-            ::TPhone::TimeUpdate $wphone [clock format [expr $statePhone(callLength0) - 3600] -format %X]
-        }
-        ::NotifyCall::TimeUpdate [clock format [expr $statePhone(callLength0) - 3600] -format %X]
+	    ::TPhone::TimeUpdate $wphone  \
+	      [clock format [expr {$statePhone(callLength0) - 3600}] -format %X]
+	}
+	::NotifyCall::TimeUpdate  \
+	  [clock format [expr {$statePhone(callLength0) - 3600}] -format %X]
     }
 }
 
@@ -605,25 +609,35 @@ proc ::Phone::Dial {} {
 proc ::Phone::HangupJingle {{callNo ""}} {
     variable statePhone
 
+    ::Debug 4 "::Phone::HangupJingle"
+    
     if { [lsearch $statePhone(statusLine0) "ringing"] >= 0 } {
         CommandPhone reject $statePhone(activeLine)
     } else {
-        CommandPhone changeline $statePhone(activeLine)
+
+	# @@@ Why do we change line?
+	CommandPhone changeline $statePhone(activeLine)
         CommandPhone hangupjingle
     }
-    SetNormalState
+
+    # IAX gets a notifier free event which calls 'SetNormalState'.
 }
 
 proc ::Phone::Hangup {{callNo ""}} {
     variable statePhone
 
+    ::Debug 4 "::Phone::Hangup"
+
     if { [lsearch $statePhone(statusLine0) "ringing"] >= 0 } {
 	CommandPhone reject $statePhone(activeLine)
     } else {
+
+	# @@@ Why do we change line?
 	CommandPhone changeline $statePhone(activeLine)
 	CommandPhone hangup
     }
-    SetNormalState
+
+    # IAX gets a notifier free event which calls 'SetNormalState'.
 }
 
 proc ::Phone::Mute {type onoff} {
@@ -698,8 +712,7 @@ proc ::Phone::TransferTo {w} {
     SetNormalState
 }
 
-
-###################### DialPad State ##########################
+#----------------------------- DialPad State -----------------------------------
 #   ______________________________
 #  |                              |
 #  |                              v
@@ -710,10 +723,17 @@ proc ::Phone::TransferTo {w} {
 #  |_____ Incoming ------------------------------+ 
 #
 # Dial. State originate by Dial button
-# Normal. State is the Start state and it is originate by Hangup button or Free event, too
+# Normal. State is the Start state and it is originate by Hangup button or 
+# Free event, too.
 # All the others states are originate by Events
 #
-##############################################################
+#-------------------------------------------------------------------------------
+
+# These functions control all state changes and calls the selected softphone 
+# component which is responsible for protocol stuff.
+# 
+# States: Normal, Dial, Talking, Incoming.
+
 proc ::Phone::SetUnregisterState {} {
 
 #    $wpath.pad.hangup configure -text "Hangup"
@@ -786,6 +806,7 @@ proc ::Phone::SetNormalState {{noCall ""}} {
         ::TPhone::State $wphone  "transfer"  {disabled}
     }
 
+    ::Phone::CommandPhone state "available"
     ::hooks::run phoneChangeState "available"
 }
 
@@ -802,6 +823,7 @@ proc ::Phone::SetDialState {} {
         ::TPhone::State $wphone  "backspace" {disabled}
     }
 
+    ::Phone::CommandPhone state "ring"
     ::hooks::run phoneChangeState "ring"
 }
 
@@ -822,6 +844,7 @@ proc ::Phone::SetTalkingState {{noCall ""} } {
 
     ::AddressBook::TalkingState
 
+    ::Phone::CommandPhone state "on_phone"
     ::hooks::run phoneChangeState "on_phone"
 }
 
@@ -838,6 +861,7 @@ proc ::Phone::SetIncomingState { {noCall ""}} {
         ::TPhone::State $wphone  "backspace" {disabled}   
     }
 
+    ::Phone::CommandPhone state "ring"
     ::hooks::run phoneChangeState "ring" 
 }
 

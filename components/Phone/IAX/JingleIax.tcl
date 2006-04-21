@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.20 2006-04-20 14:15:03 matben Exp $
+# $Id: JingleIax.tcl,v 1.21 2006-04-21 12:34:14 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -34,9 +34,6 @@ proc ::JingleIAX::Init { } {
     ::hooks::register loginHook             ::JingleIAX::LoginHook
     ::hooks::register logoutHook            ::JingleIAX::LogoutHook
     ::hooks::register presenceHook          ::JingleIAX::PresenceHook
-
-    ::hooks::register phoneChangeState      ::JingleIAX::SendJinglePresence
-
     ::hooks::register rosterPostCommandHook ::JingleIAX::RosterPostCommandHook
     ::hooks::register buildChatButtonTrayHook  ::JingleIAX::BuildChatButtonTrayHook
 
