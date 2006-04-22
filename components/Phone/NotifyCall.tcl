@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: NotifyCall.tcl,v 1.9 2006-04-21 08:19:04 antoniofcano Exp $
+# $Id: NotifyCall.tcl,v 1.10 2006-04-22 14:26:23 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -13,24 +13,9 @@ namespace eval ::NotifyCall { }
 
 proc ::NotifyCall::Init { } {
     
-    ::hooks::register  avatarNewPhotoHook       ::NotifyCall::AvatarNewPhotoHook
+    ::hooks::register  avatarNewPhotoHook   ::NotifyCall::AvatarNewPhotoHook
 
-    InitState
-}
-
-proc ::NotifyCall::InitState { } {
-    variable  state
-    
-    set state(win) .notifycall
-
-    # Variables used for the widgets. Levels only temporary.
-    set state(cmicrophone)    1
-    set state(cspeaker)       1
-    set state(microphone)     50
-    set state(speaker)        50
-    set state(old:microphone) 50
-    set state(old:speaker)    50
-    set state(type)           -
+    variable wmain .notifycall
 }
 
 #-----------------------------------------------------------------------
@@ -41,12 +26,10 @@ proc ::NotifyCall::InitState { } {
 # 
 
 proc ::NotifyCall::InboundCall { {line ""} {phoneNumber ""} } {
-    variable state
-  
-    set win $state(win)
-
+    variable wmain
+    
     if { $phoneNumber ne "" } { 
-        BuildDialer $win $line $phoneNumber "in"
+	Toplevel $wmain $line $phoneNumber "in"
     }
 }
 
@@ -54,18 +37,17 @@ proc ::NotifyCall::InboundCall { {line ""} {phoneNumber ""} } {
 #
 
 proc ::NotifyCall::OutboundCall { {line ""} {phoneNumber ""} } {
-    variable state
-
-    set win $state(win)
+    variable wmain
 
     if { $phoneNumber ne "" } {
-        BuildDialer $win $line $phoneNumber "out"
+	Toplevel $wmain $line $phoneNumber "out"
     }
 }
 
 # NotifyCall::BuildDialer --
 # 
 #       Dialog for incoming and outgoing calls.
+#       @@@ OUTDATED!!!!!!!!!!
        
 proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
     variable state
@@ -75,9 +57,6 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
 	raise $w
 	return
     }
-
-    set state(type) "pbx"
-
     set state(microphone) [::Phone::GetInputLevel]
     set state(speaker)    [::Phone::GetOutputLevel]
     
@@ -90,8 +69,6 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
     } else {
         wm title $w [mc outCall]
     }
-
-    ::UI::SetWindowPosition $w
 
     # Global frame.
     ttk::frame $w.f
@@ -115,8 +92,6 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
     #------- Only Incoming from Jingle (jid and res)  has Avatar -----------
     jlib::splitjid $phoneNumber jid2 res
     if { $res ne "" } {
-        set state(type) "jingle"
-
         #---- Gets Avatar from Incoming Number -----
         # Bug in 8.4.1 but ok in 8.4.9
         if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
@@ -146,7 +121,7 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
 #      -width 18
 
     ttk::button $box.hungup -text [mc callHungUp]  \
-      -command [list [namespace current]::HungUp $w $line]
+      -command [list [namespace current]::HangUp $w $line]
  
     grid $box.hungup -column 0 -row 4 -padx 1 -pady 4
 
@@ -192,8 +167,188 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
     }
     focus $box.hungup
     wm resizable $w 0 0
+    ::UI::SetWindowPosition $w
 }
 
+# NotifyCall::Toplevel --
+# 
+#       Build a toplevel dialog for call admin.
+#       Dialog for incoming and outgoing calls.
+
+proc ::NotifyCall::Toplevel {w line phoneNumber type} {
+    
+    # Make sure only single instance of this dialog.
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
+    
+    ::UI::Toplevel $w -class PhoneNotify \
+      -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
+      -closecommand ::NotifyCall::CloseDialer
+
+    if { $type eq "in" } {
+	wm title $w [mc notifyCall]
+    } else {
+	wm title $w [mc outCall]
+    }
+    
+    if { $type eq "in" } {
+	set msgHead [mc inboundCall]:
+    } else {
+	set msgHead [mc outboundCall]:
+    } 
+    
+    # Global frame.
+    ttk::frame $w.f
+    pack $w.f
+
+    ttk::label $w.f.head -style Headlabel -text $msgHead
+    pack $w.f.head -side top -fill x
+
+    ttk::separator $w.f.s -orient horizontal
+    pack $w.f.s -side top -fill x
+    
+    Frame $w.f.call $line $phoneNumber $type
+    pack $w.f.call -side top -fill x
+    $w.f.call configure -padding [option get . dialogPadding {}]
+
+    wm resizable $w 0 0
+    ::UI::SetWindowPosition $w
+}
+
+proc ::NotifyCall::GetFrame {w} {
+    return $w.f.call
+}
+
+proc ::NotifyCall::InitState {win} {
+    variable $win
+    upvar #0 $win state
+
+    # Variables used for the widgets. Levels only temporary.
+    set state(cmicrophone)    1
+    set state(cspeaker)       1
+    set state(microphone)     50
+    set state(speaker)        50
+    set state(old:microphone) 50
+    set state(old:speaker)    50
+    set state(type)           "pbx"
+}
+
+# NotifyCall::Frame --
+# 
+#       Build the actual megawidget frame. Multi instance.
+#       @@@ This can be used to but in a notebook page.
+
+proc ::NotifyCall::Frame {win line phoneNumber type} {
+
+    # Have state array with same name as frame.
+    variable $win
+    upvar #0 $win state
+          
+    InitState $win
+
+    # The vertical scales need a 100-level rescale!
+    set state(microphone) [::Phone::GetInputLevel]
+    set state(speaker)    [::Phone::GetOutputLevel]
+    set state(microphone-100) [expr {100 - $state(microphone)}]
+    set state(speaker-100)    [expr {100 - $state(speaker)}]
+    
+    set state(line)        $line
+    set state(type)        $type
+    set state(phoneNumber) $phoneNumber
+
+    jlib::splitjid $phoneNumber jid2 res
+
+    ttk::frame $win    
+    ttk::label $win.num -text $phoneNumber
+
+    ttk::frame $win.left
+    ttk::frame $win.right
+
+    ttk::button $win.hangup -text [mc callHungUp]  \
+      -command [list [namespace current]::HangUp $win]
+    ttk::button $win.answer -text [mc callAnswer]  \
+      -command [list [namespace current]::Answer $win]
+
+    ttk::button $win.info -text [mc callInfo]  \
+      -command [list [namespace current]::CallInfo $win]
+    ttk::frame $win.ava
+        
+    grid  $win.num     -            -sticky w
+    grid  $win.left    $win.right   -sticky ew -padx 4 -pady 4
+    grid  $win.info    $win.ava     -sticky ew -padx 4 -pady 4
+    grid  $win.hangup  $win.answer  -sticky ew -padx 4 -pady 4
+    grid columnconfigure $win 0 -uniform a
+    grid columnconfigure $win 1 -uniform a
+    
+    # Level controls.
+    set subPath [file join components Phone timages]
+    set images(microphone) [::Theme::GetImage microphone $subPath]
+    set images(speaker)    [::Theme::GetImage speaker $subPath]    
+
+    # Microphone:
+    set wmic $win.left.mic
+    ttk::frame $wmic
+    ttk::scale $wmic.s -orient vertical -from 0 -to 100 -length 60  \
+      -variable $win\(microphone-100)  \
+      -command [list ::NotifyCall::MicCmd $win]
+    ttk::checkbutton $wmic.l -style Toolbutton  \
+      -variable $win\(cmicrophone) -image $images(microphone)  \
+      -onvalue 0 -offvalue 1 -padding {1}  \
+      -command [list ::NotifyCall::Mute $win microphone]
+    pack  $wmic.s  $wmic.l  -side top
+    pack $wmic.l -pady 4
+    pack $wmic
+    
+    # Speakers:
+    set wspk $win.right.spk
+    ttk::frame $wspk
+    ttk::scale $wspk.s -orient vertical -from 0 -to 100 -length 60  \
+      -variable $win\(speaker-100)  \
+      -command [list ::NotifyCall::SpkCmd $win]
+    ttk::checkbutton $wspk.l -style Toolbutton  \
+      -variable $win\(cspeaker) -image $images(speaker)  \
+      -onvalue 0 -offvalue 1 -padding {1}  \
+      -command [list ::NotifyCall::Mute $win speaker]
+    pack  $wspk.s  $wspk.l  -side top
+    pack $wspk.l -pady 4
+    pack $wspk
+    
+    # Only Incoming from Jingle (jid and res)  has Avatar.
+    if { $res ne "" } {
+	set state(type) "jingle"
+	set state(wavatar) $win.ava.avatar
+	
+	#---- Gets Avatar from Incoming Number -----
+	# Bug in 8.4.1 but ok in 8.4.9
+	if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
+	    label $win.ava.avatar -relief sunken -bd 1 -bg white
+	} else {
+	    ttk::label $win.ava.avatar -style Sunken.TLabel -compound image
+	}	
+	::Avatar::GetAsyncIfExists $jid2
+	AvatarNewPhotoHook $jid2
+    }
+
+    # Button info is available only for Jingle Calls.
+    if { $res eq "" } {
+	$win.info state {disabled}
+    }
+    if { $type ne "in" } {
+	$win.answer state {disabled}
+    }    
+
+    bind $win <Destroy>  { ::NotifyCall::Free %W }
+    return $win
+}
+
+proc ::NotifyCall::SetTalkingState {win} {
+    variable $win
+    upvar #0 $win state
+
+    $win.answer state {disabled}
+}
 
 #-----------------------------------------------------------------------
 #--------------------------- Notify Call Actions -----------------------
@@ -201,75 +356,95 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
 
 proc ::NotifyCall::CloseDialer {w} {
     
-#    ::UI::SaveWinGeom $w   
+    set msg "Do you actually want to hang up?"
+    set ans [tk_messageBox -icon question -type yesno -message [mc $msg]]
+    if {$ans eq "no"} {
+	return stop
+    } else {
+	::UI::SaveWinGeom $w
+	HangUp [GetFrame $w]
+	return
+    }
 }
 
-proc ::NotifyCall::Answer  {w line} {
+proc ::NotifyCall::Answer {win} {
+    variable $win
+    upvar #0 $win state
+
     ::Phone::Answer
 }
 
-proc ::NotifyCall::HungUp {w line} {
-    variable state
- 
-    ::Debug 4 "::NotifyCall::HungUp"
-
-    if { $state(type) eq "pbx" } {    
-        ::Phone::Hangup $line
-    } else {
-        ::Phone::HangupJingle $line
-    }
-    destroy $w
-}
-
-proc ::NotifyCall::CallInfo {w phoneNumber} {
-
-    ::UserInfo::Get $phoneNumber 
-}
-
-proc ::NotifyCall::MicCmd {w level} {
-    variable state
+proc ::NotifyCall::HangUp {win} {
+    variable $win
+    upvar #0 $win state
     
+    ::Debug 4 "::NotifyCall::HangUp"
+    
+    if { $state(type) eq "pbx" } {    
+	::Phone::Hangup $state(line)
+    } else {
+	::Phone::HangupJingle $state(line)
+    }
+    
+    # @@@ What to do? BAD!!!
+    set w [winfo toplevel $win]
+    if {[winfo class $w] eq "PhoneNotify"} {
+	destroy $w
+    }
+}
+
+proc ::NotifyCall::CallInfo {win} {
+    variable $win
+    upvar #0 $win state
+
+    ::UserInfo::Get $state(phoneNumber) 
+}
+
+proc ::NotifyCall::MicCmd {win level} {
+    variable $win
+    upvar #0 $win state
+    
+    set level [expr {100 - $level}]
+    set state(microphone) $level
     if {$level != $state(old:microphone)} {
 	::Phone::SetInputLevel $level
     }
     set state(old:microphone) $level
 }
 
-proc ::NotifyCall::SpkCmd {w level} {
-    variable state    
+proc ::NotifyCall::SpkCmd {win level} {
+    variable $win
+    upvar #0 $win state
 
+    set level [expr {100 - $level}]
+    set state(speaker) $level
     if {$level != $state(old:speaker)} {
 	::Phone::SetOutputLevel $level        
     }
     set state(old:speaker) $level
 }
 
-proc ::NotifyCall::Mute {w type} {
-    variable state
+proc ::NotifyCall::Mute {win what} {
+    variable $win
+    upvar #0 $win state
    
-    if { $state(c$type) == 1 } {
-        set state($type) 0
+    if { $state(c$what) } {
+        set state($what) 0
     } else {
-        set state($type) $state(old:$type)
+        set state($what) $state(old:$what)
     }
-    ::Phone::Mute $type $state(c$type)
+    ::Phone::Mute $what $state(c$what)
 }
 
 proc ::NotifyCall::TimeUpdate {time} {
-    variable state
 
-    #What to do when user is talking
-    #set win $state(win)
-    #set wbox .notify.l
+}
 
-    #ttk::separator $wbox.s4 -orient horizontal
-    #pack  $wbox.s4  -side top -fill x
-        
-    #ttk::label $wbox.lcd -text "[mc callDuration]:  $time"
-    #pack  $wbox.lcd  -side bottom -fill x
-
-
-#    puts "Update Time: $time"
+proc ::NotifyCall::Free {win} {
+    variable $win
+    upvar #0 $win state
+    
+    unset -nocomplain state
 }
 
 # These are the interfaces that the Phone component calls.......................
@@ -286,49 +461,46 @@ proc ::NotifyCall::IncomingEvent {callNo remote remote_name} {
     
     set phoneNameInput $remote
     set phoneNumberInput $remote_name
-    InboundCall $callNo  "$phoneNameInput ($phoneNumberInput)"
+    InboundCall $callNo "$phoneNameInput ($phoneNumberInput)"
 }
 
 proc ::NotifyCall::OutgoingEvent {remote_name} {
 
+    ::Debug 4 "::NotifyCall::OutgoingEvent"
+    
     set phoneNameInput $remote_name
     OutboundCall 1 $phoneNameInput
 }
 
 proc ::NotifyCall::HangupEvent {args} {
-    variable state
+    variable wmain
 
-   set win $state(win)
-   if {[winfo exists $win]} {
-       destroy $win
-   }
+    destroy $wmain
 }
 
 proc ::NotifyCall::TalkingEvent {args} {
-    variable state
+    variable wmain
     
     # What to do when user is talking
-    set win $state(win)
-    set wbox $win.f.f.b
-
-    $wbox.answer configure -state disabled
-    $wbox.mic.l  configure -state enabled
-    $wbox.spk.l  configure -state enabled
+    SetTalkingState [GetFrame $wmain]
 }
 
 proc ::NotifyCall::AvatarNewPhotoHook {jid2} {
-    variable state
+    variable wmain
 
-    set w $state(win)
-    if {[winfo exists $w]} {
+    if {[winfo exists $wmain]} {
         set avatar [::Avatar::GetPhotoOfSize $jid2 64]
+	set win [GetFrame $wmain]
+	variable $win
+	upvar #0 $win state
 
         if {$avatar eq ""} {
-            grid forget $w.f.avatar
+	    grid forget $state(wavatar)
         } else {
-            # Make sure it is mapped
-            grid $w.f.avatar -row 2 -column 1 -padx 4
-            $w.f.avatar configure -image $avatar
+
+	    # Make sure it is mapped
+	    grid  $state(wavatar)  -padx 4 -pady 4
+	    $state(wavatar) configure -image $avatar
         }
     }
 }
