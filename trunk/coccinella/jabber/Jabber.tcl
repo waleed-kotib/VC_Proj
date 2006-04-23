@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.165 2006-04-19 07:53:44 matben Exp $
+# $Id: Jabber.tcl,v 1.166 2006-04-23 09:32:22 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1206,6 +1206,10 @@ proc ::Jabber::SetStatus {type args} {
     
     ::Debug 4 "::Jabber::SetStatus type=$type, args=$args"
     
+    # We protect against accidental calls. (logoutHook)
+    if {![$jstate(jlib) isinstream]} {
+	return
+    }
     array set argsArr {
 	-notype         0
     }
