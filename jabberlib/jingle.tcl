@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jingle.tcl,v 1.4 2006-04-18 14:01:27 matben Exp $
+# $Id: jingle.tcl,v 1.5 2006-04-24 06:36:19 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -345,6 +345,7 @@ proc jlib::jingle::set_state {jlibname sid action} {
     upvar ${jlibname}::jingle::session  session
 
     puts "jlib::jingle::set_state"
+    
     # Since we are a state machine we must check that the requested state
     # change is consistent.
     if {$action eq "session-initiate"} {

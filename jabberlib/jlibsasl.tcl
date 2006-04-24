@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.18 2005-11-04 15:14:55 matben Exp $
+# $Id: jlibsasl.tcl,v 1.19 2006-04-24 06:36:19 matben Exp $
 
 package require saslmd5
 set ::_saslpack saslmd5
@@ -204,6 +204,8 @@ proc jlib::sasl_callback {jlibname data} {
     upvar ${jlibname}::locals locals
 
     array set arr $data
+    
+    # @@@ Is 'convertto utf-8' really necessary?
     
     switch -- $arr(id) {
 	authname {
