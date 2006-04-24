@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.21 2006-04-21 12:34:14 matben Exp $
+# $Id: JingleIax.tcl,v 1.22 2006-04-24 06:33:11 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -395,10 +395,14 @@ proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
 }
 
 proc ::JingleIAX::SessionTerminateHandler {from jingle sid id} {
+    variable state
     
     Debug "::JingleIAX::SessionTerminateHandler from=$from"
     
-    # empty so far
+    ::Jabber::JlibCmd send_iq result {} -to $from -id $id
+    set state(sid) ""
+    
+    # @@@ Do we need to take any further action (iaxclient::hangup)?
 }
 
 #-------------------------------------------------------------------------
