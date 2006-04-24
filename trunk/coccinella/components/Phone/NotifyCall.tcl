@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: NotifyCall.tcl,v 1.10 2006-04-22 14:26:23 matben Exp $
+# $Id: NotifyCall.tcl,v 1.11 2006-04-24 06:33:11 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -174,8 +174,17 @@ proc ::NotifyCall::BuildDialer {w line phoneNumber type} {
 # 
 #       Build a toplevel dialog for call admin.
 #       Dialog for incoming and outgoing calls.
+#
+# Arguments:
+#       w
+#       line
+#       phoneNumber
+#       inout        'in' or 'out'
+#       
+# Results:
+#       $w
 
-proc ::NotifyCall::Toplevel {w line phoneNumber type} {
+proc ::NotifyCall::Toplevel {w line phoneNumber inout} {
     
     # Make sure only single instance of this dialog.
     if {[winfo exists $w]} {
@@ -187,17 +196,13 @@ proc ::NotifyCall::Toplevel {w line phoneNumber type} {
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::NotifyCall::CloseDialer
 
-    if { $type eq "in" } {
+    if { $inout eq "in" } {
 	wm title $w [mc notifyCall]
-    } else {
-	wm title $w [mc outCall]
-    }
-    
-    if { $type eq "in" } {
 	set msgHead [mc inboundCall]:
     } else {
+	wm title $w [mc outCall]
 	set msgHead [mc outboundCall]:
-    } 
+    }
     
     # Global frame.
     ttk::frame $w.f
@@ -209,12 +214,14 @@ proc ::NotifyCall::Toplevel {w line phoneNumber type} {
     ttk::separator $w.f.s -orient horizontal
     pack $w.f.s -side top -fill x
     
-    Frame $w.f.call $line $phoneNumber $type
+    Frame $w.f.call $line $phoneNumber $inout
     pack $w.f.call -side top -fill x
     $w.f.call configure -padding [option get . dialogPadding {}]
 
     wm resizable $w 0 0
     ::UI::SetWindowPosition $w
+    
+    return $w
 }
 
 proc ::NotifyCall::GetFrame {w} {
@@ -239,8 +246,17 @@ proc ::NotifyCall::InitState {win} {
 # 
 #       Build the actual megawidget frame. Multi instance.
 #       @@@ This can be used to but in a notebook page.
+#
+# Arguments:
+#       win
+#       line
+#       phoneNumber
+#       inout
+#       
+# Results:
+#       $win
 
-proc ::NotifyCall::Frame {win line phoneNumber type} {
+proc ::NotifyCall::Frame {win line phoneNumber inout} {
 
     # Have state array with same name as frame.
     variable $win
@@ -255,8 +271,11 @@ proc ::NotifyCall::Frame {win line phoneNumber type} {
     set state(speaker-100)    [expr {100 - $state(speaker)}]
     
     set state(line)        $line
-    set state(type)        $type
+    set state(inout)       $inout
     set state(phoneNumber) $phoneNumber
+    
+    set state(whangup) $win.hangup
+    set state(wanswer) $win.answer
 
     jlib::splitjid $phoneNumber jid2 res
 
@@ -316,6 +335,8 @@ proc ::NotifyCall::Frame {win line phoneNumber type} {
     pack $wspk
     
     # Only Incoming from Jingle (jid and res)  has Avatar.
+    # @@@ Antonio: we should have a better mechanism to separate calls
+    # via Asterisk and Jingle p2p calls.
     if { $res ne "" } {
 	set state(type) "jingle"
 	set state(wavatar) $win.ava.avatar
@@ -335,7 +356,7 @@ proc ::NotifyCall::Frame {win line phoneNumber type} {
     if { $res eq "" } {
 	$win.info state {disabled}
     }
-    if { $type ne "in" } {
+    if { $inout ne "in" } {
 	$win.answer state {disabled}
     }    
 
@@ -347,7 +368,7 @@ proc ::NotifyCall::SetTalkingState {win} {
     variable $win
     upvar #0 $win state
 
-    $win.answer state {disabled}
+    $state(wanswer) state {disabled}
 }
 
 #-----------------------------------------------------------------------
@@ -371,6 +392,7 @@ proc ::NotifyCall::Answer {win} {
     variable $win
     upvar #0 $win state
 
+    $state(wanswer) state {disabled}
     ::Phone::Answer
 }
 
