@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.136 2006-04-17 13:23:38 matben Exp $
+# $Id: jabberlib.tcl,v 1.137 2006-04-24 06:36:19 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1021,7 +1021,7 @@ proc jlib::iq_handler {jlibname xmldata} {
     upvar ${jlibname}::locals locals 
     variable xmppxmlns
 
-    Debug 5 "jlib::iq_handler: ------------"
+    Debug 4 "jlib::iq_handler: ------------"
 
     # Extract the command level XML data items.    
     set tag [wrapper::gettag $xmldata]
@@ -1087,11 +1087,13 @@ proc jlib::iq_handler {jlibname xmldata} {
     # (2) Handle all preregistered callbacks via id attributes.
     #     Must be type 'result' or 'error'.
     #     Some components use type='set' instead of 'result'.
+    #     BUT this creates logical errors since we may also receive iq with
+    #     identical id!
 
     # @@@ It would be better not to have separate calls for errors.
     
     switch -- $type {
-	result - set {
+	result {
 	    
 	    # Protect us from our own 'set' calls when we are awaiting 
 	    # 'result' or 'error'.
@@ -1919,9 +1921,13 @@ proc jlib::bind_resource {jlibname resource cmd} {
     
     variable xmppxmlns
 
+    # If resource is an empty string request the server to create it.
+    set subtags {}
+    if {$resource ne ""} {
+	set subtags [list [wrapper::createtag resource -chdata $resource]]
+    }
     set xmllist [wrapper::createtag bind       \
-      -attrlist [list xmlns $xmppxmlns(bind)]  \
-      -subtags [list [wrapper::createtag resource -chdata $resource]]]
+      -attrlist [list xmlns $xmppxmlns(bind)] -subtags $subtags]
     send_iq $jlibname set [list $xmllist]  \
       -command [list [namespace current]::parse_bind_resource $jlibname $cmd]
 }
@@ -1936,11 +1942,14 @@ proc jlib::parse_bind_resource {jlibname cmd type subiq args} {
       [string equal [wrapper::getattribute $subiq xmlns] $xmppxmlns(bind)]} {
 	set jidElem [wrapper::getchildswithtag $subiq jid]
 	if {[llength $jidElem]} {
+	    
+	    # Server replies with full JID.
 	    set sjid [wrapper::getcdata $jidElem]
 	    splitjid $sjid sjid2 sresource
 	    if {![string equal [resourcemap $locals(resource)] $sresource]} {
+		set locals(myjid)    $sjid
+		set locals(myjid2)   $sjid2
 		set locals(resource) $sresource
-		set locals(myjid) "$locals(myjid2)/$sresource"
 	    }
 	}
     }    
@@ -3172,14 +3181,14 @@ proc jlib::send {jlibname xmllist} {
     
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
-	
+    
     # For the auto away function.
     if {$locals(trigAutoAway)} {
 	schedule_auto_away $jlibname
     }
     set locals(last) [clock seconds]
     set xml [wrapper::createxml $xmllist]
-
+    
     # We fail only if already in stream.
     # The first failure reports the network error, closes the stream,
     # which stops multiple errors to be reported to the client.
@@ -3524,7 +3533,7 @@ proc jlib::schedule_keepalive {jlibname} {
     upvar ${jlibname}::locals locals
     upvar ${jlibname}::opts opts
     upvar ${jlibname}::lib lib
-
+    
     if {$opts(-keepalivesecs) && $lib(isinstream)} {
 	Debug 2 "SEND:"
 	if {[catch {

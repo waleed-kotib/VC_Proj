@@ -4,13 +4,14 @@
 #       SASL authentication method using the DIGEST-MD5 mechanism.
 #       SASL [RFC 2222]
 #       DIGEST-MD5 [RFC 2831]
+#       ANONYMOUS []
 #       
 #       It also includes the PLAIN mechanism, so saslmd5 is a misnomer.
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  BSD license
 #  
-# $Id: saslmd5.tcl,v 1.8 2006-04-13 10:45:05 matben Exp $
+# $Id: saslmd5.tcl,v 1.9 2006-04-24 06:36:19 matben Exp $
 
 package require base64
 package require md5 2.0
@@ -22,6 +23,7 @@ namespace eval saslmd5 {
     
     # These are in order of preference.
     variable mechanisms [list "DIGEST-MD5" "PLAIN"]
+    #variable mechanisms [list "DIGEST-MD5" "PLAIN" "ANONYMOUS"]
     variable needed {username authzid pass realm}
     variable uid 0
     
@@ -166,6 +168,9 @@ proc saslmd5::method_start {token args} {
 	DIGEST-MD5 {
 	    set output ""
 	}
+	ANONYMOUS {
+	    set output [get_anonymous_output $token]
+	}
     }
 	    
     # continue
@@ -199,6 +204,12 @@ proc saslmd5::get_plain_output {token} {
     
     set jid [jlib::joinjid $user_lat1 $realm_lat1 ""]
     return [binary format a*xa*xa* $jid $user_lat1 $pass_lat1]
+}
+
+proc saslmd5::get_anonymous_output {token} {
+
+    # ???
+    return [jlib::generateuuid]
 }
 
 # saslmd5::method_step --
