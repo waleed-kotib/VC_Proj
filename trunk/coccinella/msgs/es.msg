@@ -222,8 +222,6 @@
 ::msgcat::mcset es text             Texto
 ::msgcat::mcset es width            Anchura
 
-#--- Translate ------------------
-
 # Values (see item inspector to see what they mean):
 # anchor
 ::msgcat::mcset es n          N
@@ -234,23 +232,26 @@
 ::msgcat::mcset es sw         SW
 ::msgcat::mcset es w          W
 ::msgcat::mcset es nw         NW
-::msgcat::mcset es center     Center
+::msgcat::mcset es center     Centrado
+
 # arrow
-::msgcat::mcset es last             Last
-::msgcat::mcset es first            First
-::msgcat::mcset es both             Both
+::msgcat::mcset es last             ÚltimoL
+::msgcat::mcset es first            Primero
+::msgcat::mcset es both             Ambos
 
 ::msgcat::mcset es transparent      Transparente
-::msgcat::mcset es gray75           {Gray 75%}
-::msgcat::mcset es gray50           {Gray 50%}
-::msgcat::mcset es gray25           {Gray 25%}
-::msgcat::mcset es gray12           {Gray 12%}
+::msgcat::mcset es gray75           {Gris 75%}
+::msgcat::mcset es gray50           {Gris 50%}
+::msgcat::mcset es gray25           {Gris 25%}
+::msgcat::mcset es gray12           {Gris 12%}
 
+#--- Translate ------------------
 ::msgcat::mcset es round            Round
 ::msgcat::mcset es miter            Miter
 ::msgcat::mcset es bevel            Bevel
 ::msgcat::mcset es butt             Butt
 ::msgcat::mcset es projecting       Projecting
+# End Translate ----------------
 
 ::msgcat::mcset es normal           Normal
 ::msgcat::mcset es bold             Negrita
@@ -260,8 +261,6 @@
 ::msgcat::mcset es right            Derecha
 ::msgcat::mcset es false            Falso
 ::msgcat::mcset es true             Verdadero
-
-# End Translate ----------------
 
 ::msgcat::mcset es none			{Ninguno}
 ::msgcat::mcset es dotted		{Punteado}
@@ -813,13 +812,8 @@
 ::msgcat::mcset es jamessconnbroken	{La conexión se ha interrumpido inesperadamente}
 ::msgcat::mcset es jamessautoawayset 	{El estado "Alejado automático" ha sido enviado a %s. Desea de nuevo aparecer como "Disponible" ?}
 
-#--- Translate!
-::msgcat::mcset es jamesserrgetpublic	{Received an error when getting the public data from %s. The error code is %s with error message: %s}
-::msgcat::mcset es jamesserrlastactive	{We received an error when quering %s for last activity. The error was: %s}
-# There are some problems here with %s
 ::msgcat::mcset es jamesserrgetpublic	{Error durante la solicitud de datos públicos de %s, el código de error es %s (%s)}
-::msgcat::mcset es jamesserrlastactive	{Error durante la solicitud de la última actividad de %s, el código de error es %s (%s)}
-#---End Translate
+::msgcat::mcset es jamesserrlastactive	{Error durante la solicitud de la última actividad de %s, e error es %s}
 
 ::msgcat::mcset es jamesserrnotimeinfo	{El cliente/servicio %s no ha devuelto la información del tiempo.}
 ::msgcat::mcset es jamesstimeused	{Tiempo transcurrido desde la última actividad de %s : }
