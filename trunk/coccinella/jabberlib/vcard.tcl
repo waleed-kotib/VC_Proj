@@ -3,14 +3,14 @@
 #      This file is part of the jabberlib.
 #      It handles vcard stuff and provides cache for it as well.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: vcard.tcl,v 1.6 2006-04-27 07:48:49 matben Exp $
+# $Id: vcard.tcl,v 1.7 2006-04-27 14:16:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
 #   NAME
-#      disco - convenience command library for the disco part of XMPP.
+#      vcard - convenience command library for the vcard extension.
 #      
 #   SYNOPSIS
 #      jlib::vcard::init jlibName ?-opt value ...?
@@ -47,6 +47,7 @@ namespace eval jlib::vcard {
 proc jlib::vcard::init {jlibname args} {
     
     variable xmlns
+    set xmlns(vcard) "vcard-temp"
 	
     # Instance specific arrays.
     namespace eval ${jlibname}::vcard {
@@ -90,14 +91,14 @@ proc jlib::vcard::cmdproc {jlibname cmd args} {
 #       none.
 
 proc jlib::vcard::send_get {jlibname to cmd} {
+    variable xmlns
     upvar ${jlibname}::vcard::state state
 
     set state(pending,$to) 1
-    set attrlist [list xmlns vcard-temp]    
+    set attrlist [list xmlns $xmlns(vcard)]    
     set xmllist [wrapper::createtag "vCard" -attrlist $attrlist]
     jlib::send_iq $jlibname "get" [list $xmllist] -to $to -command   \
-      [list [namespace current]::send_get_cb $jlibname $to $cmd]
-    
+      [list [namespace current]::send_get_cb $jlibname $to $cmd]    
     return
 }
 
@@ -147,20 +148,47 @@ proc jlib::vcard::invoke_stacked {jlibname jid type subiq} {
     }
 }
 
-proc jlib::vcard::has_cache {jlibname jid} {
+# jlib::vcard::get_own_async --
+# 
+#       Getting and setting owns vcard is special since lacks to attribute.
+
+proc jlib::vcard::get_own_async {jlibname cmd} {
     upvar ${jlibname}::vcard::state state
-    
-   return [info exists state(cache,$jid)] 
+
+    set jid [$jlibname myjid2]
+    if {[info exists state(cache,$jid)]} {
+	uplevel #0 $cmd [list $jlibname result $state(cache,$jid)]
+    } elseif {[info exists state(pending,$jid)]} {
+	lappend state(invoke,$jid) $cmd
+    } else {
+	send_get_own $jlibname $cmd
+    }
+    return
 }
 
-proc jlib::vcard::get_cache {jlibname jid} {
+proc jlib::vcard::send_get_own {jlibname cmd} {
+    variable xmlns
+
+    # A user may retrieve his or her own vCard by sending XML of the 
+    # following form to his or her own JID (the 'to' attibute SHOULD NOT 
+    # be included).
+    set attrlist [list xmlns $xmlns(vcard)]    
+    set xmllist [wrapper::createtag "vCard" -attrlist $attrlist]
+    jlib::send_iq $jlibname "get" [list $xmllist] -command   \
+      [list [namespace current]::send_get_own_cb $jlibname $cmd]
+}
+
+proc jlib::vcard::send_get_own_cb {jlibname cmd type subiq} {
     upvar ${jlibname}::vcard::state state
     
-   if {[info exists state(cache,$jid)]} {
-       return $state(cache,$jid)
-   } else {
-       return
-   }
+    set jid [$jlibname myjid2]
+    unset -nocomplain state(pending,$jid)
+    if {$state(cache)} {
+	set state(cache,$jid) $subiq
+    }    
+    invoke_stacked $jlibname $jid $type $subiq
+
+    uplevel #0 $cmd [list $jlibname $type $subiq]
 }
 
 # jlib::vcard::set_my_photo --
@@ -170,20 +198,21 @@ proc jlib::vcard::get_cache {jlibname jid} {
 
 proc jlib::vcard::set_my_photo {jlibname photo mime cmd} {
     
-    get_async $jlibname [$jlibname myjid]  \
+    send_get_own $jlibname  \
       [list [namespace current]::get_my_photo_cb $photo $mime $cmd]
 }
 
 proc jlib::vcard::get_my_photo_cb {photo mime cmd jlibname type subiq} {
-
+    
     # Replace or set an element:
     # 
     # <PHOTO>
     #     <TYPE>image/jpeg</TYPE>
     #     <BINVAL>Base64-encoded-avatar-file-here!</BINVAL>
     # </PHOTO> 
-    
-    if {$type eq "result"} {
+
+    # If no vcard we are done.
+    if {($type eq "result") && ($subiq ne {})} {
 	if {$photo ne ""} {
 	    
 	    # Replace or add photo.
@@ -206,6 +235,22 @@ proc jlib::vcard::get_my_photo_cb {photo mime cmd jlibname type subiq} {
 proc jlib::vcard::set_my_photo_cb {jlibname cmd type subiq} {
     
     uplevel #0 $cmd [list $jlibname $type $subiq]
+}
+
+proc jlib::vcard::has_cache {jlibname jid} {
+    upvar ${jlibname}::vcard::state state
+    
+   return [info exists state(cache,$jid)] 
+}
+
+proc jlib::vcard::get_cache {jlibname jid} {
+    upvar ${jlibname}::vcard::state state
+    
+   if {[info exists state(cache,$jid)]} {
+       return $state(cache,$jid)
+   } else {
+       return
+   }
 }
 
 # jlib::vcard::send_set --
@@ -309,8 +354,10 @@ proc jlib::vcard::send_set {jlibname cmd args} {
 	lappend subelem [wrapper::createtag "PHOTO" -subtags $elem]
     }
     
+    set jid [$jlibname myjid2]
     set xmllist [wrapper::createtag vCard -attrlist $attrlist \
       -subtags $subelem]
+    set state(cache,$jid) $xmllist
     jlib::send_iq $jlibname "set" [list $xmllist] -command \
       [list [namespace current]::send_set_cb $jlibname $cmd]    
     return

@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.10 2006-04-27 07:48:49 matben Exp $
+# $Id: avatar.tcl,v 1.11 2006-04-27 14:16:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -838,7 +838,7 @@ if {0} {
     set data "0123456789"
     
     set jlib jlib::jlib1
-    proc cb {args} {puts "--- cb: $args"}
+    proc cb {args} {puts "--- cb"}
     $jlib avatar set_data $data image/png
     $jlib avatar store cb
     $jlib avatar send_get [$jlib getthis myjid] cb

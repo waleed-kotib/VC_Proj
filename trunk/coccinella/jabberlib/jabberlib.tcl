@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.137 2006-04-24 06:36:19 matben Exp $
+# $Id: jabberlib.tcl,v 1.138 2006-04-27 14:16:27 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3246,6 +3246,13 @@ proc jlib::myjid {jlibname} {
     upvar ${jlibname}::locals locals
     
     return $locals(myjid)
+}
+
+proc jlib::myjid2 {jlibname} {
+
+    upvar ${jlibname}::locals locals
+    
+    return $locals(myjid2)
 }
 
 # jlib::oob_set --
