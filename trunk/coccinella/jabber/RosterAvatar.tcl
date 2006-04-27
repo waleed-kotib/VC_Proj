@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.7 2006-04-27 07:48:49 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.8 2006-04-27 14:17:30 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -417,20 +417,34 @@ proc ::RosterAvatar::OnAvatarPhoto {type jid2} {
     
     ::Debug 4 "::RosterAvatar::OnAvatarPhoto type=$type, jid2=$jid2"
 
-    SetAvatarImage $type $jid2
+    # Avatars are defined per BARE JID, jid2.
+    # For online users we shall set avatar for all resources.
+    set resources [::Jabber::RosterCmd getresources $jid2]
+    if {$resources eq ""} {
+	SetAvatarImage $type $jid2
+    } else {
+	foreach res $resources {
+	    SetAvatarImage $type $jid2/$res  
+	}
+    }
 }
 
-proc ::RosterAvatar::SetAvatarImage {type jid2} {
+# RosterAvatar::SetAvatarImage --
+# 
+#       Sets, updates or removes an avatar for the specified jid.
+#
+# Arguments:
+#       jid     is as jid3 if available else jid2, identical to how items 
+#               are tagged
+
+proc ::RosterAvatar::SetAvatarImage {type jid} {
     variable T
     variable avatar
     variable avatarSize
     
-    ::Debug 4 "::RosterAvatar::SetAvatarImage jid2=$jid2"
-	
-    # @@@ Not the best solution...
-    # The problem is with JEP-0008 mixing jid2 with jid3.
-    # FAILS for vcard avatars!
-    set jid [::Jabber::JlibCmd avatar get_full_jid $jid2]
+    ::Debug 4 "::RosterAvatar::SetAvatarImage jid=$jid"
+        
+    jlib::splitjid $jid jid2 -
     set tag [list jid $jid]
     set item [FindWithTag $tag]
     if {$item ne ""} {
@@ -507,6 +521,9 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
 	unavailable eOffText
     }
 
+    # Always try to show avatar.
+    set avatarForOffline 0
+
     # jid2 is always without a resource
     # jid3 is as reported
     # jidx is as jid3 if available else jid2
@@ -546,9 +563,9 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     set item [CreateWithTag $tag $style $elem $jtext $jimage root]
     lappend items $item
     
-    if {$presence eq "available"} {
+    if {$avatarForOffline || $presence eq "available"} {
 	if {[::Avatar::HavePhoto $jid2]} {
-	    SetAvatarImage put $jid2
+	    SetAvatarImage put $jidx
 	}
     }
 
