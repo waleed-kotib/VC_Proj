@@ -1132,9 +1132,13 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en mModifyAB		{Modify}
 ::msgcat::mcset en mRemoveAB		{Remove}
 
-::msgcat::mcset en notifyCall           {Notify call}
-::msgcat::mcset en inboundCall          {Inbound call}
-::msgcat::mcset en callHungUp           {Hung up}
+::msgcat::mcset en outCall              {Make Call}
+::msgcat::mcset en notifyCall           {Notify Call}
+::msgcat::mcset en inboundCall          {Inbound Call}
+::msgcat::mcset en outboundCall         {Outbound Call}
+::msgcat::mcset en callAnswer           {Answer}
+::msgcat::mcset en callHungUp           {Hung Up}
+::msgcat::mcset en callInfo             {Info}
 ::msgcat::mcset en callVM               {Call VM?}
 
 # Fore some of these generic names could be used?

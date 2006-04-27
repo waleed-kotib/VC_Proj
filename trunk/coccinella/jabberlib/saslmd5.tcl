@@ -11,7 +11,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  BSD license
 #  
-# $Id: saslmd5.tcl,v 1.9 2006-04-24 06:36:19 matben Exp $
+# $Id: saslmd5.tcl,v 1.10 2006-04-27 07:48:49 matben Exp $
 
 package require base64
 package require md5 2.0
@@ -23,6 +23,7 @@ namespace eval saslmd5 {
     
     # These are in order of preference.
     variable mechanisms [list "DIGEST-MD5" "PLAIN"]
+    # @@@ Enable this when testing. Not production code!
     #variable mechanisms [list "DIGEST-MD5" "PLAIN" "ANONYMOUS"]
     variable needed {username authzid pass realm}
     variable uid 0
@@ -208,7 +209,7 @@ proc saslmd5::get_plain_output {token} {
 
 proc saslmd5::get_anonymous_output {token} {
 
-    # ???
+    # @@@ Is this correct???
     return [jlib::generateuuid]
 }
 

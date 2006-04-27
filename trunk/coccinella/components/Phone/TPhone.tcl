@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: TPhone.tcl,v 1.1 2006-03-02 07:05:50 matben Exp $
+# $Id: TPhone.tcl,v 1.2 2006-04-27 07:48:49 matben Exp $
 
 #-------------------------------------------------------------------------------
 # USAGE:
@@ -458,6 +458,21 @@ proc ::TPhone::Mute {w type} {
     upvar #0 $w state
        
     uplevel #0 $state(command) mute $type $state(c$type)
+}
+
+# TPhone::Button --
+# 
+#       Make standalone button.
+
+proc ::TPhone::Button {w type args} {
+    variable inited
+    variable images
+    
+    if {!$inited} {
+	Init
+    }
+    return [eval {ttk::button $w -style Phone.TButton  \
+      -image [list $images($type) pressed $images(${type}Pressed)]} $args]
 }
 
 proc ::TPhone::Free {w} {

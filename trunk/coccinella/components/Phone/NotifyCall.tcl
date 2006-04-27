@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: NotifyCall.tcl,v 1.11 2006-04-24 06:33:11 matben Exp $
+# $Id: NotifyCall.tcl,v 1.12 2006-04-27 07:48:49 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -245,7 +245,7 @@ proc ::NotifyCall::InitState {win} {
 # NotifyCall::Frame --
 # 
 #       Build the actual megawidget frame. Multi instance.
-#       @@@ This can be used to but in a notebook page.
+#       @@@ This can be used to put in a notebook page.
 #
 # Arguments:
 #       win
@@ -285,11 +285,18 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
     ttk::frame $win.left
     ttk::frame $win.right
 
-    ttk::button $win.hangup -text [mc callHungUp]  \
-      -command [list [namespace current]::HangUp $win]
-    ttk::button $win.answer -text [mc callAnswer]  \
-      -command [list [namespace current]::Answer $win]
-
+    if {1} {
+	ttk::button $win.hangup -text [mc callHungUp]  \
+	  -command [list [namespace current]::HangUp $win]
+	ttk::button $win.answer -text [mc callAnswer]  \
+	  -command [list [namespace current]::Answer $win]
+    } else {
+	# Alternative style buttons.
+	::TPhone::Button $win.hangup hangup  \
+	  -command [list [namespace current]::HangUp $win]
+	::TPhone::Button $win.answer call  \
+	  -command [list [namespace current]::Answer $win]
+    }
     ttk::button $win.info -text [mc callInfo]  \
       -command [list [namespace current]::CallInfo $win]
     ttk::frame $win.ava
@@ -411,6 +418,7 @@ proc ::NotifyCall::HangUp {win} {
     # @@@ What to do? BAD!!!
     set w [winfo toplevel $win]
     if {[winfo class $w] eq "PhoneNotify"} {
+	::UI::SaveWinGeom $w
 	destroy $w
     }
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: vcard.tcl,v 1.5 2006-04-17 13:23:38 matben Exp $
+# $Id: vcard.tcl,v 1.6 2006-04-27 07:48:49 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -161,6 +161,51 @@ proc jlib::vcard::get_cache {jlibname jid} {
    } else {
        return
    }
+}
+
+# jlib::vcard::set_my_photo --
+# 
+#       A utility to set our vCard photo.
+#       If photo empty then remove photo from vCard.
+
+proc jlib::vcard::set_my_photo {jlibname photo mime cmd} {
+    
+    get_async $jlibname [$jlibname myjid]  \
+      [list [namespace current]::get_my_photo_cb $photo $mime $cmd]
+}
+
+proc jlib::vcard::get_my_photo_cb {photo mime cmd jlibname type subiq} {
+
+    # Replace or set an element:
+    # 
+    # <PHOTO>
+    #     <TYPE>image/jpeg</TYPE>
+    #     <BINVAL>Base64-encoded-avatar-file-here!</BINVAL>
+    # </PHOTO> 
+    
+    if {$type eq "result"} {
+	if {$photo ne ""} {
+	    
+	    # Replace or add photo.
+	    lappend subElems [wrapper::createtag "TYPE" -chdata $mime]
+	    lappend subElems [wrapper::createtag "BINVAL" -chdata $photo]
+	    set photoElem [wrapper::createtag "PHOTO" -subtags $subElems]
+	    set xmllist [wrapper::setchildwithtag $subiq $photoElem]
+	} else {
+	    
+	    # Remove any photo.
+	    set xmllist [wrapper::deletechildswithtag $subiq "PHOTO"]
+	}
+	jlib::send_iq $jlibname "set" [list $xmllist] -command \
+	  [list [namespace current]::set_my_photo_cb $jlibname $cmd]    
+    } else {
+	uplevel #0 $cmd [list $jlibname $type $subiq]
+    }
+}
+
+proc jlib::vcard::set_my_photo_cb {jlibname cmd type subiq} {
+    
+    uplevel #0 $cmd [list $jlibname $type $subiq]
 }
 
 # jlib::vcard::send_set --

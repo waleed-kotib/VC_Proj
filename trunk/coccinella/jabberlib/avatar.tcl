@@ -1,13 +1,15 @@
 #  avatar.tcl --
 #  
 #      This file is part of the jabberlib. 
-#      It provides support for avatars (JEP-0008: IQ-Based Avatars).
+#      It provides support for avatars (JEP-0008: IQ-Based Avatars)
+#      and vCard based avatars as JEP-0153.
 #      Note that this JEP is "historical" only but is easy to adapt to
 #      a future pub-sub method.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2006  Mats Bengtsson
+#  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.9 2006-04-17 13:23:38 matben Exp $
+# $Id: avatar.tcl,v 1.10 2006-04-27 07:48:49 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -39,6 +41,7 @@
 #   Note that all internal storage refers to bare (2-tier) jids!
 #   @@@ It is unclear if this is correct. Perhaps the full jids shall be used.
 #   The problem is with JEP-0008 mixing jid2 with jid3.  
+#   Note that all vCards are defined per jid2, bare JID.
 #   
 #   No automatic presence or server storage is made when reconfiguring or
 #   changing own avatar. This is up to the client layer to do.
@@ -49,16 +52,17 @@ package require base64     ; # tcllib
 package require sha1       ; # tcllib                           
 package require jlib
 package require jlib::disco
+package require jlib::vcard
 
 package provide jlib::avatar 0.1
 
 namespace eval jlib::avatar {
-
     variable inited 0
     variable xmlns
-    set xmlns(x-avatar)  "jabber:x:avatar"
-    set xmlns(iq-avatar) "jabber:iq:avatar"
-    set xmlns(storage)   "storage:client:avatar"
+    set xmlns(x-avatar)   "jabber:x:avatar"
+    set xmlns(iq-avatar)  "jabber:iq:avatar"
+    set xmlns(storage)    "storage:client:avatar"
+    set xmlns(vcard-temp) "vcard-temp:x:update"
 
     jlib::ensamble_register avatar \
       [namespace current]::init    \
@@ -66,14 +70,14 @@ namespace eval jlib::avatar {
         
     jlib::register_reset [namespace current]::reset
     jlib::disco::registerfeature $xmlns(iq-avatar)
-
+    
     # Note: jlib::ensamble_register is last in this file!
 }
 
 proc jlib::avatar::init {jlibname args} {
 
     variable xmlns
-
+    
     # Instance specific arrays:
     #   avatar stores our own avatar
     #   state stores other avatars
@@ -96,9 +100,16 @@ proc jlib::avatar::init {jlibname args} {
     
     # Register some standard iq handlers that are handled internally.
     $jlibname iq_register get $xmlns(iq-avatar) [namespace current]::iq_handler
-    $jlibname presence_register_ex [namespace current]::presence_handler  \
-      -tag x -xmlns $xmlns(x-avatar)
     
+    if {0} {
+	$jlibname presence_register_ex [namespace current]::presence_handlerXXX  \
+	  -tag x -xmlns $xmlns(x-avatar)
+	$jlibname presence_register_ex [namespace current]::presence_vcard_handlerXXX  \
+	  -tag x -xmlns $xmlns(vcard-temp)
+    }
+    
+    $jlibname presence_register available [namespace current]::presence_handler
+
     return
 }
 
@@ -166,6 +177,7 @@ proc jlib::avatar::configure {jlibname args} {
 		# @@@ ???
 	    } else {
 		$jlibname unregister_presence_stanza x $xmlns(x-avatar)
+                $jlibname unregister_presence_stanza x $xmlns(vcard-temp)
 	    }
 	}
     }
@@ -211,6 +223,15 @@ proc jlib::avatar::set_data {jlibname data mime} {
     $jlibname unregister_presence_stanza x $xmlns(x-avatar)
     $jlibname register_presence_stanza $xElem
 
+    #-- vCard-temp presence stanza --
+    set photoElem [wrapper::createtag photo -chdata $avatar(hash)]
+    set xVCardElem [wrapper::createtag x         \
+      -attrlist [list xmlns $xmlns(vcard-temp)]  \
+      -subtags [list $photoElem]]
+
+    $jlibname unregister_presence_stanza x $xmlns(vcard-temp)
+    $jlibname register_presence_stanza $xVCardElem
+
     return
 }
 
@@ -234,7 +255,8 @@ proc jlib::avatar::unset_data {jlibname} {
     set options(-share)    0
     
     $jlibname unregister_presence_stanza x $xmlns(x-avatar)
-    
+    $jlibname unregister_presence_stanza x $xmlns(vcard-temp) 
+
     return
 }
 
@@ -342,14 +364,129 @@ proc jlib::avatar::get_hash {jlibname jid2} {
     }
 }
 
+proc jlib::avatar::have_hash_protocol {jlibname jid2 protocol} {
+    upvar ${jlibname}::avatar::state state
+    
+    if {[info exists state($jid2,protocol,$protocol)]} {
+	return 1
+    } else {
+	return 0
+    }
+}
+
+proc jlib::avatar::get_protocols {jlibname jid2} {
+    upvar ${jlibname}::avatar::state state
+    
+    set protocols {}
+    foreach p {avatar vcard} {
+	if {[info exists state($jid2,protocol,$p)]} {
+	    lappend protocols $p
+	}
+    }
+    return $protocols
+}
+
 # jlib::avatar::presence_handler --
+# 
+#       We must handle both 'avatar' and 'vcard' from one place
+#       since we don't want separate callbacks if both are supplied.
+#       It is assumed that hash from any are identical.
+
+proc jlib::avatar::presence_handler {jlibname jid type args} {
+    upvar ${jlibname}::avatar::options options
+
+    array set aargs $args
+    set xmldata $aargs(-xmldata)
+    set from [wrapper::getattribute $xmldata from]
+    
+    set avaSet   [PresenceAvatar $jlibname $xmldata]
+    set vcardSet [PresenceVCard $jlibname $xmldata]
+    
+    if {$avaSet || $vcardSet} {
+	if {[string length $options(-command)]} {
+	    uplevel #0 $options(-command) $from
+	}
+    }
+}
+
+# @@@ Combine these two into one!
+
+# jlib::avatar::PresenceAvatar --
 # 
 #       Caches incoming <x xmlns='jabber:x:avatar'> presence elements.
 #       "To disable the avatar, the avatar-generating user's client will send 
 #        a presence packet with the jabber:x:avatar namespace but with no hash 
 #        information"
 
-proc jlib::avatar::presence_handler {jlibname xmldata} {
+proc jlib::avatar::PresenceAvatar {jlibname xmldata} {
+    variable xmlns
+    upvar ${jlibname}::avatar::state   state
+    
+    set wasset 0
+    set elems [wrapper::getchildswithtagandxmlns $xmldata x $xmlns(x-avatar)]
+    if {[llength $elems]} {
+	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] hash]
+	set hash [wrapper::getcdata $hashElem]
+	set from [wrapper::getattribute $xmldata from]
+
+	jlib::splitjid $from jid2 -
+	
+	# hash can be empty.
+	if {![info exists state($jid2,hash)] || ($hash ne $state($jid2,hash))} {
+	    set state($jid2,hash) $hash
+	    set state($jid2,jid3) $from
+	    set state($jid2,protocol,avatar) 1
+	    if {$hash eq ""} {
+		set state($jid2,uptodate) 1
+	    } else {
+		set state($jid2,uptodate) 0
+	    }
+	    set wasset 1
+	}
+    }
+    return $wasset
+}
+
+proc jlib::avatar::PresenceVCard {jlibname xmldata} {
+    variable xmlns
+    upvar ${jlibname}::avatar::state   state
+
+    set wasset 0
+    set elems [wrapper::getchildswithtagandxmlns $xmldata x $xmlns(vcard-temp)]
+    if {[llength $elems]} {
+	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] photo]
+	set hash [wrapper::getcdata $hashElem]
+	set from [wrapper::getattribute $xmldata from]
+
+	jlib::splitjid $from jid2 -
+
+	# hash can be empty.
+	if {![info exists state($jid2,hash)] || ($hash ne $state($jid2,hash))} {
+
+	    # Note that all vCards are defined per jid2, bare JID.
+	    set state($jid2,hash) $hash
+	    set state($jid2,jid3) $from
+	    set state($jid2,protocol,vcard) 1
+	    if {$hash eq ""} {
+		set state($jid2,uptodate) 1
+	    } else {
+		set state($jid2,uptodate) 0
+	    }
+	    set wasset 1
+	}
+    }
+    return $wasset
+}
+
+# OLD!!!!!!!!!!!!!
+# jlib::avatar::presence_handlerXXX --
+# 
+#       Caches incoming <x xmlns='jabber:x:avatar'> presence elements.
+#       "To disable the avatar, the avatar-generating user's client will send 
+#        a presence packet with the jabber:x:avatar namespace but with no hash 
+#        information"
+
+proc jlib::avatar::presence_handlerXXX {jlibname xmldata} {
     variable xmlns
     upvar ${jlibname}::avatar::state   state
     upvar ${jlibname}::avatar::options options
@@ -366,6 +503,7 @@ proc jlib::avatar::presence_handler {jlibname xmldata} {
 	if {![info exists state($jid2,hash)] || ($hash ne $state($jid2,hash))} {
 	    set state($jid2,hash) $hash
 	    set state($jid2,jid3) $from
+	    set state($jid2,protocol,avatar) 1
 	    if {$hash eq ""} {
 		set state($jid2,uptodate) 1
 	    } else {
@@ -375,6 +513,43 @@ proc jlib::avatar::presence_handler {jlibname xmldata} {
 		uplevel #0 $options(-command) $from
 	    }
 	}
+    }
+}
+
+# OLD!!!!!!!!!!!!!
+#         <x xmlns='vcard-temp:x:update'>
+#             <photo>sha1-hash-of-image</photo>
+#         </x> 
+
+proc jlib::avatar::presence_vcard_handlerXXX {jlibname xmldata} {
+    variable xmlns
+    upvar ${jlibname}::avatar::state   state
+    upvar ${jlibname}::avatar::options options
+
+    set elems [wrapper::getchildswithtagandxmlns $xmldata x $xmlns(vcard-temp)]
+    if {[llength $elems]} {
+        set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] photo]
+        set hash [wrapper::getcdata $hashElem]
+        set from [wrapper::getattribute $xmldata from]
+
+        jlib::splitjid $from jid2 -
+
+        # hash can be empty.
+	if {![info exists state($jid2,hash)] || ($hash ne $state($jid2,hash))} {
+
+	    # Note that all vCards are defined per jid2, bare JID.
+	    set state($jid2,hash) $hash
+            set state($jid2,jid3) $from
+	    set state($jid2,protocol,vcard) 1
+            if {$hash eq ""} {
+                set state($jid2,uptodate) 1
+            } else {
+		set state($jid2,uptodate) 0
+            }
+            if {[string length $options(-command)]} {
+                uplevel #0 $options(-command) $from
+            }
+        }
     }
 }
 
@@ -468,7 +643,7 @@ proc jlib::avatar::SetDataFromQueryElem {jlibname jid2 queryElem ns} {
     set ans 0
     if {[wrapper::getattribute $queryElem xmlns] eq $ns} {
 	set dataElem [wrapper::getfirstchildwithtag $queryElem data]
-	if {$dataElem ne ""} {
+	if {$dataElem ne {}} {
 	    
 	    # Mime type can be empty.
 	    set state($jid2,mime) [wrapper::getattribute $dataElem mimetype]
@@ -522,10 +697,13 @@ proc jlib::avatar::invoke_stacked {jlibname type jid2} {
     }
 }
 
+# jlib::avatar::get_full_jid --
+# 
+#       This is the jid3 associated with 'avatar' or jid2 if 'vcard'.
+
 proc jlib::avatar::get_full_jid {jlibname jid2} {
     upvar ${jlibname}::avatar::state state
 
-    debug "jlib::avatar::get_full_jid $jid2"
     return $state($jid2,jid3)
 }
 
@@ -547,6 +725,91 @@ proc jlib::avatar::get_all_avatar_jids {jlibname} {
 	lappend jids $jid2
     }
     return $jids
+}
+
+#--- vCard support -------------------------------------------------------------
+
+proc jlib::avatar::get_vcard_async {jlibname jid2 cmd} {
+    upvar ${jlibname}::avatar::state state
+    
+    debug "jlib::avatar::get_vcard_async jid=$jid2"
+    
+    if {[uptodate $jlibname $jid2]} {
+	uplevel #0 $cmd [list result $jid2]
+    } else {
+	
+	# Need to clear vcard cache to trigger sending a request.
+	# The photo is anyway not up-to-date.
+	$jlibname vcard clear $jid2
+	$jlibname vcard get_async $jid2  \
+	  [list [namespace current]::get_vcard_async_cb $jid2 $cmd]
+    }
+}
+
+proc jlib::avatar::get_vcard_async_cb {jid2 cmd jlibname type subiq args} {
+	
+    debug "jlib::avatar::get_vcard_async_cb jid=$jid2"
+    
+    if {$type eq "result"} {
+	SetDataFromVCardElem $jlibname $jid2 $subiq
+    }
+    uplevel #0 $cmd [list $type $jid2]
+}
+
+# jlib::avatar::send_get_vcard --
+# 
+#       Support for vCard based avatars as JEP-0153.
+#       We must get vcard avatars from here since the result shall be cached.
+#       Note that all vCards are defined per jid2, bare JID.
+#       This method is more sane compared to iq-based avatars since it is
+#       based on bare jids and thus not client instance specific.
+#       Therefore it also handles offline users.
+
+proc jlib::avatar::send_get_vcard {jlibname jid2 cmd} {
+    
+    debug "jlib::avatar::send_get_vcard jid2=$jid2"
+    
+    $jlibname vcard send_get $jid2  \
+      -command [list [namespace current]::send_get_vcard_cb $jid2 $cmd]
+}
+
+proc jlib::avatar::send_get_vcard_cb {jid2 cmd jlibname type subiq args} {
+    
+    debug "jlib::avatar::send_get_vcard_cb"
+
+    if { $type eq "result" } {
+	SetDataFromVCardElem $jlibname $jid2 $subiq
+	uplevel #0 $cmd [list $type $subiq] $args
+    }
+}
+
+# jlib::avatar::SetDataFromVCardElem --
+# 
+#       Extracts and sets internal avtar storage for the BARE jid
+#       from a vcard element.
+#       
+# Results:
+#       1 if there was data to store, 0 else.
+
+proc jlib::avatar::SetDataFromVCardElem {jlibname jid2 subiq} {
+    upvar ${jlibname}::avatar::state state
+    
+    set ans 0
+    set photoElem [wrapper::getfirstchildwithtag $subiq PHOTO]
+    if {$photoElem ne {}} {
+	set photo [wrapper::getfirstchildwithtag $photoElem BINVAL]
+	set mime [wrapper::getfirstchildwithtag $photoElem TYPE]
+	if { $photo ne ""} {
+	    
+	    # We keep data in base64 format. This seems to be ok for image 
+	    # handlers.
+	    set state($jid2,data) $photo
+	    set state($jid2,mime) $mime 
+	    set state($jid2,uptodate) 1
+	    set ans 1
+	}
+    }
+    return $ans
 }
 
 proc jlib::avatar::debug {msg} {
