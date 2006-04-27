@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.6 2006-04-11 12:14:58 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.7 2006-04-27 07:48:49 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -415,7 +415,7 @@ proc ::RosterAvatar::Init { } {
 
 proc ::RosterAvatar::OnAvatarPhoto {type jid2} {
     
-    puts "::RosterAvatar::OnAvatarPhoto type=$type, jid2=$jid2"
+    ::Debug 4 "::RosterAvatar::OnAvatarPhoto type=$type, jid2=$jid2"
 
     SetAvatarImage $type $jid2
 }
@@ -425,10 +425,11 @@ proc ::RosterAvatar::SetAvatarImage {type jid2} {
     variable avatar
     variable avatarSize
     
-    puts "::RosterAvatar::SetAvatarImage jid2=$jid2"
+    ::Debug 4 "::RosterAvatar::SetAvatarImage jid2=$jid2"
 	
     # @@@ Not the best solution...
     # The problem is with JEP-0008 mixing jid2 with jid3.
+    # FAILS for vcard avatars!
     set jid [::Jabber::JlibCmd avatar get_full_jid $jid2]
     set tag [list jid $jid]
     set item [FindWithTag $tag]
@@ -482,6 +483,8 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     variable jidStatus
     variable rosterStyle
     upvar ::Jabber::jprefs jprefs
+    
+    ::Debug 4 "::RosterAvatar::CreateItem jid=$jid, presence=$presence"
 
     if {![regexp $presence {(available|unavailable)}]} {
 	return

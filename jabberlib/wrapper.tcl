@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.21 2005-10-12 06:59:17 matben Exp $
+# $Id: wrapper.tcl,v 1.22 2006-04-27 07:48:49 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -836,19 +836,46 @@ proc wrapper::getdhilddeep {xmllist specs} {
     return $xlist
 }
 
-proc wrapper::setattrlist {xmllist attrlist} {
- 
+proc wrapper::setattrlist {xmllist attrlist} { 
     return [lreplace $xmllist 1 1 $attrlist]
 }
 
 proc wrapper::setcdata {xmllist cdata} {
- 
     return [lreplace $xmllist 3 3 $cdata]
 }
 
 proc wrapper::setchildlist {xmllist childlist} {
-
     return [lreplace $xmllist 4 4 $childlist]
+}
+
+# wrapper::setchildwithtag --
+# 
+#       Replaces any element with same tag.
+
+proc wrapper::setchildwithtag {xmllist elem} {
+    set tag [lindex $elem 0]
+    set clist {}
+    foreach c [lindex $xmllist 4] {
+	if {[lindex $c 0] ne $tag} {
+	    lappend clist $c
+	}
+    }
+    lappend clist $elem
+    return [lreplace $xmllist 4 4 $clist]
+}
+
+# wrapper::deletechildswithtag --
+# 
+#       Deletes any element with tag.
+
+proc wrapper::deletechildswithtag {xmllist tag} {
+    set clist {}
+    foreach c [lindex $xmllist 4] {
+	if {[lindex $c 0] ne $tag} {
+	    lappend clist $c
+	}
+    }
+    return [lreplace $xmllist 4 4 $clist]
 }
 
 # wrapper::xmlcrypt --

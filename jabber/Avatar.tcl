@@ -5,9 +5,9 @@
 #       While the 'avatar' package handles the actual image data, this package
 #       keeps an image in sync with avatar image data.
 #       
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.10 2006-03-22 14:09:29 matben Exp $
+# $Id: Avatar.tcl,v 1.11 2006-04-27 07:48:49 matben Exp $
 
 # @@@ Issues:
 #     1) shall we keep cache of users avatars between sessions to save bandwidth?
@@ -28,7 +28,7 @@ namespace eval ::Avatar:: {
         
     # Array 'photo' contains our internal storage for users images.
     variable photo
-    
+
     # Our own avatar stuff.
     variable myphoto
     
@@ -44,7 +44,15 @@ namespace eval ::Avatar:: {
 	-cache      1
 	-command    ""
     }
-    
+    set options(-cachedir) $::this(cacheAvatarPath)
+
+    # Use a priority order if we have hash from both.
+    variable protocolPrio
+    array set protocolPrio {
+	1  avatar
+	2  vcard
+    }
+
     # There are two sets of prefs:
     #   1) our own avatar which must be controllable directly from UI
     #   2) getting others which is controlled by other packages
@@ -56,9 +64,28 @@ namespace eval ::Avatar:: {
     set aprefs(myavatarhash) ""
     set aprefs(share)        0
     set aprefs(fileName)     ""
+
+    variable uid 0
+
+    # We only need a limited set.
+    variable suff2Mime
+    array set suff2Mime {
+	.gif      image/gif
+	.png      image/png
+	.jpg      image/jpeg
+	.jpeg     image/jpeg
+    }
+    
+    variable mime2Suff
+    array set mime2Suff {
+	image/gif     .gif
+	image/png     .png
+	image/jpeg    .jpg
+    }
 }
 
 proc ::Avatar::Configure {args} {
+    global  this
     variable options
     upvar ::Jabber::jstate jstate
     
@@ -133,7 +160,8 @@ proc ::Avatar::LoginHook { } {
     
     set jlib $jstate(jlib)
     
-    # @@@ Perhaps this shall be done from 'avatar' instead ?
+    # @@@ Perhaps this shall be done from 'avatar' instead?
+    # @@@ Do we need to do this each time we login?
     if {$aprefs(share) && [file isfile $aprefs(fileName)]} {
 	$jlib avatar store ::Avatar::SetCB
     }
@@ -309,7 +337,7 @@ proc ::Avatar::ShareImage {fileName} {
     
     Debug "::Avatar::ShareImage"
     
-    # @@@ We could try to be economical by not storing the same image twice
+    # @@@ We could try to be economical by not storing the same image twice.
 
     set fd [open $fileName]
     fconfigure $fd -translation binary
@@ -320,12 +348,17 @@ proc ::Avatar::ShareImage {fileName} {
 
     set jlib $jstate(jlib)
     $jlib avatar set_data $data $mime
+    set base64 [$jlib avatar get_my_data base64]
     
     # If we configure while online need to update our presence info and
     # store the data with the server.
+    # Saves Avatar into vCard.
+    # @@@ Sync issue if not online while storing.
+    #     We should have a loginHook here to store any updated avatar.
     if {[$jlib isinstream]} {
 	$jlib send_presence -keep 1
 	$jlib avatar store ::Avatar::SetCB
+	$jlib vcard set_my_photo $base64 $mime ::Avatar::SetCB
     }
 }
 
@@ -344,8 +377,11 @@ proc ::Avatar::UnshareImage { } {
     if {[$jlib isinstream]} {
 	set xElem [wrapper::createtag x  \
 	  -attrlist [list xmlns "jabber:x:avatar"]]
-	$jlib send_presence -xlist [list $xElem] -keep 1
+	set xVCardElem [wrapper::createtag x  \
+	  -attrlist [list xmlns "vcard-temp:x:update"]]
+	$jlib send_presence -xlist [list $xElem $xVCardElem] -keep 1
 	$jlib avatar store_remove ::Avatar::SetCB
+	$jlib vcard set_my_photo {} {} ::Avatar::SetCB
     }    
 }
 
@@ -382,8 +418,127 @@ proc ::Avatar::OnNewHash {jid} {
 	}
 	FreePhotos $jid
     } else {
-	if {$options(-autoget)} {
-	    $jlib avatar get_async $jid ::Avatar::GetAsyncCB
+
+	# Try first to get the Avatar from Cache.
+	set data [ReadCacheAvatar $hash]
+	if {$data ne ""} {
+	    SetPhoto $jid2 $data
+	} elseif {$options(-autoget)} {
+	    GetPrioAvatar $jid
+	}
+    }
+}
+
+# Avatar::GetPrioAvatar --
+# 
+#       Get either of 'avatar' or 'vcard' avatars.
+#       If we have hash from both then get highest prio.
+
+proc ::Avatar::GetPrioAvatar {jid} {
+    variable protocolPrio
+    upvar ::Jabber::jstate jstate
+    
+    Debug "::Avatar::GetPrioAvatar jid=$jid"
+    
+    jlib::splitjid $jid jid2 -
+    set jlib $jstate(jlib)
+        
+    # We need to know if 'avatar' or 'vcard' style to get.
+    # Use a priority order if we have hash from both.    
+    # Note that all vCards are defined per jid2, bare JID.
+    foreach prio {1 2} {
+	if {[$jlib avatar have_hash_protocol $jid2 $protocolPrio($prio)]} {    
+	    switch -- $protocolPrio($prio) {
+		avatar {
+		    $jlib avatar get_async $jid ::Avatar::GetAvatarAsyncCB
+		}
+		vcard {
+		    $jlib avatar get_vcard_async $jid2 ::Avatar::GetVCardPhotoCB 
+		}
+	    }
+	    break
+	}
+    }
+}
+
+# @@@ Combine these two into one!
+
+proc ::Avatar::GetAvatarAsyncCB {type jid2} {
+    variable options
+    variable photo
+    upvar ::Jabber::jstate jstate
+    
+    Debug "::Avatar::GetAvatarAsyncCB jid2=$jid2, type=$type"
+        
+    if {$type eq "error"} {
+	InvokeAnyFallback $jid2 "vcard"
+    } else {
+	# Data may be empty from xmlns='storage:client:avatar' !
+	set jlib $jstate(jlib)
+	set data [$jlib avatar get_data $jid2]
+	if {[string bytelength $data]} {
+	    
+	    # It is our responsibility to cache the photo.
+	    set hash [$jlib avatar get_hash $jid2]
+	    set mime [$jlib avatar get_mime $jid2]
+	    WriteCacheAvatar $mime $hash $data
+	    
+	    SetPhoto $jid2 $data
+	} else {
+	    InvokeAnyFallback $jid2 "vcard"
+	}
+    }
+}
+    
+proc ::Avatar::GetVCardPhotoCB {type jid2} {
+    upvar ::Jabber::jstate jstate
+    variable xmlns
+
+    Debug "::Avatar::GetVCardPhotoCB jid2=$jid2, type=$type"
+    
+    if {$type eq "error"} {
+	InvokeAnyFallback $jid2 "avatar"
+    } else {
+	set jlib $jstate(jlib)
+	set data [$jlib avatar get_data $jid2]
+	if {[string bytelength $data]} {
+	    
+	    # It is our responsibility to cache the photo.
+	    set hash [$jlib avatar get_hash $jid2]
+	    set mime [$jlib avatar get_mime $jid2]
+	    WriteCacheAvatar $mime $hash $data
+	    
+	    SetPhoto $jid2 $data
+	} else {
+	    InvokeAnyFallback $jid2 "avatar"
+	}
+    }
+}
+
+# Avatar::InvokeAnyFallback --
+# 
+#       Handles any fallback to use 'protocol' for next try.
+
+proc ::Avatar::InvokeAnyFallback {jid2 protocol} {
+    variable protocolPrio
+    upvar ::Jabber::jstate jstate
+    
+    Debug "::Avatar::InvokeAnyFallback jid2=$jid2, protocol=$protocol"
+    
+    set jlib $jstate(jlib)
+
+    if {$protocolPrio(2) eq $protocol} {
+	if {[$jlib avatar have_hash_protocol $jid2 $protocol]} {
+
+	    switch -- $protocol {
+		avatar {
+		    set jid [$jlib avatar get_full_jid $jid2]
+		    $jlib avatar get_async $jid ::Avatar::GetAvatarAsyncCB
+		}
+		vcard {
+		    $jlib avatar get_vcard_async $jid2 ::Avatar::GetVCardPhotoCB 
+		}
+	    }
 	}
     }
 }
@@ -395,72 +550,37 @@ proc ::Avatar::OnNewHash {jid} {
 proc ::Avatar::GetAsyncIfExists {jid} {
     upvar ::Jabber::jstate jstate
     
+    Debug "::Avatar::GetAsyncIfExists jid=$jid"
+    
     set jlib $jstate(jlib)
     jlib::splitjid $jid jid2 -
     set hash [$jlib avatar get_hash $jid2]
     if {$hash ne ""} {
-	set jid [$jlib avatar get_full_jid $jid2]
-	$jlib avatar get_async $jid ::Avatar::GetAsyncCB   
-    }
-}
-
-proc ::Avatar::GetAll { } {
-    variable photo
-    upvar ::Jabber::jstate jstate
-    
-    Debug "::Avatar::GetAll"
-    
-    set jlib $jstate(jlib)    
-
-    foreach jid2 [$jlib avatar get_all_avatar_jids] {
-	set jid [$jlib avatar get_full_jid $jid2]
-	$jlib avatar get_async $jid ::Avatar::GetAsyncCB
-    }
-}
-
-proc ::Avatar::GetAsyncCB {type jid2} {
-    variable options
-    variable photo
-    upvar ::Jabber::jstate jstate
-    
-    Debug "::Avatar::GetAsyncCB jid2=$jid2, type=$type"
-        
-    if {$type eq "error"} {
 	
-	# Fallback.
-	GetVCardPhoto $jid2
-    } else {
-    
-	# Data may be empty from xmlns='storage:client:avatar' !
-	set jlib $jstate(jlib)
-	set data [$jlib avatar get_data $jid2]
-	if {[string bytelength $data]} {
+	# First try to load the avatar from Cache directory.
+	set data [ReadCacheAvatar $hash]
+	if { $data ne "" } {
 	    SetPhoto $jid2 $data
 	} else {
-	    GetVCardPhoto $jid2
+	    GetPrioAvatar $jid
 	}
     }
 }
 
-# Avatar::GetVCardPhoto --
-#
-#       Support for vCard based avatars as JEP-0153 is TODO.
-#       This method is more sane compared to iq-based avatars since it is
-#       based on bare jids and thus not client instance specific.
-#       Therefore it also handles offline users.
-#       
-#       This shall have some jlib support since it involves presence element:
-#       
-#         <x xmlns='vcard-temp:x:update'>
-#             <photo>sha1-hash-of-image</photo>
-#         </x> 
-
-proc ::Avatar::GetVCardPhoto {jid2} {
+proc ::Avatar::GetAll { } {
+    upvar ::Jabber::jstate jstate
     
-    # @@@ TODO
-
+    Debug "::Avatar::GetAll"
+    
+    set jlib $jstate(jlib)
+    foreach jid2 [$jlib avatar get_all_avatar_jids] {
+	
+	# This can be a jid2 if vcard.
+	set jid [$jlib avatar get_full_jid $jid2]
+	GetAsyncIfExists $jid
+    }
 }
-    
+
 # Avatar::SetPhoto --
 # 
 #       Create new photo if not exists and updates the image with the data.
@@ -495,8 +615,14 @@ proc ::Avatar::SetPhoto {jid2 data} {
 	Debug $err
     }
     
+    # Notification using hooks since there may be more than one interested.
     ::hooks::run avatarNewPhotoHook $jid2
 }
+
+# Avatar::PutPhoto --
+# 
+#       Assumes a blank photo is already created and creates all images
+#       of interested sizes.
 
 proc ::Avatar::PutPhoto {jid2 data} {
     variable photo
@@ -523,10 +649,24 @@ proc ::Avatar::PutPhoto {jid2 data} {
     }
 }
 
+#--- Public Interfaces ---------------------------------------------------------
+#
+# The idea is that everything shall work transparently:
+#  o cache or from 'avatar'
+#  o photo rescaling
+#  o etc.
+
+# Avatar::GetPhoto --
+# 
+#       Gets the original photo, not rescaled.
+
 proc ::Avatar::GetPhoto {jid2} {
     variable photo
     
     if {[info exists photo($jid2,orig)]} {
+	return $photo($jid2,orig)
+    } elseif {[HaveCachedJID $jid2]} {
+	CreatePhotoFromCache $jid2
 	return $photo($jid2,orig)
     } else {
 	return ""
@@ -542,31 +682,52 @@ proc ::Avatar::GetPhoto {jid2} {
 
 proc ::Avatar::GetPhotoOfSize {jid2 size} {
     variable photo
-    
-    if {![info exists photo($jid2,orig)]} {
-	return ""
-    } elseif {[info exists photo($jid2,$size)]} {
+
+    if {[info exists photo($jid2,$size)]} {
 	return $photo($jid2,$size)
-    } else {
-	
+    } elseif {[info exists photo($jid2,orig)]} {
+
 	# Is not there, create!
 	set name $photo($jid2,orig)
 	set new [CreateScaledPhoto $name $size]
 	set photo($jid2,$size) $new
 	return $new
+    } elseif {[HaveCachedJID $jid2]} {
+	CreatePhotoFromCache $jid2
+	if {[info exists photo($jid2,$size)]} {
+	    return $photo($jid2,$size)
+	}
     }
+    return ""
 }
 
 proc ::Avatar::HavePhoto {jid2} {
     variable photo
     upvar ::Jabber::jstate jstate
-        
-    set jlib $jstate(jlib)
+	
+    set jlib $jstate(jlib)    
     if {[$jlib avatar have_data $jid2] && [info exists photo($jid2,orig)]} {
 	return 1
     } else {
-	return 0
+	return [HaveCachedJID $jid2]
     }
+}
+
+#-------------------------------------------------------------------------------
+
+proc ::Avatar::CreatePhotoFromCache {jid2} {
+    variable photo
+    upvar ::Jabber::jstate jstate
+    
+    set jlib $jstate(jlib)    
+    set hash [$jlib avatar get_hash $jid2]
+    if {$hash ne ""} {
+	set data [ReadCacheAvatar $hash]
+	set photo($jid2,orig) [image create photo]
+	catch {
+	    PutPhoto $jid2 $data
+	}
+    }    
 }
 
 proc ::Avatar::FreePhotos {jid} {
@@ -697,6 +858,119 @@ proc ::Avatar::MakeScaleTableCmd {f1 f2} {
     return [expr {$r1 > $r2 ? 1 : -1}]
 }
 
+#--- Avatar File Cache ---------------------------------------------------------
+
+# A few functions for handling the avatar file cache:
+#   o files stored as hash.png etc.
+#   o binary content, not base64 encoded
+
+proc ::Avatar::HaveCachedJID {jid2} {
+    upvar ::Jabber::jstate jstate
+    
+    set jlib $jstate(jlib)    
+    set hash [$jlib avatar get_hash $jid2]
+    if {$hash ne ""} {
+	set fileName [GetCacheFileName $hash]
+	if {$fileName ne ""} {
+	    return 1
+	}
+    }
+    return 0
+}
+
+# Avatar::MakeCacheFileName --
+# 
+#       Gets the file name which may not exist.
+
+proc ::Avatar::MakeCacheFileName {hash mime} {
+    variable options
+
+    set base [file join $options(-cachedir) [string trim $hash]]
+    return ${base}[GetSuffForMime $mime]
+}
+
+# Avatar::GetCacheFileName --
+# 
+#       Gets a file and returns empty if not exists.
+
+proc ::Avatar::GetCacheFileName {hash} {
+    variable options
+    variable suff2Mime
+
+    # Search for the recognized image mime types.
+    set base [file join $options(-cachedir) [string trim $hash]]
+    foreach {suff mime} [array get suff2Mime] {
+	if {[file exists $base$suff]} {
+	    return $base$suff
+	}
+    }
+    return ""
+}
+
+# Avatar::ReadCacheAvatar --
+# 
+#       Reads a cache file and returns its content; empty if not exists.
+
+proc ::Avatar::ReadCacheAvatar {hash} {
+
+    Debug "::Avatar::ReadCacheAvatar"
+    
+    set fileName [GetCacheFileName $hash]
+    if { [file exists $fileName] } {
+	set fd [open $fileName r]
+	fconfigure $fd -translation binary
+	set data [::base64::encode [read $fd]]
+	close $fd
+    } else {
+	set data ""
+    }
+    return $data
+}
+
+# Avatar::WriteCacheAvatar --
+# 
+#       Writes the image to file with associated name.
+
+proc ::Avatar::WriteCacheAvatar {mime hash photo} {
+
+    set fileName [MakeCacheFileName $hash $mime]
+    set fd [open $fileName w]
+    fconfigure $fd -translation binary
+    puts -nonewline $fd [::base64::decode $photo]
+    close $fd
+}
+
+proc ::Avatar::GetCacheAvatarMime {hash} {
+
+    set fileName [GetCacheFileName $hash]
+    if {$fileName ne ""} {
+	return [GetMimeForFile $fileName]
+    } else {
+	return ""
+    }
+}
+
+proc ::Avatar::GetMimeForFile {fileName} {
+    variable suff2Mime
+
+    set suff [string tolower [file extension $fileName]]
+    if {[info exists suff2Mime($suff)]} {
+	return $suff2Mime($suff)
+    } else {
+	return ""
+    }
+}
+
+proc ::Avatar::GetSuffForMime {mime} {
+    variable mime2Suff
+    
+    if {[info exists mime2Suff($mime)]} {
+	return $mime2Suff($mime)
+    } else {
+	return ""
+    }
+}
+
 #--- Preference UI -------------------------------------------------------------
 
 proc ::Avatar::PrefsFrame {win} {
@@ -723,7 +997,6 @@ proc ::Avatar::PrefsFrame {win} {
     ttk::separator $win.sep -orient horizontal
     ttk::checkbutton $win.share -text [mc prefavashare]  \
       -variable [namespace current]::tmpprefs(share)
-    # ttk::checkbutton $win.vcard -text "Use this image also for the vCard photo"
     
     set wfr $win.fr
     ttk::frame $win.fr

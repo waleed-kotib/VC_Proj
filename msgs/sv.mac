@@ -1131,9 +1131,13 @@ Om användarnamnet är upptaget så får du ett meddelande om detta när du registrer
 ::msgcat::mcset sv mModifyAB		{Ändra}
 ::msgcat::mcset sv mRemoveAB		{Ta bort}
 
-::msgcat::mcset sv notifyCall           {Notify call}
-::msgcat::mcset sv inboundCall          {Inbound call}
+::msgcat::mcset sv outCall              {Make Call}
+::msgcat::mcset sv notifyCall           {Notify Call}
+::msgcat::mcset sv inboundCall          {Inkommande samtal}
+::msgcat::mcset sv outboundCall         {Utgående samtal}
+::msgcat::mcset sv callAnswer           {Svara}
 ::msgcat::mcset sv callHungUp           {Lägg på}
+::msgcat::mcset sv callInfo             {Info}
 ::msgcat::mcset sv callVM               {Call VM?}
 
 # Fore some of these generic names could be used?

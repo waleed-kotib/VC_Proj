@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.40 2006-04-13 10:45:05 matben Exp $
+# $Id: Init.tcl,v 1.41 2006-04-27 07:48:49 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -246,6 +246,7 @@ proc ::Init::MakeDirs { } {
 	historyPath
 	prefsAvatarPath
 	myAvatarPath
+	cacheAvatarPath
 	altItemPath
 	altEmoticonsPath
 	altRosticonsPath
