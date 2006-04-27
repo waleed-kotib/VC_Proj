@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.41 2006-01-11 13:24:54 matben Exp $
+# $Id: VCard.tcl,v 1.42 2006-04-27 14:17:30 matben Exp $
 
 package provide VCard 1.0
 
@@ -39,8 +39,7 @@ proc ::VCard::Fetch {type {jid {}}} {
     if {$type eq "own"} {
 	
 	# We must use the 2-tier jid here!
-        set jid3 [::Jabber::GetMyJid]
-	jlib::splitjid $jid3 jid res
+        set jid [::Jabber::JlibCmd myjid2]
     }
     
     # Keep a separate instance specific namespace for each VCard.
@@ -57,8 +56,13 @@ proc ::VCard::Fetch {type {jid {}}} {
     
     # We should query the server for this and then fill in.
     ::Jabber::UI::SetStatusMessage [mc vcardget $jid]
-    ::Jabber::JlibCmd vcard send_get $jid  \
-      [list [namespace current]::FetchCallback $token]
+    if {$type eq "own"} {
+	::Jabber::JlibCmd vcard send_get_own  \
+	  [list [namespace current]::FetchCallback $token]
+    } else {
+	::Jabber::JlibCmd vcard send_get $jid  \
+	  [list [namespace current]::FetchCallback $token]
+    }
 }
 
 # VCard::FetchCallback --

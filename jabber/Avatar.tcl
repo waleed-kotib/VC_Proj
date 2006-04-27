@@ -7,12 +7,13 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.11 2006-04-27 07:48:49 matben Exp $
+# $Id: Avatar.tcl,v 1.12 2006-04-27 14:17:30 matben Exp $
 
 # @@@ Issues:
 #     1) shall we keep cache of users avatars between sessions to save bandwidth?
 #     2) shall we compare users hash to see if they are the same?
 #     3) shall we keep a hash of our own avatar and store only if new?
+#     4) shall we try to sync the avatar with vcards avatar when login?
 
 package require jlib::avatar
 
@@ -51,6 +52,10 @@ namespace eval ::Avatar:: {
     array set protocolPrio {
 	1  avatar
 	2  vcard
+    }
+    array set protocolPrio {
+	2  avatar
+	1  vcard
     }
 
     # There are two sets of prefs:
