@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.8 2006-04-11 12:14:58 matben Exp $
+# $Id: RosterTwo.tcl,v 1.9 2006-04-28 14:04:07 matben Exp $
 
 package require RosterTree
 
@@ -102,7 +102,7 @@ proc ::RosterTwo::Init { } {
     # Available:
     set item [CreateHeadItem available]
     if {$jprefs(rost,showOffline)} {
-	$T item configure $item -button 0
+	$T item configure $item -button 1
     } else {
 	# Requested that button still shown.
 	$T item configure $item -button 1

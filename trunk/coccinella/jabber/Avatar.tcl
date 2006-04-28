@@ -7,13 +7,10 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.12 2006-04-27 14:17:30 matben Exp $
+# $Id: Avatar.tcl,v 1.13 2006-04-28 14:04:07 matben Exp $
 
 # @@@ Issues:
-#     1) shall we keep cache of users avatars between sessions to save bandwidth?
-#     2) shall we compare users hash to see if they are the same?
-#     3) shall we keep a hash of our own avatar and store only if new?
-#     4) shall we try to sync the avatar with vcards avatar when login?
+#       1) a sync problem when presence hash is set before th vcard/avatar is set
 
 package require jlib::avatar
 
@@ -48,15 +45,7 @@ namespace eval ::Avatar:: {
     set options(-cachedir) $::this(cacheAvatarPath)
 
     # Use a priority order if we have hash from both.
-    variable protocolPrio
-    array set protocolPrio {
-	1  avatar
-	2  vcard
-    }
-    array set protocolPrio {
-	2  avatar
-	1  vcard
-    }
+    variable protocolPrio {vcard avatar}
 
     # There are two sets of prefs:
     #   1) our own avatar which must be controllable directly from UI
@@ -165,10 +154,16 @@ proc ::Avatar::LoginHook { } {
     
     set jlib $jstate(jlib)
     
-    # @@@ Perhaps this shall be done from 'avatar' instead?
     # @@@ Do we need to do this each time we login?
     if {$aprefs(share) && [file isfile $aprefs(fileName)]} {
-	$jlib avatar store ::Avatar::SetCB
+	set base64 [$jlib avatar get_my_data base64]
+	set mime   [$jlib avatar get_my_data mime]
+	
+	# ejabberd has no support for 'storage:client:avatar'
+	# $jlib avatar store ::Avatar::SetCB
+	
+	# The vCard we first get and set only if photo is different.
+	$jlib vcard set_my_photo $base64 $mime ::Avatar::SetCB
     }
 }
 
@@ -361,9 +356,14 @@ proc ::Avatar::ShareImage {fileName} {
     # @@@ Sync issue if not online while storing.
     #     We should have a loginHook here to store any updated avatar.
     if {[$jlib isinstream]} {
-	$jlib send_presence -keep 1
-	$jlib avatar store ::Avatar::SetCB
+	
+	# Disabled.
+	# $jlib avatar store ::Avatar::SetCB
+	
+	# vCard avatar. 
+	# @@@ These are not completely in sync. Send presence from CB?
 	$jlib vcard set_my_photo $base64 $mime ::Avatar::SetCB
+	$jlib send_presence -keep 1
     }
 }
 
@@ -445,15 +445,15 @@ proc ::Avatar::GetPrioAvatar {jid} {
     
     Debug "::Avatar::GetPrioAvatar jid=$jid"
     
-    jlib::splitjid $jid jid2 -
     set jlib $jstate(jlib)
+    set jid2 [jlib::barejid $jid]
         
     # We need to know if 'avatar' or 'vcard' style to get.
     # Use a priority order if we have hash from both.    
     # Note that all vCards are defined per jid2, bare JID.
-    foreach prio {1 2} {
-	if {[$jlib avatar have_hash_protocol $jid2 $protocolPrio($prio)]} {    
-	    switch -- $protocolPrio($prio) {
+    foreach prot $protocolPrio {
+	if {[$jlib avatar have_hash_protocol $jid2 $prot]} {    
+	    switch -- $prot {
 		avatar {
 		    $jlib avatar get_async $jid ::Avatar::GetAvatarAsyncCB
 		}
@@ -476,7 +476,7 @@ proc ::Avatar::GetAvatarAsyncCB {type jid2} {
     Debug "::Avatar::GetAvatarAsyncCB jid2=$jid2, type=$type"
         
     if {$type eq "error"} {
-	InvokeAnyFallback $jid2 "vcard"
+	InvokeAnyFallbackFrom $jid2 "avatar"
     } else {
 	# Data may be empty from xmlns='storage:client:avatar' !
 	set jlib $jstate(jlib)
@@ -490,7 +490,7 @@ proc ::Avatar::GetAvatarAsyncCB {type jid2} {
 	    
 	    SetPhoto $jid2 $data
 	} else {
-	    InvokeAnyFallback $jid2 "vcard"
+	    InvokeAnyFallbackFrom $jid2 "avatar"
 	}
     }
 }
@@ -502,7 +502,7 @@ proc ::Avatar::GetVCardPhotoCB {type jid2} {
     Debug "::Avatar::GetVCardPhotoCB jid2=$jid2, type=$type"
     
     if {$type eq "error"} {
-	InvokeAnyFallback $jid2 "avatar"
+	InvokeAnyFallbackFrom $jid2 "vcard"
     } else {
 	set jlib $jstate(jlib)
 	set data [$jlib avatar get_data $jid2]
@@ -515,34 +515,34 @@ proc ::Avatar::GetVCardPhotoCB {type jid2} {
 	    
 	    SetPhoto $jid2 $data
 	} else {
-	    InvokeAnyFallback $jid2 "avatar"
+	    InvokeAnyFallbackFrom $jid2 "vcard"
 	}
     }
 }
 
-# Avatar::InvokeAnyFallback --
+# Avatar::InvokeAnyFallbackFrom --
 # 
-#       Handles any fallback to use 'protocol' for next try.
+#       Handles any fallback from 'protocol'.
 
-proc ::Avatar::InvokeAnyFallback {jid2 protocol} {
+proc ::Avatar::InvokeAnyFallbackFrom {jid2 protocol} {
     variable protocolPrio
     upvar ::Jabber::jstate jstate
     
-    Debug "::Avatar::InvokeAnyFallback jid2=$jid2, protocol=$protocol"
+    Debug "::Avatar::InvokeAnyFallbackFrom jid2=$jid2, protocol=$protocol"
     
     set jlib $jstate(jlib)
-
-    if {$protocolPrio(2) eq $protocol} {
-	if {[$jlib avatar have_hash_protocol $jid2 $protocol]} {
-
-	    switch -- $protocol {
-		avatar {
-		    set jid [$jlib avatar get_full_jid $jid2]
-		    $jlib avatar get_async $jid ::Avatar::GetAvatarAsyncCB
-		}
-		vcard {
-		    $jlib avatar get_vcard_async $jid2 ::Avatar::GetVCardPhotoCB 
-		}
+    
+    # Get next protocol in the priority. If empty we are done.
+    set idx [lsearch $protocolPrio $protocol]
+    set next [lindex $protocolPrio [incr idx]]
+    if {$next ne ""} {
+	switch -- $next {
+	    avatar {
+		set jid [$jlib avatar get_full_jid $jid2]
+		$jlib avatar get_async $jid ::Avatar::GetAvatarAsyncCB
+	    }
+	    vcard {
+		$jlib avatar get_vcard_async $jid2 ::Avatar::GetVCardPhotoCB 
 	    }
 	}
     }
@@ -558,7 +558,7 @@ proc ::Avatar::GetAsyncIfExists {jid} {
     Debug "::Avatar::GetAsyncIfExists jid=$jid"
     
     set jlib $jstate(jlib)
-    jlib::splitjid $jid jid2 -
+    set jid2 [jlib::barejid $jid]
     set hash [$jlib avatar get_hash $jid2]
     if {$hash ne ""} {
 	

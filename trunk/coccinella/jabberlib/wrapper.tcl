@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.22 2006-04-27 07:48:49 matben Exp $
+# $Id: wrapper.tcl,v 1.23 2006-04-28 14:04:07 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -850,7 +850,8 @@ proc wrapper::setchildlist {xmllist childlist} {
 
 # wrapper::setchildwithtag --
 # 
-#       Replaces any element with same tag.
+#       Replaces any element with same tag. 
+#       xmllist must be nonempty.
 
 proc wrapper::setchildwithtag {xmllist elem} {
     set tag [lindex $elem 0]
@@ -867,6 +868,7 @@ proc wrapper::setchildwithtag {xmllist elem} {
 # wrapper::deletechildswithtag --
 # 
 #       Deletes any element with tag.
+#       xmllist must be nonempty.
 
 proc wrapper::deletechildswithtag {xmllist tag} {
     set clist {}
