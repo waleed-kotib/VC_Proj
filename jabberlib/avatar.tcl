@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.11 2006-04-27 14:16:27 matben Exp $
+# $Id: avatar.tcl,v 1.12 2006-04-28 14:04:07 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -100,14 +100,6 @@ proc jlib::avatar::init {jlibname args} {
     
     # Register some standard iq handlers that are handled internally.
     $jlibname iq_register get $xmlns(iq-avatar) [namespace current]::iq_handler
-    
-    if {0} {
-	$jlibname presence_register_ex [namespace current]::presence_handlerXXX  \
-	  -tag x -xmlns $xmlns(x-avatar)
-	$jlibname presence_register_ex [namespace current]::presence_vcard_handlerXXX  \
-	  -tag x -xmlns $xmlns(vcard-temp)
-    }
-    
     $jlibname presence_register available [namespace current]::presence_handler
 
     return
@@ -394,116 +386,34 @@ proc jlib::avatar::get_protocols {jlibname jid2} {
 
 proc jlib::avatar::presence_handler {jlibname jid type args} {
     upvar ${jlibname}::avatar::options options
+    upvar ${jlibname}::avatar::state   state
 
     array set aargs $args
     set xmldata $aargs(-xmldata)
     set from [wrapper::getattribute $xmldata from]
-    
-    set avaSet   [PresenceAvatar $jlibname $xmldata]
-    set vcardSet [PresenceVCard $jlibname $xmldata]
-    
-    if {$avaSet || $vcardSet} {
-	if {[string length $options(-command)]} {
-	    uplevel #0 $options(-command) $from
-	}
+    set jid2 [jlib::barejid $from]
+
+    if {[info exists state($jid2,hash)]} {
+	set new 0
+	set oldhash $state($jid2,hash)
+    } else {
+	set new 1
     }
-}
-
-# @@@ Combine these two into one!
-
-# jlib::avatar::PresenceAvatar --
-# 
-#       Caches incoming <x xmlns='jabber:x:avatar'> presence elements.
-#       "To disable the avatar, the avatar-generating user's client will send 
-#        a presence packet with the jabber:x:avatar namespace but with no hash 
-#        information"
-
-proc jlib::avatar::PresenceAvatar {jlibname xmldata} {
-    variable xmlns
-    upvar ${jlibname}::avatar::state   state
+    set gotAvaHash [PresenceAvatar $jlibname $xmldata]
+    set gotVcardHash [PresenceVCard $jlibname $xmldata]
     
-    set wasset 0
-    set elems [wrapper::getchildswithtagandxmlns $xmldata x $xmlns(x-avatar)]
-    if {[llength $elems]} {
-	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] hash]
-	set hash [wrapper::getcdata $hashElem]
-	set from [wrapper::getattribute $xmldata from]
-
-	jlib::splitjid $from jid2 -
-	
-	# hash can be empty.
-	if {![info exists state($jid2,hash)] || ($hash ne $state($jid2,hash))} {
-	    set state($jid2,hash) $hash
-	    set state($jid2,jid3) $from
-	    set state($jid2,protocol,avatar) 1
-	    if {$hash eq ""} {
-		set state($jid2,uptodate) 1
-	    } else {
-		set state($jid2,uptodate) 0
-	    }
-	    set wasset 1
-	}
-    }
-    return $wasset
-}
-
-proc jlib::avatar::PresenceVCard {jlibname xmldata} {
-    variable xmlns
-    upvar ${jlibname}::avatar::state   state
-
-    set wasset 0
-    set elems [wrapper::getchildswithtagandxmlns $xmldata x $xmlns(vcard-temp)]
-    if {[llength $elems]} {
-	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] photo]
-	set hash [wrapper::getcdata $hashElem]
-	set from [wrapper::getattribute $xmldata from]
-
-	jlib::splitjid $from jid2 -
-
-	# hash can be empty.
-	if {![info exists state($jid2,hash)] || ($hash ne $state($jid2,hash))} {
-
-	    # Note that all vCards are defined per jid2, bare JID.
-	    set state($jid2,hash) $hash
-	    set state($jid2,jid3) $from
-	    set state($jid2,protocol,vcard) 1
-	    if {$hash eq ""} {
-		set state($jid2,uptodate) 1
-	    } else {
-		set state($jid2,uptodate) 0
-	    }
-	    set wasset 1
-	}
-    }
-    return $wasset
-}
-
-# OLD!!!!!!!!!!!!!
-# jlib::avatar::presence_handlerXXX --
-# 
-#       Caches incoming <x xmlns='jabber:x:avatar'> presence elements.
-#       "To disable the avatar, the avatar-generating user's client will send 
-#        a presence packet with the jabber:x:avatar namespace but with no hash 
-#        information"
-
-proc jlib::avatar::presence_handlerXXX {jlibname xmldata} {
-    variable xmlns
-    upvar ${jlibname}::avatar::state   state
-    upvar ${jlibname}::avatar::options options
+    #puts "-----------------------"
+    #puts "jid2=$jid2"
+    #puts "new=$new, gotAvaHash=$gotAvaHash, gotVcardHash=$gotVcardHash"
     
-    set elems [wrapper::getchildswithtagandxmlns $xmldata x $xmlns(x-avatar)]
-    if {[llength $elems]} {
-	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] hash]
-	set hash [wrapper::getcdata $hashElem]
-	set from [wrapper::getattribute $xmldata from]
-
-	jlib::splitjid $from jid2 -
-	
-	# hash can be empty.
-	if {![info exists state($jid2,hash)] || ($hash ne $state($jid2,hash))} {
-	    set state($jid2,hash) $hash
-	    set state($jid2,jid3) $from
-	    set state($jid2,protocol,avatar) 1
+    if {($gotAvaHash || $gotVcardHash)} {
+    
+	# 'uptodate' tells us if we need to request new avatar.
+	# If new, or not identical to previous, unless empty.
+	if {$new || ($state($jid2,hash) ne $oldhash)} {
+	    set hash $state($jid2,hash)
+	    
+	    # hash can be empty.
 	    if {$hash eq ""} {
 		set state($jid2,uptodate) 1
 	    } else {
@@ -516,41 +426,53 @@ proc jlib::avatar::presence_handlerXXX {jlibname xmldata} {
     }
 }
 
-# OLD!!!!!!!!!!!!!
-#         <x xmlns='vcard-temp:x:update'>
-#             <photo>sha1-hash-of-image</photo>
-#         </x> 
+# jlib::avatar::PresenceAvatar --
+# 
+#       Caches incoming <x xmlns='jabber:x:avatar'> presence elements.
+#       "To disable the avatar, the avatar-generating user's client will send 
+#        a presence packet with the jabber:x:avatar namespace but with no hash 
+#        information"
 
-proc jlib::avatar::presence_vcard_handlerXXX {jlibname xmldata} {
+proc jlib::avatar::PresenceAvatar {jlibname xmldata} {
     variable xmlns
     upvar ${jlibname}::avatar::state   state
-    upvar ${jlibname}::avatar::options options
+    
+    set gotHash 0
+    set elems [wrapper::getchildswithtagandxmlns $xmldata x $xmlns(x-avatar)]
+    if {[llength $elems]} {
+	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] hash]
+	set hash [wrapper::getcdata $hashElem]
+	set from [wrapper::getattribute $xmldata from]
+	set jid2 [jlib::barejid $from]
+	
+	# hash can be empty.
+	set state($jid2,hash) $hash
+	set state($jid2,jid3) $from
+	set state($jid2,protocol,avatar) 1
+	set gotHash 1
+    }
+    return $gotHash
+}
 
+proc jlib::avatar::PresenceVCard {jlibname xmldata} {
+    variable xmlns
+    upvar ${jlibname}::avatar::state   state
+
+    set gotHash 0
     set elems [wrapper::getchildswithtagandxmlns $xmldata x $xmlns(vcard-temp)]
     if {[llength $elems]} {
-        set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] photo]
-        set hash [wrapper::getcdata $hashElem]
-        set from [wrapper::getattribute $xmldata from]
+	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] photo]
+	set hash [wrapper::getcdata $hashElem]
+	set from [wrapper::getattribute $xmldata from]
+	set jid2 [jlib::barejid $from]
 
-        jlib::splitjid $from jid2 -
-
-        # hash can be empty.
-	if {![info exists state($jid2,hash)] || ($hash ne $state($jid2,hash))} {
-
-	    # Note that all vCards are defined per jid2, bare JID.
-	    set state($jid2,hash) $hash
-            set state($jid2,jid3) $from
-	    set state($jid2,protocol,vcard) 1
-            if {$hash eq ""} {
-                set state($jid2,uptodate) 1
-            } else {
-		set state($jid2,uptodate) 0
-            }
-            if {[string length $options(-command)]} {
-                uplevel #0 $options(-command) $from
-            }
-        }
+	# Note that all vCards are defined per jid2, bare JID.
+	set state($jid2,hash) $hash
+	set state($jid2,jid3) $from
+	set state($jid2,protocol,vcard) 1
+	set gotHash 1
     }
+    return $gotHash
 }
 
 proc jlib::avatar::uptodate {jlibname jid2} {
@@ -710,7 +632,6 @@ proc jlib::avatar::get_full_jid {jlibname jid2} {
 # jlib::avatar::get_all_avatar_jids --
 # 
 #       Gets a list of all jids with avatar support.
-#       @@@ Exclude the ones with empty hash (disabled)?
 #       Actually, everyone that has sent us a presence jabber:x:avatar element.
 
 proc jlib::avatar::get_all_avatar_jids {jlibname} {
@@ -720,9 +641,11 @@ proc jlib::avatar::get_all_avatar_jids {jlibname} {
     
     set jids {}
     set len [string length ",hash"]
-    foreach key [array names state *,hash] {
-	set jid2 [string range $key 0 end-$len]
-	lappend jids $jid2
+    foreach {key hash} [array get state *,hash] {
+	if {$hash ne ""} {
+	    set jid2 [string range $key 0 end-$len]
+	    lappend jids $jid2
+	}
     }
     return $jids
 }
@@ -797,19 +720,47 @@ proc jlib::avatar::SetDataFromVCardElem {jlibname jid2 subiq} {
     set ans 0
     set photoElem [wrapper::getfirstchildwithtag $subiq PHOTO]
     if {$photoElem ne {}} {
-	set photo [wrapper::getfirstchildwithtag $photoElem BINVAL]
-	set mime [wrapper::getfirstchildwithtag $photoElem TYPE]
-	if { $photo ne ""} {
+	set dataElem [wrapper::getfirstchildwithtag $photoElem BINVAL]
+	set mimeElem [wrapper::getfirstchildwithtag $photoElem TYPE]
+	if {$dataElem ne {}} {
 	    
 	    # We keep data in base64 format. This seems to be ok for image 
 	    # handlers.
-	    set state($jid2,data) $photo
-	    set state($jid2,mime) $mime 
+	    set state($jid2,data) [wrapper::getcdata $dataElem]
+	    set state($jid2,mime) [wrapper::getcdata $mimeElem] 
 	    set state($jid2,uptodate) 1
 	    set ans 1
 	}
     }
     return $ans
+}
+
+# jlib::avatar::writehashmap --
+# 
+#       Writes an array to file that maps jid2 to hash.
+#       Just source this file to read it.
+
+proc jlib::avatar::writehashmap {fileName} {
+    upvar ${jlibname}::avatar::state state
+    
+    set fd [open $fileName w]
+    puts $fd "array set hashmap {"
+    set len [string length ",hash"]
+    foreach {key hash} [array get state *,hash] {
+	set jid2 [string range $key 0 end-$len]
+	puts $fd "\t$jid2 \t$hash"
+    }
+    puts $fd "}"
+    close $fd
+}
+
+proc jlib::avatar::readhashmap {fileName} {
+    upvar ${jlibname}::avatar::state state
+    
+    source $fileName
+    foreach {jid2 hash} [array get hashmap] {
+	set state($jid2,hash) $hash
+    }
 }
 
 proc jlib::avatar::debug {msg} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: vcard.tcl,v 1.7 2006-04-27 14:16:27 matben Exp $
+# $Id: vcard.tcl,v 1.8 2006-04-28 14:04:07 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -170,7 +170,7 @@ proc jlib::vcard::send_get_own {jlibname cmd} {
     variable xmlns
 
     # A user may retrieve his or her own vCard by sending XML of the 
-    # following form to his or her own JID (the 'to' attibute SHOULD NOT 
+    # following form to his or her own JID (the 'to' attribute SHOULD NOT 
     # be included).
     set attrlist [list xmlns $xmlns(vcard)]    
     set xmllist [wrapper::createtag "vCard" -attrlist $attrlist]
@@ -203,6 +203,7 @@ proc jlib::vcard::set_my_photo {jlibname photo mime cmd} {
 }
 
 proc jlib::vcard::get_my_photo_cb {photo mime cmd jlibname type subiq} {
+    variable xmlns
     
     # Replace or set an element:
     # 
@@ -211,22 +212,49 @@ proc jlib::vcard::get_my_photo_cb {photo mime cmd jlibname type subiq} {
     #     <BINVAL>Base64-encoded-avatar-file-here!</BINVAL>
     # </PHOTO> 
 
-    # If no vcard we are done.
-    if {($type eq "result") && ($subiq ne {})} {
+    if {$type eq "result"} {
 	if {$photo ne ""} {
-	    
-	    # Replace or add photo.
-	    lappend subElems [wrapper::createtag "TYPE" -chdata $mime]
-	    lappend subElems [wrapper::createtag "BINVAL" -chdata $photo]
-	    set photoElem [wrapper::createtag "PHOTO" -subtags $subElems]
-	    set xmllist [wrapper::setchildwithtag $subiq $photoElem]
+	    set newphoto 1
+	    	    
+	    # Replace or add photo. But only if different.
+	    set photoElem [wrapper::getfirstchildwithtag $subiq "PHOTO"]
+	    if {$photoElem ne {}} {
+		set binElem [wrapper::getfirstchildwithtag $photoElem "BINVAL"]
+		if {$binElem ne {}} {
+		    set sphoto [wrapper::getcdata $binElem]
+		    
+		    # Base64 code can contain undefined spaces: decode!
+		    set sdata [::base64::decode $sphoto]
+		    set data  [::base64::decode $photo]
+		    if {[string equal $sdata $data]} {
+			set newphoto 0
+		    }
+		}
+	    }
+	    if {$newphoto} {
+		lappend subElems [wrapper::createtag "TYPE" -chdata $mime]
+		lappend subElems [wrapper::createtag "BINVAL" -chdata $photo]
+		set photoElem [wrapper::createtag "PHOTO" -subtags $subElems]
+		if {$subiq eq {}} {
+		    set xmllist [wrapper::createtag "vCard"  \
+		      -attrlist [list xmlns $xmlns(vcard)]   \
+		      -subtags [list $photoElem]]
+		} else {
+		    set xmllist [wrapper::setchildwithtag $subiq $photoElem]
+		}
+		jlib::send_iq $jlibname "set" [list $xmllist] -command \
+		  [list [namespace current]::set_my_photo_cb $jlibname $cmd]
+	    }
 	} else {
 	    
-	    # Remove any photo.
-	    set xmllist [wrapper::deletechildswithtag $subiq "PHOTO"]
+	    # Remove any photo. If there is no PHOTO no need to set.
+	    set photoElem [wrapper::getfirstchildwithtag $subiq "PHOTO"]
+	    if {$photoElem ne {}} {
+		set xmllist [wrapper::deletechildswithtag $subiq "PHOTO"]
+		jlib::send_iq $jlibname "set" [list $xmllist] -command \
+		  [list [namespace current]::set_my_photo_cb $jlibname $cmd]    
+	    }
 	}
-	jlib::send_iq $jlibname "set" [list $xmllist] -command \
-	  [list [namespace current]::set_my_photo_cb $jlibname $cmd]    
     } else {
 	uplevel #0 $cmd [list $jlibname $type $subiq]
     }
@@ -269,8 +297,9 @@ proc jlib::vcard::get_cache {jlibname jid} {
 #       none.
 
 proc jlib::vcard::send_set {jlibname cmd args} {
+    variable xmlns
 
-    set attrlist [list xmlns vcard-temp]    
+    set attrlist [list xmlns $xmlns(vcard)]    
     
     # Form all the sub elements by inspecting the -key.
     array set arr $args
@@ -355,7 +384,7 @@ proc jlib::vcard::send_set {jlibname cmd args} {
     }
     
     set jid [$jlibname myjid2]
-    set xmllist [wrapper::createtag vCard -attrlist $attrlist \
+    set xmllist [wrapper::createtag "vCard" -attrlist $attrlist \
       -subtags $subelem]
     set state(cache,$jid) $xmllist
     jlib::send_iq $jlibname "set" [list $xmllist] -command \
