@@ -2,9 +2,9 @@
 #  
 #      This file is part of The Coccinella application. 
 #      
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.42 2006-04-27 14:17:30 matben Exp $
+# $Id: VCard.tcl,v 1.43 2006-04-29 09:55:08 matben Exp $
 
 package provide VCard 1.0
 
@@ -103,7 +103,7 @@ proc ::VCard::ParseXmlList {subiq arrName} {
         set tag [string tolower [wrapper::gettag $c]]
 	
         switch -- $tag {
-            fn - nickname - bday - url - title - role - desc {
+            fn - nickname - bday - url - title - role - desc - jabberid {
                 set arr($tag) [wrapper::getcdata $c]     
             }
             n - org {
@@ -590,8 +590,8 @@ proc ::VCard::SetPhotoFile {etoken fileName} {
 
     set elem(w,photoFile) $fileName
     
-    # Limit size to max 128.
-    set maxsize 128
+    # Limit size to max 64.
+    set maxsize 64
     set size [max [image width $name] [image height $name]]
     if {$size > $maxsize} {
 	set factor [expr {int($size/($maxsize + 0.0) + 1)}]
@@ -628,7 +628,7 @@ proc ::VCard::SetVCard {token}  {
     set wdesctxt $elem(w,desctxt)
 
     if {[info exists elem(n_given)] && [info exists elem(n_family)]} {
-	if {($elem(n_given) != "") && ($elem(n_family) != "")} {
+	if {($elem(n_given) ne "") && ($elem(n_family) ne "")} {
 	    set elem(fn) "$elem(n_given) $elem(n_family)"
 	}
     }
@@ -647,13 +647,40 @@ proc ::VCard::SetVCard {token}  {
 	}
     }
     eval {::Jabber::JlibCmd vcard send_set ::VCard::SetVCardCallback} $argList
+    
+    # Sync the photo (also empty) with our avatar.
+    SyncAvatar $token
+    
     Close $token
+}
+
+# VCard::SyncAvatar --
+# 
+#       @@@ Having avatar both as server stored vcard and locally stored file
+#           is a problem!
+
+proc ::VCard::SyncAvatar {token} {
+    
+    upvar ${token}::elem elem
+    upvar ${token}::priv priv
+
+    if {[info exists elem(photo_binval)]} {
+	::Jabber::JlibCmd avatar set_data $elem(photo_binval) $elem(photo_type)
+	::Avatar::SetMyAvatarFromBase64 $elem(photo_binval) $elem(photo_type)
+    } else {
+	::Jabber::JlibCmd avatar unset_data
+	::Avatar::UnsetMyPhoto
+    }
+    
+    # @@@ Update presence hashes only if changed photo. TODO check.
+
+    ::Jabber::JlibCmd send_presence -keep 1
 }
 
 proc ::VCard::CloseHook {wclose} {
 
     set token [GetTokenFrom w $wclose]
-    if {$token != ""} {
+    if {$token ne ""} {
 	Close $token
     }   
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.8 2006-04-27 14:17:30 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.9 2006-04-29 09:55:08 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -522,7 +522,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     }
 
     # Always try to show avatar.
-    set avatarForOffline 0
+    set avatarForOffline 1
 
     # jid2 is always without a resource
     # jid3 is as reported
