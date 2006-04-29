@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.12 2006-04-28 14:04:07 matben Exp $
+# $Id: avatar.tcl,v 1.13 2006-04-29 09:55:08 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -93,7 +93,7 @@ proc jlib::avatar::init {jlibname args} {
     array set options {
 	-announce   0
 	-share      0
-	-cache      0
+	-cache      1
 	-command    ""
     }
     eval {configure $jlibname} $args
@@ -740,10 +740,11 @@ proc jlib::avatar::SetDataFromVCardElem {jlibname jid2 subiq} {
 #       Writes an array to file that maps jid2 to hash.
 #       Just source this file to read it.
 
-proc jlib::avatar::writehashmap {fileName} {
+proc jlib::avatar::writehashmap {jlibname fileName} {
     upvar ${jlibname}::avatar::state state
     
     set fd [open $fileName w]
+    puts $fd "# This file defines an array that maps jid2 -> avatar hash"
     puts $fd "array set hashmap {"
     set len [string length ",hash"]
     foreach {key hash} [array get state *,hash] {
@@ -754,12 +755,18 @@ proc jlib::avatar::writehashmap {fileName} {
     close $fd
 }
 
-proc jlib::avatar::readhashmap {fileName} {
+proc jlib::avatar::readhashmap {jlibname fileName} {
     upvar ${jlibname}::avatar::state state
     
-    source $fileName
-    foreach {jid2 hash} [array get hashmap] {
-	set state($jid2,hash) $hash
+    if {[file exists $fileName]} {
+	source $fileName
+	foreach {jid2 hash} [array get hashmap] {
+	    set state($jid2,hash) $hash
+	    # Guesswork...
+	    set state($jid2,jid3) $jid2
+	    set state($jid2,protocol,vcard) 1
+	    set state($jid2,uptodate) 1
+	}
     }
 }
 

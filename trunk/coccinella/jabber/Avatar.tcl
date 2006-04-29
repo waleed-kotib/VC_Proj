@@ -7,10 +7,10 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.13 2006-04-28 14:04:07 matben Exp $
+# $Id: Avatar.tcl,v 1.14 2006-04-29 09:55:08 matben Exp $
 
 # @@@ Issues:
-#       1) a sync problem when presence hash is set before th vcard/avatar is set
+#       ?
 
 package require jlib::avatar
 
@@ -23,6 +23,7 @@ namespace eval ::Avatar:: {
     ::hooks::register  jabberInitHook  ::Avatar::JabberInitHook
     ::hooks::register  loginHook       ::Avatar::LoginHook
     ::hooks::register  logoutHook      ::Avatar::LogoutHook
+    ::hooks::register   quitAppHook    ::Avatar::QuitHook
         
     # Array 'photo' contains our internal storage for users images.
     variable photo
@@ -58,6 +59,7 @@ namespace eval ::Avatar:: {
     set aprefs(myavatarhash) ""
     set aprefs(share)        0
     set aprefs(fileName)     ""
+    set aprefs(hashmapFile)  [file join $options(-cachedir) hashmap]
 
     variable uid 0
 
@@ -136,14 +138,15 @@ proc ::Avatar::InitPrefsHook { } {
 }
 
 proc ::Avatar::JabberInitHook {jlibname} {
-    global  this
     variable aprefs
+    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::JabberInitHook"
     
     if {$aprefs(share) && [file isfile $aprefs(fileName)]} {
 	ShareImage $aprefs(fileName)
     }
+    $jstate(jlib) avatar readhashmap $aprefs(hashmapFile)
 }
 
 proc ::Avatar::LoginHook { } {
@@ -160,10 +163,10 @@ proc ::Avatar::LoginHook { } {
 	set mime   [$jlib avatar get_my_data mime]
 	
 	# ejabberd has no support for 'storage:client:avatar'
-	# $jlib avatar store ::Avatar::SetCB
+	# $jlib avatar store [list ::Avatar::SetCB 0]
 	
 	# The vCard we first get and set only if photo is different.
-	$jlib vcard set_my_photo $base64 $mime ::Avatar::SetCB
+	$jlib vcard set_my_photo $base64 $mime [list ::Avatar::SetCB 0]
     }
 }
 
@@ -173,6 +176,14 @@ proc ::Avatar::LogoutHook { } {
     if {!$options(-cache)} {
 	FreeAllPhotos
     }
+}
+
+proc ::Avatar::QuitHook { } {
+    variable aprefs
+    upvar ::Jabber::jstate jstate
+    
+    set jlib $jstate(jlib)
+    $jlib avatar writehashmap $aprefs(hashmapFile)
 }
 
 #--- First section deals with our own avatar -----------------------------------
@@ -188,6 +199,43 @@ proc ::Avatar::Load {fileName} {
     }
 }
 
+proc ::Avatar::SetMyAvatarFromBase64 {data mime} {
+    
+    Debug "::Avatar::SetMyAvatarFromBase64"
+    
+    if {![catch {image create photo -data $data} tmpname]} {
+	SetMyPhoto $tmpname
+	WriteBase64ToFile $data $mime
+	image delete $tmpname
+    }
+}
+
+# Avatar::WriteBase64ToFile --
+# 
+#       If we get a server stored vcard photo we need this to sync storage.
+
+proc ::Avatar::WriteBase64ToFile {data mime} {
+    global  this
+    variable aprefs
+    
+    Debug "::Avatar::WriteBase64ToFile"
+    
+    set dir [file normalize $this(myAvatarPath)]
+
+    # Store the avatar file in prefs folder to protect it from being removed.
+    foreach f [glob -nocomplain -directory $dir *] {
+	file delete $f
+    }
+    set suff [GetSuffForMime $mime]
+    set fileName [file join $dir myavatar$suff]
+    set fd [open $fileName w]
+    fconfigure $fd -translation binary
+    puts -nonewline $fd [::base64::decode $data]
+    close $fd
+    
+    set aprefs(fileName) $fileName
+}
+
 # Avatar::CreateAndVerifyPhoto --
 # 
 # 
@@ -201,6 +249,7 @@ proc ::Avatar::CreateAndVerifyPhoto {fileName nameVar} {
     if {![lindex $ans 0]} {
 	set msg [lindex $ans 1]
 	::UI::MessageBox -message $msg -icon error -title [mc Error]
+	return 0
     } else {
 	if {[catch {set name [image create photo -file $fileName]}]} {
 	    return 0
@@ -358,12 +407,14 @@ proc ::Avatar::ShareImage {fileName} {
     if {[$jlib isinstream]} {
 	
 	# Disabled.
-	# $jlib avatar store ::Avatar::SetCB
+	# $jlib avatar store [list ::Avatar::SetCB 0]
 	
 	# vCard avatar. 
 	# @@@ These are not completely in sync. Send presence from CB?
-	$jlib vcard set_my_photo $base64 $mime ::Avatar::SetCB
-	$jlib send_presence -keep 1
+	$jlib vcard set_my_photo $base64 $mime [list ::Avatar::SetCB 1]
+	
+	# Do not update presence hashes until we the callback to avoid sync issues.
+	#$jlib send_presence -keep 1
     }
 }
 
@@ -380,20 +431,29 @@ proc ::Avatar::UnshareImage { } {
     $jlib avatar unset_data
     
     if {[$jlib isinstream]} {
+	$jlib avatar store_remove [list ::Avatar::SetCB 0]
+	$jlib vcard set_my_photo {} {} [list ::Avatar::SetCB 0]
+
 	set xElem [wrapper::createtag x  \
 	  -attrlist [list xmlns "jabber:x:avatar"]]
 	set xVCardElem [wrapper::createtag x  \
 	  -attrlist [list xmlns "vcard-temp:x:update"]]
 	$jlib send_presence -xlist [list $xElem $xVCardElem] -keep 1
-	$jlib avatar store_remove ::Avatar::SetCB
-	$jlib vcard set_my_photo {} {} ::Avatar::SetCB
     }    
 }
 
-proc ::Avatar::SetCB {jlibname type queryElem} {
+proc ::Avatar::SetCB {sync jlibname type queryElem} {
+    upvar ::Jabber::jstate jstate
     
     if {$type eq "error"} {
 	::Jabber::AddErrorLog {} $queryElem
+    } else {
+	
+	# Now we are sure avatar is stored and can announce it.
+	if {$sync} {
+	    set jlib $jstate(jlib)
+	    $jlib send_presence -keep 1
+	}
     }
 }
 
