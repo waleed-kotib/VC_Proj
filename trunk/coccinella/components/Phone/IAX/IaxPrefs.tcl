@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: IaxPrefs.tcl,v 1.2 2006-03-10 15:34:46 matben Exp $
+# $Id: IaxPrefs.tcl,v 1.3 2006-04-29 14:07:37 matben Exp $
 
 package provide IaxPrefs 0.1
 
@@ -22,19 +22,19 @@ namespace eval ::IaxPrefs {
 proc ::IaxPrefs::InitPrefsHook { } {
     global  prefs
 
-    set prefs(iaxPhone,user) ""
-    set prefs(iaxPhone,password) 0
-    set prefs(iaxPhone,host) 0
-    set prefs(iaxPhone,cidnum) 0
-    set prefs(iaxPhone,cidname) ""
-    set prefs(iaxPhone,codec) ""
-    set prefs(iaxPhone,inputDevices) ""
+    set prefs(iaxPhone,user)          ""
+    set prefs(iaxPhone,password)      "" ;# Was 0
+    set prefs(iaxPhone,host)          "" ;# Was 0
+    set prefs(iaxPhone,cidnum)        0
+    set prefs(iaxPhone,cidname)       ""
+    set prefs(iaxPhone,codec)         ""
+    set prefs(iaxPhone,inputDevices)  ""
     set prefs(iaxPhone,outputDevices) ""
-    set prefs(iaxPhone,agc) 0
-    set prefs(iaxPhone,aagc) 0
-    set prefs(iaxPhone,noise) 0
-    set prefs(iaxPhone,comfort) 0
-#    set prefs(iaxPhone,echo) 0
+    set prefs(iaxPhone,agc)           0
+    set prefs(iaxPhone,aagc)          0
+    set prefs(iaxPhone,noise)         0
+    set prefs(iaxPhone,comfort)       0
+#    set prefs(iaxPhone,echo)          0
 
     variable allKeys 
     set allKeys {user password host cidnum cidname codec  \
@@ -68,11 +68,9 @@ proc ::IaxPrefs::BuildPrefsHook {wtree nbframe} {
 proc ::IaxPrefs::BuildPage {page} {
     global  prefs
     variable tmpPrefs
-    
-    set padding [option get . notebookPageSmallPadding {}]
-    
+        
     set wc $page.i
-    ttk::frame $wc -padding $padding
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]    
     
     set waccount $wc.ac
@@ -84,9 +82,9 @@ proc ::IaxPrefs::BuildPage {page} {
     grid  $waccount  -sticky ew -padx 8
     grid  $wnb       -sticky ew
     
-    $wnb add [DevicesFrame $wnb.de] -padding $padding -text [mc Devices]
-    $wnb add [FiltersFrame $wnb.fi] -padding $padding -text [mc Filters]
-    $wnb add [CodecsFrame  $wnb.co] -padding $padding -text [mc Codecs]
+    $wnb add [DevicesFrame $wnb.de] -text [mc Devices]
+    $wnb add [FiltersFrame $wnb.fi] -text [mc Filters]
+    $wnb add [CodecsFrame  $wnb.co] -text [mc Codecs]
 }
 
 proc ::IaxPrefs::AccountFrame {win} {
@@ -97,12 +95,10 @@ proc ::IaxPrefs::AccountFrame {win} {
       -padding [option get . groupSmallPadding {}]
     pack $win -side top -anchor w
 
-    set tmpPrefs(user) $prefs(iaxPhone,user) 
-    set tmpPrefs(password)  $prefs(iaxPhone,password)
-    set tmpPrefs(host) $prefs(iaxPhone,host)
-    set tmpPrefs(cidnum) $prefs(iaxPhone,cidnum)
-    set tmpPrefs(cidname) $prefs(iaxPhone,cidname) 
-
+    foreach key {user password host cidnum cidname} {
+	set tmpPrefs($key) $prefs(iaxPhone,$key)
+    }
+    
     ttk::label $win.luser -text "[mc iaxPhoneUser]:"
     ttk::entry $win.user -textvariable [namespace current]::tmpPrefs(user)
 
@@ -134,19 +130,22 @@ proc ::IaxPrefs::DevicesFrame {win} {
     ttk::frame $win -padding [option get . groupSmallPadding {}]
     pack $win -side top -anchor w
 
+    set prefs(iaxPhone,inputDevices)  [lindex [iaxclient::devices input -current] 0]
+    set prefs(iaxPhone,outputDevices) [lindex [iaxclient::devices output -current] 0]
     set tmpPrefs(inputDevices)  $prefs(iaxPhone,inputDevices)
     set tmpPrefs(outputDevices) $prefs(iaxPhone,outputDevices)
 
-    set listInputDevices [iaxclient::devices input]
-    foreach {device} $listInputDevices {
+    set listInputDevices  [iaxclient::devices input]
+    set listOutputDevices [iaxclient::devices output]
+    
+    foreach device $listInputDevices {
         lappend inputDevices [lindex $device 0]
     } 
     ttk::label $win.linputDev -text "[mc iaxPhoneInputDev]:"
     ttk::combobox $win.input_dev -state readonly  \
       -textvariable [namespace current]::tmpPrefs(inputDevices) -values $inputDevices
 
-    set listOutputDevices [iaxclient::devices output]
-    foreach {device}  $listOutputDevices {
+    foreach device $listOutputDevices {
         lappend outputDevices [lindex $device 0]
     }
     ttk::label $win.loutputDev -text "[mc iaxPhoneOutputDev]:"
@@ -167,10 +166,9 @@ proc ::IaxPrefs::FiltersFrame {win} {
     ttk::frame $win -padding [option get . groupSmallPadding {}]
     pack $win -side top -anchor w
 
-    set tmpPrefs(agc) $prefs(iaxPhone,agc)
-    set tmpPrefs(aagc) $prefs(iaxPhone,aagc)
-    set tmpPrefs(noise) $prefs(iaxPhone,noise)
-    set tmpPrefs(comfort) $prefs(iaxPhone,comfort)
+    foreach key {agc aagc noise comfort} {
+	set tmpPrefs($key) $prefs(iaxPhone,$key)
+    }
 #    set tmpPrefs(echo) $prefs(iaxPhone,echo)
 
     ttk::label $win.lagc -text "[mc iaxPhoneAGC]:"
@@ -215,7 +213,7 @@ proc ::IaxPrefs::CodecsFrame {win} {
 
     ttk::radiobutton $win.codeca -text "aLaw" -variable [namespace current]::tmpPrefs(codec) -value "ALAW" 
     ttk::radiobutton $win.codecu -text "uLaw" -variable [namespace current]::tmpPrefs(codec) -value "ULAW"
-    ttk::radiobutton $win.codecg -text "GSM" -variable [namespace current]::tmpPrefs(codec) -value "GSM"
+    ttk::radiobutton $win.codecg -text "GSM"  -variable [namespace current]::tmpPrefs(codec) -value "GSM"
     ttk::radiobutton $win.codeci -text "iLBC" -variable [namespace current]::tmpPrefs(codec) -value "ILBC"
 
     # If you add more codecs use a new column.
@@ -224,6 +222,7 @@ proc ::IaxPrefs::CodecsFrame {win} {
     grid  x            $win.codecg  -sticky w
     grid  x            $win.codeci  -sticky w
     grid $win.lcodec -padx 4
+    
     return $win
 }
 

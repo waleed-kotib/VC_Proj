@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.22 2006-04-24 06:33:11 matben Exp $
+# $Id: JingleIax.tcl,v 1.23 2006-04-29 14:07:37 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -37,6 +37,7 @@ proc ::JingleIAX::Init { } {
     ::hooks::register rosterPostCommandHook ::JingleIAX::RosterPostCommandHook
     ::hooks::register buildChatButtonTrayHook  ::JingleIAX::BuildChatButtonTrayHook
 
+    # This shall be done generically and dispatched to relevant softphone.
     #--------------- Variables Uses For PopUP Menus -------------------------
     variable popMenuDef
     set popMenuDef(call) {
@@ -193,15 +194,22 @@ proc ::JingleIAX::SessionInitiateCB {type subiq args} {
     #--------- Comes an Error from Initiate --------
     if { ($type eq "error") || ($type eq "cancel")} {
 	
-	# @@@ Cleanup!
-
+	# Cleanup!
+	SessionTerminate
 	ui::dialog -icon error -type ok -message [mc phoneFailedCalling] \
 	  -detail $subiq
     }
 }
 
+# JingleIAX::SessionTerminate --
+# 
+#       This is supposed to terminate a session and trigger all cleaning up.
+#       Shall also work to call in case of any errors during a call.
+
 proc ::JingleIAX::SessionTerminate {} {
     variable state
+    
+    # @@@ Do we need to take any further action (iaxclient::hangup)?
 
     ::Jabber::JlibCmd jingle send_set $state(sid) "session-terminate"  \
       ::JingleIAX::EmptyCB
@@ -237,6 +245,7 @@ proc ::JingleIAX::IQHandler {jlib jelem args} {
 	    SessionTerminateHandler $from $jelem $sid $id
 	}
     }
+    return
 }
 
 # JingleIAX::SessionInitiateHandler --
@@ -257,8 +266,7 @@ proc ::JingleIAX::SessionInitiateHandler {from jingle sid id} {
 	set state(sid) $sid
 	TransportAccept $from
     } else {
-	::Jabber::JlibCmd jingle send_set $sid "terminate-session"  \
-	  ::JingleIAX::EmptyCB
+	SessionTerminate
     }
 }
 
@@ -297,7 +305,7 @@ proc ::JingleIAX::TransportAccept {from} {
       -subtags $candidateElems]
 
     ::Jabber::JlibCmd jingle send_set $state(sid) "transport-accept"  \
-      ::JingleIAX::EmptyCB [list $transportElem ]
+      ::JingleIAX::EmptyCB [list $transportElem]
     ::Jabber::JlibCmd jingle send_set $state(sid) "session-accept"    \
       ::JingleIAX::EmptyCB
 }
@@ -332,14 +340,14 @@ proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
 
         if { ($transportType ne $xmlns(transport)) && ($version ne 2) } {
 	    ::Jabber::JlibCmd jingle send_error $from $id unsupported-transports
-	    # @@@ Cleanup?
+	    SessionTerminate
             return
         }
 
         set candidateList [wrapper::getchildswithtag $transport candidate]
         if {$candidateList eq {}} {
 	    ::Jabber::JlibCmd jingle send_error $from $id unsupported-media
-	    # @@@ Cleanup?
+	    SessionTerminate
 	    return
 	}
 	foreach candidate $candidateList {
@@ -349,7 +357,7 @@ proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
 		set candidateDesc($name,port) [wrapper::getattribute $candidate port]
 	    } else {
 		::Jabber::JlibCmd send_iq_error $from $id 404 cancel bad-request
-		# @@@ Cleanup?
+		SessionTerminate
 		return
 	    }
 	}
@@ -388,6 +396,7 @@ proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
 	}	
 
 	# @@@ We should provide a list of candidates to ::Phone::DialJingle.
+	# There should be some kind of callback from 'DialJingle' for this???
 	Debug "\t ::Phone::DialJingle ip=$ip, port=$port"
 	set myjid [::Jabber::JlibCmd getthis myjid]
         ::Phone::DialJingle $ip $port $from $myjid $user $password
