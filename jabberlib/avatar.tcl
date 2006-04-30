@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.13 2006-04-29 09:55:08 matben Exp $
+# $Id: avatar.tcl,v 1.14 2006-04-30 09:18:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -378,6 +378,52 @@ proc jlib::avatar::get_protocols {jlibname jid2} {
     return $protocols
 }
 
+# jlib::avatar::get_full_jid --
+# 
+#       This is the jid3 associated with 'avatar' or jid2 if 'vcard',
+#       else we just return the jid2.
+
+proc jlib::avatar::get_full_jid {jlibname jid2} {
+    upvar ${jlibname}::avatar::state state
+
+    if {[info exists state($jid2,jid3)]} {
+	return $state($jid2,jid3)
+    } else {
+	return $jid2
+    }
+}
+
+# jlib::avatar::get_all_avatar_jids --
+# 
+#       Gets a list of all jids with avatar support.
+#       Actually, everyone that has sent us a presence jabber:x:avatar element.
+
+proc jlib::avatar::get_all_avatar_jids {jlibname} {
+    upvar ${jlibname}::avatar::state state
+    
+    debug "jlib::avatar::get_all_avatar_jids"
+    
+    set jids {}
+    set len [string length ",hash"]
+    foreach {key hash} [array get state *,hash] {
+	if {$hash ne ""} {
+	    set jid2 [string range $key 0 end-$len]
+	    lappend jids $jid2
+	}
+    }
+    return $jids
+}
+
+proc jlib::avatar::uptodate {jlibname jid2} {
+    upvar ${jlibname}::avatar::state state
+
+    if {[info exists state($jid2,uptodate)]} {
+	return $state($jid2,uptodate)
+    } else {
+	return 0
+    }
+}
+
 # jlib::avatar::presence_handler --
 # 
 #       We must handle both 'avatar' and 'vcard' from one place
@@ -473,16 +519,6 @@ proc jlib::avatar::PresenceVCard {jlibname xmldata} {
 	set gotHash 1
     }
     return $gotHash
-}
-
-proc jlib::avatar::uptodate {jlibname jid2} {
-    upvar ${jlibname}::avatar::state state
-
-    if {[info exists state($jid2,uptodate)]} {
-	return $state($jid2,uptodate)
-    } else {
-	return 0
-    }
 }
 
 # jlib::avatar::get_async --
@@ -619,37 +655,6 @@ proc jlib::avatar::invoke_stacked {jlibname type jid2} {
     }
 }
 
-# jlib::avatar::get_full_jid --
-# 
-#       This is the jid3 associated with 'avatar' or jid2 if 'vcard'.
-
-proc jlib::avatar::get_full_jid {jlibname jid2} {
-    upvar ${jlibname}::avatar::state state
-
-    return $state($jid2,jid3)
-}
-
-# jlib::avatar::get_all_avatar_jids --
-# 
-#       Gets a list of all jids with avatar support.
-#       Actually, everyone that has sent us a presence jabber:x:avatar element.
-
-proc jlib::avatar::get_all_avatar_jids {jlibname} {
-    upvar ${jlibname}::avatar::state state
-    
-    debug "jlib::avatar::get_all_avatar_jids"
-    
-    set jids {}
-    set len [string length ",hash"]
-    foreach {key hash} [array get state *,hash] {
-	if {$hash ne ""} {
-	    set jid2 [string range $key 0 end-$len]
-	    lappend jids $jid2
-	}
-    }
-    return $jids
-}
-
 #--- vCard support -------------------------------------------------------------
 
 proc jlib::avatar::get_vcard_async {jlibname jid2 cmd} {
@@ -733,41 +738,6 @@ proc jlib::avatar::SetDataFromVCardElem {jlibname jid2 subiq} {
 	}
     }
     return $ans
-}
-
-# jlib::avatar::writehashmap --
-# 
-#       Writes an array to file that maps jid2 to hash.
-#       Just source this file to read it.
-
-proc jlib::avatar::writehashmap {jlibname fileName} {
-    upvar ${jlibname}::avatar::state state
-    
-    set fd [open $fileName w]
-    puts $fd "# This file defines an array that maps jid2 -> avatar hash"
-    puts $fd "array set hashmap {"
-    set len [string length ",hash"]
-    foreach {key hash} [array get state *,hash] {
-	set jid2 [string range $key 0 end-$len]
-	puts $fd "\t$jid2 \t$hash"
-    }
-    puts $fd "}"
-    close $fd
-}
-
-proc jlib::avatar::readhashmap {jlibname fileName} {
-    upvar ${jlibname}::avatar::state state
-    
-    if {[file exists $fileName]} {
-	source $fileName
-	foreach {jid2 hash} [array get hashmap] {
-	    set state($jid2,hash) $hash
-	    # Guesswork...
-	    set state($jid2,jid3) $jid2
-	    set state($jid2,protocol,vcard) 1
-	    set state($jid2,uptodate) 1
-	}
-    }
 }
 
 proc jlib::avatar::debug {msg} {
