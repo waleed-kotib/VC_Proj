@@ -11,13 +11,11 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.11 2006-04-21 12:34:14 matben Exp $
+# $Id: Iax.tcl,v 1.12 2006-04-30 14:15:21 matben Exp $
 
 namespace eval ::Iax { }
 
 proc ::Iax::Init { } {
-
-    variable iaxPrefs
 
     if {![component::exists Phone]} {
 	return
@@ -32,16 +30,6 @@ proc ::Iax::Init { } {
 	return
     }
     component::register IAX "Provides the iax client softphone."
-
-    array set iaxPrefs {
-	registerid   -
-        user         ""
-        password     ""
-        host         ""
-        cidname      ""
-        cidnum       ""
-        codecs       ""
-    }
     
     ::Phone::RegisterPhone iax "IAX Phone"  \
       ::Iax::InitProc ::Iax::CmdProc ::Iax::DeleteProc
@@ -62,6 +50,9 @@ proc ::Iax::Init { } {
     variable iaxstate
     set iaxstate(old) "free"
     set iaxstate(now) "free"
+    
+    # Register ID.
+    set iaxstate(registerid) -
 }
 
 proc ::Iax::InitProc {} {
@@ -74,7 +65,7 @@ proc ::Iax::InitProc {} {
 #       Phone component.
 
 proc ::Iax::CmdProc {type args} {
-    variable iaxPrefs
+    variable iaxstate
     
     ::Debug 4 "::Iax::CmdProc type=$type, args=$args"
     
@@ -149,8 +140,8 @@ proc ::Iax::CmdProc {type args} {
 	    #iaxclient::unhold $value
 	}
 	unregister {
-	    if {[string is integer -strict $iaxPrefs(registerid)]} {
-		iaxclient::unregister $iaxPrefs(registerid)
+	    if {[string is integer -strict $iaxstate(registerid)]} {
+		iaxclient::unregister $iaxstate(registerid)
 	    }
 	}
     }
@@ -161,9 +152,16 @@ proc ::Iax::DeleteProc {} {
 }
 
 proc ::Iax::Register {} {
-    variable iaxPrefs
+    variable iaxstate
    
-    set iaxPrefs(registerid) [iaxclient::register $iaxPrefs(user) $iaxPrefs(password) $iaxPrefs(host)]
+    # Set plain variable names.
+    foreach {name value} [::IaxPrefs::GetAll] {
+	set $name $value
+    }
+
+    # @@@ Do note register if empty host?
+    #     Or a separate switch: Register automatically
+    set iaxstate(registerid) [iaxclient::register $user $password $host]
 
     ## This is tricky, when we got two iaxclient instances in the same box 
     ## the second one has the port 0
@@ -192,17 +190,20 @@ proc ::Iax::NotifyText { type callno textmessage args} {
 }
 
 proc ::Iax::NotifyRegister {id reply msgcount} {
-    variable iaxPrefs
+    variable iaxstate
 
     ::Debug 4 "::Iax::NotifyRegister id=$id, reply=$reply"
     
-    if { ($iaxPrefs(registerid) == $id) && ($reply eq "timeout") } {
-        ::Phone::HidePhone
-    }
-
-    if { $reply eq "ack"} {
-        ::Phone::ShowPhone
-        ::Phone::UpdateRegister $id $reply $msgcount
+    switch -- $reply {
+	timeout {
+	    if {$iaxstate(registerid) == $id} {
+		::Phone::HidePhone
+	    }
+	}
+	ack {
+	    ::Phone::ShowPhone
+	    ::Phone::UpdateRegister $id $reply $msgcount
+	}
     }
 }
 
@@ -264,18 +265,21 @@ proc ::Iax::NotifyState {callNo state codec remote remote_name args} {
 #------------------------------- Protocol Actions --------------------------
 #---------------------------------------------------------------------------
 
-proc ::Iax::CallerID { {cidname ""} {cidnum ""} } {
-    variable iaxPrefs
+proc ::Iax::CallerID { {_cidname ""} {_cidnum ""} } {
 
-    if { $cidname eq "" } {
-        iaxclient::callerid $iaxPrefs(cidname) $iaxPrefs(cidnum)
-    } else {
+    # Set plain variable names. Note name conflicts!
+    foreach {name value} [::IaxPrefs::GetAll] {
+	set $name $value
+    }
+
+    if { $_cidname eq "" } {
         iaxclient::callerid $cidname $cidnum
+    } else {
+        iaxclient::callerid $_cidname $_cidnum
     }
 }
 
 proc ::Iax::DialJingle {peer {line ""} {subject ""} {user ""} {password ""}} {
-    variable iaxPrefs
 
     ::Debug 4 "::Iax::DialJingle peer=$peer"
     
@@ -284,35 +288,38 @@ proc ::Iax::DialJingle {peer {line ""} {subject ""} {user ""} {password ""}} {
     } else {
 	set callNo $line
     }
-
     set callNo 1 
 
     #---- Peer String: IP[:Port]/extension
     #---- Dial Peer String: [user[:password]@]peer
     set userDef ""
     if {$user ne ""} {
-        set userDef $user
+        append userDef $user
     }
     if {$password ne ""} {
-        set userDef "$userDef:$password"
+	append userDef ":$password"
     }
     if {$userDef ne ""} {
-        set userDef "$userDef@"
+	append userDef "@"
     }
 
     #----- Dial Peer -------
     ::Debug 4 "\t iaxclient::dial $userDef$peer $callNo"
-    iaxclient::dial "$userDef$peer" $callNo
+    iaxclient::dial ${userDef}${peer} $callNo
     if { $subject ne "" } {
 	iaxclient::sendtext $subject
     }
 }
 
 proc ::Iax::Dial {phonenumber {line ""} {subject ""}} {
-    variable iaxPrefs
 
     ::Debug 4 "::Iax::Dial phonenumber=$phonenumber "
     
+    # Set plain variable names.
+    foreach {name value} [::IaxPrefs::GetAll] {
+	set $name $value
+    }
+
     if {$line eq ""} {
 	set callNo 1 
     } else {
@@ -321,7 +328,7 @@ proc ::Iax::Dial {phonenumber {line ""} {subject ""}} {
     set callNo 1 
  
     ::Debug 4 "\t iaxclient::dial ..."
-    iaxclient::dial "$iaxPrefs(user):$iaxPrefs(password)@$iaxPrefs(host)/$phonenumber" $callNo
+    iaxclient::dial "${user}:${password}@${host}/${phonenumber}" $callNo
     if { $subject ne "" } {
 	iaxclient::sendtext $subject
     }
@@ -329,85 +336,46 @@ proc ::Iax::Dial {phonenumber {line ""} {subject ""}} {
 
 proc ::Iax::LoadPrefs {} {
     global prefs
-    variable iaxPrefs
     
-    set iaxPrefs(user)			$prefs(iaxPhone,user)
-    set iaxPrefs(password)		$prefs(iaxPhone,password)
-    set iaxPrefs(host)	 	        $prefs(iaxPhone,host) 
-    set iaxPrefs(cidnum)		$prefs(iaxPhone,cidnum)
-    set iaxPrefs(cidname)		$prefs(iaxPhone,cidname)
-    set iaxPrefs(codec)			$prefs(iaxPhone,codec)
-    
-    if { $prefs(iaxPhone,agc) eq ""} {
-	set value 0
-    } else {
-	set value $prefs(iaxPhone,agc)
+    ::Debug 4 "::Iax::LoadPrefs"
+
+    # Set plain variable names.
+    foreach {name value} [::IaxPrefs::GetAll] {
+	set $name $value
     }
-    set iaxPrefs(agc)			$value
+    set echo 0
 
-    if { $prefs(iaxPhone,aagc) eq ""} {
-	set value 0
-    } else {
-	set value $prefs(iaxPhone,aagc)
-    }
-    set iaxPrefs(aagc)			$value
-    
-    if { $prefs(iaxPhone,noise) eq ""} {
-	set value 0
-    } else {
-	set value $prefs(iaxPhone,noise)
-    }
-    set iaxPrefs(noise)			$value
-    
-    if { $prefs(iaxPhone,comfort) eq ""} {
-	set value 0
-    } else {
-	set value $prefs(iaxPhone,comfort)
-    }
-    set iaxPrefs(comfort)		$value
+    iaxclient::applyfilters $agc $aagc $comfort $noise $echo
 
-#    if { $prefs(iaxPhone,echo) eq ""} {
-#	set value 0
-#    } else {
-#	set value $prefs(iaxPhone,echo)
-#    }
-
-    set value 0
-    set iaxPrefs(echo)		$value
-
-    iaxclient::applyfilters $iaxPrefs(agc) $iaxPrefs(aagc) $iaxPrefs(comfort) $iaxPrefs(noise) $iaxPrefs(echo)
-
-    set iaxPrefs(outputDevices)		""
-    set listOutputDevices [iaxclient::devices output]
-    foreach {device} $listOutputDevices {
-        if { [lindex $device 0] eq $prefs(iaxPhone,outputDevices)} {
-	    set iaxPrefs(outputDevices) [lindex $device 1]
-	    iaxclient::setdevices output $iaxPrefs(outputDevices) 
+    # Pick matching device name.
+    foreach device [iaxclient::devices output] {
+	if { [lindex $device 0] eq $outputDevices} {
+	    iaxclient::setdevices output [lindex $device 1]
+	    break
 	}
     }
-
-    set iaxPrefs(inputDevices)		""
-    set listInputDevices [iaxclient::devices "input"]
-    foreach {device} $listInputDevices {
-        if { [lindex $device 0] eq $prefs(iaxPhone,inputDevices)} {
-	    set iaxPrefs(inputDevices) [lindex $device 1] 
-	    iaxclient::setdevices input $iaxPrefs(inputDevices)
+    foreach device [iaxclient::devices input] {
+	if { [lindex $device 0] eq $inputDevices} {
+	    iaxclient::setdevices input [lindex $device 1]
+	    break
 	}
     }
-
-    iaxclient::callerid $iaxPrefs(cidname) $iaxPrefs(cidnum)
-    if {$iaxPrefs(codec) ne ""} {
-        iaxclient::formats $iaxPrefs(codec)
+    
+    iaxclient::callerid $cidname $cidnum
+    if {$codec ne ""} {
+        iaxclient::formats $codec
     }
 
     iaxclient::toneinit 880 960 16000 48000 10
 }
 
 proc ::Iax::Reload {} {
-    variable iaxPrefs
+    variable iaxstate
 
-    if { $iaxPrefs(registerid) >= 0 } {
-	::iaxclient::unregister $iaxPrefs(registerid)
+    if {[string is integer -strict $iaxstate(registerid)]} {
+	if { $iaxstate(registerid) >= 0 } {
+	    ::iaxclient::unregister $iaxstate(registerid)
+	}
     }
     LoadPrefs
     Register
