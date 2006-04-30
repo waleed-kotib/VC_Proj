@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.14 2006-04-29 09:55:08 matben Exp $
+# $Id: Avatar.tcl,v 1.15 2006-04-30 09:19:00 matben Exp $
 
 # @@@ Issues:
 #       ?
@@ -139,14 +139,13 @@ proc ::Avatar::InitPrefsHook { } {
 
 proc ::Avatar::JabberInitHook {jlibname} {
     variable aprefs
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::JabberInitHook"
     
     if {$aprefs(share) && [file isfile $aprefs(fileName)]} {
 	ShareImage $aprefs(fileName)
     }
-    $jstate(jlib) avatar readhashmap $aprefs(hashmapFile)
+    ReadHashmap $aprefs(hashmapFile)
 }
 
 proc ::Avatar::LoginHook { } {
@@ -182,8 +181,7 @@ proc ::Avatar::QuitHook { } {
     variable aprefs
     upvar ::Jabber::jstate jstate
     
-    set jlib $jstate(jlib)
-    $jlib avatar writehashmap $aprefs(hashmapFile)
+    WriteHashmap $aprefs(hashmapFile)
 }
 
 #--- First section deals with our own avatar -----------------------------------
@@ -611,15 +609,15 @@ proc ::Avatar::InvokeAnyFallbackFrom {jid2 protocol} {
 # Avatar::GetAsyncIfExists --
 # 
 #       Can be called to get a specific avatar. Notified via hook. Bad?
+#       
+#       jid:    jid2 or jid3
 
 proc ::Avatar::GetAsyncIfExists {jid} {
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::GetAsyncIfExists jid=$jid"
     
-    set jlib $jstate(jlib)
     set jid2 [jlib::barejid $jid]
-    set hash [$jlib avatar get_hash $jid2]
+    set hash [GetHash $jid2]
     if {$hash ne ""} {
 	
 	# First try to load the avatar from Cache directory.
@@ -632,11 +630,25 @@ proc ::Avatar::GetAsyncIfExists {jid} {
     }
 }
 
+# Avatar::GetAll --
+# 
+#       Requests all avatars in our roster.
+
 proc ::Avatar::GetAll { } {
     upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::GetAll"
     
+    set jlib   $jstate(jlib)
+    set roster $jstate(roster)
+
+    foreach jid2 [$roster getusers] {
+	set jid [$jlib avatar get_full_jid $jid2]
+	GetAsyncIfExists $jid
+    }
+    return
+   
+    # BU
     set jlib $jstate(jlib)
     foreach jid2 [$jlib avatar get_all_avatar_jids] {
 	
@@ -782,10 +794,8 @@ proc ::Avatar::HavePhoto {jid2} {
 
 proc ::Avatar::CreatePhotoFromCache {jid2} {
     variable photo
-    upvar ::Jabber::jstate jstate
     
-    set jlib $jstate(jlib)    
-    set hash [$jlib avatar get_hash $jid2]
+    set hash [GetHash $jid2]
     if {$hash ne ""} {
 	set data [ReadCacheAvatar $hash]
 	set photo($jid2,orig) [image create photo]
@@ -930,10 +940,8 @@ proc ::Avatar::MakeScaleTableCmd {f1 f2} {
 #   o binary content, not base64 encoded
 
 proc ::Avatar::HaveCachedJID {jid2} {
-    upvar ::Jabber::jstate jstate
-    
-    set jlib $jstate(jlib)    
-    set hash [$jlib avatar get_hash $jid2]
+
+    set hash [GetHash $jid2]
     if {$hash ne ""} {
 	set fileName [GetCacheFileName $hash]
 	if {$fileName ne ""} {
@@ -981,7 +989,7 @@ proc ::Avatar::ReadCacheAvatar {hash} {
     Debug "::Avatar::ReadCacheAvatar"
     
     set fileName [GetCacheFileName $hash]
-    if { [file exists $fileName] } {
+    if {[file exists $fileName]} {
 	set fd [open $fileName r]
 	fconfigure $fd -translation binary
 	set data [::base64::encode [read $fd]]
@@ -1033,6 +1041,70 @@ proc ::Avatar::GetSuffForMime {mime} {
 	return $mime2Suff($mime)
     } else {
 	return ""
+    }
+}
+
+# Avatar::GetHash --
+# 
+#       Tries to get hash first from 'avatar' then from hashmap.
+
+proc ::Avatar::GetHash {jid2} {
+    variable hashmap
+    upvar ::Jabber::jstate jstate
+    
+    # Get the most current if it exists.
+    set jlib $jstate(jlib)    
+    set hash [$jlib avatar get_hash $jid2]
+
+    # Use the hashmap as a fallback.
+    if {($hash eq "") && [info exists hashmap($jid2)]} {
+	set hash $hashmap($jid2)
+    }
+    return $hash
+}
+
+# Avatar::WriteHashmap --
+# 
+#       Writes an array to file that maps jid2 to hash.
+#       Just source this file to read it.
+
+proc ::Avatar::WriteHashmap {fileName} {
+    variable hashmap
+    upvar ::Jabber::jstate jstate
+    
+    Debug "::Avatar::WriteHashmap"
+    
+    # Start from the hashmap that may have been read earlier and update it.
+    set jlib $jstate(jlib)
+    foreach jid2 [$jlib avatar get_all_avatar_jids] {
+	set hash [$jlib avatar get_hash $jid2]
+	set hashmap($jid2) $hash
+    }
+    
+    set fd [open $fileName w]
+    puts $fd "# This file defines an array that maps jid2 -> avatar hash"
+    puts $fd "array set hashmap {"
+    foreach {jid2 hash} [array get hashmap] {
+	puts $fd "\t$jid2 \t$hash"
+    }
+    puts $fd "}"
+    close $fd
+}
+
+proc ::Avatar::ReadHashmap {fileName} {
+    variable hashmap
+    
+    Debug "::Avatar::ReadHashmap"
+    
+    if {[file exists $fileName]} {
+	source $fileName
+	
+	# Files may have been deleted. Cleanup hashmap.
+	foreach {jid2 hash} [array get hashmap] {
+	    if {[GetCacheFileName $hash] eq ""} {
+		unset hashmap($jid2)
+	    }
+	}
     }
 }
 

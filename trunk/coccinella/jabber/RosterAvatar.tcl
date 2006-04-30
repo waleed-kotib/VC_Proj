@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.9 2006-04-29 09:55:08 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.10 2006-04-30 09:19:00 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -563,7 +563,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     set item [CreateWithTag $tag $style $elem $jtext $jimage root]
     lappend items $item
     
-    if {$avatarForOffline || $presence eq "available"} {
+    if {$avatarForOffline || ($presence eq "available")} {
 	if {[::Avatar::HavePhoto $jid2]} {
 	    SetAvatarImage put $jidx
 	}
