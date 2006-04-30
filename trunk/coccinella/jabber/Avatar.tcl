@@ -7,10 +7,12 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.15 2006-04-30 09:19:00 matben Exp $
+# $Id: Avatar.tcl,v 1.16 2006-04-30 14:00:47 matben Exp $
 
 # @@@ Issues:
-#       ?
+# 
+# Features:
+#       1) We don't request avatar for offline users, only if already cached.
 
 package require jlib::avatar
 
@@ -642,6 +644,7 @@ proc ::Avatar::GetAll { } {
     set jlib   $jstate(jlib)
     set roster $jstate(roster)
 
+    # @@@ Not sure here...
     foreach jid2 [$roster getusers] {
 	set jid [$jlib avatar get_full_jid $jid2]
 	GetAsyncIfExists $jid
@@ -771,8 +774,13 @@ proc ::Avatar::GetPhotoOfSize {jid2 size} {
 	return $new
     } elseif {[HaveCachedJID $jid2]} {
 	CreatePhotoFromCache $jid2
-	if {[info exists photo($jid2,$size)]} {
-	    return $photo($jid2,$size)
+	
+	# If succesful; Note that only orig created.
+	if {[info exists photo($jid2,orig)]} {
+	    set name $photo($jid2,orig)
+	    set new [CreateScaledPhoto $name $size]
+	    set photo($jid2,$size) $new
+	    return $new
 	}
     }
     return ""
@@ -941,6 +949,8 @@ proc ::Avatar::MakeScaleTableCmd {f1 f2} {
 
 proc ::Avatar::HaveCachedJID {jid2} {
 
+    Debug "::Avatar::HaveCachedJID jid2=$jid2"
+    
     set hash [GetHash $jid2]
     if {$hash ne ""} {
 	set fileName [GetCacheFileName $hash]
