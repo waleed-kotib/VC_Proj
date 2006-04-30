@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: IaxPrefs.tcl,v 1.3 2006-04-29 14:07:37 matben Exp $
+# $Id: IaxPrefs.tcl,v 1.4 2006-04-30 14:15:22 matben Exp $
 
 package provide IaxPrefs 0.1
 
@@ -49,6 +49,34 @@ proc ::IaxPrefs::InitPrefsHook { } {
 	lappend plist [list $name $rsrc $val]
     }
     ::PrefUtils::Add $plist
+    VerifySanity
+}
+
+proc ::IaxPrefs::VerifySanity { } {
+    global  prefs
+    
+    # Verify booleans.
+    foreach key {cidnum agc aagc noise comfort} {
+	set value $prefs(iaxPhone,$key)
+	if {!(($value == 0) || ($value == 1))} {
+	    set prefs(iaxPhone,$key) 0
+	}
+    }
+}
+
+# IaxPrefs::GetAll --
+# 
+#       A way to get all relevant IAX prefs with simple names.
+
+proc ::IaxPrefs::GetAll { } {
+    global  prefs
+    variable allKeys 
+    
+    set plist {}
+    foreach key $allKeys {
+	lappend plist $key $prefs(iaxPhone,$key)
+    }
+    return $plist
 }
 
 proc ::IaxPrefs::BuildPrefsHook {wtree nbframe} {
@@ -233,7 +261,8 @@ proc ::IaxPrefs::SavePrefsHook { } {
 
     foreach key $allKeys {
 	set prefs(iaxPhone,$key) $tmpPrefs($key)
-    }
+    }    
+    VerifySanity
     ::Iax::Reload
 }
 
