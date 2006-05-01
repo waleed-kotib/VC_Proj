@@ -9,7 +9,10 @@
 ::msgcat::mcset en Active
 ::msgcat::mcset en Add
 ::msgcat::mcset en Address
+::msgcat::mcset en Admin
+::msgcat::mcset en admin
 ::msgcat::mcset en Advanced
+::msgcat::mcset en Affiliation
 ::msgcat::mcset en Agents
 ::msgcat::mcset en Allow
 ::msgcat::mcset en Appearance
@@ -68,6 +71,7 @@
 ::msgcat::mcset en General
 ::msgcat::mcset en Get
 ::msgcat::mcset en Getting
+::msgcat::mcset en Grant
 ::msgcat::mcset en Group
 ::msgcat::mcset en Groupchat
 ::msgcat::mcset en Handling
@@ -84,8 +88,12 @@
 ::msgcat::mcset en Less
 ::msgcat::mcset en Login
 ::msgcat::mcset en Logout
+::msgcat::mcset en Member
+::msgcat::mcset en member
 ::msgcat::mcset en Message
 ::msgcat::mcset en Middle
+::msgcat::mcset en Moderator
+::msgcat::mcset en moderator
 ::msgcat::mcset en Moderators
 ::msgcat::mcset en More
 ::msgcat::mcset en Name
@@ -104,6 +112,8 @@
 ::msgcat::mcset en Online
 ::msgcat::mcset en Open
 ::msgcat::mcset en Options
+::msgcat::mcset en Owner
+::msgcat::mcset en owner
 ::msgcat::mcset en Participants
 ::msgcat::mcset en Password
 ::msgcat::mcset en Pause
@@ -123,12 +133,15 @@
 ::msgcat::mcset en Quit?
 ::msgcat::mcset en Quote
 ::msgcat::mcset en Reason
+::msgcat::mcset en Refresh
 ::msgcat::mcset en Register
 ::msgcat::mcset en Remaining
 ::msgcat::mcset en Remove
 ::msgcat::mcset en Reply
 ::msgcat::mcset en Resource
 ::msgcat::mcset en Restart
+::msgcat::mcset en Revoke
+::msgcat::mcset en Role
 ::msgcat::mcset en Room
 ::msgcat::mcset en Roster
 ::msgcat::mcset en Save
@@ -170,6 +183,8 @@
 ::msgcat::mcset en Username
 ::msgcat::mcset en Value
 ::msgcat::mcset en Visitors
+::msgcat::mcset en Voice
+::msgcat::mcset en voice
 ::msgcat::mcset en Warning
 ::msgcat::mcset en Welcome
 ::msgcat::mcset en Whiteboard
@@ -509,6 +524,7 @@
 ::msgcat::mcset en {Incoming Message}
 ::msgcat::mcset en {Incoming Messages}
 ::msgcat::mcset en {Incoming Presence}
+::msgcat::mcset en {Info Room}
 ::msgcat::mcset en {Inspect Associations}
 ::msgcat::mcset en {Invite User}
 ::msgcat::mcset en {IP address}
@@ -668,6 +684,19 @@
 ::msgcat::mcset en {Version Info}
 ::msgcat::mcset en {Whiteboard fonts}
 ::msgcat::mcset en {Writing file}
+
+# Rooms.
+::msgcat::mcset en {Kick Participant}
+::msgcat::mcset en {Ban Participant}
+::msgcat::mcset en {Configure Room}
+::msgcat::mcset en {Destroy Room}
+::msgcat::mcset en {Edit Lists}
+::msgcat::mcset en {Edit the privilege to speak in the room, the voice.}
+::msgcat::mcset en {Edit the ban list}
+::msgcat::mcset en {Edit the member list}
+::msgcat::mcset en {Edit the moderator list}
+::msgcat::mcset en {Edit the admin list}
+::msgcat::mcset en {Edit the owner list}
 
 # Time intervals.
 ::msgcat::mcset en {Ten seconds}
@@ -1056,6 +1085,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
 ::msgcat::mcset en jachathist   {Show or hide the chat history}
 
+::msgcat::mcset en {InfoRoomDesc}       {This dialog makes available a number of options and actions for a room. Your role and affiliation determines your privilege to act.\
+Further restrictions may exist depending on specific room configuration.}
 
 # Setup assistant:
 ::msgcat::mcset en suintro1 	{This is a setup assistant to help you fill in the necessary things that is needed for a new or an existing account on a Jabber server.}
@@ -1072,6 +1103,20 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en supubserv	{Get list of public and open Jabber servers}
 ::msgcat::mcset en suservlist	{List of open Jabber servers}
 
+
+# Groupchat:
+::msgcat::mcset en mucErrEnter      {We got an error when entering room "%s".}
+::msgcat::mcset en mucErrCode       {The error code is %s: %s}
+::msgcat::mcset en mucErrEnterTitle {Error Enter Room}
+::msgcat::mcset en mucErrInvite     {Invitation to %s to join room %s failed.}
+::msgcat::mcset en mucErrInviteCode {Error message: %s}
+::msgcat::mcset en mucInviteText    {You have received an invitation from %s to join a groupchat in the room %s.}
+::msgcat::mcset en mucInviteReason  {The reason: %s}
+::msgcat::mcset en mucInvitePass    {The password "%s" is needed for entry.}
+::msgcat::mcset en mucInviteQuest   {Do you want to join right away?}
+::msgcat::mcset en mucInvite        {Invitation}
+::msgcat::mcset en mucDestroy       {You are about to destroy the room "%s". Optionally you may give any present room participants an alternative room jid and a reason.}
+::msgcat::mcset en mucIQError       {We received an error when interaction with the room "%s": %s}
 
 
 ::msgcat::mcset en vcardget	{Getting vCard from user %s. Waiting for server response...}
@@ -1158,3 +1203,5 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en iaxPhoneCodec        {Codec}
 
 # END --------------------------------------------------------------------------
+
+

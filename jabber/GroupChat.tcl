@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.143 2006-04-17 15:08:18 matben Exp $
+# $Id: GroupChat.tcl,v 1.144 2006-05-01 13:35:58 matben Exp $
 
 package require Enter
 package require History
@@ -50,6 +50,8 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*infoDisImage         infoDis          widgetDefault
     option add *GroupChat*printImage           print            widgetDefault
     option add *GroupChat*printDisImage        printDis         widgetDefault
+    option add *GroupChat*whiteboardImage      whiteboard       widgetDefault
+    option add *GroupChat*whiteboardDisImage   whiteboardDis    widgetDefault
 
     option add *GroupChat*tabAlertImage        ktip               widgetDefault    
     option add *GroupChat*tabCloseImage        closebutton        widgetDefault    
@@ -314,6 +316,7 @@ proc ::GroupChat::SetProtocol {roomjid _protocol} {
 	set wtray $dlgstate(wtray)
 	$wtray buttonconfigure invite -state normal
 	$wtray buttonconfigure info   -state normal
+        $wtray buttonconfigure whiteboard   -state normal
 	$chatstate(wbtnick) configure -state normal
     }
 }
@@ -494,12 +497,12 @@ proc ::GroupChat::EnterCallback {jlibName type args} {
     
     array set argsArr $args
     if {[string equal $type "error"]} {
-	set msg "We got an error when entering room \"$argsArr(-from)\"."
+	set msg [mc mucErrEnter $argsArr(-from)]
 	if {[info exists argsArr(-error)]} {
 	    foreach {errcode errmsg} $argsArr(-error) break
-	    append msg " The error code is $errcode: $errmsg"
+	    append msg [mc mucErrCode $errcode $errmsg]
 	}
-	::UI::MessageBox -title "Error Enter Room" -message $msg -icon error
+	::UI::MessageBox -title [mc mucErrEnterTitle] -message $msg -icon error
 	return
     }
     
@@ -735,6 +738,8 @@ proc ::GroupChat::Build {roomjid args} {
     set iconInfoDis     [::Theme::GetImage [option get $w infoDisImage {}]]
     set iconPrint       [::Theme::GetImage [option get $w printImage {}]]
     set iconPrintDis    [::Theme::GetImage [option get $w printDisImage {}]]
+    set iconWB          [::Theme::GetImage [option get $w whiteboardImage {}]]
+    set iconWBDis       [::Theme::GetImage [option get $w whiteboardDisImage {}]]
 
     ::ttoolbar::ttoolbar $wtray
     pack $wtray -side top -fill x
@@ -757,7 +762,10 @@ proc ::GroupChat::Build {roomjid args} {
     $wtray newbutton print -text [mc Print] \
       -image $iconPrint -disabledimage $iconPrintDis   \
       -command [list [namespace current]::Print $dlgtoken]
-    
+    $wtray newbutton whiteboard -text [mc Whiteboard] \
+      -image $iconWB -disabledimage $iconWBDis    \
+      -command [list [namespace current]::Whiteboard $dlgtoken] 
+
     ::hooks::run buildGroupChatButtonTrayHook $wtray $roomjid
     
     set shortBtWidth [expr [$wtray minwidth] + 8]
@@ -780,6 +788,7 @@ proc ::GroupChat::Build {roomjid args} {
     if {!( [info exists protocol($roomjid)] && ($protocol($roomjid) eq "muc") )} {
 	$wtray buttonconfigure invite -state disabled
 	$wtray buttonconfigure info   -state disabled
+        $wtray buttonconfigure whiteboard   -state disabled
     }
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jgc)]]
@@ -1289,7 +1298,7 @@ proc ::GroupChat::SetRoomState {dlgtoken chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    puts "::GroupChat::SetRoomState $dlgtoken $chattoken"
+    ::Debug 2 "::GroupChat::SetRoomState $dlgtoken $chattoken"
     
     if {[winfo exists $dlgstate(wnb)]} {
 	$dlgstate(wnb) tab $chatstate(wpage) -image ""  \
@@ -1311,7 +1320,7 @@ proc ::GroupChat::SetState {chattoken _state} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    puts "::GroupChat::SetState $chattoken $_state"
+    ::Debug 2 "::GroupChat::SetState $chattoken $_state"
     
     set dlgtoken $chatstate(dlgtoken)
     variable $dlgtoken
@@ -1947,7 +1956,7 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
 proc ::GroupChat::CloseCmd {wclose} {
     global  wDlgs
 
-    #puts "::GroupChat::CloseCmd $wclose"
+    ::Debug 2  "::GroupChat::CloseCmd $wclose"
     
     set dlgtoken [GetTokenFrom dlg w $wclose]
     if {$dlgtoken ne ""} {
@@ -2022,7 +2031,7 @@ proc ::GroupChat::ExitAndClose {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    #puts "::GroupChat::ExitAndClose $chattoken"
+    ::Debug 2  "::GroupChat::ExitAndClose $chattoken"
         
     set ans "yes"
     if {[::Jabber::IsConnected]} {
@@ -2078,7 +2087,7 @@ proc ::GroupChat::Exit {chattoken} {
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jstate jstate
 
-    #puts "::GroupChat::Exit $chattoken"
+    ::Debug 2  "::GroupChat::Exit $chattoken"
 
     if {[::Jabber::IsConnected]} {
 	set roomjid $chatstate(roomjid)
@@ -2677,6 +2686,15 @@ proc ::GroupChat::Info {dlgtoken} {
     upvar 0 $chattoken chatstate
     
     ::MUC::BuildInfo $chatstate(roomjid)
+}
+
+proc ::GroupChat::Whiteboard {dlgtoken} {
+
+    set chattoken [GetActiveChatToken $dlgtoken]
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+   ::Jabber::WB::NewWhiteboardTo $chatstate(roomjid)
 }
 
 proc ::GroupChat::Print {dlgtoken} {

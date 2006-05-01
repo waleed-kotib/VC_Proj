@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.75 2006-04-17 15:08:18 matben Exp $
+# $Id: MUC.tcl,v 1.76 2006-05-01 13:35:58 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -98,7 +98,7 @@ namespace eval ::MUC:: {
 # 
 #       Make an invitation to a room.
 
-proc ::MUC::Invite {roomjid} {
+proc ::MUC::Invite {roomjid {continue ""}} {
     global this wDlgs
     
     variable inviteuid
@@ -125,6 +125,7 @@ proc ::MUC::Invite {roomjid} {
 
     set invite(w)        $w
     set invite(reason)   ""
+    set invite(continue) $continue
     set invite(finished) -1
     set invite(roomjid)  $roomjid
 
@@ -223,15 +224,20 @@ proc ::MUC::DoInvite {token} {
     upvar 0 $token invite
     upvar ::Jabber::jstate jstate
 
-    set jid     $invite(jid)
-    set reason  $invite(reason)
-    set roomjid $invite(roomjid)
+    set jid      $invite(jid)
+    set reason   $invite(reason)
+    set roomjid  $invite(roomjid)
+    set continue $invite(continue)
     InviteCloseCmd $token $invite(w)
     
     set opts [list -command [list [namespace current]::InviteCB $token]]
     if {$reason ne ""} {
 	set opts [list -reason $reason]
     }
+    if {$continue ne ""} {
+        lappend opts -continue 1 
+    }
+
     eval {$jstate(jlib) muc invite $roomjid $jid} $opts
     set invite(finished) 1
 }
@@ -243,11 +249,11 @@ proc ::MUC::InviteCB {token jlibname type args} {
     array set argsArr $args
     
     if {$type eq "error"} {
-	set msg "Invitation to $invite(jid) to join room $invite(roomjid) failed."
+	set msg [mc mucErrInvite $invite(jid) $invite(roomjid)]
 	if {[info exists argsArr(-error)]} {
 	    set errcode [lindex $argsArr(-error) 0]
 	    set errmsg [lindex $argsArr(-error) 1]
-	    append msg " " "Error message: $errmsg"
+	    append msg " " [mc mucErrInviteCode $errmsg]
 	}
 	::UI::MessageBox -icon error -title [mc Error] -type ok -message $msg
     }
@@ -290,19 +296,18 @@ proc ::MUC::MUCMessage {jlibname xmlns msgElem args} {
 	}
     }
     
-    if {$invite} {
-	set msg "You have received an invitation from $inviter to join\
-	  a groupchat in the room $from."
+    if {$invite} {        
+	set msg [mc mucInviteText]
 	set opts {}
 	if {[info exists reason]} {
-	    append msg " The reason: $reason"
+	    append msg " " [mc mucInviteReason $reason]
 	}
 	if {[info exists password]} {
-	    append msg " The password \"$password\" is needed for entry."
+	    append msg " " [mc mucInvitePass $password]
 	    lappend opts -password $password
 	}
-	append msg " Do you want to join right away?"
-	set ans [::UI::MessageBox -icon info -type yesno -title "Invitation" \
+	append msg [mc mucInviteQuest]
+	set ans [::UI::MessageBox -icon info -type yesno -title [mc mucInvite] \
 	  -message $msg]
 	if {$ans eq "yes"} {
 	    eval {BuildEnter -roomjid $from} $opts
@@ -378,11 +383,6 @@ proc ::MUC::BuildInfo {roomjid} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
     
-    set msg "This dialog makes available a number of options and actions for a\
-      room. Your role and affiliation determines your privilege to act.\
-      Further restrictions may exist depending on specific room\
-      configuration."
-
     set msg [mc InfoRoomDesc]
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 12} -wraplength 300 -justify left -text $msg
@@ -801,12 +801,12 @@ proc ::MUC::EditListBuild {roomjid type} {
     
     # Customize according to the $type.
     array set editmsg {
-	voice     "Edit the privilege to speak in the room, the voice."
-	ban       "Edit the ban list"
-	member    "Edit the member list"
-	moderator "Edit the moderator list"
-	admin     "Edit the admin list"
-	owner     "Edit the owner list"
+	voice     {Edit the privilege to speak in the room, the voice.}
+	ban       {Edit the ban list}
+	member    {Edit the member list}
+	moderator {Edit the moderator list}
+	admin     {Edit the admin list}
+	owner     {Edit the owner list}
     }
     array set setListDefs {
 	voice     {nick affiliation role jid reason}
@@ -849,7 +849,7 @@ proc ::MUC::EditListBuild {roomjid type} {
     pack $wbox -fill both -expand 1
     
     ttk::label $wbox.msg  \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text $editmsg($type)
+      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc $editmsg($type)]
     pack $wbox.msg -side top -anchor w
     
     #
@@ -1522,9 +1522,7 @@ proc ::MUC::Destroy {roomjid} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
     
-    set msg "You are about to destroy the room \"$roomName\".\
-      Optionally you may give any present room particpants an\
-      alternative room jid and a reason."
+    set msg [mc mucDestroy]
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 300 -justify left -text $msg
     pack $wbox.msg -side top -anchor w
@@ -1606,9 +1604,7 @@ proc ::MUC::IQCallback {roomjid jlibname type subiq} {
     
     if {$type eq "error"} {
     	regexp {^([^@]+)@.*} $roomjid match roomName
-    	set msg "We received an error when interaction with the room\
-    	\"$roomName\": $subiq"
-	::UI::MessageBox -type ok -icon error -title "Error" -message $msg
+	::UI::MessageBox -type ok -icon error -title "Error" -message [mc mucIQError $roomName $subiq]
     }
 }
 
@@ -1622,9 +1618,7 @@ proc ::MUC::PresCallback {roomjid jlibname type args} {
 	    foreach {errcode errmsg} $argsArr(-error) break
 	}	
     	regexp {^([^@]+)@.*} $roomjid match roomName
-    	set msg "We received an error when interaction with the room\
-    	\"$roomName\": $errmsg"
-	::UI::MessageBox -type ok -icon error -title "Error" -message $msg
+	::UI::MessageBox -type ok -icon error -title "Error" -message [mc mucIQError $roomName $errmsg]
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.158 2006-04-11 12:14:58 matben Exp $
+# $Id: Chat.tcl,v 1.159 2006-05-01 13:35:58 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -59,6 +59,8 @@ namespace eval ::Chat:: {
     option add *Chat*printDisImage        printDis              widgetDefault
     option add *Chat*whiteboardImage      whiteboard            widgetDefault
     option add *Chat*whiteboardDisImage   whiteboardDis         widgetDefault
+    option add *Chat*inviteImage          invite                widgetDefault
+    option add *Chat*inviteDisImage       inviteDis             widgetDefault
 
     option add *Chat*notifierImage        notifier              widgetDefault    
     option add *Chat*tabAlertImage        ktip                  widgetDefault    
@@ -715,6 +717,91 @@ proc ::Chat::MakeAndInsertHistory {chattoken} {
     }
 }
 
+# Chat::GetHistory --
+# 
+#       Find any matching history record and return as list.
+
+proc ::Chat::GetHistory {chattoken args} {
+    global  prefs this
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+   
+    ::Debug 2 "::Chat::GetHistory $args"
+    if {![info exists chatstate(historyfile)]} {
+	return
+    }    
+    array set opts {
+        -last      -1
+        -maxage     0
+        -thread     0
+    }
+    array set opts $args
+  
+    # First find any matching history file.
+    set jid2     $chatstate(jid2)
+    set threadID $chatstate(threadid)
+
+    # If chatting with a room member we must use jid3.
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+        set jidH $chatstate(jid)
+    } else {
+        set jidH $jid2
+    }
+
+    array set msg [::History::ReadMessageFromFile $chatstate(historyfile) $jidH]
+    set names [lsort -integer [array names msg]]
+    set keys $names
+
+    # Start with the complete message history and limit using the options.
+    if {$opts(-thread)} {
+
+        # Collect all matching threads.
+        set keys {}
+        foreach i $names {
+            array unset tmp
+            array set tmp $msg($i)
+            if {[info exists tmp(-thread)] && \
+              [string equal $tmp(-thread) $threadID]} {
+                lappend keys $i
+            }
+        }
+    }
+    if {$opts(-last) >= 0} {
+        set keys [lrange $names end-$opts(-last) end]
+    }
+    set now [clock seconds]
+    set maxage $opts(-maxage)
+
+    set result {}
+    foreach i $keys {
+        array unset tmp
+        foreach key {body name tag type thread} {
+            set tmp(-$key) ""
+        }
+        array set tmp $msg($i)
+
+        if {$tmp(-time) ne ""} {
+            set secs [clock scan $tmp(-time)]
+            if {$maxage} {
+                if {[expr {$now - $secs}] > $maxage} {
+                    continue
+                }
+            }
+        } else {
+            set secs ""
+        }
+        if {[string equal $tmp(-name) $jid2]} {
+            set whom you
+        } else {
+            set whom me
+        }
+        set spec [list $whom history]
+
+        lappend result [list -body $tmp(-body) -name $tmp(-name) -secs $secs -spec $spec -whom $whom]
+    }
+    return $result
+}
+
 # Chat::InsertHistory --
 # 
 #       Find any matching history record and insert into dialog.
@@ -734,74 +821,18 @@ proc ::Chat::InsertHistory {chattoken args} {
 	-thread     0
     }
     array set opts $args
-    
+ 
     if {$opts(-last) == 0} {
 	return
     }
-    
-    # First find any matching history file.
-    set jid2     $chatstate(jid2)
     set wtext    $chatstate(wtext)
-    set threadID $chatstate(threadid)
-
-    # If chatting with a room member we must use jid3.
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
-	set jidH $chatstate(jid)	
-    } else {
-	set jidH $jid2	
-    }
-
-    array set msg [::History::ReadMessageFromFile $chatstate(historyfile) $jidH]
-    set names [lsort -integer [array names msg]]
-    set keys $names
-
-    # Start with the complete message history and limit using the options.
-    if {$opts(-thread)} {
-	
-	# Collect all matching threads.	
-	set keys {}
-	foreach i $names {
-	    array unset tmp
-	    array set tmp $msg($i)
-	    if {[info exists tmp(-thread)] && \
-	      [string equal $tmp(-thread) $threadID]} {
-		lappend keys $i
-	    }
-	}
-    }
-    if {$opts(-last) >= 0} {
-	set keys [lrange $names end-$opts(-last) end]
-    }
-    set now [clock seconds]
-    set maxage $opts(-maxage)
-    
     $wtext mark set insert 1.0
 
-    foreach i $keys {
-	array unset tmp
-	foreach key {body name tag type thread} {
-	    set tmp(-$key) ""
-	}
-	array set tmp $msg($i)
-
-	if {$tmp(-time) ne ""} {
-	    set secs [clock scan $tmp(-time)]
-	    if {$maxage} {
-		if {[expr {$now - $secs}] > $maxage} {
-		    continue
-		}
-	    }
-	} else {
-	    set secs ""
-	}
-	if {[string equal $tmp(-name) $jid2]} {
-	    set whom you
-	} else {
-	    set whom me
-	}
-	set spec [list $whom history]
-	InsertMessage $chattoken $spec $tmp(-body) -secs $secs \
-	  -jidfrom $tmp(-name)
+    set result [GetHistory $chattoken -last $opts(-last) -maxage $opts(-maxage)]
+    foreach elem $result {
+        array set arrResult $elem
+        InsertMessage $chattoken $arrResult(-spec) $arrResult(-body) -secs $arrResult(-secs) \
+          -jidfrom $arrResult(-name)
     }
     $wtext mark set insert end
 }
@@ -902,6 +933,8 @@ proc ::Chat::Build {threadID args} {
     set iconPrintDis    [::Theme::GetImage [option get $w printDisImage {}]]
     set iconWB          [::Theme::GetImage [option get $w whiteboardImage {}]]
     set iconWBDis       [::Theme::GetImage [option get $w whiteboardDisImage {}]]
+    set iconInvite      [::Theme::GetImage [option get $w inviteImage {}]]
+    set iconInviteDis   [::Theme::GetImage [option get $w inviteDisImage {}]]
 
     set iconNotifier    [::Theme::GetImage [option get $w notifierImage {}]]
     set dlgstate(iconNotifier) $iconNotifier
@@ -935,10 +968,13 @@ proc ::Chat::Build {threadID args} {
       -text [mc History] -image $iconHistory \
       -disabledimage $iconHistoryDis \
       -command [list [namespace current]::BuildHistory $dlgtoken]
-    $wtray newbutton settings  \
-      -text [mc Settings] -image $iconSettings \
-      -disabledimage $iconSettingsDis \
-      -command [list [namespace current]::Settings $dlgtoken]
+    if {0} {
+	# Too many buttons. Skip this one.
+	$wtray newbutton settings  \
+	  -text [mc Settings] -image $iconSettings \
+	  -disabledimage $iconSettingsDis \
+	  -command [list [namespace current]::Settings $dlgtoken]
+    }
     $wtray newbutton print  \
       -text [mc Print] -image $iconPrint  \
       -disabledimage $iconPrintDis   \
@@ -947,7 +983,11 @@ proc ::Chat::Build {threadID args} {
       -text [mc Whiteboard] -image $iconWB  \
       -disabledimage $iconWBDis   \
       -command [list [namespace current]::Whiteboard $dlgtoken]
-    
+    $wtray newbutton invite \
+      -text [mc Invite] -image $iconInvite \
+      -disabledimage $iconInviteDis  \
+      -command [list [namespace current]::Invite $dlgtoken]
+ 
     ::hooks::run buildChatButtonTrayHook $wtray $dlgtoken
     
     set shortBtWidth [$wtray minwidth]
@@ -988,6 +1028,56 @@ proc ::Chat::Build {threadID args} {
     
     focus $w
     return $dlgtoken
+}
+
+# Chat::Invite --
+#
+#      MUC 6.8. Converting One-to-One Chat Into a Conference 
+#      
+# Arguments:
+#       dlgtoken    topwindow token
+
+proc ::Chat::Invite {dlgtoken} {
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+ 
+    set chattoken [GetActiveChatToken $dlgtoken]
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    #First Create the Room 
+    set timeStamp [clock format [clock seconds] -format %m%j%Y]
+    set myjid [::Jabber::GetMyJid]
+    jlib::splitjidex $myjid node host res 
+
+    set chatservers [$jstate(jlib) disco getconferences]
+    if {0 && $chatservers == {}} {
+        ::UI::MessageBox -icon error -message [mc jamessnogroupchat]
+        return
+    }
+    set server [lindex $chatservers 0]
+    set roomName "$node$timeStamp"
+    set roomjid [jlib::joinjid $roomName $server ""]
+
+    set result [eval {::Create::Build} -nickname $node -server $server -roomname $roomName]
+    if { $result eq "create" } {
+        #Second Send History to MUC
+        set result [GetHistory $chattoken -last $jprefs(chat,histLen) -maxage $jprefs(chat,histAge)]
+        foreach elem $result {
+            array set arrResult $elem
+            set dateISO [clock format $arrResult(-secs) -format "%Y%m%dT%H:%M:%S"]
+            set xelem [wrapper::createtag "x"     \
+               -attrlist [list xmlns jabber:x:delay from $arrResult(-name) stamp $dateISO]]
+           ::Jabber::JlibCmd send_message $roomjid -type groupchat -body $arrResult(-body) -xlist [list $xelem]
+        }
+
+        #Third Invite the second user
+        set opts [list -reason "A por tres" -continue true]
+        eval {$jstate(jlib) muc invite $roomjid $chatstate(fromjid)} $opts
+
+        #Third and Invite the third user
+        ::MUC::Invite $roomjid 1
+    }
 }
 
 # Chat::BuildThreadWidget --

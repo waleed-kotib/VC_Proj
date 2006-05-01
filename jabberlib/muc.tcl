@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.30 2006-04-17 15:08:42 matben Exp $
+# $Id: muc.tcl,v 1.31 2006-05-01 13:35:58 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -263,6 +263,9 @@ proc jlib::muc::invite {jlibname roomjid jid args} {
 	    -reason {
 		lappend children [wrapper::createtag  \
 		  [string trimleft $name "-"] -chdata $value]
+	    }
+	    -continue {
+		lappend children [wrapper::createtag "continue"]
 	    }
 	    default {
 		return -code error "Unrecognized option \"$name\""
