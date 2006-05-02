@@ -6,7 +6,7 @@
 #  
 #  This particular package is BSD licensed. 
 #
-# $Id: can2svg.tcl,v 1.19 2005-01-31 14:06:53 matben Exp $
+# $Id: can2svg.tcl,v 1.20 2006-05-02 06:55:00 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -102,13 +102,15 @@ namespace eval can2svg {
     variable stippleDataArr
     
     set stippleDataArr(gray75)  \
-      {M 0 0 h3 M 0 1 h1 m 1 0 h2 M 0 2 h2 m 1 0 h1 M 0 3 h3}
+      {M 0 0 h3  M 0 1 h1 M 2 1 h2
+       M 0 2 h3  M 0 3 h1 M 2 3 h1}
     set stippleDataArr(gray50)  \
-      {M 0 0 h1 m 1 0 h1 M 1 1 h1 m 1 0 h1 \
-      M 0 2 h1 m 1 0 h1 M 1 3 h1 m 1 0 h1}
+      {M 0 0 h1 M 2 0 h1  M 1 1 h1 M 3 1 h1
+       M 0 2 h1 M 2 2 h1  M 1 3 h1 M 3 3 h1}
     set stippleDataArr(gray25)  \
-      {M 0 0 h1 M 2 1 h1 M 1 2 h1 M 3 3 h1}
-    set stippleDataArr(gray12) {M 0 0 h1 M 2 2 h1}
+      {M 3 0 h1 M 1 1 h1 M 3 2 h1 M 1 3 h1}
+    set stippleDataArr(gray12)  \
+      {M 1 1 h1 M 3 3 h1}
     
 }
 
@@ -222,6 +224,11 @@ proc can2svg::svgasxmllist {cmd args} {
 	set coo [lindex $coo 0]
     }
     array set optArr $opts
+
+    # Is the item in normal state? If not, return.
+    if {[info exists optArr(-state)] && $optArr(-state) != "normal"} {
+      return {}
+    }
     
     # Figure out if we've got a spline.
     set haveSpline 0
@@ -311,12 +318,14 @@ proc can2svg::svgasxmllist {cmd args} {
 	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 	}
 	bitmap - image {
-	    set elem "image"
-	    set attr [eval {MakeImageAttr $coo $opts} $args]
-	    if {[string length $idAttr] > 0} {
-		set attr [concat $attr $idAttr]
+            if {[info exists optArr(-image)]} {
+	        set elem "image"
+	        set attr [eval {MakeImageAttr $coo $opts} $args]
+	        if {[string length $idAttr] > 0} {
+	            set attr [concat $attr $idAttr]
+	        }
+	        lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 	    }
-	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 	}
 	line {
 	    set attr [CoordsToAttr $type $coo $opts elem]	    
@@ -331,7 +340,8 @@ proc can2svg::svgasxmllist {cmd args} {
 	    set attr [CoordsToAttr $type $coo $opts elem]	    
 	    foreach {x y w h} [NormalizeRectCoords $coo] break
 	    if {[expr $w == $h] && !$argsArr(-ovalasellipse)} {
-		set elem "circle"
+		# set elem "circle";# circle needs an r: not an rx & ry
+		set elem "ellipse"
 	    } else {
 		set elem "ellipse"
 	    }
@@ -444,7 +454,7 @@ proc can2svg::svgasxmllist {cmd args} {
 
 # can2svg::CoordsToAttr --
 #
-#       Makes a list of attrbutes corresponding to type and coords.
+#       Makes a list of attributes corresponding to type and coords.
 #       
 # Arguments:
 #
@@ -472,8 +482,11 @@ proc can2svg::CoordsToAttr {type coo opts svgElementVar} {
 	    set attr [list "d" $data]
 	}
 	bitmap - image {
-	    set elem "image"
-	    set attr [ImageCoordsToAttr $coo $opts]
+	    array set __optArr $opts
+            if {[info exists __optArr(-image)]} {
+	        set elem "image"
+	        set attr [ImageCoordsToAttr $coo $opts]
+	    }
 	}
 	line {
 	    if {$haveSpline} {
@@ -772,12 +785,12 @@ proc can2svg::MakeStyleList {type opts args} {
     if {[info exists stippleValue]} {
 	
 	# Overwrite any existing.
-	set styleArr(fill) "url(#tile$stippleValue)"
+	set styleArr(fill) "url(#tile[string trimleft $stippleValue @])"
     }
     if {[info exists outlineStippleValue]} {
 	
 	# Overwrite any existing.
-	set styleArr(stroke) "url(#tile$stippleValue)"
+	set styleArr(stroke) "url(#tile[string trimleft $stippleValue @])"
     }
     
     # Transform dash value.
@@ -996,7 +1009,6 @@ proc can2svg::MakeImageAttr {coo opts args} {
 }
 
 proc can2svg::ImageCoordsToAttr {coo opts} {
-    
     array set optArr {-anchor nw}
     array set optArr $opts
     if {[info exists optArr(-image)]} {
@@ -1336,10 +1348,9 @@ proc can2svg::NormalizeRectCoords {coo} {
 proc can2svg::makedocument {width height xml} {
     
     set pre "<?xml version='1.0'?>\n\
-      <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\"\
-      \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">"
-    
-    set svgStart "<svg width='$width' height='$height'>"
+      <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\
+      \"Graphics/SVG/1.1/DTD/svg11.dtd\">"
+    set svgStart "<svg width='$width' height='$height' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>"
     set svgEnd "</svg>"
     return "${pre}\n${svgStart}\n${xml}${svgEnd}"
 }
