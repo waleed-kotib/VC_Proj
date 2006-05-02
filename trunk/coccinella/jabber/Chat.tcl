@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.159 2006-05-01 13:35:58 matben Exp $
+# $Id: Chat.tcl,v 1.160 2006-05-02 12:46:59 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -146,6 +146,20 @@ namespace eval ::Chat:: {
 
     # Bindtags instead of binding to toplevel.
     bind ChatToplevel <Destroy> {+::Chat::OnDestroyToplevel %W}
+
+    variable chatStateMap 
+    array set chatStateMap {
+        active,lostfocus     inactive
+        active,close         gone
+        active,typing        composing
+        inactive,focus       active
+        inactive,typing      composing
+        inactive,close       gone
+        inactive,send        active
+        composing,lostfocus  inactive
+        composing,close      gone
+        composing,send       active
+    }
 }
 
 # Chat::OnToolButton --
@@ -373,6 +387,11 @@ proc ::Chat::StartThread {jid args} {
 	
 	variable $chattoken
 	upvar 0 $chattoken chatstate
+
+        if { ![info exists chatstate(chatstate)]} {
+            set chatstate(havecs) first
+            set chatstate(chatstate) active
+        }
     }
   
     # Since we initated this thread need to set recipient to jid2 unless room.
@@ -475,6 +494,9 @@ proc ::Chat::GotMsg {body args} {
 	    set chattoken [eval {NewChat $threadID $jid} $args]
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
+
+            #First ChatState is active
+            set chatstate(chatstate) active
 	    
 	    eval {::hooks::run newChatThreadHook $body} $args
 	}
@@ -493,18 +515,61 @@ proc ::Chat::GotMsg {body args} {
     
     set w $dlgstate(w)
 
+    # Check for ChatState (JEP-0085) support
+    set msgChatState ""
+    if {[info exists argsArr(-active)]} {
+        set chatstate(havecs) true
+        set msgChatState active
+    } elseif {[info exists argsArr(-composing)]} {
+        set chatstate(havecs) true
+        set msgChatState composing
+    } elseif {[info exists argsArr(-paused)]} {
+        set chatstate(havecs) true
+        set msgChatState paused
+    } elseif {[info exists argsArr(-inactive)]} {
+        set chatstate(havecs) true
+        set msgChatState inactive
+    } elseif {[info exists argsArr(-gone)]} {
+        set chatstate(havecs) true
+        set msgChatState gone
+    } else {
+        if { $chatstate(havecs) ne "true" } {
+            set chatstate(havecs) false 
+        }
+    }
+
+    if {$chatstate(havecs) eq "true"} {
+        if { $msgChatState ne "" } {
+            jlib::splitjid $chatstate(jid) jid2 res
+            set name [::Jabber::RosterCmd getname $jid2]
+            if {$name eq ""} {
+                if {[::Jabber::JlibCmd service isroom $jid2]} {
+                    set name [::Jabber::JlibCmd service nick $chatstate(jid)]
+                } else {
+                    set name $chatstate(displayname)
+                }
+            }
+            $chatstate(wnotifier) configure -image $dlgstate(iconNotifier)
+            set notifyString "chatcomp$msgChatState"
+            set chatstate(notifier) " [mc $notifyString $name]"
+        }
+    } 
+
     set opts {}
     if {[info exists argsArr(-x)]} {
-	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
-	if {$tm ne ""} {
-	    set secs [clock scan $tm -gmt 1]
-	    lappend opts -secs $secs
-	}
+        set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
+        if {$tm ne ""} {
+           set secs [clock scan $tm -gmt 1]
+           lappend opts -secs $secs
+        }
 
-	# See if we've got a jabber:x:event (JEP-0022).
-	# 
-	# @@@ Should we handle this with hooks?
-	eval {XEventHandleAnyXElem $chattoken $argsArr(-x)} $args
+        # If doesn't come a ChatState event (JEP-0085).
+        # See if we've got a jabber:x:event (JEP-0022).
+        # 
+        # @@@ Should we handle this with hooks?
+        if {$chatstate(havecs) eq "true"} {
+            eval {XEventHandleAnyXElem $chattoken $argsArr(-x)} $args
+        }
     }
 
     if {[info exists argsArr(-subject)]} {
@@ -1030,13 +1095,13 @@ proc ::Chat::Build {threadID args} {
     return $dlgtoken
 }
 
+
 # Chat::Invite --
 #
 #      MUC 6.8. Converting One-to-One Chat Into a Conference 
 #      
 # Arguments:
 #       dlgtoken    topwindow token
-
 proc ::Chat::Invite {dlgtoken} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
@@ -1367,9 +1432,18 @@ proc ::Chat::DnDLeave {chattoken win data dndtype} {
 }
 
 proc ::Chat::OnDestroyThread {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
     Debug 4 "::Chat::OnDestroyThread chattoken=$chattoken"
     # For some strange reason [info vars ..] seem to find nonexisting variables.
+
+    #Trigger Close chatstate
+    if {$chatstate(havecs) eq "true"} {
+        ChangeChatState $chattoken close
+        SendChatState $chattoken $chatstate(chatstate)
+    }
+
     unset $chattoken
     array unset $chattoken    
 }
@@ -1641,6 +1715,20 @@ proc ::Chat::TabChanged {dlgtoken} {
 
     set chatstate(nhiddenmsgs) 0
 
+    #Trigger Focus chatstate
+    if {$chatstate(havecs) eq "true"} {
+        set chattokens $dlgstate(chattokens)
+        foreach ichattoken $chattokens {
+            if { $ichattoken eq $chattoken } {
+                ChangeChatState $ichattoken focus
+            } else {
+                ChangeChatState $ichattoken lostfocus
+            }
+            upvar 0 $ichattoken ichatstate
+            SendChatState $ichattoken $ichatstate(chatstate)
+        }
+    }
+
     SetThreadState $dlgtoken $chattoken
     SetFocus $dlgtoken $chattoken
     
@@ -1750,6 +1838,7 @@ proc ::Chat::SetFocus {dlgtoken chattoken} {
     if {[string equal $this(platform) "macosx"]} {
 	update idletasks
     }
+
     focus $wfocus
 }
 
@@ -2165,7 +2254,23 @@ proc ::Chat::Send {dlgtoken} {
 	  [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
 	  -subtags [list [wrapper::createtag "composing"]]]]
     }
-    
+
+
+    #-- The <active ...> tag is only sended in the first message, 
+    #-- for next messages we have to check if the contact has reply to us with the same active tag
+    #-- this check is done with chatstate(havecs) but we need to send for first anyway
+    set cselems {}
+    if { ($chatstate(havecs) eq "first") || ($chatstate(havecs) eq "true") } {
+        #-- The cselems is sended for first and then wait for a right reply 
+        if {$chatstate(havecs) eq "first"} {
+            set chatstate(havecs) false
+        }
+        ChangeChatState $chattoken send
+        set csxmlns "http://jabber.org/protocol/chatstates"
+        lappend cselems [wrapper::createtag $chatstate(chatstate) -attrlist [list xmlns $csxmlns]]
+        lappend opts -xlist $cselems
+    }
+
     eval {::Jabber::JlibCmd send_message $jid  \
       -thread $threadID -type chat -body $allText} $opts
 
@@ -2505,6 +2610,7 @@ proc ::Chat::Close {dlgtoken} {
 	if {$closetoplevel} {
 	    ::UI::SaveWinGeom $wDlgs(jchat) $dlgstate(w)
 	    foreach chattoken $chattokens {
+                #Send CancelCompose jabber:x:event
 		XEventSendCancelCompose $chattoken
 	    }
 	    destroy $dlgstate(w)
@@ -2652,7 +2758,7 @@ proc ::Chat::KeyPressEvent {chattoken char} {
     upvar ::Jabber::jstate jstate
 
     ::Debug 6 "::Chat::KeyPressEvent chattoken=$chattoken, char=$char"
-    
+   
     if {$char eq ""} {
 	return
     }
@@ -2671,6 +2777,13 @@ proc ::Chat::KeyPressEvent {chattoken char} {
     if {$chatstate(xevent,status) eq "composing"} {
 	set chatstate(xevent,afterid) [after $cprefs(xeventsmillis) \
 	  [list [namespace current]::XEventSendCancelCompose $chattoken]]
+    }
+
+    #Sending keypress for ChatState
+    if { ($chatstate(havecs) eq "true") && ($chatstate(chatstate) ne "composing")} {
+        #Trigger Close chatstate
+        ChangeChatState $chattoken typing
+        SendChatState $chattoken $chatstate(chatstate)
     }
 }
 
@@ -2697,7 +2810,7 @@ proc ::Chat::XEventSendCompose {chattoken} {
       -subtags [list  \
       [wrapper::createtag "composing"] \
       [wrapper::createtag "id" -chdata $id]]]]
-    
+
     eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
 }
 
@@ -2740,7 +2853,7 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
     set xelems [list \
       [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
       -subtags [list [wrapper::createtag "id" -chdata $id]]]]
-    
+
     eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
 }
 
@@ -2892,6 +3005,31 @@ proc ::Chat::DestroyPrefsHook { } {
     variable tmpJPrefs
     
     unset -nocomplain tmpJPrefs
+}
+
+#-------------------------------------------------------------------------------
+# Support for JEP-0085 ChatState ...............................................
+
+proc ::Chat::ChangeChatState {chattoken trigger} {
+    upvar 0 $chattoken chatstate
+
+    variable chatStateMap
+    set actualState $chatstate(chatstate)
+
+    if {[info exists chatStateMap($actualState,$trigger)]} {
+        set chatstate(chatstate) $chatStateMap($actualState,$trigger)
+    }
+}
+
+proc ::Chat::SendChatState {chattoken state} {
+    upvar 0 $chattoken chatstate
+
+    set csxmlns "http://jabber.org/protocol/chatstates"
+    set cselems [list  \
+      [wrapper::createtag $state -attrlist [list xmlns $csxmlns]]]
+
+    eval {::Jabber::JlibCmd send_message $chatstate(jid)  \
+      -thread $chatstate(threadid) -type chat -xlist $cselems}
 }
 
 #-------------------------------------------------------------------------------
