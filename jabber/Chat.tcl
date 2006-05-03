@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.160 2006-05-02 12:46:59 matben Exp $
+# $Id: Chat.tcl,v 1.161 2006-05-03 13:11:36 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -387,11 +387,6 @@ proc ::Chat::StartThread {jid args} {
 	
 	variable $chattoken
 	upvar 0 $chattoken chatstate
-
-        if { ![info exists chatstate(chatstate)]} {
-            set chatstate(havecs) first
-            set chatstate(chatstate) active
-        }
     }
   
     # Since we initated this thread need to set recipient to jid2 unless room.
@@ -1095,56 +1090,6 @@ proc ::Chat::Build {threadID args} {
     return $dlgtoken
 }
 
-
-# Chat::Invite --
-#
-#      MUC 6.8. Converting One-to-One Chat Into a Conference 
-#      
-# Arguments:
-#       dlgtoken    topwindow token
-proc ::Chat::Invite {dlgtoken} {
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
- 
-    set chattoken [GetActiveChatToken $dlgtoken]
-    variable $chattoken
-    upvar 0 $chattoken chatstate
-
-    #First Create the Room 
-    set timeStamp [clock format [clock seconds] -format %m%j%Y]
-    set myjid [::Jabber::GetMyJid]
-    jlib::splitjidex $myjid node host res 
-
-    set chatservers [$jstate(jlib) disco getconferences]
-    if {0 && $chatservers == {}} {
-        ::UI::MessageBox -icon error -message [mc jamessnogroupchat]
-        return
-    }
-    set server [lindex $chatservers 0]
-    set roomName "$node$timeStamp"
-    set roomjid [jlib::joinjid $roomName $server ""]
-
-    set result [eval {::Create::Build} -nickname $node -server $server -roomname $roomName]
-    if { $result eq "create" } {
-        #Second Send History to MUC
-        set result [GetHistory $chattoken -last $jprefs(chat,histLen) -maxage $jprefs(chat,histAge)]
-        foreach elem $result {
-            array set arrResult $elem
-            set dateISO [clock format $arrResult(-secs) -format "%Y%m%dT%H:%M:%S"]
-            set xelem [wrapper::createtag "x"     \
-               -attrlist [list xmlns jabber:x:delay from $arrResult(-name) stamp $dateISO]]
-           ::Jabber::JlibCmd send_message $roomjid -type groupchat -body $arrResult(-body) -xlist [list $xelem]
-        }
-
-        #Third Invite the second user
-        set opts [list -reason "A por tres" -continue true]
-        eval {$jstate(jlib) muc invite $roomjid $chatstate(fromjid)} $opts
-
-        #Third and Invite the third user
-        ::MUC::Invite $roomjid 1
-    }
-}
-
 # Chat::BuildThreadWidget --
 # 
 #       Builds page with all thread specific ui parts.
@@ -1209,6 +1154,10 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(xevent,msgidlist) ""
     set chatstate(xevent,type)      chat
     set chatstate(nhiddenmsgs)      0
+
+    set chatstate(havecs)           first
+    set chatstate(chatstate)        active
+
     if {[info exists argsArr(-subject)]} {
 	set chatstate(subject) $argsArr(-subject)
     }
@@ -1950,6 +1899,57 @@ proc ::Chat::LogoutHook { } {
     }
     SaveDialogs
     return
+}
+
+# Chat::Invite --
+#
+#      MUC 6.8. Converting One-to-One Chat Into a Conference 
+#      
+# Arguments:
+#       dlgtoken    topwindow token
+
+proc ::Chat::Invite {dlgtoken} {
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+ 
+    set chattoken [GetActiveChatToken $dlgtoken]
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    # First Create the Room 
+    set timeStamp [clock format [clock seconds] -format %m%j%Y]
+    set myjid [::Jabber::GetMyJid]
+    jlib::splitjidex $myjid node host res 
+
+    set chatservers [$jstate(jlib) disco getconferences]
+    if {0 && $chatservers == {}} {
+	::UI::MessageBox -icon error -message [mc jamessnogroupchat]
+	return
+    }
+    set server [lindex $chatservers 0]
+    set roomName "$node$timeStamp"
+    set roomjid [jlib::joinjid $roomName $server ""]
+
+    set result [eval {::Create::Build} -nickname $node -server $server -roomname $roomName]
+    if { $result eq "create" } {
+	
+	# Second Send History to MUC
+	set result [GetHistory $chattoken -last $jprefs(chat,histLen) -maxage $jprefs(chat,histAge)]
+	foreach elem $result {
+	    array set arrResult $elem
+	    set dateISO [clock format $arrResult(-secs) -format "%Y%m%dT%H:%M:%S"]
+	    set xelem [wrapper::createtag "x"     \
+	       -attrlist [list xmlns jabber:x:delay from $arrResult(-name) stamp $dateISO]]
+	   ::Jabber::JlibCmd send_message $roomjid -type groupchat -body $arrResult(-body) -xlist [list $xelem]
+	}
+
+	# Third Invite the second user
+	set opts [list -reason "A por tres" -continue true]
+	eval {$jstate(jlib) muc invite $roomjid $chatstate(fromjid)} $opts
+
+	# Third and Invite the third user
+	::MUC::Invite $roomjid 1
+    }
 }
 
 proc ::Chat::QuitHook { } {
