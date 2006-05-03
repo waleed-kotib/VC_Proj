@@ -1253,10 +1253,9 @@ namespace eval ::EditShortcuts:: {
 
 # END --------------------------------------------------------------------------
 ::msgcat::mcset es {Info Room} 		{Información Sala}
-::msgcat::mcset es {InfoRoomDesc}       {This dialog makes available a number of options and actions for a\
-      room. Your role and affiliation determines your privilege to act.\
-      Further restrictions may exist depending on specific room\
-      configuration.}
+::msgcat::mcset es {InfoRoomDesc}       {En esta ventana puede cambiar las opciones así como administrar la sala\
+      Su perfil y afiliación determina los privilegios con los que puede actuar\
+      Las distintas restricciones dependerán de la configuración de la sala.}
 ::msgcat::mcset es Role			{Rol}
 ::msgcat::mcset es Affiliation		{Afiliación}
 ::msgcat::mcset es {Kick Participant}	{Echar al participante}
@@ -1277,3 +1276,32 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es moderator            {moderador}
 ::msgcat::mcset es admin                {administrador}
 ::msgcat::mcset es owner                {propietario}
+
+::msgcat::mcset es {Edit the privilege to speak in the room, the voice.} {Editar el privilegio para hablar en la sala, la voz.}
+::msgcat::mcset es {Edit the ban list}        {Editar la lista de miembros expulsados}
+::msgcat::mcset es {Edit the member list}     {Editar la lista de miembros}
+::msgcat::mcset es {Edit the moderator list}  {Editar la lista de moderadores}
+::msgcat::mcset es {Edit the admin list}      {Editar la lista de administradores}
+::msgcat::mcset es {Edit the owner list}      {Editar la lista de propietarios}
+
+::msgcat::mcset es mucErrEnter      {Se ha recibido un error al entrar en la sala \"%s\".}
+::msgcat::mcset es mucErrCode       {El código de error es %s: %s}
+::msgcat::mcset es mucErrEnterTitle {Error al entrar en la sala}
+::msgcat::mcset es mucErrInvite     {La invitación a %s para entrar a la sala  %s ha fallado.}
+::msgcat::mcset es mucErrInviteCode {Mensaje de error: %s}
+::msgcat::mcset es mucInviteText    {Ha recibido una invidación de %s para entrar \
+          a la sala %s.}
+::msgcat::mcset es mucInviteReason  {El motivo: %s}
+::msgcat::mcset es mucInvitePass    {La contraseña  para entrar es \"%s\".}
+::msgcat::mcset es mucInviteQuest   {Esta seguro de querer entrar?}
+::msgcat::mcset es mucInvite        {Invitación}
+::msgcat::mcset es mucDestroy       {Está apunto de eliminar la sala \"%s\".\
+      Opcionalmente puede dar a los participantes una sala alternativa y un motivo.}
+::msgcat::mcset es mucIQError       {Se ha recibido un error al interactuar con la sala \
+        \"%s\": %s}
+
+::msgcat::mcset es chatcompactive     {%s tiene la conversación abierta}
+::msgcat::mcset es chatcompcomposing  {%s le está respondiendo}
+::msgcat::mcset es chatcomppaused     {%s está pensando lo que escribe}
+::msgcat::mcset es chatcompinactive   {%s abandonó temporalmente la conversación}
+::msgcat::mcset es chatcompgone       {%s ha cerrado la conversación}
