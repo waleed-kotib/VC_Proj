@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.25 2006-04-18 09:32:05 matben Exp $
+# $Id: Sounds.tcl,v 1.26 2006-05-03 13:10:43 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -53,6 +53,7 @@ proc ::Sounds::Load { } {
     set priv(canPlay)      0
     set priv(QuickTimeTcl) 0
     set priv(snack)        0
+    set priv(inited)       0
 
     switch -- $this(platform) {
 	macosx - macintosh - windows {
@@ -102,6 +103,8 @@ proc ::Sounds::InitHook { } {
     
     ::Debug 2 "::Sounds::InitHook"
     
+    # We do this after a delay to avoid locking the UI.
+    # Be sure to force an Init if needed before this.
     after 200 ::Sounds::Init
 }
 
@@ -121,6 +124,10 @@ proc ::Sounds::Init { } {
     variable sprefs
 	
     ::Debug 2 "::Sounds::Init"
+
+    if {$priv(inited)} {
+	return
+    }
     
     # Create all sounds from current sound set (which is "" as default).
     if {$priv(canPlay)} {
@@ -131,6 +138,7 @@ proc ::Sounds::Init { } {
 	}
 	LoadSoundSet $sprefs(soundSet)
     }
+    set priv(inited) 1
 }
 
 proc ::Sounds::LoadSoundSet {soundSet} {
@@ -214,6 +222,10 @@ proc ::Sounds::Play {snd} {
     variable soundIndex
     variable wqtframe
 
+    if {!$priv(inited)} {
+	Init
+    }
+    
     # Check the jabber prefs if sound should be played.
     if {[info exists sprefs($snd)] && !$sprefs($snd)} {
 	return
