@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.161 2006-05-03 13:11:36 matben Exp $
+# $Id: Chat.tcl,v 1.162 2006-05-04 12:46:39 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1944,7 +1944,7 @@ proc ::Chat::Invite {dlgtoken} {
 	}
 
 	# Third Invite the second user
-	set opts [list -reason "A por tres" -continue true]
+	set opts [list -reason [mc mucChat2ConfInv] -continue true]
 	eval {$jstate(jlib) muc invite $roomjid $chatstate(fromjid)} $opts
 
 	# Third and Invite the third user
