@@ -404,6 +404,9 @@
 #::msgcat::mcset es mTimeCode            {Timecode}
 ::msgcat::mcset es mUserInfo            {Informacion del usuario}
 ::msgcat::mcset es mEditBookmarks       {Editar favoritos}
+::msgcat::mcset es mToolbar		{Barra de herramientas}
+::msgcat::mcset es mNotebook		{Pestañas}
+::msgcat::mcset es mMinimal		{Reducido}
 
 # Popups.
 ::msgcat::mcset es mMessage     	{Mensaje...}
@@ -528,6 +531,9 @@
 ::msgcat::mcset es {Is conectad}		{Conectado}
 ::msgcat::mcset es {Is safe}			{Seguro}
 ::msgcat::mcset es {Is server up}		{Conectado}
+::msgcat::mcset es {Item Inspector}             {Inspector de Propiedades}
+::msgcat::mcset es {Item Options}  	        {Propiedades del elemento}
+::msgcat::mcset es {Item type}		        {Tipo de elemento}
 ::msgcat::mcset es {Jabber address}		{Dirección Jabber}
 ::msgcat::mcset es {Jabber Client}		{Cliente Jabber}
 ::msgcat::mcset es {Jabber Server}		{Servidor Jabber}
@@ -1113,21 +1119,18 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es suservlist {Lista de Servidores Jabber}
 
 # Groupchat:
-::msgcat::mcset es mucErrEnter      {Se ha recibido un error al entrar en la sala \"%s\".}
+::msgcat::mcset es mucErrEnter      {Se ha recibido un error al entrar en la sala "%s".}
 ::msgcat::mcset es mucErrCode       {El código de error es %s: %s}
 ::msgcat::mcset es mucErrEnterTitle {Error al entrar en la sala}
 ::msgcat::mcset es mucErrInvite     {La invitación a %s para entrar a la sala  %s ha fallado.}
 ::msgcat::mcset es mucErrInviteCode {Mensaje de error: %s}
-::msgcat::mcset es mucInviteText    {Ha recibido una invidación de %s para entrar \
-          a la sala %s.}
+::msgcat::mcset es mucInviteText    {Ha recibido una invidación de %s para entrar a la sala %s.}
 ::msgcat::mcset es mucInviteReason  {El motivo: %s}
-::msgcat::mcset es mucInvitePass    {La contraseña  para entrar es \"%s\".}
+::msgcat::mcset es mucInvitePass    {La contraseña  para entrar es "%s".}
 ::msgcat::mcset es mucInviteQuest   {Esta seguro de querer entrar?}
 ::msgcat::mcset es mucInvite        {Invitación}
-::msgcat::mcset es mucDestroy       {Está apunto de eliminar la sala \"%s\".\
-      Opcionalmente puede dar a los participantes una sala alternativa y un motivo.}
-::msgcat::mcset es mucIQError       {Se ha recibido un error al interactuar con la sala \
-        \"%s\": %s}
+::msgcat::mcset es mucDestroy       {Está apunto de eliminar la sala "%s". Opcionalmente puede dar a los participantes una sala alternativa y un motivo.}
+::msgcat::mcset es mucIQError       {Se ha recibido un error al interactuar con la sala "%s": %s}
 ::msgcat::mcset es mucChat2ConfInv  {Convirtiendo Chat en Conferencia}
 
 ::msgcat::mcset es vcardget	{Cargando de la tarjeta del usuario %s.. Esperando de la respuesta del servidor...}
@@ -1218,9 +1221,6 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es iaxPhoneComfort      {Comfort}
 ::msgcat::mcset es iaxPhoneCodec        {Codec}
 
-::msgcat::mcset es mToolbar		{Barra de herramientas}
-::msgcat::mcset es mNotebook		{Pestañas}
-::msgcat::mcset es mMinimal		{Reducido}
 ::msgcat::mcset es {Devices}		{Dispositivos}
 ::msgcat::mcset es {Filters}		{Filtros}
 ::msgcat::mcset es {Codecs}		{Codecs}
@@ -1246,9 +1246,6 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es {>>Import>>}		{>>Importar>>}
 ::msgcat::mcset es {Standard}		{Estandar}
 
-::msgcat::mcset es {Item Inspector}     {Inspector de Propiedades}
-::msgcat::mcset es {Item Options}	{Propiedades del elemento}
-::msgcat::mcset es {Item type}		{Tipo de elemento}
 ::msgcat::mcset es {Movie Options}	{Opciones de la película}
 ::msgcat::mcset es {Broken Image}	{Imagen rota}
 
