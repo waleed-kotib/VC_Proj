@@ -38,6 +38,7 @@
 ::msgcat::mcset en Clear
 ::msgcat::mcset en Client
 ::msgcat::mcset en Close
+::msgcat::mcset en Codecs
 ::msgcat::mcset en Conference
 ::msgcat::mcset en Connect
 ::msgcat::mcset en Connection
@@ -53,6 +54,7 @@
 ::msgcat::mcset en Deny
 ::msgcat::mcset en Department
 ::msgcat::mcset en Description
+::msgcat::mcset en Devices
 ::msgcat::mcset en Drawing
 ::msgcat::mcset en Document
 ::msgcat::mcset en Done
@@ -62,6 +64,8 @@
 ::msgcat::mcset en Error
 ::msgcat::mcset en Exit
 ::msgcat::mcset en File
+::msgcat::mcset en Filter
+::msgcat::mcset en Filters
 ::msgcat::mcset en Finish
 ::msgcat::mcset en Finished
 ::msgcat::mcset en First
@@ -140,6 +144,7 @@
 ::msgcat::mcset en Reply
 ::msgcat::mcset en Resource
 ::msgcat::mcset en Restart
+::msgcat::mcset en Rosticons
 ::msgcat::mcset en Revoke
 ::msgcat::mcset en Role
 ::msgcat::mcset en Room
@@ -1117,7 +1122,7 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en mucInvite        {Invitation}
 ::msgcat::mcset en mucDestroy       {You are about to destroy the room "%s". Optionally you may give any present room participants an alternative room jid and a reason.}
 ::msgcat::mcset en mucIQError       {We received an error when interaction with the room "%s": %s}
-
+::msgcat::mcset en mucChat2ConfInv  {Converting Chat into Conference}
 
 ::msgcat::mcset en vcardget	{Getting vCard from user %s. Waiting for server response...}
 ::msgcat::mcset en vcarderrget	{Failed getting the vCard. The result was: %s}
