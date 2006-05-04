@@ -1127,7 +1127,15 @@ Further restrictions may exist depending on specific room configuration.}
 
 ::msgcat::mcset en autoupdatenot        {Do not automatically check for updates}
 ::msgcat::mcset en oobmsg               {Let user %s download a file from your built in server. The description is optional.}
-::msgcat::mcset en chatcompreply        {%s is composing a reply}
+
+# Composing events
+::msgcat::mcset en chatcompreply      {%s is composing a reply}
+::msgcat::mcset en chatcompactive     {%s is on the chat}
+::msgcat::mcset en chatcompcomposing  {%s is composing a reply}
+::msgcat::mcset en chatcomppaused     {%s is thinking what to write}
+::msgcat::mcset en chatcompinactive   {%s has left the chat for a while}
+::msgcat::mcset en chatcompgone       {%s has closed the chat}
+
 
 # Get file
 ::msgcat::mcset en getcontacting   {Contacting %s. Waiting for response...}
