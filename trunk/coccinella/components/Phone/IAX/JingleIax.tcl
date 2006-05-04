@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.23 2006-04-29 14:07:37 matben Exp $
+# $Id: JingleIax.tcl,v 1.24 2006-05-04 12:37:13 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -422,6 +422,10 @@ proc ::JingleIAX::PresenceHook {jid type args} {
 
     # Beware! jid without resource!
     Debug "::JingleIAX::PresenceHook jid=$jid, type=$type"
+    
+    if {$type ne "available"} {
+	return
+    }
 
     array set aargs $args
     set from $aargs(-from)
