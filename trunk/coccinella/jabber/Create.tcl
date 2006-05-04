@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: Create.tcl,v 1.1 2006-04-08 07:02:48 matben Exp $
+# $Id: Create.tcl,v 1.2 2006-05-04 12:50:15 matben Exp $
 
 package provide Create 1.0
 
@@ -19,7 +19,7 @@ namespace eval ::Create:: {
 #       Initiates the process of creating a room.
 #       
 # Arguments:
-#       args    -server, -roomname
+#       args    -server, -roomname, -nickname
 #       
 # Results:
 #       "cancel" or "create".
@@ -56,9 +56,15 @@ proc ::Create::Build {args} {
 	roomname    ""
 	nickname    ""
     }
+    if {[info exists argsArr(-roomname)]} {
+	set state(roomname) $argsArr(-roomname)
+    }
+    if {[info exists argsArr(-nickname)]} {
+	set state(nickname) $argsArr(-nickname)
+    }
     set state(w)              $w
     set state(wraplength)     300
-    
+        
     set confServers [$jstate(jlib) disco getconferences]
     if {$confServers eq {}} {
 	set serviceList [list [mc {No Available}]]
