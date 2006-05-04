@@ -1120,7 +1120,7 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en mucInvitePass    {The password "%s" is needed for entry.}
 ::msgcat::mcset en mucInviteQuest   {Do you want to join right away?}
 ::msgcat::mcset en mucInvite        {Invitation}
-::msgcat::mcset en mucDestroy       {You are about to destroy the room "%s". Optionally you may give any present room participants an alternative room jid and a reason.}
+::msgcat::mcset en mucDestroy       {You are about to destroy the room "%s". Optionally you may give any present room participants an alternative room JID and a reason.}
 ::msgcat::mcset en mucIQError       {We received an error when interaction with the room "%s": %s}
 ::msgcat::mcset en mucChat2ConfInv  {Converting Chat into Conference}
 
