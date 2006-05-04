@@ -10,25 +10,30 @@
 # La cana fuente se usa como mensaje.
 
 ::msgcat::mcset es Accept		{Aceptar}
-#::msgcat::mcset es Action {}
-#::msgcat::mcset es Active {}
+::msgcat::mcset es Action 		{Acción}
+::msgcat::mcset es Active 		{Activo}
 ::msgcat::mcset es Add			{Añadir}
 ::msgcat::mcset es Address		{Dirección}
+::msgcat::mcset es Admin                {Administrador}
+::msgcat::mcset es admin                {administrador}
 ::msgcat::mcset es Advanced		{Avanzado}
+::msgcat::mcset es Affiliation          {Afiliación}
 ::msgcat::mcset es Agents		{Agentes}
-#::msgcat::mcset es Allow {}
+::msgcat::mcset es Allow 		{Permitir}
 ::msgcat::mcset es Appearance           {Apariencia}
 ::msgcat::mcset es Apply		{Aplicar}
 ::msgcat::mcset es Available		{Disponible}
 ::msgcat::mcset es Away			{Alejado}
 ::msgcat::mcset es Binary		{Binario}
 ::msgcat::mcset es Birthday		{Cumpleaños}
-#::msgcat::mcset es Block {}
+::msgcat::mcset es Block 		{Bloquear}
 ::msgcat::mcset es Blockers		{Bloqueadores}
 ::msgcat::mcset es Blocking		{Bloqueando}
 ::msgcat::mcset es Browser		{Navigador}
-# ::msgcat::mcset es Bookmark
-# ::msgcat::mcset es Bookmarks
+#Descomentado
+::msgcat::mcset es Bookmark		{Favorito}
+::msgcat::mcset es Bookmarks		{Favoritos}
+#Descomentado
 ::msgcat::mcset es Both			{Ambos}
 ::msgcat::mcset es Buffering		{Buffer}
 ::msgcat::mcset es Cancel		{Cancelar}
@@ -37,8 +42,9 @@
 ::msgcat::mcset es Choose		{Elegir}
 ::msgcat::mcset es City			{Ciudad}
 ::msgcat::mcset es Clear		{Limpiar}
-#::msgcat::mcset es Client
+::msgcat::mcset es Client               {Cliente}
 ::msgcat::mcset es Close		{Cerrar}
+::msgcat::mcset es Codecs		{Codecs}
 ::msgcat::mcset es Conference		{Conferencia}
 ::msgcat::mcset es Connect		{Conectarse}
 ::msgcat::mcset es Connection		{Conexión}
@@ -53,6 +59,7 @@
 ::msgcat::mcset es Deny			{Denegar}
 ::msgcat::mcset es Department		{Departamento}
 ::msgcat::mcset es Description		{Descripción}
+::msgcat::mcset es Devices		{Dispositivos}
 ::msgcat::mcset es Drawing		{Dibujo}
 ::msgcat::mcset es Document		{Documento}
 ::msgcat::mcset es Done			{Hecho}
@@ -61,6 +68,8 @@
 ::msgcat::mcset es Error		{Error}
 ::msgcat::mcset es Exit			{Salir}
 ::msgcat::mcset es File			{Archivo}
+::msgcat::mcset es Filter		{Filtro}
+::msgcat::mcset es Filters		{Filtros}
 ::msgcat::mcset es Finish		{Terminar}
 ::msgcat::mcset es Finished		{Terminado}
 ::msgcat::mcset es First		{Primero}
@@ -70,46 +79,51 @@
 ::msgcat::mcset es General		{General}
 ::msgcat::mcset es Get			{Recibir}
 ::msgcat::mcset es Getting		{Recibiendo}
+::msgcat::mcset es Grant                {Dar permisos}
 ::msgcat::mcset es Group		{Grupo}
 ::msgcat::mcset es Groupchat            {Grupo de chat}
 ::msgcat::mcset es Handling		{Ergonomia}
-#Descomentado
 ::msgcat::mcset es Height 		{Altura}
-#Descomentado
 ::msgcat::mcset es History		{Historial}
 ::msgcat::mcset es Home			{Inicio}
-#::msgcat::mcset es Image {}
+::msgcat::mcset es Image 		{Imagen}
 ::msgcat::mcset es Import		{Importar}
 ::msgcat::mcset es Inbox		{Mensajes}
-::msgcat::mcset es Info			{Info}
+::msgcat::mcset es Info			{Información}
 ::msgcat::mcset es Invite		{Invitar}
 ::msgcat::mcset es Last			{Último}
 ::msgcat::mcset es Less			{Menos}
 ::msgcat::mcset es Login		{Conectarse}
 ::msgcat::mcset es Logout		{Desconectarse}
+::msgcat::mcset es Member               {Miembro}
+::msgcat::mcset es member               {miembro}
 ::msgcat::mcset es Message		{Mensaje}
 ::msgcat::mcset es Middle		{Medio}
+::msgcat::mcset es Moderator            {Moderador}
+::msgcat::mcset es moderator            {moderador}
 ::msgcat::mcset es Moderators		{Moderadores}
 ::msgcat::mcset es More			{Más}
-#::msgcat::mcset es Name {}
+::msgcat::mcset es Name 		{Nombre}
 ::msgcat::mcset es Never		{Nunca}
 ::msgcat::mcset es New			{Nuevo}
 ::msgcat::mcset es Next			{Siguiente}
-# ::msgcat::mcset es Nick {}
-# ::msgcat::mcset es Nickname {}
+::msgcat::mcset es Nick 		{Alias}
+::msgcat::mcset es Nickname 		{Miembro}
 ::msgcat::mcset es No			{No}
 ::msgcat::mcset es no			{no}
-::msgcat::mcset es None			{Ningún}
-#::msgcat::mcset es Notes
+::msgcat::mcset es None			{Ninguno}
+::msgcat::mcset es Notes		{Notas}
 ::msgcat::mcset es Occupation		{Profesión}
 ::msgcat::mcset es Offline		{Desconectado}
 ::msgcat::mcset es OK			{OK}
 ::msgcat::mcset es Online		{Conectado}
 ::msgcat::mcset es Open			{Abrir}
 ::msgcat::mcset es Options		{Opciones}
+::msgcat::mcset es Owner                {Propietario}
+::msgcat::mcset es owner                {propietario}
 ::msgcat::mcset es Participants		{Participantes}
 ::msgcat::mcset es Password		{Contraseña}
-# ::msgcat::mcset es Pause
+::msgcat::mcset es Pause		{Pausa}
 ::msgcat::mcset es Pick			{Elegir}
 ::msgcat::mcset es Phone		{Teléfono}
 ::msgcat::mcset es Play			{Escuchar}
@@ -125,13 +139,17 @@
 ::msgcat::mcset es Progress		{Progreso}
 ::msgcat::mcset es Quit?		{Abandonar?}
 ::msgcat::mcset es Quote		{Citar}
-# ::msgcat::mcset es Reason {}
+::msgcat::mcset es Reason               {Motivo}
+::msgcat::mcset es Refresh              {Refrescar}
 ::msgcat::mcset es Register		{Registrarse}
 ::msgcat::mcset es Remaining		{Restante}
 ::msgcat::mcset es Remove		{Borrar}
 ::msgcat::mcset es Reply		{Responder}
 ::msgcat::mcset es Resource		{Recursos}
-# ::msgcat::mcset es Restart
+::msgcat::mcset es Restart		{Reiniciar}
+::msgcat::mcset es Rosticons		{Temas de iconos}
+::msgcat::mcset es Revoke               {Quitar permisos}
+::msgcat::mcset es Role                 {Rol}
 ::msgcat::mcset es Room			{Sala}
 ::msgcat::mcset es Roster		{Contactos}
 ::msgcat::mcset es Save			{Guardar}
@@ -140,12 +158,12 @@
 ::msgcat::mcset es Send			{Enviar}
 ::msgcat::mcset es Server		{Servidor}
 ::msgcat::mcset es Servers		{Servidores}
-# ::msgcat::mcset es Service {}
+::msgcat::mcset es Service 		{Servicio}
 ::msgcat::mcset es Set			{Instalar}
 ::msgcat::mcset es Settings		{Opciones}
 ::msgcat::mcset es Shortcut		{Atajo}
 ::msgcat::mcset es Shortcuts		{Atajos}
-#::msgcat::mcset es Size
+::msgcat::mcset es Size			{Tamaño}
 ::msgcat::mcset es Sounds		{Sonidos}
 ::msgcat::mcset es Specifications	{Especificaciones}
 ::msgcat::mcset es Speech		{Dialogar}
@@ -163,26 +181,90 @@
 ::msgcat::mcset es Title		{Título}
 ::msgcat::mcset es To			{Para}
 ::msgcat::mcset es Topic		{Tópico}
-#::msgcat::mcset es Transports
+::msgcat::mcset es Transports		{Pasarela}
 ::msgcat::mcset es Trash		{Basura}
-#::msgcat::mcset es Type {}
+::msgcat::mcset es Type 		{Tipo}
 ::msgcat::mcset es Unregister		{Desregistrarse}
 ::msgcat::mcset es Unsubscribe		{Desubscribirse}
 ::msgcat::mcset es Unsubscribed		{Desubscrito}
 ::msgcat::mcset es Username		{Nombre}
-#::msgcat::mcset es Value {}
+::msgcat::mcset es Value 		{Valor}
 ::msgcat::mcset es Visitors		{Visitantes}
+::msgcat::mcset es Voice                {Voz}
+::msgcat::mcset es voice                {voz}
 ::msgcat::mcset es Warning		{Atención}
 ::msgcat::mcset es Welcome              {Bienvenido}
 ::msgcat::mcset es Whiteboard		{Pizarra}
-#Descomentado
 ::msgcat::mcset es Width 		{Anchura}
-#Descomentado
 ::msgcat::mcset es Work			{Trabajo}
-::msgcat::mcset es Yes			{Sí}
-::msgcat::mcset es yes			{sí}
+::msgcat::mcset es Work                 {Trabajo
+::msgcat::mcset es Yes                  {Sí}e
+::msgcat::mcset es yes                  {sí}i
 
-# Trazos.
+# Canvas item options, names and values.
+# Names:
+::msgcat::mcset es anchor           Ancla
+::msgcat::mcset es arrow            Flecha
+::msgcat::mcset es arrowshape       {Flecha Shape}
+::msgcat::mcset es capstyle         {Estilo Cap}
+::msgcat::mcset es coordinates      Coordenadas
+::msgcat::mcset es dash             {Estilo de línea}
+::msgcat::mcset es file             Archivo
+::msgcat::mcset es fill             Rellenar
+::msgcat::mcset es fontfamily       {Familia de la fuente}
+::msgcat::mcset es fontsize         {Tamaño de la fuente}
+::msgcat::mcset es fontweight       {Grosor de la fuente}
+::msgcat::mcset es image            Imagen
+::msgcat::mcset es joinstyle        {Estilo de la unión}
+::msgcat::mcset es justify          Justificación
+::msgcat::mcset es outline          {Linea exterior}
+::msgcat::mcset es outlinestipple   {Linea exterior Stipple}
+::msgcat::mcset es smooth           Suavizado
+::msgcat::mcset es stipple          Stipple
+::msgcat::mcset es tags             Marcas
+::msgcat::mcset es text             Texto
+::msgcat::mcset es width            Anchura
+
+# Values (see item inspector to see what they mean):
+# anchor
+::msgcat::mcset es n          N
+::msgcat::mcset es ne         NE
+::msgcat::mcset es e          E
+::msgcat::mcset es se         SE
+::msgcat::mcset es s          S
+::msgcat::mcset es sw         SW
+::msgcat::mcset es w          W
+::msgcat::mcset es nw         NW
+::msgcat::mcset es center     Centrado
+
+# arrow
+::msgcat::mcset es last             ÚltimoL
+::msgcat::mcset es first            Primero
+::msgcat::mcset es both             Ambos
+
+::msgcat::mcset es transparent      Transparente
+::msgcat::mcset es gray75           {Gris 75%}
+::msgcat::mcset es gray50           {Gris 50%}
+::msgcat::mcset es gray25           {Gris 25%}
+::msgcat::mcset es gray12           {Gris 12%}
+
+#--- Translate ------------------
+::msgcat::mcset es round            Round
+::msgcat::mcset es miter            Miter
+::msgcat::mcset es bevel            Bevel
+::msgcat::mcset es butt             Butt
+::msgcat::mcset es projecting       Projecting
+# End Translate ----------------
+
+::msgcat::mcset es normal           Normal
+::msgcat::mcset es bold             Negrita
+::msgcat::mcset es italic           Italica
+
+::msgcat::mcset es left             Izquierda
+::msgcat::mcset es right            Derecha
+::msgcat::mcset es false            Falso
+::msgcat::mcset es true             Verdadero
+
 ::msgcat::mcset es none			{Ninguno}
 ::msgcat::mcset es dotted		{Punteado}
 ::msgcat::mcset es dash-dotted		{Guiones-puntos}
@@ -198,7 +280,6 @@
 ::msgcat::mcset es chat                 {chat}
 ::msgcat::mcset es subscribed           {subscrito}
 ::msgcat::mcset es unsubscribed         {desubscrito}
-
 
 # Titulos de todos los menués ; concatenados con 'm' para la clave de la base de datos.
 ::msgcat::mcset es mFile		{Archivo}
@@ -286,7 +367,7 @@
 ::msgcat::mcset es mMessageInbox	{Mensajes}
 ::msgcat::mcset es mSearch		{Busca&r...}
 ::msgcat::mcset es mAddNewUser		{Añadir un nuevo usuario...}
-::msgcat::mcset es mSendMessage		{En&viar un mensaje...}
+::msgcat::mcset es mSendMessage		{Enviar un mensaje...}
 ::msgcat::mcset es mChat		{Chat}
 ::msgcat::mcset es mStatus		{Estado}
 ::msgcat::mcset es mDirStatus           {Estado deseado}
@@ -325,13 +406,13 @@
 ::msgcat::mcset es mCoccinellaHome  	{Inicio de Coccinella...}
 ::msgcat::mcset es mComponents          {Componentes...}
 ::msgcat::mcset es mBugReport           {Informar de un fallo...}
-#::msgcat::mcset es mTakeSnapShot        {Take Snapshot}
+::msgcat::mcset es mTakeSnapShot        {Coger captura}
 #::msgcat::mcset es mTimeCode            {Timecode}
-#::msgcat::mcset es mShow Show
-#::msgcat::mcset es mOffline Offline
-#::msgcat::mcset es mTransports Transports
 ::msgcat::mcset es mUserInfo            {Informacion del usuario}
 ::msgcat::mcset es mEditBookmarks       {Editar favoritos}
+::msgcat::mcset es mToolbar		{Barra de herramientas}
+::msgcat::mcset es mNotebook		{Pestañas}
+::msgcat::mcset es mMinimal		{Reducido}
 
 # Popups.
 ::msgcat::mcset es mMessage     	{Mensaje...}
@@ -351,7 +432,7 @@
 ::msgcat::mcset es mLoginTrpt     	{Conectarse a un servidor de transporte}
 ::msgcat::mcset es mLogoutTrpt     	{Desconectarse de un servidor de transporte}
 ::msgcat::mcset es mRemoveContact  	{Borrar el contacto...}
-#::msgcat::mcset es mIgnore         	{Ignore}
+::msgcat::mcset es mIgnore         	{Ignorar}
 ::msgcat::mcset es mShow                {Visualizacion}
 ::msgcat::mcset es mOffline             {Desconectado}
 ::msgcat::mcset es mTransports          {Transportes de otras redes}
@@ -363,9 +444,6 @@
 ::msgcat::mcset es mCall                {Llamar a...}
 ::msgcat::mcset es mForward             {Deviar la llamada actual a...}
 
-
-
-
 # Textos cortos únicamente.
 ::msgcat::mcset es {30 days}			{30 días}
 ::msgcat::mcset es {About Coccinella}		{Acerca de Coccinella}
@@ -374,7 +452,7 @@
 ::msgcat::mcset es {About %s}                   {Acerca de %s}
 ::msgcat::mcset es {Active <Return>}		{Enviar automático}
 ::msgcat::mcset es {Add New User}		{Añadir un nuevo usuario}
-#::msgcat::mcset es {Add permanently} {}
+::msgcat::mcset es {Add permanently} 		{Añadir permanentemente}
 ::msgcat::mcset es {Add Server}			{Añadir un servidor}
 ::msgcat::mcset es {Add Shortcut}		{Añadir un atajo}
 ::msgcat::mcset es {Address 1}			{Dirección 1}
@@ -391,11 +469,11 @@
 ::msgcat::mcset es {Away status}		{Estado "Alejado"}
 ::msgcat::mcset es {Basic Info}			{Información básica}
 ::msgcat::mcset es {Block JID}			{Bloqueo JID}
-# ::msgcat::mcset es {Bookmark this room}
+::msgcat::mcset es {Bookmark this room}		{Añadir esta sala a favoritos}
 ::msgcat::mcset es {Buddy Pouncing}             {Alertas}
 ::msgcat::mcset es {Built in server port}	{Puerto del servidor interno}
 ::msgcat::mcset es {Cache folder}		{Directorio de caché}
-#::msgcat::mcset es {Canvas Size} {}
+::msgcat::mcset es {Canvas Size} 		{Tamaño del lienzo}
 ::msgcat::mcset es {Chat History}		{Historial del chat}
 ::msgcat::mcset es {Chat With}			{Chatear con}
 ::msgcat::mcset es {Clear Disk Cache Now}	{Limpiar la caché}
@@ -406,8 +484,8 @@
 ::msgcat::mcset es {Create Room}		{Crear una sala}
 ::msgcat::mcset es {Default group}		{Grupo por defecto}
 ::msgcat::mcset es {Default Logout Status}	{Desconexión por defecto}
-# ::msgcat::mcset es {Default status descriptions} {}
-#::msgcat::mcset es {Delete Rule} {}
+::msgcat::mcset es {Default status descriptions} {Mensaje de estado por defecto}
+::msgcat::mcset es {Delete Rule} 		{Eliminar regla}
 ::msgcat::mcset es {Disk Cache}			{Caché}
 ::msgcat::mcset es {Different Passwords}        {Contraseñas distintas}
 ::msgcat::mcset es {Do Not Disturb}		{No molestar}
@@ -438,26 +516,30 @@
 ::msgcat::mcset es {Get File}			{Ver el archivo}
 ::msgcat::mcset es {Get File Error}		{Error durante recepción del archivo}
 ::msgcat::mcset es {Get vCard}			{Ver la tarjeta}
-# ::msgcat::mcset es {Getting available rooms...} {}
-# ::msgcat::mcset es {Groupchat presence change} {}
+::msgcat::mcset es {Getting available rooms...} {Obteniendo las salas disponibles...}
+::msgcat::mcset es {Groupchat presence change}  {Cambiar el estado de presencia en la sala}
 ::msgcat::mcset es {Groupchat-1.0 (fallback)}	{Groupchat 1.0 (fallback)}
 ::msgcat::mcset es {Handled By}			{Manejado por}
-# ::msgcat::mcset es {History length} {}
+::msgcat::mcset es {History length} 		{Tamaño del historial}
 ::msgcat::mcset es {Host name}			{Nombre de dominio}
 ::msgcat::mcset es {HTTP port}			{Puerto HTTP}
-# ::msgcat::mcset es {Import Iconset...}
+::msgcat::mcset es {Import Iconset...}		{Importar juego de iconos}
 ::msgcat::mcset es {Import using}		{Importar usando...}
 ::msgcat::mcset es {Import/Remove fonts}	{Importar/Borrar fuentes}
 ::msgcat::mcset es {Incoming Message}		{Mensaje entrante}
-#::msgcat::mcset es {Incoming Messages} {}
-#::msgcat::mcset es {Incoming Presence} {}
+::msgcat::mcset es {Incoming Messages} 		{Mensaje entrantes}
+::msgcat::mcset es {Incoming Presence}		{Conectando}
+::msgcat::mcset es {Info Room}                  {Información Sala}
 ::msgcat::mcset es {Inspect Associations}	{Inspeccionar las asociaciones}
 ::msgcat::mcset es {Invite User}                {Invitar al usuario}
 ::msgcat::mcset es {IP address}			{Dirección IP}
-#::msgcat::mcset es {Is connected} {}
+::msgcat::mcset es {Is connected} 		{Está conectado}
 ::msgcat::mcset es {Is conectad}		{Conectado}
 ::msgcat::mcset es {Is safe}			{Seguro}
 ::msgcat::mcset es {Is server up}		{Conectado}
+::msgcat::mcset es {Item Inspector}             {Inspector de Propiedades}
+::msgcat::mcset es {Item Options}  	        {Propiedades del elemento}
+::msgcat::mcset es {Item type}		        {Tipo de elemento}
 ::msgcat::mcset es {Jabber address}		{Dirección Jabber}
 ::msgcat::mcset es {Jabber Client}		{Cliente Jabber}
 ::msgcat::mcset es {Jabber Server}		{Servidor Jabber}
@@ -477,19 +559,19 @@
 ::msgcat::mcset es {Multi Connect}		{Conexiones múltiples}
 ::msgcat::mcset es {My Avatar}			{Avatar}
 ::msgcat::mcset es {My Status}			{Mi estado}
-#::msgcat::mcset es {Name of list} {}
+::msgcat::mcset es {Name of list} 		{Nombre de la lista}
 ::msgcat::mcset es {Network Error}		{Error de Red}
 ::msgcat::mcset es {Network Setup}		{Configuración de red}
 ::msgcat::mcset es {New Account}		{Nuevo usuario}
-# ::msgcat::mcset es {New bookmark}
+::msgcat::mcset es {New bookmark}		{Nuevo favorito}
 ::msgcat::mcset es {New chat message}		{Nuevo mensaje en el chat}
 ::msgcat::mcset es {New chat thread}		{Nuevo chat}
 ::msgcat::mcset es {New Color}			{Nuevo color}
 ::msgcat::mcset es {New incoming message}	{Nuevo mensaje entrante}
 ::msgcat::mcset es {New Message}		{Nuevo mensaje}
-#::msgcat::mcset es {New Nickname} {}
+::msgcat::mcset es {New Nickname}		{Nuevo usuario}
 ::msgcat::mcset es {New password}		{Nueva contraseña}
-#::msgcat::mcset es {New Rule} {}
+::msgcat::mcset es {New Rule} 			{Nueva regla}
 ::msgcat::mcset es {New Topic}			{Nuevo tópico}
 ::msgcat::mcset es {New shortcut}		{Nuevo atajo}
 ::msgcat::mcset es {New User}			{Nuevo usuario}
@@ -498,7 +580,7 @@
 ::msgcat::mcset es {NAT Address}		{Dirección NAT}
 ::msgcat::mcset es {Nick name}			{Alias}
 ::msgcat::mcset es {No Address}			{Sin dirección}
-# ::msgcat::mcset es {No Available} {}
+::msgcat::mcset es {No Available} 		{No disponible}
 ::msgcat::mcset es {No Inbox}			{Sin buzón}
 ::msgcat::mcset es {No Printing}		{Sin impresión}
 ::msgcat::mcset es {Not Available}		{No disponible}
@@ -520,16 +602,14 @@
 ::msgcat::mcset es {Personal URL}		{URL personal}
 ::msgcat::mcset es {Pick Directory}		{Elegir un directorio}
 ::msgcat::mcset es {Pick File}			{Elegir un archivo}
-# Descomentado
- ::msgcat::mcset es {Pick skin}			{Seleccionar tema}
-# Descomentado
+::msgcat::mcset es {Pick skin}			{Seleccionar tema}
 ::msgcat::mcset es {Plugin Info}		{Información sobre el plugin}
 ::msgcat::mcset es {Plugin Control}		{Control del plugin}
 ::msgcat::mcset es {Port number}		{Número de puerto}
 ::msgcat::mcset es {Postal Code}		{Código postal}
 ::msgcat::mcset es {Preferred Protocol}		{Protocolo preferido}
 ::msgcat::mcset es {Presence Error}		{Error de estado}
-#::msgcat::mcset es {Privacy List} {}
+::msgcat::mcset es {Privacy List} 		{Listad de privacidad}
 ::msgcat::mcset es {Profile Name}               {Nombre del perfil}
 ::msgcat::mcset es {Proxy Setup}		{Configuración del proxy}
 ::msgcat::mcset es {Put File Error}		{Error al insertar el archivo}
@@ -554,19 +634,17 @@
 ::msgcat::mcset es {Search results}		{Buscar resultados}
 ::msgcat::mcset es {Search Service}		{Buscar servicio}
 ::msgcat::mcset es {Search Specifications}	{Buscar especificaciones}
-#::msgcat::mcset es {Select a new nickname} {}
+::msgcat::mcset es {Select a new nickname} 	{Seleccione un nuevo nombre de usuario}
 ::msgcat::mcset es {Select Font}		{Elegir fuente}
 ::msgcat::mcset es {Send File}			{Enviar archivo}
 ::msgcat::mcset es {Send Live}			{Enviar en directo}
 ::msgcat::mcset es {Server Info}		{Información sobre el servidor}
 ::msgcat::mcset es {Service server}		{Servidor de servicios}
 ::msgcat::mcset es {Set Directed Presence}      {Aplicar el estado deseado}
-#::msgcat::mcset es {Set New Nickname} {}
+::msgcat::mcset es {Set New Nickname} 		{Elegir nuevo alias}
 ::msgcat::mcset es {Set New Topic}		{Elegir nuevo tópico}
 ::msgcat::mcset es {Set Status}			{Elegir estado}
-# Descomentado
 ::msgcat::mcset es {Set windows opacity} 	{Establecer la transparencia}
-# Descomentado
 ::msgcat::mcset es {Settings Panels}		{Paneles de configuración}
 ::msgcat::mcset es {Setup Assistant}		{Asistente de configuración}
 ::msgcat::mcset es {Slide Show}			{Presentación}
@@ -602,12 +680,24 @@
 ::msgcat::mcset es {Version Info}		{Información de la version}
 ::msgcat::mcset es {Whiteboard fonts}		{Fuentes de la pizarra}
 ::msgcat::mcset es {Writing file}		{Guardar archivo}
-#::msgcat::mcset es {Groupchat presence change}
+
+# Rooms.
+::msgcat::mcset es {Kick Participant}   {Echar al participante}
+::msgcat::mcset es {Ban Participant}    {Prohibir la entrada al participante}
+::msgcat::mcset es {Configure Room}     {Configurar sala}
+::msgcat::mcset es {Destroy Room}       {Eliminar sala}
+::msgcat::mcset es {Edit Lists}         {Editar Listas}
+::msgcat::mcset es {Edit the privilege to speak in the room, the voice.} {Editar el privilegio para hablar en la sala, la voz.}
+::msgcat::mcset es {Edit the ban list}        {Editar la lista de miembros expulsados}
+::msgcat::mcset es {Edit the member list}     {Editar la lista de miembros}
+::msgcat::mcset es {Edit the moderator list}  {Editar la lista de moderadores}
+::msgcat::mcset es {Edit the admin list}      {Editar la lista de administradores}
+::msgcat::mcset es {Edit the owner list}      {Editar la lista de propietarios}
 
 # Time intervals.
-# ::msgcat::mcset es {Ten seconds} {}
-# ::msgcat::mcset es {One minute} {}
-# ::msgcat::mcset es {Ten minutes} {}
+::msgcat::mcset es {Ten seconds} 		{Diez segundos}
+::msgcat::mcset es {One minute} 		{Un minuto}
+::msgcat::mcset es {Ten minutes} 		{Diez minutos}
 ::msgcat::mcset es {One hour} 			{Una hora}
 ::msgcat::mcset es {One day} 			{Un día}
 ::msgcat::mcset es {One week}	 		{Una semana}
@@ -706,8 +796,10 @@
  a su lista de contactos}
 ::msgcat::mcset es jamessconnbroken	{La conexión se ha interrumpido inesperadamente}
 ::msgcat::mcset es jamessautoawayset 	{El estado "Alejado automático" ha sido enviado a %s. Desea de nuevo aparecer como "Disponible" ?}
+
 ::msgcat::mcset es jamesserrgetpublic	{Error durante la solicitud de datos públicos de %s, el código de error es %s (%s)}
-::msgcat::mcset es jamesserrlastactive	{Error durante la solicitud de la última actividad de %s, el código de error es %s (%s)}
+::msgcat::mcset es jamesserrlastactive	{Error durante la solicitud de la última actividad de %s, e error es %s}
+
 ::msgcat::mcset es jamesserrnotimeinfo	{El cliente/servicio %s no ha devuelto la información del tiempo.}
 ::msgcat::mcset es jamesstimeused	{Tiempo transcurrido desde la última actividad de %s : }
 ::msgcat::mcset es jamesstimeconn	{Tiempo transcurrido desde la última conexión de %s : }
@@ -807,6 +899,8 @@
 ::msgcat::mcset es printunixcmd                 {Comando de imprimir, puede cambiarlo si es necesario}
 ::msgcat::mcset es enterpassword                {Introducir la contraseña para la cuenta "%s"}
 
+::msgcat::mcset es wblockitem                   {Proteger este elemento para no ser editado} 
+
 ::msgcat::mcset es httptrptok                   {Fin de la descarga del archivo %s}
 ::msgcat::mcset es httptrpterror                {Error de transferencia durante la descarga del archivo %s : %s}
 ::msgcat::mcset es httptrpteof                  {El servidor ha terminado la conexión sin respuesta.}
@@ -854,7 +948,7 @@
   La información registrada por el servidor es accessible por cualquier usuario.}
 ::msgcat::mcset es prefaaset     {Introduzca el estado "Alejado automático": }
 ::msgcat::mcset es prefminaw     {Minutos antes de estado "Alejado": }
-::msgcat::mcset es prefminea     {Minutos antes de estado "Alejado para mucho tiempo": }
+::msgcat::mcset es prefminea     {Minutos antes de estado "Alejado por mucho tiempo": }
 ::msgcat::mcset es prefsuif      {Si alguien quiere añadirme a sus contactos y...}
 ::msgcat::mcset es prefsuis      {...ya se encuentra en mis contactos: }
 ::msgcat::mcset es prefsuisnot   {...no forma parte de mis contactos : }
@@ -882,10 +976,8 @@
 ::msgcat::mcset es prefcubrowse  {Explorar los servicios si el método está disponible}
 ::msgcat::mcset es prefcuagent   {Siempre utilizar el método de los agentes}
 ::msgcat::mcset es prefcuupdate  {Buscar automáticamente actualizaciones de Coccinella}
-
-#--- Translate ---
 ::msgcat::mcset es prefcuremdlgs {Rcordar los dialogos abiertos entre sesiones}
-#--- Translate ---
+
 
 ::msgcat::mcset es preffmhelp    {Plugins de ayuda para los tipos de archivos}
 ::msgcat::mcset es preffmsave    {"guardar en disco" en el directorio entrante}
@@ -928,6 +1020,13 @@ además de las fuentes estándar (Times, Helvetica o Courier), Aseguresé que ha
 ::msgcat::mcset es prefavashare {Compartir el Avatar con otros usuarios}
 ::msgcat::mcset es prefproxymsg {El uso de un Proxy Http es determinado por cada perfil. La transferencia de archivos no funcionara si usted esta usando un proxyHttp!}
 ::msgcat::mcset es prefproxyexc {Excluir direcciones (* como comodin)}
+
+
+::msgcat::mcset es prefdrivesame {Guarde sus preferencias en el mismo lugar donde reside el programa (por ejemplo en USB).}
+::msgcat::mcset es prefdriwsame  {Eligio almacenar sus preferencias en el mismo dispositivo donde reside la aplicacion. Si este es un dispositivo movil (pej. USB) sus preferencias podrian ser visibles. \
+  Desea continuar?}
+::msgcat::mcset es prefdriwdef   {Eligio almacenar en el dispositivo por defecto. Salvo que elimine o mueva sus configuraciones personales en "%s"\
+  seran usadas de forma automatica la siguiente vez que inicie Coccinella. Desea continuar y eliminarlas ahora?}
 
 # Espace EditShortcuts :
 namespace eval ::EditShortcuts:: {
@@ -980,19 +1079,16 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jaupdatenewver {La nueva versión es : %s}
 ::msgcat::mcset es jaupdateremind {No recordarme esto}
 # remove-- ::msgcat::mcset es jasettopic   {Introduzca un nuevo tema para este grupo de chat}
-# new-- ::msgcat::mcset es jasettopic2  {Set new topic for this room.}
+::msgcat::mcset es jasettopic2  {Elegir un nuevo tópico para esta sala.}
 ::msgcat::mcset es jadirpresmsg {Enviar el estado deseado al usuario "%s".}
 ::msgcat::mcset es jatlsnegot   {Seguridad TLS...}
 
-#--- Translate ---
 ::msgcat::mcset es jamucentermsg {Introduzca su usuario y pulse la tecla "Intro" para acceder a la sala de chat. Puede buscar para ver las salas de chat disponibles en el servicio. Solo las salas restringidas necesitan contraseñia.}
 ::msgcat::mcset es jainmsgshow {Mostrar los mensajes entrantes en esta ventana}
 ::msgcat::mcset es jadisaddserv {Encuentra otros servicios o salas de chat en el servidor. Puede añadir otro servidor de forma permanente para que posteriormente activado de forma automática.El servidor al que se accede de forma automatica mostrará todos los servicios.}
 ::msgcat::mcset es jadisrmall {Borrar todos los servidores que han sido automaticamente encontrados.}
 ::msgcat::mcset es jauserinnote {Agregue sus notas personales acerca de este usuario}
 ::msgcat::mcset es jaregisterex {Complete el nombre de los servidores Jabber con los que desea registrar. Pulse el botón "Get" para recibir la información de registro. Complete la información y finalice el registro.}
-#--- Translate ---
-
 ::msgcat::mcset es jaloginjid   {Introduzca su jid con el formato "joey@myjabb.org", o seleccione un perfil. Debe de tener una cuenta en el servidor.}
 ::msgcat::mcset es jaregalready {Esta registrado en este servicio. Su configuracion actual en el servicio.}
 ::msgcat::mcset es jaactiveret {Si esta activo la 'Tecla Enter' enviara los mensajes, sino use la combinacion de teclas Ctrl/Cmd-Return}
@@ -1003,7 +1099,12 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jaregnewwith {Desea registrar una cuenta nueva en %s.}
 ::msgcat::mcset es jaregisterexserv {Registro con el servicio %s. Debe pulsar el boton 'Obtener' si la informacion de registro no llega de forma automatica.}
 
-
+::msgcat::mcset es jaseliconset {Seleccione el juego de iconos para cada grupo. Algun grupo podria no estar seleccionado.}
+::msgcat::mcset en jachathist   {Muestra u oculta el historial del chat}
+::msgcat::mcset es {InfoRoomDesc}       {En esta ventana puede cambiar las opciones así como administrarr
+ la sala\
+      Su perfil y afiliación determina los privilegios con los que puede actuar\
+      Las distintas restricciones dependerán de la configuración de la sala.}
 
 
 # Assistant de configuration :
@@ -1023,6 +1124,21 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es supubserv {Obtener una lista de servidores abiertos y publicos de Jabber}
 ::msgcat::mcset es suservlist {Lista de Servidores Jabber}
 
+# Groupchat:
+::msgcat::mcset es mucErrEnter      {Se ha recibido un error al entrar en la sala "%s".}
+::msgcat::mcset es mucErrCode       {El código de error es %s: %s}
+::msgcat::mcset es mucErrEnterTitle {Error al entrar en la sala}
+::msgcat::mcset es mucErrInvite     {La invitación a %s para entrar a la sala  %s ha fallado.}
+::msgcat::mcset es mucErrInviteCode {Mensaje de error: %s}
+::msgcat::mcset es mucInviteText    {Ha recibido una invidación de %s para entrar a la sala %s.}
+::msgcat::mcset es mucInviteReason  {El motivo: %s}
+::msgcat::mcset es mucInvitePass    {La contraseña  para entrar es "%s".}
+::msgcat::mcset es mucInviteQuest   {Esta seguro de querer entrar?}
+::msgcat::mcset es mucInvite        {Invitación}
+::msgcat::mcset es mucDestroy       {Está apunto de eliminar la sala "%s". Opcionalmente puede dar a los participantes una sala alternativa y un motivo.}
+::msgcat::mcset es mucIQError       {Se ha recibido un error al interactuar con la sala "%s": %s}
+::msgcat::mcset es mucChat2ConfInv  {Convirtiendo Chat en Conferencia}
+
 ::msgcat::mcset es vcardget	{Cargando de la tarjeta del usuario %s.. Esperando de la respuesta del servidor...}
 ::msgcat::mcset es vcarderrget	{La carga de la tarjeta ha fallado (%s).}
 ::msgcat::mcset es vcardrec	{La tarjeta ha sido recibida.}
@@ -1030,6 +1146,11 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es autoupdatenot        {No comprobar automáticamente las actualizaciones}
 ::msgcat::mcset es oobmsg               {Dejar al usuario %s descargar uno de sus archivos sobre el servidor. La descrición es obligatoria.}
 ::msgcat::mcset es chatcompreply        {%s le está respondiendo.}
+::msgcat::mcset es chatcompactive     {%s tiene la conversación abierta}
+::msgcat::mcset es chatcompcomposing  {%s le está respondiendo}
+::msgcat::mcset es chatcomppaused     {%s está pensando lo que escribe}
+::msgcat::mcset es chatcompinactive   {%s abandonó temporalmente la conversación}
+::msgcat::mcset es chatcompgone       {%s ha cerrado la conversación}
 
 # Recibido de archivos
 ::msgcat::mcset es getcontacting   {Contacto de %s. Esperando una respuesta...}
@@ -1090,12 +1211,13 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es callVM               {Desviar a buzon de voz}
 
 # Fore some of these generic names could be used?
+::msgcat::mcset es {IAX Account}	{Cuenta IAX}
 ::msgcat::mcset es iaxPhone             {IAX Phone}
-::msgcat::mcset es iaxPhoneAccount      {IAX Account}
+::msgcat::mcset es iaxPhoneAccount      {Cuenta IAX}
 ::msgcat::mcset es iaxPhoneUser         {Usuario}
 ::msgcat::mcset es iaxPhonePassword     {Contraseña}
 ::msgcat::mcset es iaxPhoneHost         {Servidor}
-::msgcat::mcset es iaxPhoneCidNum       {Número del Cid (Identificador de llamada)}
+::msgcat::mcset es iaxPhoneCidNum       {Número del Ci (Identificador de llamada)}
 ::msgcat::mcset es iaxPhoneCidName      {Nombre del Cid}
 ::msgcat::mcset es iaxPhoneInputDev     {Dispositivo de entrada}
 ::msgcat::mcset es iaxPhoneOutputDev    {Dispositivo de salida}
@@ -1105,11 +1227,26 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es iaxPhoneComfort      {Comfort}
 ::msgcat::mcset es iaxPhoneCodec        {Codec}
 
-::msgcat::mcset es mToolbar		{Barra de herramientas}
-::msgcat::mcset es mNotebook		{Pestañas}
-::msgcat::mcset es mMinimal		{Reducido}
 
+::msgcat::mcset es {Disco method}        {Metodo Disco}
+::msgcat::mcset es {Sound Set}          {Sonidos}
+::msgcat::mcset es {MIDI Player}	{Reproductor midi}
+::msgcat::mcset es {Default nickname}	{Nombre de usuario por defecto}
+::msgcat::mcset es {File...}		{Archivo...}
+::msgcat::mcset es {Proxy Server}	{Servidor Proxy}
+::msgcat::mcset es {Proxy Port}		{Puerto del Proxy}
+::msgcat::mcset es {Filetransfer (bytestreams) port}	{Puerto para la Transferencia de archivos (bytestreams)}
+::msgcat::mcset es {Connect using HTTP}	{Conectar por HTTP}
+::msgcat::mcset es {Use Secure Connection}	{Usar conexión segura}
+::msgcat::mcset es {Use TLS and SASL authentization}	{Usar autenticacion TLS y SASL}
+::msgcat::mcset es {Use TLS on separate port (old)}	{Usar TLS en un puerto aparte (antigüo)}
+::msgcat::mcset es {Use proxy}		{Usar proxy}
+::msgcat::mcset es {Smooth freehand strokes}		{Suavizar lineas dibujadas a mano alzada}
+::msgcat::mcset es {Make new text item for each line}	{Crear un nuevo elemento de texto para cada línea}
+::msgcat::mcset es {>>Import>>}		{>>Importar>>}
+::msgcat::mcset es {Standard}		{Estandar}
 
+::msgcat::mcset es {Movie Options}	{Opciones de la película}
+::msgcat::mcset es {Broken Image}	{Imagen rota}
 
 # END --------------------------------------------------------------------------
-
