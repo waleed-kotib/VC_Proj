@@ -1072,6 +1072,21 @@ Om användarnamnet är upptaget så får du ett meddelande om detta när du registrer
 ::msgcat::mcset sv suservlist   {Lista på öppna Jabber servrar}
 
 
+# Groupchat:
+::msgcat::mcset sv mucErrEnter      {Vi fick ett fel när gick in i rum "%s".}
+::msgcat::mcset sv mucErrCode       {Felet var %s: %s}
+::msgcat::mcset sv mucErrEnterTitle {Rumsfel}
+::msgcat::mcset sv mucErrInvite     {Inbjudan till %s till rum %s misslyckdes.}
+::msgcat::mcset sv mucErrInviteCode {Felmeddelande: %s}
+::msgcat::mcset sv mucInviteText    {Du har fått en inbjudan från %s att ansluta till gruppchattrum %s.}
+::msgcat::mcset sv mucInviteReason  {Anledning: %s}
+::msgcat::mcset sv mucInvitePass    {Lösenordet "%s" behövs för anslutningen.}
+::msgcat::mcset sv mucInviteQuest   {Önskar du ansluta med en gång?}
+::msgcat::mcset sv mucInvite        {Inbjudan}
+::msgcat::mcset sv mucDestroy       {Du kommer att förstöra rummet "%s". Du kan ge de närvarande deltagarna ett alternitivt rums JID och en anledning.}
+::msgcat::mcset sv mucIQError       {Vi fick att fel när interagerade med rummet "%s": %s}
+::msgcat::mcset sv mucChat2ConfInv  {Omvandla chatt till konferans.}
+
 
 ::msgcat::mcset sv vcardget	{Hämtar vCard från %s. Väntar på serversvar...}
 ::msgcat::mcset sv vcarderrget	{Misslyckades hämta vCard. Resultat: %s}
@@ -1081,7 +1096,14 @@ Om användarnamnet är upptaget så får du ett meddelande om detta när du registrer
 
 ::msgcat::mcset sv autoupdatenot        {Leta ej automatiskt efter uppdatering}
 ::msgcat::mcset sv oobmsg               {Låt användaren %s ladda ner en fil från din inbyggda server. Beskrivningen är ej nödvändig.}
-::msgcat::mcset sv chatcompreply        {%s skriver på ett svar}
+
+# Composing events
+::msgcat::mcset sv chatcompreply      {%s skriver på ett svar}
+::msgcat::mcset sv chatcompactive     {%s är med i chatten}
+::msgcat::mcset sv chatcompcomposing  {%s skriver på ett svar}
+::msgcat::mcset sv chatcomppaused     {%s avvaktar med att skriva}
+::msgcat::mcset sv chatcompinactive   {%s har lämnat chatten för ett tag}
+::msgcat::mcset sv chatcompgone       {%s har stängt chatten}
 
 # Get file
 ::msgcat::mcset sv getcontacting   {Kontaktat %s. Väntar på svar...}
