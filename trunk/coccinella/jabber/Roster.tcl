@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.166 2006-04-21 14:12:22 matben Exp $
+# $Id: Roster.tcl,v 1.167 2006-05-05 09:11:47 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -440,6 +440,7 @@ proc ::Roster::LogoutHook { } {
     # Clear roster and browse windows.
     if {$jprefs(rost,clrLogout)} {
 	::RosterTree::StyleInit
+	::RosterTree::FreeAltImagesCache
     }
 }
 
@@ -1012,7 +1013,7 @@ proc ::Roster::Presence {jid presence args} {
 	set isavailable [$jstate(roster) isavailable $jid2]
 	if {!$isavailable} {
 	    set items [eval {
-		::RosterTree::StyleCreateItem $jid $treePres
+		::RosterTree::StyleCreateItem $jid2 $treePres
 	    } $itemAttr $args]
 	}
     } elseif {[string equal $presence "available"]} {

@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.16 2006-04-30 14:00:47 matben Exp $
+# $Id: Avatar.tcl,v 1.17 2006-05-05 09:11:46 matben Exp $
 
 # @@@ Issues:
 # 
@@ -1095,7 +1095,9 @@ proc ::Avatar::WriteHashmap {fileName} {
     puts $fd "# This file defines an array that maps jid2 -> avatar hash"
     puts $fd "array set hashmap {"
     foreach {jid2 hash} [array get hashmap] {
-	puts $fd "\t$jid2 \t$hash"
+	if {$hash ne ""} {
+	    puts $fd "\t$jid2 \t$hash"
+	}
     }
     puts $fd "}"
     close $fd

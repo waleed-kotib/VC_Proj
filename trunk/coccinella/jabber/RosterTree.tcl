@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.17 2006-03-22 14:09:29 matben Exp $
+# $Id: RosterTree.tcl,v 1.18 2006-05-05 09:11:47 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -101,8 +101,12 @@ proc ::RosterTree::GetPreviousStyle {} {
 proc ::RosterTree::GetAllStyles {} {
     variable plugin
  
-    set styles {}
+    set names {}
     foreach {key name} [array get plugin *,name] {
+	lappend names $name
+    }
+    set styles {}
+    foreach name [lsort $names] {
 	lappend styles $name $plugin($name,label)
     }
     return $styles
@@ -132,7 +136,9 @@ proc ::RosterTree::StyleCreateItem {jid presence args} {
     variable plugin
     
     set name $plugin(selected)
-    return [eval {$plugin($name,createItem) $jid $presence} $args]
+    set ans [eval {$plugin($name,createItem) $jid $presence} $args]
+    StyleConfigureAltImages $jid
+    return $ans
 }
 
 proc ::RosterTree::StyleDeleteItem {jid} {
@@ -145,6 +151,8 @@ proc ::RosterTree::StyleDeleteItem {jid} {
 # RosterTree::StyleSetItemAlternative --
 # 
 #       Sets an alternative image or text for the specified jid.
+#       An alternative attribute set here is only a hint to the roster style
+#       which is free to ignore it.
 #       
 # Arguments:
 #       jid
@@ -158,8 +166,80 @@ proc ::RosterTree::StyleDeleteItem {jid} {
 proc ::RosterTree::StyleSetItemAlternative {jid key type value} {
     variable plugin
     
+    switch -- $type {
+	image {
+	    StyleCacheAltImage $jid $key $value
+	}
+    }
     set name $plugin(selected)
     return [$plugin($name,setItemAlt) $jid $key $type $value]
+}
+
+proc ::RosterTree::StyleCacheAltImage {jid key value} {
+    variable altImageCache
+
+    # We must cache this info: jid -> {key value ...}
+    # @@@ When to free this cache? Logout? Unavailable?
+    if {[info exists altImageCache($jid)]} {
+	array set tmp $altImageCache($jid)
+	if {$value eq ""} {
+	    array unset tmp $key
+	    if {[array size tmp]} {
+		set altImageCache($jid) [array get tmp]
+	    } else {
+		unset altImageCache($jid)
+	    }
+	} else {
+	    set tmp($key) $value
+	    set altImageCache($jid) [array get tmp]
+	}
+    } else {
+	set altImageCache($jid) [list $key $value]
+    }
+}
+
+proc ::RosterTree::GetItemAlternatives {jid type} {
+    variable altImageCache
+    
+    switch -- $type {
+	image {
+	    if {[info exists altImageCache($jid)]} {
+		return $altImageCache($jid)
+	    } else {
+		return {}
+	    }
+	}
+    }
+}
+
+proc ::RosterTree::StyleConfigureAltImages {jid} {
+    variable plugin
+    variable altImageCache
+    
+    #puts "::RosterTree::StyleConfigureAltImages jid=$jid"
+    
+    if {[info exists altImageCache($jid)]} {
+	#puts "\t altImageCache=$altImageCache($jid)"
+	set name $plugin(selected)
+	foreach {key value} $altImageCache($jid) {
+	     $plugin($name,setItemAlt) $jid $key image $value
+	}
+    }
+}
+
+proc ::RosterTree::FreeAltImagesCache {} {
+    variable altImageCache
+    
+    unset -nocomplain altImageCache
+}
+
+# Debug stuff:
+if {0} {
+    ::RosterTree::StyleSetItemAlternative mari@localhost phone image [::Rosticons::Get phone/available]
+    ::RosterTree::StyleSetItemAlternative mari@localhost xxxxx image [::Rosticons::Get phone/on_phone]
+    ::RosterTree::StyleSetItemAlternative killer@localhost phone image [::Rosticons::Get phone/on_phone]
+    parray ::RosterTree::altImageCache
+    parray ::RosterAvatar::altImageKeyToElem
 }
     
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

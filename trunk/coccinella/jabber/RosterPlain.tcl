@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements a plain style roster tree using treectrl.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.14 2006-04-11 12:14:58 matben Exp $
+# $Id: RosterPlain.tcl,v 1.15 2006-05-05 09:11:47 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -83,11 +83,13 @@ proc ::RosterPlain::InitDB { } {
     
     option add *Roster.plain:styAvailable:eText-padx     2              widgetDefault
     option add *Roster.plain:styAvailable:eImage-pady    {1 2}          widgetDefault
-    option add *Roster.plain:styAvailable:eAltImage-padx 2              widgetDefault
+    option add *Roster.plain:styAvailable:eAltImage0-padx 4             widgetDefault
+    option add *Roster.plain:styAvailable:eAltImage1-padx 2             widgetDefault
 
     option add *Roster.plain:styUnavailable:eText-padx     2            widgetDefault
     option add *Roster.plain:styUnavailable:eImage-pady    {1 2}        widgetDefault
-    option add *Roster.plain:styUnavailable:eAltImage-padx 2            widgetDefault
+    option add *Roster.plain:styUnavailable:eAltImage0-padx 4           widgetDefault
+    option add *Roster.plain:styUnavailable:eAltImage1-padx 2           widgetDefault
 
     option add *Roster.plain:styTransport:eText-padx       4            widgetDefault
     option add *Roster.plain:styTransport:eImage-pady      {1 2}        widgetDefault
@@ -127,14 +129,16 @@ proc ::RosterPlain::Configure {_T} {
     # Two columns: 
     #   0) the tree 
     #   1) hidden for tags
-    $T column create -tag cTree -itembackground $stripes -resize 0 -expand 1
+    $T column create -tag cTree -itembackground $stripes -resize 0  \
+      -expand 1 -squeeze 1
     $T column create -tag cTag -visible 0
     $T configure -treecolumn cTree -showheader 0
 
     # The elements.
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     $T element create eImage image
-    $T element create eAltImage image
+    $T element create eAltImage0 image
+    $T element create eAltImage1 image
     $T element create eText text -lines 1
     $T element create eNumText text -lines 1
     $T element create eBorder rect -open new -showfocus 1
@@ -155,17 +159,19 @@ proc ::RosterPlain::Configure {_T} {
     $T style layout $S eBorder  -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styAvailable]
-    $T style elements $S {eBorder eImage eAltImage eText}
-    $T style layout $S eText     -squeeze x -expand ns
+    $T style elements $S {eBorder eImage eText eAltImage1 eAltImage0}
+    $T style layout $S eText     -squeeze x -iexpand xy -sticky w
     $T style layout $S eImage    -expand ns -minheight $minH
-    $T style layout $S eAltImage -expand ns
+    $T style layout $S eAltImage0 -expand ns
+    $T style layout $S eAltImage1 -expand ns
     $T style layout $S eBorder   -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styUnavailable]
-    $T style elements $S {eBorder eImage eAltImage eText}
-    $T style layout $S eText     -squeeze x -expand ns
+    $T style elements $S {eBorder eImage eText eAltImage1 eAltImage0}
+    $T style layout $S eText     -squeeze x -iexpand xy -sticky w
     $T style layout $S eImage    -expand ns -minheight $minH
-    $T style layout $S eAltImage -expand ns
+    $T style layout $S eAltImage0 -expand ns
+    $T style layout $S eAltImage1 -expand ns
     $T style layout $S eBorder   -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styTransport]
@@ -225,7 +231,10 @@ proc ::RosterPlain::Init { } {
     }
 }
 
-proc ::RosterPlain::Delete { } { }
+proc ::RosterPlain::Delete {} {
+
+    FreeAltCache
+}
 
 # RosterPlain::CreateItem --
 #
@@ -383,26 +392,44 @@ proc ::RosterPlain::SetItemAlternative {jid key type value} {
     }
 }
 
-# @@@ multiple keys TODO
+# This proc is duplicated for all styles BAD!
+# Since it makes assumptions about the elements: 'eAltImage*'.
 proc ::RosterPlain::SetAltImage {jid key image} {
     variable T
-    variable altKeyElemArr
+    variable altImageKeyToElem
+	
+    #puts "::RosterPlain::SetAltImage $jid, $key"
     
-    # altKeyElemArr maps ($key,image|text) -> element name
+    # altImageKeyToElem maps: key -> element name
+    # 
+    # We use a static mapping: BAD?
     
     set mjid [jlib::jidmap $jid]
     set tag [list jid $mjid]
     set item [FindWithTag $tag]
     
-    if {[info exists altKeyElemArr($key,image)]} {
-	set elem $altKeyElemArr($key,image)
+    if {[info exists altImageKeyToElem($key)]} {
+	set elem $altImageKeyToElem($key)
     } else {
-	set elem eAltImage
-	set altKeyElemArr($key,image) eAltImage
-    }    
-    $T item element configure $item cTree $elem -image $image  
+	
+	# Find element name to use.
+	set size [array size altImageKeyToElem]
+	set maxSize 2
+	if {$size >= $maxSize} {
+	   return
+	}
+	set elem eAltImage${size}
+	set altImageKeyToElem($key) $elem
+    }  
+    $T item element configure $item cTree $elem -image $image
 
-    return [list $T $item cTree eAltImage]
+    return [list $T $item cTree $elem]
+}
+
+proc ::RosterPlain::FreeAltCache {} {
+    variable altImageKeyToElem
+    
+    unset -nocomplain altImageKeyToElem
 }
 
 #

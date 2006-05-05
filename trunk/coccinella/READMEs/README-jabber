@@ -7,10 +7,6 @@ This brief text describes the jabber features supported:
 
   * Ordinary messages, one-to-one chat, and groupchat.
 
-  * Agent(s) method to discover services.
-
-  * Browsing (jabber:iq:browse).
-
   * Disco.
 
   * Groupchat is supported via the "old" 'groupchat 1.0' protocol,

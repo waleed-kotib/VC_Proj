@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements an avatar style roster tree using treectrl.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.10 2006-04-30 09:19:00 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.11 2006-05-05 09:11:47 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -26,7 +26,9 @@ package provide RosterAvatar 1.0
 
 namespace eval ::RosterAvatar {
     
-    variable rosterStyle "avatar"
+    # The generic style name is 'avatar' which is also used in db names.
+    variable rosterBaseStyle "avatar"
+    variable thisRosterStyles {avatar flat flatsmall}
         
     # Register this style.
     ::RosterTree::RegisterStyle avatar Avatar  \
@@ -36,8 +38,26 @@ namespace eval ::RosterAvatar {
       ::RosterAvatar::CreateItem  \
       ::RosterAvatar::DeleteItem  \
       ::RosterAvatar::SetItemAlternative
-    
+
+    ::RosterTree::RegisterStyle flat Flat  \
+      ::RosterAvatar::Configure   \
+      ::RosterAvatar::Init        \
+      ::RosterAvatar::Delete      \
+      ::RosterAvatar::CreateItem  \
+      ::RosterAvatar::DeleteItem  \
+      ::RosterAvatar::SetItemAlternative
+
+    ::RosterTree::RegisterStyle flatsmall "Flat Small"  \
+      ::RosterAvatar::Configure   \
+      ::RosterAvatar::Init        \
+      ::RosterAvatar::Delete      \
+      ::RosterAvatar::CreateItem  \
+      ::RosterAvatar::DeleteItem  \
+      ::RosterAvatar::SetItemAlternative
+
+
     ::RosterTree::RegisterStyleSort avatar ::RosterAvatar::Sort
+    ::RosterTree::RegisterStyleSort flat   ::RosterAvatar::Sort
 
     # Event hooks.
     ::hooks::register  discoInfoHook        ::RosterAvatar::DiscoInfoHook
@@ -73,19 +93,25 @@ proc ::RosterAvatar::InitDB { } {
 
     # Use option database for customization. 
     # We use a specific format: 
-    #   element options:    rosterStyle:elementName-option
-    #   style options:      rosterStyle:styleName:elementName-option
+    #   element options:    rosterBaseStyle:elementName-option
+    #   style options:      rosterBaseStyle:styleName:elementName-option
 
     array set uFont [font actual CociDefaultFont]
     set uFont(-underline) 1
     set underlineFont [eval font create [array get uFont]]
 
-    set fillT {white {selected focus} black {selected !focus}}
-    set fillZ {white {selected focus} "#535353"  {}}
-    set fillM {blue {mouseover}} 
-    set fontU [list $underlineFont {mouseover}]
-    set fillF [concat $fillT $fillM]
-    set fontF [list $underlineFont {mouseover} CociDefaultFont {}]
+    array set uFontS [font actual CociSmallFont]
+    set uFontS(-underline) 1
+    set underlineFontS [eval font create [array get uFontS]]
+
+    set fillT   {white {selected focus} black {selected !focus}}
+    set fillZ   {white {selected focus} "#535353"  {}}
+    set fillM   {blue {mouseover}} 
+    set fontU   [list $underlineFont {mouseover}]
+    set fontUS  [list $underlineFontS {mouseover}]
+    set fillF   [concat $fillT $fillM]
+    set fontF   [list $underlineFont {mouseover} CociDefaultFont {}]
+    set fontFS  [list $underlineFontS {mouseover} CociSmallFont {}]
     set imop [::Rosticons::Get application/folder-open]
     set imcl [::Rosticons::Get application/folder-closed]
     set imageF [list $imop {open} $imcl {!open}]
@@ -121,14 +147,21 @@ proc ::RosterAvatar::InitDB { } {
     option add *Roster.avatar:eBorder-outlinewidth:nbg 0                 widgetDefault
 
     # Style layout options:
+    option add *Roster.avatar:styStatus:eImage-padx             {4 2}   widgetDefault
+    option add *Roster.avatar:styStatus:eImage-pady             2       widgetDefault
+
     option add *Roster.avatar:styAvailable:eOnText-padx         4       widgetDefault
-    option add *Roster.avatar:styAvailable:eAltImage-padx       2       widgetDefault
-    option add *Roster.avatar:styAvailable:eAvBorder-padx       1       widgetDefault
+    option add *Roster.avatar:styAvailable:eOnText-pady         4       widgetDefault
+    option add *Roster.avatar:styAvailable:eAltImage0-padx      2       widgetDefault
+    option add *Roster.avatar:styAvailable:eAltImage1-padx      2       widgetDefault
+    option add *Roster.avatar:styAvailable:eAvBorder-padx       {2 4}   widgetDefault
     option add *Roster.avatar:styAvailable:eAvBorder-pady       {1 2}   widgetDefault
 
     option add *Roster.avatar:styUnavailable:eOffText-padx      4       widgetDefault
-    option add *Roster.avatar:styUnavailable:eAltImage-padx     2       widgetDefault
-    option add *Roster.avatar:styUnavailable:eAvBorder-padx     1       widgetDefault
+    option add *Roster.avatar:styUnavailable:eOffText-pady      4       widgetDefault
+    option add *Roster.avatar:styUnavailable:eAltImage0-padx    2       widgetDefault
+    option add *Roster.avatar:styUnavailable:eAltImage1-padx    2       widgetDefault
+    option add *Roster.avatar:styUnavailable:eAvBorder-padx     {2 4}   widgetDefault
     option add *Roster.avatar:styUnavailable:eAvBorder-pady     {1 2}   widgetDefault
 
     option add *Roster.avatar:styFolder:eImage-padx             2       widgetDefault
@@ -138,7 +171,15 @@ proc ::RosterAvatar::InitDB { } {
     option add *Roster.avatar:styHead:eImage-padx               2       widgetDefault
     option add *Roster.avatar:styHead:eFolderText-padx          4       widgetDefault
     option add *Roster.avatar:styHead:eNumText-padx             4       widgetDefault
-
+    
+    # Specific roster style db options.
+    option add *Roster.flatsmall:eText-font           CociSmallFont     widgetDefault
+    option add *Roster.flatsmall:eNumText-font        CociSmallFont     widgetDefault
+    option add *Roster.flatsmall:eOnText-font         CociSmallFont     widgetDefault
+    option add *Roster.flatsmall:eOffText-font        CociSmallFont     widgetDefault
+    option add *Roster.flatsmall:eFolderText-font     $fontFS           widgetDefault
+    
+    
     set initedDB 1
 }
 
@@ -152,7 +193,7 @@ proc ::RosterAvatar::Configure {_T} {
     variable avatar
     variable avatarSize
     variable avatarDefault 
-    variable rosterStyle
+    variable rosterBaseStyle
     variable sortColumn
     variable initedDB
     
@@ -161,6 +202,7 @@ proc ::RosterAvatar::Configure {_T} {
     if {!$initedDB} {
 	InitDB
     }
+    set styleName [::RosterTree::GetStyle]
     
     # This is a dummy option.
     set stripeBackground [option get $T stripeBackground {}]
@@ -174,11 +216,13 @@ proc ::RosterAvatar::Configure {_T} {
     #   0) status
     #   1) the tree 
     #   2) hidden for tags
+    #   
+    # minwidth 24 = 16 + {4 2}
     $T column create -tag cStatus  \
-      -itembackground $stripes -resize 0 -minwidth 32 -button 1  \
+      -itembackground $stripes -resize 0 -minwidth 24 -button 1  \
       -borderwidth $bd -background $bg
     $T column create -tag cTree    \
-      -itembackground $stripes -resize 0 -expand 1 \
+      -itembackground $stripes -resize 0 -expand 1 -squeeze 1  \
       -text [mc {Contact Name}] -button 1 -arrow up -borderwidth $bd \
       -background $bg
     $T column create -tag cTag     \
@@ -190,11 +234,12 @@ proc ::RosterAvatar::Configure {_T} {
 	$T state define mouseover
     }
     
-    # The elements.
+    # The elements. eIndent is used for indentions.
     $T element create eImage       image
     $T element create eAvBorder    rect
     $T element create eAvatarImage image
-    $T element create eAltImage    image
+    $T element create eAltImage0   image
+    $T element create eAltImage1   image
     $T element create eOnText      text -lines 1
     $T element create eOffText     text -lines 1
     $T element create eText        text
@@ -203,29 +248,49 @@ proc ::RosterAvatar::Configure {_T} {
     $T element create eBorder      rect -open new -showfocus 1
     $T element create eNumText     text -lines 1
     $T element create eIndent      rect -fill ""
+
+    $T element create eDebug       rect -fill red -width 10 -height 10
     
-    # Styles collecting the elements.
+    # Styles collecting the elements ---
+    # Status:
     set S [$T style create styStatus]
     $T style elements $S {eBorder eImage}
     $T style layout $S eImage  -expand news
     $T style layout $S eBorder -detach 1 -iexpand xy
 
+    # Available:
     set S [$T style create styAvailable]
-    $T style elements $S {eBorder eIndent eAvBorder eAvatarImage eAltImage eOnText}
+    if {$styleName eq "avatar"} {
+	$T style elements $S {eBorder eIndent eOnText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
+    } elseif {$styleName eq "flat" || $styleName eq "flatsmall"} {
+	$T style elements $S {eBorder eIndent eOnText eAltImage1 eAltImage0}
+    }
     $T style layout $S eBorder      -detach 1 -iexpand xy
-    $T style layout $S eAvBorder    -union {eAvatarImage}
-    $T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
-    $T style layout $S eAltImage    -expand ns
-    $T style layout $S eOnText      -squeeze x -expand ns
-
+    $T style layout $S eOnText      -squeeze x -iexpand xy -sticky w
+    $T style layout $S eAltImage0   -expand ns
+    $T style layout $S eAltImage1   -expand ns
+    if {$styleName eq "avatar"} {
+	$T style layout $S eAvBorder    -union {eAvatarImage}
+	$T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
+    }
+    
+    # Unavailable:
     set S [$T style create styUnavailable]
-    $T style elements $S {eBorder eIndent eAvBorder eAvatarImage eAltImage eOffText}
+    if {$styleName eq "avatar"} {
+	$T style elements $S {eBorder eIndent eOffText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
+    } elseif {$styleName eq "flat" || $styleName eq "flatsmall"} {
+	$T style elements $S {eBorder eIndent eOffText eAltImage1 eAltImage0}
+    }
     $T style layout $S eBorder      -detach 1 -iexpand xy
-    $T style layout $S eAvBorder    -union {eAvatarImage}
-    $T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
-    $T style layout $S eAltImage    -expand ns
-    $T style layout $S eOffText     -squeeze x -expand ns
-
+    $T style layout $S eOffText     -squeeze x -iexpand xy -sticky w
+    $T style layout $S eAltImage0   -expand ns
+    $T style layout $S eAltImage1   -expand ns
+    if {$styleName eq "avatar"} {
+	$T style layout $S eAvBorder    -union {eAvatarImage} -sticky e
+	$T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
+    }
+    
+    # Folder:
     set S [$T style create styFolder]
     $T style elements $S {eBorder eFolderImage eFolderText eNumText}
     $T style layout $S eFolderText -squeeze x -expand ns
@@ -254,13 +319,15 @@ proc ::RosterAvatar::Configure {_T} {
     
     set sortColumn cTree
 
-    ::RosterTree::DBOptions $rosterStyle
+    ::RosterTree::DBOptions $rosterBaseStyle
+    ::RosterTree::DBOptions $styleName
 
- 
-    ::Avatar::Configure -autoget 1 -command ::RosterAvatar::OnAvatarPhoto
-    
-    # We shall get avatars for all users.
-    ::Avatar::GetAll
+    if {$styleName eq "avatar"} {
+	::Avatar::Configure -autoget 1 -command ::RosterAvatar::OnAvatarPhoto
+	
+	# We shall get avatars for all users.
+	::Avatar::GetAll
+    }
 }
 
 proc ::RosterAvatar::Sort {item order} {
@@ -403,7 +470,7 @@ proc ::RosterAvatar::SortStatus {item1 item2} {
 proc ::RosterAvatar::Init { } {
     variable T
     upvar ::Jabber::jprefs jprefs
-        
+	
     $T item delete all
     ::RosterTree::FreeTags
 }
@@ -416,6 +483,10 @@ proc ::RosterAvatar::Init { } {
 proc ::RosterAvatar::OnAvatarPhoto {type jid2} {
     
     ::Debug 4 "::RosterAvatar::OnAvatarPhoto type=$type, jid2=$jid2"
+    
+    if {[::RosterTree::GetStyle] ne "avatar"} {
+	return
+    }
 
     # Avatars are defined per BARE JID, jid2.
     # For online users we shall set avatar for all resources.
@@ -475,6 +546,7 @@ proc ::RosterAvatar::SetAvatarImage {type jid} {
 proc ::RosterAvatar::Delete { } {
     
     ::Avatar::Configure -autoget 0 -command ""
+    FreeAltCache
 }
 
 # RosterAvatar::CreateItem --
@@ -495,7 +567,7 @@ proc ::RosterAvatar::Delete { } {
 proc ::RosterAvatar::CreateItem {jid presence args} {    
     variable T
     variable jidStatus
-    variable rosterStyle
+    variable rosterBaseStyle
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 4 "::RosterAvatar::CreateItem jid=$jid, presence=$presence"
@@ -543,7 +615,6 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     set jtext  [eval {MakeDisplayText $jid $presence} $args]
     set jimage [eval {GetPresenceIcon $jidx $presence} $args]
     set items  {}
-    set jitems {}
         
     set status $presence
     if {[info exists argsArr(-show)]} {
@@ -581,7 +652,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
 	# Group(s):
 	#set image [::Rosticons::Get application/group-online]
 	set w [::Roster::GetRosterWindow]
-	set indent [option get $w ${rosterStyle}:indent {}]
+	set indent [option get $w ${rosterBaseStyle}:indent {}]
 
 	foreach group $argsArr(-groups) {
 	    set ptag [list group $group]
@@ -604,15 +675,19 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
 	$T item element configure $item cTree eNumText -text "($n)"
     }
 
+    # Design the balloon help window message.
+    foreach item $items {
+	eval {Balloon $jidx $presence $item} $args
+    }
     return $items
 }
 
 proc ::RosterAvatar::PutItemInHead {item ptag ptext pimage} {
     variable T
-    variable rosterStyle
+    variable rosterBaseStyle
     
     set w [::Roster::GetRosterWindow]
-    set indent [option get $w ${rosterStyle}:indent {}]
+    set indent [option get $w ${rosterBaseStyle}:indent {}]
 
     set pitem [FindWithTag $ptag]
     if {$pitem eq ""} {
@@ -679,6 +754,10 @@ proc ::RosterAvatar::CreateItemFromJID {jid} {
     return [eval {CreateItem $jid $opts(-type)} [array get opts]]
 }
 
+# RosterAvatar::SetItemAlternative --
+# 
+#       Sets additional icons. Empty removes.
+
 proc ::RosterAvatar::SetItemAlternative {jid key type value} {
 
     switch -- $type {
@@ -692,26 +771,44 @@ proc ::RosterAvatar::SetItemAlternative {jid key type value} {
     }
 }
 
-# @@@ multiple keys TODO
+# This proc is duplicated for all styles BAD!
+# Since it makes assumptions about the elements: 'eAltImage*'.
 proc ::RosterAvatar::SetAltImage {jid key image} {
     variable T
-    variable altKeyElemArr
+    variable altImageKeyToElem
     
-    # altKeyElemArr maps ($key,image|text) -> element name
+    #puts "::RosterAvatar::SetAltImage $jid, $key"
+        
+    # altImageKeyToElem maps: key -> element name
+    # 
+    # We use a static mapping: BAD?
     
     set mjid [jlib::jidmap $jid]
     set tag [list jid $mjid]
     set item [FindWithTag $tag]
     
-    if {[info exists altKeyElemArr($key,image)]} {
-	set elem $altKeyElemArr($key,image)
+    if {[info exists altImageKeyToElem($key)]} {
+	set elem $altImageKeyToElem($key)
     } else {
-	set elem eAltImage
-	set altKeyElemArr($key,image) eAltImage
-    }    
-    $T item element configure $item cTree $elem -image $image  
+	
+	# Find element name to use.
+	set size [array size altImageKeyToElem]
+	set maxSize 2
+	if {$size >= $maxSize} {
+	   return
+	}
+	set elem eAltImage${size}
+	set altImageKeyToElem($key) $elem
+    }  
+    $T item element configure $item cTree $elem -image $image
 
-    return [list $T $item cTree eAltImage]
+    return [list $T $item cTree $elem]
+}
+
+proc ::RosterAvatar::FreeAltCache {} {
+    variable altImageKeyToElem
+    
+    unset -nocomplain altImageKeyToElem
 }
 
 #
@@ -758,9 +855,11 @@ proc ::RosterAvatar::Balloon {jid presence item args} {
 
 proc ::RosterAvatar::TreeConfigureHook {args} {
     variable T
-    variable rosterStyle
+    variable thisRosterStyles
+    variable rosterBaseStyle
     
-    if {[::RosterTree::GetStyle] ne $rosterStyle} {
+    # We must verify we are displayed. Better?
+    if {[lsearch $thisRosterStyles [::RosterTree::GetStyle]] < 0} {
 	return
     }
     set wclass [::Roster::GetRosterWindow]
@@ -772,7 +871,7 @@ proc ::RosterAvatar::TreeConfigureHook {args} {
 	set postfix ""
     }
     foreach oname {-outline -outlinewidth} {
-	set dbname ${rosterStyle}:${ename}${oname}${postfix}	    
+	set dbname ${rosterBaseStyle}:${ename}${oname}${postfix}	    
 	set dbvalue [option get $wclass $dbname {}]
 	lappend eopts $oname $dbvalue
     }
@@ -790,10 +889,11 @@ proc ::RosterAvatar::TreeConfigureHook {args} {
 #       possible to set icons of foreign IM users.
 
 proc ::RosterAvatar::DiscoInfoHook {type from subiq args} {
-    variable rosterStyle
+    variable thisRosterStyles
     upvar ::Jabber::jstate jstate
     
-    if {[::RosterTree::GetStyle] ne $rosterStyle} {
+    # We must verify we are displayed. Better?
+    if {[lsearch $thisRosterStyles [::RosterTree::GetStyle]] < 0} {
 	return
     }
     if {$type ne "error"} {
