@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.15 2006-05-05 09:11:47 matben Exp $
+# $Id: RosterPlain.tcl,v 1.16 2006-05-07 14:08:00 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -242,8 +242,9 @@ proc ::RosterPlain::Delete {} {
 #       configures each of them according to our style.
 #
 # Arguments:
-#       jid         as reported by the presence
-#                   if from roster element any nonempty resource is appended
+#       jid         for available JID always use the JID as reported in the
+#                   presence 'from' attribute.
+#                   for unavailable JID always us the roster item JID.
 #       presence    "available" or "unavailable"
 #       args        list of '-key value' pairs of presence and roster
 #                   attributes.
@@ -259,25 +260,14 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 	unavailable  styUnavailable
     }
 
-    # jid2 is always without a resource
-    # jid3 is as reported
-    # jidx is as jid3 if available else jid2
-    
-    jlib::splitjid $jid jid2 res
-    
-    set jid3 $jid
-    set jidx $jid
-    if {$presence eq "available"} {
-	set jidx $jid
-    } else {
-	set jidx $jid2
-    }    
+    # @@@ Use JID as will be used for new item!
     
     # Defaults:
     set jtext  [eval {MakeDisplayText $jid $presence} $args]
-    set jimage [eval {GetPresenceIcon $jidx $presence} $args]
+    set jimage [eval {GetPresenceIcon $jid $presence} $args]
     set items  {}
     set jitems {}
+    puts "++++++++++++::RosterPlain::CreateItem jid=$jid, jimage=$jimage"
     
     # Creates a list {item tag ?item tag? ...} for items.
     set itemTagList [eval {::RosterTree::CreateItemBase $jid $presence} $args]
@@ -337,13 +327,15 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 
     # Design the balloon help window message.
     foreach item $jitems {
-	eval {Balloon $jidx $presence $item} $args
+	eval {Balloon $jid $presence $item} $args
     }
     return $items
 }
 
 proc ::RosterPlain::ConfigureItem {item style text image} {
     variable T
+    
+    puts "%%%%%%%  ::RosterPlain::ConfigureItem item=$item, image=$image"
     
     $T item style set $item cTree $style
     $T item element configure $item  \
@@ -356,9 +348,7 @@ proc ::RosterPlain::ConfigureItem {item style text image} {
 #       It is also responsible for cleaning up empty dirs etc.
 
 proc ::RosterPlain::DeleteItem {jid} {
- 
-    ::Debug 5 "::RosterPlain::DeleteItem, jid=$jid"
-    
+     
     # Sibling of '::RosterTree::CreateItemBase'.
     ::RosterTree::DeleteItemBase $jid
     
@@ -398,7 +388,7 @@ proc ::RosterPlain::SetAltImage {jid key image} {
     variable T
     variable altImageKeyToElem
 	
-    #puts "::RosterPlain::SetAltImage $jid, $key"
+    puts "::RosterPlain::SetAltImage $jid, $key"
     
     # altImageKeyToElem maps: key -> element name
     # 
@@ -543,40 +533,15 @@ proc ::RosterPlain::DiscoInfoHook {type from subiq args} {
 
 proc ::RosterPlain::PostProcess {method from} {
     
-    ::Debug 5 "::RosterPlain::PostProcess $from"
-
     if {[string equal $method "browse"]} {
 	set matchHost 0
 	PostProcessItem $from $matchHost root
     } elseif {[string equal $method "disco"]} {
-	PostProcessDiscoInfo $from
+	::RosterTree::BasePostProcessDiscoInfo $from cTree eImage
     }    
 }
 
-proc ::RosterPlain::PostProcessDiscoInfo {from} {
-    variable T
-        
-    set jids [::Roster::GetUsersWithSameHost $from]
-    foreach jid $jids {
-	set tag [list jid $jid]
-	foreach item [FindWithTag $tag] {
-	    
-	    # Need to identify any associated transport and place it
-	    # in the transport if not there.
-	    set icon [GetPresenceIconFromJid $jid]
-	    set istrpt [::Roster::IsTransportHeuristics $jid]
-	    if {$istrpt} {
-		$T item delete $item
-		CreateItemFromJID $jid
-	    } else {
-		if {$icon ne ""} {
-		    $T item image $item cTree $icon
-		}
-	    }
-	}
-    }
-}
-
+# OUTDATED: browse!
 proc ::RosterPlain::PostProcessItem {from matchHost item} {
     variable T    
     

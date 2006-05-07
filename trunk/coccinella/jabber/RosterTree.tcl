@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.18 2006-05-05 09:11:47 matben Exp $
+# $Id: RosterTree.tcl,v 1.19 2006-05-07 14:08:01 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -132,6 +132,21 @@ proc ::RosterTree::StyleDelete {name} {
     $plugin($name,delete)
 }
 
+# RosterTree::StyleCreateItem --
+# 
+#       Dispatch tree item creation and configure any alternatives.
+# 
+# Arguments:
+#       jid         for available JID always use the JID as reported in the
+#                   presence 'from' attribute.
+#                   for unavailable JID always us the roster item JID.
+#       presence    "available" or "unavailable"
+#       args        list of '-key value' pairs of presence and roster
+#                   attributes.
+#       
+# Results:
+#       treectrl item.
+
 proc ::RosterTree::StyleCreateItem {jid presence args} {
     variable plugin
     
@@ -239,6 +254,7 @@ if {0} {
     ::RosterTree::StyleSetItemAlternative mari@localhost xxxxx image [::Rosticons::Get phone/on_phone]
     ::RosterTree::StyleSetItemAlternative killer@localhost phone image [::Rosticons::Get phone/on_phone]
     parray ::RosterTree::altImageCache
+    parray ::RosterPlain::altImageKeyToElem
     parray ::RosterAvatar::altImageKeyToElem
 }
     
@@ -689,6 +705,10 @@ proc ::RosterTree::OnDestroy {} {
 #       Offline and other are stored with 2-tier jid with no resource.
 #       
 # Arguments:
+#       jid         for available JID always use the JID as reported in the
+#                   presence 'from' attribute.
+#                   for unavailable JID always us the roster item JID.
+#
 #       jid         as reported by the presence
 #                   if from roster element any nonempty resource is appended
 #       presence    "available" or "unavailable"
@@ -704,9 +724,9 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs  jprefs
     
-    ::Debug 5 "::RosterTree::CreateItemBase jid=$jid, presence=$presence, args='$args'"
+    ::Debug 4 "::RosterTree::CreateItemBase jid=$jid, presence=$presence, args='$args'"
 
-    if {![regexp $presence {(available|unavailable)}]} {
+    if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
     }
     if {!$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
@@ -719,24 +739,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     array set argsArr $args
     set itemTagList {}
 
-    # For Online users, the tree item must be a 3-tier jid with resource 
-    # since a user may be logged in from more than one resource.
-    # Note that some (icq) transports have 3-tier items that are unavailable!
-    
-    # jid2 is always without a resource
-    # jid3 is as reported
-    # jidx is as jid3 if available else jid2
-    
-    jlib::splitjid $jid jid2 res
-    
-    set jid3 $jid
-    set jidx $jid
-    if {$presence eq "available"} {
-	set jidx $jid
-    } else {
-	set jidx $jid2
-    }    
-    set mjid [jlib::jidmap $jidx]
+    set mjid [jlib::jidmap $jid]
     
     # Keep track of any dirs created.
     set dirtags {}
@@ -744,7 +747,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     if {$istrpt} {
 	
 	# Transports:
-	set itemTagList [CreateItemWithParent $jid3 transport]
+	set itemTagList [CreateItemWithParent $mjid transport]
 	if {[llength $itemTagList] == 4} {
 	    lappend dirtags [lindex $itemTagList 1]
 	}
@@ -847,6 +850,59 @@ proc ::RosterTree::DeleteItemBase {jid} {
     # Pending and transports.
     DeleteWithTag [list pending $jid]
     DeleteWithTag [list transport $jid]
+}
+
+# RosterTree::BasePostProcessDiscoInfo --
+# 
+#       Disco info post processing must handle two sets of JID:
+#         1) transports: 
+#             - move to transport folder if not there
+#             - set associated icon
+#         2) users from this transport:
+#             - set associated icon
+#       
+#       Note that the 'from', disco item, may differ by a resource to the
+#       roster item JID.
+
+proc ::RosterTree::BasePostProcessDiscoInfo {from column elem} {
+    variable T
+	
+    set jids [::Roster::GetUsersWithSameHost $from]
+
+    #puts ">>>>>>>>> ::RosterTree::BasePostProcessDiscoInfo jids=$jids"
+
+    foreach jid $jids {
+	
+	# Ordinary users and so far unrecognized transports.
+	set istrpt [::Roster::IsTransportHeuristics $jid]
+	set icon [::Roster::GetPresenceIconFromJid $jid]
+	#puts "\t istrpt=$istrpt, icon=$icon"
+
+	set tag [list jid $jid]
+	foreach item [FindWithTag $tag] {
+	    
+	    # Need to identify any associated transport and place it
+	    # in the transport if not there.
+	    if {$istrpt} {
+		
+		# It was placed among the users, move to transports.
+		$T item delete $item
+		CreateItemFromJID $jid
+	    } else {
+		if {$icon ne ""} {
+		    $T item element configure $item $column $elem -image $icon
+		}
+	    }
+	}
+	
+	# Set icons for already recognized transports.
+	set tag [list transport $jid]
+	foreach item [FindWithTag $tag] {
+	    if {$icon ne ""} {
+		$T item element configure $item $column $elem -image $icon
+	    }
+	}
+    }
 }
 
 proc ::RosterTree::MCHead {str} {

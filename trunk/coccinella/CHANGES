@@ -22,6 +22,7 @@ Coccinella-0.95.12 (0604??):
  o removed all old agents/browse/conference code
  o support for vcrad based avatars
  o file cache for avatars
+ o new (flat) minimalistic roster styles
 
 Coccinella-0.95.11 (060115):
 

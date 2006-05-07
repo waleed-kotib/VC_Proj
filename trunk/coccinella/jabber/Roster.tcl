@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.167 2006-05-05 09:11:47 matben Exp $
+# $Id: Roster.tcl,v 1.168 2006-05-07 14:08:00 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -31,7 +31,7 @@ namespace eval ::Roster:: {
     ::hooks::register prefsUserDefaultsHook  ::Roster::UserDefaultsHook
 
     # Use option database for customization. 
-    # Use priority 30 just to override the widgetDefault values!
+    # Use priority 50 just to override the widgetDefault values!
     
     # Standard widgets and standard options.
     option add *Roster.borderWidth          0               50
@@ -44,6 +44,7 @@ namespace eval ::Roster:: {
     # Specials.
     option add *Roster.waveImage            wave            widgetDefault
     option add *Roster.minimalPadding       {0}             widgetDefault
+    option add *Roster.whiteboard12Image    whiteboard12    widgetDefault
     
     variable wtree -
     
@@ -267,6 +268,7 @@ proc ::Roster::Build {w} {
     variable wbox
     variable wwave
     variable rstyle
+    variable icons
     upvar ::Jabber::jprefs jprefs
         
     # The frame of class Roster.
@@ -302,7 +304,10 @@ proc ::Roster::Build {w} {
     grid  $wxsc   -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure    $wbox 0 -weight 1
-        
+    
+    # Cache any expensive stuff.
+    set icons(whiteboard12) [::Theme::GetImage [option get $w whiteboard12Image {}]]
+   
     # Handle the prefs "Show" state.
     if {$jprefs(ui,main,show,minimal)} {
 	StyleMinimal
@@ -775,7 +780,7 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    if {[info exists attrArr(-type)]} {
 		set type $attrArr(-type)
 	    }
-	    if {![regexp $type {(available|unavailable)}]} {
+	    if {($type ne "available") && ($type ne "unavailable")} {
 		return
 	    }
 	    
@@ -896,12 +901,14 @@ proc ::Roster::SetItem {jid args} {
     #    sure that we don't have any "old" item???
     # 2) Must remove all resources for this jid first, and then add back.
     #    Remove also jid2.
+
     if {!$inroster} {
     	set resList [$jstate(roster) getresources $jid]
-	foreach res $resList {
-	    ::RosterTree::StyleDeleteItem $jid/$res
-	}
-	if {$resList eq ""} {
+	if {$resList ne {}} {
+	    foreach res $resList {
+		::RosterTree::StyleDeleteItem $jid/$res
+	    }
+	} else {
 	    ::RosterTree::StyleDeleteItem $jid
 	}
     }
@@ -945,7 +952,7 @@ proc ::Roster::SetItem {jid args} {
 #       Sets the presence of the jid in our UI.
 #
 # Arguments:
-#       jid         3-tier jid usually but can be a 2-tier jid if ICQ...
+#       jid         the JID as reported by the presence 'from' attribute.
 #       presence    "available", "unavailable", or "unsubscribed"
 #       args        list of '-key value' pairs of presence attributes.
 #       
@@ -955,6 +962,7 @@ proc ::Roster::SetItem {jid args} {
 proc ::Roster::Presence {jid presence args} {
     variable timer
     variable sortID
+    variable icons
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
@@ -968,26 +976,23 @@ proc ::Roster::Presence {jid presence args} {
     # Wrong! We may have 2-tier jids from transports:
     # <presence from='user%hotmail.com@msn.myserver' ...
     # Or 3-tier (icq) with presence = 'unavailable' !
-    
-    jlib::splitjid $jid jid2 res
+    # 
+    # New: For available JID always use the JID as reported in the
+    #      presence 'from' attribute.
+    #      For unavailable JID always us the roster item JID.
+
+    set rjid [$jstate(roster) getrosterjid $jid]
         
     # This gets a list '-name ... -groups ...' etc. from our roster.
-    set itemAttr [$jstate(roster) getrosteritem $jid2]
-    if {$itemAttr eq ""} {
-	# Needed for icq transports etc.
-	set jid3 $jid2/$argsArr(-resource)
-	set itemAttr [$jstate(roster) getrosteritem $jid3]
-    }
+    set itemAttr [$jstate(roster) getrosteritem $rjid]
     
     # First remove if there, then add in the right tree dir.
     ::RosterTree::StyleDeleteItem $jid
 
-    set treePres $presence
     set items {}
 
     # Put in our roster tree.
     if {[string equal $presence "unsubscribed"]} {
-	set treePres "unavailable"
 	if {$jprefs(rost,rmIfUnsub)} {
 	    
 	    # Must send a subscription remove here to get rid if it completely??
@@ -995,35 +1000,35 @@ proc ::Roster::Presence {jid presence args} {
 	    #$jstate(jlib) roster_remove $jid ::Roster::PushProc
 	} else {
 	    set items [eval {
-		::RosterTree::StyleCreateItem $jid $treePres
+		::RosterTree::StyleCreateItem $rjid "unavailable"
 	    } $itemAttr $args]
 	}
     } elseif {[string equal $presence "unavailable"]} {
 	
 	# XMPP specifies that an 'unavailable' element is sent *after* 
 	# we've got a subscription='remove' element. Skip it!
-	# Problems with transports that have /registered.
-	set mjid2 [jlib::jidmap $jid2]
-	set users [$jstate(roster) getusers]
-	if {([lsearch $users $mjid2] < 0) && ([lsearch $users $jid] < 0)} {
-	    return
-	}
+	# Problems with transports that have /registered?
 	
-	# Add only if no other jid2/* available.
-	set isavailable [$jstate(roster) isavailable $jid2]
+	# Add only to offline if no other jid2/* available.
+	# If not in roster we don't get 'isavailable'.
+	set isavailable [$jstate(roster) isavailable $rjid]
 	if {!$isavailable} {
 	    set items [eval {
-		::RosterTree::StyleCreateItem $jid2 $treePres
+		::RosterTree::StyleCreateItem $rjid $presence
 	    } $itemAttr $args]
 	}
     } elseif {[string equal $presence "available"]} {
 	set items [eval {
-	    ::RosterTree::StyleCreateItem $jid $treePres
+	    ::RosterTree::StyleCreateItem $jid $presence
 	} $itemAttr $args]
+	if {[IsCoccinella $jid]} {
+	    ::RosterTree::StyleSetItemAlternative $jid whiteboard  \
+	      image $icons(whiteboard12)
+	}
     }
     
     # This minimizes the cost of sorting.
-    if {$items ne {} && ![info exists sortID]} {
+    if {[llength $items] && ![info exists sortID]} {
 	set pitem [::RosterTree::GetParent [lindex $items end]]
 	set sortID [after idle [namespace current]::SortIdle $pitem]
     }
@@ -1052,6 +1057,7 @@ proc ::Roster::IsCoccinella {jid3} {
     upvar ::Jabber::coccixmlns coccixmlns
     upvar ::Jabber::xmppxmlns xmppxmlns
     
+    #puts "\t ::Roster::IsTransport=[::Roster::IsTransport $jid3]"
     set ans 0
     if {![IsTransportHeuristics $jid3]} {
 	set node [$jstate(roster) getcapsattr $jid3 node]
@@ -1059,6 +1065,7 @@ proc ::Roster::IsCoccinella {jid3} {
 	    set ans 1
 	}
     }
+    #puts "\t ::Roster::IsCoccinella $ans  $jid3"
     return $ans
 }
 
@@ -1099,7 +1106,7 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     
     array set argsArr $args
     
-    ::Debug 5 "GetPresenceIcon jid=$jid, presence=$presence, args=$args"
+    ::Debug 4 "GetPresenceIcon jid=$jid, presence=$presence, args=$args"
     
     # Construct the 'type/sub' specifying the icon.
     set itype status
@@ -1386,21 +1393,43 @@ proc ::Roster::IsTransport {jid} {
 }
 
 # This is a really BAD thing to do but I there seems to be no robust method.
+# I really hate do do this!
+# Use 'IsTransport' to get a true answer.
 
 proc ::Roster::IsTransportHeuristics {jid} {
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jserver jserver
     
-    # Some transports (icq) have a jid = icq.jabber.se/registered.
+    # Some transports (icq) have a jid = icq.jabber.se/registered and
+    # yahoo.jabber.ru/registered
     # Others, like MSN, have a jid = msn.jabber.ccc.de.
     set transport 0
     if {![catch {jlib::splitjidex $jid node host res}]} {
-	if {($node eq "") && ($res eq "registered")} {
-	    set transport 1
+	if {$node eq ""} {
+	    if {$res eq "registered"} {
+		set transport 1
+	    } else {
+		
+		# Search for matching  msn.$jserver(this)  etc.
+		set idx [string first . $host]
+		if {$idx > 0} {
+		    set phost [string range $host [expr {$idx+1}] end]
+		    if {$phost eq $jserver(this)} {
+			set cname [string range $host 0 [expr {$idx-1}]]
+			switch -- $cname {
+			    aim - gadugadu - icq - msn - smtp - yahoo {			
+				set transport 1
+			    }
+			}
+		    }
+		}
+	    }
 	}
     }
     if {!$transport} {
 	set transport [IsTransport $jid]
     }
+    #puts "\t ::Roster::IsTransportHeuristics $transport $jid"
     return $transport
 }
 
@@ -1445,7 +1474,7 @@ proc ::Roster::InitPrefsHook { } {
     set jprefs(rost,showTrpts)      1
     set jprefs(rost,sort)          +1
     
-    set jprefs(rost,useWBrosticon)  1
+    set jprefs(rost,useWBrosticon)  0
     
     # Keep track of all closed tree items. Default is all open.
     set jprefs(rost,closedItems) {}

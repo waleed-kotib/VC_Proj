@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.22 2006-04-06 12:47:40 matben Exp $
+# $Id: Rosticons.tcl,v 1.23 2006-05-07 14:08:01 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -43,6 +43,7 @@ namespace eval ::Rosticons:: {
     # Other init hooks depend on us!
     ::hooks::register initHook               ::Rosticons::Init    20
     
+    # The sets made default (not the named default) MUST always exist!
     variable defaultSet
     array set defaultSet {
 	aim             "Crystal"
@@ -50,7 +51,7 @@ namespace eval ::Rosticons:: {
 	gadugadu        "default"
 	icq             "Crystal"
 	msn             "Crystal"
-	phone           "default"
+	phone           "plain"
 	smtp            "default"
 	status          "Crystal"
 	whiteboard      "default"
@@ -66,6 +67,7 @@ proc ::Rosticons::Init { } {
     
     variable priv
     variable state
+    variable defaultSet
     upvar ::Jabber::jprefs jprefs
 
     # 'tmpicons(name,key)' map from status/offline (key) and iconset name
@@ -94,11 +96,11 @@ proc ::Rosticons::Init { } {
     # process anything.
     GetAllTypeSets
     
-    # Treat each 'type' in turn. Verify that exists. 'default' as fallback.
+    # Treat each 'type' in turn. Verify that exists. defaultSet as fallback.
     foreach type $state(types) {
 	set name $jprefs(rost,icons,$type)
 	if {![info exists state(path,$type,$name)]} {
-	    set name "default"
+	    set name $defaultSet($type)
 	}
 	LoadTmpIconSet $type $name
 	SetFromTmp $type $name

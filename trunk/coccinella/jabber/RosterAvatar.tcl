@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.11 2006-05-05 09:11:47 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.12 2006-05-07 14:08:00 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -484,6 +484,7 @@ proc ::RosterAvatar::OnAvatarPhoto {type jid2} {
     
     ::Debug 4 "::RosterAvatar::OnAvatarPhoto type=$type, jid2=$jid2"
     
+    # We get this callback async. Beware!
     if {[::RosterTree::GetStyle] ne "avatar"} {
 	return
     }
@@ -555,8 +556,8 @@ proc ::RosterAvatar::Delete { } {
 #       configures each of them according to our style.
 #
 # Arguments:
-#       jid         as reported by the presence
-#                   if from roster element any nonempty resource is appended
+#       jid         the jid that shall be used in roster, typically jid3 for
+#                   online users and jid2 for offline.
 #       presence    "available" or "unavailable"
 #       args        list of '-key value' pairs of presence and roster
 #                   attributes.
@@ -572,7 +573,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     
     ::Debug 4 "::RosterAvatar::CreateItem jid=$jid, presence=$presence"
 
-    if {![regexp $presence {(available|unavailable)}]} {
+    if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
     }
     if {!$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
@@ -592,28 +593,17 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
 	available   eOnText
 	unavailable eOffText
     }
+    set rosterStyle [::RosterTree::GetStyle]
 
     # Always try to show avatar.
     set avatarForOffline 1
+    
+    set mjid  [jlib::jidmap $jid]
+    set mjid2 [jlib::barejid $mjid]
 
-    # jid2 is always without a resource
-    # jid3 is as reported
-    # jidx is as jid3 if available else jid2
-    
-    jlib::splitjid $jid jid2 res
-    
-    set jid3 $jid
-    set jidx $jid
-    if {$presence eq "available"} {
-	set jidx $jid
-    } else {
-	set jidx $jid2
-    }    
-    set mjid [jlib::jidmap $jidx]
-    
     # Defaults:
     set jtext  [eval {MakeDisplayText $jid $presence} $args]
-    set jimage [eval {GetPresenceIcon $jidx $presence} $args]
+    set jimage [eval {GetPresenceIcon $jid $presence} $args]
     set items  {}
         
     set status $presence
@@ -634,9 +624,11 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     set item [CreateWithTag $tag $style $elem $jtext $jimage root]
     lappend items $item
     
-    if {$avatarForOffline || ($presence eq "available")} {
-	if {[::Avatar::HavePhoto $jid2]} {
-	    SetAvatarImage put $jidx
+    if {$rosterStyle eq "avatar"} {
+	if {$avatarForOffline || ($presence eq "available")} {
+	    if {[::Avatar::HavePhoto $mjid2]} {
+		SetAvatarImage put $mjid
+	    }
 	}
     }
 
@@ -677,7 +669,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
 
     # Design the balloon help window message.
     foreach item $items {
-	eval {Balloon $jidx $presence $item} $args
+	eval {Balloon $jid $presence $item} $args
     }
     return $items
 }
@@ -931,32 +923,8 @@ proc ::RosterAvatar::PostProcess {method from} {
 	set matchHost 0
 	PostProcessItem $from $matchHost root
     } elseif {[string equal $method "disco"]} {
-	PostProcessDiscoInfo $from
+	::RosterTree::BasePostProcessDiscoInfo $from cStatus eImage
     }    
-}
-
-proc ::RosterAvatar::PostProcessDiscoInfo {from} {
-    variable T
-        
-    set jids [::Roster::GetUsersWithSameHost $from]
-    foreach jid $jids {
-	set tag [list jid $jid]
-	foreach item [FindWithTag $tag] {
-	    
-	    # Need to identify any associated transport and place it
-	    # in the transport if not there.
-	    set icon [GetPresenceIconFromJid $jid]
-	    set istrpt [::Roster::IsTransportHeuristics $jid]
-	    if {$istrpt} {
-		$T item delete $item
-		CreateItemFromJID $jid
-	    } else {
-		if {$icon ne ""} {
-		    $T item image $item cStatus $icon
-		}
-	    }
-	}
-    }
 }
 
 proc ::RosterAvatar::PostProcessItem {from matchHost item} {
