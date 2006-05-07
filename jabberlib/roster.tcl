@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.45 2006-04-18 14:01:27 matben Exp $
+# $Id: roster.tcl,v 1.46 2006-05-07 14:08:01 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -639,6 +639,38 @@ proc roster::isitem {rostName jid} {
 	return 1
     } else {
 	return 0
+    }
+}
+
+# roster::getrosterjid --
+# 
+#       Returns the matching jid as reported by a roster item.
+#       If given a full JID try match this, else bare JID.
+#       If given a bare JID try match this.
+#       It cannot find a full JID from a bare JID.
+#       For ordinary users this is a jid2.
+#
+# Arguments:
+#       rostName:   the instance of this roster.
+#       jid:        
+#       
+# Results:
+#       a jid or empty if no matching roster item.
+
+proc roster::getrosterjid {rostName jid} {
+    
+    upvar ${rostName}::rostArr rostArr
+
+    set mjid [jlib::jidmap $jid]
+    if {[info exists rostArr($mjid,item)]} {
+	return $jid
+    } else {
+	set mjid2 [jlib::barejid $mjid]
+	if {[info exists rostArr($mjid2,item)]} {
+	    return [jlib::barejid $jid]
+	} else {
+	    return ""
+	}
     }
 }
 

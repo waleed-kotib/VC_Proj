@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements a two line style roster tree using treectrl.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 20052006  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.9 2006-04-28 14:04:07 matben Exp $
+# $Id: RosterTwo.tcl,v 1.10 2006-05-07 14:08:01 matben Exp $
 
 package require RosterTree
 
@@ -140,8 +140,8 @@ proc ::RosterTwo::CreateHeadItem {type} {
 #       configures each of them according to our style.
 #
 # Arguments:
-#       jid         as reported by the presence
-#                   if from roster element any nonempty resource is appended
+#       jid         the jid that shall be used in roster, typically jid3 for
+#                   online users and jid2 for offline.
 #       presence    "available" or "unavailable"
 #       args        list of '-key value' pairs of presence and roster
 #                   attributes.
@@ -150,33 +150,35 @@ proc ::RosterTwo::CreateHeadItem {type} {
 #       treectrl item.
 
 proc ::RosterTwo::CreateItem {jid presence args} {    
-    upvar ::Jabber::jstate jstate
     variable T
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
 
-    # jid2 is always without a resource
-    # jid3 is as reported
-    # jidx is as jid3 if available else jid2
-    
-    jlib::splitjid $jid jid2 res
-    
-    set jid3 $jid
-    set jidx $jid
-    if {$presence eq "available"} {
-	set jidx $jid
-    } else {
-	set jidx $jid2
-    }    
+    if {($presence ne "available") && ($presence ne "unavailable")} {
+	return
+    }
+    if {!$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
+	return
+    }
+    set istrpt [::Roster::IsTransportHeuristics $jid]
+    if {$istrpt && !$jprefs(rost,showTrpts)} {
+	return
+    }
+    array set argsArr $args
+
+    set jid2 [jlib::barejid $jid]
+    set mjid [jlib::jidmap $jid]
     
     # Defaults:
     set name [$jstate(roster) getname $jid2]
     if {$name ne ""} {
-	set jtext "$name ($jidx)"
+	set jtext "$name ($jid)"
     } else {
-	set jtext $jidx
+	set jtext $jid
     }
     set status [$jstate(roster) getstatus $jid]
     set since  [$jstate(roster) availablesince $jid]
-    set jimage [eval {GetPresenceIcon $jidx $presence} $args]
+    set jimage [eval {GetPresenceIcon $jid $presence} $args]
     set items  {}
     set jitems {}
     
@@ -248,7 +250,7 @@ proc ::RosterTwo::CreateItem {jid presence args} {
     
     # Design the balloon help window message.
     foreach item $jitems {
-	eval {Balloon $jidx $presence $item} $args
+	eval {Balloon $jid $presence $item} $args
     }
     return $items
 }
@@ -392,31 +394,8 @@ proc ::RosterTwo::PostProcess {method from} {
     if {[string equal $method "browse"]} {
 	# empty
     } elseif {[string equal $method "disco"]} {
-	PostProcessDiscoInfo $from
+	::RosterTree::BasePostProcessDiscoInfo $from cTree eImage
     }    
 }
 
-proc ::RosterTwo::PostProcessDiscoInfo {from} {
-    variable T
-	
-    set jids [::Roster::GetUsersWithSameHost $from]
-    foreach jid $jids {
-	set tag [list jid $jid]
-	foreach item [FindWithTag $tag] {
-	    
-	    # Need to identify any associated transport and place it
-	    # in the transport if not there.
-	    set icon [GetPresenceIconFromJid $jid]
-	    set istrpt [::Roster::IsTransportHeuristics $jid]
-	    if {$istrpt} {
-		$T item delete $item
-		CreateItemFromJID $jid
-	    } else {
-		if {$icon ne ""} {
-		    $T item image $item cTree $icon
-		}
-	    }
-	}
-    }
-}
 
