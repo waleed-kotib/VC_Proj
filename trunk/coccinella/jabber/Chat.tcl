@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.162 2006-05-04 12:46:39 matben Exp $
+# $Id: Chat.tcl,v 1.163 2006-05-08 13:21:53 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -566,6 +566,9 @@ proc ::Chat::GotMsg {body args} {
             eval {XEventHandleAnyXElem $chattoken $argsArr(-x)} $args
         }
     }
+
+    # This is important since clicks may have reset the insert mark.
+    $chatstate(wtext) mark set insert end
 
     if {[info exists argsArr(-subject)]} {
 	set chatstate(subject) $argsArr(-subject)
@@ -2233,6 +2236,9 @@ proc ::Chat::Send {dlgtoken} {
      -type chat -name $jstate(mejid) -thread $threadID -time $dateISO \
      -body $allText -tag me
 
+   # This is important since clicks may have reset the insert mark.
+   $chatstate(wtext) mark set insert end
+
     # Need to detect if subject changed.
     set opts {}
     if {![string equal $chatstate(subject) $chatstate(lastsubject)]} {
@@ -2393,6 +2399,10 @@ proc ::Chat::PresenceHook {jid type args} {
 	if {[string equal $chatstate(presence) $show]} {
 	    return
 	}
+
+	# This is important since clicks may have reset the insert mark.
+	$chatstate(wtext) mark set insert end
+
 	set showStr [::Roster::MapShowToText $show]
 	InsertMessage $chattoken sys "$from is: $showStr\n$status"
 	
