@@ -197,9 +197,8 @@
 ::msgcat::mcset es Whiteboard		{Pizarra}
 ::msgcat::mcset es Width 		{Anchura}
 ::msgcat::mcset es Work			{Trabajo}
-::msgcat::mcset es Work                 {Trabajo
-::msgcat::mcset es Yes                  {Sí}e
-::msgcat::mcset es yes                  {sí}i
+::msgcat::mcset es Yes                  {Sí}
+::msgcat::mcset es yes                  {sí}
 
 # Canvas item options, names and values.
 # Names:
