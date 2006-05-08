@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.123 2006-04-08 07:02:48 matben Exp $
+# $Id: JUI.tcl,v 1.124 2006-05-08 09:57:38 matben Exp $
 
 package provide JUI 1.0
 
@@ -124,11 +124,14 @@ proc ::Jabber::UI::Init { } {
 	  {-variable ::Jabber::jstate(inboxVis)}}
 	{separator}
 	{command     mSearch        {::Search::Build}         disabled {}}
-	{command     mAddNewUser    {::Jabber::User::NewDlg}       disabled {}}
+	{command     mAddNewUser    {::Jabber::User::NewDlg}  disabled {}}
+	{cascade     mDisco         {}                        disabled {} {} {
+	    {command mAddServer     {::Disco::AddServerDlg}   normal   {}}
+	}}
 	{separator}
 	{command     mSendMessage   {::NewMsg::Build}         disabled M}
 	{command     mChat          {::Chat::OnMenu}          disabled T}
-	{cascade     mStatus        {}                                  disabled {} {} {}}
+	{cascade     mStatus        {}                        disabled {} {} {}}
 	{separator}
 	{command     mEnterRoom     {::GroupChat::EnterOrCreate enter}  disabled R}
 	{command     mCreateRoom    {::GroupChat::EnterOrCreate create} disabled {}}
@@ -175,7 +178,8 @@ proc ::Jabber::UI::Init { } {
     }
 
     # The status menu is built dynamically due to the -image options on 8.4.
-    lset menuDefs(rost,jabber) 12 6 [::Jabber::Status::BuildStatusMenuDef]
+    set idx [lindex [lsearchsublists $menuDefs(rost,jabber) mStatus] 0]
+    lset menuDefs(rost,jabber) $idx 6 [::Jabber::Status::BuildStatusMenuDef]
 
     set menuDefs(rost,edit) {    
 	{command   mCut              {::UI::CutCopyPasteCmd cut}      disabled X}
@@ -967,6 +971,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mEditBookmarks -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mRemoveAccount -state normal
+	    ::UI::MenuMethod $wmj entryconfigure mDisco -state normal
 	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state disabled
 	}
 	disconnect {
@@ -993,6 +998,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mEditBookmarks -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mRemoveAccount -state disabled
+	    ::UI::MenuMethod $wmj entryconfigure mDisco -state disabled
 	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state normal
 	}
     }
