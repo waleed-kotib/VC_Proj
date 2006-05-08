@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.85 2006-04-17 13:23:38 matben Exp $
+# $Id: Disco.tcl,v 1.86 2006-05-08 09:57:38 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -278,6 +278,7 @@ proc ::Disco::GetItems {jid args} {
 
 proc ::Disco::InfoCB {cmd jlibname type from subiq args} {
     variable wtree
+    variable wtab
     upvar ::Jabber::jstate jstate
      
     set from [jlib::jidmap $from]
@@ -294,8 +295,11 @@ proc ::Disco::InfoCB {cmd jlibname type from subiq args} {
 	# need to be set since we get items before name.
 	# 
 	# BUT the items element may also have a name attribute???
+	if {![winfo exists $wtab]} {
+	    NewPage
+	}
 	if {![winfo exists $wtree]} {
-	    return
+	    #return
 	}
 	set ppv     [$jstate(jlib) disco parents2 $from $node]
 	set item    [list $from $node]
@@ -338,6 +342,7 @@ proc ::Disco::InfoCB {cmd jlibname type from subiq args} {
 proc ::Disco::ItemsCB {cmd jlibname type from subiq args} {
     variable tstate
     variable wwave
+    variable wtab
     variable discoInfoLimit
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
@@ -356,7 +361,7 @@ proc ::Disco::ItemsCB {cmd jlibname type from subiq args} {
     } else {
 	
 	# It is at this stage we are confident that a Disco page is needed.
-	if {[jlib::jidequal $from $jserver(this)]} {
+	if {![winfo exists $wtab]} {
 	    NewPage
 	}
 	
