@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #       
-# $Id: AddressBook.tcl,v 1.4 2006-05-16 06:06:28 matben Exp $
+# $Id: AddressBook.tcl,v 1.5 2006-05-16 12:03:59 antoniofcano Exp $
 
 namespace eval ::AddressBook:: { }
 
@@ -54,7 +54,7 @@ proc ::AddressBook::NewPage {} {
     set popMenuDef(log,def) {
 	mRedial   phone {::AddressBook::DialExtension $phone}
         separator     {}          {}
-        mToAB         phone       {::AddressBook::NewAddressbookDlg [lindex $phone 1]}
+        mToAB         phone       {::AddressBook::NewAddressbookDlg $phone}
     }
 
     set popMenuDef(call) {
@@ -590,7 +590,7 @@ proc ::AddressBook::LoadEntries {} {
 }
 
 proc ::AddressBook::DialExtension {phonenumber} {    
-    ::Phone::Dial [lindex $phonenumber 1]
+    ::Phone::Dial $phonenumber
 }
 
 proc ::AddressBook::TransferExtension {phonenumber} {

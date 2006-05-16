@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.13 2006-04-21 14:11:13 matben Exp $
+# $Id: Phone.tcl,v 1.14 2006-05-16 12:03:59 antoniofcano Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -507,12 +507,19 @@ proc ::Phone::Touch {{key ""} {alt_key ""}} {
     set phoneNumberInput $phonenumber
 
     # BackSpace key pressed.
+    puts "Touching key=$key, alt_key=$alt_key, phoneNumberInput=$phoneNumberInput"
     if { $key eq "" && $alt_key eq "" } {
         set last [string length $phonenumber]
+        puts "Touching last=$last"
         if { $last > 0} {
             set phonenumber [string range $phonenumber 0 [expr $last - 2] ]
             set phoneNumberInput $phonenumber
             ::TPhone::KeyDelete $wphone
+        } else {
+            #@@@ This is ugly tricky. 
+            #@@@ What we can do  when Display different from phoneNumberInput,
+            #@@@ Maybe remove all the display with the first backspace.
+            ::Phone::UpdateDisplay ""
         }
     }
     set statePhone(numberLine0) $phoneNumberInput
@@ -580,11 +587,17 @@ proc ::Phone::Answer {} {
     # IAX gets a notifier 'active complete' event which calls 'SetTalkingState'.
 }
 
-proc ::Phone::Dial {} {
+proc ::Phone::Dial {{phoneNumber ""}} {
     variable statePhone
     variable phoneNumberInput 
     variable wphone
     
+    #----- if Dial is called from AddressBook -------
+    if { $phoneNumber ne "" } {
+        UpdateDisplay $phoneNumber
+        set phoneNumberInput $phoneNumber
+    }
+
     set activeLine 0
     set statePhone(numberLine$activeLine) $phoneNumberInput
     set statePhone(onholdLine$activeLine) "no"
