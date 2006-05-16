@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.55 2006-04-17 13:23:38 matben Exp $
+# $Id: Utils.tcl,v 1.56 2006-05-16 06:06:29 matben Exp $
 
 package provide Utils 1.0
 
@@ -572,7 +572,6 @@ proc ::Text::ParseWord {w word tagList} {
     if {[::Emoticons::Exists $word]} {
 	::Emoticons::Make $w $word
     } elseif {![ParseUrl $w $word]} {
-	#$w insert end $word $tagList
 	$w insert insert $word $tagList
     }
 }
@@ -599,7 +598,6 @@ proc ::Text::ParseUrl {w word} {
 	  [list ::Text::UrlEnter $w $urltag $activefg]
 	$w tag bind $urltag <Any-Leave>  \
 	  [list ::Text::UrlLeave $w $urltag $urlfg]
-	#$w insert end $word $urltag
 	$w insert insert $word $urltag
 	incr idurl
 	return 1

@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #       
-# $Id: AddressBook.tcl,v 1.3 2006-04-05 07:46:21 matben Exp $
+# $Id: AddressBook.tcl,v 1.4 2006-05-16 06:06:28 matben Exp $
 
 namespace eval ::AddressBook:: { }
 
@@ -571,8 +571,6 @@ proc ::AddressBook::LoadEntries {} {
     variable abline
     global  prefs this
     
-    # @@@ Mats
-    #set fileName "$this(prefsPath)/addressbook.csv"
     set fileName [file join $this(prefsPath) addressbook.csv]
     set abline ""
     if { [ file exists $fileName ] } {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.168 2006-05-07 14:08:00 matben Exp $
+# $Id: Roster.tcl,v 1.169 2006-05-16 06:06:29 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -437,11 +437,11 @@ proc ::Roster::LogoutHook { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
         
+    ::RosterTree::GetClosed
+
     # Here?
     $jstate(roster) reset
     
-    ::RosterTree::GetClosed
-
     # Clear roster and browse windows.
     if {$jprefs(rost,clrLogout)} {
 	::RosterTree::StyleInit
@@ -806,12 +806,20 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    } elseif {[$jstate(roster) isitem $jid3]} {
 		eval {Presence $jid3 $type} $args
 	    }
-		
+	    	    
 	    # General type presence hooks.
 	    eval {::hooks::run presenceHook $jid $type} $args
 
 	    # Specific type presence hooks.
 	    eval {::hooks::run presence[string totitle $type]Hook $jid $type} $args
+
+	    # Hook to run only for new presence/show/status.
+	    # This is helpful because of some x-elements can be broadcasted.
+	    array set oldPres [$jstate(roster) getoldpresence $jid3]
+	    set same [arraysequalnames attrArr oldPres {-type -show -status}]
+	    if {!$same} {
+		eval {::hooks::run presenceNewHook $jid $type} $args
+	    }
 	    
 	    # Make an additional call for delayed presence.
 	    # This only happend when type='available'.
@@ -1113,14 +1121,16 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     set isub  $presence
     
     # Then see if any <show/> element
-    if {[info exists argsArr(-subscription)] &&   \
+    if {$presence eq "available"} {
+	if {[info exists argsArr(-show)]} {
+	    set isub $argsArr(-show)
+	}
+    } elseif {[info exists argsArr(-subscription)] &&   \
       [string equal $argsArr(-subscription) "none"]} {
 	set isub "ask"
     } elseif {[info exists argsArr(-ask)] &&   \
       [string equal $argsArr(-ask) "subscribe"]} {
 	set isub "ask"
-    } elseif {[info exists argsArr(-show)]} {
-	set isub $argsArr(-show)
     }
     
     # Foreign IM systems.

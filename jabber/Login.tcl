@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.81 2006-03-22 14:09:29 matben Exp $
+# $Id: Login.tcl,v 1.82 2006-05-16 06:06:29 matben Exp $
 
 package provide Login 1.0
 
@@ -167,7 +167,7 @@ proc ::Login::Dlg { } {
     # Triangle switch for more options.
     if {$config(login,more)} {
 	set wtri $wbox.tri
-	ttk::button $wtri -style Small.Toolbutton \
+	ttk::button $wtri -style Small.Toolbutton -padding {6 1} \
 	  -compound left -image [::UI::GetIcon mactriangleclosed] \
 	  -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
 	pack $wtri -side top -anchor w

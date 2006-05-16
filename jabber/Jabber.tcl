@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.166 2006-04-23 09:32:22 matben Exp $
+# $Id: Jabber.tcl,v 1.167 2006-05-16 06:06:29 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -628,11 +628,12 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
     
     array set argsArr $args
     set from $argsArr(-from)
+    set subscription [$jstate(roster) getsubscription $from]
     
     switch -- $type {
 	subscribe {
 	    
-	    jlib::splitjid $from jid2 resource
+	    set jid2 [jlib::barejid $from]
 	    
 	    # Treat the case where the sender is a transport component.
 	    # We must be indenpendent of method; agent, browse, disco
@@ -642,9 +643,18 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    
 	    ::Debug 4 "\t jidtype=$jidtype"
 	    
-	    if {[regexp {^(service|gateway)/.*} $jidtype]} {
+	    if {[::Roster::IsTransportHeuristics $from]} {
+		
+		# Add roster item before sending 'subscribed'. Didn't help :-(
+		if {![$jstate(roster) isitem $from]} {
+		    $jstate(jlib) roster_set $from ::Subscribe::ResProc
+		}
 		$jstate(jlib) send_presence -to $from -type "subscribed"
-		$jstate(jlib) roster_set $from ::Subscribe::ResProc
+
+		# It doesn't hurt to be subscribed to the transports presence.
+		if {($subscription eq "none") || ($subscription eq "from")} {
+		    $jstate(jlib) send_presence -to $from -type "subscribe"
+		}
 		
 		set subtype [lindex [split $jidtype /] 1]
 		set typename [::Roster::GetNameFromTrpt $subtype]
@@ -655,19 +665,17 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		
 		# Another user request to subscribe to our presence.
 		# Figure out what the user's prefs are.
-		set allUsers [$jstate(roster) getusers]
-		if {[lsearch -exact $allUsers $from] >= 0} {
+		if {[$jstate(roster) isitem $from]} {
 		    set key inrost
 		} else {
 		    set key notinrost
 		}		
 		
 		# No resource here!
-		set subState [$jstate(roster) getsubscription $from]
-		set isSubscriberToMe 0
-		if {[string equal $subState "from"] ||  \
-		  [string equal $subState "both"]} {
+		if {($subscription eq "from") || ($subscription eq "both")} {
 		    set isSubscriberToMe 1
+		} else {
+		    set isSubscriberToMe 0
 		}
 		
 		# Accept, deny, or ask depending on preferences we've set.
@@ -709,8 +717,12 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    }
 	}
 	subscribed {
-	    ::UI::MessageBox -title [mc Subscribed] -icon info -type ok  \
-	      -message [mc jamessallowsub $from]
+	    if {[::Roster::IsTransportHeuristics $from]} {
+		# silent.
+	    } else {
+		::UI::MessageBox -title [mc Subscribed] -icon info -type ok  \
+		  -message [mc jamessallowsub $from]
+	    }
 	}
 	unsubscribe {	    
 	    if {$jprefs(rost,rmIfUnsub)} {
@@ -727,9 +739,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		  -message [mc jamessunsubpres $from]
 		
 		# If there is any subscription to this jid's presence.
-		set sub [$jstate(roster) getsubscription $from]
-		if {[string equal $sub "both"] ||  \
-		  [string equal $sub "to"]} {
+		if {($subscription eq "both") || ($subscription eq "to")} {
 		    
 		    set ans [::UI::MessageBox -title [mc Unsubscribed]  \
 		      -icon question -type yesno -default yes \
@@ -744,9 +754,8 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	unsubscribed {
 	    
 	    # If we fail to subscribe someone due to a technical reason we
-	    # have sunscription='none'
-	    set sub [$jstate(roster) getsubscription $from]
-	    if {$sub eq "none"} {
+	    # have subscription='none'
+	    if {$subscription eq "none"} {
 		set msg [mc jamessfailedsubsc $from]
 		if {[info exists argsArr(-status)]} {
 		    append msg " Status message: $argsArr(-status)"
@@ -1429,7 +1438,7 @@ proc ::Jabber::SetStatusWithMessage { } {
     set wtext $wbox.txt
     text $wtext -height 4 -width 36 -wrap word -bd 1 -relief sunken
     pack $wtext -expand 1 -fill both
-    
+        
     # Any existing presence status?
     set status [::Jabber::JlibCmd mypresencestatus]
     $wtext insert end $status

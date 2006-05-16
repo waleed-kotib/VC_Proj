@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.124 2006-05-08 09:57:38 matben Exp $
+# $Id: JUI.tcl,v 1.125 2006-05-16 06:06:29 matben Exp $
 
 package provide JUI 1.0
 
@@ -357,6 +357,8 @@ proc ::Jabber::UI::Build {w} {
     ttk::notebook $wnb
     pack $wnb -side bottom -fill both -expand 1
     
+    bind $wnb <<NotebookTabChanged>>  {+::Jabber::UI::NotebookTabChanged }
+    
     # Make the Roster page -----------------------------------------------
     
     # Each notebook page must be a direct child of the notebook and we therefore
@@ -395,6 +397,27 @@ proc ::Jabber::UI::Build {w} {
 	RosterMoveFromPage
     }
     return $w
+}
+
+proc ::Jabber::UI::NotebookTabChanged {} {
+    variable jwapp
+        
+    set state disabled
+
+    # We assume that the roster page has index 0.
+    set current [$jwapp(notebook) index current]
+    if {$current == 0} {
+	set tags [::RosterTree::GetSelected]
+	if {[llength $tags] == 1} {
+	    lassign [lindex $tags 0] mtag jid
+	    if {$mtag eq "jid"} {
+		if {[::Jabber::RosterCmd isavailable $jid]} {
+		    set state normal
+		}
+	    }
+	}
+    }
+    $jwapp(wtbar) buttonconfigure chat -state $state  
 }
 
 proc ::Jabber::UI::StatusCmd {status} {

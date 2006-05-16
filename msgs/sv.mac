@@ -387,6 +387,7 @@
 ::msgcat::mcset sv mToolbar         	{Verktygsfält}
 ::msgcat::mcset sv mNotebook         	{Tabbar}
 ::msgcat::mcset sv mMinimal         	{Minimal}
+::msgcat::mcset sv mDisco         	{Disco}
 
 
 # Popups
@@ -585,7 +586,7 @@
 ::msgcat::mcset sv {Preferred Protocol}    {Förstahands protokoll}
 ::msgcat::mcset sv {Presence Error}	   {Presence fel}
 ::msgcat::mcset sv {Privacy List}          {Integritetslista}
-::msgcat::mcset sv {Profile Name}          {Profil namn}
+::msgcat::mcset sv {Profile Name}          {Profilnamn}
 ::msgcat::mcset sv {Proxy Setup}           {Proxyinställning}
 ::msgcat::mcset sv {Public Jabber Servers} {Offentliga Jabber servrar}
 ::msgcat::mcset sv {Put File Error}        {Felektighet vid filöverföring}
@@ -648,7 +649,10 @@
 ::msgcat::mcset sv {Unknown: Prompt user}  {Okänt: Fråga användare}
 ::msgcat::mcset sv {Url of homepage}       {Url till hemsidan}
 ::msgcat::mcset sv {Use proxy}             {Använd proxy}
+::msgcat::mcset sv {Use Secure Connection} {Använd säker uppkoppling}
 ::msgcat::mcset sv {Use SSL for security}  {Använd SSL för säkerhet}
+::msgcat::mcset sv {Use TLS and SASL authentization} {Använd TLS och SASL autentisering}
+::msgcat::mcset sv {Use TLS on separate port (old)} {Använd TLS på separat nätverksport}
 ::msgcat::mcset sv {User is}		   {Användare är}
 ::msgcat::mcset sv {User is offline}       {Användare är borta}
 ::msgcat::mcset sv {User is online}        {Användare är tillgänglig}

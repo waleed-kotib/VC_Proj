@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.163 2006-05-08 13:21:53 matben Exp $
+# $Id: Chat.tcl,v 1.164 2006-05-16 06:06:28 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2386,12 +2386,21 @@ proc ::Chat::PresenceHook {jid type args} {
     if {[info exists argsArr(-status)]} {
 	set status "$argsArr(-status)\n"
     }
-    set mjid [jlib::jidmap $jid]
+    set mjid  [jlib::jidmap $jid]
+    set mfrom [jlib::jidmap $jid]
     jlib::splitjid $from jid2 res
+    
+    # If we chat with a room member we shall not trigger on other JIDs.
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	set pjid $mfrom
+    } else {
+	set pjid ${mjid}*
+    }
+    
     array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
     set icon [::Roster::GetPresenceIconFromJid $from]
     
-    foreach chattoken [GetAllTokensFrom chat jid ${mjid}*] {
+    foreach chattoken [GetAllTokensFrom chat jid $pjid] {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 	

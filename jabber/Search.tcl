@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.22 2006-04-07 14:08:28 matben Exp $
+# $Id: Search.tcl,v 1.23 2006-05-16 06:06:29 matben Exp $
 
 package provide Search 1.0
 
@@ -125,7 +125,7 @@ proc ::Search::Build {args} {
 	set sstate(server) $argsArr(-server)
 	$wcomboserver configure -state disabled
     }
-    if {$searchServ == {}} {
+    if {$searchServ eq {}} {
 	$wbtget       state {disabled}
 	$wcomboserver state {disabled}
     }
@@ -156,14 +156,17 @@ proc ::Search::Build {args} {
     pack $wright.se -side top -fill both -expand 1
     tablelist::tablelist $wtb \
       -columns [list 60 [mc {Search results}]]  \
-      -xscrollcommand [list $wxsc set] -yscrollcommand [list $wysc set]  \
+      -xscrollcommand [list $wxsc set]  \
+      -yscrollcommand [list ::UI::ScrollSet $wysc \
+      [list grid $wysc -column 1 -row 0 -sticky ns]]  \
       -width 60 -height 20
     
     ttk::scrollbar $wysc -command [list $wtb yview] -orient vertical
     ttk::scrollbar $wxsc -command [list $wtb xview] -orient horizontal
-    grid  $wtb   $wysc  -sticky news
-    grid  $wxsc  -      -sticky ew
-    grid rowconfigure $frsearch 0 -weight 1
+    grid  $wtb   -column 0 -row 0 -sticky news
+    grid  $wysc  -column 1 -row 0 -sticky ns
+    grid  $wxsc  -column 0 -row 1 -sticky ew -columnspan 2
+    grid rowconfigure    $frsearch 0 -weight 1
     grid columnconfigure $frsearch 0 -weight 1
     
     bind [$wtb bodytag] <Double-Button-1> { ::Search::TableCmd %W %x %y }
@@ -203,7 +206,7 @@ proc ::Search::TableCmd {w x y} {
 
 	# Warn if already in our roster.
 	set users [$jstate(roster) getusers]
-	if {[lsearch -exact $users $jid] >= 0} {
+	if {[$jstate(roster) isitem $jid]} {
 	    set ans [::UI::MessageBox -message [mc jamessalreadyinrost $jid] \
 	      -icon error -type ok]
 	} else {
@@ -217,7 +220,7 @@ proc ::Search::Get { } {
     upvar ::Jabber::jstate jstate
     
     # Verify.
-    if {$sstate(server) == ""} {
+    if {$sstate(server) eq ""} {
 	::UI::MessageBox -type ok -icon error  \
 	  -message [mc jamessregnoserver]
 	return
@@ -253,7 +256,7 @@ proc ::Search::GetCB {jlibName type subiq} {
     $sstate(wsearrows) stop
     set sstate(status) ""
     
-    if {$type == "error"} {
+    if {$type eq "error"} {
 	::UI::MessageBox -type ok -icon error  \
 	  -message [mc jamesserrsearch [lindex $subiq 0] [lindex $subiq 1]]
 	return
@@ -339,7 +342,7 @@ proc ::Search::ResultCallback {server type subiq} {
     set sstate(status) ""
     if {[string equal $type "error"]} {
 	foreach {ecode emsg} [lrange $subiq 0 1] break
-	if {$ecode == "406"} {
+	if {$ecode eq "406"} {
 	    set msg "There was an invalid field. Please correct it: $emsg"
 	} else {
 	    set msg "Failed searching service. Error code $ecode with message: $emsg"

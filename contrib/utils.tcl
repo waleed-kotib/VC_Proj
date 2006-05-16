@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: utils.tcl,v 1.4 2006-01-04 11:02:37 matben Exp $
+# $Id: utils.tcl,v 1.5 2006-05-16 06:06:28 matben Exp $
 
 package provide utils 1.0
     
@@ -176,6 +176,27 @@ proc arraysequal {arrName1 arrName2} {
 	    return 0
 	}
 	if {![string equal $arr1($key) $arr2($key)]} {
+	    return 0
+	}
+    }
+    return 1
+}
+
+# arraysequalnames --
+# 
+#       Checked named array indexes only.
+
+proc arraysequalnames {arrName1 arrName2 names} {
+    upvar 1 $arrName1 arr1 $arrName2 arr2
+    
+    foreach name $names {
+	set ex1 [info exists arr1($name)]
+	set ex2 [info exists arr2($name)]
+	if {$ex1 && $ex2} {
+	    if {$arr1($name) != $arr2($name)} {
+		return 0
+	    }
+	} elseif {($ex1 && !$ex2) || (!$ex1 && $ex2)} {
 	    return 0
 	}
     }

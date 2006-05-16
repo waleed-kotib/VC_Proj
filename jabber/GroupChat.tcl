@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.144 2006-05-01 13:35:58 matben Exp $
+# $Id: GroupChat.tcl,v 1.145 2006-05-16 06:06:28 matben Exp $
 
 package require Enter
 package require History
@@ -1934,6 +1934,7 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
 	set htag -history
     }
     
+    $wtext mark set insert end
     $wtext configure -state normal
     $wtext insert end $prefix ${whom}pre${htag}
     
