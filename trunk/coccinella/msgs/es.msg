@@ -197,9 +197,8 @@
 ::msgcat::mcset es Whiteboard		{Pizarra}
 ::msgcat::mcset es Width 		{Anchura}
 ::msgcat::mcset es Work			{Trabajo}
-::msgcat::mcset es Work                 {Trabajo
-::msgcat::mcset es Yes                  {Sí}e
-::msgcat::mcset es yes                  {sí}i
+::msgcat::mcset es Yes                  {Sí}
+::msgcat::mcset es yes                  {sí}
 
 # Canvas item options, names and values.
 # Names:
@@ -1200,6 +1199,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es mNewAB		{Agregar}
 ::msgcat::mcset es mModifyAB		{Modificar}
 ::msgcat::mcset es mRemoveAB		{Eliminar}
+::msgcat::mcset es mRedial              {Rellamada}
+::msgcat::mcset es mToAB                {Copiar a la agenda}}
 
 ::msgcat::mcset es outCall              {Llamando a}
 ::msgcat::mcset es notifyCall           {Llamada entrante}
