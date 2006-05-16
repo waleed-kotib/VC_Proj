@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.24 2006-05-04 12:37:13 matben Exp $
+# $Id: JingleIax.tcl,v 1.25 2006-05-16 06:06:28 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -30,6 +30,7 @@ proc ::JingleIAX::Init { } {
     set xmlns(transport)  "http://jabber.org/protocol/jingle/transport/iax"
 
     # Add event hooks.
+    ::hooks::register initHook              ::JingleIAX::InitHook
     ::hooks::register jabberInitHook        ::JingleIAX::JabberInitHook
     ::hooks::register loginHook             ::JingleIAX::LoginHook
     ::hooks::register logoutHook            ::JingleIAX::LogoutHook
@@ -74,6 +75,12 @@ proc ::JingleIAX::Init { } {
     ::Jabber::RegisterCapsExtKey iax $subtags
 }
 
+proc ::JingleIAX::InitHook {} {
+    variable popMenuDef  
+    
+    ::Roster::RegisterPopupEntry $popMenuDef(call) 
+}
+
 # JingleIAX::JabberInitHook --
 # 
 #       Gets called for each new jlib instance.
@@ -100,11 +107,8 @@ proc ::JingleIAX::GetXPresence {type} {
 #----------------------------------------------------------------------------
 
 proc ::JingleIAX::LoginHook { } {
-    variable popMenuDef  
 
     InitState
-    # @@@ Should the menu entry be persistent?
-    ::Roster::RegisterPopupEntry $popMenuDef(call) 
 }
 
 proc ::JingleIAX::InitState {} {
@@ -134,8 +138,6 @@ proc ::JingleIAX::StunCB {token status args} {
 
 proc ::JingleIAX::LogoutHook { } {
 
-    # @@@ See above.
-    ::Roster::DeRegisterPopupEntry mCall
     ::Jabber::UI::RemoveAlternativeStatusImage JingleIAX
 }
 
@@ -426,7 +428,15 @@ proc ::JingleIAX::PresenceHook {jid type args} {
     if {$type ne "available"} {
 	return
     }
-
+    if {![::Jabber::RosterCmd isitem $jid]} {
+	return
+    }
+    
+    # Some transports propagate the complete prsence stanza.
+    if {[::Roster::IsTransportHeuristics $jid]} {
+	return
+    }
+    
     array set aargs $args
     set from $aargs(-from)
 

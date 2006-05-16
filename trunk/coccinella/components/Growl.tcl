@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.9 2005-12-29 09:05:16 matben Exp $
+# $Id: Growl.tcl,v 1.10 2006-05-16 06:06:28 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -27,7 +27,7 @@ proc ::Growl::Init { } {
     
     # Add event hooks.
     ::hooks::register newChatMessageHook  ::Growl::ChatMessageHook
-    ::hooks::register presenceHook        ::Growl::PresenceHook
+    ::hooks::register presenceNewHook     ::Growl::PresenceHook
     ::hooks::register jivePhoneEvent      ::Growl::JivePhoneEventHook
 }
 

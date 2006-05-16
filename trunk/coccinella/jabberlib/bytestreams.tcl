@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.16 2006-04-17 13:23:38 matben Exp $
+# $Id: bytestreams.tcl,v 1.17 2006-05-16 06:06:29 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -24,6 +24,9 @@
 ############################# CHANGES ##########################################
 #
 #       0.1         first version
+#       
+# TODO:
+#   o put a timeout on the whole operation
 
 package require sha1
 package require jlib
@@ -37,7 +40,8 @@ package provide jlib::bytestreams 0.1
 namespace eval jlib::bytestreams {
 
     variable xmlns
-    set xmlns(bs)  "http://jabber.org/protocol/bytestreams"
+    set xmlns(bs)   "http://jabber.org/protocol/bytestreams"
+    set xmlns(fast) "http://affinix.com/jabber/stream"
         
     jlib::si::registertransport $xmlns(bs) $xmlns(bs) 40  \
       [namespace current]::si_open   \
@@ -45,7 +49,11 @@ namespace eval jlib::bytestreams {
       [namespace current]::si_close    
     
     jlib::disco::registerfeature $xmlns(bs)
-
+    
+    # Support for http://affinix.com/jabber/stream.
+    # @@@ Not Implemented!
+    variable fastmode 0
+    
     # Note: jlib::ensamble_register is last in this file!
 }
 
@@ -71,7 +79,8 @@ proc jlib::bytestreams::init {jlibname args} {
 	variable static
 	
 	# Server port 0 says that arbitrary port can be chosen.
-	set static(-port) 0
+	set static(-port)      0
+	set static(-timeoutms) 10000  ;# TODO
     }
 
     # Register some standard iq handlers that is handled internally.
@@ -81,8 +90,6 @@ proc jlib::bytestreams::init {jlibname args} {
 }
 
 proc jlib::bytestreams::cmdproc {jlibname cmd args} {
-    
-    Debug 4 "jlib::bytestreams::cmdproc jlibname=$jlibname, cmd='$cmd', args='$args'"
 
     # Which command? Just dispatch the command to the right procedure.
     return [eval {$cmd $jlibname} $args]
@@ -95,11 +102,11 @@ proc jlib::bytestreams::configure {jlibname args} {
     foreach {key value} $args {
 	
 	switch -- $key {
-	    -port {
+	    -port - -timeoutms {
 		if {![string is integer -strict $value]} {
-		    return -code error "port must be integer number"
+		    return -code error "$key must be integer number"
 		}
-		set static(-port) $value
+		set static($key) $value
 	    }
 	    default {
 		return -code error "unknown option \"$key\""
@@ -118,6 +125,7 @@ proc jlib::bytestreams::configure {jlibname args} {
 
 proc jlib::bytestreams::si_open {jlibname jid sid args} {
     
+    variable fastmode
     upvar ${jlibname}::bytestreams::istate istate
     upvar ${jlibname}::bytestreams::static static
     upvar ${jlibname}::bytestreams::hash2sid hash2sid
@@ -139,9 +147,21 @@ proc jlib::bytestreams::si_open {jlibname jid sid args} {
     set host [list $myjid -host $ip -port $static(port)]
     
     set si_open_cb [list [namespace current]::si_open_cb $jlibname $sid]
-    initiate $jlibname $jid $sid $si_open_cb -streamhost $host
+    initiate $jlibname $jid $sid $si_open_cb -streamhost $host  \
+      -fastmode $fastmode
 
+    #set istate($sid,timeoutid) [after $static(-timeoutms)  \
+    #  [list [namespace current]::si_timeout_cb $jlibname $sid]]
     return
+}
+
+proc jlib::bytestreams::si_timeout_cb {jlibname sid} {
+    
+    upvar ${jlibname}::bytestreams::istate istate
+    #puts "jlib::bytestreams::si_timeout_cb (i)"
+    
+    jlib::si::transport_open_cb $jlibname $sid "error" ???
+    ifinish $jlibname $sid
 }
 
 proc jlib::bytestreams::si_open_cb {jlibname sid type subiq args} {
@@ -149,6 +169,7 @@ proc jlib::bytestreams::si_open_cb {jlibname sid type subiq args} {
     upvar ${jlibname}::bytestreams::istate istate
     #puts "jlib::bytestreams::si_open_cb (i)"
     
+    #after cancel $istate($sid,timeoutid)
     jlib::si::transport_open_cb $jlibname $sid $type $subiq
 }
 
@@ -201,6 +222,7 @@ proc jlib::bytestreams::s5i_server {jlibname} {
 # jlib::bytestreams::initiate --
 # 
 #       -streamhost {jid (-host -port | -zeroconf)}
+#       -fastmode
 
 proc jlib::bytestreams::initiate {jlibname to sid cmd args} {
     variable xmlns    
@@ -221,11 +243,20 @@ proc jlib::bytestreams::initiate {jlibname to sid cmd args} {
 		lappend sublist \
 		  [wrapper::createtag "streamhost" -attrlist $hostattr]
 	    }
+	    -fastmode {
+		if {$value} {
+
+		    # <fast xmlns="http://affinix.com/jabber/stream"/> 
+		    lappend sublist [wrapper::createtag "fast"  \
+		      -attrlist [list xmlns $xmlns(fast)]]
+		}
+	    }
 	    default {
 		return -code error "unknown option \"$key\""
 	    }
 	}
     }
+    
     set xmllist [wrapper::createtag "query" -attrlist $attrlist \
       -subtags $sublist]
     eval {$jlibname send_iq "set" [list $xmllist] -to $to -command $cmd} $opts
@@ -244,9 +275,8 @@ proc jlib::bytestreams::initiate {jlibname to sid cmd args} {
 
 proc jlib::bytestreams::s5i_accept {jlibname sock addr port} {
 
-    #puts "jlib::bytestreams::s5_accept (i)"
+    #puts "jlib::bytestreams::s5i_accept (i)"
     
-    #set istate($sid,sock) $sock
     fconfigure $sock -translation binary -blocking 0
 
     fileevent $sock readable \
@@ -257,7 +287,6 @@ proc jlib::bytestreams::s5i_read_methods {jlibname sock} {
    
     #puts "jlib::bytestreams::s5i_read_methods (i)"   
     
-    #set sock $istate($sid,sock)
     fileevent $sock readable {}
     if {[catch {read $sock} data] || [eof $sock]} {
 	catch {close $sock}
@@ -291,7 +320,6 @@ proc jlib::bytestreams::s5i_read_auth {jlibname sock} {
     upvar ${jlibname}::bytestreams::hash2sid hash2sid
     #puts "jlib::bytestreams::s5i_read_auth (i)"
 
-    #set sock $istate($sid,sock)
     fileevent $sock readable {}
     if {[catch {read $sock} data] || [eof $sock]} {
 	catch {close $sock}
@@ -316,8 +344,10 @@ proc jlib::bytestreams::s5i_read_auth {jlibname sock} {
 	set sid $hash2sid($hash)
 	set istate($sid,sock) $sock
 	set reply [string replace $data 1 1 \x00]
-	puts -nonewline $sock $reply
-	flush $sock
+	catch {
+	    puts -nonewline $sock $reply
+	    flush $sock
+	}
 	#puts "\t wrote [string length $reply]"
     } else {
 	set reply [string replace $data 1 1 \x02]
@@ -352,8 +382,12 @@ proc jlib::bytestreams::ifree {jlibname sid} {
 #    
 
 proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
+    variable fastmode
+    variable xmlns    
     
     upvar ${jlibname}::bytestreams::tstate tstate
+    upvar ${jlibname}::bytestreams::static static
+    upvar ${jlibname}::bytestreams::hash2sid hash2sid
     #puts "jlib::bytestreams::handle_set (t) $args"
     
     array set argsArr $args
@@ -368,6 +402,7 @@ proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
     }
     set id  $argsArr(-id)
     set sid $attr(sid)
+    set jid $from
 
     # We make sure that we have already got a si with this sid.
     if {![jlib::si::havesi $jlibname $sid]} {
@@ -393,14 +428,48 @@ proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
 	return 1
     }
     set tstate($sid,id)     $id
-    set tstate($sid,jid)    $from
+    set tstate($sid,jid)    $jid
     set tstate($sid,hosts)  $hosts
     set tstate($sid,rhosts) $hosts
     set tstate($sid,queryElem) $queryElem
+    
+    if {$fastmode} {
+	set fastElem [wrapper::getchildswithtagandxmlns $queryElem "fast"  \
+	  $xmlns(fast)]
+	#puts "\t fastElem=$fastElem"
+	if {[llength $fastElem]} {
+	    
+	    # Put this in separate function...
+	    if {![info exists static(sock)]} {
+		s5i_server $jlibname
+	    }
+	    
+	    # Provide a streamhost to the initiator.
+	    set ip    [jlib::getip $jlibname]
+	    set myjid [jlib::myjid $jlibname]
+	    set hash  [::sha1::sha1 ${sid}${myjid}${jid}]
+	    set hash2sid($hash)    $sid
+	    
+	    set host [list $myjid -host $ip -port $static(port)]
+	    
+	    set si_open_fast_cb  \
+	      [list [namespace current]::si_open_fast_cb $jlibname $sid]
+	    initiate $jlibname $jid $sid $si_open_fast_cb -streamhost $host
+	}
+    }
 
     # Try the host(s) in turn.
     connect_host $jlibname $sid
     return 1
+}
+
+proc jlib::bytestreams::si_open_fast_cb {jlibname sid type subiq args} {
+    
+    upvar ${jlibname}::bytestreams::tstate tstate
+    #puts "jlib::bytestreams::si_open_fast_cb (t)"
+
+    
+    
 }
 
 # jlib::bytestreams::connect_host --
@@ -630,103 +699,6 @@ proc jlib::bytestreams::tfree {jlibname sid} {
     #puts "jlib::bytestreams::tfree (t)"
 
     array unset tstate $sid,*
-}
-
-
-# SURPLUS CODE ------------------------------------
-# 
-# 
-# -------------------------
-
-
-#--- target section ------------------------------------------------------------
-
-namespace eval jlib::bytestreams::target { }
-
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-proc jlib::bytestreams::streamhosts {jid} {    
-    variable streamhosts
-    
-    # The jid attribute is a MUST.
-    if {[info exists streamhosts($jid,jid)]} {
-	set ans {}
-	foreach {key value} [array get streamhosts [jlib::ESC $jid]] {
-	    # @@@ 'dict' will rescue from these things.
-	    set name [string map [list $jid, ""]]
-	    lappend opts -$name $value
-	}
-	return $ans
-    } else {
-	return
-    }
-}
-
-# jlib::bytestreams::get --
-# 
-#       Initiator discovers network address of streamhost.
-#
-# Arguments:
-#       to
-#       cmd     tclProc 
-#       
-# Results:
-#       None
-
-proc jlib::bytestreams::get {jlibname to cmd} {
-    variable xmlns
-    
-    $jlibname iq_get $xmlns(bs) -to $to \
-      -command [list [namespace current]::get_cb $to $cmd]
-}
-
-proc jlib::bytestreams::get_cb {from cmd jlibname type queryElem} {
-    variable streamhosts
-    
-    # Cache any result.
-    if {$type eq "result"} {
-	set streamhostElems [wrapper::getfromchilds $queryElem streamhost]
-	array unset streamhosts [jlib::ESC $jid]
-	foreach elem $streamhostElems {
-	    foreach {name value} [wrapper::getattrlist $elem] {
-		set streamhosts($from,$name) $value
-	    }
-	}
-    }
-    uplevel #0 $cmd [list $jlibname $type $queryElem]
-}
-
-# jlib::bytestreams::error --
-# 
-#       Return an error to initiator.
-
-proc jlib::bytestreams::error {jlibname to type args} {
-    variable xmlns
-    upvar jlib::xmppxmlns xmppxmlns
-       
-    switch -- $type {
-	auth {
-	    set errCode 403
-	    set errName "forbidden"
-	}
-	cancel {
-	    set errCode 405
-	    set errName "not-allowed"
-	}
-	default {
-	    return -code error "unknown type \"$type\""
-	}
-    }   
-    set queryElem [wrapper::createtag "query" -attrlist [list xmlns $xmlns(bs)]]
-    set subElem   [wrapper::createtag $errName \
-      -attrlist [list xmlns $xmppxmlns(stanzas)]]
-    set errorElem [wrapper::createtag "error" \
-      -attrlist [list code $errCode type $type] \
-      -subtags [list $subElem]]
-
-    $jlibname send_iq "error" [list $queryElem $errorElem] -to $to
 }
 
 # jlib::bytestreams::activate --

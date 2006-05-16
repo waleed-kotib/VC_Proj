@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.46 2006-05-07 14:08:01 matben Exp $
+# $Id: roster.tcl,v 1.47 2006-05-16 06:06:29 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -871,6 +871,31 @@ proc roster::getpresence2 {rostName jid args} {
 	} else {
 	    set result [list [list -jid $jid -type unavailable]]
 	}
+    }
+    return $result
+}
+
+# roster::getoldpresence --
+# 
+#       This makes a simplified assumption and uses the full JID.
+
+proc roster::getoldpresence {rostName jid} {    
+
+    variable rostGlobals
+    upvar ${rostName}::rostArr rostArr
+    upvar ${rostName}::oldpresArr oldpresArr
+
+    set jid [jlib::jidmap $jid]
+    
+    if {[info exists oldpresArr($jid,type)]} {
+	set result {}
+	foreach key $rostGlobals(presTags) {
+	    if {[info exists oldpresArr($jid,$key)]} {
+		lappend result -$key $oldpresArr($jid,$key)
+	    }
+	}	
+    } else {
+	set result [list -type unavailable]
     }
     return $result
 }

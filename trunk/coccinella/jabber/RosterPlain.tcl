@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.16 2006-05-07 14:08:00 matben Exp $
+# $Id: RosterPlain.tcl,v 1.17 2006-05-16 06:06:29 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -267,7 +267,7 @@ proc ::RosterPlain::CreateItem {jid presence args} {
     set jimage [eval {GetPresenceIcon $jid $presence} $args]
     set items  {}
     set jitems {}
-    puts "++++++++++++::RosterPlain::CreateItem jid=$jid, jimage=$jimage"
+    #puts "++++++++++++::RosterPlain::CreateItem jid=$jid, jimage=$jimage"
     
     # Creates a list {item tag ?item tag? ...} for items.
     set itemTagList [eval {::RosterTree::CreateItemBase $jid $presence} $args]
@@ -335,7 +335,7 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 proc ::RosterPlain::ConfigureItem {item style text image} {
     variable T
     
-    puts "%%%%%%%  ::RosterPlain::ConfigureItem item=$item, image=$image"
+    #puts "%%%%%%%  ::RosterPlain::ConfigureItem item=$item, image=$image"
     
     $T item style set $item cTree $style
     $T item element configure $item  \
@@ -388,7 +388,7 @@ proc ::RosterPlain::SetAltImage {jid key image} {
     variable T
     variable altImageKeyToElem
 	
-    puts "::RosterPlain::SetAltImage $jid, $key"
+    #puts "::RosterPlain::SetAltImage $jid, $key"
     
     # altImageKeyToElem maps: key -> element name
     # 

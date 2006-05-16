@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.12 2006-04-17 13:23:38 matben Exp $
+# $Id: si.tcl,v 1.13 2006-05-16 06:06:29 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -38,7 +38,7 @@
 #           callbacks.
 #           
 #       TARGET: each profile (file-transfer) registers for open, read & close
-#           using 'registerprofile'. The transports registers for element
+#           using 'registerprofile'. The transports register for element
 #           handlers for their specific protocol. When activated, the transport
 #           calls si which in turn calls the profile using its registered 
 #           handlers.
@@ -283,7 +283,7 @@ proc jlib::si::transport_open_cb {jlibname sid type iqChild} {
     
     upvar ${jlibname}::si::istate istate    
     #puts "jlib::si::transport_open_cb (i)"
-    
+    	
     # Just report this to the relevant profile.
     eval $istate($sid,openCmd) [list $jlibname $type $sid $iqChild]
 }

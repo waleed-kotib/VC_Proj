@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.59 2006-03-28 14:12:11 matben Exp $
+# $Id: Profiles.tcl,v 1.60 2006-05-16 06:06:29 matben Exp $
 
 package provide Profiles 1.0
 
@@ -411,9 +411,9 @@ proc ::Profiles::FindProfileNameFromJID {jid} {
 	    set opts(-resource) ""
 	    array set opts [lrange $spec 3 end]
 	    
-	    if {($serv == $server) && ($user == $username)} {
-		if {$resource != ""} {
-		    if {$resource == $opts(-resource)} {
+	    if {($serv eq $server) && ($user eq $username)} {
+		if {$resource ne ""} {
+		    if {$resource eq $opts(-resource)} {
 			set profilename $prof
 			break
 		    }
@@ -632,7 +632,7 @@ proc ::Profiles::ImportFromJserver { } {
     foreach {name spec} $jserver(profile) {
 	lassign $spec se us pa re
 	set plist [list $se $us $pa]
-	if {$re != ""} {
+	if {$re ne ""} {
 	    lappend plist -resource $re
 	}
 	lappend profiles $name $plist
@@ -652,7 +652,6 @@ proc ::Profiles::GetDefaultOpts {server} {
     # We MUST list all available options here!
     if {![info exists defaultOpts]} {
 	array set defaultOpts {
-	    -resource       ""
 	    -digest         1
 	    -invisible      0
 	    -ip             ""
@@ -663,6 +662,9 @@ proc ::Profiles::GetDefaultOpts {server} {
 	    -secure         0
 	    -method         sasl
 	}
+	# DO NOT add this!
+	#-resource       ""
+
 	set defaultOpts(-port) $jprefs(port)
 	if {!$this(package,tls)} {
 	    set defaultOpts(-secure) 0
@@ -701,6 +703,18 @@ proc ::Profiles::BuildHook {wtree nbframe} {
 }
 
 proc ::Profiles::BuildPage {page} {
+    
+    set wc $page.c
+    FrameWidget $wc 0 -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor [option get . dialogAnchor {}]    
+}
+
+# Profiles::FrameWidget --
+# 
+#       Megawidget profile frame.
+#       @@@ TODO OO
+
+proc ::Profiles::FrameWidget {w moreless args} {
     global  prefs
     
     variable profiles
@@ -716,8 +730,9 @@ proc ::Profiles::BuildPage {page} {
     variable wuserinfofocus
     variable tmpProfArr
     variable tmpSelected
-    variable wpage $page
     variable wtabnb
+    variable wtri
+    variable wfrmore
     
     # Make temp array for servers. Be sure they are sorted first.
     SortProfileList
@@ -732,27 +747,14 @@ proc ::Profiles::BuildPage {page} {
     
     set allNames [GetAllNames]
     
-    set wc $page.c
-    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
-    pack $wc -side top -anchor [option get . dialogAnchor {}]
+    eval {ttk::frame $w} $args
     
-    set wp $wc.p
-    ttk::labelframe $wp -text [mc {User Profiles}] \
-      -padding [option get . groupSmallPadding {}]
-    pack  $wp  -side top -fill x
+    ttk::label $w.msg -text [mc prefprof] -wraplength 200 -justify left
+    grid  $w.msg  -  -sticky ew
     
-    ttk::label $wp.msg -text [mc prefprof] -wraplength 200 -justify left
-    pack $wp.msg -side top -anchor w -fill x
-    
-    # Need to pack options here to get the complete bottom slice.
-    set wopt $wp.fopt
-    ttk::frame $wopt
-    pack  $wopt  -side bottom -fill x -expand 1
-
-    set wui $wp.u
+    set wui $w.u
     ttk::frame $wui
-    pack  $wui  -side left
-
+    
     ttk::label $wui.lpop -text "[mc Profile]:" -anchor e
     
     set wmenu [eval {
@@ -792,14 +794,15 @@ proc ::Profiles::BuildPage {page} {
     
     set wuserinfofocus $wui.eserv
         
-    set wbt $wp.bt 
+    set wbt $w.bt 
     ttk::frame $wbt -padding {6 0 0 0}
-    pack  $wbt  -side right -fill y
+    grid  $wui  $wbt
+    grid $wbt -sticky n
     
     ttk::button $wbt.new -text [mc New] \
-      -command [namespace current]::NewCmd
+      -command [list [namespace current]::NewCmd $w]
     ttk::button $wbt.del -text [mc Delete] \
-      -command [namespace current]::DeleteCmd
+      -command [list [namespace current]::DeleteCmd $w]
 
     pack  $wbt.new  $wbt.del  -side top -fill x -pady 4
 
@@ -819,24 +822,65 @@ proc ::Profiles::BuildPage {page} {
 	    }
 	}
     }
+    # Need to pack options here to get the complete bottom slice.
+    set wopt $w.fopt
+    ttk::frame $wopt
+    grid  $wopt  -  -sticky ew
+    
+    # Triangle switch for more options.
+    if {$moreless} {
+	set wtri $wopt.tri
+	ttk::button $wtri -style Small.Toolbutton -padding {6 1} \
+	  -compound left -image [::UI::GetIcon mactriangleclosed] \
+	  -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
+	pack $wtri -side top -anchor w
+    }
+    
+    # More options.
+    set wfrmore $wopt.frmore
+    ttk::frame $wfrmore
 
+    if {!$moreless} {
+	pack $wfrmore -side top -fill x
+    }
+    
     # Tabbed notebook for more options.
-    set wtabnb $wopt.nb
+    set wtabnb $wfrmore.nb
     NotebookOptionWidget $wtabnb $token
-    pack $wtabnb -fill x
+    pack $wtabnb -fill x -expand 1
     
     # The actual prefs state for the current profile must be set.
     SetCurrentFromTmp $tmpSelected
 
     # This allows us to clean up some things when we go away.
-    bind $wc <Destroy> [list [namespace current]::DestroyHandler]
+    bind $w <Destroy> [list [namespace current]::DestroyHandler]
 
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
 	%s.msg configure -wraplength [expr [winfo reqwidth %s] - 20]
-    } $wp $wp]    
+    } $w $w]    
     after idle $script
+    
+    return $w
+}
+
+proc ::Profiles::MoreOpts {w} {
+    variable wtri
+    variable wfrmore
+
+    pack $wfrmore -side top -fill x -padx 2
+    $wtri configure -command [list [namespace current]::LessOpts $w] \
+      -image [::UI::GetIcon mactriangleopen] -text "[mc Less]..."   
+}
+
+proc ::Profiles::LessOpts {w} {
+    variable wtri
+    variable wfrmore
+    
+    pack forget $wfrmore
+    $wtri configure -command [list [namespace current]::MoreOpts $w] \
+      -image [::UI::GetIcon mactriangleclosed] -text "[mc More]..."   
 }
 
 # Profiles::NotebookOptionWidget --
@@ -852,6 +896,12 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     
     Debug 2 "::Profiles::NotebookOptionWidget w=$w, token=$token"
     
+    # Collect all widget paths. Note the trick to get the array name!
+    variable $w
+    upvar 0 $w wstate
+
+    set wstate(token) $token
+
     # Tabbed notebook for more options.
     ttk::notebook $w -style Small.TNotebook -padding {4}
 
@@ -862,6 +912,10 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::frame $wlog -padding [option get . notebookPageSmallPadding {}]
     pack  $wlog  -side top -anchor [option get . dialogAnchor {}]
 
+    set wstate(digest)        $wlog.cdig
+    set wstate(priority)      $wlog.sp
+    set wstate(invisible)     $wlog.cinv
+
     ttk::checkbutton $wlog.cdig -style Small.TCheckbutton \
       -text [mc {Scramble password}]  \
       -variable $token\(digest)
@@ -869,7 +923,9 @@ proc ::Profiles::NotebookOptionWidget {w token} {
       -text "[mc {Priority}]:"
     spinbox $wlog.sp -font CociSmallFont \
       -textvariable $token\(priority) \
-      -width 5 -state readonly -increment 1 -from 0 -to 127
+      -width 5 -increment 1 -from -128 -to 127 -validate all  \
+      -validatecommand [list ::Profiles::NotebookValidatePrio $token %V %P]  \
+      -invalidcommand bell
     ttk::checkbutton $wlog.cinv -style Small.TCheckbutton \
       -text [mc {Login as invisible}]  \
       -variable $token\(invisible)
@@ -885,6 +941,9 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::frame $wcon -padding [option get . notebookPageSmallPadding {}]
     pack  $wcon  -side top -anchor [option get . dialogAnchor {}]
 
+    set wstate(ip)            $wcon.eip
+    set wstate(port)          $wcon.eport
+
     ttk::label $wcon.lip -style Small.TLabel \
       -text "[mc {IP address}]:"
     ttk::entry $wcon.eip -font CociSmallFont \
@@ -897,6 +956,11 @@ proc ::Profiles::NotebookOptionWidget {w token} {
         
     set wse $wcon.se
     ttk::frame $wcon.se
+
+    set wstate(mssl)          $wse.mssl
+    set wstate(mtls)          $wse.mtls
+    set wstate(sasl)          $wse.sasl
+
     ttk::checkbutton $wse.tls -style Small.TCheckbutton  \
       -text [mc {Use Secure Connection}] -variable $token\(secure)  \
       -command [list ::Profiles::NotebookSecCmd $w]
@@ -926,9 +990,14 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     set whttp $w.http.f
     ttk::frame $whttp -padding [option get . notebookPageSmallPadding {}]
     pack  $whttp  -side top -fill x -anchor [option get . dialogAnchor {}]
-    
+
+    set wstate(http)          $whttp.http
+    set wstate(httpurl)       $whttp.u.eurl
+    set wstate(httpproxy)     $whttp.bproxy
+
     ttk::checkbutton $whttp.http -style Small.TCheckbutton \
-      -text [mc {Connect using HTTP}] -variable $token\(http)
+      -text [mc {Connect using HTTP}] -variable $token\(http)  \
+      -command [list ::Profiles::NotebookHttpCmd $w]
     
     ttk::frame $whttp.u
     ttk::label $whttp.u.lurl -style Small.TLabel  \
@@ -952,24 +1021,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     grid  $whttp.u       -             -sticky ew -pady 1
     grid  $whttp.bproxy  -                        -pady 1
     #grid  $whttp.lpoll   $whttp.spoll  -sticky w  -pady 1
-    grid columnconfigure $whttp 1 -weight 1
-    
-    # Collect all widget paths. Note the trick to get the array name!
-    variable $w
-    upvar 0 $w wstate
-    
-    set wstate(digest)        $wlog.cdig
-    set wstate(priority)      $wlog.sp
-    set wstate(invisible)     $wlog.cinv
-    set wstate(ip)            $wcon.eip
-    set wstate(port)          $wcon.eport
-    set wstate(mssl)          $wse.mssl
-    set wstate(mtls)          $wse.mtls
-    set wstate(sasl)          $wse.sasl
-    set wstate(http)          $whttp.http
-    set wstate(httpurl)       $whttp.u.eurl    
-    
-    set wstate(token)         $token
+    grid columnconfigure $whttp 1 -weight 1    
 
     if {!$this(package,tls)} {
 	$wse.tls state {disabled}
@@ -991,8 +1043,39 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     return $w
 }
 
+proc ::Profiles::NotebookValidatePrio {token type new} {
+    variable $token
+    upvar 0 $token state
+    
+    switch -- $type {
+	key {
+	    if {($new eq "-") || ($new eq "")} {
+		return 1
+	    } elseif {[string is integer -strict $new]  \
+	      && ($new >= -128) && ($new <= 127)} {
+		return 1
+	    } else {
+		return 0
+	    }
+	}
+	focusout - forced {
+	    if {[string is integer -strict $new]  \
+	      && ($new >= -128) && ($new <= 127)} {
+		return 1
+	    } else {
+		set state(priority) 0
+		return 0
+	    }
+	}
+	default {
+	    return 1
+	}
+    }
+}
+
 proc ::Profiles::NotebookDefaultWidgetStates {w} {
     NotebookSecCmd $w
+    NotebookHttpCmd $w
 }
 
 proc ::Profiles::NotebookSecCmd {w} {
@@ -1014,7 +1097,24 @@ proc ::Profiles::NotebookSecCmd {w} {
     } else {
 	$wstate(mssl)  state {disabled}
 	$wstate(mtls)  state {disabled}
-	$wstate(sasl) state {disabled}
+	$wstate(sasl)  state {disabled}
+    }
+}
+
+proc ::Profiles::NotebookHttpCmd {w} {
+    variable $w
+    upvar 0 $w wstate
+
+    set token $wstate(token)
+    variable $token
+    upvar 0 $token state
+
+    if {$state(http)} {
+	$wstate(httpurl)   state {!disabled}
+	$wstate(httpproxy) state {!disabled}
+    } else {
+	$wstate(httpurl)   state {disabled}
+	$wstate(httpproxy) state {disabled}
     }
 }
 
@@ -1167,6 +1267,7 @@ proc ::Profiles::SetCurrentFromTmp {profName} {
     set server   $tmpProfArr($profName,server)
     set username $tmpProfArr($profName,username)
     set password $tmpProfArr($profName,password)
+    set resource ""
     NotebookSetDefaults [namespace current]::moreOpts $server
     
     foreach {key value} [array get tmpProfArr $profName,-*] {
@@ -1207,7 +1308,9 @@ proc ::Profiles::SaveCurrentToTmp {profName} {
 	set tmpProfArr($profName,server)     $server
 	set tmpProfArr($profName,username)   $username
 	set tmpProfArr($profName,password)   $password
-	set tmpProfArr($profName,-resource)  $resource
+	if {$resource ne ""} {
+	    set tmpProfArr($profName,-resource)  $resource
+	}
 	
 	# Set more options if different from defaults.
 	foreach key [array names moreOpts] {
@@ -1271,7 +1374,7 @@ proc ::Profiles::GetAllTmpNames { } {
     return [lsort -dictionary $allNames]
 }
 
-proc ::Profiles::NewCmd { } {
+proc ::Profiles::NewCmd {w} {
     
     variable tmpProfArr
     variable tmpSelected
@@ -1289,7 +1392,7 @@ proc ::Profiles::NewCmd { } {
     # First get a unique profile name.
     set ans [::UI::MegaDlgMsgAndEntry [mc Profile] [mc prefprofname] \
       "[mc {Profile Name}]:" newProfile [mc Cancel] [mc OK]]
-    if {$ans == "cancel"} {
+    if {$ans eq "cancel"} {
 	return
     }
     Debug 2 "::Profiles::NewCmd tmpSelected=$tmpSelected, newProfile=$newProfile"
@@ -1311,14 +1414,13 @@ proc ::Profiles::NewCmd { } {
     focus $wuserinfofocus
 }
 
-proc ::Profiles::DeleteCmd { } {
+proc ::Profiles::DeleteCmd {w} {
     global  prefs
     
     variable tmpProfArr
     variable tmpSelected
     variable profile
     variable wmenu
-    variable wpage
     
     Debug 2 "::Profiles::DeleteCmd profile=$profile"
     set ans "yes"
@@ -1327,10 +1429,10 @@ proc ::Profiles::DeleteCmd { } {
     if {[info exists tmpProfArr($profile,server)]} {
 	set ans [::UI::MessageBox -title [mc Warning]  \
 	  -type yesno -icon warning -default yes  \
-	  -parent [winfo toplevel $wpage] \
+	  -parent [winfo toplevel $w] \
 	  -message [mc messremoveprofile]]
     }
-    if {$ans == "yes"} {
+    if {$ans eq "yes"} {
 	set ind [$wmenu index $profile]
 	if {$ind >= 0} {
 	    $wmenu delete $ind
@@ -1448,6 +1550,12 @@ proc ::Profiles::UserDefaultsHook { } {
     }
 }
 
+namespace eval ::Profiles {
+    
+    option add *JProfiles*settingsImage        settings         widgetDefault
+    option add *JProfiles*settingsDisImage     settingsDis      widgetDefault
+}
+
 # Profiles::BuildDialog --
 # 
 #       Standalone dialog profile settings dialog.
@@ -1467,13 +1575,24 @@ proc ::Profiles::BuildDialog { } {
     wm title $w [mc Profiles]
     ::UI::SetWindowPosition $w
     
+    set im   [::Theme::GetImage [option get $w settingsImage {}]]
+    set imd  [::Theme::GetImage [option get $w settingsDisImage {}]]
+
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
 
+    ttk::label $w.frall.head -style Headlabel \
+      -text [mc Profiles] -compound left \
+      -image [list $im background $imd]
+    pack  $w.frall.head  -side top -fill both -expand 1
+
+    ttk::separator $w.frall.s -orient horizontal
+    pack  $w.frall.s  -side top -fill x
+
     set wpage $w.frall.page
-    ttk::frame $wpage -padding {8}
-    BuildPage $wpage
+    FrameWidget $wpage 1 -padding [option get . dialogPadding {}]
+
     pack $wpage -side top
     
     # Button part.

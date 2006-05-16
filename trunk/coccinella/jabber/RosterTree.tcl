@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.19 2006-05-07 14:08:01 matben Exp $
+# $Id: RosterTree.tcl,v 1.20 2006-05-16 06:06:29 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -303,7 +303,10 @@ proc ::RosterTree::New {_T wxsc wysc} {
     bind $T <Double-1>        { ::RosterTree::DoubleClick %x %y }        
     bind $T <<ButtonPopup>>   { ::RosterTree::Popup %x %y }
     bind $T <Destroy>         {+::RosterTree::OnDestroy }
-    
+    bind $T <Key-Return>      { ::RosterTree::OnReturn }
+    bind $T <KP_Enter>        { ::RosterTree::OnReturn }
+    bind $T <Key-BackSpace>   { ::RosterTree::OnBackSpace }
+
     $T notify bind $T <Selection> {+::RosterTree::Selection }
     
     # This automatically cleans up the tag array.
@@ -390,6 +393,33 @@ proc ::RosterTree::CloseTreeCmd {item} {
     #empty
 }
 
+proc ::RosterTree::OnReturn {} {
+    variable T
+    
+    set id [$T selection get]
+    if {[$T selection count] == 1} {
+	set tags [$T item element cget $id cTag eText -text]
+	if {[lindex $tags 0] eq "jid"} {
+	    set jid [lindex $tags 1]
+	    ActionDoubleClick $jid
+	}
+    }
+}
+
+proc ::RosterTree::OnBackSpace {} {
+    variable T
+
+    set id [$T selection get]
+    if {[$T selection count] == 1} {
+	set tags [$T item element cget $id cTag eText -text]
+	if {[lindex $tags 0] eq "jid"} {
+	    set jid [lindex $tags 1]
+	    set jid2 [jlib::barejid $jid]
+	    ::Roster::SendRemove $jid2
+	}
+    }
+}
+
 proc ::RosterTree::ButtonPress {x y} {
     variable T
     variable buttonAfterId
@@ -401,6 +431,10 @@ proc ::RosterTree::ButtonPress {x y} {
 	}
 	set cmd [list ::RosterTree::Popup $x $y]
 	set buttonAfterId [after $buttonPressMillis $cmd]
+    }
+    set id [$T identify $x $y]
+    if {$id eq ""} {
+	$T selection clear all
     }
 }
 
@@ -416,8 +450,6 @@ proc ::RosterTree::ButtonRelease {x y} {
 
 proc ::RosterTree::DoubleClick {x y} {
     variable T
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
 
     # According to XMPP def sect. 4.1, we should use user@domain when
     # initiating a new chat or sending a new message that is not a reply.
@@ -427,19 +459,26 @@ proc ::RosterTree::DoubleClick {x y} {
 	set tags [$T item element cget $item cTag eText -text]
 	if {[lindex $tags 0] eq "jid"} {
 	    set jid [lindex $tags 1]
-	    jlib::splitjid $jid jid2 res
-	    	    
-	    if {[string equal $jprefs(rost,dblClk) "normal"]} {
-		::NewMsg::Build -to $jid2
-	    } elseif {[string equal $jprefs(rost,dblClk) "chat"]} {
-		if {[$jstate(roster) isavailable $jid]} {
-		    
-		    # We let Chat handle this internally.
-		    ::Chat::StartThread $jid
-		} else {
-		    ::NewMsg::Build -to $jid2
-		}
-	    }
+	    ActionDoubleClick $jid
+	}
+    }
+}
+
+proc ::RosterTree::ActionDoubleClick {jid} {
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+    
+    set jid2 [jlib::barejid $jid]
+	    
+    if {[string equal $jprefs(rost,dblClk) "normal"]} {
+	::NewMsg::Build -to $jid2
+    } elseif {[string equal $jprefs(rost,dblClk) "chat"]} {
+	if {[$jstate(roster) isavailable $jid]} {
+	    
+	    # We let Chat handle this internally.
+	    ::Chat::StartThread $jid
+	} else {
+	    ::NewMsg::Build -to $jid2
 	}
     }
 }
@@ -1005,7 +1044,7 @@ proc ::RosterTree::GetClosedItems {item} {
     
     set closed {}
     if {[$T item numchildren $item]} {
-	if {![$T item isopen $item]} {
+	if {![$T item isopen $item] && [$T item compare root != $item]} {
 	    set tags [$T item element cget $item cTag eText -text]
 	    lappend closed $tags
 	}

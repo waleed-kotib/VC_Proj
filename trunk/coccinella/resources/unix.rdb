@@ -23,6 +23,7 @@
 *Labelframe.highlightBackground:     #dcdad5
 *Radiobutton.background:             #dcdad5
 *Radiobutton.highlightBackground:    #dcdad5
+*Text.highlightBackground:           #dcdad5
 
 ! tk standard widgets (clam theme background)
 !
@@ -31,7 +32,6 @@
 *Scrollbar.borderWidth:              1
 *Scrollbar.width:                    12
 *Scrollbar.troughColor:              #bdbdbd
-!*Text.highlightBackground:           #dcdad5
 
 *TreeCtrl.columnBackground:          #dcdad5
 

@@ -409,6 +409,7 @@
 ::msgcat::mcset en mToolbar         	{Toolbar}
 ::msgcat::mcset en mNotebook         	{Notebook}
 ::msgcat::mcset en mMinimal         	{Minimal}
+::msgcat::mcset en mDisco         	{Disco}
 
 # Popups
 ::msgcat::mcset en mMessage     	{Message...}
@@ -508,6 +509,7 @@
 ::msgcat::mcset en {File suffixes}
 ::msgcat::mcset en {File Transfer}
 ::msgcat::mcset en {File Transfer Error}
+::msgcat::mcset en {File transfer port}
 ::msgcat::mcset en {First name}
 ::msgcat::mcset en {Font size}
 ::msgcat::mcset en {Font weight}
@@ -585,6 +587,7 @@
 ::msgcat::mcset en {No Inbox}
 ::msgcat::mcset en {No Printing}
 ::msgcat::mcset en {No Restriction}
+::msgcat::mcset en {No registered history for %s}
 ::msgcat::mcset en {Not Available}
 ::msgcat::mcset en {Not available}
 ::msgcat::mcset en {Not Connected}

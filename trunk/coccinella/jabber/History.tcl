@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.12 2006-04-05 07:46:22 matben Exp $
+# $Id: History.tcl,v 1.13 2006-05-16 06:06:29 matben Exp $
 
 package require uriencode
 
@@ -129,7 +129,7 @@ proc ::History::BuildHistory {jid dlgtype args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btclose -text [mc Close] \
+    ttk::button $frbot.btcancel -text [mc Close] \
       -command [list destroy $w]
     ttk::button $frbot.btclear -text [mc Clear]  \
       -command [list [namespace current]::ClearHistory $jid $wtext]
@@ -139,24 +139,25 @@ proc ::History::BuildHistory {jid dlgtype args} {
       -command [list [namespace current]::SaveHistory $jid $wtext]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
-	pack $frbot.btclose -side right
-	pack $frbot.btclear -side right -padx $padx
-	pack $frbot.btprint -side right
-	pack $frbot.btsave  -side right -padx $padx
+	pack $frbot.btcancel -side right
+	pack $frbot.btclear  -side right -padx $padx
+	pack $frbot.btprint  -side right
+	pack $frbot.btsave   -side right -padx $padx
     } else {
-	pack $frbot.btsave  -side right
-	pack $frbot.btprint -side right -padx $padx
-	pack $frbot.btclear -side right
-	pack $frbot.btclose -side right -padx $padx
+	pack $frbot.btsave   -side right
+	pack $frbot.btprint  -side right -padx $padx
+	pack $frbot.btclear  -side right
+	pack $frbot.btclose  -side right -padx $padx
     }
     pack $frbot -side bottom -fill x
     
     # Text.
     frame $wchatframe -class $argsArr(-class)
     pack  $wchatframe -fill both -expand 1
-    text $wtext -height 20 -width 72 -cursor {} \
+    text $wtext -height 20 -width 72 -cursor {} -wrap word \
       -highlightthickness 0 -borderwidth 1 -relief sunken \
-      -yscrollcommand [list $wysc set] -wrap word
+      -yscrollcommand [list ::UI::ScrollSet $wysc \
+      [list grid $wysc -column 1 -row 0 -sticky ns]]
     ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
 
     grid  $wtext  -column 0 -row 0 -sticky news
@@ -172,7 +173,9 @@ proc ::History::BuildHistory {jid dlgtype args} {
 
     set clockFormat         [option get $wchatframe clockFormat {}]
     set clockFormatNotToday [option get $wchatframe clockFormatNotToday {}]
-    
+
+    $wtext mark set insert end
+
     if {[file exists $path]} {
 	set uidstart 1000
 	set uid $uidstart
@@ -232,7 +235,8 @@ proc ::History::BuildHistory {jid dlgtype args} {
 	    $wtext insert end \n
 	}
     } else {
-	$wtext insert end "No registered history for $jid\n" histhead
+	$wtext insert end [mc {No registered history for} $jid] histhead
+	$wtext insert end "\n" histhead
     }
     $wtext configure -state disabled
     ::UI::SetWindowGeometry $w $wDlgs(jhist)

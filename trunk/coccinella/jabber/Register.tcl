@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.44 2006-04-07 14:08:28 matben Exp $
+# $Id: Register.tcl,v 1.45 2006-05-16 06:06:29 matben Exp $
 
 package provide Register 1.0
 
@@ -1319,13 +1319,12 @@ proc ::GenRegister::DoRegister {token} {
     $state(wsearrows) start
     
     set subelements [::JForms::GetXML $state(formtoken)]
-    
+ 
     # We need to do it the crude way.
     $jstate(jlib) send_iq "set"  \
       [list [wrapper::createtag "query" \
       -attrlist {xmlns jabber:iq:register} -subtags $subelements]] \
-      -to $state(server) \
-      -command [list [namespace current]::ResultCallback $token]
+      -to $state(server) -command [list [namespace current]::ResultCallback $token]
 
     # Keep state array until callback.
     set state(finished) 1
@@ -1339,15 +1338,17 @@ proc ::GenRegister::DoRegister {token} {
 proc ::GenRegister::ResultCallback {token type subiq args} {
     variable $token
     upvar 0 $token state
+    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::GenRegister::ResultCallback type=$type, subiq='$subiq'"
 
+    set jid $state(server)
+
     if {[string equal $type "error"]} {
 	::UI::MessageBox -type ok -icon error -message \
-	  [mc jamesserrregset $state(server) [lindex $subiq 0] [lindex $subiq 1]]
+	  [mc jamesserrregset $jid [lindex $subiq 0] [lindex $subiq 1]]
     } else {
-	::UI::MessageBox -type ok -icon info \
-	  -message [mc jamessokreg $state(server)]
+	::UI::MessageBox -type ok -icon info -message [mc jamessokreg $jid]
     }
     
     # Time to clean up.

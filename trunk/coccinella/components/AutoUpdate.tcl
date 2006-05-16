@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: AutoUpdate.tcl,v 1.14 2005-12-29 09:05:16 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.15 2006-05-16 06:06:28 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -170,6 +170,7 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
       -spacing1 2 -spacing3 2
     $wtext configure -tabs {100 right 110 left}
         
+    $wtext mark set insert end
     $wtext configure -state normal
     $wtext insert end $message msgtag
     $wtext insert end "\n"

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.85 2006-01-02 15:17:09 matben Exp $
+# $Id: MailBox.tcl,v 1.86 2006-05-16 06:06:29 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1191,6 +1191,7 @@ proc ::MailBox::DisplayMsg {id} {
     
     $wtextmsg configure -state normal
     $wtextmsg delete 1.0 end
+    $wtextmsg mark set insert end
     ::Text::ParseMsg normal $from $wtextmsg $body normal
     $wtextmsg insert end \n
     $wtextmsg configure -state disabled

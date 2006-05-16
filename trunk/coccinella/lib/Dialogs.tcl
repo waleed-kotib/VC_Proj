@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Dialogs.tcl,v 1.65 2006-01-11 13:25:48 matben Exp $
+# $Id: Dialogs.tcl,v 1.66 2006-05-16 06:06:29 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -252,11 +252,15 @@ proc ::Dialogs::InfoComponents { } {
     set wtxt $tbox.txt
     set wysc $tbox.ysc
     ttk::scrollbar $wysc -orient vertical -command [list $wtxt yview]
-    text $wtxt -yscrollcommand [list $wysc set] -highlightthickness 0 -bd 0 \
-      -bg white -wrap word -width 50 -height 16 -exportselection 1
+    text $wtxt -highlightthickness 0 -bd 0 \
+      -bg white -wrap word -width 50 -height 16 -exportselection 1 \
+      -yscrollcommand [list ::UI::ScrollSet $wysc \
+      [list grid $wysc -column 1 -row 0 -sticky ns]]
 
-    pack $wysc -side right -fill y
-    pack $wtxt -side left -fill both -expand 1
+    grid  $wtxt  -column 0 -row 0 -sticky news
+    grid  $wysc  -column 1 -row 0 -sticky ns
+    grid columnconfigure $tbox 0 -weight 1
+    grid rowconfigure $tbox 0 -weight 1
 
     $wtxt tag configure ttitle -foreground black -background #dedede  \
       -spacing1 2 -spacing3 2 -lmargin1 20 -font CociSmallBoldFont

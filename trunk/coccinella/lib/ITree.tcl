@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.9 2006-02-10 15:40:50 matben Exp $
+# $Id: ITree.tcl,v 1.10 2006-05-16 06:06:29 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -131,6 +131,10 @@ proc ::ITree::ButtonPress {T x y} {
 	    set cmd [list ::ITree::ButtonPressCmd $T $x $y]
 	    set buttonAfterId [after $buttonPressMillis $cmd]
 	}
+    }
+    set id [$T identify $x $y]
+    if {$id eq ""} {
+	$T selection clear all
     }
 }
 

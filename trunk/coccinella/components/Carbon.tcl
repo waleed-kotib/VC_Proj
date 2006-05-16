@@ -2,7 +2,7 @@
 # 
 #       Interface for the carbon package.
 #       
-# $Id: Carbon.tcl,v 1.1 2006-02-25 08:11:13 matben Exp $
+# $Id: Carbon.tcl,v 1.2 2006-05-16 06:06:28 matben Exp $
 
 namespace eval ::Carbon { 
 
@@ -29,6 +29,7 @@ proc ::Carbon::Init { } {
     ::hooks::register newChatThreadHook   [list [namespace current]::NotifyHook]
     ::hooks::register newMessageBox       [list [namespace current]::NotifyHook]
     ::hooks::register appInFrontHook      [list [namespace current]::AppInFrontHook]
+    ::hooks::register quitAppHook         [list [namespace current]::QuitHook]
 }
 
 proc ::Carbon::NewMsgHook {body args} {
@@ -57,6 +58,10 @@ proc ::Carbon::AppInFrontHook {} {
     variable nHiddenMsgs
     
     set nHiddenMsgs 0
+    ::carbon::dock overlay -text ""
+}
+
+proc ::Carbon::QuitHook {} {
     ::carbon::dock overlay -text ""
 }
 

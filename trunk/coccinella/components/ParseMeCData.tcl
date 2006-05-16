@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ParseMeCData.tcl,v 1.2 2005-10-04 06:24:26 matben Exp $
+# $Id: ParseMeCData.tcl,v 1.3 2006-05-16 06:06:28 matben Exp $
 
 namespace eval ::ParseMeCData:: {
     
@@ -30,15 +30,15 @@ proc ::ParseMeCData::ParseWordHook {type jid w word tagList} {
 		jlib::splitjid $jid roomjid nick
 	    }
 	    chat {
-		jlib::splitjid $jid jid2 res
+		set jid2 [jlib::barejid $jid]
 		if {[::Jabber::JlibCmd service isroom $jid2]} {
 		    set nick $jid
 		} else {
-		    set nick $jid2
+		    set nick [::Roster::GetDisplayName $jid]
 		}
 	    }
 	    default {
-		jlib::splitjid $jid nick -
+		set nick [jlib::barejid $jid]
 	    }
 	}
 	set wd [string map [list "/me" "* $nick"] $word]

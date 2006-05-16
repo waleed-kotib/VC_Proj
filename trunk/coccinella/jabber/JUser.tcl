@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.18 2006-04-12 12:52:12 matben Exp $
+# $Id: JUser.tcl,v 1.19 2006-05-16 06:06:29 matben Exp $
 
 package provide JUser 1.0
 
@@ -193,7 +193,7 @@ proc ::Jabber::User::DoAdd {token} {
     
     # Warn if already in our roster.
     set allUsers [$jstate(roster) getusers]
-    if {[lsearch -exact $allUsers $jid] >= 0} {
+    if {[$jstate(roster) isitem $jid]} {
 	set ans [::UI::MessageBox -message [mc jamessalreadyinrost $jid] \
 	  -icon error -type yesno]
 	if {[string equal $ans "no"]} {

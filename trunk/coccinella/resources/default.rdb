@@ -111,6 +111,7 @@
 *Disco*Tree.highlightThickness:      0
 *GroupChat*Scrollbar.width:          12
 *GroupChat*Tree.background:          white
+*GroupChat*histHeadBackground:       #dedeff
 *NewMsg*Scrollbar.width:             12
 *Roster*Scrollbar.width:             12
 *Roster*Tree.highlightThickness:     0

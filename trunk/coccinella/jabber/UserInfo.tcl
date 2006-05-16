@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.11 2005-11-30 08:32:00 matben Exp $
+# $Id: UserInfo.tcl,v 1.12 2006-05-16 06:06:29 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -52,7 +52,7 @@ proc ::UserInfo::Get {jid {node ""}} {
     set priv(avail)   $avail
     set priv(ncount)  0
     set priv(erruid)  0
-    if {[lsearch [$jstate(roster) getusers] $jid2] >= 0} {
+    if {[$jstate(roster) isitem $jid2]} {
 	set priv(type) "user"
     } else {
 	set priv(type) "item"

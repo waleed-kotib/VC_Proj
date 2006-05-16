@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: PrefNet.tcl,v 1.3 2006-03-28 08:12:12 matben Exp $
+# $Id: PrefNet.tcl,v 1.4 2006-05-16 06:06:29 matben Exp $
  
 package provide PrefNet 1.0
 
@@ -334,7 +334,7 @@ proc ::PrefNet::Advanced {  } {
 
     ttk::label $frmid.lserv -text "[mc {Built in server port}]:"
     ttk::label $frmid.lhttp -text "[mc {HTTP port}]:"
-    ttk::label $frmid.lbs   -text "[mc {Filetransfer (bytestreams) port}]:"
+    ttk::label $frmid.lbs   -text "[mc {File transfer port}]:"
     ttk::entry $frmid.eserv -width 6 -textvariable  \
       [namespace current]::tmpAdvPrefs(thisServPort)
     ttk::entry $frmid.ehttp -width 6 -textvariable  \

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.21 2006-03-29 10:03:47 matben Exp $
+# $Id: tileutils.tcl,v 1.22 2006-05-16 06:06:28 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -25,6 +25,7 @@ namespace eval ::tileutils {
 	bindtags . [linsert [bindtags .] 1 ThemeChanged]
     }
     bind ThemeChanged <<ThemeChanged>> { tileutils::ThemeChanged }
+    bind Text         <<ThemeChanged>> { tileutils::TextThemeChanged %W }
     if {[tk windowingsystem] eq "x11"} {
 	bind TreeCtrl <<ThemeChanged>> { tileutils::TreeCtrlThemeChanged %W }
     }
@@ -36,23 +37,60 @@ namespace eval ::tileutils {
 
 proc tileutils::ThemeChanged {} {
     
-    array set style [style configure .]    
+    array set style [style configure .]
+    array set map   [style map .]
     if {[info exists style(-background)]} {
 	set color $style(-background)
-	option add *ChaseArrows.background      $color startupFile
-	option add *Menu.background             $color startupFile
-	option add *TreeCtrl.columnBackground   $color startupFile
-	option add *WaveLabel.columnBackground  $color startupFile
+	
+	# Seems X11 has some system option db that must be overridden.
+	if {[tk windowingsystem] eq "x11"} {
+	    set priority 60
+	} else {
+	    set priority startupFile
+	}
+	option add *ChaseArrows.background      $color $priority
+	option add *Menu.background             $color $priority
+	option add *Text.highlightBackground    $color $priority
+	option add *TreeCtrl.columnBackground   $color $priority
+	option add *WaveLabel.columnBackground  $color $priority
+	if {[info exists map(-background)]} {
+	    foreach {state col} $map(-background) {
+		if {[lsearch $state active] >= 0} {
+		    option add *Menu.activeBackground $col $priority
+		    break
+		}
+	    }
+	}
+    }
+}
+
+proc tileutils::TextThemeChanged {win} {
+    
+    array set style [style configure .]    
+    if {[info exists style(-background)]} {
+	if {[winfo class $win] eq "Text"} {
+	    set color $style(-background)
+	    $win configure -highlightbackground $color
+	}
     }
 }
 
 proc tileutils::MenuThemeChanged {win} {
 
     array set style [style configure .]    
+    array set map   [style map .]
     if {[info exists style(-background)]} {
 	if {[winfo class $win] eq "Menu"} {
 	    set color $style(-background)
 	    $win configure -bg $color
+	    if {[info exists map(-background)]} {
+		foreach {state col} $map(-background) {
+		    if {[lsearch $state active] >= 0} {
+			$win configure -activebackground $col
+			break
+		    }
+		}
+	    }
 	}
     }
 }

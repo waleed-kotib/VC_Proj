@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.45 2005-11-30 08:32:00 matben Exp $
+# $Id: GotMsg.tcl,v 1.46 2006-05-16 06:06:28 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -128,6 +128,7 @@ proc ::GotMsg::Show {thisMsgId} {
     # Insert the actual body of the message.
     $wtext configure -state normal
     $wtext delete 1.0 end
+    $wtext mark set insert end
     ::Text::ParseMsg normal $jid $wtext $body normal
     $wtext insert end \n
     $wtext configure -state disabled

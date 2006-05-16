@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.26 2006-05-03 13:10:43 matben Exp $
+# $Id: Sounds.tcl,v 1.27 2006-05-16 06:06:28 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -88,7 +88,7 @@ proc ::Sounds::InitEventHooks { } {
     ::hooks::register newGroupChatMessageHook [list ::Sounds::Msg groupchat newmsg]
     ::hooks::register newChatThreadHook       [list ::Sounds::Event newchatthread]
     ::hooks::register loginHook               [list ::Sounds::Event connected]
-    ::hooks::register presenceHook            ::Sounds::Presence
+    ::hooks::register presenceNewHook         ::Sounds::Presence
 
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Sounds::InitPrefsHook
