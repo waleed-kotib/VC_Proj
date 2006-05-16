@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.17 2006-05-16 06:06:29 matben Exp $
+# $Id: bytestreams.tcl,v 1.18 2006-05-16 12:14:07 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -604,7 +604,7 @@ proc jlib::bytestreams::socks5 {jlibname sid addr port cmd} {
     if {[catch {
 	puts -nonewline $sock "\x05\x01\x00"
 	flush $sock
-	#puts "\t wrote 3: 'x05x01x00'"
+	puts "\t wrote 3: 'x05x01x00'"
     } err]} {
 	return -code error $err
     }
@@ -684,6 +684,7 @@ proc jlib::bytestreams::return_error {jlibname qElem errcode errtype stanza args
 
 proc jlib::bytestreams::send_error {jlibname sid errcode errtype stanza} {
 
+    upvar ${jlibname}::bytestreams::tstate tstate
     #puts "jlib::bytestreams::send_error (t)"
     
     set id  $tstate($sid,id)
