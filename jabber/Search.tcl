@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.23 2006-05-16 06:06:29 matben Exp $
+# $Id: Search.tcl,v 1.24 2006-05-17 06:35:02 matben Exp $
 
 package provide Search 1.0
 
@@ -14,6 +14,13 @@ namespace eval ::Search:: {
 
     # Wait for this variable to be set.
     variable finished  
+
+    variable popMenuDefs
+    
+    set popMenuDefs {
+	{command    mAddNewUser  {::Jabber::User::NewDlg -jid $jid} }
+	{command    mvCard       {::VCard::Fetch other $jid} }	
+    }
 }
 
 # Search::Build --
@@ -45,10 +52,15 @@ proc ::Search::Build {args} {
     set wraplength 200
     
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document {closeBox resizable}}
+      -macclass {document {closeBox resizable}}  \
+      -closecommand ::Search::CloseCmd
     wm title $w [mc {Search Service}]
     set sstate(w) $w
-    ::UI::SetWindowPosition $wDlgs(jsearch)
+
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsearch)]]
+    if {$nwin == 1} {
+	::UI::SetWindowGeometry $w $wDlgs(jsearch)
+    }
 
     # Global frame.
     ttk::frame $w.frall
@@ -84,7 +96,7 @@ proc ::Search::Build {args} {
     ttk::button $frbot.search -text [mc Search] \
       -command [namespace current]::DoSearch
     ttk::button $frbot.btcancel -text [mc Cancel]  \
-      -command [list destroy $w]
+      -command [list ::Search::CloseCmd $w]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.search   -side right
@@ -155,11 +167,11 @@ proc ::Search::Build {args} {
     frame $wright.se -bd 1 -relief sunken
     pack $wright.se -side top -fill both -expand 1
     tablelist::tablelist $wtb \
+      -width 60 -height 20  \
       -columns [list 60 [mc {Search results}]]  \
       -xscrollcommand [list $wxsc set]  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
-      [list grid $wysc -column 1 -row 0 -sticky ns]]  \
-      -width 60 -height 20
+      [list grid $wysc -column 1 -row 0 -sticky ns]]
     
     ttk::scrollbar $wysc -command [list $wtb yview] -orient vertical
     ttk::scrollbar $wxsc -command [list $wtb xview] -orient horizontal
@@ -170,6 +182,7 @@ proc ::Search::Build {args} {
     grid columnconfigure $frsearch 0 -weight 1
     
     bind [$wtb bodytag] <Double-Button-1> { ::Search::TableCmd %W %x %y }
+    bind [$wtb bodytag] <<ButtonPopup>>   { ::Search::TablePopup %W %x %y }
     
     wm minsize $w 400 320
 
@@ -205,13 +218,51 @@ proc ::Search::TableCmd {w x y} {
 	set jid [string trim [lindex $row 0]]
 
 	# Warn if already in our roster.
-	set users [$jstate(roster) getusers]
 	if {[$jstate(roster) isitem $jid]} {
 	    set ans [::UI::MessageBox -message [mc jamessalreadyinrost $jid] \
 	      -icon error -type ok]
 	} else {
 	    ::Jabber::User::NewDlg -jid $jid
 	}
+    }
+}
+
+proc ::Search::TablePopup {w x y} {
+    variable popMenuDefs
+    
+    lassign [tablelist::convEventFields $w $x $y] wtb xtb ytb
+    set ind [$wtb containing $ytb]
+	
+    if {$ind >= 0} {
+	set row [$wtb get $ind]
+	set jid [string trim [lindex $row 0]]
+
+	
+	
+	# Make the appropriate menu.
+	set m .popup_search
+	catch {destroy $m}
+	menu $m -tearoff 0  \
+	  -postcommand [list ::Search::PostMenuCmd $m $jid]
+	
+	::AMenu::Build $m $popMenuDefs -varlist [list jid $jid]
+	
+	# This one is needed on the mac so the menu is built before it is posted.
+	update idletasks
+	
+	# Post popup menu.	
+	set X [expr [winfo rootx $w] + $x]
+	set Y [expr [winfo rooty $w] + $y]
+	tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
+    }
+}
+
+proc ::Search::PostMenuCmd {m jid} {
+    upvar ::Jabber::jstate jstate
+
+    if {[$jstate(roster) isitem $jid]} {
+	set midx [::AMenu::GetMenuIndex $m mAddNewUser]
+	$m entryconfigure $midx -state disabled
     }
 }
 
@@ -285,6 +336,8 @@ proc ::Search::GetCB {jlibName type subiq} {
     set width [expr {$sstate(wraplength) - 40}]
     set formtoken [::JForms::Build $wform $subiq -tilestyle Small -width $width]
     pack $wform -fill both -expand 1
+    
+    ::JForms::BindEntry $wform <Return> +[list $sstate(wbtsearch) invoke]
 
     set sstate(formtoken) $formtoken
 
@@ -368,6 +421,13 @@ proc ::Search::ResultCallback {server type subiq} {
 	    }
 	}
     }
+}
+
+proc ::Search::CloseCmd {w} {
+    global  wDlgs
+    
+    ::UI::SaveWinPrefixGeom $wDlgs(jsearch)
+    destroy $w
 }
 
 #-------------------------------------------------------------------------------
