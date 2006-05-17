@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.72 2006-04-07 14:08:28 matben Exp $
+# $Id: NewMsg.tcl,v 1.73 2006-05-17 06:35:02 matben Exp $
 
 package require ui::entryex
 
@@ -44,26 +44,26 @@ namespace eval ::NewMsg:: {
     option add *NewMsg*Text.borderWidth           0               50
     option add *NewMsg*Text.relief                flat            50
 
-    option add *JMultiAddress.background    #999999         50
+    option add *JMultiAddress.background        "#999999"         60
 
     # Specials.
-    option add *JMultiAddress.entry1Background  white       50
-    option add *JMultiAddress.entry1Foreground  #333333     50
-    option add *JMultiAddress.entry2Background  white       50
-    option add *JMultiAddress.entry2Foreground  black       50
-    option add *JMultiAddress.entry3Background  white       50
-    option add *JMultiAddress.entry4Background  white       50
-    option add *JMultiAddress.popup1Background  #adadad     50
-    option add *JMultiAddress.popup2Background  #dedede     50
+    option add *JMultiAddress.entry1Background  white             20
+    option add *JMultiAddress.entry1Foreground  "#333333"         20
+    option add *JMultiAddress.entry2Background  white             20
+    option add *JMultiAddress.entry2Foreground  black             20
+    option add *JMultiAddress.entry3Background  white             20
+    option add *JMultiAddress.entry4Background  white             20
+    option add *JMultiAddress.popup1Background  "#adadad"         20
+    option add *JMultiAddress.popup2Background  "#dedede"         20
 
     switch -- $this(platform) {
 	windows {
-	    option add *JMultiAddress.popupImage      xppopupbt  50
-	    option add *JMultiAddress.popupImageDown  xppopupbt  50
+	    option add *JMultiAddress.popupImage      xppopupbt  20
+	    option add *JMultiAddress.popupImageDown  xppopupbt  20
 	}
 	default {
-	    option add *JMultiAddress.popupImage      reliefpopupbt      50
-	    option add *JMultiAddress.popupImageDown  reliefpopupbtpush  50
+	    option add *JMultiAddress.popupImage      reliefpopupbt      20
+	    option add *JMultiAddress.popupImageDown  reliefpopupbtpush  20
 	}
     }
     variable locals

@@ -5,17 +5,15 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.145 2006-05-16 06:06:28 matben Exp $
+# $Id: GroupChat.tcl,v 1.146 2006-05-17 06:35:02 matben Exp $
 
+package require Create
 package require Enter
 package require History
 package require Bookmarks
 package require colorutils
 
 package provide GroupChat 1.0
-
-# Provides dialog for old-style gc-1.0 groupchat but the rest should work for 
-# any protocol.
 
 
 namespace eval ::GroupChat:: {
@@ -266,7 +264,7 @@ proc ::GroupChat::EnterOrCreate {what args} {
 	    set ans [eval {::Enter::Build $protocol} $args]
 	}
 	create,gc-1.0 {
-	    set ans [eval {BuildEnter} $args]
+	    set ans [eval {::Create::GCBuild} $args]
 	}
 	create,muc {
 	    set ans [eval {::Create::Build} $args]
@@ -319,195 +317,6 @@ proc ::GroupChat::SetProtocol {roomjid _protocol} {
         $wtray buttonconfigure whiteboard   -state normal
 	$chatstate(wbtnick) configure -state normal
     }
-}
-
-# GroupChat::BuildEnter --
-#
-#       This is to provide support for the old-style 'groupchat 1.0' protocol
-#       which shall be used when not server is being browsed.
-#       
-# Arguments:
-#       args        -server, -roomjid, -nickname
-#       
-# Results:
-#       "cancel" or "enter".
-     
-proc ::GroupChat::BuildEnter {args} {
-    global  this wDlgs
-
-    variable enteruid
-    variable dlguid
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
-
-    set chatservers [$jstate(jlib) disco getconferences]
-    ::Debug 2 "::GroupChat::BuildEnter chatservers=$chatservers args='$args'"
-    
-    if {0 && $chatservers == {}} {
-	::UI::MessageBox -icon error -message [mc jamessnogroupchat]
-	return
-    }
-
-    # State variable to collect instance specific variables.
-    set token [namespace current]::enter[incr enteruid]
-    variable $token
-    upvar 0 $token enter
-    
-    set w $wDlgs(jgcenter)[incr dlguid]
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox} \
-      -closecommand [namespace current]::CloseEnterCB
-    wm title $w [mc {Enter/Create Room}]
-    
-    set enter(w) $w
-    array set enter {
-	finished    -1
-	server      ""
-	roomname    ""
-	nickname    ""
-    }
-    set enter(nickname) $jprefs(defnick)
-    array set argsArr $args
-    
-    # Global frame.
-    ttk::frame $w.frall
-    pack $w.frall -fill both -expand 1
-
-    set wbox $w.frall.f
-    ttk::frame $wbox -padding [option get . dialogPadding {}]
-    pack $wbox -fill both -expand 1
-
-    set enter(server) [lindex $chatservers 0]
-    set frmid $wbox.mid
-    ttk::frame $frmid
-    pack $frmid -side top -fill both -expand 1
-
-    set msg [mc jagchatmsg]
-    ttk::label $frmid.msg -style Small.TLabel \
-      -padding {0 0 0 6} -anchor w -wraplength 300 -justify left -text $msg
-    ttk::label $frmid.lserv -text "[mc Servers]:" -anchor e
-
-    set wcomboserver $frmid.eserv
-    ttk::combobox $wcomboserver -width 18  \
-      -textvariable $token\(server) -values $chatservers
-    ttk::label $frmid.lroom -text "[mc Room]:" -anchor e
-    ttk::entry $frmid.eroom -width 24    \
-      -textvariable $token\(roomname) -validate key  \
-      -validatecommand {::Jabber::ValidateUsernameStr %S}
-    ttk::label $frmid.lnick -text "[mc {Nick name}]:" \
-      -anchor e
-    ttk::entry $frmid.enick -width 24    \
-      -textvariable $token\(nickname) -validate key  \
-      -validatecommand {::Jabber::ValidateResourceStr %S}
-    
-    grid  $frmid.msg    -             -pady 2 -sticky w
-    grid  $frmid.lserv  $frmid.eserv  -pady 2
-    grid  $frmid.lroom  $frmid.eroom  -pady 2
-    grid  $frmid.lnick  $frmid.enick  -pady 2
-    grid  $frmid.lserv  $frmid.lroom  $frmid.lnick -sticky e
-    grid  $frmid.eserv  $frmid.eroom  $frmid.enick -sticky ew
-    
-    if {[info exists argsArr(-roomjid)]} {
-	jlib::splitjidex $argsArr(-roomjid) node service res
-	set enter(roomname) $node
-	set enter(server)   $service
-	$wcomboserver state {disabled}
-	$frmid.eroom  state {disabled}
-    }
-    if {[info exists argsArr(-server)]} {
-	set server $argsArr(-server)
-	set enter(server) $argsArr(-server)
-	$wcomboserver state {disabled}
-    }
-    if {[info exists argsArr(-nickname)]} {
-	set enter(nickname) $argsArr(-nickname)
-    }
-    
-    # Button part.
-    set frbot $wbox.b
-    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Enter] -default active \
-      -command [list [namespace current]::DoEnter $token]
-    ttk::button $frbot.btcancel -text [mc Cancel]   \
-      -command [list [namespace current]::Cancel $token]
-    set padx [option get . buttonPadX {}]
-    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
-	pack $frbot.btok -side right
-	pack $frbot.btcancel -side right -padx $padx
-    } else {
-	pack $frbot.btcancel -side right
-	pack $frbot.btok -side right -padx $padx
-    }
-    pack $frbot -side top -fill x
-    
-    # Grab and focus.
-    set oldFocus [focus]
-    focus $w
-    wm resizable $w 0 0
-    ::UI::SetWindowPosition $w $wDlgs(jgcenter)
-    bind $w <Return> [list $frbot.btok invoke]
-    
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
-    
-    catch {focus $oldFocus}
-    set finished $enter(finished)
-    unset enter
-    return [expr {($finished <= 0) ? "cancel" : "enter"}]
-}
-
-proc ::GroupChat::CloseEnterCB {w} {
-    global  wDlgs
-    
-    ::UI::SaveWinPrefixGeom $wDlgs(jgcenter)
-    return
-}
-
-proc ::GroupChat::Cancel {token} {
-    variable $token
-    upvar 0 $token enter
-
-    set enter(finished) 0
-    catch {destroy $enter(w)}
-}
-
-proc ::GroupChat::DoEnter {token} {
-    variable $token
-    upvar 0 $token enter
-
-    upvar ::Jabber::jstate jstate
-    
-    # Verify the fields first.
-    if {($enter(server) eq "") || ($enter(roomname) eq "") ||  \
-      ($enter(nickname) eq "")} {
-	::UI::MessageBox -title [mc Warning] -type ok -message \
-	  [mc jamessgchatfields] -parent $enter(w)
-	return
-    }
-
-    set roomjid [jlib::jidmap [jlib::joinjid $enter(roomname) $enter(server) ""]]
-    $jstate(jlib) groupchat enter $roomjid $enter(nickname) \
-      -command [namespace current]::EnterCallback
-
-    set enter(finished) 1
-    destroy $enter(w)
-}
-
-proc ::GroupChat::EnterCallback {jlibName type args} {
-    
-    array set argsArr $args
-    if {[string equal $type "error"]} {
-	set msg [mc mucErrEnter $argsArr(-from)]
-	if {[info exists argsArr(-error)]} {
-	    foreach {errcode errmsg} $argsArr(-error) break
-	    append msg [mc mucErrCode $errcode $errmsg]
-	}
-	::UI::MessageBox -title [mc mucErrEnterTitle] -message $msg -icon error
-	return
-    }
-    
-    # Cache groupchat protocol type (muc|conference|gc-1.0).
-    ::hooks::run groupchatEnterRoomHook $argsArr(-from) "gc-1.0"
 }
 
 # GroupChat::NormalMsgHook --

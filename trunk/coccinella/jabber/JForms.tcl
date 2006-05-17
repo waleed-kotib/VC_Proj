@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.23 2005-11-30 08:32:00 matben Exp $
+# $Id: JForms.tcl,v 1.24 2006-05-17 06:35:02 matben Exp $
 # 
 #      Updated to version 2.5 of JEP-0004
 #  
@@ -130,6 +130,18 @@ proc ::JForms::Build {w queryElem args} {
     bind $w <Destroy> [list [namespace current]::Free $token]
     
     return $token
+}
+
+proc ::JForms::BindEntry {w event cmd} {
+    
+    foreach win [winfo children $w] {
+	set wclass [winfo class $win]
+	if {($wclass eq "Entry") || ($wclass eq "TEntry")} {
+	    bind $win $event $cmd
+	} else {
+	    BindEntry $win $event $cmd
+	}
+    }
 }
 
 # Support for the "plain" forms, typically:
