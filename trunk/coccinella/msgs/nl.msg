@@ -591,6 +591,8 @@
 ::msgcat::mcset nl {Url of homepage}		{Adres van website}
 ::msgcat::mcset nl {Use proxy}			{Proxy gebruiken}
 ::msgcat::mcset nl {Use SSL for security}	{Met SSL beveiligen}
+::msgcat::mcset nl {Use TLS and SASL authentization} {Met TLS en SASL authenticeren}
+::msgcat::mcset nl {Use TLS on separate port (old)} {Met TLS op een aparte poort authenticeren (oud)}
 ::msgcat::mcset nl {User is}			{Contactpersoon is}
 ::msgcat::mcset nl {User is offline}		{Contactpersoon is offline}
 ::msgcat::mcset nl {User is online}		{Contactpersoon is online}
