@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.146 2006-05-17 06:35:02 matben Exp $
+# $Id: GroupChat.tcl,v 1.147 2006-05-17 13:32:00 matben Exp $
 
 package require Create
 package require Enter
@@ -813,6 +813,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid args} {
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns -padx 2]]
     ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
+    bindtags $wtext [linsert [bindtags $wtext] 0 ReadOnlyText]
  
     grid  $wtext  -column 0 -row 0 -sticky news
     grid  $wysc   -column 1 -row 0 -sticky ns -padx 2

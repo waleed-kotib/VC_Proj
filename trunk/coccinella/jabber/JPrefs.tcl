@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.35 2006-04-07 14:08:27 matben Exp $
+# $Id: JPrefs.tcl,v 1.36 2006-05-17 13:32:00 matben Exp $
 
 package require ui::fontselector
 
@@ -297,7 +297,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	      $name [set tileThemeArr($name) [string totitle $name]]
 	}
     }
-    set tmpPrefs(tileTheme) ::tile::currentTheme
+    set tmpPrefs(tileTheme) $::tile::currentTheme
 
     set wc $page.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
