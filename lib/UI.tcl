@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.125 2006-03-23 08:09:26 matben Exp $
+# $Id: UI.tcl,v 1.126 2006-05-17 13:31:19 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -155,6 +155,18 @@ proc ::UI::InitCommonBinds { } {
     bind Text <<Cut>>           {+ ::UI::FixMenusWhenSelection %W }
     bind Text <<Copy>>          {+ ::UI::FixMenusWhenSelection %W }
 
+    # Read only text widget bindings.
+    # Usage: bindtags $w [linsert [bindtags $w] 0 ReadOnlyText]
+    bind ReadOnlyText <Button-1> { focus %W }
+    bind ReadOnlyText <Tab> { 	
+	focus [tk_focusNext %W]
+	break
+    }
+    bind ReadOnlyText <Shift-Tab> { 	
+	focus [tk_focusPrev %W]
+	break
+    }
+        
     if {[string equal "x11" [tk windowingsystem]]} {
 	# Support for mousewheels on Linux/Unix commonly comes through mapping
 	# the wheel to the extended buttons.  If you have a mousewheel, find
@@ -202,6 +214,15 @@ proc ::UI::InitCommonBinds { } {
     if {[string equal $this(platform) "unix"]} {
 	bind Text <Control-Key-v> {}
     }
+}
+
+if {0} {
+    pack [text .t]
+    .t insert end "jfioepfhouidšs fhuldshbflds fhlds gfdskl fg"
+    .t configure -state disabled
+    bind .t <1> {focus %W}
+    toplevel .tt
+    pack [text .tt.t]
 }
 
 proc ::UI::InitVirtualEvents { } {
