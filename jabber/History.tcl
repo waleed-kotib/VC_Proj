@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.13 2006-05-16 06:06:29 matben Exp $
+# $Id: History.tcl,v 1.14 2006-05-17 13:32:00 matben Exp $
 
 package require uriencode
 
@@ -159,6 +159,7 @@ proc ::History::BuildHistory {jid dlgtype args} {
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns]]
     ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
+    bindtags $wtext [linsert [bindtags $wtext] 0 ReadOnlyText]
 
     grid  $wtext  -column 0 -row 0 -sticky news
     grid  $wysc   -column 1 -row 0 -sticky ns

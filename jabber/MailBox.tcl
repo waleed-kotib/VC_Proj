@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.86 2006-05-16 06:06:29 matben Exp $
+# $Id: MailBox.tcl,v 1.87 2006-05-17 13:32:00 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -317,6 +317,7 @@ proc ::MailBox::Build {args} {
       [list grid $wyscmsg -column 1 -row 0 -sticky ns]] \
       -state disabled
     $wtextmsg tag configure normal
+    bindtags $wtextmsg [linsert [bindtags $wtextmsg] 0 ReadOnlyText]
     ttk::scrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
 
     grid  $wtextmsg  -column 0 -row 0 -sticky news
