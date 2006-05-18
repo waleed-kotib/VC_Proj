@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.165 2006-05-17 13:32:00 matben Exp $
+# $Id: Chat.tcl,v 1.166 2006-05-18 12:20:20 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -65,9 +65,14 @@ namespace eval ::Chat:: {
     option add *Chat*notifierImage        notifier              widgetDefault    
     option add *Chat*tabAlertImage        ktip                  widgetDefault    
 
-    option add *Chat*tabCloseImage        closebutton           widgetDefault    
-    option add *Chat*tabCloseActiveImage  closebuttonActive     widgetDefault    
-
+    if {[tk windowingsystem] eq "aqua"} {
+	option add *Chat*tabClose16Image        closeAqua         widgetDefault    
+	option add *Chat*tabCloseActive16Image  closeAquaActive   widgetDefault    
+    } else {
+	option add *Chat*tabClose16Image        close             widgetDefault    
+	option add *Chat*tabCloseActive16Image  close             widgetDefault    
+    }
+    
     # These are stored in images/16 so no conflicts.
     option add *Chat*history16Image       history               widgetDefault    
     option add *Chat*history16DisImage    historyDis            widgetDefault    
@@ -1213,8 +1218,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(wnotifier) $wnotifier
         
     # The bottom frame.
-    set subPath [file join images 16]
-    
+    set subPath [file join images 16]    
     set im  [::Theme::GetImage [option get $w history16Image {}] $subPath]
     set imd [::Theme::GetImage [option get $w history16DisImage {}] $subPath]
     set imH [list $im disabled $imd background $imd]
@@ -1491,11 +1495,14 @@ proc ::Chat::DrawCloseButton {dlgtoken} {
     
     # Close button (exp). 
     set w $dlgstate(w)
-    set im       [::Theme::GetImage [option get $w tabCloseImage {}]]
-    set imactive [::Theme::GetImage [option get $w tabCloseActiveImage {}]]
+    
+    set subPath [file join images 16]    
+    set im  [::Theme::GetImage [option get $w tabClose16Image {}] $subPath]
+    set ima [::Theme::GetImage [option get $w tabCloseActive16Image {}] $subPath]
     set wclose $dlgstate(wnb).close
+
     ttk::button $wclose -style Plain.TButton  \
-      -image [list $im active $imactive] -compound image  \
+      -image [list $im active $ima] -compound image  \
       -command [list [namespace current]::ClosePageCmd $dlgtoken]
     place $wclose -anchor ne -relx 1.0 -x -6 -y 6
 

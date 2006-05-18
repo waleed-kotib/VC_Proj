@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.60 2006-05-16 06:06:29 matben Exp $
+# $Id: Profiles.tcl,v 1.61 2006-05-18 12:20:20 matben Exp $
 
 package provide Profiles 1.0
 
@@ -795,17 +795,28 @@ proc ::Profiles::FrameWidget {w moreless args} {
     set wuserinfofocus $wui.eserv
         
     set wbt $w.bt 
-    ttk::frame $wbt -padding {6 0 0 0}
-    grid  $wui  $wbt
-    grid $wbt -sticky n
-    
-    ttk::button $wbt.new -text [mc New] \
+    ttk::frame $wbt -padding {0 4 0 6}
+    if {0} {
+	grid  $wui  $wbt
+	grid $wbt -sticky n
+    } else {
+	grid  $wui  -sticky ew
+	grid  $wbt  -sticky ew    
+    }
+    ttk::button $wbt.new -text [mc {New Profile}] \
       -command [list [namespace current]::NewCmd $w]
-    ttk::button $wbt.del -text [mc Delete] \
+    ttk::button $wbt.del -text [mc {Delete Profile}] \
       -command [list [namespace current]::DeleteCmd $w]
 
-    pack  $wbt.new  $wbt.del  -side top -fill x -pady 4
-
+    if {0} {
+	pack  $wbt.new  $wbt.del  -side top -fill x -pady 4
+    } else {
+	grid  $wbt.new  $wbt.del  -sticky ew -padx 10
+	foreach c {0 1} {
+	    grid columnconfigure $wbt $c -uniform u -weight 1
+	}
+    }
+    
     # We use an array for "more" options.
     set token [namespace current]::moreOpts
     variable $token

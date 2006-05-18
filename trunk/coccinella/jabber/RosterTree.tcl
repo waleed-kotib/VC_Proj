@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.20 2006-05-16 06:06:29 matben Exp $
+# $Id: RosterTree.tcl,v 1.21 2006-05-18 12:20:20 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -231,10 +231,10 @@ proc ::RosterTree::StyleConfigureAltImages {jid} {
     variable plugin
     variable altImageCache
     
-    #puts "::RosterTree::StyleConfigureAltImages jid=$jid"
+    puts "::RosterTree::StyleConfigureAltImages jid=$jid"
     
     if {[info exists altImageCache($jid)]} {
-	#puts "\t altImageCache=$altImageCache($jid)"
+	puts "\t altImageCache=$altImageCache($jid)"
 	set name $plugin(selected)
 	foreach {key value} $altImageCache($jid) {
 	     $plugin($name,setItemAlt) $jid $key image $value
