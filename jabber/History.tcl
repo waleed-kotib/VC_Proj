@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.14 2006-05-17 13:32:00 matben Exp $
+# $Id: History.tcl,v 1.15 2006-05-18 12:20:20 matben Exp $
 
 package require uriencode
 
@@ -147,7 +147,7 @@ proc ::History::BuildHistory {jid dlgtype args} {
 	pack $frbot.btsave   -side right
 	pack $frbot.btprint  -side right -padx $padx
 	pack $frbot.btclear  -side right
-	pack $frbot.btclose  -side right -padx $padx
+	pack $frbot.btcancel -side right -padx $padx
     }
     pack $frbot -side bottom -fill x
     

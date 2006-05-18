@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.147 2006-05-17 13:32:00 matben Exp $
+# $Id: GroupChat.tcl,v 1.148 2006-05-18 12:20:20 matben Exp $
 
 package require Create
 package require Enter
@@ -52,6 +52,14 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*whiteboardDisImage   whiteboardDis    widgetDefault
 
     option add *GroupChat*tabAlertImage        ktip               widgetDefault    
+
+    if {[tk windowingsystem] eq "aqua"} {
+	option add *GroupChat*tabClose16Image        closeAqua         widgetDefault    
+	option add *GroupChat*tabCloseActive16Image  closeAquaActive   widgetDefault    
+    } else {
+	option add *GroupChat*tabClose16Image        close             widgetDefault    
+	option add *GroupChat*tabCloseActive16Image  close             widgetDefault    
+    }
     option add *GroupChat*tabCloseImage        closebutton        widgetDefault    
     option add *GroupChat*tabCloseActiveImage  closebuttonActive  widgetDefault    
 
@@ -917,9 +925,12 @@ proc ::GroupChat::DrawCloseButton {dlgtoken} {
     
     # Close button (exp). 
     set w $dlgstate(w)
-    set im       [::Theme::GetImage [option get $w tabCloseImage {}]]
-    set imactive [::Theme::GetImage [option get $w tabCloseActiveImage {}]]
+    
+    set subPath [file join images 16]    
+    set im  [::Theme::GetImage [option get $w tabClose16Image {}] $subPath]
+    set ima [::Theme::GetImage [option get $w tabCloseActive16Image {}] $subPath]
     set wclose $dlgstate(wnb).close
+
     ttk::button $wclose -style Plain.TButton  \
       -image [list $im active $imactive] -compound image  \
       -command [list [namespace current]::ClosePageCmd $dlgtoken]

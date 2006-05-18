@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.17 2006-05-16 06:06:29 matben Exp $
+# $Id: RosterPlain.tcl,v 1.18 2006-05-18 12:20:20 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -388,7 +388,7 @@ proc ::RosterPlain::SetAltImage {jid key image} {
     variable T
     variable altImageKeyToElem
 	
-    #puts "::RosterPlain::SetAltImage $jid, $key"
+    puts "::RosterPlain::SetAltImage $jid, $key"
     
     # altImageKeyToElem maps: key -> element name
     # 
