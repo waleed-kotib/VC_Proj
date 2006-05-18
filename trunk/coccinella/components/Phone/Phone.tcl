@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.14 2006-05-16 12:03:59 antoniofcano Exp $
+# $Id: Phone.tcl,v 1.15 2006-05-18 16:37:05 antoniofcano Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -217,6 +217,7 @@ proc ::Phone::LoginHook {} {
 proc ::Phone::ShowPhone {} {
     if {[GetPhone] ne ""} {
         NewPage
+        ::AddressBook::NewPage
     }
 }
 
@@ -232,6 +233,7 @@ proc ::Phone::HidePhone {} {
             $wnb forget $wphone
             destroy $wphone
         }
+        ::AddressBook::CloseAddressBook
     }
 }
 
@@ -570,7 +572,6 @@ proc ::Phone::DialJingle  { ipPeer portPeer calledName callerName {user ""} {pas
         
     set statePhone(fromStateLine0) "Dial"
     set statePhone(initDate0)  [clock seconds]
-    ::AddressBook::Called $calledName
     SetDialState
  
 }
