@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: IaxPrefs.tcl,v 1.4 2006-04-30 14:15:22 matben Exp $
+# $Id: IaxPrefs.tcl,v 1.5 2006-05-18 16:40:11 antoniofcano Exp $
 
 package provide IaxPrefs 0.1
 
@@ -27,7 +27,7 @@ proc ::IaxPrefs::InitPrefsHook { } {
     set prefs(iaxPhone,host)          "" ;# Was 0
     set prefs(iaxPhone,cidnum)        0
     set prefs(iaxPhone,cidname)       ""
-    set prefs(iaxPhone,codec)         ""
+    set prefs(iaxPhone,codec)         "ILBC"
     set prefs(iaxPhone,inputDevices)  ""
     set prefs(iaxPhone,outputDevices) ""
     set prefs(iaxPhone,agc)           0
@@ -239,16 +239,18 @@ proc ::IaxPrefs::CodecsFrame {win} {
 
     ttk::label $win.lcodec -text "[mc iaxPhoneCodec]:"
 
+    ttk::radiobutton $win.codeci -text "iLBC" -variable [namespace current]::tmpPrefs(codec) -value "ILBC"
+    ttk::radiobutton $win.codecs -text "Speex" -variable [namespace current]::tmpPrefs(codec) -value "SPEEX"
     ttk::radiobutton $win.codeca -text "aLaw" -variable [namespace current]::tmpPrefs(codec) -value "ALAW" 
     ttk::radiobutton $win.codecu -text "uLaw" -variable [namespace current]::tmpPrefs(codec) -value "ULAW"
     ttk::radiobutton $win.codecg -text "GSM"  -variable [namespace current]::tmpPrefs(codec) -value "GSM"
-    ttk::radiobutton $win.codeci -text "iLBC" -variable [namespace current]::tmpPrefs(codec) -value "ILBC"
 
     # If you add more codecs use a new column.
-    grid  $win.lcodec  $win.codeca  -sticky w
+    grid  $win.lcodec  $win.codeci  -sticky w
+    grid  x            $win.codecs  -sticky w
+    grid  x            $win.codeca  -sticky w
     grid  x            $win.codecu  -sticky w
     grid  x            $win.codecg  -sticky w
-    grid  x            $win.codeci  -sticky w
     grid $win.lcodec -padx 4
     
     return $win
