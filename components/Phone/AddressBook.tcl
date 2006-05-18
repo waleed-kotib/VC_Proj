@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #       
-# $Id: AddressBook.tcl,v 1.5 2006-05-16 12:03:59 antoniofcano Exp $
+# $Id: AddressBook.tcl,v 1.6 2006-05-18 16:37:05 antoniofcano Exp $
 
 namespace eval ::AddressBook:: { }
 
@@ -16,7 +16,7 @@ proc ::AddressBook::Init { } {
     # Add event hooks.
     
     ############################# Direct from Phone User Interface #############################
-    ::hooks::register phoneInit                       ::AddressBook::NewPage
+    #::hooks::register phoneInit                       ::AddressBook::NewPage
     
     #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------
     variable wtab -
@@ -38,6 +38,15 @@ proc ::AddressBook::Init { } {
 #---------------------------------------------------------------------------
 #------------------- Addressbook SpeedDial Tab User Interface --------------
 #---------------------------------------------------------------------------
+proc ::AddressBook::CloseAddressBook {} {
+    variable wtab 
+
+    if {[winfo exists $wphone]} {
+        set wnb [::Jabber::UI::GetNotebook]
+        $wnb forget $wtab
+        destroy $wtab
+    }
+} 
 
 proc ::AddressBook::NewPage {} {
     variable wtab
