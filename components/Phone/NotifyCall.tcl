@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: NotifyCall.tcl,v 1.12 2006-04-27 07:48:49 matben Exp $
+# $Id: NotifyCall.tcl,v 1.13 2006-05-18 16:37:49 antoniofcano Exp $
 
 package provide NotifyCall 0.1
 
@@ -281,6 +281,8 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
 
     ttk::frame $win    
     ttk::label $win.num -text $phoneNumber
+    ttk::label $win.time -text "(00:00:00)" 
+    set state(wtime) $win.time
 
     ttk::frame $win.left
     ttk::frame $win.right
@@ -301,7 +303,7 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
       -command [list [namespace current]::CallInfo $win]
     ttk::frame $win.ava
         
-    grid  $win.num     -            -sticky w
+    grid  $win.num     $win.time    -sticky ew -padx 4 -pady 4
     grid  $win.left    $win.right   -sticky ew -padx 4 -pady 4
     grid  $win.info    $win.ava     -sticky ew -padx 4 -pady 4
     grid  $win.hangup  $win.answer  -sticky ew -padx 4 -pady 4
@@ -467,7 +469,17 @@ proc ::NotifyCall::Mute {win what} {
 }
 
 proc ::NotifyCall::TimeUpdate {time} {
+    variable wmain
 
+    if {[winfo exists $wmain]} {
+        set win [GetFrame $wmain]
+        variable $win
+        upvar #0 $win state
+
+        # Make sure it is mapped
+        grid  $state(wtime)  -padx 4 -pady 4
+        $state(wtime) configure -text "($time)"
+    }
 }
 
 proc ::NotifyCall::Free {win} {
