@@ -1200,7 +1200,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es mModifyAB		{Modificar}
 ::msgcat::mcset es mRemoveAB		{Eliminar}
 ::msgcat::mcset es mRedial              {Rellamada}
-::msgcat::mcset es mToAB                {Copiar a la agenda}}
+::msgcat::mcset es mToAB                {Copiar a la agenda}
 
 ::msgcat::mcset es outCall              {Llamando a}
 ::msgcat::mcset es notifyCall           {Llamada entrante}
