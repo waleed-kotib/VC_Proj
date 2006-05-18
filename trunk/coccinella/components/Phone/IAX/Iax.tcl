@@ -11,7 +11,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.12 2006-04-30 14:15:21 matben Exp $
+# $Id: Iax.tcl,v 1.13 2006-05-18 16:38:48 antoniofcano Exp $
 
 namespace eval ::Iax { }
 
@@ -161,7 +161,9 @@ proc ::Iax::Register {} {
 
     # @@@ Do note register if empty host?
     #     Or a separate switch: Register automatically
-    set iaxstate(registerid) [iaxclient::register $user $password $host]
+    if {$host ne ""} {
+        set iaxstate(registerid) [iaxclient::register $user $password $host]
+    }
 
     ## This is tricky, when we got two iaxclient instances in the same box 
     ## the second one has the port 0
