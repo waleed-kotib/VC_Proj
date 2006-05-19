@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.21 2006-05-18 12:20:20 matben Exp $
+# $Id: RosterTree.tcl,v 1.22 2006-05-19 06:38:18 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -150,6 +150,8 @@ proc ::RosterTree::StyleDelete {name} {
 proc ::RosterTree::StyleCreateItem {jid presence args} {
     variable plugin
     
+    #puts "::RosterTree::StyleCreateItem jid=$jid"
+    
     set name $plugin(selected)
     set ans [eval {$plugin($name,createItem) $jid $presence} $args]
     StyleConfigureAltImages $jid
@@ -180,6 +182,8 @@ proc ::RosterTree::StyleDeleteItem {jid} {
 
 proc ::RosterTree::StyleSetItemAlternative {jid key type value} {
     variable plugin
+    
+    #puts "::RosterTree::StyleSetItemAlternative jid=$jid key=$key"
     
     switch -- $type {
 	image {
@@ -213,6 +217,22 @@ proc ::RosterTree::StyleCacheAltImage {jid key value} {
     }
 }
 
+proc ::RosterTree::StyleConfigureAltImages {jid} {
+    variable plugin
+    variable altImageCache
+    
+    #puts "::RosterTree::StyleConfigureAltImages jid=$jid"
+    
+    if {[info exists altImageCache($jid)]} {
+	#puts "\t altImageCache=$altImageCache($jid)"
+	set name $plugin(selected)
+	foreach {key value} $altImageCache($jid) {
+	     $plugin($name,setItemAlt) $jid $key image $value
+	}
+    }
+    #puts "\t exit ::RosterTree::StyleConfigureAltImages"
+}
+
 proc ::RosterTree::GetItemAlternatives {jid type} {
     variable altImageCache
     
@@ -227,22 +247,15 @@ proc ::RosterTree::GetItemAlternatives {jid type} {
     }
 }
 
-proc ::RosterTree::StyleConfigureAltImages {jid} {
-    variable plugin
+# Assumes that alternatives only for online users.
+
+proc ::RosterTree::FreeItemAlternatives {jid} {
     variable altImageCache
-    
-    puts "::RosterTree::StyleConfigureAltImages jid=$jid"
-    
-    if {[info exists altImageCache($jid)]} {
-	puts "\t altImageCache=$altImageCache($jid)"
-	set name $plugin(selected)
-	foreach {key value} $altImageCache($jid) {
-	     $plugin($name,setItemAlt) $jid $key image $value
-	}
-    }
+
+    unset -nocomplain altImageCache($jid)
 }
 
-proc ::RosterTree::FreeAltImagesCache {} {
+proc ::RosterTree::FreeAllAltImagesCache {} {
     variable altImageCache
     
     unset -nocomplain altImageCache
@@ -990,7 +1003,9 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
 	}
 	if {$presence eq "available"} {
 	    if {[info exists argsArr(-resource)] && ($argsArr(-resource) ne "")} {
-		append str " ($argsArr(-resource))"
+
+		# Configurable?
+		#append str " ($argsArr(-resource))"
 	    }
 	}
     }
