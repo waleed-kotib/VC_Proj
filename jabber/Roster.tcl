@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.169 2006-05-16 06:06:29 matben Exp $
+# $Id: Roster.tcl,v 1.170 2006-05-19 06:38:18 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -445,7 +445,7 @@ proc ::Roster::LogoutHook { } {
     # Clear roster and browse windows.
     if {$jprefs(rost,clrLogout)} {
 	::RosterTree::StyleInit
-	::RosterTree::FreeAltImagesCache
+	::RosterTree::FreeAllAltImagesCache
     }
 }
 
@@ -1017,6 +1017,8 @@ proc ::Roster::Presence {jid presence args} {
 	# we've got a subscription='remove' element. Skip it!
 	# Problems with transports that have /registered?
 	
+	::RosterTree::FreeItemAlternatives $jid
+	
 	# Add only to offline if no other jid2/* available.
 	# If not in roster we don't get 'isavailable'.
 	set isavailable [$jstate(roster) isavailable $rjid]
@@ -1026,13 +1028,12 @@ proc ::Roster::Presence {jid presence args} {
 	    } $itemAttr $args]
 	}
     } elseif {[string equal $presence "available"]} {
+	if {[IsCoccinella $jid]} {
+	    ::RosterTree::StyleCacheAltImage $jid whiteboard $icons(whiteboard12)
+	}
 	set items [eval {
 	    ::RosterTree::StyleCreateItem $jid $presence
 	} $itemAttr $args]
-	if {[IsCoccinella $jid]} {
-	    ::RosterTree::StyleSetItemAlternative $jid whiteboard  \
-	      image $icons(whiteboard12)
-	}
     }
     
     # This minimizes the cost of sorting.
