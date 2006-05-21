@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.7 2006-02-15 08:12:21 matben Exp $
+# $Id: FTrans.tcl,v 1.8 2006-05-21 13:09:33 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -498,6 +498,8 @@ proc ::FTrans::SetHandler {jlibname jid name size cmd args} {
     ui::dialog $state(w) -title [mc {Get File}] -icon question  \
       -type yesno -default yes -message $msg                    \
       -command [list [namespace current]::SetHandlerAnswer $token]
+    
+    ::hooks::run fileTransferReceiveHook $jid $name $size
 }
 
 proc ::FTrans::SetHandlerAnswer {token wdlg answer} {

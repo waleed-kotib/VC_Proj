@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.86 2006-05-08 09:57:38 matben Exp $
+# $Id: Disco.tcl,v 1.87 2006-05-21 13:09:33 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -296,10 +296,12 @@ proc ::Disco::InfoCB {cmd jlibname type from subiq args} {
 	# 
 	# BUT the items element may also have a name attribute???
 	if {![winfo exists $wtab]} {
-	    NewPage
+	    #NewPage
 	}
+	
+	# Google Talk responds to info but not to items.
 	if {![winfo exists $wtree]} {
-	    #return
+	    return
 	}
 	set ppv     [$jstate(jlib) disco parents2 $from $node]
 	set item    [list $from $node]
