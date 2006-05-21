@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.41 2006-04-27 07:48:49 matben Exp $
+# $Id: Init.tcl,v 1.42 2006-05-21 13:08:29 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -469,7 +469,7 @@ proc ::Init::LoadPackages { } {
     # Other utility packages that can be platform specific.
     # The 'Thread' package requires that the Tcl core has been built with support.
     array set extraPacksArr {
-	macosx      {Itcl Tclapplescript tls Thread MacCarbonPrint}
+	macosx      {Itcl Tclapplescript tls Thread MacCarbonPrint carbon}
 	windows     {Itcl printer gdi tls Thread optcl tcom}
 	unix        {Itcl tls Thread}
     }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.126 2006-05-17 13:31:19 matben Exp $
+# $Id: UI.tcl,v 1.127 2006-05-21 13:08:29 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -441,16 +441,24 @@ proc ::UI::GetScreenSize { } {
 #       [focus] is not reliable so it is better called after idle.
 
 proc ::UI::IsAppInFront { } {
+    global  this
     
-    # The 'wm stackorder' is not reliable in sorting windows!
-    # How about message boxes in front? We never get called since they block.
-    set isfront 0
-    set wfocus [focus]
-    foreach w [wm stackorder .] {
-	if {[string equal [wm state $w] "normal"]} {
-	    if {($wfocus ne "") && [string equal [winfo toplevel $wfocus] $w]} {
-		set isfront 1
-		break
+    if {[tk windowingsystem] eq "aqua" \
+      && [info exists this(package,carbon)]  \
+      && $this(package,carbon)} {
+	return [expr [carbon::process current] == [carbon::process front]]
+    } else {
+	
+	# The 'wm stackorder' is not reliable in sorting windows!
+	# How about message boxes in front? We never get called since they block.
+	set isfront 0
+	set wfocus [focus]
+	foreach w [wm stackorder .] {
+	    if {[string equal [wm state $w] "normal"]} {
+		if {($wfocus ne "") && [string equal [winfo toplevel $wfocus] $w]} {
+		    set isfront 1
+		    break
+		}
 	    }
 	}
     }
