@@ -11,7 +11,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.13 2006-05-18 16:38:48 antoniofcano Exp $
+# $Id: Iax.tcl,v 1.14 2006-05-24 17:14:59 antoniofcano Exp $
 
 namespace eval ::Iax { }
 
@@ -159,8 +159,7 @@ proc ::Iax::Register {} {
 	set $name $value
     }
 
-    # @@@ Do note register if empty host?
-    #     Or a separate switch: Register automatically
+    # If Host is blank then we don't  need to register into the PBX
     if {$host ne ""} {
         set iaxstate(registerid) [iaxclient::register $user $password $host]
     }
@@ -177,7 +176,9 @@ proc ::Iax::Register {} {
 
 proc ::Iax::NotifyLevels {args} {
     
-    # @@@ I don't know what this notifier does.
+    # This callbak is called every X milliseconds during the call
+    # It is intended for level meters (todo)
+    # We are using for counting the call duration length in the TPhone Widget and NotifyCall too 
     ::Phone::UpdateLevels $args
 }
 
@@ -335,6 +336,10 @@ proc ::Iax::Dial {phonenumber {line ""} {subject ""}} {
 	iaxclient::sendtext $subject
     }
 }
+
+#---------------------------------------------------------------------------
+#------------------------- Protocol Preferences Actions --------------------
+#---------------------------------------------------------------------------
 
 proc ::Iax::LoadPrefs {} {
     global prefs
