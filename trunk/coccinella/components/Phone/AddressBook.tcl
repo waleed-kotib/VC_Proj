@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #       
-# $Id: AddressBook.tcl,v 1.6 2006-05-18 16:37:05 antoniofcano Exp $
+# $Id: AddressBook.tcl,v 1.7 2006-05-24 17:10:04 antoniofcano Exp $
 
 namespace eval ::AddressBook:: { }
 
@@ -41,7 +41,7 @@ proc ::AddressBook::Init { } {
 proc ::AddressBook::CloseAddressBook {} {
     variable wtab 
 
-    if {[winfo exists $wphone]} {
+    if {[winfo exists $wtab]} {
         set wnb [::Jabber::UI::GetNotebook]
         $wnb forget $wtab
         destroy $wtab
@@ -620,17 +620,20 @@ proc ::AddressBook::TalkingState {args} {
     variable wtab
     variable popMenuDef
 
+    if {[winfo exists $wtab]} {
 #    $wtab entryconfigure $popMenuDef(call)  \
 #      -label [mc mForward] -command {::AddressBook::TransferExtension $phone}
 
 #    $wtab entryconfigure $popMenuDef(redial)  \
 #      -label [mc mForward] -command {::AddressBook::TransferExtension $phone}
+    }
 }
 
 proc ::AddressBook::NormalState {args} {
     variable wtab
     variable popMenuDef
 
+    if {[winfo exists $wtab]} {
 #    $wtab entryconfigure $popMenuDef(addressbook,def)  \
 #      -label [mc mCall] -command {::AddressBook::DialExtension $phone}
 
@@ -639,56 +642,66 @@ proc ::AddressBook::NormalState {args} {
 
 #    $wtab entryconfigure $popMenuDef(redial)  \
 #      -label [mc mRedial] -command {::AddressBook::DialExtension $phone}
+    }
 }
 
 proc ::AddressBook::ReceivedCall {callNo remote remote_name} {
     variable wtree
+    variable wtab
+
+    if {[winfo exists $wtab]} {    
+        set opts {-text "$remote_name $remote" -button 0 -open 0}
+        set v [list "Received" $remote]
     
-    set opts {-text "$remote_name $remote" -button 0 -open 0}
-    set v [list "Received" $remote]
-    
-    if { [::ITree::IsItem $wtree $v] == 0 } {
-        eval {::ITree::Item $wtree $v} $opts
+        if { [::ITree::IsItem $wtree $v] == 0 } {
+            eval {::ITree::Item $wtree $v} $opts
+        }
     }
 }
 
 proc ::AddressBook::Called {phonenumber args} {
     variable wtree
+    variable wtab
+
+    if {[winfo exists $wtab]} {    
+        set opts {-text $phonenumber -button 0 -open 0}
+        set v [list "Called" $phonenumber]
     
-    set opts {-text $phonenumber -button 0 -open 0}
-    set v [list "Called" $phonenumber]
-    
-    if { [::ITree::IsItem $wtree $v] == 0 } {
-        eval {::ITree::Item $wtree $v} $opts
+        if { [::ITree::IsItem $wtree $v] == 0 } {
+            eval {::ITree::Item $wtree $v} $opts
+        }
     }
 }
 
 proc ::AddressBook::UpdateLogs {type remote remote_name initDate callLength} {
     variable wtree
+    variable wtab
 
-    if { [clock format [clock seconds] -format %D] eq  [clock format $initDate -format "%D"]} {
-        set textDate "[mc Today] [clock format $initDate -format "%X"]"
-    } else {
-        set textDate [clock format $initDate -format "%D %X"]
-    }
-    set v [list $type  $remote]    
-    if { $type eq "Missed" } {
-        set textUpdate "$textDate $remote_name $remote"
-        set opts {-text $textUpdate -button 0 -open 0}
-        if { [::ITree::IsItem $wtree $v] == 0 } {
-            eval {::ITree::Item $wtree $v} $opts
+    if {[winfo exists $wtab]} {
+        if { [clock format [clock seconds] -format %D] eq  [clock format $initDate -format "%D"]} {
+            set textDate "[mc Today] [clock format $initDate -format "%X"]"
+        } else {
+            set textDate [clock format $initDate -format "%D %X"]
         }
+        set v [list $type  $remote]    
+        if { $type eq "Missed" } {
+            set textUpdate "$textDate $remote_name $remote"
+            set opts {-text $textUpdate -button 0 -open 0}
+            if { [::ITree::IsItem $wtree $v] == 0 } {
+                eval {::ITree::Item $wtree $v} $opts
+            }
         
-        #Remove Missed Call from Received.
-        set v [list "Received" $remote]
-        if { [::ITree::IsItem $wtree $v] > 0 } {
-            eval {::ITree::DeleteItem $wtree $v}
-        }
-    } else {
-        if { [::ITree::IsItem $wtree $v] > 0 } {
-            set textUpdate "$textDate ([clock format [expr $callLength - 3600] -format %X]) $remote_name $remote"
-            set opts {-text $textUpdate}
-            eval {::ITree::ItemConfigure $wtree $v} $opts
+            #Remove Missed Call from Received.
+            set v [list "Received" $remote]
+            if { [::ITree::IsItem $wtree $v] > 0 } {
+                eval {::ITree::DeleteItem $wtree $v}
+            }
+        } else {
+            if { [::ITree::IsItem $wtree $v] > 0 } {
+                set textUpdate "$textDate ([clock format [expr $callLength - 3600] -format %X]) $remote_name $remote"
+                set opts {-text $textUpdate}
+                eval {::ITree::ItemConfigure $wtree $v} $opts
+            }
         }
     }
 }
@@ -697,16 +710,18 @@ proc ::AddressBook::Search {phonenumber} {
     #For searching into vCard Disco Service, take a look into Search.tcl (DoSearch, ResultCallback) and JForms.tcl (ResultPlainList)
     variable abline
     set name ""
-    
-    set index [lsearch $abline $phonenumber]
-    if { $index >= 0 } {
-        set name [lindex $abline [expr $index-1]]
+
+    if {[info exists abline]} {    
+        set index [lsearch $abline $phonenumber]
+        if { $index >= 0 } {
+            set name [lindex $abline [expr $index-1]]
+        }
     }
     return $name
 }
 
 proc ::AddressBook::Debug {msg} {
-    if {0} {
+    if {1} {
 	puts "-------- $msg"
     }
 }
