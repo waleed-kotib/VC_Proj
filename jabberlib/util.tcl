@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: util.tcl,v 1.2 2006-04-17 13:23:38 matben Exp $
+# $Id: util.tcl,v 1.3 2006-05-24 08:38:15 matben Exp $
 
 package provide jlib::util 0.1
 
@@ -38,7 +38,7 @@ proc jlib::util::lprune {listName elem} {
     upvar $listName listValue    
     set idx [lsearch $listValue $elem]
     if {$idx >= 0} {
-	uplevel set $listName [list [lreplace $listValue $idx $idx]]
+	uplevel [list set $listName [lreplace $listValue $idx $idx]]
     }
     return
 }

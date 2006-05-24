@@ -19,7 +19,7 @@
 #  
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.11 2006-04-18 14:01:27 matben Exp $
+# $Id: caps.tcl,v 1.12 2006-05-24 08:38:15 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -114,9 +114,7 @@ proc jlib::caps::disco_what {jlibname jid what value cmd} {
     
     set roster [jlib::getrostername $jlibname]
     set node [$roster getcapsattr $jid node]
-    
-    puts "+++jlib::caps::disco_what jid=$jid, what=$what, value=$value, node=$node"
-    
+        
     # There are three situations here:
     #   1) if we have cached this info just return it
     #   2) if pending disco for node+ver then just add to stack to be invoked
@@ -151,8 +149,6 @@ proc jlib::caps::disco_what {jlibname jid what value cmd} {
 
 proc jlib::caps::disco_cb {node what value jlibname type from subiq args} {
     upvar ${jlibname}::caps::state state
-
-    puts "+++jlib::caps::disco_cb type=$type, from=$from"
 
     set key $what,$node,$value
 
@@ -204,9 +200,7 @@ proc jlib::caps::avail_cb {jlibname jid type args} {
     set node [$roster getcapsattr $jid node]
     set ver  [$roster getcapsattr $jid ver]
     set ext  [$roster getcapsattr $jid ext]
-    
-    puts "+++ jlib::caps::avail_cb $jid, node=$node"
-    
+        
     # Skip if client have not a caps presence element.
     if {$node eq ""} {
 	return
@@ -247,9 +241,7 @@ proc jlib::caps::unavail_cb {jlibname jid type args} {
     set node $state(jid,$jid,node)
     set ver  $state(jid,$jid,ver)
     set ext  $state(jid,$jid,ext)
-    
-    puts "+++ jlib::caps::unavail_cb jid=$jid, node=$node"
-    
+        
     # Free node+ver -> jids mapping
     if {[info exists state(jids,ver,$node,$ver)]} {
 	jlib::util::lprune state(jids,ver,$node,$ver) $jid
