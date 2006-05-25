@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.13 2006-05-16 06:06:29 matben Exp $
+# $Id: si.tcl,v 1.14 2006-05-25 14:08:30 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -546,8 +546,9 @@ proc jlib::si::reset {jlibname sid} {
 proc jlib::si::havesi {jlibname sid} {
     
     upvar ${jlibname}::si::tstate tstate
+    upvar ${jlibname}::si::istate istate
 
-    if {[info exists tstate($sid,profile)]} {
+    if {[info exists tstate($sid,profile)] || [info exists istate($sid,profile)]} {
 	return 1
     } else {
 	return 0
