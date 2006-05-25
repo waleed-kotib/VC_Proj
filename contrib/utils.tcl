@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: utils.tcl,v 1.5 2006-05-16 06:06:28 matben Exp $
+# $Id: utils.tcl,v 1.6 2006-05-25 14:09:39 matben Exp $
 
 package provide utils 1.0
     
@@ -42,10 +42,9 @@ proc min {args} {
 
 proc lprune {listName elem} {
     upvar $listName listValue
-    
     set idx [lsearch $listValue $elem]
     if {$idx >= 0} {
-	uplevel set $listName [list [lreplace $listValue $idx $idx]]
+	uplevel [list set $listName [lreplace $listValue $idx $idx]]
     }
     return
 }
