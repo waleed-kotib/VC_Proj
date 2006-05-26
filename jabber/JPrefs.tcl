@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.36 2006-05-17 13:32:00 matben Exp $
+# $Id: JPrefs.tcl,v 1.37 2006-05-26 14:13:56 matben Exp $
 
 package require ui::fontselector
 
@@ -287,6 +287,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	winnative	"Windows native"
 	xpnative	"XP Native"
 	aqua    	"Aqua"
+	tileqt          "Qt"
     }
     array set tileThemeArr $tileThemeList;
 
@@ -332,6 +333,8 @@ proc ::JPrefs::BuildAppearancePage {page} {
     eval {ttk::optionmenu $wthe.p [namespace current]::tmpPrefs(themeName)} \
       $allrsrc
     
+    grid  $wthe.l   $wthe.p
+
     # Tile's themes (skins).
     set wskin $wap.skin
     set wmenu $wskin.b.m
@@ -349,9 +352,16 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	    $wmenu entryconfigure $name -state disabled
 	}
     }
+    set tileqt 0
+    if {[lsearch [tile::availableThemes] tileqt] >= 0} {
+	set tileqt 1
+	ttk::button $wskin.qt -text "Qt Theme" -command ::JPrefs::BuildQtSetup
+    }
     
-    grid  $wthe.l   $wthe.p
     grid  $wskin.l  $wskin.b
+    if {$tileqt} {
+	grid  $wskin.qt  -column 2 -row 0 -padx 12
+    }
     
     # Window opacities if exists.
     array set wmopts [wm attributes .]
@@ -380,6 +390,13 @@ proc ::JPrefs::BuildAppearancePage {page} {
     grid  $wap.bgpick  $wap.bgdefk  $wap.btfont  $wap.dfont  -sticky ew
     
     pack  $wap  -side top -fill x
+}
+
+proc ::JPrefs::BuildQtSetup {} {
+    
+    set w ._tileqt_su
+    ::UI::Toplevel $w -title "Qt Theme"
+    tile::theme::tileqt::createThemeConfigurationPanel $w
 }
 
 proc ::JPrefs::BuildCustomPage {page} {
