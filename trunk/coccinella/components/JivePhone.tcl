@@ -1,10 +1,10 @@
-#agents JivePhone.tcl --
+# JivePhone.tcl --
 # 
 #       JivePhone bindings for the jive server and Asterisk.
 #       
 #       Contributions and testing by Antonio Cano damas
 #       
-# $Id: JivePhone.tcl,v 1.20 2006-04-08 07:02:48 matben Exp $
+# $Id: JivePhone.tcl,v 1.21 2006-05-26 13:23:08 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -49,15 +49,15 @@ proc ::JivePhone::Init { } {
     #--------------- Variables Uses For PopUP Menus -------------------------
     variable popMenuDef
     set popMenuDef(call) {
-	command  mCall     {user available} {::JivePhone::DialJID $jid "DIAL"} {}
+	command  mJiveCall  {user available} {::JivePhone::DialJID $jid "DIAL"} {}
     }
     set popMenuDef(forward) {
-	command  mForward  {user available} {::JivePhone::DialJID  $jid "FORWARD"} {}
+	command  mJiveForward  {user available} {::JivePhone::DialJID $jid "FORWARD"} {}
     }
 
     variable menuDef
     set menuDef  \
-      {command  mCall     {::JivePhone::DoDial "DIAL"}    normal {}}
+      {command  mJiveCall     {::JivePhone::DoDial "DIAL"}    normal {}}
 
 
     #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------
@@ -65,7 +65,7 @@ proc ::JivePhone::Init { } {
     variable abline
 
     set popMenuDef(addressbook,def) {
-        mCall          jid       {::JivePhone::DialExtension $jid "DIAL"}
+        mJiveCall      jid       {::JivePhone::DialExtension $jid "DIAL"}
         separator      {}        {}
         mNewAB         jid       {::JivePhone::NewAddressbookDlg}
         mModifyAB      jid       {::JivePhone::ModifyAddressbookDlg  $jid}
@@ -235,9 +235,9 @@ proc ::JivePhone::LogoutHook { } {
     variable wtab
     variable abline
 
-    ::Roster::DeRegisterPopupEntry mCall
-    ::Roster::DeRegisterPopupEntry mForward
-    ::Jabber::UI::DeRegisterMenuEntry jabber mCall
+    ::Roster::DeRegisterPopupEntry mJiveCall
+    ::Roster::DeRegisterPopupEntry mJiveForward
+    ::Jabber::UI::DeRegisterMenuEntry jabber mJiveCall
     ::Jabber::UI::RemoveAlternativeStatusImage jivephone
     
     if {[winfo exists $state(wstatus)]} {
@@ -334,7 +334,7 @@ proc ::JivePhone::MessageHook {body args} {
 		eval {::hooks::run jivePhoneEvent $type $cid $callID} $args
 	    }
 	    if {$type eq "HANG_UP"} {
-		::Roster::DeRegisterPopupEntry mForward
+		::Roster::DeRegisterPopupEntry mJiveForward
 
 		bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
 		::balloonhelp::balloonforwindow $win [mc phoneMakeCall]
@@ -374,11 +374,11 @@ proc ::JivePhone::RosterPostCommandHook {wmenu jidlist clicked status} {
 	    
 	    switch -- $state(status,$jid3) {
 		AVAILABLE - HANG_UP {
-		    ::Roster::SetMenuEntryState $wmenu mCall normal
+		    ::Roster::SetMenuEntryState $wmenu mJiveCall normal
 		}
 		XXXX {
 		    # @@@ ???
-		    ::Roster::SetMenuEntryState $wmenu mForward normal
+		    ::Roster::SetMenuEntryState $wmenu mJiveForward normal
 		}
 	    }
 	}
@@ -679,8 +679,6 @@ proc ::JivePhone::LoadEntries {} {
     variable abline
     global  prefs this
     
-    # @@@ Mats
-    #set fileName "$this(prefsPath)/addressbook.csv"
     set fileName [file join $this(prefsPath) addressbook.csv]
 
     if { [ file exists $fileName ] } {
