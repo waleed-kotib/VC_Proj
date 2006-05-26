@@ -68,6 +68,7 @@
 ::msgcat::mcset es Error		{Error}
 ::msgcat::mcset es Exit			{Salir}
 ::msgcat::mcset es File			{Archivo}
+::msgcat::mcset es {File...}		{Archivo...}
 ::msgcat::mcset es Filter		{Filtro}
 ::msgcat::mcset es Filters		{Filtros}
 ::msgcat::mcset es Finish		{Terminar}
@@ -167,6 +168,7 @@
 ::msgcat::mcset es Sounds		{Sonidos}
 ::msgcat::mcset es Specifications	{Especificaciones}
 ::msgcat::mcset es Speech		{Dialogar}
+::msgcat::mcset es Standard		{Estandar}
 ::msgcat::mcset es State		{Estado}
 ::msgcat::mcset es State/Region		{Estado/Región}
 ::msgcat::mcset es Stop			{Parar}
@@ -470,6 +472,7 @@
 ::msgcat::mcset es {Basic Info}			{Información básica}
 ::msgcat::mcset es {Block JID}			{Bloqueo JID}
 ::msgcat::mcset es {Bookmark this room}		{Añadir esta sala a favoritos}
+::msgcat::mcset es {Broken Image}	        {Imagen rota}
 ::msgcat::mcset es {Buddy Pouncing}             {Alertas}
 ::msgcat::mcset es {Built in server port}	{Puerto del servidor interno}
 ::msgcat::mcset es {Cache folder}		{Directorio de caché}
@@ -480,14 +483,17 @@
 ::msgcat::mcset es {Company Name}		{Nombre de la empresa}
 ::msgcat::mcset es {Component Info}		{Infos del componente}
 ::msgcat::mcset es {Conference server}		{Servidor de conferencia}
+::msgcat::mcset es {Connect using HTTP}	        {Conectar por HTTP}
 ::msgcat::mcset es {Contact Type}		{Tipo de contacto}
 ::msgcat::mcset es {Create Room}		{Crear una sala}
 ::msgcat::mcset es {Default group}		{Grupo por defecto}
 ::msgcat::mcset es {Default Logout Status}	{Desconexión por defecto}
+::msgcat::mcset es {Default nickname}	        {Nombre de usuario por defecto}
 ::msgcat::mcset es {Default status descriptions} {Mensaje de estado por defecto}
 ::msgcat::mcset es {Delete Rule} 		{Eliminar regla}
-::msgcat::mcset es {Disk Cache}			{Caché}
 ::msgcat::mcset es {Different Passwords}        {Contraseñas distintas}
+::msgcat::mcset es {Disk Cache}			{Caché}
+::msgcat::mcset es {Disco method}               {Metodo Disco}
 ::msgcat::mcset es {Do Not Disturb}		{No molestar}
 ::msgcat::mcset es {Edit Fonts}			{Editar las fuentes}
 ::msgcat::mcset es {Edit Item}			{Editar el objeto}
@@ -523,6 +529,7 @@
 ::msgcat::mcset es {History length} 		{Tamaño del historial}
 ::msgcat::mcset es {Host name}			{Nombre de dominio}
 ::msgcat::mcset es {HTTP port}			{Puerto HTTP}
+::msgcat::mcset es {>>Import>>}		        {>>Importar>>}
 ::msgcat::mcset es {Import Iconset...}		{Importar juego de iconos}
 ::msgcat::mcset es {Import using}		{Importar usando...}
 ::msgcat::mcset es {Import/Remove fonts}	{Importar/Borrar fuentes}
@@ -555,7 +562,10 @@
 ::msgcat::mcset es {Logged out}                 {Desconectado}
 ::msgcat::mcset es {Login as invisible}		{Conectarse con el estado "Invisible"}
 ::msgcat::mcset es {Mailbox Error}		{Error de buzón}
+::msgcat::mcset es {Make new text item for each line}	{Crear un nuevo elemento de texto para cada línea}
+::msgcat::mcset es {MIDI Player}	        {Reproductor midi}
 ::msgcat::mcset es {MIME type}			{Tipo MIME}
+::msgcat::mcset es {Movie Options}	        {Opciones de la película}
 ::msgcat::mcset es {Multi Connect}		{Conexiones múltiples}
 ::msgcat::mcset es {My Avatar}			{Avatar}
 ::msgcat::mcset es {My Status}			{Mi estado}
@@ -611,6 +621,8 @@
 ::msgcat::mcset es {Presence Error}		{Error de estado}
 ::msgcat::mcset es {Privacy List} 		{Listad de privacidad}
 ::msgcat::mcset es {Profile Name}               {Nombre del perfil}
+::msgcat::mcset es {Proxy Port}		        {Puerto del Proxy}
+::msgcat::mcset es {Proxy Server}	        {Servidor Proxy}
 ::msgcat::mcset es {Proxy Setup}		{Configuración del proxy}
 ::msgcat::mcset es {Put File Error}		{Error al insertar el archivo}
 ::msgcat::mcset es {Put Image/Movie}		{Insertar imagen/vídeo}
@@ -649,7 +661,9 @@
 ::msgcat::mcset es {Setup Assistant}		{Asistente de configuración}
 ::msgcat::mcset es {Slide Show}			{Presentación}
 ::msgcat::mcset es {Slide Show Folder}		{Directorio para las Presentaciones}
+::msgcat::mcset es {Smooth freehand strokes}		{Suavizar lineas dibujadas a mano alzada}
 ::msgcat::mcset es {Software Update}		{Actualización del programa}
+::msgcat::mcset es {Sound Set}                  {Sonidos}
 ::msgcat::mcset es {Sounds & Speech}		{Sonidos e idioma}
 ::msgcat::mcset es {Start Chat}			{Comenzar chat}
 ::msgcat::mcset es {Status message}		{Mensaje de estado}
@@ -669,7 +683,11 @@
 ::msgcat::mcset es {Type of File}		{Tipo de archivo}
 ::msgcat::mcset es {Unknown: Prompt user}	{Desconocido : Nombre de usuario}
 ::msgcat::mcset es {Url of homepage}		{URL de la página de inicio}
+::msgcat::mcset es {Use proxy}		        {Usar proxy}
 ::msgcat::mcset es {Use SSL for security}	{Usar SSL para la seguridad}
+::msgcat::mcset es {Use Secure Connection}	{Usar conexión segura}
+::msgcat::mcset es {Use TLS and SASL authentization}	{Usar autenticacion TLS y SASL}
+::msgcat::mcset es {Use TLS on separate port (old)}	{Usar TLS en un puerto aparte (antigüo)}
 ::msgcat::mcset es {User is}			{El usuario está}
 ::msgcat::mcset es {User is offline}		{El usuario está desconectado}
 ::msgcat::mcset es {User is online}		{El usuario está conectado}
@@ -1213,7 +1231,6 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es callVM               {Desviar a buzon de voz}
 
 # Fore some of these generic names could be used?
-::msgcat::mcset es {IAX Account}	{Cuenta IAX}
 ::msgcat::mcset es iaxPhone             {IAX Phone}
 ::msgcat::mcset es iaxPhoneAccount      {Cuenta IAX}
 ::msgcat::mcset es iaxPhoneUser         {Usuario}
@@ -1230,25 +1247,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es iaxPhoneCodec        {Codec}
 
 
-::msgcat::mcset es {Disco method}        {Metodo Disco}
-::msgcat::mcset es {Sound Set}          {Sonidos}
-::msgcat::mcset es {MIDI Player}	{Reproductor midi}
-::msgcat::mcset es {Default nickname}	{Nombre de usuario por defecto}
-::msgcat::mcset es {File...}		{Archivo...}
-::msgcat::mcset es {Proxy Server}	{Servidor Proxy}
-::msgcat::mcset es {Proxy Port}		{Puerto del Proxy}
 ::msgcat::mcset es {Filetransfer (bytestreams) port}	{Puerto para la Transferencia de archivos (bytestreams)}
-::msgcat::mcset es {Connect using HTTP}	{Conectar por HTTP}
-::msgcat::mcset es {Use Secure Connection}	{Usar conexión segura}
-::msgcat::mcset es {Use TLS and SASL authentization}	{Usar autenticacion TLS y SASL}
-::msgcat::mcset es {Use TLS on separate port (old)}	{Usar TLS en un puerto aparte (antigüo)}
-::msgcat::mcset es {Use proxy}		{Usar proxy}
-::msgcat::mcset es {Smooth freehand strokes}		{Suavizar lineas dibujadas a mano alzada}
-::msgcat::mcset es {Make new text item for each line}	{Crear un nuevo elemento de texto para cada línea}
-::msgcat::mcset es {>>Import>>}		{>>Importar>>}
-::msgcat::mcset es {Standard}		{Estandar}
 
-::msgcat::mcset es {Movie Options}	{Opciones de la película}
-::msgcat::mcset es {Broken Image}	{Imagen rota}
 
 # END --------------------------------------------------------------------------
