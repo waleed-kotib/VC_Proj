@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.166 2006-05-18 12:20:20 matben Exp $
+# $Id: Chat.tcl,v 1.167 2006-05-26 07:15:57 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1055,10 +1055,6 @@ proc ::Chat::Build {threadID args} {
       -text [mc Invite] -image $iconInvite \
       -disabledimage $iconInviteDis  \
       -command [list [namespace current]::Invite $dlgtoken]
- 
-    ::hooks::run buildChatButtonTrayHook $wtray $dlgtoken
-    
-    set shortBtWidth [$wtray minwidth]
     
     # D =
     ttk::separator $w.frall.divt -orient horizontal
@@ -1083,7 +1079,11 @@ proc ::Chat::Build {threadID args} {
     }
     SetTitle $chattoken
     SetThreadState $dlgtoken $chattoken
-    
+ 
+    # We do it here to be sure that we have the chattoken.
+    ::hooks::run buildChatButtonTrayHook $wtray $dlgtoken
+        
+    set shortBtWidth [$wtray minwidth]
     wm minsize $w [expr {$shortBtWidth < 220} ? 220 : $shortBtWidth] 320
     wm maxsize $w 800 2000
 
@@ -1352,7 +1352,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     return $chattoken
 }
 
-proc InitDnD {chattoken win} {
+proc ::Chat::InitDnD {chattoken win} {
     
     dnd bindtarget $win text/uri-list <Drop>      \
      [list ::Chat::DnDDrop $chattoken %W %D %T]
