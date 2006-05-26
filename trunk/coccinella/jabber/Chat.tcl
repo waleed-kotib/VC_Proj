@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.167 2006-05-26 07:15:57 matben Exp $
+# $Id: Chat.tcl,v 1.168 2006-05-26 09:41:28 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -511,7 +511,7 @@ proc ::Chat::GotMsg {body args} {
     # We may have reset its jid to a 2-tier jid if it has been offline.
     set chatstate(jid)         $mjid
     set chatstate(fromjid)     $jid
-    set chatstate(displayname) [::Roster::GetDisplayName $jid]
+    set chatstate(displayname) [::Roster::GetDisplayName $jid2]
     
     set w $dlgstate(w)
 
@@ -688,7 +688,7 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	    } else {
 		set youjid $jid
 	    }
-	    jlib::splitjid $youjid jid2 res
+	    set jid2 [jlib::barejid $youjid]
 	    if {[::Jabber::JlibCmd service isroom $jid2]} {
 		set name [::Jabber::JlibCmd service nick $jid]
 		set from $jid2/$name
@@ -1148,7 +1148,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(fromjid)          $jid
     set chatstate(jid)              $mjid
     set chatstate(jid2)             $jid2
-    set chatstate(displayname)      [::Roster::GetDisplayName $mjid]
+    set chatstate(displayname)      [::Roster::GetDisplayName $jid2]
     set chatstate(dlgtoken)         $dlgtoken
     set chatstate(threadid)         $threadID
     set chatstate(nameorjid)        [::Roster::GetNameOrjid $jid2]
