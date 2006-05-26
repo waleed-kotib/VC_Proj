@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.25 2006-05-16 06:06:28 matben Exp $
+# $Id: JingleIax.tcl,v 1.26 2006-05-26 13:26:54 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -77,7 +77,7 @@ proc ::JingleIAX::Init { } {
 
 proc ::JingleIAX::InitHook {} {
     variable popMenuDef  
-    
+        
     ::Roster::RegisterPopupEntry $popMenuDef(call) 
 }
 
