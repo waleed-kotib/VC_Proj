@@ -64,6 +64,7 @@
 ::msgcat::mcset en Error
 ::msgcat::mcset en Exit
 ::msgcat::mcset en File
+::msgcat::mcset en File...
 ::msgcat::mcset en Filter
 ::msgcat::mcset en Filters
 ::msgcat::mcset en Finish
@@ -469,6 +470,7 @@
 ::msgcat::mcset en {Basic Info}
 ::msgcat::mcset en {Block JID}
 ::msgcat::mcset en {Bookmark this room}
+::msgcat::mcset en {Broken Image}
 ::msgcat::mcset en {Buddy Pouncing}
 ::msgcat::mcset en {Built in server port}
 ::msgcat::mcset en {Cache folder}
@@ -488,8 +490,9 @@
 ::msgcat::mcset en {Default status descriptions}
 ::msgcat::mcset en {Delete Rule}
 ::msgcat::mcset en {Delete Profile}
-::msgcat::mcset en {Disk Cache}
 ::msgcat::mcset en {Different Passwords}
+::msgcat::mcset en {Disk Cache}
+::msgcat::mcset en {Disco method}
 ::msgcat::mcset en {Do Not Disturb}
 ::msgcat::mcset en {Edit Fonts}
 ::msgcat::mcset en {Edit Item}
@@ -561,6 +564,7 @@
 ::msgcat::mcset en {Make new text item for each line}
 ::msgcat::mcset en {MIDI Player}
 ::msgcat::mcset en {MIME type}
+::msgcat::mcset en {Movie Options}
 ::msgcat::mcset en {Multi Connect}
 ::msgcat::mcset en {My Avatar}
 ::msgcat::mcset en {My Status}
@@ -617,6 +621,8 @@
 ::msgcat::mcset en {Presence Error}
 ::msgcat::mcset en {Privacy List}
 ::msgcat::mcset en {Profile Name}
+::msgcat::mcset en {Proxy Port}
+::msgcat::mcset en {Proxy Server}
 ::msgcat::mcset en {Proxy Setup}
 ::msgcat::mcset en {Public Jabber Servers}
 ::msgcat::mcset en {Put File Error}
@@ -660,6 +666,7 @@
 ::msgcat::mcset en {Slide Show Folder}
 ::msgcat::mcset en {Smooth freehand strokes}
 ::msgcat::mcset en {Software Update}
+::msgcat::mcset en {Sound Set} 
 ::msgcat::mcset en {Sounds & Speech}
 ::msgcat::mcset en {Start Chat}
 ::msgcat::mcset en {Status message}
