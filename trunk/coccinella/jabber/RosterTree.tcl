@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.22 2006-05-19 06:38:18 matben Exp $
+# $Id: RosterTree.tcl,v 1.23 2006-05-26 13:27:50 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -319,6 +319,7 @@ proc ::RosterTree::New {_T wxsc wysc} {
     bind $T <Key-Return>      { ::RosterTree::OnReturn }
     bind $T <KP_Enter>        { ::RosterTree::OnReturn }
     bind $T <Key-BackSpace>   { ::RosterTree::OnBackSpace }
+    bind $T <Button1-Motion>  { ::RosterTree::OnButtonMotion }
 
     $T notify bind $T <Selection> {+::RosterTree::Selection }
     
@@ -494,6 +495,15 @@ proc ::RosterTree::ActionDoubleClick {jid} {
 	    ::NewMsg::Build -to $jid2
 	}
     }
+}
+
+proc ::RosterTree::OnButtonMotion { } {
+    variable buttonAfterId
+    
+    if {[info exists buttonAfterId]} {
+	catch {after cancel $buttonAfterId}
+	unset buttonAfterId
+    }    
 }
 
 proc ::RosterTree::GetSelected { } {

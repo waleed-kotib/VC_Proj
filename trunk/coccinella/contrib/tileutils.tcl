@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.22 2006-05-16 06:06:28 matben Exp $
+# $Id: tileutils.tcl,v 1.23 2006-05-26 13:27:50 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -25,6 +25,7 @@ namespace eval ::tileutils {
 	bindtags . [linsert [bindtags .] 1 ThemeChanged]
     }
     bind ThemeChanged <<ThemeChanged>> { tileutils::ThemeChanged }
+    bind Listbox      <<ThemeChanged>> { tileutils::ListboxThemeChanged %W }
     bind Text         <<ThemeChanged>> { tileutils::TextThemeChanged %W }
     if {[tk windowingsystem] eq "x11"} {
 	bind TreeCtrl <<ThemeChanged>> { tileutils::TreeCtrlThemeChanged %W }
@@ -48,11 +49,12 @@ proc tileutils::ThemeChanged {} {
 	} else {
 	    set priority startupFile
 	}
-	option add *ChaseArrows.background      $color $priority
-	option add *Menu.background             $color $priority
-	option add *Text.highlightBackground    $color $priority
-	option add *TreeCtrl.columnBackground   $color $priority
-	option add *WaveLabel.columnBackground  $color $priority
+	option add *ChaseArrows.background        $color $priority
+	option add *Listbox.highlightBackground   $color $priority
+	option add *Menu.background               $color $priority
+	option add *Text.highlightBackground      $color $priority
+	option add *TreeCtrl.columnBackground     $color $priority
+	option add *WaveLabel.columnBackground    $color $priority
 	if {[info exists map(-background)]} {
 	    foreach {state col} $map(-background) {
 		if {[lsearch $state active] >= 0} {
@@ -60,6 +62,17 @@ proc tileutils::ThemeChanged {} {
 		    break
 		}
 	    }
+	}
+    }
+}
+
+proc tileutils::ListboxThemeChanged {win} {
+    
+    array set style [style configure .]    
+    if {[info exists style(-background)]} {
+	if {[winfo class $win] eq "Listbox"} {
+	    set color $style(-background)
+	    $win configure -highlightbackground $color
 	}
     }
 }

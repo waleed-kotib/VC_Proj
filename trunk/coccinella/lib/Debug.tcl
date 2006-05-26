@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Debug.tcl,v 1.3 2006-03-04 14:07:49 matben Exp $
+# $Id: Debug.tcl,v 1.4 2006-05-26 13:27:50 matben Exp $
 
 # If no debug printouts, no console.
 if {$debugLevel == 0} {
@@ -34,7 +34,7 @@ proc ::CallTrace {num} {
     if {$num <= $debugLevel} {
 	puts "Tcl call trace:"
 	for {set i [expr [info level] - 1]} {$i > 0} {incr i -1} {
-	    puts "\t$i: [info level $i]"
+	    puts "\t$i: [string range [info level $i] 0 80] ..."
 	}
     }
 }

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.135 2006-03-28 08:12:12 matben Exp $	
+# $Id: Coccinella.tcl,v 1.136 2006-05-26 13:27:50 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -166,7 +166,7 @@ package require Splash
 ::Splash::SetMsg [mc splashsource]
 update
 
-# Beware! [info hostname] can be very slow on Macs first time it is called.
+# Make sure we have the extra packages necessary and some optional.
 ::Splash::SetMsg [mc splashhost]
 ::Init::SetHostname
 ::Init::LoadPackages

@@ -20,9 +20,10 @@ Coccinella-0.95.12 (0604??):
  o toggle chat history
  o tabbed groupchats
  o removed all old agents/browse/conference code
- o support for vcrad based avatars
+ o support for vcard based avatars
  o file cache for avatars
  o new (flat) minimalistic roster styles
+ o added fast bytestreams protocol (Psi)
 
 Coccinella-0.95.11 (060115):
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Dialogs.tcl,v 1.66 2006-05-16 06:06:29 matben Exp $
+# $Id: Dialogs.tcl,v 1.67 2006-05-26 13:27:50 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -262,7 +262,7 @@ proc ::Dialogs::InfoComponents { } {
     grid columnconfigure $tbox 0 -weight 1
     grid rowconfigure $tbox 0 -weight 1
 
-    $wtxt tag configure ttitle -foreground black -background #dedede  \
+    $wtxt tag configure ttitle -foreground black -background "#dedeff"  \
       -spacing1 2 -spacing3 2 -lmargin1 20 -font CociSmallBoldFont
     $wtxt tag configure ttxt -font CociSmallFont -wrap word -lmargin1 10 -lmargin2 10 \
       -spacing1 6 -spacing3 6

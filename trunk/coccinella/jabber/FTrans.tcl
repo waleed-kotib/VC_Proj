@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.8 2006-05-21 13:09:33 matben Exp $
+# $Id: FTrans.tcl,v 1.9 2006-05-26 13:27:50 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -423,6 +423,7 @@ proc ::FTrans::SendCommand {jlibname status sid {subiq ""}} {
 
     if {$status eq "error"} {
 	lassign $subiq stanza errstr
+	
 	switch -- $stanza {
 	    forbidden {
 		set msg [mc jamessooberr406 $state(jid) $state(name)]
