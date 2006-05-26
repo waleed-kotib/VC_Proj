@@ -5,4 +5,4 @@
 #    load [file join $dir libtileqt0.4.so] tileqt
 #}]
 
-package tile::theme::tileqt 0.4  [list load [file join $dir libtileqt0.4.so] tileqt]
+#package ifneeded tile::theme::tileqt 0.4  [list load [file join $dir libtileqt0.4.so] tileqt]
