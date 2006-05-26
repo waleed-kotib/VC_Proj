@@ -359,7 +359,8 @@
 ::msgcat::mcset nl mDecreasing         	{Z-A}
 ::msgcat::mcset nl mStyle         	{Stijl}
 ::msgcat::mcset nl mCall         	{Telefoneer}
-::msgcat::mcset nl mForward         	{Telefoongesprek omleiden}
+::msgcat::mcset nl mJiveCall         	{Telefoneer}
+::msgcat::mcset nl mJiveForward         {Telefoongesprek omleiden}
 ::msgcat::mcset nl mBackgroundImage     {Achtergrondafbeelding}
 
 

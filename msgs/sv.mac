@@ -417,7 +417,8 @@
 ::msgcat::mcset sv mDecreasing         	{Minskande}
 ::msgcat::mcset sv mStyle         	{Stil}
 ::msgcat::mcset sv mCall         	{Ring}
-::msgcat::mcset sv mForward         	{Vidarekoppla}
+::msgcat::mcset sv mJiveCall         	{Ring}
+::msgcat::mcset sv mJiveForward         {Vidarekoppla}
 ::msgcat::mcset sv mBackgroundImage     {Bakgrundsbild}
 
 
