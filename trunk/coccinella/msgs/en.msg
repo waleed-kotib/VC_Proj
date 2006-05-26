@@ -438,7 +438,8 @@
 ::msgcat::mcset en mDecreasing         	{Decreasing}
 ::msgcat::mcset en mStyle         	{Style}
 ::msgcat::mcset en mCall         	{Call}
-::msgcat::mcset en mForward         	{Forward Call}
+::msgcat::mcset en mJiveCall         	{Call}
+::msgcat::mcset en mJiveForward         {Forward Call}
 ::msgcat::mcset en mBackgroundImage     {Background Image}
 
 
@@ -486,6 +487,7 @@
 ::msgcat::mcset en {Default nickname}
 ::msgcat::mcset en {Default status descriptions}
 ::msgcat::mcset en {Delete Rule}
+::msgcat::mcset en {Delete Profile}
 ::msgcat::mcset en {Disk Cache}
 ::msgcat::mcset en {Different Passwords}
 ::msgcat::mcset en {Do Not Disturb}
@@ -574,6 +576,7 @@
 ::msgcat::mcset en {New Message}
 ::msgcat::mcset en {New Nickname}
 ::msgcat::mcset en {New password}
+::msgcat::mcset en {New Profile}
 ::msgcat::mcset en {New Rule}
 ::msgcat::mcset en {New Topic}
 ::msgcat::mcset en {New shortcut}

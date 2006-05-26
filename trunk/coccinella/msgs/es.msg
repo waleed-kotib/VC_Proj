@@ -441,7 +441,8 @@
 ::msgcat::mcset es mDecreasing          {Descendente}
 ::msgcat::mcset es mStyle               {Estilo de vista}
 ::msgcat::mcset es mCall                {Llamar a...}
-::msgcat::mcset es mForward             {Deviar la llamada actual a...}
+::msgcat::mcset es mJiveCall            {Llamar a...}
+::msgcat::mcset es mJiveForward         {Deviar la llamada actual a...}
 
 # Textos cortos únicamente.
 ::msgcat::mcset es {30 days}			{30 días}
