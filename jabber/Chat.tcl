@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.168 2006-05-26 09:41:28 matben Exp $
+# $Id: Chat.tcl,v 1.169 2006-05-27 10:09:09 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1694,6 +1694,8 @@ proc ::Chat::TabChanged {dlgtoken} {
     
     lappend dlgstate(recentctokens) $chattoken
     set dlgstate(recentctokens) [lrange $dlgstate(recentctokens) end-1 end]
+    
+    ::hooks::run chatTabChangedHook $chattoken
 }
 
 proc ::Chat::GetNotebookWpageFromIndex {wnb index} {

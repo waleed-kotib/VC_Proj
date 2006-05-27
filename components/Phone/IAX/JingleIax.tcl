@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.26 2006-05-26 13:26:54 matben Exp $
+# $Id: JingleIax.tcl,v 1.27 2006-05-27 10:08:29 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -37,7 +37,8 @@ proc ::JingleIAX::Init { } {
     ::hooks::register presenceHook          ::JingleIAX::PresenceHook
     ::hooks::register rosterPostCommandHook ::JingleIAX::RosterPostCommandHook
     ::hooks::register buildChatButtonTrayHook  ::JingleIAX::BuildChatButtonTrayHook
-
+    ::hooks::register chatTabChangedHook    ::JingleIAX::ChatTabChangedHook
+    
     # This shall be done generically and dispatched to relevant softphone.
     #--------------- Variables Uses For PopUP Menus -------------------------
     variable popMenuDef
@@ -499,6 +500,9 @@ proc ::JingleIAX::BuildChatButtonTrayHook {wtray dlgtoken args} {
       -text [mc phoneMakeCall] -image $iconCall  \
       -disabledimage $iconCallDis   \
       -command [list ::JingleIAX::ChatCall $dlgtoken]
+
+    set chattoken [::Chat::GetActiveChatToken $dlgtoken]
+    SetChatButtonState $chattoken
 }
 
 proc ::JingleIAX::ChatCall {dlgtoken} {
@@ -509,6 +513,25 @@ proc ::JingleIAX::ChatCall {dlgtoken} {
     if {$xelem ne {}} {
 	SessionInitiate $jid
     }
+}
+
+proc ::JingleIAX::ChatTabChangedHook {chattoken} {
+ 
+    SetChatButtonState $chattoken
+}
+
+proc ::JingleIAX::SetChatButtonState {chattoken} {
+    
+    set dlgtoken [::Chat::GetChatTokenValue $chattoken dlgtoken]
+    set wtray [::Chat::GetDlgTokenValue $dlgtoken wtray]
+    set jid [::Chat::GetChatTokenValue $chattoken jid]
+    set xelem [::Jabber::RosterCmd getx $jid "jingle/media/audio"]
+    if {$xelem ne {}} {
+	set state normal
+    } else {
+	set state disabled
+    }
+    $wtray buttonconfigure call -state $state
 }
 
 proc ::JingleIAX::Debug {msg} {
