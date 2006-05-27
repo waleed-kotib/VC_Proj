@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.9 2006-05-26 13:27:50 matben Exp $
+# $Id: FTrans.tcl,v 1.10 2006-05-27 13:41:36 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -288,22 +288,22 @@ proc ::FTrans::Nop {args} { }
 proc ::FTrans::Send {jid args} {
     variable xmlns
     upvar ::Jabber::jstate jstate
-
+    
     if {[$jstate(jlib) disco isdiscoed info $jid]} {
 	set feature [DiscoGetFeature $jid]
 	if {$feature eq ""} {
 	    ui::dialog [ui::autoname]  \
 	      -type ok -icon error -title [mc {Error}]  \
-	      -message "We couldn't see that $jid supports file transfer."
+	      -message [mc jamessnofiletrpt $jid]
 	} else {
 	    eval {Build $jid} $args
 	}
     } else {
 	set w [eval {Build $jid} $args]
 	$w state disabled
-	$w status "Waiting for disco result..."
-	set discoCB [list [namespace current]::DiscoCB $w]
-	$jstate(jlib) disco send_get info $jid $discoCB
+	$w status [mc jawaitdisco]
+	set cb [list [namespace current]::DiscoCB $w]
+	$jstate(jlib) disco get_async info $jid $cb
     }
 }
 
@@ -328,21 +328,13 @@ proc ::FTrans::DiscoCB {w jlibname type jid subiq} {
     
     if {[winfo exists $w]} {
 	$w status ""
-	if {$type eq "error"} {
+	if {($type eq "error") || ([DiscoGetFeature $jid] eq "")} {
 	    ui::dialog [ui::autoname]  \
 	      -type ok -icon error -title [mc {Error}]  \
-	      -message "We couldn't see that $jid supports file transfer."
+	      -message [mc jamessnofiletrpt $jid]
 	    destroy $w
 	} else {
-	    set feature [DiscoGetFeature $jid]
-	    if {$feature eq ""} {
-		ui::dialog [ui::autoname]  \
-		  -type ok -icon error -title [mc {Error}]  \
-		  -message "We couldn't see that $jid supports file transfer."
-		destroy $w
-	    } else {
-		$w state !disabled
-	    }
+	    $w state !disabled
 	}
     }
 }
@@ -392,7 +384,7 @@ proc ::FTrans::DoSend {win jid fileName desc} {
     set feature [DiscoGetFeature $jid]
     if {$feature eq ""} {
 	::UI::MessageBox -type ok -icon error -title [mc {Error}]  \
-	  -message "We couldn't see that $jid supports file transfer."
+	  -message [mc jamessnofiletrpt $jid]
 	return
     }
     if {$feature eq $xmlns(file-transfer)} {
@@ -542,8 +534,6 @@ proc ::FTrans::TProgress {token jlibname sid total bytes} {
     variable $token
     upvar 0 $token state
     
-    ::Debug 6 "---> ::FTrans::TProgress total=$total, bytes=$bytes"
-
     # Cache timing info.
     ::timing::setbytes $sid $bytes
 
@@ -581,7 +571,7 @@ proc ::FTrans::TCommand {token jlibname sid status {errmsg ""}} {
     if {$status eq "error"} {
 	ui::dialog [ui::autoname]  \
 	  -icon error -type ok -title [mc Error]  \
-	  -message "Failed to get file $state(name) from $state(jid): $errmsg"
+	  -message [mc jamessfiletrpterr $state(name) $state(jid) $errmsg]
 	catch {file delete $state(fileName)}
     } elseif {$status eq "reset"} {
 	catch {file delete $state(fileName)}
