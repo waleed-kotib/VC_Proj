@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.149 2006-05-23 13:21:21 matben Exp $
+# $Id: GroupChat.tcl,v 1.150 2006-05-27 10:09:10 matben Exp $
 
 package require Create
 package require Enter
@@ -1098,6 +1098,8 @@ proc ::GroupChat::TabChanged {dlgtoken} {
     
     lappend dlgstate(recentctokens) $chattoken
     set dlgstate(recentctokens) [lrange $dlgstate(recentctokens) end-1 end]
+
+    ::hooks::run groupchatTabChangedHook $chattoken
 }
 
 proc ::GroupChat::GetNotebookWpageFromIndex {wnb index} {
