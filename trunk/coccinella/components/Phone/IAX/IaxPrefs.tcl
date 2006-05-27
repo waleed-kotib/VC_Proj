@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: IaxPrefs.tcl,v 1.5 2006-05-18 16:40:11 antoniofcano Exp $
+# $Id: IaxPrefs.tcl,v 1.6 2006-05-27 13:40:34 matben Exp $
 
 package provide IaxPrefs 0.1
 
@@ -27,7 +27,7 @@ proc ::IaxPrefs::InitPrefsHook { } {
     set prefs(iaxPhone,host)          "" ;# Was 0
     set prefs(iaxPhone,cidnum)        0
     set prefs(iaxPhone,cidname)       ""
-    set prefs(iaxPhone,codec)         "ILBC"
+    set prefs(iaxPhone,codec)         ""
     set prefs(iaxPhone,inputDevices)  ""
     set prefs(iaxPhone,outputDevices) ""
     set prefs(iaxPhone,agc)           0
@@ -39,7 +39,7 @@ proc ::IaxPrefs::InitPrefsHook { } {
     variable allKeys 
     set allKeys {user password host cidnum cidname codec  \
       inputDevices outputDevices agc aagc noise comfort}
-    # echo
+    # echo 
 
     set plist {}
     foreach key $allKeys {
@@ -112,7 +112,7 @@ proc ::IaxPrefs::BuildPage {page} {
     
     $wnb add [DevicesFrame $wnb.de] -text [mc Devices]
     $wnb add [FiltersFrame $wnb.fi] -text [mc Filters]
-    $wnb add [CodecsFrame  $wnb.co] -text [mc Codecs]
+    #$wnb add [CodecsFrame  $wnb.co] -text [mc Codecs]
 }
 
 proc ::IaxPrefs::AccountFrame {win} {
@@ -199,31 +199,22 @@ proc ::IaxPrefs::FiltersFrame {win} {
     }
 #    set tmpPrefs(echo) $prefs(iaxPhone,echo)
 
-    ttk::label $win.lagc -text "[mc iaxPhoneAGC]:"
-    ttk::checkbutton $win.agc   \
+    ttk::checkbutton $win.agc -text "[mc iaxPhoneAGC]"  \
       -variable [namespace current]::tmpPrefs(agc)
-
-    ttk::label $win.laagc -text "[mc iaxPhoneAAGC]:"
-    ttk::checkbutton $win.aagc  \
+    ttk::checkbutton $win.aagc -text "[mc iaxPhoneAAGC]"  \
       -variable [namespace current]::tmpPrefs(aagc)
-
-    ttk::label $win.lnoise -text "[mc iaxPhoneNoise]:"
-    ttk::checkbutton $win.noise  \
+    ttk::checkbutton $win.noise -text "[mc iaxPhoneNoise]"  \
       -variable [namespace current]::tmpPrefs(noise)
-
-    ttk::label $win.lcomfort -text "[mc iaxPhoneComfort]:"
-    ttk::checkbutton $win.comfort   \
+    ttk::checkbutton $win.comfort -text "[mc iaxPhoneComfort]"  \
       -variable [namespace current]::tmpPrefs(comfort)
-
-#    ttk::label $win.lecho -text "[mc iaxPhoneEcho]:"
-#    ttk::checkbutton $win.echo -text [mc Echo]  \
+#    ttk::checkbutton $win.echo -text "[mc iaxPhoneEcho]"  \
 #      -variable [namespace current]::tmpPrefs(echo)
 
-    grid  $win.lagc      $win.agc      -sticky e
-    grid  $win.laagc     $win.aagc     -sticky e
-    grid  $win.lnoise    $win.noise    -sticky e
-    grid  $win.lcomfort  $win.comfort  -sticky e
-#    grid  $win.lecho $win.echo   -sticky w
+    grid  $win.agc      -sticky w
+    grid  $win.aagc     -sticky w
+    grid  $win.noise    -sticky w
+    grid  $win.comfort  -sticky w
+#    grid  $win.echo   -sticky w
     
     return $win
 }
@@ -262,7 +253,9 @@ proc ::IaxPrefs::SavePrefsHook { } {
     variable allKeys 
 
     foreach key $allKeys {
-	set prefs(iaxPhone,$key) $tmpPrefs($key)
+	if {[info exists tmpPrefs($key)]} {
+	    set prefs(iaxPhone,$key) $tmpPrefs($key)
+	}
     }    
     VerifySanity
     ::Iax::Reload
@@ -274,9 +267,11 @@ proc ::IaxPrefs::CancelPrefsHook { } {
     variable allKeys 
 
     foreach key $allKeys {
-	if {![string equal $prefs(iaxPhone,$key) $tmpPrefs($key)]} {
-	    ::Preferences::HasChanged
-	    break
+	if {[info exists tmpPrefs($key)]} {
+	    if {![string equal $prefs(iaxPhone,$key) $tmpPrefs($key)]} {
+		::Preferences::HasChanged
+		break
+	    }
 	}
     }
 }

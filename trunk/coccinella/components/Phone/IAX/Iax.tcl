@@ -11,7 +11,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.14 2006-05-24 17:14:59 antoniofcano Exp $
+# $Id: Iax.tcl,v 1.15 2006-05-27 13:40:34 matben Exp $
 
 namespace eval ::Iax { }
 
@@ -370,7 +370,8 @@ proc ::Iax::LoadPrefs {} {
     
     iaxclient::callerid $cidname $cidnum
     if {$codec ne ""} {
-        iaxclient::formats $codec
+	# We skip this since it is unclear how it works. Use hardcoded in lib.
+        #iaxclient::formats $codec
     }
 
     iaxclient::toneinit 880 960 16000 48000 10
