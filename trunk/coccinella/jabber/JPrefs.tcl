@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.37 2006-05-26 14:13:56 matben Exp $
+# $Id: JPrefs.tcl,v 1.38 2006-05-28 13:02:10 matben Exp $
 
 package require ui::fontselector
 
@@ -352,16 +352,19 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	    $wmenu entryconfigure $name -state disabled
 	}
     }
+    
+    # This has been disabled since it starts a child interpreter which needs
+    # another ::tileqt::library.
     set tileqt 0
-    if {[lsearch [tile::availableThemes] tileqt] >= 0} {
-	set tileqt 1
-	ttk::button $wskin.qt -text "Qt Theme" -command ::JPrefs::BuildQtSetup
-    }
+    #if {[lsearch [tile::availableThemes] tileqt] >= 0} {
+    #    set tileqt 1
+    #	ttk::button $wskin.qt -text "Qt Theme" -command ::JPrefs::BuildQtSetup
+    #}
     
     grid  $wskin.l  $wskin.b
-    if {$tileqt} {
-	grid  $wskin.qt  -column 2 -row 0 -padx 12
-    }
+    #if {$tileqt} {
+    #	grid  $wskin.qt  -column 2 -row 0 -padx 12
+    #}
     
     # Window opacities if exists.
     array set wmopts [wm attributes .]
