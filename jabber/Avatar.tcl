@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.17 2006-05-05 09:11:46 matben Exp $
+# $Id: Avatar.tcl,v 1.18 2006-05-28 15:30:30 matben Exp $
 
 # @@@ Issues:
 # 
@@ -1130,6 +1130,8 @@ proc ::Avatar::PrefsFrame {win} {
     variable wshare
     variable haveDND
     
+    Debug "::Avatar::PrefsFrame"
+    
     if {![info exists haveDND]} {
 	set haveDND 0
 	if {![catch {package require tkdnd}]} {
@@ -1218,7 +1220,8 @@ proc ::Avatar::PrefsFile { } {
 	lappend types {{PNG Files}    {.png}}
     }
     lset types 0 1 $suffs
-    set fileName [tk_getOpenFile -title "Pick image file" -filetypes $types]
+    set fileName [tk_getOpenFile -title [mc {Pick Image File}]  \
+      -filetypes $types]
     if {$fileName ne ""} {
 	if {[CreateAndVerifyPhoto $fileName me]} {
 	    $wphoto configure -image $me
@@ -1226,7 +1229,7 @@ proc ::Avatar::PrefsFile { } {
 		set tmpphoto [image create photo]
 	    }
 	    $tmpphoto blank
-	    $tmpphoto copy $me
+	    $tmpphoto copy $me -compositingrule set
 	    set tmpprefs(fileName) $fileName
 	    set tmpprefs(editedPhoto) 1
 	    $wshare state {!disabled}
