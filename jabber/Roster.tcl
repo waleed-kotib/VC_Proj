@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.170 2006-05-19 06:38:18 matben Exp $
+# $Id: Roster.tcl,v 1.171 2006-05-28 09:53:22 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -838,7 +838,7 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    foreach res $resList {
 		::RosterTree::StyleDeleteItem $jid/$res
 	    }
-	    if {$resList == {}} {
+	    if {$resList eq {}} {
 		::RosterTree::StyleDeleteItem $jid
 	    }
 	}

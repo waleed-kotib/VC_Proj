@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.19 2006-05-19 06:38:18 matben Exp $
+# $Id: RosterPlain.tcl,v 1.20 2006-05-28 09:53:22 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -348,7 +348,7 @@ proc ::RosterPlain::ConfigureItem {item style text image} {
 #       It is also responsible for cleaning up empty dirs etc.
 
 proc ::RosterPlain::DeleteItem {jid} {
-     
+         
     # Sibling of '::RosterTree::CreateItemBase'.
     ::RosterTree::DeleteItemBase $jid
     

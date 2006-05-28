@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.19 2006-05-25 14:08:30 matben Exp $
+# $Id: bytestreams.tcl,v 1.20 2006-05-28 09:53:22 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -123,6 +123,7 @@ proc jlib::bytestreams::init {jlibname args} {
 	
 	# Server port 0 says that arbitrary port can be chosen.
 	set static(-port)      0
+	set static(-address)   ""
 	set static(-timeoutms) 30000
     }
 
@@ -145,6 +146,9 @@ proc jlib::bytestreams::configure {jlibname args} {
     foreach {key value} $args {
 	
 	switch -- $key {
+	    -address {
+		set static($key) $value
+	    }
 	    -port - -timeoutms {
 		if {![string is integer -strict $value]} {
 		    return -code error "$key must be integer number"
@@ -208,7 +212,11 @@ proc jlib::bytestreams::si_open {jlibname jid sid args} {
 	}
     }
     
-    set ip    [jlib::getip $jlibname]
+    if {$static(-address) ne ""} {
+	set ip $static(-address)
+    } else {
+	set ip [jlib::getip $jlibname]
+    }
     set myjid [jlib::myjid $jlibname]
     set hash  [::sha1::sha1 ${sid}${myjid}${jid}]
     
@@ -756,6 +764,9 @@ proc jlib::bytestreams::ifree {jlibname sid} {
 #       proposed bytestream. 
 #    
 #       For fastmode this can be either initiator or target.
+#       
+# Result:
+#       MUST return 0 or 1!
 
 proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
     variable xmlns    
@@ -858,7 +869,11 @@ proc jlib::bytestreams::t_handle_set {jlibname sid id jid hosts queryElem} {
 		set tstate($sid,fast,state) initiate
 		
 		# Provide a streamhost to the initiator.
-		set ip    [jlib::getip $jlibname]
+		if {$static(-address) ne ""} {
+		    set ip $static(-address)
+		} else {
+		    set ip [jlib::getip $jlibname]
+		}
 		set myjid [jlib::myjid $jlibname]
 		set hash  [::sha1::sha1 ${sid}${myjid}${jid}]
 		set tstate($sid,hash) $hash

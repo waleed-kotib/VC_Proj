@@ -850,6 +850,8 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv jamessstarttls-failure        {TLS förhandling med servern "%s" misslyckades.}
 ::msgcat::mcset sv jamessgcinvite               {Du har blivit inbjuden till en gruppchatt %s av %s. Vill du delta?}
 ::msgcat::mcset sv jamessnorooms                {Hittade inga rum hos %s.}
+::msgcat::mcset sv jamessnofiletrpt             {Vi kunde inte se att %s har stöd för filöverföring.}
+::msgcat::mcset sv jamessfiletrpterr            {Misslyckades med att ta emot filen %s från %s: %s}
 
 
 
@@ -1058,6 +1060,7 @@ Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jaregisterexserv {Registrera hos tjänsten %s. Du behöver kanske trycka på Hämta om inte registrerings info hämtas automatiskt.}
 ::msgcat::mcset sv jaseliconset {Välj ikonsammling för varje grupp. Varje grupp kan väljas bort.}
 ::msgcat::mcset sv jachathist   {Visa eller göm chatt historiken}
+::msgcat::mcset sv jawaitdisco  {Väntar på disco resultat...}
 
 
 
