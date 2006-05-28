@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.23 2006-05-26 13:27:50 matben Exp $
+# $Id: tileutils.tcl,v 1.24 2006-05-28 09:53:22 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -137,6 +137,12 @@ proc tileutils::configstyles {name} {
 
     style theme settings $name {
 	
+	# Set invalid state maps.
+	style map TEntry  \
+	  -fieldbackground {invalid "#FFFFE0"} -foreground {invalid "#FF0000"}
+	style map TCombobox  \
+	  -fieldbackground {invalid "#FFFFE0"} -foreground {invalid "#FF0000"}
+
 	style layout Headlabel {
 	    Headlabel.border -children {
 		Headlabel.padding -children {

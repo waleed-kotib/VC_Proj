@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.6 2006-01-11 13:25:48 matben Exp $
+# $Id: Proxy.tcl,v 1.7 2006-05-28 09:53:23 matben Exp $
  
 package require autoproxy
 
@@ -102,6 +102,11 @@ proc ::Proxy::BuildPage {wpage} {
     variable wnoproxy
     variable wprx
     
+    set stun 0
+    if {![catch {package require stun}]} {
+	set stun 1
+    }
+    
     set prefs(noproxy) [lsort -unique $prefs(noproxy)]
     
     foreach key {setNATip NATip \
@@ -165,15 +170,34 @@ proc ::Proxy::BuildPage {wpage} {
       -variable [namespace current]::tmpPrefs(setNATip)
     ttk::entry $wnat.eip \
       -textvariable [namespace current]::tmpPrefs(NATip)
-
-    grid  $wnat.cb  -sticky w
-    grid  $wnat.eip -sticky ew
+    if {$stun} {
+	ttk::button $wnat.stun -text [mc Get] -command ::Proxy::GetStun
+    }
+    
+    grid  $wnat.cb   -  -sticky w
+    grid  $wnat.eip  x  -sticky ew
     grid columnconfigure $wnat 0 -weight 1
+    if {$stun} {
+	grid  $wnat.stun  -column 1 -row 1 -padx 4
+    }
     
     set anchor [option get . dialogAnchor {}]
 
     pack  $wprx  -side top -fill x -anchor $anchor
     pack  $wnat  -side top -fill x -anchor $anchor -pady 12
+}
+
+proc ::Proxy::GetStun {} {
+    ::stun::request stun.fwdnet.net -command ::Proxy::GetStunCB
+}
+
+proc ::Proxy::GetStunCB {token status args} {
+    variable tmpPrefs
+    
+    array set aargs $args
+    if {$status eq "ok" && [info exists aargs(-address)]} {
+	set tmpPrefs(NATip) $aargs(-address)
+    }   
 }
 
 proc ::Proxy::SetUseProxyState { } {

@@ -5,7 +5,7 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.95.12 (0604??):
+Coccinella-0.95.12 (0606??):
 
  o new application theme engine
  o systray support on X11 (linux)
@@ -24,6 +24,7 @@ Coccinella-0.95.12 (0604??):
  o file cache for avatars
  o new (flat) minimalistic roster styles
  o added fast bytestreams protocol (Psi)
+ o added stun support to get NAT external address.
 
 Coccinella-0.95.11 (060115):
 

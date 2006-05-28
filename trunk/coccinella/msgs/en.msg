@@ -900,6 +900,9 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en jamessstarttls-failure       {TLS negotiating with server "%s" failed.}
 ::msgcat::mcset en jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
 ::msgcat::mcset en jamessnorooms                {Failed to find any rooms at %s.}
+::msgcat::mcset en jamessnofiletrpt             {We couldn't see that %s supports file transfer.}
+::msgcat::mcset en jamessfiletrpterr            {Failed to get file %s from %s: %s}
+
 
 
 ::msgcat::mcset en openquicktime		{Open QuickTime live stream}
@@ -1102,6 +1105,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jaregisterexserv {Register with the service %s. You may need to press the Get button if not registration info obtained automatically.}
 ::msgcat::mcset en jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
 ::msgcat::mcset en jachathist   {Show or hide the chat history}
+::msgcat::mcset en jawaitdisco  {Waiting for disco result...}
+
 
 ::msgcat::mcset en {InfoRoomDesc}       {This dialog makes available a number of options and actions for a room. Your role and affiliation determines your privilege to act.\
 Further restrictions may exist depending on specific room configuration.}

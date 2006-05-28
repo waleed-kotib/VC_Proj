@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.42 2006-05-21 13:08:29 matben Exp $
+# $Id: Init.tcl,v 1.43 2006-05-28 09:53:23 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -439,6 +439,13 @@ proc ::Init::LoadPackages { } {
 	::Splash::SetMsg "[mc splashlook] tile..."
 	namespace eval ::tile {}
 	set ::tile::library [file join $this(binLibPath) tile]
+	
+	# tileqt has its own library support.
+	if {[tk windowingsystem] eq "x11"} {
+	    namespace eval ::tileqt {}
+	    set ::tileqt::library [file join $this(binLibPath) tileqt]
+	}
+
 	if {[catch {uplevel #0 [list package require tile 0.7]} msg]} {
 	    tk_messageBox -icon error \
 	      -message "This application requires the tile package to work! $::errorInfo"

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.10 2006-05-27 13:41:36 matben Exp $
+# $Id: FTrans.tcl,v 1.11 2006-05-28 09:53:22 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -18,7 +18,6 @@ package provide FTrans 1.0
 namespace eval ::FTrans {
 
     ::hooks::register prefsInitHook          ::FTrans::InitPrefsHook
-    ::hooks::register jabberInitHook         ::FTrans::JabberInitHook
     
     set title [mc {Send File}]
         
@@ -48,10 +47,16 @@ proc ::FTrans::InitPrefsHook { } {
       ]    
 }
 
-proc ::FTrans::JabberInitHook {jlibname} {
+proc ::FTrans::BytestreamsConfigure {} {
+    global  prefs
     upvar ::Jabber::jprefs jprefs
-    
-    $jlibname bytestreams configure -port $jprefs(bytestreams,port)
+    upvar ::Jabber::jstate jstate
+        
+    set opts [list -port $jprefs(bytestreams,port)]
+    if {$prefs(setNATip) && ($prefs(NATip) ne "")} {
+	lappend opts -address $prefs(NATip)
+    }
+    eval {$jstate(jlib) bytestreams configure} $opts
 }
 
 #... Initiator (sender) section ................................................
@@ -388,6 +393,9 @@ proc ::FTrans::DoSend {win jid fileName desc} {
 	return
     }
     if {$feature eq $xmlns(file-transfer)} {
+	
+	# Do this each time since we may have changed proxy settings.
+	BytestreamsConfigure
 	set sendCB [namespace current]::SendCommand
 	eval {$jstate(jlib) filetransfer send $jid $sendCB -file $fileName} $opts
     } else {
@@ -506,6 +514,10 @@ proc ::FTrans::SetHandlerAnswer {token wdlg answer} {
     set cmd  $state(cmd)
 
     if {$answer} {
+	
+	# Do this each time since we may have changed proxy settings.
+	BytestreamsConfigure
+	
 	set userDir [::Utils::GetDirIfExist $prefs(userPath)]
 	set fileName [tk_getSaveFile -title [mc {Save File}] \
 	  -initialfile $name -initialdir $userDir]

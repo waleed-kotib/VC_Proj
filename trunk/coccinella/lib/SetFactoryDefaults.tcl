@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.48 2006-02-03 07:17:17 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.49 2006-05-28 09:53:23 matben Exp $
 
 package provide FactoryDefaults 1.0
 
@@ -58,11 +58,7 @@ proc FactoryDefaults { } {
     # File transport method: put/get or http.
     set prefs(trptMethod) putget
     #set prefs(trptMethod) http
-    
-    # NAT stuff.
-    set prefs(setNATip) 0
-    set prefs(NATip) ""
-    
+        
     # so no server delay is needed
     set prefs(afterStartServer) 0   
     

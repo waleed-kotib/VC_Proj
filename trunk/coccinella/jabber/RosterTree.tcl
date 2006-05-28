@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.23 2006-05-26 13:27:50 matben Exp $
+# $Id: RosterTree.tcl,v 1.24 2006-05-28 09:53:22 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -891,9 +891,7 @@ proc ::RosterTree::CreateItemWithParent {jid type} {
 #       with a jid.
 
 proc ::RosterTree::DeleteItemBase {jid} {
-    
-    ::Debug 5 "::RosterTree::DeleteItemBase, jid=$jid"
-    
+        
     # If have 3-tier jid:
     #    presence = 'available'   => remove jid2 + jid3
     #    presence = 'unavailable' => remove jid2 + jid3
