@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.43 2006-04-29 09:55:08 matben Exp $
+# $Id: VCard.tcl,v 1.44 2006-05-28 15:30:30 matben Exp $
 
 package provide VCard 1.0
 
@@ -566,7 +566,7 @@ proc ::VCard::SelectPhoto {etoken} {
 	lappend types {{JPEG Files}   {.jpg .jpeg}}
     }
     lset types 0 1 $suffs
-    set fileName [tk_getOpenFile -title "Pick image file" \
+    set fileName [tk_getOpenFile -title [mc {Pick Image File}] \
       -filetypes $types]
     if {$fileName == ""} {
 	return
@@ -597,7 +597,7 @@ proc ::VCard::SetPhotoFile {etoken fileName} {
 	set factor [expr {int($size/($maxsize + 0.0) + 1)}]
 	set imnew [image create photo]
 	$imnew blank
-	$imnew copy $name -subsample $factor
+	$imnew copy $name -subsample $factor -compositingrule set
 	image delete $name
 	set name $imnew
     }
