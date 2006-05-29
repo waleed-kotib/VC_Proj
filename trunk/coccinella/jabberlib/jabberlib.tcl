@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.140 2006-05-07 14:08:01 matben Exp $
+# $Id: jabberlib.tcl,v 1.141 2006-05-29 08:03:51 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -387,6 +387,7 @@ proc jlib::init_inst {jlibname} {
     set locals(status)        "unavailable"
     set locals(pres,type)     "unavailable"
     set locals(myjid)         ""
+    set locals(myjid2)        ""
     set locals(trigAutoAway)  1
     set locals(server)        ""
 }
@@ -1940,7 +1941,7 @@ proc jlib::parse_bind_resource {jlibname cmd type subiq args} {
     # The server MAY change the 'resource' why we need to check this here.
     if {[string equal [wrapper::gettag $subiq] bind] &&  \
       [string equal [wrapper::getattribute $subiq xmlns] $xmppxmlns(bind)]} {
-	set jidElem [wrapper::getchildswithtag $subiq jid]
+	set jidElem [wrapper::getfirstchildwithtag $subiq jid]
 	if {[llength $jidElem]} {
 	    
 	    # Server replies with full JID.
