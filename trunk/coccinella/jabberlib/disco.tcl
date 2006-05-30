@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.37 2006-05-27 13:41:09 matben Exp $
+# $Id: disco.tcl,v 1.38 2006-05-30 14:32:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -147,7 +147,7 @@ proc jlib::disco::init {jlibname args} {
       [list [namespace current]::handle_get info]
 
     # Clear any cache info we may have collected since likely invalid offline.
-    $jlibname presence_register unavailable [namespace current]::unavail_cb
+    $jlibname presence_register unavailable [namespace current]::unavail_cb 20
 
     set info(conferences) {}
     

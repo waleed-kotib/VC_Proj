@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.44 2006-05-28 15:30:30 matben Exp $
+# $Id: VCard.tcl,v 1.45 2006-05-30 14:32:38 matben Exp $
 
 package provide VCard 1.0
 
@@ -13,8 +13,8 @@ package require mactabnotebook
 namespace eval ::VCard::  {
         
     # Add all event hooks.
-    ::hooks::register initHook            ::VCard::InitHook    
-
+    ::hooks::register initHook   ::VCard::InitHook    
+    
     variable uid 0
 }
 
@@ -458,7 +458,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     if {$type eq "other"} {
         foreach wpar [list $pbi $pbp $pbh $pbw $pbptop $pbpmid] {
             foreach win [winfo children $wpar] {
-                if {[winfo class $win] == "TEntry"} {
+                if {[winfo class $win] eq "TEntry"} {
                     $win state {readonly}
                 }
             }
@@ -568,7 +568,7 @@ proc ::VCard::SelectPhoto {etoken} {
     lset types 0 1 $suffs
     set fileName [tk_getOpenFile -title [mc {Pick Image File}] \
       -filetypes $types]
-    if {$fileName == ""} {
+    if {$fileName eq ""} {
 	return
     }
 
@@ -664,17 +664,22 @@ proc ::VCard::SyncAvatar {token} {
     upvar ${token}::elem elem
     upvar ${token}::priv priv
 
+    # @@@ Update presence hashes only if changed photo. TODO check.
     if {[info exists elem(photo_binval)]} {
 	::Jabber::JlibCmd avatar set_data $elem(photo_binval) $elem(photo_type)
 	::Avatar::SetMyAvatarFromBase64 $elem(photo_binval) $elem(photo_type)
+	::Avatar::SetShareOption 1
+
+	# Need to do this ourselves.
+	::Jabber::JlibCmd send_presence -keep 1
     } else {
 	::Jabber::JlibCmd avatar unset_data
 	::Avatar::UnsetMyPhoto
+	
+	# UnshareImage sends presence with empty hashes.
+	::Avatar::UnshareImage
+	::Avatar::SetShareOption 0
     }
-    
-    # @@@ Update presence hashes only if changed photo. TODO check.
-
-    ::Jabber::JlibCmd send_presence -keep 1
 }
 
 proc ::VCard::CloseHook {wclose} {
@@ -712,7 +717,7 @@ proc ::VCard::Close {token} {
 
 proc ::VCard::SetVCardCallback {jlibName type theQuery} {
 
-    if {$type == "error"} {
+    if {$type eq "error"} {
 	::UI::MessageBox -title [mc Error] -icon error -type ok \
 	  -message "Failed setting the vCard. The result was: $theQuery"
 	return

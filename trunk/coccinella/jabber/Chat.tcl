@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.169 2006-05-27 10:09:09 matben Exp $
+# $Id: Chat.tcl,v 1.170 2006-05-30 14:32:38 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2734,12 +2734,9 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
 	set msgid $argsArr(-id)
 	lappend chatstate(xevent,msgidlist) $msgid
     }
-    set composeElem [wrapper::getchildswithtag $xevent "composing"]
-    set idElem [wrapper::getchildswithtag $xevent "id"]
-    
-    ::Debug 6 "::Chat::XEventRecv \
-      msgid=$msgid, composeElem=$composeElem, idElem=$idElem"
-    
+    set composeElem [wrapper::getfirstchildwithtag $xevent "composing"]
+    set idElem      [wrapper::getfirstchildwithtag $xevent "id"]
+        
     if {($msgid ne "") && ($composeElem != {}) && ($idElem == {})} {
 	
 	# 1) Request for event notification

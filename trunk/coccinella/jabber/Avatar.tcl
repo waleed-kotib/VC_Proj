@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.18 2006-05-28 15:30:30 matben Exp $
+# $Id: Avatar.tcl,v 1.19 2006-05-30 14:32:38 matben Exp $
 
 # @@@ Issues:
 # 
@@ -25,7 +25,8 @@ namespace eval ::Avatar:: {
     ::hooks::register  jabberInitHook  ::Avatar::JabberInitHook
     ::hooks::register  loginHook       ::Avatar::LoginHook
     ::hooks::register  logoutHook      ::Avatar::LogoutHook
-    ::hooks::register   quitAppHook    ::Avatar::QuitHook
+    ::hooks::register  quitAppHook     ::Avatar::QuitHook
+    ::hooks::register  presenceAvailableHook   ::Avatar::PresenceHook  20
         
     # Array 'photo' contains our internal storage for users images.
     variable photo
@@ -338,6 +339,16 @@ proc ::Avatar::UnsetMyPhoto { } {
     }
 }
 
+# Avatar::SetShareOption --
+# 
+#       Just sets the share option. Necessary to sync vCard photo.
+
+proc ::Avatar::SetShareOption {bool} {
+    variable aprefs
+    
+    set aprefs(share) $bool
+}
+
 # Avatar::SaveFile --
 # 
 #       Store the avatar file in prefs folder to protect it from being removed.
@@ -381,6 +392,13 @@ proc ::Avatar::GetMyAvatarFile { } {
     }
 }
 
+# Avatar::ShareImage --
+# 
+#       Does everything to share the image file 'fileName'.
+#       It sets both internal avatar cache, and if online, also sets our
+#       vCard avatar and sends updated presence when stored.
+#       It does not handle our application file cache.
+
 proc ::Avatar::ShareImage {fileName} {
     upvar ::Jabber::jstate jstate
     
@@ -421,6 +439,7 @@ proc ::Avatar::ShareImage {fileName} {
 # Avatar::UnshareImage --
 # 
 #       Remove our avatar for public usage.
+#       It sends new presence with empty hashes.
 
 proc ::Avatar::UnshareImage { } {
     upvar ::Jabber::jstate jstate
@@ -474,7 +493,7 @@ proc ::Avatar::OnNewHash {jid} {
     
     Debug "::Avatar::OnNewHash jid=$jid"
     
-    jlib::splitjid $jid jid2 -
+    set jid2 [jlib::barejid $jid]
     set jlib $jstate(jlib)
     set hash [$jlib avatar get_hash $jid2]
     if {$hash eq ""} {
@@ -482,6 +501,7 @@ proc ::Avatar::OnNewHash {jid} {
 	    $options(-command) remove $jid2
 	}
 	FreePhotos $jid
+	FreeHashCache $jid2
     } else {
 
 	# Try first to get the Avatar from Cache.
@@ -717,7 +737,7 @@ proc ::Avatar::PutPhoto {jid2 data} {
 	    set name $photo($jid2,$size)
 	    if {[image inuse $name]} {
 		set tmp [CreateScaledPhoto $orig $size]
-		$name copy $tmp
+		$name copy $tmp -compositingrule set
 		image delete $tmp
 	    } else {
 		
@@ -726,6 +746,25 @@ proc ::Avatar::PutPhoto {jid2 data} {
 		unset photo($jid2,$size)
 	    }
 	}
+    }
+}
+
+# Avatar::PresenceHook --
+# 
+#       Available presence hook.
+#       We may get presence without any hashes and need therefore clear the cache.
+
+proc ::Avatar::PresenceHook {jid type args} {
+    
+    if {$type ne "available"} {
+	return
+    }
+    set jid2 [jlib::barejid $jid]
+    set hash [::Jabber::JlibCmd avatar get_hash $jid2]
+    if {$hash eq ""} {
+	
+	# Clear any cached hash map we may have. Not the image though.
+	FreeHashCache $jid2
     }
 }
 
@@ -786,13 +825,22 @@ proc ::Avatar::GetPhotoOfSize {jid2 size} {
     return ""
 }
 
+# Avatar::HavePhoto --
+# 
+#       Return 1 if avatar and 0 else.
+#       For available users we require that we have got a presence hash.
+
 proc ::Avatar::HavePhoto {jid2} {
     variable photo
     upvar ::Jabber::jstate jstate
-	
+    
     set jlib $jstate(jlib)    
-    if {[$jlib avatar have_data $jid2] && [info exists photo($jid2,orig)]} {
-	return 1
+    if {[$jstate(roster) isavailable $jid2]} {
+	if {[$jlib avatar have_data $jid2] && [info exists photo($jid2,orig)]} {
+	    return 1
+	} else {
+	    return 0
+	}
     } else {
 	return [HaveCachedJID $jid2]
     }
@@ -1071,6 +1119,12 @@ proc ::Avatar::GetHash {jid2} {
 	set hash $hashmap($jid2)
     }
     return $hash
+}
+
+proc ::Avatar::FreeHashCache {jid2} {
+    variable hashmap
+
+    unset -nocomplain hashmap($jid2)    
 }
 
 # Avatar::WriteHashmap --

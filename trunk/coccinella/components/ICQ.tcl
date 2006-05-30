@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.10 2006-04-08 07:02:48 matben Exp $
+# $Id: ICQ.tcl,v 1.11 2006-05-30 14:32:38 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -89,7 +89,7 @@ proc ::ICQ::VCardGetCB {from jlibName type subiq} {
 	if {$name eq ""} {
 
 	    # Find any NICKNAME element.
-	    set nickElem [lindex [wrapper::getchildswithtag $subiq "NICKNAME"] 0]
+	    set nickElem [wrapper::getfirstchildwithtag $subiq "NICKNAME"]
 	    set nick     [wrapper::getcdata $nickElem]
 	    set vcardnick($from) $name
 	    jlib::splitjid $from jid2 res

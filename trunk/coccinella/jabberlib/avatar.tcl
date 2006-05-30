@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.14 2006-04-30 09:18:14 matben Exp $
+# $Id: avatar.tcl,v 1.15 2006-05-30 14:32:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -45,6 +45,8 @@
 #   
 #   No automatic presence or server storage is made when reconfiguring or
 #   changing own avatar. This is up to the client layer to do.
+#   It is callback based which means that the -command is only invoked when
+#   getting hashes and not else.
 #      
 ################################################################################
 
@@ -100,7 +102,7 @@ proc jlib::avatar::init {jlibname args} {
     
     # Register some standard iq handlers that are handled internally.
     $jlibname iq_register get $xmlns(iq-avatar) [namespace current]::iq_handler
-    $jlibname presence_register available [namespace current]::presence_handler
+    $jlibname presence_register available [namespace current]::presence_handler 20
 
     return
 }
@@ -136,7 +138,7 @@ proc jlib::avatar::cmdproc {jlibname cmd args} {
 proc jlib::avatar::configure {jlibname args} {
     
     upvar ${jlibname}::avatar::options options
-
+    
     set opts [lsort [array names options -*]]
     set usage [join $opts ", "]
     if {[llength $args] == 0} {
@@ -180,6 +182,8 @@ proc jlib::avatar::configure {jlibname args} {
 # jlib::avatar::set_data --
 # 
 #       Sets our own avatar data and shares it by default.
+#       Registers new hashes but does not send updated presence.
+#       You have to send presence yourself.
 #       
 # Arguments:
 #       jlibname:   the instance of this jlib.
@@ -213,7 +217,7 @@ proc jlib::avatar::set_data {jlibname data mime} {
       -subtags [list $hashElem]]
 
     $jlibname unregister_presence_stanza x $xmlns(x-avatar)
-    $jlibname register_presence_stanza $xElem
+    $jlibname register_presence_stanza $xElem -type available
 
     #-- vCard-temp presence stanza --
     set photoElem [wrapper::createtag photo -chdata $avatar(hash)]
@@ -222,7 +226,7 @@ proc jlib::avatar::set_data {jlibname data mime} {
       -subtags [list $photoElem]]
 
     $jlibname unregister_presence_stanza x $xmlns(vcard-temp)
-    $jlibname register_presence_stanza $xVCardElem
+    $jlibname register_presence_stanza $xVCardElem -type available
 
     return
 }
@@ -235,19 +239,20 @@ proc jlib::avatar::get_my_data {jlibname what} {
 
 # jlib::avatar::unset_data --
 # 
-#       Unsets our avatar and does not share it anymore
+#       Unsets our avatar and does not share it anymore.
+#       You have to send presence yourself with empty hashes.
 
 proc jlib::avatar::unset_data {jlibname} {
     variable xmlns
     upvar ${jlibname}::avatar::avatar  avatar
     upvar ${jlibname}::avatar::options options
-
+    
     unset -nocomplain avatar
     set options(-announce) 0
     set options(-share)    0
     
     $jlibname unregister_presence_stanza x $xmlns(x-avatar)
-    $jlibname unregister_presence_stanza x $xmlns(vcard-temp) 
+    $jlibname unregister_presence_stanza x $xmlns(vcard-temp)
 
     return
 }
@@ -448,10 +453,10 @@ proc jlib::avatar::presence_handler {jlibname jid type args} {
     set gotAvaHash [PresenceAvatar $jlibname $xmldata]
     set gotVcardHash [PresenceVCard $jlibname $xmldata]
     
-    #puts "-----------------------"
-    #puts "jid2=$jid2"
-    #puts "new=$new, gotAvaHash=$gotAvaHash, gotVcardHash=$gotVcardHash"
-    
+    #puts "\t jid2=$jid2"
+    #puts "\t gotAvaHash=$gotAvaHash"
+    #puts "\t gotVcardHash=$gotVcardHash"
+        
     if {($gotAvaHash || $gotVcardHash)} {
     
 	# 'uptodate' tells us if we need to request new avatar.
@@ -462,12 +467,19 @@ proc jlib::avatar::presence_handler {jlibname jid type args} {
 	    # hash can be empty.
 	    if {$hash eq ""} {
 		set state($jid2,uptodate) 1
+		unset -nocomplain state($jid2,data)
 	    } else {
 		set state($jid2,uptodate) 0
 	    }
 	    if {[string length $options(-command)]} {
 		uplevel #0 $options(-command) $from
 	    }
+	}
+    } else {
+	
+	# Must be sure that nothing there.
+	if {[info exists state($jid2,hash)]} {
+	    array unset state [jlib::ESC $jid2],*
 	}
     }
 }

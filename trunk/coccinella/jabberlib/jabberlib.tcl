@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.141 2006-05-29 08:03:51 matben Exp $
+# $Id: jabberlib.tcl,v 1.142 2006-05-30 14:32:38 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1453,20 +1453,24 @@ proc jlib::presence_handler {jlibname xmldata} {
 	}
     }
     
+    # Handle callbacks specific for 'type' that have been registered with 
+    # 'presence_register(_ex)'.
+    eval {presence_run_hook $jlibname $from $type} $arglist
+    presence_ex_run_hook $jlibname $xmldata
+    
     # Invoke any callback before the rosters callback.
     if {[info exists id] && [info exists prescmd($id)]} {
 	uplevel #0 $prescmd($id) [list $jlibname $type] $arglist
 	unset -nocomplain prescmd($id)
     }	
+
     if {![string equal $type "error"]} {
 	eval {$lib(rostername) invokecommand $from $type} $arglist
     }
     
-    #     Handle callbacks specific for 'type' that have been
-    #     registered with 'presence_register'
-
-    eval {presence_run_hook $jlibname $from $type} $arglist
-    presence_ex_run_hook $jlibname $xmldata
+    # Old. Moved up! Only users: avatar + caps +disco
+    #eval {presence_run_hook $jlibname $from $type} $arglist
+    #presence_ex_run_hook $jlibname $xmldata
 }
 
 # jlib::features_handler --
@@ -2366,18 +2370,14 @@ proc jlib::presence_ex_run_hook {jlibname xmldata} {
     }
     jlib::splitjid $from from2 -
     set pkey "$type,$from,$from2"
-    
-    #puts "\t pkey=$pkey"
-    
+        
     # Make matching in two steps, attributes and elements.
     # First the attributes.
     set matched {}
     foreach {pat value} [array get expreshook] {
-	#puts "\t pat=$pat"
 	if {[string match $pat $pkey]} {
 	    
 	    foreach spec $value {
-		#puts "\t\t spec=$spec"
     
 		# Match attributes only if opts empty.
 		if {[lindex $spec 0] eq {}} {
@@ -2407,17 +2407,13 @@ proc jlib::presence_ex_run_hook {jlibname xmldata} {
 	    set xmlns [wrapper::getattribute $c xmlns]
 	    lappend tagxmlns [list [wrapper::gettag $c] $xmlns]	    
 	}
-	#puts "\t matched=$matched"
-	#puts "\t tagxmlns=$tagxmlns"
 
 	foreach spec $matched {
-	    #puts "\t spec=$spec"
 	    array set opts {-tag * -xmlns *}
 	    array set opts [lindex $spec 0]
 
 	    # The 'olist' must be ordered.
 	    set olist [list $opts(-tag) $opts(-xmlns)]
-	    #puts "\t olist=$olist"	
 	    set idx [lsearch -glob $tagxmlns $olist]
 	    if {$idx >= 0} {
 		set func [lindex $spec 1]
@@ -2466,16 +2462,6 @@ proc jlib::presence_deregister_ex {jlibname func args} {
 	
 	
     }
-}
-
-if {0} {
-    proc cb {args} {puts "-+-+-+-+ $args"}
-    proc cx {args} {puts "xxxxxxxx $args"}
-    jlib::jlib1 presence_register_ex cb -type available
-    jlib::jlib1 presence_register_ex cb -type available -from2 matben2@localhost
-    jlib::jlib1 presence_register_ex cx -type available -tag x
-    jlib::jlib1 presence_register_ex cx -type available -tag x -xmlns jabber:x:avatar
-    parray ::jlib::jlib1::expreshook
 }
 
 # jlib::element_register --
