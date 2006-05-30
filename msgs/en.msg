@@ -612,6 +612,7 @@
 ::msgcat::mcset en {Personal URL}
 ::msgcat::mcset en {Pick Directory}
 ::msgcat::mcset en {Pick File}
+::msgcat::mcset en {Pick Image File}
 ::msgcat::mcset en {Pick skin}
 ::msgcat::mcset en {Plugin Info}
 ::msgcat::mcset en {Plugin Control}

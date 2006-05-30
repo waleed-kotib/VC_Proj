@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.24 2006-05-28 09:53:22 matben Exp $
+# $Id: tileutils.tcl,v 1.25 2006-05-30 14:32:38 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -232,6 +232,24 @@ proc tileutils::configstyles {name} {
 	style map Sunken.TEntry  \
 	  -foreground {{background} "#363636" {} black}
 	style configure Small.Sunken.TEntry -font CociSmallFont
+	
+	# Safari type button.
+	if {0} {
+	    style element create Safari.background image $tiles(blank)  \
+	      -border {6 6 6 6} -padding {0} -sticky news  \
+	      -map [list active $tiles(oval) pressed $tiles(ovalDark)]
+	    
+	    style layout Safari {
+		Safari.background -children {
+		    Safari.padding -children {
+			Safari.label
+		    }
+		}
+	    }	    
+	    style configure Safari  \
+	      -padding {8 0 8 1} -relief flat -font CociSmallFont
+	    style map Safari -foreground [list active white]	
+	}
 	
 	# Url clickable link:
 	style layout Url {

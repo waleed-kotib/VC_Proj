@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.171 2006-05-28 09:53:22 matben Exp $
+# $Id: Roster.tcl,v 1.172 2006-05-30 14:32:38 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -806,9 +806,6 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    } elseif {[$jstate(roster) isitem $jid3]} {
 		eval {Presence $jid3 $type} $args
 	    }
-	    	    
-	    # General type presence hooks.
-	    eval {::hooks::run presenceHook $jid $type} $args
 
 	    # Specific type presence hooks.
 	    eval {::hooks::run presence[string totitle $type]Hook $jid $type} $args
@@ -820,6 +817,9 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    if {!$same} {
 		eval {::hooks::run presenceNewHook $jid $type} $args
 	    }
+		    
+	    # General type presence hooks.
+	    eval {::hooks::run presenceHook $jid $type} $args
 	    
 	    # Make an additional call for delayed presence.
 	    # This only happend when type='available'.
@@ -1066,7 +1066,6 @@ proc ::Roster::IsCoccinella {jid3} {
     upvar ::Jabber::coccixmlns coccixmlns
     upvar ::Jabber::xmppxmlns xmppxmlns
     
-    #puts "\t ::Roster::IsTransport=[::Roster::IsTransport $jid3]"
     set ans 0
     if {![IsTransportHeuristics $jid3]} {
 	set node [$jstate(roster) getcapsattr $jid3 node]
@@ -1074,7 +1073,6 @@ proc ::Roster::IsCoccinella {jid3} {
 	    set ans 1
 	}
     }
-    #puts "\t ::Roster::IsCoccinella $ans  $jid3"
     return $ans
 }
 
@@ -1440,7 +1438,6 @@ proc ::Roster::IsTransportHeuristics {jid} {
     if {!$transport} {
 	set transport [IsTransport $jid]
     }
-    #puts "\t ::Roster::IsTransportHeuristics $transport $jid"
     return $transport
 }
 

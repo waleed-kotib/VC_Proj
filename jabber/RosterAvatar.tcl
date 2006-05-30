@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.12 2006-05-07 14:08:00 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.13 2006-05-30 14:32:38 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -514,7 +514,7 @@ proc ::RosterAvatar::SetAvatarImage {type jid} {
     variable avatar
     variable avatarSize
     
-    ::Debug 4 "::RosterAvatar::SetAvatarImage jid=$jid"
+    ::Debug 4 "::RosterAvatar::SetAvatarImage $type, jid=$jid"
         
     jlib::splitjid $jid jid2 -
     set tag [list jid $jid]
@@ -768,9 +768,7 @@ proc ::RosterAvatar::SetItemAlternative {jid key type value} {
 proc ::RosterAvatar::SetAltImage {jid key image} {
     variable T
     variable altImageKeyToElem
-    
-    #puts "::RosterAvatar::SetAltImage $jid, $key"
-        
+            
     # altImageKeyToElem maps: key -> element name
     # 
     # We use a static mapping: BAD?

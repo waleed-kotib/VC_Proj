@@ -19,7 +19,7 @@
 #  
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.12 2006-05-24 08:38:15 matben Exp $
+# $Id: caps.tcl,v 1.13 2006-05-30 14:32:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -54,8 +54,8 @@ proc jlib::caps::init {jlibname args} {
     namespace eval ${jlibname}::caps {
 	variable state
     }
-    jlib::presence_register $jlibname available   [namespace current]::avail_cb
-    jlib::presence_register $jlibname unavailable [namespace current]::unavail_cb
+    jlib::presence_register $jlibname available   [namespace current]::avail_cb 20
+    jlib::presence_register $jlibname unavailable [namespace current]::unavail_cb 20
 }
 
 proc jlib::caps::configure {jlibname args} {
