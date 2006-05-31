@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.15 2006-05-30 14:32:38 matben Exp $
+# $Id: avatar.tcl,v 1.16 2006-05-31 08:30:26 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -35,8 +35,10 @@
 #      jlibName avatar send_get jid command
 #      jlibName avatar send_get_storage jid command
 #      jlibName avatar get_data jid2
+#      jlibName avatar get_hash jid2
 #      jlibName avatar get_mime jid2
 #      jlibName avatar have_data jid2
+#      jlibName avatar have_hash jid2
 #      
 #   Note that all internal storage refers to bare (2-tier) jids!
 #   @@@ It is unclear if this is correct. Perhaps the full jids shall be used.
@@ -359,6 +361,12 @@ proc jlib::avatar::get_hash {jlibname jid2} {
     } else {
 	return ""
     }
+}
+
+proc jlib::avatar::have_hash {jlibname jid2} {
+    upvar ${jlibname}::avatar::state state
+    
+    return [info exists state($jid2,hash)]
 }
 
 proc jlib::avatar::have_hash_protocol {jlibname jid2 protocol} {
