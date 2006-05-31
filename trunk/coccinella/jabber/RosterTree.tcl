@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.24 2006-05-28 09:53:22 matben Exp $
+# $Id: RosterTree.tcl,v 1.25 2006-05-31 08:32:26 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -13,6 +13,7 @@
 #   that maps a tag to a set of items. 
 #   One jid can belong to several groups (bad) which doesn't make {jid $jid}
 #   unique!
+#   Always use mapped JIDs.
 # 
 #   tags:
 #     {head available/unavailable/transport/pending}
@@ -150,8 +151,6 @@ proc ::RosterTree::StyleDelete {name} {
 proc ::RosterTree::StyleCreateItem {jid presence args} {
     variable plugin
     
-    #puts "::RosterTree::StyleCreateItem jid=$jid"
-    
     set name $plugin(selected)
     set ans [eval {$plugin($name,createItem) $jid $presence} $args]
     StyleConfigureAltImages $jid
@@ -182,8 +181,6 @@ proc ::RosterTree::StyleDeleteItem {jid} {
 
 proc ::RosterTree::StyleSetItemAlternative {jid key type value} {
     variable plugin
-    
-    #puts "::RosterTree::StyleSetItemAlternative jid=$jid key=$key"
     
     switch -- $type {
 	image {
@@ -221,16 +218,12 @@ proc ::RosterTree::StyleConfigureAltImages {jid} {
     variable plugin
     variable altImageCache
     
-    #puts "::RosterTree::StyleConfigureAltImages jid=$jid"
-    
     if {[info exists altImageCache($jid)]} {
-	#puts "\t altImageCache=$altImageCache($jid)"
 	set name $plugin(selected)
 	foreach {key value} $altImageCache($jid) {
 	     $plugin($name,setItemAlt) $jid $key image $value
 	}
     }
-    #puts "\t exit ::RosterTree::StyleConfigureAltImages"
 }
 
 proc ::RosterTree::GetItemAlternatives {jid type} {
@@ -689,7 +682,7 @@ proc ::RosterTree::RemoveTags {item} {
     if {$idx >= 0} {
 	set tag2items($tag) [lreplace $items $idx $idx]
     }
-    if {$tag2items($tag) == {}} {
+    if {$tag2items($tag) eq {}} {
 	unset tag2items($tag)
     }
 }
@@ -896,20 +889,19 @@ proc ::RosterTree::DeleteItemBase {jid} {
     #    presence = 'available'   => remove jid2 + jid3
     #    presence = 'unavailable' => remove jid2 + jid3
     # Else if 2-tier jid:  => remove jid2
-
-    jlib::splitjid $jid jid2 res
-    set mjid2 [jlib::jidmap $jid2]
+    
+    set mjid3 [jlib::jidmap $jid]
+    jlib::splitjid $mjid3 mjid2 res
     
     set tag [list jid $mjid2]
     DeleteWithTag $tag
     if {$res ne ""} {
-	set mjid3 [jlib::jidmap $jid]
 	DeleteWithTag [list jid $mjid3]
     }
     
     # Pending and transports.
-    DeleteWithTag [list pending $jid]
-    DeleteWithTag [list transport $jid]
+    DeleteWithTag [list pending $mjid3]
+    DeleteWithTag [list transport $mjid3]
 }
 
 # RosterTree::BasePostProcessDiscoInfo --
@@ -929,14 +921,11 @@ proc ::RosterTree::BasePostProcessDiscoInfo {from column elem} {
 	
     set jids [::Roster::GetUsersWithSameHost $from]
 
-    #puts ">>>>>>>>> ::RosterTree::BasePostProcessDiscoInfo jids=$jids"
-
     foreach jid $jids {
 	
 	# Ordinary users and so far unrecognized transports.
 	set istrpt [::Roster::IsTransportHeuristics $jid]
 	set icon [::Roster::GetPresenceIconFromJid $jid]
-	#puts "\t istrpt=$istrpt, icon=$icon"
 
 	set tag [list jid $jid]
 	foreach item [FindWithTag $tag] {
