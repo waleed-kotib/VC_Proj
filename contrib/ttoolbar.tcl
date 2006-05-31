@@ -3,10 +3,10 @@
 #      This file is part of The Coccinella application.
 #      It implements a toolbar mega widget using tile.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.2 2005-12-02 09:01:21 matben Exp $
+# $Id: ttoolbar.tcl,v 1.3 2006-05-31 13:55:38 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -42,12 +42,6 @@ namespace eval ::ttoolbar::  {
     
     namespace export ttoolbar
     
-    style map TToolbar.TLabel -relief {
-	disabled flat
-	selected sunken
-	pressed  sunken
-	active   raised
-    }
 }
 
 # ::ttoolbar::Init --
@@ -69,6 +63,26 @@ proc ::ttoolbar::Init { } {
     variable ttoolbarOptions
     variable widgetOptions
     
+    foreach name [tile::availableThemes] {
+	style theme settings $name {
+	    
+	    style layout TToolbar.TButton {
+		TToolbar.border -children {
+		    TToolbar.padding -children {
+			TToolbar.label -side left
+		    }
+		}
+	    }
+	    style configure TToolbar.TButton -padding 2 -relief flat -borderwidth 1
+	    style map TToolbar.TButton -relief {
+		disabled flat
+		selected sunken
+		pressed  sunken
+		active   raised
+	    }
+	}
+    }
+    
     # List all allowed options with their database names and class names.
     array set widgetOptions {
 	-packimagepadx       {packImagePadX        PackImagePadX       }
@@ -76,21 +90,20 @@ proc ::ttoolbar::Init { } {
 	-packtextpadx        {packTextPadX         PackTextPadX        }
 	-packtextpady        {packTextPadY         PackTextPadY        }
 	-padding             {padding              Padding             }
+	-styleimage          {styleImage           StyleImage          }
+	-styletext           {styleText            StyleText           }
     }
     
     set ttoolbarOptions [array names widgetOptions]
 
-    option add *TToolbar.padding            {6 4 6 2}       widgetDefault
-    option add *TToolbar.packImagePadX       4              widgetDefault
-    option add *TToolbar.packImagePadY       0              widgetDefault
-    option add *TToolbar.packTextPadX        2              widgetDefault
-    option add *TToolbar.packTextPadY        0              widgetDefault
+    option add *TToolbar.padding            {10 4 6 4}        widgetDefault
+    option add *TToolbar.packImagePadX       4                widgetDefault
+    option add *TToolbar.packImagePadY       0                widgetDefault
+    option add *TToolbar.packTextPadX        0                widgetDefault
+    option add *TToolbar.packTextPadY        0                widgetDefault
+    option add *TToolbar.styleImage          TToolbar.TButton widgetDefault
+    option add *TToolbar.styleText           Toolbutton       widgetDefault
 
-    option add *TToolbar.TLabel.borderWidth  1              widgetDefault
-    option add *TToolbar.TLabel.padding      1              widgetDefault
-    option add *TToolbar.TLabel.width       -6              widgetDefault
-    option add *TToolbar.TLabel.font         TkDefaultFont  widgetDefault
-    
     # This allows us to clean up some things when we go away.
     bind TToolbar <Destroy> {+::ttoolbar::DestroyHandler %W }
     
@@ -289,44 +302,20 @@ proc ::ttoolbar::NewButton {w name args} {
     set widgets($name,image) $wimage
     set widgets($name,text)  $wtext
     
-    ttk::label $wimage -compound image -style TToolbar.TLabel
-    ttk::label $wtext  -compound text
+    set cmd [list [namespace current]::Invoke $w $name]
+    ttk::button $wimage -style $options(-styleimage) -command $cmd  \
+      -compound image
+    ttk::button $wtext  -style $options(-styletext)  -command $cmd  \
+      -compound text
     
     grid  $wimage  -column $ncol -row 0 \
       -padx $options(-packimagepadx) -pady $options(-packimagepady)
     grid  $wtext   -column $ncol -row 1 \
       -padx $options(-packtextpadx) -pady $options(-packtextpady)
 
-    Bind $w $name
     eval {ButtonConfigure $w $name} $args
     
     incr locals(uid)
-}
-
-proc ::ttoolbar::Bind {w name} {
-    
-    upvar ::ttoolbar::${w}::widgets widgets
-
-    set wimage $widgets($name,image)
-    set wtext  $widgets($name,text)
-    
-    set script [format \
-      { %%W instate {pressed !disabled } \
-      { %%W state !pressed; ::ttoolbar::Invoke %s %s } } $w $name]
-
-    # Essentially from tile's button.tcl
-    foreach wlabel [list $wimage $wtext] {
-	bind $wlabel <Enter> { %W state active }
-	bind $wlabel <Leave> { %W state !active }
-	
-	bind $wlabel <ButtonPress-1> \
-	  { %W instate !disabled { %W state pressed } }
-	bind $wlabel <ButtonRelease-1> $script
-	bind $wlabel <Button1-Enter> \
-	  { %W instate !disabled { %W state pressed } }
-	bind $wlabel <Button1-Leave> \
-	  { %W instate !disabled { %W state !pressed } }
-    }
 }
 
 proc ::ttoolbar::Invoke {w name} {

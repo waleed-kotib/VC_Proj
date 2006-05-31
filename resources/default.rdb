@@ -90,6 +90,7 @@
 *Tablelist.labelBorderWidth:         1
 *Tablelist.stripeBackground:         #dedeff
 *Tablelist.background:               white
+*TToolbar.styleText:                 Safari
 
 ! some of these are dummies just to set column options etc.
 !
