@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.25 2006-05-30 14:32:38 matben Exp $
+# $Id: tileutils.tcl,v 1.26 2006-05-31 13:55:38 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -234,22 +234,27 @@ proc tileutils::configstyles {name} {
 	style configure Small.Sunken.TEntry -font CociSmallFont
 	
 	# Safari type button.
-	if {0} {
-	    style element create Safari.background image $tiles(blank)  \
-	      -border {6 6 6 6} -padding {0} -sticky news  \
-	      -map [list active $tiles(oval) pressed $tiles(ovalDark)]
-	    
-	    style layout Safari {
-		Safari.background -children {
-		    Safari.padding -children {
-			Safari.label
-		    }
+	unset -nocomplain foreground
+	array set foreground [style map . -foreground]
+	
+	style element create Safari.background image $tiles(blank)  \
+	  -border {6 6 6 6} -padding {0} -sticky news  \
+	  -map [list  \
+	  {background}        $tiles(blank)  \
+	  {active !disabled}  $tiles(oval)   \
+	  {pressed !disabled} $tiles(ovalDark)]
+	
+	style layout Safari {
+	    Safari.background -children {
+		Safari.padding -children {
+		    Safari.label
 		}
-	    }	    
-	    style configure Safari  \
-	      -padding {8 0 8 1} -relief flat -font CociSmallFont
-	    style map Safari -foreground [list active white]	
-	}
+	    }
+	}	    
+	style configure Safari  \
+	  -padding {6 0 6 1} -relief flat -font CociSmallFont
+	set foreground([list active !disabled]) white
+	style map Safari -foreground [array get foreground]
 	
 	# Url clickable link:
 	style layout Url {
@@ -290,12 +295,13 @@ proc tileutils::configstyles {name} {
 
 	
 	# Test------------------
-	style layout BorderFrame {
-	    BorderFrame.border -sticky nswe
+	if {0} {
+	    style layout BorderFrame {
+		BorderFrame.border -sticky nswe
+	    }
+	    style configure BorderFrame  \
+	      -relief solid -borderwidth 1 -background gray50
 	}
-	style configure BorderFrame  \
-	  -relief solid -borderwidth 1 -background gray50
-
     }    
 }
 
@@ -503,13 +509,16 @@ if {0} {
     ttk::button $w.b2 -style Small.Url -text www.smallhome.se -class TUrl \
       -command cmd
     
+    ttk::button $w.bp1 -style Plain.TButton -text "Plain Button" -command cmd
+    
     frame $w.f
     ttk::label $w.f.l -style Sunken.TLabel -compound image -image $name
     grid  $w.f.l  -sticky news
     grid columnconfigure $w.f 0 -minsize [expr {2*4 + 2*4 + 64}]
     grid rowconfigure    $w.f 0 -minsize [expr {2*4 + 2*4 + 64}]
 
-    pack $w.l1 $w.l2 $w.l3 $w.l4 $w.l5 $w.e1 $w.e2 $w.b1 $w.b2 $w.f \
+    pack $w.l1 $w.l2 $w.l3 $w.l4 $w.l5 $w.e1 $w.e2 $w.b1 $w.b2  \
+      $w.bp1 $w.f \
       -padx 20 -pady 10
     
 }
