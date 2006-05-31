@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.19 2006-05-30 14:32:38 matben Exp $
+# $Id: Avatar.tcl,v 1.20 2006-05-31 08:31:09 matben Exp $
 
 # @@@ Issues:
 # 
@@ -827,22 +827,27 @@ proc ::Avatar::GetPhotoOfSize {jid2 size} {
 
 # Avatar::HavePhoto --
 # 
-#       Return 1 if avatar and 0 else.
-#       For available users we require that we have got a presence hash.
+#       Return 1 if we have an avatar ready to use and 0 else.
+#       For online users we don't get cache unless they have sent us a
+#       nonempty presence hash.
 
 proc ::Avatar::HavePhoto {jid2} {
     variable photo
     upvar ::Jabber::jstate jstate
     
     set jlib $jstate(jlib)    
-    if {[$jstate(roster) isavailable $jid2]} {
-	if {[$jlib avatar have_data $jid2] && [info exists photo($jid2,orig)]} {
-	    return 1
-	} else {
-	    return 0
-	}
+    if {[$jlib avatar have_data $jid2] && [info exists photo($jid2,orig)]} {
+	return 1
     } else {
-	return [HaveCachedJID $jid2]
+	if {[$jstate(roster) isavailable $jid2]} {
+	    if {[$jlib avatar get_hash $jid2] ne ""} {
+		return [HaveCachedJID $jid2]
+	    } else {
+		return 0
+	    }
+	} else {
+	    return [HaveCachedJID $jid2]
+	}
     }
 }
 
