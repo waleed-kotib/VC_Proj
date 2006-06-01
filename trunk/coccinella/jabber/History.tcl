@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.15 2006-05-18 12:20:20 matben Exp $
+# $Id: History.tcl,v 1.16 2006-06-01 13:54:35 matben Exp $
 
 package require uriencode
 
@@ -241,7 +241,13 @@ proc ::History::BuildHistory {jid dlgtype args} {
     }
     $wtext configure -state disabled
     ::UI::SetWindowGeometry $w $wDlgs(jhist)
-    wm minsize $w 200 320
+    
+    set script [format {
+	update idletasks
+	set min [winfo reqwidth %s]
+	wm minsize %s [expr {$min+20}] 200
+    } $frbot $w]    
+    after idle $script
 }
 
 proc ::History::ReadMessageFile {jid} {
