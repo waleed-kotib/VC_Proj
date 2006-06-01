@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.26 2006-05-31 13:55:38 matben Exp $
+# $Id: tileutils.tcl,v 1.27 2006-06-01 12:10:49 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -253,6 +253,9 @@ proc tileutils::configstyles {name} {
 	}	    
 	style configure Safari  \
 	  -padding {6 0 6 1} -relief flat -font CociSmallFont
+	unset -nocomplain foreground(active)
+	unset -nocomplain foreground(selected)
+	unset -nocomplain foreground(focus)
 	set foreground([list active !disabled]) white
 	style map Safari -foreground [array get foreground]
 	
