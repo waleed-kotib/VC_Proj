@@ -25,6 +25,9 @@ Coccinella-0.95.12 (0606??):
  o new (flat) minimalistic roster styles
  o added fast bytestreams protocol (Psi)
  o added stun support to get NAT external address.
+ o added jingle library support
+ o test version of iaxclient/jingle for voip (JEP-0166 and 0179)
+ o chat state notification (JEP-0085)
 
 Coccinella-0.95.11 (060115):
 
