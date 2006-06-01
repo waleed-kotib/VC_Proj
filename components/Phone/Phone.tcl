@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.16 2006-05-26 13:26:54 matben Exp $
+# $Id: Phone.tcl,v 1.17 2006-06-01 12:33:11 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -77,8 +77,6 @@ proc ::Phone::Init { } {
     #    ::hooks::register logoutHook            ::Phone::LogoutHook
     ::hooks::register launchFinalHook       ::Phone::LoginHook
 
-    #option add *Phone.phone16Image              call16           widgetDefault
-    #option add *Phone.phoneDisImage             callDis16        widgetDefault
     option add *Phone.phone16Image              phone16          widgetDefault
     option add *Phone.phone16DisImage           phone16Dis       widgetDefault
 }
@@ -546,6 +544,10 @@ proc ::Phone::Touch {{key ""} {alt_key ""}} {
     }
 }
 
+# Phone::DialJingle --
+# 
+#       Public interface for the phone components, special for Jingle/IAX.
+
 proc ::Phone::DialJingle  { ipPeer portPeer calledName callerName {user ""} {password ""} } {
     variable statePhone
     variable phoneNumberInput
@@ -631,6 +633,10 @@ proc ::Phone::Dial {{phoneNumber ""}} {
         SetDialState
     }
 }
+
+# Phone::HangupJingle --
+# 
+#       Public interface for the phone components, special for Jingle/IAX.
 
 proc ::Phone::HangupJingle {{callNo ""}} {
     variable statePhone

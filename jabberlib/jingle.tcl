@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jingle.tcl,v 1.5 2006-04-24 06:36:19 matben Exp $
+# $Id: jingle.tcl,v 1.6 2006-06-01 12:33:11 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -221,8 +221,6 @@ proc jlib::jingle::init {jlibname args} {
     variable inited
     variable jxmlns
     
-    puts "jlib::jingle::init"
-    
     if {!$inited} {
 	InitOnce
     }    
@@ -286,8 +284,6 @@ proc jlib::jingle::cmdproc {jlibname cmd args} {
 proc jlib::jingle::send_set {jlibname sid action cmd {elems {}}} {
     variable verifyState
     
-    puts "jlib::jingle::send_set sid=$sid, action=$action, cmd=$cmd"
-    
     # Be sure to set the internal state as well.
     set state [set_state $jlibname $sid $action]
     if {$verifyState && $state eq ""} {
@@ -305,8 +301,6 @@ proc jlib::jingle::send_set {jlibname sid action cmd {elems {}}} {
 proc jlib::jingle::do_send_set {jlibname sid action cmd {elems {}}} {
     variable jxmlns
     upvar ${jlibname}::jingle::session  session
-    
-    puts "jlib::jingle::do_send_set sid=$sid, action=$action, cmd=$cmd"
     
     set jid       $session($sid,jid)
     set initiator $session($sid,initiator)
@@ -344,7 +338,7 @@ proc jlib::jingle::set_state {jlibname sid action} {
     variable transportMap
     upvar ${jlibname}::jingle::session  session
 
-    puts "jlib::jingle::set_state"
+    #puts "jlib::jingle::set_state"
     
     # Since we are a state machine we must check that the requested state
     # change is consistent.
@@ -354,7 +348,7 @@ proc jlib::jingle::set_state {jlibname sid action} {
 	set session($sid,state,session)   "pending"
 	set session($sid,state,media)     "pending"
 	set session($sid,state,transport) "pending"
-	puts "\t action=$action, state=pending"
+	#puts "\t action=$action, state=pending"
 	return "pending"
     } elseif {$action eq "session-terminate"} {
 
@@ -362,21 +356,21 @@ proc jlib::jingle::set_state {jlibname sid action} {
 	set session($sid,state,session)   "ended"
 	set session($sid,state,media)     "ended"
 	set session($sid,state,transport) "ended"
-	puts "\t action=$action, state=ended"
+	#puts "\t action=$action, state=ended"
 	return "ended"
 
     } else {
 	set actionType [lindex [split $action -] 0]
 	set state $session($sid,state,$actionType)
     
-	puts "\t action=$action, state=$state,   actionType=$actionType"
+	#puts "\t action=$action, state=$state,   actionType=$actionType"
 	if {[info exists ${actionType}Map\($state,$action)]} {
 	    set state [set ${actionType}Map\($state,$action)]
-	    puts "\t new state=$state"
+	    #puts "\t new state=$state"
 	    set session($sid,state,$actionType) $state
 	    return $state
 	} else {
-	    puts "\t out-of-sync"
+	    #puts "\t out-of-sync"
 	    return ""
 	}
     }    
@@ -402,7 +396,7 @@ proc jlib::jingle::initiate {jlibname name jid mediaElems trptElems cmd args} {
     variable jingle
     upvar ${jlibname}::jingle::session  session
     
-    puts "jlib::jingle::initiate"
+    #puts "jlib::jingle::initiate"
       
     # SIP may want to generate its own sid.
     set opts(-sid) [jlib::generateuuid]
@@ -434,7 +428,7 @@ proc jlib::jingle::set_handler {jlibname from subiq args} {
     variable verifyState
     upvar ${jlibname}::jingle::session  session
     
-    puts "jlib::jingle::set_handler"
+    #puts "jlib::jingle::set_handler"
     
     array set argsArr $args
     if {![info exists argsArr(-id)]} {
@@ -467,12 +461,12 @@ proc jlib::jingle::set_handler {jlibname from subiq args} {
     foreach aname {sid action initiator} {
 	set $aname [wrapper::getattribute $jelem $aname]
 	if {$aname eq ""} {
-	    puts "\t missing $aname"
+	    #puts "\t missing $aname"
 	    jlib::send_iq_error $jlibname $from $id 404 cancel bad-request
 	    return 1
 	}
     }
-    puts "\t $sid $action $initiator"
+    #puts "\t $sid $action $initiator"
     
     # We already have a session for this sid.
     if {[info exists session($sid,sid)]} {
@@ -491,7 +485,7 @@ proc jlib::jingle::set_handler {jlibname from subiq args} {
 	# change is consistent.
 	set state [set_state $jlibname $sid $action]
 	if {$verifyState && $state eq ""} {
-	    puts "\t $action out-of-order"
+	    #puts "\t $action out-of-order"
 	    send_error $jlibname $from $id out-of-order
 	    return 1
 	}
@@ -529,7 +523,7 @@ proc jlib::jingle::initiate_handler {jlibname sid id jelem args} {
     variable jingle
     upvar ${jlibname}::jingle::session  session
     
-    puts "jlib::jingle::initiate_handler"
+    #puts "jlib::jingle::initiate_handler"
     
     # Use the 'sid' as the identifier for the state array.
     set session($sid,state,session)   "pending"
@@ -583,7 +577,7 @@ proc jlib::jingle::initiate_handler {jlibname sid id jelem args} {
 	}
     } else {
 	set lbest [lsort -integer -index 1 -decreasing $lbest]
-	puts "\t lbest=$lbest"
+	#puts "\t lbest=$lbest"
     
 	# Delegate to the component.
 	# It is then up to the component to take the initiatives:
@@ -600,7 +594,7 @@ proc jlib::jingle::initiate_handler {jlibname sid id jelem args} {
 proc jlib::jingle::send_error {jlibname jid id stanza} {
     variable jxmlns
     
-    puts "jlib::jingle::send_error"
+    #puts "jlib::jingle::send_error"
     # @@@ Not sure about the details here.
     # We must add an extra error element:
     #   <unsupported-transports 
@@ -622,10 +616,16 @@ proc jlib::jingle::getstate {jlibname type sid} {
     return $session($sid,state,$type)
 }
 
-proc jlib::jingle::getvalue {jlibname type sid key} {
+proc jlib::jingle::getvalue {jlibname sid key} {
     upvar ${jlibname}::jingle::session  session
 
     return $session($sid,$key)
+}
+
+proc jlib::jingle::havesession {jlibname sid} {
+    upvar ${jlibname}::jingle::session  session
+    
+    return [info exists session($sid,sid)]
 }
 
 proc jlib::jingle::reset {jlibname} {
@@ -636,8 +636,6 @@ proc jlib::jingle::reset {jlibname} {
 proc jlib::jingle::free {jlibname sid} {
     upvar ${jlibname}::jingle::session  session
 
-    puts "jlib::jingle::free"
-    
     array unset session   $sid,*
 }
 
@@ -667,11 +665,11 @@ if {0} {
       -attrlist [list xmlns $xmlnsMediaAudio] ]
     
     proc cmdIAX {jlibname _jelem args} {
-	puts "IAX: $args"
+	#puts "IAX: $args"
 	array set argsArr $args
 	set sid    [wrapper::getattribute $_jelem sid]
 	set action [wrapper::getattribute $_jelem action]
-	puts "\t action=$action, sid=$sid"
+	#puts "\t action=$action, sid=$sid"
 	
 	# Only session actions are acknowledged?
 	if {[string match "session-*" $action]} {

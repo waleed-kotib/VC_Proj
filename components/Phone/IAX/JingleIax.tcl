@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.27 2006-05-27 10:08:29 matben Exp $
+# $Id: JingleIax.tcl,v 1.28 2006-06-01 12:33:11 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -35,6 +35,7 @@ proc ::JingleIAX::Init { } {
     ::hooks::register loginHook             ::JingleIAX::LoginHook
     ::hooks::register logoutHook            ::JingleIAX::LogoutHook
     ::hooks::register presenceHook          ::JingleIAX::PresenceHook
+    ::hooks::register presenceHook          ::JingleIAX::PresenceHangUpHook
     ::hooks::register rosterPostCommandHook ::JingleIAX::RosterPostCommandHook
     ::hooks::register buildChatButtonTrayHook  ::JingleIAX::BuildChatButtonTrayHook
     ::hooks::register chatTabChangedHook    ::JingleIAX::ChatTabChangedHook
@@ -415,6 +416,30 @@ proc ::JingleIAX::SessionTerminateHandler {from jingle sid id} {
     set state(sid) ""
     
     # @@@ Do we need to take any further action (iaxclient::hangup)?
+}
+
+# JingleIAX::PresenceHangUpHook --
+# 
+#       The Jingle JEP specifies that if a user we have a session with becomes
+#       unavailable we must close down the call.
+
+proc ::JingleIAX::PresenceHangUpHook {jid type args} {
+    variable state
+    
+    # Beware! jid without resource!
+    Debug "::JingleIAX::PresenceHangUpHook jid=$jid, type=$type, $args"
+
+    if {$type eq "unavailable"} {
+	set sid $state(sid)
+	if {[::Jabber::JlibCmd jingle havesession $sid]} {
+	    array set aargs $args
+	    set from $aargs(-from)
+	    set jjid [::Jabber::JlibCmd jingle getvalue $sid jid]
+	    if {[jlib::jidequal $jjid $from]} {
+		::Phone::HangupJingle
+	    }
+	}
+    }
 }
 
 #-------------------------------------------------------------------------
