@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.170 2006-05-30 14:32:38 matben Exp $
+# $Id: Chat.tcl,v 1.171 2006-06-01 12:09:57 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1083,9 +1083,13 @@ proc ::Chat::Build {threadID args} {
     # We do it here to be sure that we have the chattoken.
     ::hooks::run buildChatButtonTrayHook $wtray $dlgtoken
         
-    set shortBtWidth [$wtray minwidth]
-    wm minsize $w [expr {$shortBtWidth < 220} ? 220 : $shortBtWidth] 320
-    wm maxsize $w 800 2000
+    set minsize [$wtray minwidth]
+    if {[lsearch [grid slaves $wtop] $wavatar] >= 0} {
+	array set gridInfo [grid info $wavatar]
+	incr minsize [expr 2*$gridInfo(-padx)]
+	incr minsize [winfo reqwidth $wavatar]	
+    }
+    wm minsize $w [expr {$minsize < 220} ? 220 : $minsize] 320
 
     bind $w <FocusIn> [list [namespace current]::FocusIn $dlgtoken]
     
@@ -1366,7 +1370,6 @@ proc ::Chat::DnDDrop {chattoken win data dndtype} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    puts "$win $data $dndtype"
     # Take only first file.
     set f [lindex $data 0]
 	
@@ -1378,7 +1381,7 @@ proc ::Chat::DnDDrop {chattoken win data dndtype} {
 }
 
 proc ::Chat::DnDEnter {chattoken win action data dndtype} {
-    puts "$win $action $data $dndtype"
+
     focus $win
     set act "none"
     return $act
@@ -1422,10 +1425,12 @@ proc ::Chat::SetTitle {chattoken} {
     if {$dlgstate(nhiddenmsgs) > 0} {
 	set wfocus [focus]
 	set n $dlgstate(nhiddenmsgs)
-	if {$wfocus eq ""} {
-	    append str " ($n)"
-	} elseif {[winfo toplevel $wfocus] ne $chatstate(w)} {
-	    append str " ($n)"
+	if {$n > 0} {
+	    if {$wfocus eq ""} {
+		append str " ($n)"
+	    } elseif {[winfo toplevel $wfocus] ne $chatstate(w)} {
+		append str " ($n)"
+	    }
 	}
     }
     wm title $chatstate(w) $str
@@ -1446,8 +1451,15 @@ proc ::Chat::SetAnyAvatar {chattoken} {
     } else {
 
 	# Make sure it is mapped
-	grid  $wavatar  -column 1 -row 0 -padx 10 -pady 4
+	set padx 10
+	grid  $wavatar  -column 1 -row 0 -padx $padx -pady 4
 	$wavatar configure -image $avatar
+	
+	set mintray [$dlgstate(wtray) minwidth]
+	set minava [winfo reqwidth $wavatar]
+	set min [expr {$mintray + $minava + 2*$padx}]
+	
+	wm minsize $dlgstate(w) [expr {$min < 220} ? 220 : $min] 320
     }    
 }
 
