@@ -11,7 +11,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.15 2006-05-27 13:40:34 matben Exp $
+# $Id: Iax.tcl,v 1.16 2006-06-01 12:33:11 matben Exp $
 
 namespace eval ::Iax { }
 
@@ -53,6 +53,9 @@ proc ::Iax::Init { } {
     
     # Register ID.
     set iaxstate(registerid) -
+    
+    # Peer address.
+    set iaxstate(peer) ""
 }
 
 proc ::Iax::InitProc {} {
@@ -260,6 +263,7 @@ proc ::Iax::NotifyState {callNo state codec remote remote_name args} {
     #--------- IAXClient sometimes return free state for a changeline action
     if { $state eq "free" || $state eq "selected"  } {
 	::Phone::SetNormalState $callNo
+	set iaxstate(peer) ""
 	iaxclient::ringstop
     } 
 }
@@ -283,6 +287,7 @@ proc ::Iax::CallerID { {_cidname ""} {_cidnum ""} } {
 }
 
 proc ::Iax::DialJingle {peer {line ""} {subject ""} {user ""} {password ""}} {
+    variable iaxstate
 
     ::Debug 4 "::Iax::DialJingle peer=$peer"
     
@@ -308,6 +313,8 @@ proc ::Iax::DialJingle {peer {line ""} {subject ""} {user ""} {password ""}} {
 
     #----- Dial Peer -------
     ::Debug 4 "\t iaxclient::dial $userDef$peer $callNo"
+    set iaxstate(peer) $userDef$peer
+    
     iaxclient::dial ${userDef}${peer} $callNo
     if { $subject ne "" } {
 	iaxclient::sendtext $subject
@@ -331,7 +338,10 @@ proc ::Iax::Dial {phonenumber {line ""} {subject ""}} {
     set callNo 1 
  
     ::Debug 4 "\t iaxclient::dial ..."
-    iaxclient::dial "${user}:${password}@${host}/${phonenumber}" $callNo
+    set addr "${user}:${password}@${host}/${phonenumber}"
+    set iaxstate(peer) $addr
+
+    iaxclient::dial $addr $callNo
     if { $subject ne "" } {
 	iaxclient::sendtext $subject
     }
