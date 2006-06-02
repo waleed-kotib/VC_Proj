@@ -6,7 +6,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.3 2006-05-31 13:55:38 matben Exp $
+# $Id: ttoolbar.tcl,v 1.4 2006-06-02 10:00:50 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -63,7 +63,15 @@ proc ::ttoolbar::Init { } {
     variable ttoolbarOptions
     variable widgetOptions
     
+    puts "::ttoolbar::Init-----------"
+    
     foreach name [tile::availableThemes] {
+	puts "\t name=$name"
+
+	if {[catch {package require tile::theme::$name}]} {
+	    continue
+	}
+
 	style theme settings $name {
 	    
 	    style layout TToolbar.TButton {
@@ -73,7 +81,8 @@ proc ::ttoolbar::Init { } {
 		    }
 		}
 	    }
-	    style configure TToolbar.TButton -padding 2 -relief flat -borderwidth 1
+	    style configure TToolbar.TButton   \
+	      -padding 2 -relief flat -borderwidth 1
 	    style map TToolbar.TButton -relief {
 		disabled flat
 		selected sunken
