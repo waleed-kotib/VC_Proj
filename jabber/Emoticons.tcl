@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.41 2006-04-05 07:46:22 matben Exp $
+# $Id: Emoticons.tcl,v 1.42 2006-06-02 14:04:33 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -565,7 +565,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -fill both -expand 1 \
       -anchor [option get . dialogAnchor {}]
-    
+        
     ttk::label $wc.l -text [mc preficonsel]
     pack  $wc.l  -side top -anchor w -pady 4
 
@@ -574,7 +574,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
       -padding [option get . groupSmallPadding {}]
     pack $wfr -side top -anchor w -fill both -expand 1
     
-    set wmb $wfr.mb
+    set wmb $wc.mb
     set wiconsetmenu [eval {
 	ttk::optionmenu $wmb [namespace current]::tmpSet
     } $allSets]
