@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.44 2006-06-02 09:59:51 matben Exp $
+# $Id: Init.tcl,v 1.45 2006-06-02 14:05:04 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -444,8 +444,8 @@ proc ::Init::LoadPackages { } {
 	if {[tk windowingsystem] eq "x11"} {
 	    namespace eval ::tileqt {}
 	    set ::tileqt::library [file join $this(binLibPath) tileqt]
+	    puts "::tileqt::library=$::tileqt::library"
 	}
-	puts "::tileqt::library=$::tileqt::library"
 
 	if {[catch {uplevel #0 [list package require tile 0.7]} msg]} {
 	    tk_messageBox -icon error \
