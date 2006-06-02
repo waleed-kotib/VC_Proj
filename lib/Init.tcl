@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.43 2006-05-28 09:53:23 matben Exp $
+# $Id: Init.tcl,v 1.44 2006-06-02 09:59:51 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -445,6 +445,7 @@ proc ::Init::LoadPackages { } {
 	    namespace eval ::tileqt {}
 	    set ::tileqt::library [file join $this(binLibPath) tileqt]
 	}
+	puts "::tileqt::library=$::tileqt::library"
 
 	if {[catch {uplevel #0 [list package require tile 0.7]} msg]} {
 	    tk_messageBox -icon error \
