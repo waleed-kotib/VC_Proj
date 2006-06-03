@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.28 2006-06-02 10:00:50 matben Exp $
+# $Id: tileutils.tcl,v 1.29 2006-06-03 13:42:16 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -240,9 +240,9 @@ proc tileutils::configstyles {name} {
 	style element create Safari.background image $tiles(blank)  \
 	  -border {6 6 6 6} -padding {0} -sticky news  \
 	  -map [list  \
-	  {background}        $tiles(blank)  \
-	  {active !disabled}  $tiles(oval)   \
-	  {pressed !disabled} $tiles(ovalDark)]
+	  {background}                 $tiles(blank)  \
+	  {active !disabled !pressed}  $tiles(oval)   \
+	  {pressed !disabled}          $tiles(ovalDark)]
 	
 	style layout Safari {
 	    Safari.background -children {
