@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.167 2006-05-16 06:06:29 matben Exp $
+# $Id: Jabber.tcl,v 1.168 2006-06-04 12:18:21 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1400,8 +1400,11 @@ proc ::Jabber::SetStatusWithMessage { } {
 	return
     }
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
+      -macclass {document closeBox} -closecommand [namespace current]::CloseStatus
     wm title $w [mc {Set Status}]
+
+    ::UI::SetWindowPosition $w
+
     set finishedStat -1
     
     # Global frame.
@@ -1490,9 +1493,15 @@ proc ::Jabber::StatusMsgRadioCmd {w} {
     }
 }
 
+proc ::Jabber::CloseStatus {w} {
+    
+    ::UI::SaveWinGeom $w
+}
+
 proc ::Jabber::SetStatusCancel {w} {    
     variable finishedStat
 
+    ::UI::SaveWinGeom $w
     set finishedStat 0
     destroy $w
 }
@@ -1507,6 +1516,7 @@ proc ::Jabber::BtSetStatus {w} {
     
     # Set present status.
     eval {SetStatus $show} $opts
+    ::UI::SaveWinGeom $w
     set finishedStat 1
     destroy $w
 }
