@@ -6,7 +6,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.4 2006-06-02 10:00:50 matben Exp $
+# $Id: ttoolbar.tcl,v 1.5 2006-06-05 12:34:37 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -63,10 +63,7 @@ proc ::ttoolbar::Init { } {
     variable ttoolbarOptions
     variable widgetOptions
     
-    puts "::ttoolbar::Init-----------"
-    
     foreach name [tile::availableThemes] {
-	puts "\t name=$name"
 
 	if {[catch {package require tile::theme::$name}]} {
 	    continue
