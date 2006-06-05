@@ -183,7 +183,7 @@ namespace eval tile::theme::tileqt {
          pressed         [currentThemeColour -active   -button] \
          selected        [currentThemeColour -active   -button] \
       ]
-      style default TCheckbutton ;#-padding 0
+      style default TCheckbutton -padding {0 1 0 1}
       
       style map TCombobox -foreground [list \
          active          [currentThemeColour -active   -buttonText] \
@@ -272,7 +272,7 @@ namespace eval tile::theme::tileqt {
          pressed         [currentThemeColour -active   -button] \
          selected        [currentThemeColour -active   -button] \
       ]
-      style default TRadiobutton -padding 0
+      style default TRadiobutton -padding {0 1 0 1}
 
       style map Toolbutton -foreground [list \
          active          [currentThemeColour -active   -buttonText] \
@@ -291,16 +291,7 @@ namespace eval tile::theme::tileqt {
     };# style theme settings tileqt
   };# updateStyles
 
-  ## kdeStyleChangeNotification:
-  #  This procedure will be called from tileqt core each time a message is
-  #  received from KDE to change the style used.
-  proc kdeStyleChangeNotification {} {
-    puts >>kdeStyleChangeNotification
-    ## This method will be called each time a ClientMessage is received from
-    ## KDE KIPC...
-    ## Our Job is:
-    ##  a) To get the current style from KDE, and
-    ##  b) Apply it.
+  proc kdeLocate_kdeglobals {} {
     set KDE_dirs {}
     # As a first step, examine the KDE env variables...
     global env
@@ -318,9 +309,104 @@ namespace eval tile::theme::tileqt {
       }
     }
     # Now, examine all the paths found to locate the kdeglobals file.
+    set PATHS {}
     foreach path $KDE_dirs {
       if {[file exists $path/share/config/kdeglobals]} {
-        set file [open $path/share/config/kdeglobals]
+        lappend PATHS $path/share/config/kdeglobals
+      }
+    }
+    return $PATHS
+  };# kdeLocate_kdeglobals
+
+  ## updateColourPalette:
+  #  This procedure will be called from tileqt core each time a message is
+  #  received from KDE to change the palette used.
+  proc updateColourPalette {} {
+    #  puts >>updateColourPalette
+    foreach filename [kdeLocate_kdeglobals] {
+      if {[file exists $filename]} {
+        set file [open $filename]
+        while {[gets $file line] != -1} {
+          set line [string trim $line]
+          switch -glob $line {
+            contrast=*         {
+              if {![info exists options(-contrast)]} {
+                set options(-contrast) [string range $line 9 end]
+              }
+            }
+            background=*       {
+              if {![info exists options(-background)]} {
+                set options(-background) [kdeGetColourHex $line]
+              }
+            }
+            foreground=*       {
+              if {![info exists options(-foreground)]} {
+                set options(-foreground) [kdeGetColourHex $line]
+              }
+            }
+            buttonBackground=* {
+              if {![info exists options(-buttonBackground)]} {
+                set options(-buttonBackground) [kdeGetColourHex $line]
+              }
+            }
+            buttonForeground=* {
+              if {![info exists options(-buttonForeground)]} {
+                set options(-buttonForeground) [kdeGetColourHex $line]
+              }
+            }
+            selectBackground=* {
+              if {![info exists options(-selectBackground)]} {
+                set options(-selectBackground) [kdeGetColourHex $line]
+              }
+            }
+            selectForeground=* {
+              if {![info exists options(-selectForeground)]} {
+                set options(-selectForeground) [kdeGetColourHex $line]
+              }
+            }
+            windowBackground=* {
+              if {![info exists options(-windowBackground)]} {
+                set options(-windowBackground) [kdeGetColourHex $line]
+              }
+            }
+            windowForeground=* {
+              if {![info exists options(-windowForeground)]} {
+                set options(-windowForeground) [kdeGetColourHex $line]
+              }
+            }
+            linkColor=*        {
+              if {![info exists options(-linkColor)]} {
+                set options(-linkColor) [kdeGetColourHex $line]
+              }
+            }
+            visitedLinkColor=* {
+              if {![info exists options(-visitedLinkColor)]} {
+                set options(-visitedLinkColor) [kdeGetColourHex $line]
+              }
+            }
+          }
+        }
+        close $file
+      }
+    }
+    if {[info exists options]} {
+      eval setPalette [array get options]
+    }
+  };# updateColourPalette
+
+  ## kdeStyleChangeNotification:
+  #  This procedure will be called from tileqt core each time a message is
+  #  received from KDE to change the style used.
+  proc kdeStyleChangeNotification {} {
+    #  puts >>kdeStyleChangeNotification
+    ## This method will be called each time a ClientMessage is received from
+    ## KDE KIPC...
+    ## Our Job is:
+    ##  a) To get the current style from KDE, and
+    ##  b) Apply it.
+    foreach filename [kdeLocate_kdeglobals] {
+      if {[file exists $filename]} {
+        set file [open $filename]
         while {[gets $file line] != -1} {
           set line [string trim $line]
           if {[string match widgetStyle*=* $line]} {
@@ -344,11 +430,27 @@ namespace eval tile::theme::tileqt {
   #  Ths "style" parameter must be a string from the style names returned by
   #  tile::theme::tileqt::availableStyles.
   proc applyStyle {style} {
+    updateColourPalette
     setStyle $style
     updateStyles
     updateLayouts
     event generate {} <<ThemeChanged>>
   };# applyStyle
+
+  ## kdePaletteChangeNotification:
+  #  This procedure will be called from tileqt core each time a message is
+  #  received from KDE to change the palette used.
+  proc kdePaletteChangeNotification {} {
+    #  puts >>kdePaletteChangeNotification
+    kdeStyleChangeNotification
+  };# kdePaletteChangeNotification
+
+  proc kdeGetColourHex {line} {
+    set index [string first = $line]; incr index
+    set value [string range $line $index end]
+    foreach {r g b} [split $value ,] {break}
+    return [format #%02X%02X%02X $r $g $b]
+  };# kdeGetColourHex
 
   ## createThemeConfigurationPanel:
   #  This method will create a configuration panel for the tileqt theme in the
