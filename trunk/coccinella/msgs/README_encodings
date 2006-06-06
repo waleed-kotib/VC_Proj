@@ -128,8 +128,7 @@ set uidc(en) 0
 evalcatalog en.msg
 
 set files [glob *.msg]
-#foreach f $files
-foreach f pl.msg {
+foreach f $files {
     if {$f == "en.msg"} continue
     if {[string match *_new.msg $f]} continue
     set lang [file rootname [file tail $f]]
