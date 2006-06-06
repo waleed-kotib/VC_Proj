@@ -24,6 +24,7 @@
 ::msgcat::mcset es Apply		{Aplicar}
 ::msgcat::mcset es Available		{Disponible}
 ::msgcat::mcset es Away			{Alejado}
+::msgcat::mcset es Back
 ::msgcat::mcset es Binary		{Binario}
 ::msgcat::mcset es Birthday		{Cumpleaños}
 ::msgcat::mcset es Block 		{Bloquear}
@@ -37,6 +38,7 @@
 ::msgcat::mcset es Both			{Ambos}
 ::msgcat::mcset es Buffering		{Buffer}
 ::msgcat::mcset es Cancel		{Cancelar}
+::msgcat::mcset es Coordinates
 ::msgcat::mcset es Change		{Cambiar}
 ::msgcat::mcset es Chat			{Chat}
 ::msgcat::mcset es Choose		{Elegir}
@@ -64,6 +66,7 @@
 ::msgcat::mcset es Document		{Documento}
 ::msgcat::mcset es Done			{Hecho}
 ::msgcat::mcset es Edit			{Editar}
+::msgcat::mcset es Email
 ::msgcat::mcset es Enter		{Entrar}
 ::msgcat::mcset es Error		{Error}
 ::msgcat::mcset es Exit			{Salir}
@@ -92,6 +95,7 @@
 ::msgcat::mcset es Inbox		{Mensajes}
 ::msgcat::mcset es Info			{Información}
 ::msgcat::mcset es Invite		{Invitar}
+::msgcat::mcset es Language
 ::msgcat::mcset es Last			{Último}
 ::msgcat::mcset es Less			{Menos}
 ::msgcat::mcset es Login		{Conectarse}
@@ -414,6 +418,8 @@
 ::msgcat::mcset es mToolbar		{Barra de herramientas}
 ::msgcat::mcset es mNotebook		{Pestañas}
 ::msgcat::mcset es mMinimal		{Reducido}
+::msgcat::mcset es mDisco               {Disco}
+
 
 # Popups.
 ::msgcat::mcset es mMessage     	{Mensaje...}
@@ -490,6 +496,7 @@
 ::msgcat::mcset es {Default Logout Status}	{Desconexión por defecto}
 ::msgcat::mcset es {Default nickname}	        {Nombre de usuario por defecto}
 ::msgcat::mcset es {Default status descriptions} {Mensaje de estado por defecto}
+::msgcat::mcset es {Delete Profile}
 ::msgcat::mcset es {Delete Rule} 		{Eliminar regla}
 ::msgcat::mcset es {Different Passwords}        {Contraseñas distintas}
 ::msgcat::mcset es {Disk Cache}			{Caché}
@@ -515,6 +522,7 @@
 ::msgcat::mcset es {File suffixes}		{Extensión de los archivos}
 ::msgcat::mcset es {File Transfer}		{Transferencia de archivos}
 ::msgcat::mcset es {File Transfer Error}	{Error en la transferencia}
+::msgcat::mcset es {File transfer port}
 ::msgcat::mcset es {First name}			{Nombre}
 ::msgcat::mcset es {Font size}			{Tamaño de la fuente}
 ::msgcat::mcset es {Font weight}		{Grosor de la fuente}
@@ -546,7 +554,7 @@
 ::msgcat::mcset es {Is server up}		{Conectado}
 ::msgcat::mcset es {Item Inspector}             {Inspector de Propiedades}
 ::msgcat::mcset es {Item Options}  	        {Propiedades del elemento}
-::msgcat::mcset es {Item type}		        {Tipo de elemento}
+::msgcat::mcset es {Item Type}		        {Tipo de elemento}
 ::msgcat::mcset es {Jabber address}		{Dirección Jabber}
 ::msgcat::mcset es {Jabber Client}		{Cliente Jabber}
 ::msgcat::mcset es {Jabber Server}		{Servidor Jabber}
@@ -581,6 +589,7 @@
 ::msgcat::mcset es {New Message}		{Nuevo mensaje}
 ::msgcat::mcset es {New Nickname}		{Nuevo usuario}
 ::msgcat::mcset es {New password}		{Nueva contraseña}
+::msgcat::mcset es {New Profile}
 ::msgcat::mcset es {New Rule} 			{Nueva regla}
 ::msgcat::mcset es {New Topic}			{Nuevo tópico}
 ::msgcat::mcset es {New shortcut}		{Nuevo atajo}
@@ -593,9 +602,12 @@
 ::msgcat::mcset es {No Available} 		{No disponible}
 ::msgcat::mcset es {No Inbox}			{Sin buzón}
 ::msgcat::mcset es {No Printing}		{Sin impresión}
+::msgcat::mcset es {No registered history for %s}
+::msgcat::mcset es {No Restriction}
 ::msgcat::mcset es {Not Available}		{No disponible}
 ::msgcat::mcset es {Not available}		{No disponible}
 ::msgcat::mcset es {Not Connected}		{Desconectado}
+::msgcat::mcset es {Not older than}
 ::msgcat::mcset es {Once per session}		{Una vez por sesión}
 ::msgcat::mcset es {One hour} 			{Una hora}
 ::msgcat::mcset es {One day} 			{Un día}
@@ -612,6 +624,7 @@
 ::msgcat::mcset es {Personal URL}		{URL personal}
 ::msgcat::mcset es {Pick Directory}		{Elegir un directorio}
 ::msgcat::mcset es {Pick File}			{Elegir un archivo}
+::msgcat::mcset es {Pick Image File}
 ::msgcat::mcset es {Pick skin}			{Seleccionar tema}
 ::msgcat::mcset es {Plugin Info}		{Información sobre el plugin}
 ::msgcat::mcset es {Plugin Control}		{Control del plugin}
@@ -624,6 +637,7 @@
 ::msgcat::mcset es {Proxy Port}		        {Puerto del Proxy}
 ::msgcat::mcset es {Proxy Server}	        {Servidor Proxy}
 ::msgcat::mcset es {Proxy Setup}		{Configuración del proxy}
+::msgcat::mcset es {Public Jabber Servers}
 ::msgcat::mcset es {Put File Error}		{Error al insertar el archivo}
 ::msgcat::mcset es {Put Image/Movie}		{Insertar imagen/vídeo}
 ::msgcat::mcset es {Reject receive}		{Rechazar la recepción}
@@ -634,6 +648,7 @@
 ::msgcat::mcset es {Register Now}		{Registrarse ahora}
 ::msgcat::mcset es {Register Service}		{Servicio de registro}
 ::msgcat::mcset es {Remove Item}		{Borrar el objeto}
+::msgcat::mcset es {Remove Photo}
 ::msgcat::mcset es {Room name}			{Nombre de la sala}
 ::msgcat::mcset es {Room name (optional)}	{Nombre de la sala (opcional)}
 ::msgcat::mcset es {Roster & Services}		{Contactos y servicios}
@@ -648,6 +663,7 @@
 ::msgcat::mcset es {Search Specifications}	{Buscar especificaciones}
 ::msgcat::mcset es {Select a new nickname} 	{Seleccione un nuevo nombre de usuario}
 ::msgcat::mcset es {Select Font}		{Elegir fuente}
+::msgcat::mcset es {Select Photo}
 ::msgcat::mcset es {Send File}			{Enviar archivo}
 ::msgcat::mcset es {Send Live}			{Enviar en directo}
 ::msgcat::mcset es {Server Info}		{Información sobre el servidor}
@@ -692,6 +708,7 @@
 ::msgcat::mcset es {User is offline}		{El usuario está desconectado}
 ::msgcat::mcset es {User is online}		{El usuario está conectado}
 ::msgcat::mcset es {User Profiles}		{Perfiles de usuario}
+::msgcat::mcset es {Users Avatar}
 ::msgcat::mcset es {User's status changed}	{El estado del usuario ha cambiado}
 ::msgcat::mcset es {Username & Password}	{Nombre y contraseña}
 ::msgcat::mcset es {vCard Info}			{Información de la tarjeta}
@@ -910,6 +927,11 @@
 ::msgcat::mcset es jamessgcnoroomnick           {Debe de introducir un nombre de usuario.}
 ::msgcat::mcset es jamessnorooms                {Problemas al buscar una sala en %s.}
 
+# Translate
+::msgcat::mcset es jamessnofiletrpt {We couldn't see that %s supports file transfer.}
+::msgcat::mcset es jamessfiletrpterr {Failed to get file %s from %s: %s}
+
+
 ::msgcat::mcset es openquicktime		{Abrir el streaming QuickTime}
 ::msgcat::mcset es writeurl			{Escribir la URL o elegir el atajo : }
 ::msgcat::mcset es openquicktimeurlmsg		{Abrir la URL de un archivo SDP con la extensión .mov para hacer streaming usando QuickTime. Puede ser audio (radio) o video (TV).\
@@ -1116,9 +1138,11 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jaloginuser  {Introduzca su usuario y password para entrar en %s.}
 ::msgcat::mcset es jaregnewwith {Desea registrar una cuenta nueva en %s.}
 ::msgcat::mcset es jaregisterexserv {Registro con el servicio %s. Debe pulsar el boton 'Obtener' si la informacion de registro no llega de forma automatica.}
-
 ::msgcat::mcset es jaseliconset {Seleccione el juego de iconos para cada grupo. Algun grupo podria no estar seleccionado.}
-::msgcat::mcset en jachathist   {Muestra u oculta el historial del chat}
+::msgcat::mcset es jawaitdisco {Waiting for disco result...}
+::msgcat::mcset es jachathist   {Muestra u oculta el historial del chat}
+
+
 ::msgcat::mcset es {InfoRoomDesc}       {En esta ventana puede cambiar las opciones así como administrarr
  la sala\
       Su perfil y afiliación determina los privilegios con los que puede actuar\

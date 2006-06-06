@@ -569,6 +569,7 @@
 ::msgcat::mcset en {Multi Connect}
 ::msgcat::mcset en {My Avatar}
 ::msgcat::mcset en {My Status}
+::msgcat::mcset en {My vCard}
 ::msgcat::mcset en {Name of list}
 ::msgcat::mcset en {Network Error}
 ::msgcat::mcset en {Network Setup}
@@ -587,15 +588,14 @@
 ::msgcat::mcset en {New shortcut}
 ::msgcat::mcset en {New User}
 ::msgcat::mcset en {New Version}
-::msgcat::mcset en {My vCard}
 ::msgcat::mcset en {NAT Address}
 ::msgcat::mcset en {Nick name}
 ::msgcat::mcset en {No Address}
 ::msgcat::mcset en {No Available}
 ::msgcat::mcset en {No Inbox}
 ::msgcat::mcset en {No Printing}
-::msgcat::mcset en {No Restriction}
 ::msgcat::mcset en {No registered history for %s}
+::msgcat::mcset en {No Restriction}
 ::msgcat::mcset en {Not Available}
 ::msgcat::mcset en {Not available}
 ::msgcat::mcset en {Not Connected}

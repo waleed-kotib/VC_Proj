@@ -128,7 +128,8 @@ set uidc(en) 0
 evalcatalog en.msg
 
 set files [glob *.msg]
-foreach f $files {
+#foreach f $files
+foreach f pl.msg {
     if {$f == "en.msg"} continue
     if {[string match *_new.msg $f]} continue
     set lang [file rootname [file tail $f]]
@@ -150,7 +151,12 @@ foreach f $files {
     foreach uid [lsort -integer $missinguids] {
         set key  $table(iuid,en,$uid)
 	set str  $table(str,en,$key)
-        puts "# [list ::msgcat::mcset $lang $key $str]"
+        #puts "# [list ::msgcat::mcset $lang $key $str]"
+	if {$str eq ""} {
+	    puts "[list ::msgcat::mcset $lang $key]"
+	} else {
+	    puts "[list ::msgcat::mcset $lang $key $str]"
+	}
     }
 
     # If you want to create "patched" catalogs.
