@@ -145,9 +145,9 @@
 ::msgcat::mcset en Reply
 ::msgcat::mcset en Resource
 ::msgcat::mcset en Restart
-::msgcat::mcset en Rosticons
 ::msgcat::mcset en Revoke
 ::msgcat::mcset en Role
+::msgcat::mcset en Rosticons
 ::msgcat::mcset en Room
 ::msgcat::mcset en Roster
 ::msgcat::mcset en Save
@@ -260,6 +260,7 @@
 ::msgcat::mcset en false            False
 ::msgcat::mcset en true             True
 
+# dashes
 ::msgcat::mcset en none             None
 ::msgcat::mcset en dotted           Dotted
 ::msgcat::mcset en dash-dotted      Dash-dotted
