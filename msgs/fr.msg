@@ -11,13 +11,17 @@
 ::msgcat::mcset fr Active		{Actif}
 ::msgcat::mcset fr Add			{Ajouter}
 ::msgcat::mcset fr Address		{Adresse}
+::msgcat::mcset fr Admin
+::msgcat::mcset fr admin
 ::msgcat::mcset fr Advanced		{Avancé}
+::msgcat::mcset fr Affiliation
 ::msgcat::mcset fr Agents		{Agents}
 ::msgcat::mcset fr Allow		{Autoriser}
 ::msgcat::mcset fr Appearance           {Apparence}
 ::msgcat::mcset fr Apply		{Appliquer}
 ::msgcat::mcset fr Available		{Disponible}
 ::msgcat::mcset fr Away			{Absent}
+::msgcat::mcset fr Back
 ::msgcat::mcset fr Binary		{Binaire}
 ::msgcat::mcset fr Birthday		{Anniversaire}
 ::msgcat::mcset fr Block		{Bloquer}
@@ -36,11 +40,13 @@
 ::msgcat::mcset fr Clear		{Nettoyer}
 ::msgcat::mcset fr Client		{Client}
 ::msgcat::mcset fr Close		{Fermer}
+::msgcat::mcset fr Codecs
 ::msgcat::mcset fr Conference		{Conférence}
 ::msgcat::mcset fr Connect		{Se connecter}
 ::msgcat::mcset fr Connection		{Connexion}
 ::msgcat::mcset fr Contact		{Contact}
 ::msgcat::mcset fr Contacts		{Contacts}
+::msgcat::mcset fr Coordinates
 ::msgcat::mcset fr Country		{Pays}
 ::msgcat::mcset fr Create		{Créer}
 ::msgcat::mcset fr Customization	{Affichage}
@@ -50,14 +56,19 @@
 ::msgcat::mcset fr Deny			{Rejeter}
 ::msgcat::mcset fr Department		{Département}
 ::msgcat::mcset fr Description		{Description}
+::msgcat::mcset fr Devices
 ::msgcat::mcset fr Drawing		{Dessin}
 ::msgcat::mcset fr Document		{Document}
 ::msgcat::mcset fr Done			{Fait}
 ::msgcat::mcset fr Edit			{Éditer}
+::msgcat::mcset fr Email
 ::msgcat::mcset fr Enter		{Entrer}
 ::msgcat::mcset fr Error		{Erreur}
 ::msgcat::mcset fr Exit			{Sortie}
 ::msgcat::mcset fr File			{Fichier}
+::msgcat::mcset fr File...              {Fichier...}
+::msgcat::mcset fr Filter
+::msgcat::mcset fr Filters
 ::msgcat::mcset fr Finish		{Terminer}
 ::msgcat::mcset fr Finished		{Terminé}
 ::msgcat::mcset fr First		{Premier}
@@ -67,6 +78,7 @@
 ::msgcat::mcset fr General		{Général}
 ::msgcat::mcset fr Get			{Recevoir}
 ::msgcat::mcset fr Getting		{Réception}
+::msgcat::mcset fr Grant
 ::msgcat::mcset fr Group		{Groupe}
 ::msgcat::mcset fr Groupchat            {Groupe de discussion}
 ::msgcat::mcset fr Handling		{Ergonomie}
@@ -78,12 +90,17 @@
 ::msgcat::mcset fr Inbox		{Messages}
 ::msgcat::mcset fr Info			{Infos}
 ::msgcat::mcset fr Invite		{Inviter}
+::msgcat::mcset fr Language
 ::msgcat::mcset fr Last			{Dernier}
 ::msgcat::mcset fr Less			{Moins}
 ::msgcat::mcset fr Login		{Se connecter}
 ::msgcat::mcset fr Logout		{Se déconnecter}
+::msgcat::mcset fr Member
+::msgcat::mcset fr member
 ::msgcat::mcset fr Message		{Message}
 ::msgcat::mcset fr Middle		{Milieu}
+::msgcat::mcset fr Moderator
+::msgcat::mcset fr moderator
 ::msgcat::mcset fr Moderators		{Modérateurs}
 ::msgcat::mcset fr More			{Plus}
 ::msgcat::mcset fr Name			{Nom}
@@ -102,6 +119,8 @@
 ::msgcat::mcset fr Online		{Connecté}
 ::msgcat::mcset fr Open			{Ouvrir}
 ::msgcat::mcset fr Options		{Options}
+::msgcat::mcset fr Owner
+::msgcat::mcset fr owner
 ::msgcat::mcset fr Participants		{Participants}
 ::msgcat::mcset fr Password		{Mot de passe}
 ::msgcat::mcset fr Pause		{Pause}
@@ -121,14 +140,18 @@
 ::msgcat::mcset fr Quit?		{Quitter ?}
 ::msgcat::mcset fr Quote		{Citer}
 ::msgcat::mcset fr Reason 		{Raison}
+::msgcat::mcset fr Refresh
 ::msgcat::mcset fr Register		{S'enregistrer}
 ::msgcat::mcset fr Remaining		{Restant}
 ::msgcat::mcset fr Remove		{Enlever}
 ::msgcat::mcset fr Reply		{Répondre}
 ::msgcat::mcset fr Resource		{Ressources}
 ::msgcat::mcset fr Restart		{Redémarrer}
+::msgcat::mcset fr Revoke
+::msgcat::mcset fr Role
 ::msgcat::mcset fr Room			{Salon}
 ::msgcat::mcset fr Roster		{Contacts}
+::msgcat::mcset fr Rosticons
 ::msgcat::mcset fr Save			{Enregistrer}
 ::msgcat::mcset fr Search		{Chercher}
 ::msgcat::mcset fr Select               {Choisir}
@@ -144,6 +167,7 @@
 ::msgcat::mcset fr Sounds		{Sons}
 ::msgcat::mcset fr Specifications	{Spécifications}
 ::msgcat::mcset fr Speech		{Dialoguer}
+::msgcat::mcset fr Standard
 ::msgcat::mcset fr State		{État}
 ::msgcat::mcset fr State/Region		{État/Région}
 ::msgcat::mcset fr Stop			{Arrêter}
@@ -167,6 +191,8 @@
 ::msgcat::mcset fr Username		{Nom}
 ::msgcat::mcset fr Value		{Valeur}
 ::msgcat::mcset fr Visitors		{Visitors}
+::msgcat::mcset fr Voice
+::msgcat::mcset fr voice
 ::msgcat::mcset fr Warning		{Attention}
 ::msgcat::mcset fr Welcome              {Bienvenue}
 ::msgcat::mcset fr Whiteboard		{Tableau}
@@ -174,6 +200,68 @@
 ::msgcat::mcset fr Work			{Travail}
 ::msgcat::mcset fr Yes			{Oui}
 ::msgcat::mcset fr yes			{oui}
+
+# Translate
+# Canvas item options, names and values.
+# Names:
+::msgcat::mcset fr anchor           Anchor
+::msgcat::mcset fr arrow            Arrow
+::msgcat::mcset fr arrowshape       {Arrow Shape}
+::msgcat::mcset fr capstyle         {Cap Style}
+::msgcat::mcset fr coordinates      Coordinates
+::msgcat::mcset fr dash             Dash
+::msgcat::mcset fr file             File
+::msgcat::mcset fr fill             Fill
+::msgcat::mcset fr fontfamily       {Font Familiy}
+::msgcat::mcset fr fontsize         {Font Size}
+::msgcat::mcset fr fontweight       {Font Weight}
+::msgcat::mcset fr image            Image
+::msgcat::mcset fr joinstyle        {Join Style}
+::msgcat::mcset fr justify          Justify
+::msgcat::mcset fr outline          Outline
+::msgcat::mcset fr outlinestipple   {Outline Stipple}
+::msgcat::mcset fr smooth           Smooth
+::msgcat::mcset fr stipple          Stipple
+::msgcat::mcset fr tags             Tags
+::msgcat::mcset fr text             Text
+::msgcat::mcset fr width            Width
+
+# Values (see item inspector to see what they mean):
+# anchor
+::msgcat::mcset fr n          N
+::msgcat::mcset fr ne         NE
+::msgcat::mcset fr e          E
+::msgcat::mcset fr se         SE
+::msgcat::mcset fr s          S
+::msgcat::mcset fr sw         SW
+::msgcat::mcset fr w          W
+::msgcat::mcset fr nw         NW
+::msgcat::mcset fr center     Center
+# arrow
+::msgcat::mcset fr last             Last
+::msgcat::mcset fr first            First
+::msgcat::mcset fr both             Both
+
+::msgcat::mcset fr transparent      Transparent
+::msgcat::mcset fr gray75           {Gray 75%}
+::msgcat::mcset fr gray50           {Gray 50%}
+::msgcat::mcset fr gray25           {Gray 25%}
+::msgcat::mcset fr gray12           {Gray 12%}
+
+::msgcat::mcset fr round            Round
+::msgcat::mcset fr miter            Miter
+::msgcat::mcset fr bevel            Bevel
+::msgcat::mcset fr butt             Butt
+::msgcat::mcset fr projecting       Projecting
+
+::msgcat::mcset fr normal           Normal
+::msgcat::mcset fr bold             Bold
+::msgcat::mcset fr italic           Italic
+
+::msgcat::mcset fr left             Left
+::msgcat::mcset fr right            Right
+::msgcat::mcset fr false            False
+::msgcat::mcset fr true             True
 
 # Tirets.
 ::msgcat::mcset fr none			{Aucun}
@@ -322,6 +410,12 @@
 ::msgcat::mcset fr mTimeCode            {}
 ::msgcat::mcset fr mUserInfo            {Infos utilisateur...}
 
+# Translate
+::msgcat::mcset fr mToolbar             {Toolbar}
+::msgcat::mcset fr mNotebook            {Notebook}
+::msgcat::mcset fr mMinimal             {Minimal}
+::msgcat::mcset fr mDisco               {Disco}
+
 
 # Popups.
 ::msgcat::mcset fr mMessage     	{Message...}
@@ -347,6 +441,15 @@
 ::msgcat::mcset fr mIgnore         	{Ignorer}
 ::msgcat::mcset fr mEditBookmarks	{Éditer les marque-pages...}
 
+# Translate
+::msgcat::mcset fr mSort                {Sort}
+::msgcat::mcset fr mIncreasing          {Increasing}
+::msgcat::mcset fr mDecreasing          {Decreasing}
+::msgcat::mcset fr mStyle               {Style}
+::msgcat::mcset fr mCall                {Call}
+::msgcat::mcset fr mJiveCall            {Call}
+::msgcat::mcset fr mJiveForward         {Forward Call}
+::msgcat::mcset fr mBackgroundImage     {Background Image}
 
 
 # Courts textes uniquement. Anglais pour les clés de la base de données.
@@ -375,6 +478,8 @@
 ::msgcat::mcset fr {Basic Info}			{Informations de bases}
 ::msgcat::mcset fr {Block JID}			{Bloquage JID}
 ::msgcat::mcset fr {Bookmark this room}		{Ajouter ce salon à vos marque-pages}
+::msgcat::mcset fr {Broken Image}
+::msgcat::mcset fr {Buddy Pouncing}
 ::msgcat::mcset fr {Built in server port}	{Port du serveur interne}
 ::msgcat::mcset fr {Cache folder}		{Répertoire du cache}
 ::msgcat::mcset fr {Canvas Size}		{Taille du dessin}
@@ -384,13 +489,17 @@
 ::msgcat::mcset fr {Company Name}		{Nom de l'entreprise}
 ::msgcat::mcset fr {Component Info}		{Infos sur la fonctionnalité}
 ::msgcat::mcset fr {Conference server}		{Serveur de la conférence}
+::msgcat::mcset fr {Connect using HTTP}
 ::msgcat::mcset fr {Contact Type}		{Type de contact}
 ::msgcat::mcset fr {Create Room}		{Créer un salon}
 ::msgcat::mcset fr {Default group}		{Groupe par défaut}
 ::msgcat::mcset fr {Default Logout Status}	{Déconnexion par défaut}
+::msgcat::mcset fr {Default nickname}
 ::msgcat::mcset fr {Default status descriptions} {Description du statut par défaut}
+::msgcat::mcset fr {Delete Profile}
 ::msgcat::mcset fr {Delete Rule}		{Règle de suppression}
 ::msgcat::mcset fr {Disk Cache}			{Cache}
+::msgcat::mcset fr {Disco method}
 ::msgcat::mcset fr {Different Passwords}        {Différents mots de passe}
 ::msgcat::mcset fr {Do Not Disturb}		{Ne pas déranger}
 ::msgcat::mcset fr {Edit Fonts}			{Éditer les polices}
@@ -413,6 +522,7 @@
 ::msgcat::mcset fr {File suffixes}		{Extension des fichiers}
 ::msgcat::mcset fr {File Transfer}		{Transfert de fichiers}
 ::msgcat::mcset fr {File Transfer Error}	{Erreur dans le transfert}
+::msgcat::mcset fr {File transfer port}
 ::msgcat::mcset fr {First name}			{Prénom}
 ::msgcat::mcset fr {Font size}			{Taille de la police}
 ::msgcat::mcset fr {Font weight}		{Épaisseur de la police}
@@ -426,18 +536,23 @@
 ::msgcat::mcset fr {History length}		{Longueur de l'historique}
 ::msgcat::mcset fr {Host name}			{Nom de domaine}
 ::msgcat::mcset fr {HTTP port}			{Port HTTP}
+::msgcat::mcset fr {>>Import>>}
 ::msgcat::mcset fr {Import Iconset...}		{Importer un thème d'icônes}
 ::msgcat::mcset fr {Import using}		{Importer en utilisant...}
 ::msgcat::mcset fr {Import/Remove fonts}	{Importer/Supprimer polices}
 ::msgcat::mcset fr {Incoming Message}		{Message entrant}
 ::msgcat::mcset fr {Incoming Messages}		{Messages entrants}
 ::msgcat::mcset fr {Incoming Presence}		{Connexion en cours}
+::msgcat::mcset fr {Info Room}
 ::msgcat::mcset fr {Inspect Associations}	{Inspecter les associations}
 ::msgcat::mcset fr {Invite User}		{Inviter un utilisateur}
 ::msgcat::mcset fr {IP address}			{Adresse IP}
 ::msgcat::mcset fr {Is connected}		{Connecté}
 ::msgcat::mcset fr {Is safe}			{Sûr}
 ::msgcat::mcset fr {Is server up}		{Connecté}
+::msgcat::mcset fr {Item Inspector}
+::msgcat::mcset fr {Item Options}
+::msgcat::mcset fr {Item Type}
 ::msgcat::mcset fr {Jabber address}		{Adresse Jabber}
 ::msgcat::mcset fr {Jabber Client}		{Client Jabber}
 ::msgcat::mcset fr {Jabber Server}		{Serveur Jabber}
@@ -453,8 +568,12 @@
 ::msgcat::mcset fr {Logged out}                 {Déconnecter}
 ::msgcat::mcset fr {Login as invisible}		{Se connecter avec le statut "Invisible"}
 ::msgcat::mcset fr {Mailbox Error}		{Erreur de boîte aux lettres}
+::msgcat::mcset fr {Make new text item for each line}
+::msgcat::mcset fr {MIDI Player}
 ::msgcat::mcset fr {MIME type}			{Type MIME}
+::msgcat::mcset fr {Movie Options}
 ::msgcat::mcset fr {Multi Connect}		{Connexions multiples}
+::msgcat::mcset fr {My Avatar}
 ::msgcat::mcset fr {My Status}			{Mon statut}
 ::msgcat::mcset fr {Name of list}		{Nom de liste}
 ::msgcat::mcset fr {Network Error}		{Erreur de Réseau}
@@ -468,6 +587,7 @@
 ::msgcat::mcset fr {New Message}		{Nouveau message}
 ::msgcat::mcset fr {New Nickname}		{Nouveau pseudo}
 ::msgcat::mcset fr {New password}		{Nouveau mot de passe}
+::msgcat::mcset fr {New Profile}
 ::msgcat::mcset fr {New Rule}			{Nouvelle règle}
 ::msgcat::mcset fr {New Topic}			{Nouveau sujet}
 ::msgcat::mcset fr {New shortcut}		{Nouveau raccourci}
@@ -480,6 +600,7 @@
 ::msgcat::mcset fr {No Available}		{Aucun disponible}
 ::msgcat::mcset fr {No Inbox}			{Pas de message entrant}
 ::msgcat::mcset fr {No Printing}		{Pas d'impression}
+::msgcat::mcset fr {No registered history for %s}
 ::msgcat::mcset fr {No Restriction}		{Pas de restriction}
 ::msgcat::mcset fr {Not Available}		{Indisponible}
 ::msgcat::mcset fr {Not available}		{Indisponible}
@@ -498,6 +619,7 @@
 ::msgcat::mcset fr {Personal URL}		{URL personnelle}
 ::msgcat::mcset fr {Pick Directory}		{Choisir un dossier}
 ::msgcat::mcset fr {Pick File}			{Choisir un fichier}
+::msgcat::mcset fr {Pick Image File}
 ::msgcat::mcset fr {Pick skin}			{Choisir un thème}
 ::msgcat::mcset fr {Plugin Info}		{Infos sur le plugin}
 ::msgcat::mcset fr {Plugin Control}		{Contrôle du plugin}
@@ -507,7 +629,10 @@
 ::msgcat::mcset fr {Presence Error}		{Erreur de statut}
 ::msgcat::mcset fr {Privacy List}		{Liste personnelle}
 ::msgcat::mcset fr {Profile Name}               {Nom du profil}
+::msgcat::mcset fr {Proxy Port}
+::msgcat::mcset fr {Proxy Server}
 ::msgcat::mcset fr {Proxy Setup}		{Configuration du proxy}
+::msgcat::mcset fr {Public Jabber Servers}
 ::msgcat::mcset fr {Put File Error}		{Erreur lors de l'insertion du fichier}
 ::msgcat::mcset fr {Put Image/Movie}		{Insérer image/vidéo}
 ::msgcat::mcset fr {Reject receive}		{Rejeter la réception}
@@ -518,6 +643,7 @@
 ::msgcat::mcset fr {Register Now}		{S'enregistrer maintenant}
 ::msgcat::mcset fr {Register Service}		{Service d'enregistrement}
 ::msgcat::mcset fr {Remove Item}		{Supprimer l'outil}
+::msgcat::mcset fr {Remove Photo}
 ::msgcat::mcset fr {Room name}			{Nom du salon}
 ::msgcat::mcset fr {Room name (optional)}	{Nom du salon (facultatif)}
 ::msgcat::mcset fr {Roster & Services}		{Contacts & services}
@@ -532,6 +658,7 @@
 ::msgcat::mcset fr {Search Specifications}	{Chercher les spécifications}
 ::msgcat::mcset fr {Select a new nickname}	{Choisir un nouveau pseudo}
 ::msgcat::mcset fr {Select Font}		{Choisir police}
+::msgcat::mcset fr {Select Photo}
 ::msgcat::mcset fr {Send File}			{Envoyer fichier}
 ::msgcat::mcset fr {Send Live}			{Envoyer live}
 ::msgcat::mcset fr {Server Info}		{Infos sur le serveur}
@@ -545,7 +672,9 @@
 ::msgcat::mcset fr {Setup Assistant}		{Assistant de configuration}
 ::msgcat::mcset fr {Slide Show}			{Diaporama}
 ::msgcat::mcset fr {Slide Show Folder}		{Dossier des Diaporamas}
+::msgcat::mcset fr {Smooth freehand strokes}
 ::msgcat::mcset fr {Software Update}		{Mise-à-jour du logiciel}
+::msgcat::mcset fr {Sound Set}
 ::msgcat::mcset fr {Sounds & Speech}		{Sons & langage}
 ::msgcat::mcset fr {Start Chat}			{Lancer la discussion}
 ::msgcat::mcset fr {Status message}		{Message du statut}
@@ -565,18 +694,38 @@
 ::msgcat::mcset fr {Type of File}		{Type de fichier}
 ::msgcat::mcset fr {Unknown: Prompt user}	{Inconnu : Nom d'utilisateur}
 ::msgcat::mcset fr {Url of homepage}		{URL de la page de démarrage}
+::msgcat::mcset fr {Use proxy}
+::msgcat::mcset fr {Use Secure Connection}
 ::msgcat::mcset fr {Use SSL for security}	{Utiliser SSL pour la sécurité}
+::msgcat::mcset fr {Use TLS and SASL authentization}
+::msgcat::mcset fr {Use TLS on separate port (old)}
 ::msgcat::mcset fr {User is}			{L'utilisateur est}
 ::msgcat::mcset fr {User is offline}		{L'utilisateur est déconnecté}
 ::msgcat::mcset fr {User is online}		{L'utilisateur est connecté}
 ::msgcat::mcset fr {User Profiles}		{Profils d'utilisateur}
 ::msgcat::mcset fr {User's status changed}	{Le statut de l'utilisateur a changé}
+::msgcat::mcset fr {Users Avatar}
 ::msgcat::mcset fr {Username & Password}	{Nom & mot de passe}
 ::msgcat::mcset fr {vCard Info}			{Infos sur la carte de visite}
 ::msgcat::mcset fr {Version Info}		{Infos sur la version}
 ::msgcat::mcset fr {Whiteboard fonts}		{Polices du tableau}
 ::msgcat::mcset fr {Writing file}		{Écriture du fichier}
 ::msgcat::mcset fr {Groupchat presence change}	{Changement de statut sur un salon}
+
+# Translate
+# Rooms.
+::msgcat::mcset fr {Kick Participant}
+::msgcat::mcset fr {Ban Participant}
+::msgcat::mcset fr {Configure Room}
+::msgcat::mcset fr {Destroy Room}
+::msgcat::mcset fr {Edit Lists}
+::msgcat::mcset fr {Edit the privilege to speak in the room, the voice.}
+::msgcat::mcset fr {Edit the ban list}
+::msgcat::mcset fr {Edit the member list}
+::msgcat::mcset fr {Edit the moderator list}
+::msgcat::mcset fr {Edit the admin list}
+::msgcat::mcset fr {Edit the owner list}
+
 
 # Time intervals.
 ::msgcat::mcset fr {Ten seconds}		{Dix secondes}
@@ -585,6 +734,32 @@
 ::msgcat::mcset fr {One hour} 			{Une heure}
 ::msgcat::mcset fr {One day} 			{Un jour}
 ::msgcat::mcset fr {One week}	 		{Une semaine}
+
+
+# Translate
+# Language names.
+::msgcat::mcset fr {Danish} 
+::msgcat::mcset fr {Dutch} 
+::msgcat::mcset fr {English} 
+::msgcat::mcset fr {French} 
+::msgcat::mcset fr {German} 
+::msgcat::mcset fr {Polish} 
+::msgcat::mcset fr {Russian} 
+::msgcat::mcset fr {Spanish} 
+::msgcat::mcset fr {Swedish} 
+
+# Translate
+# Same languge names but with their native names.
+# See the other catalogs to get these.
+::msgcat::mcset fr nativeDanish     Dansk
+::msgcat::mcset fr nativeDutch      Nederlands
+::msgcat::mcset fr nativeEnglish    English
+::msgcat::mcset fr nativeFrench     Français
+::msgcat::mcset fr nativeGerman     Deutsch
+::msgcat::mcset fr nativePolish 
+::msgcat::mcset fr nativeRussian 
+::msgcat::mcset fr nativeSpanish    Castellano
+::msgcat::mcset fr nativeSwedish    Svenska 
 
 
 
@@ -750,6 +925,9 @@
 ::msgcat::mcset fr jamessgcinvite               {Vous avez été invité dans le salon %s par %s. Voulez-vous y aller ?}
 ::msgcat::mcset fr jamessnorooms		{Impossible de trouver un salon sur %s.}
 
+# Translate
+::msgcat::mcset fr jamessnofiletrpt             {We couldn't see that %s supports file transfer.}
+::msgcat::mcset fr jamessfiletrpterr            {Failed to get file %s from %s: %s}
 
 
 ::msgcat::mcset fr openquicktime		{Ouvrir le streaming QuickTime}
@@ -759,6 +937,8 @@
 ::msgcat::mcset fr printunixcmd                 {Commande d'impression, peut être changée}
 ::msgcat::mcset fr enterpassword                {Entrez le mot de passe pour le compte "%s"}
 
+# Translate
+::msgcat::mcset fr wblockitem                   {Lock this item from being edited}
 
 
 ::msgcat::mcset fr httptrptok                   {Fin du télachargement du fichier %s}
@@ -874,6 +1054,10 @@ que les polices standard (Times, Helvetica ou Courier), vous devez vous assurer 
 ::msgcat::mcset fr prefssresize {Redimensionner automatiquement le dessin pour l'ajuster à l'image}
 
 #--- Translate!
+::msgcat::mcset fr prefavashare {Share this avatar with other users}
+::msgcat::mcset fr prefproxymsg {Usage of the Http proxy is determined by each profile settings. File transfers wont work if you use Http proxy!}
+::msgcat::mcset fr prefproxyexc {Exclude addresses (* as wildcard)}
+
 ::msgcat::mcset fr prefdrivesame {Always store user preferences on same drive as program}
 ::msgcat::mcset fr prefdriwsame  {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible.\
   Do you want to continue?}
@@ -950,6 +1134,13 @@ namespace eval ::EditShortcuts:: {
 
 #--- Translate ---
 ::msgcat::mcset fr jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
+::msgcat::mcset fr jaloginuser {Enter your username and password to login to %s.}
+::msgcat::mcset fr jaregnewwith {Do you want to register a new account with %s.}
+::msgcat::mcset fr jaregisterexserv {Register with the service %s. You may need to press the Get button if not registration info obtained automatically.}
+::msgcat::mcset fr jachathist {Show or hide the chat history}
+::msgcat::mcset fr jawaitdisco {Waiting for disco result...}
+
+::msgcat::mcset fr InfoRoomDesc {This dialog makes available a number of options and actions for a room. Your role and affiliation determines your privilege to act. Further restrictions may exist depending on specific room configuration.}
 #--- Translate ---
 
 # Assistant de configuration :
@@ -966,6 +1157,24 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr sufinmsg	{C'est tout ! Quoi qu'il en soit, soyez gentil avec l'insecte ;-)}
 ::msgcat::mcset fr suheadtxt	{Assistant de configuration de Coccinella}
 
+# Translate
+::msgcat::mcset fr supubserv    {Get list of public and open Jabber servers}
+::msgcat::mcset fr suservlist   {List of open Jabber servers}
+
+# Groupchat:
+::msgcat::mcset fr mucErrEnter      {We got an error when entering room "%s".}
+::msgcat::mcset fr mucErrCode       {The error code is %s: %s}
+::msgcat::mcset fr mucErrEnterTitle {Error Enter Room}
+::msgcat::mcset fr mucErrInvite     {Invitation to %s to join room %s failed.}
+::msgcat::mcset fr mucErrInviteCode {Error message: %s}
+::msgcat::mcset fr mucInviteText    {You have received an invitation from %s to join a groupchat in the room %s.}
+::msgcat::mcset fr mucInviteReason  {The reason: %s}
+::msgcat::mcset fr mucInvitePass    {The password "%s" is needed for entry.}
+::msgcat::mcset fr mucInviteQuest   {Do you want to join right away?}
+::msgcat::mcset fr mucInvite        {Invitation}
+::msgcat::mcset fr mucDestroy       {You are about to destroy the room "%s". Optionally you may give any present room participants an alternative room JID and a reason.}
+::msgcat::mcset fr mucIQError       {We received an error when interaction with the room "%s": %s}
+::msgcat::mcset fr mucChat2ConfInv  {Converting Chat into Conference}
 
 
 ::msgcat::mcset fr vcardget	{Chargement de la carte de visite de l'utilisateur %s.. En attente de la réponse du serveur...}
@@ -976,7 +1185,15 @@ namespace eval ::EditShortcuts:: {
 
 ::msgcat::mcset fr autoupdatenot        {Ne pas vérifier automatiquement les mises-à-jour}
 ::msgcat::mcset fr oobmsg               {Laisser l'utilisateur %s télécharger un de vos fichiers sur le serveur. La description est facultative.}
-::msgcat::mcset fr chatcompreply        {%s rédige une réponse}
+
+# Translate
+# Composing events
+::msgcat::mcset fr chatcompreply      {%s rédige une réponse}
+::msgcat::mcset fr chatcompactive     {%s is on the chat}
+::msgcat::mcset fr chatcompcomposing  {%s is composing a reply}
+::msgcat::mcset fr chatcomppaused     {%s is thinking what to write}
+::msgcat::mcset fr chatcompinactive   {%s has left the chat for a while}
+::msgcat::mcset fr chatcompgone       {%s has closed the chat}
 
 # Réception de fichiers
 ::msgcat::mcset fr getcontacting   {Contact de %s. En attente d'une réponse...}
@@ -1003,6 +1220,54 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr putended        {Le transfert de %s s'est terminé prématurément.}
 ::msgcat::mcset fr putfinished     {Le fichier "%s" de %s a été reçu.}
 ::msgcat::mcset fr putneterr       {Erreur de transfert lors de la réception de %s.}
+
+# Translate
+# These are specific for phones (VoIP)
+::msgcat::mcset fr phoneMakeCall           {Make a call}
+::msgcat::mcset fr phoneMakeForward        {Forward current call to...}
+::msgcat::mcset fr phoneRing               {Ring, ring...}
+::msgcat::mcset fr phoneRingFrom           {Phone is ringing from %s}
+::msgcat::mcset fr phoneFailedCalling      {Failed calling %s}
+::msgcat::mcset fr phoneDial               {Dial}
+::msgcat::mcset fr phoneNumber             {Number}
+::msgcat::mcset fr phoneDialerCall         {Call to...}
+::msgcat::mcset fr phoneDialerForward      {Forward to...}
+
+::msgcat::mcset fr AddressBook		{Address Book}
+::msgcat::mcset fr newAddressbookDlg	{New address book}
+::msgcat::mcset fr newAddressbook       {New address book}
+::msgcat::mcset fr abName		{Name}
+::msgcat::mcset fr abPhone		{Phone number}
+::msgcat::mcset fr modifyAddressbookDlg {Modify address book}
+::msgcat::mcset fr modifyAddressbook	{Modify address book}
+::msgcat::mcset fr mNewAB		{New}
+::msgcat::mcset fr mModifyAB		{Modify}
+::msgcat::mcset fr mRemoveAB		{Remove}
+
+::msgcat::mcset fr outCall              {Make Call}
+::msgcat::mcset fr notifyCall           {Notify Call}
+::msgcat::mcset fr inboundCall          {Inbound Call}
+::msgcat::mcset fr outboundCall         {Outbound Call}
+::msgcat::mcset fr callAnswer           {Answer}
+::msgcat::mcset fr callHungUp           {Hung Up}
+::msgcat::mcset fr callInfo             {Info}
+::msgcat::mcset fr callVM               {Call VM?}
+
+# Fore some of these generic names could be used?
+::msgcat::mcset fr iaxPhone             {IAX Phone}
+::msgcat::mcset fr iaxPhoneAccount      {IAX Account}
+::msgcat::mcset fr iaxPhoneUser         {User}
+::msgcat::mcset fr iaxPhonePassword     {Password}
+::msgcat::mcset fr iaxPhoneHost         {Host}
+::msgcat::mcset fr iaxPhoneCidNum       {Cid Number}
+::msgcat::mcset fr iaxPhoneCidName      {Cid Name}
+::msgcat::mcset fr iaxPhoneInputDev     {Input Device}
+::msgcat::mcset fr iaxPhoneOutputDev    {Output Device}
+::msgcat::mcset fr iaxPhoneAGC          {AGC}
+::msgcat::mcset fr iaxPhoneAAGC         {AAGC}
+::msgcat::mcset fr iaxPhoneNoise        {Noise}
+::msgcat::mcset fr iaxPhoneComfort      {Comfort}
+::msgcat::mcset fr iaxPhoneCodec        {Codec}
 
 # END --------------------------------------------------------------------------
 

@@ -12,7 +12,10 @@
 ::msgcat::mcset nl Active		{Actief}
 ::msgcat::mcset nl Add			{Toevoegen}
 ::msgcat::mcset nl Address		{Adres}
+::msgcat::mcset nl Admin                {Beheerdersprivileges}
+::msgcat::mcset nl admin                {Beheerdersprivileges}
 ::msgcat::mcset nl Advanced		{Geavanceerd}
+::msgcat::mcset nl Affiliation          {Afilliatie}
 ::msgcat::mcset nl Agents		{Agenten}
 ::msgcat::mcset nl Allow		{Toestaan}
 ::msgcat::mcset nl Appearance   	{Uiterlijk}
@@ -38,11 +41,13 @@
 ::msgcat::mcset nl Clear		{Leegmaken}
 ::msgcat::mcset nl Client		{Chatprogramma}
 ::msgcat::mcset nl Close		{Annuleren}
+::msgcat::mcset nl Codecs
 ::msgcat::mcset nl Conference		{Chatruimte}
 ::msgcat::mcset nl Connect		{Aanmelden}
 ::msgcat::mcset nl Connection		{Verbinding}
 ::msgcat::mcset nl Contact		{Contactpersoon}
 ::msgcat::mcset nl Contacts		{Contactpersonen}
+::msgcat::mcset nl Coordinates
 ::msgcat::mcset nl Country		{Land}
 ::msgcat::mcset nl Create		{Aanmaken}
 ::msgcat::mcset nl Customization	{Varia}
@@ -52,6 +57,7 @@
 ::msgcat::mcset nl Deny			{Weigeren}
 ::msgcat::mcset nl Department		{Afdeling}
 ::msgcat::mcset nl Description		{Notities}
+::msgcat::mcset nl Devices
 ::msgcat::mcset nl Drawing		{Tekening}
 ::msgcat::mcset nl Document		{Document}
 ::msgcat::mcset nl Done			{Klaar}
@@ -61,6 +67,9 @@
 ::msgcat::mcset nl Error		{Fout}
 ::msgcat::mcset nl Exit			{Sluiten}
 ::msgcat::mcset nl File			{Bestand}
+::msgcat::mcset nl File...		{Bestand...}
+::msgcat::mcset nl Filter
+::msgcat::mcset nl Filters
 ::msgcat::mcset nl Finish		{Beëindigen}
 ::msgcat::mcset nl Finished		{Beëindigd}
 ::msgcat::mcset nl First		{Eerste}
@@ -70,6 +79,7 @@
 ::msgcat::mcset nl General		{Algemeen}
 ::msgcat::mcset nl Get			{Ophalen}
 ::msgcat::mcset nl Getting		{Bezig met ophalen van}
+::msgcat::mcset nl Grant                {Verlenen van}
 ::msgcat::mcset nl Group		{Groep}
 ::msgcat::mcset nl Groupchat            {Chatruimte}
 ::msgcat::mcset nl Handling		{Behandeling}
@@ -86,8 +96,12 @@
 ::msgcat::mcset nl Less			{Minder}
 ::msgcat::mcset nl Login		{Aanmelden}
 ::msgcat::mcset nl Logout		{Afmelden}
+::msgcat::mcset nl Member               {Lidmaatschap}
+::msgcat::mcset nl member               {Lidmaatschap}
 ::msgcat::mcset nl Message		{Bericht}
 ::msgcat::mcset nl Middle		{Tussennaam}
+::msgcat::mcset nl Moderator            {Moderatorprivileges}
+::msgcat::mcset nl moderator            {Moderatorprivileges}
 ::msgcat::mcset nl Moderators		{Moderators}
 ::msgcat::mcset nl More			{Meer}
 ::msgcat::mcset nl Name			{Naam}
@@ -106,6 +120,8 @@
 ::msgcat::mcset nl Online		{Online}
 ::msgcat::mcset nl Open			{Openen}
 ::msgcat::mcset nl Options		{Opties}
+::msgcat::mcset nl Owner                {Eigenaarsprivileges}
+::msgcat::mcset nl owner                {Eigenaarschapsprivileges}
 ::msgcat::mcset nl Participants		{Deelnemers}
 ::msgcat::mcset nl Password		{Wachtwoord}
 ::msgcat::mcset nl Pause		{Onderbreken}
@@ -125,13 +141,17 @@
 ::msgcat::mcset nl Quit?		{Afsluiten?}
 ::msgcat::mcset nl Quote		{Citeren}
 ::msgcat::mcset nl Reason		{Reden}
+::msgcat::mcset nl Refresh              {Verversen}
 ::msgcat::mcset nl Register		{Registreren}
 ::msgcat::mcset nl Remaining		{Resterend}
 ::msgcat::mcset nl Remove		{Verwijderen}
 ::msgcat::mcset nl Reply		{Beantwoorden}
 ::msgcat::mcset nl Resource		{Bron}
 ::msgcat::mcset nl Restart		{Herstarten}
+::msgcat::mcset nl Revoke               {Intrekken van}
+::msgcat::mcset nl Role                 {Rol}
 ::msgcat::mcset nl Room			{Chatruimte}
+::msgcat::mcset nl Rosticons
 ::msgcat::mcset nl Roster		{Roster}
 ::msgcat::mcset nl Save			{Opslaan}
 ::msgcat::mcset nl Search		{Zoeken}
@@ -148,6 +168,7 @@
 ::msgcat::mcset nl Sounds		{Geluiden}
 ::msgcat::mcset nl Specifications	{Specificaties}
 ::msgcat::mcset nl Speech		{Spraak}
+::msgcat::mcset nl Standard
 ::msgcat::mcset nl State		{Provincie}
 ::msgcat::mcset nl State/Region		{Provincie}
 ::msgcat::mcset nl Stop			{Stoppen}
@@ -171,6 +192,8 @@
 ::msgcat::mcset nl Username		{Gebruikersnaam}
 ::msgcat::mcset nl Value		{Waarde}
 ::msgcat::mcset nl Visitors		{Bezoekers}
+::msgcat::mcset nl Voice                {Medezeggenschap}
+::msgcat::mcset nl voice                {Medezeggenschap}
 ::msgcat::mcset nl Warning		{Waarschuwing}
 ::msgcat::mcset nl Welcome              {Welkom}
 ::msgcat::mcset nl Whiteboard		{Whiteboard}
@@ -178,6 +201,68 @@
 ::msgcat::mcset nl Work			{Werk}
 ::msgcat::mcset nl Yes			{Ja}
 ::msgcat::mcset nl yes			{ja}
+
+
+# Canvas item options, names and values.
+# Names:
+::msgcat::mcset nl anchor           Anchor
+::msgcat::mcset nl arrow            Arrow
+::msgcat::mcset nl arrowshape       {Arrow Shape}
+::msgcat::mcset nl capstyle         {Cap Style}
+::msgcat::mcset nl coordinates      Coordinates
+::msgcat::mcset nl dash             Dash
+::msgcat::mcset nl file             File
+::msgcat::mcset nl fill             Fill
+::msgcat::mcset nl fontfamily       {Font Familiy}
+::msgcat::mcset nl fontsize         {Font Size}
+::msgcat::mcset nl fontweight       {Font Weight}
+::msgcat::mcset nl image            Image
+::msgcat::mcset nl joinstyle        {Join Style}
+::msgcat::mcset nl justify          Justify
+::msgcat::mcset nl outline          Outline
+::msgcat::mcset nl outlinestipple   {Outline Stipple}
+::msgcat::mcset nl smooth           Smooth
+::msgcat::mcset nl stipple          Stipple
+::msgcat::mcset nl tags             Tags
+::msgcat::mcset nl text             Text
+::msgcat::mcset nl width            Width
+
+# Values (see item inspector to see what they mean):
+# anchor
+::msgcat::mcset nl n          N
+::msgcat::mcset nl ne         NE
+::msgcat::mcset nl e          E
+::msgcat::mcset nl se         SE
+::msgcat::mcset nl s          S
+::msgcat::mcset nl sw         SW
+::msgcat::mcset nl w          W
+::msgcat::mcset nl nw         NW
+::msgcat::mcset nl center     Center
+# arrow
+::msgcat::mcset nl last             Last
+::msgcat::mcset nl first            First
+::msgcat::mcset nl both             Both
+
+::msgcat::mcset nl transparent      Transparent
+::msgcat::mcset nl gray75           {Gray 75%}
+::msgcat::mcset nl gray50           {Gray 50%}
+::msgcat::mcset nl gray25           {Gray 25%}
+::msgcat::mcset nl gray12           {Gray 12%}
+
+::msgcat::mcset nl round            Round
+::msgcat::mcset nl miter            Miter
+::msgcat::mcset nl bevel            Bevel
+::msgcat::mcset nl butt             Butt
+::msgcat::mcset nl projecting       Projecting
+
+::msgcat::mcset nl normal           Normal
+::msgcat::mcset nl bold             Bold
+::msgcat::mcset nl italic           Italic
+
+::msgcat::mcset nl left             Left
+::msgcat::mcset nl right            Right
+::msgcat::mcset nl false            False
+::msgcat::mcset nl true             True
 
 # dashes.
 ::msgcat::mcset nl none			{geen}
@@ -391,6 +476,7 @@
 ::msgcat::mcset nl {Basic Info}			{Basisinfo}
 ::msgcat::mcset nl {Block JID}			{Jabber ID blokkeren}
 ::msgcat::mcset nl {Bookmark this room}		{Bladwijzer toevoegen}
+::msgcat::mcset nl {Broken Image}
 ::msgcat::mcset nl {Buddy Pouncing}		{Notificaties...}
 ::msgcat::mcset nl {Built in server port}	{Poort van ingebouwde server}
 ::msgcat::mcset nl {Cache folder}		{Cachemap}
@@ -406,8 +492,11 @@
 ::msgcat::mcset nl {Create Room}		{Chatruimte aanmaken}
 ::msgcat::mcset nl {Default group}		{Standaard groep}
 ::msgcat::mcset nl {Default Logout Status}	{Standaard afmeldaanwezigheid}
+::msgcat::mcset nl {Default nickname}
 ::msgcat::mcset nl {Default status descriptions} {Standaardberichten bij aanwezigheid}
+::msgcat::mcset nl {Delete Profile}
 ::msgcat::mcset nl {Delete Rule}		{Regel verwijderen}
+::msgcat::mcset nl {Disco method}
 ::msgcat::mcset nl {Disk Cache}			{Schijfcache}
 ::msgcat::mcset nl {Different Passwords}        {Verschillende wachtwoorden}
 ::msgcat::mcset nl {Do Not Disturb}		{Niet storen}
@@ -446,18 +535,23 @@
 ::msgcat::mcset nl {History length}		{Lengte van geschiedenis}
 ::msgcat::mcset nl {Host name}			{Hostnaam}
 ::msgcat::mcset nl {HTTP port}			{HTTP-poort}
+::msgcat::mcset nl {>>Import>>}
 ::msgcat::mcset nl {Import Iconset...}		{Emoticonset importeren...}
 ::msgcat::mcset nl {Import using}		{Importeren met:}
 ::msgcat::mcset nl {Import/Remove fonts}	{Lettertypes importeren/verwijderen}
 ::msgcat::mcset nl {Incoming Message}		{Inkomend bericht}
 ::msgcat::mcset nl {Incoming Messages}		{Inkomende berichten}
 ::msgcat::mcset nl {Incoming Presence}		{Inkomende aanwezigheid}
+::msgcat::mcset nl {Info Room}                  {Chatruimte instellen}
 ::msgcat::mcset nl {Inspect Associations}	{Bestandstype bewerken}
 ::msgcat::mcset nl {Invite User}		{Contactpersoon uitnodigen}
 ::msgcat::mcset nl {IP address}			{IP-adres}
 ::msgcat::mcset nl {Is connected}		{Is verbonden}
 ::msgcat::mcset nl {Is safe}			{Beveiligd}
 ::msgcat::mcset nl {Is server up}		{Server draait}
+::msgcat::mcset nl {Item Inspector}
+::msgcat::mcset nl {Item Options}
+::msgcat::mcset nl {Item Type}
 ::msgcat::mcset nl {Jabber address}		{Jabber-adres}
 ::msgcat::mcset nl {Jabber Client}		{Jabber-client}
 ::msgcat::mcset nl {Jabber Server}		{Jabber-server}
@@ -473,10 +567,14 @@
 ::msgcat::mcset nl {Logged out}           	{Afgemeld}
 ::msgcat::mcset nl {Login as invisible}		{Onzichtbaar aanmelden}
 ::msgcat::mcset nl {Mailbox Error}		{Fout met Postvak In}
+::msgcat::mcset nl {Make new text item for each line}
+::msgcat::mcset nl {MIDI Player}
 ::msgcat::mcset nl {MIME type}			{Bestandstype}
+::msgcat::mcset nl {Movie Options}
 ::msgcat::mcset nl {Multi Connect}		{Multi connecteren}
 ::msgcat::mcset nl {My Avatar}			{Mijn avatar}
 ::msgcat::mcset nl {My Status}			{Mijn aanwezigheid}
+::msgcat::mcset nl {My vCard}			{Mijn persoonlijke info}
 ::msgcat::mcset nl {Name of list}		{Lijst}
 ::msgcat::mcset nl {Network Error}		{Netwerkfout}
 ::msgcat::mcset nl {Network Setup}		{Netwerk instellen}
@@ -489,12 +587,12 @@
 ::msgcat::mcset nl {New Message}		{Nieuw bericht}
 ::msgcat::mcset nl {New Nickname}		{Nieuwe bijnaam}
 ::msgcat::mcset nl {New password}		{Nieuw wachtwoord}
+::msgcat::mcset nl {New Profile}
 ::msgcat::mcset nl {New Rule}			{Nieuwe regel}
 ::msgcat::mcset nl {New Topic}			{Nieuw onderwerp}
 ::msgcat::mcset nl {New shortcut}		{Nieuwe snelkoppeling}
 ::msgcat::mcset nl {New User}			{Nieuwe contactpersoon}
 ::msgcat::mcset nl {New Version}		{Nieuwe versie}
-::msgcat::mcset nl {My vCard}			{Mijn persoonlijke info}
 ::msgcat::mcset nl {NAT Address}		{NAT-adres}
 ::msgcat::mcset nl {Nick name}			{Bijnaam}
 ::msgcat::mcset nl {No Address}			{Geen adres}
@@ -520,6 +618,7 @@
 ::msgcat::mcset nl {Personal URL}		{Website}
 ::msgcat::mcset nl {Pick Directory}		{Map kiezen}
 ::msgcat::mcset nl {Pick File}			{Bestand kiezen}
+::msgcat::mcset nl {Pick Image File}
 ::msgcat::mcset nl {Pick skin}			{Stijl}
 ::msgcat::mcset nl {Plugin Info}		{Plugin info}
 ::msgcat::mcset nl {Plugin Control}		{Plugincontrole}
@@ -529,6 +628,8 @@
 ::msgcat::mcset nl {Presence Error}		{Fout met aanwezigheid}
 ::msgcat::mcset nl {Privacy List}		{Privacylijst}
 ::msgcat::mcset nl {Profile Name}         	{Profielnaam}
+::msgcat::mcset nl {Proxy Port}
+::msgcat::mcset nl {Proxy Server}
 ::msgcat::mcset nl {Proxy Setup}		{Proxy instellen}
 ::msgcat::mcset nl {Public Jabber Servers}	{Publieke Jabber-servers}
 ::msgcat::mcset nl {Put File Error}		{Bestandsplaatsingsfout}
@@ -570,7 +671,9 @@
 ::msgcat::mcset nl {Setup Assistant}		{Installatieassistent}
 ::msgcat::mcset nl {Slide Show}			{Diavoorstelling}
 ::msgcat::mcset nl {Slide Show Folder}		{Map voor diavoorstelling}
+::msgcat::mcset nl {Smooth freehand strokes}
 ::msgcat::mcset nl {Software Update}		{Software bijwerken}
+::msgcat::mcset nl {Sound Set}
 ::msgcat::mcset nl {Sounds & Speech}		{Geluiden & spraak}
 ::msgcat::mcset nl {Start Chat}			{Chatsessie starten}
 ::msgcat::mcset nl {Status message}		{Bericht}
@@ -591,6 +694,7 @@
 ::msgcat::mcset nl {Unknown: Prompt user}	{Om bevestiging vragen}
 ::msgcat::mcset nl {Url of homepage}		{Adres van website}
 ::msgcat::mcset nl {Use proxy}			{Proxy gebruiken}
+::msgcat::mcset nl {Use Secure Connection}
 ::msgcat::mcset nl {Use SSL for security}	{Met SSL beveiligen}
 ::msgcat::mcset nl {Use TLS and SASL authentization} {Met TLS en SASL authenticeren}
 ::msgcat::mcset nl {Use TLS on separate port (old)} {Met TLS op een aparte poort authenticeren (oud)}
@@ -605,6 +709,22 @@
 ::msgcat::mcset nl {Version Info}		{Versiegegevens}
 ::msgcat::mcset nl {Whiteboard fonts}		{Whiteboard}
 ::msgcat::mcset nl {Writing file}		{Bezig met wegschrijven bestand}
+
+# Translate
+# Rooms.
+::msgcat::mcset nl {Kick Participant}   {Deelnemer kicken}
+::msgcat::mcset nl {Ban Participant}    {Deelnemer verbannen}
+::msgcat::mcset nl {Configure Room}     {Chatruimte instellen}
+::msgcat::mcset nl {Destroy Room}       {Chatruimte verwijderen}
+::msgcat::mcset nl {Edit Lists}         {Lijsten bewerken}
+::msgcat::mcset nl {Edit the privilege to speak in the room, the voice.}
+::msgcat::mcset nl {Edit the ban list}
+::msgcat::mcset nl {Edit the member list}
+::msgcat::mcset nl {Edit the moderator list}
+::msgcat::mcset nl {Edit the admin list}
+::msgcat::mcset nl {Edit the owner list}
+
+
 
 # Time intervals.
 ::msgcat::mcset nl {Ten seconds}		{Tien seconden}
@@ -793,6 +913,9 @@
 ::msgcat::mcset nl jamessgcinvite               {U werd uitgenodigd op de chatruimte %s door %s. Wenst u deze chatruimte te betreden?}
 ::msgcat::mcset nl jamessnorooms                {Kon geen enkele chatruimte vinden op %s.}
 
+# Translate
+::msgcat::mcset nl jamessnofiletrpt {We couldn't see that %s supports file transfer.}
+::msgcat::mcset nl jamessfiletrpterr {Failed to get file %s from %s: %s}
 
 
 ::msgcat::mcset nl openquicktime		{QuickTime live stream openen}
@@ -803,6 +926,8 @@
 ::msgcat::mcset nl printunixcmd                 {Afdrukcommando, bewerk indien gewenst}
 ::msgcat::mcset nl enterpassword                {Voer het wachtwoord van uw account "%s" in.}
 
+# Translate
+::msgcat::mcset nl wblockitem {Lock this item from being edited}
 
 
 ::msgcat::mcset nl httptrptok                   {Bestand %s met succes gedownload.}
@@ -990,6 +1115,13 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jaregisterexserv {Registreer op de dienst %s. U moet misschien op de knop "Ophalen" drukken als de nodige gegevens niet vanzelf worden opgehaald.}
 ::msgcat::mcset nl jaseliconset {Selecteer de emoticonsets die u wilt gebruiken.}
 
+# Translate
+::msgcat::mcset nl jachathist {Show or hide the chat history}
+::msgcat::mcset nl jawaitdisco {Waiting for disco result...}
+
+
+::msgcat::mcset nl {InfoRoomDesc}       {Hier kunt u de chatruimte instellen. Rol en affiliatie bepalen uw privileges.}
+
 # Setup assistant:
 ::msgcat::mcset nl suintro1 	{Deze assistent helpt u bij het instellen van een Jabber-account.}
 ::msgcat::mcset nl suintro2 	{Als u van plan bent om in peer-to-peer modus te werken dan moet u dit instellen bij "Voorkeuren" en daarna Coccinella herstarten.}
@@ -1005,6 +1137,21 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl suservlist	{Lijst van publieke Jabber-servers}
 
 
+# Translate
+# Groupchat:
+::msgcat::mcset nl mucErrEnter      {We got an error when entering room "%s".}
+::msgcat::mcset nl mucErrCode       {The error code is %s: %s}
+::msgcat::mcset nl mucErrEnterTitle {Error Enter Room}
+::msgcat::mcset nl mucErrInvite     {Invitation to %s to join room %s failed.}
+::msgcat::mcset nl mucErrInviteCode {Error message: %s}
+::msgcat::mcset nl mucInviteText    {You have received an invitation from %s to join a groupchat in the room %s.}
+::msgcat::mcset nl mucInviteReason  {The reason: %s}
+::msgcat::mcset nl mucInvitePass    {The password "%s" is needed for entry.}
+::msgcat::mcset nl mucInviteQuest   {Do you want to join right away?}
+::msgcat::mcset nl mucInvite        {Invitation}
+::msgcat::mcset nl mucDestroy       {You are about to destroy the room "%s". Optionally you may give any present room participants an alternative room JID and a reason.}
+::msgcat::mcset nl mucIQError       {We received an error when interaction with the room "%s": %s}
+::msgcat::mcset nl mucChat2ConfInv  {Converting Chat into Conference}
 
 ::msgcat::mcset nl vcardget	{Info over %s ophalen. Bezig met wachten op antwoord van de server...}
 ::msgcat::mcset nl vcarderrget	{Fout tijdens ophalen van info over de contactpersoon. De foutmelding is: %s}
@@ -1014,7 +1161,16 @@ Wilt u ze niet opslaan?}
 
 ::msgcat::mcset nl autoupdatenot        {Automatische controle voor updates uitschakelen}
 ::msgcat::mcset nl oobmsg               {Verzend een bestand naar %s. Een beschrijving is optioneel.}
-::msgcat::mcset nl chatcompreply        {%s stelt momenteel een antwoord op}
+
+# Translate
+# Composing events
+::msgcat::mcset nl chatcompreply      {%s stelt momenteel een antwoord op}
+::msgcat::mcset nl chatcompactive     {%s is on the chat}
+::msgcat::mcset nl chatcompcomposing  {%s is composing a reply}
+::msgcat::mcset nl chatcomppaused     {%s is thinking what to write}
+::msgcat::mcset nl chatcompinactive   {%s has left the chat for a while}
+::msgcat::mcset nl chatcompgone       {%s has closed the chat}
+
 
 # Get file
 ::msgcat::mcset nl getcontacting   {Bezig met %s te contacteren. Bezig met wachten op een antwoord...}
@@ -1064,48 +1220,30 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl mModifyAB		{Wijzigen}
 ::msgcat::mcset nl mRemoveAB		{Verwijderen}
 
+::msgcat::mcset nl outCall              {Make Call}
 ::msgcat::mcset nl notifyCall           {Telefoongesprek melden}
 ::msgcat::mcset nl inboundCall          {Inkomend telefoongesprek}
+::msgcat::mcset nl outboundCall         {Outbound Call}
+::msgcat::mcset nl callAnswer           {Answer}
 ::msgcat::mcset nl callHungUp           {Ophangen}
+::msgcat::mcset nl callInfo             {Info}
 ::msgcat::mcset nl callVM               {Wilt u naar VM telefoneren?}
 
+
 # Fore some of these generic names could be used?
-::msgcat::mcset en iaxPhone             {IAX-telefoon}
-::msgcat::mcset en iaxPhoneAccount      {IAX-account}
-::msgcat::mcset en iaxPhoneUser         {Gebruiker}
-::msgcat::mcset en iaxPhonePassword     {Wachtwoord}
-::msgcat::mcset en iaxPhoneHost         {Server}
-::msgcat::mcset en iaxPhoneCidNum       {Cid-nummer}
-::msgcat::mcset en iaxPhoneCidName      {Cid-naam}
-::msgcat::mcset en iaxPhoneInputDev     {Invoerapparaat}
-::msgcat::mcset en iaxPhoneOutputDev    {Uitvoerapparaat}
-::msgcat::mcset en iaxPhoneAGC          {AGC}
-::msgcat::mcset en iaxPhoneAAGC         {AAGC}
-::msgcat::mcset en iaxPhoneNoise        {Ruis}
-::msgcat::mcset en iaxPhoneComfort      {Comfort}
-::msgcat::mcset en iaxPhoneCodec        {Codec}
+::msgcat::mcset nl iaxPhone             {IAX-telefoon}
+::msgcat::mcset nl iaxPhoneAccount      {IAX-account}
+::msgcat::mcset nl iaxPhoneUser         {Gebruiker}
+::msgcat::mcset nl iaxPhonePassword     {Wachtwoord}
+::msgcat::mcset nl iaxPhoneHost         {Server}
+::msgcat::mcset nl iaxPhoneCidNum       {Cid-nummer}
+::msgcat::mcset nl iaxPhoneCidName      {Cid-naam}
+::msgcat::mcset nl iaxPhoneInputDev     {Invoerapparaat}
+::msgcat::mcset nl iaxPhoneOutputDev    {Uitvoerapparaat}
+::msgcat::mcset nl iaxPhoneAGC          {AGC}
+::msgcat::mcset nl iaxPhoneAAGC         {AAGC}
+::msgcat::mcset nl iaxPhoneNoise        {Ruis}
+::msgcat::mcset nl iaxPhoneComfort      {Comfort}
+::msgcat::mcset nl iaxPhoneCodec        {Codec}
 
 # END --------------------------------------------------------------------------
-
-::msgcat::mcset nl {Info Room}          {Chatruimte instellen}
-::msgcat::mcset nl {InfoRoomDesc}       {Hier kunt u de chatruimte instellen. Rol en affiliatie bepalen uw privileges.}
-::msgcat::mcset nl Role                 {Rol}
-::msgcat::mcset nl Affiliation          {Afilliatie}
-::msgcat::mcset nl {Kick Participant}   {Deelnemer kicken}
-::msgcat::mcset nl {Ban Participant}    {Deelnemer verbannen}
-::msgcat::mcset nl {Configure Room}     {Chatruimte instellen}
-::msgcat::mcset nl {Destroy Room}       {Chatruimte verwijderen}
-::msgcat::mcset nl {Edit Lists}         {Lijsten bewerken}
-::msgcat::mcset nl Refresh              {Verversen}
-::msgcat::mcset nl Grant                {Verlenen van}
-::msgcat::mcset nl Revoke               {Intrekken van}
-::msgcat::mcset nl Voice                {Medezeggenschap}
-::msgcat::mcset nl Member               {Lidmaatschap}
-::msgcat::mcset nl Moderator            {Moderatorprivileges}
-::msgcat::mcset nl Admin                {Beheerdersprivileges}
-::msgcat::mcset nl Owner                {Eigenaarsprivileges}
-::msgcat::mcset nl voice                {Medezeggenschap}
-::msgcat::mcset nl member               {Lidmaatschap}
-::msgcat::mcset nl moderator            {Moderatorprivileges}
-::msgcat::mcset nl admin                {Beheerdersprivileges}
-::msgcat::mcset nl owner                {Eigenaarschapsprivileges}
