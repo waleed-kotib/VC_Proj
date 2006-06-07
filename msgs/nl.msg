@@ -435,7 +435,7 @@
 ::msgcat::mcset nl mLoginTrpt     	{Transport aanmelden}
 ::msgcat::mcset nl mLogoutTrpt     	{Transport afmelden}
 ::msgcat::mcset nl mRemoveContact  	{Contactpersoon verwijderen...}
-::msgcat::mcset nl mShow		{Laten zien}
+::msgcat::mcset nl mShow		{Tonen}
 ::msgcat::mcset nl mOffline		{Offline contactpersonen}
 ::msgcat::mcset nl mTransports		{Transporten}
 ::msgcat::mcset nl mIgnore         	{Negeren}
@@ -710,19 +710,18 @@
 ::msgcat::mcset nl {Whiteboard fonts}		{Whiteboard}
 ::msgcat::mcset nl {Writing file}		{Bezig met wegschrijven bestand}
 
-# Translate
 # Rooms.
 ::msgcat::mcset nl {Kick Participant}   {Deelnemer kicken}
 ::msgcat::mcset nl {Ban Participant}    {Deelnemer verbannen}
 ::msgcat::mcset nl {Configure Room}     {Chatruimte instellen}
 ::msgcat::mcset nl {Destroy Room}       {Chatruimte verwijderen}
 ::msgcat::mcset nl {Edit Lists}         {Lijsten bewerken}
-::msgcat::mcset nl {Edit the privilege to speak in the room, the voice.}
-::msgcat::mcset nl {Edit the ban list}
-::msgcat::mcset nl {Edit the member list}
-::msgcat::mcset nl {Edit the moderator list}
-::msgcat::mcset nl {Edit the admin list}
-::msgcat::mcset nl {Edit the owner list}
+::msgcat::mcset nl {Edit the privilege to speak in the room, the voice.} {Medezeggenschaplijst bewerken}
+::msgcat::mcset nl {Edit the ban list} {Banlijst bewerken}
+::msgcat::mcset nl {Edit the member list} {Ledenlijst bewerken}
+::msgcat::mcset nl {Edit the moderator list} {Moderatorslijst bewerken}
+::msgcat::mcset nl {Edit the admin list} {Beheerderslijst bewerken}
+::msgcat::mcset nl {Edit the owner list} {Eigenaarslijst bewerken}
 
 
 
@@ -773,7 +772,7 @@
 
 # Messages for tk_messageBox:
 ::msgcat::mcset nl messfailedhttp	{Starten van interne HTTP-server mislukte: %s}
-::msgcat::mcset nl messinfoscript	{Omwille van de 'info script' bug op uw Mac, moet u expliciet de 'Whiteboard-%s' map in het volgende venster selecteren.}
+::msgcat::mcset nl messinfoscript	{Omwille van de 'info script' bug op uw Mac, moet u effectief de 'Whiteboard-%s' map in het volgende venster selecteren.}
 ::msgcat::mcset nl messfailedsock	{Kan socket naar server niet aanmaken. Misschien werkt het netwerk niet of heeft de server problemen. De foutcode is: %s}
 ::msgcat::mcset nl messeofconnect	{Er liep iets mis tijdens het verbinden. Fout: eof ontvangen.}
 ::msgcat::mcset nl messfailconnect	{Er liep iets mis tijdens het verbinden met %s}
@@ -913,9 +912,8 @@
 ::msgcat::mcset nl jamessgcinvite               {U werd uitgenodigd op de chatruimte %s door %s. Wenst u deze chatruimte te betreden?}
 ::msgcat::mcset nl jamessnorooms                {Kon geen enkele chatruimte vinden op %s.}
 
-# Translate
-::msgcat::mcset nl jamessnofiletrpt {We couldn't see that %s supports file transfer.}
-::msgcat::mcset nl jamessfiletrpterr {Failed to get file %s from %s: %s}
+::msgcat::mcset nl jamessnofiletrpt  {Er kon niet gedetecteerd worden of %s bestandsoverdracht ondersteunt.}
+::msgcat::mcset nl jamessfiletrpterr {Downloaden van bestand %s van %s mislukte: %s}
 
 
 ::msgcat::mcset nl openquicktime		{QuickTime live stream openen}
@@ -926,8 +924,7 @@
 ::msgcat::mcset nl printunixcmd                 {Afdrukcommando, bewerk indien gewenst}
 ::msgcat::mcset nl enterpassword                {Voer het wachtwoord van uw account "%s" in.}
 
-# Translate
-::msgcat::mcset nl wblockitem {Lock this item from being edited}
+::msgcat::mcset nl wblockitem {Dit item vergrendelen zodat het niet bewerkt kan worden}
 
 
 ::msgcat::mcset nl httptrptok                   {Bestand %s met succes gedownload.}
@@ -1099,7 +1096,7 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jadirpresmsg {Voorgeschreven aanwezigheid verzenden naar "%s".}
 ::msgcat::mcset nl jatlsnegot   {Bezig met beveiligd verbinden via TLS...}
 ::msgcat::mcset nl jamucentermsg {Kies een dienst voor chatruimtes, een chatruimte, een bijnaam en eventueel een wachtwoord indien nodig. Druk dan op de knop "Betreden". Met de knop "Browse" kunt u zien welke chatruimtes er bestaan op de gekozen dienst.}
-::msgcat::mcset nl jainmsgshow {Inkomende berichten in dit venster laten zien}
+::msgcat::mcset nl jainmsgshow {Inkomende berichten in dit venster tonen}
 ::msgcat::mcset nl jadisaddserv {Hier kunt u een server al dan niet permanent aan de lijst toevoegen. De server van uw account is altijd zichtbaar.}
 ::msgcat::mcset nl jadisrmall {Permanente servers uit de lijst verwijderen.}
 ::msgcat::mcset nl jauserinnote {Uw persoonlijke notities over deze contactpersoon kunt u hier bewaren.}
@@ -1115,9 +1112,8 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jaregisterexserv {Registreer op de dienst %s. U moet misschien op de knop "Ophalen" drukken als de nodige gegevens niet vanzelf worden opgehaald.}
 ::msgcat::mcset nl jaseliconset {Selecteer de emoticonsets die u wilt gebruiken.}
 
-# Translate
-::msgcat::mcset nl jachathist {Show or hide the chat history}
-::msgcat::mcset nl jawaitdisco {Waiting for disco result...}
+::msgcat::mcset nl jachathist {Geschiedenis tonen/verbergen}
+::msgcat::mcset nl jawaitdisco {Bezig met wachten op resultaat van discovery-aanvraag...}
 
 
 ::msgcat::mcset nl {InfoRoomDesc}       {Hier kunt u de chatruimte instellen. Rol en affiliatie bepalen uw privileges.}
@@ -1137,21 +1133,20 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl suservlist	{Lijst van publieke Jabber-servers}
 
 
-# Translate
 # Groupchat:
-::msgcat::mcset nl mucErrEnter      {We got an error when entering room "%s".}
-::msgcat::mcset nl mucErrCode       {The error code is %s: %s}
-::msgcat::mcset nl mucErrEnterTitle {Error Enter Room}
-::msgcat::mcset nl mucErrInvite     {Invitation to %s to join room %s failed.}
-::msgcat::mcset nl mucErrInviteCode {Error message: %s}
-::msgcat::mcset nl mucInviteText    {You have received an invitation from %s to join a groupchat in the room %s.}
-::msgcat::mcset nl mucInviteReason  {The reason: %s}
-::msgcat::mcset nl mucInvitePass    {The password "%s" is needed for entry.}
-::msgcat::mcset nl mucInviteQuest   {Do you want to join right away?}
-::msgcat::mcset nl mucInvite        {Invitation}
-::msgcat::mcset nl mucDestroy       {You are about to destroy the room "%s". Optionally you may give any present room participants an alternative room JID and a reason.}
-::msgcat::mcset nl mucIQError       {We received an error when interaction with the room "%s": %s}
-::msgcat::mcset nl mucChat2ConfInv  {Converting Chat into Conference}
+::msgcat::mcset nl mucErrEnter      {Er deed zich een fout voor tijdens het betreden van chatruimte "%s".}
+::msgcat::mcset nl mucErrCode       {De foutcode is %s met als foutmelding: %s}
+::msgcat::mcset nl mucErrEnterTitle {Fout bij betreden van chatruimte}
+::msgcat::mcset nl mucErrInvite     {Uitnodiging aan %s om de chatruimte %s te betreden, mislukte.}
+::msgcat::mcset nl mucErrInviteCode {De foutcode is: %s}
+::msgcat::mcset nl mucInviteText    {U hebt een uitnodiging ontvangen van %s voor de chatruimte %s.}
+::msgcat::mcset nl mucInviteReason  {Reden: %s}
+::msgcat::mcset nl mucInvitePass    {U heeft het wachtwoord "%s" nodig om de chatruimte te kunnen betreden.}
+::msgcat::mcset nl mucInviteQuest   {Wilt u de chatruimte onmiddellijk betreden?}
+::msgcat::mcset nl mucInvite        {Uitnodiging}
+::msgcat::mcset nl mucDestroy       {U staat op het punt om de chatruimte "%s" te vernietigen. Als u dat wenst, kunt u de aanwezigen een reden en/of de Jabber ID van een alternatieve chatruimte meedelen.}
+::msgcat::mcset nl mucIQError       {Er deed zich een fout voor tijdens de interactie met de chatruimte "%s": %s}
+::msgcat::mcset nl mucChat2ConfInv  {Bezig met omzetten van chatsessie in chatruimte}
 
 ::msgcat::mcset nl vcardget	{Info over %s ophalen. Bezig met wachten op antwoord van de server...}
 ::msgcat::mcset nl vcarderrget	{Fout tijdens ophalen van info over de contactpersoon. De foutmelding is: %s}
@@ -1162,14 +1157,13 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl autoupdatenot        {Automatische controle voor updates uitschakelen}
 ::msgcat::mcset nl oobmsg               {Verzend een bestand naar %s. Een beschrijving is optioneel.}
 
-# Translate
 # Composing events
 ::msgcat::mcset nl chatcompreply      {%s stelt momenteel een antwoord op}
-::msgcat::mcset nl chatcompactive     {%s is on the chat}
-::msgcat::mcset nl chatcompcomposing  {%s is composing a reply}
-::msgcat::mcset nl chatcomppaused     {%s is thinking what to write}
-::msgcat::mcset nl chatcompinactive   {%s has left the chat for a while}
-::msgcat::mcset nl chatcompgone       {%s has closed the chat}
+::msgcat::mcset nl chatcompactive     {%s chat nog steeds met jou}
+::msgcat::mcset nl chatcompcomposing  {%s stelt momenteel een antwoord op}
+::msgcat::mcset nl chatcomppaused     {%s denkt na wat te schrijven}
+::msgcat::mcset nl chatcompinactive   {%s verliet de chatsessie voor een tijdje}
+::msgcat::mcset nl chatcompgone       {%s sloot de chatsessie}
 
 
 # Get file
@@ -1220,11 +1214,11 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl mModifyAB		{Wijzigen}
 ::msgcat::mcset nl mRemoveAB		{Verwijderen}
 
-::msgcat::mcset nl outCall              {Make Call}
+::msgcat::mcset nl outCall              {Binnenkomend gesprek}
 ::msgcat::mcset nl notifyCall           {Telefoongesprek melden}
 ::msgcat::mcset nl inboundCall          {Inkomend telefoongesprek}
-::msgcat::mcset nl outboundCall         {Outbound Call}
-::msgcat::mcset nl callAnswer           {Answer}
+::msgcat::mcset nl outboundCall         {Uitgaand gesprek}
+::msgcat::mcset nl callAnswer           {Antwoorden}
 ::msgcat::mcset nl callHungUp           {Ophangen}
 ::msgcat::mcset nl callInfo             {Info}
 ::msgcat::mcset nl callVM               {Wilt u naar VM telefoneren?}
