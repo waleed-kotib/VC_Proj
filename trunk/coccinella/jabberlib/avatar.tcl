@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.16 2006-05-31 08:30:26 matben Exp $
+# $Id: avatar.tcl,v 1.17 2006-06-07 07:51:46 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -480,7 +480,7 @@ proc jlib::avatar::presence_handler {jlibname jid type args} {
 		set state($jid2,uptodate) 0
 	    }
 	    if {[string length $options(-command)]} {
-		uplevel #0 $options(-command) $from
+		uplevel #0 $options(-command) [list $from]
 	    }
 	}
     } else {
