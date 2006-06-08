@@ -6,7 +6,7 @@
 #  
 #  This particular package is BSD licensed. 
 #
-# $Id: can2svg.tcl,v 1.20 2006-05-02 06:55:00 matben Exp $
+# $Id: can2svg.tcl,v 1.21 2006-06-08 13:55:05 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -224,7 +224,7 @@ proc can2svg::svgasxmllist {cmd args} {
 	set coo [lindex $coo 0]
     }
     array set optArr $opts
-
+    
     # Is the item in normal state? If not, return.
     if {[info exists optArr(-state)] && $optArr(-state) != "normal"} {
       return {}
@@ -372,6 +372,7 @@ proc can2svg::svgasxmllist {cmd args} {
 	}
 	text {
 	    set elem "text"
+	    set chdata ""
 	    set nlines 1
 	    if {[info exists optArr(-font)]} {
 		set theFont $optArr(-font)
@@ -383,25 +384,30 @@ proc can2svg::svgasxmllist {cmd args} {
 	    if {[info exists optArr(-text)]} {
 		set chdata $optArr(-text)
 		
-		# MICK O'DONNELL: if the text is wrapped in the wgt, we need
-		# to simulate linebreaks
-		# 
-		# If the item has got -width != 0 then we must wrap it ourselves
-		# using newlines since the -text does not have extra newlines
-		# at these linebreaks.
-		set lines [split $chdata \n]
-		set newlines {}
-		foreach line $lines {
-		    set lines2 [SplitWrappedLines $line $theFont $optArr(-width)]
-		    set newlines [concat $newlines $lines2]
+		if {[info exists optArr(-width)]} {
+		    
+		    # MICK O'DONNELL: if the text is wrapped in the wgt, we need
+		    # to simulate linebreaks
+		    # 
+		    # If the item has got -width != 0 then we must wrap it ourselves
+		    # using newlines since the -text does not have extra newlines
+		    # at these linebreaks.
+		    set lines [split $chdata \n]
+		    set newlines {}
+		    foreach line $lines {
+			set lines2 [SplitWrappedLines $line $theFont $optArr(-width)]
+			set newlines [concat $newlines $lines2]
+		    }
+		    set chdata [join $newlines \n]
+		    if {!$argsArr(-allownewlines) || \
+		      ([llength $newlines] > [llength $lines])} {
+			set nlines [expr [regexp -all "\n" $chdata] + 1]
+		    }
+		} else {
+		    if {!$argsArr(-allownewlines)} {
+			set nlines [expr [regexp -all "\n" $chdata] + 1]
+		    }
 		}
-		set chdata [join $newlines \n]
-		if {!$argsArr(-allownewlines) || \
-		  ([llength $newlines] > [llength $lines])} {
-		    set nlines [expr [regexp -all "\n" $chdata] + 1]
-		}
-	    } else {
-		set chdata ""
 	    }
 	    
 	    # Figure out the coords of the first baseline.

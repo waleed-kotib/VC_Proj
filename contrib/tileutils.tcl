@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.29 2006-06-03 13:42:16 matben Exp $
+# $Id: tileutils.tcl,v 1.30 2006-06-08 13:55:05 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -295,6 +295,8 @@ proc tileutils::configstyles {name} {
 	}
 	style configure Plain.TButton  \
 	  -padding {0} -borderwidth 0 -relief flat
+	
+	style configure Small.Plain.TButton -font CociSmallFont
 
 	
 	# Test------------------
@@ -361,9 +363,7 @@ set dir [file join [file dirname [info script]] tiles]
 tileutils::LoadImages $dir {*.gif *.png}
 tileutils::MakeFonts
     
-puts "tileutils-------------"
 foreach name [tile::availableThemes] {
-    puts "\t name=$name"
     
     # @@@ We could be more economical here and load theme only when needed.
     if {[catch {package require tile::theme::$name}]} {
