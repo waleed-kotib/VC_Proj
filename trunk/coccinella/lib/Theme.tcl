@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2006  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.30 2006-05-17 13:31:19 matben Exp $
+# $Id: Theme.tcl,v 1.31 2006-06-10 07:05:05 matben Exp $
 
 package provide Theme 1.0
 
@@ -72,6 +72,11 @@ proc ::Theme::Init { } {
 	    }
 	    break
 	}
+    }
+
+    # Bug in 8.4.1 but ok in 8.4.9
+    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
+	option add *TToolbar.styleText  Small.Plain.TButton      60
     }
 	
     # Any named fonts from any resource file must be constructed.

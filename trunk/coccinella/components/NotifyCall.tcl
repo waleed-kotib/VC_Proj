@@ -59,13 +59,9 @@ proc ::NotifyCall::BuildDialer {w phoneNumber } {
 	return
     }
 
-puts "$w Comprueba $phoneNumber ----"
-
     ::UI::Toplevel $w -class PhoneNotify \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::NotifyCall::CloseDialer
-
-puts "$w Comprueba $phoneNumber ----"
 
     wm title $w [mc notifyCall]
 
@@ -108,7 +104,6 @@ puts "$w Comprueba $phoneNumber ----"
     focus $box.hungup
     wm resizable $w 0 0
 
-puts "Comprueba $phoneNumber ----"
 }
 
 proc ::NotifyCall::CloseDialer {w} {

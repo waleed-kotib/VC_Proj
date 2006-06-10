@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.17 2006-06-01 12:33:11 matben Exp $
+# $Id: Phone.tcl,v 1.18 2006-06-10 07:05:05 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -252,18 +252,14 @@ proc ::Phone::IncomingCall {callNo remote remote_name} {
         set statePhone(activeLine) $callNo
         set statePhone(fromStateLine0) "Incoming"
 	
-	puts "\t 1"
-
         # Set State for Incoming
         set statePhone(numberLine0) $remote
 	set AddressBookName [::AddressBook::Search $remote]
-	puts "\t after ::AddressBook::Search"
 	if { $AddressBookName ne "" } {
 	    set statePhone(nameLine0) $AddressBookName
 	} else {
 	    set statePhone(nameLine0) $remote_name
 	}
-	puts "\t 2"
 
         set phoneNumberInput $remote
 
@@ -272,31 +268,24 @@ proc ::Phone::IncomingCall {callNo remote remote_name} {
 	if {[winfo exists $wphone]} {
             ::TPhone::Number $wphone $remote
         }
-	puts "\t 3"
 
         set initLength 0
 	if {[winfo exists $wphone]} {
 	    ::TPhone::TimeUpdate $wphone  \
 	      [clock format [expr {$initLength - 3600}] -format %X]
         } 
-	puts "\t 4"
 	
 	::NotifyCall::TimeUpdate  \
 	  [clock format [expr {$initLength - 3600}] -format %X]
-	puts "\t 5"
 	::NotifyCall::IncomingEvent $callNo $remote $statePhone(nameLine0)
-	puts "\t 6"
 	::AddressBook::ReceivedCall $callNo $remote $statePhone(nameLine0)
-	puts "\t 7"
 	SetIncomingState
-	puts "\t 8"
 
 	::hooks::run phoneNotifyIncomingCall $callNo $remote $statePhone(nameLine0)
 
     } else {
         puts "No more than one line, Reject"
     }
-    puts "\t exit ::Phone::IncomingCall"
 }
 
 proc ::Phone::UpdateState {callNo state} {
@@ -518,10 +507,8 @@ proc ::Phone::Touch {{key ""} {alt_key ""}} {
     set phoneNumberInput $phonenumber
 
     # BackSpace key pressed.
-    puts "Touching key=$key, alt_key=$alt_key, phoneNumberInput=$phoneNumberInput"
     if { $key eq "" && $alt_key eq "" } {
         set last [string length $phonenumber]
-        puts "Touching last=$last"
         if { $last > 0} {
             set phonenumber [string range $phonenumber 0 [expr $last - 2] ]
             set phoneNumberInput $phonenumber

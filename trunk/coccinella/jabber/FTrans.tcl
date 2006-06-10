@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.11 2006-05-28 09:53:22 matben Exp $
+# $Id: FTrans.tcl,v 1.12 2006-06-10 07:05:05 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -553,7 +553,7 @@ proc ::FTrans::TProgress {token jlibname sid total bytes} {
 
     # Update the progress window.
     if {[winfo exists $w]} {
-	set percent [expr 100.0 * $bytes/($total + 0.001)]
+	set percent [expr {100.0 * $bytes/($total + 0.001)}]
 	set timsg [::timing::getmessage $sid $total]
 	set str "[mc Rate]: $timsg"	
 	$w configuredelayed -percent $percent -text2 $str

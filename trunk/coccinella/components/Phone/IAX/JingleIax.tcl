@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.28 2006-06-01 12:33:11 matben Exp $
+# $Id: JingleIax.tcl,v 1.29 2006-06-10 07:05:05 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -266,6 +266,30 @@ proc ::JingleIAX::SessionInitiateHandler {from jingle sid id} {
     # terminate the session.
 
     ::Jabber::JlibCmd send_iq result {} -to $from -id $id
+    
+    # Must check that we are free to answer.
+    if {([iaxclient::state] eq "free") && ($state(sid) eq "")} {
+	set state(sid) $sid
+	TransportAccept $from
+    } else {
+	
+	# Need a direct call since state(sid) can be busy with another sid.
+	::Jabber::JlibCmd jingle send_set $sid "session-terminate"  \
+	  ::JingleIAX::EmptyCB
+    }
+}
+
+proc ::JingleIAX::SessionInitiateHandlerBU {from jingle sid id} {
+    variable state
+
+    Debug "::JingleIAX::SessionInitiateHandler from=$from, sid=$sid, id=$id"
+
+    # JEP-0166: In order to decline the session initiation request, the target 
+    # entity MUST acknowledge receipt of the session initiation request, then 
+    # terminate the session.
+
+    ::Jabber::JlibCmd send_iq result {} -to $from -id $id
+    
     if {[iaxclient::state] eq "free"} {
 	set state(sid) $sid
 	TransportAccept $from
