@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.168 2006-06-04 12:18:21 matben Exp $
+# $Id: Jabber.tcl,v 1.169 2006-06-11 10:32:17 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -120,7 +120,7 @@ namespace eval ::Jabber:: {
 	jabber:client                "Client entity"
 	jabber:iq:agent              "Server component properties"
 	jabber:iq:agents             "Server component properties"
-	jabber:iq:auth               "Client authentization"      
+	jabber:iq:auth               "Client authentication"      
 	jabber:iq:autoupdate         "Release information"
 	jabber:iq:browse             "Browsing services"
 	jabber:iq:conference         "Conferencing service"
@@ -208,7 +208,7 @@ namespace eval ::Jabber:: {
     array set errorCodeToText {\
       conf_pres,301           {The room has changed names}     \
       conf_pres,307           {This room has changed location temporarily}  \
-      conf_pres,401           {An authentization step is needed at the service\
+      conf_pres,401           {An authentication step is needed at the service\
       level before you can communicate with this room}      \
       conf_pres,403           {You are being denied access to rooms at the\
       service level}     \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.20 2006-05-28 09:53:22 matben Exp $
+# $Id: bytestreams.tcl,v 1.21 2006-06-11 10:32:18 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -1182,7 +1182,7 @@ proc jlib::bytestreams::send_used {jlibname to id hostjid} {
 # The target socks5 functions --------------------------------------------------
 #
 # This object handles everything to make a single socks5 connection + 
-# authentization.
+# authentication.
 #       [in]:  addr, port, hash, cmd
 #       [out]: sock, result
 

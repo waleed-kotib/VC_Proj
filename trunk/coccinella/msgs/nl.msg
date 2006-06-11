@@ -739,6 +739,7 @@
 ::msgcat::mcset nl {English} 			{Engels}
 ::msgcat::mcset nl {French} 			{Frans}
 ::msgcat::mcset nl {German} 			{Duits}
+::msgcat::mcset nl {Italian}
 ::msgcat::mcset nl {Polish} 			{Pools}
 ::msgcat::mcset nl {Russian} 			{Russisch}
 ::msgcat::mcset nl {Spanish} 			{Spaans}
@@ -751,6 +752,7 @@
 ::msgcat::mcset nl nativeEnglish    English
 ::msgcat::mcset nl nativeFrench     Français
 ::msgcat::mcset nl nativeGerman     Deutsch
+::msgcat::mcset nl nativeItalian
 #::msgcat::mcset nl nativePolish 
 #::msgcat::mcset nl nativeRussian 
 ::msgcat::mcset nl nativeSpanish   Castellano
