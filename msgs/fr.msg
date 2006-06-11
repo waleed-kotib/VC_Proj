@@ -697,7 +697,7 @@
 ::msgcat::mcset fr {Use proxy}
 ::msgcat::mcset fr {Use Secure Connection}
 ::msgcat::mcset fr {Use SSL for security}	{Utiliser SSL pour la sécurité}
-::msgcat::mcset fr {Use TLS and SASL authentization}
+::msgcat::mcset fr {Use TLS and SASL authentication}
 ::msgcat::mcset fr {Use TLS on separate port (old)}
 ::msgcat::mcset fr {User is}			{L'utilisateur est}
 ::msgcat::mcset fr {User is offline}		{L'utilisateur est déconnecté}
@@ -743,6 +743,7 @@
 ::msgcat::mcset fr {English} 
 ::msgcat::mcset fr {French} 
 ::msgcat::mcset fr {German} 
+::msgcat::mcset fr {Italian} 
 ::msgcat::mcset fr {Polish} 
 ::msgcat::mcset fr {Russian} 
 ::msgcat::mcset fr {Spanish} 
@@ -756,6 +757,7 @@
 ::msgcat::mcset fr nativeEnglish    English
 ::msgcat::mcset fr nativeFrench     Français
 ::msgcat::mcset fr nativeGerman     Deutsch
+::msgcat::mcset fr nativeItalian
 ::msgcat::mcset fr nativePolish 
 ::msgcat::mcset fr nativeRussian 
 ::msgcat::mcset fr nativeSpanish    Castellano

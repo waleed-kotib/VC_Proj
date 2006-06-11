@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.82 2006-05-16 06:06:29 matben Exp $
+# $Id: Login.tcl,v 1.83 2006-06-11 10:32:17 matben Exp $
 
 package provide Login 1.0
 
@@ -616,7 +616,7 @@ proc ::Login::AutoLoginCB {logtoken status {errmsg ""}} {
 #                       it corresponds to the original jabber method
 #            tlssasl    in stream tls negotiation + sasl, xmpp compliant
 #                       XMPP requires sasl after starttls!
-#            sasl       only sasl authentization
+#            sasl       only sasl authentication
 #       
 # Results:
 #       Callback initiated.
@@ -765,7 +765,7 @@ proc ::Login::HighInitStreamCB {token args} {
 	# We will get a bunch of errors later anyway. So don't stop here.
 	if {$needsasl && !$version1} {
 	    ::Jabber::AddErrorLog $state(server)  \
-	      "SASL authentization failed since server does not support version=1.0"
+	      "SASL authentication failed since server does not support version=1.0"
 	}
 	if {$starttls && !$version1} {
 	    ::Jabber::AddErrorLog $state(server)  \
@@ -1101,7 +1101,7 @@ proc ::Login::Authorize {server username resource password cmd args} {
 	  [list [namespace current]::AuthorizeCB $token] -digest $digestedPw
     } else {
 	
-	# Plain password authentization.
+	# Plain password authentication.
 	$jstate(jlib) send_auth $username $resource   \
 	  [list [namespace current]::AuthorizeCB $token] -password $password
     }

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.61 2006-05-18 12:20:20 matben Exp $
+# $Id: Profiles.tcl,v 1.62 2006-06-11 10:32:18 matben Exp $
 
 package provide Profiles 1.0
 
@@ -48,7 +48,7 @@ namespace eval ::Profiles:: {
     #                       it corresponds to the original jabber method
     #            tlssasl    in stream tls negotiation + sasl, xmpp compliant
     #                       XMPP requires sasl after starttls!
-    #            sasl       only sasl authentization
+    #            sasl       only sasl authentication
  
     variable profiles
     
@@ -979,7 +979,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
       -text [mc prefsusesasl]  \
       -variable $token\(method) -value sasl
     ttk::radiobutton $wse.mtls -style Small.TRadiobutton  \
-      -text [mc {Use TLS and SASL authentization}]  \
+      -text [mc {Use TLS and SASL authentication}]  \
       -variable $token\(method) -value tlssasl
     ttk::radiobutton $wse.mssl -style Small.TRadiobutton  \
       -text [mc {Use TLS on separate port (old)}]  \

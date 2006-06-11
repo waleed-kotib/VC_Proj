@@ -691,7 +691,7 @@
 ::msgcat::mcset en {Use proxy}
 ::msgcat::mcset en {Use Secure Connection}
 ::msgcat::mcset en {Use SSL for security}
-::msgcat::mcset en {Use TLS and SASL authentization}
+::msgcat::mcset en {Use TLS and SASL authentication}
 ::msgcat::mcset en {Use TLS on separate port (old)}
 ::msgcat::mcset en {User is}
 ::msgcat::mcset en {User is offline}
@@ -732,6 +732,7 @@
 ::msgcat::mcset en {English} 
 ::msgcat::mcset en {French} 
 ::msgcat::mcset en {German} 
+::msgcat::mcset en {Italian}
 ::msgcat::mcset en {Polish} 
 ::msgcat::mcset en {Russian} 
 ::msgcat::mcset en {Spanish} 
@@ -744,6 +745,7 @@
 ::msgcat::mcset en nativeEnglish    English
 ::msgcat::mcset en nativeFrench     Français
 ::msgcat::mcset en nativeGerman     Deutsch
+::msgcat::mcset en nativeItalian
 ::msgcat::mcset en nativePolish 
 ::msgcat::mcset en nativeRussian 
 ::msgcat::mcset en nativeSpanish    Castellano
@@ -1011,7 +1013,7 @@ this font installed on their system.}
 ::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset en prefprofname  {Enter desired name of user profile}
 ::msgcat::mcset en prefstabui    {Use tabbed notebook interface}
-::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
+::msgcat::mcset en prefsusesasl  {Use SASL authentication method}
 ::msgcat::mcset en prefprivmsg   {Each user may administrate zero or many lists. Only the active or default list affect message processing. Any active list affects only the session.\
   The default list is processed if there is no active list.}
 ::msgcat::mcset en prefprivunav  {Filter options unavailable while not connected}
