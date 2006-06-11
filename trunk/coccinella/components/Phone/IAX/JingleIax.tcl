@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.29 2006-06-10 07:05:05 matben Exp $
+# $Id: JingleIax.tcl,v 1.30 2006-06-11 08:42:16 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -584,7 +584,7 @@ proc ::JingleIAX::SetChatButtonState {chattoken} {
 }
 
 proc ::JingleIAX::Debug {msg} {
-    if {1} {
+    if {0} {
         puts "-------- $msg"
     }
 }
