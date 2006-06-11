@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ParseMeCData.tcl,v 1.4 2006-05-26 09:41:04 matben Exp $
+# $Id: ParseMeCData.tcl,v 1.5 2006-06-11 08:42:16 matben Exp $
 
 namespace eval ::ParseMeCData:: {
     
@@ -44,7 +44,7 @@ proc ::ParseMeCData::ParseWordHook {type jid w word tagList} {
 	set wd [string map [list "/me" "* $nick"] $word]
 	set meopts [option get . parseMeCDataOpts {}]
 	eval {$w tag configure tmecdata} $meopts
-	$w insert end $wd [concat $tagList tmecdata]
+	$w insert insert $wd [concat $tagList tmecdata]
 	set handled stop
     }
     return $handled

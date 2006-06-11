@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ParseStyledText.tcl,v 1.1 2005-12-27 14:53:55 matben Exp $
+# $Id: ParseStyledText.tcl,v 1.2 2006-06-11 08:42:16 matben Exp $
 
 namespace eval ::ParseStyledText:: {
     
@@ -45,7 +45,7 @@ proc ::ParseStyledText::ParseWordHook {type jid w word tagList} {
 		array set fopts [font configure $font]
 		set fopts($name) $value
 		$w tag configure $ftag -font [array get fopts]
-		$w insert end $new [concat $tagList $ftag]
+		$w insert insert $new [concat $tagList $ftag]
 	    }
 	    set handled stop
 	    break

@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #       
-# $Id: AddressBook.tcl,v 1.7 2006-05-24 17:10:04 antoniofcano Exp $
+# $Id: AddressBook.tcl,v 1.8 2006-06-11 08:42:16 matben Exp $
 
 namespace eval ::AddressBook:: { }
 
@@ -721,7 +721,7 @@ proc ::AddressBook::Search {phonenumber} {
 }
 
 proc ::AddressBook::Debug {msg} {
-    if {1} {
+    if {0} {
 	puts "-------- $msg"
     }
 }
