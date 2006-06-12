@@ -739,7 +739,7 @@
 ::msgcat::mcset nl {English} 			{Engels}
 ::msgcat::mcset nl {French} 			{Frans}
 ::msgcat::mcset nl {German} 			{Duits}
-::msgcat::mcset nl {Italian}
+::msgcat::mcset nl {Italian}			{Italiaans}
 ::msgcat::mcset nl {Polish} 			{Pools}
 ::msgcat::mcset nl {Russian} 			{Russisch}
 ::msgcat::mcset nl {Spanish} 			{Spaans}
