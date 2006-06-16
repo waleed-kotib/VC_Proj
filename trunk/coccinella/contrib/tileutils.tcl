@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.30 2006-06-08 13:55:05 matben Exp $
+# $Id: tileutils.tcl,v 1.31 2006-06-16 08:34:41 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -286,17 +286,17 @@ proc tileutils::configstyles {name} {
 	style configure MiniMenubutton -padding 6
 	
 	# Just a very basic button with image and/or text.
-	style layout Plain.TButton {
-	    Plain.border -children {
-		Plain.padding -children {
+	style layout Plain {
+	    Plain.border -sticky news -border 1 -children {
+		Plain.padding -sticky news -border 1 -children {
 		    Plain.label -side left
 		}
 	    }
 	}
-	style configure Plain.TButton  \
+	style configure Plain  \
 	  -padding {0} -borderwidth 0 -relief flat
-	
-	style configure Small.Plain.TButton -font CociSmallFont
+
+	style configure Small.Plain -font CociSmallFont
 
 	
 	# Test------------------
@@ -514,7 +514,7 @@ if {0} {
     ttk::button $w.b2 -style Small.Url -text www.smallhome.se -class TUrl \
       -command cmd
     
-    ttk::button $w.bp1 -style Plain.TButton -text "Plain Button" -command cmd
+    ttk::button $w.bp1 -style Plain -text "Plain Button" -command cmd
     
     frame $w.f
     ttk::label $w.f.l -style Sunken.TLabel -compound image -image $name

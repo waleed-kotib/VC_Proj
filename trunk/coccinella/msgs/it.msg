@@ -3,6 +3,8 @@
 # General type of text, such as "OK", "Cancel", and the like.
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
+# 
+# Translated by Mirko Graziani (contatto@imatica.it )
 
 ::msgcat::mcset it Accept {Accetta}
 ::msgcat::mcset it Action {Azione}

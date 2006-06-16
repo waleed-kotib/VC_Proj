@@ -5,7 +5,7 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.95.12 (0606??):
+Coccinella-0.95.12 (060616):
 
  o new application theme engine
  o systray support on X11 (linux)

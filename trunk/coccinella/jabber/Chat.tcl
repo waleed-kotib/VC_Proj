@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.171 2006-06-01 12:09:57 matben Exp $
+# $Id: Chat.tcl,v 1.172 2006-06-16 08:34:41 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1513,7 +1513,7 @@ proc ::Chat::DrawCloseButton {dlgtoken} {
     set ima [::Theme::GetImage [option get $w tabCloseActive16Image {}] $subPath]
     set wclose $dlgstate(wnb).close
 
-    ttk::button $wclose -style Plain.TButton  \
+    ttk::button $wclose -style Plain  \
       -image [list $im active $ima] -compound image  \
       -command [list [namespace current]::ClosePageCmd $dlgtoken]
     place $wclose -anchor ne -relx 1.0 -x -6 -y 6
