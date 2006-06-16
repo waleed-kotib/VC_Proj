@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.150 2006-05-27 10:09:10 matben Exp $
+# $Id: GroupChat.tcl,v 1.151 2006-06-16 08:34:42 matben Exp $
 
 package require Create
 package require Enter
@@ -931,7 +931,7 @@ proc ::GroupChat::DrawCloseButton {dlgtoken} {
     set ima [::Theme::GetImage [option get $w tabCloseActive16Image {}] $subPath]
     set wclose $dlgstate(wnb).close
 
-    ttk::button $wclose -style Plain.TButton  \
+    ttk::button $wclose -style Plain  \
       -image [list $im active $ima] -compound image  \
       -command [list [namespace current]::ClosePageCmd $dlgtoken]
     place $wclose -anchor ne -relx 1.0 -x -6 -y 6

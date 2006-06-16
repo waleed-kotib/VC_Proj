@@ -96,6 +96,7 @@ Translations:
     German:     Hermann J. Beckers
     Dutch:      Sander Devrieze
     French:     Guillaume Ayoub
+    Italian:    Mirko Graziani
     Spanish:    Nestor Diaz & Antonio Cano damas
     Polish:     Zbigniew Baniewski
     Danish:     Mogens Pedersen
