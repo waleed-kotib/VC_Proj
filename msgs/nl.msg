@@ -41,13 +41,13 @@
 ::msgcat::mcset nl Clear		{Leegmaken}
 ::msgcat::mcset nl Client		{Chatprogramma}
 ::msgcat::mcset nl Close		{Annuleren}
-::msgcat::mcset nl Codecs
+::msgcat::mcset nl Codecs		{Codecs}
 ::msgcat::mcset nl Conference		{Chatruimte}
 ::msgcat::mcset nl Connect		{Aanmelden}
 ::msgcat::mcset nl Connection		{Verbinding}
 ::msgcat::mcset nl Contact		{Contactpersoon}
 ::msgcat::mcset nl Contacts		{Contactpersonen}
-::msgcat::mcset nl Coordinates
+::msgcat::mcset nl Coordinates		{Coördinaten}
 ::msgcat::mcset nl Country		{Land}
 ::msgcat::mcset nl Create		{Aanmaken}
 ::msgcat::mcset nl Customization	{Varia}
@@ -57,7 +57,7 @@
 ::msgcat::mcset nl Deny			{Weigeren}
 ::msgcat::mcset nl Department		{Afdeling}
 ::msgcat::mcset nl Description		{Notities}
-::msgcat::mcset nl Devices
+::msgcat::mcset nl Devices		{Apparaten}
 ::msgcat::mcset nl Drawing		{Tekening}
 ::msgcat::mcset nl Document		{Document}
 ::msgcat::mcset nl Done			{Klaar}
@@ -68,8 +68,8 @@
 ::msgcat::mcset nl Exit			{Sluiten}
 ::msgcat::mcset nl File			{Bestand}
 ::msgcat::mcset nl File...		{Bestand...}
-::msgcat::mcset nl Filter
-::msgcat::mcset nl Filters
+::msgcat::mcset nl Filter		{Filter}
+::msgcat::mcset nl Filters		{Filters}
 ::msgcat::mcset nl Finish		{Beëindigen}
 ::msgcat::mcset nl Finished		{Beëindigd}
 ::msgcat::mcset nl First		{Eerste}
@@ -151,7 +151,7 @@
 ::msgcat::mcset nl Revoke               {Intrekken van}
 ::msgcat::mcset nl Role                 {Rol}
 ::msgcat::mcset nl Room			{Chatruimte}
-::msgcat::mcset nl Rosticons
+::msgcat::mcset nl Rosticons		{Rostericonen}
 ::msgcat::mcset nl Roster		{Roster}
 ::msgcat::mcset nl Save			{Opslaan}
 ::msgcat::mcset nl Search		{Zoeken}
@@ -168,7 +168,7 @@
 ::msgcat::mcset nl Sounds		{Geluiden}
 ::msgcat::mcset nl Specifications	{Specificaties}
 ::msgcat::mcset nl Speech		{Spraak}
-::msgcat::mcset nl Standard
+::msgcat::mcset nl Standard		{Standaard}
 ::msgcat::mcset nl State		{Provincie}
 ::msgcat::mcset nl State/Region		{Provincie}
 ::msgcat::mcset nl Stop			{Stoppen}
@@ -205,70 +205,70 @@
 
 # Canvas item options, names and values.
 # Names:
-::msgcat::mcset nl anchor           Anchor
-::msgcat::mcset nl arrow            Arrow
-::msgcat::mcset nl arrowshape       {Arrow Shape}
-::msgcat::mcset nl capstyle         {Cap Style}
-::msgcat::mcset nl coordinates      Coordinates
-::msgcat::mcset nl dash             Dash
+::msgcat::mcset nl anchor           Anker
+::msgcat::mcset nl arrow            Pijl
+::msgcat::mcset nl arrowshape       {Pijlvorm}
+::msgcat::mcset nl capstyle         {Cap-stijl}
+::msgcat::mcset nl coordinates      Coördinaten
+::msgcat::mcset nl dash             Streep
 ::msgcat::mcset nl file             File
-::msgcat::mcset nl fill             Fill
-::msgcat::mcset nl fontfamily       {Font Familiy}
-::msgcat::mcset nl fontsize         {Font Size}
-::msgcat::mcset nl fontweight       {Font Weight}
-::msgcat::mcset nl image            Image
-::msgcat::mcset nl joinstyle        {Join Style}
-::msgcat::mcset nl justify          Justify
-::msgcat::mcset nl outline          Outline
-::msgcat::mcset nl outlinestipple   {Outline Stipple}
-::msgcat::mcset nl smooth           Smooth
-::msgcat::mcset nl stipple          Stipple
+::msgcat::mcset nl fill             Vullen
+::msgcat::mcset nl fontfamily       {Lettertype}
+::msgcat::mcset nl fontsize         {Lettergrootte}
+::msgcat::mcset nl fontweight       {Schrijfwijze}
+::msgcat::mcset nl image            Afbeelding
+::msgcat::mcset nl joinstyle        {Samenvoegstijl}
+::msgcat::mcset nl justify          Uitlijnen
+::msgcat::mcset nl outline          Omtrek
+::msgcat::mcset nl outlinestipple   {Gestippelde omtrek}
+::msgcat::mcset nl smooth           Glad
+::msgcat::mcset nl stipple          Stippels
 ::msgcat::mcset nl tags             Tags
-::msgcat::mcset nl text             Text
-::msgcat::mcset nl width            Width
+::msgcat::mcset nl text             Tekst
+::msgcat::mcset nl width            Breedte
 
 # Values (see item inspector to see what they mean):
 # anchor
 ::msgcat::mcset nl n          N
-::msgcat::mcset nl ne         NE
-::msgcat::mcset nl e          E
-::msgcat::mcset nl se         SE
-::msgcat::mcset nl s          S
-::msgcat::mcset nl sw         SW
+::msgcat::mcset nl ne         NO
+::msgcat::mcset nl e          O
+::msgcat::mcset nl se         ZO
+::msgcat::mcset nl s          Z
+::msgcat::mcset nl sw         ZW
 ::msgcat::mcset nl w          W
 ::msgcat::mcset nl nw         NW
-::msgcat::mcset nl center     Center
+::msgcat::mcset nl center     Centreren
 # arrow
-::msgcat::mcset nl last             Last
-::msgcat::mcset nl first            First
-::msgcat::mcset nl both             Both
+::msgcat::mcset nl last             Achteraan
+::msgcat::mcset nl first            Vooraan
+::msgcat::mcset nl both             Beide
 
-::msgcat::mcset nl transparent      Transparent
-::msgcat::mcset nl gray75           {Gray 75%}
-::msgcat::mcset nl gray50           {Gray 50%}
-::msgcat::mcset nl gray25           {Gray 25%}
-::msgcat::mcset nl gray12           {Gray 12%}
+::msgcat::mcset nl transparent      Transparant
+::msgcat::mcset nl gray75           {75%}
+::msgcat::mcset nl gray50           {50%}
+::msgcat::mcset nl gray25           {25%}
+::msgcat::mcset nl gray12           {12%}
 
-::msgcat::mcset nl round            Round
-::msgcat::mcset nl miter            Miter
-::msgcat::mcset nl bevel            Bevel
-::msgcat::mcset nl butt             Butt
-::msgcat::mcset nl projecting       Projecting
+::msgcat::mcset nl round            Rond
+::msgcat::mcset nl miter            Verstek
+::msgcat::mcset nl bevel            Schuin
+::msgcat::mcset nl butt             Stomp
+::msgcat::mcset nl projecting       Projecterend
 
-::msgcat::mcset nl normal           Normal
-::msgcat::mcset nl bold             Bold
-::msgcat::mcset nl italic           Italic
+::msgcat::mcset nl normal           Normaal
+::msgcat::mcset nl bold             Vet
+::msgcat::mcset nl italic           Cursief
 
-::msgcat::mcset nl left             Left
-::msgcat::mcset nl right            Right
-::msgcat::mcset nl false            False
-::msgcat::mcset nl true             True
+::msgcat::mcset nl left             Links
+::msgcat::mcset nl right            Rechts
+::msgcat::mcset nl false            Nee
+::msgcat::mcset nl true             Ja
 
 # dashes.
-::msgcat::mcset nl none			{geen}
-::msgcat::mcset nl dotted		{gestippeld}
-::msgcat::mcset nl dash-dotted		{stippen en strepen}
-::msgcat::mcset nl dashed		{onderstreept}
+::msgcat::mcset nl none			{Geen}
+::msgcat::mcset nl dotted		{Gestippeld}
+::msgcat::mcset nl dash-dotted		{Stippen en strepen}
+::msgcat::mcset nl dashed		{Onderstreept}
 
 # Status messages.
 ::msgcat::mcset nl available		{beschikbaar}
@@ -323,7 +323,7 @@
 ::msgcat::mcset nl mCut			{Knippen}
 ::msgcat::mcset nl mCopy		{&Kopiëren}
 ::msgcat::mcset nl mPaste		{&Plakken}
-::msgcat::mcset nl mInspectItem		{Item onderzoeken...}
+::msgcat::mcset nl mInspectItem		{Item bewerken...}
 ::msgcat::mcset nl mRaise		{Naar voo&rgrond verplaatsen}
 ::msgcat::mcset nl mLower		{Naar achtergrond verp&laatsen}
 ::msgcat::mcset nl mLarger		{Breder}
@@ -341,13 +341,13 @@
 ::msgcat::mcset nl mFillColor		{Opvulkleur...}
 ::msgcat::mcset nl mOutlineColor	{Omlijningskleur}
 ::msgcat::mcset nl mLineSmoothness	{Lijngladheid}
-::msgcat::mcset nl mStraighten   	{Scherper Maken}
+::msgcat::mcset nl mStraighten   	{Scherper maken}
 ::msgcat::mcset nl mArcs		{Bogen}
 ::msgcat::mcset nl mPieslice		{Taartspie}
 ::msgcat::mcset nl mChord		{Koorde}
 ::msgcat::mcset nl mArc			{Boog}
-::msgcat::mcset nl mDash		{Onderstreping}
-::msgcat::mcset nl mShiftConstrain	{Roteer begrenzing}
+::msgcat::mcset nl mDash		{Streep}
+::msgcat::mcset nl mShiftConstrain	{Begrenzing roteren}
 ::msgcat::mcset nl mTo90degrees		{90 graden draaien}
 ::msgcat::mcset nl mTo45degrees		{45 graden draaien}
 ::msgcat::mcset nl mFont		{Lettertype}
@@ -476,7 +476,7 @@
 ::msgcat::mcset nl {Basic Info}			{Basisinfo}
 ::msgcat::mcset nl {Block JID}			{Jabber ID blokkeren}
 ::msgcat::mcset nl {Bookmark this room}		{Bladwijzer toevoegen}
-::msgcat::mcset nl {Broken Image}
+::msgcat::mcset nl {Broken Image}		{Beschadigde afbeelding}
 ::msgcat::mcset nl {Buddy Pouncing}		{Notificaties...}
 ::msgcat::mcset nl {Built in server port}	{Poort van ingebouwde server}
 ::msgcat::mcset nl {Cache folder}		{Cachemap}
@@ -492,11 +492,11 @@
 ::msgcat::mcset nl {Create Room}		{Chatruimte aanmaken}
 ::msgcat::mcset nl {Default group}		{Standaard groep}
 ::msgcat::mcset nl {Default Logout Status}	{Standaard afmeldaanwezigheid}
-::msgcat::mcset nl {Default nickname}
+::msgcat::mcset nl {Default nickname}		{Standaard bijnaam}
 ::msgcat::mcset nl {Default status descriptions} {Standaardberichten bij aanwezigheid}
-::msgcat::mcset nl {Delete Profile}
+::msgcat::mcset nl {Delete Profile}		{Profiel verwijderen}
 ::msgcat::mcset nl {Delete Rule}		{Regel verwijderen}
-::msgcat::mcset nl {Disco method}
+::msgcat::mcset nl {Disco method}		{Disco-methode}
 ::msgcat::mcset nl {Disk Cache}			{Schijfcache}
 ::msgcat::mcset nl {Different Passwords}        {Verschillende wachtwoorden}
 ::msgcat::mcset nl {Do Not Disturb}		{Niet storen}
@@ -535,7 +535,7 @@
 ::msgcat::mcset nl {History length}		{Lengte van geschiedenis}
 ::msgcat::mcset nl {Host name}			{Hostnaam}
 ::msgcat::mcset nl {HTTP port}			{HTTP-poort}
-::msgcat::mcset nl {>>Import>>}
+::msgcat::mcset nl {>>Import>>}			{>>Importeren>>}
 ::msgcat::mcset nl {Import Iconset...}		{Emoticonset importeren...}
 ::msgcat::mcset nl {Import using}		{Importeren met:}
 ::msgcat::mcset nl {Import/Remove fonts}	{Lettertypes importeren/verwijderen}
@@ -549,9 +549,9 @@
 ::msgcat::mcset nl {Is connected}		{Is verbonden}
 ::msgcat::mcset nl {Is safe}			{Beveiligd}
 ::msgcat::mcset nl {Is server up}		{Server draait}
-::msgcat::mcset nl {Item Inspector}
-::msgcat::mcset nl {Item Options}
-::msgcat::mcset nl {Item Type}
+::msgcat::mcset nl {Item Inspector}		{Itemopties}
+::msgcat::mcset nl {Item Options}		{Itemopties}
+::msgcat::mcset nl {Item Type}			{Soort}
 ::msgcat::mcset nl {Jabber address}		{Jabber-adres}
 ::msgcat::mcset nl {Jabber Client}		{Jabber-client}
 ::msgcat::mcset nl {Jabber Server}		{Jabber-server}
@@ -568,9 +568,9 @@
 ::msgcat::mcset nl {Login as invisible}		{Onzichtbaar aanmelden}
 ::msgcat::mcset nl {Mailbox Error}		{Fout met Postvak In}
 ::msgcat::mcset nl {Make new text item for each line}
-::msgcat::mcset nl {MIDI Player}
+::msgcat::mcset nl {MIDI Player}		{Midi-apparaat}
 ::msgcat::mcset nl {MIME type}			{Bestandstype}
-::msgcat::mcset nl {Movie Options}
+::msgcat::mcset nl {Movie Options}		{Filmopties}
 ::msgcat::mcset nl {Multi Connect}		{Multi connecteren}
 ::msgcat::mcset nl {My Avatar}			{Mijn avatar}
 ::msgcat::mcset nl {My Status}			{Mijn aanwezigheid}
@@ -587,7 +587,7 @@
 ::msgcat::mcset nl {New Message}		{Nieuw bericht}
 ::msgcat::mcset nl {New Nickname}		{Nieuwe bijnaam}
 ::msgcat::mcset nl {New password}		{Nieuw wachtwoord}
-::msgcat::mcset nl {New Profile}
+::msgcat::mcset nl {New Profile}		{Nieuw profiel}
 ::msgcat::mcset nl {New Rule}			{Nieuwe regel}
 ::msgcat::mcset nl {New Topic}			{Nieuw onderwerp}
 ::msgcat::mcset nl {New shortcut}		{Nieuwe snelkoppeling}
@@ -618,7 +618,7 @@
 ::msgcat::mcset nl {Personal URL}		{Website}
 ::msgcat::mcset nl {Pick Directory}		{Map kiezen}
 ::msgcat::mcset nl {Pick File}			{Bestand kiezen}
-::msgcat::mcset nl {Pick Image File}
+::msgcat::mcset nl {Pick Image File}		{Afbeelding kiezen}
 ::msgcat::mcset nl {Pick skin}			{Stijl}
 ::msgcat::mcset nl {Plugin Info}		{Plugin info}
 ::msgcat::mcset nl {Plugin Control}		{Plugincontrole}
@@ -628,8 +628,8 @@
 ::msgcat::mcset nl {Presence Error}		{Fout met aanwezigheid}
 ::msgcat::mcset nl {Privacy List}		{Privacylijst}
 ::msgcat::mcset nl {Profile Name}         	{Profielnaam}
-::msgcat::mcset nl {Proxy Port}
-::msgcat::mcset nl {Proxy Server}
+::msgcat::mcset nl {Proxy Port}			{Proxypoort}
+::msgcat::mcset nl {Proxy Server}		{Proxyserver}
 ::msgcat::mcset nl {Proxy Setup}		{Proxy instellen}
 ::msgcat::mcset nl {Public Jabber Servers}	{Publieke Jabber-servers}
 ::msgcat::mcset nl {Put File Error}		{Bestandsplaatsingsfout}
@@ -671,9 +671,9 @@
 ::msgcat::mcset nl {Setup Assistant}		{Installatieassistent}
 ::msgcat::mcset nl {Slide Show}			{Diavoorstelling}
 ::msgcat::mcset nl {Slide Show Folder}		{Map voor diavoorstelling}
-::msgcat::mcset nl {Smooth freehand strokes}
+::msgcat::mcset nl {Smooth freehand strokes}	{Lijnen uit de losse hand vervagen}
 ::msgcat::mcset nl {Software Update}		{Software bijwerken}
-::msgcat::mcset nl {Sound Set}
+::msgcat::mcset nl {Sound Set}			{Geluidsthema}
 ::msgcat::mcset nl {Sounds & Speech}		{Geluiden & spraak}
 ::msgcat::mcset nl {Start Chat}			{Chatsessie starten}
 ::msgcat::mcset nl {Status message}		{Bericht}
@@ -694,7 +694,7 @@
 ::msgcat::mcset nl {Unknown: Prompt user}	{Om bevestiging vragen}
 ::msgcat::mcset nl {Url of homepage}		{Adres van website}
 ::msgcat::mcset nl {Use proxy}			{Proxy gebruiken}
-::msgcat::mcset nl {Use Secure Connection}
+::msgcat::mcset nl {Use Secure Connection}	{Verbinding beveiligen}
 ::msgcat::mcset nl {Use SSL for security}	{Met SSL beveiligen}
 ::msgcat::mcset nl {Use TLS and SASL authentization} {Met TLS en SASL authenticeren}
 ::msgcat::mcset nl {Use TLS on separate port (old)} {Met TLS op een aparte poort authenticeren (oud)}
@@ -856,7 +856,7 @@
 ::msgcat::mcset nl jamesserrregget	{Ophalen van registratiegegevens mislukte. Foutcode %s met als foutmelding: %s}
 ::msgcat::mcset nl jamesserrregset	{Registratie met dienst "%s" mislukte. Foutcode %s met als foutmelding: %s}
 ::msgcat::mcset nl jamessokreg		{Registratie met dienst "%s" is gelukt.}
-::msgcat::mcset nl jamessinvalidjid	{De Jabber ID is niet juist gevormd. Het veld onderaan moet een geldige Jabber ID bevatten. (bv: 'gebruikersnaam@voorbeeld.org').}
+::msgcat::mcset nl jamessinvalidjid	{De Jabber ID is niet juist gevormd. U moet onderaan een geldige Jabber ID opgeven in het veld. (bv: 'gebruikersnaam@voorbeeld.org').}
 ::msgcat::mcset nl jamessnotconnected	{Kan niet verzenden: er is geen verbinding met een server}
 ::msgcat::mcset nl jamessaddrmiss	{U moet minstens één geldig adres invoeren}
 ::msgcat::mcset nl jamesschatclose	{Als u dit venster sluit, dan verliest u ook de volledige conversatie. Wilt u het werkelijk sluiten?}
@@ -926,7 +926,7 @@
 ::msgcat::mcset nl printunixcmd                 {Afdrukcommando, bewerk indien gewenst}
 ::msgcat::mcset nl enterpassword                {Voer het wachtwoord van uw account "%s" in.}
 
-::msgcat::mcset nl wblockitem {Dit item vergrendelen zodat het niet bewerkt kan worden}
+::msgcat::mcset nl wblockitem {Item vergrendelen zodat het niet bewerkt kan worden}
 
 
 ::msgcat::mcset nl httptrptok                   {Bestand %s met succes gedownload.}
