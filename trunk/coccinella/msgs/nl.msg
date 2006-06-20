@@ -696,8 +696,8 @@
 ::msgcat::mcset nl {Use proxy}			{Proxy gebruiken}
 ::msgcat::mcset nl {Use Secure Connection}	{Verbinding beveiligen}
 ::msgcat::mcset nl {Use SSL for security}	{Met SSL beveiligen}
-::msgcat::mcset nl {Use TLS and SASL authentization} {Met TLS en SASL authenticeren}
-::msgcat::mcset nl {Use TLS on separate port (old)} {Met TLS op een aparte poort authenticeren (oud)}
+::msgcat::mcset nl {Use TLS and SASL authentization}	{Met TLS en SASL}
+::msgcat::mcset nl {Use TLS on separate port (old)} {Met TLS op een aparte poort (oud)}
 ::msgcat::mcset nl {User is}			{Contactpersoon is}
 ::msgcat::mcset nl {User is offline}		{Contactpersoon is offline}
 ::msgcat::mcset nl {User is online}		{Contactpersoon is online}
@@ -1025,7 +1025,7 @@
 ::msgcat::mcset nl prefchnormal  {Normale berichten als chatberichten behandelen}
 ::msgcat::mcset nl prefprofname  {Voer de gewenste naam voor het profiel in}
 ::msgcat::mcset nl prefstabui    {Laptopinterface met tabbladen}
-::msgcat::mcset nl prefsusesasl  {Met SASL authenticeren}
+::msgcat::mcset nl prefsusesasl  {Met SASL}
 ::msgcat::mcset nl prefprivmsg   {Enkel de actieve lijst of de standaardlijst beïnvloedt de verwerking van berichten. Een actieve lijst beïnvloedt enkel de huidige sessie. De standaardlijst wordt gebruikt als er geen actieve lijst is.}
 ::msgcat::mcset nl prefprivunav {Filteropties zijn offline niet beschikbaar}
 ::msgcat::mcset nl prefprivnotex {Filteropties zijn op deze server niet beschikbaar}
