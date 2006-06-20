@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: IaxPrefs.tcl,v 1.6 2006-05-27 13:40:34 matben Exp $
+# $Id: IaxPrefs.tcl,v 1.7 2006-06-20 10:14:17 matben Exp $
 
 package provide IaxPrefs 0.1
 
@@ -158,13 +158,19 @@ proc ::IaxPrefs::DevicesFrame {win} {
     ttk::frame $win -padding [option get . groupSmallPadding {}]
     pack $win -side top -anchor w
 
-    set prefs(iaxPhone,inputDevices)  [lindex [iaxclient::devices input -current] 0]
-    set prefs(iaxPhone,outputDevices) [lindex [iaxclient::devices output -current] 0]
-    set tmpPrefs(inputDevices)  $prefs(iaxPhone,inputDevices)
-    set tmpPrefs(outputDevices) $prefs(iaxPhone,outputDevices)
-
     set listInputDevices  [iaxclient::devices input]
     set listOutputDevices [iaxclient::devices output]
+
+    # Workaround for old buggy linux build.
+    if {[catch {
+	set prefs(iaxPhone,inputDevices)  [lindex [iaxclient::devices input -current] 0]
+	set prefs(iaxPhone,outputDevices) [lindex [iaxclient::devices output -current] 0]
+    }]} {
+	set prefs(iaxPhone,inputDevices)  [lindex $listInputDevices 0 0]
+	set prefs(iaxPhone,outputDevices) [lindex $listOutputDevices 0 0]
+    }
+    set tmpPrefs(inputDevices)  $prefs(iaxPhone,inputDevices)
+    set tmpPrefs(outputDevices) $prefs(iaxPhone,outputDevices)
     
     foreach device $listInputDevices {
         lappend inputDevices [lindex $device 0]

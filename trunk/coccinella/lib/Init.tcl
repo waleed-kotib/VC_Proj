@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.47 2006-06-11 10:32:18 matben Exp $
+# $Id: Init.tcl,v 1.48 2006-06-20 10:14:17 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -216,7 +216,7 @@ proc ::Init::SetThisVersion { } {
     # default file, never read.
     set this(vers,major)    0
     set this(vers,minor)   95
-    set this(vers,release) 12
+    set this(vers,release) 13
     set this(vers,full) $this(vers,major).$this(vers,minor).$this(vers,release)
 
     # This is used only to track upgrades.
