@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.31 2006-06-16 08:34:41 matben Exp $
+# $Id: tileutils.tcl,v 1.32 2006-06-20 10:14:17 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -257,7 +257,7 @@ proc tileutils::configstyles {name} {
 	unset -nocomplain foreground(selected)
 	unset -nocomplain foreground(focus)
 	set foreground([list active !disabled]) white
-	style map Safari -foreground [array get foreground]
+	style map Safari -foreground [array get foreground] -background {}
 	
 	# Url clickable link:
 	style layout Url {
