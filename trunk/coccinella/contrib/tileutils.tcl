@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.32 2006-06-20 10:14:17 matben Exp $
+# $Id: tileutils.tcl,v 1.33 2006-06-20 14:01:31 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -301,6 +301,41 @@ proc tileutils::configstyles {name} {
 	
 	# Test------------------
 	if {0} {
+	    
+	    # Search entry (from Michael Kirkham).
+	    set pad [style default TEntry -padding]
+	    switch -- [llength $pad] {
+		0 {
+		    set pad [list 4 0 0 0]
+		}
+		1 {
+		    set pad [list [expr {$pad+4}] $pad $pad $pad]
+		}
+		2 {
+		    foreach {padx pady} $pad break
+		    set pad [list [expr {$padx+4}] $pady $padx $pady]
+		}
+		4 {
+		    lset pad 0 [expr {$padx1+4}]
+		}
+	    }
+	    style layout SearchEntry {
+		Entry.field -children {
+		    SearchEntry.icon -side left
+		    Entry.padding -children {
+			Entry.textarea
+		    }
+		}
+	    }
+	    style configure SearchEntry -padding $pad
+	    style element create SearchEntry.icon image $tiles(search) \
+	      -padding {10 0 0 0} -sticky {}
+	    style map SearchEntry -image [list disabled $tiles(search)] \
+	      -fieldbackground {invalid "#FFFFE0"} -foreground {invalid "#FF0000"}
+
+	    style configure Small.SearchEntry -font CociSmallFont
+
+	    
 	    style layout BorderFrame {
 		BorderFrame.border -sticky nswe
 	    }
@@ -516,6 +551,9 @@ if {0} {
     
     ttk::button $w.bp1 -style Plain -text "Plain Button" -command cmd
     
+    ttk::entry $w.es -style SearchEntry
+    ttk::entry $w.ess -style Small.SearchEntry
+    
     frame $w.f
     ttk::label $w.f.l -style Sunken.TLabel -compound image -image $name
     grid  $w.f.l  -sticky news
@@ -523,7 +561,7 @@ if {0} {
     grid rowconfigure    $w.f 0 -minsize [expr {2*4 + 2*4 + 64}]
 
     pack $w.l1 $w.l2 $w.l3 $w.l4 $w.l5 $w.e1 $w.e2 $w.b1 $w.b2  \
-      $w.bp1 $w.f \
+      $w.bp1 $w.es $w.ess $w.f \
       -padx 20 -pady 10
     
 }
