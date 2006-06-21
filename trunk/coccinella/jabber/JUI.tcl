@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.125 2006-05-16 06:06:29 matben Exp $
+# $Id: JUI.tcl,v 1.126 2006-06-21 12:15:04 matben Exp $
 
 package provide JUI 1.0
 
@@ -179,7 +179,7 @@ proc ::Jabber::UI::Init { } {
 
     # The status menu is built dynamically due to the -image options on 8.4.
     set idx [lindex [lsearchsublists $menuDefs(rost,jabber) mStatus] 0]
-    lset menuDefs(rost,jabber) $idx 6 [::Jabber::Status::BuildStatusMenuDef]
+    lset menuDefs(rost,jabber) $idx 6 [::Jabber::Status::BuildMenuDef]
 
     set menuDefs(rost,edit) {    
 	{command   mCut              {::UI::CutCopyPasteCmd cut}      disabled X}

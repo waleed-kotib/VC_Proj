@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.151 2006-06-16 08:34:42 matben Exp $
+# $Id: GroupChat.tcl,v 1.152 2006-06-21 12:15:04 matben Exp $
 
 package require Create
 package require Enter
@@ -1676,11 +1676,11 @@ proc ::GroupChat::TreeUnsetTags {T item} {
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-proc ::GroupChat::StatusCmd {chattoken status} {
+proc ::GroupChat::StatusCmd {chattoken status args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    ::Debug 2 "::GroupChat::StatusCmd status=$status"
+    ::Debug 2 "::GroupChat::StatusCmd status=$status, args=$args"
 
     if {$status eq "unavailable"} {
 	set ans [ExitAndClose $chattoken]
@@ -1690,7 +1690,7 @@ proc ::GroupChat::StatusCmd {chattoken status} {
     } else {
     
 	# Send our status.
-	::Jabber::SetStatus $status -to $chatstate(roomjid)
+	eval {::Jabber::SetStatus $status -to $chatstate(roomjid)} $args
 	set chatstate(oldStatus) $status
     }
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.15 2006-04-05 07:46:22 matben Exp $
+# $Id: Status.tcl,v 1.16 2006-06-21 12:15:05 matben Exp $
 
 package provide Status 1.0
 
@@ -84,10 +84,10 @@ proc ::Jabber::Status::MainButton {w statusVar} {
     return $w
 }
 
-proc ::Jabber::Status::MainCmd {w status} {
-    
+proc ::Jabber::Status::MainCmd {w status args} {
+        
     if {[::Jabber::IsConnected]} {
-	::Jabber::SetStatus $status
+	eval {::Jabber::SetStatus $status} $args
     } else {
 
 	# Status "available" is special since used for login.
@@ -124,7 +124,7 @@ proc ::Jabber::Status::BuildMainMenu {mt} {
 
     set menuVar [namespace current]::menuVar($mt)
     set $menuVar $status
-    BuildGenericMenu $mt -variable $menuVar \
+    BuildGenericMenu $mt $menuVar \
       -command [list [namespace current]::MainMenuCmd $mt $menuVar]   
 
     trace add variable $statusVar write  \
@@ -136,6 +136,7 @@ proc ::Jabber::Status::BuildMainMenu {mt} {
 
 proc ::Jabber::Status::MainMenuCmd {mt varName} {
     upvar $varName status
+    
     MainCmd $mt $status
 }
 
@@ -164,7 +165,7 @@ proc ::Jabber::Status::Button {w varName args} {
       -compound image -image [::Rosticons::Get status/$status]
     ConfigImage $w $status
     menu $wmenu -tearoff 0
-    set menuBuildCmd($w) [list BuildGenericMenu $wmenu -variable $varName  \
+    set menuBuildCmd($w) [list BuildGenericMenu $wmenu $varName  \
       -command [list [namespace current]::ButtonCmd $w $varName $argsArr(-command)]]
     eval $menuBuildCmd($w)
     $w configure -menu $wmenu
@@ -175,11 +176,11 @@ proc ::Jabber::Status::Button {w varName args} {
     return $w
 }
 
-proc ::Jabber::Status::ButtonCmd {w varName cmd} {
-    upvar $varName status
+proc ::Jabber::Status::ButtonCmd {w varName cmd args} {
+    upvar $varName show
 	
     if {$cmd != {}} {
-	uplevel #0 $cmd $status
+	uplevel #0 $cmd $show $args
     }
 }
 
@@ -187,24 +188,24 @@ proc ::Jabber::Status::Trace {w varName index op} {
     upvar $varName var
     
     if {$index eq ""} {
-	set status $var
+	set show $var
     } else {
-	set status $var($index)
+	set show $var($index)
     }
     if {[winfo exists $w]} {
-	ConfigImage $w $status
+	ConfigImage $w $show
     }
 }
 
-proc ::Jabber::Status::ConfigImage {w status} {
+proc ::Jabber::Status::ConfigImage {w show} {
         
     # Status "available" is special since used for login.
     # You have to set the state for the button itself yourself since
     # this varies with usage.
-    if {($status eq "available") && ![::Jabber::IsConnected]} {
+    if {($show eq "available") && ![::Jabber::IsConnected]} {
 	# empty
     } else {
-	$w configure -image [::Rosticons::Get status/$status]
+	$w configure -image [::Rosticons::Get status/$show]
     }
 }
 
@@ -220,7 +221,7 @@ proc ::Jabber::Status::PostMenu {wmenu x y} {
 # 
 #       Builds a generic status menu.
 
-proc ::Jabber::Status::BuildGenericMenu {mt args} {
+proc ::Jabber::Status::BuildGenericMenu {mt varName args} {
     global  this
     variable mapShowElemToText
     
@@ -236,13 +237,13 @@ proc ::Jabber::Status::BuildGenericMenu {mt args} {
 		  -image [::Rosticons::Get status/$name]]
 	    }
 	    eval {
-		$mt add radio -label $mapShowElemToText($name) -value $name
-	    } $args $opts
+		$mt add radio -label $mapShowElemToText($name)  \
+		  -variable $varName -value $name} $args $opts
 	}
     }
     $mt add separator
     $mt add command -label [mc mAttachMessage] \
-      -command ::Jabber::SetStatusWithMessage
+      -command [concat ::Jabber::Status::SetWithMessage $varName $args]
     $mt configure -postcommand [list [namespace current]::PostCmd $mt]
 }
 
@@ -283,7 +284,7 @@ proc ::Jabber::Status::Free {w varName} {
     unset -nocomplain menuBuildCmd($w)
 }
 
-# Jabber::Status::BuildStatusMenuDef --
+# Jabber::Status::BuildMenuDef --
 # 
 #       Builds a menuDef list for the main status menu.
 #       
@@ -292,7 +293,7 @@ proc ::Jabber::Status::Free {w varName} {
 # Results:
 #       menuDef list.
 
-proc ::Jabber::Status::BuildStatusMenuDef { } {
+proc ::Jabber::Status::BuildMenuDef { } {
     global  this
     variable mapShowElemToText
     variable mapShowTextToMLabel
@@ -317,9 +318,184 @@ proc ::Jabber::Status::BuildStatusMenuDef { } {
 	}
     }
     lappend statMenuDef {separator}  \
-      {command mAttachMessage {::Jabber::SetStatusWithMessage}  normal {}}
+      {command mAttachMessage {::Jabber::Status::SetWithMessage ::Jabber::jstate(status)}  normal {}}
     
     return $statMenuDef
+}
+
+proc ::Jabber::Status::MainWithMessage {} {
+    upvar ::Jabber::jstate jstate
+    
+    set status [::Jabber::JlibCmd mypresencestatus]
+
+    return [SetWithMessage -show $jstate(status) -status $status]
+}
+
+#-- Generic status dialog ------------------------------------------------------
+
+# Jabber::Status::SetWithMessage --
+#
+#       Dialog for setting user's status with message.
+#       
+# Arguments:
+#       
+# Results:
+#       "cancel" or "set".
+
+proc ::Jabber::Status::SetWithMessage {varName args} {
+    global  this wDlgs
+
+    upvar $varName show
+
+    set w $wDlgs(jpresmsg)
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
+    
+    # Keep instance specific state array.
+    variable $w
+    upvar #0 $w state
+    
+    set state(finished) -1
+    set state(varName) $varName
+    set state(args) $args
+    set state(-to) ""
+    set state(-status) ""
+    array set state $args
+    
+    # We must work with a temporary varName for status.
+    set state(show) $show
+    
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox} -closecommand [namespace current]::CloseStatus
+    wm title $w [mc {Set Status}]
+
+    ::UI::SetWindowPosition $w
+    
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    # Top frame.
+    set wtop $wbox.top
+    ttk::labelframe $wtop -text [mc {My Status}] \
+      -padding [option get . groupPadding {}]
+    pack $wtop -side top -fill x
+
+    foreach val {available chat away xa dnd invisible} {
+	ttk::radiobutton $wtop.$val -style Small.TRadiobutton \
+	  -compound left -text [mc jastat${val}]          \
+	  -image [::Roster::GetPresenceIconFromKey $val]  \
+	  -variable $w\(show) -value $val \
+	  -command [list [namespace current]::StatusMsgRadioCmd $w]
+	grid  $wtop.$val  -sticky w
+    }
+        
+    ttk::label $wbox.lbl -text "[mc {Status message}]:" \
+      -padding [option get . groupTopPadding {}]
+    pack $wbox.lbl -side top -anchor w -padx 6
+
+    set wtext $wbox.txt
+    text $wtext -height 4 -width 36 -wrap word -bd 1 -relief sunken
+    pack $wtext -expand 1 -fill both
+	
+    # Any existing presence status?
+    $wtext insert end $state(-status)
+	
+    # Button part.
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Set] -default active \
+      -command [list [namespace current]::BtSetStatus $w]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::SetStatusCancel $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
+    
+    wm resizable $w 0 0
+    bind $w <Return> {}
+    
+    set state(wtext) $wtext
+    
+    # Grab and focus.
+    set oldFocus [focus]
+    focus $w
+    catch {grab $w}
+    
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
+    
+    catch {grab release $w}
+    catch {focus $oldFocus}
+    set finished $state(finished)
+    unset -nocomplain state
+    return [expr {($finished <= 0) ? "cancel" : "set"}]
+}
+
+proc ::Jabber::Status::StatusMsgRadioCmd {w} {
+    upvar ::Jabber::jprefs jprefs
+
+    variable $w
+    upvar #0 $w state
+
+    # We could have an option here to set default status message if any.
+    if {0} {
+	if {$jprefs(statusMsg,bool,$show) && ($jprefs(statusMsg,msg,$show) ne "")} {
+	    set wtext $state(wtext)
+	    set show $state(-show)
+	    $wtext delete 1.0 end
+	    $wtext insert end $jprefs(statusMsg,msg,$show)
+	}
+    }
+}
+
+proc ::Jabber::Status::CloseStatus {w} {
+    
+    ::UI::SaveWinGeom $w
+}
+
+proc ::Jabber::Status::SetStatusCancel {w} {    
+    variable $w
+    upvar #0 $w state
+
+    ::UI::SaveWinGeom $w
+    set state(finished) 0
+    destroy $w
+}
+
+proc ::Jabber::Status::BtSetStatus {w} {
+    variable $w
+    upvar #0 $w state
+        
+    set $state(varName) $state(show)
+
+    set text [string trim [$state(wtext) get 1.0 end]]
+    set opts [list -status $text]
+    if {$state(-to) ne ""} {
+	lappend opts -to $state(-to)
+    }
+    
+    # Set present status.
+    if {$state(-command) ne ""} {
+	uplevel #0 $state(-command) $opts
+    } else {
+	eval {::Jabber::SetStatus $state(show)} $opts
+    }
+    ::UI::SaveWinGeom $w
+    set state(finished) 1
+    destroy $w
 }
 
 #-------------------------------------------------------------------------------
