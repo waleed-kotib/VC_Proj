@@ -696,7 +696,7 @@
 ::msgcat::mcset nl {Use proxy}			{Proxy gebruiken}
 ::msgcat::mcset nl {Use Secure Connection}	{Verbinding beveiligen}
 ::msgcat::mcset nl {Use SSL for security}	{Met SSL beveiligen}
-::msgcat::mcset nl {Use TLS and SASL authentization}	{Met TLS en SASL}
+::msgcat::mcset nl {Use TLS and SASL authentication}	{Met TLS en SASL}
 ::msgcat::mcset nl {Use TLS on separate port (old)} {Met TLS op een aparte poort (oud)}
 ::msgcat::mcset nl {User is}			{Contactpersoon is}
 ::msgcat::mcset nl {User is offline}		{Contactpersoon is offline}
