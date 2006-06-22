@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.33 2006-06-20 14:01:31 matben Exp $
+# $Id: tileutils.tcl,v 1.34 2006-06-22 11:52:35 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -304,21 +304,17 @@ proc tileutils::configstyles {name} {
 	    
 	    # Search entry (from Michael Kirkham).
 	    set pad [style default TEntry -padding]
+
 	    switch -- [llength $pad] {
-		0 {
-		    set pad [list 4 0 0 0]
-		}
-		1 {
-		    set pad [list [expr {$pad+4}] $pad $pad $pad]
-		}
+		0 { set pad [list 4 0 0 0] }
+		1 { set pad [list [expr {$pad+4}] $pad $pad $pad] }
 		2 {
 		    foreach {padx pady} $pad break
 		    set pad [list [expr {$padx+4}] $pady $padx $pady]
 		}
-		4 {
-		    lset pad 0 [expr {$padx1+4}]
-		}
+		4 { lset pad 0 [expr {[lindex $pad 0]+4}] }
 	    }
+
 	    style layout SearchEntry {
 		Entry.field -children {
 		    SearchEntry.icon -side left
@@ -329,7 +325,7 @@ proc tileutils::configstyles {name} {
 	    }
 	    style configure SearchEntry -padding $pad
 	    style element create SearchEntry.icon image $tiles(search) \
-	      -padding {10 0 0 0} -sticky {}
+	      -padding {8 0 0 0} -sticky {}
 	    style map SearchEntry -image [list disabled $tiles(search)] \
 	      -fieldbackground {invalid "#FFFFE0"} -foreground {invalid "#FF0000"}
 

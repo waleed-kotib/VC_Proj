@@ -5,9 +5,9 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.95.13 (060621):
+Coccinella-0.95.13 (060622):
 
- o Critical bugfix for iaxclient on linux system without audio support
+ o Critical bugfix for iaxclient on linux systems without audio support
 
 Coccinella-0.95.12 (060616):
 
