@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.21 2006-03-28 08:12:12 matben Exp $
+# $Id: Taskbar.tcl,v 1.22 2006-06-28 07:43:13 matben Exp $
 
 package require balloonhelp
 
@@ -225,6 +225,7 @@ proc ::Taskbar::ToggleVisibility {} {
 }
 
 proc ::Taskbar::Post {m} {
+    variable menuIndex
 
     switch -- [wm state [::UI::GetMainWindow]] {
 	zoomed - normal {
@@ -246,8 +247,8 @@ proc ::Taskbar::Post {m} {
 	set state0 normal
 	set state3 disabled
     }
-    $m entryconfigure [$m index [mc mSendMessage]] -state $state0 
-    $m entryconfigure [$m index [mc mAddNewUser]] -state $state0
+    $m entryconfigure $menuIndex(mSendMessage) -state $state0 
+    $m entryconfigure $menuIndex(mAddNewUser) -state $state0
 }
 
 proc ::Taskbar::TearOff {wm wt} {
@@ -269,21 +270,23 @@ proc ::Taskbar::ShowMain { } {
 
 proc ::Taskbar::LoginHook { } {
     variable wtearoff
+    variable menuIndex
     
     if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
 	set m $wtearoff
-	$m entryconfigure [$m index [mc mSendMessage]] -state normal
-	$m entryconfigure [$m index [mc mAddNewUser]] -state normal
+	$m entryconfigure $menuIndex(mSendMessage) -state normal
+	$m entryconfigure $menuIndex(mAddNewUser) -state normal
     }
 }
 
 proc ::Taskbar::LogoutHook { } {
     variable wtearoff
+    variable menuIndex
 
     if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
 	set m $wtearoff
-	$m entryconfigure [$m index [mc mSendMessage]] -state disabled 
-	$m entryconfigure [$m index [mc mAddNewUser]] -state disabled
+	$m entryconfigure $menuIndex(mSendMessage) -state disabled 
+	$m entryconfigure $menuIndex(mAddNewUser) -state disabled
     }
 }
 
