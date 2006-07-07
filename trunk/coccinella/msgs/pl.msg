@@ -11,17 +11,17 @@
 ::msgcat::mcset pl Active	Aktywna
 ::msgcat::mcset pl Add		Dodaj
 ::msgcat::mcset pl Address	Adres
-::msgcat::mcset pl Admin
-::msgcat::mcset pl admin
+::msgcat::mcset pl Admin	Administrator
+::msgcat::mcset pl admin	administrator
 ::msgcat::mcset pl Advanced	Poszerzony
-::msgcat::mcset pl Affiliation
+::msgcat::mcset pl Affiliation	Towarzystwo
 ::msgcat::mcset pl Agents	Agenty
 ::msgcat::mcset pl Allow	Zezwól
 ::msgcat::mcset pl Appearance	Wygląd
 ::msgcat::mcset pl Apply	Użyj
 ::msgcat::mcset pl Available	Dostępny/a
 ::msgcat::mcset pl Away		Nieobecny
-::msgcat::mcset pl Back
+::msgcat::mcset pl Back		Cofnij
 ::msgcat::mcset pl Binary	Binarny
 ::msgcat::mcset pl Birthday	Urodziny
 ::msgcat::mcset pl Block	Zablokuj
@@ -40,13 +40,13 @@
 ::msgcat::mcset pl Clear	Skasuj
 ::msgcat::mcset pl Client	Aktywność
 ::msgcat::mcset pl Close	Zamknij
-::msgcat::mcset pl Codecs
+::msgcat::mcset pl Codecs	Kodeki
 ::msgcat::mcset pl Conference	Konferencja
 ::msgcat::mcset pl Connect	Połącz
 ::msgcat::mcset pl Connection	Połączenie
 ::msgcat::mcset pl Contact	Kontakt
 ::msgcat::mcset pl Contacts	Kontakty
-::msgcat::mcset pl Coordinates
+::msgcat::mcset pl Coordinates	Namiary
 ::msgcat::mcset pl Country	Kraj
 ::msgcat::mcset pl Create	Utwórz
 ::msgcat::mcset pl Customization	Dopasowanie
@@ -56,19 +56,19 @@
 ::msgcat::mcset pl Deny		Odmów
 ::msgcat::mcset pl Department	Dział
 ::msgcat::mcset pl Description	Opis
-::msgcat::mcset pl Devices
+::msgcat::mcset pl Devices	Urządzenia
 ::msgcat::mcset pl Drawing	Rysunek
 ::msgcat::mcset pl Document	Dokument
 ::msgcat::mcset pl Done		Gotowe
 ::msgcat::mcset pl Edit		Edytuj
-::msgcat::mcset pl Email
+::msgcat::mcset pl Email	Email
 ::msgcat::mcset pl Enter	Wejdź
 ::msgcat::mcset pl Error	Błąd
 ::msgcat::mcset pl Exit		Zakończ
 ::msgcat::mcset pl File		Plik
 ::msgcat::mcset pl File...	Plik...
-::msgcat::mcset pl Filter
-::msgcat::mcset pl Filters
+::msgcat::mcset pl Filter	Filtr
+::msgcat::mcset pl Filters	Filtry
 ::msgcat::mcset pl Finish	Koniec
 ::msgcat::mcset pl Finished	Zakończone
 ::msgcat::mcset pl First	Najpierw
@@ -78,7 +78,7 @@
 ::msgcat::mcset pl General	Ogólne
 ::msgcat::mcset pl Get		Pobierz
 ::msgcat::mcset pl Getting	Odbierz
-::msgcat::mcset pl Grant
+::msgcat::mcset pl Grant	{Udziel prawa}
 ::msgcat::mcset pl Group	Grupa
 ::msgcat::mcset pl Groupchat	{Konferencja}
 ::msgcat::mcset pl Handling	Postępowanie
@@ -90,17 +90,17 @@
 ::msgcat::mcset pl Inbox	Skrzynka
 ::msgcat::mcset pl Info		Informacja
 ::msgcat::mcset pl Invite	Zaproś
-::msgcat::mcset pl Language
+::msgcat::mcset pl Language	Język
 ::msgcat::mcset pl Last		Ostatni
 ::msgcat::mcset pl Less		Mniej
 ::msgcat::mcset pl Login	Zaloguj
 ::msgcat::mcset pl Logout	Wyloguj
-::msgcat::mcset pl Member
-::msgcat::mcset pl member
+::msgcat::mcset pl Member	Uczestnik
+::msgcat::mcset pl member	uczestnik
 ::msgcat::mcset pl Message	Wiadomość
 ::msgcat::mcset pl Middle	{drugie imię}
-::msgcat::mcset pl Moderator
-::msgcat::mcset pl moderator
+::msgcat::mcset pl Moderator	Moderator
+::msgcat::mcset pl moderator	moderator
 ::msgcat::mcset pl Moderators	Moderatorzy
 ::msgcat::mcset pl More		Więcej
 ::msgcat::mcset pl Name		Nazwa
@@ -119,8 +119,8 @@
 ::msgcat::mcset pl Online	Obecni
 ::msgcat::mcset pl Open		Otwórz
 ::msgcat::mcset pl Options	Opcje
-::msgcat::mcset pl Owner
-::msgcat::mcset pl owner
+::msgcat::mcset pl Owner	Właściciel
+::msgcat::mcset pl owner	właściciel
 ::msgcat::mcset pl Participants	Uczestnicy
 ::msgcat::mcset pl Password	Hasło
 ::msgcat::mcset pl Pause	Pauza
@@ -140,18 +140,18 @@
 ::msgcat::mcset pl Quit?	Koniec?
 ::msgcat::mcset pl Quote	Cytat
 ::msgcat::mcset pl Reason	{Przyczyna}
-::msgcat::mcset pl Refresh
+::msgcat::mcset pl Refresh	Odśwież
 ::msgcat::mcset pl Register	Zarejestruj
 ::msgcat::mcset pl Remaining	Pozostało
 ::msgcat::mcset pl Remove	Usuń
 ::msgcat::mcset pl Reply	Odpowiedź
 ::msgcat::mcset pl Resource	Zasób
 ::msgcat::mcset pl Restart	Restart
-::msgcat::mcset pl Revoke
-::msgcat::mcset pl Role
+::msgcat::mcset pl Revoke	Odbierz
+::msgcat::mcset pl Role		Rola
 ::msgcat::mcset pl Room		Pokój
 ::msgcat::mcset pl Roster	Lista
-::msgcat::mcset pl Rosticons
+::msgcat::mcset pl Rosticons	{Ikonki listy}
 ::msgcat::mcset pl Save		Zapisz
 ::msgcat::mcset pl Search	Przeszukaj
 ::msgcat::mcset pl Select	Wybierz
@@ -167,7 +167,7 @@
 ::msgcat::mcset pl Sounds	Dźwięki
 ::msgcat::mcset pl Specifications	Specyfikacje
 ::msgcat::mcset pl Speech	Mowa
-::msgcat::mcset pl Standard
+::msgcat::mcset pl Standard	Standard
 ::msgcat::mcset pl State	Państwo
 ::msgcat::mcset pl State/Region	Państwo/Region
 ::msgcat::mcset pl Stop		Stop
@@ -191,8 +191,8 @@
 ::msgcat::mcset pl Username	Użytkownik
 ::msgcat::mcset pl Value	Wartość
 ::msgcat::mcset pl Visitors	Goście
-::msgcat::mcset pl Voice
-::msgcat::mcset pl voice
+::msgcat::mcset pl Voice	Głos
+::msgcat::mcset pl voice	głos
 ::msgcat::mcset pl Warning	Ostrzeżenie
 ::msgcat::mcset pl Welcome	Witamy
 ::msgcat::mcset pl Whiteboard	Tablica
@@ -204,27 +204,27 @@
 #translate
 # Canvas item options, names and values.
 # Names:
-::msgcat::mcset pl anchor           Anchor
-::msgcat::mcset pl arrow            Arrow
-::msgcat::mcset pl arrowshape       {Arrow Shape}
-::msgcat::mcset pl capstyle         {Cap Style}
-::msgcat::mcset pl coordinates      Coordinates
-::msgcat::mcset pl dash             Dash
-::msgcat::mcset pl file             File
-::msgcat::mcset pl fill             Fill
-::msgcat::mcset pl fontfamily       {Font Familiy}
-::msgcat::mcset pl fontsize         {Font Size}
-::msgcat::mcset pl fontweight       {Font Weight}
-::msgcat::mcset pl image            Image
-::msgcat::mcset pl joinstyle        {Join Style}
-::msgcat::mcset pl justify          Justify
-::msgcat::mcset pl outline          Outline
-::msgcat::mcset pl outlinestipple   {Outline Stipple}
-::msgcat::mcset pl smooth           Smooth
-::msgcat::mcset pl stipple          Stipple
-::msgcat::mcset pl tags             Tags
-::msgcat::mcset pl text             Text
-::msgcat::mcset pl width            Width
+::msgcat::mcset pl anchor           Osadzenie
+::msgcat::mcset pl arrow            Strzałka
+::msgcat::mcset pl arrowshape       {Kształt strzałki}
+::msgcat::mcset pl capstyle         {Styl Cap}
+::msgcat::mcset pl coordinates      Współrzędne
+::msgcat::mcset pl dash             Kreska
+::msgcat::mcset pl file             Plik
+::msgcat::mcset pl fill             Wypełnij
+::msgcat::mcset pl fontfamily       {rodzaj czcionki}
+::msgcat::mcset pl fontsize         {wielkość czcionki}
+::msgcat::mcset pl fontweight       {grubość czcionki}
+::msgcat::mcset pl image            Grafika
+::msgcat::mcset pl joinstyle        {styl join}
+::msgcat::mcset pl justify          Justowanie
+::msgcat::mcset pl outline          Szkic
+::msgcat::mcset pl outlinestipple   {Grawiura}
+::msgcat::mcset pl smooth           gładki
+::msgcat::mcset pl stipple          kropkowanie
+::msgcat::mcset pl tags             zaznaczenia
+::msgcat::mcset pl text             tekst
+::msgcat::mcset pl width            szerokość
 
 # Values (see item inspector to see what they mean):
 # anchor
@@ -412,9 +412,9 @@
 ::msgcat::mcset pl mEditBookmarks	{Edytuj zakładki...}
 
 # Translate
-::msgcat::mcset pl mToolbar             {Toolbar}
-::msgcat::mcset pl mNotebook            {Notebook}
-::msgcat::mcset pl mMinimal             {Minimal}
+::msgcat::mcset pl mToolbar             {Pasek narzędzi}
+::msgcat::mcset pl mNotebook            {Notatnik}
+::msgcat::mcset pl mMinimal             {Minimalny}
 ::msgcat::mcset pl mDisco               {Disco}
 
 # Popups
@@ -441,14 +441,14 @@
 ::msgcat::mcset pl mIgnore         	{Ignoruj}
 
 # Translate
-::msgcat::mcset pl mSort                {Sort}
-::msgcat::mcset pl mIncreasing          {Increasing}
-::msgcat::mcset pl mDecreasing          {Decreasing}
-::msgcat::mcset pl mStyle               {Style}
-::msgcat::mcset pl mCall                {Call}
-::msgcat::mcset pl mJiveCall            {Call}
-::msgcat::mcset pl mJiveForward         {Forward Call}
-::msgcat::mcset pl mBackgroundImage     {Background Image}
+::msgcat::mcset pl mSort                {Rodzaj}
+::msgcat::mcset pl mIncreasing          {Rosnący}
+::msgcat::mcset pl mDecreasing          {Malejący}
+::msgcat::mcset pl mStyle               {Styl}
+::msgcat::mcset pl mCall                {Rozmowa}
+::msgcat::mcset pl mJiveCall            {Rozmowa "jive"}
+::msgcat::mcset pl mJiveForward         {Przekazanie rozmowy}
+::msgcat::mcset pl mBackgroundImage     {Grafika tła}
 
 # Short texts only. Use english text as database key.
 ::msgcat::mcset pl {30 days}              {30 dni}
@@ -696,7 +696,7 @@
 ::msgcat::mcset pl {Use proxy}
 ::msgcat::mcset pl {Use Secure Connection}
 ::msgcat::mcset pl {Use SSL for security} {Dla bezpieczeństwa korzystać z SSL}
-::msgcat::mcset pl {Use TLS and SASL authentication}
+::msgcat::mcset pl {Use TLS and SASL authentization}
 ::msgcat::mcset pl {Use TLS on separate port (old)}
 ::msgcat::mcset pl {User is}              {Użytkownik jest}
 ::msgcat::mcset pl {User is offline}      {Użytkownik jest wylogowany}
@@ -712,17 +712,17 @@
 
 # Translate
 # Rooms.
-::msgcat::mcset pl {Kick Participant}
-::msgcat::mcset pl {Ban Participant}
-::msgcat::mcset pl {Configure Room}
-::msgcat::mcset pl {Destroy Room}
-::msgcat::mcset pl {Edit Lists}
-::msgcat::mcset pl {Edit the privilege to speak in the room, the voice.}
-::msgcat::mcset pl {Edit the ban list}
-::msgcat::mcset pl {Edit the member list}
-::msgcat::mcset pl {Edit the moderator list}
-::msgcat::mcset pl {Edit the admin list}
-::msgcat::mcset pl {Edit the owner list}
+::msgcat::mcset pl {Kick Participant}     {Usuń uczestnika}
+::msgcat::mcset pl {Ban Participant}      {Usuń i zabroń wstępu}
+::msgcat::mcset pl {Configure Room}       {Konfiguracja pokoju}
+::msgcat::mcset pl {Destroy Room}         {Usuń pokój}
+::msgcat::mcset pl {Edit Lists}           {Sporządź listy}
+::msgcat::mcset pl {Edit the privilege to speak in the room, the voice.} {Dodaj uprawnienie, by móc rozmawiać w niniejszym pokoju (głos).}
+::msgcat::mcset pl {Edit the ban list}    {Sporządź listę wypędków}
+::msgcat::mcset pl {Edit the member list} {Sporządź listę uczestników}
+::msgcat::mcset pl {Edit the moderator list} {Sporządź listę moderatorów}
+::msgcat::mcset pl {Edit the admin list}  {Sporządź listę administratorów}
+::msgcat::mcset pl {Edit the owner list}  {Sporządź listę właścicieli}
 
 # Time intervals.
 ::msgcat::mcset pl {Ten seconds}          {Dziesięć sekund}
@@ -739,7 +739,6 @@
 ::msgcat::mcset pl {English} 
 ::msgcat::mcset pl {French} 
 ::msgcat::mcset pl {German} 
-::msgcat::mcset pl {Italian} 
 ::msgcat::mcset pl {Polish} 
 ::msgcat::mcset pl {Russian} 
 ::msgcat::mcset pl {Spanish} 
@@ -752,7 +751,6 @@
 ::msgcat::mcset pl nativeEnglish    English
 ::msgcat::mcset pl nativeFrench     Français
 ::msgcat::mcset pl nativeGerman     Deutsch
-::msgcat::mcset pl nativeItalian
 ::msgcat::mcset pl nativePolish 
 ::msgcat::mcset pl nativeRussian 
 ::msgcat::mcset pl nativeSpanish    Castellano
