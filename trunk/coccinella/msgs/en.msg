@@ -568,6 +568,7 @@
 ::msgcat::mcset en {Movie Options}
 ::msgcat::mcset en {Multi Connect}
 ::msgcat::mcset en {My Avatar}
+::msgcat::mcset en {My nickname for own display}
 ::msgcat::mcset en {My Status}
 ::msgcat::mcset en {My vCard}
 ::msgcat::mcset en {Name of list}

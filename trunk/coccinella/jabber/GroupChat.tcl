@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.152 2006-06-21 12:15:04 matben Exp $
+# $Id: GroupChat.tcl,v 1.153 2006-07-18 14:02:16 matben Exp $
 
 package require Create
 package require Enter
@@ -615,7 +615,6 @@ proc ::GroupChat::Build {roomjid args} {
     SetTitle $chattoken
     
     wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
-    wm maxsize $w 800 2000
 
     bind $w <FocusIn> [list [namespace current]::FocusIn $dlgtoken]
 
