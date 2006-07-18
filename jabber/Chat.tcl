@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.172 2006-06-16 08:34:41 matben Exp $
+# $Id: Chat.tcl,v 1.173 2006-07-18 14:02:16 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -657,6 +657,7 @@ proc ::Chat::GotNormalMsg {body args} {
 proc ::Chat::InsertMessage {chattoken spec body args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
+    upvar ::Jabber::jprefs jprefs
     
     array set argsArr $args
     
@@ -680,6 +681,9 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	    } else {
 		set name $node
 		set from ${node}@${host}
+	    }
+	    if {$jprefs(chat,mynick) ne ""} {
+		set name $jprefs(chat,mynick)
 	    }
 	}
 	you {
@@ -2913,6 +2917,30 @@ proc ::Chat::BuildHistoryForJid {jid} {
       -tagscommand ::Chat::ConfigureTextTags
 }
 
+# Support for JEP-0085 ChatState ...............................................
+
+proc ::Chat::ChangeChatState {chattoken trigger} {
+    upvar 0 $chattoken chatstate
+
+    variable chatStateMap
+    set actualState $chatstate(chatstate)
+
+    if {[info exists chatStateMap($actualState,$trigger)]} {
+	set chatstate(chatstate) $chatStateMap($actualState,$trigger)
+    }
+}
+
+proc ::Chat::SendChatState {chattoken state} {
+    upvar 0 $chattoken chatstate
+
+    set csxmlns "http://jabber.org/protocol/chatstates"
+    set cselems [list  \
+      [wrapper::createtag $state -attrlist [list xmlns $csxmlns]]]
+
+    eval {::Jabber::JlibCmd send_message $chatstate(jid)  \
+      -thread $chatstate(threadid) -type chat -xlist $cselems}
+}
+
 # Preference page --------------------------------------------------------------
 
 proc ::Chat::InitPrefsHook { } {
@@ -2924,6 +2952,7 @@ proc ::Chat::InitPrefsHook { } {
     set jprefs(chat,normalAsChat) 0
     set jprefs(chat,histLen)      10
     set jprefs(chat,histAge)      0
+    set jprefs(chat,mynick)       ""
     
     ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(showMsgNewWin) jprefs_showMsgNewWin $jprefs(showMsgNewWin)]  \
@@ -2931,6 +2960,7 @@ proc ::Chat::InitPrefsHook { } {
       [list ::Jabber::jprefs(chat,normalAsChat)   jprefs_chatnormalAsChat   $jprefs(chat,normalAsChat)]  \
       [list ::Jabber::jprefs(chat,histLen)  jprefs_chathistLen   $jprefs(chat,histLen)]  \
       [list ::Jabber::jprefs(chat,histAge)  jprefs_chathistAge   $jprefs(chat,histAge)]  \
+      [list ::Jabber::jprefs(chat,mynick)   jprefs_chatmynick    $jprefs(chat,mynick)]  \
       [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)] \
       ]    
 }
@@ -2949,7 +2979,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
     
     foreach key {
 	chatActiveRet showMsgNewWin inbox2click chat,normalAsChat
-	chat,histLen chat,histAge
+	chat,histLen chat,histAge chat,mynick
     } {
 	set tmpJPrefs($key) $jprefs($key)
     }
@@ -2957,34 +2987,32 @@ proc ::Chat::BuildPrefsPage {wpage} {
     set wc $wpage.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
-
-    set wca $wc.ca
-    ttk::labelframe $wca -text [mc Chat] \
-      -padding [option get . groupSmallPadding {}]
  
-    ttk::checkbutton $wca.active -text [mc prefchactret]  \
+    ttk::checkbutton $wc.active -text [mc prefchactret]  \
       -variable [namespace current]::tmpJPrefs(chatActiveRet)
-    ttk::checkbutton $wca.newwin -text [mc prefcushow] \
+    ttk::checkbutton $wc.newwin -text [mc prefcushow] \
       -variable [namespace current]::tmpJPrefs(showMsgNewWin)
-    ttk::checkbutton $wca.normal -text [mc prefchnormal]  \
+    ttk::checkbutton $wc.normal -text [mc prefchnormal]  \
       -variable [namespace current]::tmpJPrefs(chat,normalAsChat)
 
-    ttk::separator $wca.sep -orient horizontal    
+    ttk::separator $wc.sep -orient horizontal    
 
-    ttk::label $wca.lmb2 -text [mc prefcu2clk]
-    ttk::radiobutton $wca.rb2new -text [mc prefcuopen] \
+    ttk::label $wc.lmb2 -text [mc prefcu2clk]
+    ttk::radiobutton $wc.rb2new -text [mc prefcuopen] \
       -value newwin -variable [namespace current]::tmpJPrefs(inbox2click)
-    ttk::radiobutton $wca.rb2re   \
+    ttk::radiobutton $wc.rb2re   \
       -text [mc prefcureply] -value reply \
       -variable [namespace current]::tmpJPrefs(inbox2click)
 
-    ttk::separator $wca.sep2 -orient horizontal
+    ttk::separator $wc.sep2 -orient horizontal
     
-    ttk::label $wca.lhist -text "[mc {History length}]:"
-    spinbox $wca.shist -width 4 -from 0 -increment 5 -to 1000 -state readonly \
+    set whi $wc.hi
+    ttk::frame $wc.hi
+    ttk::label $whi.lhist -text "[mc {History length}]:"
+    spinbox $whi.shist -width 4 -from 0 -increment 5 -to 1000 -state readonly \
       -textvariable [namespace current]::tmpJPrefs(chat,histLen)
-    ttk::label $wca.lage -text "[mc {Not older than}]:"
-    set mb $wca.mbage
+    ttk::label $whi.lage -text "[mc {Not older than}]:"
+    set mb $whi.mbage
     set menuDef [list                       \
 	[list [mc {Ten seconds}]     -value 10]    \
 	[list [mc {One minute}]      -value 60]    \
@@ -2994,21 +3022,32 @@ proc ::Chat::BuildPrefsPage {wpage} {
     ]
     ui::optionmenu $mb -menulist $menuDef -direction flush \
       -variable [namespace current]::tmpJPrefs(chat,histAge)
-    
-    grid  $wca.active  -  -  -  -sticky w
-    grid  $wca.newwin  -  -  -  -sticky w
-    grid  $wca.normal  -  -  -  -sticky w
-    grid  $wca.sep     -  -  -  -sticky ew -pady 6
-    grid  $wca.lmb2    -  -  -  -sticky w
-    grid  $wca.rb2new  -  -  -  -sticky w
-    grid  $wca.rb2re   -  -  -  -sticky w
-    grid  $wca.sep2    -  -  -  -sticky ew -pady 6
-    grid  $wca.lhist   $wca.shist  $wca.lage  $wca.mbage  -sticky w
-    
-    grid columnconfigure $wca 1 -weight 1
-    grid columnconfigure $wca 3 -minsize [$mb maxwidth]
 
-    pack  $wca  -side top -fill x
+    grid  $whi.lhist   $whi.shist  $whi.lage  $whi.mbage  -sticky w
+    grid columnconfigure $whi 1 -weight 1
+    grid columnconfigure $whi 3 -minsize [$mb maxwidth]
+
+    ttk::separator $wc.sep3 -orient horizontal
+
+    set wni $wc.ni
+    ttk::frame $wc.ni
+    ttk::label $wni.lni -text [mc {My nickname for own display}]
+    ttk::entry $wni.eni -textvariable [namespace current]::tmpJPrefs(chat,mynick)
+
+    grid  $wni.lni  $wni.eni  -sticky w
+    grid columnconfigure $wni 1 -weight 1
+
+    grid  $wc.active  -sticky w
+    grid  $wc.newwin  -sticky w
+    grid  $wc.normal  -sticky w
+    grid  $wc.sep     -sticky ew -pady 6
+    grid  $wc.lmb2    -sticky w
+    grid  $wc.rb2new  -sticky w
+    grid  $wc.rb2re   -sticky w
+    grid  $wc.sep2    -sticky ew -pady 6
+    grid  $wc.hi      -sticky w
+    grid  $wc.sep3    -sticky ew -pady 6
+    grid  $wc.ni      -sticky ew
 }
 
 proc ::Chat::SavePrefsHook { } {
@@ -3043,31 +3082,6 @@ proc ::Chat::DestroyPrefsHook { } {
     variable tmpJPrefs
     
     unset -nocomplain tmpJPrefs
-}
-
-#-------------------------------------------------------------------------------
-# Support for JEP-0085 ChatState ...............................................
-
-proc ::Chat::ChangeChatState {chattoken trigger} {
-    upvar 0 $chattoken chatstate
-
-    variable chatStateMap
-    set actualState $chatstate(chatstate)
-
-    if {[info exists chatStateMap($actualState,$trigger)]} {
-        set chatstate(chatstate) $chatStateMap($actualState,$trigger)
-    }
-}
-
-proc ::Chat::SendChatState {chattoken state} {
-    upvar 0 $chattoken chatstate
-
-    set csxmlns "http://jabber.org/protocol/chatstates"
-    set cselems [list  \
-      [wrapper::createtag $state -attrlist [list xmlns $csxmlns]]]
-
-    eval {::Jabber::JlibCmd send_message $chatstate(jid)  \
-      -thread $chatstate(threadid) -type chat -xlist $cselems}
 }
 
 #-------------------------------------------------------------------------------

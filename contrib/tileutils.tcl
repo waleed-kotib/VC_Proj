@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.34 2006-06-22 11:52:35 matben Exp $
+# $Id: tileutils.tcl,v 1.35 2006-07-18 14:02:16 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -134,6 +134,10 @@ proc tileutils::TreeCtrlThemeChanged {win} {
 proc tileutils::configstyles {name} {
     variable tiles
     variable fonts
+    
+    # Joe English has said that it is not necessary to redefine the layout
+    # and create elements in each theme but only in the "default" theme,
+    # but that doesn't work for me.
 
     style theme settings $name {
 	
@@ -331,7 +335,8 @@ proc tileutils::configstyles {name} {
 
 	    style configure Small.SearchEntry -font CociSmallFont
 
-	    
+	    # Plain border element.
+	    style element create border from classic
 	    style layout BorderFrame {
 		BorderFrame.border -sticky nswe
 	    }
@@ -400,14 +405,13 @@ foreach name [tile::availableThemes] {
     if {[catch {package require tile::theme::$name}]} {
 	continue
     }
-    tileutils::configstyles $name
-    
-    # Tiles button bindings must be duplicated.
-    tile::CopyBindings TButton TUrl
-    bind TUrl <Enter>	   {+%W configure -cursor hand2 }
-    bind TUrl <Leave>	   {+%W configure -cursor arrow }
-    
+    tileutils::configstyles $name    
 }
+
+# Tiles button bindings must be duplicated.
+tile::CopyBindings TButton TUrl
+bind TUrl <Enter>	   {+%W configure -cursor hand2 }
+bind TUrl <Leave>	   {+%W configure -cursor arrow }
 
 # ttk::optionmenu --
 # 

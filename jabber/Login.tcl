@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.83 2006-06-11 10:32:17 matben Exp $
+# $Id: Login.tcl,v 1.84 2006-07-18 14:02:16 matben Exp $
 
 package provide Login 1.0
 
@@ -283,18 +283,20 @@ proc ::Login::TraceMenuVar {name key op} {
     set username $tmpProfArr($profile,username)
     set password $tmpProfArr($profile,password)
     
-    ::Profiles::NotebookSetDefaults [namespace current]::moreOpts $server
-
-    foreach {key value} [array get tmpProfArr $profile,-*] {
-	set optname [string map [list $profile,- ""] $key]
-	if {$optname ne "resource"} {
-	    set moreOpts($optname) $value
+    if {$config(login,more)} {
+	::Profiles::NotebookSetDefaults [namespace current]::moreOpts $server
+	
+	foreach {key value} [array get tmpProfArr $profile,-*] {
+	    set optname [string map [list $profile,- ""] $key]
+	    if {$optname ne "resource"} {
+		set moreOpts($optname) $value
+	    }
 	}
+	set resource $tmpProfArr($profile,-resource)
+	set jid [jlib::joinjid $username $server $resource]
+	::Profiles::NotebookSetAnyConfigState $wtabnb $profile
+	::Profiles::NotebookDefaultWidgetStates $wtabnb
     }
-    set resource $tmpProfArr($profile,-resource)
-    set jid [jlib::joinjid $username $server $resource]
-    ::Profiles::NotebookSetAnyConfigState $wtabnb $profile
-    ::Profiles::NotebookDefaultWidgetStates $wtabnb
 }
 
 proc ::Login::GetNormalSize {w} {
