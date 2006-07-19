@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.23 2006-04-28 14:04:07 matben Exp $
+# $Id: wrapper.tcl,v 1.24 2006-07-19 13:51:27 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -583,6 +583,14 @@ proc wrapper::createtag {tagname args} {
     return $xmllist
 }
 
+# wrapper::validxmllist --
+# 
+#       Makes a primitive check to see if this is a valid xmllist.
+
+proc wrapper::validxmllist {xmllist} {
+    return [expr ([llength $xmllist] == 5) ? 1 : 0]
+}
+
 # wrapper::getattr --
 #
 #       This proc returns the value of 'attrname' from 'attrlist'.
@@ -787,7 +795,7 @@ proc wrapper::getnamespacefromchilds {childs tag ns} {
     return $clist
 }
 
-# wrapper::getdhilddeep --
+# wrapper::getchilddeep --
 # 
 #       Searches recursively for the first child with matching tags and 
 #       optionally matching xmlns attributes.
@@ -799,7 +807,7 @@ proc wrapper::getnamespacefromchilds {childs tag ns} {
 # Results:
 #       first found matching child element or empty if not found
 
-proc wrapper::getdhilddeep {xmllist specs} {
+proc wrapper::getchilddeep {xmllist specs} {
     
     set xlist $xmllist
     
