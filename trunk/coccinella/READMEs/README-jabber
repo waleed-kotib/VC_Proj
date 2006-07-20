@@ -3,43 +3,51 @@
                             =============
 
 
-This brief text describes the jabber features supported:
+This brief text describes the jabber features supported.
 
-  * Ordinary messages, one-to-one chat, and groupchat.
+XMPP Core
+---------
 
-  * Disco.
 
-  * Groupchat is supported via the "old" 'groupchat 1.0' protocol,
-    via the never approved, but wide spread, jabber:iq:conference method,
-    and MUC.
 
-  * File transfer using the oob method (http actually).
+XMPP IM
+-------
 
-  * Handles forms using jabber:x:data
 
-  * The Coccinella client can be discoed to, and returns the following
-    namespace declarations describing its services:
 
-      o jabber:client
-      o jabber:iq:browse
-      o jabber:iq:last
-      o jabber:iq:oob
-      o jabber:iq:roster
-      o jabber:iq:time
-      o jabber:iq:version
-      o jabber:x:data
-      o jabber:x:event
-      o http://jabber.org/protocol/bytestreams 
-      o http://jabber.org/protocol/disco 
-      o http://jabber.org/protocol/disco#items
-      o http://jabber.org/protocol/disco#info
-      o http://jabber.org/protocol/ibb 
-      o http://jabber.org/protocol/muc 
-      o http://jabber.org/protocol/si 
-      o http://jabber.org/protocol/si/profile/file-transfer
-      o http://coccinella.sourceforge.net/protocol/servers
-      o http://coccinella.sourceforge.net/protocol/whiteboard
-   
 
-Note, however, that the jabber protocols outside the very core, are a moving 
-target, and that changes and adoptions takes place at a rapid pace.
+JEPS
+----
+
+The following JEPs (Jabber Extension Proposals) are implemented, completely
+or in parts. Note that some of these JEPs have the form of a library or
+support protocol for other 
+
+   JEP  | Name                          | Implementation
+  --------------------------------------------------------------------------
+   0004 | Data Forms                    | complete
+   0008 | IQ-Based Avatars (outdated)   | complete
+   0012 | Last Activity                 | complete
+   0022 | Message Events                | parts
+   0025 | Jabber HTTP Polling           | complete
+   0030 | Service Discovery             | complete
+   0045 | Multi-User Chat               | complete
+   0047 | In-Band Bytestreams           | complete
+   0048 | Bookmark Storage              | for conference rooms
+   0054 | vcard-temp                    | complete
+   0055 | Jabber Search                 | complete
+   0060 | Publish-Subscribe             | complete
+   0065 | SOCKS5 Bytestreams            | proxies not implemented
+   0066 | Out of Band Data              | complete
+   0077 | In-Band Registration          | complete
+   0078 | Non-SASL Authentication       | complete
+   0085 | Chat State Notifications      | complete
+   0090 | Entity Time                   | complete
+   0091 | Delayed Delivery              | complete
+   0092 | Software Version              | complete
+   0095 | Stream Initiation             | complete
+   0096 | File Transfer                 | complete
+   0115 | Entity Capabilities           | complete
+   0153 | vCard-Based Avatars           | complete
+   0166 | Jingle                        | complete
+   0179 | Jingle IAX Transport Method   | complete
