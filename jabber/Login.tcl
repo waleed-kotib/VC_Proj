@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements functions for logging in at different application levels.
 #      
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.84 2006-07-18 14:02:16 matben Exp $
+# $Id: Login.tcl,v 1.85 2006-07-22 13:15:23 matben Exp $
 
 package provide Login 1.0
 
@@ -34,6 +34,8 @@ namespace eval ::Login:: {
     set ::config(login,profiles)     1
     set ::config(login,autosave)     0
     set ::config(login,autoregister) 0
+    set ::config(login,dnssrv)       1
+    set ::config(login,dnstxthttp)   0
 }
 
 # Login::Dlg --
@@ -894,7 +896,7 @@ proc ::Login::HighFinish {token {err ""} {msg ""}} {
 #       Callback scheduled.
 
 proc ::Login::Connect {server cmd args} {
-    global  prefs
+    global  prefs config
     variable pending
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
@@ -941,18 +943,52 @@ proc ::Login::Connect {server cmd args} {
     }
     
     # Open socket unless we are using a http proxy.
-    if {!$argsArr(-http)} {
-	set callback [list [namespace current]::ConnectCB $cmd]
-	::Network::Open $host $port $callback -timeout $prefs(timeoutSecs)  \
-	  -ssl $ssl
+    if {$argsArr(-http)} {
+	if {$config(login,dnstxthttp)} {
+	    set tok [jlib::dns::get_http_poll_url $server \
+	      [list [namespace current]::DNSURLCB $argsArr(-httpurl) $cmd]]
+	} else {
+	
+	    # Perhaps it gives a better structure to have this elsewhere?
+	    # Proxy configuration works transparently using autoproxy.
+	    jlib::http::new $jstate(jlib) $argsArr(-httpurl)
+	    uplevel #0 $cmd [list ok ""]
+	}
     } else {
 	
-	# Perhaps it gives a better structure to have this elsewhere?
-	# Proxy configuration works transparently using autoproxy.
-	jlib::http::new $jstate(jlib) $argsArr(-httpurl)
-
-	uplevel #0 $cmd [list ok ""]
+	# Do not do DNS SRV lookup if we have an explicit ip address.
+	set callback [list [namespace current]::ConnectCB $cmd]
+	if {($argsArr(-ip) eq "") && $config(login,dnssrv)} {
+	    set opts [list -timeout $prefs(timeoutSecs) -ssl $ssl]
+	    set tok [jlib::dns::get_addr_port $server \
+	      [list [namespace current]::DNSCB $server $port $callback $opts]]
+	} else {
+	    ::Network::Open $host $port $callback -timeout $prefs(timeoutSecs)  \
+	      -ssl $ssl
+	}
     }
+}
+
+proc ::Login::DNSCB {server port callback opts addrPort {err ""}} {
+        
+    # We never let a failure stop us here. Use host as fallback.
+    if {$err eq ""} {
+	set host [lindex $addrPort 0 0]
+	set port [lindex $addrPort 0 1]
+    } else {
+	set host $server
+    }
+    eval {::Network::Open $host $port $callback} $opts
+}
+
+proc ::Login::DNSURLCB {url cmd dnsurl {err ""}} {
+
+    # We never let a failure stop us here.
+    if {$err eq ""} {
+	set url $dnsurl
+    }
+    jlib::http::new $jstate(jlib) $url
+    uplevel #0 $cmd [list ok ""]
 }
 
 # Login::ConnectCB --

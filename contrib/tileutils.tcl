@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.35 2006-07-18 14:02:16 matben Exp $
+# $Id: tileutils.tcl,v 1.36 2006-07-22 13:15:23 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -139,13 +139,22 @@ proc tileutils::configstyles {name} {
     # and create elements in each theme but only in the "default" theme,
     # but that doesn't work for me.
 
+    array set colors {
+	invalidfg   "#ff0000"
+	invalidbg   "#ffffb0"
+    }
+    
     style theme settings $name {
 	
 	# Set invalid state maps.
 	style map TEntry  \
-	  -fieldbackground {invalid "#FFFFE0"} -foreground {invalid "#FF0000"}
+	  -fieldbackground [list invalid $colors(invalidbg)]  \
+	  -foreground [list invalid $colors(invalidfg)]       \
+	  -background [list invalid $colors(invalidbg)]
 	style map TCombobox  \
-	  -fieldbackground {invalid "#FFFFE0"} -foreground {invalid "#FF0000"}
+	  -fieldbackground [list invalid $colors(invalidbg)]  \
+	  -foreground [list invalid $colors(invalidfg)]       \
+	  -background [list invalid $colors(invalidbg)]
 
 	style layout Headlabel {
 	    Headlabel.border -children {
@@ -236,6 +245,37 @@ proc tileutils::configstyles {name} {
 	style map Sunken.TEntry  \
 	  -foreground {{background} "#363636" {} black}
 	style configure Small.Sunken.TEntry -font CociSmallFont
+
+	# Search entry (from Michael Kirkham).
+	set pad [style default TEntry -padding]
+	switch -- [llength $pad] {
+	    0 { set pad [list 4 0 0 0] }
+	    1 { set pad [list [expr {$pad+4}] $pad $pad $pad] }
+	    2 {
+		foreach {padx pady} $pad break
+		set pad [list [expr {$padx+4}] $pady $padx $pady]
+	    }
+	    4 { lset pad 0 [expr {[lindex $pad 0]+4}] }
+	}
+
+	style element create searchEntryIcon image $tiles(search) \
+	  -padding {8 0 0 0} -sticky {}
+
+	style layout Search.TEntry {
+	    Entry.field -children {
+		searchEntryIcon -side left
+		Entry.padding -children {
+		    Entry.textarea
+		}
+	    }
+	}
+	style configure Search.TEntry -padding $pad
+	style map Search.TEntry -image [list disabled $tiles(search)] \
+	  -fieldbackground [list invalid $colors(invalidbg)]  \
+	  -foreground [list invalid $colors(invalidfg)]       \
+	  -background [list invalid $colors(invalidbg)]
+
+	style configure Small.Search.TEntry -font CociSmallFont
 	
 	# Safari type button.
 	unset -nocomplain foreground
@@ -305,36 +345,6 @@ proc tileutils::configstyles {name} {
 	
 	# Test------------------
 	if {0} {
-	    
-	    # Search entry (from Michael Kirkham).
-	    set pad [style default TEntry -padding]
-
-	    switch -- [llength $pad] {
-		0 { set pad [list 4 0 0 0] }
-		1 { set pad [list [expr {$pad+4}] $pad $pad $pad] }
-		2 {
-		    foreach {padx pady} $pad break
-		    set pad [list [expr {$padx+4}] $pady $padx $pady]
-		}
-		4 { lset pad 0 [expr {[lindex $pad 0]+4}] }
-	    }
-
-	    style layout SearchEntry {
-		Entry.field -children {
-		    SearchEntry.icon -side left
-		    Entry.padding -children {
-			Entry.textarea
-		    }
-		}
-	    }
-	    style configure SearchEntry -padding $pad
-	    style element create SearchEntry.icon image $tiles(search) \
-	      -padding {8 0 0 0} -sticky {}
-	    style map SearchEntry -image [list disabled $tiles(search)] \
-	      -fieldbackground {invalid "#FFFFE0"} -foreground {invalid "#FF0000"}
-
-	    style configure Small.SearchEntry -font CociSmallFont
-
 	    # Plain border element.
 	    style element create border from classic
 	    style layout BorderFrame {
@@ -551,8 +561,8 @@ if {0} {
     
     ttk::button $w.bp1 -style Plain -text "Plain Button" -command cmd
     
-    ttk::entry $w.es -style SearchEntry
-    ttk::entry $w.ess -style Small.SearchEntry
+    ttk::entry $w.es -style Search.TEntry
+    ttk::entry $w.ess -style Small.Search.TEntry -font CociSmallFont
     
     frame $w.f
     ttk::label $w.f.l -style Sunken.TLabel -compound image -image $name
