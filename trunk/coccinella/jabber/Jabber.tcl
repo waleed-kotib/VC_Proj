@@ -2,9 +2,9 @@
 #  
 #      This file is part of The Coccinella application. 
 #      
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.170 2006-06-21 12:15:04 matben Exp $
+# $Id: Jabber.tcl,v 1.171 2006-07-22 13:15:23 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -22,9 +22,11 @@ package require roster
 package require jlib::bytestreams
 package require jlib::caps
 package require jlib::disco
+package require jlib::dns
 package require jlib::ftrans
 package require jlib::http
 package require jlib::ibb
+package require jlib::pubsub
 package require jlib::si
 package require jlib::vcard
 

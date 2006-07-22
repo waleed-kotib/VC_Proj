@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.19 2006-03-20 14:37:18 matben Exp $
+# $Id: Network.tcl,v 1.20 2006-07-22 13:15:23 matben Exp $
 
 package provide Network 1.0
 
@@ -41,7 +41,7 @@ proc ::Network::Open {nameOrIP port cmd args} {
     variable opts
     
     if {$debug > 1} {
-	puts "::Network::Open, nameOrIP=$nameOrIP, port=$port"
+	puts "::Network::Open, nameOrIP=$nameOrIP, port=$port, cmd=$cmd, args=$args"
     }
     array set opts {
 	-timeout 0
@@ -81,7 +81,6 @@ proc ::Network::Open {nameOrIP port cmd args} {
     if {$opts(-timeout) > 0} {
 	::Network::ScheduleKiller $sock $cmd
     }
-    
     return
 }
 
@@ -145,7 +144,7 @@ proc ::Network::WhenSocketOpensInits {sock nameOrIP port cmd tls} {
 	}
 	fconfigure $sock -blocking 0
     }
-    
+           
     # Evaluate our callback procedure.
     uplevel #0 $cmd [list $sock $nameOrIP $port ok]
 }
