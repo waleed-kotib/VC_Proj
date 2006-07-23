@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.85 2006-07-22 13:15:23 matben Exp $
+# $Id: Login.tcl,v 1.86 2006-07-23 13:29:07 matben Exp $
 
 package provide Login 1.0
 
@@ -34,7 +34,7 @@ namespace eval ::Login:: {
     set ::config(login,profiles)     1
     set ::config(login,autosave)     0
     set ::config(login,autoregister) 0
-    set ::config(login,dnssrv)       1
+    set ::config(login,dnssrv)       0
     set ::config(login,dnstxthttp)   0
 }
 
