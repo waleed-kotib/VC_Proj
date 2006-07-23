@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.16 2006-06-21 12:15:05 matben Exp $
+# $Id: Status.tcl,v 1.17 2006-07-23 13:29:07 matben Exp $
 
 package provide Status 1.0
 
@@ -358,10 +358,11 @@ proc ::Jabber::Status::SetWithMessage {varName args} {
     upvar #0 $w state
     
     set state(finished) -1
-    set state(varName) $varName
-    set state(args) $args
-    set state(-to) ""
-    set state(-status) ""
+    set state(varName)  $varName
+    set state(args)     $args
+    set state(-to)      ""
+    set state(-status)  ""
+    set state(-command) ""
     array set state $args
     
     # We must work with a temporary varName for status.
@@ -480,6 +481,8 @@ proc ::Jabber::Status::BtSetStatus {w} {
     upvar #0 $w state
         
     set $state(varName) $state(show)
+    
+    parray state
 
     set text [string trim [$state(wtext) get 1.0 end]]
     set opts [list -status $text]
