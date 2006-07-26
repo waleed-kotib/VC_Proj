@@ -6,8 +6,9 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.19 2006-04-24 06:36:19 matben Exp $
+# $Id: jlibsasl.tcl,v 1.20 2006-07-26 06:26:29 matben Exp $
 
+package require jlib
 package require saslmd5
 set ::_saslpack saslmd5
 
@@ -58,7 +59,7 @@ proc jlib::encode64 {str} {
 
 # jlib::auth_sasl --
 # 
-# 
+#       Create a new SASL object.
 
 proc jlib::auth_sasl {jlibname username resource password cmd} {
     
@@ -330,16 +331,15 @@ proc jlib::sasl_failure {jlibname tag xmllist} {
 
     Debug 2 "jlib::sasl_failure"
     
-    if {[wrapper::getattribute $xmllist xmlns] == $xmppxmlns(sasl)} {
+    if {[wrapper::getattribute $xmllist xmlns] eq $xmppxmlns(sasl)} {
 	set errelem [lindex [wrapper::getchildren $xmllist] 0]
-	#puts "\t errelem=$errelem"
 	if {$errelem eq ""} {
 	    set errmsg "not-authorized"
 	} else {
 	    set errtag [wrapper::gettag $errelem]
 	    set errmsg [sasl_getmsg $errtag]
 	}
-	sasl_final $jlibname error [list {} $errmsg]
+	sasl_final $jlibname error [list $errtag $errmsg]
     }
     return {}
 }

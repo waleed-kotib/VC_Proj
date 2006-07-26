@@ -5,14 +5,13 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.9 2006-03-20 14:37:17 matben Exp $
+# $Id: jlibtls.tcl,v 1.10 2006-07-26 06:26:29 matben Exp $
 
 package require tls
+package require jlib
 
 package provide jlibtls 1.0
 
-
-namespace eval jlib { }
 
 proc jlib::starttls {jlibname cmd args} {
     
@@ -38,7 +37,7 @@ proc jlib::starttls {jlibname cmd args} {
 
 proc jlib::tls_features_write {jlibname name1 name2 op} {
     
-    Debug 2 "jlib::tls_features_write"
+    Debug 2 "jlib::tls_features_write $jlibname $name1 $name2 $op"
     
     trace remove variable ${jlibname}::locals(features) write \
       [list [namespace current]::tls_features_write $jlibname]
@@ -47,13 +46,12 @@ proc jlib::tls_features_write {jlibname name1 name2 op} {
 
 proc jlib::tls_continue {jlibname} {
     
-    upvar ${jlibname}::locals locals
     variable xmppxmlns
 
     Debug 2 "jlib::tls_continue"
     
     # Must verify that the server provides a 'starttls' feature.
-    if {![info exists locals(features,starttls)]} {
+    if {![have_features $jlibname starttls]} {
 	tls_finish $jlibname starttls-nofeature
     }
     set xmllist [wrapper::createtag starttls -attrlist [list xmlns $xmppxmlns(tls)]]

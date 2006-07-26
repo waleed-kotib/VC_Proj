@@ -29,7 +29,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # -------------------------------------------------------------------------
 #
-# $Id: dns.tcl,v 1.1 2006-07-22 13:15:23 matben Exp $
+# $Id: dns.tcl,v 1.2 2006-07-26 06:26:29 matben Exp $
 
 # Mats Bengtsson: Stripped out a few packages to reduce dependencies.
 
@@ -38,8 +38,10 @@ package require Tcl 8.2;                # tcl minimum version
 package require ip;                     # tcllib 1.7
 
 namespace eval ::dns {
-    variable version 1.3.1
-    variable rcsid {$Id: dns.tcl,v 1.1 2006-07-22 13:15:23 matben Exp $}
+    #variable version 1.3.1
+    # Fake version to avoid loding buggy installed one.
+    variable version 9.9
+    variable rcsid {$Id: dns.tcl,v 1.2 2006-07-26 06:26:29 matben Exp $}
 
     namespace export configure resolve name address cname \
         status reset wait cleanup errorcode
@@ -657,11 +659,7 @@ proc ::dns::TcpTransmit {token} {
     # FRINK: nocheck
     variable $token
     upvar 0 $token state
-
-    # For TCP the message must be prefixed with a 16bit length field.
-    set req [binary format S [string length $state(request)]]
-    append req $state(request)
-
+    
     # setup the timeout
     if {$state(-timeout) > 0} {
         set state(after) [after $state(-timeout) \
@@ -670,16 +668,51 @@ proc ::dns::TcpTransmit {token} {
                                    "operation timed out"]]
     }
 
-    set s [socket $state(-nameserver) $state(-port)]
+    if {[catch {
+	if {$state(-command) == {}} {
+	    set s [socket $state(-nameserver) $state(-port)]
+	} else {
+	    set s [socket -async $state(-nameserver) $state(-port)]
+	}
+    } err]} {
+	Finish $token $err
+	return
+    }
     fconfigure $s -blocking 0 -translation binary -buffering none
     set state(sock) $s
     set state(status) connect
 
-    puts -nonewline $s $req
-
-    fileevent $s readable [list [namespace current]::TcpEvent $token]
-    
+    if {$state(-command) == {}} {
+	TcpSend $token
+    } else {
+	fileevent $s writable [list [namespace current]::TcpSend $token]
+    }    
     return $token
+}
+
+proc ::dns::TcpSend {token} {
+    variable $token
+    upvar 0 $token state
+    
+    set s $state(sock)
+    fileevent $s writable {}
+
+    if {[catch {eof $s} iseof] || $iseof} {
+	Finish $token eof
+	return
+    }
+
+    # For TCP the message must be prefixed with a 16bit length field.
+    set req [binary format S [string length $state(request)]]
+    append req $state(request)
+
+    if {[catch {
+	puts -nonewline $s $req
+    } err]} {
+	Finish $token $err
+    } else {
+	fileevent $s readable [list [namespace current]::TcpEvent $token]
+    }
 }
 
 # -------------------------------------------------------------------------
@@ -732,7 +765,7 @@ proc ::dns::Finish {token {errormsg ""}} {
     variable $token
     upvar 0 $token state
     global errorInfo errorCode
-
+    
     if {[string length $errormsg] != 0} {
 	set state(error) $errormsg
 	set state(status) error

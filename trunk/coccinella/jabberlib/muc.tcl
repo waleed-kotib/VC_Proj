@@ -1,6 +1,6 @@
 #  muc.tcl --
 #  
-#      This file is part of the whiteboard application and jabberlib.
+#      This file is part of jabberlib.
 #      It implements the Multi User Chat (MUC) protocol part of the XMPP
 #      protocol as defined by the 'http://jabber.org/protocol/muc*'
 #      namespace.
@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.31 2006-05-01 13:35:58 matben Exp $
+# $Id: muc.tcl,v 1.32 2006-07-26 06:26:29 matben Exp $
 # 
 ############################# USAGE ############################################
 #

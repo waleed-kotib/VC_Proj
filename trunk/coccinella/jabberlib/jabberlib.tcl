@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.142 2006-05-30 14:32:38 matben Exp $
+# $Id: jabberlib.tcl,v 1.143 2006-07-26 06:26:29 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -146,6 +146,8 @@
 #      
 #-------------------------------------------------------------------------------
 
+# @@@ TODO: change package names to jlib::*
+
 package require wrapper
 package require roster
 package require service
@@ -196,12 +198,13 @@ namespace eval jlib {
     
     variable jxmlns
     array set jxmlns {
+	amp             http://jabber.org/protocol/amp
+	caps            http://jabber.org/protocol/caps
+	compress        http://jabber.org/features/compress 
 	disco           http://jabber.org/protocol/disco 
 	disco,items     http://jabber.org/protocol/disco#items 
 	disco,info      http://jabber.org/protocol/disco#info
-	caps            http://jabber.org/protocol/caps
 	ibb             http://jabber.org/protocol/ibb
-	amp             http://jabber.org/protocol/amp
 	muc             http://jabber.org/protocol/muc
 	muc,user        http://jabber.org/protocol/muc#user
 	muc,admin       http://jabber.org/protocol/muc#admin
@@ -591,6 +594,15 @@ proc jlib::verify_options {jlibname args} {
 	    return -code error "Unknown option $flag, can be: $usage"
 	}
     }
+}
+
+# jlib::connect --
+# 
+#       Just a wrapper for the jlib::connect::connect function.
+
+proc jlib::connect {jlibname jid password cmd args} {
+    
+    return [eval {jlib::connect::connect $jlibname $jid $password $cmd} $args]
 }
 
 # jlib::state --
@@ -1511,6 +1523,15 @@ proc jlib::features_handler {jlibname xmllist} {
 		    }
 		}
 	    }
+	    compression {
+		if {[wrapper::getattr $attr xmlns] eq $xmppxmlns(compress)} {
+		    set locals(features,compression) 1
+		    foreach c [wrapper::getchildswithtag $xmllist method] {
+			set method [wrapper::getcdata $c]
+			set locals(features,compression,$method) 1
+		    }
+		}
+	    }
 	    default {
 		set locals(features,$tag) 1
 	    }
@@ -1521,7 +1542,7 @@ proc jlib::features_handler {jlibname xmllist} {
     set locals(features) 1
 }
 
-# jlib::get_features --
+# jlib::get_features, have_features --
 # 
 #       Just to get access of the stream features.
 
@@ -1537,6 +1558,23 @@ proc jlib::get_features {jlibname name {name2 ""}} {
     } else {
 	if {[info exists locals(features,$name)]} {
 	    set ans $locals(features,$name)
+	}
+    }
+    return $ans
+}
+
+proc jlib::have_features {jlibname name {name2 ""}} {
+    
+    upvar ${jlibname}::locals locals
+
+    set ans 0
+    if {$name2 ne ""} {
+	if {[info exists locals(features,$name,$name2)]} {
+	    set ans 1
+	}
+    } else {
+	if {[info exists locals(features,$name)]} {
+	    set ans 1
 	}
     }
     return $ans
