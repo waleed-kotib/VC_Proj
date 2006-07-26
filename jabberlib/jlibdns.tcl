@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jlibdns.tcl,v 1.1 2006-07-22 13:15:23 matben Exp $
+# $Id: jlibdns.tcl,v 1.2 2006-07-26 06:26:29 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -20,7 +20,7 @@
 #      jlib::dns::get_http_poll_url domain cmd
 
 
-package require dns
+package require dns 9.9    ;# Fake version to avoid loding buggy version.
 package require jlib
 
 package provide jlib::dns 0.1
@@ -40,11 +40,12 @@ namespace eval jlib::dns {
     }
 }
 
-proc jlib::dns::get_addr_port {domain cmd} {
+proc jlib::dns::get_addr_port {domain cmd args} {
     
+    # dns::resolve my throw error!
     set name _xmpp-client._tcp.$domain
-    return [dns::resolve $name -type SRV  \
-      -command [list [namespace current]::addr_cb $cmd]]
+    return [eval {dns::resolve $name -type SRV  \
+      -command [list [namespace current]::addr_cb $cmd]} $args]
 }
 
 proc jlib::dns::addr_cb {cmd token} {
@@ -83,7 +84,7 @@ proc jlib::dns::addr_cb {cmd token} {
 	    }
 	    uplevel #0 $cmd [list $addrPort]
 	} else {
-	    uplevel #0 $cmd [list {} "empty reply"]
+	    uplevel #0 $cmd [list {} dns-empty]
 	}
     } else {
 	uplevel #0 $cmd [list {} [dns::error $token]]
@@ -105,11 +106,11 @@ proc jlib::dns::get_http_bind_url {domain cmd} {
       -command [list [namespace current]::http_cb bind $cmd]]
 }
 
-proc jlib::dns::get_http_poll_url {domain cmd} {
+proc jlib::dns::get_http_poll_url {domain cmd args} {
     
     set name _xmppconnect.$domain
-    return [dns::resolve $name -type TXT  \
-      -command [list [namespace current]::http_cb poll $cmd]]
+    return [eval {dns::resolve $name -type TXT  \
+      -command [list [namespace current]::http_cb poll $cmd]} $args]
 }
 
 proc jlib::dns::http_cb {attr cmd token} {
@@ -131,7 +132,7 @@ proc jlib::dns::http_cb {attr cmd token} {
 		}
 	    }
 	}
-	uplevel #0 $cmd [list {} "no resource record"]
+	uplevel #0 $cmd [list {} dns-no-resource-record]
     } else {
 	uplevel #0 $cmd [list {} [dns::error $token]]
     }
@@ -150,6 +151,7 @@ if {0} {
     proc cb {args} {puts "---> $args"}
     jlib::dns::get_addr_port gmail.com cb
     jlib::dns::get_addr_port jabber.ru cb
+    jlib::dns::get_addr_port jabber.com cb
     # Missing 
     jlib::dns::get_http_poll_url gmail.com cb    
     jlib::dns::get_http_poll_url jabber.ru cb    

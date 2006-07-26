@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.86 2006-07-23 13:29:07 matben Exp $
+# $Id: Login.tcl,v 1.87 2006-07-26 06:26:29 matben Exp $
 
 package provide Login 1.0
 
@@ -34,7 +34,7 @@ namespace eval ::Login:: {
     set ::config(login,profiles)     1
     set ::config(login,autosave)     0
     set ::config(login,autoregister) 0
-    set ::config(login,dnssrv)       0
+    set ::config(login,dnssrv)       1
     set ::config(login,dnstxthttp)   0
 }
 
@@ -945,8 +945,8 @@ proc ::Login::Connect {server cmd args} {
     # Open socket unless we are using a http proxy.
     if {$argsArr(-http)} {
 	if {$config(login,dnstxthttp)} {
-	    set tok [jlib::dns::get_http_poll_url $server \
-	      [list [namespace current]::DNSURLCB $argsArr(-httpurl) $cmd]]
+	    set cb [list [namespace current]::DNSURLCB $argsArr(-httpurl) $cmd]
+	    set tok [jlib::dns::get_http_poll_url $server $cb -timeout 2000]
 	} else {
 	
 	    # Perhaps it gives a better structure to have this elsewhere?
@@ -960,8 +960,8 @@ proc ::Login::Connect {server cmd args} {
 	set callback [list [namespace current]::ConnectCB $cmd]
 	if {($argsArr(-ip) eq "") && $config(login,dnssrv)} {
 	    set opts [list -timeout $prefs(timeoutSecs) -ssl $ssl]
-	    set tok [jlib::dns::get_addr_port $server \
-	      [list [namespace current]::DNSCB $server $port $callback $opts]]
+	    set cb [list [namespace current]::DNSCB $server $port $callback $opts]
+	    set tok [jlib::dns::get_addr_port $server $cb -timeout 2000]
 	} else {
 	    ::Network::Open $host $port $callback -timeout $prefs(timeoutSecs)  \
 	      -ssl $ssl

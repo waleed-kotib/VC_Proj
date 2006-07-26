@@ -8,16 +8,16 @@ This brief text describes the jabber features supported.
 XMPP Core (RFC 3920)
 --------------------
 
- o TLS (sect. 5)
- o SASL authentication with mechanisms [PLAIN], [DIGEST-MD5] (sect. 6, 14.7)
- o Resource binding (sect. 7)
- o DNS hostname resolved using SRV records (sect. 14.3)
+   o TLS (sect. 5)
+   o SASL authentication with mechanisms [PLAIN], [DIGEST-MD5] (sect. 6, 14.7)
+   o Resource binding (sect. 7)
+   o DNS hostname resolved using SRV records (sect. 14.3)
 
 
 XMPP IM
 -------
 
-
+1.2.  Requirements   o  Exchange messages with other users   o  Exchange presence information with other users   o  Manage subscriptions to and from other users   o  Manage items in a contact list (in XMPP this is called a "roster")   o  Block communications to or from specific other users (TODO)
 
 
 JEPS
@@ -25,7 +25,7 @@ JEPS
 
 The following JEPs (Jabber Extension Proposals) are implemented, completely
 or in parts. Note that some of these JEPs have the form of a library or
-support protocol for other 
+support protocol for other functions.
 
    JEP  | Name                          | Implementation
   --------------------------------------------------------------------------
@@ -53,6 +53,9 @@ support protocol for other
    0096 | File Transfer                 | complete
    0115 | Entity Capabilities           | complete
    0153 | vCard-Based Avatars           | complete
+   0156 | A DNS TXT Resource...         | complete
    0166 | Jingle                        | complete
    0179 | Jingle IAX Transport Method   | complete
+
+
 

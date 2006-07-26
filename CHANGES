@@ -5,6 +5,12 @@
 
 Not to mention all bugfixes and rewrites.
 
+Coccinella-0.95.14 (06????):
+
+ o support for DNS SRV and TXT (HTTP) lookup
+ o pubsub library support
+
+
 Coccinella-0.95.13 (060622):
 
  o Critical bugfix for iaxclient on linux systems without audio support
