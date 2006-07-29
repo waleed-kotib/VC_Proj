@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.45 2006-05-16 06:06:29 matben Exp $
+# $Id: Register.tcl,v 1.46 2006-07-29 13:12:59 matben Exp $
 
 package provide Register 1.0
 
@@ -13,368 +13,14 @@ namespace eval ::Register:: {
 
     option add *JRegister.registerImage         register         widgetDefault
     option add *JRegister.registerDisImage      registerDis      widgetDefault
-
-    variable server
-    variable username
-    variable password
 }
 
-# Register::NewDlg --
-#
-#       Registers new user with a server.
-#
-# Arguments:
-#       args   -server, -username, -password
-#       
-# Results:
-#       "cancel" or "new".
-
-proc ::Register::NewDlg {args} {
-    global  this wDlgs
-    
-    upvar ::Jabber::jprefs jprefs
-    variable finished  -1
-    variable server    ""
-    variable username  ""
-    variable password  ""
-    variable password2 ""
-    variable ssl       0
-    variable port      $jprefs(port)
-    
-    set w $wDlgs(jreg)
-    if {[winfo exists $w]} {
-	return
-    }
-    array set argsArr $args
-    foreach name {server username password} {
-	if {[info exists argsArr(-$name)]} {
-	    set $name $argsArr(-$name)
-	}
-    }
-    if {[info exists password]} {
-	set password2 $password
-    }
-    set ssl $jprefs(usessl)
-
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox} -class JRegister
-    wm title $w [mc {Register New Account}]
-
-    set im   [::Theme::GetImage [option get $w registerImage {}]]
-    set imd  [::Theme::GetImage [option get $w registerDisImage {}]]
-
-    # Global frame.
-    ttk::frame $w.frall
-    pack $w.frall -fill both -expand 1
-    
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc {New Account}] -compound left \
-      -image [list $im background $imd]
-    pack $w.frall.head -side top -anchor w
-
-    ttk::separator $w.frall.s -orient horizontal
-    pack $w.frall.s -side top -fill x
-
-    set wbox $w.frall.f
-    ttk::frame $wbox -padding [option get . dialogPadding {}]
-    pack $wbox -fill both -expand 1
-    
-    ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc janewaccount]
-    pack $wbox.msg -side top -anchor w
-    
-    # Entries etc.
-    
-    set frmid $wbox.frmid
-    ttk::frame $frmid
-    pack $frmid -side top -fill both -expand 1
-
-    ttk::label $frmid.lserv -text "[mc {Jabber Server}]:" -anchor e
-    ttk::entry $frmid.eserv  \
-      -textvariable [namespace current]::server -validate key  \
-      -validatecommand {::Jabber::ValidateDomainStr %S}
-    ttk::label $frmid.luser -text "[mc Username]:" -anchor e
-    ttk::entry $frmid.euser  \
-      -textvariable [namespace current]::username -validate key  \
-      -validatecommand {::Jabber::ValidateUsernameStr %S}
-    ttk::label $frmid.lpass -text "[mc Password]:" -anchor e
-    ttk::entry $frmid.epass   \
-      -textvariable [namespace current]::password -validate key  \
-      -validatecommand {::Jabber::ValidatePasswordStr %S} -show {*}
-    ttk::label $frmid.lpass2 -text "[mc {Retype password}]:"  \
-      -anchor e
-    ttk::entry $frmid.epass2  \
-      -textvariable [namespace current]::password2 -validate key  \
-      -validatecommand {::Jabber::ValidatePasswordStr %S} -show {*}
-    ttk::checkbutton $frmid.cssl -style Small.TCheckbutton \
-      -text [mc {Use SSL for security}]  \
-      -variable [namespace current]::ssl \
-      -command [namespace current]::SSLCmd
-    ttk::label $frmid.lport -style Small.TLabel \
-      -text "[mc {Port}]:" -anchor e
-    ttk::entry $frmid.eport -style Small.TEntry -width 6   \
-      -textvariable [namespace current]::port -validate key  \
-      -validatecommand {::Register::ValidatePortNumber %S}  \
-      -font CociSmallFont
-    
-    grid  $frmid.lserv   $frmid.eserv  -pady 2
-    grid  $frmid.luser   $frmid.euser  -pady 2
-    grid  $frmid.lpass   $frmid.epass  -pady 2
-    grid  $frmid.lpass2  $frmid.epass2 -pady 2
-    grid  x              $frmid.cssl   -pady 2
-    grid  $frmid.lport   $frmid.eport  -pady 2
-    
-    grid $frmid.lserv $frmid.luser $frmid.lpass $frmid.lpass2 $frmid.lport \
-      -sticky e
-    grid $frmid.eserv $frmid.euser $frmid.epass $frmid.epass2 -sticky ew
-    grid $frmid.cssl $frmid.eport -sticky w
-    
-    # Button part.
-    set frbot $wbox.b
-    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Register] -default active \
-      -command [list [namespace current]::OK $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::Cancel $w]
-    set padx [option get . buttonPadX {}]
-    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
-	pack $frbot.btok -side right
-	pack $frbot.btcancel -side right -padx $padx
-    } else {
-	pack $frbot.btcancel -side right
-	pack $frbot.btok -side right -padx $padx
-    }
-    pack $frbot -side bottom -fill x
-    
-    wm resizable $w 0 0
-    bind $w <Return> [list $frbot.btok invoke]
-    
-    # Grab and focus.
-    set oldFocus [focus]
-    focus $frmid.eserv
-    catch {grab $w}
-    
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
-    
-    catch {grab release $w}
-    catch {focus $oldFocus}
-    return [expr {($finished <= 0) ? "cancel" : "new"}]
-}
-
-proc ::Register::ValidatePortNumber {str} {
-    
+proc ::Register::ValidatePortNumber {str} {    
     if {[string is integer $str]} {
 	return 1
     } else {
 	bell
 	return 0
-    }
-}
-
-proc ::Register::SSLCmd { } {
-    variable ssl
-    variable port
-    upvar ::Jabber::jprefs jprefs
-    
-    if {$ssl} {
-	set port $jprefs(sslport)
-    } else {
-	set port $jprefs(port)
-    }
-}
-
-proc ::Register::Cancel {w} {
-    variable finished
-
-    set finished 0
-    destroy $w
-}
-
-proc ::Register::OK {w} {
-    variable password
-    variable password2
-    
-    if {$password != $password2} {
-	::UI::MessageBox -icon error -title [mc {Different Passwords}] \
-	  -message [mc messpasswddifferent] -parent $w
-	set password  ""
-	set password2 ""
-    } else {
-	[namespace current]::DoRegister $w
-    }
-}
-
-# Register::DoRegister --
-#
-#       Initiates a register operation.
-# Arguments:
-#       w
-#       
-# Results:
-#       None, dialog closed.
-
-proc ::Register::DoRegister {w} {
-    global  errorCode prefs
-
-    variable finished
-    variable server
-    variable username
-    variable password
-    variable ssl
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::Register::DoRegister"
-    
-    # Kill any pending open states.
-    ::Network::KillAll
-    ::Jabber::UI::SetStatusMessage ""
-    ::Jabber::UI::StartStopAnimatedWave 0
-    
-    # Check 'server', 'username' if acceptable.
-    foreach name {server username} {
-	upvar 0 $name what
-	if {[string length $what] <= 1} {
-	    ::UI::MessageBox -icon error -type ok -parent [winfo toplevel $w] \
-	      -message [mc jamessnamemissing $name]
-	    return
-	}
-	
-	# This is just to check the validity!
-	if {[catch {
-	    switch -- $name {
-		server {
-		    jlib::nameprep $what
-		}
-		username {
-		    jlib::nodeprep $what
-		}
-	    }
-	} err]} {
-	    ::UI::MessageBox -icon error -type ok \
-	      -message [mc jamessillegalchar $name $what]
-	    return
-	}
-    }    
-    destroy $w
-    
-    # Asks for a socket to the server.
-    ::Login::Connect $server [namespace current]::ConnectCB -ssl $ssl
-}
-
-proc ::Register::ConnectCB {status msg} {
-    variable server
-
-    ::Debug 2 "::Register::ConnectCB status=$status"
-    
-    switch $status {
-	error {
-	    ::UI::MessageBox -icon error -type ok \
-	      -message [mc jamessnosocket $server $msg]
-	}
-	timeout {
-	    ::UI::MessageBox -icon error -type ok \
-	      -message [mc jamesstimeoutserver $server]
-	}
-	default {
-	    # Go ahead...
-	    if {[catch {
-		::Login::InitStream $server \
-		  [namespace current]::SendRegister
-	    } err]} {
-		::UI::MessageBox -icon error -title [mc {Open Failed}] \
-		  -type ok -message $err
-	    }
-	}
-    }
-}
-
-proc ::Register::SendRegister {args} {
-    variable username
-    variable password
-    variable streamid
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::Register::SendRegister args=$args"
-    
-    array set argsArr $args
-    if {![info exists argsArr(id)]} {
-	::UI::MessageBox -icon error -type ok -message \
-	  "no id for digest in receiving <stream>"
-    } else {
-	set streamid $argsArr(id)
-
-	# Make a new account. Perhaps necessary to get additional variables
-	# from some user preferences.
-	$jstate(jlib) register_set $username $password   \
-	  [namespace current]::SendRegisterCB
-    }
-}
-
-proc ::Register::SendRegisterCB {jlibName type theQuery} {    
-    variable finished
-    variable server
-    variable username
-    variable resource
-    variable password
-    variable streamid
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
-    
-    ::Debug 2 "::Register::SendRegisterCB jlibName=$jlibName,\
-      type=$type, theQuery=$theQuery"
-    
-    if {[string equal $type "error"]} {
-	set errcode [lindex $theQuery 0]
-	set errmsg [lindex $theQuery 1]
-	if {$errcode == 409} {
-	    set msg [mc jamessregerrinuse $errmsg]
-	} else {
-	    set msg [mc jamessregerr $errmsg]
-	}
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message $msg
-    } else {
-
-	# Save to our jserver variable. Create a new profile.
-	::Profiles::Set {} $server $username $password
-    }
-    if {$jprefs(logonWhenRegister)} {
-	
-	# Go on and authenticate.
-	set resource "coccinella"
-	::Login::Authorize $server $username $resource $password \
-	  [namespace current]::AuthorizeCB -streamid $streamid -digest 1
-    } else {
-	::UI::MessageBox -icon info -type ok \
-	  -message [mc jamessregisterok $server]
-    
-	# Disconnect. This should reset both wrapper and XML parser!
-	# Beware: we are in the middle of a callback from the xml parser,
-	# and need to be sure to exit from it before resetting!
-	after idle $jstate(jlib) closestream
-    }
-    set finished 1
-}
-
-proc ::Register::AuthorizeCB {type msg} {
-    variable server
-    variable username
-    variable resource
-    
-    ::Debug 2 "::Register::AuthorizeCB type=$type"
-    
-    if {[string equal $type "error"]} {
-	::UI::MessageBox -icon error -type ok -title [mc Error]  \
-	  -message $msg
-    } else {
-	
-	# Login was succesful, set presence.
-	::Login::SetStatus
-	set jid [jlib::joinjid $username $server $resource]
-	::UI::MessageBox -icon info -type ok \
-	  -message [mc jamessregloginok $jid]
     }
 }
 
@@ -432,10 +78,6 @@ proc ::Register::Remove {{jid {}}} {
     }
 }
 
-proc ::Register::Noop {args} {
-    # empty
-}
-
 proc ::Register::RemoveCallback {jid jlibName type theQuery} {
     
     if {[string equal $type "error"]} {
@@ -474,6 +116,7 @@ namespace eval ::RegisterEx:: {
     
     set ::config(registerex,server)  ""
     set ::config(registerex,autoget) 0
+    set ::config(registerex,autologin) 1
     
     # Allow only a single instance of this dialog.
     variable win $::wDlgs(jreg)_ibr
@@ -751,13 +394,12 @@ proc ::RegisterEx::SetState {token theState} {
 proc ::RegisterEx::Get {token} {
     variable $token
     upvar 0 $token state
+    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::RegisterEx::Get"
     
     # Kill any pending open states.
-    ::Network::KillAll
-    ::Jabber::UI::SetStatusMessage ""
-    ::Jabber::UI::StartStopAnimatedWave 0
+    ::Login::Kill
     
     # Verify.
     if {$state(-server) eq ""} {
@@ -775,7 +417,7 @@ proc ::RegisterEx::Get {token} {
     set state(status) [mc jawaitserver]
     $state(wprog) start
 
-    set opts {}
+    set opts [list -noauth 1]
     set tokenOpts $state(tokenOpts)
     foreach {key value} [array get $tokenOpts] {
 	# ssl vs. tls naming conflict.
@@ -786,64 +428,28 @@ proc ::RegisterEx::Get {token} {
     }
 
     # Asks for a socket to the server.
-    eval {::Login::Connect $state(-server) \
-      [list [namespace current]::ConnectCB $token]} $opts
-
+    set cb [list ::RegisterEx::ConnectCB $token]
+    eval {$jstate(jlib) connect $state(-server) {} $cb} $opts
 }
 
-proc ::RegisterEx::ConnectCB {token status msg} {
-    variable $token
-    upvar 0 $token state
-
-    ::Debug 2 "::RegisterEx::ConnectCB status=$status"
-    
-    if {![info exists state]} {
-	return
-    }
-    switch $status {
-	error {
-	    NotBusy $token
-	    ::UI::MessageBox -icon error -type ok \
-	      -message [mc jamessnosocket $state(-server) $msg]
-	}
-	timeout {
-	    NotBusy $token
-	    ::UI::MessageBox -icon error -type ok \
-	      -message [mc jamesstimeoutserver $state(-server)]
-	}
-	default {
-	    # Go ahead...
-	    if {[catch {
-		::Login::InitStream $state(-server) \
-		  [list [namespace current]::StreamCB $token]
-	    } err]} {
-		NotBusy $token
-		::UI::MessageBox -icon error -title [mc {Open Failed}] \
-		  -type ok -message $err
-	    }
-	}
-    }
-}
-
-proc ::RegisterEx::StreamCB {token args} {
+proc ::RegisterEx::ConnectCB {token jlibname status {errcode ""} {errmsg ""}} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::RegisterEx::StreamCB args=$args"
 
+    ::Debug 2 "::RegisterEx::ConnectCB status=$status, errcode=$errcode, errmsg=$errmsg"
+    
     if {![info exists state]} {
 	return
     }
-
-    # The stream attributes. id is needed if trying to logon.
-    foreach {name value} $args {
-	set state(stream,$name) $value
+    if {$status eq "ok"} {
+	$jstate(jlib) register_get [list [namespace current]::GetCB $token] \
+	  -to $state(-server)
+    } elseif {$status eq "error"} {
+	NotBusy $token
+	set str [::Login::GetErrorStr $errcode $errmsg]
+	::UI::MessageBox -icon error -type ok -message $str
     }
-
-    # Send get register.
-    $jstate(jlib) register_get [list [namespace current]::GetCB $token] \
-      -to $state(-server)
 }
 
 proc ::RegisterEx::GetCB {token jlibName type iqchild} {    
@@ -870,7 +476,8 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
 	return
     } 
     
-    $state(wbtok) configure -state normal -text [mc Register] \
+    $state(wbtok) state {!disabled}
+    $state(wbtok) configure -text [mc Register] \
       -command [list [namespace current]::SendRegister $token]
     
     # Extract registration tags.
@@ -1012,6 +619,7 @@ proc ::RegisterEx::SendRegister {token} {
 }
 
 proc ::RegisterEx::SendRegisterCB {token type theQuery} {    
+    global  config
     variable $token
     upvar 0 $token state
 
@@ -1043,21 +651,15 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	# Save to our jserver variable. Create a new profile.
 	::Profiles::Set {} $server $username $password
 
-	if {$jprefs(logonWhenRegister)} {
-	    
-	    if {![info exists state(stream,id)]} {
-		::UI::MessageBox -icon error -type ok -message \
-		  "no id for digest in receiving <stream>"
-		return
-	    }
+	if {$config(registerex,autologin)} {
 	    
 	    # Go on and authenticate.
 	    # @@@ extra options?
 	    set resource "coccinella"
-	    ::Login::Authorize $server $username $resource $password \
-	      [namespace current]::AuthorizeCB \
-	      -streamid $state(stream,id) \
-	      -digest 1
+	    set streamid [$jstate(jlib) getstreamattr id]
+	    set digested [::sha1::sha1 $streamid$password]
+	    $jstate(jlib) send_auth $username $resource   \
+	      ::RegisterEx::AuthorizeCB -digest $digested
 	} else {
 	    ::UI::MessageBox -icon info -type ok \
 	      -message [mc jamessregisterok $server]
@@ -1073,17 +675,20 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
     }
 }
 
-proc ::RegisterEx::AuthorizeCB {type msg} {
+proc ::RegisterEx::AuthorizeCB {jlibname type queryE} {
     
-    ::Debug 2 "::RegisterEx::AuthorizeCB type=$type"
+    ::Debug 2 "::RegisterEx::AuthorizeCB"
     
     if {[string equal $type "error"]} {
-	::UI::MessageBox -icon error -type ok -title [mc Error]  \
-	  -message $msg
+	foreach {errcode errmsg} $queryE break
+	set str [mc xmpp-stanzas-$errcode]
+	::UI::MessageBox -icon error -type ok -title [mc Error] -message $str
     } else {
 	
 	# Login was succesful, set presence.
 	::Login::SetStatus
+	::Login::SetLoginState
+	::Jabber::UI::FixUIWhen "connectfin"
 	set jid [::Jabber::GetMyJid]
 	::UI::MessageBox -icon info -type ok -message [mc jamessregloginok $jid]
     }

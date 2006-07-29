@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.87 2006-07-26 06:26:29 matben Exp $
+# $Id: Login.tcl,v 1.88 2006-07-29 13:12:59 matben Exp $
 
 package provide Login 1.0
 
@@ -18,11 +18,8 @@ namespace eval ::Login:: {
     variable server
     variable username
     variable password
-    variable uid
-    variable pending
-
-    set uid 0
-    set pending 0
+    variable uid 0
+    variable pending 0
     
     # Add all event hooks.
     ::hooks::register quitAppHook     ::Login::QuitAppHook
@@ -371,9 +368,11 @@ proc ::Login::IsPending { } {
 
 proc ::Login::Kill { } {
     variable pending
+    upvar ::Jabber::jstate jstate
 
     set pending 0
-    ::Network::KillAll
+    $jstate(jlib) kill 
+
     ::Jabber::UI::SetStatusMessage ""
     ::Jabber::UI::StartStopAnimatedWave 0
     ::Jabber::UI::FixUIWhen "disconnect"
@@ -462,85 +461,10 @@ proc ::Login::DoLogin {} {
       [namespace current]::LoginCallback} $opts
 }
 
-proc ::Login::LoginCallback {token status {errmsg ""}} {
-    variable $token
-    upvar 0 $token state
+proc ::Login::LoginCallback {token {errcode ""} {errmsg ""}} {
     
     ::Debug 2 "::Login::LoginCallback"
-    
-    ShowAnyMessageBox $token $status $errmsg
-}
-
-#       Show message box if necessary.
-
-proc ::Login::ShowAnyMessageBox {token status {errmsg ""}} {
-    global  config
-    variable $token
-    upvar 0 $token state
-    
-    ::Debug 2 "::Login::ShowAnyMessageBox status=$status errmsg=$errmsg"
-    
-    set str ""
-    
-    switch -- $status {
-	ok {
-	    # empty
-	}
-	connect-failed {
-	    set str [mc jamessnosocket $state(server) $errmsg]
-	}
-	timeout {
-	    set str [mc jamesstimeoutserver $state(server)]
-	}
-	authfail {
-	    set str $errmsg
-	}
-	starttls-nofeature {
-	    set str [mc jamessstarttls-nofeature $state(server)]
-	}
-	startls-failure {
-	    set str [mc jamessstarttls-failure $state(server)]
-	}
-	default {
-	    set str $errmsg
-	}
-    }
-    if {$str ne ""} {
-	set type ok
-	set default ok
-	
-	# Do only try register new account if authorization failed.
-	if {$status eq "authfail" && $config(login,autoregister)} {
-	    append str " " [mc jaregnewwith $state(server)]
-	    set type yesno
-	    set default no
-	}
-	set ans [::UI::MessageBox -icon error -type $type -default $default \
-	  -message $str]
-	if {$ans eq "yes"} {
-	    ::RegisterEx::New -server $state(server) -autoget 1
-	}
-    }
-}
-
-proc ::Login::SetStatus {args} {
-    upvar ::Jabber::jstate jstate
-    
-    array set argsArr {
-	-invisible    0
-	-priority     0
-    }
-    array set argsArr $args
-    set presArgs {}
-    if {$argsArr(-priority) != 0} {
-	lappend presArgs -priority $priority
-    }
-    
-    if {$argsArr(-invisible)} {
-	eval {::Jabber::SetStatus invisible} $presArgs
-    } else {
-	eval {::Jabber::SetStatus available -notype 1} $presArgs
-    }    
+    # empty
 }
 
 # Login::LaunchHook --
@@ -568,7 +492,7 @@ proc ::Login::LaunchHook { } {
 	set node   [::Profiles::Get $profname node]
 	set opts   [::Profiles::Get $profname options]
 	array set optsArr $opts
-	if {[info exists optsArr(-resource)] && ($optsArr(-resource) != "")} {
+	if {[info exists optsArr(-resource)] && ($optsArr(-resource) ne "")} {
 	    set res $optsArr(-resource)
 	} else {
 	    set res "coccinella"
@@ -584,16 +508,14 @@ proc ::Login::QuitAppHook { } {
     ::UI::SaveWinGeom $wDlgs(jlogin)    
 }
 
-proc ::Login::AutoLoginCB {logtoken status {errmsg ""}} {
-
-    ::Login::ShowAnyMessageBox $logtoken $status $errmsg
+proc ::Login::AutoLoginCB {token {errcode ""} {errmsg ""}} {
+    # empty
 }
 
 #-------------------------------------------------------------------------------
 
 # Initialize the complete login processs and receive callback when finished.
-# Sort of high level call at application level. Handles all UI except
-# any message boxes.
+# Sort of high level call at application level. Handles all UI.
 
 # Login::HighLogin --
 # 
@@ -623,585 +545,227 @@ proc ::Login::AutoLoginCB {logtoken status {errmsg ""}} {
 #            sasl       only sasl authentication
 #       
 # Results:
-#       Callback initiated.
+#       token
 
 proc ::Login::HighLogin {server username resource password cmd args} {
-    global  prefs this
+    global  config
+    variable pending
     variable uid
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-    
+        
     ::Debug 2 "::Login::HighLogin args=$args"
-    
-    array set argsArr {
-	-digest         1
-	-invisible      0
-	-ip             ""
-	-priority       0
-	-http           0
-	-httpurl        ""
-	-minpollsecs    4
-	-secure         0
-	-method         sasl
-    }
-    array set argsArr $args
-    
-    # If secure and ssl different default port (5223).
-    if {![info exists argsArr(-port)]} {
-	if {$argsArr(-secure) && ($argsArr(-method) eq "ssl")} {
-	    set argsArr(-port) $jprefs(sslport)
-	} else {
-	    set argsArr(-port) $jprefs(port)
-	}
-    }
-    if {$resource eq ""} {
-	set resource "coccinella"
-    }
-
-    # Initialize the state variable, an array, that keeps the storage.
-    
+        
+    # Initialize the state variable, an array, that keeps some storage. 
+    # The rest is tored in the jlib::connect object. Do not duplicate this!   
     set token [namespace current]::high[incr uid]
     variable $token
-    upvar 0 $token state
+    upvar 0 $token highstate
 
-    set state(server)     $server
-    set state(username)   $username
-    set state(resource)   $resource
-    set state(password)   $password
-    set state(cmd)        $cmd
-    foreach {key value} [array get argsArr] {
-	set state($key) $value
-    }
-    
-    # Have some fallbacks here (or throw an error?).
-    if {$state(-secure)} {
-	if {$state(-method) eq "sasl"} {
-	   if {[catch {package require jlibsasl}]} {
-	       set state(-secure) 0
-	   }
-       }
-       if {!$this(package,tls)} {
-	   if {($state(-method) eq "ssl") || ($state(-method) eq "tlssasl")} {
-	       set state(-secure) 0
-	   }
-       }
-    }
-    
-    # Any stream version. XMPP requires 1.0.
-    if {$state(-secure)} {
-	if {($state(-method) eq "sasl") || ($state(-method) eq "tlssasl")} {
-	    set state(version) 1.0
-	}
-    }
+    set pending 1
 
-    # Make a network connection.
-    set callback [list [namespace current]::HighConnectCB $token]
-    eval {Connect $server $callback -port $state(-port)} [array get argsArr]
-}
+    set highstate(cmd)     $cmd
+    set highstate(args)    $args
+    set highstate(pending) 1
 
-proc ::Login::HighConnectCB {token status msg} {
-    variable $token
-    upvar 0 $token state
-    
-    ::Debug 2 "::Login::HighConnectCB status=$status"
-    
-    switch $status {
-	error {
-	    HighFinish $token connect-failed $msg
-	}
-	timeout {
-	    HighFinish $token timeout $msg
-	}
-	default {
-	    set opts {}
-	    if {[info exists state(version)]} {
-		lappend opts -version $state(version)
-	    }
-	    set callback [list [namespace current]::HighInitStreamCB $token]
-	    if {[catch {
-		eval {InitStream $state(server) $callback} $opts
-	    } err]} {
-		HighFinish $token connect-failed $err
-	    }
-	}
-    }
-}
-
-proc ::Login::HighInitStreamCB {token args} {
-    variable $token
-    upvar 0 $token state
-    upvar ::Jabber::jstate jstate
-
-    ::Debug 2 "::Login::HighInitStreamCB"
-    
-    array set argsArr $args
-
-    if {![info exists argsArr(id)]} {
-	HighFinish $token missingid "no id for digest in receiving <stream>"
-    } else {
-
-	# If we are trying to use sasl or tls indicated by version='1.0' 
-	# we must also be sure to receive a version attribute larger or 
-	# equal to 1.0.
-	set version1 0
-	if {[info exists argsArr(version)]} {
-	    if {[package vcompare $argsArr(version) 1.0] >= 0} {
-		set version1 1
-	    }
-	}
-	
-	set starttls 0
-	set startsasl 0
-	set needsasl 0
-	if {$state(-secure)} {
-	    switch -- $state(-method) {
-		tlssasl {
-		    set starttls 1
-		    set needsasl 1
-		}
-		sasl {
-		    set startsasl 1
-		    set needsasl 1
-		}
-	    }
-	}
-	
-	# We will get a bunch of errors later anyway. So don't stop here.
-	if {$needsasl && !$version1} {
-	    ::Jabber::AddErrorLog $state(server)  \
-	      "SASL authentication failed since server does not support version=1.0"
-	}
-	if {$starttls && !$version1} {
-	    ::Jabber::AddErrorLog $state(server)  \
-	      "STARTTLS failed since server does not support version=1.0"
-	}
-	
-	# We cannot verify that server supports tls since we have not yet
-	# received the 'features' element. Done inside jlib.
-		
-	# We either start tls or authorize.
-	if {$starttls} {
-	    StartTls [list [namespace current]::HighStartTlsCB $token]
-	} else {
-	    set callback [list [namespace current]::HighAuthorizeCB $token]
-	    Authorize $state(server) $state(username) $state(resource) \
-	      $state(password) $callback \
-	      -streamid $argsArr(id) -digest $state(-digest) -sasl $startsasl
-	}    
-    }    
-}
-
-proc ::Login::HighStartTlsCB {token type args} {
-    variable $token
-    upvar 0 $token state
-    upvar ::Jabber::jstate jstate
-
-    ::Debug 2 "::Login::HighStartTlsCB type=$type args=$args"
-    
-    if {[string equal $type "error"]} {
-	foreach {errcode errmsg} [lindex $args 0] break
-	HighFinish $token $errcode $errmsg
-    } else {
-	set id [$jstate(jlib) getstreamattr id]
-	if {$id eq ""} {
-	    HighFinish $token missingid \
-	      "no id for digest in receiving <stream>"
-	} else {
-	    
-	    # XMPP Core:
-	    # 
-	    # 12. If the TLS negotiation is successful, the initiating entity MUST
-	    #     continue with SASL negotiation.
-
-	    set callback [list [namespace current]::HighAuthorizeCB $token]
-	    Authorize $state(server) $state(username) $state(resource) \
-	      $state(password) $callback   \
-	      -streamid $id -digest $state(-digest) -sasl 1
-	}
-    }
-}
-
-proc ::Login::HighAuthorizeCB {token type msg} {
-    variable $token
-    upvar 0 $token state
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::Login::HighAuthorizeCB type=$type"
-
-    switch -- $type {
-	error {
-	    HighFinish $token authfail $msg
-	}
-	default {
-
-	    # Login was succesful, set presence.
-	    set opts {}
-	    if {$state(-priority) != 0} {
-		lappend opts -priority $state(-priority)
-	    }
-	    if {$state(-invisible)} {
-		eval {::Jabber::SetStatus invisible} $opts
-	    } else {
-		eval {::Jabber::SetStatus available -notype 1} $opts
-	    }    
-	    HighFinish $token
-	}
-    }
-}
-
-proc ::Login::HighFinish {token {err ""} {msg ""}} {
-    variable $token
-    upvar 0 $token state
-   
-    ::Jabber::UI::SetStatusMessage ""
-    ::Jabber::UI::StartStopAnimatedWave 0
-    if {$err eq ""} {
-	uplevel #0 $state(cmd) $token ok
-    } else {
-	::Jabber::UI::FixUIWhen "disconnect"
-	uplevel #0 $state(cmd) [list $token $err $msg]
-    }
-    unset state
-}
-
-#-------------------------------------------------------------------------------
-
-# A few functions to handle each stage in the login process as a separate
-# component:
-#       o connect socket
-#       o initialize the stream
-#       o start tls
-#       o authorize
-#       
-# They get and set jstate and other state variables. User interface elements
-# are set, but no message boxes are shown. That is up to the caller.
-
-
-# Login::Connect --
-#
-#       Creates any network connection necessary as a fist step to establish
-#       contact with a jabber server.
-#
-# Arguments:
-#       server
-#       cmd         callback command when socket connected
-#       args  -ip
-#             -port
-#             -secure  0|1
-#             -method  ssl|tlssasl|sasl
-#             -http 0|1
-#             ...
-#       
-# Results:
-#       Callback scheduled.
-
-proc ::Login::Connect {server cmd args} {
-    global  prefs config
-    variable pending
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::Login::Connect args=$args"
-        
-    array set argsArr {
-	-ip         ""
-	-secure     0
-	-method     sasl
-	-http       0
-	-httpurl    ""
-    }
-    array set argsArr $args
-    
     # Kill any pending open states.
     Kill
     ::Jabber::UI::SetStatusMessage [mc jawaitresp $server]
     ::Jabber::UI::StartStopAnimatedWave 1
     ::Jabber::UI::FixUIWhen "connectinit"
-    set pending 1
-    update idletasks
+
+    jlib::connect::configure              \
+      -defaultresource "coccinella"       \
+      -defaultport $jprefs(port)          \
+      -defaultsslport $jprefs(sslport)    \
+      -dnssrv $config(login,dnssrv)       \
+      -dnstxthttp $config(login,dnstxthttp)
     
-    # If secure and ssl different default port (5223).
-    if {[info exists argsArr(-port)]} {
-	set port $argsArr(-port)
-    } else {
-	if {$argsArr(-secure) && ($argsArr(-method) eq "ssl")} {
-	    set port $jprefs(sslport)
-	} else {
-	    set port $jprefs(port)
+    set jid [jlib::joinjid $username $server $resource]
+    set cb [list ::Login::HighLoginCB $token]
+    eval {$jstate(jlib) connect $jid $password $cb} $args
+    
+    return $token
+}
+
+proc ::Login::HighLoginCB {token jlibname status {errcode ""} {errmsg ""}} {
+
+    ::Debug 2 "::Login::HighLoginCB +++ status=$status, errcode=$errcode, errmsg=$errmsg"
+    
+    array set state [jlib::connect::get_state $jlibname]
+    
+    switch -- $status {
+	ok {
+	    HighHandleFinal $token	    
 	}
-    }
-    if {$argsArr(-ip) eq ""} {
-	set host $server
-    } else {
-	set host $argsArr(-ip)
-    }
-    
-    # In xmpp tls negotiating is made in stream using the standard port.
-    set ssl 0
-    if {$argsArr(-secure) && ($argsArr(-method) eq "ssl")} {
-	set ssl 1
-    }
-    
-    # Open socket unless we are using a http proxy.
-    if {$argsArr(-http)} {
-	if {$config(login,dnstxthttp)} {
-	    set cb [list [namespace current]::DNSURLCB $argsArr(-httpurl) $cmd]
-	    set tok [jlib::dns::get_http_poll_url $server $cb -timeout 2000]
-	} else {
-	
-	    # Perhaps it gives a better structure to have this elsewhere?
-	    # Proxy configuration works transparently using autoproxy.
-	    jlib::http::new $jstate(jlib) $argsArr(-httpurl)
-	    uplevel #0 $cmd [list ok ""]
+	error {
+	    HighHandleError $token $errcode $errmsg
 	}
-    } else {
-	
-	# Do not do DNS SRV lookup if we have an explicit ip address.
-	set callback [list [namespace current]::ConnectCB $cmd]
-	if {($argsArr(-ip) eq "") && $config(login,dnssrv)} {
-	    set opts [list -timeout $prefs(timeoutSecs) -ssl $ssl]
-	    set cb [list [namespace current]::DNSCB $server $port $callback $opts]
-	    set tok [jlib::dns::get_addr_port $server $cb -timeout 2000]
-	} else {
-	    ::Network::Open $host $port $callback -timeout $prefs(timeoutSecs)  \
-	      -ssl $ssl
+	dnsresolve - initnetwork - authenticate {
+	    # empty
+	}
+	initstream {
+	    ::Jabber::UI::SetStatusMessage [mc jawaitxml $state(server)]
+	}
+	starttls {
+	    ::Jabber::UI::SetStatusMessage [mc jatlsnegot]
 	}
     }
 }
 
-proc ::Login::DNSCB {server port callback opts addrPort {err ""}} {
-        
-    # We never let a failure stop us here. Use host as fallback.
-    if {$err eq ""} {
-	set host [lindex $addrPort 0 0]
-	set port [lindex $addrPort 0 1]
-    } else {
-	set host $server
-    }
-    eval {::Network::Open $host $port $callback} $opts
-}
-
-proc ::Login::DNSURLCB {url cmd dnsurl {err ""}} {
-
-    # We never let a failure stop us here.
-    if {$err eq ""} {
-	set url $dnsurl
-    }
-    jlib::http::new $jstate(jlib) $url
-    uplevel #0 $cmd [list ok ""]
-}
-
-# Login::ConnectCB --
-#
-#       Callback when socket has been opened. Logins.
-#       
-# Arguments:
-#       cmd         callback command
-#       status      "error", "timeout", or "ok".
-#       
-# Results:
-#       Callback initiated.
-
-proc ::Login::ConnectCB {cmd sock ip port status {msg {}}} {    
-    upvar ::Jabber::jstate jstate
+proc ::Login::HighHandleFinal {token} {
     
-    ::Debug 2 "::Login::ConnectCB status=$status"
-    
-    switch $status {
-	error - timeout {
-	    Kill
-	}
-	default {
-	    set jstate(sock) $sock
-	    $jstate(jlib) setsockettransport $jstate(sock)
-	}
-    }    
-    uplevel #0 $cmd [list $status $msg]
-}
-
-# Login::InitStream --
-# 
-#       Sends the init stream xml command. When received servers stream,
-#       invokes the cmd callback.
-#       
-# Arguments:
-#       server      host
-#       cmd         callback command
-#       args        -version 1.0
-#       
-# Results:
-#       Callback initiated.
-
-proc ::Login::InitStream {server cmd args} {
+    variable $token
+    upvar 0 $token highstate
+    upvar ::Jabber::jstate jstate    
     variable pending
-    upvar ::Jabber::jstate jstate
     
-    ::Jabber::UI::SetStatusMessage [mc jawaitxml $server]
-    set opts {}
-    array set argsArr $args
-    if {[info exists argsArr(-version)]} {
-	lappend opts -version $argsArr(-version)
-    }
+    set pending 0
+    eval {SetStatus} $highstate(args)
+    set server [$jstate(jlib) getserver]
+    ::Jabber::UI::StartStopAnimatedWave 0
+    ::Jabber::UI::SetStatusMessage [mc jaauthok $server]
+    ::Jabber::UI::FixUIWhen "connectfin"
+    SetLoginState
     
-    # Initiate a new stream. We should wait for the server <stream>.
-    if {[catch {
-	eval {$jstate(jlib) openstream $server  \
-	  -cmd [list [namespace current]::InitStreamCB $cmd]} $opts
-    } err]} {
-	Kill
-	return -code error $err
-    }
+    uplevel #0 $highstate(cmd) [list $token]
+
+    unset highstate
 }
 
-proc ::Login::InitStreamCB {cmd jlibName args} {
-    
-    # One of args shall be -id hexnumber
-    uplevel #0 $cmd $args
-}
+proc ::Login::HighHandleError {token {errcode ""} {errmsg ""}} {
 
-# Login::StartTls --
-# 
-# 
-
-proc ::Login::StartTls {cmd} {
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 4 "::Login::StartTls"
-    ::Jabber::UI::SetStatusMessage [mc jatlsnegot]
-    $jstate(jlib) starttls [list [namespace current]::StartTlsCB $cmd]    
-}
-
-proc ::Login::StartTlsCB {cmd jlibName type args} {
+    variable $token
+    upvar 0 $token highstate
     variable pending
-    upvar ::Jabber::jstate jstate
 
-    if {[string equal $type "error"]} {
-	Kill
-	after idle $jstate(jlib) closestream
-    }    
-    uplevel #0 $cmd $type $args
+    set pending 0
+    ::Jabber::UI::SetStatusMessage ""
+    ::Jabber::UI::StartStopAnimatedWave 0
+    ::Jabber::UI::FixUIWhen "disconnect"
+    HandleErrorCode $errcode $errmsg
+    
+    uplevel #0 $highstate(cmd) [list $token $errcode $errmsg]
+
+    unset highstate
 }
 
-# Login::Authorize --
-# 
-#       A fairly general method for authentication. Handles UI stuff, but
-#       does not show any message boxes.
-#       
-# Arguments:
-#       server
-#       username
-#       resource
-#       password
-#       cmd         callback command
-#       args:
-#           -digest     0|1
-#           -streamid 
-#           -sasl       0|1
-#       
-# Results:
-#       Callback initiated.
-
-proc ::Login::Authorize {server username resource password cmd args} {
-    variable uid
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::Login::Authorize"
+proc ::Login::SetStatus {args} {
     
     array set argsArr {
-	-digest     1
-	-streamid   ""
-	-sasl       0
+	-invisible    0
+	-priority     0
     }
     array set argsArr $args
-
-    # Initialize the state variable, an array, that keeps is the storage.
-    
-    set token [namespace current]::auth[incr uid]
-    variable $token
-    upvar 0 $token state
-
-    set state(server)     $server
-    set state(username)   $username
-    set state(resource)   $resource
-    set state(password)   $password
-    set state(streamid)   $argsArr(-streamid)
-    set state(cmd)        $cmd
-    
-    if {$argsArr(-sasl)} {
-	$jstate(jlib) auth_sasl $username $resource $password  \
-	  [list [namespace current]::AuthorizeCB $token]
-    } elseif {$argsArr(-digest)} {
-	if {$argsArr(-streamid) eq ""} {
-	    return -code error "missing -streamid for -digest"
-	}
-	set digestedPw [::sha1::sha1 $state(streamid)${password}]
-	$jstate(jlib) send_auth $username $resource   \
-	  [list [namespace current]::AuthorizeCB $token] -digest $digestedPw
+    set presArgs {}
+    if {$argsArr(-priority) != 0} {
+	lappend presArgs -priority $priority
+    }    
+    if {$argsArr(-invisible)} {
+	eval {::Jabber::SetStatus invisible} $presArgs
     } else {
+	eval {::Jabber::SetStatus available -notype 1} $presArgs
+    }    
+}
+
+proc ::Login::GetErrorStr {errcode {errmsg ""}} {
+    upvar ::Jabber::jstate jstate
+    
+    ::Debug 2 "::Login::GetErrorStr errcode=$errcode, errmsg=$errmsg"
+
+    array set state [jlib::connect::get_state $jstate(jlib)]
+    set str ""
 	
-	# Plain password authentication.
-	$jstate(jlib) send_auth $username $resource   \
-	  [list [namespace current]::AuthorizeCB $token] -password $password
+    switch -- $errcode {
+	connect-failed - network-failure {
+	    set str [mc jamessnosocket $state(server) $errmsg]
+	}
+	timeout {
+	    set str [mc jamesstimeoutserver $state(server)]
+	}
+	409 {
+	    set str [mc jamesslogin409 $errcode]
+	}
+	starttls-nofeature {
+	    set str [mc xmpp-stanzas-starttls-nofeature $state(server)]
+	}
+	startls-failure {
+	    set str [mc xmpp-stanzas-starttls-failure $state(server)]
+	}
+	default {
+	    
+	    # Identify the xmpp-stanzas.
+	    if {$state(state) eq "authenticate"} {
+		
+		# @@@ We should display a simpler message here since
+		# xmpp-stanzas a bit technical.
+		set str [mc xmpp-stanzas-$errcode]
+	    } else {
+		set str $errmsg
+	    }
+	}
+    }
+    return $str
+}
+
+# Login::HandleErrorCode --
+# 
+#       Show error message box.
+
+proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
+    global  config
+    upvar ::Jabber::jstate jstate
+    
+    ::Debug 2 "::Login::ShowAnyMessageBox errcode=$errcode, errmsg=$errmsg"
+
+    array set state [jlib::connect::get_state $jstate(jlib)]
+    set str [GetErrorStr $errcode $errmsg]
+    set type ok
+    set default ok
+    
+    # Do only try register new account if authorization failed.
+    if {($state(state) eq "authenticate") && $config(login,autoregister)} {
+	append str " " [mc jaregnewwith $state(server)]
+	set type yesno
+	set default no
+    }
+    set ans [::UI::MessageBox -icon error -type $type -default $default \
+      -message $str]
+    if {$ans eq "yes"} {
+	::RegisterEx::New -server $state(server) -autoget 1
     }
 }
 
-proc ::Login::AuthorizeCB {token jlibName type theQuery} {
+proc ::Login::SetLoginState {} {
     global  this
-    variable pending
-    variable $token
-    upvar 0 $token state
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
-
-    ::Debug 2 "::Login::AuthorizeCB type=$type, theQuery='$theQuery'"
+   
+    ::Debug 2 "::Login::SetLoginState"
     
-    set server   $state(server)
-    set username $state(username)
-    set resource $state(resource)
-    set password $state(password)
-    set cmd      $state(cmd)
-    set msg      ""
-    set pending  0
+    set jlib $jstate(jlib)
 
-    ::Jabber::UI::StartStopAnimatedWave 0
+    # @@@ There is a lot of duplicates here. Remove! Keep in jabberlib only!
+    set ip [$jlib getip]
+    set jstate(ipNum) $ip
+    set this(ipnum)   $ip
     
-    if {[string equal $type "error"]} {	
-	foreach {errcode errmsg} $theQuery break
-	::Jabber::UI::SetStatusMessage [mc jaerrlogin $server $errmsg]
-	::Jabber::UI::FixUIWhen "disconnect"
-	if {$errcode == 409} {
-	    set msg [mc jamesslogin409 $errcode]
-	} else {
-	    set msg [mc jamessloginerr $errcode $errmsg]
-	}
+    # Ourself. Do JIDPREP? So far only on the domain name.
+    # MUST handle situations with redirection (server alias)!
 
-	# There is a potential problem if called from within a xml parser 
-	# callback which makes the subsequent parsing to fail. (after idle?)
-	after idle $jstate(jlib) closestream
-    } else {
-	set ip [$jstate(jlib) getip]
-	set jstate(ipNum) $ip
-	set this(ipnum)   $ip
-	::Debug 4 "\t this(ipnum)=$ip"
-	
-	# Ourself. Do JIDPREP? So far only on the domain name.
-	# MUST handle situations with redirection (server alias)!
-	#set server               [jlib::jidmap $server]
-	set server               [jlib::jidmap [$jstate(jlib) getserver]]
-	set jstate(mejid)        [jlib::joinjid $username $server ""]
-	set jstate(meres)        $resource
-	set jstate(mejidres)     [jlib::joinjid $username $server $resource]
-	set jstate(mejidmap)     [jlib::jidmap $jstate(mejid)]
-	set jstate(mejidresmap)  [jlib::jidmap $jstate(mejidres)]
-	set jserver(this)        $server
-	
-	# Run all login hooks. We do this to get our roster before we get presence.
-	::hooks::run loginHook
-    }
-    uplevel #0 $cmd [list $type $msg]
+    set jid [$jlib myjid]
+    jlib::splitjidex $jid username server resource
+
+    set server               [jlib::jidmap [$jlib getserver]]
+    set jstate(mejid)        [jlib::joinjid $username $server ""]
+    set jstate(meres)        $resource
+    set jstate(mejidres)     [jlib::joinjid $username $server $resource]
+    set jstate(mejidmap)     [jlib::jidmap $jstate(mejid)]
+    set jstate(mejidresmap)  [jlib::jidmap $jstate(mejidres)]
+    set jserver(this)        $server
     
-    # Cleanup
-    unset state
+    # Run all login hooks. We do this to get our roster before we get presence.
+    ::hooks::run loginHook
 }
 
 #-------------------------------------------------------------------------------

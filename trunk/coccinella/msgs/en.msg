@@ -901,13 +901,23 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en jamessregerr                 {The registration failed with error message: %s}
 ::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s service will be put in your roster to work as a transport with this service.}
 ::msgcat::mcset en jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
-::msgcat::mcset en jamessstarttls-nofeature     {The server "%s" has no support for TLS.}
-::msgcat::mcset en jamessstarttls-failure       {TLS negotiating with server "%s" failed.}
 ::msgcat::mcset en jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
 ::msgcat::mcset en jamessnorooms                {Failed to find any rooms at %s.}
 ::msgcat::mcset en jamessnofiletrpt             {We couldn't see that %s supports file transfer.}
 ::msgcat::mcset en jamessfiletrpterr            {Failed to get file %s from %s: %s}
 
+# This maps Defined Conditions to clear text messages.
+# draft-ietf-xmpp-core23; 6.4 Defined Conditions
+::msgcat::mcset en xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
+::msgcat::mcset en xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
+::msgcat::mcset en xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
+::msgcat::mcset en xmpp-stanzas-invalid-mechanism   {The initiating entity did not provide a mechanism or requested a mechanism that is not supported by the receiving entity.}
+::msgcat::mcset en xmpp-stanzas-mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
+::msgcat::mcset en xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
+::msgcat::mcset en xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
+
+::msgcat::mcset en xmpp-stanzas-starttls-nofeature     {The server "%s" has no support for TLS.}
+::msgcat::mcset en xmpp-stanzas-starttls-failure       {TLS negotiating with server "%s" failed.}
 
 
 ::msgcat::mcset en openquicktime		{Open QuickTime live stream}

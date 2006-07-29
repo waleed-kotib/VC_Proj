@@ -29,19 +29,19 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # -------------------------------------------------------------------------
 #
-# $Id: dns.tcl,v 1.2 2006-07-26 06:26:29 matben Exp $
+# $Id: dns.tcl,v 1.3 2006-07-29 13:12:58 matben Exp $
 
 # Mats Bengtsson: Stripped out a few packages to reduce dependencies.
 
 
 package require Tcl 8.2;                # tcl minimum version
-package require ip;                     # tcllib 1.7
+package require ip 9.9;                 # tcllib 1.7; fake version number (Mats)
 
 namespace eval ::dns {
     #variable version 1.3.1
     # Fake version to avoid loding buggy installed one.
     variable version 9.9
-    variable rcsid {$Id: dns.tcl,v 1.2 2006-07-26 06:26:29 matben Exp $}
+    variable rcsid {$Id: dns.tcl,v 1.3 2006-07-29 13:12:58 matben Exp $}
 
     namespace export configure resolve name address cname \
         status reset wait cleanup errorcode

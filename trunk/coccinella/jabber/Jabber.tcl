@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.171 2006-07-22 13:15:23 matben Exp $
+# $Id: Jabber.tcl,v 1.172 2006-07-29 13:12:58 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -21,6 +21,7 @@ package require jlib
 package require roster
 package require jlib::bytestreams
 package require jlib::caps
+package require jlib::connect
 package require jlib::disco
 package require jlib::dns
 package require jlib::ftrans
@@ -280,7 +281,6 @@ proc ::Jabber::FactoryDefaults { } {
     
     # Other
     set jprefs(defSubscribe)        1
-    set jprefs(logonWhenRegister)   1
     
     # Shall we query ip number directly when verified Coccinella?
     set jprefs(preGetIP) 1

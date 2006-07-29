@@ -9,7 +9,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # -------------------------------------------------------------------------
 #
-# $Id: ip.tcl,v 1.1 2006-07-22 13:15:23 matben Exp $
+# $Id: ip.tcl,v 1.2 2006-07-29 13:12:58 matben Exp $
 
 # @mdgen EXCLUDE: ipMoreC.tcl
 
@@ -18,8 +18,10 @@
 package require Tcl 8.2;                # tcl minimum version
 
 namespace eval ip {
-    variable version 1.1.0
-    variable rcsid {$Id: ip.tcl,v 1.1 2006-07-22 13:15:23 matben Exp $}
+    #variable version 1.1.0
+    # Fake version to avoid loding buggy installed one.
+    variable version 9.9
+    variable rcsid {$Id: ip.tcl,v 1.2 2006-07-29 13:12:58 matben Exp $}
 
     namespace export is version normalize equal type contract mask
     #catch {namespace ensemble create}

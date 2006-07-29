@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.126 2006-06-21 12:15:04 matben Exp $
+# $Id: JUI.tcl,v 1.127 2006-07-29 13:12:58 matben Exp $
 
 package provide JUI 1.0
 
@@ -14,7 +14,6 @@ namespace eval ::Jabber::UI:: {
     
     # Add all event hooks.
     ::hooks::register quitAppHook            ::Jabber::UI::QuitHook
-    ::hooks::register loginHook              ::Jabber::UI::LoginCmd
     ::hooks::register logoutHook             ::Jabber::UI::LogoutHook
     ::hooks::register setPresenceHook        ::Jabber::UI::SetPresenceHook
     ::hooks::register rosterIconsChangedHook ::Jabber::UI::RosterIconsChangedHook
@@ -694,18 +693,6 @@ proc ::Jabber::UI::RosterSelectionHook { } {
 	}
     }
     $wtbar buttonconfigure chat -state $state    
-}
-
-# Jabber::UI::LoginCmd --
-# 
-#       The login hook command.
-
-proc ::Jabber::UI::LoginCmd { } {
-
-    # Update UI in Roster window.
-    set server [::Jabber::GetServerJid]
-    SetStatusMessage [mc jaauthok $server]
-    FixUIWhen "connectfin"
 }
 
 proc ::Jabber::UI::LogoutHook { } {
