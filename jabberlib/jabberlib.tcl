@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.143 2006-07-26 06:26:29 matben Exp $
+# $Id: jabberlib.tcl,v 1.144 2006-07-29 13:12:59 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -76,10 +76,10 @@
 #      jlibName config ?args?
 #      jlibName openstream server ?args?
 #      jlibName closestream
-#      jlibName element_deregister tag func
-#      jlibName element_register tag func ?seq?
+#      jlibName element_deregister xmlns func
+#      jlibName element_register xmlns func ?seq?
 #      jlibName getstreamattr name
-#      jlibName get_features name
+#      jlibName get_feature name
 #      jlibName get_last to cmd
 #      jlibName get_time to cmd
 #      jlibName getserver
@@ -114,7 +114,7 @@
 #      jlibName setsockettransport socket
 #      jlibName state
 #      jlibName transport
-#      jlibName unregister_presence_stanza tag xmlns
+#      jlibName deregister_presence_stanza tag xmlns
 #      
 #      
 #   The callbacks given for any of the '-iqcommand', '-messagecommand', 
@@ -283,6 +283,7 @@ proc jlib::new {rostername clientcmd args} {
 	variable preshook
 	variable opts
 	variable pres
+	variable features
     }
             
     # Set simpler variable names.
@@ -292,6 +293,7 @@ proc jlib::new {rostername clientcmd args} {
     upvar ${jlibname}::msgcmd   msgcmd
     upvar ${jlibname}::opts     opts
     upvar ${jlibname}::locals   locals
+    upvar ${jlibname}::features features
     
     array set opts {
 	-iqcommand            ""
@@ -328,7 +330,7 @@ proc jlib::new {rostername clientcmd args} {
     set lib(isinstream) 0
     set lib(state)      ""
     set lib(transport,name) ""
-    
+
     init_inst $jlibname
             
     # Init groupchat state.
@@ -385,6 +387,7 @@ proc jlib::init {} {
 proc jlib::init_inst {jlibname} {
 
     upvar ${jlibname}::locals   locals
+    upvar ${jlibname}::features features
     
     # Any of {available chat away xa dnd invisible unavailable}
     set locals(status)        "unavailable"
@@ -393,6 +396,8 @@ proc jlib::init_inst {jlibname} {
     set locals(myjid2)        ""
     set locals(trigAutoAway)  1
     set locals(server)        ""
+
+    set features(trace) {}
 }
 
 # jlib::havesasl --
@@ -594,15 +599,6 @@ proc jlib::verify_options {jlibname args} {
 	    return -code error "Unknown option $flag, can be: $usage"
 	}
     }
-}
-
-# jlib::connect --
-# 
-#       Just a wrapper for the jlib::connect::connect function.
-
-proc jlib::connect {jlibname jid password cmd args} {
-    
-    return [eval {jlib::connect::connect $jlibname $jid $password $cmd} $args]
 }
 
 # jlib::state --
@@ -894,7 +890,7 @@ proc jlib::closestream {jlibname} {
     
     if {$lib(isinstream)} {
 	set xml "</stream:stream>"
-	sendraw $jlibname $xml
+	catch {sendraw $jlibname $xml}
 	set lib(isinstream) 0
     }
     kill $jlibname
@@ -996,13 +992,12 @@ proc jlib::dispatcher {jlibname xmldata} {
 	}
 	features {
 	    features_handler $jlibname $xmldata
-	    element_run_hook $jlibname $tag $xmldata
 	}
 	error {
 	    error_handler $jlibname $xmldata
 	}
 	default {
-	    element_run_hook $jlibname $tag $xmldata
+	    element_run_hook $jlibname $xmldata
 	}
     }
 }
@@ -1479,10 +1474,6 @@ proc jlib::presence_handler {jlibname xmldata} {
     if {![string equal $type "error"]} {
 	eval {$lib(rostername) invokecommand $from $type} $arglist
     }
-    
-    # Old. Moved up! Only users: avatar + caps +disco
-    #eval {presence_run_hook $jlibname $from $type} $arglist
-    #presence_ex_run_hook $jlibname $xmldata
 }
 
 # jlib::features_handler --
@@ -1491,89 +1482,149 @@ proc jlib::presence_handler {jlibname xmldata} {
 
 proc jlib::features_handler {jlibname xmllist} {
 
-    upvar ${jlibname}::locals locals
+    upvar ${jlibname}::features features
     variable xmppxmlns
     
     Debug 4 "jlib::features_handler"
-    
+
+    set features(xmllist) $xmllist
+
     foreach child [wrapper::getchildren $xmllist] {
 	wrapper::splitxml $child tag attr chdata children
+	set xmlns [wrapper::getattribute $child xmlns]
 	
+	# All feature elements must be namespaced.
+	if {$xmlns eq ""} {
+	    continue
+	}
+	set features(elem,$xmlns) $child
+		
 	switch -- $tag {
+	    starttls {
+		
+		# TLS
+		if {$xmlns eq $xmppxmlns(tls)} {
+		    set features(starttls) 1
+		    set childs [wrapper::getchildswithtag $xmllist required]
+		    if {$childs ne ""} {
+			set features(starttls,required) 1
+		    }
+		}
+	    }
+	    compression {
+		
+		# Compress
+		if {$xmlns eq $xmppxmlns(compress)} {
+		    set features(compression) 1
+		    foreach c [wrapper::getchildswithtag $xmllist method] {
+			set method [wrapper::getcdata $c]
+			set features(compression,$method) 1
+		    }
+		}
+	    }
 	    mechanisms {
+		
+		# SASL
 		set mechanisms {}
-		if {[wrapper::getattr $attr xmlns] eq $xmppxmlns(sasl)} {
+		if {$xmlns eq $xmppxmlns(sasl)} {
+		    set features(sasl) 1
 		    foreach mechelem $children {
 			wrapper::splitxml $mechelem mtag mattr mchdata mchild
 			if {$mtag eq "mechanism"} {
 			    lappend mechanisms $mchdata
 			}
+			set features(mechanism,$mchdata) 1
 		    }
 		}
 
 		# Variable that may trigger a trace event.
-		set locals(features,mechanisms) $mechanisms
+		set features(mechanisms) $mechanisms
 	    }
-	    starttls {
-		if {[wrapper::getattr $attr xmlns] eq $xmppxmlns(tls)} {
-		    set locals(features,starttls) 1
-		    set childs [wrapper::getchildswithtag $xmllist required]
-		    if {$childs ne ""} {
-			set locals(features,starttls,required) 1
-		    }
+	    bind {
+		if {$xmlns eq $xmppxmlns(bind)} {
+		    set features(bind) 1
 		}
 	    }
-	    compression {
-		if {[wrapper::getattr $attr xmlns] eq $xmppxmlns(compress)} {
-		    set locals(features,compression) 1
-		    foreach c [wrapper::getchildswithtag $xmllist method] {
-			set method [wrapper::getcdata $c]
-			set locals(features,compression,$method) 1
-		    }
+	    session {
+		if {$xmlns eq $xmppxmlns(session)} {
+		    set features(session) 1
 		}
 	    }
 	    default {
-		set locals(features,$tag) 1
+		
+		# Have no idea of what this could be.
+		set features($xmlns) 1
 	    }
 	}
     }
-    
-    # Variable that may trigger a trace event.
-    set locals(features) 1
+        
+    if {$features(trace) ne {}} {
+	uplevel #0 $features(trace) [list $jlibname]
+    }
 }
 
-# jlib::get_features, have_features --
+# jlib::trace_stream_features --
+# 
+#       Register a callback when getting stream features.
+#       Only one component at a time.
+#       
+#       args:     tclProc  set callback
+#                 {}       unset callback
+#                 empty    return callback
+
+proc jlib::trace_stream_features {jlibname args} {
+    
+    upvar ${jlibname}::features features
+    
+    switch -- [llength $args] {
+	0 {
+	    return $features(trace)
+	}
+	1 {
+	    set features(trace) [lindex $args 0]
+	}
+	default {
+	    return -code error "Usage: trace_stream_features ?tclProc?"
+	}
+    }
+}
+
+# jlib::get_feature, have_feature --
 # 
 #       Just to get access of the stream features.
 
-proc jlib::get_features {jlibname name {name2 ""}} {
+proc jlib::get_feature {jlibname name {name2 ""}} {
     
-    upvar ${jlibname}::locals locals
+    upvar ${jlibname}::features features
 
     set ans ""
     if {$name2 ne ""} {
-	if {[info exists locals(features,$name,$name2)]} {
-	    set ans $locals(features,$name,$name2)
+	if {[info exists features($name,$name2)]} {
+	    set ans $features($name,$name2)
 	}
     } else {
-	if {[info exists locals(features,$name)]} {
-	    set ans $locals(features,$name)
+	if {[info exists features($name)]} {
+	    set ans $features($name)
 	}
     }
     return $ans
 }
 
-proc jlib::have_features {jlibname name {name2 ""}} {
+proc jlib::have_feature {jlibname {name ""} {name2 ""}} {
     
-    upvar ${jlibname}::locals locals
-
+    upvar ${jlibname}::features features
+    
     set ans 0
     if {$name2 ne ""} {
-	if {[info exists locals(features,$name,$name2)]} {
+	if {[info exists features($name,$name2)]} {
+	    set ans 1
+	}
+    } elseif {$name ne ""} {
+	if {[info exists features($name)]} {
 	    set ans 1
 	}
     } else {
-	if {[info exists locals(features,$name)]} {
+	if {[info exists features(xmllist)]} {
 	    set ans 1
 	}
     }
@@ -1739,6 +1790,7 @@ proc jlib::reset {jlibname} {
     upvar ${jlibname}::iqcmd iqcmd
     upvar ${jlibname}::prescmd prescmd
     upvar ${jlibname}::locals locals
+    upvar ${jlibname}::features features
     variable statics
     
     Debug 4 "jlib::reset"
@@ -1754,6 +1806,7 @@ proc jlib::reset {jlibname} {
     set prescmd(uid) $num
     
     unset -nocomplain locals
+    unset -nocomplain features
     
     init_inst $jlibname
 
@@ -1767,7 +1820,7 @@ proc jlib::reset {jlibname} {
     if {[havetls]} {
 	tls_reset $jlibname
     }
-    
+        
     # Execute any register reset commands.
     foreach cmd $statics(resetCmds) {
 	uplevel #0 $cmd $jlibname
@@ -1784,9 +1837,13 @@ proc jlib::reset {jlibname} {
 proc jlib::stream_reset {jlibname} {
     
     upvar ${jlibname}::locals locals
+    upvar ${jlibname}::features features
     
-    array unset locals features*
     array unset locals streamattr,*
+    
+    set cmd $features(trace)
+    unset -nocomplain features
+    set features(trace) $cmd
 }
 
 # jlib::getstanzaerrorspec --
@@ -2506,25 +2563,25 @@ proc jlib::presence_deregister_ex {jlibname func args} {
 # 
 #       Used to get callbacks from non stanza elements, like sasl etc.
 
-proc jlib::element_register {jlibname tag func {seq 50}} {
+proc jlib::element_register {jlibname xmlns func {seq 50}} {
     
     upvar ${jlibname}::elementhook elementhook
     
-    lappend elementhook($tag) [list $func $seq]
-    set elementhook($tag)  \
-      [lsort -integer -index 1 [lsort -unique $elementhook($tag)]]
+    lappend elementhook($xmlns) [list $func $seq]
+    set elementhook($xmlns)  \
+      [lsort -integer -index 1 [lsort -unique $elementhook($xmlns)]]
 }
 
-proc jlib::element_deregister {jlibname tag func} {
+proc jlib::element_deregister {jlibname xmlns func} {
     
     upvar ${jlibname}::elementhook elementhook
     
-    if {![info exists elementhook($tag)]} {
+    if {![info exists elementhook($xmlns)]} {
 	return
     }
     set ind -1
     set found 0
-    foreach spec $elementhook($tag) {
+    foreach spec $elementhook($xmlns) {
 	incr ind
 	if {[string equal $func [lindex $spec 0]]} {
 	    set found 1
@@ -2532,21 +2589,22 @@ proc jlib::element_deregister {jlibname tag func} {
 	}
     }
     if {$found} {
-	set elementhook($tag) [lreplace $elementhook($tag) $ind $ind]
+	set elementhook($xmlns) [lreplace $elementhook($xmlns) $ind $ind]
     }
 }
 
-proc jlib::element_run_hook {jlibname tag xmldata} {
+proc jlib::element_run_hook {jlibname xmldata} {
     
     upvar ${jlibname}::elementhook elementhook
 
     set ishandled 0
+    set xmlns [wrapper::getattribute $xmldata xmlns]
     
-    if {[info exists elementhook($tag)]} {
-	foreach spec $elementhook($tag) {
+    if {[info exists elementhook($xmlns)]} {
+	foreach spec $elementhook($xmlns) {
 	    set func [lindex $spec 0]
 	    set code [catch {
-		uplevel #0 $func [list $jlibname $tag $xmldata]
+		uplevel #0 $func [list $jlibname $xmldata]
 	    } ans]
 	    if {$code} {
 		bgerror "preshook $func failed: $code\n$::errorInfo"
@@ -3174,7 +3232,7 @@ proc jlib::register_presence_stanza {jlibname elem args} {
     set pres(stanza,$tag,$xmlns,$type) $elem
 }
 
-proc jlib::unregister_presence_stanza {jlibname tag xmlns} {
+proc jlib::deregister_presence_stanza {jlibname tag xmlns} {
     
     upvar ${jlibname}::pres pres
     
@@ -3228,11 +3286,15 @@ proc jlib::send {jlibname xmllist} {
     return
 }
 
+# jlib::sendraw --
+# 
+#       Send raw xml. The caller is responsible for catching errors.
+
 proc jlib::sendraw {jlibname xml} {
     
     upvar ${jlibname}::lib lib
 
-    $lib(transport,send) $jlibname $xml
+    uplevel #0 $lib(transport,send) [list $jlibname $xml]
 }
 
 # jlib::mypresence --

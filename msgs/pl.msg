@@ -905,10 +905,22 @@ Otrzymałeś autoryzację od %s: %s.}
 ::msgcat::mcset pl jamessregerr                 {Błąd nieudanej rejestracji: %s}
 ::msgcat::mcset pl jamesstrptsubsc              {Twoje konto zarejestrowane w systemie %s znajdzie się na Twojej własnej liście jako przekaźnik wiadomości ("transport") do tego systemu.}
 ::msgcat::mcset pl jamessfailedsubsc            {Brak autoryzacji ze strony %s - użytkownik nie wyraził zgody.}
-::msgcat::mcset pl jamessstarttls-nofeature     {Brak możliwości skorzystania z TLS na serwerze "%s".}
-::msgcat::mcset pl jamessstarttls-failure       {Nieudana negocjacja TLS z serwerem "%s".}
 ::msgcat::mcset pl jamessgcinvite               {Masz zaproszenie do wzięcia udziału w konferencji %s (od %s). Przyłączysz się?}
 ::msgcat::mcset pl jamessnorooms                {Nie znaleziono żadnych pokoi pod adresem %s.}
+
+# This maps Defined Conditions to clear text messages.
+# draft-ietf-xmpp-core23; 6.4 Defined Conditions
+::msgcat::mcset pl xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
+::msgcat::mcset pl xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
+::msgcat::mcset pl xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
+::msgcat::mcset pl xmpp-stanzas-invalid-mechanism   {The initiating entity did not provide a mechanism or requested a mechanism that is not supported by the receiving entity.}
+::msgcat::mcset pl xmpp-stanzas-mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
+::msgcat::mcset pl xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
+::msgcat::mcset pl xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
+
+::msgcat::mcset pl xmpp-stanzas-starttls-nofeature     {Brak możliwości skorzystania z TLS na serwerze "%s".}
+::msgcat::mcset pl xmpp-stanzas-starttls-failure       {Nieudana negocjacja TLS z serwerem "%s".}
+
 
 # Translate
 ::msgcat::mcset pl jamessnofiletrpt {We couldn't see that %s supports file transfer.}

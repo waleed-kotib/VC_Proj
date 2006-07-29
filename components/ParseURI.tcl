@@ -7,7 +7,7 @@
 #       Most recent reference at the time of writing:
 #       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
 # 
-# $Id: ParseURI.tcl,v 1.25 2006-04-08 07:02:48 matben Exp $
+# $Id: ParseURI.tcl,v 1.26 2006-07-29 13:12:58 matben Exp $
 
 package require uriencode
 
@@ -131,10 +131,9 @@ proc ::ParseURI::Parse {args} {
 #       Note that we have got two tokens here, the first one our own,
 #       the second from the login.
 
-proc ::ParseURI::LoginCB {token logtoken status {errmsg ""}} {
+proc ::ParseURI::LoginCB {token {errcode ""} {errmsg ""}} {
     
-    ::Login::ShowAnyMessageBox $logtoken $status $errmsg
-    if {$status eq "ok"} {
+    if {$errcode eq ""} {
 	ProcessURI $token
     }
 }

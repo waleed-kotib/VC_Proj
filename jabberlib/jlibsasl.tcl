@@ -3,10 +3,15 @@
 #      This file is part of the jabberlib. It provides support for the
 #      sasl authentication layer via the tclsasl package or the saslmd5
 #      pure tcl package.
+#      It also makes the resource binding and session initiation.
 #      
-#  Copyright (c) 2004-2005  Mats Bengtsson
+#        o sasl authentication
+#        o bind resource
+#        o establish session
+#      
+#  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.20 2006-07-26 06:26:29 matben Exp $
+# $Id: jlibsasl.tcl,v 1.21 2006-07-29 13:12:59 matben Exp $
 
 package require jlib
 package require saslmd5
@@ -64,6 +69,7 @@ proc jlib::encode64 {str} {
 proc jlib::auth_sasl {jlibname username resource password cmd} {
     
     upvar ${jlibname}::locals locals
+    variable xmppxmlns
     
     Debug 2 "jlib::auth_sasl"
         
@@ -76,33 +82,50 @@ proc jlib::auth_sasl {jlibname username resource password cmd} {
     set locals(sasl,cmd) $cmd
     
     # Set up callbacks for elements that are of interest to us.
-    element_register $jlibname challenge [namespace current]::sasl_challenge
-    element_register $jlibname failure   [namespace current]::sasl_failure
-    element_register $jlibname success   [namespace current]::sasl_success
+    element_register $jlibname $xmppxmlns(sasl) [namespace current]::sasl_parse
 
-    if {[info exists locals(features,mechanisms)]} {
+    if {[have_feature $jlibname mechanisms]} {
 	auth_sasl_continue $jlibname
     } else {
-	element_register $jlibname features [namespace current]::sasl_features
+	trace_stream_features $jlibname [namespace current]::sasl_features
     }
 }
 
-proc jlib::sasl_features {jlibname tag xmllist} {
+proc jlib::sasl_features {jlibname} {
 
     upvar ${jlibname}::locals locals
 
     Debug 2 "jlib::sasl_features"
-
-    element_deregister $jlibname features [namespace current]::sasl_features
     
     # Verify that sasl is supported before going on.
-    set features [get_features $jlibname "mechanisms"]
+    set features [get_feature $jlibname "mechanisms"]
     if {$features eq ""} {
 	set msg "no sasl mechanisms announced by the server"
-	sasl_final $jlibname error [list {} $msg]
+	sasl_final $jlibname error [list no-mechanisms-announced $msg]
     } else {
 	auth_sasl_continue $jlibname
     }
+}
+
+proc jlib::sasl_parse {jlibname xmldata} {
+    
+    set tag [wrapper::gettag $xmldata]
+    
+    switch -- $tag {
+	challenge {
+	    sasl_challenge $jlibname $tag $xmldata
+	}
+	failure {
+	    sasl_failure $jlibname $tag $xmldata
+	}
+	success {
+	    sasl_success $jlibname $tag $xmldata	    
+	}
+	default {
+	    sasl_final $jlibname error [list sasl-protocol-error {}]
+	}
+    }
+    return
 }
 
 # jlib::auth_sasl_continue --
@@ -154,13 +177,14 @@ proc jlib::auth_sasl_continue {jlibname} {
     }
     
     # Returns a serialized array if succesful.
+    set mechanisms [get_feature $jlibname mechanisms]
     if {$cyrussasl} {
 	set code [catch {
-	    $sasltoken -operation start -mechanisms $locals(features,mechanisms) \
+	    $sasltoken -operation start -mechanisms $mechanisms \
 	      -interact [list [namespace current]::sasl_interact $jlibname]
 	} out]
     } else {
-	set ans [$sasltoken start -mechanisms $locals(features,mechanisms)]
+	set ans [$sasltoken start -mechanisms $mechanisms]
 	set code [lindex $ans 0]
 	set out  [lindex $ans 1]
     }
@@ -186,7 +210,7 @@ proc jlib::auth_sasl_continue {jlibname} {
 	default {
 	    # This is an error
 	    # We should perhaps send an abort element here.
-	    sasl_final $jlibname error [list {} $out]
+	    sasl_final $jlibname error [list error $out]
 	}
     }
 }
@@ -271,14 +295,11 @@ proc jlib::saslmd5_callback {jlibname data} {
 }
 
 proc jlib::sasl_challenge {jlibname tag xmllist} {
-    variable xmppxmlns
     
     Debug 2 "jlib::sasl_challenge"
     
-    if {[wrapper::getattribute $xmllist xmlns] == $xmppxmlns(sasl)} {
-	sasl_step $jlibname [wrapper::getcdata $xmllist]
-    }
-    return {}
+    sasl_step $jlibname [wrapper::getcdata $xmllist]
+    return
 }
 
 proc jlib::sasl_step {jlibname serverin64} {
@@ -319,7 +340,7 @@ proc jlib::sasl_step {jlibname serverin64} {
 	}
 	default {
 	    #puts "\t errdetail: [$lib(sasl,token) -operation errdetail]"
-	    sasl_final $jlibname error [list {} $output]
+	    sasl_final $jlibname error [list error $output]
 	}
     }
 }
@@ -341,7 +362,7 @@ proc jlib::sasl_failure {jlibname tag xmllist} {
 	}
 	sasl_final $jlibname error [list $errtag $errmsg]
     }
-    return {}
+    return
 }
 
 proc jlib::sasl_success {jlibname tag xmllist} {
@@ -356,11 +377,16 @@ proc jlib::sasl_success {jlibname tag xmllist} {
 	return
     }
     
-    # xmpp-core sect 6.2:
-    # Upon receiving the <success/> element,
-    # the initiating entity MUST initiate a new stream by sending an
-    # opening XML stream header to the receiving entity (it is not
-    # necessary to send a closing </stream> tag first...
+    # Upon receiving a success indication within the SASL negotiation, the
+    # client MUST send a new stream header to the server, to which the
+    # server MUST respond with a stream header as well as a list of
+    # available stream features.  Specifically, if the server requires the
+    # client to bind a resource to the stream after successful SASL
+    # negotiation, it MUST include an empty <bind/> element qualified by
+    # the 'urn:ietf:params:xml:ns:xmpp-bind' namespace in the stream
+    # features list it presents to the client upon sending the header for
+    # the response stream sent after successful SASL negotiation (but not
+    # before):
     
     wrapper::reset $lib(wrap)
     
@@ -370,45 +396,49 @@ proc jlib::sasl_success {jlibname tag xmllist} {
     set xml "<stream:stream\
       xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppxmlns(stream)'\
       to='$locals(server)' xml:lang='[getlang]' version='1.0'>"
-
-    sendraw $jlibname $xml
-    
-    # Must be careful so this is not triggered by a reset or something...
-    trace add variable ${jlibname}::locals(features) write \
-      [list [namespace current]::auth_sasl_features_write $jlibname]
-    
+    if {[catch {
+	sendraw $jlibname $xml
+    } err]} {
+	sasl_final $jlibname error [list network-failure $err]
+	return
+    }
+	
+    # Wait for the resource binding feature (optional) or session (mandantory):
+    trace_stream_features $jlibname  \
+      [namespace current]::auth_sasl_features_write
     return {}
 }
 
-proc jlib::auth_sasl_features_write {jlibname name1 name2 op} {
+proc jlib::auth_sasl_features_write {jlibname} {
     
     upvar ${jlibname}::locals locals
 
-    trace remove variable ${jlibname}::locals(features) write \
-      [list [namespace current]::auth_sasl_features_write $jlibname]
-
-    bind_resource $jlibname $locals(resource) \
-      [namespace current]::resource_bind_cb
+    if {[have_feature $jlibname bind]} {
+	bind_resource $jlibname $locals(resource) \
+	  [namespace current]::resource_bind_cb
+    } else {
+	establish_session $jlibname
+    }
 }
 
 proc jlib::resource_bind_cb {jlibname type subiq} {
     
-    upvar ${jlibname}::locals locals
+    if {$type eq "error"} {
+	sasl_final $jlibname error $subiq
+    } else {
+	establish_session $jlibname
+    }
+}
+
+proc jlib::establish_session {jlibname} {
+    
     variable xmppxmlns
     
-    switch -- $type {
-	error {
-	    sasl_final $jlibname error $subiq
-	}
-	default {
-	    
-	    # Establish the session.
-	    set xmllist [wrapper::createtag session \
-	      -attrlist [list xmlns $xmppxmlns(session)]]
-	    send_iq $jlibname set [list $xmllist] -command \
-	      [list [namespace current]::send_session_cb $jlibname]
-	}
-    }
+    # Establish the session.
+    set xmllist [wrapper::createtag session \
+      -attrlist [list xmlns $xmppxmlns(session)]]
+    send_iq $jlibname set [list $xmllist] -command \
+      [list [namespace current]::send_session_cb $jlibname]
 }
 
 proc jlib::send_session_cb {jlibname type subiq args} {
@@ -421,14 +451,12 @@ proc jlib::send_session_cb {jlibname type subiq args} {
 proc jlib::sasl_final {jlibname type subiq} {
     
     upvar ${jlibname}::locals locals
+    variable xmppxmlns
     
     Debug 2 "jlib::sasl_final"
 
     # We are no longer interested in these.
-    element_deregister $jlibname challenge [namespace current]::sasl_challenge
-    element_deregister $jlibname failure   [namespace current]::sasl_failure
-    element_deregister $jlibname success   [namespace current]::sasl_success
-    element_deregister $jlibname features  [namespace current]::sasl_features
+    element_deregister $jlibname $xmppxmlns(sasl) [namespace current]::sasl_parse
 
     uplevel #0 $locals(sasl,cmd) [list $jlibname $type $subiq]
 }
@@ -440,16 +468,13 @@ proc jlib::sasl_log {args} {
 
 proc jlib::sasl_reset {jlibname} {
     
-    upvar ${jlibname}::locals locals
+    variable xmppxmlns
 
-    foreach tspec [trace info variable ${jlibname}::locals(features,mechanisms)] {
-	foreach {op cmd} $tspec {break}
-	trace remove variable ${jlibname}::locals(features,mechanisms) $op $cmd
+    set cmd [trace_stream_features $jlibname]
+    if {$cmd eq "[namespace current]::sasl_features"} {
+	trace_stream_features $jlibname {}
     }
-    foreach tspec [trace info variable ${jlibname}::locals(features)] {
-	foreach {op cmd} $tspec {break}
-	trace remove variable ${jlibname}::locals(features) $op $cmd
-    }
+    element_deregister $jlibname $xmppxmlns(sasl) [namespace current]::sasl_parse
 }
 
 namespace eval jlib {

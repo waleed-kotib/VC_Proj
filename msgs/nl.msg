@@ -909,13 +909,23 @@
 ::msgcat::mcset nl jamessregerr                 {De registratie mislukte met foutmelding: %s}
 ::msgcat::mcset nl jamesstrptsubsc              {Uw account op de dienst %s zal in uw roster geplaatst worden en zal dienen als transport voor die dienst.}
 ::msgcat::mcset nl jamessfailedsubsc            {Inschrijven op %s mislukte omdat de contactpersoon weigerde.}
-::msgcat::mcset nl jamessstarttls-nofeature     {Server "%s" ondersteunt TLS niet.}
-::msgcat::mcset nl jamessstarttls-failure       {Beveiligd verbinden via TLS met server "%s" mislukte.}
 ::msgcat::mcset nl jamessgcinvite               {U werd uitgenodigd op de chatruimte %s door %s. Wenst u deze chatruimte te betreden?}
 ::msgcat::mcset nl jamessnorooms                {Kon geen enkele chatruimte vinden op %s.}
-
 ::msgcat::mcset nl jamessnofiletrpt  {Er kon niet gedetecteerd worden of %s bestandsoverdracht ondersteunt.}
 ::msgcat::mcset nl jamessfiletrpterr {Downloaden van bestand %s van %s mislukte: %s}
+
+# This maps Defined Conditions to clear text messages.
+# draft-ietf-xmpp-core23; 6.4 Defined Conditions
+::msgcat::mcset nl xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
+::msgcat::mcset nl xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
+::msgcat::mcset nl xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
+::msgcat::mcset nl xmpp-stanzas-invalid-mechanism   {The initiating entity did not provide a mechanism or requested a mechanism that is not supported by the receiving entity.}
+::msgcat::mcset nl xmpp-stanzas-mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
+::msgcat::mcset nl xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
+::msgcat::mcset nl xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
+
+::msgcat::mcset nl xmpp-stanzas-starttls-nofeature     {Server "%s" ondersteunt TLS niet.}
+::msgcat::mcset nl xmpp-stanzas-starttls-failure       {Beveiligd verbinden via TLS met server "%s" mislukte.}
 
 
 ::msgcat::mcset nl openquicktime		{QuickTime live stream openen}

@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.17 2006-06-07 07:51:46 matben Exp $
+# $Id: avatar.tcl,v 1.18 2006-07-29 13:12:59 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -172,8 +172,8 @@ proc jlib::avatar::configure {jlibname args} {
 	    if {$options(-announce)} {
 		# @@@ ???
 	    } else {
-		$jlibname unregister_presence_stanza x $xmlns(x-avatar)
-                $jlibname unregister_presence_stanza x $xmlns(vcard-temp)
+		$jlibname deregister_presence_stanza x $xmlns(x-avatar)
+                $jlibname deregister_presence_stanza x $xmlns(vcard-temp)
 	    }
 	}
     }
@@ -218,7 +218,7 @@ proc jlib::avatar::set_data {jlibname data mime} {
       -attrlist [list xmlns $xmlns(x-avatar)] \
       -subtags [list $hashElem]]
 
-    $jlibname unregister_presence_stanza x $xmlns(x-avatar)
+    $jlibname deregister_presence_stanza x $xmlns(x-avatar)
     $jlibname register_presence_stanza $xElem -type available
 
     #-- vCard-temp presence stanza --
@@ -227,7 +227,7 @@ proc jlib::avatar::set_data {jlibname data mime} {
       -attrlist [list xmlns $xmlns(vcard-temp)]  \
       -subtags [list $photoElem]]
 
-    $jlibname unregister_presence_stanza x $xmlns(vcard-temp)
+    $jlibname deregister_presence_stanza x $xmlns(vcard-temp)
     $jlibname register_presence_stanza $xVCardElem -type available
 
     return
@@ -253,8 +253,8 @@ proc jlib::avatar::unset_data {jlibname} {
     set options(-announce) 0
     set options(-share)    0
     
-    $jlibname unregister_presence_stanza x $xmlns(x-avatar)
-    $jlibname unregister_presence_stanza x $xmlns(vcard-temp)
+    $jlibname deregister_presence_stanza x $xmlns(x-avatar)
+    $jlibname deregister_presence_stanza x $xmlns(vcard-temp)
 
     return
 }
