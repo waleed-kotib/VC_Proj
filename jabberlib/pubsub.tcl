@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.8 2006-07-19 13:51:27 matben Exp $
+# $Id: pubsub.tcl,v 1.9 2006-07-29 10:15:44 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -303,7 +303,7 @@ proc jlib::pubsub::items {jlibname to node args} {
     variable xmlns
 
     set opts [list -to $to]
-    set attr [list node $node subid $subid]
+    set attr [list node $node]
     set itemids {}
     foreach {key value} $args {
 	set name [string trimleft $key -]
@@ -546,7 +546,7 @@ proc jlib::pubsub::register_event {jlibname func args} {
       [lsort -integer -index 1 [lsort -unique $events($pattern)]]
 }
 
-proc jlib::pubsub::unregister_event {jlibname func args} {
+proc jlib::pubsub::deregister_event {jlibname func args} {
     
     upvar ${jlibname}::events events
     
