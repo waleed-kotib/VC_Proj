@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.1 2006-07-29 13:12:59 matben Exp $
+# $Id: connect.tcl,v 1.2 2006-07-31 07:22:35 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -21,7 +21,7 @@
 #       o transport                                     initnetwork
 #       o initialize xmpp stream                        initstream
 #       o start tls (optional)                          starttls
-#       o stream compression (todo)                     startcompress
+#       o stream compression (untested)                 startcompress
 #       o sasl authentication (or digest or plain)      authenticate
 #       o final                                         ok | error 
 # 
@@ -98,6 +98,7 @@ proc jlib::connect::init {} {
     # Default options.
     variable options
     array set options {
+	-compress         0
 	-defaulthttpurl   http://%h:5280/http-poll/
 	-defaultport      5222
 	-defaultresource  "default"
@@ -121,7 +122,6 @@ proc jlib::connect::init {} {
     
     # todo:
     # -anonymous
-    # -compress
     set inited 1
 }
 
@@ -190,6 +190,7 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 #       password
 #       cmd         callback command
 #       args:
+#           -compress         0|1
 #           -defaulthttpurl   url
 #           -defaultport      5222
 #           -defaultresource  
@@ -304,12 +305,19 @@ proc jlib::connect::connect {jlibname jid password cmd args} {
 	    }
 	}
     }
+    if {$state(-compress) && !$have(jlibcompress)} {
+	return -code error "missing jlibcompress package"
+    }
+    if {$state(-compress) && ($state(usetls) || $state(usessl))} {
+	return -code error "connot have -compress and tls at the same time"
+    }
+    if {$state(-compress)} {
+	set state(usecompress) 1
+    }
 
     # Any stream version. XMPP requires 1.0.
-    if {$state(-secure)} {
-	if {($state(-method) eq "sasl") || ($state(-method) eq "tlssasl")} {
-	    set state(version) 1.0
-	}
+    if {$state(usesasl) || $state(usetls) || $state(usecompress)} {
+	set state(version) 1.0
     }
     
     # Schedule a timeout.
@@ -466,9 +474,10 @@ proc jlib::connect::tcp_writable {jlibname} {
 	finish $jlibname network-failure $sockname
 	return
     }
+    $jlibname setsockettransport $sock
     
     # Do SSL handshake.
-    if {$state(-secure) && ($state(-method) eq "ssl")} {
+    if {$state(usessl)} {
 	fconfigure $sock -blocking 1
 	if {[catch {::tls::handshake $sock} err]} {
 	    finish $jlibname tls-failure $err
@@ -476,7 +485,6 @@ proc jlib::connect::tcp_writable {jlibname} {
 	}
 	fconfigure $sock -blocking 0
     }
-    $jlibname setsockettransport $sock
 
     # Send the init stream xml command.
     init_stream $jlibname
@@ -543,6 +551,9 @@ proc jlib::connect::init_stream_cb {jlibname args} {
 	set state(state) starttls
 	uplevel #0 $state(cmd) $jlibname starttls
 	$jlibname starttls jlib::connect::starttls_cb
+    } elseif {$state(usecompress)} {
+	uplevel #0 $state(cmd) $jlibname startcompress
+	jlib::compress::start $jlibname jlib::connect::compress_cb
     } elseif {$state(-noauth)} {
 	finish $jlibname
     } else {
@@ -564,6 +575,25 @@ proc jlib::connect::starttls_cb {jlibname type args} {
 	#    12. If the TLS negotiation is successful, the initiating entity
 	#        MUST continue with SASL negotiation.
 	set state(streamid) [$jlibname getstreamattr id]
+	auth $jlibname
+    }
+}
+
+proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {
+    
+    upvar ${jlibname}::connect::state state
+    
+    debug "jlib::connect::compress_cb"
+  
+    # Note: Failure of compression setup SHOULD NOT be treated as an 
+    # unrecoverable error and therefore SHOULD NOT result in a stream error. 
+    if {$errcode ne ""} {
+	finish $jlibname $errcode $errmsg
+	return
+    }
+    if {$state(-noauth)} {
+	finish $jlibname
+    } else {
 	auth $jlibname
     }
 }
@@ -623,7 +653,7 @@ proc jlib::connect::reset {jlibname} {
 proc jlib::connect::timeout {jlibname} {
 
     $jlibname tls_reset
-    $jlibname sasl__reset
+    $jlibname sasl_reset
     finish $jlibname timeout
 }
 
@@ -686,7 +716,7 @@ if {0} {
     package require jlib::connect
     proc cb {args} {
 	puts "---> $args"
-	puts [jlib::connect::get_state ::jlib::jlib1]
+	#puts [jlib::connect::get_state ::jlib::jlib1]
     }
     jlib::connect::connect ::jlib::jlib1 matben@localhost xxx cb 
     jlib::connect::connect ::jlib::jlib1 matben@devrieze.dyndns.org 1amason cb \
@@ -694,6 +724,9 @@ if {0} {
    
     jlib::connect::connect ::jlib::jlib1 matben@sgi.se 1amason cb  \
       -http 1 -httpurl http://sgi.se:5280/http-poll/
+
+    jlib::connect::connect ::jlib::jlib1 matben@jabber.ru 1amason cb  \
+      -compress 1 -secure 1 -method sasl
 
     jlib::jlib1 closestream
 }

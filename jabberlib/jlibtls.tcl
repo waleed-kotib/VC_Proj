@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.11 2006-07-29 13:12:59 matben Exp $
+# $Id: jlibtls.tcl,v 1.12 2006-07-31 07:22:35 matben Exp $
 
 package require tls
 package require jlib
@@ -76,10 +76,7 @@ proc jlib::tls_parse {jlibname xmldata} {
 
 proc jlib::tls_proceed {jlibname tag xmllist} {    
 
-    upvar ${jlibname}::locals locals
-    upvar ${jlibname}::opts opts
     upvar ${jlibname}::lib lib
-    variable xmppxmlns
     
     Debug 2 "jlib::tls_proceed"
     
@@ -115,14 +112,10 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
     # We must clear out any server info we've received so far.
     stream_reset $jlibname
     
-    set xml "<stream:stream\
-      xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppxmlns(stream)'\
-      to='$locals(server)' xml:lang='[getlang]' version='1.0'>"
-
     # The tls package resets the encoding to: -encoding binary
     if {[catch {
 	fconfigure $sock -encoding utf-8
-	sendraw $jlibname $xml
+	sendstream $jlibname -version 1.0
     } err]} {
 	tls_finish $jlibname network-failure $err
 	return
