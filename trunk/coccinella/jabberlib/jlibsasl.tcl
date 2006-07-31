@@ -11,7 +11,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.21 2006-07-29 13:12:59 matben Exp $
+# $Id: jlibsasl.tcl,v 1.22 2006-07-31 07:22:35 matben Exp $
 
 package require jlib
 package require saslmd5
@@ -368,14 +368,8 @@ proc jlib::sasl_failure {jlibname tag xmllist} {
 proc jlib::sasl_success {jlibname tag xmllist} {
     
     upvar ${jlibname}::lib lib
-    upvar ${jlibname}::locals locals
-    upvar ${jlibname}::opts opts
-    variable xmppxmlns
 
     Debug 2 "jlib::sasl_success"
-    if {[wrapper::getattribute $xmllist xmlns] != $xmppxmlns(sasl)} {
-	return
-    }
     
     # Upon receiving a success indication within the SASL negotiation, the
     # client MUST send a new stream header to the server, to which the
@@ -393,11 +387,8 @@ proc jlib::sasl_success {jlibname tag xmllist} {
     # We must clear out any server info we've received so far.
     stream_reset $jlibname
     
-    set xml "<stream:stream\
-      xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppxmlns(stream)'\
-      to='$locals(server)' xml:lang='[getlang]' version='1.0'>"
     if {[catch {
-	sendraw $jlibname $xml
+	sendstream $jlibname -version 1.0
     } err]} {
 	sasl_final $jlibname error [list network-failure $err]
 	return

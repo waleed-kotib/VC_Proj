@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.144 2006-07-29 13:12:59 matben Exp $
+# $Id: jabberlib.tcl,v 1.145 2006-07-31 07:22:35 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -330,6 +330,9 @@ proc jlib::new {rostername clientcmd args} {
     set lib(isinstream) 0
     set lib(state)      ""
     set lib(transport,name) ""
+
+    set lib(socketfilter,out) {}
+    set lib(socketfilter,in)  {}
 
     init_inst $jlibname
             
@@ -702,6 +705,10 @@ proc jlib::putssocket {jlibname xml} {
     upvar ${jlibname}::lib lib
 
     Debug 2 "SEND: $xml"
+
+    if {$lib(socketfilter,out) ne {}} {
+	set xml [$lib(socketfilter,out) $xml]
+    }
     if {[catch {puts -nonewline $lib(sock) $xml} err]} {
 	# Error propagated to the caller that calls clientcmd.
 	return -code error
@@ -724,6 +731,9 @@ proc jlib::resetsocket {jlibname} {
 
     catch {close $lib(sock)}
     catch {after cancel $locals(aliveid)}
+
+    set lib(socketfilter,out) {}
+    set lib(socketfilter,in)  {}
 }
 
 # jlib::recvsocket --
@@ -755,11 +765,24 @@ proc jlib::recvsocket {jlibname} {
 	uplevel #0 $lib(clientcmd) [list $jlibname networkerror]	  
 	return
     }
+    if {$lib(socketfilter,in) ne {}} {
+	set data [$lib(socketfilter,in) $data]
+    }
     Debug 2 "RECV: $data"
     
     # Feed the XML parser. When the end of a command element tag is reached,
     # we get a callback to 'jlib::dispatcher'.
     wrapper::parse $lib(wrap) $data
+}
+
+proc jlib::set_socket_filter {jlibname outcmd incmd} {
+    
+    upvar ${jlibname}::lib lib
+
+    set lib(socketfilter,out) $outCmd
+    set lib(socketfilter,in)  $inCmd
+
+    fconfigure $lib(sock) -translation binary
 }
 
 # jlib::ipsocket --
@@ -868,6 +891,29 @@ proc jlib::openstream {jlibname server args} {
     return
 }
 
+# jlib::sendstream --
+# 
+#       Utility for SASL, TLS etc. Sends only the actual stream:stream tag.
+#       May throw error!
+
+proc jlib::sendstream {jlibname args} {
+    
+    upvar ${jlibname}::locals locals
+    upvar ${jlibname}::opts opts
+    variable xmppxmlns
+    
+    set attr ""
+    foreach {key value} $args {
+	set name [string trimleft $key "-"]
+	append attr " $name='$value'"
+    }
+    set xml "<stream:stream\
+      xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppxmlns(stream)'\
+      to='$locals(server)' xml:lang='[getlang]' $attr>"
+   
+    sendraw $jlibname $xml
+}
+
 # jlib::closestream --
 #
 #       Closes the stream down, closes socket, and resets internal variables.
@@ -927,6 +973,13 @@ proc jlib::kill {jlibname} {
     # Be sure to reset the wrapper, which implicitly resets the XML parser.
     wrapper::reset $lib(wrap)
     return
+}
+
+proc jlib::wrapper_reset {jlibname} {
+    
+    upvar ${jlibname}::lib lib
+
+    wrapper::reset $lib(wrap)
 }
 
 # jlib::getip --
@@ -1484,6 +1537,7 @@ proc jlib::features_handler {jlibname xmllist} {
 
     upvar ${jlibname}::features features
     variable xmppxmlns
+    variable jxmlns
     
     Debug 4 "jlib::features_handler"
 
@@ -1505,7 +1559,7 @@ proc jlib::features_handler {jlibname xmllist} {
 		# TLS
 		if {$xmlns eq $xmppxmlns(tls)} {
 		    set features(starttls) 1
-		    set childs [wrapper::getchildswithtag $xmllist required]
+		    set childs [wrapper::getchildswithtag $child required]
 		    if {$childs ne ""} {
 			set features(starttls,required) 1
 		    }
@@ -1514,9 +1568,9 @@ proc jlib::features_handler {jlibname xmllist} {
 	    compression {
 		
 		# Compress
-		if {$xmlns eq $xmppxmlns(compress)} {
+		if {$xmlns eq $jxmlns(compress)} {
 		    set features(compression) 1
-		    foreach c [wrapper::getchildswithtag $xmllist method] {
+		    foreach c [wrapper::getchildswithtag $child method] {
 			set method [wrapper::getcdata $c]
 			set features(compression,$method) 1
 		    }
