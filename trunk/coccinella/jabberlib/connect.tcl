@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.2 2006-07-31 07:22:35 matben Exp $
+# $Id: connect.tcl,v 1.3 2006-07-31 07:27:33 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -719,13 +719,13 @@ if {0} {
 	#puts [jlib::connect::get_state ::jlib::jlib1]
     }
     jlib::connect::connect ::jlib::jlib1 matben@localhost xxx cb 
-    jlib::connect::connect ::jlib::jlib1 matben@devrieze.dyndns.org 1amason cb \
+    jlib::connect::connect ::jlib::jlib1 matben@devrieze.dyndns.org xxx cb \
       -secure 1 -method tlssasl
    
-    jlib::connect::connect ::jlib::jlib1 matben@sgi.se 1amason cb  \
+    jlib::connect::connect ::jlib::jlib1 matben@sgi.se xxx cb  \
       -http 1 -httpurl http://sgi.se:5280/http-poll/
 
-    jlib::connect::connect ::jlib::jlib1 matben@jabber.ru 1amason cb  \
+    jlib::connect::connect ::jlib::jlib1 matben@jabber.ru xxx cb  \
       -compress 1 -secure 1 -method sasl
 
     jlib::jlib1 closestream
