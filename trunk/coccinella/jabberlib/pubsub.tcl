@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.9 2006-07-29 10:15:44 matben Exp $
+# $Id: pubsub.tcl,v 1.10 2006-08-01 06:17:57 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -77,8 +77,9 @@ proc jlib::pubsub::cmdproc {jlibname cmd args} {
 #       Create a new pubsub node.
 #       
 # Arguments:
-#       to            JID
-#       args: -command    tclProc
+#       args: 
+#             -to         (JID) if not indicated, we are using PEP recomendations
+#             -command    tclProc
 #             -configure  0 no configure element
 #                         1 new node with default configuration
 #                         xmldata jabber:x:data element
@@ -87,12 +88,12 @@ proc jlib::pubsub::cmdproc {jlibname cmd args} {
 # Results:
 #       none
 
-proc jlib::pubsub::create {jlibname to args} {
+proc jlib::pubsub::create {jlibname args} {
     
     variable xmlns
     
     set attr {}
-    set opts [list -to $to]
+    set opts {}
     set configure 0
     foreach {key value} $args {
 	set name [string trimleft $key -]
@@ -106,6 +107,9 @@ proc jlib::pubsub::create {jlibname to args} {
 	    }
 	    -node {
 		lappend attr $name $value
+	    }
+	    -to {
+		lappend opts -to $value
 	    }
 	}
     }
@@ -148,7 +152,7 @@ proc jlib::pubsub::configure {jlibname type to node args} {
 	}
     }
     set subtags [list [wrapper::createtag configure  \
-      -attrlist [list node $node] -subtags [list $xE]]
+      -attrlist [list node $node] -subtags [list $xE]]]
     set xmllist [list [wrapper::createtag pubsub \
       -attrlist [list xmlns $xmlns(owner)] -subtags $subtags]]
     eval {jlib::send_iq $jlibname $type $xmllist} $opts
@@ -378,12 +382,24 @@ proc jlib::pubsub::options {jlibname type to jid node args} {
 # jlib::pubsub::publish --
 # 
 #       Publish an item to a node.
+#
+# Arguments:
+#       args:
+#             -to         (JID) if not indicated, we are using PEP recomendations
+#             -command    tclProc
+#             -configure  0 no configure element
+#                         1 new node with default configuration
+#                         xmldata jabber:x:data element
+#             -node       the nodeID (else we get an instant node)
+#
+# Results:
+#       none
 
-proc jlib::pubsub::publish {jlibname to node args} {
+proc jlib::pubsub::publish {jlibname node args} {
 
     variable xmlns
     
-    set opts [list -to $to]
+    set opts {}
     set itemEs {}
     foreach {key value} $args {	
 	switch -- $key {
@@ -392,6 +408,9 @@ proc jlib::pubsub::publish {jlibname to node args} {
 	    }
 	    -items {
 		set itemEs $value
+	    }
+	    -to {
+		lappend opts -to $value
 	    }
 	}
     }
@@ -643,11 +662,11 @@ if {0} {
     set node mats
     set node home/$server/matben/xyz
     
-    $jlib pubsub create $psjid -node $node -command cb
+    $jlib pubsub create -to $psjid -node $node -command cb
     $jlib pubsub register_event cb -from $psjid -node $node
     $jlib pubsub subscribe $psjid $myjid -node $node -command cb
     $jlib pubsub subscriptions get $psjid $node -command cb
-    $jlib pubsub publish $psjid $node -items [list $itemE]
+    $jlib pubsub publish $node -to $psjid -items [list $itemE]
 
 
 
