@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.127 2006-05-21 13:08:29 matben Exp $
+# $Id: UI.tcl,v 1.128 2006-08-01 14:01:25 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1967,51 +1967,6 @@ ing8Yc/v+/97CQA7}
     set locals(inited) 1
 }
 
-# UI::NewCutCopyPaste --
-#
-#       Makes a new cut/copy/paste window look-alike mega widget.
-#       
-# Arguments:
-#       w      the cut/copy/paste widget.
-#       
-# Results:
-#       $w
-
-proc ::UI::NewCutCopyPaste {w} {
-    
-    # Set simpler variable names.
-    upvar ::UI::CCP::locals locals
-    
-    if {!$locals(inited)} {
-	::UI::InitCutCopyPaste
-    }
-    
-    frame $w -bd 0
-    foreach name {cut copy paste} {
-	label $w.$name -image $locals(im$name) -borderwidth 0
-    }
-    pack $w.cut $w.copy $w.paste -side left -padx 0 -pady 0
-    
-    set locals($w,w) [winfo toplevel $w]
-    
-    # Set binding to focus to set normal/disabled correctly.
-    bind $locals($w,w) <FocusIn> "+ ::UI::CutCopyPasteFocusIn $w"
-    bind $w.cut <Button-1> [list $w.cut configure -image $locals(imcutPush)]
-    bind $w.copy <Button-1> [list $w.copy configure -image $locals(imcopyPush)]
-    bind $w.paste <Button-1> [list $w.paste configure -image $locals(impastePush)]
-
-    bind $w.cut <ButtonRelease> "[list $w.cut configure -image $locals(imcut)]; \
-      [list ::UI::CutCopyPasteCmd "cut"]"
-    bind $w.copy <ButtonRelease> "[list $w.copy configure -image $locals(imcopy)]; \
-      [list ::UI::CutCopyPasteCmd "copy"]"
-    bind $w.paste <ButtonRelease> "[list $w.paste configure -image $locals(impaste)]; \
-      [list ::UI::CutCopyPasteCmd "paste"]"
-
-    # Register this thing.
-    lappend locals(wccpList) $w
-    
-    return $w
-}
 
 # UI::CutCopyPasteCmd ---
 #
