@@ -1286,5 +1286,47 @@ namespace eval ::EditShortcuts:: {
 
 ::msgcat::mcset es {Filetransfer (bytestreams) port}	{Puerto para la Transferencia de archivos (bytestreams)}
 
+#Messages for Mood PEP
+::msgcat::mcset es mMood	{Estado de animo}
+::msgcat::mcset es mAngry	Enfadado
+::msgcat::mcset es mAnxious     Ansioso
+::msgcat::mcset es mAshamed     Avergonzado
+::msgcat::mcset es mBored	Aburrido
+::msgcat::mcset es mCurious	Curioso
+::msgcat::mcset es mDepressed   Deprimido
+::msgcat::mcset es mExcited     Excitado
+::msgcat::mcset es mHappy	Feliz
+::msgcat::mcset es mInLove	Enamorado
+::msgcat::mcset es mInvincible  Invencible
+::msgcat::mcset es mJealous	Celoso
+::msgcat::mcset es mNervous     Nervioso
+::msgcat::mcset es mSad		Triste
+::msgcat::mcset es mSleepy      Agotado	
+::msgcat::mcset es mStressed    Estresado
+::msgcat::mcset es mWorried     Preocupado
 
+::msgcat::mcset es moodEvent   {Cambio de estado de animo}
+::msgcat::mcset es heIs        esta
+::msgcat::mcset es because     porque
+::msgcat::mcset es angry       enfadado
+::msgcat::mcset es anxious     ansioso
+::msgcat::mcset es ashamed    avergonzado
+::msgcat::mcset es bored       aburrido
+::msgcat::mcset es curious     curiosote
+::msgcat::mcset es depressed   deprimido
+::msgcat::mcset es excited     excitado
+::msgcat::mcset es happy       feliz
+::msgcat::mcset es in_love     enamorado
+::msgcat::mcset es invincible  invencible
+::msgcat::mcset es jealous     celosote
+::msgcat::mcset es nervous     nervioso
+::msgcat::mcset es sad         triste
+::msgcat::mcset es sleepy      agotado
+::msgcat::mcset es stressed    estresado
+::msgcat::mcset es worried     preocupado
+
+::msgcat::mcset es moodDlg {Estado de animo}
+::msgcat::mcset es selectCustomMood {Seleccione un estado de animo}
+::msgcat::mcset es moodMessage {Motivo}
+::msgcat::mcset es mCustom {Personalizar animo}
 # END --------------------------------------------------------------------------
