@@ -754,8 +754,8 @@
 ::msgcat::mcset nl nativeGerman     Deutsch
 #::msgcat::mcset nl nativeItalian
 #::msgcat::mcset nl nativePolish 
-#::msgcat::mcset nl nativeRussian 
-::msgcat::mcset nl nativeSpanish   Castellano
+::msgcat::mcset nl nativeRussian    русский
+::msgcat::mcset nl nativeSpanish    Castellano
 ::msgcat::mcset nl nativeSwedish    Svenska 
 
 
