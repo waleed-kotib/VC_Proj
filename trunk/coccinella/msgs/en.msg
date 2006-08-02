@@ -1248,6 +1248,50 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en iaxPhoneComfort      {Comfort}
 ::msgcat::mcset en iaxPhoneCodec        {Codec}
 
+# Messages for Mood PEP
+::msgcat::mcset en mMood        Mood 
+::msgcat::mcset en mAngry       Angry
+::msgcat::mcset en mAnxious     Anxious
+::msgcat::mcset en mAshamed     Ashamed
+::msgcat::mcset en mBored       Bored
+::msgcat::mcset en mCurious     Curious
+::msgcat::mcset en mDepressed   Depressed
+::msgcat::mcset en mExcited     Excited
+::msgcat::mcset en mHappy       Happy
+::msgcat::mcset en mInLove      {In love}
+::msgcat::mcset en mInvincible  Invincible
+::msgcat::mcset en mJealous     Jealous
+::msgcat::mcset en mNervous     Nervous
+::msgcat::mcset en mSad         Sad
+::msgcat::mcset en mSleepy      Sleepy
+::msgcat::mcset en mStressed    Stressed
+::msgcat::mcset en mWorried     Worried
+
+::msgcat::mcset en moodEvent   {Mood change}
+::msgcat::mcset en heIs        is
+::msgcat::mcset en because     because
+::msgcat::mcset en angry       angry
+::msgcat::mcset en anxious     anxious
+::msgcat::mcset en ashamed     ashamed
+::msgcat::mcset en bored       bored
+::msgcat::mcset en curious     curious
+::msgcat::mcset en depressed   depressed
+::msgcat::mcset en excited     excited
+::msgcat::mcset en happy       happy
+::msgcat::mcset en in_love     {in love}
+::msgcat::mcset en invincible  invincible
+::msgcat::mcset en jealous     jealous
+::msgcat::mcset en nervous     nervous
+::msgcat::mcset en sad         sad
+::msgcat::mcset en sleepy      sleepy
+::msgcat::mcset en stressed    stressed
+::msgcat::mcset en worried     worried
+
+::msgcat::mcset en moodDlg              {Mood}
+::msgcat::mcset en selectCustomMood     {Select a mood}
+::msgcat::mcset en moodMessage          {Reason for mood}
+::msgcat::mcset en mCustom              {Custom mood}
+
 # END --------------------------------------------------------------------------
 
 

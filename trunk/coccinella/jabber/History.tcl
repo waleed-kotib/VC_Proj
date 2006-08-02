@@ -5,9 +5,10 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.16 2006-06-01 13:54:35 matben Exp $
+# $Id: History.tcl,v 1.17 2006-08-02 12:58:08 matben Exp $
 
 package require uriencode
+package require UI::WSearch
 
 package provide History 1.0
 
@@ -113,7 +114,10 @@ proc ::History::BuildHistory {jid dlgtype args} {
       -usemacmainmenu 1 -macstyle documentProc \
       -closecommand ::History::CloseHook
     wm title $w $argsArr(-title)
-    
+
+    variable $w
+    upvar 0 $w state
+
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
@@ -152,7 +156,7 @@ proc ::History::BuildHistory {jid dlgtype args} {
     pack $frbot -side bottom -fill x
     
     # Text.
-    frame $wchatframe -class $argsArr(-class)
+    ttk::frame $wchatframe -class $argsArr(-class)
     pack  $wchatframe -fill both -expand 1
     text $wtext -height 20 -width 72 -cursor {} -wrap word \
       -highlightthickness 0 -borderwidth 1 -relief sunken \
@@ -242,12 +246,43 @@ proc ::History::BuildHistory {jid dlgtype args} {
     $wtext configure -state disabled
     ::UI::SetWindowGeometry $w $wDlgs(jhist)
     
+    set state(jid)     $jid
+    set state(dlgtype) $dlgtype
+    set state(wtext)   $wtext
+    set state(wchatframe) $wchatframe
+    set state(wfind)   $wchatframe.find
+
+    bind $w <$this(modkey)-Key-f> [list [namespace code Find] $w]
+    bind $w <$this(modkey)-Key-g> [list [namespace code FindNext] $w]
+    bind $w <Destroy> +[list [namespace code OnDestroy] $w]
+
     set script [format {
 	update idletasks
 	set min [winfo reqwidth %s]
 	wm minsize %s [expr {$min+20}] 200
     } $frbot $w]    
     after idle $script
+}
+
+proc ::History::Find {w} {
+    variable $w
+    upvar 0 $w state
+    
+    set wfind $state(wfind)
+    if {![winfo exists $wfind]} {
+	UI::WSearch $wfind $state(wtext)
+	grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky w -pady 2
+    }
+}
+
+proc ::History::FindNext {w} {
+    variable $w
+    upvar 0 $w state
+
+    set wfind $state(wfind)
+    if {[winfo exists $wfind]} {
+	$wfind Next
+    }
 }
 
 proc ::History::ReadMessageFile {jid} {
@@ -403,5 +438,10 @@ proc ::History::SaveHistory {jid wtext} {
 	close $fd
     }
 }
+
+proc ::History::OnDestroy {w} {
+    unset -nocomplain $w
+}
+
 
 #-------------------------------------------------------------------------------
