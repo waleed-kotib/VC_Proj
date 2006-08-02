@@ -979,7 +979,7 @@
 ::msgcat::mcset nl prefsounpick  {Kies alarmgeluiden voor de volgende gebeurtenissen:}
 ::msgcat::mcset nl prefshortcut  {Hier kunt u snelkoppelingen toevoegen of bewerken die enkel van toepassing zijn op peer-to-peer verbindingen en niet gebruikt worden bij het Jabber-systeem.\
   Als u niet uitdrukkelijk voor peer-to-peer hebt gekozen in het "Netwerk instellen"-gedeelte, dan zijn deze snelkoppelingen niet van toepassing.}
-::msgcat::mcset nl prefprof      {Hier kunt u profielen aanmaken en bewerken voor accounts op een Jabber-server.}
+::msgcat::mcset nl prefprof      {Hier kunt u accountprofielen aanmaken en bewerken.}
 ::msgcat::mcset nl prefpers      {Uw persoonlijke gegevens zijn opgeslagen in uw voorkeurenbestand maar kunnen ook opgeslagen worden in een Jabber User Directory.\
   Gegevens opgeslagen op een server zijn zichtbaar voor iedereen die met die server kan verbinden.}
 ::msgcat::mcset nl prefaaset     {Instellingen voor "Automatisch afwezig":}
