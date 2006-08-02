@@ -21,7 +21,7 @@ proc ::Mood::Init { } {
     variable moodjlib
 
     variable node
-    set node "http://jabber.org/protocol/moodee"
+    set node "http://jabber.org/protocol/mood"
 
     variable xmlnsMood
     set xmlnsMood "http://jabber.org/protocol/mood"
@@ -29,17 +29,55 @@ proc ::Mood::Init { } {
     variable state
 
     variable menuMood
-    set menuMood [list  \
-      command mMood [namespace current]::Cmd  normal {}]
+
+    set menuMood [list cascade [mc mMood] {} normal {} {} {}]
+    set subEntries {}
+        lappend subEntries [list radio [mc mAngry] {::Mood::Cmd "angry"}  normal {} {}]
+        lappend subEntries [list radio [mc mAnxious] {::Mood::Cmd "anxious"}  normal {} {}]
+        lappend subEntries [list radio [mc mAshamed] {::Mood::Cmd "ashamed"} normal {} {}]
+        lappend subEntries [list radio [mc mBored] {::Mood::Cmd "bored"} normal {} {}]
+        lappend subEntries [list radio [mc mCurious] {::Mood::Cmd "curious"}  normal {} {}]
+        lappend subEntries [list radio [mc mDepressed] {::Mood::Cmd "depressed"} normal {} {}]
+        lappend subEntries [list radio [mc mExcited] {::Mood::Cmd "excited"} normal {} {}]
+        lappend subEntries [list radio [mc mHappy] {::Mood::Cmd "happy"}  normal {} {}]
+        lappend subEntries [list radio [mc mInLove] {::Mood::Cmd "in_love"} normal {} {}]
+        lappend subEntries [list radio [mc mInvincible] {::Mood::Cmd "invincible"}  normal {} {}]
+        lappend subEntries [list radio [mc mJealous] {::Mood::Cmd "jealous"} normal {} {}]
+        lappend subEntries [list radio [mc mNervous] {::Mood::Cmd "nervous"}  normal {} {}]
+        lappend subEntries [list radio [mc mSad] {::Mood::Cmd "sad"} normal {} {}]
+        lappend subEntries [list radio [mc mSleepy] {::Mood::Cmd "sleepy"} normal {} {}]
+        lappend subEntries [list radio [mc mStressed] {::Mood::Cmd "stressed"}  normal {} {}]
+        lappend subEntries [list radio [mc mWorried] {::Mood::Cmd "worried"} normal {} {}]
+        lappend subEntries [list radio [mc mCustom] {::Mood::CustomMoodWindow} normal {} {}]
+        lset menuMood 6 $subEntries
+
+    variable mapMoodTextToElem
+    variable mapMoodElemToText
+
+    # Cache messages for efficiency.
+    array set mapMoodTextToElem [list \
+      [mc mAngry]       angry      \
+      [mc mAnxious]     anxious    \
+      [mc mAshamed]     ashamed    \
+      [mc mBored]       bored      \
+      [mc mCurious]     curious    \
+      [mc mDepressed]   depressed  \
+      [mc mInvincible]  invincible \
+      [mc mJealous]     jealous    \
+      [mc mNervous]     nervous    \
+      [mc mSad]         sad        \
+      [mc mSleepy]      sleepy     \
+      [mc mStressed]    stressed   \
+      [mc mWorried]     worried]
+
+    variable moodState
+    variable moodMessage
 }
 
 proc ::Mood::LoginHook { } {
     variable server
     variable myjid
     variable moodjlib
-
-#    lappend menuMood [list radio angry [namespace current]::Cmd normal {} {}]
-#    lappend menuMood [list radio bored [namespace current]::Cmd normal {} {}]
 
     #----- Initialize variables ------
     set moodjlib jlib::jlib1
@@ -87,12 +125,8 @@ proc ::Mood::Cmd {{moodState ""} {text ""}} {
     variable node
     variable xmlnsMood
 
-    #@@@ This comes from UI
-    set moodState "happy"
-    set text "nobody"
-
     set moodValues [list afraid amazed angry annoyed anxious aroused ashamed bored brave calm cold confused contented cranky \
-                         courious depressed disappointed disgusted distracted embarrassed excited flirtatious frustated grumpy \
+                         curious depressed disappointed disgusted distracted embarrassed excited flirtatious frustated grumpy \
                          guilty happy hot humbled humiliated hungry hurt impressed in_awe in_love indignant interested intoxicated \
                          invincible jealous lonely mean moody nervous neutral offended playful proud relieved remorseful restless \
                          sad sarcastic serious shocked shy sick sleepy stressed surprised thirsty worried]
@@ -228,6 +262,8 @@ proc ::Mood::MessageHook {body args} {
     array set aargs $args
     set event $aargs(-xmldata)
 
+    set from [wrapper::getattribute $event from]
+
     set eventElem [wrapper::getfirstchildwithtag $event event]
 
     set itemsElem [wrapper::getfirstchildwithtag $eventElem items]
@@ -254,8 +290,110 @@ proc ::Mood::MessageHook {body args} {
     }
 
    #@@@ Add Mood info into user ballon
-   #???
+    puts "From: $from"
     puts "Node: $node"
     puts "Text: $text"
     puts "Mood: $mood"
+
+    eval {::hooks::run moodEvent $from $mood $text} $args
+}
+
+#--------------------------------------------------------------
+#----------------- UI for Custom Mood Dialog ------------------
+#--------------------------------------------------------------
+proc ::Mood::CustomMoodWindow {} {
+    global  this wDlgs
+    variable moodMessage
+    variable moodState
+
+    set w ".mumdlg"
+    ::UI::Toplevel $w \
+      -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
+      -closecommand [namespace current]::CloseCmd
+    wm title $w [mc {moodDlg}]
+
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
+    if {$nwin == 1} {
+        ::UI::SetWindowPosition $w ".mumdlg"
+    }
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc selectCustomMood]
+    pack $wbox.msg -side top -anchor w
+
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
+
+    set moodList [list [mc mAngry] [mc mAnxious] [mc mAshamed] [mc mBored] [mc mCurious] [mc mDepressed] [mc mExcited] [mc mHappy] [mc mInLove] [mc mInvincible] [mc mJealous] [mc mNervous] [mc mSad] [mc mSleepy] [mc mStressed] [mc mWorried]]
+
+    ttk::label $frmid.lmood -text "[mc {mMood}]:" 
+    ttk::combobox $frmid.cmood -state readonly -values $moodList -textvariable [namespace current]::moodState
+
+    ttk::label $frmid.ltext -text "[mc {moodMessage}]:"
+    ttk::entry $frmid.etext -textvariable [namespace current]::moodMessage
+
+    grid  $frmid.lmood    $frmid.cmood        -  -sticky e -pady 2
+    grid  $frmid.ltext    $frmid.etext        -  -sticky e -pady 2
+    grid columnconfigure $frmid 1 -weight 1
+
+    # Button part.
+    set frbot $wbox.b
+    set wenter  $frbot.btok
+    ttk::frame $frbot
+    ttk::button $wenter -text [mc Enter] \
+      -default active -command [list [namespace current]::sendMoodEnter $w]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::CancelEnter $w]
+
+
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+        pack $frbot.btok -side right
+        pack $frbot.btcancel -side right -padx $padx
+    } else {
+        pack $frbot.btcancel -side right
+        pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
+
+    wm resizable $w 0 0
+
+    bind $w <Return> [list $wenter invoke]
+
+    # Trick to resize the labels wraplength.
+    set script [format {
+        update idletasks
+        %s configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $wbox.msg $w]
+    after idle $script
+}
+
+proc ::Mood::sendMoodEnter {w} {
+    variable moodState
+    variable moodMessage
+    variable mapMoodTextToElem
+
+    ::Mood::Cmd $mapMoodTextToElem($moodState) $moodMessage
+
+    ::UI::SaveWinGeom $w
+    destroy $w
+}
+
+proc ::Mood::CancelEnter {w} {
+
+    ::UI::SaveWinGeom $w
+    destroy $w
+}
+
+proc ::Mood::CloseCmd {w} {
+    ::UI::SaveWinGeom $w
 }

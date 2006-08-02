@@ -4,7 +4,7 @@
 #       
 # Copyright (c) 2006 Mats Bengtsson
 #       
-# $Id: WSearch.tcl,v 1.1 2006-08-01 14:01:25 matben Exp $
+# $Id: WSearch.tcl,v 1.2 2006-08-02 12:58:08 matben Exp $
 
 package require snit 1.0
 package require tileutils 0.1
@@ -12,33 +12,6 @@ package require tileutils 0.1
 package provide UI::WSearch 1.0
 
 namespace eval UI::WSearch {
-
-    # New bindtag for this widget. Be sure not to override any commands.
-    # @@@ There are some more text editing commands to be added.
-    # @@@ Or use -textvariable and trace it?
-
-    bind TextSearch <KeyPress>             { [winfo parent %W] Event }
-    bind TextSearch <BackSpace>            { [winfo parent %W] Event }
-    bind TextSearch <Delete>               { [winfo parent %W] Event }
-    bind TextSearch <<Cut>>                { [winfo parent %W] Event }
-    bind TextSearch <<Copy>>               { [winfo parent %W] Event }
-    bind TextSearch <<Paste>>              { [winfo parent %W] Event }
-    bind TextSearch <<Clear>>              { [winfo parent %W] Event }
-    bind TextSearch <<PasteSelection>>     { [winfo parent %W] Event }
-    bind TextSearch <Control-KeyPress>     {# nothing}
-    bind TextSearch <Select>               {# nothing}
-    bind TextSearch <Home>                 {# nothing}
-    bind TextSearch <End>                  {# nothing}
-    bind TextSearch <Alt-KeyPress>         {# nothing}
-    bind TextSearch <Meta-KeyPress>        {# nothing}
-    bind TextSearch <Control-KeyPress>     {# nothing}
-    bind TextSearch <Escape>               {# nothing}
-    bind TextSearch <Return>               {# nothing}
-    bind TextSearch <KP_Enter>             {# nothing}
-    bind TextSearch <Tab>                  {# nothing}
-    if {[string equal [tk windowingsystem] "aqua"]} {
-	bind TextSearch <Command-KeyPress> {# nothing}
-    }
     
     option add *WSearch.highlightBackground   yellow
     option add *WSearch.foundBackground       green
@@ -55,8 +28,9 @@ snit::widgetadaptor UI::WSearch::widget {
     variable wtext
     variable wentry
     variable wnext
-    variable idxs
-    variable idxfocus
+    variable idxs     {}
+    variable idxfocus {}
+    variable string   {}
     
     delegate method * to hull
     delegate option * to hull 
@@ -79,11 +53,13 @@ snit::widgetadaptor UI::WSearch::widget {
 	  -command [list $self Close]
 	ttk::label $win.find -style Small.TLabel -padding {4 0 0 0}  \
 	  -text "[mc Find]:"
-	ttk::entry $win.entry -style Small.Search.TEntry -font CociSmallFont
+	ttk::entry $win.entry -style Small.Search.TEntry -font CociSmallFont \
+	  -textvariable [myvar string]
 	ttk::button $win.next -style Small.TButton -command [list $self Next] \
 	  -text [mc Next]
 	
 	grid  $win.close  $win.find  $win.entry  $win.next
+	grid $win.find -sticky ew
 	grid $win.next -padx 4
 	grid columnconfigure $win 2 -weight 1
 	
@@ -98,28 +74,27 @@ snit::widgetadaptor UI::WSearch::widget {
 	if {[lsearch [$wtext tag names] tfound] < 0} {
 	    $wtext tag configure tfound -background $fbg
 	}
-	set tags [bindtags $wentry]
-	if {[set idx [lsearch -exact $tags TEntry]] < 0} {
-	    set idx 1
-	}
-	bindtags $wentry [linsert $tags [incr idx] TextSearch]
 	focus $wentry
+	trace add variable [myvar string] write [list $self Trace]
 	
 	return
     }
     
     destructor {
+	trace remove variable [myvar string] write [list $self Trace]
 	if {[winfo exists $wtext]} {
 	    $wtext tag remove thighlight 1.0 end
 	    $wtext tag remove tfound 1.0 end
 	}
     }
+    
+    method Trace {name1 name2 op} {
+	$self Event
+    }
 
     method Event {} {
-	
 	$wtext tag remove thighlight 1.0 end
 	$wtext tag remove tfound 1.0 end
-	set str [$wentry get]
 	set idxs [$self FindAll]
 	set idx0 [lindex $idxs 0]
 	if {$idxs eq {}} {
@@ -127,7 +102,7 @@ snit::widgetadaptor UI::WSearch::widget {
 	} else {
 	    $wentry state {!invalid}
 	    $wtext see [lindex $idxs 0]
-	    set len [string length $str]
+	    set len [string length $string]
 	    foreach idx $idxs {
 		$wtext tag add thighlight $idx "$idx + $len chars"
 	    }
@@ -143,13 +118,12 @@ snit::widgetadaptor UI::WSearch::widget {
     
     method FindAll {} {
 	set idxs {}
-	set str [$wentry get]
-	set len [string length $str]
-	set idx [$wtext search -nocase $str 1.0]
+	set len [string length $string]
+	set idx [$wtext search -nocase $string 1.0]
 	if {$idx ne ""} {
 	    set first $idx
 	    lappend idxs $idx
-	    while {[set idx [$wtext search -nocase $str "$idx + $len chars"]] ne $first} {
+	    while {[set idx [$wtext search -nocase $string "$idx + $len chars"]] ne $first} {
 		lappend idxs $idx
 	    }
 	}
@@ -166,7 +140,7 @@ snit::widgetadaptor UI::WSearch::widget {
 		incr ind
 	    }
 	    set idxfocus [lindex $idxs $ind]
-	    set len [string length [$wentry get]]
+	    set len [string length $string]
 	    $wtext tag add tfound $idxfocus "$idxfocus + $len chars"
 	    $wtext see $idxfocus
 	}
@@ -177,29 +151,3 @@ snit::widgetadaptor UI::WSearch::widget {
     }
 }
     
-if {0} {
-    # Test code:
-    set top ._bgh
-    toplevel $top
-    pack [text $top.t] -expand 1 -fill both
-    $top.t insert end {The text command creates a new window (given by the pathName argument) and makes it into a text widget. Additional options, described above, may be specified on the command line or in the option database to configure aspects of the text such as its default background color and relief.  The text command returns the path name of the new window. 
-    
-    A text widget displays one or more lines of text and allows that text to be edited. Text widgets support four different kinds of annotations on the text, called tags, marks, embedded windows or embedded images. Tags allow different portions of the text to be displayed with different fonts and colors. In addition, Tcl commands can be associated with tags so that scripts are invoked when particular actions such as keystrokes and mouse button presses occur in particular ranges of the text. See TAGS below for more details.}
-    
-    pack [ttk::frame $top.f -padding 6] -fill x
-    set w $top.f.s
-    UI::WSearch $w $top.t
-    pack $w -side left
-    
-    proc DoFind {} {
-	if {![winfo exists $::w]} {
-	    UI::WSearch $::w $::top.t
-	    pack $::w -side left
-	}
-    }
-    proc DoNext {} {$::w Next}
-    bind $top <Command-f> DoFind
-    bind $top <Command-g> DoNext
-}
-    
-

@@ -1253,4 +1253,48 @@ Om användarnamnet är upptaget så får du ett meddelande om detta när du registrer
 ::msgcat::mcset sv iaxPhoneComfort      {Comfort}
 ::msgcat::mcset sv iaxPhoneCodec        {Codec}
 
+# Messages for Mood PEP
+::msgcat::mcset sv mMood        Humör 
+::msgcat::mcset sv mAngry       Arg
+::msgcat::mcset sv mAnxious     Orolig
+::msgcat::mcset sv mAshamed     Skamfull
+::msgcat::mcset sv mBored       Uttråkad
+::msgcat::mcset sv mCurious     Nyfiken
+::msgcat::mcset sv mDepressed   Deprimerad
+::msgcat::mcset sv mExcited     Upprymd
+::msgcat::mcset sv mHappy       Lycklig
+::msgcat::mcset sv mInLove      Kär
+::msgcat::mcset sv mInvincible  Oövervinnerlig
+::msgcat::mcset sv mJealous     Svartsjuk
+::msgcat::mcset sv mNervous     Nervös
+::msgcat::mcset sv mSad         Ledsen
+::msgcat::mcset sv mSleepy      Sömnig
+::msgcat::mcset sv mStressed    Stressad
+::msgcat::mcset sv mWorried     Bekymrad
+
+::msgcat::mcset sv moodEvent   Humörändring
+::msgcat::mcset sv heIs        är
+::msgcat::mcset sv because     därför
+::msgcat::mcset sv angry       args
+::msgcat::mcset sv anxious     orolig
+::msgcat::mcset sv ashamed     skamfull
+::msgcat::mcset sv bored       uttråkad
+::msgcat::mcset sv curious     nyfiken
+::msgcat::mcset sv depressed   deprimerad
+::msgcat::mcset sv excited     upprymd
+::msgcat::mcset sv happy       lycklig
+::msgcat::mcset sv in_love     kär
+::msgcat::mcset sv invincible  oövervinnerlig
+::msgcat::mcset sv jealous     svartsjuk
+::msgcat::mcset sv nervous     nervös
+::msgcat::mcset sv sad         ledsen
+::msgcat::mcset sv sleepy      sömnig
+::msgcat::mcset sv stressed    stressad
+::msgcat::mcset sv worried     bekymrad
+
+::msgcat::mcset sv moodDlg              {Humör}
+::msgcat::mcset sv selectCustomMood     {Välj humör}
+::msgcat::mcset sv moodMessage          {Anledning till humör}
+::msgcat::mcset sv mCustom              {Speciellt humör}
+
 # END --------------------------------------------------------------------------

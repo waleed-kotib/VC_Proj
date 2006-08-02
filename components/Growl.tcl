@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.11 2006-05-21 13:07:30 matben Exp $
+# $Id: Growl.tcl,v 1.12 2006-08-02 12:58:08 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -24,13 +24,15 @@ proc ::Growl::Init { } {
     set cociFile [file join $this(imagePath) Coccinella.png]
     
     growl register Coccinella  \
-      {newMessage changeStatus fileTransfer phoneRings} $cociFile
+      {newMessage changeStatus fileTransfer phoneRings moodEvent} $cociFile
     
     # Add event hooks.
     ::hooks::register newChatMessageHook  ::Growl::ChatMessageHook
     ::hooks::register presenceNewHook     ::Growl::PresenceHook
     ::hooks::register jivePhoneEvent      ::Growl::JivePhoneEventHook
     ::hooks::register fileTransferReceiveHook  ::Growl::FileTransferRecvHook
+    ::hooks::register moodEvent           ::Growl::MoodEventHook
+
 }
 
 proc ::Growl::ChatMessageHook {body args} {    
@@ -115,5 +117,18 @@ proc ::Growl::JivePhoneEventHook {type cid callID args} {
     }
 }
 
+proc ::Growl::MoodEventHook {from mood text args} {
+    variable cociFile
+
+puts "Growl...."
+    set title [mc moodEvent]
+    set msg "$from [mc heIs] [mc $mood] "
+    if {$text ne ""} {
+        set msg "$msg [mc because] $text"
+    }
+puts "Growl dice $msg"
+
+    growl post moodEvent $title $msg $cociFile
+} 
 #-------------------------------------------------------------------------------
 

@@ -52,6 +52,7 @@ support protocol for other functions.
    0095 | Stream Initiation             | complete
    0096 | File Transfer                 | complete
    0115 | Entity Capabilities           | complete
+   0138 | Stream Compression            | untested; only library level
    0153 | vCard-Based Avatars           | complete
    0156 | A DNS TXT Resource...         | complete
    0166 | Jingle                        | complete
