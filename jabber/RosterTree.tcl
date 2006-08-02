@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.25 2006-05-31 08:32:26 matben Exp $
+# $Id: RosterTree.tcl,v 1.26 2006-08-02 07:04:13 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1039,6 +1039,8 @@ proc ::RosterTree::Balloon {jid presence item args} {
     }
     
     ::balloonhelp::treectrl $T $item $msg
+    
+    ::hooks::run rosterBalloonhelp $T $item $jid
 }
 
 # RosterTree::GetClosed --

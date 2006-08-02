@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.87 2006-05-21 13:09:33 matben Exp $
+# $Id: Disco.tcl,v 1.88 2006-08-02 07:04:13 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -1205,6 +1205,8 @@ proc ::Disco::MakeBalloonHelp {vstruct} {
     }
     set item [::ITree::GetItem $wtree $vstruct]
     ::balloonhelp::treectrl $wtree $item $msg
+    
+    ::hooks::run discoBalloonhelp $wtree $item $jid
 }
 
 proc ::Disco::Refresh {vstruct} {    
