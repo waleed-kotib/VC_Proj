@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.46 2006-07-29 13:12:59 matben Exp $
+# $Id: Register.tcl,v 1.47 2006-08-02 07:04:13 matben Exp $
 
 package provide Register 1.0
 
@@ -121,6 +121,8 @@ namespace eval ::RegisterEx:: {
     # Allow only a single instance of this dialog.
     variable win $::wDlgs(jreg)_ibr
 }
+
+# This section is actually support for JEP-0077: In-Band Registration 
 
 # RegisterEx::New --
 # 

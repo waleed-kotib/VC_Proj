@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.88 2006-07-29 13:12:59 matben Exp $
+# $Id: Login.tcl,v 1.89 2006-08-02 07:04:13 matben Exp $
 
 package provide Login 1.0
 
@@ -562,8 +562,6 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     variable $token
     upvar 0 $token highstate
 
-    set pending 1
-
     set highstate(cmd)     $cmd
     set highstate(args)    $args
     set highstate(pending) 1
@@ -573,6 +571,8 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     ::Jabber::UI::SetStatusMessage [mc jawaitresp $server]
     ::Jabber::UI::StartStopAnimatedWave 1
     ::Jabber::UI::FixUIWhen "connectinit"
+
+    set pending 1
 
     jlib::connect::configure              \
       -defaultresource "coccinella"       \
