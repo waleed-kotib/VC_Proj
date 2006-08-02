@@ -752,7 +752,7 @@
 ::msgcat::mcset nl nativeEnglish    English
 ::msgcat::mcset nl nativeFrench     Français
 ::msgcat::mcset nl nativeGerman     Deutsch
-::msgcat::mcset nl nativeItalian
+#::msgcat::mcset nl nativeItalian
 #::msgcat::mcset nl nativePolish 
 #::msgcat::mcset nl nativeRussian 
 ::msgcat::mcset nl nativeSpanish   Castellano
@@ -916,13 +916,13 @@
 
 # This maps Defined Conditions to clear text messages.
 # draft-ietf-xmpp-core23; 6.4 Defined Conditions
-::msgcat::mcset nl xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
-::msgcat::mcset nl xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
-::msgcat::mcset nl xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
-::msgcat::mcset nl xmpp-stanzas-invalid-mechanism   {The initiating entity did not provide a mechanism or requested a mechanism that is not supported by the receiving entity.}
-::msgcat::mcset nl xmpp-stanzas-mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
-::msgcat::mcset nl xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
-::msgcat::mcset nl xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
+::msgcat::mcset nl xmpp-stanzas-aborted             {De ontvanger bericht de ontvangst van een mislukt element verzonden door de initiërende partij.}
+::msgcat::mcset nl xmpp-stanzas-incorrect-encoding  {De gegevens van de initiërende partij konden niet worden verwerkt omdat de [BASE64]-encodering foutief is.}
+::msgcat::mcset nl xmpp-stanzas-invalid-authzid     {De "authzid" van de initiërende partij is ongeldig. Ofwel omdat de ID foutief is opgemaakt, ofwel omdat de initiërende partij geen toelating heeft om die ID te autoriseren.}
+::msgcat::mcset nl xmpp-stanzas-invalid-mechanism   {De initiërende partij gaf geen mechanisme op of vroeg een mechanisme aan dat de ontvanger niet ondersteunt.}
+::msgcat::mcset nl xmpp-stanzas-mechanism-too-weak  {Het door de initiërende partij aangevraagde mechanisme is zwakker dan het beleid dat de server toestaat voor die initiërende partij.}
+::msgcat::mcset nl xmpp-stanzas-not-authorized      {De authenticatie mislukte omdat de initiërende partij geen geldig legitimatiebewijs opgaf (dit omvat onder andere het gebruik van een onbekende gebruikersnaam).}
+::msgcat::mcset nl xmpp-stanzas-temporary-auth-failure {De authenticatie mislukte door een tijdelijke fout bij de ontvanger.}
 
 ::msgcat::mcset nl xmpp-stanzas-starttls-nofeature     {Server "%s" ondersteunt TLS niet.}
 ::msgcat::mcset nl xmpp-stanzas-starttls-failure       {Beveiligd verbinden via TLS met server "%s" mislukte.}
