@@ -5,7 +5,7 @@
 #  Code idee from Harrison & McLennan
 #  This source file is distributed under the BSD license.
 #  
-# $Id: balloonhelp.tcl,v 1.21 2006-02-26 10:35:33 matben Exp $
+# $Id: balloonhelp.tcl,v 1.22 2006-08-02 07:03:34 matben Exp $
 
 package require treeutil
 
@@ -159,6 +159,21 @@ proc ::balloonhelp::treectrl {win item msg args} {
     ::treeutil::bind $win $item <Leave> {+::balloonhelp::Cancel %T }    
     bind $win <Button>   {+::balloonhelp::Cancel %W }
     bind $win <Destroy>  {+::balloonhelp::Free %W }
+}
+
+# ::balloonhelp::treectrl_set --
+# 
+#       Plugin model for adding extra messages.
+
+proc ::balloonhelp::treectrl_set {win item name {msg ""}} {
+
+    variable locals  
+
+    if {$msg eq ""} {
+	unset -nocomplain locals($win,$item,$name)
+    } else {
+	set locals($win,$item,$name) $msg
+    }
 }
 
 proc ::balloonhelp::balloonfortree {win itemid msg args} {
@@ -345,6 +360,10 @@ proc ::balloonhelp::Show {win type} {
 		    set x [expr {[winfo rootx $win] + $x}]
 		    set y [expr {[winfo rooty $win] + $y}]
 		    set msg $locals($win,$item)
+		    
+		    foreach {key value} [array get locals $win,$item,*] {
+			append msg $value
+		    }
 		}
 	    }
 	}
