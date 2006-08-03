@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.47 2006-08-02 07:04:13 matben Exp $
+# $Id: Register.tcl,v 1.48 2006-08-03 14:17:16 matben Exp $
 
 package provide Register 1.0
 
@@ -95,25 +95,7 @@ proc ::Register::RemoveCallback {jid jlibName type theQuery} {
 namespace eval ::RegisterEx:: {
 
     variable uid 0
-    
-    variable help
-    array set help {
-	username        "Account name associated with the user"
-	nick            "Familiar name of the user"
-	password        "Password or secret for the user"
-	name            "Full name of the user"
-	first           "First name or given name of the user"
-	last            "Last name, surname, or family name of the user"
-	email           "Email address of the user"
-	address         "Street portion of a physical or mailing address"
-	city            "Locality portion of a physical or mailing address"
-	state           "Region portion of a physical or mailing address"
-	zip             "Postal code portion of a physical or mailing address"
-	phone           "Telephone number of the user"
-	url             "URL to web page describing the user"
-	date            "Some date (e.g., birth date, hire date, sign-up date)"
-    }
-    
+        
     set ::config(registerex,server)  ""
     set ::config(registerex,autoget) 0
     set ::config(registerex,autologin) 1
@@ -459,8 +441,6 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
 
-    variable help
-
     ::Debug 2 "::RegisterEx::GetCB type=$type, iqchild=$iqchild"
 
     if {![info exists state]} {
@@ -545,9 +525,10 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
 	    if {[info exists state(-$tag)]} {
 		$wfr.e$tag state {disabled}
 	    }
-	    if {[info exists help($tag)]} {
-		::balloonhelp::balloonforwindow $wfr.l$tag $help($tag)
-		::balloonhelp::balloonforwindow $wfr.e$tag $help($tag)
+	    set help [mc registration-$tag]
+	    if {$help ne "registration-$tag"} {
+		::balloonhelp::balloonforwindow $wfr.l$tag $help
+		::balloonhelp::balloonforwindow $wfr.e$tag $help
 	    }
 	}
     }
@@ -561,16 +542,16 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
 	ttk::entry $wfr.e$tag -textvariable $token\(elem,$tag)
 	grid  $wfr.l$tag  $wfr.e$tag  -sticky e -pady 2
 	grid  $wfr.e$tag  -sticky ew
-	if {[info exists help($tag)]} {
-	    ::balloonhelp::balloonforwindow $wfr.l$tag $help($tag)
-	    ::balloonhelp::balloonforwindow $wfr.e$tag $help($tag)
+
+	set help [mc registration-$tag]
+	if {$help ne "registration-$tag"} {
+	    ::balloonhelp::balloonforwindow $wfr.l$tag $help
+	    ::balloonhelp::balloonforwindow $wfr.e$tag $help
 	}
     }
     if {$isRegistered} {
-	set str "You are already registered with this service.\
-	  These are your current settings of your login parameters."
-	ttk::label $wfr.lregistered -text $str -anchor w \
-	  -wraplength 260 -justify left
+	ttk::label $wfr.lregistered -text [mc registration-is-registered]  \
+	  -anchor w -wraplength 260 -justify left
 	grid  $wfr.lregistered  -sticky ew
     }
     grid columnconfigure $wfr 1 -weight 1
