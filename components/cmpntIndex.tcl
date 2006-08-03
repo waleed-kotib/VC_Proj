@@ -8,6 +8,7 @@ component::attempt GnomeMeeting [file join $dir GMeeting.tcl]    ::GMeeting::Ini
 component::attempt ICQ          [file join $dir ICQ.tcl]         ::ICQ::Init
 component::attempt ImageMagic   [file join $dir ImageMagic.tcl]  ::ImageMagic::Init
 component::attempt JivePhone    [file join $dir JivePhone.tcl]   ::JivePhone::Init
+component::attempt Mood         [file join $dir Mood.tcl]        ::Mood::Init
 component::attempt Notifier     [file join $dir Notifier.tcl]    ::Notifier::Init
 component::attempt NotifyOnline [file join $dir NotifyOnline.tcl] ::NotifyOnline::Init
 component::attempt ParseMeCData [file join $dir ParseMeCData.tcl] ::ParseMeCData::Init
