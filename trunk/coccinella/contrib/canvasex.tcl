@@ -5,7 +5,7 @@
 #  Copyright (c) 2003  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: canvasex.tcl,v 1.5 2004-10-12 13:48:56 matben Exp $
+# $Id: canvasex.tcl,v 1.6 2006-08-03 07:00:25 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -26,32 +26,7 @@ namespace eval ::canvasex:: {
 
     namespace export canvasex
     
-    variable defaultDB
-    variable optionDB
-    variable coordDef
-    
-    set optionDB(roundrect) {
-	{-radius {} {} 6 6}
-    }
-
-    # Cache default options.
-    foreach type [array names optionDB] {
-	foreach spec $optionDB($type) {
-	    lappend defaultDB($type) [lindex $spec 0] [lindex $spec 4]
-	}
-    }
-    
-    # New types.
-    namespace eval ::canvasex::RoundRect:: {
-    
-	# Coords.
-	variable coordDef
-	set coordDef(roundrect)  \
-	  {list $x0 $y0 [expr $x0+$a] $y0 [expr $x1-$a] $y0 $x1 $y0 \
-	  $x1 [expr $y0+$a] $x1 [expr $y1-$a] $x1 $y1  \
-	  [expr $x1-$a] $y1 [expr $x0+$a] $y1 $x0 $y1  \
-	  $x0 [expr $y1-$a] $x0 [expr $y0+$a]}
-    }
+    variable groupRE {^group(:[0-9]+)+$}
 }
 
 # ::canvasex::canvasex --
@@ -145,17 +120,7 @@ proc ::canvasex::Coords {w args} {
     } else {
 	set id [lindex [$wcan find withtag $tagOrId] 0]
     }
-    if {[info exists cache($id,type)]} {
-	
-	# Extra item type.
-	switch -- $cache($id,type) {
-	    roundrect {
-		set ans [eval {::canvasex::RoundRect::Coords $w $id} $args]
-	    }
-	}
-    } else {
-	set ans [eval {$wcan coords} $args]
-    }
+    set ans [eval {$wcan coords} $args]
     return $ans
 }
 
@@ -175,9 +140,6 @@ proc ::canvasex::Create {w args} {
     }
     
     switch -- [lindex $args 0] {
-	roundrect {
-	    set id [eval {::canvasex::RoundRect::New $w} [lrange $args 1 end]]
-	}
 	default {
 	    set id [eval {$wcan create} $args]
 	}
@@ -191,12 +153,13 @@ proc ::canvasex::Create {w args} {
 # Group ------------------------------------------------------------------------
 
 proc ::canvasex::GetGroups {w args} {
+    variable groupRE
     upvar ::canvasex::${w}::priv priv
 
     set wcan $priv(canvas)
     set all {}
     foreach id [$wcan find all] {
-	set gid [lsearch -inline -regexp [$w gettags $id] {^group(#[0-9]+)+$}]
+	set gid [lsearch -inline -regexp [$w gettags $id] $groupRE]
 	if {$gid != ""} {
 	    lappend all $gid
 	}
@@ -205,6 +168,7 @@ proc ::canvasex::GetGroups {w args} {
 }
 
 proc ::canvasex::Group {w args} {
+    variable groupRE
     upvar ::canvasex::${w}::priv priv
 
     incr priv(guid)
@@ -214,7 +178,7 @@ proc ::canvasex::Group {w args} {
     # We must be very careful not to create any nested groups.
     # Only hierarchies are acceptable.
     foreach id $args {
-	set gid [lsearch -inline -regexp [$w gettags $id] {^group(#[0-9]+)+$}]
+	set gid [lsearch -inline -regexp [$w gettags $id] $groupRE]
 	if {$gid != ""} {
 	    if {![string equal $id $gid]} {
 		return -code error "trying to group nested item $id"
@@ -239,6 +203,7 @@ proc ::canvasex::Ungroup {w gid} {
 }
 
 proc ::canvasex::Type {w args} {
+    variable groupRE
     upvar ::canvasex::${w}::priv priv
     upvar ::canvasex::${w}::cache cache
 
@@ -254,7 +219,7 @@ proc ::canvasex::Type {w args} {
     }
     
     # If any group return 'group'.
-    if {[lsearch -regexp [$wcan gettags $args] {^group(#[0-9]+)+$}]} {
+    if {[lsearch -regexp [$wcan gettags $args] $groupRE]} {
 	return group
     } else {
 	if {[info exists cache($id,type)]} {
@@ -270,11 +235,12 @@ proc ::canvasex::Type {w args} {
 #       Adds or removes a group tag respecitvely. Internal use only.
 
 proc ::canvasex::AddGroupTag {w id gid} {
+    variable groupRE
     upvar ::canvasex::${w}::priv priv
     
     set wcan $priv(canvas)
     set tags [$wcan gettags $id]
-    set gtag [lsearch -inline -regexp $tags {^group(#[0-9]+)+$}]
+    set gtag [lsearch -inline -regexp $tags $groupRE]
     if {$gtag == ""} {
 	$wcan addtag "group#${gid}" withtag $id
     } else {
@@ -284,11 +250,12 @@ proc ::canvasex::AddGroupTag {w id gid} {
 }
 
 proc ::canvasex::DeleteGroupTag {w id gid} {
+    variable groupRE
     upvar ::canvasex::${w}::priv priv
     
     set wcan $priv(canvas)
     set tags [$wcan gettags $id]
-    set gtag [lsearch -inline -regexp $tags {^group(#[0-9]+)+$}]
+    set gtag [lsearch -inline -regexp $tags $groupRE]
     if {$gtag != ""} {
 	if {[regexp {group(#[0-9]+)*#${gid}$} $gtag match gtagsub]} {
 	    $wcan dtag $id $gtag
@@ -304,88 +271,11 @@ proc ::canvasex::DeleteGroupTag {w id gid} {
 }
 
 proc ::canvasex::GetGroupTag {w id} {
+    variable groupRE
     upvar ::canvasex::${w}::priv priv
     
     set tags [$priv(canvas) gettags $id]
-    return [lsearch -inline -regexp $tags {^group(#[0-9]+)+$}]
-}
-
-# ::canvasex::RoundRect::New --
-# 
-#       Creates a rectangle with rounded corners.
-
-proc ::canvasex::RoundRect::New {w args} {
-    variable coordDef
-    upvar ::canvasex::defaultDB defaultDB
-    upvar ::canvasex::${w}::priv priv
-    upvar ::canvasex::${w}::cache cache
-    
-    set wcan $priv(canvas)
-    
-    if {[llength $args] < 4} {
-	return -code error  \
-	  "Usage: \"canvasexPath create roundrect x0 y0 x1 y1\ ?-key value ...?\""
-    }
-    foreach {x0 y0 x1 y1} [lrange $args 0 3] break
-    set rmax [expr {($x1-$x0) < ($y1-$y0) ? ($x1-$x0)/2 : ($y1-$y0)/2}]
-    set canopts {-smooth 1}
-    array set optsArr $defaultDB(roundrect)
-    
-    foreach {key value} [lrange $args 4 end] {
-
-	# Set specific roundrect options.
-	if {[info exists optsArr($key)]} {
-	    set optsArr($key) $value
-	} else {
-
-	    # Standard canvas options.
-	    lappend canopts $key $value
-	}
-    }
-    set r $optsArr(-radius)
-    if {$r > $rmax} {
-	set r $rmax
-    }
-    set a [expr 2*$r]
-    puts "r=$r, a=$a"
-    set co [eval $coordDef(roundrect)]
-    set id [eval {$wcan create polygon} $co $canopts]
-    
-    # Cache config options.
-    set cache($id,type) roundrect
-    set cache($id,coords) [list $x0 $y0 $x1 $y1]
-    set cache($id,opts) $args
-    return $id
-}
-
-# ::canvasex::RoundRect::Coords --
-# 
-#       Handles the 'coords' command for roundrects.
-
-proc ::canvasex::RoundRect::Coords {w id args} {
-    variable coordDef
-    upvar ::canvasex::${w}::priv priv
-    upvar ::canvasex::${w}::cache cache
-    
-    set wcan $priv(canvas)
-    set len [llength $args]
-    if {$len == 0} {
-	return $cache($id,coords)
-    } elseif {$len == 4} {
-	 
-	# Coords changed. Propagate to polygon.
-	foreach {x0 y0 x1 y1} [lrange $args 0 3] break
-	set rmax [expr {($x1-$x0) < ($y1-$y0) ? ($x1-$x0)/2 : ($y1-$y0)/2}]
-	set r $optsArr(-radius)
-	if {$r > $rmax} {
-	    set r $rmax
-	}
-	set a [expr 2*$r]
-	set co [eval $coordDef(roundrect)]
-	eval {$wcan coords polygon} $co
-    } else {
-	return -code error "roundrect needs four coordinates"
-    }
+    return [lsearch -inline -regexp $tags $groupRE]
 }
 
 #-------------------------------------------------------------------------------
