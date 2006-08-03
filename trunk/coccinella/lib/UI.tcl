@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.128 2006-08-01 14:01:25 matben Exp $
+# $Id: UI.tcl,v 1.129 2006-08-03 07:01:19 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1859,115 +1859,6 @@ proc ::UI::OkCancelButtons {args} {
     }
 }
 
-#--- Cut, Copy, & Paste stuff --------------------------------------------------
-
-namespace eval ::UI::CCP:: {
-    variable locals
-    
-    set locals(inited) 0
-    set locals(wccpList) {}
-}
-
-proc ::UI::InitCutCopyPaste { } {
-    
-    upvar ::UI::CCP::locals locals
-
-    # Icons.
-    set cutdata {
-R0lGODdhFgAUALMAAP///97WztbWzoSEhHNra2trrWtra2trY0JCQgAAhAAA
-AAAAAAAAAAAAAAAAAAAAACwAAAAAFgAUAAAEfhDISatFIOjNOx+YEAhkaZ4k
-mIleqwmqKJdGqZyBOu4vsSsbmU42Eh0MAQOQtIvtiILbjSXEPK+K7IuouxJv
-vCqACQ0kFAly01omJcyJ9NNZjgveZi77+u6L3mJtaYMjciJDfHlwV3RXBTNe
-iGVhjBgDl5iZmpoInZ6foKGdEQA7}
-
-    set copydata {
-R0lGODdhFgAUALMAAP///97WztbWzsbGxoSExoSEhGtrrUJCQgAAhAAAQgAA
-AAAAAAAAAAAAAAAAAAAAACwAAAAAFgAUAAAEhRDISas9IOjNOy+YEAhkaZ4k
-mIleqwmqKCg0jZqBOgbKRLey2KhXGCgICYPSQNrpRL0JgoJA7GCYXa82lQKs
-IuGMCqB9q+Anr0zrVhDh7JBcM6dD0LqbGs/sOFN1PXcrMiV7Un0bLCNojlUj
-MSUjMi6KLyyGOEEYBZ6foKGhB6SlpqeopBEAOw==}
-
-    set pastedata {
-R0lGODdhFgAUAMQAAP//////AO/va97WztbWzoSExoSEhISEQoSEAHNrrXNr
-a2trrWtrpWtra2trY2NjQkJCQgAAhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAFgAUAAAFoyAgjmRpQsCgrmzLGigx
-EHRt3zScym4/DzqZkCYpSnAz3Y9glAQCTYlKFpxJDg+FoKFVQA6HhlApkyAg
-0aLBoBjHrIYDwjCv0x0/8sB8oEf+gBFiSSg/EnFzESURDHlvTAh9CIokEQUz
-BHqHcgaKgACAKpqRfiagVI+biaCBBRGEO1ZGlIuoAEJLAwwJC7y+C7C5uMO5
-OmvHyMnJEMzNzs/QzSEAOw==}
-
-    set cutDisdata {
-R0lGODdhFgAUALMAAP///+/v7+/v597WztbWzrWtra2trYSEhEJCQgAAAAAA
-AAAAAAAAAAAAAAAAAAAAACwAAAAAFgAUAAAEgBDISatFYOjNOz8YMRBkaZ4k
-mImdsbkcoYp0eaz3SA7q6G83UVAjDPlqhwMvd+zRfjLADbArUo+6JfPnxPqm
-zxQG+0wqs9ZwU5okjrrlpFRyKI/DhoDglsulsQUZfUpXMndHMoQjEm5wP4ws
-boaFXohVPBhmmpucSQifoKGio58RADs=}
-
-    set copyDisdata {
-R0lGODdhFgAUALMAAP////fv7+/v797e3t7WztbWzsbGxrWtra2trYSEhEJC
-QgAAAAAAAAAAAAAAAAAAACwAAAAAFgAUAAAEjBDISatVgOjNO09YQRRkaZ4k
-mInI0SIeV6gjkUxJMqKiKs4BzU3X+dF6hsQsx1T+bJhaQiCxURIwY2iUSDIz
-QsPzaKNKhkqmdDvz5jJVwI0b7ZnlcuZhDl3ZmnNXAClsBAIBhzcIBowDfGRP
-S4BzM1E1TwQWEj0hkTsxGpVgnjxjGJOoqAqrrK2ur6sRADs=}
-
-    set pasteDisdata {
-R0lGODdhFgAUALMAAP///+/v797WztbWzsbGxrW9tbWtra2trYSEhEJCQgAA
-AAAAAAAAAAAAAAAAAAAAACwAAAAAFgAUAAAEeRDISatNQOjNO0fYIAxkaZ4k
-mIncYbjeqIrDgdx4bgrqyOfAm0Y0k90sOACtRwwCV7yQ0ZlcYnzUHJT5004I
-CKVMOghmNAcAAnttanEGnIZrPhAIBUIgXCbbtAIVYVFQgRNZGUUkHRYTfVA7
-LDGPWZUgCZiZmpucCREAOw==}
-
-    set cutPushdata {
-R0lGODdhFgAUALMAAP///97WztbWzoSEhHNra2trrWtra2trY0JCQgAAhAAA
-AAAAAAAAAAAAAAAAAAAAACwAAAAAFgAUAAAEfXDISatFI+jNOweY4I0dmIlC
-qq6sYKIkaQbwaqgKO9O8JhA8xUb04qFEB0PAIEzRZjVjLifi7aIihdaHKhq/
-uR4RQ8MGEoqEsxv6HhPnhNpKNssF8DN7YD/r/WMnbmqENHMubVFwc3JGUG4B
-BUdfJgCWl5iZmQicnZ6foJwRADs=}
-
-    set copyPushdata {
-R0lGODdhFgAUALMAAP///97WztbWzsbGxoSExoSEhGtrrUJCQgAAhAAAQgAA
-AAAAAAAAAAAAAAAAAAAAACwAAAAAFgAUAAAEhrDISas9JejNOweY4I0dmIlC
-qq6sYKIkaQaoYtvt+tKBAvy2kWhWAxQGCkLCwDSkaDOe7wdAUKsI3k7ku1mp
-1qwLwxNMf1YbFpGNcgHeK3hcENHOVfjN1yY/9wpfcgh0G3YbaXtVAW4oKoJX
-hDsahwJsl5iMfio0MEImcqGiPwelpqeoqaURADs=}
-	
-    set pastePushdata {
-R0lGODdhFgAUAMQAAP//////AO/va97WztbWzoSExoSEhISEQoSEAHNrrXNr
-a2trrWtrpWtra2trY2NjQkJCQgAAhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAFgAUAAAFo6AhjmRpQsagrmzLAijh
-zi2cykSu7zxh47SZDzUA6iRISW/wKxaTkkAAKlENb8/DQyFocBWQw6Eha8ok
-CAgVKVKUiTiJ4YAw1O92R9FmHaAPdhGCgxFkTDFOcnQGEQCOjhEMe3BPCIAI
-jY8AEQWTKYlzdY2Dm4KHBkB/gZqPEVdOBIqipYMFEadGUJmsrnxGTgwJC8LE
-C6esyMmOEMzNzs/QzCEAOw==}
-
-    set printdata {
-R0lGODdhFgAUAKIAAP//////ANTQyICAgEBAQAAAAAAAAAAAACwAAAAAFgAU
-AAADYQi63E5AyEkrHdCKwnufWFQVjlKA2Qh45ImKE1m6Uqiy6yfYcbluQN6G
-5QFydima5sREiohQyYmnrA0GUqAzWwl4pcftEFp0CauUZi0FJiuFmrhYHg9d
-7/i8nsDv+/+AfAkAOw==}
-
-    set printPushdata {
-R0lGODdhFgAUAKIAAP//////ANTQyICAgEBAQAAAAAAAAAAAACwAAAAAFgAU
-AAADYDi63E5DyEkrBdBqi6MuYBhK3Qec6FmQmVUA4ruyHvWm6CyUlSzCI97k
-hoMJVq+WJBY7HpM13ccJHTKZS6FUslg6tZaAeAnaKa/YldC5QdJ66PJ7QzcP
-ing8Yc/v+/97CQA7}
-
-    set locals(imcut) [image create photo -format gif -data $cutdata]
-    set locals(imcopy) [image create photo -format gif -data $copydata]
-    set locals(impaste) [image create photo -format gif -data $pastedata]
-    set locals(imcutDis) [image create photo -format gif -data $cutDisdata]
-    set locals(imcopyDis) [image create photo -format gif -data $copyDisdata]
-    set locals(impasteDis) [image create photo -format gif -data $pasteDisdata]
-    set locals(imcutPush) [image create photo -format gif -data $cutPushdata]
-    set locals(imcopyPush) [image create photo -format gif -data $copyPushdata]
-    set locals(impastePush) [image create photo -format gif -data $pastePushdata]
-    set locals(imprint) [image create photo -format gif -data $printdata]
-    set locals(imprintPush) [image create photo -format gif -data $printPushdata]
-    
-    set locals(inited) 1
-}
-
-
 # UI::CutCopyPasteCmd ---
 #
 #       Supposed to be a generic cut/copy/paste function for menu commands.
@@ -1999,114 +1890,6 @@ proc ::UI::CutCopyPasteCmd {cmd} {
 	}
     }
 }
-
-proc ::UI::CutCopyPasteConfigure {w which args} {
-    
-    upvar ::UI::CCP::locals locals
-
-    if {![winfo exists $w]} {
-	return
-    }
-    array set opts {
-	-state   normal
-    }
-    array set opts $args
-    
-    foreach opt [array names opts] {
-	set val $opts($opt)
-	switch -- $opt {
-	    -state {
-		if {$val eq "normal"} {
-		    $w.$which configure -image $locals(im$which)
-		    bind $w.$which <Button-1>   \
-		      [list $w.$which configure -image $locals(im${which}Push)]
-		    bind $w.$which <ButtonRelease>  \
-		      "[list $w.$which configure -image $locals(im$which)]; \
-		      [list ::UI::CutCopyPasteCmd $which]"
-		} elseif {$val eq "disabled"} {
-		    $w.$which configure -image $locals(im${which}Dis)
-		    bind $w.$which <Button-1> {}
-		    bind $w.$which <ButtonRelease> {}
-		}
-	    }
-	}
-    }
-}
-
-proc ::UI::CutCopyPasteHelpSetState {w} {
-    
-    upvar ::UI::CCP::locals locals
-    
-    set wfocus [focus]
-    if {[string length $wfocus] == 0} {
-	return
-    }
-    set wClass [winfo class $wfocus]
-    set setState disabled
-    if {[string equal $wClass "Entry"]} {
-	if {[$wfocus selection present] eq "1"} {
-	    set setState normal
-	}
-    } elseif {[string equal $wClass "Text"]} {
-	if {[string length [$wfocus tag ranges sel]] > 0} {
-	    set setState normal
-	}
-    }
-    ::UI::CutCopyPasteConfigure $w cut -state $setState
-    ::UI::CutCopyPasteConfigure $w copy -state $setState
-}
-
-proc ::UI::CutCopyPasteFocusIn {w} {
-
-    upvar ::UI::CCP::locals locals
-
-    if {![catch {selection get -selection CLIPBOARD} _s]  &&  \
-      ([string length $_s] > 0)} {
-	::UI::CutCopyPasteConfigure $w paste -state normal
-    } else {
-	::UI::CutCopyPasteConfigure $w paste -state disabled
-    }
-}
-
-proc ::UI::CutCopyPasteCheckState {w state clipState} {
-
-    upvar ::UI::CCP::locals locals
-
-    set wtoplevel [winfo toplevel $w]
-    set tmp {}
-    
-    # Find any ccp widget that's in the same toplevel as 'w'.
-    foreach wccp $locals(wccpList) {
-	if {[winfo exists $wccp]} {
-	    lappend tmp $wccp
-	    if {[string equal $wtoplevel [winfo toplevel $wccp]]} {
-		::UI::CutCopyPasteConfigure $wccp cut -state $state
-		::UI::CutCopyPasteConfigure $wccp copy -state $state	    
-		::UI::CutCopyPasteConfigure $wccp paste -state $clipState	    	    
-	    }
-	}
-    }
-    set locals(wccpList) $tmp
-}
-
-proc ::UI::NewPrint {w cmd} {
-    
-    # Set simpler variable names.
-    upvar ::UI::CCP::locals locals
-    
-    if {!$locals(inited)} {
-	::UI::InitCutCopyPaste
-    }    
-    label $w -image $locals(imprint) -borderwidth 0
-    set locals($w,w) [winfo toplevel $w]
-    
-    bind $w <Button-1> [list $w configure -image $locals(imprintPush)]
-    bind $w <ButtonRelease> "[list $w configure -image $locals(imprint)]; $cmd"
-    
-    return $w
-}
-
-
 
 # ::UI::ParseWMGeometry --
 # 
@@ -2262,11 +2045,6 @@ proc ::UI::FixMenusWhenSelection {win} {
 	    ::UI::MenuMethod $medit entryconfigure mCut -state $setState
 	    ::UI::MenuMethod $medit entryconfigure mCopy -state $setState
 	    ::UI::MenuMethod $medit entryconfigure mPaste -state $haveClipState
-	}
-	
-	# If we have a cut/copy/paste row of buttons need to set their state.
-	if {[winfo exists $win]} {
-	    ::UI::CutCopyPasteCheckState $win $setState $haveClipState
 	}
     } 
 }
