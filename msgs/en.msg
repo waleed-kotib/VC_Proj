@@ -938,6 +938,7 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en registration-phone           {Telephone number of the user}
 ::msgcat::mcset en registration-url             {URL to web page describing the user}
 ::msgcat::mcset en registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
+::msgcat::mcset en registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
 
 
 
