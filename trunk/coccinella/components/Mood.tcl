@@ -1,6 +1,9 @@
 # Mood.tcl --
 # 
-#       User Mood using PubSub library code.
+#       User Mood using PEP recommendations over PubSub library code.
+#
+#  Copyright (c) 2006 Mats Bengtsson
+#  Copyright (c) 2006 Antonio Cano Damas
 
 namespace eval ::Mood:: { }
 
@@ -15,6 +18,7 @@ proc ::Mood::Init { } {
     ::hooks::register newMessageHook        ::Mood::MessageHook
     ::hooks::register presenceHook          ::Mood::PresenceHook
     ::hooks::register loginHook             ::Mood::LoginHook
+    ::hooks::register rosterBalloonhelp     ::Mood::BalloonHook
 
     variable server
     variable myjid
@@ -52,9 +56,6 @@ proc ::Mood::Init { } {
         lset menuMood 6 $subEntries
 
     variable mapMoodTextToElem
-    variable mapMoodElemToText
-
-    # Cache messages for efficiency.
     array set mapMoodTextToElem [list \
       [mc mAngry]       angry      \
       [mc mAnxious]     anxious    \
@@ -62,6 +63,9 @@ proc ::Mood::Init { } {
       [mc mBored]       bored      \
       [mc mCurious]     curious    \
       [mc mDepressed]   depressed  \
+      [mc mExcited]     excited    \
+      [mc mHappy]       happy      \
+      [mc mInLove]      in_love    \
       [mc mInvincible]  invincible \
       [mc mJealous]     jealous    \
       [mc mNervous]     nervous    \
@@ -70,8 +74,8 @@ proc ::Mood::Init { } {
       [mc mStressed]    stressed   \
       [mc mWorried]     worried]
 
-    variable moodState
-    variable moodMessage
+    variable moodStateDlg
+    variable moodMessageDlg
 }
 
 proc ::Mood::LoginHook { } {
@@ -85,11 +89,10 @@ proc ::Mood::LoginHook { } {
     set server [$moodjlib getserver]
 
     #----- Disco server for pubsub support -----
-    ::Jabber::JlibCmd disco get_async items $server ::Mood::OnDiscoServer
+    ::Jabber::JlibCmd disco get_async info $server ::Mood::OnDiscoServer
 }
 
 proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
-    variable state
     variable myjid
     variable moodjlib
     variable node
@@ -99,22 +102,12 @@ proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
     ::Debug 2 "::Mood::OnDiscoServer"
 
     if {$type eq "result"} {
-        set childs [::Jabber::JlibCmd disco children $from]
-        foreach service $childs {
-            set name [::Jabber::JlibCmd disco name $service]
-
-            ::Debug 2 "\t service=$service, name=$name"
-#           @@@ Has to look for identity=pep 
-#           if {$name eq "pubsub"} {
-            if { [string first "pubsub" $service] != -1 } {
-                #------ Initialize User Interface -------
+        set node [wrapper::getattribute $subiq node]
+        #---- Check if disco returns <indetity category=pubsub type=pep>
+        if {[::Jabber::JlibCmd disco iscategorytype pubsub/pep $from $node]} {
                 ::Jabber::UI::RegisterMenuEntry jabber $menuMood
-
                 #----- Create Node for Mood -------------
                 ::Jabber::JlibCmd disco get_async items $myjid [list ::Mood::CreateNode]
-                break
-            }
-#            }
         }
     }
 }
@@ -187,7 +180,7 @@ variable node
 
 proc ::Mood::PubSubCreateCB {type args} {
 
-    if { $type ne 'result' } {
+    if { $type ne "result" } {
         puts "(CreateNode error)----> $args"
     }
 }
@@ -221,7 +214,7 @@ proc ::Mood::PresenceHook {jid type args} {
     jlib::splitjidex $from node jidserver res
     set jid2 $node@$jidserver
 
-    if { ![info exists state($from,pubsubsupport)] } {
+    if { ![info exists state($jid2,pubsubsupport)] } {
         #------------- Check(disco#items) If the User supports PEP before subscribe
         ::Jabber::JlibCmd disco get_async items $jid2 [list ::Mood::OnDiscoContact]
     } 
@@ -240,19 +233,20 @@ proc ::Mood::OnDiscoContact {jlibname type from subiq args} {
         set nodes [::Jabber::JlibCmd disco nodes $from]
         foreach nodeItem $nodes {
             if { [string first "mood" $nodeItem] != -1 } {
+
+puts "Parece que si que $from soporta mood"
+
                 set state($from,pubsubsupport) true
            
-                jlib::splitjidex $from nodeFrom jidserver res
-                set jid2 $nodeFrom@$jidserver 
-                $moodjlib pubsub subscribe $jid2 $myjid -node $node -command ::Mood::PubSubscribeCB
+                $moodjlib pubsub subscribe $from $myjid -node $node -command ::Mood::PubSubscribeCB
                 break
             }
         }
     }
 }
 
-proc ::Mood::PubSubscribeCB {type args} {
-        puts "@@@@@ (PubSub) ---> $args"
+proc ::Mood::PubSubscribeCB {args} {
+        puts "(Subscribe CB) ---> $args"
 }
 
 #-------------------------------------------------------------------------
@@ -260,6 +254,8 @@ proc ::Mood::PubSubscribeCB {type args} {
 #-------------------------------------------------------------------------
 proc ::Mood::MessageHook {body args} {
     array set aargs $args
+    variable state
+
     set event $aargs(-xmldata)
 
     set from [wrapper::getattribute $event from]
@@ -289,13 +285,33 @@ proc ::Mood::MessageHook {body args} {
         set text [wrapper::getcdata $textElem]
     }
 
-   #@@@ Add Mood info into user ballon
-    puts "From: $from"
-    puts "Node: $node"
-    puts "Text: $text"
-    puts "Mood: $mood"
+    #Cache Mood info for BallonHook
+    set state($from,text) $text
+    set state($from,mood) $mood
+    
+    #@@@ Refresh Roster, the BalloonHook is called only when a Presence is coming and a Refresh of the roster
+    ::Roster::Refresh
 
     eval {::hooks::run moodEvent $from $mood $text} $args
+
+}
+
+proc ::Mood::BalloonHook {T item jid} {
+   variable state
+
+    jlib::splitjidex $jid node jidserver res
+    set jid2 $node@$jidserver
+
+    set text ""
+    if { [info exists state($jid2,text)] } {
+        if {$state($jid2,text) ne ""} {
+            set text ($state($jid2,text))
+        }
+    }
+
+    if { [info exists state($jid2,mood)] } {
+        ::balloonhelp::treectrl_set $T $item mood "\n[mc mMood]: [mc $state($jid2,mood)] $text"
+    }
 }
 
 #--------------------------------------------------------------
@@ -336,10 +352,10 @@ proc ::Mood::CustomMoodWindow {} {
     set moodList [list [mc mAngry] [mc mAnxious] [mc mAshamed] [mc mBored] [mc mCurious] [mc mDepressed] [mc mExcited] [mc mHappy] [mc mInLove] [mc mInvincible] [mc mJealous] [mc mNervous] [mc mSad] [mc mSleepy] [mc mStressed] [mc mWorried]]
 
     ttk::label $frmid.lmood -text "[mc {mMood}]:" 
-    ttk::combobox $frmid.cmood -state readonly -values $moodList -textvariable [namespace current]::moodState
+    ttk::combobox $frmid.cmood -state readonly -values $moodList -textvariable [namespace current]::moodStateDlg
 
     ttk::label $frmid.ltext -text "[mc {moodMessage}]:"
-    ttk::entry $frmid.etext -textvariable [namespace current]::moodMessage
+    ttk::entry $frmid.etext -textvariable [namespace current]::moodMessageDlg
 
     grid  $frmid.lmood    $frmid.cmood        -  -sticky e -pady 2
     grid  $frmid.ltext    $frmid.etext        -  -sticky e -pady 2
@@ -378,11 +394,11 @@ proc ::Mood::CustomMoodWindow {} {
 }
 
 proc ::Mood::sendMoodEnter {w} {
-    variable moodState
-    variable moodMessage
+    variable moodStateDlg
+    variable moodMessageDlg
     variable mapMoodTextToElem
 
-    ::Mood::Cmd $mapMoodTextToElem($moodState) $moodMessage
+    ::Mood::Cmd $mapMoodTextToElem($moodStateDlg) $moodMessageDlg
 
     ::UI::SaveWinGeom $w
     destroy $w
