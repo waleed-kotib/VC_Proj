@@ -922,6 +922,24 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en starttls-failure       {TLS negotiating with server "%s" failed.}
 ::msgcat::mcset en sasl-no-mechanisms     {The server has no support for SASL authentication.}
 
+# Account xform balloon help.
+# From: JEP-0077: In-Band Registration 
+::msgcat::mcset en registration-username        {Account name associated with the user}
+::msgcat::mcset en registration-nick            {Familiar name of the user}
+::msgcat::mcset en registration-password        {Password or secret for the user}
+::msgcat::mcset en registration-name            {Full name of the user}
+::msgcat::mcset en registration-first           {First name or given name of the user}
+::msgcat::mcset en registration-last            {Last name, surname, or family name of the user}
+::msgcat::mcset en registration-email           {Email address of the user}
+::msgcat::mcset en registration-address         {Street portion of a physical or mailing address}
+::msgcat::mcset en registration-city            {Locality portion of a physical or mailing address}
+::msgcat::mcset en registration-state           {Region portion of a physical or mailing address}
+::msgcat::mcset en registration-zip             {Postal code portion of a physical or mailing address}
+::msgcat::mcset en registration-phone           {Telephone number of the user}
+::msgcat::mcset en registration-url             {URL to web page describing the user}
+::msgcat::mcset en registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
+
+
 
 ::msgcat::mcset en openquicktime		{Open QuickTime live stream}
 ::msgcat::mcset en writeurl			{Write URL or choose from shortcut:}
