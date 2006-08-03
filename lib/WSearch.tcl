@@ -4,7 +4,7 @@
 #       
 # Copyright (c) 2006 Mats Bengtsson
 #       
-# $Id: WSearch.tcl,v 1.2 2006-08-02 12:58:08 matben Exp $
+# $Id: WSearch.tcl,v 1.3 2006-08-03 06:14:24 matben Exp $
 
 package require snit 1.0
 package require tileutils 0.1
@@ -59,7 +59,7 @@ snit::widgetadaptor UI::WSearch::widget {
 	  -text [mc Next]
 	
 	grid  $win.close  $win.find  $win.entry  $win.next
-	grid $win.find -sticky ew
+	grid $win.entry -sticky ew
 	grid $win.next -padx 4
 	grid columnconfigure $win 2 -weight 1
 	

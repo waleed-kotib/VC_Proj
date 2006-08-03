@@ -5,12 +5,13 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.153 2006-07-18 14:02:16 matben Exp $
+# $Id: GroupChat.tcl,v 1.154 2006-08-03 06:14:24 matben Exp $
 
 package require Create
 package require Enter
 package require History
 package require Bookmarks
+package require UI::WSearch
 package require colorutils
 
 package provide GroupChat 1.0
@@ -679,6 +680,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid args} {
 	
     set wtext       $wroom.mid.pv.l.text
     set wysc        $wroom.mid.pv.l.ysc
+    set wfind       $wroom.mid.pv.l.find
     set wusers      $wroom.mid.pv.r.tree
     set wyscusers   $wroom.mid.pv.r.ysc
     
@@ -700,6 +702,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid args} {
 	set chatstate(displayName) $roomjid
     }
     set chatstate(wtext)        $wtext
+    set chatstate(wfind)        $wfind
     set chatstate(wtextsend)    $wtextsend
     set chatstate(wusers)       $wusers
     set chatstate(wpanev)       $wpanev
@@ -872,8 +875,31 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid args} {
     bind $wtextsend <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $chattoken]
     bind $wroom <Destroy> +[list ::GroupChat::OnDestroyChat $chattoken]
-    
+    bind $w <$this(modkey)-Key-f> [list [namespace code Find] $chattoken]
+    bind $w <$this(modkey)-Key-g> [list [namespace code FindNext] $chattoken]
+
     return $chattoken
+}
+
+proc ::GroupChat::Find {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set wfind $chatstate(wfind)
+    if {![winfo exists $wfind]} {
+	UI::WSearch $wfind $chatstate(wtext) -padding {6 2}
+	grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky ew
+    }
+}
+
+proc ::GroupChat::FindNext {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    set wfind $chatstate(wfind)
+    if {[winfo exists $wfind]} {
+	$wfind Next
+    }
 }
 
 proc ::GroupChat::OnDestroyDlg {dlgtoken} {

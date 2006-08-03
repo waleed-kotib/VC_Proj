@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.17 2006-08-02 12:58:08 matben Exp $
+# $Id: History.tcl,v 1.18 2006-08-03 06:14:24 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -270,8 +270,8 @@ proc ::History::Find {w} {
     
     set wfind $state(wfind)
     if {![winfo exists $wfind]} {
-	UI::WSearch $wfind $state(wtext)
-	grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky w -pady 2
+	UI::WSearch $wfind $state(wtext) -padding {2}
+	grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky ew
     }
 }
 

@@ -5,13 +5,14 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.173 2006-07-18 14:02:16 matben Exp $
+# $Id: Chat.tcl,v 1.174 2006-08-03 06:14:24 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
 package require uriencode
 package require colorutils
 package require History
+package require UI::WSearch
 
 package provide Chat 1.0
 
@@ -1211,10 +1212,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set icon [::Roster::GetPresenceIconFromJid $jid]
     
     # D =
-    ttk::label $wtop.l -style Small.TLabel \
-      -text "[mc Subject]:" -padding {4 0}
-    ttk::entry $wtop.e -font CociSmallFont \
-      -textvariable $chattoken\(subject)
+    ttk::label $wtop.l -style Small.TLabel -text "[mc Subject]:" -padding {4 0}
+    ttk::entry $wtop.e -font CociSmallFont -textvariable $chattoken\(subject)
     ttk::frame $wtop.p1 -width 8
     ttk::label $wtop.i  -image $icon
     pack  $wtop.l  -side left
@@ -1263,6 +1262,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set wysc        $wthread.m.pane.frtxt.ysc
     set wtextsnd    $wthread.m.pane.frtxtsnd.text
     set wyscsnd     $wthread.m.pane.frtxtsnd.ysc
+    set wfind       $wthread.m.pane.frtxt.find
 
     # Frame to serve as container for the pane geometry manager.
     # D =
@@ -1339,6 +1339,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     if {$havednd} {
 	InitDnD $chattoken $wtextsnd
     }
+    bind $w <$this(modkey)-Key-f> [list [namespace code Find] $chattoken]
+    bind $w <$this(modkey)-Key-g> [list [namespace code FindNext] $chattoken]
     
     set chatstate(wthread)  $wthread
     set chatstate(wpane)    $wpane
@@ -1348,6 +1350,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(wsubject) $wsubject
     set chatstate(wsmile)   $wsmile
     set chatstate(wpresimage) $wpresimage
+    set chatstate(wfind)    $wfind
     
     bind $wthread <Destroy> +[list ::Chat::OnDestroyThread $chattoken]
 
@@ -1358,6 +1361,27 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     after idle [list raise [winfo toplevel $wthread]]
     
     return $chattoken
+}
+
+proc ::Chat::Find {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set wfind $chatstate(wfind)
+    if {![winfo exists $wfind]} {
+	UI::WSearch $wfind $chatstate(wtext) -padding {6 2}
+	grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky ew
+    }
+}
+
+proc ::Chat::FindNext {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    set wfind $chatstate(wfind)
+    if {[winfo exists $wfind]} {
+	$wfind Next
+    }
 }
 
 proc ::Chat::InitDnD {chattoken win} {
