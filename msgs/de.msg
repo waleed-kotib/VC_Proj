@@ -919,8 +919,8 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de jamessnofiletrpt             {We couldn't see that %s supports file transfer.}
 ::msgcat::mcset de jamessfiletrpterr            {Failed to get file %s from %s: %s}
 
-# This maps Defined Conditions to clear text messages.
-# draft-ietf-xmpp-core23; 6.4 Defined Conditions
+# This maps Defined Error Conditions to clear text messages.
+# RFC 3929 (XMPP Core): 6.4 SASL Errors
 ::msgcat::mcset de xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
 ::msgcat::mcset de xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
 ::msgcat::mcset de xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
@@ -929,8 +929,9 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
 ::msgcat::mcset de xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
 
-::msgcat::mcset de xmpp-stanzas-starttls-nofeature     {Der Server "%s" bietet keine Unterstützung für TLS.}
-::msgcat::mcset de xmpp-stanzas-starttls-failure        {TLS-Aushandlung mit Server "%s" fehlerhaft.}
+::msgcat::mcset de starttls-nofeature     {Der Server "%s" bietet keine Unterstützung für TLS.}
+::msgcat::mcset de starttls-failure        {TLS-Aushandlung mit Server "%s" fehlerhaft.}
+::msgcat::mcset de sasl-no-mechanisms     {The server has no support for SASL authentication.}
 
 
 ::msgcat::mcset de openquicktime		{Öffne QuickTime live stream}

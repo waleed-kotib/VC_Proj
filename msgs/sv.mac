@@ -907,8 +907,8 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv jamessfiletrpterr            {Misslyckades med att ta emot filen %s från %s: %s}
 
 
-# This maps Defined Conditions to clear text messages.
-# draft-ietf-xmpp-core23; 6.4 Defined Conditions
+# This maps Defined Error Conditions to clear text messages.
+# RFC 3929 (XMPP Core): 6.4 SASL Errors
 ::msgcat::mcset sv xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
 ::msgcat::mcset sv xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
 ::msgcat::mcset sv xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
@@ -917,8 +917,9 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
 ::msgcat::mcset sv xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
 
-::msgcat::mcset sv xmpp-stanzas-starttls-nofeature     {Servern "%s" saknar stöd för TLS.}
-::msgcat::mcset sv xmpp-stanzas-starttls-failure        {TLS förhandling med servern "%s" misslyckades.}
+::msgcat::mcset sv starttls-nofeature     {Servern "%s" saknar stöd för TLS.}
+::msgcat::mcset sv starttls-failure        {TLS förhandling med servern "%s" misslyckades.}
+::msgcat::mcset sv sasl-no-mechanisms     {The server has no support for SASL authentication.}
 
 
 ::msgcat::mcset sv openquicktime		{Öppna en QuickTime ström}
@@ -1295,6 +1296,6 @@ Om användarnamnet är upptaget så får du ett meddelande om detta när du registrer
 ::msgcat::mcset sv moodDlg              {Humör}
 ::msgcat::mcset sv selectCustomMood     {Välj humör}
 ::msgcat::mcset sv moodMessage          {Anledning till humör}
-::msgcat::mcset sv mCustom              {Speciellt humör}
+::msgcat::mcset sv mCustomMood              {Speciellt humör}
 
 # END --------------------------------------------------------------------------

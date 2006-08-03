@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.3 2006-07-31 07:27:33 matben Exp $
+# $Id: connect.tcl,v 1.4 2006-08-03 13:01:49 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -33,10 +33,27 @@
 #       tls-failure
 #       starttls-nofeature
 #       starttls-failure
-#       starttls-protoco-lerror
+#       starttls-protocol-error
+#       sasl-no-mechanisms
 #       
 #       All SASL error elements according to RFC 3920 (XMPP Core)
 #       not-authorized    being the most common
+#       
+### From: JEP-0170: Recommended Order of Stream Feature Negotiation ############
+#
+#   The XMPP RFCs define an ordering for the features defined therein, namely: 
+#       0.  TLS 
+#       1.  SASL 
+#       2.  Resource binding 
+#       3.  IM session establishment 
+#       
+#   Using Stream Compression:
+#       0.  TLS 
+#       1.  SASL 
+#       2.  Stream compression
+#       3.  Resource binding 
+#       4.  IM session establishment 
+#       
 
 package require jlib
 package require sha1
@@ -568,7 +585,8 @@ proc jlib::connect::starttls_cb {jlibname type args} {
     debug "jlib::connect::starttls_cb type=$type, args=$args"
 
     if {$type eq "error"} {
-	finish $jlibname tls-failed
+	foreach {errcode errmsg} [lindex $args 0] break
+	finish $jlibname $errcode $errmsg
     } else {
     
 	# We have a new stream. XMPP Core:
@@ -726,7 +744,7 @@ if {0} {
       -http 1 -httpurl http://sgi.se:5280/http-poll/
 
     jlib::connect::connect ::jlib::jlib1 matben@jabber.ru xxx cb  \
-      -compress 1 -secure 1 -method sasl
+      -compress 1 -secure 1 -method tls
 
     jlib::jlib1 closestream
 }

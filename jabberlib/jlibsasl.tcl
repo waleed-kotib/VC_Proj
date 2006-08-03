@@ -11,7 +11,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.22 2006-07-31 07:22:35 matben Exp $
+# $Id: jlibsasl.tcl,v 1.23 2006-08-03 13:01:49 matben Exp $
 
 package require jlib
 package require saslmd5
@@ -101,7 +101,7 @@ proc jlib::sasl_features {jlibname} {
     set features [get_feature $jlibname "mechanisms"]
     if {$features eq ""} {
 	set msg "no sasl mechanisms announced by the server"
-	sasl_final $jlibname error [list no-mechanisms-announced $msg]
+	sasl_final $jlibname error [list sasl-no-mechanisms $msg]
     } else {
 	auth_sasl_continue $jlibname
     }
@@ -210,7 +210,7 @@ proc jlib::auth_sasl_continue {jlibname} {
 	default {
 	    # This is an error
 	    # We should perhaps send an abort element here.
-	    sasl_final $jlibname error [list error $out]
+	    sasl_final $jlibname error [list sasl-error $out]
 	}
     }
 }
@@ -340,7 +340,7 @@ proc jlib::sasl_step {jlibname serverin64} {
 	}
 	default {
 	    #puts "\t errdetail: [$lib(sasl,token) -operation errdetail]"
-	    sasl_final $jlibname error [list error $output]
+	    sasl_final $jlibname error [list sasl-error $output]
 	}
     }
 }
