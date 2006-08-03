@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.24 2006-05-17 06:35:02 matben Exp $
+# $Id: JForms.tcl,v 1.25 2006-08-03 14:04:31 matben Exp $
 # 
 #      Updated to version 2.5 of JEP-0004
 #  
@@ -37,23 +37,6 @@ namespace eval ::JForms:: {
     # Spacer for some labels.
     variable topPadding {0 2 0 0}
     
-    variable help
-    array set help {
-	username        "Account name associated with the user"
-	nick            "Familiar name of the user"
-	password        "Password or secret for the user"
-	name            "Full name of the user"
-	first           "First name or given name of the user"
-	last            "Last name, surname, or family name of the user"
-	email           "Email address of the user"
-	address         "Street portion of a physical or mailing address"
-	city            "Locality portion of a physical or mailing address"
-	state           "Region portion of a physical or mailing address"
-	zip             "Postal code portion of a physical or mailing address"
-	phone           "Telephone number of the user"
-	url             "URL to web page describing the user"
-	date            "Some date (e.g., birth date, hire date, sign-up date)"
-    }
 }
 
 # JForms::Build --
@@ -202,7 +185,6 @@ proc ::JForms::BuildPlainFrame {token} {
 proc ::JForms::PlainEntry {token child} {
     variable $token
     upvar 0 $token state
-    variable help
     
     set w $state(w)
     set tag   [wrapper::gettag $child]
@@ -256,9 +238,11 @@ proc ::JForms::PlainEntry {token child} {
 	if {$tag eq "password"} {
 	    $went configure -show {*}
 	}
-	if {[info exists help($tag)]} {
-	    ::balloonhelp::balloonforwindow $wlab $help($tag)
-	    ::balloonhelp::balloonforwindow $went $help($tag)
+	
+	set help [mc registration-$tag]
+	if {$help ne "registration-$tag"} {
+	    ::balloonhelp::balloonforwindow $wlab $help
+	    ::balloonhelp::balloonforwindow $went $help
 	}
     }
 }
