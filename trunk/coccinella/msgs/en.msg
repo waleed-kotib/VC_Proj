@@ -906,8 +906,8 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en jamessnofiletrpt             {We couldn't see that %s supports file transfer.}
 ::msgcat::mcset en jamessfiletrpterr            {Failed to get file %s from %s: %s}
 
-# This maps Defined Conditions to clear text messages.
-# draft-ietf-xmpp-core23; 6.4 Defined Conditions
+# This maps Defined Error Conditions to clear text messages.
+# RFC 3929 (XMPP Core): 6.4 SASL Errors
 ::msgcat::mcset en xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
 ::msgcat::mcset en xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
 ::msgcat::mcset en xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
@@ -916,8 +916,11 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
 ::msgcat::mcset en xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
 
-::msgcat::mcset en xmpp-stanzas-starttls-nofeature     {The server "%s" has no support for TLS.}
-::msgcat::mcset en xmpp-stanzas-starttls-failure       {TLS negotiating with server "%s" failed.}
+
+# Related error conditions detected by the client.
+::msgcat::mcset en starttls-nofeature     {The server "%s" has no support for TLS.}
+::msgcat::mcset en starttls-failure       {TLS negotiating with server "%s" failed.}
+::msgcat::mcset en sasl-no-mechanisms     {The server has no support for SASL authentication.}
 
 
 ::msgcat::mcset en openquicktime		{Open QuickTime live stream}
@@ -1290,7 +1293,7 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en moodDlg              {Mood}
 ::msgcat::mcset en selectCustomMood     {Select a mood}
 ::msgcat::mcset en moodMessage          {Reason for mood}
-::msgcat::mcset en mCustom              {Custom mood}
+::msgcat::mcset en mCustomMood              {Custom mood}
 
 # END --------------------------------------------------------------------------
 

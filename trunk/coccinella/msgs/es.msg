@@ -931,8 +931,8 @@
 ::msgcat::mcset es jamessnofiletrpt {We couldn't see that %s supports file transfer.}
 ::msgcat::mcset es jamessfiletrpterr {Failed to get file %s from %s: %s}
 
-# This maps Defined Conditions to clear text messages.
-# draft-ietf-xmpp-core23; 6.4 Defined Conditions
+# This maps Defined Error Conditions to clear text messages.
+# RFC 3929 (XMPP Core): 6.4 SASL Errors
 ::msgcat::mcset es xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
 ::msgcat::mcset es xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
 ::msgcat::mcset es xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
@@ -941,8 +941,9 @@
 ::msgcat::mcset es xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
 ::msgcat::mcset es xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
 
-::msgcat::mcset es xmpp-stanzas-starttls-nofeature     {El servidor "%s" no soporta TLS.}
-::msgcat::mcset es xmpp-stanzas-starttls-failure       {Error durante la conexion TLS con el servidor "%s".}
+::msgcat::mcset es starttls-nofeature     {El servidor "%s" no soporta TLS.}
+::msgcat::mcset es starttls-failure       {Error durante la conexion TLS con el servidor "%s".}
+::msgcat::mcset es sasl-no-mechanisms     {The server has no support for SASL authentication.}
 
 
 ::msgcat::mcset es openquicktime		{Abrir el streaming QuickTime}
@@ -1328,5 +1329,5 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es moodDlg {Estado de animo}
 ::msgcat::mcset es selectCustomMood {Seleccione un estado de animo}
 ::msgcat::mcset es moodMessage {Motivo}
-::msgcat::mcset es mCustom {Personalizar animo}
+::msgcat::mcset es mCustomMood {Personalizar animo}
 # END --------------------------------------------------------------------------

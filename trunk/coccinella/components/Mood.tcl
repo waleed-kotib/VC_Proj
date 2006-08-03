@@ -52,7 +52,7 @@ proc ::Mood::Init { } {
         lappend subEntries [list radio [mc mSleepy] {::Mood::Cmd "sleepy"} normal {} {}]
         lappend subEntries [list radio [mc mStressed] {::Mood::Cmd "stressed"}  normal {} {}]
         lappend subEntries [list radio [mc mWorried] {::Mood::Cmd "worried"} normal {} {}]
-        lappend subEntries [list radio [mc mCustom] {::Mood::CustomMoodWindow} normal {} {}]
+        lappend subEntries [list radio [mc mCustomMood] {::Mood::CustomMoodWindow} normal {} {}]
         lset menuMood 6 $subEntries
 
     variable mapMoodTextToElem

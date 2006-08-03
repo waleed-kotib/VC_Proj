@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.89 2006-08-02 07:04:13 matben Exp $
+# $Id: Login.tcl,v 1.90 2006-08-03 13:01:49 matben Exp $
 
 package provide Login 1.0
 
@@ -687,10 +687,13 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	    set str [mc jamesslogin409 $errcode]
 	}
 	starttls-nofeature {
-	    set str [mc xmpp-stanzas-starttls-nofeature $state(server)]
+	    set str [mc starttls-nofeature $state(server)]
 	}
 	startls-failure {
-	    set str [mc xmpp-stanzas-starttls-failure $state(server)]
+	    set str [mc starttls-failure $state(server)]
+	}
+	sasl-no-mechanisms {
+	    set str [mc sasl-no-mechanisms]
 	}
 	default {
 	    
@@ -716,7 +719,7 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
     global  config
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Login::ShowAnyMessageBox errcode=$errcode, errmsg=$errmsg"
+    ::Debug 2 "::Login::HandleErrorCode errcode=$errcode, errmsg=$errmsg"
 
     array set state [jlib::connect::get_state $jstate(jlib)]
     set str [GetErrorStr $errcode $errmsg]
