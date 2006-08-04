@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.90 2006-08-03 13:01:49 matben Exp $
+# $Id: Login.tcl,v 1.91 2006-08-04 13:14:32 matben Exp $
 
 package provide Login 1.0
 
@@ -583,7 +583,7 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     
     set jid [jlib::joinjid $username $server $resource]
     set cb [list ::Login::HighLoginCB $token]
-    eval {$jstate(jlib) connect $jid $password $cb} $args
+    eval {$jstate(jlib) connect connect $jid $password -command $cb} $args
     
     return $token
 }
@@ -592,14 +592,11 @@ proc ::Login::HighLoginCB {token jlibname status {errcode ""} {errmsg ""}} {
 
     ::Debug 2 "::Login::HighLoginCB +++ status=$status, errcode=$errcode, errmsg=$errmsg"
     
-    array set state [jlib::connect::get_state $jlibname]
+    array set state [$jlibname connect get_state]
     
     switch -- $status {
-	ok {
-	    HighHandleFinal $token	    
-	}
-	error {
-	    HighHandleError $token $errcode $errmsg
+	ok - error {
+	    HighFinal $token $jlibname $status $errcode $errmsg
 	}
 	dnsresolve - initnetwork - authenticate {
 	    # empty
@@ -613,7 +610,7 @@ proc ::Login::HighLoginCB {token jlibname status {errcode ""} {errmsg ""}} {
     }
 }
 
-proc ::Login::HighHandleFinal {token} {
+proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
     
     variable $token
     upvar 0 $token highstate
@@ -621,33 +618,29 @@ proc ::Login::HighHandleFinal {token} {
     variable pending
     
     set pending 0
-    eval {SetStatus} $highstate(args)
-    set server [$jstate(jlib) getserver]
+
+    switch -- $status {
+	ok {
+	    eval {SetStatus} $highstate(args)
+	    set server [$jstate(jlib) getserver]
+	    set msg [mc jaauthok $server] 
+	    ::Jabber::UI::FixUIWhen "connectfin"
+	    SetLoginState
+	}
+	error {
+	    set msg ""
+	    ::Jabber::UI::FixUIWhen "disconnect"
+	    HandleErrorCode $errcode $errmsg
+	}
+    }        
+    ::Jabber::UI::SetStatusMessage $msg
     ::Jabber::UI::StartStopAnimatedWave 0
-    ::Jabber::UI::SetStatusMessage [mc jaauthok $server]
-    ::Jabber::UI::FixUIWhen "connectfin"
-    SetLoginState
-    
-    uplevel #0 $highstate(cmd) [list $token]
 
-    unset highstate
-}
-
-proc ::Login::HighHandleError {token {errcode ""} {errmsg ""}} {
-
-    variable $token
-    upvar 0 $token highstate
-    variable pending
-
-    set pending 0
-    ::Jabber::UI::SetStatusMessage ""
-    ::Jabber::UI::StartStopAnimatedWave 0
-    ::Jabber::UI::FixUIWhen "disconnect"
-    HandleErrorCode $errcode $errmsg
-    
     uplevel #0 $highstate(cmd) [list $token $errcode $errmsg]
 
+    # Free all.
     unset highstate
+    $jstate(jlib) connect free
 }
 
 proc ::Login::SetStatus {args} {

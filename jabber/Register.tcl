@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.48 2006-08-03 14:17:16 matben Exp $
+# $Id: Register.tcl,v 1.49 2006-08-04 13:14:32 matben Exp $
 
 package provide Register 1.0
 
@@ -413,7 +413,7 @@ proc ::RegisterEx::Get {token} {
 
     # Asks for a socket to the server.
     set cb [list ::RegisterEx::ConnectCB $token]
-    eval {$jstate(jlib) connect $state(-server) {} $cb} $opts
+    eval {$jstate(jlib) connect connect $state(-server) {} -command $cb} $opts
 }
 
 proc ::RegisterEx::ConnectCB {token jlibname status {errcode ""} {errmsg ""}} {
@@ -433,6 +433,7 @@ proc ::RegisterEx::ConnectCB {token jlibname status {errcode ""} {errmsg ""}} {
 	NotBusy $token
 	set str [::Login::GetErrorStr $errcode $errmsg]
 	::UI::MessageBox -icon error -type ok -message $str
+	$jstate(jlib) connect free
     }
 }
 
@@ -617,6 +618,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
     set server   $state(-server)
     set username $state(elem,username)
     set password $state(elem,password)
+    set resource "coccinella"
 
     if {[string equal $type "error"]} {
 	set errcode [lindex $theQuery 0]
@@ -638,11 +640,10 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	    
 	    # Go on and authenticate.
 	    # @@@ extra options?
-	    set resource "coccinella"
-	    set streamid [$jstate(jlib) getstreamattr id]
-	    set digested [::sha1::sha1 $streamid$password]
-	    $jstate(jlib) send_auth $username $resource   \
-	      ::RegisterEx::AuthorizeCB -digest $digested
+	    set jid [jlib::joinjid $username $server $resource]
+	    $jstate(jlib) connect register $jid $password
+	    $jstate(jlib) connect auth  \
+	      -command [namespace code AuthCB]
 	} else {
 	    ::UI::MessageBox -icon info -type ok \
 	      -message [mc jamessregisterok $server]
@@ -658,22 +659,30 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
     }
 }
 
-proc ::RegisterEx::AuthorizeCB {jlibname type queryE} {
+proc ::RegisterEx::AuthCB {jlibname status {errcode ""} {errmsg ""}} {
+    upvar ::Jabber::jstate jstate
+
+    ::Debug 2 "::RegisterEx::AuthCB status=$status, errcode=$errcode, errmsg=$errmsg"
     
-    ::Debug 2 "::RegisterEx::AuthorizeCB"
-    
-    if {[string equal $type "error"]} {
-	foreach {errcode errmsg} $queryE break
-	set str [mc xmpp-stanzas-$errcode]
-	::UI::MessageBox -icon error -type ok -title [mc Error] -message $str
-    } else {
+    switch -- $status {
+	ok {
 	
-	# Login was succesful, set presence.
-	::Login::SetStatus
-	::Login::SetLoginState
-	::Jabber::UI::FixUIWhen "connectfin"
-	set jid [::Jabber::GetMyJid]
-	::UI::MessageBox -icon info -type ok -message [mc jamessregloginok $jid]
+	    # Login was succesful, set presence.
+	    ::Login::SetStatus
+	    ::Login::SetLoginState
+	    ::Jabber::UI::FixUIWhen "connectfin"
+	    set jid [::Jabber::GetMyJid]
+	    ::UI::MessageBox -icon info -type ok -message [mc jamessregloginok $jid]
+	    $jlibname connect free
+	}
+	error {
+	    set str [mc xmpp-stanzas-$errcode]
+	    ::UI::MessageBox -icon error -type ok -title [mc Error] -message $str
+	    $jlibname connect free
+	}
+	default {
+	    # empty since there are intermediate callbacks!
+	}
     }
 }
 
