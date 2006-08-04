@@ -6,12 +6,16 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.4 2006-08-03 13:01:49 matben Exp $
+# $Id: connect.tcl,v 1.5 2006-08-04 13:13:41 matben Exp $
 # 
 ############################# USAGE ############################################
 #
 #   jlib::connect::configure ?options?
-#   jlib::connect::connect jlibname jid password cmd ?options?
+#   jlibname connect connect jid password ?options?     (constructor)
+#   jlibname connect reset
+#   jlibname connect register jid password
+#   jlibname connect auth
+#   jlibname connect free                               (destructor)
 #
 #### EXECUTION PATHS ###########################################################
 # 
@@ -63,20 +67,26 @@ package provide jlib::connect 0.1
 namespace eval jlib::connect {
     
     variable inited 0
-    variable debug 0
     variable have
+    variable debug 0
 }
 
-# jlib::connect --
-# 
-#       Just a wrapper for the jlib::connect::connect function.
+proc jlib::connect::init {jlibname} {
 
-proc jlib::connect {jlibname jid password cmd args} {
-    
-    return [eval {jlib::connect::connect $jlibname $jid $password $cmd} $args]
+    variable inited
+
+    if {!$inited} {
+	init_static
+    }
 }
 
-proc jlib::connect::init {} {
+proc jlib::connect::cmdproc {jlibname cmd args} {
+        
+    # Just dispatch the command to the right procedure.
+    return [eval {$cmd $jlibname} $args]
+}
+
+proc jlib::connect::init_static {} {
 
     variable inited
     variable have
@@ -115,6 +125,7 @@ proc jlib::connect::init {} {
     # Default options.
     variable options
     array set options {
+	-command          ""
 	-compress         0
 	-defaulthttpurl   http://%h:5280/http-poll/
 	-defaultport      5222
@@ -148,20 +159,21 @@ proc jlib::connect::init {} {
 
 proc jlib::connect::configure {args} {
     
-    variable inited
     variable have
     variable options
     
     debug "jlib::connect::configure args=$args"
     
-    if {!$inited} {
-	init
-    }
     if {[llength $args] == 0} {
 	return [array get options]
     } else {
 	foreach {key value} $args {
 	    switch -- $key {
+		-compress {
+		    if {!$have(jlibcompress)} {
+			return -code error "missing jlib::compress package"
+		    }
+		}
 		-http {
 		    if {!$have(jlibhttp)} {
 			return -code error "missing jlib::http package"
@@ -207,6 +219,7 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 #       password
 #       cmd         callback command
 #       args:
+#           -command          tclProc
 #           -compress         0|1
 #           -defaulthttpurl   url
 #           -defaultport      5222
@@ -242,18 +255,13 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 # Results:
 #       Callback initiated.
 
-proc jlib::connect::connect {jlibname jid password cmd args} {
+proc jlib::connect::connect {jlibname jid password args} {
     
-    variable inited
     variable have
     variable options
     
-    debug "jlib::connect::connect jid=$jid, cmd=$cmd, args=$args"
-    
-    if {!$inited} {
-	init
-    }
-    
+    debug "jlib::connect::connect jid=$jid, args=$args"
+        
     # Instance specific namespace.
     namespace eval ${jlibname}::connect {
 	variable state
@@ -273,7 +281,6 @@ proc jlib::connect::connect {jlibname jid password cmd args} {
     set state(host)     $server
     set state(resource) $resource
     set state(password) $password
-    set state(cmd)      $cmd
     set state(args)     $args
     set state(error)    ""
     set state(state)    ""
@@ -292,17 +299,8 @@ proc jlib::connect::connect {jlibname jid password cmd args} {
     }
 
     # Verify that we have the necessary packages.
-    if {$state(-secure)} {
-	if {($state(-method) eq "sasl") && !$have(jlibsasl)} {
-	    return -code error "missing jlibsasl package"
-	}
-	if {($state(-method) eq "ssl") && !$have(tls)} {
-	    return -code error "missing tls package"
-	}
-	if {($state(-method) eq "tlssasl")  \
-	  && (!$have(jlibtls) || !$have(jlibsasl))} {
-	    return -code error "missing jlibtls or jlibsasl package"
-	}
+    if {[catch {verify $jlibname} err]} {
+	return -code error $err
     }
 
     if {$state(-http)} {
@@ -322,11 +320,8 @@ proc jlib::connect::connect {jlibname jid password cmd args} {
 	    }
 	}
     }
-    if {$state(-compress) && !$have(jlibcompress)} {
-	return -code error "missing jlibcompress package"
-    }
     if {$state(-compress) && ($state(usetls) || $state(usessl))} {
-	return -code error "connot have -compress and tls at the same time"
+	#return -code error "connot have -compress and tls at the same time"
     }
     if {$state(-compress)} {
 	set state(usecompress) 1
@@ -352,7 +347,9 @@ proc jlib::connect::connect {jlibname jid password cmd args} {
 	} else {
 	    set state(state) dnsresolve
 	    set cb [list jlib::connect::dns_srv_cb $jlibname]
-	    uplevel #0 $state(cmd) $jlibname dnsresolve
+	    if {$state(-command) ne {}} {
+		uplevel #0 $state(-command) $jlibname dnsresolve
+	    }
 	    if {[catch {
 		set state(dnstoken) [jlib::dns::get_addr_port $server $cb  \
 		  -protocol $state(-dnsprotocol) -timeout $state(-dnstimeout)]
@@ -370,7 +367,9 @@ proc jlib::connect::connect {jlibname jid password cmd args} {
 	} else {
 	    set state(state) dnsresolve
 	    set cb [list jlib::connect::dns_http_cb $jlibname]
-	    uplevel #0 $state(cmd) $jlibname dnsresolve
+	    if {$state(-command) ne {}} {
+		uplevel #0 $state(-command) $jlibname dnsresolve
+	    }
 	    if {[catch {
 		set state(dnstoken) [jlib::dns::get_http_poll_url $server $cb]
 	    } err]} {
@@ -379,6 +378,28 @@ proc jlib::connect::connect {jlibname jid password cmd args} {
 		http_init $jlibname
 	    }
 	}
+    }
+}
+
+proc jlib::connect::verify {jlibname} {
+    
+    variable have
+    upvar ${jlibname}::connect::state state
+
+    if {$state(-secure)} {
+	if {($state(-method) eq "sasl") && !$have(jlibsasl)} {
+	    return -code error "missing jlibsasl package"
+	}
+	if {($state(-method) eq "ssl") && !$have(tls)} {
+	    return -code error "missing tls package"
+	}
+	if {($state(-method) eq "tlssasl")  \
+	  && (!$have(jlibtls) || !$have(jlibsasl))} {
+	    return -code error "missing jlibtls or jlibsasl package"
+	}
+    }
+    if {$state(-compress) && !$have(jlibcompress)} {
+	return -code error "missing jlibcompress package"
     }
 }
 
@@ -449,7 +470,9 @@ proc jlib::connect::tcp_connect {jlibname} {
     debug "jlib::connect::tcp_connect"
 
     set state(state) initnetwork
-    uplevel #0 $state(cmd) $jlibname initnetwork
+    if {$state(-command) ne {}} {
+	uplevel #0 $state(-command) $jlibname initnetwork
+    }
   
     if {$state(usessl)} {
 	set socketCmd {::tls::socket -request 0 -require 0}
@@ -514,7 +537,9 @@ proc jlib::connect::init_stream {jlibname} {
     debug "jlib::connect::init_stream"
 
     set state(state) initstream
-    uplevel #0 $state(cmd) $jlibname initstream
+    if {$state(-command) ne {}} {
+	uplevel #0 $state(-command) $jlibname initstream
+    }
     
     set opts {}
     if {[info exists state(version)]} {
@@ -535,6 +560,8 @@ proc jlib::connect::init_stream {jlibname} {
 proc jlib::connect::init_stream_cb {jlibname args} {
 
     upvar ${jlibname}::connect::state state
+    
+    if {![info exists state]} return
     
     debug "jlib::connect::init_stream_cb args=$args"
     
@@ -566,10 +593,14 @@ proc jlib::connect::init_stream_cb {jlibname args} {
 
     if {$state(usetls)} {
 	set state(state) starttls
-	uplevel #0 $state(cmd) $jlibname starttls
+	if {$state(-command) ne {}} {
+	    uplevel #0 $state(-command) $jlibname starttls
+	}
 	$jlibname starttls jlib::connect::starttls_cb
     } elseif {$state(usecompress)} {
-	uplevel #0 $state(cmd) $jlibname startcompress
+	if {$state(-command) ne {}} {
+	    uplevel #0 $state(-command) $jlibname startcompress
+	}
 	jlib::compress::start $jlibname jlib::connect::compress_cb
     } elseif {$state(-noauth)} {
 	finish $jlibname
@@ -581,6 +612,8 @@ proc jlib::connect::init_stream_cb {jlibname args} {
 proc jlib::connect::starttls_cb {jlibname type args} {
 
     upvar ${jlibname}::connect::state state
+    
+    if {![info exists state]} return
     
     debug "jlib::connect::starttls_cb type=$type, args=$args"
 
@@ -601,6 +634,8 @@ proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {
     
     upvar ${jlibname}::connect::state state
     
+    if {![info exists state]} return
+    
     debug "jlib::connect::compress_cb"
   
     # Note: Failure of compression setup SHOULD NOT be treated as an 
@@ -616,14 +651,46 @@ proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {
     }
 }
 
-proc jlib::connect::auth {jlibname} {
+# jlib::connect::register --
+# 
+#       Typically used after registered a new account since JID and password
+#       not known until registration succesful.
+
+proc jlib::connect::register {jlibname jid password} {
+    
+    upvar ${jlibname}::connect::state state
+    
+    jlib::splitjidex $jid username server resource
+
+    set state(jid)      $jid
+    set state(username) $username
+    set state(password) $password
+    if {$resource eq ""} {
+	set state(resource) $state(-defaultresource)
+    }
+}
+
+# jlib::connect::auth --
+# 
+#       Initiates the authentication process using an existing connect instance,
+#       typically when started using -noauth.
+#       The user can modify the options from the initial ones.
+
+proc jlib::connect::auth {jlibname args} {
         
     upvar ${jlibname}::connect::state state
     
     debug "jlib::connect::auth"
 
+    array set state $args
+    
+    if {[catch {verify $jlibname} err]} {
+	return -code error $err
+    }
     set state(state) authenticate
-    uplevel #0 $state(cmd) $jlibname authenticate
+    if {$state(-command) ne {}} {
+	uplevel #0 $state(-command) $jlibname authenticate
+    }
     
     set username $state(username)
     set password $state(password)
@@ -647,6 +714,8 @@ proc jlib::connect::auth {jlibname} {
 proc jlib::connect::auth_cb {jlibname type queryE} {
     
     upvar ${jlibname}::connect::state state
+    
+    if {![info exists state]} return
     
     debug "jlib::connect::auth_cb type=$type, queryE=$queryE"
 
@@ -713,12 +782,21 @@ proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {
     }
     
     # Here status must be either 'ok' or 'error'.
-    if {$errcode eq ""} {
-	uplevel #0 $state(cmd) [list $jlibname $status]
-    } else {
-	uplevel #0 $state(cmd) [list $jlibname $status $errcode $errmsg]
+    if {$state(-command) ne {}} {
+	if {$errcode eq ""} {
+	    uplevel #0 $state(-command) [list $jlibname $status]
+	} else {
+	    uplevel #0 $state(-command) [list $jlibname $status $errcode $errmsg]
+	}
     }
-    unset state
+}
+
+proc jlib::connect::free {jlibname} {
+
+    upvar ${jlibname}::connect::state state
+
+    debug  "jlib::connect::free"
+    unset -nocomplain state
 }
 
 proc jlib::connect::debug {str} {
@@ -729,6 +807,15 @@ proc jlib::connect::debug {str} {
     }
 }
 
+# We have to do it here since need the initProc before doing this.
+
+namespace eval jlib::connect {
+
+    jlib::ensamble_register connect  \
+      [namespace current]::init      \
+      [namespace current]::cmdproc
+}
+
 # Tests
 if {0} {
     package require jlib::connect
@@ -736,14 +823,14 @@ if {0} {
 	puts "---> $args"
 	#puts [jlib::connect::get_state ::jlib::jlib1]
     }
-    jlib::connect::connect ::jlib::jlib1 matben@localhost xxx cb 
-    jlib::connect::connect ::jlib::jlib1 matben@devrieze.dyndns.org xxx cb \
-      -secure 1 -method tlssasl
+    ::jlib::jlib1 connect connect matben@localhost xxx -command cb    
+    ::jlib::jlib1 connect connect matben@devrieze.dyndns.org xxx \
+      -command cb -secure 1 -method tlssasl
    
-    jlib::connect::connect ::jlib::jlib1 matben@sgi.se xxx cb  \
+    ::jlib::jlib1 connect connect matben@sgi.se xxx -command cb  \
       -http 1 -httpurl http://sgi.se:5280/http-poll/
 
-    jlib::connect::connect ::jlib::jlib1 matben@jabber.ru xxx cb  \
+    ::jlib::jlib1 connect connect matben@jabber.ru xxx -command cb  \
       -compress 1 -secure 1 -method tls
 
     jlib::jlib1 closestream
