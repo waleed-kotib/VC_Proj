@@ -56,6 +56,7 @@ support protocol for other functions.
    0153 | vCard-Based Avatars           | complete
    0156 | A DNS TXT Resource...         | complete
    0166 | Jingle                        | complete
+   0170 | Recommended Order of Stream.. | except for stream compression
    0179 | Jingle IAX Transport Method   | complete
 
 
