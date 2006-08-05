@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.129 2006-08-03 07:01:19 matben Exp $
+# $Id: UI.tcl,v 1.130 2006-08-05 07:29:36 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -403,7 +403,7 @@ proc ::UI::GetMainWindow { } {
 }
 
 proc ::UI::GetMainMenu { } {
-    global  prefs wDlgs
+    global  prefs
     
     switch -- $prefs(protocol) {
 	jabber {
@@ -596,8 +596,7 @@ proc ::UI::Toplevel {w args} {
     }
     if {[tk windowingsystem] eq "aqua"} {
 	if {[info exists argsArr(-macclass)]} {
-	    eval {::tk::unsupported::MacWindowStyle style $w}  \
-	      $argsArr(-macclass)
+	    eval {::tk::unsupported::MacWindowStyle style $w} $argsArr(-macclass)
 	} elseif {[info exists argsArr(-macstyle)]} {
 	    ::tk::unsupported::MacWindowStyle style $w $argsArr(-macstyle)
 	}
@@ -611,6 +610,9 @@ proc ::UI::Toplevel {w args} {
 	    
 	    # Application defined virtual event.
 	    bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w "command"]
+	}
+	if {$argsArr(-usemacmainmenu)} {
+	    SetMenuAcceleratorBinds $w [GetMainMenu]
 	}
     }
     if {$prefs(opacity) != 100} {
@@ -631,6 +633,7 @@ proc ::UI::Toplevel {w args} {
     bind $w <FocusIn>  +[list ::UI::OnFocusIn %W $w]
     bind $w <FocusOut> +[list ::UI::OnFocusOut %W $w]
     bind $w <Destroy>  +[list ::UI::OnDestroy %W $w]
+
     ::hooks::run newToplevelWindowHook $w
     
     return $w
@@ -1352,19 +1355,19 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
     set wmain [GetMainWindow]
     set wlist $wmain
 
-    if {$w == $wmain} {
+    if {$w eq $wmain} {
 	
 	# Handle Macs that use (inherit) the main menu.
-	if {[tk windowingsystem] eq "aqua"} {
-	    set wtmp $wThatUseMainMenu
-	    set wThatUseMainMenu {}
-	    foreach wmac $wtmp {
-		if {[winfo exists $wmac]} {
-		    lappend wThatUseMainMenu $wmac
-		}
+	#if {[tk windowingsystem] eq "aqua"}
+	# We do this on all platforms!
+	set wtmp $wThatUseMainMenu
+	set wThatUseMainMenu {}
+	foreach wmac $wtmp {
+	    if {[winfo exists $wmac]} {
+		lappend wThatUseMainMenu $wmac
 	    }
-	    set wlist [concat $wmain $wThatUseMainMenu]
-	}	
+	}
+	set wlist [concat $wmain $wThatUseMainMenu]
     } else {
 	set wlist $w
     }
@@ -1413,10 +1416,6 @@ proc ::UI::SetMenuAcceleratorBinds {w wmenubar} {
     variable cachedMenuSpec
     variable wThatUseMainMenu
     
-    if {![string match "mac*" $this(platform)]} {
-	return
-    }
-
     lappend wThatUseMainMenu $w
 
     foreach {wmenu wtop} [array get mapWmenuToWtop $wmenubar.*] {
@@ -1434,17 +1433,21 @@ proc ::UI::SetMenuAcceleratorBinds {w wmenubar} {
 		if {[string equal $state "normal"]} {
 		    set acckey [string map {< less > greater}  \
 		      [string tolower $accel]]
-		    bind $w <$this(modkey)-Key-${acckey}> [lindex $line 2]
+		    bind $w <$this(modkey)-Key-$acckey> [lindex $line 2]
 		}
 	    }
 	}
     }
-
-    # This sets up the edit menu that we inherit from the main menu.
-    bind $w <FocusIn> +[list ::UI::MacFocusFixEditMenu $w $wmenubar %W]
     
-    # If we hand over to a 3rd party toplevel window we need to take precautions.
-    bind $w <FocusOut> +[list ::UI::MacFocusFixEditMenu $w $wmenubar %W]
+    if {[tk windowingsystem] eq "aqua"} {
+
+	# @@@ Is this going to be replaced by  -postcommand  ???
+	# This sets up the edit menu that we inherit from the main menu.
+	bind $w <FocusIn> +[list ::UI::MacFocusFixEditMenu $w $wmenubar %W]
+	
+	# If we hand over to a 3rd party toplevel window we need to take precautions.
+	bind $w <FocusOut> +[list ::UI::MacFocusFixEditMenu $w $wmenubar %W]
+    }
 }
 
 proc ::UI::BuildAppleMenu {w wmenuapple state} {
