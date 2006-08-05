@@ -1,7 +1,7 @@
-# English language version of the Coccinella message catalog.
+# Dutch language version of the Coccinella message catalog.
 #
-# Dutch translation by Sander Devrieze (s.devrieze at pandora.be), 2004, 2005, 2006.
-# Bart Van Hove (bartvanhove at skynet.be), 2004.
+# Dutch translation by Sander Devrieze (s.devrieze at pandora.be), 2004-2006.
+# and Bart Van Hove (bartvanhove at skynet.be), 2004.
 #
 # General type of text, such as "OK", "Cancel", and the like. 
 # We use the source string as the message.
@@ -27,12 +27,12 @@
 ::msgcat::mcset nl Birthday		{Geboortedatum}
 ::msgcat::mcset nl Block		{Blokkeren}
 ::msgcat::mcset nl Blockers		{Geblokkeerde Jabber ID's}
-::msgcat::mcset nl Blocking		{Ondersteuning voor blokkeren}
+::msgcat::mcset nl Blocking		{Ondersteunt blokkeren}
 ::msgcat::mcset nl Bookmark		{Bladwijzer}
 ::msgcat::mcset nl Bookmarks		{Bladwijzers}
 ::msgcat::mcset nl Browser		{Browser}
 ::msgcat::mcset nl Both			{Beiden}
-::msgcat::mcset nl Buffering		{Ondersteuning voor bufferen}
+::msgcat::mcset nl Buffering		{Ondersteunt bufferen}
 ::msgcat::mcset nl Cancel		{Annuleren}
 ::msgcat::mcset nl Change		{Wijzigen}
 ::msgcat::mcset nl Chat			{Chat}
@@ -386,9 +386,9 @@
 ::msgcat::mcset nl mRemoveAccount	{Account verwijderen}
 ::msgcat::mcset nl mErrorLog		{Error log...}
 ::msgcat::mcset nl mDebug		{Debug}
-::msgcat::mcset nl mOnServer		{Over &server...}
-::msgcat::mcset nl mOnClients		{Over &clients...}
-::msgcat::mcset nl mOnPlugins		{Over &plugins...}
+::msgcat::mcset nl mOnServer		{&Servergegevens...}
+::msgcat::mcset nl mOnClients		{&Clientinfo...}
+::msgcat::mcset nl mOnPlugins		{&Plugininfo...}
 ::msgcat::mcset nl mHelpOn		{Help met}
 ::msgcat::mcset nl mNetworkSetup	{Netwerk instellen}
 ::msgcat::mcset nl mServers		{Servers}
@@ -571,7 +571,7 @@
 ::msgcat::mcset nl {MIDI Player}		{Midi-apparaat}
 ::msgcat::mcset nl {MIME type}			{Bestandstype}
 ::msgcat::mcset nl {Movie Options}		{Filmopties}
-::msgcat::mcset nl {Multi Connect}		{Multi connecteren}
+::msgcat::mcset nl {Multi Connect}		{Multiconnecteren}
 ::msgcat::mcset nl {My Avatar}			{Mijn avatar}
 ::msgcat::mcset nl {My Status}			{Mijn aanwezigheid}
 ::msgcat::mcset nl {My vCard}			{Mijn persoonlijke info}
@@ -776,7 +776,7 @@
 ::msgcat::mcset nl messfailedhttp	{Starten van interne HTTP-server mislukte: %s}
 ::msgcat::mcset nl messinfoscript	{Omwille van de 'info script' bug op uw Mac, moet u effectief de 'Whiteboard-%s' map in het volgende venster selecteren.}
 ::msgcat::mcset nl messfailedsock	{Kan socket naar server niet aanmaken. Misschien werkt het netwerk niet of heeft de server problemen. De foutcode is: %s}
-::msgcat::mcset nl messeofconnect	{Er liep iets mis tijdens het verbinden. Fout: eof ontvangen.}
+::msgcat::mcset nl messeofconnect	{Er liep iets mis tijdens het verbinden. Fout: eof.}
 ::msgcat::mcset nl messfailconnect	{Er liep iets mis tijdens het verbinden met %s}
 ::msgcat::mcset nl messtimeout		{Tijdslimiet overschreden na het proberen te verbinden.}
 ::msgcat::mcset nl messnoplugs		{Er zijn geen plugins of helpprogramma's geïdentificeerd op dit systeem.}
@@ -824,17 +824,17 @@
 
 ::msgcat::mcset nl jamessconnbroken	{De verbinding werd onverwachts verbroken.}
 ::msgcat::mcset nl jamessautoawayset 	{De aanwezigheid "Automatisch afwezig" werd ingesteld op %s. Wilt u de aanwezigheid terug instellen op "Beschikbaar"?}
-::msgcat::mcset nl jamesserrgetpublic	{Fout ontvangen bij ophalen van de publiek toegankelijke gegevens van %s. De foutcode is %s met als foutmelding: %s}
-::msgcat::mcset nl jamesserrlastactive	{Fout ontvangen bij het opvragen bij %s voor laatste activiteit. De fout was: %s}
+::msgcat::mcset nl jamesserrgetpublic	{Fout bij ophalen van de publiek toegankelijke gegevens van %s. De foutcode is %s met als foutmelding: %s}
+::msgcat::mcset nl jamesserrlastactive	{Fout bij het opvragen bij %s voor laatste activiteit. De fout was: %s}
 ::msgcat::mcset nl jamesserrnotimeinfo	{De client/dienst %s verzende geen tijdsinformatie terug.}
 ::msgcat::mcset nl jamesstimeused	{Tijd sinds client "%s" het laatst actief was: }
-::msgcat::mcset nl jamesstimeconn	{Tijd verstreken sinds "%s" de laatste keer online was: }
+::msgcat::mcset nl jamesstimeconn	{Tijd verstreken sinds "%s" het laatst online was: }
 ::msgcat::mcset nl jamesstimeservstart	{Tijd verstreken sinds de server "%s" gestart is: }
-::msgcat::mcset nl jamessuptime		{De uptime (van diensten) of de laatste activiteit van de contactpersoon bedraagt: }
+::msgcat::mcset nl jamessuptime		{De uptime (van diensten) of de laatste activiteit van de contactpersoon is: }
 ::msgcat::mcset nl jamesserrtime	{Er deed zich een fout voor tijdens het opvragen van de tijd van %s. De fout was: %s}
-::msgcat::mcset nl jamesslocaltime	{De lokale tijd voor %s is: %s}
-::msgcat::mcset nl jamesserrvers	{Fout ontvangen bij het opvragen van de versie van %s. De fout was: %s}
-::msgcat::mcset nl jamesserrautoupdate 	{Fout ontvangen bij de controle voor clientupdates bij %s. De fout was: %s}
+::msgcat::mcset nl jamesslocaltime	{De lokale tijd bij %s is: %s}
+::msgcat::mcset nl jamesserrvers	{Fout bij het opvragen van de versie van %s. De fout was: %s}
+::msgcat::mcset nl jamesserrautoupdate 	{Fout bij de controle voor clientupdates bij %s. De fout was: %s}
 ::msgcat::mcset nl jamesswarberasewb	{Wilt u werkelijk het whiteboard uitwissen?}
 ::msgcat::mcset nl jamesswarnremove	{Een contactpersoon uit uw roster verwijderen is een onomkeerbare actie. U moet opnieuw om autorisatie vragen bij deze contactpersoon als u hem\
   terug wilt toevoegen. Wilt u toch verder gaan?}
@@ -926,7 +926,7 @@
 
 ::msgcat::mcset nl starttls-nofeature     {Server "%s" ondersteunt TLS niet.}
 ::msgcat::mcset nl starttls-failure       {Beveiligd verbinden via TLS met server "%s" mislukte.}
-::msgcat::mcset nl sasl-no-mechanisms     {The server has no support for SASL authentication.}
+::msgcat::mcset nl sasl-no-mechanisms     {De server ondersteunt authenticatie met SASL niet.}
 
 
 ::msgcat::mcset nl openquicktime		{QuickTime live stream openen}
@@ -966,11 +966,11 @@
 
 
 # Preferences:
-::msgcat::mcset nl prefnetconf  {Netwerk- en serverinstellingen}
-::msgcat::mcset nl prefnethead  {Het is mogelijk om oftewel te verbinden met een Jabber-server of direct met een andere client. Veel onderdelen van de interface hangen af van welke optie u kiest.}
-::msgcat::mcset nl prefnetauto  {Wanneer een client met deze server verbindt, dan zal automatisch verbonden worden met de in de client ingebouwde server.}
-::msgcat::mcset nl prefnetjabb  {Het Jabber-serversysteem. Uitgebreide gebruikersbeheer met vensters via het menu Jabber. Dit gebruikt een op XML gebaseerd protocol.}
-::msgcat::mcset nl prefnetmulti {Automatisch met alle clients in dit netwerk verbinden wanneer er met één verbonden wordt.}
+::msgcat::mcset nl prefnetconf  {Netwerkinstellingen}
+::msgcat::mcset nl prefnethead  {U kunt verbinden met een Jabber-server of direct met een andere client. Veel onderdelen van de interface hangen af van welke optie u kiest.}
+::msgcat::mcset nl prefnetauto  {Als een andere client contact opneemt, dan zal die verbonden worden met de ingebouwde server.}
+::msgcat::mcset nl prefnetjabb  {Jabber-serveropstelling. Uitgebreid gebruikersbeheer met vensters via het menu "Jabber".}
+::msgcat::mcset nl prefnetmulti {Automatisch met alle clients in het netwerk verbinden wanneer er met één verbonden wordt.}
 ::msgcat::mcset nl prefnetadv   {Een client draait normaal twee verschillende servers, een ingebouwde server voor peer-to-peer en een HTTP-server. Wijzigingen worden pas doorgevoerd na een herstart van Coccinella.}
 ::msgcat::mcset nl prefsounsynwb {Laat de tekst in het whiteboard uitspreken door een synthetische stem}
 ::msgcat::mcset nl prefsounsynno {Laat de tekst in normale berichten uitspreken door een synthetische stem}
@@ -1042,7 +1042,7 @@
 ::msgcat::mcset nl prefprivnotex {Filteropties zijn op deze server niet beschikbaar}
 ::msgcat::mcset nl prefprivobtained {Filterlijsten verkregen van de server}
 ::msgcat::mcset nl prefprivgetlist {Bezig met ophalen van filterlijst "%s"}
-::msgcat::mcset nl prefprivrules {Elke lijst bevat één of meerdere regels. Elke regel geeft het berichttype en de bijhorende actie op. Als u een groep wilt blokkeren dan moet deze ook effectief bestaan in uw roster.}
+::msgcat::mcset nl prefprivrules {Elke lijst bevat ten minste één regel. Een regel bestaat uit een berichttype en een bijhorende actie. Als u een groep wilt blokkeren dan moet deze ook effectief bestaan in uw roster.}
 ::msgcat::mcset nl prefuserinactive {Deze contactpersoon is al een tijdje niet actief}
 ::msgcat::mcset nl preficonsel {De geselecteerde emoticonset zal gebruikt worden als u op opslaan drukt}
 ::msgcat::mcset nl prefwbscroll {U kunt een grotere waarde instellen dan de standaardgrootte %sx%s}
@@ -1181,7 +1181,7 @@ Wilt u ze niet opslaan?}
 
 # Get file
 ::msgcat::mcset nl getcontacting   {Bezig met %s te contacteren. Bezig met wachten op een antwoord...}
-::msgcat::mcset nl geteoferr       {Verbinden met %s mislukte: eof ontvangen.}
+::msgcat::mcset nl geteoferr       {Verbinden met %s mislukte: eof.}
 ::msgcat::mcset nl getconnerr      {Verbinden met %s mislukte.}
 ::msgcat::mcset nl getnegotiate    {Client gecontacteerd: %s; bezig met verbinden...}
 ::msgcat::mcset nl getreaderr      {Fout tijdens het lezen van serverantwoord van %s.}
@@ -1194,7 +1194,7 @@ Wilt u ze niet opslaan?}
 
 # Put file
 ::msgcat::mcset nl putcontacting   {Bezig met %s te contacteren. Bezig met wachten op een antwoord...}
-::msgcat::mcset nl puteoferr       {Verbinden met %s mislukte: eof ontvangen.}
+::msgcat::mcset nl puteoferr       {Verbinden met %s mislukte: eof.}
 ::msgcat::mcset nl putconnerr      {Verbinden met %s mislukte.}
 ::msgcat::mcset nl putnegotiate    {Client gecontacteerd: %s; bezig met verbinden...}
 ::msgcat::mcset nl putreaderr      {Fout tijdens het lezen van serverantwoord van %s.}
