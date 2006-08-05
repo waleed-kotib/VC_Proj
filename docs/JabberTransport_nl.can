@@ -1,17 +1,18 @@
 # Version: 2
-create text 20.0 19.0 -anchor nw -font {Helvetica 3 bold} -tags {*/116547358 std text} -text {Jabber Bestandsoverdracht}
-create oval 313.0 160.0 326.0 172.0 -disabledwidth 0 -fill #cd0532 -tags {oval */116547359 std}
-create line 322.0 161.0 331.0 126.0 289.0 116.0 -arrow last -smooth 1 -splinesteps 5 -tags {line poly */116547360 std}
-create text 11.0 61.0 -anchor nw -font {Helvetica 2 normal} -tags {*/116547361 std text} -text {Terwijl elke client zijn eigen\nverbinding naar de Jabber\nserver heeeft, draait het ook\neen interne server die\ngeschikt is voor peer-to-peer\nbestandsoverdracht tussen\nclients. \n   Wanneer A een afbeelding\nopent, dan vraagt het B's IP nummer. Dit gebeurt ofwel\ndirect, ofwel via het "iq" publieke\nelement, waarin elke client zijn IP nummer en poort in\nopslaat. A opent dan een socket naar B's server, \nbrengt de verbinding tot stand en brengt het bestand over.}
-create oval 203.0 69.0 216.0 81.0 -disabledwidth 0 -fill #cd0532 -tags {oval */116547362 std}
-create oval 278.0 108.0 291.0 120.0 -disabledwidth 0 -fill #008000 -tags {oval */116547363 std}
-create oval 201.0 153.0 214.0 165.0 -disabledwidth 0 -fill #cd0532 -tags {oval */116547364 std}
-create oval 268.0 57.0 281.0 69.0 -disabledwidth 0 -fill #cd0532 -tags {oval */116547365 std}
-create line 215.0 157.0 259.0 148.0 282.0 119.0 -arrow last -smooth 1 -splinesteps 5 -tags {line poly */116547366 std}
-create line 213.0 82.0 230.0 112.0 277.0 113.0 -arrow last -smooth 1 -splinesteps 5 -tags {line poly */116547367 std}
-create line 278.0 65.0 302.0 75.0 289.0 109.0 -arrow last -smooth 1 -splinesteps 5 -tags {line poly */116547368 std}
-create line 19.0 40.0 215.0 40.0 -tags {line */116547369 std}
-create text 222.0 69.0 -anchor nw -font {Helvetica 3 bold} -tags {*/116547370 std text} -text A
-create text 216.0 139.0 -anchor nw -font {Helvetica 3 bold} -tags {*/116547371 std text} -text B
-create line 201.0 76.0 160.0 109.0 197.0 150.0 -arrow last -arrowshape {12 14 4} -smooth 1 -splinesteps 6 -tags {line poly */116547372 std} -width 2.0
-create oval 197.0 149.0 204.0 157.0 -disabledwidth 0 -fill white -tags {oval */116547373 std}
+create text 20.0 19.0 -anchor nw -font {Helvetica 3 bold} -tags {sdevrieze@levi/7061843 std text} -text Bestandsoverdracht
+create oval 313.0 160.0 326.0 172.0 -disabledwidth 0 -fill #cd0532 -tags {oval sdevrieze@levi/7061844 std}
+create line 322.0 161.0 331.0 126.0 289.0 116.0 -arrow last -smooth 1 -splinesteps 5 -tags {line poly sdevrieze@levi/7061845 std}
+create text 11.0 61.0 -anchor nw -font {Helvetica 2 normal} -tags {sdevrieze@levi/7061846 std text} -text {Hoewel elke client zijn eigen\nverbinding naar een Jabber-\nserver heeft, draait het\nook een interne server\ndie geschikt is voor p2p-\nbestandsoverdracht. \n   Wanneer A een afbeelding\nopent, dan vraagt het B's IP-nummer. Dit gebeurt ofwel\ndirect, ofwel via het "iq" publieke element waarin elke\nclient zijn IP-nummer en poort bewaart. A opent dan\neen socket naar B's server, maakt verbinding en\nverstuurt het bestand.}
+create oval 203.0 69.0 216.0 81.0 -disabledwidth 0 -fill #cd0532 -tags {oval sdevrieze@levi/7061847 std}
+create oval 278.0 108.0 291.0 120.0 -disabledwidth 0 -fill #008000 -tags {oval sdevrieze@levi/7061848 std}
+create oval 201.0 153.0 214.0 165.0 -disabledwidth 0 -fill #cd0532 -tags {oval sdevrieze@levi/7061849 std}
+create oval 268.0 57.0 281.0 69.0 -disabledwidth 0 -fill #cd0532 -tags {oval sdevrieze@levi/7061850 std}
+create line 215.0 157.0 259.0 148.0 282.0 119.0 -arrow last -smooth 1 -splinesteps 5 -tags {line poly sdevrieze@levi/7061851 std}
+create line 213.0 82.0 230.0 112.0 277.0 113.0 -arrow last -smooth 1 -splinesteps 5 -tags {line poly sdevrieze@levi/7061852 std}
+create line 278.0 65.0 302.0 75.0 289.0 109.0 -arrow last -smooth 1 -splinesteps 5 -tags {line poly sdevrieze@levi/7061853 std}
+create text 222.0 69.0 -anchor nw -font {Helvetica 3 bold} -tags {sdevrieze@levi/7061855 std text} -text A
+create text 216.0 139.0 -anchor nw -font {Helvetica 3 bold} -tags {sdevrieze@levi/7061856 std text} -text B
+create line 201.0 76.0 160.0 109.0 197.0 150.0 -arrow last -arrowshape {12 14 4} -smooth 1 -splinesteps 6 -tags {line poly sdevrieze@levi/7061857 std} -width 2.0
+create oval 197.0 149.0 204.0 157.0 -disabledwidth 0 -fill white -tags {oval sdevrieze@levi/7061858 std}
+create line 19.0 41.0 162.0 41.0 -tags {line sdevrieze@levi/7061862 std}
+

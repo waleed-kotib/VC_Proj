@@ -21,3 +21,4 @@ create line 35.0 83.0 52.0 113.0 99.0 114.0 -arrow last -smooth 1 -splinesteps 5
 create line 100.0 66.0 124.0 76.0 111.0 110.0 -arrow last -smooth 1 -splinesteps 5 -tags {line poly */116547395 std}
 create text 9.0 202.0 -anchor nw -font {Helvetica 2 normal} -tags {*/116547396 std text} -text {Er draait een Jabber server\nop een aparte computer\nwaarmee clients verbinden.\nVerbind ofwel met een\npublieke server zoals\njabber.org of gebruik uw\neigen server.}
 create text 9.0 308.0 -anchor nw -font {Helvetica 2 normal} -tags {*/116547397 std text} -text {De hoofdinstellingen van de network setup zijn te vinden onder\nVoorkeuren/Voorkeuren..., in het "Netwerk Setup"\ntabblad.}
+
