@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jlibdns.tcl,v 1.2 2006-07-26 06:26:29 matben Exp $
+# $Id: jlibdns.tcl,v 1.3 2006-08-06 13:22:05 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -115,6 +115,7 @@ proc jlib::dns::get_http_poll_url {domain cmd args} {
 
 proc jlib::dns::http_cb {attr cmd token} {
         
+    set found 0
     if {[dns::status $token] eq "ok"} {
 	set result [dns::result $token]
 	foreach reply $result {
@@ -123,16 +124,20 @@ proc jlib::dns::http_cb {attr cmd token} {
 	    if {[info exists rr(rdata)]} {
 		if {$attr eq "bind"} {
 		    if {[regexp {_xmpp-client-httpbind=(.*)} $rr(rdata) - url]} {
+			set found 1
 			uplevel #0 $cmd [list $url]
 		    }
 		} elseif {$attr eq "poll"} {
 		    if {[regexp {_xmpp-client-httppoll=(.*)} $rr(rdata) - url]} {
+			set found 1
 			uplevel #0 $cmd [list $url]
 		    }
 		}
 	    }
 	}
-	uplevel #0 $cmd [list {} dns-no-resource-record]
+	if {!$found} {
+	    uplevel #0 $cmd [list {} dns-no-resource-record]
+	}
     } else {
 	uplevel #0 $cmd [list {} [dns::error $token]]
     }
@@ -155,4 +160,5 @@ if {0} {
     # Missing 
     jlib::dns::get_http_poll_url gmail.com cb    
     jlib::dns::get_http_poll_url jabber.ru cb    
+    jlib::dns::get_http_poll_url ham9.net cb    
 }

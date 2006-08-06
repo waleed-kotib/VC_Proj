@@ -5,8 +5,9 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.57 2006-06-11 10:32:18 matben Exp $
+# $Id: Utils.tcl,v 1.58 2006-08-06 13:22:05 matben Exp $
 
+package require uri
 package provide Utils 1.0
 
 namespace eval ::Utils:: {
@@ -510,9 +511,24 @@ namespace eval ::Text:: {
     # Unique counter to produce specified link tags.
     variable idurl 1000
         
-    variable urlRegexp {^(http://|https://|www\.|ftp://|ftp\.)([^ \t\r\n]+)}
+    # @@@ Use uri package here!
+    variable urlRE {^(http://|https://|www\.|ftp://|ftp\.)([^ \t\r\n]+)}
+    set httpRE $::uri::http::url
+    set ftpRE $::uri::ftp::url
+    # @@@ TODO
+    variable emailRE $::uri::mailto::url
     variable urlColor
     array set urlColor {fg blue activefg red}
+
+    # Plugin model for parsing URI's
+    variable reguri
+    lappend reguri $urlRE ::Text::UrlButton
+}
+
+proc ::Text::RegisterURI {re cmd} {
+    variable reguri
+    
+    lappend reguri $re $cmd
 }
 
 # Text::ParseMsg --
@@ -547,7 +563,6 @@ proc ::Text::ParseMsg {type jid w str tagList} {
 	}
 	
 	# Insert the whitespace after word.
-	#$w insert end $space $tagList
 	$w insert insert $space $tagList
     }
     
@@ -572,39 +587,40 @@ proc ::Text::ParseWord {w word tagList} {
     
     if {[::Emoticons::Exists $word]} {
 	::Emoticons::Make $w $word
-    } elseif {![ParseUrl $w $word]} {
+    } elseif {![ParseURI $w $word]} {
 	$w insert insert $word $tagList
     }
 }
 
-proc ::Text::ParseUrl {w word} {
-    variable urlRegexp
+proc ::Text::ParseURI {w word} {
+    variable reguri
     variable idurl
     variable urlColor
-    
-    if {[regexp $urlRegexp $word]} {
-	set urltag url${idurl}
-	set urlfg       [option get $w urlForeground       Text]
-	set urlactivefg [option get $w urlActiveForeground Text]
-	if {$urlfg eq ""} {
-	    set urlfg $urlColor(fg)
+
+    foreach {re cmd} $reguri {
+	if {[regexp $re $word]} {
+	    set urltag url${idurl}
+	    set urlfg       [option get $w urlForeground       Text]
+	    set urlactivefg [option get $w urlActiveForeground Text]
+	    if {$urlfg eq ""} {
+		set urlfg $urlColor(fg)
+	    }
+	    if {$urlactivefg eq ""} {
+		set activefg $urlColor(activefg)
+	    }
+	    $w tag configure $urltag -foreground $urlfg -underline 1
+	    $w tag bind $urltag <Button-1>   \
+	      [list $cmd [string map {% %%} $word]]
+	    $w tag bind $urltag <Any-Enter>  \
+	      [list ::Text::UrlEnter $w $urltag $activefg]
+	    $w tag bind $urltag <Any-Leave>  \
+	      [list ::Text::UrlLeave $w $urltag $urlfg]
+	    $w insert insert $word $urltag
+	    incr idurl
+	    return 1
 	}
-	if {$urlactivefg eq ""} {
-	    set activefg $urlColor(activefg)
-	}
-	$w tag configure $urltag -foreground $urlfg -underline 1
-	$w tag bind $urltag <Button-1>  \
-	  [list ::Text::UrlButton [string map {% %%} $word]]
-	$w tag bind $urltag <Any-Enter>  \
-	  [list ::Text::UrlEnter $w $urltag $activefg]
-	$w tag bind $urltag <Any-Leave>  \
-	  [list ::Text::UrlLeave $w $urltag $urlfg]
-	$w insert insert $word $urltag
-	incr idurl
-	return 1
-    } else {
-	return 0
     }
+    return 0
 }
 
 proc ::Text::UrlButton {url} {
@@ -650,7 +666,6 @@ proc ::Text::InsertURL {w str url tag} {
       [list ::Text::UrlEnter $w $urltag $activefg]
     $w tag bind $urltag <Any-Leave>  \
       [list ::Text::UrlLeave $w $urltag $urlfg]
-    #$w insert end $str [list $tag $urltag]
     $w insert insert $str [list $tag $urltag]
     incr idurl
 }
@@ -664,7 +679,7 @@ proc ::Text::TransformToPureText {w args} {
     unset -nocomplain puretext($w)
     set puretext($w) ""
     foreach {key value index} [$w dump 1.0 end] {
-	::Text::TransformToPureTextCallback $w $key $value $index
+	TransformToPureTextCallback $w $key $value $index
     }
     return $puretext($w)
 }

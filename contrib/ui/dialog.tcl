@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.12 2005-12-13 13:57:52 matben Exp $
+# $Id: dialog.tcl,v 1.13 2006-08-06 13:22:05 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -57,49 +57,6 @@ namespace eval ui::dialog {
 	    option add *Dialog.buttonPadX          4              widgetDefault
 	}
     }    
-}
-if {0} {
-    package require Img
-    
-    set f "/Users/matben/Graphics/Crystal Clear/64x64/actions/info.png"
-    set im [image create photo -file $f]
-    ui::dialog::setimage info $im
-
-    set f "/Users/matben/Graphics/Crystal Clear/64x64/actions/stop.png"
-    set im [image create photo -file $f]
-    ui::dialog::setimage error $im
-
-    set f "/Users/matben/Graphics/Crystal Clear/64x64/apps/miscellaneous2.png"
-    set im [image create photo -file $f]
-    ui::dialog::setimage question $im
-
-    set f "/Users/matben/Graphics/Crystal Clear/64x64/apps/important.png"
-    set im [image create photo -file $f]
-    ui::dialog::setimage warning $im
-    
-    set f "/Users/matben/Tcl/cvs/coccinella/images/Coccinella.png"
-    set im [image create photo -file $f]
-    ui::dialog::setbadge $im
-    
-    set w .t22
-    ui::dialog -message "These two must be able to call before any dialog instance created." \
-      -detail "These two must be able to call before any dialog instance created."
-    ui::dialog -message "These two must be able to call before any dialog instance created." \
-      -detail "These two must be able to call before any dialog instance created." \
-      -icon error -buttons {yes no cancel} -default yes
-    ui::dialog $w -message "These two must be able to call before any dialog instance created." \
-      -detail "These two must be able to call before any dialog instance created." \
-      -icon error -type yesnocancel -modal 1
-    set fr [$w clientframe]
-    pack [ttk::checkbutton $fr.c -text "Elvis has left the building"] -side left
-    
-    proc cmd {w bt} {
-	destroy $w
-	tk_getSaveFile
-    }
-    ui::dialog -message "Check destroy from -command" -command cmd
-    ui::dialog -message "Check timeout for auto destruction"  \
-      -timeout 4000 -buttons {}
 }
 
 # These two must be able to call before any dialog instance created.
@@ -447,6 +404,33 @@ snit::widget ui::dialog::widget {
 
     method grab {} {
 	ui::Grab $win
+    }
+}
+
+if {0} {
+    # Tests... Run from inside Coccinella.
+    foreach name {info error warning question} {
+	ui::dialog::setimage $name [::Theme::GetImage ${name}64]
+    }
+    ui::dialog::setbadge [::Theme::GetImage Coccinella]
+    ui::dialog::setimage coccinella [::Theme::GetImage coccinella64]
+
+    set str "These two must be able to call before any dialog instance created."
+    set str2 "Elvis has left the building"
+    ui::dialog -message $str -detail $str
+    ui::dialog -message $str -detail $str  \
+      -icon error -buttons {yes no cancel} -default yes
+    ui::dialog -message "Check destroy from -command" -command cmd
+    ui::dialog -message "Check timeout for auto destruction"  \
+      -timeout 4000 -buttons {}
+    set w [ui::dialog -message $str -detail $str  \
+      -icon error -type yesnocancel -modal 1]
+    set fr [$w clientframe]
+    pack [ttk::checkbutton $fr.c -text $str2] -side left
+
+    proc cmd {w bt} {
+	destroy $w
+	tk_getSaveFile
     }
 }
 

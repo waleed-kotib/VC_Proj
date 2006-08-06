@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.62 2006-06-11 10:32:18 matben Exp $
+# $Id: Profiles.tcl,v 1.63 2006-08-06 13:22:05 matben Exp $
 
 package provide Profiles 1.0
 
@@ -1160,18 +1160,27 @@ proc ::Profiles::NotebookSetState {w args} {
     }
 }
 
-proc ::Profiles::NotebookSetAllNormal {w} {
+proc ::Profiles::NotebookSetAllState {w state} {
     variable $w
     upvar 0 $w wstate
+    
+    if {$state eq "normal" || $state eq "!disabled"} {
+	set tkstate normal
+	set ttkstate {!disabled}
+    } else {
+	set tkstate disabled
+	set ttkstate {disabled}
+    }
 
     foreach {key widget} [array get wstate] {
+	if {$key eq "token"} continue
 
 	switch -glob -- [winfo class $widget] {
 	    T* {
-		$widget state {!disabled}
+		$widget state $ttkstate
 	    }
 	    default {
-		$widget configure -state normal
+		$widget configure -state $tkstate
 	    }
 	}
     }
@@ -1181,7 +1190,7 @@ proc ::Profiles::NotebookSetAnyConfigState {w name} {
     
     # Disable every option set by any config.
     if {[DoConfig]} {
-	NotebookSetAllNormal $w
+	NotebookSetAllState $w normal
 	set sopts {}
 	foreach {key value} [lrange [GetConfigProfile $name] 3 end] {
 	    lappend sopts $key disabled

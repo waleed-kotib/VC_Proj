@@ -11,6 +11,7 @@ Coccinella-0.95.14 (06????):
  o pubsub library support
  o library support for JEP-0138: Stream Compression
  o text search in history and chat dialogs
+ o parsing xmpp URIs updated to RFC 4622; added in text xmpp URI parsing
 
 
 Coccinella-0.95.13 (060622):
