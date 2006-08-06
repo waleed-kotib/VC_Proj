@@ -14,10 +14,21 @@ XMPP Core (RFC 3920)
    o DNS hostname resolved using SRV records (sect. 14.3)
 
 
-XMPP IM
--------
+XMPP IM (RFC 3921)
+------------------
 
-1.2.  Requirements   o  Exchange messages with other users   o  Exchange presence information with other users   o  Manage subscriptions to and from other users   o  Manage items in a contact list (in XMPP this is called a "roster")   o  Block communications to or from specific other users (TODO)
+1.2.  Requirements
+
+   o  Exchange messages with other users
+   o  Exchange presence information with other users
+   o  Manage subscriptions to and from other users
+   o  Manage items in a contact list (in XMPP this is called a "roster")
+   o  Block communications to or from specific other users (TODO)
+
+
+Other supported standards:
+
+   o  XMPP URIs (RFC 4622)
 
 
 JEPS
