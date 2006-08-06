@@ -4,10 +4,41 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 #       
-#       Most recent reference at the time of writing:
-#       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
+#       Reference: 
+#       RFC 4622
+#       Internationalized Resource Identifiers (IRIs)
+#       and Uniform Resource Identifiers (URIs) for
+#       the Extensible Messaging and Presence Protocol (XMPP)
+#       
+#       A citation:
+#       
+#     xmppuri   = "xmpp" ":" hierxmpp [ "?" querycomp ] [ "#" fragment ]
+#     hierxmpp  = authpath / pathxmpp                                     OR
+#     authpath  = "//" authxmpp [ "/" pathxmpp ]
+#     authxmpp  = nodeid "@" host
+#     pathxmpp  = [ nodeid "@" ] host [ "/" resid ]
+#     ...
+#     querycomp = querytype [ *pair ]
+#     querytype = *( unreserved / pct-encoded )
+#     pair      = ";" key "=" value
+#     key       = *( unreserved / pct-encoded )
+#     value     = *( unreserved / pct-encoded )
+#     
+#       Example:
+#         
+#       The following XMPP IRI/URI signals the processing application to 
+#       authenticate as "guest@example.com" and to send a message to 
+#       "support@example.com":
+#
+#         xmpp://guest@example.com/support@example.com?message
 # 
-# $Id: ParseURI.tcl,v 1.26 2006-07-29 13:12:58 matben Exp $
+#       By contrast, the following XMPP IRI/URI signals the processing
+#       application to authenticate as its configured default account and to
+#       send a message to "support@example.com":
+#
+#         xmpp:support@example.com?message
+#
+# $Id: ParseURI.tcl,v 1.27 2006-08-06 13:22:05 matben Exp $
 
 package require uriencode
 
@@ -20,11 +51,18 @@ proc ::ParseURI::Init { } {
 
     ::Debug 2 "::ParseURI::Init"
     
-    ::hooks::register launchFinalHook ::ParseURI::Parse
-    ::hooks::register relaunchHook    ::ParseURI::RelaunchHook
+    ::hooks::register launchFinalHook   ::ParseURI::Parse
+    ::hooks::register relaunchHook      ::ParseURI::RelaunchHook
+    
+    # A bit simplified xmpp URI.
+    ::Text::RegisterURI {^xmpp:.+} ::ParseURI::TextCmd
     
     component::register ParseURI  \
       {Any command line -uri xmpp:jid[?query] is parsed and processed.}
+}
+
+proc ::ParseURI::TextCmd {uri} {
+    Parse -uri $uri
 }
 
 # ParseURI::Parse --
@@ -36,28 +74,33 @@ proc ::ParseURI::Parse {args} {
     variable uid
     upvar ::Jabber::jprefs jprefs
     
-    if {$args == {}} {
+    if {$args eq {}} {
 	set args $argv
     }
-    set ind [lsearch $args -uri]
-    if {$ind < 0} {
+    set idx [lsearch $args -uri]
+    if {$idx < 0} {
 	return
     }
-    set uri [lindex $args [incr ind]]
+    set uri [lindex $args [incr idx]]
     set uri [uriencode::decodeurl $uri]
     
     ::Debug 2 "::ParseURI::Parse uri=$uri"
 
     # Actually parse the uri.
-    # {^xmpp:([^\?]+)(\?([^&]+)&(.+))?$}
-    # {^xmpp:([^\?#]+)(\?([^&]+)&([^#]+))?(#(.+))?$}
-    # 
-    #         {^xmpp:([^\?#]+) \?([^&#]+)  (& [^#]+){0,}?(#(.+)){0,1}}
-    set re {^xmpp:([^\?#]+)(\?([^&#]+)){0,1}(&([^#]+)){0,1}(#(.+)){0,1}$}
-    if {![regexp $re $uri match jid x querytype y query z fragment]} {
+    set re {^xmpp:([^\?#]+)(\?([^;#]+)){0,1}(;([^#]+)){0,1}(#(.+)){0,1}$}
+    if {![regexp $re $uri - hierxmpp - iquerytype - querypairs - fragment]} {
 	::Debug 2 "\t regexp failed"
 	return
     }
+    
+    # authpath  = "//" authxmpp [ "/" pathxmpp ]
+    set re {^//([^/]+)/(.+$)}
+    if {![regexp $re $hierxmpp - authxmpp pathxmpp]} {
+	set authxmpp ""
+	set pathxmpp $hierxmpp
+    }
+    
+    set jid $pathxmpp
     jlib::splitjid $jid jid2 resource
     
     # Initialize the state variable, an array, that keeps is the storage.
@@ -65,28 +108,51 @@ proc ::ParseURI::Parse {args} {
     variable $token
     upvar 0 $token state
 
-    set state(uri)       $uri
-    set state(jid)       $jid
-    set state(jid2)      $jid2
-    set state(resource)  $resource
-    set state(querytype) $querytype
-    set state(query)     $query
-    set state(fragment)  $fragment
+    set state(uri)        $uri
+    set state(pathxmpp)   $pathxmpp
+    set state(jid)        $jid
+    set state(jid2)       $jid2
+    set state(resource)   $resource
+    set state(authxmpp)   $authxmpp
+    set state(iquerytype) $iquerytype
+    set state(querypairs) $querypairs
+    set state(fragment)   $fragment
     
     # Parse the query into an array.
-    foreach sub [split $query &] {
+    foreach sub [split $querypairs ";"] {
 	foreach {key value} [split $sub =] {break}
 	set state(query,$key) $value
     }
     
-    # Use our default profile account. 
-    # Keep our own jid apart from jid in uri!
-    set name   [::Profiles::GetSelectedName]
-    set domain [::Profiles::Get $name domain]
-    set state(profname) $name
-    set state(domain)   $domain
+    if {$authxmpp eq ""} {
+	
+	# Use our default profile account. 
+	# Keep our own JID apart from JID in uri!
+	set name       [::Profiles::GetSelectedName]
+	set authDomain [::Profiles::Get $name domain]
+	set authNode   [::Profiles::Get $name node]
+	set password   [::Profiles::Get $name password]
+	set state(profname)   $name
+	set state(authNode)   $authNode
+	set state(authDomain) $authDomain
+    } else {
+	
+	# We are given a bare JID. Try find matching profile if any.
+	set name [::Profiles::FindProfileNameFromJID $authxmpp]
+	set state(profname) $name
+	jlib::splitjidex $authxmpp authNode authDomain -
+	set state(authNode)   $authNode
+	set state(authDomain) $authDomain
+	if {$name ne {}} {
+	    set password [::Profiles::Get $name password]
+	} else {
+	    set password ""
+	}
+    }
     
     if {[::Jabber::IsConnected]} {
+	
+	# How to treat any authxmpp?
 	ProcessURI $token
     } elseif {$jprefs(autoLogin)} {
 	
@@ -94,7 +160,6 @@ proc ::ParseURI::Parse {args} {
 	::hooks::register loginHook   [list ::ParseURI::LoginHook $token]
     } else {
 	set profname $state(profname)
-	set password [::Profiles::Get $profname password]
 	set ans "ok"
 	if {$password eq ""} {
 	    set ans [::UI::MegaDlgMsgAndEntry  \
@@ -102,7 +167,6 @@ proc ::ParseURI::Parse {args} {
 	      password [mc Cancel] [mc OK] -show {*}]
 	}
 	if {$ans eq "ok"} {
-	    set node [::Profiles::Get $profname node]
 	    array set optsArr [::Profiles::Get $profname options]
 	    if {[info exists optsArr(-resource)] && ($optsArr(-resource) ne "")} {
 		set res $optsArr(-resource)
@@ -120,7 +184,7 @@ proc ::ParseURI::Parse {args} {
 	    }
 	    
 	    # Use a "high-level" login application api for this.
-	    eval {::Login::HighLogin $state(domain) $node $res $password \
+	    eval {::Login::HighLogin $authDomain $authNode $res $password \
 	      [list [namespace current]::LoginCB $token]} [array get optsArr]
 	} else {
 	    Free $token
@@ -131,7 +195,7 @@ proc ::ParseURI::Parse {args} {
 #       Note that we have got two tokens here, the first one our own,
 #       the second from the login.
 
-proc ::ParseURI::LoginCB {token {errcode ""} {errmsg ""}} {
+proc ::ParseURI::LoginCB {token htoken {errcode ""} {errmsg ""}} {
     
     if {$errcode eq ""} {
 	ProcessURI $token
@@ -152,8 +216,10 @@ proc ::ParseURI::RelaunchHook {args} {
 proc ::ParseURI::ProcessURI {token} {
     variable $token
     upvar 0 $token state
+    
+    ::Debug 2 "::ParseURI::ProcessURI iquerytype=$state(iquerytype)"
   
-    switch -- $state(querytype) {
+    switch -- $state(iquerytype) {
 	message {
 	    DoMessage $token
 	}

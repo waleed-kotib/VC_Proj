@@ -937,6 +937,7 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv registration-phone           {Telephone number of the user}
 ::msgcat::mcset sv registration-url             {URL to web page describing the user}
 ::msgcat::mcset sv registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
+::msgcat::mcset sv registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
 
 
 

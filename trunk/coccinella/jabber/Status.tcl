@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.17 2006-07-23 13:29:07 matben Exp $
+# $Id: Status.tcl,v 1.18 2006-08-06 13:22:05 matben Exp $
 
 package provide Status 1.0
 
@@ -368,7 +368,7 @@ proc ::Jabber::Status::SetWithMessage {varName args} {
     # We must work with a temporary varName for status.
     set state(show) $show
     
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+    ::UI::Toplevel $w -macstyle documentProc \
       -macclass {document closeBox} -closecommand [namespace current]::CloseStatus
     wm title $w [mc {Set Status}]
 

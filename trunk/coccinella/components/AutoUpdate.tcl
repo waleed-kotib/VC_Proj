@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: AutoUpdate.tcl,v 1.15 2006-05-16 06:06:28 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.16 2006-08-06 13:22:04 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -181,7 +181,7 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
 	switch -- $name {
 	    url {
 		$wtext insert end "\t"
-		::Text::ParseUrl $wtext $value
+		::Text::ParseURI $wtext $value
 	    }
 	    date {
 		set date [clock format [clock scan $value]  \

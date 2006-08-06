@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.38 2006-05-28 13:02:10 matben Exp $
+# $Id: JPrefs.tcl,v 1.39 2006-08-06 13:22:05 matben Exp $
 
 package require ui::fontselector
 
@@ -19,7 +19,6 @@ namespace eval ::JPrefs:: {
     ::hooks::register prefsSaveHook          ::JPrefs::SavePrefsHook
     ::hooks::register prefsCancelHook        ::JPrefs::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::JPrefs::UserDefaultsHook
-    ::hooks::register prefsDestroyHook       ::JPrefs::DestroyPrefsHook
 }
 
 
@@ -143,6 +142,8 @@ proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
     # Customization page -------------------------------------------------------
     set wpage [$nbframe page {Customization}]    
     ::JPrefs::BuildCustomPage $wpage
+    
+    bind <Destroy> $nbframe +::JPrefs::DestroyPrefsHook
 }
 
 proc ::JPrefs::BuildAutoAwayPage {page} {
@@ -564,8 +565,8 @@ proc ::JPrefs::CancelPrefsHook { } {
 	set tmpPrefs(themeName) ""
     }
     
-    # @@@ FIX!
-    unset tmpPrefs(tileTheme)
+    # We don't store the tileTheme this way.
+    unset -nocomplain tmpPrefs(tileTheme)
     
     foreach key [array names tmpPrefs] {
 	if {![string equal $prefs($key) $tmpPrefs($key)]} {

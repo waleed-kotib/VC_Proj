@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.136 2006-05-26 13:27:50 matben Exp $	
+# $Id: Coccinella.tcl,v 1.137 2006-08-06 13:22:04 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -29,6 +29,8 @@ if {[catch {package require Tk 8.4}]} {
 wm withdraw .
 tk appname coccinella
 
+# Keep 'launchStatus' around for the complete launch process to help components.
+set state(launchStatus) start
 set state(launchSecs) [clock seconds]
 
 # MacOSX adds a -psn_* switch.
@@ -164,6 +166,7 @@ if {[tk windowingsystem] eq "windows"} {
 package require Splash
 ::Splash::SplashScreen
 ::Splash::SetMsg [mc splashsource]
+set state(launchStatus) splash
 update
 
 # Make sure we have the extra packages necessary and some optional.
@@ -171,6 +174,7 @@ update
 ::Init::SetHostname
 ::Init::LoadPackages
 
+set state(launchStatus) tile
 set tileTheme [option get . tileTheme {}]
 if {[lsearch -exact [tile::availableThemes] $tileTheme] >= 0} {
     tile::setTheme $tileTheme
@@ -179,6 +183,8 @@ if {[lsearch -exact [tile::availableThemes] $tileTheme] >= 0} {
 # The packages are divided into categories depending on their degree
 # of generality.
 ::Splash::SetMsg [mc splashload]
+set state(launchStatus) packages
+
 set packages(generic) {
     component
     hooks
@@ -234,6 +240,7 @@ switch -- $this(platform) {
 # The Jabber stuff. 
 # @@@ Should jabber code be loaded at all if p2p?
 ::Splash::SetMsg [mc splashsourcejabb]
+set state(launchStatus) jabber
 package require Jabber
 
 # Define MIME types etc.
@@ -257,6 +264,7 @@ component::load
 
 # Set the user preferences from the preferences file.
 ::Splash::SetMsg [mc splashprefs]
+set state(launchStatus) preferences
 ::Preferences::SetMiscPrefs
 
 # Override any 'config's. 
@@ -318,7 +326,7 @@ switch -- $prefs(protocol) {
 	    wm withdraw [::P2P::GetMainWindow]
 	}
 	
-	# The most convinient solution is to create the namespaces at least.
+	# The most convenient solution is to create the namespaces at least.
 	namespace eval ::Jabber:: {}
     }
 }
@@ -329,7 +337,7 @@ update idletasks
 
 ::Debug 2 "--> launchFinalHook"
 ::hooks::run launchFinalHook
-
+unset -nocomplain state(launchStatus)
 set prefs(firstLaunch) 0
 
 #-------------------------------------------------------------------------------

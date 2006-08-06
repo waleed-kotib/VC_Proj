@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: util.tcl,v 1.6 2006-04-05 14:16:45 matben Exp $
+# $Id: util.tcl,v 1.7 2006-08-06 13:22:05 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -65,9 +65,10 @@ namespace eval ui {
 
 proc ui::autoname {} {
     variable dlg
-    set w $dlg[expr {int(1000000*rand())}]
+    set max 0x0FFFFFFF
+    set w $dlg[format %08x [expr {int($max*rand())}]]
     while {[winfo exists $w]} {
-	set w $dlg[expr {int(1000000*rand())}]
+	set w $dlg[format %08x [expr {int($max*rand())}]]
     }
     return $w
 }

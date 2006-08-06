@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.49 2006-08-04 13:14:32 matben Exp $
+# $Id: Register.tcl,v 1.50 2006-08-06 13:22:05 matben Exp $
 
 package provide Register 1.0
 
@@ -371,7 +371,7 @@ proc ::RegisterEx::SetState {token theState} {
     if {[winfo exists $state(wserv)]} {
 	$state(wserv)  state $theState
 	$state(wbtok)  state $theState
-	# @@@ Triangle ?
+	::Profiles::NotebookSetAllState $state(wtabnb) $theState
     }
 }
 
@@ -639,7 +639,6 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	if {$config(registerex,autologin)} {
 	    
 	    # Go on and authenticate.
-	    # @@@ extra options?
 	    set jid [jlib::joinjid $username $server $resource]
 	    $jstate(jlib) connect register $jid $password
 	    $jstate(jlib) connect auth  \

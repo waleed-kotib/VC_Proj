@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.91 2006-08-04 13:14:32 matben Exp $
+# $Id: Login.tcl,v 1.92 2006-08-06 13:22:05 matben Exp $
 
 package provide Login 1.0
 
@@ -557,7 +557,7 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     ::Debug 2 "::Login::HighLogin args=$args"
         
     # Initialize the state variable, an array, that keeps some storage. 
-    # The rest is tored in the jlib::connect object. Do not duplicate this!   
+    # The rest is stored in the jlib::connect object. Do not duplicate this!   
     set token [namespace current]::high[incr uid]
     variable $token
     upvar 0 $token highstate
