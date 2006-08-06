@@ -552,7 +552,7 @@
 ::msgcat::mcset nl {Item Options}		{Itemopties}
 ::msgcat::mcset nl {Item Type}			{Soort}
 ::msgcat::mcset nl {Jabber address}		{Jabber-adres}
-::msgcat::mcset nl {Jabber Client}		{Jabber-client}
+::msgcat::mcset nl {Jabber Client}		{Jabber}
 ::msgcat::mcset nl {Jabber Server}		{Jabber-server}
 ::msgcat::mcset nl {Jabber server port}		{Poort van Jabber-server}
 ::msgcat::mcset nl {Jabber user ID}		{Jabber ID}
@@ -763,12 +763,12 @@
 ::msgcat::mcset nl splashload		{Tcl-pakketten laden...}
 ::msgcat::mcset nl splashloadsha1	{Pakket sha1 laden...}
 ::msgcat::mcset nl splashsourcejabb	{Jabber-code laden...}
-::msgcat::mcset nl splashhost		{Hostnaam zoeken...}
+::msgcat::mcset nl splashhost		{Hostnaam detecteren...}
 ::msgcat::mcset nl splashinit		{Initializeren...}
 ::msgcat::mcset nl splashprefs		{Voorkeuren lezen en instellen...}
-::msgcat::mcset nl splashbuildmenu	{Menus opbouwen...}
+::msgcat::mcset nl splashbuildmenu	{Menu's opbouwen...}
 ::msgcat::mcset nl splashbuild		{Interface opbouwen...}
-::msgcat::mcset nl splashlook		{Kijken naar}
+::msgcat::mcset nl splashlook		{Nazien van}
 
 
 # Messages for tk_messageBox:
