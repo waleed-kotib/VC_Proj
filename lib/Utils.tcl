@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.58 2006-08-06 13:22:05 matben Exp $
+# $Id: Utils.tcl,v 1.59 2006-08-07 12:36:55 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -295,9 +295,6 @@ proc ::Utils::OpenURLInBrowser {url} {
 	windows,* {	    
 	    ::Windows::OpenUrl $url
 	}
-	macintosh,* {    
-	    ::Mac::OpenUrl $url
-	}
     }
 }
 
@@ -515,8 +512,6 @@ namespace eval ::Text:: {
     variable urlRE {^(http://|https://|www\.|ftp://|ftp\.)([^ \t\r\n]+)}
     set httpRE $::uri::http::url
     set ftpRE $::uri::ftp::url
-    # @@@ TODO
-    variable emailRE $::uri::mailto::url
     variable urlColor
     array set urlColor {fg blue activefg red}
 

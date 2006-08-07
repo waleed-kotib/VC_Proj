@@ -3,30 +3,62 @@
 #      This file is part of The Coccinella application. It implements things
 #      that are windows only, like a glue to win only packages.
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
+#  See: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/shellcc/platform/shell/programmersguide/shell_adv/registeringapps.asp
 #  
-# $Id: WindowsUtils.tcl,v 1.10 2005-08-14 07:17:55 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.11 2006-08-07 12:36:55 matben Exp $
 
 package require registry
 package provide WindowsUtils 1.0
 
 namespace eval ::Windows:: {
+    
+    variable ProgramFiles
+    
+    if {[info exists ::env(ProgramFiles)]} {
+	set ProgramFiles $::env(ProgramFiles)
+    } elseif {[info exists ::env(PROGRAMFILES)]} {
+	set ProgramFiles $::env(PROGRAMFILES)
+    }
+}
 
+proc ::Windows::OpenURI {uri} {	
+    variable ProgramFiles
+
+    # uri MUST have the form "protocol:..."
+    if {![regexp {^([^:]+):.+} $uri - name]} {
+	return
+    }
+    set key [format {HKEY_CLASSES_ROOT\%s\shell\open\command} $name] 
+    if {[catch {registry get $key {}} appCmd]} {
+	return
+    }
+    if {[info exists ProgramFiles]} {
+	regsub -nocase "%programfiles%" $appCmd $ProgramFiles appCmd
+    }
+    regsub -all {\\} $appCmd  {\\\\} appCmd
+    
+    # Outlook uses a mailurl:%1 which I don't know how to interpret.
+    regsub {%1} $appCmd $uri appCmd
+    
+    if {[catch {
+	eval exec $appCmd &
+    } err]} {
+	tk_messageBox -icon error -message $err
+    }
 }
 
 # Slight rewrite of Chris Nelson's Wiki contribution.
 
 proc ::Windows::OpenUrl {url} {
-
-    # Look for the application under HKEY_CLASSES_ROOT
-    set root HKEY_CLASSES_ROOT
+    variable ProgramFiles
     
-    # Get the application key for HTML files
-    set appKey [registry get $root\\.html ""]
-
     set ext .html
+
+    # Get the application key for HTML files
+    set appKey [registry get HKEY_CLASSES_ROOT\\$ext ""]
+
     set appKey [registry get [format {HKEY_CLASSES_ROOT\%s} $ext] {}]
     set key [format {HKEY_CLASSES_ROOT\%s\shell\open\command} $appKey] 
 	 
@@ -44,13 +76,20 @@ proc ::Windows::OpenUrl {url} {
     
     # Double up the backslashes for eval (below)
     regsub -all {\\} $appCmd  {\\\\} appCmd
+    if {[info exists ProgramFiles]} {
+	regsub -nocase "%programfiles%" $appCmd $ProgramFiles appCmd
+    }
     
     # Substitute the url name into the command for %1
     # Not always needed (opennew).
     regsub {%1} $appCmd $url appCmd
     
     # Invoke the command
-    eval exec $appCmd $url &
+    if {[catch {
+	eval exec $appCmd $url &
+    } err]} {
+	tk_messageBox -icon error -message $err
+    }
 }
 
 # ::Windows::OpenFileFromSuffix --
@@ -59,13 +98,12 @@ proc ::Windows::OpenUrl {url} {
 #       its suffix.
 
 proc ::Windows::OpenFileFromSuffix {path} {
+    variable ProgramFiles
 
-    # Look for the application under HKEY_CLASSES_ROOT
-    set root HKEY_CLASSES_ROOT
     set ext [file extension $path]
     
     # Get the application key for .ext files
-    set appKey [registry get $root\\$ext {}]
+    set appKey [registry get HKEY_CLASSES_ROOT\\$ext {}]
     set key [format {HKEY_CLASSES_ROOT\%s\shell\open\command} $appKey] 
    
     # Get the command for opening $suff files
@@ -78,9 +116,16 @@ proc ::Windows::OpenFileFromSuffix {path} {
     # Double up the backslashes for eval (below)
     regsub -all {\\} $appCmd  {\\\\} appCmd
     regsub {%1} $appCmd $path appCmd
+    if {[info exists ProgramFiles]} {
+	regsub -nocase "%programfiles%" $appCmd $ProgramFiles appCmd
+    }
     
     # Invoke the command
-    eval exec $appCmd $path &
+    if {[catch {
+	eval exec $appCmd $path &
+    } err]} {
+	tk_messageBox -icon error -message $err
+    }
 }
 
 proc ::Windows::CanOpenFileWithSuffix {path} {
@@ -96,8 +141,7 @@ proc ::Windows::CanOpenFileWithSuffix {path} {
     
     # Perhaps there can be other commands than 'open'.
     if {[catch {
-	set appCmd [registry get \
-	  $root\\$appKey\\shell\\open\\command ""]
+	set appCmd [registry get $root\\$appKey\\shell\\open\\command ""]
     } msg]} {
 	return 0
     }

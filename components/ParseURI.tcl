@@ -37,8 +37,21 @@
 #       send a message to "support@example.com":
 #
 #         xmpp:support@example.com?message
+#     
+#       Reference:
+#       RFC 3860
+#       Common Profile for Instant Messaging (CPIM)
 #
-# $Id: ParseURI.tcl,v 1.27 2006-08-06 13:22:05 matben Exp $
+#     The syntax follows the existing mailto: URI syntax specified in RFC
+#     2368.  The ABNF is:
+#
+#     IM-URI         = "im:" [ to ] [ headers ]
+#     to             =  mailbox
+#     headers        =  "?" header *( "&" header )
+#     header         =  hname "=" hvalue
+#     ...
+#
+# $Id: ParseURI.tcl,v 1.28 2006-08-07 12:36:55 matben Exp $
 
 package require uriencode
 
@@ -56,6 +69,7 @@ proc ::ParseURI::Init { } {
     
     # A bit simplified xmpp URI.
     ::Text::RegisterURI {^xmpp:.+} ::ParseURI::TextCmd
+    ::Text::RegisterURI {^im:.+}   ::ParseURI::TextCmd
     
     component::register ParseURI  \
       {Any command line -uri xmpp:jid[?query] is parsed and processed.}
@@ -87,15 +101,19 @@ proc ::ParseURI::Parse {args} {
     ::Debug 2 "::ParseURI::Parse uri=$uri"
 
     # Actually parse the uri.
-    set re {^xmpp:([^\?#]+)(\?([^;#]+)){0,1}(;([^#]+)){0,1}(#(.+)){0,1}$}
-    if {![regexp $re $uri - hierxmpp - iquerytype - querypairs - fragment]} {
+    set RE {^xmpp:([^\?#]+)(\?([^;#]+)){0,1}(;([^#]+)){0,1}(#(.+)){0,1}$}
+    if {[regexp $RE $uri - hierxmpp - iquerytype - querypairs - fragment]} {
+	
+    } elseif {[regexp {^im:.+} $uri]} {
+	
+    } else {
 	::Debug 2 "\t regexp failed"
 	return
     }
     
     # authpath  = "//" authxmpp [ "/" pathxmpp ]
-    set re {^//([^/]+)/(.+$)}
-    if {![regexp $re $hierxmpp - authxmpp pathxmpp]} {
+    set RE {^//([^/]+)/(.+$)}
+    if {![regexp $RE $hierxmpp - authxmpp pathxmpp]} {
 	set authxmpp ""
 	set pathxmpp $hierxmpp
     }
