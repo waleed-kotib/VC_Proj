@@ -3,9 +3,9 @@
 #       Flexible dialog box.
 #       Some code from ttk::dialog.
 #
-# Copyright (c) 2005 Mats Bengtsson
+# Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.13 2006-08-06 13:22:05 matben Exp $
+# $Id: dialog.tcl,v 1.14 2006-08-08 08:10:03 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -155,6 +155,7 @@ snit::widget ui::dialog::widget {
     variable client
     variable timeoutID
     variable fadeoutID
+    variable isDone 0
     
     delegate option -message to message as -text
     delegate option -detail  to detail  as -text
@@ -176,6 +177,7 @@ snit::widget ui::dialog::widget {
     option -badge       1
     option -modal       0
     option -timeout     {}
+    option -variable    {}
     
     typeconstructor {
 
@@ -302,7 +304,7 @@ snit::widget ui::dialog::widget {
 	    # This doesn't work because we are destroyed after grab is released!
 	    #ui::Grab $win
 	}
-	if {$options(-timeout) ne ""} {
+	if {[string length $options(-timeout)]} {
 	    set timeoutID [after $options(-timeout) [list $self Timeout]]
 	}
 	return
@@ -315,8 +317,21 @@ snit::widget ui::dialog::widget {
 	if {[info exists fadeoutID]} {
 	    after cancel $fadeoutID
 	}
-	if {$options(-cancel) ne ""} {
-	    $self Done $options(-cancel)
+	
+	# This happens when the dialog isn't closed with any of the buttons.
+	if {!$isDone} {
+	    
+	    # If there is a cancel button this is the default in this case.
+	    # Else an empty string indicates that the dialog was closed this way.
+	    if {$options(-cancel) ne ""} {
+		set button $options(-cancel)
+	    } else {
+		set button ""
+	    }
+	    if {[string length $options(-variable)]} {
+		uplevel #0 [list set $options(-variable) $button]
+	    }
+	    set rc [catch [linsert $options(-command) end $win $button] result]
 	}
     }
 
@@ -373,6 +388,10 @@ snit::widget ui::dialog::widget {
     }
 	
     method Done {button} {
+	set isDone 1
+	if {[string length $options(-variable)]} {
+	    uplevel #0 [list set $options(-variable) $button]
+	}
 	set rc [catch [linsert $options(-command) end $win $button] result]
 	if {$rc == 1} {
 	    return -code $rc -errorinfo $::errorInfo -errorcode $::errorCode $result
@@ -386,7 +405,7 @@ snit::widget ui::dialog::widget {
 	    $self Dismiss
 	}
     }
-    
+        
     method Dismiss {} {
 	destroy $win
     }
@@ -414,24 +433,22 @@ if {0} {
     }
     ui::dialog::setbadge [::Theme::GetImage Coccinella]
     ui::dialog::setimage coccinella [::Theme::GetImage coccinella64]
+    proc cmd1 {w bt} {destroy $w}
+    proc cmd2 {w bt} {puts "cmd: bt=$bt, dlgvar=$::dlgvar"}
 
     set str "These two must be able to call before any dialog instance created."
     set str2 "Elvis has left the building"
     ui::dialog -message $str -detail $str
     ui::dialog -message $str -detail $str  \
-      -icon error -buttons {yes no cancel} -default yes
-    ui::dialog -message "Check destroy from -command" -command cmd
+      -icon error -buttons {yes no cancel} -default yes -variable dlgvar
+    ui::dialog -message "Check destroy from -command" -command cmd1
+    ui::dialog -message $str -type yesnocancel -command cmd2 -variable dlgvar
     ui::dialog -message "Check timeout for auto destruction"  \
       -timeout 4000 -buttons {}
     set w [ui::dialog -message $str -detail $str  \
       -icon error -type yesnocancel -modal 1]
     set fr [$w clientframe]
     pack [ttk::checkbutton $fr.c -text $str2] -side left
-
-    proc cmd {w bt} {
-	destroy $w
-	tk_getSaveFile
-    }
 }
 
 #-------------------------------------------------------------------------------
