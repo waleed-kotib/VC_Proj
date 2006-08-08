@@ -55,7 +55,7 @@
 #       XMPP URI/IRI Querytypes 
 #       JEP-0147: XMPP URI Scheme Query Components 
 #
-# $Id: ParseURI.tcl,v 1.30 2006-08-08 13:12:04 matben Exp $
+# $Id: ParseURI.tcl,v 1.31 2006-08-08 14:33:52 matben Exp $
 
 package require uriencode
 
@@ -269,7 +269,7 @@ proc ::ParseURI::ProcessURI {token} {
 	    DoDisco $token
 	}
 	invite {
-	    
+	    DoInvite $token
 	}
 	join {
 	    DoJoin $token	    
@@ -279,6 +279,24 @@ proc ::ParseURI::ProcessURI {token} {
 	}
 	presence {
 	    DoPresence $token	    
+	}
+	probe {
+	    DoProbe $token
+	}
+	remove {
+	    DoRemove $token
+	}
+	roster {
+	    DoRoster $token
+	}
+	subscribe {
+	    DoSubscribe $token
+	}
+	unsubscribe {
+	    DoUnsubscribe $token
+	}
+	pubsub - recvfile - register - sendfile - unregister - vcard {
+	    # @@@ TODO
 	}
     }
 }
@@ -311,6 +329,112 @@ proc ::ParseURI::DoDisco {token} {
     } else {
 	# Not implemented
     }
+}
+
+proc ::ParseURI::DoInvite {token} {
+    
+    # Description: enables simultaneously joining a groupchat room and 
+    # inviting others.
+    HandleJoinGroupchat $token
+}
+
+proc ::ParseURI::DoJoin {token} {
+    HandleJoinGroupchat $token
+}
+
+# This is old code where we first disco. This stage is now skipped.
+
+proc ::ParseURI::DoJoinBU {token} {
+    variable $token
+    upvar 0 $token state
+    upvar ::Jabber::jstate jstate
+    
+    ::Debug 2 "::ParseURI::DoJoin"
+    
+    # Get groupcat service from room.
+    jlib::splitjidex $state(jid) roomname service res
+    set state(service) $service
+    set state(discocmd)  [list ::ParseURI::DiscoInfoHook $token]
+
+    # We should check if we've got info before setting up the hooks.
+    if {[$jstate(jlib) disco isdiscoed info $service]} {
+	DiscoInfoHook $token result $service {}
+    } else {    
+	
+	# These must be one shot hooks.
+	::hooks::register discoInfoHook  $state(discocmd)
+    }
+}
+
+proc ::ParseURI::DiscoInfoHook {token type from subiq args} {
+    variable $token
+    upvar 0 $token state
+
+    if {![jlib::jidequal $from $state(service)]} {
+	return
+    }
+    HandleJoinGroupchat $token
+}
+
+proc ::ParseURI::HandleJoinGroupchat {token} {
+    variable $token
+    upvar 0 $token state
+    
+    #::hooks::deregister  discoInfoHook  $state(discocmd)
+    
+    ::Debug 2 "::ParseURI::HandleJoinGroupchat................"
+    ::Debug 2 [parray state]
+    
+    # We require a nick name (resource part).
+    set nick $state(resource)
+    if {$nick eq ""} {
+	set str "Please enter your desired nick name for the room $state(jid2)"
+	set w [ui::dialog -message $str -title [mc {Nick name}]  \
+	  -icon info -type okcancel -modal 1  \
+	  -variable [namespace current]::ans]
+	set fr [$w clientframe]
+	ttk::label $fr.l -text "[mc {Nick name}]:"
+	ttk::entry $fr.e -show {*}  \
+	  -textvariable [namespace current]::nick
+	pack $fr.l -side left
+	pack $fr.e -side top -fill x
+	$w grab	
+	if {($ans ne "ok") || ($nick eq "")} {
+	    return
+	}
+    }
+    
+    # We brutaly assumes muc room here.
+    set opts {}
+    if {[info exists state(query,password)]} {
+	lappend opts -password $state(query,password)
+    }
+    eval {::Enter::EnterRoom $state(jid2) $nick \
+      -command [list [namespace current]::EnterRoomCB $token]} $opts
+}
+
+proc ::ParseURI::EnterRoomCB {token type args} {
+    variable $token
+    upvar 0 $token state
+    
+    ::Debug 2 "::ParseURI::EnterRoomCB"
+        
+    if {![string equal $type "error"]} {
+	
+	if {$state(iquerytype) eq "invite"} {
+	    if {[info exists state(query,jid)]} {
+		set tojid $state(query,jid)
+		jlib::splitjid $state(jid) roomjid res
+		::Jabber::JlibCmd muc invite $roomjid $tojid
+	    }
+	    
+	    # Check that this is actually a whiteboard.
+	} elseif {[info exists state(query,xmlns)] && \
+	  [string equal $state(query,xmlns) "whiteboard"]} {
+	    ::Jabber::WB::NewWhiteboardTo $state(jid2) -type groupchat
+	}
+    }
+    Free $token
 }
 
 proc ::ParseURI::DoMessage {token} {
@@ -348,7 +472,7 @@ proc ::ParseURI::DoMessage {token} {
 	    eval {::Chat::StartThread $state(jid)} $opts	    
 	}
 	groupchat {
-	    # Not implemented
+	    # Not implemented since I don't understand it. Enter room first?
 	}
     }
     Free $token
@@ -364,85 +488,52 @@ proc ::ParseURI::DoPresence {token} {
     Free $token
 }
 
-proc ::ParseURI::DoJoin {token} {
+proc ::ParseURI::DoProbe {token} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::ParseURI::DoJoin"
-    
-    # Get groupcat service from room.
-    jlib::splitjidex $state(jid) roomname service res
-    set state(service) $service
 
-    set state(discocmd)  [list ::ParseURI::DiscoInfoHook $token]
-
-    # We should check if we've got info before setting up the hooks.
-    if {[$jstate(jlib) disco isdiscoed info $service]} {
-	DiscoInfoHook $token result $service {}
-    } else {    
-	
-	# These must be one shot hooks.
-	::hooks::register discoInfoHook  $state(discocmd)
-    }
+    ::Jabber::JlibCmd send_presence -to $state(jid) -type "probe"
 }
 
-proc ::ParseURI::DiscoInfoHook {token type from subiq args} {
+proc ::ParseURI::DoRemove {token} {
     variable $token
     upvar 0 $token state
 
-    if {![jlib::jidequal $from $state(service)]} {
-	return
-    }
-    HandleGroupchat $token
+    ::Jabber::JlibCmd roster_remove $state(jid) ::ParseURI::Noop
 }
 
-proc ::ParseURI::HandleGroupchat {token} {
+proc ::ParseURI::DoRoster {token} {
     variable $token
     upvar 0 $token state
-    
-    ::hooks::deregister  discoInfoHook  $state(discocmd)
-    
-    ::Debug 2 "::ParseURI::HandleGroupchat................"
-    ::Debug 2 [parray state]
-    
-    # We require a nick name (resource part).
-    set nick $state(resource)
-    if {$nick eq ""} {
-	set ans [::UI::MegaDlgMsgAndEntry  \
-	  [mc {Nick name}] \
-	  "Please enter your desired nick name for the room $state(jid2)" \
-	  "[mc {Nick name}]:" \
-	  nick [mc Cancel] [mc OK]]
-	if {($ans ne "ok") || ($nick eq "")} {
-	    return
-	}
-    }
-    
-    # We brutaly assumes muc room here.
+
     set opts {}
-    if {[info exists state(query,password)]} {
-	lappend opts -password $state(query,password)
-    }
-    eval {::Enter::EnterRoom $state(jid2) $nick \
-      -command [list [namespace current]::EnterRoomCB $token]} $opts
-}
-
-proc ::ParseURI::EnterRoomCB {token type args} {
-    variable $token
-    upvar 0 $token state
-    
-    ::Debug 2 "::ParseURI::EnterRoomCB"
-        
-    if {![string equal $type "error"]} {
+    foreach {key value} [array get state query,*] {
 	
-	# Check that this is actually a whiteboard.
-	if {[info exists state(query,xmlns)] && \
-	  [string equal $state(query,xmlns) "whiteboard"]} {
-	    ::Jabber::WB::NewWhiteboardTo $state(jid2) -type groupchat
+	switch -- $key {
+	    query,group {
+		lappend opts -groups [list $value]
+	    }
+	    query,name {
+		lappend opts -name $value
+	    }
 	}
     }
-    Free $token
+    eval {::Jabber::JlibCmd roster_set $state(jid) ::ParseURI::Noop} $opts
+}
+
+proc ::ParseURI::DoSubscribe {token} {
+    variable $token
+    upvar 0 $token state
+
+    ::Jabber::JlibCmd roster_set $state(jid) ::ParseURI::Noop
+    ::Jabber::JlibCmd send_presence -to $state(jid) -type "subscribe"
+}
+
+proc ::ParseURI::DoUnsubscribe {token} {
+    variable $token
+    upvar 0 $token state
+
+    ::Jabber::JlibCmd send_presence -to $state(jid) -type "unsubscribe"
 }
 
 proc ::ParseURI::Noop {args} { }
