@@ -51,7 +51,7 @@
 #     header         =  hname "=" hvalue
 #     ...
 #
-# $Id: ParseURI.tcl,v 1.28 2006-08-07 12:36:55 matben Exp $
+# $Id: ParseURI.tcl,v 1.29 2006-08-08 08:10:03 matben Exp $
 
 package require uriencode
 
@@ -101,21 +101,41 @@ proc ::ParseURI::Parse {args} {
     ::Debug 2 "::ParseURI::Parse uri=$uri"
 
     # Actually parse the uri.
-    set RE {^xmpp:([^\?#]+)(\?([^;#]+)){0,1}(;([^#]+)){0,1}(#(.+)){0,1}$}
-    if {[regexp $RE $uri - hierxmpp - iquerytype - querypairs - fragment]} {
+
+    set xmppRE {^xmpp:([^\?#]+)(\?([^;#]+)){0,1}(;([^#]+)){0,1}(#(.+)){0,1}$}
+    set imRE {^im:([^\?]+)(\?(.+)){0,1}$}
+    
+    if {[regexp $xmppRE $uri - hierxmpp - iquerytype - querypairs - fragment]} {
+	set type xmpp
+
+	# authpath  = "//" authxmpp [ "/" pathxmpp ]
+	set RE {^//([^/]+)/(.+$)}
+	if {![regexp $RE $hierxmpp - authxmpp pathxmpp]} {
+	    set authxmpp ""
+	    set pathxmpp $hierxmpp
+	}
+	set querylist {}
+	foreach sub [split $querypairs ";"] {
+	    foreach {key value} [split $sub =] {break}
+	    lappend querylist $key $value
+	}
+    } elseif {[regexp $imRE $uri - mailbox - headers]} {
 	
-    } elseif {[regexp {^im:.+} $uri]} {
-	
+	# Interpret this in terms of the xmpp format.
+	set type im
+	set authxmpp ""
+	set pathxmpp $mailbox
+	set iquerytype message
+	set fragment ""
+	set querypairs $headers
+	set querylist {}
+	foreach sub [split $querypairs "&"] {
+	    foreach {key value} [split $sub =] {break}
+	    lappend querylist $key $value
+	}	
     } else {
 	::Debug 2 "\t regexp failed"
 	return
-    }
-    
-    # authpath  = "//" authxmpp [ "/" pathxmpp ]
-    set RE {^//([^/]+)/(.+$)}
-    if {![regexp $RE $hierxmpp - authxmpp pathxmpp]} {
-	set authxmpp ""
-	set pathxmpp $hierxmpp
     }
     
     set jid $pathxmpp
@@ -135,10 +155,8 @@ proc ::ParseURI::Parse {args} {
     set state(iquerytype) $iquerytype
     set state(querypairs) $querypairs
     set state(fragment)   $fragment
-    
-    # Parse the query into an array.
-    foreach sub [split $querypairs ";"] {
-	foreach {key value} [split $sub =] {break}
+
+    foreach {key value} $querylist {
 	set state(query,$key) $value
     }
     
@@ -180,9 +198,14 @@ proc ::ParseURI::Parse {args} {
 	set profname $state(profname)
 	set ans "ok"
 	if {$password eq ""} {
-	    set ans [::UI::MegaDlgMsgAndEntry  \
-	      [mc {Password}] [mc enterpassword $state(jid)] "[mc Password]:" \
-	      password [mc Cancel] [mc OK] -show {*}]
+	    set w [ui::dialog -message [mc enterpassword $state(jid)]  \
+	      -icon info -type okcancel -modal 1  \
+	      -variable [namespace current]::ans]
+	    set fr [$w clientframe]
+	    ttk::entry $fr.e -show {*}  \
+	      -textvariable [namespace current]::password
+	    pack $fr.e -side top -fill x
+	    $w grab
 	}
 	if {$ans eq "ok"} {
 	    array set optsArr [::Profiles::Get $profname options]
