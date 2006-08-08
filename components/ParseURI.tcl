@@ -51,7 +51,11 @@
 #     header         =  hname "=" hvalue
 #     ...
 #
-# $Id: ParseURI.tcl,v 1.29 2006-08-08 08:10:03 matben Exp $
+#       Reference:
+#       XMPP URI/IRI Querytypes 
+#       JEP-0147: XMPP URI Scheme Query Components 
+#
+# $Id: ParseURI.tcl,v 1.30 2006-08-08 13:12:04 matben Exp $
 
 package require uriencode
 
@@ -261,15 +265,51 @@ proc ::ParseURI::ProcessURI {token} {
     ::Debug 2 "::ParseURI::ProcessURI iquerytype=$state(iquerytype)"
   
     switch -- $state(iquerytype) {
+	disco {
+	    DoDisco $token
+	}
+	invite {
+	    
+	}
+	join {
+	    DoJoin $token	    
+	}
 	message {
 	    DoMessage $token
 	}
 	presence {
 	    DoPresence $token	    
 	}
-	groupchat {
-	    DoGroupchat $token	    
+    }
+}
+
+proc ::ParseURI::DoDisco {token} {
+    variable $token
+    upvar 0 $token state
+    
+    set node ""
+    set request info
+    set type get
+    set opts {}
+    foreach {key value} [array get state query,*] {
+	
+	switch -- $key {
+	    query,node {
+		lappend opts -node $value
+	    }
+	    query,request {
+		set request $value
+	    }
+	    query,type {
+		set type $value
+	    }
 	}
+    }
+    set cmd ::ParseURI::Noop
+    if {$type eq "get"} {
+	eval {::Jabber::JlibCmd disco send_get $request $cmd $state(jid)} $opts
+    } else {
+	# Not implemented
     }
 }
 
@@ -278,26 +318,38 @@ proc ::ParseURI::DoMessage {token} {
     upvar 0 $token state
     
     set opts {}
+    set type normal
     foreach {key value} [array get state query,*] {
 	
 	switch -- $key {
 	    query,body {
 		lappend opts -message $value
 	    }
+	    query,from {
+		lappend opts -from $value
+	    }
 	    query,subject {
 		lappend opts -subject $value
 	    }
 	    query,thread {
-		set thread $value
+		lappend opts -thread $value
+	    }
+	    query,type {
+		set type $value
 	    }
 	}
     }
     
-    # Chat or normal message?
-    if {[info exists thread]} {
-	eval {::Chat::StartThread $state(jid) -thread $thread} $opts
-    } else {
-	eval {::NewMsg::Build -to $state(jid)} $opts
+    switch -- $type {
+	normal {
+	    eval {::NewMsg::Build -to $state(jid)} $opts	    
+	}
+	chat {
+	    eval {::Chat::StartThread $state(jid)} $opts	    
+	}
+	groupchat {
+	    # Not implemented
+	}
     }
     Free $token
 }
@@ -312,12 +364,12 @@ proc ::ParseURI::DoPresence {token} {
     Free $token
 }
 
-proc ::ParseURI::DoGroupchat {token} {
+proc ::ParseURI::DoJoin {token} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::ParseURI::DoGroupchat"
+    ::Debug 2 "::ParseURI::DoJoin"
     
     # Get groupcat service from room.
     jlib::splitjidex $state(jid) roomname service res
@@ -392,6 +444,8 @@ proc ::ParseURI::EnterRoomCB {token type args} {
     }
     Free $token
 }
+
+proc ::ParseURI::Noop {args} { }
 
 proc ::ParseURI::Free {token} {
     variable $token

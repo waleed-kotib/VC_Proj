@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.59 2006-08-07 12:36:55 matben Exp $
+# $Id: Utils.tcl,v 1.60 2006-08-08 13:12:04 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -234,26 +234,92 @@ proc ::Utils::FormatBytes {bytes} {
 proc ::Utils::UnixGetWebBrowser { } {
     global  this prefs env
     
-    set browser ""
-    if {$this(platform) eq "unix"} {
-	if {[info exists env(BROWSER)]} {
-	    if {[llength [auto_execok $env(BROWSER)]] > 0} {
-		set browser $env(BROWSER)
-	    }
-	}
-	set cmd [auto_execok $prefs(webBrowser)]
-	if {$cmd == {}} {
-	    foreach name {firefox galeon konqueror mozilla-firefox \
-	      mozilla-firebird mozilla netscape iexplorer opera} {
-		if {[llength [set e [auto_execok $name]]] > 0} {
-		    set browser [lindex $e 0]
-		    break
-		}
-	    }
-	}
-	set prefs(webBrowser) $browser
+    set browser {}
+    set e [auto_execok $prefs(webBrowser)]
+    if {[llength $e]} {
+	set browser [lindex $e 0]
     }
+    if {$browser eq {}} {
+	if {[info exists env(BROWSER)]} {
+	    if {[llength [set e [auto_execok $env(BROWSER)]]]} {
+		set browser [lindex $e 0]
+	    }
+	}
+    }
+    if {$browser eq {}} {
+	set browser [KDEGetBrowser]
+    }
+    if {$browser eq {}} {
+	foreach name {firefox galeon konqueror mozilla-firefox \
+	  mozilla-firebird mozilla netscape iexplorer opera} {
+	    if {[llength [set e [auto_execok $name]]]} {
+		set browser [lindex $e 0]
+		break
+	    }
+	}
+    }
+    set prefs(webBrowser) $browser
     return $browser
+}
+
+proc ::Utils::UnixGetEmailClient { } {
+    global  prefs env
+    
+    # @@@ Temporary solution...
+    set mail {}
+    set prefs(mailClient) {}
+    
+    set e [auto_execok $prefs(mailClient)]
+    if {[llength $e]} {
+	set mail [lindex $e 0]
+    }
+    if {$mail eq {}} {
+	set mail [KDEGetEmailClient]
+    }
+    if {$mail eq {}} {
+	foreach name {thunderbird kmail} {
+	    if {[llength [set e [auto_execok $name]]] > 0} {
+		set mail [lindex $e 0]
+		break
+	    }
+	}
+    }
+    return $mail
+}
+
+proc ::Utils::KDEGetBrowser { } {
+    set name [KDEGetConfigValue ~/.kde/share/config/kdeglobals BrowserApplication]
+    if {[llength [set e [auto_execok $name]]]} {
+	return $e
+    } else {
+	return {}
+    }
+}
+
+proc ::Utils::KDEGetEmailClient { } {
+    set name [KDEGetConfigValue ~/.kde/share/config/emaildefaults EmailClient]
+    if {[llength [set e [auto_execok $name]]]} {
+	return $e
+    } else {
+	return {}
+    }
+}
+
+proc ::Utils::KDEGetConfigValue {f key} {
+    
+    set ans ""
+    if {[file exists $f] && [file readable $f]} {
+	set fd [open $f r]
+	set lines [split [read $fd] "\n"]
+	foreach line $lines {
+	    if {[string match "$key=*" $line]} {
+		set RE [format {%s=(.+)$} $key]
+		regexp $RE $line - ans
+	    }
+	}
+	close $fd
+    }
+    return $ans
 }
 
 proc ::Utils::UnixOpenUrl {url} {

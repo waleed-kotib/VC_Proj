@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.49 2006-05-28 09:53:23 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.50 2006-08-08 13:12:04 matben Exp $
 
 package provide FactoryDefaults 1.0
 
@@ -254,9 +254,6 @@ proc FactoryDefaults { } {
 	    } else {
 		set prefs(webBrowser) ""
 	    }
-	}
-	macintosh {
-	    set prefs(webBrowser) {Internet Explorer}
 	}
 	macosx {
 	    set prefs(webBrowser) {Safari}

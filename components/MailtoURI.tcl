@@ -2,7 +2,7 @@
 # 
 #       Parses any in-text mailto: URIs.
 #       
-# $Id: MailtoURI.tcl,v 1.1 2006-08-07 12:36:55 matben Exp $
+# $Id: MailtoURI.tcl,v 1.2 2006-08-08 13:12:04 matben Exp $
 
 package require uri
 package require uriencode
@@ -19,33 +19,15 @@ proc ::MailtoURI::Init { } {
 }
 
 proc ::MailtoURI::TextCmd {uri} {
-    global  this prefs
-    
-    set prefs(mailClient) ""
-    
+    global  this
+        
     switch -- $this(platform) {
 	macosx {
 	    exec open $uri
 	}
 	unix {
-	    if {[info exists env(MAIL)]} {
-		if {[llength [auto_execok $env(MAIL)]] > 0} {
-		    set mailClient $env(MAIL)
-		}
-	    }
-	    set cmd [auto_execok $prefs(mailClient)]
-	    if {$cmd == {}} {
-		foreach name {thunderbird kmail} {
-		    if {[llength [set e [auto_execok $name]]] > 0} {
-			set mailClient [lindex $e 0]
-			break
-		    }
-		}
-	    }
-	    set prefs(mailClient) $mailClient
-	    catch {
-		exec $mailClient $uri
-	    }
+	    set mail [::Utils::UnixGetEmailClient]
+	    catch {exec $mail $uri &}
 	}
 	windows {
 	    ::Windows::OpenURI $uri
