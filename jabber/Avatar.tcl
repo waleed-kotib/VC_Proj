@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.20 2006-05-31 08:31:09 matben Exp $
+# $Id: Avatar.tcl,v 1.21 2006-08-09 13:28:51 matben Exp $
 
 # @@@ Issues:
 # 
@@ -185,6 +185,78 @@ proc ::Avatar::QuitHook { } {
     upvar ::Jabber::jstate jstate
     
     WriteHashmap $aprefs(hashmapFile)
+}
+
+# Avatar::Widget --
+# 
+#       Display avatar widget.
+
+proc ::Avatar::Widget {w} {
+    
+    frame $w
+    
+    # Bug in 8.4.1 but ok in 8.4.9
+    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
+	label $w.l -relief sunken -bd 1 -bg white
+    } else {
+	ttk::label $w.l -style Sunken.TLabel -compound image
+    }
+    grid  $w.l  -sticky news
+    grid columnconfigure $w 0 -minsize [expr {2*4 + 2*4 + 64}]
+    grid rowconfigure    $w 0 -minsize [expr {2*4 + 2*4 + 64}]
+     
+    return $w
+}
+
+proc ::Avatar::WidgetSetPhoto {w image {size 64}} {
+    
+    if {$image ne ""} {
+	set W [image width $image]
+	set H [image height $image]
+	set max [expr {$W > $H ? $W : $H}]
+	if {$max > $size} {
+	    lassign [GetScaleMN $max $size] M N	
+	    set display [ScalePhotoN->M $image $N $M]
+	    bind $w <Destroy> +[list image delete $display]
+	} else {
+	    set display $image
+	}
+	$w.l configure -image $display
+    } else {
+	$w.l configure -image ""
+    }
+    if {$image ne "" && $max > $size} {
+	bind $w <Enter> [list [namespace code WidgetBalloon] 1 $w $image]
+	bind $w <Leave> [list [namespace code WidgetBalloon] 0 $w $image]
+    } else {
+	bind $w <Enter> {}
+	bind $w <Leave> {}
+    }
+}
+
+proc ::Avatar::WidgetBalloon {show w image} {
+    
+    set win $w.ball
+    if {![winfo exists $win]} {
+	toplevel $win -bd 0 -relief flat
+	wm overrideredirect $win 1
+	wm transient $win
+	wm withdraw  $win
+	wm resizable $win 0 0 
+	
+	if {[tk windowingsystem] eq "aqua"} {
+	    tk::unsupported::MacWindowStyle style $win help none
+	}
+	pack [label $win.l -bd 0 -bg white -compound none -image $image]
+    }
+    if {$show} {
+	set x [expr {[winfo rootx $w] + 10}]
+	set y [expr {[winfo rooty $w] + [winfo height $w]}]
+	wm geometry $win +${x}+${y}
+	wm deiconify $win
+    } else {
+	wm withdraw $win
+    }
 }
 
 #--- First section deals with our own avatar -----------------------------------

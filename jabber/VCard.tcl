@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.45 2006-05-30 14:32:38 matben Exp $
+# $Id: VCard.tcl,v 1.46 2006-08-09 13:28:51 matben Exp $
 
 package provide VCard 1.0
 
@@ -373,25 +373,14 @@ proc ::VCard::Pages {nbframe etoken type} {
     grid rowconfigure $wp1 0 -weight 1
 
     set wp2 $wbot.2
-    frame $wp2
-    # Bug in 8.4.1 but ok in 8.4.9
-    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
-	label $wp2.l -relief sunken -bd 1 -bg white
-    } else {
-	ttk::label $wp2.l -style Sunken.TLabel -compound image
-    }
-    
+    ::Avatar::Widget $wp2
     pack  $wp2 -side left
-    grid  $wp2.l  -sticky news
-    grid columnconfigure $wp2 0 -minsize [expr {2*4 + 2*4 + 64}]
-    grid rowconfigure    $wp2 0 -minsize [expr {2*4 + 2*4 + 64}]
 
     set pbptop $wtop
     set pbpmid $wmid
     set wbtphoto $wp1.b
     set wbtphrem $wp1.br
     set wfrphoto $wp2
-    set wphoto   $wp2.l
     
     # Fill in any image.
     if {[info exists elem(photo_binval)]} {
@@ -401,7 +390,7 @@ proc ::VCard::Pages {nbframe etoken type} {
 	}
 	set im [::Utils::ImageFromData $elem(photo_binval) $mimetype]
 	if {$im ne ""} {
-	    $wphoto configure -image $im
+	    ::Avatar::WidgetSetPhoto $wp2 $im
 	}
     }
     
@@ -470,7 +459,6 @@ proc ::VCard::Pages {nbframe etoken type} {
     }
 
     set elem(w,frphoto) $wfrphoto
-    set elem(w,photo)   $wphoto
     set elem(w,emails)  $wemails
     set elem(w,desctxt) $wdesctxt
     
@@ -579,30 +567,14 @@ proc ::VCard::SetPhotoFile {etoken fileName} {
     
     upvar $etoken elem
     
-    set wphoto $elem(w,photo)
     if {[catch {image create photo -file $fileName} name]} {
 	::UI::MessageBox -icon error \
 	  -message "Error creating image from file $fileName"
 	return
     }
-    
-    # @@@ We could limit the image size here.
-
+    ::Avatar::WidgetSetPhoto $elem(w,frphoto) $name
     set elem(w,photoFile) $fileName
-    
-    # Limit size to max 64.
-    set maxsize 64
-    set size [max [image width $name] [image height $name]]
-    if {$size > $maxsize} {
-	set factor [expr {int($size/($maxsize + 0.0) + 1)}]
-	set imnew [image create photo]
-	$imnew blank
-	$imnew copy $name -subsample $factor -compositingrule set
-	image delete $name
-	set name $imnew
-    }
-    $wphoto configure -image $name
-    
+        
     # Store as element if we want to send it off.
     set fd [open $fileName {RDONLY}]
     fconfigure $fd -translation binary
@@ -615,7 +587,7 @@ proc ::VCard::DeletePhoto {etoken} {
     
     upvar $etoken elem
     
-    $elem(w,photo) configure -image ""
+    ::Avatar::WidgetSetPhoto $elem(w,frphoto) ""
     unset -nocomplain elem(photo_binval)
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.7 2006-05-28 09:53:23 matben Exp $
+# $Id: Proxy.tcl,v 1.8 2006-08-09 13:28:51 matben Exp $
  
 package require autoproxy
 
@@ -101,6 +101,7 @@ proc ::Proxy::BuildPage {wpage} {
     variable tmpPrefs
     variable wnoproxy
     variable wprx
+    variable wnat
     
     set stun 0
     if {![catch {package require stun}]} {
@@ -121,7 +122,9 @@ proc ::Proxy::BuildPage {wpage} {
     
     set wprx $wc.proxy
     set wnat $wc.nat
-
+    variable wprxuse $wprx.use
+    variable wnatuse $wnat.use
+    
     # Proxy.
     ttk::labelframe $wprx -text [mc {Http Proxy}]  \
       -padding [option get . groupSmallPadding {}]
@@ -166,7 +169,8 @@ proc ::Proxy::BuildPage {wpage} {
     # NAT address.
     ttk::labelframe $wnat -text [mc {NAT Address}] \
       -padding [option get . groupSmallPadding {}]
-    ttk::checkbutton $wnat.cb -text [mc prefnatip] \
+    ttk::checkbutton $wnat.use -text [mc prefnatip] \
+      -command [namespace code SetUseNATState]  \
       -variable [namespace current]::tmpPrefs(setNATip)
     ttk::entry $wnat.eip \
       -textvariable [namespace current]::tmpPrefs(NATip)
@@ -174,12 +178,13 @@ proc ::Proxy::BuildPage {wpage} {
 	ttk::button $wnat.stun -text [mc Get] -command ::Proxy::GetStun
     }
     
-    grid  $wnat.cb   -  -sticky w
+    grid  $wnat.use  -  -sticky w
     grid  $wnat.eip  x  -sticky ew
     grid columnconfigure $wnat 0 -weight 1
     if {$stun} {
 	grid  $wnat.stun  -column 1 -row 1 -padx 4
     }
+    SetUseNATState
     
     set anchor [option get . dialogAnchor {}]
 
@@ -202,20 +207,45 @@ proc ::Proxy::GetStunCB {token status args} {
 
 proc ::Proxy::SetUseProxyState { } {
     variable wprx
+    variable wprxuse
     variable tmpPrefs
     
-    set state    disabled
-    set ttkstate {disabled}
     if {$tmpPrefs(useproxy)} {
+	SetChildrenStates $wprx normal
+    } else {
+	SetChildrenStates $wprx disabled
+    }
+    $wprxuse state {!disabled}
+}
+
+proc ::Proxy::SetUseNATState { } {
+    variable wnat
+    variable wnatuse
+    variable tmpPrefs
+    
+    if {$tmpPrefs(setNATip)} {
+	SetChildrenStates $wnat normal
+    } else {
+	SetChildrenStates $wnat disabled
+    }
+    $wnatuse state {!disabled}
+}
+
+proc ::Proxy::SetChildrenStates {win _state} {
+    
+    if {$_state eq "normal" || $_state eq "!disabled"} {
 	set state normal
 	set ttkstate {!disabled}
-    }
-    foreach w [winfo children $wprx] {
+    } else {
+	set state    disabled
+	set ttkstate {disabled}
+    }    
+    foreach w [winfo children $win] {
 	switch -- [winfo class $w] {
-	    Text {
+	    Text - Entry {
 		$w configure -state $state
 	    }
-	    TEntry {
+	    TEntry - TButton - TCheckbutton - TRadiobutton {
 		$w state $ttkstate
 	    }
 	}
