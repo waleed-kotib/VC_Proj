@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.30 2005-10-22 14:26:21 matben Exp $
+# $Id: Subscribe.tcl,v 1.31 2006-08-09 07:13:47 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -210,7 +210,7 @@ proc ::Subscribe::Accept {token} {
 	if {[string length $state(name)]} {
 	    lappend opts -name $state(name)
 	}
-	if {($state(group) != "") && ($state(group) != "None")} {
+	if {($state(group) ne "") && ($state(group) ne "None")} {
 	    lappend opts -groups [list $state(group)]
 	}
 	eval {$jstate(jlib) roster_set $jid [namespace current]::ResProc} $opts

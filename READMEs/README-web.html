@@ -8,8 +8,9 @@
 </head>
 
 <body>
-<center><h2><u>XMPP Protocol Initiation URI Syntax.</u></h2></center>
+<center><h1><u>XMPP Protocol Initiation URI Syntax.</u></h1></center>
 
+<h2>Specifications</h2>
 
 You can put an url in a web page to launch The Coccinella. Use a link:
 <a href="xmpp:matben@athlon.se">xmpp:matben@athlon.se</a>
@@ -24,6 +25,14 @@ The definition of the uri syntax is found in RFC 4622 from
 <A HREF="http://www.ietf.org/">http://www.ietf.org/</A>.
 If you use non US-ascii characters make sure the JID is encoded according
 to the reference above.
+
+<p>
+The other specifications can be found at
+
+<UL TYPE="DISC">
+    <LI><A HREF="http://www.jabber.org/jeps/jep-0147.html">http://www.jabber.org/jeps/jep-0147.html</A>
+    <LI><A HREF="http://www.jabber.org/registrar/querytypes.html">http://www.jabber.org/registrar/querytypes.html</A>
+</UL>
 
 <p>
 You can also launch The Coccinella using the switch -uri:
@@ -59,7 +68,8 @@ send a message to "support@example.com":
       </pre>
       
 <p>
-The supported querytype are: <CODE>message</CODE> and <CODE>groupchat</CODE>.
+In addition to the standards described above, there are currently a few additions
+which may change later.
 For any querytype you may specify the following key-value pairs:
 
 <pre>
@@ -70,23 +80,17 @@ For any querytype you may specify the following key-value pairs:
 "sasl"          0|1
 </pre>
 
-<p>
-For the <CODE>message</CODE> type the following key-value pairs are handled:
-<pre>
-"subject"       string
-"body"          string
-"thread"        unique string   this starts a chat with the JID in the uri
-</pre>
 
 <p>
-For the <CODE>groupchat</CODE> type the following key-value pairs are handled
+For the <CODE>join</CODE> type the following key-value pair has been added:
 (note that the JID you specify here must be room/nickname):
 <pre>
-"password"      string        this is the password for entering the room if necessary
 "xmlns"         "whiteboard"
 </pre>
 The server must support the disco method for service discovery, and the
 groupchat must be of the MUC type. All modern servers comply with this.
+
+<h2>Examples</h2>
 
 <h3>01 Perform a Coccinella login ##
 <small>xmpp:admin_user_node@example.com</small></h3>
@@ -106,15 +110,15 @@ Valid in all cases below!
 
 <h3>03 Prepare to start a chat session ##
 <small>xmpp:contact_user_node@example.com</small></h3>
-Prepare to start a chat session with mickey@example.com using thread 100:
-<a href="xmpp:mickey@example.com?message;subject=Hi;body=Hello%20World;thread=100">
-xmpp:mickey@example.com?message;subject=Hi;body=Hello%20World;thread=100</a>.
+Prepare to start a chat session with mickey@example.com:
+<a href="xmpp:mickey@example.com?message;subject=Hi;body=Hello%20World;type=chat">
+xmpp:mickey@example.com?message;subject=Hi;body=Hello%20World;type=chat</a>.
 
 <h3>04 Enter a chat room ##
 <small>xmpp:roomname@conference.example.com/nickname</small></h3>
 Enter the sss chat room using nickname Terry:
-<a href="xmpp:sss@conference.example.com/Terry?groupchat">
-xmpp:sss@conference.example.com/Terry?groupchat</a>.
+<a href="xmpp:sss@conference.example.com/Terry?join">
+xmpp:sss@conference.example.com/Terry?join</a>.
 <p>
 Note that the same presumption of the <EM>current selected profile</EM>
 is providing the necessary authentication for this activity on the server.
@@ -125,11 +129,11 @@ the 'sss' room requires a password.
 <h3>05 Start a whiteboard session ##
 <small>xmpp:roomname@conference.example.com/nickname</small></h3>
 Start a whiteboard session in the sss chat room with nickname Terry:
-<a href="xmpp:sss@conference.example.com/Terry?groupchat;xmlns=whiteboard">
-xmpp:sss@conference.example.com/Terry?groupchat;xmlns=whiteboard</a>.
+<a href="xmpp:sss@conference.example.com/Terry?join;xmlns=whiteboard">
+xmpp:sss@conference.example.com/Terry?join;xmlns=whiteboard</a>.
 <p>
 Again, this works because Terry owns 'sss', or actually, the JID behind Terry owns the room.
-Howevr, most rooms are not password protected, hence no password key is necessary.
+However, most rooms are not password protected, hence no password key is necessary.
 
 </body>
 </html>

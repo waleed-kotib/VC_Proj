@@ -29,6 +29,7 @@ XMPP IM (RFC 3921)
 Other supported standards:
 
    o  XMPP URIs (RFC 4622)
+   o  XMPP URI/IRI Querytypes from the Jabber Registrar
 
 
 JEPS
@@ -64,6 +65,7 @@ support protocol for other functions.
    0096 | File Transfer                 | complete
    0115 | Entity Capabilities           | complete
    0138 | Stream Compression            | untested; only library level
+   0147 | XMPP URI Scheme Query Comp... | almost complete
    0153 | vCard-Based Avatars           | complete
    0156 | A DNS TXT Resource...         | complete
    0166 | Jingle                        | complete
