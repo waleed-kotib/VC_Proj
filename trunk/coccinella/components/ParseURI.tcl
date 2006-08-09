@@ -55,7 +55,7 @@
 #       XMPP URI/IRI Querytypes 
 #       JEP-0147: XMPP URI Scheme Query Components 
 #
-# $Id: ParseURI.tcl,v 1.31 2006-08-08 14:33:52 matben Exp $
+# $Id: ParseURI.tcl,v 1.32 2006-08-09 07:13:47 matben Exp $
 
 package require uriencode
 
@@ -265,37 +265,23 @@ proc ::ParseURI::ProcessURI {token} {
     ::Debug 2 "::ParseURI::ProcessURI iquerytype=$state(iquerytype)"
   
     switch -- $state(iquerytype) {
-	disco {
-	    DoDisco $token
+	disco       -  
+	invite      -
+	join        -
+	message     -
+	probe       -
+	pubsub      -
+	register    -
+	remove      -
+	roster      -
+	sendfile    -
+	subscribe   -
+	unregister  -
+	unsubscribe - 
+	vcard         {
+	    Do[string totitle $state(iquerytype)] $token
 	}
-	invite {
-	    DoInvite $token
-	}
-	join {
-	    DoJoin $token	    
-	}
-	message {
-	    DoMessage $token
-	}
-	presence {
-	    DoPresence $token	    
-	}
-	probe {
-	    DoProbe $token
-	}
-	remove {
-	    DoRemove $token
-	}
-	roster {
-	    DoRoster $token
-	}
-	subscribe {
-	    DoSubscribe $token
-	}
-	unsubscribe {
-	    DoUnsubscribe $token
-	}
-	pubsub - recvfile - register - sendfile - unregister - vcard {
+	recvfile {
 	    # @@@ TODO
 	}
     }
@@ -329,6 +315,7 @@ proc ::ParseURI::DoDisco {token} {
     } else {
 	# Not implemented
     }
+    Free $token
 }
 
 proc ::ParseURI::DoInvite {token} {
@@ -400,6 +387,7 @@ proc ::ParseURI::HandleJoinGroupchat {token} {
 	pack $fr.e -side top -fill x
 	$w grab	
 	if {($ans ne "ok") || ($nick eq "")} {
+	    Free $token
 	    return
 	}
     }
@@ -463,7 +451,7 @@ proc ::ParseURI::DoMessage {token} {
 	    }
 	}
     }
-    
+        
     switch -- $type {
 	normal {
 	    eval {::NewMsg::Build -to $state(jid)} $opts	    
@@ -478,21 +466,47 @@ proc ::ParseURI::DoMessage {token} {
     Free $token
 }
 
-proc ::ParseURI::DoPresence {token} {
-    variable $token
-    upvar 0 $token state
-    
-    # I don't understand why we should send directed presence when
-    # we just sent global presence, or is this wrong?
-
-    Free $token
-}
-
 proc ::ParseURI::DoProbe {token} {
     variable $token
     upvar 0 $token state
 
     ::Jabber::JlibCmd send_presence -to $state(jid) -type "probe"
+    Free $token
+}
+
+proc ::ParseURI::DoPubsub {token} {
+    variable $token
+    upvar 0 $token state
+
+    set opts {}
+    set action subscribe
+    foreach {key value} [array get state query,*] {
+	
+	switch -- $key {
+	    query,action {
+		set action $value
+	    }
+	    query,node {
+		lappend opts -node $value
+	    }
+	}
+    }
+    if {![regexp {^(subscribe|unsubscribe)$} $action]} {
+	Free $token
+	return
+    }
+    set myjid [::Jabber::JlibCmd myjid]
+    jlib:splitjid $myjid myjid2 -
+    eval {::Jabber::JlibCmd pubsub $action $state(jid) $myjid2} $opts
+    Free $token
+}
+
+proc ::ParseURI::DoRegister {token} {
+    variable $token
+    upvar 0 $token state
+
+    ::GenRegister::NewDlg -server $state(jid) -autoget 1
+    Free $token
 }
 
 proc ::ParseURI::DoRemove {token} {
@@ -500,6 +514,7 @@ proc ::ParseURI::DoRemove {token} {
     upvar 0 $token state
 
     ::Jabber::JlibCmd roster_remove $state(jid) ::ParseURI::Noop
+    Free $token
 }
 
 proc ::ParseURI::DoRoster {token} {
@@ -519,6 +534,15 @@ proc ::ParseURI::DoRoster {token} {
 	}
     }
     eval {::Jabber::JlibCmd roster_set $state(jid) ::ParseURI::Noop} $opts
+    Free $token
+}
+
+proc ::ParseURI::DoSendfile {token} {
+    variable $token
+    upvar 0 $token state
+
+    ::FTrans::Send $state(jid)
+    Free $token
 }
 
 proc ::ParseURI::DoSubscribe {token} {
@@ -527,6 +551,15 @@ proc ::ParseURI::DoSubscribe {token} {
 
     ::Jabber::JlibCmd roster_set $state(jid) ::ParseURI::Noop
     ::Jabber::JlibCmd send_presence -to $state(jid) -type "subscribe"
+    Free $token
+}
+
+proc ::ParseURI::DoUnregister {token} {
+    variable $token
+    upvar 0 $token state
+
+    ::Register::Remove $state(jid)
+    Free $token
 }
 
 proc ::ParseURI::DoUnsubscribe {token} {
@@ -534,6 +567,15 @@ proc ::ParseURI::DoUnsubscribe {token} {
     upvar 0 $token state
 
     ::Jabber::JlibCmd send_presence -to $state(jid) -type "unsubscribe"
+    Free $token
+}
+
+proc ::ParseURI::DoVcard {token} {
+    variable $token
+    upvar 0 $token state
+
+    ::VCard::Fetch "other" $state(jid)
+    Free $token
 }
 
 proc ::ParseURI::Noop {args} { }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.12 2006-06-10 07:05:05 matben Exp $
+# $Id: FTrans.tcl,v 1.13 2006-08-09 07:13:47 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -297,8 +297,7 @@ proc ::FTrans::Send {jid args} {
     if {[$jstate(jlib) disco isdiscoed info $jid]} {
 	set feature [DiscoGetFeature $jid]
 	if {$feature eq ""} {
-	    ui::dialog [ui::autoname]  \
-	      -type ok -icon error -title [mc {Error}]  \
+	    ui::dialog -type ok -icon error -title [mc {Error}]  \
 	      -message [mc jamessnofiletrpt $jid]
 	} else {
 	    eval {Build $jid} $args
