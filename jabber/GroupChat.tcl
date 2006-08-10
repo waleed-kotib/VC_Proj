@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.154 2006-08-03 06:14:24 matben Exp $
+# $Id: GroupChat.tcl,v 1.155 2006-08-10 13:55:53 matben Exp $
 
 package require Create
 package require Enter
@@ -25,7 +25,6 @@ namespace eval ::GroupChat:: {
     ::hooks::register newGroupChatMessageHook ::GroupChat::GotMsg
     ::hooks::register newMessageHook          ::GroupChat::NormalMsgHook
     ::hooks::register logoutHook              ::GroupChat::LogoutHook
-    ::hooks::register presenceHook            ::GroupChat::PresenceHook
     ::hooks::register setPresenceHook         ::GroupChat::StatusSyncHook
     ::hooks::register groupchatEnterRoomHook  ::GroupChat::EnterHook
     
@@ -174,6 +173,7 @@ namespace eval ::GroupChat:: {
 	none        3
     }
     
+    # Not used.
     variable show2String
     set show2String(available)   [mc available]
     set show2String(away)        [mc away]
@@ -290,8 +290,17 @@ proc ::GroupChat::EnterOrCreate {what args} {
 proc ::GroupChat::EnterHook {roomjid protocol} {
     
     ::Debug 2 "::GroupChat::EnterHook roomjid=$roomjid $protocol"
+  
+    # If we haven't a window for this roomjid, make one!
+    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    if {$chattoken eq ""} {
+	set chattoken [NewChat $roomjid]
+    }
     
     SetProtocol $roomjid $protocol
+    
+    ::Jabber::JlibCmd presence_register_ex [namespace code PresenceEvent] \
+      -from2 $roomjid
 }
 
 # GroupChat::SetProtocol --
@@ -394,19 +403,19 @@ proc ::GroupChat::NormalMsgHook {body args} {
 # Results:
 #       chattoken
 
-proc ::GroupChat::NewChat {roomjid args} {
+proc ::GroupChat::NewChat {roomjid} {
     upvar ::Jabber::jprefs jprefs
     
     if {$jprefs(chat,tabbedui)} {
 	set dlgtoken [GetFirstDlgToken]
 	if {$dlgtoken eq ""} {
-	    set dlgtoken [eval {Build $roomjid} $args]
+	    set dlgtoken [Build $roomjid]
 	    set chattoken [GetTokenFrom chat roomjid $roomjid]
 	} else {
 	    set chattoken [NewPage $dlgtoken $roomjid]
 	}
     } else {
-	set dlgtoken [eval {Build $roomjid} $args]
+	set dlgtoken [Build $roomjid]
 	set chattoken [GetActiveChatToken $dlgtoken]
     }
     
@@ -447,7 +456,7 @@ proc ::GroupChat::GotMsg {body args} {
     # If we haven't a window for this roomjid, make one!
     set chattoken [GetTokenFrom chat roomjid $roomjid]
     if {$chattoken eq ""} {
-	set chattoken [eval {NewChat $roomjid} $args]
+	set chattoken [NewChat $roomjid]
     }
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -489,12 +498,11 @@ proc ::GroupChat::GotMsg {body args} {
 #
 # Arguments:
 #       roomjid     The roomname@server
-#       args        ??
 #       
 # Results:
 #       shows window, returns token.
 
-proc ::GroupChat::Build {roomjid args} {
+proc ::GroupChat::Build {roomjid} {
     global  prefs wDlgs
     
     variable protocol
@@ -503,7 +511,7 @@ proc ::GroupChat::Build {roomjid args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::GroupChat::Build roomjid=$roomjid, args='$args'"
+    ::Debug 2 "::GroupChat::Build roomjid=$roomjid"
 
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -513,7 +521,6 @@ proc ::GroupChat::Build {roomjid args} {
 
     # Make unique toplevel name.
     set w $wDlgs(jgc)$uiddlg
-    array set argsArr $args
 
     set dlgstate(w)             $w
     set dlgstate(uid)           0
@@ -598,9 +605,7 @@ proc ::GroupChat::Build {roomjid args} {
     pack $wcont -side top -fill both -expand 1
     
     # Use an extra frame that contains everything room specific.
-    set chattoken [eval {
-	BuildRoomWidget $dlgtoken $wroom $roomjid
-    } $args]
+    set chattoken [BuildRoomWidget $dlgtoken $wroom $roomjid]
     pack $wroom -in $wcont -fill both -expand 1
 
     if {!( [info exists protocol($roomjid)] && ($protocol($roomjid) eq "muc") )} {
@@ -635,12 +640,11 @@ proc ::GroupChat::Build {roomjid args} {
 #       dlgtoken    topwindow token
 #       wroom       megawidget frame
 #       roomjid
-#       args
 #       
 # Results:
 #       chattoken
 
-proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid args} {
+proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     global  this
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
@@ -652,8 +656,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::GroupChat::BuildRoomWidget, roomjid=$roomjid, args=$args"
-    array set argsArr $args
+    ::Debug 2 "::GroupChat::BuildRoomWidget, roomjid=$roomjid"
 
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -1011,9 +1014,7 @@ proc ::GroupChat::MakeNewPage {dlgtoken roomjid args} {
     # We must make the new page a sibling of the notebook in order to be
     # able to reparent it when notebook gons.
     set wroom $dlgstate(wroom)[incr uidpage]
-    set chattoken [eval {
-	BuildRoomWidget $dlgtoken $wroom $roomjid
-    } $args]
+    set chattoken [BuildRoomWidget $dlgtoken $wroom $roomjid]
     pack $wroom -in $wpage -fill both -expand true
 
     variable $chattoken
@@ -1582,7 +1583,7 @@ proc ::GroupChat::TreeOnDestroy {T} {
     array unset tag2item $T,*
 }
 
-proc ::GroupChat::TreeCreateUserItem {chattoken jid3 presence args} {
+proc ::GroupChat::TreeCreateUserItem {chattoken jid3} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     variable userRoleToStr
@@ -1613,7 +1614,7 @@ proc ::GroupChat::TreeCreateUserItem {chattoken jid3 presence args} {
 	$T item style set $item cTree styUser
     }
     set text [$jstate(jlib) service nick $jid3]
-    set image [eval {::Roster::GetPresenceIcon $jid3 $presence} $args]
+    set image [::Roster::GetPresenceIconFromJid $jid3]
     $T item element configure $item cTree  \
       eText -text $text + eImage -image $image
 }
@@ -1938,9 +1939,11 @@ proc ::GroupChat::Exit {chattoken} {
 
     ::Debug 2  "::GroupChat::Exit $chattoken"
 
+    set roomjid $chatstate(roomjid)
+    $jstate(jlib) presence_deregister_ex [namespace code PresenceEvent]  \
+      -from2 $roomjid
     if {[::Jabber::IsConnected]} {
-	set roomjid $chatstate(roomjid)
-	$jstate(jlib) service exitroom $roomjid
+	$jstate(jlib) service exitroom $roomjid	
 	::hooks::run groupchatExitRoomHook $roomjid
     }
 }
@@ -2099,98 +2102,41 @@ proc ::GroupChat::CommandReturnKeyPress {chattoken} {
     }
 }
 
-# GroupChat::Presence --
-#
-#       Sets the presence of the jid in our UI.
-#
-# Arguments:
-#       jid         'user@server' without resource
-#       presence    "available", "unavailable", or "unsubscribed"
-#       args        list of '-key value' pairs where '-key' can be
-#                   -resource, -from, -type, -show...
+# GroupChat::PresenceEvent --
+# 
+#       Callback for any presence change related to roomjid and roomjid/*
+#       Note that our own "enter presence" comes too early to be detected.
 #       
-# Results:
-#       groupchat member list updated.
+# Some msn components may send presence directly from a room when
+# a chat invites you to a multichat:
+# <presence 
+#     from='r1@msn.jabber.ccc.de/marilund60@hotmail.com' 
+#     to='matben@jabber.ccc.de'/>
+#     
+# Note that a conference service may also be a gateway!
 
-# @@@ Much better to register for presence info for room only.
-#     Register for room jid and any member.
-#     Register directly with jabberlib somehow and not via application hooks.
-
-proc ::GroupChat::PresenceHook {jid presence args} {
-    
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::GroupChat::PresenceHook jid=$jid, presence=$presence, args='$args'"
-    
-    array set argsArr $args
-    set jid2 $jid
-    set jid3 $jid
-    if {[info exists argsArr(-resource)]} {
-	set jid3 $jid2/$argsArr(-resource)
+proc ::GroupChat::PresenceEvent {jlibname xmldata} {
+    upvar ::Jabber::xmppxmlns xmppxmlns
+        
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type available
     }
-    jlib::splitjidex $jid3 node service res
-    
-    # We must check that non of jid2 or jid3 are roster items.
-    if {[$jstate(roster) isitem $jid2] || [$jstate(roster) isitem $jid3]} {
-	return
-    }
-
-    # Some msn components may send presence directly from a room when
-    # a chat invites you to a multichat:
-    # <presence 
-    #     from='r1@msn.jabber.ccc.de/marilund60@hotmail.com' 
-    #     to='matben@jabber.ccc.de'/>
-    #     
-    # Note that a conference service may also be a gateway!
-    set conferences [$jstate(jlib) disco getconferences]
-    set allroomsin  [$jstate(jlib) service allroomsin]
-    set inroom [expr [lsearch $allroomsin $jid2] < 0 ? 0 : 1]
-    set isconf [expr [lsearch $conferences $service] < 0 ? 0 : 1]
-    set isroom [$jstate(jlib) service isroom $jid]
-    set istrpt [::Roster::IsTransport $service]
-    
-    # @@@ BAD heuristics!
-    set isinvite 0
-    if {$istrpt && !$inroom && $isconf && ($presence eq "available")} {
-	set isinvite 1
-    }
-    ::Debug 4 "\t conferences=$conferences"
-    ::Debug 4 "\t allroomsin=$allroomsin"
-    ::Debug 4 "\t inroom=$inroom, isconf=$isconf, isroom=$isroom, istrpt=$istrpt"
-    
-    # @@@ This one just gives us problems:
-    # RECV: <presence from='msn.jabber.dk' to='matben@jabber.dk'/>
-    if {0 && $isinvite} {
-	
-	# This seems to be a kind of invitation for a groupchat.
-	set str [mc jamessgcinvite $jid2 $argsArr(-from)]
-	set ans [::UI::MessageBox -icon info -type yesno -message $str]
-	if {$ans eq "yes"} {
-	    jlib::splitjidex $argsArr(-to) nd hst rs
-	    EnterOrCreate enter -roomjid $jid2 -nickname $nd -protocol gc-1.0
+    jlib::splitjid $from roomjid nick
+        
+    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    if {$chattoken ne ""} {
+	if {[string equal $type "available"]} {
+	    SetUser $roomjid $from
+	} elseif {[string equal $type "unavailable"]} {
+	    RemoveUser $roomjid $from
 	}
-    } 
     
-    # Only if we actually entered the room.
-    if {$isroom} {
-	# Since there should not be any /resource.
-	set roomjid $jid
-	if {[string equal $presence "available"]} {
-	    eval {SetUser $roomjid $jid3 $presence} $args
-	} elseif {[string equal $presence "unavailable"]} {
-	    RemoveUser $roomjid $jid3
-	}
-	
-	set chattoken [GetTokenFrom chat roomjid $jid2]
-	if {$chattoken ne ""} {
-	    set cmd [concat \
-	      [list ::GroupChat::InsertPresenceChange $chattoken $presence $jid3] \
-	      $args]
-	    lappend chatstate(afterids) [after 200 $cmd]
-	}
-	
+	lappend chatstate(afterids) [after 200 [list  \
+	  ::GroupChat::InsertPresenceChange $chattoken $from]]
+    
 	# When kicked etc. from a MUC room...
-	# 
 	# 
 	#  <x xmlns='http://jabber.org/protocol/muc#user'>
 	#    <item affiliation='none' role='none'>
@@ -2199,28 +2145,18 @@ proc ::GroupChat::PresenceHook {jid presence args} {
 	#    </item>
 	#    <status code='307'/>
 	#  </x>
-	
-	if {[info exists argsArr(-x)]} {
-	    foreach c $argsArr(-x) {
-		set xmlns [wrapper::getattribute $c xmlns]
-		
-		switch -- $xmlns {
-		    "http://jabber.org/protocol/muc#user" {
-			# Seems hard to figure out anything here...		    
-		    }
-		}
-	    }
-	}
+
+	set xE [wrapper::getfirstchild $xmldata x $xmppxmlns(muc,user)]
+
+	# @@@ TODO
     }
 }
 
-proc ::GroupChat::InsertPresenceChange {chattoken presence jid3 args} {
+proc ::GroupChat::InsertPresenceChange {chattoken jid3} {
     variable $chattoken
     upvar 0 $chattoken chatstate
-    variable show2String
-    
-    array set argsArr $args
-    
+    upvar ::Jabber::jstate jstate
+        
     if {[info exists chatstate(w)] && [winfo exists $chatstate(w)]} {
 	
 	# Some services send out presence changes automatically.
@@ -2229,12 +2165,24 @@ proc ::GroupChat::InsertPresenceChange {chattoken presence jid3 args} {
 	if {[expr {$ms - $chatstate(last,sys) < 400}]} {
 	    return
 	}
-	set nick [::Jabber::JlibCmd service nick $jid3]	
-	set show $presence
-	if {[info exists argsArr(-show)]} {
-	    set show $argsArr(-show)
+	jlib::splitjid $jid3 jid2 res
+	if {$res eq ""} {
+	    jlib::splitjidex $jid3 node domain res
+	    set name $node
+	} else {
+	    set name $res
 	}
-	InsertMessage $chattoken $chatstate(roomjid) "${nick}: $show2String($show)"
+	if {$res eq ""} {
+	    array set presA [lindex [$jstate(roster) getpresence $jid2] 0]
+	} else {
+	    array set presA [$jstate(roster) getpresence $jid2 -resource $res]
+	}
+	set show $presA(-type)
+	if {[info exists presA(-show)]} {
+	    set show $presA(-show)
+	}
+	set str [string tolower [::Roster::MapShowToText $show]]
+	InsertMessage $chattoken $chatstate(roomjid) "$name: $str"
     }
 }
 
@@ -2254,7 +2202,7 @@ proc ::GroupChat::AddUsers {chattoken} {
 	set res $presArr(-resource)
 	if {$res ne ""} {
 	    set jid3 $roomjid/$res
-	    eval {SetUser $roomjid $jid3 $presArr(-type)} $pres
+	    SetUser $roomjid $jid3
 	}
     }
 }
@@ -2266,44 +2214,34 @@ proc ::GroupChat::AddUsers {chattoken} {
 # Arguments:
 #       roomjid     the room's jid
 #       jid3        roomjid/hashornick
-#       presence    "available", "unavailable", or "unsubscribed"
-#       args        list of '-key value' pairs where '-key' can be
-#                   -resource, -from, -type, -show,...
 #       
 # Results:
 #       updated UI.
 
-proc ::GroupChat::SetUser {roomjid jid3 presence args} {
+proc ::GroupChat::SetUser {roomjid jid3} {
     global  this
 
     variable userRoleToStr
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::GroupChat::SetUser roomjid=$roomjid, jid3=$jid3 \
-      presence=$presence args=$args"
+    ::Debug 2 "::GroupChat::SetUser roomjid=$roomjid, jid3=$jid3"
 
-    array set argsArr $args
     set roomjid [jlib::jidmap $roomjid]
     set jid3    [jlib::jidmap $jid3]
 
     # If we haven't a window for this thread, make one!
     set chattoken [GetTokenFrom chat roomjid $roomjid]
     if {$chattoken eq ""} {
-	set chattoken [eval {NewChat $roomjid} $args]
+	set chattoken [NewChat $roomjid]
     }       
     variable $chattoken
     upvar 0 $chattoken chatstate
         
-    # If we got a browse push with a <user>, assume is available.
-    if {$presence eq ""} {
-	set presence available
-    }    
-    
     # Don't forget to init the ignore state.
     if {![info exists chatstate(ignore,$jid3)]} {
 	set chatstate(ignore,$jid3) 0
     }
-    eval {TreeCreateUserItem $chattoken $jid3 $presence} $args
+    TreeCreateUserItem $chattoken $jid3
 }
 
 proc ::GroupChat::GetRoleFromJid {jid3} {
