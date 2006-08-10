@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.146 2006-08-09 07:13:47 matben Exp $
+# $Id: jabberlib.tcl,v 1.147 2006-08-10 13:55:54 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2490,6 +2490,9 @@ proc jlib::presence_register_ex {jlibname func args} {
 	    -tag - -xmlns {
 		set aopts($key) $value
 	    }
+	    -seq {
+		set seq $value
+	    }
 	}
     }
     set pat "$type,$from,$from2"
@@ -2508,7 +2511,7 @@ proc jlib::presence_ex_run_hook {jlibname xmldata} {
 
     upvar ${jlibname}::expreshook expreshook
     upvar ${jlibname}::locals locals
-
+    
     set type [wrapper::getattribute $xmldata type]
     set from [wrapper::getattribute $xmldata from]
     if {$type eq ""} {
@@ -2519,11 +2522,12 @@ proc jlib::presence_ex_run_hook {jlibname xmldata} {
     }
     jlib::splitjid $from from2 -
     set pkey "$type,$from,$from2"
-        
+            
     # Make matching in two steps, attributes and elements.
     # First the attributes.
     set matched {}
     foreach {pat value} [array get expreshook] {
+
 	if {[string match $pat $pkey]} {
 	    
 	    foreach spec $value {
@@ -2584,8 +2588,7 @@ proc jlib::presence_deregister_ex {jlibname func args} {
     set type  "*"
     set from  "*"
     set from2 "*"
-    set seq   50
-    set spec  {}
+    set seq   "*"
 
     foreach {key value} $args {
 	switch -- $key {
@@ -2597,19 +2600,28 @@ proc jlib::presence_deregister_ex {jlibname func args} {
 		set type $value
 	    }
 	    -tag - -xmlns {
-		lappend spec $key $value
+		set aopts($key) $value
+	    }
+	    -seq {
+		set seq $value
 	    }
 	}
     }
     set pat "$type,$from,$from2"
     if {[info exists expreshook($pat)]} {
-	# @@@ TODO
-	set idx [lsearch -glob $expreshook($pat) "$func *"]
-	if {$idx >= 0} {
-	    set expreshook($type) [lreplace $expreshook($type) $idx $idx]
+
+	# The 'opts' must be ordered.
+	set opts {}
+	foreach key [array names aopts] {
+	    lappend opts $key $aopts($key)
 	}
-	
-	
+	set idx [lsearch -glob $expreshook($pat) [list $opts $func $seq]]
+	if {$idx >= 0} {
+	    set expreshook($pat) [lreplace $expreshook($pat) $idx $idx]
+	    if {$expreshook($pat) eq {}} {
+		unset expreshook($pat)
+	    }
+	}
     }
 }
 
