@@ -55,7 +55,7 @@
 #       XMPP URI/IRI Querytypes 
 #       JEP-0147: XMPP URI Scheme Query Components 
 #
-# $Id: ParseURI.tcl,v 1.32 2006-08-09 07:13:47 matben Exp $
+# $Id: ParseURI.tcl,v 1.33 2006-08-11 06:01:16 matben Exp $
 
 package require uriencode
 
@@ -200,7 +200,7 @@ proc ::ParseURI::Parse {args} {
 	::hooks::register loginHook   [list ::ParseURI::LoginHook $token]
     } else {
 	set profname $state(profname)
-	set ans "ok"
+	variable ans "ok"
 	if {$password eq ""} {
 	    set w [ui::dialog -message [mc enterpassword $state(jid)]  \
 	      -icon info -type okcancel -modal 1  \
@@ -234,6 +234,7 @@ proc ::ParseURI::Parse {args} {
 	} else {
 	    Free $token
 	}
+	unset -nocomplain ans
     }
 }
 
@@ -375,6 +376,7 @@ proc ::ParseURI::HandleJoinGroupchat {token} {
     # We require a nick name (resource part).
     set nick $state(resource)
     if {$nick eq ""} {
+	variable ans
 	set str "Please enter your desired nick name for the room $state(jid2)"
 	set w [ui::dialog -message $str -title [mc {Nick name}]  \
 	  -icon info -type okcancel -modal 1  \
@@ -390,6 +392,7 @@ proc ::ParseURI::HandleJoinGroupchat {token} {
 	    Free $token
 	    return
 	}
+	unset -nocomplain ans
     }
     
     # We brutaly assumes muc room here.
