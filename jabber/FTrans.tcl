@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.13 2006-08-09 07:13:47 matben Exp $
+# $Id: FTrans.tcl,v 1.14 2006-08-11 06:01:16 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -333,8 +333,7 @@ proc ::FTrans::DiscoCB {w jlibname type jid subiq} {
     if {[winfo exists $w]} {
 	$w status ""
 	if {($type eq "error") || ([DiscoGetFeature $jid] eq "")} {
-	    ui::dialog [ui::autoname]  \
-	      -type ok -icon error -title [mc {Error}]  \
+	    ui::dialog -type ok -icon error -title [mc {Error}]  \
 	      -message [mc jamessnofiletrpt $jid]
 	    destroy $w
 	} else {
@@ -432,11 +431,9 @@ proc ::FTrans::SendCommand {jlibname status sid {subiq ""}} {
 		  $stanza $errstr]
 	    }
 	}
-	ui::dialog [ui::autoname]  \
-	  -icon error -type ok -title [mc Error] -message $msg
+	ui::dialog -icon error -type ok -title [mc Error] -message $msg
     } else {
-	ui::dialog [ui::autoname]  \
-	  -icon info -type ok -title [mc {File Transfer}] \
+	ui::dialog -icon info -type ok -title [mc {File Transfer}] \
 	  -message [mc jamessoobok2 $state(name) $state(jid)]
     }
 }
@@ -459,11 +456,9 @@ proc ::FTrans::SendCommandOOB {fileName jid jlibname type subiq} {
 	    }
 	}
 	
-	ui::dialog [ui::autoname]  \
-	  -icon error -type ok -title [mc Error] -message $msg
+	ui::dialog -icon error -type ok -title [mc Error] -message $msg
     } else {
-	ui::dialog [ui::autoname]  \
-	  -icon info -type ok -title [mc {File Transfer}] \
+	ui::dialog -icon info -type ok -title [mc {File Transfer}] \
 	  -message [mc jamessoobok2 $tail $jid]
     }
 }
@@ -580,8 +575,7 @@ proc ::FTrans::TCommand {token jlibname sid status {errmsg ""}} {
     ::Debug 2 "---> ::FTrans::TCommand status=$status"
 
     if {$status eq "error"} {
-	ui::dialog [ui::autoname]  \
-	  -icon error -type ok -title [mc Error]  \
+	ui::dialog -icon error -type ok -title [mc Error]  \
 	  -message [mc jamessfiletrpterr $state(name) $state(jid) $errmsg]
 	catch {file delete $state(fileName)}
     } elseif {$status eq "reset"} {

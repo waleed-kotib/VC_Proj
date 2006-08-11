@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.172 2006-07-29 13:12:58 matben Exp $
+# $Id: Jabber.tcl,v 1.173 2006-08-11 06:01:16 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -581,7 +581,7 @@ proc ::Jabber::MessageHandler {jlibName type args} {
 	    if {[info exists argsArr(-error)]} {
 		set errcode [lindex $argsArr(-error) 0]
 		set errmsg  [lindex $argsArr(-error) 1]		
-		ui::dialog [ui::autoname] -title [mc Error] \
+		ui::dialog -title [mc Error] \
 		  -message [mc jamesserrsend $from $errcode $errmsg] \
 		  -icon error -type ok		
 	    }
