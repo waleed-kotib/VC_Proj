@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.62 2006-04-07 14:08:28 matben Exp $
+# $Id: JWB.tcl,v 1.63 2006-08-12 13:48:25 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -258,6 +258,8 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
     set jid [jlib::jidmap $jid]
     jlib::splitjid $jid jid2 res
     
+    set jlib $jstate(jlib)
+    
     set isRoom 0
     if {[string equal $argsArr(-type) "groupchat"]} {
 	set isRoom 1
@@ -265,10 +267,10 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 	set isRoom 1
     }
     set isUserInRoom 0
-    if {[$jstate(jlib) service isroom $jid2] && [string length $res]} {
+    if {[$jlib service isroom $jid2] && [string length $res]} {
 	set isUserInRoom 1
     }
-    set isAvailable [$jstate(roster) isavailable $jid]
+    set isAvailable [$jlib roster isavailable $jid]
     
     ::Debug 2 "\t isRoom=$isRoom, isUserInRoom=$isUserInRoom, isAvailable=$isAvailable"
 
@@ -278,10 +280,10 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
     if {$isRoom} {
 	
 	# Must enter room in the usual way if not there already.
-	set inrooms [$jstate(jlib) service allroomsin]
+	set inrooms [$jlib service allroomsin]
 	::Debug 4 "\t inrooms=$inrooms"
 	
-	set roomName [$jstate(jlib) disco name $jid]
+	set roomName [$jlib disco name $jid]
 	if {[llength $roomName]} {
 	    set title "Groupchat room $roomName"
 	} else {
@@ -311,7 +313,7 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 	} else {
 	    set thread [::sha1::sha1 "$jstate(mejid)[clock seconds]"]
 	}
-	set name [$jstate(roster) getname $jid]
+	set name [$jlib roster getname $jid]
 	if {[string length $name]} {
 	    set title "[mc {Chat With}] $name"
 	} else {
@@ -324,7 +326,7 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
     } else {
 	
 	# Normal whiteboard message.
-	set name [$jstate(roster) getname $jid]
+	set name [$jlib roster getname $jid]
 	if {[string length $name]} {
 	    set title "Send Message to $name"
 	} else {
@@ -418,7 +420,7 @@ proc ::Jabber::WB::BuildEntryHook {w wcomm} {
     set contactOnImage  [::Theme::GetImage [option get $w contactOnImage {}]]
     set iconResize      [::Theme::GetImage [option get $w resizeHandleImage {}]]
 
-    set jidlist [$jstate(roster) getusers]
+    set jidlist [$jstate(jlib) roster getusers]
     
     set wframe $wcomm.f
     ttk::frame $wframe
@@ -778,7 +780,7 @@ proc ::Jabber::WB::CheckIfOnline {w} {
 
     set isok 1
     if {[string equal $jwbstate($w,type) "chat"]} {
-	set isok [$jstate(roster) isavailable $jwbstate($w,jid)]
+	set isok [$jstate(jlib) roster isavailable $jwbstate($w,jid)]
 	if {!$isok} {
 	    ::UI::MessageBox -type ok -icon warning -parent $w \
 	      -message [mc jamesschatoffline]
@@ -897,7 +899,7 @@ proc ::Jabber::WB::DoSendCanvas {w} {
     if {[jlib::jidvalidate $jid]} {
 		
 	# If user not online no files may be sent off.
-	if {![$jstate(roster) isavailable $jid]} {
+	if {![$jstate(jlib) roster isavailable $jid]} {
 	    set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
 	      -message "The user you are sending to,\
 	      \"$jid\", is not online, and if this message contains any images\
@@ -1195,7 +1197,7 @@ proc ::Jabber::WB::SVGHttpHandler {w cmd} {
     # THIS IS NOT A 3-tier JID!!!!!
     set jid3 $jwbstate($w,jid)
 
-    if {[$jstate(roster) isavailable $jid3] || \
+    if {[$jstate(jlib) roster isavailable $jid3] || \
       [jlib::jidequal $jid3 $jstate(mejidres)]} {
 	set tryimport 1
     }
@@ -1485,7 +1487,7 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
 	    
 	    # Starting with 0.95.1 we send server info along the initial 
 	    # presence element.
-	    set coccielem [$jstate(roster) getextras $mjid $coccixmlns(servers)]
+	    set coccielem [$jstate(jlib) roster getextras $mjid $coccixmlns(servers)]
 	    if {$coccielem != {}} {
 		set ipElements [wrapper::getchildswithtag $coccielem ip]
 		set ip [wrapper::getcdata [lindex $ipElements 0]]
@@ -1569,7 +1571,7 @@ proc ::Jabber::WB::PutFileOrScheduleHook {w fileName opts} {
 	} else {
 	    
 	    # Else put to resource with highest priority.
-	    set res [$jstate(roster) gethighestresource $tojid]
+	    set res [$jstate(jlib) roster gethighestresource $tojid]
 	    if {$res eq ""} {
 		
 		# This is someone we haven't got presence from.
@@ -1590,7 +1592,7 @@ proc ::Jabber::WB::PutFileOrScheduleHook {w fileName opts} {
 	if {$isRoom} {
 	    set avail 1
 	} else {
-	    set avail [$jstate(roster) isavailable $jid3]
+	    set avail [$jstate(jlib) roster isavailable $jid3]
 	}
 	set mjid3 [jlib::jidmap $jid3]
 	

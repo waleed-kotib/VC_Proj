@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.76 2006-05-01 13:35:58 matben Exp $
+# $Id: MUC.tcl,v 1.77 2006-08-12 13:48:25 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -121,7 +121,7 @@ proc ::MUC::Invite {roomjid {continue ""}} {
 	::UI::SetWindowPosition $w $wDlgs(jmucinvite)
     }
     jlib::splitjidex $roomjid node domain res
-    set jidlist [$jstate(roster) getusers -type available]
+    set jidlist [$jstate(jlib) roster getusers -type available]
 
     set invite(w)        $w
     set invite(reason)   ""
@@ -528,12 +528,13 @@ proc ::MUC::FillTable {roomjid} {
     $wtbl delete 0 end
     
     # Fill in tablelist.
-    set presList [$jstate(roster) getpresence $roomjid -type available]
-    set resourceList [$jstate(roster) getresources $roomjid -type available]
+    set jlib $jstate(jlib)
+    set presList [$jlib roster getpresence $roomjid -type available]
+    set resourceList [$jlib roster getresources $roomjid -type available]
     set irow 0
     
     foreach res $resourceList {
-	set xelem [$jstate(roster) getx $roomjid/$res "muc#user"]
+	set xelem [$jlib roster getx $roomjid/$res "muc#user"]
 	set aff none
 	set role none
 	foreach elem [wrapper::getchildren $xelem] {

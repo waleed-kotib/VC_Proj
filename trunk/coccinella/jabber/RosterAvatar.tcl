@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.13 2006-05-30 14:32:38 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.14 2006-08-12 13:48:25 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -736,10 +736,11 @@ proc ::RosterAvatar::DeleteItem {jid} {
 
 proc ::RosterAvatar::CreateItemFromJID {jid} {    
     upvar ::Jabber::jstate jstate
-    
+
+    set jlib $jstate(jlib)
     jlib::splitjid $jid jid2 res
-    set pres [$jstate(roster) getpresence $jid2 -resource $res]
-    set rost [$jstate(roster) getrosteritem $jid2]
+    set pres [$jlib roster getpresence $jid2 -resource $res]
+    set rost [$jlib roster getrosteritem $jid2]
     array set opts $pres
     array set opts $rost
 

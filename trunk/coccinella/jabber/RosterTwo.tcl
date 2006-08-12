@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 20052006  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.10 2006-05-07 14:08:01 matben Exp $
+# $Id: RosterTwo.tcl,v 1.11 2006-08-12 13:48:25 matben Exp $
 
 package require RosterTree
 
@@ -169,15 +169,17 @@ proc ::RosterTwo::CreateItem {jid presence args} {
     set jid2 [jlib::barejid $jid]
     set mjid [jlib::jidmap $jid]
     
+    set jlib $jstate(jlib)
+    
     # Defaults:
-    set name [$jstate(roster) getname $jid2]
+    set name [$jlib roster getname $jid2]
     if {$name ne ""} {
 	set jtext "$name ($jid)"
     } else {
 	set jtext $jid
     }
-    set status [$jstate(roster) getstatus $jid]
-    set since  [$jstate(roster) availablesince $jid]
+    set status [$jlib roster getstatus $jid]
+    set since  [$jlib roster availablesince $jid]
     set jimage [eval {GetPresenceIcon $jid $presence} $args]
     set items  {}
     set jitems {}
@@ -283,9 +285,10 @@ proc ::RosterTwo::DeleteItem {jid} {
 proc ::RosterTwo::CreateItemFromJID {jid} {    
     upvar ::Jabber::jstate jstate
     
+    set jlib $jstate(jlib)
     jlib::splitjid $jid jid2 res
-    set pres [$jstate(roster) getpresence $jid2 -resource $res]
-    set rost [$jstate(roster) getrosteritem $jid2]
+    set pres [$jlib roster getpresence $jid2 -resource $res]
+    set rost [$jlib roster getrosteritem $jid2]
     array set opts $pres
     array set opts $rost
 

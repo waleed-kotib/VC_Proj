@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.173 2006-08-11 06:01:16 matben Exp $
+# $Id: Jabber.tcl,v 1.174 2006-08-12 13:48:25 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -18,7 +18,7 @@ package require wavelabel
 
 # jlib components shall be declared here, or later.
 package require jlib
-package require roster
+package require jlib::roster
 package require jlib::bytestreams
 package require jlib::caps
 package require jlib::connect
@@ -440,7 +440,7 @@ proc ::Jabber::IsConnected { } {
 proc ::Jabber::RosterCmd {args}  {
     variable jstate
     
-    eval {$jstate(roster)} $args
+    eval {$jstate(jlib) roster} $args
 }
 
 proc ::Jabber::DiscoCmd {args}  {
@@ -470,10 +470,7 @@ proc ::Jabber::Init { } {
     variable xmppxmlns
     
     ::Debug 2 "::Jabber::Init"
-    
-    # Make the roster object.
-    set jstate(roster) [::roster::roster ::Roster::PushProc]
-    
+        
     # Check if we need to set any auto away options.
     set opts {}
     if {$jprefs(autoaway) && ($jprefs(awaymin) > 0)} {
@@ -485,15 +482,15 @@ proc ::Jabber::Init { } {
     
     # Add the three element callbacks.
     lappend opts  \
-      -iqcommand       ::Jabber::IqCallback       \
+      -iqcommand       ::Jabber::IqHandler        \
       -messagecommand  ::Jabber::MessageHandler   \
-      -presencecommand ::Jabber::PresenceCallback
+      -presencecommand ::Jabber::PresenceHandler
 
     # Make an instance of jabberlib and fill in our roster object.
-    set jlibname [eval {
-	::jlib::new $jstate(roster) ::Jabber::ClientProc
-    } $opts]
+    set jlibname [eval {::jlib::new ::Jabber::ClientProc} $opts]
     set jstate(jlib) $jlibname
+    
+    $jlibname roster register_cmd ::Roster::PushProc
 
     # Register handlers for various iq elements.
     $jlibname iq_register get jabber:iq:version    ::Jabber::ParseGetVersion
@@ -527,7 +524,7 @@ proc ::Jabber::Init { } {
     $jlibname register_presence_stanza [CreateCoccinellaPresElement] -type available
 }
 
-# ::Jabber::IqCallback --
+# ::Jabber::IqHandler --
 #
 #       Registered callback proc for <iq> elements. Most handled elsewhere,
 #       in roster, browser and registered callbacks.
@@ -535,11 +532,11 @@ proc ::Jabber::Init { } {
 # Results:
 #       boolean (0/1) telling if this was handled or not. Only for 'get'.
 
-proc ::Jabber::IqCallback {jlibName type args} {
+proc ::Jabber::IqHandler {jlibName type args} {
     variable jstate
     variable jprefs
     
-    ::Debug 2 "::Jabber::IqCallback type=$type, args='$args'"
+    ::Debug 2 "::Jabber::IqHandler type=$type, args='$args'"
     
     array set attrArr $args
     set xmlns [wrapper::getattribute $attrArr(-query) xmlns]
@@ -608,7 +605,7 @@ proc ::Jabber::MessageHandler {jlibName type args} {
     }
 }
 
-# ::Jabber::PresenceCallback --
+# ::Jabber::PresenceHandler --
 #
 #       Registered callback proc for <presence> elements.
 #       
@@ -620,17 +617,19 @@ proc ::Jabber::MessageHandler {jlibName type args} {
 # Results:
 #       none.
 
-proc ::Jabber::PresenceCallback {jlibName type args} {
+proc ::Jabber::PresenceHandler {jlibName type args} {
     global  wDlgs prefs
     
     variable jstate
     variable jprefs
     
-    ::Debug 2 "::Jabber::PresenceCallback type=$type, args='$args'"
+    ::Debug 2 "::Jabber::PresenceHandler type=$type, args='$args'"
     
     array set argsArr $args
     set from $argsArr(-from)
-    set subscription [$jstate(roster) getsubscription $from]
+    set jlib $jstate(jlib)
+    
+    set subscription [$jlib roster getsubscription $from]
     
     switch -- $type {
 	subscribe {
@@ -641,21 +640,21 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    # We must be indenpendent of method; agent, browse, disco
 	    # The icq transports gives us subscribe from icq.host/registered
 	    
-	    set jidtype [lindex [$jstate(jlib) disco types $jid2] 0]
+	    set jidtype [lindex [$jlib disco types $jid2] 0]
 	    
 	    ::Debug 4 "\t jidtype=$jidtype"
 	    
 	    if {[::Roster::IsTransportHeuristics $from]} {
 		
 		# Add roster item before sending 'subscribed'. Didn't help :-(
-		if {![$jstate(roster) isitem $from]} {
-		    $jstate(jlib) roster_set $from ::Subscribe::ResProc
+		if {![$jlib roster isitem $from]} {
+		    $jlib roster send_set $from -command ::Subscribe::ResProc
 		}
-		$jstate(jlib) send_presence -to $from -type "subscribed"
+		$jlib send_presence -to $from -type "subscribed"
 
 		# It doesn't hurt to be subscribed to the transports presence.
 		if {($subscription eq "none") || ($subscription eq "from")} {
-		    $jstate(jlib) send_presence -to $from -type "subscribe"
+		    $jlib send_presence -to $from -type "subscribe"
 		}
 		
 		set subtype [lindex [split $jidtype /] 1]
@@ -667,7 +666,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		
 		# Another user request to subscribe to our presence.
 		# Figure out what the user's prefs are.
-		if {[$jstate(roster) isitem $from]} {
+		if {[$jlib roster isitem $from]} {
 		    set key inrost
 		} else {
 		    set key notinrost
@@ -686,12 +685,12 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		
 		switch -- $jprefs(subsc,$key) {
 		    accept {
-			$jstate(jlib) send_presence -to $from -type "subscribed"
+			$jlib send_presence -to $from -type "subscribed"
 			set autoaccepted 1
 			set msg [mc jamessautoaccepted $from]
 		    }
 		    reject {
-			$jstate(jlib) send_presence -to $from -type "unsubscribed"
+			$jlib send_presence -to $from -type "unsubscribed"
 			set msg [mc jamessautoreject $from]
 		    }
 		    ask {
@@ -708,10 +707,11 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		    
 		    # Explicitly set the users group.
 		    if {[string length $jprefs(subsc,group)]} {
-			$jstate(jlib) roster_set $from ::Subscribe::ResProc \
+			$jlib roster send_set $from  \
+			  -command ::Subscribe::ResProc \
 			  -groups [list $jprefs(subsc,group)]
 		    }
-		    $jstate(jlib) send_presence -to $from -type "subscribe"
+		    $jlib send_presence -to $from -type "subscribe"
 		    set msg [mc jamessautosubs $from]
 		    ::UI::MessageBox -title [mc Info] -icon info -type ok \
 		      -message $msg
@@ -730,13 +730,13 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    if {$jprefs(rost,rmIfUnsub)} {
 		
 		# Remove completely from our roster.
-		$jstate(jlib) roster_remove $from ::Roster::PushProc
+		$jlib roster send_remove $from
 		::UI::MessageBox -title [mc Unsubscribe] \
 		  -icon info -type ok  \
 		  -message [mc jamessunsub $from]
 	    } else {
 		
-		$jstate(jlib) send_presence -to $from -type "unsubscribed"
+		$jlib send_presence -to $from -type "unsubscribed"
 		::UI::MessageBox -title [mc Unsubscribe] -icon info -type ok  \
 		  -message [mc jamessunsubpres $from]
 		
@@ -747,8 +747,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		      -icon question -type yesno -default yes \
 		      -message [mc jamessunsubask $from $from]]
 		    if {$ans eq "yes"} {
-			$jstate(jlib) roster_remove $from \
-			  ::Roster::PushProc
+			$jlib roster send_remove $from
 		    }
 		}
 	    }
@@ -767,7 +766,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		if {$jprefs(rost,rmIfUnsub)} {
 		    
 		    # Remove completely from our roster.
-		    $jstate(jlib) roster_remove $from ::Roster::PushProc
+		    $jlib roster send_remove $from
 		}
 	    } else {		
 		::UI::MessageBox -title [mc Unsubscribed] -icon info -type ok \

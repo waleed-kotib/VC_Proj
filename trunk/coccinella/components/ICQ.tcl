@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.11 2006-05-30 14:32:38 matben Exp $
+# $Id: ICQ.tcl,v 1.12 2006-08-12 13:48:25 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -93,8 +93,7 @@ proc ::ICQ::VCardGetCB {from jlibName type subiq} {
 	    set nick     [wrapper::getcdata $nickElem]
 	    set vcardnick($from) $name
 	    jlib::splitjid $from jid2 res
-	    ::Jabber::JlibCmd roster_set $jid2  \
-	      [namespace current]::RosterSetCB -name $nick
+	    ::Jabber::JlibCmd roster send_set $jid2 -name $nick
 	}
     }
 }

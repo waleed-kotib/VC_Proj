@@ -55,7 +55,7 @@
 #       XMPP URI/IRI Querytypes 
 #       JEP-0147: XMPP URI Scheme Query Components 
 #
-# $Id: ParseURI.tcl,v 1.33 2006-08-11 06:01:16 matben Exp $
+# $Id: ParseURI.tcl,v 1.34 2006-08-12 13:48:25 matben Exp $
 
 package require uriencode
 
@@ -516,7 +516,7 @@ proc ::ParseURI::DoRemove {token} {
     variable $token
     upvar 0 $token state
 
-    ::Jabber::JlibCmd roster_remove $state(jid) ::ParseURI::Noop
+    ::Jabber::JlibCmd roster send_remove $state(jid)
     Free $token
 }
 
@@ -536,7 +536,7 @@ proc ::ParseURI::DoRoster {token} {
 	    }
 	}
     }
-    eval {::Jabber::JlibCmd roster_set $state(jid) ::ParseURI::Noop} $opts
+    eval {::Jabber::JlibCmd roster send_set $state(jid)} $opts
     Free $token
 }
 
@@ -552,7 +552,7 @@ proc ::ParseURI::DoSubscribe {token} {
     variable $token
     upvar 0 $token state
 
-    ::Jabber::JlibCmd roster_set $state(jid) ::ParseURI::Noop
+    ::Jabber::JlibCmd roster send_set $state(jid)
     ::Jabber::JlibCmd send_presence -to $state(jid) -type "subscribe"
     Free $token
 }

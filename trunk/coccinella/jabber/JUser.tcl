@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.19 2006-05-16 06:06:29 matben Exp $
+# $Id: JUser.tcl,v 1.20 2006-08-12 13:48:25 matben Exp $
 
 package provide JUser 1.0
 
@@ -63,7 +63,7 @@ proc ::Jabber::User::NewDlg {args} {
     set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
 
     # Find all our groups for any jid.
-    set allGroups [$jstate(roster) getgroups]
+    set allGroups [$jstate(jlib) roster getgroups]
     set allTypes  [::Roster::GetTransportNames $token]
     
     # Global frame.
@@ -190,10 +190,11 @@ proc ::Jabber::User::DoAdd {token} {
 	    return
 	}
     }
+    set jlib $jstate(jlib)
     
     # Warn if already in our roster.
-    set allUsers [$jstate(roster) getusers]
-    if {[$jstate(roster) isitem $jid]} {
+    set allUsers [$jlib roster getusers]
+    if {[$jlib roster isitem $jid]} {
 	set ans [::UI::MessageBox -message [mc jamessalreadyinrost $jid] \
 	  -icon error -type yesno]
 	if {[string equal $ans "no"]} {
@@ -234,11 +235,11 @@ proc ::Jabber::User::DoAdd {token} {
     
     # This is the only (?) situation when a client "sets" a roster item.
     # The actual roster item is pushed back to us, and not set from here.
-    eval {$jstate(jlib) roster_set $jid   \
-      [list [namespace current]::SetCB $jid]} $opts
+    set cb [list [namespace code SetCB] $jid]
+    eval {$jlib roster send_set $jid -command $cb} $opts    
 
     # Send subscribe request.
-    $jstate(jlib) send_presence -type "subscribe" -to $jid \
+    $jlib send_presence -type "subscribe" -to $jid \
       -command [namespace current]::PresError
         
     ::UI::SaveWinPrefixGeom $wDlgs(jrostadduser)
@@ -255,10 +256,10 @@ proc ::Jabber::User::DoAdd {token} {
 #       type        "result" or "error"
 #       args
 
-proc ::Jabber::User::SetCB {jid type args} {
+proc ::Jabber::User::SetCB {jid type queryE} {
     
     if {[string equal $type "error"]} {
-	foreach {errcode errmsg} [lindex $args 0] break
+	foreach {errcode errmsg} $queryE break
 	::UI::MessageBox -icon error -type ok -message \
 	  [mc jamessfailsetnick $jid $errcode $errmsg]
     }	
@@ -287,7 +288,7 @@ proc ::Jabber::User::PresError {jlibName type args} {
 	  The error is: $errmsg ($errcode).\
 	  Do you want to remove it from your roster?"]
 	if {$ans eq "yes"} {
-	    $jstate(jlib) roster_remove $argsArr(-from) [namespace current]::PushProc
+	    $jstate(jlib) roster send_remove $argsArr(-from)
 	}
     }
 }
@@ -347,16 +348,18 @@ proc ::Jabber::User::EditDlg {jid} {
 proc ::Jabber::User::EditTransportDlg {jid} {
     upvar ::Jabber::jstate jstate
     
+    set jlib $jstate(jlib)
+    
     # We get jid2 here. For transports we need the full jid!
-    set res [lindex [$jstate(roster) getresources $jid] 0]
+    set res [lindex [$jlib roster getresources $jid] 0]
     if {$res eq ""} {
 	set jid3 $jid
     } else {
 	set jid3 $jid/$res
     }
-    set subscription [$jstate(roster) getsubscription $jid3]
+    set subscription [$jlib roster getsubscription $jid3]
     jlib::splitjidex $jid node host x
-    set trpttype [lindex [$jstate(jlib) disco types $host] 0]
+    set trpttype [lindex [$jlib disco types $host] 0]
     set subtype [lindex [split $trpttype /] 1]
     set typename [::Roster::GetNameFromTrpt $subtype]
     set msg [mc jamessowntrpt $typename $jid3 $subscription]
@@ -403,9 +406,11 @@ proc ::Jabber::User::EditUserDlg {jid} {
     }
     set im  [::Theme::GetImage [option get $w adduserImage {}]]
     set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
+    
+    set jlib $jstate(jlib)
 
     # Find all our groups for any jid.
-    set allGroups [$jstate(roster) getgroups]
+    set allGroups [$jlib roster getgroups]
 
     # Get 'name' and 'group(s)'.
     set name ""
@@ -413,7 +418,7 @@ proc ::Jabber::User::EditUserDlg {jid} {
     set subscribe 0
     set unsubscribe 0
     set subscription "none"
-    foreach {key value} [$jstate(roster) getrosteritem $jid] {
+    foreach {key value} [$jlib roster getrosteritem $jid] {
 	
 	# 'groups', 'subscription',...
 	set keym [string trimleft $key "-"]
@@ -438,7 +443,7 @@ proc ::Jabber::User::EditUserDlg {jid} {
     set state(unsubscribe) $unsubscribe
     if {$istransport} {
 	jlib::splitjidex $jid node host res
-	set trpttype [lindex [$jstate(jlib) disco types $host] 0]
+	set trpttype [lindex [$jlib disco types $host] 0]
 	set subtype [lindex [split $trpttype /] 1]
 	set msg [mc jamessowntrpt $subtype $jid $subscription]
     } else {
@@ -607,15 +612,17 @@ proc ::Jabber::User::DoEdit {token} {
     if {$groups ne $origgroups} {
 	lappend opts -groups $groups
     }
-    eval {$jstate(jlib) roster_set $jid   \
-      [list [namespace current]::SetCB $jid]} $opts
+    set jlib $jstate(jlib)
 
+    set cb [list [namespace code SetCB] $jid]
+    eval {$jlib roster send_set $jid -command $cb} $opts    
+    
     # Send (un)subscribe request.
     if {$subscribe} {
-	$jstate(jlib) send_presence -type "subscribe" -to $jid \
+	$jlib send_presence -type "subscribe" -to $jid \
 	  -command [namespace current]::PresError
     } elseif {$unsubscribe} {
-	$jstate(jlib) send_presence -type "unsubscribe" -to $jid \
+	$jlib send_presence -type "unsubscribe" -to $jid \
 	  -command [namespace current]::PresError
     }
     

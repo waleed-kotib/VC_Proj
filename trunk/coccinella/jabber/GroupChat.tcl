@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.155 2006-08-10 13:55:53 matben Exp $
+# $Id: GroupChat.tcl,v 1.156 2006-08-12 13:48:25 matben Exp $
 
 package require Create
 package require Enter
@@ -2173,9 +2173,9 @@ proc ::GroupChat::InsertPresenceChange {chattoken jid3} {
 	    set name $res
 	}
 	if {$res eq ""} {
-	    array set presA [lindex [$jstate(roster) getpresence $jid2] 0]
+	    array set presA [lindex [$jstate(jlib) roster getpresence $jid2] 0]
 	} else {
-	    array set presA [$jstate(roster) getpresence $jid2 -resource $res]
+	    array set presA [$jstate(jlib) roster getpresence $jid2 -resource $res]
 	}
 	set show $presA(-type)
 	if {[info exists presA(-show)]} {
@@ -2194,7 +2194,7 @@ proc ::GroupChat::AddUsers {chattoken} {
     
     set roomjid $chatstate(roomjid)
     
-    set presenceList [$jstate(roster) getpresence $roomjid -type available]
+    set presenceList [$jstate(jlib) roster getpresence $roomjid -type available]
     foreach pres $presenceList {
 	unset -nocomplain presArr
 	array set presArr $pres
@@ -2248,7 +2248,7 @@ proc ::GroupChat::GetRoleFromJid {jid3} {
     upvar ::Jabber::jstate jstate
    
     set role ""
-    set userElem [$jstate(roster) getx $jid3 "muc#user"]
+    set userElem [$jstate(jlib) roster getx $jid3 "muc#user"]
     if {$userElem != {}} {
 	set ilist [wrapper::getchildswithtag $userElem "item"]
 	if {$ilist != {}} {

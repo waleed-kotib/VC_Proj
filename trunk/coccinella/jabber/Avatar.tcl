@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.21 2006-08-09 13:28:51 matben Exp $
+# $Id: Avatar.tcl,v 1.22 2006-08-12 13:48:25 matben Exp $
 
 # @@@ Issues:
 # 
@@ -733,11 +733,10 @@ proc ::Avatar::GetAll { } {
     
     Debug "::Avatar::GetAll"
     
-    set jlib   $jstate(jlib)
-    set roster $jstate(roster)
+    set jlib $jstate(jlib)
 
     # @@@ Not sure here...
-    foreach jid2 [$roster getusers] {
+    foreach jid2 [$jlib roster getusers] {
 	set jid [$jlib avatar get_full_jid $jid2]
 	GetAsyncIfExists $jid
     }
@@ -911,7 +910,7 @@ proc ::Avatar::HavePhoto {jid2} {
     if {[$jlib avatar have_data $jid2] && [info exists photo($jid2,orig)]} {
 	return 1
     } else {
-	if {[$jstate(roster) isavailable $jid2]} {
+	if {[$jlib roster isavailable $jid2]} {
 	    if {[$jlib avatar get_hash $jid2] ne ""} {
 		return [HaveCachedJID $jid2]
 	    } else {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.31 2006-08-09 07:13:47 matben Exp $
+# $Id: Subscribe.tcl,v 1.32 2006-08-12 13:48:25 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -74,10 +74,11 @@ proc ::Subscribe::NewDlg {jid args} {
     set im   [::Theme::GetImage [option get $w adduserImage {}]]
     set imd  [::Theme::GetImage [option get $w adduserDisImage {}]]
 
-    # Find all our groups for any jid.
-    set allGroups [$jstate(roster) getgroups]
+    set jlib $jstate(jlib)
 
-    set subscription [$jstate(roster) getsubscription $jid]
+    # Find all our groups for any jid.
+    set allGroups [$jlib roster getgroups]
+    set subscription [$jlib roster getsubscription $jid]
     
     switch -- $subscription none - from {
 	set havesubsc 0
@@ -191,7 +192,7 @@ proc ::Subscribe::Accept {token} {
     upvar ::Jabber::jstate jstate
     
     set jid $state(jid)
-    set subscription [$jstate(roster) getsubscription $jid]
+    set subscription [$jstate(jlib) roster getsubscription $jid]
     
     switch -- $subscription none - from {
 	set sendsubsc 1
@@ -200,9 +201,10 @@ proc ::Subscribe::Accept {token} {
 	set sendsubsc 0
 	set havesubsc 1
     }
+    set jlib $jstate(jlib)
 
     # Accept (allow) subscription.
-    $jstate(jlib) send_presence -to $jid -type "subscribed"
+    $jlib send_presence -to $jid -type "subscribed"
 	
     # Add user to my roster. Send subscription request.	
     if {$sendsubsc} {
@@ -213,8 +215,9 @@ proc ::Subscribe::Accept {token} {
 	if {($state(group) ne "") && ($state(group) ne "None")} {
 	    lappend opts -groups [list $state(group)]
 	}
-	eval {$jstate(jlib) roster_set $jid [namespace current]::ResProc} $opts
-	$jstate(jlib) send_presence -to $jid -type "subscribe"
+	eval {$jlib roster send_set $jid  \
+	  -command [namespace current]::ResProc} $opts
+	$jlib send_presence -to $jid -type "subscribe"
     }  
     
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
@@ -240,11 +243,11 @@ proc ::Subscribe::CloseCmd {token w} {
 #       This is our callback proc when setting the roster item from the
 #       subscription dialog. Catch any errors here.
 
-proc ::Subscribe::ResProc {jlibName what} {
+proc ::Subscribe::ResProc {type queryE} {
         
-    ::Debug 2 "::Subscribe::ResProc: jlibName=$jlibName, what=$what"
+    ::Debug 2 "::Subscribe::ResProc: type=$type"
 
-    if {[string equal $what "error"]} {
+    if {[string equal $type "error"]} {
 	::UI::MessageBox -type ok -message "We got an error from the\
 	  Subscribe::ResProc callback"
     }   
