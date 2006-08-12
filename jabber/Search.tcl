@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.24 2006-05-17 06:35:02 matben Exp $
+# $Id: Search.tcl,v 1.25 2006-08-12 13:48:25 matben Exp $
 
 package provide Search 1.0
 
@@ -218,7 +218,7 @@ proc ::Search::TableCmd {w x y} {
 	set jid [string trim [lindex $row 0]]
 
 	# Warn if already in our roster.
-	if {[$jstate(roster) isitem $jid]} {
+	if {[$jstate(jlib) roster isitem $jid]} {
 	    set ans [::UI::MessageBox -message [mc jamessalreadyinrost $jid] \
 	      -icon error -type ok]
 	} else {
@@ -260,7 +260,7 @@ proc ::Search::TablePopup {w x y} {
 proc ::Search::PostMenuCmd {m jid} {
     upvar ::Jabber::jstate jstate
 
-    if {[$jstate(roster) isitem $jid]} {
+    if {[$jstate(jlib) roster isitem $jid]} {
 	set midx [::AMenu::GetMenuIndex $m mAddNewUser]
 	$m entryconfigure $midx -state disabled
     }

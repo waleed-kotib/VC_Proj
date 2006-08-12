@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.53 2005-09-19 13:30:57 matben Exp $
+# $Id: OOB.tcl,v 1.54 2006-08-12 13:48:25 matben Exp $
 
 # NOTE: Parts if this code is obsolete (the send part) but the receiving
 #       part is still retained for backwards compatibility.
@@ -268,7 +268,7 @@ proc ::OOB::DoSend { } {
     # If 'jid' is without a resource, we MUST add it!
     set jid $locals(jid)
     if {![regexp {^[^@]+@[^/]+/(.+)$} $jid match res]} {
-	set res [lindex [$jstate(roster) getresources $jid] 0]
+	set res [lindex [$jstate(jlib) roster getresources $jid] 0]
 	set jid $jid/$res
     }
     set opts {}

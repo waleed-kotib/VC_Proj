@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.88 2006-08-02 07:04:13 matben Exp $
+# $Id: Disco.tcl,v 1.89 2006-08-12 13:48:25 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -1256,18 +1256,19 @@ proc ::Disco::PresenceHook {jid presence args} {
 	set res $argsArr(-resource)
     }
     set jid3 $jid2/$res
+    set jlib $jstate(jlib)
 
     if {![info exists wtree] || ![winfo exists $wtree]} {
 	return
     }
-    if {[$jstate(jlib) service isroom $jid2]} {
-	set presList [$jstate(roster) getpresence $jid2 -resource $res]
+    if {[$jlib service isroom $jid2]} {
+	set presList [$jlib roster getpresence $jid2 -resource $res]
 	array set presArr $presList
 	set icon [eval {
 	    ::Roster::GetPresenceIcon $jid3 $presArr(-type)
 	} $presList]
 	set item [list $jid3 {}]
-	set vstruct [concat [$jstate(jlib) disco parents2 $jid3] [list $item]]
+	set vstruct [concat [$jlib disco parents2 $jid3] [list $item]]
 	if {[::ITree::IsItem $wtree $vstruct]} {
 	    ::ITree::ItemConfigure $wtree $vstruct -image $icon
 	}
@@ -1282,7 +1283,7 @@ proc ::Disco::GetCoccinellaIP {jid3} {
     upvar ::Jabber::coccixmlns coccixmlns
     
     set ip ""
-    set cociElem [$jstate(roster) getextras $jid3 $coccixmlns(servers)]
+    set cociElem [$jstate(jlib) roster getextras $jid3 $coccixmlns(servers)]
     if {$cociElem != {}} {
 	set ipElements [wrapper::getchildswithtag $cociElem ip]
 	set ip [wrapper::getcdata [lindex $ipElements 0]]

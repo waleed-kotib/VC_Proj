@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.47 2006-05-17 13:32:00 matben Exp $
+# $Id: GotMsg.tcl,v 1.48 2006-08-12 13:48:25 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -105,8 +105,10 @@ proc ::GotMsg::Show {thisMsgId} {
     # Split jid into jid2 and resource.
     jlib::splitjid $jid jid2 res
     
+    set jlib $jstate(jlib)
+    
     # Use nick name.
-    set rname [$jstate(roster) getname $jid2]
+    set rname [$jlib roster getname $jid2]
     if {[string length $rname]} {
 	set username "$rname <${jid}>"
     } else {
@@ -115,7 +117,7 @@ proc ::GotMsg::Show {thisMsgId} {
     if {[jlib::jidequal $jid $jstate(mejidres)]} {
 	set show [::Jabber::GetMyStatus]
     } else {
-	array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
+	array set presArr [$jlib roster getpresence $jid2 -resource $res]
 	set show $presArr(-type)
 	if {[info exists presArr(-show)]} {
 	    set show $presArr(-show)

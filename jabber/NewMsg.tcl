@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.73 2006-05-17 06:35:02 matben Exp $
+# $Id: NewMsg.tcl,v 1.74 2006-08-12 13:48:25 matben Exp $
 
 package require ui::entryex
 
@@ -467,7 +467,7 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     
     set locals(wpopupbase) ._[string range $wDlgs(jsendmsg) 1 end]_trpt
     
-    set jidlist [$jstate(roster) getusers]
+    set jidlist [$jstate(jlib) roster getusers]
     set num $locals($w,num)
     frame $wfr.f$n -bd 0
     entry $wfr.f$n.trpt -width 18 -bd 0 -highlightthickness 0 \

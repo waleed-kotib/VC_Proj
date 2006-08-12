@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.12 2006-05-16 06:06:29 matben Exp $
+# $Id: UserInfo.tcl,v 1.13 2006-08-12 13:48:25 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -52,25 +52,27 @@ proc ::UserInfo::Get {jid {node ""}} {
     set priv(avail)   $avail
     set priv(ncount)  0
     set priv(erruid)  0
-    if {[$jstate(roster) isitem $jid2]} {
+    
+    set jlib $jstate(jlib)
+    if {[$jlib roster isitem $jid2]} {
 	set priv(type) "user"
     } else {
 	set priv(type) "item"
     }
 
     # jabber:iq:last
-    $jstate(jlib) get_last $jid [list [namespace current]::LastCB $token]
+    $jlib get_last $jid [list [namespace current]::LastCB $token]
     incr priv(ncount)
 
     # jabber:iq:time
-    $jstate(jlib) get_time $jid [list [namespace current]::TimeCB $token]
+    $jlib get_time $jid [list [namespace current]::TimeCB $token]
     incr priv(ncount)
 
     # vCard
     if {$room} {
-	$jstate(jlib) vcard send_get $jid [list [namespace current]::VCardCB $token]
+	$jlib vcard send_get $jid [list [namespace current]::VCardCB $token]
     } else {
-	$jstate(jlib) vcard send_get $jid2 [list [namespace current]::VCardCB $token]
+	$jlib vcard send_get $jid2 [list [namespace current]::VCardCB $token]
     }
     incr priv(ncount)
     
@@ -82,7 +84,7 @@ proc ::UserInfo::Get {jid {node ""}} {
 	set version 1
     }
     if {$version} {
-	$jstate(jlib) get_version $jid [list [namespace current]::VersionCB $token]
+	$jlib get_version $jid [list [namespace current]::VersionCB $token]
 	incr priv(ncount)
     }
     
@@ -93,7 +95,7 @@ proc ::UserInfo::Get {jid {node ""}} {
 	    lappend opts -node $node
 	}
 	set discoCB [list [namespace current]::DiscoCB $token]
-	eval {$jstate(jlib) disco send_get info $jid $discoCB} $opts
+	eval {$jlib disco send_get info $jid $discoCB} $opts
 	incr priv(ncount)
     }
     

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.174 2006-08-03 06:14:24 matben Exp $
+# $Id: Chat.tcl,v 1.175 2006-08-12 13:48:25 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -337,7 +337,7 @@ proc ::Chat::DoStart {w} {
     }    
     
     # User must be online.
-    if {![$jstate(roster) isavailable $user]} {
+    if {![$jstate(jlib) roster isavailable $user]} {
 	set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
 	  -default no  \
 	  -message "The user you intend chatting with,\
@@ -1141,6 +1141,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 
     lappend dlgstate(chattokens)    $chattoken
     lappend dlgstate(recentctokens) $chattoken
+    
+    set jlib $jstate(jlib)
 
     # -from is sometimes a 3-tier jid /resource included.
     # Try to keep any /resource part unless not possible.
@@ -1185,7 +1187,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     
     # We need to kep track of current presence/status since we may get
     # duplicate presence (delay).
-    array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
+    array set presArr [$jlib roster getpresence $jid2 -resource $res]
     set chatstate(presence) $presArr(-type)
     if {[info exists presArr(-show)]} {
 	set chatstate(presence) $presArr(-show)
@@ -1761,7 +1763,7 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
     Debug 6 "::Chat::SetThreadState chattoken=$chattoken"
     
     jlib::splitjid $chatstate(jid) user res
-    if {[$jstate(roster) isavailable $user]} {
+    if {[$jstate(jlib) roster isavailable $user]} {
 	SetState $chattoken normal
     } else {
 	SetState $chattoken disabled
@@ -2440,14 +2442,16 @@ proc ::Chat::PresenceHook {jid type args} {
     set mfrom [jlib::jidmap $jid]
     jlib::splitjid $from jid2 res
     
+    set jlib $jstate(jlib)
+    
     # If we chat with a room member we shall not trigger on other JIDs.
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
+    if {[$jlib service isroom $jid2]} {
 	set pjid $mfrom
     } else {
 	set pjid ${mjid}*
     }
     
-    array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
+    array set presArr [$jlib roster getpresence $jid2 -resource $res]
     set icon [::Roster::GetPresenceIconFromJid $from]
     
     foreach chattoken [GetAllTokensFrom chat jid $pjid] {
@@ -2833,7 +2837,7 @@ proc ::Chat::KeyPressEvent {chattoken char} {
 	unset chatstate(xevent,afterid)
     }
     jlib::splitjid $chatstate(jid) user res
-    if {[$jstate(roster) isavailable $user] && ($chatstate(state) eq "normal")} {
+    if {[$jstate(jlib) roster isavailable $user] && ($chatstate(state) eq "normal")} {
 
 	if {[info exists chatstate(xevent,msgid)]  \
 	  && ($chatstate(xevent,status) eq "")} {
@@ -2898,7 +2902,7 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
 	return
     }
     jlib::splitjid $chatstate(jid) user res
-    if {![$jstate(roster) isavailable $user]} {
+    if {![$jstate(jlib) roster isavailable $user]} {
 	return
     }
     if {[info exists chatstate(xevent,afterid)]} {

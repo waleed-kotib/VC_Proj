@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.26 2006-08-02 07:04:13 matben Exp $
+# $Id: RosterTree.tcl,v 1.27 2006-08-12 13:48:25 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -480,7 +480,7 @@ proc ::RosterTree::ActionDoubleClick {jid} {
     if {[string equal $jprefs(rost,dblClk) "normal"]} {
 	::NewMsg::Build -to $jid2
     } elseif {[string equal $jprefs(rost,dblClk) "chat"]} {
-	if {[$jstate(roster) isavailable $jid]} {
+	if {[$jstate(jlib) roster isavailable $jid]} {
 	    
 	    # We let Chat handle this internally.
 	    ::Chat::StartThread $jid
@@ -538,7 +538,7 @@ proc ::RosterTree::Popup {x y} {
 	    }
 	    jid {
 		set jid [lindex $tags 1]
-		if {[$jstate(roster) isavailable $jid]} {
+		if {[$jstate(jlib) roster isavailable $jid]} {
 		    set status available
 		} else {
 		    set status unavailable
@@ -587,7 +587,7 @@ proc ::RosterTree::Popup {x y} {
 	    set jid3 [lindex $tags 1]
 	    set jidlist [list $jid3]
 	    # Transports in own directory.
-	    if {[$jstate(roster) isavailable $jid3]} {
+	    if {[$jstate(jlib) roster isavailable $jid3]} {
 		set status available
 	    } else {
 		set status unavailable
@@ -1025,7 +1025,7 @@ proc ::RosterTree::Balloon {jid presence item args} {
     append msg "\n" [::Roster::MapShowToText $show]
 
     if {[string equal $presence "available"]} {
-	set delay [$jstate(roster) getx $jid "jabber:x:delay"]
+	set delay [$jstate(jlib) roster getx $jid "jabber:x:delay"]
 	if {$delay ne ""} {
 	    
 	    # An ISO 8601 point-in-time specification. clock works!

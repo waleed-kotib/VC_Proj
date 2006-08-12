@@ -19,7 +19,7 @@
 #  
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.13 2006-05-30 14:32:38 matben Exp $
+# $Id: caps.tcl,v 1.14 2006-08-12 13:48:25 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -37,6 +37,8 @@
 #      and the 'from' argument must not be the jid from the original call.
 
 package require jlib::disco
+package require jlib::roster
+
 package provide jlib::caps 0.1
 
 namespace eval jlib::caps {
@@ -87,8 +89,7 @@ proc jlib::caps::cmdproc {jlibname cmd args} {
 
 proc jlib::caps::disco_ver {jlibname jid cmd} {
 
-    set roster [jlib::getrostername $jlibname]
-    set ver [$roster getcapsattr $jid ver]
+    set ver [$jlibname roster getcapsattr $jid ver]
     disco_what $jlibname $jid ver $ver $cmd
 }
 
@@ -112,8 +113,7 @@ proc jlib::caps::disco_ext {jlibname jid ext cmd} {
 proc jlib::caps::disco_what {jlibname jid what value cmd} {
     upvar ${jlibname}::caps::state state
     
-    set roster [jlib::getrostername $jlibname]
-    set node [$roster getcapsattr $jid node]
+    set node [$jlibname roster getcapsattr $jid node]
         
     # There are three situations here:
     #   1) if we have cached this info just return it
@@ -196,10 +196,10 @@ proc jlib::caps::avail_cb {jlibname jid type args} {
     upvar ${jlibname}::caps::state state
     
     set jid [jlib::jidmap $jid]
-    set roster [jlib::getrostername $jlibname]
-    set node [$roster getcapsattr $jid node]
-    set ver  [$roster getcapsattr $jid ver]
-    set ext  [$roster getcapsattr $jid ext]
+
+    set node [$jlibname roster getcapsattr $jid node]
+    set ver  [$jlibname roster getcapsattr $jid ver]
+    set ext  [$jlibname roster getcapsattr $jid ext]
         
     # Skip if client have not a caps presence element.
     if {$node eq ""} {

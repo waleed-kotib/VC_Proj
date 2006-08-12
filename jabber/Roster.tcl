@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.172 2006-05-30 14:32:38 matben Exp $
+# $Id: Roster.tcl,v 1.173 2006-08-12 13:48:25 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -130,7 +130,7 @@ namespace eval ::Roster:: {
 proc ::Roster::GetNameOrjid {jid} {
     upvar ::Jabber::jstate jstate
        
-    set name [$jstate(roster) getname $jid]
+    set name [$jstate(jlib) roster getname $jid]
     if {$name eq ""} {
 	set name $jid
     }
@@ -140,7 +140,7 @@ proc ::Roster::GetNameOrjid {jid} {
 proc ::Roster::GetShortName {jid} {
     upvar ::Jabber::jstate jstate
     
-    set name [$jstate(roster) getname $jid]
+    set name [$jstate(jlib) roster getname $jid]
     if {$name eq ""} {	
 	jlib::splitjidex $jid node domain res
 	if {$node eq ""} {
@@ -159,7 +159,7 @@ proc ::Roster::GetShortName {jid} {
 proc ::Roster::GetDisplayName {jid} {
     upvar ::Jabber::jstate jstate
     
-    set name [$jstate(roster) getname $jid]
+    set name [$jstate(jlib) roster getname $jid]
     if {$name eq ""} {
 	jlib::splitjidex $jid node domain res
 	if {$node eq ""} {
@@ -427,8 +427,8 @@ proc ::Roster::SetPresenceMessage {jid presence args} {
 
 proc ::Roster::LoginCmd { } {
     upvar ::Jabber::jstate jstate
-    
-    $jstate(jlib) roster_get ::Roster::PushProc
+
+    $jstate(jlib) roster send_get
 
     set server [::Jabber::GetServerJid]
 }
@@ -440,7 +440,7 @@ proc ::Roster::LogoutHook { } {
     ::RosterTree::GetClosed
 
     # Here?
-    $jstate(roster) reset
+    $jstate(jlib) roster reset
     
     # Clear roster and browse windows.
     if {$jprefs(rost,clrLogout)} {
@@ -470,7 +470,7 @@ proc ::Roster::Refresh { } {
     ::RosterTree::GetClosed
     
     # Get my roster.
-    $jstate(jlib) roster_get [namespace current]::PushProc
+    $jstate(jlib) roster send_get
     $wwave animate 1
 }
 
@@ -514,7 +514,7 @@ proc ::Roster::SendRemove {jidrm} {
     set ans [::UI::MessageBox -title [mc {Remove Item}] \
       -message [mc jamesswarnremove] -icon warning -type yesno -default no]
     if {[string equal $ans "yes"]} {
-	$jstate(jlib) roster_remove $jid [namespace current]::PushProc
+	$jstate(jlib) roster send_remove $jid
     }
 }
     
@@ -751,7 +751,7 @@ proc ::Roster::StyleMenu {m} {
 #       Populate our roster tree.
 #
 # Arguments:
-#       rostName
+#       jlibname
 #       what        any of "presence", "remove", "set", "enterroster",
 #                   "exitroster"
 #       jid         'user@server' without any /resource usually.
@@ -762,7 +762,7 @@ proc ::Roster::StyleMenu {m} {
 # Results:
 #       updates the roster UI.
 
-proc ::Roster::PushProc {rostName what {jid {}} args} {    
+proc ::Roster::PushProc {jlibname what {jid {}} args} {    
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     variable inroster
@@ -771,6 +771,8 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 
     # Extract the args list as an array.
     array set attrArr $args
+    
+    set jlib $jstate(jlib)
         
     switch -- $what {
 	presence {
@@ -788,22 +790,22 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    set jid3 $jid
 	    if {[info exists attrArr(-resource)] &&  \
 	      [string length $attrArr(-resource)]} {
-		set jid3 ${jid}/$attrArr(-resource)
+		set jid3 $jid/$attrArr(-resource)
 	    }
 	    
 	    # This 'isroom' gives wrong answer if a gateway also supports
 	    # conference (groupchat).
 	    if {0} {
-		if {![$jstate(jlib) service isroom $jid]} {
+		if {![$jlib service isroom $jid]} {
 		    eval {Presence $jid3 $type} $args
 		}
 	    }
 	    
 	    # We get presence also for rooms etc which are not roster items.
 	    # Some transports have /registered resource.
-	    if {[$jstate(roster) isitem $jid]} {
+	    if {[$jlib roster isitem $jid]} {
 		eval {Presence $jid3 $type} $args
-	    } elseif {[$jstate(roster) isitem $jid3]} {
+	    } elseif {[$jlib roster isitem $jid3]} {
 		eval {Presence $jid3 $type} $args
 	    }
 
@@ -812,7 +814,7 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 
 	    # Hook to run only for new presence/show/status.
 	    # This is helpful because of some x-elements can be broadcasted.
-	    array set oldPres [$jstate(roster) getoldpresence $jid3]
+	    array set oldPres [$jlib roster getoldpresence $jid3]
 	    set same [arraysequalnames attrArr oldPres {-type -show -status}]
 	    if {!$same} {
 		eval {::hooks::run presenceNewHook $jid $type} $args
@@ -834,7 +836,7 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	remove {
 	    
 	    # Must remove all resources, and jid2 if no resources.
-    	    set resList [$jstate(roster) getresources $jid]
+    	    set resList [$jlib roster getresources $jid]
 	    foreach res $resList {
 		::RosterTree::StyleDeleteItem $jid/$res
 	    }
@@ -865,8 +867,8 @@ proc ::Roster::RepopulateTree { } {
     ::RosterTree::GetClosed
     ::RosterTree::StyleInit
     
-    foreach jid [$jstate(roster) getusers] {
-	eval {SetItem $jid} [$jstate(roster) getrosteritem $jid]
+    foreach jid [$jstate(jlib) roster getusers] {
+	eval {SetItem $jid} [$jstate(jlib) roster getrosteritem $jid]
     }
     Sort
 }
@@ -910,8 +912,10 @@ proc ::Roster::SetItem {jid args} {
     # 2) Must remove all resources for this jid first, and then add back.
     #    Remove also jid2.
 
+    set jlib $jstate(jlib)
+    
     if {!$inroster} {
-    	set resList [$jstate(roster) getresources $jid]
+    	set resList [$jlib roster getresources $jid]
 	if {$resList ne {}} {
 	    foreach res $resList {
 		::RosterTree::StyleDeleteItem $jid/$res
@@ -936,8 +940,8 @@ proc ::Roster::SetItem {jid args} {
     
 	# Add only the one with highest priority.
 	jlib::splitjid $jid jid2 res
-	set res [$jstate(roster) gethighestresource $jid2]
-	array set pres [$jstate(roster) getpresence $jid2 -resource $res]
+	set res [$jlib roster gethighestresource $jid2]
+	array set pres [$jlib roster getpresence $jid2 -resource $res]
 	
 	if {$res ne ""} {
 	    set jid $jid/$res
@@ -989,10 +993,11 @@ proc ::Roster::Presence {jid presence args} {
     #      presence 'from' attribute.
     #      For unavailable JID always us the roster item JID.
 
-    set rjid [$jstate(roster) getrosterjid $jid]
+    set jlib $jstate(jlib)
+    set rjid [$jlib roster getrosterjid $jid]
         
     # This gets a list '-name ... -groups ...' etc. from our roster.
-    set itemAttr [$jstate(roster) getrosteritem $rjid]
+    set itemAttr [$jlib roster getrosteritem $rjid]
     
     # First remove if there, then add in the right tree dir.
     ::RosterTree::StyleDeleteItem $jid
@@ -1005,7 +1010,7 @@ proc ::Roster::Presence {jid presence args} {
 	    
 	    # Must send a subscription remove here to get rid if it completely??
 	    # Think this is already been made from our presence callback proc.
-	    #$jstate(jlib) roster_remove $jid ::Roster::PushProc
+
 	} else {
 	    set items [eval {
 		::RosterTree::StyleCreateItem $rjid "unavailable"
@@ -1021,7 +1026,7 @@ proc ::Roster::Presence {jid presence args} {
 	
 	# Add only to offline if no other jid2/* available.
 	# If not in roster we don't get 'isavailable'.
-	set isavailable [$jstate(roster) isavailable $rjid]
+	set isavailable [$jlib roster isavailable $rjid]
 	if {!$isavailable} {
 	    set items [eval {
 		::RosterTree::StyleCreateItem $rjid $presence
@@ -1068,7 +1073,7 @@ proc ::Roster::IsCoccinella {jid3} {
     
     set ans 0
     if {![IsTransportHeuristics $jid3]} {
-	set node [$jstate(roster) getcapsattr $jid3 node]
+	set node [$jstate(jlib) roster getcapsattr $jid3 node]
 	if {[string equal $node $coccixmlns(caps)]} {
 	    set ans 1
 	}
@@ -1088,13 +1093,14 @@ proc ::Roster::GetPresenceIconFromKey {key} {
 proc ::Roster::GetPresenceIconFromJid {jid} {
     upvar ::Jabber::jstate jstate
     
+    set jlib $jstate(jlib)
     jlib::splitjid $jid jid2 res
     if {$res eq ""} {
-	set pres [lindex [$jstate(roster) getpresence $jid2] 0]
+	set pres [lindex [$jlib roster getpresence $jid2] 0]
     } else {
-	set pres [$jstate(roster) getpresence $jid2 -resource $res]
+	set pres [$jlib roster getpresence $jid2 -resource $res]
     }
-    set rost [$jstate(roster) getrosteritem $jid2]
+    set rost [$jlib roster getrosteritem $jid2]
     array set argsArr $pres
     array set argsArr $rost
     
@@ -1447,7 +1453,7 @@ proc ::Roster::GetUsersWithSameHost {jid} {
     set jidlist {}
     jlib::splitjidex $jid - host -
 
-    foreach ujid [$jstate(roster) getusers] {
+    foreach ujid [$jstate(jlib) roster getusers] {
 	jlib::splitjidex $ujid - uhost -
 	if {$host eq $uhost} {
 	    lappend jidlist $ujid
@@ -1460,12 +1466,8 @@ proc ::Roster::RemoveUsers {jidlist} {
     upvar ::Jabber::jstate jstate
 
     foreach jid $jidlist {
-	$jstate(jlib) roster_remove $jid ::Roster::Noop
+	$jstate(jlib) roster send_remove $jid
     }
-}
-
-proc ::Roster::Noop {args} {
-    # empty
 }
 
 # Prefs page ...................................................................

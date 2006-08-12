@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.147 2006-08-10 13:55:54 matben Exp $
+# $Id: jabberlib.tcl,v 1.148 2006-08-12 13:48:25 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -20,7 +20,6 @@
 # lib:
 #	lib(wrap)                  : Wrap ID
 #       lib(clientcmd)             : Callback proc up to the client
-#       lib(rostername)            : the name of the roster object
 #	lib(sock)                  : socket name
 #	lib(streamcmd)             : Callback command to run when the <stream>
 #	                             tag is received from the server.
@@ -39,16 +38,15 @@
 #	                               
 ############################# SCHEMA ###########################################
 #
-#                                         -> roster >-  
-#                                        /            \ 
-#                                       /              \
-#   TclXML <---> wrapper <---> jabberlib <-----------> client
-#                                       
-#                                       
-#   
-#   Note the one-way communication with the 'roster' object since it may only
-#   be set by the server, that is, from 'jabberlib'. 
-#   The client only "gets" the roster.
+#   TclXML <---> wrapper <---> jabberlib <---> client
+#                                 | 
+#                             jlib::roster
+#                             jlib::disco
+#                             jlib::muc
+#                               ...
+#                               
+#   Most jlib-packages are self-registered and are invoked using ensamble (sub)
+#   commands.
 #
 ############################# USAGE ############################################
 #
@@ -56,7 +54,7 @@
 #      jabberlib - an interface between Jabber clients and the wrapper
 #      
 #   SYNOPSIS
-#      jlib::new rosterName clientCmd ?-opt value ...?
+#      jlib::new clientCmd ?-opt value ...?
 #      jlib::havesasl
 #      jlib::havetls
 #      
@@ -100,9 +98,6 @@
 #      jlibName register_presence_stanza elem
 #      jlibName register_remove to cmd ?args?
 #      jlibName resetstream
-#      jlibName roster_get cmd
-#      jlibName roster_set item cmd ?args?
-#      jlibName roster_remove item cmd
 #      jlibName schedule_auto_away
 #      jlibName search_get to cmd
 #      jlibName search_set to cmd ?args?
@@ -142,14 +137,13 @@
 #      elements to callbacks. Callbacks then get attributes like 'from' etc
 #      using accessor functions.
 #      
-#      2) Roster as an ensamble command, just like disco, muc etc.
+#      2) Cleanup all the presence code.
 #      
 #-------------------------------------------------------------------------------
 
 # @@@ TODO: change package names to jlib::*
 
 package require wrapper
-package require roster
 package require service
 package require stanzaerror
 package require streamerror
@@ -245,7 +239,6 @@ proc jlib::getxmlns {name} {
 #       This creates a new instance jlib interpreter.
 #       
 # Arguments:
-#       rostername: the name of the roster object
 #       clientcmd:  callback procedure for the client
 #       args:       
 #	-iqcommand            
@@ -262,7 +255,7 @@ proc jlib::getxmlns {name} {
 # Results:
 #       jlibname which is the namespaced instance command
   
-proc jlib::new {rostername clientcmd args} {    
+proc jlib::new {clientcmd args} {    
 
     variable statics
     variable objectmap
@@ -323,7 +316,6 @@ proc jlib::new {rostername clientcmd args} {
     set iqcmd(uid)   1001
     set prescmd(uid) 1001
     set msgcmd(uid)  1001
-    set lib(rostername)   $rostername
     set lib(clientcmd)    $clientcmd
     set lib(wrap)         $wrapper
     
@@ -380,6 +372,7 @@ proc jlib::init {} {
     } else {
 	set statics(tls) 1
     }
+    
     set statics(inited) 1
 }
 
@@ -437,6 +430,17 @@ proc jlib::havetls { } {
     return $statics(tls)
 }
 
+# jlib::register_package --
+# 
+#       This is supposed to be a method for jlib::* packages to register
+#       themself just so we know they are there. SO far only for the 'roster'.
+
+proc jlib::register_package {name} {
+    variable statics
+    
+    set statics($name) 1
+}
+
 # jlib::ensamble_register --
 # 
 #       Register a sub command.
@@ -491,17 +495,6 @@ proc jlib::cmdproc {jlibname cmd args} {
     } else {
 	return [eval {$cmd $jlibname} $args]
     }
-}
-
-# jlib::getrostername --
-# 
-#       Just returns the roster instance for this jlib instance.
-
-proc jlib::getrostername {jlibname} {
-    
-    upvar ${jlibname}::lib lib
-    
-    return $lib(rostername)
 }
 
 # jlib::config --
@@ -1059,13 +1052,12 @@ proc jlib::dispatcher {jlibname xmldata} {
 #
 #       Callback for incoming <iq> elements.
 #       The handling sequence is the following:
-#       1) handle all roster pushes (set) internally
-#       2) handle all preregistered callbacks via id attributes
-#       3) handle callbacks specific for 'type' and 'xmlns' that have been
+#       1) handle all preregistered callbacks via id attributes
+#       2) handle callbacks specific for 'type' and 'xmlns' that have been
 #          registered with 'iq_register'
-#       4) if unhandled by 3, use any -iqcommand callback
-#       5) if still, use the client command callback
-#       6) if type='get' and still unhandled, return an error element
+#       3) if unhandled by 2, use any -iqcommand callback
+#       4) if still, use the client command callback
+#       5) if type='get' and still unhandled, return an error element
 #       
 # Arguments:
 #       jlibname:   the instance of this jlib.
@@ -1123,35 +1115,14 @@ proc jlib::iq_handler {jlibname xmldata} {
 	set callbackType "iqreply"
     }
     set ishandled 0
-
-    # (1) This is a server push! Handle internally.
-
-    if {[string equal $type "set"]} {
-	
-	switch -- $xmlns {
-	    jabber:iq:roster {
-		
-		# Found a roster-push, typically after a subscription event.
-		# First, we reply to the server, saying that, we 
-		# got the data, and accepted it. ???		    
-		# We call the 'parse_roster_get', because this
-		# data is the same as the one we get from a 'roster_get'.
-		
-		parse_roster_get $jlibname 1 {} ok $subiq
-		# @@@
-		#parse_roster_get $jlibname 1 {} set $subiq
-		set ishandled 1
-	    }
-	}
-    }
     
-    # (2) Handle all preregistered callbacks via id attributes.
+    # (1) Handle all preregistered callbacks via id attributes.
     #     Must be type 'result' or 'error'.
     #     Some components use type='set' instead of 'result'.
     #     BUT this creates logical errors since we may also receive iq with
     #     identical id!
 
-    # @@@ It would be better not to have separate calls for errors.
+    # @@@ It would be better NOT to have separate calls for errors.
     
     switch -- $type {
 	result {
@@ -1164,16 +1135,11 @@ proc jlib::iq_handler {jlibname xmldata} {
 		set setus 1
 	    }
 
-	    # A request for the entire roster is coming this way, 
-	    # and calls 'parse_roster_set'.
-	    # $iqcmd($id) contains the 'parse_...' call as 1st element.
 	    if {!$setus && [info exists id] && [info exists iqcmd($id)]} {
-		
-		# @@@ TODO: add attrArr to callback.
-		# BETTER: deliver complete xml!
 		uplevel #0 $iqcmd($id) [list result $subiq]
-		        
-		#uplevel #0 $iqcmd($id) [list result $subiq] $arglist
+		      
+		# @@@ TODO:
+		#uplevel #0 $iqcmd($id) [list $jlibname xmldata]
 		
 		# The callback my in turn call 'closestream' which unsets 
 		# all iq before returning.
@@ -1188,7 +1154,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		# @@@ Having a separate form of error callbacks is really BAD!!!
 		uplevel #0 $iqcmd($id) [list error $errspec]
 		
-		#uplevel #0 $iqcmd($id) [list error $xmldata]
+		#uplevel #0 $iqcmd($id) [list $jlibname $xmldata]
 		
 		unset -nocomplain iqcmd($id)
 		set ishandled 1
@@ -1196,7 +1162,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 	}
     }
 	        
-    # (3) Handle callbacks specific for 'type' and 'xmlns' that have been
+    # (2) Handle callbacks specific for 'type' and 'xmlns' that have been
     #     registered with 'iq_register'
 
     if {[string equal $ishandled "0"]} {
@@ -1204,7 +1170,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    iq_run_hook $jlibname $type $xmlns $afrom $subiq} $arglist]
     }
     
-    # (4) If unhandled by 3, use any -iqcommand callback.
+    # (3) If unhandled by 2, use any -iqcommand callback.
 
     if {[string equal $ishandled "0"]} {	
 	if {[string length $opts(-iqcommand)]} {
@@ -1213,7 +1179,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    set ishandled [uplevel #0 $opts(-iqcommand) $iqcallback]
 	} 
 	    
-	# (5) If unhandled by 3 and 4, use the client command callback.
+	# (4) If unhandled by 2 and 3, use the client command callback.
 
 	if {[string equal $ishandled "0"]} {
 	    set clientcallback [concat  \
@@ -1221,7 +1187,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    set ishandled [uplevel #0 $lib(clientcmd) $clientcallback]
 	}
 
-	# (6) If type='get' or 'set', and still unhandled, return an error element.
+	# (5) If type='get' or 'set', and still unhandled, return an error element.
 
 	if {[string equal $ishandled "0"] && \
 	  ([string equal $type "get"] || [string equal $type "set"])} {
@@ -1422,7 +1388,7 @@ proc jlib::send_message_error {jlibname jid id errcode errtype stanza {extraElem
 #       roster object set, callbacks invoked.
 
 proc jlib::presence_handler {jlibname xmldata} { 
-
+    variable statics
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::prescmd prescmd
     upvar ${jlibname}::opts opts
@@ -1479,10 +1445,10 @@ proc jlib::presence_handler {jlibname xmldata} {
 		}
 	    }
 	}	    
-	if {[llength $x] > 0} {
+	if {[llength $x]} {
 	    lappend arglist -x $x
 	}
-	if {[llength $extras] > 0} {
+	if {[llength $extras]} {
 	    lappend arglist -extras $extras
 	}
 	
@@ -1495,15 +1461,19 @@ proc jlib::presence_handler {jlibname xmldata} {
 	    # It must be set for presence sent to groupchat rooms!
 	    
 	    # Set presence in our roster object
-	    eval {$lib(rostername) setpresence $from $type} $arglist
+	    if {[info exists statics(roster)]} {
+		eval {jlib::roster::setpresence $jlibname $from $type} $arglist
+	    }
 	} else {
 	    
 	    # We probably need to respond to the 'presence' element;
-	    # 'subscribed'?. ????????????????? via lib(rostername)
+	    # 'subscribed'?.
 	    # If we have 'unsubscribe'd another users presence it cannot be
 	    # anything else than 'unavailable' anymore.
 	    if {[string equal $type "unsubscribed"]} {
-		$lib(rostername) setpresence $from "unsubscribed"
+		if {[info exists statics(roster)]} {
+		    jlib::roster::setpresence $jlibname $from "unsubscribed"
+		}
 	    }
 	    if {[string length $opts(-presencecommand)]} {
 		uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
@@ -1525,7 +1495,9 @@ proc jlib::presence_handler {jlibname xmldata} {
     }	
 
     if {![string equal $type "error"]} {
-	eval {$lib(rostername) invokecommand $from $type} $arglist
+	if {[info exists statics(roster)]} {
+	    eval {jlib::roster::invokecommand $jlibname $from $type} $arglist
+	}
     }
 }
 
@@ -2130,159 +2102,6 @@ proc jlib::invoke_iq_callback {jlibname cmd type subiq} {
     Debug 3 "jlib::invoke_iq_callback cmd=$cmd, type=$type, subiq=$subiq"
     
     uplevel #0 $cmd [list $jlibname $type $subiq]
-}
-
-# jlib::parse_roster_get --
-#
-#       Callback command from the 'roster_get' call.
-#       Could also be a roster push from the server.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       ispush:     is this the result of a roster push or from our 
-#                   'roster_set' call?
-#       cmd:        callback command for an error element.
-#       type:       "error" or "ok"
-#       thequery:       
-#       
-# Results:
-#       the roster object is populated.
-
-proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
-
-    upvar ${jlibname}::lib lib
-
-    Debug 3 "jlib::parse_roster_get ispush=$ispush, cmd=$cmd, type=$type,"
-    Debug 3 "   thequery=$thequery"
-    if {[string equal $type "error"]} {
-	
-	# We've got an error reply. Roster pushes should never be an error!
-	if {[string length $cmd] > 0} {
-	    uplevel #0 $cmd [list $jlibname error]
-	}
-	return
-    }
-    if {!$ispush} {
-	
-	# Clear the roster and presence.
-	$lib(rostername) enterroster
-    }
-    
-    # Extract the XML data items.
-    if {![string equal [wrapper::getattribute $thequery xmlns] "jabber:iq:roster"]} {
-    
-	# Here we should issue a warning:
-	# attribute of query tag doesn't match 'jabber:iq:roster'
-	
-    }    
-    if {$ispush} {
-	set what "roster_push"
-    } else {
-	set what "roster_item"
-    }
-    foreach child [wrapper::getchildren $thequery] {
-	
-	# Extract the message sub-elements XML data items.
-	set ctag [wrapper::gettag $child]
-	set cattrlist [wrapper::getattrlist $child]
-	set cchdata [wrapper::getcdata $child]
-	
-	if {[string equal $ctag "item"]} {
-	    
-	    # Add each item to our roster object.
-	    # Build the argument list of '-key value' pairs. Extract the jid.
-	    set arglist {}
-	    set subscription {}
-	    foreach {key value} $cattrlist {
-		if {[string equal $key "jid"]} {
-		    set jid $value
-		} else {
-		    lappend arglist -$key $value
-		    if {[string equal $key "subscription"]} {
-			set subscription $value
-		    }
-		}
-	    }
-	    
-	    # Check if item should be romoved (subscription='remove').
-	    if {[string equal $subscription "remove"]} {
-		$lib(rostername) removeitem $jid
-	    } else {
-	    
-		# Collect the group elements.
-		set groups {}
-		foreach subchild [wrapper::getchildren $child] {
-		    set subtag [wrapper::gettag $subchild]
-		    if {[string equal $subtag "group"]} {
-			lappend groups [wrapper::getcdata $subchild]
-		    }
-		}
-		if {[string length $groups]} {
-		    lappend arglist -groups $groups
-		}
-		
-		# Fill in our roster with this.
-		eval {$lib(rostername) setrosteritem $jid} $arglist
-	    }
-	}
-    }
-    
-    # Tell our roster object that we leave...
-    if {!$ispush} {
-	$lib(rostername) exitroster
-    }
-}
-
-# jlib::parse_roster_set --
-#
-#       Callback command from the 'roster_set' call.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       jid:        the jabber id (without resource).
-#       cmd:        callback command for an error query element.
-#       groups:     
-#       name:       
-#       type:       "error" or "ok"
-#       thequery:
-#       
-# Results:
-#       none.
-
-proc jlib::parse_roster_set {jlibname jid cmd groups name type thequery} {
-
-    upvar ${jlibname}::lib lib
-
-    Debug 3 "jlib::parse_roster_set jid=$jid"
-    if {[string equal $type "error"]} {
-	
-	# We've got an error reply.
-	uplevel #0 $cmd [list $jlibname error]
-	return
-    }
-}
-
-# jlib::parse_roster_remove --
-#
-#       Callback command from the 'roster_remove' command.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       jid:        the jabber id (without resource).
-#       cmd:        callback command for an error query element.
-#       type:
-#       thequery:
-#       
-# Results:
-#       none.
-
-proc jlib::parse_roster_remove {jlibname jid cmd type thequery} {
-
-    Debug 3 "jlib::parse_roster_remove jid=$jid, cmd=$cmd, type=$type,"
-    Debug 3 "   thequery=$thequery"
-    if {[string equal $type "error"]} {
-	uplevel #0 $cmd [list $jlibname error]
-    }
 }
 
 # jlib::parse_search_set --
@@ -3568,122 +3387,6 @@ proc jlib::handle_get_version {jlibname from subiq args} {
     return 1
 }
 
-# jlib::roster_get --
-#
-#       To get your roster from server.
-#       All roster info is propagated to the client via the callback in the
-#       roster object. The 'cmd' is only called as a response to an iq-result
-#       element.
-#
-# Arguments:
-#       
-#       jlibname:   the instance of this jlib.
-#       args:       ?
-#       cmd:        callback command for an error query element.
-#     
-# Results:
-#       none.
-  
-proc jlib::roster_get {jlibname cmd args} {
-
-    array set argsArr $args  
-    
-    set xmllist [wrapper::createtag "query"  \
-      -attrlist {xmlns jabber:iq:roster}]
-    send_iq $jlibname "get" [list $xmllist] -command   \
-      [list [namespace current]::parse_roster_get $jlibname 0 $cmd]
-    return
-}
-
-# jlib::roster_set --
-#
-#       To set/add an jid in/to your roster.
-#       All roster info is propagated to the client via the callback in the
-#       roster object. The 'cmd' is only called as a response to an iq-result
-#       element.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       jid:        jabber user id to add/set.
-#       cmd:        callback command for an error query element.
-#       args:
-#           -name $name:     A name to show the user-id as on roster to the user.
-#           -groups $group_list: Groups of user. If you omit this, then the user's
-#                            groups will be set according to the user's options
-#                            stored in the roster object. If user doesn't exist,
-#                            or you haven't got your roster, user's groups will be
-#                            set to "", which means no groups.
-#       
-# Results:
-#       none.
- 
-proc jlib::roster_set {jlibname jid cmd args} {
-
-    upvar ${jlibname}::lib lib
-
-    Debug 3 "jlib::roster_set jid=$jid, cmd=$cmd, args='$args'"
-    array set argsArr $args  
-
-    # Find group(s).
-    if {![info exists argsArr(-groups)]} {
-	set groups [$lib(rostername) getgroups $jid]
-    } else {
-	set groups $argsArr(-groups)
-    }
-    
-    set attrlist [list {jid} $jid]
-    set name {}
-    if {[info exists argsArr(-name)]} {
-	set name $argsArr(-name)
-	lappend attrlist {name} $name
-    }
-    set subdata {}
-    foreach group $groups {
-    	if {$group ne ""} {
-	    lappend subdata [wrapper::createtag "group" -chdata $group]
-	}
-    }
-    
-    set xmllist [wrapper::createtag "query"   \
-      -attrlist {xmlns jabber:iq:roster}      \
-      -subtags [list [wrapper::createtag {item} -attrlist $attrlist  \
-      -subtags $subdata]]]
-    send_iq $jlibname "set" [list $xmllist] -command   \
-      [list [namespace current]::parse_roster_set $jlibname $jid $cmd  \
-      $groups $name]
-    return
-}
-
-# jlib::roster_remove --
-#
-#       To remove an item in your roster.
-#       All roster info is propagated to the client via the callback in the
-#       roster object. The 'cmd' is only called as a response to an iq-result
-#       element.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       jid:        jabber user id.
-#       cmd:        callback command for an error query element.
-#       args:       ?
-#       
-# Results:
-#       none.
-
-proc jlib::roster_remove {jlibname jid cmd args} {
-
-    Debug 3 "jlib::roster_remove jid=$jid, cmd=$cmd, args=$args"
-    
-    set xmllist [wrapper::createtag "query"   \
-      -attrlist {xmlns jabber:iq:roster}      \
-      -subtags [list  \
-      [wrapper::createtag "item"  \
-      -attrlist [list jid $jid subscription remove]]]]
-    send_iq $jlibname "set" [list $xmllist] -command   \
-      [list [namespace current]::parse_roster_remove $jlibname $jid $cmd]
-    return
-}
-
 # jlib::schedule_keepalive --
 # 
 #       Supposed to detect network failures but seems not to work like that.
@@ -3788,16 +3491,18 @@ proc jlib::auto_away_cmd {jlibname what} {
 # 
 #       Tries to obtain the correct form of jid to send message to.
 #       Follows the XMPP spec, section 4.1.
+#       
+#       @@@ Perhaps this should go in app code?
 
 proc jlib::getrecipientjid {jlibname jid} {
-
-    upvar ${jlibname}::lib lib
+    variable statics
     
     splitjid $jid jid2 resource 
     set isroom [[namespace current]::service::isroom $jlibname $jid2]
     if {$isroom} {
 	return $jid
-    } elseif {[$lib(rostername) isavailable $jid]} {
+    } elseif {[info exists statics(roster)] &&  \
+      [$jlibname roster isavailable $jid]} {
 	return $jid
     } else {
 	return $jid2

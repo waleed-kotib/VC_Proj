@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.32 2006-07-26 06:26:29 matben Exp $
+# $Id: muc.tcl,v 1.33 2006-08-12 13:48:26 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -47,6 +47,7 @@
 
 package require jlib
 package require jlib::disco
+package require jlib::roster
 
 package provide jlib::muc 0.3
 
@@ -211,14 +212,13 @@ proc jlib::muc::exit {jlibname roomjid} {
 
     upvar ${jlibname}::muc::cache cache
 
-    set rostername [$jlibname getrostername]
     if {[info exists cache($roomjid,mynick)]} {
 	set jid $roomjid/$cache($roomjid,mynick)
 	$jlibname send_presence -to $jid -type "unavailable"
 	unset -nocomplain cache($roomjid,mynick)
     }
     unset -nocomplain cache($roomjid,inside)
-    $rostername clearpresence "${roomjid}*"
+    $jlibname roster clearpresence "${roomjid}*"
 }
 
 # jlib::muc::setnick --
@@ -628,11 +628,10 @@ proc jlib::muc::participants {jlibname roomjid} {
 
     upvar ${jlibname}::muc::cache cache
     
-    set rostername [[namespace parent]::getrostername $jlibname]
     set everyone {}
 
     # The rosters presence elements should give us all info we need.
-    foreach userAttr [$rostername getpresence $roomjid -type available] {
+    foreach userAttr [$jlibname roster getpresence $roomjid -type available] {
 	unset -nocomplain attr
 	array set attr $userAttr
 	lappend everyone $roomjid/$attr(-resource)

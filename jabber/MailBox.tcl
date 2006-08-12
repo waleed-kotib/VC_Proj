@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.87 2006-05-17 13:32:00 matben Exp $
+# $Id: MailBox.tcl,v 1.88 2006-08-12 13:48:25 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1070,7 +1070,7 @@ proc ::MailBox::DisplayRawMessage {jid3 uid} {
     
     # Only if user available shall we try to import.
     set tryimport 0
-    if {[$jstate(roster) isavailable $jid3] || \
+    if {[$jstate(jlib) roster isavailable $jid3] || \
       [jlib::jidequal $jid3 $jstate(mejidres)]} {
 	set tryimport 1
     }
@@ -1103,7 +1103,7 @@ proc ::MailBox::DisplayXElementSVG {jid3 xlist} {
     
     # Only if user available shall we try to import.
     set tryimport 0
-    if {[$jstate(roster) isavailable $jid3] || \
+    if {[$jstate(jlib) roster isavailable $jid3] || \
       [jlib::jidequal $jid3 $jstate(mejidres)]} {
 	set tryimport 1
     }
