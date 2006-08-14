@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Enter.tcl,v 1.5 2006-04-07 14:08:27 matben Exp $
+# $Id: Enter.tcl,v 1.6 2006-08-14 13:08:03 matben Exp $
 
 package provide Enter 1.0
 
@@ -555,29 +555,29 @@ proc ::Enter::DoEnter {token} {
 #       is needed for entering room.
 #
 # Arguments:
+#       token
 #       jlibname 
-#       type    presence typ attribute, 'available' etc.
-#       args    -from, -id, -to, -x ...
 #       
 # Results:
 #       None.
 
-proc ::Enter::MUCCallback {token jlibname type args} {
+proc ::Enter::MUCCallback {token jlibname xmldata} {
     variable $token
     upvar 0 $token state
     
-    ::Debug 4 "::Enter::MUCCallback type=$type, args='$args'"
-
-    array set argsArr $args
-    jlib::splitjid $argsArr(-from) roomjid res
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type "available"
+    }    
+    set roomjid [jlib::jidmap [jlib::barejid $from]]
     set retry 0
-    
-    if {$type eq "error"} {
-	set errcode ???
-	set errmsg ""
-	if {[info exists argsArr(-error)]} {
-	    set errcode [lindex $argsArr(-error) 0]
-	    set errmsg  [lindex $argsArr(-error) 1]
+
+    if {[string equal $type "error"]} {
+	set errspec [jlib::getstanzaerrorspec $xmldata]
+	if {[llength $errspec]} {
+	    set errcode [lindex $errspec 0]
+	    set errmsg  [lindex $errspec 1]
 	    
 	    switch -- $errcode {
 		401 - not-authorized {
@@ -594,7 +594,6 @@ proc ::Enter::MUCCallback {token jlibname type args} {
 		    }
 		}
 		default {
-		    set errmsg [lindex $argsArr(-error) 1]
 		    ::UI::MessageBox -type ok -icon error  \
 		      -message [mc jamesserrconfgetcre $errcode $errmsg]
 		}
@@ -608,33 +607,38 @@ proc ::Enter::MUCCallback {token jlibname type args} {
 	::hooks::run groupchatEnterRoomHook $roomjid "muc"
     }
     if {!$retry && [info exists state(-command)]} {
-	uplevel #0 $state(-command) $type $args
+	uplevel #0 $state(-command) [list $xmldata]
     }
     Free $token
 }
 
-proc ::Enter::GCCallback {token jlibname type args} {
+proc ::Enter::GCCallback {token jlibname xmldata} {
     variable $token
     upvar 0 $token state
     
-    ::Debug 4 "::Enter::GCCallback type=$type, args='$args'"
-
-    array set argsArr $args
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type "available"
+    }    
+    set roomjid [jlib::jidmap [jlib::barejid $from]]
     
     if {[string equal $type "error"]} {
-	set msg "We got an error when entering room \"$argsArr(-from)\"."
-	if {[info exists argsArr(-error)]} {
-	    foreach {errcode errmsg} $argsArr(-error) break
+	set msg "We got an error when entering room \"$roomjid\"."
+	set errspec [jlib::getstanzaerrorspec $xmldata]
+	if {[llength $errspec]} {
+	    set errcode [lindex $errspec 0]
+	    set errmsg  [lindex $errspec 1]
 	    append msg " The error code is $errcode: $errmsg"
 	}
 	::UI::MessageBox -title "Error Enter Room" -message $msg -icon error
     } else {
     
 	# Cache groupchat protocol type (muc|conference|gc-1.0).
-	::hooks::run groupchatEnterRoomHook $argsArr(-from) "gc-1.0"
+	::hooks::run groupchatEnterRoomHook $roomjid "gc-1.0"
     }
     if {[info exists state(-command)]} {
-	uplevel #0 $state(-command) $type $args
+	uplevel #0 $state(-command) [list $xmldata]
     }
     Free $token
 }

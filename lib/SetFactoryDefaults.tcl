@@ -10,9 +10,14 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.50 2006-08-08 13:12:04 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.51 2006-08-14 13:08:03 matben Exp $
 
 package provide FactoryDefaults 1.0
+
+# Hardcoded configureation options:
+# 
+# How expressive shall we be with message boxes?
+set config(talkative) 0
 
 proc FactoryDefaults { } {
     global  prefs this state tmsec 
@@ -64,9 +69,6 @@ proc FactoryDefaults { } {
     
     # it isn't done when client connects
     set prefs(afterConnect) 1000
-    
-    # How expressive shall we be with message boxes?
-    set prefs(talkative) 0
     
     # Wraplength of text in message box for windows.
     set prefs(msgWrapLength) 60

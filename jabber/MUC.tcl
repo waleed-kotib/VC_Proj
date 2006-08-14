@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.77 2006-08-12 13:48:25 matben Exp $
+# $Id: MUC.tcl,v 1.78 2006-08-14 13:08:03 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -1484,7 +1484,7 @@ proc ::MUC::SetNick {roomjid} {
     # Perhaps check that characters are valid?
     if {($ans eq "ok") && ($nickname ne "")} {
 	$jstate(jlib) muc setnick $roomjid $nickname \
-	  -command [list [namespace current]::PresCallback $roomjid]
+	  -command [namespace current]::PresCallback
     }
     return $ans
 }
@@ -1603,23 +1603,31 @@ proc ::MUC::DestroyCloseCmd {wclose} {
 
 proc ::MUC::IQCallback {roomjid jlibname type subiq} {
     
-    if {$type eq "error"} {
-    	regexp {^([^@]+)@.*} $roomjid match roomName
-	::UI::MessageBox -type ok -icon error -title "Error" -message [mc mucIQError $roomName $subiq]
+    if {[string equal $type "error"]} {
+	jlib::splitjidex $roomjid roomName - -
+	::UI::MessageBox -type ok -icon error -title [mc Error]  \
+	  -message [mc mucIQError $roomName $subiq]
     }
 }
 
 
-proc ::MUC::PresCallback {roomjid jlibname type args} {
+proc ::MUC::PresCallback {jlibname xmldata} {
     
-    if {$type eq "error"} {
-    	set errcode ???
-    	set errmsg ""
-    	if {[info exists argsArr(-error)]} {
-	    foreach {errcode errmsg} $argsArr(-error) break
-	}	
-    	regexp {^([^@]+)@.*} $roomjid match roomName
-	::UI::MessageBox -type ok -icon error -title "Error" -message [mc mucIQError $roomName $errmsg]
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type "available"
+    }    
+    if {[string equal $type "error"]} {
+	set errspec [jlib::getstanzaerrorspec $xmldata]
+	set errmsg ""
+	if {[llength $errspec]} {
+	    set errcode [lindex $errspec 0]
+	    set errmsg  [lindex $errspec 1]
+	}
+	jlib::splitjidex $from roomName - -
+	::UI::MessageBox -type ok -icon error -title [mc Error]  \
+	  -message [mc mucIQError $roomName $errmsg]
     }
 }
 

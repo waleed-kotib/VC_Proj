@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.20 2006-08-12 13:48:25 matben Exp $
+# $Id: JUser.tcl,v 1.21 2006-08-14 13:08:03 matben Exp $
 
 package provide JUser 1.0
 
@@ -269,26 +269,26 @@ proc ::Jabber::User::SetCB {jid type queryE} {
 # 
 #       Callback when sending presence to user for (un)subscription requests.
 
-proc ::Jabber::User::PresError {jlibName type args} {
+proc ::Jabber::User::PresError {jlibname xmldata} {
     upvar ::Jabber::jstate jstate
     
-    array set argsArr {
-	-from       unknown
-	-error      {{} Unknown}
-	-from       ""
-    }
-    array set argsArr $args
-    
-    ::Debug 2 "::Jabber::User::PresError type=$type, args=$args"
-
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type "available"
+    }    
     if {[string equal $type "error"]} {
-	foreach {errcode errmsg} $argsArr(-error) break
-	set ans [::UI::MessageBox -icon error -type yesno -message  \
-	  "We received an error when (un)subscribing to $argsArr(-from).\
-	  The error is: $errmsg ($errcode).\
-	  Do you want to remove it from your roster?"]
-	if {$ans eq "yes"} {
-	    $jstate(jlib) roster send_remove $argsArr(-from)
+	set errspec [jlib::getstanzaerrorspec $xmldata]
+	if {[llength $errspec]} {
+	    set errcode [lindex $errspec 0]
+	    set errmsg  [lindex $errspec 1]
+	    set str "We received an error when (un)subscribing to $from.\
+	      The error is: $errmsg ($errcode).\
+	      Do you want to remove it from your roster?"
+	    set ans [::UI::MessageBox -icon error -type yesno -message $str]
+	    if {$ans eq "yes"} {
+		$jstate(jlib) roster send_remove $from
+	    }
 	}
     }
 }

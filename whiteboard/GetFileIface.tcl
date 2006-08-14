@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: GetFileIface.tcl,v 1.9 2005-09-20 14:09:51 matben Exp $
+# $Id: GetFileIface.tcl,v 1.10 2006-08-14 13:08:03 matben Exp $
 
 package require getfile
 package require uriencode
@@ -374,7 +374,6 @@ proc ::GetFileIface::Progress {gettoken token total current} {
 #       Command callback for the getfile package.
 
 proc ::GetFileIface::Command {gettoken token what msg} {
-    global  prefs
     upvar #0 $gettoken getstate          
     
     ::Debug 2 "+\t\t::GetFileIface::Command token=$token, what=$what msg=$msg"
@@ -385,7 +384,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
     
     if {[string equal $what "error"]} {
 	::WB::SetStatusMessage $w $str
-	if {$prefs(talkative) >= 1} {
+	if {$::config(talkative) >= 1} {
 	    ::UI::MessageBox -title [mc {Get File Error}] \
 	      -type ok -message $msg
 	}

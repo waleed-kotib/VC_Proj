@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: Create.tcl,v 1.3 2006-05-17 06:35:02 matben Exp $
+# $Id: Create.tcl,v 1.4 2006-08-14 13:08:03 matben Exp $
 
 package provide Create 1.0
 
@@ -330,32 +330,37 @@ proc ::Create::SendGet {token} {
 #       Presence callabck from the 'muc create' command.
 #
 # Arguments:
-#       jlibName 
-#       type    presence typ attribute, 'available' etc.
-#       args    -from, -id, -to, -x ...
+#       token
+#       jlibname 
 #       
 # Results:
 #       None.
 
-proc ::Create::CreateMUCCB {token jlibName type args} {
+proc ::Create::CreateMUCCB {token jlibname xmldata} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Create::CreateMUCCB type=$type, args='$args'"
+    ::Debug 2 "::Create::CreateMUCCB"
     
     if {![info exists state(w)]} {
 	return
     }
     $state(wsearrows) stop
-    array set argsArr $args
-    
-    if {$type eq "error"} {
-    	set errcode ???
+
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type "available"
+    }    
+    set roomjid [jlib::jidmap $from]
+    if {[string equal $type "error"]} {
+    	set errcode ""
     	set errmsg ""
-    	if {[info exists argsArr(-error)]} {
-    	    set errcode [lindex $argsArr(-error) 0]
-    	    set errmsg [lindex $argsArr(-error) 1]
+	set errspec [jlib::getstanzaerrorspec $xmldata]
+	if {[llength $errspec]} {
+	    set errcode [lindex $errspec 0]
+	    set errmsg  [lindex $errspec 1]
 	}
 	::UI::MessageBox -type ok -icon error \
 	  -message [mc jamesserrconfgetcre $errcode $errmsg]
@@ -648,13 +653,19 @@ proc ::Create::GCDoEnter {token} {
     destroy $enter(w)
 }
 
-proc ::Create::EnterCallback {jlibName type args} {
+proc ::Create::EnterCallback {jlibname xmldata} {
     
-    array set argsArr $args
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type "available"
+    }    
     if {[string equal $type "error"]} {
-	set msg [mc mucErrEnter $argsArr(-from)]
-	if {[info exists argsArr(-error)]} {
-	    foreach {errcode errmsg} $argsArr(-error) break
+	set msg [mc mucErrEnter $from]
+	set errspec [jlib::getstanzaerrorspec $xmldata]
+	if {[llength $errspec]} {
+	    set errcode [lindex $errspec 0]
+	    set errmsg  [lindex $errspec 1]
 	    append msg [mc mucErrCode $errcode $errmsg]
 	}
 	::UI::MessageBox -title [mc mucErrEnterTitle] -message $msg -icon error
@@ -662,7 +673,7 @@ proc ::Create::EnterCallback {jlibName type args} {
     }
     
     # Cache groupchat protocol type (muc|conference|gc-1.0).
-    ::hooks::run groupchatEnterRoomHook $argsArr(-from) "gc-1.0"
+    ::hooks::run groupchatEnterRoomHook $from "gc-1.0"
 }
 
 #-------------------------------------------------------------------------------

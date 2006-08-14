@@ -19,7 +19,7 @@
 #  
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.14 2006-08-12 13:48:25 matben Exp $
+# $Id: caps.tcl,v 1.15 2006-08-14 13:08:03 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -56,8 +56,10 @@ proc jlib::caps::init {jlibname args} {
     namespace eval ${jlibname}::caps {
 	variable state
     }
-    jlib::presence_register $jlibname available   [namespace current]::avail_cb 20
-    jlib::presence_register $jlibname unavailable [namespace current]::unavail_cb 20
+    jlib::presence_register_int $jlibname available    \
+      [namespace current]::avail_cb
+    jlib::presence_register_int $jlibname unavailable  \
+      [namespace current]::unavail_cb
 }
 
 proc jlib::caps::configure {jlibname args} {
@@ -192,9 +194,10 @@ proc jlib::caps::disco_cb {node what value jlibname type from subiq args} {
 #       The exts may be different for identical node+ver and must be
 #       obtained for individual jids using 'roster getcapsattr'.
 
-proc jlib::caps::avail_cb {jlibname jid type args} {
+proc jlib::caps::avail_cb {jlibname xmldata} {
     upvar ${jlibname}::caps::state state
     
+    set jid [wrapper::getattribute $xmldata from]
     set jid [jlib::jidmap $jid]
 
     set node [$jlibname roster getcapsattr $jid node]
@@ -229,9 +232,10 @@ proc jlib::caps::avail_cb {jlibname jid type args} {
 #       Registered unavailable presence callback.
 #       Frees internal cache related to this jid.
 
-proc jlib::caps::unavail_cb {jlibname jid type args} {
+proc jlib::caps::unavail_cb {jlibname xmldata} {
     upvar ${jlibname}::caps::state state
 
+    set jid [wrapper::getattribute $xmldata from]
     set jid [jlib::jidmap $jid]
     
     # JID may not have caps.

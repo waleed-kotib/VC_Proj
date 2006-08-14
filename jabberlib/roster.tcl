@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.48 2006-08-12 13:48:26 matben Exp $
+# $Id: roster.tcl,v 1.49 2006-08-14 13:08:03 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -45,8 +45,8 @@
 #                  
 #       oldpresA                  : As presA but any previous state.
 #       
-#       state($jid,*)               : Keeps other info not directly related
-#                                     to roster or presence elements.
+#       state($jid,*)             : Keeps other info not directly related
+#                                   to roster or presence elements.
 #                                      
 ############################# USAGE ############################################
 #
@@ -57,40 +57,32 @@
 #      roster - an object for roster and presence information.
 #      
 #   SYNOPSIS
-#      roster::roster clientCommand
-#      
-#   OPTIONS
-#      none
+#      jlibname roster cmd ??
 #      
 #   INSTANCE COMMANDS
-#      jabberlib roster availablesince jid
-#      jabberlib roster clearpresence ?jidpattern?
-#      jabberlib roster enterroster
-#      jabberlib roster exitroster
-#      jabberlib roster getgroups ?jid?
-#      jabberlib roster getask jid
-#      jabberlib roster getcapsattr jid name
-#      jabberlib roster getname jid
-#      jabberlib roster getpresence jid ?-resource, -type?
-#      jabberlib roster getresources jid
-#      jabberlib roster gethighestresource jid
-#      jabberlib roster getrosteritem jid
-#      jabberlib roster getstatus jid
-#      jabberlib roster getsubscription jid
-#      jabberlib roster getusers ?-type available|unavailable?
-#      jabberlib roster getx jid xmlns
-#      jabberlib roster getextras jid xmlns
-#      jabberlib roster isavailable jid
-#      jabberlib roster isitem jid
-#      jabberlib roster haveroster
-#      jabberlib roster removeitem jid
-#      jabberlib roster reset
-#      jabberlib roster send_get ?-command tclProc?
-#      jabberlib roster send_remove ?-command tclProc?
-#      jabberlib roster send_set ?-command tclProc, -name, -groups?
-#      jabberlib roster setpresence jid type ?-option value -option ...?
-#      jabberlib roster setitem jid ?-option value -option ...?
-#      jabberlib roster wasavailable jid
+#      jlibname roster availablesince jid
+#      jlibname roster clearpresence ?jidpattern?
+#      jlibname roster getgroups ?jid?
+#      jlibname roster getask jid
+#      jlibname roster getcapsattr jid name
+#      jlibname roster getname jid
+#      jlibname roster getpresence jid ?-resource, -type?
+#      jlibname roster getresources jid
+#      jlibname roster gethighestresource jid
+#      jlibname roster getrosteritem jid
+#      jlibname roster getstatus jid
+#      jlibname roster getsubscription jid
+#      jlibname roster getusers ?-type available|unavailable?
+#      jlibname roster getx jid xmlns
+#      jlibname roster getextras jid xmlns
+#      jlibname roster isavailable jid
+#      jlibname roster isitem jid
+#      jlibname roster haveroster
+#      jlibname roster reset
+#      jlibname roster send_get ?-command tclProc?
+#      jlibname roster send_remove ?-command tclProc?
+#      jlibname roster send_set ?-command tclProc, -name, -groups?
+#      jlibname roster wasavailable jid
 #      
 #   The 'clientCommand' procedure must have the following form:
 #   
@@ -125,7 +117,7 @@ namespace eval jlib::roster {
     variable rostGlobals
     
     # Globals same for all instances of this roster.
-    set rostGlobals(debug) 2
+    set rostGlobals(debug) 0
     
     # List of all rostA element sub entries. First the actual roster,
     # with 'rostA($jid,...)'
@@ -169,6 +161,12 @@ proc jlib::roster::init {jlibname args} {
     # Register for roster pushes.
     $jlibname iq_register set "jabber:iq:roster" [namespace code set_handler]
         
+    # Register for presence. Be sure they are first in order.
+    $jlibname presence_register_int available   \
+      [namespace code presence_handler] 10
+    $jlibname presence_register_int unavailable \
+      [namespace code presence_handler] 10
+    
     set rostA(groups) {}
     set options(cmd) ""
     
@@ -577,178 +575,92 @@ proc jlib::roster::clearpresence {jlibname {jidpattern ""}} {
     }
 }
 
-# jlib::roster::setpresence --
-#
-#       Sets the presence of a roster item. Adds the corresponding resource
-#       to the list of resources for this jid.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       jid:        the from attribute. Usually 3-tier jid with /resource part.
-#       type:       one of 'available', 'unavailable', or 'unsubscribed'.
-#       args:       a list of '-key value' pairs, where '-key' is any of:
-#                     -status value
-#                     -priority value
-#                     -show value
-#                     -x list of xml lists
-#       
-# Results:
-#       none.
+proc jlib::roster::presence_handler {jlibname xmldata} {    
+    presence $jlibname $xmldata
+    return 0
+}
 
-proc jlib::roster::setpresence {jlibname jid type args} { 
+# jlib::roster::presence --
+# 
+#       Registered internal presence handler for 'available' and 'unavailable'
+#       that caches all presence info.
 
+proc jlib::roster::presence {jlibname xmldata} {
+    
     variable rostGlobals
     upvar ${jlibname}::roster::rostA rostA
     upvar ${jlibname}::roster::presA presA
     upvar ${jlibname}::roster::oldpresA oldpresA
-    upvar ${jlibname}::roster::options options
     upvar ${jlibname}::roster::state state
-    
-    Debug 2 "roster::setpresence jid='$jid', type='$type', args='$args'"
-    
-    set mjid [jlib::jidmap $jid]
-    jlib::splitjid $mjid mjid2 resource
-    jlib::splitjid $jid jid2 x
-    
-    # XMPP specifies that an 'unavailable' element is sent *after* we've got
-    # an subscription='remove' element. Store?
-    
-    #if {$type ne "available" && $type ne "unavailable"}
-    
-    if {[string equal $type "unsubscribed"]} {
-	set argList [list -type $type]
-    } else {
-	
-	# Set secs only if unavailable before.
-	if {![info exists presA($mjid,type)]  \
-	  || ($presA($mjid,type) eq "unavailable")} {
-	    set state($mjid,secs) [clock seconds]
-	}
-	
-	# Keep cache of any old state.
-        # Note special handling of * for array unset - prefix with \\ to quote.
-	array unset oldpresA [jlib::ESC $mjid],*
-	array set oldpresA [array get presA [jlib::ESC $mjid],*]
-	
-	# Clear out the old presence state since elements may still be lurking.
-	array unset presA [jlib::ESC $mjid],*
-	
-	# Should we add something more to our roster, such as subscription,
-	# if we haven't got our roster before this?
-	
-	# Add to list of resources.
-	set presA($mjid2,res) [lsort -unique [lappend presA($mjid2,res) \
-	  $resource]]
 
-	set presA($mjid,type) $type
-		
-	foreach {name value} $args {
-	    set par [string trimleft $name "-"]
-	    
-	    switch -- $par {
-		x {
-		    
-		    # This is a list of <x> lists.
-		    foreach xelem $value {
-			set ns [wrapper::getattribute $xelem xmlns]
-			regexp {http://jabber.org/protocol/(.*)$} $ns - ns
-			set presA($mjid,x,$ns) $xelem
-		    }
-		}
-		extras {
+    Debug 2 "jlib::roster::presence"
 
-		    # This can be anything properly namespaced.
-		    foreach xelem $value {
-			set ns [wrapper::getattribute $xelem xmlns]
-			set presA($mjid,extras,$ns) $xelem
-		    }
-		}
-		default {
-		    set presA($mjid,$par) $value
-		}
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type "available"
+    }
+
+    # We don't handle subscription types (remove?).
+    if {$type ne "available" && $type ne "unavailable"} {
+	return
+    }
+
+    set mjid [jlib::jidmap $from]
+    jlib::splitjid $mjid mjid2 res
+
+    # Set secs only if unavailable before.
+    if {![info exists presA($mjid,type)]  \
+      || ($presA($mjid,type) eq "unavailable")} {
+	set state($mjid,secs) [clock seconds]
+    }
+    
+    # Keep cache of any old state.
+    # Note special handling of * for array unset - prefix with \\ to quote.
+    array unset oldpresA [jlib::ESC $mjid],*
+    array set oldpresA [array get presA [jlib::ESC $mjid],*]
+    
+    # Clear out the old presence state since elements may still be lurking.
+    array unset presA [jlib::ESC $mjid],*
+
+    # Add to list of resources.
+    set presA($mjid2,res) [lsort -unique [lappend presA($mjid2,res) $res]]
+
+    set presA($mjid,type) $type
+
+    foreach E [wrapper::getchildren $xmldata] {
+	set tag [wrapper::gettag $E]
+	set chdata [wrapper::getcdata $E]
+	
+	switch -- $tag {
+	    status - priority {
+		set presA($mjid,$tag) $chdata
+	    }
+	    show {
+		set presA($mjid,$tag) [string tolower $chdata]
+	    }
+	    x {
+		set ns [wrapper::getattribute $E xmlns]
+		regexp {http://jabber.org/protocol/(.*)$} $ns - ns
+		set presA($mjid,x,$ns) $E
+	    }
+	    default {
+
+		# This can be anything properly namespaced.
+		set ns [wrapper::getattribute $E xmlns]
+		set presA($mjid,extras,$ns) $E
 	    }
 	}
-    }
-    return
-}
-
-# jlib::roster::invokecommand --
-# 
-#       Evaluates the registered command procedure if any.
-
-proc jlib::roster::invokecommand {jlibname jid type args} { 
-
-    upvar ${jlibname}::roster::options options
-        
-    if {[string length $options(cmd)]} {
-	jlib::splitjid $jid jid2 resource
-	set argList $args
-	lappend argList -type $type -resource $resource
-	uplevel #0 $options(cmd) [list $jlibname presence $jid2] $argList
-    }
+    }    
 }
 
 
 # Firts attempt to keep the jid's as they are reported, with no separate
 # resource part.
 
-proc jlib::roster::setpresence2 {jlibname jid type args} { 
+proc jlib::roster::setpresence2 {jlibname xmldata} { 
 
-    variable rostGlobals
-    upvar ${jlibname}::roster::rostA rostA
-    upvar ${jlibname}::roster::presA2 presA2
-    upvar ${jlibname}::roster::oldpresA2 oldpresA2
-    upvar ${jlibname}::roster::options options
 
-    Debug 2 "roster::setpresence2 jid='$jid', type='$type', args='$args'"
-    
-    set mjid [jlib::jidmap $jid]
-    
-    set argList $args
-    lappend argList -type $type
-
-    if {[string equal $type "unsubscribed"]} {
-	# empty
-    } else {
-	
-	# Keep cache of any old state.
-	array unset oldpresA2 [jlib::ESC $mjid],*
-	array set oldpresA2 [array get presA2 [jlib::ESC $mjid],*]
-	
-	# Clear out the old presence state since elements may still be lurking.
-	array unset presA2 [jlib::ESC $mjid],*
-    
-	set presA2($mjid,type) $type
-	set presA2($mjid,jid)  $mjid
-		
-	foreach {name value} $args {
-	    set par [string trimleft $name "-"]
-	    
-	    switch -- $par {
-		x {
-		    
-		    # This is a list of <x> lists.
-		    foreach xelem $value {
-			set ns [wrapper::getattribute $xelem xmlns]
-			regexp {http://jabber.org/protocol/(.*)$} $ns - ns
-			set presA2($mjid,x,$ns) $xelem
-		    }
-		}
-		extras {
-
-		    # This can be anything properly namespaced.
-		    foreach xelem $value {
-			set ns [wrapper::getattribute $xelem xmlns]
-			set presA2($mjid,extras,$ns) $xelem
-		    }
-		}
-		default {
-		    set presA2($mjid,$par) $value
-		}
-	    }
-	}
-    }
-    return
 }
 
 # jlib::roster::getrosteritem --
@@ -1568,7 +1480,7 @@ proc jlib::roster::getpresencesecs {jlibname jid} {
 proc jlib::roster::Debug {num str} {
     variable rostGlobals
     if {$num <= $rostGlobals(debug)} {
-	puts $str
+	puts "===========$str"
     }
 }
 

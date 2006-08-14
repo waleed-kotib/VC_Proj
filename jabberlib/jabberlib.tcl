@@ -1,14 +1,11 @@
-################################################################################
+# jabberlib.tcl --
 #
-# This is JabberLib (abbreviated jlib), the Tcl library for 
-# use in making Jabber clients.
-# Is originally written by Kerem HADIMLI, with additions
-# from Todd Bradley. 
-# Completely rewritten from scratch by Mats Bengtsson.
-# The algorithm for building parse trees has been completely redesigned.
-# Only some structures and API names are kept essentially unchanged.
+#       This is the main part of the jabber lib, a Tcl library for interacting
+#       with jabber servers. The core parts are known under the name XMPP.
 #
-# $Id: jabberlib.tcl,v 1.148 2006-08-12 13:48:25 matben Exp $
+# Copyright (c) 2001-2006  Mats Bengtsson
+#  
+# $Id: jabberlib.tcl,v 1.149 2006-08-14 13:08:03 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -115,7 +112,7 @@
 #   The callbacks given for any of the '-iqcommand', '-messagecommand', 
 #   or '-presencecommand' must have the following form:
 #   
-#      Callback {jlibName type args}
+#      tclProc {jlibname xmldata}
 #      
 #   where 'type' is the type attribute valid for each specific element, and
 #   'args' is a list of '-key value' pairs. The '-iqcommand' returns a boolean
@@ -126,9 +123,8 @@
 #   
 #      clientCmd {jlibName what args}
 #      
-#   where 'what' can be any of: connect, disconnect, iqreply, message, xmlerror,
-#   version, presence, networkerror, oob, away, xaway, .... Iq elements have
-#   the what equal to the last namespace specifier.
+#   where 'what' can be any of: connect, disconnect, xmlerror,
+#   version, networkerror, ....
 #   'args' is a list of '-key value' pairs.
 #      
 #   @@@ TODO:
@@ -1056,8 +1052,7 @@ proc jlib::dispatcher {jlibname xmldata} {
 #       2) handle callbacks specific for 'type' and 'xmlns' that have been
 #          registered with 'iq_register'
 #       3) if unhandled by 2, use any -iqcommand callback
-#       4) if still, use the client command callback
-#       5) if type='get' and still unhandled, return an error element
+#       4) if type='get' and still unhandled, return an error element
 #       
 # Arguments:
 #       jlibname:   the instance of this jlib.
@@ -1107,13 +1102,6 @@ proc jlib::iq_handler {jlibname xmldata} {
     set subiq [lindex $childlist 0]
     set xmlns [wrapper::getattribute $subiq xmlns]
     
-    if {[string equal $type "error"]} {
-	set callbackType "error"
-    } elseif {[regexp {.*:([^ :]+)$} $xmlns match callbackType]} {
-	# empty
-    } else {
-	set callbackType "iqreply"
-    }
     set ishandled 0
     
     # (1) Handle all preregistered callbacks via id attributes.
@@ -1174,20 +1162,10 @@ proc jlib::iq_handler {jlibname xmldata} {
 
     if {[string equal $ishandled "0"]} {	
 	if {[string length $opts(-iqcommand)]} {
-	    set iqcallback [concat  \
-	      [list $jlibname $type -query $subiq] $arglist]
-	    set ishandled [uplevel #0 $opts(-iqcommand) $iqcallback]
+	    set ishandled [uplevel #0 $opts(-iqcommand) [list $jlibname $xmldata]]
 	} 
 	    
-	# (4) If unhandled by 2 and 3, use the client command callback.
-
-	if {[string equal $ishandled "0"]} {
-	    set clientcallback [concat  \
-	      [list $jlibname $callbackType -query $subiq] $arglist]
-	    set ishandled [uplevel #0 $lib(clientcmd) $clientcallback]
-	}
-
-	# (5) If type='get' or 'set', and still unhandled, return an error element.
+	# (4) If type='get' or 'set', and still unhandled, return an error element.
 
 	if {[string equal $ishandled "0"] && \
 	  ([string equal $type "get"] || [string equal $type "set"])} {
@@ -1346,9 +1324,7 @@ proc jlib::message_handler {jlibname xmldata} {
     
 	# Invoke callback to client.
 	if {[string length $opts(-messagecommand)]} {
-	    uplevel #0 $opts(-messagecommand) [list $jlibname $type] $arglist
-	} else {
-	    uplevel #0 $lib(clientcmd) [list $jlibname message] $arglist
+	    uplevel #0 $opts(-messagecommand) [list $jlibname $xmldata]
 	}
     }
 }
@@ -1451,53 +1427,33 @@ proc jlib::presence_handler {jlibname xmldata} {
 	if {[llength $extras]} {
 	    lappend arglist -extras $extras
 	}
-	
-	# Do different things depending on the 'type' attribute.
-	if {[string equal $type "available"] ||  \
-	  [string equal $type "unavailable"]} {
-	    
-	    # Not sure if we should exclude roster here since this
-	    # is not pushed to us but requested.
-	    # It must be set for presence sent to groupchat rooms!
-	    
-	    # Set presence in our roster object
-	    if {[info exists statics(roster)]} {
-		eval {jlib::roster::setpresence $jlibname $from $type} $arglist
-	    }
-	} else {
-	    
-	    # We probably need to respond to the 'presence' element;
-	    # 'subscribed'?.
-	    # If we have 'unsubscribe'd another users presence it cannot be
-	    # anything else than 'unavailable' anymore.
-	    if {[string equal $type "unsubscribed"]} {
-		if {[info exists statics(roster)]} {
-		    jlib::roster::setpresence $jlibname $from "unsubscribed"
-		}
-	    }
-	    if {[string length $opts(-presencecommand)]} {
-		uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
-	    } else {
-		uplevel #0 $lib(clientcmd) [list $jlibname presence] $arglist
-	    }	
-	}
     }
     
     # Handle callbacks specific for 'type' that have been registered with 
     # 'presence_register(_ex)'.
-    eval {presence_run_hook $jlibname $from $type} $arglist
-    presence_ex_run_hook $jlibname $xmldata
     
+    # We keep two sets of registered handlers, jlib internal which are
+    # called first, and then externals which are used by the client.
+
+    # Internals:
+    presence_run_hook $jlibname 1 $xmldata
+    presence_ex_run_hook $jlibname 1 $xmldata
+    
+    # Externals:
+    presence_run_hook $jlibname 0 $xmldata
+    presence_ex_run_hook $jlibname 0 $xmldata
+
     # Invoke any callback before the rosters callback.
+    # @@@ Right place ???
     if {[info exists id] && [info exists prescmd($id)]} {
-	uplevel #0 $prescmd($id) [list $jlibname $type] $arglist
+	#uplevel #0 $prescmd($id) [list $jlibname $type] $arglist
+	uplevel #0 $prescmd($id) [list $jlibname $xmldata]
 	unset -nocomplain prescmd($id)
     }	
-
-    if {![string equal $type "error"]} {
-	if {[info exists statics(roster)]} {
-	    eval {jlib::roster::invokecommand $jlibname $from $type} $arglist
-	}
+    
+    # This is the last station.
+    if {[string length $opts(-presencecommand)]} {
+	uplevel #0 $opts(-presencecommand) [list $jlibname $xmldata]
     }
 }
 
@@ -2210,33 +2166,50 @@ proc jlib::message_run_hook {jlibname type xmlns msgElem args} {
     return $ishandled
 }
 
+# @@@ We keep two versions, internal for jlib usage and external for apps.
+#     Do this for all registered callbacks!
+
 # jlib::presence_register --
 # 
-#       Handler for registered presence callbacks.
-#       
-#       @@@ We should be able to register for certain jid's
-#           such as rooms and members using wildcards.
+#       Handler for registered presence callbacks. Simple version.
 
-proc jlib::presence_register {jlibname type func {seq 50}} {
-    
-    upvar ${jlibname}::preshook preshook
-    
-    lappend preshook($type) [list $func $seq]
-    set preshook($type)  \
-      [lsort -integer -index 1 [lsort -unique $preshook($type)]]
+proc jlib::presence_register_int {jlibname type func {seq 50}} {
+    pres_reg $jlibname 1 $type $func $seq
 }
 
-proc jlib::presence_run_hook {jlibname from type args} {
+proc jlib::presence_register {jlibname type func {seq 50}} {
+    pres_reg $jlibname 0 $type $func $seq
+}
+
+proc jlib::pres_reg {jlibname int type func {seq 50}} {
     
     upvar ${jlibname}::preshook preshook
+    
+    lappend preshook($int,$type) [list $func $seq]
+    set preshook($int,$type)  \
+      [lsort -integer -index 1 [lsort -unique $preshook($int,$type)]]
+}
 
+proc jlib::presence_run_hook {jlibname int xmldata} {
+    
+    upvar ${jlibname}::preshook preshook
+    upvar ${jlibname}::locals locals
+    
+    set type [wrapper::getattribute $xmldata type]
+    set from [wrapper::getattribute $xmldata from]
+    if {$type eq ""} {
+	set type "available"
+    }
+    if {$from eq ""} {
+	set from $locals(server)
+    }
     set ishandled 0
     
-    if {[info exists preshook($type)]} {
-	foreach spec $preshook($type) {
+    if {[info exists preshook($int,$type)]} {
+	foreach spec $preshook($int,$type) {
 	    set func [lindex $spec 0]
 	    set code [catch {
-		uplevel #0 $func [list $jlibname $from $type] $args
+		uplevel #0 $func [list $jlibname $xmldata]
 	    } ans]
 	    if {$code} {
 		bgerror "preshook $func failed: $code\n$::errorInfo"
@@ -2250,14 +2223,22 @@ proc jlib::presence_run_hook {jlibname from type args} {
     return $ishandled
 }
 
+proc jlib::presence_deregister_int {jlibname type func} {
+    pres_dereg $jlibname 1 $type $func
+}
+
 proc jlib::presence_deregister {jlibname type func} {
+    pres_dereg $jlibname 0 $type $func
+}
+
+proc jlib::pres_dereg {jlibname int type func} {
     
     upvar ${jlibname}::preshook preshook
     
-    if {[info exists preshook($type)]} {
-	set idx [lsearch -glob $preshook($type) "$func *"]
+    if {[info exists preshook($int,$type)]} {
+	set idx [lsearch -glob $preshook($int,$type) "$func *"]
 	if {$idx >= 0} {
-	    set preshook($type) [lreplace $preshook($type) $idx $idx]
+	    set preshook($int,$type) [lreplace $preshook($int,$type) $idx $idx]
 	}
     }
 }
@@ -2288,7 +2269,15 @@ proc jlib::presence_deregister {jlibname type func} {
 # Results:
 #       none.
 
+proc jlib::presence_register_ex_int {jlibname func args} {
+    eval {pres_reg_ex $jlibname 1 $func} $args
+}
+
 proc jlib::presence_register_ex {jlibname func args} {
+    eval {pres_reg_ex $jlibname 0 $func} $args
+}
+
+proc jlib::pres_reg_ex {jlibname int func args} {
     
     upvar ${jlibname}::expreshook expreshook
 
@@ -2321,12 +2310,12 @@ proc jlib::presence_register_ex {jlibname func args} {
     foreach key [array names aopts] {
 	lappend opts $key $aopts($key)
     }
-    lappend expreshook($pat) [list $opts $func $seq]
-    set expreshook($pat)  \
-      [lsort -integer -index 2 [lsort -unique $expreshook($pat)]]  
+    lappend expreshook($int,$pat) [list $opts $func $seq]
+    set expreshook($int,$pat)  \
+      [lsort -integer -index 2 [lsort -unique $expreshook($int,$pat)]]  
 }
 
-proc jlib::presence_ex_run_hook {jlibname xmldata} {
+proc jlib::presence_ex_run_hook {jlibname int xmldata} {
 
     upvar ${jlibname}::expreshook expreshook
     upvar ${jlibname}::locals locals
@@ -2340,12 +2329,12 @@ proc jlib::presence_ex_run_hook {jlibname xmldata} {
 	set from $locals(server)
     }
     jlib::splitjid $from from2 -
-    set pkey "$type,$from,$from2"
+    set pkey "$int,$type,$from,$from2"
             
     # Make matching in two steps, attributes and elements.
     # First the attributes.
     set matched {}
-    foreach {pat value} [array get expreshook] {
+    foreach {pat value} [array get expreshook $int,*] {
 
 	if {[string match $pat $pkey]} {
 	    
@@ -2400,7 +2389,15 @@ proc jlib::presence_ex_run_hook {jlibname xmldata} {
     }
 }
 
+proc jlib::presence_deregister_ex_int {jlibname func args} {
+    eval {pres_dereg_ex $jlibname 1 $func} $args
+}
+
 proc jlib::presence_deregister_ex {jlibname func args} {
+    eval {pres_dereg_ex $jlibname 0 $func} $args
+}
+
+proc jlib::pres_dereg_ex {jlibname int func args} {
     
     upvar ${jlibname}::expreshook expreshook
     
@@ -2427,18 +2424,18 @@ proc jlib::presence_deregister_ex {jlibname func args} {
 	}
     }
     set pat "$type,$from,$from2"
-    if {[info exists expreshook($pat)]} {
+    if {[info exists expreshook($int,$pat)]} {
 
 	# The 'opts' must be ordered.
 	set opts {}
 	foreach key [array names aopts] {
 	    lappend opts $key $aopts($key)
 	}
-	set idx [lsearch -glob $expreshook($pat) [list $opts $func $seq]]
+	set idx [lsearch -glob $expreshook($int,$pat) [list $opts $func $seq]]
 	if {$idx >= 0} {
-	    set expreshook($pat) [lreplace $expreshook($pat) $idx $idx]
-	    if {$expreshook($pat) eq {}} {
-		unset expreshook($pat)
+	    set expreshook($int,$pat) [lreplace $expreshook($int,$pat) $idx $idx]
+	    if {$expreshook($int,$pat) eq {}} {
+		unset expreshook($int,$pat)
 	    }
 	}
     }

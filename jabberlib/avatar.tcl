@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.18 2006-07-29 13:12:59 matben Exp $
+# $Id: avatar.tcl,v 1.19 2006-08-14 13:08:03 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -104,7 +104,8 @@ proc jlib::avatar::init {jlibname args} {
     
     # Register some standard iq handlers that are handled internally.
     $jlibname iq_register get $xmlns(iq-avatar) [namespace current]::iq_handler
-    $jlibname presence_register available [namespace current]::presence_handler 20
+    $jlibname presence_register_int available   \
+      [namespace current]::presence_handler
 
     return
 }
@@ -443,14 +444,13 @@ proc jlib::avatar::uptodate {jlibname jid2} {
 #       since we don't want separate callbacks if both are supplied.
 #       It is assumed that hash from any are identical.
 
-proc jlib::avatar::presence_handler {jlibname jid type args} {
+proc jlib::avatar::presence_handler {jlibname xmldata} {
     upvar ${jlibname}::avatar::options options
     upvar ${jlibname}::avatar::state   state
 
-    array set aargs $args
-    set xmldata $aargs(-xmldata)
-    set from [wrapper::getattribute $xmldata from]
-    set jid2 [jlib::barejid $from]
+    set jid [wrapper::getattribute $xmldata from]
+    set mjid [jlib::jidmap $jid]
+    set jid2 [jlib::barejid $mjid]
 
     if {[info exists state($jid2,hash)]} {
 	set new 0

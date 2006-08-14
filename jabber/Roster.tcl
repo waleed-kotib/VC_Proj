@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.173 2006-08-12 13:48:25 matben Exp $
+# $Id: Roster.tcl,v 1.174 2006-08-14 13:08:03 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -22,6 +22,7 @@ namespace eval ::Roster:: {
     ::hooks::register logoutHook             ::Roster::LogoutHook
     ::hooks::register quitAppHook            ::Roster::QuitHook
     ::hooks::register uiMainToggleMinimal    ::Roster::ToggleMinimalHook
+    ::hooks::register jabberInitHook         ::Roster::JabberInitHook
     
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Roster::InitPrefsHook
@@ -125,6 +126,12 @@ namespace eval ::Roster:: {
     set timer(msg,ms) 10000
     set timer(exitroster,secs) 0
     set timer(pres,secs) 4
+}
+
+proc ::Roster::JabberInitHook {jlibname} {
+    
+    $jlibname presence_register available [namespace code PresenceEvent]   
+    $jlibname presence_register unavailable [namespace code PresenceEvent]   
 }
 
 proc ::Roster::GetNameOrjid {jid} {
@@ -752,7 +759,7 @@ proc ::Roster::StyleMenu {m} {
 #
 # Arguments:
 #       jlibname
-#       what        any of "presence", "remove", "set", "enterroster",
+#       what        any of "remove", "set", "enterroster",
 #                   "exitroster"
 #       jid         'user@server' without any /resource usually.
 #                   Some transports keep a resource part in jid.
@@ -775,64 +782,6 @@ proc ::Roster::PushProc {jlibname what {jid {}} args} {
     set jlib $jstate(jlib)
         
     switch -- $what {
-	presence {
-	    
-	    # If no 'type' attribute given "available" is default.
-	    set type "available"
-	    if {[info exists attrArr(-type)]} {
-		set type $attrArr(-type)
-	    }
-	    if {($type ne "available") && ($type ne "unavailable")} {
-		return
-	    }
-	    
-	    # We may get presence 'available' with empty resource (ICQ)!
-	    set jid3 $jid
-	    if {[info exists attrArr(-resource)] &&  \
-	      [string length $attrArr(-resource)]} {
-		set jid3 $jid/$attrArr(-resource)
-	    }
-	    
-	    # This 'isroom' gives wrong answer if a gateway also supports
-	    # conference (groupchat).
-	    if {0} {
-		if {![$jlib service isroom $jid]} {
-		    eval {Presence $jid3 $type} $args
-		}
-	    }
-	    
-	    # We get presence also for rooms etc which are not roster items.
-	    # Some transports have /registered resource.
-	    if {[$jlib roster isitem $jid]} {
-		eval {Presence $jid3 $type} $args
-	    } elseif {[$jlib roster isitem $jid3]} {
-		eval {Presence $jid3 $type} $args
-	    }
-
-	    # Specific type presence hooks.
-	    eval {::hooks::run presence[string totitle $type]Hook $jid $type} $args
-
-	    # Hook to run only for new presence/show/status.
-	    # This is helpful because of some x-elements can be broadcasted.
-	    array set oldPres [$jlib roster getoldpresence $jid3]
-	    set same [arraysequalnames attrArr oldPres {-type -show -status}]
-	    if {!$same} {
-		eval {::hooks::run presenceNewHook $jid $type} $args
-	    }
-		    
-	    # General type presence hooks.
-	    eval {::hooks::run presenceHook $jid $type} $args
-	    
-	    # Make an additional call for delayed presence.
-	    # This only happend when type='available'.
-	    if {[info exists attrArr(-x)]} {
-		set delayElem [wrapper::getnamespacefromchilds  \
-		  $attrArr(-x) x "jabber:x:delay"]
-		if {[llength $delayElem]} {
-		    eval {::hooks::run presenceDelayHook $jid $type} $args
-		}
-	    }
-	}
 	remove {
 	    
 	    # Must remove all resources, and jid2 if no resources.
@@ -856,6 +805,105 @@ proc ::Roster::PushProc {jlibname what {jid {}} args} {
 	    set inroster 0
 	    ExitRoster
 	    ::hooks::run rosterExit
+	}
+    }
+}
+
+# Roster::PresenceEvent --
+# 
+#       Registered jlib presence handler for (un)available events only.
+#       This is the application main organizer for presence stanzas and
+#       takes care of calling functions to update roster, run hooks etc.
+
+proc ::Roster::PresenceEvent {jlibname xmldata} {
+    upvar ::Jabber::jstate jstate
+    
+    ::Debug 2 "---presence->"
+    
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type "available"
+    }
+
+    # We don't handle subscription types (remove?).
+    if {$type ne "available" && $type ne "unavailable"} {
+	return
+    }
+    set jlib $jstate(jlib)
+        
+    set jid3 $from
+    jlib::splitjid $from jid2 res
+    set jid $jid2
+    
+    # @@@ So far we preprocess the presence element to an option list.
+    #     In the future it is better not to.
+    set opts [list -from $from -type $type -resource $res]
+    set x {}
+    set extras {}
+    foreach E [wrapper::getchildren $xmldata] {
+	set tag [wrapper::gettag $E]
+	set chdata [wrapper::getcdata $E]
+	
+	switch -- $tag {
+	    status - priority {
+		lappend opts -$tag $chdata
+	    }
+	    show {
+		lappend opts -$tag [string tolower $chdata]
+	    }
+	    x {
+		lappend x $E
+	    }
+	    default {
+		lappend extras $E
+	    }
+	}
+    }
+    if {[llength $x]} {
+	lappend opts -x $x
+    }
+    if {[llength $extras]} {
+	lappend opts -extras $extras
+    }
+    
+    # This 'isroom' gives wrong answer if a gateway also supports
+    # conference (groupchat).
+    if {0} {
+	if {![$jlib service isroom $jid]} {
+	    eval {Presence $jid3 $type} $opts
+	}
+    }
+    
+    # We get presence also for rooms etc which are not roster items.
+    # Some transports have /registered resource.
+    if {[$jlib roster isitem $jid]} {
+	eval {Presence $jid3 $type} $opts
+    } elseif {[$jlib roster isitem $jid3]} {
+	eval {Presence $jid3 $type} $opts
+    }
+    
+    # Specific type presence hooks.
+    eval {::hooks::run presence[string totitle $type]Hook $jid $type} $opts
+    
+    # Hook to run only for new presence/show/status.
+    # This is helpful because of some x-elements can be broadcasted.
+    array set oldPres [$jlib roster getoldpresence $jid3]
+    set same [arraysequalnames attrArr oldPres {-type -show -status}]
+    if {!$same} {
+	eval {::hooks::run presenceNewHook $jid $type} $opts
+    }
+    
+    # General type presence hooks.
+    eval {::hooks::run presenceHook $jid $type} $opts
+    
+    # Make an additional call for delayed presence.
+    # This only happend when type='available'.
+    if {[info exists attrArr(-x)]} {
+	set delayElem [wrapper::getnamespacefromchilds  \
+	  $attrArr(-x) x "jabber:x:delay"]
+	if {[llength $delayElem]} {
+	    eval {::hooks::run presenceDelayHook $jid $type} $opts
 	}
     }
 }
@@ -965,7 +1013,7 @@ proc ::Roster::SetItem {jid args} {
 #
 # Arguments:
 #       jid         the JID as reported by the presence 'from' attribute.
-#       presence    "available", "unavailable", or "unsubscribed"
+#       presence    "available", "unavailable"
 #       args        list of '-key value' pairs of presence attributes.
 #       
 # Results:
@@ -1003,20 +1051,9 @@ proc ::Roster::Presence {jid presence args} {
     ::RosterTree::StyleDeleteItem $jid
 
     set items {}
-
+    
     # Put in our roster tree.
-    if {[string equal $presence "unsubscribed"]} {
-	if {$jprefs(rost,rmIfUnsub)} {
-	    
-	    # Must send a subscription remove here to get rid if it completely??
-	    # Think this is already been made from our presence callback proc.
-
-	} else {
-	    set items [eval {
-		::RosterTree::StyleCreateItem $rjid "unavailable"
-	    } $itemAttr $args]
-	}
-    } elseif {[string equal $presence "unavailable"]} {
+    if {[string equal $presence "unavailable"]} {
 	
 	# XMPP specifies that an 'unavailable' element is sent *after* 
 	# we've got a subscription='remove' element. Skip it!
