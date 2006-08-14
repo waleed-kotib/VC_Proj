@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.32 2006-08-12 13:48:25 matben Exp $
+# $Id: Subscribe.tcl,v 1.33 2006-08-14 13:08:03 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -34,12 +34,11 @@ namespace eval ::Subscribe:: {
 #
 # Arguments:
 #       jid    the jid we receive a 'subscribe' presence element from.
-#       args   ?-key value ...? look for any '-status' only.
 #       
 # Results:
 #       none
 
-proc ::Subscribe::NewDlg {jid args} {
+proc ::Subscribe::NewDlg {jid} {
     global  this prefs wDlgs
 
     variable uid
@@ -56,7 +55,6 @@ proc ::Subscribe::NewDlg {jid args} {
     set w $wDlgs(jsubsc)${uid}
     set state(w)        $w
     set state(jid)      $jid
-    set state(args)     $args
     set state(finished) -1
     set state(name)     ""
     set state(group)    ""
@@ -71,8 +69,8 @@ proc ::Subscribe::NewDlg {jid args} {
 	::UI::SetWindowPosition $w $wDlgs(jsubsc)
     }
   
-    set im   [::Theme::GetImage [option get $w adduserImage {}]]
-    set imd  [::Theme::GetImage [option get $w adduserDisImage {}]]
+    set im  [::Theme::GetImage [option get $w adduserImage {}]]
+    set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
 
     set jlib $jstate(jlib)
 

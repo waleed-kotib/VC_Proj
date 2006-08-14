@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.175 2006-08-12 13:48:25 matben Exp $
+# $Id: Chat.tcl,v 1.176 2006-08-14 13:08:03 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1995,7 +1995,7 @@ proc ::Chat::Invite {dlgtoken} {
 	    set dateISO [clock format $arrResult(-secs) -format "%Y%m%dT%H:%M:%S"]
 	    set xelem [wrapper::createtag "x"     \
 	       -attrlist [list xmlns jabber:x:delay from $arrResult(-name) stamp $dateISO]]
-	   ::Jabber::JlibCmd send_message $roomjid -type groupchat -body $arrResult(-body) -xlist [list $xelem]
+	   $jstate(jlib) send_message $roomjid -type groupchat -body $arrResult(-body) -xlist [list $xelem]
 	}
 
 	# Third Invite the second user

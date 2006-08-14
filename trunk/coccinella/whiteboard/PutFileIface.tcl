@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: PutFileIface.tcl,v 1.6 2005-08-14 08:37:52 matben Exp $
+# $Id: PutFileIface.tcl,v 1.7 2006-08-14 13:08:03 matben Exp $
 
 package require putfile
 package require uriencode
@@ -86,7 +86,6 @@ proc ::PutFileIface::PutProgress {puttoken token total current} {
 }
 
 proc ::PutFileIface::PutCommand {puttoken token what msg} {
-    global  prefs
     upvar #0 $puttoken putstate          
     
     Debug 2 "+\t\tPutCommand:: token=$token, what=$what msg=$msg"
@@ -99,7 +98,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 	set codetxt [::putfile::ncodetotext $ncode]
 	
 	# Depending on the flavour of the return code do different things.
-	if {$prefs(talkative) >= 1} {
+	if {$::config(talkative) >= 1} {
 	    ::UI::MessageBox -title [mc {Put File Error}]  \
 	      -type ok -message $str
 	} else {
@@ -111,7 +110,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 		} 
 		default {
 		    set errmsg "Failed while putting file \"$putstate(filetail)\""
-		    if {$prefs(talkative) >= 1} {
+		    if {$::config(talkative) >= 1} {
 			::UI::MessageBox -title [mc {Put File Error}] \
 			  -type ok -message $errmsg
 		    }

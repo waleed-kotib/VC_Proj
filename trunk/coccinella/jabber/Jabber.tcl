@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.174 2006-08-12 13:48:25 matben Exp $
+# $Id: Jabber.tcl,v 1.175 2006-08-14 13:08:03 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -495,6 +495,12 @@ proc ::Jabber::Init { } {
     # Register handlers for various iq elements.
     $jlibname iq_register get jabber:iq:version    ::Jabber::ParseGetVersion
     $jlibname iq_register get $coccixmlns(servers) ::Jabber::ParseGetServers
+    
+    # Register handlers for all four (un)subscribe(d).
+    $jlibname presence_register subscribe    [namespace code SubscribeEvent]
+    $jlibname presence_register subscribed   [namespace code SubscribedEvent]
+    $jlibname presence_register unsubscribe  [namespace code UnsubscribeEvent]
+    $jlibname presence_register unsubscribed [namespace code UnsubscribedEvent]
         
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Jabber::UI::Show $wDlgs(jmain)
@@ -532,17 +538,10 @@ proc ::Jabber::Init { } {
 # Results:
 #       boolean (0/1) telling if this was handled or not. Only for 'get'.
 
-proc ::Jabber::IqHandler {jlibName type args} {
-    variable jstate
-    variable jprefs
-    
-    ::Debug 2 "::Jabber::IqHandler type=$type, args='$args'"
-    
-    array set attrArr $args
-    set xmlns [wrapper::getattribute $attrArr(-query) xmlns]
-    set stat 0
-    
-    return $stat
+proc ::Jabber::IqHandler {jlibname xmldata} {
+
+    # empty
+    return 0
 }
 
 # ::Jabber::MessageHandler --
@@ -558,40 +557,59 @@ proc ::Jabber::IqHandler {jlibName type args} {
 # Results:
 #       none.
 
-proc ::Jabber::MessageHandler {jlibName type args} {    
-    variable jstate
-    variable jprefs
-    
-    ::Debug 2 "::Jabber::MessageHandler type=$type"
-    
-    array set argsArr {-body ""}
-    array set argsArr $args
-    
-    set from $argsArr(-from)
-    set body $argsArr(-body)
+proc ::Jabber::MessageHandler {jlibname xmldata} {    
         
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    set body ""
+
+    # The hooks are expecting a -key value list of preprocessed xml.
+    # @@@ In the future we may deliver the full xmldata instead.
+    set opts [list -xmldata $xmldata]
+    foreach {name value} [wrapper::getattrlist $xmldata] {
+	lappend opts -$name $value
+    }
+    foreach E [wrapper::getchildren $xmldata] {
+	set tag    [wrapper::gettag $E]
+	set chdata [wrapper::getcdata $E]
+
+	switch -- $tag {
+	    body {
+		set body $chdata
+		lappend opts -$tag $chdata
+	    }
+	    subject - thread {
+		lappend opts -$tag $chdata
+	    }
+	    default {
+		lappend opts -$tag $E
+	    }
+	}	
+    }    
+    
     switch -- $type {
 	error {
 	    
 	    # We must check if there is an error element sent along with the
 	    # body element. In that case the body element shall not be processed.
-	    if {[info exists argsArr(-error)]} {
-		set errcode [lindex $argsArr(-error) 0]
-		set errmsg  [lindex $argsArr(-error) 1]		
+	    set errspec [jlib::getstanzaerrorspec $xmldata]
+	    if {[llength $errspec]} {
+		set errcode [lindex $errspec 0]
+		set errmsg  [lindex $errspec 1]		
 		ui::dialog -title [mc Error] \
 		  -message [mc jamesserrsend $from $errcode $errmsg] \
 		  -icon error -type ok		
 	    }
-	    eval {::hooks::run newErrorMessageHook} $args
+	    eval {::hooks::run newErrorMessageHook} $opts
 	}
 	chat {
-	    eval {::hooks::run newChatMessageHook $body} $args
+	    eval {::hooks::run newChatMessageHook $body} $opts
 	}
 	groupchat {
-	    eval {::hooks::run newGroupChatMessageHook $body} $args
+	    eval {::hooks::run newGroupChatMessageHook $body} $opts
 	}
 	headline {
-	    eval {::hooks::run newHeadlineMessageHook $body} $args
+	    eval {::hooks::run newHeadlineMessageHook $body} $opts
 	}
 	default {
 	    
@@ -600,9 +618,188 @@ proc ::Jabber::MessageHandler {jlibName type args} {
 	    # eval {::hooks::run newMessageHook $body [jlib::generateuuid]} $args
 	    
 	    # Normal message. Handles whiteboard stuff as well.
-	    eval {::hooks::run newMessageHook $body} $args
+	    eval {::hooks::run newMessageHook $body} $opts
 	}
     }
+}
+
+# Jabber::(Un)Subscribe(d)Event --
+# 
+#       Registered handlers for these presence event types.
+#       Note that XMPP IM requires all from attributes to be bare JIDs.
+
+proc ::Jabber::SubscribeEvent {jlibname xmldata} {
+    variable jstate
+    variable jprefs
+    
+    set jlib $jstate(jlib)
+    
+    set from [wrapper::getattribute $xmldata from]    
+    set jid2 [jlib::barejid $from]
+    set subscription [$jlib roster getsubscription $from]
+
+    # Treat the case where the sender is a transport component.
+    # We must be indenpendent of method; agent, browse, disco
+    # The icq transports gives us subscribe from icq.host/registered
+    
+    set jidtype [lindex [$jlib disco types $jid2] 0]
+    
+    ::Debug 4 "\t jidtype=$jidtype"
+    
+    if {[::Roster::IsTransportHeuristics $from]} {
+	
+	# Add roster item before sending 'subscribed'. Didn't help :-(
+	if {![$jlib roster isitem $from]} {
+	    $jlib roster send_set $from -command ::Subscribe::ResProc
+	}
+	$jlib send_presence -to $from -type "subscribed"
+
+	# It doesn't hurt to be subscribed to the transports presence.
+	if {$subscription eq "none" || $subscription eq "from"} {
+	    $jlib send_presence -to $from -type "subscribe"
+	}
+	
+	set subtype [lindex [split $jidtype /] 1]
+	set typename [::Roster::GetNameFromTrpt $subtype]
+	::ui::dialog -title [mc {Transport Subscription}] \
+	  -icon info -type ok -message [mc jamesstrptsubsc $typename]
+    } else {
+	
+	# Another user request to subscribe to our presence.
+	# Figure out what the user's prefs are.
+	if {[$jlib roster isitem $jid2]} {
+	    set key inrost
+	} else {
+	    set key notinrost
+	}		
+	
+	# No resource here!
+	if {$subscription eq "from" || $subscription eq "both"} {
+	    set isSubscriberToMe 1
+	} else {
+	    set isSubscriberToMe 0
+	}
+	
+	# Accept, deny, or ask depending on preferences we've set.
+	set msg ""
+	set autoaccepted 0
+	
+	switch -- $jprefs(subsc,$key) {
+	    accept {
+		$jlib send_presence -to $from -type "subscribed"
+		set autoaccepted 1
+		set msg [mc jamessautoaccepted $from]
+	    }
+	    reject {
+		$jlib send_presence -to $from -type "unsubscribed"
+		set msg [mc jamessautoreject $from]
+	    }
+	    ask {
+		::Subscribe::NewDlg $from
+	    }
+	}
+	if {$msg ne ""} {
+	    ::ui::dialog -title [mc Info] -icon info -type ok \
+	      -message $msg
+	}
+	
+	# Auto subscribe to subscribers to me.
+	if {$autoaccepted && $jprefs(subsc,auto)} {
+	    
+	    # Explicitly set the users group.
+	    if {[string length $jprefs(subsc,group)]} {
+		$jlib roster send_set $from  \
+		  -groups [list $jprefs(subsc,group)]
+	    }
+	    $jlib send_presence -to $from -type "subscribe"
+	    set msg [mc jamessautosubs $from]
+	    ::ui::dialog -title [mc Info] -icon info -type ok \
+	      -message $msg
+	}
+    }
+    return 1
+}
+
+proc ::Jabber::SubscribedEvent {jlibname xmldata} {
+    variable jstate
+    
+    set jlib $jstate(jlib)
+    
+    set from [wrapper::getattribute $xmldata from]    
+
+    if {[::Roster::IsTransportHeuristics $from]} {
+	# silent.
+    } else {
+	::ui::dialog -title [mc Subscribed] -icon info -type ok  \
+	  -message [mc jamessallowsub $from]
+    }
+    return 1
+}
+
+proc ::Jabber::UnsubscribeEvent {jlibname xmldata} {
+    variable jstate
+    variable jprefs
+    
+    set jlib $jstate(jlib)
+
+    set from [wrapper::getattribute $xmldata from]    
+    set subscription [$jlib roster getsubscription $from]
+
+    if {$jprefs(rost,rmIfUnsub)} {
+	
+	# Remove completely from our roster.
+	$jlib roster send_remove $from
+	::ui::dialog -title [mc Unsubscribe] \
+	  -icon info -type ok -message [mc jamessunsub $from]
+    } else {
+	
+	$jlib send_presence -to $from -type "unsubscribed"
+	::UI::MessageBox -title [mc Unsubscribe] -icon info -type ok  \
+	  -message [mc jamessunsubpres $from]
+	
+	# If there is any subscription to this jid's presence.
+	if {$subscription eq "both" || $subscription eq "to"} {
+	    
+	    set ans [::UI::MessageBox -title [mc Unsubscribed]  \
+	      -icon question -type yesno -default yes \
+	      -message [mc jamessunsubask $from $from]]
+	    if {$ans eq "yes"} {
+		$jlib roster send_remove $from
+	    }
+	}
+    }
+    return 1
+}
+
+proc ::Jabber::UnsubscribedEvent {jlibname xmldata} {
+    variable jstate
+    variable jprefs
+    
+    set jlib $jstate(jlib)
+
+    set from [wrapper::getattribute $xmldata from]    
+    set subscription [$jlib roster getsubscription $from]
+    
+    # If we fail to subscribe someone due to a technical reason we
+    # have subscription='none'
+    if {$subscription eq "none"} {
+	set msg [mc jamessfailedsubsc $from]
+	set status [$jlib roster getstatus $from]
+	if {$status ne ""} {
+	    append msg " " $status
+	}
+	::ui::dialog -title [mc {Subscription Failed}]  \
+	  -icon info -type ok -message $msg
+	if {$jprefs(rost,rmIfUnsub)} {
+	    
+	    # Remove completely from our roster.
+	    $jlib roster send_remove $from
+	}
+    } else {		
+	::ui::dialog -title [mc Unsubscribed] -icon info -type ok \
+	  -message [mc jamessunsubscribed $from]
+    }
+    return 1
 }
 
 # ::Jabber::PresenceHandler --
@@ -617,166 +814,20 @@ proc ::Jabber::MessageHandler {jlibName type args} {
 # Results:
 #       none.
 
-proc ::Jabber::PresenceHandler {jlibName type args} {
-    global  wDlgs prefs
+proc ::Jabber::PresenceHandler {jlibname xmldata} {
     
-    variable jstate
-    variable jprefs
-    
-    ::Debug 2 "::Jabber::PresenceHandler type=$type, args='$args'"
-    
-    array set argsArr $args
-    set from $argsArr(-from)
-    set jlib $jstate(jlib)
-    
-    set subscription [$jlib roster getsubscription $from]
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type "available"
+    }
     
     switch -- $type {
-	subscribe {
-	    
-	    set jid2 [jlib::barejid $from]
-	    
-	    # Treat the case where the sender is a transport component.
-	    # We must be indenpendent of method; agent, browse, disco
-	    # The icq transports gives us subscribe from icq.host/registered
-	    
-	    set jidtype [lindex [$jlib disco types $jid2] 0]
-	    
-	    ::Debug 4 "\t jidtype=$jidtype"
-	    
-	    if {[::Roster::IsTransportHeuristics $from]} {
-		
-		# Add roster item before sending 'subscribed'. Didn't help :-(
-		if {![$jlib roster isitem $from]} {
-		    $jlib roster send_set $from -command ::Subscribe::ResProc
-		}
-		$jlib send_presence -to $from -type "subscribed"
-
-		# It doesn't hurt to be subscribed to the transports presence.
-		if {($subscription eq "none") || ($subscription eq "from")} {
-		    $jlib send_presence -to $from -type "subscribe"
-		}
-		
-		set subtype [lindex [split $jidtype /] 1]
-		set typename [::Roster::GetNameFromTrpt $subtype]
-		::UI::MessageBox -title [mc {Transport Subscription}] \
-		  -icon info -type ok \
-		  -message [mc jamesstrptsubsc $typename]
-	    } else {
-		
-		# Another user request to subscribe to our presence.
-		# Figure out what the user's prefs are.
-		if {[$jlib roster isitem $from]} {
-		    set key inrost
-		} else {
-		    set key notinrost
-		}		
-		
-		# No resource here!
-		if {($subscription eq "from") || ($subscription eq "both")} {
-		    set isSubscriberToMe 1
-		} else {
-		    set isSubscriberToMe 0
-		}
-		
-		# Accept, deny, or ask depending on preferences we've set.
-		set msg ""
-		set autoaccepted 0
-		
-		switch -- $jprefs(subsc,$key) {
-		    accept {
-			$jlib send_presence -to $from -type "subscribed"
-			set autoaccepted 1
-			set msg [mc jamessautoaccepted $from]
-		    }
-		    reject {
-			$jlib send_presence -to $from -type "unsubscribed"
-			set msg [mc jamessautoreject $from]
-		    }
-		    ask {
-			eval {::Subscribe::NewDlg $from} $args
-		    }
-		}
-		if {$msg ne ""} {
-		    ::UI::MessageBox -title [mc Info] -icon info -type ok \
-		      -message $msg
-		}
-		
-		# Auto subscribe to subscribers to me.
-		if {$autoaccepted && $jprefs(subsc,auto)} {
-		    
-		    # Explicitly set the users group.
-		    if {[string length $jprefs(subsc,group)]} {
-			$jlib roster send_set $from  \
-			  -command ::Subscribe::ResProc \
-			  -groups [list $jprefs(subsc,group)]
-		    }
-		    $jlib send_presence -to $from -type "subscribe"
-		    set msg [mc jamessautosubs $from]
-		    ::UI::MessageBox -title [mc Info] -icon info -type ok \
-		      -message $msg
-		}
-	    }
-	}
-	subscribed {
-	    if {[::Roster::IsTransportHeuristics $from]} {
-		# silent.
-	    } else {
-		::UI::MessageBox -title [mc Subscribed] -icon info -type ok  \
-		  -message [mc jamessallowsub $from]
-	    }
-	}
-	unsubscribe {	    
-	    if {$jprefs(rost,rmIfUnsub)} {
-		
-		# Remove completely from our roster.
-		$jlib roster send_remove $from
-		::UI::MessageBox -title [mc Unsubscribe] \
-		  -icon info -type ok  \
-		  -message [mc jamessunsub $from]
-	    } else {
-		
-		$jlib send_presence -to $from -type "unsubscribed"
-		::UI::MessageBox -title [mc Unsubscribe] -icon info -type ok  \
-		  -message [mc jamessunsubpres $from]
-		
-		# If there is any subscription to this jid's presence.
-		if {($subscription eq "both") || ($subscription eq "to")} {
-		    
-		    set ans [::UI::MessageBox -title [mc Unsubscribed]  \
-		      -icon question -type yesno -default yes \
-		      -message [mc jamessunsubask $from $from]]
-		    if {$ans eq "yes"} {
-			$jlib roster send_remove $from
-		    }
-		}
-	    }
-	}
-	unsubscribed {
-	    
-	    # If we fail to subscribe someone due to a technical reason we
-	    # have subscription='none'
-	    if {$subscription eq "none"} {
-		set msg [mc jamessfailedsubsc $from]
-		if {[info exists argsArr(-status)]} {
-		    append msg " Status message: $argsArr(-status)"
-		}
-		::UI::MessageBox -title [mc {Subscription Failed}]  \
-		  -icon info -type ok -message $msg
-		if {$jprefs(rost,rmIfUnsub)} {
-		    
-		    # Remove completely from our roster.
-		    $jlib roster send_remove $from
-		}
-	    } else {		
-		::UI::MessageBox -title [mc Unsubscribed] -icon info -type ok \
-		  -message [mc jamessunsubscribed $from]
-	    }
-	}
 	error {
-	    foreach {errcode errmsg} $argsArr(-error) break		
+	    set errspec [jlib::getstanzaerrorspec $xmldata]
+	    foreach {errcode errmsg} $errspec break		
 	    set msg [mc jamesserrpres $errcode $errmsg]
-	    if {$prefs(talkative)} {
+	    if {$::config(talkative)} {
 		::UI::MessageBox -icon error -type ok  \
 		  -title [mc {Presence Error}] -message $msg
 	    }

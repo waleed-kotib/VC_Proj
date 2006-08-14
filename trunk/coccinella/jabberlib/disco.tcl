@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.38 2006-05-30 14:32:38 matben Exp $
+# $Id: disco.tcl,v 1.39 2006-08-14 13:08:03 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -147,7 +147,7 @@ proc jlib::disco::init {jlibname args} {
       [list [namespace current]::handle_get info]
 
     # Clear any cache info we may have collected since likely invalid offline.
-    $jlibname presence_register unavailable [namespace current]::unavail_cb 20
+    $jlibname presence_register_int unavailable [namespace current]::unavail_cb
 
     set info(conferences) {}
     
@@ -1124,8 +1124,9 @@ proc jlib::disco::handle_get {discotype jlibname from subiq args} {
 #       Registered unavailable presence callback.
 #       Frees internal cache related to this jid.
 
-proc jlib::disco::unavail_cb {jlibname jid type args} {
+proc jlib::disco::unavail_cb {jlibname xmldata} {
 
+    set jid [wrapper::getattribute $xmldata from]
     reset $jlibname $jid
 }
 

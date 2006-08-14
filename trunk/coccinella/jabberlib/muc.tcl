@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.33 2006-08-12 13:48:26 matben Exp $
+# $Id: muc.tcl,v 1.34 2006-08-14 13:08:03 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -175,7 +175,7 @@ proc jlib::muc::enter {jlibname roomjid nick args} {
     set xelem [wrapper::createtag "x" -subtags $xsub \
       -attrlist [list xmlns $xmlns(muc)]]
     $jlibname send_presence -to $jid -xlist [list $xelem] -extras $extras \
-      -command [list [namespace current]::parse_enter $roomjid $cmd]
+      -command [list [namespace current]::parse_enter $cmd]
     set cache($roomjid,mynick) $nick
     set rooms($roomjid) 1
     $jlibname service setroomprotocol $roomjid "muc"
@@ -184,23 +184,24 @@ proc jlib::muc::enter {jlibname roomjid nick args} {
 # jlib::muc::parse_enter --
 # 
 #       Callback when entering room to make sure there are no error.
-# 
-# Arguments:
-#       jlibname 
-#       type    presence typ attribute, 'available', 'error', etc.
-#       args    -from, -id, -to, -x ...
 
-proc jlib::muc::parse_enter {roomjid cmd jlibname type args} {
+proc jlib::muc::parse_enter {cmd jlibname xmldata} {
 
     upvar ${jlibname}::muc::cache cache
 
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type "available"
+    }    
+    set roomjid [jlib::jidmap $from]
     if {[string equal $type "error"]} {
 	unset -nocomplain cache($roomjid,mynick)
     } else {
 	set cache($roomjid,inside) 1
     }
     if {$cmd ne ""} {
-	uplevel #0 $cmd $jlibname $type $args
+	uplevel #0 $cmd [list $jlibname $xmldata]
     }
 }
 
@@ -453,23 +454,29 @@ proc jlib::muc::create {jlibname roomjid nick command args} {
     set xelem [wrapper::createtag "x" -attrlist [list xmlns $xmlns(muc)]]
     $jlibname send_presence  \
       -to $jid  -xlist [list $xelem]  -extras $extras  \
-      -command [list [namespace current]::parse_create $roomjid $command]
+      -command [list [namespace current]::parse_create $command]
     set cache($roomjid,mynick) $nick
     set rooms($roomjid) 1
     $jlibname service setroomprotocol $roomjid "muc"
 }
 
-proc jlib::muc::parse_create {roomjid cmd jlibname type args} {
+proc jlib::muc::parse_create {cmd jlibname xmldata} {
 
     upvar ${jlibname}::muc::cache cache
 
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type "available"
+    }    
+    set roomjid [jlib::jidmap $from]
     if {[string equal $type "error"]} {
 	unset -nocomplain cache($roomjid,mynick)
     } else {
 	set cache($roomjid,inside) 1
     }
     if {$cmd ne ""} {
-	uplevel #0 $cmd $jlibname $type $args
+	uplevel #0 $cmd [list $jlibname $xmldata]
     }
 }
 
