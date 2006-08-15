@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.175 2006-08-14 13:08:03 matben Exp $
+# $Id: Jabber.tcl,v 1.176 2006-08-15 14:02:27 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -496,7 +496,7 @@ proc ::Jabber::Init { } {
     $jlibname iq_register get jabber:iq:version    ::Jabber::ParseGetVersion
     $jlibname iq_register get $coccixmlns(servers) ::Jabber::ParseGetServers
     
-    # Register handlers for all four (un)subscribe(d).
+    # Register handlers for all four (un)subscribe(d) events.
     $jlibname presence_register subscribe    [namespace code SubscribeEvent]
     $jlibname presence_register subscribed   [namespace code SubscribedEvent]
     $jlibname presence_register unsubscribe  [namespace code UnsubscribeEvent]

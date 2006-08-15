@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.149 2006-08-14 13:08:03 matben Exp $
+# $Id: jabberlib.tcl,v 1.150 2006-08-15 14:02:27 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1370,64 +1370,7 @@ proc jlib::presence_handler {jlibname xmldata} {
     upvar ${jlibname}::opts opts
     upvar ${jlibname}::locals locals
     
-    # Extract the command level XML data items.
-    set attrlist  [wrapper::getattrlist $xmldata]
-    set childlist [wrapper::getchildren $xmldata]
-    array set attrArr $attrlist
-    
-    # Make an argument list ('-key value' pairs) suitable for callbacks.
-    # Make variables of the attributes.
-    set arglist {}
-    set type "available"
-    set from $locals(server)
-    foreach {attrkey attrval} $attrlist {
-	set $attrkey $attrval
-	lappend arglist -$attrkey $attrval
-    }
-
-    # This helps callbacks to adapt to using full element as argument.
-    lappend arglist -xmldata $xmldata
-
-    # Check first if this is an error element (from conferencing?).
-    if {[string equal $type "error"]} {
-	set errspec [getstanzaerrorspec $xmldata]
-	lappend arglist -error $errspec
-    } else {
-	
-	# Extract the presence sub-elements. Separate the x element.
-	set x {}
-	set extras {}
-	foreach child $childlist {
-	    
-	    # Extract the presence sub-elements XML data items.
-	    set ctag [wrapper::gettag $child]
-	    set cchdata [wrapper::getcdata $child]
-	    
-	    switch -- $ctag {
-		status - priority - show {
-		    if {$ctag eq "show"} {
-			set cchdata [string tolower $cchdata]
-		    }
-		    lappend params $ctag $cchdata
-		    lappend arglist -$ctag $cchdata
-		}
-		x {
-		    lappend x $child
-		}
-		default {
-		    
-		    # This can be anything properly namespaced.
-		    lappend extras $child
-		}
-	    }
-	}	    
-	if {[llength $x]} {
-	    lappend arglist -x $x
-	}
-	if {[llength $extras]} {
-	    lappend arglist -extras $extras
-	}
-    }
+    set id [wrapper::getattribute $xmldata id]
     
     # Handle callbacks specific for 'type' that have been registered with 
     # 'presence_register(_ex)'.
@@ -1445,8 +1388,7 @@ proc jlib::presence_handler {jlibname xmldata} {
 
     # Invoke any callback before the rosters callback.
     # @@@ Right place ???
-    if {[info exists id] && [info exists prescmd($id)]} {
-	#uplevel #0 $prescmd($id) [list $jlibname $type] $arglist
+    if {[info exists prescmd($id)]} {
 	uplevel #0 $prescmd($id) [list $jlibname $xmldata]
 	unset -nocomplain prescmd($id)
     }	

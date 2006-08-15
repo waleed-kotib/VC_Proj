@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.10 2006-05-16 06:06:29 matben Exp $
+# $Id: ITree.tcl,v 1.11 2006-08-15 14:02:29 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -286,15 +286,38 @@ proc ::ITree::Sort {T v args} {
     }    
 }
 
-proc ::ITree::FindEndItems {T vend} {
+# ITree::FindAllTagMatches --
+# 
+#       This assumes that the tags are a list of sub tags and where
+#       we try to find all theat matches this particular sub tag.
+#
+# Arguments:
+#       T       tree widget
+#       tag     an element of the tag list
+#       
+# Results:
+#       a list of complete matching tags
+
+proc ::ITree::FindAllTagMatches {T tag} {
+    variable tag2item
+    
+    set vlist {}
+    foreach {key item} [array get tag2item "$T,*{$tag}*"] {
+	lappend vlist [string map [list "$T," ""] $key]
+    }
+    return $vlist
+}
+
+# ITree::FindEndItems--
+# 
+#       This is equivalent of getting all parents of this item.
+
+proc ::ITree::FindEndItems {T tagend} {
     variable tag2item
 
     set vlist {}
-    foreach {key item} [array get tag2item $T,*] {
-	set v [string map [list "$T," ""] $key]
-	if {[lindex $v end] eq $vend} {
-	    lappend vlist $v
-	}
+    foreach {key item} [array get tag2item "$T,*{$tagend}"] {
+	lappend vlist [string map [list "$T," ""] $key]
     }
     return $vlist
 }
