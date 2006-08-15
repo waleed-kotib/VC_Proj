@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.39 2006-08-14 13:08:03 matben Exp $
+# $Id: disco.tcl,v 1.40 2006-08-15 14:02:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -19,13 +19,13 @@
 #	
 #   INSTANCE COMMANDS
 #      jlibname disco children jid
+#      jlibname disco childs jid ?node?
 #      jlibname disco send_get discotype jid cmd ?-opt value ...?
 #      jlibname disco isdiscoed discotype jid ?node?
 #      jlibname disco get discotype key jid ?node?
 #      jlibname disco getallcategories pattern
 #      jlibname disco get_async discotype jid cmd ?-node node?
 #      jlibname disco getconferences
-#      jlibname disco getflatlist jid ?node?
 #      jlibname disco getjidsforcategory pattern
 #      jlibname disco getjidsforfeature feature
 #      jlibname disco features jid ?node?
@@ -34,52 +34,37 @@
 #      jlibname disco iscategorytype category/type jid ?node?
 #      jlibname disco name jid ?node?
 #      jlibname disco nodes jid ?node?
-#      jlibname disco parent jid
-#      jlibname disco parentitemslist jid ?node?
-#      jlibname disco parentnode jid node
-#      jlibname disco parentnodes jid node
-#      jlibname disco parents jid
-#      jlibname disco splititemlist list
 #      jlibname disco types jid ?node?
 #      jlibname disco reset ?jid ?node??
 #      
 #      where discotype = (items|info)
 #      
-############################# CHANGES ##########################################
+################################################################################
 #
-#       0.1         first version
-#       050208      major rewrite with api changes
-
 # Structures:
-#       items(jid,parent)           the parent jid
-#       items(jid,parents)          list of parents jid
-#       items(jid,node,children)    list of any children jids
-#       
-#       items(jid,node,pnode)       the parent node; empty if top node
-#       items(jid,node,pnodes)      list of parent nodes
-#       items(jid,node,nodes)       list of any sub nodes
+#       items(jid,node,children)  list of any children JIDs
+#       items(jid,node,childs)    list of {JID node}
 #       
 #       jid must always be nonempty while node may be empty.
 #       
 #       rooms(jid,node)             exists if children of 'conference'
 
 # NEW: In order to manage the complex jid/node structure it is best to
-#      keep an internal structure always using a pair jid&node. 
+#      keep an internal structure always using a pair JID+node. 
 #      As array index: ($jid,$node,..) or list of childs:
-#      {{$jid1 $node1} {$jid2 $node2} ..} where any of jid or node can be
+#      {{JID1 node1} {JID2 node2} ..} where any of JID or node can be
 #      empty but not both.
 #       
 #      This reflects the disco xml structure (node can be empty):
 #      
-#      jid node
-#            jid node
-#            jid node
+#      JID node
+#            JID node
+#            JID node
 #            ...
 #            
-# 050910 INCOMPATIBLE CHANGE! complete reorganization using ensamble command.
-# 
-# @@@ While parent -> child is uniquely defined parent <- child is NOT!
-#     I have made a fundamentally wrong assumption. REMOVE!!!
+# @@@ While 'parent -> child' is uniquely defined 'parent <- child' is NOT!
+#     A certain JID+node can appear in more than one place in the disco tree!
+#     It is better to use another data structure to store this.
 
 package require jlib
 
@@ -277,7 +262,7 @@ proc jlib::disco::get_async {jlibname type jid cmd args} {
 # 
 #       Fills in the internal state arrays, and invokes any callback.
 
-proc jlib::disco::send_get_cb {ditype from cmd jlibname type subiq args} {
+proc jlib::disco::send_get_cb {ditype from cmd jlibname type queryE args} {
     
     upvar ${jlibname}::disco::items items
     upvar ${jlibname}::disco::info  info
@@ -288,7 +273,7 @@ proc jlib::disco::send_get_cb {ditype from cmd jlibname type subiq args} {
 
     # Do STRINGPREP.
     set from [jlib::jidmap $from]
-    set node [wrapper::getattribute $subiq "node"]
+    set node [wrapper::getattribute $queryE "node"]
 
     unset -nocomplain state(pending,$ditype,$from,$node)
     
@@ -296,46 +281,46 @@ proc jlib::disco::send_get_cb {ditype from cmd jlibname type subiq args} {
 
 	# Cache xml for later retrieval.
 	set var ${ditype}($from,$node,xml)
-	set $var [eval {getfulliq $type $subiq} $args]
+	set $var [eval {getfulliq $type $queryE} $args]
     } else {
 	switch -- $ditype {
 	    items {
-		parse_get_items $jlibname $from $subiq
+		parse_get_items $jlibname $from $queryE
 	    }
 	    info {
-		parse_get_info $jlibname $from $subiq
+		parse_get_info $jlibname $from $queryE
 	    }
 	}
     }
-    invoke_stacked $jlibname $ditype $type $from $subiq
+    invoke_stacked $jlibname $ditype $type $from $queryE
     
     # Invoke callback for this get.
-    uplevel #0 $cmd [list $jlibname $type $from $subiq] $args
+    uplevel #0 $cmd [list $jlibname $type $from $queryE] $args
 }
 
-proc jlib::disco::invoke_stacked {jlibname ditype type jid subiq} {
+proc jlib::disco::invoke_stacked {jlibname ditype type jid queryE} {
     
     upvar ${jlibname}::disco::state state
     
-    set node [wrapper::getattribute $subiq "node"]
+    set node [wrapper::getattribute $queryE "node"]
     if {[info exists state(invoke,$ditype,$jid,$node)]} {
 	foreach cmd $state(invoke,$ditype,$jid,$node) {
-	    uplevel #0 $cmd [list $jlibname $type $jid $subiq]
+	    uplevel #0 $cmd [list $jlibname $type $jid $queryE]
 	}
 	unset -nocomplain state(invoke,$ditype,$jid,$node)
     }
 }
 
-proc jlib::disco::getfulliq {type subiq args} {
+proc jlib::disco::getfulliq {type queryE args} {
     
     # Errors are reported specially!
     # @@@ BAD!!!
-    # If error subiq is just a two element list {errtag text}
+    # If error queryE is just a two element list {errtag text}
     set attr [list type $type]
     foreach {key value} $args {
 	lappend attr [string trimleft $key "-"] $value
     }
-    return [wrapper::createtag iq -attrlist $attr -subtags [list $subiq]]
+    return [wrapper::createtag iq -attrlist $attr -subtags [list $queryE]]
 }
 
 # jlib::disco::parse_get_items --
@@ -343,17 +328,17 @@ proc jlib::disco::getfulliq {type subiq args} {
 #       Fills the internal records with this disco items query result.
 #       There are four parent-childs combinations:
 #       
-#         (0)   jid1
-#                   jid         jid1 != jid
+#         (0)   JID1
+#                   JID         JID1 != JID
 #               
-#         (1)   jid1
-#                   jid1+node   jid equal
+#         (1)   JID1
+#                   JID1+node   JID equal
 #               
-#         (2)   jid1+node1
-#                   jid         jid1 != jid
+#         (2)   JID1+node1
+#                   JID         JID1 != JID
 #               
-#         (3)   jid1+node1
-#                   jid+node    jid1 != jid
+#         (3)   JID1+node1
+#                   JID+node    JID1 != JID
 #        
 #        Typical xml:
 #        <iq type='result' ...>
@@ -386,28 +371,33 @@ proc jlib::disco::getfulliq {type subiq args} {
 #   JID+node could yield both (1) items that are addressed as JIDs and (2) 
 #   items that are addressed as JID+node combinations. 
 
-proc jlib::disco::parse_get_items {jlibname from subiq} {
+proc jlib::disco::parse_get_items {jlibname from queryE} {
 
     upvar ${jlibname}::disco::items items
     upvar ${jlibname}::disco::info  info
     upvar ${jlibname}::disco::rooms rooms
 
     # Parents node if any.
-    set pnode [wrapper::getattribute $subiq "node"]
+    set pnode [wrapper::getattribute $queryE "node"]
     set pitem [list $from $pnode]
     
-    set items($from,$pnode,xml) [getfulliq result $subiq]
+    set items($from,$pnode,xml) [getfulliq result $queryE]
     unset -nocomplain items($from,$pnode,children) items($from,$pnode,nodes)
-    unset -nocomplain items($from,$pnode,childs2)
+    unset -nocomplain items($from,$pnode,childs)
     
     # This is perhaps not a robust way.
-    if {![info exists items($from,parent)]} {
-	set items($from,parent)  {}
-	set items($from,parents) {}
+    if {0} {
+	if {![info exists items($from,parent)]} {
+	    set items($from,parent)  {}
+	    set items($from,parents) {}
+	}
+	if {![info exists items($from,$pnode,parent2)]} {
+	    set items($from,$pnode,parent2)  {}
+	    set items($from,$pnode,parents2) {}
+	}
     }
-    if {![info exists items($from,$pnode,parent2)]} {
-	set items($from,$pnode,parent2)  {}
-	set items($from,$pnode,parents2) {}
+    if {![info exists items($from,$pnode,paL)]} {
+	set items($from,$pnode,paL)  {}
     }
     
     # Cache children of category='conference' as rooms.
@@ -417,7 +407,7 @@ proc jlib::disco::parse_get_items {jlibname from subiq} {
 	set isrooms 0
     }
     
-    foreach c [wrapper::getchildren $subiq] {
+    foreach c [wrapper::getchildren $queryE] {
 	if {![string equal [wrapper::gettag $c] "item"]} {
 	    continue
 	}
@@ -429,7 +419,7 @@ proc jlib::disco::parse_get_items {jlibname from subiq} {
 	set node ""
 	
 	# Children--->
-	# Only 'childs2' gives the full picture.
+	# Only 'childs' gives the full picture.
 	if {$jid ne $from} {
 	    lappend items($from,$pnode,children) $jid
 	}
@@ -443,9 +433,16 @@ proc jlib::disco::parse_get_items {jlibname from subiq} {
 	    }
 	    lappend items($from,$pnode,nodes) $node	    
 	}
-	lappend items($from,$pnode,childs2) [list $jid $node]
+	lappend items($from,$pnode,childs) [list $jid $node]
 	
 	# Parents--->
+	
+	# Keep list of parents since not unique.
+	lappend items($jid,$node,paL) $pitem
+	
+	#--------------------------
+	if {0} {
+	    
 	# Case (2) above is particularly problematic since an entity jid's
 	# position in the disco tree is not unique.
 	if {$node eq ""} {
@@ -492,6 +489,8 @@ proc jlib::disco::parse_get_items {jlibname from subiq} {
 	    set items($jid,$node,parents2) [concat $items($from,$pnode,parents2) \
 	      [list $pitem]]
 	}
+	}
+	#-----------------------------
 	
 	# Cache the optional attributes.
 	# Any {jid node} must have identical attributes and childrens.
@@ -510,19 +509,19 @@ proc jlib::disco::parse_get_items {jlibname from subiq} {
 # 
 #       Fills the internal records with this disco info query result.
 
-proc jlib::disco::parse_get_info {jlibname from subiq} {
+proc jlib::disco::parse_get_info {jlibname from queryE} {
 
     upvar ${jlibname}::disco::items items
     upvar ${jlibname}::disco::info  info
     upvar ${jlibname}::disco::rooms rooms
 
-    set node [wrapper::getattribute $subiq "node"]
+    set node [wrapper::getattribute $queryE "node"]
 
     array unset info [jlib::ESC $from],[jlib::ESC $node],*
-    set info($from,$node,xml) [getfulliq result $subiq]
+    set info($from,$node,xml) [getfulliq result $queryE]
     set isconference 0
     
-    foreach c [wrapper::getchildren $subiq] {
+    foreach c [wrapper::getchildren $queryE] {
 	unset -nocomplain attr
 	array set attr [wrapper::getattrlist $c]
 	
@@ -806,25 +805,6 @@ proc jlib::disco::isroom {jlibname jid} {
     }
 }
 
-proc jlib::disco::isroomOLD {jlibname jid} {
-    
-    upvar ${jlibname}::disco::info  info
-    
-    set jid [jlib::jidmap $jid]
-
-    # Use the form of the jid to get the service.
-    jlib::splitjidex $jid node service res
-    if {($node ne "") && ($service ne "") && ($res eq "")} {
-	if {[lsearch -exact $info(conferences) $service] >= 0} {
-	    return 1
-	} else {
-	    return 0
-	}
-    } else {
-	return 0
-    }
-}
-
 # jlib::disco::children --
 # 
 #       Returns a list of all child jids of this jid.
@@ -841,39 +821,15 @@ proc jlib::disco::children {jlibname jid} {
     }
 }
 
-proc jlib::disco::childs2 {jlibname jid {node ""}} {
+proc jlib::disco::childs {jlibname jid {node ""}} {
     
     upvar ${jlibname}::disco::items items
 
     set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,$node,childs2)]} {
-	return $items($jid,$node,childs2)
+    if {[info exists items($jid,$node,childs)]} {
+	return $items($jid,$node,childs)
     } else {
 	return {}
-    }
-}
-
-# Note: jid and node childs can be mixed!
-
-proc jlib::disco::childrenlist {jlibname jid {node ""}} {
-    
-    upvar ${jlibname}::disco::items items
-
-    set jid [jlib::jidmap $jid]
-    set clist {}
-    if {$node eq ""} {
-	if {[info exists items($jid,,children)]} {
-	    set clist $items($jid,,children)
-	}
-	if {[info exists items($jid,$node,nodes)]} {
-	    set clist [concat $clist $items($jid,$node,nodes)]
-	}
-	return $clist
-    } else {
-	if {[info exists items($jid,$node,nodes)]} {
-	    set clist $items($jid,$node,nodes)
-	}
-	return $clist
     }
 }
 
@@ -893,228 +849,49 @@ proc jlib::disco::nodes {jlibname jid {node ""}} {
     }
 }
 
-# jlib::disco::parent --
-# 
-#       Returns the parent of the jid. Empty if no parent known.
+# Testing............
 
-proc jlib::disco::parent {jlibname jid} {
+proc jlib::disco::parentlist {jlibname jid {node ""}} {
     
     upvar ${jlibname}::disco::items items
 
     set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,parent)]} {
-	return $items($jid,parent)
+    if {[info exists items($jid,$node,paL)]} {
+	set items($jid,$node,paL) [lsort -unique $items($jid,$node,paL)]
+	return $items($jid,$node,paL)
     } else {
 	return {}
     }
 }
 
-proc jlib::disco::parent2 {jlibname jid node} {
+proc jlib::disco::getparentrecursive {jlibname jid {node ""}} {
     
     upvar ${jlibname}::disco::items items
 
     set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,$node,parent2)]} {
-	return $items($jid,$node,parent2)
-    } else {
-	return {}
-    }
-}
-
-# jlib::disco::parents --
-# 
-#       Returns a list of parents of the jid. Empty if no parent known.
-
-proc jlib::disco::parents {jlibname jid} {
-    
-    upvar ${jlibname}::disco::items items
-
-    set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,parents)]} {
-	return $items($jid,parents)
-    } else {
-	return {}
-    }
-}
-
-# jlib::disco::parents2 --
-# 
-#       Returns the {{jid node} {jid node} ...} parents.
-
-proc jlib::disco::parents2 {jlibname jid {node ""}} {
-    
-    upvar ${jlibname}::disco::items items
-
-    set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,$node,parents2)]} {
-	return $items($jid,$node,parents2)
-    } else {
-	return {}
-    }
-}
-
-# This wont distinguish between top node and nonexisting!!!
-
-# jlib::disco::parentnode, parentnodes --
-# 
-#       Same as parent(s) but for nodes.
-
-proc jlib::disco::parentnode {jlibname jid node} {
-    
-    upvar ${jlibname}::disco::items items
-    
-    set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,$node,pnode)]} {
-	return $items($jid,$node,pnode)
-    } else {
-	return {}
-    }
-}
-
-proc jlib::disco::parentnodes {jlibname jid node} {
-    
-    upvar ${jlibname}::disco::items items
-    
-    set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,$node,pnodes)]} {
-	return $items($jid,$node,pnodes)
-    } else {
-	return {}
-    }
-}
-
-# jlib::disco::parentitemslist --
-# 
-#       Return a "flat list" of jids and nodes: {jid jid... ?node node...?}
-#       of the parent of the jid/node combination.
-
-proc jlib::disco::parentitemslist {jlibname jid {node ""}} {
-    
-    upvar ${jlibname}::disco::items items
-    
-    set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,parents)]} {
-	set plist $items($jid,parents)
-	if {$node ne ""} {
-	    lappend plist $jid
+    if {[info exists items($jid,$node,paL)]} {
+	set plist {}
+	set pitem $items($jid,$node,paL)
+	while {$pitem ne {}} {
 	    
-	    # The echo component messes up the jid's and therefore this check.
-	    if {[info exists items($jid,$node,pnodes)]} {
-		set plist [concat $plist $items($jid,$node,pnodes)]
-	    }
+	
 	}
-	return $plist
+	
     } else {
 	return {}
     }
 }
 
-# jlib::disco::getflatlist --
-# 
-#       Same as parentitemslist but includes the jid/node specified.
+#....................
 
-proc jlib::disco::getflatlist {jlibname jid {node ""}} {
-    
-    set plist [parentitemslist $jlibname $jid $node]
-    if {$node eq ""} {
-	set v [concat $plist [list $jid]]
-    } else {
-	set v [concat $plist [list $node]]
-    }
-    return $v
-}
-
-# jlib::disco::flatentitylist --
-# 
-#       Flattens an entity list with each element {jid node} and picks
-#       the most relevant of jid or node.
-#       Not guarenteed to be unique!
-
-proc jlib::disco::flatentitylist {jlibname elist} {
-    
-    set flat {}
-    set pjid ""
-    foreach item $elist {
-	set jid  [lindex $item 0]
-	set node [lindex $item 1]
-	if {$node ne ""} {
-	    lappend flat $node
-	} else {
-	    lappend flat $jid
-	}
-	set pjid $jid
-    }
-    return $flat
-}
-
-# jlib::disco::getstructfromflat --
-# 
-#       Inverse to 'flatentitylist'. Not unique result if any jid = node!
-
-proc jlib::disco::getstructfromflat {jlibname flat} {
-    
-    upvar ${jlibname}::disco::items items
-       
-    # Assume first is jid.
-    set jid [lindex $flat 0]
-    set node ""
-    set elist [list [list $jid $node]]
-    
-    # First one already matched.
-    foreach e [lrange $flat 1 end] {
-	puts "e=$e"
-	if {![info exists items($jid,$node,childs2)]} {
-	    return -code error "inconsistent entity list \"$flat\""
-	}
-	set clist $items($jid,$node,childs2)
-	puts "\t clist=$clist"
-	
-	# Search for any node first.
-	if {[set ind [lsearch -regexp $clist " ${e}$"]] >= 0} {
-	    puts "\t node: ind=$ind"
-	    set item [lindex $clist $ind]
-	} elseif {[set ind [lsearch -regexp $clist "^$e "]] >= 0} {
-	    puts "\t jid: ind=$ind"
-	    set item [lindex $clist $ind]
-	} else {
-	    return -code error "inconsistent entity list \"$flat\""
-	}
-	puts "\t item=$item"
-	lappend elist $item
-	set jid  [lindex $item 0]
-	set node [lindex $item 1]
-    }
-    return $elist
-}
-
-# jlib::disco::splititemlist --
-# 
-#       Takes a flatlist of jids/nodes and returns {{jid jid...} {node...}}
-
-proc jlib::disco::splititemlist {jlibname plist} {
-    
-    upvar ${jlibname}::disco::items items
-    
-    set jidlist  {}
-    set nodelist {}
-    foreach a $plist {
-	if {[info exists items($a,parent)]} {
-	    lappend jidlist $a
-	} else {
-	    lappend nodelist $a
-	}
-    }    
-    return [list $jidlist $nodelist]
-}
-
-proc jlib::disco::handle_get {discotype jlibname from subiq args} {
+proc jlib::disco::handle_get {discotype jlibname from queryE args} {
     
     upvar ${jlibname}::disco::handler handler
 
     set ishandled 0
     if {[info exists handler]} {
 	set ishandled [uplevel #0 $handler  \
-	  [list $jlibname $discotype $from $subiq] $args]
+	  [list $jlibname $discotype $from $queryE] $args]
     }
     return $ishandled
 }
@@ -1174,7 +951,10 @@ proc jlib::disco::ResetJid {jlibname jid} {
 	set info(conferences) {}
     } else {
 	
+	if {0} {
+	    
 	# Keep parents!
+
 	if {[info exists items($jid,parent)]} {
 	    set parent $items($jid,parent)
 	}
@@ -1188,11 +968,15 @@ proc jlib::disco::ResetJid {jlibname jid} {
 	if {[info exists items($jid,,parents2)]} {
 	    set parents2 $items($jid,,parents2)
 	}
+	
+	}
 
 	array unset items [jlib::ESC $jid],*
 	array unset info  [jlib::ESC $jid],*
 	array unset rooms [jlib::ESC $jid],*
 	
+	if {0} {
+	    
 	# Add back parent(s).
 	if {[info exists parent]} {
 	    set items($jid,parent) $parent
@@ -1208,6 +992,8 @@ proc jlib::disco::ResetJid {jlibname jid} {
 	    set items($jid,,parents2) $parents2
 	}
 
+	}
+	
 	# Rest.
 	foreach {key value} [array get info "*,typelist"] {
 	    set info($key) [lsearch -all -not -inline -exact $value $jid]
