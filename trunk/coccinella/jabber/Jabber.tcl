@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.176 2006-08-15 14:02:27 matben Exp $
+# $Id: Jabber.tcl,v 1.177 2006-08-20 13:41:18 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -324,9 +324,9 @@ proc ::Jabber::FactoryDefaults { } {
     variable menuDefs
     
     set menuDefs(min,edit) {    
-	{command   mCut              {::UI::CutCopyPasteCmd cut}           disabled X}
-	{command   mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
-	{command   mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
+	{command   mCut              {::UI::CutEvent}           disabled X}
+	{command   mCopy             {::UI::CopyEvent}          disabled C}
+	{command   mPaste            {::UI::PasteEvent}         disabled V}
     }    
 }
 
@@ -420,12 +420,6 @@ proc ::Jabber::GetMyStatus { } {
     # Alternative: [$jstate(jlib) mypresence]
 }
 
-proc ::Jabber::JlibCmd {args} {
-    variable jstate
-    
-    eval {$jstate(jlib)} $args
-}
-
 proc ::Jabber::IsConnected { } {
     variable jserver
 
@@ -433,9 +427,11 @@ proc ::Jabber::IsConnected { } {
     return [expr [string length $jserver(this)] == 0 ? 0 : 1]
 }
 
-# Jabber::RosterCmd --
-# 
-#       Access functions for invoking these commands from the outside.
+proc ::Jabber::JlibCmd {args} {
+    variable jstate
+    
+    eval {$jstate(jlib)} $args
+}
 
 proc ::Jabber::RosterCmd {args}  {
     variable jstate
@@ -503,7 +499,7 @@ proc ::Jabber::Init { } {
     $jlibname presence_register unsubscribed [namespace code UnsubscribedEvent]
         
     if {[string equal $prefs(protocol) "jabber"]} {
-	::Jabber::UI::Show $wDlgs(jmain)
+	::JUI::Show $wDlgs(jmain)
 	set jstate(haveJabberUI) 1
     }
     
@@ -1822,6 +1818,12 @@ namespace eval ::Jabber::Passwd:: {
     variable password
 }
 
+proc ::Jabber::Passwd::OnMenu { } {
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	Build
+    }    
+}
+
 # Jabber::Passwd::Build --
 #
 #       Sets new password.
@@ -1983,20 +1985,22 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
     }
 }
 
-# Jabber::LoginLogout --
+# Jabber::OnMenuLogInOut --
 # 
-#       Toggle login/logout. Useful for binding in menu.
+#       Toggle login/logout. Menu and button bindings.
 
-proc ::Jabber::LoginLogout { } {
+proc ::Jabber::OnMenuLogInOut { } {
     
-    ::Debug 2 "::Jabber::LoginLogout"
-    
-    if {[IsConnected]} {
-	DoCloseClientConnection
-    } elseif {[::Login::IsPending]} {
-	::Login::Kill
-    } else {
-	::Login::Dlg
+    switch -- [::JUI::GetConnectState] {
+	connect - connectfin {
+	    DoCloseClientConnection
+	}
+	connectinit {
+	    ::Login::Kill
+	}
+	disconnect {
+	    ::Login::Dlg
+	}
     }    
 }
 
@@ -2006,6 +2010,12 @@ namespace eval ::Jabber::Logout:: {
 
     option add *JLogout.connectImage             connect         widgetDefault
     option add *JLogout.connectDisImage          connectDis      widgetDefault
+}
+
+proc ::Jabber::Logout::OnMenuStatus { } {
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	WithStatus
+    }
 }
 
 proc ::Jabber::Logout::WithStatus { } {

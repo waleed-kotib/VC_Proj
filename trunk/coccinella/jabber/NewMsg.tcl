@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.74 2006-08-12 13:48:25 matben Exp $
+# $Id: NewMsg.tcl,v 1.75 2006-08-20 13:41:18 matben Exp $
 
 package require ui::entryex
 
@@ -148,6 +148,12 @@ proc ::NewMsg::InitMultiAddress {wmulti} {
     set locals(initedaddr) 1
 }
 
+proc ::NewMsg::OnMenu {} {
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	Build -tolist [::RosterTree::GetSelectedJID]
+    }
+}
+
 # NewMsg::Build --
 #
 #       The standard send message dialog.
@@ -203,7 +209,7 @@ proc ::NewMsg::Build {args} {
     
     # Toplevel menu for mac only.
     if {[string match "mac*" $this(platform)]} {
-	$w configure -menu [::Jabber::UI::GetRosterWmenu]
+	$w configure -menu [::JUI::GetRosterWmenu]
     }
     
     # Global frame.

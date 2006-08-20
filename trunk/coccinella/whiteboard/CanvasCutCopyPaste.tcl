@@ -1,4 +1,3 @@
-
 #  CanvasCutCopyPaste.tcl ---
 #  
 #      This file is part of The Coccinella application. It implements the
@@ -6,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.8 2005-08-14 08:37:52 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.9 2006-08-20 13:41:19 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -18,48 +17,32 @@ namespace eval ::CanvasCCP:: {
 
     # For canvas items we use the following format in the clipboard:
     #   {$magicToken {{create line ...} {import ...} ...}}
-    variable magicToken b5e080568e2a3537dce97a88f411c365237703a5
+    variable magicToken c75a6301-530b0317
 }
 
-# CanvasCCP::CutCopyPasteCmd ---
-#
-#       Cut/copy/paste command for the whiteboard.
-#       
-# Arguments:
-#       cmd      cut/copy/paste
-#       
-# Results:
-#       none
+# CanvasCCP::Cut, Copy, Paste --
+# 
+#       Event bind commands for Whiteboard virtual events <<Cut>>, <<Copy>>, 
+#       and <<Paste>>.
 
-proc ::CanvasCCP::CutCopyPasteCmd {cmd} {
-    
-    set wfocus [focus]
-    ::Debug 4 "::CanvasCCP::CutCopyPasteCmd cmd=$cmd, wfocus=$wfocus"
-    
-    if {$wfocus eq ""} {
-	return
-    }
-	    
-    # Operate on the whiteboard's canvas.
-    set w [winfo toplevel $wfocus]
-    upvar ::WB::${w}::wapp wapp
-    
-    switch -- $cmd {
-	cut - copy {
-	    ::CanvasCCP::CopySelectedToClipboard $wapp(can) $cmd		    
-	}
-	paste {
-	    ::CanvasCCP::PasteFromClipboardTo $wapp(can)
-	}
-    }
+proc ::CanvasCCP::Cut {w} {
+    CopySelected $w cut
 }
 
-# CanvasCCP::CopySelectedToClipboard --
+proc ::CanvasCCP::Copy {w} {
+    CopySelected $w copy
+}
+
+proc ::CanvasCCP::Paste {w} {
+    PasteOnCanvas $w
+}
+
+# CanvasCCP::CopySelected --
 #
 #       Copies the selection, either complete items or pure text, to the clipboard.
 #       If there are no selected items, pure text is copied.
 #       Set a flag 'clipToken' to tell which; "string" or "item".
-#       The items are copied one by one using 'CopySingleItemToClipboard'.
+#       The items are copied one by one using 'CopySingle'.
 #       doWhat: "cut" or "copy".
 #       
 # Arguments:
@@ -69,11 +52,11 @@ proc ::CanvasCCP::CutCopyPasteCmd {cmd} {
 # Results:
 #       none
  
-proc ::CanvasCCP::CopySelectedToClipboard {wcan doWhat} {
+proc ::CanvasCCP::CopySelected {wcan doWhat} {
     variable clipToken
     variable magicToken
     
-    Debug 4 "CopySelectedToClipboard:: wcan=$wcan, doWhat=$doWhat"
+    Debug 4 "CopySelected:: wcan=$wcan, doWhat=$doWhat"
     Debug 4 "\t focus=[focus], class=[winfo class $wcan]"
 
     if {![string equal [winfo class $wcan] "Canvas"]} {
@@ -87,7 +70,7 @@ proc ::CanvasCCP::CopySelectedToClipboard {wcan doWhat} {
     set ids [$wcan find withtag selected]	
     
     # If selected text within text item.
-    if {$ids == {}} {
+    if {$ids eq {}} {
 	::CanvasText::Copy $wcan
 	if {[string equal $doWhat "cut"]} {
 	    ::CanvasText::Delete $wcan
@@ -98,7 +81,7 @@ proc ::CanvasCCP::CopySelectedToClipboard {wcan doWhat} {
 	# See format definition above.
 	clipboard append "$magicToken {"
 	foreach id $ids {
-	    CopySingleItemToClipboard $wcan $doWhat $id
+	    CopySingle $wcan $doWhat $id
 	}
 	clipboard append "}"
 	set clipToken "item"
@@ -109,7 +92,6 @@ proc ::CanvasCCP::CopySelectedToClipboard {wcan doWhat} {
     #  [list [namespace current]::SelectionHandle $wcan]
     #selection own -selection CLIPBOARD \
     #  -command [list [namespace current]::SelectionLost $wcan] $wcan
-    ::WB::FixMenusWhenCopy $wcan
 }
 
 # CanvasCCP::SelectionLost --
@@ -133,7 +115,7 @@ proc ::CanvasCCP::SelectionHandle {wcan offset maxbytes} {
     return [string range $str $offset [expr $offset + $maxbytes]]
 }
 
-# CanvasCCP::CopySingleItemToClipboard --
+# CanvasCCP::CopySingle --
 #
 #       Copies the item given by 'id' to the clipboard.
 #       doWhat: "cut" or "copy".
@@ -146,9 +128,9 @@ proc ::CanvasCCP::SelectionHandle {wcan offset maxbytes} {
 # Results:
 #       none
 
-proc ::CanvasCCP::CopySingleItemToClipboard {wcan doWhat id} {
+proc ::CanvasCCP::CopySingle {wcan doWhat id} {
     
-    Debug 4 "CopySingleItemToClipboard:: id=$id"
+    Debug 4 "CopySingle:: id=$id"
 
     if {$id eq ""} {
 	return
@@ -170,14 +152,7 @@ proc ::CanvasCCP::CopySingleItemToClipboard {wcan doWhat id} {
     set itemType [$wcan type $id]
     set co [$wcan coords $id]
     set cmd [concat "create" $itemType $co $opcmd]
-    
-    # If we use the 'import' command for images garbage collection would work,
-    # but this costs an extra network connection.
-    if {0} {
-	set cmd [::CanvasUtils::GetOneLinerForAny $wcan $id -usehtmlsize 0 \
-	  -encodenewlines 0]
-    }
-    
+        
     # Copy the canvas object to the clipboard.
     clipboard append " {$cmd}"
     
@@ -193,46 +168,12 @@ proc ::CanvasCCP::CopySingleItemToClipboard {wcan doWhat id} {
 	    # empty
 	}	
     }
-    ::WB::FixMenusWhenCopy $wcan
 }
 
-# CanvasCCP::PasteFromClipboardTo
-#
-#       
-# Arguments:
-#       win    the focus (canvas) widget.
-#       
-# Results:
-#       none
-
-proc ::CanvasCCP::PasteFromClipboardTo {win} {
-    
-    set wClass [winfo class $win]
-    Debug 4 "PasteFromClipboardTo:: win=$win, wClass=$wClass"
-
-    switch -glob -- $wClass {
-	Canvas {
-	    ::CanvasCCP::PasteFromClipboardToCanvas $win
-	} 
-	Wish* - Whiteboard {
-	
-	    # We assume that it is the canvas that should receive this?
-	    set w [winfo toplevel $win]
-	    set wcan [::WB::GetCanvasFromWtop $w]
-	    ::CanvasCCP::PasteFromClipboardToCanvas $wcan
-	}
-	default {
-	
-	    # Wild guess...
-	    event generate $win <<Paste>>
-	}
-    }
-}
-
-# CanvasCCP::PasteFromClipboardToCanvas --
+# CanvasCCP::PasteOnCanvas --
 #
 #       Depending on 'clipToken', either paste simple text string, or complete item(s).
-#       Items are pasted one by one using 'PasteSingleFromClipboardToCanvas'.
+#       Items are pasted one by one using 'PasteSingleOnCanvas'.
 #       
 # Arguments:
 #       wcan   the canvas widget.
@@ -240,17 +181,17 @@ proc ::CanvasCCP::PasteFromClipboardTo {win} {
 # Results:
 #       none
 
-proc ::CanvasCCP::PasteFromClipboardToCanvas {wcan} {
+proc ::CanvasCCP::PasteOnCanvas {wcan} {
     variable clipToken
     variable magicToken
 
-    Debug 4 "PasteFromClipboardToCanvas:: wcan=$wcan"
+    Debug 4 "PasteOnCanvas:: wcan=$wcan"
     
     if {[catch {selection get -sel CLIPBOARD} str]} {
 	return
     }
     Debug 4 "\t str=$str"
-    ::CanvasCmd::DeselectAll [winfo toplevel $wcan]
+    ::CanvasCmd::DeselectAll $wcan
         
     # Check first if it has the potential of a canvas command.
     if {[regexp ^$magicToken $str]} {
@@ -276,7 +217,7 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {wcan} {
 	} 
 	item {
 	    foreach cmd [lindex $str 1] {
-		PasteSingleFromClipboardToCanvas $wcan $cmd
+		PasteSingleOnCanvas $wcan $cmd
 	    }
 	}
     }
@@ -286,7 +227,7 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {wcan} {
     set clipToken "string"
 }
 
-# CanvasCCP::PasteSingleFromClipboardToCanvas --
+# CanvasCCP::PasteSingleOnCanvas --
 #
 #       Evaluates the canvas create command given by 'cmd', but at a coordinate
 #       offset, makes it the new selection and copies it again to clipboard.
@@ -299,10 +240,10 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {wcan} {
 # Results:
 #       copied canvas item, sent to all clients.
 
-proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {wcan cmd} {
+proc ::CanvasCCP::PasteSingleOnCanvas {wcan cmd} {
     global  prefs
     
-    Debug 4 "PasteSingleFromClipboardToCanvas:: cmd=$cmd"
+    Debug 4 "PasteSingleOnCanvas:: cmd=$cmd"
     
     set w [winfo toplevel $wcan]
     
@@ -361,7 +302,7 @@ proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {wcan cmd} {
 	      [list [list $newcmd local] [list $cmdremote remote]]]
 	    set undo [list ::CanvasUtils::Command $w $undocmd]
 	    eval $redo
-	    undo::add [::WB::GetUndoToken $w] $undo $redo
+	    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 	}
     }
     
@@ -369,7 +310,7 @@ proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {wcan cmd} {
     ::CanvasDraw::MarkBbox $wcan 1 $utag
     
     # Copy the newly pasted object to clipboard.
-    CopySelectedToClipboard $wcan copy
+    CopySelected $wcan copy
 }
 
 # CanvasCCP::CmdToken --

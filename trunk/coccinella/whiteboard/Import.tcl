@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Import.tcl,v 1.23 2006-01-12 11:03:17 matben Exp $
+# $Id: Import.tcl,v 1.24 2006-08-20 13:41:20 matben Exp $
 
 package require http
 package require httpex
@@ -33,15 +33,14 @@ namespace eval ::Import:: {
 #       'type' must match.
 #       
 # Arguments:
-#       w           toplevel widget path
+#       wcan        canvas widget
 #       
 # Results:
 #       Defines option arrays and icons for movie controllers.
 
-proc ::Import::ImportImageOrMovieDlg {w} {    
+proc ::Import::ImportImageOrMovieDlg {wcan} {    
     global  prefs    
     
-    set wcan [::WB::GetCanvasFromWtop $w]
     set userDir [::Utils::GetDirIfExist $prefs(userPath)]
     set opts [list -initialdir $userDir]
     set fileName [eval {tk_getOpenFile -title [mc {Open Image/Movie}] \
@@ -360,7 +359,7 @@ proc ::Import::DoImport {wcan opts args} {
     if {$argsArr(-addundo) && ($errMsg eq "")} {
 	set redo [concat [list ::Import::DoImport $wcan $opts -addundo 0] $args]
 	set undo [list ::CanvasUtils::Command $w [list delete $useTag]]
-	undo::add [::WB::GetUndoToken $w] $undo $redo
+	undo::add [::WB::GetUndoToken $wcan] $undo $redo
     }
     return $errMsg
 }
@@ -1753,7 +1752,7 @@ proc ::Import::GetTransportSyntaxOptsFromTcl {optList} {
 #       -2 for a size decrease to half size.   
 #       
 # Arguments:
-#       w           toplevel widget path
+#       w           canvas widget
 #       zoomFactor   an integer factor to scale with.
 #       which    "sel": selected images, or a specific image with tag 'which'.
 #       newTag   "auto": generate a new utag, 
@@ -1767,15 +1766,12 @@ proc ::Import::GetTransportSyntaxOptsFromTcl {optList} {
 # Results:
 #       image item resized, propagated to clients.
 
-proc ::Import::ResizeImage {w zoomFactor which newTag {where all}} {
+proc ::Import::ResizeImage {wcan zoomFactor which newTag {where all}} {
         
-    set wcan [::WB::GetCanvasFromWtop $w]
-
-    Debug 2 "ResizeImage: w=$w, wcan=$wcan, which=$which"
-    Debug 2 "    zoomFactor=$zoomFactor"
-
     set scaleFactor 2
     set int_ {[-0-9]+}
+    
+    set w [winfo toplevel $wcan]
     
     # Compute total resize factor.
     if {($zoomFactor >= 0) && ($zoomFactor <= 1)} {
@@ -1905,9 +1901,9 @@ proc ::Import::ResizeImage {w zoomFactor which newTag {where all}} {
 	set redo [list ::CanvasUtils::GenCommandExList $w $cmdExList]
 	set undo [list ::CanvasUtils::GenCommandExList $w $undocmdExList]
 	eval $redo
-	undo::add [::WB::GetUndoToken $w] $undo $redo
+	undo::add [::WB::GetUndoToken $wcan] $undo $redo
     }
-    ::CanvasCmd::DeselectAll $w
+    ::CanvasCmd::DeselectAll $wcan
     
     # Mark the new ones if old ones selected.
     foreach id $idsNewSelected {
@@ -2018,7 +2014,6 @@ proc ::Import::QuickTimeMCCallback {utag wmovie msg {par {}}} {
 	play {
 	    set time [$wcan time]
 	    set rate $par
-	    #puts "MCCallback time=$time, par (rate)=$rate"
 	    
 	    # If any of them are different from cached state then send.
 	    set timetrig 1
@@ -2031,7 +2026,6 @@ proc ::Import::QuickTimeMCCallback {utag wmovie msg {par {}}} {
 	      ($moviestate($utag,rate) == $rate)} {
 		set ratetrig 0		
 	    }
-	    #puts "\t timetrig=$timetrig, ratetrig=$ratetrig"
 	    if {$timetrig || $ratetrig} {
 		set str "QUICKTIME: play $utag $time $rate"
 		::CanvasUtils::GenCommand $w $str remote
@@ -2079,8 +2073,6 @@ proc ::Import::QuickTimeHandler {wcan type cmd args} {
 	    # Cache target state which must not be resent via callback!
 	    set moviestate($utag,time) $dsttime
 	    set moviestate($utag,rate) $dstrate
-	    #puts "\t dsttime=$dsttime, dstrate=$dstrate"
-	    #puts "\t time=[$wmov time], rate=[$wmov rate]"
 	    if {$dstrate == 0.0} {
 		if {[$wmov rate] != $dstrate} {
 		    $wmov rate 0.0

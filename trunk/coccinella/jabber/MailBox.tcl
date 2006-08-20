@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.88 2006-08-12 13:48:25 matben Exp $
+# $Id: MailBox.tcl,v 1.89 2006-08-20 13:41:18 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -72,7 +72,6 @@ namespace eval ::MailBox:: {
     set locals(hooksInited)   0
     set locals(updateDateid)  ""
     set locals(updateDatems)  [expr 1000*60]
-    set jstate(inboxVis)      0
     
     # Running id for incoming messages; never reused.
     variable uidmsg 1000
@@ -140,6 +139,21 @@ proc ::MailBox::LaunchHook { } {
     }
 }
 
+proc ::MailBox::OnMenu { } {
+    ShowHide
+}
+
+proc ::MailBox::IsVisible { } {
+    global wDlgs
+
+    set w $wDlgs(jinbox)
+    if {[winfo exists $w] && [winfo ismapped $w]} {
+	return 1
+    } else {
+	return 0
+    }
+}
+
 # MailBox::ShowHide --
 # 
 #       Toggles the display of the inbox. With -visible 1 it forces it
@@ -160,12 +174,6 @@ proc ::MailBox::ShowHide {args} {
 	
 	# First time we are being called.
 	Build
-	if {[info exists argsArr(-visible)] && \
-	  ($argsArr(-visible) == 0)} {
-	    set jstate(inboxVis) 0
-	} else {
-	    set jstate(inboxVis) 1
-	}
     } else {
 	set ismapped [winfo ismapped $w]
 	set targetstate [expr $ismapped ? 0 : 1]
@@ -182,7 +190,6 @@ proc ::MailBox::ShowHide {args} {
 		after cancel $locals(updateDateid)
 	    }
 	}
-	set jstate(inboxVis) $targetstate
     }
 }
 
@@ -216,7 +223,6 @@ proc ::MailBox::Build {args} {
     wm title $w [mc Inbox]
 
     set locals(w) $w
-    set jstate(inboxVis) 1
     
     # Global frame.
     ttk::frame $w.frall
@@ -813,7 +819,7 @@ proc ::MailBox::MessageHook {bodytxt args} {
 	InsertRow $wtbl $mailbox($uidmsg) end
 	$wtbl see end
     }
-    ::Jabber::UI::MailBoxState nonempty
+    ::JUI::MailBoxState nonempty
     
     # Any separate window.
     # @@@ as hook instead
@@ -844,7 +850,7 @@ proc ::MailBox::HandleRawWBMessage {jlibname xmlns msgElem args} {
 	ReadMailbox
     }
     set messageList [eval {MakeMessageList ""} $args]
-    set rawList     [::Jabber::WB::GetRawCanvasMessageList $argsArr(-x) $xmlns]
+    set rawList     [::JWB::GetRawCanvasMessageList $argsArr(-x) $xmlns]
     set canvasuid   [uuid::uuid generate]
     set filePath    [file join $this(inboxCanvasPath) $canvasuid.can]
     ::CanvasFile::DataToFile $filePath $rawList
@@ -859,7 +865,7 @@ proc ::MailBox::HandleRawWBMessage {jlibname xmlns msgElem args} {
 	InsertRow $wtbl $mailbox($uidmsg) end
 	$wtbl see end
     }
-    ::Jabber::UI::MailBoxState nonempty
+    ::JUI::MailBoxState nonempty
     
     eval {::hooks::run newWBMessageHook} $args
 
@@ -903,7 +909,7 @@ proc ::MailBox::HandleSVGWBMessage {jlibname xmlns msgElem args} {
 	InsertRow $wtbl $mailbox($uidmsg) end
 	$wtbl see end
     }
-    ::Jabber::UI::MailBoxState nonempty
+    ::JUI::MailBoxState nonempty
     
     eval {::hooks::run newWBMessageHook} $args
 
@@ -1037,7 +1043,7 @@ proc ::MailBox::TrashMsg { } {
 	$wtbar buttonconfigure print   -state disabled
 	$wtbar buttonconfigure trash   -state disabled
 	MsgDisplayClear
-	::Jabber::UI::MailBoxState empty
+	::JUI::MailBoxState empty
     } elseif {$select ne ""} {
 	$T selection add $select
     }
@@ -1108,7 +1114,7 @@ proc ::MailBox::DisplayXElementSVG {jid3 xlist} {
 	set tryimport 1
     }
 
-    set cmdList [::Jabber::WB::GetSVGWBMessageList $w $xlist]
+    set cmdList [::JWB::GetSVGWBMessageList $w $xlist]
     foreach line $cmdList {
 	::CanvasUtils::HandleCanvasDraw $w $line -tryimport $tryimport
     }         
@@ -1125,14 +1131,15 @@ proc ::MailBox::MakeWhiteboard {jid2} {
     set title "Inbox: $jid2"
     
     if {[winfo exists $w]} {
+	set wcan [::WB::GetCanvasFromWtop $w]
 	::Import::HttpResetAll  $w
-	::CanvasCmd::EraseAll   $w
+	::CanvasCmd::EraseAll   $wcan
 	::WB::ConfigureMain     $w -title $title	    
 	::WB::SetStatusMessage  $w ""
-	::Jabber::WB::Configure $w -jid $jid2
-	undo::reset [::WB::GetUndoToken $w]
+	::JWB::Configure $w -jid $jid2
+	undo::reset [::WB::GetUndoToken $wcan]
     } else {
-	::Jabber::WB::NewWhiteboard -w $w -state disabled \
+	::JWB::NewWhiteboard -w $w -state disabled \
 	  -title $title -jid $jid2 -usewingeom 1
     }
     return $w

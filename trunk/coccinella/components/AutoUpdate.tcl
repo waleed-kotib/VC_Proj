@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: AutoUpdate.tcl,v 1.16 2006-08-06 13:22:04 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.17 2006-08-20 13:41:09 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -31,7 +31,7 @@ proc ::AutoUpdate::Init { } {
 
     set menuspec  \
       {command   mUpdateCheck     {::AutoUpdate::Get -silent 0} normal   {}}
-    ::Jabber::UI::RegisterMenuEntry info $menuspec
+    ::JUI::RegisterMenuEntry info $menuspec
 
     component::register AutoUpdate  \
       "Automatically checks for new version of this application."

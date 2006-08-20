@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: CanvasFile.tcl,v 1.23 2006-02-03 07:17:17 matben Exp $
+# $Id: CanvasFile.tcl,v 1.24 2006-08-20 13:41:20 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -59,8 +59,8 @@ proc ::CanvasFile::OpenCanvas {wcan fileName args} {
 	  -icon error -type ok
 	return
     }
-    ::CanvasCmd::DoEraseAll $w   
-    ::undo::reset [::WB::GetUndoToken $w]
+    ::CanvasCmd::DoEraseAll $wcan   
+    ::undo::reset [::WB::GetUndoToken $wcan]
     fconfigure $fd -encoding utf-8
     eval {FileToCanvas $wcan $fd $fileName} $args
     close $fd
@@ -173,7 +173,6 @@ proc ::CanvasFile::FileToCanvasVer1 {wcan fd absPath args} {
 	# a complete mess is the result.
 	
 	if {![regexp {(^| )([^/ ]+/[0-9]+)} $tags match junk oldUtag]} {
-	    puts "FileToCanvas:: Warning, didn't match tags! tags=$tags"
 	    continue
 	}
 	if {$updateUtags} {
@@ -215,7 +214,6 @@ proc ::CanvasFile::FileToCanvasVer1 {wcan fd absPath args} {
 		    set filePath [file nativename $filePath]
 		}
 	    } else {
-	        puts "FileToCanvas:: couldn't localize image/window"
 	        continue
 	    }
 		
@@ -505,16 +503,16 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
 #       open dialog.
 #
 # Arguments:
-#       w           toplevel widget path
+#       wcan        canvas widget
 #       filePath    absolute path to the save file.
 #       
 # Results:
 #       none
 
-proc ::CanvasFile::OpenCanvasFileDlg {w {filePath {}}} {
+proc ::CanvasFile::OpenCanvasFileDlg {wcan {filePath {}}} {
     global  prefs this
     
-    set wcan [::WB::GetCanvasFromWtop $w]
+    set w [winfo toplevel $wcan]
     
     if {[string length $filePath] == 0} {
 	set typelist {
@@ -542,8 +540,8 @@ proc ::CanvasFile::OpenCanvasFileDlg {w {filePath {}}} {
     
     switch -- [file extension $fileName] {
 	.svg {
-	    ::undo::reset [::WB::GetUndoToken $w]
-	    ::CanvasCmd::DoEraseAll $w
+	    ::undo::reset [::WB::GetUndoToken $wcan]
+	    ::CanvasCmd::DoEraseAll $wcan
 	    ::CanvasFile::SVGFileToCanvas $w $fileName
 	}
 	.can {	    
@@ -558,18 +556,18 @@ proc ::CanvasFile::OpenCanvasFileDlg {w {filePath {}}} {
 #       displays a Save As dialog instead.
 #       
 # Arguments:
-#       w           toplevel widget path
+#       wcan        canvas widget
 #       
 # Results:
 #       file save dialog shown if needed, file written.
 
-proc ::CanvasFile::Save {w} {
+proc ::CanvasFile::Save {wcan} {
+    set w [winfo toplevel $wcan]
     upvar ::WB::${w}::state state
     
     if {$state(fileName) eq ""} {
-	set fileName [SaveAsDlg $w]
+	set fileName [SaveAsDlg $wcan]
     } else {
-	set wcan [::WB::GetCanvasFromWtop $w]
 	set fileName [SaveCanvas $wcan $state(fileName)]
     }
     return $fileName
@@ -580,15 +578,16 @@ proc ::CanvasFile::Save {w} {
 #       Displays a Save As dialog and acts correspondingly.
 #       
 # Arguments:
-#       w           toplevel widget path
+#       wcan        canvas widget
 #       
 # Results:
 #       file save dialog shown, file written.
 
-proc ::CanvasFile::SaveAsDlg {w} {
+proc ::CanvasFile::SaveAsDlg {wcan} {
+    set w [winfo toplevel $wcan]
     upvar ::WB::${w}::state state
     
-    set fileName [SaveCanvasFileDlg $w]
+    set fileName [SaveCanvasFileDlg $wcan]
     if {$fileName ne ""} {
 	set state(fileName) $fileName
     }
@@ -604,15 +603,14 @@ proc ::CanvasFile::SaveAsDlg {w} {
 #       'CanvasToFile' to write into it, closes it.
 #
 # Arguments:
-#       w           toplevel widget path
+#       wcan        canvas widget
 #       
 # Results:
 #       fileName or empty
 
-proc ::CanvasFile::SaveCanvasFileDlg {w} {
+proc ::CanvasFile::SaveCanvasFileDlg {wcan} {
     global  prefs this
         
-    set wcan [::WB::GetCanvasFromWtop $w]
     set typelist {
 	{"Canvas"            {.can}}
 	{"XML/SVG"           {.svg}}
@@ -687,10 +685,9 @@ proc ::CanvasFile::SaveCanvas {wcan fileName args} {
 # 
 # 
 
-proc ::CanvasCmd::DoSaveAsItem {w} {
+proc ::CanvasCmd::DoSaveAsItem {wcan} {
     global  prefs this
 	
-    set wcan [::WB::GetCanvasFromWtop $w]
     set typelist {
 	{"Canvas"            {.can}}
     }

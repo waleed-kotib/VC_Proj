@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.150 2006-08-15 14:02:27 matben Exp $
+# $Id: jabberlib.tcl,v 1.151 2006-08-20 13:41:19 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -270,6 +270,7 @@ proc jlib::new {clientcmd args} {
 	variable iqhook
 	variable msghook
 	variable preshook
+	variable genhook
 	variable opts
 	variable pres
 	variable features
@@ -1042,6 +1043,8 @@ proc jlib::dispatcher {jlibname xmldata} {
 	    element_run_hook $jlibname $xmldata
 	}
     }
+    # Will have to wait...
+    #general_run_hook $jlibname $xmldata
 }
 
 # jlib::iq_handler --
@@ -2440,6 +2443,113 @@ proc jlib::element_run_hook {jlibname xmldata} {
 	}
     }
     return $ishandled
+}
+
+# This part is supposed to be a maximal flexible event register mechanism.
+# 
+# Bind:  stanza  (presence, iq, message,...)
+#        its attributes  (optional)
+#        any child tag name  (optional)
+#        its attributes  (optional)
+#        
+# genhook(stanza) = {{attrspec childspec func seq} ...}
+# 
+# with:  attrspec = {name1 value1 name2 value2 ...}
+#        childspec = {tag attrspec}
+
+# jlib::general_register --
+# 
+#       A mechanism to register for almost any kind of elements.
+
+proc jlib::general_register {jlibname tag attrspec childspec func {seq 50}} {
+    
+    upvar ${jlibname}::genhook genhook
+    
+    lappend genhook($tag) [list $attrspec $childspec $func $seq]
+    set genhook($tag)  \
+      [lsort -integer -index 3 [lsort -unique $genhook($tag)]]
+}
+
+proc jlib::general_run_hook {jlibname xmldata} {
+
+    upvar ${jlibname}::genhook genhook
+
+    set ishandled 0
+    set tag [wrapper::gettag $xmldata]
+    if {[info exists genhook($tag)]} {
+	foreach spec $genhook($tag) {
+	    lassign $spec attrspec childspec func seq
+	    lassign $childspec ctag cattrspec
+	    if {![match_attr $attrspec [wrapper::getattrlist $xmldata]]} {
+		continue
+	    }
+	    
+	    # Search child elements for matches.
+	    set match 0
+	    foreach c [wrapper::getchildren $xmldata] {
+		if {$ctag ne "" && $ctag ne [wrapper::gettag $c]} {
+		    continue
+		}
+		if {![match_attr $cattrspec [wrapper::getattrlist $c]]} {
+		    continue
+		}
+		set match 1
+		break
+	    }
+	    if {!$match} {
+		continue
+	    }
+	    
+	    # If the spec survived here it matched.
+	    set code [catch {
+		uplevel #0 $func [list $jlibname $xmldata]
+	    } ans]
+	    if {$code} {
+		bgerror "genhook $func failed: $code\n$::errorInfo"
+	    }
+	    if {[string equal $ans "1"]} {
+		set ishandled 1
+		break
+	    }
+	}
+    }
+    return $ishandled
+}
+
+proc jlib::match_attr {attrspec attr} {
+    
+    array set attrA $attr
+    foreach {name value} $attrspec {
+	if {![info exists attrA($name)]} {
+	    return 0
+	} elseif {$value ne $attrA($name)} {
+	    return 0
+	}
+    }
+    return 1
+}
+
+proc jlib::general_deregister {jlibname tag attrspec childspec func} {
+    
+    upvar ${jlibname}::genhook genhook
+
+    if {[info exists genhook($tag)]} {
+	set idx [lsearch -glob $genhook($tag) [list $attrspec $childspec $func *]]
+	if {$idx >= 0} {
+	    set genhook($tag) [lreplace $genhook($tag) $idx $idx]
+	
+	}
+    }
+}
+
+# Test code...
+if {0} {
+    proc cb {args} {puts "************** $args"}
+    set childspec [list query [list xmlns "http://jabber.org/protocol/disco#items"]]
+    ::jlib::jlib1 general_register iq {} $childspec cb
+    ::jlib::jlib1 general_deregister iq {} $childspec cb
+    
+    
 }
 
 # jlib::send_iq --

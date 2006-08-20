@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2006  Mats Bengtsson
 #  
-# $Id: ItemInspector.tcl,v 1.13 2006-03-29 13:09:26 matben Exp $
+# $Id: ItemInspector.tcl,v 1.14 2006-08-20 13:41:20 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -91,24 +91,22 @@ namespace eval ::ItemInspector::  {
 #       Shows options dialog for the selected canvas item.
 #   
 # Arguments:
-#       w           toplevel widget path
+#       w           canvas widget
 #       which       a valid specifier for a canvas item
 #       args        ?-state normal|disabled?
 #       
 # Results:
 #       dialog displayed.
 
-proc ::ItemInspector::ItemInspector {w which args} {
-    
-    Debug 2 "ItemInspector:: w=$w, which=$which"
-    set wcan [::WB::GetCanvasFromWtop $w]
-    
+proc ::ItemInspector::ItemInspector {wcan which args} {
+        
     # We need to create an item specific instance. 
     # Use the item id for instance.
     set idlist [$wcan find withtag $which]
     if {$idlist == {}}  {
 	return
     }
+    set w [winfo toplevel $wcan]
     
     # Query the whiteboard's state.
     array set opts [::WB::ConfigureMain $w]
@@ -116,9 +114,9 @@ proc ::ItemInspector::ItemInspector {w which args} {
     foreach id $idlist {
 	set tags [$wcan gettags $id]
 	if {[lsearch $tags broken] >= 0} {
-	    eval {Broken $w $id} [array get opts]
+	    eval {Broken $wcan $id} [array get opts]
 	} else {
-	    eval {Build $w $id} [array get opts]
+	    eval {Build $wcan $id} [array get opts]
 	}
     }
 }
@@ -133,12 +131,10 @@ proc ::ItemInspector::ItemInspector {w which args} {
 # Results:
 #       dialog window path
 
-proc ::ItemInspector::Build {wtoplevel itemid args} {
+proc ::ItemInspector::Build {wcan itemid args} {
     global  prefs fontPoints2Size this wDlgs
     upvar ::WB::dashShort2Full dashShort2Full
     
-    ::Debug 2 "::ItemInspector::Build wtoplevel=$wtoplevel, itemid=$itemid"
-
     set w $wDlgs(iteminsp)$itemid
     
     # If window already there, just return silently.
@@ -146,7 +142,7 @@ proc ::ItemInspector::Build {wtoplevel itemid args} {
 	raise $w
 	return
     }
-    set wcan [::WB::GetCanvasFromWtop $wtoplevel]
+    set wtoplevel [winfo toplevel $wcan]
     
     # Keep state array for item options etc.
     set token [namespace current]::$itemid
@@ -509,8 +505,6 @@ proc ::ItemInspector::Configure {token} {
 	set oldVal $state($op,value)
 	set newVal $state($op)
 	
-	#puts "op=$op, oldVal=$oldVal, newVal=$newVal"
-
 	# Intercept options for nontext output.
 	switch -- $op {
 	    type         -
@@ -575,7 +569,6 @@ proc ::ItemInspector::Configure {token} {
 		# empty
 	    }
 	}
-	#puts "\t newVal=$newVal"
 	
 	# If new different from old, reconfigure. Reinterpret \n"
 	if {![string equal $oldVal $newVal]}  {
@@ -602,7 +595,6 @@ proc ::ItemInspector::Configure {token} {
 	    set allNewOpts [array get newOptsArr]
 	}
     }
-    #puts "allNewOpts=$allNewOpts"
     
     # Do the actual change.
     if {$allNewOpts != {}}  {
@@ -657,7 +649,7 @@ proc ::ItemInspector::Free {token} {
 #
 #
 
-proc ::ItemInspector::Movie {wtoplevel winfr args} {
+proc ::ItemInspector::Movie {wcan winfr args} {
     global  wDlgs
     
     variable skipMovieOpts
@@ -672,7 +664,7 @@ proc ::ItemInspector::Movie {wtoplevel winfr args} {
 	raise $w
 	return
     }
-    set wcan [::WB::GetCanvasFromWtop $wtoplevel]
+    set wtoplevel [winfo toplevel $wcan]
     
     # Keep state array for item options etc.
     set token [namespace current]::m$uid
@@ -844,7 +836,7 @@ proc ::ItemInspector::MovieConfigure {token} {
     Free $token
 }
 
-proc ::ItemInspector::Broken {wtoplevel itemid args} {
+proc ::ItemInspector::Broken {wcan itemid args} {
     global  wDlgs
         
     set w $wDlgs(iteminsp)$itemid
@@ -854,7 +846,7 @@ proc ::ItemInspector::Broken {wtoplevel itemid args} {
 	raise $w
 	return
     }
-    set wcan [::WB::GetCanvasFromWtop $w]
+    set wtoplevel [winfo toplevel $wcan]
     
     # Keep state array for item options etc.
     set token [namespace current]::$itemid

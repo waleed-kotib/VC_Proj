@@ -4,7 +4,7 @@
 #       
 #       Contributions and testing by Antonio Cano damas
 #       
-# $Id: JivePhone.tcl,v 1.21 2006-05-26 13:23:08 matben Exp $
+# $Id: JivePhone.tcl,v 1.22 2006-08-20 13:41:17 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -218,10 +218,10 @@ proc ::JivePhone::WeHavePhone { } {
 	return
     }
     ::Roster::RegisterPopupEntry $popMenuDef(call)
-    ::Jabber::UI::RegisterMenuEntry  jabber $menuDef
+    ::JUI::RegisterMenuEntry  jabber $menuDef
     
     set image [::Rosticons::Get [string tolower phone/available]]
-    set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
+    set win [::JUI::SetAlternativeStatusImage jivephone $image]
     bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
     ::balloonhelp::balloonforwindow $win [mc phoneMakeCall]
     
@@ -237,8 +237,8 @@ proc ::JivePhone::LogoutHook { } {
 
     ::Roster::DeRegisterPopupEntry mJiveCall
     ::Roster::DeRegisterPopupEntry mJiveForward
-    ::Jabber::UI::DeRegisterMenuEntry jabber mJiveCall
-    ::Jabber::UI::RemoveAlternativeStatusImage jivephone
+    ::JUI::DeRegisterMenuEntry jabber mJiveCall
+    ::JUI::RemoveAlternativeStatusImage jivephone
     
     if {[winfo exists $state(wstatus)]} {
 	destroy $state(wstatus)
@@ -321,7 +321,7 @@ proc ::JivePhone::MessageHook {body args} {
 	    }
 	    set image [::Rosticons::Get [string tolower phone/$status]]
 	    
-	    set win [::Jabber::UI::SetAlternativeStatusImage jivephone $image]
+	    set win [::JUI::SetAlternativeStatusImage jivephone $image]
 	    set type [wrapper::getattribute $elem "type"]
 
 	    # @@@ What to do more?
@@ -589,7 +589,7 @@ proc ::JivePhone::DialCB {dnid type subiq args} {
 proc ::JivePhone::NewPage { } {
     variable wtab
 
-    set wnb [::Jabber::UI::GetNotebook]
+    set wnb [::JUI::GetNotebook]
     set wtab $wnb.ab
     if {![winfo exists $wtab]} {
         set im [::Theme::GetImage \

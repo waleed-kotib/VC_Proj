@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.156 2006-08-12 13:48:25 matben Exp $
+# $Id: GroupChat.tcl,v 1.157 2006-08-20 13:41:18 matben Exp $
 
 package require Create
 package require Enter
@@ -141,7 +141,7 @@ namespace eval ::GroupChat:: {
 	{command   mChat          {::Chat::StartThread $jid}    }
 	{command   mSendFile      {::FTrans::Send $jid}         }
 	{command   mUserInfo      {::UserInfo::Get $jid}        }
-	{command   mWhiteboard    {::Jabber::WB::NewWhiteboardTo $jid} }
+	{command   mWhiteboard    {::JWB::NewWhiteboardTo $jid} }
 	{check     mIgnore        {::GroupChat::Ignore $chattoken $jid} {
 	    -variable $chattoken\(ignore,$jid)
 	}}
@@ -225,6 +225,18 @@ proc ::GroupChat::HaveMUC {{jid ""}} {
     ::Debug 4 "::GroupChat::HaveMUC = $ans, jid=$jid"
     
     return $ans
+}
+
+proc ::GroupChat::OnMenuEnter {} {
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	EnterOrCreate enter
+    }
+}
+
+proc ::GroupChat::OnMenuCreate {} {
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	EnterOrCreate create
+    }
 }
 
 # GroupChat::EnterOrCreate --
@@ -2481,7 +2493,7 @@ proc ::GroupChat::Whiteboard {dlgtoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-   ::Jabber::WB::NewWhiteboardTo $chatstate(roomjid)
+   ::JWB::NewWhiteboardTo $chatstate(roomjid)
 }
 
 proc ::GroupChat::Print {dlgtoken} {
@@ -2717,6 +2729,12 @@ proc ::GroupChat::BookmarkSendGet {callback} {
     $jstate(jlib) send_iq get [list $queryElem] -command $callback
 }
 
+proc ::GroupChat::OnMenuBookmark { } {
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	EditBookmarks
+    }   
+}
+
 proc ::GroupChat::EditBookmarks { } {
     global  wDlgs
     variable bookmarksVar
@@ -2736,7 +2754,7 @@ proc ::GroupChat::EditBookmarks { } {
     ::Bookmarks::Dialog $dlg [namespace current]::bookmarksVar  \
       -menu $m -geovariable prefs(winGeom,$dlg) -columns $columns  \
       -command [namespace current]::BookmarksDlgSave
-    ::UI::SetMenuAcceleratorBinds $dlg $m
+    ::UI::SetMenubarAcceleratorBinds $dlg $m
     
     $dlg boolean 4
     $dlg state disabled

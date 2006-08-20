@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.46 2006-08-09 13:28:51 matben Exp $
+# $Id: VCard.tcl,v 1.47 2006-08-20 13:41:19 matben Exp $
 
 package provide VCard 1.0
 
@@ -26,6 +26,12 @@ proc ::VCard::InitHook { } {
     if {![catch {package require tkdnd}]} {
 	set locals(haveTkDnD) 1
     }       
+}
+
+proc ::VCard::OnMenu { } {
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	Fetch own
+    }   
 }
 
 # VCard::Fetch --
@@ -55,7 +61,7 @@ proc ::VCard::Fetch {type {jid {}}} {
     set priv(w)    $wDlgs(jvcard)$uid
     
     # We should query the server for this and then fill in.
-    ::Jabber::UI::SetStatusMessage [mc vcardget $jid]
+    ::JUI::SetStatusMessage [mc vcardget $jid]
     if {$type eq "own"} {
 	::Jabber::JlibCmd vcard send_get_own  \
 	  [list [namespace current]::FetchCallback $token]
@@ -77,11 +83,11 @@ proc ::VCard::FetchCallback {token jlibName result theQuery} {
 	set errmsg "([lindex $theQuery 0]) [lindex $theQuery 1]"
         ::UI::MessageBox -title [mc Error] -icon error -type ok \
           -message [mc vcarderrget $errmsg]
-        ::Jabber::UI::SetStatusMessage ""
+        ::JUI::SetStatusMessage ""
 	Free $token
         return
     }
-    ::Jabber::UI::SetStatusMessage [mc vcardrec]
+    ::JUI::SetStatusMessage [mc vcardrec]
     
     # The 'theQuery' now contains all the vCard data in a xml list.
     if {[llength $theQuery]} {

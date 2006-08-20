@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.39 2006-08-06 13:22:05 matben Exp $
+# $Id: JPrefs.tcl,v 1.40 2006-08-20 13:41:18 matben Exp $
 
 package require ui::fontselector
 
@@ -462,7 +462,7 @@ proc ::JPrefs::PickFont { } {
     set m [::UI::GetMainMenu]
     lappend opts -menu $m
     set w [eval ui::fontselector [ui::autoname] $opts]
-    ::UI::SetMenuAcceleratorBinds $w $m
+    ::UI::SetMenubarAcceleratorBinds $w $m
     $w grab
 }
 

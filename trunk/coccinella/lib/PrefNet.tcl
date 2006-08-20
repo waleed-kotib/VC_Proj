@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: PrefNet.tcl,v 1.4 2006-05-16 06:06:29 matben Exp $
+# $Id: PrefNet.tcl,v 1.5 2006-08-20 13:41:19 matben Exp $
  
 package provide PrefNet 1.0
 
@@ -262,7 +262,7 @@ proc ::PrefNet::UpdateUI { } {
 	jabber {
 	    
 	    # Show our combination window.
-	    ::Jabber::UI::Show $wDlgs(jmain)
+	    ::JUI::Show $wDlgs(jmain)
 	}
 	central {
 	    
@@ -272,7 +272,7 @@ proc ::PrefNet::UpdateUI { } {
 	    $wmenu entryconfigure *Jabber* -state disabled
 	    
 	    # Hide our combination window.
-	    ::Jabber::UI::Close $wDlgs(jmain)
+	    ::JUI::Close $wDlgs(jmain)
 	}
 	default {
 	    ::UI::MenuMethod $wmenu.file entryconfigure mOpenConnection   \
@@ -280,7 +280,7 @@ proc ::PrefNet::UpdateUI { } {
 	    $wmenu entryconfigure *Jabber* -state disabled
 		
 	    # Hide our combination window.
-	    ::Jabber::UI::Close $wDlgs(jmain)
+	    ::JUI::Close $wDlgs(jmain)
 	}
     }
     

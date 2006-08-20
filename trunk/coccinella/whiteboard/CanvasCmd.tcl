@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.11 2006-02-10 15:40:50 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.12 2006-08-20 13:41:19 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -20,14 +20,13 @@ namespace eval ::CanvasCmd:: {
 #       Selects all items in the canvas.
 #   
 # Arguments:
-#       w           toplevel widget path
+#       wcan        canvas widget
 #       
 # Results:
 #       none
 
-proc ::CanvasCmd::SelectAll {w} {
+proc ::CanvasCmd::SelectAll {wcan} {
     
-    set wcan [::WB::GetCanvasFromWtop $w]
     $wcan delete tbbox
     set ids [$wcan find all]
     foreach id $ids {
@@ -41,16 +40,77 @@ proc ::CanvasCmd::SelectAll {w} {
 #       Deselects all items in the canvas.
 #   
 # Arguments:
-#       w           toplevel widget path
+#       wcan        canvas widget
 #       
 # Results:
 #       none
 
-proc ::CanvasCmd::DeselectAll {w} {
+proc ::CanvasCmd::DeselectAll {wcan} {
 	
-    set wcan [::WB::GetCanvasFromWtop $w]
     $wcan delete withtag tbbox
     $wcan dtag all selected
+}
+
+proc ::CanvasCmd::MoveSelected {wcan detail} {
+    
+    set selected [$wcan find withtag selected]
+    if {![llength $selected]} {
+	return
+    }
+    set dx 0
+    set dy 0
+    set step 10
+    
+    switch -- $detail {
+	up {
+	    set dy -$step
+	}
+	down {
+	    set dy $step
+	}
+	right {
+	    set dx $step
+	}
+	left {
+	    set dx -$step
+	}
+    }
+    
+    set mdx [expr {-1*$dx}]
+    set mdy [expr {-1*$dy}]
+    set cmdList {}
+    set cmdUndoList {}
+    
+    foreach id $selected {
+	set utag [::CanvasUtils::GetUtag $wcan $id]
+	
+	# Let images use coords instead since more robust if transported.
+	switch -- [$wcan type $id] {
+	    image {
+		
+		# Find new coords.
+		lassign [$wcan coords $id] x0 y0
+		set x [expr {$x0 + $dx}]
+		set y [expr {$y0 + $dy}]
+		lappend cmdList [list coords $utag $x $y]
+		lappend cmdUndoList [list coords $utag $x0 $y0]
+	    }
+	    default {
+		lappend cmdList [list move $utag $dx $dy]
+		lappend cmdUndoList [list move $utag $mdx $mdy]
+	    }
+	}
+    }
+    set w [winfo toplevel $wcan]
+    set redo [list ::CanvasUtils::CommandList $w $cmdList]
+    set undo [list ::CanvasUtils::CommandList $w $cmdUndoList]
+    eval $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo   
+    
+    DeselectAll $wcan
+    foreach id $selected {
+	::CanvasDraw::SelectItem $wcan $id
+    }
 }
 
 # CanvasCmd::RaiseOrLowerItems --
@@ -58,17 +118,16 @@ proc ::CanvasCmd::DeselectAll {w} {
 #       Raise or lower the stacking order of the selected canvas item.
 #       
 # Arguments:
-#       w           toplevel widget path
+#       wcan        canvas widget
 #       what        "raise" or "lower"
 #       
 # Results:
 #       none.
 
-proc ::CanvasCmd::RaiseOrLowerItems {w {what raise}} {
-    
+proc ::CanvasCmd::RaiseOrLowerItems {wcan {what raise}} {
+        
+    set w [winfo toplevel $wcan]
     upvar ::WB::${w}::state state
-    
-    set wcan [::WB::GetCanvasFromWtop $w]    
 
     set cmdList {}
     set undoList {}
@@ -90,7 +149,7 @@ proc ::CanvasCmd::RaiseOrLowerItems {w {what raise}} {
     set redo [list ::CanvasUtils::CommandList $w $cmdList]
     set undo [list ::CanvasUtils::CommandList $w $undoList]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 }
 
 # CanvasCmd::SetCanvasBgColor --
@@ -119,7 +178,7 @@ proc ::CanvasCmd::SetCanvasBgColor {w} {
 	set redo [list ::CanvasUtils::Command $w $cmd]
 	set undo [list ::CanvasUtils::Command $w $undocmd]
 	eval $redo
-	undo::add [::WB::GetUndoToken $w] $undo $redo
+	undo::add [::WB::GetUndoToken $wcan] $undo $redo
     }
 }
 
@@ -172,18 +231,18 @@ proc ::CanvasCmd::DoCanvasGrid {w} {
 #       Not all item types are rescaled. 
 #       
 # Arguments:
-#       w           toplevel widget path
+#       wcan        canvas widget
 #       factor      a numerical factor to scale with.
 #       
 # Results:
 #       item resized, propagated to clients.
 
-proc ::CanvasCmd::ResizeItem {w factor} {
+proc ::CanvasCmd::ResizeItem {wcan factor} {
     global  prefs
 	
-    set wcan [::WB::GetCanvasFromWtop $w]
+    set w [winfo toplevel $wcan]
     set ids [$wcan find withtag selected]
-    if {[string length $ids] == 0} {
+    if {$ids eq {}} {
 	return
     }
     if {$prefs(scaleCommonCG)} {
@@ -218,7 +277,7 @@ proc ::CanvasCmd::ResizeItem {w factor} {
     set redo [list ::CanvasUtils::CommandList $w $cmdList]
     set undo [list ::CanvasUtils::CommandList $w $undoList]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
     
     # New markers.
     foreach id $ids {
@@ -231,9 +290,9 @@ proc ::CanvasCmd::ResizeItem {w factor} {
 #
 #
 
-proc ::CanvasCmd::FlipItem {w direction} {
-	
-    set wcan [::WB::GetCanvasFromWtop $w]
+proc ::CanvasCmd::FlipItem {wcan direction} {
+
+    set w [winfo toplevel $wcan]
     set id [$wcan find withtag selected]
     if {[llength $id] != 1} {
 	return
@@ -263,36 +322,30 @@ proc ::CanvasCmd::FlipItem {w direction} {
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 	
     # New markers.
     ::CanvasDraw::DeleteSelection $wcan $id
     ::CanvasDraw::MarkBbox $wcan 1 $id
 }
 
-# CanvasCmd::Undo --
-#
-#       The undo command.
-
-proc ::CanvasCmd::Undo {w} {
+proc ::CanvasCmd::Undo {wcan} {
     
     # Make the text stuff in sync.
-    set wcan [::WB::GetCanvasFromWtop $w]
     ::CanvasText::EvalBufferedText $wcan
     
     # The actual undo command.
-    undo::undo [::WB::GetUndoToken $w]
+    undo::undo [::WB::GetUndoToken $wcan]
     
-    ::CanvasDraw::SyncMarks $w
+    ::CanvasDraw::SyncMarks $wcan
 }
 
 # CanvasCmd::Redo --
 #
 #       The redo command.
 
-proc ::CanvasCmd::Redo {w} {
-    
-    undo::redo [::WB::GetUndoToken $w]
+proc ::CanvasCmd::Redo {wcan} {
+    undo::redo [::WB::GetUndoToken $wcan]
 }
 
 # CanvasCmd::DoEraseAll --
@@ -300,7 +353,7 @@ proc ::CanvasCmd::Redo {w} {
 #       Erases all items in canvas except for grids. Deselects all items.
 #       
 # Arguments:
-#       w           toplevel widget path
+#       w           canvas widget
 #       where    "all": erase this canvas and all others.
 #                "remote": erase only client canvases.
 #                "local": erase only own canvas.
@@ -308,16 +361,12 @@ proc ::CanvasCmd::Redo {w} {
 # Results:
 #       all items deleted, propagated to all clients.
 
-proc ::CanvasCmd::DoEraseAll {w {where all}} {
-	
-    set wcan [::WB::GetCanvasFromWtop $w]
-    DeselectAll $w
+proc ::CanvasCmd::DoEraseAll {wcan {where all}} {
+    DeselectAll $wcan
     ::CanvasDraw::DeleteIds $wcan [$wcan find all] $where
 }
 
-proc ::CanvasCmd::EraseAll {w} {
-	
-    set wcan [::WB::GetCanvasFromWtop $w]
+proc ::CanvasCmd::EraseAll {wcan} {	
     foreach id [$wcan find all] {
 	$wcan delete $id
     }
@@ -344,7 +393,7 @@ proc ::CanvasCmd::DoPutCanvasDlg {w} {
     }
     
     # Erase all other client canvases.
-    DoEraseAll $w remote
+    DoEraseAll $wcan remote
 
     # Put this canvas to all others.
     ::CanvasCmd::DoPutCanvas $wcan all
@@ -418,9 +467,10 @@ proc ::CanvasCmd::DoGetCanvas {w} {
     if {$getCanIPNum eq ""} {
 	return
     }    
+    set wcan [::WB::GetCanvasFromWtop $w]
     
     # Erase everything in own canvas.
-    DoEraseAll $w local
+    DoEraseAll $wcan local
     
     # GET CANVAS.
     ::WB::SendGenMessageList $w [list "GET CANVAS:"] -ips $getCanIPNum

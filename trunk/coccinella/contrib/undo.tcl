@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: undo.tcl,v 1.4 2004-07-30 12:55:53 matben Exp $
+# $Id: undo.tcl,v 1.5 2006-08-20 13:41:17 matben Exp $
 
 package provide undo 0.1
 
@@ -22,7 +22,6 @@ namespace eval undo {
 }
 
 proc undo::new {args} {
-
     variable uid
     variable undoStack
     variable histStack
@@ -43,7 +42,6 @@ proc undo::new {args} {
 }
 
 proc undo::reset {token} {
-
     variable undoStack
     variable histStack
     variable stackPtr
@@ -59,7 +57,6 @@ proc undo::reset {token} {
 }
 
 proc undo::delete {token} {
-
     variable undoStack
     variable histStack
     variable stackPtr
@@ -92,8 +89,7 @@ proc undo::add {token undocmd redocmd} {
     }
 }
 
-proc undo::undo {token} {
-    
+proc undo::undo {token} {    
     variable undoStack
     variable stackPtr
     variable opts
@@ -113,7 +109,6 @@ proc undo::undo {token} {
 }
 
 proc undo::redo {token} {
-
     variable histStack
     variable stackPtr
     variable opts
@@ -132,8 +127,20 @@ proc undo::redo {token} {
     }
 }
 
-proc undo::dump {token} {
+proc undo::canundo {token} {
+    variable stackPtr
 
+    return [expr {($stackPtr($token) <= 0) ? 0 : 1}]
+}
+
+proc undo::canredo {token} {
+    variable histStack
+    variable stackPtr
+
+    return [expr {($stackPtr($token) == [llength $histStack($token)]) ? 0 : 1}]
+}
+
+proc undo::dump {token} {
     variable stackPtr
     variable undoStack
     variable histStack
