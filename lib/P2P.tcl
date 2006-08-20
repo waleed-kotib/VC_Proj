@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.26 2005-11-30 08:32:00 matben Exp $
+# $Id: P2P.tcl,v 1.27 2006-08-20 13:41:19 matben Exp $
 
 package provide P2P 1.0
 
@@ -52,7 +52,6 @@ proc ::P2P::Init {} {
     # Register canvas draw event handler.
     ::hooks::register whiteboardBuildEntryHook       ::P2P::BuildEntryHook
     ::hooks::register whiteboardSetMinsizeHook       ::P2P::SetMinsizeHook    
-    ::hooks::register whiteboardFixMenusWhenHook     ::P2P::FixMenusWhenHook
     ::hooks::register whiteboardSendMessageHook      ::P2P::SendMessageListHook
     ::hooks::register whiteboardSendGenMessageHook   ::P2P::SendGenMessageListHook
     ::hooks::register whiteboardPutFileHook          ::P2P::PutFileHook
@@ -73,11 +72,11 @@ proc ::P2P::Init {} {
 
     set buttonTrayDefs(symmetric) {
 	connect    {::P2PNet::OpenConnection $wDlgs(openConn)}
-	save       {::CanvasFile::Save $w}
-	open       {::CanvasFile::OpenCanvasFileDlg $w}
-	import     {::Import::ImportImageOrMovieDlg $w}
+	save       {::WB::OnMenuSaveCanvas}
+	open       {::WB::OnMenuOpenCanvas}
+	import     {::WB::OnMenuImport}
 	send       {::CanvasCmd::DoPutCanvasDlg $w}
-	print      {::UserActions::DoPrintCanvas $w}
+	print      {::WB::OnMenuPrintCanvas}
 	stop       {::P2P::CancelAllPutGetAndPendingOpen $w}
     }
     set buttonTrayDefs(client) $buttonTrayDefs(symmetric)
@@ -86,23 +85,23 @@ proc ::P2P::Init {} {
 
     set menuDefsFile {
 	{command   mOpenConnection     {::UserActions::DoConnect}                 normal   O}
-	{command   mCloseWindow        {::UI::DoCloseWindow}                      normal   W}
+	{command   mCloseWindow        {::UI::CloseWindowEvent}                      normal   W}
 	{separator}
 	{command   mPutCanvas          {::CanvasCmd::DoPutCanvasDlg $w}        disabled {}}
 	{command   mGetCanvas          {::CanvasCmd::DoGetCanvas $w}           disabled {}}
 	{command   mPutFile            {::P2P::PutFileDlg $w}         disabled {}}
 	{command   mStopPut/Get/Open   {::P2P::CancelAllPutGetAndPendingOpen $w} normal {}}
 	{separator}
-	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $w}    normal  I}
-	{command   mOpenURLStream      {::Multicast::OpenMulticast $w}     normal   {}}
+	{command   mOpenImage/Movie    {::WB::OnMenuImport}    normal  I}
+	{command   mOpenURLStream      {::WB::OnMenuOpenURL}     normal   {}}
 	{separator}
-	{command   mOpenCanvas         {::CanvasFile::OpenCanvasFileDlg $w}     normal   {}}
-	{command   mSaveCanvas         {::CanvasFile::Save $w}             normal   S}
+	{command   mOpenCanvas         {::WB::OnMenuOpenCanvas}     normal   {}}
+	{command   mSaveCanvas         {::WB::OnMenuSaveCanvas}             normal   S}
 	{separator}
-	{command   mSaveAs             {::CanvasFile::SaveAsDlg $w}        normal   {}}
-	{command   mSaveAsItem         {::CanvasCmd::DoSaveAsItem $w}      normal   {}}
-	{command   mPageSetup          {::UserActions::PageSetup $w}           normal   {}}
-	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $w}       normal   P}
+	{command   mSaveAs             {::WB::OnMenuSaveAs}        normal   {}}
+	{command   mSaveAsItem         {::WB::OnMenuSaveAsItem}      normal   {}}
+	{command   mPageSetup          {::WB::OnMenuPageSetup}           normal   {}}
+	{command   mPrintCanvas        {::WB::OnMenuPrintCanvas}       normal   P}
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
     }

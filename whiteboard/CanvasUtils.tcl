@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasUtils.tcl,v 1.38 2006-02-10 15:40:50 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.39 2006-08-20 13:41:20 matben Exp $
 
 package require sha1
 package require can2svg
@@ -111,15 +111,15 @@ proc ::CanvasUtils::Init { } {
     set menuDefs(pop,outline)  \
       {command   mOutlineColor {::CanvasUtils::SetItemColorDialog $wcan $id -outline}  normal {}}
     set menuDefs(pop,inspect)  \
-      {command   mInspectItem  {::ItemInspector::ItemInspector $w $id}   normal {}}
+      {command   mInspectItem  {::ItemInspector::ItemInspector $wcan $id}   normal {}}
     set menuDefs(pop,inspectqt)  \
-      {command   mInspectItem  {::ItemInspector::Movie $w $winfr}        normal {}}
+      {command   mInspectItem  {::ItemInspector::Movie $wcan $winfr}        normal {}}
     set menuDefs(pop,saveimageas)  \
       {command   mSaveImageAs  {::Import::SaveImageAsFile $wcan $id}    normal {}}
     set menuDefs(pop,imagelarger)  \
-      {command   mImageLarger  {::Import::ResizeImage $w 2 $id auto}   normal {}}
+      {command   mImageLarger  {::Import::ResizeImage $wcan 2 $id auto}   normal {}}
     set menuDefs(pop,imagesmaller)  \
-      {command   mImageSmaller {::Import::ResizeImage $w -2 $id auto}   normal {}}
+      {command   mImageSmaller {::Import::ResizeImage $wcan -2 $id auto}   normal {}}
     set menuDefs(pop,exportimage)  \
       {command   mExportImage  {::Import::ExportImageAsFile $wcan $id}  normal {}}
     set menuDefs(pop,exportmovie)  \
@@ -133,7 +133,7 @@ proc ::CanvasUtils::Init { } {
 	{checkbutton  mTimeCode {::Import::TimeCode $w $winfr}  normal {} {} \
 	  {-variable ::CanvasUtils::popupVars(-timecode)}}
     set menuDefs(pop,inspectbroken)  \
-      {command   mInspectItem  {::ItemInspector::Broken $w $id}          normal {}}
+      {command   mInspectItem  {::ItemInspector::Broken $wcan $id}          normal {}}
     set menuDefs(pop,reloadimage)  \
       {command   mReloadImage  {::Import::ReloadImage $w $id}     normal {}}
     set menuDefs(pop,smoothness)  \
@@ -238,8 +238,6 @@ proc ::CanvasUtils::Init { } {
 proc ::CanvasUtils::Command {w cmd {where all}} {
     
     set wcan [::WB::GetCanvasFromWtop $w]
-    
-    #puts "-------- where=$where $cmd"
     
     # Make drawing in own canvas.
     if {[string equal $where "all"] || [string equal $where "local"]} {
@@ -1122,6 +1120,8 @@ proc ::CanvasUtils::CreateItem {w args} {
     
     Debug 2 "::CanvasUtils::CreateItem args=$args"
     
+    set wcan [::WB::GetCanvasFromWtop $w]
+
     set utag [GetUtagFromCreateCmd $args]
     set cmd [concat create $args]
     set undocmd [list delete $utag]
@@ -1130,7 +1130,7 @@ proc ::CanvasUtils::CreateItem {w args} {
     set undo [list ::CanvasUtils::CommandList $w [list $undocmd]]
     
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 }
 
 # CanvasUtils::ItemConfigure --
@@ -1167,7 +1167,7 @@ proc ::CanvasUtils::ItemConfigure {wcan id args} {
     set undo [list ::CanvasUtils::CommandExList $w  \
       [list [list $undocmd local] [list $undocmdremote remote]]]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
     
     # If selected, redo the selection to fit.
     if {[::CanvasDraw::IsSelected $wcan $id]} {
@@ -1203,7 +1203,7 @@ proc ::CanvasUtils::ItemCoords {wcan id coords} {
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
     
     # If selected, redo the selection to fit.
     set idsMarker [$wcan find withtag id$id]
@@ -1223,7 +1223,7 @@ proc ::CanvasUtils::AddTag {wcan id tag} {
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 }
 
 proc ::CanvasUtils::DeleteTag {wcan id tag} {
@@ -1236,7 +1236,7 @@ proc ::CanvasUtils::DeleteTag {wcan id tag} {
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 }
 
 # CanvasUtils::DuplicateItem --
@@ -2014,7 +2014,7 @@ proc ::CanvasUtils::HandleCanvasDraw {w instr args} {
     if {$prefs(privacy) == 0} {
 	set redo [list ::CanvasUtils::Command $w $instr]
 	set undo [GetUndoCommand $w $instr]
-	undo::add [::WB::GetUndoToken $w] $undo $redo
+	undo::add [::WB::GetUndoToken $wServCan] $undo $redo
     }
     
     eval {::hooks::run whiteboardPreCanvasDraw $w $bsinstr} $args
@@ -2093,15 +2093,30 @@ proc ::CanvasUtils::CanvasDrawSafe {w args} {
     eval $w $args
 }    
 
-# CanvasUtils::DefineWhiteboardBindtags --
+# CanvasUtils::BindWhiteboardBindtags --
 # 
 #       Defines a number of binding tags for the whiteboard canvas.
 #       This is helpful when switching bindings depending on which tool is 
 #       selected. It defines only widget bindtags, not item bindings!
 
-proc ::CanvasUtils::DefineWhiteboardBindtags { } {
+proc ::CanvasUtils::BindWhiteboardBindtags { } {
     global  this
-    
+
+    set mod $this(modkey)
+
+    # Item edit key binds.
+    bind Whiteboard <${mod}-Key-z>       { ::WB::OnUndo %W }
+    bind Whiteboard <${mod}-Key-a>       { ::WB::OnAll %W }
+    bind Whiteboard <${mod}-Key-r>       { ::WB::OnRaise %W }
+    bind Whiteboard <${mod}-Key-l>       { ::WB::OnLower %W }
+    bind Whiteboard <${mod}-Key-greater> { ::WB::OnLarger %W }
+    bind Whiteboard <${mod}-Key-less>    { ::WB::OnSmaller %W }
+
+    bind Whiteboard <Key-Up>        { ::WB::OnKeyAnyArrow %W up }
+    bind Whiteboard <Key-Down>      { ::WB::OnKeyAnyArrow %W down }
+    bind Whiteboard <Key-Left>      { ::WB::OnKeyAnyArrow %W left }
+    bind Whiteboard <Key-Right>     { ::WB::OnKeyAnyArrow %W right }
+
     if {[string equal "x11" [tk windowingsystem]]} {
 	# Support for mousewheels on Linux/Unix commonly comes through mapping
 	# the wheel to the extended buttons.  If you have a mousewheel, find
@@ -2145,14 +2160,25 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
 	}
     }
     
+    bind Whiteboard <Control-Right> {%W xview scroll  1 units}
+    bind Whiteboard <Control-Left>  {%W xview scroll -1 units}
+    bind Whiteboard <Control-Down>  {%W yview scroll  1 units}
+    bind Whiteboard <Control-Up>    {%W yview scroll -1 units}
+    
     bind Whiteboard <<Cut>> {
-	::CanvasCCP::CutCopyPasteCmd cut
+	::CanvasCCP::Cut %W
     }
     bind Whiteboard <<Copy>> {
-	::CanvasCCP::CutCopyPasteCmd copy
+	::CanvasCCP::Copy %W
     }
     bind Whiteboard <<Paste>> {
-	::CanvasCCP::CutCopyPasteCmd paste
+	::CanvasCCP::Paste %W
+    }
+    
+    bind Whiteboard <Button-1> {
+	if {[%W cget -state] ne "disabled"} {
+	    focus %W
+	}
     }
 
     # WhiteboardPoint

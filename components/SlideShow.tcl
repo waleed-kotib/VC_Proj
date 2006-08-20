@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.18 2005-11-04 15:14:55 matben Exp $
+#       $Id: SlideShow.tcl,v 1.19 2006-08-20 13:41:17 matben Exp $
 
 package require undo
 
@@ -325,8 +325,8 @@ proc ::SlideShow::OpenFile {w fileName} {
 	    ::CanvasFile::OpenCanvas $wcan $fileName
 	}
 	default {
-	    ::CanvasCmd::DoEraseAll $w  
-	    ::undo::reset [::WB::GetUndoToken $w]
+	    ::CanvasCmd::DoEraseAll $wcan
+	    ::undo::reset [::WB::GetUndoToken $wcan]
 	    ::Import::DoImport $wcan {-coords {0 0}} -file $fileName
 	}
     }

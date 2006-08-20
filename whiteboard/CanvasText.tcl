@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasText.tcl,v 1.12 2006-03-20 11:03:53 matben Exp $
+# $Id: CanvasText.tcl,v 1.13 2006-08-20 13:41:20 matben Exp $
 
 package require sha1
 
@@ -114,12 +114,12 @@ proc ::CanvasText::EditBind {wcan} {
     # <KeyPress> class binding will also fire and insert the character,
     # which is wrong.  Ditto for Escape, and Tab.
     
-    $wcan bind text <Alt-KeyPress> {# nothing}
-    $wcan bind text <Meta-KeyPress> {# nothing}
-    $wcan bind text <Control-KeyPress> {# nothing}
-    $wcan bind text <Escape> {# nothing}
-    $wcan bind text <KP_Enter> {# nothing}
-    $wcan bind text <Tab> {# nothing}
+    $wcan bind text <Alt-KeyPress>      {# nothing}
+    $wcan bind text <Meta-KeyPress>     {# nothing}
+    $wcan bind text <Control-KeyPress>  {# nothing}
+    $wcan bind text <Escape>            {# nothing}
+    $wcan bind text <KP_Enter>          {# nothing}
+    $wcan bind text <Tab>               {# nothing}
 
     # Additional emacs-like bindings.
     $wcan bind text <Control-d> {
@@ -169,7 +169,7 @@ proc ::CanvasText::Copy {wcan} {
     
     Debug 2 "::CanvasText::Copy select item=[$wcan select item]"
 
-    if {[$wcan select item] != {}}	 { 
+    if {[$wcan select item] ne {}} { 
 	clipboard clear
 	set t [$wcan select item]
 	set text [$wcan itemcget $t -text]
@@ -254,7 +254,7 @@ proc ::CanvasText::SetFocus {wcan x y {forceNew 0}} {
 	  [list [list $cmdlocal local] [list $cmdremote remote]]]
 	set undo [list ::CanvasUtils::Command $w $undocmd]
 	eval $redo
-	undo::add [::WB::GetUndoToken $w] $undo $redo
+	undo::add [::WB::GetUndoToken $wcan] $undo $redo
 
 	$wcan focus $utag
 	$wcan select clear
@@ -313,7 +313,7 @@ proc ::CanvasText::Insert {wcan char} {
     }
     
     # If this is an empty text item then reuse any cached font.
-    if {([$wcan itemcget $itfocus -text] eq "") && ($priv(font) != {})} {
+    if {([$wcan itemcget $itfocus -text] eq "") && ($priv(font) ne {})} {
 	if {[string equal $priv(sha1) [sha1::sha1 "$priv(magic)$char"]]} {
 	    ::CanvasUtils::ItemConfigure $wcan $itfocus -font $priv(font)
 	}
@@ -325,7 +325,7 @@ proc ::CanvasText::Insert {wcan char} {
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $undocmd]    
     eval {$wcan} $cmd
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
         
     Debug 9 "\t utag = $utag, ind = $ind, char: $char"
     
@@ -629,8 +629,7 @@ proc ::CanvasText::Hit {wcan x y {select 1}} {
 proc ::CanvasText::Drag {wcan x y} {
     global  this
     
-    set w [winfo toplevel $wcan]
-    ::CanvasCmd::DeselectAll $w
+    ::CanvasCmd::DeselectAll $wcan
     $wcan select to current @$x,$y
     
     # Mac text bindings.????
@@ -652,8 +651,7 @@ proc ::CanvasText::Drag {wcan x y} {
 
 proc ::CanvasText::SelectWord {wcan x y} {
     
-    set w [winfo toplevel $wcan]
-    ::CanvasCmd::DeselectAll $w
+    ::CanvasCmd::DeselectAll $wcan
     $wcan focus current
     
     set id [$wcan find withtag current]
@@ -719,14 +717,12 @@ proc ::CanvasText::NewLine {wcan} {
 	
 	# Local command.
 	set cmd [concat create text $x1 $y [array get opts]]
-	#puts "local: cmd=$cmd"
 	lappend cmds [list $cmd local]
 	
 	# Remote command.
 	set size [lindex $opts(-font) 1]
 	lset opts(-font) 1 $fontPoints2Size($size)
 	set cmd [concat create text $x1 $y [array get opts]]
-	#puts "remote: cmd=$cmd"
 	lappend cmds [list $cmd remote]
 	lappend undocmds [list delete $utagNew]
 	set redo [list ::CanvasUtils::CommandExList $w $cmds]
@@ -741,7 +737,7 @@ proc ::CanvasText::NewLine {wcan} {
     }
 
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 
     if {$prefs(wb,nlNewText)} {
 	$wcan focus $utagNew
@@ -787,7 +783,7 @@ proc ::CanvasText::Delete {wcan {offset 0}} {
 	set str [string range $str $sfirst $slast]
 	set cmd [list dchars $utag $sfirst $slast]
 	set undocmd [list insert $utag $sfirst $str]
-    } elseif {$idfocus != {}} {
+    } elseif {$idfocus ne {}} {
 	set ind [expr [$wcan index $idfocus insert] - 1 + $offset]
 	set str [$wcan itemcget $idfocus -text]
 	set str [string index $str $ind]
@@ -798,7 +794,7 @@ proc ::CanvasText::Delete {wcan {offset 0}} {
 	set redo [list ::CanvasUtils::Command $w $cmd]
 	set undo [list ::CanvasUtils::Command $w $undocmd]    
 	eval $redo
-	undo::add [::WB::GetUndoToken $w] $undo $redo
+	undo::add [::WB::GetUndoToken $wcan] $undo $redo
     }
 }
 

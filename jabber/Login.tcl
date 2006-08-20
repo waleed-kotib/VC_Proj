@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.92 2006-08-06 13:22:05 matben Exp $
+# $Id: Login.tcl,v 1.93 2006-08-20 13:41:18 matben Exp $
 
 package provide Login 1.0
 
@@ -360,12 +360,6 @@ proc ::Login::Close {w} {
     catch {destroy $w}    
 }
 
-proc ::Login::IsPending { } {
-    variable pending
-
-    return $pending
-}
-
 proc ::Login::Kill { } {
     variable pending
     upvar ::Jabber::jstate jstate
@@ -373,9 +367,10 @@ proc ::Login::Kill { } {
     set pending 0
     $jstate(jlib) kill 
 
-    ::Jabber::UI::SetStatusMessage ""
-    ::Jabber::UI::StartStopAnimatedWave 0
-    ::Jabber::UI::FixUIWhen "disconnect"
+    ::JUI::SetStatusMessage ""
+    ::JUI::StartStopAnimatedWave 0
+    ::JUI::FixUIWhen "disconnect"
+    ::JUI::SetConnectState "disconnect"
 }
 
 # Login::DoLogin --
@@ -568,10 +563,11 @@ proc ::Login::HighLogin {server username resource password cmd args} {
 
     # Kill any pending open states.
     Kill
-    ::Jabber::UI::SetStatusMessage [mc jawaitresp $server]
-    ::Jabber::UI::StartStopAnimatedWave 1
-    ::Jabber::UI::FixUIWhen "connectinit"
-
+    ::JUI::SetStatusMessage [mc jawaitresp $server]
+    ::JUI::StartStopAnimatedWave 1
+    ::JUI::FixUIWhen "connectinit"
+    ::JUI::SetConnectState "connectfin"
+    
     set pending 1
 
     jlib::connect::configure              \
@@ -602,10 +598,10 @@ proc ::Login::HighLoginCB {token jlibname status {errcode ""} {errmsg ""}} {
 	    # empty
 	}
 	initstream {
-	    ::Jabber::UI::SetStatusMessage [mc jawaitxml $state(server)]
+	    ::JUI::SetStatusMessage [mc jawaitxml $state(server)]
 	}
 	starttls {
-	    ::Jabber::UI::SetStatusMessage [mc jatlsnegot]
+	    ::JUI::SetStatusMessage [mc jatlsnegot]
 	}
     }
 }
@@ -624,17 +620,19 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
 	    eval {SetStatus} $highstate(args)
 	    set server [$jstate(jlib) getserver]
 	    set msg [mc jaauthok $server] 
-	    ::Jabber::UI::FixUIWhen "connectfin"
+	    ::JUI::FixUIWhen "connectfin"
+	    ::JUI::SetConnectState "connectfin"
 	    SetLoginState
 	}
 	error {
 	    set msg ""
-	    ::Jabber::UI::FixUIWhen "disconnect"
+	    ::JUI::FixUIWhen "disconnect"
+	    ::JUI::SetConnectState "disconnect"
 	    HandleErrorCode $errcode $errmsg
 	}
     }        
-    ::Jabber::UI::SetStatusMessage $msg
-    ::Jabber::UI::StartStopAnimatedWave 0
+    ::JUI::SetStatusMessage $msg
+    ::JUI::StartStopAnimatedWave 0
 
     uplevel #0 $highstate(cmd) [list $token $errcode $errmsg]
 

@@ -5,20 +5,20 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.127 2006-07-29 13:12:58 matben Exp $
+# $Id: JUI.tcl,v 1.128 2006-08-20 13:41:18 matben Exp $
 
 package provide JUI 1.0
 
 
-namespace eval ::Jabber::UI:: {
+namespace eval ::JUI:: {
     
     # Add all event hooks.
-    ::hooks::register quitAppHook            ::Jabber::UI::QuitHook
-    ::hooks::register logoutHook             ::Jabber::UI::LogoutHook
-    ::hooks::register setPresenceHook        ::Jabber::UI::SetPresenceHook
-    ::hooks::register rosterIconsChangedHook ::Jabber::UI::RosterIconsChangedHook
-    ::hooks::register prefsInitHook          ::Jabber::UI::InitPrefsHook
-    ::hooks::register rosterTreeSelectionHook  ::Jabber::UI::RosterSelectionHook
+    ::hooks::register quitAppHook            ::JUI::QuitHook
+    ::hooks::register logoutHook             ::JUI::LogoutHook
+    ::hooks::register setPresenceHook        ::JUI::SetPresenceHook
+    ::hooks::register rosterIconsChangedHook ::JUI::RosterIconsChangedHook
+    ::hooks::register prefsInitHook          ::JUI::InitPrefsHook
+    ::hooks::register rosterTreeSelectionHook  ::JUI::RosterSelectionHook
 
     # Use option database for customization.
     # Shortcut buttons.
@@ -90,7 +90,7 @@ namespace eval ::Jabber::UI:: {
 }
 
 
-proc ::Jabber::UI::Init { } {
+proc ::JUI::Init { } {
     global  this
     
     # Menu definitions for the Roster/services window.
@@ -99,54 +99,54 @@ proc ::Jabber::UI::Init { } {
     
     if {[string match "mac*" $this(platform)]} {
 	set menuDefs(rost,file) {
-	    {command   mNewWhiteboard      {::Jabber::WB::NewWhiteboard}  normal   N}
-	    {command   mCloseWindow        {::UI::DoCloseWindow}          normal   W}
-	    {command   mPreferences...     {::Preferences::Build}         normal   {}}
+	    {command   mNewWhiteboard      {::JWB::NewWhiteboard}   normal   N}
+	    {command   mCloseWindow        {::UI::CloseWindowEvent} normal   W}
+	    {command   mPreferences...     {::Preferences::Build}   normal   {}}
 	    {separator}
-	    {command   mQuit               {::UserActions::DoQuit}        normal   Q}
+	    {command   mQuit               {::UserActions::DoQuit}  normal   Q}
 	}
     } else {
 	set menuDefs(rost,file) {
-	    {command   mNewWhiteboard      {::Jabber::WB::NewWhiteboard}  normal   N}
-	    {command   mPreferences...     {::Preferences::Build}         normal   {}}
+	    {command   mNewWhiteboard      {::JWB::NewWhiteboard}   normal   N}
+	    {command   mPreferences...     {::Preferences::Build}   normal   {}}
 	    {separator}
-	    {command   mQuit               {::UserActions::DoQuit}        normal   Q}
+	    {command   mQuit               {::UserActions::DoQuit}  normal   Q}
 	}
     }
     set menuDefs(rost,jabber) {    
-	{command     mNewAccount    {::RegisterEx::New}      normal   {}}
-	{command     mLogin         {::Jabber::LoginLogout}           normal   L}
-	{command     mLogoutWith    {::Jabber::Logout::WithStatus}    disabled {}}
-	{command     mPassword      {::Jabber::Passwd::Build}         disabled {}}
+	{command     mNewAccount    {::RegisterEx::OnMenu}            normal {}}
+	{command     mLogin         {::Jabber::OnMenuLogInOut}        normal L}
+	{command     mLogoutWith    {::Jabber::Logout::OnMenuStatus}  normal {}}
+	{command     mPassword      {::Jabber::Passwd::OnMenu}        normal {}}
 	{separator}
-	{checkbutton mMessageInbox  {::MailBox::ShowHide}     normal   I \
-	  {-variable ::Jabber::jstate(inboxVis)}}
+	{checkbutton mMessageInbox  {::MailBox::OnMenu}     normal   I \
+	  {-variable ::JUI::state(mailbox,visible)}}
 	{separator}
-	{command     mSearch        {::Search::Build}         disabled {}}
-	{command     mAddNewUser    {::Jabber::User::NewDlg}  disabled {}}
-	{cascade     mDisco         {}                        disabled {} {} {
-	    {command mAddServer     {::Disco::AddServerDlg}   normal   {}}
+	{command     mSearch        {::Search::OnMenu}        normal {}}
+	{command     mAddNewUser    {::JUser::OnMenu}         normal {}}
+	{cascade     mDisco         {}                        normal {} {} {
+	    {command mAddServer     {::Disco::OnMenuAddServer}   normal   {}}
 	}}
 	{separator}
-	{command     mSendMessage   {::NewMsg::Build}         disabled M}
-	{command     mChat          {::Chat::OnMenu}          disabled T}
-	{cascade     mStatus        {}                        disabled {} {} {}}
+	{command     mSendMessage   {::NewMsg::OnMenu}        normal M}
+	{command     mChat          {::Chat::OnMenu}          normal T}
+	{cascade     mStatus        {}                        normal {} {} {}}
 	{separator}
-	{command     mEnterRoom     {::GroupChat::EnterOrCreate enter}  disabled R}
-	{command     mCreateRoom    {::GroupChat::EnterOrCreate create} disabled {}}
-	{command     mEditBookmarks {::GroupChat::EditBookmarks}        disabled {}}
+	{command     mEnterRoom     {::GroupChat::OnMenuEnter}  normal R}
+	{command     mCreateRoom    {::GroupChat::OnMenuCreate} normal {}}
+	{command     mEditBookmarks {::GroupChat::OnMenuBookmark}       normal {}}
 	{separator}
-	{command     mvCard         {::VCard::Fetch own}              disabled {}}
-	{cascade     mShow          {}                                normal   {} {} {
-	    {check   mToolbar       {::Jabber::UI::ToggleToolbar}     normal   {} 
-	    {-variable ::Jabber::UI::state(show,toolbar)}}
-	    {check   mNotebook      {::Jabber::UI::ToggleNotebook}    normal   {} 
-	    {-variable ::Jabber::UI::state(show,notebook)}}
-	    {check   mMinimal       {::Jabber::UI::ToggleMinimal}     normal   {} 
-	    {-variable ::Jabber::UI::state(show,minimal)}} }
+	{command     mvCard         {::VCard::OnMenu}              normal {}}
+	{cascade     mShow          {}                             normal   {} {} {
+	    {check   mToolbar       {::JUI::OnMenuToggleToolbar}   normal   {} 
+	    {-variable ::JUI::state(show,toolbar)}}
+	    {check   mNotebook      {::JUI::OnMenuToggleNotebook}  normal   {} 
+	    {-variable ::JUI::state(show,notebook)}}
+	    {check   mMinimal       {::JUI::OnMenuToggleMinimal}   normal   {} 
+	    {-variable ::JUI::state(show,minimal)}} }
 	}
 	{separator}
-	{command     mRemoveAccount {::Register::Remove}      disabled {}}	
+	{command     mRemoveAccount {::Register::OnMenuRemove}     normal {}}	
     }
 
     if {[tk windowingsystem] eq "aqua"} {
@@ -157,8 +157,8 @@ proc ::Jabber::UI::Init { } {
 	    {checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \
 	      {-variable ::Jabber::jstate(debugCmd)}}
 	    {separator}
-	    {command     mCoccinellaHome {::Jabber::UI::OpenCoccinellaURL} normal {}}
-	    {command     mBugReport      {::Jabber::UI::OpenBugURL}   normal {}}
+	    {command     mCoccinellaHome {::JUI::OpenCoccinellaURL} normal {}}
+	    {command     mBugReport      {::JUI::OpenBugURL}   normal {}}
 	}
     } else {
 	set menuDefs(rost,info) {    
@@ -171,8 +171,8 @@ proc ::Jabber::UI::Init { } {
 	      {-variable ::Jabber::jstate(debugCmd)}}
 	    {separator}
 	    {command     mAboutCoccinella  {::Splash::SplashScreen} normal   {}}
-	    {command     mCoccinellaHome   {::Jabber::UI::OpenCoccinellaURL} normal {}}
-	    {command     mBugReport        {::Jabber::UI::OpenBugURL}   normal {}}
+	    {command     mCoccinellaHome   {::JUI::OpenCoccinellaURL} normal {}}
+	    {command     mBugReport        {::JUI::OpenBugURL}   normal {}}
 	}
     }
 
@@ -181,9 +181,9 @@ proc ::Jabber::UI::Init { } {
     lset menuDefs(rost,jabber) $idx 6 [::Jabber::Status::BuildMenuDef]
 
     set menuDefs(rost,edit) {    
-	{command   mCut              {::UI::CutCopyPasteCmd cut}      disabled X}
-	{command   mCopy             {::UI::CutCopyPasteCmd copy}     disabled C}
-	{command   mPaste            {::UI::CutCopyPasteCmd paste}    disabled V}
+	{command   mCut              {::UI::CutEvent}      normal X}
+	{command   mCopy             {::UI::CopyEvent}     normal C}
+	{command   mPaste            {::UI::PasteEvent}    normal V}
     }
     
     # We should do this for all menus eventaully.
@@ -215,14 +215,14 @@ proc ::Jabber::UI::Init { } {
     set inited 1
 }
 
-proc ::Jabber::UI::Show {w args} {
+proc ::JUI::Show {w args} {
     upvar ::Jabber::jstate jstate
 
     array set argsArr $args
     if {[info exists argsArr(-visible)]} {
 	set jstate(rostBrowseVis) $argsArr(-visible)
     }
-    ::Debug 2 "::Jabber::UI::Show w=$w, jstate(rostBrowseVis)=$jstate(rostBrowseVis)"
+    ::Debug 2 "::JUI::Show w=$w, jstate(rostBrowseVis)=$jstate(rostBrowseVis)"
 
     if {$jstate(rostBrowseVis)} {
 	Build $w
@@ -233,7 +233,7 @@ proc ::Jabber::UI::Show {w args} {
     }
 }
 
-# Jabber::UI::Build --
+# JUI::Build --
 #
 #       A combination tabbed window with roster/disco...
 #       Must be persistant since roster/disco etc. are built once.
@@ -244,7 +244,7 @@ proc ::Jabber::UI::Show {w args} {
 # Results:
 #       $w
 
-proc ::Jabber::UI::Build {w} {
+proc ::JUI::Build {w} {
     global  this prefs
     
     upvar ::Jabber::jstate jstate
@@ -254,16 +254,17 @@ proc ::Jabber::UI::Build {w} {
     variable jwapp
     variable inited
 
-    ::Debug 2 "::Jabber::UI::Build w=$w"
+    ::Debug 2 "::JUI::Build w=$w"
     
     if {!$inited} {
 	Init
     }
     ::UI::Toplevel $w -class JMain \
-      -macstyle documentProc -closecommand ::Jabber::UI::CloseHook  \
+      -macstyle documentProc -closecommand ::JUI::CloseHook  \
       -allowclose 0
     wm title $w $prefs(appName)
     ::UI::SetWindowGeometry $w
+    
     set jwapp(w)     $w
     set jwapp(jmain) $w
     
@@ -271,11 +272,7 @@ proc ::Jabber::UI::Build {w} {
     set wmenu $w.menu
     set jwapp(wmenu) $wmenu
     menu $wmenu -tearoff 0
-    if {[string match "mac*" $this(platform)]} {
-	# @@@ discard when -postcommand implemented
-	bind $w <FocusIn>  +[list ::UI::MacFocusFixEditMenu $w $wmenu %W]
-	bind $w <FocusOut> +[list ::UI::MacFocusFixEditMenu $w $wmenu %W]
-    }    
+
     if {([tk windowingsystem] eq "aqua") && $prefs(haveMenus)} {
 	::UI::BuildAppleMenu $w $wmenu.apple normal
     }    
@@ -286,13 +283,19 @@ proc ::Jabber::UI::Build {w} {
     # Note that in 8.0 on Macintosh and Windows, all commands in a menu systems
     # are executed before any are posted. This is due to the limitations in the 
     # individual platforms' menu managers.
+    $wmenu.file configure  \
+      -postcommand [list ::JUI::FilePostCommand $wmenu.file]
+    $wmenu.jabber configure  \
+      -postcommand [list ::JUI::JabberPostCommand $wmenu.jabber]
+    $wmenu.info configure  \
+      -postcommand [list ::JUI::InfoPostCommand $wmenu.info]
     if {[tk windowingsystem] eq "aqua"} {
 	$wmenu.edit configure  \
-	  -postcommand [list ::Jabber::UI::EditPostCommand $wmenu.edit]
+	  -postcommand [list ::JUI::EditPostCommand $wmenu.edit]
     }
-    $wmenu.jabber configure  \
-      -postcommand [list ::Jabber::UI::JabberPostCommand $wmenu.jabber]
-    $w configure -menu $wmenu    
+    $w configure -menu $wmenu
+    ::UI::SetMenubarAcceleratorBinds $w $wmenu
+
     
     # Global frame.
     set wall $w.f
@@ -356,7 +359,7 @@ proc ::Jabber::UI::Build {w} {
     ttk::notebook $wnb
     pack $wnb -side bottom -fill both -expand 1
     
-    bind $wnb <<NotebookTabChanged>>  {+::Jabber::UI::NotebookTabChanged }
+    bind $wnb <<NotebookTabChanged>>  {+::JUI::NotebookTabChanged }
     
     # Make the Roster page -----------------------------------------------
     
@@ -398,7 +401,7 @@ proc ::Jabber::UI::Build {w} {
     return $w
 }
 
-proc ::Jabber::UI::NotebookTabChanged {} {
+proc ::JUI::NotebookTabChanged {} {
     variable jwapp
         
     set state disabled
@@ -419,7 +422,7 @@ proc ::Jabber::UI::NotebookTabChanged {} {
     $jwapp(wtbar) buttonconfigure chat -state $state  
 }
 
-proc ::Jabber::UI::StatusCmd {status} {
+proc ::JUI::StatusCmd {status} {
     
     # @@@ Could perhaps be moved to Status.
     if {[::Jabber::IsConnected]} {
@@ -429,7 +432,7 @@ proc ::Jabber::UI::StatusCmd {status} {
     }
 }
 
-proc ::Jabber::UI::BuildToolbar {w wtbar} {
+proc ::JUI::BuildToolbar {w wtbar} {
     
     # Shortcut button part.
     set iconConnect       [::Theme::GetImage [option get $w connectImage {}]]
@@ -449,7 +452,7 @@ proc ::Jabber::UI::BuildToolbar {w wtbar} {
     
     $wtbar newbutton connect -text [mc Connect] \
       -image $iconConnect -disabledimage $iconConnectDis \
-      -command ::Login::Dlg
+      -command ::Jabber::OnMenuLogInOut
     if {[::MailBox::HaveMailBox]} {
 	$wtbar newbutton inbox -text [mc Inbox] \
 	  -image $iconInboxLett -disabledimage $iconInboxLettDis  \
@@ -461,7 +464,7 @@ proc ::Jabber::UI::BuildToolbar {w wtbar} {
     }
     $wtbar newbutton newuser -text [mc Contact] \
       -image $iconAddUser -disabledimage $iconAddUserDis  \
-      -command ::Jabber::User::NewDlg -state disabled
+      -command ::JUser::NewDlg -state disabled
     $wtbar newbutton chat -text [mc Chat] \
       -image $iconChat -disabledimage $iconChatDis  \
       -command ::Chat::OnToolButton -state disabled
@@ -471,7 +474,7 @@ proc ::Jabber::UI::BuildToolbar {w wtbar} {
     return $wtbar
 }
 
-proc ::Jabber::UI::BuildMenu {name} {
+proc ::JUI::BuildMenu {name} {
     variable menuBarDef
     variable menuDefs
     variable menuDefsInsertInd
@@ -491,7 +494,7 @@ proc ::Jabber::UI::BuildMenu {name} {
     ::UI::NewMenu $w $wmenu.$name  $mLabel($name)  $menuMerged  normal
 }
 
-proc ::Jabber::UI::RosterMoveFromPage { } {
+proc ::JUI::RosterMoveFromPage { } {
     variable jwapp
     upvar ::Jabber::jprefs jprefs
     
@@ -501,7 +504,7 @@ proc ::Jabber::UI::RosterMoveFromPage { } {
     set jprefs(ui,main,show,notebook) 0
 }
 
-proc ::Jabber::UI::RosterMoveToPage { } {
+proc ::JUI::RosterMoveToPage { } {
     variable jwapp
     upvar ::Jabber::jprefs jprefs
     
@@ -512,19 +515,19 @@ proc ::Jabber::UI::RosterMoveToPage { } {
     set jprefs(ui,main,show,notebook) 1
 }
 
-proc ::Jabber::UI::GetMainWindow { } {
+proc ::JUI::GetMainWindow { } {
     global wDlgs
     
     return $wDlgs(jmain)
 }
 
-proc ::Jabber::UI::GetMainMenu { } {
+proc ::JUI::GetMainMenu { } {
     variable jwapp
     
     return $jwapp(wmenu)
 }
 
-proc ::Jabber::UI::ToggleToolbar { } {
+proc ::JUI::OnMenuToggleToolbar { } {
     variable jwapp
     variable state
     
@@ -536,7 +539,7 @@ proc ::Jabber::UI::ToggleToolbar { } {
     ::hooks::run uiMainToggleToolbar $state(show,toolbar)
 }
 
-proc ::Jabber::UI::HideToolbar { } {
+proc ::JUI::HideToolbar { } {
     variable jwapp
     upvar ::Jabber::jprefs jprefs
     
@@ -545,7 +548,7 @@ proc ::Jabber::UI::HideToolbar { } {
     set jprefs(ui,main,show,toolbar) 0
 }
 
-proc ::Jabber::UI::ShowToolbar { } {
+proc ::JUI::ShowToolbar { } {
     variable jwapp
     upvar ::Jabber::jprefs jprefs
     
@@ -554,7 +557,7 @@ proc ::Jabber::UI::ShowToolbar { } {
     set jprefs(ui,main,show,toolbar) 1
 }
 
-proc ::Jabber::UI::ToggleNotebook { } {
+proc ::JUI::OnMenuToggleNotebook { } {
     variable jwapp
     variable state
     
@@ -566,7 +569,7 @@ proc ::Jabber::UI::ToggleNotebook { } {
     ::hooks::run uiMainToggleNotebook $state(show,notebook)
 }
 
-proc ::Jabber::UI::ToggleMinimal { } {
+proc ::JUI::OnMenuToggleMinimal { } {
     variable jwapp
     variable state
     upvar ::Jabber::jprefs jprefs
@@ -576,7 +579,7 @@ proc ::Jabber::UI::ToggleMinimal { } {
     ::hooks::run uiMainToggleMinimal $state(show,minimal)
 }
 
-# Jabber::UI::SetAlternativeStatusImage --
+# JUI::SetAlternativeStatusImage --
 # 
 #       APIs for handling alternative status images.
 #       Each instance is specified by a unique key.
@@ -588,7 +591,7 @@ proc ::Jabber::UI::ToggleMinimal { } {
 # Results:
 #       the label widget added or modified
 
-proc ::Jabber::UI::SetAlternativeStatusImage {key image} {
+proc ::JUI::SetAlternativeStatusImage {key image} {
     variable jwapp
     variable altImageKeyToWin
     
@@ -609,7 +612,7 @@ proc ::Jabber::UI::SetAlternativeStatusImage {key image} {
     return $win
 }
 
-proc ::Jabber::UI::GetAlternativeStatusImage {key} {
+proc ::JUI::GetAlternativeStatusImage {key} {
     variable altImageKeyToWin
 
     if {[info exists altImageKeyToWin($key)]} {
@@ -619,7 +622,7 @@ proc ::Jabber::UI::GetAlternativeStatusImage {key} {
     }
 }
 
-proc ::Jabber::UI::HaveAlternativeStatusImage {key} {
+proc ::JUI::HaveAlternativeStatusImage {key} {
     variable altImageKeyToWin
 
     if {[info exists altImageKeyToWin($key)]} {
@@ -629,7 +632,7 @@ proc ::Jabber::UI::HaveAlternativeStatusImage {key} {
     }
 }
 
-proc ::Jabber::UI::RemoveAlternativeStatusImage {key} {
+proc ::JUI::RemoveAlternativeStatusImage {key} {
     variable jwapp
     variable altImageKeyToWin
     
@@ -645,7 +648,7 @@ proc ::Jabber::UI::RemoveAlternativeStatusImage {key} {
 
 #...............................................................................
 
-proc ::Jabber::UI::CloseHook {wclose} {    
+proc ::JUI::CloseHook {wclose} {    
     variable jwapp
     
     set result ""
@@ -657,7 +660,7 @@ proc ::Jabber::UI::CloseHook {wclose} {
     return $result
 }
 
-proc ::Jabber::UI::QuitHook { } {
+proc ::JUI::QuitHook { } {
     variable jwapp
 
     if {[info exists jwapp(jmain)]} {
@@ -665,12 +668,12 @@ proc ::Jabber::UI::QuitHook { } {
     }
 }
 
-proc ::Jabber::UI::SetPresenceHook {type args} {
+proc ::JUI::SetPresenceHook {type args} {
     
     # empty for the moment
 }
 
-proc ::Jabber::UI::RosterIconsChangedHook { } {
+proc ::JUI::RosterIconsChangedHook { } {
     variable jwapp
     upvar ::Jabber::jstate jstate
     
@@ -678,7 +681,7 @@ proc ::Jabber::UI::RosterIconsChangedHook { } {
     $jwapp(mystatus) configure -image [::Rosticons::Get status/$status]
 }
 
-proc ::Jabber::UI::RosterSelectionHook { } {
+proc ::JUI::RosterSelectionHook { } {
     variable jwapp
     
     set wtbar $jwapp(wtbar)
@@ -695,60 +698,61 @@ proc ::Jabber::UI::RosterSelectionHook { } {
     $wtbar buttonconfigure chat -state $state    
 }
 
-proc ::Jabber::UI::LogoutHook { } {
+proc ::JUI::LogoutHook { } {
     
     SetStatusMessage [mc {Logged out}]
     FixUIWhen "disconnect"
+    SetConnectState "disconnect"
     
     # Be sure to kill the wave; could end up here when failing to connect.
     StartStopAnimatedWave 0
 }
     
-proc ::Jabber::UI::GetRosterWmenu { } {
+proc ::JUI::GetRosterWmenu { } {
     variable jwapp
 
     return $jwapp(wmenu)
 }
 
-proc ::Jabber::UI::OpenCoccinellaURL { } {
+proc ::JUI::OpenCoccinellaURL { } {
     global  config
     
     ::Utils::OpenURLInBrowser $config(url,home)
 }
 
-proc ::Jabber::UI::OpenBugURL { } {
+proc ::JUI::OpenBugURL { } {
     global  config
     
     ::Utils::OpenURLInBrowser $config(url,bugs)
 }
 
-proc ::Jabber::UI::StopConnect { } {
+proc ::JUI::StopConnect { } {
     
     ::Jabber::DoCloseClientConnection
     ::Login::Kill
 }    
 
-proc ::Jabber::UI::GetNotebook { } {
+proc ::JUI::GetNotebook { } {
     variable jwapp
     
     return $jwapp(notebook)
 }
 
-proc ::Jabber::UI::StartStopAnimatedWave {start} {
+proc ::JUI::StartStopAnimatedWave {start} {
 
     ::Roster::Animate $start
 }
 
-proc ::Jabber::UI::SetStatusMessage {msg} {
+proc ::JUI::SetStatusMessage {msg} {
 
     ::Roster::TimedMessage $msg
 }
 
-# Jabber::UI::MailBoxState --
+# JUI::MailBoxState --
 # 
 #       Sets icon to display empty|nonempty inbox state.
 
-proc ::Jabber::UI::MailBoxState {mailboxstate} {
+proc ::JUI::MailBoxState {mailboxstate} {
     variable jwapp    
     
     set w $jwapp(jmain)
@@ -769,11 +773,11 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
     }
 }
 
-# Jabber::UI::RegisterMenuEntry --
+# JUI::RegisterMenuEntry --
 # 
 #       Lets plugins/components register their own menu entry.
 
-proc ::Jabber::UI::RegisterMenuEntry {name menuSpec} {
+proc ::JUI::RegisterMenuEntry {name menuSpec} {
     variable jwapp
     
     # Keeps track of all registered menu entries.
@@ -795,7 +799,7 @@ proc ::Jabber::UI::RegisterMenuEntry {name menuSpec} {
     }
 }
 
-proc ::Jabber::UI::DeRegisterMenuEntry {name mLabel} {
+proc ::JUI::DeRegisterMenuEntry {name mLabel} {
     variable jwapp
     variable extraMenuDefs
     
@@ -818,84 +822,36 @@ proc ::Jabber::UI::DeRegisterMenuEntry {name mLabel} {
     }
 }
 
-proc ::Jabber::UI::EditPostCommand {wmenu} {
+proc ::JUI::FilePostCommand {wmenu} {
+      
+    ::hooks::run menuPostCommand file $wmenu
     
-    # @@@ The situation with a ttk::entry in readonly state is not understood.
-    # @@@ Not sure focus is needed for selections.
-    set wfocus [focus]
-    set haveFocus 0
-    set haveSelection 0
-    set editable 1
-        
-    if {$wfocus ne ""} {
-	set wclass [winfo class $wfocus]
-	if {[lsearch {Entry Text TEntry} $wclass] >= 0} {
-	    set haveFocus 1
-	}
+    # Workaround for mac bug.
+    update idletasks
+}
 
-	switch -- $wclass {
-	    TEntry {
-		set haveSelection [$wfocus selection present]
-		set state [$wfocus state]
-		if {[lsearch $state disabled] >= 0} {
-		    set editable 0
-		} elseif {[lsearch $state readonly] >= 0} {
-		    set editable 0
-		}
-	    }
-	    Entry {
-		set haveSelection [$wfocus selection present]
-		if {[$wfocus cget -state] eq "disabled"} {
-		    set editable 0
-		}
-	    }
-	    Text {
-		if {![catch {$wfocus get sel.first sel.last} data]} {
-		    if {$data ne ""} {
-			set haveSelection 1
-		    }
-		}
-		if {[$wfocus cget -state] eq "disabled"} {
-		    set editable 0
-		}
-	    }
-	}
-    }    
+proc ::JUI::EditPostCommand {wmenu} {
     
-    # Cut, copy and paste menu entries.
-    if {$haveSelection} {
-	if {$editable} {
-	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
-	} else {
-	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
-	}
-	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal    
-    } else {
-	::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
-	::UI::MenuMethod $wmenu entryconfigure mCopy -state disabled    
-    }
-    if {[catch {selection get -sel CLIPBOARD} str]} {
-	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
-    } elseif {$editable && $haveFocus && ($str ne "")} {
-	::UI::MenuMethod $wmenu entryconfigure mPaste -state normal
-    } else {
-	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
-    }
-
+    foreach {mkey mstate} [::UI::GenericCCPMenuStates] {
+	::UI::MenuMethod $wmenu entryconfigure $mkey -state $mstate
+    }	
+    
     ::hooks::run menuPostCommand edit $wmenu
 
     # Workaround for mac bug.
     update idletasks
 }
 
-proc ::Jabber::UI::JabberPostCommand {wmenu} {
+proc ::JUI::JabberPostCommand {wmenu} {
     global wDlgs
     variable state
     variable jwapp
-        
+
     # For aqua we must do this only for .jmain
     if {[::UI::IsToplevelActive $wDlgs(jmain)]} {
 	::UI::MenuMethod $wmenu entryconfigure mShow -state normal
+	
+	# Set -variable values.
 	if {[winfo ismapped $jwapp(wtbar)]} {
 	    set state(show,toolbar) 1
 	} else {
@@ -915,13 +871,103 @@ proc ::Jabber::UI::JabberPostCommand {wmenu} {
 	::UI::MenuMethod $wmenu entryconfigure mShow -state disabled
     }
     
+    # Set -variable value.
+    if {[::MailBox::IsVisible]} {
+	set state(mailbox,visible) 1
+    } else {
+	set state(mailbox,visible) 0
+    }
+    
+    switch -- [GetConnectState] {
+	connectinit {
+	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
+	      -label [mc mLogout]
+	}
+	connectfin - connect {
+	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
+	      -label [mc mLogout]
+	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mPassword -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mSearch -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mAddNewUser -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mChat -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mvCard -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mDisco -state normal
+	}
+	disconnect {
+	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
+	      -label [mc mLogin]
+	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mPassword -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mSearch -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mAddNewUser -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mChat -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mvCard -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mDisco -state disabled
+	}	
+    }    
+        
     ::hooks::run menuPostCommand jabber $wmenu
     
     # Workaround for mac bug.
     update idletasks
 }
 
-# Jabber::UI::FixUIWhen --
+proc ::JUI::InfoPostCommand {wmenu} {
+
+    switch -- [GetConnectState] {
+	connectinit {
+	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant -state disabled
+	}
+	connectfin - connect {
+	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant -state disabled
+	}
+	disconnect {
+	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant -state normal
+	}	
+    }    
+	
+    ::hooks::run menuPostCommand info $wmenu
+    
+    # Workaround for mac bug.
+    update idletasks   
+}
+
+namespace eval ::JUI {
+    variable connectState
+    
+    set connectState disconnect
+}
+
+proc ::JUI::GetConnectState {} {
+    variable connectState
+    
+    return $connectState
+}
+
+proc ::JUI::SetConnectState {state} {
+    variable connectState
+    
+    set connectState $state
+    return $connectState
+}
+
+# JUI::FixUIWhen --
 #       
 #       Sets the correct state for menus and buttons when 'what'.
 #       
@@ -930,32 +976,22 @@ proc ::Jabber::UI::JabberPostCommand {wmenu} {
 #
 # Results:
 
-proc ::Jabber::UI::FixUIWhen {what} {
+proc ::JUI::FixUIWhen {what} {
     variable jwapp
         
     set w     $jwapp(jmain)
-    set wmenu $jwapp(wmenu)
-    set wmj   $wmenu.jabber
-    set wmi   $wmenu.info
     set wtbar $jwapp(wtbar)
-
+        
     set contactOffImage [::Theme::GetImage [option get $w contactOffImage {}]]
     set contactOnImage  [::Theme::GetImage [option get $w contactOnImage {}]]
 
     switch -exact -- $what {
 	connectinit {
-	    set stopImage       [::Theme::GetImage [option get $w stopImage {}]]
+	    set stopImage [::Theme::GetImage [option get $w stopImage {}]]
 
 	    $wtbar buttonconfigure connect -text [mc Stop] \
 	      -image $stopImage -disabledimage $stopImage \
-	      -command ::Jabber::UI::StopConnect
-	    ::UI::MenuMethod $wmj entryconfigure mLogin -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
-	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state disabled
-
-	    # test... Logout kills login process.
-	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
-	      -label [mc mLogout] -state normal
+	      -command ::JUI::StopConnect
 	}
 	connectfin - connect {
 	    set connectedImage    [::Theme::GetImage [option get $w connectedImage {}]]
@@ -963,26 +999,8 @@ proc ::Jabber::UI::FixUIWhen {what} {
 
 	    $wtbar buttonconfigure connect -text [mc Logout] \
 	      -image $connectedImage -disabledimage $connectedDisImage \
-	      -command ::Jabber::LoginLogout
+	      -command ::Jabber::OnMenuLogInOut
 	    $wtbar buttonconfigure newuser -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
-	      -label [mc mLogout] -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mLogoutWith -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mPassword -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mSearch -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mAddNewUser -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mSendMessage -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mChat -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mStatus -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mvCard -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mEnterRoom -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mCreateRoom -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mEditBookmarks -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mPassword -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mRemoveAccount -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mDisco -state normal
-	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state disabled
 	}
 	disconnect {
 	    set iconConnect     [::Theme::GetImage [option get $w connectImage {}]]
@@ -990,31 +1008,13 @@ proc ::Jabber::UI::FixUIWhen {what} {
 
 	    $wtbar buttonconfigure connect -text [mc Login] \
 	      -image $iconConnect -disabledimage $iconConnectDis \
-	      -command ::Jabber::LoginLogout
+	      -command ::Jabber::OnMenuLogInOut
 	    $wtbar buttonconfigure newuser -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
-	      -label [mc mLogin] -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mLogoutWith -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mPassword -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mSearch -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mAddNewUser -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mSendMessage -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mChat -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mStatus -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mvCard -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mEnterRoom -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mCreateRoom -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mEditBookmarks -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mPassword -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mRemoveAccount -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mDisco -state disabled
-	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state normal
 	}
     }
 }
 
-proc ::Jabber::UI::InitPrefsHook { } {
+proc ::JUI::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
 
     set jprefs(ui,main,show,toolbar)  1

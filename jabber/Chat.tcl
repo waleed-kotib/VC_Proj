@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.176 2006-08-14 13:08:03 matben Exp $
+# $Id: Chat.tcl,v 1.177 2006-08-20 13:41:18 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -173,37 +173,21 @@ namespace eval ::Chat:: {
 #       Toolbar button command.
 
 proc ::Chat::OnToolButton { } {
-    
-    set tags [::RosterTree::GetSelected]
-    switch -- [llength $tags] {
-	0 {
-	    StartThreadDlg	    
-	}
-	1 {
-	    lassign [lindex $tags 0] mtag jid
-	    if {$mtag eq "jid"} {
-		if {[::Jabber::RosterCmd isavailable $jid]} {
-		    jlib::splitjid $jid jid2 res
-		    StartThread $jid2
-		} else {
-		    StartThreadDlg -jid $jid
-		}
-	    }
-	}
-	default {
-	    StartThreadDlg	    
-	}
-    }
+    OnMenu
 }
 
 proc ::Chat::OnMenu { } {
     
-    set tags [::RosterTree::GetSelected]
-    if {[llength $tags]} {
-	foreach tag $tags {
-	    lassign $tag mtag jid
-	    if {$mtag eq "jid"} {
-		StartThreadDlg -jid $jid
+    set jidL [::RosterTree::GetSelectedJID]
+    if {[llength $jidL]} {
+	foreach jid $jidL {
+	    if {[::Jabber::RosterCmd isavailable $jid]} {
+		jlib::splitjid $jid jid2 res
+		StartThread $jid2
+	    } else {
+		if {[llength $jidL] == 1} {
+		    StartThreadDlg -jid $jid
+		}
 	    }
 	}
     } else {
@@ -2384,8 +2368,8 @@ proc ::Chat::Whiteboard {dlgtoken} {
     upvar 0 $chattoken chatstate
 
     set jid $chatstate(jid)
-    if {![::Jabber::WB::HaveWhiteboard $jid]} {
-	::Jabber::WB::NewWhiteboardTo $jid -type chat
+    if {![::JWB::HaveWhiteboard $jid]} {
+	::JWB::NewWhiteboardTo $jid -type chat
     }
 }
 

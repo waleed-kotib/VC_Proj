@@ -2,13 +2,11 @@
 #      
 #  Copyright (c) 1999-2003  Mats Bengtsson
 #  
-# $Id: Multicast.tcl,v 1.6 2005-08-26 15:02:34 matben Exp $
+# $Id: Multicast.tcl,v 1.7 2006-08-20 13:41:20 matben Exp $
 
 package provide Multicast 1.0
 
 namespace eval ::Multicast:: {
-    
-    namespace export OpenMulticast
     
     variable uid 0
     variable txtvarEntMulticast
@@ -21,13 +19,12 @@ namespace eval ::Multicast:: {
 #       Makes dialog to open streaming audio/video.
 #   
 # Arguments:
-#       wtop        toplevel widget path
-#       w           the toplevel dialog.
+#       wcan        canvas widget
 #       
 # Results:
 #       shows dialog.
 
-proc ::Multicast::OpenMulticast {wtop} {
+proc ::Multicast::OpenMulticast {wcan} {
     global  prefs this wDlgs
     
     variable uid
@@ -77,7 +74,7 @@ proc ::Multicast::OpenMulticast {wtop} {
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $frbot.btconn -text [mc Open] -default active  \
-      -command [list Multicast::OpenMulticastQTStream $wtop $frtot.entip]
+      -command [list Multicast::OpenMulticastQTStream $wcan $frtot.entip]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list set [namespace current]::finished 0]
     ttk::button $frbot.btedit -text "[mc Edit]..."   \
@@ -162,13 +159,11 @@ proc ::Multicast::TraceSelMulticastName {name junk1 junk2} {
 #       Initiates a separate download of the tiny SDR file with http.
 #   
 # Arguments:
-#       wtop        toplevel widget path
+#       wcan        canvas widget
 
-proc ::Multicast::OpenMulticastQTStream {wtop wentry} {
+proc ::Multicast::OpenMulticastQTStream {wcan wentry} {
     global  this prefs
     variable finished
-
-    set wcan [::WB::GetCanvasFromWtop $wtop]
 
     # Patterns.
     set proto_ {[^:]+}

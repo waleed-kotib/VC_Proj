@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.90 2006-08-15 14:02:27 matben Exp $
+# $Id: Disco.tcl,v 1.91 2006-08-20 13:41:18 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -76,7 +76,7 @@ namespace eval ::Disco:: {
     set popMenuDefs(disco,def) {
 	{command    mMessage       {::NewMsg::Build -to $jid} }
 	{command    mChat          {::Chat::StartThread $jid} }
-	{command    mWhiteboard    {::Jabber::WB::NewWhiteboardTo $jid} }
+	{command    mWhiteboard    {::JWB::NewWhiteboardTo $jid} }
 	{command    mEnterRoom     {
 	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
 	} }
@@ -194,7 +194,7 @@ proc ::Disco::LogoutHook { } {
     variable wtab
     
     if {[winfo exists $wtab]} {
-	set wnb [::Jabber::UI::GetNotebook]
+	set wnb [::JUI::GetNotebook]
 	$wnb forget $wtab
 	destroy $wtab
     }
@@ -703,7 +703,7 @@ proc ::Disco::ParseGetItems {from queryE args} {
 proc ::Disco::NewPage { } {
     variable wtab
     
-    set wnb [::Jabber::UI::GetNotebook]
+    set wnb [::JUI::GetNotebook]
     set wtab $wnb.di
     if {![winfo exists $wtab]} {
 	Build $wtab
@@ -1438,6 +1438,12 @@ proc ::Disco::AutoDiscoServers { } {
 	if {![jlib::jidequal $server $jserver(this)]} {
 	    DiscoServer $server
 	}
+    }
+}
+
+proc ::Disco::OnMenuAddServer { } {
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	AddServerDlg
     }
 }
 

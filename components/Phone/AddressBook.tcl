@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #       
-# $Id: AddressBook.tcl,v 1.8 2006-06-11 08:42:16 matben Exp $
+# $Id: AddressBook.tcl,v 1.9 2006-08-20 13:41:17 matben Exp $
 
 namespace eval ::AddressBook:: { }
 
@@ -42,7 +42,7 @@ proc ::AddressBook::CloseAddressBook {} {
     variable wtab 
 
     if {[winfo exists $wtab]} {
-        set wnb [::Jabber::UI::GetNotebook]
+        set wnb [::JUI::GetNotebook]
         $wnb forget $wtab
         destroy $wtab
     }
@@ -78,7 +78,7 @@ proc ::AddressBook::NewPage {} {
 	mForward  phone {::AddressBook::TransferExtension $phone}
     }
     
-    set wnb [::Jabber::UI::GetNotebook]
+    set wnb [::JUI::GetNotebook]
     set wtab $wnb.ab
     if {![winfo exists $wtab]} {
         Build $wtab

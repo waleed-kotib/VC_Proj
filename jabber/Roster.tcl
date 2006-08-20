@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.174 2006-08-14 13:08:03 matben Exp $
+# $Id: Roster.tcl,v 1.175 2006-08-20 13:41:18 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -85,11 +85,11 @@ namespace eval ::Roster:: {
     set popMenuDefs(roster,def) {
 	command     mMessage       {head group user}  {::NewMsg::Build -to $jid -tolist $jidlist} {}
 	command     mChat          {user available}   {::Chat::StartThread $jid3}         {}
-	command     mWhiteboard    {wb available}     {::Jabber::WB::NewWhiteboardTo $jid3} {}
+	command     mWhiteboard    {wb available}     {::JWB::NewWhiteboardTo $jid3} {}
 	command     mSendFile      {user available}   {::FTrans::Send $jid3}             {}
 	separator   {}             {}                 {} {}
-	command     mAddNewUser    {}                 {::Jabber::User::NewDlg}            {}
-	command     mEditUser      {user}             {::Jabber::User::EditDlg $jid}      {}
+	command     mAddNewUser    {}                 {::JUser::NewDlg}            {}
+	command     mEditUser      {user}             {::JUser::EditDlg $jid}      {}
 	command     mUserInfo      {user}             {::UserInfo::Get $jid3}             {}
 	command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
 	command     mRemoveContact {user}             {::Roster::SendRemove $jid}         {}
@@ -111,8 +111,8 @@ namespace eval ::Roster:: {
     set popMenuDefs(roster,trpt,def) {
 	command     mLastLogin/Activity {user}        {::Jabber::GetLast $jid}        {}
 	command     mvCard         {user}             {::VCard::Fetch other $jid}     {}
-	command     mAddNewUser    {}                 {::Jabber::User::NewDlg}        {}
-	command     mEditUser      {user}             {::Jabber::User::EditDlg $jid}  {}
+	command     mAddNewUser    {}                 {::JUser::NewDlg}        {}
+	command     mEditUser      {user}             {::JUser::EditDlg $jid}  {}
 	command     mVersion       {user}             {::Jabber::GetVersion $jid3}    {}
 	command     mLoginTrpt     {trpt unavailable} {::Roster::LoginTrpt $jid3}     {}
 	command     mLogoutTrpt    {trpt available}   {::Roster::LogoutTrpt $jid3}    {}
@@ -926,7 +926,7 @@ proc ::Roster::ExitRoster { } {
     variable timer
 
     Sort
-    ::Jabber::UI::SetStatusMessage [mc jarostupdate]
+    ::JUI::SetStatusMessage [mc jarostupdate]
     $wwave animate -1
     set timer(exitroster,secs) [clock seconds]
 }

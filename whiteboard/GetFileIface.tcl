@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: GetFileIface.tcl,v 1.10 2006-08-14 13:08:03 matben Exp $
+# $Id: GetFileIface.tcl,v 1.11 2006-08-20 13:41:20 matben Exp $
 
 package require getfile
 package require uriencode
@@ -508,7 +508,7 @@ proc ::GetFileIface::DoImport {mime opts args} {
     ::Debug 3 "+        ::GetFileIface::DoImport"
 
     if {[string equal $prefs(protocol) "jabber"]} {
-	eval {::Jabber::WB::DispatchToImporter $mime $opts} $args
+	eval {::JWB::DispatchToImporter $mime $opts} $args
     } else {
 	if {[::Plugins::HaveImporterForMime $mime]} {
 	    set servCan [::WB::GetServerCanvasFromWtop [::P2P::GetMainWindow]]

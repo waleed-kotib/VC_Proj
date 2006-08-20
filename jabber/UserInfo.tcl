@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.13 2006-08-12 13:48:25 matben Exp $
+# $Id: UserInfo.tcl,v 1.14 2006-08-20 13:41:19 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -103,7 +103,7 @@ proc ::UserInfo::Get {jid {node ""}} {
     NotesPage $token
     
     if {[::Jabber::IsConnected]} {
-	::Jabber::UI::SetStatusMessage [mc vcardget $jid]
+	::JUI::SetStatusMessage [mc vcardget $jid]
 	$priv(warrow) start
     }
     

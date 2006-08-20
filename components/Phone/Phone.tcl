@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.18 2006-06-10 07:05:05 matben Exp $
+# $Id: Phone.tcl,v 1.19 2006-08-20 13:41:17 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -196,7 +196,7 @@ proc ::Phone::LogoutHook {} {
 	CommandPhone unregister
     
 	if {[winfo exists $wphone]} {
-	    set wnb [::Jabber::UI::GetNotebook]
+	    set wnb [::JUI::GetNotebook]
 	    $wnb forget $wphone
 	    destroy $wphone
 	}
@@ -227,7 +227,7 @@ proc ::Phone::HidePhone {} {
         CommandPhone unregister
    
         if {[winfo exists $wphone]} {
-            set wnb [::Jabber::UI::GetNotebook]
+            set wnb [::JUI::GetNotebook]
             $wnb forget $wphone
             destroy $wphone
         }
@@ -351,7 +351,7 @@ proc ::Phone::NewPage { } {
     variable statePhone
     variable wphone
 
-    set wnb [::Jabber::UI::GetNotebook]
+    set wnb [::JUI::GetNotebook]
     set wphone $wnb.phone
     if {![winfo exists $wphone]} {
 	set subPath [file join components Phone images]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.27 2006-08-12 13:48:25 matben Exp $
+# $Id: RosterTree.tcl,v 1.28 2006-08-20 13:41:19 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -508,6 +508,19 @@ proc ::RosterTree::GetSelected { } {
 	lappend selected $tag
     }
     return $selected
+}
+
+proc ::RosterTree::GetSelectedJID { } {
+    
+    set jidL {}
+    set tags [GetSelected]
+    foreach tag $tags {
+	lassign $tag mtag jid
+	if {$mtag eq "jid"} {
+	    lappend jidL $jid
+	}
+    }
+    return $jidL
 }
 
 # RosterTree::Popup --

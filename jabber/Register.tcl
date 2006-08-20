@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.50 2006-08-06 13:22:05 matben Exp $
+# $Id: Register.tcl,v 1.51 2006-08-20 13:41:18 matben Exp $
 
 package provide Register 1.0
 
@@ -22,6 +22,12 @@ proc ::Register::ValidatePortNumber {str} {
 	bell
 	return 0
     }
+}
+
+proc ::Register::OnMenuRemove {} {
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	Build -tolist [::RosterTree::GetSelectedJID]
+    }    
 }
 
 # Register::Remove --
@@ -105,6 +111,12 @@ namespace eval ::RegisterEx:: {
 }
 
 # This section is actually support for JEP-0077: In-Band Registration 
+
+proc ::RegisterEx::OnMenu {} {
+    if {[::JUI::GetConnectState] eq "disconnect"} {
+	New
+    }    
+}
 
 # RegisterEx::New --
 # 
@@ -283,8 +295,8 @@ proc ::RegisterEx::New {args} {
     # Wait here for a button press and window to be destroyed.
     tkwait variable $token\(finished)
     
-    ::Jabber::UI::SetStatusMessage ""
-    ::Jabber::UI::StartStopAnimatedWave 0
+    ::JUI::SetStatusMessage ""
+    ::JUI::StartStopAnimatedWave 0
 
     ::UI::SaveWinPrefixGeom $wDlgs(jreg)
     ::UI::GrabRelease $w
@@ -360,8 +372,8 @@ proc ::RegisterEx::NotBusy {token} {
     SetState $token !disabled
     $state(wprog) stop
     set state(status) ""
-    ::Jabber::UI::SetStatusMessage ""
-    ::Jabber::UI::StartStopAnimatedWave 0
+    ::JUI::SetStatusMessage ""
+    ::JUI::StartStopAnimatedWave 0
 }
 
 proc ::RegisterEx::SetState {token theState} {
@@ -669,7 +681,8 @@ proc ::RegisterEx::AuthCB {jlibname status {errcode ""} {errmsg ""}} {
 	    # Login was succesful, set presence.
 	    ::Login::SetStatus
 	    ::Login::SetLoginState
-	    ::Jabber::UI::FixUIWhen "connectfin"
+	    ::JUI::FixUIWhen "connectfin"
+	    ::JUI::SetConnectState "connectfin"
 	    set jid [::Jabber::GetMyJid]
 	    ::UI::MessageBox -icon info -type ok -message [mc jamessregloginok $jid]
 	    $jlibname connect free

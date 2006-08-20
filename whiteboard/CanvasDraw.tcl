@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2006  Mats Bengtsson
 #  
-# $Id: CanvasDraw.tcl,v 1.20 2006-02-10 15:40:50 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.21 2006-08-20 13:41:19 matben Exp $
 
 #-- TAGS -----------------------------------------------------------------------
 #  
@@ -136,7 +136,7 @@ proc ::CanvasDraw::FinalMoveSelected {wcan x y} {
     set redo [list ::CanvasUtils::CommandList $w $cmdList]
     set undo [list ::CanvasUtils::CommandList $w $cmdUndoList]
     eval $redo remote
-    undo::add [::WB::GetUndoToken $w] $undo $redo    
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo    
     
     $wcan dtag _move
     unset -nocomplain moveArr
@@ -227,7 +227,7 @@ proc ::CanvasDraw::FinalMoveCurrent {wcan x y} {
     set redo [list ::CanvasUtils::CommandList $w $cmdList]
     set undo [list ::CanvasUtils::CommandList $w $cmdUndoList]
     eval $redo remote
-    undo::add [::WB::GetUndoToken $w] $undo $redo    
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo    
     
     unset -nocomplain moveArr
 }
@@ -354,7 +354,7 @@ proc ::CanvasDraw::FinalMoveRectPoint {wcan x y} {
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $moveArr(undocmd)]
     eval $redo remote
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 
     unset -nocomplain moveArr
 }
@@ -529,7 +529,7 @@ proc ::CanvasDraw::FinalMoveArcPoint {wcan x y} {
     set undo [list ::CanvasUtils::Command $w $moveArr(undocmd)]
 
     eval $redo remote
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
     
     unset -nocomplain moveArr
 }
@@ -657,7 +657,7 @@ proc ::CanvasDraw::FinalMovePolyLinePoint {wcan x y} {
     }
 
     eval $redo remote
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
    
     unset -nocomplain moveArr
 }
@@ -765,7 +765,7 @@ proc ::CanvasDraw::FinMoveFrame {wcan wframe  x y} {
     }
     eval $redo remote
     if {[info exists undo]} {
-	undo::add [::WB::GetUndoToken $w] $undo $redo
+	undo::add [::WB::GetUndoToken $wcan] $undo $redo
     }    
     unset -nocomplain xDragFrame
 }
@@ -865,7 +865,7 @@ proc ::CanvasDraw::FinMoveWindow {wcan win x y} {
     }
     eval $redo remote
     if {[info exists undo]} {
-	undo::add [::WB::GetUndoToken $w] $undo $redo
+	undo::add [::WB::GetUndoToken $wcan] $undo $redo
     }    
     unset -nocomplain xDragWin
 }
@@ -971,7 +971,7 @@ proc ::CanvasDraw::FinalMoveCurrentGrid {wcan x y grid args} {
     # Do send to all connected.
     set undo [list ::CanvasUtils::Command $w $undoCmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo    
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo    
 
     unset -nocomplain moveArr
 }
@@ -1219,7 +1219,7 @@ proc ::CanvasDraw::FinalizeBox {wcan x y shift type {mark 0}} {
 	set redo [list ::CanvasUtils::Command $w $cmd]
 	set undo [list ::CanvasUtils::Command $w $undocmd]
 	eval $redo
-	undo::add [::WB::GetUndoToken $w] $undo $redo
+	undo::add [::WB::GetUndoToken $wcan] $undo $redo
     }
     array unset theBox $wcan,*
 }
@@ -1463,7 +1463,7 @@ proc ::CanvasDraw::FinalizeArc {wcan x y} {
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
     unset -nocomplain arcBox
 }
 
@@ -1669,7 +1669,7 @@ proc ::CanvasDraw::FinalizePoly {wcan x y} {
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
     unset -nocomplain thePoly
 }
 
@@ -1815,7 +1815,7 @@ proc ::CanvasDraw::FinalizeLine {wcan x y shift {opt 0}} {
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
     unset -nocomplain theLine
 }
 
@@ -1951,7 +1951,7 @@ proc ::CanvasDraw::FinalizeStroke {wcan x y {brush 0}} {
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
     unset -nocomplain stroke
 }
 
@@ -2124,7 +2124,7 @@ proc ::CanvasDraw::DoPaint {wcan x y {shift 0}} {
 		set redo [list ::CanvasUtils::Command $w $cmd]
 		set undo [list ::CanvasUtils::Command $w $undocmd]
 		eval $redo
-		undo::add [::WB::GetUndoToken $w] $undo $redo	    
+		undo::add [::WB::GetUndoToken $wcan] $undo $redo	    
 	    }
 	}
     }
@@ -2320,7 +2320,7 @@ proc ::CanvasDraw::FinalizeRotate {wcan x y} {
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $undocmd]
     ::CanvasUtils::Command $w $cmd remote
-    undo::add [::WB::GetUndoToken $w] $undo $redo	    
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo	    
     unset -nocomplain rotDrag
 }
 
@@ -2350,8 +2350,7 @@ proc ::CanvasDraw::DeleteSelected {wcan} {
 	return
     }
     DeleteIds $wcan $ids all
-    set w [winfo toplevel $wcan]
-    ::CanvasCmd::DeselectAll $w
+    ::CanvasCmd::DeselectAll $wcan
 }
 
 # CanvasDraw::DeleteIds --
@@ -2441,7 +2440,7 @@ proc ::CanvasDraw::DeleteIds {wcan ids where args} {
     set undo [list ::CanvasDraw::EvalCommandList $undoCmdList]
     
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 
     # Garbage collect unused images with 'std' tag.
     GarbageUnusedImages
@@ -2517,7 +2516,7 @@ proc ::CanvasDraw::DeleteFrame {wcan wframe x y {where all}} {
     # We need to reconstruct how it was imported.
     set undo [::CanvasUtils::GetUndoCommand $w [list delete $utag]]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 }
 
 # CanvasDraw::DeleteWindow --
@@ -2563,7 +2562,7 @@ proc ::CanvasDraw::DeleteWindow {wcan win x y {where all}} {
     # We need to reconstruct how it was imported.
     set undo [::CanvasUtils::GetUndoCommand $w [list delete $utag]]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 }
 
 proc ::CanvasDraw::PointButton {wcan x y {modifier {}}} {
@@ -2591,13 +2590,13 @@ proc ::CanvasDraw::PointButton {wcan x y {modifier {}}} {
 proc ::CanvasDraw::MarkBbox {wcan shift {which current}} {
     global  prefs kGrad2Rad
     
-    Debug 3 "MarkBbox:: wcan=$wcan, shift=$shift, which=$which"
+    Debug 4 "MarkBbox:: wcan=$wcan, shift=$shift, which=$which"
 
     set w [winfo toplevel $wcan]
     
     # If no shift key, deselect all.
     if {$shift == 0} {
-	::CanvasCmd::DeselectAll $w
+	::CanvasCmd::DeselectAll $wcan
     }
     set id [$wcan find withtag $which]
     if {$id eq ""} {
@@ -2747,13 +2746,12 @@ proc ::CanvasDraw::DrawItemSelection {wcan which tmark} {
 proc ::CanvasDraw::LostSelection {w} {
     
     if {$w == [selection own]} {
-	::CanvasCmd::DeselectAll $w
+	#::CanvasCmd::DeselectAll $wcan
     }
 }
 
-proc ::CanvasDraw::SyncMarks {w} {
+proc ::CanvasDraw::SyncMarks {wcan} {
 
-    set wcan [::WB::GetCanvasFromWtop $w]
     $wcan delete withtag tbbox
     foreach id [$wcan find withtag "selected"] {
 	MarkBbox $wcan 1 $id	
@@ -2929,7 +2927,7 @@ proc ::CanvasDraw::MakeSpeechBubble {wcan id} {
     set redo [list ::CanvasUtils::CommandList $w [list $redocmd $cmdLower]]
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $wcan] $undo $redo
 }
 
 proc ::CanvasDraw::SpeechBubbleCmd {wcan bbox args} {

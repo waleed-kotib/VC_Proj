@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.25 2006-08-12 13:48:25 matben Exp $
+# $Id: Search.tcl,v 1.26 2006-08-20 13:41:19 matben Exp $
 
 package provide Search 1.0
 
@@ -18,8 +18,14 @@ namespace eval ::Search:: {
     variable popMenuDefs
     
     set popMenuDefs {
-	{command    mAddNewUser  {::Jabber::User::NewDlg -jid $jid} }
+	{command    mAddNewUser  {::JUser::NewDlg -jid $jid} }
 	{command    mvCard       {::VCard::Fetch other $jid} }	
+    }
+}
+
+proc ::Search::OnMenu {} {
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	Build
     }
 }
 
@@ -222,7 +228,7 @@ proc ::Search::TableCmd {w x y} {
 	    set ans [::UI::MessageBox -message [mc jamessalreadyinrost $jid] \
 	      -icon error -type ok]
 	} else {
-	    ::Jabber::User::NewDlg -jid $jid
+	    ::JUser::NewDlg -jid $jid
 	}
     }
 }

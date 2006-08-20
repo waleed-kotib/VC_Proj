@@ -9,7 +9,7 @@
 #       To be safe the code should run in a safe interpreter with all
 #       methods and variables in this base class aliased.
 # 
-# $Id: BaseWBCanvas.itcl,v 1.4 2005-08-14 08:37:52 matben Exp $
+# $Id: BaseWBCanvas.itcl,v 1.5 2006-08-20 13:41:19 matben Exp $
 
 class BaseWBCanvas {
 	
@@ -137,8 +137,7 @@ body BaseWBCanvas::FinalMoveCurrentGrid {x y grid} {
 }
 
 body BaseWBCanvas::AddUndo {undo redo} {
-    set w [winfo toplevel $tkCanvas]
-    undo::add [::WB::GetUndoToken $w] $undo $redo
+    undo::add [::WB::GetUndoToken $tkCanvas] $undo $redo
 }
 
 body BaseWBCanvas::DeleteCurrent {} {

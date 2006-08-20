@@ -5,11 +5,11 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.21 2006-08-14 13:08:03 matben Exp $
+# $Id: JUser.tcl,v 1.22 2006-08-20 13:41:18 matben Exp $
 
 package provide JUser 1.0
 
-namespace eval ::Jabber::User:: {
+namespace eval ::JUser:: {
 	
     option add *JUser.adduserImage                adduser         widgetDefault
     option add *JUser.adduserDisImage             adduserDis      widgetDefault
@@ -18,20 +18,26 @@ namespace eval ::Jabber::User:: {
     variable uid 0
 
     # Hooks for add user dialog.
-    ::hooks::register quitAppHook  ::Jabber::User::QuitAppHook 
+    ::hooks::register quitAppHook  ::JUser::QuitAppHook 
 }
 
-proc ::Jabber::User::QuitAppHook { } {
+proc ::JUser::QuitAppHook { } {
     global  wDlgs
     
     ::UI::SaveWinGeom $wDlgs(jrostadduser)    
 }
 
-# Jabber::User::NewDlg --
+proc ::JUser::OnMenu {} {
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	NewDlg
+    }   
+}
+
+# JUser::NewDlg --
 # 
 #       Add new user dialog.
 
-proc ::Jabber::User::NewDlg {args} {
+proc ::JUser::NewDlg {args} {
     global  this prefs wDlgs
 
     variable uid
@@ -157,12 +163,12 @@ proc ::Jabber::User::NewDlg {args} {
     tkwait window $w
 
     set ans [expr {($state(finished) <= 0) ? "cancel" : "add"}]
-    ::Jabber::User::Free $token
+    ::JUser::Free $token
     
     return $ans
 }
 
-proc ::Jabber::User::CancelAdd {token} {
+proc ::JUser::CancelAdd {token} {
     global  wDlgs
     variable $token
     upvar 0 $token state
@@ -172,7 +178,7 @@ proc ::Jabber::User::CancelAdd {token} {
     destroy $state(w)
 }
 
-proc ::Jabber::User::DoAdd {token} {
+proc ::JUser::DoAdd {token} {
     global  wDlgs
     variable $token
     upvar 0 $token state
@@ -247,7 +253,7 @@ proc ::Jabber::User::DoAdd {token} {
     destroy $state(w)
 }
 
-# Jabber::User::SetCB --
+# JUser::SetCB --
 #
 #       This is our callback procedure to the roster set command.
 #
@@ -256,7 +262,7 @@ proc ::Jabber::User::DoAdd {token} {
 #       type        "result" or "error"
 #       args
 
-proc ::Jabber::User::SetCB {jid type queryE} {
+proc ::JUser::SetCB {jid type queryE} {
     
     if {[string equal $type "error"]} {
 	foreach {errcode errmsg} $queryE break
@@ -265,11 +271,11 @@ proc ::Jabber::User::SetCB {jid type queryE} {
     }	
 }
 
-# Jabber::User::PresError --
+# JUser::PresError --
 # 
 #       Callback when sending presence to user for (un)subscription requests.
 
-proc ::Jabber::User::PresError {jlibname xmldata} {
+proc ::JUser::PresError {jlibname xmldata} {
     upvar ::Jabber::jstate jstate
     
     set from [wrapper::getattribute $xmldata from]
@@ -293,7 +299,7 @@ proc ::Jabber::User::PresError {jlibname xmldata} {
     }
 }
 
-proc ::Jabber::User::TypeCmd {token name1 name2 op} {
+proc ::JUser::TypeCmd {token name1 name2 op} {
     variable $token
     upvar 0 $token state
         
@@ -324,7 +330,7 @@ proc ::Jabber::User::TypeCmd {token name1 name2 op} {
     }
 }
 
-proc ::Jabber::User::CloseCmd {wclose} {
+proc ::JUser::CloseCmd {wclose} {
     global  wDlgs
     
     ::UI::SaveWinPrefixGeom $wDlgs(jrostadduser)
@@ -332,11 +338,11 @@ proc ::Jabber::User::CloseCmd {wclose} {
 
 #--- The Edit section ----------------------------------------------------------
 
-# Jabber::User::EditDlg --
+# JUser::EditDlg --
 # 
 #       Dispatcher for edit dialog.
 
-proc ::Jabber::User::EditDlg {jid} {
+proc ::JUser::EditDlg {jid} {
 
     if {[::Roster::IsTransport $jid]} {
 	EditTransportDlg $jid
@@ -345,7 +351,7 @@ proc ::Jabber::User::EditDlg {jid} {
     }
 }
 
-proc ::Jabber::User::EditTransportDlg {jid} {
+proc ::JUser::EditTransportDlg {jid} {
     upvar ::Jabber::jstate jstate
     
     set jlib $jstate(jlib)
@@ -368,11 +374,11 @@ proc ::Jabber::User::EditTransportDlg {jid} {
       -icon info
 }
 
-# Jabber::User::EditUserDlg --
+# JUser::EditUserDlg --
 # 
 #       Edit user dialog.
 
-proc ::Jabber::User::EditUserDlg {jid} {
+proc ::JUser::EditUserDlg {jid} {
     global  this prefs wDlgs
 
     variable uid
@@ -563,12 +569,12 @@ proc ::Jabber::User::EditUserDlg {jid} {
     tkwait window $w
 
     set ans [expr {($state(finished) <= 0) ? "cancel" : "edit"}]
-    ::Jabber::User::Free $token
+    ::JUser::Free $token
     
     return $ans
 }
 
-proc ::Jabber::User::CancelEdit {token} {
+proc ::JUser::CancelEdit {token} {
     global  wDlgs
     variable $token
     upvar 0 $token state
@@ -578,7 +584,7 @@ proc ::Jabber::User::CancelEdit {token} {
     destroy $state(w)
 }
 
-proc ::Jabber::User::DoEdit {token} {
+proc ::JUser::DoEdit {token} {
     global  wDlgs
     variable $token
     upvar 0 $token state
@@ -631,7 +637,7 @@ proc ::Jabber::User::DoEdit {token} {
     destroy $state(w)
 }
 
-proc ::Jabber::User::Free {token} {
+proc ::JUser::Free {token} {
     variable $token
     upvar 0 $token state
 	

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: UserActions.tcl,v 1.45 2006-01-13 13:23:12 matben Exp $
+# $Id: UserActions.tcl,v 1.46 2006-08-20 13:41:19 matben Exp $
 
 package provide UserActions 1.0
 
@@ -17,10 +17,10 @@ namespace eval ::UserActions:: {
 #
 #       Platform independent printing of canvas.
 
-proc ::UserActions::DoPrintCanvas {w} {
+proc ::UserActions::DoPrintCanvas {wcan} {
     global  this prefs wDlgs
         
-    set wcan [::WB::GetCanvasFromWtop $w]
+    set w [winfo toplevel $wcan]
     
     switch -- $this(platform) {
 	macosx {

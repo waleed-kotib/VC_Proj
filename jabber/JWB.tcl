@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.63 2006-08-12 13:48:25 matben Exp $
+# $Id: JWB.tcl,v 1.64 2006-08-20 13:41:18 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -13,11 +13,11 @@ package require ui::entryex
 
 package provide JWB 1.0
 
-# The ::Jabber::WB:: namespace -------------------------------------------------
+# The ::JWB:: namespace -------------------------------------------------
 
-namespace eval ::Jabber::WB:: {
+namespace eval ::JWB:: {
        
-    ::hooks::register jabberInitHook               ::Jabber::WB::Init
+    ::hooks::register jabberInitHook               ::JWB::Init
     
     # Internal storage for jabber specific parts of whiteboard.
     variable jwbstate
@@ -30,31 +30,31 @@ namespace eval ::Jabber::WB:: {
     variable xmlnsSVGWB "http://jabber.org/protocol/svgwb"
 }
 
-proc ::Jabber::WB::Init {jlibName} {
+proc ::JWB::Init {jlibName} {
     global  this prefs
     variable xmlnsSVGWB
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     upvar ::Jabber::xmppxmlns xmppxmlns
     
-    ::Debug 4 "::Jabber::WB::Init"
+    ::Debug 4 "::JWB::Init"
     
-    ::hooks::register whiteboardPreBuildHook       ::Jabber::WB::PreBuildHook
-    ::hooks::register whiteboardPostBuildHook      ::Jabber::WB::PostBuildHook
-    ::hooks::register whiteboardBuildEntryHook     ::Jabber::WB::BuildEntryHook
-    ::hooks::register whiteboardSetMinsizeHook     ::Jabber::WB::SetMinsizeHook    
-    ::hooks::register whiteboardCloseHook          ::Jabber::WB::CloseHook        20
-    ::hooks::register whiteboardSendMessageHook    ::Jabber::WB::SendMessageListHook
-    ::hooks::register whiteboardSendGenMessageHook ::Jabber::WB::SendGenMessageListHook
-    ::hooks::register whiteboardPutFileHook        ::Jabber::WB::PutFileOrScheduleHook
-    ::hooks::register whiteboardConfigureHook      ::Jabber::WB::Configure
-    ::hooks::register serverPutRequestHook         ::Jabber::WB::HandlePutRequest
-    ::hooks::register presenceHook                 ::Jabber::WB::PresenceHook
+    ::hooks::register whiteboardPreBuildHook       ::JWB::PreBuildHook
+    ::hooks::register whiteboardPostBuildHook      ::JWB::PostBuildHook
+    ::hooks::register whiteboardBuildEntryHook     ::JWB::BuildEntryHook
+    ::hooks::register whiteboardSetMinsizeHook     ::JWB::SetMinsizeHook    
+    ::hooks::register whiteboardCloseHook          ::JWB::CloseHook        20
+    ::hooks::register whiteboardSendMessageHook    ::JWB::SendMessageListHook
+    ::hooks::register whiteboardSendGenMessageHook ::JWB::SendGenMessageListHook
+    ::hooks::register whiteboardPutFileHook        ::JWB::PutFileOrScheduleHook
+    ::hooks::register whiteboardConfigureHook      ::JWB::Configure
+    ::hooks::register serverPutRequestHook         ::JWB::HandlePutRequest
+    ::hooks::register presenceHook                 ::JWB::PresenceHook
     
-    ::hooks::register loginHook                    ::Jabber::WB::LoginHook
-    ::hooks::register logoutHook                   ::Jabber::WB::LogoutHook
-    ::hooks::register groupchatEnterRoomHook       ::Jabber::WB::EnterRoomHook
-    ::hooks::register groupchatExitRoomHook        ::Jabber::WB::ExitRoomHook
+    ::hooks::register loginHook                    ::JWB::LoginHook
+    ::hooks::register logoutHook                   ::JWB::LogoutHook
+    ::hooks::register groupchatEnterRoomHook       ::JWB::EnterRoomHook
+    ::hooks::register groupchatExitRoomHook        ::JWB::ExitRoomHook
 
     # Configure the Tk->SVG translation to use http.
     # Must be reconfigured when we know our address after connecting???
@@ -105,19 +105,19 @@ proc ::Jabber::WB::Init {jlibName} {
       [list xmlns $xmppxmlns(amp)] -subtags [list $rule2]]
 }
 
-proc ::Jabber::WB::InitUI { } {
+proc ::JWB::InitUI { } {
     global  prefs this
     variable initted
     
-    ::Debug 2 "::Jabber::WB::InitUI"
+    ::Debug 2 "::JWB::InitUI"
 
     set buttonTrayDefs {
-	save       {::CanvasFile::Save $w}
-	open       {::CanvasFile::OpenCanvasFileDlg $w}
-	import     {::Import::ImportImageOrMovieDlg $w}
-	send       {::Jabber::WB::DoSendCanvas $w}
-	print      {::UserActions::DoPrintCanvas $w}
-	stop       {::Jabber::WB::Stop $w}
+	save       {::WB::OnMenuSaveCanvas}
+	open       {::WB::OnMenuOpenCanvas}
+	import     {::WB::OnMenuImport}
+	send       {::JWB::DoSendCanvas $w}
+	print      {::WB::OnMenuPrintCanvas}
+	stop       {::JWB::Stop $w}
     }
     ::WB::SetButtonTrayDefs $buttonTrayDefs
 
@@ -125,20 +125,20 @@ proc ::Jabber::WB::InitUI { } {
     #     Aqua: handled in apple menu
     #     Else: handled in main window
     set menuDefsFile {
-	{command   mNew                {::WB::NewWhiteboard}             normal   N}
-	{command   mCloseWindow        {::UI::DoCloseWindow $w}          normal   W}
+	{command   mNew                {::WB::NewWhiteboard}      normal   N}
+	{command   mCloseWindow        {::UI::CloseWindowEvent}   normal   W}
 	{separator}
-	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $w}    normal   I}
-	{command   mOpenURLStream      {::Multicast::OpenMulticast $w}     normal   {}}
-	{command   mStopPut/Get/Open   {::Jabber::WB::Stop $w}        normal {}}
+	{command   mOpenImage/Movie    {::WB::OnMenuImport}       normal   I}
+	{command   mOpenURLStream      {::WB::OnMenuOpenURL}      normal   {}}
+	{command   mStopPut/Get/Open   {::JWB::Stop $w}           normal   {}}
 	{separator}
-	{command   mOpenCanvas         {::CanvasFile::OpenCanvasFileDlg $w}     normal   O}
-	{command   mSaveCanvas         {::CanvasFile::Save $w}           normal   S}
+	{command   mOpenCanvas         {::WB::OnMenuOpenCanvas}   normal   O}
+	{command   mSaveCanvas         {::WB::OnMenuSaveCanvas}   normal   S}
 	{separator}
-	{command   mSaveAs             {::CanvasFile::SaveAsDlg $w}      normal   {}}
-	{command   mSaveAsItem         {::CanvasCmd::DoSaveAsItem $w}    normal   {}}
-	{command   mPageSetup          {::UserActions::PageSetup $w}           normal   {}}
-	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $w}       normal   P}
+	{command   mSaveAs             {::WB::OnMenuSaveAs}       normal   {}}
+	{command   mSaveAsItem         {::WB::OnMenuSaveAsItem}   normal   {}}
+	{command   mPageSetup          {::WB::OnMenuPageSetup}    normal   {}}
+	{command   mPrintCanvas        {::WB::OnMenuPrintCanvas}  normal   P}
     }
     if {![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefsFile 4 3 disabled
@@ -162,12 +162,12 @@ proc ::Jabber::WB::InitUI { } {
     }
     ::WB::SetMenuDefs file $menuDefsFile
     
-    bind WhiteboardToplevel <Destroy> {+::Jabber::WB::Free %W}
+    bind TopWhiteboard <Destroy> {+::JWB::Free %W}
 
     set initted 1
 }
 
-proc ::Jabber::WB::NewWhiteboard {args} {
+proc ::JWB::NewWhiteboard {args} {
     variable jwbstate
     variable initted
     
@@ -175,7 +175,7 @@ proc ::Jabber::WB::NewWhiteboard {args} {
 	InitUI
     }    
     
-    ::Debug 4 "::Jabber::WB::NewWhiteboard $args"
+    ::Debug 4 "::JWB::NewWhiteboard $args"
 
     array set argsArr $args
     if {[info exists argsArr(-w)]} {
@@ -214,7 +214,7 @@ proc ::Jabber::WB::NewWhiteboard {args} {
     }
 }
 
-# Jabber::WB::NewWhiteboardTo --
+# JWB::NewWhiteboardTo --
 #
 #       Starts a new whiteboard session.
 #       
@@ -226,12 +226,12 @@ proc ::Jabber::WB::NewWhiteboard {args} {
 # Results:
 #       toplevel widget path
 
-proc ::Jabber::WB::NewWhiteboardTo {jid args} {
+proc ::JWB::NewWhiteboardTo {jid args} {
     variable initted
     variable delayed
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::WB::NewWhiteboardTo jid=$jid, args='$args'"
+    ::Debug 2 "::JWB::NewWhiteboardTo jid=$jid, args='$args'"
     
     array set argsArr {
 	-state   normal
@@ -344,15 +344,15 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
     return $w
 }
 
-# Jabber::WB::PreBuildHook, PostBuildHook --
+# JWB::PreBuildHook, PostBuildHook --
 # 
 #       Sets up custom state for whiteboard. Called during build process.
 
-proc ::Jabber::WB::PreBuildHook {w args} {
+proc ::JWB::PreBuildHook {w args} {
     variable jwbstate
     variable initted
     
-    ::Debug 4 "::Jabber::WB::PreBuildHook w=$w, args=$args"
+    ::Debug 4 "::JWB::PreBuildHook w=$w, args=$args"
     
     array set argsArr {
 	-state   normal
@@ -380,10 +380,10 @@ proc ::Jabber::WB::PreBuildHook {w args} {
     }
 }
 
-proc ::Jabber::WB::PostBuildHook {w} {
+proc ::JWB::PostBuildHook {w} {
     variable jwbstate
        
-    ::Debug 4 "::Jabber::WB::PostBuildHook w=$w"
+    ::Debug 4 "::JWB::PostBuildHook w=$w"
     
     if {$jwbstate($w,state) eq "disabled"} {
 	$jwbstate($w,wjid)  state {disabled}
@@ -391,14 +391,14 @@ proc ::Jabber::WB::PostBuildHook {w} {
     }
 }
 
-# ::Jabber::WB::EnterRoomHook --
+# ::JWB::EnterRoomHook --
 # 
 #       We create only whiteboard if enter succeeds.
 
-proc ::Jabber::WB::EnterRoomHook {roomjid protocol} {
+proc ::JWB::EnterRoomHook {roomjid protocol} {
     variable delayed
     
-    ::Debug 4 "::Jabber::WB::EnterRoomHook roomjid=$roomjid"
+    ::Debug 4 "::JWB::EnterRoomHook roomjid=$roomjid"
     
     if {[info exists delayed($roomjid,jid)]} {
 	eval {::WB::NewWhiteboard} $delayed($roomjid,args)
@@ -406,15 +406,15 @@ proc ::Jabber::WB::EnterRoomHook {roomjid protocol} {
     }
 }
 
-# ::Jabber::WB::BuildEntryHook --
+# ::JWB::BuildEntryHook --
 # 
 #       Build the jabber specific part of the whiteboard.
 
-proc ::Jabber::WB::BuildEntryHook {w wcomm} {
+proc ::JWB::BuildEntryHook {w wcomm} {
     variable jwbstate
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::WB::BuildEntryHook wcomm=$wcomm"
+    ::Debug 2 "::JWB::BuildEntryHook wcomm=$wcomm"
 	
     set contactOffImage [::Theme::GetImage [option get $w contactOffImage {}]]
     set contactOnImage  [::Theme::GetImage [option get $w contactOnImage {}]]
@@ -468,7 +468,7 @@ proc ::Jabber::WB::BuildEntryHook {w wcomm} {
     SetNetworkState  $w $netstate
 }
 
-proc ::Jabber::WB::Configure {w args} {
+proc ::JWB::Configure {w args} {
     variable jwbstate
     
     foreach {key value} $args {
@@ -477,11 +477,11 @@ proc ::Jabber::WB::Configure {w args} {
     }
 }
 
-# Jabber::WB::SetStateFromType --
+# JWB::SetStateFromType --
 # 
 # 
 
-proc ::Jabber::WB::SetStateFromType {w} {
+proc ::JWB::SetStateFromType {w} {
     variable jwbstate
     
     switch -- $jwbstate($w,type) {
@@ -497,12 +497,12 @@ proc ::Jabber::WB::SetStateFromType {w} {
     }
 }
 
-# Jabber::WB::SetNetworkState --
+# JWB::SetNetworkState --
 # 
 #       Sets the state of all jabber specific ui parts of whiteboard when
 #       login/logout.
 
-proc ::Jabber::WB::SetNetworkState {w what} {
+proc ::JWB::SetNetworkState {w what} {
     variable jwbstate
     
     if {![info exists jwbstate($w,w)]} {
@@ -544,13 +544,13 @@ proc ::Jabber::WB::SetNetworkState {w what} {
     }
 }
 
-proc ::Jabber::WB::SetMinsizeHook {w} {
+proc ::JWB::SetMinsizeHook {w} {
     
     # It is our responsibilty to set new minsize since we have added stuff.
-    after idle ::Jabber::WB::SetMinsize $w
+    after idle ::JWB::SetMinsize $w
 }
 
-proc ::Jabber::WB::SetMinsize {w} {
+proc ::JWB::SetMinsize {w} {
     variable jwbstate
     
     lassign [::WB::GetBasicWhiteboardMinsize $w] wMin hMin
@@ -561,7 +561,7 @@ proc ::Jabber::WB::SetMinsize {w} {
     wm minsize $w $wMin $hMin
 }
 
-# Jabber::WB::Stop --
+# JWB::Stop --
 #
 #       It is supposed to stop every put and get operation taking place.
 #       This may happen when the user presses a stop button or something.
@@ -570,7 +570,7 @@ proc ::Jabber::WB::SetMinsize {w} {
 #
 # Results:
 
-proc ::Jabber::WB::Stop {w} {
+proc ::JWB::Stop {w} {
     variable jwbstate
     
     switch -- $jwbstate($w,type) {
@@ -586,11 +586,11 @@ proc ::Jabber::WB::Stop {w} {
     ::WB::StartStopAnimatedWave $w 0
 }
 
-# Jabber::WB::LoginHook --
+# JWB::LoginHook --
 # 
 #       The login hook command.
 
-proc ::Jabber::WB::LoginHook { } {
+proc ::JWB::LoginHook { } {
     
     # Multiinstance whiteboard UI stuff.
     foreach w [::WB::GetAllWhiteboards] {
@@ -599,7 +599,7 @@ proc ::Jabber::WB::LoginHook { } {
 }
 
 
-proc ::Jabber::WB::LogoutHook { } {
+proc ::JWB::LogoutHook { } {
     variable delayed
     
     unset -nocomplain delayed
@@ -608,10 +608,10 @@ proc ::Jabber::WB::LogoutHook { } {
     }    
 }
 
-proc ::Jabber::WB::CloseHook {w} {
+proc ::JWB::CloseHook {w} {
     variable jwbstate
     
-    ::Debug 2 "::Jabber::WB::CloseHook w=$w"
+    ::Debug 2 "::JWB::CloseHook w=$w"
         
     switch -- $jwbstate($w,type) {
 	chat {
@@ -635,7 +635,7 @@ proc ::Jabber::WB::CloseHook {w} {
     }
 }
 
-proc ::Jabber::WB::ExitRoomHook {roomJid} {
+proc ::JWB::ExitRoomHook {roomJid} {
     variable jwbstate
     
     set w [GetWtopFromMessage groupchat $roomJid]
@@ -646,7 +646,7 @@ proc ::Jabber::WB::ExitRoomHook {roomJid} {
 
 # Various procs for sending wb messages ........................................
 
-# Jabber::WB::SendMessageHook --
+# JWB::SendMessageHook --
 #
 #       This is just a shortcut for sending a message. 
 #       
@@ -659,10 +659,10 @@ proc ::Jabber::WB::ExitRoomHook {roomJid} {
 # Results:
 #       none.
 
-proc ::Jabber::WB::SendMessageHook {w msg args} {
+proc ::JWB::SendMessageHook {w msg args} {
     variable jwbstate
     
-    ::Debug 2 "::Jabber::WB::SendMessageHook"
+    ::Debug 2 "::JWB::SendMessageHook"
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
@@ -693,14 +693,14 @@ proc ::Jabber::WB::SendMessageHook {w msg args} {
     return {}
 }
 
-# Jabber::WB::SendMessageListHook --
+# JWB::SendMessageListHook --
 #
 #       As above but for a list of commands.
 
-proc ::Jabber::WB::SendMessageListHook {w msgList args} {
+proc ::JWB::SendMessageListHook {w msgList args} {
     variable jwbstate
     
-    ::Debug 2 "::Jabber::WB::SendMessageListHook msgList=$msgList; $args"
+    ::Debug 2 "::JWB::SendMessageListHook msgList=$msgList; $args"
     
     if {![::Jabber::IsConnected]} {
 	return
@@ -726,15 +726,15 @@ proc ::Jabber::WB::SendMessageListHook {w msgList args} {
     return {}
 }
 
-# Jabber::WB::SendGenMessageListHook --
+# JWB::SendGenMessageListHook --
 # 
 #       As above but includes a prefix in each message from the old
 #       protocol. BAD!!!
 
-proc ::Jabber::WB::SendGenMessageListHook {w msgList args} {
+proc ::JWB::SendGenMessageListHook {w msgList args} {
     variable jwbstate
     
-    ::Debug 2 "::Jabber::WB::SendGenMessageListHook"
+    ::Debug 2 "::JWB::SendGenMessageListHook"
     
     if {![::Jabber::IsConnected]} {
 	return
@@ -757,7 +757,7 @@ proc ::Jabber::WB::SendGenMessageListHook {w msgList args} {
     return {}
 }
 
-proc ::Jabber::WB::SendArgs {w} {
+proc ::JWB::SendArgs {w} {
     variable jwbstate
 
     set argsList {}
@@ -774,7 +774,7 @@ proc ::Jabber::WB::SendArgs {w} {
     return $argsList
 }
 
-proc ::Jabber::WB::CheckIfOnline {w} {
+proc ::JWB::CheckIfOnline {w} {
     variable jwbstate
     upvar ::Jabber::jstate jstate
 
@@ -789,7 +789,7 @@ proc ::Jabber::WB::CheckIfOnline {w} {
     return $isok
 }
 
-# Jabber::WB::SendMessage --
+# JWB::SendMessage --
 #
 #       Actually send whiteboard commands as messages.
 #       
@@ -801,7 +801,7 @@ proc ::Jabber::WB::CheckIfOnline {w} {
 # Results:
 #       none.
 
-proc ::Jabber::WB::SendMessage {w jid msg args} {    
+proc ::JWB::SendMessage {w jid msg args} {    
     upvar ::Jabber::jstate jstate
     
     set xlist [CanvasCmdListToMessageXElement $w [list $msg]]
@@ -809,11 +809,11 @@ proc ::Jabber::WB::SendMessage {w jid msg args} {
     eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
 }
 
-# Jabber::WB::SendMessageList --
+# JWB::SendMessageList --
 #
 #       As above but for a list of commands.
 
-proc ::Jabber::WB::SendMessageList {w jid msgList args} {
+proc ::JWB::SendMessageList {w jid msgList args} {
     upvar ::Jabber::jstate jstate
     
     set xlist [CanvasCmdListToMessageXElement $w $msgList]
@@ -821,11 +821,11 @@ proc ::Jabber::WB::SendMessageList {w jid msgList args} {
     eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
 }
 
-# Jabber::WB::SendRawMessageList --
+# JWB::SendRawMessageList --
 # 
 #       Handles any prefixed canvas command using the "raw" protocol.
 
-proc ::Jabber::WB::SendRawMessageList {jid msgList args} {
+proc ::JWB::SendRawMessageList {jid msgList args} {
     upvar ::Jabber::jstate jstate
  
     # Form an <x xmlns='coccinella:wb'><raw> element in message.
@@ -839,7 +839,7 @@ proc ::Jabber::WB::SendRawMessageList {jid msgList args} {
     eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
 }
 
-# Jabber::WB::CanvasCmdListToMessageXElement --
+# JWB::CanvasCmdListToMessageXElement --
 # 
 #       Takes a list of canvas commands and returns the xml
 #       x element xmllist appropriate.
@@ -848,7 +848,7 @@ proc ::Jabber::WB::SendRawMessageList {jid msgList args} {
 #       cmdList     a list of canvas commands without the widgetPath.
 #                   no CANVAS:
 
-proc ::Jabber::WB::CanvasCmdListToMessageXElement {w cmdList} {
+proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
     variable xmlnsSVGWB
     variable ampElem
     upvar ::Jabber::jprefs jprefs
@@ -885,11 +885,11 @@ proc ::Jabber::WB::CanvasCmdListToMessageXElement {w cmdList} {
     return $xlist
 }
 
-# Jabber::WB::DoSendCanvas --
+# JWB::DoSendCanvas --
 # 
 #       Wrapper for ::CanvasCmd::DoSendCanvas.
 
-proc ::Jabber::WB::DoSendCanvas {w} {
+proc ::JWB::DoSendCanvas {w} {
     global  prefs
     variable jwbstate
     upvar ::Jabber::jstate jstate
@@ -918,21 +918,20 @@ proc ::Jabber::WB::DoSendCanvas {w} {
     }
 }
 
-
-proc ::Jabber::WB::FilterTags {tags} {
+proc ::JWB::FilterTags {tags} {
     
     return [::CanvasUtils::GetUtagFromTagList $tags]
 }
 
 # Various message handlers......................................................
 
-# Jabber::WB::HandleSpecialMessage --
+# JWB::HandleSpecialMessage --
 # 
 #       Takes care of any special (BAD) commands from the old protocol.
 
-proc ::Jabber::WB::HandleSpecialMessage {jlibname xmlns msgElem args} {
+proc ::JWB::HandleSpecialMessage {jlibname xmlns msgElem args} {
         
-    ::Debug 2 "::Jabber::WB::HandleSpecialMessage $xmlns, args=$args"
+    ::Debug 2 "::JWB::HandleSpecialMessage $xmlns, args=$args"
     array set argsArr $args
     if {![info exists argsArr(-x)]} {
 	return
@@ -969,14 +968,14 @@ proc ::Jabber::WB::HandleSpecialMessage {jlibname xmlns msgElem args} {
     return $ishandled
 }
 
-# Jabber::WB::HandleRawChatMessage --
+# JWB::HandleRawChatMessage --
 # 
 #       This is the dispatcher for "raw" chat whiteboard messages using the
 #       CANVAS: (and RESIZE IMAGE: etc.) prefixed drawing commands.
 
-proc ::Jabber::WB::HandleRawChatMessage {jlibname xmlns msgElem args} {
+proc ::JWB::HandleRawChatMessage {jlibname xmlns msgElem args} {
         
-    ::Debug 2 "::Jabber::WB::HandleRawChatMessage args=$args"
+    ::Debug 2 "::JWB::HandleRawChatMessage args=$args"
     array set argsArr $args
     if {![info exists argsArr(-x)]} {
 	return
@@ -992,14 +991,14 @@ proc ::Jabber::WB::HandleRawChatMessage {jlibname xmlns msgElem args} {
     return 1
 }
 
-# Jabber::WB::HandleRawGroupchatMessage --
+# JWB::HandleRawGroupchatMessage --
 # 
 #       This is the dispatcher for "raw" chat whiteboard messages using the
 #       CANVAS: (and RESIZE IMAGE: etc.) prefixed drawing commands.
 
-proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns msgElem args} {
+proc ::JWB::HandleRawGroupchatMessage {jlibname xmlns msgElem args} {
 	
-    ::Debug 2 "::Jabber::WB::HandleRawGroupchatMessage args=$args"	
+    ::Debug 2 "::JWB::HandleRawGroupchatMessage args=$args"	
     array set argsArr $args
     if {![info exists argsArr(-x)]} {
 	return
@@ -1027,9 +1026,9 @@ proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns msgElem args} {
     return $ishandled
 }
 
-proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns msgElem args} {
+proc ::JWB::HandleSVGWBChatMessage {jlibname xmlns msgElem args} {
     
-    ::Debug 2 "::Jabber::WB::HandleSVGWBChatMessage"
+    ::Debug 2 "::JWB::HandleSVGWBChatMessage"
     array set argsArr $args
     if {![info exists argsArr(-x)]} {
 	return
@@ -1052,9 +1051,9 @@ proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns msgElem args} {
     return 1
 }
 
-proc ::Jabber::WB::HandleSVGWBGroupchatMessage {jlibname xmlns msgElem args} {
+proc ::JWB::HandleSVGWBGroupchatMessage {jlibname xmlns msgElem args} {
     
-    ::Debug 2 "::Jabber::WB::HandleSVGWBGroupchatMessage"
+    ::Debug 2 "::JWB::HandleSVGWBGroupchatMessage"
     array set argsArr $args
     if {![info exists argsArr(-x)]} {
 	return
@@ -1090,7 +1089,7 @@ proc ::Jabber::WB::HandleSVGWBGroupchatMessage {jlibname xmlns msgElem args} {
     return $ishandled
 }
 
-# Jabber::WB::GetRawMessageList --
+# JWB::GetRawMessageList --
 # 
 #       Extracts the raw canvas drawing commands from an x list elements.
 #       
@@ -1101,7 +1100,7 @@ proc ::Jabber::WB::HandleSVGWBGroupchatMessage {jlibname xmlns msgElem args} {
 # Results:
 #       a list of raw element drawing commands, or empty. Keeps CANVAS: prefix.
 
-proc ::Jabber::WB::GetRawMessageList {xlist xmlns} {
+proc ::JWB::GetRawMessageList {xlist xmlns} {
     
     set rawElemList {}
     
@@ -1118,11 +1117,11 @@ proc ::Jabber::WB::GetRawMessageList {xlist xmlns} {
     return $rawElemList
 }
 
-# Jabber::WB::GetRawCanvasMessageList --
+# JWB::GetRawCanvasMessageList --
 # 
 #       As above but skips the CANVAS: prefix. Assumes CANVAS: prefix!
 
-proc ::Jabber::WB::GetRawCanvasMessageList {xlist xmlns} {
+proc ::JWB::GetRawCanvasMessageList {xlist xmlns} {
     
     set cmdList {}
     
@@ -1139,13 +1138,13 @@ proc ::Jabber::WB::GetRawCanvasMessageList {xlist xmlns} {
     return $cmdList
 }
 
-# Jabber::WB::GetSVGWBMessageList --
+# JWB::GetSVGWBMessageList --
 # 
 #       Translates the SVGWB protocol to a list of canvas commands.
 #       Needs the canvas widget path for this due to the bad design
 #       of the Tk canvas (-fill/-outline needs type when item configure).
 
-proc ::Jabber::WB::GetSVGWBMessageList {w xlist} {
+proc ::JWB::GetSVGWBMessageList {w xlist} {
     variable xmlnsSVGWB
 
     set wcan [::WB::GetCanvasFromWtop $w]
@@ -1163,11 +1162,11 @@ proc ::Jabber::WB::GetSVGWBMessageList {w xlist} {
     return $cmdList
 }
 
-# Jabber::WB::SVGForeignObjectHandler --
+# JWB::SVGForeignObjectHandler --
 # 
 #       The only excuse for this is to add '-where local'.
 
-proc ::Jabber::WB::SVGForeignObjectHandler {w xmllist paropts transformList args} {
+proc ::JWB::SVGForeignObjectHandler {w xmllist paropts transformList args} {
     
     array set argsArr $args
     set argsArr(-where) local
@@ -1175,13 +1174,13 @@ proc ::Jabber::WB::SVGForeignObjectHandler {w xmllist paropts transformList args
       $transformList} [array get argsArr]
 }
 
-# Jabber::WB::SVGHttpHandler --
+# JWB::SVGHttpHandler --
 # 
 #       Callback for SVG to canvas translator for http uri's.
 #       
 #       cmd:        create image $x $y -key value ...
 
-proc ::Jabber::WB::SVGHttpHandler {w cmd} {
+proc ::JWB::SVGHttpHandler {w cmd} {
     variable jwbstate
     upvar ::Jabber::jstate jstate
         
@@ -1211,16 +1210,16 @@ proc ::Jabber::WB::SVGHttpHandler {w cmd} {
 
 }
 
-# Jabber::WB::HandleNonCanvasCmds --
+# JWB::HandleNonCanvasCmds --
 # 
 #       Until we have a better protocol for this handle it here.
 #       This really SUCKS!!!
 #       Handles RESIZE IMAGE, strips off CANVAS: prefix of rest and returns this.
 
-proc ::Jabber::WB::HandleNonCanvasCmds {type cmdList args} {
+proc ::JWB::HandleNonCanvasCmds {type cmdList args} {
     variable handler
     
-    ::Debug 4 "::Jabber::WB::HandleNonCanvasCmds type=$type"
+    ::Debug 4 "::JWB::HandleNonCanvasCmds type=$type"
     
     set canCmdList {}
     foreach cmd $cmdList {
@@ -1275,24 +1274,24 @@ proc ::Jabber::WB::HandleNonCanvasCmds {type cmdList args} {
     return $canCmdList
 }
 
-# ::Jabber::WB::GetRegisteredHandlers --
+# ::JWB::GetRegisteredHandlers --
 # 
 #       Get protocol handlers, present and future.
 
-proc ::Jabber::WB::GetRegisteredHandlers { } {
+proc ::JWB::GetRegisteredHandlers { } {
     variable handler
     
     array set handler [::WB::GetRegisteredHandlers]
-    ::hooks::register whiteboardRegisterHandlerHook  ::Jabber::WB::RegisterHandlerHook
+    ::hooks::register whiteboardRegisterHandlerHook  ::JWB::RegisterHandlerHook
 }
 
-proc ::Jabber::WB::RegisterHandlerHook {prefix cmd} {
+proc ::JWB::RegisterHandlerHook {prefix cmd} {
     variable handler
     
     set handler($prefix) $cmd
 }
 
-# ::Jabber::WB::ChatMsg, GroupchatMsg --
+# ::JWB::ChatMsg, GroupchatMsg --
 # 
 #       Handles incoming chat/groupchat message aimed for a whiteboard.
 #       It may not exist, for instance, if we receive a new chat thread.
@@ -1302,11 +1301,11 @@ proc ::Jabber::WB::RegisterHandlerHook {prefix cmd} {
 # Arguments:
 #       args        -from, -to, -type, -thread, -x,...
 
-proc ::Jabber::WB::ChatMsg {cmdList args} {    
+proc ::JWB::ChatMsg {cmdList args} {    
     upvar ::Jabber::jstate jstate
 
     array set argsArr $args
-    ::Debug 2 "::Jabber::WB::ChatMsg args='$args'"
+    ::Debug 2 "::JWB::ChatMsg args='$args'"
     
     # This one returns empty if not exists.
     set w [eval {GetWtopFromMessage chat $argsArr(-from)} $args]
@@ -1318,11 +1317,11 @@ proc ::Jabber::WB::ChatMsg {cmdList args} {
     }     
 }
 
-proc ::Jabber::WB::GroupchatMsg {cmdList args} {    
+proc ::JWB::GroupchatMsg {cmdList args} {    
     upvar ::Jabber::jstate jstate
 
     array set argsArr $args
-    ::Debug 2 "::Jabber::WB::GroupchatMsg args='$args'"
+    ::Debug 2 "::JWB::GroupchatMsg args='$args'"
     
     # The -from argument is either the room itself, or usually a user in
     # the room.
@@ -1337,11 +1336,11 @@ proc ::Jabber::WB::GroupchatMsg {cmdList args} {
     }
 }
 
-proc ::Jabber::WB::Free {w} {
+proc ::JWB::Free {w} {
     variable jwbstate
     variable delayed
     
-    ::Debug 2 "::Jabber::WB::Free"
+    ::Debug 2 "::JWB::Free"
     
     catch {
 	unset -nocomplain jwbstate($jwbstate($w,thread),thread,w) \
@@ -1354,7 +1353,7 @@ proc ::Jabber::WB::Free {w} {
 #
 #       These are replaced by extra presence elements in most cases.
 
-# Jabber::WB::GetIPnumber / PutIPnumber --
+# JWB::GetIPnumber / PutIPnumber --
 #
 #       Utilites to put/get ip numbers from clients.
 #
@@ -1365,10 +1364,10 @@ proc ::Jabber::WB::Free {w} {
 # Results:
 #       none.
 
-proc ::Jabber::WB::GetIPnumber {jid {cmd {}}} {    
+proc ::JWB::GetIPnumber {jid {cmd {}}} {    
     variable ipCache
 
-    ::Debug 2 "::Jabber::WB::GetIPnumber:: jid=$jid, cmd='$cmd'"
+    ::Debug 2 "::JWB::GetIPnumber:: jid=$jid, cmd='$cmd'"
     
     set getid $ipCache(getid)
     if {$cmd ne ""} {
@@ -1386,7 +1385,7 @@ proc ::Jabber::WB::GetIPnumber {jid {cmd {}}} {
     incr ipCache(getid)
 }
 
-# Jabber::WB::GetIPCallback --
+# JWB::GetIPCallback --
 #
 #       This proc gets called when a requested ip number is received
 #       by our server.
@@ -1399,11 +1398,11 @@ proc ::Jabber::WB::GetIPnumber {jid {cmd {}}} {
 # Results:
 #       Any registered callback proc is eval'ed.
 
-proc ::Jabber::WB::GetIPCallback {jid id ip} {    
+proc ::JWB::GetIPCallback {jid id ip} {    
     upvar ::Jabber::jstate jstate
     variable ipCache
 
-    ::Debug 2 "::Jabber::WB::GetIPCallback: jid=$jid, id=$id, ip=$ip"
+    ::Debug 2 "::JWB::GetIPCallback: jid=$jid, id=$id, ip=$ip"
 
     set mjid [jlib::jidmap $jid]
     set ipCache(ip,$mjid) $ip
@@ -1414,19 +1413,19 @@ proc ::Jabber::WB::GetIPCallback {jid id ip} {
     }
 }
 
-proc ::Jabber::WB::PutIPnumber {jid id} {
+proc ::JWB::PutIPnumber {jid id} {
     
-    ::Debug 2 "::Jabber::WB::PutIPnumber:: jid=$jid, id=$id"
+    ::Debug 2 "::JWB::PutIPnumber:: jid=$jid, id=$id"
     
     set ip [::Network::GetThisPublicIP]
     SendRawMessageList $jid [list "PUT IP: $id $ip"]
 }
 
-# Jabber::WB::GetCoccinellaServers --
+# JWB::GetCoccinellaServers --
 # 
 #       Get Coccinella server ports and ip via <iq>.
 
-proc ::Jabber::WB::GetCoccinellaServers {jid3 {cmd {}}} {
+proc ::JWB::GetCoccinellaServers {jid3 {cmd {}}} {
     variable ipCache
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
@@ -1434,18 +1433,18 @@ proc ::Jabber::WB::GetCoccinellaServers {jid3 {cmd {}}} {
     set mjid3 [jlib::jidmap $jid3]
     set ipCache(req,$mjid3) 1
     $jstate(jlib) iq_get $coccixmlns(servers) -to $jid3  \
-      -command [list ::Jabber::WB::GetCoccinellaServersCallback $jid3 $cmd]
+      -command [list ::JWB::GetCoccinellaServersCallback $jid3 $cmd]
 }
 
-proc ::Jabber::WB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
+proc ::JWB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
     variable ipCache
     
-    # ::Jabber::WB::GetCoccinellaServersCallback jabberlib1 ok 
+    # ::JWB::GetCoccinellaServersCallback jabberlib1 ok 
     #  {query {xmlns http://coccinella.sourceforge.net/protocol/servers} 0 {} {
     #     {ip {protocol putget port 8235} 0 212.214.113.57 {}} 
     #     {ip {protocol http port 8077} 0 212.214.113.57 {}}
     #  }}
-    ::Debug 2 "::Jabber::WB::GetCoccinellaServersCallback"
+    ::Debug 2 "::JWB::GetCoccinellaServersCallback"
 
     if {$type eq "error"} {
 	return
@@ -1460,16 +1459,16 @@ proc ::Jabber::WB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
     unset -nocomplain ipCache(req,$mjid3)
 }
 
-# Jabber::WB::PresenceHook --
+# JWB::PresenceHook --
 # 
 #       Administrate our internal ip cache.
 
-proc ::Jabber::WB::PresenceHook {jid type args} {
+proc ::JWB::PresenceHook {jid type args} {
     variable ipCache
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     
-    ::Debug 2 "::Jabber::WB::PresenceHook jid=$jid, type=$type"
+    ::Debug 2 "::JWB::PresenceHook jid=$jid, type=$type"
     
     array set argsArr $args
     if {[info exists argsArr(-resource)] && [string length $argsArr(-resource)]} {
@@ -1497,7 +1496,7 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
     }
 }
 
-# Jabber::WB::PutFileOrScheduleHook --
+# JWB::PutFileOrScheduleHook --
 # 
 #       Handles everything needed to put a file to the jid's corresponding
 #       to the 'w'. Users that we haven't got ip number from are scheduled
@@ -1513,12 +1512,12 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
 # Results:
 #       none.
 
-proc ::Jabber::WB::PutFileOrScheduleHook {w fileName opts} {    
+proc ::JWB::PutFileOrScheduleHook {w fileName opts} {    
     variable ipCache
     variable jwbstate
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::WB::PutFileOrScheduleHook: \
+    ::Debug 2 "::JWB::PutFileOrScheduleHook: \
       w=$w, fileName=$fileName, opts='$opts'"
     
     # Before doing anything check that the Send checkbutton is on. ???
@@ -1612,7 +1611,7 @@ proc ::Jabber::WB::PutFileOrScheduleHook {w fileName opts} {
 		# We need to get this jid's ip number and register the
 		# PutFile as a callback when receiving this ip.
 		GetCoccinellaServers $jid3  \
-		  [list ::Jabber::WB::PutFile $w $fileName $mime  \
+		  [list ::JWB::PutFile $w $fileName $mime  \
 		  $optjidList $jid3]
 	    }
 	} else {
@@ -1626,7 +1625,7 @@ proc ::Jabber::WB::PutFileOrScheduleHook {w fileName opts} {
     $jstate(jlib) schedule_auto_away
 }
 
-# Jabber::WB::PutFile --
+# JWB::PutFile --
 #
 #       Puts the file to the given jid provided the client has
 #       told us its ip number.
@@ -1642,16 +1641,16 @@ proc ::Jabber::WB::PutFileOrScheduleHook {w fileName opts} {
 #       
 # Results:
 
-proc ::Jabber::WB::PutFile {w fileName mime opts jid} {
+proc ::JWB::PutFile {w fileName mime opts jid} {
     global  prefs
     variable ipCache
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::WB::PutFile: fileName=$fileName, opts='$opts', jid=$jid"
+    ::Debug 2 "::JWB::PutFile: fileName=$fileName, opts='$opts', jid=$jid"
 
     set mjid [jlib::jidmap $jid]
     if {![info exists ipCache(ip,$mjid)]} {
-	puts "::Jabber::WB::PutFile: Houston, we have a problem. \
+	puts "::JWB::PutFile: Houston, we have a problem. \
 	  ipCache(ip,$mjid) not there"
 	return
     }
@@ -1668,20 +1667,20 @@ proc ::Jabber::WB::PutFile {w fileName mime opts jid} {
     ::PutFileIface::PutFile $w $fileName $ipCache(ip,$mjid) $optList
 }
 
-# Jabber::WB::HandlePutRequest --
+# JWB::HandlePutRequest --
 # 
 #       Takes care of a PUT command from the server.
 
-proc ::Jabber::WB::HandlePutRequest {channel fileName opts} {
+proc ::JWB::HandlePutRequest {channel fileName opts} {
 	
-    ::Debug 2 "::Jabber::WB::HandlePutRequest"
+    ::Debug 2 "::JWB::HandlePutRequest"
     
     # The whiteboard must exist!
     set w [MakeWhiteboardExist $opts]
     ::GetFileIface::GetFile $w $channel $fileName $opts
 }
 
-# Jabber::WB::MakeWhiteboardExist --
+# JWB::MakeWhiteboardExist --
 # 
 #       Verifies that there exists a whiteboard for this message.
 #       
@@ -1691,11 +1690,11 @@ proc ::Jabber::WB::HandlePutRequest {channel fileName opts} {
 # Results:
 #       $w; may create new toplevel whiteboard
 
-proc ::Jabber::WB::MakeWhiteboardExist {opts} {
+proc ::JWB::MakeWhiteboardExist {opts} {
 
     array set optArr $opts
     
-    ::Debug 2 "::Jabber::WB::MakeWhiteboardExist"
+    ::Debug 2 "::JWB::MakeWhiteboardExist"
 
     switch -- $optArr(-type) {
 	chat {
@@ -1725,7 +1724,7 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
     return $w
 }
 
-proc ::Jabber::WB::HaveWhiteboard {jid} {
+proc ::JWB::HaveWhiteboard {jid} {
     variable jwbstate
     
     if {[info exists jwbstate($jid,jid,w)]} {
@@ -1735,7 +1734,7 @@ proc ::Jabber::WB::HaveWhiteboard {jid} {
     }
 }
 
-# ::Jabber::WB::GetWtopFromMessage --
+# ::JWB::GetWtopFromMessage --
 # 
 #       Figures out if we've got an existing whiteboard for an incoming
 #       message. Need to map 'type', 'jid', and -thread 'thread'. 
@@ -1748,7 +1747,7 @@ proc ::Jabber::WB::HaveWhiteboard {jid} {
 # Results:
 #       $w or empty
 
-proc ::Jabber::WB::GetWtopFromMessage {type jid args} {
+proc ::JWB::GetWtopFromMessage {type jid args} {
     variable jwbstate
     
     set w ""
@@ -1788,7 +1787,7 @@ proc ::Jabber::WB::GetWtopFromMessage {type jid args} {
      return $w
 }
 
-# ::Jabber::WB::DispatchToImporter --
+# ::JWB::DispatchToImporter --
 # 
 #       Is called as a response to a GET file event. 
 #       We've received a file that should be imported somewhere.
@@ -1798,9 +1797,9 @@ proc ::Jabber::WB::GetWtopFromMessage {type jid args} {
 #       opts
 #       args        -file, -where; for importer proc.
 
-proc ::Jabber::WB::DispatchToImporter {mime opts args} {
+proc ::JWB::DispatchToImporter {mime opts args} {
 	
-    ::Debug 2 "::Jabber::WB::DispatchToImporter"
+    ::Debug 2 "::JWB::DispatchToImporter"
 
     array set optArr $opts
 
@@ -1833,7 +1832,7 @@ proc ::Jabber::WB::DispatchToImporter {mime opts args} {
     }
 }
 
-# Jabber::WB::VerifyJIDWhiteboard --
+# JWB::VerifyJIDWhiteboard --
 #
 #       Validate entry for jid.
 #       
@@ -1843,7 +1842,7 @@ proc ::Jabber::WB::DispatchToImporter {mime opts args} {
 # Results:
 #       boolean: 0 if reject, 1 if accept
 
-proc ::Jabber::WB::VerifyJIDWhiteboard {w} {
+proc ::JWB::VerifyJIDWhiteboard {w} {
     variable jwbstate
     
     if {$jwbstate($w,send)} {

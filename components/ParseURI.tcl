@@ -55,7 +55,7 @@
 #       XMPP URI/IRI Querytypes 
 #       JEP-0147: XMPP URI Scheme Query Components 
 #
-# $Id: ParseURI.tcl,v 1.34 2006-08-12 13:48:25 matben Exp $
+# $Id: ParseURI.tcl,v 1.35 2006-08-20 13:41:17 matben Exp $
 
 package require uriencode
 
@@ -422,7 +422,7 @@ proc ::ParseURI::EnterRoomCB {token type args} {
 	    # Check that this is actually a whiteboard.
 	} elseif {[info exists state(query,xmlns)] && \
 	  [string equal $state(query,xmlns) "whiteboard"]} {
-	    ::Jabber::WB::NewWhiteboardTo $state(jid2) -type groupchat
+	    ::JWB::NewWhiteboardTo $state(jid2) -type groupchat
 	}
     }
     Free $token

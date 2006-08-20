@@ -105,7 +105,7 @@ proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
         set node [wrapper::getattribute $subiq node]
         #---- Check if disco returns <indetity category=pubsub type=pep>
         if {[::Jabber::JlibCmd disco iscategorytype pubsub/pep $from $node]} {
-                ::Jabber::UI::RegisterMenuEntry jabber $menuMood
+                ::JUI::RegisterMenuEntry jabber $menuMood
                 #----- Create Node for Mood -------------
                 ::Jabber::JlibCmd disco get_async items $myjid [list ::Mood::CreateNode]
         }

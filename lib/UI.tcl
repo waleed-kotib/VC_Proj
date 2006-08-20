@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.130 2006-08-05 07:29:36 matben Exp $
+# $Id: UI.tcl,v 1.131 2006-08-20 13:41:19 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -30,7 +30,6 @@ namespace eval ::UI:: {
     option add *question64Image          question64     widgetDefault
 
     option add *badgeImage               Coccinella     widgetDefault
-    #option add *badgeImage               coccinella64   widgetDefault
     option add *applicationImage         coccinella64   widgetDefault
     
     variable wThatUseMainMenu {}
@@ -138,23 +137,6 @@ proc ::UI::Init {} {
 proc ::UI::InitCommonBinds { } {
     global  this
     
-    # A mechanism to set -state of cut/copy/paste. Not robust!!!
-    # All selections are not detected (shift <- -> etc).
-    # 
-    # @@@ Shall be replaced with -postcommand for each window type.
-    # 
-    # Entry copy/paste.
-    bind Entry <FocusIn>         {+ ::UI::FixMenusWhenSelection %W }
-    bind Entry <ButtonRelease-1> {+ ::UI::FixMenusWhenSelection %W }
-    bind Entry <<Cut>>           {+ ::UI::FixMenusWhenSelection %W }
-    bind Entry <<Copy>>          {+ ::UI::FixMenusWhenSelection %W }
-	
-    # Text copy/paste.
-    bind Text <FocusIn>         {+ ::UI::FixMenusWhenSelection %W }
-    bind Text <ButtonRelease-1> {+ ::UI::FixMenusWhenSelection %W }
-    bind Text <<Cut>>           {+ ::UI::FixMenusWhenSelection %W }
-    bind Text <<Copy>>          {+ ::UI::FixMenusWhenSelection %W }
-
     # Read only text widget bindings.
     # Usage: bindtags $w [linsert [bindtags $w] 0 ReadOnlyText]
     bind ReadOnlyText <Button-1> { focus %W }
@@ -217,6 +199,7 @@ proc ::UI::InitCommonBinds { } {
 }
 
 if {0} {
+    # Read only text widget.
     pack [text .t]
     .t insert end "jfioepfhouidšs fhuldshbflds fhlds gfdskl fg"
     .t configure -state disabled
@@ -394,7 +377,7 @@ proc ::UI::GetMainWindow { } {
     
     switch -- $prefs(protocol) {
 	jabber {
-	    return [::Jabber::UI::GetMainWindow]
+	    return [::JUI::GetMainWindow]
 	}
 	default {
 	    return [::P2P::GetMainWindow]
@@ -407,7 +390,7 @@ proc ::UI::GetMainMenu { } {
     
     switch -- $prefs(protocol) {
 	jabber {
-	    return [::Jabber::UI::GetMainMenu]
+	    return [::JUI::GetMainMenu]
 	}
 	default {
 	    return [GetMenuFromWindow [::P2P::GetMainWindow]]
@@ -600,20 +583,14 @@ proc ::UI::Toplevel {w args} {
 	} elseif {[info exists argsArr(-macstyle)]} {
 	    ::tk::unsupported::MacWindowStyle style $w $argsArr(-macstyle)
 	}
-	if {$argsArr(-usemacmainmenu)} {
-	    SetMenuAcceleratorBinds $w [GetMainMenu]
-	}
 	# Unreliable!!!
 	# ::UI::SetAquaProxyIcon $w
-    } else {
-	if {$argsArr(-allowclose)} {
-	    
-	    # Application defined virtual event.
-	    bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w "command"]
-	}
-	if {$argsArr(-usemacmainmenu)} {
-	    SetMenuAcceleratorBinds $w [GetMainMenu]
-	}
+    }
+    if {$argsArr(-allowclose)} {
+	bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w "command"]
+    }
+    if {$argsArr(-usemacmainmenu)} {
+	SetMenubarAcceleratorBinds $w [GetMainMenu]
     }
     if {$prefs(opacity) != 100} {
 	array set attr [wm attributes $w]
@@ -716,8 +693,7 @@ proc ::UI::DoCloseWindow {{wevent ""} {type "command"}} {
     
     set w ""
     if {$wevent eq ""} {
-	set wfocus [focus]
-	if {$wfocus ne ""} {
+	if {[winfo exists [focus]]} {
 	    set w [winfo toplevel [focus]]
 	}
     } else {
@@ -1256,20 +1232,6 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef state args} {
 		set cmd [subst -nocommands $cmd]
 		if {[string length $accel]} {
 		    lappend mopts -accelerator ${mod}+${accel}
-
-		    # Cut, Copy & Paste handled by widgets internally!
-		    if {![regexp {(X|C|V)} $accel]} {
-			set key [string map {< less > greater}  \
-			  [string tolower $accel]]
-			
-			if {[string equal $state "normal"]} {
-			    if {[string equal $mstate "normal"]} {
-				bind $w <${mod}-Key-${key}> $cmd
-			    }
-			} else {
-			    bind $w <${mod}-Key-${key}> {}
-			}			
-		    }
 		}
 		eval {$m add $type -label $locname -command $cmd -state $mstate} \
 		  $mopts 
@@ -1328,78 +1290,18 @@ proc ::UI::FreeMenu {w} {
 #       binds to toplevel changed
 
 proc ::UI::MenuMethod {wmenu cmd key args} {
-    global  this prefs wDlgs
-            
     variable menuKeyToIndex
-    variable mapWmenuToWtop
-    variable cachedMenuSpec
-    variable wThatUseMainMenu
     
     # Be silent about nonexistent entries?
-    if {![info exists menuKeyToIndex($wmenu,$key)]} {
-	::Debug 2 "::UI::MenuMethod missing menuKeyToIndex($wmenu,$key)"
-	return
-    }
-    
-    # Need to cache the complete menuSpec's since needed in MenuMethod.
-    set w        $mapWmenuToWtop($wmenu)
-    set menuSpec $cachedMenuSpec($w,$wmenu)
-    set mind     $menuKeyToIndex($wmenu,$key)
-    
-    # This would be enough unless we needed to work with accelerator keys.
-    eval {$wmenu $cmd $mind} $args
-    
-    # Handle any menu accelerators as well. 
-    # Make sure the necessary variables for the command exist here!
-    
-    set wmain [GetMainWindow]
-    set wlist $wmain
-
-    if {$w eq $wmain} {
-	
-	# Handle Macs that use (inherit) the main menu.
-	#if {[tk windowingsystem] eq "aqua"}
-	# We do this on all platforms!
-	set wtmp $wThatUseMainMenu
-	set wThatUseMainMenu {}
-	foreach wmac $wtmp {
-	    if {[winfo exists $wmac]} {
-		lappend wThatUseMainMenu $wmac
-	    }
-	}
-	set wlist [concat $wmain $wThatUseMainMenu]
-    } else {
-	set wlist $w
-    }
-	    
-    foreach {key val} $args {
-	    
-	switch -- $key {
-	    -state {
-		set mcmd [lindex $menuSpec $mind 2]
-		set mcmd [subst -nocommands $mcmd]
-		set acc  [lindex $menuSpec $mind 4]
-
-		# Cut, Copy & Paste handled by widgets internally!
-		if {($acc ne "") && ![regexp {(X|C|V)} $acc]} {
-		    set akey [string map {< less > greater} [string tolower $acc]]
-		    foreach w $wlist {
-			if {$val eq "normal"} {
-			    bind $w <$this(modkey)-Key-${akey}> $mcmd
-			} else {
-			    bind $w <$this(modkey)-Key-${akey}> {}
-			}
-		    }
-		}
-	    }
-	}
+    if {[info exists menuKeyToIndex($wmenu,$key)]} {
+	set mind  $menuKeyToIndex($wmenu,$key)
+	eval {$wmenu $cmd $mind} $args
     }
 }
 
-# UI::SetMenuAcceleratorBinds --
+# UI::SetMenubarAcceleratorBinds --
 # 
-#       Used on MacOSX to set accelerator keys for a toplevel that inherits
-#       the menu from 'wmenubar'.
+#       Binds all main menu accelerator keys to window.
 #       
 # Arguments:
 #       w
@@ -1408,7 +1310,7 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
 # Results:
 #       none
 
-proc ::UI::SetMenuAcceleratorBinds {w wmenubar} {
+proc ::UI::SetMenubarAcceleratorBinds {w wmenubar} {
     global  this
     
     variable menuKeyToIndex
@@ -1417,7 +1319,7 @@ proc ::UI::SetMenuAcceleratorBinds {w wmenubar} {
     variable wThatUseMainMenu
     
     lappend wThatUseMainMenu $w
-
+    
     foreach {wmenu wtop} [array get mapWmenuToWtop $wmenubar.*] {
 	foreach line $cachedMenuSpec($wtop,$wmenu) {
 	    
@@ -1429,6 +1331,8 @@ proc ::UI::SetMenuAcceleratorBinds {w wmenubar} {
 		# Must check the actual state of menu!
 		set name [lindex $line 1]
 		set mind $menuKeyToIndex($wmenu,$name)
+		
+		# @@@ ???
 		set state [$wmenu entrycget $mind -state]
 		if {[string equal $state "normal"]} {
 		    set acckey [string map {< less > greater}  \
@@ -1438,25 +1342,35 @@ proc ::UI::SetMenuAcceleratorBinds {w wmenubar} {
 	    }
 	}
     }
-    
-    if {[tk windowingsystem] eq "aqua"} {
+}
 
-	# @@@ Is this going to be replaced by  -postcommand  ???
-	# This sets up the edit menu that we inherit from the main menu.
-	bind $w <FocusIn> +[list ::UI::MacFocusFixEditMenu $w $wmenubar %W]
-	
-	# If we hand over to a 3rd party toplevel window we need to take precautions.
-	bind $w <FocusOut> +[list ::UI::MacFocusFixEditMenu $w $wmenubar %W]
+# UI::SetMenuAcceleratorBinds --
+# 
+#       Sets the accelerator key binds to toplevel for specific menu.
+
+proc ::UI::SetMenuAcceleratorBinds {w wmenu} {
+    global  this
+
+    variable cachedMenuSpec
+    variable menuKeyToIndex
+    
+    foreach line $cachedMenuSpec($w,$wmenu) {
+	set accel [lindex $line 4]
+	if {[string length $accel]} {
+	    set name [lindex $line 1]
+	    set mind $menuKeyToIndex($wmenu,$name)
+	    set key [string map {< less > greater} [string tolower $accel]]
+	    bind $w <$this(modkey)-Key-$key> [lindex $line 2]
+	}
     }
 }
 
 proc ::UI::BuildAppleMenu {w wmenuapple state} {
-    global  this wDlgs
     variable menuDefs
     
     ::UI::NewMenu $w $wmenuapple {} $menuDefs(main,apple) $state
     
-    if {[string equal $this(platform) "macosx"]} {
+    if {[tk windowingsystem] eq "aqua"} {
 	proc ::tk::mac::ShowPreferences { } {
 	    ::Preferences::Build
 	}
@@ -1482,6 +1396,16 @@ proc ::UI::MenubarEnableAll {mbar} {
     for {set ind 0} {$ind <= $iend} {incr ind} {
 	$mbar entryconfigure $ind -state normal
     }    
+}
+
+proc ::UI::MenuEnableAll {mw} {
+    
+    set iend [$mw index end]
+    for {set i 0} {$i <= $iend} {incr i} {
+	if {[$mw type $i] ne "separator"} {
+	    $mw entryconfigure $i -state normal
+	}
+    }
 }
 
 proc ::UI::MenuDisableAllBut {mw normalList} {
@@ -1677,25 +1601,6 @@ proc ::UI::BuildMenuEntryFromSpec {w m menuSpec} {
     }
 }
 
-# UI::UndoConfig  --
-# 
-#       Callback for the undo/redo object.
-#       Sets the menu's states.
-
-proc ::UI::UndoConfig {w token what mstate} {
-        
-    set medit $w.menu.edit
-    
-    switch -- $what {
-	undo {
-	    MenuMethod $medit entryconfigure mUndo -state $mstate
-	}
-	redo {
-	    MenuMethod $medit entryconfigure mRedo -state $mstate	    
-	}
-    }
-}
-
 # UI::LabelButton --
 # 
 #       A html link type button from a label widget.
@@ -1862,36 +1767,105 @@ proc ::UI::OkCancelButtons {args} {
     }
 }
 
-# UI::CutCopyPasteCmd ---
+# UI::CutEvent, CopyEvent, PasteEvent --
+# 
+#       Used in menu commands to generate <<Cut>>, <<Copy>>, and <<Paste>>
+#       virtual events for _any_ widget.
+
+proc ::UI::CutEvent {} {
+    if {[winfo exists [focus]]} {
+	event generate [focus] <<Cut>>
+    }	
+}
+
+proc ::UI::CopyEvent {} {
+    if {[winfo exists [focus]]} {
+	event generate [focus] <<Copy>>
+    }	
+}
+
+proc ::UI::PasteEvent {} {
+    if {[winfo exists [focus]]} {
+	event generate [focus] <<Paste>>
+    }	
+}
+
+proc ::UI::CloseWindowEvent {} {
+    if {[winfo exists [focus]]} {
+	event generate [focus] <<CloseWindow>>
+    }
+}
+
+# UI::GenericCCPMenuStates --
+# 
+#       Retuns a flat array with cut, copy, and paste menu entry states when
+#       any of the standard widgets TEntry, Entry, and Text have focus.
 #
-#       Supposed to be a generic cut/copy/paste function for menu commands.
-#       
-# Arguments:
-#       cmd      cut/copy/paste
-#       
-# Results:
-#       none
+#       Edits are typically different from other commands in that they operate
+#       on a specific widget.
 
-proc ::UI::CutCopyPasteCmd {cmd} {
+proc ::UI::GenericCCPMenuStates {} {
     
-    set wfocus [focus]    
-    ::Debug 2 "::UI::CutCopyPasteCmd cmd=$cmd, wfocus=$wfocus"
+    # @@@ The situation with a ttk::entry in readonly state is not understood.
+    # @@@ Not sure focus is needed for selections.
+    set w [focus]
+    set haveFocus 1
+    set haveSelection 0
+    set editable 1
     
-    if {$wfocus eq ""} {
-	return
+    array set ccpStateA {
+	mCut    disabled
+	mCopy   disabled
+	mPaste  disabled
     }
+    
+    if {[winfo exists $w]} {
 
-    switch -- $cmd {
-	cut {
-	    event generate $wfocus <<Cut>>
+	switch -- [winfo class $w] {
+	    TEntry {
+		set haveSelection [$w selection present]
+		set state [$w state]
+		if {[lsearch $state disabled] >= 0} {
+		    set editable 0
+		} elseif {[lsearch $state readonly] >= 0} {
+		    set editable 0
+		}
+	    }
+	    Entry {
+		set haveSelection [$w selection present]
+		if {[$w cget -state] eq "disabled"} {
+		    set editable 0
+		}
+	    }
+	    Text {
+		if {![catch {$w get sel.first sel.last} data]} {
+		    if {$data ne ""} {
+			set haveSelection 1
+		    }
+		}
+		if {[$w cget -state] eq "disabled"} {
+		    set editable 0
+		}
+	    }
+	    default {
+		set haveFocus 0
+	    }
 	}
-	copy {
-	    event generate $wfocus <<Copy>>			    
+    }    
+
+    # Cut, copy and paste menu entries.
+    if {$haveSelection} {
+	if {$editable} {
+	    set ccpStateA(mCut) normal
 	}
-	paste {
-	    event generate $wfocus <<Paste>>	
+	set ccpStateA(mCopy) normal
+    }
+    if {![catch {selection get -sel CLIPBOARD} str]} {
+	if {$editable && $haveFocus && ($str ne "")} {
+	    set ccpStateA(mPaste) normal
 	}
     }
+    return [array get ccpStateA]
 }
 
 # ::UI::ParseWMGeometry --
@@ -1908,179 +1882,6 @@ proc ::UI::ParseWMGeometry {wmgeom} {
     regexp {([0-9]+)x([0-9]+)\+(\-?[0-9]+)\+(\-?[0-9]+)} $wmgeom - w h x y
     return [list $w $h $x $y]
 }
-
-# This is to a large extent OBSOLETE!!!
-# Handled via -postcommand instead
-
-# UI::FixMenusWhenSelection --
-# 
-#       Sets the correct state for menus and buttons when selection.
-#       Take the whiteboard's state into accounts.
-#       
-# Arguments:
-#       win     the widget that contains something that is selected.
-#
-# Results:
-
-proc ::UI::FixMenusWhenSelection {win} {
-    global  this
-    
-    set w      [winfo toplevel $win]
-    set wClass [winfo class $win]
-    set medit $w.menu.edit 
-    
-    Debug 6 "::UI::FixMenusWhenSelection win=$win,\n\tw=$w, wClass=$wClass"
-    
-    # Do different things dependent on the type of widget.
-    if {[winfo exists $w.menu] && [string equal $wClass "Canvas"]} {
-	
-	# Respect any disabled whiteboard state.
-	upvar ::WB::${w}::opts opts
-	set isDisabled 0
-	if {[string equal $opts(-state) "disabled"]} {
-	    set isDisabled 1
-	}
-	
-	# Any images selected?
-	set allSelected [$win find withtag selected]
-	set anyImageSel 0
-	set anyNotImageSel 0
-	set anyTextSel 0
-	set allowFlip 0	
-	foreach id $allSelected {
-	    set theType [$win type $id]
-	    if {[string equal $theType "line"] ||  \
-	      [string equal $theType "polygon"]} {
-		if {[llength $allSelected] == 1} {
-		    set allowFlip 1
-		}
-	    }
-	    if {[string equal $theType "image"]} {
-		set anyImageSel 1
-	    } else {
-		set anyNotImageSel 1
-		if {[string equal $theType "text"]} {
-		    set anyTextSel 1
-		}
-	    }
-	    if {$anyImageSel && $anyNotImageSel} {
-		break
-	    }
-	}
-	if {([llength $allSelected] == 0) && \
-	  ([llength [$win select item]] == 0)} {
-	    
-	    # There is no selection in the canvas.
-	    if {$isDisabled} {
-		::UI::MenuMethod $medit entryconfigure mCopy -state disabled
-		::UI::MenuMethod $medit entryconfigure mInspectItem -state disabled
-	    } else {		
-		::UI::MenuMethod $medit entryconfigure mCut -state disabled
-		::UI::MenuMethod $medit entryconfigure mCopy -state disabled
-		::UI::MenuMethod $medit entryconfigure mInspectItem -state disabled
-		::UI::MenuMethod $medit entryconfigure mRaise -state disabled
-		::UI::MenuMethod $medit entryconfigure mLower -state disabled
-		::UI::MenuMethod $medit entryconfigure mLarger -state disabled
-		::UI::MenuMethod $medit entryconfigure mSmaller -state disabled
-		::UI::MenuMethod $medit entryconfigure mFlip -state disabled
-		::UI::MenuMethod $medit entryconfigure mImageLarger -state disabled
-		::UI::MenuMethod $medit entryconfigure mImageSmaller -state disabled
-	    }
-	} else {
-	    if {$isDisabled} {
-		::UI::MenuMethod $medit entryconfigure mCopy -state normal
-		::UI::MenuMethod $medit entryconfigure mInspectItem -state normal
-	    } else {		
-		::UI::MenuMethod $medit entryconfigure mCut -state normal
-		::UI::MenuMethod $medit entryconfigure mCopy -state normal
-		::UI::MenuMethod $medit entryconfigure mInspectItem -state normal
-		::UI::MenuMethod $medit entryconfigure mRaise -state normal
-		::UI::MenuMethod $medit entryconfigure mLower -state normal
-		if {$anyNotImageSel} {
-		    ::UI::MenuMethod $medit entryconfigure mLarger -state normal
-		    ::UI::MenuMethod $medit entryconfigure mSmaller -state normal
-		}
-		if {$anyImageSel} {
-		    ::UI::MenuMethod $medit entryconfigure mImageLarger -state normal
-		    ::UI::MenuMethod $medit entryconfigure mImageSmaller -state normal
-		}
-		if {$allowFlip} {
-		    # Seems to be buggy on mac...
-		    ::UI::MenuMethod $medit entryconfigure mFlip -state normal
-		}
-	    }
-	}
-	
-    } elseif {[string equal $wClass "Entry"] ||  \
-      [string equal $wClass "Text"]} {
-	set setState disabled
-	
-	switch -- $wClass {
-	    Entry {
-		if {[$win selection present] eq "1"} {
-		    set setState normal
-		}
-	    }
-	    Text {
-		if {[string length [$win tag ranges sel]] > 0} {
-		    set setState normal
-		}
-	    }
-	}
-	
-	# Check to see if there is something to paste.
-	set haveClipState disabled
-	if {![catch {selection get -selection CLIPBOARD} sel]} {
-	    if {[string length $sel] > 0} {
-		set haveClipState normal
-	    }
-	}	
-	if {[winfo exists $medit]} {
-	    
-	    # We have an explicit menu for this window.
-	    ::UI::MenuMethod $medit entryconfigure mCut -state $setState
-	    ::UI::MenuMethod $medit entryconfigure mCopy -state $setState
-	    ::UI::MenuMethod $medit entryconfigure mPaste -state $haveClipState
-	} elseif {[string equal $this(platform) "macosx"]} {
-	    
-	    # We use the menu associated with wmainmenu since it is default one.
-	    set medit [GetMainMenu].edit
-	    ::UI::MenuMethod $medit entryconfigure mCut -state $setState
-	    ::UI::MenuMethod $medit entryconfigure mCopy -state $setState
-	    ::UI::MenuMethod $medit entryconfigure mPaste -state $haveClipState
-	}
-    } 
-}
-
-# UI::MacFocusFixEditMenu --
-# 
-#       Called when a window using the main menubar gets focus in/out.
-#       Mac only.
-#       
-# Arguments:
-#       w           the toplevel which gets focus
-#       wmenu
-#       wfocus      the %W which is either equal to $w or a children of it.
-#       
-# Results:
-#       none
-
-proc ::UI::MacFocusFixEditMenu {w wmenu wfocus} {
-    
-    # Binding to a toplevel is also triggered by its children.
-    if {$w != $wfocus} {
-	return
-    }
-    
-    # The <FocusIn> events are sent in order, from toplevel and down
-    # to the actual window with focus.
-    # Any '::UI::FixMenusWhenSelection' will therefore be called after this.
-    set medit $wmenu.edit
-    ::UI::MenuMethod $medit entryconfigure mPaste -state disabled
-    ::UI::MenuMethod $medit entryconfigure mCut -state disabled
-    ::UI::MenuMethod $medit entryconfigure mCopy -state disabled
-}
-
 
 proc ::UI::CenterWindow {win} {
     

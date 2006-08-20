@@ -1,11 +1,11 @@
-#  Whiteboard.tcl ---
+#  Whiteboard.tcl --
 #  
 #      This file is part of The Coccinella application. 
 #      It implements the actual whiteboard.
 #      
-#  Copyright (c) 2002-2005  Mats Bengtsson
+#  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.58 2006-02-14 08:05:13 matben Exp $
+# $Id: Whiteboard.tcl,v 1.59 2006-08-20 13:41:20 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -55,52 +55,52 @@ namespace eval ::WB:: {
     }
 
     # Use option database for customization.
-    option add *Whiteboard*TRadiobutton.padding  {0}             50
+    option add *TopWhiteboard*TRadiobutton.padding  {0}             50
 
     # Shortcut buttons.
-    option add *Whiteboard*connectImage         connect         widgetDefault
-    option add *Whiteboard*connectDisImage      connectDis      widgetDefault
-    option add *Whiteboard.saveImage            save            widgetDefault
-    option add *Whiteboard.saveDisImage         saveDis         widgetDefault
-    option add *Whiteboard.openImage            open            widgetDefault
-    option add *Whiteboard.openDisImage         openDis         widgetDefault
-    option add *Whiteboard.importImage          import          widgetDefault
-    option add *Whiteboard.importDisImage       importDis       widgetDefault
-    option add *Whiteboard.sendImage            send            widgetDefault
-    option add *Whiteboard.sendDisImage         sendDis         widgetDefault
-    option add *Whiteboard.printImage           print           widgetDefault
-    option add *Whiteboard.printDisImage        printDis        widgetDefault
-    option add *Whiteboard.stopImage            stop            widgetDefault
-    option add *Whiteboard.stopDisImage         stopDis         widgetDefault
+    option add *TopWhiteboard*connectImage         connect         widgetDefault
+    option add *TopWhiteboard*connectDisImage      connectDis      widgetDefault
+    option add *TopWhiteboard.saveImage            save            widgetDefault
+    option add *TopWhiteboard.saveDisImage         saveDis         widgetDefault
+    option add *TopWhiteboard.openImage            open            widgetDefault
+    option add *TopWhiteboard.openDisImage         openDis         widgetDefault
+    option add *TopWhiteboard.importImage          import          widgetDefault
+    option add *TopWhiteboard.importDisImage       importDis       widgetDefault
+    option add *TopWhiteboard.sendImage            send            widgetDefault
+    option add *TopWhiteboard.sendDisImage         sendDis         widgetDefault
+    option add *TopWhiteboard.printImage           print           widgetDefault
+    option add *TopWhiteboard.printDisImage        printDis        widgetDefault
+    option add *TopWhiteboard.stopImage            stop            widgetDefault
+    option add *TopWhiteboard.stopDisImage         stopDis         widgetDefault
 
     # Other icons.
-    option add *Whiteboard.contactOffImage      contactOff      widgetDefault
-    option add *Whiteboard.contactOnImage       contactOn       widgetDefault
-    option add *Whiteboard.waveImage            wave            widgetDefault
-    option add *Whiteboard.resizeHandleImage    resizehandle    widgetDefault
+    option add *TopWhiteboard.contactOffImage      contactOff      widgetDefault
+    option add *TopWhiteboard.contactOnImage       contactOn       widgetDefault
+    option add *TopWhiteboard.waveImage            wave            widgetDefault
+    option add *TopWhiteboard.resizeHandleImage    resizehandle    widgetDefault
 
-    option add *Whiteboard.barhorizImage        barhoriz        widgetDefault
-    option add *Whiteboard.barvertImage         barvert         widgetDefault
+    option add *TopWhiteboard.barhorizImage        barhoriz        widgetDefault
+    option add *TopWhiteboard.barvertImage         barvert         widgetDefault
 
     # Drawing tool buttons.
     foreach tname [array names btName2No] {
-	option add *Whiteboard.tool${tname}Image $tname         widgetDefault
+	option add *TopWhiteboard.tool${tname}Image $tname         widgetDefault
     }
 
     # Color selector.
-    option add *Whiteboard.bwrectImage          bwrect          widgetDefault
-    option add *Whiteboard.colorSelectorImage   colorSelector   widgetDefault
-    option add *Whiteboard.colorSelBWImage      colorSelBW      widgetDefault
-    option add *Whiteboard.colorSelSwapImage    colorSelSwap    widgetDefault
+    option add *TopWhiteboard.bwrectImage          bwrect          widgetDefault
+    option add *TopWhiteboard.colorSelectorImage   colorSelector   widgetDefault
+    option add *TopWhiteboard.colorSelBWImage      colorSelBW      widgetDefault
+    option add *TopWhiteboard.colorSelSwapImage    colorSelSwap    widgetDefault
     
     # Canvas selections.
-    option add *Whiteboard.aSelect              2               widgetDefault
-    option add *Whiteboard.fgSelectNormal       black           widgetDefault
-    option add *Whiteboard.fgSelectLocked       red             widgetDefault
+    option add *TopWhiteboard.aSelect              2               widgetDefault
+    option add *TopWhiteboard.fgSelectNormal       black           widgetDefault
+    option add *TopWhiteboard.fgSelectLocked       red             widgetDefault
 
     # Special for X11 menus to look ok.
     if {[tk windowingsystem] eq "x11"} {
-	option add *Whiteboard.Menu.borderWidth 0               50
+	option add *TopWhiteboard.Menu.borderWidth 0               50
     }
 
     # Keeps various geometry info.
@@ -307,10 +307,10 @@ proc ::WB::Init {} {
     variable animateWave
     
     # Defines canvas binding tags suitable for each tool.
-    ::CanvasUtils::DefineWhiteboardBindtags
+    ::CanvasUtils::BindWhiteboardBindtags
     
     # Bindtags instead of binding to toplevel.
-    bind WhiteboardToplevel <Destroy> {+::WB::Free %W}
+    bind TopWhiteboard <Destroy> {+::WB::Free %W}
 }
 
 # WB::InitIcons --
@@ -441,20 +441,20 @@ proc ::WB::InitMenuDefs { } {
 
     # Only basic functionality.
     set menuDefs(main,file) {
-	{command   mCloseWindow     {::UI::DoCloseWindow $w}             normal   W}
+	{command   mCloseWindow     {::UI::CloseWindowEvent}    normal  W}
 	{separator}
-	{command   mOpenImage/Movie {::Import::ImportImageOrMovieDlg $w} normal  I}
-	{command   mOpenURLStream   {::Multicast::OpenMulticast $w}  normal   {}}
+	{command   mOpenImage/Movie {::WB::OnMenuImport}        normal  I}
+	{command   mOpenURLStream   {::WB::OnMenuOpenURL}       normal  {}}
 	{separator}
-	{command   mOpenCanvas      {::CanvasFile::OpenCanvasFileDlg $w} normal   {}}
-	{command   mSaveCanvas      {::CanvasFile::Save $w}              normal   S}
+	{command   mOpenCanvas      {::WB::OnMenuOpenCanvas}    normal  {}}
+	{command   mSaveCanvas      {::WB::OnMenuSaveCanvas}    normal  S}
 	{separator}
-	{command   mSaveAs          {::CanvasFile::SaveAsDlg $w}         normal   {}}
-	{command   mSaveAsItem      {::CanvasCmd::DoSaveAsItem $w}       normal   {}}
-	{command   mPageSetup       {::UserActions::PageSetup $w}        normal   {}}
-	{command   mPrintCanvas     {::UserActions::DoPrintCanvas $w}    normal   P}
+	{command   mSaveAs          {::WB::OnMenuSaveAs}        normal  {}}
+	{command   mSaveAsItem      {::WB::OnMenuSaveAsItem}    normal  {}}
+	{command   mPageSetup       {::WB::OnMenuPageSetup}     normal  {}}
+	{command   mPrintCanvas     {::WB::OnMenuPrintCanvas}   normal  P}
 	{separator}
-	{command   mQuit            {::UserActions::DoQuit}                 normal   Q}
+	{command   mQuit            {::UserActions::DoQuit}     normal  Q}
     }
     if {![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefs(main,file) 3 3 disabled
@@ -466,30 +466,30 @@ proc ::WB::InitMenuDefs { } {
     } else {
 	package require Multicast
     }
-
+    
     set menuDefs(main,edit) {    
-	{command     mUndo             {::CanvasCmd::Undo $w}             normal   Z}
-	{command     mRedo             {::CanvasCmd::Redo $w}             normal   {}}
+	{command     mUndo             {::WB::OnMenuUndo}      normal   Z}
+	{command     mRedo             {::WB::OnMenuRedo}      normal   {}}
 	{separator}
-	{command     mCut              {::UI::CutCopyPasteCmd cut}        disabled X}
-	{command     mCopy             {::UI::CutCopyPasteCmd copy}       disabled C}
-	{command     mPaste            {::UI::CutCopyPasteCmd paste}      disabled V}
-	{command     mAll              {::CanvasCmd::SelectAll $w}        normal   A}
-	{command     mEraseAll         {::CanvasCmd::DoEraseAll $w}       normal   {}}
+	{command     mCut              {::UI::CutEvent}        disabled X}
+	{command     mCopy             {::UI::CopyEvent}       disabled C}
+	{command     mPaste            {::UI::PasteEvent}      disabled V}
+	{command     mAll              {::WB::OnMenuAll}       normal   A}
+	{command     mEraseAll         {::WB::OnMenuEraseAll}  normal   {}}
 	{separator}
-	{command     mInspectItem      {::ItemInspector::ItemInspector $w selected} disabled {}}
+	{command     mInspectItem      {::WB::OnMenuItemInspector} normal {}}
 	{separator}
-	{command     mRaise            {::CanvasCmd::RaiseOrLowerItems $w raise} disabled R}
-	{command     mLower            {::CanvasCmd::RaiseOrLowerItems $w lower} disabled L}
+	{command     mRaise            {::WB::OnMenuRaise} normal R}
+	{command     mLower            {::WB::OnMenuLower} normal L}
 	{separator}
-	{command     mLarger           {::CanvasCmd::ResizeItem $w $prefs(scaleFactor)} disabled >}
-	{command     mSmaller          {::CanvasCmd::ResizeItem $w $prefs(invScaleFac)} disabled <}
-	{cascade     mFlip             {}                                      disabled {} {} {
-	    {command   mHorizontal     {::CanvasCmd::FlipItem $w horizontal}  normal   {} {}}
-	    {command   mVertical       {::CanvasCmd::FlipItem $w vertical}    normal   {} {}}}
+	{command     mLarger           {::WB::OnMenuLarger}  normal >}
+	{command     mSmaller          {::WB::OnMenuSmaller} normal <}
+	{cascade     mFlip             {}                            normal {} {} {
+	    {command   mHorizontal     {::WB::OnMenuFlipHorizontal}  normal   {} {}}
+	    {command   mVertical       {::WB::OnMenuFlipVertical}    normal   {} {}}}
 	}
-	{command     mImageLarger      {::Import::ResizeImage $w 2 sel auto} disabled {}}
-	{command     mImageSmaller     {::Import::ResizeImage $w -2 sel auto} disabled {}}
+	{command     mImageLarger      {::WB::OnMenuImageLarger} normal {}}
+	{command     mImageSmaller     {::WB::OnMenuImageSmaller} normal {}}
     }
     
     # These are used not only in the drop-down menus.
@@ -646,15 +646,15 @@ proc ::WB::InitMenuDefs { } {
 	
     # Menu definitions for a minimal setup. Used on mac only.
     set menuDefs(min,file) {
-	{command   mNewWhiteboard    {::WB::NewWhiteboard}                       normal   N}
-	{command   mCloseWindow      {::UI::DoCloseWindow}                 normal   W}
+	{command   mNewWhiteboard    {::WB::NewWhiteboard}      normal   N}
+	{command   mCloseWindow      {::UI::CloseWindowEvent}   normal   W}
 	{separator}
-	{command   mQuit             {::UserActions::DoQuit}               normal   Q}
+	{command   mQuit             {::UserActions::DoQuit}    normal   Q}
     }	    
     set menuDefs(min,edit) {    
-	{command   mCut              {::UI::CutCopyPasteCmd cut}           disabled X}
-	{command   mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
-	{command   mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
+	{command   mCut              {::UI::CutEvent}           disabled X}
+	{command   mCopy             {::UI::CopyEvent}          disabled C}
+	{command   mPaste            {::UI::PasteEvent}         disabled V}
     }
     
     # Used only on mac until the -postcommand bug fixed.
@@ -787,7 +787,7 @@ proc ::WB::BuildWhiteboard {w args} {
     }
     set state(msg) ""
     
-    ::UI::Toplevel $w -class Whiteboard -closecommand ::WB::CloseHook
+    ::UI::Toplevel $w -class TopWhiteboard -closecommand ::WB::CloseHook
     wm withdraw $w
     wm title $w $opts(-title)
     
@@ -871,17 +871,13 @@ proc ::WB::BuildWhiteboard {w args} {
     ::CanvasCmd::DoCanvasGrid $w
     
     # Create the undo/redo object.
-    set state(undotoken) [undo::new -command [list ::UI::UndoConfig $w]]
+    # @@@ This shall be per canvas in the future!
+    set state(undotoken) [undo::new]
 
     # Set up paste menu if something on the clipboard.
     GetFocus $w $w
-    bind $w         <FocusIn>  [list [namespace current]::GetFocus $w %W]
-    bind $wapp(can) <Button-1> [list focus $wapp(can)]
+    bind $w  <FocusIn>  [list [namespace current]::GetFocus $w %W]
 
-    if {[lsearch [bindtags $w] WhiteboardToplevel] < 0} {
-	bindtags $w [linsert [bindtags $w] 0 WhiteboardToplevel]
-    }
-        
     if {$opts(-usewingeom)} {
 	::UI::SetWindowGeometry $w
     } else {
@@ -944,11 +940,6 @@ proc ::WB::NewCanvas {w args} {
     grid rowconfigure    $w 0 -weight 1
 
     ::CanvasText::Init $wcan
-    
-    bind $wcan <Control-Right> [list $wcan xview scroll  1 units]
-    bind $wcan <Control-Left>  [list $wcan xview scroll -1 units]
-    bind $wcan <Control-Down>  [list $wcan yview scroll  1 units]
-    bind $wcan <Control-Up>    [list $wcan yview scroll -1 units]
 
     return $wcan
 }
@@ -1252,10 +1243,10 @@ proc ::WB::ConfigureMain {w args} {
 		}
 		-state {
 		    set wmenu $wapp(menu)
+		    MenubarSetState $wmenu $value
 		    if {[string equal $value "normal"]} {
-			
+
 		    } else {
-			::WB::DisableWhiteboardMenus $wmenu
 			DisableShortcutButtonPad $w
 		    }
 		}
@@ -1340,7 +1331,9 @@ proc ::WB::GetButtonState {w} {
     return $state(tool)
 }
 
-proc ::WB::GetUndoToken {w} {    
+# This shall be per canvas in the future!
+proc ::WB::GetUndoToken {wcan} { 
+    set w [winfo toplevel $wcan]
     upvar ::WB::${w}::state state
     
     return $state(undotoken)
@@ -1408,7 +1401,7 @@ proc ::WB::SetToolButton {w btName} {
 	$wcan select clear
     }
     if {$btName eq "del" || $btName eq "text"} {
-	::CanvasCmd::DeselectAll $w
+	::CanvasCmd::DeselectAll $wcan
     }
     
     # Cancel any outstanding polygon drawings.
@@ -1417,38 +1410,108 @@ proc ::WB::SetToolButton {w btName} {
     $wcan config -cursor {}
     
     RemoveAllBindings $wcan
-    SetItemBinds $w $btName    
-    SetFrameItemBinds $w $btName
+    SetBindtags $wcan $btName 
+    SetItemBinds $wcan $btName 
+    SetFrameItemBinds $wcan $btName
+    SetToolUI $wcan $btName
+    
+    # Should this be tool specific?
+    SetKeyboardBinds $wcan $btName
 
     # This is a hook for plugins to register their own bindings.
     # Calls any registered bindings for the plugin, and deregisters old ones.
     ::Plugins::SetCanvasBinds $wcan $state(toolPrev) $btName
 }
 
-# WB::SetItemBinds --
+# WB::SetBindtags --
+# 
+#       Bindings directly to the canvas widget are dealt with using bindtags.
 #
-#       Mainly sets all button specific bindings.
+#       The bindtags used:
+#         Whiteboard
+#         WhiteboardNonText
+#         WhiteboardPoint
+#         WhiteboardMove
+#         WhiteboardLine
+#         WhiteboardArrow
+#         WhiteboardRect
+#         WhiteboardOval
+#         WhiteboardText
+#         WhiteboardDel
+#         WhiteboardPen
+#         WhiteboardBrush
+#         WhiteboardPaint
+#         WhiteboardPoly
+#         WhiteboardArc
+#         WhiteboardRot
+#         
+#       Be sure to NEVER use any of these as -class or any other bindtags!
 #       
 # Arguments:
-#       w           toplevel widget path
-#       btName 
+#       wcan        canvas widget
+#       btName      tool button name
 #       
 # Results:
 #       none
 
-proc ::WB::SetItemBinds {w btName} {
-    global  this wapp
-
-    upvar ::WB::${w}::wapp wapp
-
-    set wcan $wapp(can)
-
-    # Bindings directly to the canvas widget are dealt with using bindtags.
+proc ::WB::SetBindtags {wcan btName} {
     
+    set w [winfo toplevel $wcan]
+    
+    switch -- $btName {
+	point - move - line - arrow - rect - oval -
+	del - pen - brush - paint - poly - arc - rot {
+	    
+	    # For all nontext items we have generically named bindtags.
+	    set tag Whiteboard[string totitle $btName]
+	    bindtags $wcan [list $wcan $tag WhiteboardNonText Whiteboard $w all]
+	}
+	text {
+	    bindtags $wcan  \
+	      [list $wcan WhiteboardText Whiteboard $w all]
+	}
+    }
+}
+
+# WB::SetKeyboardBinds --
+# 
+#       Sets edit menu key binds.
+
+proc ::WB::SetKeyboardBinds {wcan btName} {
+    global  this
+    
+    set mod $this(modkey)
+        
+    # Generic nontext binds.
+    # 
+    # @@@ Could perhaps made to bind to 'Whiteboard'.
+    if {$btName ne "text"} {
+	bind $wcan <BackSpace> [list ::CanvasDraw::DeleteSelected $wcan]
+	bind $wcan <Delete>    [list ::CanvasDraw::DeleteSelected $wcan]
+	bind $wcan <Control-d> [list ::CanvasDraw::DeleteSelected $wcan]
+    }
+}
+
+# WB::SetItemBinds --
+#
+#       Mainly sets all button specific item binds.
+#       
+# Arguments:
+#       wcan        canvas widget
+#       btName      tool button name
+#       
+# Results:
+#       none
+
+proc ::WB::SetItemBinds {wcan btName} {
+    global  this
+
+    set w [winfo toplevel $wcan]
+
     # These ones are needed to cancel selection since we compete
     # with Button-1 binding to canvas.
     switch -- $this(platform) {
-	macintosh - macosx {
+	macosx {
 	    $wcan bind std <Control-ButtonRelease-1> {
 		::CanvasDraw::CancelBox %W
 		::CanvasDraw::CancelPoly %W
@@ -1470,14 +1533,11 @@ proc ::WB::SetItemBinds {w btName} {
 
     switch -- $btName {
 	point {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardPoint WhiteboardNonText Whiteboard $w all]
-
 	    $wcan bind std <Double-Button-1>  \
-	      [list ::ItemInspector::ItemInspector $w current]
+	      [list ::ItemInspector::ItemInspector $wcan current]
 
 	    switch -- $this(platform) {
-		macintosh - macosx {
+		macosx {
 		    $wcan bind std&&!locked <Button-1> {
 			::CanvasUtils::StartTimerToPopupEx %W %X %Y \
 			  ::CanvasUtils::DoItemPopup
@@ -1489,10 +1549,6 @@ proc ::WB::SetItemBinds {w btName} {
 		    $wcan bind std <ButtonRelease-1> {
 			::CanvasUtils::StopTimerToPopupEx
 		    }
-		    SetStatusMessage $w [mc uastatpointmac]
-		}
-		default {
-		    SetStatusMessage $w [mc uastatpoint]		      
 		}
 	    }
 	}
@@ -1503,8 +1559,6 @@ proc ::WB::SetItemBinds {w btName} {
 	    # Binds directly to canvas widget since we want to move selected 
 	    # items as well.
 	    # With shift constrained move.
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardMove WhiteboardNonText Whiteboard $w all]	    
 
 	    $wcan bind std&&!locked <Button-1> {
 		::CanvasDraw::InitMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
@@ -1557,81 +1611,77 @@ proc ::WB::SetItemBinds {w btName} {
 	    $wcan bind tbbox&&arc <Shift-B1-Motion> {
 		::CanvasDraw::DragMoveArcPoint %W [%W canvasx %x] [%W canvasy %y] shift
 	    }
-	    
-	    $wcan config -cursor fleur
-	    SetStatusMessage $w [mc uastatmove]
-	}
-	line {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardLine WhiteboardNonText Whiteboard $w all]
-	    SetStatusMessage $w [mc uastatline]
-	}
-	arrow {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardArrow WhiteboardNonText Whiteboard $w all]
-	    SetStatusMessage $w [mc uastatarrow]
-	}
-	rect {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardRect WhiteboardNonText Whiteboard $w all]
-	    SetStatusMessage $w [mc uastatrect]
-	}
-	oval {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardOval WhiteboardNonText Whiteboard $w all]
-	    SetStatusMessage $w [mc uastatoval]
 	}
 	text {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardText Whiteboard $w all]
 	    ::CanvasText::EditBind $wcan
-	    $wcan config -cursor xterm
-	    SetStatusMessage $w [mc uastattext]
 	}
 	del {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardDel WhiteboardNonText Whiteboard $w all]
 	    $wcan bind std&&!locked <Button-1> {
 		::CanvasDraw::DeleteCurrent %W
 	    }
 	}
+    }
+}
+
+proc ::WB::SetToolUI {wcan btName} {
+    global  this
+
+    set w [winfo toplevel $wcan]
+
+    switch -- $btName {
+	point {
+	    switch -- $this(platform) {
+		macosx {
+		    SetStatusMessage $w [mc uastatpointmac]
+		}
+		default {
+		    SetStatusMessage $w [mc uastatpoint]		      
+		}
+	    }
+	}
+	move {
+	    $wcan config -cursor fleur
+	    SetStatusMessage $w [mc uastatmove]
+	}
+	line {
+	    SetStatusMessage $w [mc uastatline]
+	}
+	arrow {
+	    SetStatusMessage $w [mc uastatarrow]
+	}
+	rect {
+	    SetStatusMessage $w [mc uastatrect]
+	}
+	oval {
+	    SetStatusMessage $w [mc uastatoval]
+	}
+	text {
+	    $wcan config -cursor xterm
+	    SetStatusMessage $w [mc uastattext]
+	}
+	del {
+	    SetStatusMessage $w [mc uastatdel]
+	}
 	pen {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardPen WhiteboardNonText Whiteboard $w all]
 	    $wcan config -cursor pencil
 	    SetStatusMessage $w [mc uastatpen]
 	}
 	brush {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardBrush WhiteboardNonText Whiteboard $w all]
 	    SetStatusMessage $w [mc uastatbrush]
 	}
 	paint {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardPaint WhiteboardNonText Whiteboard $w all]
 	    SetStatusMessage $w [mc uastatpaint]	      
 	}
 	poly {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardPoly WhiteboardNonText Whiteboard $w all]
 	    SetStatusMessage $w [mc uastatpoly]	      
 	}       
 	arc {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardArc WhiteboardNonText Whiteboard $w all]
 	    SetStatusMessage $w [mc uastatarc]	      
 	}
 	rot {
-	    bindtags $wcan  \
-	      [list $wcan WhiteboardRot WhiteboardNonText Whiteboard $w all]
 	    $wcan config -cursor exchange
 	    SetStatusMessage $w [mc uastatrot]	      
 	}
-    }
-    
-    # Collect all common non textual bindings in one procedure.
-    if {$btName ne "text"} {
-	GenericNonTextBindings $w
     }
 }
 
@@ -1644,18 +1694,17 @@ proc ::WB::SetItemBinds {w btName} {
 #       2) When whiteboard gets focus
 #       
 # Arguments:
-#       w           toplevel widget path
-#       btName 
+#       wcan        canvas widget
+#       btName      tool button name
 #       
 # Results:
 #       none
 
-proc ::WB::SetFrameItemBinds {w btName} {
+proc ::WB::SetFrameItemBinds {wcan btName} {
     global  this
-    upvar ::WB::${w}::wapp wapp
-    
-    set wcan $wapp(can)
-    
+
+    set w [winfo toplevel $wcan]
+
     bind QTFrame <Button-1> {}
     bind QTFrame <B1-Motion> {}
     bind QTFrame <ButtonRelease-1> {}
@@ -1719,20 +1768,8 @@ proc ::WB::SetFrameItemBinds {w btName} {
 	      [subst {::CanvasDraw::DeleteFrame $wcan %W %x %y}]
 	    bind SnackFrame <Button-1>  \
 	      [subst {::CanvasDraw::DeleteFrame $wcan %W %x %y}]
-	    SetStatusMessage $w [mc uastatdel]
 	}
     }
-}
-
-proc ::WB::GenericNonTextBindings {w} {
-    
-    upvar ::WB::${w}::wapp wapp
-    set wcan $wapp(can)
-    
-    # Various bindings.
-    bind $wcan <BackSpace> [list ::CanvasDraw::DeleteSelected $wcan]
-    bind $wcan <Delete>    [list ::CanvasDraw::DeleteSelected $wcan]
-    bind $wcan <Control-d> [list ::CanvasDraw::DeleteSelected $wcan]
 }
 
 # WB::RemoveAllBindings --
@@ -1798,6 +1835,275 @@ proc ::WB::RegisterCanvasInstBinds {wcan name canvasBindList} {
     ::Plugins::SetCanvasBinds $wcan $state(toolPrev) $state(tool)
 }
 
+# WB::HaveCanvasFocus, ... --
+#
+#       These are functions used for menu and keyboard whiteboard commands.
+#       Commands that need an explicit selection requires canvas focus but
+#       other commands operate on the frontmost canvas.
+
+proc ::WB::HaveCanvasFocus {} {
+    if {[winfo exists [focus]]} {
+	if {[winfo class [winfo parent [focus]]] eq "WBCanvas"} {
+	    return 1
+	}
+    }
+    return 0
+}
+
+proc ::WB::GetFrontmostCanvas {} {
+    if {[winfo exists [focus]]} {
+	return [GetCanvasFromWtop [winfo toplevel [focus]]]
+    }
+}
+
+proc ::WB::HaveSelection {wcan} {
+    return [expr {[llength [$wcan find withtag selected]] == 0 ? 0 : 1}]
+}
+
+proc ::WB::StateNormal {wcan} {
+    set w [winfo toplevel $wcan]
+    upvar ::WB::${w}::opts opts
+    return [expr {($opts(-state) eq "normal") ? 1 : 0}]
+}
+
+# Menu events ------------------------------------------------------------------
+
+# File menu.
+
+proc ::WB::OnMenuImport {} {
+    OnImport [GetFrontmostCanvas]
+}
+
+proc ::WB::OnMenuOpenURL {} {
+    OnOpenURL [GetFrontmostCanvas]
+}
+
+proc ::WB::OnMenuOpenCanvas {} {
+    OnOpenCanvas [GetFrontmostCanvas]
+}
+
+proc ::WB::OnMenuSaveCanvas {} {
+    OnSaveCanvas [GetFrontmostCanvas]
+}
+
+proc ::WB::OnMenuSaveAs {} {
+    OnSaveAs [GetFrontmostCanvas]
+}
+
+proc ::WB::OnMenuSaveAsItem {} {
+    OnSaveAsItem [GetFrontmostCanvas]
+}
+
+proc ::WB::OnMenuPageSetup {} {
+    OnPageSetup [GetFrontmostCanvas]
+}
+
+proc ::WB::OnMenuPrintCanvas {} {
+    OnPrintCanvas [GetFrontmostCanvas]
+}
+
+# Edit menu.
+
+proc ::WB::OnMenuUndo {} {
+    OnUndo [GetFrontmostCanvas]
+}
+
+proc ::WB::OnMenuRedo {} {
+    OnRedo [GetFrontmostCanvas]
+}
+
+proc ::WB::OnMenuAll {} {
+    OnAll [GetFrontmostCanvas]
+}
+
+proc ::WB::OnMenuEraseAll {} {
+    OnEraseAll [GetFrontmostCanvas]
+}
+
+proc ::WB::OnMenuRaise {} {
+    if {[HaveCanvasFocus]} {
+	OnRaise [focus]
+    }
+}
+
+proc ::WB::OnMenuLower {} {
+    if {[HaveCanvasFocus]} {
+	OnLower [focus]
+    }
+}
+
+proc ::WB::OnMenuLarger {} {
+    if {[HaveCanvasFocus]} {
+	OnLarger [focus]
+    }
+}
+
+proc ::WB::OnMenuSmaller {} {
+    if {[HaveCanvasFocus]} {
+	OnSmaller [focus]
+    }
+}
+
+proc ::WB::OnMenuItemInspector {} {
+    if {[HaveCanvasFocus]} {
+	OnItemInspector [focus]
+    }
+}
+
+proc ::WB::OnMenuFlipHorizontal {} {
+    if {[HaveCanvasFocus]} {
+	OnFlipHorizontal [focus]
+    }
+}
+
+proc ::WB::OnMenuFlipVertical {} {
+    if {[HaveCanvasFocus]} {
+	OnFlipVertical [focus]
+    }
+}
+
+proc ::WB::OnMenuImageLarger {} {
+    if {[HaveCanvasFocus]} {
+	OnImageLarger [focus]
+    }
+}
+
+proc ::WB::OnMenuImageSmaller {} {
+    if {[HaveCanvasFocus]} {
+	OnImageSmaller [focus]
+    }
+}
+
+# Keyboard events --------------------------------------------------------------
+
+# File events.
+
+proc ::WB::OnImport {wcan} {
+    if {[StateNormal $wcan]} {
+	::Import::ImportImageOrMovieDlg $wcan
+    }
+}
+
+proc ::WB::OnOpenURL {wcan} {
+    if {[StateNormal $wcan]} {
+	::Multicast::OpenMulticast $wcan
+    }
+}
+
+proc ::WB::OnOpenCanvas {wcan} {
+    if {[StateNormal $wcan]} {
+	::CanvasFile::OpenCanvasFileDlg $wcan
+    }
+}
+
+proc ::WB::OnSaveCanvas {wcan} {
+    ::CanvasFile::Save $wcan
+}
+
+proc ::WB::OnSaveAs {wcan} {
+    ::CanvasFile::SaveAsDlg $wcan
+}
+
+proc ::WB::OnSaveAsItem {wcan} {
+    if {[StateNormal $wcan]} {
+	::CanvasCmd::DoSaveAsItem $wcan
+    }
+}
+
+proc ::WB::OnPageSetup {wcan} {
+    ::UserActions::PageSetup [winfo toplevel $wcan]
+}
+
+proc ::WB::OnPrintCanvas {wcan} {
+    ::UserActions::DoPrintCanvas $wcan
+}
+
+# Edit events.
+
+proc ::WB::OnUndo {wcan} {
+    if {[StateNormal $wcan] && [undo::canundo [GetUndoToken $wcan]]} {
+	::CanvasCmd::Undo $wcan
+    }
+}
+
+proc ::WB::OnRedo {wcan} {
+    if {[StateNormal $wcan] && [undo::canredo [GetUndoToken $wcan]]} {
+	::CanvasCmd::Redo $wcan
+    }
+}
+
+proc ::WB::OnAll {wcan} {
+    ::CanvasCmd::SelectAll $wcan
+}
+
+proc ::WB::OnEraseAll {wcan} {
+    if {[StateNormal $wcan]} {
+	::CanvasCmd::DoEraseAll $wcan
+    }
+}
+
+proc ::WB::OnLower {wcan} {
+    if {[HaveSelection $wcan] && [StateNormal $wcan]} {
+	::CanvasCmd::RaiseOrLowerItems $wcan lower
+    }
+}
+
+proc ::WB::OnRaise {wcan} {
+    if {[HaveSelection $wcan] && [StateNormal $wcan]} {
+	::CanvasCmd::RaiseOrLowerItems $wcan raise
+    }
+}
+
+proc ::WB::OnLarger {wcan} {
+    global  prefs
+    if {[HaveSelection $wcan] && [StateNormal $wcan]} {
+	::CanvasCmd::ResizeItem $wcan $prefs(scaleFactor)
+    }    
+}
+
+proc ::WB::OnSmaller {wcan} {
+    global  prefs
+    if {[HaveSelection $wcan] && [StateNormal $wcan]} {
+	::CanvasCmd::ResizeItem $wcan $prefs(invScaleFac)
+    }    
+}
+
+proc ::WB::OnItemInspector {wcan} {
+    if {[HaveSelection $wcan] && [StateNormal $wcan]} {
+	::ItemInspector::ItemInspector $wcan selected
+    }
+}
+
+proc ::WB::OnFlipHorizontal {wcan} {
+    if {[HaveSelection $wcan] && [StateNormal $wcan]} {
+	::CanvasCmd::FlipItem $wcan horizontal
+    }
+}
+
+proc ::WB::OnFlipVertical {wcan} {
+    if {[HaveSelection $wcan] && [StateNormal $wcan]} {
+	::CanvasCmd::FlipItem $wcan vertical
+    }
+}
+
+proc ::WB::OnImageLarger {wcan} {
+    if {[HaveSelection $wcan] && [StateNormal $wcan]} {
+	::Import::ResizeImage $wcan 2 sel auto
+    }
+}
+
+proc ::WB::OnImageSmaller {wcan} {
+    if {[HaveSelection $wcan] && [StateNormal $wcan]} {
+	::Import::ResizeImage $wcan -2 sel auto
+    }
+}
+
+proc ::WB::OnKeyAnyArrow {wcan detail} {
+    if {[HaveSelection $wcan] && [StateNormal $wcan]} {
+	::CanvasCmd::MoveSelected $wcan $detail
+    }
+}
+
 # WB::BuildWhiteboardMenus --
 #
 #       Makes all menus for a toplevel window.
@@ -1826,7 +2132,7 @@ proc ::WB::BuildWhiteboardMenus {w} {
     } else {
 	frame $wmenu -bd 1 -relief raised
     }
-    if {[string match "mac*" $this(platform)] && $prefs(haveMenus)} {
+    if {[tk windowingsystem] eq "aqua" && $prefs(haveMenus)} {
 	set haveAppleMenu 1
     } else {
 	set haveAppleMenu 0
@@ -1849,17 +2155,26 @@ proc ::WB::BuildWhiteboardMenus {w} {
     ::UI::BuildPublicMenus $w $wmenu
     
     ::UI::NewMenu $w $wmenu.info mInfo $menuDefs(main,info) $opts(-state)
+    
+    # The edit menu binds directly to canvas.
+    ::UI::SetMenuAcceleratorBinds $w $wmenu.file
+    ::UI::SetMenuAcceleratorBinds $w $wmenu.prefs
+    ::UI::SetMenuAcceleratorBinds $w $wmenu.info
 
     # Handle '-state disabled' option. Keep Edit/Copy.
     if {$opts(-state) eq "disabled"} {
-	::WB::DisableWhiteboardMenus $wmenu
+	MenubarSetState $wmenu disabled
     }
     
     # Use a function for this to dynamically build this menu if needed.
-    ::WB::BuildFontMenu $w $prefs(canvasFonts)    
+    BuildFontMenu $w $prefs(canvasFonts)    
 
+    $wmenu.file configure -postcommand  \
+      [list ::WB::FilePostCommand $w $wmenu.file]
     $wmenu.edit configure -postcommand  \
       [list ::WB::EditPostCommand $w $wmenu.edit]
+    $wmenu.prefs configure -postcommand  \
+      [list ::WB::PrefsPostCommand $w $wmenu.prefs]
 
     # End menus; place the menubar.
     if {$prefs(haveMenus)} {
@@ -1869,25 +2184,21 @@ proc ::WB::BuildWhiteboardMenus {w} {
     }
 }
 
-# WB::DisableWhiteboardMenus --
+# WB::MenubarSetState --
 #
 #       Handle '-state disabled' option. Sets in a readonly state.
 
-proc ::WB::DisableWhiteboardMenus {wmenu} {
+proc ::WB::MenubarSetState {wmenu mbstate} {
     variable menuSpecPublic
     
-    ::UI::MenuDisableAllBut $wmenu.file {
-	mNew mCloseWindow mSaveCanvas mPageSetup mPrintCanvas
-    }
-    ::UI::MenuDisableAllBut $wmenu.edit {mAll}
-    $wmenu entryconfigure [mc mPreferences] -state disabled
-    $wmenu entryconfigure [mc mLibrary] -state disabled
-    $wmenu entryconfigure [mc mInfo] -state disabled
+    $wmenu entryconfigure [mc mPreferences] -state $mbstate
+    $wmenu entryconfigure [mc mLibrary] -state $mbstate
+    $wmenu entryconfigure [mc mInfo] -state $mbstate
 	
     # Handle all 'plugins'.
     foreach wpath $menuSpecPublic(wpaths) {
 	set name $menuSpecPublic($wpath,name)
-	$wmenu entryconfigure $name -state disabled
+	$wmenu entryconfigure $name -state $mbstate
     }
 }
 
@@ -2449,6 +2760,26 @@ proc ::WB::SetScrollregion {w swidth sheight} {
     $wapp(can) configure -scrollregion [list 0 0 $swidth $sheight]
 }
 
+proc ::WB::FilePostCommand {w wmenu} {
+    upvar ::WB::${w}::opts opts
+
+    set editable 0
+    if {$opts(-state) eq "normal"} {
+	set editable 1
+    }
+    if {$editable} {
+	::UI::MenuEnableAll $wmenu
+    } else {
+	::UI::MenuDisableAllBut $wmenu {
+	    mNew mCloseWindow mSaveCanvas mPageSetup mPrintCanvas
+	}
+    }
+    ::hooks::run menuPostCommand file $wmenu
+    
+    # Workaround for mac bug.
+    update idletasks
+}
+
 # WB::EditPostCommand --
 # 
 #       Post command for edit menu.
@@ -2460,91 +2791,41 @@ proc ::WB::SetScrollregion {w swidth sheight} {
 # Results:
 
 proc ::WB::EditPostCommand {w wmenu} {
-    upvar ::WB::${w}::wapp wapp
-    upvar ::WB::${w}::opts opts
     
     set wfocus [focus]
-    set haveFocus 0
-    set haveSelection 0
-    set editable 0
-    if {$opts(-state) eq "normal"} {
-	set editable 1
-    }
-    if {$wfocus ne ""} {
+
+    # Start by having all off.
+    ::UI::MenuDisableAllBut $wmenu {}
+
+    if {[winfo exists $wfocus]} {
 	set wclass [winfo class $wfocus]
-	if {[lsearch {Canvas Entry Text TEntry} $wclass] >= 0} {
-	    set haveFocus 1
+	if {$wclass eq "Canvas" && [winfo class [winfo parent $wfocus]] eq "WBCanvas"} {
+	    set wclass WBCanvas
 	}
+
 	switch -- $wclass {
-	    TEntry {
-		set haveSelection [$wfocus selection present]
-		set state [$wfocus state]
-		if {[lsearch $state disabled] >= 0} {
-		    set editable 0
-		} elseif {[lsearch $state readonly] >= 0} {
-		    set editable 0
-		}
+	    TEntry - Entry - Text {
+		foreach {mkey mstate} [::UI::GenericCCPMenuStates] {
+		    ::UI::MenuMethod $wmenu entryconfigure $mkey -state $mstate
+		}	
 	    }
-	    Entry {
-		set haveSelection [$wfocus selection present]
-		if {[$wfocus cget -state] eq "disabled"} {
-		    set editable 0
-		}
-	    }
-	    Text {
-		if {![catch {$wfocus get sel.first sel.last} data]} {
-		    if {$data ne ""} {
-			set haveSelection 1
-		    }
-		}
-		if {[$wfocus cget -state] eq "disabled"} {
-		    set editable 0
-		}
-	    }
-	    Canvas {
-		set wcan $wapp(can)
-		if {[$wcan find withtag selected] != {}} {
-		    set haveSelection 1
-		} elseif {[$wcan select item] != {}} {
-		    set haveSelection 1
-		}
+	    WBCanvas {
+		EditPostCommandWhiteboard $w $wmenu		
 	    }
 	}
     }
-    
-    # Cut, copy and paste menu entries.
-    if {$haveSelection} {
-	if {$editable} {
-	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
-	} else {
-	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
-	}
-	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal    
-    } else {
-	::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
-	::UI::MenuMethod $wmenu entryconfigure mCopy -state disabled    
-    }
-    if {[catch {selection get -sel CLIPBOARD} str]} {
-	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
-    } elseif {$editable && $haveFocus && ($str ne "")} {
-	::UI::MenuMethod $wmenu entryconfigure mPaste -state normal
-    } else {
-	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
-    }
-    if {$wclass eq "Canvas"} {
-	EditPostCommandCanvas $w $wmenu
-    }
-    
+
+    ::hooks::run menuPostCommand edit $wmenu
+
     # Workaround for mac bug.
     update idletasks
 }
 
-# WB::EditPostCommandCanvas --
+# WB::EditPostCommandWhiteboard --
 # 
-#       Supposed to set the specific whiteboard edit menu entries.
-#       Cut, copy and paste handled elsewhere.
+#       Sets the specific whiteboard edit menu entry states.
 
-proc ::WB::EditPostCommandCanvas {w wmenu} {
+proc ::WB::EditPostCommandWhiteboard {w wmenu} {
     upvar ::WB::${w}::wapp wapp
     upvar ::WB::${w}::opts opts
 
@@ -2555,6 +2836,8 @@ proc ::WB::EditPostCommandCanvas {w wmenu} {
     }
     set selected [$wcan find withtag selected]
     set len [llength $selected]
+    set haveSelection 0
+    set haveTextSelection 0
     set haveFlip 0
     set haveImage 0
     set haveText 0
@@ -2588,12 +2871,77 @@ proc ::WB::EditPostCommandCanvas {w wmenu} {
 	    set flip 1
 	}
     }
+    if {$len} {
+	set haveSelection 1
+    } else {
+	set t [$wcan select item]
+	if {$t ne {}} {
+	    set text [$wcan itemcget $t -text]
+	    set start [$wcan index $t sel.first]
+	    set end [$wcan index $t sel.last]
+	    if {[string length [string range $text $start $end]]} {
+		set haveTextSelection 1
+	    }
+	}
+    }
     if {$haveResize && !$haveImage && !$haveText} {
 	set resize 1
     }
-    #puts "len=$len, haveFlip=$haveFlip, haveImage=$haveImage, haveText=$haveText"
-    #puts "haveResize=$haveResize, flip=$flip, resize=$resize, resizeImage=$resizeImage,"
 
+    
+    proc ::WB::OnUndo {wcan} {
+	if {[StateNormal $wcan] && [undo::canundo [GetUndoToken $wcan]]} {
+	    ::CanvasCmd::Undo $wcan
+	}
+    }
+
+    proc ::WB::OnRedo {wcan} {
+	if {[StateNormal $wcan] && [undo::canredo [GetUndoToken $wcan]]} {
+	    ::CanvasCmd::Redo $wcan
+	}
+    }
+
+    # Undo and redo.
+    if {$normal && [undo::canundo [GetUndoToken $wcan]]} {
+	::UI::MenuMethod $wmenu entryconfigure mUndo -state normal
+    } else {
+	::UI::MenuMethod $wmenu entryconfigure mUndo -state disabled
+    }
+    if {$normal && [undo::canredo [GetUndoToken $wcan]]} {
+	::UI::MenuMethod $wmenu entryconfigure mRedo -state normal
+    } else {
+	::UI::MenuMethod $wmenu entryconfigure mRedo -state disabled
+    }
+    
+    # Cut, copy and paste menu entries.
+    if {$haveSelection} {
+	if {$normal} {
+	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
+	} else {
+	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
+	}
+	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal 
+    } elseif {$haveTextSelection} {
+	::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
+	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal    
+    } else {
+	::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mCopy -state disabled    
+    }
+    if {[catch {selection get -sel CLIPBOARD} str]} {
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
+    } elseif {$normal && ($str ne "")} {
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state normal
+    } else {
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
+    }
+
+    ::UI::MenuMethod $wmenu entryconfigure mAll -state normal
+    if {$len && $normal} {
+	::UI::MenuMethod $wmenu entryconfigure mEraseAll -state normal
+    } else {
+	::UI::MenuMethod $wmenu entryconfigure mEraseAll -state disabled
+    }
     if {!$len || !$normal} {
 	
 	# There is no selection in the canvas or whiteboard disabled.
@@ -2631,50 +2979,37 @@ proc ::WB::EditPostCommandCanvas {w wmenu} {
     }
 }
 
+proc ::WB::PrefsPostCommand {w wmenu} {
+    
+    # Complete menu disabled for disabled whiteboard.
+    
+    ::hooks::run menuPostCommand prefs $wmenu
+    
+    # Workaround for mac bug.
+    update idletasks
+}
+
 # WB::GetFocus --
 #
-#       Check clipboard and activate corresponding menus.    
+#       Check clipboard and activate corresponding menus. ???   
 #       
 # Results:
-#       updates state of menus.
+#       none.
 
 proc ::WB::GetFocus {w wevent} {
     
     upvar ::WB::${w}::opts opts
     upvar ::WB::${w}::wapp wapp
 
+    set wcan $wapp(can)
+
     # Bind to toplevel may fire multiple times.
-    if {$w != $wevent} {
+    if {$w ne $wevent} {
 	return
     }
     Debug 3 "GetFocus:: w=$w, wevent=$wevent"
     
-    SetFrameItemBinds $w [GetButtonState $w]
-}
-
-# WB::FixMenusWhenCopy --     OBSOLETE ???
-# 
-#       Sets the correct state for menus and buttons when copy something.
-#       
-# Arguments:
-#       wevent    the widget that contains something that is copied.
-#
-# Results:
-
-proc ::WB::FixMenusWhenCopy {wevent} {
-
-    set w [winfo toplevel $wevent]
-    upvar ::WB::${w}::opts opts
-    
-    if {0} {
-	if {$opts(-state) eq "normal"} {
-	    ::UI::MenuMethod $w.menu.edit entryconfigure mPaste -state normal
-	} else {
-	    ::UI::MenuMethod $w.menu.edit entryconfigure mPaste -state disabled
-	}
-    }
-        
-    ::hooks::run whiteboardFixMenusWhenHook $w "copy"
+    SetFrameItemBinds $wcan [GetButtonState $w]
 }
 
 # WB::MakeItemMenuDef --

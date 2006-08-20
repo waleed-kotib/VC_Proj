@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.14 2006-08-11 06:01:16 matben Exp $
+# $Id: FTrans.tcl,v 1.15 2006-08-20 13:41:18 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -321,7 +321,7 @@ proc ::FTrans::Build {jid args} {
     eval {SendDialog $w $jid  \
       -command [namespace current]::DoSend  \
       -menu $m -geovariable prefs(winGeom,$dlg)} $args
-    ::UI::SetMenuAcceleratorBinds $w $m
+    ::UI::SetMenubarAcceleratorBinds $w $m
 
     return $w
 }
