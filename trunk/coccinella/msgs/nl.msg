@@ -355,7 +355,7 @@
 ::msgcat::mcset nl mNormal			{Normaal}
 ::msgcat::mcset nl mBold			{Vet}
 ::msgcat::mcset nl mItalic			{Cursief}
-::msgcat::mcset nl mPreferences			{&Voorkeuren...}
+::msgcat::mcset nl mPreferences			{Voorkeuren}
 ::msgcat::mcset nl mNewAccount			{Nieuwe account...}
 ::msgcat::mcset nl mLogin			{Aanmelden...}
 ::msgcat::mcset nl mLogout			{Afmelden}
