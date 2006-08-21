@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: AutoUpdate.tcl,v 1.17 2006-08-20 13:41:09 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.18 2006-08-21 09:45:47 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -30,7 +30,7 @@ proc ::AutoUpdate::Init { } {
     ::hooks::register launchFinalHook ::AutoUpdate::LaunchHook
 
     set menuspec  \
-      {command   mUpdateCheck     {::AutoUpdate::Get -silent 0} normal   {}}
+      {command   mUpdateCheck     {::AutoUpdate::Get -silent 0}   {}}
     ::JUI::RegisterMenuEntry info $menuspec
 
     component::register AutoUpdate  \

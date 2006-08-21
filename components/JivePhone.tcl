@@ -4,7 +4,7 @@
 #       
 #       Contributions and testing by Antonio Cano damas
 #       
-# $Id: JivePhone.tcl,v 1.22 2006-08-20 13:41:17 matben Exp $
+# $Id: JivePhone.tcl,v 1.23 2006-08-21 09:45:48 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -57,7 +57,7 @@ proc ::JivePhone::Init { } {
 
     variable menuDef
     set menuDef  \
-      {command  mJiveCall     {::JivePhone::DoDial "DIAL"}    normal {}}
+      {command  mJiveCall     {::JivePhone::DoDial "DIAL"}    {}}
 
 
     #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------

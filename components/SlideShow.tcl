@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.19 2006-08-20 13:41:17 matben Exp $
+#       $Id: SlideShow.tcl,v 1.20 2006-08-21 09:45:48 matben Exp $
 
 package require undo
 
@@ -18,13 +18,13 @@ proc ::SlideShow::Load { } {
     ::Debug 2 "::SlideShow::Load"
     
     set menuspec \
-      {cascade     {Slide Show}     {}                           normal   {} {} {
-	{command   {Pick Directory} {::SlideShow::PickFolder $w} normal   {} {}}
+      {cascade     {Slide Show}     {}                             {} {} {
+	{command   {Pick Directory} {::SlideShow::PickFolder $w}   {} {}}
 	{separator}
-	{command   {Previous}       {::SlideShow::Previous $w}   disabled {} {}}
-	{command   {Next}           {::SlideShow::Next $w}       disabled {} {}}
-	{command   {First}          {::SlideShow::First $w}      disabled {} {}}
-	{command   {Last}           {::SlideShow::Last $w}       disabled {} {}}
+	{command   {Previous}       {::SlideShow::Previous $w}   {} {}}
+	{command   {Next}           {::SlideShow::Next $w}       {} {}}
+	{command   {First}          {::SlideShow::First $w}      {} {}}
+	{command   {Last}           {::SlideShow::Last $w}       {} {}}
       }
     }
 
@@ -38,7 +38,8 @@ proc ::SlideShow::Load { } {
     ::hooks::register initHook                       ::SlideShow::InitHook
     ::hooks::register whiteboardBuildButtonTrayHook  ::SlideShow::BuildButtonsHook
     ::hooks::register whiteboardCloseHook            ::SlideShow::CloseHook
-
+    ::hooks::register menuPostCommand                ::SlideShow::MenuPostHook
+    
     ::UI::Public::RegisterMenuEntry file $menuspec
     
     component::register SlideShow  \
@@ -263,10 +264,6 @@ proc ::SlideShow::PickFolder {w} {
 	
 	# Check first if any useful content?
 	set priv($w,dir) $ans
-	set prefs(slideShow,dir) $ans
-	set msshow [::UI::GetMenu $w "Slide Show" Next]
-	::UI::MenuMethod $msshow entryconfigure First -state normal
-	::UI::MenuMethod $msshow entryconfigure Last  -state normal
 	LoadFolder $w
     }
 }
@@ -289,7 +286,7 @@ proc ::SlideShow::LoadFolder {w} {
     
     # Pick first one.
     OpenPage $w [lindex $pages 0]
-    SetMenuState $w
+    SetButtonState $w
 }
 
 proc ::SlideShow::GetFile {w page} {
@@ -354,7 +351,7 @@ proc ::SlideShow::Previous {w} {
     SaveCurrentCanvas $w
     set ind [lsearch -exact $priv(pages) $priv($w,current)]
     OpenPage $w [lindex $priv(pages) [expr $ind - 1]]
-    SetMenuState $w
+    SetButtonState $w
 }
 
 proc ::SlideShow::Next {w} {    
@@ -363,7 +360,7 @@ proc ::SlideShow::Next {w} {
     SaveCurrentCanvas $w
     set ind [lsearch -exact $priv(pages) $priv($w,current)]
     OpenPage $w [lindex $priv(pages) [expr $ind + 1]]
-    SetMenuState $w
+    SetButtonState $w
 }
 
 proc ::SlideShow::First {w} {    
@@ -371,7 +368,7 @@ proc ::SlideShow::First {w} {
 
     SaveCurrentCanvas $w
     OpenPage $w [lindex $priv(pages) 0]
-    SetMenuState $w
+    SetButtonState $w
 }
 
 proc ::SlideShow::Last {w} {    
@@ -379,33 +376,54 @@ proc ::SlideShow::Last {w} {
 
     SaveCurrentCanvas $w
     OpenPage $w [lindex $priv(pages) end]
-    SetMenuState $w
+    SetButtonState $w
 }
 
-proc ::SlideShow::SetMenuState {w} {
+proc ::SlideShow::SetButtonState {w} {
     variable priv
     
     set wtray $priv($w,wtray)
-    set msshow [::UI::GetMenu $w "Slide Show" Next]
     if {[llength $priv(pages)]} {
-	::UI::MenuMethod $msshow entryconfigure Previous -state normal
-	::UI::MenuMethod $msshow entryconfigure Next     -state normal
 	if {[$wtray exists next]} {
 	    $wtray buttonconfigure next     -state normal
 	    $wtray buttonconfigure previous -state normal
 	}
     }
     if {[string equal $priv($w,current) [lindex $priv(pages) 0]]} {
-	::UI::MenuMethod $msshow entryconfigure Previous -state disabled
 	if {[$wtray exists previous]} {
 	    $wtray buttonconfigure previous -state disabled
 	}
     } elseif {[string equal $priv($w,current) [lindex $priv(pages) end]]} {
-	::UI::MenuMethod $msshow entryconfigure Next -state disabled
 	if {[$wtray exists next]} {
 	    $wtray buttonconfigure next -state disabled
 	}
     }
+}
+
+proc ::SlideShow::SetMenuState {w} {
+    global  prefs
+    variable priv
+    
+    set wmenu [::UI::GetMenu $w "Slide Show"]
+    if {[info exists priv($w,dir)] && [file isdirectory $priv($w,dir)]} {
+	::UI::MenuMethod $wmenu entryconfigure First -state normal
+	::UI::MenuMethod $wmenu entryconfigure Last  -state normal
+
+	if {[llength $priv(pages)]} {
+	    ::UI::MenuMethod $wmenu entryconfigure Previous -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure Next     -state normal
+	}
+	if {[string equal $priv($w,current) [lindex $priv(pages) 0]]} {
+	    ::UI::MenuMethod $wmenu entryconfigure Previous -state disabled
+	} elseif {[string equal $priv($w,current) [lindex $priv(pages) end]]} {
+	    ::UI::MenuMethod $wmenu entryconfigure Next -state disabled
+	}
+    } else {
+	::UI::MenuMethod $wmenu entryconfigure First -state disabled
+	::UI::MenuMethod $wmenu entryconfigure Last  -state disabled
+	::UI::MenuMethod $wmenu entryconfigure Previous -state disabled
+	::UI::MenuMethod $wmenu entryconfigure Next     -state disabled
+    }    
 }
 
 proc ::SlideShow::SaveCurrentCanvas {w} {
@@ -414,6 +432,16 @@ proc ::SlideShow::SaveCurrentCanvas {w} {
     set wcan [::WB::GetCanvasFromWtop $w]
     set fileName [file join $priv($w,dir) $priv($w,current)].can
     ::CanvasFile::SaveCanvas $wcan $fileName
+}
+
+proc ::SlideShow::MenuPostHook {type wmenu} {
+    variable priv
+    
+    if {$type eq "whiteboard-file"} {
+	if {[winfo exists [focus]]} {
+	    SetMenuState [winfo toplevel [focus]]
+	}
+    }
 }
 
 proc ::SlideShow::CloseHook {w} {

@@ -2,7 +2,7 @@
 # 
 #       Interface for launching Gnome Meeting.
 #
-# $Id: GMeeting.tcl,v 1.11 2006-08-20 13:41:17 matben Exp $
+# $Id: GMeeting.tcl,v 1.12 2006-08-21 09:45:47 matben Exp $
 
 namespace eval ::GMeeting:: {
     
@@ -35,7 +35,7 @@ proc ::GMeeting::Init { } {
     }
     
     set menuspec [list  \
-      command {Gnome Meeting...} [namespace current]::MenuCmd normal {} {} {}]
+      command {Gnome Meeting...} [namespace current]::MenuCmd {} {} {}]
     set menuSpec \
       [list command "Gnome Meeting..." user {::GMeeting::RosterCmd $jid3} {}]
         

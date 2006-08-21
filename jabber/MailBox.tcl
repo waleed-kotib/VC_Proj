@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.89 2006-08-20 13:41:18 matben Exp $
+# $Id: MailBox.tcl,v 1.90 2006-08-21 09:45:48 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1141,8 +1141,31 @@ proc ::MailBox::MakeWhiteboard {jid2} {
     } else {
 	::JWB::NewWhiteboard -w $w -state disabled \
 	  -title $title -jid $jid2 -usewingeom 1
+	bind $w <Destroy> {+::MailBox::OnDestroyWhiteboard %W}
     }
     return $w
+}
+
+proc ::MailBox::OnDestroyWhiteboard {w} {
+    variable locals
+    variable mailbox
+    
+    if {[winfo toplevel $w] eq $w} {
+	
+	# Deselect any selected whiteboards on destroy.
+	set T $locals(wtbl)
+	foreach item [$T selection get] {
+	    set uid  [$T item element cget $item cUid  eText -text]
+	    set uidcan [GetCanvasHexUID $uid]
+	    set svgElem [GetAnySVGElements $mailbox($uid)]
+	    if {[string length $uidcan]} {	
+		$T selection clear $item
+	    } elseif {[llength $svgElem]} {
+		$T selection clear $item
+	    }
+
+	}
+    }
 }
 
 proc ::MailBox::DoubleClickMsg {T} {

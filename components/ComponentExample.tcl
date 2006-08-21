@@ -12,7 +12,7 @@ proc ::ComponentExample::Init { } {
     ::Debug 2 "::ComponentExample::Init"
     
     set menuspec [list  \
-      command {More Junk...} [namespace current]::Cmd normal {} {} {}]
+      command {More Junk...} [namespace current]::Cmd  {} {} {}]
     set popMenuSpec [list "Plugin Junk" user [namespace current]::Cmd]
     
     ::UI::Public::RegisterNewMenu junk "Mats Junk" $menuspec

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: CanvasFile.tcl,v 1.24 2006-08-20 13:41:20 matben Exp $
+# $Id: CanvasFile.tcl,v 1.25 2006-08-21 09:45:48 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -802,7 +802,6 @@ proc ::CanvasFile::SVGFileToCanvas {w filePath} {
 
 proc ::CanvasFile::SVGImageHandler {w cmd} {
     
-    #puts "::CanvasFile::SVGImageHandler cmd=$cmd"
     set idx [lsearch -regexp $cmd {-[a-z]+}]
     array set argsArr [lrange $cmd $idx end]
     return [::WB::CreateImageForWtop $w "" -file $argsArr(-file)]
@@ -830,17 +829,18 @@ namespace eval ::CanvasFile:: {
     variable mkdbuid 0
 }
 
-proc ::CanvasFile::CanvasToMetakit {w fileName} {
+proc ::CanvasFile::CanvasToMetakit {wcan fileName} {
     variable mkdbuid
 
     package require Mk4tcl
     
     set tag canvasmkfile[incr mkdbuid]
     mk::file open $tag $fileName
-    set view [mk::view layout $tag.canvas command:S file:B data:S]
+    set view [mk::view layout $tag.canvas {command:S file:B data:S}]
+    puts "layout=[mk::view layout $tag.canvas]"
 
-    foreach id [$w find all] {
-	set line [::CanvasUtils::GetOneLinerForAny $w $id]
+    foreach id [$wcan find all] {
+	set line [::CanvasUtils::GetOneLinerForAny $wcan $id]
 
 	# Replace any -file options with a database entry.
 	set ind [lsearch -exact $line -file]
@@ -874,8 +874,12 @@ proc ::CanvasFile::MetakitToCanvas {wcan fileName} {
     
     set tag canvasmkfile[incr mkdbuid]
     mk::file open $tag $fileName
+
+    puts "layout=[mk::view layout $tag.canvas]"
+
     set views [mk::file views $tag]
     puts "views=$views"
+
     set w [winfo toplevel $wcan]
     
     # Handle only 'canvas' view.
@@ -892,16 +896,28 @@ proc ::CanvasFile::MetakitToCanvas {wcan fileName} {
 	if {$ind >= 0} {
 	    set tail [lindex $line [incr ind]]
 	    puts "..........c=$c"
-	    set dbd [mk::channel $c file read]
-	    set tmp [file join $this(tmpPath) ${tag}${i}${tail}]
-	    set fd [open $tmp {WRONLY CREAT}]
-	    fconfigure $fd -translation binary
-	    set n [fcopy $dbd $fd]
-	    puts "n=$n"
-	    close $fd
-	    close $dbd
-	    lset line $ind $tmp
-	    incr i
+	    
+	    if {0} {
+		set dbd [mk::channel $c file read]
+		set tmp [file join $this(tmpPath) ${tag}${i}${tail}]
+		set fd [open $tmp {WRONLY CREAT}]
+		fconfigure $fd -translation binary
+		set n [fcopy $dbd $fd]
+		puts "n=$n"
+		close $fd
+		close $dbd
+		lset line $ind $tmp
+		incr i
+	    } else {
+		set data [mk::get $c file]
+		set tmp [file join $this(tmpPath) ${tag}${i}${tail}]
+		set fd [open $tmp {WRONLY CREAT}]
+		fconfigure $fd -translation binary
+		puts -nonewline $fd $data
+		close $fd
+		lset line $ind $tmp
+		incr i
+	    }
 	}
 
 	set utag [::CanvasUtils::NewUtag]

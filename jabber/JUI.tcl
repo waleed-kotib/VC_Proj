@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.128 2006-08-20 13:41:18 matben Exp $
+# $Id: JUI.tcl,v 1.129 2006-08-21 09:45:48 matben Exp $
 
 package provide JUI 1.0
 
@@ -99,91 +99,91 @@ proc ::JUI::Init { } {
     
     if {[string match "mac*" $this(platform)]} {
 	set menuDefs(rost,file) {
-	    {command   mNewWhiteboard      {::JWB::NewWhiteboard}   normal   N}
-	    {command   mCloseWindow        {::UI::CloseWindowEvent} normal   W}
-	    {command   mPreferences...     {::Preferences::Build}   normal   {}}
+	    {command   mNewWhiteboard      {::JWB::NewWhiteboard}     N}
+	    {command   mCloseWindow        {::UI::CloseWindowEvent}   W}
+	    {command   mPreferences...     {::Preferences::Build}     {}}
 	    {separator}
-	    {command   mQuit               {::UserActions::DoQuit}  normal   Q}
+	    {command   mQuit               {::UserActions::DoQuit}    Q}
 	}
     } else {
 	set menuDefs(rost,file) {
-	    {command   mNewWhiteboard      {::JWB::NewWhiteboard}   normal   N}
-	    {command   mPreferences...     {::Preferences::Build}   normal   {}}
+	    {command   mNewWhiteboard      {::JWB::NewWhiteboard}     N}
+	    {command   mPreferences...     {::Preferences::Build}     {}}
 	    {separator}
-	    {command   mQuit               {::UserActions::DoQuit}  normal   Q}
+	    {command   mQuit               {::UserActions::DoQuit}    Q}
 	}
     }
     set menuDefs(rost,jabber) {    
-	{command     mNewAccount    {::RegisterEx::OnMenu}            normal {}}
-	{command     mLogin         {::Jabber::OnMenuLogInOut}        normal L}
-	{command     mLogoutWith    {::Jabber::Logout::OnMenuStatus}  normal {}}
-	{command     mPassword      {::Jabber::Passwd::OnMenu}        normal {}}
+	{command     mNewAccount    {::RegisterEx::OnMenu}            {}}
+	{command     mLogin         {::Jabber::OnMenuLogInOut}        L}
+	{command     mLogoutWith    {::Jabber::Logout::OnMenuStatus}  {}}
+	{command     mPassword      {::Jabber::Passwd::OnMenu}        {}}
 	{separator}
-	{checkbutton mMessageInbox  {::MailBox::OnMenu}     normal   I \
+	{checkbutton mMessageInbox  {::MailBox::OnMenu}               I \
 	  {-variable ::JUI::state(mailbox,visible)}}
 	{separator}
-	{command     mSearch        {::Search::OnMenu}        normal {}}
-	{command     mAddNewUser    {::JUser::OnMenu}         normal {}}
-	{cascade     mDisco         {}                        normal {} {} {
-	    {command mAddServer     {::Disco::OnMenuAddServer}   normal   {}}
+	{command     mSearch        {::Search::OnMenu}                {}}
+	{command     mAddNewUser    {::JUser::OnMenu}                 {}}
+	{cascade     mDisco         {}                                {} {} {
+	    {command mAddServer     {::Disco::OnMenuAddServer}        {}}
 	}}
 	{separator}
-	{command     mSendMessage   {::NewMsg::OnMenu}        normal M}
-	{command     mChat          {::Chat::OnMenu}          normal T}
-	{cascade     mStatus        {}                        normal {} {} {}}
+	{command     mSendMessage   {::NewMsg::OnMenu}                M}
+	{command     mChat          {::Chat::OnMenu}                  T}
+	{cascade     mStatus        {}                                {} {} {}}
 	{separator}
-	{command     mEnterRoom     {::GroupChat::OnMenuEnter}  normal R}
-	{command     mCreateRoom    {::GroupChat::OnMenuCreate} normal {}}
-	{command     mEditBookmarks {::GroupChat::OnMenuBookmark}       normal {}}
+	{command     mEnterRoom     {::GroupChat::OnMenuEnter}        R}
+	{command     mCreateRoom    {::GroupChat::OnMenuCreate}       {}}
+	{command     mEditBookmarks {::GroupChat::OnMenuBookmark}     {}}
 	{separator}
-	{command     mvCard         {::VCard::OnMenu}              normal {}}
-	{cascade     mShow          {}                             normal   {} {} {
-	    {check   mToolbar       {::JUI::OnMenuToggleToolbar}   normal   {} 
+	{command     mvCard         {::VCard::OnMenu}                 {}}
+	{cascade     mShow          {}                                {} {} {
+	    {check   mToolbar       {::JUI::OnMenuToggleToolbar}      {} 
 	    {-variable ::JUI::state(show,toolbar)}}
-	    {check   mNotebook      {::JUI::OnMenuToggleNotebook}  normal   {} 
+	    {check   mNotebook      {::JUI::OnMenuToggleNotebook}     {} 
 	    {-variable ::JUI::state(show,notebook)}}
-	    {check   mMinimal       {::JUI::OnMenuToggleMinimal}   normal   {} 
+	    {check   mMinimal       {::JUI::OnMenuToggleMinimal}      {} 
 	    {-variable ::JUI::state(show,minimal)}} }
 	}
 	{separator}
-	{command     mRemoveAccount {::Register::OnMenuRemove}     normal {}}	
+	{command     mRemoveAccount {::Register::OnMenuRemove}        {}}	
     }
 
     if {[tk windowingsystem] eq "aqua"} {
 	set menuDefs(rost,info) {    
-	    {command     mSetupAssistant {::Jabber::SetupAss::SetupAss}  normal {}}
-	    {command     mComponents    {::Dialogs::InfoComponents}   normal   {}}
-	    {command     mErrorLog      {::Jabber::ErrorLogDlg}       normal   {}}
-	    {checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \
+	    {command     mSetupAssistant {::Jabber::SetupAss::SetupAss} {}}
+	    {command     mComponents    {::Dialogs::InfoComponents}     {}}
+	    {command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
+	    {checkbutton mDebug         {::Jabber::DebugCmd}            {} \
 	      {-variable ::Jabber::jstate(debugCmd)}}
 	    {separator}
-	    {command     mCoccinellaHome {::JUI::OpenCoccinellaURL} normal {}}
-	    {command     mBugReport      {::JUI::OpenBugURL}   normal {}}
+	    {command     mCoccinellaHome {::JUI::OpenCoccinellaURL}     {}}
+	    {command     mBugReport      {::JUI::OpenBugURL}            {}}
 	}
     } else {
 	set menuDefs(rost,info) {    
 	    {command     mSetupAssistant {
 		package require SetupAss; ::Jabber::SetupAss::SetupAss
 	    }                             normal {}}
-	    {command     mComponents    {::Dialogs::InfoComponents}   normal   {}}
-	    {command     mErrorLog      {::Jabber::ErrorLogDlg}       normal   {}}
-	    {checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \
+	    {command     mComponents    {::Dialogs::InfoComponents}      {}}
+	    {command     mErrorLog      {::Jabber::ErrorLogDlg}          {}}
+	    {checkbutton mDebug         {::Jabber::DebugCmd}             {} \
 	      {-variable ::Jabber::jstate(debugCmd)}}
 	    {separator}
-	    {command     mAboutCoccinella  {::Splash::SplashScreen} normal   {}}
-	    {command     mCoccinellaHome   {::JUI::OpenCoccinellaURL} normal {}}
-	    {command     mBugReport        {::JUI::OpenBugURL}   normal {}}
+	    {command     mAboutCoccinella  {::Splash::SplashScreen}      {}}
+	    {command     mCoccinellaHome   {::JUI::OpenCoccinellaURL}    {}}
+	    {command     mBugReport        {::JUI::OpenBugURL}           {}}
 	}
     }
 
     # The status menu is built dynamically due to the -image options on 8.4.
     set idx [lindex [lsearchsublists $menuDefs(rost,jabber) mStatus] 0]
-    lset menuDefs(rost,jabber) $idx 6 [::Jabber::Status::BuildMenuDef]
+    lset menuDefs(rost,jabber) $idx 5 [::Jabber::Status::BuildMenuDef]
 
     set menuDefs(rost,edit) {    
-	{command   mCut              {::UI::CutEvent}      normal X}
-	{command   mCopy             {::UI::CopyEvent}     normal C}
-	{command   mPaste            {::UI::PasteEvent}    normal V}
+	{command   mCut              {::UI::CutEvent}        X}
+	{command   mCopy             {::UI::CopyEvent}       C}
+	{command   mPaste            {::UI::PasteEvent}      V}
     }
     
     # We should do this for all menus eventaully.
@@ -491,7 +491,7 @@ proc ::JUI::BuildMenu {name} {
 	    linsert $menuMerged $menuDefsInsertInd(rost,$name)
 	} $extraMenuDefs(rost,$name)]
     }
-    ::UI::NewMenu $w $wmenu.$name  $mLabel($name)  $menuMerged  normal
+    ::UI::NewMenu $w $wmenu.$name  $mLabel($name)  $menuMerged
 }
 
 proc ::JUI::RosterMoveFromPage { } {
@@ -824,7 +824,7 @@ proc ::JUI::DeRegisterMenuEntry {name mLabel} {
 
 proc ::JUI::FilePostCommand {wmenu} {
       
-    ::hooks::run menuPostCommand file $wmenu
+    ::hooks::run menuPostCommand main-file $wmenu
     
     # Workaround for mac bug.
     update idletasks
@@ -836,7 +836,7 @@ proc ::JUI::EditPostCommand {wmenu} {
 	::UI::MenuMethod $wmenu entryconfigure $mkey -state $mstate
     }	
     
-    ::hooks::run menuPostCommand edit $wmenu
+    ::hooks::run menuPostCommand main-edit $wmenu
 
     # Workaround for mac bug.
     update idletasks
@@ -922,7 +922,7 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	}	
     }    
         
-    ::hooks::run menuPostCommand jabber $wmenu
+    ::hooks::run menuPostCommand main-jabber $wmenu
     
     # Workaround for mac bug.
     update idletasks
@@ -942,7 +942,7 @@ proc ::JUI::InfoPostCommand {wmenu} {
 	}	
     }    
 	
-    ::hooks::run menuPostCommand info $wmenu
+    ::hooks::run menuPostCommand main-info $wmenu
     
     # Workaround for mac bug.
     update idletasks   

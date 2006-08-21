@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.59 2006-08-20 13:41:20 matben Exp $
+# $Id: Whiteboard.tcl,v 1.60 2006-08-21 09:45:48 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -435,26 +435,26 @@ proc ::WB::InitMenuDefs { } {
     # May be customized by jabber, p2p...
 
     set menuDefs(main,info,aboutwhiteboard)  \
-      {command   mAboutCoccinella    {::Splash::SplashScreen} normal   {}}
+      {command   mAboutCoccinella    {::Splash::SplashScreen}    {}}
     set menuDefs(main,info,aboutquicktimetcl)  \
       {command   mAboutQuickTimeTcl  {::Dialogs::AboutQuickTimeTcl}                normal   {}}
 
     # Only basic functionality.
     set menuDefs(main,file) {
-	{command   mCloseWindow     {::UI::CloseWindowEvent}    normal  W}
+	{command   mCloseWindow     {::UI::CloseWindowEvent}      W}
 	{separator}
-	{command   mOpenImage/Movie {::WB::OnMenuImport}        normal  I}
-	{command   mOpenURLStream   {::WB::OnMenuOpenURL}       normal  {}}
+	{command   mOpenImage/Movie {::WB::OnMenuImport}          I}
+	{command   mOpenURLStream   {::WB::OnMenuOpenURL}         {}}
 	{separator}
-	{command   mOpenCanvas      {::WB::OnMenuOpenCanvas}    normal  {}}
-	{command   mSaveCanvas      {::WB::OnMenuSaveCanvas}    normal  S}
+	{command   mOpenCanvas      {::WB::OnMenuOpenCanvas}      {}}
+	{command   mSaveCanvas      {::WB::OnMenuSaveCanvas}      S}
 	{separator}
-	{command   mSaveAs          {::WB::OnMenuSaveAs}        normal  {}}
-	{command   mSaveAsItem      {::WB::OnMenuSaveAsItem}    normal  {}}
-	{command   mPageSetup       {::WB::OnMenuPageSetup}     normal  {}}
-	{command   mPrintCanvas     {::WB::OnMenuPrintCanvas}   normal  P}
+	{command   mSaveAs          {::WB::OnMenuSaveAs}          {}}
+	{command   mSaveAsItem      {::WB::OnMenuSaveAsItem}      {}}
+	{command   mPageSetup       {::WB::OnMenuPageSetup}       {}}
+	{command   mPrintCanvas     {::WB::OnMenuPrintCanvas}     P}
 	{separator}
-	{command   mQuit            {::UserActions::DoQuit}     normal  Q}
+	{command   mQuit            {::UserActions::DoQuit}       Q}
     }
     if {![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefs(main,file) 3 3 disabled
@@ -468,85 +468,85 @@ proc ::WB::InitMenuDefs { } {
     }
     
     set menuDefs(main,edit) {    
-	{command     mUndo             {::WB::OnMenuUndo}      normal   Z}
-	{command     mRedo             {::WB::OnMenuRedo}      normal   {}}
+	{command     mUndo             {::WB::OnMenuUndo}         Z}
+	{command     mRedo             {::WB::OnMenuRedo}         {}}
 	{separator}
-	{command     mCut              {::UI::CutEvent}        disabled X}
-	{command     mCopy             {::UI::CopyEvent}       disabled C}
-	{command     mPaste            {::UI::PasteEvent}      disabled V}
-	{command     mAll              {::WB::OnMenuAll}       normal   A}
-	{command     mEraseAll         {::WB::OnMenuEraseAll}  normal   {}}
+	{command     mCut              {::UI::CutEvent}           X}
+	{command     mCopy             {::UI::CopyEvent}          C}
+	{command     mPaste            {::UI::PasteEvent}         V}
+	{command     mAll              {::WB::OnMenuAll}          A}
+	{command     mEraseAll         {::WB::OnMenuEraseAll}     {}}
 	{separator}
-	{command     mInspectItem      {::WB::OnMenuItemInspector} normal {}}
+	{command     mInspectItem      {::WB::OnMenuItemInspector}  {}}
 	{separator}
-	{command     mRaise            {::WB::OnMenuRaise} normal R}
-	{command     mLower            {::WB::OnMenuLower} normal L}
+	{command     mRaise            {::WB::OnMenuRaise}        R}
+	{command     mLower            {::WB::OnMenuLower}        L}
 	{separator}
-	{command     mLarger           {::WB::OnMenuLarger}  normal >}
-	{command     mSmaller          {::WB::OnMenuSmaller} normal <}
-	{cascade     mFlip             {}                            normal {} {} {
-	    {command   mHorizontal     {::WB::OnMenuFlipHorizontal}  normal   {} {}}
-	    {command   mVertical       {::WB::OnMenuFlipVertical}    normal   {} {}}}
+	{command     mLarger           {::WB::OnMenuLarger}       >}
+	{command     mSmaller          {::WB::OnMenuSmaller}      <}
+	{cascade     mFlip             {}                             {} {} {
+	    {command   mHorizontal     {::WB::OnMenuFlipHorizontal}     {} {}}
+	    {command   mVertical       {::WB::OnMenuFlipVertical}       {} {}}}
 	}
-	{command     mImageLarger      {::WB::OnMenuImageLarger} normal {}}
-	{command     mImageSmaller     {::WB::OnMenuImageSmaller} normal {}}
+	{command     mImageLarger      {::WB::OnMenuImageLarger}   {}}
+	{command     mImageSmaller     {::WB::OnMenuImageSmaller}  {}}
     }
     
     # These are used not only in the drop-down menus.
     set menuDefs(main,prefs,separator) 	{separator}
     set menuDefs(main,prefs,background)  \
-      {command     mBackgroundColor      {::CanvasCmd::SetCanvasBgColor $w} normal   {}}
+      {command     mBackgroundColor      {::CanvasCmd::SetCanvasBgColor $w}    {}}
     set menuDefs(main,prefs,grid)  \
-      {checkbutton mGrid             {::CanvasCmd::DoCanvasGrid $w}   normal   {} \
+      {checkbutton mGrid             {::CanvasCmd::DoCanvasGrid $w}      {} \
       {-variable ::WB::${w}::state(canGridOn)}}
     set menuDefs(main,prefs,thickness)  \
-      {cascade     mThickness        {}                                    normal   {} {} {
-	{radio   1                 {}                                      normal   {} \
+      {cascade     mThickness        {}                                       {} {} {
+	{radio   1                 {}                                         {} \
 	  {-variable ::WB::${w}::state(penThick)}}
-	{radio   2                 {}                                      normal   {} \
+	{radio   2                 {}                                         {} \
 	  {-variable ::WB::${w}::state(penThick)}}
-	{radio   4                 {}                                      normal   {} \
+	{radio   4                 {}                                         {} \
 	  {-variable ::WB::${w}::state(penThick)}}
-	{radio   6                 {}                                      normal   {} \
+	{radio   6                 {}                                         {} \
 	  {-variable ::WB::${w}::state(penThick)}}}
     }
     set menuDefs(main,prefs,brushthickness)  \
-      {cascade     mBrushThickness   {}                                    normal   {} {} {
-	{radio   8                 {}                                      normal   {} \
+      {cascade     mBrushThickness   {}                                       {} {} {
+	{radio   8                 {}                                         {} \
 	  {-variable ::WB::${w}::state(brushThick)}}
-	{radio   10                {}                                      normal   {} \
+	{radio   10                {}                                         {} \
 	  {-variable ::WB::${w}::state(brushThick)}}
-	{radio   12                {}                                      normal   {} \
+	{radio   12                {}                                         {} \
 	  {-variable ::WB::${w}::state(brushThick)}}
-	{radio   16                {}                                      normal   {} \
+	{radio   16                {}                                         {} \
 	  {-variable ::WB::${w}::state(brushThick)}}}
     }
     set menuDefs(main,prefs,fill)  \
-      {checkbutton mFill             {}                                    normal   {} \
+      {checkbutton mFill             {}                                       {} \
       {-variable ::WB::${w}::state(fill)}}
     set menuDefs(main,prefs,smoothness)  \
-      {cascade     mLineSmoothness   {}                                    normal   {} {} {
-	{radio   None              {set ::WB::${w}::state(smooth) 0}        normal   {} \
+      {cascade     mLineSmoothness   {}                                       {} {} {
+	{radio   None              {set ::WB::${w}::state(smooth) 0}           {} \
 	  {-value 0 -variable ::WB::${w}::state(splinesteps)}}
-	{radio   2                 {set ::WB::${w}::state(smooth) 1}        normal   {} \
+	{radio   2                 {set ::WB::${w}::state(smooth) 1}           {} \
 	  {-value 2 -variable ::WB::${w}::state(splinesteps)}}
-	{radio   4                 {set ::WB::${w}::state(smooth) 1}        normal   {} \
+	{radio   4                 {set ::WB::${w}::state(smooth) 1}           {} \
 	  {-value 4 -variable ::WB::${w}::state(splinesteps)}}
-	{radio   6                 {set ::WB::${w}::state(smooth) 1}        normal   {} \
+	{radio   6                 {set ::WB::${w}::state(smooth) 1}           {} \
 	  {-value 6 -variable ::WB::${w}::state(splinesteps)}}
-	{radio   10                {set ::WB::${w}::state(smooth) 1}        normal   {} \
+	{radio   10                {set ::WB::${w}::state(smooth) 1}           {} \
 	  {-value 10 -variable ::WB::${w}::state(splinesteps)}}}
     }
     set menuDefs(main,prefs,smooth)  \
-      {checkbutton mLineSmoothness   {}                                    normal   {} \
+      {checkbutton mLineSmoothness   {}                                       {} \
       {-variable ::WB::${w}::state(smooth)}}
     set menuDefs(main,prefs,arcs)  \
-      {cascade     mArcs             {}                                    normal   {} {} {
-	{radio   mPieslice         {}                                      normal   {} \
+      {cascade     mArcs             {}                                       {} {} {
+	{radio   mPieslice         {}                                         {} \
 	  {-value pieslice -variable ::WB::${w}::state(arcstyle)}}
-	{radio   mChord            {}                                      normal   {} \
+	{radio   mChord            {}                                         {} \
 	  {-value chord -variable ::WB::${w}::state(arcstyle)}}
-	{radio   mArc              {}                                      normal   {} \
+	{radio   mArc              {}                                         {} \
 	  {-value arc -variable ::WB::${w}::state(arcstyle)}}}
     }
     
@@ -559,46 +559,46 @@ proc ::WB::InitMenuDefs { } {
 	} else {
 	    set dopts [format {-value %s -variable ::WB::${w}::state(dash)} $dashval]
 	}
-	lappend dashList [list radio $dash {} normal {} $dopts]
+	lappend dashList [list radio $dash {} {} $dopts]
     }
     set menuDefs(main,prefs,dash)  \
-      [list cascade   mDash          {}                                    normal   {} {} $dashList]
+      [list cascade   mDash          {}                                       {} {} $dashList]
 	
     set menuDefs(main,prefs,constrain)  \
-      {cascade     mShiftConstrain   {}                                    normal   {} {} {
-	{radio   mTo90degrees      {}                                      normal   {} \
+      {cascade     mShiftConstrain   {}                                       {} {} {
+	{radio   mTo90degrees      {}                                         {} \
 	  {-variable prefs(45) -value 0}}
-	{radio   mTo45degrees      {}                                      normal   {} \
+	{radio   mTo45degrees      {}                                         {} \
 	  {-variable prefs(45) -value 1}}}
     }
     set menuDefs(main,prefs,font)  \
-      {cascade     mFont             {}                                    normal   {} {} {}}
+      {cascade     mFont             {}                                       {} {} {}}
     set menuDefs(main,prefs,fontsize)  \
-      {cascade     mSize             {}                                    normal   {} {} {
-	{radio   1                 {::WB::FontChanged $w size}          normal   {} \
+      {cascade     mSize             {}                                       {} {} {
+	{radio   1                 {::WB::FontChanged $w size}             {} \
 	  {-variable ::WB::${w}::state(fontSize)}}
-	{radio   2                 {::WB::FontChanged $w size}          normal   {} \
+	{radio   2                 {::WB::FontChanged $w size}             {} \
 	  {-variable ::WB::${w}::state(fontSize)}}
-	{radio   3                 {::WB::FontChanged $w size}          normal   {} \
+	{radio   3                 {::WB::FontChanged $w size}             {} \
 	  {-variable ::WB::${w}::state(fontSize)}}
-	{radio   4                 {::WB::FontChanged $w size}          normal   {} \
+	{radio   4                 {::WB::FontChanged $w size}             {} \
 	  {-variable ::WB::${w}::state(fontSize)}}
-	{radio   5                 {::WB::FontChanged $w size}          normal   {} \
+	{radio   5                 {::WB::FontChanged $w size}             {} \
 	  {-variable ::WB::${w}::state(fontSize)}}
-	{radio   6                 {::WB::FontChanged $w size}          normal   {} \
+	{radio   6                 {::WB::FontChanged $w size}             {} \
 	  {-variable ::WB::${w}::state(fontSize)}}}
     }
     set menuDefs(main,prefs,fontweight)  \
-      {cascade     mWeight           {}                                    normal   {} {} {
-	{radio   mNormal           {::WB::FontChanged $w weight}        normal   {} \
+      {cascade     mWeight           {}                                       {} {} {
+	{radio   mNormal           {::WB::FontChanged $w weight}           {} \
 	  {-value normal -variable ::WB::${w}::state(fontWeight)}}
-	{radio   mBold             {::WB::FontChanged $w weight}        normal   {} \
+	{radio   mBold             {::WB::FontChanged $w weight}           {} \
 	  {-value bold -variable ::WB::${w}::state(fontWeight)}}
-	{radio   mItalic           {::WB::FontChanged $w weight}        normal   {} \
+	{radio   mItalic           {::WB::FontChanged $w weight}           {} \
 	  {-value italic -variable ::WB::${w}::state(fontWeight)}}}
     }
     set menuDefs(main,prefs,prefs)  \
-      {command     mPreferences...   {::Preferences::Build}                normal   {}}
+      {command     mPreferences...   {::Preferences::Build}                   {}}
     
     # Build hierarchical list.
     set menuDefs(main,prefs) {}
@@ -608,11 +608,11 @@ proc ::WB::InitMenuDefs { } {
     }
 
     set menuDefs(main,info) {    
-	{command     mOnServer       {::Dialogs::ShowInfoServer}        normal {}}	
-	{command     mOnClients      {::Dialogs::ShowInfoClients}       disabled {}}	
-	{command     mOnPlugins      {::Dialogs::InfoOnPlugins}         normal {}}	
+	{command     mOnServer       {::Dialogs::ShowInfoServer}         {}}	
+	{command     mOnClients      {::Dialogs::ShowInfoClients}        {}}	
+	{command     mOnPlugins      {::Dialogs::InfoOnPlugins}          {}}	
 	{separator}
-	{cascade     mHelpOn             {}                             normal   {} {} {}}
+	{cascade     mHelpOn             {}                                {} {} {}}
     }
     
     # Build "Help On" menu dynamically.
@@ -629,7 +629,7 @@ proc ::WB::InitMenuDefs { } {
 	# Important to protect any $ since we do 'subst'.
 	set f [string map {$ \\$} $f]
 	lappend infoDefs [list \
-	  command m${name} [list ::Dialogs::Canvas $f -title $name] normal {}]
+	  command m${name} [list ::Dialogs::Canvas $f -title $name]  {}]
     }
     lset menuDefs(main,info) end end $infoDefs
     
@@ -646,15 +646,15 @@ proc ::WB::InitMenuDefs { } {
 	
     # Menu definitions for a minimal setup. Used on mac only.
     set menuDefs(min,file) {
-	{command   mNewWhiteboard    {::WB::NewWhiteboard}      normal   N}
-	{command   mCloseWindow      {::UI::CloseWindowEvent}   normal   W}
+	{command   mNewWhiteboard    {::WB::NewWhiteboard}         N}
+	{command   mCloseWindow      {::UI::CloseWindowEvent}      W}
 	{separator}
-	{command   mQuit             {::UserActions::DoQuit}    normal   Q}
+	{command   mQuit             {::UserActions::DoQuit}       Q}
     }	    
     set menuDefs(min,edit) {    
-	{command   mCut              {::UI::CutEvent}           disabled X}
-	{command   mCopy             {::UI::CopyEvent}          disabled C}
-	{command   mPaste            {::UI::PasteEvent}         disabled V}
+	{command   mCut              {::UI::CutEvent}            X}
+	{command   mCopy             {::UI::CopyEvent}           C}
+	{command   mPaste            {::UI::PasteEvent}          V}
     }
     
     # Used only on mac until the -postcommand bug fixed.
@@ -1985,7 +1985,7 @@ proc ::WB::OnImport {wcan} {
 }
 
 proc ::WB::OnOpenURL {wcan} {
-    if {[StateNormal $wcan]} {
+    if {[StateNormal $wcan] && [::Plugins::HavePackage QuickTimeTcl]} {
 	::Multicast::OpenMulticast $wcan
     }
 }
@@ -2140,13 +2140,13 @@ proc ::WB::BuildWhiteboardMenus {w} {
     if {$haveAppleMenu} {
 	::UI::BuildAppleMenu $w $wmenu.apple $opts(-state)
     }
-    ::UI::NewMenu $w $wmenu.file   mFile        $menuDefs(main,file)  $opts(-state)
-    ::UI::NewMenu $w $wmenu.edit   mEdit        $menuDefs(main,edit)  $opts(-state)
-    ::UI::NewMenu $w $wmenu.prefs  mPreferences $menuDefs(main,prefs) $opts(-state)
+    ::UI::NewMenu $w $wmenu.file   mFile        $menuDefs(main,file)  
+    ::UI::NewMenu $w $wmenu.edit   mEdit        $menuDefs(main,edit)  
+    ::UI::NewMenu $w $wmenu.prefs  mPreferences $menuDefs(main,prefs) 
     if {[tk windowingsystem] eq "aqua"} {
-	::UI::NewMenu $w $wmenu.items  mLibrary $menuDefs(main,items) $opts(-state)
+	::UI::NewMenu $w $wmenu.items  mLibrary $menuDefs(main,items) 
     } else {
-	::UI::NewMenu $w $wmenu.items  mLibrary {} $opts(-state)
+	::UI::NewMenu $w $wmenu.items  mLibrary {} 
 	$wmenu.items configure -postcommand  \
 	  [list ::WB::BuildItemsMenu $w $wmenu.items]
     }
@@ -2154,7 +2154,7 @@ proc ::WB::BuildWhiteboardMenus {w} {
     # Plugin menus if any.
     ::UI::BuildPublicMenus $w $wmenu
     
-    ::UI::NewMenu $w $wmenu.info mInfo $menuDefs(main,info) $opts(-state)
+    ::UI::NewMenu $w $wmenu.info mInfo $menuDefs(main,info)
     
     # The edit menu binds directly to canvas.
     ::UI::SetMenuAcceleratorBinds $w $wmenu.file
@@ -2532,7 +2532,7 @@ proc ::WB::BuildToolPopups {w} {
 	foreach key $menuArr($name) {
 	    lappend mDef($name) $menuDefs(main,prefs,$key)
 	}
-	::UI::NewMenu $w $wtool.pop${name} {} $mDef($name) normal
+	::UI::NewMenu $w $wtool.pop${name} {} $mDef($name)
 	if {!$prefs(haveDash) && ([lsearch $menuArr($name) dash] >= 0)} {
 	    ::UI::MenuMethod $wtool.pop${name} entryconfigure mDash -state disabled
 	}
@@ -2769,12 +2769,15 @@ proc ::WB::FilePostCommand {w wmenu} {
     }
     if {$editable} {
 	::UI::MenuEnableAll $wmenu
+	if {![::Plugins::HavePackage QuickTimeTcl]} {
+	    ::UI::MenuMethod $wmenu entryconfigure mOpenURLStream -state disabled
+	}
     } else {
 	::UI::MenuDisableAllBut $wmenu {
 	    mNew mCloseWindow mSaveCanvas mPageSetup mPrintCanvas
 	}
     }
-    ::hooks::run menuPostCommand file $wmenu
+    ::hooks::run menuPostCommand whiteboard-file $wmenu
     
     # Workaround for mac bug.
     update idletasks
@@ -2815,7 +2818,7 @@ proc ::WB::EditPostCommand {w wmenu} {
 	}
     }
 
-    ::hooks::run menuPostCommand edit $wmenu
+    ::hooks::run menuPostCommand whiteboard-edit $wmenu
 
     # Workaround for mac bug.
     update idletasks
@@ -2983,7 +2986,7 @@ proc ::WB::PrefsPostCommand {w wmenu} {
     
     # Complete menu disabled for disabled whiteboard.
     
-    ::hooks::run menuPostCommand prefs $wmenu
+    ::hooks::run menuPostCommand whiteboard-prefs $wmenu
     
     # Workaround for mac bug.
     update idletasks
@@ -3032,7 +3035,7 @@ proc ::WB::MakeItemMenuDef {dir} {
 	    set submdef [MakeItemMenuDef $f]
 	    set name [file tail $f]
 	    if {[llength $submdef]} {
-		lappend mdef [list cascade $name {} normal {} {} $submdef]
+		lappend mdef [list cascade $name {} {} {} $submdef]
 	    }
 	} elseif {[string equal [file extension $f] ".can"]} {
 	    set name [file rootname [file tail $f]]
@@ -3040,7 +3043,7 @@ proc ::WB::MakeItemMenuDef {dir} {
 
 	    # Important to protect any $ since we do 'subst'.
 	    lappend cmd [string map {$ \\$} $f]
-	    lappend mdef [list command $name $cmd normal {}]
+	    lappend mdef [list command $name $cmd {}]
 	}
     }
     return $mdef

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.131 2006-08-20 13:41:19 matben Exp $
+# $Id: UI.tcl,v 1.132 2006-08-21 09:45:48 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -32,8 +32,6 @@ namespace eval ::UI:: {
     option add *badgeImage               Coccinella     widgetDefault
     option add *applicationImage         coccinella64   widgetDefault
     
-    variable wThatUseMainMenu {}
-
     # components stuff.
     variable menuSpecPublic
     set menuSpecPublic(wpaths) {}
@@ -323,9 +321,9 @@ proc ::UI::InitMenuDefs { } {
     #      {{type name cmd state accelerator opts} {{...} {...} ...}}
 
     set menuDefs(main,info,aboutwhiteboard)  \
-      {command   mAboutCoccinella    {::Splash::SplashScreen} normal   {}}
+      {command   mAboutCoccinella    {::Splash::SplashScreen}   {}}
     set menuDefs(main,info,aboutquicktimetcl)  \
-      {command   mAboutQuickTimeTcl  {::Dialogs::AboutQuickTimeTcl}                normal   {}}
+      {command   mAboutQuickTimeTcl  {::Dialogs::AboutQuickTimeTcl} {}}
 
     # Mac only.
     set menuDefs(main,apple) [list \
@@ -1106,14 +1104,13 @@ proc ::UI::GetPrefixedToplevels {wprefix} {
 #       wmenu       the menus widget path name (".menu.file" etc.).
 #       label       its label.
 #       menuSpec    a hierarchical list that defines the menu content.
-#                   {{type name cmd state accelerator opts} {{...} {...} ...}}
-#       state       'normal' or 'disabled'.
+#                   {{type name cmd accelerator opts} {{...} {...} ...}}
 #       args        form ?-varName value? list that defines local variables to set.
 #       
 # Results:
 #       $wmenu
 
-proc ::UI::NewMenu {w wmenu label menuSpec state args} {    
+proc ::UI::NewMenu {w wmenu label menuSpec args} {    
     variable mapWmenuToWtop
     variable cachedMenuSpec
             
@@ -1121,7 +1118,7 @@ proc ::UI::NewMenu {w wmenu label menuSpec state args} {
     set cachedMenuSpec($w,$wmenu) $menuSpec
     set mapWmenuToWtop($wmenu)    $w
 
-    eval {BuildMenu $w $wmenu $label $menuSpec $state} $args
+    eval {BuildMenu $w $wmenu $label $menuSpec} $args
 }
 
 # UI::BuildMenu --
@@ -1134,14 +1131,13 @@ proc ::UI::NewMenu {w wmenu label menuSpec state args} {
 #       wmenu       the menus widget path name (".menu.file" etc.).
 #       mLabel      its mLabel.
 #       menuDef     a hierarchical list that defines the menu content.
-#                   {{type name cmd state accelerator opts} {{...} {...} ...}}
-#       state       'normal' or 'disabled'.
+#                   {{type name cmd accelerator opts} {{...} {...} ...}}
 #       args        form ?-varName value? list that defines local variables to set.
 #       
 # Results:
 #       $wmenu
 
-proc ::UI::BuildMenu {w wmenu mLabel menuDef state args} {
+proc ::UI::BuildMenu {w wmenu mLabel menuDef args} {
     global  this wDlgs prefs
 
     variable menuKeyToIndex
@@ -1191,7 +1187,7 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef state args} {
     set mod $this(modkey)
     set i 0
     foreach line $menuDef {
-	foreach {type name cmd mstate accel mopts subdef} $line {
+	foreach {type name cmd accel mopts subdef} $line {
 	    
 	    # Localized menu label. Special for mAboutCoccinella!
 	    if {$name eq "mAboutCoccinella"} {
@@ -1217,10 +1213,10 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef state args} {
 		set wsubmenu $wmenu.$mt
 		set cachedMenuSpec($w,$wsubmenu) $subdef
 		set mapWmenuToWtop($wsubmenu) $w
-		eval {BuildMenu $w $wsubmenu $name $subdef $state} $args
+		eval {BuildMenu $w $wsubmenu $name $subdef} $args
 		
 		# Explicitly set any disabled state of cascade.
-		MenuMethod $m entryconfigure $name -state $mstate
+		MenuMethod $m entryconfigure $name
 	    } else {
 		
 		# All variables (and commands) in menuDef's cmd shall be 
@@ -1233,8 +1229,7 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef state args} {
 		if {[string length $accel]} {
 		    lappend mopts -accelerator ${mod}+${accel}
 		}
-		eval {$m add $type -label $locname -command $cmd -state $mstate} \
-		  $mopts 
+		eval {$m add $type -label $locname -command $cmd} $mopts 
 	    }
 	}
 	incr i
@@ -1316,16 +1311,13 @@ proc ::UI::SetMenubarAcceleratorBinds {w wmenubar} {
     variable menuKeyToIndex
     variable mapWmenuToWtop
     variable cachedMenuSpec
-    variable wThatUseMainMenu
-    
-    lappend wThatUseMainMenu $w
-    
+        
     foreach {wmenu wtop} [array get mapWmenuToWtop $wmenubar.*] {
 	foreach line $cachedMenuSpec($wtop,$wmenu) {
 	    
 	    # {type name cmd mstate accel mopts subdef} $line
 	    # Cut, Copy & Paste handled by widgets internally!
-	    set accel [lindex $line 4]
+	    set accel [lindex $line 3]
 	    if {[string length $accel] && ![regexp {(X|C|V)} $accel]} {
 
 		# Must check the actual state of menu!
@@ -1355,7 +1347,7 @@ proc ::UI::SetMenuAcceleratorBinds {w wmenu} {
     variable menuKeyToIndex
     
     foreach line $cachedMenuSpec($w,$wmenu) {
-	set accel [lindex $line 4]
+	set accel [lindex $line 3]
 	if {[string length $accel]} {
 	    set name [lindex $line 1]
 	    set mind $menuKeyToIndex($wmenu,$name)
@@ -1368,7 +1360,7 @@ proc ::UI::SetMenuAcceleratorBinds {w wmenu} {
 proc ::UI::BuildAppleMenu {w wmenuapple state} {
     variable menuDefs
     
-    ::UI::NewMenu $w $wmenuapple {} $menuDefs(main,apple) $state
+    NewMenu $w $wmenuapple {} $menuDefs(main,apple) $state
     
     if {[tk windowingsystem] eq "aqua"} {
 	proc ::tk::mac::ShowPreferences { } {
