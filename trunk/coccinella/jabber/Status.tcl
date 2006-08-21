@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.18 2006-08-06 13:22:05 matben Exp $
+# $Id: Status.tcl,v 1.19 2006-08-21 09:45:48 matben Exp $
 
 package provide Status 1.0
 
@@ -314,11 +314,11 @@ proc ::Jabber::Status::BuildMenuDef { } {
 		set opts [list -variable ::Jabber::jstate(status) -value $name \
 		  -compound left -image [::Rosticons::Get status/$name]]
 	    }
-	    lappend statMenuDef [list radio $mName $cmd normal {} $opts]
+	    lappend statMenuDef [list radio $mName $cmd {} $opts]
 	}
     }
     lappend statMenuDef {separator}  \
-      {command mAttachMessage {::Jabber::Status::SetWithMessage ::Jabber::jstate(status)}  normal {}}
+      {command mAttachMessage {::Jabber::Status::SetWithMessage ::Jabber::jstate(status)} {}}
     
     return $statMenuDef
 }

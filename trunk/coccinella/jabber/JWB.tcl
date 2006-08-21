@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.64 2006-08-20 13:41:18 matben Exp $
+# $Id: JWB.tcl,v 1.65 2006-08-21 09:45:48 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -125,24 +125,22 @@ proc ::JWB::InitUI { } {
     #     Aqua: handled in apple menu
     #     Else: handled in main window
     set menuDefsFile {
-	{command   mNew                {::WB::NewWhiteboard}      normal   N}
-	{command   mCloseWindow        {::UI::CloseWindowEvent}   normal   W}
+	{command   mNew                {::WB::NewWhiteboard}         N}
+	{command   mCloseWindow        {::UI::CloseWindowEvent}      W}
 	{separator}
-	{command   mOpenImage/Movie    {::WB::OnMenuImport}       normal   I}
-	{command   mOpenURLStream      {::WB::OnMenuOpenURL}      normal   {}}
-	{command   mStopPut/Get/Open   {::JWB::Stop $w}           normal   {}}
+	{command   mOpenImage/Movie    {::WB::OnMenuImport}          I}
+	{command   mOpenURLStream      {::WB::OnMenuOpenURL}         {}}
+	{command   mStopPut/Get/Open   {::JWB::Stop $w}              {}}
 	{separator}
-	{command   mOpenCanvas         {::WB::OnMenuOpenCanvas}   normal   O}
-	{command   mSaveCanvas         {::WB::OnMenuSaveCanvas}   normal   S}
+	{command   mOpenCanvas         {::WB::OnMenuOpenCanvas}      O}
+	{command   mSaveCanvas         {::WB::OnMenuSaveCanvas}      S}
 	{separator}
-	{command   mSaveAs             {::WB::OnMenuSaveAs}       normal   {}}
-	{command   mSaveAsItem         {::WB::OnMenuSaveAsItem}   normal   {}}
-	{command   mPageSetup          {::WB::OnMenuPageSetup}    normal   {}}
-	{command   mPrintCanvas        {::WB::OnMenuPrintCanvas}  normal   P}
+	{command   mSaveAs             {::WB::OnMenuSaveAs}          {}}
+	{command   mSaveAsItem         {::WB::OnMenuSaveAsItem}      {}}
+	{command   mPageSetup          {::WB::OnMenuPageSetup}       {}}
+	{command   mPrintCanvas        {::WB::OnMenuPrintCanvas}     P}
     }
-    if {![::Plugins::HavePackage QuickTimeTcl]} {
-	lset menuDefsFile 4 3 disabled
-    } else {
+    if {[::Plugins::HavePackage QuickTimeTcl]} {
 	package require Multicast
     }
      

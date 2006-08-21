@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.177 2006-08-20 13:41:18 matben Exp $
+# $Id: Jabber.tcl,v 1.178 2006-08-21 09:45:48 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -324,9 +324,9 @@ proc ::Jabber::FactoryDefaults { } {
     variable menuDefs
     
     set menuDefs(min,edit) {    
-	{command   mCut              {::UI::CutEvent}           disabled X}
-	{command   mCopy             {::UI::CopyEvent}          disabled C}
-	{command   mPaste            {::UI::PasteEvent}         disabled V}
+	{command   mCut              {::UI::CutEvent}           X}
+	{command   mCopy             {::UI::CopyEvent}          C}
+	{command   mPaste            {::UI::PasteEvent}         V}
     }    
 }
 

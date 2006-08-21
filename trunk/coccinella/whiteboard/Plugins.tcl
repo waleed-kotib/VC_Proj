@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Plugins.tcl,v 1.22 2006-06-20 10:14:17 matben Exp $
+# $Id: Plugins.tcl,v 1.23 2006-08-21 09:45:48 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -126,16 +126,11 @@ namespace eval ::Plugins:: {
 	Img                {windows     unix}
 	tkpng              {macosx      windows     unix}
     }
-    array set helpers2Platform {xanim unix}
+    array set helpers2Platform {xanim unix} 
     
     # Snack buggy on NT4.
-
-    set os $tcl_platform(os)
-    set osVer $tcl_platform(osVersion) 
-    set os "xxxx\n (hej"
-
-
-    if {($os eq "Windows NT") && ($osVer == 4.0)} {
+    if {($tcl_platform(os) eq "Windows NT") &&  \
+      ($tcl_platform(osVersion) == 4.0)} {
 	set packages2Platform(snack)  \
 	  [lsearch -inline -not -all $packages2Platform(snack) "windows"]
     }
@@ -456,13 +451,11 @@ proc ::Plugins::PostProcessInfo { } {
     variable prefMimeType2Package
     variable mimeTypeDoWhat
     
-    set plugin(QuickTimeTcl,mimes) {}
-        
     # We add the tk library to the other ones.
     foreach name [concat tk $plugin(all)] {
 	if {$plugin($name,loaded)}  {
 	    set supSuff($name) {}
-	    
+
 	    # Loop over all file MIME types supported by this specific package.
 	    foreach mimeType $plugin($name,mimes) {
 		

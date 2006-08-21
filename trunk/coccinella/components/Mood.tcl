@@ -34,26 +34,26 @@ proc ::Mood::Init { } {
 
     variable menuMood
 
-    set menuMood [list cascade [mc mMood] {} normal {} {} {}]
+    set menuMood [list cascade [mc mMood] {} {} {} {}]
     set subEntries {}
-        lappend subEntries [list radio [mc mAngry] {::Mood::Cmd "angry"}  normal {} {}]
-        lappend subEntries [list radio [mc mAnxious] {::Mood::Cmd "anxious"}  normal {} {}]
-        lappend subEntries [list radio [mc mAshamed] {::Mood::Cmd "ashamed"} normal {} {}]
-        lappend subEntries [list radio [mc mBored] {::Mood::Cmd "bored"} normal {} {}]
-        lappend subEntries [list radio [mc mCurious] {::Mood::Cmd "curious"}  normal {} {}]
-        lappend subEntries [list radio [mc mDepressed] {::Mood::Cmd "depressed"} normal {} {}]
-        lappend subEntries [list radio [mc mExcited] {::Mood::Cmd "excited"} normal {} {}]
-        lappend subEntries [list radio [mc mHappy] {::Mood::Cmd "happy"}  normal {} {}]
-        lappend subEntries [list radio [mc mInLove] {::Mood::Cmd "in_love"} normal {} {}]
-        lappend subEntries [list radio [mc mInvincible] {::Mood::Cmd "invincible"}  normal {} {}]
-        lappend subEntries [list radio [mc mJealous] {::Mood::Cmd "jealous"} normal {} {}]
-        lappend subEntries [list radio [mc mNervous] {::Mood::Cmd "nervous"}  normal {} {}]
-        lappend subEntries [list radio [mc mSad] {::Mood::Cmd "sad"} normal {} {}]
-        lappend subEntries [list radio [mc mSleepy] {::Mood::Cmd "sleepy"} normal {} {}]
-        lappend subEntries [list radio [mc mStressed] {::Mood::Cmd "stressed"}  normal {} {}]
-        lappend subEntries [list radio [mc mWorried] {::Mood::Cmd "worried"} normal {} {}]
-        lappend subEntries [list radio [mc mCustomMood] {::Mood::CustomMoodWindow} normal {} {}]
-        lset menuMood 6 $subEntries
+        lappend subEntries [list radio [mc mAngry] {::Mood::Cmd "angry"}   {} {}]
+        lappend subEntries [list radio [mc mAnxious] {::Mood::Cmd "anxious"}   {} {}]
+        lappend subEntries [list radio [mc mAshamed] {::Mood::Cmd "ashamed"}  {} {}]
+        lappend subEntries [list radio [mc mBored] {::Mood::Cmd "bored"}  {} {}]
+        lappend subEntries [list radio [mc mCurious] {::Mood::Cmd "curious"}   {} {}]
+        lappend subEntries [list radio [mc mDepressed] {::Mood::Cmd "depressed"}  {} {}]
+        lappend subEntries [list radio [mc mExcited] {::Mood::Cmd "excited"}  {} {}]
+        lappend subEntries [list radio [mc mHappy] {::Mood::Cmd "happy"}   {} {}]
+        lappend subEntries [list radio [mc mInLove] {::Mood::Cmd "in_love"}  {} {}]
+        lappend subEntries [list radio [mc mInvincible] {::Mood::Cmd "invincible"}   {} {}]
+        lappend subEntries [list radio [mc mJealous] {::Mood::Cmd "jealous"}  {} {}]
+        lappend subEntries [list radio [mc mNervous] {::Mood::Cmd "nervous"}   {} {}]
+        lappend subEntries [list radio [mc mSad] {::Mood::Cmd "sad"}  {} {}]
+        lappend subEntries [list radio [mc mSleepy] {::Mood::Cmd "sleepy"}  {} {}]
+        lappend subEntries [list radio [mc mStressed] {::Mood::Cmd "stressed"}   {} {}]
+        lappend subEntries [list radio [mc mWorried] {::Mood::Cmd "worried"}  {} {}]
+        lappend subEntries [list radio [mc mCustomMood] {::Mood::CustomMoodWindow}  {} {}]
+        lset menuMood 5 $subEntries
 
     variable mapMoodTextToElem
     array set mapMoodTextToElem [list \
