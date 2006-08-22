@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: CanvasFile.tcl,v 1.25 2006-08-21 09:45:48 matben Exp $
+# $Id: CanvasFile.tcl,v 1.26 2006-08-22 14:25:18 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -85,6 +85,7 @@ proc ::CanvasFile::OpenCanvas {wcan fileName args} {
 proc ::CanvasFile::FileToCanvas {w fd absPath args} {
     
     # Dispatch to the actual file reader depending on file format version.
+    set version 0
     if {[gets $fd line] >= 0} { 
 	if {![regexp -nocase {^ *# *version: *([0-9]+)} $line match version]} {
 	    set version 1
@@ -511,6 +512,7 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
 
 proc ::CanvasFile::OpenCanvasFileDlg {wcan {filePath {}}} {
     global  prefs this
+    variable regOpen
     
     set w [winfo toplevel $wcan]
     
@@ -520,6 +522,11 @@ proc ::CanvasFile::OpenCanvasFileDlg {wcan {filePath {}}} {
 	    {"XML/SVG"    {.svg}}
 	    {"Text"       {.txt}}
 	}
+
+	foreach {key name} [array get regOpen *,name] {
+	    lappend typelist [list $regOpen($name,label) $regOpen($name,suffix)]
+	}
+
 	set ans [::UI::MessageBox -icon warning -type okcancel -default ok \
 	  -parent $w -message [mc messcanerasewarn]]
 	if {$ans eq "cancel"} {
@@ -537,8 +544,9 @@ proc ::CanvasFile::OpenCanvasFileDlg {wcan {filePath {}}} {
     } else {
 	set fileName $filePath
     }  
+    set ext [file extension $fileName]
     
-    switch -- [file extension $fileName] {
+    switch -- $ext {
 	.svg {
 	    ::undo::reset [::WB::GetUndoToken $wcan]
 	    ::CanvasCmd::DoEraseAll $wcan
@@ -546,6 +554,11 @@ proc ::CanvasFile::OpenCanvasFileDlg {wcan {filePath {}}} {
 	}
 	.can {	    
 	    OpenCanvas $wcan $fileName
+	}
+	default {
+	    if {[info exists regOpen($ext,suff-openProc)]} {
+		uplevel #0 $regOpen($ext,suff-openProc) [list $wcan $fileName]
+	    }
 	}
     }
 }
@@ -610,13 +623,19 @@ proc ::CanvasFile::SaveAsDlg {wcan} {
 
 proc ::CanvasFile::SaveCanvasFileDlg {wcan} {
     global  prefs this
-        
+    variable regSave
+            
     set typelist {
 	{"Canvas"            {.can}}
 	{"XML/SVG"           {.svg}}
 	{"Postscript File"   {.ps} }
 	{"Text"              {.txt}}
     }
+    
+    foreach {key name} [array get regSave *,name] {
+	lappend typelist [list $regSave($name,label) $regSave($name,suffix)]
+    }
+    
     set userDir [::Utils::GetDirIfExist $prefs(userPath)]
     set opts [list -initialdir $userDir]
     if {$prefs(haveSaveFiletypes)} {
@@ -631,7 +650,7 @@ proc ::CanvasFile::SaveCanvasFileDlg {wcan} {
 	return
     }
     set prefs(userPath) [file dirname $fileName]
-    ::CanvasFile::SaveCanvas $wcan $fileName
+    SaveCanvas $wcan $fileName
     
     return $fileName
 }
@@ -643,6 +662,7 @@ proc ::CanvasFile::SaveCanvasFileDlg {wcan} {
 
 proc ::CanvasFile::SaveCanvas {wcan fileName args} {
     global  prefs this
+    variable regSave
     
     set ext [file extension $fileName]
 
@@ -662,21 +682,26 @@ proc ::CanvasFile::SaveCanvas {wcan fileName args} {
 	}
 	default {
 	    
-	    # If not .txt make sure it's .can extension.
-	    if {$ext ne ".txt"} {
-		set fileName "[file rootname $fileName].can"
+	    if {[info exists regSave($ext,suff-saveProc)]} {
+		uplevel #0 $regSave($ext,suff-saveProc) [list $wcan $fileName]
+	    } else {
+		
+		# If not .txt make sure it's .can extension.
+		if {$ext ne ".txt"} {
+		    set fileName "[file rootname $fileName].can"
+		}
+		
+		# Opens the data file.
+		if {[catch {open $fileName w} fd]} {
+		    set tail [file tail $fileName]
+		    ::UI::MessageBox -icon error -type ok \
+		      -message [mc messfailopwrite $tail $fd]
+		    return
+		}	    
+		fconfigure $fd -encoding utf-8
+		CanvasToFile $wcan $fd $fileName
+		close $fd
 	    }
-	    
-	    # Opens the data file.
-	    if {[catch {open $fileName w} fd]} {
-		set tail [file tail $fileName]
-		::UI::MessageBox -icon error -type ok \
-		  -message [mc messfailopwrite $tail $fd]
-		return
-	    }	    
-	    fconfigure $fd -encoding utf-8
-	    CanvasToFile $wcan $fd $fileName
-	    close $fd
 	}
     }
 }
@@ -809,143 +834,26 @@ proc ::CanvasFile::SVGImageHandler {w cmd} {
 
 # Perhaps a mechanism for components to register new open/save formats?
 
-proc ::CanvasFile::RegisterOpenFormat {} {
+proc ::CanvasFile::RegisterSaveFormat {name label suffix saveProc} {
+    variable regSave
     
+    set regSave($name,name)     $name
+    set regSave($name,label)    $label
+    set regSave($name,suffix)   $suffix
+    set regSave($name,saveProc) $saveProc
     
+    set regSave($suffix,suff-saveProc) $saveProc
 }
 
-proc ::CanvasFile::RegisterSaveFormat {} {
+proc ::CanvasFile::RegisterOpenFormat {name label suffix openProc} {
+    variable regOpen
     
-    
+    set regOpen($name,name)     $name
+    set regOpen($name,label)    $label
+    set regOpen($name,suffix)   $suffix
+    set regOpen($name,openProc) $openProc
+
+    set regOpen($suffix,suff-openProc) $openProc
 }
-
-#
-# These could go in a component for themselves.
-# Only a first incomplete sketch!!!
-#
-
-namespace eval ::CanvasFile:: {
     
-    variable mkdbuid 0
-}
-
-proc ::CanvasFile::CanvasToMetakit {wcan fileName} {
-    variable mkdbuid
-
-    package require Mk4tcl
-    
-    set tag canvasmkfile[incr mkdbuid]
-    mk::file open $tag $fileName
-    set view [mk::view layout $tag.canvas {command:S file:B data:S}]
-    puts "layout=[mk::view layout $tag.canvas]"
-
-    foreach id [$wcan find all] {
-	set line [::CanvasUtils::GetOneLinerForAny $wcan $id]
-
-	# Replace any -file options with a database entry.
-	set ind [lsearch -exact $line -file]
-	if {$ind >= 0} {
-	    set f [lindex $line [incr ind]]
-	    if {[file exists $f]} {
-		lset line $ind [file tail $f]
-		set cursor [mk::row append $view command $line]
-		set fd [open $f RDONLY]
-		fconfigure $fd -translation binary
-		puts ".........cursor=$cursor"
-		set dbd [mk::channel $cursor file write]
-		set n [fcopy $fd $dbd]
-		puts "n=$n"
-		close $fd
-		close $dbd
-		mk::file commit $tag
-	    }
-	} else {
-	    set cursor [mk::row append $view command $line]
-	}
-    }
-    mk::file close $tag
-}
-
-proc ::CanvasFile::MetakitToCanvas {wcan fileName} {
-    global  this
-    variable mkdbuid
-    
-    package require Mk4tcl
-    
-    set tag canvasmkfile[incr mkdbuid]
-    mk::file open $tag $fileName
-
-    puts "layout=[mk::view layout $tag.canvas]"
-
-    set views [mk::file views $tag]
-    puts "views=$views"
-
-    set w [winfo toplevel $wcan]
-    
-    # Handle only 'canvas' view.
-    if {[lsearch $views canvas] < 0} {
-	return -code error "no canvas viw in metakit file"
-    }
-    set i 0
-    set view $tag.canvas
-    
-    mk::loop c $view {
-	set line [mk::get $c command]
-	puts "line=$line"
-	set ind [lsearch -exact $line -file]
-	if {$ind >= 0} {
-	    set tail [lindex $line [incr ind]]
-	    puts "..........c=$c"
-	    
-	    if {0} {
-		set dbd [mk::channel $c file read]
-		set tmp [file join $this(tmpPath) ${tag}${i}${tail}]
-		set fd [open $tmp {WRONLY CREAT}]
-		fconfigure $fd -translation binary
-		set n [fcopy $dbd $fd]
-		puts "n=$n"
-		close $fd
-		close $dbd
-		lset line $ind $tmp
-		incr i
-	    } else {
-		set data [mk::get $c file]
-		set tmp [file join $this(tmpPath) ${tag}${i}${tail}]
-		set fd [open $tmp {WRONLY CREAT}]
-		fconfigure $fd -translation binary
-		puts -nonewline $fd $data
-		close $fd
-		lset line $ind $tmp
-		incr i
-	    }
-	}
-
-	set utag [::CanvasUtils::NewUtag]
-	set line [::CanvasUtils::ReplaceUtag $line $utag]
-	set cmd [lindex $line 0]
-	set type [lindex $line 1]
-
-	switch -- $cmd {
-	    create {
-		# If html font sizes, then translate these to point sizes.
-		if {[string equal $type "text"]} {
-		    set cmdlocal [subst -nocommands -novariables $line]
-		    set cmdlocal [::CanvasUtils::FontHtmlToPointSize $cmdlocal]
-		    # Wrong size
-		    set line $cmdlocal
-		}
-		::CanvasUtils::Command $w $line
-	    }
-	    import {
-		set errMsg [::Import::HandleImportCmd $wcan $line -addundo 0  \
-		  -progress [list ::Import::ImportProgress $line]  \
-		  -command  [list ::Import::ImportCommand $line]]
-
-	    }
-	}
-    }
-    
-    mk::file close $tag
-}
-
 #-------------------------------------------------------------------------------
