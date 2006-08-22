@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.60 2006-08-21 09:45:48 matben Exp $
+# $Id: Whiteboard.tcl,v 1.61 2006-08-22 14:25:18 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -2891,19 +2891,6 @@ proc ::WB::EditPostCommandWhiteboard {w wmenu} {
 	set resize 1
     }
 
-    
-    proc ::WB::OnUndo {wcan} {
-	if {[StateNormal $wcan] && [undo::canundo [GetUndoToken $wcan]]} {
-	    ::CanvasCmd::Undo $wcan
-	}
-    }
-
-    proc ::WB::OnRedo {wcan} {
-	if {[StateNormal $wcan] && [undo::canredo [GetUndoToken $wcan]]} {
-	    ::CanvasCmd::Redo $wcan
-	}
-    }
-
     # Undo and redo.
     if {$normal && [undo::canundo [GetUndoToken $wcan]]} {
 	::UI::MenuMethod $wmenu entryconfigure mUndo -state normal
@@ -2939,8 +2926,9 @@ proc ::WB::EditPostCommandWhiteboard {w wmenu} {
 	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
     }
 
+    # All and Erase All.
     ::UI::MenuMethod $wmenu entryconfigure mAll -state normal
-    if {$len && $normal} {
+    if {$normal} {
 	::UI::MenuMethod $wmenu entryconfigure mEraseAll -state normal
     } else {
 	::UI::MenuMethod $wmenu entryconfigure mEraseAll -state disabled
