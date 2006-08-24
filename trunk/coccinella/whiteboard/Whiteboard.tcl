@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.61 2006-08-22 14:25:18 matben Exp $
+# $Id: Whiteboard.tcl,v 1.62 2006-08-24 07:01:37 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -2006,7 +2006,7 @@ proc ::WB::OnSaveAs {wcan} {
 
 proc ::WB::OnSaveAsItem {wcan} {
     if {[StateNormal $wcan]} {
-	::CanvasCmd::DoSaveAsItem $wcan
+	::CanvasFile::DoSaveAsItem $wcan
     }
 }
 

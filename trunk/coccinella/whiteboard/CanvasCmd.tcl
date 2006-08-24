@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.12 2006-08-20 13:41:19 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.13 2006-08-24 07:01:37 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -427,7 +427,7 @@ proc ::CanvasCmd::DoPutCanvas {wcan {toIPnum all}} {
 	  -icon error -type ok
     }
     fconfigure $fileId -encoding utf-8
-    ::CanvasFile::CanvasToFile $wcan $fileId $absFilePath
+    ::CanvasFile::CanvasToChannel $wcan $fileId $absFilePath
     catch {close $fileId}
 
     if {[catch {open $absFilePath r} fileId]} {
