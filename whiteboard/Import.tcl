@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Import.tcl,v 1.24 2006-08-20 13:41:20 matben Exp $
+# $Id: Import.tcl,v 1.25 2006-08-24 07:01:37 matben Exp $
 
 package require http
 package require httpex
@@ -461,6 +461,7 @@ proc ::Import::DrawImage {wcan optsVar args} {
 # Import::DrawQuickTimeTcl --
 # 
 #       Draws a local QuickTime movie onto canvas.
+#       If inside VFS file is first copied to tmp space.
 #       
 # Arguments:
 #       wcan        the canvas widget path.
@@ -471,6 +472,7 @@ proc ::Import::DrawImage {wcan optsVar args} {
 #       an error string which is empty if things went ok.
 
 proc ::Import::DrawQuickTimeTcl {wcan optsVar args} {
+    global  this
     upvar $optsVar opts
     
     ::Debug 2 "::Import::DrawQuickTimeTcl args='$args'"
@@ -485,6 +487,16 @@ proc ::Import::DrawQuickTimeTcl {wcan optsVar args} {
 	return -code error "Does not yet support -data option"
     }
     set fileName $argsArr(-file)
+    
+    # QuickTime doesn't know about VFS.
+    set fs [file system $fileName]
+    if {[lindex $fs 0] ne "native"} {
+	set root [file rootname [file tail $fileName]]
+	set tmp [::tfileutils::tempfile $this(tmpPath) $root]
+	append tmp [file extension $fileName]
+	file copy $fileName $tmp
+	set fileName $tmp
+    }
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
@@ -527,6 +539,8 @@ proc ::Import::DrawQuickTimeTcl {wcan optsVar args} {
     # Cache options.
     set configOpts {}
     if {[info exists argsArr(-file)]} {
+	
+	# @@@ What if VFS?
 	lappend configOpts -file $argsArr(-file)
     }
     if {[info exists optArr(-url)]} {

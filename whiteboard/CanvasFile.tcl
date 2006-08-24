@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: CanvasFile.tcl,v 1.26 2006-08-22 14:25:18 matben Exp $
+# $Id: CanvasFile.tcl,v 1.27 2006-08-24 07:01:37 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -431,40 +431,45 @@ proc ::CanvasFile::FileToCanvasVer2 {wcan fd absPath args} {
     return $nimports
 }
 
-# CanvasFile::CanvasToFile --
+# CanvasFile::CanvasToChannel --
 #
 #       Writes line by line to file. Each line contains an almost complete 
 #       canvas command except for the widget path. 
 #       The file must be opened and file id given as 'fd'.
 #
 # Arguments:
-#       w                canvas widget path.
+#       wcan             canvas widget path.
 #       fd               file descriptor of the saved file.
 #       absPath          absolute path to the saved file.
+#       args:            -pathtype absolute|relative(D)
+#                        anyone for GetOneLiner*
 #       
 # Results:
 #       none
 
-proc ::CanvasFile::CanvasToFile {w fd absPath args} {
+proc ::CanvasFile::CanvasToChannel {wcan fd absPath args} {
     global  this prefs
     
-    Debug 2 "::CanvasFile::CanvasToFile absPath=$absPath"
+    Debug 2 "::CanvasFile::CanvasToChannel absPath=$absPath"
     
     # When saving images or movies, save relative or absolute path names?
     # It is perhaps best to choose a path relative the actual file path of the 
     # file?
     
-    array set argsArr {
+    array set argsA {
 	-keeputag     1
+	-pathtype     relative
     }
-    array set argsArr $args
-    set argsArr(-basepath) $absPath
+    array set argsA $args
+    if {$argsA(-pathtype) eq "relative"} {
+	set argsA(-basepath) $absPath
+    }
     
     puts $fd "# Version: 2"
     
-    foreach id [$w find all] {
-	set line [eval {::CanvasUtils::GetOneLinerForAny $w $id} \
-	  [array get argsArr]]
+    foreach id [$wcan find all] {
+	set line [eval {::CanvasUtils::GetOneLinerForAny $wcan $id}  \
+	  [array get argsA]]
 	if {$line != {}} {
 	    puts $fd $line		    
 	}
@@ -613,7 +618,7 @@ proc ::CanvasFile::SaveAsDlg {wcan} {
 # SaveCanvasFileDlg --
 #
 #       Creates a standard file save dialog, opens the file, and calls
-#       'CanvasToFile' to write into it, closes it.
+#       'CanvasToChannel' to write into it, closes it.
 #
 # Arguments:
 #       wcan        canvas widget
@@ -699,18 +704,18 @@ proc ::CanvasFile::SaveCanvas {wcan fileName args} {
 		    return
 		}	    
 		fconfigure $fd -encoding utf-8
-		CanvasToFile $wcan $fd $fileName
+		CanvasToChannel $wcan $fd $fileName
 		close $fd
 	    }
 	}
     }
 }
 
-# CanvasCmd::DoSaveAsItem --
+# CanvasFile::DoSaveAsItem --
 # 
 # 
 
-proc ::CanvasCmd::DoSaveAsItem {wcan} {
+proc ::CanvasFile::DoSaveAsItem {wcan} {
     global  prefs this
 	
     set typelist {
@@ -730,7 +735,7 @@ proc ::CanvasCmd::DoSaveAsItem {wcan} {
 	return
     }	    
     fconfigure $fd -encoding utf-8
-    ::CanvasFile::CanvasToFile $wcan $fd $fileName -keeputag 0
+    CanvasToChannel $wcan $fd $fileName -keeputag 0
     close $fd
 }
 
@@ -832,7 +837,79 @@ proc ::CanvasFile::SVGImageHandler {w cmd} {
     return [::WB::CreateImageForWtop $w "" -file $argsArr(-file)]
 }
 
-# Perhaps a mechanism for components to register new open/save formats?
+# CanvasFile::FlattenToDir --
+# 
+#       Takes an existing canvas file and puts it inside 'dir' together
+#       with all its referenced files. Files may be renamed to avoid
+#       name collisions. The 'dir' must already exist and can be a VFS.
+
+proc ::CanvasFile::FlattenToDir {fileName dir} {
+    global  this
+    
+    set origfd [open $fileName {RDONLY}]
+    fconfigure $origfd -encoding utf-8
+
+    set tmp [::tfileutils::tempfile $this(tmpPath) ""]
+    set tmpfd [open $tmp {CREAT WRONLY}]
+    fconfigure $tmpfd -encoding utf-8
+    
+    # Must process all -file options to point to the ones in 'dir'.
+    while {[gets $origfd line] >= 0} { 
+	if {[regexp {(^ *#|^[ \n\t]*$)} $line]} {
+	    puts $tmpfd $line
+	    continue
+	}
+	set cmd [lindex $line 0]
+	if {$cmd ne "import"} {
+	    puts $tmpfd $line
+	    continue
+	}
+	set idx [lsearch -exact $line -file]
+	if {$idx >= 0} {
+	    set src [lindex $line [incr idx]]
+	    	    
+	    # Protect for duplicate tails.
+	    set tail [file tail $src]
+	    if {[info exists tailA($tail)]} {
+		set suff [file extension $src]
+		set root [file rootname $tail]
+		set n 0
+		set newTail ${root}-[incr n]$suff
+		while {[info exists tailA($newTail)]} {
+		    set newTail ${root}-[incr n]$suff
+		}
+		set dstTail $newTail
+	    } else {
+		set dstTail $tail
+	    }
+	    set tailA($dstTail) 1
+	    set dst [file join $dir $dstTail]
+
+	    # Map from original file name to vfs file name.
+	    set map($src) $dst
+
+	    lset line $idx $dstTail
+	    puts $tmpfd $line
+	}
+    }
+    close $origfd
+    close $tmpfd    
+
+    # Save as an ordinary can file inside vfs.
+    set canFile [file join $dir [file tail $fileName]]
+    file copy $tmp $canFile
+    
+    # Copy all files. Do not overwrite if already exists.
+    foreach {src dst} [array get map] {
+	if {![file exists $dst]} {
+	    file copy $src $dst
+	}
+    }
+}
+
+# CanvasFile::RegisterSaveFormat, RegisterOpenFormat --
+# 
+#       Mechanisms for components to register new open/save formats.
 
 proc ::CanvasFile::RegisterSaveFormat {name label suffix saveProc} {
     variable regSave
