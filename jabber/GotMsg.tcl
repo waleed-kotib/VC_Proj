@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.48 2006-08-12 13:48:25 matben Exp $
+# $Id: GotMsg.tcl,v 1.49 2006-08-27 13:14:02 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -14,6 +14,7 @@ namespace eval ::GotMsg:: {
     # Add all event hooks.
     ::hooks::register quitAppHook        ::GotMsg::QuitAppHook
     ::hooks::register presenceHook       ::GotMsg::PresenceHook    
+    #::hooks::register newMessageHook     ::GotMsg::MessageHook
     
     # Wait for this variable to be set.
     variable finished  
@@ -32,26 +33,34 @@ proc ::GotMsg::QuitAppHook { } {
     ::UI::SaveWinGeom $wDlgs(jgotmsg)
 }
 
+# @@@ Enable this when solved the uidmsg vs. uuid mixup.
+proc ::GotMsg::MessageHook {bodytxt args} {
+    upvar ::Jabber::jprefs jprefs
+
+    if {$jprefs(showMsgNewWin) && ($bodytxt ne "")} {
+	array set argsA $args
+	GotMsg $argsA(-uuid)
+    }
+}
+
 # GotMsg::GotMsg --
 #
 #       Called when we get an incoming message.
 #       Calls 'GotMsg::Show' if not mapped.
 #
 # Arguments:
-#       id          the message id, see Inbox.
+#       uid          the message uuid
 #       
 # Results:
 #       may show message window.
 
-proc ::GotMsg::GotMsg {id} {
+proc ::GotMsg::GotMsg {uid} {
     global  wDlgs
     
     variable w
     variable wbtnext
-    variable msgIdDisplay
-    upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "GotMsg::GotMsg id=$id"
+    ::Debug 2 "GotMsg::GotMsg uid=$uid"
     
     set w $wDlgs(jgotmsg)
         
@@ -59,7 +68,7 @@ proc ::GotMsg::GotMsg {id} {
     if {[winfo exists $w]} {
 	$wbtnext state {!disabled}
     } else {
-	Show $id
+	Show $uid
     }
 }
 
@@ -92,12 +101,7 @@ proc ::GotMsg::Show {thisMsgId} {
     Build
     
     set msgIdDisplay $thisMsgId
-    
-    set subject [::MailBox::Get $thisMsgId subject]
-    set jid     [::MailBox::Get $thisMsgId from]
-    set date    [::MailBox::Get $thisMsgId date]
-    set body    [::MailBox::Get $thisMsgId message]
-    
+    lassign [::MailBox::GetContentList $thisMsgId] subject jid date body
     set jid [::Jabber::JlibCmd getrecipientjid $jid]
     set jidtxt $jid
     set smartdate [::Utils::SmartClockFormat [clock scan $date]]

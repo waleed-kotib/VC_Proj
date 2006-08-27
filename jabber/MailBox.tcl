@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements a mailbox for jabber messages.
 #      
-#  Copyright (c) 2002-2005  Mats Bengtsson
+#  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.90 2006-08-21 09:45:48 matben Exp $
+# $Id: MailBox.tcl,v 1.91 2006-08-27 13:14:03 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -19,6 +19,9 @@
 # The inbox must be read to memory when mailbox is displayed, or when (before)
 # receiving first message. This is to keep the mailbox array in sync.
 # The inbox needs only be saved if we have edits.
+# 
+# UPDATE: Now using a metakit database for storing all messages as they are
+#         received, see below.
 
 package require uuid
 
@@ -72,6 +75,9 @@ namespace eval ::MailBox:: {
     set locals(hooksInited)   0
     set locals(updateDateid)  ""
     set locals(updateDatems)  [expr 1000*60]
+    
+    set locals(w)    -
+    set locals(wtbl) -
     
     # Running id for incoming messages; never reused.
     variable uidmsg 1000
@@ -164,11 +170,11 @@ proc ::MailBox::ShowHide {args} {
     upvar ::Jabber::jstate jstate
     variable locals  
 
-    array set argsArr $args
+    array set argsA $args
     set w $wDlgs(jinbox)
     
-    if {[info exists argsArr(-visible)]} {
-	set visible $argsArr(-visible)
+    if {[info exists argsA(-visible)]} {
+	set visible $argsA(-visible)
     }
     if {![winfo exists $w]} {
 	
@@ -177,8 +183,8 @@ proc ::MailBox::ShowHide {args} {
     } else {
 	set ismapped [winfo ismapped $w]
 	set targetstate [expr $ismapped ? 0 : 1]
-	if {[info exists argsArr(-visible)]} {
-	    set targetstate $argsArr(-visible)
+	if {[info exists argsA(-visible)]} {
+	    set targetstate $argsA(-visible)
 	}
 	if {$targetstate} {
 	    catch {wm deiconify $w}
@@ -307,12 +313,6 @@ proc ::MailBox::Build {args} {
     grid columnconfigure $wfrmbox 0 -weight 1
     grid rowconfigure $wfrmbox 0 -weight 1
     
-    set i 0
-    foreach id [lsort -integer [array names mailbox]] {
-	InsertRow $wtbl $mailbox($id) $i
-	incr i
-    }
-    
     # Display message in a text widget.
     set wfrmsg $wpane.frmsg    
     set wtextmsg $wfrmsg.text
@@ -356,9 +356,7 @@ proc ::MailBox::Build {args} {
     # Grab and focus.
     focus $w
     
-    # Make selection available in text widget but not editable!
-    # Seems to stop the tablelist from getting focus???
-    #$wtextmsg bind <Key> break
+    InsertAll
     
     # Default sorting.
     HeaderCmd $wtbl cDate
@@ -450,6 +448,23 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set sortColumn 0
 }
 
+proc ::MailBox::InsertAll {} {
+
+    if {[MKHaveMetakit]} {
+	MKInsertAll
+    } else {
+	variable mailbox
+	variable locals
+
+	set wtbl $locals(wtbl)
+	set i 0
+	foreach id [lsort -integer [array names mailbox]] {
+	    InsertRow $wtbl $mailbox($id) $i
+	    incr i
+	}
+    }
+}
+
 # MailBox::InsertRow --
 #
 #       Does the actual job of adding a line in the mailbox widget.
@@ -523,12 +538,6 @@ proc ::MailBox::Selection {T} {
 	$wtbar buttonconfigure trash   -state disabled
 	MsgDisplayClear
     } elseif {$n == 1} {
-	set item [$T selection get]
-	set jid3 [$T item element cget $item cFrom eText -text]
-	set uid  [$T item element cget $item cUid  eText -text]
-	jlib::splitjid $jid3 jid2 res
-		
-	DisplayMsg $uid
 	
 	# Configure buttons.
 	$wtbar buttonconfigure reply   -state normal
@@ -536,24 +545,7 @@ proc ::MailBox::Selection {T} {
 	$wtbar buttonconfigure save    -state normal
 	$wtbar buttonconfigure print   -state normal
 	$wtbar buttonconfigure trash   -state normal
-	
-	# If any whiteboard stuff in message...
-	set uidcan [GetCanvasHexUID $uid]
-	set svgElem [GetAnySVGElements $mailbox($uid)]
-
-	::Debug 2 "::MailBox::Selection  uidcan=$uidcan, svgElem='$svgElem'"
-	 
-	# The "raw" protocol stores the canvas in a separate file indicated by
-	# the -canvasuid key in the message list.
-	# The SVG protocol stores the complete x element in the mailbox 
-	# -x listOfElements
-	
-	# The "raw" protocol.
-	if {[string length $uidcan] > 0} {	
-	    DisplayRawMessage $jid3 $uidcan
-	} elseif {[llength $svgElem]} {
-	    DisplayXElementSVG $jid3 $svgElem
-	}
+	DisplayAny [$T selection get]
     } else {
 	
 	# If multiple selected items.
@@ -638,28 +630,32 @@ proc ::MailBox::UpdateDateAndTime {T} {
 
 proc ::MailBox::DisplayMessageHook {body args} {
 
-    array set argsArr $args
-    if {[info exists argsArr(-msgid)]} {
-	MarkMsgAsRead $argsArr(-msgid)
+    array set argsA $args
+    if {[info exists argsA(-msgid)]} {
+	MarkMsgAsRead $argsA(-msgid)
     }
 }
 
 proc ::MailBox::MarkMsgAsRead {uid} {
     global  wDlgs
-    variable mailbox
-    variable mailboxindex
     variable locals
     variable tableUid2Item
     
-    if {[lindex $mailbox($uid) $mailboxindex(isread)] == 0} {
-	lset mailbox($uid) $mailboxindex(isread) 1
-	
-	if {[winfo exists $wDlgs(jinbox)]} {
-	    set T $locals(wtbl)
-	    set item $tableUid2Item($uid)
-	    $T item state set $item read
+    if {[MKHaveMetakit]} {
+	MKMarkAsRead $uid
+    } else {
+	variable mailbox
+	variable mailboxindex
+
+	if {[lindex $mailbox($uid) $mailboxindex(isread)] == 0} {
+	    lset mailbox($uid) $mailboxindex(isread) 1	    
+	    set locals(haveEdits) 1
 	}
-	set locals(haveEdits) 1
+    }
+    if {[winfo exists $wDlgs(jinbox)]} {
+	set T $locals(wtbl)
+	set item $tableUid2Item($uid)
+	$T item state set $item read
     }
 }
 
@@ -673,7 +669,7 @@ proc ::MailBox::CloseHook {wclose} {
 proc ::MailBox::GetToplevel { } {    
     variable locals
     
-    if {[info exists locals(w)] && [winfo exists $locals(w)]} {
+    if {[winfo exists $locals(w)]} {
 	return $locals(w)
     } else {
 	return {}
@@ -682,61 +678,101 @@ proc ::MailBox::GetToplevel { } {
 
 # Various accessor functions.
 
-proc ::MailBox::Get {id key} {
-    variable mailbox
-    variable mailboxindex
+proc ::MailBox::Get {uid key} {
+
+    if {[MKHaveMetakit]} {
+	lassign [MKGetContentList $uid] subject from date body
+	switch -- $key {
+	    subject - from - date {
+		return [set $key]
+	    }
+	    message {
+		return $body
+	    }
+	}
+    } else {
+	variable mailbox
+	variable mailboxindex
     
-    return [lindex $mailbox($id) $mailboxindex($key)]
+	return [lindex $mailbox($uid) $mailboxindex($key)]
+    }
+}
+
+proc ::MailBox::GetContentList {uid} {
+    
+    if {[MKHaveMetakit]} {
+	return [MKGetContentList $uid]
+    } else {
+	variable mailbox
+	variable mailboxindex
+	
+	return [list  \
+	  [lindex $mailbox($uid) $mailboxindex(subject)] \
+	  [lindex $mailbox($uid) $mailboxindex(from)]    \
+	  [lindex $mailbox($uid) $mailboxindex(date)]    \
+	  [lindex $mailbox($uid) $mailboxindex(message)] \
+	  ]
+    }
 }
 
 proc ::MailBox::Set {id key value} {
-    variable mailbox
-    variable mailboxindex
-    
-    lset mailbox($id) $mailboxindex($key) $value
+
+    if {[MKHaveMetakit]} {
+	# @@@ TODO or remove?
+    } else {
+	variable mailbox
+	variable mailboxindex
+	
+	lset mailbox($id) $mailboxindex($key) $value
+    }
 }
 
-proc ::MailBox::IsLastMessage {id} {
-    variable mailbox
-
-    set sorted [lsort -integer [array names mailbox]]
-    return [expr ($id >= [lindex $sorted end]) ? 1 : 0]
+proc ::MailBox::IsLastMessage {uid} {
+    
+    if {[MKHaveMetakit]} {
+	return [MKIsLast $uid]
+    } else {
+	variable mailbox
+	
+	set sorted [lsort -integer [array names mailbox]]
+	return [expr ($uid >= [lindex $sorted end]) ? 1 : 0]
+    }
 }
 
 proc ::MailBox::AllRead { } {
-    variable mailbox
-    variable mailboxindex
-    
-    # Find first that is not read.
-    set allRead 1
-    foreach uid [array names mailbox] {
-	if {![lindex $mailbox($uid) $mailboxindex(isread)]} {
-	    set allRead 0
-	    break
-	}
-    }
-    return $allRead
-}
 
-proc ::MailBox::GetNextMsgID {id} {
-    variable mailbox
-
-    set nextid $id
-    set sorted [lsort -integer [array names mailbox]]
-    set ind [lsearch $sorted $id]
-    if {($ind >= 0) && ([expr $ind + 1] < [llength $sorted])} {
-	set next [lindex $sorted [incr ind]]
-    }
-    return $next
-}
-
-proc ::MailBox::GetMsgFromUid {id} {
-    variable mailbox
-    
-    if {[info exists mailbox($id)]} {
-	return $mailbox($id)
+    if {[MKHaveMetakit]} {
+	return [MKAllRead]
     } else {
-	return {}
+	variable mailbox
+	variable mailboxindex
+	
+	# Find first that is not read.
+	set allRead 1
+	foreach uid [array names mailbox] {
+	    if {![lindex $mailbox($uid) $mailboxindex(isread)]} {
+		set allRead 0
+		break
+	    }
+	}
+	return $allRead
+    }
+}
+
+proc ::MailBox::GetNextMsgID {uid} {
+    
+    if {[MKHaveMetakit]} {
+	return [MKGetNextUUID $uid]
+    } else {
+	variable mailbox
+	
+	set nextid $uid
+	set sorted [lsort -integer [array names mailbox]]
+	set ind [lsearch $sorted $uid]
+	if {($ind >= 0) && ([expr $ind + 1] < [llength $sorted])} {
+	    set next [lindex $sorted [incr ind]]
+	}
+	return $next
     }
 }
 
@@ -776,20 +812,21 @@ proc ::MailBox::MessageHook {bodytxt args} {
     variable locals
     variable mailbox
     variable uidmsg
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::MailBox::MessageHook bodytxt='$bodytxt', args='$args'"
 
-    array set argsArr $args
-    
+    array set argsA $args
+    set xmldata $argsA(-xmldata)
+    set uuid $argsA(-uuid)
+        
     # Ignore messages with empty body and subject. 
     # They are probably not for display.
     if {$bodytxt eq ""} {
-	if {![info exists argsArr(-subject)]} {
+	if {![info exists argsA(-subject)]} {
 	    return
 	}
-	if {$argsArr(-subject) eq ""} {
+	if {$argsA(-subject) eq ""} {
 	    return
 	}
     }
@@ -803,28 +840,46 @@ proc ::MailBox::MessageHook {bodytxt args} {
     if {!$locals(mailboxRead)} {
 	ReadMailbox
     }
-    set bodytxt [string trimright $bodytxt "\n"]
-    set messageList [eval {MakeMessageList $bodytxt} $args]    
-    
-    # All messages cached in 'mailbox' array.
-    set mailbox($uidmsg) $messageList
-    
-    # Always cache it in inbox.
-    PutMessageInInbox $messageList
-        
+
     # Show in mailbox. Sorting?
     set w [GetToplevel]
+    set wtbl $locals(wtbl)
+    
+    if {[MKHaveMetakit]} {
+	set stamp [::Jabber::GetDelayStamp $xmldata]
+	if {$stamp ne ""} {
+	    set secs [clock scan $stamp -gmt 1]
+	} else {
+	    set secs [clock seconds]
+	}
+	set time [clock format $secs -format "%Y%m%dT%H:%M:%S"]
+	MKAdd $uuid $time 0 $xmldata ""
+	if {$w ne ""} {
+	    MKInsertRow $uuid $time 0 $xmldata ""
+	}
+	set idxuuid $uuid
+    } else {
+	set bodytxt [string trimright $bodytxt "\n"]
+	set messageList [eval {MakeMessageList $bodytxt} $args]    
+	
+	# All messages cached in 'mailbox' array.
+	set mailbox($uidmsg) $messageList
+	
+	# Always cache it in inbox.
+	PutMessageInInbox $messageList
+	if {$w ne ""} {
+	    InsertRow $wtbl $mailbox($uidmsg) end
+	}
+	set idxuuid $uidmsg
+    }    
     if {$w ne ""} {
-	set wtbl $locals(wtbl)
-	InsertRow $wtbl $mailbox($uidmsg) end
 	$wtbl see end
     }
     ::JUI::MailBoxState nonempty
-    
-    # Any separate window.
-    # @@@ as hook instead
+
+    # @@@ as hook instead when solved the uuid vs. uidmsg mixup!
     if {$jprefs(showMsgNewWin) && ($bodytxt ne "")} {
-	::GotMsg::GotMsg $uidmsg
+	::GotMsg::GotMsg $idxuuid
     }
 }
 
@@ -832,7 +887,7 @@ proc ::MailBox::MessageHook {bodytxt args} {
 # 
 #       Same as above, but for raw whiteboard messages.
 
-proc ::MailBox::HandleRawWBMessage {jlibname xmlns msgElem args} {
+proc ::MailBox::HandleRawWBMessage {jlibname xmlns xmldata args} {
     global  prefs this
 
     variable mailbox
@@ -840,29 +895,51 @@ proc ::MailBox::HandleRawWBMessage {jlibname xmlns msgElem args} {
     variable locals
     
     ::Debug 2 "::MailBox::HandleRawWBMessage args=$args"
-    array set argsArr $args
-    if {![info exists argsArr(-x)]} {
+    array set argsA $args
+    if {![info exists argsA(-x)]} {
 	return
     }
+    
+    # We get this message from jlib and need therefore to generate a uuid.
+    set uuid [uuid::uuid generate]
 	
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {
 	ReadMailbox
     }
-    set messageList [eval {MakeMessageList ""} $args]
-    set rawList     [::JWB::GetRawCanvasMessageList $argsArr(-x) $xmlns]
-    set canvasuid   [uuid::uuid generate]
-    set filePath    [file join $this(inboxCanvasPath) $canvasuid.can]
-    ::CanvasFile::DataToFile $filePath $rawList
-    lappend messageList -canvasuid $canvasuid
-    set mailbox($uidmsg) $messageList
-    PutMessageInInbox $messageList
-
+    
     # Show in mailbox.
     set w [GetToplevel]
-    if {$w != ""} {
-	set wtbl $locals(wtbl)
-	InsertRow $wtbl $mailbox($uidmsg) end
+    set wtbl $locals(wtbl)
+
+    set rawList  [::JWB::GetRawCanvasMessageList $argsA(-x) $xmlns]
+    set filePath [file join $this(inboxCanvasPath) $uuid.can]
+    ::CanvasFile::DataToFile $filePath $rawList
+
+    if {[MKHaveMetakit]} {
+	set stamp [::Jabber::GetDelayStamp $xmldata]
+	if {$stamp ne ""} {
+	    set secs [clock scan $stamp -gmt 1]
+	} else {
+	    set secs [clock seconds]
+	}
+	set time [clock format $secs -format "%Y%m%dT%H:%M:%S"]
+	
+	# @@@ This will be duplicate storage!
+	MKAdd $uuid $time 0 $xmldata $uuid.can
+	if {$w ne ""} {
+	    MKInsertRow $uuid $time 0 $xmldata $uuid.can
+	}
+    } else {
+	set messageList [eval {MakeMessageList ""} $args]
+	lappend messageList -canvasuid $uuid
+	set mailbox($uidmsg) $messageList
+	PutMessageInInbox $messageList
+	if {$w ne ""} {
+	    InsertRow $wtbl $mailbox($uidmsg) end
+	}
+    }
+    if {$w ne ""} {
 	$wtbl see end
     }
     ::JUI::MailBoxState nonempty
@@ -877,7 +954,7 @@ proc ::MailBox::HandleRawWBMessage {jlibname xmlns msgElem args} {
 # 
 #       As above but for SVG whiteboard messages.
 
-proc ::MailBox::HandleSVGWBMessage {jlibname xmlns msgElem args} {
+proc ::MailBox::HandleSVGWBMessage {jlibname xmlns xmldata args} {
     global  prefs
 
     variable mailbox
@@ -885,8 +962,8 @@ proc ::MailBox::HandleSVGWBMessage {jlibname xmlns msgElem args} {
     variable locals
     
     ::Debug 2 "::MailBox::HandleSVGWBMessage args='$args'"
-    array set argsArr $args
-    if {![info exists argsArr(-x)]} {
+    array set argsA $args
+    if {![info exists argsA(-x)]} {
 	return
     }
 	
@@ -894,19 +971,37 @@ proc ::MailBox::HandleSVGWBMessage {jlibname xmlns msgElem args} {
     if {!$locals(mailboxRead)} {
 	ReadMailbox
     }
-    set messageList [eval {MakeMessageList ""} $args]
-
-    # Store svg in x element.
-    lappend messageList -x $argsArr(-x)
-
-    set mailbox($uidmsg) $messageList
-    PutMessageInInbox $messageList
-
-    # Show in mailbox.
     set w [GetToplevel]
-    if {$w != ""} {
-	set wtbl $locals(wtbl)
-	InsertRow $wtbl $mailbox($uidmsg) end
+    set wtbl $locals(wtbl)
+
+    if {[MKHaveMetakit]} {
+	set stamp [::Jabber::GetDelayStamp $xmldata]
+	if {$stamp ne ""} {
+	    set secs [clock scan $stamp -gmt 1]
+	} else {
+	    set secs [clock seconds]
+	}
+	set time [clock format $secs -format "%Y%m%dT%H:%M:%S"]
+	
+	# @@@ We don't detect the svgwb part of xml as a whiteboard.
+	#     Fix when adapting SVG.
+	MKAdd $uuid $time 0 $xmldata ""
+	if {$w ne ""} {
+	    MKInsertRow $uuid $time 0 $xmldata ""
+	}
+    } else {
+	set messageList [eval {MakeMessageList ""} $args]
+
+	# Store svg in x element.
+	lappend messageList -x $argsA(-x)
+	
+	set mailbox($uidmsg) $messageList
+	PutMessageInInbox $messageList
+	if {$w ne ""} {
+	    InsertRow $wtbl $mailbox($uidmsg) end
+	}
+    }
+    if {$w ne ""} {
 	$wtbl see end
     }
     ::JUI::MailBoxState nonempty
@@ -921,18 +1016,18 @@ proc ::MailBox::MakeMessageList {body args} {
     variable locals
     variable uidmsg
         
-    array set argsArr {
+    array set argsA {
 	-from unknown -subject {}
     }
-    array set argsArr $args
+    array set argsA $args
 
-    jlib::splitjid $argsArr(-from) jid2 res
+    jlib::splitjid $argsA(-from) jid2 res
 
     # Here we should probably check som 'jabber:x:delay' element...
     # This is ISO 8601.
     set secs ""
-    if {[info exists argsArr(-x)]} {
-	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
+    if {[info exists argsA(-x)]} {
+	set tm [::Jabber::GetAnyDelayElem $argsA(-x)]
 	if {$tm != ""} {
 	    # Always use local time!
 	    set secs [clock scan $tm -gmt 1]
@@ -944,7 +1039,7 @@ proc ::MailBox::MakeMessageList {body args} {
     set date [clock format $secs -format "%Y%m%dT%H:%M:%S"]
 
     # List format for messages.
-    return [list $argsArr(-subject) $argsArr(-from) $date 0 [incr uidmsg] $body]
+    return [list $argsA(-subject) $argsA(-from) $date 0 [incr uidmsg] $body]
 }
 
 proc ::MailBox::PutMessageInInbox {row} {
@@ -958,9 +1053,6 @@ proc ::MailBox::PutMessageInInbox {row} {
 	#fconfigure $fd -encoding utf-8
 	if {!$exists} {
 	    WriteInboxHeader $fd
-	    if {[string equal $this(platform) "macintosh"]} {
-		file attributes $this(inboxFile) -type pref
-	    }
 	}
 	puts $fd "set mailbox(\[incr uidmsg]) {$row}"
 	close $fd
@@ -1019,13 +1111,27 @@ proc ::MailBox::TrashMsg { } {
     
     foreach item $items {
 	set uid  [$T item element cget $item cUid eText -text]
-	set cuid [GetCanvasHexUID $uid]
-	if {$cuid ne ""} {
-	    set fileName $cuid.can
-	    set filePath [file join $this(inboxCanvasPath) $fileName]
+	
+	set fileTail ""
+	if {[MKHaveMetakit]} {
+	    array unset v
+	    array set v [MKGet $uid]
+	    if {($v(file) ne "") && ([file extension $v(file)] eq ".can")} {
+		set fileTail $v(file)
+	    }
+	    MKDeleteRow $uid
+	} else {
+	    set cuid [GetCanvasHexUID $uid]
+	    if {$cuid ne ""} {
+		set fileTail $cuid.can
+	    }
+	    unset mailbox($uid)
+	}
+	if {$fileTail ne ""} {
+	    set filePath [file join $this(inboxCanvasPath) $fileTail]
 	    catch {file delete $filePath}
 	}
-	unset mailbox($uid)
+	
 	set select [$T item id "$item below"]
 	if {$select eq ""} {
 	    set select [$T item id "$item above"]
@@ -1061,14 +1167,8 @@ proc ::MailBox::GetAnySVGElements {row} {
     return $svgElem
 }
 
-# MailBox::DisplayRawMessage --
-# 
-#       Displays a raw whiteboard message when selected in inbox.
-
-proc ::MailBox::DisplayRawMessage {jid3 uid} {
+proc ::MailBox::DisplayWhiteboardFile {jid3 fileName} {
     global  prefs this wDlgs
-
-    variable mailbox
     upvar ::Jabber::jstate jstate
     
     jlib::splitjid $jid3 jid2 res
@@ -1081,7 +1181,6 @@ proc ::MailBox::DisplayRawMessage {jid3 uid} {
 	set tryimport 1
     }
 	    
-    set fileName ${uid}.can
     set filePath [file join $this(inboxCanvasPath) $fileName]
     set numImports [::CanvasFile::DrawCanvasItemFromFile $w \
       $filePath -where local -tryimport $tryimport]
@@ -1156,22 +1255,27 @@ proc ::MailBox::OnDestroyWhiteboard {w} {
 	set T $locals(wtbl)
 	foreach item [$T selection get] {
 	    set uid  [$T item element cget $item cUid  eText -text]
-	    set uidcan [GetCanvasHexUID $uid]
-	    set svgElem [GetAnySVGElements $mailbox($uid)]
-	    if {[string length $uidcan]} {	
-		$T selection clear $item
-	    } elseif {[llength $svgElem]} {
-		$T selection clear $item
-	    }
 
+	    if {[MKHaveMetakit]} {
+		array set v [MKGet $uid]
+		if {($v(file) ne "") && ([file extension $v(file)] eq ".can")} {
+		    $T selection clear $item
+		}
+	    } else {
+		set uidcan [GetCanvasHexUID $uid]
+		set svgElem [GetAnySVGElements $mailbox($uid)]
+		if {[string length $uidcan]} {	
+		    $T selection clear $item
+		} elseif {[llength $svgElem]} {
+		    $T selection clear $item
+		}
+	    }
 	}
     }
 }
 
 proc ::MailBox::DoubleClickMsg {T} {
     variable locals
-    variable mailbox
-    variable mailboxindex
     upvar ::Jabber::jprefs jprefs
         
     if {[$T selection count] != 1} {
@@ -1180,12 +1284,18 @@ proc ::MailBox::DoubleClickMsg {T} {
     set item [$T selection get]
     set uid  [$T item element cget $item cUid eText -text]
 
-    # We shall have the original, unparsed, text here.
-    set body    [lindex $mailbox($uid) $mailboxindex(message)]
-    set subject [lindex $mailbox($uid) $mailboxindex(subject)]
-    set to      [lindex $mailbox($uid) $mailboxindex(from)]
-    set date    [lindex $mailbox($uid) $mailboxindex(date)]
-    
+    if {[MKHaveMetakit]} {
+	lassign [MKGetContentList $uid] subject from date body
+    } else {
+	variable mailbox
+	variable mailboxindex
+
+	# We shall have the original, unparsed, text here.
+	set body    [lindex $mailbox($uid) $mailboxindex(message)]
+	set subject [lindex $mailbox($uid) $mailboxindex(subject)]
+	set to      [lindex $mailbox($uid) $mailboxindex(from)]
+	set date    [lindex $mailbox($uid) $mailboxindex(date)]
+    }    
     if {[string equal $jprefs(inbox2click) "newwin"]} {
 	::GotMsg::GotMsg $uid
     } elseif {[string equal $jprefs(inbox2click) "reply"]} {
@@ -1206,29 +1316,70 @@ proc ::MailBox::MsgDisplayClear { } {
     $wtextmsg configure -state disabled
 }
 
-proc ::MailBox::DisplayMsg {id} {
+proc ::MailBox::DisplayAny {item} {
+    variable locals
+    
+    set T $locals(wtbl)
+
+    set jid3 [$T item element cget $item cFrom eText -text]
+    set uid  [$T item element cget $item cUid  eText -text]
+    jlib::splitjid $jid3 jid2 res
+	    
+    DisplayTextMsg $uid
+
+    # If any whiteboard stuff in message...
+    if {[MKHaveMetakit]} {
+	array set v [MKGet $uid]
+	if {$v(file) ne ""} {
+	    DisplayWhiteboardFile $jid3 $v(file)
+	}
+    } else {
+	variable mailbox
+	variable mailboxindex
+
+	set uidcan [GetCanvasHexUID $uid]
+	set svgElem [GetAnySVGElements $mailbox($uid)]
+	
+	# The "raw" protocol stores the canvas in a separate file indicated by
+	# the -canvasuid key in the message list.
+	# The SVG protocol stores the complete x element in the mailbox 
+	# -x listOfElements
+	
+	# The "raw" protocol.
+	if {[string length $uidcan] > 0} {	
+	    DisplayWhiteboardFile $jid3 $uidcan.can
+	} elseif {[llength $svgElem]} {
+	    DisplayXElementSVG $jid3 $svgElem
+	}
+    }
+}
+
+proc ::MailBox::DisplayTextMsg {uid} {
     global  prefs
 
     variable locals
     variable mailbox
     variable mailboxindex
     
-    set wtextmsg $locals(wtextmsg)    
-
-    set subject [lindex $mailbox($id) $mailboxindex(subject)]
-    set from    [lindex $mailbox($id) $mailboxindex(from)]
-    set date    [lindex $mailbox($id) $mailboxindex(date)]
-    set body    [lindex $mailbox($id) $mailboxindex(message)]
-    
+    set wtextmsg $locals(wtextmsg)  
     $wtextmsg configure -state normal
     $wtextmsg delete 1.0 end
     $wtextmsg mark set insert end
+    
+    if {[MKHaveMetakit]} {
+	lassign [MKGetContentList $uid] subject from date body
+    } else {
+	set subject [lindex $mailbox($uid) $mailboxindex(subject)]
+	set from    [lindex $mailbox($uid) $mailboxindex(from)]
+	set date    [lindex $mailbox($uid) $mailboxindex(date)]
+	set body    [lindex $mailbox($uid) $mailboxindex(message)]
+    }
     ::Text::ParseMsg normal $from $wtextmsg $body normal
     $wtextmsg insert end \n
     $wtextmsg configure -state disabled
     
     # This hook triggers 'MarkMsgAsRead'.
-    set opts [list -subject $subject -from $from -time $date -msgid $id]
+    set opts [list -subject $subject -from $from -time $date -msgid $uid]
     eval {::hooks::run displayMessageHook $body} $opts
 }
 
@@ -1245,12 +1396,14 @@ proc ::MailBox::ReplyTo { } {
     set item [$T selection get]
     set uid  [$T item element cget $item cUid eText -text]
 
-    # We shall have the original, unparsed, text here.
-    set subject [lindex $mailbox($uid) $mailboxindex(subject)]
-    set from    [lindex $mailbox($uid) $mailboxindex(from)]
-    set date    [lindex $mailbox($uid) $mailboxindex(date)]
-    set body    [lindex $mailbox($uid) $mailboxindex(message)]
-    
+    if {[MKHaveMetakit]} {
+	lassign [MKGetContentList $uid] subject from date body
+    } else {
+	set subject [lindex $mailbox($uid) $mailboxindex(subject)]
+	set from    [lindex $mailbox($uid) $mailboxindex(from)]
+	set date    [lindex $mailbox($uid) $mailboxindex(date)]
+	set body    [lindex $mailbox($uid) $mailboxindex(message)]
+    }    
     set to [::Jabber::JlibCmd getrecipientjid $from]
     if {![regexp -nocase {^ *re:} $subject]} {
 	set subject "Re: $subject"
@@ -1271,12 +1424,14 @@ proc ::MailBox::ForwardTo { } {
     set item [$T selection get]
     set uid  [$T item element cget $item cUid eText -text]
 
-    # We shall have the original, unparsed, text here.
-    set subject [lindex $mailbox($uid) $mailboxindex(subject)]
-    set from    [lindex $mailbox($uid) $mailboxindex(from)]
-    set date    [lindex $mailbox($uid) $mailboxindex(date)]
-    set body    [lindex $mailbox($uid) $mailboxindex(message)]
-
+    if {[MKHaveMetakit]} {
+	lassign [MKGetContentList $uid] subject from date body
+    } else {
+	set subject [lindex $mailbox($uid) $mailboxindex(subject)]
+	set from    [lindex $mailbox($uid) $mailboxindex(from)]
+	set date    [lindex $mailbox($uid) $mailboxindex(date)]
+	set body    [lindex $mailbox($uid) $mailboxindex(message)]
+    }
     set subject "Forwarded: $subject"
     ::NewMsg::Build -subject $subject -forwardmessage $body -time $date
 }
@@ -1357,13 +1512,13 @@ proc ::MailBox::SaveMailboxVer2 {args} {
     variable mailbox
     variable locals
     
-    array set argsArr {
+    array set argsA {
 	-force      0
     }
-    array set argsArr $args
+    array set argsA $args
     
     # If the mailbox is read there can be edits. Needs therefore to save state.
-    if {$argsArr(-force)} {
+    if {$argsA(-force)} {
 	set doSave 1
     } else {
 	set doSave 0
@@ -1424,12 +1579,24 @@ proc ::MailBox::WriteInboxHeader {fid} {
 proc ::MailBox::ReadMailbox { } {
     global  this
     variable locals
+    variable mailbox
 
-    # Set this even if not there.
-    set locals(mailboxRead) 1
     if {[file exists $this(inboxFile)]} {
 	ReadMailboxVer2
     }
+    if {[MKHaveMetakit]} {
+	MKOpen
+	if {[file exists $this(inboxFile)]} {
+	    MKImportOld
+	    
+	    # Cleanup all old stuff which we don't use anymore.
+	    array unset mailbox
+	    file delete $this(inboxFile)
+	}
+    }
+    
+    # Set this even if not there.
+    set locals(mailboxRead) 1
 }
 
 proc ::MailBox::TranslateAnyVer1ToCurrentVer { } {
@@ -1575,10 +1742,272 @@ proc ::MailBox::QuitHook { } {
 	if {$locals(haveEdits)} {
 	    SaveMailbox
 	}
+	MKClose
     } else {
 	DeleteMailbox
+	MKDelete
     }
 }
 
+# Preliminary metakit mailbox --------------------------------------------------
+
+namespace eval ::MailBox {
+    
+    set ::this(inbox,mk,file) [file join $::this(prefsPath) Inbox.mk]
+}
+
+proc ::MailBox::MKHaveMetakit {} {
+    variable mkhavemetakit
+    
+    if {[info exists mkhavemetakit]} {
+	return $mkhavemetakit
+    } else {
+	if {[catch {
+	    package require vfs
+	    package require vfs::mk4
+	}]} {
+	    set mkhavemetakit 0
+	    return 0
+	} else {
+	    set mkhavemetakit 1
+	    return 1
+	}
+    }
+}
+
+proc ::MailBox::MKExists {} {
+    global  this
+    return [file exists $this(inbox,mk,file)]
+}
+
+proc ::MailBox::MKOpen {} {
+    global  this
+    
+    # This creates the file if not exists.
+    mk::file open mailbox $this(inbox,mk,file)
+    
+    # The actual data. 
+    # The 'file' property is the tail name for any externally stored data.
+    mk::view layout mailbox.inbox {uuid:S time:S isread:S xmldata:S file:S}
+    
+    # Keep a view that maps view to a text label.
+    mk::view layout mailbox.label {view:S label:S}
+    
+    # The first line must always be the default inbox.
+    mk::set mailbox.label!0 view inbox label [mc Inbox]
+}
+
+proc ::MailBox::MKAdd {uuid time isread xmldata file} {
+    set path mailbox.inbox
+    set cursor [mk::row append $path  \
+      uuid $uuid time $time isread $isread xmldata $xmldata file $file]
+    mk::file commit mailbox
+    return $cursor
+}
+
+proc ::MailBox::MKDeleteRow {uuid} {
+    set path mailbox.inbox
+    set idx [mk::select $path -exact uuid $uuid]
+    mk::row delete $path!$idx
+    mk::file commit mailbox
+}
+
+proc ::MailBox::MKGetContentList {uuid} {   
+    array set v [MKGet $uuid]
+    set xmldata $v(xmldata)
+    set from [wrapper::getattribute $xmldata from]
+    set subjectE [wrapper::getfirstchildwithtag $xmldata subject]
+    set bodyE    [wrapper::getfirstchildwithtag $xmldata body]
+    set subject  [wrapper::getcdata $subjectE]
+    set body     [wrapper::getcdata $bodyE]
+    
+    return [list $subject $from $v(time) $body]
+}
+
+proc ::MailBox::MKGet {uuid} {
+    set path mailbox.inbox
+    set idx [mk::select $path -exact uuid $uuid]
+    return [mk::get $path!$idx]
+}
+
+proc ::MailBox::MKInsertAll {} {   
+    mk::loop cursor mailbox.inbox {
+	array set v [mk::get $cursor]
+	MKInsertRow $v(uuid) $v(time) $v(isread) $v(xmldata) $v(file)
+    }
+}
+
+proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
+    variable tableUid2Item
+    variable locals
+    
+    set secs [clock scan $time]
+    set smartdate [::Utils::SmartClockFormat $secs -showsecs 0]
+    
+    set from [wrapper::getattribute $xmldata from]
+    set subjectE [wrapper::getfirstchildwithtag $xmldata subject]
+    set bodyE    [wrapper::getfirstchildwithtag $xmldata body]
+    set subject [wrapper::getcdata $subjectE]
+    set body    [wrapper::getcdata $bodyE]
+    
+    set iswb 0
+    if {[file extension $file] eq ".can"} {
+	set iswb 1
+    }
+    set T $locals(wtbl)
+    set item [$T item create]
+    $T item text $item  \
+      cSubject $subject cFrom $from   cDate $smartdate  \
+      cSecs    $secs    cRead $isread cUid  $uuid
+    $T item lastchild root $item
+    
+    if {$iswb} {
+	$T item element configure $item cWhiteboard eImageWb  \
+	  -image $locals(iconWB12)
+    }
+    if {$isread} {
+	$T item state set $item read
+    } else {
+	$T item state set $item unread
+    }
+    set tableUid2Item($uuid) $item
+}
+
+proc ::MailBox::MKMarkAsRead {uuid} {
+    set path mailbox.inbox
+    set idx [mk::select $path -exact uuid $uuid]
+    mk::set $path!$idx isread 1
+    mk::file commit mailbox
+}
+
+proc ::MailBox::MKAllRead {} {
+    set path mailbox.inbox
+    set idx [mk::select $path -exact isread 0]
+    return [expr {[llength $idx] == 0 ? 1 : 0}]
+}
+
+proc ::MailBox::MKGetNextUUID {uuid} {
+    set path mailbox.inbox
+    set idx [mk::select $path -exact uuid $uuid]
+    mk::cursor create c $path $idx
+    mk::cursor incr c 1
+    return [mk::get $c uuid] 
+}
+
+proc ::MailBox::MKIsLast {uuid} {
+    set path mailbox.inbox
+    set idx [mk::select $path -exact uuid $uuid]
+    mk::cursor create c $path
+    mk::cursor position c end
+    return [expr {[string equal $path!$idx $c]}]
+}
+
+# MailBox::MKImportOld --
+# 
+#       Takes the old flat file inbox and imports it into the metakit.
+
+proc ::MailBox::MKImportOld {} {
+    global  this
+    variable mailbox
+    variable mailboxindex
+    
+    set path mailbox.inbox
+    
+    # We must be sure that all messages are time ordered.
+    # Add a temporrary secs property just for sorting.
+    mk::view layout $path {uuid:S time:S isread:S xmldata:S file:S secs:I}
+     
+    # Need to construct the xmldata for each message.
+    # Must have read the old inbox first.
+    foreach id [lsort -integer [array names mailbox]] {
+	set row $mailbox($id)
+	set subject [lindex $row $mailboxindex(subject)]
+	set from    [lindex $row $mailboxindex(from)]
+	set date    [lindex $row $mailboxindex(date)]
+	set isread  [lindex $row $mailboxindex(isread)]
+	set body    [lindex $row $mailboxindex(message)]
+	set secs [clock scan $date]
+	
+	set attr [list from $from]
+	set Es {}
+	if {$body ne ""} {
+	    lappend Es [wrapper::createtag "body" -chdata $body]
+	}
+	if {$subject ne ""} {
+	    lappend Es [wrapper::createtag "subject" -chdata $subject]
+	}
+	set xmldata [wrapper::createtag "message"  \
+	  -attrlist $attr -subtags $Es]
+	
+	# The canvas is stored in a file referenced by -canvasuid.
+	array unset opts
+	array set opts [lrange $row $mailboxindex(opts) end]
+	if {[info exists opts(-canvasuid)]} {
+	    set file $opts(-canvasuid).can
+	} else {
+	    set file ""
+	}
+
+	set uuid [uuid::uuid generate]
+	set cursor [MKAdd $uuid $date $isread $xmldata $file]
+	mk::set $cursor secs $secs
+    }
+    
+    # Do the actual sorting and remove the secs.
+    mk::select $path -sort secs
+    mk::view layout $path {uuid:S time:S isread:S xmldata:S file:S}
+    mk::file commit mailbox
+}
+
+proc ::MailBox::MKExportToXMLFile {fileName} {
+    global  this
+    
+    set path mailbox.inbox
+    set label [mk::get mailbox.label!0 label]
+    set today [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
+    set fd [open $fileName w]
+    fconfigure $fd -encoding utf-8
+    puts $fd "<?xml version='1.0' encoding='UTF-8'?>"
+    puts $fd "<!DOCTYPE mailbox>"
+    puts $fd "<?xml-stylesheet type='text/xsl' href='mailbox.xsl'?>"
+    puts $fd "<mailbox date='$today' view='inbox' label='$label'>"
+    
+    mk::loop cursor $path {
+	array set v [mk::get $cursor]
+	set xml  [wrapper::createxml $v(xmldata)]
+
+	set item "<item time='$v(time)' read='$v(isread)'"
+	if {$v(file) ne ""} {
+	    set href [file join $this(inboxCanvasPath) $v(file)]
+	    if {[file exists $href]} {
+		set href [uriencode::quotepath $href]
+		append item " xlink:href='file://$href'"
+	    }
+	}
+	append item ">"
+	set indent "\t"
+	puts $fd $indent$item
+	set indent "\t\t"
+	puts $fd $indent$xml
+	set indent "\t"
+	set item "</item>"
+	puts $fd $indent$item
+    }
+    puts $fd "</mailbox>"
+    close $fd
+}
+
+proc ::MailBox::MKClose {} {
+    array set tagA [mk::file open]
+    if {[info exists tagA(mailbox)]} {
+	mk::file close mailbox
+    }
+}
+
+proc ::MailBox::MKDelete {} {
+    global  this
+    MKClose
+    file delete -force $this(inbox,mk,file)
+}
 
 #-------------------------------------------------------------------------------

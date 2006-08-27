@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.178 2006-08-21 09:45:48 matben Exp $
+# $Id: Jabber.tcl,v 1.179 2006-08-27 13:14:02 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -547,8 +547,7 @@ proc ::Jabber::IqHandler {jlibname xmldata} {
 #       the 'register_message hook', some whiteboard messages for instance.
 #       
 # Arguments:
-#       type        normal|chat|groupchat
-#       args        ?-key value ...?
+#       xmldata     intact xml list as received
 #       
 # Results:
 #       none.
@@ -562,6 +561,7 @@ proc ::Jabber::MessageHandler {jlibname xmldata} {
     # The hooks are expecting a -key value list of preprocessed xml.
     # @@@ In the future we may deliver the full xmldata instead.
     set opts [list -xmldata $xmldata]
+    
     foreach {name value} [wrapper::getattrlist $xmldata] {
 	lappend opts -$name $value
     }
@@ -608,10 +608,9 @@ proc ::Jabber::MessageHandler {jlibname xmldata} {
 	    eval {::hooks::run newHeadlineMessageHook $body} $opts
 	}
 	default {
-	    
-	    # @@@ In order to uniquely trace messages we could add an uid
-	    #     that is used in the MailBox and GotMsg.
-	    # eval {::hooks::run newMessageHook $body [jlib::generateuuid]} $args
+	    	    
+	    # Add a unique identifier for each message which is handy for the mailbox.
+	    lappend opts -uuid [uuid::uuid generate]
 	    
 	    # Normal message. Handles whiteboard stuff as well.
 	    eval {::hooks::run newMessageHook $body} $opts
@@ -1447,6 +1446,15 @@ proc ::Jabber::GetAnyDelayElem {xlist} {
 	}
     }
     return $ans
+}
+
+proc ::Jabber::GetDelayStamp {xmldata} {
+    set xE [wrapper::getchildswithtagandxmlns $xmldata x "jabber:x:delay"]
+    if {[llength $xE]} {
+	return stamp [wrapper::getattribute $xE stamp]
+    } else {
+	return ""
+    }
 }
 
 #-------------------------------------------------------------------------------

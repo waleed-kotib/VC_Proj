@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: CanvasFile.tcl,v 1.27 2006-08-24 07:01:37 matben Exp $
+# $Id: CanvasFile.tcl,v 1.28 2006-08-27 13:14:03 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -35,7 +35,7 @@ proc ::CanvasFile::DrawCanvasItemFromFile {w filePath args} {
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
-	::UI::MessageBox -icon error -type ok -parent $wcan \
+	::UI::MessageBox -icon error -type ok  \
 	  -message [mc messfailopread $tail $fd]
 	return
     }
