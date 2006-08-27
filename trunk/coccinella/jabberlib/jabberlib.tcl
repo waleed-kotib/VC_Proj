@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.151 2006-08-20 13:41:19 matben Exp $
+# $Id: jabberlib.tcl,v 1.152 2006-08-27 13:14:03 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2082,7 +2082,7 @@ proc jlib::message_register {jlibname type xmlns func {seq 50}} {
       [lsort -integer -index 1 [lsort -unique $msghook($type,$xmlns)]]
 }
 
-proc jlib::message_run_hook {jlibname type xmlns msgElem args} {
+proc jlib::message_run_hook {jlibname type xmlns xmldata args} {
     
     upvar ${jlibname}::msghook msghook
 
@@ -2093,7 +2093,7 @@ proc jlib::message_run_hook {jlibname type xmlns msgElem args} {
 	    foreach spec $msghook($key) {
 		set func [lindex $spec 0]
 		set code [catch {
-		    uplevel #0 $func [list $jlibname $xmlns $msgElem] $args
+		    uplevel #0 $func [list $jlibname $xmlns $xmldata] $args
 		} ans]
 		if {$code} {
 		    bgerror "msghook $func failed: $code\n$::errorInfo"
