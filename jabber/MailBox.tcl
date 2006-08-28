@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.91 2006-08-27 13:14:03 matben Exp $
+# $Id: MailBox.tcl,v 1.92 2006-08-28 13:55:31 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -22,6 +22,9 @@
 # 
 # UPDATE: Now using a metakit database for storing all messages as they are
 #         received, see below.
+#         We keep both storage systems parallell for a while which creates
+#         a conflict between uuid as generated, and the uidmsg for mailbox
+#         array which is a running integer number.
 
 package require uuid
 
@@ -1974,24 +1977,19 @@ proc ::MailBox::MKExportToXMLFile {fileName} {
     
     mk::loop cursor $path {
 	array set v [mk::get $cursor]
-	set xml  [wrapper::createxml $v(xmldata)]
-
-	set item "<item time='$v(time)' read='$v(isread)'"
+	
+	set attr [list time $v(time) read $v(isread)]
 	if {$v(file) ne ""} {
 	    set href [file join $this(inboxCanvasPath) $v(file)]
 	    if {[file exists $href]} {
 		set href [uriencode::quotepath $href]
-		append item " xlink:href='file://$href'"
+		lappend attr xlink:href "file://$href"
 	    }
 	}
-	append item ">"
-	set indent "\t"
-	puts $fd $indent$item
-	set indent "\t\t"
-	puts $fd $indent$xml
-	set indent "\t"
-	set item "</item>"
-	puts $fd $indent$item
+	set itemE [wrapper::createtag item  \
+	  -attrlist $attr -subtags [list $v(xmldata)]]
+	set xml [wrapper::formatxml $itemE -tab "\t"]
+	puts $fd $xml	
     }
     puts $fd "</mailbox>"
     close $fd
