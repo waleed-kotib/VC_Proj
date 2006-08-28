@@ -3,9 +3,11 @@
 #      This file is part of The Coccinella application. 
 #      It implements various methods to handle history info.
 #      
-#  Copyright (c) 2004-2005  Mats Bengtsson
+#      UPDATE: switching to xml format.
+#      
+#  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.18 2006-08-03 06:14:24 matben Exp $
+# $Id: History.tcl,v 1.19 2006-08-28 13:55:30 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -17,6 +19,150 @@ namespace eval ::History:: {
     # Add all event hooks.
 
     variable uiddlg 1000
+}
+
+# New xml based format ---------------------------------------------------------
+
+proc ::History::XPutItem {jid xmldata} {
+    
+    set time [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
+    set attr [list time $time]
+    set itemE [wrapper::createtag item  \
+      -attrlist $attr -subtags [list $xmldata]]
+    set xml [wrapper::formatxml $itemE -tab "\t"]
+
+    set mjid [jlib::jidmap $jid]
+    set fileName [file join $this(historyPath) [uriencode::quote $mjid].nxml] 
+    set fd [open $fileName a]
+    fconfigure $fd -encoding utf-8
+    puts $fd $xml
+    close $fd
+}
+
+# History::XImportOld --
+# 
+#       Takes any old history file and creates a xml based with the extension
+#       .nxml; not xml. This is since it is missing the root element in
+#       order for each messages to be just appended to an existing file.
+
+proc ::History::XImportOld {jid} {
+    global  this
+    
+    if {![HaveMessageFile $jid]} {
+	return
+    }
+    array set msgA [ReadMessageFromFile [GetMessageFile $jid] $jid]
+    
+    set mjid [jlib::jidmap $jid]
+    set fileName [file join $this(historyPath) [uriencode::quote $mjid].nxml] 
+    set fd [open $fileName w]
+    fconfigure $fd -encoding utf-8
+        
+    foreach uid [lsort -integer [array names msgA]] {
+	array unset rowA
+	array set rowA $msgA($uid)
+	set itemAttr {}
+	set msgAttr {}
+	set childEs {}
+	if {[info exists rowA(-type)]} {
+	    set type $rowA(-type)
+	} else {
+	    set type chat
+	}
+	
+	foreach {key value} [array get rowA] {
+	    switch -- $key {
+		-time {
+		    lappend itemAttr time $value
+		}
+		-body {
+		    lappend childEs [wrapper::createtag body -chdata $value]
+		}
+		-thread {
+		    lappend msgAttr thread $value
+		}
+		-name {
+		    if {$type eq "groupchat"} {
+			set from $jid/$value
+			lappend msgAttr from $from
+		    } elseif {$type eq "chat"} {
+			lappend msgAttr from $jid
+		    }
+		}
+		-tag {
+		    # me, you, sys, they ?
+		}
+	    }
+	}
+	set messageE [wrapper::createtag message  \
+	  -attrlist $msgAttr -subtags $childEs]
+	set itemE [wrapper::createtag item  \
+	  -attrlist $itemAttr -subtags [list $messageE]]
+	
+	set xml [wrapper::formatxml $itemE]
+	puts $fd $xml	
+    }
+    close $fd
+}
+
+proc ::History::XInsertText {w} {
+    global  this
+    
+    variable $w
+    upvar 0 $w state
+
+    set jid        $state(jid)
+    set dlgtype    $state(dlgtype)
+    set wtext      $state(wtext)
+    set wchatframe $state(wchatframe)
+
+    set mjid [jlib::jidmap $jid]
+    set fileName [file join $this(historyPath) [uriencode::quote $mjid].nxml] 
+    if {![file readable $fileName]} {
+	return
+    }
+    set fd [open $fileName r]
+    fconfigure $fd -encoding utf-8
+    set xml [read $fd]
+    close $fd
+    set prefix "<?xml version='1.0' encoding='UTF-8'?>"
+    append prefix \n
+    append prefix "<root>"
+    append prefix \n
+
+    $wtext configure -state normal
+    
+    $wtext mark set insert end
+
+    $wtext insert insert $xml
+    
+    $wtext configure -state disabled
+    
+    return
+    
+    set token [tinydom::parse $xml]
+    set xmllist [tinydom::documentElement $token]
+
+    
+    
+    tinydom::cleanup $token
+}
+
+proc ::History::HandleInsertText {w} {
+    global  this
+    
+    variable $w
+    upvar 0 $w state
+
+    set jid $state(jid)
+
+    # First, if any old import to new format and discard.
+    set fileName [file join $this(historyPath) [uriencode::quote $jid]]    
+    if {[file readable $fileName]} {
+	XImportOld $jid
+	# file delete $fileName
+    }
+    XInsertText $w
 }
 
 #-------------------------------------------------------------------------------
@@ -35,28 +181,6 @@ namespace eval ::History:: {
 #       with keys: -type -name -thread -time -body -tag
 #-------------------------------------------------------------------------------
 
-# History::PutToFile --
-#
-#       Writes chat event send/received to history file.
-#       
-# Arguments:
-#       jid       jid
-#       msg       {name dateISO body tag ?-thread threadID ...?}
-#       
-# Results:
-#       none.
-
-# DO NOT USE. OLD!!!!!!!!!!!!!!!!!!
-proc ::History::PutToFile {jid msg} {
-    global  this
-    
-    set path [file join $this(historyPath) [uriencode::quote $jid]]    
-    if {![catch {open $path a} fd]} {
-	#fconfigure $fd -encoding utf-8
-	puts $fd "set message(\[incr uid]) {$msg}"
-	close $fd
-    }
-}
 
 # History::PutToFileEx --
 #
@@ -101,19 +225,19 @@ proc ::History::BuildHistory {jid dlgtype args} {
     variable uiddlg
     variable historyOptions
     
-    array set argsArr [list  \
+    array set argsA [list  \
       -class        History  \
       -headtitle    "[mc Date]:" \
       -tagscommand  ""       \
       -title        "[mc History]: $jid"  \
       ]
-    array set argsArr $args
+    array set argsA $args
     
     set w $wDlgs(jhist)[incr uiddlg]
     ::UI::Toplevel $w \
       -usemacmainmenu 1 -macstyle documentProc \
       -closecommand ::History::CloseHook
-    wm title $w $argsArr(-title)
+    wm title $w $argsA(-title)
 
     variable $w
     upvar 0 $w state
@@ -129,6 +253,13 @@ proc ::History::BuildHistory {jid dlgtype args} {
     set wchatframe $wbox.fr
     set wtext      $wchatframe.t
     set wysc       $wchatframe.ysc
+    
+    set state(jid)        $jid
+    set state(dlgtype)    $dlgtype
+    set state(wtext)      $wtext
+    set state(wchatframe) $wchatframe
+    set state(wfind)      $wchatframe.find
+    set state(argsA)      [array get argsA]
 
     # Button part.
     set frbot $wbox.b
@@ -156,7 +287,7 @@ proc ::History::BuildHistory {jid dlgtype args} {
     pack $frbot -side bottom -fill x
     
     # Text.
-    ttk::frame $wchatframe -class $argsArr(-class)
+    ttk::frame $wchatframe -class $argsA(-class)
     pack  $wchatframe -fill both -expand 1
     text $wtext -height 20 -width 72 -cursor {} -wrap word \
       -highlightthickness 0 -borderwidth 1 -relief sunken \
@@ -171,17 +302,49 @@ proc ::History::BuildHistory {jid dlgtype args} {
     grid rowconfigure $wchatframe 0 -weight 1    
 	
     # The tags if any.
-    if {[string length $argsArr(-tagscommand)]} {
-	$argsArr(-tagscommand) $wchatframe $wtext    
+    if {[string length $argsA(-tagscommand)]} {
+	$argsA(-tagscommand) $wchatframe $wtext    
     }
-    set path [file join $this(historyPath) [uriencode::quote $jid]] 
+
+    InsertText $w
+        
+    ::UI::SetWindowGeometry $w $wDlgs(jhist)
+
+    bind $w <$this(modkey)-Key-f> [list [namespace code Find] $w]
+    bind $w <$this(modkey)-Key-g> [list [namespace code FindNext] $w]
+    bind $w <Destroy> +[list [namespace code OnDestroy] $w]
+
+    set script [format {
+	update idletasks
+	set min [winfo reqwidth %s]
+	wm minsize %s [expr {$min+20}] 200
+    } $frbot $w]    
+    after idle $script
+}
+
+proc ::History::InsertText {w} {
+    global  this
+    
+    variable $w
+    upvar 0 $w state
+
+    set jid        $state(jid)
+    set dlgtype    $state(dlgtype)
+    set wtext      $state(wtext)
+    set wchatframe $state(wchatframe)
+    
+    array set argsA $state(argsA)
+
+    set mjid [jlib::jidmap $jid]
+    set path [file join $this(historyPath) [uriencode::quote $mjid]] 
 
     set clockFormat         [option get $wchatframe clockFormat {}]
     set clockFormatNotToday [option get $wchatframe clockFormatNotToday {}]
 
+    $wtext configure -state normal
     $wtext mark set insert end
 
-    if {[file exists $path]} {
+    if {[file readable $path]} {
 	set uidstart 1000
 	set uid $uidstart
 	incr uidstart
@@ -216,7 +379,7 @@ proc ::History::BuildHistory {jid dlgtype args} {
 	    set havehisthead 0
 	    if {$day != $prevday} {
 		set when [clock format $secs -format "%A %B %e, %Y"]
-		$wtext insert end "$argsArr(-headtitle) $when\n" histhead
+		$wtext insert end "$argsA(-headtitle) $when\n" histhead
 		set havehisthead 1
 	    }
 	    set prevday $day
@@ -244,24 +407,6 @@ proc ::History::BuildHistory {jid dlgtype args} {
 	$wtext insert end "\n" histhead
     }
     $wtext configure -state disabled
-    ::UI::SetWindowGeometry $w $wDlgs(jhist)
-    
-    set state(jid)     $jid
-    set state(dlgtype) $dlgtype
-    set state(wtext)   $wtext
-    set state(wchatframe) $wchatframe
-    set state(wfind)   $wchatframe.find
-
-    bind $w <$this(modkey)-Key-f> [list [namespace code Find] $w]
-    bind $w <$this(modkey)-Key-g> [list [namespace code FindNext] $w]
-    bind $w <Destroy> +[list [namespace code OnDestroy] $w]
-
-    set script [format {
-	update idletasks
-	set min [winfo reqwidth %s]
-	wm minsize %s [expr {$min+20}] 200
-    } $frbot $w]    
-    after idle $script
 }
 
 proc ::History::Find {w} {
@@ -311,7 +456,8 @@ proc ::History::ReadMessageFromFile {fileName jid} {
 proc ::History::HaveMessageFile {jid} {
     global  this
     
-    set fileName [file join $this(historyPath) [uriencode::quote $jid]] 
+    set mjid [jlib::jidmap $jid]
+    set fileName [file join $this(historyPath) [uriencode::quote $mjid]] 
     if {[file exists $fileName]} {
 	return 1
     } else {
@@ -322,7 +468,8 @@ proc ::History::HaveMessageFile {jid} {
 proc ::History::GetMessageFile {jid} {
     global  this
     
-    set fileName [file join $this(historyPath) [uriencode::quote $jid]] 
+    set mjid [jlib::jidmap $jid]
+    set fileName [file join $this(historyPath) [uriencode::quote $mjid]] 
     if {[file exists $fileName]} {
 	return $fileName
     } else {

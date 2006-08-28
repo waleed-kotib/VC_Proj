@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.24 2006-07-19 13:51:27 matben Exp $
+# $Id: wrapper.tcl,v 1.25 2006-08-28 13:55:31 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -517,7 +517,7 @@ proc wrapper::createxml {xmllist} {
     set attrlist [xmlcrypt $attrlist]
     set rawxml "<$tag"
     foreach {attr value} $attrlist {
-	append rawxml " ${attr}='${value}'"
+	append rawxml " $attr='$value'"
     }
     if {$isempty} {
 	append rawxml "/>"
@@ -535,6 +535,55 @@ proc wrapper::createxml {xmllist} {
 	    append rawxml [xmlcrypt $chdata]
 	}
 	append rawxml "</$tag>"
+    }
+    return $rawxml
+}
+
+# wrapper::formatxml, formattag --
+# 
+#       Creates formatted raw xml data from a xml list.
+
+proc wrapper::formatxml {xmllist args} {
+    variable tabs
+    variable nl
+    
+    array set argsA {
+	-tab ""
+    }
+    array set argsA $args
+    set tabs $argsA(-tab)
+    set nl ""
+    formattag $xmllist
+}
+
+proc wrapper::formattag {xmllist} {
+    variable tabs
+    variable nl
+    
+    foreach {tag attrlist isempty chdata childlist} $xmllist {break}
+    set attrlist [xmlcrypt $attrlist]
+    set rawxml "$nl$tabs<$tag"
+    foreach {attr value} $attrlist {
+	append rawxml " $attr='$value'"
+    }
+    set nl "\n"
+    if {$isempty} {
+	append rawxml "/>"
+    } else {
+	append rawxml ">"
+	if {[llength $childlist]} {
+	    append tabs "\t"
+	    foreach child $childlist {
+		append rawxml [formattag $child]
+	    }
+	    set tabs [string range $tabs 0 end-1]
+	    append rawxml "$nl$tabs</$tag>"
+	} else {
+	    if {[string length $chdata]} {
+		append rawxml [xmlcrypt $chdata]
+	    }
+	    append rawxml "</$tag>"
+	}
     }
     return $rawxml
 }

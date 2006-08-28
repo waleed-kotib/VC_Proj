@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.152 2006-08-27 13:14:03 matben Exp $
+# $Id: jabberlib.tcl,v 1.153 2006-08-28 13:55:31 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1019,7 +1019,7 @@ proc jlib::isinstream {jlibname} {
 #       none.
 
 proc jlib::dispatcher {jlibname xmldata} {
-        
+
     # Which method?
     set tag [wrapper::gettag $xmldata]
     
