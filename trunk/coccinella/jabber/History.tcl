@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.19 2006-08-28 13:55:30 matben Exp $
+# $Id: History.tcl,v 1.20 2006-08-29 14:13:07 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -16,23 +16,81 @@ package provide History 1.0
 
 namespace eval ::History:: {
     
-    # Add all event hooks.
-
     variable uiddlg 1000
+    
+    # History file size limit of 100k
+    variable sizeLimit 100000
 }
 
 # New xml based format ---------------------------------------------------------
+#
+#       o Always store history per JID
+#       o File names must have the JID uri encoded
+#       o Split the complete history for a JID in multiple files of certain
+#         min size
+#       o Use file names JID-#.nxml where # is a running integer
+#       o The extension is .nxml since we store without root elements
+#       
+# @@@ TODO:
+#       + Maybe we should allow history file splits during sessions
 
-proc ::History::XPutItem {jid xmldata} {
+proc ::History::XGetPutFileName {jid} {
+    global  this
+    variable jidToFile
+    variable sizeLimit
+    
+    # Cache put file per JID since it costs to find it each time.
+    set mjid [jlib::jidmap $jid]
+    if {[info exists jidToFile($mjid)] && [file exists $jidToFile($mjid)]} {
+	return $jidToFile($mjid)
+    }
+    set rootTail [uriencode::quote $mjid]
+    set files [XGetAllFileNames $mjid]
+    if {$files eq {}} {
+	set hfile [file join $this(historyPath) ${rootTail}-0.nxml]
+    } else {
+	set hfile [lindex $files end]
+	if {[file size $hfile] > $sizeLimit} {
+	    
+	    # Create a new one.
+	    regexp $hfile {-([0-9]{1,})\.nxml$} - n
+	    incr n
+	    set hfile [file join $this(historyPath) ${rootTail}-$n.nxml]
+	}
+    }
+    set jidToFile($mjid) $hfile
+    return $hfile
+}
+
+proc ::History::XGetAllFileNames {jid} {
+    global  this
+    
+    set mjid [jlib::jidmap $jid]
+    set rootTail [uriencode::quote $mjid]
+    set files [glob -nocomplain -directory $this(historyPath) ${rootTail}-*.nxml]
+    return [lsort -dictionary $files]
+}
+
+# History::XPutItem --
+# 
+#       Appends xml to history file.
+
+proc ::History::XPutItem {type jid xmldata} {
+    
+    # Must know if ordinary chat or groupchat here.
+    if {[::Jabber::JlibCmd service isroom [jlib::barejid $jid]]} {
+	# ?????????????????? It could be a 1-1 chat with room participant!!!
+    }
+    set myjid [::Jabber::JlibCmd myjid]
+    
     
     set time [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
-    set attr [list time $time]
+    set attr [list time $time myjid $myjid]
     set itemE [wrapper::createtag item  \
       -attrlist $attr -subtags [list $xmldata]]
-    set xml [wrapper::formatxml $itemE -tab "\t"]
+    set xml [wrapper::formatxml $itemE -prefix "\t"]
 
-    set mjid [jlib::jidmap $jid]
-    set fileName [file join $this(historyPath) [uriencode::quote $mjid].nxml] 
+    set fileName [XGetPutFileName $jid] 
     set fd [open $fileName a]
     fconfigure $fd -encoding utf-8
     puts $fd $xml
@@ -41,20 +99,30 @@ proc ::History::XPutItem {jid xmldata} {
 
 # History::XImportOld --
 # 
-#       Takes any old history file and creates a xml based with the extension
-#       .nxml; not xml. This is since it is missing the root element in
-#       order for each messages to be just appended to an existing file.
+#       We don't use this for displaying old history files in text widget.
 
 proc ::History::XImportOld {jid} {
     global  this
+
+    set mjid [jlib::jidmap $jid]
+    set fileName [file join $this(historyPath) [uriencode::quote $mjid].nxml] 
+
+    XImportOldToFile $jid $fileName
+}
+
+# History::XImportOldToFile --
+# 
+#       Takes any old history file and writes it to fileName.
+#       This is since it is missing the root element in
+#       order for each messages to be just appended to an existing file.
+
+proc ::History::XImportOldToFile {jid fileName} {
     
     if {![HaveMessageFile $jid]} {
 	return
     }
     array set msgA [ReadMessageFromFile [GetMessageFile $jid] $jid]
     
-    set mjid [jlib::jidmap $jid]
-    set fileName [file join $this(historyPath) [uriencode::quote $mjid].nxml] 
     set fd [open $fileName w]
     fconfigure $fd -encoding utf-8
         
@@ -105,8 +173,17 @@ proc ::History::XImportOld {jid} {
     close $fd
 }
 
-proc ::History::XInsertText {w} {
-    global  this
+# History::XInsertText --
+# 
+# 
+# Arguments:
+#       jid
+#       wtext
+#       args: -last     integer
+#             -maxage   seconds
+#             -thread   thread ID
+
+proc ::History::XInsertText {w args} {
     
     variable $w
     upvar 0 $w state
@@ -115,54 +192,108 @@ proc ::History::XInsertText {w} {
     set dlgtype    $state(dlgtype)
     set wtext      $state(wtext)
     set wchatframe $state(wchatframe)
-
-    set mjid [jlib::jidmap $jid]
-    set fileName [file join $this(historyPath) [uriencode::quote $mjid].nxml] 
-    if {![file readable $fileName]} {
-	return
-    }
-    set fd [open $fileName r]
-    fconfigure $fd -encoding utf-8
-    set xml [read $fd]
-    close $fd
-    set prefix "<?xml version='1.0' encoding='UTF-8'?>"
-    append prefix \n
-    append prefix "<root>"
-    append prefix \n
-
-    $wtext configure -state normal
     
+    
+    $wtext configure -state normal    
     $wtext mark set insert end
 
-    $wtext insert insert $xml
+    
     
     $wtext configure -state disabled
-    
-    return
-    
-    set token [tinydom::parse $xml]
-    set xmllist [tinydom::documentElement $token]
-
-    
-    
-    tinydom::cleanup $token
+   
 }
 
-proc ::History::HandleInsertText {w} {
+# History::XParseFiles --
+# 
+#       Reads all relevant history files for JID, parses them and does a
+#       selection process based on the arguments.
+# 
+# Arguments:
+#       jid
+#       args: -last     integer
+#             -maxage   seconds
+#             -thread   thread ID
+
+proc ::History::XParseFiles {jid args} {
     global  this
-    
-    variable $w
-    upvar 0 $w state
-
-    set jid $state(jid)
-
-    # First, if any old import to new format and discard.
-    set fileName [file join $this(historyPath) [uriencode::quote $jid]]    
-    if {[file readable $fileName]} {
-	XImportOld $jid
-	# file delete $fileName
+        
+    array set argsA {
+	-last      -1
+	-maxage    0
+	-thread     0
     }
-    XInsertText $w
+    array set argsA $args
+
+    set now [clock seconds]
+    set maxage $argsA(-maxage)
+
+    # Start by reading all xml from all files.
+    set xml ""
+    set files [XGetAllFileNames $jid]
+    foreach f $files {
+	if {[file readable $f]} {
+	    set fd [open $f r]
+	    fconfigure $fd -encoding utf-8
+	    append xml [read $fd]
+	    close $fd
+	}
+    }
+    
+    # Add root tags to make true xml.
+    set prefix "<?xml version='1.0' encoding='UTF-8'?><root>"
+    set postfix "</root>"
+    
+    # Parse into xmllists to fit tcl.
+    set token [tinydom::parse $prefix$xml$postfix]
+    unset xml
+    set xmllist [tinydom::documentElement $token]
+
+    # Investigate the whole document tree and store into structures for analysis.
+    # Start with the complete message history and limit using the options.
+    # Keep track of new threads.
+    
+    set itemL {}
+    
+    foreach itemE [tinydom::children $xmllist] {
+
+	switch -- [tinydom::tagname $itemE] {
+	    item {
+		
+		# Sort by age.
+		set time [tinydom::getattribute $itemE time]
+		set secs [clock scan $time]
+		if {$maxage && [expr {$now - $secs > $maxage}]} {
+		    continue
+		}		
+		set xmppE [lindex [tinydom::children $itemE] 0]
+		 
+		switch -- [tinydom::tagname $xmppE] {
+		    message {
+			
+			# Sort by thread.
+			set thread [tinydom::getattribute $xmppE thread]
+			if {($argsA(-thread) ne "0") && ($thread ne "")} {
+			    if {$argsA(-thread) ne $thread} {
+				continue
+			    }
+			}
+		    }
+		    presence {
+			 # @@@ Don't know what to do with it.
+		    }
+		}
+		lappend itemL $itemE
+	    }
+	}
+    }
+    tinydom::cleanup $token
+
+    # Sort by last.
+    if {$argsA(-last) != -1} {
+	set last [expr {$argsA(-last) - 1}]
+	set itemL [lrange $itemL end-$last end]
+    }
+    return $itemL
 }
 
 #-------------------------------------------------------------------------------
@@ -306,7 +437,11 @@ proc ::History::BuildHistory {jid dlgtype args} {
 	$argsA(-tagscommand) $wchatframe $wtext    
     }
 
+    # Always start by inserting any old style format first.
     InsertText $w
+    
+    
+    #XInsertText $w
         
     ::UI::SetWindowGeometry $w $wDlgs(jhist)
 
@@ -321,6 +456,10 @@ proc ::History::BuildHistory {jid dlgtype args} {
     } $frbot $w]    
     after idle $script
 }
+
+# History::InsertText --
+# 
+#       Inserts text from an old style history file.
 
 proc ::History::InsertText {w} {
     global  this
@@ -367,7 +506,7 @@ proc ::History::InsertText {w} {
 	    if {$dlgtype ne $msg(-type)} {
 		continue
 	    }
-	    if {$msg(-time) != ""} {
+	    if {$msg(-time) ne ""} {
 		set secs [clock scan $msg(-time)]
 		set day [clock format $secs -format "%j"]
 	    } else {
@@ -407,6 +546,8 @@ proc ::History::InsertText {w} {
 	$wtext insert end "\n" histhead
     }
     $wtext configure -state disabled
+    
+    return
 }
 
 proc ::History::Find {w} {
@@ -577,7 +718,7 @@ proc ::History::SaveHistory {jid wtext} {
     set ans [tk_getSaveFile -title [mc Save] \
       -initialfile "Chat [uriencode::quote $jid].txt"]
 
-    if {$ans != ""} {
+    if {$ans ne ""} {
 	set allText [::Text::TransformToPureText $wtext]
 	set fd [open $ans w]
 	#fconfigure $fd -encoding utf-8

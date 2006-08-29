@@ -7,14 +7,15 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinydom.tcl,v 1.8 2006-08-28 13:55:31 matben Exp $
+# $Id: tinydom.tcl,v 1.9 2006-08-29 14:13:07 matben Exp $
 
 package require xml
 
 package provide tinydom 0.1
 
 # This is an attempt to make a minimal DOM thing to store xml data as
-# an hierarchical list which is better suited to Tcl.
+# a hierarchical list which is better suited to Tcl.
+# @@@ Try make a common syntax with wrapper.
 
 namespace eval tinydom {
 
@@ -38,7 +39,7 @@ proc tinydom::parse {xml} {
     $xmlparser parse $xml
     
     # Store in internal array and return token which is the array index.
-    set token tinydom[incr uid]
+    set token [namespace current]::[incr uid]
     set cache($token) $xmlobj(1)
     unset xmlobj
     return $token
@@ -115,6 +116,26 @@ proc tinydom::chdata {xmllist} {
 
 proc tinydom::children {xmllist} {
     return [lindex $xmllist 4]
+}
+
+proc tinydom::getattribute {xmllist attrname} {
+    foreach {attr val} [lindex $xmllist 1] {
+	if {[string equal $attr $attrname]} {
+	    return $val
+	}
+    }
+    return
+}
+
+proc tinydom::getfirstchildwithtag {xmllist tag} {    
+    set c {}
+    foreach celem [lindex $xmllist 4] {
+	if {[string equal [lindex $celem 0] $tag]} {
+	    set c $celem
+	    break
+	}
+    }
+    return $c
 }
 
 proc tinydom::cleanup {token} {
