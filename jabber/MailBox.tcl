@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.92 2006-08-28 13:55:31 matben Exp $
+# $Id: MailBox.tcl,v 1.93 2006-08-29 14:13:07 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1988,7 +1988,7 @@ proc ::MailBox::MKExportToXMLFile {fileName} {
 	}
 	set itemE [wrapper::createtag item  \
 	  -attrlist $attr -subtags [list $v(xmldata)]]
-	set xml [wrapper::formatxml $itemE -tab "\t"]
+	set xml [wrapper::formatxml $itemE -prefix "\t"]
 	puts $fd $xml	
     }
     puts $fd "</mailbox>"

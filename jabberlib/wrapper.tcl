@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.25 2006-08-28 13:55:31 matben Exp $
+# $Id: wrapper.tcl,v 1.26 2006-08-29 14:13:07 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -546,23 +546,26 @@ proc wrapper::createxml {xmllist} {
 proc wrapper::formatxml {xmllist args} {
     variable tabs
     variable nl
+    variable prefix
     
     array set argsA {
-	-tab ""
+	-prefix ""
     }
     array set argsA $args
-    set tabs $argsA(-tab)
+    set prefix $argsA(-prefix)
     set nl ""
+    set tabs ""
     formattag $xmllist
 }
 
 proc wrapper::formattag {xmllist} {
     variable tabs
     variable nl
+    variable prefix
     
     foreach {tag attrlist isempty chdata childlist} $xmllist {break}
     set attrlist [xmlcrypt $attrlist]
-    set rawxml "$nl$tabs<$tag"
+    set rawxml "$nl$prefix$tabs<$tag"
     foreach {attr value} $attrlist {
 	append rawxml " $attr='$value'"
     }
@@ -577,7 +580,7 @@ proc wrapper::formattag {xmllist} {
 		append rawxml [formattag $child]
 	    }
 	    set tabs [string range $tabs 0 end-1]
-	    append rawxml "$nl$tabs</$tag>"
+	    append rawxml "$nl$prefix$tabs</$tag>"
 	} else {
 	    if {[string length $chdata]} {
 		append rawxml [xmlcrypt $chdata]
