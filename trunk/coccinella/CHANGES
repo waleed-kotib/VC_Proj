@@ -16,6 +16,8 @@ Coccinella-0.95.14 (06????):
  o in-text parsing of mailto and im URI's
  o added metakit whiteboard file format for single file storage
  o complete inbox now stored as a single file metakit database
+ o inbox can be exported to xml file
+ o new xml based chat log format
 
 
 Coccinella-0.95.13 (060622):

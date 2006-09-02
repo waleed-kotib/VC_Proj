@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.20 2006-08-29 14:13:07 matben Exp $
+# $Id: History.tcl,v 1.21 2006-09-02 06:43:38 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -34,6 +34,44 @@ namespace eval ::History:: {
 # @@@ TODO:
 #       + Maybe we should allow history file splits during sessions
 
+
+proc ::History::XExportOldAndXToFile {jid fileName} {
+    global  this
+    
+    set prefix "<?xml version='1.0' encoding='UTF-8'?>"
+    append prefix "\n" 
+    append prefix "<!DOCTYPE log>" 
+    append prefix "\n" 
+    append prefix "<?xml-stylesheet type='text/xsl' href='log.xsl'?>"
+    append prefix "\n"
+    append prefix "<log jid='$jid'>"
+    set postfix "</log>"
+
+    set fd [open $fileName w]
+    fconfigure $fd -encoding utf-8
+    puts $fd $prefix
+
+    if {[HaveMessageFile $jid]} {
+	set tmp [::tfileutils::tempfile $this(tmpPath) ""]
+	XImportOldToFile $jid $tmp
+	set tmpfd [open $tmp r]
+	fconfigure $tmpfd -encoding utf-8
+	fcopy $tmpfd $fd
+	close $tmpfd
+	file delete $tmp
+    }
+    foreach f [XGetAllFileNames $jid] {
+	if {[file readable $f]} {
+	    set srcfd [open $f r]
+	    fconfigure $srcfd -encoding utf-8
+	    fcopy $srcfd $fd
+	    close $srcfd
+	}
+    }    
+    puts $fd $postfix
+    close $fd
+}
+
 proc ::History::XGetPutFileName {jid} {
     global  this
     variable jidToFile
@@ -47,15 +85,21 @@ proc ::History::XGetPutFileName {jid} {
     set rootTail [uriencode::quote $mjid]
     set files [XGetAllFileNames $mjid]
     if {$files eq {}} {
+	
+	# First history file.
 	set hfile [file join $this(historyPath) ${rootTail}-0.nxml]
     } else {
 	set hfile [lindex $files end]
 	if {[file size $hfile] > $sizeLimit} {
 	    
 	    # Create a new one.
-	    regexp $hfile {-([0-9]{1,})\.nxml$} - n
-	    incr n
-	    set hfile [file join $this(historyPath) ${rootTail}-$n.nxml]
+	    if {[regexp $hfile {-([0-9]{1,})\.nxml$} - n]} {
+		incr n
+		set hfile [file join $this(historyPath) ${rootTail}-$n.nxml]
+	    } else {
+		# Should never happen.
+		set hfile [file join $this(historyPath) ${rootTail}-0.nxml]
+	    }
 	}
     }
     set jidToFile($mjid) $hfile
@@ -71,22 +115,24 @@ proc ::History::XGetAllFileNames {jid} {
     return [lsort -dictionary $files]
 }
 
+proc ::History::XHaveHistory {jid} {
+    return [llength [XGetAllFileNames $jid]]
+}
+
 # History::XPutItem --
 # 
 #       Appends xml to history file.
+#       
+# Arguments:
+#       tag         "send" or "recv"
+#       jid
+#       xmldata
 
-proc ::History::XPutItem {type jid xmldata} {
-    
-    # Must know if ordinary chat or groupchat here.
-    if {[::Jabber::JlibCmd service isroom [jlib::barejid $jid]]} {
-	# ?????????????????? It could be a 1-1 chat with room participant!!!
-    }
-    set myjid [::Jabber::JlibCmd myjid]
-    
-    
+proc ::History::XPutItem {tag jid xmldata} {
+            
     set time [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
-    set attr [list time $time myjid $myjid]
-    set itemE [wrapper::createtag item  \
+    set attr [list time $time]
+    set itemE [wrapper::createtag $tag  \
       -attrlist $attr -subtags [list $xmldata]]
     set xml [wrapper::formatxml $itemE -prefix "\t"]
 
@@ -95,19 +141,6 @@ proc ::History::XPutItem {type jid xmldata} {
     fconfigure $fd -encoding utf-8
     puts $fd $xml
     close $fd
-}
-
-# History::XImportOld --
-# 
-#       We don't use this for displaying old history files in text widget.
-
-proc ::History::XImportOld {jid} {
-    global  this
-
-    set mjid [jlib::jidmap $jid]
-    set fileName [file join $this(historyPath) [uriencode::quote $mjid].nxml] 
-
-    XImportOldToFile $jid $fileName
 }
 
 # History::XImportOldToFile --
@@ -137,6 +170,7 @@ proc ::History::XImportOldToFile {jid fileName} {
 	} else {
 	    set type chat
 	}
+	set tag me
 	
 	foreach {key value} [array get rowA] {
 	    switch -- $key {
@@ -158,49 +192,24 @@ proc ::History::XImportOldToFile {jid fileName} {
 		    }
 		}
 		-tag {
-		    # me, you, sys, they ?
+		    set tag $value
 		}
 	    }
 	}
+	if {$tag eq "me"} {
+	    set tagname send
+	} else {
+	    set tagname recv
+	}
 	set messageE [wrapper::createtag message  \
 	  -attrlist $msgAttr -subtags $childEs]
-	set itemE [wrapper::createtag item  \
+	set itemE [wrapper::createtag $tagname  \
 	  -attrlist $itemAttr -subtags [list $messageE]]
 	
-	set xml [wrapper::formatxml $itemE]
+	set xml [wrapper::formatxml $itemE -prefix "\t"]
 	puts $fd $xml	
     }
     close $fd
-}
-
-# History::XInsertText --
-# 
-# 
-# Arguments:
-#       jid
-#       wtext
-#       args: -last     integer
-#             -maxage   seconds
-#             -thread   thread ID
-
-proc ::History::XInsertText {w args} {
-    
-    variable $w
-    upvar 0 $w state
-
-    set jid        $state(jid)
-    set dlgtype    $state(dlgtype)
-    set wtext      $state(wtext)
-    set wchatframe $state(wchatframe)
-    
-    
-    $wtext configure -state normal    
-    $wtext mark set insert end
-
-    
-    
-    $wtext configure -state disabled
-   
 }
 
 # History::XParseFiles --
@@ -215,18 +224,12 @@ proc ::History::XInsertText {w args} {
 #             -thread   thread ID
 
 proc ::History::XParseFiles {jid args} {
-    global  this
-        
-    array set argsA {
-	-last      -1
-	-maxage    0
-	-thread     0
-    }
-    array set argsA $args
+    set xml [XReadAllToXML $jid]
+    return [eval {XParseXMLAndSelect $xml} $args]
+}
 
-    set now [clock seconds]
-    set maxage $argsA(-maxage)
-
+proc ::History::XReadAllToXML {jid} {
+   
     # Start by reading all xml from all files.
     set xml ""
     set files [XGetAllFileNames $jid]
@@ -240,12 +243,25 @@ proc ::History::XParseFiles {jid args} {
     }
     
     # Add root tags to make true xml.
-    set prefix "<?xml version='1.0' encoding='UTF-8'?><root>"
-    set postfix "</root>"
+    set prefix "<?xml version='1.0' encoding='UTF-8'?>\n<log jid='$jid'>"
+    set postfix "</log>"    
+    return $prefix$xml$postfix
+}
+
+proc ::History::XParseXMLAndSelect {xml args} {
     
+    array set argsA {
+	-last      -1
+	-maxage     0
+	-thread     0
+    }
+    array set argsA $args
+
+    set now [clock seconds]
+    set maxage $argsA(-maxage)
+
     # Parse into xmllists to fit tcl.
-    set token [tinydom::parse $prefix$xml$postfix]
-    unset xml
+    set token [tinydom::parse $xml]
     set xmllist [tinydom::documentElement $token]
 
     # Investigate the whole document tree and store into structures for analysis.
@@ -253,40 +269,74 @@ proc ::History::XParseFiles {jid args} {
     # Keep track of new threads.
     
     set itemL {}
-    
-    foreach itemE [tinydom::children $xmllist] {
+    set haveMessages 0
+   
+    foreach itemE [tinydom::children $xmllist] {	
+	set tag [tinydom::tagname $itemE]
 
-	switch -- [tinydom::tagname $itemE] {
-	    item {
+	if {$tag eq "send" || $tag eq "recv"} {
 		
-		# Sort by age.
-		set time [tinydom::getattribute $itemE time]
-		set secs [clock scan $time]
-		if {$maxage && [expr {$now - $secs > $maxage}]} {
-		    continue
-		}		
-		set xmppE [lindex [tinydom::children $itemE] 0]
-		 
-		switch -- [tinydom::tagname $xmppE] {
-		    message {
-			
-			# Sort by thread.
-			set thread [tinydom::getattribute $xmppE thread]
-			if {($argsA(-thread) ne "0") && ($thread ne "")} {
-			    if {$argsA(-thread) ne $thread} {
-				continue
+	    # Sort by age.
+	    set time [tinydom::getattribute $itemE time]
+	    set secs [clock scan $time]
+	    if {$maxage && [expr {$now - $secs > $maxage}]} {
+		continue
+	    }		
+	    set xmppE [lindex [tinydom::children $itemE] 0]
+	    
+	    switch -- [tinydom::tagname $xmppE] {
+		message {
+		    
+		    # Sort by thread.
+		    if {$argsA(-thread) ne "0"} {
+			set threadE [tinydom::getfirstchildwithtag $xmppE thread]
+			if {$threadE ne {}} {
+			    set thread [tinydom::chdata $threadE]
+			    if {$thread ne ""} {
+				if {$argsA(-thread) ne $thread} {
+				    continue
+				}
 			    }
 			}
 		    }
-		    presence {
-			 # @@@ Don't know what to do with it.
+		    set haveMessages 1
+		    
+		    # Keep track of first and last message.
+		    if {![info exists firstSecs]} {
+			set firstSecs $secs
 		    }
+		    set lastSecs $secs
+		    lappend itemL $itemE
 		}
-		lappend itemL $itemE
+		presence {
+		    lappend itemL $itemE
+		}
 	    }
 	}
     }
     tinydom::cleanup $token
+    
+    # Since presence elements have no thread attribute we pick only those
+    # between first and last threaded message.
+    if {$argsA(-thread) ne "0"} {
+	if {$haveMessages} {
+	    set sortItemL {}
+	    foreach itemE $itemL {
+		set xmppE [lindex [tinydom::children $itemE] 0]
+		if {[tinydom::tagname $xmppE] eq "presence"} {
+		    set time [tinydom::getattribute $itemE time]
+		    set secs [clock scan $time]
+		    if {($secs < $firstSecs) || ($secs > $lastSecs)} {
+			continue
+		    }
+		}
+		lappend sortItemL $itemE
+	    }
+	    set itemL $sortItemL
+	} else {
+	    set itemL {}
+	}
+    }
 
     # Sort by last.
     if {$argsA(-last) != -1} {
@@ -294,6 +344,186 @@ proc ::History::XParseFiles {jid args} {
 	set itemL [lrange $itemL end-$last end]
     }
     return $itemL
+}
+
+# History::XInsertText --
+# 
+#       Takes a xml formatted history files and inserts content into dialog
+#       text widget.
+# 
+# Arguments:
+
+proc ::History::XInsertText {w} {
+    
+    variable $w
+    upvar 0 $w state
+
+    set jid        $state(jid)
+    set dlgtype    $state(dlgtype)
+    set wtext      $state(wtext)
+    set wchatframe $state(wchatframe)
+
+    array set argsA $state(argsA)
+    
+    set mjid  [jlib::jidmap $jid]
+    set mjid2 [jlib::barejid $mjid]
+    
+    set clockFormat         [option get $wchatframe clockFormat {}]
+    set clockFormatNotToday [option get $wchatframe clockFormatNotToday {}]
+
+    set itemL [XParseFiles $jid]
+
+    #$wtext insert end "------------XML Based------------\n"
+    
+    $wtext configure -state normal    
+    $wtext mark set insert end
+
+    set day 0
+    set prevday -1
+    set prevthread 0
+    set myRoomJid ""
+    set myShow "unavailable"
+    set myPrevShow "unavailable"
+    
+    # Keep track of own presence in the room of groupchat.
+    set presence "unavailable"
+    
+    foreach itemE $itemL {
+	set itemTag [tinydom::tagname $itemE]
+	
+	if {$itemTag ne "send" && $itemTag ne "recv"} {
+	    continue
+	}
+	set xmppE [lindex [tinydom::children $itemE] 0]
+	set stamp [::Jabber::GetDelayStamp $xmppE]
+	if {$stamp ne ""} {
+	    set secs [clock scan $stamp -gmt 1]
+	} else {
+	    set time [tinydom::getattribute $itemE time]
+	    set secs [clock scan $time]
+	    set day [clock format $secs -format "%j"]
+	}
+	set body ""
+	set thread ""
+
+	set from [tinydom::getattribute $xmppE from]
+	set to   [tinydom::getattribute $xmppE to]
+	jlib::splitjid $from from2 nick
+	
+	# Display name.
+	if {$dlgtype eq "chat"} {
+	    # Room participants?
+	    set name [jlib::barejid $from]
+	} else {
+	    if {$nick ne ""} {
+		set name $nick
+	    } else {
+		set name $from
+	    }
+	}
+	
+	# Display text tag.
+	if {$itemTag eq "send"} {
+	    set tag me
+	} elseif {$itemTag eq "recv"} {
+	    if {$dlgtype eq "chat"} {
+		set tag you
+	    } elseif {$dlgtype eq "groupchat"} {
+		if {$nick ne ""} {
+		    set tag they
+		} else {
+		    set tag sys
+		}
+	    }
+	}
+	set xmppTag [tinydom::tagname $xmppE]
+	
+	switch -- $xmppTag {
+	    message {
+		set threadE [tinydom::getfirstchildwithtag $xmppE thread]
+		if {$threadE ne {}} {
+		    set thread [tinydom::chdata $threadE]
+		}
+		set bodyE [tinydom::getfirstchildwithtag $xmppE body]
+		if {$bodyE ne {}} {
+		    set body [tinydom::chdata $bodyE]
+		}
+	    }
+	    presence {
+		set show [tinydom::getattribute $xmppE type]
+		if {$show eq ""} {
+		    set show available
+		}
+		set showE [tinydom::getfirstchildwithtag $xmppE show]
+		if {$showE ne {}} {
+		    set show [tinydom::chdata $showE]
+		}
+		set showStr [::Roster::MapShowToText $show]
+		set body $showStr
+		set statusE [tinydom::getfirstchildwithtag $xmppE status]
+		if {$statusE ne {}} {
+		    append body ", " [tinydom::chdata $statusE]
+		}
+		set tag sys
+
+		if {$itemTag eq "send"} {
+		    if {$dlgtype eq "groupchat"} {
+			set myRoomJid [tinydom::getattribute $xmppE from]
+		    }
+		    if {$show ne $myShow} {
+			set myPrevShow $myShow
+			set myShow $show
+		    }
+		}
+	    }
+	}	
+	
+	# Insert a 'histhead' for certain events.
+	set havehisthead 0
+	switch -- $dlgtype {
+	    chat {
+		if {($thread ne "") && ($thread ne $prevthread)} {
+		    set when [clock format $secs -format "%A %B %e, %Y"]
+		    $wtext insert end "[mc {Thread started}] $when\n" histhead
+		    set prevthread $thread
+		    set havehisthead 1
+		}
+	    }
+	    groupchat {
+		if {$itemTag eq "send"} {
+		    if {$xmppTag eq "presence" && $myShow ne $myPrevShow} {
+			if {$myShow eq "available"} {
+			    set prefix [GetTimeStr $secs $clockFormat $clockFormatNotToday]
+			    set str "$prefix [mc {Enter room}]"
+			    $wtext insert end $str\n histhead
+			    set havehisthead 1
+			} elseif {$myShow eq "unavailable"} {
+			    set prefix [GetTimeStr $secs $clockFormat $clockFormatNotToday]
+			    set str "$prefix [mc {Exit room}]"
+			    $wtext insert end $str\n histhead
+			    set havehisthead 1
+			}
+		    }
+		}
+	    }
+	}
+	if {!$havehisthead && ($day != $prevday)} {
+	    set when [clock format $secs -format "%A %B %e, %Y"]
+	    $wtext insert end "$argsA(-headtitle) $when\n" histhead
+	    set havehisthead 1
+	}
+	set prevday $day
+	
+	set prefix [GetTimeStr $secs $clockFormat $clockFormatNotToday]
+	append prefix "<$name>"
+	
+	$wtext insert end $prefix ${tag}pre
+	$wtext insert end "   "   ${tag}text
+	
+	::Text::ParseMsg $dlgtype $jid $wtext $body ${tag}text
+	$wtext insert end \n
+    }
+    $wtext configure -state disabled   
 }
 
 #-------------------------------------------------------------------------------
@@ -440,8 +670,15 @@ proc ::History::BuildHistory {jid dlgtype args} {
     # Always start by inserting any old style format first.
     InsertText $w
     
+    # New xml based format.
+    XInsertText $w
     
-    #XInsertText $w
+    if {[$wtext index end] eq "1.0"} {
+	$wtext configure -state normal
+	$wtext insert end [mc {No registered history for} $jid] histhead
+	$wtext insert end "\n" histhead
+	$wtext configure -state disabled
+    }
         
     ::UI::SetWindowGeometry $w $wDlgs(jhist)
 
@@ -483,67 +720,67 @@ proc ::History::InsertText {w} {
     $wtext configure -state normal
     $wtext mark set insert end
 
-    if {[file readable $path]} {
-	set uidstart 1000
-	set uid $uidstart
-	incr uidstart
-	if {[catch {source $path} err]} {
-	    return
+    if {![file readable $path]} {
+	return
+    }
+    set uidstart 1000
+    set uid $uidstart
+    incr uidstart
+    if {[catch {source $path} err]} {
+	return
+    }
+    set uidstop $uid
+    
+    set day 0
+    set prevday -1
+    set prevthread 0
+    
+    for {set i $uidstart} {$i <= $uidstop} {incr i} {
+	array unset msg
+	foreach key {body name tag type thread} {
+	    set msg(-$key) ""
 	}
-	set uidstop $uid
-		    
-	set day 0
-	set prevday -1
-	set prevthread 0
+	array set msg [NormalizeMessage $jid $message($i)]
 	
-	for {set i $uidstart} {$i <= $uidstop} {incr i} {
-	    array unset msg
-	    foreach key {body name tag type thread} {
-		set msg(-$key) ""
-	    }
-	    array set msg [NormalizeMessage $jid $message($i)]
-
-	    if {$dlgtype ne $msg(-type)} {
-		continue
-	    }
-	    if {$msg(-time) ne ""} {
-		set secs [clock scan $msg(-time)]
-		set day [clock format $secs -format "%j"]
-	    } else {
-		set secs ""
-		set day 0
-	    }
-	    
-	    # Insert a 'histhead' line for each new day.
-	    set havehisthead 0
-	    if {$day != $prevday} {
-		set when [clock format $secs -format "%A %B %e, %Y"]
-		$wtext insert end "$argsA(-headtitle) $when\n" histhead
-		set havehisthead 1
-	    }
-	    set prevday $day
-	    
-	    # Insert new thread if chat.
-	    if {!$havehisthead && ($msg(-type) eq "chat")} {
-		if {$msg(-thread) ne $prevthread} {
-		    set when [clock format $secs -format "%A %B %e, %Y"]
-		    $wtext insert end "[mc {Thread started}] $when\n" histhead
-		}
-	    }
-	    set prevthread $msg(-thread)
-	    
-	    set prefix [GetTimeStr $secs $clockFormat $clockFormatNotToday]
-	    append prefix "<$msg(-name)>"
-
-	    $wtext insert end $prefix $msg(-tag)pre
-	    $wtext insert end "   "   $msg(-tag)text
-	    
-	    ::Text::ParseMsg $dlgtype $jid $wtext $msg(-body) $msg(-tag)text
-	    $wtext insert end \n
+	if {$dlgtype ne $msg(-type)} {
+	    continue
 	}
-    } else {
-	$wtext insert end [mc {No registered history for} $jid] histhead
-	$wtext insert end "\n" histhead
+	if {$msg(-time) ne ""} {
+	    set secs [clock scan $msg(-time)]
+	    set day [clock format $secs -format "%j"]
+	} else {
+	    set secs ""
+	    set day 0
+	}
+	
+	# Insert a 'histhead' line for each new day.
+	set havehisthead 0
+	if {$day != $prevday} {
+	    set when [clock format $secs -format "%A %B %e, %Y"]
+	    $wtext insert end "$argsA(-headtitle) $when\n" histhead
+	    set havehisthead 1
+	}
+	set prevday $day
+	
+	# Insert new thread if chat.
+	if {!$havehisthead && ($msg(-type) eq "chat")} {
+	    if {$msg(-thread) ne $prevthread} {
+		set when [clock format $secs -format "%A %B %e, %Y"]
+		$wtext insert end "[mc {Thread started}] $when\n" histhead
+	    }
+	}
+	set prevthread $msg(-thread)
+	
+	set prefix [GetTimeStr $secs $clockFormat $clockFormatNotToday]
+	if {$msg(-name) ne ""} {
+	    append prefix "<$msg(-name)>"
+	}
+	
+	$wtext insert end $prefix $msg(-tag)pre
+	$wtext insert end "   "   $msg(-tag)text
+	
+	::Text::ParseMsg $dlgtype $jid $wtext $msg(-body) $msg(-tag)text
+	$wtext insert end \n
     }
     $wtext configure -state disabled
     
@@ -697,6 +934,9 @@ proc ::History::ClearHistory {jid wtext} {
     $wtext configure -state disabled
     set path [file join $this(historyPath) [uriencode::quote $jid]] 
     if {[file exists $path]} {
+	file delete $path
+    }
+    foreach path [XGetAllFileNames $jid] {
 	file delete $path
     }
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.175 2006-08-20 13:41:18 matben Exp $
+# $Id: Roster.tcl,v 1.176 2006-09-02 06:43:38 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -838,7 +838,7 @@ proc ::Roster::PresenceEvent {jlibname xmldata} {
     
     # @@@ So far we preprocess the presence element to an option list.
     #     In the future it is better not to.
-    set opts [list -from $from -type $type -resource $res]
+    set opts [list -from $from -type $type -resource $res -xmldata $xmldata]
     set x {}
     set extras {}
     foreach E [wrapper::getchildren $xmldata] {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.28 2006-08-20 13:41:19 matben Exp $
+# $Id: RosterTree.tcl,v 1.29 2006-09-02 06:43:38 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -792,7 +792,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs  jprefs
     
-    ::Debug 4 "::RosterTree::CreateItemBase jid=$jid, presence=$presence, args='$args'"
+    ::Debug 4 "::RosterTree::CreateItemBase jid=$jid, presence=$presence"
 
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return

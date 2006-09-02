@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Enter.tcl,v 1.6 2006-08-14 13:08:03 matben Exp $
+# $Id: Enter.tcl,v 1.7 2006-09-02 06:43:38 matben Exp $
 
 package provide Enter 1.0
 
@@ -524,6 +524,7 @@ proc ::Enter::DoEnter {token} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::xmppxmlns xmppxmlns
     
     ::Debug 4 "::Enter::DoEnter"
  
@@ -546,6 +547,18 @@ proc ::Enter::DoEnter {token} {
 	      -command $callback
 	}
     }
+
+    if {$state(protocol) eq "muc"} {
+	set xE [wrapper::createtag "x" -attrlist [list xmlns $xmppxmlns(muc)]]
+    } else {
+	set xE {}
+    }
+
+    set from $roomjid/$state(nickname)
+    set attr [list from $from to $roomjid]
+    set xmldata [wrapper::createtag "presence"  \
+      -attrlist $attr -subtags [list $xE]]
+    ::History::XPutItem send $roomjid $xmldata
 }
 
 # Enter::MUCCallback --
@@ -572,6 +585,8 @@ proc ::Enter::MUCCallback {token jlibname xmldata} {
     }    
     set roomjid [jlib::jidmap [jlib::barejid $from]]
     set retry 0
+
+    ::History::XPutItem recv $roomjid $xmldata
 
     if {[string equal $type "error"]} {
 	set errspec [jlib::getstanzaerrorspec $xmldata]
@@ -622,7 +637,9 @@ proc ::Enter::GCCallback {token jlibname xmldata} {
 	set type "available"
     }    
     set roomjid [jlib::jidmap [jlib::barejid $from]]
-    
+
+    ::History::XPutItem recv $roomjid $xmldata
+
     if {[string equal $type "error"]} {
 	set msg "We got an error when entering room \"$roomjid\"."
 	set errspec [jlib::getstanzaerrorspec $xmldata]
