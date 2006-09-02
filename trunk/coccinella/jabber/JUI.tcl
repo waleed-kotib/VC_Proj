@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.129 2006-08-21 09:45:48 matben Exp $
+# $Id: JUI.tcl,v 1.130 2006-09-02 07:09:59 matben Exp $
 
 package provide JUI 1.0
 
@@ -162,9 +162,7 @@ proc ::JUI::Init { } {
 	}
     } else {
 	set menuDefs(rost,info) {    
-	    {command     mSetupAssistant {
-		package require SetupAss; ::Jabber::SetupAss::SetupAss
-	    }                             normal {}}
+	    {command     mSetupAssistant {::Jabber::SetupAss::SetupAss} {}}
 	    {command     mComponents    {::Dialogs::InfoComponents}      {}}
 	    {command     mErrorLog      {::Jabber::ErrorLogDlg}          {}}
 	    {checkbutton mDebug         {::Jabber::DebugCmd}             {} \

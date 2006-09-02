@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.93 2006-08-29 14:13:07 matben Exp $
+# $Id: MailBox.tcl,v 1.94 2006-09-02 07:09:59 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1745,10 +1745,14 @@ proc ::MailBox::QuitHook { } {
 	if {$locals(haveEdits)} {
 	    SaveMailbox
 	}
-	MKClose
+	if {[MKHaveMetakit]} {
+	    MKClose
+	}
     } else {
 	DeleteMailbox
-	MKDelete
+	if {[MKHaveMetakit]} {
+	    MKDelete
+	}
     }
 }
 
@@ -1767,7 +1771,7 @@ proc ::MailBox::MKHaveMetakit {} {
     } else {
 	if {[catch {
 	    package require vfs
-	    package require vfs::mk4
+	    package require vfs::mk4 1.9
 	}]} {
 	    set mkhavemetakit 0
 	    return 0
