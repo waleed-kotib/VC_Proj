@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.95 2006-09-02 07:24:33 matben Exp $
+# $Id: MailBox.tcl,v 1.96 2006-09-02 13:29:48 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1770,8 +1770,6 @@ proc ::MailBox::MKHaveMetakit {} {
 	return $mkhavemetakit
     } else {
 	if {[catch {
-	    package require vfs
-	    package require vfs::mk4 1.9
 	    package require Mk4tcl
 	}]} {
 	    set mkhavemetakit 0

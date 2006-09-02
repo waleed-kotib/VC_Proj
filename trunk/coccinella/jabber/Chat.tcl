@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.178 2006-09-02 06:43:38 matben Exp $
+# $Id: Chat.tcl,v 1.179 2006-09-02 13:29:47 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2513,7 +2513,7 @@ proc ::Chat::Send {dlgtoken} {
     eval {::Jabber::JlibCmd send_message $jid  \
       -thread $threadID -type chat -body $allText} $opts
 
-    set dlgstate(lastsentsecs) $secs
+    set dlgstate(lastsentsecs) [clock seconds]
     
     # Add to chat window and clear send.        
     InsertMessage $chattoken me $allText
