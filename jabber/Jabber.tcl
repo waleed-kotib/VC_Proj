@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.179 2006-08-27 13:14:02 matben Exp $
+# $Id: Jabber.tcl,v 1.180 2006-09-02 06:43:38 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1436,8 +1436,7 @@ proc ::Jabber::GetCapsExtSubtags {name} {
 
 proc ::Jabber::GetAnyDelayElem {xlist} {
     
-    set ans ""
-    
+    set ans ""    
     set delayList [wrapper::getnamespacefromchilds $xlist x "jabber:x:delay"]
     if {[llength $delayList]} {
 	array set attrArr [wrapper::getattrlist [lindex $delayList 0]]
@@ -1449,9 +1448,10 @@ proc ::Jabber::GetAnyDelayElem {xlist} {
 }
 
 proc ::Jabber::GetDelayStamp {xmldata} {
-    set xE [wrapper::getchildswithtagandxmlns $xmldata x "jabber:x:delay"]
+    
+    set xE [wrapper::getfirstchildwithxmlns $xmldata "jabber:x:delay"]
     if {[llength $xE]} {
-	return stamp [wrapper::getattribute $xE stamp]
+	return [wrapper::getattribute $xE stamp]
     } else {
 	return ""
     }

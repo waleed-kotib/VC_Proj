@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.157 2006-08-20 13:41:18 matben Exp $
+# $Id: GroupChat.tcl,v 1.158 2006-09-02 06:43:38 matben Exp $
 
 package require Create
 package require Enter
@@ -1742,19 +1742,24 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
     upvar 0 $chattoken chatstate
     
     array set argsArr $args
+    
+    set xmldata $argsArr(-xmldata)
 
     set w       $chatstate(w)
     set wtext   $chatstate(wtext)
     set roomjid $chatstate(roomjid)
-        
+            
     # This can be room name or nick name.
     lassign [::Jabber::JlibCmd service hashandnick $roomjid] myroomjid mynick
     if {[string equal $myroomjid $from]} {
 	set whom me
+	set historyTag send
     } elseif {[string equal $roomjid $from]} {
 	set whom sys
+	set historyTag recv
     } else {
 	set whom they
+	set historyTag recv
     }    
     set nick ""
     
@@ -1765,13 +1770,12 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
     }
     set history 0
     set secs ""
-    if {[info exists argsArr(-x)]} {
-	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
-	if {$tm ne ""} {
-	    set secs [clock scan $tm -gmt 1]
-	    set history 1
-	}
-    }
+    
+    set stamp [::Jabber::GetDelayStamp $xmldata]
+    if {$stamp ne ""} {
+	set secs [clock scan $stamp -gmt 1]
+	set history 1
+    }    
     if {$secs eq ""} {
 	set secs [clock seconds]
     }
@@ -1804,11 +1808,10 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
     
     $wtext configure -state disabled
     $wtext see end
-
-    # History.
-    set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
-    ::History::PutToFileEx $roomjid \
-      -type groupchat -name $nick -time $dateISO -body $body -tag $whom
+    
+    # Even though we also receive what we send, denote this with send anyway.
+    # This can be used to get our own room JID (nick name).
+    ::History::XPutItem $historyTag $roomjid $xmldata
 }
 
 # GroupChat::CloseCmd --
@@ -1957,6 +1960,11 @@ proc ::GroupChat::Exit {chattoken} {
     if {[::Jabber::IsConnected]} {
 	$jstate(jlib) service exitroom $roomjid	
 	::hooks::run groupchatExitRoomHook $roomjid
+
+	lassign [::Jabber::JlibCmd service hashandnick $roomjid] myroomjid -
+	set attr [list from $myroomjid to $roomjid type unavailable]
+	set xmldata [wrapper::createtag "presence" -attrlist $attr]
+	::History::XPutItem send $roomjid $xmldata
     }
 }
 
@@ -2146,7 +2154,7 @@ proc ::GroupChat::PresenceEvent {jlibname xmldata} {
 	}
     
 	lappend chatstate(afterids) [after 200 [list  \
-	  ::GroupChat::InsertPresenceChange $chattoken $from]]
+	  ::GroupChat::InsertPresenceChange $chattoken $xmldata]]
     
 	# When kicked etc. from a MUC room...
 	# 
@@ -2164,7 +2172,7 @@ proc ::GroupChat::PresenceEvent {jlibname xmldata} {
     }
 }
 
-proc ::GroupChat::InsertPresenceChange {chattoken jid3} {
+proc ::GroupChat::InsertPresenceChange {chattoken xmldata} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jstate jstate
@@ -2177,6 +2185,7 @@ proc ::GroupChat::InsertPresenceChange {chattoken jid3} {
 	if {[expr {$ms - $chatstate(last,sys) < 400}]} {
 	    return
 	}
+	set jid3 [wrapper::getattribute $xmldata from]
 	jlib::splitjid $jid3 jid2 res
 	if {$res eq ""} {
 	    jlib::splitjidex $jid3 node domain res
@@ -2194,7 +2203,8 @@ proc ::GroupChat::InsertPresenceChange {chattoken jid3} {
 	    set show $presA(-show)
 	}
 	set str [string tolower [::Roster::MapShowToText $show]]
-	InsertMessage $chattoken $chatstate(roomjid) "$name: $str"
+	InsertMessage $chattoken $chatstate(roomjid) "$name: $str"  \
+	  -xmldata $xmldata
     }
 }
 

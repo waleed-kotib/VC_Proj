@@ -290,7 +290,8 @@ proc ::Mood::MessageHook {body args} {
     set state($from,mood) $mood
     
     #@@@ Refresh Roster, the BalloonHook is called only when a Presence is coming and a Refresh of the roster
-    ::Roster::Refresh
+    # Mats ???
+    #::Roster::Refresh
 
     eval {::hooks::run moodEvent $from $mood $text} $args
 

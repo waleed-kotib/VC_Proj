@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: Create.tcl,v 1.4 2006-08-14 13:08:03 matben Exp $
+# $Id: Create.tcl,v 1.5 2006-09-02 06:43:38 matben Exp $
 
 package provide Create 1.0
 
@@ -299,6 +299,7 @@ proc ::Create::SendGet {token} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::xmppxmlns xmppxmlns
     
     ::Debug 2 "::Create::SendGet usemuc=$state(usemuc)"
 
@@ -319,6 +320,14 @@ proc ::Create::SendGet {token} {
 
 	$jstate(jlib) muc create $roomjid $state(nickname)  \
 	  [list [namespace current]::CreateMUCCB $token]
+
+	# Design a simplified xmldata for the history.
+	set from $roomjid/$state(nickname)
+	set xE [wrapper::createtag "x" -attrlist [list xmlns $xmppxmlns(muc)]]
+	set attr [list from $from to $roomjid]
+	set xmldata [wrapper::createtag "presence"  \
+	  -attrlist $attr -subtags [list $xE]]
+	::History::XPutItem send $roomjid $xmldata
     } else {
 	
 	# Error
@@ -354,6 +363,9 @@ proc ::Create::CreateMUCCB {token jlibname xmldata} {
 	set type "available"
     }    
     set roomjid [jlib::jidmap $from]
+
+    ::History::XPutItem recv $roomjid $xmldata
+
     if {[string equal $type "error"]} {
     	set errcode ""
     	set errmsg ""

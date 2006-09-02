@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.177 2006-08-20 13:41:18 matben Exp $
+# $Id: Chat.tcl,v 1.178 2006-09-02 06:43:38 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -15,6 +15,8 @@ package require History
 package require UI::WSearch
 
 package provide Chat 1.0
+
+# TODO:   o Register presence per jid instead, see code below
 
 
 namespace eval ::Chat:: {
@@ -413,8 +415,38 @@ proc ::Chat::NewChat {threadID jid args} {
 	set chattoken [GetActiveChatToken $dlgtoken]
     }
     MakeAndInsertHistory $chattoken
-    
+        
     return $chattoken
+}
+
+# @@@ TODO
+
+proc ::Chat::RegisterPresence {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set jid2 $chatstate(jid2)
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	::Jabber::JlibCmd presence_register_ex  \
+	  [namespace code [list PresenceEvent $chattoken]] -from $chatstate(jid)
+    } else {
+	::Jabber::JlibCmd presence_register_ex  \
+	  [namespace code [list PresenceEvent $chattoken]] -from2 $jid2
+    }
+}
+
+proc ::Chat::DeregisterPresence {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set jid2 $chatstate(jid2)
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	::Jabber::JlibCmd presence_deregister_ex  \
+	  [namespace code [list PresenceEvent $chattoken]] -from $chatstate(jid)
+    } else {
+	::Jabber::JlibCmd presence_deregister_ex  \
+	  [namespace code [list PresenceEvent $chattoken]] -from2 $jid2
+    }
 }
 
 # Chat::GotMsg --
@@ -438,6 +470,8 @@ proc ::Chat::GotMsg {body args} {
     ::Debug 2 "::Chat::GotMsg args='$args'"
 
     array set argsArr $args
+    
+    set xmldata $argsArr(-xmldata)
     
     # -from is a 3-tier jid /resource included.
     set jid $argsArr(-from)
@@ -574,13 +608,8 @@ proc ::Chat::GotMsg {body args} {
 	eval {InsertMessage $chattoken you $body} $opts
 
 	# Put in history file.
-	if {![info exists secs]} {
-	    set secs [clock seconds]
-	}
-	set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
-	::History::PutToFileEx $jid2 \
-	 -type chat -name $jid2 -thread $threadID -time $dateISO -body $body \
-	 -tag you
+       ::History::XPutItem recv $jid2 $xmldata
+       
 	eval {TabAlert $chattoken} $args
 	XEventCancel $chattoken
 	    
@@ -635,7 +664,7 @@ proc ::Chat::GotNormalMsg {body args} {
 #       
 # Arguments:
 #       spec    {me|you|sys ?history?}
-#       body
+#       body    text
 #       args:   -secs seconds
 #               -jidfrom jid
 
@@ -687,7 +716,20 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	    }
 	}
 	sys {
+	    
+	    # This can indicate wrong from of setting subject ourself.
 	    set from ""
+	    if {[info exists argsArr(-jidfrom)]} {
+		set from $argsArr(-jidfrom)
+	    }
+	    set jid2 [jlib::barejid $from]
+	    if {[::Jabber::JlibCmd service isroom $jid2]} {
+		set name [::Jabber::JlibCmd service nick $jid]
+		set from $jid2/$name
+	    } else {
+		set name $chatstate(displayname)
+		set from $jid2
+	    }
 	}
     }
     if {[info exists argsArr(-secs)]} {
@@ -713,7 +755,7 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	    append prefix "<$name>"
 	}
 	sys {
-	    # empty
+	    append prefix "<$name>"
 	}
     }
     set htag ""
@@ -747,6 +789,10 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
     $wtext see end
 }
 
+# Handle new xml based history format which has different api ------------------
+#
+# @@@ Cleanup old history code later.
+#
 # Chat::MakeAndInsertHistory --
 # 
 #       If new chat dialog check to see if we have got a thread history to insert.
@@ -755,6 +801,7 @@ proc ::Chat::MakeAndInsertHistory {chattoken} {
     global  this
     variable $chattoken
     upvar 0 $chattoken chatstate
+    upvar ::Jabber::jprefs jprefs
     
     # If chatting with a room member we must use jid3.
     set jid2 $chatstate(jid2)
@@ -764,14 +811,33 @@ proc ::Chat::MakeAndInsertHistory {chattoken} {
 	set jidH $jid2	
     }
     
-    # We MUST take a snaphot of our history before first message to avoid
-    # any duplicates.
-    if {[::History::HaveMessageFile $jidH]} {
-	set histfile [::tfileutils::tempfile $this(tmpPath) ""]
-	file copy -force [::History::GetMessageFile $jidH] $histfile
-	set chatstate(historyfile) $histfile
-	HistoryCmd $chattoken
+    # We cannot merge old and new formats.
+    if {[::History::XHaveHistory $jidH]} {
+	
+	# Write the selected item list to tmp file.
+	set itemL [::History::XParseFiles $jidH  \
+	  -last $jprefs(chat,histLen) -maxage $jprefs(chat,histAge)]
+	
+	set fileH [::tfileutils::tempfile $this(tmpPath) ""]
+	set fd [open $fileH w]
+	fconfigure $fd -encoding utf-8
+	puts $fd $itemL
+	close $fd
+	
+	set chatstate(historyfile) $fileH
+	set chatstate(historytype) xml	
+    } else {
+    
+	# We MUST take a snaphot of our history before first message to avoid
+	# any duplicates.
+	if {[::History::HaveMessageFile $jidH]} {
+	    set fileH [::tfileutils::tempfile $this(tmpPath) ""]
+	    file copy -force [::History::GetMessageFile $jidH] $fileH
+	    set chatstate(historyfile) $fileH
+	    set chatstate(historytype) old
+	}
     }
+    HistoryCmd $chattoken
 }
 
 # Chat::GetHistory --
@@ -784,6 +850,7 @@ proc ::Chat::GetHistory {chattoken args} {
     upvar 0 $chattoken chatstate
    
     ::Debug 2 "::Chat::GetHistory $args"
+    
     if {![info exists chatstate(historyfile)]} {
 	return
     }    
@@ -859,16 +926,16 @@ proc ::Chat::GetHistory {chattoken args} {
     return $result
 }
 
-# Chat::InsertHistory --
+# Chat::InsertHistoryOld --
 # 
 #       Find any matching history record and insert into dialog.
 
-proc ::Chat::InsertHistory {chattoken args} {
+proc ::Chat::InsertHistoryOld {chattoken args} {
     global  prefs this
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    ::Debug 2 "::Chat::InsertHistory $args"
+    ::Debug 2 "::Chat::InsertHistoryOld $args"
     if {![info exists chatstate(historyfile)]} {
 	return
     }    
@@ -892,6 +959,105 @@ proc ::Chat::InsertHistory {chattoken args} {
           -jidfrom $arrResult(-name)
     }
     $wtext mark set insert end
+}
+
+# Using the new xml based preprocessed format.
+
+proc ::Chat::InsertHistoryXML {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    if {![info exists chatstate(historyfile)]} {
+	return
+    }    
+    set fd [open $chatstate(historyfile) r]
+    fconfigure $fd -encoding utf-8
+    set itemL [read $fd]
+    close $fd
+
+    set wtext $chatstate(wtext)
+    $wtext mark set insert 1.0
+
+    foreach itemE $itemL {
+	set itemTag [tinydom::tagname $itemE]	
+	if {$itemTag ne "send" && $itemTag ne "recv"} {
+	    continue
+	}
+	set time [tinydom::getattribute $itemE time]
+	set secs [clock scan $time]
+	set body ""
+
+	if {$itemTag eq "send"} {
+	    set tag me
+	} elseif {$itemTag eq "recv"} {
+	    set tag you
+	}
+	set xmppE [lindex [tinydom::children $itemE] 0]
+	set from [tinydom::getattribute $xmppE from]
+
+	switch -- [tinydom::tagname $xmppE] {
+	    message {
+		set bodyE [tinydom::getfirstchildwithtag $xmppE body]
+		if {$bodyE ne {}} {
+		    set body [tinydom::chdata $bodyE]
+		}
+		# Subject?
+	    }
+	    presence {
+		set show [tinydom::getattribute $xmppE type]
+		if {$show eq ""} {
+		    set show available
+		}
+		set showE [tinydom::getfirstchildwithtag $xmppE show]
+		if {$showE ne {}} {
+		    set show [tinydom::chdata $showE]
+		}
+		set showStr [::Roster::MapShowToText $show]
+		set body $showStr
+		set statusE [tinydom::getfirstchildwithtag $xmppE status]
+		if {$statusE ne {}} {
+		    append body ", " [tinydom::chdata $statusE]
+		}
+		set tag sys
+	    }
+	}	
+	set tagspec [list $tag history]
+	InsertMessage $chattoken $tagspec $body -secs $secs -jidfrom $from
+    }
+    $wtext mark set insert end
+}
+
+proc ::Chat::InsertHistory {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    upvar ::Jabber::jprefs jprefs
+
+    if {$chatstate(historytype) eq "old"} {
+	InsertHistoryOld $chattoken -last $jprefs(chat,histLen)  \
+	  -maxage $jprefs(chat,histAge)
+    } else {
+	
+	# XML based preprocessed format
+	InsertHistoryXML $chattoken
+    }    
+}
+
+proc ::Chat::HistoryCmd {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    upvar ::Jabber::jprefs jprefs
+        
+    if {$chatstate(history)} {
+	InsertHistory $chattoken
+    } else {
+	set wtext $chatstate(wtext)
+	set ranges [$wtext tag ranges history]
+	if {[llength $ranges]} {
+	    $wtext configure -state normal
+	    $wtext delete [lindex $ranges 0] [lindex $ranges end]
+	    $wtext configure -state disabled
+	}
+    }
 }
 
 namespace eval ::Chat {
@@ -1417,6 +1583,8 @@ proc ::Chat::OnDestroyThread {chattoken} {
         ChangeChatState $chattoken close
         SendChatState $chattoken $chatstate(chatstate)
     }
+    
+    
 
     unset $chattoken
     array unset $chattoken    
@@ -1944,6 +2112,21 @@ proc ::Chat::LogoutHook { } {
 #
 #      MUC 6.8. Converting One-to-One Chat Into a Conference 
 #      
+#      0: Creates a new room (which SHOULD be non-anonymous and MAY be an 
+#         instant room as specified below) 
+#      1: Optionally sends history of the one-to-one chat to the room 
+#      2: Sends an invitation to the second person and the third person, 
+#         including a <continue/> flag. 
+#      
+#      Note: Use of the Delayed Delivery protocol enables the room creator to 
+#      specify the datetime of each message from the one-to-one chat history 
+#      (via the 'stamp' attribute), as well as JID of the original sender of 
+#      each message (via the 'from' attribute). The room creator SHOULD send 
+#      the complete one-to-one chat history before inviting additional users 
+#      to the room, and SHOULD also send as history any messages appearing in 
+#      the one-to-one chat interface after joining the room and before the 
+#      second person joins the room.
+#      
 # Arguments:
 #       dlgtoken    topwindow token
 
@@ -1961,7 +2144,7 @@ proc ::Chat::Invite {dlgtoken} {
     jlib::splitjidex $myjid node host res 
 
     set chatservers [$jstate(jlib) disco getconferences]
-    if {0 && $chatservers == {}} {
+    if {0 && $chatservers eq {}} {
 	::UI::MessageBox -icon error -message [mc jamessnogroupchat]
 	return
     }
@@ -1969,17 +2152,53 @@ proc ::Chat::Invite {dlgtoken} {
     set roomName "$node$timeStamp"
     set roomjid [jlib::joinjid $roomName $server ""]
 
-    set result [eval {::Create::Build} -nickname $node -server $server -roomname $roomName]
+    set result [::Create::Build -nickname $node -server $server \
+      -roomname $roomName]
     if { $result eq "create" } {
 	
 	# Second Send History to MUC
-	set result [GetHistory $chattoken -last $jprefs(chat,histLen) -maxage $jprefs(chat,histAge)]
-	foreach elem $result {
-	    array set arrResult $elem
-	    set dateISO [clock format $arrResult(-secs) -format "%Y%m%dT%H:%M:%S"]
-	    set xelem [wrapper::createtag "x"     \
-	       -attrlist [list xmlns jabber:x:delay from $arrResult(-name) stamp $dateISO]]
-	   $jstate(jlib) send_message $roomjid -type groupchat -body $arrResult(-body) -xlist [list $xelem]
+
+	set jid2 $chatstate(jid2)
+	if {[::Jabber::JlibCmd service isroom $jid2]} {
+	    set jidH $chatstate(jid)	
+	} else {
+	    set jidH $jid2	
+	}
+
+	# We must reparse the history to get the latest.
+	set itemL [::History::XParseFiles $jidH  \
+	  -last $jprefs(chat,histLen) -maxage $jprefs(chat,histAge)]
+	foreach itemE $itemL {
+	    set xmppE [lindex [tinydom::children $itemE] 0]
+	    if {[tinydom::tagname $xmppE] eq "message"} {
+		set time [tinydom::getattribute $itemE time]
+		set from [tinydom::getattribute $xmppE from]
+		set xattr [list xmlns jabber:x:delay from $from stamp $time]
+		set xelem [wrapper::createtag "x" -attrlist $xattr]
+		set bodyE [tinydom::getfirstchildwithtag $xmppE body]
+		if {$bodyE ne {}} {
+		    set body [tinydom::chdata $bodyE]
+		} else {
+		    set body ""
+		}
+		$jstate(jlib) send_message $roomjid -type groupchat  \
+		  -body $body -xlist [list $xelem]
+	    }
+	}
+	
+	# This is the old history; keep as backup.
+	if {0} {
+	    
+	    set result [GetHistory $chattoken -last $jprefs(chat,histLen) -maxage $jprefs(chat,histAge)]
+	    foreach elem $result {
+		array set arrResult $elem
+		set dateISO [clock format $arrResult(-secs) -format "%Y%m%dT%H:%M:%S"]
+		set xelem [wrapper::createtag "x"     \
+		  -attrlist [list xmlns jabber:x:delay from $arrResult(-name) stamp $dateISO]]
+		$jstate(jlib) send_message $roomjid -type groupchat  \
+		  -body $arrResult(-body) -xlist [list $xelem]
+	    }
+	    
 	}
 
 	# Third Invite the second user
@@ -2030,7 +2249,7 @@ proc ::Chat::BuildSavedDialogs { } {
 	set chattoken [GetTokenFrom chat jid ${jid}*]
 	if {$chattoken eq ""} {
 	    set chattoken [StartThread $jid]
-	    InsertHistory $chattoken -last $jprefs(chat,histLen)
+	    InsertHistory $chattoken
 	}
     }
 }
@@ -2161,28 +2380,6 @@ proc ::Chat::ActiveCmd {chattoken} {
     set cprefs(lastActiveRet) $chatstate(active)
 }
 
-proc ::Chat::HistoryCmd {chattoken} {
-    variable $chattoken
-    upvar 0 $chattoken chatstate
-    upvar ::Jabber::jprefs jprefs
-    
-    if {$chatstate(history)} {
-	InsertHistory $chattoken -last $jprefs(chat,histLen)  \
-	  -maxage $jprefs(chat,histAge)
-    } else {
-	set wtext $chatstate(wtext)
-	set ranges [$wtext tag ranges history]
-	if {[llength $ranges]} {
-	    $wtext configure -state normal
-	    $wtext delete [lindex $ranges 0] [lindex $ranges end]
-	    $wtext configure -state disabled
-	}
-    }
-    
-    # This does not work for the images :-(
-    #$chatstate(wtext) tag configure history -elide $chatstate(history)
-}
-
 # Suggestion from marc@bruenink.de.
 # 
 #       inactive mode: 
@@ -2264,16 +2461,9 @@ proc ::Chat::Send {dlgtoken} {
     if {$allText eq ""} {
 	return
     }
-    
-    # Put in history file.
-    set secs [clock seconds]
-    set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
-    ::History::PutToFileEx $jid2 \
-     -type chat -name $jstate(mejid) -thread $threadID -time $dateISO \
-     -body $allText -tag me
-
-   # This is important since clicks may have reset the insert mark.
-   $chatstate(wtext) mark set insert end
+   
+    # This is important since clicks may have reset the insert mark.
+    $chatstate(wtext) mark set insert end
 
     # Need to detect if subject changed.
     set opts {}
@@ -2312,6 +2502,13 @@ proc ::Chat::Send {dlgtoken} {
         lappend cselems [wrapper::createtag $chatstate(chatstate) -attrlist [list xmlns $csxmlns]]
         lappend opts -xlist $cselems
     }
+     
+    # Put in history file.
+    # Need to reconstruct our xmldata. Add -from for our history record.
+    set myjid [::Jabber::JlibCmd myjid]
+    set xmldata [eval {jlib::send_message_xmllist $jid  \
+       -thread $threadID -type chat -body $allText -from $myjid} $opts]
+    ::History::XPutItem send $jid2 $xmldata
 
     eval {::Jabber::JlibCmd send_message $jid  \
       -thread $threadID -type chat -body $allText} $opts
@@ -2400,20 +2597,53 @@ proc ::Chat::Save {dlgtoken} {
     }
 }
 
+proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
+    
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type available
+    }
+
+    
+    
+}
+
 proc ::Chat::PresenceHook {jid type args} {
     
     upvar ::Jabber::jstate jstate
 
     Debug 4 "::Chat::PresenceHook jid=$jid, type=$type"
 
-    # ::Chat::PresenceHook: args=marilu@jabber.dk unavailable 
-    #-resource Psi -type unavailable -type unavailable -from marilu@jabber.dk/Psi
-    #-to matben@jabber.dk -status Disconnected
     array set argsArr $args
+    
+    set xmldata $argsArr(-xmldata)
     set from $jid
     if {[info exists argsArr(-from)]} {
 	set from $argsArr(-from)
     }    
+    set mjid  [jlib::jidmap $jid]
+    set mfrom [jlib::jidmap $from]
+    jlib::splitjid $from jid2 res
+    
+    set jlib $jstate(jlib)
+    
+    # If we chat with a room member we shall not trigger on other JIDs.
+    if {[$jlib service isroom $jid2]} {
+	set pjid $mfrom
+	set jidH $mfrom
+    } else {
+	set pjid ${mjid}*
+	set jidH $jid2
+    }
+    set tokenL [GetAllTokensFrom chat jid $pjid]
+    if {![llength $tokenL]} {
+	return
+    }
+    
     set show $type
     if {[info exists argsArr(-show)]} {
 	set show $argsArr(-show)
@@ -2422,27 +2652,15 @@ proc ::Chat::PresenceHook {jid type args} {
     if {[info exists argsArr(-status)]} {
 	set status "$argsArr(-status)\n"
     }
-    set mjid  [jlib::jidmap $jid]
-    set mfrom [jlib::jidmap $jid]
-    jlib::splitjid $from jid2 res
-    
-    set jlib $jstate(jlib)
-    
-    # If we chat with a room member we shall not trigger on other JIDs.
-    if {[$jlib service isroom $jid2]} {
-	set pjid $mfrom
-    } else {
-	set pjid ${mjid}*
-    }
     
     array set presArr [$jlib roster getpresence $jid2 -resource $res]
     set icon [::Roster::GetPresenceIconFromJid $from]
     
-    foreach chattoken [GetAllTokensFrom chat jid $pjid] {
+    foreach chattoken $tokenL {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 	
-	# Skip if duplicate presence.
+	# Skip if duplicate presence. Bug?
 	if {[string equal $chatstate(presence) $show]} {
 	    return
 	}
@@ -2451,7 +2669,8 @@ proc ::Chat::PresenceHook {jid type args} {
 	$chatstate(wtext) mark set insert end
 
 	set showStr [::Roster::MapShowToText $show]
-	InsertMessage $chattoken sys "$from is: $showStr\n$status"
+	InsertMessage $chattoken sys "$showStr, $status"
+	::History::XPutItem recv $jidH $xmldata
 	
 	if {[string equal $type "available"]} {
 	    SetState $chattoken normal
@@ -2778,7 +2997,6 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
 	if {$name eq ""} {
 	    if {[::Jabber::JlibCmd service isroom $jid2]} {
 		set name [::Jabber::JlibCmd service nick $chatstate(jid)]
-
 	    } else {
 		set name $chatstate(displayname)
 	    }

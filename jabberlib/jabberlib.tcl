@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.153 2006-08-28 13:55:31 matben Exp $
+# $Id: jabberlib.tcl,v 1.154 2006-09-02 06:43:38 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2929,6 +2929,8 @@ proc jlib::search_set {jlibname to cmd args} {
 #                   -type $type           : normal, chat or groupchat
 #                   
 #                   -id token
+#                   
+#                   -from                 : only for internal use, never send
 #
 #                   -xlist $xlist         : A list containing *X* xml_data. 
 #                   Anything can be put inside an *X*. Please make sure you 
@@ -2947,27 +2949,40 @@ proc jlib::send_message {jlibname to args} {
 
     Debug 3 "jlib::send_message to=$to, args=$args"
     
+    array set argsA $args
+    if {[info exists argsA(-command)]} {
+	set uid $msgcmd(uid)
+	set msgcmd($uid) $argsA(-command)
+	incr msgcmd(uid)
+	lappend args -id $uid
+	
+	# There exist a weird situation if we send to ourself.
+	# Skip this registered command the 1st time we get this,
+	# and let any handlers take over. Trigger this 2nd time.
+	if {[string equal $to $locals(myjid)]} {
+	    set msgcmd($uid,self) 1
+	}
+	
+    }
+    set xmllist [eval {send_message_xmllist $to} $args]
+    send $jlibname $xmllist
+    return
+}
+
+# jlib::send_message_xmllist --
+# 
+#       Create the xml list for send_message.
+
+proc jlib::send_message_xmllist {to args} {
+    
     array set argsArr $args
-    set attrlist [list to $to]
+    set attr [list to $to]
     set children {}
     
     foreach {name value} $args {
 	set par [string trimleft $name "-"]
 	
 	switch -- $name {
-	    -command {
-		set uid $msgcmd(uid)
-		lappend attrlist "id" $uid
-		set msgcmd($uid) $value
-		incr msgcmd(uid)
-		
-		# There exist a weird situation if we send to ourself.
-		# Skip this registered command the 1st time we get this,
-		# and let any handlers take over. Trigger this 2nd time.
-		if {[string equal $to $locals(myjid)]} {
-		    set msgcmd($uid,self) 1
-		}
-	    }
 	    -xlist {
 		foreach xchild $value {
 		    lappend children $xchild
@@ -2975,22 +2990,18 @@ proc jlib::send_message {jlibname to args} {
 	    }
 	    -type {
 		if {![string equal $value "normal"]} {
-		    lappend attrlist "type" $value
+		    lappend attr "type" $value
 		}
 	    }
-	    -id {
-		lappend attrlist $par $value
+	    -id - -from {
+		lappend attr $par $value
 	    }
 	    default {
 		lappend children [wrapper::createtag $par -chdata $value]
 	    }
 	}
     }
-    set xmllist [wrapper::createtag "message" -attrlist $attrlist  \
-      -subtags $children]
-    
-    send $jlibname $xmllist
-    return
+    return [wrapper::createtag "message" -attrlist $attr -subtags $children]
 }
 
 # jlib::send_presence --
