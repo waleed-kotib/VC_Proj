@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.19 2006-08-21 09:45:48 matben Exp $
+# $Id: Status.tcl,v 1.20 2006-09-03 13:10:55 matben Exp $
 
 package provide Status 1.0
 
@@ -85,7 +85,7 @@ proc ::Jabber::Status::MainButton {w statusVar} {
 }
 
 proc ::Jabber::Status::MainCmd {w status args} {
-        
+    
     if {[::Jabber::IsConnected]} {
 	eval {::Jabber::SetStatus $status} $args
     } else {

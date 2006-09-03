@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.180 2006-09-02 06:43:38 matben Exp $
+# $Id: Jabber.tcl,v 1.181 2006-09-03 13:10:54 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -422,9 +422,11 @@ proc ::Jabber::GetMyStatus { } {
 
 proc ::Jabber::IsConnected { } {
     variable jserver
+    variable jstate
 
     # @@@ Switch to: jlib::isinstream
-    return [expr [string length $jserver(this)] == 0 ? 0 : 1]
+    return [$jstate(jlib) isinstream]
+    #return [expr [string length $jserver(this)] == 0 ? 0 : 1]
 }
 
 proc ::Jabber::JlibCmd {args} {
