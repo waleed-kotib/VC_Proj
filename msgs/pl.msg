@@ -201,7 +201,6 @@
 ::msgcat::mcset pl Yes		Tak
 ::msgcat::mcset pl yes		tak
 
-#translate
 # Canvas item options, names and values.
 # Names:
 ::msgcat::mcset pl anchor           Osadzenie
@@ -410,8 +409,6 @@
 ::msgcat::mcset pl mTimeCode            {Czas wł./wył.}
 ::msgcat::mcset pl mUserInfo            {Dane użytkownika...}
 ::msgcat::mcset pl mEditBookmarks	{Edytuj zakładki...}
-
-# Translate
 ::msgcat::mcset pl mToolbar             {Pasek narzędzi}
 ::msgcat::mcset pl mNotebook            {Notatnik}
 ::msgcat::mcset pl mMinimal             {Minimalny}
@@ -439,8 +436,6 @@
 ::msgcat::mcset pl mOffline		Nieobecny
 ::msgcat::mcset pl mTransports		Transporty
 ::msgcat::mcset pl mIgnore         	{Ignoruj}
-
-# Translate
 ::msgcat::mcset pl mSort                {Rodzaj}
 ::msgcat::mcset pl mIncreasing          {Rosnący}
 ::msgcat::mcset pl mDecreasing          {Malejący}
@@ -710,7 +705,6 @@
 ::msgcat::mcset pl {Whiteboard fonts}     {Czcionki Tablicy}
 ::msgcat::mcset pl {Writing file}         {Zapis pliku}
 
-# Translate
 # Rooms.
 ::msgcat::mcset pl {Kick Participant}     {Usuń uczestnika}
 ::msgcat::mcset pl {Ban Participant}      {Usuń i zabroń wstępu}
@@ -732,17 +726,16 @@
 ::msgcat::mcset pl {One day}              {Dzień}
 ::msgcat::mcset pl {One week}             {Tydzień}
 
-# Translate
 # Language names.
-::msgcat::mcset pl {Danish} 
-::msgcat::mcset pl {Dutch} 
-::msgcat::mcset pl {English} 
-::msgcat::mcset pl {French} 
-::msgcat::mcset pl {German} 
-::msgcat::mcset pl {Polish} 
-::msgcat::mcset pl {Russian} 
-::msgcat::mcset pl {Spanish} 
-::msgcat::mcset pl {Swedish} 
+::msgcat::mcset pl {Duński} 
+::msgcat::mcset pl {Niderlandzki} 
+::msgcat::mcset pl {Angielski} 
+::msgcat::mcset pl {Francuski} 
+::msgcat::mcset pl {Niemiecki} 
+::msgcat::mcset pl {Polski} 
+::msgcat::mcset pl {Rosyjski} 
+::msgcat::mcset pl {Hiszpański} 
+::msgcat::mcset pl {Szwedzki} 
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
@@ -751,8 +744,8 @@
 ::msgcat::mcset pl nativeEnglish    English
 ::msgcat::mcset pl nativeFrench     Français
 ::msgcat::mcset pl nativeGerman     Deutsch
-::msgcat::mcset pl nativePolish 
-::msgcat::mcset pl nativeRussian 
+::msgcat::mcset pl nativePolish     Polski
+::msgcat::mcset pl nativeRussian    Russkij
 ::msgcat::mcset pl nativeSpanish    Castellano
 ::msgcat::mcset pl nativeSwedish    Svenska 
 
@@ -921,24 +914,15 @@ Otrzymałeś autoryzację od %s: %s.}
 ::msgcat::mcset pl starttls-nofeature     {Brak możliwości skorzystania z TLS na serwerze "%s".}
 ::msgcat::mcset pl starttls-failure       {Nieudana negocjacja TLS z serwerem "%s".}
 ::msgcat::mcset pl sasl-no-mechanisms     {The server has no support for SASL authentication.}
-
-
-# Translate
-::msgcat::mcset pl jamessnofiletrpt {We couldn't see that %s supports file transfer.}
-::msgcat::mcset pl jamessfiletrpterr {Failed to get file %s from %s: %s}
-
-
+::msgcat::mcset pl jamessnofiletrpt {Trudno powiedzieć, czy %s potrafi obsłużyć transfer pliku.}
+::msgcat::mcset pl jamessfiletrpterr {Nie udało się pobrać pliku %s od: %s: %s}
 ::msgcat::mcset pl openquicktime		{Podłącz się do transmisji QuickTime}
 ::msgcat::mcset pl writeurl			{Podaj URL albo wybierz skrótem:}
 ::msgcat::mcset pl openquicktimeurlmsg		{Wywołuje URL zawierający plik SDP z rozszerzeniem .mov jako transmisję danych w formacie QuickTime "na żywo". Może to być przekaz dźwięku (np. radio) albo obrazu (np. TV).\
 Można również przy pomocy przeglądarki Internetowej zlokalizować plik SDP, pobrać go - a potem odczytać jak zwyczajny plik zawierający zapis "video".}
 ::msgcat::mcset pl printunixcmd                 {Polecenie wydruku (to stosowane w powłoce rozkazów)}
 ::msgcat::mcset pl enterpassword                {Podaj hasło dla Twojego konta: "%s"}
-
-# Translate
-::msgcat::mcset pl wblockitem {Lock this item from being edited}
-
-
+::msgcat::mcset pl wblockitem                   {Zablokuj możliwość modyfikacji zawartości}
 ::msgcat::mcset pl httptrptok                   {Ukończono pobieranie pliku %s}
 ::msgcat::mcset pl httptrpterror                {Błąd przesyłania w trakcie pobierania pliku %s: %s}
 ::msgcat::mcset pl httptrpteof                  {Serwer zerwał połączenie bez dania racji.}
@@ -1047,18 +1031,14 @@ w swoich systemach takie kroje zainstalowane.}
 ::msgcat::mcset pl prefwbscroll  {Możesz wybrać większy rozmiar, niż domyślny %sx%s}
 ::msgcat::mcset pl prefssbts     {Pokazuj przyciski "następny" i "poprzedni"}
 ::msgcat::mcset pl prefssresize  {Automatycznie dopasuj tło ("płótno") do rozmiaru grafiki}
-
-#--- Translate!
-::msgcat::mcset pl prefavashare {Share this avatar with other users}
-::msgcat::mcset pl prefproxymsg {Usage of the Http proxy is determined by each profile settings. File transfers wont work if you use Http proxy!}
+::msgcat::mcset pl prefavashare  {Współdziel ten avatar z innymi}
+::msgcat::mcset pl prefproxymsg {Możliwość korzystania z proxy HTTP określają ustawienia każdego profilu z osobna. Przy korzystaniu z takiego proxy nie ma możliwości przesyłania plików!}
 ::msgcat::mcset pl prefproxyexc {Exclude addresses (* as wildcard)}
-
-::msgcat::mcset pl prefdrivesame {Always store user preferences on same drive as program}
-::msgcat::mcset pl prefdriwsame  {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible.\
-  Do you want to continue?}
-::msgcat::mcset pl prefdriwdef   {You have chosen to store your preferences in the default place. Unless you also remove or move your personal settings at "%s"\
-  it will automatically be used the next time you launch Coccinella. Do you want them removed now?}
-#---
+::msgcat::mcset pl prefdrivesame {Ustawienia użytkownika należy zawsze przchowywać na tym samym dysku, gdzie znajduje się sam program}
+::msgcat::mcset pl prefdriwsame  {Wybrałeś zapis ustawień na dysku, gdzie obecna jest aplikacja. Jeśli nie jest to dysk wymienny, Twoje osobiste ustawienia mogą być widoczne dla innych.\
+  Akceptujesz tę sytuację?}
+::msgcat::mcset pl prefdriwdef   {Wybrałeś zapis ustawień w lokalizacji podpowiadanej domyślnie. Dopóki nie skasujesz, lub nie przeniesiesz ustawień zapisanych w "%s"\
+  zostaną one użyte przy następnym uruchomieniu programu. Czy chcesz je teraz usunąć?}
 
 
 
@@ -1127,17 +1107,13 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jainvitegchat {Zaproś użytkownika do udziału w konferencji w pokoju %s}
 ::msgcat::mcset pl jaxformreq   {Wymaga się etykiet zawierających znak (*)}
 ::msgcat::mcset pl jagcsyncpres {Synchronizacja pokoju z obecnością użytkownika}
-
-#--- Translate ---
-::msgcat::mcset pl jaloginuser {Enter your username and password to login to %s.}
-::msgcat::mcset pl jaregnewwith {Do you want to register a new account with %s.}
-::msgcat::mcset pl jaregisterexserv {Register with the service %s. You may need to press the Get button if not registration info obtained automatically.}
-::msgcat::mcset pl jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
-::msgcat::mcset pl jachathist {Show or hide the chat history}
-::msgcat::mcset pl jawaitdisco {Waiting for disco result...}
-
-::msgcat::mcset pl InfoRoomDesc {This dialog makes available a number of options and actions for a room. Your role and affiliation determines your privilege to act. Further restrictions may exist depending on specific room configuration.}
-#--- Translate ---
+::msgcat::mcset pl jaloginuser {Podaj login i hasło by zalogować się w %s.}
+::msgcat::mcset pl jaregnewwith {Czy chcesz założyć nowe konto na %s.}
+::msgcat::mcset pl jaregisterexserv {Rejestracja w serwisie %s. Możliwe, że będzie trzeba kliknąć przycisk Pobierz, jeśli nie przebiegnie automatycznie.}
+::msgcat::mcset pl jaseliconset {Wybierz zestaw ikonek, które będą używane dla poszczególnych grup. Z każdej z tych grup można zdjąć zaznaczenie.}
+::msgcat::mcset pl jachathist {Pokaż lub ukryj historię rozmów}
+::msgcat::mcset pl jawaitdisco {Czekam na wyniki przeszukiwania...}
+::msgcat::mcset pl InfoRoomDesc {Tu udostępnia się możliwość podejmowania rozmaitych akcji i zmiany ustawień - dostępnych w danym pokoju. Ich dostępność zależy od Twojej bieżącej roli i przypisania. Inne ograniczenia mogą zależeć od jakichś specyficznych ustawień pokoju.}
 
 # Setup assistant:
 ::msgcat::mcset pl suintro1 	{Pomocnik Konfiguracyjny (Asystent Ustawień) pomoże dokonać wpisów niezbędnych w celu założenia nowego konta Jabberowego, lub korzystania z już istniejącego.}
@@ -1151,26 +1127,23 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl suregmsg	{Jeśli podana nazwa zostanie rozpoznana jako "nieużywana" - czy chcesz założyć nowe konto? Aby móc konto założyć, musisz uprzednio podłączyć się do sieci, usuwając ew. blokady połączenia z serwerem Jabbera.}
 ::msgcat::mcset pl sufinmsg	{To wszystko. Aha, i pamiętaj: bądź miły dla Biedroneczki... ;-)}
 ::msgcat::mcset pl suheadtxt	{Pomocnik Konfiguracyjny Coccinelli}
+::msgcat::mcset pl supubserv    {Pobierz listę publicznych, dostępnych dla każdego serwerów Jabbera}
+::msgcat::mcset pl suservlist   {Lista powszechnie dostępnych serwerów}
 
-# Translate
-::msgcat::mcset pl supubserv    {Get list of public and open Jabber servers}
-::msgcat::mcset pl suservlist   {List of open Jabber servers}
-
-# Translate
 # Groupchat:
-::msgcat::mcset pl mucErrEnter      {We got an error when entering room "%s".}
-::msgcat::mcset pl mucErrCode       {The error code is %s: %s}
-::msgcat::mcset pl mucErrEnterTitle {Error Enter Room}
-::msgcat::mcset pl mucErrInvite     {Invitation to %s to join room %s failed.}
-::msgcat::mcset pl mucErrInviteCode {Error message: %s}
-::msgcat::mcset pl mucInviteText    {You have received an invitation from %s to join a groupchat in the room %s.}
-::msgcat::mcset pl mucInviteReason  {The reason: %s}
-::msgcat::mcset pl mucInvitePass    {The password "%s" is needed for entry.}
-::msgcat::mcset pl mucInviteQuest   {Do you want to join right away?}
-::msgcat::mcset pl mucInvite        {Invitation}
-::msgcat::mcset pl mucDestroy       {You are about to destroy the room "%s". Optionally you may give any present room participants an alternative room JID and a reason.}
-::msgcat::mcset pl mucIQError       {We received an error when interaction with the room "%s": %s}
-::msgcat::mcset pl mucChat2ConfInv  {Converting Chat into Conference}
+::msgcat::mcset pl mucErrEnter      {Błąd przy próbie wejścia do pokoju "%s".}
+::msgcat::mcset pl mucErrCode       {Kod błędu: %s: %s}
+::msgcat::mcset pl mucErrEnterTitle {Błąd przy próbie wejścia}
+::msgcat::mcset pl mucErrInvite     {Nieudana próba zaproszenie %s do pokoju %s.}
+::msgcat::mcset pl mucErrInviteCode {Błąd: %s}
+::msgcat::mcset pl mucInviteText    {%s zaprasza Cię do konferencji w pokoju %s.}
+::msgcat::mcset pl mucInviteReason  {Przyczyna: %s}
+::msgcat::mcset pl mucInvitePass    {Do wejścia będzie potrzebne podanie hasła: "%s".}
+::msgcat::mcset pl mucInviteQuest   {Chcesz się przyłączyć teraz-zaraz?}
+::msgcat::mcset pl mucInvite        {Zaproszenie}
+::msgcat::mcset pl mucDestroy       {Zamierzasz zlikwidować pokój "%s". Możesz również przekazać któremukolwiek z obecnych uczestników alternatywny adres JID pokoju, wyjaśniając, o co chodzi.}
+::msgcat::mcset pl mucIQError       {Problem przy próbie podjęcia działania. Pokój: "%s", błąd: %s}
+::msgcat::mcset pl mucChat2ConfInv  {Zamiana rozmowy w konferencję}
 
 
 ::msgcat::mcset pl vcardget	{Pobieranie e-wizytówki (vCard) użytkownika %s. Czekam na odzew serwera...}
@@ -1216,52 +1189,51 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl putfinished	    {Zakończono przesyłanie pliku "%s" do %s.}
 ::msgcat::mcset pl putneterr	    {Błąd sieciowy w trakcie przesyłania do %s.}
 
-# Translate
 # These are specific for phones (VoIP)
-::msgcat::mcset pl phoneMakeCall           {Make a call}
-::msgcat::mcset pl phoneMakeForward        {Forward current call to...}
-::msgcat::mcset pl phoneRing               {Ring, ring...}
-::msgcat::mcset pl phoneRingFrom           {Phone is ringing from %s}
-::msgcat::mcset pl phoneFailedCalling      {Failed calling %s}
-::msgcat::mcset pl phoneDial               {Dial}
-::msgcat::mcset pl phoneNumber             {Number}
-::msgcat::mcset pl phoneDialerCall         {Call to...}
-::msgcat::mcset pl phoneDialerForward      {Forward to...}
+::msgcat::mcset pl phoneMakeCall           {Zadzwoń}
+::msgcat::mcset pl phoneMakeForward        {Przekaż bieżącą rozmowę do...}
+::msgcat::mcset pl phoneRing               {Dryń, dryń...}
+::msgcat::mcset pl phoneRingFrom           {%s do Ciebie dzwoni}
+::msgcat::mcset pl phoneFailedCalling      {Nieudana próba rozmowy z %s}
+::msgcat::mcset pl phoneDial               {Wybieranie}
+::msgcat::mcset pl phoneNumber             {Numer}
+::msgcat::mcset pl phoneDialerCall         {Zadzwoń do...}
+::msgcat::mcset pl phoneDialerForward      {Przekaż do...}
 
-::msgcat::mcset pl AddressBook		{Address Book}
-::msgcat::mcset pl newAddressbookDlg	{New address book}
-::msgcat::mcset pl newAddressbook       {New address book}
-::msgcat::mcset pl abName		{Name}
-::msgcat::mcset pl abPhone		{Phone number}
-::msgcat::mcset pl modifyAddressbookDlg {Modify address book}
-::msgcat::mcset pl modifyAddressbook	{Modify address book}
-::msgcat::mcset pl mNewAB		{New}
-::msgcat::mcset pl mModifyAB		{Modify}
-::msgcat::mcset pl mRemoveAB		{Remove}
+::msgcat::mcset pl AddressBook		{Książka adresowa}
+::msgcat::mcset pl newAddressbookDlg	{Nowa książka adresowa}
+::msgcat::mcset pl newAddressbook       {Nowa książka adresowa}
+::msgcat::mcset pl abName		{Nazwisko}
+::msgcat::mcset pl abPhone		{Numer telefonu}
+::msgcat::mcset pl modifyAddressbookDlg {Zmiany w książce adresowej}
+::msgcat::mcset pl modifyAddressbook	{Zmiany w książce adresowej}
+::msgcat::mcset pl mNewAB		{Nowy}
+::msgcat::mcset pl mModifyAB		{Zmień}
+::msgcat::mcset pl mRemoveAB		{Usuń}
 
-::msgcat::mcset pl outCall              {Make Call}
-::msgcat::mcset pl notifyCall           {Notify Call}
-::msgcat::mcset pl inboundCall          {Inbound Call}
-::msgcat::mcset pl outboundCall         {Outbound Call}
-::msgcat::mcset pl callAnswer           {Answer}
-::msgcat::mcset pl callHungUp           {Hung Up}
+::msgcat::mcset pl outCall              {Zadzwoń}
+::msgcat::mcset pl notifyCall           {Daj znać o rozmowie}
+::msgcat::mcset pl inboundCall          {Rozmowa przychodząca}
+::msgcat::mcset pl outboundCall         {Rozmowa wychodząca}
+::msgcat::mcset pl callAnswer           {Odbierz}
+::msgcat::mcset pl callHungUp           {Rozłącz się}
 ::msgcat::mcset pl callInfo             {Info}
 ::msgcat::mcset pl callVM               {Call VM?}
 
 # Fore some of these generic names could be used?
-::msgcat::mcset pl iaxPhone             {IAX Phone}
-::msgcat::mcset pl iaxPhoneAccount      {IAX Account}
-::msgcat::mcset pl iaxPhoneUser         {User}
-::msgcat::mcset pl iaxPhonePassword     {Password}
-::msgcat::mcset pl iaxPhoneHost         {Host}
-::msgcat::mcset pl iaxPhoneCidNum       {Cid Number}
-::msgcat::mcset pl iaxPhoneCidName      {Cid Name}
-::msgcat::mcset pl iaxPhoneInputDev     {Input Device}
-::msgcat::mcset pl iaxPhoneOutputDev    {Output Device}
+::msgcat::mcset pl iaxPhone             {Telefon IAX}
+::msgcat::mcset pl iaxPhoneAccount      {Konto IAX}
+::msgcat::mcset pl iaxPhoneUser         {Użytkownik}
+::msgcat::mcset pl iaxPhonePassword     {Hasło}
+::msgcat::mcset pl iaxPhoneHost         {Serwer}
+::msgcat::mcset pl iaxPhoneCidNum       {Numer Cid}
+::msgcat::mcset pl iaxPhoneCidName      {Nazwa Cid}
+::msgcat::mcset pl iaxPhoneInputDev     {Urządzenie wejściowe}
+::msgcat::mcset pl iaxPhoneOutputDev    {Urządzenie wyjściowe}
 ::msgcat::mcset pl iaxPhoneAGC          {AGC}
 ::msgcat::mcset pl iaxPhoneAAGC         {AAGC}
-::msgcat::mcset pl iaxPhoneNoise        {Noise}
-::msgcat::mcset pl iaxPhoneComfort      {Comfort}
+::msgcat::mcset pl iaxPhoneNoise        {Poziom szumu}
+::msgcat::mcset pl iaxPhoneComfort      {Komfort}
 ::msgcat::mcset pl iaxPhoneCodec        {Codec}
 
 # END --------------------------------------------------------------------------
