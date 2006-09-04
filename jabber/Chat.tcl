@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.179 2006-09-02 13:29:47 matben Exp $
+# $Id: Chat.tcl,v 1.180 2006-09-04 05:55:07 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -809,7 +809,8 @@ proc ::Chat::MakeAndInsertHistory {chattoken} {
 	set jidH $chatstate(jid)	
     } else {
 	set jidH $jid2	
-    }
+    }  
+    set chatstate(havehistory) 0
     
     # We cannot merge old and new formats.
     if {[::History::XHaveHistory $jidH]} {
@@ -826,6 +827,7 @@ proc ::Chat::MakeAndInsertHistory {chattoken} {
 	
 	set chatstate(historyfile) $fileH
 	set chatstate(historytype) xml	
+	set chatstate(havehistory) 1
     } else {
     
 	# We MUST take a snaphot of our history before first message to avoid
@@ -835,6 +837,7 @@ proc ::Chat::MakeAndInsertHistory {chattoken} {
 	    file copy -force [::History::GetMessageFile $jidH] $fileH
 	    set chatstate(historyfile) $fileH
 	    set chatstate(historytype) old
+	    set chatstate(havehistory) 1
 	}
     }
     HistoryCmd $chattoken
@@ -1046,8 +1049,8 @@ proc ::Chat::HistoryCmd {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jprefs jprefs
-        
-    if {$chatstate(history)} {
+
+    if {$chatstate(history) && $chatstate(havehistory)} {
 	InsertHistory $chattoken
     } else {
 	set wtext $chatstate(wtext)
@@ -1323,6 +1326,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(xevent,msgidlist) ""
     set chatstate(xevent,type)      chat
     set chatstate(nhiddenmsgs)      0
+    set chatstate(havehistory)      0
 
     set chatstate(havecs)           first
     set chatstate(chatstate)        active
