@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.96 2006-09-02 13:29:48 matben Exp $
+# $Id: MailBox.tcl,v 1.97 2006-09-04 06:31:12 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1532,7 +1532,6 @@ proc ::MailBox::SaveMailboxVer2 {args} {
 	# Be sure to not have any inbox that is empty.
 	if {[llength [array names mailbox]] == 0} {
 	    catch {file delete $this(inboxFile)}
-	    ::Debug 2 "\tdelete inbox"
 	    return
 	} else {
 	    
@@ -1540,7 +1539,6 @@ proc ::MailBox::SaveMailboxVer2 {args} {
 	    set doSave 1
 	}
     }
-    ::Debug 2 "\t doSave=$doSave"
     if {!$doSave} {
 	return
     }
@@ -1594,7 +1592,11 @@ proc ::MailBox::ReadMailbox { } {
 	    
 	    # Cleanup all old stuff which we don't use anymore.
 	    array unset mailbox
-	    file delete $this(inboxFile)
+	    
+	    # Take backup.
+	    set date [clock format [clock seconds] -format "%y-%m-%d"]
+	    set bu [file rootname $this(inboxFile)]${date}-[pid].tcl
+	    file rename -force $this(inboxFile) $bu
 	}
     }
     
