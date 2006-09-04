@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.19 2006-08-20 13:41:17 matben Exp $
+# $Id: Phone.tcl,v 1.20 2006-09-04 06:32:04 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -79,6 +79,26 @@ proc ::Phone::Init { } {
 
     option add *Phone.phone16Image              phone16          widgetDefault
     option add *Phone.phone16DisImage           phone16Dis       widgetDefault
+
+    # Values for onhold -> no, hold, mute
+    # Values for status -> returned by ::protocol:: library
+    variable statePhone
+    array set statePhone {
+	registered          0
+	activeLine          0
+	onholdLine0         no
+	statusLine0         free
+	fromStateLine0      ""
+	numberLine0         ""
+	nameLine0           ""
+	inputVolume0        0
+	outputVolume0       0
+	inputMuteVolume0    0
+	outputMuteVolume0   0
+	receivedDate0       -1
+	initDate0           -1
+	callLength0         0
+    }
 }
 
 # These procedures handle registration, administration, and dispatching to
@@ -157,24 +177,6 @@ proc ::Phone::DeletePhone {name} {
 proc ::Phone::LoadPrefs { } {
     variable statePhone
     
-    #Values for onhold -> no, hold, mute
-    #Values for status -> returned by ::protocol:: library
-    array set statePhone {
-        registered          0
-        activeLine          0
-        onholdLine0         no
-        statusLine0         free
-        fromStateLine0      ""
-        numberLine0         ""
-        nameLine0           ""
-        inputVolume0        0
-        outputVolume0        0
-	inputMuteVolume0     0
-	outputMuteVolume0    0
-        receivedDate0       -1
-        initDate0           -1
-        callLength0         0
-    }
     CommandPhone loadprefs
     CommandPhone register
 
