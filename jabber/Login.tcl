@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.93 2006-08-20 13:41:18 matben Exp $
+# $Id: Login.tcl,v 1.94 2006-09-04 07:18:25 matben Exp $
 
 package provide Login 1.0
 
@@ -643,16 +643,16 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
 
 proc ::Login::SetStatus {args} {
     
-    array set argsArr {
+    array set argsA {
 	-invisible    0
 	-priority     0
     }
-    array set argsArr $args
+    array set argsA $args
     set presArgs {}
-    if {$argsArr(-priority) != 0} {
-	lappend presArgs -priority $priority
+    if {$argsA(-priority) != 0} {
+	lappend presArgs -priority $argsA(-priority)
     }    
-    if {$argsArr(-invisible)} {
+    if {$argsA(-invisible)} {
 	eval {::Jabber::SetStatus invisible} $presArgs
     } else {
 	eval {::Jabber::SetStatus available -notype 1} $presArgs
