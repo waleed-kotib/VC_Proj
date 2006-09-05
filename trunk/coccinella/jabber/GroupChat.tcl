@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.158 2006-09-02 06:43:38 matben Exp $
+# $Id: GroupChat.tcl,v 1.159 2006-09-05 08:00:04 matben Exp $
 
 package require Create
 package require Enter
@@ -460,7 +460,7 @@ proc ::GroupChat::GotMsg {body args} {
     if {[info exists argsArr(-from)]} {
 	set from $argsArr(-from)
     } else {
-	return -code error "Missing -from attribute in group message!"
+	return
     }
     set from [jlib::jidmap $from]
     jlib::splitjid $from roomjid res
@@ -699,6 +699,8 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set wusers      $wroom.mid.pv.r.tree
     set wyscusers   $wroom.mid.pv.r.ysc
     
+    set roomjid [jlib::jidmap $roomjid]
+
     set chatstate(wroom)        $wroom
     set chatstate(roomjid)      $roomjid
     set chatstate(dlgtoken)     $dlgtoken
@@ -1327,6 +1329,10 @@ proc ::GroupChat::GetActiveChatToken {dlgtoken} {
 
 proc ::GroupChat::GetTokenFrom {type key pattern} {
     
+    if {$key eq "roomjid"} {
+	set pattern [jlib::jidmap $pattern]
+    }
+    
     # Search all tokens for this key into state array.
     foreach token [GetTokenList $type] {
 	
@@ -1354,6 +1360,9 @@ proc ::GroupChat::GetTokenFrom {type key pattern} {
 
 proc ::GroupChat::GetAllTokensFrom {type key pattern} {
     
+    if {$key eq "roomjid"} {
+	set pattern [jlib::jidmap $pattern]
+    }
     set alltokens {}
     
     # Search all tokens for this key into state array.

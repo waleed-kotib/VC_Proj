@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.21 2006-09-02 06:43:38 matben Exp $
+# $Id: History.tcl,v 1.22 2006-09-05 08:00:04 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -119,6 +119,26 @@ proc ::History::XHaveHistory {jid} {
     return [llength [XGetAllFileNames $jid]]
 }
 
+# History::XParseFiles --
+# 
+#       Reads all relevant history files for JID, parses them and does a
+#       selection process based on the arguments.
+# 
+# Arguments:
+#       jid
+#       args: -last     integer
+#             -maxage   seconds
+#             -thread   thread ID
+
+proc ::History::XParseFiles {jid args} {
+    if {[XHaveHistory $jid]} {
+	set xml [XReadAllToXML $jid]
+	return [eval {XParseXMLAndSelect $xml} $args]
+    } else {
+	return {}
+    }
+}
+
 # History::XPutItem --
 # 
 #       Appends xml to history file.
@@ -210,22 +230,6 @@ proc ::History::XImportOldToFile {jid fileName} {
 	puts $fd $xml	
     }
     close $fd
-}
-
-# History::XParseFiles --
-# 
-#       Reads all relevant history files for JID, parses them and does a
-#       selection process based on the arguments.
-# 
-# Arguments:
-#       jid
-#       args: -last     integer
-#             -maxage   seconds
-#             -thread   thread ID
-
-proc ::History::XParseFiles {jid args} {
-    set xml [XReadAllToXML $jid]
-    return [eval {XParseXMLAndSelect $xml} $args]
 }
 
 proc ::History::XReadAllToXML {jid} {
