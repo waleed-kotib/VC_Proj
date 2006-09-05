@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.63 2006-08-06 13:22:05 matben Exp $
+# $Id: Profiles.tcl,v 1.64 2006-09-05 14:27:13 matben Exp $
 
 package provide Profiles 1.0
 
@@ -665,7 +665,7 @@ proc ::Profiles::GetDefaultOpts {server} {
 	# DO NOT add this!
 	#-resource       ""
 
-	set defaultOpts(-port) $jprefs(port)
+	#set defaultOpts(-port) $jprefs(port)
 	if {!$this(package,tls)} {
 	    set defaultOpts(-secure) 0
 	    set defaultOpts(-method) sasl
