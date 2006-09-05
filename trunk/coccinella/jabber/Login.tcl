@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.94 2006-09-04 07:18:25 matben Exp $
+# $Id: Login.tcl,v 1.95 2006-09-05 13:47:20 matben Exp $
 
 package provide Login 1.0
 
@@ -668,7 +668,7 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
     set str ""
 	
     switch -- $errcode {
-	connect-failed - network-failure {
+	connect-failed - network-failure - networkerror {
 	    set str [mc jamessnosocket $state(server) $errmsg]
 	}
 	timeout {
