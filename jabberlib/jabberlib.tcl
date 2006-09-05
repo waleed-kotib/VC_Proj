@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.154 2006-09-02 06:43:38 matben Exp $
+# $Id: jabberlib.tcl,v 1.155 2006-09-05 13:47:20 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -313,8 +313,9 @@ proc jlib::new {clientcmd args} {
     set iqcmd(uid)   1001
     set prescmd(uid) 1001
     set msgcmd(uid)  1001
-    set lib(clientcmd)    $clientcmd
-    set lib(wrap)         $wrapper
+    set lib(clientcmd)      $clientcmd
+    set lib(async_handler)  ""
+    set lib(wrap)           $wrapper
     
     set lib(isinstream) 0
     set lib(state)      ""
@@ -527,15 +528,15 @@ proc jlib::config {jlibname args} {
 	    return -code error "Unknown option $flag, must be: $usage"
 	}
     } else {
-	array set argsArr $args
+	array set argsA $args
 	
 	# Reschedule auto away only if changed. Before setting new opts!
-	if {[info exists argsArr(-autoawaymins)] &&  \
-	  ($argsArr(-autoawaymins) != $opts(-autoawaymins))} {
+	if {[info exists argsA(-autoawaymins)] &&  \
+	  ($argsA(-autoawaymins) != $opts(-autoawaymins))} {
 	    schedule_auto_away $jlibname
 	}
-	if {[info exists argsArr(-xautoawaymins)] &&  \
-	  ($argsArr(-xautoawaymins) != $opts(-xautoawaymins))} {
+	if {[info exists argsA(-xautoawaymins)] &&  \
+	  ($argsA(-xautoawaymins) != $opts(-xautoawaymins))} {
 	    schedule_auto_away $jlibname
 	}
 	foreach {flag value} $args {
@@ -701,7 +702,7 @@ proc jlib::putssocket {jlibname xml} {
     }
     if {[catch {puts -nonewline $lib(sock) $xml} err]} {
 	# Error propagated to the caller that calls clientcmd.
-	return -code error
+	return -code error $err
     }
 }
 
@@ -743,16 +744,14 @@ proc jlib::recvsocket {jlibname} {
     
     if {[catch {eof $lib(sock)} iseof] || $iseof} {
 	kill $jlibname
-	uplevel #0 $lib(clientcmd) [list $jlibname networkerror]	  
+	invoke_async_error $jlibname networkerror
 	return
     }
     
     # Read what we've got.
     if {[catch {read $lib(sock)} data]} {
 	kill $jlibname
-
-	# We need to call clientcmd here since async event.
-	uplevel #0 $lib(clientcmd) [list $jlibname networkerror]	  
+	invoke_async_error $jlibname networkerror
 	return
     }
     if {$lib(socketfilter,in) ne {}} {
@@ -828,7 +827,7 @@ proc jlib::openstream {jlibname server args} {
     upvar ${jlibname}::opts opts
     variable xmppxmlns
 
-    array set argsArr $args
+    array set argsA $args
     
     # The server 'to' attribute is only temporary until we have either a 
     # confirmation or a redirection (alias) in received streams 'from' attribute.
@@ -839,8 +838,8 @@ proc jlib::openstream {jlibname server args} {
     wrapper::reset $lib(wrap)
 
     # Register a <stream> callback proc.
-    if {[info exists argsArr(-cmd)] && [llength $argsArr(-cmd)]} {
-	set lib(streamcmd) $argsArr(-cmd)
+    if {[info exists argsA(-cmd)] && [llength $argsA(-cmd)]} {
+	set lib(streamcmd) $argsA(-cmd)
     }
     set optattr ""
     foreach {key value} $args {
@@ -856,7 +855,7 @@ proc jlib::openstream {jlibname server args} {
 	}
     }
     set lib(isinstream) 1
-    set lib(state)      "instream"
+    set lib(state) "instream"
 
     if {[catch {
 
@@ -932,18 +931,42 @@ proc jlib::closestream {jlibname} {
     kill $jlibname
 }
 
+# jlib::invoke_async_error --
+# 
+#       Used for reporting async errors, typically network errors.
+
+proc jlib::invoke_async_error {jlibname err {msg ""}} {
+    
+    upvar ${jlibname}::lib lib
+    
+    if {$lib(async_handler) eq ""} {
+	uplevel #0 $lib(clientcmd) [list $jlibname $err -errormsg $msg]
+    } else {
+	uplevel #0 $lib(async_handler) [list $jlibname $err $msg]
+    }
+}
+
+# jlib::set_async_error_handler --
+# 
+#       This is a way to get all async events directly to a registered handler
+#       without delivering them to clientcmd. Used in jlib::connect.
+proc jlib::set_async_error_handler {jlibname {cmd ""}} {
+    
+    upvar ${jlibname}::lib lib
+
+    set lib(async_handler) $cmd
+}
+
 # jlib::reporterror --
 # 
 #       Used for transports to report async, fatal and nonrecoverable errors.
 
 proc jlib::reporterror {jlibname err {msg ""}} {
     
-    upvar ${jlibname}::lib lib
-    
     Debug 4 "jlib::reporterror"
 
     kill $jlibname
-    uplevel #0 $lib(clientcmd) [list $jlibname $err -errormsg $msg]
+    invoke_async_error $jlibname $err -errormsg $msg
 }
 
 # jlib::kill --
@@ -1229,7 +1252,7 @@ proc jlib::send_iq_error {jlibname jid id errcode errtype stanza {extraElem {}}}
       -attrlist [list type error to $jid id $id]  \
       -subtags [list $errElem]]
 
-    jlib::send $jlibname $iqElem
+    send $jlibname $iqElem
 }
 
 # jlib::message_handler --
@@ -1352,7 +1375,7 @@ proc jlib::send_message_error {jlibname jid id errcode errtype stanza {extraElem
       -attrlist [list type error to $jid id $id]  \
       -subtags [list $errElem]]
 
-    jlib::send $jlibname $msgElem
+    send $jlibname $msgElem
 }
 
 # jlib::presence_handler --
@@ -1585,8 +1608,6 @@ proc jlib::got_stream {jlibname args} {
     if {[info exists locals(streamattr,from)]} {
 	set locals(server) $locals(streamattr,from)
     }
-
-    uplevel #0 $lib(clientcmd) [list $jlibname connect]
     schedule_auto_away $jlibname
     
     # If we use    we should have a callback command here.
@@ -1643,7 +1664,7 @@ proc jlib::end_of_parse {jlibname} {
     Debug 4 "jlib::end_of_parse jlibname=$jlibname"
     
     catch {eval $lib(transport,reset) $jlibname}
-    uplevel #0 $lib(clientcmd) [list $jlibname disconnect]
+    invoke_async_error $jlibname disconnect
     reset $jlibname
 }
 
@@ -1662,7 +1683,6 @@ proc jlib::end_of_parse {jlibname} {
 
 proc jlib::error_handler {jlibname xmllist} {
 
-    upvar ${jlibname}::lib lib
     variable xmppxmlns
     
     Debug 4 "jlib::error_handler"
@@ -1676,7 +1696,7 @@ proc jlib::error_handler {jlibname xmllist} {
 	set errspec [list unknown [wrapper::getcdata $xmllist]]
     }
     set errmsg [lindex $errspec 1]
-    uplevel #0 $lib(clientcmd) [list $jlibname streamerror -errormsg $errmsg]
+    invoke_async_error $jlibname streamerror -errormsg $errmsg
 }
 
 # jlib::xmlerror --
@@ -1691,14 +1711,11 @@ proc jlib::error_handler {jlibname xmllist} {
 
 proc jlib::xmlerror {jlibname args} {
 
-    upvar ${jlibname}::lib lib
-
     Debug 4 "jlib::xmlerror jlibname=$jlibname, args='$args'"
     
     # This should handle all internal stuff.
     closestream $jlibname
-
-    uplevel #0 $lib(clientcmd) [list $jlibname xmlerror -errormsg $args]
+    invoke_async_error $jlibname xmlerror -errormsg $args
 }
 
 # jlib::reset --
@@ -2586,7 +2603,7 @@ proc jlib::send_iq {jlibname type xmldata args} {
         
     Debug 3 "jlib::send_iq type='$type', xmldata='$xmldata', args='$args'"
     
-    array set argsArr $args
+    array set argsA $args
     set attrlist [list "type" $type]
     
     # Need to generate a unique identifier (id) for this packet.
@@ -2594,15 +2611,15 @@ proc jlib::send_iq {jlibname type xmldata args} {
 	lappend attrlist "id" $iqcmd(uid)
 	
 	# Record any callback procedure.
-	if {[info exists argsArr(-command)] && ($argsArr(-command) ne "")} {
-	    set iqcmd($iqcmd(uid)) $argsArr(-command)
+	if {[info exists argsA(-command)] && ($argsA(-command) ne "")} {
+	    set iqcmd($iqcmd(uid)) $argsA(-command)
 	}
 	incr iqcmd(uid)
-    } elseif {[info exists argsArr(-id)]} {
-	lappend attrlist "id" $argsArr(-id)
+    } elseif {[info exists argsA(-id)]} {
+	lappend attrlist "id" $argsA(-id)
     }
-    if {[info exists argsArr(-to)]} {
-	lappend attrlist "to" $argsArr(-to)
+    if {[info exists argsA(-to)]} {
+	lappend attrlist "to" $argsA(-to)
     }
     if {[llength $xmldata]} {
 	set xmllist [wrapper::createtag "iq" -attrlist $attrlist \
@@ -2757,10 +2774,10 @@ proc jlib::send_auth {jlibname username resource cmd args} {
 
 proc jlib::register_get {jlibname cmd args} {
 
-    array set argsArr $args
+    array set argsA $args
     set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:register}]
-    if {[info exists argsArr(-to)]} {
-	set toopt [list -to $argsArr(-to)]
+    if {[info exists argsA(-to)]} {
+	set toopt [list -to $argsA(-to)]
     } else {
 	set toopt ""
     }
@@ -2804,21 +2821,21 @@ proc jlib::register_set {jlibname username password cmd args} {
     set subelements [list  \
       [wrapper::createtag "username" -chdata $username]  \
       [wrapper::createtag "password" -chdata $password]]
-    array set argsArr $args
-    foreach argsswitch [array names argsArr] {
+    array set argsA $args
+    foreach argsswitch [array names argsA] {
 	if {[string equal $argsswitch "-to"]} {
 	    continue
 	}
 	set par [string trimleft $argsswitch {-}]
 	lappend subelements [wrapper::createtag $par  \
-	  -chdata $argsArr($argsswitch)]
+	  -chdata $argsA($argsswitch)]
     }
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns jabber:iq:register}   \
       -subtags $subelements]
     
-    if {[info exists argsArr(-to)]} {
-	set toopt [list -to $argsArr(-to)]
+    if {[info exists argsA(-to)]} {
+	set toopt [list -to $argsA(-to)]
     } else {
 	set toopt ""
     }
@@ -2843,9 +2860,9 @@ proc jlib::register_set {jlibname username password cmd args} {
 proc jlib::register_remove {jlibname to cmd args} {
 
     set subelements [list [wrapper::createtag "remove"]]
-    array set argsArr $args
-    if {[info exists argsArr(-key)]} {
-	lappend subelements [wrapper::createtag "key" -chdata $argsArr(-key)]
+    array set argsA $args
+    if {[info exists argsA(-key)]} {
+	lappend subelements [wrapper::createtag "key" -chdata $argsA(-key)]
     }
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns jabber:iq:register} -subtags $subelements]
@@ -2895,12 +2912,12 @@ proc jlib::search_get {jlibname to cmd} {
 
 proc jlib::search_set {jlibname to cmd args} {
 
-    set argsarr(-subtags) {}
-    array set argsarr $args
+    set argsA(-subtags) {}
+    array set argsA $args
 
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns jabber:iq:search}   \
-      -subtags $argsarr(-subtags)]
+      -subtags $argsA(-subtags)]
     send_iq $jlibname "set" [list $xmllist] -to $to -command  \
       [list [namespace current]::parse_search_set $jlibname $cmd]
 
@@ -2975,7 +2992,7 @@ proc jlib::send_message {jlibname to args} {
 
 proc jlib::send_message_xmllist {to args} {
     
-    array set argsArr $args
+    array set argsA $args
     set attr [list to $to]
     set children {}
     
@@ -3044,7 +3061,7 @@ proc jlib::send_presence {jlibname args} {
     set directed 0
     set keep     0
     set type "available"
-    array set argsArr $args
+    array set argsA $args
     
     foreach {key value} $args {
 	set par [string trimleft $key -]
@@ -3107,8 +3124,8 @@ proc jlib::send_presence {jlibname args} {
 	#    3.  <priority/>  Always reused if cached
 	
 	foreach name {show status} {
-	    if {[info exists argsArr(-$name)]} {
-		set locals(pres,$name) $argsArr(-$name)
+	    if {[info exists argsA(-$name)]} {
+		set locals(pres,$name) $argsA(-$name)
 	    } elseif {[info exists locals(pres,$name)]} {
 		if {$keep} {
 		    lappend children [wrapper::createtag $name  \
@@ -3118,8 +3135,8 @@ proc jlib::send_presence {jlibname args} {
 		}
 	    }
 	}
-	if {[info exists argsArr(-priority)]} {
-	    set locals(pres,priority) $argsArr(-priority)
+	if {[info exists argsA(-priority)]} {
+	    set locals(pres,priority) $argsA(-priority)
 	} elseif {[info exists locals(pres,priority)]} {
 	    lappend children [wrapper::createtag "priority"  \
 	      -chdata $locals(pres,priority)]
@@ -3128,9 +3145,9 @@ proc jlib::send_presence {jlibname args} {
 	set locals(pres,type) $type
 
 	set locals(status) $type
-	if {[info exists argsArr(-show)]} {
-	    set locals(status) $argsArr(-show)
-	    set locals(pres,show) $argsArr(-show)
+	if {[info exists argsA(-show)]} {
+	    set locals(status) $argsA(-show)
+	    set locals(pres,show) $argsA(-show)
 	}
     }
     
@@ -3168,9 +3185,9 @@ proc jlib::register_presence_stanza {jlibname elem args} {
 
     upvar ${jlibname}::pres pres
 
-    set aargs(-type) ""
-    array set aargs $args
-    set type $aargs(-type)
+    set argsA(-type) ""
+    array set argsA $args
+    set type $argsA(-type)
     
     set tag   [wrapper::gettag $elem]
     set xmlns [wrapper::getattribute $elem xmlns]
@@ -3225,7 +3242,7 @@ proc jlib::send {jlibname xmllist} {
 	    uplevel #0 $lib(transport,send) [list $jlibname $xml]
 	} err]} {
 	    kill $jlibname
-	    uplevel #0 $lib(clientcmd) [list $jlibname networkerror]
+	    invoke_async_error $jlibname networkerror
 	}
     }
     return
@@ -3306,9 +3323,9 @@ proc jlib::oob_set {jlibname to cmd url args} {
 
     set attrlist {xmlns jabber:iq:oob}
     set children [list [wrapper::createtag "url" -chdata $url]]
-    array set argsarr $args
-    if {[info exists argsarr(-desc)] && [string length $argsarr(-desc)]} {
-	lappend children [wrapper::createtag {desc} -chdata $argsarr(-desc)]
+    array set argsA $args
+    if {[info exists argsA(-desc)] && [string length $argsA(-desc)]} {
+	lappend children [wrapper::createtag {desc} -chdata $argsA(-desc)]
     }
     set xmllist [wrapper::createtag query -attrlist $attrlist  \
       -subtags $children]
@@ -3338,18 +3355,18 @@ proc jlib::handle_get_last {jlibname from subiq args} {
 
     upvar ${jlibname}::locals locals
     
-    array set argsarr $args
+    array set argsA $args
 
     set secs [expr [clock seconds] - $locals(last)]
     set xmllist [wrapper::createtag "query"  \
       -attrlist [list xmlns jabber:iq:last seconds $secs]]
     
     set opts {}
-    if {[info exists argsarr(-from)]} {
-	lappend opts -to $argsarr(-from)
+    if {[info exists argsA(-from)]} {
+	lappend opts -to $argsA(-from)
     }
-    if {[info exists argsarr(-id)]} {
-	lappend opts -id $argsarr(-id)
+    if {[info exists argsA(-id)]} {
+	lappend opts -id $argsA(-id)
     }
     eval {send_iq $jlibname "result" [list $xmllist]} $opts
 
@@ -3376,7 +3393,7 @@ proc jlib::get_time {jlibname to cmd} {
 
 proc jlib::handle_get_time {jlibname from subiq args} {
     
-    array set argsarr $args
+    array set argsA $args
     
     set secs [clock seconds]
     set utc [clock format $secs -format "%Y%m%dT%H:%M:%S" -gmt 1]
@@ -3390,11 +3407,11 @@ proc jlib::handle_get_time {jlibname from subiq args} {
       -attrlist {xmlns jabber:iq:time}]
 
     set opts {}
-    if {[info exists argsarr(-from)]} {
-	lappend opts -to $argsarr(-from)
+    if {[info exists argsA(-from)]} {
+	lappend opts -to $argsA(-from)
     }
-    if {[info exists argsarr(-id)]} {
-	lappend opts -id $argsarr(-id)
+    if {[info exists argsA(-id)]} {
+	lappend opts -id $argsA(-id)
     }
     eval {send_iq $jlibname "result" [list $xmllist]} $opts
 
@@ -3423,12 +3440,12 @@ proc jlib::handle_get_version {jlibname from subiq args} {
     global  prefs tcl_platform
     variable version
     
-    array set argsArr $args
+    array set argsA $args
     
     # Return any id!
     set opts {}
-    if {[info exists argsArr(-id)]} {
-	set opts [list -id $argsArr(-id)]
+    if {[info exists argsA(-id)]} {
+	set opts [list -id $argsA(-id)]
     }
     set os $tcl_platform(os)
     if {[info exists tcl_platform(osVersion)]} {
@@ -3463,13 +3480,12 @@ proc jlib::schedule_keepalive {jlibname} {
 	    puts -nonewline $lib(sock) "\n"
 	    flush $lib(sock)
 	} err]} {
-	    closestream $jlibname
-	    set errmsg "Network was disconnected"
-	    uplevel #0 $lib(clientcmd) [list $jlibname networkerror -errormsg $errmsg]   
-	    return
+	    kill $jlibname
+	    invoke_async_error $jlibname networkerror
+	} else {
+	    set locals(aliveid) [after [expr 1000 * $opts(-keepalivesecs)] \
+	      [list [namespace current]::schedule_keepalive $jlibname]]
 	}
-	set locals(aliveid) [after [expr 1000 * $opts(-keepalivesecs)] \
-	  [list [namespace current]::schedule_keepalive $jlibname]]
     }
 }
 

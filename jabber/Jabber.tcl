@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.181 2006-09-03 13:10:54 matben Exp $
+# $Id: Jabber.tcl,v 1.182 2006-09-05 13:47:20 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -862,11 +862,6 @@ proc ::Jabber::ClientProc {jlibName what args} {
     set ishandled 0
     
     switch -- $what {
-	connect {
-	    
-	    # We just got the <stream> element from the server.
-	    # Handled via direct callback from 'jlibName connect' instead.
-	}
 	disconnect {	    
 	    
 	    # This is as a response to a </stream> element.

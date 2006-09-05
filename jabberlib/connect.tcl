@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.5 2006-08-04 13:13:41 matben Exp $
+# $Id: connect.tcl,v 1.6 2006-09-05 13:47:20 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -379,6 +379,7 @@ proc jlib::connect::connect {jlibname jid password args} {
 	    }
 	}
     }
+    jlib::set_async_error_handler $jlibname [namespace code async_error]
 }
 
 proc jlib::connect::verify {jlibname} {
@@ -401,6 +402,13 @@ proc jlib::connect::verify {jlibname} {
     if {$state(-compress) && !$have(jlibcompress)} {
 	return -code error "missing jlibcompress package"
     }
+}
+
+proc jlib::connect::async_error {jlibname err {msg ""}} {
+    
+    upvar ${jlibname}::connect::state state
+    
+    finish $jlibname $err $msg
 }
 
 proc jlib::connect::dns_srv_cb {jlibname addrPort {err ""}} {
@@ -479,6 +487,7 @@ proc jlib::connect::tcp_connect {jlibname} {
     } else {
 	set socketCmd socket
     }
+    debug "\t $socketCmd -async $state(host) $state(port)"
 
     if {[catch {eval $socketCmd {-async $state(host) $state(port)}} sock]} {
 	finish $jlibname network-failure
@@ -565,22 +574,22 @@ proc jlib::connect::init_stream_cb {jlibname args} {
     
     debug "jlib::connect::init_stream_cb args=$args"
     
-    array set aargs $args
+    array set argsA $args
     
     # We require an 'id' attribute.
-    if {![info exists aargs(id)]} {
+    if {![info exists argsA(id)]} {
 	finish $jlibname no-stream-id
 	return
     }
-    set state(streamid) $aargs(id)
+    set state(streamid) $argsA(id)
     
     # If we are trying to use sasl or tls indicated by version='1.0' 
     # we must also be sure to receive a version attribute larger or 
     # equal to 1.0.
     set version1 0
-    if {[info exists aargs(version)]} {
-	set state(streamversion) $aargs(version)
-	if {[package vcompare $aargs(version) 1.0] >= 0} {
+    if {[info exists argsA(version)]} {
+	set state(streamversion) $argsA(version)
+	if {[package vcompare $argsA(version) 1.0] >= 0} {
 	    set version1 1
 	}
     }
@@ -749,7 +758,7 @@ proc jlib::connect::timeout {jlibname} {
 #       Finalize the complete sequence, with or without any errors.
 #       
 # Arguments:
-#       errcode:    one word error code, empty of ok
+#       errcode:    one word error code, empty if ok
 #       errmsg:     an additional arbitrary error message with details that
 #                   typically gets reported by some component
 #       
@@ -761,6 +770,8 @@ proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {
     upvar ${jlibname}::connect::state state
     
     debug "jlib::connect::finish errcode=$errcode, errmsg=$errmsg"
+
+    jlib::set_async_error_handler $jlibname
 
     if {[info exists state(after)]} {
 	after cancel $state(after)
