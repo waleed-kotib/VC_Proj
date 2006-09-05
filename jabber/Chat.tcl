@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.180 2006-09-04 05:55:07 matben Exp $
+# $Id: Chat.tcl,v 1.181 2006-09-05 08:00:04 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -180,20 +180,22 @@ proc ::Chat::OnToolButton { } {
 
 proc ::Chat::OnMenu { } {
     
-    set jidL [::RosterTree::GetSelectedJID]
-    if {[llength $jidL]} {
-	foreach jid $jidL {
-	    if {[::Jabber::RosterCmd isavailable $jid]} {
-		jlib::splitjid $jid jid2 res
-		StartThread $jid2
-	    } else {
-		if {[llength $jidL] == 1} {
-		    StartThreadDlg -jid $jid
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+	set jidL [::RosterTree::GetSelectedJID]
+	if {[llength $jidL]} {
+	    foreach jid $jidL {
+		if {[::Jabber::RosterCmd isavailable $jid]} {
+		    jlib::splitjid $jid jid2 res
+		    StartThread $jid2
+		} else {
+		    if {[llength $jidL] == 1} {
+			StartThreadDlg -jid $jid
+		    }
 		}
 	    }
+	} else {
+	    StartThreadDlg
 	}
-    } else {
-	StartThreadDlg
     }
 }
 
@@ -427,26 +429,25 @@ proc ::Chat::RegisterPresence {chattoken} {
     
     set jid2 $chatstate(jid2)
     if {[::Jabber::JlibCmd service isroom $jid2]} {
-	::Jabber::JlibCmd presence_register_ex  \
-	  [namespace code [list PresenceEvent $chattoken]] -from $chatstate(jid)
+	set presenceReg  \
+	  [list [namespace code [list PresenceEvent $chattoken]] \
+	  -from $chatstate(jid)]
     } else {
-	::Jabber::JlibCmd presence_register_ex  \
-	  [namespace code [list PresenceEvent $chattoken]] -from2 $jid2
+	set presenceReg  \
+	  [list [namespace code [list PresenceEvent $chattoken]] \
+	  -from2 $jid2]
     }
+    
+    # Cache it so it gets properly deregistered.
+    set chatstate(presenceReg) $presenceReg
+    eval {::Jabber::JlibCmd presence_register_ex} $presenceReg
 }
 
 proc ::Chat::DeregisterPresence {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    set jid2 $chatstate(jid2)
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
-	::Jabber::JlibCmd presence_deregister_ex  \
-	  [namespace code [list PresenceEvent $chattoken]] -from $chatstate(jid)
-    } else {
-	::Jabber::JlibCmd presence_deregister_ex  \
-	  [namespace code [list PresenceEvent $chattoken]] -from2 $jid2
-    }
+    eval {::Jabber::JlibCmd presence_deregister_ex} $chatstate(presenceReg)
 }
 
 # Chat::GotMsg --

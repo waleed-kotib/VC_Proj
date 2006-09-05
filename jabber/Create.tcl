@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: Create.tcl,v 1.5 2006-09-02 06:43:38 matben Exp $
+# $Id: Create.tcl,v 1.6 2006-09-05 08:00:04 matben Exp $
 
 package provide Create 1.0
 
@@ -239,7 +239,7 @@ proc ::Create::Cancel {token} {
     
     # No jidmap since may not be valid.
     # Is this according to MUC?
-    set roomjid $state(roomname)@$state(server)
+    set roomjid [jlib::jidmap $state(roomname)@$state(server)]
     if {$roomjid ne ""} {
 	catch {$jstate(jlib) muc setroom $roomjid cancel}
     }
@@ -457,7 +457,7 @@ proc ::Create::SetRoom {token} {
 	  -message "Not a valid roomname"
 	return
     }
-    set state(roomjid) $roomjid
+    set state(roomjid) [jlib::jidmap $roomjid]
     
     # Submit either with or without form.
     if {[info exists state(formtoken)]} {
@@ -658,6 +658,7 @@ proc ::Create::GCDoEnter {token} {
     }
 
     set roomjid [jlib::jidmap [jlib::joinjid $enter(roomname) $enter(server) ""]]
+    set roomjid [jlib::jidmap $roomjid]
     $jstate(jlib) groupchat enter $roomjid $enter(nickname) \
       -command [namespace current]::EnterCallback
 
