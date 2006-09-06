@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.130 2006-09-02 07:09:59 matben Exp $
+# $Id: JUI.tcl,v 1.131 2006-09-06 12:51:51 matben Exp $
 
 package provide JUI 1.0
 
@@ -179,9 +179,12 @@ proc ::JUI::Init { } {
     lset menuDefs(rost,jabber) $idx 5 [::Jabber::Status::BuildMenuDef]
 
     set menuDefs(rost,edit) {    
-	{command   mCut              {::UI::CutEvent}        X}
-	{command   mCopy             {::UI::CopyEvent}       C}
-	{command   mPaste            {::UI::PasteEvent}      V}
+	{command   mCut              {::UI::CutEvent}           X}
+	{command   mCopy             {::UI::CopyEvent}          C}
+	{command   mPaste            {::UI::PasteEvent}         V}
+	{separator}
+	{command   mFind             {::UI::FindEvent}          F}
+	{command   mFindAgain        {::UI::FindAgainEvent}     G}
     }
     
     # We should do this for all menus eventaully.
@@ -833,9 +836,17 @@ proc ::JUI::EditPostCommand {wmenu} {
     foreach {mkey mstate} [::UI::GenericCCPMenuStates] {
 	::UI::MenuMethod $wmenu entryconfigure $mkey -state $mstate
     }	
+    ::UI::MenuMethod $wmenu entryconfigure mFind -state disabled
+    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state disabled
     
     ::hooks::run menuPostCommand main-edit $wmenu
-
+    
+    # Dedicated hook for a particular dialog class. Used by Find.
+    if {[winfo exists [focus]]} {
+	set wclass [winfo class [winfo toplevel [focus]]]
+	::hooks::run menu${wclass}EditPostHook $wmenu
+    }
+    
     # Workaround for mac bug.
     update idletasks
 }

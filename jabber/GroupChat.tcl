@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.159 2006-09-05 08:00:04 matben Exp $
+# $Id: GroupChat.tcl,v 1.160 2006-09-06 12:51:51 matben Exp $
 
 package require Create
 package require Enter
@@ -27,6 +27,7 @@ namespace eval ::GroupChat:: {
     ::hooks::register logoutHook              ::GroupChat::LogoutHook
     ::hooks::register setPresenceHook         ::GroupChat::StatusSyncHook
     ::hooks::register groupchatEnterRoomHook  ::GroupChat::EnterHook
+    ::hooks::register menuGroupChatEditPostHook   ::GroupChat::MenuEditPostHook
     
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook           ::GroupChat::InitPrefsHook
@@ -892,8 +893,9 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     bind $wtextsend <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $chattoken]
     bind $wroom <Destroy> +[list ::GroupChat::OnDestroyChat $chattoken]
-    bind $w <$this(modkey)-Key-f> [list [namespace code Find] $chattoken]
-    bind $w <$this(modkey)-Key-g> [list [namespace code FindNext] $chattoken]
+    
+    bind $w <<Find>>      [namespace code [list Find $chattoken]]
+    bind $w <<FindAgain>> [namespace code [list FindAgain $chattoken]]  
 
     return $chattoken
 }
@@ -909,13 +911,36 @@ proc ::GroupChat::Find {chattoken} {
     }
 }
 
-proc ::GroupChat::FindNext {chattoken} {
+proc ::GroupChat::FindAgain {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
     set wfind $chatstate(wfind)
     if {[winfo exists $wfind]} {
 	$wfind Next
+    }
+}
+
+proc ::GroupChat::MenuEditPostHook {wmenu} {
+    
+    if {[winfo exists [focus]]} {
+	set w [winfo toplevel [focus]]
+	set dlgtoken [GetTokenFrom dlg w $w]
+	if {$dlgtoken eq ""} {
+	    return
+	}
+	set chattoken [GetActiveChatToken $dlgtoken]
+	if {$chattoken eq ""} {
+	    return
+	}
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+	
+	set wfind $chatstate(wfind)
+	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
+	if {[winfo exists $wfind]} {
+	    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+	}
     }
 }
 

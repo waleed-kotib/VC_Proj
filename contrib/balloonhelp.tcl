@@ -5,7 +5,7 @@
 #  Code idee from Harrison & McLennan
 #  This source file is distributed under the BSD license.
 #  
-# $Id: balloonhelp.tcl,v 1.22 2006-08-02 07:03:34 matben Exp $
+# $Id: balloonhelp.tcl,v 1.23 2006-09-06 12:51:51 matben Exp $
 
 package require treeutil
 
@@ -63,14 +63,14 @@ proc ::balloonhelp::Build { } {
     variable w
     variable locals
     
-    toplevel $w -class Balloonhelp -bd 0 -relief flat
+    toplevel $w -class Balloonhelp -bd 0 -relief flat -takefocus 0
     set bg   [option get $w background {}]
     set fg   [option get $w foreground {}]
     set wrap [option get $w wrapLength {}]
     set just [option get $w justify {}]
 
-    pack [label $w.info -bg $bg -fg $fg -wraplength $wrap -justify $just]  \
-      -side left -fill y
+    label $w.info -bg $bg -fg $fg -wraplength $wrap -justify $just -takefocus 0
+    pack  $w.info -side left -fill y
 
     wm overrideredirect $w 1
     wm transient $w
@@ -287,6 +287,7 @@ proc ::balloonhelp::Show {win type} {
     if {$wfocus ne $w} {
 	set locals(focus) $wfocus
     }
+    
     set exists 0
     set msg ""
     set bbox {}
@@ -376,6 +377,9 @@ proc ::balloonhelp::Show {win type} {
 	    if {$locals(alpha)} {
 		wm attributes $w -alpha 1.0
 	    }
+
+	    # A trick to avoid the balloonhelp taking focus (mac).
+	    after idle [list catch [list focus $wfocus]]
 	}
 	if {$locals(timeout)} {
 	    set locals(timeoutID)  \
@@ -409,7 +413,6 @@ proc ::balloonhelp::SetPosition {x y bbox} {
 	    }
 	    if {$y < 0} { set y 0 }
 	} else {
-	    #puts "SetPosition x=$x, y=$y, bbox=$bbox"
 	    
 	    # Deal with x and y independently.
 	    if {$x < 0} {
@@ -422,7 +425,6 @@ proc ::balloonhelp::SetPosition {x y bbox} {
 	    } elseif {[expr {$y + $height}] > $screenheight} {
 		set y [expr {[lindex $bbox 1] - $height - 4}]
 	    }
-	    #puts "\t x=$x, y=$y"
 	}
 	wm geometry $w +${x}+${y}
 	update idletasks

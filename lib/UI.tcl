@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.132 2006-08-21 09:45:48 matben Exp $
+# $Id: UI.tcl,v 1.133 2006-09-06 12:51:51 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -212,6 +212,8 @@ proc ::UI::InitVirtualEvents { } {
     # Virtual events.
     event add <<CloseWindow>> <$this(modkey)-Key-w>
     event add <<ReturnEnter>> <Return> <KP_Enter>
+    event add <<Find>>        <$this(modkey)-Key-f>
+    event add <<FindAgain>>   <$this(modkey)-Key-g>
 
     switch -- $this(platform) {
 	macintosh {
@@ -1315,7 +1317,7 @@ proc ::UI::SetMenubarAcceleratorBinds {w wmenubar} {
     foreach {wmenu wtop} [array get mapWmenuToWtop $wmenubar.*] {
 	foreach line $cachedMenuSpec($wtop,$wmenu) {
 	    
-	    # {type name cmd mstate accel mopts subdef} $line
+	    # {type name cmd accel mopts subdef} $line
 	    # Cut, Copy & Paste handled by widgets internally!
 	    set accel [lindex $line 3]
 	    if {[string length $accel] && ![regexp {(X|C|V)} $accel]} {
@@ -1326,7 +1328,7 @@ proc ::UI::SetMenubarAcceleratorBinds {w wmenubar} {
 		
 		# @@@ ???
 		set state [$wmenu entrycget $mind -state]
-		if {[string equal $state "normal"]} {
+		if {1 || [string equal $state "normal"]} {
 		    set acckey [string map {< less > greater}  \
 		      [string tolower $accel]]
 		    bind $w <$this(modkey)-Key-$acckey> [lindex $line 2]
@@ -1786,6 +1788,18 @@ proc ::UI::CloseWindowEvent {} {
     if {[winfo exists [focus]]} {
 	event generate [focus] <<CloseWindow>>
     }
+}
+
+proc ::UI::FindEvent {} {
+    if {[winfo exists [focus]]} {
+	event generate [focus] <<Find>>
+    }	
+}
+
+proc ::UI::FindAgainEvent {} {
+    if {[winfo exists [focus]]} {
+	event generate [focus] <<FindAgain>>
+    }	
 }
 
 # UI::GenericCCPMenuStates --
