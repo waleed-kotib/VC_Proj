@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.181 2006-09-05 08:00:04 matben Exp $
+# $Id: Chat.tcl,v 1.182 2006-09-06 12:51:51 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -26,11 +26,11 @@ namespace eval ::Chat:: {
     ::hooks::register quitAppHook                ::Chat::QuitHook
     ::hooks::register newChatMessageHook         ::Chat::GotMsg         20
     ::hooks::register newMessageHook             ::Chat::GotNormalMsg
-    ::hooks::register presenceHook               ::Chat::PresenceHook
     ::hooks::register loginHook                  ::Chat::LoginHook
     ::hooks::register logoutHook                 ::Chat::LogoutHook
 
     ::hooks::register avatarNewPhotoHook         ::Chat::AvatarNewPhotoHook
+    ::hooks::register menuChatEditPostHook       ::Chat::MenuEditPostHook
 
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Chat::InitPrefsHook
@@ -417,37 +417,9 @@ proc ::Chat::NewChat {threadID jid args} {
 	set chattoken [GetActiveChatToken $dlgtoken]
     }
     MakeAndInsertHistory $chattoken
-        
+    RegisterPresence $chattoken        
+    
     return $chattoken
-}
-
-# @@@ TODO
-
-proc ::Chat::RegisterPresence {chattoken} {
-    variable $chattoken
-    upvar 0 $chattoken chatstate
-    
-    set jid2 $chatstate(jid2)
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
-	set presenceReg  \
-	  [list [namespace code [list PresenceEvent $chattoken]] \
-	  -from $chatstate(jid)]
-    } else {
-	set presenceReg  \
-	  [list [namespace code [list PresenceEvent $chattoken]] \
-	  -from2 $jid2]
-    }
-    
-    # Cache it so it gets properly deregistered.
-    set chatstate(presenceReg) $presenceReg
-    eval {::Jabber::JlibCmd presence_register_ex} $presenceReg
-}
-
-proc ::Chat::DeregisterPresence {chattoken} {
-    variable $chattoken
-    upvar 0 $chattoken chatstate
-    
-    eval {::Jabber::JlibCmd presence_deregister_ex} $chatstate(presenceReg)
 }
 
 # Chat::GotMsg --
@@ -1304,11 +1276,19 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     if {[info exists argsArr(-from)]} {
 	set jid [$jstate(jlib) getrecipientjid $argsArr(-from)]
     } else {
-	set jid ""
+	return
     }
     set mjid [jlib::jidmap $jid]
+    set mfrom [jlib::jidmap $argsArr(-from)]
     jlib::splitjidex $jid node domain res
-    jlib::splitjid   $mjid jid2 x
+    jlib::splitjid   $mjid jid2 -
+
+    # Chatting with room member must be made with full JID.
+    if {[$jlib service isroom $jid2]} {
+	set chatstate(minjid) $mfrom
+    } else {
+	set chatstate(minjid) $jid2
+    }
     
     set chatstate(fromjid)          $jid
     set chatstate(jid)              $mjid
@@ -1496,8 +1476,9 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     if {$havednd} {
 	InitDnD $chattoken $wtextsnd
     }
-    bind $w <$this(modkey)-Key-f> [list [namespace code Find] $chattoken]
-    bind $w <$this(modkey)-Key-g> [list [namespace code FindNext] $chattoken]
+    
+    bind $w <<Find>>      [namespace code [list Find $chattoken]]
+    bind $w <<FindAgain>> [namespace code [list FindAgain $chattoken]]  
     
     set chatstate(wthread)  $wthread
     set chatstate(wpane)    $wpane
@@ -1520,6 +1501,29 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     return $chattoken
 }
 
+proc ::Chat::MenuEditPostHook {wmenu} {
+
+    if {[winfo exists [focus]]} {
+	set w [winfo toplevel [focus]]
+	set dlgtoken [GetTokenFrom dlg w $w]
+	if {$dlgtoken eq ""} {
+	    return
+	}
+	set chattoken [GetActiveChatToken $dlgtoken]
+	if {$chattoken eq ""} {
+	    return
+	}
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+	
+	set wfind $chatstate(wfind)
+	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
+	if {[winfo exists $wfind]} {
+	    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+	}
+    }
+}
+
 proc ::Chat::Find {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -1531,7 +1535,7 @@ proc ::Chat::Find {chattoken} {
     }
 }
 
-proc ::Chat::FindNext {chattoken} {
+proc ::Chat::FindAgain {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
@@ -1588,8 +1592,7 @@ proc ::Chat::OnDestroyThread {chattoken} {
         ChangeChatState $chattoken close
         SendChatState $chattoken $chatstate(chatstate)
     }
-    
-    
+    DeregisterPresence $chattoken
 
     unset $chattoken
     array unset $chattoken    
@@ -2602,6 +2605,40 @@ proc ::Chat::Save {dlgtoken} {
     }
 }
 
+# Chat::RegisterPresence, DeregisterPresence, PresenceEvent --
+# 
+#       Handles all presence changes for chattoken.
+
+proc ::Chat::RegisterPresence {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    # If we chat with a room member we shall not trigger on other JIDs.
+    # Important: we register per chattoken and not per JID to allow
+    # multiple threads per JID!
+    set jid2 $chatstate(jid2)
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	set presenceReg  \
+	  [list [namespace code [list PresenceEvent $chattoken]] \
+	  -from $chatstate(jid)]
+    } else {
+	set presenceReg  \
+	  [list [namespace code [list PresenceEvent $chattoken]] \
+	  -from2 $jid2]
+    }
+    
+    # Cache it so it gets properly deregistered.
+    set chatstate(presenceReg) $presenceReg
+    eval {::Jabber::JlibCmd presence_register_ex} $presenceReg
+}
+
+proc ::Chat::DeregisterPresence {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    eval {::Jabber::JlibCmd presence_deregister_ex} $chatstate(presenceReg)
+}
+
 proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
     
     variable $chattoken
@@ -2612,88 +2649,45 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
     if {$type eq ""} {
 	set type available
     }
-
-    
-    
-}
-
-proc ::Chat::PresenceHook {jid type args} {
-    
-    upvar ::Jabber::jstate jstate
-
-    Debug 4 "::Chat::PresenceHook jid=$jid, type=$type"
-
-    array set argsArr $args
-    
-    set xmldata $argsArr(-xmldata)
-    set from $jid
-    if {[info exists argsArr(-from)]} {
-	set from $argsArr(-from)
-    }    
-    set mjid  [jlib::jidmap $jid]
-    set mfrom [jlib::jidmap $from]
-    jlib::splitjid $from jid2 res
-    
-    set jlib $jstate(jlib)
-    
-    # If we chat with a room member we shall not trigger on other JIDs.
-    if {[$jlib service isroom $jid2]} {
-	set pjid $mfrom
-	set jidH $mfrom
-    } else {
-	set pjid ${mjid}*
-	set jidH $jid2
+    set show $type
+    set showE [wrapper::getfirstchildwithtag $xmldata show]
+    if {[llength $showE]} {
+	set show [string tolower [wrapper::getcdata $showE]]
     }
-    set tokenL [GetAllTokensFrom chat jid $pjid]
-    if {![llength $tokenL]} {
+        
+    # Skip if duplicate presence. Bug?
+    if {[string equal $chatstate(presence) $show]} {
 	return
     }
-    
-    set show $type
-    if {[info exists argsArr(-show)]} {
-	set show $argsArr(-show)
-    }
     set status ""
-    if {[info exists argsArr(-status)]} {
-	set status "$argsArr(-status)\n"
+    set statusE [wrapper::getfirstchildwithtag $xmldata status]
+    if {[llength $statusE]} {
+	set status [string tolower [wrapper::getcdata $statusE]]
     }
+
+    # This is important since clicks may have reset the insert mark.
+    $chatstate(wtext) mark set insert end
+
+    set showStr [::Roster::MapShowToText $show]
+    if {$status ne ""} {
+	append showStr ", " $status
+    }
+    InsertMessage $chattoken sys $showStr
+    ::History::XPutItem recv $chatstate(minjid) $xmldata
     
-    array set presArr [$jlib roster getpresence $jid2 -resource $res]
+    if {[string equal $type "available"]} {
+	SetState $chattoken normal
+    } else {
+	
+	# There have been complaints about this...
+	#SetState $chattoken disabled
+    }
     set icon [::Roster::GetPresenceIconFromJid $from]
-    
-    foreach chattoken $tokenL {
-	variable $chattoken
-	upvar 0 $chattoken chatstate
-	
-	# Skip if duplicate presence. Bug?
-	if {[string equal $chatstate(presence) $show]} {
-	    return
-	}
-
-	# This is important since clicks may have reset the insert mark.
-	$chatstate(wtext) mark set insert end
-
-	set showStr [::Roster::MapShowToText $show]
-	InsertMessage $chattoken sys "$showStr, $status"
-	::History::XPutItem recv $jidH $xmldata
-	
-	if {[string equal $type "available"]} {
-	    SetState $chattoken normal
-	} else {
-	    
-	    # There have been complaints about this...
-	    #SetState $chattoken disabled
-	}
-	if {$icon ne ""} {
-	    $chatstate(wpresimage) configure -image $icon
-	}
-	
-	set chatstate(presence) $presArr(-type)
-	if {[info exists presArr(-show)]} {
-	    set chatstate(presence) $presArr(-show)
-	}
-	XEventCancel $chattoken
-    }
+    if {$icon ne ""} {
+	$chatstate(wpresimage) configure -image $icon
+    }    
+    set chatstate(presence) $show
+    XEventCancel $chattoken
 }
 
 # Chat::GetWindow --

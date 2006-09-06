@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.22 2006-09-05 08:00:04 matben Exp $
+# $Id: History.tcl,v 1.23 2006-09-06 12:51:51 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -16,6 +16,8 @@ package provide History 1.0
 
 namespace eval ::History:: {
     
+    ::hooks::register menuHistoryDlgEditPostHook    ::History::MenuEditPostHook
+
     variable uiddlg 1000
     
     # History file size limit of 100k
@@ -601,7 +603,7 @@ proc ::History::BuildHistory {jid dlgtype args} {
     set w $wDlgs(jhist)[incr uiddlg]
     ::UI::Toplevel $w \
       -usemacmainmenu 1 -macstyle documentProc \
-      -closecommand ::History::CloseHook
+      -closecommand ::History::CloseHook -class HistoryDlg
     wm title $w $argsA(-title)
 
     variable $w
@@ -686,8 +688,8 @@ proc ::History::BuildHistory {jid dlgtype args} {
         
     ::UI::SetWindowGeometry $w $wDlgs(jhist)
 
-    bind $w <$this(modkey)-Key-f> [list [namespace code Find] $w]
-    bind $w <$this(modkey)-Key-g> [list [namespace code FindNext] $w]
+    bind $w <<Find>>      [namespace code [list Find $w]]
+    bind $w <<FindAgain>> [namespace code [list FindAgain $w]]
     bind $w <Destroy> +[list [namespace code OnDestroy] $w]
 
     set script [format {
@@ -696,6 +698,24 @@ proc ::History::BuildHistory {jid dlgtype args} {
 	wm minsize %s [expr {$min+20}] 200
     } $frbot $w]    
     after idle $script
+}
+
+proc ::History::MenuEditPostHook {wmenu} {
+    
+    if {[winfo exists [focus]]} {
+	set w [winfo toplevel [focus]]
+	if {[winfo class $w] eq "HistoryDlg"} {
+	
+	    variable $w
+	    upvar 0 $w state
+	    
+	    ::UI::MenuMethod $wmenu entryconfigure mFind -state normal
+	    set wfind $state(wfind)
+	    if {[winfo exists $wfind]} {
+		::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+	    }
+	}
+    }
 }
 
 # History::InsertText --
@@ -794,7 +814,7 @@ proc ::History::InsertText {w} {
 proc ::History::Find {w} {
     variable $w
     upvar 0 $w state
-    
+        
     set wfind $state(wfind)
     if {![winfo exists $wfind]} {
 	UI::WSearch $wfind $state(wtext) -padding {2}
@@ -802,7 +822,7 @@ proc ::History::Find {w} {
     }
 }
 
-proc ::History::FindNext {w} {
+proc ::History::FindAgain {w} {
     variable $w
     upvar 0 $w state
 

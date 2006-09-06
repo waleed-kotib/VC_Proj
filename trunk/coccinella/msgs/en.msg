@@ -412,6 +412,8 @@
 ::msgcat::mcset en mNotebook         	{Notebook}
 ::msgcat::mcset en mMinimal         	{Minimal}
 ::msgcat::mcset en mDisco         	{Disco}
+::msgcat::mcset en mFind         	{Find}
+::msgcat::mcset en mFindAgain         	{Find Again}
 
 # Popups
 ::msgcat::mcset en mMessage     	{Message...}

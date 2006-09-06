@@ -411,6 +411,8 @@
 ::msgcat::mcset sv mNotebook         	{Tabbar}
 ::msgcat::mcset sv mMinimal         	{Minimal}
 ::msgcat::mcset sv mDisco         	{Disco}
+::msgcat::mcset sv mFind         	{Sšk}
+::msgcat::mcset sv mFindAgain         	{Sšk igen}
 
 
 # Popups
