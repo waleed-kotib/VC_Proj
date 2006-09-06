@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.182 2006-09-06 12:51:51 matben Exp $
+# $Id: Chat.tcl,v 1.183 2006-09-06 13:59:15 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1222,6 +1222,8 @@ proc ::Chat::Build {threadID args} {
     }
     wm minsize $w [expr {$minsize < 220} ? 220 : $minsize] 320
 
+    bind $w <<Find>>      [namespace code [list Find $dlgtoken]]
+    bind $w <<FindAgain>> [namespace code [list FindAgain $dlgtoken]]  
     bind $w <FocusIn> [list [namespace current]::FocusIn $dlgtoken]
     
     # For toplevel binds.
@@ -1477,9 +1479,6 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 	InitDnD $chattoken $wtextsnd
     }
     
-    bind $w <<Find>>      [namespace code [list Find $chattoken]]
-    bind $w <<FindAgain>> [namespace code [list FindAgain $chattoken]]  
-    
     set chatstate(wthread)  $wthread
     set chatstate(wpane)    $wpane
     set chatstate(wtext)    $wtext
@@ -1524,10 +1523,15 @@ proc ::Chat::MenuEditPostHook {wmenu} {
     }
 }
 
-proc ::Chat::Find {chattoken} {
+proc ::Chat::Find {dlgtoken} {
+
+    set chattoken [GetActiveChatToken $dlgtoken]
+    if {$chattoken eq ""} {
+	return
+    }
     variable $chattoken
     upvar 0 $chattoken chatstate
-    
+
     set wfind $chatstate(wfind)
     if {![winfo exists $wfind]} {
 	UI::WSearch $wfind $chatstate(wtext) -padding {6 2}
@@ -1535,7 +1539,12 @@ proc ::Chat::Find {chattoken} {
     }
 }
 
-proc ::Chat::FindAgain {chattoken} {
+proc ::Chat::FindAgain {dlgtoken} {
+
+    set chattoken [GetActiveChatToken $dlgtoken]
+    if {$chattoken eq ""} {
+	return
+    }
     variable $chattoken
     upvar 0 $chattoken chatstate
 
