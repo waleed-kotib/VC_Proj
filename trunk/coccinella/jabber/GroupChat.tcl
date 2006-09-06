@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.160 2006-09-06 12:51:51 matben Exp $
+# $Id: GroupChat.tcl,v 1.161 2006-09-06 13:59:15 matben Exp $
 
 package require Create
 package require Enter
@@ -634,7 +634,9 @@ proc ::GroupChat::Build {roomjid} {
     SetTitle $chattoken
     
     wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
-
+    
+    bind $w <<Find>>      [namespace code [list Find $dlgtoken]]
+    bind $w <<FindAgain>> [namespace code [list FindAgain $dlgtoken]]  
     bind $w <FocusIn> [list [namespace current]::FocusIn $dlgtoken]
 
     focus $w
@@ -893,17 +895,19 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     bind $wtextsend <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $chattoken]
     bind $wroom <Destroy> +[list ::GroupChat::OnDestroyChat $chattoken]
-    
-    bind $w <<Find>>      [namespace code [list Find $chattoken]]
-    bind $w <<FindAgain>> [namespace code [list FindAgain $chattoken]]  
 
     return $chattoken
 }
 
-proc ::GroupChat::Find {chattoken} {
+proc ::GroupChat::Find {dlgtoken} {
+
+    set chattoken [GetActiveChatToken $dlgtoken]
+    if {$chattoken eq ""} {
+	return
+    }
     variable $chattoken
     upvar 0 $chattoken chatstate
-    
+
     set wfind $chatstate(wfind)
     if {![winfo exists $wfind]} {
 	UI::WSearch $wfind $chatstate(wtext) -padding {6 2}
@@ -911,7 +915,12 @@ proc ::GroupChat::Find {chattoken} {
     }
 }
 
-proc ::GroupChat::FindAgain {chattoken} {
+proc ::GroupChat::FindAgain {dlgtoken} {
+
+    set chattoken [GetActiveChatToken $dlgtoken]
+    if {$chattoken eq ""} {
+	return
+    }
     variable $chattoken
     upvar 0 $chattoken chatstate
 
