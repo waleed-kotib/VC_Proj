@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.21 2006-08-12 13:48:25 matben Exp $
+# $Id: RosterPlain.tcl,v 1.22 2006-09-07 09:44:41 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -267,7 +267,6 @@ proc ::RosterPlain::CreateItem {jid presence args} {
     set jimage [eval {GetPresenceIcon $jid $presence} $args]
     set items  {}
     set jitems {}
-    #puts "++++++++++++::RosterPlain::CreateItem jid=$jid, jimage=$jimage"
     
     # Creates a list {item tag ?item tag? ...} for items.
     set itemTagList [eval {::RosterTree::CreateItemBase $jid $presence} $args]
@@ -511,61 +510,8 @@ proc ::RosterPlain::DiscoInfoHook {type from subiq args} {
 	
 	# Only the gateways have custom icons.
 	if {[lsearch -glob $types gateway/*] >= 0} {
-	    PostProcess disco $from
+	    ::RosterTree::BasePostProcessDiscoInfo $from cTree eImage
 	}
     }
 }
 
-# RosterPlain::PostProcess --
-# 
-#       This is necessary to get icons for foreign IM systems set correctly.
-#       Usually we get the roster before we've got disco 
-#       info, so we cannot know if an item is an ICQ etc. when putting it
-#       into the roster.
-#       
-#       Browse and disco return this information differently:
-#         browse:  from=login server
-#         disco:   from=each specific component
-#         
-# Arguments:
-#       method      "browse" or "disco"
-#       
-# Results:
-#       none.
-
-proc ::RosterPlain::PostProcess {method from} {
-    
-    if {[string equal $method "browse"]} {
-	set matchHost 0
-	PostProcessItem $from $matchHost root
-    } elseif {[string equal $method "disco"]} {
-	::RosterTree::BasePostProcessDiscoInfo $from cTree eImage
-    }    
-}
-
-# OUTDATED: browse!
-proc ::RosterPlain::PostProcessItem {from matchHost item} {
-    variable T    
-    
-    if {[$T item numchildren $item]} {
-	foreach citem [$T item children $item] {
-	    PostProcessItem $from $matchHost $citem
-	}
-    } else {
-	set tags [$T item element cget $item cTag eText -text]
-	set tag0 [lindex $tags 0]
-	if {($tag0 eq "transport") || ($tag0 eq "jid")} {
-	    set jid [lindex $tags 1]
-	    jlib::splitjidex $jid username host res
-	    
-	    # Consider only relevant jid's:
-	    # Browse always, disco only if from == host.
-	    if {!$matchHost || [string equal $from $host]} {
-		set icon [GetPresenceIconFromJid $jid]
-		if {$icon ne ""} {
-		    $T item image $item cTree $icon
-		}
-	    }
-	}
-    }
-}

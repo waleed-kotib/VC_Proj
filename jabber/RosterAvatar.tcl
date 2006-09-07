@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.14 2006-08-12 13:48:25 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.15 2006-09-07 09:44:41 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -28,10 +28,18 @@ namespace eval ::RosterAvatar {
     
     # The generic style name is 'avatar' which is also used in db names.
     variable rosterBaseStyle "avatar"
-    variable thisRosterStyles {avatar flat flatsmall}
+    variable thisRosterStyles {avatar avatarlarge flat flatsmall}
         
     # Register this style.
     ::RosterTree::RegisterStyle avatar Avatar  \
+      ::RosterAvatar::Configure   \
+      ::RosterAvatar::Init        \
+      ::RosterAvatar::Delete      \
+      ::RosterAvatar::CreateItem  \
+      ::RosterAvatar::DeleteItem  \
+      ::RosterAvatar::SetItemAlternative
+
+    ::RosterTree::RegisterStyle avatarlarge "Avatar Large"  \
       ::RosterAvatar::Configure   \
       ::RosterAvatar::Init        \
       ::RosterAvatar::Delete      \
@@ -118,9 +126,10 @@ proc ::RosterAvatar::InitDB { } {
     set fillB [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     
     # Get default avatar.
-    set f [file join $this(avatarPath) $avatarSize $avatarDefault.png]
-    set avimage [image create photo -file $f]
-    set avatar(default) $avimage
+    #set f [file join $this(avatarPath) $avatarSize $avatarDefault.png]
+    #set avimage [image create photo -file $f]
+    #set avatar(default) $avimage
+    set avimage [MakeDefaultAvatar]
     
     # Element options:
     option add *Roster.avatar:eAvatarImage-image      $avimage          widgetDefault
@@ -177,10 +186,32 @@ proc ::RosterAvatar::InitDB { } {
     option add *Roster.flatsmall:eNumText-font        CociSmallFont     widgetDefault
     option add *Roster.flatsmall:eOnText-font         CociSmallFont     widgetDefault
     option add *Roster.flatsmall:eOffText-font        CociSmallFont     widgetDefault
-    option add *Roster.flatsmall:eFolderText-font     $fontFS           widgetDefault
-    
+    option add *Roster.flatsmall:eFolderText-font     $fontFS           widgetDefault    
     
     set initedDB 1
+}
+
+proc ::RosterAvatar::InitDBStyle {} {
+    
+    set avimage [MakeDefaultAvatar]   
+    option add *Roster.avatar:eAvatarImage-image  $avimage  widgetDefault
+}
+
+proc ::RosterAvatar::MakeDefaultAvatar {} {
+    global  this
+    variable avatar
+    variable avatarSize
+    variable avatarDefault 
+    
+    if {[info exists avatar(default)]} {
+	image delete $avatar(default)
+    }
+    
+    # Get default avatar.
+    set f [file join $this(avatarPath) $avatarSize $avatarDefault.png]
+    set avimage [image create photo -file $f]
+    set avatar(default) $avimage
+    return $avimage
 }
 
 # RosterAvatar::Configure --
@@ -201,8 +232,26 @@ proc ::RosterAvatar::Configure {_T} {
     
     if {!$initedDB} {
 	InitDB
-    }
+    }   
     set styleName [::RosterTree::GetStyle]
+    if {$styleName eq "avatar"} {
+	set avatarSize 32
+    } elseif {$styleName eq "avatarlarge"} {
+	set avatarSize 48
+    }
+    switch -- $styleName {
+	avatar - avatarlarge {
+	    set styleClass avatar
+	    set optionClass avatar
+	}
+	default {
+	    set styleClass flat
+	    set optionClass $styleName
+	}
+    }
+    
+    # After 'avatarSize'.
+    InitDBStyle
     
     # This is a dummy option.
     set stripeBackground [option get $T stripeBackground {}]
@@ -260,32 +309,32 @@ proc ::RosterAvatar::Configure {_T} {
 
     # Available:
     set S [$T style create styAvailable]
-    if {$styleName eq "avatar"} {
+    if {$styleClass eq "avatar"} {
 	$T style elements $S {eBorder eIndent eOnText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
-    } elseif {$styleName eq "flat" || $styleName eq "flatsmall"} {
+    } elseif {$styleClass eq "flat"} {
 	$T style elements $S {eBorder eIndent eOnText eAltImage1 eAltImage0}
     }
     $T style layout $S eBorder      -detach 1 -iexpand xy
     $T style layout $S eOnText      -squeeze x -iexpand xy -sticky w
     $T style layout $S eAltImage0   -expand ns
     $T style layout $S eAltImage1   -expand ns
-    if {$styleName eq "avatar"} {
+    if {$styleClass eq "avatar"} {
 	$T style layout $S eAvBorder    -union {eAvatarImage}
 	$T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
     }
     
     # Unavailable:
     set S [$T style create styUnavailable]
-    if {$styleName eq "avatar"} {
+    if {$styleClass eq "avatar"} {
 	$T style elements $S {eBorder eIndent eOffText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
-    } elseif {$styleName eq "flat" || $styleName eq "flatsmall"} {
+    } elseif {$styleClass eq "flat"} {
 	$T style elements $S {eBorder eIndent eOffText eAltImage1 eAltImage0}
     }
     $T style layout $S eBorder      -detach 1 -iexpand xy
     $T style layout $S eOffText     -squeeze x -iexpand xy -sticky w
     $T style layout $S eAltImage0   -expand ns
     $T style layout $S eAltImage1   -expand ns
-    if {$styleName eq "avatar"} {
+    if {$styleClass eq "avatar"} {
 	$T style layout $S eAvBorder    -union {eAvatarImage} -sticky e
 	$T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
     }
@@ -320,9 +369,9 @@ proc ::RosterAvatar::Configure {_T} {
     set sortColumn cTree
 
     ::RosterTree::DBOptions $rosterBaseStyle
-    ::RosterTree::DBOptions $styleName
+    ::RosterTree::DBOptions $optionClass
 
-    if {$styleName eq "avatar"} {
+    if {$styleClass eq "avatar"} {
 	::Avatar::Configure -autoget 1 -command ::RosterAvatar::OnAvatarPhoto
 	
 	# We shall get avatars for all users.
@@ -485,7 +534,8 @@ proc ::RosterAvatar::OnAvatarPhoto {type jid2} {
     ::Debug 4 "::RosterAvatar::OnAvatarPhoto type=$type, jid2=$jid2"
     
     # We get this callback async. Beware!
-    if {[::RosterTree::GetStyle] ne "avatar"} {
+    set styleName [::RosterTree::GetStyle]
+    if {$styleName ne "avatar" || $styleName ne "avatarlarge"} {
 	return
     }
 
@@ -524,8 +574,7 @@ proc ::RosterAvatar::SetAvatarImage {type jid} {
 	switch -- $type {
 	    create - put {
 		set image [::Avatar::GetPhotoOfSize $jid2 $avatarSize]
-		$T item element configure $item cTree eAvatarImage  \
-		  -image $image
+		$T item element configure $item cTree eAvatarImage -image $image
 
 		# @@@ We get problems with this since only the _element_ is
 		#     configured with an image to start with.
@@ -593,7 +642,15 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
 	available   eOnText
 	unavailable eOffText
     }
-    set rosterStyle [::RosterTree::GetStyle]
+    set styleName [::RosterTree::GetStyle]
+    switch -- $styleName {
+	avatar - avatarlarge {
+	    set styleClass avatar
+	}
+	default {
+	    set styleClass flat
+	}
+    }
 
     # Always try to show avatar.
     set avatarForOffline 1
@@ -624,7 +681,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     set item [CreateWithTag $tag $style $elem $jtext $jimage root]
     lappend items $item
     
-    if {$rosterStyle eq "avatar"} {
+    if {$styleClass eq "avatar"} {
 	if {$avatarForOffline || ($presence eq "available")} {
 	    if {[::Avatar::HavePhoto $mjid2]} {
 		SetAvatarImage put $mjid
