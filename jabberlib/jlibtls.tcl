@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.12 2006-07-31 07:22:35 matben Exp $
+# $Id: jlibtls.tcl,v 1.13 2006-09-07 07:33:46 matben Exp $
 
 package require tls
 package require jlib
@@ -87,11 +87,13 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
       -request 1 -server 0 -require 0 -ssl2 no -ssl3 yes -tls1 yes
     set retry 0
     
+    # Do SSL handshake.
     while {1} {
 	if {$retry > 20} { 
 	    close $sock
 	    set err "too long retry to setup SSL connection"
 	    tls_finish $jlibname startls-failure $err
+	    return
 	}
 	if {[catch {tls::handshake $sock} err]} {
 	    if {[string match "*resource temporarily unavailable*" $err]} {

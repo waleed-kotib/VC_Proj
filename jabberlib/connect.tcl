@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.6 2006-09-05 13:47:20 matben Exp $
+# $Id: connect.tcl,v 1.7 2006-09-07 07:33:46 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -509,7 +509,10 @@ proc jlib::connect::tcp_writable {jlibname} {
     upvar ${jlibname}::connect::state state
     
     debug "jlib::connect::tcp_writable"
-
+    
+    if {![info exists state(sock)]} {
+	return
+    }
     set sock $state(sock)
     fileevent $sock writable {}
 
@@ -527,12 +530,30 @@ proc jlib::connect::tcp_writable {jlibname} {
     
     # Do SSL handshake.
     if {$state(usessl)} {
-	fconfigure $sock -blocking 1
-	if {[catch {::tls::handshake $sock} err]} {
-	    finish $jlibname tls-failure $err
-	    return
+	set retry 0
+
+	# Do SSL handshake.
+	while {1} {
+	    if {$retry > 20} { 
+		close $sock
+		set err "too long retry to setup SSL connection"
+		finish $jlibname tls-failure $err
+		return
+	    }
+	    if {[catch {tls::handshake $sock} err]} {
+		if {[string match "*resource temporarily unavailable*" $err]} {
+		    after 50  
+		    incr retry
+		} else {
+		    close $sock
+		    finish $jlibname tls-failure $err
+		    return
+		}
+	    } else {
+		break
+	    }
 	}
-	fconfigure $sock -blocking 0
+	fconfigure $sock -blocking 0 -encoding utf-8
     }
 
     # Send the init stream xml command.
