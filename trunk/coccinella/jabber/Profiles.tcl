@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.64 2006-09-05 14:27:13 matben Exp $
+# $Id: Profiles.tcl,v 1.65 2006-09-07 09:44:41 matben Exp $
 
 package provide Profiles 1.0
 
@@ -661,6 +661,7 @@ proc ::Profiles::GetDefaultOpts {server} {
 	    -minpollsecs    4
 	    -secure         0
 	    -method         sasl
+	    -port           ""
 	}
 	# DO NOT add this!
 	#-resource       ""

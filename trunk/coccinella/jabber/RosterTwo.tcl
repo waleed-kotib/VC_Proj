@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 20052006  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.11 2006-08-12 13:48:25 matben Exp $
+# $Id: RosterTwo.tcl,v 1.12 2006-09-07 09:44:41 matben Exp $
 
 package require RosterTree
 
@@ -368,37 +368,8 @@ proc ::RosterTwo::DiscoInfoHook {type from subiq args} {
 	
 	# Only the gateways have custom icons.
 	if {[lsearch -glob $types gateway/*] >= 0} {
-	    PostProcess disco $from
+	    ::RosterTree::BasePostProcessDiscoInfo $from cTree eImage
 	}
     }
 }
-
-# RosterTwo::PostProcess --
-# 
-#       This is necessary to get icons for foreign IM systems set correctly.
-#       Usually we get the roster before we've got disco 
-#       info, so we cannot know if an item is an ICQ etc. when putting it
-#       into the roster.
-#       
-#       Browse and disco return this information differently:
-#         browse:  from=login server
-#         disco:   from=each specific component
-#         
-# Arguments:
-#       method      "browse" or "disco"
-#       
-# Results:
-#       none.
-
-proc ::RosterTwo::PostProcess {method from} {
-    
-    ::Debug 4 "::RosterTwo::PostProcess $from"
-
-    if {[string equal $method "browse"]} {
-	# empty
-    } elseif {[string equal $method "disco"]} {
-	::RosterTree::BasePostProcessDiscoInfo $from cTree eImage
-    }    
-}
-
 
