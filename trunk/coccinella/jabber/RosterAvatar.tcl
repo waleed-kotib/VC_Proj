@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.16 2006-09-08 07:03:34 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.17 2006-09-08 12:39:58 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -151,6 +151,11 @@ proc ::RosterAvatar::InitDB { } {
     option add *Roster.avatar:eBorder-outlinewidth    1                 widgetDefault
     option add *Roster.avatar:eBorder-fill            $fillB            widgetDefault
 
+    option add *Roster.avatar:eNotify-fill            "#ffd6d6"         widgetDefault
+    option add *Roster.avatar:eNotify-outline         "#e2a19d"         widgetDefault
+    option add *Roster.avatar:eNotify-outlinewidth    1                 widgetDefault
+    option add *Roster.avatar:eNotify-draw            {1 notify 0 {}}   widgetDefault
+
     # If no background image:
     option add *Roster.avatar:eBorder-outline:nbg      gray              widgetDefault
     option add *Roster.avatar:eBorder-outlinewidth:nbg 0                 widgetDefault
@@ -261,6 +266,11 @@ proc ::RosterAvatar::Configure {_T} {
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
 
+    # Define a new item state
+    if {[lsearch [$T state names] notify] < 0} {
+	$T state define notify
+    }
+
     # Three columns: 
     #   0) status
     #   1) the tree 
@@ -297,6 +307,7 @@ proc ::RosterAvatar::Configure {_T} {
     $T element create eBorder      rect -open new -showfocus 1
     $T element create eNumText     text -lines 1
     $T element create eIndent      rect -fill ""
+    $T element create eNotify rect
 
     $T element create eDebug       rect -fill red -width 10 -height 10
     
@@ -310,9 +321,9 @@ proc ::RosterAvatar::Configure {_T} {
     # Available:
     set S [$T style create styAvailable]
     if {$styleClass eq "avatar"} {
-	$T style elements $S {eBorder eIndent eOnText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
+	$T style elements $S {eBorder eNotify eIndent eOnText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
     } elseif {$styleClass eq "flat"} {
-	$T style elements $S {eBorder eIndent eOnText eAltImage1 eAltImage0}
+	$T style elements $S {eBorder eNotify eIndent eOnText eAltImage1 eAltImage0}
     }
     $T style layout $S eBorder      -detach 1 -iexpand xy
     $T style layout $S eOnText      -squeeze x -iexpand xy -sticky w
@@ -322,13 +333,14 @@ proc ::RosterAvatar::Configure {_T} {
 	$T style layout $S eAvBorder    -union {eAvatarImage}
 	$T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
     }
+    $T style layout $S eNotify   -detach 1 -iexpand xy -indent 0 -padx 2 -pady 2
     
     # Unavailable:
     set S [$T style create styUnavailable]
     if {$styleClass eq "avatar"} {
-	$T style elements $S {eBorder eIndent eOffText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
+	$T style elements $S {eBorder eNotify eIndent eOffText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
     } elseif {$styleClass eq "flat"} {
-	$T style elements $S {eBorder eIndent eOffText eAltImage1 eAltImage0}
+	$T style elements $S {eBorder eNotify eIndent eOffText eAltImage1 eAltImage0}
     }
     $T style layout $S eBorder      -detach 1 -iexpand xy
     $T style layout $S eOffText     -squeeze x -iexpand xy -sticky w
@@ -338,6 +350,7 @@ proc ::RosterAvatar::Configure {_T} {
 	$T style layout $S eAvBorder    -union {eAvatarImage} -sticky e
 	$T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
     }
+    $T style layout $S eNotify   -detach 1 -iexpand xy -indent 0 -padx 2 -pady 2
     
     # Folder:
     set S [$T style create styFolder]
