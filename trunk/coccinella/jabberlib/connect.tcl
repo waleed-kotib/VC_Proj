@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.7 2006-09-07 07:33:46 matben Exp $
+# $Id: connect.tcl,v 1.8 2006-09-08 06:15:16 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -332,6 +332,18 @@ proc jlib::connect::connect {jlibname jid password args} {
 	set state(version) 1.0
     }
     
+    # Actual port to connect to (tcp). 
+    # May be changed by DNS lookup unless -port set.
+    if {[string is integer -strict $state(-port)]} {
+	set state(port) $state(-port)
+    } else {
+	if {$state(usessl)} {
+	    set state(port) $state(-defaultsslport)
+	} else {
+	    set state(port) $state(-defaultport)
+	}
+    }
+    
     # Schedule a timeout.
     if {$state(-timeout) > 0} {
 	set state(after) [after $state(-timeout)  \
@@ -426,8 +438,6 @@ proc jlib::connect::dns_srv_cb {jlibname addrPort {err ""}} {
 	if {$state(usessl)} {
 	    incr state(port)
 	}
-    } else {
-	set state(port) $state(-defaultport)
     }
     
     # If -port set this always takes precedence.
