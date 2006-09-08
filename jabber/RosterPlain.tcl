@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.23 2006-09-08 07:03:34 matben Exp $
+# $Id: RosterPlain.tcl,v 1.24 2006-09-08 12:39:58 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -66,6 +66,11 @@ proc ::RosterPlain::InitDB { } {
     option add *Roster.plain:eBorder-outlinewidth     1                 widgetDefault
     option add *Roster.plain:eBorder-fill             $fillB            widgetDefault
 
+    option add *Roster.plain:eNotify-fill             "#ffd6d6"         widgetDefault
+    option add *Roster.plain:eNotify-outline          "#e2a19d"         widgetDefault
+    option add *Roster.plain:eNotify-outlinewidth     1                 widgetDefault
+    option add *Roster.plain:eNotify-draw             {1 notify 0 {}}   widgetDefault
+
     # If no background image:
     option add *Roster.plain:eBorder-outline:nbg      gray              widgetDefault
     option add *Roster.plain:eBorder-outlinewidth:nbg 0                 widgetDefault
@@ -125,6 +130,11 @@ proc ::RosterPlain::Configure {_T} {
     # One pixel from the top border line and two pixels below since border
     # is drawn inside.
     set ipy {1 2}
+    
+    # Define a new item state
+    if {[lsearch [$T state names] notify] < 0} {
+	$T state define notify
+    }
 
     # Two columns: 
     #   0) the tree 
@@ -142,6 +152,7 @@ proc ::RosterPlain::Configure {_T} {
     $T element create eText text -lines 1
     $T element create eNumText text -lines 1
     $T element create eBorder rect -open new -showfocus 1
+    $T element create eNotify rect
  
     # Styles collecting the elements.
     set S [$T style create styHead]
@@ -159,20 +170,22 @@ proc ::RosterPlain::Configure {_T} {
     $T style layout $S eBorder  -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styAvailable]
-    $T style elements $S {eBorder eImage eText eAltImage1 eAltImage0}
+    $T style elements $S {eBorder eNotify eImage eText eAltImage1 eAltImage0}
     $T style layout $S eText     -squeeze x -iexpand xy -sticky w
     $T style layout $S eImage    -expand ns -minheight $minH
     $T style layout $S eAltImage0 -expand ns
     $T style layout $S eAltImage1 -expand ns
     $T style layout $S eBorder   -detach 1 -iexpand xy -indent 0
+    $T style layout $S eNotify   -detach 1 -iexpand xy -indent 0 -padx 2 -pady 2
 
     set S [$T style create styUnavailable]
-    $T style elements $S {eBorder eImage eText eAltImage1 eAltImage0}
+    $T style elements $S {eBorder eNotify eImage eText eAltImage1 eAltImage0}
     $T style layout $S eText     -squeeze x -iexpand xy -sticky w
     $T style layout $S eImage    -expand ns -minheight $minH
     $T style layout $S eAltImage0 -expand ns
     $T style layout $S eAltImage1 -expand ns
     $T style layout $S eBorder   -detach 1 -iexpand xy -indent 0
+    $T style layout $S eNotify   -detach 1 -iexpand xy -indent 0 -padx 2 -pady 2
 
     set S [$T style create styTransport]
     $T style elements $S {eBorder eImage eText}

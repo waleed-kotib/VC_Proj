@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Enter.tcl,v 1.7 2006-09-02 06:43:38 matben Exp $
+# $Id: Enter.tcl,v 1.8 2006-09-08 12:39:58 matben Exp $
 
 package provide Enter 1.0
 
@@ -549,7 +549,7 @@ proc ::Enter::DoEnter {token} {
     }
 
     if {$state(protocol) eq "muc"} {
-	set xE [wrapper::createtag "x" -attrlist [list xmlns $xmppxmlns(muc)]]
+	set xE [list [wrapper::createtag "x" -attrlist [list xmlns $xmppxmlns(muc)]]]
     } else {
 	set xE {}
     }
@@ -557,7 +557,7 @@ proc ::Enter::DoEnter {token} {
     set from $roomjid/$state(nickname)
     set attr [list from $from to $roomjid]
     set xmldata [wrapper::createtag "presence"  \
-      -attrlist $attr -subtags [list $xE]]
+      -attrlist $attr -subtags $xE]
     ::History::XPutItem send $roomjid $xmldata
 }
 
