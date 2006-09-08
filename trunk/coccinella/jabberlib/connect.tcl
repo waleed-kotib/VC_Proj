@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.8 2006-09-08 06:15:16 matben Exp $
+# $Id: connect.tcl,v 1.9 2006-09-08 10:29:06 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -68,7 +68,7 @@ namespace eval jlib::connect {
     
     variable inited 0
     variable have
-    variable debug 0
+    variable debug 1
 }
 
 proc jlib::connect::init {jlibname} {
@@ -330,6 +330,10 @@ proc jlib::connect::connect {jlibname jid password args} {
     # Any stream version. XMPP requires 1.0.
     if {$state(usesasl) || $state(usetls) || $state(usecompress)} {
 	set state(version) 1.0
+    }
+    
+    if {$state(-ip) ne ""} {
+	set state(host) $state(-ip)
     }
     
     # Actual port to connect to (tcp). 
