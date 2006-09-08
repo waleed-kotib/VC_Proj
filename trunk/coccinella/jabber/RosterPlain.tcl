@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.22 2006-09-07 09:44:41 matben Exp $
+# $Id: RosterPlain.tcl,v 1.23 2006-09-08 07:03:34 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -504,7 +504,6 @@ proc ::RosterPlain::DiscoInfoHook {type from subiq args} {
     if {[::RosterTree::GetStyle] ne $rosterStyle} {
 	return
     }
-
     if {$type ne "error"} {
 	set types [$jstate(jlib) disco types $from]
 	
