@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.176 2006-09-02 06:43:38 matben Exp $
+# $Id: Roster.tcl,v 1.177 2006-09-08 07:03:34 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -1147,7 +1147,7 @@ proc ::Roster::GetPresenceIconFromJid {jid} {
 # Roster::GetPresenceIcon --
 #
 #       Returns the image appropriate for 'presence', and any 'show' attribute.
-#       If presence is to make sense, the jid shall be a 3-tier jid.
+#       If presence is to make sense, the jid shall be a 3-tier jid?
 
 proc ::Roster::GetPresenceIcon {jid presence args} {    
     upvar ::Jabber::jstate jstate
@@ -1469,7 +1469,7 @@ proc ::Roster::IsTransportHeuristics {jid} {
 		    if {$phost eq $jserver(this)} {
 			set cname [string range $host 0 [expr {$idx-1}]]
 			switch -- $cname {
-			    aim - gadugadu - icq - msn - smtp - yahoo {			
+			    aim - gg - gadugadu - icq - msn - smtp - yahoo {			
 				set transport 1
 			    }
 			}

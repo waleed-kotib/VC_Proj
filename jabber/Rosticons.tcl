@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.23 2006-05-07 14:08:01 matben Exp $
+# $Id: Rosticons.tcl,v 1.24 2006-09-08 07:03:34 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -13,7 +13,7 @@
 #
 #   roster/        aim/
 #          application/
-#             gadugadu/
+#            gadu-gadu/
 #                  icq/
 #                  msn/
 #                 smtp/
@@ -26,6 +26,22 @@
 #  Each group must have a default dir or default.jisp archive.
 #  The set named 'default' is a fallback set. The actual default set is
 #  defined in the 'defaultSet' array.
+#
+#  From disco-categories:
+#
+#  The "gateway" category consists of translators between Jabber/XMPP services 
+#  and non-Jabber services. 
+#
+#   aim         Gateway to AOL IM               <identity category='gateway' type='aim'/> 
+#   gadu-gadu   Gateway to the Gadu-Gadu        <identity category='gateway' type='gadu-gadu'/> 
+#   http-ws     Gateway that provides HTTP Web Services access  <identity category='gateway' type='http-ws'/> 
+#   icq         Gateway to ICQ                  <identity category='gateway' type='icq'/> 
+#   msn         Gateway to MSN Messenger        <identity category='gateway' type='msn'/> 
+#   qq          Gateway to the QQ IM service    <identity category='gateway' type='qq'/> 
+#   sms         Gateway to Short Message Service  <identity category='gateway' type='sms'/> 
+#   smtp        Gateway to the SMTP (email) network  <identity category='gateway' type='smtp'/> 
+#   tlen        Gateway to the Tlen IM service  <identity category='gateway' type='tlen'/> 
+#   yahoo       Gateway to Yahoo! Instant Messenger  <identity category='gateway' type='yahoo'/> 
 
 package require Icondef
 
@@ -48,6 +64,7 @@ namespace eval ::Rosticons:: {
     array set defaultSet {
 	aim             "Crystal"
 	application     "Crystal"
+	gadu-gadu       "default"
 	gadugadu        "default"
 	icq             "Crystal"
 	msn             "Crystal"
@@ -136,7 +153,7 @@ proc ::Rosticons::GetTypes { } {
 #       state(types)       listOfTypes
 #       
 #       type is typically:
-#       aim application gadugadu icq msn status whiteboard yahoo
+#       aim application gadu-gadu icq msn status whiteboard yahoo
 
 proc ::Rosticons::GetAllTypeSets { } {
     global  this
@@ -192,7 +209,7 @@ proc ::Rosticons::GetAllTypeSets { } {
     return $state(types)
 }
 
-# ::Rosticons::Get --
+# Rosticons::Get --
 # 
 #       Returns the image to use for this key.
 #       

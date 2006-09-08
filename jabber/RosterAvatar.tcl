@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.15 2006-09-07 09:44:41 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.16 2006-09-08 07:03:34 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -949,62 +949,8 @@ proc ::RosterAvatar::DiscoInfoHook {type from subiq args} {
 	
 	# Only the gateways have custom icons.
 	if {[lsearch -glob $types gateway/*] >= 0} {
-	    PostProcess disco $from
+	    ::RosterTree::BasePostProcessDiscoInfo $from cStatus eImage
 	}
     }
 }
 
-# RosterAvatar::PostProcess --
-# 
-#       This is necessary to get icons for foreign IM systems set correctly.
-#       Usually we get the roster before we've got disco 
-#       info, so we cannot know if an item is an ICQ etc. when putting it
-#       into the roster.
-#       
-#       Browse and disco return this information differently:
-#         browse:  from=login server
-#         disco:   from=each specific component
-#         
-# Arguments:
-#       method      "browse" or "disco"
-#       
-# Results:
-#       none.
-
-proc ::RosterAvatar::PostProcess {method from} {
-    
-    ::Debug 4 "::RosterAvatar::PostProcess $from"
-
-    if {[string equal $method "browse"]} {
-	set matchHost 0
-	PostProcessItem $from $matchHost root
-    } elseif {[string equal $method "disco"]} {
-	::RosterTree::BasePostProcessDiscoInfo $from cStatus eImage
-    }    
-}
-
-proc ::RosterAvatar::PostProcessItem {from matchHost item} {
-    variable T    
-    
-    if {[$T item numchildren $item]} {
-	foreach citem [$T item children $item] {
-	    PostProcessItem $from $matchHost $citem
-	}
-    } else {
-	set tags [$T item element cget $item cTag eOnText -text]
-	set tag0 [lindex $tags 0]
-	if {($tag0 eq "transport") || ($tag0 eq "jid")} {
-	    set jid [lindex $tags 1]
-	    jlib::splitjidex $jid username host res
-	    
-	    # Consider only relevant jid's:
-	    # Browse always, disco only if from == host.
-	    if {!$matchHost || [string equal $from $host]} {
-		set icon [GetPresenceIconFromJid $jid]
-		if {$icon ne ""} {
-		    $T item image $item cStatus $icon
-		}
-	    }
-	}
-    }
-}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 20052006  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.12 2006-09-07 09:44:41 matben Exp $
+# $Id: RosterTwo.tcl,v 1.13 2006-09-08 07:03:34 matben Exp $
 
 package require RosterTree
 
@@ -362,7 +362,6 @@ proc ::RosterTwo::DiscoInfoHook {type from subiq args} {
     if {[::RosterTree::GetStyle] ne "two"} {
 	return
     }
-
     if {$type ne "error"} {
 	set types [$jstate(jlib) disco types $from]
 	
