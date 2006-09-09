@@ -4,56 +4,99 @@
 #
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
+#  
+#  $Id: Mood.tcl,v 1.9 2006-09-09 13:09:54 matben Exp $
+
+package require ui::optionmenu
 
 namespace eval ::Mood:: { }
 
 proc ::Mood::Init { } {
 
-    component::register Mood \
-      "This is User Mood (JEP-0107)."
+    component::register Mood "This is User Mood (JEP-0107)."
 
     ::Debug 2 "::Mood::Init"
 
     # Add event hooks.
     ::hooks::register newMessageHook        ::Mood::MessageHook
-    ::hooks::register presenceHook          ::Mood::PresenceHook
+    #::hooks::register presenceHook          ::Mood::PresenceHook
     ::hooks::register loginHook             ::Mood::LoginHook
+    ::hooks::register logoutHook            ::Mood::LogoutHook
     ::hooks::register rosterBalloonhelp     ::Mood::BalloonHook
 
-    variable server
-    variable myjid
-    variable moodjlib
+    variable moodNode
+    set moodNode "http://jabber.org/protocol/mood"
 
-    variable node
-    set node "http://jabber.org/protocol/mood"
-
-    variable xmlnsMood
-    set xmlnsMood "http://jabber.org/protocol/mood"
+    variable xmlns
+    set xmlns(mood)        "http://jabber.org/protocol/mood"
+    set xmlns(node_config) "http://jabber.org/protocol/pubsub#node_config"
 
     variable state
 
-    variable menuMood
-
-    set menuMood [list cascade [mc mMood] {} {} {} {}]
-    set subEntries {}
-        lappend subEntries [list radio [mc mAngry] {::Mood::Cmd "angry"}   {} {}]
-        lappend subEntries [list radio [mc mAnxious] {::Mood::Cmd "anxious"}   {} {}]
-        lappend subEntries [list radio [mc mAshamed] {::Mood::Cmd "ashamed"}  {} {}]
-        lappend subEntries [list radio [mc mBored] {::Mood::Cmd "bored"}  {} {}]
-        lappend subEntries [list radio [mc mCurious] {::Mood::Cmd "curious"}   {} {}]
-        lappend subEntries [list radio [mc mDepressed] {::Mood::Cmd "depressed"}  {} {}]
-        lappend subEntries [list radio [mc mExcited] {::Mood::Cmd "excited"}  {} {}]
-        lappend subEntries [list radio [mc mHappy] {::Mood::Cmd "happy"}   {} {}]
-        lappend subEntries [list radio [mc mInLove] {::Mood::Cmd "in_love"}  {} {}]
-        lappend subEntries [list radio [mc mInvincible] {::Mood::Cmd "invincible"}   {} {}]
-        lappend subEntries [list radio [mc mJealous] {::Mood::Cmd "jealous"}  {} {}]
-        lappend subEntries [list radio [mc mNervous] {::Mood::Cmd "nervous"}   {} {}]
-        lappend subEntries [list radio [mc mSad] {::Mood::Cmd "sad"}  {} {}]
-        lappend subEntries [list radio [mc mSleepy] {::Mood::Cmd "sleepy"}  {} {}]
-        lappend subEntries [list radio [mc mStressed] {::Mood::Cmd "stressed"}   {} {}]
-        lappend subEntries [list radio [mc mWorried] {::Mood::Cmd "worried"}  {} {}]
-        lappend subEntries [list radio [mc mCustomMood] {::Mood::CustomMoodWindow}  {} {}]
-        lset menuMood 5 $subEntries
+    variable myMoods
+    set myMoods {
+	angry       anxious     ashamed     bored
+	curious     depressed   excited     happy
+	in_love     invincible  jealous     nervous
+	sad         sleepy      stressed    worried
+    }
+    
+    variable allMoods
+    set allMoods {
+	afraid 	    amazed      angry       annoyed 
+	anxious     aroused     ashamed     bored 
+	brave       calm        cold        confused 
+	contented   cranky      curious     depressed 
+	disappointed disgusted  distracted  embarrassed 
+	excited     flirtatious frustrated  grumpy 
+	guilty      happy       hot         humbled 
+	humiliated  hungry      hurt        impressed 
+	in_awe      in_love     indignant   interested 
+	intoxicated invincible  jealous     lonely 
+	mean        moody       nervous     neutral 
+	offended    playful     proud       relieved 
+	remorseful  restless    sad         sarcastic 
+	serious     shocked     shy         sick 
+	sleepy      stressed    surprised   thirsty 
+	worried 
+    }
+    
+    variable mood2mLabel
+    array set mood2mLabel {
+	angry       mAngry
+	anxious     mAnxious
+	ashamed     mAshamed
+	bored       mBored
+	curious     mCurious
+	depressed   mDepressed
+	excited     mExcited
+	happy       mHappy
+	in_love     mInLove
+	invincible  mInvincible
+	jealous     mJealous
+	nervous     mNervous
+	sad         mSad
+	sleepy      mSleepy
+	stressed    mStressed
+	worried     mWorried
+    }
+  
+    variable menuDef
+    set menuDef [list cascade mMood {} {} {} {}]
+    set subMenu {}
+    set opts [list -variable ::Mood::menuMoodVar -value "-"]
+    lappend subMenu [list radio None ::Mood::MenuCmd {} $opts]
+    foreach mood $myMoods {
+	set opts [list -variable ::Mood::menuMoodVar -value $mood]
+	lappend subMenu [list radio $mood2mLabel($mood) ::Mood::MenuCmd {} $opts]
+    }
+    lappend subMenu {separator}
+    lappend subMenu [list command mCustomMood ::Mood::CustomMoodDlg {} {}]
+    lset menuDef 5 $subMenu
+    
+    variable menuMoodVar
+    set menuMoodVar "-"
+    
 
     variable mapMoodTextToElem
     array set mapMoodTextToElem [list \
@@ -74,124 +117,161 @@ proc ::Mood::Init { } {
       [mc mStressed]    stressed   \
       [mc mWorried]     worried]
 
-    variable moodStateDlg
-    variable moodMessageDlg
 }
 
-proc ::Mood::LoginHook { } {
-    variable server
-    variable myjid
-    variable moodjlib
-
-    #----- Initialize variables ------
-    set moodjlib jlib::jlib1
-    set myjid [$moodjlib myjid2]
-    set server [$moodjlib getserver]
-
+proc ::Mood::LoginHook {} {
+   
     #----- Disco server for pubsub support -----
+    set server [::Jabber::JlibCmd getserver]
     ::Jabber::JlibCmd disco get_async info $server ::Mood::OnDiscoServer
 }
 
 proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
-    variable myjid
-    variable moodjlib
     variable node
-    variable xmlnsMood
-    variable menuMood
+    variable xmlns
+    variable menuDef
+    variable menuMoodVar
  
     ::Debug 2 "::Mood::OnDiscoServer"
 
     if {$type eq "result"} {
         set node [wrapper::getattribute $subiq node]
-        #---- Check if disco returns <indetity category=pubsub type=pep>
+        
+	# Check if disco returns <identity category='pubsub' type='pep'/>
         if {[::Jabber::JlibCmd disco iscategorytype pubsub/pep $from $node]} {
-                ::JUI::RegisterMenuEntry jabber $menuMood
-                #----- Create Node for Mood -------------
-                ::Jabber::JlibCmd disco get_async items $myjid [list ::Mood::CreateNode]
-        }
-    }
-}
-proc ::Mood::Cmd {{moodState ""} {text ""}} {    
-    variable server
-    variable myjid
-    variable moodjlib
-    variable node
-    variable xmlnsMood
-
-    set moodValues [list afraid amazed angry annoyed anxious aroused ashamed bored brave calm cold confused contented cranky \
-                         curious depressed disappointed disgusted distracted embarrassed excited flirtatious frustated grumpy \
-                         guilty happy hot humbled humiliated hungry hurt impressed in_awe in_love indignant interested intoxicated \
-                         invincible jealous lonely mean moody nervous neutral offended playful proud relieved remorseful restless \
-                         sad sarcastic serious shocked shy sick sleepy stressed surprised thirsty worried]
-
-    if {[lsearch $moodValues $moodState] >= 0} {
-	set moodTextTag [wrapper::createtag text -chdata $text] 
-
-        set moodStateTag [wrapper::createtag $moodState]
-        set moodTag [wrapper::createtag mood -attrlist [list xmlns $xmlnsMood] -subtags [list  $moodStateTag $moodTextTag] ]
-
-        set itemElem [wrapper::createtag item -subtags [list $moodTag]]
-
-        $moodjlib pubsub publish $node  -items [list $itemElem] -command ::Mood::PubSubPublishCB
+	    ::JUI::RegisterMenuEntry jabber $menuDef
+                
+	    # Create Node for mood.
+	    # This seems not necessary with latest PEP.
+	    if {1} {
+		set myjid2 [::Jabber::JlibCmd myjid2]
+		::Jabber::JlibCmd disco get_async items $myjid2 ::Mood::OnDiscoUser
+	    } else {
+		
+		# Publish node directly since PEP service automatically creates
+		# a pubsub node with default configuration.
+		if {$menuMoodVar ne "-"} {
+		    Publish $menuMoodVar
+		}
+	    }
+	}
     }
 }
 
-proc ::Mood::PubSubPublishCB {args} {
-     puts "(Publish Results)----> $args"
+proc ::Mood::LogoutHook {} {
+    
+    ::JUI::DeRegisterMenuEntry jabber mMood
+}
+
+proc ::Mood::MenuCmd {} {
+    variable menuMoodVar
+    
+    Publish $menuMoodVar
+}
+
+proc ::Mood::Publish {mood {text ""}} {
+    variable moodNode
+    variable xmlns
+    
+    set moodChildEs [list [wrapper::createtag $mood]]
+    if {$text ne ""} {
+	lappend moodChildEs [wrapper::createtag text -chdata $text] 
+    }
+    set moodE [wrapper::createtag mood  \
+      -attrlist [list xmlns $xmlns(mood)] -subtags $moodChildEs]
+    set itemE [wrapper::createtag item -subtags [list $moodE]]
+    
+    ::Jabber::JlibCmd pubsub publish $moodNode -items [list $itemE]  \
+      -command ::Mood::PublishCB
+}
+
+proc ::Mood::PublishCB {args} {
+    # empty
 }
 
 #--------------------------------------------------------------------
 #-------             Checks and create if node exists ---------------
 #-----------            before the publish tasks     ----------------
 #--------------------------------------------------------------------
-proc ::Mood::CreateNode {jlibname type from subiq args} {
-variable server
-variable myjid
-variable moodjlib
-variable node
-
+#
+# Not used for PEP?
+proc ::Mood::OnDiscoUser {jlibname type from subiq args} {
+    
+    puts "\t ::Mood::OnDiscoUser"
+    
     #------- Before create a node checks if it is created ---------
     set findMood false
     if {$type eq "result"} {
-        set nodes [::Jabber::JlibCmd disco nodes $from]
-        foreach nodeItem $nodes {
-            if { [string first "moodee" $nodeItem] != -1 } {
-                set findMood true
-                break
-            }
-        }
+	set nodes [::Jabber::JlibCmd disco nodes $from]
+	foreach nodeItem $nodes {
+	    if { [string first "moodee" $nodeItem] != -1 } {
+		set findMood true
+		break
+	    }
+	}
     }
-
+    puts "\t findMood=$findMood"
+    
     #---------- Create the node for mood information -------------
+    # This is not necessary if we not wants default configuration.
     if { !$findMood } {
-        #Configure setup for PEP node
-        set valueFormElem  [wrapper::createtag value -chdata "http://jabber.org/protocol/pubsub#node_config"]
-        set fieldFormElem [wrapper::createtag field -attrlist [list var "FORM_TYPE" type hidden] -subtags [list $valueFormElem]]
-
-        #PEP Values for access_model: roster / presence / open or authorize / whitelist
-        set valueAccessModel [wrapper::createtag value -chdata roster]
-        set fieldAccessModelElem [wrapper::createtag field -attrlist [list var "pubsub#access_model"] -subtags [list $valueAccessModel]]
-
-        set xElem [wrapper::createtag x -attrlist [list xmlns "jabber:x:data" type submit] -subtags [list $fieldFormElem $fieldAccessModelElem]]
-
-        $moodjlib pubsub create -node $node -command ::Mood::PubSubCreateCB -configure $xElem
+	CreateNode
     }
 }
 
-proc ::Mood::PubSubCreateCB {type args} {
+if {0} { 
+    <iq from='juliet@capulet.com/balcony' type='set' id='create-open'>
+      <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+	<create node='http://jabber.org/protocol/tune'/>
+	<configure>
+	  <x xmlns='jabber:x:data' type='submit'>
+	    <field var='FORM_TYPE' type='hidden'>
+	      <value>http://jabber.org/protocol/pubsub#node_config</value>
+	    </field>
+	    <field var='pubsub#access_model'>
+	      <option><value>open</value></option>
+	    </field>
+	  </x>
+	</configure>
+      </pubsub>
+    </iq> 
+}
 
-    if { $type ne "result" } {
-        puts "(CreateNode error)----> $args"
-    }
+proc ::Mood::CreateNode {} {
+    variable moodNode
+    variable xmlns
+    
+    puts "\t ::Mood::CreateNode"
+    
+    # Configure setup for PEP node
+    set valueFormE [wrapper::createtag value -chdata $xmlns(node_config)]
+    set fieldFormE [wrapper::createtag field  \
+      -attrlist [list var "FORM_TYPE" type hidden] -subtags [list $valueFormE]]
+    
+    # PEP Values for access_model: roster / presence / open or authorize / whitelist
+    set valueModelE [wrapper::createtag value -chdata roster]
+    set fieldModelE [wrapper::createtag field  \
+      -attrlist [list var "pubsub#access_model"] -subtags [list $valueModelE]]
+    
+    set xattr [list xmlns "jabber:x:data" type submit]
+    set xsubE [list $fieldFormE $fieldModelE]
+    set xE [wrapper::createtag x -attrlist $xattr -subtags $xsubE]
+    
+    ::Jabber::JlibCmd pubsub create -node $moodNode  \
+      -command ::Mood::CreateNodeCB -configure $xE
+}
+
+proc ::Mood::CreateNodeCB {type args} {
+    # empty
 }
 
 #-------------------------------------------------------------------------
 #---------------------- (Extended Presence) ------------------------------
 #-------------------------------------------------------------------------
 
+# Not necessary for PEP.
 proc ::Mood::PresenceHook {jid type args} {
     variable state
-    variable moodjlib
 
     # Beware! jid without resource!
     ::Debug 2 "::Mood::PresenceHook jid=$jid, type=$type"
@@ -209,8 +289,8 @@ proc ::Mood::PresenceHook {jid type args} {
         return
     }
 
-    array set aargs $args
-    set from $aargs(-from)
+    array set argsA $args
+    set from $argsA(-from)
     jlib::splitjidex $from node jidserver res
     set jid2 $node@$jidserver
 
@@ -222,8 +302,6 @@ proc ::Mood::PresenceHook {jid type args} {
 
 proc ::Mood::OnDiscoContact {jlibname type from subiq args} {
     variable state
-    variable moodjlib
-    variable myjid
     variable node
 
     ::Debug 2 "::Mood::OnDiscoContactServer"
@@ -234,11 +312,11 @@ proc ::Mood::OnDiscoContact {jlibname type from subiq args} {
         foreach nodeItem $nodes {
             if { [string first "mood" $nodeItem] != -1 } {
 
-puts "Parece que si que $from soporta mood"
 
                 set state($from,pubsubsupport) true
-           
-                $moodjlib pubsub subscribe $from $myjid -node $node -command ::Mood::PubSubscribeCB
+		set myjid2 [::Jabber::JlibCmd myjid2]
+
+                ::Jabber::JlibCmd pubsub subscribe $from $myjid2 -node $node -command ::Mood::PubSubscribeCB
                 break
             }
         }
@@ -253,14 +331,14 @@ proc ::Mood::PubSubscribeCB {args} {
 #---------------------- (Incoming Mood Handling) -------------------------
 #-------------------------------------------------------------------------
 proc ::Mood::MessageHook {body args} {
-    array set aargs $args
+    array set argsA $args
     variable state
 
-    set event $aargs(-xmldata)
+    set xmlE $argsA(-xmldata)
 
-    set from [wrapper::getattribute $event from]
+    set from [wrapper::getattribute $xmlE from]
 
-    set eventElem [wrapper::getfirstchildwithtag $event event]
+    set eventElem [wrapper::getfirstchildwithtag $xmlE event]
 
     set itemsElem [wrapper::getfirstchildwithtag $eventElem items]
     set node [wrapper::getattribute $itemsElem node]
@@ -318,21 +396,29 @@ proc ::Mood::BalloonHook {T item jid} {
 #--------------------------------------------------------------
 #----------------- UI for Custom Mood Dialog ------------------
 #--------------------------------------------------------------
-proc ::Mood::CustomMoodWindow {} {
+
+proc ::Mood::CustomMoodDlg {} {
     global  this wDlgs
     variable moodMessage
     variable moodState
+    variable menuMoodVar
+    variable myMoods
+    variable mood2mLabel
+    variable moodStateDlg
 
     set w ".mumdlg"
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
     ::UI::Toplevel $w \
       -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
       -closecommand [namespace current]::CloseCmd
     wm title $w [mc {moodDlg}]
 
-    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
-    if {$nwin == 1} {
-        ::UI::SetWindowPosition $w ".mumdlg"
-    }
+    ::UI::SetWindowPosition $w ".mumdlg"
+    
+    set moodStateDlg $menuMoodVar
 
     # Global frame.
     ttk::frame $w.frall
@@ -342,7 +428,7 @@ proc ::Mood::CustomMoodWindow {} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
 
-    ttk::label $wbox.msg -style Small.TLabel \
+    ttk::label $wbox.msg  \
       -padding {0 0 0 6} -wraplength 260 -justify left -text [mc selectCustomMood]
     pack $wbox.msg -side top -anchor w
 
@@ -350,23 +436,33 @@ proc ::Mood::CustomMoodWindow {} {
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
-    set moodList [list [mc mAngry] [mc mAnxious] [mc mAshamed] [mc mBored] [mc mCurious] [mc mDepressed] [mc mExcited] [mc mHappy] [mc mInLove] [mc mInvincible] [mc mJealous] [mc mNervous] [mc mSad] [mc mSleepy] [mc mStressed] [mc mWorried]]
+    #set moodList [list [mc mAngry] [mc mAnxious] [mc mAshamed] [mc mBored] [mc mCurious] [mc mDepressed] [mc mExcited] [mc mHappy] [mc mInLove] [mc mInvincible] [mc mJealous] [mc mNervous] [mc mSad] [mc mSleepy] [mc mStressed] [mc mWorried]]
 
     ttk::label $frmid.lmood -text "[mc {mMood}]:" 
-    ttk::combobox $frmid.cmood -state readonly -values $moodList -textvariable [namespace current]::moodStateDlg
+    
+    set mDef {}
+    foreach mood $myMoods {
+	lappend mDef [list [mc $mood2mLabel($mood)] -value $mood] 
+    }
+    ui::optionmenu $frmid.cmood -menulist $mDef -direction flush \
+      -variable [namespace current]::moodStateDlg
+
+    #ttk::combobox $frmid.cmood -state readonly -values $moodList \
+    #  -textvariable [namespace current]::moodStateDlg
 
     ttk::label $frmid.ltext -text "[mc {moodMessage}]:"
     ttk::entry $frmid.etext -textvariable [namespace current]::moodMessageDlg
 
-    grid  $frmid.lmood    $frmid.cmood        -  -sticky e -pady 2
-    grid  $frmid.ltext    $frmid.etext        -  -sticky e -pady 2
+    grid  $frmid.lmood    $frmid.cmood  -sticky e -pady 2
+    grid  $frmid.ltext    $frmid.etext  -sticky e -pady 2
+    grid $frmid.cmood $frmid.etext -sticky ew
     grid columnconfigure $frmid 1 -weight 1
 
     # Button part.
     set frbot $wbox.b
     set wenter  $frbot.btok
-    ttk::frame $frbot
-    ttk::button $wenter -text [mc Enter] \
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $wenter -text [mc OK] \
       -default active -command [list [namespace current]::sendMoodEnter $w]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelEnter $w]
@@ -399,7 +495,7 @@ proc ::Mood::sendMoodEnter {w} {
     variable moodMessageDlg
     variable mapMoodTextToElem
 
-    ::Mood::Cmd $mapMoodTextToElem($moodStateDlg) $moodMessageDlg
+    Publish $mapMoodTextToElem($moodStateDlg) $moodMessageDlg
 
     ::UI::SaveWinGeom $w
     destroy $w

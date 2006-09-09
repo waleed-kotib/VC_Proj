@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.10 2006-08-01 06:17:57 matben Exp $
+# $Id: pubsub.tcl,v 1.11 2006-09-09 13:09:54 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -391,6 +391,7 @@ proc jlib::pubsub::options {jlibname type to jid node args} {
 #                         1 new node with default configuration
 #                         xmldata jabber:x:data element
 #             -node       the nodeID (else we get an instant node)
+#             -items
 #
 # Results:
 #       none

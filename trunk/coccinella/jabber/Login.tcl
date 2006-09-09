@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.95 2006-09-05 13:47:20 matben Exp $
+# $Id: Login.tcl,v 1.96 2006-09-09 13:09:54 matben Exp $
 
 package provide Login 1.0
 
@@ -360,12 +360,18 @@ proc ::Login::Close {w} {
     catch {destroy $w}    
 }
 
+# Login::Kill --
+# 
+#       This is the destructor for the complete login process.
+#       Must take care of everything.
+
 proc ::Login::Kill { } {
     variable pending
     upvar ::Jabber::jstate jstate
 
     set pending 0
-    $jstate(jlib) kill 
+    $jstate(jlib) connect reset
+    #$jstate(jlib) kill 
 
     ::JUI::SetStatusMessage ""
     ::JUI::StartStopAnimatedWave 0
