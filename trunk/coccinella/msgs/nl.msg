@@ -488,7 +488,7 @@
 ::msgcat::mcset nl {Connect using HTTP}		{Via HTTP verbinden}
 ::msgcat::mcset nl {Contact Type}		{Netwerk}
 ::msgcat::mcset nl {Create Room}		{Chatruimte aanmaken}
-::msgcat::mcset nl {Default group}		{Standaard groep}
+::msgcat::mcset nl {Default group}		{Standaardgroep}
 ::msgcat::mcset nl {Default Logout Status}	{Standaard afmeldaanwezigheid}
 ::msgcat::mcset nl {Default nickname}		{Standaard bijnaam}
 ::msgcat::mcset nl {Default status descriptions} {Standaardberichten bij aanwezigheid}
@@ -535,7 +535,7 @@
 ::msgcat::mcset nl {HTTP port}			{HTTP-poort}
 ::msgcat::mcset nl {>>Import>>}			{>>Importeren>>}
 ::msgcat::mcset nl {Import Iconset...}		{Emoticonset importeren...}
-::msgcat::mcset nl {Import using}		{Importeren met:}
+::msgcat::mcset nl {Import using}		{Importeren met}
 ::msgcat::mcset nl {Import/Remove fonts}	{Lettertypes importeren/verwijderen}
 ::msgcat::mcset nl {Incoming Message}		{Inkomend bericht}
 ::msgcat::mcset nl {Incoming Messages}		{Inkomende berichten}
