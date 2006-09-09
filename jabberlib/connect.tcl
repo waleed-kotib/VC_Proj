@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.9 2006-09-08 10:29:06 matben Exp $
+# $Id: connect.tcl,v 1.10 2006-09-09 13:09:54 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -68,7 +68,7 @@ namespace eval jlib::connect {
     
     variable inited 0
     variable have
-    variable debug 1
+    variable debug 0
 }
 
 proc jlib::connect::init {jlibname} {
@@ -132,7 +132,7 @@ proc jlib::connect::init_static {} {
 	-defaultresource  "default"
 	-defaultsslport   5223
 	-digest           1
-	-dnsprotocol      tcp
+	-dnsprotocol      udp
 	-dnssrv           1
 	-dnstxthttp       0
 	-dnstimeout       3000
@@ -774,11 +774,17 @@ proc jlib::connect::auth_cb {jlibname type queryE} {
     }
 }
 
+# jlib::connect::reset --
+# 
+#       This is kills any ongoing or nonexisting connect object.
+
 proc jlib::connect::reset {jlibname} {
 
     $jlibname tls_reset
     $jlibname sasl_reset
-    finish $jlibname reset
+    if {[namespace exists ${jlibname}::connect]} {
+	finish $jlibname reset
+    }
 }
 
 proc jlib::connect::timeout {jlibname} {
@@ -808,6 +814,10 @@ proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {
 
     jlib::set_async_error_handler $jlibname
 
+    if {![info exists state(state)]} {
+	# We do not exist.
+	return
+    }
     if {[info exists state(after)]} {
 	after cancel $state(after)
     }
@@ -820,6 +830,7 @@ proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {
     if {$errcode ne ""} {
 	set status error
 	if {[info exists state(sock)]} {
+	    # This 'kills' the connection.
 	    # after idle seems necessary when resetting xml parser from callback
 	    after idle [list $jlibname closestream]
 	}
