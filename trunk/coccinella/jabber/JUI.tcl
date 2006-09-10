@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.131 2006-09-06 12:51:51 matben Exp $
+# $Id: JUI.tcl,v 1.132 2006-09-10 14:58:05 matben Exp $
 
 package provide JUI 1.0
 
@@ -730,7 +730,7 @@ proc ::JUI::OpenBugURL { } {
 proc ::JUI::StopConnect { } {
     
     ::Jabber::DoCloseClientConnection
-    ::Login::Kill
+    ::Login::Reset
 }    
 
 proc ::JUI::GetNotebook { } {

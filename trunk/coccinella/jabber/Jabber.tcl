@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.182 2006-09-05 13:47:20 matben Exp $
+# $Id: Jabber.tcl,v 1.183 2006-09-10 14:58:05 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -2001,7 +2001,7 @@ proc ::Jabber::OnMenuLogInOut { } {
 	    DoCloseClientConnection
 	}
 	connectinit {
-	    ::Login::Kill
+	    ::Login::Reset
 	}
 	disconnect {
 	    ::Login::Dlg

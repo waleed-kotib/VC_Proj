@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.183 2006-09-06 13:59:15 matben Exp $
+# $Id: Chat.tcl,v 1.184 2006-09-10 14:58:05 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1087,6 +1087,7 @@ proc ::Chat::Build {threadID args} {
     set w $wDlgs(jchat)${uiddlg}
     array set argsArr $args
 
+    set dlgstate(exists)      1
     set dlgstate(w)           $w
     set dlgstate(uid)         0
     set dlgstate(recentctokens) {}
@@ -1292,6 +1293,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 	set chatstate(minjid) $jid2
     }
     
+    set chatstate(exists)           1
     set chatstate(fromjid)          $jid
     set chatstate(jid)              $mjid
     set chatstate(jid2)             $jid2
@@ -2829,7 +2831,11 @@ proc ::Chat::GetTokenList {type} {
       [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]] \
       [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]] {
 	if {[array exists $token]} {
-	    lappend tokens $token   
+	    variable $token
+	    upvar 0 $token state    
+	    if {[info exists state(exists)]} {
+		lappend tokens $token   
+	    }
 	}
     }
     return $tokens
