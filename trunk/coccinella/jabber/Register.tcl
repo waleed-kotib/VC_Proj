@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.52 2006-09-10 14:58:05 matben Exp $
+# $Id: Register.tcl,v 1.53 2006-09-10 15:11:10 matben Exp $
 
 package provide Register 1.0
 
@@ -26,7 +26,7 @@ proc ::Register::ValidatePortNumber {str} {
 
 proc ::Register::OnMenuRemove {} {
     if {[::JUI::GetConnectState] eq "connectfin"} {
-	Build -tolist [::RosterTree::GetSelectedJID]
+	::Register::Remove
     }    
 }
 
