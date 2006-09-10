@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.51 2006-08-20 13:41:18 matben Exp $
+# $Id: Register.tcl,v 1.52 2006-09-10 14:58:05 matben Exp $
 
 package provide Register 1.0
 
@@ -395,7 +395,7 @@ proc ::RegisterEx::Get {token} {
     ::Debug 2 "::RegisterEx::Get"
     
     # Kill any pending open states.
-    ::Login::Kill
+    ::Login::Reset
     
     # Verify.
     if {$state(-server) eq ""} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.96 2006-09-09 13:09:54 matben Exp $
+# $Id: Login.tcl,v 1.97 2006-09-10 14:58:05 matben Exp $
 
 package provide Login 1.0
 
@@ -360,12 +360,12 @@ proc ::Login::Close {w} {
     catch {destroy $w}    
 }
 
-# Login::Kill --
+# Login::Reset --
 # 
-#       This is the destructor for the complete login process.
+#       This resets the complete login process.
 #       Must take care of everything.
 
-proc ::Login::Kill { } {
+proc ::Login::Reset { } {
     variable pending
     upvar ::Jabber::jstate jstate
 
@@ -400,8 +400,8 @@ proc ::Login::DoLogin {} {
     
     ::Debug 2 "::Login::DoLogin"
     
-    # Kill any pending open states.
-    Kill
+    # Reset any pending open states.
+    Reset
 
     if {$config(login,style) eq "jid"} {
 	jlib::splitjidex $jid username server resource
@@ -567,8 +567,8 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     set highstate(args)    $args
     set highstate(pending) 1
 
-    # Kill any pending open states.
-    Kill
+    # Reset any pending open states. Done above.
+    #Reset
     ::JUI::SetStatusMessage [mc jawaitresp $server]
     ::JUI::StartStopAnimatedWave 1
     ::JUI::FixUIWhen "connectinit"

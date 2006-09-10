@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.161 2006-09-06 13:59:15 matben Exp $
+# $Id: GroupChat.tcl,v 1.162 2006-09-10 14:58:05 matben Exp $
 
 package require Create
 package require Enter
@@ -535,6 +535,7 @@ proc ::GroupChat::Build {roomjid} {
     # Make unique toplevel name.
     set w $wDlgs(jgc)$uiddlg
 
+    set dlgstate(exists)        1
     set dlgstate(w)             $w
     set dlgstate(uid)           0
     set dlgstate(nhiddenmsgs)   0
@@ -704,6 +705,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     
     set roomjid [jlib::jidmap $roomjid]
 
+    set chatstate(exists)       1
     set chatstate(wroom)        $wroom
     set chatstate(roomjid)      $roomjid
     set chatstate(dlgtoken)     $dlgtoken
@@ -1452,10 +1454,12 @@ proc ::GroupChat::GetTokenList {type} {
       [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]] \
       [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]] \
       [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]] {
-
-	# We need to check array size becaus also empty arrays are reported.
-	if {[array size $token]} {
-	    lappend tokens $token
+	if {[array exists $token]} {
+	    variable $token
+	    upvar 0 $token state    
+	    if {[info exists state(exists)]} {
+		lappend tokens $token   
+	    }
 	}
     }
     return $tokens
