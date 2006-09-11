@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.9 2006-09-09 13:09:54 matben Exp $
+#  $Id: Mood.tcl,v 1.10 2006-09-11 09:39:24 matben Exp $
 
 package require ui::optionmenu
 
@@ -131,6 +131,7 @@ proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
     variable xmlns
     variable menuDef
     variable menuMoodVar
+    variable moodNode
  
     ::Debug 2 "::Mood::OnDiscoServer"
 
@@ -140,6 +141,7 @@ proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
 	# Check if disco returns <identity category='pubsub' type='pep'/>
         if {[::Jabber::JlibCmd disco iscategorytype pubsub/pep $from $node]} {
 	    ::JUI::RegisterMenuEntry jabber $menuDef
+	    ::Jabber::JlibCmd pubsub register_event ::Mood::Event -node $moodNode
                 
 	    # Create Node for mood.
 	    # This seems not necessary with latest PEP.
@@ -217,24 +219,6 @@ proc ::Mood::OnDiscoUser {jlibname type from subiq args} {
     if { !$findMood } {
 	CreateNode
     }
-}
-
-if {0} { 
-    <iq from='juliet@capulet.com/balcony' type='set' id='create-open'>
-      <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-	<create node='http://jabber.org/protocol/tune'/>
-	<configure>
-	  <x xmlns='jabber:x:data' type='submit'>
-	    <field var='FORM_TYPE' type='hidden'>
-	      <value>http://jabber.org/protocol/pubsub#node_config</value>
-	    </field>
-	    <field var='pubsub#access_model'>
-	      <option><value>open</value></option>
-	    </field>
-	  </x>
-	</configure>
-      </pubsub>
-    </iq> 
 }
 
 proc ::Mood::CreateNode {} {
@@ -330,6 +314,48 @@ proc ::Mood::PubSubscribeCB {args} {
 #-------------------------------------------------------------------------
 #---------------------- (Incoming Mood Handling) -------------------------
 #-------------------------------------------------------------------------
+
+if {0} {
+    <message from='juliet@capulet.com'
+	     to='benvolio@montague.net'
+	     type='headline'
+	     id='foo'>
+      <event xmlns='http://jabber.org/protocol/pubsub#event'>
+	<items node='http://jabber.org/protocol/tune'>
+	  <item>
+	    <tune xmlns='http://jabber.org/protocol/tune'>
+	      <artist>Gerald Finzi</artist>
+	      <title>Introduction (Allegro vigoroso)</title>
+	      <source>Music for "Love's Labors Lost" (Suite for small orchestra)</source>
+	      <track>1</track>
+	      <length>255</length>
+	    </tune>
+	  </item>
+	</items>
+      </event>
+    </message> 
+}
+
+proc ::Mood::Event {jlibname xmldata} {
+    
+    puts "::Mood::Event----->"
+ 
+    set from [wrapper::getattribute $xmldata from]
+    set eventE [wrapper::getfirstchildwithtag $xmldata event]
+    if {[llength $eventE]} {
+	set itemsE [wrapper::getfirstchildwithtag $eventE items]
+	if {[llength $itemsE]} {
+	    set node [wrapper::getattribute $itemsE node]
+    
+	    set itemE [wrapper::getfirstchildwithtag $itemsE item]
+	    set moodE [wrapper::getfirstchildwithtag $itemE mood]
+	
+	
+	
+	}
+    }
+}
+
 proc ::Mood::MessageHook {body args} {
     array set argsA $args
     variable state

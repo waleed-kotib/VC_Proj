@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.133 2006-09-06 12:51:51 matben Exp $
+# $Id: UI.tcl,v 1.134 2006-09-11 09:39:24 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1641,7 +1641,6 @@ namespace eval ::UI:: {
 proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok args} {
     global this
     
-    variable finmega
     variable megauid
     upvar $varName entryVar
     
@@ -1662,7 +1661,12 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok args} {
       -macclass {document closeBox} \
       -closecommand ::UI::MegaDlgMsgCloseCmd
     wm title $w $title
-    set finmega -1
+
+    # Widget specific storage.
+    variable $w
+    upvar #0 $w state
+
+    set state(button) 0
     
     # Global frame.
     ttk::frame $w.frall
@@ -1694,9 +1698,9 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok args} {
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $frbot.btok -text $btok  \
-      -default active -command [list set [namespace current]::finmega 1]
+      -default active -command [list set $w\(button) ok]
     ttk::button $frbot.btcancel -text $btcancel  \
-      -command [list set [namespace current]::finmega 0]
+      -command [list set $w\(button) cancel]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btok -side right
@@ -1717,19 +1721,22 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok args} {
     catch {grab $w}
     
     # Wait here for a button press.
-    tkwait variable [namespace current]::finmega
+    tkwait variable $w\(button)
     
     set entryVar [$wentry get]
     catch {grab release $w}
     catch {destroy $w}
     catch {focus $oldFocus}
-    return [expr {($finmega <= 0) ? "cancel" : "ok"}]
+    set button $state(button)
+    unset -nocomplain state
+    
+    return $button
 }
 
 proc ::UI::MegaDlgMsgCloseCmd {w} {
-    variable finmega
-    
-    set finmega 0
+    variable $w
+    upvar #0 $w state
+    set state(button) cancel
     return stop
 }
 
