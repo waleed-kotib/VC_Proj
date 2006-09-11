@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.34 2006-08-14 13:08:03 matben Exp $
+# $Id: muc.tcl,v 1.35 2006-09-11 12:15:18 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -194,7 +194,7 @@ proc jlib::muc::parse_enter {cmd jlibname xmldata} {
     if {$type eq ""} {
 	set type "available"
     }    
-    set roomjid [jlib::jidmap $from]
+    set roomjid [jlib::jidmap [jlib::barejid $from]]
     if {[string equal $type "error"]} {
 	unset -nocomplain cache($roomjid,mynick)
     } else {
@@ -469,7 +469,7 @@ proc jlib::muc::parse_create {cmd jlibname xmldata} {
     if {$type eq ""} {
 	set type "available"
     }    
-    set roomjid [jlib::jidmap $from]
+    set roomjid [jlib::jidmap [jlib::barejid $from]]
     if {[string equal $type "error"]} {
 	unset -nocomplain cache($roomjid,mynick)
     } else {
