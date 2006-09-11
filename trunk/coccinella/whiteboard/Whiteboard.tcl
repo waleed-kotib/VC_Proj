@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.62 2006-08-24 07:01:37 matben Exp $
+# $Id: Whiteboard.tcl,v 1.63 2006-09-11 12:18:19 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -609,7 +609,6 @@ proc ::WB::InitMenuDefs { } {
 
     set menuDefs(main,info) {    
 	{command     mOnServer       {::Dialogs::ShowInfoServer}         {}}	
-	{command     mOnClients      {::Dialogs::ShowInfoClients}        {}}	
 	{command     mOnPlugins      {::Dialogs::InfoOnPlugins}          {}}	
 	{separator}
 	{cascade     mHelpOn             {}                                {} {} {}}
