@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.65 2006-08-21 09:45:48 matben Exp $
+# $Id: JWB.tcl,v 1.66 2006-09-11 12:14:17 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -175,9 +175,9 @@ proc ::JWB::NewWhiteboard {args} {
     
     ::Debug 4 "::JWB::NewWhiteboard $args"
 
-    array set argsArr $args
-    if {[info exists argsArr(-w)]} {
-	set w $argsArr(-w)
+    array set argsA $args
+    if {[info exists argsA(-w)]} {
+	set w $argsA(-w)
     } else {
 	set w [::WB::GetNewToplevelPath]
     }
@@ -206,7 +206,7 @@ proc ::JWB::NewWhiteboard {args} {
     }
     eval {::WB::BuildWhiteboard $w} $restargs
     
-    if {[info exists argsArr(-state)] && ($argsArr(-state) eq "disabled")} {
+    if {[info exists argsA(-state)] && ($argsA(-state) eq "disabled")} {
 	$jwbstate($w,wjid)  state {disabled}
 	$jwbstate($w,wsend) state {disabled}
     }
@@ -231,20 +231,20 @@ proc ::JWB::NewWhiteboardTo {jid args} {
     
     ::Debug 2 "::JWB::NewWhiteboardTo jid=$jid, args='$args'"
     
-    array set argsArr {
+    array set argsA {
 	-state   normal
 	-jid     ""
 	-type    normal
 	-send    0
 	-force   0
     }
-    array set argsArr $args
+    array set argsA $args
     
     if {!$initted} {
 	InitUI
     }
-    set force $argsArr(-force)
-    unset argsArr(-force)
+    set force $argsA(-force)
+    unset argsA(-force)
 
     # Make a fresh whiteboard window. Use any -type argument.
     # Note that the jid can belong to a room but we may still have a 2p chat.
@@ -259,7 +259,7 @@ proc ::JWB::NewWhiteboardTo {jid args} {
     set jlib $jstate(jlib)
     
     set isRoom 0
-    if {[string equal $argsArr(-type) "groupchat"]} {
+    if {[string equal $argsA(-type) "groupchat"]} {
 	set isRoom 1
     } elseif {[$jstate(jlib) service isroom $jid]} {
 	set isRoom 1
@@ -273,7 +273,7 @@ proc ::JWB::NewWhiteboardTo {jid args} {
     ::Debug 2 "\t isRoom=$isRoom, isUserInRoom=$isUserInRoom, isAvailable=$isAvailable"
 
     set doBuild 1
-    set argsArr(-jid) $jid
+    set argsA(-jid) $jid
     
     if {$isRoom} {
 	
@@ -287,14 +287,13 @@ proc ::JWB::NewWhiteboardTo {jid args} {
 	} else {
 	    set title "Groupchat room $jid"
 	}
-	set argsArr(-title) $title
-	set argsArr(-type)  groupchat
-	set argsArr(-send)  1
+	set argsA(-title) $title
+	set argsA(-type)  groupchat
+	set argsA(-send)  1
 	if {!$force && ([lsearch $inrooms $jid] < 0)} {
 	    set ans [::GroupChat::EnterOrCreate enter -roomjid $jid \
 	      -autoget 1]
 	    if {$ans eq "cancel"} {
-		Free $w
 		return
 	    }
 	    set doBuild 0
@@ -302,12 +301,12 @@ proc ::JWB::NewWhiteboardTo {jid args} {
 	
 	# Set flag for delayed create.
 	set delayed($jid,jid)  1
-	set delayed($jid,args) [array get argsArr]
+	set delayed($jid,args) [array get argsA]
     } elseif {$isAvailable || $isUserInRoom} {
 	
 	# Two person whiteboard chat.
-	if {[info exists argsArr(-thread)]} {
-	    set thread $argsArr(-thread)
+	if {[info exists argsA(-thread)]} {
+	    set thread $argsA(-thread)
 	} else {
 	    set thread [::sha1::sha1 "$jstate(mejid)[clock seconds]"]
 	}
@@ -317,10 +316,10 @@ proc ::JWB::NewWhiteboardTo {jid args} {
 	} else {
 	    set title "[mc {Chat With}] $jid"
 	}	
-	set argsArr(-title)  $title
-	set argsArr(-type)   chat
-	set argsArr(-thread) $thread
-	set argsArr(-send)   1
+	set argsA(-title)  $title
+	set argsA(-type)   chat
+	set argsA(-thread) $thread
+	set argsA(-send)   1
     } else {
 	
 	# Normal whiteboard message.
@@ -330,14 +329,14 @@ proc ::JWB::NewWhiteboardTo {jid args} {
 	} else {
 	    set title "Send Message to $jid"
 	}
-	set argsArr(-title) $title
+	set argsA(-title) $title
     }
     
     # This is too early to have a whiteboard for groupchat since we don't
     # know if we succeed to enter.
     set w ""
     if {$doBuild} {
-	set w [eval {::WB::NewWhiteboard} [array get argsArr]]
+	set w [eval {::WB::NewWhiteboard} [array get argsA]]
     }
     return $w
 }
@@ -352,19 +351,19 @@ proc ::JWB::PreBuildHook {w args} {
     
     ::Debug 4 "::JWB::PreBuildHook w=$w, args=$args"
     
-    array set argsArr {
+    array set argsA {
 	-state   normal
 	-jid     ""
 	-type    normal
 	-send    0
     }
-    array set argsArr $args
-    foreach {key value} [array get argsArr] {
+    array set argsA $args
+    foreach {key value} [array get argsA] {
 	set jwbstate($w,[string trimleft $key -]) $value
     }
     
     # Be sure to be able to map wtoplevel->jid and jid->wtoplevel.
-    set jid [jlib::jidmap $argsArr(-jid)]
+    set jid [jlib::jidmap $argsA(-jid)]
     set jwbstate($w,jid) $jid
     set jwbstate($jid,jid,w) $w
     
@@ -930,25 +929,25 @@ proc ::JWB::FilterTags {tags} {
 proc ::JWB::HandleSpecialMessage {jlibname xmlns msgElem args} {
         
     ::Debug 2 "::JWB::HandleSpecialMessage $xmlns, args=$args"
-    array set argsArr $args
-    if {![info exists argsArr(-x)]} {
+    array set argsA $args
+    if {![info exists argsA(-x)]} {
 	return
     }
-    set rawList [GetRawMessageList $argsArr(-x) $xmlns]
+    set rawList [GetRawMessageList $argsA(-x) $xmlns]
     set ishandled 1
     foreach raw $rawList {
 	
 	switch -glob -- $raw {
 	    "GET IP:*" {
 		if {[regexp {^GET IP: +([^ ]+)$} $raw m id]} {
-		    PutIPnumber $argsArr(-from) $id
+		    PutIPnumber $argsA(-from) $id
 		}
 	    }
 	    "PUT IP:*" {
 		    
 		# We have got the requested ip number from the client.
 		if {[regexp {^PUT IP: +([^ ]+) +([^ ]+)$} $raw m id ip]} {
-		    GetIPCallback $argsArr(-from) $id $ip
+		    GetIPCallback $argsA(-from) $id $ip
 		}		
 	    }	
 	    "CANVAS:*" {		
@@ -974,12 +973,12 @@ proc ::JWB::HandleSpecialMessage {jlibname xmlns msgElem args} {
 proc ::JWB::HandleRawChatMessage {jlibname xmlns msgElem args} {
         
     ::Debug 2 "::JWB::HandleRawChatMessage args=$args"
-    array set argsArr $args
-    if {![info exists argsArr(-x)]} {
+    array set argsA $args
+    if {![info exists argsA(-x)]} {
 	return
     }
         
-    set cmdList [GetRawMessageList $argsArr(-x) $xmlns]
+    set cmdList [GetRawMessageList $argsA(-x) $xmlns]
     set cmdList [eval {HandleNonCanvasCmds chat $cmdList} $args]
 
     eval {ChatMsg $cmdList} $args
@@ -997,19 +996,19 @@ proc ::JWB::HandleRawChatMessage {jlibname xmlns msgElem args} {
 proc ::JWB::HandleRawGroupchatMessage {jlibname xmlns msgElem args} {
 	
     ::Debug 2 "::JWB::HandleRawGroupchatMessage args=$args"	
-    array set argsArr $args
-    if {![info exists argsArr(-x)]} {
+    array set argsA $args
+    if {![info exists argsA(-x)]} {
 	return
     }
     
     # Don't do anything if we haven't entered the room using whiteboard.
-    set mjid [jlib::jidmap $argsArr(-from)]
+    set mjid [jlib::jidmap $argsA(-from)]
     jlib::splitjid $mjid roomjid res
     if {[HaveWhiteboard $roomjid]} {
 	
 	# Do not duplicate ourselves!
-	if {![::Jabber::IsMyGroupchatJid $argsArr(-from)]} {
-	    set cmdList [GetRawMessageList $argsArr(-x) $xmlns]
+	if {![::Jabber::IsMyGroupchatJid $argsA(-from)]} {
+	    set cmdList [GetRawMessageList $argsA(-x) $xmlns]
 	    set cmdList [eval {HandleNonCanvasCmds groupchat $cmdList} $args]
 	    
 	    eval {GroupchatMsg $cmdList} $args
@@ -1027,19 +1026,19 @@ proc ::JWB::HandleRawGroupchatMessage {jlibname xmlns msgElem args} {
 proc ::JWB::HandleSVGWBChatMessage {jlibname xmlns msgElem args} {
     
     ::Debug 2 "::JWB::HandleSVGWBChatMessage"
-    array set argsArr $args
-    if {![info exists argsArr(-x)]} {
+    array set argsA $args
+    if {![info exists argsA(-x)]} {
 	return
     }
 	
     # Need to have the actual canvas before doing svg -> canvas translation.
     # This is a duplicate; fix later...
-    set w [eval {GetWtopFromMessage chat $argsArr(-from)} $args]
+    set w [eval {GetWtopFromMessage chat $argsA(-from)} $args]
     if {$w eq ""} {
-	set w [eval {NewWhiteboardTo $argsArr(-from)} $args]
+	set w [eval {NewWhiteboardTo $argsA(-from)} $args]
     }
     
-    set cmdList [GetSVGWBMessageList $w $argsArr(-x)]
+    set cmdList [GetSVGWBMessageList $w $argsA(-x)]
     if {[llength $cmdList]} {
 	eval {ChatMsg $cmdList} $args
 	eval {::hooks::run newWBChatMessageHook} $args
@@ -1052,13 +1051,13 @@ proc ::JWB::HandleSVGWBChatMessage {jlibname xmlns msgElem args} {
 proc ::JWB::HandleSVGWBGroupchatMessage {jlibname xmlns msgElem args} {
     
     ::Debug 2 "::JWB::HandleSVGWBGroupchatMessage"
-    array set argsArr $args
-    if {![info exists argsArr(-x)]} {
+    array set argsA $args
+    if {![info exists argsA(-x)]} {
 	return
     }
     
     # Don't do anything if we haven't entered the room using whiteboard.
-    set mjid [jlib::jidmap $argsArr(-from)]
+    set mjid [jlib::jidmap $argsA(-from)]
     jlib::splitjid $mjid roomjid res
     if {[HaveWhiteboard $roomjid]} {
 
@@ -1070,8 +1069,8 @@ proc ::JWB::HandleSVGWBGroupchatMessage {jlibname xmlns msgElem args} {
 	}
 	
 	# Do not duplicate ourselves!
-	if {![::Jabber::IsMyGroupchatJid $argsArr(-from)]} {
-	    set cmdList [GetSVGWBMessageList $w $argsArr(-x)]
+	if {![::Jabber::IsMyGroupchatJid $argsA(-from)]} {
+	    set cmdList [GetSVGWBMessageList $w $argsA(-x)]
 	    
 	    if {[llength $cmdList]} {
 		eval {GroupchatMsg $cmdList} $args
@@ -1166,10 +1165,10 @@ proc ::JWB::GetSVGWBMessageList {w xlist} {
 
 proc ::JWB::SVGForeignObjectHandler {w xmllist paropts transformList args} {
     
-    array set argsArr $args
-    set argsArr(-where) local
+    array set argsA $args
+    set argsA(-where) local
     eval {::CanvasUtils::SVGForeignObjectHandler $w $xmllist $paropts \
-      $transformList} [array get argsArr]
+      $transformList} [array get argsA]
 }
 
 # JWB::SVGHttpHandler --
@@ -1230,18 +1229,18 @@ proc ::JWB::HandleNonCanvasCmds {type cmdList args} {
 	    "RESIZE IMAGE" {
 		if {[regexp {^RESIZE IMAGE: +([^ ]+) +([^ ]+) +([-0-9]+)$}  \
 		  $cmd match utag utagNew zoom]} {
-		    array set argsArr $args
+		    array set argsA $args
 		    set w ""
 		
 		    # Make sure whiteboard exists.
 		    switch -- $type {
 			chat - groupchat {
 			    set w [eval {GetWtopFromMessage \
-			      $type $argsArr(-from)} $args]
+			      $type $argsA(-from)} $args]
 			    if {$w eq ""} {
 				continue
 				set w [eval {
-				    NewWhiteboardTo $argsArr(-from)} $args]
+				    NewWhiteboardTo $argsA(-from)} $args]
 			    }
 			}
 		    }
@@ -1250,13 +1249,13 @@ proc ::JWB::HandleNonCanvasCmds {type cmdList args} {
 	    }
 	    default {
 		if {[info exists handler($prefix)]} {
-		    array set argsArr $args
+		    array set argsA $args
 		    set w ""
 
 		    switch -- $type {
 			chat - groupchat {
 			    set w [eval {GetWtopFromMessage \
-			      $type $argsArr(-from)} $args]
+			      $type $argsA(-from)} $args]
 			}
 		    }
 		    if {$w ne ""} {
@@ -1302,13 +1301,13 @@ proc ::JWB::RegisterHandlerHook {prefix cmd} {
 proc ::JWB::ChatMsg {cmdList args} {    
     upvar ::Jabber::jstate jstate
 
-    array set argsArr $args
+    array set argsA $args
     ::Debug 2 "::JWB::ChatMsg args='$args'"
     
     # This one returns empty if not exists.
-    set w [eval {GetWtopFromMessage chat $argsArr(-from)} $args]
+    set w [eval {GetWtopFromMessage chat $argsA(-from)} $args]
     if {$w eq ""} {
-	set w [eval {NewWhiteboardTo $argsArr(-from)} $args]
+	set w [eval {NewWhiteboardTo $argsA(-from)} $args]
     }
     foreach line $cmdList {
 	::CanvasUtils::HandleCanvasDraw $w $line
@@ -1318,12 +1317,12 @@ proc ::JWB::ChatMsg {cmdList args} {
 proc ::JWB::GroupchatMsg {cmdList args} {    
     upvar ::Jabber::jstate jstate
 
-    array set argsArr $args
+    array set argsA $args
     ::Debug 2 "::JWB::GroupchatMsg args='$args'"
     
     # The -from argument is either the room itself, or usually a user in
     # the room.
-    jlib::splitjid $argsArr(-from) roomjid resource
+    jlib::splitjid $argsA(-from) roomjid resource
     set w [GetWtopFromMessage groupchat $roomjid]
     if {$w eq ""} {
 	set w [eval {NewWhiteboardTo $roomjid -force 1} $args]
@@ -1468,9 +1467,9 @@ proc ::JWB::PresenceHook {jid type args} {
     
     ::Debug 2 "::JWB::PresenceHook jid=$jid, type=$type"
     
-    array set argsArr $args
-    if {[info exists argsArr(-resource)] && [string length $argsArr(-resource)]} {
-	set jid $jid/$argsArr(-resource)
+    array set argsA $args
+    if {[info exists argsA(-resource)] && [string length $argsA(-resource)]} {
+	set jid $jid/$argsA(-resource)
     }
     set mjid [jlib::jidmap $jid]
     
@@ -1749,12 +1748,12 @@ proc ::JWB::GetWtopFromMessage {type jid args} {
     variable jwbstate
     
     set w ""
-    array set argsArr $args
+    array set argsA $args
     
     switch -- $type {
 	 chat {
-	     if {[info exists argsArr(-thread)]} {
-		 set thread $argsArr(-thread)
+	     if {[info exists argsA(-thread)]} {
+		 set thread $argsA(-thread)
 		 if {[info exists jwbstate($thread,thread,w)]} {
 		     set w $jwbstate($thread,thread,w)
 		 }
