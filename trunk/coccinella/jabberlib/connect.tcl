@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.10 2006-09-09 13:09:54 matben Exp $
+# $Id: connect.tcl,v 1.11 2006-09-11 09:39:24 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -68,7 +68,7 @@ namespace eval jlib::connect {
     
     variable inited 0
     variable have
-    variable debug 0
+    variable debug 1
 }
 
 proc jlib::connect::init {jlibname} {

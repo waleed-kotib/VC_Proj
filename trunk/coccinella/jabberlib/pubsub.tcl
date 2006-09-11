@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.11 2006-09-09 13:09:54 matben Exp $
+# $Id: pubsub.tcl,v 1.12 2006-09-11 09:39:24 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -61,9 +61,7 @@ proc jlib::pubsub::init {jlibname} {
     }
 	
     # Register event notifier.
-    $jlibname message_register normal $xmlns(event)  \
-      [namespace current]::event
-
+    $jlibname message_register normal $xmlns(event) [namespace code event]
 }
 
 proc jlib::pubsub::cmdproc {jlibname cmd args} {

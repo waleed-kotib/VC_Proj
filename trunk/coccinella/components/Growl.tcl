@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.12 2006-08-02 12:58:08 matben Exp $
+# $Id: Growl.tcl,v 1.13 2006-09-11 09:39:24 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -41,10 +41,10 @@ proc ::Growl::ChatMessageHook {body args} {
     if {$body eq ""} {
 	return
     }
-    array set argsArr $args
+    array set argsA $args
 
     # -from is a 3-tier jid /resource included.
-    set jid $argsArr(-from)
+    set jid $argsA(-from)
     jlib::splitjid $jid jid2 -
     
     if {[::Chat::HaveChat $jid]} {
@@ -58,8 +58,8 @@ proc ::Growl::ChatMessageHook {body args} {
     # 	set chattoken [::Chat::GetTokenFrom chat threadid $threadID]
     # 	parray chattoken
 
-    if {[info exists argsArr(-subject)]} {
-	append title "\n$argsArr(-subject)"
+    if {[info exists argsA(-subject)]} {
+	append title "\n$argsA(-subject)"
     }
     growl post newMessage $title $body $cociFile
 }
@@ -75,20 +75,27 @@ proc ::Growl::PresenceHook {jid type args} {
 	if {$delay ne ""} {
 	    return
 	}
-	array set argsArr $args
+	array set argsA $args
 	set show $type
-	if {[info exists argsArr(-show)]} {
-	    set show $argsArr(-show)
+	if {[info exists argsA(-show)]} {
+	    set show $argsA(-show)
 	}
 	set status ""
-	if {[info exists argsArr(-status)]} {
-	    set status $argsArr(-status)
+	if {[info exists argsA(-status)]} {
+	    set status $argsA(-status)
 	}
 	
 	# This just translates the show code into a readable text.
 	set showMsg [::Roster::MapShowToText $show]
-	set title "$jid $show"
-	set msg "$jid $showMsg"
+	set djid $jid
+	if {[::Jabber::JlibCmd service isroom $jid]} {
+	    if {[info exists argsA(-from)]} {
+		set djid $argsA(-from)
+	    } 
+	}
+
+	set title "$djid $show"
+	set msg "$djid $showMsg"
 	if {$status ne ""} {
 	    append msg "\n$status"
 	}

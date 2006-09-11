@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.78 2006-08-14 13:08:03 matben Exp $
+# $Id: MUC.tcl,v 1.79 2006-09-11 09:39:24 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -699,7 +699,7 @@ proc ::MUC::GrantRevoke {roomjid which type} {
     }
     set row [$wtbl get $item]
     foreach {nick role aff} $row break
-    regexp {^([^@]+)@.+} $roomjid match roomName
+    jlib::splitjidex $roomjid roomName - -
     
     set ans [eval {
       ::UI::MegaDlgMsgAndEntry} [subst $dlgDefs($which,$type)] \
@@ -728,7 +728,7 @@ proc ::MUC::Kick {roomjid} {
     }
     set row [$wtbl get $item]
     foreach {nick role aff} $row break
-    regexp {^([^@]+)@.+} $roomjid match roomName
+    jlib::splitjidex $roomjid roomName - -
     
     set ans [::UI::MegaDlgMsgAndEntry  \
       {Kick Participant}  \
@@ -758,13 +758,14 @@ proc ::MUC::Ban {roomjid} {
     }
     set row [$wtbl get $item]
     foreach {nick role aff} $row break
-    regexp {^([^@]+)@.+} $roomjid match roomName
-    
+    jlib::splitjidex $roomjid roomName - -
+
     set ans [::UI::MegaDlgMsgAndEntry  \
       {Ban User}  \
       "Ban the user \"$nick\" from the room \"$roomName\""  \
       "Reason:"  \
       reason [mc Cancel] [mc OK]]
+    
     set opts {}
     if {$reason ne ""} {
 	set opts [list -reason $reason]
@@ -959,6 +960,7 @@ proc ::MUC::EditListBuild {roomjid type} {
     set oldFocus [focus]
     
     # Cache local variables.
+    set state(w)           $w
     set state(wtbl)        $wtbl
     set state(warrows)     $warrows
     set state(wbtok)       $wbtok  
@@ -1058,8 +1060,14 @@ proc ::MUC::EditListGetCB {token callid jlibname type subiq} {
     upvar 0 $token state
 
     upvar ::Jabber::jstate jstate
+    
+    # SInce we get this async we may have been already destroyed.
+    if {![info exists state(w)]} {
+	return
+    }
 
-    set type      $state(type)
+    set atype     $state(type)
+    set w         $state(w)
     set wtbl      $state(wtbl)
     set warrows   $state(warrows)
     set wbtok     $state(wbtok)
@@ -1071,13 +1079,16 @@ proc ::MUC::EditListGetCB {token callid jlibname type subiq} {
     if {$callid != $state(callid)} {
 	return
     }
-    if {![winfo exists $warrows]} {
+    if {![winfo exists $w]} {
 	return
     }
     
     $warrows stop
     if {$type eq "error"} {
-	::UI::MessageBox -type ok -icon error -message $subiq
+	set state(finished) 0
+	update idletasks
+	lassign $subiq errkey errmsg
+	::UI::MessageBox -type ok -icon error -message $errmsg
 	return
     }
     
@@ -1088,7 +1099,7 @@ proc ::MUC::EditListGetCB {token callid jlibname type subiq} {
     $wbtok configure -default active
     $wbtok state {!disabled}
 
-    switch -- $type {
+    switch -- $atype {
 	voice {
 	    $wbtrm state {!disabled}
 	}
@@ -1123,16 +1134,17 @@ proc ::MUC::FillEditList {token} {
     set wbtok     $state(wbtok)
     set type      $state(type)
     
-    set queryElem [wrapper::getchildren $state(subiq)]
+    set queryE $state(subiq)
     set tmplist {}
-    
-    foreach item [wrapper::getchildren $queryElem] {
+        
+    foreach itemE [wrapper::getchildren $queryE] {
 	set row {}
 	array set val {nick "" role none affiliation none jid "" reason ""}
-	array set val [lindex $item 1]
-	foreach c [wrapper::getchildren $item] {
-	    if {[string equal [lindex $c 0] "reason"]} {
-		set val(reason) [lindex $c 3]
+	array set val [wrapper::getattrlist $itemE]
+	foreach c [wrapper::getchildren $itemE] {
+	    set tag [wrapper::gettag $c]
+	    if {[string equal $tag "reason"]} {
+		set val(reason) [wrapper::getcdata $c]
 		break
 	    }
 	}
@@ -1471,9 +1483,7 @@ proc ::MUC::RoomConfigResult {roomjid jlibname type subiq} {
 proc ::MUC::SetNick {roomjid} {
     variable locals
     upvar ::Jabber::jstate jstate
-    
-    puts ::MUC::SetNick
-    
+        
     set nickname ""
     set ans [::UI::MegaDlgMsgAndEntry  \
       [mc {Set New Nickname}]  \
