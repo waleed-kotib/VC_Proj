@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: util.tcl,v 1.7 2006-08-06 13:22:05 matben Exp $
+# $Id: util.tcl,v 1.8 2006-09-12 13:28:34 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -222,7 +222,7 @@ proc ui::Grab {win} {
     tkwait window $win
 }
 
-proc ui::GrabNEW {win} {
+proc ui::GrabTEST {win} {
     grab $win
     set idxlist [MenubarDisable $win]
     set mb [$win cget -menu]
@@ -233,10 +233,12 @@ proc ui::GrabNEW {win} {
 proc ui::MenubarDisable {win} {
 
     # @@@ This doesn't handle accelerators!
+    # But with grab other windows should never get focus.
+    # @@@ Must allow cut/copy/paste from edit menu.
     set idxlist {}
     if {[tk windowingsystem] eq "aqua"} {
 	set mb [$win cget -menu]
-	if {$mb != ""} {
+	if {$mb ne ""} {
 	    set iend [$mbar index end]
 	    for {set idx 0} {$idx <= $iend} {incr idx} {
 		if {[$mb entrycget $idx -state] eq "normal"} {
