@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.132 2006-09-10 14:58:05 matben Exp $
+# $Id: JUI.tcl,v 1.133 2006-09-12 10:19:22 matben Exp $
 
 package provide JUI 1.0
 
@@ -727,12 +727,6 @@ proc ::JUI::OpenBugURL { } {
     ::Utils::OpenURLInBrowser $config(url,bugs)
 }
 
-proc ::JUI::StopConnect { } {
-    
-    ::Jabber::DoCloseClientConnection
-    ::Login::Reset
-}    
-
 proc ::JUI::GetNotebook { } {
     variable jwapp
     
@@ -999,16 +993,14 @@ proc ::JUI::FixUIWhen {what} {
 	    set stopImage [::Theme::GetImage [option get $w stopImage {}]]
 
 	    $wtbar buttonconfigure connect -text [mc Stop] \
-	      -image $stopImage -disabledimage $stopImage \
-	      -command ::JUI::StopConnect
+	      -image $stopImage -disabledimage $stopImage
 	}
 	connectfin - connect {
 	    set connectedImage    [::Theme::GetImage [option get $w connectedImage {}]]
 	    set connectedDisImage [::Theme::GetImage [option get $w connectedDisImage {}]]
 
 	    $wtbar buttonconfigure connect -text [mc Logout] \
-	      -image $connectedImage -disabledimage $connectedDisImage \
-	      -command ::Jabber::OnMenuLogInOut
+	      -image $connectedImage -disabledimage $connectedDisImage
 	    $wtbar buttonconfigure newuser -state normal
 	}
 	disconnect {
@@ -1016,8 +1008,7 @@ proc ::JUI::FixUIWhen {what} {
 	    set iconConnectDis  [::Theme::GetImage [option get $w connectDisImage {}]]
 
 	    $wtbar buttonconfigure connect -text [mc Login] \
-	      -image $iconConnect -disabledimage $iconConnectDis \
-	      -command ::Jabber::OnMenuLogInOut
+	      -image $iconConnect -disabledimage $iconConnectDis
 	    $wtbar buttonconfigure newuser -state disabled
 	}
     }
