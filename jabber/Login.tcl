@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.97 2006-09-10 14:58:05 matben Exp $
+# $Id: Login.tcl,v 1.98 2006-09-12 10:19:22 matben Exp $
 
 package provide Login 1.0
 
@@ -371,7 +371,6 @@ proc ::Login::Reset { } {
 
     set pending 0
     $jstate(jlib) connect reset
-    #$jstate(jlib) kill 
 
     ::JUI::SetStatusMessage ""
     ::JUI::StartStopAnimatedWave 0
@@ -572,7 +571,7 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     ::JUI::SetStatusMessage [mc jawaitresp $server]
     ::JUI::StartStopAnimatedWave 1
     ::JUI::FixUIWhen "connectinit"
-    ::JUI::SetConnectState "connectfin"
+    ::JUI::SetConnectState "connectinit"
     
     set pending 1
 
@@ -697,6 +696,9 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	    # Identify the xmpp-stanzas.
 	    if {$state(state) eq "authenticate"} {
 		
+		# Added 'bad-auth' which seems to be a ejabberd anachronism.
+		set errcode [string map {bad-auth not-authorized} $errcode]
+		
 		# @@@ We should display a simpler message here since
 		# xmpp-stanzas a bit technical.
 		set str [mc xmpp-stanzas-$errcode]
@@ -717,8 +719,12 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Login::HandleErrorCode errcode=$errcode, errmsg=$errmsg"
+    
+    if {$errcode eq "reset"} {
+	return
+    }
 
-    array set state [jlib::connect::get_state $jstate(jlib)]
+    array set state [$jstate(jlib) connect get_state]
     set str [GetErrorStr $errcode $errmsg]
     set type ok
     set default ok

@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.14 2006-08-08 08:10:03 matben Exp $
+# $Id: dialog.tcl,v 1.15 2006-09-12 10:19:22 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -416,7 +416,8 @@ snit::widget ui::dialog::widget {
 	if {![winfo exists $client]} {
 	    ttk::frame $client
 	    grid $client -column 1 -row 2 -sticky news
-	    lower $client	;# so it's first in keyboard traversal order
+	    # so it's first in keyboard traversal order
+	    lower $client
 	}
 	return $client 
     }
@@ -448,7 +449,12 @@ if {0} {
     set w [ui::dialog -message $str -detail $str  \
       -icon error -type yesnocancel -modal 1]
     set fr [$w clientframe]
-    pack [ttk::checkbutton $fr.c -text $str2] -side left
+    grid [ttk::label $fr.l -text Enter:] [ttk::entry $fr.e -textvariable v] -sticky e
+    grid $fr.e -sticky ew
+    grid columnconfigure $fr 1 -weight 1
+    #pack [ttk::checkbutton $fr.c -text $str2] -side left
+    
+    
 }
 
 #-------------------------------------------------------------------------------

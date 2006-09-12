@@ -11,7 +11,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.23 2006-08-03 13:01:49 matben Exp $
+# $Id: jlibsasl.tcl,v 1.24 2006-09-12 10:19:23 matben Exp $
 
 package require jlib
 package require saslmd5
@@ -471,7 +471,8 @@ proc jlib::sasl_reset {jlibname} {
 namespace eval jlib {
     
     # This maps Defined Conditions to clear text messages.
-    # draft-ietf-xmpp-core23; 6.4 Defined Conditions
+    # RFC 3920 (XMPP core); 6.4 Defined Conditions
+    # Added 'bad-auth' which seems to be a ejabberd anachronism.
     
     variable saslmsg
     array set saslmsg {
@@ -482,6 +483,7 @@ namespace eval jlib {
     mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
     not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
     temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
+    bad-auth            {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
    }
 }
 

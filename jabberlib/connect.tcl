@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.11 2006-09-11 09:39:24 matben Exp $
+# $Id: connect.tcl,v 1.12 2006-09-12 10:19:22 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -68,7 +68,7 @@ namespace eval jlib::connect {
     
     variable inited 0
     variable have
-    variable debug 1
+    variable debug 0
 }
 
 proc jlib::connect::init {jlibname} {
@@ -832,7 +832,8 @@ proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {
 	if {[info exists state(sock)]} {
 	    # This 'kills' the connection.
 	    # after idle seems necessary when resetting xml parser from callback
-	    after idle [list $jlibname closestream]
+	    #after idle [list $jlibname closestream]
+	    $jlibname kill
 	}
     } else {
 	set status ok
