@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.162 2006-09-10 14:58:05 matben Exp $
+# $Id: GroupChat.tcl,v 1.163 2006-09-12 06:46:24 matben Exp $
 
 package require Create
 package require Enter
@@ -704,6 +704,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set wyscusers   $wroom.mid.pv.r.ysc
     
     set roomjid [jlib::jidmap $roomjid]
+    jlib::splitjidex $roomjid node domain -
 
     set chatstate(exists)       1
     set chatstate(wroom)        $wroom
@@ -723,6 +724,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     } else {
 	set chatstate(displayName) $roomjid
     }
+    set chatstate(roomNode)     $node
     set chatstate(wtext)        $wtext
     set chatstate(wfind)        $wfind
     set chatstate(wtextsend)    $wtextsend
@@ -1028,7 +1030,7 @@ proc ::GroupChat::MoveRoomToPage {dlgtoken chattoken} {
     set wnb      $dlgstate(wnb)
     set wcont    $dlgstate(wcont)
     set wroom    $chatstate(wroom)
-    set dispname $chatstate(displayName)
+    set roomNode $chatstate(roomNode)
     
     pack forget $wroom
 
@@ -1040,7 +1042,7 @@ proc ::GroupChat::MoveRoomToPage {dlgtoken chattoken} {
 
     set wpage $wnb.p[incr dlgstate(uid)]
     ttk::frame $wpage
-    $wnb add $wpage -sticky news -text $dispname -compound left
+    $wnb add $wpage -sticky news -text $roomNode -compound left
     pack $wroom -in $wpage -fill both -expand true -side right
     raise $wroom
     
@@ -1069,7 +1071,7 @@ proc ::GroupChat::MakeNewPage {dlgtoken roomjid args} {
 
     variable $chattoken
     upvar 0 $chattoken chatstate
-    $wnb tab $wpage -text $chatstate(displayName)
+    $wnb tab $wpage -text $chatstate(roomNode)
     set chatstate(wpage) $wpage
     set dlgstate(wpage2token,$wpage) $chattoken
     
@@ -1201,7 +1203,7 @@ proc ::GroupChat::SetRoomState {dlgtoken chattoken} {
     
     if {[winfo exists $dlgstate(wnb)]} {
 	$dlgstate(wnb) tab $chatstate(wpage) -image ""  \
-	  -text $chatstate(displayName)
+	  -text $chatstate(roomNode)
     }
     SetTitle $chattoken
     if {[::Jabber::IsConnected]} {
@@ -1295,10 +1297,9 @@ proc ::GroupChat::TabAlert {chattoken args} {
 	set wnb     $dlgstate(wnb)
 	
 	# Show only if not current page.
-	if {[GetActiveChatToken $dlgtoken] != $chattoken} {
+	if {[GetActiveChatToken $dlgtoken] ne $chattoken} {
 	    incr chatstate(nhiddenmsgs)
-	    set postfix " ($chatstate(nhiddenmsgs))"
-	    set name $chatstate(displayName)
+	    set name $chatstate(roomNode)
 	    append name " " "($chatstate(nhiddenmsgs))"
 	    set icon [::Theme::GetImage [option get $w tabAlertImage {}]]
 	    $wnb tab $chatstate(wpage) -image $icon -text $name
@@ -1574,11 +1575,11 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     }
     bindtags $T [concat UsersTreeTag [bindtags $T]]
     
-    bind UsersTreeTag <Button-1>        [list ::GroupChat::TreeButtonPress $chattoken %W %x %y ]
-    bind UsersTreeTag <ButtonRelease-1> { ::GroupChat::TreeButtonRelease %W %x %y }        
-    bind UsersTreeTag <<ButtonPopup>>   [list ::GroupChat::TreePopup $chattoken %W %x %y ]
-    bind UsersTreeTag <Double-1>        { ::GroupChat::DoubleClick %W %x %y }        
-    bind UsersTreeTag <Destroy>         {+::GroupChat::TreeOnDestroy %W }
+    bind $T <Button-1>        [list ::GroupChat::TreeButtonPress $chattoken %W %x %y ]
+    bind $T <ButtonRelease-1> { ::GroupChat::TreeButtonRelease %W %x %y }        
+    bind $T <<ButtonPopup>>   [list ::GroupChat::TreePopup $chattoken %W %x %y ]
+    bind $T <Double-1>        { ::GroupChat::DoubleClick %W %x %y }        
+    bind $T <Destroy>         {+::GroupChat::TreeOnDestroy %W }
     
     ::treeutil::setdboptions $T $w utree
 }
@@ -2398,7 +2399,7 @@ proc ::GroupChat::Popup {chattoken w tag x y} {
     }
 
     ::Debug 2 "\t jid=$jid, clicked=$clicked"
-        
+
     # Insert any registered popup menu entries.
     set mDef  $popMenuDefs(groupchat,def)
     set mType $popMenuDefs(groupchat,type)
