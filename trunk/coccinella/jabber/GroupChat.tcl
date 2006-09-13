@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.163 2006-09-12 06:46:24 matben Exp $
+# $Id: GroupChat.tcl,v 1.164 2006-09-13 14:09:11 matben Exp $
 
 package require Create
 package require Enter
@@ -2806,7 +2806,7 @@ proc ::GroupChat::EditBookmarks { } {
     set columns [list  \
       0 [mc Bookmark] 0 [mc Address]  \
       0 [mc Nickname] 0 [mc Password] \
-      0 [mc Autojoin]]
+      0 [mc {Auto Join}]]
 
     set bookmarksVar {}
     ::Bookmarks::Dialog $dlg [namespace current]::bookmarksVar  \

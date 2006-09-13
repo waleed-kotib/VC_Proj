@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.53 2006-09-10 15:11:10 matben Exp $
+# $Id: Register.tcl,v 1.54 2006-09-13 14:09:11 matben Exp $
 
 package provide Register 1.0
 
@@ -55,11 +55,8 @@ proc ::Register::Remove {{jid {}}} {
     } else {
 	set jidlist [::Roster::GetUsersWithSameHost $jid]
 	if {[llength $jidlist]} {
-	    set msg "You are about to unregister a transport with a number\
-	      of dependent users. Do you want to remove these users as well (Yes),\
-	      keep them (No), or cancel the whole thing (Cancel)."
 	    set ans [::UI::MessageBox -icon warning -title [mc Unregister] \
-	      -type yesnocancel -default no -message $msg]
+	      -type yesnocancel -default no -message [mc register-trpt-unreg]]
 	    if {$ans eq "cancel"} {
 		return
 	    } elseif {$ans eq "yes"} {
@@ -399,8 +396,7 @@ proc ::RegisterEx::Get {token} {
     
     # Verify.
     if {$state(-server) eq ""} {
-	::UI::MessageBox -type ok -icon error  \
-	  -message [mc jamessregnoserver]
+	::UI::MessageBox -type ok -icon error -message [mc jamessregnoserver]
 	return
     }	
     # This is just to check the validity!
@@ -519,7 +515,7 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
 	    grid  $wfr.l$tag  $wfr.e$tag  -sticky e -pady 2
 	    grid  $wfr.e$tag  -sticky ew
 	    if {$tag eq "password"} {
-		set str "[mc {Retype password}]:"
+		set str "[mc {Retype Password}]:"
 		if {[info exists state(-password)]} {
 		    set state(elem,${tag}2) $state(-password)
 		} else {
@@ -688,7 +684,7 @@ proc ::RegisterEx::AuthCB {jlibname status {errcode ""} {errmsg ""}} {
 	    $jlibname connect free
 	}
 	error {
-	    set str [mc xmpp-stanzas-$errcode]
+	    set str [mc xmpp-stanzas-short-$errcode]
 	    ::UI::MessageBox -icon error -type ok -title [mc Error] -message $str
 	    $jlibname connect free
 	}

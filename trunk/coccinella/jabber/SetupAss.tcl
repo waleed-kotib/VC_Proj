@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.39 2006-04-17 13:23:38 matben Exp $
+# $Id: SetupAss.tcl,v 1.40 2006-09-13 14:09:11 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -137,7 +137,7 @@ proc ::Jabber::SetupAss::SetupAss { } {
     ttk::label $fr3.srv2 -textvariable ${ns}::server
     ttk::label $fr3.lan  -text "[mc Username]:"
     ttk::label $fr3.lap  -text "[mc Password]:"
-    ttk::label $fr3.lap2 -text "[mc {Retype password}]:"
+    ttk::label $fr3.lap2 -text "[mc {Retype Password}]:"
     ttk::entry $fr3.name -textvariable ${ns}::username \
        -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
     ttk::entry $fr3.pass -textvariable ${ns}::password -show {*} \

@@ -474,6 +474,7 @@
 ::msgcat::mcset de {Ask each time}        {Jedes Mal fragen}
 ::msgcat::mcset de {Auto Away}            {Autom. Abwesenheit}
 ::msgcat::mcset de {Auto Connect}         {Autom. Verbindung}
+::msgcat::mcset de {Auto Join}
 ::msgcat::mcset de {Auto-accept}          {Autom. Annahme}
 ::msgcat::mcset de {Auto-reject}          {Autom. Abweisung}
 ::msgcat::mcset de {Away status}          {Abwesenheits-Status}
@@ -577,19 +578,20 @@
 ::msgcat::mcset de {Movie Options}
 ::msgcat::mcset de {Multi Connect}        {Mehrfach-Verbindung}
 ::msgcat::mcset de {My Avatar}
+::msgcat::mcset de {My nickname for own display}
 ::msgcat::mcset de {My Status}            {Mein Status}
 ::msgcat::mcset de {Name of list}    	  {Name der Liste} 
 ::msgcat::mcset de {Network Error}        {Netzwerk-Fehler}
 ::msgcat::mcset de {Network Setup}        {Netzwerk-Einrichtung}
 ::msgcat::mcset de {New Account}          {Neues Konto}
-::msgcat::mcset de {New bookmark}	  {Neues Lesezeichen}
+::msgcat::mcset de {New Bookmark}	  {Neues Lesezeichen}
 ::msgcat::mcset de {New chat message}     {Neue Chat-Nachricht}
 ::msgcat::mcset de {New chat thread}      {Neues Chat-Thema}
 ::msgcat::mcset de {New Color}            {Neue Farbe}
 ::msgcat::mcset de {New incoming message} {Neue eingehende Nachricht}
 ::msgcat::mcset de {New Message}          {Neue Nachricht}
 ::msgcat::mcset de {New Nickname} 	  {Neuer Spitzname}
-::msgcat::mcset de {New password}         {Neues Passwort}
+::msgcat::mcset de {New Password}         {Neues Passwort}
 ::msgcat::mcset de {New Profile}
 ::msgcat::mcset de {New Rule}	 	  {Neue Regel}
 ::msgcat::mcset de {New Topic}            {Neues Thema}
@@ -640,7 +642,7 @@
 ::msgcat::mcset de {Put Image/Movie}      {Bild/Film senden}
 ::msgcat::mcset de {Reject receive}       {Ablehnung erhalten}
 ::msgcat::mcset de {Request To User}      {Anforderung an Benutzer}
-::msgcat::mcset de {Retype password}      {Passwort erneut eingeben}
+::msgcat::mcset de {Retype Password}      {Passwort erneut eingeben}
 ::msgcat::mcset de {Revert Panel}         {Einstellungen zurücksetzen}
 ::msgcat::mcset de {Register New Account} {Neues Konto registrieren}
 ::msgcat::mcset de {Register Now}         {Jetzt registrieren}
@@ -968,6 +970,8 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de version-name                 {Name}
 ::msgcat::mcset de version-version              {Version}
 ::msgcat::mcset de version-os                   {Operating system}
+
+::msgcat::mcset de register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
 
 
 ::msgcat::mcset de openquicktime		{Öffne QuickTime live stream}

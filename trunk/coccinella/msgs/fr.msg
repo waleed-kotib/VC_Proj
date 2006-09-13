@@ -472,6 +472,7 @@
 ::msgcat::mcset fr {Ask each time}		{Demander chaque fois}
 ::msgcat::mcset fr {Auto Away}			{Départ automatique}
 ::msgcat::mcset fr {Auto Connect}		{Connexion automatique}
+::msgcat::mcset fr {Auto Join}
 ::msgcat::mcset fr {Auto-accept}		{Accepter automatiquement}
 ::msgcat::mcset fr {Auto-reject}		{Rejeter automatiquement}
 ::msgcat::mcset fr {Away status}		{Statut "Absent"}
@@ -574,19 +575,20 @@
 ::msgcat::mcset fr {Movie Options}
 ::msgcat::mcset fr {Multi Connect}		{Connexions multiples}
 ::msgcat::mcset fr {My Avatar}
+::msgcat::mcset fr {My nickname for own display}
 ::msgcat::mcset fr {My Status}			{Mon statut}
 ::msgcat::mcset fr {Name of list}		{Nom de liste}
 ::msgcat::mcset fr {Network Error}		{Erreur de Réseau}
 ::msgcat::mcset fr {Network Setup}		{Configuration du réseau}
 ::msgcat::mcset fr {New Account}		{&Nouvel utilisateur}
-::msgcat::mcset fr {New bookmark}		{Nouveau marque-page}
+::msgcat::mcset fr {New Bookmark}		{Nouveau marque-page}
 ::msgcat::mcset fr {New chat message}		{Nouveau message dans la discussion}
 ::msgcat::mcset fr {New chat thread}		{Nouvelle discussion}
 ::msgcat::mcset fr {New Color}			{Nouvelle couleur}
 ::msgcat::mcset fr {New incoming message}	{Nouveau message entrant}
 ::msgcat::mcset fr {New Message}		{Nouveau message}
 ::msgcat::mcset fr {New Nickname}		{Nouveau pseudo}
-::msgcat::mcset fr {New password}		{Nouveau mot de passe}
+::msgcat::mcset fr {New Password}		{Nouveau mot de passe}
 ::msgcat::mcset fr {New Profile}
 ::msgcat::mcset fr {New Rule}			{Nouvelle règle}
 ::msgcat::mcset fr {New Topic}			{Nouveau sujet}
@@ -637,7 +639,7 @@
 ::msgcat::mcset fr {Put Image/Movie}		{Insérer image/vidéo}
 ::msgcat::mcset fr {Reject receive}		{Rejeter la réception}
 ::msgcat::mcset fr {Request To User}		{Demande à l'utilisateur}
-::msgcat::mcset fr {Retype password}		{Retaper le mot de passe}
+::msgcat::mcset fr {Retype Password}		{Retaper le mot de passe}
 ::msgcat::mcset fr {Revert Panel}		{Annuler les changements}
 ::msgcat::mcset fr {Register New Account}	{Enregistrer nouveau compte}
 ::msgcat::mcset fr {Register Now}		{S'enregistrer maintenant}
@@ -978,6 +980,8 @@
 ::msgcat::mcset fr version-name                 {Name}
 ::msgcat::mcset fr version-version              {Version}
 ::msgcat::mcset fr version-os                   {Operating system}
+
+::msgcat::mcset fr register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
 
 
 ::msgcat::mcset fr openquicktime		{Ouvrir le streaming QuickTime}

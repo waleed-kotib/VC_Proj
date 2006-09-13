@@ -468,6 +468,7 @@
 ::msgcat::mcset sv {Ask each time}         {Fråga varje gång}
 ::msgcat::mcset sv {Auto Away}             {Auto frånvarande}
 ::msgcat::mcset sv {Auto Connect}          {Autoanslut}
+::msgcat::mcset sv {Auto Join}             {Anslut automatiskt}
 ::msgcat::mcset sv {Auto-accept}           {Acceptera automatiskt}
 ::msgcat::mcset sv {Auto-reject}           {Neka automatiskt}
 ::msgcat::mcset sv {Away status}           {Frånvarande status}
@@ -571,19 +572,20 @@
 ::msgcat::mcset sv {Movie Options}         {Film inställningar}
 ::msgcat::mcset sv {Multi Connect}         {Multipelanslut}
 ::msgcat::mcset sv {My Avatar}             {Min avatar}
+::msgcat::mcset sv {My nickname for own display} {Mitt kortnamn för egna dialoger}
 ::msgcat::mcset sv {My Status}		   {Min status}
 ::msgcat::mcset sv {Name of list}          {Listnamn}
 ::msgcat::mcset sv {Network Error}         {Nätverksfel}
 ::msgcat::mcset sv {Network Setup}         {Nätverksinställning}
 ::msgcat::mcset sv {New Account}           {Nytt konto}
-::msgcat::mcset sv {New bookmark}          {Nytt bokmärke}
+::msgcat::mcset sv {New Bookmark}          {Nytt bokmärke}
 ::msgcat::mcset sv {New chat message}      {Nytt chatt meddelande}
 ::msgcat::mcset sv {New chat thread}       {Ny chatt tråd}
 ::msgcat::mcset sv {New Color}             {Ny färg}
 ::msgcat::mcset sv {New incoming message}  {Nytt meddelande}
 ::msgcat::mcset sv {New Message}           {Nytt meddelande}
 ::msgcat::mcset sv {New Nickname}          {Nytt kortnamn}
-::msgcat::mcset sv {New password}          {Nytt lösenord}
+::msgcat::mcset sv {New Password}          {Nytt lösenord}
 ::msgcat::mcset sv {New Profile}           {Ny profil}
 ::msgcat::mcset sv {New Rule}              {Ny regel}
 ::msgcat::mcset sv {New shortcut}          {Ny genväg}
@@ -634,7 +636,7 @@
 ::msgcat::mcset sv {Put Image/Movie}       {Skicka bild/film}
 ::msgcat::mcset sv {Reject receive}        {Neka mottagande}
 ::msgcat::mcset sv {Request To User}       {Förfrågan till användaren}
-::msgcat::mcset sv {Retype password}       {Upprepa lösenord}
+::msgcat::mcset sv {Retype Password}       {Upprepa lösenord}
 ::msgcat::mcset sv {Revert Panel}          {Återställ panelen}
 ::msgcat::mcset sv {Register New Account}  {Registrera nytt konto}
 ::msgcat::mcset sv {Register Now}	   {Registrera nu}
@@ -961,6 +963,8 @@ där användarnamnet är okänt).}
 ::msgcat::mcset sv version-name                 {Namn}
 ::msgcat::mcset sv version-version              {Version}
 ::msgcat::mcset sv version-os                   {Operativsystem}
+
+::msgcat::mcset sv register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
 
 
 ::msgcat::mcset sv openquicktime		{Öppna en QuickTime ström}

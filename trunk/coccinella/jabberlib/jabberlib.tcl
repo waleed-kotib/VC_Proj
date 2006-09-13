@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.155 2006-09-05 13:47:20 matben Exp $
+# $Id: jabberlib.tcl,v 1.156 2006-09-13 14:09:12 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1895,7 +1895,7 @@ proc jlib::getstreamerrorspec {errelem} {
 #       kind.       'stanzas' or 'streams'
 #       
 # Results:
-#       none.
+#       {errcode errmsg}
 
 proc jlib::geterrspecfromerror {errelem kind} {
        
@@ -3607,6 +3607,7 @@ namespace eval jlib {
     
     # We just the http error codes here since may be useful if we only
     # get the 'code' attribute in an error element.
+    # @@@ Add to message catalogs.
     variable errCodeToText
     array set errCodeToText {
 	100 "Continue"

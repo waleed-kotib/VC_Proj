@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.66 2006-09-11 12:14:17 matben Exp $
+# $Id: JWB.tcl,v 1.67 2006-09-13 14:09:11 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -125,7 +125,7 @@ proc ::JWB::InitUI { } {
     #     Aqua: handled in apple menu
     #     Else: handled in main window
     set menuDefsFile {
-	{command   mNew                {::WB::NewWhiteboard}         N}
+	{command   mNewWhiteboard      {::WB::NewWhiteboard}         N}
 	{command   mCloseWindow        {::UI::CloseWindowEvent}      W}
 	{separator}
 	{command   mOpenImage/Movie    {::WB::OnMenuImport}          I}

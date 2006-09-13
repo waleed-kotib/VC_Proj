@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.66 2006-09-13 07:56:01 matben Exp $
+# $Id: Profiles.tcl,v 1.67 2006-09-13 14:09:11 matben Exp $
 
 package provide Profiles 1.0
 
@@ -355,7 +355,7 @@ proc ::Profiles::SetWithKey {name key value} {
 	set profArr($name) [concat [lrange $profArr($name) 0 2] [array get opts]]
     }
     if {$config(profiles,do)} {
-	set prof [eval {FilterConfigProfile $name} $profArr($name)
+	set prof [eval {FilterConfigProfile $name} $profArr($name)]
 	if {$prof ne {}} {
 	    set profArr($name) $prof
 	    set cprofiles [array get profArr]
