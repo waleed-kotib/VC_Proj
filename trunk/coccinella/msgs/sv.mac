@@ -911,13 +911,29 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
-::msgcat::mcset sv xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
-::msgcat::mcset sv xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
-::msgcat::mcset sv xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
-::msgcat::mcset sv xmpp-stanzas-invalid-mechanism   {The initiating entity did not provide a mechanism or requested a mechanism that is not supported by the receiving entity.}
-::msgcat::mcset sv xmpp-stanzas-mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
-::msgcat::mcset sv xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
-::msgcat::mcset sv xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
+# 
+# These are much too formal to be used for user display and we therfore instead use the short forms below.
+
+::msgcat::mcset sv xmpp-stanzas-aborted             {Den mottagande enheten bekräftar avbrottet från den initierande enheten.}
+::msgcat::mcset sv xmpp-stanzas-incorrect-encoding  {Data från den initierande enheten kunde ej behandlas därför att [BASE64] kodningen var felaktig.}
+::msgcat::mcset sv xmpp-stanzas-invalid-authzid     {Den authzid från den initierande enheten är oriktig, antingen därför att formatet är felaktigt eller därför att den initierande enheten
+ej har tillstånd att autentisera denna ID.}
+::msgcat::mcset sv xmpp-stanzas-invalid-mechanism   {Den initierande enheten erbjöd ej en mekanism eller krävde en mekanism som ej stöds av den mottagande enheten.}
+::msgcat::mcset sv xmpp-stanzas-mechanism-too-weak  {Mekanismen som efterfrågades av den initerande enheten är svagare än vad servern tillåter för denna enhet.}
+::msgcat::mcset sv xmpp-stanzas-not-authorized      {Autentiseringen misslyckades därför att den initierande enheten ej erbjöd tillräckliga kreditiv (detta inkluderar men begränsas ej till fallet
+där användarnamnet är okänt).}
+::msgcat::mcset sv xmpp-stanzas-temporary-auth-failure {Autentiseringen misslyckades på grund av ett tillfälligt fel hos den mottagande enheten.}
+
+# Short messages in place of the above ones.
+::msgcat::mcset sv xmpp-stanzas-short-aborted             {Påloggningen blev avbruten.}
+::msgcat::mcset sv xmpp-stanzas-short-incorrect-encoding  {Protokollfel vid inloggningen.}
+::msgcat::mcset sv xmpp-stanzas-short-invalid-authzid     {Protokollfel vid inloggningen.}
+::msgcat::mcset sv xmpp-stanzas-short-invalid-mechanism   {Protokollfel vid inloggningen.}
+::msgcat::mcset sv xmpp-stanzas-short-mechanism-too-weak  {Protokollfel vid inloggningen.}
+::msgcat::mcset sv xmpp-stanzas-short-not-authorized      {Påloggningen misslyckades på grund av felaktigt användarnamn eller lösenord.}
+::msgcat::mcset sv xmpp-stanzas-short-temporary-auth-failure {Protokollfel vid inloggningen.}
+
+
 
 ::msgcat::mcset sv starttls-nofeature     {Servern "%s" saknar stöd för TLS.}
 ::msgcat::mcset sv starttls-failure        {TLS förhandling med servern "%s" misslyckades.}
@@ -941,6 +957,10 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
 ::msgcat::mcset sv registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
 
+# Map version info tags to display names.
+::msgcat::mcset sv version-name                 {Namn}
+::msgcat::mcset sv version-version              {Version}
+::msgcat::mcset sv version-os                   {Operativsystem}
 
 
 ::msgcat::mcset sv openquicktime		{Öppna en QuickTime ström}

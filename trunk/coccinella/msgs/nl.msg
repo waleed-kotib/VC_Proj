@@ -908,6 +908,9 @@
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
+# 
+# These are much too formal to be used for user display and we therfore instead use the short forms below.
+
 ::msgcat::mcset nl xmpp-stanzas-aborted			{De ontvanger bericht de ontvangst van een mislukt element verzonden door de initiërende partij.}
 ::msgcat::mcset nl xmpp-stanzas-incorrect-encoding	{De gegevens van de initiërende partij konden niet worden verwerkt omdat de [BASE64]-encodering foutief is.}
 ::msgcat::mcset nl xmpp-stanzas-invalid-authzid		{De "authzid" van de initiërende partij is ongeldig omdat de ID foutief is opgemaakt of omdat de initiërende partij geen toestemming heeft om die ID te autoriseren.}
@@ -915,6 +918,16 @@
 ::msgcat::mcset nl xmpp-stanzas-mechanism-too-weak	{Het door de initiërende partij aangevraagde mechanisme is zwakker dan het beleid dat de server toestaat voor die initiërende partij.}
 ::msgcat::mcset nl xmpp-stanzas-not-authorized		{De authenticatie mislukte omdat de initiërende partij geen geldig legitimatiebewijs opgaf (dit omvat onder andere het gebruik van een onbekende gebruikersnaam).}
 ::msgcat::mcset nl xmpp-stanzas-temporary-auth-failure	{De authenticatie mislukte door een tijdelijke fout bij de ontvanger.}
+
+# Short messages in place of the above ones.
+::msgcat::mcset nl xmpp-stanzas-short-aborted             {The login process was aborted.}
+::msgcat::mcset nl xmpp-stanzas-short-incorrect-encoding  {Protocol error during the login process.}
+::msgcat::mcset nl xmpp-stanzas-short-invalid-authzid     {Protocol error during the login process.}
+::msgcat::mcset nl xmpp-stanzas-short-invalid-mechanism   {Protocol error during the login process.}
+::msgcat::mcset nl xmpp-stanzas-short-mechanism-too-weak  {Protocol error during the login process.}
+::msgcat::mcset nl xmpp-stanzas-short-not-authorized      {Login failed because of unknown user or wrong password.}
+::msgcat::mcset nl xmpp-stanzas-short-temporary-auth-failure {Protocol error during the login process.}
+
 
 ::msgcat::mcset nl starttls-nofeature	{Server "%s" ondersteunt TLS niet.}
 ::msgcat::mcset nl starttls-failure	{Beveiligd verbinden via TLS met server "%s" mislukte.}

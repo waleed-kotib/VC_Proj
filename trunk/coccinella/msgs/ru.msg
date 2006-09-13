@@ -805,6 +805,9 @@ You have a subscription for %s: %s.}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
+# 
+# These are much too formal to be used for user display and we therfore instead use the short forms below.
+
 ::msgcat::mcset ru xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
 ::msgcat::mcset ru xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
 ::msgcat::mcset ru xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
@@ -812,6 +815,16 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset ru xmpp-stanzas-mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
 ::msgcat::mcset ru xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
 ::msgcat::mcset ru xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
+
+# Short messages in place of the above ones.
+::msgcat::mcset ru xmpp-stanzas-short-aborted             {The login process was aborted.}
+::msgcat::mcset ru xmpp-stanzas-short-incorrect-encoding  {Protocol error during the login process.}
+::msgcat::mcset ru xmpp-stanzas-short-invalid-authzid     {Protocol error during the login process.}
+::msgcat::mcset ru xmpp-stanzas-short-invalid-mechanism   {Protocol error during the login process.}
+::msgcat::mcset ru xmpp-stanzas-short-mechanism-too-weak  {Protocol error during the login process.}
+::msgcat::mcset ru xmpp-stanzas-short-not-authorized      {Login failed because of unknown user or wrong password.}
+::msgcat::mcset ru xmpp-stanzas-short-temporary-auth-failure {Protocol error during the login process.}
+
 
 ::msgcat::mcset ru starttls-nofeature     {The server "%s" has no support for TLS.}
 ::msgcat::mcset ru starttls-failure       {TLS negotiating with server "%s" failed.}

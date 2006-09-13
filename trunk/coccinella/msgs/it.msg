@@ -903,6 +903,9 @@
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
+# 
+# These are much too formal to be used for user display and we therfore instead use the short forms below.
+
 ::msgcat::mcset it xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
 ::msgcat::mcset it xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
 ::msgcat::mcset it xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
@@ -910,6 +913,16 @@
 ::msgcat::mcset it xmpp-stanzas-mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
 ::msgcat::mcset it xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
 ::msgcat::mcset it xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
+
+# Short messages in place of the above ones.
+::msgcat::mcset it xmpp-stanzas-short-aborted             {The login process was aborted.}
+::msgcat::mcset it xmpp-stanzas-short-incorrect-encoding  {Protocol error during the login process.}
+::msgcat::mcset it xmpp-stanzas-short-invalid-authzid     {Protocol error during the login process.}
+::msgcat::mcset it xmpp-stanzas-short-invalid-mechanism   {Protocol error during the login process.}
+::msgcat::mcset it xmpp-stanzas-short-mechanism-too-weak  {Protocol error during the login process.}
+::msgcat::mcset it xmpp-stanzas-short-not-authorized      {Login failed because of unknown user or wrong password.}
+::msgcat::mcset it xmpp-stanzas-short-temporary-auth-failure {Protocol error during the login process.}
+
 
 ::msgcat::mcset it starttls-nofeature {Il server "%s" non supporta il TLS.}
 ::msgcat::mcset it starttls-failure {Errore durante la negoziazione TLS con il server "%s".}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.98 2006-09-12 10:19:22 matben Exp $
+# $Id: Login.tcl,v 1.99 2006-09-13 07:56:01 matben Exp $
 
 package provide Login 1.0
 
@@ -566,8 +566,6 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     set highstate(args)    $args
     set highstate(pending) 1
 
-    # Reset any pending open states. Done above.
-    #Reset
     ::JUI::SetStatusMessage [mc jawaitresp $server]
     ::JUI::StartStopAnimatedWave 1
     ::JUI::FixUIWhen "connectinit"
@@ -697,11 +695,8 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	    if {$state(state) eq "authenticate"} {
 		
 		# Added 'bad-auth' which seems to be a ejabberd anachronism.
-		set errcode [string map {bad-auth not-authorized} $errcode]
-		
-		# @@@ We should display a simpler message here since
-		# xmpp-stanzas a bit technical.
-		set str [mc xmpp-stanzas-$errcode]
+		set errcode [string map {bad-auth not-authorized} $errcode]		
+		set str [mc xmpp-stanzas-short-$errcode]
 	    } else {
 		set str $errmsg
 	    }
