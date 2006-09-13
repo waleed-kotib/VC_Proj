@@ -928,6 +928,28 @@
 ::msgcat::mcset it starttls-failure {Errore durante la negoziazione TLS con il server "%s".}
 ::msgcat::mcset it sasl-no-mechanisms     {The server has no support for SASL authentication.}
 
+# Account xform balloon help.
+# From: JEP-0077: In-Band Registration 
+::msgcat::mcset it registration-username        {Account name associated with the user}
+::msgcat::mcset it registration-nick            {Familiar name of the user}
+::msgcat::mcset it registration-password        {Password or secret for the user}
+::msgcat::mcset it registration-name            {Full name of the user}
+::msgcat::mcset it registration-first           {First name or given name of the user}
+::msgcat::mcset it registration-last            {Last name, surname, or family name of the user}
+::msgcat::mcset it registration-email           {Email address of the user}
+::msgcat::mcset it registration-address         {Street portion of a physical or mailing address}
+::msgcat::mcset it registration-city            {Locality portion of a physical or mailing address}
+::msgcat::mcset it registration-state           {Region portion of a physical or mailing address}
+::msgcat::mcset it registration-zip             {Postal code portion of a physical or mailing address}
+::msgcat::mcset it registration-phone           {Telephone number of the user}
+::msgcat::mcset it registration-url             {URL to web page describing the user}
+::msgcat::mcset it registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
+::msgcat::mcset it registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
+
+# Map version info tags to display names.
+::msgcat::mcset it version-name                 {Name}
+::msgcat::mcset it version-version              {Version}
+::msgcat::mcset it version-os                   {Operating system}
 
 ::msgcat::mcset it openquicktime {Apri lo stream QuickTime.}
 ::msgcat::mcset it writeurl {Scrivi l'URL o sceglilo dai preferiti.}

@@ -956,6 +956,29 @@
 ::msgcat::mcset fr starttls-failure       {Erreur lors de la sécurisation TLS avec le serveur "%s".}
 ::msgcat::mcset fr sasl-no-mechanisms     {The server has no support for SASL authentication.}
 
+# Account xform balloon help.
+# From: JEP-0077: In-Band Registration 
+::msgcat::mcset fr registration-username        {Account name associated with the user}
+::msgcat::mcset fr registration-nick            {Familiar name of the user}
+::msgcat::mcset fr registration-password        {Password or secret for the user}
+::msgcat::mcset fr registration-name            {Full name of the user}
+::msgcat::mcset fr registration-first           {First name or given name of the user}
+::msgcat::mcset fr registration-last            {Last name, surname, or family name of the user}
+::msgcat::mcset fr registration-email           {Email address of the user}
+::msgcat::mcset fr registration-address         {Street portion of a physical or mailing address}
+::msgcat::mcset fr registration-city            {Locality portion of a physical or mailing address}
+::msgcat::mcset fr registration-state           {Region portion of a physical or mailing address}
+::msgcat::mcset fr registration-zip             {Postal code portion of a physical or mailing address}
+::msgcat::mcset fr registration-phone           {Telephone number of the user}
+::msgcat::mcset fr registration-url             {URL to web page describing the user}
+::msgcat::mcset fr registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
+::msgcat::mcset fr registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
+
+# Map version info tags to display names.
+::msgcat::mcset fr version-name                 {Name}
+::msgcat::mcset fr version-version              {Version}
+::msgcat::mcset fr version-os                   {Operating system}
+
 
 ::msgcat::mcset fr openquicktime		{Ouvrir le streaming QuickTime}
 ::msgcat::mcset fr writeurl			{Écrire l'URL ou choisir le raccourci : }

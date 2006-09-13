@@ -927,6 +927,31 @@ Otrzymałeś autoryzację od %s: %s.}
 ::msgcat::mcset pl starttls-nofeature     {Brak możliwości skorzystania z TLS na serwerze "%s".}
 ::msgcat::mcset pl starttls-failure       {Nieudana negocjacja TLS z serwerem "%s".}
 ::msgcat::mcset pl sasl-no-mechanisms     {The server has no support for SASL authentication.}
+
+# Account xform balloon help.
+# From: JEP-0077: In-Band Registration 
+::msgcat::mcset pl registration-username        {Account name associated with the user}
+::msgcat::mcset pl registration-nick            {Familiar name of the user}
+::msgcat::mcset pl registration-password        {Password or secret for the user}
+::msgcat::mcset pl registration-name            {Full name of the user}
+::msgcat::mcset pl registration-first           {First name or given name of the user}
+::msgcat::mcset pl registration-last            {Last name, surname, or family name of the user}
+::msgcat::mcset pl registration-email           {Email address of the user}
+::msgcat::mcset pl registration-address         {Street portion of a physical or mailing address}
+::msgcat::mcset pl registration-city            {Locality portion of a physical or mailing address}
+::msgcat::mcset pl registration-state           {Region portion of a physical or mailing address}
+::msgcat::mcset pl registration-zip             {Postal code portion of a physical or mailing address}
+::msgcat::mcset pl registration-phone           {Telephone number of the user}
+::msgcat::mcset pl registration-url             {URL to web page describing the user}
+::msgcat::mcset pl registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
+::msgcat::mcset pl registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
+
+# Map version info tags to display names.
+::msgcat::mcset pl version-name                 {Name}
+::msgcat::mcset pl version-version              {Version}
+::msgcat::mcset pl version-os                   {Operating system}
+
+
 ::msgcat::mcset pl jamessnofiletrpt {Trudno powiedzieć, czy %s potrafi obsłużyć transfer pliku.}
 ::msgcat::mcset pl jamessfiletrpterr {Nie udało się pobrać pliku %s od: %s: %s}
 ::msgcat::mcset pl openquicktime		{Podłącz się do transmisji QuickTime}

@@ -830,6 +830,29 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset ru starttls-failure       {TLS negotiating with server "%s" failed.}
 ::msgcat::mcset ru sasl-no-mechanisms     {The server has no support for SASL authentication.}
 
+# Account xform balloon help.
+# From: JEP-0077: In-Band Registration 
+::msgcat::mcset ru registration-username        {Account name associated with the user}
+::msgcat::mcset ru registration-nick            {Familiar name of the user}
+::msgcat::mcset ru registration-password        {Password or secret for the user}
+::msgcat::mcset ru registration-name            {Full name of the user}
+::msgcat::mcset ru registration-first           {First name or given name of the user}
+::msgcat::mcset ru registration-last            {Last name, surname, or family name of the user}
+::msgcat::mcset ru registration-email           {Email address of the user}
+::msgcat::mcset ru registration-address         {Street portion of a physical or mailing address}
+::msgcat::mcset ru registration-city            {Locality portion of a physical or mailing address}
+::msgcat::mcset ru registration-state           {Region portion of a physical or mailing address}
+::msgcat::mcset ru registration-zip             {Postal code portion of a physical or mailing address}
+::msgcat::mcset ru registration-phone           {Telephone number of the user}
+::msgcat::mcset ru registration-url             {URL to web page describing the user}
+::msgcat::mcset ru registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
+::msgcat::mcset ru registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
+
+# Map version info tags to display names.
+::msgcat::mcset ru version-name                 {Name}
+::msgcat::mcset ru version-version              {Version}
+::msgcat::mcset ru version-os                   {Operating system}
+
 
 ::msgcat::mcset ru openquicktime		{Открытие QuickTime потока}
 ::msgcat::mcset ru writeurl			{Write URL or choose from shortcut:}
