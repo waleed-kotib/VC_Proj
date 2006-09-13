@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Dialogs.tcl,v 1.67 2006-05-26 13:27:50 matben Exp $
+# $Id: Dialogs.tcl,v 1.68 2006-09-13 14:09:12 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -197,13 +197,13 @@ proc ::Dialogs::InfoOnPlugins { } {
 	}
 	$wtxt insert end " $plug\n" ttitle
 	$wtxt insert end "\n" tline
-	$wtxt insert end "\tType:\t" tkey
+	$wtxt insert end "\t[mc Type]:\t" tkey
 	$wtxt insert end "[::Plugins::GetTypeDesc $plug]\n" ttxt
-	$wtxt insert end "\tDescription:\t" tkey
+	$wtxt insert end "\t[mc Description]:\t" tkey
 	$wtxt insert end "[::Plugins::GetDescForPlugin $plug]\n" ttxt
-	$wtxt insert end "\tVersion:\t" tkey
+	$wtxt insert end "\t[mc Version]:\t" tkey
 	$wtxt insert end "$txtver\n" ttxt
-	$wtxt insert end "\tSuffixes:\t" tkey
+	$wtxt insert end "\t[mc {File suffixes}]:\t" tkey
 	$wtxt insert end "$txtsuf\n" ttxt
 	$wtxt insert end "\n"
     }

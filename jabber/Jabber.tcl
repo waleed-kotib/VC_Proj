@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.184 2006-09-12 10:19:22 matben Exp $
+# $Id: Jabber.tcl,v 1.185 2006-09-13 14:09:11 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1873,11 +1873,11 @@ proc ::Jabber::Passwd::Build { } {
 
     ttk::label $frmid.ll -text [mc janewpass]
     ttk::label $frmid.le -text $jstate(mejid)
-    ttk::label $frmid.lserv -text "[mc {New password}]:" -anchor e
+    ttk::label $frmid.lserv -text "[mc {New Password}]:" -anchor e
     ttk::entry $frmid.eserv -width 18 -show *  \
       -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidatePasswordStr %S}
-    ttk::label $frmid.lvalid -text "[mc {Retype password}]:" -anchor e
+    ttk::label $frmid.lvalid -text "[mc {Retype Password}]:" -anchor e
     ttk::entry $frmid.evalid -width 18 -show * \
       -textvariable [namespace current]::validate -validate key  \
       -validatecommand {::Jabber::ValidatePasswordStr %S}

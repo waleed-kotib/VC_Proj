@@ -465,6 +465,7 @@
 ::msgcat::mcset pl {Ask each time}        {Powiadom każdorazowo}
 ::msgcat::mcset pl {Auto Away}            {Automatyczne ustawianie "zaraz wracam"}
 ::msgcat::mcset pl {Auto Connect}         {Połącz automatycznie}
+::msgcat::mcset pl {Auto Join}
 ::msgcat::mcset pl {Auto-accept}          {autoakceptacja}
 ::msgcat::mcset pl {Auto-reject}          {autoodmowa}
 ::msgcat::mcset pl {Away status}          {Opis statusu "zaraz wracam"}
@@ -568,19 +569,20 @@
 ::msgcat::mcset pl {Movie Options}
 ::msgcat::mcset pl {Multi Connect}        {Połączenie wielokrotne}
 ::msgcat::mcset pl {My Avatar}
+::msgcat::mcset pl {My nickname for own display}
 ::msgcat::mcset pl {My Status}            {Mój status}
 ::msgcat::mcset pl {Name of list}         {Nazwa listy}
 ::msgcat::mcset pl {Network Error}        {Problem w sieci}
 ::msgcat::mcset pl {Network Setup}        {Ustawienia sieci}
 ::msgcat::mcset pl {New Account}          {Nowe konto}
-::msgcat::mcset pl {New bookmark}         {Nowa zakładka}
+::msgcat::mcset pl {New Bookmark}         {Nowa zakładka}
 ::msgcat::mcset pl {New chat message}     {"Odezwanie się" rozmówcy}
 ::msgcat::mcset pl {New chat thread}      {Rozpoczęcie nowej rozmowy}
 ::msgcat::mcset pl {New Color}            {Nowy kolor}
 ::msgcat::mcset pl {New incoming message} {Nadeszła nowa wiadomość}
 ::msgcat::mcset pl {New Message}          {Nowa wiadomość}
 ::msgcat::mcset pl {New Nickname}         {Nowy pseudonim}
-::msgcat::mcset pl {New password}         {Nowe hasło}
+::msgcat::mcset pl {New Password}         {Nowe hasło}
 ::msgcat::mcset pl {New Profile}
 ::msgcat::mcset pl {New Rule}             {Nowa reguła}
 ::msgcat::mcset pl {New Topic}            {Nowy temat}
@@ -631,7 +633,7 @@
 ::msgcat::mcset pl {Put Image/Movie}      {Wysyłka grafiki/filmu}
 ::msgcat::mcset pl {Reject receive}       {Odmów odbioru}
 ::msgcat::mcset pl {Request To User}      {Prośba do użytownika}
-::msgcat::mcset pl {Retype password}      {Powtórz hasło}
+::msgcat::mcset pl {Retype Password}      {Powtórz hasło}
 ::msgcat::mcset pl {Revert Panel}         {Przywróć ustawienia}
 ::msgcat::mcset pl {Register New Account} {Załóż nowe konto}
 ::msgcat::mcset pl {Register Now}         {Zarejestruj}
@@ -950,6 +952,8 @@ Otrzymałeś autoryzację od %s: %s.}
 ::msgcat::mcset pl version-name                 {Name}
 ::msgcat::mcset pl version-version              {Version}
 ::msgcat::mcset pl version-os                   {Operating system}
+
+::msgcat::mcset pl register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
 
 
 ::msgcat::mcset pl jamessnofiletrpt {Trudno powiedzieć, czy %s potrafi obsłużyć transfer pliku.}

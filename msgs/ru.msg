@@ -424,6 +424,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Ask each time}			{Постоянно спрашивать}
 ::msgcat::mcset ru {Auto Away}			{Авто статус}
 ::msgcat::mcset ru {Auto Connect}
+::msgcat::mcset ru {Auto Join}
 ::msgcat::mcset ru {Auto-accept}			{Авто-принять}
 ::msgcat::mcset ru {Auto-reject}			{Авто-отказ}
 ::msgcat::mcset ru {Away status}			{Нет на месте}
@@ -512,6 +513,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Mailbox Error}
 ::msgcat::mcset ru {MIME type}
 ::msgcat::mcset ru {Multi Connect}
+::msgcat::mcset ru {My nickname for own display}
 ::msgcat::mcset ru {My Status}
 ::msgcat::mcset ru {Name of list}			{Имя списка}
 ::msgcat::mcset ru {Network Error}
@@ -523,7 +525,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {New incoming message}	{Новое входящее сообщение}
 ::msgcat::mcset ru {New Message}
 ::msgcat::mcset ru {New Nickname}		{Новое имя}
-::msgcat::mcset ru {New password}		{Новый пароль}
+::msgcat::mcset ru {New Password}		{Новый пароль}
 ::msgcat::mcset ru {New Rule}			{Новое правило}
 ::msgcat::mcset ru {New Topic}			{Новая тема}
 ::msgcat::mcset ru {New shortcut}
@@ -547,7 +549,7 @@ configuration.}			{Блин}
 
 ::msgcat::mcset ru {Bookmark this room}	{Добавить в закладки эту комнату}
 ::msgcat::mcset ru {Import Iconset...}		{Импортирование иконок}
-::msgcat::mcset ru {New bookmark}		{Новая закладка}
+::msgcat::mcset ru {New Bookmark}		{Новая закладка}
 ::msgcat::mcset ru {No Restriction}			{Без ограничений}
 ::msgcat::mcset ru {Not older than}		{Не старее чем}
 ::msgcat::mcset ru {Pick skin}				{Выбрать скин}
@@ -583,7 +585,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Put Image/Movie}
 ::msgcat::mcset ru {Reject receive}
 ::msgcat::mcset ru {Request To User}
-::msgcat::mcset ru {Retype password}		{Повторите новый пароль}
+::msgcat::mcset ru {Retype Password}		{Повторите новый пароль}
 ::msgcat::mcset ru {Revert Panel}			{Вернуть эту настройку}
 ::msgcat::mcset ru {Register New Account}
 ::msgcat::mcset ru {Register Now}
@@ -852,6 +854,8 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset ru version-name                 {Name}
 ::msgcat::mcset ru version-version              {Version}
 ::msgcat::mcset ru version-os                   {Operating system}
+
+::msgcat::mcset ru register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
 
 
 ::msgcat::mcset ru openquicktime		{Открытие QuickTime потока}

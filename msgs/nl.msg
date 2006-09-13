@@ -468,6 +468,7 @@
 ::msgcat::mcset nl {Ask each time}		{Altijd om bevestiging vragen}
 ::msgcat::mcset nl {Auto Away}			{Automatisch afwezig}
 ::msgcat::mcset nl {Auto Connect}		{Automatisch aanmelden}
+::msgcat::mcset nl {Auto Join}
 ::msgcat::mcset nl {Auto-accept}		{Automatisch accepteren}
 ::msgcat::mcset nl {Auto-reject}		{Automatisch weigeren}
 ::msgcat::mcset nl {Away status}		{Afwezig}
@@ -571,20 +572,21 @@
 ::msgcat::mcset nl {Movie Options}		{Filmopties}
 ::msgcat::mcset nl {Multi Connect}		{Multiconnecteren}
 ::msgcat::mcset nl {My Avatar}			{Mijn avatar}
+::msgcat::mcset nl {My nickname for own display}
 ::msgcat::mcset nl {My Status}			{Mijn aanwezigheid}
 ::msgcat::mcset nl {My vCard}			{Mijn persoonlijke info}
 ::msgcat::mcset nl {Name of list}		{Lijst}
 ::msgcat::mcset nl {Network Error}		{Netwerkfout}
 ::msgcat::mcset nl {Network Setup}		{Netwerk instellen}
 ::msgcat::mcset nl {New Account}		{Nieuwe account}
-::msgcat::mcset nl {New bookmark}		{Nieuwe bladwijzer}
+::msgcat::mcset nl {New Bookmark}		{Nieuwe bladwijzer}
 ::msgcat::mcset nl {New chat message}		{Nieuw bericht}
 ::msgcat::mcset nl {New chat thread}		{Nieuwe chatsessie}
 ::msgcat::mcset nl {New Color}			{Nieuwe kleur}
 ::msgcat::mcset nl {New incoming message}	{Nieuw inkomend bericht}
 ::msgcat::mcset nl {New Message}		{Nieuw bericht}
 ::msgcat::mcset nl {New Nickname}		{Nieuwe bijnaam}
-::msgcat::mcset nl {New password}		{Nieuw wachtwoord}
+::msgcat::mcset nl {New Password}		{Nieuw wachtwoord}
 ::msgcat::mcset nl {New Profile}		{Nieuw profiel}
 ::msgcat::mcset nl {New Rule}			{Nieuwe regel}
 ::msgcat::mcset nl {New Topic}			{Nieuw onderwerp}
@@ -634,7 +636,7 @@
 ::msgcat::mcset nl {Put Image/Movie}		{Afbeelding/film plaatsen}
 ::msgcat::mcset nl {Reject receive}		{Ontvangst weigeren}
 ::msgcat::mcset nl {Request To User}		{Aanvraag aan contactpersoon}
-::msgcat::mcset nl {Retype password}		{Wachtwoord herhalen}
+::msgcat::mcset nl {Retype Password}		{Wachtwoord herhalen}
 ::msgcat::mcset nl {Revert Panel}		{Paneel omkeren}
 ::msgcat::mcset nl {Register New Account}	{Nieuwe account aanmaken}
 ::msgcat::mcset nl {Register Now}		{Nieuwe account aanmaken}
@@ -955,6 +957,8 @@
 ::msgcat::mcset nl version-name                 {Name}
 ::msgcat::mcset nl version-version              {Version}
 ::msgcat::mcset nl version-os                   {Operating system}
+
+::msgcat::mcset nl register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
 
 ::msgcat::mcset nl openquicktime	{QuickTime livestream openen}
 ::msgcat::mcset nl writeurl		{Voer een URL in of kies een snelkoppeling:}

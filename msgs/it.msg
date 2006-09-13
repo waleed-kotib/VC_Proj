@@ -465,6 +465,7 @@
 ::msgcat::mcset it {Ask each time} {Chiedi sempre}
 ::msgcat::mcset it {Auto Away} {Allontanamento automatico}
 ::msgcat::mcset it {Auto Connect} {Connessione automatica}
+::msgcat::mcset it {Auto Join}
 ::msgcat::mcset it {Auto-accept} {Accetta automaticamente}
 ::msgcat::mcset it {Auto-reject} {Rifiuta automaticamente}
 ::msgcat::mcset it {Away status} {Stato "Allontanato"}
@@ -568,20 +569,21 @@
 ::msgcat::mcset it {Movie Options} {Opzioni del filmato}
 ::msgcat::mcset it {Multi Connect} {Connessione multipla}
 ::msgcat::mcset it {My Avatar} {Il mio avatar}
+::msgcat::mcset it {My nickname for own display}
 ::msgcat::mcset it {My Status} {Il mio stato}
 ::msgcat::mcset it {My vCard} {La mia vCard}
 ::msgcat::mcset it {Name of list} {Nome lista}
 ::msgcat::mcset it {Network Error} {Errore di rete}
 ::msgcat::mcset it {Network Setup} {Configurazione rete}
 ::msgcat::mcset it {New Account} {Nuovo account}
-::msgcat::mcset it {New bookmark} {Nuovo segnalibro}
+::msgcat::mcset it {New Bookmark} {Nuovo segnalibro}
 ::msgcat::mcset it {New chat message} {Nuovo messaggio di chat}
 ::msgcat::mcset it {New chat thread} {Nuova chat}
 ::msgcat::mcset it {New Color} {Nuovo colore}
 ::msgcat::mcset it {New incoming message} {Nuovo messaggio in arrivo}
 ::msgcat::mcset it {New Message} {Nuovo messaggio}
 ::msgcat::mcset it {New Nickname} {Nuovo nickname}
-::msgcat::mcset it {New password} {Nuova password}
+::msgcat::mcset it {New Password} {Nuova password}
 ::msgcat::mcset it {New Profile} {Nuovo profilo}
 ::msgcat::mcset it {New Rule} {Nuova regola}
 ::msgcat::mcset it {New Topic} {Nuovo argomento}
@@ -631,7 +633,7 @@
 ::msgcat::mcset it {Put Image/Movie} {Inserisci immagine/filmato}
 ::msgcat::mcset it {Reject receive} {Rifiuta ricezione}
 ::msgcat::mcset it {Request To User} {Richiedi all'utente}
-::msgcat::mcset it {Retype password} {Riscrivi la password}
+::msgcat::mcset it {Retype Password} {Riscrivi la password}
 ::msgcat::mcset it {Revert Panel} {Annulla modifiche}
 ::msgcat::mcset it {Register New Account} {Iscrivi un nuovo account}
 ::msgcat::mcset it {Register Now} {Iscriviti ora}
@@ -950,6 +952,8 @@
 ::msgcat::mcset it version-name                 {Name}
 ::msgcat::mcset it version-version              {Version}
 ::msgcat::mcset it version-os                   {Operating system}
+
+::msgcat::mcset it register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
 
 ::msgcat::mcset it openquicktime {Apri lo stream QuickTime.}
 ::msgcat::mcset it writeurl {Scrivi l'URL o sceglilo dai preferiti.}

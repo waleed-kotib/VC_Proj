@@ -467,6 +467,7 @@
 ::msgcat::mcset en {Ask each time}
 ::msgcat::mcset en {Auto Away}
 ::msgcat::mcset en {Auto Connect}
+::msgcat::mcset en {Auto Join}
 ::msgcat::mcset en {Auto-accept}
 ::msgcat::mcset en {Auto-reject}
 ::msgcat::mcset en {Away status}
@@ -577,14 +578,14 @@
 ::msgcat::mcset en {Network Error}
 ::msgcat::mcset en {Network Setup}
 ::msgcat::mcset en {New Account}
-::msgcat::mcset en {New bookmark}
+::msgcat::mcset en {New Bookmark}
 ::msgcat::mcset en {New chat message}
 ::msgcat::mcset en {New chat thread}
 ::msgcat::mcset en {New Color}
 ::msgcat::mcset en {New incoming message}
 ::msgcat::mcset en {New Message}
 ::msgcat::mcset en {New Nickname}
-::msgcat::mcset en {New password}
+::msgcat::mcset en {New Password}
 ::msgcat::mcset en {New Profile}
 ::msgcat::mcset en {New Rule}
 ::msgcat::mcset en {New Topic}
@@ -634,7 +635,7 @@
 ::msgcat::mcset en {Put Image/Movie}
 ::msgcat::mcset en {Reject receive}
 ::msgcat::mcset en {Request To User}
-::msgcat::mcset en {Retype password}
+::msgcat::mcset en {Retype Password}
 ::msgcat::mcset en {Revert Panel}
 ::msgcat::mcset en {Register New Account}
 ::msgcat::mcset en {Register Now}
@@ -958,6 +959,9 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en version-name                 {Name}
 ::msgcat::mcset en version-version              {Version}
 ::msgcat::mcset en version-os                   {Operating system}
+
+
+::msgcat::mcset en register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
 
 
 ::msgcat::mcset en openquicktime		{Open QuickTime live stream}

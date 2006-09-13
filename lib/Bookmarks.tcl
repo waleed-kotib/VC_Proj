@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Bookmarks.tcl,v 1.4 2006-03-15 07:35:35 matben Exp $
+# $Id: Bookmarks.tcl,v 1.5 2006-09-13 14:09:12 matben Exp $
 
 package require snit 1.0
 package require ui::util
@@ -106,7 +106,7 @@ snit::widget ::Bookmarks::Dialog {
 	::chasearrows::chasearrows $bot.run -size 16
 	ttk::button $bot.cancel -text [mc Cancel]  \
 	  -command [list $self Destroy]
-	ttk::button $bot.new -text [mc New]  \
+	ttk::button $bot.new -text [mc {New Bookmark}]  \
 	  -command [list $self New]
 	set padx [option get . buttonPadX {}]
 	if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -148,7 +148,7 @@ snit::widget ::Bookmarks::Dialog {
     }
     
     method New {} {
-	set row [list [mc {New bookmark}]]
+	set row [list [mc {New Bookmark}]]
 	set ncol [$wtablelist columncount]
 	for {set i 1} {$i < $ncol} {incr i} {
 	    lappend row {}
@@ -162,6 +162,7 @@ snit::widget ::Bookmarks::Dialog {
 	foreach item [lsort -integer -decreasing $items] {
 	    $wtablelist delete $item	
 	}
+	puts $tmpList
     }
         
     method Save {} {
@@ -174,13 +175,22 @@ snit::widget ::Bookmarks::Dialog {
 	    lappend tmp {}
 	}
 	set tmpList [lsearch -all -not -inline $tmpList $tmp]
-	
+
+	puts $tmpList
+
 	# Any booleans.
-	foreach {key value} [array get boolVar] {
-	    #puts "\t key=$key, value=$value"
-	    foreach {row col} [split $key ,] break
-	    lset tmpList $row $col $value
+	if {1} {
+	    foreach {key value} [array get boolVar] {
+		puts "\t key=$key, value=$value"
+		foreach {row col} [split $key ,] break
+		lset tmpList $row $col $value
+	    }
 	}
+
+	#set wcheck [$wtablelist cellconfigure $row,$col -window]
+	#puts "wcheck=$wcheck"
+
+	
 	
 	uplevel #0 [list set $bookmarksVar $tmpList]
 
