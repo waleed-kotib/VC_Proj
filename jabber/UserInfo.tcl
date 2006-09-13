@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.14 2006-08-20 13:41:19 matben Exp $
+# $Id: UserInfo.tcl,v 1.15 2006-09-13 07:56:01 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -164,12 +164,12 @@ proc ::UserInfo::VersionCB {token jlibname type subiq} {
 	::Jabber::AddErrorLog $jid $str
 	AddError $token $str
     } else {
-	set str [mc {Version Info}]
-	append str ":"
+	set str [mc {Version Info}]:
 	set f $priv(wpageversion)
 	set i 0
-	foreach c [wrapper::getchildren $subiq] {
-	    ttk::label $f.l$i -text "[wrapper::gettag $c]:" \
+	foreach c [wrapper::getchildren $subiq] {	    
+	    set key [mc version-[wrapper::gettag $c]]
+	    ttk::label $f.l$i -text $key: \
 	      -wraplength 300 -justify left
 	    ttk::label $f.t$i -text [wrapper::getcdata $c] \
 	      -wraplength 300 -justify left

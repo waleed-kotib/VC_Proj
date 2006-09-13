@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.65 2006-09-07 09:44:41 matben Exp $
+# $Id: Profiles.tcl,v 1.66 2006-09-13 07:56:01 matben Exp $
 
 package provide Profiles 1.0
 
@@ -675,7 +675,9 @@ proc ::Profiles::GetDefaultOpts {server} {
 	    set defaultOpts(-secure) 0
 	}
     }
-    set defaultOpts(-httpurl) [GetDefaultHttpUrl $server]
+    
+    # Leave it empty.
+    #set defaultOpts(-httpurl) [GetDefaultHttpUrl $server]
     return [array get defaultOpts]
 }
 
