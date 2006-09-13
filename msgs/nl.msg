@@ -933,6 +933,28 @@
 ::msgcat::mcset nl starttls-failure	{Beveiligd verbinden via TLS met server "%s" mislukte.}
 ::msgcat::mcset nl sasl-no-mechanisms	{De server ondersteunt authenticatie met SASL niet.}
 
+# Account xform balloon help.
+# From: JEP-0077: In-Band Registration 
+::msgcat::mcset nl registration-username        {Account name associated with the user}
+::msgcat::mcset nl registration-nick            {Familiar name of the user}
+::msgcat::mcset nl registration-password        {Password or secret for the user}
+::msgcat::mcset nl registration-name            {Full name of the user}
+::msgcat::mcset nl registration-first           {First name or given name of the user}
+::msgcat::mcset nl registration-last            {Last name, surname, or family name of the user}
+::msgcat::mcset nl registration-email           {Email address of the user}
+::msgcat::mcset nl registration-address         {Street portion of a physical or mailing address}
+::msgcat::mcset nl registration-city            {Locality portion of a physical or mailing address}
+::msgcat::mcset nl registration-state           {Region portion of a physical or mailing address}
+::msgcat::mcset nl registration-zip             {Postal code portion of a physical or mailing address}
+::msgcat::mcset nl registration-phone           {Telephone number of the user}
+::msgcat::mcset nl registration-url             {URL to web page describing the user}
+::msgcat::mcset nl registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
+::msgcat::mcset nl registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
+
+# Map version info tags to display names.
+::msgcat::mcset nl version-name                 {Name}
+::msgcat::mcset nl version-version              {Version}
+::msgcat::mcset nl version-os                   {Operating system}
 
 ::msgcat::mcset nl openquicktime	{QuickTime livestream openen}
 ::msgcat::mcset nl writeurl		{Voer een URL in of kies een snelkoppeling:}

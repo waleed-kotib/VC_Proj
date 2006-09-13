@@ -946,6 +946,29 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de starttls-failure        {TLS-Aushandlung mit Server "%s" fehlerhaft.}
 ::msgcat::mcset de sasl-no-mechanisms     {The server has no support for SASL authentication.}
 
+# Account xform balloon help.
+# From: JEP-0077: In-Band Registration 
+::msgcat::mcset de registration-username        {Account name associated with the user}
+::msgcat::mcset de registration-nick            {Familiar name of the user}
+::msgcat::mcset de registration-password        {Password or secret for the user}
+::msgcat::mcset de registration-name            {Full name of the user}
+::msgcat::mcset de registration-first           {First name or given name of the user}
+::msgcat::mcset de registration-last            {Last name, surname, or family name of the user}
+::msgcat::mcset de registration-email           {Email address of the user}
+::msgcat::mcset de registration-address         {Street portion of a physical or mailing address}
+::msgcat::mcset de registration-city            {Locality portion of a physical or mailing address}
+::msgcat::mcset de registration-state           {Region portion of a physical or mailing address}
+::msgcat::mcset de registration-zip             {Postal code portion of a physical or mailing address}
+::msgcat::mcset de registration-phone           {Telephone number of the user}
+::msgcat::mcset de registration-url             {URL to web page describing the user}
+::msgcat::mcset de registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
+::msgcat::mcset de registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
+
+# Map version info tags to display names.
+::msgcat::mcset de version-name                 {Name}
+::msgcat::mcset de version-version              {Version}
+::msgcat::mcset de version-os                   {Operating system}
+
 
 ::msgcat::mcset de openquicktime		{Öffne QuickTime live stream}
 ::msgcat::mcset de writeurl			{Url eingeben oder aus Abkürzung wählen:}

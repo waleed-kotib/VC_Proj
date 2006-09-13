@@ -958,6 +958,28 @@
 ::msgcat::mcset es starttls-failure       {Error durante la conexion TLS con el servidor "%s".}
 ::msgcat::mcset es sasl-no-mechanisms     {The server has no support for SASL authentication.}
 
+# Account xform balloon help.
+# From: JEP-0077: In-Band Registration 
+::msgcat::mcset es registration-username        {Account name associated with the user}
+::msgcat::mcset es registration-nick            {Familiar name of the user}
+::msgcat::mcset es registration-password        {Password or secret for the user}
+::msgcat::mcset es registration-name            {Full name of the user}
+::msgcat::mcset es registration-first           {First name or given name of the user}
+::msgcat::mcset es registration-last            {Last name, surname, or family name of the user}
+::msgcat::mcset es registration-email           {Email address of the user}
+::msgcat::mcset es registration-address         {Street portion of a physical or mailing address}
+::msgcat::mcset es registration-city            {Locality portion of a physical or mailing address}
+::msgcat::mcset es registration-state           {Region portion of a physical or mailing address}
+::msgcat::mcset es registration-zip             {Postal code portion of a physical or mailing address}
+::msgcat::mcset es registration-phone           {Telephone number of the user}
+::msgcat::mcset es registration-url             {URL to web page describing the user}
+::msgcat::mcset es registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
+::msgcat::mcset es registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
+
+# Map version info tags to display names.
+::msgcat::mcset es version-name                 {Name}
+::msgcat::mcset es version-version              {Version}
+::msgcat::mcset es version-os                   {Operating system}
 
 ::msgcat::mcset es openquicktime		{Abrir el streaming QuickTime}
 ::msgcat::mcset es writeurl			{Escribir la URL o elegir el atajo : }
