@@ -179,6 +179,9 @@
 ::msgcat::mcset ru Yes
 ::msgcat::mcset ru yes
 
+# A few words that are not unambiguous and have therefore a prefix.
+::msgcat::mcset ru program-Application        Application
+
 # dashes.
 ::msgcat::mcset ru none
 ::msgcat::mcset ru dotted
@@ -470,8 +473,8 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {File Transfer}
 ::msgcat::mcset ru {File Transfer Error}
 ::msgcat::mcset ru {First name}	{Имя}
-::msgcat::mcset ru {Font size}			{Размер шрифта}
-::msgcat::mcset ru {Font weight}		{Ширина шрифта}
+::msgcat::mcset ru {Font Size}			{Размер шрифта}
+::msgcat::mcset ru {Font Weight}		{Ширина шрифта}
 ::msgcat::mcset ru {Format mm/dd/yyyy}	{Формат мм/дд/гггг}
 ::msgcat::mcset ru {Get File}
 ::msgcat::mcset ru {Get File Error}

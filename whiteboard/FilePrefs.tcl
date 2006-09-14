@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.12 2005-12-17 12:15:50 matben Exp $
+# $Id: FilePrefs.tcl,v 1.13 2006-09-14 13:15:50 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -427,8 +427,8 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
 	if {[llength $packageList] > 0} {		    
 	    set packageVar $tmpPrefMimeType2Package($mime)
 	} else {
-	    set packageList None
-	    set packageVar None
+	    set packageList [mc None]
+	    set packageVar [mc None]
 	}
     } elseif {$what eq "new"} {
 	set textVarMime   ""
@@ -436,8 +436,8 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
 	set textVarSuffix ""
 	set codingVar 0
 	set receiveVar reject
-	set packageVar None
-	set packageList None
+	set packageVar [mc None]
+	set packageList [mc None]
     }
 
     # Global frame.
@@ -486,10 +486,15 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
     ttk::frame $wha.fr
     ttk::radiobutton $wha.x3 -text "[mc {Import using}]:"  \
       -variable [namespace current]::receiveVar -value import
+
+
+
+
     set wMenu [eval {
 	ttk::optionmenu $wha.x3m [namespace current]::packageVar
     } $packageList]
     $wMenu configure -font CociSmallFont     
+
     ttk::radiobutton $wha.x8 -text [mc {Unknown: Prompt user}]  \
       -variable [namespace current]::receiveVar -value ask
     ttk::frame $wha.fc
@@ -511,7 +516,7 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
     # If we dont have any registered packages for this MIME, disable this
     # option.
     
-    if {($what eq "edit") && ($packageList eq "None")} {
+    if {($what eq "edit") && ($packageList eq [mc None])} {
 	$wha.x3  state {disabled}
 	$wha.x3m state {disabled}
     }
@@ -590,7 +595,7 @@ proc ::FilePrefs::SaveThisAss { } {
     
     # Put this specific MIME type associations in the tmp arrays.
     set tmpMime2Description($mime) $desc
-    if {$packageVar eq "None"} {
+    if {$packageVar eq [mc None]} {
 	set tmpPrefMimeType2Package($mime) ""
     }
     
