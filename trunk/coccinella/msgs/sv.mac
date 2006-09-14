@@ -201,6 +201,9 @@
 ::msgcat::mcset sv Yes 			{Ja}
 ::msgcat::mcset sv yes 			{ja}
 
+# A few words that are not unambiguous and have therefore a prefix.
+::msgcat::mcset sv program-Application        Program
+
 
 # Canvas item options, names and values.
 # Names:
@@ -214,7 +217,7 @@
 ::msgcat::mcset sv fill             Fyll
 ::msgcat::mcset sv fontfamily       Typsnittsfamilj
 ::msgcat::mcset sv fontsize         Typsnittsstorlek
-::msgcat::mcset sv fontweight       Typsnittsvikt
+::msgcat::mcset sv fontweight       Teckensnitt
 ::msgcat::mcset sv image            Bild
 ::msgcat::mcset sv joinstyle        Fšrbindningsstil
 ::msgcat::mcset sv justify          Justera
@@ -524,8 +527,8 @@
 ::msgcat::mcset sv {File Transfer Error}   {Filšverfšringsfel}
 ::msgcat::mcset sv {File transfer port}    {Filšverfšringsport}
 ::msgcat::mcset sv {First name}            {Fšrnamn}
-::msgcat::mcset sv {Font size}             {Typsnittsstorlek}
-::msgcat::mcset sv {Font weight}           {Typsnittsstil}
+::msgcat::mcset sv {Font Size}             {Typsnittsstorlek}
+::msgcat::mcset sv {Font Weight}           {Teckensnitt}
 ::msgcat::mcset sv {Format mm/dd/yyyy}     {Format mm/dd/Œr}
 ::msgcat::mcset sv {Get File}		   {HŠmta fil}
 ::msgcat::mcset sv {Get File Error}        {HŠmta fil fel}

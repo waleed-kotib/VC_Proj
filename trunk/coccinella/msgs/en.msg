@@ -202,6 +202,10 @@
 ::msgcat::mcset en Yes
 ::msgcat::mcset en yes
 
+# A few words that are not unambiguous and have therefore a prefix.
+::msgcat::mcset en program-Application        Application
+
+
 # Canvas item options, names and values.
 # Names:
 ::msgcat::mcset en anchor           Anchor
@@ -523,8 +527,8 @@
 ::msgcat::mcset en {File Transfer Error}
 ::msgcat::mcset en {File transfer port}
 ::msgcat::mcset en {First name}
-::msgcat::mcset en {Font size}
-::msgcat::mcset en {Font weight}
+::msgcat::mcset en {Font Size}
+::msgcat::mcset en {Font Weight}
 ::msgcat::mcset en {Format mm/dd/yyyy}
 ::msgcat::mcset en {Get File}
 ::msgcat::mcset en {Get File Error}

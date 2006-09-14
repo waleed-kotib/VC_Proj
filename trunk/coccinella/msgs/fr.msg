@@ -201,6 +201,10 @@
 ::msgcat::mcset fr Yes			{Oui}
 ::msgcat::mcset fr yes			{oui}
 
+# A few words that are not unambiguous and have therefore a prefix.
+::msgcat::mcset fr program-Application        Application
+
+
 # Translate
 # Canvas item options, names and values.
 # Names:
@@ -525,8 +529,8 @@
 ::msgcat::mcset fr {File Transfer Error}	{Erreur dans le transfert}
 ::msgcat::mcset fr {File transfer port}
 ::msgcat::mcset fr {First name}			{Prénom}
-::msgcat::mcset fr {Font size}			{Taille de la police}
-::msgcat::mcset fr {Font weight}		{Épaisseur de la police}
+::msgcat::mcset fr {Font Size}			{Taille de la police}
+::msgcat::mcset fr {Font Weight}		{Épaisseur de la police}
 ::msgcat::mcset fr {Format mm/dd/yyyy}		{Format mm/jj/aaaa}
 ::msgcat::mcset fr {Get File}			{Voir le fichier}
 ::msgcat::mcset fr {Get File Error}		{Erreur lors de la réception du fichier}

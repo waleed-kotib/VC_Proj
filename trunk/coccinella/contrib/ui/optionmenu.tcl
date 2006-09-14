@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.6 2006-09-14 09:37:28 matben Exp $
+# $Id: optionmenu.tcl,v 1.7 2006-09-14 13:15:49 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -67,11 +67,11 @@ snit::widgetadaptor ui::optionmenu::widget {
 	if {[info exists $options(-variable)]} {
 	    set value [set $options(-variable)]
 	    set menuVar $imap($value)
-	    
-	    # If variable is changed must update us.
-	    if {$options(-variable) ne ""} {
-		trace add variable $options(-variable) write [list $self Trace]
-	    }
+	}
+	
+	# If variable is changed must update us.
+	if {$options(-variable) ne ""} {
+	    trace add variable $options(-variable) write [list $self Trace]
 	}
 
 	$win configure -textvariable [myvar menuVar] -menu $m

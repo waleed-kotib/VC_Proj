@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.25 2006-09-14 09:37:28 matben Exp $
+# $Id: Rosticons.tcl,v 1.26 2006-09-14 13:15:49 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -542,6 +542,14 @@ proc ::Rosticons::PFillTree {T} {
 	}
 	if {$type eq "status"} {
 	    set typeName "Jabber"
+	} elseif {$type eq "application"} {
+	    set typeName [mc program-Application]
+	} elseif {$type eq "phone"} {
+	    set typeName [mc Phone]
+	} elseif {$type eq "smtp"} {
+	    set typeName [mc Email]
+	} elseif {$type eq "whiteboard"} {
+	    set typeName [mc Whiteboard]
 	} else {
 	    set typeName [::Roster::GetNameFromTrpt $type]
 	}
@@ -560,10 +568,16 @@ proc ::Rosticons::PFillTree {T} {
 	      -variable [namespace current]::ptmp(name,$type)  \
 	      -value $name
 	    
+	    if {$name eq "default"} {
+		set str [mc Default]
+	    } else {
+		set str $name
+	    }
+	    
 	    set tag [list $type $name]
 	    set item [$T item create -parent $pitem]
 	    $T item element configure $item cButton eButton -window $wradio
-	    $T item element configure $item cTree eText -text $name
+	    $T item element configure $item cTree eText -text $str
 	    $T item element configure $item cTag eText -text $tag
 	    set tag2item($tag) $item
 	}

@@ -20,6 +20,7 @@
 ::msgcat::mcset nl Allow				{Toestaan}
 ::msgcat::mcset nl Appearance   			{Uiterlijk}
 ::msgcat::mcset nl Apply				{Toepassen}
+::msgcat::mcset nl Author
 ::msgcat::mcset nl Available				{Beschikbaar}
 ::msgcat::mcset nl Away					{Afwezig}
 ::msgcat::mcset nl Back					{Terug}
@@ -86,11 +87,13 @@
 ::msgcat::mcset nl Height				{Hoogte}
 ::msgcat::mcset nl History				{Geschiedenis}
 ::msgcat::mcset nl Home					{Thuis}
+::msgcat::mcset nl Icon
 ::msgcat::mcset nl Image				{Afbeelding}
 ::msgcat::mcset nl Import				{Importeren}
 ::msgcat::mcset nl Inbox				{Postvak in}
 ::msgcat::mcset nl Info					{Info}
 ::msgcat::mcset nl Invite				{Uitnodigen}
+::msgcat::mcset nl Key
 ::msgcat::mcset nl Language				{Taal}
 ::msgcat::mcset nl Last					{Laatste}
 ::msgcat::mcset nl Less					{Minder}
@@ -201,6 +204,9 @@
 ::msgcat::mcset nl Work					{Werk}
 ::msgcat::mcset nl Yes					{Ja}
 ::msgcat::mcset nl yes					{ja}
+
+# A few words that are not unambiguous and have therefore a prefix.
+::msgcat::mcset nl program-Application                  Application
 
 
 # Canvas item options, names and values.
@@ -523,8 +529,8 @@
 ::msgcat::mcset nl {File Transfer Error}		{Fout bij bestandsoverdracht}
 ::msgcat::mcset nl {File transfer port}			{Poort voor bestandsoverdracht}
 ::msgcat::mcset nl {First name}				{Voornaam}
-::msgcat::mcset nl {Font size}				{Lettergrootte}
-::msgcat::mcset nl {Font weight}			{Schrijfwijze lettertype}
+::msgcat::mcset nl {Font Size}				{Lettergrootte}
+::msgcat::mcset nl {Font Weight}			{Schrijfwijze lettertype}
 ::msgcat::mcset nl {Format mm/dd/yyyy}			{Formaat: mm/dd/jjjj}
 ::msgcat::mcset nl {Get File}				{Bestand ophalen}
 ::msgcat::mcset nl {Get File Error}			{Bestandsfout ophalen}
@@ -1273,5 +1279,49 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl iaxPhoneNoise			{Ruis}
 ::msgcat::mcset nl iaxPhoneComfort			{Comfort}
 ::msgcat::mcset nl iaxPhoneCodec			{Codec}
+
+# Messages for Mood PEP
+::msgcat::mcset nl mMood        Mood 
+::msgcat::mcset nl mAngry       Angry
+::msgcat::mcset nl mAnxious     Anxious
+::msgcat::mcset nl mAshamed     Ashamed
+::msgcat::mcset nl mBored       Bored
+::msgcat::mcset nl mCurious     Curious
+::msgcat::mcset nl mDepressed   Depressed
+::msgcat::mcset nl mExcited     Excited
+::msgcat::mcset nl mHappy       Happy
+::msgcat::mcset nl mInLove      {In love}
+::msgcat::mcset nl mInvincible  Invincible
+::msgcat::mcset nl mJealous     Jealous
+::msgcat::mcset nl mNervous     Nervous
+::msgcat::mcset nl mSad         Sad
+::msgcat::mcset nl mSleepy      Sleepy
+::msgcat::mcset nl mStressed    Stressed
+::msgcat::mcset nl mWorried     Worried
+
+::msgcat::mcset nl moodEvent   {Mood change}
+::msgcat::mcset nl heIs        is
+::msgcat::mcset nl because     because
+::msgcat::mcset nl angry       angry
+::msgcat::mcset nl anxious     anxious
+::msgcat::mcset nl ashamed     ashamed
+::msgcat::mcset nl bored       bored
+::msgcat::mcset nl curious     curious
+::msgcat::mcset nl depressed   depressed
+::msgcat::mcset nl excited     excited
+::msgcat::mcset nl happy       happy
+::msgcat::mcset nl in_love     {in love}
+::msgcat::mcset nl invincible  invincible
+::msgcat::mcset nl jealous     jealous
+::msgcat::mcset nl nervous     nervous
+::msgcat::mcset nl sad         sad
+::msgcat::mcset nl sleepy      sleepy
+::msgcat::mcset nl stressed    stressed
+::msgcat::mcset nl worried     worried
+
+::msgcat::mcset nl moodDlg              {Mood}
+::msgcat::mcset nl selectCustomMood     {Select a mood}
+::msgcat::mcset nl moodMessage          {Reason for mood}
+::msgcat::mcset nl mCustomMood              {Custom mood}
 
 # END --------------------------------------------------------------------------

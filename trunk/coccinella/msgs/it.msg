@@ -201,6 +201,10 @@
 ::msgcat::mcset it Yes {Si}
 ::msgcat::mcset it yes {si}
 
+# A few words that are not unambiguous and have therefore a prefix.
+::msgcat::mcset it program-Application        Application
+
+
 # Canvas item options, names and values.
 # Names:
 ::msgcat::mcset it anchor Ancora
@@ -518,8 +522,8 @@
 ::msgcat::mcset it {File Transfer Error} {Errore trasferimento file}
 ::msgcat::mcset it {File transfer port} {Porta per trasferimento file}
 ::msgcat::mcset it {First name} {Nome}
-::msgcat::mcset it {Font size} {Dimensione carattere}
-::msgcat::mcset it {Font weight} {Peso del carattere}
+::msgcat::mcset it {Font Size} {Dimensione carattere}
+::msgcat::mcset it {Font Weight} {Peso del carattere}
 ::msgcat::mcset it {Format mm/dd/yyyy} {Formato mm/gg/aaaa}
 ::msgcat::mcset it {Get File} {Carica file}
 ::msgcat::mcset it {Get File Error} {Errore caricamento file}

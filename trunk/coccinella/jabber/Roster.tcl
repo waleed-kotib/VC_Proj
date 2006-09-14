@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.177 2006-09-08 07:03:34 matben Exp $
+# $Id: Roster.tcl,v 1.178 2006-09-14 13:15:49 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -1329,6 +1329,7 @@ namespace eval ::Roster:: {
 	yahoo       {Yahoo}
 	irc         {IRC}
 	x-gadugadu  {Gadu-Gadu}
+	gadu-gadu   {Gadu-Gadu}
     }
     variable trptToName {
 	jabber      {Jabber}
@@ -1338,6 +1339,7 @@ namespace eval ::Roster:: {
 	yahoo       {Yahoo}
 	irc         {IRC}
 	gadugadu    {Gadu-Gadu}
+	gadu-gadu   {Gadu-Gadu}
 	x-gadugadu  {Gadu-Gadu}
     }
     variable nameToTrpt {
@@ -1348,6 +1350,7 @@ namespace eval ::Roster:: {
 	{Yahoo}            yahoo
 	{IRC}              irc
 	{Gadu-Gadu}        x-gadugadu
+	{Gadu-Gadu}        gadu-gadu
     }
     
     variable  trptToNameArr
