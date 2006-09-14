@@ -285,6 +285,7 @@
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset nl mFile				{Bestand}
 ::msgcat::mcset nl mEdit				{Bewerken}
+::msgcat::mcset nl mPreferences 		        {Voorkeuren}
 ::msgcat::mcset nl mJabber				{Jabber}
 ::msgcat::mcset nl mItems				{Items}
 ::msgcat::mcset nl mLibrary				{Gallerij}
