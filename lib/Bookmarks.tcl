@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Bookmarks.tcl,v 1.5 2006-09-13 14:09:12 matben Exp $
+# $Id: Bookmarks.tcl,v 1.6 2006-09-14 08:03:24 matben Exp $
 
 package require snit 1.0
 package require ui::util
@@ -32,10 +32,11 @@ snit::widget ::Bookmarks::Dialog {
     # -menu must be done only on creation, else crash on mac.
     delegate option -menu to hull
     
-    variable bookmarksVar
+    variable bookmarksVar {}
     variable tmpList
-    variable boolColumns
+    variable boolColumns {}
     variable boolVar
+    variable rowuid 0
     variable wtablelist
     variable wnew
     variable wsave
@@ -52,7 +53,11 @@ snit::widget ::Bookmarks::Dialog {
 	set bookmarksVar $_bookmarksVar
 	
 	# Operate on a temporary list.
-	set tmpList [uplevel #0 [list set $bookmarksVar]]
+	if {[uplevel #0 {info exists bookmarksVar}]} {
+	    set tmpList [uplevel #0 [list set $bookmarksVar]]
+	} else {
+	    set tmpList {}
+	}
 	
 	if {[tk windowingsystem] ne "aqua"} {
 	    $win configure -menu ""
@@ -88,6 +93,7 @@ snit::widget ::Bookmarks::Dialog {
 	}
 	set rowCount [$wtb size]
 	for {set row 0} {$row < $rowCount} {incr row} {
+	    $wtb rowconfigure $row -name [incr rowuid]
 	    $self BooleanColumnsForRow $row
 	}
 	
@@ -108,6 +114,8 @@ snit::widget ::Bookmarks::Dialog {
 	  -command [list $self Destroy]
 	ttk::button $bot.new -text [mc {New Bookmark}]  \
 	  -command [list $self New]
+	ttk::button $bot.del -text [mc Delete]  \
+	  -command [list $self Delete]
 	set padx [option get . buttonPadX {}]
 	if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	    pack $bot.save   -side right
@@ -117,6 +125,7 @@ snit::widget ::Bookmarks::Dialog {
 	    pack $bot.save   -side right -padx $padx
 	}
 	pack $bot.new -side left
+	pack $bot.del -side left
 	pack $bot.run -side left -padx 8
 	pack $bot -side bottom -fill x
 	
@@ -148,13 +157,15 @@ snit::widget ::Bookmarks::Dialog {
     }
     
     method New {} {
-	set row [list [mc {New Bookmark}]]
+	set line [list [mc {New Bookmark}]]
 	set ncol [$wtablelist columncount]
 	for {set i 1} {$i < $ncol} {incr i} {
-	    lappend row {}
+	    lappend line {}
 	}
-	lappend tmpList $row
+	lappend tmpList $line
+	$wtablelist rowconfigure end -name [incr rowuid]
 	$wtablelist editcell end,0
+	$self BooleanColumnsForRow end
     }
     
     method Delete {} {
@@ -162,37 +173,45 @@ snit::widget ::Bookmarks::Dialog {
 	foreach item [lsort -integer -decreasing $items] {
 	    $wtablelist delete $item	
 	}
-	puts $tmpList
     }
         
+    method BooleanColumnsForRow {row} {
+	foreach c $boolColumns {
+	    $wtablelist cellconfigure $row,$c  \
+	      -window [list $self MakeCheckbutton]
+	}
+    }
+    
+    method SetCheckbuttonForRow {row} {
+	set name [$wtablelist rowcget $row -name]
+	foreach col $boolColumns {
+	    set boolVar($name,$col) [lindex $tmpList $row $col]
+	    lset tmpList $row $col ""
+	    $wtablelist cellconfigure $row,$col -editable 0
+	}	    
+    }
+
+    method MakeCheckbutton {tbl row col w} {
+	set name [$wtablelist rowcget $row -name]
+	checkbutton $w -highlightthickness 0 -padx 0 -pady 0 -bg white  \
+	  -variable [myvar boolVar($name,$col)]
+    }
+	
     method Save {} {
 	$wtablelist finishediting
 	
-	# Trim empty rows.
+	# Need to do it this way to get the boolean variables.
 	set tmp {}
-	set ncol [$wtablelist columncount]
-	for {set c 0} {$c < $ncol} {incr c} {
-	    lappend tmp {}
-	}
-	set tmpList [lsearch -all -not -inline $tmpList $tmp]
-
-	puts $tmpList
-
-	# Any booleans.
-	if {1} {
-	    foreach {key value} [array get boolVar] {
-		puts "\t key=$key, value=$value"
-		foreach {row col} [split $key ,] break
-		lset tmpList $row $col $value
+	set size [$wtablelist size]
+	for {set row 0} {$row < $size} {incr row} {
+	    lappend tmp [$wtablelist get $row]
+	    set name [$wtablelist rowcget $row -name]
+	    foreach col $boolColumns {
+		lset tmp $row $col $boolVar($name,$col)
 	    }
 	}
-
-	#set wcheck [$wtablelist cellconfigure $row,$col -window]
-	#puts "wcheck=$wcheck"
-
 	
-	
-	uplevel #0 [list set $bookmarksVar $tmpList]
+	uplevel #0 [list set $bookmarksVar $tmp]
 
 	if {$options(-command) ne ""} {
 	    set rc [catch {$options(-command)} result]
@@ -203,31 +222,6 @@ snit::widget ::Bookmarks::Dialog {
 	    } 
 	}
 	$self Destroy
-    }
-        
-    method BooleanColumnsForRow {row} {
-	#puts "BooleanColumnsForRow row=$row"
-	foreach c $boolColumns {
-	    $wtablelist cellconfigure $row,$c  \
-	      -window [list $self MakeCheckbutton]
-	}
-    }
-    
-    method SetCheckbuttonForRow {row} {
-	#puts "SetCheckbuttonForRow row=$row"
-	foreach col $boolColumns {
-	    set boolVar($row,$col) [lindex $tmpList $row $col]
-	    lset tmpList $row $col ""
-	    $wtablelist cellconfigure $row,$col -editable 0
-	}	    
-	#puts "tmpList=$tmpList"
-	#parray boolVar
-    }
-
-    method MakeCheckbutton {tbl row col w} {
-	#puts "MakeCheckbutton $tbl $row $col $w"
-	checkbutton $w -highlightthickness 0 -padx 0 -pady 0 -bg white  \
-	  -variable [myvar boolVar($row,$col)]
     }
     
     method Destroy {} {
@@ -241,6 +235,7 @@ snit::widget ::Bookmarks::Dialog {
 
     method add {row} {
 	lappend tmpList $row
+	$wtablelist rowconfigure end -name [incr rowuid]
 	set ridx [expr {[llength $tmpList]-1}]
 	if {[llength $boolColumns]} {
 	    $self BooleanColumnsForRow $ridx
@@ -276,4 +271,12 @@ snit::widget ::Bookmarks::Dialog {
 }
 
 proc ::Bookmarks::Nop {args} {}
+
+if {0} {
+    ::Bookmarks::Dialog .bm ::var -columns {0 A 0 B 0 C}
+    .bm boolean 2
+    .bm add {111 111 0}
+    .bm add {222 222 1} 
+    .bm add {333 333 0}
+}
 
