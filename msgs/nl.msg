@@ -20,7 +20,7 @@
 ::msgcat::mcset nl Allow				{Toestaan}
 ::msgcat::mcset nl Appearance   			{Uiterlijk}
 ::msgcat::mcset nl Apply				{Toepassen}
-::msgcat::mcset nl Author
+::msgcat::mcset nl Author				{Auteur}
 ::msgcat::mcset nl Available				{Beschikbaar}
 ::msgcat::mcset nl Away					{Afwezig}
 ::msgcat::mcset nl Back					{Terug}
@@ -87,13 +87,14 @@
 ::msgcat::mcset nl Height				{Hoogte}
 ::msgcat::mcset nl History				{Geschiedenis}
 ::msgcat::mcset nl Home					{Thuis}
-::msgcat::mcset nl Icon
+::msgcat::mcset nl Icon					{Pictogram}
 ::msgcat::mcset nl Image				{Afbeelding}
 ::msgcat::mcset nl Import				{Importeren}
 ::msgcat::mcset nl Inbox				{Postvak in}
 ::msgcat::mcset nl Info					{Info}
 ::msgcat::mcset nl Invite				{Uitnodigen}
-::msgcat::mcset nl Key
+# @sander: I need to verify next translation:
+::msgcat::mcset nl Key					{Sleutel}
 ::msgcat::mcset nl Language				{Taal}
 ::msgcat::mcset nl Last					{Laatste}
 ::msgcat::mcset nl Less					{Minder}
@@ -158,7 +159,7 @@
 ::msgcat::mcset nl Roster				{Roster}
 ::msgcat::mcset nl Save					{Opslaan}
 ::msgcat::mcset nl Search				{Zoeken}
-::msgcat::mcset nl Select				{Selecteren}
+::msgcat::mcset nl Select				{Kiezen}
 ::msgcat::mcset nl Send					{Verzenden}
 ::msgcat::mcset nl Server				{Server}
 ::msgcat::mcset nl Servers				{Servers}
@@ -206,7 +207,7 @@
 ::msgcat::mcset nl yes					{ja}
 
 # A few words that are not unambiguous and have therefore a prefix.
-::msgcat::mcset nl program-Application                  Application
+::msgcat::mcset nl program-Application                  Toepassing
 
 
 # Canvas item options, names and values.
@@ -663,9 +664,9 @@
 ::msgcat::mcset nl {Search results}			{Zoekresultaten}
 ::msgcat::mcset nl {Search Service}			{Zoeken}
 ::msgcat::mcset nl {Search Specifications}		{Specificaties zoeken}
-::msgcat::mcset nl {Select a new nickname}		{Nieuwe bijnaam selecteren}
-::msgcat::mcset nl {Select Font}			{Lettertype selecteren}
-::msgcat::mcset nl {Select Photo}			{Foto selecteren}
+::msgcat::mcset nl {Select a new nickname}		{Nieuwe bijnaam kiezen}
+::msgcat::mcset nl {Select Font}			{Lettertype kiezen}
+::msgcat::mcset nl {Select Photo}			{Foto kiezen}
 ::msgcat::mcset nl {Send File}				{Bestand verzenden}
 ::msgcat::mcset nl {Send Live}				{Live verzenden}
 ::msgcat::mcset nl {Server Info}			{Servergegevens}
@@ -782,7 +783,7 @@
 
 # Messages for tk_messageBox:
 ::msgcat::mcset nl messfailedhttp			{Starten van interne HTTP-server mislukte: %s.}
-::msgcat::mcset nl messinfoscript			{Omwille van de 'info script' bug op uw Mac, moet u effectief de 'Whiteboard-%s' map in het volgende venster selecteren.}
+::msgcat::mcset nl messinfoscript			{Omwille van de 'info script' bug op uw Mac, moet u effectief de 'Whiteboard-%s' map in het volgende venster kiezen.}
 ::msgcat::mcset nl messfailedsock			{Kon socket naar server niet aanmaken. Mogelijk werkt het netwerk niet of heeft uw server problemen. Foutcode: %s.}
 ::msgcat::mcset nl messeofconnect			{Verbinden mislukte. Fout: eof.}
 ::msgcat::mcset nl messfailconnect			{Verbinden met %s mislukte.}
@@ -896,7 +897,7 @@
 ::msgcat::mcset nl jamesserrinboxread			{Fout bij proberen te lezen van het Postvak in-bestand "%s": %s.}
 ::msgcat::mcset nl jamesschatclose			{Als u dit venster sluit dan verliest u de volledige conversatie. Wilt u het toch sluiten?}
 ::msgcat::mcset nl jamessgchatfields			{U moet alle velden invullen voor u een chatruimte betreedt.}
-::msgcat::mcset nl jamessconfmsg			{Selecteer een server en een chatruimte. Klik daarna op "Downloaden" om de toegangsspecificatie af te halen van de gewenste chatruimte (elke chatruimte en server kan verschillende vereisten hebben).}
+::msgcat::mcset nl jamessconfmsg			{Kies een server en een chatruimte. Klik daarna op "Downloaden" om de toegangsspecificatie af te halen van de gewenste chatruimte (elke chatruimte en server kan verschillende vereisten hebben).}
 ::msgcat::mcset nl jamesssavemsg			{Wilt u dit bericht opslaan?}
 ::msgcat::mcset nl jamessskipsendq			{Adres "%s" is foutief. Wilt u het overslaan en verzenden naar de anderen?}
 ::msgcat::mcset nl jamessillformresend			{Adres "%s" is foutief. Corrigeer het en verzend het daarna opnieuw.}
@@ -998,7 +999,7 @@
 ::msgcat::mcset nl uastatpoly				{Veelhoek, spatiebalk om ongedaan te maken}
 ::msgcat::mcset nl uastatarc				{Boog, klik om het centrum in te stellen, spatiebalk om ongedaan te maken}
 ::msgcat::mcset nl uastatarc2				{Boog, klik en sleep}
-::msgcat::mcset nl uastatrot				{Draaien, selecteer eerst een item}
+::msgcat::mcset nl uastatrot				{Draaien, kies eerst een item}
 
 
 # Preferences:
@@ -1063,7 +1064,7 @@
 ::msgcat::mcset nl prefmucconf				{Multi-User-Chat protocol met Conference protocol als backup}
 ::msgcat::mcset nl prefrostbgim				{Achtergrondafbeelding (gif) in roster}
 ::msgcat::mcset nl preftheme				{Thema (herstart van Coccinella vereist)}
-::msgcat::mcset nl prefplugctrl				{Enkel de geselecteerde pakketten worden geladen. U moet Coccinella herstarten voor de wijzigingen worden doorgevoerd.}
+::msgcat::mcset nl prefplugctrl				{Enkel de gekozen pakketten worden geladen. U moet Coccinella herstarten voor de wijzigingen worden doorgevoerd.}
 ::msgcat::mcset nl prefchactret				{Altijd actieve <enter> in chatvenster gebruiken}
 ::msgcat::mcset nl prefchnormal				{Normale berichten als chatberichten behandelen}
 ::msgcat::mcset nl prefprofname				{Voer de gewenste naam voor het profiel in}
@@ -1076,7 +1077,7 @@
 ::msgcat::mcset nl prefprivgetlist			{Bezig met ophalen van filterlijst "%s".}
 ::msgcat::mcset nl prefprivrules			{Elke lijst bevat minstens één regel. Een regel bestaat uit een berichttype en een bijhorende actie. Als u een groep wilt blokkeren dan moet deze ook effectief bestaan in uw roster.}
 ::msgcat::mcset nl prefuserinactive			{Deze contactpersoon is al een tijdje niet actief}
-::msgcat::mcset nl preficonsel				{De geselecteerde emoticonset zal gebruikt worden als u op "Opslaan" klikt.}
+::msgcat::mcset nl preficonsel				{De gekozen emoticonset zal gebruikt worden als u op "Opslaan" klikt.}
 ::msgcat::mcset nl prefwbscroll				{U kunt een grotere waarde instellen dan de standaardgrootte %sx%s}
 ::msgcat::mcset nl prefssbts				{Bladerknoppen laten zien}
 ::msgcat::mcset nl prefssresize				{Doek automatisch aanpassen aan afbeeldingsgrootte}
@@ -1095,7 +1096,7 @@ namespace eval ::EditShortcuts:: {
 
 }
 
-::msgcat::mcset nl jalogin				{Voer het IP-nummer of de naam van de Jabber-server in, of selecteer een server uit het popupmenu. Verzeker u ervan dat u al een account hebt op deze server.}
+::msgcat::mcset nl jalogin				{Voer het IP-nummer of de naam van de Jabber-server in, of kies een server uit het popupmenu. Verzeker u ervan dat u al een account hebt op deze server.}
 ::msgcat::mcset nl janewaccount				{Voer het IP-nummer of de naam van de Jabber-server in. Kies een gebruikersnaam en een wachtwoord.}
 ::msgcat::mcset nl janewpass				{Nieuw wachtwoord instellen voor}
 ::msgcat::mcset nl jasubwant				{"%s" wilt u toevoegen aan zijn roster.}
@@ -1117,8 +1118,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jasendauth				{Server "%s" antwoorde. Bezig met verzenden van autorisatie-informatie.}
 ::msgcat::mcset nl jaerrlogin				{Aanmelden op %s mislukte: %s.}
 ::msgcat::mcset nl jaauthok				{Autorisatie met server "%s" is gelukt. Bezig met ophalen van roster...}
-::msgcat::mcset nl jagchatmsg				{Kies een dienst voor chatruimtes, selecteer een chatruimte en geef uw naam en bijnaam op}
-::msgcat::mcset nl jacreateroom				{Selecteer een dienst voor chatruimtes en voer de naam voor de chatruimte in. Klik dan op de knop "Ophalen" om de chatruimte in te stellen.}
+::msgcat::mcset nl jagchatmsg				{Kies een dienst voor chatruimtes, kies een chatruimte en geef uw naam en bijnaam op}
+::msgcat::mcset nl jacreateroom				{Kies een dienst voor chatruimtes en voer de naam voor de chatruimte in. Klik dan op de knop "Ophalen" om de chatruimte in te stellen.}
 ::msgcat::mcset nl jawaitserver				{Bezig met wachten op server...}
 ::msgcat::mcset nl jaregmsg				{Als u al geregistreerd bent op deze dienst dan kunt u hier uw persoonlijke info publiceren.}
 ::msgcat::mcset nl jastatavailable			{Beschikbaar}
@@ -1152,7 +1153,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jaloginuser				{Voer uw gebruikersnaam en wachtwoord in om aan te melden op %s.}
 ::msgcat::mcset nl jaregnewwith				{Wilt u een nieuwe account aanmaken op %s?}
 ::msgcat::mcset nl jaregisterexserv			{Registreer op de dienst %s. U moet mogelijk op de knop "Ophalen" klikken als de nodige gegevens niet vanzelf worden opgehaald.}
-::msgcat::mcset nl jaseliconset				{Selecteer de emoticonsets die u wilt gebruiken.}
+::msgcat::mcset nl jaseliconset				{Kies de emoticonsets die u wilt gebruiken.}
 ::msgcat::mcset nl jachathist				{Geschiedenis tonen/verbergen}
 ::msgcat::mcset nl jawaitdisco				{Bezig met wachten op resultaat van discovery-aanvraag...}
 
@@ -1281,47 +1282,47 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl iaxPhoneCodec			{Codec}
 
 # Messages for Mood PEP
-::msgcat::mcset nl mMood        Mood 
-::msgcat::mcset nl mAngry       Angry
-::msgcat::mcset nl mAnxious     Anxious
-::msgcat::mcset nl mAshamed     Ashamed
-::msgcat::mcset nl mBored       Bored
-::msgcat::mcset nl mCurious     Curious
-::msgcat::mcset nl mDepressed   Depressed
-::msgcat::mcset nl mExcited     Excited
-::msgcat::mcset nl mHappy       Happy
-::msgcat::mcset nl mInLove      {In love}
-::msgcat::mcset nl mInvincible  Invincible
-::msgcat::mcset nl mJealous     Jealous
-::msgcat::mcset nl mNervous     Nervous
-::msgcat::mcset nl mSad         Sad
-::msgcat::mcset nl mSleepy      Sleepy
-::msgcat::mcset nl mStressed    Stressed
-::msgcat::mcset nl mWorried     Worried
+::msgcat::mcset nl mMood				Stemming
+::msgcat::mcset nl mAngry				Boos
+::msgcat::mcset nl mAnxious				Bezorgd
+::msgcat::mcset nl mAshamed				Beschaamd
+::msgcat::mcset nl mBored				Verveeld
+::msgcat::mcset nl mCurious				Nieuwsgierig
+::msgcat::mcset nl mDepressed				Gedeprimeerd
+::msgcat::mcset nl mExcited				Opgewonden
+::msgcat::mcset nl mHappy				Gelukkig
+::msgcat::mcset nl mInLove				Verliefd
+::msgcat::mcset nl mInvincible				Onoverwinnelijk
+::msgcat::mcset nl mJealous				Jaloers
+::msgcat::mcset nl mNervous				Angstig
+::msgcat::mcset nl mSad					Droevig
+::msgcat::mcset nl mSleepy				Slaperig
+::msgcat::mcset nl mStressed				Gestresseerd
+::msgcat::mcset nl mWorried				Ongerust
 
-::msgcat::mcset nl moodEvent   {Mood change}
-::msgcat::mcset nl heIs        is
-::msgcat::mcset nl because     because
-::msgcat::mcset nl angry       angry
-::msgcat::mcset nl anxious     anxious
-::msgcat::mcset nl ashamed     ashamed
-::msgcat::mcset nl bored       bored
-::msgcat::mcset nl curious     curious
-::msgcat::mcset nl depressed   depressed
-::msgcat::mcset nl excited     excited
-::msgcat::mcset nl happy       happy
-::msgcat::mcset nl in_love     {in love}
-::msgcat::mcset nl invincible  invincible
-::msgcat::mcset nl jealous     jealous
-::msgcat::mcset nl nervous     nervous
-::msgcat::mcset nl sad         sad
-::msgcat::mcset nl sleepy      sleepy
-::msgcat::mcset nl stressed    stressed
-::msgcat::mcset nl worried     worried
+::msgcat::mcset nl moodEvent				{Wijziging van stemming}
+::msgcat::mcset nl heIs					is
+::msgcat::mcset nl because				omdat
+::msgcat::mcset nl angry				boos
+::msgcat::mcset nl anxious				bezorgd
+::msgcat::mcset nl ashamed				beschaamd
+::msgcat::mcset nl bored				verveeld
+::msgcat::mcset nl curious				nieuwsgierig
+::msgcat::mcset nl depressed				gedeprimeerd
+::msgcat::mcset nl excited				opgewonden
+::msgcat::mcset nl happy				gelukkig
+::msgcat::mcset nl in_love				verliefd
+::msgcat::mcset nl invincible				onoverwinnelijk
+::msgcat::mcset nl jealous				jaloers
+::msgcat::mcset nl nervous				angstig
+::msgcat::mcset nl sad					droevig
+::msgcat::mcset nl sleepy				slaperig
+::msgcat::mcset nl stressed				gestresseerd
+::msgcat::mcset nl worried				ongerust
 
-::msgcat::mcset nl moodDlg              {Mood}
-::msgcat::mcset nl selectCustomMood     {Select a mood}
-::msgcat::mcset nl moodMessage          {Reason for mood}
-::msgcat::mcset nl mCustomMood              {Custom mood}
+::msgcat::mcset nl moodDlg				{Stemming}
+::msgcat::mcset nl selectCustomMood			{Stemming kiezen}
+::msgcat::mcset nl moodMessage				{Bericht bij stemming}
+::msgcat::mcset nl mCustomMood				{Aangepaste stemming}
 
 # END --------------------------------------------------------------------------
