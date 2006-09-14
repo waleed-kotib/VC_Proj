@@ -17,6 +17,7 @@
 ::msgcat::mcset en Allow
 ::msgcat::mcset en Appearance
 ::msgcat::mcset en Apply
+::msgcat::mcset en Author
 ::msgcat::mcset en Available
 ::msgcat::mcset en Away
 ::msgcat::mcset en Back
@@ -83,11 +84,13 @@
 ::msgcat::mcset en Height
 ::msgcat::mcset en History
 ::msgcat::mcset en Home
+::msgcat::mcset en Icon
 ::msgcat::mcset en Image
 ::msgcat::mcset en Import
 ::msgcat::mcset en Inbox
 ::msgcat::mcset en Info
 ::msgcat::mcset en Invite
+::msgcat::mcset en Key
 ::msgcat::mcset en Language
 ::msgcat::mcset en Last
 ::msgcat::mcset en Less

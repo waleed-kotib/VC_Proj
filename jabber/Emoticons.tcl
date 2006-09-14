@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.42 2006-06-02 14:04:33 matben Exp $
+# $Id: Emoticons.tcl,v 1.43 2006-09-14 09:37:28 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -500,7 +500,7 @@ proc ::Emoticons::InsertTextLegend {w name args} {
     # Meta data:
     foreach ind [array names meta $name,*] {
 	set key [string map [list "$name," ""] $ind]
-	$w insert insert "[string totitle $key]:\t" tmeta
+	$w insert insert "[mc [string totitle $key]]:\t" tmeta
 	foreach val $meta($ind) {
 	    $w insert insert "$val, " tmeta
 	}
@@ -557,7 +557,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     set allSets [GetAllSets]
 
     # This should never happen!
-    if {$allSets == {}} {
+    if {$allSets eq {}} {
 	set allSets None
     }
 
@@ -574,10 +574,18 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
       -padding [option get . groupSmallPadding {}]
     pack $wfr -side top -anchor w -fill both -expand 1
     
-    set wmb $wc.mb
-    set wiconsetmenu [eval {
-	ttk::optionmenu $wmb [namespace current]::tmpSet
-    } $allSets]
+    set wmb $wc.mb    
+    set menuDef {}
+    foreach name $allSets {
+	if {$name eq "default"} {
+	    lappend menuDef [list [mc Default] -value default]
+	} else {
+	    lappend menuDef [list $name -value $name]
+	}
+    }
+    ui::optionmenu $wmb -menulist $menuDef -variable [namespace current]::tmpSet \
+      -command [namespace code PrefsSetCmd]
+    
     $wfr configure -labelwidget $wmb
     
     ttk::scrollbar $wfr.ysc -orient vertical -command [list $wfr.t yview]
@@ -595,14 +603,12 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
       -command [namespace current]::ImportSet
     pack $wc.imp -side top -anchor w -pady 4
     
-    trace add variable [namespace current]::tmpSet write  \
-      [namespace current]::PopCmd
-
     if {[lsearch $allSets $jprefs(emoticonSet)] < 0} {
 	set tmpSet $priv(defaultSet)
     } else {
 	set tmpSet $jprefs(emoticonSet)
     }
+    PrefsSetCmd $tmpSet
 }
 
 proc ::Emoticons::ImportSet { } {
@@ -637,21 +643,20 @@ proc ::Emoticons::ImportSet { } {
     }
 }
 
-proc ::Emoticons::PopCmd {name1 name2 op} {
+proc ::Emoticons::PrefsSetCmd {value} {
     variable wprefpage
     variable wpreftext 
     variable state
     variable tmpSet
     variable priv
     upvar ::Jabber::jprefs jprefs
-    upvar $name1 var
-
-    if {![info exists state($var,loaded)]} {
+    
+    if {![info exists state($tmpSet,loaded)]} {
 	if {[catch {
-	    LoadTmpIconSet $state($var,path)
+	    LoadTmpIconSet $state($tmpSet,path)
 	} err]} {
 	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message "Failed loading iconset $var. $err" \
+	      -message "Failed loading iconset $tmpSet. $err" \
 	      -parent [winfo toplevel $wprefpage]
 	    set priv(havezip) 0
 	    set jprefs(emoticonSet) $priv(defaultSet)
@@ -660,13 +665,11 @@ proc ::Emoticons::PopCmd {name1 name2 op} {
 	    return
 	}
     }
-    InsertTextLegend $wpreftext $var
+    InsertTextLegend $wpreftext $tmpSet
 }
 
 proc ::Emoticons::FreePrefsPage { } {
     
-    trace remove variable [namespace current]::tmpSet write  \
-      [namespace current]::PopCmd
 }
 
 proc ::Emoticons::SavePrefsHook { } {

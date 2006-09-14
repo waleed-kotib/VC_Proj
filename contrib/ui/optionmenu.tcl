@@ -2,9 +2,9 @@
 # 
 #       Menubutton with associated menu.
 # 
-# Copyright (c) 2005 Mats Bengtsson
+# Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.5 2006-04-17 13:23:38 matben Exp $
+# $Id: optionmenu.tcl,v 1.6 2006-09-14 09:37:28 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -67,11 +67,11 @@ snit::widgetadaptor ui::optionmenu::widget {
 	if {[info exists $options(-variable)]} {
 	    set value [set $options(-variable)]
 	    set menuVar $imap($value)
-	}
-	
-	# If variable is changed must update us.
-	if {$options(-variable) ne ""} {
-	    trace add variable $options(-variable) write [list $self Trace]
+	    
+	    # If variable is changed must update us.
+	    if {$options(-variable) ne ""} {
+		trace add variable $options(-variable) write [list $self Trace]
+	    }
 	}
 
 	$win configure -textvariable [myvar menuVar] -menu $m
@@ -89,7 +89,7 @@ snit::widgetadaptor ui::optionmenu::widget {
 	    uplevel #0 [list set $options(-variable) $map($menuVar)]
 	}
 	if {$options(-command) ne ""} {
-	    uplevel #0 $options(-command)
+	    uplevel #0 $options(-command) [list $map($menuVar)]
 	}
     }
     
@@ -137,7 +137,7 @@ if {0} {
 	{"One hour"        -value 3600}
 	{"No restriction"  -value 0}
     }
-    proc Cmd {} {puts "Cmd var=$::var"}
+    proc Cmd {value} {puts "Cmd value=$value"}
 
     toplevel .t
     ui::optionmenu .t.mb -menulist $menuDef -direction flush \

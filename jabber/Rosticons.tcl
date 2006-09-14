@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.24 2006-09-08 07:03:34 matben Exp $
+# $Id: Rosticons.tcl,v 1.25 2006-09-14 09:37:28 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -525,7 +525,7 @@ proc ::Rosticons::PFillTree {T} {
     upvar ::Jabber::jprefs jprefs
     
     foreach type $state(types) {
-	set ptmp(use,$type) $jprefs(rost,icons,use,$type)
+	set ptmp(use,$type)  $jprefs(rost,icons,use,$type)
 	set ptmp(name,$type) $jprefs(rost,icons,$type)
     }
     
