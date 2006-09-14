@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Plugins.tcl,v 1.23 2006-08-21 09:45:48 matben Exp $
+# $Id: Plugins.tcl,v 1.24 2006-09-14 13:48:22 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -129,11 +129,11 @@ namespace eval ::Plugins:: {
     array set helpers2Platform {xanim unix} 
     
     # Snack buggy on NT4.
-    if {($tcl_platform(os) eq "Windows NT") &&  \
-      ($tcl_platform(osVersion) == 4.0)} {
-	set packages2Platform(snack)  \
-	  [lsearch -inline -not -all $packages2Platform(snack) "windows"]
-    }
+    #if {($tcl_platform(os) eq "Windows NT") &&  \
+    #  ($tcl_platform(osVersion) == 4.0)} {
+#	set packages2Platform(snack)  \
+#	  [lsearch -inline -not -all $packages2Platform(snack) "windows"]
+    #}
     
     array set plugType2DescArr {
 	internal    "Internal Plugin"
