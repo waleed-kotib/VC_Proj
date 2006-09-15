@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.13 2006-04-08 07:02:47 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.14 2006-09-15 13:18:17 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -155,8 +155,14 @@ proc ::BuddyPounce::Build {typeselected item group} {
     set w ${wdlg}${uid}
     set state(w) $w
     
-    switch -- $typeselected {
-	user - wb {    
+    if {[lsearch $typeselected user] >= 0} {
+	set clicked user
+    } else {
+	set clicked $typeselected
+    }
+    
+    switch -- $clicked {
+	user {    
 	    set jid [jlib::jidmap $item]
 	    jlib::splitjid $jid jid2 res
 	    set state(jid)  $jid

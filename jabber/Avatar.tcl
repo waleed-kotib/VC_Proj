@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.22 2006-08-12 13:48:25 matben Exp $
+# $Id: Avatar.tcl,v 1.23 2006-09-15 13:18:17 matben Exp $
 
 # @@@ Issues:
 # 
@@ -344,7 +344,7 @@ proc ::Avatar::VerifyPhotoFile {fileName} {
     Debug "::Avatar::VerifyPhotoFile"
     
     set mime [::Types::GetMimeTypeForFileName $fileName]
-    if {[lsearch {image/gif image/png} $mime] < 0} {
+    if {[lsearch {image/gif image/png image/jpeg} $mime] < 0} {
 	set msg "Our avatar shall be either a PNG or a GIF file."
 	return [list 0 $msg]
     }
@@ -455,7 +455,7 @@ proc ::Avatar::GetMyAvatarFile { } {
     Debug "::Avatar::GetMyAvatarFile"
     
     set fileNames [glob -nocomplain -types f  \
-      -directory $this(myAvatarPath) *.gif *.png]
+      -directory $this(myAvatarPath) *.gif *.png *.jpg *.jpeg]
     set fileName [lindex $fileNames 0]
     if {[file isfile $fileName]} {
 	return $fileName
@@ -577,12 +577,19 @@ proc ::Avatar::OnNewHash {jid} {
     } else {
 
 	# Try first to get the Avatar from Cache.
-	set data [ReadCacheAvatar $hash]
-	if {$data ne ""} {
-	    SetPhoto $jid2 $data
+	if {[HaveCachedHash $hash]} {
+	    SetPhotoFromCache $jid2
 	} elseif {$options(-autoget)} {
 	    GetPrioAvatar $jid
 	}
+	
+	# Try first to get the Avatar from Cache.
+	#set data [ReadCacheAvatar $hash]
+	#if {$data ne ""} {
+	#    SetPhotoFromData $jid2 $data
+	#} elseif {$options(-autoget)} {
+	#    GetPrioAvatar $jid
+	#}
     }
 }
 
@@ -640,7 +647,8 @@ proc ::Avatar::GetAvatarAsyncCB {type jid2} {
 	    set mime [$jlib avatar get_mime $jid2]
 	    WriteCacheAvatar $mime $hash $data
 	    
-	    SetPhoto $jid2 $data
+	    SetPhotoFromCache $jid2
+	    #SetPhotoFromData $jid2 $data
 	} else {
 	    InvokeAnyFallbackFrom $jid2 "avatar"
 	}
@@ -665,7 +673,8 @@ proc ::Avatar::GetVCardPhotoCB {type jid2} {
 	    set mime [$jlib avatar get_mime $jid2]
 	    WriteCacheAvatar $mime $hash $data
 	    
-	    SetPhoto $jid2 $data
+	    SetPhotoFromCache $jid2
+	    #SetPhotoFromData $jid2 $data
 	} else {
 	    InvokeAnyFallbackFrom $jid2 "vcard"
 	}
@@ -715,9 +724,9 @@ proc ::Avatar::GetAsyncIfExists {jid} {
     if {$hash ne ""} {
 	
 	# First try to load the avatar from Cache directory.
-	set data [ReadCacheAvatar $hash]
-	if { $data ne "" } {
-	    SetPhoto $jid2 $data
+	if {[HaveCachedHash $hash]} {
+	    SetPhotoFromCache $jid2
+	    #SetPhotoFromData $jid2 $data
 	} else {
 	    GetPrioAvatar $jid
 	}
@@ -752,7 +761,7 @@ proc ::Avatar::GetAll { } {
     }
 }
 
-# Avatar::SetPhoto --
+# Avatar::SetPhotoFromData --
 # 
 #       Create new photo if not exists and updates the image with the data.
 #       Any -command is invoked notifying the event.
@@ -763,11 +772,11 @@ proc ::Avatar::GetAll { } {
 #       photo(jid,48)
 #       photo(jid,64)   
 
-proc ::Avatar::SetPhoto {jid2 data} {
+proc ::Avatar::SetPhotoFromData {jid2 data} {
     variable photo
     variable options
 
-    Debug "::Avatar::SetPhoto jid2=$jid2"
+    Debug "::Avatar::SetPhotoFromData jid2=$jid2"
     
     set type put
     if {![info exists photo($jid2,orig)]} {
@@ -777,7 +786,7 @@ proc ::Avatar::SetPhoto {jid2 data} {
     
     # Be silent!
     if {![catch {
-	PutPhoto $jid2 $data
+	PutPhotoFromData $jid2 $data
     } err]} {
 	if {$options(-command) ne ""} {
 	    $options(-command) $type $jid2
@@ -790,18 +799,92 @@ proc ::Avatar::SetPhoto {jid2 data} {
     ::hooks::run avatarNewPhotoHook $jid2
 }
 
-# Avatar::PutPhoto --
+proc ::Avatar::SetPhotoFromCache {jid2} {
+    variable photo
+    variable options
+
+    Debug "::Avatar::SetPhotoFromCache jid2=$jid2"
+    
+    set type put
+    if {![info exists photo($jid2,orig)]} {
+	set photo($jid2,orig) [image create photo]
+	set type create
+    }
+
+    # Be silent!
+    if {![catch {
+	PutPhotoFromCache $jid2
+    } err]} {
+	if {$options(-command) ne ""} {
+	    $options(-command) $type $jid2
+	}
+    } else {
+	Debug $err
+    }
+    
+    # Notification using hooks since there may be more than one interested.
+    ::hooks::run avatarNewPhotoHook $jid2
+}
+
+# Avatar::PutPhotoFromCache --
 # 
 #       Assumes a blank photo is already created and creates all images
 #       of interested sizes.
+#       May throw error!
 
-proc ::Avatar::PutPhoto {jid2 data} {
+proc ::Avatar::PutPhotoFromCache {jid2} {
+    variable photo
+    
+    Debug "::Avatar::PutPhotoFromCache jid2=$jid2"
+    
+    set orig $photo($jid2,orig)
+
+    set hash [GetHash $jid2]
+    if {$hash ne ""} {
+	set fileName [GetCacheFileName $hash]
+	if {[file exists $fileName]} {
+	    if {![catch {
+		set tmp [image create photo -file $fileName]
+	    }]} {
+		$orig copy $tmp -compositingrule set
+		image delete $tmp
+	    }
+	}
+    }    
+    
+    # We must update all photos of all sizes for this jid.
+    PutPhotoCreateSizes $jid2    
+}
+
+# Avatar::PutPhotoFromData --
+# 
+#       Assumes a blank photo is already created and creates all images
+#       of interested sizes.
+#       May throw error!
+
+proc ::Avatar::PutPhotoFromData {jid2 data} {
+    variable photo
+    variable sizes
+    
+    # Write new image data on existing image.
+    set orig $photo($jid2,orig)
+    $orig put $data
+    
+    # We must update all photos of all sizes for this jid.
+    PutPhotoCreateSizes $jid2
+}
+
+# Avatar::PutPhotoCreateSizes --
+# 
+#       Creates all the scaled photos that are in use when putting a new
+#       avatar.
+
+proc ::Avatar::PutPhotoCreateSizes {jid2} {
     variable photo
     variable sizes
     
     set orig $photo($jid2,orig)
-    $orig put $data
-    
+
     # We must update all photos of all sizes for this jid.
     foreach size $sizes {
 	if {[info exists photo($jid2,$size)]} {
@@ -857,7 +940,11 @@ proc ::Avatar::GetPhoto {jid2} {
 	return $photo($jid2,orig)
     } elseif {[HaveCachedJID $jid2]} {
 	CreatePhotoFromCache $jid2
-	return $photo($jid2,orig)
+	if {[info exists photo($jid2,orig)]} {
+	    return $photo($jid2,orig)
+	} else {
+	    return ""
+	}
     } else {
 	return ""
     }
@@ -926,14 +1013,21 @@ proc ::Avatar::HavePhoto {jid2} {
 
 proc ::Avatar::CreatePhotoFromCache {jid2} {
     variable photo
-    
+
     set hash [GetHash $jid2]
     if {$hash ne ""} {
-	set data [ReadCacheAvatar $hash]
-	set photo($jid2,orig) [image create photo]
-	catch {
-	    PutPhoto $jid2 $data
+	set fileName [GetCacheFileName $hash]
+	if {[file exists $fileName]} {
+	    catch {
+		set photo($jid2,orig) [image create photo -file $fileName]
+	    }
 	}
+	# BU
+	#set data [ReadCacheAvatar $hash]
+	#set photo($jid2,orig) [image create photo]
+	#catch {
+	#    PutPhotoFromData $jid2 $data
+	#}
     }    
 }
 
@@ -1112,6 +1206,10 @@ proc ::Avatar::GetCacheFileName {hash} {
 	}
     }
     return ""
+}
+
+proc ::Avatar::HaveCachedHash {hash} {    
+    return [expr {[GetCacheFileName $hash] eq "" ? 0 : 1}]
 }
 
 # Avatar::ReadCacheAvatar --
@@ -1343,11 +1441,15 @@ proc ::Avatar::PrefsFile { } {
     set suffs {.gif}
     set types {
 	{{Image Files}  {.gif}}
-	{{GIF Files}    {.gif}}
+	{{GIF Image}    {.gif}}
     }
     if {[::Plugins::HaveImporterForMime image/png]} {
 	lappend suffs .png
-	lappend types {{PNG Files}    {.png}}
+	lappend types {{PNG Image}    {.png}}
+    }
+    if {[::Plugins::HaveImporterForMime image/jpeg]} {
+	lappend suffs .jpg .jpeg
+	lappend types {{JPEG Image}    {.jpg .jpeg}}
     }
     lset types 0 1 $suffs
     set fileName [tk_getOpenFile -title [mc {Pick Image File}]  \

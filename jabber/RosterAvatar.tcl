@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.17 2006-09-08 12:39:58 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.18 2006-09-15 13:18:17 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -548,7 +548,7 @@ proc ::RosterAvatar::OnAvatarPhoto {type jid2} {
     
     # We get this callback async. Beware!
     set styleName [::RosterTree::GetStyle]
-    if {$styleName ne "avatar" || $styleName ne "avatarlarge"} {
+    if {($styleName ne "avatar") && ($styleName ne "avatarlarge")} {
 	return
     }
 
