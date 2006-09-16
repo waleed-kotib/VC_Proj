@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.91 2006-08-20 13:41:18 matben Exp $
+# $Id: Disco.tcl,v 1.92 2006-09-16 06:34:31 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -308,10 +308,10 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 	# in more than one place of the disco tree. Find them all.
 	
 	set vlist [::ITree::FindEndItems $wtree [list $from $node]]
-	set cattype [lindex [$jstate(jlib) disco types $from $node] 0]
+	set cattypes [$jstate(jlib) disco types $from $node]
 
 	foreach vstruct $vlist {
-	    set icon [::Servicons::Get $cattype]
+	    set icon [::Servicons::GetFromTypeList $cattypes]
 	    set opts {}	    
 	    set name [$jstate(jlib) disco name $from $node]
 	    if {$name ne ""} {
@@ -332,10 +332,11 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 	
 	# Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
 	# and general (discoInfoHook) hooks.
-	set ct [split $cattype /]
-	set hookName [string totitle [lindex $ct 0]][string totitle [lindex $ct 1]]
-	
-	eval {::hooks::run discoInfo${hookName}Hook $type $from $queryE} $args
+	foreach c $cattypes {
+	    set ct [split $c /]
+	    set hname [string totitle [lindex $ct 0]][string totitle [lindex $ct 1]]   
+	    eval {::hooks::run discoInfo${hname}Hook $type $from $queryE} $args
+	}
 	eval {::hooks::run discoInfoHook $type $from $queryE} $args
     }
     if {$cmd ne ""} {
@@ -1110,11 +1111,9 @@ proc ::Disco::TreeItem {vstruct} {
 	}
     }    
 
-    set cattype [lindex [$jstate(jlib) disco types $jid $node] 0]
-    set isconference 0
-    if {[lindex [split $cattype /] 0] eq "conference"} {
-	set isconference 1
-    }
+    set cattypes [$jstate(jlib) disco types $jid $node]
+    set isconference [expr {[lsearch -glob $cattypes conference/*] < 0 ? 0 : 1}]
+    
     jlib::splitjid $jid jid2 res
     set isroom [$jstate(jlib) disco isroom $jid2]
     
@@ -1149,7 +1148,7 @@ proc ::Disco::TreeItem {vstruct} {
 		    set name $node
 		}
 	    }
-	    set icon [::Servicons::Get $cattype]
+	    set icon [::Servicons::GetFromTypeList $cattypes]
 	}	    
 	set isopen 0
 	if {[llength $vstruct] == 1} {
