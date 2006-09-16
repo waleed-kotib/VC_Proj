@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Servicons.tcl,v 1.3 2005-11-16 08:52:03 matben Exp $
+# $Id: Servicons.tcl,v 1.4 2006-09-16 06:34:31 matben Exp $
 
 package require Icondef
 
@@ -113,7 +113,7 @@ proc ::Servicons::Exists {key} {
 #       key       category/type, ex: conference/text, gateway/icq
 #       
 # Results:
-#       a valid image.
+#       a valid image or empty.
 
 proc ::Servicons::Get {key} {
     variable icons
@@ -122,15 +122,45 @@ proc ::Servicons::Get {key} {
 
     # @@@ For gateways we could use a rosticon instead to get the sets match
     
-    if {[info exists alias($key)]} {
-	set key $alias($key)
-    }
-    lassign $key category type
-    if {[info exists icons($key)]} {
+    set key [string map [array get alias] $key]
+    if {[string match gateway/* $key]} {
+	set gtype [lindex [split $key /] 1]/available
+	return [::Rosticons::Get $gtype]
+    } elseif {[info exists icons($key)]} {
 	return $icons($key)
     } else {
-	return
+	return ""
     }
+}
+
+# Servicons::GetFromTypeList --
+# 
+#       As Get but takes a category/type list and searches this in priority.
+
+proc ::Servicons::GetFromTypeList {typelist} {
+    variable icons
+    variable priv
+    variable alias
+    
+    set typelist [string map [array get alias] $typelist]
+    
+    # Do a priority search: server, gateway, and the rest...
+    set sorted {}
+    lappend sorted [lsearch -glob -inline $typelist server/*]
+    lappend sorted [lsearch -glob -inline $typelist gateway/*]
+    set typelist [lsearch -glob -inline -not -all $typelist server/*]
+    set typelist [lsearch -glob -inline -not -all $typelist gateway/*]
+    set sorted [concat $sorted $typelist]
+    
+    foreach type $sorted {
+	if {[string match gateway/* $type]} {
+	    set gtype [lindex [split $type /] 1]/available
+	    return [::Rosticons::Get $gtype]
+	} elseif {[info exists icons($type)]} {
+	    return $icons($type)
+	}
+    }
+    return ""
 }
 
 proc ::Servicons::GetTypes { } {
