@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Servicons.tcl,v 1.4 2006-09-16 06:34:31 matben Exp $
+# $Id: Servicons.tcl,v 1.5 2006-09-16 13:46:17 matben Exp $
 
 package require Icondef
 
@@ -28,6 +28,7 @@ namespace eval ::Servicons:: {
 	services/jabber       server/im
 	headline/rss          headline/newmail
 	conference/irc        conference/text
+	pubsub/generic        pubsub/service
     }
 }
 

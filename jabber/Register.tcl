@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.54 2006-09-13 14:09:11 matben Exp $
+# $Id: Register.tcl,v 1.55 2006-09-16 13:46:17 matben Exp $
 
 package provide Register 1.0
 
@@ -674,11 +674,14 @@ proc ::RegisterEx::AuthCB {jlibname status {errcode ""} {errmsg ""}} {
     switch -- $status {
 	ok {
 	
-	    # Login was succesful, set presence.
-	    ::Login::SetStatus
-	    ::Login::SetLoginState
+	    # Login was succesful.
+	    ::Login::SetLoginStateRunHook
 	    ::JUI::FixUIWhen "connectfin"
 	    ::JUI::SetConnectState "connectfin"
+
+	    # Important to send presence *after* we request the roster (loginHook)!
+	    ::Login::SetStatus
+
 	    set jid [::Jabber::GetMyJid]
 	    ::UI::MessageBox -icon info -type ok -message [mc jamessregloginok $jid]
 	    $jlibname connect free

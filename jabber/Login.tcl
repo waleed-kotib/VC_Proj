@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.99 2006-09-13 07:56:01 matben Exp $
+# $Id: Login.tcl,v 1.100 2006-09-16 13:46:17 matben Exp $
 
 package provide Login 1.0
 
@@ -620,12 +620,14 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
 
     switch -- $status {
 	ok {
-	    eval {SetStatus} $highstate(args)
 	    set server [$jstate(jlib) getserver]
 	    set msg [mc jaauthok $server] 
 	    ::JUI::FixUIWhen "connectfin"
 	    ::JUI::SetConnectState "connectfin"
-	    SetLoginState
+	    SetLoginStateRunHook
+	    
+	    # Important to send presence *after* we request the roster (loginHook)!
+	    eval {SetStatus} $highstate(args)
 	}
 	error {
 	    set msg ""
@@ -737,12 +739,12 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
     }
 }
 
-proc ::Login::SetLoginState {} {
+proc ::Login::SetLoginStateRunHook {} {
     global  this
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
    
-    ::Debug 2 "::Login::SetLoginState"
+    ::Debug 2 "::Login::SetLoginStateRunHook"
     
     set jlib $jstate(jlib)
 
