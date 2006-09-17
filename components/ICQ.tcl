@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.12 2006-08-12 13:48:25 matben Exp $
+# $Id: ICQ.tcl,v 1.13 2006-09-17 13:13:51 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -14,8 +14,8 @@ proc ::ICQ::Init { } {
     ::Debug 2 "::ICQ::Init"
     
     # Add all hooks we need.
-    ::hooks::register discoInfoHook          ::ICQ::DiscoInfoHook
-    ::hooks::register logoutHook             ::ICQ::LogoutHook
+    ::hooks::register discoInfoGatewayIcqHook   ::ICQ::DiscoInfoHook
+    ::hooks::register logoutHook                ::ICQ::LogoutHook
     
     component::register ICQ  \
       "The roster name is automatically set to the ICQ user's vCard nickname."
@@ -25,13 +25,7 @@ proc ::ICQ::Init { } {
 }
 
 proc ::ICQ::DiscoInfoHook {type from subiq args} {
-    
-    ::Debug 4 "::ICQ::DiscoInfoHook"
-    
-    set cattype [lindex [::Jabber::DiscoCmd types $from] 0]
-    if {$cattype eq "gateway/icq"} {
-	InvestigateRoster
-    }
+    InvestigateRoster
 }
 
 proc ::ICQ::InvestigateRoster { } {
