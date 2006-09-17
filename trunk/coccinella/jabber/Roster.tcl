@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.178 2006-09-14 13:15:49 matben Exp $
+# $Id: Roster.tcl,v 1.179 2006-09-17 12:49:18 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -419,10 +419,10 @@ proc ::Roster::CancelTimedMessage { } {
 
 proc ::Roster::SetPresenceMessage {jid presence args} {
     
-    array set argsArr $args
+    array set argsA $args
     set show $presence
-    if {[info exists argsArr(-show)]} {
-	set show $argsArr(-show)
+    if {[info exists argsA(-show)]} {
+	set show $argsA(-show)
     }
     set name [GetDisplayName $jid]
     TimedMessage "$name [mc $show]"
@@ -987,18 +987,20 @@ proc ::Roster::SetItem {jid args} {
     if {$add} {
     
 	# Add only the one with highest priority.
-	jlib::splitjid $jid jid2 res
+	set jid2 [jlib::barejid $jid]
 	set res [$jlib roster gethighestresource $jid2]
-	array set pres [$jlib roster getpresence $jid2 -resource $res]
+	array set presA [$jlib roster getpresence $jid2 -resource $res]
 	
+	# For online users we replace the actual resource with max priority one.
+	# Make sure we do not duplicate resource for jid3 roster items!
 	if {$res ne ""} {
-	    set jid $jid/$res
+	    set jid $jid2/$res
 	}
 	
 	# Put in our roster tree. Append any resource if available.
 	set items [eval {
-	    ::RosterTree::StyleCreateItem $jid $pres(-type)
-	} $args [array get pres]]
+	    ::RosterTree::StyleCreateItem $jid $presA(-type)
+	} $args [array get presA]]
 	
 	if {!$inroster && ![info exists sortID] && [llength $items]} {
 	    set pitem [::RosterTree::GetParent [lindex $items end]]
@@ -1027,7 +1029,7 @@ proc ::Roster::Presence {jid presence args} {
     upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Roster::Presence jid=$jid, presence=$presence"
-    array set argsArr $args
+    array set argsA $args
 
     # All presence have a 3-tier jid as 'from' attribute:
     # presence = 'available'   => remove jid2 + jid3,  add jid3
@@ -1138,10 +1140,10 @@ proc ::Roster::GetPresenceIconFromJid {jid} {
 	set pres [$jlib roster getpresence $jid2 -resource $res]
     }
     set rost [$jlib roster getrosteritem $jid2]
-    array set argsArr $pres
-    array set argsArr $rost
+    array set argsA $pres
+    array set argsA $rost
     
-    return [eval {GetPresenceIcon $jid $argsArr(-type)} [array get argsArr]]
+    return [eval {GetPresenceIcon $jid $argsA(-type)} [array get argsA]]
 }
 
 # Roster::GetPresenceIcon --
@@ -1154,7 +1156,7 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     
-    array set argsArr $args
+    array set argsA $args
     
     ::Debug 4 "GetPresenceIcon jid=$jid, presence=$presence, args=$args"
     
@@ -1164,14 +1166,14 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     
     # Then see if any <show/> element
     if {$presence eq "available"} {
-	if {[info exists argsArr(-show)]} {
-	    set isub $argsArr(-show)
+	if {[info exists argsA(-show)]} {
+	    set isub $argsA(-show)
 	}
-    } elseif {[info exists argsArr(-subscription)] &&   \
-      [string equal $argsArr(-subscription) "none"]} {
+    } elseif {[info exists argsA(-subscription)] &&   \
+      [string equal $argsA(-subscription) "none"]} {
 	set isub "ask"
-    } elseif {[info exists argsArr(-ask)] &&   \
-      [string equal $argsArr(-ask) "subscribe"]} {
+    } elseif {[info exists argsA(-ask)] &&   \
+      [string equal $argsA(-ask) "subscribe"]} {
 	set isub "ask"
     }
     
