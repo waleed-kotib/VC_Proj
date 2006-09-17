@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.29 2006-09-02 06:43:38 matben Exp $
+# $Id: RosterTree.tcl,v 1.30 2006-09-17 12:49:19 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -773,10 +773,6 @@ proc ::RosterTree::OnDestroy {} {
 #       Offline and other are stored with 2-tier jid with no resource.
 #       
 # Arguments:
-#       jid         for available JID always use the JID as reported in the
-#                   presence 'from' attribute.
-#                   for unavailable JID always us the roster item JID.
-#
 #       jid         as reported by the presence
 #                   if from roster element any nonempty resource is appended
 #       presence    "available" or "unavailable"
@@ -792,7 +788,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs  jprefs
     
-    ::Debug 4 "::RosterTree::CreateItemBase jid=$jid, presence=$presence"
+    ::Debug 6 "::RosterTree::CreateItemBase jid=$jid, presence=$presence"
 
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
@@ -804,7 +800,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     if {$istrpt && !$jprefs(rost,showTrpts)} {
 	return
     }
-    array set argsArr $args
+    array set argsA $args
     set itemTagList {}
 
     set mjid [jlib::jidmap $jid]
@@ -819,17 +815,17 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
 	if {[llength $itemTagList] == 4} {
 	    lappend dirtags [lindex $itemTagList 1]
 	}
-    } elseif {[info exists argsArr(-ask)] && ($argsArr(-ask) eq "subscribe")} {
+    } elseif {[info exists argsA(-ask)] && ($argsA(-ask) eq "subscribe")} {
 	
 	# Pending:
 	set itemTagList [CreateItemWithParent $mjid pending]
 	if {[llength $itemTagList] == 4} {
 	    lappend dirtags [lindex $itemTagList 1]
 	}
-    } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) ne "")} {
+    } elseif {[info exists argsA(-groups)] && ($argsA(-groups) ne "")} {
 	
 	# Group(s):
-	foreach group $argsArr(-groups) {
+	foreach group $argsA(-groups) {
 	    
 	    # Make group if not exists already.
 	    set ptag [list group $group $presence]
@@ -875,6 +871,8 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
 
 proc ::RosterTree::CreateItemWithParent {jid type} {
     variable T
+
+    ::Debug 6 "::RosterTree::CreateItemWithParent jid=$jid, type=$type"
     
     set itemTagList {}
     set ptag [list head $type]
@@ -980,7 +978,7 @@ proc ::RosterTree::MCHead {str} {
 proc ::RosterTree::MakeDisplayText {jid presence args} {
     upvar ::Jabber::jserver jserver
 
-    array set argsArr $args
+    array set argsA $args
     
     # Format item:
     #  - If 'name' attribute, use this, else
@@ -997,25 +995,25 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
 
     if {$istrpt} {
 	set str $jid
-	if {[info exists argsArr(-show)]} {
-	    set sstr [::Roster::MapShowToText $argsArr(-show)]
+	if {[info exists argsA(-show)]} {
+	    set sstr [::Roster::MapShowToText $argsA(-show)]
 	    append str " ($sstr)" 
-	} elseif {[info exists argsArr(-status)]} {
-	    append str " ($argsArr(-status))"
+	} elseif {[info exists argsA(-status)]} {
+	    append str " ($argsA(-status))"
 	}
     } else {
-	if {[info exists argsArr(-name)] && ($argsArr(-name) ne "")} {
-	    set str $argsArr(-name)
+	if {[info exists argsA(-name)] && ($argsA(-name) ne "")} {
+	    set str $argsA(-name)
 	} elseif {[regexp "^(\[^@\]+)@${server}" $jid match user]} {
 	    set str $user
 	} else {
 	    set str $jid
 	}
 	if {$presence eq "available"} {
-	    if {[info exists argsArr(-resource)] && ($argsArr(-resource) ne "")} {
+	    if {[info exists argsA(-resource)] && ($argsA(-resource) ne "")} {
 
 		# Configurable?
-		#append str " ($argsArr(-resource))"
+		#append str " ($argsA(-resource))"
 	    }
 	}
     }
@@ -1026,12 +1024,12 @@ proc ::RosterTree::Balloon {jid presence item args} {
     variable T    
     upvar ::Jabber::jstate jstate
 
-    array set argsArr $args
+    array set argsA $args
     
     # Design the balloon help window message.
     set msg $jid
-    if {[info exists argsArr(-show)]} {
-	set show $argsArr(-show)
+    if {[info exists argsA(-show)]} {
+	set show $argsA(-show)
     } else {
 	set show $presence
     }
@@ -1047,8 +1045,8 @@ proc ::RosterTree::Balloon {jid presence item args} {
 	    append msg "\n" "Online since: $tstr"
 	}
     }
-    if {[info exists argsArr(-status)] && ($argsArr(-status) ne "")} {
-	append msg "\n" $argsArr(-status)
+    if {[info exists argsA(-status)] && ($argsA(-status) ne "")} {
+	append msg "\n" $argsA(-status)
     }
     
     ::balloonhelp::treectrl $T $item $msg
