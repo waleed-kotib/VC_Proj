@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.10 2006-09-11 09:39:24 matben Exp $
+#  $Id: Mood.tcl,v 1.11 2006-09-18 08:04:10 matben Exp $
 
 package require ui::optionmenu
 
@@ -119,6 +119,10 @@ proc ::Mood::Init { } {
 
 }
 
+# Setting own mood -------------------------------------------------------------
+#
+#       Disco server for PEP, disco own bare JID, create pubsub node.
+
 proc ::Mood::LoginHook {} {
    
     #----- Disco server for pubsub support -----
@@ -127,7 +131,6 @@ proc ::Mood::LoginHook {} {
 }
 
 proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
-    variable node
     variable xmlns
     variable menuDef
     variable menuMoodVar
@@ -147,7 +150,8 @@ proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
 	    # This seems not necessary with latest PEP.
 	    if {1} {
 		set myjid2 [::Jabber::JlibCmd myjid2]
-		::Jabber::JlibCmd disco get_async items $myjid2 ::Mood::OnDiscoUser
+		::Jabber::JlibCmd disco get_async items $myjid2  \
+		  [namespace code OnDiscoUser]
 	    } else {
 		
 		# Publish node directly since PEP service automatically creates
@@ -184,7 +188,7 @@ proc ::Mood::Publish {mood {text ""}} {
     set itemE [wrapper::createtag item -subtags [list $moodE]]
     
     ::Jabber::JlibCmd pubsub publish $moodNode -items [list $itemE]  \
-      -command ::Mood::PublishCB
+      -command [namespace code PublishCB]
 }
 
 proc ::Mood::PublishCB {args} {
@@ -198,26 +202,20 @@ proc ::Mood::PublishCB {args} {
 #
 # Not used for PEP?
 proc ::Mood::OnDiscoUser {jlibname type from subiq args} {
+    variable moodNode
     
-    puts "\t ::Mood::OnDiscoUser"
+    puts "::Mood::OnDiscoUser"
     
     #------- Before create a node checks if it is created ---------
-    set findMood false
     if {$type eq "result"} {
 	set nodes [::Jabber::JlibCmd disco nodes $from]
-	foreach nodeItem $nodes {
-	    if { [string first "moodee" $nodeItem] != -1 } {
-		set findMood true
-		break
-	    }
+	puts "\t nodes=$nodes"
+	
+	#---------- Create the node for mood information -------------
+	# This is not necessary if we not wants default configuration.
+	if {[lsearch $nodes $moodNode] < 0} {
+	    CreateNode
 	}
-    }
-    puts "\t findMood=$findMood"
-    
-    #---------- Create the node for mood information -------------
-    # This is not necessary if we not wants default configuration.
-    if { !$findMood } {
-	CreateNode
     }
 }
 
@@ -242,12 +240,16 @@ proc ::Mood::CreateNode {} {
     set xE [wrapper::createtag x -attrlist $xattr -subtags $xsubE]
     
     ::Jabber::JlibCmd pubsub create -node $moodNode  \
-      -command ::Mood::CreateNodeCB -configure $xE
+      -command [namespace code CreateNodeCB] -configure $xE
 }
 
 proc ::Mood::CreateNodeCB {type args} {
     # empty
 }
+
+# Others mood ------------------------------------------------------------------
+# 
+#       Disco bare JID, subscribe to node, handle events.
 
 #-------------------------------------------------------------------------
 #---------------------- (Extended Presence) ------------------------------
@@ -280,29 +282,25 @@ proc ::Mood::PresenceHook {jid type args} {
 
     if { ![info exists state($jid2,pubsubsupport)] } {
         #------------- Check(disco#items) If the User supports PEP before subscribe
-        ::Jabber::JlibCmd disco get_async items $jid2 [list ::Mood::OnDiscoContact]
+        ::Jabber::JlibCmd disco get_async items $jid2 [namespace code OnDiscoContact]
     } 
 }
 
 proc ::Mood::OnDiscoContact {jlibname type from subiq args} {
     variable state
-    variable node
+    variable moodNode
 
     ::Debug 2 "::Mood::OnDiscoContactServer"
 
     # --- Check if contact supports Mood node ----
     if {$type eq "result"} {
         set nodes [::Jabber::JlibCmd disco nodes $from]
-        foreach nodeItem $nodes {
-            if { [string first "mood" $nodeItem] != -1 } {
-
-
-                set state($from,pubsubsupport) true
-		set myjid2 [::Jabber::JlibCmd myjid2]
-
-                ::Jabber::JlibCmd pubsub subscribe $from $myjid2 -node $node -command ::Mood::PubSubscribeCB
-                break
-            }
+	if {[lsearch $nodes $moodNode] >= 0} {
+	    set state($from,pubsubsupport) true
+	    set myjid2 [::Jabber::JlibCmd myjid2]
+	    
+	    ::Jabber::JlibCmd pubsub subscribe $from $myjid2 -node $moodNode  \
+	      -command [namespace code PubSubscribeCB]
         }
     }
 }
