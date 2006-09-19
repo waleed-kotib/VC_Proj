@@ -932,6 +932,8 @@
 ::msgcat::mcset es jamessgcnoroomname           {Debe de introducir el nombre de una sala.}
 ::msgcat::mcset es jamessgcnoroomnick           {Debe de introducir un nombre de usuario.}
 ::msgcat::mcset es jamessnorooms                {Problemas al buscar una sala en %s.}
+::msgcat::mcset es jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
+you happen to be online while this message is being read. Do you want to send it anyway?}
 
 # Translate
 ::msgcat::mcset es jamessnofiletrpt {We couldn't see that %s supports file transfer.}

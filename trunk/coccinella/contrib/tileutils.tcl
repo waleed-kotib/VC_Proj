@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.36 2006-07-22 13:15:23 matben Exp $
+# $Id: tileutils.tcl,v 1.37 2006-09-19 10:02:13 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -49,10 +49,11 @@ proc tileutils::ThemeChanged {} {
 	} else {
 	    set priority startupFile
 	}
+	# The highlightBackground needs a better solution.
 	option add *ChaseArrows.background        $color $priority
-	option add *Listbox.highlightBackground   $color $priority
+	option add *Listbox.highlightBackground   white  $priority
 	option add *Menu.background               $color $priority
-	option add *Text.highlightBackground      $color $priority
+	option add *Text.highlightBackground      white  $priority
 	option add *TreeCtrl.columnBackground     $color $priority
 	option add *WaveLabel.columnBackground    $color $priority
 	if {[info exists map(-background)]} {

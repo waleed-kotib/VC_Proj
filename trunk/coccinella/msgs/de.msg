@@ -919,6 +919,8 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de jamessfailedsubsc            {Anmeldung bei %s nicht möglich. Der Benutzer verweigerte die Anmeldung.}
 ::msgcat::mcset de jamessgcinvite               {Sie wurden zum Gruppen-Chat in Raum %s von %s eingeladen. Möchten Sie teilnehmen?}
 ::msgcat::mcset de jamessnorooms {Kann in %s keine Räume finden.}
+::msgcat::mcset de jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
+you happen to be online while this message is being read. Do you want to send it anyway?}
 
 # Translate
 ::msgcat::mcset de jamessnofiletrpt             {We couldn't see that %s supports file transfer.}

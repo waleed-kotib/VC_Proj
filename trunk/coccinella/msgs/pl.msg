@@ -905,6 +905,8 @@ Otrzymałeś autoryzację od %s: %s.}
 ::msgcat::mcset pl jamessfailedsubsc            {Brak autoryzacji ze strony %s - użytkownik nie wyraził zgody.}
 ::msgcat::mcset pl jamessgcinvite               {Masz zaproszenie do wzięcia udziału w konferencji %s (od %s). Przyłączysz się?}
 ::msgcat::mcset pl jamessnorooms                {Nie znaleziono żadnych pokoi pod adresem %s.}
+::msgcat::mcset pl jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
+you happen to be online while this message is being read. Do you want to send it anyway?}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
