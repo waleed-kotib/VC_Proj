@@ -1,24 +1,28 @@
 # Mood.tcl --
 # 
 #       User Mood using PEP recommendations over PubSub library code.
+#       The current code reflects the PEP JEP prior to the simplification
+#       of version 0.15.
 #
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.11 2006-09-18 08:04:10 matben Exp $
+#  $Id: Mood.tcl,v 1.12 2006-09-19 14:09:53 matben Exp $
 
 package require ui::optionmenu
 
 namespace eval ::Mood:: { }
 
 proc ::Mood::Init { } {
+    
+    return
 
     component::register Mood "This is User Mood (JEP-0107)."
 
     ::Debug 2 "::Mood::Init"
 
     # Add event hooks.
-    ::hooks::register newMessageHook        ::Mood::MessageHook
+    #::hooks::register newMessageHook        ::Mood::MessageHook
     #::hooks::register presenceHook          ::Mood::PresenceHook
     ::hooks::register loginHook             ::Mood::LoginHook
     ::hooks::register logoutHook            ::Mood::LogoutHook
@@ -122,10 +126,14 @@ proc ::Mood::Init { } {
 # Setting own mood -------------------------------------------------------------
 #
 #       Disco server for PEP, disco own bare JID, create pubsub node.
+#       
+#       1) Disco server for pubsub/pep support
+#       2) Create node if not there
+#       3) Publish mood
 
 proc ::Mood::LoginHook {} {
    
-    #----- Disco server for pubsub support -----
+    # Disco server for pubsub/pep support.
     set server [::Jabber::JlibCmd getserver]
     ::Jabber::JlibCmd disco get_async info $server ::Mood::OnDiscoServer
 }
@@ -154,12 +162,16 @@ proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
 		  [namespace code OnDiscoUser]
 	    } else {
 		
+		# NEW PEP:
 		# Publish node directly since PEP service automatically creates
 		# a pubsub node with default configuration.
 		if {$menuMoodVar ne "-"} {
 		    Publish $menuMoodVar
 		}
 	    }
+	    
+	    ::Jabber::JlibCmd presence_register available  \
+	      [namespace code PresenceEvent]
 	}
     }
 }
@@ -167,12 +179,64 @@ proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
 proc ::Mood::LogoutHook {} {
     
     ::JUI::DeRegisterMenuEntry jabber mMood
+    ::Jabber::JlibCmd presence_deregister available [namespace code PresenceEvent]
 }
 
 proc ::Mood::MenuCmd {} {
     variable menuMoodVar
     
     Publish $menuMoodVar
+}
+
+#--------------------------------------------------------------------
+#-------             Checks and create if node exists ---------------
+#-----------            before the publish tasks     ----------------
+#--------------------------------------------------------------------
+
+proc ::Mood::OnDiscoUser {jlibname type from subiq args} {
+    variable moodNode
+    
+    puts "::Mood::OnDiscoUser"
+    
+    #------- Before create a node checks if it is created ---------
+    if {$type eq "result"} {
+	set nodes [::Jabber::JlibCmd disco nodes $from]
+	puts "\t nodes=$nodes"
+	
+	# Create the node for mood information if not exists.
+	# NEW PEP: This is not necessary if we not wants default configuration.
+	if {[lsearch $nodes $moodNode] < 0} {
+	    CreateNode
+	}
+    }
+}
+
+proc ::Mood::CreateNode {} {
+    variable moodNode
+    variable xmlns
+    
+    puts "\t ::Mood::CreateNode"
+    
+    # Configure setup for PEP node
+    set valueFormE [wrapper::createtag value -chdata $xmlns(node_config)]
+    set fieldFormE [wrapper::createtag field  \
+      -attrlist [list var "FORM_TYPE" type hidden] -subtags [list $valueFormE]]
+    
+    # PEP Values for access_model: roster / presence / open or authorize / whitelist
+    set valueModelE [wrapper::createtag value -chdata open]
+    set fieldModelE [wrapper::createtag field  \
+      -attrlist [list var "pubsub#access_model"] -subtags [list $valueModelE]]
+    
+    set xattr [list xmlns "jabber:x:data" type submit]
+    set xsubE [list $fieldFormE $fieldModelE]
+    set xE [wrapper::createtag x -attrlist $xattr -subtags $xsubE]
+    
+    ::Jabber::JlibCmd pubsub create -node $moodNode  \
+      -command [namespace code CreateNodeCB] -configure $xE
+}
+
+proc ::Mood::CreateNodeCB {type args} {
+    # empty
 }
 
 proc ::Mood::Publish {mood {text ""}} {
@@ -195,67 +259,37 @@ proc ::Mood::PublishCB {args} {
     # empty
 }
 
-#--------------------------------------------------------------------
-#-------             Checks and create if node exists ---------------
-#-----------            before the publish tasks     ----------------
-#--------------------------------------------------------------------
-#
-# Not used for PEP?
-proc ::Mood::OnDiscoUser {jlibname type from subiq args} {
-    variable moodNode
-    
-    puts "::Mood::OnDiscoUser"
-    
-    #------- Before create a node checks if it is created ---------
-    if {$type eq "result"} {
-	set nodes [::Jabber::JlibCmd disco nodes $from]
-	puts "\t nodes=$nodes"
-	
-	#---------- Create the node for mood information -------------
-	# This is not necessary if we not wants default configuration.
-	if {[lsearch $nodes $moodNode] < 0} {
-	    CreateNode
-	}
-    }
-}
-
-proc ::Mood::CreateNode {} {
-    variable moodNode
-    variable xmlns
-    
-    puts "\t ::Mood::CreateNode"
-    
-    # Configure setup for PEP node
-    set valueFormE [wrapper::createtag value -chdata $xmlns(node_config)]
-    set fieldFormE [wrapper::createtag field  \
-      -attrlist [list var "FORM_TYPE" type hidden] -subtags [list $valueFormE]]
-    
-    # PEP Values for access_model: roster / presence / open or authorize / whitelist
-    set valueModelE [wrapper::createtag value -chdata roster]
-    set fieldModelE [wrapper::createtag field  \
-      -attrlist [list var "pubsub#access_model"] -subtags [list $valueModelE]]
-    
-    set xattr [list xmlns "jabber:x:data" type submit]
-    set xsubE [list $fieldFormE $fieldModelE]
-    set xE [wrapper::createtag x -attrlist $xattr -subtags $xsubE]
-    
-    ::Jabber::JlibCmd pubsub create -node $moodNode  \
-      -command [namespace code CreateNodeCB] -configure $xE
-}
-
-proc ::Mood::CreateNodeCB {type args} {
-    # empty
-}
-
 # Others mood ------------------------------------------------------------------
 # 
-#       Disco bare JID, subscribe to node, handle events.
+#       1) Disco bare JID
+#       2) subscribe to node
+#       3) handle events
 
 #-------------------------------------------------------------------------
 #---------------------- (Extended Presence) ------------------------------
 #-------------------------------------------------------------------------
 
-# Not necessary for PEP.
+# Not necessary for NEW PEP.
+
+proc ::Mood::PresenceEvent {jlibname xmldata} {
+    
+    set type [wrapper::getattribute $xmldata type]
+    set from [wrapper::getattribute $xmldata from]
+    if {$type eq ""} {
+	set type "available"
+    }
+    if {![::Jabber::JlibCmd roster isitem ]} {
+	return
+    }
+    if {[::Roster::IsTransportHeuristics $from]} {
+	return
+    }
+    
+    
+    
+    
+}
+
 proc ::Mood::PresenceHook {jid type args} {
     variable state
 
@@ -291,7 +325,7 @@ proc ::Mood::OnDiscoContact {jlibname type from subiq args} {
     variable moodNode
 
     ::Debug 2 "::Mood::OnDiscoContactServer"
-
+    
     # --- Check if contact supports Mood node ----
     if {$type eq "result"} {
         set nodes [::Jabber::JlibCmd disco nodes $from]
@@ -313,43 +347,34 @@ proc ::Mood::PubSubscribeCB {args} {
 #---------------------- (Incoming Mood Handling) -------------------------
 #-------------------------------------------------------------------------
 
-if {0} {
-    <message from='juliet@capulet.com'
-	     to='benvolio@montague.net'
-	     type='headline'
-	     id='foo'>
-      <event xmlns='http://jabber.org/protocol/pubsub#event'>
-	<items node='http://jabber.org/protocol/tune'>
-	  <item>
-	    <tune xmlns='http://jabber.org/protocol/tune'>
-	      <artist>Gerald Finzi</artist>
-	      <title>Introduction (Allegro vigoroso)</title>
-	      <source>Music for "Love's Labors Lost" (Suite for small orchestra)</source>
-	      <track>1</track>
-	      <length>255</length>
-	    </tune>
-	  </item>
-	</items>
-      </event>
-    </message> 
-}
-
 proc ::Mood::Event {jlibname xmldata} {
     
-    puts "::Mood::Event----->"
+    puts "::Mood::Event-----> xmldata=$xmldata"
  
     set from [wrapper::getattribute $xmldata from]
     set eventE [wrapper::getfirstchildwithtag $xmldata event]
     if {[llength $eventE]} {
 	set itemsE [wrapper::getfirstchildwithtag $eventE items]
 	if {[llength $itemsE]} {
-	    set node [wrapper::getattribute $itemsE node]
-    
+	    set node [wrapper::getattribute $itemsE node]    
 	    set itemE [wrapper::getfirstchildwithtag $itemsE item]
 	    set moodE [wrapper::getfirstchildwithtag $itemE mood]
 	
+	    set text ""
+	    set mood ""
+	    foreach E [wrapper::getchildren $moodE] {
+		set tag [wrapper::gettag $E]
+		switch -- $tag {
+		    text {
+			set text [wrapper::getcdata $E]
+		    }
+		    default {
+			set mood $tag
+		    }
+		}
+	    }
 	
-	
+	    ::hooks::run moodEvent $from $mood $text
 	}
     }
 }
