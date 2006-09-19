@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.63 2006-09-11 12:18:19 matben Exp $
+# $Id: Whiteboard.tcl,v 1.64 2006-09-19 12:38:02 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -437,7 +437,7 @@ proc ::WB::InitMenuDefs { } {
     set menuDefs(main,info,aboutwhiteboard)  \
       {command   mAboutCoccinella    {::Splash::SplashScreen}    {}}
     set menuDefs(main,info,aboutquicktimetcl)  \
-      {command   mAboutQuickTimeTcl  {::Dialogs::AboutQuickTimeTcl}                normal   {}}
+      {command   mAboutQuickTimeTcl  {::Dialogs::AboutQuickTimeTcl}  {}}
 
     # Only basic functionality.
     set menuDefs(main,file) {
