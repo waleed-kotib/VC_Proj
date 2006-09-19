@@ -905,6 +905,8 @@
 ::msgcat::mcset it jamessnorooms {Failed to find any rooms at %s.}
 ::msgcat::mcset it jamessnofiletrpt {Non sembra che %s supporti il trasferimento di file.}
 ::msgcat::mcset it jamessfiletrpterr {Errore durante la ricezione del file %s da %s: %s}
+::msgcat::mcset it jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
+you happen to be online while this message is being read. Do you want to send it anyway?}
 
 
 # This maps Defined Error Conditions to clear text messages.

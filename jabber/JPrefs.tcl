@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.40 2006-08-20 13:41:18 matben Exp $
+# $Id: JPrefs.tcl,v 1.41 2006-09-19 10:02:13 matben Exp $
 
 package require ui::fontselector
 
@@ -289,14 +289,20 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	xpnative	"XP Native"
 	aqua    	"Aqua"
 	tileqt          "Qt"
+	step            "Step"
     }
-    array set tileThemeArr $tileThemeList;
-
+    array set tileThemeArr $tileThemeList
+    
     # Add in any available loadable themes:
     foreach name [tile::availableThemes] {
 	if {![info exists tileThemeArr($name)]} {
 	    lappend tileThemeList \
 	      $name [set tileThemeArr($name) [string totitle $name]]
+	}
+    }
+    foreach {theme name} $tileThemeList {
+	if {![catch {package require tile::theme::$theme}]} {
+	    lappend menuDef [list $name -value $theme]
 	}
     }
     set tmpPrefs(tileTheme) $::tile::currentTheme
@@ -341,16 +347,22 @@ proc ::JPrefs::BuildAppearancePage {page} {
     set wmenu $wskin.b.m
     ttk::frame $wskin
     ttk::label $wskin.l -text "[mc {Pick skin}]:"
-    ttk::menubutton $wskin.b -textvariable ::tile::currentTheme \
-      -menu $wmenu -direction flush
-    menu $wmenu -tearoff 0
     
-    foreach {theme name} $tileThemeList {
-	$wmenu add radiobutton -label $name \
-	  -variable ::tile::currentTheme -value $theme \
-	  -command [list tile::setTheme $theme]
-	if {[lsearch -exact [package names] tile::theme::$theme] == -1} {
-	    $wmenu entryconfigure $name -state disabled
+    ui::optionmenu $wskin.b -menulist $menuDef -variable ::tile::currentTheme \
+      -command tile::setTheme
+    
+    if {0} {
+	ttk::menubutton $wskin.b -textvariable ::tile::currentTheme \
+	  -menu $wmenu -direction flush
+	menu $wmenu -tearoff 0
+	
+	foreach {theme name} $tileThemeList {
+	    $wmenu add radiobutton -label $name \
+	      -variable ::tile::currentTheme -value $theme \
+	      -command [list tile::setTheme $theme]
+	    if {[lsearch -exact [package names] tile::theme::$theme] == -1} {
+		$wmenu entryconfigure $name -state disabled
+	    }
 	}
     }
     

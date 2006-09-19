@@ -930,6 +930,8 @@
 ::msgcat::mcset fr jamessfailedsubsc            {Échec de l'inscription à %s. L'utilisateur a refusé l'inscription.}
 ::msgcat::mcset fr jamessgcinvite               {Vous avez été invité dans le salon %s par %s. Voulez-vous y aller ?}
 ::msgcat::mcset fr jamessnorooms		{Impossible de trouver un salon sur %s.}
+::msgcat::mcset fr jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
+you happen to be online while this message is being read. Do you want to send it anyway?}
 
 # Translate
 ::msgcat::mcset fr jamessnofiletrpt             {We couldn't see that %s supports file transfer.}

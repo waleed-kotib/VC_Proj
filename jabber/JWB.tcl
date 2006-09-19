@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.67 2006-09-13 14:09:11 matben Exp $
+# $Id: JWB.tcl,v 1.68 2006-09-19 10:02:13 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -898,11 +898,7 @@ proc ::JWB::DoSendCanvas {w} {
 	# If user not online no files may be sent off.
 	if {![$jstate(jlib) roster isavailable $jid]} {
 	    set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
-	      -message "The user you are sending to,\
-	      \"$jid\", is not online, and if this message contains any images\
-	      or other similar entities, this user will not get them unless\
-	      you happen to be online while this message is being read.\
-	      Do you want to send it anyway?"]
+	      -message [mc jamesswarnsendcanoff $jid]]
 	    if {$ans eq "no"} {
 		return
 	    }

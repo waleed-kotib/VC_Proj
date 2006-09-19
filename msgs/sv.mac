@@ -915,6 +915,8 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv jamessnorooms                {Hittade inga rum hos %s.}
 ::msgcat::mcset sv jamessnofiletrpt             {Vi kunde inte se att %s har stöd för filöverföring.}
 ::msgcat::mcset sv jamessfiletrpterr            {Misslyckades med att ta emot filen %s från %s: %s}
+::msgcat::mcset sv jamesswarnsendcanoff         {Användaren du vill skicka till, "%s", är inte tillgänglig och om detta meddelande innehåller bilder eller likanande så kommer mottagaren inte att få\
+dessa om du inte händelsevis är tillgänglig när mottagaren läser det. Vill du skicka trots detta?}
 
 
 # This maps Defined Error Conditions to clear text messages.
@@ -970,7 +972,7 @@ där användarnamnet är okänt).}
 ::msgcat::mcset sv version-version              {Version}
 ::msgcat::mcset sv version-os                   {Operativsystem}
 
-::msgcat::mcset sv register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
+::msgcat::mcset sv register-trpt-unreg          {Du önskar avregistrera en transport som servar ett antal användare. Vill du ta bort dessa användare också (Ja), behålla dem (Nej), eller avbryta (Avbryt).}
 
 
 ::msgcat::mcset sv openquicktime		{Öppna en QuickTime ström}

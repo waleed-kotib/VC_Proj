@@ -915,6 +915,9 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en jamessnorooms                {Failed to find any rooms at %s.}
 ::msgcat::mcset en jamessnofiletrpt             {We couldn't see that %s supports file transfer.}
 ::msgcat::mcset en jamessfiletrpterr            {Failed to get file %s from %s: %s}
+::msgcat::mcset en jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
+you happen to be online while this message is being read. Do you want to send it anyway?}
+
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors

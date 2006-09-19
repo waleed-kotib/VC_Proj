@@ -807,6 +807,9 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset ru jamesstrptsubsc              {Your registered account with the %s service will be put in your roster to work as a transport with this service.}
 ::msgcat::mcset ru jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
 ::msgcat::mcset ru jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
+::msgcat::mcset ru jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
+you happen to be online while this message is being read. Do you want to send it anyway?}
+
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors

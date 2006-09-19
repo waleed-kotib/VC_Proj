@@ -916,6 +916,8 @@
 ::msgcat::mcset nl jamessnorooms			{Kon geen enkele chatruimte vinden op %s.}
 ::msgcat::mcset nl jamessnofiletrpt			{Coccinella kon niet detecteren of %s bestandsoverdracht ondersteunt.}
 ::msgcat::mcset nl jamessfiletrpterr			{Downloaden van bestand %s van %s mislukte: %s.}
+::msgcat::mcset nl jamesswarnsendcanoff                 {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
+you happen to be online while this message is being read. Do you want to send it anyway?}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors

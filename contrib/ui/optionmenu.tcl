@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.7 2006-09-14 13:15:49 matben Exp $
+# $Id: optionmenu.tcl,v 1.8 2006-09-19 10:02:13 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -63,7 +63,7 @@ snit::widgetadaptor ui::optionmenu::widget {
 	      -command [list $self Command]} [array get opts]
 	}
 	
-	# If the variable have exists must set our own menuVar.
+	# If the variable exists must set our own menuVar.
 	if {[info exists $options(-variable)]} {
 	    set value [set $options(-variable)]
 	    set menuVar $imap($value)
@@ -137,11 +137,12 @@ if {0} {
 	{"One hour"        -value 3600}
 	{"No restriction"  -value 0}
     }
+    set var 0
     proc Cmd {value} {puts "Cmd value=$value"}
 
     toplevel .t
     ui::optionmenu .t.mb -menulist $menuDef -direction flush \
-      -variable var -command Cmd
+      -variable ::var -command Cmd
     pack .t.mb
     .t.mb maxwidth
 }
