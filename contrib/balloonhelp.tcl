@@ -5,7 +5,10 @@
 #  Code idee from Harrison & McLennan
 #  This source file is distributed under the BSD license.
 #  
-# $Id: balloonhelp.tcl,v 1.23 2006-09-06 12:51:51 matben Exp $
+#  @@@ Treectrl is problematic since items come and go and are not free'd.
+#      Perhaps a callback based method instead?
+#  
+# $Id: balloonhelp.tcl,v 1.24 2006-09-20 14:12:38 matben Exp $
 
 package require treeutil
 
@@ -25,7 +28,7 @@ namespace eval ::balloonhelp:: {
     # Java style popup: light blue schemata: bg=#D8E1F4, bd=#4A6EBC
     # Standard: light yellow: bg=#FFFF9F
     
-    option add *Balloonhelp.background            #FFFF9F   widgetDefault
+    option add *Balloonhelp.background            "#FFFF9F" widgetDefault
     option add *Balloonhelp.foreground            black     widgetDefault
     option add *Balloonhelp.wrapLength            180       widgetDefault
     option add *Balloonhelp.justify               left      widgetDefault

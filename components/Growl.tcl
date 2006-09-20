@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.13 2006-09-11 09:39:24 matben Exp $
+# $Id: Growl.tcl,v 1.14 2006-09-20 14:12:38 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -124,16 +124,15 @@ proc ::Growl::JivePhoneEventHook {type cid callID args} {
     }
 }
 
-proc ::Growl::MoodEventHook {from mood text args} {
+proc ::Growl::MoodEventHook {xmldata mood text} {
     variable cociFile
 
-puts "Growl...."
     set title [mc moodEvent]
-    set msg "$from [mc heIs] [mc $mood] "
+    set from [wrapper::getattribute $xmldata from]
+    set msg "$from [mc heIs] [mc $mood]"
     if {$text ne ""} {
-        set msg "$msg [mc because] $text"
+        append msg " " [mc because] $text
     }
-puts "Growl dice $msg"
 
     growl post moodEvent $title $msg $cociFile
 } 

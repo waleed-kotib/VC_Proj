@@ -29,11 +29,11 @@
 # liability for all claims, expenses, losses, damages and costs any user may
 # incur as a result of using, copying or modifying the Software.
 #
-# $Id: xml-8.1.tcl,v 1.2 2004-08-17 14:10:30 matben Exp $
+# $Id: xml-8.1.tcl,v 1.3 2006-09-20 14:12:38 matben Exp $
 
 package require Tcl 8.1
 
-package provide xmldefs 2.0
+package provide xmldefs 3.1
 
 package require sgml 1.8
 
@@ -71,6 +71,10 @@ namespace eval xml {
     regsub -all : $NCName {} NCName
     variable QName (${NCName}:)?$NCName		;# (Prefix ':')? LocalPart
 
+    # The definition of the Namespace URI for XML Namespaces themselves.
+    # The prefix 'xml' is automatically bound to this URI.
+    variable xmlnsNS http://www.w3.org/XML/1998/namespace
+
     # table of predefined entities
 
     variable EntityPredef
@@ -81,6 +85,7 @@ namespace eval xml {
     # Expressions for pulling things apart
     variable tokExpr <(/?)([::xml::cl ^$::xml::Wsp>/]+)([::xml::cl $::xml::Wsp]*[::xml::cl ^>]*)>
     variable substExpr "\}\n{\\2} {\\1} {\\3} \{"
+
 }
 
 ###

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.12 2006-09-11 09:39:24 matben Exp $
+# $Id: pubsub.tcl,v 1.13 2006-09-20 14:12:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -424,21 +424,21 @@ proc jlib::pubsub::publish {jlibname node args} {
 # 
 #       Delete an item from a node.
 
-proc jlib::pubsub::retract {jlibname to node itemids args} {
+proc jlib::pubsub::retract {jlibname node items args} {
     
     variable xmlns
 
-    set opts [list -to $to]
+    set opts {}
+
     foreach {key value} $args {
 	switch -- $key {
 	    -command {
 		lappend opts $name $value
 	    }
+	    -to {
+		lappend opts -to $value
+	    }
 	}
-    }
-    set items {}
-    foreach id $itemids {
-	lappend items [wrapper::createtag item -attrlist [list id $id]]
     }
     set subtags [list [wrapper::createtag retract \
       -attrlist [list node $node] -subtags $items]]
