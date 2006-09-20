@@ -63,11 +63,13 @@ support protocol for other functions.
    0092 | Software Version              | complete
    0095 | Stream Initiation             | complete
    0096 | File Transfer                 | complete
+   0107 | User Mood                     | complete
    0115 | Entity Capabilities           | complete
    0138 | Stream Compression            | untested; only library level
    0147 | XMPP URI Scheme Query Comp... | almost complete
    0153 | vCard-Based Avatars           | complete
    0156 | A DNS TXT Resource...         | complete
+   0163 | Personal Eventing via Pubsub  | not the simplified from v0.15+
    0166 | Jingle                        | complete
    0170 | Recommended Order of Stream.. | except for stream compression
    0179 | Jingle IAX Transport Method   | complete

@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.156 2006-09-13 14:09:12 matben Exp $
+# $Id: jabberlib.tcl,v 1.157 2006-09-20 14:12:38 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -966,7 +966,7 @@ proc jlib::reporterror {jlibname err {msg ""}} {
     Debug 4 "jlib::reporterror"
 
     kill $jlibname
-    invoke_async_error $jlibname $err -errormsg $msg
+    invoke_async_error $jlibname $err $msg
 }
 
 # jlib::kill --
@@ -1696,7 +1696,7 @@ proc jlib::error_handler {jlibname xmllist} {
 	set errspec [list unknown [wrapper::getcdata $xmllist]]
     }
     set errmsg [lindex $errspec 1]
-    invoke_async_error $jlibname streamerror -errormsg $errmsg
+    invoke_async_error $jlibname streamerror $errmsg
 }
 
 # jlib::xmlerror --
@@ -1715,7 +1715,7 @@ proc jlib::xmlerror {jlibname args} {
     
     # This should handle all internal stuff.
     closestream $jlibname
-    invoke_async_error $jlibname xmlerror -errormsg $args
+    invoke_async_error $jlibname xmlerror $args
 }
 
 # jlib::reset --

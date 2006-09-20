@@ -2,31 +2,27 @@
 # 
 #       User Mood using PEP recommendations over PubSub library code.
 #       The current code reflects the PEP JEP prior to the simplification
-#       of version 0.15.
+#       of version 0.15. NEW PEP means version 0.15+
 #
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.12 2006-09-19 14:09:53 matben Exp $
+#  $Id: Mood.tcl,v 1.13 2006-09-20 14:12:38 matben Exp $
 
 package require ui::optionmenu
 
 namespace eval ::Mood:: { }
 
 proc ::Mood::Init { } {
-    
-    return
 
     component::register Mood "This is User Mood (JEP-0107)."
 
     ::Debug 2 "::Mood::Init"
 
     # Add event hooks.
-    #::hooks::register newMessageHook        ::Mood::MessageHook
-    #::hooks::register presenceHook          ::Mood::PresenceHook
     ::hooks::register loginHook             ::Mood::LoginHook
     ::hooks::register logoutHook            ::Mood::LogoutHook
-    ::hooks::register rosterBalloonhelp     ::Mood::BalloonHook
+    #::hooks::register rosterBalloonhelp     ::Mood::BalloonHook
 
     variable moodNode
     set moodNode "http://jabber.org/protocol/mood"
@@ -90,6 +86,7 @@ proc ::Mood::Init { } {
     set subMenu {}
     set opts [list -variable ::Mood::menuMoodVar -value "-"]
     lappend subMenu [list radio None ::Mood::MenuCmd {} $opts]
+    lappend subMenu {separator}
     foreach mood $myMoods {
 	set opts [list -variable ::Mood::menuMoodVar -value $mood]
 	lappend subMenu [list radio $mood2mLabel($mood) ::Mood::MenuCmd {} $opts]
@@ -155,11 +152,11 @@ proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
 	    ::Jabber::JlibCmd pubsub register_event ::Mood::Event -node $moodNode
                 
 	    # Create Node for mood.
-	    # This seems not necessary with latest PEP.
+	    # This seems not necessary with NEW PEP.
 	    if {1} {
 		set myjid2 [::Jabber::JlibCmd myjid2]
 		::Jabber::JlibCmd disco get_async items $myjid2  \
-		  [namespace code OnDiscoUser]
+		  [namespace code OnDiscoMe]
 	    } else {
 		
 		# NEW PEP:
@@ -170,22 +167,43 @@ proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
 		}
 	    }
 	    
+	    # Register presence for all that get available.
 	    ::Jabber::JlibCmd presence_register available  \
 	      [namespace code PresenceEvent]
+	    
+	    # For those where we've already got presence.
+	    set allAvail [::Jabber::JlibCmd roster getusers -type available]
+
+	    foreach ajid $allAvail {
+		if {[::Roster::IsTransportHeuristics $ajid]} {
+		    continue
+		}
+		::Jabber::JlibCmd disco get_async items $ajid  \
+		  [namespace code OnDiscoContact]
+	    }
 	}
     }
 }
 
 proc ::Mood::LogoutHook {} {
+    variable state
     
     ::JUI::DeRegisterMenuEntry jabber mMood
     ::Jabber::JlibCmd presence_deregister available [namespace code PresenceEvent]
+
+    unset -nocomplain state
 }
 
 proc ::Mood::MenuCmd {} {
     variable menuMoodVar
     
-    Publish $menuMoodVar
+    puts "::Mood::MenuCmd menuMoodVar=$menuMoodVar"
+    
+    if {$menuMoodVar eq "-"} {
+	Retract
+    } else {
+	Publish $menuMoodVar
+    }
 }
 
 #--------------------------------------------------------------------
@@ -193,12 +211,12 @@ proc ::Mood::MenuCmd {} {
 #-----------            before the publish tasks     ----------------
 #--------------------------------------------------------------------
 
-proc ::Mood::OnDiscoUser {jlibname type from subiq args} {
+proc ::Mood::OnDiscoMe {jlibname type from subiq args} {
     variable moodNode
     
-    puts "::Mood::OnDiscoUser"
+    puts "::Mood::OnDiscoMe"
     
-    #------- Before create a node checks if it is created ---------
+    # Create a mood node only if not there.
     if {$type eq "result"} {
 	set nodes [::Jabber::JlibCmd disco nodes $from]
 	puts "\t nodes=$nodes"
@@ -214,9 +232,10 @@ proc ::Mood::OnDiscoUser {jlibname type from subiq args} {
 proc ::Mood::CreateNode {} {
     variable moodNode
     variable xmlns
+    variable state
     
     puts "\t ::Mood::CreateNode"
-    
+
     # Configure setup for PEP node
     set valueFormE [wrapper::createtag value -chdata $xmlns(node_config)]
     set fieldFormE [wrapper::createtag field  \
@@ -231,8 +250,8 @@ proc ::Mood::CreateNode {} {
     set xsubE [list $fieldFormE $fieldModelE]
     set xE [wrapper::createtag x -attrlist $xattr -subtags $xsubE]
     
-    ::Jabber::JlibCmd pubsub create -node $moodNode  \
-      -command [namespace code CreateNodeCB] -configure $xE
+    ::Jabber::JlibCmd pubsub create -node $moodNode -configure $xE  \
+      -command [namespace code CreateNodeCB]
 }
 
 proc ::Mood::CreateNodeCB {type args} {
@@ -259,65 +278,167 @@ proc ::Mood::PublishCB {args} {
     # empty
 }
 
+proc ::Mood::Retract {} {
+    variable moodNode
+    variable xmlns
+ 
+    set moodE [wrapper::createtag mood  \
+      -attrlist [list xmlns $xmlns(mood)]]
+    set itemE [wrapper::createtag item  \
+      -subtags [list $moodE]]
+    ::Jabber::JlibCmd pubsub retract $moodNode [list $itemE]
+}
+
+#--------------------------------------------------------------
+#----------------- UI for Custom Mood Dialog ------------------
+#--------------------------------------------------------------
+
+proc ::Mood::CustomMoodDlg {} {
+    global  this wDlgs
+    variable moodMessageDlg
+    variable moodState
+    variable menuMoodVar
+    variable myMoods
+    variable mood2mLabel
+    variable moodStateDlg
+
+    set w ".mumdlg"
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
+    ::UI::Toplevel $w \
+      -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
+      -closecommand [namespace current]::CloseCmd
+    wm title $w [mc {moodDlg}]
+
+    ::UI::SetWindowPosition $w ".mumdlg"
+    
+    set moodStateDlg $menuMoodVar
+    set moodMessageDlg ""
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    ttk::label $wbox.msg  \
+      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc selectCustomMood]
+    pack $wbox.msg -side top -anchor w
+
+    set frmid $wbox.frmid
+    ttk::frame $frmid
+    pack $frmid -side top -fill both -expand 1
+
+    ttk::label $frmid.lmood -text "[mc {mMood}]:" 
+    
+    set mDef {}
+    lappend mDef [list [mc None] -value "-"]
+    foreach mood $myMoods {
+	lappend mDef [list [mc $mood2mLabel($mood)] -value $mood] 
+    }
+    ui::optionmenu $frmid.cmood -menulist $mDef -direction flush \
+      -variable [namespace current]::moodStateDlg
+
+    ttk::label $frmid.ltext -text "[mc {moodMessage}]:"
+    ttk::entry $frmid.etext -textvariable [namespace current]::moodMessageDlg
+
+    grid  $frmid.lmood    $frmid.cmood  -sticky e -pady 2
+    grid  $frmid.ltext    $frmid.etext  -sticky e -pady 2
+    grid $frmid.cmood $frmid.etext -sticky ew
+    grid columnconfigure $frmid 1 -weight 1
+
+    # Button part.
+    set frbot $wbox.b
+    set wenter  $frbot.btok
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $wenter -text [mc OK] \
+      -default active -command [list [namespace current]::sendMoodEnter $w]
+    ttk::button $frbot.btcancel -text [mc Cancel]  \
+      -command [list [namespace current]::CancelEnter $w]
+
+
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
+
+    wm resizable $w 0 0
+
+    bind $w <Return> [list $wenter invoke]
+
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $wbox.msg $w]
+    after idle $script
+}
+
+proc ::Mood::sendMoodEnter {w} {
+    variable moodStateDlg
+    variable moodMessageDlg
+    variable mapMoodTextToElem
+    variable menuMoodVar
+
+    Publish $moodStateDlg $moodMessageDlg
+    set menuMoodVar $moodStateDlg
+
+    ::UI::SaveWinGeom $w
+    destroy $w
+}
+
+proc ::Mood::CancelEnter {w} {
+
+    ::UI::SaveWinGeom $w
+    destroy $w
+}
+
+proc ::Mood::CloseCmd {w} {
+    ::UI::SaveWinGeom $w
+}
+
 # Others mood ------------------------------------------------------------------
 # 
 #       1) Disco bare JID
 #       2) subscribe to node
 #       3) handle events
 
-#-------------------------------------------------------------------------
-#---------------------- (Extended Presence) ------------------------------
-#-------------------------------------------------------------------------
-
 # Not necessary for NEW PEP.
 
 proc ::Mood::PresenceEvent {jlibname xmldata} {
+    variable state
+    
+    puts "::Mood::PresenceEvent"
     
     set type [wrapper::getattribute $xmldata type]
     set from [wrapper::getattribute $xmldata from]
     if {$type eq ""} {
 	set type "available"
     }
-    if {![::Jabber::JlibCmd roster isitem ]} {
+    set jid2 [jlib::barejid $from]
+    if {![::Jabber::JlibCmd roster isitem $jid2]} {
 	return
     }
     if {[::Roster::IsTransportHeuristics $from]} {
 	return
     }
     
-    
-    
-    
-}
-
-proc ::Mood::PresenceHook {jid type args} {
-    variable state
-
-    # Beware! jid without resource!
-    ::Debug 2 "::Mood::PresenceHook jid=$jid, type=$type"
-
-    if {$type ne "available"} {
-        return
+    # We should be careful not to disco/publish for each presence change.
+    # @@@ There is a small glitch here if user changes presence before we
+    #     received its disco result.
+    if {![::Jabber::JlibCmd disco isdiscoed items $from]} {
+	::Jabber::JlibCmd disco get_async items $jid2  \
+	  [namespace code OnDiscoContact]
     }
-
-    if {![::Jabber::RosterCmd isitem $jid]} {
-        return
-    }
-
-    # Some transports propagate the complete prsence stanza.
-    if {[::Roster::IsTransportHeuristics $jid]} {
-        return
-    }
-
-    array set argsA $args
-    set from $argsA(-from)
-    jlib::splitjidex $from node jidserver res
-    set jid2 $node@$jidserver
-
-    if { ![info exists state($jid2,pubsubsupport)] } {
-        #------------- Check(disco#items) If the User supports PEP before subscribe
-        ::Jabber::JlibCmd disco get_async items $jid2 [namespace code OnDiscoContact]
-    } 
 }
 
 proc ::Mood::OnDiscoContact {jlibname type from subiq args} {
@@ -326,11 +447,11 @@ proc ::Mood::OnDiscoContact {jlibname type from subiq args} {
 
     ::Debug 2 "::Mood::OnDiscoContactServer"
     
-    # --- Check if contact supports Mood node ----
+    # Check if contact supports Mood node.
     if {$type eq "result"} {
         set nodes [::Jabber::JlibCmd disco nodes $from]
 	if {[lsearch $nodes $moodNode] >= 0} {
-	    set state($from,pubsubsupport) true
+	    set state($from,pubsubsupport) 1
 	    set myjid2 [::Jabber::JlibCmd myjid2]
 	    
 	    ::Jabber::JlibCmd pubsub subscribe $from $myjid2 -node $moodNode  \
@@ -343,14 +464,17 @@ proc ::Mood::PubSubscribeCB {args} {
         puts "(Subscribe CB) ---> $args"
 }
 
-#-------------------------------------------------------------------------
-#---------------------- (Incoming Mood Handling) -------------------------
-#-------------------------------------------------------------------------
+# Mood::Event --
+# 
+#       Mood event handler for mood messages.
 
 proc ::Mood::Event {jlibname xmldata} {
+    variable state
     
     puts "::Mood::Event-----> xmldata=$xmldata"
  
+    # The server MUST set the 'from' address on the notification to the 
+    # bare JID (<node@domain.tld>) of the account owner.
     set from [wrapper::getattribute $xmldata from]
     set eventE [wrapper::getfirstchildwithtag $xmldata event]
     if {[llength $eventE]} {
@@ -373,55 +497,15 @@ proc ::Mood::Event {jlibname xmldata} {
 		    }
 		}
 	    }
-	
-	    ::hooks::run moodEvent $from $mood $text
+	    set mjid [jlib::jidmap $from]
+	    
+	    # Cache the result.
+	    set state($mjid,mood) $mood
+	    set state($mjid,text) $text
+	    
+	    ::hooks::run moodEvent $xmldata $mood $text
 	}
     }
-}
-
-proc ::Mood::MessageHook {body args} {
-    array set argsA $args
-    variable state
-
-    set xmlE $argsA(-xmldata)
-
-    set from [wrapper::getattribute $xmlE from]
-
-    set eventElem [wrapper::getfirstchildwithtag $xmlE event]
-
-    set itemsElem [wrapper::getfirstchildwithtag $eventElem items]
-    set node [wrapper::getattribute $itemsElem node]
-
-    set itemElem [wrapper::getfirstchildwithtag $itemsElem item]
-    set moodElem [wrapper::getfirstchildwithtag $itemElem mood]
-
-    set moodElemTemp [wrapper::getchildren $moodElem] 
-    set elem1 [lindex $moodElemTemp 0]
-    set elem2 [lindex $moodElemTemp 1]
-
-    if { [wrapper::gettag $elem1] eq "text" } {
-        set textElem $elem1
-        set mood [wrapper::gettag $elem2]
-    } else {
-        set textElem $elem2
-        set mood [wrapper::gettag $elem1]
-    }
- 
-    set text ""
-    if {$textElem ne {}} {
-        set text [wrapper::getcdata $textElem]
-    }
-
-    #Cache Mood info for BallonHook
-    set state($from,text) $text
-    set state($from,mood) $mood
-    
-    #@@@ Refresh Roster, the BalloonHook is called only when a Presence is coming and a Refresh of the roster
-    # Mats ???
-    #::Roster::Refresh
-
-    eval {::hooks::run moodEvent $from $mood $text} $args
-
 }
 
 proc ::Mood::BalloonHook {T item jid} {
@@ -442,120 +526,3 @@ proc ::Mood::BalloonHook {T item jid} {
     }
 }
 
-#--------------------------------------------------------------
-#----------------- UI for Custom Mood Dialog ------------------
-#--------------------------------------------------------------
-
-proc ::Mood::CustomMoodDlg {} {
-    global  this wDlgs
-    variable moodMessage
-    variable moodState
-    variable menuMoodVar
-    variable myMoods
-    variable mood2mLabel
-    variable moodStateDlg
-
-    set w ".mumdlg"
-    if {[winfo exists $w]} {
-	raise $w
-	return
-    }
-    ::UI::Toplevel $w \
-      -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
-      -closecommand [namespace current]::CloseCmd
-    wm title $w [mc {moodDlg}]
-
-    ::UI::SetWindowPosition $w ".mumdlg"
-    
-    set moodStateDlg $menuMoodVar
-
-    # Global frame.
-    ttk::frame $w.frall
-    pack $w.frall -fill both -expand 1
-
-    set wbox $w.frall.f
-    ttk::frame $wbox -padding [option get . dialogPadding {}]
-    pack $wbox -fill both -expand 1
-
-    ttk::label $wbox.msg  \
-      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc selectCustomMood]
-    pack $wbox.msg -side top -anchor w
-
-    set frmid $wbox.frmid
-    ttk::frame $frmid
-    pack $frmid -side top -fill both -expand 1
-
-    #set moodList [list [mc mAngry] [mc mAnxious] [mc mAshamed] [mc mBored] [mc mCurious] [mc mDepressed] [mc mExcited] [mc mHappy] [mc mInLove] [mc mInvincible] [mc mJealous] [mc mNervous] [mc mSad] [mc mSleepy] [mc mStressed] [mc mWorried]]
-
-    ttk::label $frmid.lmood -text "[mc {mMood}]:" 
-    
-    set mDef {}
-    foreach mood $myMoods {
-	lappend mDef [list [mc $mood2mLabel($mood)] -value $mood] 
-    }
-    ui::optionmenu $frmid.cmood -menulist $mDef -direction flush \
-      -variable [namespace current]::moodStateDlg
-
-    #ttk::combobox $frmid.cmood -state readonly -values $moodList \
-    #  -textvariable [namespace current]::moodStateDlg
-
-    ttk::label $frmid.ltext -text "[mc {moodMessage}]:"
-    ttk::entry $frmid.etext -textvariable [namespace current]::moodMessageDlg
-
-    grid  $frmid.lmood    $frmid.cmood  -sticky e -pady 2
-    grid  $frmid.ltext    $frmid.etext  -sticky e -pady 2
-    grid $frmid.cmood $frmid.etext -sticky ew
-    grid columnconfigure $frmid 1 -weight 1
-
-    # Button part.
-    set frbot $wbox.b
-    set wenter  $frbot.btok
-    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $wenter -text [mc OK] \
-      -default active -command [list [namespace current]::sendMoodEnter $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::CancelEnter $w]
-
-
-    set padx [option get . buttonPadX {}]
-    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
-        pack $frbot.btok -side right
-        pack $frbot.btcancel -side right -padx $padx
-    } else {
-        pack $frbot.btcancel -side right
-        pack $frbot.btok -side right -padx $padx
-    }
-    pack $frbot -side bottom -fill x
-
-    wm resizable $w 0 0
-
-    bind $w <Return> [list $wenter invoke]
-
-    # Trick to resize the labels wraplength.
-    set script [format {
-        update idletasks
-        %s configure -wraplength [expr [winfo reqwidth %s] - 20]
-    } $wbox.msg $w]
-    after idle $script
-}
-
-proc ::Mood::sendMoodEnter {w} {
-    variable moodStateDlg
-    variable moodMessageDlg
-    variable mapMoodTextToElem
-
-    Publish $mapMoodTextToElem($moodStateDlg) $moodMessageDlg
-
-    ::UI::SaveWinGeom $w
-    destroy $w
-}
-
-proc ::Mood::CancelEnter {w} {
-
-    ::UI::SaveWinGeom $w
-    destroy $w
-}
-
-proc ::Mood::CloseCmd {w} {
-    ::UI::SaveWinGeom $w
-}

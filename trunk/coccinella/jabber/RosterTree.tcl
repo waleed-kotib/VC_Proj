@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.30 2006-09-17 12:49:19 matben Exp $
+# $Id: RosterTree.tcl,v 1.31 2006-09-20 14:12:38 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1004,10 +1004,13 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
     } else {
 	if {[info exists argsA(-name)] && ($argsA(-name) ne "")} {
 	    set str $argsA(-name)
-	} elseif {[regexp "^(\[^@\]+)@${server}" $jid match user]} {
-	    set str $user
 	} else {
-	    set str $jid
+	    jlib::splitjidex $jid node domain res
+	    if {$domain eq $jserver(this)} {
+		set str $node
+	    } else {
+		set str [jlib::barejid $jid]
+	    }
 	}
 	if {$presence eq "available"} {
 	    if {[info exists argsA(-resource)] && ($argsA(-resource) ne "")} {
@@ -1052,6 +1055,11 @@ proc ::RosterTree::Balloon {jid presence item args} {
     ::balloonhelp::treectrl $T $item $msg
     
     ::hooks::run rosterBalloonhelp $T $item $jid
+}
+
+proc ::RosterTree::BalloonSet {} {
+    
+    
 }
 
 # RosterTree::GetClosed --

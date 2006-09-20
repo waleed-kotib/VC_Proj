@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.37 2006-09-19 10:02:13 matben Exp $
+# $Id: tileutils.tcl,v 1.38 2006-09-20 14:12:38 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -50,6 +50,7 @@ proc tileutils::ThemeChanged {} {
 	    set priority startupFile
 	}
 	# The highlightBackground needs a better solution.
+	# text ._text; set textbg [._text cget -background]; destroy ._text
 	option add *ChaseArrows.background        $color $priority
 	option add *Listbox.highlightBackground   white  $priority
 	option add *Menu.background               $color $priority
