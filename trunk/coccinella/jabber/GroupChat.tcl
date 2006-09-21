@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.164 2006-09-13 14:09:11 matben Exp $
+# $Id: GroupChat.tcl,v 1.165 2006-09-21 13:48:06 matben Exp $
 
 package require Create
 package require Enter
@@ -260,16 +260,16 @@ proc ::GroupChat::EnterOrCreate {what args} {
     set service  ""
     set ans      "cancel"
     
-    array set argsArr $args
-    if {[info exists argsArr(-roomjid)]} {
-	set roomjid $argsArr(-roomjid)
+    array set argsA $args
+    if {[info exists argsA(-roomjid)]} {
+	set roomjid $argsA(-roomjid)
 	jlib::splitjidex $roomjid node service -
-    } elseif {[info exists argsArr(-server)]} {
-	set service $argsArr(-server)
+    } elseif {[info exists argsA(-server)]} {
+	set service $argsA(-server)
     }
 
-    if {[info exists argsArr(-protocol)]} {
-	set protocol $argsArr(-protocol)
+    if {[info exists argsA(-protocol)]} {
+	set protocol $argsA(-protocol)
     } else {
 	set protocol "muc"
 	if {$service ne ""} {
@@ -357,16 +357,16 @@ proc ::GroupChat::SetProtocol {roomjid _protocol} {
 proc ::GroupChat::NormalMsgHook {body args} {
     upvar ::Jabber::xmppxmlns xmppxmlns
     
-    array set argsArr $args
+    array set argsA $args
 
     set isinvite 0
-    if {[info exists argsArr(-x)]} {
+    if {[info exists argsA(-x)]} {
     
 	::Debug 2 "::GroupChat::NormalMsgHook args='$args'"
 
-	set xList $argsArr(-x)
+	set xList $argsA(-x)
 	set cList [wrapper::getnamespacefromchilds $xList x $xmppxmlns(muc,user)]
-	set roomjid $argsArr(-from)
+	set roomjid $argsA(-from)
 	
 	if {$cList != {}} {
 	    set inviteElem [wrapper::getfirstchildwithtag [lindex $cList 0] invite]
@@ -455,11 +455,11 @@ proc ::GroupChat::GotMsg {body args} {
     
     ::Debug 2 "::GroupChat::GotMsg args='$args'"
     
-    array set argsArr $args
+    array set argsA $args
     
     # We must follow the roomjid...
-    if {[info exists argsArr(-from)]} {
-	set from $argsArr(-from)
+    if {[info exists argsA(-from)]} {
+	set from $argsA(-from)
     } else {
 	return
     }
@@ -482,8 +482,8 @@ proc ::GroupChat::GotMsg {body args} {
     if {[info exists chatstate(ignore,$from)] && $chatstate(ignore,$from)} {
 	return
     }
-    if {[info exists argsArr(-subject)]} {
-	set chatstate(subject) $argsArr(-subject)
+    if {[info exists argsA(-subject)]} {
+	set chatstate(subject) $argsA(-subject)
 	set str "[mc Subject]: $chatstate(subject)"
 	eval {InsertMessage $chattoken $from $str} $args
     }
@@ -1055,7 +1055,7 @@ proc ::GroupChat::MakeNewPage {dlgtoken roomjid args} {
     upvar 0 $dlgtoken dlgstate
     
     variable uidpage
-    array set argsArr $args
+    array set argsA $args
 	
     # Make fresh page with chat widget.
     set wnb $dlgstate(wnb)
@@ -1789,9 +1789,9 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    array set argsArr $args
+    array set argsA $args
     
-    set xmldata $argsArr(-xmldata)
+    set xmldata $argsA(-xmldata)
 
     set w       $chatstate(w)
     set wtext   $chatstate(wtext)
@@ -2570,9 +2570,9 @@ proc ::GroupChat::StatusSyncHook {status args} {
 	# This is better handled via the logout hook.
 	return
     }
-    array set argsArr $args
+    array set argsA $args
 
-    if {$jprefs(gchat,syncPres) && ![info exists argsArr(-to)]} {
+    if {$jprefs(gchat,syncPres) && ![info exists argsA(-to)]} {
 	foreach chattoken [GetTokenList chat] {
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
