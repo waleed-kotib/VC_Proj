@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.31 2006-09-20 14:12:38 matben Exp $
+# $Id: RosterTree.tcl,v 1.32 2006-09-21 12:23:57 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -25,6 +25,8 @@
 package provide RosterTree 1.0
 
 namespace eval ::RosterTree {
+
+    ::hooks::register logoutHook             ::RosterTree::LogoutHook
 
     # Actual:
     #option add *Roster*TreeCtrl.indent          18              widgetDefault
@@ -1023,12 +1025,19 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
     return $str
 }
 
+# RosterTree::Balloon --
+# 
+#       jid:        as reported in xml
+
 proc ::RosterTree::Balloon {jid presence item args} {
     variable T    
+    variable balloon
     upvar ::Jabber::jstate jstate
 
     array set argsA $args
     
+    set mjid [jlib::jidmap $jid]
+
     # Design the balloon help window message.
     set msg $jid
     if {[info exists argsA(-show)]} {
@@ -1052,14 +1061,80 @@ proc ::RosterTree::Balloon {jid presence item args} {
 	append msg "\n" $argsA(-status)
     }
     
+    # Append any registered balloon messages. Both bare and full JIDs.
+    if {[array exists balloon]} {
+	set bnames [array names balloon *,[jlib::ESC $mjid]]
+	if {[jlib::isfulljid $mjid]} {
+	    set xnames [array names balloon *,[jlib::ESC [jlib::barejid $mjid]]]
+	    set bnames [concat $bnames $xnames]
+	}
+	foreach key [lsort $bnames] {
+	    append msg "\n" $balloon($key)
+	}
+    }
+    
     ::balloonhelp::treectrl $T $item $msg
     
     ::hooks::run rosterBalloonhelp $T $item $jid
 }
 
-proc ::RosterTree::BalloonSet {} {
+# RosterTree::BalloonRegister --
+# 
+#       @@@ Better place is in ::Roster
+
+proc ::RosterTree::BalloonRegister {key jid msg} {
+    variable balloon
+    upvar ::Jabber::jstate jstate
     
+    set mjid [jlib::jidmap $jid]
+    if {$msg eq ""} {
+	unset -nocomplain balloon($key,$mjid)
+    } else {
+	set balloon($key,$mjid) $msg
+    }
+    BalloonSetForJID $jid
+}
+
+# RosterTree::BalloonSetForJID --
+# 
+#       jid:    bare or full JID; if bare set for all full JIDs
+
+proc ::RosterTree::BalloonSetForJID {jid} {
+    upvar ::Jabber::jstate jstate
     
+    jlib::splitjid $jid jid2 res
+    if {[jlib::isfulljid $jid]} {
+	array set presA [$jstate(jlib) roster getpresence $jid2 -resource $res]
+	
+	set tag [list jid $jid]
+	foreach item [FindWithTag $tag] {
+	    #puts "\t item=$item"
+	    eval {Balloon $jid $presA(-type) $item} [array get presA]
+	}
+    } else {
+	set presL [$jstate(jlib) roster getpresence $jid2]
+	#puts "presL=$presL"
+	foreach p $presL {
+	    array unset presA
+	    array set presA $p
+	    if {$presA(-type) eq "available" && $presA(-resource) ne ""} {
+		set pjid $jid2/$presA(-resource)
+	    } else {
+		set pjid $jid	    
+	    }
+	    set tag [list jid $pjid]
+	    foreach item [FindWithTag $tag] {
+		#puts "\t item=$item"
+		eval {Balloon $pjid $presA(-type) $item} [array get presA]
+	    }
+	}
+    }
+}
+
+proc ::RosterTree::LogoutHook {} {
+    variable balloon
+
+    unset -nocomplain balloon 
 }
 
 # RosterTree::GetClosed --

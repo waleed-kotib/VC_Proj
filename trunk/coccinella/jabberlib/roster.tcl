@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.49 2006-08-14 13:08:03 matben Exp $
+# $Id: roster.tcl,v 1.50 2006-09-21 12:23:57 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -764,12 +764,12 @@ proc jlib::roster::getusers {jlibname args} {
     foreach {x jid} [array get rostA *,item] {
 	lappend all $jid
     }
-    array set argsArr $args
+    array set argsA $args
     set jidlist {}
     if {$args == {}} {
 	set jidlist $all
-    } elseif {[info exists argsArr(-type)]} {
-	set type $argsArr(-type)
+    } elseif {[info exists argsA(-type)]} {
+	set type $argsA(-type)
 	set jidlist {}
 	foreach jid2 $all {
 	    set isavailable 0
@@ -794,6 +794,7 @@ proc jlib::roster::getusers {jlibname args} {
 # jlib::roster::getpresence --
 #
 #       Returns the presence state of an existing roster item.
+#       This is as reported in presence element.
 #
 # Arguments:
 #       jlibname:   the instance of this jlib.
@@ -821,17 +822,17 @@ proc jlib::roster::getpresence {jlibname jid args} {
     Debug 2 "roster::getpresence jid=$jid, args='$args'"
     
     set jid [jlib::jidmap $jid]
-    array set argsArr $args
+    array set argsA $args
     set haveRes 0
-    if {[info exists argsArr(-resource)]} {
+    if {[info exists argsA(-resource)]} {
 	set haveRes 1
-	set resource $argsArr(-resource)
+	set resource $argsA(-resource)
     }
     
     # It may happen that there is no roster item for this jid (groupchat).
     if {![info exists presA($jid,res)] || ($presA($jid,res) eq "")} {
-	if {[info exists argsArr(-type)] &&  \
-	  [string equal $argsArr(-type) "available"]} {
+	if {[info exists argsA(-type)] &&  \
+	  [string equal $argsA(-type) "available"]} {
 	    return {}
 	} else {
 	    if {$haveRes} {
@@ -856,8 +857,8 @@ proc jlib::roster::getpresence {jlibname jid args} {
 	} else {
 	    set jid3 $jid/$resource
 	}
-	if {[info exists argsArr(-type)] &&  \
-	  ![string equal $argsArr(-type) $presA($jid3,type)]} {
+	if {[info exists argsA(-type)] &&  \
+	  ![string equal $argsA(-type) $presA($jid3,type)]} {
 	    return {}
 	}
 	foreach key $rostGlobals(presTags) {
@@ -876,8 +877,8 @@ proc jlib::roster::getpresence {jlibname jid args} {
 	    } else {
 		set jid3 $jid/$res
 	    }
-	    if {[info exists argsArr(-type)] &&  \
-	      ![string equal $argsArr(-type) $presA($jid3,type)]} {
+	    if {[info exists argsA(-type)] &&  \
+	      ![string equal $argsA(-type) $presA($jid3,type)]} {
 		# Empty.
 	    } else {
 		foreach key $rostGlobals(presTags) {
@@ -906,10 +907,10 @@ proc jlib::roster::getpresence2 {jlibname jid args} {
     
     Debug 2 "roster::getpresence2 jid=$jid, args='$args'"
     
-    array set argsArr {
+    array set argsA {
 	-type *
     }
-    array set argsArr $args
+    array set argsA $args
 
     set mjid [jlib::jidmap $jid]
     jlib::splitjid $mjid jid2 resource
@@ -935,7 +936,7 @@ proc jlib::roster::getpresence2 {jlibname jid args} {
 	
 	# 3-tier jid. Only exact match.
 	if {[info exists presA2($mjid,type)]} {
-	    if {[string match $argsArr(-type) $presA2($mjid,type)]} {
+	    if {[string match $argsA(-type) $presA2($mjid,type)]} {
 		set result [list [list -jid $jid -type $presA2($mjid,type)]]
 	    }
 	} else {
@@ -1089,14 +1090,15 @@ proc jlib::roster::getresources {jlibname jid args} {
     upvar ${jlibname}::roster::presA presA
    
     Debug 2 "roster::getresources jid='$jid'"
-    array set argsArr $args
+    array set argsA $args
     
+    set jid [jlib::jidmap $jid]
     if {[info exists presA($jid,res)]} {
-	if {[info exists argsArr(-type)]} {
+	if {[info exists argsA(-type)]} {
 	    
 	    # Need to loop through all resources for this jid.
 	    set resList {}
-	    set type $argsArr(-type)
+	    set type $argsA(-type)
 	    foreach res $presA($jid,res) {
 
 		# Be sure to handle empty resources as well: '1234@icq.host'
@@ -1105,7 +1107,7 @@ proc jlib::roster::getresources {jlibname jid args} {
 		} else {
 		    set jid3 $jid/$res
 		}
-		if {[string equal $argsArr(-type) $presA($jid3,type)]} {
+		if {[string equal $argsA(-type) $presA($jid3,type)]} {
 		    lappend resList $res
 		}
 	    }
@@ -1148,6 +1150,7 @@ proc jlib::roster::gethighestresource {jlibname jid} {
    
     Debug 2 "roster::gethighestresource jid='$jid'"
     
+    set jid [jlib::jidmap $jid]
     set maxres ""
     if {[info exists presA($jid,res)]} {
 	
@@ -1162,10 +1165,14 @@ proc jlib::roster::gethighestresource {jlibname jid} {
 	    } else {
 		set jid3 $jid/$res
 	    }
-	    if {[info exists presA($jid3,priority)]} {
-		if {$presA($jid3,priority) > $maxpri} {
-		    set maxres $res
-		    set maxpri $presA($jid3,priority)
+	    if {[info exists presA($jid3,type)]} {
+		if {$presA($jid3,type) eq "available"} {
+		    if {[info exists presA($jid3,priority)]} {
+			if {$presA($jid3,priority) > $maxpri} {
+			    set maxres $res
+			    set maxpri $presA($jid3,priority)
+			}
+		    }
 		}
 	    }
 	}

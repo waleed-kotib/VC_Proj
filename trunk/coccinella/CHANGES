@@ -18,6 +18,7 @@ Coccinella-0.95.14 (06????):
  o complete inbox now stored as a single file metakit database
  o inbox can be exported to xml file
  o new xml based chat log format
+ o added support for pep/mood
 
 
 Coccinella-0.95.13 (060622):
