@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.14 2006-09-20 14:12:38 matben Exp $
+# $Id: Growl.tcl,v 1.15 2006-09-21 12:23:57 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -131,10 +131,11 @@ proc ::Growl::MoodEventHook {xmldata mood text} {
     set from [wrapper::getattribute $xmldata from]
     set msg "$from [mc heIs] [mc $mood]"
     if {$text ne ""} {
-        append msg " " [mc because] $text
+        append msg " " [mc because] " " $text
     }
 
     growl post moodEvent $title $msg $cociFile
 } 
+
 #-------------------------------------------------------------------------------
 

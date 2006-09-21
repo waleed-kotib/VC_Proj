@@ -1329,7 +1329,7 @@ Om användarnamnet är upptaget så får du ett meddelande om detta när du registrer
 ::msgcat::mcset sv moodEvent   Humörändring
 ::msgcat::mcset sv heIs        är
 ::msgcat::mcset sv because     därför
-::msgcat::mcset sv angry       args
+::msgcat::mcset sv angry       arg
 ::msgcat::mcset sv anxious     orolig
 ::msgcat::mcset sv ashamed     skamfull
 ::msgcat::mcset sv bored       uttråkad

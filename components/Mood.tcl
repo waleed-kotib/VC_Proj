@@ -7,7 +7,9 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.13 2006-09-20 14:12:38 matben Exp $
+#  @@@ TODO: There seems to be a problem resetting mood to none (retract?)
+#  
+#  $Id: Mood.tcl,v 1.14 2006-09-21 12:23:57 matben Exp $
 
 package require ui::optionmenu
 
@@ -22,7 +24,6 @@ proc ::Mood::Init { } {
     # Add event hooks.
     ::hooks::register loginHook             ::Mood::LoginHook
     ::hooks::register logoutHook            ::Mood::LogoutHook
-    #::hooks::register rosterBalloonhelp     ::Mood::BalloonHook
 
     variable moodNode
     set moodNode "http://jabber.org/protocol/mood"
@@ -141,7 +142,7 @@ proc ::Mood::OnDiscoServer {jlibname type from subiq args} {
     variable menuMoodVar
     variable moodNode
  
-    ::Debug 2 "::Mood::OnDiscoServer"
+    ::Debug 4 "::Mood::OnDiscoServer"
 
     if {$type eq "result"} {
         set node [wrapper::getattribute $subiq node]
@@ -197,8 +198,6 @@ proc ::Mood::LogoutHook {} {
 proc ::Mood::MenuCmd {} {
     variable menuMoodVar
     
-    puts "::Mood::MenuCmd menuMoodVar=$menuMoodVar"
-    
     if {$menuMoodVar eq "-"} {
 	Retract
     } else {
@@ -214,15 +213,12 @@ proc ::Mood::MenuCmd {} {
 proc ::Mood::OnDiscoMe {jlibname type from subiq args} {
     variable moodNode
     
-    puts "::Mood::OnDiscoMe"
-    
     # Create a mood node only if not there.
     if {$type eq "result"} {
 	set nodes [::Jabber::JlibCmd disco nodes $from]
-	puts "\t nodes=$nodes"
 	
 	# Create the node for mood information if not exists.
-	# NEW PEP: This is not necessary if we not wants default configuration.
+	# NEW PEP: This is not necessary if we not want default configuration.
 	if {[lsearch $nodes $moodNode] < 0} {
 	    CreateNode
 	}
@@ -234,14 +230,13 @@ proc ::Mood::CreateNode {} {
     variable xmlns
     variable state
     
-    puts "\t ::Mood::CreateNode"
-
     # Configure setup for PEP node
     set valueFormE [wrapper::createtag value -chdata $xmlns(node_config)]
     set fieldFormE [wrapper::createtag field  \
       -attrlist [list var "FORM_TYPE" type hidden] -subtags [list $valueFormE]]
     
     # PEP Values for access_model: roster / presence / open or authorize / whitelist
+    #set valueModelE [wrapper::createtag value -chdata presence]
     set valueModelE [wrapper::createtag value -chdata open]
     set fieldModelE [wrapper::createtag field  \
       -attrlist [list var "pubsub#access_model"] -subtags [list $valueModelE]]
@@ -282,10 +277,8 @@ proc ::Mood::Retract {} {
     variable moodNode
     variable xmlns
  
-    set moodE [wrapper::createtag mood  \
-      -attrlist [list xmlns $xmlns(mood)]]
-    set itemE [wrapper::createtag item  \
-      -subtags [list $moodE]]
+    set moodE [wrapper::createtag mood -attrlist [list xmlns $xmlns(mood)]]
+    set itemE [wrapper::createtag item -subtags [list $moodE]]
     ::Jabber::JlibCmd pubsub retract $moodNode [list $itemE]
 }
 
@@ -417,8 +410,6 @@ proc ::Mood::CloseCmd {w} {
 proc ::Mood::PresenceEvent {jlibname xmldata} {
     variable state
     
-    puts "::Mood::PresenceEvent"
-    
     set type [wrapper::getattribute $xmldata type]
     set from [wrapper::getattribute $xmldata from]
     if {$type eq ""} {
@@ -445,7 +436,7 @@ proc ::Mood::OnDiscoContact {jlibname type from subiq args} {
     variable state
     variable moodNode
 
-    ::Debug 2 "::Mood::OnDiscoContactServer"
+    ::Debug 4 "::Mood::OnDiscoContactServer"
     
     # Check if contact supports Mood node.
     if {$type eq "result"} {
@@ -461,7 +452,7 @@ proc ::Mood::OnDiscoContact {jlibname type from subiq args} {
 }
 
 proc ::Mood::PubSubscribeCB {args} {
-        puts "(Subscribe CB) ---> $args"
+        # empty
 }
 
 # Mood::Event --
@@ -471,8 +462,6 @@ proc ::Mood::PubSubscribeCB {args} {
 proc ::Mood::Event {jlibname xmldata} {
     variable state
     
-    puts "::Mood::Event-----> xmldata=$xmldata"
- 
     # The server MUST set the 'from' address on the notification to the 
     # bare JID (<node@domain.tld>) of the account owner.
     set from [wrapper::getattribute $xmldata from]
@@ -503,26 +492,15 @@ proc ::Mood::Event {jlibname xmldata} {
 	    set state($mjid,mood) $mood
 	    set state($mjid,text) $text
 	    
+	    if {$mood eq ""} {
+		set msg ""
+	    } else {
+		set msg "[mc mMood]: [mc $mood] $text"
+	    }
+	    ::RosterTree::BalloonRegister mood $from $msg
+	    
 	    ::hooks::run moodEvent $xmldata $mood $text
 	}
-    }
-}
-
-proc ::Mood::BalloonHook {T item jid} {
-   variable state
-
-    jlib::splitjidex $jid node jidserver res
-    set jid2 $node@$jidserver
-
-    set text ""
-    if { [info exists state($jid2,text)] } {
-        if {$state($jid2,text) ne ""} {
-            set text ($state($jid2,text))
-        }
-    }
-
-    if { [info exists state($jid2,mood)] } {
-        ::balloonhelp::treectrl_set $T $item mood "\n[mc mMood]: [mc $state($jid2,mood)] $text"
     }
 }
 
