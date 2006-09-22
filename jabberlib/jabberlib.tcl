@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.158 2006-09-21 12:23:57 matben Exp $
+# $Id: jabberlib.tcl,v 1.159 2006-09-22 14:24:41 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -837,15 +837,17 @@ proc jlib::openstream {jlibname server args} {
     # Make sure we start with a clean state.
     wrapper::reset $lib(wrap)
 
-    # Register a <stream> callback proc.
-    if {[info exists argsA(-cmd)] && [llength $argsA(-cmd)]} {
-	set lib(streamcmd) $argsA(-cmd)
-    }
     set optattr ""
     foreach {key value} $args {
 	
 	switch -- $key {
-	    -cmd - -socket {
+	    -cmd {
+		if {$value ne ""} {
+		    # Register a <stream> callback proc.
+		    set lib(streamcmd) $value
+		}
+	    }
+	    -socket {
 		# empty
 	    }
 	    default {

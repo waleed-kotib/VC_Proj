@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.12 2006-09-12 10:19:22 matben Exp $
+# $Id: connect.tcl,v 1.13 2006-09-22 14:24:41 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -611,6 +611,9 @@ proc jlib::connect::init_stream_cb {jlibname args} {
     
     array set argsA $args
     
+    # Check first for any <stream:error/> element.
+    
+    
     # We require an 'id' attribute.
     if {![info exists argsA(id)]} {
 	finish $jlibname no-stream-id
@@ -670,7 +673,11 @@ proc jlib::connect::starttls_cb {jlibname type args} {
 	#    12. If the TLS negotiation is successful, the initiating entity
 	#        MUST continue with SASL negotiation.
 	set state(streamid) [$jlibname getstreamattr id]
-	auth $jlibname
+	if {$state(-noauth)} {
+	    finish $jlibname
+	} else {
+	    auth $jlibname
+	}
     }
 }
 
