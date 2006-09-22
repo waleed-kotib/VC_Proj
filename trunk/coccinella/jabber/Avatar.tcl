@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.23 2006-09-15 13:18:17 matben Exp $
+# $Id: Avatar.tcl,v 1.24 2006-09-22 09:43:06 matben Exp $
 
 # @@@ Issues:
 # 
@@ -216,7 +216,7 @@ proc ::Avatar::WidgetSetPhoto {w image {size 64}} {
 	set max [expr {$W > $H ? $W : $H}]
 	if {$max > $size} {
 	    lassign [GetScaleMN $max $size] M N	
-	    set display [ScalePhotoN->M $image $N $M]
+	    set display [ScalePhotoM->N $image $M $N]
 	    bind $w <Destroy> +[list image delete $display]
 	} else {
 	    set display $image
@@ -1084,15 +1084,15 @@ proc ::Avatar::CreateScaledPhoto {name size} {
 	return $new
     } else {
 	lassign [GetScaleMN $max $size] M N
-	return [ScalePhotoN->M $name $N $M]
+	return [ScalePhotoM->N $name $M $N]
     }
 }
 
-proc ::Avatar::ScalePhotoN->M {name N M} {
+proc ::Avatar::ScalePhotoM->N {name M N} {
     
     set new [image create photo]
-    if {$M == 1} {
-	$new copy $name -subsample $N
+    if {$N == 1} {
+	$new copy $name -subsample $M
     } else {
 	set tmp [image create photo]
 	$tmp copy $name -zoom $M
