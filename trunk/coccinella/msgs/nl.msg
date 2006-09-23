@@ -911,13 +911,12 @@
 ::msgcat::mcset nl jamessregerrinuse			{Uw account kon niet worden aangemaakt omdat de gebruikersnaam al in gebruik is door iemand anders. Als dit toch uw account is, probeer dan opnieuw aan te melden. Foutmelding: %s.}
 ::msgcat::mcset nl jamessregerr				{De registratie mislukte met foutmelding: %s.}
 ::msgcat::mcset nl jamesstrptsubsc			{Uw account op de dienst %s zal in uw roster geplaatst worden en zal dienen als transport voor die dienst.}
-::msgcat::mcset nl jamessfailedsubsc			{Inschrijven op %s mislukte omdat de contactpersoon weigerde.}
+::msgcat::mcset nl jamessfailedsubsc			{Inschrijven op de aanwezigheid van %s werd geweigerd.}
 ::msgcat::mcset nl jamessgcinvite			{U werd uitgenodigd op de chatruimte %s door %s. Wenst u deze chatruimte te betreden?}
 ::msgcat::mcset nl jamessnorooms			{Kon geen enkele chatruimte vinden op %s.}
 ::msgcat::mcset nl jamessnofiletrpt			{Coccinella kon niet detecteren of %s bestandsoverdracht ondersteunt.}
 ::msgcat::mcset nl jamessfiletrpterr			{Downloaden van bestand %s van %s mislukte: %s.}
-::msgcat::mcset nl jamesswarnsendcanoff                 {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
-you happen to be online while this message is being read. Do you want to send it anyway?}
+::msgcat::mcset nl jamesswarnsendcanoff			{De contactpersoon waarnaar u verzendt ("%s") is niet online. Als uw bericht afbeeldingen of dergelijke bevat, dan zal uw contactpersoon ze niet kunnen zien als u niet online bent als hij uw bericht leest. Wilt u het bericht verzenden?}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
