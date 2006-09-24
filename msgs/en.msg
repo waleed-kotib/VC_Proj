@@ -947,6 +947,10 @@ you happen to be online while this message is being read. Do you want to send it
 ::msgcat::mcset en starttls-failure       {TLS negotiating with server "%s" failed.}
 ::msgcat::mcset en sasl-no-mechanisms     {The server has no support for SASL authentication.}
 
+# A collective description of all stream errors.
+::msgcat::mcset en xmpp-streams-error     {We received a stream error from the server with code: %s}
+
+
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration 
 ::msgcat::mcset en registration-username        {Account name associated with the user}

@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.27 2006-09-22 14:24:41 matben Exp $
+# $Id: wrapper.tcl,v 1.28 2006-09-24 06:38:15 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -86,7 +86,6 @@ namespace eval wrapper {
 
     # Keep all internal data in this array, with 'id' as first index.
     variable wrapper
-    variable debug 0
     
     # Running id that is never reused; start from 0.
     set wrapper(uid) 0
@@ -114,11 +113,6 @@ namespace eval wrapper {
 
 proc wrapper::new {streamstartcmd streamendcmd parsecmd errorcmd} {
     variable wrapper
-    variable debug
-    
-    if {$debug > 1}  {
-	puts "wrapper::new"
-    }
     
     # Handle id of the wrapper.
     set id wrap[incr wrapper(uid)]
@@ -348,11 +342,6 @@ proc wrapper::elementend {id tagname args} {
 
 proc wrapper::append_child {id level childtree} {
     variable wrapper
-    variable debug
-
-    if {$debug > 1} {
-	puts "wrapper::append_child id=$id, level=$level, childtree='$childtree'"
-    }
 
     # Get child list at parent level (level).
     set childlist [lindex $wrapper($id,tree,$level) 4]
@@ -378,12 +367,7 @@ proc wrapper::append_child {id level childtree} {
 
 proc wrapper::chdata {id chardata} {   
     variable wrapper
-    variable debug
 
-    if {$debug > 2}  {
-	puts "wrapper::chdata id=$id, chardata='$chardata',  \
-	  level=$wrapper($id,level)"
-    }
     set level $wrapper($id,level)
     
     # If we receive CHDATA before any root element, 
@@ -413,17 +397,9 @@ proc wrapper::chdata {id chardata} {
 
 proc wrapper::reset {id} {   
     variable wrapper
-    variable debug
-
-    if {$debug > 1} {
-	puts "wrapper::reset id=$id"
-    }
 	
     # This resets the actual XML parser. Not sure this is actually needed.
     $wrapper($id,parser) reset
-    if {$debug > 1} {
-	puts "   wrapper::reset configure parser"
-    }
     
     # Unfortunately it also removes all our callbacks and options.
     if {$wrapper($id,class) eq "expat"} {
@@ -476,11 +452,7 @@ proc wrapper::reset {id} {
 
 proc wrapper::xmlerror {id args} {
     variable wrapper
-    variable debug
 
-    if {$debug > 1} {
-	puts "wrapper::xmlerror id=$id, args='$args'"
-    }
     uplevel #0 $wrapper($id,errorcmd) $args
     return
 }

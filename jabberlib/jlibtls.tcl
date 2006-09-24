@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.13 2006-09-07 07:33:46 matben Exp $
+# $Id: jlibtls.tcl,v 1.14 2006-09-24 06:38:15 matben Exp $
 
 package require tls
 package require jlib
@@ -92,7 +92,7 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
 	if {$retry > 20} { 
 	    close $sock
 	    set err "too long retry to setup SSL connection"
-	    tls_finish $jlibname startls-failure $err
+	    tls_finish $jlibname starttls-failure $err
 	    return
 	}
 	if {[catch {tls::handshake $sock} err]} {
@@ -101,7 +101,7 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
 		incr retry
 	    } else {
 		close $sock
-		tls_finish $jlibname startls-failure $err
+		tls_finish $jlibname starttls-failure $err
 		return
 	    }
 	} else {
@@ -140,7 +140,7 @@ proc jlib::tls_failure {jlibname tag xmllist} {
     Debug 2 "jlib::tls_failure"
     
     # Seems we don't get any additional error info here.
-    tls_finish $jlibname startls-failure "tls failed"
+    tls_finish $jlibname starttls-failure "tls failed"
 }
 
 proc jlib::tls_finish {jlibname {errcode ""} {msg ""}} {

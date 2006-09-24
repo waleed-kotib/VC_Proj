@@ -11,7 +11,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.24 2006-09-12 10:19:23 matben Exp $
+# $Id: jlibsasl.tcl,v 1.25 2006-09-24 06:38:15 matben Exp $
 
 package require jlib
 package require saslmd5
@@ -210,7 +210,7 @@ proc jlib::auth_sasl_continue {jlibname} {
 	default {
 	    # This is an error
 	    # We should perhaps send an abort element here.
-	    sasl_final $jlibname error [list sasl-error $out]
+	    sasl_final $jlibname error [list sasl-protocol-error $out]
 	}
     }
 }
@@ -340,7 +340,7 @@ proc jlib::sasl_step {jlibname serverin64} {
 	}
 	default {
 	    #puts "\t errdetail: [$lib(sasl,token) -operation errdetail]"
-	    sasl_final $jlibname error [list sasl-error $output]
+	    sasl_final $jlibname error [list sasl-protocol-error $output]
 	}
     }
 }

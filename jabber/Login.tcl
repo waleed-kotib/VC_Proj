@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.100 2006-09-16 13:46:17 matben Exp $
+# $Id: Login.tcl,v 1.101 2006-09-24 06:38:15 matben Exp $
 
 package provide Login 1.0
 
@@ -672,7 +672,7 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
     array set state [jlib::connect::get_state $jstate(jlib)]
     set str ""
 	
-    switch -- $errcode {
+    switch -glob -- $errcode {
 	connect-failed - network-failure - networkerror {
 	    set str [mc jamessnosocket $state(server) $errmsg]
 	}
@@ -690,6 +690,11 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	}
 	sasl-no-mechanisms {
 	    set str [mc sasl-no-mechanisms]
+	}
+	xmpp-streams-error* {
+	    set streamstag ""
+	    regexp {xmpp-streams-error-(.+)$} $errcode - streamstag
+	    set str [mc xmpp-streams-error $streamstag]
 	}
 	default {
 	    
