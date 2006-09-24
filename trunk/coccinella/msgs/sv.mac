@@ -943,6 +943,8 @@ där användarnamnet är okänt).}
 ::msgcat::mcset sv xmpp-stanzas-short-not-authorized      {Påloggningen misslyckades på grund av felaktigt användarnamn eller lösenord.}
 ::msgcat::mcset sv xmpp-stanzas-short-temporary-auth-failure {Protokollfel vid inloggningen.}
 
+# A collective description of all stream errors.
+::msgcat::mcset sv xmpp-streams-error     {Vi fick en felkod från servern: %s}
 
 
 ::msgcat::mcset sv starttls-nofeature     {Servern "%s" saknar stöd för TLS.}

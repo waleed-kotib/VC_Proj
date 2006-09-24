@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.55 2006-09-16 13:46:17 matben Exp $
+# $Id: Register.tcl,v 1.56 2006-09-24 06:38:15 matben Exp $
 
 package provide Register 1.0
 
@@ -649,8 +649,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	    # Go on and authenticate.
 	    set jid [jlib::joinjid $username $server $resource]
 	    $jstate(jlib) connect register $jid $password
-	    $jstate(jlib) connect auth  \
-	      -command [namespace code AuthCB]
+	    $jstate(jlib) connect auth -command [namespace code AuthCB]
 	} else {
 	    ::UI::MessageBox -icon info -type ok \
 	      -message [mc jamessregisterok $server]

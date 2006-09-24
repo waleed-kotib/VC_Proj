@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.13 2006-09-22 14:24:41 matben Exp $
+# $Id: connect.tcl,v 1.14 2006-09-24 06:38:15 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -39,9 +39,16 @@
 #       starttls-failure
 #       starttls-protocol-error
 #       sasl-no-mechanisms
+#       sasl-protocol-error
 #       
 #       All SASL error elements according to RFC 3920 (XMPP Core)
 #       not-authorized    being the most common
+#       
+#       xmpp-streams-error
+#       
+#       And all stream error tags as defined in "4.7.3.  Defined Conditions"
+#       in RFC 3920 (XMPP Core) as:
+#       xmpp-streams-error-TheTagName
 #       
 ### From: JEP-0170: Recommended Order of Stream Feature Negotiation ############
 #
@@ -610,10 +617,7 @@ proc jlib::connect::init_stream_cb {jlibname args} {
     debug "jlib::connect::init_stream_cb args=$args"
     
     array set argsA $args
-    
-    # Check first for any <stream:error/> element.
-    
-    
+        
     # We require an 'id' attribute.
     if {![info exists argsA(id)]} {
 	finish $jlibname no-stream-id
@@ -787,6 +791,8 @@ proc jlib::connect::auth_cb {jlibname type queryE} {
 
 proc jlib::connect::reset {jlibname} {
 
+    debug "jlib::connect::reset"
+    
     $jlibname tls_reset
     $jlibname sasl_reset
     if {[namespace exists ${jlibname}::connect]} {

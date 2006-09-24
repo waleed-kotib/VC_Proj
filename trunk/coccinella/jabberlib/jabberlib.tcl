@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.159 2006-09-22 14:24:41 matben Exp $
+# $Id: jabberlib.tcl,v 1.160 2006-09-24 06:38:15 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -940,6 +940,7 @@ proc jlib::closestream {jlibname} {
 proc jlib::invoke_async_error {jlibname err {msg ""}} {
     
     upvar ${jlibname}::lib lib
+    Debug 4 "jlib::invoke_async_error err=$err, msg=$msg"
     
     if {$lib(async_handler) eq ""} {
 	uplevel #0 $lib(clientcmd) [list $jlibname $err -errormsg $msg]
@@ -1694,11 +1695,13 @@ proc jlib::error_handler {jlibname xmllist} {
     
     if {[llength [wrapper::getchildren $xmllist]]} {
 	set errspec [getstreamerrorspec $xmllist]
+	set errcode "xmpp-streams-error-[lindex $errspec 0]"
+	set errmsg [lindex $errspec 1]
     } else {
-	set errspec [list unknown [wrapper::getcdata $xmllist]]
+	set errcode xmpp-streams-error
+	set errmsg [wrapper::getcdata $xmllist]
     }
-    set errmsg [lindex $errspec 1]
-    invoke_async_error $jlibname streamerror $errmsg
+    invoke_async_error $jlibname $errcode $errmsg
 }
 
 # jlib::xmlerror --
@@ -1948,10 +1951,7 @@ proc jlib::geterrspecfromerror {errelem kind} {
 	}
     }
     if {[info exists errstr]} {
-	if {$errmsg ne ""} {
-	    append errmsg ". "
-	}
-	append errmsg $errstr
+	set errmsg $errstr
     }
     if {$errmsg eq ""} {
 	set errmsg "Unknown"

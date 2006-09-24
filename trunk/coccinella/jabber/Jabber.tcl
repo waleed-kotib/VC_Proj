@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.185 2006-09-13 14:09:11 matben Exp $
+# $Id: Jabber.tcl,v 1.186 2006-09-24 06:38:15 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -861,7 +861,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
     array set argsArr $args
     set ishandled 0
     
-    switch -- $what {
+    switch -glob -- $what {
 	disconnect {	    
 	    
 	    # This is as a response to a </stream> element.
@@ -878,7 +878,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    ::hooks::run setPresenceHook $what
 	    #after idle ::Jabber::AutoAway
 	}
-	streamerror {
+	streamerror - xmpp-streams-error* {
 	    DoCloseClientConnection
 	    if {[info exists argsArr(-errormsg)]} {
 		set msg "Receieved a fatal error: "
