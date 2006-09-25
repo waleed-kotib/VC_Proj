@@ -7,7 +7,7 @@
 #  
 #  See: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/shellcc/platform/shell/programmersguide/shell_adv/registeringapps.asp
 #  
-# $Id: WindowsUtils.tcl,v 1.11 2006-08-07 12:36:55 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.12 2006-09-25 13:02:52 matben Exp $
 
 package require registry
 package provide WindowsUtils 1.0
@@ -96,6 +96,7 @@ proc ::Windows::OpenUrl {url} {
 # 
 #       Uses the registry to try to find an application for a file using
 #       its suffix.
+#       If the path starts with "file://" we assume it is already uri encoded.
 
 proc ::Windows::OpenFileFromSuffix {path} {
     variable ProgramFiles
@@ -118,6 +119,11 @@ proc ::Windows::OpenFileFromSuffix {path} {
     regsub {%1} $appCmd $path appCmd
     if {[info exists ProgramFiles]} {
 	regsub -nocase "%programfiles%" $appCmd $ProgramFiles appCmd
+    }
+    
+    # URI encode if necessary.
+    if {![regexp {^file://.*} $path]} {
+	set path "file://[uriencode::quotepath $path]"
     }
     
     # Invoke the command
