@@ -22,6 +22,9 @@
 ::msgcat::mcset es Allow 		{Permitir}
 ::msgcat::mcset es Appearance           {Apariencia}
 ::msgcat::mcset es Apply		{Aplicar}
+
+::msgcat::mcset es Author
+
 ::msgcat::mcset es Available		{Disponible}
 ::msgcat::mcset es Away			{Alejado}
 ::msgcat::mcset es Back
@@ -90,11 +93,17 @@
 ::msgcat::mcset es Height 		{Altura}
 ::msgcat::mcset es History		{Historial}
 ::msgcat::mcset es Home			{Inicio}
+
+::msgcat::mcset es Icon
+
 ::msgcat::mcset es Image 		{Imagen}
 ::msgcat::mcset es Import		{Importar}
 ::msgcat::mcset es Inbox		{Mensajes}
 ::msgcat::mcset es Info			{Información}
 ::msgcat::mcset es Invite		{Invitar}
+
+::msgcat::mcset es Key
+
 ::msgcat::mcset es Language
 ::msgcat::mcset es Last			{Último}
 ::msgcat::mcset es Less			{Menos}
@@ -423,6 +432,9 @@
 ::msgcat::mcset es mNotebook		{Pestañas}
 ::msgcat::mcset es mMinimal		{Reducido}
 ::msgcat::mcset es mDisco               {Disco}
+
+::msgcat::mcset es mFind         	{Find}
+::msgcat::mcset es mFindAgain         	{Find Again}
 
 
 # Popups.
@@ -962,9 +974,14 @@ you happen to be online while this message is being read. Do you want to send it
 ::msgcat::mcset es xmpp-stanzas-short-temporary-auth-failure {Protocol error during the login process.}
 
 
+# Related error conditions detected by the client.
 ::msgcat::mcset es starttls-nofeature     {El servidor "%s" no soporta TLS.}
 ::msgcat::mcset es starttls-failure       {Error durante la conexion TLS con el servidor "%s".}
 ::msgcat::mcset es sasl-no-mechanisms     {The server has no support for SASL authentication.}
+
+# A collective description of all stream errors.
+::msgcat::mcset es xmpp-streams-error     {We received a stream error from the server with code: %s}
+
 
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration 
