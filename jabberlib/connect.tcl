@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.14 2006-09-24 06:38:15 matben Exp $
+# $Id: connect.tcl,v 1.15 2006-09-25 07:21:56 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -141,7 +141,7 @@ proc jlib::connect::init_static {} {
 	-digest           1
 	-dnsprotocol      udp
 	-dnssrv           1
-	-dnstxthttp       0
+	-dnstxthttp       1
 	-dnstimeout       3000
 	-http             0
 	-httpurl          ""
@@ -383,6 +383,7 @@ proc jlib::connect::connect {jlibname jid password args} {
 	    }
 	}
     } elseif {$state(-transport) eq "http"} {
+
 	# Do not do a DNS TXT lookup if we have an explicit url address.
 	if {!$state(-dnstxthttp) || ($state(-httpurl) ne "")} {
 	    set state(httpurl) $state(-httpurl)
@@ -842,12 +843,11 @@ proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {
     }
     if {$errcode ne ""} {
 	set status error
-	if {[info exists state(sock)]} {
-	    # This 'kills' the connection.
-	    # after idle seems necessary when resetting xml parser from callback
-	    #after idle [list $jlibname closestream]
-	    $jlibname kill
-	}
+
+	# This 'kills' the connection. Needed for both tcp and http!
+	# after idle seems necessary when resetting xml parser from callback
+	#after idle [list $jlibname closestream]
+	$jlibname kill
     } else {
 	set status ok
     }

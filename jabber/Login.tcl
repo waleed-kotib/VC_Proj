@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.101 2006-09-24 06:38:15 matben Exp $
+# $Id: Login.tcl,v 1.102 2006-09-25 07:21:56 matben Exp $
 
 package provide Login 1.0
 
@@ -32,7 +32,7 @@ namespace eval ::Login:: {
     set ::config(login,autosave)     0
     set ::config(login,autoregister) 0
     set ::config(login,dnssrv)       1
-    set ::config(login,dnstxthttp)   0
+    set ::config(login,dnstxthttp)   1
 }
 
 # Login::Dlg --
@@ -436,7 +436,7 @@ proc ::Login::DoLogin {} {
     }
 
     # Verify http url if any.
-    if {[info exists moreOpts(http)] && $moreOpts(http)} {
+    if {0 && [info exists moreOpts(http)] && $moreOpts(http)} {
 	if {![::Utils::IsWellformedUrl $moreOpts(httpurl)]} {
 	    ::UI::MessageBox -icon error -type ok \
 	      -message "The url \"$moreOpts(httpurl)\" is invalid."
