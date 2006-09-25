@@ -4,7 +4,7 @@
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.13 2006-04-13 10:45:05 matben Exp $
+# $Id: jlibhttp.tcl,v 1.14 2006-09-25 07:21:56 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -51,6 +51,11 @@ package require sha1
 package provide jlib::http 0.1
 
 namespace eval jlib::http {
+    
+    # Check for the TLS package so we can use https.
+    if {![catch {package require tls}]} {
+	http::register https 443 ::tls::socket
+    }
 
     # Inherit jlib's debug level.
     variable debug 0
