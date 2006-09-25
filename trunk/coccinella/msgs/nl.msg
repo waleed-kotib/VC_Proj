@@ -945,6 +945,11 @@
 ::msgcat::mcset nl starttls-failure			{Beveiligd verbinden via TLS met server "%s" mislukte.}
 ::msgcat::mcset nl sasl-no-mechanisms			{De server ondersteunt authenticatie met SASL niet.}
 
+# A collective description of all stream errors.
+::msgcat::mcset nl xmpp-streams-error     {We received a stream error from the server with code: %s}
+
+
+
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration 
 ::msgcat::mcset nl registration-username		{Uw gebruikersnaam}

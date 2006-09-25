@@ -128,7 +128,7 @@ set uidc(en) 0
 evalcatalog en.msg
 
 set files [glob *.msg]
-set files {en.msg nl.msg sv.msg}
+set files {en.msg es.msg nl.msg sv.msg}
 foreach f $files {
     if {$f == "en.msg"} continue
     if {[string match *_new.msg $f]} continue
