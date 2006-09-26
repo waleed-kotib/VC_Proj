@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.92 2006-09-16 06:34:31 matben Exp $
+# $Id: Disco.tcl,v 1.93 2006-09-26 12:24:26 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -770,6 +770,7 @@ proc ::Disco::Build {w} {
       -buttonpress ::Disco::Popup         \
       -buttonpopup ::Disco::Popup
     
+    ::ITree::ElementLayout $wtree image -minwidth 16
     SetBackgroundImage
 
     grid  $wtree  -row 0 -column 0 -sticky news
