@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.11 2006-08-15 14:02:29 matben Exp $
+# $Id: ITree.tcl,v 1.12 2006-09-26 12:23:35 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -85,6 +85,18 @@ proc ::ITree::New {T wxsc wysc args} {
 	} 
     }
     bindtags $T [concat RosterTreeTag [bindtags $T]]
+}
+
+proc ::ITree::GetStyle {T} {
+    return styStd
+}
+
+proc ::ITree::ElementLayout {T type args} {
+    array set type2elem {
+	image eImage
+	text  eText
+    }
+    return [eval {$T style layout styStd $type2elem($type)} $args]
 }
 
 proc ::ITree::Selection {T} {
