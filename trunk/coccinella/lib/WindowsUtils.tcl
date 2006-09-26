@@ -7,7 +7,7 @@
 #  
 #  See: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/shellcc/platform/shell/programmersguide/shell_adv/registeringapps.asp
 #  
-# $Id: WindowsUtils.tcl,v 1.12 2006-09-25 13:02:52 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.13 2006-09-26 06:19:52 matben Exp $
 
 package require registry
 package provide WindowsUtils 1.0
@@ -86,7 +86,7 @@ proc ::Windows::OpenUrl {url} {
     
     # Invoke the command
     if {[catch {
-	eval exec $appCmd $url &
+	eval exec $appCmd [list $url] &
     } err]} {
 	tk_messageBox -icon error -message $err
     }
@@ -121,14 +121,14 @@ proc ::Windows::OpenFileFromSuffix {path} {
 	regsub -nocase "%programfiles%" $appCmd $ProgramFiles appCmd
     }
     
-    # URI encode if necessary.
-    if {![regexp {^file://.*} $path]} {
-	set path "file://[uriencode::quotepath $path]"
+    # URI encode if necessary. We fixed this using [list $path] instead!
+    if {0 && ![regexp {^file://.*} $path]} {
+	#set path "file://[uriencode::quotepath $path]"
     }
     
     # Invoke the command
     if {[catch {
-	eval exec $appCmd $path &
+	eval exec $appCmd [list $path] &
     } err]} {
 	tk_messageBox -icon error -message $err
     }
