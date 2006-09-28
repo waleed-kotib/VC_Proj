@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.64 2006-09-19 12:38:02 matben Exp $
+# $Id: Whiteboard.tcl,v 1.65 2006-09-28 13:28:55 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -441,28 +441,24 @@ proc ::WB::InitMenuDefs { } {
 
     # Only basic functionality.
     set menuDefs(main,file) {
-	{command   mCloseWindow     {::UI::CloseWindowEvent}      W}
-	{separator}
 	{command   mOpenImage/Movie {::WB::OnMenuImport}          I}
 	{command   mOpenURLStream   {::WB::OnMenuOpenURL}         {}}
-	{separator}
 	{command   mOpenCanvas      {::WB::OnMenuOpenCanvas}      {}}
-	{command   mSaveCanvas      {::WB::OnMenuSaveCanvas}      S}
 	{separator}
+	{command   mCloseWindow     {::UI::CloseWindowEvent}      W}
+	{command   mSaveCanvas      {::WB::OnMenuSaveCanvas}      S}
 	{command   mSaveAs          {::WB::OnMenuSaveAs}          {}}
 	{command   mSaveAsItem      {::WB::OnMenuSaveAsItem}      {}}
+	{separator}
 	{command   mPageSetup       {::WB::OnMenuPageSetup}       {}}
 	{command   mPrintCanvas     {::WB::OnMenuPrintCanvas}     P}
 	{separator}
 	{command   mQuit            {::UserActions::DoQuit}       Q}
     }
-    if {![::Plugins::HavePackage QuickTimeTcl]} {
-	lset menuDefs(main,file) 3 3 disabled
-    }
 	    
     # If embedded the embedding app should close us down.
     if {$this(embedded)} {
-	lset menuDefs(main,file) end 3 disabled
+	#lset menuDefs(main,file) end 3 disabled
     } else {
 	package require Multicast
     }
