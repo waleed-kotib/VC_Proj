@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.68 2006-09-19 10:02:13 matben Exp $
+# $Id: JWB.tcl,v 1.69 2006-09-28 13:28:55 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -126,17 +126,17 @@ proc ::JWB::InitUI { } {
     #     Else: handled in main window
     set menuDefsFile {
 	{command   mNewWhiteboard      {::WB::NewWhiteboard}         N}
-	{command   mCloseWindow        {::UI::CloseWindowEvent}      W}
-	{separator}
+	{command   mOpenCanvas         {::WB::OnMenuOpenCanvas}      O}
 	{command   mOpenImage/Movie    {::WB::OnMenuImport}          I}
 	{command   mOpenURLStream      {::WB::OnMenuOpenURL}         {}}
+	{separator}
 	{command   mStopPut/Get/Open   {::JWB::Stop $w}              {}}
 	{separator}
-	{command   mOpenCanvas         {::WB::OnMenuOpenCanvas}      O}
+	{command   mCloseWindow        {::UI::CloseWindowEvent}      W}
 	{command   mSaveCanvas         {::WB::OnMenuSaveCanvas}      S}
-	{separator}
 	{command   mSaveAs             {::WB::OnMenuSaveAs}          {}}
 	{command   mSaveAsItem         {::WB::OnMenuSaveAsItem}      {}}
+	{separator}
 	{command   mPageSetup          {::WB::OnMenuPageSetup}       {}}
 	{command   mPrintCanvas        {::WB::OnMenuPrintCanvas}     P}
     }

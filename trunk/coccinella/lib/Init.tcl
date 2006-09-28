@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.49 2006-07-18 14:02:16 matben Exp $
+# $Id: Init.tcl,v 1.50 2006-09-28 13:28:55 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -338,10 +338,10 @@ proc ::Init::Msgcat { } {
     if {$lang eq "ru"} {
 	switch -- [tk windowingsystem] {
 	    win32 {
-		encoding system cp1251
+		catch {encoding system cp1251}
 	    }
 	    x11 {
-		encoding system koi8-r
+		catch {encoding system koi8-r}
 	    }
 	}
     }

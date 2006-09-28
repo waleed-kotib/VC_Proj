@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.27 2006-08-20 13:41:19 matben Exp $
+# $Id: P2P.tcl,v 1.28 2006-09-28 13:28:55 matben Exp $
 
 package provide P2P 1.0
 
@@ -84,30 +84,28 @@ proc ::P2P::Init {} {
     ::WB::SetButtonTrayDefs    $buttonTrayDefs($prefs(protocol))
 
     set menuDefsFile {
-	{command   mOpenConnection     {::UserActions::DoConnect}                 normal   O}
-	{command   mCloseWindow        {::UI::CloseWindowEvent}                      normal   W}
+	{command   mOpenConnection     {::UserActions::DoConnect}            O}
+	{command   mCloseWindow        {::UI::CloseWindowEvent}              W}
 	{separator}
-	{command   mPutCanvas          {::CanvasCmd::DoPutCanvasDlg $w}        disabled {}}
-	{command   mGetCanvas          {::CanvasCmd::DoGetCanvas $w}           disabled {}}
-	{command   mPutFile            {::P2P::PutFileDlg $w}         disabled {}}
-	{command   mStopPut/Get/Open   {::P2P::CancelAllPutGetAndPendingOpen $w} normal {}}
+	{command   mPutCanvas          {::CanvasCmd::DoPutCanvasDlg $w}      {}}
+	{command   mGetCanvas          {::CanvasCmd::DoGetCanvas $w}         {}}
+	{command   mPutFile            {::P2P::PutFileDlg $w}                {}}
+	{command   mStopPut/Get/Open   {::P2P::CancelAllPutGetAndPendingOpen $w} {}}
 	{separator}
-	{command   mOpenImage/Movie    {::WB::OnMenuImport}    normal  I}
-	{command   mOpenURLStream      {::WB::OnMenuOpenURL}     normal   {}}
+	{command   mOpenImage/Movie    {::WB::OnMenuImport}                  I}
+	{command   mOpenURLStream      {::WB::OnMenuOpenURL}                 {}}
 	{separator}
-	{command   mOpenCanvas         {::WB::OnMenuOpenCanvas}     normal   {}}
-	{command   mSaveCanvas         {::WB::OnMenuSaveCanvas}             normal   S}
+	{command   mOpenCanvas         {::WB::OnMenuOpenCanvas}              {}}
+	{command   mSaveCanvas         {::WB::OnMenuSaveCanvas}              S}
 	{separator}
-	{command   mSaveAs             {::WB::OnMenuSaveAs}        normal   {}}
-	{command   mSaveAsItem         {::WB::OnMenuSaveAsItem}      normal   {}}
-	{command   mPageSetup          {::WB::OnMenuPageSetup}           normal   {}}
-	{command   mPrintCanvas        {::WB::OnMenuPrintCanvas}       normal   P}
+	{command   mSaveAs             {::WB::OnMenuSaveAs}                  {}}
+	{command   mSaveAsItem         {::WB::OnMenuSaveAsItem}              {}}
+	{command   mPageSetup          {::WB::OnMenuPageSetup}               {}}
+	{command   mPrintCanvas        {::WB::OnMenuPrintCanvas}             P}
 	{separator}
-	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
+	{command   mQuit               {::UserActions::DoQuit}               Q}
     }
-    if {![::Plugins::HavePackage QuickTimeTcl]} {
-	lset menuDefsFile 4 3 disabled
-    } else {
+    if {[::Plugins::HavePackage QuickTimeTcl]} {
 	package require Multicast
     }
 
