@@ -1,7 +1,7 @@
 #==============================================================================
 # Contains the implementation of the tablelist move and movecolumn subcommands.
 #
-# Copyright (c) 2003-2005  Csaba Nemethi (E-mail: csaba.nemethi@t-online.de)
+# Copyright (c) 2003-2006  Csaba Nemethi (E-mail: csaba.nemethi@t-online.de)
 #==============================================================================
 
 #------------------------------------------------------------------------------
@@ -10,6 +10,7 @@
 # This procedure is invoked to process the tablelist move subcommand.
 #------------------------------------------------------------------------------
 proc tablelist::moveSubCmd {win source target} {
+    variable canElide
     variable elide
     upvar ::tablelist::ns${win}::data data
 
@@ -55,7 +56,7 @@ proc tablelist::moveSubCmd {win source target} {
     set line [expr {$source + 1}]
     set textIdx [expr {double($line)}]
     for {set col 0} {$col < $data(colCount)} {incr col} {
-	if {$data($col-hide)} {
+	if {$data($col-hide) && !$canElide} {
 	    continue
 	}
 
@@ -77,70 +78,45 @@ proc tablelist::moveSubCmd {win source target} {
     $w insert $targetLine.0 "\n"
     set snipStr $data(-snipstring)
     set sourceItem [lindex $data(itemList) $source]
-    set dispItem [strToDispStr $sourceItem]
-    set key [lindex $sourceItem end]
-    array set itemData [array get data $key*-\[bf\]*]		;# for speed
-    set rowTags {}
-    foreach name [array names itemData $key-\[bf\]*] {
-	set tail [lindex [split $name "-"] 1]
-	lappend rowTags row-$tail-$itemData($name)
+    if {[lsearch -exact $data(fmtCmdFlagList) 1] >= 0} {
+	set formattedItem \
+	    [formatItem $win [lrange $sourceItem 0 $data(lastCol)]]
+    } else {
+	set formattedItem [lrange $sourceItem 0 $data(lastCol)]
     }
+    set key [lindex $sourceItem end]
     set col 0
-    foreach text [lrange $dispItem 0 $data(lastCol)] \
-	    colFont $data(colFontList) \
+    foreach text [strToDispStr $formattedItem] \
 	    colTags $data(colTagsList) \
-	    fmtCmdFlag $data(fmtCmdFlagList) \
 	    {pixels alignment} $data(colList) {
-	if {$data($col-hide)} {
+	if {$data($col-hide) && !$canElide} {
 	    incr col
 	    continue
 	}
 
 	#
-	# Adjust the cell text and the image or window width
+	# Build the list of tags to be applied to the cell
 	#
-	if {$fmtCmdFlag} {
-	    set text [uplevel #0 $data($col-formatcommand) \
-		      [list [lindex $sourceItem $col]]]
-	    set text [strToDispStr $text]
-	}
-	set aux [getAuxData $win $key $col auxType auxWidth]
-	if {[info exists data($key-$col-font)]} {
-	    set cellFont $data($key-$col-font)
-	} elseif {[info exists data($key-font)]} {
-	    set cellFont $data($key-font)
-	} else {
-	    set cellFont $colFont
-	}
-	if {$pixels == 0} {			;# convention: dynamic width
-	    if {$data($col-maxPixels) > 0 &&
-		$data($col-reqPixels) > $data($col-maxPixels)} {
-		set pixels $data($col-maxPixels)
+	set cellTags $colTags
+	foreach opt {-background -foreground -font} {
+	    if {[info exists data($key,$col$opt)]} {
+		lappend cellTags cell$opt-$data($key,$col$opt)
 	    }
 	}
-	if {$pixels != 0} {
-	    incr pixels $data($col-delta)
-	}
-	adjustElem $win text auxWidth $cellFont $pixels $alignment $snipStr
 
 	#
-	# Insert the text and the auxiliary object
+	# Append the text and the label or window
+	# (if any) to the target line of body text widget
 	#
-	set cellTags {}
-	foreach name [array names itemData $key-$col-\[bf\]*] {
-	    set tail [lindex [split $name "-"] 2]
-	    lappend cellTags cell-$tail-$itemData($name)
-	}
-	set tagNames [concat $colTags $rowTags $cellTags]
-	if {$auxType == 0} {
-	    $w insert $targetLine.end "\t$text\t" $tagNames
-	} else {
-	    $w insert $targetLine.end "\t\t" $tagNames
-	    createAuxObject $win $key $source $col $aux $auxType $auxWidth
-	    insertElem $w $targetLine.end-1c $text $aux $auxType $alignment
-	}
+	appendComplexElem $win $key $source $col $text $pixels \
+			  $alignment $snipStr $cellTags $targetLine
 
 	incr col
+    }
+    foreach opt {-background -foreground -font} {
+	if {[info exists data($key$opt)]} {
+	    $w tag add row$opt-$data($key$opt) $targetLine.0 $targetLine.end
+	}
     }
 
     #
@@ -180,9 +156,9 @@ proc tablelist::moveSubCmd {win source target} {
     }
 
     #
-    # Restore the stripes in the body text widget
+    # Invalidate the list of the row indices indicating the non-hidden rows
     #
-    makeStripesWhenIdle $win
+    set data(nonHiddenRowList) {-1}
 
     #
     # Select those source elements that were selected before
@@ -190,6 +166,14 @@ proc tablelist::moveSubCmd {win source target} {
     foreach col $selectedCols {
 	cellselectionSubCmd $win set $target1 $col $target1 $col
     }
+
+    #
+    # Adjust the elided text, restore the stripes in the body
+    # text widget, and redisplay the line numbers (if any)
+    #
+    adjustElidedText $win
+    makeStripes $win
+    showLineNumbersWhenIdle $win
 
     #
     # Restore the edit window if it was present before
@@ -201,11 +185,6 @@ proc tablelist::moveSubCmd {win source target} {
 	    set data(editRow) [lsearch $data(itemList) "* $editKey"]
 	}
     }
-
-    #
-    # Adjust the elided text
-    #
-    adjustElidedTextWhenIdle $win
 
     return ""
 }
@@ -251,8 +230,8 @@ proc tablelist::movecolumnSubCmd {win source target} {
     # Save some elements of data corresponding to source
     #
     array set tmp [array get data $source-*]
-    array set tmp [array get data k*-$source-*]
-    foreach specialCol {activeCol anchorCol editCol arrowCol sortCol} {
+    array set tmp [array get data k*,$source-*]
+    foreach specialCol {activeCol anchorCol editCol} {
 	set tmp($specialCol) $data($specialCol)
     }
     set selCells [curcellselectionSubCmd $win]
@@ -348,6 +327,7 @@ proc tablelist::movecolumnSubCmd {win source target} {
     #
     setupColumns $win $data(-columns) 0
     makeColFontAndTagLists $win
+    makeSortAndArrowColLists $win
     adjustColumns $win {} 0
 
     #

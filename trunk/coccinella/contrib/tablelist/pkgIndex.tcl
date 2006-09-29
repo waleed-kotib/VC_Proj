@@ -1,28 +1,26 @@
 #==============================================================================
 # Tablelist and Tablelist_tile package index file.
 #
-# Copyright (c) 2000-2005  Csaba Nemethi (E-mail: csaba.nemethi@t-online.de)
+# Copyright (c) 2000-2006  Csaba Nemethi (E-mail: csaba.nemethi@t-online.de)
 #==============================================================================
 
-if {[string compare $::tcl_platform(platform) "macintosh"] == 0} {
-    #
-    # We need to do this here instead of in tablelist.tcl, because of
-    # a bug in [info script] in some Tcl releases for the Macintosh.
-    #
-    namespace eval tablelist {}
-    set tablelist::library $dir
-}
-
-foreach package {Tablelist tablelist} {
-    package ifneeded $package 4.1 "
-	[list source [file join $dir tablelistPublic.tcl]]
+#
+# Regular packages:
+#
+package ifneeded tablelist         4.5 \
 	[list source [file join $dir tablelist.tcl]]
-    "
-}
-
-foreach package {Tablelist_tile tablelist_tile} {
-    package ifneeded $package 4.1 "
-	[list source [file join $dir tablelistPublic.tcl]]
+package ifneeded tablelist_tile    4.5 \
 	[list source [file join $dir tablelist_tile.tcl]]
-    "
-}
+
+#
+# Aliases:
+#
+package ifneeded Tablelist         4.5 { package require tablelist }
+package ifneeded Tablelist_tile    4.5 { package require tablelist_tile }
+
+#
+# Code common to all packages:
+#
+package ifneeded tablelist::common 4.5 \
+        "namespace eval ::tablelist { proc DIR {} {return [list $dir]} } ;\
+	 source [list [file join $dir tablelistPublic.tcl]]"
