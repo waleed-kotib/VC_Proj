@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.186 2006-09-24 06:38:15 matben Exp $
+# $Id: Jabber.tcl,v 1.187 2006-09-29 06:24:07 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -421,12 +421,14 @@ proc ::Jabber::GetMyStatus { } {
 }
 
 proc ::Jabber::IsConnected { } {
-    variable jserver
     variable jstate
 
-    # @@@ Switch to: jlib::isinstream
-    return [$jstate(jlib) isinstream]
-    #return [expr [string length $jserver(this)] == 0 ? 0 : 1]
+    # @@@ Bad solution to fix p2p bugs.
+    if {[info exists jstate(jlib)]} {
+	return [$jstate(jlib) isinstream]
+    } else {
+	return 0
+    }
 }
 
 proc ::Jabber::JlibCmd {args} {
@@ -1209,12 +1211,8 @@ proc ::Jabber::ValidateResourceStr {str} {
 
 proc ::Jabber::ValidatePasswordStr {str} {
     
-    if {[regexp {[ ]} $str match junk]} {
-	bell
-	return 0
-    } else {
-	return 1
-    }
+    # @@@ I don't know if there are any limitations at all.
+    return 1
 }
 
 # Jabber::IsMyGroupchatJid --
