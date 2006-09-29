@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.24 2006-09-22 09:43:06 matben Exp $
+# $Id: Avatar.tcl,v 1.25 2006-09-29 06:24:07 matben Exp $
 
 # @@@ Issues:
 # 
@@ -1311,6 +1311,11 @@ proc ::Avatar::WriteHashmap {fileName} {
     upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::WriteHashmap"
+    
+    # @@@ Bad workaround for p2p.
+    if {![info exists jstate(jlib)]} {
+	return
+    }
     
     # Start from the hashmap that may have been read earlier and update it.
     set jlib $jstate(jlib)

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: PrefNet.tcl,v 1.5 2006-08-20 13:41:19 matben Exp $
+# $Id: PrefNet.tcl,v 1.6 2006-09-29 06:24:07 matben Exp $
  
 package provide PrefNet 1.0
 
@@ -33,6 +33,8 @@ proc ::PrefNet::InitPrefsHook { } {
     
     # When connecting to other client, connect automatically to all *its* clients.
     set prefs(multiConnect) 1
+    
+    # @@@ We should know protocol earlier in the launch process!
     
     ::PrefUtils::Add [list  \
       [list prefs(protocol)        prefs_protocol        $prefs(protocol)]       \
