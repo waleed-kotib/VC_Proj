@@ -5,7 +5,7 @@
 #   - Namespace initialization
 #   - Public utility procedures
 #
-# Copyright (c) 2000-2005  Csaba Nemethi (E-mail: csaba.nemethi@t-online.de)
+# Copyright (c) 2000-2006  Csaba Nemethi (E-mail: csaba.nemethi@t-online.de)
 #==============================================================================
 
 package require Tcl 8
@@ -20,16 +20,16 @@ namespace eval mwutil {
     #
     # Public variables:
     #
-    variable version	2.0
+    variable version	2.2
     variable library	[file dirname [info script]]
 
     #
     # Public procedures:
     #
     namespace export	wrongNumArgs getAncestorByClass convEventFields \
-			defineKeyNav processTraversal configure \
-			fullConfigOpt fullOpt enumOpts setConfigVals \
-			configSubCmd attribSubCmd getScrollInfo
+			defineKeyNav processTraversal configureWidget \
+			fullConfigOpt fullOpt enumOpts configureSubCmd \
+			attribSubCmd getScrollInfo
 }
 
 #
@@ -128,16 +128,15 @@ proc mwutil::processTraversal {w class event} {
 }
 
 #------------------------------------------------------------------------------
-# mwutil::configure
+# mwutil::configureWidget
 #
 # Configures the widget win by processing the command-line arguments specified
 # in optValPairs and, if the value of initialize is true, also those database
 # options that don't match any command-line arguments.
 #------------------------------------------------------------------------------
-proc mwutil::configure {win configSpecsName configValsName \
-			configCmd optValPairs initialize} {
+proc mwutil::configureWidget {win configSpecsName configCmd cgetCmd \
+			      optValPairs initialize} {
     upvar $configSpecsName configSpecs
-    upvar $configValsName configVals
 
     #
     # Process the command-line arguments
@@ -158,7 +157,7 @@ proc mwutil::configure {win configSpecsName configValsName \
 	}
 	set opt $result
 	lappend cmdLineOpts $opt
-	lappend savedVals $configVals($opt)
+	lappend savedVals [eval $cgetCmd [list $win $opt]]
 	if {[catch {eval $configCmd [list $win $opt $val]} result] != 0} {
 	    set failed 1
 	    break
@@ -327,44 +326,12 @@ proc mwutil::enumOpts optList {
 }
 
 #------------------------------------------------------------------------------
-# mwutil::setConfigVals
-#
-# Sets the elements of the array specified by configValsName to the values
-# returned by passing the widget name win and the relevant options to the
-# command given by cgetCmd.
-#------------------------------------------------------------------------------
-proc mwutil::setConfigVals {win configSpecsName configValsName
-			    cgetCmd argList} {
-    upvar $configSpecsName configSpecs
-    upvar $configValsName configVals
-
-    set optList {}
-    if {[llength $argList] == 0} {
-	foreach opt [array names configSpecs] {
-	    if {[llength $configSpecs($opt)] > 1} {
-		lappend optList $opt
-	    }
-	}
-    } else {
-	foreach {opt val} $argList {
-	    lappend optList [fullConfigOpt $opt configSpecs]
-	}
-    }
-
-    foreach opt $optList {
-	set configVals($opt) [eval $cgetCmd [list $win $opt]]
-    }
-}
-
-#------------------------------------------------------------------------------
-# mwutil::configSubCmd
+# mwutil::configureSubCmd
 #
 # This procedure is invoked to process configuration subcommands.
 #------------------------------------------------------------------------------
-proc mwutil::configSubCmd {win configSpecsName configValsName
-			   configCmd argList} {
+proc mwutil::configureSubCmd {win configSpecsName configCmd cgetCmd argList} {
     upvar $configSpecsName configSpecs
-    upvar $configValsName configVals
 
     switch [llength $argList] {
 	0 {
@@ -385,7 +352,7 @@ proc mwutil::configSubCmd {win configSpecsName configValsName
 		    set dbClass [lindex $configSpecs($opt) 1]
 		    set default [lindex $configSpecs($opt) 3]
 		    lappend result [list $opt $dbName $dbClass $default \
-				    $configVals($opt)]
+				    [eval $cgetCmd [list $win $opt]]]
 		}
 	    }
 	    return $result
@@ -399,14 +366,16 @@ proc mwutil::configSubCmd {win configSpecsName configValsName
 	    set dbName [lindex $configSpecs($opt) 0]
 	    set dbClass [lindex $configSpecs($opt) 1]
 	    set default [lindex $configSpecs($opt) 3]
-	    return [list $opt $dbName $dbClass $default $configVals($opt)]
+	    return [list $opt $dbName $dbClass $default \
+		    [eval $cgetCmd [list $win $opt]]]
 	}
 
 	default {
 	    #
 	    # Set the specified configuration options to the given values
 	    #
-	    return [configure $win configSpecs configVals $configCmd $argList 0]
+	    return [configureWidget $win configSpecs $configCmd $cgetCmd \
+		    $argList 0]
 	}
     }
 }
