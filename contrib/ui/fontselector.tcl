@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: fontselector.tcl,v 1.4 2005-11-30 14:57:05 matben Exp $
+# $Id: fontselector.tcl,v 1.5 2006-10-02 13:52:05 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -169,18 +169,21 @@ snit::widget ui::fontselector::widget {
 	wm resizable $win 0 0
 	
 	if {[llength $options(-selectfont)]} {
-	    array set farr [font actual $options(-selectfont)]
-	    set idx [lsearch $families $farr(-family)]
+	    array set fontA [font actual $options(-selectfont)]
+	    set idx [lsearch $families $fontA(-family)]
 	    if {$idx < 0} {
 		set family "Helvetica"
+		set idx [lsearch $families $family]
 	    } else {
-		set family $farr(-family)
+		set family $fontA(-family)
 	    }
-	    set size   $farr(-size)
-	    set weight $farr(-weight)
+	    set size   $fontA(-size)
+	    set weight $fontA(-weight)
+	    $wlistbox selection clear 0 end
+	    $wlistbox selection set $idx
+	    $wlistbox see $idx
 	    $self Select
-	}
-	if {[llength $options(-defaultfont)]} {
+	} elseif {[llength $options(-defaultfont)]} {
 	    $self Default
 	} else {
 	    $wdefault state {disabled}
@@ -255,10 +258,10 @@ snit::widget ui::fontselector::widget {
     }
     
     method Default {} {
-	array set defaultArr [font actual $options(-defaultfont)]
-	set family $defaultArr(-family)
-	set size   $defaultArr(-size)
-	set weight $defaultArr(-weight)
+	array set defaultA [font actual $options(-defaultfont)]
+	set family $defaultA(-family)
+	set size   $defaultA(-size)
+	set weight $defaultA(-weight)
 	$wlistbox selection clear 0 end
 	set idx [lsearch $families $family]
 	$wlistbox selection set $idx
