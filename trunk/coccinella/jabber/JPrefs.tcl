@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.41 2006-09-19 10:02:13 matben Exp $
+# $Id: JPrefs.tcl,v 1.42 2006-10-02 13:52:57 matben Exp $
 
 package require ui::fontselector
 
@@ -27,7 +27,7 @@ proc ::JPrefs::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     
     # Defaults...
-    set prefs(opacity) 100
+    set prefs(opacity) 100.0
     
     # Auto away page:
     set jprefs(autoaway)     0
@@ -115,7 +115,7 @@ proc ::JPrefs::InitPrefsHook { } {
 	  $jprefs(statusMsg,msg,$status)]                 \
 	  ]
     }
-    if {$jprefs(chatFont) != ""} {
+    if {[llength $jprefs(chatFont)]} {
 	set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
     }
     ::PrefUtils::Add [list  \
@@ -331,7 +331,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     ttk::button $wap.btfont -text "[mc Pick]..." -style Small.TButton \
       -command [namespace current]::PickFont
     ttk::button $wap.dfont -text [mc {Default}]  \
-      -command [list set [namespace current]::tmpJprefs(chatFont) ""]  \
+      -command [namespace current]::DefaultChatFont  \
       -style Small.TButton
 
     set wthe $wap.the
@@ -350,22 +350,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     
     ui::optionmenu $wskin.b -menulist $menuDef -variable ::tile::currentTheme \
       -command tile::setTheme
-    
-    if {0} {
-	ttk::menubutton $wskin.b -textvariable ::tile::currentTheme \
-	  -menu $wmenu -direction flush
-	menu $wmenu -tearoff 0
-	
-	foreach {theme name} $tileThemeList {
-	    $wmenu add radiobutton -label $name \
-	      -variable ::tile::currentTheme -value $theme \
-	      -command [list tile::setTheme $theme]
-	    if {[lsearch -exact [package names] tile::theme::$theme] == -1} {
-		$wmenu entryconfigure $name -state disabled
-	    }
-	}
-    }
-    
+        
     # This has been disabled since it starts a child interpreter which needs
     # another ::tileqt::library.
     set tileqt 0
@@ -461,19 +446,19 @@ proc ::JPrefs::BuildCustomPage {page} {
 proc ::JPrefs::PickFont { } {
     variable tmpJPrefs
     
-    set opts {
+    array set optsA {
 	-defaultfont CociSmallFont
 	-geovariable prefs(winGeom,jfontsel)
 	-command     ::JPrefs::PickFontCommand
     }
     if {[string length $tmpJPrefs(chatFont)]} {
-	lappend opts -selectfont $tmpJPrefs(chatFont)
+	set optsA(-selectfont) $tmpJPrefs(chatFont)
     } else {
-	lappend opts -selectfont CociSmallFont
+	set optsA(-selectfont) CociSmallFont
     }
     set m [::UI::GetMainMenu]
-    lappend opts -menu $m
-    set w [eval ui::fontselector [ui::autoname] $opts]
+    set optsA(-menu) $m
+    set w [eval ui::fontselector [ui::autoname] [array get optsA]]
     ::UI::SetMenubarAcceleratorBinds $w $m
     $w grab
 }
@@ -488,6 +473,12 @@ proc ::JPrefs::PickFontCommand {{theFont ""}} {
 	    set tmpJPrefs(chatFont) $theFont
 	}
     }
+}
+
+proc ::JPrefs::DefaultChatFont { } {
+    variable tmpJPrefs
+
+    set tmpJPrefs(chatFont) ""
 }
 
 proc ::JPrefs::PickBgImage {where} {
