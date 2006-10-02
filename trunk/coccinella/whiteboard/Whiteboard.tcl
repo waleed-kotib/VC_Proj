@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.65 2006-09-28 13:28:55 matben Exp $
+# $Id: Whiteboard.tcl,v 1.66 2006-10-02 06:24:10 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -996,7 +996,7 @@ proc ::WB::SelectPageCmd {wpage name} {
 
 proc ::WB::CloseHook {w} {
     
-    if {[winfo exists $w] && [string equal [winfo class $w] "Whiteboard"]} {
+    if {[winfo exists $w] && [string equal [winfo class $w] "TopWhiteboard"]} {
 	set wcan [GetCanvasFromWtop $w]
 	::Plugins::DeregisterCanvasInstBinds $wcan
 	::hooks::run whiteboardCloseHook $w
