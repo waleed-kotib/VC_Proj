@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2006  Mats Bengtsson
 #  
-# $Id: CanvasDraw.tcl,v 1.21 2006-08-20 13:41:19 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.22 2006-10-02 06:24:10 matben Exp $
 
 #-- TAGS -----------------------------------------------------------------------
 #  
@@ -1482,8 +1482,13 @@ proc ::CanvasDraw::ArcCancel {wcan} {
     variable arcBox
     set w [winfo toplevel $wcan]
 
+    bind $wcan <B1-Motion> {}
+    bind $wcan <ButtonRelease-1> {}
+    bind $wcan <KeyPress-space> {}
+
     ::WB::SetStatusMessage $w [mc uastatarc]
     catch {$wcan delete tcent}
+    catch {$wcan delete $arcBox($wcan,last)}
     unset -nocomplain arcBox
 }
 
