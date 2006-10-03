@@ -1,6 +1,7 @@
 # Russian language version of the Coccinella message catalog.
 #
 # Translated by Gescheit(xmmp://gescheit@jabber.ttn.ru)
+# gescheit@list.ru
 #
 # General type of text, such as "OK", "Cancel", and the like. 
 # We use the source string as the message.

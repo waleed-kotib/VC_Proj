@@ -19,6 +19,9 @@
 ::msgcat::mcset pl Allow	Zezwól
 ::msgcat::mcset pl Appearance	Wygląd
 ::msgcat::mcset pl Apply	Użyj
+
+::msgcat::mcset pl Author
+
 ::msgcat::mcset pl Available	Dostępny/a
 ::msgcat::mcset pl Away		Nieobecny
 ::msgcat::mcset pl Back		Cofnij
@@ -85,11 +88,17 @@
 ::msgcat::mcset pl Height	Wysokość
 ::msgcat::mcset pl History	Przebieg
 ::msgcat::mcset pl Home		{Namiary}
+
+::msgcat::mcset pl Icon
+
 ::msgcat::mcset pl Image	Obrazek
 ::msgcat::mcset pl Import	Import
 ::msgcat::mcset pl Inbox	Skrzynka
 ::msgcat::mcset pl Info		Informacja
 ::msgcat::mcset pl Invite	Zaproś
+
+::msgcat::mcset pl Key
+
 ::msgcat::mcset pl Language	Język
 ::msgcat::mcset pl Last		Ostatni
 ::msgcat::mcset pl Less		Mniej
@@ -417,6 +426,9 @@
 ::msgcat::mcset pl mMinimal             {Minimalny}
 ::msgcat::mcset pl mDisco               {Disco}
 
+::msgcat::mcset pl mFind                {Find}
+::msgcat::mcset pl mFindAgain           {Find Again}
+
 # Popups
 ::msgcat::mcset pl mMessage     	{Wiadomość...}
 ::msgcat::mcset pl mWhiteboard     	{Tablica...}
@@ -696,7 +708,7 @@
 ::msgcat::mcset pl {Use proxy}
 ::msgcat::mcset pl {Use Secure Connection}
 ::msgcat::mcset pl {Use SSL for security} {Dla bezpieczeństwa korzystać z SSL}
-::msgcat::mcset pl {Use TLS and SASL authentization}
+::msgcat::mcset pl {Use TLS and SASL authentication}
 ::msgcat::mcset pl {Use TLS on separate port (old)}
 ::msgcat::mcset pl {User is}              {Użytkownik jest}
 ::msgcat::mcset pl {User is offline}      {Użytkownik jest wylogowany}
@@ -931,9 +943,13 @@ you happen to be online while this message is being read. Do you want to send it
 ::msgcat::mcset pl xmpp-stanzas-short-temporary-auth-failure {Protocol error during the login process.}
 
 
+# Related error conditions detected by the client.
 ::msgcat::mcset pl starttls-nofeature     {Brak możliwości skorzystania z TLS na serwerze "%s".}
 ::msgcat::mcset pl starttls-failure       {Nieudana negocjacja TLS z serwerem "%s".}
 ::msgcat::mcset pl sasl-no-mechanisms     {The server has no support for SASL authentication.}
+
+# A collective description of all stream errors.
+::msgcat::mcset pl xmpp-streams-error     {We received a stream error from the server with code: %s}
 
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration 
@@ -1282,6 +1298,49 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl iaxPhoneNoise        {Poziom szumu}
 ::msgcat::mcset pl iaxPhoneComfort      {Komfort}
 ::msgcat::mcset pl iaxPhoneCodec        {Codec}
+
+# Messages for Mood PEP
+::msgcat::mcset pl mMood Mood
+::msgcat::mcset pl mAngry Angry
+::msgcat::mcset pl mAnxious Anxious
+::msgcat::mcset pl mAshamed Ashamed
+::msgcat::mcset pl mBored Bored
+::msgcat::mcset pl mCurious Curious
+::msgcat::mcset pl mDepressed Depressed
+::msgcat::mcset pl mExcited Excited
+::msgcat::mcset pl mHappy Happy
+::msgcat::mcset pl mInLove {In love}
+::msgcat::mcset pl mInvincible Invincible
+::msgcat::mcset pl mJealous Jealous
+::msgcat::mcset pl mNervous Nervous
+::msgcat::mcset pl mSad Sad
+::msgcat::mcset pl mSleepy Sleepy
+::msgcat::mcset pl mStressed Stressed
+::msgcat::mcset pl mWorried Worried
+
+::msgcat::mcset pl moodEvent {Mood change}
+::msgcat::mcset pl heIs is
+::msgcat::mcset pl because because
+::msgcat::mcset pl angry angry
+::msgcat::mcset pl anxious anxious
+::msgcat::mcset pl ashamed ashamed
+::msgcat::mcset pl bored bored
+::msgcat::mcset pl curious curious
+::msgcat::mcset pl depressed depressed
+::msgcat::mcset pl excited excited
+::msgcat::mcset pl happy happy
+::msgcat::mcset pl in_love {in love}
+::msgcat::mcset pl invincible invincible
+::msgcat::mcset pl jealous jealous
+::msgcat::mcset pl nervous nervous
+::msgcat::mcset pl sad sad
+::msgcat::mcset pl sleepy sleepy
+::msgcat::mcset pl stressed stressed
+::msgcat::mcset pl worried worried
+::msgcat::mcset pl moodDlg Mood
+::msgcat::mcset pl selectCustomMood {Select a mood}
+::msgcat::mcset pl moodMessage {Reason for mood}
+::msgcat::mcset pl mCustomMood {Custom mood}
 
 # END --------------------------------------------------------------------------
 

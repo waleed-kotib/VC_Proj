@@ -1,6 +1,3 @@
-# English language version of the Coccinella message catalog.
-#
-# French translation by Guillaume Ayoub (xovni at wanadoo.fr), 2004
 #
 # Spanish translation from french by Néstor Díaz (nestordiaz at equusdigital.com) 2004
 # Spanish review by Antonio F. Cano (antonio at igestec.com) 2006
@@ -425,7 +422,9 @@
 ::msgcat::mcset es mComponents          {Componentes...}
 ::msgcat::mcset es mBugReport           {Informar de un fallo...}
 ::msgcat::mcset es mTakeSnapShot        {Coger captura}
-#::msgcat::mcset es mTimeCode            {Timecode}
+
+::msgcat::mcset es mTimeCode            {Timecode}
+
 ::msgcat::mcset es mUserInfo            {Informacion del usuario}
 ::msgcat::mcset es mEditBookmarks       {Editar favoritos}
 ::msgcat::mcset es mToolbar		{Barra de herramientas}
@@ -635,7 +634,9 @@
 ::msgcat::mcset es {Open Helpfile}		{Abrir el archivo de ayuda}
 ::msgcat::mcset es {Open Image/Movie}		{Abrir imagen/vídeo}
 ::msgcat::mcset es {Open Stream}		{Abrir streaming}
-#::msgcat::mcset es {Outgoing Presence} {}
+
+::msgcat::mcset es {Outgoing Presence}          {Outgoing Presence}
+
 ::msgcat::mcset es {Peer-to-Peer}		{Punto-a-punto}
 ::msgcat::mcset es {Personal Info}		{Información personal}
 ::msgcat::mcset es {Personal Information}	{Información personal}
