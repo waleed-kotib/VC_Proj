@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Enter.tcl,v 1.8 2006-09-08 12:39:58 matben Exp $
+# $Id: Enter.tcl,v 1.9 2006-10-03 13:09:26 matben Exp $
 
 package provide Enter 1.0
 
@@ -79,7 +79,12 @@ proc ::Enter::Build {protocol args} {
 	password    ""
     }
     set state(protocol) $protocol
-    set state(nickname) $jprefs(defnick)
+    if {$jprefs(defnick) eq ""} {
+	jlib::splitjidex [Jabber::JlibCmd myjid] node - -
+	set state(nickname) $node
+    } else {
+	set state(nickname) $jprefs(defnick)
+    }
     
     # Global frame.
     ttk::frame $w.frall

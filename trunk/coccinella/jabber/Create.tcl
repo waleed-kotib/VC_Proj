@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: Create.tcl,v 1.6 2006-09-05 08:00:04 matben Exp $
+# $Id: Create.tcl,v 1.7 2006-10-03 13:09:26 matben Exp $
 
 package provide Create 1.0
 
@@ -538,7 +538,12 @@ proc ::Create::GCBuild {args} {
 	roomname    ""
 	nickname    ""
     }
-    set enter(nickname) $jprefs(defnick)
+    if {$jprefs(defnick) eq ""} {
+	jlib::splitjidex [Jabber::JlibCmd myjid] node - -
+	set enter(nickname) $node
+    } else {
+	set enter(nickname) $jprefs(defnick)
+    }
     array set argsArr $args
     
     # Global frame.
