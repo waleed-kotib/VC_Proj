@@ -20,6 +20,9 @@
 ::msgcat::mcset de Allow  	Erlaube
 ::msgcat::mcset de Appearance   Aussehen
 ::msgcat::mcset de Apply	Anwenden
+
+::msgcat::mcset de Author
+
 ::msgcat::mcset de Available	Verfügbar
 ::msgcat::mcset de Away		Weg
 ::msgcat::mcset de Back
@@ -86,11 +89,17 @@
 ::msgcat::mcset de Height 	Höhe
 ::msgcat::mcset de History	Verlauf
 ::msgcat::mcset de Home		Privat
+
+::msgcat::mcset de Icon
+
 ::msgcat::mcset de Image  	Bild
 ::msgcat::mcset de Import	Import
 ::msgcat::mcset de Inbox	Posteingang
 ::msgcat::mcset de Info		Information
 ::msgcat::mcset de Invite	Einladen
+
+::msgcat::mcset de Key
+
 ::msgcat::mcset de Language
 ::msgcat::mcset de Last		Letzte
 ::msgcat::mcset de Less		Weniger
@@ -423,6 +432,9 @@
 ::msgcat::mcset de mNotebook            Notebook
 ::msgcat::mcset de mMinimal             Minimal
 ::msgcat::mcset de mDisco               Disco
+
+::msgcat::mcset de mFind                Find
+::msgcat::mcset de mFindAgain           {Find Again}
 
 
 # Popups
@@ -948,10 +960,14 @@ you happen to be online while this message is being read. Do you want to send it
 ::msgcat::mcset de xmpp-stanzas-short-not-authorized      {Login failed because of unknown user or wrong password.}
 ::msgcat::mcset de xmpp-stanzas-short-temporary-auth-failure {Protocol error during the login process.}
 
-
+# Related error conditions detected by the client.
 ::msgcat::mcset de starttls-nofeature     {Der Server "%s" bietet keine Unterstützung für TLS.}
 ::msgcat::mcset de starttls-failure        {TLS-Aushandlung mit Server "%s" fehlerhaft.}
 ::msgcat::mcset de sasl-no-mechanisms     {The server has no support for SASL authentication.}
+
+# A collective description of all stream errors.
+::msgcat::mcset de xmpp-streams-error           {We received a stream error from the server with code: %s}
+
 
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration 
@@ -1318,5 +1334,46 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de iaxPhoneNoise        {Noise}
 ::msgcat::mcset de iaxPhoneComfort      {Comfort}
 ::msgcat::mcset de iaxPhoneCodec        {Codec}
+
+::msgcat::mcset de mMood Mood
+::msgcat::mcset de mAngry Angry
+::msgcat::mcset de mAnxious Anxious
+::msgcat::mcset de mAshamed Ashamed
+::msgcat::mcset de mBored Bored
+::msgcat::mcset de mCurious Curious
+::msgcat::mcset de mDepressed Depressed
+::msgcat::mcset de mExcited Excited
+::msgcat::mcset de mHappy Happy
+::msgcat::mcset de mInLove {In love}
+::msgcat::mcset de mInvincible Invincible
+::msgcat::mcset de mJealous Jealous
+::msgcat::mcset de mNervous Nervous
+::msgcat::mcset de mSad Sad
+::msgcat::mcset de mSleepy Sleepy
+::msgcat::mcset de mStressed Stressed
+::msgcat::mcset de mWorried Worried
+::msgcat::mcset de moodEvent {Mood change}
+::msgcat::mcset de heIs is
+::msgcat::mcset de because because
+::msgcat::mcset de angry angry
+::msgcat::mcset de anxious anxious
+::msgcat::mcset de ashamed ashamed
+::msgcat::mcset de bored bored
+::msgcat::mcset de curious curious
+::msgcat::mcset de depressed depressed
+::msgcat::mcset de excited excited
+::msgcat::mcset de happy happy
+::msgcat::mcset de in_love {in love}
+::msgcat::mcset de invincible invincible
+::msgcat::mcset de jealous jealous
+::msgcat::mcset de nervous nervous
+::msgcat::mcset de sad sad
+::msgcat::mcset de sleepy sleepy
+::msgcat::mcset de stressed stressed
+::msgcat::mcset de worried worried
+::msgcat::mcset de moodDlg Mood
+::msgcat::mcset de selectCustomMood {Select a mood}
+::msgcat::mcset de moodMessage {Reason for mood}
+::msgcat::mcset de mCustomMood {Custom mood}
 
 # END --------------------------------------------------------------------------

@@ -20,6 +20,9 @@
 ::msgcat::mcset fr Appearance           {Apparence}
 ::msgcat::mcset fr Apply		{Appliquer}
 ::msgcat::mcset fr Available		{Disponible}
+
+::msgcat::mcset fr Author
+
 ::msgcat::mcset fr Away			{Absent}
 ::msgcat::mcset fr Back
 ::msgcat::mcset fr Binary		{Binaire}
@@ -85,11 +88,17 @@
 ::msgcat::mcset fr Height		{Hauteur}
 ::msgcat::mcset fr History		{Historique}
 ::msgcat::mcset fr Home			{Démarrer}
+
+::msgcat::mcset fr Icon
+
 ::msgcat::mcset fr Image		{Image}
 ::msgcat::mcset fr Import		{Importer}
 ::msgcat::mcset fr Inbox		{Messages}
 ::msgcat::mcset fr Info			{Infos}
 ::msgcat::mcset fr Invite		{Inviter}
+
+::msgcat::mcset fr Key
+
 ::msgcat::mcset fr Language
 ::msgcat::mcset fr Last			{Dernier}
 ::msgcat::mcset fr Less			{Moins}
@@ -419,6 +428,8 @@
 ::msgcat::mcset fr mNotebook            {Notebook}
 ::msgcat::mcset fr mMinimal             {Minimal}
 ::msgcat::mcset fr mDisco               {Disco}
+::msgcat::mcset fr mFind                {Find}
+::msgcat::mcset fr mFindAgain           {Find Again}
 
 
 # Popups.
@@ -960,9 +971,14 @@ you happen to be online while this message is being read. Do you want to send it
 ::msgcat::mcset fr xmpp-stanzas-short-temporary-auth-failure {Protocol error during the login process.}
 
 
+# Related error conditions detected by the client.
 ::msgcat::mcset fr starttls-nofeature     {Le serveur "%s" ne supporte pas le TLS.}
 ::msgcat::mcset fr starttls-failure       {Erreur lors de la sécurisation TLS avec le serveur "%s".}
 ::msgcat::mcset fr sasl-no-mechanisms     {The server has no support for SASL authentication.}
+
+# A collective description of all stream errors.
+::msgcat::mcset fr xmpp-streams-error {We received a stream error from the server with code: %s}
+
 
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration 
@@ -1328,6 +1344,49 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr iaxPhoneNoise        {Noise}
 ::msgcat::mcset fr iaxPhoneComfort      {Comfort}
 ::msgcat::mcset fr iaxPhoneCodec        {Codec}
+
+# Messages for Mood PEP
+::msgcat::mcset fr mMood Mood
+::msgcat::mcset fr mAngry Angry
+::msgcat::mcset fr mAnxious Anxious
+::msgcat::mcset fr mAshamed Ashamed
+::msgcat::mcset fr mBored Bored
+::msgcat::mcset fr mCurious Curious
+::msgcat::mcset fr mDepressed Depressed
+::msgcat::mcset fr mExcited Excited
+::msgcat::mcset fr mHappy Happy
+::msgcat::mcset fr mInLove {In love}
+::msgcat::mcset fr mInvincible Invincible
+::msgcat::mcset fr mJealous Jealous
+::msgcat::mcset fr mNervous Nervous
+::msgcat::mcset fr mSad Sad
+::msgcat::mcset fr mSleepy Sleepy
+::msgcat::mcset fr mStressed Stressed
+::msgcat::mcset fr mWorried Worried
+
+::msgcat::mcset fr moodEvent {Mood change}
+::msgcat::mcset fr heIs is
+::msgcat::mcset fr because because
+::msgcat::mcset fr angry angry
+::msgcat::mcset fr anxious anxious
+::msgcat::mcset fr ashamed ashamed
+::msgcat::mcset fr bored bored
+::msgcat::mcset fr curious curious
+::msgcat::mcset fr depressed depressed
+::msgcat::mcset fr excited excited
+::msgcat::mcset fr happy happy
+::msgcat::mcset fr in_love {in love}
+::msgcat::mcset fr invincible invincible
+::msgcat::mcset fr jealous jealous
+::msgcat::mcset fr nervous nervous
+::msgcat::mcset fr sad sad
+::msgcat::mcset fr sleepy sleepy
+::msgcat::mcset fr stressed stressed
+::msgcat::mcset fr worried worried
+::msgcat::mcset fr moodDlg Mood
+::msgcat::mcset fr selectCustomMood {Select a mood}
+::msgcat::mcset fr moodMessage {Reason for mood}
+::msgcat::mcset fr mCustomMood {Custom mood}
 
 # END --------------------------------------------------------------------------
 
