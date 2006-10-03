@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.21 2006-09-25 07:21:54 matben Exp $
+#       $Id: SlideShow.tcl,v 1.22 2006-10-03 06:57:37 matben Exp $
 
 package require undo
 
@@ -404,8 +404,6 @@ proc ::SlideShow::SetMenuState {w} {
     global  prefs
     variable priv
     
-    puts "::SlideShow::SetMenuState $w"
-    
     set wmenu [::UI::GetMenu $w "Slide Show"]
     if {[info exists priv($w,dir)] && [file isdirectory $priv($w,dir)]} {
 	::UI::MenuMethod $wmenu entryconfigure First -state normal
@@ -440,9 +438,13 @@ proc ::SlideShow::MenuPostHook {type wmenu} {
     variable priv
     
     if {$type eq "whiteboard-file"} {
-	puts "focus=[focus]"
 	if {[winfo exists [focus]]} {
-	    SetMenuState [winfo toplevel [focus]]
+	    set wtop [winfo toplevel [focus]]
+	    
+	    # Sander reports a bug related to this.
+	    if {[winfo class $wtop] eq "TopWhiteboard"} {
+		SetMenuState $wtop
+	    }
 	}
     }
 }
