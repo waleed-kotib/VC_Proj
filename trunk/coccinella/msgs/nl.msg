@@ -946,7 +946,7 @@
 ::msgcat::mcset nl sasl-no-mechanisms			{De server ondersteunt authenticatie met SASL niet.}
 
 # A collective description of all stream errors.
-::msgcat::mcset nl xmpp-streams-error     {We received a stream error from the server with code: %s}
+::msgcat::mcset nl xmpp-streams-error			{Streamfout van de server ontvangen met foutcode: %s}
 
 
 
