@@ -20,7 +20,7 @@
 ::msgcat::mcset it Appearance {Aspetto}
 ::msgcat::mcset it Apply {Applica}
 
-::msgcat::mcset it Author
+::msgcat::mcset it Author {Autore}
 
 ::msgcat::mcset it Available {Disponibile}
 ::msgcat::mcset it Away {Assente}
@@ -89,7 +89,7 @@
 ::msgcat::mcset it History {Storia}
 ::msgcat::mcset it Home {Inizio}
 
-::msgcat::mcset it Icon
+::msgcat::mcset it Icon {Icona}
 
 ::msgcat::mcset it Image {Immagine}
 ::msgcat::mcset it Import {Importa}
@@ -97,7 +97,7 @@
 ::msgcat::mcset it Info {Info}
 ::msgcat::mcset it Invite {Invita}
 
-::msgcat::mcset it Key
+::msgcat::mcset it Key {Chiave}
 
 ::msgcat::mcset it Language {Lingua}
 ::msgcat::mcset it Last {Ultimo}
@@ -211,7 +211,7 @@
 ::msgcat::mcset it yes {si}
 
 # A few words that are not unambiguous and have therefore a prefix.
-::msgcat::mcset it program-Application        Application
+::msgcat::mcset it program-Application        Programma
 
 
 # Canvas item options, names and values.
@@ -426,8 +426,8 @@
 ::msgcat::mcset it mMinimal {Minimale}
 ::msgcat::mcset it mDisco {Disco}
 
-::msgcat::mcset it mFind Find
-::msgcat::mcset it mFindAgain {Find Again}
+::msgcat::mcset it mFind Trova
+::msgcat::mcset it mFindAgain {Trova successivo}
 
 # Popups
 ::msgcat::mcset it mMessage {Messaggio...}
@@ -481,7 +481,7 @@
 ::msgcat::mcset it {Ask each time} {Chiedi sempre}
 ::msgcat::mcset it {Auto Away} {Allontanamento automatico}
 ::msgcat::mcset it {Auto Connect} {Connessione automatica}
-::msgcat::mcset it {Auto Join}
+::msgcat::mcset it {Auto Join} {Auto Join}
 ::msgcat::mcset it {Auto-accept} {Accetta automaticamente}
 ::msgcat::mcset it {Auto-reject} {Rifiuta automaticamente}
 ::msgcat::mcset it {Away status} {Stato "Allontanato"}
@@ -585,7 +585,7 @@
 ::msgcat::mcset it {Movie Options} {Opzioni del filmato}
 ::msgcat::mcset it {Multi Connect} {Connessione multipla}
 ::msgcat::mcset it {My Avatar} {Il mio avatar}
-::msgcat::mcset it {My nickname for own display}
+::msgcat::mcset it {My nickname for own display} {Mio nickname che appare sul mio pc}
 ::msgcat::mcset it {My Status} {Il mio stato}
 ::msgcat::mcset it {My vCard} {La mia vCard}
 ::msgcat::mcset it {Name of list} {Nome lista}
@@ -917,8 +917,8 @@
 ::msgcat::mcset it jamessnorooms {Failed to find any rooms at %s.}
 ::msgcat::mcset it jamessnofiletrpt {Non sembra che %s supporti il trasferimento di file.}
 ::msgcat::mcset it jamessfiletrpterr {Errore durante la ricezione del file %s da %s: %s}
-::msgcat::mcset it jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
-you happen to be online while this message is being read. Do you want to send it anyway?}
+::msgcat::mcset it jamesswarnsendcanoff         {L'utente a cui stai inviando non è in linea, e se questo messaggio contiene immagini o altri oggetti simili, l'utente non li riceverà, a meno che tu non sia collegato proprio mentre il messaggio viene ricevuto. Vuoi inviare lo stesso?}
+
 
 
 # This maps Defined Error Conditions to clear text messages.
@@ -926,57 +926,57 @@ you happen to be online while this message is being read. Do you want to send it
 # 
 # These are much too formal to be used for user display and we therfore instead use the short forms below.
 
-::msgcat::mcset it xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
-::msgcat::mcset it xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
-::msgcat::mcset it xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
-::msgcat::mcset it xmpp-stanzas-invalid-mechanism   {The initiating entity did not provide a mechanism or requested a mechanism that is not supported by the receiving entity.}
-::msgcat::mcset it xmpp-stanzas-mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
-::msgcat::mcset it xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
-::msgcat::mcset it xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
+::msgcat::mcset it xmpp-stanzas-aborted             {L'entità ricevente ha riconosciuto un elemento di fallimento inviato dell'entità iniziante.}
+::msgcat::mcset it xmpp-stanzas-incorrect-encoding  {Non è stato possibile processare i dati forniti dall'entità iniziante perchè l'encoding [BASE64] è errato.}
+::msgcat::mcset it xmpp-stanzas-invalid-authzid     {l'"authzid" fornito dall'entità iniziante non è valido, o perchè non è ben formattato o perchè l'entità iniziante non ha i permessi per authorizzare quell'ID.}
+::msgcat::mcset it xmpp-stanzas-invalid-mechanism   {L'entità iniziante non ha fornito un meccanismo o ne ha richiesto uno non supportato dall'entità ricevente.}
+::msgcat::mcset it xmpp-stanzas-mechanism-too-weak  {Il meccanismo richiesto dall'entita è più leggero di quanto sia permesso dalle restrizioni del server per quel tipo di entitià iniziale.}
+::msgcat::mcset it xmpp-stanzas-not-authorized      {Autenticazione fallita perchè l'entità iniziale non ha fornito credenziali valide (ciò include anche - ma non solo - la dichiarazioe di un utente inesistente).}
+::msgcat::mcset it xmpp-stanzas-temporary-auth-failure {Autenticazione fallita a causa di una condizione d'errore temporanea con l'entità ricevente.}
 
 # Short messages in place of the above ones.
-::msgcat::mcset it xmpp-stanzas-short-aborted             {The login process was aborted.}
-::msgcat::mcset it xmpp-stanzas-short-incorrect-encoding  {Protocol error during the login process.}
-::msgcat::mcset it xmpp-stanzas-short-invalid-authzid     {Protocol error during the login process.}
-::msgcat::mcset it xmpp-stanzas-short-invalid-mechanism   {Protocol error during the login process.}
-::msgcat::mcset it xmpp-stanzas-short-mechanism-too-weak  {Protocol error during the login process.}
-::msgcat::mcset it xmpp-stanzas-short-not-authorized      {Login failed because of unknown user or wrong password.}
-::msgcat::mcset it xmpp-stanzas-short-temporary-auth-failure {Protocol error during the login process.}
+::msgcat::mcset it xmpp-stanzas-short-aborted             {Processo di autenticazione fallito.}
+::msgcat::mcset it xmpp-stanzas-short-incorrect-encoding  {Errore di protocollo durante il processo di autenticazione.}
+::msgcat::mcset it xmpp-stanzas-short-invalid-authzid     {Errore di protocollo durante il processo di autenticazione.}
+::msgcat::mcset it xmpp-stanzas-short-invalid-mechanism   {Errore di protocollo durante il processo di autenticazione.}
+::msgcat::mcset it xmpp-stanzas-short-mechanism-too-weak  {Errore di protocollo durante il processo di autenticazione.}
+::msgcat::mcset it xmpp-stanzas-short-not-authorized      {Autenticazione fallita a causa di utente o password errati.}
+::msgcat::mcset it xmpp-stanzas-short-temporary-auth-failure {Errore di protocollo durante il processo di autenticazione.}
 
 
 # Related error conditions detected by the client.
 ::msgcat::mcset it starttls-nofeature {Il server "%s" non supporta il TLS.}
 ::msgcat::mcset it starttls-failure {Errore durante la negoziazione TLS con il server "%s".}
-::msgcat::mcset it sasl-no-mechanisms     {The server has no support for SASL authentication.}
+::msgcat::mcset it sasl-no-mechanisms     {Il server non ha il supporto per l'autenticazione SASL.}
 
 # A collective description of all stream errors.
-::msgcat::mcset it xmpp-streams-error {We received a stream error from the server with code: %s}
+::msgcat::mcset it xmpp-streams-error {Ricevuto un errore di flusso dati dal server con codice: %s}
 
 
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration 
-::msgcat::mcset it registration-username        {Account name associated with the user}
-::msgcat::mcset it registration-nick            {Familiar name of the user}
-::msgcat::mcset it registration-password        {Password or secret for the user}
-::msgcat::mcset it registration-name            {Full name of the user}
-::msgcat::mcset it registration-first           {First name or given name of the user}
-::msgcat::mcset it registration-last            {Last name, surname, or family name of the user}
-::msgcat::mcset it registration-email           {Email address of the user}
-::msgcat::mcset it registration-address         {Street portion of a physical or mailing address}
-::msgcat::mcset it registration-city            {Locality portion of a physical or mailing address}
-::msgcat::mcset it registration-state           {Region portion of a physical or mailing address}
-::msgcat::mcset it registration-zip             {Postal code portion of a physical or mailing address}
-::msgcat::mcset it registration-phone           {Telephone number of the user}
-::msgcat::mcset it registration-url             {URL to web page describing the user}
-::msgcat::mcset it registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
-::msgcat::mcset it registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
+::msgcat::mcset it registration-username        {Account associato all'utente}
+::msgcat::mcset it registration-nick            {Soprannome dell'utente}
+::msgcat::mcset it registration-password        {Password dell'utente}
+::msgcat::mcset it registration-name            {Nome completo dell'utente}
+::msgcat::mcset it registration-first           {Nome dell'utente}
+::msgcat::mcset it registration-last            {Cognome dell'utente}
+::msgcat::mcset it registration-email           {Indirizzo email dell'utente}
+::msgcat::mcset it registration-address         {Indirizzo}
+::msgcat::mcset it registration-city            {Località}
+::msgcat::mcset it registration-state           {Regione/Provincia}
+::msgcat::mcset it registration-zip             {CAP}
+::msgcat::mcset it registration-phone           {Telefono dell'utente}
+::msgcat::mcset it registration-url             {Indirizzo URL della web page dell'utente}
+::msgcat::mcset it registration-date            {Data (esempi:, data di nascita, di noleggio, di registrazione, ...)}
+::msgcat::mcset it registration-is-registered   {Se già registrato con questo servizio. Queste sono le tue impostazioni correnti dei parametri di login.}
 
 # Map version info tags to display names.
-::msgcat::mcset it version-name                 {Name}
-::msgcat::mcset it version-version              {Version}
-::msgcat::mcset it version-os                   {Operating system}
+::msgcat::mcset it version-name                 {Nome}
+::msgcat::mcset it version-version              {Versione}
+::msgcat::mcset it version-os                   {Sistema operativo}
 
-::msgcat::mcset it register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
+::msgcat::mcset it register-trpt-unreg          {Stai rimuovendo l'iscrizione a un trasporto che continene degli utenti. Scegli se vuoi rimuovere anche questi utenti (Si), mantenerli (No), o annullare l'operazione (Annulla).}
 
 ::msgcat::mcset it openquicktime {Apri lo stream QuickTime.}
 ::msgcat::mcset it writeurl {Scrivi l'URL o sceglilo dai preferiti.}
@@ -1291,47 +1291,47 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset it iaxPhoneCodec {Codec}
 
 # Messages for Mood PEP
-::msgcat::mcset it mMood Mood
-::msgcat::mcset it mAngry Angry
-::msgcat::mcset it mAnxious Anxious
-::msgcat::mcset it mAshamed Ashamed
-::msgcat::mcset it mBored Bored
-::msgcat::mcset it mCurious Curious
-::msgcat::mcset it mDepressed Depressed
-::msgcat::mcset it mExcited Excited
-::msgcat::mcset it mHappy Happy
-::msgcat::mcset it mInLove {In love}
-::msgcat::mcset it mInvincible Invincible
-::msgcat::mcset it mJealous Jealous
-::msgcat::mcset it mNervous Nervous
-::msgcat::mcset it mSad Sad
-::msgcat::mcset it mSleepy Sleepy
-::msgcat::mcset it mStressed Stressed
-::msgcat::mcset it mWorried Worried
+::msgcat::mcset it mMood Umore
+::msgcat::mcset it mAngry Arrabbiato
+::msgcat::mcset it mAnxious Ansioso
+::msgcat::mcset it mAshamed {Si vergogna}
+::msgcat::mcset it mBored Annoiato
+::msgcat::mcset it mCurious Curioso
+::msgcat::mcset it mDepressed Depresso
+::msgcat::mcset it mExcited Eccitato
+::msgcat::mcset it mHappy Felice
+::msgcat::mcset it mInLove Innamorato
+::msgcat::mcset it mInvincible Invincibile
+::msgcat::mcset it mJealous Geloso
+::msgcat::mcset it mNervous Nervoso
+::msgcat::mcset it mSad Triste
+::msgcat::mcset it mSleepy Assonnato
+::msgcat::mcset it mStressed Stressato
+::msgcat::mcset it mWorried Preoccupato
 
-::msgcat::mcset it moodEvent {Mood change}
-::msgcat::mcset it heIs is
-::msgcat::mcset it because because
-::msgcat::mcset it angry angry
-::msgcat::mcset it anxious anxious
-::msgcat::mcset it ashamed ashamed
-::msgcat::mcset it bored bored
-::msgcat::mcset it curious curious
-::msgcat::mcset it depressed depressed
-::msgcat::mcset it excited excited
-::msgcat::mcset it happy happy
-::msgcat::mcset it in_love {in love}
-::msgcat::mcset it invincible invincible
-::msgcat::mcset it jealous jealous
-::msgcat::mcset it nervous nervous
-::msgcat::mcset it sad sad
-::msgcat::mcset it sleepy sleepy
-::msgcat::mcset it stressed stressed
-::msgcat::mcset it worried worried
-::msgcat::mcset it moodDlg Mood
-::msgcat::mcset it selectCustomMood {Select a mood}
-::msgcat::mcset it moodMessage {Reason for mood}
-::msgcat::mcset it mCustomMood {Custom mood}
+::msgcat::mcset it moodEvent {Cambio d'umore}
+::msgcat::mcset it heIs è
+::msgcat::mcset it because perchè
+::msgcat::mcset it angry arrabbiato
+::msgcat::mcset it anxious ansioso
+::msgcat::mcset it ashamed {si vergogna}
+::msgcat::mcset it bored annoiato
+::msgcat::mcset it curious curioso
+::msgcat::mcset it depressed depresso
+::msgcat::mcset it excited eccitato
+::msgcat::mcset it happy felice
+::msgcat::mcset it in_love innamorato
+::msgcat::mcset it invincible invincibile
+::msgcat::mcset it jealous geloso
+::msgcat::mcset it nervous nervoso
+::msgcat::mcset it sad triste
+::msgcat::mcset it sleepy assonnato
+::msgcat::mcset it stressed stressato
+::msgcat::mcset it worried preoccupato
+::msgcat::mcset it moodDlg Umore
+::msgcat::mcset it selectCustomMood {Seleziona un umore}
+::msgcat::mcset it moodMessage {Motivo dell'umore}
+::msgcat::mcset it mCustomMood {Umore personalizzato}
 
 # END --------------------------------------------------------------------------
 
