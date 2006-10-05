@@ -1,7 +1,7 @@
 #
-# Spanish translation from french by Néstor Díaz (nestordiaz at equusdigital.com) 2004
-# Spanish review by Antonio F. Cano (antonio at igestec.com) 2006
-# Spanish review by Agustin Vericat (agustin at igestec.com) 2006
+# Spanish translation from french by Néstor Díaz (n3storm at grupoikusnet.com) 2004
+# Spanish review by Antonio F. Cano (antonio at grupoikusnet.com) 2006
+# Spanish review by Agustin Vericat (agustin at grupoikusnet.com) 2006
 #
 # Textos estándar "OK", "Cancelar", etc...
 # La cana fuente se usa como mensaje.
@@ -20,25 +20,23 @@
 ::msgcat::mcset es Appearance           {Apariencia}
 ::msgcat::mcset es Apply		{Aplicar}
 
-::msgcat::mcset es Author
+::msgcat::mcset es Author		{Autor}
 
 ::msgcat::mcset es Available		{Disponible}
 ::msgcat::mcset es Away			{Alejado}
-::msgcat::mcset es Back
+::msgcat::mcset es Back			{Regresar}
 ::msgcat::mcset es Binary		{Binario}
 ::msgcat::mcset es Birthday		{Cumpleaños}
 ::msgcat::mcset es Block 		{Bloquear}
 ::msgcat::mcset es Blockers		{Bloqueadores}
 ::msgcat::mcset es Blocking		{Bloqueando}
-::msgcat::mcset es Browser		{Navigador}
-#Descomentado
+::msgcat::mcset es Browser		{Navegador}
 ::msgcat::mcset es Bookmark		{Favorito}
 ::msgcat::mcset es Bookmarks		{Favoritos}
-#Descomentado
 ::msgcat::mcset es Both			{Ambos}
 ::msgcat::mcset es Buffering		{Buffer}
 ::msgcat::mcset es Cancel		{Cancelar}
-::msgcat::mcset es Coordinates
+::msgcat::mcset es Coordinates		{Coordenadas}
 ::msgcat::mcset es Change		{Cambiar}
 ::msgcat::mcset es Chat			{Chat}
 ::msgcat::mcset es Choose		{Elegir}
@@ -66,7 +64,7 @@
 ::msgcat::mcset es Document		{Documento}
 ::msgcat::mcset es Done			{Hecho}
 ::msgcat::mcset es Edit			{Editar}
-::msgcat::mcset es Email
+::msgcat::mcset es Email		{Correo electronico}
 ::msgcat::mcset es Enter		{Entrar}
 ::msgcat::mcset es Error		{Error}
 ::msgcat::mcset es Exit			{Salir}
@@ -91,7 +89,7 @@
 ::msgcat::mcset es History		{Historial}
 ::msgcat::mcset es Home			{Inicio}
 
-::msgcat::mcset es Icon
+::msgcat::mcset es Icon			Icono
 
 ::msgcat::mcset es Image 		{Imagen}
 ::msgcat::mcset es Import		{Importar}
@@ -99,7 +97,7 @@
 ::msgcat::mcset es Info			{Información}
 ::msgcat::mcset es Invite		{Invitar}
 
-::msgcat::mcset es Key
+::msgcat::mcset es Key			Clave
 
 ::msgcat::mcset es Language
 ::msgcat::mcset es Last			{Último}
@@ -213,7 +211,7 @@
 ::msgcat::mcset es yes                  {sí}
 
 # A few words that are not unambiguous and have therefore a prefix.
-::msgcat::mcset es program-Application        Application
+::msgcat::mcset es program-Application       Programa 
 
 
 # Canvas item options, names and values.
@@ -423,6 +421,7 @@
 ::msgcat::mcset es mBugReport           {Informar de un fallo...}
 ::msgcat::mcset es mTakeSnapShot        {Coger captura}
 
+#Translate
 ::msgcat::mcset es mTimeCode            {Timecode}
 
 ::msgcat::mcset es mUserInfo            {Informacion del usuario}
@@ -432,8 +431,8 @@
 ::msgcat::mcset es mMinimal		{Reducido}
 ::msgcat::mcset es mDisco               {Disco}
 
-::msgcat::mcset es mFind         	{Find}
-::msgcat::mcset es mFindAgain         	{Find Again}
+::msgcat::mcset es mFind         	{Buscar}
+::msgcat::mcset es mFindAgain         	{Siguiente coincidencia}
 
 
 # Popups.
@@ -487,7 +486,7 @@
 ::msgcat::mcset es {Ask each time}		{Preguntar cada vez}
 ::msgcat::mcset es {Auto Away}			{Alejado automático}
 ::msgcat::mcset es {Auto Connect}		{Conexión automática}
-::msgcat::mcset es {Auto Join}
+::msgcat::mcset es {Auto Join}			{Unirse de forma automA!tica}
 ::msgcat::mcset es {Auto-accept}		{Aceptar automáticamente}
 ::msgcat::mcset es {Auto-reject}		{Rechazar automáticamente}
 ::msgcat::mcset es {Away status}		{Estado "Alejado"}
@@ -512,7 +511,7 @@
 ::msgcat::mcset es {Default Logout Status}	{Desconexión por defecto}
 ::msgcat::mcset es {Default nickname}	        {Nombre de usuario por defecto}
 ::msgcat::mcset es {Default status descriptions} {Mensaje de estado por defecto}
-::msgcat::mcset es {Delete Profile}
+::msgcat::mcset es {Delete Profile}		{Eliminar perfil}
 ::msgcat::mcset es {Delete Rule} 		{Eliminar regla}
 ::msgcat::mcset es {Different Passwords}        {Contraseñas distintas}
 ::msgcat::mcset es {Disk Cache}			{Caché}
@@ -538,7 +537,7 @@
 ::msgcat::mcset es {File suffixes}		{Extensión de los archivos}
 ::msgcat::mcset es {File Transfer}		{Transferencia de archivos}
 ::msgcat::mcset es {File Transfer Error}	{Error en la transferencia}
-::msgcat::mcset es {File transfer port}
+::msgcat::mcset es {File transfer port}		{Puerto para la transferencia de archivos}
 ::msgcat::mcset es {First name}			{Nombre}
 ::msgcat::mcset es {Font Size}			{Tamaño de la fuente}
 ::msgcat::mcset es {Font Weight}		{Grosor de la fuente}
@@ -592,7 +591,7 @@
 ::msgcat::mcset es {Movie Options}	        {Opciones de la película}
 ::msgcat::mcset es {Multi Connect}		{Conexiones múltiples}
 ::msgcat::mcset es {My Avatar}			{Avatar}
-::msgcat::mcset es {My nickname for own display}
+::msgcat::mcset es {My nickname for own display} {Mi alias para mostrar}
 ::msgcat::mcset es {My Status}			{Mi estado}
 ::msgcat::mcset es {Name of list} 		{Nombre de la lista}
 ::msgcat::mcset es {Network Error}		{Error de Red}
@@ -606,7 +605,7 @@
 ::msgcat::mcset es {New Message}		{Nuevo mensaje}
 ::msgcat::mcset es {New Nickname}		{Nuevo usuario}
 ::msgcat::mcset es {New Password}		{Nueva contraseña}
-::msgcat::mcset es {New Profile}
+::msgcat::mcset es {New Profile}		{Nuevo perfil}
 ::msgcat::mcset es {New Rule} 			{Nueva regla}
 ::msgcat::mcset es {New Topic}			{Nuevo tópico}
 ::msgcat::mcset es {New shortcut}		{Nuevo atajo}
@@ -619,12 +618,12 @@
 ::msgcat::mcset es {No Available} 		{No disponible}
 ::msgcat::mcset es {No Inbox}			{Sin buzón}
 ::msgcat::mcset es {No Printing}		{Sin impresión}
-::msgcat::mcset es {No registered history for %s}
-::msgcat::mcset es {No Restriction}
+::msgcat::mcset es {No registered history for %s} {No existe historial para %s}
+::msgcat::mcset es {No Restriction}             {Sin restriccion}
 ::msgcat::mcset es {Not Available}		{No disponible}
 ::msgcat::mcset es {Not available}		{No disponible}
 ::msgcat::mcset es {Not Connected}		{Desconectado}
-::msgcat::mcset es {Not older than}
+::msgcat::mcset es {Not older than}		{No mas antiguo que}
 ::msgcat::mcset es {Once per session}		{Una vez por sesión}
 ::msgcat::mcset es {One hour} 			{Una hora}
 ::msgcat::mcset es {One day} 			{Un día}
@@ -635,7 +634,7 @@
 ::msgcat::mcset es {Open Image/Movie}		{Abrir imagen/vídeo}
 ::msgcat::mcset es {Open Stream}		{Abrir streaming}
 
-::msgcat::mcset es {Outgoing Presence}          {Outgoing Presence}
+::msgcat::mcset es {Outgoing Presence}          {Presencia que veran fuera}
 
 ::msgcat::mcset es {Peer-to-Peer}		{Punto-a-punto}
 ::msgcat::mcset es {Personal Info}		{Información personal}
@@ -945,69 +944,68 @@
 ::msgcat::mcset es jamessgcnoroomname           {Debe de introducir el nombre de una sala.}
 ::msgcat::mcset es jamessgcnoroomnick           {Debe de introducir un nombre de usuario.}
 ::msgcat::mcset es jamessnorooms                {Problemas al buscar una sala en %s.}
-::msgcat::mcset es jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
-you happen to be online while this message is being read. Do you want to send it anyway?}
 
-# Translate
-::msgcat::mcset es jamessnofiletrpt {We couldn't see that %s supports file transfer.}
-::msgcat::mcset es jamessfiletrpterr {Failed to get file %s from %s: %s}
+::msgcat::mcset es jamesswarnsendcanoff         {El usuario que esta enviando, "%s", no se encuentra disponible, y si el mensaje contiene cualquier imagen o elemento similar, entonces el usuario no podra recibirlos excepto que aparezca disponible mientras lee este mensaje. Desea continuar?}
+
+::msgcat::mcset es jamessnofiletrpt {%s no soporta la transferencia de archivos.}
+::msgcat::mcset es jamessfiletrpterr {Fallo al recibir el archivo %s de %s: %s}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
 # 
 # These are much too formal to be used for user display and we therfore instead use the short forms below.
 
-::msgcat::mcset es xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
-::msgcat::mcset es xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
-::msgcat::mcset es xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
-::msgcat::mcset es xmpp-stanzas-invalid-mechanism   {The initiating entity did not provide a mechanism or requested a mechanism that is not supported by the receiving entity.}
-::msgcat::mcset es xmpp-stanzas-mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
-::msgcat::mcset es xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
-::msgcat::mcset es xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
+::msgcat::mcset es xmpp-stanzas-aborted             {El servidor ha recibido un comando para cancelar el proceso de inicializacion.}
+::msgcat::mcset es xmpp-stanzas-incorrect-encoding  {La informacion que envia no se encuentra codificada correctamente.}
+::msgcat::mcset es xmpp-stanzas-invalid-authzid     {El usuario es incorrecto, quizas porque no lo escribio bien o porque no esta registrado en el servidor.}
+::msgcat::mcset es xmpp-stanzas-invalid-mechanism   {No ha especificado un mecanismo o el mecanismo de autenticacion solicitado no es soportado por el servidor.}
+::msgcat::mcset es xmpp-stanzas-mechanism-too-weak  {El mecanismo solicitado para autenticar es mas inseguro que el requerido por el servidor.}
+::msgcat::mcset es xmpp-stanzas-not-authorized      {La autenticacion fallo debido a que no se han introducido unas credenciales validas (pej. un usuario desconocido, o una contrasena incorrecta, ...).}
+::msgcat::mcset es xmpp-stanzas-temporary-auth-failure {La autenticacion fallo debido a un error temporal recibido.}
 
 # Short messages in place of the above ones.
-::msgcat::mcset es xmpp-stanzas-short-aborted             {The login process was aborted.}
-::msgcat::mcset es xmpp-stanzas-short-incorrect-encoding  {Protocol error during the login process.}
-::msgcat::mcset es xmpp-stanzas-short-invalid-authzid     {Protocol error during the login process.}
-::msgcat::mcset es xmpp-stanzas-short-invalid-mechanism   {Protocol error during the login process.}
-::msgcat::mcset es xmpp-stanzas-short-mechanism-too-weak  {Protocol error during the login process.}
-::msgcat::mcset es xmpp-stanzas-short-not-authorized      {Login failed because of unknown user or wrong password.}
-::msgcat::mcset es xmpp-stanzas-short-temporary-auth-failure {Protocol error during the login process.}
+::msgcat::mcset es xmpp-stanzas-short-aborted             {El proceso de autenticacion ha sido cancelado.}
+::msgcat::mcset es xmpp-stanzas-short-incorrect-encoding  {Error de protocolo: Codificacion incorrecta durante la autenticacion.}
+::msgcat::mcset es xmpp-stanzas-short-invalid-authzid     {Error de protocolo: Usuario incorrecto.}
+::msgcat::mcset es xmpp-stanzas-short-invalid-mechanism   {Error de protocolo: Mecanismo incorrecto.}
+::msgcat::mcset es xmpp-stanzas-short-mechanism-too-weak  {Error de protocolo: Mecanismo inseguro.}
+::msgcat::mcset es xmpp-stanzas-short-not-authorized      {Fallo la autenticacion porque el usuario o la contrasena es incorrecta.}
+::msgcat::mcset es xmpp-stanzas-short-temporary-auth-failure {Error de protocolo: fallo durante la autenticacion.}
 
 
 # Related error conditions detected by the client.
 ::msgcat::mcset es starttls-nofeature     {El servidor "%s" no soporta TLS.}
 ::msgcat::mcset es starttls-failure       {Error durante la conexion TLS con el servidor "%s".}
-::msgcat::mcset es sasl-no-mechanisms     {The server has no support for SASL authentication.}
+::msgcat::mcset es sasl-no-mechanisms     {El servidor no soporta la autenticacion via SASL.}
 
 # A collective description of all stream errors.
-::msgcat::mcset es xmpp-streams-error     {We received a stream error from the server with code: %s}
+::msgcat::mcset es xmpp-streams-error     {Se ha recibido un error del servidor con el codigo: %s}
 
 
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration 
-::msgcat::mcset es registration-username        {Account name associated with the user}
-::msgcat::mcset es registration-nick            {Familiar name of the user}
-::msgcat::mcset es registration-password        {Password or secret for the user}
-::msgcat::mcset es registration-name            {Full name of the user}
-::msgcat::mcset es registration-first           {First name or given name of the user}
-::msgcat::mcset es registration-last            {Last name, surname, or family name of the user}
-::msgcat::mcset es registration-email           {Email address of the user}
-::msgcat::mcset es registration-address         {Street portion of a physical or mailing address}
-::msgcat::mcset es registration-city            {Locality portion of a physical or mailing address}
-::msgcat::mcset es registration-state           {Region portion of a physical or mailing address}
-::msgcat::mcset es registration-zip             {Postal code portion of a physical or mailing address}
-::msgcat::mcset es registration-phone           {Telephone number of the user}
-::msgcat::mcset es registration-url             {URL to web page describing the user}
-::msgcat::mcset es registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
-::msgcat::mcset es registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
+::msgcat::mcset es registration-username        {Nombre de la cuenta asociada con el usuario}
+::msgcat::mcset es registration-nick            {Alias del usuario}
+::msgcat::mcset es registration-password        {Contrasena del usuario}
+::msgcat::mcset es registration-name            {Nombre del usuario}
+::msgcat::mcset es registration-first           {Primer apellido  del usuario}
+::msgcat::mcset es registration-last            {Segundo apeelido, del usuario}
+::msgcat::mcset es registration-email           {Correo electronico  del usuario}
+::msgcat::mcset es registration-address         {Direccion}
+::msgcat::mcset es registration-city            {Ciudad}
+::msgcat::mcset es registration-state           {Provincia}
+::msgcat::mcset es registration-zip             {Codigo Postal}
+::msgcat::mcset es registration-phone           {Telefono}
+::msgcat::mcset es registration-url             {Pagina Web}
+::msgcat::mcset es registration-date            {Alguna fecha (ej., nacimiento, boda, alta en el servicio)}
+::msgcat::mcset es registration-is-registered   {Ha sido registrado en este servicio. Estas son las opciones actuales de su cuenta.}
 
 # Map version info tags to display names.
-::msgcat::mcset es version-name                 {Name}
+::msgcat::mcset es version-name                 {Nombre}
 ::msgcat::mcset es version-version              {Version}
-::msgcat::mcset es version-os                   {Operating system}
+::msgcat::mcset es version-os                   {Sistema Operativo}
 
-::msgcat::mcset es register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
+::msgcat::mcset es register-trpt-unreg          {Estas apunto de elminiar un transporte con usuarios asociados. Desea eliminar estos usuarios tambien (Si), Mantenerlos (No), o bien cancelar la operacion (Cancelar).}
 
 ::msgcat::mcset es openquicktime		{Abrir el streaming QuickTime}
 ::msgcat::mcset es writeurl			{Escribir la URL o elegir el atajo : }
