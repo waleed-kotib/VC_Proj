@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Import.tcl,v 1.25 2006-08-24 07:01:37 matben Exp $
+# $Id: Import.tcl,v 1.26 2006-10-08 06:46:27 matben Exp $
 
 package require http
 package require httpex
@@ -616,7 +616,7 @@ proc ::Import::DrawSnack {wcan optsVar args} {
     if {[catch {::snack::sound $uniqueName -file $fileName} err]} {
 	return $err
     }
-    lappend snackSounds($w) $uniqueName
+    lappend snackSounds($wcan) $uniqueName
     set wfr $wcan.fr_${uniqueName}
     frame $wfr -height 1 -width 1 -bg gray40 -class SnackFrame
     set wmovie $wfr.m
