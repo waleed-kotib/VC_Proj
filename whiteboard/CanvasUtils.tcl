@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasUtils.tcl,v 1.40 2006-08-21 09:45:48 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.41 2006-10-08 06:46:27 matben Exp $
 
 package require sha1
 package require can2svg
@@ -1905,23 +1905,21 @@ proc ::CanvasUtils::CreateFontSizeMapping { } {
     set p1 36
     
     # Points.
-    set y0 [font measure "Times $p0" $refStr]
-    set y1 [font measure "Times $p1" $refStr]
-    set k [expr ($y1 - $y0)/double($p1 - $p0)]
-    set m [expr $y1 - $k*$p1]
+    set y0 [font measure "Times $p0" -displayof . $refStr]
+    set y1 [font measure "Times $p1" -displayof . $refStr]
+    set k [expr {($y1 - $y0)/double($p1 - $p0)}]
+    set m [expr {$y1 - $k*$p1}]
     
-    # Pixels.
-    #set y0 [font measure "Times -10" $refStr]
-    #set y1 [font measure "Times -36" $refStr]
-    #set kpix [expr ($y1 - $y0)/double($p1 - $p0)]
-    #set mpix [expr $y1 - $kpix*$p1]
+    # Bug: [ 1545496 ] Crash on init 
+    # Seems to have k=0, thus, [font measure ...] returns 0.
+        
     
     # For what x (font size in points) do we get 'refHtmlSizeToLength(1)', etc.
     # x = (y - m)/k
     # Mac and Windows are hardcoded for optimal view.
     
     switch -- $this(platform) {
-	macintosh - macosx {
+	macosx {
 	    array set fontSize2Points {1 10 2 12 3 14 4 18 5 24 6 36}
 	}
 	windows {
