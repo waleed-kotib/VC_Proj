@@ -32,14 +32,14 @@ Other supported standards:
    o  XMPP URI/IRI Querytypes from the Jabber Registrar
 
 
-JEPS
-----
+XMPP Extension Protocols (XEPs)
+-------------------------------
 
-The following JEPs (Jabber Extension Proposals) are implemented, completely
-or in parts. Note that some of these JEPs have the form of a library or
-support protocol for other functions.
+The following XEPs are implemented, completely or in parts. Note that some of 
+these XEPs have the form of a library or support protocol for other functions.
+(These were formerly known as JEPs.)
 
-   JEP  | Name                          | Implementation
+   XEP  | Name                          | Implementation
   --------------------------------------------------------------------------
    0004 | Data Forms                    | complete
    0008 | IQ-Based Avatars (outdated)   | complete
