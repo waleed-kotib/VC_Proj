@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.134 2006-09-11 09:39:24 matben Exp $
+# $Id: UI.tcl,v 1.135 2006-10-09 14:18:18 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -575,7 +575,7 @@ proc ::UI::Toplevel {w args} {
     # be handled from there.
     wm protocol $w WM_DELETE_WINDOW [list ::UI::DoCloseWindow $w "wm"]
     if {$argsArr(-allowclose)} {
-	bind $w <Escape> [list destroy $w]
+	bind $w <Escape> [list ::UI::DoCloseWindow $w "command"]
     }
     if {[tk windowingsystem] eq "aqua"} {
 	if {[info exists argsArr(-macclass)]} {
