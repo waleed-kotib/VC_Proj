@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.97 2006-09-04 06:31:12 matben Exp $
+# $Id: MailBox.tcl,v 1.98 2006-10-10 06:25:49 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -77,7 +77,7 @@ namespace eval ::MailBox:: {
     set locals(haveEdits)     0
     set locals(hooksInited)   0
     set locals(updateDateid)  ""
-    set locals(updateDatems)  [expr 1000*60]
+    set locals(updateDatems)  [expr {1000*60}]
     
     set locals(w)    -
     set locals(wtbl) -
@@ -192,12 +192,8 @@ proc ::MailBox::ShowHide {args} {
 	if {$targetstate} {
 	    catch {wm deiconify $w}
 	    raise $w
-	    UpdateDateAndTime $locals(wtbl)
 	} else {
 	    catch {wm withdraw $w}
-	    if {$locals(updateDateid) != ""} {
-		after cancel $locals(updateDateid)
-	    }
 	}
     }
 }
@@ -348,7 +344,7 @@ proc ::MailBox::Build {args} {
     #after 10 [list ::UI::SetSashPos $w $wpane]
     wm minsize $w 300 260
     wm maxsize $w 1200 1000
-    
+        
     # Add all event hooks.
     if {!$locals(hooksInited)} {
 	set locals(hooksInited) 1
@@ -366,6 +362,8 @@ proc ::MailBox::Build {args} {
     
     set locals(updateDateid) [after $locals(updateDatems) \
       [list [namespace current]::UpdateDateAndTime $wtbl]]
+    
+    bind $wtbl <Destroy> +[namespace code OnDestroyTree]
 }
 
 # MailBox::TreeCtrl --
@@ -447,8 +445,14 @@ proc ::MailBox::TreeCtrl {T wysc} {
     $T notify bind $T <Selection> [list [namespace current]::Selection %T]
     bind $T <Double-1>            [list [namespace current]::DoubleClickMsg %W]
     bind $T <KeyPress-BackSpace>  [namespace current]::TrashMsg
-    
+
     set sortColumn 0
+}
+
+proc ::MailBox::OnDestroyTree {} {
+    variable locals
+    
+    after cancel $locals(updateDateid)
 }
 
 proc ::MailBox::InsertAll {} {
