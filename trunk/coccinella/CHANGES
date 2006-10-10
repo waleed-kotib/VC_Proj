@@ -5,7 +5,7 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.95.14 (06????):
+Coccinella-0.95.14 (061010):
 
  o support for DNS SRV and TXT (HTTP) lookup
  o pubsub library support
@@ -19,7 +19,6 @@ Coccinella-0.95.14 (06????):
  o inbox can be exported to xml file
  o new xml based chat log format
  o added support for pep/mood
-
 
 Coccinella-0.95.13 (060622):
 
