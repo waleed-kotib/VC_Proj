@@ -247,32 +247,32 @@
 ::msgcat::mcset pl sw         SW
 ::msgcat::mcset pl w          W
 ::msgcat::mcset pl nw         NW
-::msgcat::mcset pl center     Center
+::msgcat::mcset pl center     Środek
 # arrow
-::msgcat::mcset pl last             Last
-::msgcat::mcset pl first            First
-::msgcat::mcset pl both             Both
+::msgcat::mcset pl last             Ostatni
+::msgcat::mcset pl first            Pierwszy
+::msgcat::mcset pl both             Oba
 
-::msgcat::mcset pl transparent      Transparent
-::msgcat::mcset pl gray75           {Gray 75%}
-::msgcat::mcset pl gray50           {Gray 50%}
-::msgcat::mcset pl gray25           {Gray 25%}
-::msgcat::mcset pl gray12           {Gray 12%}
+::msgcat::mcset pl transparent      Przezroczysty
+::msgcat::mcset pl gray75           {Szary 75%}
+::msgcat::mcset pl gray50           {Szary 50%}
+::msgcat::mcset pl gray25           {Szary 25%}
+::msgcat::mcset pl gray12           {Szary 12%}
 
-::msgcat::mcset pl round            Round
-::msgcat::mcset pl miter            Miter
-::msgcat::mcset pl bevel            Bevel
-::msgcat::mcset pl butt             Butt
-::msgcat::mcset pl projecting       Projecting
+::msgcat::mcset pl round            Okrągły
+::msgcat::mcset pl miter            Drobny
+::msgcat::mcset pl bevel            Ukośny
+::msgcat::mcset pl butt             Beczułkowaty
+::msgcat::mcset pl projecting       Wypukły
 
-::msgcat::mcset pl normal           Normal
-::msgcat::mcset pl bold             Bold
-::msgcat::mcset pl italic           Italic
+::msgcat::mcset pl normal           Normalne
+::msgcat::mcset pl bold             Wytłuszczone
+::msgcat::mcset pl italic           Kursywa
 
-::msgcat::mcset pl left             Left
-::msgcat::mcset pl right            Right
-::msgcat::mcset pl false            False
-::msgcat::mcset pl true             True
+::msgcat::mcset pl left             Lewo
+::msgcat::mcset pl right            Prawo
+::msgcat::mcset pl false            Fałsz
+::msgcat::mcset pl true             Prawda
 
 # dashes.
 ::msgcat::mcset pl none		żaden
@@ -426,8 +426,8 @@
 ::msgcat::mcset pl mMinimal             {Minimalny}
 ::msgcat::mcset pl mDisco               {Disco}
 
-::msgcat::mcset pl mFind                {Find}
-::msgcat::mcset pl mFindAgain           {Find Again}
+::msgcat::mcset pl mFind                {Szukaj}
+::msgcat::mcset pl mFindAgain           {Szukaj ponownie}
 
 # Popups
 ::msgcat::mcset pl mMessage     	{Wiadomość...}
@@ -480,14 +480,14 @@
 ::msgcat::mcset pl {Ask each time}        {Powiadom każdorazowo}
 ::msgcat::mcset pl {Auto Away}            {Automatyczne ustawianie "zaraz wracam"}
 ::msgcat::mcset pl {Auto Connect}         {Połącz automatycznie}
-::msgcat::mcset pl {Auto Join}
+::msgcat::mcset pl {Auto Join}            {Dołącz automatycznie}
 ::msgcat::mcset pl {Auto-accept}          {autoakceptacja}
 ::msgcat::mcset pl {Auto-reject}          {autoodmowa}
 ::msgcat::mcset pl {Away status}          {Opis statusu "zaraz wracam"}
 ::msgcat::mcset pl {Basic Info}           {Informacje podstawowe}
 ::msgcat::mcset pl {Block JID}            {Zablokuj JID}
 ::msgcat::mcset pl {Bookmark this room}   {Dodaj zakładkę tego pokoju}
-::msgcat::mcset pl {Broken Image}
+::msgcat::mcset pl {Broken Image}         {Błąd w pliku graficznym}
 ::msgcat::mcset pl {Buddy Pouncing}
 ::msgcat::mcset pl {Built in server port} {Domyślny port serwera}
 ::msgcat::mcset pl {Cache folder}         {Katalog buforowy}
@@ -498,14 +498,14 @@
 ::msgcat::mcset pl {Company Name}         {Nazwa firmy}
 ::msgcat::mcset pl {Component Info}       {Dane komponentu}
 ::msgcat::mcset pl {Conference server}    {Serwer konferencji}
-::msgcat::mcset pl {Connect using HTTP}
+::msgcat::mcset pl {Connect using HTTP}   {Połącz korzystając z HTTP}
 ::msgcat::mcset pl {Contact Type}         {Rodzaj kontaktu}
 ::msgcat::mcset pl {Create Room}          {Otwórz pokój}
 ::msgcat::mcset pl {Default group}        {Grupa domyślna}
 ::msgcat::mcset pl {Default Logout Status}  {Domyślny opis "nieobecności"}
-::msgcat::mcset pl {Default nickname}
+::msgcat::mcset pl {Default nickname}     {Domyślny pseudonim}
 ::msgcat::mcset pl {Default status descriptions}  {Domyślny opis statusu}
-::msgcat::mcset pl {Delete Profile}
+::msgcat::mcset pl {Delete Profile}       {Usuń profil}
 ::msgcat::mcset pl {Delete Rule}          {Usuń regułę}
 ::msgcat::mcset pl {Disk Cache}           {Bufor dyskowy}
 ::msgcat::mcset pl {Different Passwords}  {Niezgodność haseł}
@@ -531,7 +531,7 @@
 ::msgcat::mcset pl {File suffixes}        {Przyrostki nazw plików}
 ::msgcat::mcset pl {File Transfer}        {Przesyłanie pliku}
 ::msgcat::mcset pl {File Transfer Error}  {Błąd w trakcie przesyłania}
-::msgcat::mcset pl {File transfer port}
+::msgcat::mcset pl {File transfer port}   {Port transferu plików}
 ::msgcat::mcset pl {First name}           {Imię}
 ::msgcat::mcset pl {Font Size}            {Rozmiar czcionki}
 ::msgcat::mcset pl {Font Weight}          {Grubość pisma}
@@ -579,11 +579,11 @@
 ::msgcat::mcset pl {Login as invisible}   {Zaloguj się "niewidoczny"}
 ::msgcat::mcset pl {Mailbox Error}        {Błąd skrzynki}
 ::msgcat::mcset pl {Make new text item for each line}
-::msgcat::mcset pl {MIDI Player}
+::msgcat::mcset pl {MIDI Player}          {Odtwarzacz plików MIDI}
 ::msgcat::mcset pl {MIME type}            {Typ MIME}
 ::msgcat::mcset pl {Movie Options}
 ::msgcat::mcset pl {Multi Connect}        {Połączenie wielokrotne}
-::msgcat::mcset pl {My Avatar}
+::msgcat::mcset pl {My Avatar}            {Mój Awatar}
 ::msgcat::mcset pl {My nickname for own display}
 ::msgcat::mcset pl {My Status}            {Mój status}
 ::msgcat::mcset pl {Name of list}         {Nazwa listy}
@@ -598,7 +598,7 @@
 ::msgcat::mcset pl {New Message}          {Nowa wiadomość}
 ::msgcat::mcset pl {New Nickname}         {Nowy pseudonim}
 ::msgcat::mcset pl {New Password}         {Nowe hasło}
-::msgcat::mcset pl {New Profile}
+::msgcat::mcset pl {New Profile}          {Nowy profil}
 ::msgcat::mcset pl {New Rule}             {Nowa reguła}
 ::msgcat::mcset pl {New Topic}            {Nowy temat}
 ::msgcat::mcset pl {New shortcut}         {Nowy skrót}
@@ -611,7 +611,7 @@
 ::msgcat::mcset pl {No Available}         {Brak dostępności}
 ::msgcat::mcset pl {No Inbox}             {Brak skrzynki}
 ::msgcat::mcset pl {No Printing}          {Bez drukowania}
-::msgcat::mcset pl {No registered history for %s}
+::msgcat::mcset pl {No registered history for %s} {Brak zapisów rozmów z %s}
 ::msgcat::mcset pl {No Restriction}       {Bez ograniczeń}
 ::msgcat::mcset pl {Not Available}        {Brak}
 ::msgcat::mcset pl {Not available}        {brak}
@@ -630,7 +630,7 @@
 ::msgcat::mcset pl {Personal URL}         {Własny URL}
 ::msgcat::mcset pl {Pick Directory}       {Wskaż katalog}
 ::msgcat::mcset pl {Pick File}            {Wskaż plik}
-::msgcat::mcset pl {Pick Image File}
+::msgcat::mcset pl {Pick Image File}      {Wskaż plik graficzny}
 ::msgcat::mcset pl {Pick skin}            {Wskaż "skórkę"}
 ::msgcat::mcset pl {Plugin Info}          {Informacje o wtyczce}
 ::msgcat::mcset pl {Plugin Control}       {Sterowanie wtyczką}
@@ -640,10 +640,10 @@
 ::msgcat::mcset pl {Presence Error}       {Błąd "obecności"}
 ::msgcat::mcset pl {Privacy List}         {Lista prywatności}
 ::msgcat::mcset pl {Profile Name}         {Nazwa profilu}
-::msgcat::mcset pl {Proxy Port}
-::msgcat::mcset pl {Proxy Server}
+::msgcat::mcset pl {Proxy Port}           {Port serwera proxy}
+::msgcat::mcset pl {Proxy Server}         {Adres serwera proxy}
 ::msgcat::mcset pl {Proxy Setup}          {Ustawienia proxy}
-::msgcat::mcset pl {Public Jabber Servers}
+::msgcat::mcset pl {Public Jabber Servers} {Publicznie dostępne serwery Jabbera}
 ::msgcat::mcset pl {Put File Error}       {Błąd przy wysyłce pliku}
 ::msgcat::mcset pl {Put Image/Movie}      {Wysyłka grafiki/filmu}
 ::msgcat::mcset pl {Reject receive}       {Odmów odbioru}
@@ -654,7 +654,7 @@
 ::msgcat::mcset pl {Register Now}         {Zarejestruj}
 ::msgcat::mcset pl {Register Service}     {Rejestracja serwisu}
 ::msgcat::mcset pl {Remove Item}          {Usuń element}
-::msgcat::mcset pl {Remove Photo}
+::msgcat::mcset pl {Remove Photo}         {Usuń grafikę}
 ::msgcat::mcset pl {Room name}            {Nazwa pokoju}
 ::msgcat::mcset pl {Room name (optional)} {Nazwa pokoju (niekonieczna)} 
 ::msgcat::mcset pl {Roster & Services}    {Kontakty/serwisy}
@@ -669,7 +669,7 @@
 ::msgcat::mcset pl {Search Specifications}  {Kryteria przeszukiwania}
 ::msgcat::mcset pl {Select a new nickname}  {Podaj nowy pseudonim}
 ::msgcat::mcset pl {Select Font}          {Wybierz krój czcionki}
-::msgcat::mcset pl {Select Photo}
+::msgcat::mcset pl {Select Photo}         {Wybierz grafikę}
 ::msgcat::mcset pl {Send File}            {Wyślij plik}
 ::msgcat::mcset pl {Send Live}            {Wyślij bezpośrednio}
 ::msgcat::mcset pl {Server Info}          {Serwer Info}
@@ -683,9 +683,9 @@
 ::msgcat::mcset pl {Setup Assistant}      {Asystent ustawień}
 ::msgcat::mcset pl {Slide Show}           {Prezentacja}
 ::msgcat::mcset pl {Slide Show Folder}    {Katalog prezentacji}
-::msgcat::mcset pl {Smooth freehand strokes}
+::msgcat::mcset pl {Smooth freehand strokes} {Rozmazane pociągnięcia}
 ::msgcat::mcset pl {Software Update}      {Aktualizacja oprogramowania}
-::msgcat::mcset pl {Sound Set}
+::msgcat::mcset pl {Sound Set}            {Zestaw dźwięków}
 ::msgcat::mcset pl {Sounds & Speech}      {Dźwięk i mowa}
 ::msgcat::mcset pl {Start Chat}           {Rozpocznij rozmowę}
 ::msgcat::mcset pl {Status message}       {Opis statusu}
@@ -705,17 +705,17 @@
 ::msgcat::mcset pl {Type of File}         {Rodzaj pliku}
 ::msgcat::mcset pl {Unknown: Prompt user} {Nieznany: spytaj użytkownika}
 ::msgcat::mcset pl {Url of homepage}      {URL serwisu WWW}
-::msgcat::mcset pl {Use proxy}
-::msgcat::mcset pl {Use Secure Connection}
+::msgcat::mcset pl {Use proxy}            {Korzystaj z serwera proxy}
+::msgcat::mcset pl {Use Secure Connection} {Zapewnij bezpieczeństwo połączenia}
 ::msgcat::mcset pl {Use SSL for security} {Dla bezpieczeństwa korzystać z SSL}
-::msgcat::mcset pl {Use TLS and SASL authentication}
-::msgcat::mcset pl {Use TLS on separate port (old)}
+::msgcat::mcset pl {Use TLS and SASL authentication} {Użyj TLS oraz uwierzytelnienia poprzez SASL}
+::msgcat::mcset pl {Use TLS on separate port (old)} {Użyj TLS na osobnym porcie (przestarzałe)}
 ::msgcat::mcset pl {User is}              {Użytkownik jest}
 ::msgcat::mcset pl {User is offline}      {Użytkownik jest wylogowany}
 ::msgcat::mcset pl {User is online}       {Użytkownik jest zalogowany}
 ::msgcat::mcset pl {User Profiles}        {Profile użytkownika}
 ::msgcat::mcset pl {User's status changed}  {Status użytkownika zmieniony}
-::msgcat::mcset pl {Users Avatar}
+::msgcat::mcset pl {Users Avatar}         {Awatar użytkownika}
 ::msgcat::mcset pl {Username & Password}  {Login i hasło}
 ::msgcat::mcset pl {vCard Info}           {Informacje e-wizytówki}
 ::msgcat::mcset pl {Version Info}         {Dane wersji}
@@ -917,65 +917,64 @@ Otrzymałeś autoryzację od %s: %s.}
 ::msgcat::mcset pl jamessfailedsubsc            {Brak autoryzacji ze strony %s - użytkownik nie wyraził zgody.}
 ::msgcat::mcset pl jamessgcinvite               {Masz zaproszenie do wzięcia udziału w konferencji %s (od %s). Przyłączysz się?}
 ::msgcat::mcset pl jamessnorooms                {Nie znaleziono żadnych pokoi pod adresem %s.}
-::msgcat::mcset pl jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
-you happen to be online while this message is being read. Do you want to send it anyway?}
+::msgcat::mcset pl jamesswarnsendcanoff         {Odbiorca komunikatu - "%s" - nie jest w tej chwili dostępny. Jeśli więc do wiadomości dołączone są grafiki lub inne pliki, nie dotrą do celu, jeśli nie zdarzy się,\
+iż Ty będziesz dostępny, podczas gdy Twoja wiadomość będzie czytana przez odbiorcę. Czy mimo to chcesz ją przesłać?}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
 # 
 # These are much too formal to be used for user display and we therfore instead use the short forms below.
 
-::msgcat::mcset pl xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
-::msgcat::mcset pl xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
-::msgcat::mcset pl xmpp-stanzas-invalid-authzid     {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
-::msgcat::mcset pl xmpp-stanzas-invalid-mechanism   {The initiating entity did not provide a mechanism or requested a mechanism that is not supported by the receiving entity.}
-::msgcat::mcset pl xmpp-stanzas-mechanism-too-weak  {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
-::msgcat::mcset pl xmpp-stanzas-not-authorized      {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
-::msgcat::mcset pl xmpp-stanzas-temporary-auth-failure {The authentication failed because of a temporary error condition within the receiving entity.}
+::msgcat::mcset pl xmpp-stanzas-aborted             {Odbiorca potwierdził zamiar zaniechania zasygnalizowany przez nadawcę.}
+::msgcat::mcset pl xmpp-stanzas-incorrect-encoding  {Przesłane dane nie mogły zostać odpowiednio przetworzone ze względu na błędne kodowanie [BASE64].}
+::msgcat::mcset pl xmpp-stanzas-invalid-authzid     {authzid podany przez inicjatora jest nieprawidłowy - albo z powodu złego formatu, albo przez brak uprawnień inicjatora do posługiwania się podanym ID.}
+::msgcat::mcset pl xmpp-stanzas-invalid-mechanism   {Inicjator nie przekazał nazwy stosownego mechanizmu, lub oczekuje mechanizmu, którym odbiorca nie ma możliwości się posłużyć.}
+::msgcat::mcset pl xmpp-stanzas-mechanism-too-weak  {Mechanizm oczekiwany przez inicjatora jest słabszej jakości, niż przewiduje to "polityka" serwera, gdy chodzi o takich Inicjatorów.}
+::msgcat::mcset pl xmpp-stanzas-not-authorized      {Niepowodzenie uwierzytelnienia ze względu na brak podania przez inicjatora odpowiednich haseł  (przyczyną może być np. błędne wpisanie nazwy użytkownika - ale nie tylko to).}
+::msgcat::mcset pl xmpp-stanzas-temporary-auth-failure {Niepowodzenie uwierzytelnienia ze względu na czasowy problem występujący po stronie odbiorcy.}
 
 # Short messages in place of the above ones.
-::msgcat::mcset pl xmpp-stanzas-short-aborted             {The login process was aborted.}
-::msgcat::mcset pl xmpp-stanzas-short-incorrect-encoding  {Protocol error during the login process.}
-::msgcat::mcset pl xmpp-stanzas-short-invalid-authzid     {Protocol error during the login process.}
-::msgcat::mcset pl xmpp-stanzas-short-invalid-mechanism   {Protocol error during the login process.}
-::msgcat::mcset pl xmpp-stanzas-short-mechanism-too-weak  {Protocol error during the login process.}
-::msgcat::mcset pl xmpp-stanzas-short-not-authorized      {Login failed because of unknown user or wrong password.}
-::msgcat::mcset pl xmpp-stanzas-short-temporary-auth-failure {Protocol error during the login process.}
+::msgcat::mcset pl xmpp-stanzas-short-aborted             {Przerwany proces logowania.}
+::msgcat::mcset pl xmpp-stanzas-short-incorrect-encoding  {Błąd protokołu w trakcie procesu logowania.}
+::msgcat::mcset pl xmpp-stanzas-short-invalid-authzid     {Błąd protokołu w trakcie procesu logowania.}
+::msgcat::mcset pl xmpp-stanzas-short-invalid-mechanism   {Błąd protokołu w trakcie procesu logowania.}
+::msgcat::mcset pl xmpp-stanzas-short-mechanism-too-weak  {Błąd protokołu w trakcie procesu logowania.}
+::msgcat::mcset pl xmpp-stanzas-short-not-authorized      {Logowanie nieudane ze względu ma błędnie podany login i/lub hasło.}
+::msgcat::mcset pl xmpp-stanzas-short-temporary-auth-failure {Błąd protokołu w trakcie procesu logowania.}
 
 
 # Related error conditions detected by the client.
 ::msgcat::mcset pl starttls-nofeature     {Brak możliwości skorzystania z TLS na serwerze "%s".}
 ::msgcat::mcset pl starttls-failure       {Nieudana negocjacja TLS z serwerem "%s".}
-::msgcat::mcset pl sasl-no-mechanisms     {The server has no support for SASL authentication.}
+::msgcat::mcset pl sasl-no-mechanisms     {Serwer nie ma możliwości uwierzytelniania poprzez mechanizm SASL.}
 
 # A collective description of all stream errors.
-::msgcat::mcset pl xmpp-streams-error     {We received a stream error from the server with code: %s}
+::msgcat::mcset pl xmpp-streams-error     {Sygnał błędu transmisji z serwera. Kod błędu: %s}
 
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration 
-::msgcat::mcset pl registration-username        {Account name associated with the user}
-::msgcat::mcset pl registration-nick            {Familiar name of the user}
-::msgcat::mcset pl registration-password        {Password or secret for the user}
-::msgcat::mcset pl registration-name            {Full name of the user}
-::msgcat::mcset pl registration-first           {First name or given name of the user}
-::msgcat::mcset pl registration-last            {Last name, surname, or family name of the user}
-::msgcat::mcset pl registration-email           {Email address of the user}
-::msgcat::mcset pl registration-address         {Street portion of a physical or mailing address}
-::msgcat::mcset pl registration-city            {Locality portion of a physical or mailing address}
-::msgcat::mcset pl registration-state           {Region portion of a physical or mailing address}
-::msgcat::mcset pl registration-zip             {Postal code portion of a physical or mailing address}
-::msgcat::mcset pl registration-phone           {Telephone number of the user}
-::msgcat::mcset pl registration-url             {URL to web page describing the user}
-::msgcat::mcset pl registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
-::msgcat::mcset pl registration-is-registered   {You are already registered with this service. These are your current settings of your login parameters.}
+::msgcat::mcset pl registration-username        {Nazwa konto skojarzona z użytkownikiem}
+::msgcat::mcset pl registration-nick            {Pseudonim użytkownika, łatwy do zapamiętania}
+::msgcat::mcset pl registration-password        {Hasło użytkownika}
+::msgcat::mcset pl registration-name            {Imię i nazwisko użytkownika}
+::msgcat::mcset pl registration-first           {Imię lub przezwisko użytkownika}
+::msgcat::mcset pl registration-last            {Nazwisko użytkownika}
+::msgcat::mcset pl registration-email           {Adres poczty elektronicznej}
+::msgcat::mcset pl registration-address         {Ulica i nr domu/mieszkania (adres pocztowy)}
+::msgcat::mcset pl registration-city            {Miejscowość (adres pocztowy)}
+::msgcat::mcset pl registration-state           {Region/państwo (adres pocztowy)}
+::msgcat::mcset pl registration-zip             {Kod pocztowy}
+::msgcat::mcset pl registration-phone           {Nr telefonu użytkownika}
+::msgcat::mcset pl registration-url             {Odnośnik do strony domowej użytkownika}
+::msgcat::mcset pl registration-date            {Data (np. data urodzenia, d. podjęcia współpracy, data rejestracji...)}
+::msgcat::mcset pl registration-is-registered   {Już masz rejestrację w tym serwisie - oto Twoje bieżące ustawienia parametrów logowania.}
 
 # Map version info tags to display names.
-::msgcat::mcset pl version-name                 {Name}
-::msgcat::mcset pl version-version              {Version}
-::msgcat::mcset pl version-os                   {Operating system}
+::msgcat::mcset pl version-name                 {Nazwa}
+::msgcat::mcset pl version-version              {Wersja}
+::msgcat::mcset pl version-os                   {System operacyjny}
 
-::msgcat::mcset pl register-trpt-unreg          {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
-
+::msgcat::mcset pl register-trpt-unreg          {Zamierzasz wyrejestrować się z korzystania z transportu, który umożliwia Ci komunikację z niektórymi z Twoich kontaktów. Czy chcesz te kontakty usunąć (Tak), zachować (Nie) - czy też w ogóle wycofujesz się z tego zamiaru (Anuluj)?}
 
 ::msgcat::mcset pl jamessnofiletrpt {Trudno powiedzieć, czy %s potrafi obsłużyć transfer pliku.}
 ::msgcat::mcset pl jamessfiletrpterr {Nie udało się pobrać pliku %s od: %s: %s}
@@ -1080,7 +1079,7 @@ w swoich systemach takie kroje zainstalowane.}
 ::msgcat::mcset pl prefchnormal  {Traktuj wiadomości jako rozpoczęcie rozmowy}
 ::msgcat::mcset pl prefprofname  {Jak chcesz nazwać swój profil?}
 ::msgcat::mcset pl prefstabui    {Korzystaj z "zakładek"}
-::msgcat::mcset pl prefsusesasl  {Użyj metody autentyfikacji SASL}
+::msgcat::mcset pl prefsusesasl  {Użyj metody uwierzytelnienia SASL}
 ::msgcat::mcset pl prefprivmsg   {Każdy użytkownik może zarządzać dowolną ilością list (lub żadną). Jedynie lista w danej chwili aktywna (lub domyślna) wpływa na sposób przetwarzania wiadomości. Aktywna lista wpływa jedynie na przebieg bieżącej sesji.\
   Z listy domyślnej korzysta się, gdy w danej chwili nie wybrano innej aktywnej.}
 ::msgcat::mcset pl prefprivunav  {Bez połączenia opcje filtracji niedostępne}
@@ -1220,11 +1219,11 @@ namespace eval ::EditShortcuts:: {
 
 # Composing events
 ::msgcat::mcset pl chatcompreply      {%s układa odpowiedź}
-::msgcat::mcset pl chatcompactive     {%s is on the chat}
-::msgcat::mcset pl chatcompcomposing  {%s is composing a reply}
-::msgcat::mcset pl chatcomppaused     {%s is thinking what to write}
-::msgcat::mcset pl chatcompinactive   {%s has left the chat for a while}
-::msgcat::mcset pl chatcompgone       {%s has closed the chat}
+::msgcat::mcset pl chatcompactive     {%s akurat rozmawia}
+::msgcat::mcset pl chatcompcomposing  {%s układa odpowiedź}
+::msgcat::mcset pl chatcomppaused     {%s chwilowo nie pisze}
+::msgcat::mcset pl chatcompinactive   {%s na pewien czas odłączył/a się od rozmowy}
+::msgcat::mcset pl chatcompgone       {%s zakończył/a rozmowę}
 
 # Get file
 ::msgcat::mcset pl getcontacting   {Nawiązywanie kontaktu z %s. Czekam na odzew...}
@@ -1297,50 +1296,50 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl iaxPhoneAAGC         {AAGC}
 ::msgcat::mcset pl iaxPhoneNoise        {Poziom szumu}
 ::msgcat::mcset pl iaxPhoneComfort      {Komfort}
-::msgcat::mcset pl iaxPhoneCodec        {Codec}
+::msgcat::mcset pl iaxPhoneCodec        {Kodek}
 
 # Messages for Mood PEP
-::msgcat::mcset pl mMood Mood
-::msgcat::mcset pl mAngry Angry
-::msgcat::mcset pl mAnxious Anxious
-::msgcat::mcset pl mAshamed Ashamed
-::msgcat::mcset pl mBored Bored
-::msgcat::mcset pl mCurious Curious
-::msgcat::mcset pl mDepressed Depressed
-::msgcat::mcset pl mExcited Excited
-::msgcat::mcset pl mHappy Happy
-::msgcat::mcset pl mInLove {In love}
-::msgcat::mcset pl mInvincible Invincible
-::msgcat::mcset pl mJealous Jealous
-::msgcat::mcset pl mNervous Nervous
-::msgcat::mcset pl mSad Sad
-::msgcat::mcset pl mSleepy Sleepy
-::msgcat::mcset pl mStressed Stressed
-::msgcat::mcset pl mWorried Worried
+::msgcat::mcset pl mMood Samopoczucie
+::msgcat::mcset pl mAngry Rozgniewany
+::msgcat::mcset pl mAnxious Zaniepokojony
+::msgcat::mcset pl mAshamed Zawstydzony
+::msgcat::mcset pl mBored Znudzony
+::msgcat::mcset pl mCurious Zaciekawiony
+::msgcat::mcset pl mDepressed Przybity
+::msgcat::mcset pl mExcited Podekscytowany
+::msgcat::mcset pl mHappy Szczęśliwy
+::msgcat::mcset pl mInLove Zakochany
+::msgcat::mcset pl mInvincible Nieugięty
+::msgcat::mcset pl mJealous Zazdrosny
+::msgcat::mcset pl mNervous Zdenerwowany
+::msgcat::mcset pl mSad Smutny
+::msgcat::mcset pl mSleepy Śpiący
+::msgcat::mcset pl mStressed Zestresowany
+::msgcat::mcset pl mWorried Zmartwiony
 
 ::msgcat::mcset pl moodEvent {Mood change}
-::msgcat::mcset pl heIs is
-::msgcat::mcset pl because because
-::msgcat::mcset pl angry angry
-::msgcat::mcset pl anxious anxious
-::msgcat::mcset pl ashamed ashamed
-::msgcat::mcset pl bored bored
-::msgcat::mcset pl curious curious
-::msgcat::mcset pl depressed depressed
-::msgcat::mcset pl excited excited
-::msgcat::mcset pl happy happy
-::msgcat::mcset pl in_love {in love}
-::msgcat::mcset pl invincible invincible
-::msgcat::mcset pl jealous jealous
-::msgcat::mcset pl nervous nervous
-::msgcat::mcset pl sad sad
-::msgcat::mcset pl sleepy sleepy
-::msgcat::mcset pl stressed stressed
-::msgcat::mcset pl worried worried
-::msgcat::mcset pl moodDlg Mood
-::msgcat::mcset pl selectCustomMood {Select a mood}
-::msgcat::mcset pl moodMessage {Reason for mood}
-::msgcat::mcset pl mCustomMood {Custom mood}
+::msgcat::mcset pl heIs jest
+::msgcat::mcset pl because gdyż
+::msgcat::mcset pl angry rozgniewany
+::msgcat::mcset pl anxious zaniepokojony
+::msgcat::mcset pl ashamed zawstydzony
+::msgcat::mcset pl bored znudzony
+::msgcat::mcset pl curious zaciekawiony
+::msgcat::mcset pl depressed przybity
+::msgcat::mcset pl excited podekscytowany
+::msgcat::mcset pl happy szczęśliwy
+::msgcat::mcset pl in_love zakochany
+::msgcat::mcset pl invincible nieugięty
+::msgcat::mcset pl jealous zazdrosny
+::msgcat::mcset pl nervous zdenerwowany
+::msgcat::mcset pl sad smutny
+::msgcat::mcset pl sleepy śpiący
+::msgcat::mcset pl stressed zestresowany
+::msgcat::mcset pl worried zmartwiony
+::msgcat::mcset pl moodDlg Samopoczucie
+::msgcat::mcset pl selectCustomMood {Wskaż nastrój}
+::msgcat::mcset pl moodMessage {Przyczyna nastroju}
+::msgcat::mcset pl mCustomMood {Inny rodzaj nastroju}
 
 # END --------------------------------------------------------------------------
 
