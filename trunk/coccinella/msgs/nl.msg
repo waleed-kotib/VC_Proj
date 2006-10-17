@@ -508,6 +508,9 @@
 ::msgcat::mcset nl {Disk Cache}				{Schijfcache}
 ::msgcat::mcset nl {Different Passwords}		{Verschillende wachtwoorden}
 ::msgcat::mcset nl {Do Not Disturb}			{Niet storen}
+
+::msgcat::mcset nl {Do not save password}
+
 ::msgcat::mcset nl {Edit Fonts}				{Lettertypes bewerken}
 ::msgcat::mcset nl {Edit Item}				{Item bewerken}
 ::msgcat::mcset nl {Edit Shortcut}			{Snelkoppeling bewerken}

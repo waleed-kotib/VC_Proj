@@ -453,6 +453,9 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Disk Cache}				{Размер кеша}
 ::msgcat::mcset ru {Different Passwords}
 ::msgcat::mcset ru {Do Not Disturb}
+
+::msgcat::mcset ru {Do not save password}
+
 ::msgcat::mcset ru {Edit Fonts}		{Изменить шрифт}
 ::msgcat::mcset ru {Edit Item}
 ::msgcat::mcset ru {Edit Shortcut}
