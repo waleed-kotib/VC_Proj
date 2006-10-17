@@ -511,6 +511,9 @@
 ::msgcat::mcset pl {Different Passwords}  {Niezgodność haseł}
 ::msgcat::mcset pl {Disco method}
 ::msgcat::mcset pl {Do Not Disturb}       {Nie przeszkadzać}
+
+::msgcat::mcset pl {Do not save password}
+
 ::msgcat::mcset pl {Edit Fonts}           {Edycja czcionek}
 ::msgcat::mcset pl {Edit Item}            {Edycja składnika}
 ::msgcat::mcset pl {Edit Shortcut}        {Edycja skrótu}

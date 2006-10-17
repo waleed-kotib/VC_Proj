@@ -505,6 +505,9 @@
 ::msgcat::mcset sv {Disco method}          {Diskometod}
 ::msgcat::mcset sv {Different Passwords}   {Lösenorden skiljer}
 ::msgcat::mcset sv {Do Not Disturb}	   {Stör ej}
+
+::msgcat::mcset sv {Do not save password}  {Spara ej lösenordet}
+
 ::msgcat::mcset sv {Edit Fonts}            {Redigera typsnitt}
 ::msgcat::mcset sv {Edit Item}             {Redigera objekt}
 ::msgcat::mcset sv {Edit Shortcut}         {Redigera genväg}

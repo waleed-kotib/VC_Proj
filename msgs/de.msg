@@ -516,6 +516,9 @@
 ::msgcat::mcset de {Disco method}	  {Disco-Methode}
 ::msgcat::mcset de {Different Passwords}  {Passwörter unterschiedlich}
 ::msgcat::mcset de {Do Not Disturb}       {Bitte nicht stören}
+
+::msgcat::mcset de {Do not save password}
+
 ::msgcat::mcset de {Edit Fonts}           {Schriften bearbeiten}
 ::msgcat::mcset de {Edit Item}            {Element bearbeiten}
 ::msgcat::mcset de {Edit Shortcut}        {Abkürzung bearbeiten}

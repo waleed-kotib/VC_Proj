@@ -505,6 +505,7 @@
 ::msgcat::mcset en {Disk Cache}
 ::msgcat::mcset en {Disco method}
 ::msgcat::mcset en {Do Not Disturb}
+::msgcat::mcset en {Do not save password}
 ::msgcat::mcset en {Edit Fonts}
 ::msgcat::mcset en {Edit Item}
 ::msgcat::mcset en {Edit Shortcut}

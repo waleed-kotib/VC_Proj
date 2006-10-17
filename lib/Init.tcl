@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.51 2006-10-10 07:08:53 matben Exp $
+# $Id: Init.tcl,v 1.52 2006-10-17 13:27:51 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -216,7 +216,7 @@ proc ::Init::SetThisVersion { } {
     # default file, never read.
     set this(vers,major)    0
     set this(vers,minor)   95
-    set this(vers,release) 14
+    set this(vers,release) 15
     set this(vers,full) $this(vers,major).$this(vers,minor).$this(vers,release)
 
     # This is used only to track upgrades.
@@ -347,7 +347,7 @@ proc ::Init::Msgcat { } {
     }
     
     # Test here if you want a particular message catalog (en, nl, de, fr, sv,...).
-    #::msgcat::mclocale de
+    #::msgcat::mclocale pl
     uplevel #0 [list ::msgcat::mcload $this(msgcatPath)]
 
     # This is a method to override default messages with custom ones for each
