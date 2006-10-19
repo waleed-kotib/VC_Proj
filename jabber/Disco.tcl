@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.93 2006-09-26 12:24:26 matben Exp $
+# $Id: Disco.tcl,v 1.94 2006-10-19 14:05:42 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -20,6 +20,7 @@ namespace eval ::Disco:: {
     ::hooks::register logoutHook           ::Disco::LogoutHook
     ::hooks::register presenceHook         ::Disco::PresenceHook
     ::hooks::register uiMainToggleMinimal  ::Disco::ToggleMinimalHook
+    ::hooks::register menuPostCommand      ::Disco::MainMenuPostHook
     
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook        ::Disco::InitPrefsHook
@@ -304,7 +305,7 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 	    return
 	}
 	
-	# There is nothing that stops a JID+node combination from appering
+	# There is nothing that stops a JID+node combination from appearing
 	# in more than one place of the disco tree. Find them all.
 	
 	set vlist [::ITree::FindEndItems $wtree [list $from $node]]
@@ -312,8 +313,8 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 
 	foreach vstruct $vlist {
 	    set icon [::Servicons::GetFromTypeList $cattypes]
-	    set opts {}	    
 	    set name [$jstate(jlib) disco name $from $node]
+	    set opts {}	    
 	    if {$name ne ""} {
 		lappend opts -text $name
 	    }
@@ -1150,6 +1151,13 @@ proc ::Disco::TreeItem {vstruct} {
 		}
 	    }
 	    set icon [::Servicons::GetFromTypeList $cattypes]
+	    if {$icon eq ""} {
+		
+		# Fallback for rooms.
+		if {$isroom} {
+		    set icon [::Servicons::Get conference/text]
+		}
+	    }
 	}	    
 	set isopen 0
 	if {[llength $vstruct] == 1} {
@@ -1580,6 +1588,30 @@ proc ::Disco::AddServerErrorCheck {from} {
     upvar ::Jabber::jprefs jprefs
     
     lprune jprefs(disco,autoServers) $from
+}
+
+proc ::Disco::MainMenuPostHook {type wmenu} {
+    
+    # return
+    if {$type eq "main-jabber"} {
+	set m [::UI::MenuMethod $wmenu entrycget mRegister -menu]
+	#puts "m=$m"
+	catch {destroy $m}
+	set m $wmenu.register
+	menu $m -tearoff 0
+	::UI::MenuMethod $wmenu entryconfigure mRegister -menu $m
+
+	set server [::Jabber::JlibCmd getserver]
+	set jidL [::Jabber::JlibCmd disco getjidsforfeature "jabber:iq:register"]
+	set jidL [lsearch -all -not -inline $jidL $server]
+	foreach jid $jidL {
+	    set name [::Jabber::JlibCmd disco name $jid]
+	    #puts "jid=$jid, name=$name"
+	    $m add command -label $name  \
+	      -command [list ::GenRegister::NewDlg -server $jid -autoget 1]
+	}
+	update
+    }
 }
 
 #-------------------------------------------------------------------------------

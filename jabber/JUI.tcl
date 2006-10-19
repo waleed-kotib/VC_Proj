@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.133 2006-09-12 10:19:22 matben Exp $
+# $Id: JUI.tcl,v 1.134 2006-10-19 14:05:42 matben Exp $
 
 package provide JUI 1.0
 
@@ -115,6 +115,7 @@ proc ::JUI::Init { } {
     }
     set menuDefs(rost,jabber) {    
 	{command     mNewAccount    {::RegisterEx::OnMenu}            {}}
+	{cascade     mRegister      {}                                {} {} {}}
 	{command     mLogin         {::Jabber::OnMenuLogInOut}        L}
 	{command     mLogoutWith    {::Jabber::Logout::OnMenuStatus}  {}}
 	{command     mPassword      {::Jabber::Passwd::OnMenu}        {}}
@@ -889,6 +890,7 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	}
 	connectfin - connect {
 	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mRegister -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
 	      -label [mc mLogout]
 	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state normal
@@ -907,6 +909,7 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	}
 	disconnect {
 	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mRegister -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
 	      -label [mc mLogin]
 	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state disabled
@@ -924,7 +927,7 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mDisco -state disabled
 	}	
     }    
-        
+      
     ::hooks::run menuPostCommand main-jabber $wmenu
     
     # Workaround for mac bug.

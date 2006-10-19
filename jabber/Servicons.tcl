@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Servicons.tcl,v 1.5 2006-09-16 13:46:17 matben Exp $
+# $Id: Servicons.tcl,v 1.6 2006-10-19 14:05:42 matben Exp $
 
 package require Icondef
 
@@ -143,6 +143,9 @@ proc ::Servicons::GetFromTypeList {typelist} {
     variable priv
     variable alias
     
+    if {$typelist eq {}} {
+	return ""
+    }
     set typelist [string map [array get alias] $typelist]
     
     # Do a priority search: server, gateway, and the rest...
