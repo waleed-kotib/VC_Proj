@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.15 2006-09-25 07:21:56 matben Exp $
+# $Id: connect.tcl,v 1.16 2006-10-19 08:03:40 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -550,13 +550,13 @@ proc jlib::connect::tcp_writable {jlibname} {
     }
     $jlibname setsockettransport $sock
     
-    # Do SSL handshake.
+    # Do SSL handshake. See jlib::tls_handshake for a better way!
     if {$state(usessl)} {
 	set retry 0
 
 	# Do SSL handshake.
 	while {1} {
-	    if {$retry > 20} { 
+	    if {$retry > 100} { 
 		close $sock
 		set err "too long retry to setup SSL connection"
 		finish $jlibname tls-failure $err

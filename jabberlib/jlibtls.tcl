@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.14 2006-09-24 06:38:15 matben Exp $
+# $Id: jlibtls.tcl,v 1.15 2006-10-19 08:03:40 matben Exp $
 
 package require tls
 package require jlib
@@ -77,26 +77,115 @@ proc jlib::tls_parse {jlibname xmldata} {
 proc jlib::tls_proceed {jlibname tag xmllist} {    
 
     upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
     
     Debug 2 "jlib::tls_proceed"
     
     set sock $lib(sock)
+    
+    # Make it a SSL connection.
+    tls::import $sock -cafile "" -certfile "" -keyfile "" \
+      -request 1 -server 0 -require 0 -ssl2 no -ssl3 yes -tls1 yes
+    
+    # We must initiate the handshake before getting any answers.
+    set locals(tls,retry) 0
+    set locals(tls,fevent) [fileevent $sock readable]
+    tls_handshake $jlibname
+}
+
+# jlib::tls_handshake --
+# 
+#       Does the TLS handshake using filevent readable until completed
+#       or a nonrecoverable error.
+#       This method of using fileevent readable seems independent of
+#       speed of network connection (dialup/broadband) which a fixed
+#       loop with 50ms delay isn't!
+
+proc jlib::tls_handshake {jlibname} {
+    global  errorCode
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
+    
+    set sock $lib(sock)
+    
+    # Do SSL handshake.
+    if {$locals(tls,retry) > 100} { 
+	close $sock
+	set err "too long retry to setup SSL connection"
+	tls_finish $jlibname starttls-failure $err
+    } elseif {[catch {tls::handshake $sock} complete]} {
+	if {[lindex $errorCode 1] eq "EAGAIN"} {
+	    incr locals(tls,retry)
+	    
+	    # Temporarily hijack these events.
+	    fileevent $sock readable  \
+	      [namespace code [list tls_handshake $jlibname]]
+	} else {
+	    close $sock
+	    tls_finish $jlibname starttls-failure $err
+	}
+    } elseif {$complete} {
+	
+	# Reset the event handler to what it was.
+	fileevent $sock readable $locals(tls,fevent)
+	tls_handshake_fin $jlibname
+    }   
+}
+
+proc jlib::tls_handshake_fin {jlibname} {
+
+    upvar ${jlibname}::lib lib
+
+    wrapper::reset $lib(wrap)
+    
+    # We must clear out any server info we've received so far.
+    stream_reset $jlibname
+    set sock $lib(sock)
+    
+    # The tls package resets the encoding to: -encoding binary
+    if {[catch {
+	fconfigure $sock -encoding utf-8
+	sendstream $jlibname -version 1.0
+    } err]} {
+	tls_finish $jlibname network-failure $err
+	return
+    }
+
+    # Wait for the SASL features. Seems to be the only way to detect success.
+    trace_stream_features $jlibname [namespace current]::tls_features_write_2nd
+    return
+}
+
+proc jlib::tls_proceedBU {jlibname tag xmllist} {    
+    global  errorCode
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
+    
+    Debug 2 "jlib::tls_proceed"
+    
+    set sock $lib(sock)
+    
+    puts "[fileevent $sock readable]"
 
     # Make it a SSL connection.
     tls::import $sock -cafile "" -certfile "" -keyfile "" \
       -request 1 -server 0 -require 0 -ssl2 no -ssl3 yes -tls1 yes
+
     set retry 0
-    
+
     # Do SSL handshake.
     while {1} {
-	if {$retry > 20} { 
+	if {$retry > 100} { 
 	    close $sock
 	    set err "too long retry to setup SSL connection"
 	    tls_finish $jlibname starttls-failure $err
 	    return
 	}
+	#puts "retry=$retry"
 	if {[catch {tls::handshake $sock} err]} {
-	    if {[string match "*resource temporarily unavailable*" $err]} {
+	    #puts "\t catch err=$err, errorCode=$::errorCode"
+	    #if {[string match "*resource temporarily unavailable*" $err]}
+	    if {[lindex $errorCode 1] eq "EAGAIN"} {
 		after 50  
 		incr retry
 	    } else {
@@ -107,8 +196,8 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
 	} else {
 	    break
 	}
-    }
-    
+    }   
+
     wrapper::reset $lib(wrap)
     
     # We must clear out any server info we've received so far.
