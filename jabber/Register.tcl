@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.57 2006-10-17 13:27:51 matben Exp $
+# $Id: Register.tcl,v 1.58 2006-10-20 09:26:49 matben Exp $
 
 package provide Register 1.0
 
@@ -25,6 +25,7 @@ proc ::Register::ValidatePortNumber {str} {
 }
 
 proc ::Register::OnMenuRemove {} {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	::Register::Remove
     }    
@@ -111,6 +112,7 @@ namespace eval ::RegisterEx:: {
 # This section is actually support for JEP-0077: In-Band Registration 
 
 proc ::RegisterEx::OnMenu {} {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "disconnect"} {
 	New
     }    

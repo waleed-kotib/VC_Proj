@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005 Mats Bengtsson
 #       
-# $Id: util.tcl,v 1.8 2006-09-12 13:28:34 matben Exp $
+# $Id: util.tcl,v 1.9 2006-10-20 09:26:49 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -222,42 +222,33 @@ proc ui::Grab {win} {
     tkwait window $win
 }
 
-proc ui::GrabTEST {win} {
+proc ui::GrabAndWait {win} {
     grab $win
-    set idxlist [MenubarDisable $win]
-    set mb [$win cget -menu]
+    MenubarDisable $win
     tkwait window $win
-    MenubarNormal $mb $idxlist
+    MenubarNormal $win
 }
 
 proc ui::MenubarDisable {win} {
 
-    # @@@ This doesn't handle accelerators!
-    # But with grab other windows should never get focus.
+    # Accelerators must be handled from OnMenu* commands.
     # @@@ Must allow cut/copy/paste from edit menu.
-    set idxlist {}
-    if {[tk windowingsystem] eq "aqua"} {
-	set mb [$win cget -menu]
-	if {$mb ne ""} {
-	    set iend [$mbar index end]
-	    for {set idx 0} {$idx <= $iend} {incr idx} {
-		if {[$mb entrycget $idx -state] eq "normal"} {
-		    $mb entryconfigure $idx -state disabled
-		    lappend idxlist $idx
-		}
-	    }
+    set mbar [$win cget -menu]
+    if {$mbar ne ""} {
+	set iend [$mbar index end]
+	for {set idx 0} {$idx <= $iend} {incr idx} {
+	    $mbar entryconfigure $idx -state disabled
 	}
     }
-    return $idxlist
 }
 
-proc ui::MenubarNormal {mb idxlist} {
-    if {[tk windowingsystem] eq "aqua"} {
-	if {$mb != ""} {
-	    foreach idx $idxlist {
-		$mb entryconfigure $idx -state normal
-	    }
-	}	
+proc ui::MenubarNormal {win} {
+    set mbar [$win cget -menu]
+    if {$mbar ne ""} {
+	set iend [$mbar index end]
+	for {set ind 0} {$ind <= $iend} {incr ind} {
+	    $mbar entryconfigure $ind -state normal
+	}    
     }
 }
 

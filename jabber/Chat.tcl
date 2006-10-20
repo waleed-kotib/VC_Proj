@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.184 2006-09-10 14:58:05 matben Exp $
+# $Id: Chat.tcl,v 1.185 2006-10-20 09:26:49 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -180,6 +180,8 @@ proc ::Chat::OnToolButton { } {
 
 proc ::Chat::OnMenu { } {
     
+    if {[llength [grab current]]} { return }
+
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	set jidL [::RosterTree::GetSelectedJID]
 	if {[llength $jidL]} {

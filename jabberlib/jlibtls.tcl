@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.15 2006-10-19 08:03:40 matben Exp $
+# $Id: jlibtls.tcl,v 1.16 2006-10-20 09:26:50 matben Exp $
 
 package require tls
 package require jlib
@@ -95,7 +95,7 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
 
 # jlib::tls_handshake --
 # 
-#       Does the TLS handshake using filevent readable until completed
+#       Performs the TLS handshake using filevent readable until completed
 #       or a nonrecoverable error.
 #       This method of using fileevent readable seems independent of
 #       speed of network connection (dialup/broadband) which a fixed
@@ -125,6 +125,7 @@ proc jlib::tls_handshake {jlibname} {
 	    tls_finish $jlibname starttls-failure $err
 	}
     } elseif {$complete} {
+	Debug 2 "\t number of TLS handshakes=$locals(tls,retry)"
 	
 	# Reset the event handler to what it was.
 	fileevent $sock readable $locals(tls,fevent)

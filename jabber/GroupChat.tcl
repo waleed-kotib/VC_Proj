@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.165 2006-09-21 13:48:06 matben Exp $
+# $Id: GroupChat.tcl,v 1.166 2006-10-20 09:26:49 matben Exp $
 
 package require Create
 package require Enter
@@ -229,12 +229,14 @@ proc ::GroupChat::HaveMUC {{jid ""}} {
 }
 
 proc ::GroupChat::OnMenuEnter {} {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	EnterOrCreate enter
     }
 }
 
 proc ::GroupChat::OnMenuCreate {} {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	EnterOrCreate create
     }
@@ -2788,6 +2790,7 @@ proc ::GroupChat::BookmarkSendGet {callback} {
 }
 
 proc ::GroupChat::OnMenuBookmark { } {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	EditBookmarks
     }   

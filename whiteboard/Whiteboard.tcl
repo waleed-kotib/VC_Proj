@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.66 2006-10-02 06:24:10 matben Exp $
+# $Id: Whiteboard.tcl,v 1.67 2006-10-20 09:26:50 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -1866,104 +1866,125 @@ proc ::WB::StateNormal {wcan} {
 # File menu.
 
 proc ::WB::OnMenuImport {} {
+    if {[llength [grab current]]} { return }
     OnImport [GetFrontmostCanvas]
 }
 
 proc ::WB::OnMenuOpenURL {} {
+    if {[llength [grab current]]} { return }
     OnOpenURL [GetFrontmostCanvas]
 }
 
 proc ::WB::OnMenuOpenCanvas {} {
+    if {[llength [grab current]]} { return }
     OnOpenCanvas [GetFrontmostCanvas]
 }
 
 proc ::WB::OnMenuSaveCanvas {} {
+    if {[llength [grab current]]} { return }
     OnSaveCanvas [GetFrontmostCanvas]
 }
 
 proc ::WB::OnMenuSaveAs {} {
+    if {[llength [grab current]]} { return }
     OnSaveAs [GetFrontmostCanvas]
 }
 
 proc ::WB::OnMenuSaveAsItem {} {
+    if {[llength [grab current]]} { return }
     OnSaveAsItem [GetFrontmostCanvas]
 }
 
 proc ::WB::OnMenuPageSetup {} {
+    if {[llength [grab current]]} { return }
     OnPageSetup [GetFrontmostCanvas]
 }
 
 proc ::WB::OnMenuPrintCanvas {} {
+    if {[llength [grab current]]} { return }
     OnPrintCanvas [GetFrontmostCanvas]
 }
 
 # Edit menu.
 
 proc ::WB::OnMenuUndo {} {
+    if {[llength [grab current]]} { return }
     OnUndo [GetFrontmostCanvas]
 }
 
 proc ::WB::OnMenuRedo {} {
+    if {[llength [grab current]]} { return }
     OnRedo [GetFrontmostCanvas]
 }
 
 proc ::WB::OnMenuAll {} {
+    if {[llength [grab current]]} { return }
     OnAll [GetFrontmostCanvas]
 }
 
 proc ::WB::OnMenuEraseAll {} {
+    if {[llength [grab current]]} { return }
     OnEraseAll [GetFrontmostCanvas]
 }
 
 proc ::WB::OnMenuRaise {} {
+    if {[llength [grab current]]} { return }
     if {[HaveCanvasFocus]} {
 	OnRaise [focus]
     }
 }
 
 proc ::WB::OnMenuLower {} {
+    if {[llength [grab current]]} { return }
     if {[HaveCanvasFocus]} {
 	OnLower [focus]
     }
 }
 
 proc ::WB::OnMenuLarger {} {
+    if {[llength [grab current]]} { return }
     if {[HaveCanvasFocus]} {
 	OnLarger [focus]
     }
 }
 
 proc ::WB::OnMenuSmaller {} {
+    if {[llength [grab current]]} { return }
     if {[HaveCanvasFocus]} {
 	OnSmaller [focus]
     }
 }
 
 proc ::WB::OnMenuItemInspector {} {
+    if {[llength [grab current]]} { return }
     if {[HaveCanvasFocus]} {
 	OnItemInspector [focus]
     }
 }
 
 proc ::WB::OnMenuFlipHorizontal {} {
+    if {[llength [grab current]]} { return }
     if {[HaveCanvasFocus]} {
 	OnFlipHorizontal [focus]
     }
 }
 
 proc ::WB::OnMenuFlipVertical {} {
+    if {[llength [grab current]]} { return }
     if {[HaveCanvasFocus]} {
 	OnFlipVertical [focus]
     }
 }
 
 proc ::WB::OnMenuImageLarger {} {
+    if {[llength [grab current]]} { return }
     if {[HaveCanvasFocus]} {
 	OnImageLarger [focus]
     }
 }
 
 proc ::WB::OnMenuImageSmaller {} {
+    if {[llength [grab current]]} { return }
     if {[HaveCanvasFocus]} {
 	OnImageSmaller [focus]
     }

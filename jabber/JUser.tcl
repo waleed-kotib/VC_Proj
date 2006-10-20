@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.22 2006-08-20 13:41:18 matben Exp $
+# $Id: JUser.tcl,v 1.23 2006-10-20 09:26:49 matben Exp $
 
 package provide JUser 1.0
 
@@ -28,6 +28,7 @@ proc ::JUser::QuitAppHook { } {
 }
 
 proc ::JUser::OnMenu {} {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	NewDlg
     }   
