@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.134 2006-10-19 14:05:42 matben Exp $
+# $Id: JUI.tcl,v 1.135 2006-10-20 09:26:49 matben Exp $
 
 package provide JUI 1.0
 
@@ -99,15 +99,15 @@ proc ::JUI::Init { } {
     
     if {[string match "mac*" $this(platform)]} {
 	set menuDefs(rost,file) {
-	    {command   mNewWhiteboard      {::JWB::NewWhiteboard}     N}
-	    {command   mCloseWindow        {::UI::CloseWindowEvent}   W}
+	    {command   mNewWhiteboard      {::JWB::OnMenuNewWhiteboard}  N}
+	    {command   mCloseWindow        {::UI::CloseWindowEvent}  W}
 	    {command   mPreferences...     {::Preferences::Build}     {}}
 	    {separator}
 	    {command   mQuit               {::UserActions::DoQuit}    Q}
 	}
     } else {
 	set menuDefs(rost,file) {
-	    {command   mNewWhiteboard      {::JWB::NewWhiteboard}     N}
+	    {command   mNewWhiteboard      {::JWB::OnMenuNewWhiteboard}  N}
 	    {command   mPreferences...     {::Preferences::Build}     {}}
 	    {separator}
 	    {command   mQuit               {::UserActions::DoQuit}    Q}
@@ -184,8 +184,8 @@ proc ::JUI::Init { } {
 	{command   mCopy             {::UI::CopyEvent}          C}
 	{command   mPaste            {::UI::PasteEvent}         V}
 	{separator}
-	{command   mFind             {::UI::FindEvent}          F}
-	{command   mFindAgain        {::UI::FindAgainEvent}     G}
+	{command   mFind             {::UI::OnMenuFind}         F}
+	{command   mFindAgain        {::UI::OnMenuFindAgain}    G}
     }
     
     # We should do this for all menus eventaully.
@@ -533,6 +533,7 @@ proc ::JUI::OnMenuToggleToolbar { } {
     variable jwapp
     variable state
     
+    if {[llength [grab current]]} { return }
     if {[winfo ismapped $jwapp(wtbar)]} {
 	HideToolbar
     } else {
@@ -563,6 +564,7 @@ proc ::JUI::OnMenuToggleNotebook { } {
     variable jwapp
     variable state
     
+    if {[llength [grab current]]} { return }
     if {[winfo ismapped $jwapp(notebook)]} {
 	RosterMoveFromPage
     } else {
@@ -575,6 +577,8 @@ proc ::JUI::OnMenuToggleMinimal { } {
     variable jwapp
     variable state
     upvar ::Jabber::jprefs jprefs
+
+    if {[llength [grab current]]} { return }
 
     # Handle via hooks since we can't know which tab pages we have.
     set jprefs(ui,main,show,minimal) $state(show,minimal)
@@ -819,6 +823,13 @@ proc ::JUI::DeRegisterMenuEntry {name mLabel} {
 }
 
 proc ::JUI::FilePostCommand {wmenu} {
+    
+    ::UI::MenuMethod $wmenu entryconfigure mCloseWindow -state normal
+    if {[winfo exists [focus]]} {
+	if {[winfo class [winfo toplevel [focus]]] eq "JMain"} {
+	    ::UI::MenuMethod $wmenu entryconfigure mCloseWindow -state disabled
+	}
+    }
       
     ::hooks::run menuPostCommand main-file $wmenu
     
@@ -850,7 +861,7 @@ proc ::JUI::JabberPostCommand {wmenu} {
     global wDlgs
     variable state
     variable jwapp
-
+    
     # For aqua we must do this only for .jmain
     if {[::UI::IsToplevelActive $wDlgs(jmain)]} {
 	::UI::MenuMethod $wmenu entryconfigure mShow -state normal

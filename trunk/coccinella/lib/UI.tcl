@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.135 2006-10-09 14:18:18 matben Exp $
+# $Id: UI.tcl,v 1.136 2006-10-20 09:26:50 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -797,31 +797,6 @@ proc ::UI::GetToplevelFromPath {w} {
     }
 }
 
-# UI::Grab --
-# 
-# 
-
-proc ::UI::Grab {w} {
-    
-    catch {grab $w}
-    if {[tk windowingsystem] eq "aqua"} {
-	
-	# Disable menubar except Edit menu.
-	set m [$w cget -menu]
-	MenubarDisableBut $m edit
-    }
-}
-
-proc ::UI::GrabRelease {w} {
-    
-    catch {grab release $w}
-    if {[tk windowingsystem] eq "aqua"} {
-	
-	# Enable menubar.
-	MenubarEnableAll [$w cget -menu]
-    }
-}
-
 # UI::ScrollFrame --
 # 
 #       A few functions to make scrollable frames.
@@ -1373,7 +1348,7 @@ proc ::UI::BuildAppleMenu {w wmenuapple state} {
 
 proc ::UI::MenubarDisableBut {mbar name} {
 
-    # @@@ This doesn't fix accelerators!
+    # Accelerators must be handled from OnMenu* commands.
     set iend [$mbar index end]
     for {set ind 0} {$ind <= $iend} {incr ind} {
 	set m [$mbar entrycget $ind -menu]
@@ -1385,7 +1360,7 @@ proc ::UI::MenubarDisableBut {mbar name} {
 
 proc ::UI::MenubarEnableAll {mbar} {
     
-    # @@@ This doesn't fix accelerators!
+    # Accelerators must be handled from OnMenu* commands.
     set iend [$mbar index end]
     for {set ind 0} {$ind <= $iend} {incr ind} {
 	$mbar entryconfigure $ind -state normal
@@ -1400,6 +1375,10 @@ proc ::UI::MenuEnableAll {mw} {
 	    $mw entryconfigure $i -state normal
 	}
     }
+}
+
+proc ::UI::MenuDisableAll {mw} {
+    MenuDisableAllBut $mw {}
 }
 
 proc ::UI::MenuDisableAllBut {mw normalList} {
@@ -1421,6 +1400,28 @@ proc ::UI::DoTopMenuPopup {w wmenu} {
 	set x [winfo rootx $w]
 	set y [expr [winfo rooty $w] + [winfo height $w]]
 	tk_popup $wmenu $x $y
+    }
+}
+
+# These Grab/GrabRelease handle menus as well.
+
+proc ::UI::Grab {w} {
+    catch {grab $w}
+	
+    # Disable menubar except Edit menu.
+    set mb [$w cget -menu]
+    if {$mb ne ""} {
+	MenubarDisableBut $mb edit
+    }
+}
+
+proc ::UI::GrabRelease {w} {    
+    catch {grab release $w}
+    
+    # Enable menubar.
+    set mb [$w cget -menu]
+    if {$mb ne ""} {
+	MenubarEnableAll $mb
     }
 }
 
@@ -1807,6 +1808,19 @@ proc ::UI::FindAgainEvent {} {
     if {[winfo exists [focus]]} {
 	event generate [focus] <<FindAgain>>
     }	
+}
+
+# For menu commands.
+# Note that we must allow CloseWindowEvent on grabbed window.
+
+proc ::UI::OnMenuFind {} {
+    if {[llength [grab current]]} { return }
+    FindEvent
+}
+
+proc ::UI::OnMenuFindAgain {} {
+    if {[llength [grab current]]} { return }
+    FindAgainEvent
 }
 
 # UI::GenericCCPMenuStates --

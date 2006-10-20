@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.75 2006-08-20 13:41:18 matben Exp $
+# $Id: NewMsg.tcl,v 1.76 2006-10-20 09:26:49 matben Exp $
 
 package require ui::entryex
 
@@ -149,6 +149,7 @@ proc ::NewMsg::InitMultiAddress {wmulti} {
 }
 
 proc ::NewMsg::OnMenu {} {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	Build -tolist [::RosterTree::GetSelectedJID]
     }

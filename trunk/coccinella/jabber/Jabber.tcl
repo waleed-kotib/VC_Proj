@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.187 2006-09-29 06:24:07 matben Exp $
+# $Id: Jabber.tcl,v 1.188 2006-10-20 09:26:49 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1822,6 +1822,7 @@ namespace eval ::Jabber::Passwd:: {
 }
 
 proc ::Jabber::Passwd::OnMenu { } {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	Build
     }    
@@ -1993,7 +1994,9 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 #       Toggle login/logout. Menu and button bindings.
 
 proc ::Jabber::OnMenuLogInOut { } {
-        
+
+    if {[llength [grab current]]} { return }
+
     switch -- [::JUI::GetConnectState] {
 	connect - connectfin {
 	    DoCloseClientConnection
@@ -2016,6 +2019,7 @@ namespace eval ::Jabber::Logout:: {
 }
 
 proc ::Jabber::Logout::OnMenuStatus { } {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	WithStatus
     }

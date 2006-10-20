@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.26 2006-08-20 13:41:19 matben Exp $
+# $Id: Search.tcl,v 1.27 2006-10-20 09:26:49 matben Exp $
 
 package provide Search 1.0
 
@@ -24,6 +24,7 @@ namespace eval ::Search:: {
 }
 
 proc ::Search::OnMenu {} {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	Build
     }

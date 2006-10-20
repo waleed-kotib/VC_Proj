@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.98 2006-10-10 06:25:49 matben Exp $
+# $Id: MailBox.tcl,v 1.99 2006-10-20 09:26:49 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -149,6 +149,7 @@ proc ::MailBox::LaunchHook { } {
 }
 
 proc ::MailBox::OnMenu { } {
+    if {[llength [grab current]]} { return }
     ShowHide
 }
 

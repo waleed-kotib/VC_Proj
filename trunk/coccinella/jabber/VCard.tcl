@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.47 2006-08-20 13:41:19 matben Exp $
+# $Id: VCard.tcl,v 1.48 2006-10-20 09:26:49 matben Exp $
 
 package provide VCard 1.0
 
@@ -29,6 +29,7 @@ proc ::VCard::InitHook { } {
 }
 
 proc ::VCard::OnMenu { } {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	Fetch own
     }   
