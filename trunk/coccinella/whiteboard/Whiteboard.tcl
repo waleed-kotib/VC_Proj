@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.67 2006-10-20 09:26:50 matben Exp $
+# $Id: Whiteboard.tcl,v 1.68 2006-10-20 14:29:48 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -78,9 +78,6 @@ namespace eval ::WB:: {
     option add *TopWhiteboard.contactOnImage       contactOn       widgetDefault
     option add *TopWhiteboard.waveImage            wave            widgetDefault
     option add *TopWhiteboard.resizeHandleImage    resizehandle    widgetDefault
-
-    option add *TopWhiteboard.barhorizImage        barhoriz        widgetDefault
-    option add *TopWhiteboard.barvertImage         barvert         widgetDefault
 
     # Drawing tool buttons.
     foreach tname [array names btName2No] {
@@ -189,10 +186,7 @@ proc ::WB::InitPrefsHook { } {
     set state(tool)      "point"
     set state(toolPrev)  "point"
     set state(toolCache) "point"
-    
-    # Is the toolbar visible?
-    set state(visToolbar) 1
-    
+        
     # Bg color for canvas.
     set state(bgColCan) white
     
@@ -258,8 +252,7 @@ proc ::WB::InitPrefsHook { } {
       [list state(fontWeight)      state_fontWeight      $state(fontWeight)]     \
       [list state(smooth)          state_smooth          $state(smooth)]         \
       [list state(dash)            state_dash            $state(dash)]           \
-      [list state(canGridOn)       state_canGridOn       $state(canGridOn)]      \
-      [list state(visToolbar)      state_visToolbar      $state(visToolbar)]  ]    
+      [list state(canGridOn)       state_canGridOn       $state(canGridOn)]  ]    
 }
 
 proc ::WB::EarlyInitHook { } {
@@ -333,11 +326,7 @@ proc ::WB::InitIcons {w} {
 
     # Make all standard icons.
     CreateToolImages
-    Stuff
     
-    set wbicons(barhoriz) [::WB::GetThemeImage [option get $w barhorizImage {}]]
-    set wbicons(barvert)  [::WB::GetThemeImage [option get $w barvertImage {}]]
-
     # Drawing tool buttons.
     foreach name [array names btName2No] {
 	set wbicons($name) [::WB::GetThemeImage  \
@@ -368,49 +357,6 @@ proc ::WB::CreateToolImages { } {
     foreach name {colorSelector colorSelBW colorSelSwap} {
 	set iconsPreloaded($name) [::Theme::GetImage $name $subPath]
     }
-}
-
-proc ::WB::Stuff { } {
-    variable iconsPreloaded
-    
-    # height = 54
-    set ::WB::iconsPreloaded(barvert) [image create photo -data {
-	R0lGODdhCwA2ALMAAP////e1ve+cre9zhOdae+dKY94xUtYAIdDQ0M7Ozpyc
-	nISEhFJSUgAAAAAAAAAAACwAAAAACwA2AAAEYjDJSauVQQzCSTGLdIzksShT
-	aaIUeV7rJScAVVcMlc/VLfmTnUTI+9ksRGIRCBzqisdJM5GESqPPoNV4xWWt
-	TOQXGvZqt+Wxkpc+O9FYN3VLi7/vZPtcvtRXEwiBgoOEhQgRADs=
-    }]
-
-    # height = 58
-    set ::WB::iconsPreloaded(barvert) [image create photo -data {
-    R0lGODdhCwA6AMQAAM7Ozve1ve+cre9zhOdae+dKY94xUoSEhNYAIZycnP//
-    /1JSUtDQ0P///////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    AAAAAAAAAAAAAAAAAAAAAAAAACwAAAAACwA6AAAFbiAgjmRpioEwECxRGIeI
-    zDRyJGNt4yR9n7uTEKAgFUsLUnJYOoqco6VIynwaTVRqFQqdKqvXUReQBYvD
-    36jZekamzVzsGxx3q9f1uZaZv3vxaH5ka0SBf4d0hoOCW4plAAyRkpOSCpOW
-    kYJ7hGshADs=
-    }]
-
-    set ::WB::iconsPreloaded(barhoriz) [image create photo -data {
-	R0lGODdhQQALAOcAAP//////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////
-	/////++Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+U
-	pe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe97lO97lO97lO97
-	lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97
-	lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lNYAIdYAIdYAIdYAIdYAIdYAIdYAIdYA
-	IdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYA
-	IdYAIdYAIdYAIdYAIdYAIdYAIc7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O
-	zs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O
-	zs7Ozs7OzpycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJyc
-	nJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnISEhISEhISE
-	hISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISE
-	hISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhFJSUv//////////////////////
-	////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////ywAAAAAQQALAAAIdwABCRxIsKDBgwgTKlzIsKHD
-	hw9DIAQgkCIgixgrary4MSPHjx4tHgwBBgzCbwJRAlLJMqXLlS9bwpwpU2VBkiVNQtzJc2TO
-	nD2D8gTy86fQow5/KV26dGDIjlBBRn0q9SCoq1ivEqwZsytNr1y/Ih1LtqxZhAEBADs=
-    }]
-
 }
 
 # WB::InitMenuDefs --
@@ -745,18 +691,18 @@ proc ::WB::BuildWhiteboard {w args} {
     set wfrleft         $wfmain.frleft
     set wfrcan          $wfmain.fc
     set wcomm           $w.fcomm
+    set wtbar           $w.tb
     
     # Common widget paths.
     set wapp(toplevel)  $w
     set wapp(menu)      $w.menu
-    set wapp(frtop)     $w.frtop
-    set wapp(tray)      $w.frtop.on.fr
+    set wapp(tbar)      $w.tb
     set wapp(tool)      $wfrleft.f.tool
     set wapp(buglabel)  $wfrleft.pad.f.bug
     set wapp(frcan)     $wfrcan
     set wapp(comm)      $wcomm
     set wapp(frstat)    $wcomm.st    
-    set wapp(topchilds) [list $w.menu $w.frtop $w.fmain $w.fcomm]
+    set wapp(topchilds) [list $w.menu $w.tb $w.fmain $w.fcomm]
     
     # temporary...
     set wapp(can)       $wfrcan.can
@@ -805,11 +751,9 @@ proc ::WB::BuildWhiteboard {w args} {
     }
 
     # Shortcut buttons at top? Do we want the toolbar to be visible.
-    CreateShortcutButtonPad $w
-    if {!$state(visToolbar)} {
-	ConfigShortcutButtonPad $w off
-    }
-
+    BuildToolbar $w
+    pack  $wtbar  -side top -fill x
+    
     # Make the connection frame.
     ttk::frame $wcomm
     pack  $wcomm  -side bottom -fill x
@@ -1337,7 +1281,7 @@ proc ::WB::GetUndoToken {wcan} {
 proc ::WB::GetButtonTray {w} {
     upvar ::WB::${w}::wapp wapp
 
-    return $wapp(tray)
+    return $wapp(tbar)
 }
 
 proc ::WB::GetMenu {w} {
@@ -2218,104 +2162,6 @@ proc ::WB::MenubarSetState {wmenu mbstate} {
     }
 }
 
-proc ::WB::CreateShortcutButtonPad {w} {
-    variable wbicons
-    upvar ::WB::${w}::wapp wapp
-    upvar ::WB::${w}::opts opts
-    upvar ::WB::${w}::state state    
-    
-    Debug 3 "::WB::CreateShortcutButtonPad"
-
-    set wfrtop  $wapp(frtop)
-    set wfron   $wfrtop.on
-    set wonbar  $wfrtop.on.barvert
-    set wonfr   $wonbar.f
-    set woffbar $wfrtop.barhoriz    
-    
-    frame $wfrtop
-    frame $wfron
-
-    # On bar.
-    frame $wonbar -bd 1 -relief raised
-    ttk::frame $wonbar.f
-    ttk::label $wonbar.f.l -compound image -image [::UI::GetIcon mactriangleopen]
-    pack  $wonbar.f    -fill both -expand 1
-    pack  $wonbar.f.l  -side top
-    
-    bind  $wonfr <Button-1> [list $wonbar configure -relief sunken]
-    bind  $wonfr <ButtonRelease-1>  \
-      [list [namespace current]::ConfigShortcutButtonPad $w "off"]	
-    bind  $wonfr.l <Button-1> [list $wonbar configure -relief sunken]
-    bind  $wonfr.l <ButtonRelease-1>  \
-      [list [namespace current]::ConfigShortcutButtonPad $w "off"]
-    
-    # Off bar.
-    label $woffbar -image $wbicons(barhoriz) -relief raised -borderwidth 1
-    
-    bind $woffbar <Button-1> [list $woffbar configure -relief sunken]
-    bind $woffbar <ButtonRelease-1>   \
-      [list [namespace current]::ConfigShortcutButtonPad $w "on"]
-
-    pack  $wfrtop -side top -fill x
-    pack  $wfron -fill x -side left -expand 1
-    pack  $wonbar  -side left -fill y
-    
-    # Build the actual toolbar.
-    BuildToolbar $w
-    pack $wapp(tray) -side left -fill both -expand 1
-    if {$opts(-state) eq "disabled"} {
-	DisableShortcutButtonPad $w
-    }
-}
-
-# WB::ConfigShortcutButtonPad --
-#
-#       Switches between 'on' and 'off' state.
-#       
-# Arguments:
-#       w           toplevel widget path
-#       what        can be "on", or "off".
-#       
-# Results:
-#       toolbar created, or state toggled.
-
-proc ::WB::ConfigShortcutButtonPad {w what} {
-    global  this wDlgs prefs
-    
-    variable wbicons
-    upvar ::WB::${w}::wapp wapp
-    upvar ::WB::${w}::opts opts
-    upvar ::WB::${w}::state state    
-    
-    Debug 3 "::WB::ConfigShortcutButtonPad what=$what"
-
-    set wfrtop  $wapp(frtop)
-    set wfron   $wfrtop.on
-    set wonbar  $wfrtop.on.barvert
-    set woffbar $wfrtop.barhoriz
-    
-    wm positionfrom $w user
-         
-    switch -- $what {
-	off {
-	    pack forget $wfron
-	    $wfrtop configure -bg gray75
-	    pack $woffbar -side left -padx 0 -pady 0
-	    $wonbar configure -relief raised
-	    set state(visToolbar) 0
-	}
-	on {
-	    pack forget $woffbar
-	    pack $wfron -fill x -side left -expand 1
-	    $woffbar configure -relief raised
-	    set state(visToolbar) 1
-	}
-    }
-    
-    # New minsize is required.
-    after idle ::hooks::run whiteboardSetMinsizeHook $w
-}
-
 namespace eval ::WB:: {
     variable extButtonDefs {}
 }
@@ -2326,16 +2172,15 @@ namespace eval ::WB:: {
 
 proc ::WB::BuildToolbar {w} {
     global  wDlgs
-    variable wbicons
     variable btShortDefs
     variable extButtonDefs
     upvar ::WB::${w}::wapp wapp
+    upvar ::WB::${w}::opts opts
     
     set wcan   $wapp(can)
-    set wtray  $wapp(tray)
-    set h [image height $wbicons(barvert)]
+    set wtbar  $wapp(tbar)
 
-    ::ttoolbar::ttoolbar $wtray -height $h -relief raised -borderwidth 1
+    ::ttoolbar::ttoolbar $wtbar -relief flat
 
     # We need to substitute $wcan, $w etc specific for this wb instance.
     foreach {name cmd} $btShortDefs {
@@ -2343,7 +2188,7 @@ proc ::WB::BuildToolbar {w} {
 	set iconDis [::Theme::GetImage [option get $w ${name}DisImage {}]]
 	set cmd [subst -nocommands -nobackslashes $cmd]
 	set txt [string totitle $name]
-	$wtray newbutton $name -text [mc $txt] \
+	$wtbar newbutton $name -text [mc $txt] \
 	  -image $icon -disabledimage $iconDis -command $cmd
     }
     
@@ -2352,13 +2197,17 @@ proc ::WB::BuildToolbar {w} {
 	foreach {name icon iconDis cmd} $btdef {
 	    set cmd [subst -nocommands -nobackslashes $cmd]
 	    set txt [string totitle $name]
-	    $wtray newbutton $name -text [mc $txt] \
+	    $wtbar newbutton $name -text [mc $txt] \
 	      -image $icon -disabledimage $iconDis -command $cmd
 	}
     }
 
     # Anything special here.
-    ::hooks::run whiteboardBuildButtonTrayHook $wtray
+    ::hooks::run whiteboardBuildButtonTrayHook $wtbar
+
+    if {$opts(-state) eq "disabled"} {
+	DisableShortcutButtonPad $w
+    }
 }
 
 proc ::WB::RegisterShortcutButtons {btdefs} {
@@ -2405,8 +2254,8 @@ proc ::WB::DeregisterShortcutButton {name} {
 proc ::WB::DisableShortcutButtonPad {w} {
     variable btShortDefs
     upvar ::WB::${w}::wapp wapp
-
-    set wtray $wapp(tray)
+    
+    set wtbar $wapp(tbar)
     foreach {name cmd} $btShortDefs {
 
 	switch -- $name {
@@ -2414,7 +2263,7 @@ proc ::WB::DisableShortcutButtonPad {w} {
 		continue
 	    }
 	    default {
-		$wtray buttonconfigure $name -state disabled
+		$wtbar buttonconfigure $name -state disabled
 	    }
 	}
     }
@@ -2695,23 +2544,18 @@ proc ::WB::GetBasicWhiteboardMinsize {w} {
 	set hMenu [winfo reqheight $wapp(menu)]
     }
     set hTop 0
-    if {[winfo exists $wapp(frtop)]} {
-	set hTop [winfo reqheight $wapp(frtop)]
+    if {[winfo exists $wapp(tbar)]} {
+	set hTop [winfo reqheight $wapp(tbar)]
     }
     set hTool     [winfo reqheight $wapp(tool)]
     set hBugImage [image height $wapp(bugImage)]
     set hStatus   [winfo reqheight $wapp(frstat)]
     
     # The min width.
-    set wBarVert  [image width $wbicons(barvert)]
-    set wButtons  [$wapp(tray) minwidth]
+    set wButtons  [$wapp(tbar) minwidth]
     
-    set wMin [expr $wBarVert + $wButtons]
-    set hMin [expr $hMenu + $hTop + $hTool + $hBugImage + $hStatus]
-
-    Debug 6 "::WB::GetBasicWhiteboardMinsize: (wMin=$wMin, hMin=$hMin), \
-      hTop=$hTop, hTool=$hTool, hBugImage=$hBugImage, hStatus=$hStatus,\
-      wButtons=$wButtons, wBarVert=$wBarVert"
+    set wMin [expr {$wButtons + 6}]
+    set hMin [expr {$hMenu + $hTop + $hTool + $hBugImage + $hStatus}]
     
     return [list $wMin $hMin]
 }
@@ -2734,7 +2578,7 @@ proc ::WB::SetCanvasSize {w cw ch} {
     set widthtot  [expr $cw + [winfo reqwidth $wapp(tool)]]
     set heighttot [expr $ch + \
       [winfo reqheight $wapp(comm)] + \
-      [winfo reqheight $wapp(frtop)]]
+      [winfo reqheight $wapp(tbar)]]
     incr widthtot  [expr [winfo reqwidth $wapp(ysc)] + 4 + $thick]
     incr heighttot [expr [winfo reqheight $wapp(xsc)] + 4 + $thick]
     
