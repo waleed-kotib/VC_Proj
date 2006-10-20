@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.94 2006-10-19 14:05:42 matben Exp $
+# $Id: Disco.tcl,v 1.95 2006-10-20 06:46:36 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -1151,11 +1151,16 @@ proc ::Disco::TreeItem {vstruct} {
 		}
 	    }
 	    set icon [::Servicons::GetFromTypeList $cattypes]
+	    
+	    # Fallbacks:
 	    if {$icon eq ""} {
-		
-		# Fallback for rooms.
 		if {$isroom} {
 		    set icon [::Servicons::Get conference/text]
+		} elseif {$node ne ""} {
+		    set xtypes [$jstate(jlib) disco types $jid]
+		    if {[lsearch -glob $xtypes pubsub/*] >= 0} {
+			set icon [::Servicons::Get pubsub/service]
+		    }
 		}
 	    }
 	}	    
@@ -1450,6 +1455,7 @@ proc ::Disco::AutoDiscoServers { } {
 }
 
 proc ::Disco::OnMenuAddServer { } {
+    if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	AddServerDlg
     }
