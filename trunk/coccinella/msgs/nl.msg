@@ -509,7 +509,7 @@
 ::msgcat::mcset nl {Different Passwords}		{Verschillende wachtwoorden}
 ::msgcat::mcset nl {Do Not Disturb}			{Niet storen}
 
-::msgcat::mcset nl {Do not save password}
+::msgcat::mcset nl {Do not save password}		{Wachtwoord niet opslaan}
 
 ::msgcat::mcset nl {Edit Fonts}				{Lettertypes bewerken}
 ::msgcat::mcset nl {Edit Item}				{Item bewerken}
