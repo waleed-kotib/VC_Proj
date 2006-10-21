@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.95 2006-10-20 06:46:36 matben Exp $
+# $Id: Disco.tcl,v 1.96 2006-10-21 10:39:18 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -1158,9 +1158,7 @@ proc ::Disco::TreeItem {vstruct} {
 		    set icon [::Servicons::Get conference/text]
 		} elseif {$node ne ""} {
 		    set xtypes [$jstate(jlib) disco types $jid]
-		    if {[lsearch -glob $xtypes pubsub/*] >= 0} {
-			set icon [::Servicons::Get pubsub/service]
-		    }
+		    set icon [::Servicons::GetFromTypeList $xtypes]
 		}
 	    }
 	}	    

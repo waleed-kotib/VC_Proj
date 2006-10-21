@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.70 2006-10-20 09:26:49 matben Exp $
+# $Id: JWB.tcl,v 1.71 2006-10-21 10:39:18 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -418,10 +418,11 @@ proc ::JWB::BuildEntryHook {w wcomm} {
     
     ::Debug 2 "::JWB::BuildEntryHook wcomm=$wcomm"
 	
-    set contactOffImage [::Theme::GetImage [option get $w contactOffImage {}]]
-    set contactOnImage  [::Theme::GetImage [option get $w contactOnImage {}]]
-    set iconResize      [::Theme::GetImage [option get $w resizeHandleImage {}]]
-
+    set subPath [file join images 16]    
+    set imOff [::Theme::GetImage [option get $w connect16Image {}] $subPath]
+    set imOn  [::Theme::GetImage [option get $w connected16Image {}] $subPath]
+    set iconResize [::Theme::GetImage [option get $w resizeHandleImage {}]]
+    
     set jidlist [$jstate(jlib) roster getusers]
     
     set wframe $wcomm.f
@@ -443,9 +444,9 @@ proc ::JWB::BuildEntryHook {w wcomm} {
       -variable [namespace current]::jwbstate($w,send)
     $wframe.to state {disabled}
     if {[::Jabber::IsConnected]} {
-	set im $contactOnImage
+	set im $imOn
     } else {
-	set im $contactOffImage
+	set im $imOff
     }
     ttk::label $wframe.icon -image $im -padding {10 4}
     pack  $wframe.ljid  -side left
@@ -531,17 +532,17 @@ proc ::JWB::SetNetworkState {w what} {
 		    }
 		}
 	    }
-	    set contactOnImage  [::Theme::GetImage \
-	      [option get $w contactOnImage {}]]
-	    after 400 [list $wcontact configure -image $contactOnImage]
+	    set subPath [file join images 16]    
+	    set im [::Theme::GetImage [option get $w connected16Image {}] $subPath]
+	    after 400 [list $wcontact configure -image $im]
 	}
 	logout {
 	    set wtray [::WB::GetButtonTray $w]
 	    $wtray buttonconfigure send -state disabled
 	    $jwbstate($w,wsend) state {disabled}
-	    set contactOffImage [::Theme::GetImage \
-	       [option get $w contactOffImage {}]]
-	     after 400 [list $wcontact configure -image $contactOffImage]
+	    set subPath [file join images 16]    
+	    set im [::Theme::GetImage [option get $w connect16Image {}] $subPath]
+	    after 400 [list $wcontact configure -image $im]
 	}
     }
 }
