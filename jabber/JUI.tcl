@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.135 2006-10-20 09:26:49 matben Exp $
+# $Id: JUI.tcl,v 1.136 2006-10-21 10:39:18 matben Exp $
 
 package provide JUI 1.0
 
@@ -47,8 +47,6 @@ namespace eval ::JUI:: {
     option add *JMain.head.relief                 flat            50
 
     # Other icons.
-    option add *JMain.contactOffImage             contactOff      widgetDefault
-    option add *JMain.contactOnImage              contactOn       widgetDefault
     option add *JMain.waveImage                   wave            widgetDefault
     option add *JMain.resizeHandleImage           resizehandle    widgetDefault
 
@@ -318,7 +316,6 @@ proc ::JUI::Build {w} {
     }
 
     # Other icons.
-    set iconContactOff [::Theme::GetImage [option get $w contactOffImage {}]]
     set iconResize     [::Theme::GetImage [option get $w resizeHandleImage {}]]
     set iconRoster     [::Theme::GetImage [option get $w roster16Image {}]]
     set iconRosterDis  [::Theme::GetImage [option get $w roster16DisImage {}]]
@@ -999,9 +996,6 @@ proc ::JUI::FixUIWhen {what} {
     set w     $jwapp(jmain)
     set wtbar $jwapp(wtbar)
         
-    set contactOffImage [::Theme::GetImage [option get $w contactOffImage {}]]
-    set contactOnImage  [::Theme::GetImage [option get $w contactOnImage {}]]
-
     switch -exact -- $what {
 	connectinit {
 	    set stopImage [::Theme::GetImage [option get $w stopImage {}]]

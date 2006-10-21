@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.28 2006-09-28 13:28:55 matben Exp $
+# $Id: P2P.tcl,v 1.29 2006-10-21 10:39:18 matben Exp $
 
 package provide P2P 1.0
 
@@ -157,8 +157,9 @@ proc ::P2P::BuildEntryHook {w wcomm} {
       
     set nEnt($w) 0
   
-    set contactOffImage [::Theme::GetImage [option get $w contactOffImage {}]]
-    set contactOnImage  [::Theme::GetImage [option get $w contactOnImage {}]]
+    set subPath [file join images 16]    
+    set imOff [::Theme::GetImage [option get $w connect16Image {}] $subPath]
+    set imOn  [::Theme::GetImage [option get $w connected16Image {}] $subPath]
 
     set fr $wcomm.f
     frame $fr
@@ -214,7 +215,7 @@ proc ::P2P::BuildEntryHook {w wcomm} {
 	    ttk::label $waddr -text "Remote address:" -width 22 -anchor w
 	    ttk::label $wuser -text "User:" -width 14 -anchor w
 	    ttk::label $wto   -text [mc To]
-	    ttk::label $fr.icon -image $contactOffImage
+	    ttk::label $fr.icon -image $imOff
 	    grid  $waddr $wuser $wto $fr.icon -sticky nws -padx 6 -pady 1
 	}
     }  

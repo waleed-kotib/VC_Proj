@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.58 2006-10-20 09:26:49 matben Exp $
+# $Id: Register.tcl,v 1.59 2006-10-21 10:39:18 matben Exp $
 
 package provide Register 1.0
 
@@ -563,14 +563,16 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
 	    ::balloonhelp::balloonforwindow $wfr.e$tag $help
 	}
     }
-    if {$isRegistered} {
-	ttk::label $wfr.lregistered -text [mc registration-is-registered]  \
-	  -anchor w -wraplength 260 -justify left
-	grid  $wfr.lregistered  -sticky ew
-    }
+
     ttk::checkbutton $wfr.csavepw -style Small.TCheckbutton  \
       -text [mc {Do not save password}] -variable $token\(notsavepassword)
     grid  x  $wfr.csavepw  -sticky w
+
+    if {$isRegistered} {
+	ttk::label $wfr.lregistered -text [mc registration-is-registered]  \
+	  -anchor w -wraplength 260 -justify left
+	grid  $wfr.lregistered  -  -sticky ew
+    }
     
     grid columnconfigure $wfr 1 -weight 1
     

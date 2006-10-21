@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.68 2006-10-20 14:29:48 matben Exp $
+# $Id: Whiteboard.tcl,v 1.69 2006-10-21 10:39:18 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -74,8 +74,8 @@ namespace eval ::WB:: {
     option add *TopWhiteboard.stopDisImage         stopDis         widgetDefault
 
     # Other icons.
-    option add *TopWhiteboard.contactOffImage      contactOff      widgetDefault
-    option add *TopWhiteboard.contactOnImage       contactOn       widgetDefault
+    option add *TopWhiteboard.connect16Image       connect         widgetDefault
+    option add *TopWhiteboard.connected16Image     connected       widgetDefault
     option add *TopWhiteboard.waveImage            wave            widgetDefault
     option add *TopWhiteboard.resizeHandleImage    resizehandle    widgetDefault
 
