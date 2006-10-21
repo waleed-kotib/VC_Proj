@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.96 2006-10-21 10:39:18 matben Exp $
+# $Id: Disco.tcl,v 1.97 2006-10-21 15:12:58 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -1596,25 +1596,21 @@ proc ::Disco::AddServerErrorCheck {from} {
 
 proc ::Disco::MainMenuPostHook {type wmenu} {
     
-    # return
     if {$type eq "main-jabber"} {
 	set m [::UI::MenuMethod $wmenu entrycget mRegister -menu]
-	#puts "m=$m"
-	catch {destroy $m}
-	set m $wmenu.register
-	menu $m -tearoff 0
-	::UI::MenuMethod $wmenu entryconfigure mRegister -menu $m
+	$m delete 0 end
 
-	set server [::Jabber::JlibCmd getserver]
-	set jidL [::Jabber::JlibCmd disco getjidsforfeature "jabber:iq:register"]
-	set jidL [lsearch -all -not -inline $jidL $server]
-	foreach jid $jidL {
-	    set name [::Jabber::JlibCmd disco name $jid]
-	    #puts "jid=$jid, name=$name"
-	    $m add command -label $name  \
-	      -command [list ::GenRegister::NewDlg -server $jid -autoget 1]
+	if {[::JUI::GetConnectState] eq "connectfin"} {
+	    set server [::Jabber::JlibCmd getserver]
+	    set jidL [::Jabber::JlibCmd disco getjidsforfeature "jabber:iq:register"]
+	    set jidL [lsearch -all -not -inline $jidL $server]
+	    foreach jid $jidL {
+		set name [::Jabber::JlibCmd disco name $jid]
+		$m add command -label $name  \
+		  -command [list ::GenRegister::NewDlg -server $jid -autoget 1]
+	    }
 	}
-	update
+	update idletasks
     }
 }
 
