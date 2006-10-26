@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.136 2006-10-21 10:39:18 matben Exp $
+# $Id: JUI.tcl,v 1.137 2006-10-26 06:54:13 matben Exp $
 
 package provide JUI 1.0
 
@@ -326,6 +326,7 @@ proc ::JUI::Build {w} {
     
     set trayMinW [$wtbar minwidth]
 
+    # The top separator shall only be mapped between the toolbar and the notebook.
     ttk::separator $wall.sep -orient horizontal
     pack $wall.sep -side top -fill x
     
@@ -497,9 +498,14 @@ proc ::JUI::RosterMoveFromPage { } {
     variable jwapp
     upvar ::Jabber::jprefs jprefs
     
-    pack forget $jwapp(roster)
-    pack forget $jwapp(notebook)
-    pack $jwapp(roster) -side bottom -fill both -expand 1
+    set wnb     $jwapp(notebook)
+    set wroster $jwapp(roster)
+
+    pack forget $jwapp(tsep)
+    pack forget $wroster
+    pack forget $wnb
+    pack $wroster -side bottom -fill both -expand 1
+    
     set jprefs(ui,main,show,notebook) 0
 }
 
@@ -507,23 +513,18 @@ proc ::JUI::RosterMoveToPage { } {
     variable jwapp
     upvar ::Jabber::jprefs jprefs
     
-    pack forget $jwapp(roster)
-    pack $jwapp(notebook) -side bottom -fill both -expand 1
-    pack $jwapp(roster) -in $jwapp(notebook).cont -fill both -expand 1
-    raise $jwapp(roster)
+    set wnb     $jwapp(notebook)
+    set wroster $jwapp(roster)
+        
+    pack forget $wroster
+    if {[winfo ismapped $jwapp(wtbar)]} {
+	pack $jwapp(tsep)  -side top -fill x
+    }
+    pack $wnb     -fill both -expand 1 -side bottom
+    pack $wroster -fill both -expand 1 -in $wnb.cont
+    raise $wroster
+    
     set jprefs(ui,main,show,notebook) 1
-}
-
-proc ::JUI::GetMainWindow { } {
-    global wDlgs
-    
-    return $wDlgs(jmain)
-}
-
-proc ::JUI::GetMainMenu { } {
-    variable jwapp
-    
-    return $jwapp(wmenu)
 }
 
 proc ::JUI::OnMenuToggleToolbar { } {
@@ -553,7 +554,9 @@ proc ::JUI::ShowToolbar { } {
     upvar ::Jabber::jprefs jprefs
     
     pack $jwapp(wtbar) -side top -fill x
-    pack $jwapp(tsep)  -side top -fill x
+    if {[winfo ismapped $jwapp(notebook)]} {
+	pack $jwapp(tsep)  -side top -fill x
+    }
     set jprefs(ui,main,show,toolbar) 1
 }
 
@@ -580,6 +583,18 @@ proc ::JUI::OnMenuToggleMinimal { } {
     # Handle via hooks since we can't know which tab pages we have.
     set jprefs(ui,main,show,minimal) $state(show,minimal)
     ::hooks::run uiMainToggleMinimal $state(show,minimal)
+}
+
+proc ::JUI::GetMainWindow { } {
+    global wDlgs
+    
+    return $wDlgs(jmain)
+}
+
+proc ::JUI::GetMainMenu { } {
+    variable jwapp
+    
+    return $jwapp(wmenu)
 }
 
 # JUI::SetAlternativeStatusImage --
