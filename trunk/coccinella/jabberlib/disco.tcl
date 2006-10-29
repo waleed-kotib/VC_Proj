@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.40 2006-08-15 14:02:27 matben Exp $
+# $Id: disco.tcl,v 1.41 2006-10-29 13:57:37 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -587,7 +587,7 @@ proc jlib::disco::parse_get_info {jlibname from queryE} {
     
     # If this is a conference be sure to cache any children as rooms.
     if {$isconference && [info exists items($from,,children)]} {
-	foreach c [$items($from,,children)] {
+	foreach c $items($from,,children) {
 	    set rooms($c,) 1
 	}
     }
