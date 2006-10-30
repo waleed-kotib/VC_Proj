@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.185 2006-10-20 09:26:49 matben Exp $
+# $Id: Chat.tcl,v 1.186 2006-10-30 09:36:15 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1227,7 +1227,7 @@ proc ::Chat::Build {threadID args} {
 
     bind $w <<Find>>      [namespace code [list Find $dlgtoken]]
     bind $w <<FindAgain>> [namespace code [list FindAgain $dlgtoken]]  
-    bind $w <FocusIn> [list [namespace current]::FocusIn $dlgtoken]
+    bind $w <FocusIn>    +[namespace code [list FocusIn $dlgtoken]]
     
     # For toplevel binds.
     if {[lsearch [bindtags $w] ChatToplevel] < 0} {
@@ -1890,7 +1890,7 @@ proc ::Chat::TabChanged {dlgtoken} {
 
     set chatstate(nhiddenmsgs) 0
 
-    #Trigger Focus chatstate
+    # Trigger Focus chatstate
     if {$chatstate(havecs) eq "true"} {
         set chattokens $dlgstate(chattokens)
         foreach ichattoken $chattokens {
@@ -2016,7 +2016,7 @@ proc ::Chat::SetFocus {dlgtoken chattoken} {
 	update idletasks
     }
 
-    focus $wfocus
+    catch {focus $wfocus}
 }
 
 # Chat::GetDlgTokenValue, GetChatTokenValue --
