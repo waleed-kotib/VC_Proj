@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.166 2006-10-20 09:26:49 matben Exp $
+# $Id: GroupChat.tcl,v 1.167 2006-10-30 09:36:15 matben Exp $
 
 package require Create
 package require Enter
@@ -640,7 +640,7 @@ proc ::GroupChat::Build {roomjid} {
     
     bind $w <<Find>>      [namespace code [list Find $dlgtoken]]
     bind $w <<FindAgain>> [namespace code [list FindAgain $dlgtoken]]  
-    bind $w <FocusIn> [list [namespace current]::FocusIn $dlgtoken]
+    bind $w <FocusIn>    +[namespace code [list FocusIn $dlgtoken]]
 
     focus $w
     set tag TopTag$w
