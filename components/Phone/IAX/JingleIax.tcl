@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.31 2006-08-20 13:41:17 matben Exp $
+# $Id: JingleIax.tcl,v 1.32 2006-11-02 14:13:56 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -131,10 +131,10 @@ proc ::JingleIAX::InitState {} {
 
 proc ::JingleIAX::StunCB {token status args} {
     variable state
-    array set aargs $args
+    array set argsA $args
 
-    if {$status eq "ok" && [info exists aargs(-address)]} {
-	set state(public,ip)  $aargs(-address)
+    if {$status eq "ok" && [info exists argsA(-address)]} {
+	set state(public,ip)  $argsA(-address)
     }
 }
 
@@ -227,14 +227,14 @@ proc ::JingleIAX::SessionTerminate {} {
 #       This is our registered jlib jingle handler.
 
 proc ::JingleIAX::IQHandler {jlib jelem args} {
-    array set aargs $args
+    array set argsA $args
     variable state
 
     Debug "::JingleIAX::IQHandler"
     
-    array set aargs $args
-    set id   $aargs(-id)
-    set from $aargs(-from)
+    array set argsA $args
+    set id   $argsA(-id)
+    set from $argsA(-from)
     set sid    [wrapper::getattribute $jelem sid]
     set action [wrapper::getattribute $jelem action]
 
@@ -276,25 +276,6 @@ proc ::JingleIAX::SessionInitiateHandler {from jingle sid id} {
 	# Need a direct call since state(sid) can be busy with another sid.
 	::Jabber::JlibCmd jingle send_set $sid "session-terminate"  \
 	  ::JingleIAX::EmptyCB
-    }
-}
-
-proc ::JingleIAX::SessionInitiateHandlerBU {from jingle sid id} {
-    variable state
-
-    Debug "::JingleIAX::SessionInitiateHandler from=$from, sid=$sid, id=$id"
-
-    # JEP-0166: In order to decline the session initiation request, the target 
-    # entity MUST acknowledge receipt of the session initiation request, then 
-    # terminate the session.
-
-    ::Jabber::JlibCmd send_iq result {} -to $from -id $id
-    
-    if {[iaxclient::state] eq "free"} {
-	set state(sid) $sid
-	TransportAccept $from
-    } else {
-	SessionTerminate
     }
 }
 
@@ -417,7 +398,22 @@ proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
 	    }
 	}
 	
-	# @@@ Antonio, what does this? Add comment.
+	# Sort a list of {host port} candidates in priority order.
+	set cands {}
+	foreach name {custom public local} {
+	    if {[info exists candidateDesc($name,ip)]} { 
+		set ip   $candidateDesc($name,ip)
+		set port $candidateDesc($name,port)
+
+		# If both users are on the same LAN they also have identical 
+		# public IP. Exclude this candidate.
+		if {$ip ne $state(public,ip)} {
+		    lappend cands [list $ip $port]
+		}
+	    }
+	}
+	
+	# If both users are on the same LAN they also have identical public IP.
 	if {$ip eq $state(public,ip)} {
 	    set ip   $candidateDesc(local,ip)
 	    set port $candidateDesc(local,port)
@@ -427,7 +423,11 @@ proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
 	# There should be some kind of callback from 'DialJingle' for this???
 	Debug "\t ::Phone::DialJingle ip=$ip, port=$port"
 	set myjid [::Jabber::JlibCmd getthis myjid]
-        ::Phone::DialJingle $ip $port $from $myjid $user $password
+        if {0} {
+	    ::Phone::DialJingle $ip $port $from $myjid $user $password
+	} else {
+	    ::Phone::DialJingleCandidates $cands $from $myjid $user $password
+	}
     }
 }
 
@@ -456,8 +456,8 @@ proc ::JingleIAX::PresenceHangUpHook {jid type args} {
     if {$type eq "unavailable"} {
 	set sid $state(sid)
 	if {[::Jabber::JlibCmd jingle havesession $sid]} {
-	    array set aargs $args
-	    set from $aargs(-from)
+	    array set argsA $args
+	    set from $argsA(-from)
 	    set jjid [::Jabber::JlibCmd jingle getvalue $sid jid]
 	    if {[jlib::jidequal $jjid $from]} {
 		::Phone::HangupJingle
@@ -487,8 +487,8 @@ proc ::JingleIAX::PresenceHook {jid type args} {
 	return
     }
     
-    array set aargs $args
-    set from $aargs(-from)
+    array set argsA $args
+    set from $argsA(-from)
 
     # Set roster status icon if user has extended presence.
     set xelem [::Jabber::RosterCmd getx $from "jingle/media/audio"]

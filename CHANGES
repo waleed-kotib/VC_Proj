@@ -8,6 +8,8 @@ Not to mention all bugfixes and rewrites.
 Coccinella-0.95.15 (?):
 
  o added option to avoid saving password when registering
+ o added Jabber/Register/ICQ,MSN,... sub menus
+ o lot of fixes to iaxclient voip part
 
 
 Coccinella-0.95.14 (061010):

@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: NotifyCall.tcl,v 1.14 2006-06-07 14:14:40 matben Exp $
+# $Id: NotifyCall.tcl,v 1.15 2006-11-02 14:13:56 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -138,11 +138,16 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
           
     InitState $win
 
+    jlib::splitjid $phoneNumber jid2 res
+
     # The vertical scales need a 100-level rescale!
     set state(microphone) [::Phone::GetInputLevel]
     set state(speaker)    [::Phone::GetOutputLevel]
     set state(microphone-100) [expr {100 - $state(microphone)}]
     set state(speaker-100)    [expr {100 - $state(speaker)}]
+    
+    set state(inlevel)  0
+    set state(outlevel) 0
     
     set state(line)        $line
     set state(inout)       $inout
@@ -150,11 +155,11 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
     
     set state(whangup) $win.hangup
     set state(wanswer) $win.answer
-
-    jlib::splitjid $phoneNumber jid2 res
+    
+    set state(jid2) $jid2
 
     ttk::frame $win    
-    ttk::label $win.num -text $phoneNumber
+    ttk::label $win.num -text $jid2
     ttk::label $win.time -text "(00:00:00)" 
     set state(wtime) $win.time
 
@@ -177,7 +182,8 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
       -command [list [namespace current]::CallInfo $win]
     ttk::frame $win.ava
         
-    grid  $win.num     $win.time    -sticky ew -padx 4 -pady 4
+    grid  $win.num     -            -sticky ew -padx 4 -pady 4
+    grid  $win.time    -            -sticky ew -padx 4 -pady 4
     grid  $win.left    $win.right   -sticky ew -padx 4 -pady 4
     grid  $win.info    $win.ava     -sticky ew -padx 4 -pady 4
     grid  $win.hangup  $win.answer  -sticky ew -padx 4 -pady 4
@@ -192,29 +198,39 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
     # Microphone:
     set wmic $win.left.mic
     ttk::frame $wmic
+    ttk::progressbar $wmic.p -length 60 -orient vertical  \
+      -variable $win\(inlevel)
     ttk::scale $wmic.s -orient vertical -from 0 -to 100 -length 60  \
       -variable $win\(microphone-100)  \
       -command [list ::NotifyCall::MicCmd $win]
-    ttk::checkbutton $wmic.l -style Toolbutton  \
+    ttk::checkbutton $wmic.c -style Toolbutton  \
       -variable $win\(cmicrophone) -image $images(microphone)  \
       -onvalue 0 -offvalue 1 -padding {1}  \
       -command [list ::NotifyCall::Mute $win microphone]
-    pack  $wmic.s  $wmic.l  -side top
-    pack $wmic.l -pady 4
+    
+    grid  $wmic.p  $wmic.s  -sticky ns
+    grid  $wmic.c    -
+    grid $wmic.c -pady 4
+
     pack $wmic
     
     # Speakers:
     set wspk $win.right.spk
     ttk::frame $wspk
+    ttk::progressbar $wspk.p -length 60 -orient vertical  \
+      -variable $win\(outlevel)
     ttk::scale $wspk.s -orient vertical -from 0 -to 100 -length 60  \
       -variable $win\(speaker-100)  \
       -command [list ::NotifyCall::SpkCmd $win]
-    ttk::checkbutton $wspk.l -style Toolbutton  \
+    ttk::checkbutton $wspk.c -style Toolbutton  \
       -variable $win\(cspeaker) -image $images(speaker)  \
       -onvalue 0 -offvalue 1 -padding {1}  \
       -command [list ::NotifyCall::Mute $win speaker]
-    pack  $wspk.s  $wspk.l  -side top
-    pack $wspk.l -pady 4
+
+    grid  $wspk.p  $wspk.s  -sticky ns
+    grid  $wspk.c    -
+    grid $wspk.c -pady 4
+
     pack $wspk
     
     # Only Incoming from Jingle (jid and res)  has Avatar.
@@ -399,6 +415,19 @@ proc ::NotifyCall::TalkingEvent {args} {
     
     # What to do when user is talking
     SetTalkingState [GetFrame $wmain]
+}
+
+proc ::NotifyCall::LevelEvent {in out} {
+    variable wmain
+        
+    if {[winfo exists $wmain]} {
+	set win [GetFrame $wmain]
+	variable $win
+	upvar #0 $win state
+    
+	set state(inlevel)  $in
+	set state(outlevel) $out
+    }
 }
 
 proc ::NotifyCall::AvatarNewPhotoHook {jid2} {

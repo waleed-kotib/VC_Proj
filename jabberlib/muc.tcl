@@ -7,9 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#
-# $Id: muc.tcl,v 1.35 2006-09-11 12:15:18 matben Exp $
+# $Id: muc.tcl,v 1.36 2006-11-02 14:13:56 matben Exp $
 # 
 ############################# USAGE ############################################
 #
