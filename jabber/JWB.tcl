@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.71 2006-10-21 10:39:18 matben Exp $
+# $Id: JWB.tcl,v 1.72 2006-11-02 14:47:04 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1246,7 +1246,8 @@ proc ::JWB::HandleNonCanvasCmds {type cmdList args} {
 			    }
 			}
 		    }
-		    ::Import::ResizeImage $w $zoom $utag $utagNew "local"
+		    set wcan [::WB::GetCanvasFromWtop $w]
+		    ::Import::ResizeImage $wcan $zoom $utag $utagNew "local"
 		}
 	    }
 	    default {
