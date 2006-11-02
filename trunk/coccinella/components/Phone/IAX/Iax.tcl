@@ -11,9 +11,12 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.16 2006-06-01 12:33:11 matben Exp $
+# $Id: Iax.tcl,v 1.17 2006-11-02 14:13:56 matben Exp $
 
-namespace eval ::Iax { }
+namespace eval ::Iax {
+
+    variable scriptPath [file dirname [info script]]
+}
 
 proc ::Iax::Init { } {
 
@@ -35,11 +38,15 @@ proc ::Iax::Init { } {
       ::Iax::InitProc ::Iax::CmdProc ::Iax::DeleteProc
     
     # Setting up Callbacks functions.
-    iaxclient::notify <State>         [namespace current]::NotifyState
+    #iaxclient::notify <State>         [namespace current]::NotifyState
     iaxclient::notify <Registration>  [namespace current]::NotifyRegister
     iaxclient::notify <Levels>        [namespace current]::NotifyLevels
     iaxclient::notify <NetStats>      [namespace current]::NotifyNetStats
     iaxclient::notify <Text>          [namespace current]::NotifyText
+    
+    # Set <State> handler action interface.
+    iaxclient::actionbind
+    iaxclient::statebind add [namespace current]::NotifyIncoming
     
     # @@@ temporary
     ::Phone::SetPhone iax
@@ -70,14 +77,13 @@ proc ::Iax::InitProc {} {
 proc ::Iax::CmdProc {type args} {
     variable iaxstate
     
-    ::Debug 4 "::Iax::CmdProc type=$type, args=$args"
+    ::Debug 4 "::Iax::CmdProc $type"
     
     set value [lindex $args 0]
 
     switch -- $type {
 	answer {
 	    iaxclient::answer $value
-	    #::Phone::SetTalkingState
 	}
 	callerid {
 	    eval CallerID $args
@@ -90,6 +96,9 @@ proc ::Iax::CmdProc {type args} {
 	}
 	dialjingle {
 	    eval DialJingle $args
+	}
+	dialjinglecandidates {
+	    eval DialJingleCandidates $args
 	}
 	getinputlevel {
 	    return [iaxclient::level input]
@@ -177,12 +186,20 @@ proc ::Iax::Register {} {
 #--------------------------- Protocol CallBacks Hooks ----------------------
 #---------------------------------------------------------------------------
 
-proc ::Iax::NotifyLevels {args} {
+proc ::Iax::NotifyLevels {in out} {
     
     # This callbak is called every X milliseconds during the call
     # It is intended for level meters (todo)
     # We are using for counting the call duration length in the TPhone Widget and NotifyCall too 
-    ::Phone::UpdateLevels $args
+
+    # iaxclient deliver levels [-infinity 0] with -99 silence? 
+    # Scale to 0-100.
+    set in [expr {$in + 99}]
+    set in [expr {($in < 0) ? 0 : ($in > 100) ? 100 : $in}]
+    set out [expr {$out + 99}]
+    set out [expr {($out < 0) ? 0 : ($out > 100) ? 100 : $out}]
+    
+    ::Phone::UpdateLevels $in $out
 }
 
 proc ::Iax::NotifyNetStats {args} {
@@ -268,6 +285,42 @@ proc ::Iax::NotifyState {callNo state codec remote remote_name args} {
     } 
 }
 
+# Iax::NotifyIncoming --
+# 
+#       Callback when the iaxclient state changes.
+#       This controls the phone state and all state changes such as extended
+#       presence originate from here.
+#       The Phone component then delegates the state change to the selected
+#       softphone component (us).
+#       We shall handle only incoming calls here.
+
+proc ::Iax::NotifyIncoming {action callNo state codec remote remote_name args} {
+    variable iaxstate
+
+    ::Debug 4 "::Iax::NotifyIncoming action=$action, state=$state"
+
+    # Connect Peers Right (Outgoing & Incoming calls).
+    if { [lsearch $action "complete"] >= 0 } {
+	::Phone::SetTalkingState $callNo
+	iaxclient::ringstop
+    }
+
+    #----- Incoming Call Notify
+    if { $action eq [list active ringing] } {
+	::Phone::IncomingCall $callNo $remote $remote_name
+	iaxclient::ringstart 1
+    }
+
+
+    #----- Connection free (incoming & outgoing) Or ChangeLine,
+    #--------- IAXClient sometimes return free state for a changeline action
+    if { $action eq "free" || $action eq "selected"  } {
+	::Phone::SetNormalState $callNo
+	set iaxstate(peer) ""
+	iaxclient::ringstop
+    } 
+}
+
 #---------------------------------------------------------------------------
 #------------------------------- Protocol Actions --------------------------
 #---------------------------------------------------------------------------
@@ -318,6 +371,47 @@ proc ::Iax::DialJingle {peer {line ""} {subject ""} {user ""} {password ""}} {
     iaxclient::dial ${userDef}${peer} $callNo
     if { $subject ne "" } {
 	iaxclient::sendtext $subject
+    }
+}
+
+proc ::Iax::DialJingleCandidates {candidates} {
+    
+    ::Debug 4 "::Iax::DialJingleCandidates candidates=$candidates"
+    
+    iaxclient::dial_candidates $candidates [namespace code DialCB]
+}
+
+proc ::Iax::DialCB {candidate type callNo state args} {
+    variable iaxstate
+    
+    ::Debug 4 "::Iax::DialCB candidate=$candidate, type=$type"
+    
+    set iaxstate(peer) [lindex $candidate 0 0]:[lindex $candidate 0 1]/
+    ::Phone::UpdateState $callNo $type
+
+    #----- Originate Outgoing Call
+    if { $type eq [list active outgoing ringing] } {
+	iaxclient::ringstart 0
+    }
+
+    # Connect Peers Right (Outgoing & Incoming calls).
+    if { [lsearch $type "complete"] >= 0 } {
+	::Phone::SetTalkingState $callNo
+	iaxclient::ringstop
+    }
+
+    #----- Connection free (incoming & outgoing) Or ChangeLine,
+    #--------- IAXClient sometimes return free state for a changeline action
+    if { $type eq "free" || $type eq "selected" || $type eq "error" } {
+	::Phone::SetNormalState $callNo
+	set iaxstate(peer) ""
+	iaxclient::ringstop
+    } 
+
+    if {$type eq "error"} {
+	ui::dialog -message "Failed contacting ..."  \
+	  -detail "Either you have a rigorous firewall or the other user\
+	  has one that does not allow network connections like this."
     }
 }
 

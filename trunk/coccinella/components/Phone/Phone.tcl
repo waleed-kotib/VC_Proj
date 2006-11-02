@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.20 2006-09-04 06:32:04 matben Exp $
+# $Id: Phone.tcl,v 1.21 2006-11-02 14:13:56 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -306,10 +306,14 @@ proc ::Phone::UpdateText {callno textmessage} {
     ::NotifyCall::SubjectEvent $textmessage
 }
 
-proc ::Phone::UpdateLevels {args} {
+proc ::Phone::UpdateLevels {in out} {
     variable statePhone
     variable wphone
     
+    ::NotifyCall::LevelEvent $in $out
+    
+    # @@@ This is a stupid way to do it!!!
+    #     Better is to add a state handler: iaxclient::statebind
     # Update Call Length
     if { $statePhone(initDate0) >= 0 } {
         set tempDate [clock seconds]
@@ -574,8 +578,44 @@ proc ::Phone::DialJingle  { ipPeer portPeer calledName callerName {user ""} {pas
         
     set statePhone(fromStateLine0) "Dial"
     set statePhone(initDate0)  [clock seconds]
-    SetDialState
- 
+    SetDialState 
+}
+
+proc ::Phone::DialJingleCandidates {candidates calledName callerName {user ""} {password ""}} {
+    variable statePhone
+    variable phoneNumberInput
+    variable wphone 
+    
+    ::Debug 4 "::Phone::DialJingleCandidates"
+    
+    #---- Set Caller and Called Identification ------
+    ::Phone::UpdateDisplay $calledName
+    CommandPhone callerid "Jingle" $callerName
+
+    # @@@ ???
+    set phoneNumberInput ""
+    set activeLine 0
+
+    set statePhone(statusLine0) "outgoing"
+    set statePhone(numberLine$activeLine) $phoneNumberInput
+    set statePhone(onholdLine$activeLine) "no"
+
+    set subject ""
+    if {[winfo exists $wphone]} {
+	set subject [::TPhone::GetSubject $wphone]
+    }
+    if {$subject eq ""} {
+	set subject "Jingle Call"
+    }
+    
+    ::NotifyCall::OutgoingEvent $calledName
+    CommandPhone dialjinglecandidates $candidates
+    
+    ::hooks::run phoneNotifyOutgoingCall $calledName
+    
+    set statePhone(fromStateLine0) "Dial"
+    set statePhone(initDate0)  [clock seconds]
+    SetDialState 
 }
 
 proc ::Phone::Answer {} {

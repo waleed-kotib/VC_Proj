@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.69 2006-10-21 10:39:18 matben Exp $
+# $Id: Whiteboard.tcl,v 1.70 2006-11-02 14:13:56 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -815,7 +815,7 @@ proc ::WB::BuildWhiteboard {w args} {
 
     # Set up paste menu if something on the clipboard.
     GetFocus $w $w
-    bind $w  <FocusIn>  [list [namespace current]::GetFocus $w %W]
+    bind $w  <FocusIn>  +[list [namespace current]::GetFocus $w %W]
 
     if {$opts(-usewingeom)} {
 	::UI::SetWindowGeometry $w
