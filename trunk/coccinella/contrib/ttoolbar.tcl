@@ -6,7 +6,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.5 2006-06-05 12:34:37 matben Exp $
+# $Id: ttoolbar.tcl,v 1.6 2006-11-04 08:42:10 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -91,6 +91,7 @@ proc ::ttoolbar::Init { } {
     
     # List all allowed options with their database names and class names.
     array set widgetOptions {
+	-compound            {compound             Compound            }
 	-packimagepadx       {packImagePadX        PackImagePadX       }
 	-packimagepady       {packImagePadY        PackImagePadY       }
 	-packtextpadx        {packTextPadX         PackTextPadX        }
@@ -102,6 +103,7 @@ proc ::ttoolbar::Init { } {
     
     set ttoolbarOptions [array names widgetOptions]
 
+    option add *TToolbar.compound            both             widgetDefault
     option add *TToolbar.padding            {10 4 6 4}        widgetDefault
     option add *TToolbar.packImagePadX       4                widgetDefault
     option add *TToolbar.packImagePadY       0                widgetDefault
@@ -168,8 +170,9 @@ proc ::ttoolbar::ttoolbar {w args} {
     
     # Apply the options supplied in the widget command.
     # Overwrites defaults when option set in command.
-    if {[llength $args] > 0}  {
-	array set options $args
+    if {[llength $args]} {
+	eval {Configure $w} $args
+	#array set options $args
     }
     set locals(uid) 0
         
@@ -282,9 +285,50 @@ proc ::ttoolbar::Configure {w args} {
     if {[expr {[llength $args]%2}] == 1}  {
 	return -code error "value for \"[lindex $args end]\" missing"
     }    
+    array set saveOpts [array get options]
+    array set options $args
 	
     # Process the new configuration options.
-    
+    set ncol [llength [array names locals *,-text]]
+    if {$ncol && ($saveOpts(-compound) ne $options(-compound))} {
+	set wtexts [lsearch -glob -inline -all [winfo children $w] $w.t*]
+	set wimages [lsearch -glob -inline -all [winfo children $w] $w.i*]
+
+	switch -- $options(-compound) {
+	    both {
+		set mapimage 1
+		set maptext  1
+	    }
+	    image {
+		set mapimage 1
+		set maptext  0
+	    }
+	    text {
+		set mapimage 0
+		set maptext  1
+	    }
+	}
+	if {$maptext} {
+	    set ncol 0
+	    foreach wtext $wtexts {
+		grid  $wtext  -column $ncol -row 1 \
+		  -padx $options(-packtextpadx) -pady $options(-packtextpady)
+		incr ncol
+	    }
+	} else {
+	    eval {grid forget} $wtexts	    
+	}
+	if {$mapimage} {
+	    set ncol 0
+	    foreach wimage $wimages {
+		grid  $wimage  -column $ncol -row 0 \
+		  -padx $options(-packimagepadx) -pady $options(-packimagepady)
+		incr ncol
+	    }
+	} else {
+	    eval {grid forget} $wimages
+	}
+    }
 }
 
 proc ::ttoolbar::NewButton {w name args} {
@@ -313,12 +357,29 @@ proc ::ttoolbar::NewButton {w name args} {
       -compound image
     ttk::button $wtext  -style $options(-styletext)  -command $cmd  \
       -compound text
-    
-    grid  $wimage  -column $ncol -row 0 \
-      -padx $options(-packimagepadx) -pady $options(-packimagepady)
-    grid  $wtext   -column $ncol -row 1 \
-      -padx $options(-packtextpadx) -pady $options(-packtextpady)
-
+       
+    switch -- $options(-compound) {
+	both {
+	    set mapimage 1
+	    set maptext  1
+	}
+	image {
+	    set mapimage 1
+	    set maptext  0
+	}
+	text {
+	    set mapimage 0
+	    set maptext  1
+	}
+    }
+    if {$mapimage} {
+	grid  $wimage  -column $ncol -row 0 \
+	  -padx $options(-packimagepadx) -pady $options(-packimagepady)
+    } 
+    if {$maptext} {
+	grid  $wtext  -column $ncol -row 1 \
+	  -padx $options(-packtextpadx) -pady $options(-packtextpady)
+    }
     eval {ButtonConfigure $w $name} $args
     
     incr locals(uid)

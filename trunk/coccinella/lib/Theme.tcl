@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2006  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.32 2006-06-16 08:34:42 matben Exp $
+# $Id: Theme.tcl,v 1.33 2006-11-04 08:42:10 matben Exp $
 
 package provide Theme 1.0
 
@@ -118,7 +118,7 @@ proc ::Theme::Fonts { } {
 	    variable viewsize 12
 	    variable smallsize 11
 	    variable largesize 18
-
+	    
 	    font configure CociDefaultFont   -family $family -size $size
 	    font configure CociSmallFont     -family $family -size $smallsize
 	    font configure CociSmallBoldFont -family $family -size $smallsize -weight bold

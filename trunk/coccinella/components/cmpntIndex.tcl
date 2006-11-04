@@ -19,7 +19,6 @@ component::attempt SlideShow    [file join $dir SlideShow.tcl]   ::SlideShow::Lo
 component::attempt Sounds       [file join $dir Sounds.tcl]      ::Sounds::Load    
 component::attempt Speech       [file join $dir Speech.tcl]      ::Speech::Load    
 component::attempt URIRegistry  [file join $dir URIRegistry.tcl] ::URIRegistry::Init
-component::attempt VoIP         [file join $dir VoIP.tcl]        ::VoIP::Init
 component::attempt WhiteboardMK [file join $dir WhiteboardMK.tcl]  ::WhiteboardMK::Init
 
 if {[tk windowingsystem] eq "aqua"} {
