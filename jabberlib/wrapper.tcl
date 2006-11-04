@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.28 2006-09-24 06:38:15 matben Exp $
+# $Id: wrapper.tcl,v 1.29 2006-11-04 08:42:10 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -911,12 +911,22 @@ proc wrapper::deletechildswithtag {xmllist tag} {
 #       chdata with XML standard entities replaced.
 
 proc wrapper::xmlcrypt {chdata} {
-
-    foreach from {\& < > {"} {'}}   \
-      to {{\&amp;} {\&lt;} {\&gt;} {\&quot;} {\&apos;}} {
-	regsub -all $from $chdata $to chdata
-    }	
-    return $chdata
+    
+    # RFC 3454 (STRINGPREP):
+    # C.2.1 ASCII control characters
+    #    0000-001F; [CONTROL CHARACTERS]
+    #    007F; DELETE
+    
+    return [string map {& &amp; < &lt; > &gt; \" &quot; ' &apos;
+                        \x00 " " \x01 " " \x02 " " \x03 " "
+			\x04 " " \x05 " " \x06 " " \x07 " "
+			\x08 " "                   \x0B " "
+			\x0C " "          \x0E " " \x0F " "
+			\x10 " " \x11 " " \x12 " " \x13 " "
+			\x14 " " \x15 " " \x16 " " \x17 " "
+			\x18 " " \x19 " " \x1A " " \x1B " "
+			\x1C " " \x1D " " \x1E " " \x1F " "
+		        \x7F " "} $chdata]
 }
 
 # wrapper::xmldecrypt --
@@ -931,11 +941,8 @@ proc wrapper::xmlcrypt {chdata} {
 
 proc wrapper::xmldecrypt {chdata} {
 
-    foreach from {{\&amp;} {\&lt;} {\&gt;} {\&quot;} {\&apos;}}   \
-      to {{\&} < > {"} {'}} {
-	regsub -all $from $chdata $to chdata
-    }	
-    return $chdata
+    return [string map {
+	{&amp;} {&} {&lt;} {<} {&gt;} {>} {&quot;} {"} {&apos;} {'}} $chdata]   
 }
 
 # wrapper::parse_xmllist_to_array --

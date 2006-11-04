@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinydom.tcl,v 1.9 2006-08-29 14:13:07 matben Exp $
+# $Id: tinydom.tcl,v 1.10 2006-11-04 08:42:10 matben Exp $
 
 package require xml
 
@@ -90,11 +90,8 @@ proc tinydom::XmlAppend {plevel childtree} {
 
 proc tinydom::xmldecrypt {chdata} {
 
-    foreach from {{\&amp;} {\&lt;} {\&gt;} {\&quot;} {\&apos;}}   \
-      to {{\&} < > {"} {'}} {
-	regsub -all $from $chdata $to chdata
-    }	
-    return $chdata
+    return [string map {
+	{&amp;} {&} {&lt;} {<} {&gt;} {>} {&quot;} {"} {&apos;} {'}} $chdata]   
 }
 
 proc tinydom::documentElement {token} {
