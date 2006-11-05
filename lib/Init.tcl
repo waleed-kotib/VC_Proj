@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It sets up the global 'this' array for useful things.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.52 2006-10-17 13:27:51 matben Exp $
+# $Id: Init.tcl,v 1.53 2006-11-05 15:05:14 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -13,55 +13,7 @@ proc ::Init::SetThis {thisScript} {
     global  this auto_path tcl_platform prefs
     
     # Path where preferences etc are stored.
-    switch -- $this(platform) {
-	macintosh {
-	    if {[info exists ::env(PREF_FOLDER)]} {
-		set this(prefsPath) [file join $::env(PREF_FOLDER) Coccinella]
-	    } else {
-		set this(prefsPath) $this(path)
-	    }
-	}
-	macosx {
-	    set this(prefsPath)  \
-	      [file join [file nativename ~/Library/Preferences] Coccinella]
-	}    
-	unix {
-	    set this(prefsPath) [file nativename ~/.coccinella]
-	}
-	windows {
-	    foreach key {USERPROFILE APPDATA HOME HOMEPATH \
-	      ALLUSERSPROFILE CommonProgramFiles HOMEDRIVE} {
-		if {[info exists ::env($key)] && [file writable $::env($key)]} {
-		    set winPrefsDir $::env($key)
-		    break
-		}
-	    }
-	    if {![info exists winPrefsDir]} {
-		set vols [lsort [file volumes]]
-		set vols [lsearch -all -inline -glob -not $vols A:*]
-		set vols [lsearch -all -inline -glob -not $vols B:*]
-		
-		# If none of the above are writable this is unlikely.
-		if {[file writable [lindex $vols 0]]} {
-		    set winPrefsDir [lindex $vols 0]
-		} else {
-		    if {[info exists starkit::topdir]} {
-			set dir [file dirname [info nameofexecutable]]
-		    } else {
-			set dir [file dirname [file dirname $thisScript]]
-		    }
-		    if {[file writable $dir]} {
-			set winPrefsDir $dir
-		    }
-		}
-	    }
-	    if {[info exists winPrefsDir]} {
-		set this(prefsPath) [file join $winPrefsDir Coccinella]
-	    } else {
-		set this(prefsPath) ""
-	    }
-	}
-    }
+    set this(prefsPath) [GetDefaultPrefsPath]
     
     # If we store the prefs file on a removable drive, use this folder name:
     #    F:\CoccinellaPrefs  etc.  
@@ -83,32 +35,23 @@ proc ::Init::SetThis {thisScript} {
     set this(postPrefsPath)     [file join $this(resourcePath) post]
     set this(postPrefsFile)     [file join $this(postPrefsPath) prefs.rdb]
     set this(soundsPath)        [file join $this(path) sounds]
-    set this(altSoundsPath)     [file join $this(prefsPath) sounds]  
     set this(basThemePrefsFile) [file join $this(resourcePath) post theme.rdb]
-    set this(themePrefsFile)    [file join $this(prefsPath) theme]
     set this(msgcatPath)        [file join $this(path) msgs]
     set this(msgcatPostPath)    [file join $this(path) msgs post]
     set this(docsPath)          [file join $this(path) docs]
     set this(itemPath)          [file join $this(path) items]
-    set this(altItemPath)       [file join $this(prefsPath) items]
     set this(pluginsPath)       [file join $this(path) plugins]
     set this(appletsPath)       [file join $this(path) plugins applets]
     set this(componentPath)     [file join $this(path) components]
     set this(emoticonsPath)     [file join $this(path) iconsets emoticons]
-    set this(altEmoticonsPath)  [file join $this(prefsPath) iconsets emoticons]
     set this(rosticonsPath)     [file join $this(path) iconsets roster]
-    set this(altRosticonsPath)  [file join $this(prefsPath) iconsets roster]
     set this(serviconsPath)     [file join $this(path) iconsets service]
-    set this(altServiconsPath)  [file join $this(prefsPath) iconsets service]
-    set this(inboxFile)         [file join $this(prefsPath) Inbox.tcl]
-    set this(notesFile)         [file join $this(prefsPath) Notes.tcl]
     set this(avatarPath)        [file join $this(imagePath) avatar]
-    set this(prefsAvatarPath)   [file join $this(prefsPath) avatar]
-    set this(myAvatarPath)      [file join $this(prefsPath) avatar my]
-    set this(cacheAvatarPath)   [file join $this(prefsPath) avatar cache]
     set this(themesPath)        [file join $this(path) themes]
-    set this(altThemesPath)     [file join $this(prefsPath) themes]
     set this(httpdRootPath)     $this(path)
+    
+    # Sets all paths that are dependent on this(prefsPath).
+    SetPrefsPaths
 
     # Need to rework this...
     if {0 && [info exists starkit::topdir]} {
@@ -157,56 +100,141 @@ proc ::Init::SetThis {thisScript} {
 	set this(binPath) {}
     }
     
-    # Path to preference file and others found in this(prefsPath)
-    
     switch -- $this(platform) {
-	unix {
-	    set this(modkey) Control
-	    set this(prefsName) "whiteboard"
-	    
-	    # On a central installation need to have local dirs for write access.
-	    set this(userPrefsFilePath)  \
-	      [file nativename [file join $this(prefsPath) $this(prefsName)]]
-	    set this(oldPrefsFilePath) [file nativename ~/.whiteboard]
-	    set this(inboxCanvasPath)  \
-	      [file nativename [file join $this(prefsPath) canvases]]
-	    set this(historyPath)  \
-	      [file nativename [file join $this(prefsPath) history]]
-	}
 	macosx {
 	    set this(modkey) Command
-	    set this(prefsName) "Whiteboard Prefs"
-	    set this(userPrefsFilePath)  \
-	      [file join $this(prefsPath) $this(prefsName)]
-	    set this(oldPrefsFilePath) $this(userPrefsFilePath)
-	    set this(inboxCanvasPath) [file join $this(prefsPath) Canvases]
-	    set this(historyPath) [file join $this(prefsPath) History]
 	}
-	windows {
+	default {
 	    set this(modkey) Control
-	    set this(prefsName) "WBPREFS.TXT"
-	    set this(userPrefsFilePath)  \
-	      [file join $this(prefsPath) $this(prefsName)]
-	    set this(oldPrefsFilePath) [file join C: "WBPREFS.TXT"]
-	    set this(inboxCanvasPath) [file join $this(prefsPath) Canvases]
-	    set this(historyPath) [file join $this(prefsPath) History]
 	}
     }
     
     # Find user name.
-    if {[info exists ::env(USER)]} {
-	set this(username) $::env(USER)
-    } elseif {[info exists ::env(LOGIN)]} {
-	set this(username) $::env(LOGIN)
-    } elseif {[info exists ::env(USERNAME)]} {
-	set this(username) $::env(USERNAME)
-    } elseif {[llength [set this(hostname) [info hostname]]]} {
-	set this(username) $this(hostname)
-    } else {
-	set this(username) "Unknown"
-    }
+    set this(username) [GetUserName]
     
     MakeDirs
+}
+
+# Init::GetDefaultPrefsPath --
+# 
+#       Finds the actual file path to our default prefs dir.
+
+proc ::Init::GetDefaultPrefsPath { } {
+    global  this
+    
+    # Path where preferences etc are stored.
+    switch -- $this(platform) {
+	macosx {
+	    set prefsPath  \
+	      [file join [file nativename ~/Library/Preferences] Coccinella]
+	}    
+	unix {
+	    set prefsPath [file nativename ~/.coccinella]
+	}
+	windows {
+	    foreach key {USERPROFILE APPDATA HOME HOMEPATH \
+	      ALLUSERSPROFILE CommonProgramFiles HOMEDRIVE} {
+		if {[info exists ::env($key)] && [file writable $::env($key)]} {
+		    set winPrefsDir $::env($key)
+		    break
+		}
+	    }
+	    if {![info exists winPrefsDir]} {
+		set vols [lsort [file volumes]]
+		set vols [lsearch -all -inline -glob -not $vols A:*]
+		set vols [lsearch -all -inline -glob -not $vols B:*]
+		
+		# If none of the above are writable this is unlikely.
+		if {[file writable [lindex $vols 0]]} {
+		    set winPrefsDir [lindex $vols 0]
+		} else {
+		    if {[info exists starkit::topdir]} {
+			set dir [file dirname [info nameofexecutable]]
+		    } else {
+			set dir [file dirname [file dirname $thisScript]]
+		    }
+		    if {[file writable $dir]} {
+			set winPrefsDir $dir
+		    }
+		}
+	    }
+	    if {[info exists winPrefsDir]} {
+		set prefsPath [file join $winPrefsDir Coccinella]
+	    } else {
+		set prefsPath ""
+	    }
+	}
+    }
+    return $prefsPath
+}
+
+# Init::SetPrefsPaths --
+# 
+#       Is supposed to set all standard paths that are dependent on 
+#       this(prefsPath).
+
+proc ::Init::SetPrefsPaths { } {
+    global  this
+    
+    set path $this(prefsPath)
+    
+    set this(altSoundsPath)     [file join $path sounds]  
+    set this(themePrefsFile)    [file join $path theme]
+    set this(altItemPath)       [file join $path items]
+    set this(altEmoticonsPath)  [file join $path iconsets emoticons]
+    set this(altRosticonsPath)  [file join $path iconsets roster]
+    set this(altServiconsPath)  [file join $path iconsets service]
+    set this(inboxFile)         [file join $path Inbox.tcl]
+    set this(notesFile)         [file join $path Notes.tcl]
+    set this(prefsAvatarPath)   [file join $path avatar]
+    set this(myAvatarPath)      [file join $path avatar my]
+    set this(cacheAvatarPath)   [file join $path avatar cache]
+    set this(altThemesPath)     [file join $path themes]
+
+    switch -- $this(platform) {
+	unix {
+	    set pname "whiteboard"
+	    
+	    # On a central installation need to have local dirs for write access.
+	    set this(userPrefsFilePath) [file nativename [file join $path $pname]]
+	    set this(oldPrefsFilePath) [file nativename ~/.whiteboard]
+	    set this(inboxCanvasPath) [file nativename [file join $path canvases]]
+	    set this(historyPath) [file nativename [file join $path history]]
+	}
+	macosx {
+	    set pname "Whiteboard Prefs"
+	    set this(userPrefsFilePath) [file join $path $pname]
+	    set this(oldPrefsFilePath) $this(userPrefsFilePath)
+	    set this(inboxCanvasPath) [file join $path Canvases]
+	    set this(historyPath) [file join $path History]
+	}
+	windows {
+	    set pname "WBPREFS.TXT"
+	    set this(userPrefsFilePath) [file join $path $pname]
+	    set this(oldPrefsFilePath) [file join C: "WBPREFS.TXT"]
+	    set this(inboxCanvasPath) [file join $path Canvases]
+	    set this(historyPath) [file join $path History]
+	}
+    }
+    set this(prefsName) $pname
+}
+
+proc ::Init::GetUserName { } {
+    global  this
+      
+    # Find user name.
+    if {[info exists ::env(USER)]} {
+	set username $::env(USER)
+    } elseif {[info exists ::env(LOGIN)]} {
+	set username $::env(LOGIN)
+    } elseif {[info exists ::env(USERNAME)]} {
+	set username $::env(USERNAME)
+    } elseif {[llength [set this(hostname) [info hostname]]]} {
+	set username $this(hostname)
+    } else {
+	set username "Unknown"
+    }
+    return $username
 }
 
 proc ::Init::SetThisVersion { } {
