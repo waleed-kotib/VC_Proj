@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.70 2006-11-02 14:13:56 matben Exp $
+# $Id: Whiteboard.tcl,v 1.71 2006-11-07 07:50:47 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -2180,7 +2180,7 @@ proc ::WB::BuildToolbar {w} {
     set wcan   $wapp(can)
     set wtbar  $wapp(tbar)
 
-    ::ttoolbar::ttoolbar $wtbar -relief flat
+    ::ttoolbar::ttoolbar $wtbar
 
     # We need to substitute $wcan, $w etc specific for this wb instance.
     foreach {name cmd} $btShortDefs {
