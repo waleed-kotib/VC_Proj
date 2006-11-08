@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: PrefGeneral.tcl,v 1.2 2006-04-17 13:23:38 matben Exp $
+# $Id: PrefGeneral.tcl,v 1.3 2006-11-08 07:44:38 matben Exp $
  
 package provide PrefGeneral 1.0
 
@@ -20,6 +20,7 @@ namespace eval ::PrefGeneral:: {
 proc ::PrefGeneral::InitPrefsHook { } {
     global  prefs
     
+    # This is actually never used from the prefs file.
     set prefs(prefsSameDrive) 0
     
     ::PrefUtils::Add [list  \
@@ -28,7 +29,7 @@ proc ::PrefGeneral::InitPrefsHook { } {
 }
 
 proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
-    global prefs
+    global  this prefs
     variable tmpPrefs
     
     set tmpPrefs(prefsSameDrive) $prefs(prefsSameDrive)
@@ -54,8 +55,13 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
     pack $wd -side top -fill x -anchor w
     
     # If the app not lives on another drive.
-    set removable [::PrefUtils::IsAppOnRemovableDrive]
-    if {!$removable} {
+    if { ![::Init::IsAppOnRemovableDrive] } {
+	set prefs(prefsSameDrive) 0
+	$wd.c state {disabled}
+    }
+    
+    # Don't know how to detect removable drives here.
+    if { $this(platform) eq "unix" } {
 	set prefs(prefsSameDrive) 0
 	$wd.c state {disabled}
     }
@@ -84,21 +90,31 @@ proc ::PrefGeneral::SavePrefsHook {} {
     global prefs this
     variable tmpPrefs
     
-    set prefFile [::PrefUtils::GetAppDrivePrefsFile]
-
     if {$tmpPrefs(prefsSameDrive) && !$prefs(prefsSameDrive)} {
 	set ans [tk_messageBox -icon question -type yesno  \
 	  -message [mc prefdriwsame]]
 	if {$ans eq "yes"} {
 	    set prefs(prefsSameDrive) $tmpPrefs(prefsSameDrive)
+	    
+	    # Need to change all paths that depend on this(prefsPath) and make
+	    # sure dirs are there (removable drive).
+	    ::Init::SetPrefsPathToRemovable
+	    ::hooks::run prefsFilePathChangedHook
 	}
     } elseif {!$tmpPrefs(prefsSameDrive) && $prefs(prefsSameDrive)} {
-	set ans [tk_messageBox -icon question -type yesno  \
-	  -message [mc prefdriwdef $prefFile]]
-	if {$ans eq "yes"} {
-	    file delete $prefFile
-	}	
+	
+	# Remove prefs file so we wont detect it next time we are launched.
+	set prefFile [file join [::Init::GetAppDrivePrefsPath] $this(prefsName)]
+	if {[file exists $prefFile]} {
+	    set ans [tk_messageBox -icon question -type yesno  \
+	      -message [mc prefdriwdef $prefFile]]
+	    if {$ans eq "yes"} {
+		file delete $prefFile
+	    }	
+	}
+	::Init::SetPrefsPathToDefault
 	set prefs(prefsSameDrive) $tmpPrefs(prefsSameDrive)
+	::hooks::run prefsFilePathChangedHook
     }
     
     # Load any new message catalog.

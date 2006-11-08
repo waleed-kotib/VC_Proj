@@ -79,6 +79,20 @@ Additional Notes:
       data may "get stuck" in the server if karma is too low. This only
       happend if you does a lot of drawings in a short period of time.
 
+Removable Drives:
+
+    You can have the Coccinella application on a USB stick, or similar device,
+    and keep the complete preferences etc. on this device without touching
+    the normal drive (not implemented on linux). If you want this to be 
+    effective already when you start Coccinella, just make an empty file on this
+    drive as indicated below:
+
+    G:\CoccinellaPrefs\WBPREFS.TXT        (Windows)
+    "/CoccinellaPrefs/Whiteboard Prefs"   (Mac OS X; no quotes)
+
+    You may also do this switch from the Preferences settings, the General
+    panel.
+
 Documentation:
 
     The source code is the only documentation. At least so far ;-)

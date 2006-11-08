@@ -10,7 +10,8 @@ Coccinella-0.95.15 (?):
  o added option to avoid saving password when registering
  o added Jabber/Register/ICQ,MSN,... sub menus
  o lot of fixes to iaxclient voip part
-
+ o more robust TLS negotiation on slow networks
+ o now the complete prefs folder can be stored on a removable drive
 
 Coccinella-0.95.14 (061010):
 
