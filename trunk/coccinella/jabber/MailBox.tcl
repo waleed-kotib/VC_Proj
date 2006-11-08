@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.99 2006-10-20 09:26:49 matben Exp $
+# $Id: MailBox.tcl,v 1.100 2006-11-08 07:44:38 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -69,6 +69,7 @@ namespace eval ::MailBox:: {
     ::hooks::register jabberInitHook      ::MailBox::InitHandler
     ::hooks::register quitAppHook         ::MailBox::QuitHook
     ::hooks::register displayMessageHook  ::MailBox::DisplayMessageHook
+    ::hooks::register prefsFilePathChangedHook  ::MailBox::PrefsFilePathHook
 
     variable locals
     
@@ -1737,6 +1738,29 @@ proc ::MailBox::DeleteMailbox { } {
     }
 }
 
+# MailBox::PrefsFilePathHook --
+# 
+#       This gets called when we want user prefs on a removable drive or
+#       vice versa.
+
+proc ::MailBox::PrefsFilePathHook { } {
+    global wDlgs
+    variable locals
+    variable mailbox
+    
+    if {$locals(mailboxRead)} {
+	if {[winfo exists $wDlgs(jinbox)]} {
+	    $locals(wtbl) item delete all
+	}
+	if {[MKHaveMetakit]} {
+	    MKClose
+	}
+	unset -nocomplain mailbox
+	ReadMailbox
+	InsertAll
+    }
+}
+
 proc ::MailBox::QuitHook { } {
     global wDlgs
     upvar ::Jabber::jprefs jprefs
@@ -1765,9 +1789,11 @@ proc ::MailBox::QuitHook { } {
 
 # Preliminary metakit mailbox --------------------------------------------------
 
-namespace eval ::MailBox {
+proc ::MailBox::MKInit {} {
+    global  this
     
-    set ::this(inbox,mk,file) [file join $::this(prefsPath) Inbox.mk]
+    # Note that this(prefsPath) can vary!
+    set this(inbox,mk,file) [file join $this(prefsPath) Inbox.mk]
 }
 
 proc ::MailBox::MKHaveMetakit {} {
@@ -1790,12 +1816,16 @@ proc ::MailBox::MKHaveMetakit {} {
 
 proc ::MailBox::MKExists {} {
     global  this
+
+    MKInit
     return [file exists $this(inbox,mk,file)]
 }
 
 proc ::MailBox::MKOpen {} {
     global  this
     
+    MKInit
+
     # This creates the file if not exists.
     mk::file open mailbox $this(inbox,mk,file)
     
@@ -2006,6 +2036,8 @@ proc ::MailBox::MKExportToXMLFile {fileName} {
 }
 
 proc ::MailBox::MKClose {} {
+    
+    # Close only if open metakit.
     array set tagA [mk::file open]
     if {[info exists tagA(mailbox)]} {
 	mk::file close mailbox

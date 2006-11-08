@@ -5,62 +5,93 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.53 2006-11-05 15:05:14 matben Exp $
+# $Id: Init.tcl,v 1.54 2006-11-08 07:44:38 matben Exp $
 
 namespace eval ::Init:: { }
 
-proc ::Init::SetThis {thisScript} {
+proc ::Init::SetThis {mainScript} {
     global  this auto_path tcl_platform prefs
-    
-    # Path where preferences etc are stored.
-    set this(prefsPath) [GetDefaultPrefsPath]
     
     # If we store the prefs file on a removable drive, use this folder name:
     #    F:\CoccinellaPrefs  etc.  
     set this(prefsDriverDir) "CoccinellaPrefs"
     
     # Collect paths in 'this' array.
-    set this(script)            $thisScript
-    set this(path)              [file dirname $thisScript]
-    set this(appPath)           $this(path)
+    set path                    [file dirname $mainScript]
+    set this(path)              $path
+    set this(script)            $mainScript
+    
+    set this(images)            images
+    set this(resources)         resources
+    set this(componentPath)     [file join $path components]
+    set this(docsPath)          [file join $path docs]
+    set this(emoticonsPath)     [file join $path iconsets emoticons]
+    set this(rosticonsPath)     [file join $path iconsets roster]
+    set this(serviconsPath)     [file join $path iconsets service]
+    set this(imagePath)         [file join $path images]
+    set this(avatarPath)        [file join $path images avatar]
+    set this(itemPath)          [file join $path items]
+    set this(msgcatPath)        [file join $path msgs]
+    set this(msgcatPostPath)    [file join $path msgs post]
+    set this(pluginsPath)       [file join $path plugins]
+    set this(appletsPath)       [file join $path plugins applets]
+    set this(resourcePath)      [file join $path resources]
+    set this(postPrefsPath)     [file join $path resources post]
+    set this(postPrefsFile)     [file join $path resources post prefs.rdb]
+    set this(basThemePrefsFile) [file join $path resources post theme.rdb]
+    set this(prePrefsPath)      [file join $path resources pre]
+    set this(prePrefsFile)      [file join $path resources pre prefs.rdb]
+    set this(themesPath)        [file join $path themes]
+    set this(soundsPath)        [file join $path sounds]
+    set this(httpdRootPath)     $path
+    set this(appPath)           $path
     if {[info exists starkit::topdir]} {
 	set this(appPath) [file dirname [info nameofexecutable]]
     }
-    set this(images)            images
-    set this(resources)         resources
-    set this(imagePath)         [file join $this(path) images]
-    set this(resourcePath)      [file join $this(path) resources]
-    set this(prePrefsPath)      [file join $this(resourcePath) pre]
-    set this(prePrefsFile)      [file join $this(prePrefsPath) prefs.rdb]
-    set this(postPrefsPath)     [file join $this(resourcePath) post]
-    set this(postPrefsFile)     [file join $this(postPrefsPath) prefs.rdb]
-    set this(soundsPath)        [file join $this(path) sounds]
-    set this(basThemePrefsFile) [file join $this(resourcePath) post theme.rdb]
-    set this(msgcatPath)        [file join $this(path) msgs]
-    set this(msgcatPostPath)    [file join $this(path) msgs post]
-    set this(docsPath)          [file join $this(path) docs]
-    set this(itemPath)          [file join $this(path) items]
-    set this(pluginsPath)       [file join $this(path) plugins]
-    set this(appletsPath)       [file join $this(path) plugins applets]
-    set this(componentPath)     [file join $this(path) components]
-    set this(emoticonsPath)     [file join $this(path) iconsets emoticons]
-    set this(rosticonsPath)     [file join $this(path) iconsets roster]
-    set this(serviconsPath)     [file join $this(path) iconsets service]
-    set this(avatarPath)        [file join $this(imagePath) avatar]
-    set this(themesPath)        [file join $this(path) themes]
-    set this(httpdRootPath)     $this(path)
+    
+    # Path where preferences etc are stored.
+    set this(prefsDefPath) [GetDefaultPrefsPath]
+    set this(prefsPath)    $this(prefsDefPath)
+
+    switch -- $this(platform) {
+	macosx {
+	    set this(prefsName) "Whiteboard Prefs"
+	}
+	unix {
+	    set this(prefsName) "whiteboard"
+	}
+	windows {
+	    set this(prefsName) "WBPREFS.TXT"
+	}
+    }
+
+    # Handle the situation where the app lives on a removable drive (USB stick).
+    # If it lives on a removable drive, and if we find an existing prefs 
+    # file there, then we should relate all prefs related paths to it.
+    set this(prefsPathRemovable) 0
+    if {[IsAppOnRemovableDrive]} {
+	set prefsPathDrive [GetAppDrivePrefsPath]
+	set prefFile [file join $prefsPathDrive $this(prefsName)]
+	if {[file exists $prefFile] && [file writable $prefFile]} {
+	    set this(prefsPathRemovable) 1
+	    set this(prefsPath) $prefsPathDrive
+	}    
+    }
     
     # Sets all paths that are dependent on this(prefsPath).
     SetPrefsPaths
+    
+    # Make sure all dirs exist.
+    MakePrefsDirs
 
     # Need to rework this...
     if {0 && [info exists starkit::topdir]} {
-	set this(httpdRootPath)     $starkit::topdir
-	set this(httpdRelPath)      \
+	set this(httpdRootPath) $starkit::topdir
+	set this(httpdRelPath)  \
 	  [file join $::starkit::topdir lib app-Coccinella httpd]
     }
-    set this(internalIPnum)     127.0.0.1
-    set this(internalIPname)    "localhost"
+    set this(internalIPnum)  127.0.0.1
+    set this(internalIPname) "localhost"
     
     # Set our IP number temporarily.
     set this(ipnum) $this(internalIPnum) 
@@ -91,8 +122,8 @@ proc ::Init::SetThis {thisScript} {
     # Make cvs happy.
     regsub -all " " $machineSpecPath "" machineSpecPath
     
-    set this(binLibPath) [file join $this(path) bin library]
-    set this(binPath)    [file join $this(path) bin $this(platform) $machineSpecPath]
+    set this(binLibPath) [file join $path bin library]
+    set this(binPath)    [file join $path bin $this(platform) $machineSpecPath]
     if {[file exists $this(binPath)]} {
 	set auto_path [concat [list $this(binPath)] $auto_path]
 	set auto_path [concat [list $this(binLibPath)] $auto_path]
@@ -111,8 +142,6 @@ proc ::Init::SetThis {thisScript} {
     
     # Find user name.
     set this(username) [GetUserName]
-    
-    MakeDirs
 }
 
 # Init::GetDefaultPrefsPath --
@@ -151,7 +180,7 @@ proc ::Init::GetDefaultPrefsPath { } {
 		    if {[info exists starkit::topdir]} {
 			set dir [file dirname [info nameofexecutable]]
 		    } else {
-			set dir [file dirname [file dirname $thisScript]]
+			set dir [file dirname [file dirname $this(script)]]
 		    }
 		    if {[file writable $dir]} {
 			set winPrefsDir $dir
@@ -166,6 +195,57 @@ proc ::Init::GetDefaultPrefsPath { } {
 	}
     }
     return $prefsPath
+}
+
+proc ::Init::IsAppOnRemovableDrive { } {
+    global  this
+    
+    set ans 0
+
+    if {$this(platform) eq "windows"} {
+	set prefsDrive [string tolower [string index $this(prefsDefPath) 0]]
+	set appDrive   [string tolower [string index $this(appPath) 0]]
+	if {$prefsDrive ne $appDrive} {
+	    set ans 1
+	}
+    } elseif {$this(platform) eq "macosx"} {
+	
+	# Try to see if different drives. Ad hoc.
+	set lprefs [file split $this(prefsDefPath)]
+	set lapp   [file split $this(appPath)]
+	set prefs1 [lindex $lprefs 1]
+	set app1   [lindex $lapp 1]
+	if {($app1 ne $prefs1) && ($app1 eq "Volumes")} {
+	    set ans 1
+	}
+    } elseif {$this(platform) eq "unix"} {
+	# @@@ Don't know how to detect drives on unix in general.
+    } 
+    return $ans
+}
+
+# Init::GetAppDrivePrefsPath --
+#
+#       Gets the prefs path for nonstandard drive.
+#       It doesn't check for its existence.
+#       You MUST have 'IsAppOnRemovableDrive' for this to make sense.
+
+proc ::Init::GetAppDrivePrefsPath { } {
+    global  this
+    
+    set lapp   [file split $this(appPath)]
+
+    if {$this(platform) eq "windows"} {
+	set path [file join [lindex $lapp 0] $this(prefsDriverDir)]
+    } elseif {$this(platform) eq "macosx"} {
+	set drive [lindex $lapp 2]
+	set path [file join [lindex $lapp 0] [lindex $lapp 1] [lindex $lapp 2]  \
+	  $this(prefsDriverDir)]
+    } elseif {$this(platform) eq "unix"} {
+	# @@@ Don't know how to detect drives on unix in general.
+	set path ""
+    } 
+    return $path
 }
 
 # Init::SetPrefsPaths --
@@ -191,9 +271,10 @@ proc ::Init::SetPrefsPaths { } {
     set this(cacheAvatarPath)   [file join $path avatar cache]
     set this(altThemesPath)     [file join $path themes]
 
+    set pname $this(prefsName)
+
     switch -- $this(platform) {
 	unix {
-	    set pname "whiteboard"
 	    
 	    # On a central installation need to have local dirs for write access.
 	    set this(userPrefsFilePath) [file nativename [file join $path $pname]]
@@ -202,21 +283,42 @@ proc ::Init::SetPrefsPaths { } {
 	    set this(historyPath) [file nativename [file join $path history]]
 	}
 	macosx {
-	    set pname "Whiteboard Prefs"
 	    set this(userPrefsFilePath) [file join $path $pname]
 	    set this(oldPrefsFilePath) $this(userPrefsFilePath)
 	    set this(inboxCanvasPath) [file join $path Canvases]
 	    set this(historyPath) [file join $path History]
 	}
 	windows {
-	    set pname "WBPREFS.TXT"
 	    set this(userPrefsFilePath) [file join $path $pname]
 	    set this(oldPrefsFilePath) [file join C: "WBPREFS.TXT"]
 	    set this(inboxCanvasPath) [file join $path Canvases]
 	    set this(historyPath) [file join $path History]
 	}
     }
-    set this(prefsName) $pname
+}
+
+# Init::SetPrefsPathToDefault, SetPrefsPathToRemovable --
+# 
+#       Helpers to allow switching prefs location.
+
+proc ::Init::SetPrefsPathToDefault { } {
+    global  this
+    
+    set this(prefsPath) [GetDefaultPrefsPath]
+    set this(prefsPathRemovable) 0
+
+    ::Init::SetPrefsPaths
+    ::Init::MakePrefsDirs
+}
+
+proc ::Init::SetPrefsPathToRemovable { } {
+    global  this
+    
+    set this(prefsPath) [GetAppDrivePrefsPath]
+    set this(prefsPathRemovable) 1
+    
+    ::Init::SetPrefsPaths
+    ::Init::MakePrefsDirs
 }
 
 proc ::Init::GetUserName { } {
@@ -265,7 +367,7 @@ proc ::Init::SetThisEmbedded { } {
     }
 }
 
-proc ::Init::MakeDirs { } {
+proc ::Init::MakePrefsDirs { } {
     global  this tcl_platform
     
     foreach name {

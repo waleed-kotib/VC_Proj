@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. It defines some 
 #      utilities for keeping the user preferences. 
 #      
-#  Copyright (c) 1999-2005  Mats Bengtsson
+#  Copyright (c) 1999-2006  Mats Bengtsson
 #
-# $Id: PrefUtils.tcl,v 1.6 2006-03-28 08:12:12 matben Exp $
+# $Id: PrefUtils.tcl,v 1.7 2006-11-08 07:44:38 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -74,22 +74,15 @@ proc ::PrefUtils::Init { } {
     set appName    [option get . appName {}]
     set theAppName [option get . theAppName {}]
     
-    # If the application lives on a different drive than the default prefs
-    # folder, try to load that instead of the defaults.
-    set loaded [LoadRemovableDrivePrefs]
-    set prefs(fromSameDrive) $loaded
-
-    if {!$loaded} {
-	if {[file exists $prefsFilePath]} {
-	    if {[catch {option readfile $prefsFilePath} err]} {
-		tk_messageBox -type ok -icon error \
-		  -message "Error reading preference file: $prefsFilePath."
-	    }
-	} elseif {[file exists $old]} {
-	    if {[catch {option readfile $old} err]} {
-		tk_messageBox -type ok -icon error \
-		  -message "Error reading preference file: $old."
-	    }
+    if {[file exists $prefsFilePath]} {
+	if {[catch {option readfile $prefsFilePath} err]} {
+	    tk_messageBox -type ok -icon error \
+	      -message "Error reading preference file: $prefsFilePath."
+	}
+    } elseif {[file exists $old]} {
+	if {[catch {option readfile $old} err]} {
+	    tk_messageBox -type ok -icon error \
+	      -message "Error reading preference file: $old."
 	}
     }
     
@@ -97,79 +90,6 @@ proc ::PrefUtils::Init { } {
     if {[file exists $this(postPrefsFile)]} {
 	catch {option readfile $this(postPrefsFile)} err
     }
-}
-
-proc ::PrefUtils::LoadRemovableDrivePrefs { } {
-    global  this prefs
-    
-    set loaded 0
-    if {[IsAppOnRemovableDrive]} {
-	set prefFile [GetAppDrivePrefsFile]
-	if {[file exists $prefFile] && [file writable $prefFile]} {
-	    if {[catch {option readfile $prefFile} err]} {
-		tk_messageBox -type ok -icon error \
-		  -message "Error reading preference file: $prefFile."
-	    } else {
-		set loaded 1
-	    }
-	}
-    }
-    return $loaded
-}
-
-# PrefUtils::GetAppDrivePrefsFile --
-#
-#       Gets the prefs file path for nonstandard drive.
-#       It doesn't check for its existence.
-#       You MUST have 'IsAppOnRemovableDrive' for this to make sense.
-
-proc ::PrefUtils::GetAppDrivePrefsFile { } {
-    global  this prefs
-    
-    set prefFile ""
-    set lapp   [file split $this(appPath)]
-
-    if {$this(platform) eq "windows"} {
-	set prefFile [file join [lindex $lapp 0]  \
-	  $this(prefsDriverDir) $this(prefsName)]
-    } elseif {$this(platform) eq "macosx"} {
-	set drive [lindex $lapp 2]
-	set prefFile [file join  \
-	  [lindex $lapp 0]  \
-	  [lindex $lapp 1]  \
-	  [lindex $lapp 2]  \
-	  $this(prefsDriverDir) $this(prefsName)]
-    } elseif {$this(platform) eq "unix"} {
-	# @@@ Don't know how to detect drives on unix in general.
-    } 
-    return $prefFile
-}
-
-proc ::PrefUtils::IsAppOnRemovableDrive { } {
-    global  this prefs
-    
-    set ans 0
-
-    if {$this(platform) eq "windows"} {
-	set prefsDrive [string tolower [string index $this(prefsPath) 0]]
-	set appDrive   [string tolower [string index $this(appPath) 0]]
-	if {$prefsDrive ne $appDrive} {
-	    set ans 1
-	}
-    } elseif {$this(platform) eq "macosx"} {
-	
-	# Try to see if different drives. Ad hoc.
-	set lprefs [file split $this(prefsPath)]
-	set lapp   [file split $this(appPath)]
-	set prefs1 [lindex $lprefs 1]
-	set app1   [lindex $lapp 1]
-	if {($app1 ne $prefs1) && ($app1 eq "Volumes")} {
-	    set ans 1
-	}
-    } elseif {$this(platform) eq "unix"} {
-	# @@@ Don't know how to detect drives on unix in general.
-    } 
-    return $ans
 }
 
 # PrefUtils::Add --
@@ -282,16 +202,7 @@ proc ::PrefUtils::GetValue {varName resName defValue} {
 proc ::PrefUtils::SaveToFile { } {
     global prefs this
     
-    # We must detect if the user wants the prefs file on
-    if {$prefs(prefsSameDrive) && [IsAppOnRemovableDrive]} {
-	set userPrefsFile [GetAppDrivePrefsFile]
-	set dir [file dirname $userPrefsFile]
-	if {![file isdirectory $dir]} {
-	    file mkdir $dir
-	}
-    } else {
-	set userPrefsFile $this(userPrefsFilePath)	
-    }
+    set userPrefsFile $this(userPrefsFilePath)	
 
     # Work on a temporary file and switch later.
     set tmpFile $userPrefsFile.tmp

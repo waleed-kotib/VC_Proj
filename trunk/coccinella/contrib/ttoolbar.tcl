@@ -6,7 +6,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.6 2006-11-04 08:42:10 matben Exp $
+# $Id: ttoolbar.tcl,v 1.7 2006-11-08 07:44:38 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -258,7 +258,7 @@ proc ::ttoolbar::Configure {w args} {
     # Error checking.
     foreach {name value} $args  {
 	if {![info exists widgetOptions($name)]}  {
-	    return -code error "unknown option for the moviecontroller: $name"
+	    return -code error "unknown option for the ttoolbar: $name"
 	}
     }
     if {[llength $args] == 0}  {
