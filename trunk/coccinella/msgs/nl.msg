@@ -57,7 +57,7 @@
 ::msgcat::mcset nl Delete				{Verwijderen}
 ::msgcat::mcset nl Deny					{Weigeren}
 ::msgcat::mcset nl Department				{Afdeling}
-::msgcat::mcset nl Description				{Notities}
+::msgcat::mcset nl Description				{Beschrijving}
 ::msgcat::mcset nl Devices				{Apparaten}
 ::msgcat::mcset nl Drawing				{Tekening}
 ::msgcat::mcset nl Document				{Document}
@@ -388,9 +388,9 @@
 ::msgcat::mcset nl mEnterRoom				{Chatruimte betreden...}
 ::msgcat::mcset nl mExitRoom				{Chatruimte verlaten}
 ::msgcat::mcset nl mCreateRoom				{Chatruimte aanmaken...}
-::msgcat::mcset nl mvCard				{Persoonlijke info...}
+::msgcat::mcset nl mvCard				{Contactgegevens...}
 ::msgcat::mcset nl mRemoveAccount			{Account verwijderen}
-::msgcat::mcset nl mErrorLog				{Error log...}
+::msgcat::mcset nl mErrorLog				{Foutmeldingen...}
 ::msgcat::mcset nl mDebug				{Debug}
 ::msgcat::mcset nl mOnServer				{&Servergegevens...}
 ::msgcat::mcset nl mOnClients				{&Clientinfo...}
@@ -481,7 +481,7 @@
 ::msgcat::mcset nl {Auto-accept}			{Automatisch accepteren}
 ::msgcat::mcset nl {Auto-reject}			{Automatisch weigeren}
 ::msgcat::mcset nl {Away status}			{Afwezig}
-::msgcat::mcset nl {Basic Info}				{Basisinfo}
+::msgcat::mcset nl {Basic Info}				{Basis}
 ::msgcat::mcset nl {Block JID}				{Jabber ID blokkeren}
 ::msgcat::mcset nl {Bookmark this room}			{Bladwijzer toevoegen}
 ::msgcat::mcset nl {Broken Image}			{Beschadigde afbeelding}
@@ -586,7 +586,7 @@
 ::msgcat::mcset nl {My Avatar}				{Mijn avatar}
 ::msgcat::mcset nl {My nickname for own display}	{Mijn bijnaam in eigen vensters}
 ::msgcat::mcset nl {My Status}				{Mijn aanwezigheid}
-::msgcat::mcset nl {My vCard}				{Mijn persoonlijke info}
+::msgcat::mcset nl {My vCard}				{Mijn contactgegevens}
 ::msgcat::mcset nl {Name of list}			{Lijst}
 ::msgcat::mcset nl {Network Error}			{Netwerkfout}
 ::msgcat::mcset nl {Network Setup}			{Netwerk instellen}
@@ -625,8 +625,8 @@
 ::msgcat::mcset nl {Open Stream}			{Stream openen}
 ::msgcat::mcset nl {Outgoing Presence}			{Uitgaande aanwezigheid}
 ::msgcat::mcset nl {Peer-to-Peer}			{P2P}
-::msgcat::mcset nl {Personal Info}			{Persoonlijke gegevens}
-::msgcat::mcset nl {Personal Information}		{Persoonelijke gegevens}
+::msgcat::mcset nl {Personal Info}			{Persoonlijk}
+::msgcat::mcset nl {Personal Information}		{Persoonlijk}
 ::msgcat::mcset nl {Personal URL}			{Website}
 ::msgcat::mcset nl {Pick Directory}			{Map kiezen}
 ::msgcat::mcset nl {Pick File}				{Bestand kiezen}
@@ -967,7 +967,7 @@
 ::msgcat::mcset nl registration-state			{Uw regio}
 ::msgcat::mcset nl registration-zip			{Uw postcode}
 ::msgcat::mcset nl registration-phone			{Uw telefoonnummer}
-::msgcat::mcset nl registration-url			{Het adres van uw persoonlijke website}
+::msgcat::mcset nl registration-url			{Het adres van uw website}
 ::msgcat::mcset nl registration-date			{Een datum (bv.: geboortedatum, inschrijvingsdatum)}
 ::msgcat::mcset nl registration-is-registered		{U bent al geregistreerd op deze dienst. Dit zijn uw huidige instellingen.}
 
@@ -1026,7 +1026,7 @@
 ::msgcat::mcset nl prefsounpick				{Kies alarmgeluiden voor de volgende gebeurtenissen:}
 ::msgcat::mcset nl prefshortcut				{Hier kunt u snelkoppelingen toevoegen of bewerken die enkel van toepassing zijn op P2P-verbindingen en niet gebruikt worden bij de client-serveropstelling. Als u niet uitdrukkelijk voor P2P hebt gekozen in het "Netwerk instellen"-gedeelte dan zijn deze snelkoppelingen niet van toepassing.}
 ::msgcat::mcset nl prefprof				{Hier kunt u accountprofielen aanmaken en bewerken.}
-::msgcat::mcset nl prefpers				{Uw persoonlijke gegevens zijn opgeslagen in uw voorkeurenbestand maar kunnen ook opgeslagen worden in een Jabber User Directory. Gegevens opgeslagen op een server zijn zichtbaar voor iedereen die met die server kan verbinden.}
+::msgcat::mcset nl prefpers				{Uw contactgegevens zijn opgeslagen op uw server en zijn niet publiek beschikbaar. U kunt uw contactgegevens ook publiceren in een publieke Jabber User Directory. Ze zijn dan zichtbaar voor iedereen.}
 ::msgcat::mcset nl prefaaset				{Instellingen voor "Automatisch afwezig":}
 ::msgcat::mcset nl prefminaw				{Aantal minuten voor de aanwezigheid "Afwezig" wordt ingesteld:}
 ::msgcat::mcset nl prefminea				{Aantal minuten voor de aanwezigheid "Langdurig afwezig" wordt ingesteld:}
@@ -1094,8 +1094,8 @@
 ::msgcat::mcset nl prefproxymsg				{De proxy-instellingen worden bewaard voor elk profiel. Bestandsoverdracht werkt niet met een proxy!}
 ::msgcat::mcset nl prefproxyexc				{Adressen uitsluiten (gebruik het sterretje (*) als jokerteken)}
 ::msgcat::mcset nl prefdrivesame			{Voorkeuren altijd bewaren op dezelfde schijf als het programma}
-::msgcat::mcset nl prefdriwsame				{U koos om uw voorkeuren te bewaren op dezelfde schijf als het programma. Als deze schijf niet verwijderbaar is dan kunnen uw persoonlijke instellingen zichtbaar zijn voor anderen. Wilt u toch verder gaan?}
-::msgcat::mcset nl prefdriwdef				{U koos om uw voorkeuren te bewaren op de standaardplaats. Tenzij u ook uw persoonlijke instellingen op "%s" verwijdert of verplaatst, zullen ze automatisch gebruikt worden wanneer u de volgende keer Coccinella opstart. Wilt u ze toch verwijderen?}
+::msgcat::mcset nl prefdriwsame				{U koos om uw voorkeuren te bewaren op dezelfde schijf als het programma. Als deze schijf niet verwijderbaar is dan kunnen uw voorkeuren zichtbaar zijn voor anderen. Wilt u toch verder gaan?}
+::msgcat::mcset nl prefdriwdef				{U koos om uw voorkeuren te bewaren op de standaardplaats. Tenzij u ook uw voorkeuren op "%s" verwijdert of verplaatst, zullen ze automatisch gebruikt worden wanneer u de volgende keer Coccinella opstart. Wilt u ze toch verwijderen?}
 
 # EditShortcuts namespace:
 namespace eval ::EditShortcuts:: {
@@ -1130,7 +1130,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jagchatmsg				{Kies een dienst voor chatruimtes, kies een chatruimte en geef uw naam en bijnaam op}
 ::msgcat::mcset nl jacreateroom				{Kies een dienst voor chatruimtes en voer de naam voor de chatruimte in. Klik dan op de knop "Ophalen" om de chatruimte in te stellen.}
 ::msgcat::mcset nl jawaitserver				{Bezig met wachten op server...}
-::msgcat::mcset nl jaregmsg				{Als u al geregistreerd bent op deze dienst dan kunt u hier uw persoonlijke info publiceren.}
+::msgcat::mcset nl jaregmsg				{Als u al geregistreerd bent op deze dienst dan kunt u hier uw contactgegevens publiceren.}
 ::msgcat::mcset nl jastatavailable			{Beschikbaar}
 ::msgcat::mcset nl jastatchat				{Chat}
 ::msgcat::mcset nl jastataway				{Afwezig}
@@ -1151,7 +1151,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jainmsgshow				{Inkomende berichten in dit venster tonen}
 ::msgcat::mcset nl jadisaddserv				{Hier kunt u een server al dan niet permanent aan de lijst toevoegen. De server van uw account is altijd zichtbaar.}
 ::msgcat::mcset nl jadisrmall				{Permanente servers uit de lijst verwijderen.}
-::msgcat::mcset nl jauserinnote				{Uw persoonlijke notities over deze contactpersoon kunt u hier bewaren.}
+::msgcat::mcset nl jauserinnote				{Opmerkingen over deze contactpersoon kunt u hier bewaren.}
 ::msgcat::mcset nl jaregisterex				{Voer de naam in van de Jabber-server waarop u een account wilt aanmaken. Klik dan op de knop "Ophalen" om de vereiste gegevens op te halen. Voer de gevraagde gegevens in en maak de account aan.}
 ::msgcat::mcset nl jaloginjid				{Voer uw Jabber ID in (bv: "jantje@voorbeeld.org") of kies een profiel.}
 ::msgcat::mcset nl jaregalready				{U bent al geregistreerd op deze dienst. Dit zijn uw huidige instellingen van uw registratie.}
