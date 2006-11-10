@@ -870,7 +870,7 @@
 ::msgcat::mcset nl jamessinvalidjid			{De Jabber ID is niet juist. U moet onderaan een geldige Jabber ID opgeven in het veld (bv: 'gebruikersnaam@voorbeeld.org').}
 ::msgcat::mcset nl jamessnotconnected			{Kon niet verzenden: er is geen verbinding met een server.}
 ::msgcat::mcset nl jamessaddrmiss			{U moet minstens één geldig adres opgeven.}
-::msgcat::mcset nl jamesschatclose			{Als u dit venster sluit dan verliest u ook de volledige conversatie. Wilt u het toch sluiten?}
+::msgcat::mcset nl jamesschatclose			{Als u dit venster sluit dan verliest u de volledige conversatie. Wilt u het toch sluiten?}
 ::msgcat::mcset nl jamessnogroupchat			{Coccinella vond geen dienst voor chatruimtes.}
 ::msgcat::mcset nl jamessgcnoroomname			{U moet een naam voor de chatruimte opgeven.}
 ::msgcat::mcset nl jamessgcnoroomnick			{U moet een bijnaam opgeven.}
@@ -908,7 +908,7 @@
 ::msgcat::mcset nl jamessloginerr			{Aanmelden mislukte met foutcode %s met als foutmelding: %s.}
 ::msgcat::mcset nl jamessaddforeign			{Een contactpersoon op een niet-Jabber IM-netwerk toevoegen, vereist dat u al een account hebt op dit netwerk en dat u deze account gebruikt hebt om te registreren met het overeenkomstige transport %s. Wilt u nu registreren?}
 ::msgcat::mcset nl jamessowntrpt			{Dit is uw account op %s die ageert als een dienst die berichten naar dat IM-netwerk transporteert. Deze dienst moet in uw roster aanwezig zijn. U hebt autorisatie voor %s: %s.}
-::msgcat::mcset nl jamesswbchatlost			{De volledige conversatie zal verloren gaan wanneer u dit whiteboard sluit. Wilt u het whiteboard toch sluiten?}
+::msgcat::mcset nl jamesswbchatlost			{De volledige whiteboardsessie zal verloren gaan wanneer u dit venster sluit. Wilt u het venster toch sluiten?}
 ::msgcat::mcset nl jamesschatoffline			{Deze contactpersoon is niet meer online waardoor het bericht niet is verzonden.}
 ::msgcat::mcset nl jamessregloginok			{U bent nu geregistreerd en automatisch aangemeld als "%s".}
 ::msgcat::mcset nl jamessregerrinuse			{Uw account kon niet worden aangemaakt omdat de gebruikersnaam al in gebruik is door iemand anders. Als dit toch uw account is, probeer dan opnieuw aan te melden. Foutmelding: %s.}
