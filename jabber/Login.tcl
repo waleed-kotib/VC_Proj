@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.102 2006-09-25 07:21:56 matben Exp $
+# $Id: Login.tcl,v 1.103 2006-11-14 13:46:39 matben Exp $
 
 package provide Login 1.0
 
@@ -115,7 +115,7 @@ proc ::Login::Dlg { } {
     # Option menu for selecting user profile.
     ttk::label $frmid.lpop -text "[mc Profile]:" -anchor e
     set wpopup $frmid.popup
-        
+
     set wpopupMenu [ttk::optionmenu $wpopup [namespace current]::menuVar {}]
 
     # Depending on 'config(login,style)' not all get mapped.

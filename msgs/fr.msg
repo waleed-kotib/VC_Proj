@@ -74,6 +74,9 @@
 ::msgcat::mcset fr Filters
 ::msgcat::mcset fr Finish		{Terminer}
 ::msgcat::mcset fr Finished		{Terminé}
+
+::msgcat::mcset fr Find
+
 ::msgcat::mcset fr First		{Premier}
 ::msgcat::mcset fr Friends              {Amis}
 ::msgcat::mcset fr Forward		{Faire suivre}
@@ -719,6 +722,7 @@
 ::msgcat::mcset fr {Use SSL for security}	{Utiliser SSL pour la sécurité}
 ::msgcat::mcset fr {Use TLS and SASL authentication}
 ::msgcat::mcset fr {Use TLS on separate port (old)}
+::msgcat::mcset fr {User Info}                  {Infos utilisateur}
 ::msgcat::mcset fr {User is}			{L'utilisateur est}
 ::msgcat::mcset fr {User is offline}		{L'utilisateur est déconnecté}
 ::msgcat::mcset fr {User is online}		{L'utilisateur est connecté}

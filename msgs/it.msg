@@ -72,6 +72,9 @@
 ::msgcat::mcset it File... {File...}
 ::msgcat::mcset it Filter {Filtro}
 ::msgcat::mcset it Filters {Filtri}
+
+::msgcat::mcset it Find
+
 ::msgcat::mcset it Finish {Finisci}
 ::msgcat::mcset it Finished {Finito}
 ::msgcat::mcset it First {Primo}
@@ -714,6 +717,7 @@
 ::msgcat::mcset it {Use SSL for security} {Usa SSL per la crittografia}
 ::msgcat::mcset it {Use TLS and SASL authentication} {Usa autenticazione TLS e SASL}
 ::msgcat::mcset it {Use TLS on separate port (old)} {Usa TLS su una porta separata (vecchio metodo)}
+::msgcat::mcset it {User Info} {Informazioni utente}
 ::msgcat::mcset it {User is} {L'utente è}
 ::msgcat::mcset it {User is offline} {L'utente è disconnesso}
 ::msgcat::mcset it {User is online} {L'utente è connesso}

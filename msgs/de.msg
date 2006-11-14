@@ -73,6 +73,9 @@
 ::msgcat::mcset de File...	Datei...
 ::msgcat::mcset de Filter	Filter
 ::msgcat::mcset de Filters	Filter
+
+::msgcat::mcset de Find
+
 ::msgcat::mcset de Finish	Ende
 ::msgcat::mcset de Finished	Beendet
 ::msgcat::mcset de First	Erste
@@ -718,6 +721,7 @@
 ::msgcat::mcset de {Use SSL for security} {SSL wegen Sicherheit benutzen}
 ::msgcat::mcset de {Use TLS and SASL authentication} {TLS und SASL-Authentifizierung benutzen}
 ::msgcat::mcset de {Use TLS on separate port (old)} {TLS mit separatem Port benutzen (alt)}
+::msgcat::mcset de {User Info}            {Benutzerinformation}
 ::msgcat::mcset de {User is}              {Benutzer ist}
 ::msgcat::mcset de {User is offline}      {Benutzer ist abgemeldet}
 ::msgcat::mcset de {User is online}       {Benutzer ist angemeldet}
