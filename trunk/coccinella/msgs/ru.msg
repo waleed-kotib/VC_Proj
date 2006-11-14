@@ -60,6 +60,9 @@
 ::msgcat::mcset ru Error		{Ошибки}
 ::msgcat::mcset ru Exit		{Выход}
 ::msgcat::mcset ru File		{Файл...}
+
+::msgcat::mcset ru Find
+
 ::msgcat::mcset ru Finish		{Закончен}
 ::msgcat::mcset ru Finished	{Закончен}
 ::msgcat::mcset ru First		{Первый}
@@ -647,6 +650,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Unknown: Prompt user}
 ::msgcat::mcset ru {Url of homepage}		{Url домашней страницы}
 ::msgcat::mcset ru {Use SSL for security}	{Использовать SSL}
+::msgcat::mcset ru {User Info}
 ::msgcat::mcset ru {User is}				{Пользователь}
 ::msgcat::mcset ru {User is offline}			{Пользователь отключился}
 ::msgcat::mcset ru {User is online}			{Пользователь подключился}

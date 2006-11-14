@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.67 2006-09-13 14:09:11 matben Exp $
+# $Id: Profiles.tcl,v 1.68 2006-11-14 13:46:39 matben Exp $
 
 package provide Profiles 1.0
 
@@ -13,14 +13,10 @@ namespace eval ::Profiles:: {
     # Define all hooks that are needed.
     ::hooks::register prefsInitHook          ::Profiles::InitHook
     ::hooks::register prefsBuildHook         ::Profiles::BuildHook         20
-    ::hooks::register prefsUserDefaultsHook  ::Profiles::UserDefaultsHook
     ::hooks::register prefsSaveHook          ::Profiles::SaveHook
     ::hooks::register prefsCancelHook        ::Profiles::CancelHook
-    ::hooks::register prefsUserDefaultsHook  ::Profiles::UserDefaultsHook
-    #::hooks::register initHook               ::Profiles::ImportIfNecessary
     
     option add *JProfiles*TLabel.style        Small.TLabel        widgetDefault
-    #option add *JProfiles*TLabelframe.style   Small.TLabelframe   widgetDefault
     option add *JProfiles*TButton.style       Small.TButton       widgetDefault
     option add *JProfiles*TMenubutton.style   Small.TMenubutton   widgetDefault
     option add *JProfiles*TRadiobutton.style  Small.TRadiobutton  widgetDefault
@@ -59,9 +55,9 @@ namespace eval ::Profiles:: {
     # This is a way to hardcode some or all of the profile. Same format.
     # Public APIs must cope with this. Both Get and Set functions.
     # If 'do' then there MUST be valid values in config array.
-    set ::config(profiles,do) 0
-    set ::config(profiles,profiles) {}
-    set ::config(profiles,selected) {}
+    set ::config(profiles,do)         0
+    set ::config(profiles,profiles)   {}
+    set ::config(profiles,selected)   {}
     set ::config(profiles,prefspanel) 1
     
     # The 'config' array shall never be written to, and since not all elements
@@ -203,7 +199,6 @@ proc ::Profiles::TranslateAnySSLSASLOptions { } {
 	    set sasl $opts(-sasl)
 	    set anyOld 1
 	}
-	#puts "\t name=$name, spec=$spec, anyOld=$anyOld"
 	if {$anyOld} {
 	    if {$ssl || $sasl} {
 		set opts(-secure) 1
@@ -376,12 +371,12 @@ proc ::Profiles::Remove {name} {
     if {[llength $profiles] <= 2} {
 	return
     }
-    set ind [lsearch -exact $profiles $name]
-    if {$ind >= 0} {
+    set idx [lsearch -exact $profiles $name]
+    if {$idx >= 0} {
 	if {[string equal $selected $name]} {
 	    set selected [lindex $profiles 0]
 	}
-	set profiles [lreplace $profiles $ind [incr ind]]
+	set profiles [lreplace $profiles $idx [incr idx]]
     }
     return
 }
@@ -460,6 +455,12 @@ proc ::Profiles::GetList { } {
     }
 }
 
+proc ::Profiles::SetList {_profiles} {
+    variable profiles
+    
+    set profiles $_profiles
+}
+
 proc ::Profiles::Get {name key} {
     global  config
     variable profiles
@@ -471,9 +472,9 @@ proc ::Profiles::Get {name key} {
 	set prof $profiles
     }
 
-    set ind [lsearch -exact $prof $name]
-    if {$ind >= 0} {
-	set spec [lindex $prof [incr ind]]
+    set idx [lsearch -exact $prof $name]
+    if {$idx >= 0} {
+	set spec [lindex $prof [incr idx]]
 	
 	switch -- $key {
 	    domain {
@@ -486,7 +487,7 @@ proc ::Profiles::Get {name key} {
 		return [lindex $spec 2]
 	    }
 	    options {
-		return [lrange [lindex $prof $ind] 3 end]
+		return [lrange [lindex $prof $idx] 3 end]
 	    }
 	}
     } else {
@@ -687,12 +688,11 @@ proc ::Profiles::GetDefaultHttpUrl {server} {
 }
 
 proc ::Profiles::GetDefaultOptValue {name server} {
-    
     array set arr [GetDefaultOpts $server]
     return $arr(-$name)
 }
 
-# User Profiles Page ...........................................................
+#- User Profiles Page ----------------------------------------------------------
 
 proc ::Profiles::BuildHook {wtree nbframe} {
     global  config
@@ -706,47 +706,191 @@ proc ::Profiles::BuildHook {wtree nbframe} {
 }
 
 proc ::Profiles::BuildPage {page} {
+    variable wprefspage
     
-    set wc $page.c
-    FrameWidget $wc 0 -padding [option get . notebookPageSmallPadding {}]
-    pack $wc -side top -anchor [option get . dialogAnchor {}]    
+    set wprefspage $page.c
+    FrameWidget $wprefspage 0 -padding [option get . notebookPageSmallPadding {}]
+    pack $wprefspage -side top -anchor [option get . dialogAnchor {}]    
+}
+
+# Profiles::SaveHook --
+# 
+#       Invoked from the Save button.
+
+proc ::Profiles::SaveHook { } {
+    global  config
+    variable wprefspage
+
+    if {$config(profiles,prefspanel)} {
+	SetList [FrameGetProfiles $wprefspage]
+	SetSelectedName [FrameGetSelected $wprefspage]
+	
+	# Update the Login dialog if any.
+	::Login::LoadProfiles
+    }
+}
+
+proc ::Profiles::CancelHook { } {
+    global  config
+    variable wprefspage
+
+    if {$config(profiles,prefspanel)} {
+
+	# Detect any changes.
+	set selected [GetSelectedName]
+	set selectedPref [FrameGetSelected $wprefspage]
+	if {![string equal $selected $selectedPref]} {
+	    ::Preferences::HasChanged
+	    return
+	}
+	array set profA [GetList]
+	array set prefA [FrameGetProfiles $wprefspage]
+	if {![arraysequal prefA profA]} {
+	    ::Preferences::HasChanged
+	}
+    }
+}
+
+#-------------------------------------------------------------------------------
+
+namespace eval ::Profiles {
+    
+    option add *JProfiles*settingsImage        settings         widgetDefault
+    option add *JProfiles*settingsDisImage     settingsDis      widgetDefault
+}
+
+# Profiles::BuildDialog --
+# 
+#       Standalone dialog profile settings dialog.
+
+proc ::Profiles::BuildDialog { } {
+    global  wDlgs
+    variable wdlgpage
+    
+    set w $wDlgs(jprofiles)
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
+    
+    ::UI::Toplevel $w -class JProfiles \
+      -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
+      -closecommand ::Profiles::CloseDlgHook
+    wm title $w [mc Profiles]
+    ::UI::SetWindowPosition $w
+    
+    set im   [::Theme::GetImage [option get $w settingsImage {}]]
+    set imd  [::Theme::GetImage [option get $w settingsDisImage {}]]
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    ttk::label $w.frall.head -style Headlabel \
+      -text [mc Profiles] -compound left \
+      -image [list $im background $imd]
+    pack  $w.frall.head  -side top -fill both -expand 1
+
+    ttk::separator $w.frall.s -orient horizontal
+    pack  $w.frall.s  -side top -fill x
+
+    set wpage $w.frall.page
+    set wdlgpage $wpage
+    FrameWidget $wpage 1 -padding [option get . dialogPadding {}]
+
+    pack $wpage -side top
+    
+    # Button part.
+    set frbot $w.frall.b
+    ttk::frame $frbot -padding [option get . okcancelNoTopPadding {}]
+    ttk::button $frbot.btok -style TButton \
+      -text [mc Save]  \
+      -default active -command [list [namespace current]::SaveDlg $w]
+    ttk::button $frbot.btcancel -style TButton \
+      -text [mc Cancel]  \
+      -command [list [namespace current]::CancelDlg $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side bottom -fill x
+
+    wm resizable $w 0 0
+}
+
+proc ::Profiles::CloseDlgHook {wclose} {
+    global  wDlgs
+
+    if {[string equal $wclose $wDlgs(jprofiles)]} {
+	CancelDlg $wclose
+    }
+}
+
+proc ::Profiles::SaveDlg {w} {
+    variable wdlgpage
+    
+    # If created new it may not have been verified.
+    if {![FrameVerifyNonEmpty $wdlgpage]} {
+	return
+    }
+    ::UI::SaveWinGeom $w
+    SetList [FrameGetProfiles $wdlgpage]
+    SetSelectedName [FrameGetSelected $wdlgpage]
+    ::Login::LoadProfiles
+    destroy $w
+}
+
+proc ::Profiles::CancelDlg {w} {
+    
+    ::UI::SaveWinGeom $w
+    destroy $w
+}
+
+#-------------------------------------------------------------------------------
+
+namespace eval ::Profiles {
+    
+    # We must keep a list of all existing FrameWidgets in order to create
+    # unique profile names.
+    variable wallframes {}
 }
 
 # Profiles::FrameWidget --
 # 
 #       Megawidget profile frame.
-#       @@@ TODO OO
 
 proc ::Profiles::FrameWidget {w moreless args} {
     global  prefs
+    variable wallframes
+            
+    set token [namespace current]::$w
+    variable $w
+    upvar 0 $w state
     
-    variable profiles
-    variable selected
-    
-    variable wmenubt
-    variable wmenu
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable wuserinfofocus
-    variable tmpProfArr
-    variable tmpSelected
-    variable wtabnb
-    variable wtri
-    variable wfrmore
+    lappend wallframes $w
+    set state(moreless) $moreless
     
     # Make temp array for servers. Be sure they are sorted first.
     SortProfileList
-    MakeTmpProfArr
-    set tmpSelected $selected
+    FrameMakeTmpProfiles $w
 		
+    # We keep two variables for the profile name:
+    #   state(profile):   which is used directly in the optionmenu
+    #   state(selected):  which is the one actually displayed
+    #                     (helpful to switch back to previous profile)
+    set selected [GetSelectedName]
+    set state(selected) $selected
+    set profile $selected
+    
     # Init textvariables.
-    set profile  $tmpSelected
-    set server   $tmpProfArr($profile,server)
-    set username $tmpProfArr($profile,username)
-    set password $tmpProfArr($profile,password)
+    set state(profile)  $selected
+    set state(server)   $state(prof,$profile,server)
+    set state(username) $state(prof,$profile,username)
+    set state(password) $state(prof,$profile,password)
     
     set allNames [GetAllNames]
     
@@ -761,30 +905,26 @@ proc ::Profiles::FrameWidget {w moreless args} {
     ttk::label $wui.lpop -text "[mc Profile]:" -anchor e
     
     set wmenu [eval {
-	ttk::optionmenu $wui.pop [namespace current]::profile
+	ttk::optionmenu $wui.pop $token\(profile)
     } $allNames]
-    trace variable [namespace current]::profile w  \
-      [namespace current]::TraceProfile
+    trace add variable $token\(profile) write  \
+      [list [namespace current]::FrameTraceProfile $w]
     
     ttk::label $wui.lserv -text "[mc {Jabber Server}]:" -anchor e
     ttk::entry $wui.eserv -font CociSmallFont \
-      -width 22   \
-      -textvariable [namespace current]::server -validate key  \
+      -width 22 -textvariable $token\(server) -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
     ttk::label $wui.luser -text "[mc Username]:" -anchor e
     ttk::entry $wui.euser -font CociSmallFont \
-      -width 22  \
-      -textvariable [namespace current]::username -validate key  \
+      -width 22 -textvariable $token\(username) -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStr %S}
     ttk::label $wui.lpass -text "[mc Password]:" -anchor e
     ttk::entry $wui.epass -font CociSmallFont \
-      -width 22 -show {*}  \
-      -textvariable [namespace current]::password -validate key  \
+      -width 22 -show {*} -textvariable $token\(password) -validate key  \
       -validatecommand {::Jabber::ValidatePasswordStr %S}
     ttk::label $wui.lres -text "[mc Resource]:" -anchor e
     ttk::entry $wui.eres -font CociSmallFont \
-      -width 22   \
-      -textvariable [namespace current]::resource -validate key  \
+      -width 22 -textvariable $token\(resource) -validate key  \
       -validatecommand {::Jabber::ValidateResourceStr %S}
 
     grid  $wui.lpop   $wui.pop    -sticky e -pady 2
@@ -807,9 +947,9 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	grid  $wbt  -sticky ew    
     }
     ttk::button $wbt.new -text [mc {New Profile}] \
-      -command [list [namespace current]::NewCmd $w]
+      -command [list [namespace current]::FrameNewCmd $w]
     ttk::button $wbt.del -text [mc {Delete Profile}] \
-      -command [list [namespace current]::DeleteCmd $w]
+      -command [list [namespace current]::FrameDeleteCmd $w]
 
     if {0} {
 	pack  $wbt.new  $wbt.del  -side top -fill x -pady 4
@@ -820,33 +960,17 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	}
     }
     
-    # We use an array for "more" options.
-    set token [namespace current]::moreOpts
-    variable $token
-
-    foreach {key value} [array get tmpProfArr $profile,-*] {
-	set optname [string map [list $profile,- ""] $key]
-	
-	switch -- $optname {
-	    resource {
-		set resource $value
-	    }
-	    default {
-		set moreOpts($optname) $value
-	    }
-	}
-    }
     # Need to pack options here to get the complete bottom slice.
     set wopt $w.fopt
     ttk::frame $wopt
     grid  $wopt  -  -sticky ew
     
     # Triangle switch for more options.
+    set wtri $wopt.tri
     if {$moreless} {
-	set wtri $wopt.tri
 	ttk::button $wtri -style Small.Toolbutton -padding {6 1} \
 	  -compound left -image [::UI::GetIcon mactriangleclosed] \
-	  -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
+	  -text "[mc More]..." -command [list [namespace current]::FrameMoreOpts $w]
 	pack $wtri -side top -anchor w
     }
     
@@ -860,14 +984,39 @@ proc ::Profiles::FrameWidget {w moreless args} {
     
     # Tabbed notebook for more options.
     set wtabnb $wfrmore.nb
-    NotebookOptionWidget $wtabnb $token
+
+    set state(wtri)   $wtri
+    set state(wtabnb) $wtabnb
+    set state(wmore)  $wfrmore
+    set state(wmenu)  $wmenu
+    set state(wfocus) $wuserinfofocus
+    
+    # We use an array for "more" options.
+    set mtoken [namespace current]::${w}-more
+    variable $mtoken
+    upvar 0 $mtoken mstate
+
+    foreach {key value} [array get state prof,$profile,-*] {
+	set optname [string map [list prof,$profile,- ""] $key]
+	
+	switch -- $optname {
+	    resource {
+		set state(resource) $value
+	    }
+	    default {
+		set mstate($optname) $value
+	    }
+	}
+    }
+
+    NotebookOptionWidget $wtabnb $mtoken
     pack $wtabnb -fill x -expand 1
     
     # The actual prefs state for the current profile must be set.
-    SetCurrentFromTmp $tmpSelected
-
+    FrameSetCurrentFromTmp $w $state(selected)
+    
     # This allows us to clean up some things when we go away.
-    bind $w <Destroy> [list [namespace current]::DestroyHandler]
+    bind $w <Destroy> +[list [namespace current]::FrameOnDestroy %W]
 
     # Trick to resize the labels wraplength.
     set script [format {
@@ -879,23 +1028,334 @@ proc ::Profiles::FrameWidget {w moreless args} {
     return $w
 }
 
-proc ::Profiles::MoreOpts {w} {
-    variable wtri
-    variable wfrmore
+proc ::Profiles::FrameMoreOpts {w} {
+    variable $w
+    upvar 0 $w state
 
-    pack $wfrmore -side top -fill x -padx 2
-    $wtri configure -command [list [namespace current]::LessOpts $w] \
+    pack $state(wmore) -side top -fill x -padx 2
+    $state(wtri) configure -command [list [namespace current]::FrameLessOpts $w] \
       -image [::UI::GetIcon mactriangleopen] -text "[mc Less]..."   
 }
 
-proc ::Profiles::LessOpts {w} {
-    variable wtri
-    variable wfrmore
-    
-    pack forget $wfrmore
-    $wtri configure -command [list [namespace current]::MoreOpts $w] \
+proc ::Profiles::FrameLessOpts {w} {
+    variable $w
+    upvar 0 $w state
+
+    pack forget $state(wmore)
+    $state(wtri) configure -command [list [namespace current]::FrameMoreOpts $w] \
       -image [::UI::GetIcon mactriangleclosed] -text "[mc More]..."   
 }
+
+# Profiles::FrameMakeTmpProfiles --
+#
+#       Make temp array for profiles.
+
+proc ::Profiles::FrameMakeTmpProfiles {w} {    
+    variable $w
+    upvar 0 $w state
+    
+    # New... Profiles
+    array unset state prof,*
+    
+    foreach {name spec} [GetList] {
+	set state(prof,$name,name) $name
+	set state(prof,$name,server)    [lindex $spec 0]
+	set state(prof,$name,username)  [lindex $spec 1]
+	set state(prof,$name,password)  [lindex $spec 2]
+	set state(prof,$name,-resource) ""
+	foreach {key value} [lrange $spec 3 end] {
+	    set state(prof,$name,$key) $value
+	}
+    }
+}
+
+proc ::Profiles::FrameTraceProfile {w name key op} {
+    variable $w
+    upvar 0 $w state
+
+    Debug 4 "FrameTraceProfile name=$name, key=$key"
+    FrameSetCmd $w $state(profile)
+}
+
+# Profiles::FrameSetCmd --
+#
+#       Callback when a new item is selected in the menu.
+
+proc ::Profiles::FrameSetCmd {w pname} {
+    variable $w
+    upvar 0 $w state
+        
+    set selected $state(selected)
+    
+    # The 'pname' is here the new profile, and 'tmpSelected' the
+    # previous one.
+    Debug 2 "::Profiles::FrameSetCmd pname=$pname, selected=$selected"
+
+    if {[info exists state(prof,$selected,name)]} {
+	Debug 2 "\t selected exists"
+	
+	# Check if there are any empty fields.
+	if {![FrameVerifyNonEmpty $w]} {
+	    set state(profile) $state(selected)
+	    Debug 2 "***::Profiles::FrameVerifyNonEmpty: set profile $state(selected)"
+	    return
+	}
+	
+	# Save previous state in tmp before setting the new one.
+	FrameSaveCurrentToTmp $w $selected
+    }
+    
+    # In case this is a new profile.
+    if {[info exists state(prof,$pname,server)]} {
+	FrameSetCurrentFromTmp $w $pname
+    }
+}
+
+proc ::Profiles::FrameSetCurrentFromTmp {w pname} {
+    variable $w
+    upvar 0 $w state
+
+    Debug 2 "::Profiles::FrameSetCurrentFromTmp pname=$pname"
+    
+    set state(server)   $state(prof,$pname,server)
+    set state(username) $state(prof,$pname,username)
+    set state(password) $state(prof,$pname,password)
+    set state(resource) ""
+
+    set mtoken [namespace current]::${w}-more
+    variable $mtoken
+    upvar 0 $mtoken mstate
+
+    NotebookSetDefaults $mtoken $state(server)
+    
+    foreach {key value} [array get state prof,$pname,-*] {
+	set optname [string map [list prof,$pname,- ""] $key]
+	Debug 4 "\t key=$key, value=$value, optname=$optname"
+	
+	# The 'resource' is a bit special...
+	if {$optname eq "resource"} {
+	    set state(resource) $value
+	} else {
+	    set mstate($optname) $value
+	}
+    }
+    set state(selected) $pname
+    
+    NotebookSetAnyConfigState $state(wtabnb) $pname
+    NotebookDefaultWidgetStates $state(wtabnb)
+}
+
+proc ::Profiles::FrameSaveCurrentToTmp {w pname} {
+    variable $w
+    upvar 0 $w state
+    
+    Debug 2 "::Profiles::FrameSaveCurrentToTmp pname=$pname"
+    
+    # Store it in the temporary array. 
+    # But only of the profile already exists since we may have just deleted it!
+    if {[info exists state(prof,$pname,name)]} {
+	Debug 2 "\t exists state(prof,$pname,name)"
+	
+	set state(prof,$pname,name)      $pname
+	set state(prof,$pname,server)    $state(server)
+	set state(prof,$pname,username)  $state(username)
+	set state(prof,$pname,password)  $state(password)
+	set state(prof,$pname,-resource) $state(resource)
+	
+	set server $state(server)
+
+	set mtoken [namespace current]::${w}-more
+	variable $mtoken
+	upvar 0 $mtoken mstate
+
+	# Set more options if different from defaults.
+	foreach key [array names mstate] {
+	    
+	    # Cleanup any old entries. Save only if different from default.
+	    unset -nocomplain state(prof,$pname,-$key)
+	    set dvalue [GetDefaultOptValue $key $server]
+	    if {![string equal $mstate($key) $dvalue]} {
+		set state(prof,$pname,-$key) $mstate($key)
+	    }
+	}
+	set state(selected) $pname
+    }
+}
+
+proc ::Profiles::FrameVerifyNonEmpty {w} {
+    variable $w
+    upvar 0 $w state
+
+    set ans 1
+    
+    # Check that necessary entries are non-empty, at least.
+    if {($state(server) eq "") || ($state(username) eq "")} {
+	::UI::MessageBox -type ok -icon error  \
+	  -title [mc Error] -message [mc messfillserveruser]
+	set ans 0
+    }
+    return $ans
+}
+
+proc ::Profiles::MakeUniqueProfileName {name} {
+    variable wallframes
+    
+    # Create a unique profile name if not given.
+    set names {}
+    foreach w $wallframes {
+	set names [concat $names [FrameGetAllTmpNames $w]]
+    }
+    set names [lsort -unique $names]
+    
+    # Make sure that 'profile' is unique.
+    if {[lsearch -exact $names $name] >= 0} {
+	set i 2
+	set tmpprof $name
+	set name ${tmpprof}-${i}
+	while {[lsearch -exact $names $name] >= 0} {
+	    incr i
+	    set name ${tmpprof}-${i}
+	}
+    }
+    return $name
+}
+    
+proc ::Profiles::FrameGetAllTmpNames {w} {
+    variable $w
+    upvar 0 $w state
+    
+    set names {}
+    foreach {key name} [array get state prof,*,name] {
+	lappend names $name
+    }    
+    return [lsort -dictionary $names]
+}
+
+proc ::Profiles::FrameNewCmd {w} {
+    variable $w
+    upvar 0 $w state
+        
+    set newName ""
+    
+    # First get a unique profile name.
+    set ans [::UI::MegaDlgMsgAndEntry [mc Profile] [mc prefprofname] \
+      "[mc {Profile Name}]:" newName [mc Cancel] [mc OK]]
+    if {$ans eq "cancel" || $newName eq ""} {
+	return
+    }
+    Debug 2 "::Profiles::FrameNewCmd state(selected)$state(selected), newName=$newName"
+
+    set wmenu $state(wmenu)
+    
+    set uname [MakeUniqueProfileName $newName]
+    $wmenu add radiobutton -label $uname  \
+      -variable [namespace current]::$w\(profile)
+
+    set state(selected) $uname
+    set state(profile)  $uname
+    set state(server)   ""
+    set state(username) ""
+    set state(password) ""
+    set state(resource) ""
+    
+    set mtoken [namespace current]::${w}-more
+    NotebookSetDefaults $mtoken ""
+    
+    # Must do this for it to be automatically saved.
+    set state(prof,$uname,name) $uname
+    focus $state(wfocus)
+}
+
+proc ::Profiles::FrameDeleteCmd {w} {
+    variable $w
+    upvar 0 $w state
+    
+    set profile $state(profile)
+        
+    Debug 2 "::Profiles::FrameDeleteCmd profile=$profile"
+    set ans "yes"
+    
+    # The present state may be something that has not been stored yet.
+    if {[info exists state(prof,$profile,server)]} {
+	set ans [::UI::MessageBox -title [mc Warning]  \
+	  -type yesno -icon warning -default yes  \
+	  -parent [winfo toplevel $w] \
+	  -message [mc messremoveprofile]]
+    }
+    if {$ans eq "yes"} {
+	set wmenu $state(wmenu)
+	set idx [$wmenu index $profile]
+	if {$idx >= 0} {
+	    $wmenu delete $idx
+	}
+	array unset state prof,$profile,*
+	
+	# Set selection to first.
+	set state(profile) [lindex [FrameGetAllTmpNames $w] 0]
+	FrameSetCmd $w $state(profile)
+    }
+}
+
+proc ::Profiles::FrameGetSelected {w} {
+    variable $w
+    upvar 0 $w state
+    
+    return $state(selected)
+}
+
+proc ::Profiles::FrameGetProfiles {w} {
+    variable $w
+    upvar 0 $w state
+    
+    Debug 2 "::Profiles::FrameGetProfiles"
+    
+    # Get present dialog state into tmp array first.
+    FrameSaveCurrentToTmp $w $state(profile)
+    
+    set profileL {}
+    foreach name [FrameGetAllTmpNames $w] {
+	set s $state(prof,$name,server)
+	set u $state(prof,$name,username)
+	set p $state(prof,$name,password)
+	set plist [list $s $u $p]
+	
+	# Set the optional options as "-key value ...". Sorted!
+	foreach key [lsort [array names state prof,$name,-*]] {
+	    set optname [string map [list prof,$name,- ""] $key]
+	    set value $state($key)
+
+	    switch -- $optname {
+		resource {
+		    if {[string length $value]} {
+			lappend plist -resource $value 
+		    }
+		}
+		default {
+	
+		    # Save only if different from default.
+		    set dvalue [GetDefaultOptValue $optname $s]
+		    if {![string equal $value $dvalue]} {
+			lappend plist -$optname $value
+		    }
+		}
+	    }
+	}
+	lappend profileL $name $plist
+    }
+    return $profileL
+}
+
+proc ::Profiles::FrameOnDestroy {w} {
+    variable $w
+    variable wallframes
+    
+    lprune wallframes $w
+
+    # This removes any traces on this array as well.
+    unset -nocomplain $w
+}
+
+#-------------------------------------------------------------------------------
 
 # Profiles::NotebookOptionWidget --
 # 
@@ -967,7 +1427,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::entry $wcon.eport -font CociSmallFont \
       -textvariable $token\(port) -width 6 -validate key  \
       -validatecommand {::Register::ValidatePortNumber %S}
-        
+	
     set wse $wcon.se
     ttk::frame $wcon.se
 
@@ -1206,463 +1666,6 @@ proc ::Profiles::NotebookOnDestroy {w} {
     variable $w
     
     unset -nocomplain $w
-}
-
-# Profiles::MakeTmpProfArr --
-#
-#       Make temp array for profiles.
-
-proc ::Profiles::MakeTmpProfArr { } {
-    
-    variable profiles
-    variable tmpProfArr
-    
-    # New... Profiles
-    unset -nocomplain tmpProfArr
-    
-    foreach {name spec} $profiles {
-	set tmpProfArr($name,name) $name
-	lassign $spec                \
-	  tmpProfArr($name,server)   \
-	  tmpProfArr($name,username) \
-	  tmpProfArr($name,password)
-	set tmpProfArr($name,-resource) ""
-	foreach {key value} [lrange $spec 3 end] {
-	    set tmpProfArr($name,$key) $value
-	}
-    }
-}
-
-proc ::Profiles::TraceProfile {name key op} {
-    variable profile
-
-    Debug 4 "TraceProfile name=$name; set name=[set $name]"
-    SetCmd [set $name]
-}
-
-# Profiles::SetCmd --
-#
-#       Callback when a new item is selected in the menu.
-
-proc ::Profiles::SetCmd {profName} {
-    
-    variable tmpProfArr
-    variable tmpSelected
-    variable profile
-    
-    # The 'profName' is here the new profile, and 'tmpSelected' the
-    # previous one.
-    Debug 2 "::Profiles::SetCmd profName=$profName, tmpSelected=$tmpSelected"
-
-    if {[info exists tmpProfArr($tmpSelected,name)]} {
-	Debug 2 "\t tmpSelected exists"
-	
-	# Check if there are any empty fields.
-	if {![VerifyNonEmpty]} {
-	    set profile $tmpSelected
-	    Debug 2 "***::Profiles::VerifyNonEmpty: set profile $tmpSelected"
-	    return
-	}
-	
-	# Save previous state in tmp before setting the new one.
-	SaveCurrentToTmp $tmpSelected
-    }
-    
-    # In case this is a new profile.
-    if {[info exists tmpProfArr($profName,server)]} {
-	SetCurrentFromTmp $profName
-    }
-}
-
-proc ::Profiles::SetCurrentFromTmp {profName} {
-    variable tmpProfArr
-    variable tmpSelected
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable moreOpts
-    variable wtabnb
-
-    Debug 2 "::Profiles::SetCurrentFromTmp profName=$profName"
-    
-    set server   $tmpProfArr($profName,server)
-    set username $tmpProfArr($profName,username)
-    set password $tmpProfArr($profName,password)
-    set resource ""
-    NotebookSetDefaults [namespace current]::moreOpts $server
-    
-    foreach {key value} [array get tmpProfArr $profName,-*] {
-	set optname [string map [list $profName,- ""] $key]
-	Debug 4 "\t key=$key, value=$value, optname=$optname"
-	
-	# The 'resource' is a bit special...
-	if {$optname eq "resource"} {
-	    set resource $value
-	} else {
-	    set moreOpts($optname) $value
-	}
-    }
-    set tmpSelected $profName  
-    
-    NotebookSetAnyConfigState $wtabnb $profName
-    NotebookDefaultWidgetStates $wtabnb
-}
-
-proc ::Profiles::SaveCurrentToTmp {profName} {
-    global  prefs
-    
-    variable tmpProfArr    
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable moreOpts
-    variable defaultOptionsArr
-    
-    Debug 2 "::Profiles::SaveCurrentToTmp profName=$profName"
-    
-    # Store it in the temporary array. 
-    # But only of the profile already exists since we may have just deleted it!
-    if {[info exists tmpProfArr($profName,name)]} {
-	Debug 2 "\t exists tmpProfArr($profName,name)"
-	set tmpProfArr($profName,name)       $profName
-	set tmpProfArr($profName,server)     $server
-	set tmpProfArr($profName,username)   $username
-	set tmpProfArr($profName,password)   $password
-	if {$resource ne ""} {
-	    set tmpProfArr($profName,-resource)  $resource
-	}
-	
-	# Set more options if different from defaults.
-	foreach key [array names moreOpts] {
-	    
-	    # Cleanup any old entries. Save only if different from default.
-	    unset -nocomplain tmpProfArr($profName,-$key)
-	    set dvalue [GetDefaultOptValue $key $server]
-	    if {![string equal $moreOpts($key) $dvalue]} {
-		set tmpProfArr($profName,-$key) $moreOpts($key)
-	    }
-	}
-	set tmpSelected $profName  
-    }
-}
-
-proc ::Profiles::VerifyNonEmpty { } {
-    variable server
-    variable username
-    variable wpage
-
-    set ans 1
-    
-    # Check that necessary entries are non-empty, at least.
-    if {($server == "") || ($username == "")} {
-	::UI::MessageBox -type ok -icon error -parent [winfo toplevel $wpage] \
-	  -title [mc Error] -message [mc messfillserveruser]
-	set ans 0
-    }
-    return $ans
-}
-
-proc ::Profiles::MakeUniqueProfileName {name} {
-    variable server
-    
-    # Create a unique profile name if not given.
-    set allNames [GetAllTmpNames]
-    if {$name == ""} {
-	set name $server
-    }
-
-    # Make sure that 'profile' is unique.
-    if {[lsearch -exact $allNames $name] >= 0} {
-	set i 2
-	set tmpprof $name
-	set name ${tmpprof}-${i}
-	while {[lsearch -exact $allNames $name] >= 0} {
-	    incr i
-	    set name ${tmpprof}-${i}
-	}
-    }
-    return $name
-}
-    
-proc ::Profiles::GetAllTmpNames { } {
-    variable tmpProfArr
-    
-    set allNames {}
-    foreach {key name} [array get tmpProfArr *,name] {
-	lappend allNames $name
-    }    
-    return [lsort -dictionary $allNames]
-}
-
-proc ::Profiles::NewCmd {w} {
-    
-    variable tmpProfArr
-    variable tmpSelected
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable moreOpts
-    variable wuserinfofocus
-    variable wmenu
-    
-    set newProfile ""
-    
-    # First get a unique profile name.
-    set ans [::UI::MegaDlgMsgAndEntry [mc Profile] [mc prefprofname] \
-      "[mc {Profile Name}]:" newProfile [mc Cancel] [mc OK]]
-    if {$ans eq "cancel"} {
-	return
-    }
-    Debug 2 "::Profiles::NewCmd tmpSelected=$tmpSelected, newProfile=$newProfile"
-
-    set uniqueName [MakeUniqueProfileName $newProfile]
-    $wmenu add radiobutton -label $uniqueName  \
-      -variable [namespace current]::profile
-
-    set tmpSelected $uniqueName
-    set profile   $uniqueName
-    set server    ""
-    set username  ""
-    set password  ""
-    set resource  ""
-    NotebookSetDefaults [namespace current]::moreOpts $server
-    
-    # Must do this for it to be automatically saved.
-    set tmpProfArr($profile,name) $profile
-    focus $wuserinfofocus
-}
-
-proc ::Profiles::DeleteCmd {w} {
-    global  prefs
-    
-    variable tmpProfArr
-    variable tmpSelected
-    variable profile
-    variable wmenu
-    
-    Debug 2 "::Profiles::DeleteCmd profile=$profile"
-    set ans "yes"
-    
-    # The present state may be something that has not been stored yet.
-    if {[info exists tmpProfArr($profile,server)]} {
-	set ans [::UI::MessageBox -title [mc Warning]  \
-	  -type yesno -icon warning -default yes  \
-	  -parent [winfo toplevel $w] \
-	  -message [mc messremoveprofile]]
-    }
-    if {$ans eq "yes"} {
-	set ind [$wmenu index $profile]
-	if {$ind >= 0} {
-	    $wmenu delete $ind
-	}
-	array unset tmpProfArr "$profile,*"
-	set allNames [GetAllTmpNames]
-	
-	# Set selection to first.
-	set profile [lindex $allNames 0]
-	SetCmd $profile
-    }
-}
-
-proc  ::Profiles::DestroyHandler { } {
-    
-    trace vdelete [namespace current]::profile w  \
-      [namespace current]::TraceProfile   
-}
-
-# Profiles::SaveHook --
-# 
-#       Invoked from the Save button.
-
-proc ::Profiles::SaveHook { } {
-    global  config
-    variable profiles
-    variable selected
-    variable tmpSelected
-
-    if {$config(profiles,prefspanel)} {
-	set profiles [GetTmpProfiles]
-	set selected $tmpSelected
-	
-	# Update the Login dialog if any.
-	::Login::LoadProfiles
-    }
-}
-
-proc ::Profiles::GetTmpProfiles { } {
-    variable tmpProfArr
-    variable profile
-    
-    Debug 2 "::Profiles::GetTmpProfiles"
-    
-    # Get present dialog state into tmp array first.
-    SaveCurrentToTmp $profile
-    
-    set tmpProfiles {}
-    foreach name [GetAllTmpNames] {
-	set s $tmpProfArr($name,server)
-	set u $tmpProfArr($name,username)
-	set p $tmpProfArr($name,password)
-	set plist [list $s $u $p]
-	
-	# Set the optional options as "-key value ...". Sorted!
-	foreach key [lsort [array names tmpProfArr $name,-*]] {
-	    set optname [string map [list $name,- ""] $key]
-	    set value $tmpProfArr($key)
-
-	    switch -- $optname {
-		resource {
-		    if {[string length $value]} {
-			lappend plist -resource $value 
-		    }
-		}
-		default {
-	
-		    # Save only if different from default.
-		    set dvalue [GetDefaultOptValue $optname $s]
-		    if {![string equal $value $dvalue]} {
-			lappend plist -$optname $value
-		    }
-		}
-	    }
-	}
-	lappend tmpProfiles $name $plist
-    }
-    return $tmpProfiles
-}
-
-proc ::Profiles::CancelHook { } {
-    global  config
-    variable profiles
-    variable selected
-    variable tmpProfArr
-    variable tmpSelected
-    
-    if {$config(profiles,prefspanel)} {
-
-	# Detect any changes.
-	if {![string equal $selected $tmpSelected]} {
-	    ::Preferences::HasChanged
-	    return
-	}
-	set tmpProfiles [GetTmpProfiles]
-	array set profArr $profiles
-	array set tmpArr $tmpProfiles
-	if {![arraysequal tmpArr profArr]} {
-	    ::Preferences::HasChanged
-	}
-    }
-}
-
-proc ::Profiles::UserDefaultsHook { } {
-    global  config
-    variable selected
-    variable tmpSelected
-    variable profile
-    
-    if {$config(profiles,prefspanel)} {
-	MakeTmpProfArr
-	set tmpSelected $selected
-	set profile $selected
-	SetCmd $selected
-    }
-}
-
-namespace eval ::Profiles {
-    
-    option add *JProfiles*settingsImage        settings         widgetDefault
-    option add *JProfiles*settingsDisImage     settingsDis      widgetDefault
-}
-
-# Profiles::BuildDialog --
-# 
-#       Standalone dialog profile settings dialog.
-
-proc ::Profiles::BuildDialog { } {
-    global  wDlgs
-    
-    set w $wDlgs(jprofiles)
-    if {[winfo exists $w]} {
-	raise $w
-	return
-    }
-    
-    ::UI::Toplevel $w -class JProfiles \
-      -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
-      -closecommand ::Profiles::CloseDlgHook
-    wm title $w [mc Profiles]
-    ::UI::SetWindowPosition $w
-    
-    set im   [::Theme::GetImage [option get $w settingsImage {}]]
-    set imd  [::Theme::GetImage [option get $w settingsDisImage {}]]
-
-    # Global frame.
-    ttk::frame $w.frall
-    pack $w.frall -fill both -expand 1
-
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc Profiles] -compound left \
-      -image [list $im background $imd]
-    pack  $w.frall.head  -side top -fill both -expand 1
-
-    ttk::separator $w.frall.s -orient horizontal
-    pack  $w.frall.s  -side top -fill x
-
-    set wpage $w.frall.page
-    FrameWidget $wpage 1 -padding [option get . dialogPadding {}]
-
-    pack $wpage -side top
-    
-    # Button part.
-    set frbot $w.frall.b
-    ttk::frame $frbot -padding [option get . okcancelNoTopPadding {}]
-    ttk::button $frbot.btok -style TButton \
-      -text [mc Save]  \
-      -default active -command [list [namespace current]::SaveDlg $w]
-    ttk::button $frbot.btcancel -style TButton \
-      -text [mc Cancel]  \
-      -command [list [namespace current]::CancelDlg $w]
-    set padx [option get . buttonPadX {}]
-    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
-	pack $frbot.btok -side right
-	pack $frbot.btcancel -side right -padx $padx
-    } else {
-	pack $frbot.btcancel -side right
-	pack $frbot.btok -side right -padx $padx
-    }
-    pack $frbot -side bottom -fill x
-
-    wm resizable $w 0 0
-}
-
-proc ::Profiles::CloseDlgHook {wclose} {
-    global  wDlgs
-
-    if {[string equal $wclose $wDlgs(jprofiles)]} {
-	CancelDlg $wclose
-    }
-}
-
-proc ::Profiles::SaveDlg {w} {
-    
-    # If created new it may not have been verified.
-    if {![VerifyNonEmpty]} {
-	return
-    }
-    ::UI::SaveWinGeom $w
-    SaveHook
-    destroy $w
-}
-
-proc ::Profiles::CancelDlg {w} {
-    
-    ::UI::SaveWinGeom $w
-    destroy $w
 }
 
 proc ::Profiles::Debug {num str} {

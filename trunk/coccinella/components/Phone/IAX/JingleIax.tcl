@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.32 2006-11-02 14:13:56 matben Exp $
+# $Id: JingleIax.tcl,v 1.33 2006-11-14 13:46:39 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -389,7 +389,6 @@ proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
         #------------- 2/ Give control to Phone Component ----------------
        	
 	# Search the candidates in priority order.
-	# @@@ We should provide a list of candidates to ::Phone::DialJingle.
 	foreach name {custom public local} {
 	    if {[info exists candidateDesc($name,ip)]} { 
 		set ip   $candidateDesc($name,ip)

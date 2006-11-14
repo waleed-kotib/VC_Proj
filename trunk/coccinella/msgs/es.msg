@@ -72,6 +72,9 @@
 ::msgcat::mcset es {File...}		{Archivo...}
 ::msgcat::mcset es Filter		{Filtro}
 ::msgcat::mcset es Filters		{Filtros}
+
+::msgcat::mcset es Find
+
 ::msgcat::mcset es Finish		{Terminar}
 ::msgcat::mcset es Finished		{Terminado}
 ::msgcat::mcset es First		{Primero}
@@ -725,6 +728,7 @@
 ::msgcat::mcset es {Use Secure Connection}	{Usar conexión segura}
 ::msgcat::mcset es {Use TLS and SASL authentication}	{Usar autenticacion TLS y SASL}
 ::msgcat::mcset es {Use TLS on separate port (old)}	{Usar TLS en un puerto aparte (antigüo)}
+::msgcat::mcset es {User Info}                  {Informacion del usuario}
 ::msgcat::mcset es {User is}			{El usuario está}
 ::msgcat::mcset es {User is offline}		{El usuario está desconectado}
 ::msgcat::mcset es {User is online}		{El usuario está conectado}
