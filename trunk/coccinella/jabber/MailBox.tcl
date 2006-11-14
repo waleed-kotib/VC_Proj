@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.100 2006-11-08 07:44:38 matben Exp $
+# $Id: MailBox.tcl,v 1.101 2006-11-14 15:08:21 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1789,11 +1789,11 @@ proc ::MailBox::QuitHook { } {
 
 # Preliminary metakit mailbox --------------------------------------------------
 
-proc ::MailBox::MKInit {} {
+proc ::MailBox::MKGetFile {} {
     global  this
     
     # Note that this(prefsPath) can vary!
-    set this(inbox,mk,file) [file join $this(prefsPath) Inbox.mk]
+    return [file join $this(prefsPath) Inbox.mk]
 }
 
 proc ::MailBox::MKHaveMetakit {} {
@@ -1815,19 +1815,14 @@ proc ::MailBox::MKHaveMetakit {} {
 }
 
 proc ::MailBox::MKExists {} {
-    global  this
-
-    MKInit
-    return [file exists $this(inbox,mk,file)]
+    return [file exists [MKGetFile]]
 }
 
 proc ::MailBox::MKOpen {} {
     global  this
     
-    MKInit
-
     # This creates the file if not exists.
-    mk::file open mailbox $this(inbox,mk,file)
+    mk::file open mailbox [MKGetFile]
     
     # The actual data. 
     # The 'file' property is the tail name for any externally stored data.
@@ -2047,7 +2042,7 @@ proc ::MailBox::MKClose {} {
 proc ::MailBox::MKDelete {} {
     global  this
     MKClose
-    file delete -force $this(inbox,mk,file)
+    file delete -force [MKGetFile]
 }
 
 #-------------------------------------------------------------------------------
