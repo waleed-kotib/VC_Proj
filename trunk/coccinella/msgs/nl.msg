@@ -71,6 +71,7 @@
 ::msgcat::mcset nl File...				{Bestand...}
 ::msgcat::mcset nl Filter				{Filter}
 ::msgcat::mcset nl Filters				{Filters}
+::msgcat::mcset nl Find					{Zoeken}
 ::msgcat::mcset nl Finish				{Beëindigen}
 ::msgcat::mcset nl Finished				{Beëindigd}
 ::msgcat::mcset nl First				{Eerste}
