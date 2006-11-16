@@ -1168,7 +1168,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jachathist				{Geschiedenis tonen/verbergen}
 ::msgcat::mcset nl jawaitdisco				{Bezig met wachten op resultaat van discovery-aanvraag...}
 
-::msgcat::mcset nl jagclogoutmsg {You have logged out and exited the room}
+::msgcat::mcset nl jagclogoutmsg			{U melde af en verliet de chatruimte}
 
 ::msgcat::mcset nl {InfoRoomDesc}			{Hier kunt u de chatruimte instellen. Rol en affiliatie bepalen uw privileges.}
 
