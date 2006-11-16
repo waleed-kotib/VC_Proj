@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.20 2006-08-22 14:54:15 matben Exp $
+# $Id: avatar.tcl,v 1.21 2006-11-16 14:28:55 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -72,7 +72,6 @@ namespace eval jlib::avatar {
       [namespace current]::init    \
       [namespace current]::cmdproc
         
-    jlib::register_reset [namespace current]::reset
     jlib::disco::registerfeature $xmlns(iq-avatar)
     
     # Note: jlib::ensamble_register is last in this file!
@@ -106,6 +105,8 @@ proc jlib::avatar::init {jlibname args} {
     $jlibname iq_register get $xmlns(iq-avatar) [namespace current]::iq_handler
     $jlibname presence_register_int available   \
       [namespace current]::presence_handler
+    
+    $jlibname register_reset [namespace current]::reset
 
     return
 }

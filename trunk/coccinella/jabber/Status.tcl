@@ -5,13 +5,13 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.20 2006-09-03 13:10:55 matben Exp $
+# $Id: Status.tcl,v 1.21 2006-11-16 14:28:55 matben Exp $
 
 package provide Status 1.0
 
-namespace eval ::Jabber::Status:: {
+namespace eval ::Status:: {
 
-    ::hooks::register rosterIconsChangedHook    ::Jabber::Status::RosticonsHook
+    ::hooks::register rosterIconsChangedHook    ::Status::RosticonsHook
     
     # Mappings from <show> element to displayable text and vice versa.
     # chat away xa dnd
@@ -59,17 +59,17 @@ namespace eval ::Jabber::Status:: {
 
 }
 
-proc ::Jabber::Status::GetStatusTextArray { } {
+proc ::Status::GetStatusTextArray { } {
     variable mapShowElemToText
     
     return [array get mapShowElemToText]
 }
 
-# Jabber::Status::MainButton --
+# Status::MainButton --
 # 
 #       Make a status menu button for login status only.
 
-proc ::Jabber::Status::MainButton {w statusVar} {
+proc ::Status::MainButton {w statusVar} {
     upvar $statusVar status
     
     # We cannot use jstate(status) directly here due to the special use
@@ -79,12 +79,12 @@ proc ::Jabber::Status::MainButton {w statusVar} {
     Button $w $menuVar -command [list [namespace current]::MainCmd $w]
 
     trace add variable $statusVar write [list [namespace current]::MainTrace $w]
-    bind $w <Destroy> +[list ::Jabber::Status::MainFree %W $statusVar]
+    bind $w <Destroy> +[list ::Status::MainFree %W $statusVar]
 
     return $w
 }
 
-proc ::Jabber::Status::MainCmd {w status args} {
+proc ::Status::MainCmd {w status args} {
     
     if {[::Jabber::IsConnected]} {
 	eval {::Jabber::SetStatus $status} $args
@@ -97,7 +97,7 @@ proc ::Jabber::Status::MainCmd {w status args} {
     }
 }
 
-proc ::Jabber::Status::MainTrace {w varName index op} {
+proc ::Status::MainTrace {w varName index op} {
     upvar $varName var
     
     # This is just to sync the menuVar after the statusVar.
@@ -106,18 +106,18 @@ proc ::Jabber::Status::MainTrace {w varName index op} {
     set $menuVar $value
 }
 
-proc ::Jabber::Status::MainFree {w statusVar} {
+proc ::Status::MainFree {w statusVar} {
 
     trace remove variable $statusVar write [list [namespace current]::MainTrace $w]
     set menuVar [namespace current]::menuVar($w)
     unset -nocomplain $menuVar
 }
 
-# Jabber::Status::BuildMainMenu --
+# Status::BuildMainMenu --
 #
 #       Builds a main status menu only. Hardcoded variable jstate(status).
 
-proc ::Jabber::Status::BuildMainMenu {mt} {
+proc ::Status::BuildMainMenu {mt} {
     
     set statusVar ::Jabber::jstate(status)
     upvar $statusVar status
@@ -129,18 +129,18 @@ proc ::Jabber::Status::BuildMainMenu {mt} {
 
     trace add variable $statusVar write  \
       [list [namespace current]::MainTrace $mt]
-    bind $mt <Destroy> +[list ::Jabber::Status::MainFree %W $statusVar]
+    bind $mt <Destroy> +[list ::Status::MainFree %W $statusVar]
 
     return $mt
 }
 
-proc ::Jabber::Status::MainMenuCmd {mt varName} {
+proc ::Status::MainMenuCmd {mt varName} {
     upvar $varName status
     
     MainCmd $mt $status
 }
 
-# ::Jabber::Status::Button --
+# ::Status::Button --
 # 
 #       A few functions to build a megawidget status menu button.
 #       This shall work independent of situation; login status or room status.
@@ -153,38 +153,37 @@ proc ::Jabber::Status::MainMenuCmd {mt varName} {
 # Results:
 #       widget path.
 
-proc ::Jabber::Status::Button {w varName args} {
+proc ::Status::Button {w varName args} {
     upvar $varName status
     variable menuBuildCmd
         
-    set argsArr(-command) {}
-    array set argsArr $args
+    set argsA(-command) {}
+    array set argsA $args
 
     set wmenu $w.menu
     ttk::menubutton $w -style MiniMenubutton  \
       -compound image -image [::Rosticons::Get status/$status]
-    ConfigImage $w $status
     menu $wmenu -tearoff 0
     set menuBuildCmd($w) [list BuildGenericMenu $wmenu $varName  \
-      -command [list [namespace current]::ButtonCmd $w $varName $argsArr(-command)]]
+      -command [list [namespace current]::ButtonCmd $w $varName $argsA(-command)]]
     eval $menuBuildCmd($w)
     $w configure -menu $wmenu
     
     trace add variable $varName write [list [namespace current]::Trace $w]
-    bind $w <Destroy> +[list ::Jabber::Status::Free %W $varName]
+    bind $w <Destroy> +[list ::Status::Free %W $varName]
 
     return $w
 }
 
-proc ::Jabber::Status::ButtonCmd {w varName cmd args} {
+proc ::Status::ButtonCmd {w varName cmd args} {
     upvar $varName show
 	
-    if {$cmd != {}} {
+    if {[llength $cmd]} {
 	uplevel #0 $cmd $show $args
     }
 }
 
-proc ::Jabber::Status::Trace {w varName index op} {
+proc ::Status::Trace {w varName index op} {
     upvar $varName var
     
     if {$index eq ""} {
@@ -197,7 +196,7 @@ proc ::Jabber::Status::Trace {w varName index op} {
     }
 }
 
-proc ::Jabber::Status::ConfigImage {w show} {
+proc ::Status::ConfigImage {w show} {
         
     # Status "available" is special since used for login.
     # You have to set the state for the button itself yourself since
@@ -209,7 +208,7 @@ proc ::Jabber::Status::ConfigImage {w show} {
     }
 }
 
-proc ::Jabber::Status::PostMenu {wmenu x y} {
+proc ::Status::PostMenu {wmenu x y} {
     
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
@@ -217,12 +216,11 @@ proc ::Jabber::Status::PostMenu {wmenu x y} {
     tk_popup $wmenu [expr int($x)] [expr int($y)]
 }
 
-# Jabber::Status::BuildGenericMenu --
+# Status::BuildGenericMenu --
 # 
 #       Builds a generic status menu.
 
-proc ::Jabber::Status::BuildGenericMenu {mt varName args} {
-    global  this
+proc ::Status::BuildGenericMenu {mt varName args} {
     variable mapShowElemToText
     
     set entries {available {} away chat dnd xa invisible {} unavailable}
@@ -243,28 +241,30 @@ proc ::Jabber::Status::BuildGenericMenu {mt varName args} {
     }
     $mt add separator
     $mt add command -label [mc mAttachMessage] \
-      -command [concat ::Jabber::Status::SetWithMessage $varName $args]
-    $mt configure -postcommand [list [namespace current]::PostCmd $mt]
+      -command [concat ::Status::SetWithMessage $varName $args]
 }
 
-proc ::Jabber::Status::PostCmd {m} {
-    variable mapShowTextToElem
+proc ::Status::MenuConfig {w args} {
     
-    if {[::Jabber::GetMyStatus] eq "unavailable"} {
-	set state disabled
-    } else {
-	set state normal
-    }
-    foreach name [array names mapShowTextToElem] {
-	$m entryconfigure [$m index $name] -state $state
-    }
-    $m entryconfigure [$m index [mc mAttachMessage]] -state $state
-
-    # This wont work for rooms why the menu shall never be posted while offline.
-    $m entryconfigure [$m index [mc mAvailable]] -state normal
+    eval {$w.menu configure} $args
 }
 
-proc ::Jabber::Status::RosticonsHook { } {
+proc ::Status::MenuSetState {w which state} {
+    variable mapShowTextToElem
+    variable mapShowElemToText
+    
+    set m $w.menu
+    if {$which eq "all"} {
+	foreach name [array names mapShowTextToElem] {
+	    $m entryconfigure [$m index $name] -state $state
+	}
+	$m entryconfigure [$m index [mc mAttachMessage]] -state $state
+    } else {
+	$m entryconfigure [$m index $mapShowElemToText($which)] -state normal
+    }
+}
+
+proc ::Status::RosticonsHook { } {
     variable menuBuildCmd
     
     foreach w [array names menuBuildCmd] {
@@ -277,14 +277,14 @@ proc ::Jabber::Status::RosticonsHook { } {
     }
 }
 
-proc ::Jabber::Status::Free {w varName} {
+proc ::Status::Free {w varName} {
     variable menuBuildCmd
     
     trace remove variable $varName write [list [namespace current]::Trace $w]
     unset -nocomplain menuBuildCmd($w)
 }
 
-# Jabber::Status::BuildMenuDef --
+# Status::BuildMenuDef --
 # 
 #       Builds a menuDef list for the main status menu.
 #       
@@ -293,8 +293,7 @@ proc ::Jabber::Status::Free {w varName} {
 # Results:
 #       menuDef list.
 
-proc ::Jabber::Status::BuildMenuDef { } {
-    global  this
+proc ::Status::BuildMenuDef { } {
     variable mapShowElemToText
     variable mapShowTextToMLabel
     upvar ::Jabber::jprefs jprefs
@@ -308,7 +307,7 @@ proc ::Jabber::Status::BuildMenuDef { } {
 	} else {
 	    set mName $mapShowTextToMLabel($name)
 	    set cmd [list ::Jabber::SetStatus $name]
-	    if {[string match "mac*" $this(platform)]} {
+	    if {[tk windowingsystem] eq "aqua"} {
 		set opts [list -variable ::Jabber::jstate(status) -value $name]
 	    } else {
 		set opts [list -variable ::Jabber::jstate(status) -value $name \
@@ -318,12 +317,12 @@ proc ::Jabber::Status::BuildMenuDef { } {
 	}
     }
     lappend statMenuDef {separator}  \
-      {command mAttachMessage {::Jabber::Status::SetWithMessage ::Jabber::jstate(status)} {}}
+      {command mAttachMessage {::Status::SetWithMessage ::Jabber::jstate(status)} {}}
     
     return $statMenuDef
 }
 
-proc ::Jabber::Status::MainWithMessage {} {
+proc ::Status::MainWithMessage {} {
     upvar ::Jabber::jstate jstate
     
     set status [::Jabber::JlibCmd mypresencestatus]
@@ -333,7 +332,7 @@ proc ::Jabber::Status::MainWithMessage {} {
 
 #-- Generic status dialog ------------------------------------------------------
 
-# Jabber::Status::SetWithMessage --
+# Status::SetWithMessage --
 #
 #       Dialog for setting user's status with message.
 #       
@@ -342,8 +341,8 @@ proc ::Jabber::Status::MainWithMessage {} {
 # Results:
 #       "cancel" or "set".
 
-proc ::Jabber::Status::SetWithMessage {varName args} {
-    global  this wDlgs
+proc ::Status::SetWithMessage {varName args} {
+    global  wDlgs
 
     upvar $varName show
 
@@ -445,7 +444,7 @@ proc ::Jabber::Status::SetWithMessage {varName args} {
     return [expr {($finished <= 0) ? "cancel" : "set"}]
 }
 
-proc ::Jabber::Status::StatusMsgRadioCmd {w} {
+proc ::Status::StatusMsgRadioCmd {w} {
     upvar ::Jabber::jprefs jprefs
 
     variable $w
@@ -462,12 +461,12 @@ proc ::Jabber::Status::StatusMsgRadioCmd {w} {
     }
 }
 
-proc ::Jabber::Status::CloseStatus {w} {
+proc ::Status::CloseStatus {w} {
     
     ::UI::SaveWinGeom $w
 }
 
-proc ::Jabber::Status::SetStatusCancel {w} {    
+proc ::Status::SetStatusCancel {w} {    
     variable $w
     upvar #0 $w state
 
@@ -476,7 +475,7 @@ proc ::Jabber::Status::SetStatusCancel {w} {
     destroy $w
 }
 
-proc ::Jabber::Status::BtSetStatus {w} {
+proc ::Status::BtSetStatus {w} {
     variable $w
     upvar #0 $w state
         

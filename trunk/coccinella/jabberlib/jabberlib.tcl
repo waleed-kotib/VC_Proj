@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.160 2006-09-24 06:38:15 matben Exp $
+# $Id: jabberlib.tcl,v 1.161 2006-11-16 14:28:55 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -163,7 +163,6 @@ namespace eval jlib {
     set statics(inited) 0
     set statics(presenceTypeExp)  \
       {(available|unavailable|subscribe|unsubscribe|subscribed|unsubscribed|invisible|probe)}
-    set statics(resetCmds) {}
     
     variable version 1.0
     
@@ -316,6 +315,7 @@ proc jlib::new {clientcmd args} {
     set lib(clientcmd)      $clientcmd
     set lib(async_handler)  ""
     set lib(wrap)           $wrapper
+    set lib(resetCmds)      {}
     
     set lib(isinstream) 0
     set lib(state)      ""
@@ -466,12 +466,6 @@ proc jlib::ensamble_deregister {name} {
     array unset ensamble ${name},*
 }
 
-proc jlib::register_reset {cmd} {
-    variable statics
-    
-    lappend statics(resetCmds) $cmd
-}
-
 # jlib::cmdproc --
 #
 #       Just dispatches the command to the right procedure.
@@ -604,6 +598,13 @@ proc jlib::state {jlibname} {
     upvar ${jlibname}::lib lib
     
     return $lib(state)
+}
+
+proc jlib::register_reset {jlibname cmd} {
+    
+    upvar ${jlibname}::lib lib
+    
+    lappend lib(resetCmds) $cmd
 }
 
 # jlib::registertransport --
@@ -1740,7 +1741,6 @@ proc jlib::reset {jlibname} {
     upvar ${jlibname}::prescmd prescmd
     upvar ${jlibname}::locals locals
     upvar ${jlibname}::features features
-    variable statics
     
     Debug 4 "jlib::reset"
     
@@ -1771,7 +1771,7 @@ proc jlib::reset {jlibname} {
     }
         
     # Execute any register reset commands.
-    foreach cmd $statics(resetCmds) {
+    foreach cmd $lib(resetCmds) {
 	uplevel #0 $cmd $jlibname
     }
 }

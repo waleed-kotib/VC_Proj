@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.140 2006-09-21 12:23:57 matben Exp $	
+# $Id: Coccinella.tcl,v 1.141 2006-11-16 14:28:54 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -238,7 +238,6 @@ switch -- $this(platform) {
 ::UI::InitDlgs
 
 # The Jabber stuff. 
-# @@@ Should jabber code be loaded at all if p2p?
 ::Splash::SetMsg [mc splashsourcejabb]
 set state(launchStatus) jabber
 package require Jabber

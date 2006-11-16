@@ -5,9 +5,9 @@
 #      
 #      This code is not completed!!!!!!!
 #      
-#  Copyright (c) 2003-2005  Mats Bengtsson
+#  Copyright (c) 2003-2006  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.79 2006-09-11 09:39:24 matben Exp $
+# $Id: MUC.tcl,v 1.80 2006-11-16 14:28:54 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
