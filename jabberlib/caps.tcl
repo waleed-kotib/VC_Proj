@@ -19,7 +19,7 @@
 #  
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.15 2006-08-14 13:08:03 matben Exp $
+# $Id: caps.tcl,v 1.16 2006-11-16 14:28:55 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -46,7 +46,6 @@ namespace eval jlib::caps {
     variable xmlns
     set xmlns(caps) "http://jabber.org/protocol/caps"
     
-    jlib::register_reset [namespace current]::reset
     
     # Note: jlib::ensamble_register is last in this file!
 }
@@ -60,6 +59,8 @@ proc jlib::caps::init {jlibname args} {
       [namespace current]::avail_cb
     jlib::presence_register_int $jlibname unavailable  \
       [namespace current]::unavail_cb
+    
+    jlib::register_reset $jlibname [namespace current]::reset
 }
 
 proc jlib::caps::configure {jlibname args} {

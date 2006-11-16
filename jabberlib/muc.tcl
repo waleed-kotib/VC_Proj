@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: muc.tcl,v 1.36 2006-11-02 14:13:56 matben Exp $
+# $Id: muc.tcl,v 1.37 2006-11-16 14:28:55 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -96,6 +96,8 @@ proc jlib::muc::init {jlibname args} {
     
     # Register service.
     $jlibname service register muc muc
+
+    $jlibname register_reset [namespace current]::reset
             
     return
 }
@@ -642,6 +644,15 @@ proc jlib::muc::participants {jlibname roomjid} {
 	lappend everyone $roomjid/$attr(-resource)
     }
     return $everyone
+}
+
+proc jlib::muc::reset {jlibname} {
+    
+    upvar ${jlibname}::muc::cache cache
+    upvar ${jlibname}::muc::rooms rooms
+    
+    unset -nocomplain cache
+    unset -nocomplain rooms
 }
 
 proc jlib::muc::Debug {num str} {

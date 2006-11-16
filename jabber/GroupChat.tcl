@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.167 2006-10-30 09:36:15 matben Exp $
+# $Id: GroupChat.tcl,v 1.168 2006-11-16 14:28:54 matben Exp $
 
 package require Create
 package require Enter
@@ -24,6 +24,7 @@ namespace eval ::GroupChat:: {
     ::hooks::register quitAppHook             ::GroupChat::GetFirstPanePos
     ::hooks::register newGroupChatMessageHook ::GroupChat::GotMsg
     ::hooks::register newMessageHook          ::GroupChat::NormalMsgHook
+    ::hooks::register loginHook               ::GroupChat::LoginHook
     ::hooks::register logoutHook              ::GroupChat::LogoutHook
     ::hooks::register setPresenceHook         ::GroupChat::StatusSyncHook
     ::hooks::register groupchatEnterRoomHook  ::GroupChat::EnterHook
@@ -242,6 +243,14 @@ proc ::GroupChat::OnMenuCreate {} {
     }
 }
 
+proc ::GroupChat::IsInRoom {roomjid} {
+    if {[lsearch [::Jabber::JlibCmd service allroomsin] $roomjid] < 0} {
+	return 0
+    } else {
+	return 1
+    }
+}
+
 # GroupChat::EnterOrCreate --
 #
 #       Dispatch entering or creating a room to either 'groupchat' (gc-1.0)
@@ -306,10 +315,24 @@ proc ::GroupChat::EnterHook {roomjid protocol} {
     
     ::Debug 2 "::GroupChat::EnterHook roomjid=$roomjid $protocol"
   
-    # If we haven't a window for this roomjid, make one!
     set chattoken [GetTokenFrom chat roomjid $roomjid]
     if {$chattoken eq ""} {
+
+	# If we haven't a window for this roomjid, make one!
 	set chattoken [NewChat $roomjid]
+    } else {
+	
+	# Refresh any existing room widget.
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+	
+	TreeDeleteAll $chatstate(wusers)
+	AddUsers $chattoken
+	SetState $chattoken normal
+	$chatstate(wbtexit) configure -text [mc Exit]
+
+	set chatstate(status) "available"
+	set chatstate(oldStatus) "available"
     }
     
     SetProtocol $roomjid $protocol
@@ -738,21 +761,21 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
 	
     # Use an extra frame that contains everything room specific.
     ttk::frame $wroom -class GroupChatRoom
-#      -padding [option get . dialogSmallPadding {}]
     
     set w [winfo toplevel $wroom]
     set chatstate(w) $w    
 
     # Button part.
+    set wbtexit   $wbot.btcancel
+    set wgroup    $wbot.grp
+    set wbtstatus $wgroup.stat
+    set wbtbmark  $wgroup.bmark
+
     ttk::frame $wbot
     ttk::button $wbot.btok -text [mc Send]  \
       -default active -command [list [namespace current]::Send $dlgtoken]
     ttk::button $wbot.btcancel -text [mc Exit]  \
       -command [list [namespace current]::ExitAndClose $chattoken]
-    
-    set wgroup    $wbot.grp
-    set wbtstatus $wgroup.stat
-    set wbtbmark  $wgroup.bmark
 
     ttk::frame $wgroup
     ttk::checkbutton $wgroup.active -style Toolbutton \
@@ -763,9 +786,12 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
       -image [::Theme::GetImage bookmarkAdd]     \
       -command [list [namespace current]::BookmarkRoom $chattoken]
 
-    ::Jabber::Status::Button $wgroup.stat $chattoken\(status)   \
+    ::Status::Button $wgroup.stat $chattoken\(status)   \
       -command [list [namespace current]::StatusCmd $chattoken] 
-    ::Jabber::Status::ConfigImage $wgroup.stat available
+    ::Status::ConfigImage $wgroup.stat available
+    ::Status::MenuConfig $wgroup.stat  \
+      -postcommand [list [namespace current]::StatusPostCmd $chattoken]
+    
     ::Emoticons::MenuButton $wgroup.smile -text $wtextsend
     
     grid  $wgroup.active  $wgroup.bmark  $wgroup.stat  $wgroup.smile  \
@@ -877,6 +903,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set chatstate(wbtsubject)   $wbtsubject
     set chatstate(wbtstatus)    $wbtstatus
     set chatstate(wbtbmark)     $wbtbmark
+    set chatstate(wbtexit)      $wbtexit
     
     set ancient [expr {[clock clicks -milliseconds] - 1000000}]
     foreach whom {me you sys} {
@@ -1225,6 +1252,12 @@ proc ::GroupChat::SetState {chattoken _state} {
 
     ::Debug 2 "::GroupChat::SetState $chattoken $_state"
     
+    if {$_state eq "normal"} {
+	set tstate {!disabled}
+    } else {
+	set tstate {disabled}
+    }
+    
     set dlgtoken $chatstate(dlgtoken)
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate    
@@ -1232,12 +1265,35 @@ proc ::GroupChat::SetState {chattoken _state} {
     foreach name {send invite info} {
 	$dlgstate(wtray) buttonconfigure $name -state $_state 
     }
-    $chatstate(wbtsubject) configure -state $_state
-    $chatstate(wbtnick)    configure -state $_state
-    $chatstate(wbtsend)    configure -state $_state
-    $chatstate(wbtstatus)  configure -state $_state
-    $chatstate(wbtbmark)   configure -state $_state
+    $chatstate(wbtsubject) state $tstate
+    $chatstate(wbtnick)    state $tstate
+    $chatstate(wbtsend)    state $tstate
+    $chatstate(wbtstatus)  state $tstate
+    $chatstate(wbtbmark)   state $tstate
     $chatstate(wtextsend)  configure -state $_state
+}
+
+proc ::GroupChat::SetLogout {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+        
+    set clockFormat [option get $chatstate(w) clockFormat {}]
+    if {$clockFormat ne ""} {
+	set theTime [clock format [clock seconds] -format $clockFormat]
+	set prefix "\[$theTime\] "
+    } else {
+	set prefix ""
+    }
+    InsertTagString $chattoken $prefix syspre
+    InsertTagString $chattoken "  [mc jagclogoutmsg]\n" systext    
+
+    lassign [::Jabber::JlibCmd service hashandnick $chatstate(roomjid)] myjid -
+    TreeRemoveUser $chattoken $myjid
+
+    $chatstate(wbtexit) configure -text [mc Close]
+    
+    set chatstate(status) "unavailable"
+    set chatstate(oldStatus) "unavailable"
 }
 
 # GroupChat::SetFocus --
@@ -1639,12 +1695,6 @@ proc ::GroupChat::DoubleClick {T x y} {
     }   
 }
 
-proc ::GroupChat::TreeOnDestroy {T} {
-    variable tag2item
-    
-    array unset tag2item $T,*
-}
-
 proc ::GroupChat::TreeCreateUserItem {chattoken jid3} {
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -1762,7 +1812,33 @@ proc ::GroupChat::TreeUnsetTags {T item} {
     unset -nocomplain tag2item($T,$tag)    
 }
 
+proc ::GroupChat::TreeDeleteAll {T} {
+    variable tag2item
+    
+    $T item delete all
+    array unset tag2item $T,*
+}
+
+proc ::GroupChat::TreeOnDestroy {T} {
+    variable tag2item
+    
+    array unset tag2item $T,*
+}
+
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+proc ::GroupChat::StatusPostCmd {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set wbtstatus $chatstate(wbtstatus)
+    if {[IsInRoom $chatstate(roomjid)]} {
+	::Status::MenuSetState $wbtstatus all normal
+    } else {
+	::Status::MenuSetState $wbtstatus all disabled
+	::Status::MenuSetState $wbtstatus available normal
+    }
+}
 
 proc ::GroupChat::StatusCmd {chattoken status args} {
     variable $chattoken
@@ -1776,10 +1852,13 @@ proc ::GroupChat::StatusCmd {chattoken status args} {
 	    set chatstate(status) $chatstate(oldStatus)
 	}
     } else {
-    
-	# Send our status.
-	eval {::Jabber::SetStatus $status -to $chatstate(roomjid)} $args
-	set chatstate(oldStatus) $status
+	set roomjid $chatstate(roomjid)
+	if {[IsInRoom $roomjid]} {
+	    eval {::Jabber::SetStatus $status -to $roomjid} $args
+	    set chatstate(oldStatus) $status
+	} else {
+	    EnterOrCreate enter -roomjid $roomjid
+	}
     }
 }
 
@@ -1862,6 +1941,21 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
     # Even though we also receive what we send, denote this with send anyway.
     # This can be used to get our own room JID (nick name).
     ::History::XPutItem $historyTag $roomjid $xmldata
+}
+
+proc ::GroupChat::InsertTagString {chattoken str tag} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set wtext $chatstate(wtext)
+    
+    $wtext mark set insert end
+    $wtext configure -state normal
+
+    $wtext insert end $str $tag
+    
+    $wtext configure -state disabled
+    $wtext see end
 }
 
 # GroupChat::CloseCmd --
@@ -2268,10 +2362,10 @@ proc ::GroupChat::AddUsers {chattoken} {
     
     set presenceList [$jstate(jlib) roster getpresence $roomjid -type available]
     foreach pres $presenceList {
-	unset -nocomplain presArr
-	array set presArr $pres
+	unset -nocomplain presA
+	array set presA $pres
 	
-	set res $presArr(-resource)
+	set res $presA(-resource)
 	if {$res ne ""} {
 	    set jid3 $roomjid/$res
 	    SetUser $roomjid $jid3
@@ -2302,6 +2396,8 @@ proc ::GroupChat::SetUser {roomjid jid3} {
     set jid3    [jlib::jidmap $jid3]
 
     # If we haven't a window for this thread, make one!
+    # @@@ This shouldn't be necessary since we fill in all users when
+    #     making the room widget.
     set chattoken [GetTokenFrom chat roomjid $roomjid]
     if {$chattoken eq ""} {
 	set chattoken [NewChat $roomjid]
@@ -2583,7 +2679,6 @@ proc ::GroupChat::StatusSyncHook {status args} {
 	    ::Jabber::SetStatus $status -to $chatstate(roomjid)
 	    set chatstate(status)    $status
 	    set chatstate(oldStatus) $status
-	    #::Jabber::Status::ConfigImage $chatstate(wbtstatus) $status
 	}
     }
 }
@@ -2602,7 +2697,20 @@ proc ::GroupChat::LogoutHook { } {
 	upvar 0 $chattoken chatstate
 
 	SetState $chattoken disabled
+	SetLogout $chattoken
 	::hooks::run groupchatExitRoomHook $chatstate(roomjid)
+    }
+}
+
+proc ::GroupChat::LoginHook { } {
+    
+    # @@@ Perhaps we should autojoin any open groupchat dialogs?
+    
+    foreach chattoken [GetTokenList chat] {
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+
+	$chatstate(wbtstatus) state {!disabled}
     }
 }
 

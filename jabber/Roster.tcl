@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.179 2006-09-17 12:49:18 matben Exp $
+# $Id: Roster.tcl,v 1.180 2006-11-16 14:28:55 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -1240,7 +1240,7 @@ proc ::Roster::DirectedPresenceDlg {jid} {
     pack [label $fr.l -text "[mc Status]:"] -side left -padx 8
     set wmb $fr.mb
 
-    ::Jabber::Status::Button $wmb $token\(status)
+    ::Status::Button $wmb $token\(status)
     
     pack $wmb -side left -padx 2 -pady 2
     

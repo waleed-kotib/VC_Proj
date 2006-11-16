@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.137 2006-10-26 06:54:13 matben Exp $
+# $Id: JUI.tcl,v 1.138 2006-11-16 14:28:54 matben Exp $
 
 package provide JUI 1.0
 
@@ -175,7 +175,7 @@ proc ::JUI::Init { } {
 
     # The status menu is built dynamically due to the -image options on 8.4.
     set idx [lindex [lsearchsublists $menuDefs(rost,jabber) mStatus] 0]
-    lset menuDefs(rost,jabber) $idx 5 [::Jabber::Status::BuildMenuDef]
+    lset menuDefs(rost,jabber) $idx 5 [::Status::BuildMenuDef]
 
     set menuDefs(rost,edit) {    
 	{command   mCut              {::UI::CutEvent}           X}
@@ -345,7 +345,9 @@ proc ::JUI::Build {w} {
     pack $wfstat -fill x
   
     set wstatcont $wfstat.cont
-    ::Jabber::Status::MainButton $wfstat.bst ::Jabber::jstate(status)
+    ::Status::MainButton $wfstat.bst ::Jabber::jstate(status)
+    ::Status::MenuConfig $wfstat.bst -postcommand ::JUI::StatusPostCmd
+    
     ttk::frame $wfstat.cont
     ttk::label $wfstat.me -textvariable ::Jabber::jstate(mejidres) -anchor w
     pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
@@ -420,6 +422,18 @@ proc ::JUI::NotebookTabChanged {} {
 	}
     }
     $jwapp(wtbar) buttonconfigure chat -state $state  
+}
+
+proc ::JUI::StatusPostCmd {} {
+    variable jwapp
+    
+    if {[::Jabber::GetMyStatus] eq "unavailable"} {
+	set state disabled
+    } else {
+	set state normal
+    }
+    ::Status::MenuSetState $jwapp(mystatus) all $state
+    ::Status::MenuSetState $jwapp(mystatus) available normal
 }
 
 proc ::JUI::StatusCmd {status} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.42 2006-10-02 13:52:57 matben Exp $
+# $Id: JPrefs.tcl,v 1.43 2006-11-16 14:28:54 matben Exp $
 
 package require ui::fontselector
 
@@ -102,7 +102,7 @@ proc ::JPrefs::InitPrefsHook { } {
       ]
     
     # Default status messages.
-    foreach {status str} [::Jabber::Status::GetStatusTextArray] {
+    foreach {status str} [::Status::GetStatusTextArray] {
 	set jprefs(statusMsg,bool,$status) 0
 	set jprefs(statusMsg,msg,$status) ""
 
@@ -154,7 +154,7 @@ proc ::JPrefs::BuildAutoAwayPage {page} {
       logoutStatus} {
 	set tmpJPrefs($key) $jprefs($key)
     }
-    foreach {status str} [::Jabber::Status::GetStatusTextArray] {
+    foreach {status str} [::Status::GetStatusTextArray] {
 	set tmpJPrefs(statusMsg,bool,$status) $jprefs(statusMsg,bool,$status)
 	set tmpJPrefs(statusMsg,msg,$status)  $jprefs(statusMsg,msg,$status)
     }
@@ -205,7 +205,7 @@ proc ::JPrefs::BuildAutoAwayPage {page} {
     pack  $waa.lab  $waf  $was  -side top -anchor w
     
     # Default logout status.
-    array set statusTextArr [::Jabber::Status::GetStatusTextArray]
+    array set statusTextArr [::Status::GetStatusTextArray]
     set wlo $wc.lo
     ttk::labelframe $wlo -text [mc {Default status descriptions}] \
       -padding [option get . groupSmallPadding {}]

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jingle.tcl,v 1.6 2006-06-01 12:33:11 matben Exp $
+# $Id: jingle.tcl,v 1.7 2006-11-16 14:28:55 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -138,8 +138,6 @@ namespace eval jlib::jingle {
 	modifying,transport-decline active
     }
     
-    jlib::register_reset [namespace current]::reset
-    
     # Note: jlib::ensamble_register is last in this file!
 }
 
@@ -233,6 +231,7 @@ proc jlib::jingle::init {jlibname args} {
                 
     # Register some standard iq handlers that is handled internally.
     $jlibname iq_register  set  $jxmlns(jingle) [namespace current]::set_handler
+    $jlibname register_reset [namespace current]::reset
 
     return
 }
