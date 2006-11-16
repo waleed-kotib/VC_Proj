@@ -1187,6 +1187,7 @@ Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jaseliconset {Välj ikonsammling för varje grupp. Varje grupp kan väljas bort.}
 ::msgcat::mcset sv jachathist   {Visa eller göm chatt historiken}
 ::msgcat::mcset sv jawaitdisco  {Väntar på disco resultat...}
+::msgcat::mcset sv jagclogoutmsg {Du har loggat ut och lämnat rummet}
 
 
 ::msgcat::mcset sv InfoRoomDesc {Den här dialogen möjliggör ett antal rumsinställningar. Din roll och adoption bestämmer din rättighet att agera. Ytterligare restriktioner kan finnas beroende på\

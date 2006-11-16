@@ -1224,6 +1224,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jawaitdisco {Waiting for disco result...}
 ::msgcat::mcset es jachathist   {Muestra u oculta el historial del chat}
 
+::msgcat::mcset es jagclogoutmsg {You have logged out and exited the room}
+
 
 ::msgcat::mcset es {InfoRoomDesc}       {En esta ventana puede cambiar las opciones así como administrarr
  la sala\

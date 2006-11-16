@@ -1182,7 +1182,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
 ::msgcat::mcset en jachathist   {Show or hide the chat history}
 ::msgcat::mcset en jawaitdisco  {Waiting for disco result...}
-
+::msgcat::mcset en jagclogoutmsg {You have logged out and exited the room}
 
 ::msgcat::mcset en {InfoRoomDesc}       {This dialog makes available a number of options and actions for a room. Your role and affiliation determines your privilege to act.\
 Further restrictions may exist depending on specific room configuration.}

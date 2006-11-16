@@ -1184,6 +1184,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jawaitdisco {Czekam na wyniki przeszukiwania...}
 ::msgcat::mcset pl InfoRoomDesc {Tu udostępnia się możliwość podejmowania rozmaitych akcji i zmiany ustawień - dostępnych w danym pokoju. Ich dostępność zależy od Twojej bieżącej roli i przypisania. Inne ograniczenia mogą zależeć od jakichś specyficznych ustawień pokoju.}
 
+::msgcat::mcset pl jagclogoutmsg {You have logged out and exited the room}
+
 # Setup assistant:
 ::msgcat::mcset pl suintro1 	{Pomocnik Konfiguracyjny (Asystent Ustawień) pomoże dokonać wpisów niezbędnych w celu założenia nowego konta Jabberowego, lub korzystania z już istniejącego.}
 ::msgcat::mcset pl suintro2 	{Jeżeli zamierzasz "działać" w trybie peer-to-peer, po prostu zaznacz to w panelu preferencji - i zrestartuj program.}
