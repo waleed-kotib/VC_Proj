@@ -1175,6 +1175,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset it jachathist {Mostra/nascondi l'archivio storico della chat}
 ::msgcat::mcset it jawaitdisco {In attesa di un risultato da "disco"...}
 
+::msgcat::mcset it jagclogoutmsg {You have logged out and exited the room}
+
 ::msgcat::mcset it {InfoRoomDesc} {Questa finestra di dialogo rende disponibile alcune opzioni ed azioni possibili in una stanza. I tuoi permessi determinano i privilegi con cui puoi agire. Potrebbero esistere ulteriori restrizioni, dipendenti dalla configurazione specifica della stanza.}
 
 # Setup assistant:

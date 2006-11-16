@@ -1222,7 +1222,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jaregisterexserv {Register with the service %s. You may need to press the Get button if not registration info obtained automatically.}
 ::msgcat::mcset fr jachathist {Show or hide the chat history}
 ::msgcat::mcset fr jawaitdisco {Waiting for disco result...}
-
+::msgcat::mcset fr jagclogoutmsg {You have logged out and exited the room}
 ::msgcat::mcset fr InfoRoomDesc {This dialog makes available a number of options and actions for a room. Your role and affiliation determines your privilege to act. Further restrictions may exist depending on specific room configuration.}
 #--- Translate ---
 

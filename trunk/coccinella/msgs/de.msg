@@ -1200,6 +1200,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jachathist {Chat-Verlauf anzeigen/verstecken}
 ::msgcat::mcset de jawaitdisco {Warte auf Disco-Ergebnisse...}
 
+::msgcat::mcset de jagclogoutmsg {You have logged out and exited the room}
+
 ::msgcat::mcset de InfoRoomDesc {Dieser Dialog stellt eine Anzahl Optionen und Aktionen für einen Raum zur Verfügungtions. Ihre Rolle und Zugehörigkeit bestimmen Ihre Handlungsprivilegien. Abhängig von speziellen Raumkonfigurationen kann es weitere Beschränkungen geben.}
 
 # Setup assistant:
