@@ -5,7 +5,7 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.95.15 (?):
+Coccinella-0.95.15 (20061117):
 
  o added option to avoid saving password when registering
  o added Jabber/Register/ICQ,MSN,... sub menus
@@ -13,7 +13,7 @@ Coccinella-0.95.15 (?):
  o more robust TLS negotiation on slow networks
  o now the complete prefs folder can be stored on a removable drive
 
-Coccinella-0.95.14 (061010):
+Coccinella-0.95.14 (20061010):
 
  o support for DNS SRV and TXT (HTTP) lookup
  o pubsub library support
@@ -28,11 +28,11 @@ Coccinella-0.95.14 (061010):
  o new xml based chat log format
  o added support for pep/mood
 
-Coccinella-0.95.13 (060622):
+Coccinella-0.95.13 (20060622):
 
  o Critical bugfix for iaxclient on linux systems without audio support
 
-Coccinella-0.95.12 (060616):
+Coccinella-0.95.12 (20060616):
 
  o new application theme engine
  o systray support on X11 (linux)
@@ -57,7 +57,7 @@ Coccinella-0.95.12 (060616):
  o chat state notification (JEP-0085)
  o new Qt theme on linux (KDE)
 
-Coccinella-0.95.11 (060115):
+Coccinella-0.95.11 (20060115):
 
  o added support for Growl on mac
  o using treectrl widget in a number of places
@@ -68,7 +68,7 @@ Coccinella-0.95.11 (060115):
  o extensive build configuration possible
  o integrated Jive/Asterisk phone presence status
 
-Coccinella-0.95.10 (051018):
+Coccinella-0.95.10 (20051018):
 
  o server connections using http possible; http proxy added
  o added the tkpng package; png support now required
@@ -81,27 +81,27 @@ Coccinella-0.95.10 (051018):
  o support for conference bookmarks according to JEP-0048
  o whiteboard actions are now constrained to the actual scroll region
 
-Coccinella-0.95.9 (050821):
+Coccinella-0.95.9 (20050821):
 
  o completely rewritten user interface with new theming engine (tile)
  o vCard avatar
 
-Coccinella-0.95.8 (050620):
+Coccinella-0.95.8 (20050620):
 
  o reworked the registration process
 
-Coccinella-0.95.7 (050429):
+Coccinella-0.95.7 (20050429):
 
  o added canvas locking mechanism
 
-Coccinella-0.95.6 (050425):
+Coccinella-0.95.6 (20050425):
 
  o added PLAIN sasl mechanism
  o updated QuickTime support which fixed an instabilty problem
    and an audio problem on Windows
  o fixed snapshot bug
 
-Coccinella-0.95.5 (050311):
+Coccinella-0.95.5 (20050311):
 
  o added support for kprinter on unix
  o status changes displayed in roster
@@ -110,18 +110,18 @@ Coccinella-0.95.5 (050311):
  o added a keepalive mechansism to guard against aggresive routers
 
 
-Coccinella-0.95.4 (050126):
+Coccinella-0.95.4 (20050126):
 
  o critical bug in one of the message catalogs
 
 
-Coccinella-0.95.3 (050125):
+Coccinella-0.95.3 (20050125):
 
  o minor bugfixes
  o added add server feature to disco
 
 
-Coccinella-0.95.2 (041217): 	Short summary --
+Coccinella-0.95.2 (20041217): 	Short summary --
 
  o each page, roster, disco, browser, agents, now have their own status widget
  o extended buddy pouncing
@@ -134,14 +134,14 @@ Coccinella-0.95.2 (041217): 	Short summary --
  o bindings to Gnome Meeting on unix
 
 
-Coccinella-0.95.1 (040930): 	Short summary --
+Coccinella-0.95.1 (20040930): 	Short summary --
 
  o SASL authentication
  o Reworked several dialogs (new user, edit user, subscription)
  o Reworked how transports are displayed and handled
 
 
-Coccinella-0.95.0 (040904): 	Short summary --
+Coccinella-0.95.0 (20040904): 	Short summary --
 
  o tabbed chat dialog
  o auto hide scrollbars
@@ -165,18 +165,18 @@ Coccinella-0.95.0 (040904): 	Short summary --
  o using disco as default in place of browse
 
 
-Coccinella-0.94.11 (040601): 	Short summary --
+Coccinella-0.94.11 (20040601): 	Short summary --
 
  o internal ip not always set correctly which made transfers fail
 
 
-Coccinella-0.94.10 (040528): 	Short summary --
+Coccinella-0.94.10 (20040528): 	Short summary --
 
  o STRINGPREP fixes in roster, browse, disco,...
  o minor fixes for XMPP (ejabberd and jabberd2)
 
 
-Coccinella-0.94.9 (04????): 	Short summary --
+Coccinella-0.94.9 (2004????): 	Short summary --
 
  o prepared for using xml/svg for all whiteboard stuff
  o major internal code reorganizations to separate whiteboard code from 
@@ -191,14 +191,14 @@ Coccinella-0.94.9 (04????): 	Short summary --
  o added privacy/filter support
 
 
-Coccinella-0.94.8 (040305): 	Short summary --
+Coccinella-0.94.8 (20040305): 	Short summary --
 
  o fixed critical bugs in p2p startup
  o fixed bug when auto away
  o added SVG importer
 
 
-Coccinella-0.94.7 (040228): 	Short summary --
+Coccinella-0.94.7 (20040228): 	Short summary --
 
  o separating actual whiteboard code from rest.
  o uses resource database for everything, also images
@@ -212,7 +212,7 @@ Coccinella-0.94.7 (040228): 	Short summary --
    linux/unix and windows
 
 
-Coccinella-0.94.6 (03????): 	Short summary --
+Coccinella-0.94.6 (2003????): 	Short summary --
 
  o internal http server in its own thread if available
  o better redo/undo functionality
@@ -229,7 +229,7 @@ Coccinella-0.94.6 (03????): 	Short summary --
  o reworked button tray into a mega widget
 
 
-Coccinella-0.94.5 (0309??): 	Short summary --
+Coccinella-0.94.5 (200309??): 	Short summary --
 
  o jid completion entry
  o setup assistant with free servers info dialog
@@ -245,7 +245,7 @@ Coccinella-0.94.5 (0309??): 	Short summary --
  o changed name of main file to Coccinella.tcl
 
 
-Whiteboard-0.94.4 (030616): 	Short summary --
+Whiteboard-0.94.4 (20030616): 	Short summary --
 
  o all jabber UI elements moved from whiteboard window to roster window
  o get side of file transport rewritten from scratch
@@ -253,7 +253,7 @@ Whiteboard-0.94.4 (030616): 	Short summary --
  o a plugin structure for the whiteboard
 
 
-Whiteboard-0.94.3 (0301??): 	Short summary --
+Whiteboard-0.94.3 (200301??): 	Short summary --
 
  o whiteboards now multiinstance for jabber; send single whiteboard
    messages, each chat and groupchat in separate whiteboards
@@ -264,7 +264,7 @@ Whiteboard-0.94.3 (0301??): 	Short summary --
  o really many bugfixes...
 
 
-Whiteboard-0.94.2 (02????): 	Short summary --
+Whiteboard-0.94.2 (2002????): 	Short summary --
 
  o undo/redo method of canvas
  o localization (language adaption) introduced via message catalogs
@@ -275,7 +275,7 @@ Whiteboard-0.94.2 (02????): 	Short summary --
  o numerous rewrites and bugfixes
 
 
-Whiteboard-0.94.1 (02????): 	Short summary --
+Whiteboard-0.94.1 (2002????): 	Short summary --
 
  o complete rewrite of the put side of the peer-to-peer file transfer
  o roster and browser (or agents) in tabbed window
@@ -292,7 +292,7 @@ Whiteboard-0.94.1 (02????): 	Short summary --
  o numerous rewrites and bugfixes
 
 
-Whiteboard-0.94 (02????): 	Short summary --
+Whiteboard-0.94 (2002????): 	Short summary --
 
  o new inbox and other dialogs for message handling
  o printing support, expat parser, ssl, MS Speech on Windows
@@ -306,7 +306,7 @@ Whiteboard-0.94 (02????): 	Short summary --
  o QuickTime movies streamed via http if possible
 
 
-Whiteboard-0.93.1 (02????): 	Short summary --
+Whiteboard-0.93.1 (2002????): 	Short summary --
 	
  o minor bugfixes and error checks
  o added prefs(stripJabber) option
@@ -315,14 +315,14 @@ Whiteboard-0.93.1 (02????): 	Short summary --
  o restricted sending to ill formed jid's (@jabber.org)
 
 
-Whiteboard-0.93 (020127): 	Short summary --
+Whiteboard-0.93 (20020127): 	Short summary --
 
  o adapting to the jabber XML IM server system
  o preferences are now collected in one window
  o code base more than doubled compared to 0.92...
 
 
-Whiteboard-0.92 (001128): 	Short summary --
+Whiteboard-0.92 (20001128): 	Short summary --
 
  o new tiny http server
  o is now running on Windows (98)
@@ -338,7 +338,7 @@ Whiteboard-0.92 (001128): 	Short summary --
  o many code rewrites, bug fixes, and enhancements
 
 
-Whiteboard-0.91 (000517): 	Short summary --
+Whiteboard-0.91 (20000517): 	Short summary --
 
  o new tools, arc item and rotate
  o collapsable shortcut toolbar
@@ -353,7 +353,7 @@ Whiteboard-0.91 (000517): 	Short summary --
  o many code rewrites, bug fixes, and enhancements
 
 
-Whiteboard-0.90 (991201): 	First official release.
+Whiteboard-0.90 (19991201): 	First official release.
 
 
 
