@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.168 2006-11-16 14:28:54 matben Exp $
+# $Id: GroupChat.tcl,v 1.169 2006-11-17 08:04:45 matben Exp $
 
 package require Create
 package require Enter
@@ -1862,6 +1862,30 @@ proc ::GroupChat::StatusCmd {chattoken status args} {
     }
 }
 
+proc ::GroupChat::StatusSyncHook {status args} {
+    upvar ::Jabber::jprefs jprefs
+
+    if {$status eq "unavailable"} {
+	# This is better handled via the logout hook.
+	return
+    }
+    array set argsA $args
+
+    if {$jprefs(gchat,syncPres) && ![info exists argsA(-to)]} {
+	foreach chattoken [GetTokenList chat] {
+	    variable $chattoken
+	    upvar 0 $chattoken chatstate
+
+	    set roomjid $chatstate(roomjid)
+	    if {[IsInRoom $roomjid]} {
+		::Jabber::SetStatus $status -to $roomjid
+		set chatstate(status)    $status
+		set chatstate(oldStatus) $status
+	    }
+	}
+    }
+}
+
 # GroupChat::InsertMessage --
 # 
 #       Puts message in text groupchat window.
@@ -2659,28 +2683,6 @@ proc ::GroupChat::Print {dlgtoken} {
     upvar 0 $chattoken chatstate
     
     ::UserActions::DoPrintText $chatstate(wtext) 
-}
-
-proc ::GroupChat::StatusSyncHook {status args} {
-    upvar ::Jabber::jprefs jprefs
-
-    if {$status eq "unavailable"} {
-	# This is better handled via the logout hook.
-	return
-    }
-    array set argsA $args
-
-    if {$jprefs(gchat,syncPres) && ![info exists argsA(-to)]} {
-	foreach chattoken [GetTokenList chat] {
-	    variable $chattoken
-	    upvar 0 $chattoken chatstate
-	    
-	    # Send our status.
-	    ::Jabber::SetStatus $status -to $chatstate(roomjid)
-	    set chatstate(status)    $status
-	    set chatstate(oldStatus) $status
-	}
-    }
 }
 
 # GroupChat::LogoutHook --
