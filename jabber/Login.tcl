@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.103 2006-11-14 13:46:39 matben Exp $
+# $Id: Login.tcl,v 1.104 2006-11-18 14:53:55 matben Exp $
 
 package provide Login 1.0
 
@@ -480,16 +480,17 @@ proc ::Login::LaunchHook { } {
     
     # Use our selected profile.
     set profname [::Profiles::GetSelectedName]
+    set domain   [::Profiles::Get $profname domain]
+    set node     [::Profiles::Get $profname node]
     set password [::Profiles::Get $profname password]
+    set jid [jlib::joinjid $node $domain ""]
     set ans "ok"
     if {$password eq ""} {
 	set ans [::UI::MegaDlgMsgAndEntry  \
-	  [mc {Password}] [mc enterpassword $state(jid)] "[mc Password]:" \
+	  [mc {Password}] [mc enterpassword $jid] "[mc Password]:" \
 	  password [mc Cancel] [mc OK] -show {*}]
     }
     if {$ans eq "ok"} {
-	set domain [::Profiles::Get $profname domain]
-	set node   [::Profiles::Get $profname node]
 	set opts   [::Profiles::Get $profname options]
 	array set optsArr $opts
 	if {[info exists optsArr(-resource)] && ($optsArr(-resource) ne "")} {
