@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.21 2006-11-16 14:28:55 matben Exp $
+# $Id: avatar.tcl,v 1.22 2006-11-19 15:11:23 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -40,10 +40,10 @@
 #      jlibName avatar have_data jid2
 #      jlibName avatar have_hash jid2
 #      
-#   Note that all internal storage refers to bare (2-tier) jids!
-#   @@@ It is unclear if this is correct. Perhaps the full jids shall be used.
-#   The problem is with JEP-0008 mixing jid2 with jid3.  
-#   Note that all vCards are defined per jid2, bare JID.
+#   Note that all internal storage refers to bare (2-tier) JIDs!
+#   @@@ It is unclear if this is correct. Perhaps the full JIDs shall be used.
+#   The problem is with JEP-0008 mixing JID2 with JID3.  
+#   Note that all vCards are defined per JID2, bare JID.
 #   
 #   No automatic presence or server storage is made when reconfiguring or
 #   changing own avatar. This is up to the client layer to do.
@@ -328,8 +328,9 @@ proc jlib::avatar::iq_handler {jlibname from queryElem args} {
 proc jlib::avatar::get_data {jlibname jid2} {
     upvar ${jlibname}::avatar::state state
     
-    if {[info exists state($jid2,data)]} {
-	return $state($jid2,data)
+    set mjid2 [jlib::jidmap $jid2]
+    if {[info exists state($mjid2,data)]} {
+	return $state($mjid2,data)
     } else {
 	return ""
     }
@@ -338,8 +339,9 @@ proc jlib::avatar::get_data {jlibname jid2} {
 proc jlib::avatar::get_mime {jlibname jid2} {
     upvar ${jlibname}::avatar::state state
     
-    if {[info exists state($jid2,mime)]} {
-	return $state($jid2,mime)
+    set mjid2 [jlib::jidmap $jid2]
+    if {[info exists state($mjid2,mime)]} {
+	return $state($mjid2,mime)
     } else {
 	return ""
     }
@@ -348,18 +350,16 @@ proc jlib::avatar::get_mime {jlibname jid2} {
 proc jlib::avatar::have_data {jlibname jid2} {
     upvar ${jlibname}::avatar::state state
     
-    if {[info exists state($jid2,data)]} {
-	return 1
-    } else {
-	return 0
-    }
+    set mjid2 [jlib::jidmap $jid2]
+    return [info exists state($mjid2,data)]
 }
 
 proc jlib::avatar::get_hash {jlibname jid2} {
     upvar ${jlibname}::avatar::state state
     
-    if {[info exists state($jid2,hash)]} {
-	return $state($jid2,hash)
+    set mjid2 [jlib::jidmap $jid2]
+    if {[info exists state($mjid2,hash)]} {
+	return $state($mjid2,hash)
     } else {
 	return ""
     }
@@ -368,25 +368,24 @@ proc jlib::avatar::get_hash {jlibname jid2} {
 proc jlib::avatar::have_hash {jlibname jid2} {
     upvar ${jlibname}::avatar::state state
     
-    return [info exists state($jid2,hash)]
+    set mjid2 [jlib::jidmap $jid2]
+    return [info exists state($mjid2,hash)]
 }
 
 proc jlib::avatar::have_hash_protocol {jlibname jid2 protocol} {
     upvar ${jlibname}::avatar::state state
     
-    if {[info exists state($jid2,protocol,$protocol)]} {
-	return 1
-    } else {
-	return 0
-    }
+    set mjid2 [jlib::jidmap $jid2]
+    return [info exists state($mjid2,protocol,$protocol)]
 }
 
 proc jlib::avatar::get_protocols {jlibname jid2} {
     upvar ${jlibname}::avatar::state state
     
     set protocols {}
+    set mjid2 [jlib::jidmap $jid2]
     foreach p {avatar vcard} {
-	if {[info exists state($jid2,protocol,$p)]} {
+	if {[info exists state($mjid2,protocol,$p)]} {
 	    lappend protocols $p
 	}
     }
@@ -401,8 +400,9 @@ proc jlib::avatar::get_protocols {jlibname jid2} {
 proc jlib::avatar::get_full_jid {jlibname jid2} {
     upvar ${jlibname}::avatar::state state
 
-    if {[info exists state($jid2,jid3)]} {
-	return $state($jid2,jid3)
+    set mjid2 [jlib::jidmap $jid2]
+    if {[info exists state($mjid2,jid3)]} {
+	return $state($mjid2,jid3)
     } else {
 	return $jid2
     }
@@ -432,8 +432,9 @@ proc jlib::avatar::get_all_avatar_jids {jlibname} {
 proc jlib::avatar::uptodate {jlibname jid2} {
     upvar ${jlibname}::avatar::state state
 
-    if {[info exists state($jid2,uptodate)]} {
-	return $state($jid2,uptodate)
+    set mjid2 [jlib::jidmap $jid2]
+    if {[info exists state($mjid2,uptodate)]} {
+	return $state($mjid2,uptodate)
     } else {
 	return 0
     }
@@ -451,18 +452,18 @@ proc jlib::avatar::presence_handler {jlibname xmldata} {
 
     set from [wrapper::getattribute $xmldata from]
     set mjid [jlib::jidmap $from]
-    set jid2 [jlib::barejid $mjid]
+    set mjid2 [jlib::barejid $mjid]
 
-    if {[info exists state($jid2,hash)]} {
+    if {[info exists state($mjid2,hash)]} {
 	set new 0
-	set oldhash $state($jid2,hash)
+	set oldhash $state($mjid2,hash)
     } else {
 	set new 1
     }
     set gotAvaHash [PresenceAvatar $jlibname $xmldata]
     set gotVcardHash [PresenceVCard $jlibname $xmldata]
     
-    #puts "\t jid2=$jid2"
+    #puts "\t mjid2=$mjid2"
     #puts "\t gotAvaHash=$gotAvaHash"
     #puts "\t gotVcardHash=$gotVcardHash"
         
@@ -470,15 +471,15 @@ proc jlib::avatar::presence_handler {jlibname xmldata} {
     
 	# 'uptodate' tells us if we need to request new avatar.
 	# If new, or not identical to previous, unless empty.
-	if {$new || ($state($jid2,hash) ne $oldhash)} {
-	    set hash $state($jid2,hash)
+	if {$new || ($state($mjid2,hash) ne $oldhash)} {
+	    set hash $state($mjid2,hash)
 	    
 	    # hash can be empty.
 	    if {$hash eq ""} {
-		set state($jid2,uptodate) 1
-		unset -nocomplain state($jid2,data)
+		set state($mjid2,uptodate) 1
+		unset -nocomplain state($mjid2,data)
 	    } else {
-		set state($jid2,uptodate) 0
+		set state($mjid2,uptodate) 0
 	    }
 	    if {[string length $options(-command)]} {
 		uplevel #0 $options(-command) [list $from]
@@ -487,8 +488,8 @@ proc jlib::avatar::presence_handler {jlibname xmldata} {
     } else {
 	
 	# Must be sure that nothing there.
-	if {[info exists state($jid2,hash)]} {
-	    array unset state [jlib::ESC $jid2],*
+	if {[info exists state($mjid2,hash)]} {
+	    array unset state [jlib::ESC $mjid2],*
 	}
     }
 }
@@ -510,12 +511,12 @@ proc jlib::avatar::PresenceAvatar {jlibname xmldata} {
 	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] hash]
 	set hash [wrapper::getcdata $hashElem]
 	set from [wrapper::getattribute $xmldata from]
-	set jid2 [jlib::barejid $from]
+	set mjid2 [jlib::jidmap [jlib::barejid $from]]
 	
 	# hash can be empty.
-	set state($jid2,hash) $hash
-	set state($jid2,jid3) $from
-	set state($jid2,protocol,avatar) 1
+	set state($mjid2,hash) $hash
+	set state($mjid2,jid3) $from
+	set state($mjid2,protocol,avatar) 1
 	set gotHash 1
     }
     return $gotHash
@@ -531,12 +532,12 @@ proc jlib::avatar::PresenceVCard {jlibname xmldata} {
 	set hashElem [wrapper::getfirstchildwithtag [lindex $elems 0] photo]
 	set hash [wrapper::getcdata $hashElem]
 	set from [wrapper::getattribute $xmldata from]
-	set jid2 [jlib::barejid $from]
+	set mjid2 [jlib::jidmap [jlib::barejid $from]]
 
 	# Note that all vCards are defined per jid2, bare JID.
-	set state($jid2,hash) $hash
-	set state($jid2,jid3) $from
-	set state($jid2,protocol,vcard) 1
+	set state($mjid2,hash) $hash
+	set state($mjid2,jid3) $from
+	set state($mjid2,protocol,vcard) 1
 	set gotHash 1
     }
     return $gotHash
@@ -551,14 +552,14 @@ proc jlib::avatar::PresenceVCard {jlibname xmldata} {
 proc jlib::avatar::get_async {jlibname jid cmd} {
     upvar ${jlibname}::avatar::state state
     
-    jlib::splitjid $jid jid2 -
-    if {[uptodate $jlibname $jid2]} {
-	uplevel #0 $cmd [list result $jid2]
-    } elseif {[info exists state($jid2,pending)]} {
-	lappend state($jid2,invoke) $cmd
+    set mjid2 [jlib::jidmap [jlib::barejid $jid]]
+    if {[uptodate $jlibname $mjid2]} {
+	uplevel #0 $cmd [list result $mjid2]
+    } elseif {[info exists state($mjid2,pending)]} {
+	lappend state($mjid2,invoke) $cmd
     } else {
 	send_get $jlibname $jid  \
-	  [list [namespace current]::get_async_cb $jlibname $jid2 $cmd]
+	  [list [namespace current]::get_async_cb $jlibname $mjid2 $cmd]
     }
 }
 
@@ -579,8 +580,8 @@ proc jlib::avatar::send_get {jlibname jid cmd} {
     
     debug "jlib::avatar::send_get jid=$jid"
     
-    jlib::splitjid $jid jid2 -
-    set state($jid2,pending) 1
+    set mjid2 [jlib::jidmap [jlib::barejid $jid]]
+    set state($mjid2,pending) 1
     $jlibname iq_get $xmlns(iq-avatar) -to $jid  \
       -command [list [namespace current]::send_get_cb $jid $cmd]    
 }
@@ -591,17 +592,18 @@ proc jlib::avatar::send_get_cb {jid cmd jlibname type subiq args} {
         
     debug "jlib::avatar::send_get_cb jid=$jid"
     
-    jlib::splitjid $jid jid2 -
-    unset -nocomplain state($jid2,pending)
+    set jid2  [jlib::barejid $jid]
+    set mjid2 [jlib::jidmap $jid2]
+    unset -nocomplain state($mjid2,pending)
 
     if {$type eq "error"} {
 	
 	# JEP-0008: "If the first method fails, the second method that should
 	# be attempted by sending a request to the server..."
-	send_get_storage $jlibname $jid2 $cmd
+	send_get_storage $jlibname $mjid2 $cmd
     } elseif {$type eq "result"} {
-	set ok [SetDataFromQueryElem $jlibname $jid2 $subiq $xmlns(iq-avatar)]
-	invoke_stacked $jlibname $type $jid2
+	set ok [SetDataFromQueryElem $jlibname $mjid2 $subiq $xmlns(iq-avatar)]
+	InvokeStacked $jlibname $type $jid2
 	uplevel #0 $cmd [list $type $subiq] $args
     }
 }
@@ -614,7 +616,7 @@ proc jlib::avatar::send_get_cb {jid cmd jlibname type subiq args} {
 # Results:
 #       1 if there was data to store, 0 else.
 
-proc jlib::avatar::SetDataFromQueryElem {jlibname jid2 queryElem ns} {
+proc jlib::avatar::SetDataFromQueryElem {jlibname mjid2 queryElem ns} {
     upvar ${jlibname}::avatar::state state
     
     # Data may be empty from xmlns='storage:client:avatar' !
@@ -625,14 +627,14 @@ proc jlib::avatar::SetDataFromQueryElem {jlibname jid2 queryElem ns} {
 	if {$dataElem ne {}} {
 	    
 	    # Mime type can be empty.
-	    set state($jid2,mime) [wrapper::getattribute $dataElem mimetype]
+	    set state($mjid2,mime) [wrapper::getattribute $dataElem mimetype]
 
 	    # We keep data in base64 format. This seems to be ok for image 
 	    # handlers.
 	    set data [wrapper::getcdata $dataElem]
 	    if {[string length $data]} {
-		set state($jid2,data) $data
-		set state($jid2,uptodate) 1
+		set state($mjid2,data) $data
+		set state($mjid2,uptodate) 1
 		set ans 1
 	    }
 	}
@@ -646,7 +648,8 @@ proc jlib::avatar::send_get_storage {jlibname jid2 cmd} {
     
     debug "jlib::avatar::send_get_storage jid2=$jid2"
     
-    set state($jid2,pending) 1
+    set mjid2 [jlib::jidmap $jid2]
+    set state($mjid2,pending) 1
     $jlibname iq_get $xmlns(storage) -to $jid2  \
       -command [list [namespace current]::send_get_storage_cb $jid2 $cmd]    
 }
@@ -657,17 +660,19 @@ proc jlib::avatar::send_get_storage_cb {jid2 cmd jlibname type subiq args} {
 
     debug "jlib::avatar::send_get_storage_cb type=$type"
 
-    unset -nocomplain state($jid2,pending)
+    set mjid2 [jlib::jidmap $jid2]
+    unset -nocomplain state($mjid2,pending)
     if {$type eq "result"} {
-	set ok [SetDataFromQueryElem $jlibname $jid2 $subiq $xmlns(storage)]
+	set ok [SetDataFromQueryElem $jlibname $mjid2 $subiq $xmlns(storage)]
     }
-    invoke_stacked $jlibname $type $jid2
+    InvokeStacked $jlibname $type $jid2
     uplevel #0 $cmd [list $type $subiq] $args
 }
 
-proc jlib::avatar::invoke_stacked {jlibname type jid2} {
+proc jlib::avatar::InvokeStacked {jlibname type jid2} {
     upvar ${jlibname}::avatar::state state
     
+    set mjid2 [jlib::jidmap $jid2]
     if {[info exists state($jid2,invoke)]} {
 	foreach cmd $state($jid2,invoke) {
 	    uplevel #0 $cmd [list $jlibname $type $jid2]
@@ -727,7 +732,8 @@ proc jlib::avatar::send_get_vcard_cb {jid2 cmd jlibname type subiq args} {
     debug "jlib::avatar::send_get_vcard_cb"
 
     if { $type eq "result" } {
-	SetDataFromVCardElem $jlibname $jid2 $subiq
+	set mjid2 [jlib::jidmap $jid2]
+	SetDataFromVCardElem $jlibname $mjid2 $subiq
 	uplevel #0 $cmd [list $type $subiq] $args
     }
 }
@@ -740,7 +746,7 @@ proc jlib::avatar::send_get_vcard_cb {jid2 cmd jlibname type subiq args} {
 # Results:
 #       1 if there was data to store, 0 else.
 
-proc jlib::avatar::SetDataFromVCardElem {jlibname jid2 subiq} {
+proc jlib::avatar::SetDataFromVCardElem {jlibname mjid2 subiq} {
     upvar ${jlibname}::avatar::state state
     
     set ans 0
@@ -752,9 +758,9 @@ proc jlib::avatar::SetDataFromVCardElem {jlibname jid2 subiq} {
 	    
 	    # We keep data in base64 format. This seems to be ok for image 
 	    # handlers.
-	    set state($jid2,data) [wrapper::getcdata $dataElem]
-	    set state($jid2,mime) [wrapper::getcdata $mimeElem] 
-	    set state($jid2,uptodate) 1
+	    set state($mjid2,data) [wrapper::getcdata $dataElem]
+	    set state($mjid2,mime) [wrapper::getcdata $mimeElem] 
+	    set state($mjid2,uptodate) 1
 	    set ans 1
 	}
     }
