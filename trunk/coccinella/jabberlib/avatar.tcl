@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.22 2006-11-19 15:11:23 matben Exp $
+# $Id: avatar.tcl,v 1.23 2006-11-21 07:51:19 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -462,11 +462,7 @@ proc jlib::avatar::presence_handler {jlibname xmldata} {
     }
     set gotAvaHash [PresenceAvatar $jlibname $xmldata]
     set gotVcardHash [PresenceVCard $jlibname $xmldata]
-    
-    #puts "\t mjid2=$mjid2"
-    #puts "\t gotAvaHash=$gotAvaHash"
-    #puts "\t gotVcardHash=$gotVcardHash"
-        
+            
     if {($gotAvaHash || $gotVcardHash)} {
     
 	# 'uptodate' tells us if we need to request new avatar.
@@ -688,7 +684,8 @@ proc jlib::avatar::get_vcard_async {jlibname jid2 cmd} {
     
     debug "jlib::avatar::get_vcard_async jid=$jid2"
     
-    if {[uptodate $jlibname $jid2]} {
+    set mjid2 [jlib::jidmap $jid2]
+    if {[uptodate $jlibname $mjid2]} {
 	uplevel #0 $cmd [list result $jid2]
     } else {
 	
@@ -705,7 +702,8 @@ proc jlib::avatar::get_vcard_async_cb {jid2 cmd jlibname type subiq args} {
     debug "jlib::avatar::get_vcard_async_cb jid=$jid2"
     
     if {$type eq "result"} {
-	SetDataFromVCardElem $jlibname $jid2 $subiq
+	set mjid2 [jlib::jidmap $jid2]
+	SetDataFromVCardElem $jlibname $mjid2 $subiq
     }
     uplevel #0 $cmd [list $type $jid2]
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: vcard.tcl,v 1.8 2006-04-28 14:04:07 matben Exp $
+# $Id: vcard.tcl,v 1.9 2006-11-21 07:51:19 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -84,21 +84,22 @@ proc jlib::vcard::cmdproc {jlibname cmd args} {
 #
 # Arguments:
 #       jlibname:   the instance of this jlib.
-#       to:         bare JID for other users, full jid for ourself.
+#       jid:        bare JID for other users, full jid for ourself.
 #       cmd:        client command to be executed at the iq "result" element.
 #       
 # Results:
 #       none.
 
-proc jlib::vcard::send_get {jlibname to cmd} {
+proc jlib::vcard::send_get {jlibname jid cmd} {
     variable xmlns
     upvar ${jlibname}::vcard::state state
 
-    set state(pending,$to) 1
+    set mjid [jlib::jidmap $jid]
+    set state(pending,$mjid) 1
     set attrlist [list xmlns $xmlns(vcard)]    
     set xmllist [wrapper::createtag "vCard" -attrlist $attrlist]
-    jlib::send_iq $jlibname "get" [list $xmllist] -to $to -command   \
-      [list [namespace current]::send_get_cb $jlibname $to $cmd]    
+    jlib::send_iq $jlibname "get" [list $xmllist] -to $jid -command   \
+      [list [namespace current]::send_get_cb $jlibname $jid $cmd]    
     return
 }
 
@@ -109,11 +110,12 @@ proc jlib::vcard::send_get {jlibname to cmd} {
 proc jlib::vcard::send_get_cb {jlibname jid cmd type subiq} {
     upvar ${jlibname}::vcard::state state
     
-    unset -nocomplain state(pending,$jid)
+    set mjid [jlib::jidmap $jid]
+    unset -nocomplain state(pending,$mjid)
     if {$state(cache)} {
-	set state(cache,$jid) $subiq
+	set state(cache,$mjid) $subiq
     }
-    invoke_stacked $jlibname $jid $type $subiq
+    InvokeStacked $jlibname $jid $type $subiq
     
     uplevel #0 $cmd [list $jlibname $type $subiq]
 }
@@ -127,24 +129,26 @@ proc jlib::vcard::send_get_cb {jlibname jid cmd type subiq} {
 proc jlib::vcard::get_async {jlibname jid cmd} {
     upvar ${jlibname}::vcard::state state
 
-    if {[info exists state(cache,$jid)]} {
-	uplevel #0 $cmd [list $jlibname result $state(cache,$jid)]
-    } elseif {[info exists state(pending,$jid)]} {
-	lappend state(invoke,$jid) $cmd
+    set mjid [jlib::jidmap $jid]
+    if {[info exists state(cache,$mjid)]} {
+	uplevel #0 $cmd [list $jlibname result $state(cache,$mjid)]
+    } elseif {[info exists state(pending,$mjid)]} {
+	lappend state(invoke,$mjid) $cmd
     } else {
 	send_get $jlibname $jid $cmd
     }
     return
 }
 
-proc jlib::vcard::invoke_stacked {jlibname jid type subiq} {
+proc jlib::vcard::InvokeStacked {jlibname jid type subiq} {
     upvar ${jlibname}::vcard::state state
 
-    if {[info exists state(invoke,$jid)]} {
-	foreach cmd $state(invoke,$jid) {
+    set mjid [jlib::jidmap $jid]
+    if {[info exists state(invoke,$mjid)]} {
+	foreach cmd $state(invoke,$mjid) {
 	    uplevel #0 $cmd [list $jlibname $type $subiq]
 	}
-	unset -nocomplain state(invoke,$jid)
+	unset -nocomplain state(invoke,$mjid)
     }
 }
 
@@ -156,10 +160,11 @@ proc jlib::vcard::get_own_async {jlibname cmd} {
     upvar ${jlibname}::vcard::state state
 
     set jid [$jlibname myjid2]
-    if {[info exists state(cache,$jid)]} {
-	uplevel #0 $cmd [list $jlibname result $state(cache,$jid)]
-    } elseif {[info exists state(pending,$jid)]} {
-	lappend state(invoke,$jid) $cmd
+    set mjid [jlib::jidmap $jid]
+    if {[info exists state(cache,$mjid)]} {
+	uplevel #0 $cmd [list $jlibname result $state(cache,$mjid)]
+    } elseif {[info exists state(pending,$mjid)]} {
+	lappend state(invoke,$mjid) $cmd
     } else {
 	send_get_own $jlibname $cmd
     }
@@ -182,11 +187,12 @@ proc jlib::vcard::send_get_own_cb {jlibname cmd type subiq} {
     upvar ${jlibname}::vcard::state state
     
     set jid [$jlibname myjid2]
-    unset -nocomplain state(pending,$jid)
+    set mjid [jlib::jidmap $jid]
+    unset -nocomplain state(pending,$mjid)
     if {$state(cache)} {
-	set state(cache,$jid) $subiq
+	set state(cache,$mjid) $subiq
     }    
-    invoke_stacked $jlibname $jid $type $subiq
+    InvokeStacked $jlibname $jid $type $subiq
 
     uplevel #0 $cmd [list $jlibname $type $subiq]
 }
@@ -268,17 +274,19 @@ proc jlib::vcard::set_my_photo_cb {jlibname cmd type subiq} {
 proc jlib::vcard::has_cache {jlibname jid} {
     upvar ${jlibname}::vcard::state state
     
-   return [info exists state(cache,$jid)] 
+    set mjid [jlib::jidmap $jid]
+    return [info exists state(cache,$mjid)] 
 }
 
 proc jlib::vcard::get_cache {jlibname jid} {
     upvar ${jlibname}::vcard::state state
     
-   if {[info exists state(cache,$jid)]} {
-       return $state(cache,$jid)
-   } else {
-       return
-   }
+    set mjid [jlib::jidmap $jid]
+    if {[info exists state(cache,$mjid)]} {
+	return $state(cache,$mjid)
+    } else {
+	return
+    }
 }
 
 # jlib::vcard::send_set --
@@ -412,7 +420,8 @@ proc jlib::vcard::clear {jlibname {jid ""}} {
     if {$jid eq ""} {
 	array unset state "cache,*"
     } else {
-	array unset state "cache,[jlib::ESC $jid]"
+	set mjid [jlib::jidmap $jid]
+	array unset state "cache,[jlib::ESC $mjid]"
     }
 }
 

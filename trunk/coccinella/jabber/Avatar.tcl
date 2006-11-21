@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.25 2006-09-29 06:24:07 matben Exp $
+# $Id: Avatar.tcl,v 1.26 2006-11-21 07:51:19 matben Exp $
 
 # @@@ Issues:
 # 
@@ -779,8 +779,9 @@ proc ::Avatar::SetPhotoFromData {jid2 data} {
     Debug "::Avatar::SetPhotoFromData jid2=$jid2"
     
     set type put
-    if {![info exists photo($jid2,orig)]} {
-	set photo($jid2,orig) [image create photo]
+    set mjid2 [jlib::jidmap $jid2]
+    if {![info exists photo($mjid2,orig)]} {
+	set photo($mjid2,orig) [image create photo]
 	set type create
     }
     
@@ -806,8 +807,9 @@ proc ::Avatar::SetPhotoFromCache {jid2} {
     Debug "::Avatar::SetPhotoFromCache jid2=$jid2"
     
     set type put
-    if {![info exists photo($jid2,orig)]} {
-	set photo($jid2,orig) [image create photo]
+    set mjid2 [jlib::jidmap $jid2]
+    if {![info exists photo($mjid2,orig)]} {
+	set photo($mjid2,orig) [image create photo]
 	set type create
     }
 
@@ -837,12 +839,12 @@ proc ::Avatar::PutPhotoFromCache {jid2} {
     
     Debug "::Avatar::PutPhotoFromCache jid2=$jid2"
     
-    set orig $photo($jid2,orig)
-
     set hash [GetHash $jid2]
     if {$hash ne ""} {
 	set fileName [GetCacheFileName $hash]
 	if {[file exists $fileName]} {
+	    set mjid2 [jlib::jidmap $jid2]
+	    set orig $photo($mjid2,orig)
 	    if {![catch {
 		set tmp [image create photo -file $fileName]
 	    }]} {
@@ -867,7 +869,8 @@ proc ::Avatar::PutPhotoFromData {jid2 data} {
     variable sizes
     
     # Write new image data on existing image.
-    set orig $photo($jid2,orig)
+    set mjid2 [jlib::jidmap $jid2]
+    set orig $photo($mjid2,orig)
     $orig put $data
     
     # We must update all photos of all sizes for this jid.
@@ -883,12 +886,13 @@ proc ::Avatar::PutPhotoCreateSizes {jid2} {
     variable photo
     variable sizes
     
-    set orig $photo($jid2,orig)
+    set mjid2 [jlib::jidmap $jid2]
+    set orig $photo($mjid2,orig)
 
     # We must update all photos of all sizes for this jid.
     foreach size $sizes {
-	if {[info exists photo($jid2,$size)]} {
-	    set name $photo($jid2,$size)
+	if {[info exists photo($mjid2,$size)]} {
+	    set name $photo($mjid2,$size)
 	    if {[image inuse $name]} {
 		set tmp [CreateScaledPhoto $orig $size]
 		$name copy $tmp -compositingrule set
@@ -897,7 +901,7 @@ proc ::Avatar::PutPhotoCreateSizes {jid2} {
 		
 		# @@@ Not sure if this is smart.
 		image delete $name
-		unset photo($jid2,$size)
+		unset -nocomplain photo($mjid2,$size)
 	    }
 	}
     }
@@ -936,12 +940,13 @@ proc ::Avatar::PresenceHook {jid type args} {
 proc ::Avatar::GetPhoto {jid2} {
     variable photo
     
-    if {[info exists photo($jid2,orig)]} {
-	return $photo($jid2,orig)
+    set mjid2 [jlib::jidmap $jid2]
+    if {[info exists photo($mjid2,orig)]} {
+	return $photo($mjid2,orig)
     } elseif {[HaveCachedJID $jid2]} {
 	CreatePhotoFromCache $jid2
-	if {[info exists photo($jid2,orig)]} {
-	    return $photo($jid2,orig)
+	if {[info exists photo($mjid2,orig)]} {
+	    return $photo($mjid2,orig)
 	} else {
 	    return ""
 	}
@@ -960,23 +965,24 @@ proc ::Avatar::GetPhoto {jid2} {
 proc ::Avatar::GetPhotoOfSize {jid2 size} {
     variable photo
 
-    if {[info exists photo($jid2,$size)]} {
-	return $photo($jid2,$size)
-    } elseif {[info exists photo($jid2,orig)]} {
+    set mjid2 [jlib::jidmap $jid2]
+    if {[info exists photo($mjid2,$size)]} {
+	return $photo($mjid2,$size)
+    } elseif {[info exists photo($mjid2,orig)]} {
 
 	# Is not there, create!
-	set name $photo($jid2,orig)
+	set name $photo($mjid2,orig)
 	set new [CreateScaledPhoto $name $size]
-	set photo($jid2,$size) $new
+	set photo($mjid2,$size) $new
 	return $new
     } elseif {[HaveCachedJID $jid2]} {
 	CreatePhotoFromCache $jid2
 	
 	# If succesful; Note that only orig created.
-	if {[info exists photo($jid2,orig)]} {
-	    set name $photo($jid2,orig)
+	if {[info exists photo($mjid2,orig)]} {
+	    set name $photo($mjid2,orig)
 	    set new [CreateScaledPhoto $name $size]
-	    set photo($jid2,$size) $new
+	    set photo($mjid2,$size) $new
 	    return $new
 	}
     }
@@ -994,7 +1000,8 @@ proc ::Avatar::HavePhoto {jid2} {
     upvar ::Jabber::jstate jstate
     
     set jlib $jstate(jlib)    
-    if {[$jlib avatar have_data $jid2] && [info exists photo($jid2,orig)]} {
+    set mjid2 [jlib::jidmap $jid2]
+    if {[$jlib avatar have_data $jid2] && [info exists photo($mjid2,orig)]} {
 	return 1
     } else {
 	if {[$jlib roster isavailable $jid2]} {
@@ -1018,13 +1025,14 @@ proc ::Avatar::CreatePhotoFromCache {jid2} {
     if {$hash ne ""} {
 	set fileName [GetCacheFileName $hash]
 	if {[file exists $fileName]} {
+	    set mjid2 [jlib::jidmap $jid2]
 	    catch {
-		set photo($jid2,orig) [image create photo -file $fileName]
+		set photo($mjid2,orig) [image create photo -file $fileName]
 	    }
 	}
 	# BU
 	#set data [ReadCacheAvatar $hash]
-	#set photo($jid2,orig) [image create photo]
+	#set photo($mjid2,orig) [image create photo]
 	#catch {
 	#    PutPhotoFromData $jid2 $data
 	#}
@@ -1035,10 +1043,11 @@ proc ::Avatar::FreePhotos {jid} {
     variable photo
     variable sizes
     
+    set mjid [jlib::jidmap $jid]
     set images {}
     foreach size [concat orig $sizes] {
-	if {[info exists photo($jid,$size)]} {
-	    lappend images $photo($jid,$size)
+	if {[info exists photo($mjid,$size)]} {
+	    lappend images $photo($mjid,$size)
 	}
     }
     
@@ -1046,7 +1055,7 @@ proc ::Avatar::FreePhotos {jid} {
     if {[llength $images]} {
 	eval {image delete} [lsort -unique $images]
     }
-    array unset photo "[jlib::ESC $jid],*"
+    array unset photo "[jlib::ESC $mjid],*"
 }
 
 proc ::Avatar::FreeAllPhotos { } {
@@ -1286,11 +1295,12 @@ proc ::Avatar::GetHash {jid2} {
     
     # Get the most current if it exists.
     set jlib $jstate(jlib)    
+    set mjid2 [jlib::jidmap $jid2]
     set hash [$jlib avatar get_hash $jid2]
 
     # Use the hashmap as a fallback.
-    if {($hash eq "") && [info exists hashmap($jid2)]} {
-	set hash $hashmap($jid2)
+    if {($hash eq "") && [info exists hashmap($mjid2)]} {
+	set hash $hashmap($mjid2)
     }
     return $hash
 }
@@ -1298,7 +1308,8 @@ proc ::Avatar::GetHash {jid2} {
 proc ::Avatar::FreeHashCache {jid2} {
     variable hashmap
 
-    unset -nocomplain hashmap($jid2)    
+    set mjid2 [jlib::jidmap $jid2]
+    unset -nocomplain hashmap($mjid2)    
 }
 
 # Avatar::WriteHashmap --
@@ -1320,16 +1331,17 @@ proc ::Avatar::WriteHashmap {fileName} {
     # Start from the hashmap that may have been read earlier and update it.
     set jlib $jstate(jlib)
     foreach jid2 [$jlib avatar get_all_avatar_jids] {
+	set mjid2 [jlib::jidmap $jid2]
 	set hash [$jlib avatar get_hash $jid2]
-	set hashmap($jid2) $hash
+	set hashmap($mjid2) $hash
     }
     
     set fd [open $fileName w]
     puts $fd "# This file defines an array that maps jid2 -> avatar hash"
     puts $fd "array set hashmap {"
-    foreach {jid2 hash} [array get hashmap] {
+    foreach {mjid2 hash} [array get hashmap] {
 	if {$hash ne ""} {
-	    puts $fd "\t$jid2 \t$hash"
+	    puts $fd "\t$mjid2 \t$hash"
 	}
     }
     puts $fd "}"
@@ -1345,9 +1357,9 @@ proc ::Avatar::ReadHashmap {fileName} {
 	source $fileName
 	
 	# Files may have been deleted. Cleanup hashmap.
-	foreach {jid2 hash} [array get hashmap] {
+	foreach {mjid2 hash} [array get hashmap] {
 	    if {[GetCacheFileName $hash] eq ""} {
-		unset hashmap($jid2)
+		unset hashmap($mjid2)
 	    }
 	}
     }
