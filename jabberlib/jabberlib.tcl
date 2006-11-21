@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.161 2006-11-16 14:28:55 matben Exp $
+# $Id: jabberlib.tcl,v 1.162 2006-11-21 07:51:19 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3833,24 +3833,6 @@ proc jlib::splitjidex {jid nodeVar domainVar resourceVar} {
     uplevel 1 [list set $nodeVar $node]
     uplevel 1 [list set $domainVar $domain]
     uplevel 1 [list set $resourceVar $res]
-}
-
-proc jlib::splitjidexBU {jid nodeVar domainVar resourceVar} {
-    
-    set node   ""
-    set domain ""
-    set res    ""
-    if {[regexp {^(([^@]+)@)?([^ /@]+)(/(.*))?$} $jid m x node domain y res]} {
-	uplevel 1 [list set $nodeVar $node]
-	uplevel 1 [list set $domainVar $domain]
-	uplevel 1 [list set $resourceVar $res]
-    } elseif {$jid eq ""} {
-	uplevel 1 [list set $nodeVar $node]
-	uplevel 1 [list set $domainVar $domain]
-	uplevel 1 [list set $resourceVar $res]
-    } else {
-	return -code error "not valid jid form"
-    }
 }
 
 proc jlib::barejid {jid} {
