@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.26 2006-11-21 07:51:19 matben Exp $
+# $Id: Avatar.tcl,v 1.27 2006-11-22 08:02:32 matben Exp $
 
 # @@@ Issues:
 # 
@@ -567,6 +567,11 @@ proc ::Avatar::OnNewHash {jid} {
     
     set jid2 [jlib::barejid $jid]
     set jlib $jstate(jlib)
+
+    # For the moment we disable all avatars for room members.
+    if {[$jlib service isroom $jid2]} {
+	return
+    }
     set hash [$jlib avatar get_hash $jid2]
     if {$hash eq ""} {
 	if {$options(-command) ne ""} {

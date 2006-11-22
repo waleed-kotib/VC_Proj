@@ -9,7 +9,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.23 2006-11-21 07:51:19 matben Exp $
+# $Id: avatar.tcl,v 1.24 2006-11-22 08:02:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -44,6 +44,8 @@
 #   @@@ It is unclear if this is correct. Perhaps the full JIDs shall be used.
 #   The problem is with JEP-0008 mixing JID2 with JID3.  
 #   Note that all vCards are defined per JID2, bare JID.
+#   
+#   @@@ And what happens for groupchat members?
 #   
 #   No automatic presence or server storage is made when reconfiguring or
 #   changing own avatar. This is up to the client layer to do.
@@ -103,7 +105,7 @@ proc jlib::avatar::init {jlibname args} {
     
     # Register some standard iq handlers that are handled internally.
     $jlibname iq_register get $xmlns(iq-avatar) [namespace current]::iq_handler
-    $jlibname presence_register_int available   \
+    $jlibname presence_register_int available  \
       [namespace current]::presence_handler
     
     $jlibname register_reset [namespace current]::reset
@@ -286,8 +288,7 @@ proc jlib::avatar::store_remove {jlibname cmd} {
     variable xmlns
     
     set jid2 [$jlibname getthis myjid2]
-    $jlibname iq_set $xmlns(storage)  \
-      -to $jid2 -command $cmd   
+    $jlibname iq_set $xmlns(storage) -to $jid2 -command $cmd   
 }
 
 # jlib::avatar::iq_handler --
@@ -671,7 +672,7 @@ proc jlib::avatar::InvokeStacked {jlibname type jid2} {
     set mjid2 [jlib::jidmap $jid2]
     if {[info exists state($jid2,invoke)]} {
 	foreach cmd $state($jid2,invoke) {
-	    uplevel #0 $cmd [list $jlibname $type $jid2]
+	    uplevel #0 $cmd [list $type $jid2]
 	}
 	unset -nocomplain state($jid2,invoke)
     }

@@ -2,9 +2,9 @@
 #  
 #      This file is part of the jabberlib.
 #      
-#  Copyright (c) 2004-2005  Mats Bengtsson
+#  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.41 2006-10-29 13:57:37 matben Exp $
+# $Id: disco.tcl,v 1.42 2006-11-22 08:02:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
