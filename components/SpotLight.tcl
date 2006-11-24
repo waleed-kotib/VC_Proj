@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano Damas
 #
-# $Id: SpotLight.tcl,v 1.1 2006-11-24 07:46:40 matben Exp $
+# $Id: SpotLight.tcl,v 1.2 2006-11-24 08:01:54 matben Exp $
 
 namespace eval ::SpotLight:: { }
 
@@ -18,7 +18,10 @@ proc ::SpotLight::Init { } {
     if {[catch {package require Tclapplescript}]} {
         return
     }
-
+    
+    # Must check that spotlight exists on this machine.
+    return
+    
     # Add event hooks.
     ::hooks::register newChatMessageHook ::SpotLight::ChatMessageHook
 
