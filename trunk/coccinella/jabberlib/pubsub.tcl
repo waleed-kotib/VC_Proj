@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.13 2006-09-20 14:12:38 matben Exp $
+# $Id: pubsub.tcl,v 1.14 2006-11-24 15:04:08 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -13,16 +13,45 @@
 #      jlibName pubsub affiliations
 #      jlibName pubsub create 
 #      jlibName pubsub delete
+#      jlibName pubsub deregister_event
 #      jlibName pubsub items
 #      jlibName pubsub options
 #      jlibName pubsub publish
 #      jlibName pubsub purge
+#      jlibName pubsub register_event
 #      jlibName pubsub retract
 #      jlibName pubsub subscribe
 #      jlibName pubsub unsubscribe
 #
 ################################################################################
-
+#
+#   BRIEF:
+#   
+#       pubsub-service
+#                 node
+#                     item
+#                     item
+#                     ...
+#                 node
+#                     item
+#                     ...
+#                 ...
+#                     
+#   Owner use case:
+#       
+#       create node
+#       delete node
+#       
+#       publish item to a node
+#       retract (remove) item from a node
+#       
+#   User use case:
+#   
+#       register for events
+#       subscribe to a node
+#       unsubscribe from a node
+#       
+################################################################################
 
 package provide jlib::pubsub 0.2
 
@@ -202,7 +231,7 @@ proc jlib::pubsub::delete {jlibname to node args} {
 
 # jlib::pubsub::purge --
 # 
-#       Purge all node items.
+#       Purge all node items. (Deletes all items of a node.)
 
 proc jlib::pubsub::purge {jlibname to node args} {
     
@@ -666,8 +695,6 @@ if {0} {
     $jlib pubsub subscribe $psjid $myjid -node $node -command cb
     $jlib pubsub subscriptions get $psjid $node -command cb
     $jlib pubsub publish $node -to $psjid -items [list $itemE]
-
-
 
 }
 
