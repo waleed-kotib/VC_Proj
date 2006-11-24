@@ -18,6 +18,7 @@ component::attempt ParseURI     [file join $dir ParseURI.tcl]    ::ParseURI::Ini
 component::attempt SlideShow    [file join $dir SlideShow.tcl]   ::SlideShow::Load  
 component::attempt Sounds       [file join $dir Sounds.tcl]      ::Sounds::Load    
 component::attempt Speech       [file join $dir Speech.tcl]      ::Speech::Load    
+component::attempt SpotLight    [file join $dir SpotLight.tcl]   ::SpotLight::Init    
 component::attempt URIRegistry  [file join $dir URIRegistry.tcl] ::URIRegistry::Init
 component::attempt WhiteboardMK [file join $dir WhiteboardMK.tcl]  ::WhiteboardMK::Init
 

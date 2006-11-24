@@ -9,13 +9,15 @@
 #  
 #  @@@ TODO: There seems to be a problem resetting mood to none (retract?)
 #  
-#  $Id: Mood.tcl,v 1.14 2006-09-21 12:23:57 matben Exp $
+#  $Id: Mood.tcl,v 1.15 2006-11-24 07:46:40 matben Exp $
 
 package require ui::optionmenu
 
 namespace eval ::Mood:: { }
 
 proc ::Mood::Init { } {
+    
+    return
 
     component::register Mood "This is User Mood (JEP-0107)."
 
