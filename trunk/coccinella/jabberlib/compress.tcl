@@ -1,7 +1,7 @@
 #  compress.tcl --
 #  
 #      This file is part of jabberlib.
-#      It implements stream compression as defined in JEP-0138: 
+#      It implements stream compression as defined in XEP-0138: 
 #      Stream Compression
 #      
 #  Copyright (c) 2006  Mats Bengtsson
@@ -9,7 +9,7 @@
 #  Note: with zlib 1.0 it seems that we can import zlib compression
 #        on the socket channel using zlib stream socket ... ???
 #  
-# $Id: compress.tcl,v 1.2 2006-07-31 07:22:34 matben Exp $
+# $Id: compress.tcl,v 1.3 2006-12-01 08:55:14 matben Exp $
 
 package require jlib
 package require zlib

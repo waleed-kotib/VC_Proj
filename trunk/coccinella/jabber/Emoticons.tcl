@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.43 2006-09-14 09:37:28 matben Exp $
+# $Id: Emoticons.tcl,v 1.44 2006-12-01 08:55:13 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -250,7 +250,7 @@ proc ::Emoticons::ParseIcon {name dir xmllist} {
 		lappend keyList [tinydom::chdata $elem]
 	    }
 	    object - graphic {
-		# graphic does not comply with JEP-0038!
+		# graphic does not comply with XEP-0038!
 		set object [tinydom::chdata $elem]
 		array set attrArr [tinydom::attrlist $elem]
 		set mime $attrArr(mime)

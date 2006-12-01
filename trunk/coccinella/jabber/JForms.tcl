@@ -7,9 +7,9 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.25 2006-08-03 14:04:31 matben Exp $
+# $Id: JForms.tcl,v 1.26 2006-12-01 08:55:13 matben Exp $
 # 
-#      Updated to version 2.5 of JEP-0004
+#      Updated to version 2.5 of XEP-0004
 #  
 #-------------------------------------------------------------------------------
 

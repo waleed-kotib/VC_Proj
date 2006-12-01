@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.169 2006-11-17 08:04:45 matben Exp $
+# $Id: GroupChat.tcl,v 1.170 2006-12-01 08:55:13 matben Exp $
 
 package require Create
 package require Enter
@@ -2730,7 +2730,7 @@ proc ::GroupChat::GetFirstPanePos { } {
     }
 }
 
-# --- Support for JEP-0048 ---
+# --- Support for XEP-0048 ---
 # 
 # @@@ Perhaps this should be in a separate file?
 # 

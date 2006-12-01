@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.16 2006-09-14 09:37:28 matben Exp $
+# $Id: dialog.tcl,v 1.17 2006-12-01 08:55:13 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -407,6 +407,9 @@ snit::widget ui::dialog::widget {
     }
         
     method Dismiss {} {
+	if {[string length $options(-geovariable)]} {
+	    ui::SaveGeometry $win $options(-geovariable)
+	}
 	destroy $win
     }
     

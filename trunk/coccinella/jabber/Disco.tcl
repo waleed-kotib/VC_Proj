@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.97 2006-10-21 15:12:58 matben Exp $
+# $Id: Disco.tcl,v 1.98 2006-12-01 08:55:13 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -510,7 +510,7 @@ proc ::Disco::IsBranchNode {jid node} {
 # Disco::ParseGetInfo --
 #
 #       Respond to an incoming discovery get info query.
-#       Some of this is described in [JEP 0115].
+#       Some of this is described in [XEP 0115].
 #
 # Arguments:
 #       
@@ -647,7 +647,7 @@ proc ::Disco::ParseGetItems {from queryE args} {
     }
     set node [wrapper::getattribute $queryE node]
     
-    # Support for caps (JEP-0115).
+    # Support for caps (XEP-0115).
     if {$node eq ""} {
 	set type "result"
 	set found 1
@@ -1459,6 +1459,8 @@ proc ::Disco::OnMenuAddServer { } {
     }
 }
 
+# @@@ We should make this a generic way to disco any JID!
+
 proc ::Disco::AddServerDlg { } {
     global  wDlgs
     variable addservervar ""
@@ -1490,8 +1492,8 @@ proc ::Disco::AddServerDlg { } {
       -padding [option get . notebookPageSmallPadding {}]
     pack $wfr -side top -fill x -pady 4
     ttk::label $wfr.l -text "[mc Server]:"
-    ttk::entry $wfr.e -textvariable [namespace current]::addservervar \
-      -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
+    ttk::entry $wfr.e -textvariable [namespace current]::addservervar
+    #  -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
     ttk::checkbutton $wfr.ch -style Small.TCheckbutton \
       -text [mc {Add permanently}] \
       -variable [namespace current]::permdiscovar

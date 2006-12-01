@@ -53,9 +53,9 @@
 #
 #       Reference:
 #       XMPP URI/IRI Querytypes 
-#       JEP-0147: XMPP URI Scheme Query Components 
+#       XEP-0147: XMPP URI Scheme Query Components 
 #
-# $Id: ParseURI.tcl,v 1.35 2006-08-20 13:41:17 matben Exp $
+# $Id: ParseURI.tcl,v 1.36 2006-12-01 08:55:13 matben Exp $
 
 package require uriencode
 

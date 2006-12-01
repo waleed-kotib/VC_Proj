@@ -1,11 +1,11 @@
 #  pubsub.tcl --
 #  
 #      This file is part of the jabberlib. It contains support code
-#      for the pub-sub (xmlns='http://jabber.org/protocol/pubsub') JEP-0060.
+#      for the pub-sub (xmlns='http://jabber.org/protocol/pubsub') XEP-0060.
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.14 2006-11-24 15:04:08 matben Exp $
+# $Id: pubsub.tcl,v 1.15 2006-12-01 08:55:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #

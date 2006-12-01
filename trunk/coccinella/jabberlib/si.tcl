@@ -1,11 +1,11 @@
 #  si.tcl --
 #  
 #      This file is part of the jabberlib. 
-#      It provides support for the stream initiation protocol (JEP-0095).
+#      It provides support for the stream initiation protocol (XEP-0095).
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.15 2006-07-19 13:51:27 matben Exp $
+# $Id: si.tcl,v 1.16 2006-12-01 08:55:14 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using

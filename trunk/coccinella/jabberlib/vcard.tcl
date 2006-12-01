@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: vcard.tcl,v 1.9 2006-11-21 07:51:19 matben Exp $
+# $Id: vcard.tcl,v 1.10 2006-12-01 08:55:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -292,7 +292,7 @@ proc jlib::vcard::get_cache {jlibname jid} {
 # jlib::vcard::send_set --
 #
 #       Sends our vCard to the server. Internally we use all lower case
-#       but the spec (JEP-0054) says that all tags be all upper case.
+#       but the spec (XEP-0054) says that all tags be all upper case.
 #
 # Arguments:
 #       jlibname:   the instance of this jlib.

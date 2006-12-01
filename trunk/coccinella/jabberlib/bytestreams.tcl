@@ -1,11 +1,11 @@
 #  bytestreams.tcl --
 #  
 #      This file is part of the jabberlib. 
-#      It provides support for the bytestreams protocol (JEP-0065).
+#      It provides support for the bytestreams protocol (XEP-0065).
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.21 2006-06-11 10:32:18 matben Exp $
+# $Id: bytestreams.tcl,v 1.22 2006-12-01 08:55:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #

@@ -1,15 +1,15 @@
 #  avatar.tcl --
 #  
 #      This file is part of the jabberlib. 
-#      It provides support for avatars (JEP-0008: IQ-Based Avatars)
-#      and vCard based avatars as JEP-0153.
-#      Note that this JEP is "historical" only but is easy to adapt to
+#      It provides support for avatars (XEP-0008: IQ-Based Avatars)
+#      and vCard based avatars as XEP-0153.
+#      Note that this XEP is "historical" only but is easy to adapt to
 #      a future pub-sub method.
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.24 2006-11-22 08:02:32 matben Exp $
+# $Id: avatar.tcl,v 1.25 2006-12-01 08:55:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -42,7 +42,7 @@
 #      
 #   Note that all internal storage refers to bare (2-tier) JIDs!
 #   @@@ It is unclear if this is correct. Perhaps the full JIDs shall be used.
-#   The problem is with JEP-0008 mixing JID2 with JID3.  
+#   The problem is with XEP-0008 mixing JID2 with JID3.  
 #   Note that all vCards are defined per JID2, bare JID.
 #   
 #   @@@ And what happens for groupchat members?
@@ -595,7 +595,7 @@ proc jlib::avatar::send_get_cb {jid cmd jlibname type subiq args} {
 
     if {$type eq "error"} {
 	
-	# JEP-0008: "If the first method fails, the second method that should
+	# XEP-0008: "If the first method fails, the second method that should
 	# be attempted by sending a request to the server..."
 	send_get_storage $jlibname $mjid2 $cmd
     } elseif {$type eq "result"} {
@@ -711,7 +711,7 @@ proc jlib::avatar::get_vcard_async_cb {jid2 cmd jlibname type subiq args} {
 
 # jlib::avatar::send_get_vcard --
 # 
-#       Support for vCard based avatars as JEP-0153.
+#       Support for vCard based avatars as XEP-0153.
 #       We must get vcard avatars from here since the result shall be cached.
 #       Note that all vCards are defined per jid2, bare JID.
 #       This method is more sane compared to iq-based avatars since it is

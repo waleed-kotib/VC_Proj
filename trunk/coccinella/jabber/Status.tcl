@@ -5,13 +5,14 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.21 2006-11-16 14:28:55 matben Exp $
+# $Id: Status.tcl,v 1.22 2006-12-01 08:55:14 matben Exp $
 
 package provide Status 1.0
 
 namespace eval ::Status:: {
 
     ::hooks::register rosterIconsChangedHook    ::Status::RosticonsHook
+    ::hooks::register prefsInitHook             ::Status::ExInitPrefsHook
     
     # Mappings from <show> element to displayable text and vice versa.
     # chat away xa dnd
@@ -113,27 +114,6 @@ proc ::Status::MainFree {w statusVar} {
     unset -nocomplain $menuVar
 }
 
-# Status::BuildMainMenu --
-#
-#       Builds a main status menu only. Hardcoded variable jstate(status).
-
-proc ::Status::BuildMainMenu {mt} {
-    
-    set statusVar ::Jabber::jstate(status)
-    upvar $statusVar status
-
-    set menuVar [namespace current]::menuVar($mt)
-    set $menuVar $status
-    BuildGenericMenu $mt $menuVar \
-      -command [list [namespace current]::MainMenuCmd $mt $menuVar]   
-
-    trace add variable $statusVar write  \
-      [list [namespace current]::MainTrace $mt]
-    bind $mt <Destroy> +[list ::Status::MainFree %W $statusVar]
-
-    return $mt
-}
-
 proc ::Status::MainMenuCmd {mt varName} {
     upvar $varName status
     
@@ -172,6 +152,8 @@ proc ::Status::Button {w varName args} {
     trace add variable $varName write [list [namespace current]::Trace $w]
     bind $w <Destroy> +[list ::Status::Free %W $varName]
 
+    #$wmenu configure -postcommand [list ::Status::ExPostCmd $wmenu $varName]
+    
     return $w
 }
 
@@ -480,8 +462,6 @@ proc ::Status::BtSetStatus {w} {
     upvar #0 $w state
         
     set $state(varName) $state(show)
-    
-    parray state
 
     set text [string trim [$state(wtext) get 1.0 end]]
     set opts [list -status $text]
@@ -498,6 +478,123 @@ proc ::Status::BtSetStatus {w} {
     ::UI::SaveWinGeom $w
     set state(finished) 1
     destroy $w
+}
+
+#-------------------------------------------------------------------------------
+
+proc ::Status::ExInitPrefsHook {} {
+    upvar ::Jabber::jprefs jprefs
+   
+    set jprefs(status,menu) {}
+    ::PrefUtils::Add [list  \
+      [list ::Jabber::jprefs(status,menu) jprefs_status_menu $jprefs(status,menu)]]
+}
+
+proc ::Status::ExPostCmd {m varName} {
+    upvar $varName status
+
+    $m delete 0 end
+    ExBuildMenu $m $varName
+   
+}
+
+proc ::Status::ExBuildMenu {m varName} {
+    upvar ::Jabber::jprefs jprefs
+    variable mapShowElemToText
+
+    set statusA(available) {}
+    set statusA(away)      {}
+    foreach {show status} $jprefs(status,menu) {
+	lappend statusA($show) $status
+    }
+    foreach show [array names statusA] {
+	set statusA($show) [lsort -unique $statusA($show)]
+    }
+    
+    # available and show shall always be there. Add other if exists.
+    set showL {available away}
+    foreach show {chat dnd xa invisible} {
+	if {[info exists statusA($show)]} {
+	    lappend showL $show	    
+	}
+    }
+    
+    foreach show $showL {
+	set opts {}
+	if {[tk windowingsystem] ne "aqua"} {
+	    set opts [list -compound left \
+	      -image [::Rosticons::Get status/$show]]
+	}
+	eval {$m add radio -label $mapShowElemToText($show)  \
+	  -variable $varName -value $show} $opts
+	foreach status $statusA($show) {
+	    if {[string length $status] > 20} {
+		set str [string range $status 0 18]
+		append str "..."
+	    } else {
+		set str $status
+	    }
+	    set value [list $show $status]
+	    set label $mapShowElemToText($show)
+	    append label " " $str
+	    eval {$m add radio -label $label  \
+	      -variable $varName -value $show} $opts
+	}
+	$m add separator
+    }
+    $m add command -label mCustomStatus -command ::Status::ExCustomDlg
+    update idletasks
+
+    return $m
+}
+
+proc ::Status::ExCustomDlg {} {
+    global  wDlgs
+    
+    set w $wDlgs(jpresmsg)
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
+    variable $w
+    upvar 0 $w state
+
+    set state(show)   [::Jabber::GetMyStatus]
+    set state(status) ""
+    
+    set menuDef [list  \
+	[list [mc mAvailable]       -value available]  \
+	[list [mc mAway]            -value away]       \
+	[list [mc mChat]            -value chat]       \
+	[list [mc mDoNotDisturb]    -value dnd]        \
+	[list [mc mExtendedAway]    -value xa]         \
+	[list [mc mInvisible]       -value invisible]  \
+	[list [mc mNotAvailable]    -value unavailable]]
+
+    set str "Set your status message for any of the presence states"
+    set dtl "The most present states and status messages are easily reachable as menu entries"
+    ui::dialog $w -type okcancel -message $str -detail $dtl -icon info  \
+      -command ::Status::ExCustomDlgCmd -geovariable [namespace current]::$w\(geo)
+    set fr [$w clientframe]
+    ui::optionmenu $fr.m -menulist $menuDef -direction flush  \
+      -variable [namespace current]::$w\(show)
+    ttk::entry $fr.e -textvariable [namespace current]::$w\(status)
+    
+    grid  $fr.m  $fr.e  -sticky ew
+    grid columnconfigure $fr 1 -weight 1
+}
+
+proc ::Status::ExCustomDlgCmd {w button} {
+    variable $w
+    upvar 0 $w state
+
+    puts "::Status::CustomDlgCmd button=$button"
+
+    parray state
+    if {$button eq "ok"} {
+	::Jabber::SetStatus $state(show) -status $state(status)
+    }
+    #unset -nocomplain state
 }
 
 #-------------------------------------------------------------------------------

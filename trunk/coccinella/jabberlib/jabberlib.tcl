@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.162 2006-11-21 07:51:19 matben Exp $
+# $Id: jabberlib.tcl,v 1.163 2006-12-01 08:55:14 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3678,7 +3678,7 @@ proc jlib::UnicodeListToRE {ulist} {
 namespace eval jlib {
     
     # Characters that need to be escaped since non valid.
-    #       JEP-0106 EXPERIMENTAL!  Think OUTDATED???
+    #       XEP-0106 EXPERIMENTAL!  Think OUTDATED???
     variable jidesc { "#\&'/:<>@}
     
     # Prohibited ASCII characters.
@@ -4024,7 +4024,7 @@ proc jlib::MapStr {str } {
 # jlib::encodeusername, decodeusername, decodejid --
 # 
 #       Jid escaping.
-#       JEP-0106 EXPERIMENTAL!
+#       XEP-0106 EXPERIMENTAL!
 
 proc jlib::encodeusername {username} {    
     variable jidesc

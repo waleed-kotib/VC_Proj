@@ -1,7 +1,7 @@
 #  caps.tcl --
 #  
 #   This file is part of the jabberlib. It handles the internal cache
-#   for caps (xmlns='http://jabber.org/protocol/caps') JEP-0115.
+#   for caps (xmlns='http://jabber.org/protocol/caps') XEP-0115.
 #      
 #   A typical caps element looks like:
 #   
@@ -19,7 +19,7 @@
 #  
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.16 2006-11-16 14:28:55 matben Exp $
+# $Id: caps.tcl,v 1.17 2006-12-01 08:55:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #

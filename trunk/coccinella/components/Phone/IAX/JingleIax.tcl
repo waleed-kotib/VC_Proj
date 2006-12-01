@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.33 2006-11-14 13:46:39 matben Exp $
+# $Id: JingleIax.tcl,v 1.34 2006-12-01 08:55:13 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -261,7 +261,7 @@ proc ::JingleIAX::SessionInitiateHandler {from jingle sid id} {
 
     Debug "::JingleIAX::SessionInitiateHandler from=$from, sid=$sid, id=$id"
 
-    # JEP-0166: In order to decline the session initiation request, the target 
+    # XEP-0166: In order to decline the session initiation request, the target 
     # entity MUST acknowledge receipt of the session initiation request, then 
     # terminate the session.
 
@@ -443,7 +443,7 @@ proc ::JingleIAX::SessionTerminateHandler {from jingle sid id} {
 
 # JingleIAX::PresenceHangUpHook --
 # 
-#       The Jingle JEP specifies that if a user we have a session with becomes
+#       The Jingle XEP specifies that if a user we have a session with becomes
 #       unavailable we must close down the call.
 
 proc ::JingleIAX::PresenceHangUpHook {jid type args} {

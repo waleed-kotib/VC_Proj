@@ -1,7 +1,7 @@
 #  pep.tcl --
 #
 #      This file is part of the jabberlib. It contains support code
-#      for the Personal Eventing PubSub (xmlns='http://jabber.org/protocol/pubsub') JEP-0163.
+#      for the Personal Eventing PubSub (xmlns='http://jabber.org/protocol/pubsub') XEP-0163.
 #
 #       The current code reflects the PEP XEP prior to the simplification
 #       of version 1.0. NEW PEP means version 1.0.
@@ -9,7 +9,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #
-# $Id: pep.tcl,v 1.2 2006-11-24 15:04:08 matben Exp $
+# $Id: pep.tcl,v 1.3 2006-12-01 08:55:14 matben Exp $
 #
 ############################# USAGE ############################################
 #
@@ -19,6 +19,11 @@
 #      jlibName pep publish
 #      jlibName pep retract
 #      jlibName pep subscribe
+#      
+#      jlibName pep have_auto_subscribe node
+#      jlibName pep list_auto_subscribe
+#      jlibName pep set_auto_subscribe node
+#      jlibName pep unset_auto_subscribe node
 #
 ################################################################################
 #
@@ -61,6 +66,7 @@ proc jlib::pep::init {jlibname} {
     # Instance specifics arrays.
     namespace eval ${jlibname}::pep {
 	variable autosub
+	set autosub(presreg) 0
     }
 }
 
@@ -227,11 +233,16 @@ proc jlib::pep::subscribe {jlibname jid node args} {
 # 
 #       Subscribe all available users automatically.
 
-proc jlib::pep::set_auto_subscribe {jlibname node} {    
+proc jlib::pep::set_auto_subscribe {jlibname node args} {    
     upvar ${jlibname}::pep::autosub  autosub
 
     Debug 4 "jlib::pep::set_auto_subscribe node=$node"
-    set autosub(node,$node) $node
+    array set argsA {
+	-command    {}
+    }
+    array set argsA $args
+    set autosub($node,node) $node
+    set autosub($node,-command) $argsA(-command)
     
     # For those where we've already got presence.
     set jidL [$jlibname roster getusers -type available]
@@ -249,18 +260,26 @@ proc jlib::pep::set_auto_subscribe {jlibname node} {
     }
     
     # And register an event handler for any presence.    
-    $jlibname presence_register_int available  \
-      [namespace code [list PresenceEvent $node]]
+    if {!$autosub(presreg)} {
+	set autosub(presreg) 1
+	$jlibname presence_register_int available [namespace code PresenceEvent]
+    }
 }
 
-proc jlib::pep::list_auto_subscribed {jlibname} {
+proc jlib::pep::list_auto_subscribe {jlibname} {
     upvar ${jlibname}::pep::autosub  autosub
     
     set nodes {}
-    foreach {key node} [array get autosub node,*] {
+    foreach {key node} [array get autosub *,node] {
 	lappend nodes $node
     }
     return $nodes
+}
+
+proc jlib::pep::have_auto_subscribe {jlibname node} {
+    upvar ${jlibname}::pep::autosub  autosub
+    
+    return [info exists autosub($node,node)]
 }
 
 proc jlib::pep::unset_auto_subscribe {jlibname node} {
@@ -268,12 +287,15 @@ proc jlib::pep::unset_auto_subscribe {jlibname node} {
     
     Debug 4 "jlib::pep::unset_auto_subscribe node=$node"
     
-    array unset autosub *,$node
-    $jlibname presence_deregister_int available  \
-      [namespace code [list PresenceEvent $node]]
+    array unset autosub $node,*
+    if {![llength [array names autosub *,node]]} {
+	set autosub(presreg) 0
+	$jlibname presence_deregister_int available [namespace code PresenceEvent]
+    }
 }
 
-proc jlib::pep::PresenceEvent {node jlibname xmldata} {
+proc jlib::pep::PresenceEvent {jlibname xmldata} {
+    upvar ${jlibname}::pep::autosub  autosub
     variable state
 
     Debug 4 "jlib::pep::PresenceEvent node=$node"
@@ -295,8 +317,10 @@ proc jlib::pep::PresenceEvent {node jlibname xmldata} {
     # @@@ There is a small glitch here if user changes presence before we
     #     received its disco result.
     if {![$jlibname disco isdiscoed info $from]} {
-	$jlibname disco get_async items $jid2  \
-	  [list [namespace current]::OnDiscoItems $node]
+	foreach {key node} [array get autosub $node,*] {
+	    $jlibname disco get_async items $jid2  \
+	      [list [namespace current]::OnDiscoItems $node]
+	}
     }
 }
 
@@ -314,8 +338,8 @@ proc jlib::pep::OnDiscoItems {node jlibname type from subiq args} {
 	    # it MUST subscribe to a node using....
 	    set subscribe [$jlibname roster getsubscription $from]
 	    set myjid2 [$jlibname myjid2]
-	    $jlibname pubsub subscribe $from $myjid2 -node $node
-	    #  -command [namespace code PubSubscribeCB]
+	    $jlibname pubsub subscribe $from $myjid2 -node $node  \
+	      -command $autosub($node,-command)
 	}
     }
 }
