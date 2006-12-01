@@ -1,13 +1,13 @@
 #  jlibdns.tcl --
 #  
 #      This file is part of the jabberlib. 
-#      It provides support for JEP-0156: 
+#      It provides support for XEP-0156: 
 #          A DNS TXT Resource Record Format for XMPP Connection Methods 
 #      and client DNS SRV records (XMPP Core sect. 14.3)
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jlibdns.tcl,v 1.3 2006-08-06 13:22:05 matben Exp $
+# $Id: jlibdns.tcl,v 1.4 2006-12-01 08:55:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #

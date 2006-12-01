@@ -1,13 +1,13 @@
 #  jingle.tcl --
 #  
 #      This file is part of the jabberlib. 
-#      It provides support for the jingle stuff JEP-0166,
+#      It provides support for the jingle stuff XEP-0166,
 #      and provides pluggable "slots" for media description formats and 
 #      transport methods, which are implemented separately. 
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jingle.tcl,v 1.7 2006-11-16 14:28:55 matben Exp $
+# $Id: jingle.tcl,v 1.8 2006-12-01 08:55:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.42 2006-11-22 08:02:32 matben Exp $
+# $Id: disco.tcl,v 1.43 2006-12-01 08:55:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -533,7 +533,7 @@ proc jlib::disco::parse_get_info {jlibname from queryE} {
 		# 'type' attributes. (category/type)
 		# Each identity element SHOULD have the same name value.
 		# 
-		# JEP 0030:
+		# XEP 0030:
 		# If the hierarchy category is used, every node in the 
 		# hierarchy MUST be identified as either a branch or a leaf; 
 		# however, since a node MAY have multiple identities, any given 

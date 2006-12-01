@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.186 2006-10-30 09:36:15 matben Exp $
+# $Id: Chat.tcl,v 1.187 2006-12-01 08:55:13 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -509,7 +509,7 @@ proc ::Chat::GotMsg {body args} {
     
     set w $dlgstate(w)
 
-    # Check for ChatState (JEP-0085) support
+    # Check for ChatState (XEP-0085) support
     set msgChatState ""
     if {[info exists argsArr(-active)]} {
         set chatstate(havecs) true
@@ -557,8 +557,8 @@ proc ::Chat::GotMsg {body args} {
            lappend opts -secs $secs
         }
 
-        # If doesn't come a ChatState event (JEP-0085).
-        # See if we've got a jabber:x:event (JEP-0022).
+        # If doesn't come a ChatState event (XEP-0085).
+        # See if we've got a jabber:x:event (XEP-0022).
         # 
         # @@@ Should we handle this with hooks?
         if {$chatstate(havecs) eq "true"} {
@@ -2709,7 +2709,7 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
 
 proc ::Chat::GetWindow {jid} {
 
-    jlib::splitjid $jid jid2 res
+    set jid2 [jlib::barejid $jid]
     set mjid2 [jlib::jidmap $jid2]
     set chattoken [GetTokenFrom chat jid ${mjid2}*]
     if {$chattoken ne ""} {
@@ -2954,11 +2954,11 @@ proc ::Chat::GetFirstSashPos { } {
 
 # Support for jabber:x:event ...................................................
 
-# Handle incoming jabber:x:event (JEP-0022).
+# Handle incoming jabber:x:event (XEP-0022).
 
 proc ::Chat::XEventHandleAnyXElem {chattoken xElem args} {
 
-    # See if we've got a jabber:x:event (JEP-0022).
+    # See if we've got a jabber:x:event (XEP-0022).
     # 
     #  Should we handle this with hooks????
     set xevent [lindex [wrapper::getnamespacefromchilds $xElem x \
@@ -3163,7 +3163,7 @@ proc ::Chat::BuildHistoryForJid {jid} {
       -tagscommand ::Chat::ConfigureTextTags
 }
 
-# Support for JEP-0085 ChatState ...............................................
+# Support for XEP-0085 ChatState ...............................................
 
 proc ::Chat::ChangeChatState {chattoken trigger} {
     upvar 0 $chattoken chatstate

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.188 2006-10-20 09:26:49 matben Exp $
+# $Id: Jabber.tcl,v 1.189 2006-12-01 08:55:13 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -163,7 +163,7 @@ namespace eval ::Jabber:: {
 	caps            "http://coccinella.sourceforge.net/protocol/caps"
     }
     
-    # Standard jabber (xmpp + JEP) protocol namespaces.
+    # Standard jabber (xmpp + XEP) protocol namespaces.
     variable xmppxmlns
     array set xmppxmlns {
 	amp         "http://jabber.org/protocol/amp"
@@ -1378,7 +1378,7 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
 # Jabber::CreateCapsPresElement --
 # 
 #       Used when sending inital presence. This way clients get various info.
-#       See [JEP 0115]
+#       See [XEP 0115]
 #       Note that this doesn't replace the 'coccinella' element since caps
 #       are not instance specific (can't send ip addresses).
 

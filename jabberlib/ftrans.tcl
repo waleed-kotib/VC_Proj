@@ -1,11 +1,11 @@
 #  ftrans.tcl --
 #  
 #      This file is part of the jabberlib. 
-#      It provides support for the file-transfer profile (JEP-0096).
+#      It provides support for the file-transfer profile (XEP-0096).
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.12 2006-04-17 13:23:38 matben Exp $
+# $Id: ftrans.tcl,v 1.13 2006-12-01 08:55:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #

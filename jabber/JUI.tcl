@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.138 2006-11-16 14:28:54 matben Exp $
+# $Id: JUI.tcl,v 1.139 2006-12-01 08:55:13 matben Exp $
 
 package provide JUI 1.0
 
@@ -424,6 +424,7 @@ proc ::JUI::NotebookTabChanged {} {
     $jwapp(wtbar) buttonconfigure chat -state $state  
 }
 
+# @@@ Move to Status
 proc ::JUI::StatusPostCmd {} {
     variable jwapp
     
@@ -434,16 +435,6 @@ proc ::JUI::StatusPostCmd {} {
     }
     ::Status::MenuSetState $jwapp(mystatus) all $state
     ::Status::MenuSetState $jwapp(mystatus) available normal
-}
-
-proc ::JUI::StatusCmd {status} {
-    
-    # @@@ Could perhaps be moved to Status.
-    if {[::Jabber::IsConnected]} {
-	::Jabber::SetStatus $status
-    } else {
-	::Login::Dlg
-    }
 }
 
 proc ::JUI::BuildToolbar {w wtbar} {

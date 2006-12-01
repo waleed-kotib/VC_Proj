@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.59 2006-10-21 10:39:18 matben Exp $
+# $Id: Register.tcl,v 1.60 2006-12-01 08:55:14 matben Exp $
 
 package provide Register 1.0
 
@@ -109,7 +109,7 @@ namespace eval ::RegisterEx:: {
     variable win $::wDlgs(jreg)_ibr
 }
 
-# This section is actually support for JEP-0077: In-Band Registration 
+# This section is actually support for XEP-0077: In-Band Registration 
 
 proc ::RegisterEx::OnMenu {} {
     if {[llength [grab current]]} { return }

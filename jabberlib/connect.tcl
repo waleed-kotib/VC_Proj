@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.16 2006-10-19 08:03:40 matben Exp $
+# $Id: connect.tcl,v 1.17 2006-12-01 08:55:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -50,7 +50,7 @@
 #       in RFC 3920 (XMPP Core) as:
 #       xmpp-streams-error-TheTagName
 #       
-### From: JEP-0170: Recommended Order of Stream Feature Negotiation ############
+### From: XEP-0170: Recommended Order of Stream Feature Negotiation ############
 #
 #   The XMPP RFCs define an ordering for the features defined therein, namely: 
 #       0.  TLS 

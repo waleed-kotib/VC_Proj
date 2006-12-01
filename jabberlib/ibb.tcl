@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.19 2006-04-17 13:23:38 matben Exp $
+# $Id: ibb.tcl,v 1.20 2006-12-01 08:55:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -164,7 +164,7 @@ proc jlib::ibb::si_send {jlibname sid data} {
 
 # jlib::ibb::si_send_cb --
 # 
-#       JEP says that we SHOULD track each mesage, in case of error.
+#       XEP says that we SHOULD track each mesage, in case of error.
 
 proc jlib::ibb::si_send_cb {jlibname sid type subiq args} {
 
