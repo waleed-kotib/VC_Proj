@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: groupchat.tcl,v 1.6 2005-11-30 08:32:00 matben Exp $
+# $Id: groupchat.tcl,v 1.7 2006-12-02 15:24:42 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -72,7 +72,6 @@ proc jlib::groupchat::enter {jlibname room nick args} {
 proc jlib::groupchat::exit {jlibname room} {
 
     upvar ${jlibname}::gchat gchat
-    upvar ${jlibname}::lib lib
     
     set room [string tolower $room]
     if {[info exists gchat($room,mynick)]} {
@@ -85,7 +84,7 @@ proc jlib::groupchat::exit {jlibname room} {
     if {$ind >= 0} {
 	set gchat(allroomsin) [lreplace $gchat(allroomsin) $ind $ind]
     }
-    $lib(rostername) clearpresence "${room}*"
+    $jlibname roster clearpresence "${room}*"
     return
 }
 
@@ -127,7 +126,6 @@ proc jlib::groupchat::participants {jlibname room} {
 
     upvar ${jlibname}::agent agent
     upvar ${jlibname}::gchat gchat
-    upvar ${jlibname}::lib lib
 
     set room [string tolower $room]
     set isroom 0
@@ -142,7 +140,7 @@ proc jlib::groupchat::participants {jlibname room} {
     
     # The rosters presence elements should give us all info we need.
     set everyone {}
-    foreach userAttr [$lib(rostername) getpresence $room -type available] {
+    foreach userAttr [$jlibname roster getpresence $room -type available] {
 	unset -nocomplain attrArr
 	array set attrArr $userAttr
 	lappend everyone ${room}/$attrArr(-resource)
