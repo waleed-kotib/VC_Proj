@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.22 2006-12-01 08:55:14 matben Exp $
+# $Id: Status.tcl,v 1.23 2006-12-02 15:19:48 matben Exp $
 
 package provide Status 1.0
 
@@ -151,8 +151,6 @@ proc ::Status::Button {w varName args} {
     
     trace add variable $varName write [list [namespace current]::Trace $w]
     bind $w <Destroy> +[list ::Status::Free %W $varName]
-
-    #$wmenu configure -postcommand [list ::Status::ExPostCmd $wmenu $varName]
     
     return $w
 }
@@ -188,14 +186,6 @@ proc ::Status::ConfigImage {w show} {
     } else {
 	$w configure -image [::Rosticons::Get status/$show]
     }
-}
-
-proc ::Status::PostMenu {wmenu x y} {
-    
-    # This one is needed on the mac so the menu is built before it is posted.
-    update idletasks
-
-    tk_popup $wmenu [expr int($x)] [expr int($y)]
 }
 
 # Status::BuildGenericMenu --
@@ -482,6 +472,11 @@ proc ::Status::BtSetStatus {w} {
 
 #-------------------------------------------------------------------------------
 
+namespace eval ::Status:: {
+    
+    set ::config(status,menu,len) 8
+}
+
 proc ::Status::ExInitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
    
@@ -490,20 +485,169 @@ proc ::Status::ExInitPrefsHook {} {
       [list ::Jabber::jprefs(status,menu) jprefs_status_menu $jprefs(status,menu)]]
 }
 
-proc ::Status::ExPostCmd {m varName} {
-    upvar $varName status
+# Status::ExMainButton --
+# 
+#       Make a status menu button for login status only.
 
-    $m delete 0 end
-    ExBuildMenu $m $varName
-   
+proc ::Status::ExMainButton {w varName} {
+    upvar $varName showStatus
+    
+    # We cannot use jstate(show+status) directly here due to the special use
+    # of the "available" entry for login.
+    set menuVar [namespace current]::menuVar($w)
+    set $menuVar $showStatus
+    ExButton $w $menuVar -command [list ::Status::ExMainCmd $w]  \
+      -postcommand [list ::Status::ExMainPostCmd $w]
+
+    trace add variable $varName write [list ::Status::ExMainTrace $w]
+    bind $w <Destroy> +[list ::Status::ExMainFree %W $varName]
+    return $w
 }
 
-proc ::Status::ExBuildMenu {m varName} {
+proc ::Status::ExMainPostCmd {w} {
+    
+    puts "::Status::ExMainPostCmd"
+    if {[::Jabber::GetMyStatus] eq "unavailable"} {
+	set state disabled
+    } else {
+	set state normal
+    }
+    ExMenuSetState [ExGetMenu $w] all $state
+    ExMenuSetState [ExGetMenu $w] available normal
+}
+
+proc ::Status::ExMainCmd {w} {
+    
+    puts "::Status::ExMainCmd"
+    set menuVar [namespace current]::menuVar($w)
+    upvar $menuVar showStatus
+    
+    puts "\t showStatus=$showStatus"
+    set show   [lindex $showStatus 0]
+    set status [lindex $showStatus 1]
+    
+    if {[::Jabber::IsConnected]} {
+	::Jabber::SetStatus $show -status $status
+    } else {
+
+	# Status "available" is special since used for login.
+	set menuVar [namespace current]::menuVar($w)
+	set $menuVar "unavailable"
+	::Login::Dlg
+    }
+}
+
+proc ::Status::ExMainTrace {w varName index op} {
+    upvar $varName var
+    
+    puts "::Status::ExMainTrace"
+    
+    # This is just to sync the menuVar after the statusVar.
+    set value $var($index)
+    set menuVar [namespace current]::menuVar($w)
+    set $menuVar $value
+}
+
+proc ::Status::ExMainFree {w statusVar} {
+
+    trace remove variable $statusVar write [list ::Status::ExMainTrace $w]
+    set menuVar [namespace current]::menuVar($w)
+    unset -nocomplain $menuVar
+}
+
+# Status::ExButton --
+# 
+#       Generic way to set any status.
+#        
+# Arguments:
+#       w         button widget
+#       varName   variable to sync with; list value {show status}
+#       args      anything for the menu entries
+#                 -postcommand
+#       
+# Results:
+#       widget path
+
+proc ::Status::ExButton {w varName args} {    
+    upvar $varName showStatus
+        
+    set show [lindex $showStatus 0]	
+    ttk::menubutton $w -style MiniMenubutton  \
+      -compound image -image [::Rosticons::Get status/$show]
+    set wmenu $w.menu
+    menu $wmenu -tearoff 0  \
+      -postcommand [list ::Status::ExPostCmd $wmenu $varName $args]
+    $w configure -menu $wmenu
+    
+    trace add variable $varName write [list [namespace current]::ExTrace $w]
+    bind $w <Destroy> +[list ::Status::ExFree %W $varName]
+    return $w
+}
+
+proc ::Status::ExGetMenu {w} {
+    return $w.menu
+}
+
+proc ::Status::ExTrace {w varName index op} {
+    
+    puts "::Status::ExTrace"
+    if {[winfo exists $w]} {
+	upvar $varName var
+
+	if {$index eq ""} {
+	    set showStatus $var
+	} else {
+	    set showStatus $var($index)
+	}
+	set show [lindex $showStatus 0]
+	$w configure -image [::Rosticons::Get status/$show]
+    }
+}
+
+proc ::Status::ExFree {w varName} {
+    variable $w    
+    unset -nocomplain $w
+    trace remove variable $varName write [list [namespace current]::ExTrace $w]
+}
+
+proc ::Status::ExPostCmd {m varName opts} {
+    $m delete 0 end
+    eval {ExBuildMenu $m $varName} $opts
+}
+
+# Status::ExBuildMenu --
+# 
+# 
+# Arguments:
+#       m         menu widget
+#       varName   variable to sync with; list value {show status}
+#       args      anything for the menu entries
+#                 -postcommand
+#       
+# Results:
+#       menu widget
+
+proc ::Status::ExBuildMenu {m varName args} {
     upvar ::Jabber::jprefs jprefs
     variable mapShowElemToText
 
-    set statusA(available) {}
-    set statusA(away)      {}
+    upvar $varName showStatus
+    puts "::Status::ExBuildMenu varName=$varName, showStatus=$showStatus, args=$args"
+    
+    # We must intersect all actions in order to keep the status list uptodate.
+    array set argsA {
+	-command      {}
+	-postcommand  {}
+    }
+    array set argsA $args
+    set argsA(-command) [list ::Status::ExMenuCmd $m $varName $argsA(-command)]
+    set postCommand $argsA(-postcommand)
+    unset -nocomplain argsA(-postcommand)
+    set args [array get argsA]
+    
+    set statusA(available)   {}
+    set statusA(unavailable) {}
+    set statusA(away)        {}
     foreach {show status} $jprefs(status,menu) {
 	lappend statusA($show) $status
     }
@@ -512,22 +656,29 @@ proc ::Status::ExBuildMenu {m varName} {
     }
     
     # available and show shall always be there. Add other if exists.
+    set showManifestL {available away unavailable}
     set showL {available away}
     foreach show {chat dnd xa invisible} {
 	if {[info exists statusA($show)]} {
 	    lappend showL $show	    
 	}
     }
+    lappend showL unavailable
     
     foreach show $showL {
+	#puts "\t show=$show"
 	set opts {}
 	if {[tk windowingsystem] ne "aqua"} {
 	    set opts [list -compound left \
 	      -image [::Rosticons::Get status/$show]]
 	}
-	eval {$m add radio -label $mapShowElemToText($show)  \
-	  -variable $varName -value $show} $opts
+	if {[lsearch $showManifestL $show] >= 0} {
+	    set value [list $show {}]
+	    eval {$m add radio -label $mapShowElemToText($show)  \
+	      -variable $varName -value $value} $opts $args
+	}
 	foreach status $statusA($show) {
+	    #puts "\t\t status=$status"
 	    if {[string length $status] > 20} {
 		set str [string range $status 0 18]
 		append str "..."
@@ -538,19 +689,66 @@ proc ::Status::ExBuildMenu {m varName} {
 	    set label $mapShowElemToText($show)
 	    append label " " $str
 	    eval {$m add radio -label $label  \
-	      -variable $varName -value $show} $opts
+	      -variable $varName -value $value} $opts $args
 	}
 	$m add separator
     }
-    $m add command -label mCustomStatus -command ::Status::ExCustomDlg
+    $m add command -label mCustomStatus  \
+      -command [concat ::Status::ExCustomDlg $varName $args]
     update idletasks
-
+    
+    if {[llength $postCommand]} {
+	uplevel #0 $postCommand
+    }
     return $m
 }
 
-proc ::Status::ExCustomDlg {} {
-    global  wDlgs
+proc ::Status::ExMenuSetState {m which state} {
+    variable mapShowTextToElem
+    variable mapShowElemToText
     
+    if {$which eq "all"} {
+	set iend [$m index end]
+	for {set i 0} {$i <= $iend} {incr i} {
+	    if {[$m type $i] ne "separator"} {
+		$m entryconfigure $i -state $state
+	    }
+	}
+    } else {
+	$m entryconfigure [$m index $mapShowElemToText($which)*] -state $state
+    }
+}
+
+proc ::Status::ExMenuCmd {m varName cmd} {    
+    upvar $varName showStatus
+    puts "::Status::ExMenuCmd"
+
+    set show   [lindex $showStatus 0]
+    set status [lindex $showStatus 1]
+    if {$status ne ""} {
+	ExAddMessage $show $status
+    }
+    if {[llength $cmd]} {
+	uplevel #0 $cmd
+    }
+}
+
+proc ::Status::ExAddMessage {show status} {
+    global  config
+    upvar ::Jabber::jprefs jprefs
+    
+    set len $config(status,menu,len)
+    
+    set statusL [linsert $jprefs(status,menu) 0 $show $status]
+    if {[llength $statusL] > [expr {2*$len}]} {
+	set statusL [lrange $statusL 0 [expr {2*$len-1}]]
+    }
+    set jprefs(status,menu) $statusL
+}
+
+proc ::Status::ExCustomDlg {varName args} {
+    global  wDlgs
+
     set w $wDlgs(jpresmsg)
     if {[winfo exists $w]} {
 	raise $w
@@ -559,9 +757,15 @@ proc ::Status::ExCustomDlg {} {
     variable $w
     upvar 0 $w state
 
-    set state(show)   [::Jabber::GetMyStatus]
-    set state(status) ""
+    upvar $varName showStatus
+
+    set state(varName)  $varName
+    set state(show)     [lindex $showStatus 0]
+    set state(status)   [lindex $showStatus 1]
+    set state(-command) ""
+    array set state $args
     
+    # @@@ -image ?
     set menuDef [list  \
 	[list [mc mAvailable]       -value available]  \
 	[list [mc mAway]            -value away]       \
@@ -572,29 +776,45 @@ proc ::Status::ExCustomDlg {} {
 	[list [mc mNotAvailable]    -value unavailable]]
 
     set str "Set your status message for any of the presence states"
-    set dtl "The most present states and status messages are easily reachable as menu entries"
+    set dtl "The most frequent states and status messages are easily reachable as menu entries"
     ui::dialog $w -type okcancel -message $str -detail $dtl -icon info  \
-      -command ::Status::ExCustomDlgCmd -geovariable [namespace current]::$w\(geo)
+      -command ::Status::ExCustomDlgCmd -geovariable prefs(winGeom,$w)
     set fr [$w clientframe]
     ui::optionmenu $fr.m -menulist $menuDef -direction flush  \
       -variable [namespace current]::$w\(show)
     ttk::entry $fr.e -textvariable [namespace current]::$w\(status)
     
-    grid  $fr.m  $fr.e  -sticky ew
+    grid  $fr.m  $fr.e  -sticky ew -padx 2
     grid columnconfigure $fr 1 -weight 1
+    
+    bind $w <Destroy> +[list ::Status::ExCustomDlgFree $w]
 }
 
 proc ::Status::ExCustomDlgCmd {w button} {
     variable $w
     upvar 0 $w state
 
-    puts "::Status::CustomDlgCmd button=$button"
+    puts "::Status::ExCustomDlgCmd button=$button"
 
-    parray state
     if {$button eq "ok"} {
-	::Jabber::SetStatus $state(show) -status $state(status)
+	upvar $state(varName) showStatus
+	
+	if {$state(status) ne ""} {
+	    ExAddMessage $state(show) $state(status)
+	}
+	set showStatus [list $state(show) $state(status)]
+	if {[llength $state(-command)]} {
+	    uplevel #0 $state(-command)
+	}
     }
-    #unset -nocomplain state
 }
+
+proc ::Status::ExCustomDlgFree {w} {
+    variable $w
+    unset -nocomplain $w
+}
+
+proc ::Status::TestCmd {} {puts "::Status::TestCmd"}
+proc ::Status::TestPostCmd {} {puts "::Status::TestPostCmd"}
 
 #-------------------------------------------------------------------------------
