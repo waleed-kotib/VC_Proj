@@ -422,6 +422,7 @@
 ::msgcat::mcset en mDisco         	{Disco}
 ::msgcat::mcset en mFind         	{Find}
 ::msgcat::mcset en mFindAgain         	{Find Again}
+::msgcat::mcset en mCustomStatus        {Custom Status...}
 
 # Popups
 ::msgcat::mcset en mMessage     	{Message...}

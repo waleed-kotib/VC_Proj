@@ -428,9 +428,10 @@
 ::msgcat::mcset it mNotebook {Taccuino}
 ::msgcat::mcset it mMinimal {Minimale}
 ::msgcat::mcset it mDisco {Disco}
-
 ::msgcat::mcset it mFind Trova
 ::msgcat::mcset it mFindAgain {Trova successivo}
+
+::msgcat::mcset it mCustomStatus        {Custom Status...}
 
 # Popups
 ::msgcat::mcset it mMessage {Messaggio...}

@@ -428,13 +428,14 @@
 ::msgcat::mcset de mOffline     	Abgemeldet
 ::msgcat::mcset de mTransports  	Transporte
 ::msgcat::mcset de mEditBookmarks       {Lesezeichen bearbeiten...}
-
 ::msgcat::mcset de mToolbar             Werkzeugleiste
 ::msgcat::mcset de mNotebook            Notizbuch
 ::msgcat::mcset de mMinimal             Minimal
 ::msgcat::mcset de mDisco               Disco
 ::msgcat::mcset de mFind                Suchen
 ::msgcat::mcset de mFindAgain           {Weiter suchen}
+
+::msgcat::mcset de mCustomStatus        {Custom Status...}
 
 
 # Popups

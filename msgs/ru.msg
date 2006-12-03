@@ -349,6 +349,8 @@
 ::msgcat::mcset ru mUserInfo			{Информация о пользовател...}
 ::msgcat::mcset ru mEditBookmarks	{Закладки}
 
+::msgcat::mcset ru mCustomStatus        {Custom Status...}
+
 # Popups
 ::msgcat::mcset ru mMessage     	{Сообщение...}
 ::msgcat::mcset ru mWhiteboard     	{Доской...}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.23 2006-12-02 15:19:48 matben Exp $
+# $Id: Status.tcl,v 1.24 2006-12-03 08:42:48 matben Exp $
 
 package provide Status 1.0
 
@@ -73,7 +73,7 @@ proc ::Status::GetStatusTextArray { } {
 proc ::Status::MainButton {w statusVar} {
     upvar $statusVar status
     
-    # We cannot use jstate(status) directly here due to the special use
+    # We cannot use jstate(show) directly here due to the special use
     # of the "available" entry for login.
     set menuVar [namespace current]::menuVar($w)
     set $menuVar $status
@@ -280,16 +280,16 @@ proc ::Status::BuildMenuDef { } {
 	    set mName $mapShowTextToMLabel($name)
 	    set cmd [list ::Jabber::SetStatus $name]
 	    if {[tk windowingsystem] eq "aqua"} {
-		set opts [list -variable ::Jabber::jstate(status) -value $name]
+		set opts [list -variable ::Jabber::jstate(show) -value $name]
 	    } else {
-		set opts [list -variable ::Jabber::jstate(status) -value $name \
+		set opts [list -variable ::Jabber::jstate(show) -value $name \
 		  -compound left -image [::Rosticons::Get status/$name]]
 	    }
 	    lappend statMenuDef [list radio $mName $cmd {} $opts]
 	}
     }
     lappend statMenuDef {separator}  \
-      {command mAttachMessage {::Status::SetWithMessage ::Jabber::jstate(status)} {}}
+      {command mAttachMessage {::Status::SetWithMessage ::Jabber::jstate(show)} {}}
     
     return $statMenuDef
 }
@@ -299,7 +299,7 @@ proc ::Status::MainWithMessage {} {
     
     set status [::Jabber::JlibCmd mypresencestatus]
 
-    return [SetWithMessage -show $jstate(status) -status $status]
+    return [SetWithMessage -show $jstate(show) -status $status]
 }
 
 #-- Generic status dialog ------------------------------------------------------
@@ -648,7 +648,9 @@ proc ::Status::ExBuildMenu {m varName args} {
     set statusA(available)   {}
     set statusA(unavailable) {}
     set statusA(away)        {}
-    foreach {show status} $jprefs(status,menu) {
+    foreach elem $jprefs(status,menu) {
+	set show   [lindex $elem 0]
+	set status [lindex $elem 1]
 	lappend statusA($show) $status
     }
     foreach show [array names statusA] {
@@ -693,7 +695,7 @@ proc ::Status::ExBuildMenu {m varName args} {
 	}
 	$m add separator
     }
-    $m add command -label mCustomStatus  \
+    $m add command -label [mc mCustomStatus]  \
       -command [concat ::Status::ExCustomDlg $varName $args]
     update idletasks
     
@@ -737,11 +739,20 @@ proc ::Status::ExAddMessage {show status} {
     global  config
     upvar ::Jabber::jprefs jprefs
     
-    set len $config(status,menu,len)
-    
-    set statusL [linsert $jprefs(status,menu) 0 $show $status]
-    if {[llength $statusL] > [expr {2*$len}]} {
-	set statusL [lrange $statusL 0 [expr {2*$len-1}]]
+    set statusL $jprefs(status,menu)
+    set elem [list $show $status]
+    set idx [lsearch $statusL $elem]
+
+    # Remove duplicates.
+    if {$idx >= 0} {	
+	set statusL [lreplace $statusL $idx $idx]
+    }
+
+    # Put new show+status first in list.
+    set statusL [linsert $statusL 0 $elem]
+    set len [llength $statusL]
+    if {[llength $statusL] > $len} {
+	set statusL [lrange $statusL 0 [expr {$len-1}]]
     }
     set jprefs(status,menu) $statusL
 }
