@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.24 2006-11-16 14:28:54 matben Exp $
+# $Id: Taskbar.tcl,v 1.25 2006-12-03 16:29:34 matben Exp $
 
 package require balloonhelp
 
@@ -151,7 +151,7 @@ proc ::Taskbar::InitHook { } {
     set STAT [::Roster::GetMyPresenceIcon]
     
     set menuDef {
-	{cascade  mStatus           @::Status::BuildMainMenu  {-image @STAT -compound left}}
+	{cascade  mStatus           {}                      {-image @STAT -compound left}}
 	{command  mHideMain         ::Taskbar::HideMain                  }
 	{command  mSendMessage      ::NewMsg::Build         {-image @MSG -compound left}}
 	{command  mPreferences...   ::Preferences::Build    {-image @SET -compound left}}
@@ -225,6 +225,7 @@ proc ::Taskbar::ToggleVisibility {} {
 }
 
 proc ::Taskbar::Post {m} {
+    global  config
     variable menuIndex
 
     switch -- [wm state [::UI::GetMainWindow]] {
@@ -249,6 +250,14 @@ proc ::Taskbar::Post {m} {
     }
     $m entryconfigure $menuIndex(mSendMessage) -state $state0 
     $m entryconfigure $menuIndex(mAddNewUser) -state $state0
+    
+    set mstatus [$m entrycget $menuIndex(mStatus) -menu]
+    $mstatus delete 0 end
+    if {$config(ui,status,menu) eq "plain"} {
+	::Status::BuildMainMenu $mstatus
+    } elseif {$config(ui,status,menu) eq "dynamic"} {
+	::Status::ExBuildMainMenu $mstatus
+    }
 }
 
 proc ::Taskbar::TearOff {wm wt} {
