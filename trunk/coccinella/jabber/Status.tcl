@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.24 2006-12-03 08:42:48 matben Exp $
+# $Id: Status.tcl,v 1.25 2006-12-03 08:46:23 matben Exp $
 
 package provide Status 1.0
 
@@ -119,6 +119,28 @@ proc ::Status::MainMenuCmd {mt varName} {
     
     MainCmd $mt $status
 }
+
+# Status::BuildMainMenu --
+#
+#       Builds a main status menu only. Hardcoded variable jstate(status).
+
+proc ::Status::BuildMainMenu {mt} {
+    
+    set statusVar ::Jabber::jstate(status)
+    upvar $statusVar status
+
+    set menuVar [namespace current]::menuVar($mt)
+    set $menuVar $status
+    BuildGenericMenu $mt $menuVar \
+      -command [list [namespace current]::MainMenuCmd $mt $menuVar]   
+
+    trace add variable $statusVar write  \
+      [list [namespace current]::MainTrace $mt]
+    bind $mt <Destroy> +[list ::Status::MainFree %W $statusVar]
+
+    return $mt
+}
+
 
 # ::Status::Button --
 # 
