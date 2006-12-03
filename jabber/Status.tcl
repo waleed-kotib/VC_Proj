@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.25 2006-12-03 08:46:23 matben Exp $
+# $Id: Status.tcl,v 1.26 2006-12-03 16:29:34 matben Exp $
 
 package provide Status 1.0
 
@@ -78,11 +78,22 @@ proc ::Status::MainButton {w statusVar} {
     set menuVar [namespace current]::menuVar($w)
     set $menuVar $status
     Button $w $menuVar -command [list [namespace current]::MainCmd $w]
-
+    MenuConfig $w -postcommand [list [namespace current]::MainPostCmd $w]
+    
     trace add variable $statusVar write [list [namespace current]::MainTrace $w]
     bind $w <Destroy> +[list ::Status::MainFree %W $statusVar]
 
     return $w
+}
+
+proc ::Status::MainPostCmd {w} {
+    if {[::Jabber::GetMyStatus] eq "unavailable"} {
+	set state disabled
+    } else {
+	set state normal
+    }
+    ExMenuSetState [ExGetMenu $w] all $state
+    ExMenuSetState [ExGetMenu $w] available normal
 }
 
 proc ::Status::MainCmd {w status args} {
@@ -122,25 +133,18 @@ proc ::Status::MainMenuCmd {mt varName} {
 
 # Status::BuildMainMenu --
 #
-#       Builds a main status menu only. Hardcoded variable jstate(status).
+#       Builds a main status menu only. Hardcoded variable jstate(show).
+#       Shall only be used for transient usage (-postcommand).
 
-proc ::Status::BuildMainMenu {mt} {
+proc ::Status::BuildMainMenu {m} {
+    upvar ::Jabber::jstate jstate
     
-    set statusVar ::Jabber::jstate(status)
-    upvar $statusVar status
-
-    set menuVar [namespace current]::menuVar($mt)
-    set $menuVar $status
-    BuildGenericMenu $mt $menuVar \
-      -command [list [namespace current]::MainMenuCmd $mt $menuVar]   
-
-    trace add variable $statusVar write  \
-      [list [namespace current]::MainTrace $mt]
-    bind $mt <Destroy> +[list ::Status::MainFree %W $statusVar]
-
-    return $mt
+    set menuVar [namespace current]::menuVar($m)
+    set $menuVar $jstate(show)
+    BuildGenericMenu $m $menuVar \
+      -command [list [namespace current]::MainMenuCmd $m $menuVar]   
+    return $m
 }
-
 
 # ::Status::Button --
 # 
@@ -496,7 +500,9 @@ proc ::Status::BtSetStatus {w} {
 
 namespace eval ::Status:: {
     
-    set ::config(status,menu,len) 8
+    set ::config(status,menu,len)           8
+    set ::config(status,menu,entry,len)     24
+    set ::config(status,menu,dynamic,shows) {away}
 }
 
 proc ::Status::ExInitPrefsHook {} {
@@ -553,8 +559,7 @@ proc ::Status::ExMainCmd {w} {
     } else {
 
 	# Status "available" is special since used for login.
-	set menuVar [namespace current]::menuVar($w)
-	set $menuVar "unavailable"
+	set $menuVar [list unavailable ""]
 	::Login::Dlg
     }
 }
@@ -571,10 +576,25 @@ proc ::Status::ExMainTrace {w varName index op} {
 }
 
 proc ::Status::ExMainFree {w statusVar} {
-
+    
     trace remove variable $statusVar write [list ::Status::ExMainTrace $w]
     set menuVar [namespace current]::menuVar($w)
     unset -nocomplain $menuVar
+}
+
+# Status::ExBuildMainMenu --
+#
+#       Builds a main status menu only. Hardcoded for jstate(show+status).
+#       Shall only be used for transient usage (-postcommand).
+
+proc ::Status::ExBuildMainMenu {m} {
+    upvar ::Jabber::jstate jstate
+    
+    set menuVar [namespace current]::menuVar($m)
+    set $menuVar $jstate(show+status)
+    ExBuildMenu $m $menuVar  \
+      -command [list [namespace current]::ExMainCmd $m]   
+    return $m
 }
 
 # Status::ExButton --
@@ -650,6 +670,7 @@ proc ::Status::ExPostCmd {m varName opts} {
 #       menu widget
 
 proc ::Status::ExBuildMenu {m varName args} {
+    global  config
     upvar ::Jabber::jprefs jprefs
     variable mapShowElemToText
 
@@ -679,18 +700,25 @@ proc ::Status::ExBuildMenu {m varName args} {
 	set statusA($show) [lsort -unique $statusA($show)]
     }
     
-    # available and show shall always be there. Add other if exists.
-    set showManifestL {available away unavailable}
-    set showL {available away}
-    foreach show {chat dnd xa invisible} {
-	if {[info exists statusA($show)]} {
-	    lappend showL $show	    
+    # Typically available, away, and unavailable shall always be there. 
+    # Add other if exists.
+    set shows $config(status,menu,dynamic,shows)
+    set showManifestL [list available unavailable]
+    set showManifestL [concat $showManifestL $shows]
+    set showL [concat available $shows]
+    foreach show {chat away dnd xa invisible} {
+	if {[lsearch $shows $show] < 0} {
+	    if {[info exists statusA($show)]} {
+		lappend showL $show	    
+	    }
 	}
     }
     lappend showL unavailable
     
+    set len $config(status,menu,entry,len)
+    set len2 [expr {$len-2}]
+    
     foreach show $showL {
-	#puts "\t show=$show"
 	set opts {}
 	if {[tk windowingsystem] ne "aqua"} {
 	    set opts [list -compound left \
@@ -702,9 +730,8 @@ proc ::Status::ExBuildMenu {m varName args} {
 	      -variable $varName -value $value} $opts $args
 	}
 	foreach status $statusA($show) {
-	    #puts "\t\t status=$status"
-	    if {[string length $status] > 20} {
-		set str [string range $status 0 18]
+	    if {[string length $status] > $len} {
+		set str [string range $status 0 $len2]
 		append str "..."
 	    } else {
 		set str $status
@@ -846,8 +873,5 @@ proc ::Status::ExCustomDlgFree {w} {
     variable $w
     unset -nocomplain $w
 }
-
-proc ::Status::TestCmd {} {puts "::Status::TestCmd"}
-proc ::Status::TestPostCmd {} {puts "::Status::TestPostCmd"}
 
 #-------------------------------------------------------------------------------

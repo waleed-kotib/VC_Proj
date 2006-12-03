@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.140 2006-12-03 08:42:47 matben Exp $
+# $Id: JUI.tcl,v 1.141 2006-12-03 16:29:34 matben Exp $
 
 package provide JUI 1.0
 
@@ -80,6 +80,8 @@ namespace eval ::JUI:: {
     set ::config(url,bugs)  \
       "http://sourceforge.net/tracker/?group_id=68334&atid=520863"
         
+    set ::config(ui,status,menu) dynamic   ;# plain|dynamic
+    
     # Collection of useful and common widget paths.
     variable jwapp
     variable inited 0
@@ -173,10 +175,6 @@ proc ::JUI::Init { } {
 	}
     }
 
-    # The status menu is built dynamically due to the -image options on 8.4.
-    set idx [lindex [lsearchsublists $menuDefs(rost,jabber) mStatus] 0]
-    lset menuDefs(rost,jabber) $idx 5 [::Status::BuildMenuDef]
-
     set menuDefs(rost,edit) {    
 	{command   mCut              {::UI::CutEvent}           X}
 	{command   mCopy             {::UI::CopyEvent}          C}
@@ -245,7 +243,7 @@ proc ::JUI::Show {w args} {
 #       $w
 
 proc ::JUI::Build {w} {
-    global  this prefs
+    global  this prefs config
     
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -345,13 +343,10 @@ proc ::JUI::Build {w} {
     pack $wfstat -fill x
   
     set wstatcont $wfstat.cont
-    if {0} {
+    if {$config(ui,status,menu) eq "plain"} {
 	::Status::MainButton $wfstat.bst ::Jabber::jstate(show)
-	::Status::MenuConfig $wfstat.bst -postcommand ::JUI::StatusPostCmd
-    } else {
-	set jstate(show+status) [list $jstate(show) {}]
+    } elseif {$config(ui,status,menu) eq "dynamic"} {
 	::Status::ExMainButton $wfstat.bst ::Jabber::jstate(show+status)
-	# -command ::Status::TestCmd -postcommand ::Status::TestPostCmd
     }
     
     ttk::frame $wfstat.cont
@@ -428,19 +423,6 @@ proc ::JUI::NotebookTabChanged {} {
 	}
     }
     $jwapp(wtbar) buttonconfigure chat -state $state  
-}
-
-# @@@ Move to Status
-proc ::JUI::StatusPostCmd {} {
-    variable jwapp
-    
-    if {[::Jabber::GetMyStatus] eq "unavailable"} {
-	set state disabled
-    } else {
-	set state normal
-    }
-    ::Status::MenuSetState $jwapp(mystatus) all $state
-    ::Status::MenuSetState $jwapp(mystatus) available normal
 }
 
 proc ::JUI::BuildToolbar {w wtbar} {
@@ -881,7 +863,7 @@ proc ::JUI::EditPostCommand {wmenu} {
 }
 
 proc ::JUI::JabberPostCommand {wmenu} {
-    global wDlgs
+    global wDlgs config
     variable state
     variable jwapp
     
@@ -914,6 +896,15 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	set state(mailbox,visible) 1
     } else {
 	set state(mailbox,visible) 0
+    }
+    
+    # The status menu.
+    set m [::UI::MenuMethod $wmenu entrycget mStatus -menu]
+    $m delete 0 end
+    if {$config(ui,status,menu) eq "plain"} {
+	::Status::BuildMainMenu $m
+    } elseif {$config(ui,status,menu) eq "dynamic"} {
+	::Status::ExBuildMainMenu $m
     }
     
     switch -- [GetConnectState] {
