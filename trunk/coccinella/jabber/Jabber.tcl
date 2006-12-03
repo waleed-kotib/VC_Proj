@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.189 2006-12-01 08:55:13 matben Exp $
+# $Id: Jabber.tcl,v 1.190 2006-12-03 08:42:47 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -87,8 +87,10 @@ namespace eval ::Jabber:: {
     set jstate(sock) {}
     set jstate(ipNum) {}
     
-    # This is our own status (presence/show).
-    set jstate(status) "unavailable"
+    # Keep variables for our presence/show/status which are used in menus etc.
+    set jstate(show) "unavailable"
+    set jstate(status) ""
+    set jstate(show+status) [list $jstate(show) $jstate(status)]
     
     # Server port actually used.
     set jstate(servPort) {}
@@ -298,7 +300,6 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(useXData) 1
     
     set jstate(rosterVis) 1
-    set jstate(browseVis) 0
     set jstate(rostBrowseVis) 1
     set jstate(debugCmd) 0
     
@@ -415,7 +416,7 @@ proc ::Jabber::GetMyJid {{roomjid {}}} {
 proc ::Jabber::GetMyStatus { } {
     variable jstate
     
-    return $jstate(status)
+    return $jstate(show)
     
     # Alternative: [$jstate(jlib) mypresence]
 }
@@ -860,7 +861,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
     
     # For each 'what', split the argument list into the proper arguments,
     # and make the necessary calls.
-    array set argsArr $args
+    array set argsA $args
     set ishandled 0
     
     switch -glob -- $what {
@@ -876,15 +877,15 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    ::UI::MessageBox -icon error -type ok -message [mc jamessconnbroken]
 	}
 	away - xa {
-	    set jstate(status) $what
+	    set jstate(show) $what
 	    ::hooks::run setPresenceHook $what
 	    #after idle ::Jabber::AutoAway
 	}
 	streamerror - xmpp-streams-error* {
 	    DoCloseClientConnection
-	    if {[info exists argsArr(-errormsg)]} {
+	    if {[info exists argsA(-errormsg)]} {
 		set msg "Receieved a fatal error: "
-		append msg $argsArr(-errormsg)
+		append msg $argsA(-errormsg)
 		append msg "\n"
 		append msg "The connection is closed."
 	    } else {
@@ -898,9 +899,9 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # XML parsing error.
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    DoCloseClientConnection
-	    if {[info exists argsArr(-errormsg)]} {
+	    if {[info exists argsA(-errormsg)]} {
 		set msg "Receieved a fatal XML parsing error: "
-		append msg $argsArr(-errormsg)
+		append msg $argsA(-errormsg)
 		append msg "\n"
 		append msg "The connection is closed down."
 	    } else {
@@ -916,9 +917,9 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    #::Jabber::DoCloseClientConnection
 	    SetClosedState
 	    set msg [mc jamessconnbroken]
-	    if {[info exists argsArr(-errormsg)]} {
+	    if {[info exists argsA(-errormsg)]} {
 		append msg "\n"
-		append msg $argsArr(-errormsg)
+		append msg $argsA(-errormsg)
 	    }
 	    ::UI::MessageBox -icon error -type ok -message $msg
 	}
@@ -1082,14 +1083,14 @@ proc ::Jabber::DoCloseClientConnection {args} {
     
     ::Debug 2 "::Jabber::DoCloseClientConnection"
     
-    array set argsArr [list -status $jprefs(logoutStatus)]    
-    array set argsArr $args
+    array set argsA [list -status $jprefs(logoutStatus)]    
+    array set argsA $args
     
     # Send unavailable information.
     if {[$jstate(jlib) isinstream]} {
 	set opts {}
-	if {[string length $argsArr(-status)] > 0} {
-	    lappend opts -status $argsArr(-status)
+	if {[string length $argsA(-status)] > 0} {
+	    lappend opts -status $argsA(-status)
 	}
 	eval {$jstate(jlib) send_presence -type unavailable} $opts
 	
@@ -1119,7 +1120,9 @@ proc ::Jabber::SetClosedState { } {
     set jstate(meres)    ""
     set jstate(mejidres) ""
     set jstate(mejidmap) ""
-    set jstate(status)   "unavailable"
+    set jstate(show)     "unavailable"
+    set jstate(status)   ""
+    set jstate(show+status) [list $jstate(show) $jstate(status)]
     set jserver(this)    ""
     set jstate(ipNum)    ""
     
@@ -1261,23 +1264,23 @@ proc ::Jabber::SetStatus {type args} {
     if {![$jstate(jlib) isinstream]} {
 	return
     }
-    array set argsArr {
+    array set argsA {
 	-notype         0
     }
     
     # Any -status take precedence, even if empty.
-    array set argsArr $args
+    array set argsA $args
 
     # Any default status?
-    if {![info exists argsArr(-status)]} {
+    if {![info exists argsA(-status)]} {
 	if {$jprefs(statusMsg,bool,$type) \
 	  && ($jprefs(statusMsg,msg,$type) ne "")} {
-	    set argsArr(-status) $jprefs(statusMsg,msg,$type)
+	    set argsA(-status) $jprefs(statusMsg,msg,$type)
 	}
     }
     
     set presArgs {}
-    foreach {key value} [array get argsArr] {
+    foreach {key value} [array get argsA] {
 	
 	switch -- $key {
 	    -to - -priority - -status - -xlist - -extras {
@@ -1285,7 +1288,7 @@ proc ::Jabber::SetStatus {type args} {
 	    }
 	}
     }
-    if {!$argsArr(-notype)} {
+    if {!$argsA(-notype)} {
 	
 	switch -- $type {
 	    available {
@@ -1303,8 +1306,16 @@ proc ::Jabber::SetStatus {type args} {
     }
     
     # General presence should not have a 'to' attribute.
-    if {![info exists argsArr(-to)]} {
-	set jstate(status) $type
+    if {![info exists argsA(-to)]} {
+	set status ""
+	if {[info exists argsA(-status)] && [string length $argsA(-status)]} {
+	    set status $argsA(-status)
+	}
+	
+	# These can be traced for UI parts.
+	set jstate(show) $type
+	set jstate(status) $status
+	set jstate(show+status) [list $type $status]
     }
     
     # It is somewhat unclear here if we should have a type attribute
@@ -1315,8 +1326,8 @@ proc ::Jabber::SetStatus {type args} {
     
     # Do we target a room or the server itself?
     set toServer 0
-    if {[info exists argsArr(-to)]} {
-	if {[jlib::jidequal $jserver(this) $argsArr(-to)]} {
+    if {[info exists argsA(-to)]} {
+	if {[jlib::jidequal $jserver(this) $argsA(-to)]} {
 	    set toServer 1
 	}
     } else {
@@ -1730,12 +1741,12 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
     
     ::Debug 2 "Jabber::ParseGetVersion args='$args'"
     
-    array set argsArr $args
+    array set argsA $args
     
     # Return any id!
     set opts {}
-    if {[info exists argsArr(-id)]} {
-	set opts [list -id $argsArr(-id)]
+    if {[info exists argsA(-id)]} {
+	set opts [list -id $argsA(-id)]
     }
     lappend opts -to $from
    
@@ -1776,12 +1787,12 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
     # Build tag and attributes lists.
     set ip [::Network::GetThisPublicIP]
     
-    array set argsArr $args
+    array set argsA $args
     
     # Return any id!
     set opts {}
-    if {[info exists argsArr(-id)]} {
-	set opts [list -id $argsArr(-id)]
+    if {[info exists argsA(-id)]} {
+	set opts [list -id $argsA(-id)]
     }
     lappend opts -to $from
     

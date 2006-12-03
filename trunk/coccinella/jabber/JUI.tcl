@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.139 2006-12-01 08:55:13 matben Exp $
+# $Id: JUI.tcl,v 1.140 2006-12-03 08:42:47 matben Exp $
 
 package provide JUI 1.0
 
@@ -345,8 +345,14 @@ proc ::JUI::Build {w} {
     pack $wfstat -fill x
   
     set wstatcont $wfstat.cont
-    ::Status::MainButton $wfstat.bst ::Jabber::jstate(status)
-    ::Status::MenuConfig $wfstat.bst -postcommand ::JUI::StatusPostCmd
+    if {0} {
+	::Status::MainButton $wfstat.bst ::Jabber::jstate(show)
+	::Status::MenuConfig $wfstat.bst -postcommand ::JUI::StatusPostCmd
+    } else {
+	set jstate(show+status) [list $jstate(show) {}]
+	::Status::ExMainButton $wfstat.bst ::Jabber::jstate(show+status)
+	# -command ::Status::TestCmd -postcommand ::Status::TestPostCmd
+    }
     
     ttk::frame $wfstat.cont
     ttk::label $wfstat.me -textvariable ::Jabber::jstate(mejidres) -anchor w
@@ -700,7 +706,7 @@ proc ::JUI::RosterIconsChangedHook { } {
     variable jwapp
     upvar ::Jabber::jstate jstate
     
-    set status $jstate(status)
+    set status $jstate(show)
     $jwapp(mystatus) configure -image [::Rosticons::Get status/$status]
 }
 

@@ -437,6 +437,8 @@
 ::msgcat::mcset es mFind         	{Buscar}
 ::msgcat::mcset es mFindAgain         	{Siguiente coincidencia}
 
+::msgcat::mcset es mCustomStatus        {Custom Status...}
+
 
 # Popups.
 ::msgcat::mcset es mMessage     	{Mensaje...}

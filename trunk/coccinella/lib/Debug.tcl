@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Debug.tcl,v 1.4 2006-05-26 13:27:50 matben Exp $
+# $Id: Debug.tcl,v 1.5 2006-12-03 08:42:48 matben Exp $
 
 # If no debug printouts, no console.
 if {$debugLevel == 0} {
@@ -48,5 +48,5 @@ if {0} {
 
     # Add variable to trace here.
     namespace eval ::Jabber {}
-    trace add variable ::Jabber::jstate(status) write TraceVar
+    trace add variable ::Jabber::jstate(show) write TraceVar
 }

@@ -431,6 +431,7 @@
 
 ::msgcat::mcset pl mFind                {Szukaj}
 ::msgcat::mcset pl mFindAgain           {Szukaj ponownie}
+::msgcat::mcset pl mCustomStatus        {Custom Status...}
 
 # Popups
 ::msgcat::mcset pl mMessage     	{Wiadomość...}

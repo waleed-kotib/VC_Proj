@@ -425,6 +425,8 @@
 ::msgcat::mcset nl mFind				{Zoeken}
 ::msgcat::mcset nl mFindAgain				{Opnieuw zoeken}
 
+::msgcat::mcset nl mCustomStatus                        {Custom Status...}
+
 # Popups
 ::msgcat::mcset nl mMessage				{Bericht...}
 ::msgcat::mcset nl mWhiteboard				{Whiteboard...}

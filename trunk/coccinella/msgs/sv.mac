@@ -420,6 +420,7 @@
 ::msgcat::mcset sv mDisco         	{Disco}
 ::msgcat::mcset sv mFind         	{Sšk}
 ::msgcat::mcset sv mFindAgain         	{Sšk igen}
+::msgcat::mcset sv mCustomStatus        {Anpassat meddelande...}
 
 
 # Popups
