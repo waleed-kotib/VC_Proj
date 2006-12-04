@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.8 2006-09-19 10:02:13 matben Exp $
+# $Id: optionmenu.tcl,v 1.9 2006-12-04 15:25:05 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -26,6 +26,7 @@ snit::widgetadaptor ui::optionmenu::widget {
     variable map
     variable imap
     variable longest
+    variable mimage
 
     delegate option * to hull except {-menulist -command -variable}
     delegate method * to hull
@@ -55,12 +56,18 @@ snit::widgetadaptor ui::optionmenu::widget {
 	    set map($str) $value
 	    set imap($value) $str
 	    unset -nocomplain opts(-value)
+	    if {[tk windowingsystem] eq "aqua"} {
+		unset -nocomplain opts(-image)
+	    }
+	    if {[info exists opts(-image)]} {
+		set mimage($value) $opts(-image)
+	    }
 	    if {[set len [string length $str]] > $maxLen} {
 		set maxLen $len
 		set longest $str
 	    }
 	    eval {$m add radiobutton -label $str -variable [myvar menuVar] \
-	      -command [list $self Command]} [array get opts]
+	      -command [list $self Command] -compound left} [array get opts]
 	}
 	
 	# If the variable exists must set our own menuVar.
@@ -74,7 +81,10 @@ snit::widgetadaptor ui::optionmenu::widget {
 	    trace add variable $options(-variable) write [list $self Trace]
 	}
 
-	$win configure -textvariable [myvar menuVar] -menu $m
+	$win configure -textvariable [myvar menuVar] -menu $m -compound left
+	if {[info exists mimage($value)]} {
+	    $win configure -image $mimage($value)
+	}
 	return
     }
     
@@ -85,11 +95,15 @@ snit::widgetadaptor ui::optionmenu::widget {
     }
     
     method Command {} {
+	set value $map($menuVar)
+	if {[info exists mimage($value)]} {
+	    $win configure -image $mimage($value)
+	}
 	if {$options(-variable) ne ""} {
-	    uplevel #0 [list set $options(-variable) $map($menuVar)]
+	    uplevel #0 [list set $options(-variable) $value]
 	}
 	if {$options(-command) ne ""} {
-	    uplevel #0 $options(-command) [list $map($menuVar)]
+	    uplevel #0 $options(-command) [list $value]
 	}
     }
     
