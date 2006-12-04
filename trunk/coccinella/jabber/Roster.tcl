@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.180 2006-11-16 14:28:55 matben Exp $
+# $Id: Roster.tcl,v 1.181 2006-12-04 12:55:23 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -186,75 +186,6 @@ proc ::Roster::MapShowToText {show} {
     } else {
 	return $show
     }
-}
-
-# Roster::Show --
-#
-#       Show the roster window.
-#
-# Arguments:
-#       w      the toplevel window.
-#       
-# Results:
-#       shows window.
-
-proc ::Roster::Show {w} {
-    upvar ::Jabber::jstate jstate
-
-    if {$jstate(rosterVis)} {
-	if {[winfo exists $w]} {
-	    catch {wm deiconify $w}
-	} else {
-	    BuildToplevel $w
-	}
-    } else {
-	catch {wm withdraw $w}
-    }
-}
-
-# Roster::BuildToplevel --
-#
-#       Build the toplevel roster window.
-#
-# Arguments:
-#       w      the toplevel window.
-#       
-# Results:
-#       shows window.
-
-proc ::Roster::BuildToplevel {w} {
-    global  prefs
-
-    variable wtop
-    variable servtxt
-    upvar ::UI::menuDefs menuDefs
-
-    if {[winfo exists $w]} {
-	return
-    }
-    set wtop $w
-    
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w {Roster (Contact list)}
-    wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
-    
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-    
-    # Top frame for info.
-    set frtop $w.frall.frtop
-    pack [frame $frtop] -fill x -side top -anchor w -padx 10 -pady 4
-    label $frtop.la -text {Connected to:} -font CociSmallBoldFont
-    label $frtop.laserv -textvariable [namespace current]::servtxt
-    pack $frtop.la $frtop.laserv -side left -pady 4
-    set servtxt {not connected}
-
-    # And the real stuff.
-    pack [Build $w.frall.br] -side top -fill both -expand 1
-    
-    wm maxsize $w 320 800
-    wm minsize $w 180 240
 }
 
 # Roster::Build --
@@ -464,12 +395,6 @@ proc ::Roster::QuitHook { } {
     }
 }
 
-proc ::Roster::CloseDlg {w} {    
-
-    catch {wm withdraw $w}
-    set jstate(rosterVis) 0
-}
-
 proc ::Roster::Refresh { } {
     variable wwave
     upvar ::Jabber::jstate jstate
@@ -596,18 +521,17 @@ proc ::Roster::DeRegisterPopupEntry {mLabel} {
 #       popup menu displayed
 
 proc ::Roster::DoPopup {jidlist clicked status group x y} {
+    global  wDlgs
     variable popMenuDefs
     variable wtree
-    
-    upvar ::Jabber::jstate jstate
-    
+        
     # Keep a temporary array that maps from mLabel to menu index.
     variable tmpMenuIndex
         
     ::Debug 2 "::Roster::DoPopup jidlist=$jidlist, clicked=$clicked, status=$status"
         
     # Make the appropriate menu.
-    set m $jstate(wpopup,roster)
+    set m $wDlgs(jpopuproster)
     set i 0
     catch {destroy $m}
     menu $m -tearoff 0
@@ -1201,119 +1125,23 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
 }
 
 proc ::Roster::GetMyPresenceIcon { } {
-
     set status [::Jabber::GetMyStatus]
     return [::Rosticons::Get status/$status]
 }
 
-proc ::Roster::DirectedPresenceDlg {jid} {
-    global  this wDlgs
-    
-    variable uid
-    
-    # Initialize the state variable, an array, that keeps is the storage.
-    
-    set token [namespace current]::dirpres[incr uid]
-    variable $token
-    upvar 0 $token state
-
-    set w $wDlgs(jdirpres)$uid
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
-    wm title $w [mc {Set Directed Presence}]
-    set state(finished) -1
-    set state(w)        $w
-    set state(jid)      $jid
-    set state(status) available
-    bind $w <Destroy> [list [namespace current]::DirectedPresenceFree $token %W]
-    
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
-
-    label $w.frall.lmsg -wraplength 200 -justify left -text  \
-      [mc jadirpresmsg $jid]
-    pack  $w.frall.lmsg -side top -anchor w -padx 4 -pady 1
-    
-    set fr $w.frall.fstat
-    pack [frame $fr -bd 0] -side top -fill x
-    pack [label $fr.l -text "[mc Status]:"] -side left -padx 8
-    set wmb $fr.mb
-
-    ::Status::Button $wmb $token\(status)
-    
-    pack $wmb -side left -padx 2 -pady 2
-    
-    # Any status message.   
-    pack [label $w.frall.lstat -text "[mc {Status message}]:"]  \
-      -side top -anchor w -padx 8 -pady 2
-    set wtext $w.frall.txt
-    text $wtext -width 40 -height 2 -wrap word
-    pack $wtext -side top -padx 8 -pady 2
-    set state(wtext) $wtext
-    
-    # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Set] -default active \
-      -command [list [namespace current]::SetDirectedPresence $token]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list destroy $w]] \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
-    
-    wm resizable $w 0 0
-    bind $w <Return> {}
-	
-    # Trick to resize the labels wraplength.
-    set script [format {
-	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
-    } $w.frall.lmsg $w]    
-    after idle $script
-}
-
-proc ::Roster::SetDirectedPresence {token} {
-    variable $token
-    upvar 0 $token state
-    
-    set opts {}
-    set allText [string trim [$state(wtext) get 1.0 end] " \n"]
-    if {[string length $allText]} {
-	set opts [list -status $allText]
-    }  
-    eval {::Jabber::SetStatus $state(status) -to $state(jid)} $opts
-    destroy $state(w)
-}
-
-proc ::Roster::DirectedPresenceFree {token w} {
-    variable $token
-    upvar 0 $token state
-    
-    if {[string equal [winfo toplevel $w] $w]} {
-	unset state
-    }
-}
-
 proc ::Roster::LoginTrpt {jid3} {
-    
     ::Jabber::SetStatus available -to $jid3
 }
 
 proc ::Roster::LogoutTrpt {jid3} {
-    
     ::Jabber::SetStatus unavailable -to $jid3    
 }
 
 proc ::Roster::ShowOffline {} {
-
-    # Need to repopulate the roster?
     RepopulateTree
 }
 
 proc ::Roster::ShowTransports {} {
-    
-    # Need to repopulate the roster?
     RepopulateTree
 }
 

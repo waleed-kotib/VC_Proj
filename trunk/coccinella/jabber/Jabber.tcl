@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.190 2006-12-03 08:42:47 matben Exp $
+# $Id: Jabber.tcl,v 1.191 2006-12-04 12:55:22 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -99,13 +99,7 @@ namespace eval ::Jabber:: {
 
     # Login server.
     set jserver(this) ""
-    
-    # Popup menus.
-    set jstate(wpopup,disco)     .jpopupdi
-    set jstate(wpopup,roster)    .jpopupro
-    set jstate(wpopup,browse)    .jpopupbr
-    set jstate(wpopup,groupchat) .jpopupgc
-    
+        
     # Keep noncritical error text here.
     set jerror {}
     
@@ -299,8 +293,6 @@ proc ::Jabber::FactoryDefaults { } {
     
     set jprefs(useXData) 1
     
-    set jstate(rosterVis) 1
-    set jstate(rostBrowseVis) 1
     set jstate(debugCmd) 0
     
     # Query these jabber servers for services. Login server is automatically
@@ -504,7 +496,7 @@ proc ::Jabber::Init { } {
     $jlibname presence_register unsubscribed [namespace code UnsubscribedEvent]
         
     if {[string equal $prefs(protocol) "jabber"]} {
-	::JUI::Show $wDlgs(jmain)
+	::JUI::Build $wDlgs(jmain)
 	set jstate(haveJabberUI) 1
     }
     

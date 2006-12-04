@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.98 2006-12-01 08:55:13 matben Exp $
+# $Id: Disco.tcl,v 1.99 2006-12-04 12:55:22 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -895,6 +895,7 @@ if {0} {
 #       popup menu displayed
 
 proc ::Disco::Popup {w vstruct x y} {
+    global  wDlgs
     variable popMenuDefs
     variable regPopMenuDef
     variable regPopMenuType
@@ -974,7 +975,7 @@ proc ::Disco::Popup {w vstruct x y} {
     }
     
     # Make the appropriate menu.
-    set m $jstate(wpopup,disco)
+    set m $wDlgs(jpopupdisco)
     catch {destroy $m}
     menu $m -tearoff 0  \
       -postcommand [list ::Disco::PostMenuCmd $m $mType $clicked]

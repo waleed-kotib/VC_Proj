@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.170 2006-12-01 08:55:13 matben Exp $
+# $Id: GroupChat.tcl,v 1.171 2006-12-04 12:55:22 matben Exp $
 
 package require Create
 package require Enter
@@ -331,8 +331,10 @@ proc ::GroupChat::EnterHook {roomjid protocol} {
 	SetState $chattoken normal
 	$chatstate(wbtexit) configure -text [mc Exit]
 
-	set chatstate(status) "available"
-	set chatstate(oldStatus) "available"
+	set chatstate(show)           "available"
+	set chatstate(oldShow)        "available"
+	set chatstate(show+status)    [list available ""]
+	set chatstate(oldShow+status) [list available ""]
     }
     
     SetProtocol $roomjid $protocol
@@ -686,7 +688,7 @@ proc ::GroupChat::Build {roomjid} {
 #       chattoken
 
 proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
-    global  this
+    global  this config
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
 
@@ -731,17 +733,19 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set roomjid [jlib::jidmap $roomjid]
     jlib::splitjidex $roomjid node domain -
 
-    set chatstate(exists)       1
-    set chatstate(wroom)        $wroom
-    set chatstate(roomjid)      $roomjid
-    set chatstate(dlgtoken)     $dlgtoken
-    set chatstate(roomName)     [$jstate(jlib) disco name $roomjid]
-    set chatstate(subject)      ""
-    set chatstate(status)       "available"
-    set chatstate(oldStatus)    "available"
+    set chatstate(exists)         1
+    set chatstate(wroom)          $wroom
+    set chatstate(roomjid)        $roomjid
+    set chatstate(dlgtoken)       $dlgtoken
+    set chatstate(roomName)       [$jstate(jlib) disco name $roomjid]
+    set chatstate(subject)        ""
+    set chatstate(show)           "available"
+    set chatstate(oldShow)        "available"
+    set chatstate(show+status)    [list available ""]
+    set chatstate(oldShow+status) [list available ""]
     set chatstate(ignore,$roomjid)  0
-    set chatstate(afterids)     {}
-    set chatstate(nhiddenmsgs)  0
+    set chatstate(afterids)       {}
+    set chatstate(nhiddenmsgs)    0
     
     # For the tabs and title etc.
     if {$chatstate(roomName) ne ""} {
@@ -786,11 +790,17 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
       -image [::Theme::GetImage bookmarkAdd]     \
       -command [list [namespace current]::BookmarkRoom $chattoken]
 
-    ::Status::Button $wgroup.stat $chattoken\(status)   \
-      -command [list [namespace current]::StatusCmd $chattoken] 
-    ::Status::ConfigImage $wgroup.stat available
-    ::Status::MenuConfig $wgroup.stat  \
-      -postcommand [list [namespace current]::StatusPostCmd $chattoken]
+    if {$config(ui,status,menu) eq "plain"} {
+	::Status::Button $wgroup.stat $chattoken\(show)   \
+	  -command [list [namespace current]::StatusCmd $chattoken] 
+	::Status::ConfigImage $wgroup.stat available
+	::Status::MenuConfig $wgroup.stat  \
+	  -postcommand [list [namespace current]::StatusPostCmd $chattoken]
+    } elseif {$config(ui,status,menu) eq "dynamic"} {
+	::Status::ExButton $wgroup.stat $chattoken\(show+status)   \
+	  -command [list [namespace current]::ExStatusCmd $chattoken] \
+	  -postcommand [list [namespace current]::ExStatusPostCmd $chattoken]
+    }
     
     ::Emoticons::MenuButton $wgroup.smile -text $wtextsend
     
@@ -1292,8 +1302,10 @@ proc ::GroupChat::SetLogout {chattoken} {
 
     $chatstate(wbtexit) configure -text [mc Close]
     
-    set chatstate(status) "unavailable"
-    set chatstate(oldStatus) "unavailable"
+    set chatstate(show)           "unavailable"
+    set chatstate(oldShow)        "unavailable"
+    set chatstate(show+status)    [list unavailable ""]
+    set chatstate(oldShow+status) [list unavailable ""]
 }
 
 # GroupChat::SetFocus --
@@ -1840,35 +1852,72 @@ proc ::GroupChat::StatusPostCmd {chattoken} {
     }
 }
 
-proc ::GroupChat::StatusCmd {chattoken status args} {
+proc ::GroupChat::StatusCmd {chattoken show args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    ::Debug 2 "::GroupChat::StatusCmd status=$status, args=$args"
+    ::Debug 2 "::GroupChat::StatusCmd show=$show, args=$args"
 
-    if {$status eq "unavailable"} {
+    if {$show eq "unavailable"} {
 	set ans [ExitAndClose $chattoken]
 	if {$ans eq "no"} {
-	    set chatstate(status) $chatstate(oldStatus)
+	    set chatstate(show) $chatstate(oldShow)
 	}
     } else {
 	set roomjid $chatstate(roomjid)
 	if {[IsInRoom $roomjid]} {
-	    eval {::Jabber::SetStatus $status -to $roomjid} $args
-	    set chatstate(oldStatus) $status
+	    eval {::Jabber::SetStatus $show -to $roomjid} $args
+	    set chatstate(oldShow) $show
 	} else {
 	    EnterOrCreate enter -roomjid $roomjid
 	}
     }
 }
 
-proc ::GroupChat::StatusSyncHook {status args} {
+proc ::GroupChat::ExStatusPostCmd {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set wbtstatus $chatstate(wbtstatus)
+    set m [::Status::ExGetMenu $wbtstatus]
+    if {[IsInRoom $chatstate(roomjid)]} {
+	::Status::ExMenuSetState $m all normal
+    } else {
+	::Status::ExMenuSetState $m all disabled
+	::Status::ExMenuSetState $m available normal
+    }
+}
+
+proc ::GroupChat::ExStatusCmd {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set show   [lindex $chatstate(show+status) 0]
+    set status [lindex $chatstate(show+status) 1]
+    if {$show eq "unavailable"} {
+	set ans [ExitAndClose $chattoken]
+	if {$ans eq "no"} {
+	    set chatstate(show+status) $chatstate(oldShow+status)
+	}
+    } else {
+	set roomjid $chatstate(roomjid)
+	if {[IsInRoom $roomjid]} {
+	    ::Jabber::SetStatus $show -to $roomjid -status $status
+	    set chatstate(oldShow+status) $show
+	} else {
+	    EnterOrCreate enter -roomjid $roomjid
+	}
+    }
+}
+
+proc ::GroupChat::StatusSyncHook {show args} {
     upvar ::Jabber::jprefs jprefs
 
-    if {$status eq "unavailable"} {
+    if {$show eq "unavailable"} {
 	# This is better handled via the logout hook.
 	return
     }
+    set argsA(-status) ""
     array set argsA $args
 
     if {$jprefs(gchat,syncPres) && ![info exists argsA(-to)]} {
@@ -1878,9 +1927,11 @@ proc ::GroupChat::StatusSyncHook {status args} {
 
 	    set roomjid $chatstate(roomjid)
 	    if {[IsInRoom $roomjid]} {
-		::Jabber::SetStatus $status -to $roomjid
-		set chatstate(status)    $status
-		set chatstate(oldStatus) $status
+		::Jabber::SetStatus $show -to $roomjid -status $argsA(-status)
+		set chatstate(show)    $show
+		set chatstate(oldShow) $show
+		set chatstate(show+status)    [list $show $argsA(-status)]
+		set chatstate(oldShow+status) [list $show $argsA(-status)]
 	    }
 	}
     }
@@ -2371,6 +2422,9 @@ proc ::GroupChat::InsertPresenceChange {chattoken xmldata} {
 	    set show $presA(-show)
 	}
 	set str [string tolower [::Roster::MapShowToText $show]]
+	if {[info exists presA(-status)]} {
+	    append str " " $presA(-status)
+	}
 	InsertMessage $chattoken $chatstate(roomjid) "$name: $str"  \
 	  -xmldata $xmldata
     }
@@ -2509,7 +2563,6 @@ proc ::GroupChat::Popup {chattoken w tag x y} {
     variable popMenuDefs
     variable regPopMenuDef
     variable regPopMenuType
-    upvar ::Jabber::jstate jstate
             
     set clicked ""
     set jid ""
@@ -2540,7 +2593,7 @@ proc ::GroupChat::Popup {chattoken w tag x y} {
     }
 
     # Make the appropriate menu.
-    set m $jstate(wpopup,groupchat)
+    set m $wDlgs(jpopupgroupchat)
     catch {destroy $m}
     menu $m -tearoff 0  \
       -postcommand [list ::GroupChat::PostMenuCmd $m $mType $clicked]
