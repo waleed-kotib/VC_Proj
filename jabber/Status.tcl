@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.26 2006-12-03 16:29:34 matben Exp $
+# $Id: Status.tcl,v 1.27 2006-12-04 12:55:23 matben Exp $
 
 package provide Status 1.0
 
@@ -534,7 +534,6 @@ proc ::Status::ExMainButton {w varName} {
 
 proc ::Status::ExMainPostCmd {w} {
     
-    puts "::Status::ExMainPostCmd"
     if {[::Jabber::GetMyStatus] eq "unavailable"} {
 	set state disabled
     } else {
@@ -546,11 +545,9 @@ proc ::Status::ExMainPostCmd {w} {
 
 proc ::Status::ExMainCmd {w} {
     
-    puts "::Status::ExMainCmd"
     set menuVar [namespace current]::menuVar($w)
     upvar $menuVar showStatus
     
-    puts "\t showStatus=$showStatus"
     set show   [lindex $showStatus 0]
     set status [lindex $showStatus 1]
     
@@ -566,8 +563,6 @@ proc ::Status::ExMainCmd {w} {
 
 proc ::Status::ExMainTrace {w varName index op} {
     upvar $varName var
-    
-    puts "::Status::ExMainTrace"
     
     # This is just to sync the menuVar after the statusVar.
     set value $var($index)
@@ -632,7 +627,6 @@ proc ::Status::ExGetMenu {w} {
 
 proc ::Status::ExTrace {w varName index op} {
     
-    puts "::Status::ExTrace"
     if {[winfo exists $w]} {
 	upvar $varName var
 
@@ -675,7 +669,6 @@ proc ::Status::ExBuildMenu {m varName args} {
     variable mapShowElemToText
 
     upvar $varName showStatus
-    puts "::Status::ExBuildMenu varName=$varName, showStatus=$showStatus, args=$args"
     
     # We must intersect all actions in order to keep the status list uptodate.
     array set argsA {
@@ -772,7 +765,6 @@ proc ::Status::ExMenuSetState {m which state} {
 
 proc ::Status::ExMenuCmd {m varName cmd} {    
     upvar $varName showStatus
-    puts "::Status::ExMenuCmd"
 
     set show   [lindex $showStatus 0]
     set status [lindex $showStatus 1]
@@ -853,8 +845,6 @@ proc ::Status::ExCustomDlg {varName args} {
 proc ::Status::ExCustomDlgCmd {w button} {
     variable $w
     upvar 0 $w state
-
-    puts "::Status::ExCustomDlgCmd button=$button"
 
     if {$button eq "ok"} {
 	upvar $state(varName) showStatus

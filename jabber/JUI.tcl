@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.141 2006-12-03 16:29:34 matben Exp $
+# $Id: JUI.tcl,v 1.142 2006-12-04 12:55:22 matben Exp $
 
 package provide JUI 1.0
 
@@ -211,24 +211,6 @@ proc ::JUI::Init { } {
 	set menuBarDef [linsert $menuBarDef 2 edit mEdit]
     }
     set inited 1
-}
-
-proc ::JUI::Show {w args} {
-    upvar ::Jabber::jstate jstate
-
-    array set argsArr $args
-    if {[info exists argsArr(-visible)]} {
-	set jstate(rostBrowseVis) $argsArr(-visible)
-    }
-    ::Debug 2 "::JUI::Show w=$w, jstate(rostBrowseVis)=$jstate(rostBrowseVis)"
-
-    if {$jstate(rostBrowseVis)} {
-	Build $w
-	wm deiconify $w
-	raise $w
-    } else {
-	catch {wm withdraw $w}
-    }
 }
 
 # JUI::Build --

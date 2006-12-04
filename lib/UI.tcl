@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.136 2006-10-20 09:26:50 matben Exp $
+# $Id: UI.tcl,v 1.137 2006-12-04 12:55:23 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -300,6 +300,21 @@ proc ::UI::InitDlgs { } {
 	jdisaddserv     .jdisaddserv
 	juserinfo       .juserinfo
 	jgcbmark        .jgcbmark
+	jpopupdisco     .jpopupdi
+	jpopuproster    .jpopupro
+	jpopupgroupchat .jpopupgc
+    }
+}
+
+# @@@ TODO
+proc ::UI::RegisterDlgName {nameDlgFlatA} {
+    global  wDlgs
+    
+    foreach {name w} $nameDlgFlatA {
+	if {[info exists $wDlgs($name)]} {
+	    return -code error "name \"$name\" already exists in wDlgs"
+	}
+	
     }
 }
 
