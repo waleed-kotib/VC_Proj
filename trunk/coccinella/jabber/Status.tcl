@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.27 2006-12-04 12:55:23 matben Exp $
+# $Id: Status.tcl,v 1.28 2006-12-04 15:25:05 matben Exp $
 
 package provide Status 1.0
 
@@ -800,6 +800,7 @@ proc ::Status::ExAddMessage {show status} {
 
 proc ::Status::ExCustomDlg {varName args} {
     global  wDlgs
+    variable mapShowElemToText
 
     set w $wDlgs(jpresmsg)
     if {[winfo exists $w]} {
@@ -817,16 +818,12 @@ proc ::Status::ExCustomDlg {varName args} {
     set state(-command) ""
     array set state $args
     
-    # @@@ -image ?
-    set menuDef [list  \
-	[list [mc mAvailable]       -value available]  \
-	[list [mc mAway]            -value away]       \
-	[list [mc mChat]            -value chat]       \
-	[list [mc mDoNotDisturb]    -value dnd]        \
-	[list [mc mExtendedAway]    -value xa]         \
-	[list [mc mInvisible]       -value invisible]  \
-	[list [mc mNotAvailable]    -value unavailable]]
-
+    set menuDef [list]
+    foreach show {available away chat dnd xa invisible unavailable} {
+	set im [::Rosticons::Get status/$show]
+	lappend menuDef [list $mapShowElemToText($show) -value $show -image $im]
+    }
+      
     set str "Set your status message for any of the presence states"
     set dtl "The most frequent states and status messages are easily reachable as menu entries"
     ui::dialog $w -type okcancel -message $str -detail $dtl -icon info  \

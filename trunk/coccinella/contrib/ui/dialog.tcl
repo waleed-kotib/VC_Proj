@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.17 2006-12-01 08:55:13 matben Exp $
+# $Id: dialog.tcl,v 1.18 2006-12-04 15:25:05 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -43,6 +43,7 @@ namespace eval ui::dialog {
 	    option add *Dialog.f.t.message.padding { 0  0  0  4}  widgetDefault
 	    option add *Dialog.f.t.detail.padding  { 0  0  0  6}  widgetDefault
 	    option add *Dialog.f.t.icon.padding    { 0  0  8  0}  widgetDefault
+	    option add *Dialog.f.t.client.padding  { 0  0  0  8}  widgetDefault
 	    option add *Dialog.buttonAnchor        center         widgetDefault
 	    option add *Dialog.buttonOrder         "okcancel"     widgetDefault
 	    option add *Dialog.buttonPadX          4              widgetDefault
@@ -52,6 +53,7 @@ namespace eval ui::dialog {
 	    option add *Dialog.f.t.message.padding { 0  0  0  4}  widgetDefault
 	    option add *Dialog.f.t.detail.padding  { 0  0  0  6}  widgetDefault
 	    option add *Dialog.f.t.icon.padding    { 0  0  8  0}  widgetDefault
+	    option add *Dialog.f.t.client.padding  { 0  0  0  8}  widgetDefault
 	    option add *Dialog.buttonAnchor        e              widgetDefault
 	    option add *Dialog.buttonOrder         "okcancel"     widgetDefault
 	    option add *Dialog.buttonPadX          4              widgetDefault
