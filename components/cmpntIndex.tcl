@@ -4,6 +4,7 @@
 component::attempt AppleEvents  [file join $dir AppleEvents.tcl] ::AppleEvents::Init
 component::attempt AutoUpdate   [file join $dir AutoUpdate.tcl]  ::AutoUpdate::Init
 component::attempt BuddyPounce  [file join $dir BuddyPounce.tcl] ::BuddyPounce::Init
+component::attempt TtkDialog    [file join $dir TtkDialog.tcl]   ::TtkDialog::Init
 component::attempt GnomeMeeting [file join $dir GMeeting.tcl]    ::GMeeting::Init
 component::attempt ICQ          [file join $dir ICQ.tcl]         ::ICQ::Init
 component::attempt ImageMagic   [file join $dir ImageMagic.tcl]  ::ImageMagic::Init
