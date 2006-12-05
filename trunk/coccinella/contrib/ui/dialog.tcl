@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.18 2006-12-04 15:25:05 matben Exp $
+# $Id: dialog.tcl,v 1.19 2006-12-05 13:54:33 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -178,6 +178,7 @@ snit::widget ui::dialog::widget {
       -validatemethod ValidateIcon
     option -badge       1
     option -modal       0
+    option -parent      .
     option -timeout     {}
     option -variable    {}
     
@@ -190,6 +191,8 @@ snit::widget ui::dialog::widget {
 	StockButton yes	   -text [::msgcat::mc Yes]
 	StockButton no	   -text [::msgcat::mc No]
 	StockButton retry  -text [::msgcat::mc Retry]
+	StockButton abort  -text [::msgcat::mc Abort]
+	StockButton ignore -text [::msgcat::mc Ignore]
 
 	# Built-in dialog types:
 	#
@@ -203,6 +206,8 @@ snit::widget ui::dialog::widget {
 	  -icon question -buttons {yes no}
 	StockDialog yesnocancel \
 	  -icon question -buttons {yes no cancel} -cancel cancel
+	StockDialog abortretryignore  \
+	  -icon question -buttons {abort retry ignore} -cancel cancel
 	
 	array set wmArr [wm attributes .]
 	if {[info exists wmArr(-alpha)]} {
@@ -236,6 +241,12 @@ snit::widget ui::dialog::widget {
 		::tk::unsupported::MacWindowStyle style $win document closeBox
 	    }
 	}
+	if {![winfo exists $options(-parent)]} {
+	    return -code error "bad window path name \"$options(-parent)\""
+	}
+	if {[winfo viewable [winfo toplevel $options(-parent)]] } {
+	    wm transient $win $options(-parent)
+	}    
 	wm title $win $options(-title)
 	set wraplength [$top.message cget -wraplength]
 	

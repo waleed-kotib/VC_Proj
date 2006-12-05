@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.142 2006-12-04 12:55:22 matben Exp $
+# $Id: JUI.tcl,v 1.143 2006-12-05 13:54:33 matben Exp $
+
+#package require AvatarMB
 
 package provide JUI 1.0
 
@@ -319,6 +321,8 @@ proc ::JUI::Build {w} {
 	ttk::label $wbot.size -compound image -image $iconResize
 	pack  $wbot.size -side right -anchor s
     }
+    
+    #pack [::AvatarMB::Button $wbot.ava] -side right -padx 8
     
     set wfstat $wbot.f
     ttk::frame $wfstat

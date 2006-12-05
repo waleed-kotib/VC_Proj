@@ -9,6 +9,7 @@
 # full path name of this file's directory.
 
 package ifneeded Avatar     1.0 [list source [file join $dir Avatar.tcl]]
+package ifneeded AvatarMB   1.0 [list source [file join $dir AvatarMB.tcl]]
 package ifneeded Chat       1.0 [list source [file join $dir Chat.tcl]]
 package ifneeded Create     1.0 [list source [file join $dir Create.tcl]]
 package ifneeded Disco      1.0 [list source [file join $dir Disco.tcl]]
