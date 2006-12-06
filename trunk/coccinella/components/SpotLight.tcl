@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano Damas
 #
-# $Id: SpotLight.tcl,v 1.3 2006-12-01 08:57:49 matben Exp $
+# $Id: SpotLight.tcl,v 1.4 2006-12-06 09:07:30 matben Exp $
 
 namespace eval ::SpotLight:: { }
 
@@ -19,25 +19,32 @@ proc ::SpotLight::Init { } {
             #@@@ Support for Beagle in Linux coming...
             return
         } else {
-            #Get Google Desktop Registry Entry
-		if {[catch {package require registry}]} {
-                return
+	    # Get Google Desktop Registry Entry
+	    if {[catch {package require registry}]} {
+		return
             } else {
                 variable gDesktopURL
-                set gDesktopURL [registry get "HKEY_CURRENT_USER\\Software\\Google\\Google Desktop\\API" "search_url"]
-                #If Google Desktop is Not installed return
+                
+		# If Google Desktop is Not installed return
+		if {[catch {
+		    set gDesktopURL [registry get "HKEY_CURRENT_USER\\Software\\Google\\Google Desktop\\API" "search_url"]
+		}]} {
+		    return
+		}		
                 if {$gDesktopURL eq ""} {
                     return
                 }
             }
         }
     } else {
-	#Check that we are running over a Tiger or greater version of OSX
+	
+	# Check that we are running over a Tiger or greater version of OSX
         set darwinVersion [string index $tcl_platform(osVersion) 0] 
         if { $darwinVersion < 8 } {
 		return
         } else {
-            #Load AppleScript support needed for launching SpotLight
+	    
+            # Load AppleScript support needed for launching SpotLight
             if {[catch {package require Tclapplescript}]} {
                 return
             }
