@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.30 2006-12-06 07:39:40 matben Exp $
+# $Id: Status.tcl,v 1.31 2006-12-06 13:25:06 matben Exp $
 
 package provide Status 1.0
 
@@ -824,8 +824,8 @@ proc ::Status::ExCustomDlg {varName args} {
 	lappend menuDef [list $mapShowElemToText($show) -value $show -image $im]
     }
       
-    set str "Set your message for any of the presence states"
-    set dtl "The most frequent states and presence messages are easily reachable as menu entries"
+    set str "Set your message for any of the presence states."
+    set dtl "The most frequent presences and corresponding messages are easily reachable as menu entries."
     ui::dialog $w -type okcancel -message $str -detail $dtl -icon info  \
       -command ::Status::ExCustomDlgCmd -geovariable prefs(winGeom,$w)  \
       -title [mc {Custom Message}]
