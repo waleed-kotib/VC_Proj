@@ -115,6 +115,7 @@ Translations:
     Polish:     Zbigniew Baniewski
     Danish:     Mogens Pedersen
     Russian:    Gescheit
+    Korean:     Dylan Park
 
 Bug Reports:
 
