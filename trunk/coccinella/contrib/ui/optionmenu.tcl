@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.9 2006-12-04 15:25:05 matben Exp $
+# $Id: optionmenu.tcl,v 1.10 2006-12-06 07:39:40 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -44,6 +44,8 @@ snit::widgetadaptor ui::optionmenu::widget {
 	menu $m -tearoff 0
 	set maxLen 0
 	set menuVar [lindex $options(-menulist) 0 0]
+	
+	# Build the menu.
 
 	foreach mdef $options(-menulist) {
 	    array unset opts
@@ -56,11 +58,11 @@ snit::widgetadaptor ui::optionmenu::widget {
 	    set map($str) $value
 	    set imap($value) $str
 	    unset -nocomplain opts(-value)
-	    if {[tk windowingsystem] eq "aqua"} {
-		unset -nocomplain opts(-image)
-	    }
 	    if {[info exists opts(-image)]} {
 		set mimage($value) $opts(-image)
+	    }
+	    if {[tk windowingsystem] eq "aqua"} {
+		unset -nocomplain opts(-image)
 	    }
 	    if {[set len [string length $str]] > $maxLen} {
 		set maxLen $len
@@ -134,10 +136,16 @@ snit::widgetadaptor ui::optionmenu::widget {
 	    set mlen [font measure [$win cget -font] $longest]
 	}
 	
-	# Ugly!
-	ttk::menubutton $win._tmp -text $longest
-	set W [winfo reqwidth $win._tmp]
-	destroy $win._tmp
+	# Ugly! 
+	# Just pick any image assuming same size.
+	set image ""
+	if {[llength [array names mimage]]} {
+	    set image $mimage([lindex [array names mimage] 0])
+	}
+	set tmp .__tmp_menubutton
+	ttk::menubutton $tmp -text $longest -image $image -compound left
+	set W [winfo reqwidth $tmp]
+	destroy $tmp
 	return [expr {$W + 8}]
     }
 }
@@ -160,6 +168,5 @@ if {0} {
     pack .t.mb
     .t.mb maxwidth
 }
-
 
 #-------------------------------------------------------------------------------

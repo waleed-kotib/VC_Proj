@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.29 2006-12-05 14:27:07 matben Exp $
+# $Id: Status.tcl,v 1.30 2006-12-06 07:39:40 matben Exp $
 
 package provide Status 1.0
 
@@ -694,7 +694,7 @@ proc ::Status::ExBuildMenu {m varName args} {
     }
     
     # Typically available, away, and unavailable shall always be there. 
-    # Add other if exists.
+    # Add other if exist.
     set shows $config(status,menu,dynamic,shows)
     set showManifestL [list available unavailable]
     set showManifestL [concat $showManifestL $shows]
@@ -759,7 +759,7 @@ proc ::Status::ExMenuSetState {m which state} {
 	    }
 	}
     } else {
-	$m entryconfigure [$m index $mapShowElemToText($which)*] -state $state
+	$m entryconfigure [$m index $mapShowElemToText($which)] -state $state
     }
 }
 
@@ -834,7 +834,10 @@ proc ::Status::ExCustomDlg {varName args} {
       -variable [namespace current]::$w\(show)
     ttk::entry $fr.e -textvariable [namespace current]::$w\(status)
     
+    set maxw [$fr.m maxwidth]
+    
     grid  $fr.m  $fr.e  -sticky ew -padx 2
+    grid columnconfigure $fr 0 -minsize $maxw
     grid columnconfigure $fr 1 -weight 1
     
     bind $w <Destroy> +[list ::Status::ExCustomDlgFree $w]
