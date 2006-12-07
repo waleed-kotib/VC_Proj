@@ -5,35 +5,110 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.1 2006-12-05 13:54:33 matben Exp $
+# $Id: AvatarMB.tcl,v 1.2 2006-12-07 15:20:00 matben Exp $
 
 package provide AvatarMB 1.0
 
 namespace eval ::AvatarMB {
     
+    variable active "#2c61b9"
+
+    # Try make a fake menu entry widget.
+    set blue ::AvatarMB::blue
+    image create photo $blue -width 2 -height 2
+    $blue blank
+    $blue put [list [list $active $active] [list $active $active]]
+
+    set blank ::AvatarMB::blank
+    image create photo $blank -width 4 -height 4
+    $blank blank
+
+    style element create FMenu.background image $blank  \
+      -padding {0} -sticky news  \
+      -map [list active $blue]
     
+    if {0} {
+	style layout FMenu {
+	    FMenu.background -sticky news -border 1 -children {
+		FMenu.padding -sticky news -border 1 -children {
+		    FMenu.label -side left
+		}
+	    }
+	}
+    }
+    style layout FMenu {
+	FMenu.background -children {
+	    FMenu.padding -children {
+		FMenu.label -side left
+	    }
+	}
+    }
     
+    style configure FMenu  \
+      -padding {18 2 10 2} -borderwidth 0 -relief flat
+    style map FMenu -foreground {active white}
+    
+    #bind FMenu <Enter>		{ %W state active; puts Enter }
+    #bind FMenu <Leave>		{ %W state !active; puts Leave }
+    #bind FMenu <B1-Enter>		{ %W state active }
+    #bind FMenu <B1-Leave>		{ %W state !active }
 }
 
-proc ::AvatarMB::Button {w args} {
+proc ::AvatarMB::Button {mb args} {
     
-    ttk::button $w -style Plain  \
-      -compound image -image [::Rosticons::Get status/available]  \
-      -command [list ::AvatarMB::Command $w]
+    ttk::label $mb \
+      -compound image -image [::Rosticons::Get status/available]
 
-    return $w
+    bind $mb <Enter>            { %W state active }
+    bind $mb <Leave>            { %W state !active }
+    bind $mb <Key-space>        { AvatarMB::Popdown %W }
+    bind $mb <<Invoke>>         { AvatarMB::Popdown %W }
+    bind $mb <ButtonPress-1>    { %W state pressed ; AvatarMB::Popdown %W }
+    bind $mb <ButtonRelease-1>  { %W state !pressed ; puts ButtonRelease }
+
+    return $mb
 }
 
-proc ::AvatarMB::Command {w} {
-    
-    set menu $w.menu
+proc ::AvatarMB::Popdown {mb} {
+    puts "::AvatarMB::Popdown $mb"
+    if {[$mb instate disabled]} {
+	return
+    }
+    PostMenu $mb
+}
+
+proc ::AvatarMB::PostMenu {mb} {
+    set menu $mb.menu
     Menu $menu
-    wm geometry $menu +[winfo rootx $w]+[winfo rooty $w]
+    foreach {x y} [PostPosition $mb below] { break }
+    wm geometry $menu +$x+$y
     grab -global $menu
 }
 
+proc ::AvatarMB::PostPosition {mb dir} {
+    set menu $mb.menu
+    set x [winfo rootx $mb]
+    set y [winfo rooty $mb]
+
+    set bw [winfo width $mb]
+    set bh [winfo height $mb]
+    set mw [winfo reqwidth $menu]
+    set mh [winfo reqheight $menu]
+    set sw [expr {[winfo screenwidth  $menu] - $bw - $mw}]
+    set sh [expr {[winfo screenheight $menu] - $bh - $mh}]
+
+    switch -- $dir {
+	above { if {$y >= $mh} { incr y -$mh } { incr y  $bh } }
+	below { if {$y <= $sh} { incr y  $bh } { incr y -$mh } }
+	left  { if {$x >= $mw} { incr x -$mw } { incr x  $bw } }
+	right { if {$x <= $sw} { incr x  $bw } { incr x -$mw } }
+    }
+
+    return [list $x $y]
+}
+
 proc ::AvatarMB::Menu {m args} {
-    
+
     toplevel $m -class AvatarMBMenu -bd 0 -relief flat -takefocus 0
     
     wm overrideredirect $m 1
@@ -43,56 +118,116 @@ proc ::AvatarMB::Menu {m args} {
     if {[tk windowingsystem] eq "aqua"} {
 	#tk::unsupported::MacWindowStyle style $m help none
 	#tk::unsupported::MacWindowStyle style $m toolbar none
-	tk::unsupported::MacWindowStyle style $m floating none
+	#tk::unsupported::MacWindowStyle style $m floating none
+	#tk::unsupported::MacWindowStyle style $m moveableModal none
     }
     ttk::frame $m.f
     pack $m.f -fill both -expand 1
     set f $m.f
     
     ttk::label $f.l -text "Recent Avatars:"
-    pack $f.l -side top -anchor w
+    pack $f.l -side top -anchor w -padx 18 -pady 2
     
     ttk::frame $f.box
-    pack $f.box -side top -anchor w -padx 8 -pady 4
+    pack $f.box -side top -anchor w -padx 18 -pady 4
     set box $f.box
     
     for {set i 0} {$i < 4} {incr i} {
 	for {set j 0} {$j < 4} {incr j} {
 	    set label $box.l${i}${j}
-	    label $label -relief flat -background gray80 -bd 2  \
-	      -compound center -activebackground blue
+	    label $label -relief flat -background gray80 -bd 2 \
+	      -compound center
 	    grid  $label  -column $j -row $i -sticky news -padx 1 -pady 1
 	    if {$i == 0} {
 		grid columnconfigure $box $j -minsize 32
 	    }
-	    bind $label <Button-1> [list ::AvatarMB::MenuPickAvatar $m $i $j]
+	    
+	    bind $label <Enter>    {::AvatarMB::Enter %W}
+	    bind $label <Leave>    {::AvatarMB::Leave %W}
+	    bind $label <B1-Enter> {::AvatarMB::Enter %W}
+	    bind $label <B1-Leave> {::AvatarMB::Leave %W}
+	    
+	    
+	    set label $label.l
+	    label $label -bd 0 -background white -compound center	    
+	    #ttk::label $label -style Sunken.TLabel
+	    pack $label -fill both -expand 1
+
+	    bind $label <ButtonPress-1>   [list ::AvatarMB::MenuPickAvatar $m $i $j]
+	    bind $label <ButtonRelease-1> [list ::AvatarMB::MenuPickAvatar $m $i $j]
 	}
 	grid rowconfigure $box $i -minsize 32
     }
-    bind $m <Button-1> {::AvatarMB::MenuRelease %W}
+    bind $m <ButtonPress-1>   [list ::AvatarMB::MenuRelease $m]
+    #bind $m <ButtonRelease-1> [list ::AvatarMB::OnButtonRelease $m %x %y]
 
+    ttk::label $f.x -style FMenu -text "Test Label"
+    BindFMenu $f.x
+    pack $f.x -side top -anchor w -fill x
+    
+    ttk::button $f.n -style FMenu -text "Pick New..."
+    BindFMenu $f.n ::AvatarMB::MenuNew
+    pack $f.n -side top -anchor w -fill x
+
+    ttk::button $f.r -style FMenu -text "Reset Menu"
+    BindFMenu $f.r ::AvatarMB::MenuReset
+    pack $f.r -side top -anchor w -fill x
+    
     array set wmA [wm attributes $m]
     if {[info exists wmA(-alpha)]} {
-	wm attributes $m -alpha 0.8
+	wm attributes $m -alpha 0.9
     }
 
     return $m
 }
 
+proc ::AvatarMB::BindFMenu {win {cmd {}}} {
+    bind $win <Enter>    { %W state active }
+    bind $win <Leave>    { %W state !active }
+    bind $win <B1-Enter> { %W state active }
+    bind $win <B1-Leave> { %W state !active }
+    bind $win <ButtonPress-1>   { %W state pressed }
+    bind $win <ButtonRelease-1> { %W state !pressed }
+    if {[llength $cmd]} {
+	bind $win <ButtonPress-1>   [list uplevel #0 $cmd]
+	bind $win <ButtonRelease-1> [list uplevel #0 $cmd]
+    }
+}
+
+proc ::AvatarMB::Enter {win} {
+    variable active
+    $win configure -bg $active
+}
+
+proc ::AvatarMB::Leave {win} {
+    $win configure -bg gray80
+}
+
 proc ::AvatarMB::MenuPickAvatar {m i j} {
-    puts "::AvatarMB::MenuPickAvatar"
+    puts "::AvatarMB::MenuPickAvatar m=$m, i=$i, j=$j"
     MenuRelease $m
 }
 
+proc ::AvatarMB::MenuNew {} {
+    
+}
+
+proc ::AvatarMB::MenuReset {} {
+    
+}
+
+proc ::AvatarMB::OnButtonRelease {m x y} {
+    puts "::AvatarMB::OnButtonRelease $x $y"
+    set mw [winfo reqwidth $m]
+    set mh [winfo reqheight $m]
+    if {($x < 0) || ($x > $mw)} {MenuRelease $m}
+    if {($y < 0) || ($y > $mh)} {MenuRelease $m}
+}
+
 proc ::AvatarMB::MenuRelease {m} {
-    puts "::AvatarMB::MenuRelease"
+    puts "::AvatarMB::MenuRelease m=$m"
     grab release $m
     destroy $m
 }
-
-
-
-
-
 
 
