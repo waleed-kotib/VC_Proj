@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-#  $Id: TtkDialog.tcl,v 1.1 2006-12-05 13:54:33 matben Exp $
+#  $Id: TtkDialog.tcl,v 1.2 2006-12-08 13:42:52 matben Exp $
 
 namespace eval ::TtkDialog {
     variable scriptDir [file dirname [info script]]
@@ -26,9 +26,10 @@ proc ::TtkDialog::Init { } {
     uplevel #0 [list source $fsdialog]
     component::register TtkDialog "Redefines the standard file selection dialogs"
 
-    interp alias {} tk_getOpenFile {} ttk::getOpenFile
-    interp alias {} tk_getSaveFile {} ttk::getSaveFile
-    interp alias {} tk_messageBox  {} ::TtkDialog::MessageBox
+    interp alias {} tk_getOpenFile     {} ttk::getOpenFile
+    interp alias {} tk_getSaveFile     {} ttk::getSaveFile
+    interp alias {} tk_chooseDirectory {} ttk::chooseDirectory
+    interp alias {} tk_messageBox      {} ::TtkDialog::MessageBox
 }
 
 proc ::TtkDialog::MessageBox {args} {

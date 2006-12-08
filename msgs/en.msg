@@ -921,6 +921,8 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en jamessfiletrpterr            {Failed to get file %s from %s: %s}
 ::msgcat::mcset en jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
 you happen to be online while this message is being read. Do you want to send it anyway?}
+::msgcat::mcset en jamessstatuscust             {Set your message for any of the presence states.}
+::msgcat::mcset en jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
 
 
 # This maps Defined Error Conditions to clear text messages.

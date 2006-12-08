@@ -927,6 +927,9 @@
 ::msgcat::mcset it jamessfiletrpterr {Errore durante la ricezione del file %s da %s: %s}
 ::msgcat::mcset it jamesswarnsendcanoff         {L'utente a cui stai inviando non è in linea, e se questo messaggio contiene immagini o altri oggetti simili, l'utente non li riceverà, a meno che tu non sia collegato proprio mentre il messaggio viene ricevuto. Vuoi inviare lo stesso?}
 
+::msgcat::mcset it jamessstatuscust             {Set your message for any of the presence states.}
+::msgcat::mcset it jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+
 
 
 # This maps Defined Error Conditions to clear text messages.

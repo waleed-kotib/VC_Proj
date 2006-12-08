@@ -925,6 +925,9 @@
 ::msgcat::mcset kr jamesswarnsendcanoff         {당신이 보내고자 하는 상대인 "%s"님이 온라인에 없습니다. 이 메세지에 그림같은 것이 있다면, 이메세지를 볼 동안 당신이 온라인에 있어야만 볼 수 있습니다.\
 그래도 보내시겠습니까?}
 
+::msgcat::mcset kr jamessstatuscust             {Set your message for any of the presence states.}
+::msgcat::mcset kr jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors

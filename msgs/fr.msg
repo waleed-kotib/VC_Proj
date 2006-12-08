@@ -955,6 +955,8 @@ you happen to be online while this message is being read. Do you want to send it
 # Translate
 ::msgcat::mcset fr jamessnofiletrpt             {We couldn't see that %s supports file transfer.}
 ::msgcat::mcset fr jamessfiletrpterr            {Failed to get file %s from %s: %s}
+::msgcat::mcset fr jamessstatuscust             {Set your message for any of the presence states.}
+::msgcat::mcset fr jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors

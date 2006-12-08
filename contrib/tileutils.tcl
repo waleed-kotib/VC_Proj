@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.38 2006-09-20 14:12:38 matben Exp $
+# $Id: tileutils.tcl,v 1.39 2006-12-08 13:42:52 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -304,6 +304,20 @@ proc tileutils::configstyles {name} {
 	unset -nocomplain foreground(focus)
 	set foreground([list active !disabled]) white
 	style map Safari -foreground [array get foreground] -background {}
+	
+	# Safari type label.
+	style element create LSafari.background image $tiles(oval)  \
+	  -border {6 6 6 6} -padding {0} -sticky news
+	style layout LSafari {
+	    LSafari.background -children {
+		LSafari.padding -children {
+		    LSafari.label
+		}
+	    }
+	}	    
+	style configure LSafari  \
+	  -padding {8 2 8 3} -relief flat -font CociSmallFont -foreground white	
+	style map LSafari -foreground {background "#dedede"}
 	
 	# Url clickable link:
 	style layout Url {

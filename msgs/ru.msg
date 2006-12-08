@@ -820,6 +820,9 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset ru jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
 you happen to be online while this message is being read. Do you want to send it anyway?}
 
+::msgcat::mcset ru jamessstatuscust             {Set your message for any of the presence states.}
+::msgcat::mcset ru jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors

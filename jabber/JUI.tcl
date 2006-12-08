@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.143 2006-12-05 13:54:33 matben Exp $
+# $Id: JUI.tcl,v 1.144 2006-12-08 13:42:52 matben Exp $
 
 #package require AvatarMB
 
@@ -70,6 +70,8 @@ namespace eval ::JUI:: {
 	option add *JMain*me.style              Small.TLabel startupFile
     } else {
 	option add *JMain*me.style              Small.Sunken.TLabel startupFile
+	# Alternative.
+	#option add *JMain*me.style              LSafari startupFile
     }
     
     # Special for X11 menus to look ok.
@@ -322,6 +324,7 @@ proc ::JUI::Build {w} {
 	pack  $wbot.size -side right -anchor s
     }
     
+    # Exp
     #pack [::AvatarMB::Button $wbot.ava] -side right -padx 8
     
     set wfstat $wbot.f
