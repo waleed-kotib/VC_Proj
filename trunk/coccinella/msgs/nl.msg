@@ -532,7 +532,7 @@
 ::msgcat::mcset nl {File Mappings}			{Bestandsassociaties}
 ::msgcat::mcset nl {File suffixes}			{Bestandsextenties}
 ::msgcat::mcset nl {File Transfer}			{Bestandsoverdracht}
-::msgcat::mcset nl {File Transfer Error}		{Fout bij bestandsoverdracht}
+::msgcat::mcset nl {File Transfer Error}		{Bestandsoverdracht mislukte}
 ::msgcat::mcset nl {File transfer port}			{Poort voor bestandsoverdracht}
 ::msgcat::mcset nl {First name}				{Voornaam}
 ::msgcat::mcset nl {Font Size}				{Lettergrootte}
@@ -810,7 +810,7 @@
 ::msgcat::mcset nl messfieldsmissing			{Minstens één veld ontbreekt. Probeer opnieuw of annuleer.}
 ::msgcat::mcset nl messrmstandardfonts			{De standaardlettertypes, Times, Helvetica, en Courier mogen niet verwijderd worden.}
 ::msgcat::mcset nl messprefschanged			{De voorkeuren zijn gewijzigd. Wilt u toch annuleren?}
-::msgcat::mcset nl messerrpreffile			{Fout bij openen van bestand %s.}
+::msgcat::mcset nl messerrpreffile			{Openen van bestand %s mislukte.}
 ::msgcat::mcset nl messfailserver			{Kon serversocket niet starten. Mogelijk bent u niet verbonden met de server.}
 ::msgcat::mcset nl messopenhelpfile			{U wenst een helpbestand te openen in het doek waardoor de huidige inhoud uitgewist zal worden. Wilt u toch verder gaan?}
 ::msgcat::mcset nl messprintnoextension			{Een vereist TCL-pakket is niet beschikbaar.}
@@ -825,7 +825,7 @@
 
 
 # Messages for tk_messageBox:
-::msgcat::mcset nl jamesserrsend			{Fout bij verzenden van een bericht naar "%s". Foutcode %s met als foutmelding: %s}
+::msgcat::mcset nl jamesserrsend			{Verzenden van een bericht naar "%s" mislukte. Foutcode %s met als foutmelding: %s}
 ::msgcat::mcset nl jamessallowsub			{%s accepteerde uw autorisatieaanvraag.}
 ::msgcat::mcset nl jamessunsub				{%s verwijderde uw autorisatie en werd verwijderd uit uw roster.}
 ::msgcat::mcset nl jamessunsubpres			{%s verwijderde uw autorisatie.}
@@ -839,17 +839,17 @@
 
 ::msgcat::mcset nl jamessconnbroken			{De verbinding werd onverwachts verbroken.}
 ::msgcat::mcset nl jamessautoawayset			{De aanwezigheid "Automatisch afwezig" werd ingesteld op %s. Wilt u de aanwezigheid terug instellen op "Beschikbaar"?}
-::msgcat::mcset nl jamesserrgetpublic			{Fout bij ophalen van de publieke gegevens van %s. Foutcode %s met als foutmelding: %s.}
-::msgcat::mcset nl jamesserrlastactive			{Fout bij opvragen van %s's laatste activiteit. Fout: %s.}
+::msgcat::mcset nl jamesserrgetpublic			{Ophalen van de publieke gegevens van %s mislukte. Foutcode %s met als foutmelding: %s.}
+::msgcat::mcset nl jamesserrlastactive			{Opvragen van %s's laatste activiteit mislukte. Fout: %s.}
 ::msgcat::mcset nl jamesserrnotimeinfo			{De contactpersoon/dienst %s verzond geen tijdsinformatie.}
 ::msgcat::mcset nl jamesstimeused			{Tijd sinds "%s" het laatst actief was: }
 ::msgcat::mcset nl jamesstimeconn			{Tijd sinds "%s" het laatst online was: }
 ::msgcat::mcset nl jamesstimeservstart			{Tijd sinds de server "%s" gestart is: }
 ::msgcat::mcset nl jamessuptime				{De uptime (van diensten) of de laatste activiteit van de contactpersoon is: }
-::msgcat::mcset nl jamesserrtime			{Fout bij opvragen van %s's tijd. Fout: %s.}
+::msgcat::mcset nl jamesserrtime			{Opvragen van %s's tijd mislukte. Fout: %s.}
 ::msgcat::mcset nl jamesslocaltime			{De lokale tijd bij %s is: %s.}
-::msgcat::mcset nl jamesserrvers			{Fout bij opvragen van %s's versie. Fout: %s.}
-::msgcat::mcset nl jamesserrautoupdate			{Fout bij controle voor nieuwe versies bij %s. Fout: %s.}
+::msgcat::mcset nl jamesserrvers			{Opvragen van %s's versie mislukte. Fout: %s.}
+::msgcat::mcset nl jamesserrautoupdate			{Controle voor nieuwe versies bij %s mislukte. Fout: %s.}
 ::msgcat::mcset nl jamesswarberasewb			{Wilt u toch het whiteboard uitwissen?}
 ::msgcat::mcset nl jamesswarnremove			{Een contactpersoon uit uw roster verwijderen is onomkeerbaar. Als u hem terug wilt toevoegen, moet u opnieuw om autorisatie vragen bij deze contactpersoon. Wilt u toch verder gaan?}
 ::msgcat::mcset nl jamessillegalchar			{Ongeldig(e) teken(s) in %s: "%s"!}
@@ -861,13 +861,13 @@
 ::msgcat::mcset nl jamesstimeoutserver			{Tijdslimiet overschreden bij wachten op antwoord van server "%s".}
 ::msgcat::mcset nl jamessregisterok			{Uw account op server "%s" is aangemaakt. U kunt nu aanmelden met de zonet aangemaakte gebruikersnaam met bijhorend wachtwoord.}
 ::msgcat::mcset nl jamessremoveaccount			{Wilt u toch uw account verwijderen? Deze handeling kan niet ongedaan gemaakt worden.}
-::msgcat::mcset nl jamesserrunreg			{Fout bij verwijderen van uw account op "%s". Foutcode %s met als foutmelding %s.}
+::msgcat::mcset nl jamesserrunreg			{Verwijderen van uw account op "%s" mislukte. Foutcode %s met als foutmelding %s.}
 ::msgcat::mcset nl jamessokunreg			{Uw account op "%s" is verwijderd.}
 ::msgcat::mcset nl jamesspasswddiff			{De wachtwoorden komen niet overeen. Probeer opnieuw.}
 ::msgcat::mcset nl jamesspasswderr			{Instellen van nieuw wachtwoord mislukte met de foutcode %s met als foutmelding: "%s".}
 ::msgcat::mcset nl jamesspasswdok			{Het nieuwe wachtwoord is met succes ingesteld.}
 ::msgcat::mcset nl jamessregnoserver			{Het is vereist dat de server is ingesteld.}
-::msgcat::mcset nl jamesserrregget			{Fout bij ophalen van registratiegegevens. Foutcode %s met als foutmelding: %s.}
+::msgcat::mcset nl jamesserrregget			{Ophalen van registratiegegevens mislukte. Foutcode %s met als foutmelding: %s.}
 ::msgcat::mcset nl jamesserrregset			{Registratie met dienst "%s" mislukte. Foutcode %s met als foutmelding: %s.}
 ::msgcat::mcset nl jamessokreg				{Registratie met dienst "%s" is gelukt.}
 ::msgcat::mcset nl jamessinvalidjid			{De Jabber ID is niet juist. U moet onderaan een geldige Jabber ID opgeven in het veld (bv: 'gebruikersnaam@voorbeeld.org').}
@@ -879,14 +879,14 @@
 ::msgcat::mcset nl jamessgcnoroomnick			{U moet een bijnaam opgeven.}
 ::msgcat::mcset nl jamessinroommiss			{U moet alle velden invullen voor u een chatruimte betreedt.}
 ::msgcat::mcset nl jamesswarnexitroom			{Wilt u toch chatruimte "%s" verlaten?}
-::msgcat::mcset nl jamesserrbrowse			{Fout bij browsen naar "%s": %s.}
+::msgcat::mcset nl jamesserrbrowse			{Browsen naar "%s" mislukte: %s.}
 ::msgcat::mcset nl jamessenterroomempty			{U moet een geldige server en een geldige chatruimte opgeven.}
-::msgcat::mcset nl jamesserrconfget			{Ophalen van info bij betreden van de chatruimte mislukte. Foutcode %s met als foutmelding: %s.}
-::msgcat::mcset nl jamesserrconfgetcre			{Ophalen van info bij aanmaak van de chatruimte mislukte. Foutcode %s met als foutmelding: %s.}
+::msgcat::mcset nl jamesserrconfget			{Betreden van chatruimte mislukte. Foutcode %s met als foutmelding: %s.}
+::msgcat::mcset nl jamesserrconfgetcre			{Aanmaken van chatruimte mislukte. Foutcode %s met als foutmelding: %s.}
 ::msgcat::mcset nl jamessinroomerasewb			{Wilt u het whiteboard wissen voor u de chatruimte betreedt?}
 ::msgcat::mcset nl jamessconffailed			{Aanmaken van chatruimte "%s" mislukte. Foutcode %s met als foutmelding: %s.}
 ::msgcat::mcset nl jamessconfservempty			{U moet een geldige server opgeven.}
-::msgcat::mcset nl jamesserragentget			{Fout bij ophalen van de agents: %s.}
+::msgcat::mcset nl jamesserragentget			{Ophalen van de agents mislukte: %s.}
 ::msgcat::mcset nl jamesserrsearch			{Ophalen van zoekspecificatie mislukte. Foutcode %s met als foutmelding: %s.}
 ::msgcat::mcset nl jamessoobok				{Bestandsoverdracht voltooid}
 ::msgcat::mcset nl jamessoobok2				{Bestandsoverdracht van %s naar "%s" is voltooid.}
@@ -898,9 +898,9 @@
 ::msgcat::mcset nl jamessoobgetfail			{Ophalen van URL "%s" mislukte: %s}
 ::msgcat::mcset nl jamessoobtimeout			{Tijdslimiet overschreden bij ophalen van een bestand via HTTP.}
 ::msgcat::mcset nl jamessooberr406			{%s weigerde het bestand %s te ontvangen.}
-::msgcat::mcset nl jamessooberr404			{Fout bij verzenden van het bestand %s naar %s. Foutcode %s met als foutmelding: %s.}
+::msgcat::mcset nl jamessooberr404			{Verzenden van het bestand %s naar %s mislukte. Foutcode %s met als foutmelding: %s.}
 ::msgcat::mcset nl jamesserrinboxopen			{Openen van Postvak in-bestand %s bij opslaan mislukte.}
-::msgcat::mcset nl jamesserrinboxread			{Fout bij proberen te lezen van het Postvak in-bestand "%s": %s.}
+::msgcat::mcset nl jamesserrinboxread			{Proberen te lezen van het Postvak in-bestand "%s" mislukte: %s.}
 ::msgcat::mcset nl jamesschatclose			{Als u dit venster sluit dan verliest u de volledige conversatie. Wilt u het toch sluiten?}
 ::msgcat::mcset nl jamessgchatfields			{U moet alle velden invullen voor u een chatruimte betreedt.}
 ::msgcat::mcset nl jamessconfmsg			{Kies een server en een chatruimte. Klik daarna op "Downloaden" om de toegangsspecificatie af te halen van de gewenste chatruimte (elke chatruimte en server kan verschillende vereisten hebben).}
@@ -915,7 +915,7 @@
 ::msgcat::mcset nl jamesschatoffline			{Deze contactpersoon is niet meer online waardoor het bericht niet is verzonden.}
 ::msgcat::mcset nl jamessregloginok			{U bent nu geregistreerd en automatisch aangemeld als "%s".}
 ::msgcat::mcset nl jamessregerrinuse			{Uw account kon niet worden aangemaakt omdat de gebruikersnaam al in gebruik is door iemand anders. Als dit toch uw account is, probeer dan opnieuw aan te melden. Foutmelding: %s.}
-::msgcat::mcset nl jamessregerr				{De registratie mislukte met foutmelding: %s.}
+::msgcat::mcset nl jamessregerr				{Registratie mislukte met foutmelding: %s.}
 ::msgcat::mcset nl jamesstrptsubsc			{Uw account op de dienst %s zal in uw roster geplaatst worden en zal dienen als transport voor die dienst.}
 ::msgcat::mcset nl jamessfailedsubsc			{Inschrijven op de aanwezigheid van %s werd geweigerd.}
 ::msgcat::mcset nl jamessgcinvite			{U werd uitgenodigd op de chatruimte %s door %s. Wenst u deze chatruimte te betreden?}
@@ -947,7 +947,7 @@
 ::msgcat::mcset nl xmpp-stanzas-short-invalid-mechanism		{Protocolfout bij aanmelden.}
 ::msgcat::mcset nl xmpp-stanzas-short-mechanism-too-weak	{Protocolfout bij aanmelden.}
 ::msgcat::mcset nl xmpp-stanzas-short-not-authorized		{Aanmelden mislukte: onbekende gebruiker of foutief wachtwoord.}
-::msgcat::mcset nl xmpp-stanzas-short-temporary-auth-failure	{Protocolfout bij aanmelden.}
+::msgcat::mcset nl xmpp-stanzas-short-temporary-auth-failure	{Aanmelden mislukte door protocolfout.}
 
 # Related error conditions detected by the client.
 ::msgcat::mcset nl starttls-nofeature			{Server "%s" ondersteunt TLS niet.}
@@ -993,9 +993,9 @@
 
 
 ::msgcat::mcset nl httptrptok				{Bestand %s met succes gedownload.}
-::msgcat::mcset nl httptrpterror			{Fout bij bestandsoverdracht van %s: %s.}
+::msgcat::mcset nl httptrpterror			{Bestandsoverdracht van %s mislukte: %s.}
 ::msgcat::mcset nl httptrpteof				{De server sloot de socket zonder te antwoorden.}
-::msgcat::mcset nl httptrptnon200			{Fout bij bestandsoverdracht van %s: Foutcode %s met als foutmelding %s.}
+::msgcat::mcset nl httptrptnon200			{estandsoverdracht van %s mislukte: Foutcode %s met als foutmelding %s.}
 ::msgcat::mcset nl httptrptreset			{Bestandsoverdracht van %s werd opnieuw geïnitialiseerd.}
 
 
@@ -1191,10 +1191,10 @@ namespace eval ::EditShortcuts:: {
 
 
 # Groupchat:
-::msgcat::mcset nl mucErrEnter				{Fout bij betreden van de chatruimte "%s".}
+::msgcat::mcset nl mucErrEnter				{Betreden van de chatruimte "%s" mislukte.}
 ::msgcat::mcset nl mucErrCode				{Foutcode %s met als foutmelding: %s.}
-::msgcat::mcset nl mucErrEnterTitle			{Fout bij betreden van de chatruimte}
-::msgcat::mcset nl mucErrInvite				{Uitnodiging aan %s om de chatruimte %s te betreden, mislukte.}
+::msgcat::mcset nl mucErrEnterTitle			{Betreden van de chatruimte mislukte}
+::msgcat::mcset nl mucErrInvite				{Verzenden van uitnodiging naar %s om de chatruimte %s te betreden, mislukte.}
 ::msgcat::mcset nl mucErrInviteCode			{Foutcode: %s}
 ::msgcat::mcset nl mucInviteText			{U hebt een uitnodiging ontvangen van %s voor de chatruimte %s.}
 ::msgcat::mcset nl mucInviteReason			{Reden: %s}
@@ -1202,11 +1202,11 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl mucInviteQuest			{Wilt u de chatruimte onmiddellijk betreden?}
 ::msgcat::mcset nl mucInvite				{Uitnodiging}
 ::msgcat::mcset nl mucDestroy				{U gaat de chatruimte "%s" vernietigen. Als u dat wenst, kunt u de aanwezigen een reden en/of de Jabber ID van een alternatieve chatruimte meedelen.}
-::msgcat::mcset nl mucIQError				{Fout bij interactie met de chatruimte "%s": %s.}
+::msgcat::mcset nl mucIQError				{Interactie met de chatruimte "%s" mislukte: %s.}
 ::msgcat::mcset nl mucChat2ConfInv			{Bezig met omzetten van chatsessie in chatruimte.}
 
 ::msgcat::mcset nl vcardget				{Info over %s ophalen. Bezig met wachten op antwoord van de server...}
-::msgcat::mcset nl vcarderrget				{Fout bij ophalen van info over de contactpersoon. Foutmelding: %s.}
+::msgcat::mcset nl vcarderrget				{Ophalen van info over de contactpersoon mislukte. Foutmelding: %s.}
 ::msgcat::mcset nl vcardrec				{Info over contactpersoon ontvangen.}
 
 
@@ -1228,26 +1228,26 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl geteoferr				{Verbinden met %s mislukte: eof.}
 ::msgcat::mcset nl getconnerr				{Verbinden met %s mislukte.}
 ::msgcat::mcset nl getnegotiate				{Client gecontacteerd: %s; bezig met verbinden...}
-::msgcat::mcset nl getreaderr				{Fout bij lezen van serverantwoord van %s.}
+::msgcat::mcset nl getreaderr				{Lezen van serverantwoord van %s mislukte.}
 ::msgcat::mcset nl getunknownprot			{De server op %s antwoorde niet met een goed gevormd protocol.}
 ::msgcat::mcset nl getnot200				{De server op %s antwoorde met een code %s: "%s"}
 ::msgcat::mcset nl getstarts				{Client op %s accepteerde bestand "%s". Het verzenden is gestart...}
 ::msgcat::mcset nl getended				{Verzenden van %s stopte te vroeg.}
 ::msgcat::mcset nl getfinished				{Downloaden van bestand "%s" van %s beëindigd.}
-::msgcat::mcset nl getneterr				{Netwerkfout bij downloaden van %s.}
+::msgcat::mcset nl getneterr				{Downloaden van %s mislukte door netwerkfout.}
 
 # Put file
 ::msgcat::mcset nl putcontacting			{Bezig met %s te contacteren. Bezig met wachten op een antwoord...}
 ::msgcat::mcset nl puteoferr				{Verbinden met %s mislukte: eof.}
 ::msgcat::mcset nl putconnerr				{Verbinden met %s mislukte.}
 ::msgcat::mcset nl putnegotiate				{Client gecontacteerd: %s; bezig met verbinden...}
-::msgcat::mcset nl putreaderr				{Fout bij lezen van serverantwoord van %s.}
+::msgcat::mcset nl putreaderr				{Lezen van serverantwoord van %s mislukte.}
 ::msgcat::mcset nl putunknownprot			{De server op %s antwoorde niet met een goed gevormd protocol.}
 ::msgcat::mcset nl putnot200				{De server op %s antwoorde met een code %s: "%s"}
 ::msgcat::mcset nl putstarts				{Client op %s accepteerde bestand %s. Het verzenden is gestart...}
 ::msgcat::mcset nl putended				{Verzenden naar %s is te vroeg gestopt.}
 ::msgcat::mcset nl putfinished				{Plaatsen van bestand "%s" naar %s werd beëindigd.}
-::msgcat::mcset nl putneterr				{Netwerkfout bij plaatsen op %s.}
+::msgcat::mcset nl putneterr				{Plaatsen op %s mislukte door netwerkfout.}
 
 # These are specific for phones (VoIP)
 ::msgcat::mcset nl phoneMakeCall			{Telefoneer}
