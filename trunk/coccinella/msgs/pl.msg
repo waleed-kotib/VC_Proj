@@ -928,6 +928,9 @@ Otrzymałeś autoryzację od %s: %s.}
 ::msgcat::mcset pl jamesswarnsendcanoff         {Odbiorca komunikatu - "%s" - nie jest w tej chwili dostępny. Jeśli więc do wiadomości dołączone są grafiki lub inne pliki, nie dotrą do celu, jeśli nie zdarzy się,\
 iż Ty będziesz dostępny, podczas gdy Twoja wiadomość będzie czytana przez odbiorcę. Czy mimo to chcesz ją przesłać?}
 
+::msgcat::mcset pl jamessstatuscust             {Set your message for any of the presence states.}
+::msgcat::mcset pl jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
 # 

@@ -937,6 +937,9 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de jamesswarnsendcanoff         {Benutzer "%s", an den Sie senden möchten, ist nicht online. Wenn diese Nachricht Bilder oder andere Anhänge enthält, wird der Benutzer diese nicht erhalten,\
 wenn Sie nicht online sind, während diese Nachricht gelesen wird. Möchten Sie trotzdem senden?}
 
+::msgcat::mcset de jamessstatuscust             {Set your message for any of the presence states.}
+::msgcat::mcset de jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+
 ::msgcat::mcset de jamessnofiletrpt             {Wir wissen, ob %s Dateiübertragung unterstützt.}
 ::msgcat::mcset de jamessfiletrpterr            {Konnte Datei %s nicht von %s erhalten: %s}
 

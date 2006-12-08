@@ -959,6 +959,9 @@
 ::msgcat::mcset es jamessnofiletrpt {%s no soporta la transferencia de archivos.}
 ::msgcat::mcset es jamessfiletrpterr {Fallo al recibir el archivo %s de %s: %s}
 
+::msgcat::mcset es jamessstatuscust             {Set your message for any of the presence states.}
+::msgcat::mcset es jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
 # 

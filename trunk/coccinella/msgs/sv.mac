@@ -923,6 +923,8 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv jamessfiletrpterr            {Misslyckades med att ta emot filen %s från %s: %s}
 ::msgcat::mcset sv jamesswarnsendcanoff         {Användaren du vill skicka till, "%s", är inte tillgänglig och om detta meddelande innehåller bilder eller likanande så kommer mottagaren inte att få\
 dessa om du inte händelsevis är tillgänglig när mottagaren läser det. Vill du skicka trots detta?}
+::msgcat::mcset sv jamessstatuscust             {Sätt ett meddelande för något av närvaro tillstånden.}
+::msgcat::mcset sv jamessstatuscustdtl          {De mest använda tillstånden och meddelanden är enkelt nåbara som menyer.}
 
 
 # This maps Defined Error Conditions to clear text messages.

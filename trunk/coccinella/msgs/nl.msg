@@ -925,6 +925,9 @@
 ::msgcat::mcset nl jamessfiletrpterr			{Downloaden van bestand %s van %s mislukte: %s.}
 ::msgcat::mcset nl jamesswarnsendcanoff			{De contactpersoon waarnaar u verzendt ("%s") is niet online. Als uw bericht afbeeldingen of dergelijke bevat, dan zal uw contactpersoon ze niet kunnen zien als u niet online bent als hij uw bericht leest. Wilt u het bericht verzenden?}
 
+::msgcat::mcset nl jamessstatuscust             {Set your message for any of the presence states.}
+::msgcat::mcset nl jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
 # 
