@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.4 2006-12-10 16:13:33 matben Exp $
+# $Id: AvatarMB.tcl,v 1.5 2006-12-11 15:51:53 matben Exp $
 
 package require colorutils
 
@@ -13,12 +13,18 @@ package provide AvatarMB 1.0
 
 namespace eval ::AvatarMB {
     
+    variable widget
     variable active "#3874d1"
     variable border "#cccccc"
     set background [style configure . -background]
     if {$background ne ""} {
 	set border [::colorutils::getdarker $background]
     }
+    
+    set widget(active) $active
+    set widget(border) $border
+    set widget(buttonsize) 24
+    set widget(menusize) 32
 
     # Try make a fake menu entry widget.
     set blue ::AvatarMB::blue
@@ -68,6 +74,7 @@ namespace eval ::AvatarMB {
     #bind FMenu <B1-Leave>	{ %W state !active }
 
     bind AvatarMBMenu <FocusIn> {}
+    bind AvatarMBMenu <Destroy> {+::AvatarMB::MenuFree %W}
 
 }
 
@@ -75,13 +82,20 @@ proc ::AvatarMB::Button {mb args} {
     variable $mb
     upvar 0 $mb state
     
-    ttk::label $mb -style SunkenMenubutton -compound image
+    # Bug in 8.4.1 but ok in 8.4.9
+    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
+	label $mb -relief sunken -bd 1 -bg white
+    } else {
+	ttk::label $mb -style SunkenMenubutton -compound image
+    }
     set myphoto [::Avatar::GetMyPhoto]
     if {$myphoto ne ""} {
 	set state(photo) [::Avatar::CreateScaledPhoto $myphoto 24]
     } else {
 	set state(photo) ""
     }
+    
+    # Use a blank photo to give the button a consistent size.
     set state(blank) [image create photo -width 24 -height 24]
     $state(blank) blank    
     if {$myphoto ne ""} {
@@ -89,17 +103,23 @@ proc ::AvatarMB::Button {mb args} {
     } else {
 	$mb configure -image $state(blank)
     }
-    bind $mb <Enter>            { %W state active }
-    bind $mb <Leave>            { %W state !active }
-    bind $mb <Key-space>        { ::AvatarMB::Popdown %W }
-    bind $mb <<Invoke>>         { ::AvatarMB::Popdown %W }
-    bind $mb <ButtonPress-1>    { %W state pressed ; AvatarMB::Popdown %W }
-    bind $mb <ButtonRelease-1>  { %W state !pressed ; puts ButtonRelease }
-
-    bind $mb <Button1-Leave> 	{ %W state !pressed }
-    bind $mb <Button1-Enter> 	{ %W instate {active !disabled} { %W state pressed } }
-
-    bind $mb <Destroy>          { ::AvatarMB::ButtonFree %W }
+    if {[winfo class $mb] eq "TLabel"} {
+	bind $mb <Enter>            { %W state active }
+	bind $mb <Leave>            { %W state !active }
+	bind $mb <Key-space>        { %W instate !disabled {::AvatarMB::Popdown %W } }
+	bind $mb <<Invoke>>         { %W instate !disabled {::AvatarMB::Popdown %W } }
+	bind $mb <ButtonPress-1>    { %W instate !disabled {%W state pressed ; ::AvatarMB::Popdown %W } }
+	bind $mb <ButtonRelease-1>  { %W state !pressed ; puts ButtonRelease }
+	
+	bind $mb <Button1-Leave>    { %W state !pressed }
+	bind $mb <Button1-Enter>    { %W instate {active !disabled} { %W state pressed } }
+    } else {
+	# @@@ TODO
+	bind $mb <Key-space>        { ::AvatarMB::Popdown %W }
+	bind $mb <<Invoke>>         { ::AvatarMB::Popdown %W }
+	bind $mb <ButtonPress-1>    { ::AvatarMB::Popdown %W }
+    }
+    bind $mb <Destroy> { ::AvatarMB::ButtonFree %W }
     
     ::hooks::register avatarMyNewPhotoHook [list ::AvatarMB::NewPhotoHook $mb]
     
@@ -131,18 +151,15 @@ proc ::AvatarMB::NewPhotoHook {mb} {
     set myphoto [::Avatar::GetMyPhoto]
     if {$myphoto ne ""} {
 	set state(photo) [::Avatar::CreateScaledPhoto $myphoto 24]
-	puts "\t size=[image width $state(photo)], [image height $state(photo)]"
+	$mb configure -image $state(photo)
     } else {
 	set state(photo) ""
+	$mb configure -image $state(blank)
     }
-    $mb configure -image $state(photo)
 }
 
 proc ::AvatarMB::Popdown {mb} {
     puts "::AvatarMB::Popdown $mb"
-    if {[$mb instate disabled]} {
-	return
-    }
     PostMenu $mb
 }
 
@@ -183,6 +200,15 @@ proc ::AvatarMB::PostPosition {mb dir} {
     return [list $x $y]
 }
 
+proc ::AvatarMB::PositionAlignX {mb x} {
+    set menu $mb.menu
+    set top [winfo toplevel $mb]
+
+    set mw [winfo reqwidth $menu]
+    
+    return $x
+}
+
 proc ::AvatarMB::Menu {m args} {
     variable border
     
@@ -198,7 +224,7 @@ proc ::AvatarMB::Menu {m args} {
 	#tk::unsupported::MacWindowStyle style $m floating none
 	#tk::unsupported::MacWindowStyle style $m moveableModal none
     }
-    ttk::frame $m.f
+    ttk::frame $m.f -padding {0 4}
     pack $m.f -fill both -expand 1
     set f $m.f
     
@@ -233,8 +259,8 @@ proc ::AvatarMB::Menu {m args} {
 	      -highlightthickness 0 -state disabled
 	    pack $label -fill both -expand 1
 
-	    bind $label <ButtonPress-1>   { ::AvatarMB::MenuPickAvatar %W }
-	    bind $label <ButtonRelease-1> { ::AvatarMB::MenuPickAvatar %W }
+	    bind $label <ButtonPress-1>   { ::AvatarMB::MenuPickRecent %W }
+	    bind $label <ButtonRelease-1> { ::AvatarMB::MenuPickRecent %W }
 	}
 	grid rowconfigure $box $i -minsize $min
     }
@@ -249,6 +275,10 @@ proc ::AvatarMB::Menu {m args} {
       -command ::AvatarMB::MenuNew
     BindFMenu $f.n
     pack $f.n -side top -anchor w -fill x
+
+    ttk::button $f.a -style FMenu -text "Aquire..." -state disabled
+    BindFMenu $f.a
+    pack $f.a -side top -anchor w -fill x
 
     ttk::button $f.c -style FMenu -text "Clear Menu" \
       -command ::AvatarMB::MenuClear
@@ -269,6 +299,15 @@ proc ::AvatarMB::Menu {m args} {
     focus $m
 
     return $m
+}
+
+proc ::AvatarMB::MenuFree {m} {
+    variable priv
+    puts "::AvatarMB::MenuFree $m"
+    
+    array unset priv win2file,*
+    eval {image delete} $priv(images)
+    set priv(images) {}
 }
 
 # Generic FMenu code.
@@ -342,8 +381,8 @@ proc ::AvatarMB::FillInRecent {box} {
     global  this
     variable priv
     
-    puts "::AvatarMB::FillInRecent"
     set childs [winfo children $box]
+    set priv(images) {}
 
     foreach f [::Avatar::GetRecentFiles] {
 	set fpath [file join $this(recentAvatarPath) $f]
@@ -368,21 +407,14 @@ proc ::AvatarMB::FillInRecent {box} {
 	    break
 	}
     }
-    bind $box <Destroy> +::AvatarMB::FreeImages
 }
 
-proc ::AvatarMB::FreeImages {} {
-    variable priv
-    eval {image delete} $priv(images)
-    set priv(images) {}
-}
-
-proc ::AvatarMB::MenuPickAvatar {w} {
+proc ::AvatarMB::MenuPickRecent {w} {
     variable priv
     variable active
     variable border
     
-    puts "::AvatarMB::MenuPickAvatar w=$w"
+    puts "::AvatarMB::MenuPickRecent w=$w"
     
     if {[$w cget -state] eq "normal"} {
 	set parent [winfo parent $w]
@@ -390,13 +422,21 @@ proc ::AvatarMB::MenuPickAvatar {w} {
 	update idletasks; after 80
 	$parent configure -bg $active
 	update idletasks; after 80
-
-	# Invoke the "command".
 	set fileName $priv(win2file,$w)
-	::Avatar::AddRecentFile $fileName
-	::Avatar::SetAndShareMyAvatarFromFile $fileName
     }    
     MenuUnpost [MenuParent $w]
+
+    # Invoke the "command".
+    if {[info exists fileName]} {
+	
+	# Always put as most recent.
+	::Avatar::AddRecentFile $fileName
+	
+	# Share & Set only if not identical to existing one.
+	if {![::Avatar::IsMyPhotoFromFile $fileName]} {
+	    ::Avatar::SetAndShareMyAvatarFromFile $fileName
+	}
+    }
 }
 
 proc ::AvatarMB::MenuNew {} {
@@ -418,8 +458,9 @@ proc ::AvatarMB::MenuNew {} {
     set fileName [tk_getOpenFile -title [mc {Pick Image File}]  \
       -filetypes $types]
     if {$fileName ne ""} {
-	::Avatar::AddRecentFile $fileName
-	::Avatar::SetAndShareMyAvatarFromFile $fileName
+	if {[::Avatar::SetAndShareMyAvatarFromFile $fileName]} {
+	    ::Avatar::AddRecentFile $fileName
+	}
     }
 }
 
@@ -429,18 +470,13 @@ proc ::AvatarMB::MenuClear {} {
 }
 
 proc ::AvatarMB::MenuRemove {} {
-    ::Avatar::UnsetMyPhoto
+    ::Avatar::UnsetMyPhotoAndFile
+    ::Avatar::UnshareImage
 }
 
 proc ::AvatarMB::OnButtonRelease {m x y} {
     puts "::AvatarMB::OnButtonRelease $x $y"
     MenuUnpost $m
-    if {0} {
-	set mw [winfo reqwidth $m]
-	set mh [winfo reqheight $m]
-	if {($x < 0) || ($x > $mw)} {MenuUnpost $m}
-	if {($y < 0) || ($y > $mh)} {MenuUnpost $m}
-    }
 }
 
 
