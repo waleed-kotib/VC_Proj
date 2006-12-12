@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.39 2006-12-08 13:42:52 matben Exp $
+# $Id: tileutils.tcl,v 1.40 2006-12-12 13:57:43 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -247,6 +247,19 @@ proc tileutils::configstyles {name} {
 	style map Sunken.TEntry  \
 	  -foreground {{background} "#363636" {} black}
 	style configure Small.Sunken.TEntry -font CociSmallFont
+	
+	# Sunken mini menubutton.
+	style layout SunkenMenubutton {
+	    Sunken.background -sticky news -children {
+		Sunken.padding -sticky news -children {
+		    Sunken.label -sticky news
+		}
+		SunkenMenubutton.indicator -sticky se
+	    }
+	}
+	style element create SunkenMenubutton.indicator image $tiles(downArrowContrast) \
+	  -sticky e -padding {0}
+	style configure SunkenMenubutton -padding {0}
 
 	# Search entry (from Michael Kirkham).
 	set pad [style default TEntry -padding]
