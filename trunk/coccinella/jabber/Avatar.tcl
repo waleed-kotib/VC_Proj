@@ -7,13 +7,14 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.27 2006-11-22 08:02:32 matben Exp $
+# $Id: Avatar.tcl,v 1.28 2006-12-12 15:17:59 matben Exp $
 
 # @@@ Issues:
 # 
 # Features:
 #       1) We don't request avatar for offline users, only if already cached.
 
+package require sha1       ; # tcllib                           
 package require jlib::avatar
 
 package provide Avatar 1.0
@@ -33,6 +34,7 @@ namespace eval ::Avatar:: {
 
     # Our own avatar stuff.
     variable myphoto
+    set myphoto(hash) ""
     
     # Allowed sizes of my avatar.
     variable sizes {32 48 64}
@@ -63,6 +65,9 @@ namespace eval ::Avatar:: {
     set aprefs(share)        0
     set aprefs(fileName)     ""
     set aprefs(hashmapFile)  [file join $options(-cachedir) hashmap]
+
+    set aprefs(recent)       {}
+    set aprefs(recentLen)    16
 
     variable uid 0
 
@@ -120,12 +125,14 @@ proc ::Avatar::Configure {args} {
 # These hooks deal with sharing (announcing) our own avatar.
 
 proc ::Avatar::InitHook { } {
+    variable myphoto
     variable aprefs
     
     Debug "::Avatar::InitHook"
     
     set fileName [GetMyAvatarFile]
     if {[file isfile $fileName]} {
+	set myphoto(hash) [GetHashForFile $fileName]
 	set aprefs(fileName) $fileName
 	if {[CreateAndVerifyPhoto $fileName name]} {
 	    SetMyPhoto $name
@@ -137,7 +144,8 @@ proc ::Avatar::InitPrefsHook { } {
     variable aprefs
     
     ::PrefUtils::Add [list  \
-      [list ::Avatar::aprefs(share)  avatar_share  $aprefs(share)]]
+      [list ::Avatar::aprefs(share)   avatar_share   $aprefs(share)] \
+      [list ::Avatar::aprefs(recent)  avatar_recent  $aprefs(recent)]]
 }
 
 proc ::Avatar::JabberInitHook {jlibname} {
@@ -189,10 +197,11 @@ proc ::Avatar::QuitHook { } {
 
 # Avatar::Widget --
 # 
-#       Display avatar widget.
+#       Display only avatar widget.
 
 proc ::Avatar::Widget {w} {
     
+    # @@@ An alternative is to have a blank image as a spacer.
     frame $w
     
     # Bug in 8.4.1 but ok in 8.4.9
@@ -260,16 +269,27 @@ proc ::Avatar::WidgetBalloon {show w image} {
 }
 
 #--- First section deals with our own avatar -----------------------------------
+#
+# There are three parts to it:
+#   1) the actual photo
+#   2) and the corresponding file
+#   3) share or not share option
 
-proc ::Avatar::Load {fileName} {
+proc ::Avatar::SetAndShareMyAvatarFromFile {fileName} {
     
-    Debug "::Avatar::Load"
-    
+    Debug "::Avatar::SetAndShareMyAvatarFromFile"
+
+    set ok 0
     if {[CreateAndVerifyPhoto $fileName name]} {
 	SetMyPhoto $name
-	SaveFile $fileName
+	SaveMyImageFile $fileName
 	ShareImage $fileName
+	image delete $name
+	set ok 1
+	
+	::hooks::run avatarMyNewPhotoHook
     }
+    return $ok
 }
 
 proc ::Avatar::SetMyAvatarFromBase64 {data mime} {
@@ -280,6 +300,8 @@ proc ::Avatar::SetMyAvatarFromBase64 {data mime} {
 	SetMyPhoto $tmpname
 	WriteBase64ToFile $data $mime
 	image delete $tmpname
+
+	::hooks::run avatarMyNewPhotoHook
     }
 }
 
@@ -345,7 +367,7 @@ proc ::Avatar::VerifyPhotoFile {fileName} {
     
     set mime [::Types::GetMimeTypeForFileName $fileName]
     if {[lsearch {image/gif image/png image/jpeg} $mime] < 0} {
-	set msg "Our avatar shall be either a PNG or a GIF file."
+	set msg "Our avatar shall be either a PNG, JPEG or a GIF file."
 	return [list 0 $msg]
     }
 	
@@ -373,17 +395,16 @@ proc ::Avatar::SetMyPhoto {name} {
     
     Debug "::Avatar::SetMyPhoto"
     
+    # Keep one and the same image for my photo to get automatic widget updates.
     if {![info exists myphoto(image)]} {
 	set myphoto(image) [image create photo]
     }
     $myphoto(image) blank
-    $myphoto(image) copy $name
+    $myphoto(image) copy $name -shrink
 }
 
 proc ::Avatar::GetMyPhoto { } {
     variable myphoto
-    
-    Debug "::Avatar::GetMyPhoto"
     
     if {[info exists myphoto(image)]} {
 	return $myphoto(image)
@@ -392,23 +413,38 @@ proc ::Avatar::GetMyPhoto { } {
     }
 }
 
-proc ::Avatar::UnsetMyPhoto { } {
+proc ::Avatar::IsMyPhotoFromFile {fileName} {
+    variable myphoto
+    return [expr {$myphoto(hash) eq [GetHashForFile $fileName]}]
+}
+
+proc ::Avatar::GetMyPhotoHash { } {
+    variable myphoto
+
+    # Note that 'jlib avatar get_my_data hash' only works if online.
+    return $myphoto(hash)
+}
+
+proc ::Avatar::UnsetMyPhotoAndFile { } {
     global  this
     variable myphoto
     variable aprefs
     upvar ::Jabber::jstate jstate
     
-    Debug "::Avatar::UnsetMyPhoto"
+    Debug "::Avatar::UnsetMyPhotoAndFile"
         
     if {[info exists myphoto(image)]} {
 	image delete $myphoto(image)
-	unset -nocomplain myphoto(image)
+	unset myphoto(image)
     }
+    set myphoto(hash) ""
     set aprefs(fileName) ""
     set dir $this(myAvatarPath)
     foreach f [glob -nocomplain -directory $dir *] {
 	file delete $f
     }
+    
+    ::hooks::run avatarMyNewPhotoHook
 }
 
 # Avatar::SetShareOption --
@@ -421,16 +457,23 @@ proc ::Avatar::SetShareOption {bool} {
     set aprefs(share) $bool
 }
 
-# Avatar::SaveFile --
-# 
-#       Store the avatar file in prefs folder to protect it from being removed.
-#       Returns cached file name.
-
-proc ::Avatar::SaveFile {fileName} {
-    global  this
+proc ::Avatar::GetShareOption { } {
     variable aprefs
     
-    Debug "::Avatar::SaveFile"
+    return $aprefs(share)
+}
+
+# Avatar::SaveMyImageFile --
+# 
+#       Store my avatar file in prefs folder to protect it from being removed.
+#       Returns cached file name.
+
+proc ::Avatar::SaveMyImageFile {fileName} {
+    global  this
+    variable aprefs
+    variable myphoto
+    
+    Debug "::Avatar::SaveMyImageFile"
     
     set dir [file normalize $this(myAvatarPath)]
 
@@ -446,6 +489,7 @@ proc ::Avatar::SaveFile {fileName} {
 	file copy $fileName $dir
 	set aprefs(fileName) [file join $dir [file tail $fileName]]
     }
+    set myphoto(hash) [GetHashForFile $fileName]
     return $aprefs(fileName)
 }
 
@@ -546,6 +590,73 @@ proc ::Avatar::SetCB {sync jlibname type queryElem} {
 	    $jlib send_presence -keep 1
 	}
     }
+}
+
+#--- Handle the "recent" avatar cache ------------------------------------------
+#
+#   o Always store recent files as hash.suffix
+#   o the 'recentAvatarPath' lists the order of the recent file cache;
+#     must be kept in sync!
+
+proc ::Avatar::GetRecentFiles {} {
+    global  this
+    variable aprefs
+    
+    set recentL {}
+    foreach f $aprefs(recent) {
+	set fname [file join $this(recentAvatarPath) $f]
+	if {[file exists $fname]} {
+	    lappend recentL $f
+	}
+    }
+    return $recentL
+}
+
+proc ::Avatar::AddRecentFile {fileName} {
+    global  this
+    variable aprefs
+    
+    puts "::Avatar::AddRecentFile fileName=$fileName"
+    
+    set hash [GetHashForFile $fileName]
+    set newTail $hash[file extension $fileName]
+    puts "newTail=$newTail"
+    
+    set recentL [GetRecentFiles]
+    set idx [lsearch $recentL $newTail]
+
+    # If it is already there then just reorder the recent list.
+    if {$idx >= 0} {
+	puts "\t already there"
+	set recentL [lreplace $recentL $idx $idx]
+	set recentL [linsert $recentL 0 $newTail]
+    } else {
+
+	# Put first in list. Guard if already there.
+	set recentL [linsert $recentL 0 $newTail]
+	set dstFile [file join $this(recentAvatarPath) $newTail]
+	if {![file exists $dstFile]} {
+	    file copy $fileName $dstFile
+	}
+	
+	# Truncate to max list length.
+	foreach f [lrange $recentL $aprefs(recentLen) end] {
+	    file delete [file join $this(recentAvatarPath) $f]
+	}
+	set recentL [lrange $recentL 0 [expr {$aprefs(recentLen) - 1}]]
+    }
+    set aprefs(recent) $recentL
+}
+
+proc ::Avatar::ClearRecent {} {
+    global  this
+    variable aprefs
+    
+    set dir $this(recentAvatarPath)
+    foreach f [glob -nocomplain -directory $dir *] {
+	file delete $f
+    }
+    set aprefs(recent) {}
 }
 
 #--- Second section deals with others avatars ----------------------------------
@@ -853,7 +964,7 @@ proc ::Avatar::PutPhotoFromCache {jid2} {
 	    if {![catch {
 		set tmp [image create photo -file $fileName]
 	    }]} {
-		$orig copy $tmp -compositingrule set
+		$orig copy $tmp -compositingrule set -shrink
 		image delete $tmp
 	    }
 	}
@@ -900,7 +1011,7 @@ proc ::Avatar::PutPhotoCreateSizes {jid2} {
 	    set name $photo($mjid2,$size)
 	    if {[image inuse $name]} {
 		set tmp [CreateScaledPhoto $orig $size]
-		$name copy $tmp -compositingrule set
+		$name copy $tmp -compositingrule set -shrink
 		image delete $tmp
 	    } else {
 		
@@ -1082,8 +1193,9 @@ proc ::Avatar::FreeAllPhotos { } {
 
 # Avatar::CreateScaledPhoto --
 # 
-#       If image with 'name' is smaller or equal 'size' then just return 'name',
-#       else create a new scaled one that is smaller or equal to 'size'.
+#       If image with 'name' is smaller or equal 'size' then just return 
+#       a copy of 'name', else create a new scaled one that is smaller or 
+#       equal to 'size'.
 
 proc ::Avatar::CreateScaledPhoto {name size} {
     
@@ -1171,6 +1283,17 @@ proc ::Avatar::MakeScaleTableCmd {f1 f2} {
     set r1 [expr {double([lindex $f1 0])/double([lindex $f1 1])}]
     set r2 [expr {double([lindex $f2 0])/double([lindex $f2 1])}]
     return [expr {$r1 > $r2 ? 1 : -1}]
+}
+
+#--- Other Utilities -----------------------------------------------------------
+
+proc ::Avatar::GetHashForFile {fileName} {
+
+    set fd [open $fileName r]
+    fconfigure $fd -translation binary
+    set hash [::sha1::sha1 [read $fd]]
+    close $fd
+    return $hash
 }
 
 #--- Avatar File Cache ---------------------------------------------------------
@@ -1483,7 +1606,7 @@ proc ::Avatar::PrefsFile { } {
 		set tmpphoto [image create photo]
 	    }
 	    $tmpphoto blank
-	    $tmpphoto copy $me -compositingrule set
+	    $tmpphoto copy $me -compositingrule set -shrink
 	    set tmpprefs(fileName) $fileName
 	    set tmpprefs(editedPhoto) 1
 	    $wshare state {!disabled}
@@ -1523,10 +1646,10 @@ proc ::Avatar::PrefsSave { } {
 	if {[info exists tmpphoto]} {
 	    SetMyPhoto $tmpphoto
 	} else {
-	    UnsetMyPhoto
+	    UnsetMyPhotoAndFile
 	}
 	if {[file exists $tmpprefs(fileName)]} {
-	    set fileName [SaveFile $tmpprefs(fileName)]
+	    set fileName [SaveMyImageFile $tmpprefs(fileName)]
 	}
     }
     set fileName [GetMyAvatarFile]
@@ -1611,16 +1734,5 @@ proc ::Avatar::Debug {text} {
     }
 }
 
-#--- Testing:
-
-if {0} {
-    set f "/Users/matben/Graphics/Crystal Clear/32x32/apps/bug.png"
-    proc ::Avatar::TestCmd {jid2} {
-	puts "---> ::Avatar::TestCmd $jid2"
-	::Avatar::GetPhoto $jid2
-    }
-    ::Avatar::Load $f
-    ::Avatar::Configure -autoget 1 -command ::Avatar::TestCmd
-}
 
 

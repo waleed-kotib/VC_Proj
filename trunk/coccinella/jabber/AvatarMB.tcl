@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.6 2006-12-12 13:59:06 matben Exp $
+# $Id: AvatarMB.tcl,v 1.7 2006-12-12 15:17:59 matben Exp $
 
 package require colorutils
 
@@ -185,7 +185,7 @@ proc ::AvatarMB::PostMenu {mb} {
     wm withdraw $menu
     update idletasks
     foreach {x y} [PostPosition $mb below] { break }
-    foreach {x y} [KeepOnScreen $mb $x $y] { break }
+    foreach {x y} [PositionOnScreen $mb $x $y] { break }
     wm geometry $menu +$x+$y
     wm deiconify $menu
     
@@ -220,9 +220,9 @@ proc ::AvatarMB::PostPosition {mb dir} {
     return [list $x $y]
 }
 
-proc ::AvatarMB::KeepOnScreen {mb x y} {
-    set menu $mb.menu
+proc ::AvatarMB::PositionOnScreen {mb x y} {
     set margin 8
+    set menu $mb.menu
     set mw [winfo reqwidth $menu]
     set mh [winfo reqheight $menu]
     set sw [winfo screenwidth $menu]
@@ -238,13 +238,26 @@ proc ::AvatarMB::KeepOnScreen {mb x y} {
     return [list $x $y]
 }
 
-proc ::AvatarMB::PositionAlignX {mb x} {
+proc ::AvatarMB::PositionAlign {mb side x y} {
+    set margin 8
     set menu $mb.menu
     set top [winfo toplevel $mb]
 
+    set tx [winfo rootx $top]
+    set ty [winfo rooty $top]
     set mw [winfo reqwidth $menu]
+    set mh [winfo reqheight $menu]
+    set tw [winfo reqwidth $top]
+    set th [winfo reqheight $top]
     
-    return $x
+    switch -- $side {
+	left   { set x [expr {$tx + $margin}] }
+	right  { set x [expr {$tx + }] }
+	top    {  }
+	bottom {  }
+    }
+    
+    return [list $x $y]
 }
 
 proc ::AvatarMB::Menu {m args} {
@@ -309,24 +322,24 @@ proc ::AvatarMB::Menu {m args} {
     
     bind $m <KeyPress> { puts "KeyPress %W %A"}
     
-    ttk::button $f.n -style FMenu -text "Pick New..." \
+    ttk::button $f.new -style FMenu -text "Pick New..." \
       -command ::AvatarMB::MenuNew
-    BindFMenu $f.n
-    pack $f.n -side top -anchor w -fill x
+    BindFMenu $f.new
+    pack $f.new -side top -anchor w -fill x
 
-    ttk::button $f.a -style FMenu -text "Aquire..." -state disabled
-    BindFMenu $f.a
-    pack $f.a -side top -anchor w -fill x
+    ttk::button $f.edit -style FMenu -text "Edit..." -state disabled
+    BindFMenu $f.edit
+    pack $f.edit -side top -anchor w -fill x
 
-    ttk::button $f.c -style FMenu -text "Clear Menu" \
+    ttk::button $f.clear -style FMenu -text "Clear Menu" \
       -command ::AvatarMB::MenuClear
-    BindFMenu $f.c
-    pack $f.c -side top -anchor w -fill x
+    BindFMenu $f.clear
+    pack $f.clear -side top -anchor w -fill x
     
-    ttk::button $f.r -style FMenu  -text [mc Remove] \
+    ttk::button $f.remove -style FMenu  -text [mc Remove] \
       -command ::AvatarMB::MenuRemove
-    BindFMenu $f.r
-    pack $f.r -side top -anchor w -fill x
+    BindFMenu $f.remove
+    pack $f.remove -side top -anchor w -fill x
         
     FillInRecent $box
     
@@ -465,6 +478,7 @@ proc ::AvatarMB::MenuPickRecent {w} {
 
     # Invoke the "command".
     if {[info exists fileName]} {
+	::Avatar::SetShareOption 1
 	
 	# Always put as most recent.
 	::Avatar::AddRecentFile $fileName
@@ -472,7 +486,6 @@ proc ::AvatarMB::MenuPickRecent {w} {
 	# Share & Set only if not identical to existing one.
 	if {![::Avatar::IsMyPhotoFromFile $fileName]} {
 	    ::Avatar::SetAndShareMyAvatarFromFile $fileName
-	    ::Avatar::SetShareOption 1
 	}
     }
 }

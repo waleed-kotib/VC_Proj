@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.48 2006-10-20 09:26:49 matben Exp $
+# $Id: VCard.tcl,v 1.49 2006-12-12 15:18:00 matben Exp $
 
 package provide VCard 1.0
 
@@ -653,7 +653,7 @@ proc ::VCard::SyncAvatar {token} {
 	::Jabber::JlibCmd send_presence -keep 1
     } else {
 	::Jabber::JlibCmd avatar unset_data
-	::Avatar::UnsetMyPhoto
+	::Avatar::UnsetMyPhotoAndFile
 	
 	# UnshareImage sends presence with empty hashes.
 	::Avatar::UnshareImage

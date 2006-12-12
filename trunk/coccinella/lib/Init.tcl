@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.55 2006-11-21 07:51:19 matben Exp $
+# $Id: Init.tcl,v 1.56 2006-12-12 15:18:00 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -269,6 +269,7 @@ proc ::Init::SetPrefsPaths { } {
     set this(prefsAvatarPath)   [file join $path avatar]
     set this(myAvatarPath)      [file join $path avatar my]
     set this(cacheAvatarPath)   [file join $path avatar cache]
+    set this(recentAvatarPath)  [file join $path avatar recent]
     set this(altThemesPath)     [file join $path themes]
 
     set pname $this(prefsName)
@@ -377,6 +378,7 @@ proc ::Init::MakePrefsDirs { } {
 	prefsAvatarPath
 	myAvatarPath
 	cacheAvatarPath
+	recentAvatarPath
 	altItemPath
 	altEmoticonsPath
 	altRosticonsPath

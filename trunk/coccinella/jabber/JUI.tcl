@@ -5,9 +5,9 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.144 2006-12-08 13:42:52 matben Exp $
+# $Id: JUI.tcl,v 1.145 2006-12-12 15:17:59 matben Exp $
 
-#package require AvatarMB
+package require AvatarMB
 
 package provide JUI 1.0
 
@@ -84,7 +84,8 @@ namespace eval ::JUI:: {
     set ::config(url,bugs)  \
       "http://sourceforge.net/tracker/?group_id=68334&atid=520863"
         
-    set ::config(ui,status,menu) dynamic   ;# plain|dynamic
+    set ::config(ui,status,menu)    dynamic   ;# plain|dynamic
+    set ::config(ui,main,infoLabel) status    ;# mejid|mejidres|status
     
     # Collection of useful and common widget paths.
     variable jwapp
@@ -321,16 +322,18 @@ proc ::JUI::Build {w} {
     pack $wbot -side bottom -fill x
     if {[tk windowingsystem] ne "aqua"} {
 	ttk::label $wbot.size -compound image -image $iconResize
-	pack  $wbot.size -side right -anchor s
+    } else {
+	ttk::frame $wbot.size -width 8
     }
-    
-    # Exp
-    #pack [::AvatarMB::Button $wbot.ava] -side right -padx 8
-    
+    pack  $wbot.size -side right -anchor s
+        
     set wfstat $wbot.f
     ttk::frame $wfstat
     pack $wfstat -fill x
-  
+
+    # Avatar menu button.
+    ::AvatarMB::Button $wfstat.ava
+
     set wstatcont $wfstat.cont
     if {$config(ui,status,menu) eq "plain"} {
 	::Status::MainButton $wfstat.bst ::Jabber::jstate(show)
@@ -338,13 +341,12 @@ proc ::JUI::Build {w} {
 	::Status::ExMainButton $wfstat.bst ::Jabber::jstate(show+status)
     }
     
+    set infoLabel $config(ui,main,infoLabel)
     ttk::frame $wfstat.cont
-    ttk::label $wfstat.me -textvariable ::Jabber::jstate(mejidres) -anchor w
+    ttk::label $wfstat.me -textvariable ::Jabber::jstate($infoLabel) -anchor w
+    pack  $wfstat.ava  -side right -padx 3 -pady 1
     pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
-    pack  $wfstat.me  -fill x -expand 1 -padx 2 -pady 4
-    if {[tk windowingsystem] eq "aqua"} {
-	pack $wfstat.me -padx 6
-    }
+    pack  $wfstat.me  -padx 3 -pady 4 -fill x -expand 1
     
     # Notebook.
     set wnb $wall.nb
