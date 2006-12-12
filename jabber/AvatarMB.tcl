@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.5 2006-12-11 15:51:53 matben Exp $
+# $Id: AvatarMB.tcl,v 1.6 2006-12-12 13:59:06 matben Exp $
 
 package require colorutils
 
@@ -13,18 +13,23 @@ package provide AvatarMB 1.0
 
 namespace eval ::AvatarMB {
     
+    # Static variables.
     variable widget
-    variable active "#3874d1"
-    variable border "#cccccc"
+    
+    set active "#3874d1"
+    set border "#cccccc"
     set background [style configure . -background]
     if {$background ne ""} {
 	set border [::colorutils::getdarker $background]
     }
+    set lightactive [::colorutils::getlighter $active]
     
-    set widget(active) $active
-    set widget(border) $border
-    set widget(buttonsize) 24
-    set widget(menusize) 32
+    set widget(active)      $active
+    set widget(border)      $border
+    set widget(lightactive) $lightactive
+    set widget(background)  white
+    set widget(buttonsize)  24
+    set widget(menusize)    32
 
     # Try make a fake menu entry widget.
     set blue ::AvatarMB::blue
@@ -78,6 +83,14 @@ namespace eval ::AvatarMB {
 
 }
 
+proc ::Avatar::InitPrefsHook { } {
+    global  prefs
+    
+    set prefs(dir,avatarPick) ""
+    ::PrefUtils::Add [list  \
+      [list prefs(dir,avatarPick)  prefs_dir_avatarPick  $prefs(dir,avatarPick)]]
+}
+
 proc ::AvatarMB::Button {mb args} {
     variable $mb
     upvar 0 $mb state
@@ -89,7 +102,7 @@ proc ::AvatarMB::Button {mb args} {
 	ttk::label $mb -style SunkenMenubutton -compound image
     }
     set myphoto [::Avatar::GetMyPhoto]
-    if {$myphoto ne ""} {
+    if {($myphoto ne "") && [::Avatar::GetShareOption]} {
 	set state(photo) [::Avatar::CreateScaledPhoto $myphoto 24]
     } else {
 	set state(photo) ""
@@ -98,7 +111,7 @@ proc ::AvatarMB::Button {mb args} {
     # Use a blank photo to give the button a consistent size.
     set state(blank) [image create photo -width 24 -height 24]
     $state(blank) blank    
-    if {$myphoto ne ""} {
+    if {$state(photo) ne ""} {
 	$mb configure -image $state(photo)
     } else {
 	$mb configure -image $state(blank)
@@ -164,14 +177,21 @@ proc ::AvatarMB::Popdown {mb} {
 }
 
 proc ::AvatarMB::PostMenu {mb} {
+    variable $mb
+    upvar 0 $mb state
+
     set menu $mb.menu
     Menu $menu
+    wm withdraw $menu
+    update idletasks
     foreach {x y} [PostPosition $mb below] { break }
+    foreach {x y} [KeepOnScreen $mb $x $y] { break }
     wm geometry $menu +$x+$y
+    wm deiconify $menu
     
-    set oldGrab [grab current $menu]
-    if {$oldGrab ne ""} {
-	set grabStatus [grab status $oldGrab]
+    set state(oldGrab) [grab current $menu]
+    if {$state(oldGrab) ne ""} {
+	set state(grabStatus) [grab status $state(oldGrab)]
     }
 
     # This will direct all events to the menu even if the mouse is outside!
@@ -196,6 +216,24 @@ proc ::AvatarMB::PostPosition {mb dir} {
 	left  { if {$x >= $mw} { incr x -$mw } { incr x  $bw } }
 	right { if {$x <= $sw} { incr x  $bw } { incr x -$mw } }
     }
+
+    return [list $x $y]
+}
+
+proc ::AvatarMB::KeepOnScreen {mb x y} {
+    set menu $mb.menu
+    set margin 8
+    set mw [winfo reqwidth $menu]
+    set mh [winfo reqheight $menu]
+    set sw [winfo screenwidth $menu]
+    set sh [winfo screenheight $menu]
+    set x2 [expr {$x + $mw}]
+    set y2 [expr {$y + $mh}]
+    
+    if {$x < $margin} {	set x $margin }
+    if {$x2 > [expr {$sw - $margin}]} { set x [expr {$sw - $mw - $margin}] }
+    if {$y < $margin} {	set y $margin }
+    if {$y2 > [expr {$sh - $margin}]} { set y [expr {$sh - $mh - $margin}] }
 
     return [list $x $y]
 }
@@ -296,8 +334,6 @@ proc ::AvatarMB::Menu {m args} {
     if {[info exists wmA(-alpha)]} {
 	wm attributes $m -alpha 0.92
     }
-    focus $m
-
     return $m
 }
 
@@ -322,16 +358,18 @@ proc ::AvatarMB::BindFMenu {w} {
 }
 
 proc ::AvatarMB::AvatarEnter {w} {
-    variable active
+    variable widget
     if {[$w cget -state] eq "normal"} {
-	$w configure -bg $active
+	$w configure -bg $widget(active)
+	$w.l configure -bg $widget(lightactive)
     }
 }
 
 proc ::AvatarMB::AvatarLeave {w} {
-    variable border
+    variable widget
     if {[$w cget -state] eq "normal"} {
-	$w configure -bg $border
+	$w configure -bg $widget(border)
+	$w.l configure -bg white
     }
 }
 
@@ -411,16 +449,15 @@ proc ::AvatarMB::FillInRecent {box} {
 
 proc ::AvatarMB::MenuPickRecent {w} {
     variable priv
-    variable active
-    variable border
+    variable widget
     
     puts "::AvatarMB::MenuPickRecent w=$w"
     
     if {[$w cget -state] eq "normal"} {
 	set parent [winfo parent $w]
-	$parent configure -bg $border
+	$parent configure -bg $widget(border)
 	update idletasks; after 80
-	$parent configure -bg $active
+	$parent configure -bg $widget(active)
 	update idletasks; after 80
 	set fileName $priv(win2file,$w)
     }    
@@ -435,11 +472,13 @@ proc ::AvatarMB::MenuPickRecent {w} {
 	# Share & Set only if not identical to existing one.
 	if {![::Avatar::IsMyPhotoFromFile $fileName]} {
 	    ::Avatar::SetAndShareMyAvatarFromFile $fileName
+	    ::Avatar::SetShareOption 1
 	}
     }
 }
 
 proc ::AvatarMB::MenuNew {} {
+    global  prefs
     
     set suffs {.gif}
     set types {
@@ -455,9 +494,14 @@ proc ::AvatarMB::MenuNew {} {
 	lappend types {{JPEG Image}    {.jpg .jpeg}}
     }
     lset types 0 1 $suffs
-    set fileName [tk_getOpenFile -title [mc {Pick Image File}]  \
-      -filetypes $types]
+    set opts {}
+    if {[file isdirectory prefs(dir,avatarPick)]} {
+	lappend opts $prefs(dir,avatarPick)
+    }
+    set fileName [eval {tk_getOpenFile -title [mc {Pick Image File}]  \
+      -filetypes $types} $opts]
     if {$fileName ne ""} {
+	set prefs(dir,avatarPick) [file dirname $fileName]
 	if {[::Avatar::SetAndShareMyAvatarFromFile $fileName]} {
 	    ::Avatar::AddRecentFile $fileName
 	}
@@ -472,6 +516,7 @@ proc ::AvatarMB::MenuClear {} {
 proc ::AvatarMB::MenuRemove {} {
     ::Avatar::UnsetMyPhotoAndFile
     ::Avatar::UnshareImage
+    ::Avatar::SetShareOption 0
 }
 
 proc ::AvatarMB::OnButtonRelease {m x y} {
