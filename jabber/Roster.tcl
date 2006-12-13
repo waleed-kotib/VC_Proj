@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.181 2006-12-04 12:55:23 matben Exp $
+# $Id: Roster.tcl,v 1.182 2006-12-13 15:14:27 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -1340,6 +1340,21 @@ proc ::Roster::RemoveUsers {jidlist} {
     }
 }
 
+proc ::Roster::SaveRosterToFile {fileName} {    
+    upvar ::Jabber::jstate jstate
+    
+    set jlib $jstate(jlib)
+    set fd [open $fileName w]
+    fconfigure $fd -encoding utf-8
+
+    foreach jid [$jlib roster getusers] {
+    
+	puts $fd
+	
+    }
+    close $fd
+}
+
 # Prefs page ...................................................................
 
 proc ::Roster::InitPrefsHook { } {
@@ -1409,9 +1424,6 @@ proc ::Roster::BuildPageRoster {page} {
     ttk::checkbutton $wc.hidetrpt -text [mc prefrohidetrpt] \
       -variable [namespace current]::tmpJPrefs(rost,showTrpts) \
       -onvalue 0 -offvalue 1
-    
-    # My avatar.
-    ::Avatar::PrefsFrame $wc.ava
 
     grid  $wc.rmifunsub  -sticky w
     grid  $wc.allsubno   -sticky w
@@ -1421,7 +1433,10 @@ proc ::Roster::BuildPageRoster {page} {
     grid  $wc.rmifunsub  -sticky w
     grid  $wc.hidetrpt   -sticky w
     
-    grid  $wc.ava        -sticky ew -pady 4
+    # My avatar. OUTDATED!
+    #::Avatar::PrefsFrame $wc.ava
+    
+    #grid  $wc.ava        -sticky ew -pady 4
     
 }
 
@@ -1429,7 +1444,7 @@ proc ::Roster::SavePrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
-    ::Avatar::PrefsSave
+    #::Avatar::PrefsSave
     
     # Need to repopulate the roster?
     if {$jprefs(rost,showOffline) != $tmpJPrefs(rost,showOffline)} {
@@ -1451,7 +1466,7 @@ proc ::Roster::CancelPrefsHook { } {
 	}
     }
     
-    ::Avatar::PrefsCancel
+    #::Avatar::PrefsCancel
 }
 
 proc ::Roster::UserDefaultsHook { } {

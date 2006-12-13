@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.49 2006-12-12 15:18:00 matben Exp $
+# $Id: VCard.tcl,v 1.50 2006-12-13 15:14:28 matben Exp $
 
 package provide VCard 1.0
 
@@ -563,31 +563,26 @@ proc ::VCard::SelectPhoto {etoken} {
     lset types 0 1 $suffs
     set fileName [tk_getOpenFile -title [mc {Pick Image File}] \
       -filetypes $types]
-    if {$fileName eq ""} {
-	return
+    if {[file exists $fileName]} {
+	SetPhotoFile $etoken $fileName   
     }
-
-    SetPhotoFile $etoken $fileName   
 }
 
 proc ::VCard::SetPhotoFile {etoken fileName} {
     
     upvar $etoken elem
     
-    if {[catch {image create photo -file $fileName} name]} {
-	::UI::MessageBox -icon error \
-	  -message "Error creating image from file $fileName"
-	return
+    if {[::Avatar::CreateAndVerifyPhoto $fileName name]} {
+	::Avatar::WidgetSetPhoto $elem(w,frphoto) $name
+	set elem(w,photoFile) $fileName
+	
+	# Store as element if we want to send it off.
+	set fd [open $fileName {RDONLY}]
+	fconfigure $fd -translation binary
+	set elem(photo_binval) [::base64::encode [read $fd]]
+	set elem(photo_type)   [Types::GetMimeTypeForFileName $fileName]
+	close $fd
     }
-    ::Avatar::WidgetSetPhoto $elem(w,frphoto) $name
-    set elem(w,photoFile) $fileName
-        
-    # Store as element if we want to send it off.
-    set fd [open $fileName {RDONLY}]
-    fconfigure $fd -translation binary
-    set elem(photo_binval) [::base64::encode [read $fd]]
-    set elem(photo_type)   [Types::GetMimeTypeForFileName $fileName]
-    close $fd
 }
 
 proc ::VCard::DeletePhoto {etoken} {
@@ -646,18 +641,14 @@ proc ::VCard::SyncAvatar {token} {
     # @@@ Update presence hashes only if changed photo. TODO check.
     if {[info exists elem(photo_binval)]} {
 	::Jabber::JlibCmd avatar set_data $elem(photo_binval) $elem(photo_type)
-	::Avatar::SetMyAvatarFromBase64 $elem(photo_binval) $elem(photo_type)
 	::Avatar::SetShareOption 1
+	::Avatar::SetMyAvatarFromBase64 $elem(photo_binval) $elem(photo_type)
 
 	# Need to do this ourselves.
 	::Jabber::JlibCmd send_presence -keep 1
     } else {
 	::Jabber::JlibCmd avatar unset_data
-	::Avatar::UnsetMyPhotoAndFile
-	
-	# UnshareImage sends presence with empty hashes.
-	::Avatar::UnshareImage
-	::Avatar::SetShareOption 0
+	::Avatar::UnsetAndUnshareMyAvatar
     }
 }
 

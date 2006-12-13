@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.22 2006-12-01 08:55:14 matben Exp $
+# $Id: bytestreams.tcl,v 1.23 2006-12-13 15:14:28 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -107,9 +107,7 @@ namespace eval jlib::bytestreams {
   
 proc jlib::bytestreams::init {jlibname args} {
     variable xmlns
-    
-    Debug 4 "jlib::bytestreams::init"
-    
+        
     # Keep different state arrays for initiator (i) and receiver (t).
     namespace eval ${jlibname}::bytestreams {
 	variable istate

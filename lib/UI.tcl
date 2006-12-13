@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.138 2006-12-12 15:18:00 matben Exp $
+# $Id: UI.tcl,v 1.139 2006-12-13 15:14:28 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1456,10 +1456,7 @@ proc ::UI::PruneMenusFromConfig {name menuDefVar} {
     global  config
     upvar $menuDefVar menuDef
     
-    array set pruneArr $config(ui,pruneMenus)
-    
-    ::Debug 4 "::UI::PruneMenusFromConfig name=$name, prune=[array get pruneArr]"
-    
+    array set pruneArr $config(ui,pruneMenus)    
     if {[info exists pruneArr($name)]} {
     
 	# Take each in turn and find any matching index.

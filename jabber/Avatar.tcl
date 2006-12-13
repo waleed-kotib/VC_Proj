@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.28 2006-12-12 15:17:59 matben Exp $
+# $Id: Avatar.tcl,v 1.29 2006-12-13 15:14:27 matben Exp $
 
 # @@@ Issues:
 # 
@@ -195,85 +195,19 @@ proc ::Avatar::QuitHook { } {
     WriteHashmap $aprefs(hashmapFile)
 }
 
-# Avatar::Widget --
-# 
-#       Display only avatar widget.
-
-proc ::Avatar::Widget {w} {
-    
-    # @@@ An alternative is to have a blank image as a spacer.
-    frame $w
-    
-    # Bug in 8.4.1 but ok in 8.4.9
-    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
-	label $w.l -relief sunken -bd 1 -bg white
-    } else {
-	ttk::label $w.l -style Sunken.TLabel -compound image
-    }
-    grid  $w.l  -sticky news
-    grid columnconfigure $w 0 -minsize [expr {2*4 + 2*4 + 64}]
-    grid rowconfigure    $w 0 -minsize [expr {2*4 + 2*4 + 64}]
-     
-    return $w
-}
-
-proc ::Avatar::WidgetSetPhoto {w image {size 64}} {
-    
-    if {$image ne ""} {
-	set W [image width $image]
-	set H [image height $image]
-	set max [expr {$W > $H ? $W : $H}]
-	if {$max > $size} {
-	    lassign [GetScaleMN $max $size] M N	
-	    set display [ScalePhotoM->N $image $M $N]
-	    bind $w <Destroy> +[list image delete $display]
-	} else {
-	    set display $image
-	}
-	$w.l configure -image $display
-    } else {
-	$w.l configure -image ""
-    }
-    if {$image ne "" && $max > $size} {
-	bind $w <Enter> [list [namespace code WidgetBalloon] 1 $w $image]
-	bind $w <Leave> [list [namespace code WidgetBalloon] 0 $w $image]
-    } else {
-	bind $w <Enter> {}
-	bind $w <Leave> {}
-    }
-}
-
-proc ::Avatar::WidgetBalloon {show w image} {
-    
-    set win $w.ball
-    if {![winfo exists $win]} {
-	toplevel $win -bd 0 -relief flat
-	wm overrideredirect $win 1
-	wm transient $win
-	wm withdraw  $win
-	wm resizable $win 0 0 
-	
-	if {[tk windowingsystem] eq "aqua"} {
-	    tk::unsupported::MacWindowStyle style $win help none
-	}
-	pack [label $win.l -bd 0 -bg white -compound none -image $image]
-    }
-    if {$show} {
-	set x [expr {[winfo rootx $w] + 10}]
-	set y [expr {[winfo rooty $w] + [winfo height $w]}]
-	wm geometry $win +${x}+${y}
-	wm deiconify $win
-    } else {
-	wm withdraw $win
-    }
-}
-
 #--- First section deals with our own avatar -----------------------------------
 #
 # There are three parts to it:
 #   1) the actual photo
 #   2) and the corresponding file
 #   3) share or not share option
+#   
+#   o 1 & 2 must be synced together
+#   o if share then photo and file must be there
+
+# Avatar::SetAndShareMyAvatarFromFile, UnsetAndUnshareMyAvatar --
+# 
+#       Mega functions to handle everything when setting and sharing own avatar.
 
 proc ::Avatar::SetAndShareMyAvatarFromFile {fileName} {
     
@@ -283,6 +217,7 @@ proc ::Avatar::SetAndShareMyAvatarFromFile {fileName} {
     if {[CreateAndVerifyPhoto $fileName name]} {
 	SetMyPhoto $name
 	SaveMyImageFile $fileName
+	SetShareOption 1
 	ShareImage $fileName
 	image delete $name
 	set ok 1
@@ -290,6 +225,15 @@ proc ::Avatar::SetAndShareMyAvatarFromFile {fileName} {
 	::hooks::run avatarMyNewPhotoHook
     }
     return $ok
+}
+
+proc ::Avatar::UnsetAndUnshareMyAvatar { } {
+
+    ::Avatar::UnsetMyPhotoAndFile
+    ::Avatar::UnshareImage
+    ::Avatar::SetShareOption 0  
+    
+    ::hooks::run avatarMyNewPhotoHook
 }
 
 proc ::Avatar::SetMyAvatarFromBase64 {data mime} {
@@ -418,6 +362,11 @@ proc ::Avatar::IsMyPhotoFromFile {fileName} {
     return [expr {$myphoto(hash) eq [GetHashForFile $fileName]}]
 }
 
+proc ::Avatar::IsMyPhotoSharedFromFile {fileName} {
+    variable aprefs
+    return [expr {$aprefs(share) && [IsMyPhotoFromFile $fileName]}]
+}
+
 proc ::Avatar::GetMyPhotoHash { } {
     variable myphoto
 
@@ -443,8 +392,6 @@ proc ::Avatar::UnsetMyPhotoAndFile { } {
     foreach f [glob -nocomplain -directory $dir *] {
 	file delete $f
     }
-    
-    ::hooks::run avatarMyNewPhotoHook
 }
 
 # Avatar::SetShareOption --
@@ -452,14 +399,12 @@ proc ::Avatar::UnsetMyPhotoAndFile { } {
 #       Just sets the share option. Necessary to sync vCard photo.
 
 proc ::Avatar::SetShareOption {bool} {
-    variable aprefs
-    
+    variable aprefs    
     set aprefs(share) $bool
 }
 
 proc ::Avatar::GetShareOption { } {
     variable aprefs
-    
     return $aprefs(share)
 }
 
@@ -518,7 +463,7 @@ proc ::Avatar::GetMyAvatarFile { } {
 proc ::Avatar::ShareImage {fileName} {
     upvar ::Jabber::jstate jstate
     
-    Debug "::Avatar::ShareImage"
+    Debug "::Avatar::ShareImage --->"
     
     # @@@ We could try to be economical by not storing the same image twice.
 
@@ -560,7 +505,7 @@ proc ::Avatar::ShareImage {fileName} {
 proc ::Avatar::UnshareImage { } {
     upvar ::Jabber::jstate jstate
     
-    Debug "::Avatar::UnshareImage"
+    Debug "::Avatar::UnshareImage --->"
     
     set jlib $jstate(jlib)
     $jlib avatar unset_data
@@ -616,18 +561,14 @@ proc ::Avatar::AddRecentFile {fileName} {
     global  this
     variable aprefs
     
-    puts "::Avatar::AddRecentFile fileName=$fileName"
-    
     set hash [GetHashForFile $fileName]
     set newTail $hash[file extension $fileName]
-    puts "newTail=$newTail"
     
     set recentL [GetRecentFiles]
     set idx [lsearch $recentL $newTail]
 
     # If it is already there then just reorder the recent list.
     if {$idx >= 0} {
-	puts "\t already there"
 	set recentL [lreplace $recentL $idx $idx]
 	set recentL [linsert $recentL 0 $newTail]
     } else {
@@ -1493,6 +1434,81 @@ proc ::Avatar::ReadHashmap {fileName} {
     }
 }
 
+#-------------------------------------------------------------------------------
+
+# Avatar::Widget --
+# 
+#       Display only avatar widget. Allows any size avatar.
+
+proc ::Avatar::Widget {w} {
+    
+    # @@@ An alternative is to have a blank image as a spacer.
+    frame $w
+    
+    # Bug in 8.4.1 but ok in 8.4.9
+    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
+	label $w.l -relief sunken -bd 1 -bg white
+    } else {
+	ttk::label $w.l -style Sunken.TLabel -compound image
+    }
+    grid  $w.l  -sticky news
+    grid columnconfigure $w 0 -minsize [expr {2*4 + 2*4 + 64}]
+    grid rowconfigure    $w 0 -minsize [expr {2*4 + 2*4 + 64}]
+     
+    return $w
+}
+
+proc ::Avatar::WidgetSetPhoto {w image {size 64}} {
+    
+    if {$image ne ""} {
+	set W [image width $image]
+	set H [image height $image]
+	set max [expr {$W > $H ? $W : $H}]
+	if {$max > $size} {
+	    lassign [GetScaleMN $max $size] M N	
+	    set display [ScalePhotoM->N $image $M $N]
+	    bind $w <Destroy> +[list image delete $display]
+	} else {
+	    set display $image
+	}
+	$w.l configure -image $display
+    } else {
+	$w.l configure -image ""
+    }
+    if {$image ne "" && $max > $size} {
+	bind $w <Enter> [list [namespace code WidgetBalloon] 1 $w $image]
+	bind $w <Leave> [list [namespace code WidgetBalloon] 0 $w $image]
+    } else {
+	bind $w <Enter> {}
+	bind $w <Leave> {}
+    }
+}
+
+proc ::Avatar::WidgetBalloon {show w image} {
+    
+    set win $w.ball
+    if {![winfo exists $win]} {
+	toplevel $win -bd 0 -relief flat
+	wm overrideredirect $win 1
+	wm transient $win
+	wm withdraw  $win
+	wm resizable $win 0 0 
+	
+	if {[tk windowingsystem] eq "aqua"} {
+	    tk::unsupported::MacWindowStyle style $win help none
+	}
+	pack [label $win.l -bd 0 -bg white -compound none -image $image]
+    }
+    if {$show} {
+	set x [expr {[winfo rootx $w] + 10}]
+	set y [expr {[winfo rooty $w] + [winfo height $w]}]
+	wm geometry $win +${x}+${y}
+	wm deiconify $win
+    } else {
+	wm withdraw $win
+    }
+}
+
 #--- Preference UI -------------------------------------------------------------
 
 proc ::Avatar::PrefsFrame {win} {
@@ -1662,10 +1678,12 @@ proc ::Avatar::PrefsSave { } {
 	    } else {
 		UnshareImage
 	    }
+	    ::hooks::run avatarMyNewPhotoHook
 	}
     } else {
 	if {$editedShare} {
 	    UnshareImage	
+	    ::hooks::run avatarMyNewPhotoHook
 	}
     }
 }

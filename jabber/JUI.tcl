@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.145 2006-12-12 15:17:59 matben Exp $
+# $Id: JUI.tcl,v 1.146 2006-12-13 15:14:27 matben Exp $
 
 package require AvatarMB
 
@@ -381,7 +381,7 @@ proc ::JUI::Build {w} {
     wm geometry $w ${minW}x360
     ::UI::SetWindowGeometry $w
     wm minsize $w $minW 300
-    wm maxsize $w 480 2000
+    wm maxsize $w 800 2000
     
     ::hooks::run jabberBuildMain
     
