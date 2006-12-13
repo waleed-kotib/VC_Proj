@@ -5,14 +5,16 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.7 2006-12-12 15:17:59 matben Exp $
+# $Id: AvatarMB.tcl,v 1.8 2006-12-13 15:14:27 matben Exp $
 
 package require colorutils
 
 package provide AvatarMB 1.0
 
 namespace eval ::AvatarMB {
-    
+
+    ::hooks::register  prefsInitHook   ::AvatarMB::InitPrefsHook
+
     # Static variables.
     variable widget
     
@@ -30,8 +32,9 @@ namespace eval ::AvatarMB {
     set widget(background)  white
     set widget(buttonsize)  24
     set widget(menusize)    32
+    set widget(menuboxsize) 4
 
-    # Try make a fake menu entry widget.
+    # Try make a fake menu (FMenu) entry widget.
     set blue ::AvatarMB::blue
     image create photo $blue -width 2 -height 2
     $blue blank
@@ -73,17 +76,11 @@ namespace eval ::AvatarMB {
       -padding {18 2 10 2} -borderwidth 0 -relief flat
     style map FMenu -foreground [array get foreground]
     
-    #bind FMenu <Enter>		{ %W state active; puts Enter }
-    #bind FMenu <Leave>		{ %W state !active; puts Leave }
-    #bind FMenu <B1-Enter>	{ %W state active }
-    #bind FMenu <B1-Leave>	{ %W state !active }
-
     bind AvatarMBMenu <FocusIn> {}
     bind AvatarMBMenu <Destroy> {+::AvatarMB::MenuFree %W}
-
 }
 
-proc ::Avatar::InitPrefsHook { } {
+proc ::AvatarMB::InitPrefsHook { } {
     global  prefs
     
     set prefs(dir,avatarPick) ""
@@ -121,11 +118,18 @@ proc ::AvatarMB::Button {mb args} {
 	bind $mb <Leave>            { %W state !active }
 	bind $mb <Key-space>        { %W instate !disabled {::AvatarMB::Popdown %W } }
 	bind $mb <<Invoke>>         { %W instate !disabled {::AvatarMB::Popdown %W } }
-	bind $mb <ButtonPress-1>    { %W instate !disabled {%W state pressed ; ::AvatarMB::Popdown %W } }
-	bind $mb <ButtonRelease-1>  { %W state !pressed ; puts ButtonRelease }
+
+	if {[tk windowingsystem] eq "x11"} {
+	    
+	} else {
+	    bind $mb <ButtonPress-1>    { 
+		%W instate !disabled {%W state pressed ; ::AvatarMB::Popdown %W } 
+	    }
+	    bind $mb <ButtonRelease-1>  { %W state !pressed ; puts ButtonRelease }
 	
-	bind $mb <Button1-Leave>    { %W state !pressed }
-	bind $mb <Button1-Enter>    { %W instate {active !disabled} { %W state pressed } }
+	    bind $mb <B1-Leave>         { %W state !pressed ; puts "B1-Leave" }
+	    bind $mb <B1-Enter>         { %W instate {active !disabled} { %W state pressed } }
+	}
     } else {
 	# @@@ TODO
 	bind $mb <Key-space>        { ::AvatarMB::Popdown %W }
@@ -134,7 +138,7 @@ proc ::AvatarMB::Button {mb args} {
     }
     bind $mb <Destroy> { ::AvatarMB::ButtonFree %W }
     
-    ::hooks::register avatarMyNewPhotoHook [list ::AvatarMB::NewPhotoHook $mb]
+    ::hooks::register avatarMyNewPhotoHook [list ::AvatarMB::MyNewPhotoHook $mb]
     
     return $mb
 }
@@ -143,7 +147,7 @@ proc ::AvatarMB::ButtonFree {mb} {
     variable $mb
     upvar 0 $mb state
     
-    hooks::deregister avatarMyNewPhotoHook [list ::AvatarMB::NewPhotoHook $mb]
+    hooks::deregister avatarMyNewPhotoHook [list ::AvatarMB::MyNewPhotoHook $mb]
     
     image delete $state(blank)
     if {$state(photo) ne ""} {
@@ -152,17 +156,18 @@ proc ::AvatarMB::ButtonFree {mb} {
     unset -nocomplain state
 }
 
-proc ::AvatarMB::NewPhotoHook {mb} {
+proc ::AvatarMB::MyNewPhotoHook {mb} {
     variable $mb
     upvar 0 $mb state
     
-    puts "::AvatarMB::NewPhotoHook mb=$mb"
+    puts "::AvatarMB::MyNewPhotoHook mb=$mb"
     
     if {$state(photo) ne ""} {
 	image delete $state(photo)	
     }
     set myphoto [::Avatar::GetMyPhoto]
-    if {$myphoto ne ""} {
+    puts "\t myphoto=$myphoto, GetShareOption=[::Avatar::GetShareOption]"
+    if {($myphoto ne "") && [::Avatar::GetShareOption]} {
 	set state(photo) [::Avatar::CreateScaledPhoto $myphoto 24]
 	$mb configure -image $state(photo)
     } else {
@@ -184,7 +189,10 @@ proc ::AvatarMB::PostMenu {mb} {
     Menu $menu
     wm withdraw $menu
     update idletasks
-    foreach {x y} [PostPosition $mb below] { break }
+    
+    # PositionAlign sould perhaps be an option.
+    foreach {x y} [PostPosition $mb above] { break }
+    foreach {x y} [PositionAlign $mb right $x $y] { break }
     foreach {x y} [PositionOnScreen $mb $x $y] { break }
     wm geometry $menu +$x+$y
     wm deiconify $menu
@@ -220,6 +228,28 @@ proc ::AvatarMB::PostPosition {mb dir} {
     return [list $x $y]
 }
 
+proc ::AvatarMB::PositionAlign {mb side x y} {
+    set margin 8
+    set menu $mb.menu
+    set top [winfo toplevel $mb]
+
+    set tx [winfo rootx $top]
+    set ty [winfo rooty $top]
+    set tw [winfo width $top]
+    set th [winfo height $top]
+    set mw [winfo reqwidth $menu]
+    set mh [winfo reqheight $menu]
+    
+    switch -- $side {
+	left   { set x [expr {$tx + $margin}] }
+	right  { set x [expr {$tx + $tw - $mw - $margin}] }
+	top    { set y [expr {$ty + $margin}] }
+	bottom { set y [expr {$ty + $th - $mh - $margin}] }
+    }
+    
+    return [list $x $y]
+}
+
 proc ::AvatarMB::PositionOnScreen {mb x y} {
     set margin 8
     set menu $mb.menu
@@ -235,28 +265,6 @@ proc ::AvatarMB::PositionOnScreen {mb x y} {
     if {$y < $margin} {	set y $margin }
     if {$y2 > [expr {$sh - $margin}]} { set y [expr {$sh - $mh - $margin}] }
 
-    return [list $x $y]
-}
-
-proc ::AvatarMB::PositionAlign {mb side x y} {
-    set margin 8
-    set menu $mb.menu
-    set top [winfo toplevel $mb]
-
-    set tx [winfo rootx $top]
-    set ty [winfo rooty $top]
-    set mw [winfo reqwidth $menu]
-    set mh [winfo reqheight $menu]
-    set tw [winfo reqwidth $top]
-    set th [winfo reqheight $top]
-    
-    switch -- $side {
-	left   { set x [expr {$tx + $margin}] }
-	right  { set x [expr {$tx + }] }
-	top    {  }
-	bottom {  }
-    }
-    
     return [list $x $y]
 }
 
@@ -352,7 +360,7 @@ proc ::AvatarMB::Menu {m args} {
 
 proc ::AvatarMB::MenuFree {m} {
     variable priv
-    puts "::AvatarMB::MenuFree $m"
+    #puts "::AvatarMB::MenuFree $m"
     
     array unset priv win2file,*
     eval {image delete} $priv(images)
@@ -362,7 +370,7 @@ proc ::AvatarMB::MenuFree {m} {
 # Generic FMenu code.
 
 proc ::AvatarMB::BindFMenu {w} {
-    bind $w <Enter>           { %W state active ; puts "m=%m s=%s" }
+    bind $w <Enter>           { %W state active }
     bind $w <Leave>           { %W state !active }
     bind $w <B1-Enter>        { %W state pressed; %W state active }
     bind $w <B1-Leave>        { %W state !pressed; %W state !active }
@@ -427,7 +435,6 @@ proc ::AvatarMB::MenuUnpost {m} {
     destroy $m
 }
 
-
 proc ::AvatarMB::FillInRecent {box} {
     global  this
     variable priv
@@ -478,21 +485,15 @@ proc ::AvatarMB::MenuPickRecent {w} {
 
     # Invoke the "command".
     if {[info exists fileName]} {
-	::Avatar::SetShareOption 1
-	
-	# Always put as most recent.
-	::Avatar::AddRecentFile $fileName
-	
-	# Share & Set only if not identical to existing one.
-	if {![::Avatar::IsMyPhotoFromFile $fileName]} {
-	    ::Avatar::SetAndShareMyAvatarFromFile $fileName
-	}
+	SetFileToShare $fileName
     }
 }
 
 proc ::AvatarMB::MenuNew {} {
     global  prefs
     
+    puts "::AvatarMB::MenuNew"
+
     set suffs {.gif}
     set types {
 	{{Image Files}  {.gif}}
@@ -508,15 +509,33 @@ proc ::AvatarMB::MenuNew {} {
     }
     lset types 0 1 $suffs
     set opts {}
-    if {[file isdirectory prefs(dir,avatarPick)]} {
-	lappend opts $prefs(dir,avatarPick)
+    if {[file isdirectory $prefs(dir,avatarPick)]} {
+	lappend opts -initialdir $prefs(dir,avatarPick)
     }
     set fileName [eval {tk_getOpenFile -title [mc {Pick Image File}]  \
       -filetypes $types} $opts]
-    if {$fileName ne ""} {
+    if {[file exists $fileName]} {
 	set prefs(dir,avatarPick) [file dirname $fileName]
+	SetFileToShare $fileName
+
+    }
+}
+
+proc ::AvatarMB::SetFileToShare {fileName} {
+    puts "::AvatarMB::SetFileToShare"
+    
+    # Share only if not identical to existing one.
+    if {[::Avatar::IsMyPhotoSharedFromFile $fileName]} {
+	puts "\t IsMyPhotoSharedFromFile=1"
+	::Avatar::SetShareOption 1
+	::Avatar::AddRecentFile $fileName
+    } else {
+	puts "\t IsMyPhotoSharedFromFile=0"
 	if {[::Avatar::SetAndShareMyAvatarFromFile $fileName]} {
+	    puts "\t ::Avatar::SetAndShareMyAvatarFromFile=1"
 	    ::Avatar::AddRecentFile $fileName
+	} else {
+	    puts "\t ::Avatar::SetAndShareMyAvatarFromFile=0"	    
 	}
     }
 }
@@ -527,9 +546,7 @@ proc ::AvatarMB::MenuClear {} {
 }
 
 proc ::AvatarMB::MenuRemove {} {
-    ::Avatar::UnsetMyPhotoAndFile
-    ::Avatar::UnshareImage
-    ::Avatar::SetShareOption 0
+    ::Avatar::UnsetAndUnshareMyAvatar
 }
 
 proc ::AvatarMB::OnButtonRelease {m x y} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2006  Mats Bengtsson
 #
-# $Id: PrefUtils.tcl,v 1.7 2006-11-08 07:44:38 matben Exp $
+# $Id: PrefUtils.tcl,v 1.8 2006-12-13 15:14:28 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -236,7 +236,7 @@ proc ::PrefUtils::SaveToFile { } {
 proc ::PrefUtils::PutsItem {item fid ignoreDefault} {
     
     lassign $item varName resName defVal
-    
+        
     # All names must be fully qualified. Therefore #0.
     upvar #0 $varName var
     
