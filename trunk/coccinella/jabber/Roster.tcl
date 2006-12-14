@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.182 2006-12-13 15:14:27 matben Exp $
+# $Id: Roster.tcl,v 1.183 2006-12-14 15:34:05 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -1340,6 +1340,13 @@ proc ::Roster::RemoveUsers {jidlist} {
     }
 }
 
+proc ::Roster::ExportRoster {} {
+    set fileName [tk_getSaveFile -defaultextension .xml -initialfile roster.xml]
+    if {[file exists $fileName]} {
+	SaveRosterToFile $fileName
+    }
+}
+
 proc ::Roster::SaveRosterToFile {fileName} {    
     upvar ::Jabber::jstate jstate
     
@@ -1347,11 +1354,14 @@ proc ::Roster::SaveRosterToFile {fileName} {
     set fd [open $fileName w]
     fconfigure $fd -encoding utf-8
 
+    puts $fd "<?xml version='1.0' encoding='UTF-8'?>"
+    puts $fd "<query xmlns='jabber:iq:roster'>"
     foreach jid [$jlib roster getusers] {
-    
-	puts $fd
-	
+	set item [$jlib roster getitem $jid]
+	set xml [wrapper::createxml $item]
+	puts $fd \t$xml
     }
+    puts $fd "</query>"
     close $fd
 }
 

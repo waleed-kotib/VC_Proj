@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.147 2006-12-14 14:09:36 matben Exp $
+# $Id: JUI.tcl,v 1.148 2006-12-14 15:34:05 matben Exp $
 
 package require AvatarMB
 
@@ -108,6 +108,10 @@ proc ::JUI::Init { } {
 	    {command   mNewWhiteboard      {::JWB::OnMenuNewWhiteboard}  N}
 	    {command   mCloseWindow        {::UI::CloseWindowEvent}  W}
 	    {command   mPreferences...     {::Preferences::Build}     {}}
+	    {separator}
+	    {cascade   mExport             {}                         {} {} {
+		{command  mRoster          {::Roster::ExportRoster}   {}}
+	    }}
 	    {separator}
 	    {command   mQuit               {::UserActions::DoQuit}    Q}
 	}
