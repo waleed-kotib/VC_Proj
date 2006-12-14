@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.146 2006-12-13 15:14:27 matben Exp $
+# $Id: JUI.tcl,v 1.147 2006-12-14 14:09:36 matben Exp $
 
 package require AvatarMB
 
@@ -16,6 +16,7 @@ namespace eval ::JUI:: {
     
     # Add all event hooks.
     ::hooks::register quitAppHook            ::JUI::QuitHook
+    ::hooks::register loginHook              ::JUI::LoginHook
     ::hooks::register logoutHook             ::JUI::LogoutHook
     ::hooks::register setPresenceHook        ::JUI::SetPresenceHook
     ::hooks::register rosterIconsChangedHook ::JUI::RosterIconsChangedHook
@@ -308,8 +309,6 @@ proc ::JUI::Build {w} {
     set wtbar $wall.tbar
     BuildToolbar $w $wtbar
     pack $wtbar -side top -fill x
-    
-    set trayMinW [$wtbar minwidth]
 
     # The top separator shall only be mapped between the toolbar and the notebook.
     ttk::separator $wall.sep -orient horizontal
@@ -377,7 +376,9 @@ proc ::JUI::Build {w} {
     set jwapp(myjid)     $wfstat.me
     set jwapp(statcont)  $wstatcont
     
-    set minW [expr $trayMinW > 200 ? $trayMinW : 200]
+    # Add an extra margin for Login/Logout string lengths.
+    set trayMinW [expr {[$wtbar minwidth] + 12}]
+    set minW [expr {$trayMinW > 200 ? $trayMinW : 200}]
     wm geometry $w ${minW}x360
     ::UI::SetWindowGeometry $w
     wm minsize $w $minW 300
@@ -698,6 +699,16 @@ proc ::JUI::RosterSelectionHook { } {
 	}
     }
     $wtbar buttonconfigure chat -state $state    
+}
+
+proc ::JUI::LoginHook { } {
+    variable jwapp
+    
+    # The Login/Logout button strings may have different widths.
+    set w $jwapp(w)
+    set minwidth [$jwapp(wtbar) minwidth]
+    set minW [expr $minwidth > 200 ? $minwidth : 200]
+    wm minsize $w $minW 300    
 }
 
 proc ::JUI::LogoutHook { } {
