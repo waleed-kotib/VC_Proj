@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.50 2006-09-21 12:23:57 matben Exp $
+# $Id: roster.tcl,v 1.51 2006-12-14 15:34:05 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -253,7 +253,9 @@ proc jlib::roster::set_handler {jlibname from queryE args} {
 }
 
 proc jlib::roster::handle_roster {jlibname queryE} {
-    
+
+    upvar ${jlibname}::roster::itemA itemA
+
     foreach itemE [wrapper::getchildren $queryE] {	
 	if {[wrapper::gettag $itemE] ne "item"} {
 	    continue
@@ -274,9 +276,12 @@ proc jlib::roster::handle_roster {jlibname queryE} {
 	if {!$havejid} {
 	    continue
 	}
+	set mjid [jlib::jidmap $jid]
 	if {$subscription eq "remove"} {
+	    unset -nocomplain itemA($mjid)
 	    removeitem $jlibname $jid
 	} else {
+	    set itemA($mjid) $itemE
 	    set groups {}
 	    foreach groupE [wrapper::getchildswithtag $itemE group] {
 		lappend groups [wrapper::getcdata $groupE]
@@ -475,6 +480,7 @@ proc jlib::roster::ClearRoster {jlibname} {
 
     variable rostGlobals
     upvar ${jlibname}::roster::rostA rostA
+    upvar ${jlibname}::roster::itemA itemA
     upvar ${jlibname}::roster::options options
     
     Debug 2 "roster::ClearRoster"
@@ -486,6 +492,7 @@ proc jlib::roster::ClearRoster {jlibname} {
 	}
     }
     array unset rostA *,item
+    unset -nocomplain itemA
     
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
@@ -694,6 +701,18 @@ proc jlib::roster::getrosteritem {jlibname jid} {
 	}
     }
     return $result
+}
+
+proc jlib::roster::getitem {jlibname jid} {
+ 
+    upvar ${jlibname}::roster::itemA itemA
+
+    set mjid [jlib::jidmap $jid]
+    if {[info exists itemA($mjid)]} {
+	return $itemA($mjid)
+    } else {
+	return {}
+    }
 }
 
 # jlib::roster::isitem --

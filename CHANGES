@@ -11,6 +11,7 @@ Coccinella-0.95.16 (200701??):
  o new basic dialogs on unix
  o new avatar settings button and menu
  o configurable JID or status entry in main window
+ o added file/export/roster menu command
 
 Coccinella-0.95.15 (20061117):
 
