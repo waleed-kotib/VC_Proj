@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.8 2006-12-13 15:14:27 matben Exp $
+# $Id: AvatarMB.tcl,v 1.9 2006-12-14 14:09:36 matben Exp $
+# 
+# @@@ TODO: Get options from option database instead
 
 package require colorutils
 
@@ -20,9 +22,9 @@ namespace eval ::AvatarMB {
     
     set active "#3874d1"
     set border "#cccccc"
-    set background [style configure . -background]
-    if {$background ne ""} {
-	set border [::colorutils::getdarker $background]
+    set bg [style configure . -background]
+    if {$bg ne ""} {
+	set border [::colorutils::getdarker $bg]
     }
     set lightactive [::colorutils::getlighter $active]
     
@@ -32,7 +34,10 @@ namespace eval ::AvatarMB {
     set widget(background)  white
     set widget(buttonsize)  24
     set widget(menusize)    32
-    set widget(menuboxsize) 4
+    set widget(nboxside)    4
+    
+    variable state
+    set state(pulldown) 0
 
     # Try make a fake menu (FMenu) entry widget.
     set blue ::AvatarMB::blue
@@ -89,8 +94,8 @@ proc ::AvatarMB::InitPrefsHook { } {
 }
 
 proc ::AvatarMB::Button {mb args} {
-    variable $mb
-    upvar 0 $mb state
+    variable widget
+    variable state
     
     # Bug in 8.4.1 but ok in 8.4.9
     if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
@@ -98,45 +103,52 @@ proc ::AvatarMB::Button {mb args} {
     } else {
 	ttk::label $mb -style SunkenMenubutton -compound image
     }
+    
+    set size $widget(buttonsize)
     set myphoto [::Avatar::GetMyPhoto]
     if {($myphoto ne "") && [::Avatar::GetShareOption]} {
-	set state(photo) [::Avatar::CreateScaledPhoto $myphoto 24]
+	set photo [::Avatar::CreateScaledPhoto $myphoto $size]
     } else {
-	set state(photo) ""
+	set photo ""
     }
     
     # Use a blank photo to give the button a consistent size.
-    set state(blank) [image create photo -width 24 -height 24]
-    $state(blank) blank    
-    if {$state(photo) ne ""} {
-	$mb configure -image $state(photo)
+    if {![info exists state(blank)]} {
+	set state(blank) [image create photo -width $size -height $size]
+    }
+    if {$photo ne ""} {
+	$mb configure -image $photo
     } else {
 	$mb configure -image $state(blank)
     }
     if {[winfo class $mb] eq "TLabel"} {
-	bind $mb <Enter>            { %W state active }
-	bind $mb <Leave>            { %W state !active }
-	bind $mb <Key-space>        { %W instate !disabled {::AvatarMB::Popdown %W } }
-	bind $mb <<Invoke>>         { %W instate !disabled {::AvatarMB::Popdown %W } }
+	bind $mb <Enter>      { %W state active }
+	bind $mb <Leave>      { %W state !active }
+	bind $mb <Key-space>  { %W instate !disabled { AvatarMB::Popdown %W } }
+	bind $mb <<Invoke>>   { %W instate !disabled { AvatarMB::Popdown %W } }
 
 	if {[tk windowingsystem] eq "x11"} {
-	    
+	    bind $mb <ButtonPress-1>    { 
+		%W instate !disabled {%W state pressed ; AvatarMB::Pulldown %W } 
+	    }
+	    bind $mb <ButtonRelease-1>  { AvatarMB::TransferGrab %W }
+	    bind $mb <B1-Leave>         { AvatarMB::TransferGrab %W }	    
 	} else {
 	    bind $mb <ButtonPress-1>    { 
-		%W instate !disabled {%W state pressed ; ::AvatarMB::Popdown %W } 
+		%W instate !disabled {%W state pressed ; AvatarMB::Popdown %W } 
 	    }
-	    bind $mb <ButtonRelease-1>  { %W state !pressed ; puts ButtonRelease }
-	
-	    bind $mb <B1-Leave>         { %W state !pressed ; puts "B1-Leave" }
+	    bind $mb <ButtonRelease-1>  { %W state !pressed }	
+	    bind $mb <B1-Leave>         { %W state !pressed }
 	    bind $mb <B1-Enter>         { %W instate {active !disabled} { %W state pressed } }
 	}
     } else {
-	# @@@ TODO
-	bind $mb <Key-space>        { ::AvatarMB::Popdown %W }
-	bind $mb <<Invoke>>         { ::AvatarMB::Popdown %W }
-	bind $mb <ButtonPress-1>    { ::AvatarMB::Popdown %W }
+	
+	# Intended for Windows only why we skip x11.
+	bind $mb <Key-space>        { AvatarMB::Popdown %W }
+	bind $mb <<Invoke>>         { AvatarMB::Popdown %W }
+	bind $mb <ButtonPress-1>    { AvatarMB::Popdown %W }
     }
-    bind $mb <Destroy> { ::AvatarMB::ButtonFree %W }
+    bind $mb <Destroy> { AvatarMB::ButtonFree %W }
     
     ::hooks::register avatarMyNewPhotoHook [list ::AvatarMB::MyNewPhotoHook $mb]
     
@@ -144,47 +156,91 @@ proc ::AvatarMB::Button {mb args} {
 }
 
 proc ::AvatarMB::ButtonFree {mb} {
-    variable $mb
-    upvar 0 $mb state
+    variable state
     
     hooks::deregister avatarMyNewPhotoHook [list ::AvatarMB::MyNewPhotoHook $mb]
     
-    image delete $state(blank)
-    if {$state(photo) ne ""} {
-	image delete $state(photo)	
+    set photo [$mb cget -image]
+    if {$photo ne $state(blank)} {
+	image delete $photo
     }
-    unset -nocomplain state
 }
 
 proc ::AvatarMB::MyNewPhotoHook {mb} {
-    variable $mb
-    upvar 0 $mb state
+    variable widget
+    variable state
     
-    puts "::AvatarMB::MyNewPhotoHook mb=$mb"
+    #puts "::AvatarMB::MyNewPhotoHook mb=$mb"
     
-    if {$state(photo) ne ""} {
-	image delete $state(photo)	
+    set photo [$mb cget -image]
+    if {$photo ne $state(blank)} {
+	image delete $photo
     }
+    set size $widget(buttonsize)
     set myphoto [::Avatar::GetMyPhoto]
-    puts "\t myphoto=$myphoto, GetShareOption=[::Avatar::GetShareOption]"
+    #puts "\t myphoto=$myphoto, GetShareOption=[::Avatar::GetShareOption]"
     if {($myphoto ne "") && [::Avatar::GetShareOption]} {
-	set state(photo) [::Avatar::CreateScaledPhoto $myphoto 24]
-	$mb configure -image $state(photo)
+	set photo [::Avatar::CreateScaledPhoto $myphoto $size]
+	$mb configure -image $photo
     } else {
-	set state(photo) ""
 	$mb configure -image $state(blank)
     }
 }
 
+proc ::AvatarMB::Pulldown {mb} {
+    variable state
+    #puts "::AvatarMB::Pulldown $mb"
+    set state(pulldown) 1
+    PostMenu $mb    
+}
+
 proc ::AvatarMB::Popdown {mb} {
-    puts "::AvatarMB::Popdown $mb"
+    #puts "::AvatarMB::Popdown $mb"
+    set menu $mb.menu
     PostMenu $mb
+    SaveGrabInfo $mb
+    
+    # This will direct all events to the menu even if the mouse is outside!
+    # Buggy on mac.
+    grab -global $menu
+}
+
+proc AvatarMB::TransferGrab {mb} {
+    variable state
+    #puts "AvatarMB::TransferGrab"
+    if {$state(pulldown)} {
+	set state(pulldown) 0
+	set menu $mb.menu
+	if {[winfo viewable $menu]} {
+	    SaveGrabInfo $mb
+	    grab -global $menu
+	}
+    }
+}
+
+proc ::AvatarMB::SaveGrabInfo {mb} {
+    variable state
+    set state(oldGrab) [grab current $mb]
+    if {$state(oldGrab) ne ""} {
+	set state(grabStatus) [grab status $state(oldGrab)]
+    }    
+}
+
+proc ::AvatarMB::RestoreOldGrab {} {
+    variable state
+    if {$state(oldGrab) ne ""} {
+	catch {
+	  if {$state(grabStatus) eq "global"} {
+		grab set -global $state(oldGrab)
+	    } else {
+		grab set $state(oldGrab)
+	    }
+	}
+	set state(oldGrab) ""
+    }    
 }
 
 proc ::AvatarMB::PostMenu {mb} {
-    variable $mb
-    upvar 0 $mb state
-
     set menu $mb.menu
     Menu $menu
     wm withdraw $menu
@@ -196,14 +252,6 @@ proc ::AvatarMB::PostMenu {mb} {
     foreach {x y} [PositionOnScreen $mb $x $y] { break }
     wm geometry $menu +$x+$y
     wm deiconify $menu
-    
-    set state(oldGrab) [grab current $menu]
-    if {$state(oldGrab) ne ""} {
-	set state(grabStatus) [grab status $state(oldGrab)]
-    }
-
-    # This will direct all events to the menu even if the mouse is outside!
-    grab -global $menu
 }
 
 proc ::AvatarMB::PostPosition {mb dir} {
@@ -269,7 +317,7 @@ proc ::AvatarMB::PositionOnScreen {mb x y} {
 }
 
 proc ::AvatarMB::Menu {m args} {
-    variable border
+    variable widget
     
     toplevel $m -class AvatarMBMenu -bd 0 -relief flat -takefocus 0
     
@@ -294,12 +342,16 @@ proc ::AvatarMB::Menu {m args} {
     pack $f.box -side top -anchor w -padx 18 -pady 4
     set box $f.box
     
+    set nbox   $widget(nboxside)
+    set border $widget(border)
+    set size   $widget(menusize)
+    set bg     $widget(background)
     set bd 2
     set pd 1
-    set min [expr {32+2*($bd+$pd)}]
+    set min [expr {$size+2*($bd+$pd)}]
     
-    for {set i 0} {$i < 4} {incr i} {
-	for {set j 0} {$j < 4} {incr j} {
+    for {set i 0} {$i < $nbox} {incr i} {
+	for {set j 0} {$j < $nbox} {incr j} {
 	    set label $box.l${i}${j}
 	    label $label -relief flat -background $border -bd $bd \
 	      -compound center -state disabled -highlightthickness 0
@@ -314,7 +366,7 @@ proc ::AvatarMB::Menu {m args} {
 	    bind $label <B1-Leave> { ::AvatarMB::AvatarLeave %W }
 	    	    
 	    set label $label.l
-	    label $label -bd 0 -background white -compound center  \
+	    label $label -bd 0 -background $bg -compound center  \
 	      -highlightthickness 0 -state disabled
 	    pack $label -fill both -expand 1
 
@@ -324,11 +376,10 @@ proc ::AvatarMB::Menu {m args} {
 	grid rowconfigure $box $i -minsize $min
     }
     bind $m <ButtonPress-1>   [list ::AvatarMB::MenuUnpost $m]
-    bind $m <ButtonRelease-1>  {puts \tButtonRelease-1}
     #bind $m <ButtonRelease-1> [list ::AvatarMB::MenuUnpost $m]
     #bind $m <ButtonRelease-1> [list ::AvatarMB::OnButtonRelease $m %x %y]
     
-    bind $m <KeyPress> { puts "KeyPress %W %A"}
+    bind $m <KeyPress> { }
     
     ttk::button $f.new -style FMenu -text "Pick New..." \
       -command ::AvatarMB::MenuNew
@@ -381,7 +432,7 @@ proc ::AvatarMB::BindFMenu {w} {
 proc ::AvatarMB::AvatarEnter {w} {
     variable widget
     if {[$w cget -state] eq "normal"} {
-	$w configure -bg $widget(active)
+	$w   configure -bg $widget(active)
 	$w.l configure -bg $widget(lightactive)
     }
 }
@@ -389,19 +440,19 @@ proc ::AvatarMB::AvatarEnter {w} {
 proc ::AvatarMB::AvatarLeave {w} {
     variable widget
     if {[$w cget -state] eq "normal"} {
-	$w configure -bg $widget(border)
-	$w.l configure -bg white
+	$w   configure -bg $widget(border)
+	$w.l configure -bg $widget(background)
     }
 }
 
 proc ::AvatarMB::MenuPress {w} {
-    puts "::AvatarMB::MenuPress"
+    #puts "::AvatarMB::MenuPress"
     MenuActivate $w
     return -code break
 }
 
 proc ::AvatarMB::MenuRelease {w} {
-    puts "::AvatarMB::MenuRelease"
+    #puts "::AvatarMB::MenuRelease"
     MenuActivate $w
     return -code break
 }
@@ -430,22 +481,25 @@ proc ::AvatarMB::MenuParent {w} {
 }
 
 proc ::AvatarMB::MenuUnpost {m} {
-    puts "::AvatarMB::MenuUnpost m=$m"
+    #puts "::AvatarMB::MenuUnpost m=$m"
     grab release $m
+    RestoreOldGrab
     destroy $m
 }
 
 proc ::AvatarMB::FillInRecent {box} {
     global  this
     variable priv
+    variable widget
     
     set childs [winfo children $box]
     set priv(images) {}
+    set size $widget(menusize)
 
     foreach f [::Avatar::GetRecentFiles] {
 	set fpath [file join $this(recentAvatarPath) $f]
 	set image [image create photo -file $fpath]
-	set scaled [::Avatar::CreateScaledPhoto $image 32]
+	set scaled [::Avatar::CreateScaledPhoto $image $size]
 	lappend priv(images) $image
 	if {$scaled ne $image} {
 	    lappend priv(images) $scaled
@@ -471,7 +525,7 @@ proc ::AvatarMB::MenuPickRecent {w} {
     variable priv
     variable widget
     
-    puts "::AvatarMB::MenuPickRecent w=$w"
+    #puts "::AvatarMB::MenuPickRecent w=$w"
     
     if {[$w cget -state] eq "normal"} {
 	set parent [winfo parent $w]
@@ -492,7 +546,7 @@ proc ::AvatarMB::MenuPickRecent {w} {
 proc ::AvatarMB::MenuNew {} {
     global  prefs
     
-    puts "::AvatarMB::MenuNew"
+    #puts "::AvatarMB::MenuNew"
 
     set suffs {.gif}
     set types {
@@ -522,26 +576,26 @@ proc ::AvatarMB::MenuNew {} {
 }
 
 proc ::AvatarMB::SetFileToShare {fileName} {
-    puts "::AvatarMB::SetFileToShare"
+    #puts "::AvatarMB::SetFileToShare"
     
     # Share only if not identical to existing one.
     if {[::Avatar::IsMyPhotoSharedFromFile $fileName]} {
-	puts "\t IsMyPhotoSharedFromFile=1"
+	#puts "\t IsMyPhotoSharedFromFile=1"
 	::Avatar::SetShareOption 1
 	::Avatar::AddRecentFile $fileName
     } else {
-	puts "\t IsMyPhotoSharedFromFile=0"
+	#puts "\t IsMyPhotoSharedFromFile=0"
 	if {[::Avatar::SetAndShareMyAvatarFromFile $fileName]} {
-	    puts "\t ::Avatar::SetAndShareMyAvatarFromFile=1"
+	    #puts "\t ::Avatar::SetAndShareMyAvatarFromFile=1"
 	    ::Avatar::AddRecentFile $fileName
 	} else {
-	    puts "\t ::Avatar::SetAndShareMyAvatarFromFile=0"	    
+	    #puts "\t ::Avatar::SetAndShareMyAvatarFromFile=0"	    
 	}
     }
 }
 
 proc ::AvatarMB::MenuClear {} {
-    puts "::AvatarMB::MenuClear ---"
+    #puts "::AvatarMB::MenuClear ---"
     ::Avatar::ClearRecent
 }
 
@@ -550,7 +604,7 @@ proc ::AvatarMB::MenuRemove {} {
 }
 
 proc ::AvatarMB::OnButtonRelease {m x y} {
-    puts "::AvatarMB::OnButtonRelease $x $y"
+    #puts "::AvatarMB::OnButtonRelease $x $y"
     MenuUnpost $m
 }
 
