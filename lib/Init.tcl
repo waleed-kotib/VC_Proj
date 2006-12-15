@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.56 2006-12-12 15:18:00 matben Exp $
+# $Id: Init.tcl,v 1.57 2006-12-15 14:12:09 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -32,6 +32,7 @@ proc ::Init::SetThis {mainScript} {
     set this(avatarPath)        [file join $path images avatar]
     set this(itemPath)          [file join $path items]
     set this(msgcatPath)        [file join $path msgs]
+    set this(msgcatCompPath)    [file join $path msgs components]
     set this(msgcatPostPath)    [file join $path msgs post]
     set this(pluginsPath)       [file join $path plugins]
     set this(appletsPath)       [file join $path plugins applets]
@@ -481,7 +482,7 @@ proc ::Init::Msgcat { } {
     # Test here if you want a particular message catalog (en, nl, de, fr, sv,...).
     #::msgcat::mclocale pl
     uplevel #0 [list ::msgcat::mcload $this(msgcatPath)]
-
+    
     # This is a method to override default messages with custom ones for each
     # language.
     if {[file isdirectory $this(msgcatPostPath)]} {
