@@ -350,6 +350,10 @@
 ::msgcat::mcset ru mEditBookmarks	{Закладки}
 
 ::msgcat::mcset ru mCustomStatus        {Custom Status...}
+::msgcat::mcset ru mImport              {Import}
+::msgcat::mcset ru mExport              {Export}
+::msgcat::mcset ru mEmoticonSet         {Emoticon Set...}
+::msgcat::mcset ru mRoster              {Roster...}
 
 # Popups
 ::msgcat::mcset ru mMessage     	{Сообщение...}

@@ -3,14 +3,11 @@
 #      This file is part of The Coccinella application. 
 #      It implements jabber GUI parts.
 #      
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.148 2006-12-14 15:34:05 matben Exp $
-
-package require AvatarMB
+# $Id: JUI.tcl,v 1.149 2006-12-15 08:07:14 matben Exp $
 
 package provide JUI 1.0
-
 
 namespace eval ::JUI:: {
     
@@ -109,6 +106,9 @@ proc ::JUI::Init { } {
 	    {command   mCloseWindow        {::UI::CloseWindowEvent}  W}
 	    {command   mPreferences...     {::Preferences::Build}     {}}
 	    {separator}
+	    {cascade   mImport             {}                         {} {} {
+		{command  mEmoticonSet     {::Emoticons::ImportSet}   {}}
+	    }}
 	    {cascade   mExport             {}                         {} {} {
 		{command  mRoster          {::Roster::ExportRoster}   {}}
 	    }}

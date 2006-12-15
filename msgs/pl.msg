@@ -428,10 +428,14 @@
 ::msgcat::mcset pl mNotebook            {Notatnik}
 ::msgcat::mcset pl mMinimal             {Minimalny}
 ::msgcat::mcset pl mDisco               {Disco}
-
 ::msgcat::mcset pl mFind                {Szukaj}
 ::msgcat::mcset pl mFindAgain           {Szukaj ponownie}
+
 ::msgcat::mcset pl mCustomStatus        {Custom Status...}
+::msgcat::mcset pl mImport              {Import}
+::msgcat::mcset pl mExport              {Export}
+::msgcat::mcset pl mEmoticonSet         {Emoticon Set...}
+::msgcat::mcset pl mRoster              {Roster...}
 
 # Popups
 ::msgcat::mcset pl mMessage     	{Wiadomość...}

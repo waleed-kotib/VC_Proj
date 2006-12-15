@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.9 2006-12-14 14:09:36 matben Exp $
+# $Id: AvatarMB.tcl,v 1.10 2006-12-15 08:07:14 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -425,8 +425,8 @@ proc ::AvatarMB::BindFMenu {w} {
     bind $w <Leave>           { %W state !active }
     bind $w <B1-Enter>        { %W state pressed; %W state active }
     bind $w <B1-Leave>        { %W state !pressed; %W state !active }
-    bind $w <ButtonPress-1>   { ::AvatarMB::MenuPress %W }
-    bind $w <ButtonRelease-1> { ::AvatarMB::MenuRelease %W }
+    bind $w <ButtonPress-1>   { AvatarMB::MenuPress %W }
+    bind $w <ButtonRelease-1> { AvatarMB::MenuRelease %W }
 }
 
 proc ::AvatarMB::AvatarEnter {w} {

@@ -436,6 +436,10 @@
 ::msgcat::mcset de mFindAgain           {Weiter suchen}
 
 ::msgcat::mcset de mCustomStatus        {Custom Status...}
+::msgcat::mcset de mImport              {Import}
+::msgcat::mcset de mExport              {Export}
+::msgcat::mcset de mEmoticonSet         {Emoticon Set...}
+::msgcat::mcset de mRoster              {Roster...}
 
 
 # Popups

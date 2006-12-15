@@ -438,6 +438,10 @@
 ::msgcat::mcset es mFindAgain         	{Siguiente coincidencia}
 
 ::msgcat::mcset es mCustomStatus        {Custom Status...}
+::msgcat::mcset es mImport              {Import}
+::msgcat::mcset es mExport              {Export}
+::msgcat::mcset es mEmoticonSet         {Emoticon Set...}
+::msgcat::mcset es mRoster              {Roster...}
 
 
 # Popups.

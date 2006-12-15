@@ -426,6 +426,11 @@
 ::msgcat::mcset nl mFindAgain				{Opnieuw zoeken}
 ::msgcat::mcset nl mCustomStatus			{Aangepast...}
 
+::msgcat::mcset nl mImport                              {Import}
+::msgcat::mcset nl mExport                              {Export}
+::msgcat::mcset nl mEmoticonSet                         {Emoticon Set...}
+::msgcat::mcset nl mRoster                              {Roster...}
+
 # Popups
 ::msgcat::mcset nl mMessage				{Bericht...}
 ::msgcat::mcset nl mWhiteboard				{Whiteboard...}
