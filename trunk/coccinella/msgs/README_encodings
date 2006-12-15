@@ -37,6 +37,10 @@ The 'iconv' utility on unix/linux is an alternative.
 5.  As a check that all entries in your message catalog exists you
 may use the small script at the end of this file.
 
+6.  Some components and packages have their own catalogs inside
+coccinella/msgs/components, see the README-msgs-components file inside
+this directory. The process is essentially repeated for each directory.
+
 Now try it...
 
 Use the following code to do this:

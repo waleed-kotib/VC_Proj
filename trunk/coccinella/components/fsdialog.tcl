@@ -1,5 +1,34 @@
 # Copyright (C) Schelte Bron.  Freely redistributable.
 
+proc ttk::messageBox {args} {
+	variable ::ttk::Priv
+	set dataName __ttk_messagebox
+	set parent .
+	foreach {opt val} $args {
+		switch -- $opt {
+			-parent {
+				set parent $val
+			}
+			default {
+				lappend opts $opt $val
+			}
+		}
+	}
+	lappend opts -command {set ::ttk::Priv(button)}
+	if {$parent eq "."} {
+		set win .$dataName
+	} else {
+		set win $parent.$dataName
+	}
+	eval [linsert $opts 0 ttk::dialog $win]
+	::tk::SetFocusGrab $win $win
+	vwait ::ttk::Priv(button)
+	::tk::RestoreFocusGrab $win $win
+	return $Priv(button)
+}
+
+interp alias {} ttk_messageBox {} ::ttk::messageBox
+
 namespace eval ::ttk::dialog {}
 namespace eval ::ttk::dialog::file {
 	variable sort name hidden 1 sepfolders 1 foldersfirst 1
@@ -331,52 +360,57 @@ proc ::ttk::dialog::file::Create {win class} {
 	set image [option get $data(cfgMenu) image Image]
 	set selimage [option get $data(cfgMenu) selectImage Image]
 
-	$data(cfgMenu) add cascade -label " Sorting" -menu $data(sortMenu) \
-		-image $image -compound left
+	$data(cfgMenu) add cascade -label " [::msgcat::mc Sorting]" \
+	  -menu $data(sortMenu) -image $image -compound left
 	$data(cfgMenu) add separator
-	$data(cfgMenu) add radiobutton -label "Short View" -compound left \
+	$data(cfgMenu) add radiobutton -label [::msgcat::mc "Short View"] \
+	        -compound left \
 		-image $image -selectimage ::ttk::dialog::image::radio16 \
 		-variable ::ttk::dialog::file::details -value 0 -indicatoron 0 \
 		-command [list ::ttk::dialog::file::setopt $win \
 			-details ::ttk::dialog::file::details]
-	$data(cfgMenu) add radiobutton -label "Detailed View" -compound left \
+	$data(cfgMenu) add radiobutton -label [::msgcat::mc "Detailed View"] \
+	        -compound left \
 		-image $image -selectimage ::ttk::dialog::image::radio16 \
 		-variable ::ttk::dialog::file::details -value 1 -indicatoron 0 \
 		-command [list ::ttk::dialog::file::setopt $win \
 			-details ::ttk::dialog::file::details]
 	$data(cfgMenu) add separator
-	$data(cfgMenu) add checkbutton -label "Show Hidden Files" \
+	$data(cfgMenu) add checkbutton -label [::msgcat::mc "Show Hidden Files"] \
 		-image $image -selectimage $selimage -compound left \
 		-variable ::ttk::dialog::file::hidden -indicatoron 0 \
 		-command [list ::ttk::dialog::file::setopt $win \
 			-hidden ::ttk::dialog::file::hidden]
-	$data(cfgMenu) add checkbutton -label "Separate Folders" \
+	$data(cfgMenu) add checkbutton -label [::msgcat::mc "Separate Folders"] \
 		-image $image -selectimage $selimage -compound left \
 		-variable ::ttk::dialog::file::sepfolders -indicatoron 0 \
 		-command [list ::ttk::dialog::file::setopt $win \
 			-sepfolders ::ttk::dialog::file::sepfolders]
-	$data(sortMenu) add radiobutton -label "By Name" -compound left \
+	$data(sortMenu) add radiobutton -label [::msgcat::mc "By Name"] \
+	        -compound left \
 		-image $image -selectimage ::ttk::dialog::image::radio16 \
 		-variable ::ttk::dialog::file::sort -value name -indicatoron 0 \
 		-command [list ::ttk::dialog::file::setopt $win \
 			-sort ::ttk::dialog::file::sort]
-	$data(sortMenu) add radiobutton -label "By Date" -compound left \
+	$data(sortMenu) add radiobutton -label [::msgcat::mc "By Date"] \
+	        -compound left \
 		-image $image -selectimage ::ttk::dialog::image::radio16 \
 		-variable ::ttk::dialog::file::sort -value date -indicatoron 0 \
 		-command [list ::ttk::dialog::file::setopt $win \
 			-sort ::ttk::dialog::file::sort]
-	$data(sortMenu) add radiobutton -label "By Size" -compound left \
+	$data(sortMenu) add radiobutton -label [::msgcat::mc "By Size"] \
+	        -compound left \
 		-image $image -selectimage ::ttk::dialog::image::radio16 \
 		-variable ::ttk::dialog::file::sort -value size -indicatoron 0 \
 		-command [list ::ttk::dialog::file::setopt $win \
 			-sort ::ttk::dialog::file::sort]
 	$data(sortMenu) add separator
-	$data(sortMenu) add checkbutton -label "Reverse" \
+	$data(sortMenu) add checkbutton -label [::msgcat::mc Reverse] \
 		-image $image -selectimage $selimage -compound left \
 		-variable ::ttk::dialog::file::reverse -indicatoron 0 \
 		-command [list ::ttk::dialog::file::setopt $win \
 			-reverse ::ttk::dialog::file::reverse]
-	$data(sortMenu) add checkbutton -label "Folders First" \
+	$data(sortMenu) add checkbutton -label [::msgcat::mc "Folders First"] \
 		-image $image -selectimage $selimage -compound left \
 		-variable ::ttk::dialog::file::foldersfirst -indicatoron 0 \
 		-command [list ::ttk::dialog::file::setopt $win \
@@ -403,17 +437,17 @@ proc ::ttk::dialog::file::Create {win class} {
 	#     and file types field.
 	#
 	set f2 [ttk::frame $w.f2]
-	ttk::label $f2.lab1 -text "Location:" -anchor w
+	ttk::label $f2.lab1 -text "[::msgcat::mc Location]:" -anchor w
 	set data(location) [ttk::combobox $f2.loc]
 	$data(location) configure \
 		-textvariable ::ttk::dialog::file::${dataName}(selectFile)
-	set data(typeMenuLab) [ttk::label $f2.lab2 -text "Filter:" -anchor w]
+	set data(typeMenuLab) [ttk::label $f2.lab2 -text "[::msgcat::mc Filter]:" -anchor w]
 	set data(typeMenuBtn) [ttk::combobox $f2.filter]
-	set data(okBtn) [ttk::button $f2.ok -text OK -default active \
-		-width 8 -style Slim.TButton \
+	set data(okBtn) [ttk::button $f2.ok -text [::msgcat::mc OK] \
+	  -default active -width -8 \
 		-command [list ::ttk::dialog::file::Done $win]]
-	set data(cancelBtn) [ttk::button $f2.cancel -text Cancel \
-		-width 8 -style Slim.TButton \
+	set data(cancelBtn) [ttk::button $f2.cancel -text [::msgcat::mc Cancel] \
+		-width -8 \
 		-command [list ::ttk::dialog::file::Cancel $win]]
 
 	grid $f2.lab1 $f2.loc $data(okBtn) -padx 4 -pady 5 -sticky ew
@@ -469,12 +503,18 @@ proc ::ttk::dialog::file::Create {win class} {
 	ttk::label $data(long).bg -relief sunken
 	ttk::frame $data(long).f
 	set data(fileHdr) [frame $data(long).f.f]
-	ttk::label $data(fileHdr).l0 -text Name -style Toolbutton -anchor w
-	ttk::label $data(fileHdr).l1 -text Size -style Toolbutton -anchor w
-	ttk::label $data(fileHdr).l2 -text Date -style Toolbutton -anchor w
-	ttk::label $data(fileHdr).l3 -text Permissions -style Toolbutton -anchor w
-	ttk::label $data(fileHdr).l4 -text Owner -style Toolbutton -anchor w
-	ttk::label $data(fileHdr).l5 -text Group -style Toolbutton -anchor w
+	ttk::label $data(fileHdr).l0 -style Toolbutton -anchor w \
+	  -text [::msgcat::mc Name]
+	ttk::label $data(fileHdr).l1 -style Toolbutton -anchor w \
+	  -text [::msgcat::mc Size]
+	ttk::label $data(fileHdr).l2 -style Toolbutton -anchor w \
+	  -text [::msgcat::mc Date]
+	ttk::label $data(fileHdr).l3 -style Toolbutton -anchor w \
+	  -text [::msgcat::mc Permissions]
+	ttk::label $data(fileHdr).l4 -style Toolbutton -anchor w \
+	  -text [::msgcat::mc Owner]
+	ttk::label $data(fileHdr).l5 -style Toolbutton -anchor w \
+	  -text [::msgcat::mc Group]
 	ttk::separator $data(fileHdr).s1 -orient vertical
 	ttk::separator $data(fileHdr).s2 -orient vertical
 	ttk::separator $data(fileHdr).s3 -orient vertical
@@ -1016,21 +1056,21 @@ proc ::ttk::dialog::file::NewDirCmd {win} {
 	set dir [lindex $data(history) $data(histpos)]
 
 	toplevel $win.new
-	wm title $win.new "New Folder"
+	wm title $win.new [::msgcat::mc "New Folder"]
 	set w [ttk::frame $win.new.f]
 	pack $w -expand 1 -fill both
 
 	ttk::label $w.prompt -anchor w -justify left \
-		-text "Create new folder in:\n$dir"
+		-text [::msgcat::mc "Create new folder in"]:\n$dir
 	ttk::entry $w.box -width 36 -validate all \
 		-validatecommand [list ::ttk::dialog::file::NewDirVCmd $w %P]
 	ttk::separator $w.sep
 	set f [ttk::frame $w.buttons]
-	ttk::button $f.clear -text Clear -takefocus 0 \
+	ttk::button $f.clear -text [::msgcat::mc Clear] -takefocus 0 \
 		-command [list $w.box delete 0 end]
-	ttk::button $f.ok -text OK -default active \
+	ttk::button $f.ok -text [::msgcat::mc OK] -default active \
 		-command [list ::ttk::dialog::file::NewDirExit $win 1]
-	ttk::button $f.cancel -text Cancel \
+	ttk::button $f.cancel -text [::msgcat::mc Cancel] \
 		-command [list ::ttk::dialog::file::NewDirExit $win]
 	grid $f.clear $f.ok $f.cancel -padx 4 -pady {0 10} -sticky we
 	grid columnconfigure $f {0 1 2} -uniform 1
@@ -1106,16 +1146,16 @@ proc ::ttk::dialog::file::Done {w} {
 
 	if {[file exists $path]} {
 		if {[string equal $data(type) save]} {
+		    set str {File "%s" already exists. Do you want to overwrite it?}
 			set reply [ttk::messageBox -icon warning -type yesno \
-				-parent $w -message "File\
-				\"$path\" already exists.\nDo\
-				you want to overwrite it?"]
+			  -parent $w -message [::msgcat::mc $str $path]]
 			if {[string equal $reply "no"]} {return}
 		}
 	} else {
 		if {[string equal $data(type) open]} {
+		    set str {File "%s" does not exist.}
 			ttk::messageBox -icon warning -type ok -parent $w \
-				-message "File \"$path\" does not exist."
+			  -message [::msgcat::mc $str $path]
 			return
 		}
 	}
@@ -1134,9 +1174,9 @@ proc ::ttk::dialog::file::chdir {w} {
 	if {[file isdirectory $dir]} {
 		ChangeDir $w $dir
 	} else {
+	    set str {Cannot change to the directory "%s". Permission denied.}
 		ttk::messageBox -type ok -parent $w \
-			-message "Cannot change to the directory\
-				\"$data(selectPath)\".\nPermission denied." \
+			-message [::msgcat::mc $str $data(selectPath)]
 			-icon warning
 	}
 	return -code break
@@ -1339,9 +1379,9 @@ proc ::ttk::dialog::file::Config {dataName type argList} {
 
 	if {$data(-title) == ""} {
 		if {[string equal $type "save"]} {
-			set data(-title) "Save As"
+			set data(-title) [::msgcat::mc "Save As"]
 		} else {
-			set data(-title) "Open"
+			set data(-title) [::msgcat::mc "Open"]
 		}
 	}
 
@@ -1404,7 +1444,8 @@ proc ::ttk::dialog::file::treeCreate {w} {
 	array set fontinfo [font actual [[label $f2.f.dummy] cget -font]]
 	set font [list $fontinfo(-family) -14]
 	destroy $f2.f.dummy
-	ttk::label $f2.f.title -text Folder -anchor w -style Toolbutton
+	ttk::label $f2.f.title -anchor w -style Toolbutton \
+	  -text [::msgcat::mc Folder]
 	set data(text) [text $f2.f.text -width 48 -height 16 -font $font \
 		-tabs 20 -wrap none -highlightthickness 0 -bd 0 -cursor "" \
 		-spacing1 1 -spacing3 1 -exportselection 0 \
@@ -1421,9 +1462,9 @@ proc ::ttk::dialog::file::treeCreate {w} {
 	pack $f2.f -fill both -expand 1 -padx 8 -pady 4
 
 	set f3 [ttk::frame $w.f3]
-	ttk::button $f3.ok -text OK -default active \
+	ttk::button $f3.ok -text [::msgcat::mc OK] -default active \
 		-command [list ::ttk::dialog::file::TreeDone $w]
-	ttk::button $f3.cancel -text Cancel \
+	ttk::button $f3.cancel -text [::msgcat::mc Cancel] \
 		-command [list ::ttk::dialog::file::Cancel $w]
 	grid x $f3.ok $f3.cancel -sticky ew -padx {4 8} -pady 8
 	grid columnconfigure $f3 {1 2} -uniform buttons -minsize 80
@@ -1704,7 +1745,6 @@ if {![llength [info procs lassign]]} {
 	}
 }
 
-style default Slim.TButton -padding 0
 option add *TkFDialog*selectBackground #0a5f89
 option add *TkFDialog*selectForeground #ffffff
 option add *TkFDialog*Toolbar*takeFocus 0

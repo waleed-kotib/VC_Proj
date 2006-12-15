@@ -1,0 +1,36 @@
+
+README for components message catalogs
+--------------------------------------
+
+Each component, package or plugin can have its own message catalog in order 
+to not pollute and create dependencies to the standard catalogs. These are 
+placed within a folder in this directory. The folder will typically have the
+same name as the component or plugin.
+
+Layout:
+
+    msgs/components/
+                    MyPlug/
+                           en.msg
+                           es.msg
+                           ...
+                    OtherPlug/
+                    ...
+
+
+A package has normally its code in a specific namespace and you may define
+some or all of your strings in this namespace as well in order to not
+interfere with the main catalogs. This is particularly useful for short
+strings which must be interpreted within the context they are used.
+
+An example:
+
+
+::msgcat::mcset  {This is one long string}  {Humbla kubla zapapy dustkop}
+
+namespace eval ::MyPlug {
+    ::msgcat::mc  File  Zkap
+    ...
+}
+
+Don't know what language this is...

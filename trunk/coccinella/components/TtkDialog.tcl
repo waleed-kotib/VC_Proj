@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-#  $Id: TtkDialog.tcl,v 1.2 2006-12-08 13:42:52 matben Exp $
+#  $Id: TtkDialog.tcl,v 1.3 2006-12-15 14:12:09 matben Exp $
 
 namespace eval ::TtkDialog {
     variable scriptDir [file dirname [info script]]
@@ -30,6 +30,12 @@ proc ::TtkDialog::Init { } {
     interp alias {} tk_getSaveFile     {} ttk::getSaveFile
     interp alias {} tk_chooseDirectory {} ttk::chooseDirectory
     interp alias {} tk_messageBox      {} ::TtkDialog::MessageBox
+
+    # Message catalog.
+    set msgdir [file join $::this(msgcatCompPath) TtkDialog]
+    if {[file isdirectory $msgdir]} {
+	uplevel #0 [list ::msgcat::mcload $msgdir]
+    }
 }
 
 proc ::TtkDialog::MessageBox {args} {

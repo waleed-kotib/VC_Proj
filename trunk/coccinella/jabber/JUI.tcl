@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.149 2006-12-15 08:07:14 matben Exp $
+# $Id: JUI.tcl,v 1.150 2006-12-15 14:12:09 matben Exp $
 
 package provide JUI 1.0
 
@@ -119,6 +119,13 @@ proc ::JUI::Init { } {
 	set menuDefs(rost,file) {
 	    {command   mNewWhiteboard      {::JWB::OnMenuNewWhiteboard}  N}
 	    {command   mPreferences...     {::Preferences::Build}     {}}
+	    {separator}
+	    {cascade   mImport             {}                         {} {} {
+		{command  mEmoticonSet     {::Emoticons::ImportSet}   {}}
+	    }}
+	    {cascade   mExport             {}                         {} {} {
+		{command  mRoster          {::Roster::ExportRoster}   {}}
+	    }}
 	    {separator}
 	    {command   mQuit               {::UserActions::DoQuit}    Q}
 	}
