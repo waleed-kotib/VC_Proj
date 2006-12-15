@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.191 2006-12-04 12:55:22 matben Exp $
+# $Id: Jabber.tcl,v 1.192 2006-12-15 08:07:14 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -33,6 +33,7 @@ package require jlib::vcard
 
 # We should have some component mechanism that lets packages load themselves.
 package require Avatar
+package require AvatarMB
 package require Chat
 package require Create
 package require Disco
@@ -1262,14 +1263,6 @@ proc ::Jabber::SetStatus {type args} {
     
     # Any -status take precedence, even if empty.
     array set argsA $args
-
-    # Any default status?
-    if {![info exists argsA(-status)]} {
-	if {$jprefs(statusMsg,bool,$type) \
-	  && ($jprefs(statusMsg,msg,$type) ne "")} {
-	    set argsA(-status) $jprefs(statusMsg,msg,$type)
-	}
-    }
     
     set presArgs {}
     foreach {key value} [array get argsA] {

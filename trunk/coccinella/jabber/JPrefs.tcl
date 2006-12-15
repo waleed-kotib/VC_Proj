@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.43 2006-11-16 14:28:54 matben Exp $
+# $Id: JPrefs.tcl,v 1.44 2006-12-15 08:07:14 matben Exp $
 
 package require ui::fontselector
 
@@ -101,20 +101,6 @@ proc ::JPrefs::InitPrefsHook { } {
       [list ::Jabber::jprefs(chat,dialogs)     jprefs_chat_dialogs      $jprefs(chat,dialogs)]  \
       ]
     
-    # Default status messages.
-    foreach {status str} [::Status::GetStatusTextArray] {
-	set jprefs(statusMsg,bool,$status) 0
-	set jprefs(statusMsg,msg,$status) ""
-
-	::PrefUtils::Add [list  \
-	  [list ::Jabber::jprefs(statusMsg,bool,$status)  \
-	  jprefs_statusMsg_bool_$status                   \
-	  $jprefs(statusMsg,bool,$status)]                \
-	  [list ::Jabber::jprefs(statusMsg,msg,$status)   \
-	  jprefs_statusMsg_msg_$status                    \
-	  $jprefs(statusMsg,msg,$status)]                 \
-	  ]
-    }
     if {[llength $jprefs(chatFont)]} {
 	set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
     }
@@ -154,24 +140,16 @@ proc ::JPrefs::BuildAutoAwayPage {page} {
       logoutStatus} {
 	set tmpJPrefs($key) $jprefs($key)
     }
-    foreach {status str} [::Status::GetStatusTextArray] {
-	set tmpJPrefs(statusMsg,bool,$status) $jprefs(statusMsg,bool,$status)
-	set tmpJPrefs(statusMsg,msg,$status)  $jprefs(statusMsg,msg,$status)
-    }
     
     set wc $page.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
     # Auto away stuff.
-    set waa $wc.faa
-    set waf $waa.fm
-    set was $waa.fs
-    ttk::labelframe $waa -text [mc {Auto Away}] \
-      -padding [option get . groupSmallPadding {}]
+    set waf $wc.fm
+    set was $wc.fs
 
-    ttk::label $waa.lab -text [mc prefaaset]
-
+    ttk::label $wc.lab -text [mc prefaaset]
     ttk::frame $waf
     ttk::checkbutton $waf.lminaw -text [mc prefminaw]  \
       -variable [namespace current]::tmpJPrefs(autoaway)
@@ -202,29 +180,7 @@ proc ::JPrefs::BuildAutoAwayPage {page} {
     grid  $was.lawmsg  $was.eawmsg  -sticky e -pady 1
     grid  $was.lxa     $was.examsg  -sticky e -pady 1
 
-    pack  $waa.lab  $waf  $was  -side top -anchor w
-    
-    # Default logout status.
-    array set statusTextArr [::Status::GetStatusTextArray]
-    set wlo $wc.lo
-    ttk::labelframe $wlo -text [mc {Default status descriptions}] \
-      -padding [option get . groupSmallPadding {}]
-    
-    foreach {status str} [array get statusTextArr] {
-	ttk::checkbutton $wlo.c$status -text $str \
-	  -variable [namespace current]::tmpJPrefs(statusMsg,bool,$status)
-	ttk::entry $wlo.e$status -font CociSmallFont \
-	  -textvariable [namespace current]::tmpJPrefs(statusMsg,msg,$status)
-	  
-	grid  $wlo.c$status  $wlo.e$status  -sticky w -pady 1
-	grid  $wlo.e$status  -sticky ew
-    }
-    grid columnconfigure $wlo 1 -weight 1
-    
-    set anchor [option get . dialogAnchor {}]
-
-    pack  $waa  -side top -fill x -anchor $anchor
-    pack  $wlo  -side top -fill x -anchor $anchor -pady 12
+    pack  $wc.lab  $waf  $was  -side top -anchor w
 }
 
 # JPrefs::UpdateAutoAwaySettings --

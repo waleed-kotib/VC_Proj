@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.44 2006-12-01 08:55:13 matben Exp $
+# $Id: Emoticons.tcl,v 1.45 2006-12-15 08:07:14 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -94,7 +94,6 @@ proc ::Emoticons::Make {w word} {
     variable smiley
     
     if {[info exists smiley($word)]} {
-	#$w image create end -image $smiley($word) -name $word
 	$w image create insert -image $smiley($word) -name $word
     }
 }
@@ -525,6 +524,33 @@ proc ::Emoticons::InsertTextLegend {w name args} {
     $w configure -state disabled
 }
 
+proc ::Emoticons::ImportSet { } {
+    global  this
+    
+    set types [list [list [mc {Jabber Iconset Archive}] {.jisp}]]
+    set fileName [tk_getOpenFile -filetypes $types \
+      -title [mc {Open jisp Archive}]]
+    if {[file exists $fileName]} {
+	set tail [file tail $fileName]
+	set name [file rootname $tail]
+	if {[lsearch [GetAllSets] $name] >= 0} {
+	    ::UI::MessageBox -icon error -title [mc Error] \
+	      -message "Iconset \"$name\" already exists."
+	    return
+	}
+	file copy $fileName $this(altEmoticonsPath)
+	set dst [file join $this(altEmoticonsPath) $tail]
+	if {[catch {
+	    LoadTmpIconSet $dst
+	} err]} {
+	    ::UI::MessageBox -icon error -title [mc Error] \
+	      -message "Failed loading iconset \"$name\". $err"
+	    return
+	}
+    }    
+    return $fileName
+}
+
 # Preference page --------------------------------------------------------------
 
 proc  ::Emoticons::InitPrefsHook { } {
@@ -600,7 +626,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     set wpreftext $wfr.t
     
     ttk::button $wc.imp -text [mc {Import Iconset...}]  \
-      -command [namespace current]::ImportSet
+      -command [namespace current]::ImportSetToPrefs
     pack $wc.imp -side top -anchor w -pady 4
     
     if {[lsearch $allSets $jprefs(emoticonSet)] < 0} {
@@ -611,7 +637,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     PrefsSetCmd $tmpSet
 }
 
-proc ::Emoticons::ImportSet { } {
+proc ::Emoticons::ImportSetToPrefs { } {
     global  this
     variable wprefpage
     variable wiconsetmenu
@@ -619,7 +645,7 @@ proc ::Emoticons::ImportSet { } {
     set types [list [list [mc {Jabber Iconset Archive}] {.jisp}]]
     set fileName [tk_getOpenFile -parent [winfo toplevel $wprefpage] \
       -filetypes $types -title [mc {Open jisp Archive}]]
-    if {[string length $fileName]} {
+    if {[file exists $fileName]} {
 	set tail [file tail $fileName]
 	set name [file rootname $tail]
 	if {[lsearch [GetAllSets] $name] >= 0} {

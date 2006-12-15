@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.32 2006-12-08 13:42:52 matben Exp $
+# $Id: Status.tcl,v 1.33 2006-12-15 08:07:15 matben Exp $
 
 package provide Status 1.0
 
@@ -448,15 +448,7 @@ proc ::Status::StatusMsgRadioCmd {w} {
     variable $w
     upvar #0 $w state
 
-    # We could have an option here to set default status message if any.
-    if {0} {
-	if {$jprefs(statusMsg,bool,$show) && ($jprefs(statusMsg,msg,$show) ne "")} {
-	    set wtext $state(wtext)
-	    set show $state(-show)
-	    $wtext delete 1.0 end
-	    $wtext insert end $jprefs(statusMsg,msg,$show)
-	}
-    }
+    # Empty.
 }
 
 proc ::Status::CloseStatus {w} {

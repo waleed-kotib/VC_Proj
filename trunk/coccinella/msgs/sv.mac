@@ -421,6 +421,10 @@
 ::msgcat::mcset sv mFind         	{Sök}
 ::msgcat::mcset sv mFindAgain         	{Sök igen}
 ::msgcat::mcset sv mCustomStatus        {Anpassat meddelande...}
+::msgcat::mcset sv mImport              {Importera}
+::msgcat::mcset sv mExport              {Exportera}
+::msgcat::mcset sv mEmoticonSet         {Smileysamling...}
+::msgcat::mcset sv mRoster              {Användarlista...}
 
 
 # Popups
