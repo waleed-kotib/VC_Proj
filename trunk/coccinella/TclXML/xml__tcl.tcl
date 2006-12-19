@@ -4,26 +4,15 @@
 #	class support found in ../tclxml.c.  It is only used
 #	when the C implementation is not installed (for some reason).
 #
-# Copyright (c) 2000 Zveno Pty Ltd
+# Copyright (c) 2000-2004 Zveno Pty Ltd
 # http://www.zveno.com/
 # 
-# Zveno makes this software and all associated data and documentation
-# ('Software') available free of charge for any purpose.
-# Copies may be made of this Software but all of this notice must be included
-# on any copy.
-# 
-# The Software was developed for research purposes and Zveno does not warrant
-# that it is error free or fit for any purpose.  Zveno disclaims any
-# liability for all claims, expenses, losses, damages and costs any user may
-# incur as a result of using, copying or modifying the Software.
+# See the file "LICENSE" in this distribution for information on usage and
+# redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# $Id: xml__tcl.tcl,v 1.3 2004-09-02 13:59:38 matben Exp $
+# $Id: xml__tcl.tcl,v 1.4 2006-12-19 13:27:09 matben Exp $
 
 package provide xml::tcl 99.0
-
-#if {![catch {package require xml::c}]} {
-#    return -code error "this package is incompatible with xml::c"
-#}
 
 namespace eval xml {
     namespace export configure parser parserclass
@@ -236,15 +225,13 @@ proc xml::ParserCmd {name method args} {
 
 	    uplevel 1 [list proc $new {method args} "eval [namespace current]::ParserCmd [list $new] \[list \$method\] \$args"]
 
-	    eval $classinfo(-createentityparsercommand) [list $name $new] $args
-
-	    return $new
+	    return [eval $classinfo(-createentityparsercommand) [list $name $new] $args]
 	}
 
 	free {
 	    eval $classinfo(-deletecommand) [list $name]
 	    unset data
-	    rename $name {}
+	    uplevel 1 [list rename $name {}]
 	}
 
 	get {
@@ -259,8 +246,7 @@ proc xml::ParserCmd {name method args} {
 	}
 
 	reset {
-	    eval $classinfo(-deletecommand) [list $name]
-	    eval $classinfo(-createcommand) [list $name]
+	    eval $classinfo(-resetcommand) [list $name]
 	}
 
 	default {

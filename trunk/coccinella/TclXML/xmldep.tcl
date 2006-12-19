@@ -6,14 +6,17 @@
 # TODO:
 #	XInclude
 #
-# Copyright (c) 2001 Zveno Pty Ltd
+# Copyright (c) 2001-2003 Zveno Pty Ltd
 # http://www.zveno.com/
 #
-# $Id: xmldep.tcl,v 1.2 2004-08-17 14:10:30 matben Exp $
+# See the file "LICENSE" in this distribution for information on usage and
+# redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# $Id: xmldep.tcl,v 1.3 2006-12-19 13:27:09 matben Exp $
 
 package require xml
 
-package provide xml::dep
+package provide xml::dep 1.0
 
 namespace eval xml::dep {
     namespace export depend
