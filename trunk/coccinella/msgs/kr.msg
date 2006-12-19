@@ -752,6 +752,9 @@
 ::msgcat::mcset kr {French} 		      {불어}
 ::msgcat::mcset kr {German} 		      {독일어}
 ::msgcat::mcset kr {Italian}		      {이태리어}
+
+::msgcat::mcset kr {Korean}
+
 ::msgcat::mcset kr {Polish} 		      {폴란드어}
 ::msgcat::mcset kr {Russian} 		      {러시아어}
 ::msgcat::mcset kr {Spanish} 		      {스페인어}
@@ -765,6 +768,7 @@
 ::msgcat::mcset kr nativeFrench     Francais
 ::msgcat::mcset kr nativeGerman     Deutsch
 ::msgcat::mcset kr nativeItalian
+::msgcat::mcset kr nativeKorean
 ::msgcat::mcset kr nativePolish 
 ::msgcat::mcset kr nativeRussian 
 ::msgcat::mcset kr nativeSpanish    Castellano

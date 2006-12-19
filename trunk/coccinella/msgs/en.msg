@@ -752,6 +752,7 @@
 ::msgcat::mcset en {French} 
 ::msgcat::mcset en {German} 
 ::msgcat::mcset en {Italian}
+::msgcat::mcset en {Korean}
 ::msgcat::mcset en {Polish} 
 ::msgcat::mcset en {Russian} 
 ::msgcat::mcset en {Spanish} 
@@ -765,6 +766,7 @@
 ::msgcat::mcset en nativeFrench     Français
 ::msgcat::mcset en nativeGerman     Deutsch
 ::msgcat::mcset en nativeItalian
+::msgcat::mcset en nativeKorean
 ::msgcat::mcset en nativePolish 
 ::msgcat::mcset en nativeRussian 
 ::msgcat::mcset en nativeSpanish    Castellano

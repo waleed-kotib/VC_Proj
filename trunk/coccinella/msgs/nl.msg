@@ -773,6 +773,7 @@
 ::msgcat::mcset nl nativeFrench				Français
 ::msgcat::mcset nl nativeGerman				Deutsch
 ::msgcat::mcset nl nativeItalian			Italiano
+::msgcat::mcset nl nativeKorean
 ::msgcat::mcset nl nativePolish				Polski
 ::msgcat::mcset nl nativeRussian			русский
 ::msgcat::mcset nl nativeSpanish			Castellano
