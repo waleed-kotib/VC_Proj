@@ -570,11 +570,6 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Not older than}		{Не старее чем}
 ::msgcat::mcset ru {Pick skin}				{Выбрать скин}
 ::msgcat::mcset ru {Set windows opacity}	{Установить прозрачность окна}
-# Time intervals.
-::msgcat::mcset ru {Ten seconds}			{Десять секунд}
-::msgcat::mcset ru {One minute}			{Одна минута}
-::msgcat::mcset ru {Ten minutes}			{Десять минут}
-
 
 
 ::msgcat::mcset ru {Open Canvas}
@@ -670,6 +665,42 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Writing file}			{Запись файла}
 ::msgcat::mcset ru {Buddy Pouncing}		{Личные настройки}
 ::msgcat::mcset ru {Info Room}			{Комната модерирования}
+
+# Time intervals.
+::msgcat::mcset ru {Ten seconds}			{Десять секунд}
+::msgcat::mcset ru {One minute}			{Одна минута}
+::msgcat::mcset ru {Ten minutes}			{Десять минут}
+::msgcat::mcset ru {One hour}
+::msgcat::mcset ru {One day} 
+::msgcat::mcset ru {One week}
+
+# Language names.
+::msgcat::mcset ru {Danish}  
+::msgcat::mcset ru {Dutch}  
+::msgcat::mcset ru {English}
+::msgcat::mcset ru {French}    
+::msgcat::mcset ru {German}    
+::msgcat::mcset ru {Italian}   
+::msgcat::mcset ru {Korean}    
+::msgcat::mcset ru {Polish}    
+::msgcat::mcset ru {Russian}   
+::msgcat::mcset ru {Spanish}   
+::msgcat::mcset ru {Swedish}   
+
+# Same languge names but with their native names.
+# See the other catalogs to get these.
+::msgcat::mcset ru nativeDanish     Dansk
+::msgcat::mcset ru nativeDutch      Nederlands
+::msgcat::mcset ru nativeEnglish    English
+::msgcat::mcset ru nativeFrench     
+::msgcat::mcset ru nativeGerman     Deutsch
+::msgcat::mcset ru nativeItalian
+::msgcat::mcset ru nativeKorean
+::msgcat::mcset ru nativePolish 
+::msgcat::mcset ru nativeRussian 
+::msgcat::mcset ru nativeSpanish    Castellano
+::msgcat::mcset ru nativeSwedish    Svenska 
+
 
 # Splash screen:
 ::msgcat::mcset ru splashsource 		{Чтение Tcl кодв...}

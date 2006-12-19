@@ -756,15 +756,17 @@
 ::msgcat::mcset pl {One week}             {Tydzień}
 
 # Language names.
-::msgcat::mcset pl {Duński} 
-::msgcat::mcset pl {Niderlandzki} 
-::msgcat::mcset pl {Angielski} 
-::msgcat::mcset pl {Francuski} 
-::msgcat::mcset pl {Niemiecki} 
-::msgcat::mcset pl {Polski} 
-::msgcat::mcset pl {Rosyjski} 
-::msgcat::mcset pl {Hiszpański} 
-::msgcat::mcset pl {Szwedzki} 
+::msgcat::mcset pl {Danish}    {Duński} 
+::msgcat::mcset pl {Dutch}     {Niderlandzki} 
+::msgcat::mcset pl {English}   {Angielski} 
+::msgcat::mcset pl {French}    {Francuski} 
+::msgcat::mcset pl {German}    {Niemiecki} 
+::msgcat::mcset pl {Italian}
+::msgcat::mcset pl {Korean} 
+::msgcat::mcset pl {Polish}    {Polski} 
+::msgcat::mcset pl {Russian}   {Rosyjski} 
+::msgcat::mcset pl {Spanish}   {Hiszpański} 
+::msgcat::mcset pl {Swedish}   {Szwedzki} 
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.

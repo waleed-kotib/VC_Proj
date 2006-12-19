@@ -755,6 +755,7 @@
 ::msgcat::mcset sv {French}     Franska
 ::msgcat::mcset sv {German}     Tyska
 ::msgcat::mcset sv {Italian}    Italienska
+::msgcat::mcset sv {Korean}     Koreanska
 ::msgcat::mcset sv {Polish}     Polska
 ::msgcat::mcset sv {Russian}    Ryska
 ::msgcat::mcset sv {Spanish}    Spanska
@@ -768,6 +769,7 @@
 ::msgcat::mcset sv nativeFrench     
 ::msgcat::mcset sv nativeGerman     Deutsch
 ::msgcat::mcset sv nativeItalian
+::msgcat::mcset sv nativeKorean
 ::msgcat::mcset sv nativePolish 
 ::msgcat::mcset sv nativeRussian 
 ::msgcat::mcset sv nativeSpanish    Castellano
