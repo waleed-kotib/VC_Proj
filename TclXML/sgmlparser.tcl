@@ -8,33 +8,17 @@
 #
 #	See sgml.tcl for variable definitions.
 #
-# Copyright (c) 1998-2001 Zveno Pty Ltd
+# Copyright (c) 1998-2003 Zveno Pty Ltd
 # http://www.zveno.com/
 #
-# Zveno makes this software available free of charge for any purpose.
-# Copies may be made of this software but all of this notice must be included
-# on any copy.
+# See the file "LICENSE" in this distribution for information on usage and
+# redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# The software was developed for research purposes only and Zveno does not
-# warrant that it is error free or fit for any purpose.  Zveno disclaims any
-# liability for all claims, expenses, losses, damages and costs any user may
-# incur as a result of using, copying or modifying this software.
-#
-# Copyright (c) 1997 ANU and CSIRO on behalf of the
-# participants in the CRC for Advanced Computational Systems ('ACSys').
-# 
-# ACSys makes this software and all associated data and documentation 
-# ('Software') available free of charge for any purpose.  You may make copies 
-# of the Software but you must include all of this notice on any copy.
-# 
-# The Software was developed for research purposes and ACSys does not warrant
-# that it is error free or fit for any purpose.  ACSys disclaims any
-# liability for all claims, expenses, losses, damages and costs any user may
-# incur as a result of using, copying or modifying the Software.
-#
-# $Id: sgmlparser.tcl,v 1.6 2005-10-06 14:41:27 matben Exp $
+# $Id: sgmlparser.tcl,v 1.7 2006-12-19 13:27:09 matben Exp $
 
-package require sgml 1.8
+package require sgml 1.9
+
+package require uri 1.1
 
 package provide sgmlparser 99.0
 
@@ -91,14 +75,16 @@ namespace eval sgml {
 	-errorcommand			[namespace current]::Error	\
 	-final				1				\
 	-validate			0				\
-	-baseurl			{}				\
+	-baseuri			{}				\
 	-name				{}				\
+	-cmd				{}				\
 	-emptyelement			[namespace current]::EmptyElement	\
 	-parseattributelistcommand	[namespace current]::noop	\
 	-parseentitydeclcommand		[namespace current]::noop	\
 	-normalize			1				\
 	-internaldtd			{}				\
 	-reportempty			0				\
+	-ignorewhitespace		0				\
     ]
 }
 
@@ -146,7 +132,6 @@ proc sgml::tokenise {sgml elemExpr elemSub args} {
     # Do the translation
 
     if {[info exists options(-statevariable)]} {
-
 	# Mats: Several rewrites here to handle -final 0 option.
 	# If any cached unparsed xml (state(leftover)), prepend it.
 	upvar #0 $options(-statevariable) state
@@ -167,6 +152,11 @@ proc sgml::tokenise {sgml elemExpr elemSub args} {
 	    # Mats: unmatched stuff means that it is chopped off. Cache it for next round.
 	    set state(leftover) $rest
 	}
+
+	# Patch from bug report #596959, Marshall Rose
+	#if {[string compare [lindex $sgml 4] ""]} {
+	#    set sgml [linsert $sgml 0 {} {} {} {} {}]
+	#}
 
     } else {
 
@@ -201,7 +191,7 @@ proc sgml::tokenise {sgml elemExpr elemSub args} {
 # Valid Options:
 #	-final			Indicates end of document data
 #	-validate		Boolean to enable validation
-#	-baseurl		URL for resolving relative URLs
+#	-baseuri		URL for resolving relative URLs
 #	-elementstartcommand	Called when an element starts
 #	-elementendcommand	Called when an element ends
 #	-characterdatacommand	Called when character data occurs
@@ -229,6 +219,7 @@ proc sgml::tokenise {sgml elemExpr elemSub args} {
 #	-statevariable		global state variable
 #	-normalize		whether to normalize names
 #	-reportempty		whether to include an indication of empty elements
+#	-ignorewhitespace	whether to automatically strip whitespace
 #
 # Results:
 #	The various callback scripts are invoked.
@@ -289,6 +280,9 @@ proc sgml::parseEvent {sgml args} {
 	set options(namespaces) [namespace current]::Namespaces$ParseEventNum
     }
 
+    # For backward-compatibility
+    catch {set options(-baseuri) $options(-baseurl)}
+
     # Choose an external entity resolver
 
     if {![string length $options(-externalentitycommand)]} {
@@ -307,8 +301,7 @@ proc sgml::parseEvent {sgml args} {
     # I've switched back to an older version here. 
     
     if {![info exists state(line)]} {
-	
-	# Initialise the state variable	
+	# Initialise the state variable
 	array set state {
 	    mode normal
 	    haveXMLDecl 0
@@ -341,11 +334,11 @@ proc sgml::parseEvent {sgml args} {
 		    set tag {}
 		    set close {}
 		    set state(mode) normal
-		    uplevel #0 $options(-commentcommand) [list $state(commentdata)<$comm1]
+		    DeProtect1 $options(-commentcommand) $state(commentdata)<$comm1
 		    unset state(commentdata)
 		} elseif {[regexp ([cl ^-]*)--\$ $param discard comm1]} {
 		    # end of comment (in attributes)
-		    uplevel #0 $options(-commentcommand) [list $state(commentdata)<$close$tag>$comm1]
+		    DeProtect1 $options(-commentcommand) $state(commentdata)<$close$tag>$comm1
 		    unset state(commentdata)
 		    set tag {}
 		    set param {}
@@ -353,7 +346,7 @@ proc sgml::parseEvent {sgml args} {
 		    set state(mode) normal
 		} elseif {[regexp ([cl ^-]*)-->(.*) $text discard comm1 text]} {
 		    # end of comment (in text)
-		    uplevel #0 $options(-commentcommand) [list $state(commentdata)<$close$tag$param>$comm1]
+		    DeProtect1 $options(-commentcommand) $state(commentdata)<$close$tag$param>$comm1
 		    unset state(commentdata)
 		    set tag {}
 		    set param {}
@@ -368,14 +361,14 @@ proc sgml::parseEvent {sgml args} {
 	    cdata {
 		if {[string length $param] && [regexp ([cl ^\]]*)\]\][cl $Wsp]*\$ $tag discard cdata1]} {
 		    # end of CDATA (in tag)
-		    uplevel #0 $options(-characterdatacommand) [list $state(cdata)<[subst -nocommand -novariable $close$cdata1]]
+		    PCDATA [array get options] $state(cdata)<[subst -nocommand -novariable $close$cdata1]
 		    set text [subst -novariable -nocommand $text]
 		    set tag {}
 		    unset state(cdata)
 		    set state(mode) normal
 		} elseif {[regexp ([cl ^\]]*)\]\][cl $Wsp]*\$ $param discard cdata1]} {
 		    # end of CDATA (in attributes)
-		    uplevel #0 $options(-characterdatacommand) [list $state(cdata)<[subst -nocommand -novariable $close$tag$cdata1]]
+		    PCDATA [array get options] $state(cdata)<[subst -nocommand -novariable $close$tag$cdata1]
 		    set text [subst -novariable -nocommand $text]
 		    set tag {}
 		    set param {}
@@ -383,7 +376,7 @@ proc sgml::parseEvent {sgml args} {
 		    set state(mode) normal
 		} elseif {[regexp (.*)\]\][cl $Wsp]*>(.*) $text discard cdata1 text]} {
 		    # end of CDATA (in text)
-		    uplevel #0 $options(-characterdatacommand) [list $state(cdata)<[subst -nocommand -novariable $close$tag$param>$cdata1]]
+		    PCDATA [array get options] $state(cdata)<[subst -nocommand -novariable $close$tag$param>$cdata1]
 		    set text [subst -novariable -nocommand $text]
 		    set tag {}
 		    set param {}
@@ -655,7 +648,7 @@ proc sgml::parseEvent {sgml args} {
 				    if {[regexp ^[cl $Wsp]+"([cl ^"]*)"(.*) $param x systemlit param] || [regexp ^[cl $Wsp]+'([cl ^']*)'(.*) $param x systemlit param]} {
 					set externalID [list SYSTEM $systemlit] ;# "
 				    } else {
-					uplevel #0 $options(-errorcommand) {XXX {syntax error: SYSTEM identifier not followed by literal}}
+					uplevel #0 $options(-errorcommand) {syntaxerror {syntax error: SYSTEM identifier not followed by literal}}
 				    }
 				}
 				PUBLIC {
@@ -712,17 +705,17 @@ proc sgml::parseEvent {sgml args} {
 			regexp {!\[CDATA\[(.*)} $tag discard cdata1
 			if {[regexp {(.*)]]$} $cdata1 discard cdata2]} {
 			    # processed CDATA (end in tag)
-			    uplevel #0 $options(-characterdatacommand) [list [subst -novariable -nocommand $cdata2]]
+			    PCDATA [array get options] [subst -novariable -nocommand $cdata2]
 			    set text [subst -novariable -nocommand $text]
 			} elseif {[regexp {(.*)]]$} $param discard cdata2]} {
 			    # processed CDATA (end in attribute)
 			    # Backslashes in param are quoted at this stage
-			    uplevel #0 $options(-characterdatacommand) [list $cdata1[subst -novariable -nocommand $cdata2]]
+			    PCDATA [array get options] $cdata1[subst -novariable -nocommand $cdata2]
 			    set text [subst -novariable -nocommand $text]
 			} elseif {[regexp {(.*)]]>(.*)} $text discard cdata2 text]} {
 			    # processed CDATA (end in text)
 			    # Backslashes in param and text are quoted at this stage
-			    uplevel #0 $options(-characterdatacommand) [list $cdata1[subst -novariable -nocommand $param]$empty>[subst -novariable -nocommand $cdata2]]
+			    PCDATA [array get options] $cdata1[subst -novariable -nocommand $param]$empty>[subst -novariable -nocommand $cdata2]
 			    set text [subst -novariable -nocommand $text]
 			} else {
 			    # start CDATA
@@ -776,13 +769,14 @@ proc sgml::parseEvent {sgml args} {
 		regsub -all {([][$\\{}])} $text {\\\1} text
 
 		# Mark entity references
-		regsub -all {&([^;]+);} $text [format {%s; %s {\1} ; %s %s} \}\} [namespace code [list Entity [array get options] $options(-entityreferencecommand) $options(-characterdatacommand) $options(entities)]] [namespace code [list DeProtect $options(-characterdatacommand)]] \{\{] text
-		set text "uplevel #0 [namespace code [list DeProtect1 $options(-characterdatacommand)]] {{$text}}"
+		regsub -all {&([^;]+);} $text [format {%s; %s {\1} ; %s %s} \}\} [namespace code [list Entity [array get options] $options(-entityreferencecommand) [namespace code [list PCDATA [array get options]]] $options(entities)]] [namespace code [list DeProtect [namespace code [list PCDATA [array get options]]]]] \{\{] text
+		set text "uplevel #0 [namespace code [list DeProtect1 [namespace code [list PCDATA [array get options]]]]] {{$text}}"
 		eval $text
 	    } else {
+
 		# Restore protected special characters
 		regsub -all {\\([][{}\\])} $text {\1} text
-		uplevel #0 $options(-characterdatacommand) [list $text]
+		PCDATA [array get options] $text
 	    }
 	} elseif {[string length [string trim $text]]} {
 	    uplevel #0 $options(-errorcommand) [list unexpectedtext "unexpected text \"$text\" in document prolog around line $state(line)"]
@@ -812,14 +806,14 @@ proc sgml::parseEvent {sgml args} {
 
 proc sgml::DeProtect1 {cmd text} {
     if {[string compare {} $text]} {
-	regsub -all {\\([][{}\\])} $text {\1} text
+	regsub -all {\\([]$[{}\\])} $text {\1} text
 	uplevel #0 $cmd [list $text]
     }
 }
 proc sgml::DeProtect {cmd text} {
     set text [lindex $text 0]
     if {[string compare {} $text]} {
-	regsub -all {\\([][{}\\])} $text {\1} text
+	regsub -all {\\([]$[{}\\])} $text {\1} text
 	uplevel #0 $cmd [list $text]
     }
 }
@@ -878,6 +872,7 @@ proc sgml::ParseEvent:ElementOpen {tag attr opts args} {
     upvar #0 $options(-statevariable) state
     array set cfg {-empty 0}
     array set cfg $args
+    set handleEmpty 0
 
     if {$options(-normalize)} {
 	set tag [string toupper $tag]
@@ -885,10 +880,10 @@ proc sgml::ParseEvent:ElementOpen {tag attr opts args} {
 
     # Update state
     lappend state(stack) $tag
-    
+
     # Parse attribute list into a key-value representation
     if {[string compare $options(-parseattributelistcommand) {}]} {
-	if {[catch {uplevel #0 $options(-parseattributelistcommand) [list $attr]} attr]} {
+	if {[catch {uplevel #0 $options(-parseattributelistcommand) [list $opts $attr]} attr]} {
 	    if {[string compare [lindex $attr 0] "unterminated attribute value"]} {
 		uplevel #0 $options(-errorcommand) [list unterminatedattribute "$attr around line $state(line)"]
 		set attr {}
@@ -906,15 +901,22 @@ proc sgml::ParseEvent:ElementOpen {tag attr opts args} {
 		if {[string first > $elemText] >= 0} {
 
 		    # Now piece the attribute list back together
-		    regexp ($Name)[cl $Wsp]*=[cl $Wsp]*("|')(.*) $brokenattr discard attname delimiter attvalue
+		    regexp [cl $Wsp]*($Name)[cl $Wsp]*=[cl $Wsp]*("|')(.*) $brokenattr discard attname delimiter attvalue
 		    regexp (.*)>([cl ^>]*)\$ $elemText discard remattlist elemText
 		    regexp ([cl ^$delimiter]*)${delimiter}(.*) $remattlist discard remattvalue remattlist
+
+		    # Gotcha: watch out for empty element syntax
+		    if {[string match */ [string trimright $remattlist]]} {
+			set remattlist [string range $remattlist 0 end-1]
+			set handleEmpty 1
+			set cfg(-empty) 1
+		    }
 
 		    append attvalue >$remattvalue
 		    lappend attlist $attname $attvalue
 
 		    # Complete parsing the attribute list
-		    if {[catch {uplevel #0 $options(-parseattributelistcommand) [list $remattlist]} attr]} {
+		    if {[catch {uplevel #0 $options(-parseattributelistcommand) [list $options(-statevariable) $remattlist]} attr]} {
 			uplevel #0 $options(-errorcommand) [list unterminatedattribute "$attr around line $state(line)"]
 			set attr {}
 			set attlist {}
@@ -989,6 +991,12 @@ proc sgml::ParseEvent:ElementOpen {tag attr opts args} {
 
     # Invoke callback
     set code [catch {uplevel #0 $options(-elementstartcommand) [list $tag $attr] $empty $ns $nsdecls} msg]
+
+    # Sometimes empty elements must be handled here (see above)
+    if {$code == 0 && $handleEmpty} {
+	ParseEvent:ElementClose $tag $opts -empty 1
+    }
+
     return -code $code -errorinfo $::errorInfo $msg
 }
 
@@ -1013,7 +1021,7 @@ proc sgml::ParseEvent:ElementClose {tag opts args} {
     upvar #0 $options(-statevariable) state
     array set cfg {-empty 0}
     array set cfg $args
- 
+
     # WF check
     if {[string compare $tag [lindex $state(stack) end]]} {
 	uplevel #0 $options(-errorcommand) [list illegalendtag "end tag \"$tag\" does not match open element \"[lindex $state(stack) end]\" around line $state(line)"]
@@ -1054,6 +1062,34 @@ proc sgml::ParseEvent:ElementClose {tag opts args} {
     return -code $code -errorinfo $::errorInfo $msg
 }
 
+# sgml::PCDATA --
+#
+#	Process PCDATA before passing to application
+#
+# Arguments:
+#	opts	options
+#	pcdata	Character data to be processed
+#
+# Results:
+#	Checks that characters are legal,
+#	checks -ignorewhitespace setting.
+
+proc sgml::PCDATA {opts pcdata} {
+    array set options $opts
+
+    if {$options(-ignorewhitespace) && \
+	    ![string length [string trim $pcdata]]} {
+	return {}
+    }
+
+    if {![regexp ^[cl $::sgml::Char]*\$ $pcdata]} {
+	upvar \#0 $options(-statevariable) state
+	uplevel \#0 $options(-errorcommand) [list illegalcharacters "illegal, non-Unicode characters found in text \"$pcdata\" around line $state(line)"]
+    }
+
+    uplevel \#0 $options(-characterdatacommand) [list $pcdata]
+}
+
 # sgml::Normalize --
 #
 #	Perform name normalization if required
@@ -1092,7 +1128,7 @@ proc sgml::Entity {opts entityrefcmd pcdatacmd entities ref} {
     upvar #0 $options(-statevariable) state
 
     if {![string length $entities]} {
-	set entities [namespace current EntityPredef]
+	set entities [namespace current]::EntityPredef
     }
 
     switch -glob -- $ref {
@@ -1227,7 +1263,7 @@ proc sgml::ParseEvent:DocTypeDecl {opts docEl pubId sysId intSSet} {
     # DTD data.  The application may supply its own resolver.
 
     if {[string length $pubId] || [string length $sysId]} {
-	uplevel #0 $options(-externalentitycommand) [list $options(-name) $options(-baseurl) $sysId $pubId]
+	uplevel #0 $options(-externalentitycommand) [list $options(-cmd) $options(-baseuri) $sysId $pubId]
     }
 
     return {}
@@ -1256,6 +1292,9 @@ proc sgml::ParseDTD:Internal {opts dtd} {
     upvar #0 $options(-statevariable) state
     upvar #0 $options(parameterentities) PEnts
     upvar #0 $options(externalparameterentities) ExtPEnts
+
+    # Bug 583947: remove comments before further processing
+    regsub -all {<!--.*?-->} $dtd {} dtd
 
     # Tokenize the DTD
 
@@ -1306,10 +1345,10 @@ proc sgml::ParseDTD:Internal {opts dtd} {
 		# BUG: no checks yet for recursive entity references
 
 		if {[info exists PEnts($entref)]} {
-		    set externalParser [$options(-name) entityparser]
+		    set externalParser [$options(-cmd) entityparser]
 		    $externalParser parse $PEnts($entref) -dtdsubset internal
 		} elseif {[info exists ExtPEnts($entref)]} {
-		    set externalParser [$options(-name) entityparser]
+		    set externalParser [$options(-cmd) entityparser]
 		    $externalParser parse $ExtPEnts($entref) -dtdsubset external
 		    #$externalParser free
 		} else {
@@ -1596,7 +1635,7 @@ proc sgml::ParseDTD:ProcessMarkupDecl {opts declVar valueVar delimiterVar nameVa
 
 		    lappend state(condSections) INCLUDE
 
-		    set parser [$options(-name) entityparser]
+		    set parser [$options(-cmd) entityparser]
 		    $parser parse $remainder\ $value> -dtdsubset external
 		    #$parser free
 
@@ -1783,7 +1822,7 @@ proc sgml::ParseDTD:External {opts dtd} {
 	    *,*,0 {
 		if {[catch {append data $PEnts($PEref)}]} {
 		    if {[info exists ExtPEnts($PEref)]} {
-			set externalParser [$options(-name) entityparser]
+			set externalParser [$options(-cmd) entityparser]
 			$externalParser parse $ExtPEnts($PEref) -dtdsubset external
 			#$externalParser free
 		    } else {
@@ -1795,7 +1834,7 @@ proc sgml::ParseDTD:External {opts dtd} {
 	    default {
 		if {[catch {append text $PEnts($PEref)}]} {
 		    if {[info exists ExtPEnts($PEref)]} {
-			set externalParser [$options(-name) entityparser]
+			set externalParser [$options(-cmd) entityparser]
 			$externalParser parse $ExtPEnts($PEref) -dtdsubset external
 			#$externalParser free
 		    } else {
@@ -1885,7 +1924,7 @@ proc sgml::DTD:ELEMENT {opts name modspec} {
     upvar #0 $options(elementdecls) elements
 
     if {$options(-validate) && [info exists elements($name)]} {
-	eval $options(-errorcommand) elementdeclared [list "element \"$name\" already declared"]
+	eval $options(-errorcommand) [list elementdeclared "element \"$name\" already declared"]
     } else {
 	switch -- $modspec {
 	    EMPTY {
@@ -1903,7 +1942,7 @@ proc sgml::DTD:ELEMENT {opts name modspec} {
 		    set cm($name) [list MIXED [split $mtoks |]]
 		} elseif {0} {
 		    if {[catch {CModelParse $state(state) $value} result]} {
-			eval $options(-errorcommand) element [list $result]
+			eval $options(-errorcommand) [list element? $result]
 		    } else {
 			set cm($id) [list ELEMENT $result]
 		    }
@@ -2643,8 +2682,8 @@ proc sgml::DTD:ENTITY {opts name param value} {
 		    # Get the replacement text now.
 		    # Could wait until the first reference, but easier
 		    # to just do it now.
-		    package require uri
-		    set token [uri::geturl [uri::resolve $options(-baseurl) [lindex $value 1]]]
+
+		    set token [uri::geturl [uri::resolve $options(-baseuri) [lindex $value 1]]]
 
 		    set ExtPEnts($name) [lindex [array get $token data] 1]
 		    uplevel #0 $options(-parameterentitydeclcommand) [eval list $name [lrange $value 1 2]]
@@ -2736,7 +2775,7 @@ proc sgml::DTD:NOTATION {opts name value} {
 
     if {[regexp $notation_exp $value x scheme data] == 2} {
     } else {
-	eval $state(-errorcommand) notationvalue [list "notation value \"$value\" incorrectly specified"]
+	eval $state(-errorcommand) [list notationvalue "notation value \"$value\" incorrectly specified"]
     }
 }
 
@@ -2745,15 +2784,13 @@ proc sgml::DTD:NOTATION {opts name value} {
 #	Default entity resolution routine
 #
 # Arguments:
-#	name	name of parent parser
+#	cmd	command of parent parser
 #	base	base URL for relative URLs
 #	sysId	system identifier
 #	pubId	public identifier
 
-proc sgml::ResolveEntity {name base sysId pubId} {
+proc sgml::ResolveEntity {cmd base sysId pubId} {
     variable ParseEventNum
-
-    package require tcllib
 
     if {[catch {uri::resolve $base $sysId} url]} {
 	return -code error "unable to resolve system identifier \"$sysId\""
@@ -2764,10 +2801,15 @@ proc sgml::ResolveEntity {name base sysId pubId} {
 
     upvar #0 $token data
 
-    set parser [uplevel #0 $name entityparser]
+    set parser [uplevel #0 $cmd entityparser]
 
-    $parser parse $data(data) -dtdsubset external
-    #$parser free
+    set body {}
+    catch {set body $data(body)}
+    catch {set body $data(data)}
+    if {[string length $body]} {
+	uplevel #0 $parser parse [list $body] -dtdsubset external
+    }
+    $parser free
 
     return {}
 }

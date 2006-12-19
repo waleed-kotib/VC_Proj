@@ -3,9 +3,12 @@
 #	Provides an XPath parser for Tcl,
 #	plus various support procedures
 #
-# Copyright (c) 2000 Zveno Pty Ltd
+# Copyright (c) 2000-2003 Zveno Pty Ltd
 #
-# $Id: xpath.tcl,v 1.2 2004-08-17 14:10:30 matben Exp $
+# See the file "LICENSE" in this distribution for information on usage and
+# redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# $Id: xpath.tcl,v 1.3 2006-12-19 13:27:09 matben Exp $
 
 package provide xpath 1.0
 
@@ -86,12 +89,10 @@ proc xpath::InnerSplit {locpath leftoverVar} {
     while {[string length [string trimleft $locpath]]} {
 	if {[regexp {^\.\.(.*)} $locpath discard locpath]} {
 	    # .. abbreviation
-	    #puts stderr [list .. abbrev]
 	    set axis parent
 	    set nodetest *
 	} elseif {[regexp {^/(.*)} $locpath discard locpath]} {
 	    # // abbreviation
-	    #puts stderr [list // abbrev]
 	    set axis descendant-or-self
 	    if {[regexp ^$nodetestExpr2 [string trimleft $locpath] discard discard discard nodetest discard typetest discard discard literal wildcard locpath]} {
 		set nodetest [ResolveWildcard $nodetest $typetest $wildcard $literal]
@@ -101,40 +102,33 @@ proc xpath::InnerSplit {locpath leftoverVar} {
 	    }
 	} elseif {[regexp ^\\.${::xml::allWsp}(.*) $locpath discard locpath]} {
 	    # . abbreviation
-	    #puts stderr [list . abbrev]
 	    set axis self
 	    set nodetest *
 	} elseif {[regexp ^@($::xml::QName)${::xml::allWsp}=${::xml::allWsp}"(\[^"\])"(.*) $locpath discard attrName discard attrValue locpath]} {
 	    # @ abbreviation
-	    #puts stderr [list @ abbrev 1]
 	    set axis attribute
 	    set nodetest $attrName
 	} elseif {[regexp ^@($::xml::QName)${::xml::allWsp}=${::xml::allWsp}'(\[^'\])'(.*) $locpath discard attrName discard attrValue locpath]} {
 	    # @ abbreviation
-	    #puts stderr [list @ abbrev 2]
 	    set axis attribute
 	    set nodetest $attrName
-	} elseif {[regexp ^@($::xml::QName)(.*) $locpath discard attrName discard locpath]} {
+	} elseif {[regexp ^@($::xml::QName)(.*) $locpath discard attrName discard2 locpath]} {
 	    # @ abbreviation
-	    #puts stderr [list @ abbrev 3 ]
 	    set axis attribute
 	    set nodetest $attrName
 	} elseif {[regexp ^((${::xml::QName})${::xml::allWsp}::${::xml::allWsp})?\\*(.*) $locpath discard discard axis discard locpath]} {
 	    # wildcard specified
-	    #puts stderr [list got axis and/or wildcard]
 	    set nodetest *
 	    if {![string length $axis]} {
 		set axis child
 	    }
 	} elseif {[regexp ^((${::xml::QName})${::xml::allWsp}::${::xml::allWsp})?$nodetestExpr2 $locpath discard discard axis discard discard discard nodetest discard typetest discard discard literal wildcard locpath]} {
 	    # nodetest, with or without axis
-	    #puts stderr [list no axis, got a nodetest]
 	    if {![string length $axis]} {
 		set axis child
 	    }
 	    set nodetest [ResolveWildcard $nodetest $typetest $wildcard $literal]
 	} else {
-	    #puts stderr [list else case]
 	    set leftover $locpath
 	    return $path
 	}
@@ -170,8 +164,8 @@ proc xpath::InnerSplit {locpath leftoverVar} {
 
 	# Move to next step
 
-	if {[string length $locpath] && ![regexp /(.*) $locpath discard locpath]} {
-	    set leftover $locpath
+	if {[string length $locpath] && ![regexp ^/(.*) $locpath discard locpath]} {
+            set leftover $locpath
 	    return $path
 	}
 
@@ -179,6 +173,17 @@ proc xpath::InnerSplit {locpath leftoverVar} {
 
     return $path
 }
+
+# xpath::ParseExpr --
+#
+#	Parse one expression in a predicate
+#
+# Arguments:
+#	locpath	location path to parse
+#	leftoverVar	Name of variable in which to store remaining path
+#
+# Results:
+#	Returns parsed expression as a Tcl list
 
 proc xpath::ParseExpr {locpath leftoverVar} {
     upvar $leftoverVar leftover
@@ -193,7 +198,6 @@ proc xpath::ParseExpr {locpath leftoverVar} {
 	switch $mode {
 	    expr {
 		# We're looking for a term
-		#puts stderr [list looking for term in $locpath]
 		if {[regexp ^-(.*) $locpath discard locpath]} {
 		    # UnaryExpr
 		    lappend stack "-"
@@ -231,37 +235,42 @@ proc xpath::ParseExpr {locpath leftoverVar} {
 		    lappend stack [list number $number]
 		    set mode term
 		} elseif {[regexp ^(${::xml::QName})\\(${::xml::allWsp}(.*) $locpath discard functionName discard locpath]} {
-		    # Function call start
+		    # Function call start or abbreviated node-type test
 
 		    if {[lsearch $nodeTypes $functionName] >= 0} {
-			return -code error "invalid function name \"$functionName\""
-		    }
-
-		    if {[regexp ^\\)${::xml::allWsp}(.*) $locpath discard locpath]} {
-			set parameters {}
+			# Looking like a node-type test
+			if {[regexp ^\\)${::xml::allWsp}(.*) $locpath discard locpath]} {
+			    lappend stack [list path [list child [list $functionName ()] {}]]
+			    set mode term
+			} else {
+			    return -code error "invalid node-type test \"$functionName\""
+			}
 		    } else {
-			set leftover2 {}
-			set parameters [ParseExpr $locpath leftover2]
-			set locpath $leftover2
-			unset leftover2
-			while {[regexp {^,(.*)} $locpath discard locpath]} {
+			if {[regexp ^\\)${::xml::allWsp}(.*) $locpath discard locpath]} {
+			    set parameters {}
+			} else {
 			    set leftover2 {}
-			    lappend parameters [ParseExpr $locpath leftover2]
+			    set parameters [ParseExpr $locpath leftover2]
 			    set locpath $leftover2
 			    unset leftover2
-			}
+			    while {[regexp {^,(.*)} $locpath discard locpath]} {
+				set leftover2 {}
+				lappend parameters [ParseExpr $locpath leftover2]
+				set locpath $leftover2
+				unset leftover2
+			    }
 
-			if {![regexp ^\\)${::xml::allWsp}(.*) [string trimleft $locpath] discard locpath]} {
-			    return -code error "unexpected text \"locpath\" - expected \")\""
-			}
+			    if {![regexp ^\\)${::xml::allWsp}(.*) [string trimleft $locpath] discard locpath]} {
+				return -code error "unexpected text \"locpath\" - expected \")\""
+			    }
+		        }
+
+			lappend stack [list function $functionName $parameters]
+			set mode term
 		    }
-
-		    lappend stack [list function $functionName $parameters]
-		    set mode term
 
 		} else {
 		    # LocationPath
-		    #puts stderr [list ParseExpr found location path]
 		    set leftover2 {}
 		    lappend stack [list path [InnerSplit $locpath leftover2]]
 		    set locpath $leftover2
@@ -271,7 +280,6 @@ proc xpath::ParseExpr {locpath leftoverVar} {
 	    }
 	    term {
 		# We're looking for an expression operator
-		#puts stderr [list looking for operator in $locpath]
 		if {[regexp ^-(.*) $locpath discard locpath]} {
 		    # UnaryExpr
 		    set stack [linsert $stack 0 expr "-"]

@@ -6,37 +6,20 @@
 #	See xml-8.[01].tcl for definitions of character sets and
 #	regular expressions.
 #
-# Copyright (c) 1998-2001 Zveno Pty Ltd
+# Copyright (c) 1998-2003 Zveno Pty Ltd
 # http://www.zveno.com/
 # 
-# Zveno makes this software and all associated data and documentation
-# ('Software') available free of charge for any purpose.
-# Copies may be made of this Software but all of this notice must be included
-# on any copy.
-# 
-# The Software was developed for research purposes and Zveno does not warrant
-# that it is error free or fit for any purpose.  Zveno disclaims any
-# liability for all claims, expenses, losses, damages and costs any user may
-# incur as a result of using, copying or modifying the Software.
+# See the file "LICENSE" in this distribution for information on usage and
+# redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# Copyright (c) 1997 Australian National University (ANU).
-# 
-# ANU makes this software and all associated data and documentation
-# ('Software') available free of charge for any purpose. You may make copies
-# of the Software but you must include all of this notice on any copy.
-# 
-# The Software was developed for research purposes and ANU does not warrant
-# that it is error free or fit for any purpose.  ANU disclaims any
-# liability for all claims, expenses, losses, damages and costs any user may
-# incur as a result of using, copying or modifying the Software.
-#
-# $Id: tclparser-8.1.tcl,v 1.4 2006-09-20 14:12:38 matben Exp $
+# $Id: tclparser-8.1.tcl,v 1.5 2006-12-19 13:27:09 matben Exp $
 
 package require Tcl 8.1
 
 package provide xml::tclparser 99.0
 
 package require xmldefs 3.1
+
 package require sgmlparser 99.0
 
 namespace eval xml::tclparser {
@@ -55,7 +38,8 @@ namespace eval xml::tclparser {
 	    -createentityparsercommand [namespace code createentityparser] \
 	    -parsecommand [namespace code parse] \
 	    -configurecommand [namespace code configure] \
-	    -deletecommand [namespace code delete]
+	    -deletecommand [namespace code delete] \
+	    -resetcommand [namespace code reset]
 }
 
 # xml::tclparser::create --
@@ -73,15 +57,16 @@ proc xml::tclparser::create name {
     # Initialise state variable
     upvar \#0 [namespace current]::$name parser
     array set parser [list -name $name			\
+	-cmd [uplevel 3 namespace current]::$name	\
 	-final 1					\
 	-validate 0					\
 	-statevariable [namespace current]::$name	\
-	-baseurl {}					\
+	-baseuri {}					\
 	internaldtd {}					\
 	entities [namespace current]::Entities$name	\
 	extentities [namespace current]::ExtEntities$name	\
 	parameterentities [namespace current]::PEntities$name	\
-	externalparameterentities [namespace current]::ExtPEntities$name \
+	externalparameterentities [namespace current]::ExtPEntities$name	\
 	elementdecls [namespace current]::ElDecls$name	\
 	attlistdecls [namespace current]::AttlistDecls$name	\
 	notationdecls [namespace current]::NotDecls$name	\
@@ -92,7 +77,7 @@ proc xml::tclparser::create name {
     # Initialise entities with predefined set
     array set [namespace current]::Entities$name [array get ::sgml::EntityPredef]
 
-    return $name
+    return $parser(-cmd)
 }
 
 # xml::tclparser::createentityparser --
@@ -113,14 +98,17 @@ proc xml::tclparser::createentityparser {parent name} {
     upvar \#0 [namespace current]::$name external
     array set external [array get p]
 
-    array set external [list -name $name			\
+    regsub $parent $p(-cmd) {} parentns
+
+    array set external [list -name $name		\
+	-cmd $parentns$name				\
 	-statevariable [namespace current]::$name	\
 	internaldtd {}					\
 	line 0						\
     ]
     incr external(depth)
 
-    return $name
+    return $external(-cmd)
 }
 
 # xml::tclparser::configure --
@@ -149,11 +137,13 @@ proc xml::tclparser::configure {name args} {
       -paramentityparsing -defaultexpandinternalentities \
       -startdoctypedeclcommand -enddoctypedeclcommand \
       -entityreferencecommand -warningcommand \
+      -defaultcommand -unknownencodingcommand -notstandalonecommand \
+      -startcdatasectioncommand -endcdatasectioncommand \
       -errorcommand -final \
-      -validate -baseurl \
-      -name -emptyelement \
+      -validate -baseuri -baseurl \
+      -name -cmd -emptyelement \
       -parseattributelistcommand -parseentitydeclcommand \
-      -normalize -internaldtd \
+      -normalize -internaldtd -dtdsubset \
       -reportempty -ignorewhitespace \
       -reportempty \
     }
@@ -173,6 +163,9 @@ proc xml::tclparser::configure {name args} {
 	    return -code error "Unknown option $flag, can be: $usage"
 	}
     }
+
+    # Backward-compatibility: -baseuri is a synonym for -baseurl
+    catch {set parser(-baseuri) $parser(-baseurl)}
 
     return {}
 }
@@ -195,7 +188,7 @@ proc xml::tclparser::parse {name xml args} {
     upvar \#0 [namespace current]::$name parser
     variable tokExpr
     variable substExpr
-    
+
     # Mats:
     if {[llength $args]} {
 	eval {configure $name} $args
@@ -209,8 +202,10 @@ proc xml::tclparser::parse {name xml args} {
     eval lappend parseOptions \
 	    [array get parser -*command] \
 	    [array get parser -reportempty] \
+	    [array get parser -ignorewhitespace] \
 	    [array get parser -name] \
-	    [array get parser -baseurl] \
+	    [array get parser -cmd] \
+	    [array get parser -baseuri] \
 	    [array get parser -validate] \
 	    [array get parser -final] \
 	    [array get parser -defaultexpandinternalentities] \
@@ -221,7 +216,7 @@ proc xml::tclparser::parse {name xml args} {
 	    [array get parser elementdecls] \
 	    [array get parser attlistdecls] \
 	    [array get parser notationdecls]
-	  
+
     # Mats:
     # If -final 0 we also need to maintain the state with a -statevariable !
     if {!$parser(-final)} {
@@ -251,7 +246,7 @@ proc xml::tclparser::parse {name xml args} {
 	    # Pass through to normal processing
 	}
     }
-        
+
     lappend tokenOptions  \
       -internaldtdvariable [namespace current]::${name}(internaldtd)
     
@@ -313,6 +308,7 @@ proc xml::tclparser::ParseEmpty {tag attr e} {
 #	name='value'
 #
 # Arguments:
+#	opts	parser options
 #	attrs	attribute string given in a tag
 #
 # Results:
@@ -326,14 +322,14 @@ proc xml::tclparser::ParseEmpty {tag attr e} {
 #	the message "unterminated attribute value", the attribute list it
 #	did manage to parse and the remainder of the attribute list.
 
-proc xml::tclparser::ParseAttrs attrs {
+proc xml::tclparser::ParseAttrs {opts attrs} {
 
     set result {}
 
     while {[string length [string trim $attrs]]} {
-	if {[regexp ($::xml::Name)[::sgml::cl $::xml::Wsp]*=[::sgml::cl $::xml::Wsp]*("|')([::sgml::cl ^<]*?)\\2(.*) $attrs discard attrName delimiter value attrs]} {
-	    lappend result $attrName [NormalizeAttValue $value]
-	} elseif {[regexp $::xml::Name[::sgml::cl $::xml::Wsp]*=[::sgml::cl $::xml::Wsp]*("|')[::sgml::cl ^<]*\$ $attrs]} {
+	if {[regexp [::sgml::cl $::xml::Wsp]*($::xml::Name)[::sgml::cl $::xml::Wsp]*=[::sgml::cl $::xml::Wsp]*("|')([::sgml::cl ^<]*?)\\2(.*) $attrs discard attrName delimiter value attrs]} {
+	    lappend result $attrName [NormalizeAttValue $opts $value]
+	} elseif {[regexp [::sgml::cl $::xml::Wsp]*$::xml::Name[::sgml::cl $::xml::Wsp]*=[::sgml::cl $::xml::Wsp]*("|')[::sgml::cl ^<]*\$ $attrs]} {
 	    return -code error [list {unterminated attribute value} $result $attrs]
 	} else {
 	    return -code error "invalid attribute list"
@@ -351,18 +347,14 @@ proc xml::tclparser::ParseAttrs attrs {
 #	. whitespace characters cause a space to be appended
 #	. other characters appended as-is
 #
-#	Because no state is passed in here, it's a bit difficult
-#	to pass entity references back into the parser for further
-#	replacement.  I'll just punt on the whole thing for now and do
-#	basic normalisation - char refs, pre-defined entities and ws.
-#
 # Arguments:
+#	opts	parser options
 #	value	unparsed attribute value
 #
 # Results:
 #	Normalised value returned.
 
-proc xml::tclparser::NormalizeAttValue value {
+proc xml::tclparser::NormalizeAttValue {opts value} {
 
     # sgmlparser already has backslashes protected
     # Protect Tcl specials
@@ -372,30 +364,44 @@ proc xml::tclparser::NormalizeAttValue value {
     regsub -all "\[$::xml::Wsp\]" $value { } value
 
     # Find entity refs
-    regsub -all {&([^;]+);} $value {[NormalizeAttValue:DeRef {\1}]} value
+    regsub -all {&([^;]+);} $value {[NormalizeAttValue:DeRef $opts {\1}]} value
 
     return [subst $value]
 }
 
 # xml::tclparser::NormalizeAttValue:DeRef --
 #
-#	Simplistic handler to normalize attribute values
+#	Handler to normalize attribute values
 #
 # Arguments:
+#	opts	parser options
 #	ref	entity reference
 #
 # Results:
 #	Returns character
 
-proc xml::tclparser::NormalizeAttValue:DeRef ref {
+proc xml::tclparser::NormalizeAttValue:DeRef {opts ref} {
+
     switch -glob -- $ref {
 	#x* {
-	    scan [string range 2 $ref] %x value
-	    return $value
+	    scan [string range $ref 2 end] %x value
+	    set char [format %c $value]
+	    # Check that the char is legal for XML
+	    if {[regexp [format {^[%s]$} $::xml::Char] $char]} {
+		return $char
+	    } else {
+		return -code error "illegal character"
+	    }
 	}
 	#* {
-	    scan [string range 1 $ref] %d value
-	    return $value
+	    scan [string range $ref 1 end] %d value
+	    set char [format %c $value]
+	    # Check that the char is legal for XML
+	    if {[regexp [format {^[%s]$} $::xml::Char] $char]} {
+		return $char
+	    } else {
+		return -code error "illegal character"
+	    }
 	}
 	lt -
 	gt -
@@ -406,7 +412,36 @@ proc xml::tclparser::NormalizeAttValue:DeRef ref {
 	    return $map($ref)
 	}
 	default {
-	    return -code error "unable to resolve entity reference \"$ref\""
+	    # A general entity.  Must resolve to a text value - no element structure.
+
+	    array set options $opts
+	    upvar #0 $options(entities) map
+
+	    if {[info exists map($ref)]} {
+
+		if {[regexp < $map($ref)]} {
+		    return -code error "illegal character \"<\" in attribute value"
+		}
+
+		if {![regexp & $map($ref)]} {
+		    # Simple text replacement
+		    return $map($ref)
+		}
+
+		# There are entity references in the replacement text.
+		# Can't use child entity parser since must catch element structures
+
+		return [NormalizeAttValue $opts $map($ref)]
+
+	    } elseif {[string compare $options(-entityreferencecommand) "::sgml::noop"]} {
+
+		set result [uplevel #0 $options(-entityreferencecommand) [list $ref]]
+
+		return $result
+
+	    } else {
+		return -code error "unable to resolve entity reference \"$ref\""
+	    }
 	}
     }
 }
@@ -539,4 +574,39 @@ proc xml::tclparser::get {name method args} {
 #	External entity is fetched and parsed
 
 proc xml::tclparser::ExternalEntity {name base sys pub} {
+}
+
+# xml::tclparser:: --
+#
+#	Reset a parser instance, ready to parse another document
+#
+# Arguments:
+#	name	parser object
+#
+# Results:
+#	Variables unset
+
+proc xml::tclparser::reset {name} {
+    upvar \#0 [namespace current]::$name parser
+
+    # Has this parser object been properly initialised?
+    if {![info exists parser] || \
+	    ![info exists parser(-name)]} {
+	return [create $name]
+    }
+
+    array set parser {
+	-final 1
+	depth 0
+	leftover {}
+    }
+
+    foreach var {Entities ExtEntities PEntities ExtPEntities ElDecls AttlistDecls NotDecls} {
+	catch {unset [namespace current]::${var}$name}
+    }
+
+    # Initialise entities with predefined set
+    array set [namespace current]::Entities$name [array get ::sgml::EntityPredef]
+
+    return {}
 }

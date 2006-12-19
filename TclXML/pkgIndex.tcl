@@ -1,6 +1,6 @@
 # Tcl package index file - handcrafted
 #
-# $Id: pkgIndex.tcl,v 1.6 2006-09-20 14:12:38 matben Exp $
+# $Id: pkgIndex.tcl,v 1.7 2006-12-19 13:27:09 matben Exp $
 
 # Handcrafted paths for the Coccinella by Mats Bengtsson
 # Mats: very much stripped down version to load my patched version only.
@@ -30,7 +30,7 @@ package ifneeded xml 99.0 {
     package provide xml 99.0
 }
 
-package ifneeded sgml 1.8 [list source [file join $dir sgml-8.1.tcl]]
+package ifneeded sgml 1.9 [list source [file join $dir sgml-8.1.tcl]]
 package ifneeded xmldefs 3.1 [list source [file join $dir xml-8.1.tcl]]
 package ifneeded xml::tclparser 99.0 [list source [file join $dir tclparser-8.1.tcl]]
 

@@ -7,35 +7,17 @@
 #	NB.  It is a misnomer.  There is no support for parsing
 #	arbitrary SGML as such.
 #
-# Copyright (c) 1998-2001 Zveno Pty Ltd
+# Copyright (c) 1998-2003 Zveno Pty Ltd
 # http://www.zveno.com/
 #
-# Zveno makes this software available free of charge for any purpose.
-# Copies may be made of this software but all of this notice must be included
-# on any copy.
+# See the file "LICENSE" in this distribution for information on usage and
+# redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# The software was developed for research purposes only and Zveno does not
-# warrant that it is error free or fit for any purpose.  Zveno disclaims any
-# liability for all claims, expenses, losses, damages and costs any user may
-# incur as a result of using, copying or modifying this software.
-#
-# Copyright (c) 1997 ANU and CSIRO on behalf of the
-# participants in the CRC for Advanced Computational Systems ('ACSys').
-# 
-# ACSys makes this software and all associated data and documentation 
-# ('Software') available free of charge for any purpose.  You may make copies 
-# of the Software but you must include all of this notice on any copy.
-# 
-# The Software was developed for research purposes and ACSys does not warrant
-# that it is error free or fit for any purpose.  ACSys disclaims any
-# liability for all claims, expenses, losses, damages and costs any user may
-# incur as a result of using, copying or modifying the Software.
-#
-# $Id: sgml-8.1.tcl,v 1.2 2004-08-17 14:10:30 matben Exp $
+# $Id: sgml-8.1.tcl,v 1.3 2006-12-19 13:27:09 matben Exp $
 
 package require Tcl 8.1
 
-package provide sgml 1.8
+package provide sgml 1.9
 
 namespace eval sgml {
 

@@ -5,31 +5,13 @@
 #
 #	See tclparser.tcl for the Tcl implementation of a XML parser.
 #
-# Copyright (c) 1998-2000 Zveno Pty Ltd
+# Copyright (c) 1998-2004 Zveno Pty Ltd
 # http://www.zveno.com/
 # 
-# Zveno makes this software and all associated data and documentation
-# ('Software') available free of charge for any purpose.
-# Copies may be made of this Software but all of this notice must be included
-# on any copy.
-# 
-# The Software was developed for research purposes and Zveno does not warrant
-# that it is error free or fit for any purpose.  Zveno disclaims any
-# liability for all claims, expenses, losses, damages and costs any user may
-# incur as a result of using, copying or modifying the Software.
+# See the file "LICENSE" in this distribution for information on usage and
+# redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# Copyright (c) 1997 Australian National University (ANU).
-# 
-# ANU makes this software and all associated data and documentation
-# ('Software') available free of charge for any purpose. You may make copies
-# of the Software but you must include all of this notice on any copy.
-# 
-# The Software was developed for research purposes and ANU does not warrant
-# that it is error free or fit for any purpose.  ANU disclaims any
-# liability for all claims, expenses, losses, damages and costs any user may
-# incur as a result of using, copying or modifying the Software.
-#
-# $Id: xml-8.1.tcl,v 1.3 2006-09-20 14:12:38 matben Exp $
+# $Id: xml-8.1.tcl,v 1.4 2006-12-19 13:27:09 matben Exp $
 
 package require Tcl 8.1
 
