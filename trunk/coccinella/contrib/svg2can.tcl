@@ -2,10 +2,10 @@
 #  
 #      This file provides translation from canvas commands to XML/SVG format.
 #      
-#  Copyright (c) 2004-2005  Mats Bengtsson
+#  Copyright (c) 2004-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.24 2006-12-17 15:51:22 matben Exp $
+# $Id: svg2can.tcl,v 1.25 2006-12-19 08:30:00 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -86,7 +86,7 @@ namespace eval svg2can {
 		}
 	    }
 	}
-	windows - macintosh {
+	windows {
 	    set systemFont system
 	}
     }
@@ -205,16 +205,19 @@ proc svg2can::ParseElemRecursive {xmllist paropts transformL args} {
     # Handle any tranform attribute; may be recursive, so keep a list.
     set transformL [concat $transformL [ParseTransformAttr [getattr $xmllist]]]
 
+    #puts "svg2can::ParseElemRecursive tag=$tag"
+    
     switch -- $tag {
 	circle - ellipse - image - line - polyline - polygon - rect - path - text {
 	    set func [string totitle $tag]
 	    if {$priv(havetkpath)} {
-		set cmd [eval {Parse${func}Ex $xmllist $paropts} $args]]
+		set cmd [eval {Parse${func}Ex $xmllist $paropts} $args]
+		#puts "\tcmd=$cmd"
 		if {[llength $cmd]} {
 		    lappend cmdList $cmd
 		}
 	    } else {
-		set cmdL [eval {Parse${func} $xmllist $paropts $transformL} $args]]
+		set cmdL [eval {Parse${func} $xmllist $paropts $transformL} $args]
 		set cmdList [concat $cmdList $cmdL]
 	    }
 	}
@@ -228,6 +231,16 @@ proc svg2can::ParseElemRecursive {xmllist paropts transformL args} {
 		    ParseElemRecursive $c $paropts $transformL
 		} [array get attrA]]]
 	    }	    
+	}
+	linearGradient {
+	    if {$priv(havetkpath)} {
+		CreatLinearGradient $xmllist
+	    }
+	}
+	radialGradient {
+	    if {$priv(havetkpath)} {
+		
+	    }
 	}
 	foreignObject {
 	    array set parseArr $paropts
@@ -306,7 +319,7 @@ proc svg2can::ParseCircle {xmllist paropts transformL args} {
     lappend opts -tags $tags
     set coords [list [expr {$cx - $r}] [expr {$cy - $r}] \
       [expr {$cx + $r}] [expr {$cy + $r}]]	
-    set opts [MergepresAttr oval $opts $presAttr]
+    set opts [MergePresentationAttr oval $opts $presAttr]
     set cmdList [list [concat create oval $coords $opts]]
 
     return [AddAnyTransformCmds $cmdList $transformL]
@@ -337,7 +350,7 @@ proc svg2can::ParseCircleEx {xmllist paropts args} {
 	    }
 	}
     }
-    set opts [MergepresAttrEx $opts $presAttr]
+    set opts [MergePresentationAttrEx $opts $presAttr]
     return [concat create circle $cx $cy $opts]
 }
 
@@ -377,7 +390,7 @@ proc svg2can::ParseEllipse {xmllist paropts transformL args} {
     lappend opts -tags $tags
     set coords [list [expr $cx - $rx] [expr $cy - $ry] \
       [expr $cx + $rx] [expr $cy + $ry]]
-    set opts [MergepresAttr oval $opts $presAttr]
+    set opts [MergePresentationAttr oval $opts $presAttr]
     set cmdList [list [concat create oval $coords $opts]]
 
     return [AddAnyTransformCmds $cmdList $transformL]
@@ -408,7 +421,7 @@ proc svg2can::ParseEllipseEx {xmllist paropts args} {
 	    }
 	}
     }
-    set opts [MergepresAttrEx $opts $presAttr]
+    set opts [MergePresentationAttrEx $opts $presAttr]
     return [concat create ellipse $cx $cy $opts]    
 }
 
@@ -449,7 +462,7 @@ proc svg2can::ParseImage {xmllist paropts transformL args} {
 	}
     }
     lappend opts -tags $tags -anchor nw
-    set opts [MergepresAttr image $opts $presAttr]
+    set opts [MergePresentationAttr image $opts $presAttr]
     
     # Handle the xlink:href attribute.
     if {[info exists xlinkhref]} {
@@ -566,7 +579,7 @@ proc svg2can::ParseImageEx {xmllist paropts args} {
 	}	
     }
     
-    set opts [MergepresAttrEx $opts $presAttr]
+    set opts [MergePresentationAttrEx $opts $presAttr]
     return [concat create pimage $x $y $opts]    
 }
 
@@ -610,7 +623,7 @@ proc svg2can::ParseLine {xmllist paropts transformL args} {
 	}
     }
     lappend opts -tags $tags
-    set opts [MergepresAttr line $opts $presAttr]  
+    set opts [MergePresentationAttr line $opts $presAttr]  
     set cmdList [list [concat create line $coords $opts]]
 
     return [AddAnyTransformCmds $cmdList $transformL]
@@ -643,7 +656,7 @@ proc svg2can::ParseLineEx {xmllist paropts args} {
 	    }
 	}
     }
-    set opts [MergepresAttrEx $opts $presAttr]
+    set opts [MergePresentationAttrEx $opts $presAttr]
     return [concat create line $x1 $y1 $x2 $y2 $opts]    
 }
 
@@ -1069,15 +1082,17 @@ proc svg2can::ParsePathEx {xmllist paropts args} {
 	    }
 	}
     }
-    set opts [MergePresentationAttr line $opts $presAttr]  
     
     regsub -all -- {([a-zA-Z])([0-9])} $path {\1 \2} path
     regsub -all -- {([0-9])([a-zA-Z])} $path {\1 \2} path
     set path [string map {- " -"} $path]
     set path [string map {, " "} $path]
-	
-    set opts [MergepresAttrEx $opts $presAttr]
-    return [concat create path [list $path] $opts]]  
+
+    #puts "\tsvg2can::ParsePathEx opts=$opts, presAttr=$presAttr"
+
+    set opts [MergePresentationAttrEx $opts $presAttr]
+    #puts "\t\topts=$opts"
+    return [concat create path [list $path] $opts]
 }
 
 proc svg2can::ParsePolyline {xmllist paropts transformL args} {
@@ -1141,7 +1156,7 @@ proc svg2can::ParsePolylineEx {xmllist paropts args} {
 	    }
 	}
     }
-    set opts [MergepresAttrEx $opts $presAttr]
+    set opts [MergePresentationAttrEx $opts $presAttr]
     return [concat create polyline $points $opts]    
 }
 
@@ -1206,7 +1221,7 @@ proc svg2can::ParsePolygonEx {xmllist paropts args} {
 	    }
 	}
     }
-    set opts [MergepresAttrEx $opts $presAttr]
+    set opts [MergePresentationAttrEx $opts $presAttr]
     return [concat create ppolygon $points $opts]    
 }
 
@@ -1291,7 +1306,7 @@ proc svg2can::ParseRectEx {xmllist paropts args} {
     }
     set x2 [expr {$x + $width}]
     set y2 [expr {$y + $height}]
-    set opts [MergepresAttrEx $opts $presAttr]
+    set opts [MergePresentationAttrEx $opts $presAttr]
     return [concat create prect $x $y $x2 $y2 $opts]    
 }
 
@@ -1519,6 +1534,82 @@ proc svg2can::AttrToCoords {type attrlist} {
     return $coords
 }
 
+# @@@ There is a lot TODO here!
+
+proc svg2can::CreatLinearGradient {xmllist} {
+    variable gradientIDToToken
+
+    set x1 0
+    set y1 0
+    set x2 1
+    set y2 0
+    set method pad
+    set stops {}
+
+    foreach {key value} [getattr $xmllist] {	
+	switch -- $key {
+	    x1 - y1 - x2 - y2 {
+		set $key [parseUnaryOrPercentage $value]
+	    }
+	    id {
+		set id $value
+	    }
+	    gradientUnits {
+		# @@@ TODO
+	    }
+	    spreadMethod {
+		set method $value
+	    }
+	}
+    }
+    if {![info exists id]} {
+	return
+    }
+    
+    foreach stopE [getchildren $xmllist] {
+	if {[gettag $stopE] eq "stop"} {
+	    set opts {}
+	    set offset 0
+	    set color black
+	    set opacity 1
+	    
+	    foreach {key value} [getattr $stopE] {	
+		switch -- $key {
+		    offset {
+			set offset [parseUnaryOrPercentage $value]
+		    }
+		    stop-color {
+			set color [parseColor $value]
+		    }
+		    stop-opacity {
+			set opacity $value
+		    }
+		    style {
+			set opts [StopsStyleToStopSpec [StyleAttrToList $value]]
+		    }
+		}
+	    }
+
+	    # Style takes precedence.
+	    array set stopA [list color $color opacity $opacity]
+	    array set stopA $opts
+	    lappend stops [list $offset $stopA(color) $stopA(opacity)]
+	}
+    }
+    
+    set token [::tkpath::lineargradient create \
+      -lineartransition [list $x1 $y1 $x2 $y2] -method $method -stops $stops]
+    set gradientIDToToken($id) $token
+}
+
+proc svg2can::parseUnaryOrPercentage {offset} {
+    if {[string is double -strict $offset]} {
+	return $offset
+    } elseif {[regexp {(.+)%} $offset - percent]} {
+	return [expr {$percent/100.0}]
+    }
+}
+
 # svg2can::parseColor --
 # 
 #       Takes a SVG color definition and turns it into a Tk color.
@@ -1532,13 +1623,13 @@ proc svg2can::AttrToCoords {type attrlist} {
 proc svg2can::parseColor {color} {
     
     if {[regexp {rgb\(([0-9]{1,3})%, *([0-9]{1,3})%, *([0-9]{1,3})%\)}  \
-      $color match r g b]} {
+      $color - r g b]} {
 	set col #
 	foreach c [list $r $g $b] {
 	    append col [format %02x [expr round(2.55 * $c)]]
 	}
     } elseif {[regexp {rgb\(([0-9]{1,3}), *([0-9]{1,3}), *([0-9]{1,3})\)}  \
-      $color match r g b]} {
+      $color - r g b]} {
 	set col #
 	foreach c [list $r $g $b] {
 	    append col [format %2x [expr round(2.55 * $c)]]
@@ -1711,11 +1802,11 @@ proc svg2can::StyleToOpts {type styleList args} {
 }
 
 proc svg2can::StyleToOptsEx {styleList args} {
-    
+
+    # @@@ Wrong if inherit?
     array set optsA {-fill black -stroke ""}
     
-    foreach {key value} $styleList {
-    
+    foreach {key value} $styleList {    
 	switch -- $key {
 	    fill - stroke {
 		set optsA(-$key) [parseColor $value]		
@@ -1735,6 +1826,26 @@ proc svg2can::StyleToOptsEx {styleList args} {
 		if {[string length $value]} {
 		    set optsA(-matrix) [TransformAttrToMatrix $value]
 		}
+	    }
+	}
+    }
+    return [array get optsA]
+}
+
+# svg2can::StopsStyleToStopSpec --
+# 
+#       Takes the stop style attribute as a list and parses it into
+#       a flat array for the gradient stopSpec: {offset color ?opacity?}
+
+proc svg2can::StopsStyleToStopSpec {styleList} {
+    
+    foreach {key value} $styleList {    
+	switch -- $key {
+	    stop-color {
+		set optsA(color) [parseColor $value]		
+	    }
+	    stop-opacity {
+		set optsA(opacity) $value
 	    }
 	}
     }
@@ -2122,11 +2233,12 @@ proc svg2can::getchildren {xmllist} {
 
 # Tests...
 if {0} {
+    # load /Users/matben/C/cvs/tkpath/macosx/build/tkpath0.2.dylib
     package require svg2can
     toplevel .t
     pack [canvas .t.c -width 600 -height 500]    
     set i 0
-    
+        
     set xml([incr i]) {<polyline points='400 10 10 10 10 400' \
       style='stroke: #000000; stroke-width: 1.0; fill: none;'/>}
                     
@@ -2155,37 +2267,33 @@ if {0} {
       style='fill-rule: evenodd; fill: none; stroke: black; stroke-width: 1.0;\
       stroke-linejoin: round;' id='std poly t005'/>}
     set xml([incr i]) {<path d='M 30 100 Q 80 30 100 100 130 65 200 80' \
-      style='fill-rule: evenodd; stroke: #af5da8; stroke-width: 4.0;\
+      style='fill-rule: evenodd; fill: none; stroke: #af5da8; stroke-width: 4.0;\
       stroke-linejoin: round;' id='std poly t006'/>}
     set xml([incr i]) {<polyline points='30 100,80 30,100 100,130 65,200 80' \
-      style='stroke: red;'/>}
-    set xml(8) {<path d='M 10 200 Q 50 150 100 200   \
-      150 250 200 200    250 150 300 200    350 250 400 200'\
-      style='fill-rule: evenodd; stroke: black; stroke-width: 2.0;\
-      stroke-linejoin: round; fill: #d7ffb5;' id='std t008'/>}
+      style='fill: none; stroke: red;'/>}
     set xml([incr i])  {<path d='M 10 200 H 100 200 v20h 10'\
-      style='fill-rule: evenodd; stroke: black; stroke-width: 2.0;\
-      stroke-linejoin: round; fill: #d7ffb5;' id='std t008'/>}
+    style='fill-rule: evenodd; fill: none; stroke: black; stroke-width: 2.0;\
+      stroke-linejoin: round;' id='std t008'/>}
     set xml([incr i])  {<path d='M 20 200 V 300 310 h 10 v 10'\
-      style='fill-rule: evenodd; stroke: blue; stroke-width: 2.0;\
-      stroke-linejoin: round; fill: #d7ffb5;' id='std t008'/>}
+      style='fill-rule: evenodd; fill: none; stroke: blue; stroke-width: 2.0;\
+      stroke-linejoin: round;' id='std t008'/>}
     set xml([incr i]) {<path d='M 30 100 Q 80 30 100 100 T 200 80' \
-      style='stroke: green; stroke-width: 2.0;' id='t006'/>}
+      style='fill: none; stroke: green; stroke-width: 2.0;' id='t006'/>}
     set xml([incr i]) {<path d='M 30 200 Q 80 130 100 200 T 150 180 200 180 250 180 300 180' \
-      style='stroke: gray50; stroke-width: 2.0;' id='t006'/>}
+      style='fill: none; stroke: gray50; stroke-width: 2.0;' id='t006'/>}
     set xml([incr i]) {<path d='M 30 300 Q 80 230 100 300 t 50 0 50 0 50 0 50 0' \
-      style='stroke: gray50; stroke-width: 1.0;' id='std poly t006'/>}
+      style='fill: none; stroke: gray50; stroke-width: 1.0;' id='std poly t006'/>}
     set xml([incr i]) {<path d="M100,200 C100,100 250,100 250,200 \
-      S400,300 400,200" />}
+      S400,300 400,200" style='fill: none; stroke: black'/>}
 
     set xml([incr i]) {<path d="M 125 75 A 100 50 0 0 0 225 125" \
-      style='stroke: blue; stroke-width: 2.0;'/>}
+      style='fill: none; stroke: blue; stroke-width: 2.0;'/>}
     set xml([incr i]) {<path d="M 125 75 A 100 50 0 0 1 225 125" \
-      style='stroke: red; stroke-width: 2.0;'/>}
+      style='fill: none; stroke: red; stroke-width: 2.0;'/>}
     set xml([incr i]) {<path d="M 125 75 A 100 50 0 1 0 225 125" \
-      style='stroke: green; stroke-width: 2.0;'/>}
+      style='fill: none; stroke: green; stroke-width: 2.0;'/>}
     set xml([incr i]) {<path d="M 125 75 A 100 50 0 1 1 225 125" \
-      style='stroke: gray50; stroke-width: 2.0;'/>}
+      style='fill: none; stroke: gray50; stroke-width: 2.0;'/>}
 
     # g
     set xml([incr i]) {<g fill="none" stroke="red" stroke-width="3" > \
@@ -2215,6 +2323,17 @@ if {0} {
 	}
     }
     
+    proc DrawSVG {fileName w} {
+	set fd [open $fileName r]
+	set xml [read $fd]
+	close $fd
+	set xmllist [tinydom::documentElement [tinydom::parse $xml]]
+	set cmdList [svg2can::parsesvgdocument $xmllist]
+	foreach c $cmdList {
+	    puts $c
+	    eval $w $c
+	}
+    }
 }
     
 #-------------------------------------------------------------------------------
