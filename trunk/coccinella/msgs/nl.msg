@@ -423,7 +423,7 @@
 ::msgcat::mcset nl mMinimal				{Minimaal}
 ::msgcat::mcset nl mDisco				{Disco}
 ::msgcat::mcset nl mFind				{Zoeken}
-::msgcat::mcset nl mFindAgain				{Opnieuw zoeken}
+::msgcat::mcset nl mFindAgain				{Volgende zoeken}
 ::msgcat::mcset nl mCustomStatus			{Aangepast...}
 ::msgcat::mcset nl mFindPrevious			{Vorige zoeken}
 ::msgcat::mcset nl mImport                              {Importeren}
