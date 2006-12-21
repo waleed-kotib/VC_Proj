@@ -431,6 +431,7 @@
 ::msgcat::mcset pl mFind                {Szukaj}
 ::msgcat::mcset pl mFindAgain           {Szukaj ponownie}
 
+::msgcat::mcset pl mFindPrevious        {Find Previous}
 ::msgcat::mcset pl mCustomStatus        {Custom Status...}
 ::msgcat::mcset pl mImport              {Import}
 ::msgcat::mcset pl mExport              {Export}

@@ -422,6 +422,7 @@
 ::msgcat::mcset en mDisco         	{Disco}
 ::msgcat::mcset en mFind         	{Find}
 ::msgcat::mcset en mFindAgain         	{Find Again}
+::msgcat::mcset en mFindPrevious        {Find Previous}
 ::msgcat::mcset en mCustomStatus        {Custom Status...}
 ::msgcat::mcset en mImport              {Import}
 ::msgcat::mcset en mExport              {Export}

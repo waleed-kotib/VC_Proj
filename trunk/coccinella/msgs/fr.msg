@@ -433,6 +433,7 @@
 ::msgcat::mcset fr mDisco               {Disco}
 ::msgcat::mcset fr mFind                {Find}
 ::msgcat::mcset fr mFindAgain           {Find Again}
+::msgcat::mcset fr mFindPrevious        {Find Previous}
 ::msgcat::mcset fr mCustomStatus        {Custom Status...}
 ::msgcat::mcset fr mImport              {Import}
 ::msgcat::mcset fr mExport              {Export}

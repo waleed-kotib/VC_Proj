@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.60 2006-08-08 13:12:04 matben Exp $
+# $Id: Utils.tcl,v 1.61 2006-12-21 11:23:47 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -480,6 +480,7 @@ proc ::Utils::LanguageMenubutton {w varName args} {
 	fr {French} 
 	de {German} 
 	it {Italian}
+	kr {Korean}
 	pl {Polish} 
 	ru {Russian} 
 	es {Spanish} 

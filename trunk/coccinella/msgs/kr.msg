@@ -428,6 +428,8 @@
 ::msgcat::mcset kr mFind         	{찾기}
 ::msgcat::mcset kr mFindAgain         	{다시 찾기}
 
+::msgcat::mcset kr mFindPrevious        {Find Previous}
+
 # Popups
 ::msgcat::mcset kr mMessage     	{메세지...}
 ::msgcat::mcset kr mWhiteboard     	{칠판...}

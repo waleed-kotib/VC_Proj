@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.150 2006-12-15 14:12:09 matben Exp $
+# $Id: JUI.tcl,v 1.151 2006-12-21 11:23:47 matben Exp $
 
 package provide JUI 1.0
 
@@ -199,6 +199,7 @@ proc ::JUI::Init { } {
 	{separator}
 	{command   mFind             {::UI::OnMenuFind}         F}
 	{command   mFindAgain        {::UI::OnMenuFindAgain}    G}
+	{command   mFindPrevious     {::UI::OnMenuFindPrevious} Shift-G}
     }
     
     # We should do this for all menus eventaully.
@@ -862,6 +863,7 @@ proc ::JUI::EditPostCommand {wmenu} {
     }	
     ::UI::MenuMethod $wmenu entryconfigure mFind -state disabled
     ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state disabled
+    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state disabled
     
     ::hooks::run menuPostCommand main-edit $wmenu
     

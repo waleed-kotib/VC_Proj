@@ -420,6 +420,7 @@
 ::msgcat::mcset sv mDisco         	{Disco}
 ::msgcat::mcset sv mFind         	{Sök}
 ::msgcat::mcset sv mFindAgain         	{Sök igen}
+::msgcat::mcset sv mFindPrevious        {Sök bakåt}
 ::msgcat::mcset sv mCustomStatus        {Anpassat meddelande...}
 ::msgcat::mcset sv mImport              {Importera}
 ::msgcat::mcset sv mExport              {Exportera}
