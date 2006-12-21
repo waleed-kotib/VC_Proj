@@ -425,9 +425,7 @@
 ::msgcat::mcset nl mFind				{Zoeken}
 ::msgcat::mcset nl mFindAgain				{Opnieuw zoeken}
 ::msgcat::mcset nl mCustomStatus			{Aangepast...}
-
-::msgcat::mcset nl mFindPrevious        {Find Previous}
-
+::msgcat::mcset nl mFindPrevious			{Vorige zoeken}
 ::msgcat::mcset nl mImport                              {Importeren}
 ::msgcat::mcset nl mExport                              {Exporteren}
 ::msgcat::mcset nl mEmoticonSet                         {Emoticonset importeren...}
@@ -775,7 +773,7 @@
 ::msgcat::mcset nl nativeFrench				Français
 ::msgcat::mcset nl nativeGerman				Deutsch
 ::msgcat::mcset nl nativeItalian			Italiano
-::msgcat::mcset nl nativeKorean
+::msgcat::mcset nl nativeKorean				한국�
 ::msgcat::mcset nl nativePolish				Polski
 ::msgcat::mcset nl nativeRussian			русский
 ::msgcat::mcset nl nativeSpanish			Castellano
