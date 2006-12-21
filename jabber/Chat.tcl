@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.187 2006-12-01 08:55:13 matben Exp $
+# $Id: Chat.tcl,v 1.188 2006-12-21 11:23:46 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1225,9 +1225,10 @@ proc ::Chat::Build {threadID args} {
     }
     wm minsize $w [expr {$minsize < 220} ? 220 : $minsize] 320
 
-    bind $w <<Find>>      [namespace code [list Find $dlgtoken]]
-    bind $w <<FindAgain>> [namespace code [list FindAgain $dlgtoken]]  
-    bind $w <FocusIn>    +[namespace code [list FocusIn $dlgtoken]]
+    bind $w <<Find>>         [namespace code [list Find $dlgtoken]]
+    bind $w <<FindAgain>>    [namespace code [list FindAgain $dlgtoken]]  
+    bind $w <<FindPrevious>> [namespace code [list FindAgain $dlgtoken -1]]  
+    bind $w <FocusIn>       +[namespace code [list FocusIn $dlgtoken]]
     
     # For toplevel binds.
     if {[lsearch [bindtags $w] ChatToplevel] < 0} {
@@ -1523,6 +1524,7 @@ proc ::Chat::MenuEditPostHook {wmenu} {
 	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
 	if {[winfo exists $wfind]} {
 	    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
 	}
     }
 }
@@ -1543,7 +1545,7 @@ proc ::Chat::Find {dlgtoken} {
     }
 }
 
-proc ::Chat::FindAgain {dlgtoken} {
+proc ::Chat::FindAgain {dlgtoken {dir 1}} {
 
     set chattoken [GetActiveChatToken $dlgtoken]
     if {$chattoken eq ""} {
@@ -1554,7 +1556,7 @@ proc ::Chat::FindAgain {dlgtoken} {
 
     set wfind $chatstate(wfind)
     if {[winfo exists $wfind]} {
-	$wfind Next
+	$wfind [expr {$dir == 1 ? "Next" : "Previous"}]
     }
 }
 

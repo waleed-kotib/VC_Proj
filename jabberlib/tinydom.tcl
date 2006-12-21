@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinydom.tcl,v 1.10 2006-11-04 08:42:10 matben Exp $
+# $Id: tinydom.tcl,v 1.11 2006-12-21 11:23:47 matben Exp $
 
 package require xml
 
@@ -49,9 +49,9 @@ proc tinydom::XmlElementStart {tagname attrlist args} {
     variable xmlobj
     variable level
 
-    array set argsarr $args
-    if {[info exists argsarr(-namespacedecls)]} {
-	lappend attrlist xmlns [lindex $argsarr(-namespacedecls) 0]
+    array set argsA $args
+    if {[info exists argsA(-namespacedecls)]} {
+	lappend attrlist xmlns [lindex $argsA(-namespacedecls) 0]
     }
     set xmlobj([incr level]) [list $tagname $attrlist 0 {} {}]
 }

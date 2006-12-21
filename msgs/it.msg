@@ -431,6 +431,7 @@
 ::msgcat::mcset it mFind Trova
 ::msgcat::mcset it mFindAgain {Trova successivo}
 
+::msgcat::mcset it mFindPrevious        {Find Previous}
 ::msgcat::mcset it mCustomStatus        {Custom Status...}
 ::msgcat::mcset it mImport              {Import}
 ::msgcat::mcset it mExport              {Export}

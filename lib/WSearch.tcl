@@ -4,7 +4,7 @@
 #       
 # Copyright (c) 2006 Mats Bengtsson
 #       
-# $Id: WSearch.tcl,v 1.3 2006-08-03 06:14:24 matben Exp $
+# $Id: WSearch.tcl,v 1.4 2006-12-21 11:23:48 matben Exp $
 
 package require snit 1.0
 package require tileutils 0.1
@@ -138,6 +138,22 @@ snit::widgetadaptor UI::WSearch::widget {
 		set ind 0
 	    } else {
 		incr ind
+	    }
+	    set idxfocus [lindex $idxs $ind]
+	    set len [string length $string]
+	    $wtext tag add tfound $idxfocus "$idxfocus + $len chars"
+	    $wtext see $idxfocus
+	}
+    }
+
+    method Previous {} {
+	$wtext tag remove tfound 1.0 end
+	set ind [lsearch $idxs $idxfocus]
+	if {$ind >= 0} {
+	    if {$ind == 0} {
+		set ind [expr {[llength $idxs] - 1}]
+	    } else {
+		incr ind -1
 	    }
 	    set idxfocus [lindex $idxs $ind]
 	    set len [string length $string]

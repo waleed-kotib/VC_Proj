@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.139 2006-12-13 15:14:28 matben Exp $
+# $Id: UI.tcl,v 1.140 2006-12-21 11:23:47 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -210,10 +210,11 @@ proc ::UI::InitVirtualEvents { } {
     global  this
       
     # Virtual events.
-    event add <<CloseWindow>> <$this(modkey)-Key-w>
-    event add <<ReturnEnter>> <Return> <KP_Enter>
-    event add <<Find>>        <$this(modkey)-Key-f>
-    event add <<FindAgain>>   <$this(modkey)-Key-g>
+    event add <<CloseWindow>>    <$this(modkey)-Key-w>
+    event add <<ReturnEnter>>    <Return> <KP_Enter>
+    event add <<Find>>           <$this(modkey)-Key-f>
+    event add <<FindAgain>>      <$this(modkey)-Key-g>
+    event add <<FindPrevious>>   <$this(modkey)-Shift-Key-g>
 
     switch -- $this(platform) {
 	macintosh {
@@ -1310,18 +1311,15 @@ proc ::UI::SetMenubarAcceleratorBinds {w wmenubar} {
 	    # Cut, Copy & Paste handled by widgets internally!
 	    set accel [lindex $line 3]
 	    if {[string length $accel] && ![regexp {(X|C|V)} $accel]} {
-
-		# Must check the actual state of menu!
 		set name [lindex $line 1]
 		set mind $menuKeyToIndex($wmenu,$name)
-		
-		# @@@ ???
-		set state [$wmenu entrycget $mind -state]
-		if {1 || [string equal $state "normal"]} {
-		    set acckey [string map {< less > greater}  \
-		      [string tolower $accel]]
-		    bind $w <$this(modkey)-Key-$acckey> [lindex $line 2]
+		set key [string tolower [string range $accel end end]]
+		set key [string map {< less > greater} $key]
+		set prefix [string range $accel 0 end-1]
+		if {$prefix eq "Shift-"} {
+		    set key [string toupper $key]
 		}
+		bind $w <$this(modkey)-$prefix$key> [lindex $line 2]
 	    }
 	}
     }
@@ -1342,8 +1340,13 @@ proc ::UI::SetMenuAcceleratorBinds {w wmenu} {
 	if {[string length $accel]} {
 	    set name [lindex $line 1]
 	    set mind $menuKeyToIndex($wmenu,$name)
-	    set key [string map {< less > greater} [string tolower $accel]]
-	    bind $w <$this(modkey)-Key-$key> [lindex $line 2]
+	    set key [string tolower [string range $accel end end]]
+	    set key [string map {< less > greater} $key]
+	    set prefix [string range $accel 0 end-1]
+	    if {$prefix eq "Shift-"} {
+		set key [string toupper $key]
+	    }
+	    bind $w <$this(modkey)-$prefix$key> [lindex $line 2]
 	}
     }
 }
@@ -1821,6 +1824,12 @@ proc ::UI::FindAgainEvent {} {
     }	
 }
 
+proc ::UI::FindPreviousEvent {} {
+    if {[winfo exists [focus]]} {
+	event generate [focus] <<FindPrevious>>
+    }	
+}
+
 # For menu commands.
 # Note that we must allow CloseWindowEvent on grabbed window.
 
@@ -1832,6 +1841,11 @@ proc ::UI::OnMenuFind {} {
 proc ::UI::OnMenuFindAgain {} {
     if {[llength [grab current]]} { return }
     FindAgainEvent
+}
+
+proc ::UI::OnMenuFindPrevious {} {
+    if {[llength [grab current]]} { return }
+    FindPreviousEvent
 }
 
 # UI::GenericCCPMenuStates --

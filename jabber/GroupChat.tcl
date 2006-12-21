@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.171 2006-12-04 12:55:22 matben Exp $
+# $Id: GroupChat.tcl,v 1.172 2006-12-21 11:23:47 matben Exp $
 
 package require Create
 package require Enter
@@ -663,9 +663,10 @@ proc ::GroupChat::Build {roomjid} {
     
     wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
     
-    bind $w <<Find>>      [namespace code [list Find $dlgtoken]]
-    bind $w <<FindAgain>> [namespace code [list FindAgain $dlgtoken]]  
-    bind $w <FocusIn>    +[namespace code [list FocusIn $dlgtoken]]
+    bind $w <<Find>>         [namespace code [list Find $dlgtoken]]
+    bind $w <<FindAgain>>    [namespace code [list FindAgain $dlgtoken]]  
+    bind $w <<FindPrevious>> [namespace code [list FindAgain $dlgtoken -1]]  
+    bind $w <FocusIn>       +[namespace code [list FocusIn $dlgtoken]]
 
     focus $w
     set tag TopTag$w
@@ -958,7 +959,7 @@ proc ::GroupChat::Find {dlgtoken} {
     }
 }
 
-proc ::GroupChat::FindAgain {dlgtoken} {
+proc ::GroupChat::FindAgain {dlgtoken {dir 1}} {
 
     set chattoken [GetActiveChatToken $dlgtoken]
     if {$chattoken eq ""} {
@@ -969,7 +970,7 @@ proc ::GroupChat::FindAgain {dlgtoken} {
 
     set wfind $chatstate(wfind)
     if {[winfo exists $wfind]} {
-	$wfind Next
+	$wfind [expr {$dir == 1 ? "Next" : "Previous"}]
     }
 }
 
@@ -992,6 +993,7 @@ proc ::GroupChat::MenuEditPostHook {wmenu} {
 	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
 	if {[winfo exists $wfind]} {
 	    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
 	}
     }
 }

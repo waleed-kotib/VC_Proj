@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: vcard.tcl,v 1.10 2006-12-01 08:55:14 matben Exp $
+# $Id: vcard.tcl,v 1.11 2006-12-21 11:23:47 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -201,6 +201,10 @@ proc jlib::vcard::send_get_own_cb {jlibname cmd type subiq} {
 # 
 #       A utility to set our vCard photo.
 #       If photo empty then remove photo from vCard.
+#       
+#       @@@ TODO: Perhaps we should use a cached vCard instead of getting it
+#                 each time? The cache would only need one request and then
+#                 set each time we set our usual vCard.
 
 proc jlib::vcard::set_my_photo {jlibname photo mime cmd} {
     

@@ -426,6 +426,8 @@
 ::msgcat::mcset nl mFindAgain				{Opnieuw zoeken}
 ::msgcat::mcset nl mCustomStatus			{Aangepast...}
 
+::msgcat::mcset nl mFindPrevious        {Find Previous}
+
 ::msgcat::mcset nl mImport                              {Importeren}
 ::msgcat::mcset nl mExport                              {Exporteren}
 ::msgcat::mcset nl mEmoticonSet                         {Emoticonset importeren...}

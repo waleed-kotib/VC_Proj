@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.23 2006-09-06 12:51:51 matben Exp $
+# $Id: History.tcl,v 1.24 2006-12-21 11:23:47 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -688,9 +688,10 @@ proc ::History::BuildHistory {jid dlgtype args} {
         
     ::UI::SetWindowGeometry $w $wDlgs(jhist)
 
-    bind $w <<Find>>      [namespace code [list Find $w]]
-    bind $w <<FindAgain>> [namespace code [list FindAgain $w]]
-    bind $w <Destroy> +[list [namespace code OnDestroy] $w]
+    bind $w <<Find>>         [namespace code [list Find $w]]
+    bind $w <<FindAgain>>    [namespace code [list FindAgain $w]]
+    bind $w <<FindPrevious>> [namespace code [list FindAgain $w -1]]
+    bind $w <Destroy>       +[list [namespace code OnDestroy] $w]
 
     set script [format {
 	update idletasks
@@ -713,6 +714,7 @@ proc ::History::MenuEditPostHook {wmenu} {
 	    set wfind $state(wfind)
 	    if {[winfo exists $wfind]} {
 		::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+		::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
 	    }
 	}
     }
@@ -822,13 +824,13 @@ proc ::History::Find {w} {
     }
 }
 
-proc ::History::FindAgain {w} {
+proc ::History::FindAgain {w {dir 1}} {
     variable $w
     upvar 0 $w state
 
     set wfind $state(wfind)
     if {[winfo exists $wfind]} {
-	$wfind Next
+	$wfind [expr {$dir == 1 ? "Next" : "Previous"}]
     }
 }
 
