@@ -5,7 +5,7 @@
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.25 2006-12-19 08:30:00 matben Exp $
+# $Id: svg2can.tcl,v 1.26 2006-12-21 11:22:11 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1543,8 +1543,9 @@ proc svg2can::CreatLinearGradient {xmllist} {
     set y1 0
     set x2 1
     set y2 0
-    set method pad
     set stops {}
+    set method pad
+    set units bbox
 
     foreach {key value} [getattr $xmllist] {	
 	switch -- $key {
@@ -1555,7 +1556,8 @@ proc svg2can::CreatLinearGradient {xmllist} {
 		set id $value
 	    }
 	    gradientUnits {
-		# @@@ TODO
+		set units [string map \
+		  {objectBoundingBox bbox userSpaceOnUse userspace} $value]
 	    }
 	    spreadMethod {
 		set method $value
@@ -1573,7 +1575,7 @@ proc svg2can::CreatLinearGradient {xmllist} {
 	    set color black
 	    set opacity 1
 	    
-	    foreach {key value} [getattr $stopE] {	
+	    foreach {key value} [getattr $stopE] {
 		switch -- $key {
 		    offset {
 			set offset [parseUnaryOrPercentage $value]
@@ -1596,9 +1598,10 @@ proc svg2can::CreatLinearGradient {xmllist} {
 	    lappend stops [list $offset $stopA(color) $stopA(opacity)]
 	}
     }
+    puts stops=$stops
     
-    set token [::tkpath::lineargradient create \
-      -lineartransition [list $x1 $y1 $x2 $y2] -method $method -stops $stops]
+    set token [::tkpath::lineargradient create -method $method -units $units \
+      -lineartransition [list $x1 $y1 $x2 $y2] -stops $stops]
     set gradientIDToToken($id) $token
 }
 
@@ -1638,6 +1641,22 @@ proc svg2can::parseColor {color} {
 	set col [MapNoneToEmpty $color]
     }
     return $col
+}
+
+proc svg2can::parseFillToList {value} {
+    variable gradientIDToToken
+
+    if {[regexp {url\(#(.+)\)} $value - id]} {
+	puts "\t id=$id"
+	if {[info exists gradientIDToToken($id)]} {
+	    puts "\t gradientIDToToken=$gradientIDToToken($id)"
+	    return [list -fillgradient $gradientIDToToken($id)]
+	} else {
+	    return [list -fill black]
+	}
+    } else {
+	return [list -fill [parseColor $value]]
+    }
 }
 
 proc svg2can::parseLength {length} {    
@@ -1808,7 +1827,12 @@ proc svg2can::StyleToOptsEx {styleList args} {
     
     foreach {key value} $styleList {    
 	switch -- $key {
-	    fill - stroke {
+	    fill {
+		foreach {name val} [parseFillToList $value] { break }
+		set optsA($name) $val
+		#set optsA(-$key) [parseColor $value]
+	    }
+	    stroke {
 		set optsA(-$key) [parseColor $value]		
 	    }
 	    stroke-dasharray - strokelinecap - strokelinejoin - \
@@ -2231,9 +2255,21 @@ proc svg2can::getchildren {xmllist} {
     return [lindex $xmllist 4]
 }
 
+proc svg2can::_DrawSVG {fileName w} {
+    set fd [open $fileName r]
+    set xml [read $fd]
+    close $fd
+    set xmllist [tinydom::documentElement [tinydom::parse $xml]]
+    set cmdList [svg2can::parsesvgdocument $xmllist]
+    foreach c $cmdList {
+	puts $c
+	eval $w $c
+    }
+}
+
 # Tests...
 if {0} {
-    # load /Users/matben/C/cvs/tkpath/macosx/build/tkpath0.2.dylib
+    # load /Users/matben/C/cvs/tkpath/macosx/build/tkpath0.2.1.dylib
     package require svg2can
     toplevel .t
     pack [canvas .t.c -width 600 -height 500]    
@@ -2323,17 +2359,6 @@ if {0} {
 	}
     }
     
-    proc DrawSVG {fileName w} {
-	set fd [open $fileName r]
-	set xml [read $fd]
-	close $fd
-	set xmllist [tinydom::documentElement [tinydom::parse $xml]]
-	set cmdList [svg2can::parsesvgdocument $xmllist]
-	foreach c $cmdList {
-	    puts $c
-	    eval $w $c
-	}
-    }
 }
     
 #-------------------------------------------------------------------------------
