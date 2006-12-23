@@ -5,7 +5,7 @@
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.26 2006-12-21 11:22:11 matben Exp $
+# $Id: svg2can.tcl,v 1.27 2006-12-23 15:14:52 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -205,7 +205,7 @@ proc svg2can::ParseElemRecursive {xmllist paropts transformL args} {
     # Handle any tranform attribute; may be recursive, so keep a list.
     set transformL [concat $transformL [ParseTransformAttr [getattr $xmllist]]]
 
-    #puts "svg2can::ParseElemRecursive tag=$tag"
+    #puts "svg2can::ParseElemRecursive tag=$tag, args=$args"
     
     switch -- $tag {
 	circle - ellipse - image - line - polyline - polygon - rect - path - text {
@@ -222,10 +222,17 @@ proc svg2can::ParseElemRecursive {xmllist paropts transformL args} {
 	    }
 	}
 	a - g {
+	    
 	    # Need to collect the attributes for the g element since
 	    # the child elements inherit them. g elements may be nested!
+	    # Must parse any style to the actual attribute names.
 	    array set attrA $args
 	    array set attrA [getattr $xmllist]
+	    unset -nocomplain attrA(id)
+	    if {[info exists attrA(style)]} {
+		array set attrA [StyleAttrToList $attrA(style)]
+	    }
+	    #puts "attrA [array get attrA]"
 	    foreach c [getchildren $xmllist] {
 		set cmdList [concat $cmdList [eval {
 		    ParseElemRecursive $c $paropts $transformL
@@ -234,12 +241,12 @@ proc svg2can::ParseElemRecursive {xmllist paropts transformL args} {
 	}
 	linearGradient {
 	    if {$priv(havetkpath)} {
-		CreatLinearGradient $xmllist
+		CreateLinearGradient $xmllist
 	    }
 	}
 	radialGradient {
 	    if {$priv(havetkpath)} {
-		
+		CreateRadialGradient $xmllist
 	    }
 	}
 	foreignObject {
@@ -1083,6 +1090,7 @@ proc svg2can::ParsePathEx {xmllist paropts args} {
 	}
     }
     
+    # @@@ Write proc for this!
     regsub -all -- {([a-zA-Z])([0-9])} $path {\1 \2} path
     regsub -all -- {([0-9])([a-zA-Z])} $path {\1 \2} path
     set path [string map {- " -"} $path]
@@ -1090,9 +1098,25 @@ proc svg2can::ParsePathEx {xmllist paropts args} {
 
     #puts "\tsvg2can::ParsePathEx opts=$opts, presAttr=$presAttr"
 
-    set opts [MergePresentationAttrEx $opts $presAttr]
-    #puts "\t\topts=$opts"
-    return [concat create path [list $path] $opts]
+    if {0} {
+	set opts [MergePresentationAttrEx $opts $presAttr]
+	return [concat create path [list $path] $opts]
+    } else {
+	array set optsA [MergePresentationAttrEx $opts $presAttr]
+	
+	# Handle different defaults for fill and stroke.
+	if {![info exists optsA(-fill)]} {
+	    set optsA(-fill) black
+	}
+	if {[info exists optsA(-fillgradient)]} {
+	    unset -nocomplain optsA(-fill)
+	}
+	if {![info exists optsA(-stroke)]} {
+	    set optsA(-stroke) {}
+	}
+	#puts "\t\topts=[array get optsA]"
+	return [concat create path [list $path] [array get optsA]]
+    }
 }
 
 proc svg2can::ParsePolyline {xmllist paropts transformL args} {
@@ -1536,14 +1560,13 @@ proc svg2can::AttrToCoords {type attrlist} {
 
 # @@@ There is a lot TODO here!
 
-proc svg2can::CreatLinearGradient {xmllist} {
+proc svg2can::CreateLinearGradient {xmllist} {
     variable gradientIDToToken
 
     set x1 0
     set y1 0
     set x2 1
     set y2 0
-    set stops {}
     set method pad
     set units bbox
 
@@ -1567,6 +1590,57 @@ proc svg2can::CreatLinearGradient {xmllist} {
     if {![info exists id]} {
 	return
     }
+    set stops [ParseGradientStops $xmllist]    
+    set token [::tkpath::lineargradient create -method $method -units $units \
+      -lineartransition [list $x1 $y1 $x2 $y2] -stops $stops]
+    set gradientIDToToken($id) $token
+    
+    #puts "svg2can::CreatLinearGradient id=$id, token=$token"
+}
+
+proc svg2can::CreateRadialGradient {xmllist} {
+    variable gradientIDToToken
+
+    set cx 0.5
+    set cy 0.5
+    set r  0.5
+    set fx 0.5
+    set fy 0.5
+    
+    set method pad
+    set units bbox
+
+    foreach {key value} [getattr $xmllist] {	
+	switch -- $key {
+	    cx - cy - r - fx - fy {
+		set $key [parseUnaryOrPercentage $value]
+	    }
+	    id {
+		set id $value
+	    }
+	    gradientUnits {
+		set units [string map \
+		  {objectBoundingBox bbox userSpaceOnUse userspace} $value]
+	    }
+	    spreadMethod {
+		set method $value
+	    }
+	}
+    }
+    if {![info exists id]} {
+	return
+    }
+    set stops [ParseGradientStops $xmllist]    
+    set token [::tkpath::radialgradient create -method $method -units $units \
+      -radialtransition [list $cx $cy $r $fx $fy] -stops $stops]
+    set gradientIDToToken($id) $token
+    
+    #puts "svg2can::CreateRadialGradient id=$id, token=$token"
+}
+
+proc svg2can::ParseGradientStops {xmllist} {
+    
+    set stops {}
     
     foreach stopE [getchildren $xmllist] {
 	if {[gettag $stopE] eq "stop"} {
@@ -1598,11 +1672,7 @@ proc svg2can::CreatLinearGradient {xmllist} {
 	    lappend stops [list $offset $stopA(color) $stopA(opacity)]
 	}
     }
-    puts stops=$stops
-    
-    set token [::tkpath::lineargradient create -method $method -units $units \
-      -lineartransition [list $x1 $y1 $x2 $y2] -stops $stops]
-    set gradientIDToToken($id) $token
+    return $stops
 }
 
 proc svg2can::parseUnaryOrPercentage {offset} {
@@ -1647,11 +1717,12 @@ proc svg2can::parseFillToList {value} {
     variable gradientIDToToken
 
     if {[regexp {url\(#(.+)\)} $value - id]} {
-	puts "\t id=$id"
+	#puts "\t id=$id"
 	if {[info exists gradientIDToToken($id)]} {
-	    puts "\t gradientIDToToken=$gradientIDToToken($id)"
+	    #puts "\t gradientIDToToken=$gradientIDToToken($id)"
 	    return [list -fillgradient $gradientIDToToken($id)]
 	} else {
+	    puts "--------> missing gradientIDToToken"
 	    return [list -fill black]
 	}
     } else {
@@ -1821,22 +1892,24 @@ proc svg2can::StyleToOpts {type styleList args} {
 }
 
 proc svg2can::StyleToOptsEx {styleList args} {
-
-    # @@@ Wrong if inherit?
-    array set optsA {-fill black -stroke ""}
     
     foreach {key value} $styleList {    
 	switch -- $key {
 	    fill {
+		# Two possibilities: -fill or -fillgradient
 		foreach {name val} [parseFillToList $value] { break }
 		set optsA($name) $val
-		#set optsA(-$key) [parseColor $value]
+	    } 
+	    opacity {
+		# @@@ This is much more complicated than this for groups!
+		set optsA(-fillopacity) $value
+		set optsA(-strokeopacity) $value
 	    }
 	    stroke {
 		set optsA(-$key) [parseColor $value]		
 	    }
-	    stroke-dasharray - strokelinecap - strokelinejoin - \
-	      strokemiterlimit - strokeopacity {		
+	    fill-opacity - stroke-dasharray - strokelinecap - \
+	      strokelinejoin - strokemiterlimit - strokeopacity {		
 		set name [string map {"-" ""} $key]
 		set optsA(-$name) $value
 	    }
@@ -2358,7 +2431,7 @@ if {0} {
 	    eval .t.c $c
 	}
     }
-    
+
 }
     
 #-------------------------------------------------------------------------------
