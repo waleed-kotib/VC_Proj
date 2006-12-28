@@ -429,6 +429,10 @@
 ::msgcat::mcset kr mFindAgain         	{다시 찾기}
 
 ::msgcat::mcset kr mFindPrevious        {Find Previous}
+::msgcat::mcset kr mFontSize            {Font Size}
+::msgcat::mcset kr mNormalFont          {Normal}
+::msgcat::mcset kr mLargerFont          {Larger}
+::msgcat::mcset kr mLargeFont           {Large}
 
 # Popups
 ::msgcat::mcset kr mMessage     	{메세지...}

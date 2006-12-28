@@ -426,6 +426,10 @@
 
 #Translate
 ::msgcat::mcset es mTimeCode            {Timecode}
+::msgcat::mcset es mFontSize            {Font Size}
+::msgcat::mcset es mNormalFont          {Normal}
+::msgcat::mcset es mLargerFont          {Larger}
+::msgcat::mcset es mLargeFont           {Large}
 
 ::msgcat::mcset es mUserInfo            {Informacion del usuario}
 ::msgcat::mcset es mEditBookmarks       {Editar favoritos}

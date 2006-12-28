@@ -437,6 +437,10 @@
 ::msgcat::mcset it mExport              {Export}
 ::msgcat::mcset it mEmoticonSet         {Emoticon Set...}
 ::msgcat::mcset it mRoster              {Roster...}
+::msgcat::mcset it mFontSize            {Font Size}
+::msgcat::mcset it mNormalFont          {Normal}
+::msgcat::mcset it mLargerFont          {Larger}
+::msgcat::mcset it mLargeFont           {Large}
 
 # Popups
 ::msgcat::mcset it mMessage {Messaggio...}

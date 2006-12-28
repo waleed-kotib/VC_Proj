@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2006  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.33 2006-11-04 08:42:10 matben Exp $
+# $Id: Theme.tcl,v 1.34 2006-12-28 13:26:46 matben Exp $
 
 package provide Theme 1.0
 
@@ -25,12 +25,14 @@ namespace eval ::Theme:: {
 
 proc ::Theme::Init { } {
     global  this prefs
+    variable fontopts
         
     # Handle theme name and locale from prefs file.
     NameAndLocalePrefs
     
     # Create named standard fonts.
     Fonts
+    FontConfigSize $prefs(fontSizePlus)
     
     # Priorities.
     # widgetDefault: 20
@@ -89,6 +91,7 @@ proc ::Theme::Init { } {
 
 proc ::Theme::Fonts { } {
     global  tcl_platform
+    variable fontopts
     
     catch {font create CociDefaultFont}
     catch {font create CociSmallFont}
@@ -104,11 +107,12 @@ proc ::Theme::Fonts { } {
 		variable family "MS Sans Serif"
 	    }
 	    variable size 8
+	    variable smallsize 8
 	    variable largesize 14
 
 	    font configure CociDefaultFont   -family $family -size $size
-	    font configure CociSmallFont     -family $family -size $size
-	    font configure CociSmallBoldFont -family $family -size $size -weight bold
+	    font configure CociSmallFont     -family $family -size $smallsize
+	    font configure CociSmallBoldFont -family $family -size $smallsize -weight bold
 	    font configure CociTinyFont      -family $family -size $size
 	    font configure CociLargeFont     -family $family -size $largesize
 	}
@@ -142,6 +146,22 @@ proc ::Theme::Fonts { } {
 	    font configure CociLargeFont     -family $family -size $largesize
 	}
     }
+    set fontopts(family)    $family
+    set fontopts(size)      $size
+    set fontopts(smallsize) $smallsize
+    set fontopts(largesize) $largesize
+}
+
+proc ::Theme::FontConfigSize {increase} {
+    variable fontopts
+    
+    # @@@ Not sure how to handle the unnamed system fonts?
+    if {$fontopts(smallsize) > 0} {
+	set size [expr {$fontopts(smallsize) + $increase}]
+    } else {
+	set size [expr {$fontopts(smallsize) - $increase}]
+    }
+    font configure CociSmallFont -size $size
 }
 
 # Theme::PostProcessFontDefs --
@@ -170,10 +190,12 @@ proc ::Theme::NameAndLocalePrefs { } {
     
     set prefs(themeName)     ""
     set prefs(messageLocale) ""
+    set prefs(fontSizePlus)  0
     
     ::PrefUtils::Add [list  \
       [list prefs(themeName)      prefs_themeName      $prefs(themeName)] \
       [list prefs(messageLocale)  prefs_messageLocale  $prefs(messageLocale)] \
+      [list prefs(fontSizePlus)   prefs_fontSizePlus   $prefs(fontSizePlus)] \
       ]    
 
     set appName    [option get . appName {}]

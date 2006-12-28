@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.33 2006-12-15 08:07:15 matben Exp $
+# $Id: Status.tcl,v 1.34 2006-12-28 13:26:46 matben Exp $
 
 package provide Status 1.0
 
@@ -493,7 +493,7 @@ proc ::Status::BtSetStatus {w} {
 namespace eval ::Status:: {
     
     set ::config(status,menu,len)           8
-    set ::config(status,menu,entry,len)     24
+    set ::config(status,menu,entry,len)     28
     set ::config(status,menu,dynamic,shows) {away}
 }
 
