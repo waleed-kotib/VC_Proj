@@ -354,6 +354,10 @@
 ::msgcat::mcset ru mExport              {Export}
 ::msgcat::mcset ru mEmoticonSet         {Emoticon Set...}
 ::msgcat::mcset ru mRoster              {Roster...}
+::msgcat::mcset ru mFontSize            {Font Size}
+::msgcat::mcset ru mNormalFont          {Normal}
+::msgcat::mcset ru mLargerFont          {Larger}
+::msgcat::mcset ru mLargeFont           {Large}
 
 # Popups
 ::msgcat::mcset ru mMessage     	{Сообщение...}

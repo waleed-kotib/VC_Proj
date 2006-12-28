@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.151 2006-12-21 11:23:47 matben Exp $
+# $Id: JUI.tcl,v 1.152 2006-12-28 13:26:45 matben Exp $
 
 package provide JUI 1.0
 
@@ -174,6 +174,14 @@ proc ::JUI::Init { } {
 	    {command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
 	    {checkbutton mDebug         {::Jabber::DebugCmd}            {} \
 	      {-variable ::Jabber::jstate(debugCmd)}}
+	    {cascade     mFontSize      {}                              {} {} {
+		{radio   mNormalFont    {::Theme::FontConfigSize  0}    {}
+		{-variable prefs(fontSizePlus) -value 0}}
+		{radio   mLargerFont    {::Theme::FontConfigSize +1}    {}
+		{-variable prefs(fontSizePlus) -value 1}}
+		{radio   mLargeFont     {::Theme::FontConfigSize +2}    {}
+		{-variable prefs(fontSizePlus) -value 2}}
+	    } }
 	    {separator}
 	    {command     mCoccinellaHome {::JUI::OpenCoccinellaURL}     {}}
 	    {command     mBugReport      {::JUI::OpenBugURL}            {}}

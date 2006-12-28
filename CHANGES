@@ -13,6 +13,8 @@ Coccinella-0.95.16 (200701??):
  o configurable JID or status entry in main window
  o added file/import/emoticons menu command
  o added file/export/roster menu command
+ o added search previous
+ o added menu to increase the smallest font sizes in two steps
 
 Coccinella-0.95.15 (20061117):
 

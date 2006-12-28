@@ -426,6 +426,10 @@
 ::msgcat::mcset sv mExport              {Exportera}
 ::msgcat::mcset sv mEmoticonSet         {Smileysamling...}
 ::msgcat::mcset sv mRoster              {Användarlista...}
+::msgcat::mcset sv mFontSize            {Typsnittsstorlek}
+::msgcat::mcset sv mNormalFont          {Normal}
+::msgcat::mcset sv mLargerFont          {Större}
+::msgcat::mcset sv mLargeFont           {Stor}
 
 
 # Popups
