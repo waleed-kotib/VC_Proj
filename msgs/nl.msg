@@ -431,10 +431,10 @@
 ::msgcat::mcset nl mEmoticonSet                         {Emoticonset importeren...}
 ::msgcat::mcset nl mRoster                              {Roster...}
 
-::msgcat::mcset nl mFontSize                            {Font Size}
-::msgcat::mcset nl mNormalFont                          {Normal}
-::msgcat::mcset nl mLargerFont                          {Larger}
-::msgcat::mcset nl mLargeFont                           {Large}
+::msgcat::mcset nl mFontSize				{Lettergrootte}
+::msgcat::mcset nl mNormalFont				{Normaal}
+::msgcat::mcset nl mLargerFont				{Groter}
+::msgcat::mcset nl mLargeFont				{Groot}
 
 # Popups
 ::msgcat::mcset nl mMessage				{Bericht...}
