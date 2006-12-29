@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.15 2006-09-21 12:23:57 matben Exp $
+# $Id: Growl.tcl,v 1.16 2006-12-29 14:23:07 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -27,12 +27,31 @@ proc ::Growl::Init { } {
       {newMessage changeStatus fileTransfer phoneRings moodEvent} $cociFile
     
     # Add event hooks.
+    ::hooks::register newMessageHook      ::Growl::MessageHook
     ::hooks::register newChatMessageHook  ::Growl::ChatMessageHook
     ::hooks::register presenceNewHook     ::Growl::PresenceHook
     ::hooks::register jivePhoneEvent      ::Growl::JivePhoneEventHook
     ::hooks::register fileTransferReceiveHook  ::Growl::FileTransferRecvHook
     ::hooks::register moodEvent           ::Growl::MoodEventHook
 
+}
+
+proc ::Growl::MessageHook {body args} { 
+    variable cociFile
+    
+    if {$body eq ""} {
+	return
+    }
+    array set argsA $args
+    set jid $argsA(-from)
+    set jid2 [jlib::barejid $jid]
+    set title "Message From: $jid2"
+    if {[info exists argsA(-subject)]} {
+	set subject $argsA(-subject)
+    } else {
+	set subject ""
+    }
+    growl post newMessage $title $subject $cociFile
 }
 
 proc ::Growl::ChatMessageHook {body args} {    
@@ -45,7 +64,7 @@ proc ::Growl::ChatMessageHook {body args} {
 
     # -from is a 3-tier jid /resource included.
     set jid $argsA(-from)
-    jlib::splitjid $jid jid2 -
+    set jid2 [jlib::barejid $jid]
     
     if {[::Chat::HaveChat $jid]} {
 	return
