@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.27 2006-05-16 06:06:28 matben Exp $
+# $Id: Sounds.tcl,v 1.28 2007-01-01 15:16:28 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -85,7 +85,7 @@ proc ::Sounds::InitEventHooks { } {
     ::hooks::register quitAppHook             ::Sounds::Free 80
     ::hooks::register newMessageHook          [list ::Sounds::Msg normal newmsg]
     ::hooks::register newChatMessageHook      [list ::Sounds::Msg chat newchatmsg]
-    ::hooks::register newGroupChatMessageHook [list ::Sounds::Msg groupchat newmsg]
+    ::hooks::register newGroupChatMessageHook [list ::Sounds::Msg groupchat newchatmsg]
     ::hooks::register newChatThreadHook       [list ::Sounds::Event newchatthread]
     ::hooks::register loginHook               [list ::Sounds::Event connected]
     ::hooks::register presenceNewHook         ::Sounds::Presence
