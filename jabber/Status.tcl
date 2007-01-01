@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.34 2006-12-28 13:26:46 matben Exp $
+# $Id: Status.tcl,v 1.35 2007-01-01 15:24:16 matben Exp $
 
 package provide Status 1.0
 
@@ -492,9 +492,11 @@ proc ::Status::BtSetStatus {w} {
 
 namespace eval ::Status:: {
     
+    # @@@ Maybe these should go in the resource options database instead?
     set ::config(status,menu,len)           8
     set ::config(status,menu,entry,len)     28
     set ::config(status,menu,dynamic,shows) {away}
+    set ::config(status,menu,separator)     "- "
 }
 
 proc ::Status::ExInitPrefsHook {} {
@@ -723,7 +725,7 @@ proc ::Status::ExBuildMenu {m varName args} {
 	    }
 	    set value [list $show $status]
 	    set label $mapShowElemToText($show)
-	    append label " " $str
+	    append label " " $config(status,menu,separator) $str
 	    eval {$m add radio -label $label  \
 	      -variable $varName -value $value} $opts $args
 	}
