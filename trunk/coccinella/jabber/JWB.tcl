@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.72 2006-11-02 14:47:04 matben Exp $
+# $Id: JWB.tcl,v 1.73 2007-01-05 07:42:32 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -614,7 +614,7 @@ proc ::JWB::LogoutHook { } {
 proc ::JWB::CloseHook {w} {
     variable jwbstate
     
-    ::Debug 2 "::JWB::CloseHook w=$w"
+    ::Debug 2 "::JWB::CloseHook w=$w, type=$jwbstate($w,type)"
         
     switch -- $jwbstate($w,type) {
 	chat {
@@ -626,10 +626,12 @@ proc ::JWB::CloseHook {w} {
 	}
 	groupchat {
 	    
-	    # Everything handled from Jabber::GroupChat
-	    set ans [::GroupChat::ExitRoomJID $jwbstate($w,jid)]
-	    if {$ans ne "yes"} {
-		return stop
+	    #  We could ask the user to also exit room here?
+	    if {0} {
+		set ans [::GroupChat::ExitRoomJID $jwbstate($w,jid)]
+		if {$ans ne "yes"} {
+		    return stop
+		}
 	    }
 	}
 	default {

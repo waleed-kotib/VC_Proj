@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.172 2006-12-21 11:23:47 matben Exp $
+# $Id: GroupChat.tcl,v 1.173 2007-01-05 07:42:32 matben Exp $
 
 package require Create
 package require Enter
@@ -2198,7 +2198,9 @@ proc ::GroupChat::ExitRoomJID {roomjid} {
     set roomjid [jlib::jidmap $roomjid]
     set chattoken [GetTokenFrom chat roomjid $roomjid]
     if {$chattoken ne ""} {
-	ExitAndClose $chattoken
+	return [ExitAndClose $chattoken]
+    } else {
+	return ""
     }
 }
 
