@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.17 2006-12-01 08:55:14 matben Exp $
+# $Id: connect.tcl,v 1.18 2007-01-07 14:35:54 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -794,8 +794,12 @@ proc jlib::connect::reset {jlibname} {
 
     debug "jlib::connect::reset"
     
-    $jlibname tls_reset
-    $jlibname sasl_reset
+    if {[jlib::havesasl]} {
+	$jlibname sasl_reset
+    }
+    if {[jlib::havetls]} {
+	$jlibname tls_reset
+    }
     if {[namespace exists ${jlibname}::connect]} {
 	finish $jlibname reset
     }
@@ -803,8 +807,12 @@ proc jlib::connect::reset {jlibname} {
 
 proc jlib::connect::timeout {jlibname} {
 
-    $jlibname tls_reset
-    $jlibname sasl_reset
+    if {[jlib::havesasl]} {
+	$jlibname sasl_reset
+    }
+    if {[jlib::havetls]} {
+	$jlibname tls_reset
+    }
     finish $jlibname timeout
 }
 
