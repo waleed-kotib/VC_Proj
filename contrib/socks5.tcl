@@ -8,7 +8,7 @@
 #  (c) 2003  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: socks5.tcl,v 1.13 2007-01-11 14:25:45 matben Exp $
+# $Id: socks5.tcl,v 1.14 2007-01-12 13:39:31 matben Exp $
 # 
 # TODO:  GSSAPI authentication which is a MUST is missing.
 #        Only CMD CONNECT implemented.
@@ -440,18 +440,19 @@ proc socks5::finish {token {errormsg ""}} {
     debug 2 "socks5::finish errormsg=$errormsg"
     catch {after cancel $state(timeoutid)}
         
+    # In case of error we do the cleanup.
     if {$state(async)} {
 	if {[string length $errormsg]} {
 	    catch {close $state(sock)}
 	    uplevel #0 $state(-command) [list $token error $errormsg]
-	    cleanup $token
+	    free $token
 	} else {
 	    uplevel #0 $state(-command) [list $token ok]
 	}
     } else {
 	if {[string length $errormsg]} {
 	    catch {close $state(sock)}
-	    cleanup $token
+	    free $token
 	    return -code error $errormsg
 	} else {
 	    return
@@ -459,14 +460,19 @@ proc socks5::finish {token {errormsg ""}} {
     }
 }
 
+proc socks5::getipandport {token} {
+    variable $token
+    upvar 0 $token state   
+    return [list $state(bnd_addr) $state(bnd_port)]
+}
+
 proc socks5::timeout {token} {
     finish $token timeout
 }
 
-proc socks5::cleanup {token} {
+proc socks5::free {token} {
     variable $token
     upvar 0 $token state
-    
     unset -nocomplain state
 }
 

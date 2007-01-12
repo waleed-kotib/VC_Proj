@@ -5,7 +5,7 @@
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.28 2006-12-28 13:18:53 matben Exp $
+# $Id: svg2can.tcl,v 1.29 2007-01-12 13:39:31 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1739,15 +1739,15 @@ proc svg2can::parseColor {color} {
     
     if {[regexp {rgb\(([0-9]{1,3})%, *([0-9]{1,3})%, *([0-9]{1,3})%\)}  \
       $color - r g b]} {
-	set col #
+	set col "#"
 	foreach c [list $r $g $b] {
 	    append col [format %02x [expr round(2.55 * $c)]]
 	}
     } elseif {[regexp {rgb\(([0-9]{1,3}), *([0-9]{1,3}), *([0-9]{1,3})\)}  \
       $color - r g b]} {
-	set col #
+	set col "#"
 	foreach c [list $r $g $b] {
-	    append col [format %2x [expr round(2.55 * $c)]]
+	    append col [format %02x $c]
 	}
     } else {
 	set col [MapNoneToEmpty $color]
@@ -1785,6 +1785,7 @@ proc svg2can::parseLength {length} {
 proc svg2can::parsePathAttr {path} {
     regsub -all -- {([a-zA-Z])([0-9])} $path {\1 \2} path
     regsub -all -- {([0-9])([a-zA-Z])} $path {\1 \2} path
+    regsub -all -- {([a-zA-Z])([a-zA-Z])} $path {\1 \2} path
     return [string map {- " -"  , " "} $path]
 }
 
@@ -2378,7 +2379,7 @@ proc svg2can::_DrawSVG {fileName w} {
     set xmllist [tinydom::documentElement [tinydom::parse $xml]]
     set cmdList [svg2can::parsesvgdocument $xmllist]
     foreach c $cmdList {
-	#puts $c
+	puts $c
 	eval $w $c
     }
 }
