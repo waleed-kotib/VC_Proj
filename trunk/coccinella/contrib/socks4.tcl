@@ -9,7 +9,7 @@
 #  
 #  @@@ TODO: merge with socks5?
 #  
-# $Id: socks4.tcl,v 1.1 2007-01-11 14:25:45 matben Exp $
+# $Id: socks4.tcl,v 1.2 2007-01-12 13:39:31 matben Exp $
 
 package provide socks4 0.1
 
@@ -27,7 +27,23 @@ namespace eval socks4 {
     }
 }
 
-proc socks4::init {sock addr port userid args} {  
+# socks4::init --
+# 
+#       Negotiates with a SOCKS server.
+#
+# Arguments:
+#       sock:       an open socket token to the SOCKS server
+#       addr:       the peer address, not SOCKS server
+#       port:       the peer's port number
+#       args:   
+#               -command    tclProc {token type args}
+#               -username   userid
+#               -timeout    millisecs
+#       
+# Results:
+#       token if -command, else ?.
+
+proc socks4::init {sock addr port args} {  
     variable const
 
     set token [namespace current]::$sock
@@ -37,13 +53,15 @@ proc socks4::init {sock addr port userid args} {
     array set state {
 	-command          ""
 	-timeout          60000
+	-username         ""
 	async             0
+	bnd_addr          ""
+	bnd_port          ""
 	trigger           0
     }
     array set state [list     \
       addr          $addr     \
       port          $port     \
-      userid        $userid   \
       sock          $sock]
     array set state $args
 
@@ -57,7 +75,7 @@ proc socks4::init {sock addr port userid args} {
     # This corresponds to IP address 0.0.0.x, with x nonzero.
     set bip \x00\x00\x00\x01
     
-    set bdata "$const(ver)$const(cmd_connect)$bport$bip$userid\x00$addr\x00"
+    set bdata "$const(ver)$const(cmd_connect)$bport$bip$state(-username)\x00$addr\x00"
     fconfigure $sock -translation {binary binary} -blocking 0
     fileevent $sock writable {}
     if {[catch {
@@ -126,8 +144,8 @@ proc socks4::response {token} {
     }
     # Translate to unsigned!
     set port [expr ( $port + 0x10000 ) % 0x10000]
-    set state(dstport) $port
-    set state(dstaddr) $addr
+    set state(bnd_port) $port
+    set state(bnd_addr) $addr
     
     return [finish $token]
 }
@@ -143,6 +161,19 @@ proc socks4::timeout {token} {
     finish $token timeout
 }
 
+proc socks4::getipandport {token} {
+    variable $token
+    upvar 0 $token state   
+    return [list $state(bnd_addr) $state(bnd_port)]
+}
+
+proc socks4::free {token} {
+    variable $token
+    upvar 0 $token state   
+    catch {after cancel $state(timeoutid)}
+    unset -nocomplain state
+}
+
 proc socks4::finish {token {errormsg ""}} {
     global errorInfo errorCode    
     variable $token
@@ -153,23 +184,30 @@ proc socks4::finish {token {errormsg ""}} {
     
     catch {after cancel $state(timeoutid)}
 
+    # In case of error we do the cleanup.
     if {$state(async)} {
 	if {[string length $errormsg]} {
 	    catch {close $state(sock)}
 	    uplevel #0 $state(-command) [list $token error $errormsg]
+	    free $token
 	} else {
 	    uplevel #0 $state(-command) [list $token ok]
 	}
-	unset -nocomplain state
     } else {
-	# ???
+	if {[string length $errormsg]} {
+	    catch {close $state(sock)}
+	    free $token
+	    return -code error $errormsg
+	} else {
+	    return
+	}
     }
 }
 
 # Test
 if {0} {
     set s [socket 127.0.0.1 3000]
-    socks4::init $s google.com 80 mats
-    
+    set t [socks4::init $s google.com 80 mats]
+    socks4::free $t
 }
 
