@@ -5,7 +5,7 @@
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.29 2007-01-12 13:39:31 matben Exp $
+# $Id: svg2can.tcl,v 1.30 2007-01-13 08:10:16 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -717,6 +717,8 @@ proc svg2can::ParseLineEx {xmllist paropts transAttr args} {
 		lappend opts -tags $value
 	    }
 	    style {
+		puts "\t style=$value"
+		puts "\t StyleToOptsEx=[StyleToOptsEx [StyleAttrToList $value]]"
 		eval {lappend opts} [StyleToOptsEx [StyleAttrToList $value]]
 	    }
 	    transform {
@@ -727,11 +729,12 @@ proc svg2can::ParseLineEx {xmllist paropts transAttr args} {
 	    }
 	}
     }
+    puts "opts=$opts"
     if {[llength $transAttr]} {
 	lappend opts -matrix [TransformAttrListToMatrix $transAttr]
     }
-    set opts [StrokeFillDefaults [MergePresentationAttrEx $opts $presAttr]]
-    return [concat create line $x1 $y1 $x2 $y2 $opts]    
+    set opts [StrokeFillDefaults [MergePresentationAttrEx $opts $presAttr] 1]
+    return [concat create pline $x1 $y1 $x2 $y2 $opts]    
 }
 
 proc svg2can::ParsePath {xmllist paropts transformL args} {
@@ -1135,10 +1138,10 @@ proc svg2can::ParsePathEx {xmllist paropts transAttr args} {
 
 # Handle different defaults for fill and stroke.
 
-proc svg2can::StrokeFillDefaults {opts} {
+proc svg2can::StrokeFillDefaults {opts {noFill 0}} {
 
     array set optsA $opts
-    if {![info exists optsA(-fill)]} {
+    if {!$noFill && ![info exists optsA(-fill)]} {
 	set optsA(-fill) black
     }
     if {[info exists optsA(-fillgradient)]} {
@@ -1957,16 +1960,24 @@ proc svg2can::StyleToOptsEx {styleList args} {
 	    stroke {
 		set optsA(-$key) [parseColor $value]		
 	    }
-	    fill-opacity - stroke-dasharray - strokelinecap - \
-	      strokelinejoin - strokemiterlimit - strokeopacity {		
+	    fill-opacity - stroke-dasharray - \
+	      stroke-linejoin - stroke-miterlimit - stroke-opacity {		
 		set name [string map {"-" ""} $key]
 		set optsA(-$name) $value
 	    }
-	    strokewidth {		
+	    stroke-linecap {
+		if {$value eq "square"} {
+		    set value "projecting"
+		}
+		set name [string map {"-" ""} $key]
+		set optsA(-$name) $value
+	    }
+	    stroke-width {		
+		set name [string map {"-" ""} $key]
 		set optsA(-$name) [parseLength $value]
 	    }
 	    r - rx - ry - width - height {
-		set optsA(-$name) [parseLength $value]
+		set optsA(-$key) [parseLength $value]
 	    }
 	}
     }
