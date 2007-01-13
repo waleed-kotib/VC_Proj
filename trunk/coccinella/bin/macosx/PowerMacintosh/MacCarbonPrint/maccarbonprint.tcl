@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2003, Mats Bengtsson
 # 
-# $Id: maccarbonprint.tcl,v 1.2 2005-08-26 15:02:34 matben Exp $
+# $Id: maccarbonprint.tcl,v 1.3 2007-01-13 14:25:24 matben Exp $
 
 namespace eval ::maccarbonprint:: {
     
@@ -104,7 +104,7 @@ proc ::maccarbonprint::printcanvas {wcanvas printObj args} {
     if {$errMsg != ""} {
     	return -code error $errMsg
     } else {
-        return
+        return ""
     }
 }
 
@@ -232,8 +232,41 @@ proc ::maccarbonprint::printtext {wtext printObj args} {
     if {$errMsg != ""} {
 	return -code error $errMsg
     } else {
-	return
+	return ""
     }
+}
+
+# ::maccarbonprint::easytextprint --
+# 
+#      Utility function for printing a text widget. Includes the complete
+#      printing loop. Works around limitations in maccarbonprint::textprint 
+#      command (maccarbon::textprint prints only a single page) by placing 
+#      text on canvas widget; can print multiple pages. Supports text only, 
+#      not images.
+# Arguments:
+#       wtext         the canvas widget path
+#       printObj      print object returned from ::maccarbonprint::print.
+#       args      
+#                
+#   
+# Results:
+#       none.
+# Contributed by Kevin Walzer, (c) 2007.
+
+proc ::maccarbonprint::easytextprint {wtext printObj args} {
+
+
+    set wtmp .__print_text
+    canvas $wtmp -width 612
+
+    set outputtext [$wtext get 1.0 end]
+    set outputfont [$wtext cget -font]
+
+    $wtmp create text 5 0 -text $outputtext -font $outputfont -width 580 -anchor nw
+
+    ::maccarbonprint::printcanvas $wtmp $printObj
+
+    destroy $wtmp
 }
 
 proc ::maccarbonprint::Debug {num str} {

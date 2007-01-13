@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.18 2007-01-07 14:35:54 matben Exp $
+# $Id: connect.tcl,v 1.19 2007-01-13 14:25:24 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -79,7 +79,6 @@ namespace eval jlib::connect {
 }
 
 proc jlib::connect::init {jlibname} {
-
     variable inited
 
     if {!$inited} {
@@ -94,36 +93,21 @@ proc jlib::connect::cmdproc {jlibname cmd args} {
 }
 
 proc jlib::connect::init_static {} {
-
     variable inited
     variable have
     
     debug "jlib::connect::init"
     
-    set have(tls)           0
-    set have(jlibsasl)      0
-    set have(jlibtls)       0
-    set have(jlibdns)       0
-    set have(jlibcompress)  0
-    set have(jlibhttp)      0
-
-    if {![catch {package require tls}]} {
-	set have(tls) 1
-    }
-    if {![catch {package require jlibsasl}]} {
-	set have(jlibsasl) 1
-    }
-    if {![catch {package require jlibtls}]} {
-	set have(jlibtls) 1
-    }
-    if {![catch {package require jlib::dns}]} {
-	set have(jlibdns) 1
-    }
-    if {![catch {package require jlib::compress}]} {
-	set have(jlibcompress) 1
-    }
-    if {![catch {package require jlib::http}]} {
-	set have(jlibhttp) 1
+    # Loop through all packages we may need.
+    foreach name {
+	tls        jlibsasl        jlibtls  
+	jlib::dns  jlib::compress  jlib::http
+	socks4     socks5
+    } {
+	set have($name) 0
+	if {![catch {package require $name}]} {
+	    set have($name) 1
+	}	
     }
     
     # -method: ssl | tlssasl | sasl
@@ -150,6 +134,11 @@ proc jlib::connect::init_static {} {
 	-minpollsecs      4
 	-noauth           0
 	-port             ""
+	-proxy            ""
+	-proxyhost        ""
+	-proxyport        0
+	-proxyusername    ""
+	-proxypassword    ""
 	-secure           0
 	-timeout          30000
 	-transport        tcp      
@@ -164,8 +153,7 @@ proc jlib::connect::init_static {} {
 # 
 # 
 
-proc jlib::connect::configure {args} {
-    
+proc jlib::connect::configure {args} {    
     variable have
     variable options
     
@@ -177,12 +165,12 @@ proc jlib::connect::configure {args} {
 	foreach {key value} $args {
 	    switch -- $key {
 		-compress {
-		    if {!$have(jlibcompress)} {
+		    if {!$have(jlib::compress)} {
 			return -code error "missing jlib::compress package"
 		    }
 		}
 		-http {
-		    if {!$have(jlibhttp)} {
+		    if {!$have(jlib::http)} {
 			return -code error "missing jlib::http package"
 		    }
 		}
@@ -202,8 +190,7 @@ proc jlib::connect::configure {args} {
     }
 }
 
-proc jlib::connect::get_state {jlibname {name ""}} {
-    
+proc jlib::connect::get_state {jlibname {name ""}} {    
     upvar ${jlibname}::connect::state state
 
     if {$name eq ""} {
@@ -227,7 +214,7 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 #       cmd         callback command
 #       args:
 #           -command          tclProc
-#           -compress         0|1
+#           -compress         0|1               (untested)
 #           -defaulthttpurl   url
 #           -defaultport      5222
 #           -defaultresource  
@@ -244,15 +231,22 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 #           -method           ssl|tlssasl|sasl
 #           -noauth           0|1
 #           -port
+#           -proxy            ""|http|socks4|socks5
+#           -proxyhost        hostname
+#           -proxyport        port number
+#           -proxyusername    ""
+#           -proxypassword    ""
 #           -timeout          millisecs
 #           -transport        tcp|http
 #           
-#           Note the naming convention for -method!
+#         o Note the naming convention for -method!
 #            ssl        using direct tls socket connection
 #                       it corresponds to the original jabber method
 #            tlssasl    in stream tls negotiation + sasl, xmpp compliant
 #                       XMPP requires sasl after starttls!
 #            sasl       only sasl authentication
+#            
+#         o The http proxy is configured from the http package.
 #            
 #       Port priorites:
 #           1) -port
@@ -262,8 +256,7 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 # Results:
 #       Callback initiated.
 
-proc jlib::connect::connect {jlibname jid password args} {
-    
+proc jlib::connect::connect {jlibname jid password args} {    
     variable have
     variable options
     
@@ -406,8 +399,7 @@ proc jlib::connect::connect {jlibname jid password args} {
     jlib::set_async_error_handler $jlibname [namespace code async_error]
 }
 
-proc jlib::connect::verify {jlibname} {
-    
+proc jlib::connect::verify {jlibname} {    
     variable have
     upvar ${jlibname}::connect::state state
 
@@ -423,20 +415,27 @@ proc jlib::connect::verify {jlibname} {
 	    return -code error "missing jlibtls or jlibsasl package"
 	}
     }
-    if {$state(-compress) && !$have(jlibcompress)} {
-	return -code error "missing jlibcompress package"
+    if {$state(-compress) && !$have(jlib::compress)} {
+	return -code error "missing jlib::compress package"
+    }
+    if {($state(-proxy) eq "socks4") && !$have(socks4)} {
+	return -code error "missing socks4 package"
+    }
+    if {($state(-proxy) eq "socks5") && !$have(socks5)} {
+	return -code error "missing socks5 package"
+    }
+    if {($state(-proxy) eq "http") && ($state(-transport) ne "http")} {
+	return -code error "must use http transport to use a http proxy"
     }
 }
 
-proc jlib::connect::async_error {jlibname err {msg ""}} {
-    
+proc jlib::connect::async_error {jlibname err {msg ""}} {    
     upvar ${jlibname}::connect::state state
     
     finish $jlibname $err $msg
 }
 
 proc jlib::connect::dns_srv_cb {jlibname addrPort {err ""}} {
-    
     upvar ${jlibname}::connect::state state
     
     debug "jlib::connect::dns_srv_cb addrPort=$addrPort, err=$err"
@@ -456,13 +455,11 @@ proc jlib::connect::dns_srv_cb {jlibname addrPort {err ""}} {
     if {[string is integer -strict $state(-port)]} {
 	set state(port) $state(-port)
     }
-    
     unset -nocomplain state(dnstoken)
     tcp_connect $jlibname
 }
 
-proc jlib::connect::dns_http_cb {jlibname url {err ""}} {
-    
+proc jlib::connect::dns_http_cb {jlibname url {err ""}} {    
     upvar ${jlibname}::connect::state state
 
     debug "jlib::connect::dns_http_cb url=$url, err=$err"
@@ -479,8 +476,7 @@ proc jlib::connect::dns_http_cb {jlibname url {err ""}} {
     http_init $jlibname
 }
 
-proc jlib::connect::http_init {jlibname} {
-    
+proc jlib::connect::http_init {jlibname} {    
     upvar ${jlibname}::connect::state state
 
     debug "jlib::connect::http_init"
@@ -493,8 +489,7 @@ proc jlib::connect::http_init {jlibname} {
     init_stream $jlibname
 }
 
-proc jlib::connect::tcp_connect {jlibname} {
-    
+proc jlib::connect::tcp_connect {jlibname} {    
     upvar ${jlibname}::connect::state state
     
     debug "jlib::connect::tcp_connect"
@@ -502,8 +497,7 @@ proc jlib::connect::tcp_connect {jlibname} {
     set state(state) initnetwork
     if {$state(-command) ne {}} {
 	uplevel #0 $state(-command) $jlibname initnetwork
-    }
-  
+    }    
     if {$state(usessl)} {
 	set socketCmd {::tls::socket -request 0 -require 0}
     } else {
@@ -511,7 +505,15 @@ proc jlib::connect::tcp_connect {jlibname} {
     }
     debug "\t $socketCmd -async $state(host) $state(port)"
 
-    if {[catch {eval $socketCmd {-async $state(host) $state(port)}} sock]} {
+    # Handle the SOCKS proxy here.
+    if {[regexp {^socks[45]} $state(-proxy)]} {
+	set host $state(-proxyhost)
+	set port $state(-proxyport)
+    } else {
+	set host $state(host)
+	set port $state(port)
+    }    
+    if {[catch {eval $socketCmd {-async $host $port}} sock]} {
 	finish $jlibname network-failure
 	return
     }
@@ -526,8 +528,7 @@ proc jlib::connect::tcp_connect {jlibname} {
       [list jlib::connect::tcp_writable $jlibname]
 }
 
-proc jlib::connect::tcp_writable {jlibname} {
-    
+proc jlib::connect::tcp_writable {jlibname} {    
     upvar ${jlibname}::connect::state state
     
     debug "jlib::connect::tcp_writable"
@@ -550,40 +551,66 @@ proc jlib::connect::tcp_writable {jlibname} {
     }
     $jlibname setsockettransport $sock
     
-    # Do SSL handshake. See jlib::tls_handshake for a better way!
-    if {$state(usessl)} {
-	set retry 0
-
-	# Do SSL handshake.
-	while {1} {
-	    if {$retry > 100} { 
-		close $sock
-		set err "too long retry to setup SSL connection"
-		finish $jlibname tls-failure $err
-		return
+    # Handle the SOCKS proxy here.
+    if {[regexp {^socks[45]} $state(-proxy)]} {
+	set opts [list]
+	lappend opts -command [list jlib::connect::socks_cb $jlibname]
+	lappend opts -timeout $state(-timeout)]
+	foreach key {username password} {
+	    if {[string length $state(-proxy$key)]} {
+		lappend opts -$key $state(-proxy$key)
 	    }
-	    if {[catch {tls::handshake $sock} err]} {
-		if {[string match "*resource temporarily unavailable*" $err]} {
-		    after 50  
-		    incr retry
-		} else {
+	}
+	# We shall have a catch here when finished testing!
+	eval {$state(-proxy)::init $sock $state(host) $state(port)} $opts
+    } else {
+    
+	# Do SSL handshake. See jlib::tls_handshake for a better way!
+	if {$state(usessl)} {
+	    set retry 0
+	    
+	    # Do SSL handshake.
+	    while {1} {
+		if {$retry > 100} { 
 		    close $sock
+		    set err "too long retry to setup SSL connection"
 		    finish $jlibname tls-failure $err
 		    return
 		}
-	    } else {
-		break
+		if {[catch {tls::handshake $sock} err]} {
+		    if {[string match "*resource temporarily unavailable*" $err]} {
+			after 50  
+			incr retry
+		    } else {
+			close $sock
+			finish $jlibname tls-failure $err
+			return
+		    }
+		} else {
+		    break
+		}
 	    }
+	    fconfigure $sock -blocking 0 -encoding utf-8
 	}
-	fconfigure $sock -blocking 0 -encoding utf-8
+	
+	# Send the init stream xml command.
+	init_stream $jlibname
     }
-
-    # Send the init stream xml command.
-    init_stream $jlibname
 }
 
-proc jlib::connect::init_stream {jlibname} {
+proc jlib::connect::socks_cb {jlibname token type args} {    
+    upvar ${jlibname}::connect::state state
     
+    $state(-proxy)::free $token
+    if {$type eq "error"} {
+	# @@@ Fix error codes!
+	finish $jlibname proxy-failure
+    } else {
+	init_stream $jlibname
+    }
+}
+
+proc jlib::connect::init_stream {jlibname} {    
     upvar ${jlibname}::connect::state state
     
     debug "jlib::connect::init_stream"
@@ -610,7 +637,6 @@ proc jlib::connect::init_stream {jlibname} {
 }
 
 proc jlib::connect::init_stream_cb {jlibname args} {
-
     upvar ${jlibname}::connect::state state
     
     if {![info exists state]} return
@@ -662,7 +688,6 @@ proc jlib::connect::init_stream_cb {jlibname args} {
 }
 
 proc jlib::connect::starttls_cb {jlibname type args} {
-
     upvar ${jlibname}::connect::state state
     
     if {![info exists state]} return
@@ -686,8 +711,7 @@ proc jlib::connect::starttls_cb {jlibname type args} {
     }
 }
 
-proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {
-    
+proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {    
     upvar ${jlibname}::connect::state state
     
     if {![info exists state]} return
@@ -712,8 +736,7 @@ proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {
 #       Typically used after registered a new account since JID and password
 #       not known until registration succesful.
 
-proc jlib::connect::register {jlibname jid password} {
-    
+proc jlib::connect::register {jlibname jid password} {    
     upvar ${jlibname}::connect::state state
     
     jlib::splitjidex $jid username server resource
@@ -732,8 +755,7 @@ proc jlib::connect::register {jlibname jid password} {
 #       typically when started using -noauth.
 #       The user can modify the options from the initial ones.
 
-proc jlib::connect::auth {jlibname args} {
-        
+proc jlib::connect::auth {jlibname args} {        
     upvar ${jlibname}::connect::state state
     
     debug "jlib::connect::auth"
@@ -767,8 +789,7 @@ proc jlib::connect::auth {jlibname args} {
     }
 }
 
-proc jlib::connect::auth_cb {jlibname type queryE} {
-    
+proc jlib::connect::auth_cb {jlibname type queryE} {    
     upvar ${jlibname}::connect::state state
     
     if {![info exists state]} return
@@ -791,7 +812,7 @@ proc jlib::connect::auth_cb {jlibname type queryE} {
 #       This is kills any ongoing or nonexisting connect object.
 
 proc jlib::connect::reset {jlibname} {
-
+    
     debug "jlib::connect::reset"
     
     if {[jlib::havesasl]} {
@@ -828,8 +849,7 @@ proc jlib::connect::timeout {jlibname} {
 # Results:
 #       Callback made.
 
-proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {
-    
+proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {    
     upvar ${jlibname}::connect::state state
     
     debug "jlib::connect::finish errcode=$errcode, errmsg=$errmsg"
@@ -871,7 +891,6 @@ proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {
 }
 
 proc jlib::connect::free {jlibname} {
-
     upvar ${jlibname}::connect::state state
 
     debug  "jlib::connect::free"
