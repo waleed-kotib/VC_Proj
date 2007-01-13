@@ -8,10 +8,12 @@
 #  (c) 2003  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: socks5.tcl,v 1.14 2007-01-12 13:39:31 matben Exp $
+# $Id: socks5.tcl,v 1.15 2007-01-13 14:25:24 matben Exp $
 # 
 # TODO:  GSSAPI authentication which is a MUST is missing.
 #        Only CMD CONNECT implemented.
+#        Do not report English text in callback but rather error keys like
+#        rsp_notallowed etc.
 
 package provide socks5 0.1
 
@@ -47,6 +49,21 @@ namespace eval socks5 {
 	rsp_cmdunsupported  \x07
 	rsp_addrunsupported \x08
     }
+
+    # Practical when mapping errors to error codes.
+    variable iconst
+    array set iconst {
+	\x00                rsp_succeeded
+	\x01                rsp_failure
+	\x02                rsp_notallowed
+	\x03                rsp_netunreachable
+	\x04                rsp_hostunreachable
+	\x05                rsp_refused
+	\x06                rsp_expired
+	\x07                rsp_cmdunsupported
+	\x08                rsp_addrunsupported
+    }
+    
     variable ipv4_num_re {([0-9]{1,3}\.){3}[0-9]{1,3}}
     variable ipv6_num_re {([0-9a-fA-F]{4}:){7}[0-9a-fA-F]{4}}
     

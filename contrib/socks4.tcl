@@ -9,7 +9,7 @@
 #  
 #  @@@ TODO: merge with socks5?
 #  
-# $Id: socks4.tcl,v 1.2 2007-01-12 13:39:31 matben Exp $
+# $Id: socks4.tcl,v 1.3 2007-01-13 14:25:24 matben Exp $
 
 package provide socks4 0.1
 
@@ -24,6 +24,18 @@ namespace eval socks4 {
 	rsp_failure         \x5b
 	rsp_errconnect      \x5c
 	rsp_erruserid       \x5d
+    }
+    
+    # Practical when mapping errors to error codes.
+    variable iconst
+    array set iconst {
+	\x04                ver
+	\x01                cmd_connect
+	\x02                cmd_bind
+	\x5a                rsp_granted
+	\x5b                rsp_failure
+	\x5c                rsp_errconnect
+	\x5c                rsp_erruserid
     }
 }
 
@@ -107,6 +119,7 @@ proc socks4::response {token} {
     variable $token
     upvar 0 $token state  
     variable const
+    variable iconst
     
     puts "socks4::response"
     
@@ -124,13 +137,17 @@ proc socks4::response {token} {
 	return
     }
     if {![string equal $status $const(rsp_granted)]} {
-	finish $token failure
+	if {[info exists iconst($status)]} {
+	    finish $token $iconst($status)
+	} else {
+	    finish $token failure
+	}
 	return
     }
     
     # Read and parse port (2 bytes) and ip (4 bytes).
     if {[catch {read $sock 6} data] || [eof $sock]} {
-	finish $token failure
+	finish $token eof
 	return
     }        
     binary scan $data ccccS i0 i1 i2 i3 port

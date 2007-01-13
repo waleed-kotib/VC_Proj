@@ -9,7 +9,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #
-# $Id: pep.tcl,v 1.3 2006-12-01 08:55:14 matben Exp $
+# $Id: pep.tcl,v 1.4 2007-01-13 14:25:24 matben Exp $
 #
 ############################# USAGE ############################################
 #
@@ -297,8 +297,6 @@ proc jlib::pep::unset_auto_subscribe {jlibname node} {
 proc jlib::pep::PresenceEvent {jlibname xmldata} {
     upvar ${jlibname}::pep::autosub  autosub
     variable state
-
-    Debug 4 "jlib::pep::PresenceEvent node=$node"
     
     set type [wrapper::getattribute $xmldata type]
     set from [wrapper::getattribute $xmldata from]
