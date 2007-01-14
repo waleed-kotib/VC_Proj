@@ -9,7 +9,7 @@
 #  
 #  @@@ TODO: merge with socks5?
 #  
-# $Id: socks4.tcl,v 1.3 2007-01-13 14:25:24 matben Exp $
+# $Id: socks4.tcl,v 1.4 2007-01-14 15:33:33 matben Exp $
 
 package provide socks4 0.1
 
@@ -29,13 +29,13 @@ namespace eval socks4 {
     # Practical when mapping errors to error codes.
     variable iconst
     array set iconst {
-	\x04                ver
-	\x01                cmd_connect
-	\x02                cmd_bind
-	\x5a                rsp_granted
-	\x5b                rsp_failure
-	\x5c                rsp_errconnect
-	\x5c                rsp_erruserid
+	\x04    ver
+	\x01    cmd_connect
+	\x02    cmd_bind
+	\x5a    rsp_granted
+	\x5b    rsp_failure
+	\x5c    rsp_errconnect
+	\x5c    rsp_erruserid
     }
 }
 
@@ -48,7 +48,7 @@ namespace eval socks4 {
 #       addr:       the peer address, not SOCKS server
 #       port:       the peer's port number
 #       args:   
-#               -command    tclProc {token type args}
+#               -command    tclProc {token status}
 #               -username   userid
 #               -timeout    millisecs
 #       
@@ -94,7 +94,7 @@ proc socks4::init {sock addr port args} {
 	puts -nonewline $sock $bdata
 	flush $sock
     } err]} {
-	return -code error $err
+	return -code error eof
     }
 
     # Setup timeout timer. !async remains!
@@ -133,14 +133,14 @@ proc socks4::response {token} {
     }    
     binary scan $data cc null status
     if {![string equal $null \x00]} {
-	finish $token errversion
+	finish $token err_version
 	return
     }
     if {![string equal $status $const(rsp_granted)]} {
 	if {[info exists iconst($status)]} {
 	    finish $token $iconst($status)
 	} else {
-	    finish $token failure
+	    finish $token error
 	}
 	return
     }
@@ -205,7 +205,7 @@ proc socks4::finish {token {errormsg ""}} {
     if {$state(async)} {
 	if {[string length $errormsg]} {
 	    catch {close $state(sock)}
-	    uplevel #0 $state(-command) [list $token error $errormsg]
+	    uplevel #0 $state(-command) [list $token $errormsg]
 	    free $token
 	} else {
 	    uplevel #0 $state(-command) [list $token ok]
@@ -224,7 +224,7 @@ proc socks4::finish {token {errormsg ""}} {
 # Test
 if {0} {
     set s [socket 127.0.0.1 3000]
-    set t [socks4::init $s google.com 80 mats]
+    set t [socks4::init $s google.com 80 -username mats]
     socks4::free $t
 }
 
