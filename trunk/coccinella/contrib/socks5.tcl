@@ -4,16 +4,16 @@
 #      Some code plus idee from Kerem 'Waster_' HADIMLI.
 #      Made from RFC 1928.
 #
-#  (C) 2000 Kerem 'Waster_' HADIMLI (minor parts)
+#  (C) 2000  Kerem 'Waster_' HADIMLI (minor parts)
 #  (c) 2003  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: socks5.tcl,v 1.15 2007-01-13 14:25:24 matben Exp $
+# $Id: socks5.tcl,v 1.16 2007-01-14 15:33:33 matben Exp $
 # 
 # TODO:  GSSAPI authentication which is a MUST is missing.
 #        Only CMD CONNECT implemented.
 #        Do not report English text in callback but rather error keys like
-#        rsp_notallowed etc.
+#        rsp_notallowed etc. Client done, server to go.
 
 package provide socks5 0.1
 
@@ -53,15 +53,15 @@ namespace eval socks5 {
     # Practical when mapping errors to error codes.
     variable iconst
     array set iconst {
-	\x00                rsp_succeeded
-	\x01                rsp_failure
-	\x02                rsp_notallowed
-	\x03                rsp_netunreachable
-	\x04                rsp_hostunreachable
-	\x05                rsp_refused
-	\x06                rsp_expired
-	\x07                rsp_cmdunsupported
-	\x08                rsp_addrunsupported
+	\x00    rsp_succeeded
+	\x01    rsp_failure
+	\x02    rsp_notallowed
+	\x03    rsp_netunreachable
+	\x04    rsp_hostunreachable
+	\x05    rsp_refused
+	\x06    rsp_expired
+	\x07    rsp_cmdunsupported
+	\x08    rsp_addrunsupported
     }
     
     variable ipv4_num_re {([0-9]{1,3}\.){3}[0-9]{1,3}}
@@ -92,7 +92,7 @@ namespace eval socks5 {
 #       addr:       the peer address, not SOCKS server
 #       port:       the peer's port number
 #       args:   
-#               -command    tclProc {token type args}
+#               -command    tclProc {token status}
 #               -username   username
 #               -password   password
 #               -timeout    millisecs
@@ -153,7 +153,7 @@ proc socks5::init {sock addr port args} {
 	puts -nonewline $sock "$const(ver)$nmethods$methods"
 	flush $sock
     } err]} {
-	return -code error $err
+	return -code error eof
     }
 
     # Setup timeout timer. !async remains!
@@ -193,7 +193,7 @@ proc socks5::response_method {token} {
     debug 2 "\tserv_ver=$serv_ver, smethod=$smethod"
     
     if {![string equal $serv_ver 5]} {
-	finish $token "Socks server isn't version 5!"
+	finish $token err_version
 	return
     }
     
@@ -205,7 +205,7 @@ proc socks5::response_method {token} {
 	
 	# User/Pass authorization required
 	if {$state(auth) == 0} {
-	    finish $token "User/Pass authorization required by Socks Server!"
+	    finish $token err_authorization_required
 	    return
 	}
     
@@ -219,7 +219,7 @@ proc socks5::response_method {token} {
 	      "$const(auth_userpass)$ulen$state(-username)$plen$state(-password)"
 	    flush $sock
 	} err]} {
-	    finish $token $err
+	    finish $token eof
 	    return
 	}
 
@@ -235,7 +235,7 @@ proc socks5::response_method {token} {
 	    return [response_auth $token]
 	}
     } else {
-	finish $token "Method not supported by Socks Server!"
+	finish $token err_unsupported_method
 	return
     }
 }
@@ -258,11 +258,11 @@ proc socks5::response_auth {token} {
     debug 2 "\tauth_ver=$auth_ver, status=$status"
     
     if {![string equal $auth_ver 1]} {
-	finish $token "Socks Server's authentication isn't supported!"
+	finish $token err_authentication_unsupported
 	return
     }
     if {![string equal $status 0]} {
-	finish $token "Wrong username or password!"
+	finish $token err_authorization
 	return
     }	
     
@@ -313,7 +313,7 @@ proc socks5::request {token} {
 	puts -nonewline $sock "$aconst$atyp_addr_port"
 	flush $sock
     } err]} {
-	finish $token $err
+	finish $token eof
 	return
     }
     
@@ -333,8 +333,8 @@ proc socks5::request {token} {
 
 proc socks5::response {token} {
     variable $token
-    variable msg
     upvar 0 $token state    
+    variable iconst
     
     debug 2 "socks5::response"
     
@@ -351,22 +351,17 @@ proc socks5::response {token} {
     binary scan $data ccc serv_ver rep rsv
     
     if {![string equal $serv_ver 5]} {
-	finish $token "Socks server isn't version 5!"
+	finish $token err_version
 	return
     }
-
-    switch -- $rep {
-	0 {
-	    #fconfigure $sock -translation {auto auto}
-	}
-	1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 {
-	    finish $token $msg($rep)
-	    return
-	}
-	default {
-	    finish $token "Socks server responded: Unknown Error"
-	    return
-	}    
+    if {$rep == 0} {
+	# OK
+    } elseif {[info exists iconst($rep)]} {
+	finish $token $iconst($rep)
+	return
+    } else {
+	finish $token err_unknown
+	return
     }
 
     # Now parse the variable length atyp+addr+host.
@@ -444,7 +439,7 @@ proc socks5::parse_atyp_addr {token addrVar portVar} {
 	    # todo
 	}
 	default {
-	    return -code error "Unknown address type"
+	    return -code error err_unknown_address_type
 	}
     }
 }
@@ -461,7 +456,7 @@ proc socks5::finish {token {errormsg ""}} {
     if {$state(async)} {
 	if {[string length $errormsg]} {
 	    catch {close $state(sock)}
-	    uplevel #0 $state(-command) [list $token error $errormsg]
+	    uplevel #0 $state(-command) [list $token $errormsg]
 	    free $token
 	} else {
 	    uplevel #0 $state(-command) [list $token ok]
@@ -867,7 +862,7 @@ proc socks5::serv_finish {token {errormsg ""}} {
 	catch {close $state(sock_dst)}
     }        
     if {[string length $errormsg]} {
-	uplevel #0 $state(command) [list $token error -error $errormsg]
+	uplevel #0 $state(command) [list $token $errormsg]
     } else {
 	uplevel #0 $state(command) [list $token ok]
     }
@@ -902,18 +897,18 @@ proc socks5::debug {num str} {
 if {0} {
     
     # Server
-    proc serv_cmd {token type args} {
-	puts "server: token=$token, type=$type, args=$args"	
-	switch -- $type {
-	    error {
-		
-	    }
+    proc serv_cmd {token status} {
+	puts "server: token=$token, status=$status"	
+	switch -- $status {
 	    ok {
 		
 	    }
 	    authorize {
 		# Here we should check that the username and password is ok.
 		return 1
+	    }
+	    default {
+		puts "error $status"
 	    }
 	}	    
     }
@@ -924,10 +919,10 @@ if {0} {
     socket -server server_connect 1080
     
     # Client
-    proc cb {token type args} {
+    proc cb {token status} {
 	global s
-	puts "client: token=$token, type=$type, args=$args"
-	if {$type == "ok"} {
+	puts "client: token=$token, status=$status"
+	if {$status eq "ok"} {
 	    fconfigure $s -buffering none
 	}
     }
