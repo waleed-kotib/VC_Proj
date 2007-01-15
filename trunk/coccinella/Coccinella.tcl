@@ -8,11 +8,11 @@
 #       It controls the startup sequence and therefore needs a number
 #       of code files/images to be succesful.
 #      
-#  Copyright (c) 1999-2006  Mats Bengtsson
+#  Copyright (c) 1999-2007  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.142 2007-01-15 10:52:59 matben Exp $	
+# $Id: Coccinella.tcl,v 1.143 2007-01-15 15:09:30 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0

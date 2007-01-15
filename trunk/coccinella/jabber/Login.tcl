@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.105 2006-12-12 15:18:00 matben Exp $
+# $Id: Login.tcl,v 1.106 2007-01-15 15:09:31 matben Exp $
 
 package provide Login 1.0
 
@@ -118,7 +118,6 @@ proc ::Login::Dlg { } {
 
     set menuVar [::Profiles::GetSelectedName]
     set wpopupMenu [ttk::optionmenu $wpopup [namespace current]::menuVar {}]
-    puts "-text [$wpopup cget -text]"
     
     # Depending on 'config(login,style)' not all get mapped.
     ttk::label $frmid.ljid -text "[mc {Jabber ID}]:" -anchor e
