@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.141 2006-11-16 14:28:54 matben Exp $	
+# $Id: Coccinella.tcl,v 1.142 2007-01-15 10:52:59 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -128,11 +128,6 @@ if {[string equal $this(platform) "unix"]} {
     set thisScript [file normalize [info script]]
 }
 set thisPath [file normalize [file dirname $thisScript]]
-if {[info exists ::env(HOME)]} {
-    cd $::env(HOME)
-} else {
-    catch {cd ~}
-}
 
 # Debug support.
 source [file join $thisPath lib Debug.tcl]
