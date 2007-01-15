@@ -4,9 +4,9 @@
 #      It provides a high level method to handle all the things to establish
 #      a connection with a jabber server and do TLS, SASL, and authentication.
 #      
-#  Copyright (c) 2006  Mats Bengtsson
+#  Copyright (c) 2006-2007  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.19 2007-01-13 14:25:24 matben Exp $
+# $Id: connect.tcl,v 1.20 2007-01-15 15:09:31 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -68,6 +68,7 @@
 
 package require jlib
 package require sha1
+package require autosocks       ;# wrapper for the 'socket' command.
 
 package provide jlib::connect 0.1
 
@@ -96,13 +97,12 @@ proc jlib::connect::init_static {} {
     variable inited
     variable have
     
-    debug "jlib::connect::init"
+    debug "jlib::connect::init_static"
     
     # Loop through all packages we may need.
     foreach name {
 	tls        jlibsasl        jlibtls  
 	jlib::dns  jlib::compress  jlib::http
-	socks4     socks5
     } {
 	set have($name) 0
 	if {![catch {package require $name}]} {
@@ -134,11 +134,6 @@ proc jlib::connect::init_static {} {
 	-minpollsecs      4
 	-noauth           0
 	-port             ""
-	-proxy            ""
-	-proxyhost        ""
-	-proxyport        0
-	-proxyusername    ""
-	-proxypassword    ""
 	-secure           0
 	-timeout          30000
 	-transport        tcp      
@@ -231,11 +226,6 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 #           -method           ssl|tlssasl|sasl
 #           -noauth           0|1
 #           -port
-#           -proxy            ""|http|socks4|socks5
-#           -proxyhost        hostname
-#           -proxyport        port number
-#           -proxyusername    ""
-#           -proxypassword    ""
 #           -timeout          millisecs
 #           -transport        tcp|http
 #           
@@ -418,15 +408,6 @@ proc jlib::connect::verify {jlibname} {
     if {$state(-compress) && !$have(jlib::compress)} {
 	return -code error "missing jlib::compress package"
     }
-    if {($state(-proxy) eq "socks4") && !$have(socks4)} {
-	return -code error "missing socks4 package"
-    }
-    if {($state(-proxy) eq "socks5") && !$have(socks5)} {
-	return -code error "missing socks5 package"
-    }
-    if {($state(-proxy) eq "http") && ($state(-transport) ne "http")} {
-	return -code error "must use http transport to use a http proxy"
-    }
 }
 
 proc jlib::connect::async_error {jlibname err {msg ""}} {    
@@ -498,34 +479,23 @@ proc jlib::connect::tcp_connect {jlibname} {
     if {$state(-command) ne {}} {
 	uplevel #0 $state(-command) $jlibname initnetwork
     }    
-    if {$state(usessl)} {
-	set socketCmd {::tls::socket -request 0 -require 0}
-    } else {
-	set socketCmd socket
-    }
-    debug "\t $socketCmd -async $state(host) $state(port)"
-
-    # Handle the SOCKS proxy here.
-    if {[regexp {^socks[45]} $state(-proxy)]} {
-	set host $state(-proxyhost)
-	set port $state(-proxyport)
-    } else {
-	set host $state(host)
-	set port $state(port)
-    }    
-    if {[catch {eval $socketCmd {-async $host $port}} sock]} {
+    if {[catch {
+	set state(sock) [autosocks::socket $state(host) $state(port) \
+	  -command [list jlib::connect::autosocks_cb $jlibname]]
+    } err]} {
 	finish $jlibname network-failure
-	return
     }
-    set state(sock) $sock
- 
-    # Configure socket.
-    fconfigure $sock -buffering line -blocking 0
-    catch {fconfigure $sock -encoding utf-8}
-        
-    # If open socket in async mode, need to wait for fileevent.
-    fileevent $sock writable   \
-      [list jlib::connect::tcp_writable $jlibname]
+}
+
+proc jlib::connect::autosocks_cb {jlibname status} {
+
+    debug "jlib::connect::autosocks_cb status=$status"
+
+    if {$status eq "ok"} {
+	tcp_writable $jlibname
+    } else {
+	finish $jlibname $status
+    }
 }
 
 proc jlib::connect::tcp_writable {jlibname} {    
@@ -549,65 +519,48 @@ proc jlib::connect::tcp_writable {jlibname} {
 	finish $jlibname network-failure $sockname
 	return
     }
+
+    # Configure socket.
+    fconfigure $sock -buffering line -blocking 0
+    catch {fconfigure $sock -encoding utf-8}
+
     $jlibname setsockettransport $sock
     
-    # Handle the SOCKS proxy here.
-    if {[regexp {^socks[45]} $state(-proxy)]} {
-	set opts [list]
-	lappend opts -command [list jlib::connect::socks_cb $jlibname]
-	lappend opts -timeout $state(-timeout)]
-	foreach key {username password} {
-	    if {[string length $state(-proxy$key)]} {
-		lappend opts -$key $state(-proxy$key)
+    # Do SSL handshake. See jlib::tls_handshake for a better way!
+    if {$state(usessl)} {
+
+	# Make it a SSL connection.
+	tls::import $sock -cafile "" -certfile "" -keyfile "" \
+	  -request 1 -server 0 -require 0 -ssl2 no -ssl3 yes -tls1 yes
+
+	set retry 0
+	
+	# Do SSL handshake.
+	while {1} {
+	    if {$retry > 100} { 
+		close $sock
+		set err "too long retry to setup SSL connection"
+		finish $jlibname tls-failure $err
+		return
 	    }
-	}
-	# We shall have a catch here when finished testing!
-	eval {$state(-proxy)::init $sock $state(host) $state(port)} $opts
-    } else {
-    
-	# Do SSL handshake. See jlib::tls_handshake for a better way!
-	if {$state(usessl)} {
-	    set retry 0
-	    
-	    # Do SSL handshake.
-	    while {1} {
-		if {$retry > 100} { 
+	    if {[catch {tls::handshake $sock} err]} {
+		if {[string match "*resource temporarily unavailable*" $err]} {
+		    after 50  
+		    incr retry
+		} else {
 		    close $sock
-		    set err "too long retry to setup SSL connection"
 		    finish $jlibname tls-failure $err
 		    return
 		}
-		if {[catch {tls::handshake $sock} err]} {
-		    if {[string match "*resource temporarily unavailable*" $err]} {
-			after 50  
-			incr retry
-		    } else {
-			close $sock
-			finish $jlibname tls-failure $err
-			return
-		    }
-		} else {
-		    break
-		}
+	    } else {
+		break
 	    }
-	    fconfigure $sock -blocking 0 -encoding utf-8
 	}
-	
-	# Send the init stream xml command.
-	init_stream $jlibname
+	fconfigure $sock -blocking 0 -encoding utf-8
     }
-}
-
-proc jlib::connect::socks_cb {jlibname token type args} {    
-    upvar ${jlibname}::connect::state state
     
-    $state(-proxy)::free $token
-    if {$type eq "error"} {
-	# @@@ Fix error codes!
-	finish $jlibname proxy-failure
-    } else {
-	init_stream $jlibname
-    }
+    # Send the init stream xml command.
+    init_stream $jlibname
 }
 
 proc jlib::connect::init_stream {jlibname} {    

@@ -1,18 +1,20 @@
 #  autosocks.tcl ---
 #  
 #      Interface to socks4/5 to make usage of 'socket' transparent.
+#      Can also be used as a wrapper for the 'socket' command without any
+#      proxy configured.
 #
 #  (c) 2007  Mats Bengtsson
 #
 #  This source file is distributed under the BSD license.
 #  
-# $Id: autosocks.tcl,v 1.1 2007-01-14 15:33:32 matben Exp $
+# $Id: autosocks.tcl,v 1.2 2007-01-15 15:09:31 matben Exp $
 
 package provide autosocks 0.1
 
 namespace eval autosocks {
-    variable static
-    array set static {
+    variable options
+    array set options {
 	-proxy          ""
 	-proxyhost      ""
 	-proxyport      ""
@@ -27,13 +29,28 @@ namespace eval autosocks {
     }
 }
 
+# autosocks::config --
+# 
+#       Get or set configuration options for the SOCKS proxy.
+#       
+# Arguments:
+#       args:
+#           -proxy            ""|socks4|socks5
+#           -proxyhost        hostname
+#           -proxyport        port number
+#           -proxyusername    ""
+#           -proxypassword    ""
+# 
+# Results:
+#       one or many option values depending on arguments.
+
 proc autosocks::config {args} {
-    variable static
+    variable options
     variable packs
     if {[llength $args] == 0} {
-	return [array get static]
+	return [array get options]
     } elseif {[llength $args] == 1} {
-	return $static($args)
+	return $options($args)
     } else {
 	set idx [lsearch $args -proxy]
 	if {$idx >= 0} {
@@ -42,7 +59,7 @@ proc autosocks::config {args} {
 		return -code error "unsupported proxy \"$proxy\""
 	    }
 	}
-	array set static $args	
+	array set options $args	
     }
 }
 
@@ -52,16 +69,16 @@ proc autosocks::config {args} {
 #       We use -command tclProc instead of -async + fileevent writable.
 
 proc autosocks::socket {host port args} {
-    variable static
+    variable options
     
     array set argsA $args
     array set optsA $args
     unset -nocomplain optsA(-command)
-    set proxy $static(-proxy)
+    set proxy $options(-proxy)
     
     if {[string length $proxy]} {
-	set ahost $static(-proxyhost)
-	set aport $static(-proxyport)
+	set ahost $options(-proxyhost)
+	set aport $options(-proxyport)
     } else {
 	set ahost $host
 	set aport $port
@@ -79,10 +96,14 @@ proc autosocks::socket {host port args} {
 	set state(sock) $sock
 	set state(cmd)  $argsA(-command)
 	fconfigure $sock -blocking 0
-	fileevent $sock writable [namespace code [list writable $token]]
+	
+	# There is a potential problem if the socket becomes writable in
+	# this call before we return! Therefore 'after idle'.
+	after idle [list \
+	  fileevent $sock writable [namespace code [list writable $token]]]
     } else {
 	set sock [eval {::socket $ahost $aport} [array get optsA]]
-	if {[string length $static(-proxy)]} {
+	if {[string length $options(-proxy)]} {
 	    ${proxy}::init $sock $host $port
 	}
     }
@@ -92,19 +113,19 @@ proc autosocks::socket {host port args} {
 proc autosocks::writable {token} {
     variable $token
     upvar 0 $token state
-    variable static
+    variable options
     
-    set proxy $static(-proxy)
+    set proxy $options(-proxy)
     set sock $state(sock)
     fileevent $sock writable {}
     
-    if {[eof $sock]} {
+    if {[catch {eof $sock} iseof] || $iseof} {
 	uplevel #0 $state(cmd) eof	        
 	unset -nocomplain state
     } else {
 	if {[string length $proxy]} {	    
 	    if {[catch {
-		$static(-proxy)::init $sock $state(host) $state(port) \
+		$options(-proxy)::init $sock $state(host) $state(port) \
 		  -command [namespace code [list socks_cb $token]]
 	    } err]} {
 		uplevel #0 $state(cmd) $err
@@ -120,10 +141,10 @@ proc autosocks::writable {token} {
 proc autosocks::socks_cb {token stok status} {
     variable $token
     upvar 0 $token state
-    variable static
+    variable options
 
     uplevel #0 $state(cmd) $status
-    $static(-proxy)::free $stok
+    $options(-proxy)::free $stok
     unset -nocomplain state
 }
 
