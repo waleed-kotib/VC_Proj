@@ -934,9 +934,10 @@
 ::msgcat::mcset nl jamessnofiletrpt			{Coccinella kon niet detecteren of %s bestandsoverdracht ondersteunt.}
 ::msgcat::mcset nl jamessfiletrpterr			{Downloaden van bestand %s van %s mislukte: %s.}
 ::msgcat::mcset nl jamesswarnsendcanoff			{De contactpersoon waarnaar u verzendt ("%s") is niet online. Als uw bericht afbeeldingen of dergelijke bevat, dan zal uw contactpersoon ze niet kunnen zien als u niet online bent als hij uw bericht leest. Wilt u het bericht verzenden?}
-
 ::msgcat::mcset nl jamessstatuscust			{Stel een bericht in voor een aanwezigheid.}
 ::msgcat::mcset nl jamessstatuscustdtl			{De meest voorkomende statussen met bijhorende berichten zijn beschikbaar in het menu.}
+
+::msgcat::mcset nl jamessproxy-failure                  {The proxy server reported an error. The error code is "%s".}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors

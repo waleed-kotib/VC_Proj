@@ -8,7 +8,7 @@
 #  (c) 2003  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: socks5.tcl,v 1.16 2007-01-14 15:33:33 matben Exp $
+# $Id: socks5.tcl,v 1.17 2007-01-16 08:22:57 matben Exp $
 # 
 # TODO:  GSSAPI authentication which is a MUST is missing.
 #        Only CMD CONNECT implemented.
@@ -153,7 +153,7 @@ proc socks5::init {sock addr port args} {
 	puts -nonewline $sock "$const(ver)$nmethods$methods"
 	flush $sock
     } err]} {
-	return -code error eof
+	return -code error network-failure
     }
 
     # Setup timeout timer. !async remains!
@@ -184,7 +184,7 @@ proc socks5::response_method {token} {
     set sock $state(sock)
     
     if {[catch {read $sock 2} data] || [eof $sock]} {
-	finish $token eof
+	finish $token network-failure
 	return
     }    
     set serv_ver ""
@@ -219,7 +219,7 @@ proc socks5::response_method {token} {
 	      "$const(auth_userpass)$ulen$state(-username)$plen$state(-password)"
 	    flush $sock
 	} err]} {
-	    finish $token eof
+	    finish $token network-failure
 	    return
 	}
 
@@ -249,7 +249,7 @@ proc socks5::response_auth {token} {
     set sock $state(sock)
 
     if {[catch {read $sock 2} data] || [eof $sock]} {
-	finish $token eof
+	finish $token network-failure
 	return
     }    
     set auth_ver ""
@@ -313,7 +313,7 @@ proc socks5::request {token} {
 	puts -nonewline $sock "$aconst$atyp_addr_port"
 	flush $sock
     } err]} {
-	finish $token eof
+	finish $token network-failure
 	return
     }
     
@@ -343,7 +343,7 @@ proc socks5::response {token} {
     
     # Start by reading ver+cmd+rsv.
     if {[catch {read $sock 3} data] || [eof $sock]} {
-	finish $token eof
+	finish $token network-failure
 	return
     }        
     set serv_ver ""
@@ -391,7 +391,7 @@ proc socks5::parse_atyp_addr {token addrVar portVar} {
 
     # Start by reading atyp.
     if {[catch {read $sock 1} data] || [eof $sock]} {
-	return -code error eof
+	return -code error network-failure
     }        
     set atyp ""
     binary scan $data c atyp
@@ -401,7 +401,7 @@ proc socks5::parse_atyp_addr {token addrVar portVar} {
     switch -- $atyp {
 	1 {
 	    if {[catch {read $sock 6} data] || [eof $sock]} {
-		return -code error eof
+		return -code error network-failure
 	    }        
 	    binary scan $data ccccS i0 i1 i2 i3 port
 	    set addr ""
@@ -417,18 +417,18 @@ proc socks5::parse_atyp_addr {token addrVar portVar} {
 	}
 	3 {
 	    if {[catch {read $sock 1} data] || [eof $sock]} {
-		return -code error eof
+		return -code error network-failure
 	    }        
 	    binary scan $data c len
 	    debug 2 "\tlen=$len"
 	    set len [expr ( $len + 0x100 ) % 0x100]
 	    if {[catch {read $sock $len} data] || [eof $sock]} {
-		return -code error eof
+		return -code error network-failure
 	    }        
 	    set addr $data
 	    debug 2 "\taddr=$addr"
 	    if {[catch {read $sock 2} data] || [eof $sock]} {
-		return -code error eof
+		return -code error network-failure
 	    }        
 	    binary scan $data S port
 	    # Translate to unsigned!
@@ -540,7 +540,7 @@ proc socks5::serverinit {sock ip port command args} {
 
     # Start by reading the method stuff.
     if {[catch {read $sock 2} data] || [eof $sock]} {
-	serv_finish $token eof
+	serv_finish $token network-failure
 	return
     }    
     set ver ""
@@ -556,7 +556,7 @@ proc socks5::serverinit {sock ip port command args} {
     }
     for {set i 0} {$i < $nmethods} {incr i} {
 	if {[catch {read $sock 1} data] || [eof $sock]} {
-	    serv_finish $token eof
+	    serv_finish $token network-failure
 	    return
 	}    
 	binary scan $data c method
@@ -613,7 +613,7 @@ proc socks5::serv_auth {token} {
     fileevent $sock readable {}
     
     if {[catch {read $sock 2} data] || [eof $sock]} {
-	serv_finish $token eof
+	serv_finish $token network-failure
 	return
     }    
     set auth_ver ""
@@ -626,19 +626,19 @@ proc socks5::serv_auth {token} {
 	return
     }    
     if {[catch {read $sock $ulen} data] || [eof $sock]} {
-	return -code error eof
+	return -code error network-failure
     }        
     set state(username) $data
     debug 2 "\tusername=$data"
     if {[catch {read $sock 1} data] || [eof $sock]} {
-	serv_finish $token eof
+	serv_finish $token network-failure
 	return
     }        
     binary scan $data c plen
     set plen [expr ( $plen + 0x100 ) % 0x100]
     debug 2 "\tplen=$plen"
     if {[catch {read $sock $plen} data] || [eof $sock]} {
-	serv_finish $token eof
+	serv_finish $token network-failure
 	return
     }        
     set state(password) $data
@@ -680,7 +680,7 @@ proc socks5::serv_request {token} {
 
     # Start by reading ver+cmd+rsv.
     if {[catch {read $sock 3} data] || [eof $sock]} {
-	serv_finish $token eof
+	serv_finish $token network-failure
 	return
     }        
     set ver ""
@@ -711,7 +711,7 @@ proc socks5::serv_request {token} {
     # Init the SOCKS connection to dst if wanted. Else???
     if {$state(-opendstsocket)} {
 	if {[catch {socket -async $addr $port} sock_dst]} {
-	    serv_finish $token eof
+	    serv_finish $token network-failure
 	    return
 	}
 	set state(sock_dst) $sock_dst
@@ -738,7 +738,7 @@ proc socks5::serv_dst_connect {token} {
     
     set sock_dst $state(sock_dst)
     if {[eof $sock_dst]} {
-	serv_finish $token eof
+	serv_finish $token network-failure
 	return
     }
     
@@ -748,7 +748,7 @@ proc socks5::serv_dst_connect {token} {
 	  break
     } err]} {
 	debug 2 "\tfconfigure failed: $err"
-	serv_finish $token eof
+	serv_finish $token network-failure
 	return
     }
     array set state [list bnd_ip $bnd_ip bnd_addr $bnd_addr bnd_port $bnd_port]
@@ -828,7 +828,7 @@ proc socks5::read_stream {token in out} {
     } elseif {[catch {eof $out} iseof] || $iseof} {
 	serv_finish $token
     } elseif {[catch {read $in} data]} {
-	serv_finish $token eof
+	serv_finish $token network-failure
     } else {
 	
 	# We could wait here (in the event loop) for channel to be writable
@@ -840,7 +840,7 @@ proc socks5::read_stream {token in out} {
 	    vwait $token\(writetrigger${primary})
 	}
 	if {[catch {puts -nonewline $out $data; flush $out}]} {
-	    serv_finish $token eof
+	    serv_finish $token network-failure
 	}
     }
 }

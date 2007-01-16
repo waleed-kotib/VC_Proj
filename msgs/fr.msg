@@ -968,6 +968,7 @@ you happen to be online while this message is being read. Do you want to send it
 ::msgcat::mcset fr jamessfiletrpterr            {Failed to get file %s from %s: %s}
 ::msgcat::mcset fr jamessstatuscust             {Set your message for any of the presence states.}
 ::msgcat::mcset fr jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+::msgcat::mcset fr jamessproxy-failure          {The proxy server reported an error. The error code is "%s".}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors

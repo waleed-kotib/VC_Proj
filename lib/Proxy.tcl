@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.8 2006-08-09 13:28:51 matben Exp $
+# $Id: Proxy.tcl,v 1.9 2007-01-16 08:22:57 matben Exp $
  
 package require autoproxy
 
@@ -138,7 +138,8 @@ proc ::Proxy::BuildPage {wpage} {
     ttk::label $wprx.lserv -text [mc {Proxy Server}]:
     ttk::entry $wprx.eserv -textvariable [namespace current]::tmpPrefs(proxy_host)
     ttk::label $wprx.lport -text [mc {Proxy Port}]:
-    ttk::entry $wprx.eport -textvariable [namespace current]::tmpPrefs(proxy_port)
+    ttk::entry $wprx.eport -textvariable [namespace current]::tmpPrefs(proxy_port) \
+      -width 6
     ttk::label $wprx.luser -text [mc Username]:
     ttk::entry $wprx.euser -textvariable [namespace current]::tmpPrefs(proxy_user)
     ttk::label $wprx.lpass -text [mc Password]:
@@ -148,17 +149,20 @@ proc ::Proxy::BuildPage {wpage} {
     ttk::label $wprx.lnop -text [mc prefproxyexc]:
     text $wprx.noproxy -font CociSmallFont -height 4 -width 24 -bd 1 -relief sunken
     
-    grid  $wprx.msg      -            -sticky w
-    grid  x              $wprx.use    -sticky w
-    grid  $wprx.lserv    $wprx.eserv  -pady 1
-    grid  $wprx.lport    $wprx.eport  -pady 1
-    grid  $wprx.luser    $wprx.euser  -pady 1
-    grid  $wprx.lpass    $wprx.epass  -pady 1
-    grid  $wprx.lnop     -            -sticky w
-    grid  $wprx.noproxy  -            -sticky ew -pady 1
+    grid  $wprx.msg  -      -            -sticky w
+    grid  $wprx.use  -      -            -sticky w
+    grid  x  $wprx.lserv    $wprx.eserv  -pady 1
+    grid  x  $wprx.lport    $wprx.eport  -pady 1
+    grid  x  $wprx.luser    $wprx.euser  -pady 1
+    grid  x  $wprx.lpass    $wprx.epass  -pady 1
+    grid  x  $wprx.lnop     -            -sticky w
+    grid  x  $wprx.noproxy  -            -sticky ew -pady 1
     
     grid  $wprx.lserv  $wprx.lport  $wprx.luser  $wprx.lpass  -sticky e
-    grid  $wprx.eserv  $wprx.eport  $wprx.euser  $wprx.epass  -sticky ew
+    grid  $wprx.eserv               $wprx.euser  $wprx.epass  -sticky ew
+    grid               $wprx.eport  -sticky w
+    
+    grid columnconfigure $wprx 0 -minsize 12
     
     foreach addr $tmpPrefs(noproxy) {
 	$wnoproxy insert end $addr

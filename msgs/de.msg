@@ -954,6 +954,8 @@ wenn Sie nicht online sind, während diese Nachricht gelesen wird. Möchten Sie tr
 ::msgcat::mcset de jamessnofiletrpt             {Wir wissen, ob %s Dateiübertragung unterstützt.}
 ::msgcat::mcset de jamessfiletrpterr            {Konnte Datei %s nicht von %s erhalten: %s}
 
+::msgcat::mcset de jamessproxy-failure          {The proxy server reported an error. The error code is "%s".}
+
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
 # 

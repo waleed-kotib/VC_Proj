@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006-2007  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.20 2007-01-15 15:09:31 matben Exp $
+# $Id: connect.tcl,v 1.21 2007-01-16 08:22:57 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -237,6 +237,7 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 #            sasl       only sasl authentication
 #            
 #         o The http proxy is configured from the http package.
+#         o The SOCKS proxy is configured from the autosocks package.
 #            
 #       Port priorites:
 #           1) -port
@@ -481,20 +482,20 @@ proc jlib::connect::tcp_connect {jlibname} {
     }    
     if {[catch {
 	set state(sock) [autosocks::socket $state(host) $state(port) \
-	  -command [list jlib::connect::autosocks_cb $jlibname]]
+	  -command [list jlib::connect::socks_cb $jlibname]]
     } err]} {
 	finish $jlibname network-failure
     }
 }
 
-proc jlib::connect::autosocks_cb {jlibname status} {
+proc jlib::connect::socks_cb {jlibname status} {
 
-    debug "jlib::connect::autosocks_cb status=$status"
+    debug "jlib::connect::socks_cb status=$status"
 
     if {$status eq "ok"} {
 	tcp_writable $jlibname
     } else {
-	finish $jlibname $status
+	finish $jlibname proxy-failure $status
     }
 }
 
@@ -530,9 +531,14 @@ proc jlib::connect::tcp_writable {jlibname} {
     if {$state(usessl)} {
 
 	# Make it a SSL connection.
-	tls::import $sock -cafile "" -certfile "" -keyfile "" \
-	  -request 1 -server 0 -require 0 -ssl2 no -ssl3 yes -tls1 yes
-
+	if {[catch {
+	    tls::import $sock -cafile "" -certfile "" -keyfile "" \
+	      -request 1 -server 0 -require 0 -ssl2 no -ssl3 yes -tls1 yes
+	} err]} {
+	    close $sock
+	    finish $jlibname tls-failure $err
+	    return
+	}
 	set retry 0
 	
 	# Do SSL handshake.
