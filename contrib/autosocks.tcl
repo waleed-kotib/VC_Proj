@@ -8,7 +8,7 @@
 #
 #  This source file is distributed under the BSD license.
 #  
-# $Id: autosocks.tcl,v 1.3 2007-01-16 08:22:56 matben Exp $
+# $Id: autosocks.tcl,v 1.4 2007-01-16 15:18:14 matben Exp $
 
 package provide autosocks 0.1
 
@@ -18,7 +18,7 @@ namespace eval autosocks {
 	-proxy          ""
 	-proxyhost      ""
 	-proxyport      ""
-	-proxyfilter    ""
+	-proxyfilter    autosocks::proxy_required
     }
     
     variable packs
@@ -40,6 +40,7 @@ namespace eval autosocks {
 #           -proxyport        port number
 #           -proxyusername    ""
 #           -proxypassword    ""
+#           -proxyfilter      tclProc {host}
 # 
 # Results:
 #       one or many option values depending on arguments.
@@ -85,9 +86,10 @@ proc autosocks::socket {host port args} {
     unset -nocomplain optsA(-command)
     set proxy $options(-proxy)
     
-    if {[string length $proxy]} {
-	set ahost $options(-proxyhost)
-	set aport $options(-proxyport)
+    set hostport [$options(-proxyfilter) $host]
+    if {[llength $hostport]} {
+	set ahost [lindex $hostport 0]
+	set aport [lindex $hostport 1]
     } else {
 	set ahost $host
 	set aport $port
@@ -157,3 +159,12 @@ proc autosocks::socks_cb {token stok status} {
     unset -nocomplain state
 }
 
+
+proc autosocks::proxy_required {host} {
+    variable options
+    if {[string length $options(-proxy)]} {
+	return [list $options(-proxyhost) $options(-proxyport)]
+    } else {
+	return [list]
+    }
+}
