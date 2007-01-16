@@ -9,7 +9,7 @@
 #  
 #  @@@ TODO: merge with socks5?
 #  
-# $Id: socks4.tcl,v 1.4 2007-01-14 15:33:33 matben Exp $
+# $Id: socks4.tcl,v 1.5 2007-01-16 08:22:56 matben Exp $
 
 package provide socks4 0.1
 
@@ -94,7 +94,7 @@ proc socks4::init {sock addr port args} {
 	puts -nonewline $sock $bdata
 	flush $sock
     } err]} {
-	return -code error eof
+	return -code error network-failure
     }
 
     # Setup timeout timer. !async remains!
@@ -128,7 +128,7 @@ proc socks4::response {token} {
     
     # Read and parse status.
     if {[catch {read $sock 2} data] || [eof $sock]} {
-	finish $token eof
+	finish $token network-failure
 	return
     }    
     binary scan $data cc null status
@@ -147,7 +147,7 @@ proc socks4::response {token} {
     
     # Read and parse port (2 bytes) and ip (4 bytes).
     if {[catch {read $sock 6} data] || [eof $sock]} {
-	finish $token eof
+	finish $token network-failure
 	return
     }        
     binary scan $data ccccS i0 i1 i2 i3 port

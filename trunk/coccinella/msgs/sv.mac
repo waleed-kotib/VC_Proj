@@ -936,6 +936,7 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 dessa om du inte händelsevis är tillgänglig när mottagaren läser det. Vill du skicka trots detta?}
 ::msgcat::mcset sv jamessstatuscust             {Sätt ett meddelande för något av närvaro tillstånden.}
 ::msgcat::mcset sv jamessstatuscustdtl          {De mest använda tillstånden och meddelanden är enkelt nåbara som menyer.}
+::msgcat::mcset sv jamessproxy-failure          {Proxy servern rapporterade ett fel. Felkoden är "%s".}
 
 
 # This maps Defined Error Conditions to clear text messages.

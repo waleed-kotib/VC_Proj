@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.106 2007-01-15 15:09:31 matben Exp $
+# $Id: Login.tcl,v 1.107 2007-01-16 08:22:57 matben Exp $
 
 package provide Login 1.0
 
@@ -687,7 +687,7 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	starttls-nofeature {
 	    set str [mc starttls-nofeature $state(server)]
 	}
-	startls-failure {
+	startls-failure - tls-failure {
 	    set str [mc starttls-failure $state(server)]
 	}
 	sasl-no-mechanisms {
@@ -697,6 +697,9 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	    set streamstag ""
 	    regexp {xmpp-streams-error-(.+)$} $errcode - streamstag
 	    set str [mc xmpp-streams-error $streamstag]
+	}
+	proxy-failure {
+	    set str [mc jamessproxy-failure $errmsg]
 	}
 	default {
 	    

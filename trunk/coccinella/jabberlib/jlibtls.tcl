@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.16 2006-10-20 09:26:50 matben Exp $
+# $Id: jlibtls.tcl,v 1.17 2007-01-16 08:22:57 matben Exp $
 
 package require tls
 package require jlib
@@ -84,8 +84,13 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
     set sock $lib(sock)
     
     # Make it a SSL connection.
-    tls::import $sock -cafile "" -certfile "" -keyfile "" \
-      -request 1 -server 0 -require 0 -ssl2 no -ssl3 yes -tls1 yes
+    if {[catch {
+	tls::import $sock -cafile "" -certfile "" -keyfile "" \
+	  -request 1 -server 0 -require 0 -ssl2 no -ssl3 yes -tls1 yes
+    } err]} {
+	close $sock
+	tls_finish $jlibname starttls-failure $err
+    }
     
     # We must initiate the handshake before getting any answers.
     set locals(tls,retry) 0

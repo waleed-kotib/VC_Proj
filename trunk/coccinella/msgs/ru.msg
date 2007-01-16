@@ -861,6 +861,7 @@ you happen to be online while this message is being read. Do you want to send it
 
 ::msgcat::mcset ru jamessstatuscust             {Set your message for any of the presence states.}
 ::msgcat::mcset ru jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+::msgcat::mcset ru jamessproxy-failure          {The proxy server reported an error. The error code is "%s".}
 
 
 # This maps Defined Error Conditions to clear text messages.

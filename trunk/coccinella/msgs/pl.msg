@@ -941,6 +941,7 @@ iż Ty będziesz dostępny, podczas gdy Twoja wiadomość będzie czytana przez 
 
 ::msgcat::mcset pl jamessstatuscust             {Set your message for any of the presence states.}
 ::msgcat::mcset pl jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+::msgcat::mcset pl jamessproxy-failure          {The proxy server reported an error. The error code is "%s".}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors

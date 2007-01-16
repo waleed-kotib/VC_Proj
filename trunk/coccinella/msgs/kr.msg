@@ -937,6 +937,7 @@
 
 ::msgcat::mcset kr jamessstatuscust             {Set your message for any of the presence states.}
 ::msgcat::mcset kr jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+::msgcat::mcset kr jamessproxy-failure          {The proxy server reported an error. The error code is "%s".}
 
 
 # This maps Defined Error Conditions to clear text messages.

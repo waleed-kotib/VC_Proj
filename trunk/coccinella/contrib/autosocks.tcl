@@ -8,7 +8,7 @@
 #
 #  This source file is distributed under the BSD license.
 #  
-# $Id: autosocks.tcl,v 1.2 2007-01-15 15:09:31 matben Exp $
+# $Id: autosocks.tcl,v 1.3 2007-01-16 08:22:56 matben Exp $
 
 package provide autosocks 0.1
 
@@ -67,6 +67,15 @@ proc autosocks::config {args} {
 # 
 #       Subclassing the 'socket' command. Only client side.
 #       We use -command tclProc instead of -async + fileevent writable.
+#       
+# Arguments:
+#       host:       the peer address, not SOCKS server
+#       port:       the peer's port number
+#       args:   
+#           -command    tclProc {token status}
+#                       the 'status' is any of: 
+#                       ok, error, timeout, network-failure, 
+#                       rsp_*, err_* (see socks4/5)
 
 proc autosocks::socket {host port args} {
     variable options
@@ -120,7 +129,7 @@ proc autosocks::writable {token} {
     fileevent $sock writable {}
     
     if {[catch {eof $sock} iseof] || $iseof} {
-	uplevel #0 $state(cmd) eof	        
+	uplevel #0 $state(cmd) network-failure	        
 	unset -nocomplain state
     } else {
 	if {[string length $proxy]} {	    

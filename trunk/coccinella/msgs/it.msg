@@ -940,6 +940,7 @@
 
 ::msgcat::mcset it jamessstatuscust             {Set your message for any of the presence states.}
 ::msgcat::mcset it jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
+::msgcat::mcset it jamessproxy-failure          {The proxy server reported an error. The error code is "%s".}
 
 
 
