@@ -7,9 +7,7 @@
 #
 #  This source file is distributed under the BSD license.
 #  
-#  @@@ TODO: merge with socks5?
-#  
-# $Id: socks4.tcl,v 1.5 2007-01-16 08:22:56 matben Exp $
+# $Id: socks4.tcl,v 1.6 2007-01-16 15:18:14 matben Exp $
 
 package provide socks4 0.1
 

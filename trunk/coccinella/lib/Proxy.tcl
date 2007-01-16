@@ -1,13 +1,14 @@
 #  Proxy.tcl ---
 #  
 #       This file is part of The Coccinella application.
-#       It is supposed to provide proxy support for http. 
+#       It is supposed to provide proxy support. 
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.9 2007-01-16 08:22:57 matben Exp $
+# $Id: Proxy.tcl,v 1.10 2007-01-16 15:18:14 matben Exp $
  
 package require autoproxy
+package require autosocks
 
 package provide Proxy 1.0
 
@@ -26,6 +27,7 @@ proc ::Proxy::InitPrefsHook { } {
     variable keySpecs
     array set keySpecs {
 	useproxy        0
+	proxy_type      http
 	proxy_host      ""
 	proxy_port      ""
 	proxy_user      ""
@@ -57,6 +59,7 @@ proc ::Proxy::InitPrefsHook { } {
     
     ::PrefUtils::Add [list  \
       [list prefs(useproxy)       prefs_useproxy       $prefs(useproxy)]      \
+      [list prefs(proxy_type)     prefs_proxytype      $prefs(proxy_type)]    \
       [list prefs(proxy_host)     prefs_proxyhost      $prefs(proxy_host)]    \
       [list prefs(proxy_port)     prefs_proxyport      $prefs(proxy_port)]    \
       [list prefs(proxy_user)     prefs_proxyuser      $prefs(proxy_user)]    \
@@ -88,6 +91,20 @@ proc ::Proxy::AutoProxyConfig { } {
     }
 }
 
+proc ::Proxy::AutoSocksConfig { } {
+    global  prefs
+    
+    autosocks::config  \
+      -proxyhost $prefs(proxy_host) \
+      -proxyport $prefs(proxy_port) \
+      -proxyfilter $prefs(no_proxy)
+    
+    if {[string length $prefs(proxy_user)]} {
+	autosocks::config  \
+	   -proxyusername $prefs(proxy_user) -proxypassword $prefs(proxy_pass)
+    }
+}
+
 proc ::Proxy::BuildPrefsHook {wtree nbframe} {
     
     ::Preferences::NewTableItem {General {Proxy Setup}} [mc {Proxy Setup}]
@@ -111,7 +128,7 @@ proc ::Proxy::BuildPage {wpage} {
     set prefs(noproxy) [lsort -unique $prefs(noproxy)]
     
     foreach key {setNATip NATip \
-      useproxy proxy_host proxy_port \
+      useproxy proxy_type proxy_host proxy_port \
       proxy_user proxy_pass noproxy} {
 	set tmpPrefs($key) $prefs($key)
     }
@@ -122,19 +139,30 @@ proc ::Proxy::BuildPage {wpage} {
     
     set wprx $wc.proxy
     set wnat $wc.nat
+    set wsep $wc.sep
     variable wprxuse $wprx.use
     variable wnatuse $wnat.use
+    variable wuser   $wprx.euser
+    variable wpass   $wprx.epass
+    
+    set menulist {
+	{"HTTP Proxy"  -value http}
+	{"SOCKS 4"     -value socks4}
+	{"SOCKS 5"     -value socks5}
+    }
     
     # Proxy.
-    ttk::labelframe $wprx -text [mc {Http Proxy}]  \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $wprx -padding {8 4 16 4}
     
     ttk::label $wprx.msg -wraplength 300 -justify left \
       -text [mc prefproxymsg]
-    
     ttk::checkbutton $wprx.use -text [mc {Use proxy}]  \
       -command [namespace code SetUseProxyState]  \
-      -variable [namespace current]::tmpPrefs(useproxy)   
+      -variable [namespace current]::tmpPrefs(useproxy)  
+    ttk::label $wprx.lmb -text [mc {Proxy Type}]:
+    ui::optionmenu $wprx.mb -menulist $menulist -direction flush \
+      -command [namespace code SetProxyType] \
+      -variable [namespace current]::tmpPrefs(proxy_type)
     ttk::label $wprx.lserv -text [mc {Proxy Server}]:
     ttk::entry $wprx.eserv -textvariable [namespace current]::tmpPrefs(proxy_host)
     ttk::label $wprx.lport -text [mc {Proxy Port}]:
@@ -151,6 +179,7 @@ proc ::Proxy::BuildPage {wpage} {
     
     grid  $wprx.msg  -      -            -sticky w
     grid  $wprx.use  -      -            -sticky w
+    grid  x  $wprx.lmb      $wprx.mb     -pady 1
     grid  x  $wprx.lserv    $wprx.eserv  -pady 1
     grid  x  $wprx.lport    $wprx.eport  -pady 1
     grid  x  $wprx.luser    $wprx.euser  -pady 1
@@ -158,9 +187,9 @@ proc ::Proxy::BuildPage {wpage} {
     grid  x  $wprx.lnop     -            -sticky w
     grid  x  $wprx.noproxy  -            -sticky ew -pady 1
     
-    grid  $wprx.lserv  $wprx.lport  $wprx.luser  $wprx.lpass  -sticky e
-    grid  $wprx.eserv               $wprx.euser  $wprx.epass  -sticky ew
-    grid               $wprx.eport  -sticky w
+    grid  $wprx.lmb  $wprx.lserv  $wprx.lport  $wprx.luser  $wprx.lpass  -sticky e
+    grid  $wprx.mb   $wprx.eserv               $wprx.euser  $wprx.epass  -sticky ew
+    grid  $wprx.eport  -sticky w
     
     grid columnconfigure $wprx 0 -minsize 12
     
@@ -169,10 +198,16 @@ proc ::Proxy::BuildPage {wpage} {
 	$wnoproxy insert end "\n"
     }
     SetUseProxyState
+
+    ttk::frame $wsep
+    ttk::separator $wsep.s -orient horizontal
+    ttk::label $wsep.l -text [mc {NAT Address}]
     
+    grid  $wsep.l  $wsep.s  -sticky ew
+    grid columnconfigure $wsep 1 -weight 1
+
     # NAT address.
-    ttk::labelframe $wnat -text [mc {NAT Address}] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $wnat -padding {8 4 16 4}
     ttk::checkbutton $wnat.use -text [mc prefnatip] \
       -command [namespace code SetUseNATState]  \
       -variable [namespace current]::tmpPrefs(setNATip)
@@ -193,7 +228,8 @@ proc ::Proxy::BuildPage {wpage} {
     set anchor [option get . dialogAnchor {}]
 
     pack  $wprx  -side top -fill x -anchor $anchor
-    pack  $wnat  -side top -fill x -anchor $anchor -pady 12
+    pack  $wsep  -side top -fill x -anchor $anchor
+    pack  $wnat  -side top -fill x -anchor $anchor
 }
 
 proc ::Proxy::GetStun {} {
@@ -203,10 +239,26 @@ proc ::Proxy::GetStun {} {
 proc ::Proxy::GetStunCB {token status args} {
     variable tmpPrefs
     
-    array set aargs $args
-    if {$status eq "ok" && [info exists aargs(-address)]} {
-	set tmpPrefs(NATip) $aargs(-address)
+    array set argsA $args
+    if {$status eq "ok" && [info exists argsA(-address)]} {
+	set tmpPrefs(NATip) $argsA(-address)
     }   
+}
+
+proc ::Proxy::SetProxyType {type} {
+    variable wuser
+    variable wpass
+    
+    switch -- $type {
+	socks5 {
+	    $wuser state {!disabled}
+	    $wpass state {!disabled}
+	} 
+	default {
+	    $wuser state {disabled}
+	    $wpass state {disabled}
+	}
+    }
 }
 
 proc ::Proxy::SetUseProxyState { } {
@@ -236,6 +288,7 @@ proc ::Proxy::SetUseNATState { } {
 }
 
 proc ::Proxy::SetChildrenStates {win _state} {
+    variable tmpPrefs
     
     if {$_state eq "normal" || $_state eq "!disabled"} {
 	set state normal
@@ -249,10 +302,13 @@ proc ::Proxy::SetChildrenStates {win _state} {
 	    Text - Entry {
 		$w configure -state $state
 	    }
-	    TEntry - TButton - TCheckbutton - TRadiobutton {
+	    TEntry - TButton - TCheckbutton - TRadiobutton - TMenubutton {
 		$w state $ttkstate
 	    }
 	}
+    }
+    if {$state eq "normal"} {
+	SetProxyType $tmpPrefs(proxy_type)
     }
 }
 
@@ -276,9 +332,19 @@ proc ::Proxy::SavePrefsHook { } {
     set prefs(proxy_pass) [string trim $prefs(proxy_pass)]
     
     if {$prefs(useproxy)} {
-	AutoProxyConfig
+	if {$prefs(proxy_type) eq "http"} {
+	    AutoProxyConfig
+	    autosocks::config \
+	      -proxy {} -proxyfilter {} -proxyhost {} -proxyport {} \
+	      -proxyusername {} -proxypassword {}
+	} else {
+	    http::config -proxyfilter {} -proxyhost {} -proxyport {}
+	    AutoSocksConfig
+	}
     } else {
 	http::config -proxyfilter {} -proxyhost {} -proxyport {}
+	autosocks::config -proxy {} -proxyfilter {} -proxyhost {} -proxyport {} \
+	  -proxyusername {} -proxypassword {}
     }
 }
 
