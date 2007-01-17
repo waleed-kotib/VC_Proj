@@ -8,7 +8,7 @@
 #
 #  This source file is distributed under the BSD license.
 #  
-# $Id: autosocks.tcl,v 1.5 2007-01-17 08:54:55 matben Exp $
+# $Id: autosocks.tcl,v 1.6 2007-01-17 13:04:23 matben Exp $
 
 package provide autosocks 0.1
 
@@ -58,7 +58,7 @@ proc autosocks::config {args} {
 	set idx [lsearch $args -proxy]
 	if {$idx >= 0} {
 	    set proxy [lindex $args [incr idx]]
-	    if {![info exists packs($proxy)]} {
+	    if {[string length $proxy] && ![info exists packs($proxy)]} {
 		return -code error "unsupported proxy \"$proxy\""
 	    }
 	}
