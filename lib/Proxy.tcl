@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.10 2007-01-16 15:18:14 matben Exp $
+# $Id: Proxy.tcl,v 1.11 2007-01-17 08:54:55 matben Exp $
  
 package require autoproxy
 package require autosocks
@@ -43,8 +43,11 @@ proc ::Proxy::InitPrefsHook { } {
     }
     
     # Configure and set our defaults.
+    # @@@ This will only set HTTP proxy (on windows) but we need it to depend
+    #     on proxy type!
     # Note: -basic {Proxy-Authorization {Basic bWF0czp6eno=}}
     autoproxy::init    
+    autosocks::init
     foreach {key value} [::autoproxy::configure] {
 	switch -- $key {
 	    -basic  { 
@@ -73,7 +76,11 @@ proc ::Proxy::InitPrefsHook { } {
     # package that uses the http package.
     # Any user settings override the one we get when autoproxy::init. 
     if {$prefs(useproxy)} {
-	AutoProxyConfig
+	if {$prefs(proxy_type) eq "http"} {
+	    AutoProxyConfig
+	} elseif {[string match {socks[45]} $prefs(proxy_type)]} {
+	    AutoSocksConfig
+	}
     }
 }
 
@@ -91,18 +98,30 @@ proc ::Proxy::AutoProxyConfig { } {
     }
 }
 
+proc ::Proxy::AutoProxyOff { } {
+    ::autoproxy::configure -proxy_host {} -proxy_port {} \
+      -basic -user {} -pass {}
+}
+
 proc ::Proxy::AutoSocksConfig { } {
     global  prefs
     
     autosocks::config  \
+      -proxy     $prefs(proxy_type) \
       -proxyhost $prefs(proxy_host) \
       -proxyport $prefs(proxy_port) \
-      -proxyfilter $prefs(no_proxy)
+      -proxyno   $prefs(no_proxy)
     
     if {[string length $prefs(proxy_user)]} {
 	autosocks::config  \
 	   -proxyusername $prefs(proxy_user) -proxypassword $prefs(proxy_pass)
     }
+}
+
+proc ::Proxy::AutoSocksOff { } {
+    autosocks::config -proxy {} -proxyno {} -proxyhost {} -proxyport {} \
+      -proxyusername {} -proxypassword {}
+
 }
 
 proc ::Proxy::BuildPrefsHook {wtree nbframe} {
@@ -334,17 +353,14 @@ proc ::Proxy::SavePrefsHook { } {
     if {$prefs(useproxy)} {
 	if {$prefs(proxy_type) eq "http"} {
 	    AutoProxyConfig
-	    autosocks::config \
-	      -proxy {} -proxyfilter {} -proxyhost {} -proxyport {} \
-	      -proxyusername {} -proxypassword {}
-	} else {
-	    http::config -proxyfilter {} -proxyhost {} -proxyport {}
+	    AutoSocksOff
+	} elseif {[string match {socks[45]} $prefs(proxy_type)]} {
+	    AutoProxyOff
 	    AutoSocksConfig
 	}
     } else {
-	http::config -proxyfilter {} -proxyhost {} -proxyport {}
-	autosocks::config -proxy {} -proxyfilter {} -proxyhost {} -proxyport {} \
-	  -proxyusername {} -proxypassword {}
+	AutoProxyOff
+	AutoSocksOff
     }
 }
 
@@ -358,7 +374,7 @@ proc ::Proxy::CancelPrefsHook { } {
     	
     foreach key [array names keySpecs] {
 	if {![string equal $prefs($key) $tmpPrefs($key)]} {
-	    puts "\t key=$key, $prefs($key), $tmpPrefs($key)"
+	    #puts "\t key=$key, $prefs($key), $tmpPrefs($key)"
 	    ::Preferences::HasChanged
 	    break
 	}

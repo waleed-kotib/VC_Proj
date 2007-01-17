@@ -7,7 +7,7 @@
 #
 #  This source file is distributed under the BSD license.
 #  
-# $Id: socks4.tcl,v 1.6 2007-01-16 15:18:14 matben Exp $
+# $Id: socks4.tcl,v 1.7 2007-01-17 08:54:55 matben Exp $
 
 package provide socks4 0.1
 
@@ -85,7 +85,8 @@ proc socks4::init {sock addr port args} {
     # This corresponds to IP address 0.0.0.x, with x nonzero.
     set bip \x00\x00\x00\x01
     
-    set bdata "$const(ver)$const(cmd_connect)$bport$bip$state(-username)\x00$addr\x00"
+    set bdata "$const(ver)$const(cmd_connect)$bport$bip"
+    append bdata "$state(-username)\x00$addr\x00"
     fconfigure $sock -translation {binary binary} -blocking 0
     fileevent $sock writable {}
     if {[catch {

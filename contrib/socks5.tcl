@@ -8,7 +8,7 @@
 #  (c) 2003  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: socks5.tcl,v 1.17 2007-01-16 08:22:57 matben Exp $
+# $Id: socks5.tcl,v 1.18 2007-01-17 08:54:55 matben Exp $
 # 
 # TODO:  GSSAPI authentication which is a MUST is missing.
 #        Only CMD CONNECT implemented.
@@ -79,7 +79,7 @@ namespace eval socks5 {
 	8 "Address type not supported"
     }
     
-    variable debug 3
+    variable debug 0
     variable uid 0
 }
 
