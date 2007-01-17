@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.11 2007-01-17 08:54:55 matben Exp $
+# $Id: Proxy.tcl,v 1.12 2007-01-17 13:29:18 matben Exp $
  
 package require autoproxy
 package require autosocks
@@ -158,7 +158,6 @@ proc ::Proxy::BuildPage {wpage} {
     
     set wprx $wc.proxy
     set wnat $wc.nat
-    set wsep $wc.sep
     variable wprxuse $wprx.use
     variable wnatuse $wnat.use
     variable wuser   $wprx.euser
@@ -171,7 +170,8 @@ proc ::Proxy::BuildPage {wpage} {
     }
     
     # Proxy.
-    ttk::frame $wprx -padding {8 4 16 4}
+    ttk::labelframe $wprx -text [mc Proxy]  \
+      -padding [option get . groupSmallPadding {}]
     
     ttk::label $wprx.msg -wraplength 300 -justify left \
       -text [mc prefproxymsg]
@@ -218,15 +218,9 @@ proc ::Proxy::BuildPage {wpage} {
     }
     SetUseProxyState
 
-    ttk::frame $wsep
-    ttk::separator $wsep.s -orient horizontal
-    ttk::label $wsep.l -text [mc {NAT Address}]
-    
-    grid  $wsep.l  $wsep.s  -sticky ew
-    grid columnconfigure $wsep 1 -weight 1
-
     # NAT address.
-    ttk::frame $wnat -padding {8 4 16 4}
+    ttk::labelframe $wnat -text [mc {NAT Address}] \
+      -padding [option get . groupSmallPadding {}]
     ttk::checkbutton $wnat.use -text [mc prefnatip] \
       -command [namespace code SetUseNATState]  \
       -variable [namespace current]::tmpPrefs(setNATip)
@@ -247,8 +241,7 @@ proc ::Proxy::BuildPage {wpage} {
     set anchor [option get . dialogAnchor {}]
 
     pack  $wprx  -side top -fill x -anchor $anchor
-    pack  $wsep  -side top -fill x -anchor $anchor
-    pack  $wnat  -side top -fill x -anchor $anchor
+    pack  $wnat  -side top -fill x -anchor $anchor -pady 10
 }
 
 proc ::Proxy::GetStun {} {
