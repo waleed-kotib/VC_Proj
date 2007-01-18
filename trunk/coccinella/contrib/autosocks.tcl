@@ -8,7 +8,7 @@
 #
 #  This source file is distributed under the BSD license.
 #  
-# $Id: autosocks.tcl,v 1.6 2007-01-17 13:04:23 matben Exp $
+# $Id: autosocks.tcl,v 1.7 2007-01-18 09:06:43 matben Exp $
 
 package provide autosocks 0.1
 
@@ -18,6 +18,8 @@ namespace eval autosocks {
 	-proxy          ""
 	-proxyhost      ""
 	-proxyport      ""
+	-proxyusername  ""
+	-proxypassword  ""
 	-proxyno        ""
 	-proxyfilter    autosocks::filter
     }
@@ -39,8 +41,8 @@ namespace eval autosocks {
 #           -proxy            ""|socks4|socks5
 #           -proxyhost        hostname
 #           -proxyport        port number
-#           -proxyusername    ""
-#           -proxypassword    ""
+#           -proxyusername    user ID
+#           -proxypassword    (socks5) password
 #           -proxyno          glob list of hosts to not use proxy
 #           -proxyfilter      tclProc {host}
 # 
@@ -121,10 +123,23 @@ proc autosocks::socket {host port args} {
     } else {
 	set sock [eval {::socket $ahost $aport} [array get optsA]]
 	if {[string length $options(-proxy)]} {
-	    ${proxy}::init $sock $host $port
+	    eval {${proxy}::init $sock $host $port} [get_opts]
 	}
     }
     return $sock
+}
+
+proc autosocks::get_opts {} {
+    variable options
+
+    set opts [list]
+    if {[string length $options(-proxyusername)]} {
+	lappend opts -username $options(-proxyusername)
+    }
+    if {[string length $options(-proxypassword)]} {
+	lappend opts -password $options(-proxypassword)
+    }
+    return $opts
 }
 
 proc autosocks::writable {token} {
@@ -142,8 +157,10 @@ proc autosocks::writable {token} {
     } else {
 	if {[string length $proxy]} {	    
 	    if {[catch {
-		$options(-proxy)::init $sock $state(host) $state(port) \
-		  -command [namespace code [list socks_cb $token]]
+		eval {
+		    $options(-proxy)::init $sock $state(host) $state(port) \
+		      -command [namespace code [list socks_cb $token]]
+		} [get_opts]
 	    } err]} {
 		uplevel #0 $state(cmd) $err
 		unset -nocomplain state

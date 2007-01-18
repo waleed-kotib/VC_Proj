@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.12 2007-01-17 13:29:18 matben Exp $
+# $Id: Proxy.tcl,v 1.13 2007-01-18 09:06:43 matben Exp $
  
 package require autoproxy
 package require autosocks
@@ -190,7 +190,8 @@ proc ::Proxy::BuildPage {wpage} {
     ttk::label $wprx.luser -text [mc Username]:
     ttk::entry $wprx.euser -textvariable [namespace current]::tmpPrefs(proxy_user)
     ttk::label $wprx.lpass -text [mc Password]:
-    ttk::entry $wprx.epass -textvariable [namespace current]::tmpPrefs(proxy_pass)
+    ttk::entry $wprx.epass -textvariable [namespace current]::tmpPrefs(proxy_pass) \
+      -show {*}
   
     set wnoproxy $wprx.noproxy
     ttk::label $wprx.lnop -text [mc prefproxyexc]:

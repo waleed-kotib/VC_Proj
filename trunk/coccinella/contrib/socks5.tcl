@@ -5,10 +5,10 @@
 #      Made from RFC 1928.
 #
 #  (C) 2000  Kerem 'Waster_' HADIMLI (minor parts)
-#  (c) 2003  Mats Bengtsson
+#  (c) 2003-2007  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: socks5.tcl,v 1.18 2007-01-17 08:54:55 matben Exp $
+# $Id: socks5.tcl,v 1.19 2007-01-18 09:06:43 matben Exp $
 # 
 # TODO:  GSSAPI authentication which is a MUST is missing.
 #        Only CMD CONNECT implemented.
@@ -105,7 +105,7 @@ proc socks5::init {sock addr port args} {
     variable const
     variable uid
     
-    debug 2 "socks5::init"
+    debug 2 "socks5::init $addr $port $args"
 
     # Initialize the state variable, an array.  We'll return the
     # name of this array as the token for the transaction.
