@@ -5,7 +5,7 @@
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.31 2007-01-18 09:06:43 matben Exp $
+# $Id: svg2can.tcl,v 1.32 2007-01-18 15:23:50 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -96,6 +96,8 @@ namespace eval svg2can {
     if {![catch {package require tkpath 0.2}]} {
 	set priv(havetkpath) 1
     }
+    
+    variable chache {}
 }
 
 # svg2can::config --
@@ -132,6 +134,46 @@ proc svg2can::config {args} {
 	    }
 	}
     }
+}
+
+# svg2can::cache_* --
+# 
+#       A few routines to handle the caching of images and gradients.
+
+proc svg2can::cache_get {} {
+    variable cache
+    return $cache
+}
+
+proc svg2can::cache_add {type token} {
+    variable cache
+    lappend cache [list $type $token]
+}
+
+proc svg2can::cache_free {} {
+    variable cache
+    
+    foreach spec $cache {
+	set type [lindex $spec 0]
+	set token [lindex $spec 1]
+	switch -- $type {
+	    image {
+		image delete $token
+	    }
+	    lineargradient {
+		::tkpath::lineargradient delete $token
+	    }
+	    radialgradient {
+		::tkpath::radialgradient delete $token
+	    }
+	}
+    }
+    set cache [list]
+}
+
+proc svg2can::cache_reset {} {
+    variable cache
+    set cache [list]
 }
 
 # svg2can::parsesvgdocument --
@@ -541,8 +583,10 @@ proc svg2can::ParseImage {xmllist paropts transformL args} {
 		} else {			
 		    if {[string tolower [file extension $path]] eq ".gif"} {
 			set photo [image create photo -file $path -format gif]
+			cache_add image $photo
 		    } else {
 			set photo [image create photo -file $path]
+			cache_add image $photo
 		    }
 		    lappend opts -image $photo
 		}
@@ -627,8 +671,10 @@ proc svg2can::ParseImageEx {xmllist paropts transAttr args} {
 		} else {			
 		    if {[string tolower [file extension $path]] eq ".gif"} {
 			set photo [image create photo -file $path -format gif]
+			cache_add image $photo
 		    } else {
 			set photo [image create photo -file $path]
+			cache_add image $photo
 		    }
 		    lappend opts -image $photo
 		}
@@ -1643,6 +1689,7 @@ proc svg2can::CreateLinearGradient {xmllist} {
     set token [::tkpath::lineargradient create -method $method -units $units \
       -lineartransition [list $x1 $y1 $x2 $y2] -stops $stops]
     set gradientIDToToken($id) $token
+    cache_add lineargradient $token
 }
 
 proc svg2can::CreateRadialGradient {xmllist} {
@@ -1681,6 +1728,7 @@ proc svg2can::CreateRadialGradient {xmllist} {
     set token [::tkpath::radialgradient create -method $method -units $units \
       -radialtransition [list $cx $cy $r $fx $fy] -stops $stops]
     set gradientIDToToken($id) $token
+    cache_add radialgradient $token
 }
 
 proc svg2can::ParseGradientStops {xmllist} {
