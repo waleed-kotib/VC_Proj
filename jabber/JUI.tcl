@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.153 2006-12-28 13:33:29 matben Exp $
+# $Id: JUI.tcl,v 1.154 2007-01-18 09:06:43 matben Exp $
 
 package provide JUI 1.0
 
@@ -83,7 +83,7 @@ namespace eval ::JUI:: {
       "http://sourceforge.net/tracker/?group_id=68334&atid=520863"
         
     set ::config(ui,status,menu)    dynamic   ;# plain|dynamic
-    set ::config(ui,main,infoLabel) status    ;# mejid|mejidres|status
+    set ::config(ui,main,infoLabel) mejid     ;# mejid|mejidres|status
     
     # Collection of useful and common widget paths.
     variable jwapp
