@@ -5,7 +5,7 @@
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.32 2007-01-18 15:23:50 matben Exp $
+# $Id: svg2can.tcl,v 1.33 2007-01-19 08:41:12 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -97,7 +97,8 @@ namespace eval svg2can {
 	set priv(havetkpath) 1
     }
     
-    variable chache {}
+    variable chache
+    variable cache_key ""
 }
 
 # svg2can::config --
@@ -139,21 +140,44 @@ proc svg2can::config {args} {
 # svg2can::cache_* --
 # 
 #       A few routines to handle the caching of images and gradients.
+#       Useful for garbage collection. Cache stuff per key which is typically
+#       a widget path, and then do:
+#       svg2can::cache_set_key $w
+#       bind $w <Destroy> +[list svg2can::cache_free $w]
+#       This works only if parsing svg docs in one shot.
 
-proc svg2can::cache_get {} {
+proc svg2can::cache_set_key {key} {
+    variable cache_key
+    set cache_key $key
+}
+
+proc svg2can::cache_get_key {} {
+    variable cache_key
+    return $cache_key
+}
+
+proc svg2can::cache_get {$key} {
     variable cache
-    return $cache
+    if {[info exists cache($key)]} {
+	return $cache($key)
+    } else {
+	return [list]
+    }
 }
 
 proc svg2can::cache_add {type token} {
     variable cache
-    lappend cache [list $type $token]
+    variable cache_key
+    lappend cache($cache_key) [list $type $token]
 }
 
-proc svg2can::cache_free {} {
+proc svg2can::cache_free {key} {
     variable cache
     
-    foreach spec $cache {
+    if {![info exists cache($key)]} {
+	return
+    }
+    foreach spec $cache($key) {
 	set type [lindex $spec 0]
 	set token [lindex $spec 1]
 	switch -- $type {
@@ -168,12 +192,12 @@ proc svg2can::cache_free {} {
 	    }
 	}
     }
-    set cache [list]
+    set cache($key) [list]
 }
 
-proc svg2can::cache_reset {} {
+proc svg2can::cache_reset {key} {
     variable cache
-    set cache [list]
+    set cache($key) [list]
 }
 
 # svg2can::parsesvgdocument --
@@ -1664,7 +1688,30 @@ proc svg2can::CreateLinearGradient {xmllist} {
     set y2 0
     set method pad
     set units bbox
+    set stops {}
 
+    # We first need to find out if any xlink:href attribute since:
+    # Any 'linearGradient' attributes which are defined on the
+    # referenced element which are not defined on this element are 
+    # inherited by this element.
+    set idx [lsearch -exact [getattr $xmllist] xlink:href]
+    if {$idx >= 0 && [expr {$idx % 2 == 0}]} {
+	set value [lindex $attr [incr idx]]
+	if {![string match {\#*} $value]} {
+	    return -code error "unrecognized gradient uri \"$value\""
+	}
+	set uri [string range $value 1 end]
+	if {![info exists gradientIDToToken($uri)]} {
+	    return -code error "unrecognized gradient uri \"$value\""
+	}
+	set hreftoken $gradientIDToToken($uri)
+	set units  [::tkpath::lineargradient cget $hreftoken -units]
+	set method [::tkpath::lineargradient cget $hreftoken -method]
+	set hrefstops [::tkpath::lineargradient cget $hreftoken -stops]
+	foreach {x1 y1 x2 y2} \
+	  [::tkpath::lineargradient cget $hreftoken -lineartransition] { break }	
+    }    
+    
     foreach {key value} [getattr $xmllist] {	
 	switch -- $key {
 	    x1 - y1 - x2 - y2 {
@@ -1685,7 +1732,16 @@ proc svg2can::CreateLinearGradient {xmllist} {
     if {![info exists id]} {
 	return
     }
+    
+    # If this element has no defined gradient stops, and the referenced element 
+    # does, then this element inherits the gradient stop from the referenced 
+    # element.
     set stops [ParseGradientStops $xmllist]    
+    if {$stops eq {}} {
+	if {[info exists hrefstops]} {
+	    set stops $hrefstops
+	}
+    }
     set token [::tkpath::lineargradient create -method $method -units $units \
       -lineartransition [list $x1 $y1 $x2 $y2] -stops $stops]
     set gradientIDToToken($id) $token
@@ -1703,6 +1759,8 @@ proc svg2can::CreateRadialGradient {xmllist} {
     
     set method pad
     set units bbox
+    
+    # @@@ TODO xlink:href as above.
 
     foreach {key value} [getattr $xmllist] {	
 	switch -- $key {
@@ -2008,12 +2066,21 @@ proc svg2can::StyleToOptsEx {styleList args} {
 	    stroke {
 		set optsA(-$key) [parseColor $value]		
 	    }
-	    fill-opacity - stroke-dasharray - \
-	      stroke-linejoin - stroke-miterlimit - stroke-opacity {		
+	    stroke-dasharray {
+		set name [string map {"-" ""} $key]
+		if {$value eq "none"} {
+		    set optsA(-$name) {}
+		} else {
+		    set optsA(-$name) $value
+		}
+	    }
+	    fill-opacity - stroke-linejoin - stroke-miterlimit - stroke-opacity {		
 		set name [string map {"-" ""} $key]
 		set optsA(-$name) $value
 	    }
 	    stroke-linecap {
+		# svg:    butt (D), square, round
+		# canvas: butt (D), projecting , round 
 		if {$value eq "square"} {
 		    set value "projecting"
 		}
