@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.173 2007-01-05 07:42:32 matben Exp $
+# $Id: GroupChat.tcl,v 1.174 2007-01-19 15:15:26 matben Exp $
 
 package require Create
 package require Enter
@@ -144,6 +144,7 @@ namespace eval ::GroupChat:: {
 	{command   mSendFile      {::FTrans::Send $jid}         }
 	{command   mUserInfo      {::UserInfo::Get $jid}        }
 	{command   mWhiteboard    {::JWB::NewWhiteboardTo $jid} }
+	{command   mEditNick      {::GroupChat::TreeEditUserStart $chattoken $jid} }
 	{check     mIgnore        {::GroupChat::Ignore $chattoken $jid} {
 	    -variable $chattoken\(ignore,$jid)
 	}}
@@ -154,6 +155,7 @@ namespace eval ::GroupChat:: {
 	{mSendFile      user        }
 	{mUserInfo      user        }
 	{mWhiteboard    wb          }
+	{mEditNick      me          }
 	{mIgnore        user        }
     }
 
@@ -1615,11 +1617,12 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     $T column create -tag cTag  -visible 0
     
     # The elements.
-    $T element create eImage       image
-    $T element create eText        text
-    $T element create eRoleImage   image
-    $T element create eRoleText    text
-    $T element create eBorder      rect  -open new -showfocus 1
+    $T element create eImage     image
+    $T element create eText      text
+    $T element create eRoleImage image
+    $T element create eRoleText  text
+    $T element create eBorder    rect  -open new -showfocus 1
+    $T element create eWindow    window
 
     # Styles collecting the elements.
     set S [$T style create styUser]
@@ -1628,6 +1631,12 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     $T style layout $S eText   -squeeze x -expand ns
     $T style layout $S eBorder -detach 1 -iexpand xy
 
+    set S [$T style create styEntry]
+    $T style elements $S {eBorder eImage eWindow}
+    $T style layout $S eImage  -expand ns
+    $T style layout $S eWindow -squeeze x -expand ns
+    $T style layout $S eBorder -detach 1 -iexpand xy
+    
     set S [$T style create styRole]
     $T style elements $S {eBorder eRoleImage eRoleText}
     $T style layout $S eRoleImage -expand ns
@@ -1796,6 +1805,54 @@ proc ::GroupChat::TreeSetIgnoreState {T jid3 {prefix ""}} {
     if {[info exists tag2item($T,$tag)]} {
 	set item $tag2item($T,$tag)
 	$T item state set $item ${prefix}ignore
+    }
+}
+
+if {0} {
+    ::GroupChat::NewChat r@xxx   
+    ::GroupChat::SetUser r@xxx r@xxx/matskiss
+}
+
+proc ::GroupChat::TreeEditUserStart {chattoken jid3} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    variable tag2item
+    
+    set T $chatstate(wusers)
+    set tag [list jid $jid3]
+    
+    if {[info exists tag2item($T,$tag)]} {
+	set item $tag2item($T,$tag)
+	set image [::Roster::GetPresenceIconFromJid $jid3]
+	set wentry $T.entry
+	set chatstate(editNick) [jlib::resourcejid $jid3]
+	entry $wentry -font CociSmallFont \
+	  -textvariable $chattoken\(editNick) -width 12
+	$T item style set $item cTree styEntry
+	$T item element configure $item cTree \
+	  eImage -image $image + eWindow -window $wentry
+	focus $wentry
+	bind $wentry <FocusOut> \
+	  [list ::GroupChat::TreeEditUserEnd $chattoken $jid3]
+    }    
+}
+
+proc ::GroupChat::TreeEditUserEnd {chattoken jid3} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    variable tag2item
+
+    set T $chatstate(wusers)
+    set tag [list jid $jid3]
+    
+    if {[info exists tag2item($T,$tag)]} {
+	set item $tag2item($T,$tag)
+	set image [::Roster::GetPresenceIconFromJid $jid3]
+	set text [jlib::resourcejid $jid3]
+	$T item style set $item cTree styUser
+	$T item element configure $item cTree \
+	  eImage -image $image + eText -text $text
+	destroy $T.entry
     }
 }
 
@@ -2563,6 +2620,8 @@ proc ::Disco::UnRegisterPopupEntry {name} {
 
 proc ::GroupChat::Popup {chattoken w tag x y} {
     global  wDlgs this
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
     variable popMenuDefs
     variable regPopMenuDef
@@ -2570,11 +2629,16 @@ proc ::GroupChat::Popup {chattoken w tag x y} {
             
     set clicked ""
     set jid ""
+    lassign [::Jabber::JlibCmd service hashandnick $chatstate(roomjid)] myjid -
+
     if {[lindex $tag 0] eq "role"} {
 	set clicked role
     } elseif {[lindex $tag 0] eq "jid"} {
 	set clicked user
 	set jid [lindex $tag 1]
+	if {[jlib::jidequal $jid $myjid]} {
+	    set clicked me
+	}
     }
 
     ::Debug 2 "\t jid=$jid, clicked=$clicked"

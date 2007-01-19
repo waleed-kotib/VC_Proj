@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.163 2006-12-01 08:55:14 matben Exp $
+# $Id: jabberlib.tcl,v 1.164 2007-01-19 15:15:26 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3842,6 +3842,15 @@ proc jlib::barejid {jid} {
 	return $jid
     } else {
 	return [string range $jid 0 [expr {$idx-1}]]
+    }
+}
+
+proc jlib::resourcejid {jid} {
+    set idx [string first / $jid]
+    if {$idx > 0} {
+	return [string range $jid [expr {$idx+1}] end]
+    } else {
+	return ""
     }
 }
 
