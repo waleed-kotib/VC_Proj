@@ -467,6 +467,7 @@
 ::msgcat::mcset nl mJiveForward				{Telefoongesprek omleiden}
 ::msgcat::mcset nl mBackgroundImage			{Achtergrondafbeelding}
 
+::msgcat::mcset nl mEditNick                            {Edit Nickname}
 
 
 # Short texts only. Use english as database key.

@@ -462,6 +462,7 @@
 ::msgcat::mcset sv mJiveCall         	{Ring}
 ::msgcat::mcset sv mJiveForward         {Vidarekoppla}
 ::msgcat::mcset sv mBackgroundImage     {Bakgrundsbild}
+::msgcat::mcset sv mEditNick            {€ndra kortnamn}
 
 
 

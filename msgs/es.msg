@@ -480,6 +480,8 @@
 ::msgcat::mcset es mJiveCall            {Llamar a...}
 ::msgcat::mcset es mJiveForward         {Deviar la llamada actual a...}
 
+::msgcat::mcset es mEditNick            {Edit Nickname}
+
 # Textos cortos únicamente.
 ::msgcat::mcset es {30 days}			{30 días}
 ::msgcat::mcset es {About Coccinella}		{Acerca de Coccinella}
