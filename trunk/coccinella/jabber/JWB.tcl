@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.73 2007-01-05 07:42:32 matben Exp $
+# $Id: JWB.tcl,v 1.74 2007-01-20 16:26:23 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1560,8 +1560,8 @@ proc ::JWB::PutFileOrScheduleHook {w fileName opts} {
 	    set allJid3 [$jstate(jlib) service roomparticipants $tojid]
 	    
 	    # Exclude ourselves.
-	    foreach {meRoomJid nick} [$jstate(jlib) service hashandnick $tojid] \
-	      break
+	    set nick [$jstate(jlib) service mynick $tojid]
+	    set meRoomJid $tojid/$nick
 	    set ind [lsearch $allJid3 $meRoomJid]
 	    if {$ind >= 0} {
 		set allJid3 [lreplace $allJid3 $ind $ind]

@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.24 2006-04-08 11:02:13 matben Exp $
+# $Id: service.tcl,v 1.25 2007-01-20 16:26:23 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -19,7 +19,6 @@
 #      jlibName service allroomsin
 #      jlibName service exitroom room
 #      jlibName service isroom jid
-#      jlibName service hashandnick jid
 #      jlibName service nick jid
 #      jlibName service register type name
 #      jlibName service roomparticipants room
@@ -59,8 +58,6 @@ namespace eval jlib::service {
 }
 
 proc jlib::service {jlibname cmd args} {
-    
-    # Which command? Just dispatch the command to the right procedure.
     set ans [eval {[namespace current]::service::${cmd} $jlibname} $args]
     return $ans
 }
@@ -85,8 +82,7 @@ proc jlib::service::init {jlibname} {
 #       Let components (browse/disco/muc etc.) register that their services
 #       are available.
 
-proc jlib::service::register {jlibname type name} {
-    
+proc jlib::service::register {jlibname type name} {    
     upvar ${jlibname}::serv serv
 
     set serv($type) 1
@@ -94,7 +90,6 @@ proc jlib::service::register {jlibname type name} {
 }
 
 proc jlib::service::unregister {jlibname type} {
-    
     upvar ${jlibname}::serv serv
 
     set serv($type) 0
@@ -102,7 +97,6 @@ proc jlib::service::unregister {jlibname type} {
 }
 
 proc jlib::service::get {jlibname type} {
-    
     upvar ${jlibname}::serv serv
     
     if {$serv($type)} {
@@ -111,7 +105,6 @@ proc jlib::service::get {jlibname type} {
 	return
     }
 }
-
 
 #-------------------------------------------------------------------------------
 #
@@ -129,7 +122,6 @@ proc jlib::service::get {jlibname type} {
 #       presently set. Only called internally!
 
 proc jlib::service::registergcprotocol {jlibname jid gcprot} {
-
     upvar ${jlibname}::serv serv
     
     Debug 2 "jlib::registergcprotocol jid=$jid, gcprot=$gcprot"
@@ -162,7 +154,6 @@ proc jlib::service::registergcprotocol {jlibname jid gcprot} {
 #       Only called internally when entering a room!
 
 proc jlib::service::setroomprotocol {jlibname roomjid protocol} {
-
     variable groupchatTypeExp
     upvar ${jlibname}::serv serv
     
@@ -180,7 +171,6 @@ proc jlib::service::setroomprotocol {jlibname roomjid protocol} {
 #       If using agent(s) method, check the agent for this jid
 
 proc jlib::service::isroom {jlibname jid} {    
-
     upvar ${jlibname}::serv serv
     upvar ${jlibname}::locals locals
     
@@ -203,94 +193,69 @@ proc jlib::service::isroom {jlibname jid} {
 #
 #       Return nick name for ANY room participant, or the rooms name
 #       if jid is a room.
-#       For the browser we return the <name> chdata, but for the
-#       groupchat-1.0 protocol we use a scheme to find nick.
+#       Not very useful since old 'conference' protocol has gone but keep
+#       it as an abstraction anyway.
 #       
 # Arguments:
 #       jlibname:   the instance of this jlib.
-#       jid:        'roomname@conference.jabber.org/nickOrHex' typically,
+#       jid:        'roomname@conference.jabber.org/nick' typically,
 #                   or just room jid.
 
 proc jlib::service::nick {jlibname jid} {   
-
-    upvar ${jlibname}::locals locals
-    upvar ${jlibname}::serv serv
-
-    # All kind of conference components seem to support the old 'gc-1.0'
-    # protocol, and we therefore must query our method for entering the room.
-    jlib::splitjid $jid room res
-        
-    # Use fallback here???
-    if {![info exists serv(roomprot,$room)]} {
-	return $res
-	#return -code error "Does not know which protocol to use in $room"
-    }
-    set nick $res
-    if {$res eq ""} {
-	set nick $jid
-    }
-    
-    switch -- $serv(roomprot,$room) {
-	gc-1.0 {
-	    
-	    # Old-style groupchat just has /nick.
-	    # Else we just use the username. (If room for instance)
-	    jlib::splitjidex $jid node domain nick
-	    if {$nick eq ""} {
-		set nick $node
-	    }
-	}
-	muc {
-	    
-	    # The MUC conference method: nick is always the resource part. 
-	    jlib::splitjid $jid x nick
-	}	
-    }
-    return $nick
+    return [jlib::resourcejid $jid]
 }
 
-# jlib::service::hashandnick --
+# jlib::service::mynick --
 #
-#       A way to get our OWN three-tier jid and nickname for a given room
-#       independent on if 'conference' or 'groupchat' is used.
+#       A way to get our OWN nickname for a given room independent of protocol.
 #       
 # Arguments:
 #       jlibname:   the instance of this jlib.
 #       room:       'roomname@conference.jabber.org' typically.
 #       
 # Results:
-#       list {kitchen@conf.athlon.se/63264ba6724.. mynickname}
+#       mynickname
 
-proc jlib::service::hashandnick {jlibname room} {    
-
-    upvar ${jlibname}::locals locals
+proc jlib::service::mynick {jlibname room} {
     upvar ${jlibname}::serv serv
-
+    
     set room [jlib::jidmap $room]
-
+    
     # All kind of conference components seem to support the old 'gc-1.0'
     # protocol, and we therefore must query our method for entering the room.
     if {![info exists serv(roomprot,$room)]} {
 	return -code error "Does not know which protocol to use in $room"
     }
-    set hashandnick [list ${room}/ ""]
     
     switch -- $serv(roomprot,$room) {
 	gc-1.0 {
-	
-	    # Old-style groupchat just has /nick.
-	    set nick [[namespace parent]::groupchat::mynick $jlibname $room]
-	    set hashandnick [list ${room}/${nick} $nick]   
+	    set nick [$jlibname groupchat mynick $room]
 	} 
 	muc {
-	    if {$serv(muc)} {
-		set nick [$jlibname muc mynick $room]
-		set hashandnick [list ${room}/${nick} $nick]   
-	    }
+	    set nick [$jlibname muc mynick $room]
 	} 
     }
+    return $nick
+}
+
+# jlib::service::setnick --
+
+proc jlib::service::setnick {jlibname room nick args} {
+    upvar ${jlibname}::serv serv
     
-    return $hashandnick
+    set room [jlib::jidmap $room]
+    if {![info exists serv(roomprot,$room)]} {
+	return -code error "Does not know which protocol to use in $room"
+    }
+
+    switch -- $serv(roomprot,$room) {
+	gc-1.0 {
+	    eval {$jlibname groupchat setnick $room $nick} $args
+	} 
+	muc {
+	    eval {$jlibname muc setnick $room $nick} $args
+	} 
+    }
 }
 
 # jlib::service::allroomsin --
@@ -298,7 +263,6 @@ proc jlib::service::hashandnick {jlibname room} {
 # 
 
 proc jlib::service::allroomsin {jlibname} {    
-
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::gchat gchat
     upvar ${jlibname}::serv serv
@@ -312,7 +276,6 @@ proc jlib::service::allroomsin {jlibname} {
 }
 
 proc jlib::service::roomparticipants {jlibname room} {
-
     upvar ${jlibname}::locals locals
     upvar ${jlibname}::serv serv
     
@@ -338,7 +301,6 @@ proc jlib::service::roomparticipants {jlibname room} {
 }
 
 proc jlib::service::exitroom {jlibname room} {    
-
     upvar ${jlibname}::locals locals
     upvar ${jlibname}::serv serv
 

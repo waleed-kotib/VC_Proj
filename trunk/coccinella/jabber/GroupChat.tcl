@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.175 2007-01-20 07:31:53 matben Exp $
+# $Id: GroupChat.tcl,v 1.176 2007-01-20 16:26:23 matben Exp $
 
 package require Create
 package require Enter
@@ -1313,7 +1313,8 @@ proc ::GroupChat::SetLogout {chattoken} {
     InsertTagString $chattoken $prefix syspre
     InsertTagString $chattoken "  [mc jagclogoutmsg]\n" systext    
 
-    lassign [::Jabber::JlibCmd service hashandnick $chatstate(roomjid)] myjid -
+    set nick [::Jabber::JlibCmd service mynick $chatstate(roomjid)]
+    set myjid $chatstate(roomjid)/$nick
     TreeRemoveUser $chattoken $myjid
 
     $chatstate(wbtexit) configure -text [mc Close]
@@ -2040,8 +2041,9 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
     set roomjid $chatstate(roomjid)
             
     # This can be room name or nick name.
-    lassign [::Jabber::JlibCmd service hashandnick $roomjid] myroomjid mynick
-    if {[string equal $myroomjid $from]} {
+    set mynick [::Jabber::JlibCmd service mynick $roomjid]
+    set myroomjid $roomjid/$mynick
+    if {[jlib::jidequal $myroomjid $from]} {
 	set whom me
 	set historyTag send
     } elseif {[string equal $roomjid $from]} {
@@ -2266,7 +2268,8 @@ proc ::GroupChat::Exit {chattoken} {
 	$jstate(jlib) service exitroom $roomjid	
 	::hooks::run groupchatExitRoomHook $roomjid
 
-	lassign [::Jabber::JlibCmd service hashandnick $roomjid] myroomjid -
+	set nick [::Jabber::JlibCmd service mynick $roomjid]
+	set myroomjid $roomjid/$nick
 	set attr [list from $myroomjid to $roomjid type unavailable]
 	set xmldata [wrapper::createtag "presence" -attrlist $attr]
 	::History::XPutItem send $roomjid $xmldata
@@ -2339,8 +2342,11 @@ proc ::GroupChat::SetNick {chattoken nick} {
     upvar 0 $chattoken chatstate
 
     set jid $chatstate(roomjid)/$nick
-    ::Jabber::JlibCmd send_presence -to $jid \
+    ::Jabber::JlibCmd service setnick $chatstate(roomjid) $nick \
       -command [list ::GroupChat::SetNickCB $chattoken]
+    
+    #::Jabber::JlibCmd send_presence -to $jid \
+    #  -command [list ::GroupChat::SetNickCB $chattoken]
 }
 
 proc ::GroupChat::SetNickCB {chattoken xmldata} {
@@ -2663,8 +2669,8 @@ proc ::GroupChat::Popup {chattoken w tag x y} {
             
     set clicked ""
     set jid ""
-    lassign [::Jabber::JlibCmd service hashandnick $chatstate(roomjid)] myjid -
-
+    set nick [::Jabber::JlibCmd service mynick $chatstate(roomjid)]
+    set myjid $chatstate(roomjid)/$nick
     if {[lindex $tag 0] eq "role"} {
 	set clicked role
     } elseif {[lindex $tag 0] eq "jid"} {
@@ -2792,7 +2798,8 @@ proc ::GroupChat::Save {dlgtoken} {
     
     if {[string length $ans]} {
 	set allText [::Text::TransformToPureText $wtext]
-	lassign [::Jabber::JlibCmd service hashandnick $roomjid] myroomjid mynick
+	set mynick [::Jabber::JlibCmd service mynick $roomjid]
+	set myroomjid $roomjid/$mynick
 	set fd [open $ans w]
 	fconfigure $fd -encoding utf-8
 	puts $fd "Groupchat in:\t$roomjid"
@@ -2986,7 +2993,7 @@ proc ::GroupChat::BookmarkRoom {chattoken} {
     if {$name eq ""} {
 	set name $roomjid
     }
-    lassign [$jstate(jlib) service hashandnick $roomjid] myroomjid nick
+    set nick [$jstate(jlib) service mynick $roomjid]
     
     # Add only if name not there already.
     foreach bmark $bookmarks {

@@ -4,14 +4,15 @@
 #       
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: groupchat.tcl,v 1.7 2006-12-02 15:24:42 matben Exp $
+# $Id: groupchat.tcl,v 1.8 2007-01-20 16:26:23 matben Exp $
 # 
 ############################# USAGE ############################################
 #
 #   INSTANCE COMMANDS
 #      jlibName groupchat enter room nick
 #      jlibName groupchat exit room
-#      jlibName groupchat mynick room ?nick?
+#      jlibName groupchat mynick room
+#      jlibName groupchat setnick room nick ?-command tclProc?
 #      jlibName groupchat status room
 #      jlibName groupchat participants room
 #      jlibName groupchat allroomsin
@@ -30,13 +31,10 @@ namespace eval jlib::groupchat { }
 #       Provides API's for the old-style groupchat protocol, 'groupchat 1.0'.
 
 proc jlib::groupchat {jlibname cmd args} {
-    
-    # Which command? Just dispatch the command to the right procedure.
     return [eval {[namespace current]::groupchat::${cmd} $jlibname} $args]
 }
 
 proc jlib::groupchat::init {jlibname} {
-
     upvar ${jlibname}::gchat gchat
     
     namespace eval ${jlibname}::groupchat {
@@ -52,32 +50,30 @@ proc jlib::groupchat::init {jlibname} {
 #       args:  -command callback
 
 proc jlib::groupchat::enter {jlibname room nick args} {
-
     upvar ${jlibname}::gchat gchat
     upvar ${jlibname}::groupchat::rooms rooms
     
-    set room [string tolower $room]
+    set room [jlib::jidmap $room]
     set jid $room/$nick
-    eval {[namespace parent]::send_presence $jlibname -to $jid} $args
+    eval {$jlibname send_presence -to $jid} $args
     set gchat($room,mynick) $nick
     
     # This is not foolproof since it may not always success.
     lappend gchat(allroomsin) $room
     set rooms($room) 1
-    [namespace parent]::service::setroomprotocol $jlibname $room "gc-1.0"
+    $jlibname service setroomprotocol $room "gc-1.0"
     set gchat(allroomsin) [lsort -unique $gchat(allroomsin)]
     return
 }
 
 proc jlib::groupchat::exit {jlibname room} {
-
     upvar ${jlibname}::gchat gchat
     
-    set room [string tolower $room]
+    set room [jlib::jidmap $room]
     if {[info exists gchat($room,mynick)]} {
 	set nick $gchat($room,mynick)
 	set jid $room/$nick
-	[namespace parent]::send_presence $jlibname -to $jid -type "unavailable"
+	$jlibname send_presence -to $jid -type "unavailable"
 	unset -nocomplain gchat($room,mynick)
     }
     set ind [lsearch -exact $gchat(allroomsin) $room]
@@ -88,38 +84,33 @@ proc jlib::groupchat::exit {jlibname room} {
     return
 }
 
-proc jlib::groupchat::mynick {jlibname room args} {
-
+proc jlib::groupchat::mynick {jlibname room} {
     upvar ${jlibname}::gchat gchat
 
-    set room [string tolower $room]
-    if {[llength $args] == 0} {
-	if {[info exists gchat($room,mynick)]} {
-	    return $gchat($room,mynick)
-	} else {
-	    return -code error "Unknown nick name for room \"$room\""
-	}
-    } elseif {[llength $args] == 1} {
-	
-	# This should work automatically.
-	enter $jlibname $room $args
-    } else {
-	return -code error "Wrong number of arguments"
-    }
+    set room [jlib::jidmap $room]
+    return $gchat($room,mynick)
+}
+
+proc jlib::groupchat::setnick {jlibname room nick args} {
+    upvar ${jlibname}::gchat gchat
+    
+    set room [jlib::jidmap $room]
+    set jid $room/$nick
+    eval {$jlibname send_presence -to $jid} $args
+    set gchat($room,mynick) $nick    
 }
 
 proc jlib::groupchat::status {jlibname room args} {
-
     upvar ${jlibname}::gchat gchat
 
-    set room [string tolower $room]
+    set room [jlib::jidmap $room]
     if {[info exists gchat($room,mynick)]} {
 	set nick $gchat($room,mynick)
     } else {
 	return -code error "Unknown nick name for room \"$room\""
     }
     set jid ${room}/${nick}
-    eval {[namespace parent]::send_presence $jlibname -to $jid} $args
+    eval {$jlibname send_presence -to $jid} $args
 }
 
 proc jlib::groupchat::participants {jlibname room} {
@@ -127,7 +118,7 @@ proc jlib::groupchat::participants {jlibname room} {
     upvar ${jlibname}::agent agent
     upvar ${jlibname}::gchat gchat
 
-    set room [string tolower $room]
+    set room [jlib::jidmap $room]
     set isroom 0
     if {[regexp {^[^@]+@([^@ ]+)$} $room match domain]} {
 	if {[info exists agent($domain,groupchat)]} {
@@ -149,7 +140,6 @@ proc jlib::groupchat::participants {jlibname room} {
 }
 
 proc jlib::groupchat::isroom {jlibname jid} {
-
     upvar ${jlibname}::groupchat::rooms rooms
     
     if {[info exists rooms($jid)]} {
@@ -160,7 +150,6 @@ proc jlib::groupchat::isroom {jlibname jid} {
 }
 
 proc jlib::groupchat::allroomsin {jlibname} {
-
     upvar ${jlibname}::gchat gchat
 
     set gchat(allroomsin) [lsort -unique $gchat(allroomsin)]
