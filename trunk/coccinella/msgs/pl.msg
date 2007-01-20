@@ -473,6 +473,8 @@
 ::msgcat::mcset pl mJiveForward         {Przekazanie rozmowy}
 ::msgcat::mcset pl mBackgroundImage     {Grafika tła}
 
+::msgcat::mcset pl mEditNick            {Edit Nickname}
+
 # Short texts only. Use english text as database key.
 ::msgcat::mcset pl {30 days}              {30 dni}
 ::msgcat::mcset pl {About Coccinella}     {O Coccinelli}

@@ -478,6 +478,7 @@
 ::msgcat::mcset fr mJiveCall            {Call}
 ::msgcat::mcset fr mJiveForward         {Forward Call}
 ::msgcat::mcset fr mBackgroundImage     {Background Image}
+::msgcat::mcset fr mEditNick            {Edit Nickname}
 
 
 # Courts textes uniquement. Anglais pour les clés de la base de données.

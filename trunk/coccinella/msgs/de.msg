@@ -476,6 +476,7 @@
 ::msgcat::mcset de mJiveForward         {Forward Call}
 ::msgcat::mcset de mBackgroundImage     {Hintergrundbild}
 
+::msgcat::mcset de mEditNick            {Edit Nickname}
 
 
 # Short texts only. Use english as database key.

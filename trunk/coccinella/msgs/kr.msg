@@ -465,6 +465,8 @@
 ::msgcat::mcset kr mJiveForward         {콜 전달하기}
 ::msgcat::mcset kr mBackgroundImage     {배경 그림}
 
+::msgcat::mcset kr mEditNick            {Edit Nickname}
+
 
 # Short texts only. Use english text as database key.
 ::msgcat::mcset kr {30 days}		      {30 일}

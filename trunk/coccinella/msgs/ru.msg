@@ -380,6 +380,7 @@
 ::msgcat::mcset ru mShow         	{Показать}
 ::msgcat::mcset ru mOffline         	{Офлайн}
 ::msgcat::mcset ru mTransports         	{Транспорты}
+::msgcat::mcset ru mEditNick            {Edit Nickname}
 
 
 # Short texts only. Use english text as database key.

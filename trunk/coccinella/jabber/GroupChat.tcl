@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.174 2007-01-19 15:15:26 matben Exp $
+# $Id: GroupChat.tcl,v 1.175 2007-01-20 07:31:53 matben Exp $
 
 package require Create
 package require Enter
@@ -375,7 +375,6 @@ proc ::GroupChat::SetProtocol {roomjid _protocol} {
 	$wtray buttonconfigure invite -state normal
 	$wtray buttonconfigure info   -state normal
         $wtray buttonconfigure whiteboard   -state normal
-	$chatstate(wbtnick) configure -state normal
     }
 }
 
@@ -836,25 +835,18 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     ttk::frame $wtop
     pack $wtop -side top -fill x
 
-    ttk::button $wtop.btp -style Small.TButton \
-      -text "[mc Topic]:" \
-      -command [list [namespace current]::SetTopic $chattoken]
-    ttk::entry $wtop.etp -font CociSmallFont \
-      -textvariable $chattoken\(subject) -state disabled
-    ttk::button $wtop.bni -style Small.TButton \
-      -text "[mc {Nick name}]..."  \
-      -command [list ::MUC::SetNick $roomjid]
+    ttk::label $wtop.btp -style Small.TLabel -text "[mc Topic]:"
+    ttk::entry $wtop.etp -font CociSmallFont -textvariable $chattoken\(subject)
     
-    grid  $wtop.btp  $wtop.etp  $wtop.bni  -sticky e -padx 4
+    grid  $wtop.btp  $wtop.etp  -sticky e -padx 0
     grid  $wtop.etp  -sticky ew
     grid columnconfigure $wtop 1 -weight 1
     
-    set wbtsubject $wtop.btp
-    set wbtnick    $wtop.bni
-
-    if {!( [info exists protocol($roomjid)] && ($protocol($roomjid) eq "muc") )} {
-	$wbtnick state {disabled}
-    }
+    # Special bindings for setting subject.
+    set wsubject $wtop.etp
+    bind $wsubject <FocusIn>  [list ::GroupChat::OnFocusInSubject $chattoken]
+    bind $wsubject <FocusOut> [list ::GroupChat::OnFocusOutSubject $chattoken]
+    bind $wsubject <Return>   [list ::GroupChat::OnReturnSubject $chattoken]    
     
     # Main frame for panes.
     frame $wmid -height 250 -width 300
@@ -912,8 +904,6 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     ConfigureTextTags $w $wtext
 	
     set chatstate(wbtsend)      $wbtsend
-    set chatstate(wbtnick)      $wbtnick
-    set chatstate(wbtsubject)   $wbtsubject
     set chatstate(wbtstatus)    $wbtstatus
     set chatstate(wbtbmark)     $wbtbmark
     set chatstate(wbtexit)      $wbtexit
@@ -943,6 +933,30 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     bind $wroom <Destroy> +[list ::GroupChat::OnDestroyChat $chattoken]
 
     return $chattoken
+}
+
+proc ::GroupChat::OnFocusInSubject {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set chatstate(subjectOld) $chatstate(subject)
+}
+
+proc ::GroupChat::OnFocusOutSubject {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    # Reset to previous subject.
+    set chatstate(subject) $chatstate(subjectOld)
+}
+
+proc ::GroupChat::OnReturnSubject {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    ::Jabber::JlibCmd send_message $chatstate(roomjid) -type groupchat \
+      -subject $chatstate(subject)
+    focus $chatstate(w)
 }
 
 proc ::GroupChat::Find {dlgtoken} {
@@ -1279,8 +1293,6 @@ proc ::GroupChat::SetState {chattoken _state} {
     foreach name {send invite info} {
 	$dlgstate(wtray) buttonconfigure $name -state $_state 
     }
-    $chatstate(wbtsubject) state $tstate
-    $chatstate(wbtnick)    state $tstate
     $chatstate(wbtsend)    state $tstate
     $chatstate(wbtstatus)  state $tstate
     $chatstate(wbtbmark)   state $tstate
@@ -1832,9 +1844,24 @@ proc ::GroupChat::TreeEditUserStart {chattoken jid3} {
 	$T item element configure $item cTree \
 	  eImage -image $image + eWindow -window $wentry
 	focus $wentry
+	bind $wentry <Return>   \
+	  [list ::GroupChat::TreeOnReturnEdit $chattoken $jid3]
 	bind $wentry <FocusOut> \
 	  [list ::GroupChat::TreeEditUserEnd $chattoken $jid3]
     }    
+}
+
+proc ::GroupChat::TreeOnReturnEdit {chattoken jid3} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set T $chatstate(wusers)
+    set wentry $T.entry
+    set nick $chatstate(editNick)
+    if {[string length $nick]} {
+	SetNick $chattoken $nick
+    }    
+    focus $chatstate(w)
 }
 
 proc ::GroupChat::TreeEditUserEnd {chattoken jid3} {
@@ -2307,25 +2334,32 @@ proc ::GroupChat::ConfigureTextTags {w wtext} {
     }
 }
 
-proc ::GroupChat::SetTopic {chattoken} {
+proc ::GroupChat::SetNick {chattoken nick} {
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jstate jstate
-    
-    set topic   $chatstate(subject)
-    set roomjid $chatstate(roomjid)
-    
-    set ans [::UI::MegaDlgMsgAndEntry  \
-      [mc {Set New Topic}]             \
-      [mc jasettopic2]                 \
-      "[mc {New Topic}]:"              \
-      topic [mc Cancel] [mc OK]]
 
-    if {($ans eq "ok") && ($topic ne "")} {
-	::Jabber::JlibCmd send_message $roomjid -type groupchat \
-	  -subject $topic
-    }
-    return $ans
+    set jid $chatstate(roomjid)/$nick
+    ::Jabber::JlibCmd send_presence -to $jid \
+      -command [list ::GroupChat::SetNickCB $chattoken]
+}
+
+proc ::GroupChat::SetNickCB {chattoken xmldata} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    if {[string equal $type "error"]} {
+	set errspec [jlib::getstanzaerrorspec $xmldata]
+	set errmsg ""
+	if {[llength $errspec]} {
+	    set errcode [lindex $errspec 0]
+	    set errmsg  [lindex $errspec 1]
+	}
+	jlib::splitjidex $from roomName - -
+	::UI::MessageBox -type ok -icon error -title [mc Error]  \
+	  -message [mc mucIQError $roomName $errmsg]
+    }    
 }
 
 proc ::GroupChat::Send {dlgtoken} {
