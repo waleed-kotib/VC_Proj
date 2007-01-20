@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.192 2006-12-15 08:07:14 matben Exp $
+# $Id: Jabber.tcl,v 1.193 2007-01-20 16:26:23 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -399,8 +399,8 @@ proc ::Jabber::GetMyJid {{roomjid {}}} {
 	set jid $jstate(mejidres)
     } else {
 	if {[$jstate(jlib) service isroom $roomjid]} {
-	    set hashandnick [$jstate(jlib) service hashandnick $roomjid]
-	    set jid [lindex $hashandnick 0]   
+	    set nick [$jstate(jlib) service mynick $roomjid]
+	    set jid $roomjid/$nick
 	}
     }
     return $jid
@@ -1218,13 +1218,10 @@ proc ::Jabber::ValidatePasswordStr {str} {
 proc ::Jabber::IsMyGroupchatJid {jid} {
     variable jstate
     
-    jlib::splitjid $jid room resource
-    foreach {meHash nick} [$jstate(jlib) service hashandnick $room] break
-    set isme 0
-    if {[string equal $meHash $jid]} {
-	set isme 1
-    }
-    return $isme
+    set room [jlib::barejid $jid]
+    set nick [$jstate(jlib) service mynick $room]
+    set myjid $room/$nick
+    return [jlib::jidequal $myjid $jid]
 }
 
 # Jabber::SetStatus --

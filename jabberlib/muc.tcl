@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: muc.tcl,v 1.37 2006-11-16 14:28:55 matben Exp $
+# $Id: muc.tcl,v 1.38 2007-01-20 16:26:23 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -115,8 +115,6 @@ proc jlib::muc::init {jlibname args} {
 #       from the individual command if any.
 
 proc jlib::muc::cmdproc {jlibname cmd args} {
-    
-    # Which sub command? Just dispatch the command to the right procedure.
     return [eval {$cmd $jlibname} $args]
 }
 
@@ -125,7 +123,6 @@ proc jlib::muc::cmdproc {jlibname cmd args} {
 # 
 
 proc jlib::muc::invoke_callback {mucname cmd type subiq} {
-
     uplevel #0 $cmd [list $mucname $type $subiq]
 }
 
@@ -145,7 +142,6 @@ proc jlib::muc::invoke_callback {mucname cmd type subiq} {
 #       none.
 
 proc jlib::muc::enter {jlibname roomjid nick args} {
-
     variable xmlns
     upvar ${jlibname}::muc::cache cache
     upvar ${jlibname}::muc::rooms rooms
@@ -186,7 +182,6 @@ proc jlib::muc::enter {jlibname roomjid nick args} {
 #       Callback when entering room to make sure there are no error.
 
 proc jlib::muc::parse_enter {cmd jlibname xmldata} {
-
     upvar ${jlibname}::muc::cache cache
 
     set from [wrapper::getattribute $xmldata from]
@@ -210,7 +205,6 @@ proc jlib::muc::parse_enter {cmd jlibname xmldata} {
 #       Exit room.
 
 proc jlib::muc::exit {jlibname roomjid} {
-
     upvar ${jlibname}::muc::cache cache
 
     if {[info exists cache($roomjid,mynick)]} {
@@ -227,7 +221,6 @@ proc jlib::muc::exit {jlibname roomjid} {
 #       Set new nick name for room.
 
 proc jlib::muc::setnick {jlibname roomjid nick args} {
-
     upvar ${jlibname}::muc::cache cache
     
     set opts {}
@@ -251,7 +244,6 @@ proc jlib::muc::setnick {jlibname roomjid nick args} {
 # 
 
 proc jlib::muc::invite {jlibname roomjid jid args} {
-    
     variable xmlns
 
     set opts {}
@@ -287,7 +279,6 @@ proc jlib::muc::invite {jlibname roomjid jid args} {
 # 
 
 proc jlib::muc::setrole {jlibname roomjid nick role args} {
-
     variable muc
     variable xmlns
     
@@ -325,7 +316,6 @@ proc jlib::muc::setrole {jlibname roomjid nick role args} {
 # 
 
 proc jlib::muc::setaffiliation {jlibname roomjid nick affiliation args} {
-
     variable muc
     variable xmlns
     
@@ -371,7 +361,6 @@ proc jlib::muc::setaffiliation {jlibname roomjid nick affiliation args} {
 # 
 
 proc jlib::muc::getrole {jlibname roomjid role callback} {
-
     variable muc
     variable xmlns
     
@@ -393,7 +382,6 @@ proc jlib::muc::getrole {jlibname roomjid role callback} {
 # 
 
 proc jlib::muc::getaffiliation {jlibname roomjid affiliation callback} {
-
     variable muc
     variable xmlns
     
@@ -433,7 +421,6 @@ proc jlib::muc::getaffiliation {jlibname roomjid affiliation callback} {
 #       none.
 
 proc jlib::muc::create {jlibname roomjid nick command args} {
-
     variable xmlns
     upvar ${jlibname}::muc::cache cache
     upvar ${jlibname}::muc::rooms rooms
@@ -461,7 +448,6 @@ proc jlib::muc::create {jlibname roomjid nick command args} {
 }
 
 proc jlib::muc::parse_create {cmd jlibname xmldata} {
-
     upvar ${jlibname}::muc::cache cache
 
     set from [wrapper::getattribute $xmldata from]
@@ -497,7 +483,6 @@ proc jlib::muc::parse_create {cmd jlibname xmldata} {
 #       None.
 
 proc jlib::muc::setroom {jlibname roomjid type args} {
-
     variable xmlns
 
     set opts {}
@@ -538,7 +523,6 @@ proc jlib::muc::setroom {jlibname roomjid type args} {
 #       None.
 
 proc jlib::muc::destroy {jlibname roomjid args} {
-
     variable xmlns
 
     set opts {}
@@ -576,7 +560,6 @@ proc jlib::muc::destroy {jlibname roomjid args} {
 # 
 
 proc jlib::muc::getroom {jlibname roomjid callback} {
-
     variable xmlns
 
     set xmllist [wrapper::createtag "query" \
@@ -590,13 +573,12 @@ proc jlib::muc::getroom {jlibname roomjid callback} {
 #       Returns own nick name for room, or empty if not there.
 
 proc jlib::muc::mynick {jlibname roomjid} {
-
     upvar ${jlibname}::muc::cache cache
     
     if {[info exists cache($roomjid,mynick)]} {
 	return $cache($roomjid,mynick)
     } else {
-	return
+	return ""
     }
 }
 
@@ -605,7 +587,6 @@ proc jlib::muc::mynick {jlibname roomjid} {
 #       Returns a list of all room jid's we are inside.
 
 proc jlib::muc::allroomsin {jlibname} {
-
     upvar ${jlibname}::muc::cache cache
     
     set roomList {}
@@ -616,8 +597,7 @@ proc jlib::muc::allroomsin {jlibname} {
     return $roomList
 }
 
-proc jlib::muc::isroom {jlibname jid} {
-    
+proc jlib::muc::isroom {jlibname jid} {    
     upvar ${jlibname}::muc::rooms rooms
     
     if {[info exists rooms($jid)]} {
@@ -632,7 +612,6 @@ proc jlib::muc::isroom {jlibname jid} {
 #
 
 proc jlib::muc::participants {jlibname roomjid} {
-
     upvar ${jlibname}::muc::cache cache
     
     set everyone {}
@@ -646,8 +625,7 @@ proc jlib::muc::participants {jlibname roomjid} {
     return $everyone
 }
 
-proc jlib::muc::reset {jlibname} {
-    
+proc jlib::muc::reset {jlibname} {    
     upvar ${jlibname}::muc::cache cache
     upvar ${jlibname}::muc::rooms rooms
     
