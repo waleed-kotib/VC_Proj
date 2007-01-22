@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.154 2007-01-18 09:06:43 matben Exp $
+# $Id: JUI.tcl,v 1.155 2007-01-22 16:09:53 matben Exp $
 
 package provide JUI 1.0
 
@@ -62,6 +62,7 @@ namespace eval ::JUI:: {
 	}
     }
     option add *JMain*TMenubutton.padding         {1}             50
+    option add *JMain*TToolbar.collapsable        1               50
 
     # Bug in 8.4.1 but ok in 8.4.9
     if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {

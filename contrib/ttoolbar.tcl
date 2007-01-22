@@ -6,7 +6,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.7 2006-11-08 07:44:38 matben Exp $
+# $Id: ttoolbar.tcl,v 1.8 2007-01-22 16:09:52 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -62,9 +62,21 @@ proc ::ttoolbar::Init { } {
     variable this
     variable ttoolbarOptions
     variable widgetOptions
+
+    # Aqua gray arrows.
+    image create photo ::ttoolbar::open -data {
+	R0lGODlhCQAJAPMAMf///62trZycnJSUlIyMjISEhHNzcwAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAJAAkAAAQccJhJzZB1DlBy
+	AUCQBSBHfSVApSBhECxoxKCQRgA7
+    }
+    image create photo ::ttoolbar::close -data {
+	R0lGODlhCQAJAPMAMf///62trZycnJSUlIyMjISEhHNzcwAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAJAAkAAAQacAxAKzCmBHtx
+	tp5HUGEolMbYYQWYbZbEUREAOw==
+    }
     
     foreach name [tile::availableThemes] {
-
+	
 	if {[catch {package require tile::theme::$name}]} {
 	    continue
 	}
@@ -86,11 +98,24 @@ proc ::ttoolbar::Init { } {
 		pressed  sunken
 		active   raised
 	    }
+	    
+	    style element create TToolbar.Arrow.label image ::ttoolbar::open \
+	     -map [list selected ::ttoolbar::close]
+	    style layout TToolbar.TCheckbutton {
+		TToolbar.border -sticky news -border 0 -children {
+		    TToolbar.padding -sticky news -border 0 -children {
+			TToolbar.Arrow.label -side left
+		    }
+		}
+	    }
+	    style configure TToolbar.TCheckbutton  \
+	      -padding {0} -borderwidth 0 -relief flat
 	}
     }
     
     # List all allowed options with their database names and class names.
     array set widgetOptions {
+	-collapsable         {collapsable          Collapsable         }
 	-compound            {compound             Compound            }
 	-packimagepadx       {packImagePadX        PackImagePadX       }
 	-packimagepady       {packImagePadY        PackImagePadY       }
@@ -103,8 +128,9 @@ proc ::ttoolbar::Init { } {
     
     set ttoolbarOptions [array names widgetOptions]
 
+    option add *TToolbar.collapsable         0                widgetDefault
     option add *TToolbar.compound            both             widgetDefault
-    option add *TToolbar.padding            {10 4 6 4}        widgetDefault
+    option add *TToolbar.padding            {6 4 6 4}        widgetDefault
     option add *TToolbar.packImagePadX       4                widgetDefault
     option add *TToolbar.packImagePadY       0                widgetDefault
     option add *TToolbar.packTextPadX        0                widgetDefault
@@ -112,9 +138,13 @@ proc ::ttoolbar::Init { } {
     option add *TToolbar.styleImage          TToolbar.TButton widgetDefault
     option add *TToolbar.styleText           Toolbutton       widgetDefault
 
+    variable widgetCommands {
+	buttonconfigure cget configure exists minwidth newbutton
+    }
+
     # This allows us to clean up some things when we go away.
     bind TToolbar <Destroy> {+::ttoolbar::DestroyHandler %W }
-    
+
     set this(inited) 1
 }
 
@@ -153,13 +183,16 @@ proc ::ttoolbar::ttoolbar {w args} {
     upvar ::ttoolbar::${w}::locals locals
 
     # We use a frame for this specific widget class.
-    set widgets(this)  [ttk::frame $w -class TToolbar]
-    set widgets(frame) ::ttoolbar::${w}::${w}
+    set widgets(this)   [ttk::frame $w -class TToolbar]
+    set widgets(frame)  ::ttoolbar::${w}::${w}
+    set widgets(bframe) $w.f
 
+    ttk::frame $w.f
+    
     # Padding to make all flush left.
-    ttk::frame $w.pad
-    grid  $w.pad  -column 99 -row 0 -sticky ew
-    grid columnconfigure $w 99 -weight 1
+    ttk::frame $w.f.pad
+    grid  $w.f.pad  -column 99 -row 0 -sticky ew
+    grid columnconfigure $w.f 99 -weight 1
 
     # Parse options for the widget. First get widget defaults.
     foreach name $ttoolbarOptions {
@@ -172,10 +205,18 @@ proc ::ttoolbar::ttoolbar {w args} {
     # Overwrites defaults when option set in command.
     if {[llength $args]} {
 	eval {Configure $w} $args
-	#array set options $args
     }
     set locals(uid) 0
-        
+    
+    if {$options(-collapsable)} {
+	ttk::checkbutton $w.arrow -style TToolbar.TCheckbutton \
+	  -command [list ::ttoolbar::CollapseCmd $w] \
+	  -variable ::ttoolbar::${w}::locals(collapse)
+	pack $w.arrow -side left -anchor n	
+	bind $w.arrow <<ButtonPopup>> [list ::ttoolbar::Popup $w %x %y]
+    }
+    pack $w.f -fill both -expand 1
+    
     # Necessary to remove the original frame procedure from the global
     # namespace into our own.
     rename ::$w $widgets(frame)
@@ -288,11 +329,13 @@ proc ::ttoolbar::Configure {w args} {
     array set saveOpts [array get options]
     array set options $args
 	
+    set f $widgets(bframe)
+    
     # Process the new configuration options.
     set ncol [llength [array names locals *,-text]]
     if {$ncol && ($saveOpts(-compound) ne $options(-compound))} {
-	set wtexts [lsearch -glob -inline -all [winfo children $w] $w.t*]
-	set wimages [lsearch -glob -inline -all [winfo children $w] $w.i*]
+	set wtexts [lsearch -glob -inline -all [winfo children $f] $f.t*]
+	set wimages [lsearch -glob -inline -all [winfo children $f] $f.i*]
 
 	switch -- $options(-compound) {
 	    both {
@@ -331,6 +374,51 @@ proc ::ttoolbar::Configure {w args} {
     }
 }
 
+proc ::ttoolbar::CollapseCmd {w} {
+    
+    upvar ::ttoolbar::${w}::widgets widgets
+    upvar ::ttoolbar::${w}::locals locals
+
+    set f $widgets(bframe)
+    if {$locals(collapse)} {
+	pack forget $f
+    } else {
+	pack $f -fill both -expand 1
+    }
+}
+
+proc ::ttoolbar::Popup {w x y} {
+
+    upvar ::ttoolbar::${w}::options options
+
+    set m $w.m
+    destroy $m
+    menu $m -tearoff 0
+    
+    set [namespace current]::menutmp $options(-compound)
+    
+    $m add radiobutton -label [::msgcat::mc {Show Text And Image}] \
+      -command [list $w configure -compound both] \
+      -variable [namespace current]::menutmp  \
+      -value both
+    $m add radiobutton -label [::msgcat::mc {Show Text}] \
+      -command [list $w configure -compound text] \
+      -variable [namespace current]::menutmp  \
+      -value text
+    $m add radiobutton -label [::msgcat::mc {Show Image}] \
+      -command [list $w configure -compound image] \
+      -variable [namespace current]::menutmp  \
+      -value image
+    
+    update idletasks
+    
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
+    tk_popup $m [expr int($X) - 0] [expr int($Y) - 0]   
+    
+    return -code break
+}
+
 proc ::ttoolbar::NewButton {w name args} {
     
     upvar ::ttoolbar::${w}::options options
@@ -345,9 +433,10 @@ proc ::ttoolbar::NewButton {w name args} {
     set locals($name,-image)          ""
     set locals($name,-disabledimage)  ""
 
+    set f $widgets(bframe)
     set uid $locals(uid)
-    set wimage $w.i$uid
-    set wtext  $w.t$uid
+    set wimage $f.i$uid
+    set wtext  $f.t$uid
     set locals($name,uid)    $locals(uid)
     set widgets($name,image) $wimage
     set widgets($name,text)  $wtext
