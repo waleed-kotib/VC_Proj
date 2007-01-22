@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.71 2006-11-07 07:50:47 matben Exp $
+# $Id: Whiteboard.tcl,v 1.72 2007-01-22 09:06:54 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -2950,7 +2950,9 @@ proc ::WB::HaveAnyCanFiles {dir} {
     
     foreach f [glob -nocomplain -directory $dir *] {
 	if {[file isdirectory $f]} {
-	    return [HaveAnyCanFiles $f]
+	    if {[HaveAnyCanFiles $f]} {
+		return 1
+	    }
 	} elseif {[string equal [file extension $f] ".can"]} {
 	    return 1
 	}
