@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.176 2007-01-20 16:26:23 matben Exp $
+# $Id: GroupChat.tcl,v 1.177 2007-01-22 08:04:09 matben Exp $
 
 package require Create
 package require Enter
@@ -189,6 +189,7 @@ namespace eval ::GroupChat:: {
 
     # @@@ Should get this from a global reaource.
     variable buttonPressMillis 1000
+    variable waitUntilEditMillis 2000
 }
 
 proc ::GroupChat::QuitAppHook { } {
@@ -1647,7 +1648,8 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     set S [$T style create styEntry]
     $T style elements $S {eBorder eImage eWindow}
     $T style layout $S eImage  -expand ns
-    $T style layout $S eWindow -squeeze x -expand ns
+    #$T style layout $S eWindow -sticky ew -iexpand xy
+    $T style layout $S eWindow -iexpand xy
     $T style layout $S eBorder -detach 1 -iexpand xy
     
     set S [$T style create styRole]
@@ -1670,10 +1672,11 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     bindtags $T [concat UsersTreeTag [bindtags $T]]
     
     bind $T <Button-1>        [list ::GroupChat::TreeButtonPress $chattoken %W %x %y ]
-    bind $T <ButtonRelease-1> { ::GroupChat::TreeButtonRelease %W %x %y }        
+    bind $T <ButtonRelease-1> [list ::GroupChat::TreeButtonRelease $chattoken %W %x %y ]
     bind $T <<ButtonPopup>>   [list ::GroupChat::TreePopup $chattoken %W %x %y ]
     bind $T <Double-1>        { ::GroupChat::DoubleClick %W %x %y }        
     bind $T <Destroy>         {+::GroupChat::TreeOnDestroy %W }
+    bind $T <KeyPress>        +[list ::GroupChat::TreeEditTimerCancel $chattoken]
     
     ::treeutil::setdboptions $T $w utree
 }
@@ -1681,6 +1684,7 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
 proc ::GroupChat::TreeButtonPress {chattoken T x y} {
     variable buttonAfterId
     variable buttonPressMillis
+    variable editTimer
 
     if {[tk windowingsystem] eq "aqua"} {
 	if {[info exists buttonAfterId]} {
@@ -1689,15 +1693,48 @@ proc ::GroupChat::TreeButtonPress {chattoken T x y} {
 	set cmd [list ::GroupChat::TreePopup $chattoken $T $x $y]
 	set buttonAfterId [after $buttonPressMillis $cmd]
     }
+
+    # Edit bindings.
+    if {[info exists editTimer(after)]} {
+	set item [$T identify $x $y]
+	if {$item eq $editTimer(id)} {
+	    TreeEditUserStart $chattoken $editTimer(jid)
+	}
+    }
 }
 
-proc ::GroupChat::TreeButtonRelease {T x y} {
+proc ::GroupChat::TreeButtonRelease {chattoken T x y} {
     variable buttonAfterId
+    variable waitUntilEditMillis
+    variable editTimer
     
     if {[info exists buttonAfterId]} {
-	catch {after cancel $buttonAfterId}
+	after cancel $buttonAfterId
 	unset buttonAfterId
     }    
+    
+    # Edit bindings.
+    set id [$T identify $x $y]
+    if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
+	set item [lindex $id 1]
+	set tags [$T item element cget $item cTag eText -text]
+	if {[lindex $tags 0] eq "jid"} {
+	    set jid [lindex $tags 1]		    
+	    set cmd [list ::GroupChat::TreeEditTimerCancel $chattoken]
+	    set editTimer(id)    $id
+	    set editTimer(jid)   $jid
+	    set editTimer(after) [after $waitUntilEditMillis $cmd]
+	}
+    }
+}
+
+proc ::GroupChat::TreeEditTimerCancel {chattoken} {
+    variable editTimer
+
+    if {[info exists editTimer(after)]} {
+	after cancel $editTimer(after)
+    }
+    unset -nocomplain editTimer
 }
 
 proc ::GroupChat::TreePopup {chattoken T x y} {
@@ -1714,7 +1751,10 @@ proc ::GroupChat::TreePopup {chattoken T x y} {
 }
 
 proc ::GroupChat::DoubleClick {T x y} {
+    variable editTimer
     upvar ::Jabber::jprefs jprefs
+
+    unset -nocomplain editTimer
 
     set id [$T identify $x $y]
     if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
@@ -1821,11 +1861,6 @@ proc ::GroupChat::TreeSetIgnoreState {T jid3 {prefix ""}} {
     }
 }
 
-if {0} {
-    ::GroupChat::NewChat r@xxx   
-    ::GroupChat::SetUser r@xxx r@xxx/matskiss
-}
-
 proc ::GroupChat::TreeEditUserStart {chattoken jid3} {
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -1840,11 +1875,13 @@ proc ::GroupChat::TreeEditUserStart {chattoken jid3} {
 	set wentry $T.entry
 	set chatstate(editNick) [jlib::resourcejid $jid3]
 	entry $wentry -font CociSmallFont \
-	  -textvariable $chattoken\(editNick) -width 12
+	  -textvariable $chattoken\(editNick) -width 1
 	$T item style set $item cTree styEntry
 	$T item element configure $item cTree \
 	  eImage -image $image + eWindow -window $wentry
 	focus $wentry
+	# This creates a focus out on mac!
+	#$wentry selection range 0 end 
 	bind $wentry <Return>   \
 	  [list ::GroupChat::TreeOnReturnEdit $chattoken $jid3]
 	bind $wentry <FocusOut> \
