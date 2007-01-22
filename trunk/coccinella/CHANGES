@@ -17,6 +17,7 @@ Coccinella-0.95.16 (200701??):
  o added menu to increase the smallest font sizes in two steps
  o added SOCKS proxy, compatible with SimpLite-Jabber
  o cleaner groupchat dialog with new methods to set subject and nickname
+ o added collapsable and flexible toolbars
 
 Coccinella-0.95.15 (20061117):
 

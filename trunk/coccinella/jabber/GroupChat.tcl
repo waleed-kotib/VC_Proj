@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.177 2007-01-22 08:04:09 matben Exp $
+# $Id: GroupChat.tcl,v 1.178 2007-01-22 16:09:53 matben Exp $
 
 package require Create
 package require Enter
@@ -1704,6 +1704,8 @@ proc ::GroupChat::TreeButtonPress {chattoken T x y} {
 }
 
 proc ::GroupChat::TreeButtonRelease {chattoken T x y} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     variable buttonAfterId
     variable waitUntilEditMillis
     variable editTimer
@@ -1719,11 +1721,15 @@ proc ::GroupChat::TreeButtonRelease {chattoken T x y} {
 	set item [lindex $id 1]
 	set tags [$T item element cget $item cTag eText -text]
 	if {[lindex $tags 0] eq "jid"} {
-	    set jid [lindex $tags 1]		    
-	    set cmd [list ::GroupChat::TreeEditTimerCancel $chattoken]
-	    set editTimer(id)    $id
-	    set editTimer(jid)   $jid
-	    set editTimer(after) [after $waitUntilEditMillis $cmd]
+	    set jid [lindex $tags 1]
+	    set nick [::Jabber::JlibCmd service mynick $chatstate(roomjid)]
+	    set myjid $chatstate(roomjid)/$nick
+	    if {[jlib::jidequal $jid $myjid]} {
+		set cmd [list ::GroupChat::TreeEditTimerCancel $chattoken]
+		set editTimer(id)    $id
+		set editTimer(jid)   $jid
+		set editTimer(after) [after $waitUntilEditMillis $cmd]
+	    }
 	}
     }
 }

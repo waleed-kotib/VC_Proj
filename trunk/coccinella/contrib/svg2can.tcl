@@ -5,7 +5,7 @@
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.33 2007-01-19 08:41:12 matben Exp $
+# $Id: svg2can.tcl,v 1.34 2007-01-22 16:09:52 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -2067,11 +2067,11 @@ proc svg2can::StyleToOptsEx {styleList args} {
 		set optsA(-$key) [parseColor $value]		
 	    }
 	    stroke-dasharray {
-		set name [string map {"-" ""} $key]
 		if {$value eq "none"} {
-		    set optsA(-$name) {}
+		    set optsA(-strokedasharray) {}
 		} else {
-		    set optsA(-$name) $value
+		    set dash [split $value ,]
+		    set optsA(-strokedasharray) $dash
 		}
 	    }
 	    fill-opacity - stroke-linejoin - stroke-miterlimit - stroke-opacity {		

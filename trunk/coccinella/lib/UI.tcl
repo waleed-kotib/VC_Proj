@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.140 2006-12-21 11:23:47 matben Exp $
+# $Id: UI.tcl,v 1.141 2007-01-22 16:09:53 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -194,16 +194,6 @@ proc ::UI::InitCommonBinds { } {
     if {[string equal $this(platform) "unix"]} {
 	bind Text <Control-Key-v> {}
     }
-}
-
-if {0} {
-    # Read only text widget.
-    pack [text .t]
-    .t insert end "jfioepfhouidšs fhuldshbflds fhlds gfdskl fg"
-    .t configure -state disabled
-    bind .t <1> {focus %W}
-    toplevel .tt
-    pack [text .tt.t]
 }
 
 proc ::UI::InitVirtualEvents { } {
