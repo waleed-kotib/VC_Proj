@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.40 2006-12-12 13:57:43 matben Exp $
+# $Id: tileutils.tcl,v 1.41 2007-01-23 15:11:22 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -332,6 +332,24 @@ proc tileutils::configstyles {name} {
 	  -padding {8 2 8 3} -relief flat -font CociSmallFont -foreground white	
 	style map LSafari -foreground {background "#dedede"}
 	
+	# Aqua type plain arrow checkbutton.
+	# {active selected} not working!
+	style element create arrowCheckIcon image $tiles(open) \
+	  -sticky w -border {0} \
+	  -map [list \
+	 {selected}        $tiles(close)     \
+	 {active}          $tiles(openDark)  \
+	 {active selected} $tiles(closeDark)]
+	style layout Arrow.TCheckbutton {
+	    Arrow.border -sticky news -border 0 -children {
+		Arrow.padding -sticky news -border 0 -children {
+		    arrowCheckIcon -side left
+		}
+	    }
+	}
+	style configure Arrow.TCheckbutton  \
+	  -padding {0} -borderwidth 0 -relief flat
+
 	# Url clickable link:
 	style layout Url {
 	    Url.background -children {

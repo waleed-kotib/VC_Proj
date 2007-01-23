@@ -90,6 +90,7 @@
 *Tablelist.labelBorderWidth:         1
 *Tablelist.stripeBackground:         #dedeff
 *Tablelist.background:               white
+*TToolbar.styleCollapse:             Arrow.TCheckbutton
 *TToolbar.styleText:                 Safari
 
 ! some of these are dummies just to set column options etc.
@@ -98,6 +99,7 @@
 *TreeCtrl.columnBorderWidth:         1
 *TreeCtrl.columnBackground:          #dedede
 
+*TToolbar.Collapse:                  1
 *TToolbar.TLabel.font:               CociSmallFont
 *WaveLabel.background:               #cecece
 

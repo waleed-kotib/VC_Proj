@@ -631,6 +631,11 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Set Status}			{Установить статус}
 ::msgcat::mcset ru {Settings Panels}		{Панель настроек}
 ::msgcat::mcset ru {Setup Assistant}
+
+::msgcat::mcset ru {Show Text and Image}
+::msgcat::mcset ru {Show Text}
+::msgcat::mcset ru {Show Image}
+
 ::msgcat::mcset ru {Slide Show}
 ::msgcat::mcset ru {Slide Show Folder}
 ::msgcat::mcset ru {Software Update}		{Апдейт программы}
