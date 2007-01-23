@@ -694,6 +694,11 @@
 ::msgcat::mcset nl {Set windows opacity}		{Ondoorzichtigheid van vensters instellen}
 ::msgcat::mcset nl {Settings Panels}			{Instellingen}
 ::msgcat::mcset nl {Setup Assistant}			{Installatieassistent}
+
+::msgcat::mcset nl {Show Text and Image}
+::msgcat::mcset nl {Show Text}
+::msgcat::mcset nl {Show Image}
+
 ::msgcat::mcset nl {Slide Show}				{Diavoorstelling}
 ::msgcat::mcset nl {Slide Show Folder}			{Map voor diavoorstelling}
 ::msgcat::mcset nl {Smooth freehand strokes}		{Lijnen uit de losse hand vervagen}

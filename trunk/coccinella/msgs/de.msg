@@ -703,6 +703,11 @@
 ::msgcat::mcset de {Set windows opacity}  {Setze Lichtundurchlässigkeit}
 ::msgcat::mcset de {Settings Panels}      {Einrichtungs-Dialog}
 ::msgcat::mcset de {Setup Assistant}      {Einrichtungs-Assistent}
+
+::msgcat::mcset de {Show Text and Image}
+::msgcat::mcset de {Show Text}
+::msgcat::mcset de {Show Image}
+
 ::msgcat::mcset de {Slide Show}		  {Präsentation}
 ::msgcat::mcset de {Slide Show Folder}    {Präsentations-Ordner}
 ::msgcat::mcset de {Smooth freehand strokes}	{Freihandstriche glätten}

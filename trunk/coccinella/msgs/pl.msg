@@ -699,6 +699,11 @@
 ::msgcat::mcset pl {Set windows opacity}  {Ustaw przezroczystość okienka}
 ::msgcat::mcset pl {Settings Panels}      {Panele ustawień}
 ::msgcat::mcset pl {Setup Assistant}      {Asystent ustawień}
+
+::msgcat::mcset pl {Show Text and Image}
+::msgcat::mcset pl {Show Text}
+::msgcat::mcset pl {Show Image}
+
 ::msgcat::mcset pl {Slide Show}           {Prezentacja}
 ::msgcat::mcset pl {Slide Show Folder}    {Katalog prezentacji}
 ::msgcat::mcset pl {Smooth freehand strokes} {Rozmazane pociągnięcia}

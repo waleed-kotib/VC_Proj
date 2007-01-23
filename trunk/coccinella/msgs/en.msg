@@ -688,6 +688,9 @@
 ::msgcat::mcset en {Set windows opacity}
 ::msgcat::mcset en {Settings Panels}
 ::msgcat::mcset en {Setup Assistant}
+::msgcat::mcset en {Show Text and Image}
+::msgcat::mcset en {Show Text}
+::msgcat::mcset en {Show Image}
 ::msgcat::mcset en {Slide Show}
 ::msgcat::mcset en {Slide Show Folder}
 ::msgcat::mcset en {Smooth freehand strokes}

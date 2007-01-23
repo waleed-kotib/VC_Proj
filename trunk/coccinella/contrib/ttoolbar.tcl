@@ -6,7 +6,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.8 2007-01-22 16:09:52 matben Exp $
+# $Id: ttoolbar.tcl,v 1.9 2007-01-23 15:11:22 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -98,43 +98,33 @@ proc ::ttoolbar::Init { } {
 		pressed  sunken
 		active   raised
 	    }
-	    
-	    style element create TToolbar.Arrow.label image ::ttoolbar::open \
-	     -map [list selected ::ttoolbar::close]
-	    style layout TToolbar.TCheckbutton {
-		TToolbar.border -sticky news -border 0 -children {
-		    TToolbar.padding -sticky news -border 0 -children {
-			TToolbar.Arrow.label -side left
-		    }
-		}
-	    }
-	    style configure TToolbar.TCheckbutton  \
-	      -padding {0} -borderwidth 0 -relief flat
-	}
+        }
     }
     
     # List all allowed options with their database names and class names.
     array set widgetOptions {
-	-collapsable         {collapsable          Collapsable         }
+	-collapse            {collapse             Collapse            }
 	-compound            {compound             Compound            }
 	-packimagepadx       {packImagePadX        PackImagePadX       }
 	-packimagepady       {packImagePadY        PackImagePadY       }
 	-packtextpadx        {packTextPadX         PackTextPadX        }
 	-packtextpady        {packTextPadY         PackTextPadY        }
 	-padding             {padding              Padding             }
+	-stylecollapse       {styleCollapse        StyleCollapse       }
 	-styleimage          {styleImage           StyleImage          }
 	-styletext           {styleText            StyleText           }
     }
     
     set ttoolbarOptions [array names widgetOptions]
 
-    option add *TToolbar.collapsable         0                widgetDefault
+    option add *TToolbar.collapse            0                widgetDefault
     option add *TToolbar.compound            both             widgetDefault
-    option add *TToolbar.padding            {6 4 6 4}        widgetDefault
+    option add *TToolbar.padding            {4 4 6 4}         widgetDefault
     option add *TToolbar.packImagePadX       4                widgetDefault
     option add *TToolbar.packImagePadY       0                widgetDefault
     option add *TToolbar.packTextPadX        0                widgetDefault
     option add *TToolbar.packTextPadY        0                widgetDefault
+    option add *TToolbar.styleCollapse       TToolbar.TCheckbutton widgetDefault
     option add *TToolbar.styleImage          TToolbar.TButton widgetDefault
     option add *TToolbar.styleText           Toolbutton       widgetDefault
 
@@ -208,8 +198,9 @@ proc ::ttoolbar::ttoolbar {w args} {
     }
     set locals(uid) 0
     
-    if {$options(-collapsable)} {
-	ttk::checkbutton $w.arrow -style TToolbar.TCheckbutton \
+    if {$options(-collapse)} {
+	set locals(collapse) 0
+	ttk::checkbutton $w.arrow -style $options(-stylecollapse) \
 	  -command [list ::ttoolbar::CollapseCmd $w] \
 	  -variable ::ttoolbar::${w}::locals(collapse)
 	pack $w.arrow -side left -anchor n	
@@ -397,7 +388,7 @@ proc ::ttoolbar::Popup {w x y} {
     
     set [namespace current]::menutmp $options(-compound)
     
-    $m add radiobutton -label [::msgcat::mc {Show Text And Image}] \
+    $m add radiobutton -label [::msgcat::mc {Show Text and Image}] \
       -command [list $w configure -compound both] \
       -variable [namespace current]::menutmp  \
       -value both

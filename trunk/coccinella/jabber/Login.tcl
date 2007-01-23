@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.107 2007-01-16 08:22:57 matben Exp $
+# $Id: Login.tcl,v 1.108 2007-01-23 15:11:22 matben Exp $
 
 package provide Login 1.0
 
@@ -167,9 +167,19 @@ proc ::Login::Dlg { } {
     # Triangle switch for more options.
     if {$config(login,more)} {
 	set wtri $wbox.tri
-	ttk::button $wtri -style Small.Toolbutton -padding {6 1} \
-	  -compound left -image [::UI::GetIcon mactriangleclosed] \
-	  -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
+	# @@@ Experiment! Try Arrow.TCheckbutton with extra text padding.
+	if {0} {
+	    ttk::button $wtri -style Small.Toolbutton -padding {6 1} \
+	      -compound left -image [::UI::GetIcon mactriangleclosed] \
+	      -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
+	} elseif {1} {
+	    ttk::button $wtri -style Small.Plain -padding {6 1} \
+	      -compound left -image [::UI::GetIcon closeAqua] \
+	      -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
+	} else {
+	    ttk::checkbutton $wtri -style ArrowText.TCheckbutton \
+	      -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
+	}
 	pack $wtri -side top -anchor w
 	
 	# More options.
@@ -319,7 +329,7 @@ proc ::Login::MoreOpts {w} {
 
     pack $wfrmore -side top -fill x -padx 2
     $wtri configure -command [list [namespace current]::LessOpts $w] \
-      -image [::UI::GetIcon mactriangleopen] -text "[mc Less]..."   
+      -image [::UI::GetIcon openAqua] -text "[mc Less]..."   
 }
 
 proc ::Login::LessOpts {w} {
@@ -331,7 +341,7 @@ proc ::Login::LessOpts {w} {
     
     pack forget $wfrmore
     $wtri configure -command [list [namespace current]::MoreOpts $w] \
-      -image [::UI::GetIcon mactriangleclosed] -text "[mc More]..."   
+      -image [::UI::GetIcon closeAqua] -text "[mc More]..."   
     after 100 [list wm geometry $w {}]
 }
 

@@ -690,6 +690,9 @@
 ::msgcat::mcset sv {Set windows opacity}   {Sätt fönstrens genomskinlighet}
 ::msgcat::mcset sv {Settings Panels}       {Inställningspaneler}
 ::msgcat::mcset sv {Setup Assistant}	   {Inställningsassistent}
+::msgcat::mcset sv {Show Text and Image}   {Visa text och bild}
+::msgcat::mcset sv {Show Text}             {Visa text} 
+::msgcat::mcset sv {Show Image}            {Visa bild}
 ::msgcat::mcset sv {Slide Show}            {Bildvisning}
 ::msgcat::mcset sv {Slide Show Folder}     {Bildvisnings mapp}
 ::msgcat::mcset sv {Smooth freehand strokes} {Utjämna pendrag}

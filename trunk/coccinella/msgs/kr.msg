@@ -690,6 +690,11 @@
 ::msgcat::mcset kr {Set windows opacity}      {원도우 투명도 설정하기}
 ::msgcat::mcset kr {Settings Panels}	      {판 설정}
 ::msgcat::mcset kr {Setup Assistant}	      {보조 설정하기}
+
+::msgcat::mcset kr {Show Text and Image}
+::msgcat::mcset kr {Show Text}
+::msgcat::mcset kr {Show Image}
+
 ::msgcat::mcset kr {Slide Show}		      {슬라이드 쇼}
 ::msgcat::mcset kr {Slide Show Folder}	      {슬라이드 쇼 폴더}
 ::msgcat::mcset kr {Smooth freehand strokes}  {손으로 쓴 것 부드럽게 하기}

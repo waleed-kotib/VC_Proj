@@ -704,6 +704,11 @@
 ::msgcat::mcset fr {Set windows opacity}	{Changer l'opacité des fenêtres}
 ::msgcat::mcset fr {Settings Panels}		{Panneau de configuration}
 ::msgcat::mcset fr {Setup Assistant}		{Assistant de configuration}
+
+::msgcat::mcset fr {Show Text and Image}
+::msgcat::mcset fr {Show Text}
+::msgcat::mcset fr {Show Image}
+
 ::msgcat::mcset fr {Slide Show}			{Diaporama}
 ::msgcat::mcset fr {Slide Show Folder}		{Dossier des Diaporamas}
 ::msgcat::mcset fr {Smooth freehand strokes}
