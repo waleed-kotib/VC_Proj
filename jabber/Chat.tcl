@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.188 2006-12-21 11:23:46 matben Exp $
+# $Id: Chat.tcl,v 1.189 2007-01-24 13:44:20 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -187,7 +187,7 @@ proc ::Chat::OnMenu { } {
 	if {[llength $jidL]} {
 	    foreach jid $jidL {
 		if {[::Jabber::RosterCmd isavailable $jid]} {
-		    jlib::splitjid $jid jid2 res
+		    set jid2 [jlib::barejid $jid]
 		    StartThread $jid2
 		} else {
 		    if {[llength $jidL] == 1} {
@@ -221,7 +221,7 @@ proc ::Chat::StartThreadDlg {args} {
 
     ::Debug 2 "::Chat::StartThreadDlg args='$args'"
 
-    array set argsArr $args
+    array set argsA $args
     set w $wDlgs(jstartchat)
     if {[winfo exists $w]} {
 	raise $w
@@ -286,8 +286,8 @@ proc ::Chat::StartThreadDlg {args} {
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
     
-    if {[info exists argsArr(-jid)]} {
-	set user $argsArr(-jid)
+    if {[info exists argsA(-jid)]} {
+	set user $argsA(-jid)
     }
 
     # Grab and focus.
@@ -359,13 +359,13 @@ proc ::Chat::StartThread {jid args} {
     
     ::Debug 2 "::Chat::StartThread jid=$jid, args=$args"
     
-    array set argsArr $args
+    array set argsA $args
     set havedlg 0
-    jlib::splitjid $jid jid2 res
+    set jid2 [jlib::barejid $jid]
 
     # Make unique thread id.
-    if {[info exists argsArr(-thread)]} {
-	set threadID $argsArr(-thread)
+    if {[info exists argsA(-thread)]} {
+	set threadID $argsA(-thread)
 	
 	# Do we already have a dialog with this thread?
 	set chattoken [GetTokenFrom chat threadid $threadID]
@@ -444,12 +444,12 @@ proc ::Chat::GotMsg {body args} {
 
     ::Debug 2 "::Chat::GotMsg args='$args'"
 
-    array set argsArr $args
+    array set argsA $args
     
-    set xmldata $argsArr(-xmldata)
+    set xmldata $argsA(-xmldata)
     
     # -from is a 3-tier jid /resource included.
-    set jid $argsArr(-from)
+    set jid $argsA(-from)
     jlib::splitjidex $jid node domain res
     set jid2  [jlib::joinjid $node $domain ""]
     set mjid  [jlib::jidmap $jid]
@@ -457,8 +457,8 @@ proc ::Chat::GotMsg {body args} {
     
     # We must follow the thread...
     # There are several cases to deal with: Have thread page, have dialog?
-    if {[info exists argsArr(-thread)]} {
-	set threadID $argsArr(-thread)
+    if {[info exists argsA(-thread)]} {
+	set threadID $argsA(-thread)
 	set chattoken [GetTokenFrom chat threadid $threadID]
     } else {
 	
@@ -511,19 +511,19 @@ proc ::Chat::GotMsg {body args} {
 
     # Check for ChatState (XEP-0085) support
     set msgChatState ""
-    if {[info exists argsArr(-active)]} {
+    if {[info exists argsA(-active)]} {
         set chatstate(havecs) true
         set msgChatState active
-    } elseif {[info exists argsArr(-composing)]} {
+    } elseif {[info exists argsA(-composing)]} {
         set chatstate(havecs) true
         set msgChatState composing
-    } elseif {[info exists argsArr(-paused)]} {
+    } elseif {[info exists argsA(-paused)]} {
         set chatstate(havecs) true
         set msgChatState paused
-    } elseif {[info exists argsArr(-inactive)]} {
+    } elseif {[info exists argsA(-inactive)]} {
         set chatstate(havecs) true
         set msgChatState inactive
-    } elseif {[info exists argsArr(-gone)]} {
+    } elseif {[info exists argsA(-gone)]} {
         set chatstate(havecs) true
         set msgChatState gone
     } else {
@@ -534,7 +534,7 @@ proc ::Chat::GotMsg {body args} {
 
     if {$chatstate(havecs) eq "true"} {
         if { $msgChatState ne "" } {
-            jlib::splitjid $chatstate(jid) jid2 res
+	    set jid2 [jlib::barejid $chatstate(jid)]
             set name [::Jabber::RosterCmd getname $jid2]
             if {$name eq ""} {
                 if {[::Jabber::JlibCmd service isroom $jid2]} {
@@ -550,8 +550,8 @@ proc ::Chat::GotMsg {body args} {
     } 
 
     set opts {}
-    if {[info exists argsArr(-x)]} {
-        set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
+    if {[info exists argsA(-x)]} {
+        set tm [::Jabber::GetAnyDelayElem $argsA(-x)]
         if {$tm ne ""} {
            set secs [clock scan $tm -gmt 1]
            lappend opts -secs $secs
@@ -562,15 +562,15 @@ proc ::Chat::GotMsg {body args} {
         # 
         # @@@ Should we handle this with hooks?
         if {$chatstate(havecs) eq "true"} {
-            eval {XEventHandleAnyXElem $chattoken $argsArr(-x)} $args
+            eval {XEventHandleAnyXElem $chattoken $argsA(-x)} $args
         }
     }
 
     # This is important since clicks may have reset the insert mark.
     $chatstate(wtext) mark set insert end
 
-    if {[info exists argsArr(-subject)]} {
-	set chatstate(subject) $argsArr(-subject)
+    if {[info exists argsA(-subject)]} {
+	set chatstate(subject) $argsA(-subject)
 	set chatstate(lastsubject) $chatstate(subject)
 	eval {
 	    InsertMessage $chattoken sys "[mc Subject]: $chatstate(subject)"
@@ -623,13 +623,13 @@ proc ::Chat::GotNormalMsg {body args} {
     }
     
     # Try identify if composing event sent as normal message.
-    array set argsArr $args
-    jlib::splitjid $argsArr(-from) jid2 res
+    array set argsA $args
+    set jid2 [jlib::barejid $argsA(-from)]
     set mjid2 [jlib::jidmap $jid2]
     set chattoken [GetTokenFrom chat jid ${mjid2}*]
     
-    if {($chattoken ne "") && [info exists argsArr(-x)]} {
-	eval {XEventHandleAnyXElem $chattoken $argsArr(-x)} $args
+    if {($chattoken ne "") && [info exists argsA(-x)]} {
+	eval {XEventHandleAnyXElem $chattoken $argsA(-x)} $args
     }
 }
 
@@ -648,7 +648,7 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jprefs jprefs
     
-    array set argsArr $args
+    array set argsA $args
     
     set w       $chatstate(w)
     set wtext   $chatstate(wtext)
@@ -658,12 +658,12 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
         
     switch -- $whom {
 	me {
-	    if {[info exists argsArr(-jidfrom)]} {
-		set myjid $argsArr(-jidfrom)
+	    if {[info exists argsA(-jidfrom)]} {
+		set myjid $argsA(-jidfrom)
 	    } else {
 		set myjid [::Jabber::GetMyJid]
 	    }
-	    jlib::splitjidex $myjid node host res
+	    jlib::splitjidex $myjid node host res	    
 	    if {$node eq ""} {
 		set name $host
 		set from $host
@@ -676,8 +676,8 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	    }
 	}
 	you {
-	    if {[info exists argsArr(-jidfrom)]} {
-		set youjid $argsArr(-jidfrom)
+	    if {[info exists argsA(-jidfrom)]} {
+		set youjid $argsA(-jidfrom)
 	    } else {
 		set youjid $jid
 	    }
@@ -694,8 +694,8 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	    
 	    # This can indicate wrong from of setting subject ourself.
 	    set from ""
-	    if {[info exists argsArr(-jidfrom)]} {
-		set from $argsArr(-jidfrom)
+	    if {[info exists argsA(-jidfrom)]} {
+		set from $argsA(-jidfrom)
 	    }
 	    set jid2 [jlib::barejid $from]
 	    if {[::Jabber::JlibCmd service isroom $jid2]} {
@@ -707,8 +707,8 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	    }
 	}
     }
-    if {[info exists argsArr(-secs)]} {
-	set secs $argsArr(-secs)
+    if {[info exists argsA(-secs)]} {
+	set secs $argsA(-secs)
     } else {
 	set secs [clock seconds]
     }
@@ -1087,7 +1087,7 @@ proc ::Chat::Build {threadID args} {
     upvar 0 $dlgtoken dlgstate
     
     set w $wDlgs(jchat)${uiddlg}
-    array set argsArr $args
+    array set argsA $args
 
     set dlgstate(exists)      1
     set dlgstate(w)           $w
@@ -1263,7 +1263,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Chat::BuildThreadWidget args=$args"
-    array set argsArr $args
+    array set argsA $args
 
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -1279,13 +1279,13 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     # -from is sometimes a 3-tier jid /resource included.
     # Try to keep any /resource part unless not possible.
     
-    if {[info exists argsArr(-from)]} {
-	set jid [$jstate(jlib) getrecipientjid $argsArr(-from)]
+    if {[info exists argsA(-from)]} {
+	set jid [$jstate(jlib) getrecipientjid $argsA(-from)]
     } else {
 	return
     }
     set mjid [jlib::jidmap $jid]
-    set mfrom [jlib::jidmap $argsArr(-from)]
+    set mfrom [jlib::jidmap $argsA(-from)]
     jlib::splitjidex $jid node domain res
     jlib::splitjid   $mjid jid2 -
 
@@ -1307,6 +1307,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(state)            normal    
     set chatstate(subject)          ""
     set chatstate(lastsubject)      ""
+    set chatstate(subjectOld)       ""
     set chatstate(notifier)         ""
     set chatstate(active)           $cprefs(lastActiveRet)
     set chatstate(history)          1
@@ -1319,8 +1320,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(havecs)           first
     set chatstate(chatstate)        active
 
-    if {[info exists argsArr(-subject)]} {
-	set chatstate(subject) $argsArr(-subject)
+    if {[info exists argsA(-subject)]} {
+	set chatstate(subject) $argsA(-subject)
     }
     
     if {$jprefs(chatActiveRet)} {
@@ -1364,6 +1365,11 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     pack  $wtop.i  -side right
     pack  $wtop.p1 -side right
     pack  $wtop.e  -side top -fill x
+
+    # Special bindings for setting subject.
+    bind $wsubject <FocusIn>  [list ::Chat::OnFocusInSubject $chattoken]
+    bind $wsubject <FocusOut> [list ::Chat::OnFocusOutSubject $chattoken]
+    bind $wsubject <Return>   [list ::Chat::OnReturnSubject $chattoken]    
 
     # Notifier label.
     set chatstate(wnotifier) $wnotifier
@@ -1451,8 +1457,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     if {$jprefs(chatFont) ne ""} {
 	$wtextsnd configure -font $jprefs(chatFont)
     }
-    if {[info exists argsArr(-message)]} {
-	$wtextsnd insert end $argsArr(-message)	
+    if {[info exists argsA(-message)]} {
+	$wtextsnd insert end $argsA(-message)	
     }
     if {$chatstate(active)} {
 	ActiveCmd $chattoken
@@ -1473,7 +1479,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 	bind $wtextsnd <KP_Enter>         {# nothing}
 	bind $wtextsnd <Tab>              {# nothing}
 	if {[string equal [tk windowingsystem] "aqua"]} {
-		bind $wtextsnd <Command-KeyPress> {# nothing}
+	    bind $wtextsnd <Command-KeyPress> {# nothing}
 	}
     }
     bind $wtextsnd <Return>  \
@@ -1503,6 +1509,47 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     after idle [list raise [winfo toplevel $wthread]]
     
     return $chattoken
+}
+
+proc ::Chat::OnFocusInSubject {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set chatstate(subjectOld) $chatstate(subject)
+}
+
+proc ::Chat::OnFocusOutSubject {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    # Reset to previous subject.
+    set chatstate(subject) $chatstate(subjectOld)
+}
+
+proc ::Chat::OnReturnSubject {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    upvar ::Jabber::jstate jstate
+
+    set dlgtoken $chatstate(dlgtoken)
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+
+    set threadID $chatstate(threadid)
+    set chatstate(fromjid) [$jstate(jlib) getrecipientjid $chatstate(fromjid)]
+    set jid [jlib::jidmap $chatstate(fromjid)]  
+    set jid2 [jlib::barejid $jid]
+    set myjid [$jstate(jlib) myjid]
+    $chatstate(wtext) mark set insert end
+    InsertMessage $chattoken sys "[mc Subject]: $chatstate(subject)"
+    set xmldata [jlib::send_message_xmllist $jid  \
+       -thread $threadID -type chat -from $myjid]
+    ::History::XPutItem send $jid2 $xmldata
+    $jstate(jlib) send_message $jid -type chat -subject $chatstate(subject) \
+      -thread $threadID
+    set chatstate(subjectOld) $chatstate(subject)
+    set dlgstate(lastsentsecs) [clock seconds]
+    focus $chatstate(w)
 }
 
 proc ::Chat::MenuEditPostHook {wmenu} {
@@ -1762,10 +1809,10 @@ proc ::Chat::MakeNewPage {dlgtoken threadID args} {
     upvar 0 $dlgtoken dlgstate
     
     variable uidpage
-    array set argsArr $args
+    array set argsA $args
         
     # Make fresh page with chat widget.
-    set dispname [::Roster::GetDisplayName $argsArr(-from)]
+    set dispname [::Roster::GetDisplayName $argsA(-from)]
     set wnb $dlgstate(wnb)
     set wpage $wnb.p[incr dlgstate(uid)]
     ttk::frame $wpage
@@ -2466,7 +2513,7 @@ proc ::Chat::Send {dlgtoken} {
     # else to 2-tier.
     set chatstate(fromjid) [$jstate(jlib) getrecipientjid $chatstate(fromjid)]
     set jid [jlib::jidmap $chatstate(fromjid)]
-    jlib::splitjid $jid jid2 res
+    set jid2 [jlib::barejid $jid]
     set chatstate(jid) $jid
     
     if {![jlib::jidvalidate $jid]} {
@@ -2488,11 +2535,15 @@ proc ::Chat::Send {dlgtoken} {
     # This is important since clicks may have reset the insert mark.
     $chatstate(wtext) mark set insert end
 
-    # Need to detect if subject changed.
+    # Need to detect if subject changed. If subject was changed it was already
+    # sent alone but some clients (Psi) doesn't recognize this why it is
+    # duplicated here. Good/bad? Skip!
     set opts {}
-    if {![string equal $chatstate(subject) $chatstate(lastsubject)]} {
-	lappend opts -subject $chatstate(subject)
-	InsertMessage $chattoken sys "Subject: $chatstate(subject)"
+    if {0} {
+	if {![string equal $chatstate(subject) $chatstate(lastsubject)]} {
+	    lappend opts -subject $chatstate(subject)
+	    InsertMessage $chattoken sys "[mc Subject]: $chatstate(subject)"
+	}
     }
     set chatstate(lastsubject) $chatstate(subject)
     
@@ -2966,14 +3017,14 @@ proc ::Chat::XEventHandleAnyXElem {chattoken xElem args} {
     set xevent [lindex [wrapper::getnamespacefromchilds $xElem x \
       "jabber:x:event"] 0]
     if {$xevent != {}} {
-	array set argsArr $args
+	array set argsA $args
 
 	# If we get xevents as normal messages, send them as normal as well.
-	if {[info exists argsArr(-type)]} {
+	if {[info exists argsA(-type)]} {
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
 
-	    if {$argsArr(-type) eq "chat"} {
+	    if {$argsA(-type) eq "chat"} {
 		set chatstate(xevent,type) chat
 	    } else {
 		set chatstate(xevent,type) normal
@@ -2987,7 +3038,7 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 	
-    array set argsArr $args
+    array set argsA $args
 
     # This can be one of three things:
     # 1) Request for event notification
@@ -2995,8 +3046,8 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
     # 3) Cancellations of message composing
     
     set msgid ""
-    if {[info exists argsArr(-id)]} {
-	set msgid $argsArr(-id)
+    if {[info exists argsA(-id)]} {
+	set msgid $argsA(-id)
 	lappend chatstate(xevent,msgidlist) $msgid
     }
     set composeElem [wrapper::getfirstchildwithtag $xevent "composing"]
