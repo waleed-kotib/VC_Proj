@@ -6,7 +6,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.9 2007-01-23 15:11:22 matben Exp $
+# $Id: ttoolbar.tcl,v 1.10 2007-01-24 13:44:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -105,6 +105,7 @@ proc ::ttoolbar::Init { } {
     array set widgetOptions {
 	-collapse            {collapse             Collapse            }
 	-compound            {compound             Compound            }
+	-ipadding            {ipadding             Ipadding            }
 	-packimagepadx       {packImagePadX        PackImagePadX       }
 	-packimagepady       {packImagePadY        PackImagePadY       }
 	-packtextpadx        {packTextPadX         PackTextPadX        }
@@ -119,6 +120,7 @@ proc ::ttoolbar::Init { } {
 
     option add *TToolbar.collapse            0                widgetDefault
     option add *TToolbar.compound            both             widgetDefault
+    option add *TToolbar.ipadding           {0}               widgetDefault
     option add *TToolbar.padding            {4 4 6 4}         widgetDefault
     option add *TToolbar.packImagePadX       4                widgetDefault
     option add *TToolbar.packImagePadY       0                widgetDefault
@@ -175,7 +177,8 @@ proc ::ttoolbar::ttoolbar {w args} {
     # We use a frame for this specific widget class.
     set widgets(this)   [ttk::frame $w -class TToolbar]
     set widgets(frame)  ::ttoolbar::${w}::${w}
-    set widgets(bframe) $w.f
+    set widgets(iframe) $w.f
+    set widgets(arrow)  $w.arrow
 
     ttk::frame $w.f
     
@@ -200,7 +203,7 @@ proc ::ttoolbar::ttoolbar {w args} {
     
     if {$options(-collapse)} {
 	set locals(collapse) 0
-	ttk::checkbutton $w.arrow -style $options(-stylecollapse) \
+	ttk::checkbutton $widgets(arrow) -style $options(-stylecollapse) \
 	  -command [list ::ttoolbar::CollapseCmd $w] \
 	  -variable ::ttoolbar::${w}::locals(collapse)
 	pack $w.arrow -side left -anchor n	
@@ -320,7 +323,8 @@ proc ::ttoolbar::Configure {w args} {
     array set saveOpts [array get options]
     array set options $args
 	
-    set f $widgets(bframe)
+    set f $widgets(iframe)
+    $f configure -padding $options(-ipadding)
     
     # Process the new configuration options.
     set ncol [llength [array names locals *,-text]]
@@ -370,7 +374,7 @@ proc ::ttoolbar::CollapseCmd {w} {
     upvar ::ttoolbar::${w}::widgets widgets
     upvar ::ttoolbar::${w}::locals locals
 
-    set f $widgets(bframe)
+    set f $widgets(iframe)
     if {$locals(collapse)} {
 	pack forget $f
     } else {
@@ -424,7 +428,7 @@ proc ::ttoolbar::NewButton {w name args} {
     set locals($name,-image)          ""
     set locals($name,-disabledimage)  ""
 
-    set f $widgets(bframe)
+    set f $widgets(iframe)
     set uid $locals(uid)
     set wimage $f.i$uid
     set wtext  $f.t$uid
@@ -516,6 +520,25 @@ proc ::ttoolbar::ButtonConfigure {w name args} {
     }
 }
 
+proc ::ttoolbar::GetPaddingWidth {padding} {
+    
+    switch -- [llength $padding] {
+	0 {
+	    set width 0
+	}
+	1 {
+	    set width [expr {2*$padding}]
+	}
+	2 {
+	    set width [expr {2*[lindex $padding 0]}]
+	}
+	4 {
+	    set width [expr {[lindex $padding 0] + [lindex $padding 2]}]
+	}
+    }
+    return $width
+}
+
 # ttoolbar::MinWidth --
 #
 #       Returns the width of all buttons created in the shortcut button pad.
@@ -525,19 +548,11 @@ proc ::ttoolbar::MinWidth {w} {
     upvar ::ttoolbar::${w}::options options
     upvar ::ttoolbar::${w}::widgets widgets
     
-    switch -- [llength $options(-padding)] {
-	1 {
-	    set width [expr 2*$options(-padding)]
-	}
-	2 {
-	    set width [expr 2*[lindex $options(-padding) 0]]
-	}
-	4 {
-	    set width [expr [lindex $options(-padding) 0] + \
-	      [lindex $options(-padding) 2]]
-	}
+    set width [GetPaddingWidth $options(-padding)]
+    incr width [GetPaddingWidth $options(-ipadding)]
+    if {[winfo exists $widgets(arrow)]} {
+	incr width [winfo width $widgets(arrow)]
     }
-
     foreach {key wtext} [array get widgets *,text] {
 	array set gridInfo [grid info $wtext]
 	incr width [expr 2*$gridInfo(-padx)]
