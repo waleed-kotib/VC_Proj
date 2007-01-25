@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.19 2007-01-25 14:33:15 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.20 2007-01-25 15:53:48 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -420,7 +420,7 @@ proc ::RosterAvatar::EditCmd {id} {
     variable T
     variable tmpEdit
     
-    puts "::RosterAvatar::EditCmd $id"
+    #puts "::RosterAvatar::EditCmd $id"
     
     if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
 	set item [lindex $id 1]
@@ -431,23 +431,30 @@ proc ::RosterAvatar::EditCmd {id} {
 	    
 	    # @@@ I'd like a way to get the style form item but found none :-(
 	    set elements [$T item style elements $item cTree]
-	    puts "elements=$elements"
+	    #puts "elements=$elements"
 	    if {[lsearch $elements eOnText] >= 0} {
 		set font [$T item element cget $item cTree eOnText -font]
-		puts "item element configure=[$T item element configure $item cTree eOnText]"
+		#puts "item element configure=[$T item element configure $item cTree eOnText]"
 	    } else {
 		set font [$T item element cget $item cTree eOffText -font]		
-		puts "item element configure=[$T item element configure $item cTree eOffText]"
+		#puts "item element configure=[$T item element configure $item cTree eOffText]"
 	    }
-	    puts "font=$font"
-	    set font CociSmallFont
+	    #puts "font=$font"
+	    switch -- [::RosterTree::GetStyle] {
+		avatar - avatarlarge - flat {
+		    set font CociDefaultFont
+		}
+		default {
+		    set font CociSmallFont
+		}
+	    }
 	    set wentry $T.entry
 	    set tmpEdit(entry) $wentry
 	    set tmpEdit(text)  $text
 	    set tmpEdit(font)  $font
 	    set tmpEdit(jid)   $jid
 	    destroy $wentry
-	    ttk::entry $wentry -font CociSmallFont \
+	    ttk::entry $wentry -font $font \
 	      -textvariable [namespace current]::tmpEdit(text) -width 1
 	    $T item style set $item cTree styEntry
 	    $T item element configure $item cTree \
