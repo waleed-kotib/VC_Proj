@@ -8,7 +8,7 @@
 #  @@@ Treectrl is problematic since items come and go and are not free'd.
 #      Perhaps a callback based method instead?
 #  
-# $Id: balloonhelp.tcl,v 1.24 2006-09-20 14:12:38 matben Exp $
+# $Id: balloonhelp.tcl,v 1.25 2007-01-25 14:33:15 matben Exp $
 
 package require treeutil
 
@@ -222,6 +222,10 @@ proc ::balloonhelp::Pending {win type args} {
     Cancel $win
     set locals(pending)  \
       [after $locals(millisecs) [list ::balloonhelp::Show $win $type]]
+}
+
+proc ::balloonhelp::cancel {} {
+    Cancel .
 }
 
 proc ::balloonhelp::Cancel {win} {

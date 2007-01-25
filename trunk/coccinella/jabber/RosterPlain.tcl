@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements a plain style roster tree using treectrl.
 #      
-#  Copyright (c) 2005-2006  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.25 2006-09-17 12:49:19 matben Exp $
+# $Id: RosterPlain.tcl,v 1.26 2007-01-25 14:33:15 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -35,9 +35,6 @@ namespace eval ::RosterPlain {
       ::RosterPlain::CreateItem  \
       ::RosterPlain::DeleteItem  \
       ::RosterPlain::SetItemAlternative
-    
-    # This is the basic style used as fallback.
-    #::RosterTree::SetStyle plain
     
     # Only if this style is in use!!!
     # These are needed to handle foreign IM systems.
@@ -149,10 +146,11 @@ proc ::RosterPlain::Configure {_T} {
     $T element create eImage image
     $T element create eAltImage0 image
     $T element create eAltImage1 image
-    $T element create eText text -lines 1
-    $T element create eNumText text -lines 1
-    $T element create eBorder rect -open new -showfocus 1
-    $T element create eNotify rect
+    $T element create eText      text -lines 1
+    $T element create eNumText   text -lines 1
+    $T element create eBorder    rect -open new -showfocus 1
+    $T element create eNotify    rect
+    $T element create eWindow    window
  
     # Styles collecting the elements.
     set S [$T style create styHead]
@@ -187,6 +185,12 @@ proc ::RosterPlain::Configure {_T} {
     $T style layout $S eBorder   -detach 1 -iexpand xy -indent 0
     $T style layout $S eNotify   -detach 1 -iexpand xy -indent 0 -padx 2 -pady 2
 
+    set S [$T style create styEntry]
+    $T style elements $S {eBorder eImage eWindow}
+    $T style layout $S eImage  -expand ns
+    $T style layout $S eWindow -iexpand xy
+    $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
+
     set S [$T style create styTransport]
     $T style elements $S {eBorder eImage eText}
     $T style layout $S eText  -squeeze x -expand ns
@@ -200,7 +204,52 @@ proc ::RosterPlain::Configure {_T} {
     $T notify bind $T <Expand-after>   { ::RosterTree::OpenTreeCmd %I }
     $T notify bind $T <Collapse-after> { ::RosterTree::CloseTreeCmd %I }
 
-    ::RosterTree::DBOptions $rosterStyle
+    ::RosterTree::DBOptions $rosterStyle    
+    ::RosterTree::EditSetBinds [namespace code EditCmd]
+}
+
+proc ::RosterPlain::EditCmd {id} {
+    variable T
+    variable tmpEdit
+    
+    if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
+	set item [lindex $id 1]
+	set tags [$T item element cget $item cTag eText -text]
+	if {[lindex $tags 0] eq "jid"} {
+	    set jid [lindex $tags 1]
+	    set image [$T item element cget $item cTree eImage -image]
+	    set text  [$T item element cget $item cTree eText -text]
+	    set wentry $T.entry
+	    set tmpEdit(entry) $wentry
+	    set tmpEdit(text)  $text
+	    set tmpEdit(jid)   $jid
+	    destroy $wentry
+	    ttk::entry $wentry -font CociSmallFont \
+	      -textvariable [namespace current]::tmpEdit(text) -width 1
+	    $T item style set $item cTree styEntry
+	    $T item element configure $item cTree \
+	      eImage -image $image + eWindow -window $wentry
+	    focus $wentry
+
+	    bind $wentry <Return>   [list ::RosterPlain::EditOnReturn $item]
+	    bind $wentry <KP_Enter> [list ::RosterPlain::EditOnReturn $item]
+	    bind $wentry <FocusOut> [list ::RosterPlain::EditEnd $item]
+	}
+    }
+}
+
+proc ::RosterPlain::EditOnReturn {item} {
+    variable tmpEdit
+
+    ::RosterTree::EditOnReturn $tmpEdit(jid) $tmpEdit(text)
+}
+
+proc ::RosterPlain::EditEnd {item} {
+    variable tmpEdit
+    
+    ::RosterTree::EditEnd $tmpEdit(jid)
+    destroy $tmpEdit(entry) 
+    unset tmpEdit
 }
 
 # RosterPlain::Init --

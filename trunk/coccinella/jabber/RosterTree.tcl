@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.32 2006-09-21 12:23:57 matben Exp $
+# $Id: RosterTree.tcl,v 1.33 2007-01-25 14:33:15 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -276,6 +276,7 @@ proc ::RosterTree::LoadStyle {name} {
     variable T
 
     Free
+    SetBinds
     SetStyle $name
     StyleConfigure $T
     ::Roster::RepopulateTree    
@@ -304,18 +305,8 @@ proc ::RosterTree::New {_T wxsc wysc} {
       -borderwidth 0 -highlightthickness 0            \
       -height 0 -width 0
     
+    SetBinds
     $T configure -backgroundimage [BackgroundImage]
-
-    bind $T <Button-1>        { ::RosterTree::ButtonPress %x %y }        
-    bind $T <ButtonRelease-1> { ::RosterTree::ButtonRelease %x %y }        
-    bind $T <Double-1>        { ::RosterTree::DoubleClick %x %y }        
-    bind $T <<ButtonPopup>>   { ::RosterTree::Popup %x %y }
-    bind $T <Destroy>         {+::RosterTree::OnDestroy }
-    bind $T <Key-Return>      { ::RosterTree::OnReturn }
-    bind $T <KP_Enter>        { ::RosterTree::OnReturn }
-    bind $T <Key-BackSpace>   { ::RosterTree::OnBackSpace }
-    bind $T <Button1-Motion>  { ::RosterTree::OnButtonMotion }
-
     $T notify bind $T <Selection> {+::RosterTree::Selection }
     
     # This automatically cleans up the tag array.
@@ -327,6 +318,22 @@ proc ::RosterTree::New {_T wxsc wysc} {
     bindtags $T [concat RosterTreeTag [bindtags $T]]
 }
 
+proc ::RosterTree::SetBinds {} {
+    variable T
+
+    # We need to do this each time a new style is loaded since all binds
+    # have been removed to allow for 'EditSetBinds'.
+    bind $T <Button-1>        {+::RosterTree::ButtonPress %x %y }        
+    bind $T <ButtonRelease-1> {+::RosterTree::ButtonRelease %x %y }        
+    bind $T <Double-1>        {+::RosterTree::DoubleClick %x %y }        
+    bind $T <<ButtonPopup>>   {+::RosterTree::Popup %x %y }
+    bind $T <Destroy>         {+::RosterTree::OnDestroy }
+    bind $T <Key-Return>      {+::RosterTree::OnReturn }
+    bind $T <KP_Enter>        {+::RosterTree::OnReturn }
+    bind $T <Key-BackSpace>   {+::RosterTree::OnBackSpace }
+    bind $T <Button1-Motion>  {+::RosterTree::OnButtonMotion }
+}
+
 proc ::RosterTree::DBOptions {rosterStyle} {
     variable T
     
@@ -335,7 +342,7 @@ proc ::RosterTree::DBOptions {rosterStyle} {
 
 # RosterTree::Free --
 # 
-#       Free all items, elements, styles, and columns.
+#       Free all items, elements, styles, and columns. And binds.
 
 proc ::RosterTree::Free {} {
     variable T
@@ -344,7 +351,90 @@ proc ::RosterTree::Free {} {
     $T column delete all
     eval {$T style delete} [$T style names]
     eval {$T element delete} [$T element names]
+    foreach sequence [bind $T] {
+	bind $T $sequence {}
+    }
 }
+
+
+# Edit stuff --------------------------
+
+namespace eval ::RosterTree:: {
+    
+    # @@@ Move to global resource.
+    variable waitUntilEditMillis 2000
+}
+
+proc ::RosterTree::EditSetBinds {cmd} {
+    variable T
+    variable editBind
+    
+    set editBind(cmd) $cmd
+    bind $T <Button-1>        {+::RosterTree::EditButtonPress %x %y }        
+    bind $T <ButtonRelease-1> {+::RosterTree::EditButtonRelease %x %y }        
+    bind $T <Double-1>        {+::RosterTree::EditTimerCancel }        
+}
+
+proc ::RosterTree::EditButtonPress {x y} {
+    variable T
+    variable editTimer
+    variable editBind
+    
+    if {[info exists editTimer(after)]} {
+	set id [$T identify $x $y]
+	if {$id eq $editTimer(id)} {
+	    
+	    # The balloonhelp window on Mac takes focus. Stop it.
+	    ::balloonhelp::cancel
+	    uplevel #0 $editBind(cmd) [list $id]
+	}
+    }
+}
+
+proc ::RosterTree::EditButtonRelease {x y} {
+    variable T
+    variable editTimer
+    variable waitUntilEditMillis
+
+    set id [$T identify $x $y]
+    if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
+	set editTimer(id) $id
+	set editTimer(after) \
+	  [after $waitUntilEditMillis ::RosterTree::EditTimerCancel]
+    }
+}
+
+proc ::RosterTree::EditOnReturn {jid name} {
+    variable T
+    upvar ::Jabber::jstate jstate
+    
+    puts "::RosterTree::EditOnReturn $jid $name"
+    
+    set jid [$jstate(jlib) roster getrosterjid $jid]
+    set groups [$jstate(jlib) roster getgroups $jid]
+    $jstate(jlib) roster send_set $jid -name $name -groups $groups
+    focus $T
+}
+
+proc ::RosterTree::EditEnd {jid} {
+    variable T
+    upvar ::Jabber::jstate jstate
+    
+    # Restore item with its original style.
+    set jid [$jstate(jlib) roster getrosterjid $jid]
+    eval {::Roster::SetItem $jid} [$jstate(jlib) roster getrosteritem $jid]
+}
+
+proc ::RosterTree::EditTimerCancel {} {
+    variable editTimer
+
+    if {[info exists editTimer(after)]} {
+	after cancel $editTimer(after)
+    }
+    unset -nocomplain editTimer
+}
+
+# -------------------------------------
 
 proc ::RosterTree::SetBackgroundImage {} {
     
@@ -460,6 +550,8 @@ proc ::RosterTree::ButtonRelease {x y} {
 proc ::RosterTree::DoubleClick {x y} {
     variable T
 
+    ::balloonhelp::cancel
+
     # According to XMPP def sect. 4.1, we should use user@domain when
     # initiating a new chat or sending a new message that is not a reply.
     set id [$T identify $x $y]
@@ -534,6 +626,8 @@ proc ::RosterTree::Popup {x y} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::RosterTree::Popup"
+
+    ::balloonhelp::cancel
     
     set tags    {}
     set clicked {}

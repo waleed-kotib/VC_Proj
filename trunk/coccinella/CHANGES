@@ -19,6 +19,7 @@ Coccinella-0.95.16 (200701??):
  o cleaner groupchat dialog with new methods to set subject and nickname
  o added collapsable and flexible toolbars
  o chat subject now set by pressing Return in subject field
+ o users name attribute can now be edited directly in situ (in roster)
 
 Coccinella-0.95.15 (20061117):
 

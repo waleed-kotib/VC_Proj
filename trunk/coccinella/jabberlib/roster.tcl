@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.51 2006-12-14 15:34:05 matben Exp $
+# $Id: roster.tcl,v 1.52 2007-01-25 14:33:15 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -333,7 +333,7 @@ proc jlib::roster::send_set {jlibname jid args} {
     
     set attr [list jid $jid]
     set name {}
-    if {[info exists argsA(-name)]} {
+    if {[info exists argsA(-name)] && [string length $argsA(-name)]} {
 	set name $argsA(-name)
 	lappend attr name $name
     }

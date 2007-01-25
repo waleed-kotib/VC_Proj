@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.178 2007-01-22 16:09:53 matben Exp $
+# $Id: GroupChat.tcl,v 1.179 2007-01-25 14:33:15 matben Exp $
 
 package require Create
 package require Enter
@@ -1648,7 +1648,6 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     set S [$T style create styEntry]
     $T style elements $S {eBorder eImage eWindow}
     $T style layout $S eImage  -expand ns
-    #$T style layout $S eWindow -sticky ew -iexpand xy
     $T style layout $S eWindow -iexpand xy
     $T style layout $S eBorder -detach 1 -iexpand xy
     
@@ -1889,6 +1888,8 @@ proc ::GroupChat::TreeEditUserStart {chattoken jid3} {
 	# This creates a focus out on mac!
 	#$wentry selection range 0 end 
 	bind $wentry <Return>   \
+	  [list ::GroupChat::TreeOnReturnEdit $chattoken $jid3]
+	bind $wentry <KP_Enter>   \
 	  [list ::GroupChat::TreeOnReturnEdit $chattoken $jid3]
 	bind $wentry <FocusOut> \
 	  [list ::GroupChat::TreeEditUserEnd $chattoken $jid3]
