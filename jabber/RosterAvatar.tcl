@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.18 2006-09-15 13:18:17 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.19 2007-01-25 14:33:15 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -178,6 +178,9 @@ proc ::RosterAvatar::InitDB { } {
     option add *Roster.avatar:styUnavailable:eAvBorder-padx     {2 4}   widgetDefault
     option add *Roster.avatar:styUnavailable:eAvBorder-pady     {1 2}   widgetDefault
 
+    option add *Roster.avatar:styEntry:eAvBorder-padx           {2 4}   widgetDefault
+    option add *Roster.avatar:styEntry:eAvBorder-pady           {1 2}   widgetDefault
+
     option add *Roster.avatar:styFolder:eImage-padx             2       widgetDefault
     option add *Roster.avatar:styFolder:eFolderText-padx        4       widgetDefault
     option add *Roster.avatar:styFolder:eNumText-padx           4       widgetDefault
@@ -307,9 +310,12 @@ proc ::RosterAvatar::Configure {_T} {
     $T element create eBorder      rect -open new -showfocus 1
     $T element create eNumText     text -lines 1
     $T element create eIndent      rect -fill ""
-    $T element create eNotify rect
+    $T element create eNotify      rect
+    $T element create eWindow      window
 
     $T element create eDebug       rect -fill red -width 10 -height 10
+    
+    # @@@ Have available/unavailable as states instead of separate styles?
     
     # Styles collecting the elements ---
     # Status:
@@ -321,10 +327,11 @@ proc ::RosterAvatar::Configure {_T} {
     # Available:
     set S [$T style create styAvailable]
     if {$styleClass eq "avatar"} {
-	$T style elements $S {eBorder eNotify eIndent eOnText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
+	set elements {eBorder eNotify eIndent eOnText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
     } elseif {$styleClass eq "flat"} {
-	$T style elements $S {eBorder eNotify eIndent eOnText eAltImage1 eAltImage0}
+	set elements {eBorder eNotify eIndent eOnText eAltImage1 eAltImage0}
     }
+    $T style elements $S $elements
     $T style layout $S eBorder      -detach 1 -iexpand xy
     $T style layout $S eOnText      -squeeze x -iexpand xy -sticky w
     $T style layout $S eAltImage0   -expand ns
@@ -338,10 +345,11 @@ proc ::RosterAvatar::Configure {_T} {
     # Unavailable:
     set S [$T style create styUnavailable]
     if {$styleClass eq "avatar"} {
-	$T style elements $S {eBorder eNotify eIndent eOffText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
+	set elements {eBorder eNotify eIndent eOffText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
     } elseif {$styleClass eq "flat"} {
-	$T style elements $S {eBorder eNotify eIndent eOffText eAltImage1 eAltImage0}
+	set elements {eBorder eNotify eIndent eOffText eAltImage1 eAltImage0}
     }
+    $T style elements $S $elements
     $T style layout $S eBorder      -detach 1 -iexpand xy
     $T style layout $S eOffText     -squeeze x -iexpand xy -sticky w
     $T style layout $S eAltImage0   -expand ns
@@ -351,6 +359,21 @@ proc ::RosterAvatar::Configure {_T} {
 	$T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
     }
     $T style layout $S eNotify   -detach 1 -iexpand xy -indent 0 -padx 2 -pady 2
+  
+    # Edit:
+    set S [$T style create styEntry]
+    if {$styleClass eq "avatar"} {
+	set elements {eBorder eNotify eIndent eWindow eAvBorder eAvatarImage}
+    } elseif {$styleClass eq "flat"} {
+	set elements {eBorder eNotify eIndent eWindow}
+    }
+    $T style elements $S $elements
+    $T style layout $S eBorder  -detach 1 -iexpand xy
+    $T style layout $S eWindow  -iexpand xy
+    if {$styleClass eq "avatar"} {
+	$T style layout $S eAvBorder    -union {eAvatarImage}
+	$T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
+    }
     
     # Folder:
     set S [$T style create styFolder]
@@ -383,6 +406,7 @@ proc ::RosterAvatar::Configure {_T} {
 
     ::RosterTree::DBOptions $rosterBaseStyle
     ::RosterTree::DBOptions $optionClass
+    ::RosterTree::EditSetBinds [namespace code EditCmd]
 
     if {$styleClass eq "avatar"} {
 	::Avatar::Configure -autoget 1 -command ::RosterAvatar::OnAvatarPhoto
@@ -390,6 +414,65 @@ proc ::RosterAvatar::Configure {_T} {
 	# We shall get avatars for all users.
 	::Avatar::GetAll
     }
+}
+
+proc ::RosterAvatar::EditCmd {id} {
+    variable T
+    variable tmpEdit
+    
+    puts "::RosterAvatar::EditCmd $id"
+    
+    if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
+	set item [lindex $id 1]
+	set tags [$T item element cget $item cTag eText -text]
+	if {[lindex $tags 0] eq "jid"} {
+	    set jid [lindex $tags 1]
+	    set text [$T item text $item cTree]
+	    
+	    # @@@ I'd like a way to get the style form item but found none :-(
+	    set elements [$T item style elements $item cTree]
+	    puts "elements=$elements"
+	    if {[lsearch $elements eOnText] >= 0} {
+		set font [$T item element cget $item cTree eOnText -font]
+		puts "item element configure=[$T item element configure $item cTree eOnText]"
+	    } else {
+		set font [$T item element cget $item cTree eOffText -font]		
+		puts "item element configure=[$T item element configure $item cTree eOffText]"
+	    }
+	    puts "font=$font"
+	    set font CociSmallFont
+	    set wentry $T.entry
+	    set tmpEdit(entry) $wentry
+	    set tmpEdit(text)  $text
+	    set tmpEdit(font)  $font
+	    set tmpEdit(jid)   $jid
+	    destroy $wentry
+	    ttk::entry $wentry -font CociSmallFont \
+	      -textvariable [namespace current]::tmpEdit(text) -width 1
+	    $T item style set $item cTree styEntry
+	    $T item element configure $item cTree \
+	      eWindow -window $wentry
+	    focus $wentry
+
+	    bind $wentry <Return>   [namespace code [list EditOnReturn $item]]
+	    bind $wentry <KP_Enter> [namespace code [list EditOnReturn $item]]
+	    bind $wentry <FocusOut> [namespace code [list EditEnd $item]]
+	}
+    }
+}
+
+proc ::RosterAvatar::EditOnReturn {item} {
+    variable tmpEdit
+    
+    ::RosterTree::EditOnReturn $tmpEdit(jid) $tmpEdit(text)
+}
+
+proc ::RosterAvatar::EditEnd {item} {
+    variable tmpEdit
+    
+    ::RosterTree::EditEnd $tmpEdit(jid)
+    destroy $tmpEdit(entry) 
+    unset tmpEdit
 }
 
 proc ::RosterAvatar::Sort {item order} {
