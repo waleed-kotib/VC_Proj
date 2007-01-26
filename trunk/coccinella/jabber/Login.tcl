@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.108 2007-01-23 15:11:22 matben Exp $
+# $Id: Login.tcl,v 1.109 2007-01-26 13:50:15 matben Exp $
 
 package provide Login 1.0
 
@@ -785,6 +785,7 @@ proc ::Login::SetLoginStateRunHook {} {
     set jstate(mejidres)     [jlib::joinjid $username $server $resource]
     set jstate(mejidmap)     [jlib::jidmap $jstate(mejid)]
     set jstate(mejidresmap)  [jlib::jidmap $jstate(mejidres)]
+    set jstate(server)       $server
     set jserver(this)        $server
     
     # Run all login hooks. We do this to get our roster before we get presence.

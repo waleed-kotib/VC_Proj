@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.26 2007-01-25 14:33:15 matben Exp $
+# $Id: RosterPlain.tcl,v 1.27 2007-01-26 13:50:16 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -188,7 +188,7 @@ proc ::RosterPlain::Configure {_T} {
     set S [$T style create styEntry]
     $T style elements $S {eBorder eImage eWindow}
     $T style layout $S eImage  -expand ns
-    $T style layout $S eWindow -iexpand xy
+    $T style layout $S eWindow -iexpand x -expand ns
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styTransport]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.20 2007-01-25 15:53:48 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.21 2007-01-26 13:50:16 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -64,8 +64,10 @@ namespace eval ::RosterAvatar {
       ::RosterAvatar::SetItemAlternative
 
 
-    ::RosterTree::RegisterStyleSort avatar ::RosterAvatar::Sort
-    ::RosterTree::RegisterStyleSort flat   ::RosterAvatar::Sort
+    ::RosterTree::RegisterStyleSort avatar      ::RosterAvatar::Sort
+    ::RosterTree::RegisterStyleSort avatarlarge ::RosterAvatar::Sort
+    ::RosterTree::RegisterStyleSort flat        ::RosterAvatar::Sort
+    ::RosterTree::RegisterStyleSort flatsmall   ::RosterAvatar::Sort
 
     # Event hooks.
     ::hooks::register  discoInfoHook        ::RosterAvatar::DiscoInfoHook
@@ -369,7 +371,7 @@ proc ::RosterAvatar::Configure {_T} {
     }
     $T style elements $S $elements
     $T style layout $S eBorder  -detach 1 -iexpand xy
-    $T style layout $S eWindow  -iexpand xy
+    $T style layout $S eWindow  -iexpand x -expand ns
     if {$styleClass eq "avatar"} {
 	$T style layout $S eAvBorder    -union {eAvatarImage}
 	$T style layout $S eAvatarImage -expand ns -minheight $minH -minwidth $minW
@@ -440,13 +442,10 @@ proc ::RosterAvatar::EditCmd {id} {
 		#puts "item element configure=[$T item element configure $item cTree eOffText]"
 	    }
 	    #puts "font=$font"
-	    switch -- [::RosterTree::GetStyle] {
-		avatar - avatarlarge - flat {
-		    set font CociDefaultFont
-		}
-		default {
-		    set font CociSmallFont
-		}
+	    if {[::RosterTree::GetStyle] eq "flatsmall"} {
+		set font CociDefaultFont
+	    } else {
+		set font CociSmallFont
 	    }
 	    set wentry $T.entry
 	    set tmpEdit(entry) $wentry
@@ -528,7 +527,7 @@ proc ::RosterAvatar::SortColumn {C order} {
     variable T
 
     # Keep transports and pending always at the end.
-    set opts {}
+    set opts -dictionary
     
     # Be sure to have transport & pending last.
     # Shall only test this if not alone.
