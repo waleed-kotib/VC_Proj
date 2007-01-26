@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.193 2007-01-20 16:26:23 matben Exp $
+# $Id: Jabber.tcl,v 1.194 2007-01-26 13:50:15 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -84,6 +84,7 @@ namespace eval ::Jabber:: {
     set jstate(mejidres) ""
     set jstate(mejidmap) ""
     set jstate(meres)    ""
+    set jstate(server)   ""
     
     set jstate(sock) {}
     set jstate(ipNum) {}
@@ -1113,6 +1114,7 @@ proc ::Jabber::SetClosedState { } {
     set jstate(meres)    ""
     set jstate(mejidres) ""
     set jstate(mejidmap) ""
+    set jstate(server)   ""
     set jstate(show)     "unavailable"
     set jstate(status)   ""
     set jstate(show+status) [list $jstate(show) $jstate(status)]

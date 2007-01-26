@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.10 2006-12-06 07:39:40 matben Exp $
+# $Id: optionmenu.tcl,v 1.11 2007-01-26 13:50:12 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -55,6 +55,9 @@ snit::widgetadaptor ui::optionmenu::widget {
 	    if {[info exists opts(-value)]} {
 		set value $opts(-value)
 	    }
+	    if {![info exists firstValue]} {
+		set firstValue $value
+	    }
 	    set map($str) $value
 	    set imap($value) $str
 	    unset -nocomplain opts(-value)
@@ -68,9 +71,11 @@ snit::widgetadaptor ui::optionmenu::widget {
 		set maxLen $len
 		set longest $str
 	    }
+	    # @@@ TODO: keep a -value since labels can be identical!
 	    eval {$m add radiobutton -label $str -variable [myvar menuVar] \
 	      -command [list $self Command] -compound left} [array get opts]
 	}
+	set value $firstValue
 	
 	# If the variable exists must set our own menuVar.
 	if {[info exists $options(-variable)]} {

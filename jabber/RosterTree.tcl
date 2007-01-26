@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.33 2007-01-25 14:33:15 matben Exp $
+# $Id: RosterTree.tcl,v 1.34 2007-01-26 13:50:16 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1284,7 +1284,7 @@ proc ::RosterTree::SortDefault {item order} {
     }
     if {$item ne "root"} {
 	if {[$T item numchildren $item]} {
-	    $T item sort $item $order -column cTree  \
+	    $T item sort $item $order -dictionary -column cTree  \
 	      -command ::RosterTree::SortCommand
 	}
     }
@@ -1305,7 +1305,7 @@ proc ::RosterTree::SortCommand {item1 item2} {
     } else {
 	set text1 [$T item text $item1 cTree]
 	set text2 [$T item text $item2 cTree]
-	set ans [string compare $text1 $text2]
+	set ans [string compare -nocase $text1 $text2]
     }
     return $ans
 }

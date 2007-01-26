@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.179 2007-01-25 14:33:15 matben Exp $
+# $Id: GroupChat.tcl,v 1.180 2007-01-26 13:50:14 matben Exp $
 
 package require Create
 package require Enter
@@ -2540,14 +2540,15 @@ proc ::GroupChat::InsertPresenceChange {chattoken xmldata} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jstate jstate
-        
+            
     if {[info exists chatstate(w)] && [winfo exists $chatstate(w)]} {
 	
 	# Some services send out presence changes automatically.
 	# This should only be called if not the room does it.
+	# ejabberd does not. Skip it!
 	set ms [clock clicks -milliseconds]
 	if {[expr {$ms - $chatstate(last,sys) < 400}]} {
-	    return
+	    #return
 	}
 	set jid3 [wrapper::getattribute $xmldata from]
 	jlib::splitjid $jid3 jid2 res

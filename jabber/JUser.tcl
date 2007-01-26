@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.23 2006-10-20 09:26:49 matben Exp $
+# $Id: JUser.tcl,v 1.24 2007-01-26 13:50:15 matben Exp $
 
 package provide JUser 1.0
 
@@ -71,7 +71,16 @@ proc ::JUser::NewDlg {args} {
 
     # Find all our groups for any jid.
     set allGroups [$jstate(jlib) roster getgroups]
-    set allTypes  [::Roster::GetTransportNames $token]
+    set trpts [::Roster::GetTransportNames]
+    
+    set menuDef [list]
+    foreach spec $trpts {
+	lassign $spec jid type name
+	set state(servicejid,$type) $jid
+	set state(servicetype,$jid) $type
+	set imtrpt [::Servicons::Get gateway/$type]
+	lappend menuDef [list $name -value $jid -image $imtrpt]
+    }
     
     # Global frame.
     set wall $w.fr
@@ -99,7 +108,8 @@ proc ::JUser::NewDlg {args} {
     pack $frmid -side top -fill both -expand 1
 
     ttk::label $frmid.ltype -text "[mc {Contact Type}]:"
-    eval {ttk::optionmenu $frmid.type $token\(type)} $allTypes
+    ui::optionmenu $frmid.type -menulist $menuDef -direction flush  \
+      -variable $token\(type) -command [namespace code [list TrptCmd $token]]
     ttk::label $frmid.ljid -text "[mc {Jabber user ID}]:" -anchor e
     ttk::entry $frmid.ejid -textvariable $token\(jid)
     ttk::label $frmid.lnick -text "[mc {Nick name}]:" -anchor e
@@ -144,9 +154,6 @@ proc ::JUser::NewDlg {args} {
     }
     pack $frbot -side top -fill x
     
-    trace add variable $token\(type) write \
-      [list [namespace current]::TypeCmd $token]
-
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
     
@@ -164,7 +171,7 @@ proc ::JUser::NewDlg {args} {
     tkwait window $w
 
     set ans [expr {($state(finished) <= 0) ? "cancel" : "add"}]
-    ::JUser::Free $token
+    Free $token
     
     return $ans
 }
@@ -300,29 +307,28 @@ proc ::JUser::PresError {jlibname xmldata} {
     }
 }
 
-proc ::JUser::TypeCmd {token name1 name2 op} {
+proc ::JUser::TrptCmd {token jid} {
     variable $token
     upvar 0 $token state
-        
+	
     set wjid $state(wjid)
-    set type $state(type)
-    set trpt [::Roster::GetTrptFromName $type]
+    set type $state(servicetype,$jid)
 
     # Seems to be necessary to achive any selection.
     focus $wjid
 
-    switch -- $trpt {
+    switch -- $type {
 	jabber - aim - yahoo {
-	    set state(jid) "userName@$state(servicejid,$trpt)"
+	    set state(jid) "userName@$state(servicejid,$type)"
 	}
 	icq {
-	    set state(jid) "screeNumber@$state(servicejid,icq)"
+	    set state(jid) "screeNumber@$state(servicejid,$type)"
 	}
 	msn {
-	    set state(jid) "userName%hotmail.com@$state(servicejid,msn)"
+	    set state(jid) "userName%hotmail.com@$state(servicejid,$type)"
 	}
 	default {
-	    set state(jid) "userName@$state(servicejid,$trpt)"
+	    set state(jid) "userName@$state(servicejid,$type)"
 	}
     }
     set ind [string first @ $state(jid)]

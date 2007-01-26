@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.183 2006-12-14 15:34:05 matben Exp $
+# $Id: Roster.tcl,v 1.184 2007-01-26 13:50:15 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -1195,23 +1195,23 @@ namespace eval ::Roster:: {
     }
 }
 
-proc ::Roster::GetNameFromTrpt {trpt} {
+proc ::Roster::GetNameFromTrpt {type} {
     variable  trptToNameArr
    
-    if {[info exists trptToNameArr($trpt)]} {
-	return $trptToNameArr($trpt)
+    if {[info exists trptToNameArr($type)]} {
+	return $trptToNameArr($type)
     } else {
-	return $trpt
+	return $type
     }
 }
 
-proc ::Roster::GetTrptFromName {type} {
+proc ::Roster::GetTrptFromName {name} {
     variable nameToTrptArr
    
-    if {[info exists nameToTrptArr($type)]} {
-	return $nameToTrptArr($type)
+    if {[info exists nameToTrptArr($name)]} {
+	return $nameToTrptArr($name)
     } else {
-	return $type
+	return $name
     }
 }
 
@@ -1233,34 +1233,29 @@ proc ::Roster::GetAllTransportJids { } {
     return [lsearch -all -inline -not $alltrpts $jserver(this)]
 }
 
-proc ::Roster::GetTransportNames {token} {
-    variable $token
-    upvar 0 $token state
+# Roster::GetTransportNames --
+# 
+#       Utility to get a flat array of 'jid type name' for each transports.
+
+proc ::Roster::GetTransportNames { } {
     variable trptToName
     variable allTransports
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
     set trpts {}
-    foreach subtype $allTransports {
-	set jids [$jstate(jlib) disco getjidsforcategory "gateway/$subtype"]
-	if {[llength $jids]} {
-	    lappend trpts $subtype
-	    set state(servicejid,$subtype) [lindex $jids 0]
+    foreach type $allTransports {
+	if {$type eq "jabber"} {
+	    continue
+	}
+	set jidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
+	foreach jid $jidL {
+	    lappend trpts [list $jid $type [GetNameFromTrpt $type]]
 	}
     }    
 
     # Disco doesn't return jabber. Make sure it's first.
-    set trpts [lsearch -all -not -inline $trpts jabber]
-    set trpts [concat jabber $trpts]
-    set state(servicejid,jabber) $jserver(this)
-
-    array set arr $trptToName
-    set names {}
-    foreach name $trpts {
-	lappend names $arr($name)
-    }
-    return $names
+    return [concat [list [list $jserver(this) jabber [GetNameFromTrpt jabber]]] $trpts]
 }
 
 proc ::Roster::IsTransport {jid} {
