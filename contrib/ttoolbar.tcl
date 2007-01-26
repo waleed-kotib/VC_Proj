@@ -6,7 +6,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.10 2007-01-24 13:44:20 matben Exp $
+# $Id: ttoolbar.tcl,v 1.11 2007-01-26 14:19:05 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -555,8 +555,10 @@ proc ::ttoolbar::MinWidth {w} {
     }
     foreach {key wtext} [array get widgets *,text] {
 	array set gridInfo [grid info $wtext]
-	incr width [expr 2*$gridInfo(-padx)]
-	incr width [winfo reqwidth $wtext]
+	if {[info exists gridInfo(-padx)]} {
+	    incr width [expr 2*$gridInfo(-padx)]
+	    incr width [winfo reqwidth $wtext]
+	}
     }
     return $width
 }
