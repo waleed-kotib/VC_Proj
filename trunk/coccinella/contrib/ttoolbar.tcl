@@ -6,7 +6,7 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.11 2007-01-26 14:19:05 matben Exp $
+# $Id: ttoolbar.tcl,v 1.12 2007-01-27 14:59:26 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -62,6 +62,12 @@ proc ::ttoolbar::Init { } {
     variable this
     variable ttoolbarOptions
     variable widgetOptions
+    
+    if {[catch {package require balloonhelp}]} {
+	set this(balloonhelp) 0
+    } else {
+	set this(balloonhelp) 1
+    }
 
     # Aqua gray arrows.
     image create photo ::ttoolbar::open -data {
@@ -103,7 +109,7 @@ proc ::ttoolbar::Init { } {
     
     # List all allowed options with their database names and class names.
     array set widgetOptions {
-	-collapse            {collapse             Collapse            }
+	-collapsable         {collapsable          Collapsable         }
 	-compound            {compound             Compound            }
 	-ipadding            {ipadding             Ipadding            }
 	-packimagepadx       {packImagePadX        PackImagePadX       }
@@ -111,6 +117,7 @@ proc ::ttoolbar::Init { } {
 	-packtextpadx        {packTextPadX         PackTextPadX        }
 	-packtextpady        {packTextPadY         PackTextPadY        }
 	-padding             {padding              Padding             }
+	-showballoon         {showBalloon          ShowBalloon         }
 	-stylecollapse       {styleCollapse        StyleCollapse       }
 	-styleimage          {styleImage           StyleImage          }
 	-styletext           {styleText            StyleText           }
@@ -118,7 +125,7 @@ proc ::ttoolbar::Init { } {
     
     set ttoolbarOptions [array names widgetOptions]
 
-    option add *TToolbar.collapse            0                widgetDefault
+    option add *TToolbar.collapsable         0                widgetDefault
     option add *TToolbar.compound            both             widgetDefault
     option add *TToolbar.ipadding           {0}               widgetDefault
     option add *TToolbar.padding            {4 4 6 4}         widgetDefault
@@ -126,6 +133,7 @@ proc ::ttoolbar::Init { } {
     option add *TToolbar.packImagePadY       0                widgetDefault
     option add *TToolbar.packTextPadX        0                widgetDefault
     option add *TToolbar.packTextPadY        0                widgetDefault
+    option add *TToolbar.showBalloon         1                widgetDefault
     option add *TToolbar.styleCollapse       TToolbar.TCheckbutton widgetDefault
     option add *TToolbar.styleImage          TToolbar.TButton widgetDefault
     option add *TToolbar.styleText           Toolbutton       widgetDefault
@@ -201,7 +209,7 @@ proc ::ttoolbar::ttoolbar {w args} {
     }
     set locals(uid) 0
     
-    if {$options(-collapse)} {
+    if {$options(-collapsable)} {
 	set locals(collapse) 0
 	ttk::checkbutton $widgets(arrow) -style $options(-stylecollapse) \
 	  -command [list ::ttoolbar::CollapseCmd $w] \
@@ -252,6 +260,16 @@ proc ::ttoolbar::WidgetProc {w command args} {
 	    }
 	    set result $options($args)
 	}
+	collapse {
+	    if {[llength $args] == 0} {
+		return $locals(collapse)
+	    } elseif {[llength $args] == 1} {
+		set locals(collapse) $args
+		CollapseCmd $w
+	    } else {
+		return -code error "wrong # args: should be $w collapse ?0|1?"
+	    }
+	}
 	configure {
 	    set result [eval {Configure $w} $args]
 	}
@@ -285,10 +303,11 @@ proc ::ttoolbar::WidgetProc {w command args} {
 
 proc ::ttoolbar::Configure {w args} {
 
+    variable this
     variable widgetOptions
     upvar ::ttoolbar::${w}::options options
     upvar ::ttoolbar::${w}::widgets widgets
-    upvar ::ttoolbar::${w}::locals locals
+    upvar ::ttoolbar::${w}::locals  locals
     
     # Error checking.
     foreach {name value} $args  {
@@ -366,6 +385,19 @@ proc ::ttoolbar::Configure {w args} {
 	} else {
 	    eval {grid forget} $wimages
 	}
+	if {$this(balloonhelp) && $options(-showballoon)} {
+	    if {$options(-compound) eq "image"} {
+		foreach {key name} [array get locals *,name] {
+		    ::balloonhelp::balloonforwindow $widgets($name,image) \
+		      $locals($name,-text)
+		}
+	    } else {
+		foreach wimage $wimages {
+		    ::balloonhelp::delete $wimage
+		}
+	    }
+	}
+	event generate $w <<TToolbarCompound>>
     }
 }
 
@@ -380,6 +412,7 @@ proc ::ttoolbar::CollapseCmd {w} {
     } else {
 	pack $f -fill both -expand 1
     }
+    event generate $w <<TToolbarCollapse>>
 }
 
 proc ::ttoolbar::Popup {w x y} {
@@ -409,7 +442,7 @@ proc ::ttoolbar::Popup {w x y} {
     
     set X [expr [winfo rootx $w] + $x]
     set Y [expr [winfo rooty $w] + $y]
-    tk_popup $m [expr int($X) - 0] [expr int($Y) - 0]   
+    tk_popup $m [expr {int($X) - 0}] [expr {int($Y) - 0}]   
     
     return -code break
 }
@@ -418,10 +451,11 @@ proc ::ttoolbar::NewButton {w name args} {
     
     upvar ::ttoolbar::${w}::options options
     upvar ::ttoolbar::${w}::widgets widgets
-    upvar ::ttoolbar::${w}::locals locals
+    upvar ::ttoolbar::${w}::locals  locals
         
     set ncol [llength [array names locals *,-text]]
 
+    set locals($name,name)            $name
     set locals($name,-text)           $name
     set locals($name,-command)        ""
     set locals($name,-state)          normal
@@ -477,13 +511,16 @@ proc ::ttoolbar::Invoke {w name} {
 }
 
 proc ::ttoolbar::ButtonConfigure {w name args} {
-    
+    variable this
+    upvar ::ttoolbar::${w}::options options
     upvar ::ttoolbar::${w}::widgets widgets
-    upvar ::ttoolbar::${w}::locals locals
+    upvar ::ttoolbar::${w}::locals  locals
     
     if {![info exists locals($name,-state)]} {
 	return -code error "button \"$name\" does not exist in $w"
     }
+    set wimage $widgets($name,image)
+    set wtext  $widgets($name,text)
     
     foreach {key value} $args {
 	set flags($key) 1
@@ -494,7 +531,14 @@ proc ::ttoolbar::ButtonConfigure {w name args} {
 	    }
 	    -text {
 		set locals($name,-text) $value
-		$widgets($name,text) configure -text $value
+		$wtext configure -text $value
+		
+		if {$this(balloonhelp) && $options(-showballoon)} {
+		    if {$options(-compound) eq "image"} {
+			::balloonhelp::delete $wimage
+			::balloonhelp::balloonforwindow $wimage $value
+		    }
+		}
 	    }
 	}
     }
@@ -506,16 +550,16 @@ proc ::ttoolbar::ButtonConfigure {w name args} {
 	    if {$imNameDis != ""} {
 		lappend imSpec disabled $imNameDis background $imNameDis
 	    }
-	    $widgets($name,image) configure -image $imSpec
+	    $wimage configure -image $imSpec
 	}
     }
     if {[info exists flags(-state)]} {	
 	if {[string equal $locals($name,-state) "normal"]} {
-	    $widgets($name,image) state {!disabled}
-	    $widgets($name,text)  state {!disabled}
+	    $wimage state {!disabled}
+	    $wtext  state {!disabled}
 	} else {
-	    $widgets($name,image) state {disabled}
-	    $widgets($name,text)  state {disabled}
+	    $wimage state {disabled}
+	    $wtext  state {disabled}
 	}
     }
 }

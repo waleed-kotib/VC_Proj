@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.60 2006-12-01 08:55:14 matben Exp $
+# $Id: Register.tcl,v 1.61 2007-01-27 14:59:26 matben Exp $
 
 package provide Register 1.0
 
@@ -44,13 +44,12 @@ proc ::Register::OnMenuRemove {} {
 proc ::Register::Remove {{jid {}}} {
     
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
 
     ::Debug 2 "::Register::Remove jid=$jid"
     
     set ans "yes"
     if {$jid eq ""} {
-	set jid $jserver(this)
+	set jid $jstate(server)
 	set ans [::UI::MessageBox -icon warning -title [mc Unregister] \
 	  -type yesno -default no -message [mc jamessremoveaccount]]
     } else {
@@ -73,7 +72,7 @@ proc ::Register::Remove {{jid {}}} {
 	  [list ::Register::RemoveCallback $jid]
 	
 	# Remove also from our profile if our login account.
-	if {$jid eq $jserver(this)} {
+	if {[ljib::jidequal $jid $jstate(server)]} {
 	    set profile [::Profiles::FindProfileNameFromJID $jstate(mejid)]
 	    if {$profile ne ""} {
 		::Profiles::Remove $profile
@@ -652,7 +651,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	NotBusy $token
     } else {
 	
-	# Save to our jserver variable. Create a new profile.
+	# Create a new profile.
 	if {$state(notsavepassword)} {
 	    ::Profiles::Set {} $server $username {}
 	} else {

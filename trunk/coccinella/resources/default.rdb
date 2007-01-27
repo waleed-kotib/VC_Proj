@@ -99,7 +99,7 @@
 *TreeCtrl.columnBorderWidth:         1
 *TreeCtrl.columnBackground:          #dedede
 
-*TToolbar.Collapse:                  1
+*TToolbar.Collapsable:               1
 *TToolbar.TLabel.font:               CociSmallFont
 *WaveLabel.background:               #cecece
 

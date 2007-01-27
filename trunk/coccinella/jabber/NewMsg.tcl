@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.76 2006-10-20 09:26:49 matben Exp $
+# $Id: NewMsg.tcl,v 1.77 2007-01-27 14:59:26 matben Exp $
 
 package require ui::entryex
 
@@ -111,7 +111,6 @@ proc ::NewMsg::InitEach { } {
     variable locals
     variable transportDefs
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
     
     ::Debug 2 "NewMsg::InitEach"
     
@@ -127,7 +126,7 @@ proc ::NewMsg::InitEach { } {
     # Disco doesn't return jabber. Make sure it's first.
     set trpts [lsearch -all -not -inline $trpts jabber]
     set trpts [concat jabber $trpts]
-    set locals(servicejid,jabber) $jserver(this)
+    set locals(servicejid,jabber) $jstate(server)
     set locals(ourtransports) $trpts
     
     # Build popup defs. Keep order of transportDefs.
@@ -683,7 +682,6 @@ proc ::NewMsg::PopupCmd {w n} {
     
     variable locals
     variable transportDefs
-    upvar ::Jabber::jserver jserver
     
     set num     $locals($w,num)
     set wfrport $locals($w,wfrport)

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.24 2007-01-26 13:50:15 matben Exp $
+# $Id: JUser.tcl,v 1.25 2007-01-27 14:59:26 matben Exp $
 
 package provide JUser 1.0
 
@@ -43,7 +43,6 @@ proc ::JUser::NewDlg {args} {
 
     variable uid
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
     
     # Initialize the state variable, an array.    
     set token [namespace current]::dlg[incr uid]
@@ -390,7 +389,6 @@ proc ::JUser::EditUserDlg {jid} {
 
     variable uid
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
     
     # Initialize the state variable, an array.    
     set token [namespace current]::dlg[incr uid]
