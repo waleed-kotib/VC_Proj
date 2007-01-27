@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.184 2007-01-26 13:50:15 matben Exp $
+# $Id: Roster.tcl,v 1.185 2007-01-27 14:59:27 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -1077,7 +1077,6 @@ proc ::Roster::GetPresenceIconFromJid {jid} {
 
 proc ::Roster::GetPresenceIcon {jid presence args} {    
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     
     array set argsA $args
@@ -1104,7 +1103,7 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     # Foreign IM systems.
     set foreign 0
     jlib::splitjidex $jid user host res
-    if {![string equal $host $jserver(this)]} {
+    if {![jlib::jidequal $host $jstate(server)]} {
 	
 	# If empty we have likely not yet browsed etc.
 	set cattype [lindex [$jstate(jlib) disco types $host] 0]
@@ -1220,7 +1219,6 @@ proc ::Roster::GetTrptFromName {name} {
 #       Method to get the jids of all services that are not jabber.
 
 proc ::Roster::GetAllTransportJids { } {
-    upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     
     set alltrpts [$jstate(jlib) disco getjidsforcategory "gateway/*"]
@@ -1230,7 +1228,7 @@ proc ::Roster::GetAllTransportJids { } {
     foreach jid $jabbjids {
 	set alltrpts [lsearch -all -inline -not $alltrpts $jid]
     }
-    return [lsearch -all -inline -not $alltrpts $jserver(this)]
+    return [lsearch -all -inline -not $alltrpts $jstate(server)]
 }
 
 # Roster::GetTransportNames --
@@ -1241,7 +1239,6 @@ proc ::Roster::GetTransportNames { } {
     variable trptToName
     variable allTransports
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
     
     set trpts {}
     foreach type $allTransports {
@@ -1255,7 +1252,7 @@ proc ::Roster::GetTransportNames { } {
     }    
 
     # Disco doesn't return jabber. Make sure it's first.
-    return [concat [list [list $jserver(this) jabber [GetNameFromTrpt jabber]]] $trpts]
+    return [concat [list [list $jstate(server) jabber [GetNameFromTrpt jabber]]] $trpts]
 }
 
 proc ::Roster::IsTransport {jid} {
@@ -1278,7 +1275,6 @@ proc ::Roster::IsTransport {jid} {
 
 proc ::Roster::IsTransportHeuristics {jid} {
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
     
     # Some transports (icq) have a jid = icq.jabber.se/registered and
     # yahoo.jabber.ru/registered
@@ -1290,11 +1286,11 @@ proc ::Roster::IsTransportHeuristics {jid} {
 		set transport 1
 	    } else {
 		
-		# Search for matching  msn.$jserver(this)  etc.
+		# Search for matching  msn.$jstate(server)  etc.
 		set idx [string first . $host]
 		if {$idx > 0} {
 		    set phost [string range $host [expr {$idx+1}] end]
-		    if {$phost eq $jserver(this)} {
+		    if {$phost eq $jstate(server)} {
 			set cname [string range $host 0 [expr {$idx-1}]]
 			switch -- $cname {
 			    aim - gg - gadugadu - icq - msn - smtp - yahoo {			

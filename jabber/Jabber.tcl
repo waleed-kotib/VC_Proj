@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.194 2007-01-26 13:50:15 matben Exp $
+# $Id: Jabber.tcl,v 1.195 2007-01-27 14:59:26 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -98,9 +98,6 @@ namespace eval ::Jabber:: {
     set jstate(servPort) {}
     
     set jstate(haveJabberUI) 0
-
-    # Login server.
-    set jserver(this) ""
         
     # Keep noncritical error text here.
     set jerror {}
@@ -301,10 +298,7 @@ proc ::Jabber::FactoryDefaults { } {
     # queried.
     set jprefs(browseServers) {}
     set jprefs(agentsServers) {}
-    
-    # The User Info of servers.    
-    set jserver(this) ""
-    
+        
     # New... Profiles. These are just leftovers that shall be removed later.
     set jserver(profile)  \
       {jabber.org {jabber.org myUsername myPassword home}}
@@ -381,9 +375,9 @@ proc ::Jabber::GetIQRegisterElements { } {
 }
 
 proc ::Jabber::GetServerJid { } {
-    variable jserver
+    variable jstate
 
-    return $jserver(this)
+    return $jstate(server)
 }
 
 proc ::Jabber::GetServerIpNum { } {
@@ -1072,7 +1066,6 @@ proc ::Jabber::DoCloseClientConnection {args} {
     global  prefs
         
     variable jstate
-    variable jserver
     variable jprefs
     
     ::Debug 2 "::Jabber::DoCloseClientConnection"
@@ -1105,7 +1098,6 @@ proc ::Jabber::DoCloseClientConnection {args} {
 
 proc ::Jabber::SetClosedState { } {
     variable jstate
-    variable jserver
     
     ::Debug 2 "::Jabber::SetClosedState"
 
@@ -1118,7 +1110,6 @@ proc ::Jabber::SetClosedState { } {
     set jstate(show)     "unavailable"
     set jstate(status)   ""
     set jstate(show+status) [list $jstate(show) $jstate(status)]
-    set jserver(this)    ""
     set jstate(ipNum)    ""
     
     # Run all logout hooks.
@@ -1132,7 +1123,6 @@ proc ::Jabber::SetClosedState { } {
 
 proc ::Jabber::EndSession { } {    
     variable jstate
-    variable jserver
     variable jprefs
     
     # This protects against previous p2p setup. BAD!
@@ -1247,7 +1237,6 @@ proc ::Jabber::IsMyGroupchatJid {jid} {
 
 proc ::Jabber::SetStatus {type args} {    
     variable jstate
-    variable jserver
     variable jprefs
     
     ::Debug 4 "::Jabber::SetStatus type=$type, args=$args"
@@ -1311,7 +1300,7 @@ proc ::Jabber::SetStatus {type args} {
     # Do we target a room or the server itself?
     set toServer 0
     if {[info exists argsA(-to)]} {
-	if {[jlib::jidequal $jserver(this) $argsA(-to)]} {
+	if {[jlib::jidequal $jstate(server) $argsA(-to)]} {
 	    set toServer 1
 	}
     } else {
@@ -1945,7 +1934,6 @@ proc ::Jabber::Passwd::Doit {w} {
     variable password
     variable finished
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
     
     ::Debug 2 "::Jabber::Passwd::Doit"
 
@@ -1956,7 +1944,7 @@ proc ::Jabber::Passwd::Doit {w} {
     set finished 1
     regexp -- {^([^@]+)@.+$} $jstate(mejid) match username
     $jstate(jlib) register_set $username $password \
-      [list [namespace current]::ResponseProc] -to $jserver(this)
+      [list [namespace current]::ResponseProc] -to $jstate(server)
     destroy $w
 
     # Just wait for a callback to the procedure.

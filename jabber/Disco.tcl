@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.99 2006-12-04 12:55:22 matben Exp $
+# $Id: Disco.tcl,v 1.100 2007-01-27 14:59:26 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -185,10 +185,10 @@ proc ::Disco::NewJlibHook {jlibName} {
 
 proc ::Disco::LoginHook { } {
     upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jstate jstate
     
     # We disco servers jid 'items+info', and disco its childrens 'info'.
-    DiscoServer $jserver(this)
+    DiscoServer $jstate(server)
 }
 
 proc ::Disco::LogoutHook { } {
@@ -203,10 +203,9 @@ proc ::Disco::LogoutHook { } {
 }
 
 proc ::Disco::HaveTree { } {    
-    upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     
-    if {[$jstate(jlib) disco isdiscoed items $jserver(this)]} {
+    if {[$jstate(jlib) disco isdiscoed items $jstate(server)]} {
 	return 1
     } else {
 	return 0
@@ -351,7 +350,6 @@ proc ::Disco::ItemsCB {cmd jlibname type from queryE args} {
     variable wtree
     variable wtab
     variable discoInfoLimit
-    upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
@@ -408,7 +406,7 @@ proc ::Disco::ItemsCB {cmd jlibname type from queryE args} {
 		GetInfo $cjid -node $cnode
 	    }
 	}
-	if {[jlib::jidequal $from $jserver(this)] && ($pnode eq "")} {
+	if {[jlib::jidequal $from $jstate(server)] && ($pnode eq "")} {
 	    AutoDiscoServers
 	}
     }
@@ -1095,7 +1093,6 @@ proc ::Disco::TreeItem {vstruct} {
     variable treeuid
     upvar ::Jabber::jstate  jstate
     upvar ::Jabber::jprefs  jprefs
-    upvar ::Jabber::jserver jserver
     
     # We disco servers jid 'items+info', and disco its childrens 'info'.    
     ::Debug 4 "::Disco::TreeItem vstruct='$vstruct'"
@@ -1108,7 +1105,7 @@ proc ::Disco::TreeItem {vstruct} {
     # If this is a tree root element add only if a discoed server.
     if {($pjid eq "") && ($pnode eq "")} {
 	set all [concat $jprefs(disco,tmpServers) $jprefs(disco,autoServers)]
-	lappend all $jserver(this)
+	lappend all $jstate(server)
 	if {[lsearch -exact $all $jid] < 0} {
 	    return
 	}
@@ -1441,13 +1438,13 @@ proc ::Disco::BuildInfoPage {win jid {node ""}} {
 
 proc ::Disco::AutoDiscoServers { } {
     upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jstate jstate
     
     # Guard against empty elements. Old bug!
     lprune jprefs(disco,autoServers) {}
 
     foreach server $jprefs(disco,autoServers) {
-	if {![jlib::jidequal $server $jserver(this)]} {
+	if {![jlib::jidequal $server $jstate(server)]} {
 	    DiscoServer $server
 	}
     }

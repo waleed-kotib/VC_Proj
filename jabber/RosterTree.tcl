@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.34 2007-01-26 13:50:16 matben Exp $
+# $Id: RosterTree.tcl,v 1.35 2007-01-27 14:59:30 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -881,7 +881,6 @@ proc ::RosterTree::OnDestroy {} {
 proc ::RosterTree::CreateItemBase {jid presence args} {    
     variable T
     upvar ::Jabber::jstate  jstate
-    upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs  jprefs
     
     ::Debug 6 "::RosterTree::CreateItemBase jid=$jid, presence=$presence"
@@ -1072,7 +1071,7 @@ proc ::RosterTree::MCHead {str} {
 #       Make a standard display text.
 
 proc ::RosterTree::MakeDisplayText {jid presence args} {
-    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jstate jstate
 
     array set argsA $args
     
@@ -1087,7 +1086,7 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
     # Note that some (icq) transports have 3-tier items that are unavailable!
 
     set istrpt [::Roster::IsTransportHeuristics $jid]
-    set server $jserver(this)
+    set server $jstate(server)
 
     if {$istrpt} {
 	set str $jid
@@ -1102,7 +1101,7 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
 	    set str $argsA(-name)
 	} else {
 	    jlib::splitjidex $jid node domain res
-	    if {$domain eq $jserver(this)} {
+	    if {$domain eq $jstate(server)} {
 		set str $node
 	    } else {
 		set str [jlib::barejid $jid]

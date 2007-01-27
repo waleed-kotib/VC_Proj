@@ -8,7 +8,7 @@
 #  @@@ Treectrl is problematic since items come and go and are not free'd.
 #      Perhaps a callback based method instead?
 #  
-# $Id: balloonhelp.tcl,v 1.25 2007-01-25 14:33:15 matben Exp $
+# $Id: balloonhelp.tcl,v 1.26 2007-01-27 14:59:26 matben Exp $
 
 package require treeutil
 
@@ -48,8 +48,7 @@ namespace eval ::balloonhelp:: {
     }
 }
 
-proc ::balloonhelp::Init { } {
-    
+proc ::balloonhelp::Init { } {    
     variable w
     variable locals
 
@@ -61,8 +60,7 @@ proc ::balloonhelp::Init { } {
     }
 }
 
-proc ::balloonhelp::Build { } {
-    
+proc ::balloonhelp::Build { } {    
     variable w
     variable locals
     
@@ -92,8 +90,7 @@ proc ::balloonhelp::Build { } {
     }
 }
 
-proc ::balloonhelp::configure {args} {
-    
+proc ::balloonhelp::configure {args} {    
     variable locals
     
     array set opts [list -active $locals(active) -millisecs $locals(millisecs)]
@@ -118,7 +115,6 @@ proc ::balloonhelp::configure {args} {
 }
 
 proc ::balloonhelp::balloonforwindow {win msg args} {
-
     variable locals
     
     Init
@@ -132,7 +128,6 @@ proc ::balloonhelp::balloonforwindow {win msg args} {
 }
 
 proc ::balloonhelp::balloonforcanvas {win itemid msg args} {
-
     variable locals  
     
     Debug 2 "::balloonhelp::balloonforcanvas win=$win, itemid=$itemid"
@@ -150,7 +145,6 @@ proc ::balloonhelp::balloonforcanvas {win itemid msg args} {
 }
 
 proc ::balloonhelp::treectrl {win item msg args} {
-
     variable locals  
 
     Init
@@ -164,12 +158,26 @@ proc ::balloonhelp::treectrl {win item msg args} {
     bind $win <Destroy>  {+::balloonhelp::Free %W }
 }
 
+proc ::balloonhelp::delete {win} {
+    
+    Free $win
+    foreach sequence [bind $win] {
+	set newL [list]
+	set cmdL [bind $win $sequence]
+	bind $win $sequence {}
+	foreach cmd [split $cmdL "\;\n"] {
+	    if {![string match ::balloonhelp::* $cmd]} {
+		bind $win $sequence +$cmd
+	    }
+	}
+    }
+}
+
 # ::balloonhelp::treectrl_set --
 # 
 #       Plugin model for adding extra messages.
 
 proc ::balloonhelp::treectrl_set {win item name {msg ""}} {
-
     variable locals  
 
     if {$msg eq ""} {
@@ -180,7 +188,6 @@ proc ::balloonhelp::treectrl_set {win item name {msg ""}} {
 }
 
 proc ::balloonhelp::balloonfortree {win itemid msg args} {
-
     variable locals    
 
     Init
@@ -189,7 +196,6 @@ proc ::balloonhelp::balloonfortree {win itemid msg args} {
 }
 
 proc ::balloonhelp::balloonfortext {win tag msg args} {
-
     variable locals    
     Debug 2 "::balloonhelp::balloonfortext win=$win, tag=$tag"
 
@@ -213,9 +219,8 @@ proc ::balloonhelp::balloonfortext {win tag msg args} {
 #                   -item     item for treectrl
 
 proc ::balloonhelp::Pending {win type args} {
-
     variable locals
-    Debug 2 "::balloonhelp::Pending win=$win, args='$args'"
+
     foreach {key value} $args {
 	set locals($win,[string trimleft $key -]) $value
     }
@@ -228,11 +233,9 @@ proc ::balloonhelp::cancel {} {
     Cancel .
 }
 
-proc ::balloonhelp::Cancel {win} {
-    
+proc ::balloonhelp::Cancel {win} {    
     variable w
     variable locals    
-    Debug 2 "::balloonhelp::Cancel"
     
     if {[info exists locals(pending)]} {
 	after cancel $locals(pending)
@@ -279,8 +282,7 @@ proc ::balloonhelp::Fadeout {win fades} {
     }
 }
 
-proc ::balloonhelp::Show {win type} {
-    
+proc ::balloonhelp::Show {win type} {    
     variable w
     variable locals
     
@@ -400,8 +402,7 @@ proc ::balloonhelp::Show {win type} {
 # 
 #       Be sure to position the help window outside the bbox but inside the screen.
 
-proc ::balloonhelp::SetPosition {x y bbox} {
-    
+proc ::balloonhelp::SetPosition {x y bbox} {    
     variable w
 
     if {[winfo exists $w]} {
@@ -438,8 +439,7 @@ proc ::balloonhelp::SetPosition {x y bbox} {
     }
 }
 
-proc ::balloonhelp::Free {win} {
-    
+proc ::balloonhelp::Free {win} {    
     variable locals
 
     Cancel $win

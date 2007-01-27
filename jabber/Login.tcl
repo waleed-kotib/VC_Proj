@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.109 2007-01-26 13:50:15 matben Exp $
+# $Id: Login.tcl,v 1.110 2007-01-27 14:59:26 matben Exp $
 
 package provide Login 1.0
 
@@ -762,7 +762,6 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
 proc ::Login::SetLoginStateRunHook {} {
     global  this
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
    
     ::Debug 2 "::Login::SetLoginStateRunHook"
     
@@ -786,7 +785,6 @@ proc ::Login::SetLoginStateRunHook {} {
     set jstate(mejidmap)     [jlib::jidmap $jstate(mejid)]
     set jstate(mejidresmap)  [jlib::jidmap $jstate(mejidres)]
     set jstate(server)       $server
-    set jserver(this)        $server
     
     # Run all login hooks. We do this to get our roster before we get presence.
     ::hooks::run loginHook
