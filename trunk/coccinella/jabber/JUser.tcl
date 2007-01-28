@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.25 2007-01-27 14:59:26 matben Exp $
+# $Id: JUser.tcl,v 1.26 2007-01-28 12:21:18 matben Exp $
 
 package provide JUser 1.0
 
@@ -318,16 +318,16 @@ proc ::JUser::TrptCmd {token jid} {
 
     switch -- $type {
 	jabber - aim - yahoo {
-	    set state(jid) "userName@$state(servicejid,$type)"
+	    set state(jid) "userName@$jid"
 	}
 	icq {
-	    set state(jid) "screeNumber@$state(servicejid,$type)"
+	    set state(jid) "screeNumber@$jid"
 	}
 	msn {
-	    set state(jid) "userName%hotmail.com@$state(servicejid,$type)"
+	    set state(jid) "userName%hotmail.com@$jid"
 	}
 	default {
-	    set state(jid) "userName@$state(servicejid,$type)"
+	    set state(jid) "userName@$jid"
 	}
     }
     set ind [string first @ $state(jid)]
