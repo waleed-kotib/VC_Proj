@@ -466,8 +466,7 @@
 ::msgcat::mcset nl mJiveCall				{Telefoneer}
 ::msgcat::mcset nl mJiveForward				{Telefoongesprek omleiden}
 ::msgcat::mcset nl mBackgroundImage			{Achtergrondafbeelding}
-
-::msgcat::mcset nl mEditNick                            {Edit Nickname}
+::msgcat::mcset nl mEditNick				{Bijnaam bewerken}
 
 
 # Short texts only. Use english as database key.
@@ -694,11 +693,9 @@
 ::msgcat::mcset nl {Set windows opacity}		{Ondoorzichtigheid van vensters instellen}
 ::msgcat::mcset nl {Settings Panels}			{Instellingen}
 ::msgcat::mcset nl {Setup Assistant}			{Installatieassistent}
-
-::msgcat::mcset nl {Show Text and Image}
-::msgcat::mcset nl {Show Text}
-::msgcat::mcset nl {Show Image}
-
+::msgcat::mcset nl {Show Text and Image}		{Tekst en afbeelding tonen}
+::msgcat::mcset nl {Show Text}				{Tekst tonen}
+::msgcat::mcset nl {Show Image}				{Afbeelding tonen}
 ::msgcat::mcset nl {Slide Show}				{Diavoorstelling}
 ::msgcat::mcset nl {Slide Show Folder}			{Map voor diavoorstelling}
 ::msgcat::mcset nl {Smooth freehand strokes}		{Lijnen uit de losse hand vervagen}
@@ -784,8 +781,7 @@
 ::msgcat::mcset nl nativeFrench				Français
 ::msgcat::mcset nl nativeGerman				Deutsch
 ::msgcat::mcset nl nativeItalian			Italiano
-::msgcat::mcset nl nativeKorean				한국�
-::msgcat::mcset nl nativePolish				Polski
+::msgcat::mcset nl nativeKorean				한국�::msgcat::mcset nl nativePolish				Polski
 ::msgcat::mcset nl nativeRussian			русский
 ::msgcat::mcset nl nativeSpanish			Castellano
 ::msgcat::mcset nl nativeSwedish			Svenska 
@@ -942,8 +938,7 @@
 ::msgcat::mcset nl jamesswarnsendcanoff			{De contactpersoon waarnaar u verzendt ("%s") is niet online. Als uw bericht afbeeldingen of dergelijke bevat, dan zal uw contactpersoon ze niet kunnen zien als u niet online bent als hij uw bericht leest. Wilt u het bericht verzenden?}
 ::msgcat::mcset nl jamessstatuscust			{Stel een bericht in voor een aanwezigheid.}
 ::msgcat::mcset nl jamessstatuscustdtl			{De meest voorkomende statussen met bijhorende berichten zijn beschikbaar in het menu.}
-
-::msgcat::mcset nl jamessproxy-failure                  {The proxy server reported an error. The error code is "%s".}
+::msgcat::mcset nl jamessproxy-failure			{De proxyserver rapporteerde volgende foutcode: "%s".}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
@@ -1190,9 +1185,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jachathist				{Geschiedenis tonen/verbergen}
 ::msgcat::mcset nl jawaitdisco				{Bezig met wachten op resultaat van discovery-aanvraag...}
 ::msgcat::mcset nl jagclogoutmsg			{U melde af en verliet de chatruimte}
-
-::msgcat::mcset nl jagcreqnick                          {Please enter your desired nick name for the room %s}
-
+::msgcat::mcset nl jagcreqnick				{Voer de gewenste bijnaam in voor de chatruimte %s}
 ::msgcat::mcset nl {InfoRoomDesc}			{Hier kunt u de chatruimte instellen. Rol en affiliatie bepalen uw privileges.}
 
 # Setup assistant:
