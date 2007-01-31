@@ -11,7 +11,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.17 2006-11-02 14:13:56 matben Exp $
+# $Id: Iax.tcl,v 1.18 2007-01-31 08:14:38 matben Exp $
 
 namespace eval ::Iax {
 
@@ -458,6 +458,7 @@ proc ::Iax::LoadPrefs {} {
 
     iaxclient::applyfilters $agc $aagc $comfort $noise $echo
 
+    if {0} {
     # Pick matching device name.
     foreach device [iaxclient::devices output] {
 	if { [lindex $device 0] eq $outputDevices} {
@@ -470,6 +471,7 @@ proc ::Iax::LoadPrefs {} {
 	    iaxclient::setdevices input [lindex $device 1]
 	    break
 	}
+    }
     }
     
     iaxclient::callerid $cidname $cidnum
