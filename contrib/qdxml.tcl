@@ -1,10 +1,14 @@
 # qdxml.tcl --
 # 
-#       A Quick & Dirty xml parser. Some parts from tclxml.
+#   A Quick & Dirty xml parser. Many parts from tclxml.
+#   It is supposed to parse fragmented xml which can start and stop
+#   in the middle of the document.
+# 
+#   NOT COMPLETED!    
 # 
 # Copyright (c) 2007 Mats Bengtsson
 #       
-# $Id: qdxml.tcl,v 1.1 2007-01-28 15:59:29 matben Exp $
+# $Id: qdxml.tcl,v 1.2 2007-01-31 07:33:11 matben Exp $
 
 package provide qdxml 0.1
 
@@ -37,45 +41,156 @@ namespace eval qdxml {
     variable Nmtokens ${Nmtoken}(?:$Wsp$Nmtoken)*
 
     # Expressions for pulling things apart.
-    variable tokExpr <(/?)([::qdxml::cl ^$::qdxml::Wsp>/]+)([::qdxml::cl $::qdxml::Wsp]*[::qdxml::cl ^>]*)>
+    variable tokExpr <(/?)([::qdxml::cl ^$Wsp>/]+)([::qdxml::cl $Wsp]*[::qdxml::cl ^>]*)>
     variable substExpr "\}\n{\\2} {\\1} {\\3} \{"
 }
 
 proc qdxml::tokenise {xml} {
     variable tokExpr
     variable substExpr
-    
-    
+        
     # Protect Tcl special characters
-    regsub -all {([{}\\])} $xml {\\\1} xml
+    regsub -all {([][$\\{}])} $xml {\\\1} xml
 
-    
-    
+    # The actual processing into list.
     regsub -all $tokExpr $xml $substExpr xml
     set xml "{} {} {} \{$xml\}"
 
-    
-    
     return $xml
 }
 
-proc qdxml::parse {xml} {
-
+proc qdxml::parse {xml args} {
+    variable Wsp
+    
+    array set options {
+	-elementstartcommand  {}
+	-elementendcommand    {}
+	-characterdatacommand {}
+    }
+    array set options $args
+    
     foreach {tag close param text} $xml {
 	
-	puts "tag=$tag, close=$close, param=$param, text=$text"
-	
-	
-    }
+	set empty [ParseEmpty $tag $param {}]
 
+	puts "tag=$tag, close=$close, param=$param, text=$text"
+	set len [string length $tag]
+	set decl [regexp {^\?|!.*} $tag]
+	puts "\t $len,$decl,$close,$empty"
+	
+	switch -glob -- $len,$decl,$close,$empty {
+	    0,0,, {
+		# Ignore empty tag.
+	    }
+	    *,0,, {
+		# Start tag for an element.		
+		# Parse attribute list into a key-value representation.
+		set attr [ParseAttrs $param]
+		if {[string length $options(-elementstartcommand)]} {
+		    set code [catch {uplevel #0 $options(-elementstartcommand) [list $tag $attr]}]
+		}
+	    }
+	    *,0,/, {
+		# End tag for an element.
+		if {[string length $options(-elementendcommand)]} {
+		    set code [catch {uplevel #0 $options(-elementendcommand) [list $tag]}]
+		}
+	    }
+	    *,0,,/ {
+		# Empty element.
+		# The trailing slash sneaks through into the param variable.
+		regsub -all /[cl $Wsp]*\$ $param {} param
+		set attr [ParseAttrs $param]
+		if {[string length $options(-elementstartcommand)]} {
+		    set code [catch {uplevel #0 $options(-elementstartcommand) [list $tag $attr]}]
+		}
+		if {[string length $options(-elementendcommand)]} {
+		    set code [catch {uplevel #0 $options(-elementendcommand) [list $tag]}]
+		}
+	    }
+	    *,1,* {
+		# Processing instructions or XML declaration.
+	    }
+	    *,1,*  -  *,0,/,/ {
+		# Syntax error.
+	    }
+	}
+	
+	# Process character data ???????????
+	if {[string length $text]} {
+	    set str [Entity $text]
+	    if {[string length $options(-characterdatacommand)]} {
+		set code [catch {uplevel #0 $options(-characterdatacommand) [list $str]}]
+	    }
+	}
+    }
+    return {}
 }
 
+proc qdxml::ParseEmpty {tag attr e} {
+    variable Wsp
+    
+    switch -glob [string length $e],[regexp "/[::qdxml::cl $Wsp]*$" $attr] {
+	0,0 {
+	    return {}
+	}
+	0,* {
+	    return /
+	}
+	default {
+	    return $e
+	}
+    }
+}
+
+proc qdxml::ParseAttrs {attrs} {
+    variable Wsp
+    variable Name
+    
+    set result {}
+
+    while {[string length [string trim $attrs]]} {
+	if {[regexp [cl $Wsp]*($Name)[cl $Wsp]*=[cl $Wsp]*("|')([cl ^<]*?)\\2(.*) $attrs discard attrName delimiter value attrs]} {
+	    lappend result $attrName [Entity $value]
+	} elseif {[regexp [cl $Wsp]*$Name[cl $Wsp]*=[cl $Wsp]*("|')[cl ^<]*\$ $attrs]} {
+	    return -code error [list {unterminated attribute value} $result $attrs]
+	} else {
+	    return -code error "invalid attribute list"
+	}
+    }
+
+    return $result
+}
+
+proc qdxml::Entity {value} {
+    
+    set value [string map {{&amp;} {&} {&lt;} {<} {&gt;} {>} {&quot;} {"} {&apos;} {'}} $value]
+    
+    # Protect Tcl special characters
+    regsub -all {([][$\\{}])} $value {\\\1} value
+
+    # Character entity - hex
+    regsub -all {&#x([0-9a-hA-H]+);} $value {[format %c [scan \1 %x tmp; set tmp]]} value
+	
+    # Character entity - decimal
+    regsub -all {&#([0-9]+);} $value {[format %c [scan \1 %d tmp; set tmp]]} value
+    return [subst $value]
+}
+
+
 if {0} {
-    set f /Users/matben/Desktop/test.xml
+    proc Start {args} {puts "Start: $args"}
+    proc End {args} {puts "End: $args"}
+    proc Data {args} {puts "Data: $args"}
+    set f /Users/matben/Desktop/test2.xml
     set fd [open $f r]
     set xml [read $fd]
     close $fd
-    set tokenised [qdxml::tokenise $xml]
-    qdxml::parse $tokenised
+    set tokenised [qdxml::tokenise $xml]; set a 0
+    qdxml::parse $tokenised  \
+      -elementstartcommand  Start \
+      -elementendcommand    End   \
+      -characterdatacommand Data
+
 }
 
