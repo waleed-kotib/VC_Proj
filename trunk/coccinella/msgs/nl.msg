@@ -1189,8 +1189,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jaseliconset				{Kies de emoticonsets die u wilt gebruiken.}
 ::msgcat::mcset nl jachathist				{Geschiedenis tonen/verbergen}
 ::msgcat::mcset nl jawaitdisco				{Bezig met wachten op resultaat van discovery-aanvraag...}
-
 ::msgcat::mcset nl jagclogoutmsg			{U melde af en verliet de chatruimte}
+
+::msgcat::mcset nl jagcreqnick                          {Please enter your desired nick name for the room %s}
 
 ::msgcat::mcset nl {InfoRoomDesc}			{Hier kunt u de chatruimte instellen. Rol en affiliatie bepalen uw privileges.}
 

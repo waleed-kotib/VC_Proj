@@ -55,7 +55,7 @@
 #       XMPP URI/IRI Querytypes 
 #       XEP-0147: XMPP URI Scheme Query Components 
 #
-# $Id: ParseURI.tcl,v 1.36 2006-12-01 08:55:13 matben Exp $
+# $Id: ParseURI.tcl,v 1.37 2007-01-31 07:33:11 matben Exp $
 
 package require uriencode
 
@@ -368,27 +368,24 @@ proc ::ParseURI::HandleJoinGroupchat {token} {
     variable $token
     upvar 0 $token state
     
-    #::hooks::deregister  discoInfoHook  $state(discocmd)
-    
     ::Debug 2 "::ParseURI::HandleJoinGroupchat................"
-    ::Debug 2 [parray state]
+    ::Debug 2 "state=[array get state]"
     
     # We require a nick name (resource part).
-    set nick $state(resource)
-    if {$nick eq ""} {
+    set state(nick) $state(resource)
+    if {$state(nick) eq ""} {
 	variable ans
-	set str "Please enter your desired nick name for the room $state(jid2)"
+	set str [mc jagcreqnick $state(jid2)]
 	set w [ui::dialog -message $str -title [mc {Nick name}]  \
 	  -icon info -type okcancel -modal 1  \
 	  -variable [namespace current]::ans]
 	set fr [$w clientframe]
 	ttk::label $fr.l -text "[mc {Nick name}]:"
-	ttk::entry $fr.e -show {*}  \
-	  -textvariable [namespace current]::nick
+	ttk::entry $fr.e -textvariable $token\(nick)
 	pack $fr.l -side left
 	pack $fr.e -side top -fill x
 	$w grab	
-	if {($ans ne "ok") || ($nick eq "")} {
+	if {($ans ne "ok") || ($state(nick) eq "")} {
 	    Free $token
 	    return
 	}
@@ -400,7 +397,7 @@ proc ::ParseURI::HandleJoinGroupchat {token} {
     if {[info exists state(query,password)]} {
 	lappend opts -password $state(query,password)
     }
-    eval {::Enter::EnterRoom $state(jid2) $nick \
+    eval {::Enter::EnterRoom $state(jid2) $state(nick) \
       -command [list [namespace current]::EnterRoomCB $token]} $opts
 }
 

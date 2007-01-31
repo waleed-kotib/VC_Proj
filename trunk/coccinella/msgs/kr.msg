@@ -1207,6 +1207,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset kr jawaitdisco  {disco 결과 기다리는 중...}
 ::msgcat::mcset kr jagclogoutmsg {당신은 로그아웃하였고 방도 나가 있습니다}
 
+::msgcat::mcset kr jagcreqnick  {Please enter your desired nick name for the room %s}
+
 ::msgcat::mcset kr {InfoRoomDesc}       {이 대화창은 대화방에 대한 가능한 옵션과 활동을 지정할 수 있습니다. 당신의 강비및 역할이 조정할 수 있는 권한을 결정합니다.\
 특정 방의 조정에 따라 몇가지 기능이 제한되기도 합니다.}
 

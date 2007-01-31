@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.24 2006-12-21 11:23:47 matben Exp $
+# $Id: History.tcl,v 1.25 2007-01-31 07:33:11 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -22,6 +22,15 @@ namespace eval ::History:: {
     
     # History file size limit of 100k
     variable sizeLimit 100000
+    
+    variable xmlPrefix
+    set xmlPrefix "<?xml version='1.0' encoding='UTF-8'?>"
+    append xmlPrefix "\n" 
+    append xmlPrefix "<!DOCTYPE log>" 
+    append xmlPrefix "\n" 
+    append xmlPrefix "<?xml-stylesheet type='text/xsl' href='log.xsl'?>"
+    append xmlPrefix "\n"
+    append xmlPrefix "<log jid='%s'>"
 }
 
 # New xml based format ---------------------------------------------------------
@@ -86,7 +95,7 @@ proc ::History::XGetPutFileName {jid} {
     }
     set rootTail [uriencode::quote $mjid]
     set files [XGetAllFileNames $mjid]
-    if {$files eq {}} {
+    if {[llength $files] == 0} {
 	
 	# First history file.
 	set hfile [file join $this(historyPath) ${rootTail}-0.nxml]
@@ -125,6 +134,7 @@ proc ::History::XHaveHistory {jid} {
 # 
 #       Reads all relevant history files for JID, parses them and does a
 #       selection process based on the arguments.
+#       Public interface.
 # 
 # Arguments:
 #       jid
@@ -162,6 +172,24 @@ proc ::History::XPutItem {tag jid xmldata} {
     set fd [open $fileName a]
     fconfigure $fd -encoding utf-8
     puts $fd $xml
+    close $fd
+}
+
+proc ::History::XAppendTag {fileName xml} {
+    
+    set fd [open $fileName {RDWR CREAT}]
+    fconfigure $fd -encoding utf-8
+    set endTag </log>
+    
+    # Write over the end tag and add it back after.
+    seek $fd -10 end
+    set data [read $fd]
+    if {[regexp -indices $endTag $data idxL]} {
+	set offset [expr {10 - [lindex $idxL 0]}]
+	seek $fd -$offset end
+    }
+    puts $fd $xml
+    puts $fd $endTag
     close $fd
 }
 

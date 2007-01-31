@@ -1207,6 +1207,7 @@ Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jachathist   {Visa eller göm chatt historiken}
 ::msgcat::mcset sv jawaitdisco  {Väntar på disco resultat...}
 ::msgcat::mcset sv jagclogoutmsg {Du har loggat ut och lämnat rummet}
+::msgcat::mcset sv jagcreqnick  {Vänligen skriv in ditt önskade kortnamn for rummet %s}
 
 
 ::msgcat::mcset sv InfoRoomDesc {Den här dialogen möjliggör ett antal rumsinställningar. Din roll och adoption bestämmer din rättighet att agera. Ytterligare restriktioner kan finnas beroende på\
