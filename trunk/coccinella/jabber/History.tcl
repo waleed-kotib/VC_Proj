@@ -3,11 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements various methods to handle history info.
 #      
-#      UPDATE: switching to xml format.
-#      
-#  Copyright (c) 2004-2006  Mats Bengtsson
+#  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.25 2007-01-31 07:33:11 matben Exp $
+# $Id: History.tcl,v 1.26 2007-02-01 14:54:31 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -20,17 +18,47 @@ namespace eval ::History:: {
 
     variable uiddlg 1000
     
-    # History file size limit of 100k
-    variable sizeLimit 100000
+    # History file size limit of 50k
+    variable sizeLimit 50000
     
     variable xmlPrefix
-    set xmlPrefix "<?xml version='1.0' encoding='UTF-8'?>"
-    append xmlPrefix "\n" 
-    append xmlPrefix "<!DOCTYPE log>" 
+    set xmlPrefix ""
+    append xmlPrefix "<?xml version='1.0' encoding='UTF-8'?>"
     append xmlPrefix "\n" 
     append xmlPrefix "<?xml-stylesheet type='text/xsl' href='log.xsl'?>"
     append xmlPrefix "\n"
+    append xmlPrefix "<!DOCTYPE log>" 
+    append xmlPrefix "\n" 
     append xmlPrefix "<log jid='%s'>"
+    
+    variable xmlPostfix
+    set xmlPostfix "</log>"
+    
+    # For the pseudo xml parser:
+
+    # Convenience routine
+    proc cl x {
+	return "\[$x\]"
+    }
+
+    # white space
+    variable Wsp " \t\r\n"
+    
+    variable bodyRE     ^[cl $Wsp]*<body>
+    variable sendrecvRE ^[cl $Wsp]*<(send|recv)
+    variable timeRE     time='([cl ^']+)'
+    variable endlogRE   ^[cl $Wsp]*</log>
+}
+
+# Test code:
+if {0} {
+    set f /Users/matben/Library/Preferences/Coccinella/History/mari@localhost-0.nxml
+    set f /Users/matben/Desktop/mariShort.xml
+    set f /Users/matben/Desktop/mari.xml
+    set age [expr [clock seconds] - [clock scan 20070124T14:17:54]]
+    ::History::XFastSelection $f 10 $age  
+    
+    ::History::XFastParseFiles mari@localhost 2 0
 }
 
 # New xml based format ---------------------------------------------------------
@@ -39,8 +67,12 @@ namespace eval ::History:: {
 #       o File names must have the JID uri encoded
 #       o Split the complete history for a JID in multiple files of certain
 #         min size
-#       o Use file names JID-#.nxml where # is a running integer
+#       OLD:
+#       o Use file names JID-#.nxml where # is a running integer (nxml format)
 #       o The extension is .nxml since we store without root elements
+#       NEW (070131):
+#       o Use file names JID-#.xml where # is a running integer (xml format)
+#       o The files are proper xml and no fake
 #       
 # @@@ TODO:
 #       + Maybe we should allow history file splits during sessions
@@ -48,20 +80,17 @@ namespace eval ::History:: {
 
 proc ::History::XExportOldAndXToFile {jid fileName} {
     global  this
+    variable xmlPrefix
+    variable xmlPostfix
     
-    set prefix "<?xml version='1.0' encoding='UTF-8'?>"
-    append prefix "\n" 
-    append prefix "<!DOCTYPE log>" 
-    append prefix "\n" 
-    append prefix "<?xml-stylesheet type='text/xsl' href='log.xsl'?>"
-    append prefix "\n"
-    append prefix "<log jid='$jid'>"
-    set postfix "</log>"
+    set prefix [format $xmlPrefix [wrapper::xmlcrypt $jid]]
+    set postfix $xmlPostfix
 
     set fd [open $fileName w]
     fconfigure $fd -encoding utf-8
     puts $fd $prefix
 
+    # Old format.
     if {[HaveMessageFile $jid]} {
 	set tmp [::tfileutils::tempfile $this(tmpPath) ""]
 	XImportOldToFile $jid $tmp
@@ -71,7 +100,9 @@ proc ::History::XExportOldAndXToFile {jid fileName} {
 	close $tmpfd
 	file delete $tmp
     }
-    foreach f [XGetAllFileNames $jid] {
+    
+    # The nxml format.
+    foreach f [XGetAllNXMLFileNames $jid] {
 	if {[file readable $f]} {
 	    set srcfd [open $f r]
 	    fconfigure $srcfd -encoding utf-8
@@ -79,6 +110,10 @@ proc ::History::XExportOldAndXToFile {jid fileName} {
 	    close $srcfd
 	}
     }    
+    
+    # True xml format.
+    puts $fd [XReadAllXMLToFlat $jid]
+    
     puts $fd $postfix
     close $fd
 }
@@ -88,28 +123,28 @@ proc ::History::XGetPutFileName {jid} {
     variable jidToFile
     variable sizeLimit
     
-    # Cache put file per JID since it costs to find it each time.
+    # Cache put file per JID since it costs to find it each time. ???
     set mjid [jlib::jidmap $jid]
     if {[info exists jidToFile($mjid)] && [file exists $jidToFile($mjid)]} {
 	return $jidToFile($mjid)
     }
     set rootTail [uriencode::quote $mjid]
-    set files [XGetAllFileNames $mjid]
+    set files [XGetAllXMLFileNames $mjid]
     if {[llength $files] == 0} {
 	
 	# First history file.
-	set hfile [file join $this(historyPath) ${rootTail}-0.nxml]
+	set hfile [file join $this(historyPath) ${rootTail}-0.xml]
     } else {
 	set hfile [lindex $files end]
 	if {[file size $hfile] > $sizeLimit} {
 	    
 	    # Create a new one.
-	    if {[regexp $hfile {-([0-9]{1,})\.nxml$} - n]} {
+	    if {[regexp $hfile {-([0-9]{1,})\.xml$} - n]} {
 		incr n
-		set hfile [file join $this(historyPath) ${rootTail}-$n.nxml]
+		set hfile [file join $this(historyPath) ${rootTail}-$n.xml]
 	    } else {
 		# Should never happen.
-		set hfile [file join $this(historyPath) ${rootTail}-0.nxml]
+		set hfile [file join $this(historyPath) ${rootTail}-0.xml]
 	    }
 	}
     }
@@ -117,20 +152,46 @@ proc ::History::XGetPutFileName {jid} {
     return $hfile
 }
 
+# History::XGetAllFileNames --
+# 
+#       Gets history files for JID in an ordered manner from old to new.
+#       Note the naming conventions for the nxml and xml formats.
+
 proc ::History::XGetAllFileNames {jid} {
+    return [concat [XGetAllNXMLFileNames $jid] [XGetAllXMLFileNames $jid]]
+}
+
+proc ::History::XGetAllNXMLFileNames {jid} {
     global  this
     
     set mjid [jlib::jidmap $jid]
     set rootTail [uriencode::quote $mjid]
-    set files [glob -nocomplain -directory $this(historyPath) ${rootTail}-*.nxml]
-    return [lsort -dictionary $files]
+    set nfiles [glob -nocomplain -directory $this(historyPath) ${rootTail}-*.nxml]
+    return [lsort -dictionary $nfiles]
+}
+
+proc ::History::XGetAllXMLFileNames {jid} {
+    global  this
+    
+    set mjid [jlib::jidmap $jid]
+    set rootTail [uriencode::quote $mjid]
+    set xfiles [glob -nocomplain -directory $this(historyPath) ${rootTail}-*.xml]
+    return [lsort -dictionary $xfiles]
 }
 
 proc ::History::XHaveHistory {jid} {
     return [llength [XGetAllFileNames $jid]]
 }
 
-# History::XParseFiles --
+proc ::History::XHaveNXMLHistory {jid} {
+    return [llength [XGetAllNXMLFileNames $jid]]
+}
+
+proc ::History::XHaveXMLHistory {jid} {
+    return [llength [XGetAllXMLFileNames $jid]]
+}
+
+# History::XParseNXMLFiles --
 # 
 #       Reads all relevant history files for JID, parses them and does a
 #       selection process based on the arguments.
@@ -142,13 +203,120 @@ proc ::History::XHaveHistory {jid} {
 #             -maxage   seconds
 #             -thread   thread ID
 
-proc ::History::XParseFiles {jid args} {
-    if {[XHaveHistory $jid]} {
-	set xml [XReadAllToXML $jid]
+# SLOOOOOOOOOOOOOWWWWW!!!!!!
+# Only for the nxml format!
+proc ::History::XParseNXMLFiles {jid args} {
+    if {[XHaveNXMLHistory $jid]} {
+	set xml [XReadAllNXMLToXML $jid]
 	return [eval {XParseXMLAndSelect $xml} $args]
     } else {
 	return {}
     }
+}
+
+# Works for both nxml and xml formats.
+proc ::History::XFastParseFiles {jid nlast maxage} {
+    variable xmlPrefix
+    variable xmlPostfix
+
+    if {[XHaveHistory $jid]} {
+	set files [XGetAllFileNames $jid]
+	set nleft $nlast
+	set elemL ""
+	
+	# Process history files from newest to oldest until we run out of files
+	# or have aquired 'nlast' messages.
+	while {[llength $files]} {
+	    set fileName [lindex $files end]
+	    set files [lrange $files 0 end-1]
+	    lassign [XFastSelection $fileName $nlast $maxage] n xml
+	    incr nleft -$n
+	    set elemL $xml$elemL
+	    if {$nleft <= 0} {
+		break
+	    }	    
+	}
+
+	# Parse into xmllists to fit tcl.
+	set token [tinydom::parse $xmlPrefix$elemL$xmlPostfix]
+	set xmllist [tinydom::documentElement $token]
+	tinydom::cleanup $token
+	return [wrapper::getchildren $xmllist]
+    } else {
+	return {}
+    }
+}
+
+# Only for the nxml format!
+proc ::History::XReadAllNXMLToXML {jid} {
+    variable xmlPrefix
+    variable xmlPostfix
+    
+    set prefix [format $xmlPrefix [wrapper::xmlcrypt $jid]]
+    set postfix $xmlPostfix
+    set xml [XReadAllNXMLToFlat $jid]
+    
+    # Add root tags to make true xml.
+    return $prefix$xml$postfix
+}
+
+proc ::History::XReadAllNXMLToFlat {jid} {
+    
+    # Start by reading all xml from all nxml files.
+    set xml ""
+    set files [XGetAllNXMLFileNames $jid]
+    foreach f $files {
+	if {[file readable $f]} {
+	    set fd [open $f r]
+	    fconfigure $fd -encoding utf-8
+	    append xml [read $fd]
+	    close $fd
+	}
+    }
+    return $xml
+}
+
+proc ::History::XParseNXMLToItemList {jid} {
+
+    set xml [XReadAllNXMLToXML $jid]
+    set token [tinydom::parse $xml]
+    set xmllist [tinydom::documentElement $token]
+    tinydom::cleanup $token
+    return [wrapper::getchildren $xmllist]
+}
+
+proc ::History::XReadAllXMLToFlat {jid} {
+    
+    set flatxml ""
+    set files [XGetAllXMLFileNames $jid]
+    foreach f $files {
+	if {[file readable $f]} {
+	    set fd [open $f r]
+	    fconfigure $fd -encoding utf-8
+	    set xml [read $fd]
+	    close $fd
+	    
+	    # Extract the stuff between <log ..> and </log>
+	    regexp -indices "<log +[cl ^>]+>" $xml idxL
+	    set idx0 [expr {[lindex $idxL 1] + 1}]
+	    regexp -indices "</log>" $xml idxL
+	    set idx1 [expr {[lindex $idxL 0] - 1}]
+	    append flatxml [string range $xml $idx0 $idx1]
+	}
+    }
+    return $flatxml
+}
+
+proc ::History::XParseXMLToItemList {jid} {
+    variable xmlPrefix
+    variable xmlPostfix
+
+    # First need to join all xml files.
+    set xmlflat [XReadAllXMLToFlat $jid]
+    set token [tinydom::parse $xmlPrefix$xmlflat$xmlPostfix]
+    set xmllist [tinydom::documentElement $token]
+    tinydom::cleanup $token
+    return [wrapper::getchildren $xmllist]
 }
 
 # History::XPutItem --
@@ -169,17 +337,29 @@ proc ::History::XPutItem {tag jid xmldata} {
     set xml [wrapper::formatxml $itemE -prefix "\t"]
 
     set fileName [XGetPutFileName $jid] 
-    set fd [open $fileName a]
+    if {![file exists $fileName]} {
+	XPutHeader $fileName $jid
+    }
+    XAppendTag $fileName $xml
+}
+
+proc ::History::XPutHeader {fileName jid} {
+    variable xmlPrefix
+    
+    # Only if not exists!
+    set fd [open $fileName {WRONLY CREAT}]
     fconfigure $fd -encoding utf-8
+    set xml [format $xmlPrefix [wrapper::xmlcrypt $jid]]
     puts $fd $xml
     close $fd
 }
 
 proc ::History::XAppendTag {fileName xml} {
+    variable xmlPostfix
     
-    set fd [open $fileName {RDWR CREAT}]
+    set fd [open $fileName {RDWR}]
     fconfigure $fd -encoding utf-8
-    set endTag </log>
+    set endTag $xmlPostfix
     
     # Write over the end tag and add it back after.
     seek $fd -10 end
@@ -191,6 +371,124 @@ proc ::History::XAppendTag {fileName xml} {
     puts $fd $xml
     puts $fd $endTag
     close $fd
+}
+
+# History::XFastSelection --
+# 
+#       Selects the last <send/> or <recv/> tags which contain nlast 'body' 
+#       element.
+#       Hardcoded and dedicated brute xml parsing.
+#       It does several assumptions about the format of the xml.
+#       In particular it assumes that xml is pretty formatted with tags on 
+#       separate lines.
+#       
+# Arguments:
+#       fileName
+#       nlast       pick these many elements from the end which contain
+#                   a body element. If -1 accept all.
+#       maxage      maximum age in terms of seconds from now. If 0 accept
+#                   independent of age.
+#       
+# Results:
+#       a list {ntotal xml} :
+#           ntotal is the number of elements that matched
+#           xml is a list of the recv and send tags only
+
+proc ::History::XFastSelection {fileName nlast maxage} {
+    variable bodyRE
+    variable sendrecvRE
+    variable timeRE
+    variable endlogRE
+    
+    if {$nlast == 0} {
+	return [list 0 ""]
+    }
+    
+    # NB: We can't count in bytes since 'read' counts characters:
+    # Both seek and tell operate in terms of bytes, not characters, unlike read.
+    # Count lines instead.    
+    set skip 0
+    set anyskip 0
+    set nbody 0
+    set nlines 0
+    set everyone 0
+    set now [clock seconds]
+
+    set fd [open $fileName r]
+    fconfigure $fd -encoding utf-8
+
+    while {[gets $fd line] != -1} {
+	incr nlines
+	set content($nlines) $line
+			
+	# send/recv tags always come before body
+	if {[regexp $sendrecvRE $line]} {
+	    set nsendrecv $nlines
+	    if {![info exists nfirstline]} {
+		set nfirstline $nlines
+	    }
+	    
+	    # Skip if older than maxage.
+	    if {$maxage} {
+		if {[regexp $timeRE $line - time]} {
+		    set secs [clock scan $time]
+		    if {[expr {$now - $secs > $maxage}]} {
+			set skip 1
+			set anyskip 1
+			continue
+		    }		
+		}
+		set skip 0
+	    }
+	} elseif {!$skip && [regexp $bodyRE $line]} {
+	    
+	    # Only the ones that pass any 'maxage' constraint.
+	    incr nbody
+	    set elemStart($nbody) $nsendrecv
+	}
+    }    
+    close $fd
+    
+    if {$nlast == -1} {
+	# Accept all.
+	set nstart 1
+	set ntotal $nbody
+    } else {
+	# Select the 'nlast' ones.
+	set nstart [expr {$nbody - $nlast + 1}]
+	set ntotal $nlast
+	if {$nstart <= 0} {
+	    set nstart 1
+	    set ntotal $nbody
+	}
+    }
+    
+    # If all matched be sure to collect from the beginning.
+    if {!$anyskip && ($nlast >= $nbody)} {
+	set everyone 1
+    }
+    
+    # Strip off any end tag.
+    if {[regexp $endlogRE $content($nlines)]} {
+	incr nlines -1
+    }    
+    
+    # Collect the xml. Only if any matches.
+    set xml ""
+    if {[array exists elemStart]} {
+	if {$everyone} {
+	    set nfirst $nfirstline
+	} else {
+	    set nfirst $elemStart($nstart)
+	}
+	for {set n $nfirst} {$n <= $nlines} {incr n} {
+	    append xml $content($n)
+	    if {$n < $nlines} {
+		append xml "\n"
+	    }
+	}
+    }
+    return [list $ntotal $xml]
 }
 
 # History::XImportOldToFile --
@@ -262,26 +560,7 @@ proc ::History::XImportOldToFile {jid fileName} {
     close $fd
 }
 
-proc ::History::XReadAllToXML {jid} {
-   
-    # Start by reading all xml from all files.
-    set xml ""
-    set files [XGetAllFileNames $jid]
-    foreach f $files {
-	if {[file readable $f]} {
-	    set fd [open $f r]
-	    fconfigure $fd -encoding utf-8
-	    append xml [read $fd]
-	    close $fd
-	}
-    }
-    
-    # Add root tags to make true xml.
-    set prefix "<?xml version='1.0' encoding='UTF-8'?>\n<log jid='$jid'>"
-    set postfix "</log>"    
-    return $prefix$xml$postfix
-}
-
+# SLOOOOOOOOOOOOOWWWWW!!!!!!
 proc ::History::XParseXMLAndSelect {xml args} {
     
     array set argsA {
@@ -382,8 +661,8 @@ proc ::History::XParseXMLAndSelect {xml args} {
 
 # History::XInsertText --
 # 
-#       Takes a xml formatted history files and inserts content into dialog
-#       text widget.
+#       Takes nxml and xml formatted history files and inserts content into 
+#       dialog text widget.
 # 
 # Arguments:
 
@@ -405,9 +684,11 @@ proc ::History::XInsertText {w} {
     set clockFormat         [option get $wchatframe clockFormat {}]
     set clockFormatNotToday [option get $wchatframe clockFormatNotToday {}]
 
-    set itemL [XParseFiles $jid]
-
-    #$wtext insert end "------------XML Based------------\n"
+    # Start with the nxml format since oldest.
+    set item1L [XParseNXMLToItemList $jid]
+    
+    # Then the true xml format.
+    set item2L [XParseXMLToItemList $jid]
     
     $wtext configure -state normal    
     $wtext mark set insert end
@@ -421,6 +702,8 @@ proc ::History::XInsertText {w} {
     
     # Keep track of own presence in the room of groupchat.
     set presence "unavailable"
+    
+    set itemL [concat $item1L $item2L]
     
     foreach itemE $itemL {
 	set itemTag [tinydom::tagname $itemE]
@@ -602,6 +885,7 @@ proc ::History::PutToFileEx {jid args} {
 # History::BuildHistory --
 #
 #       Builds history dialog for jid.
+#       Must work for all formats, old, nxml and xml.
 #       
 # Arguments:
 #       jid       2-tier jid
@@ -704,7 +988,7 @@ proc ::History::BuildHistory {jid dlgtype args} {
     # Always start by inserting any old style format first.
     InsertText $w
     
-    # New xml based format.
+    # nxml and xml based formats.
     XInsertText $w
     
     if {[$wtext index end] eq "1.0"} {
