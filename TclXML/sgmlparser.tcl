@@ -14,7 +14,7 @@
 # See the file "LICENSE" in this distribution for information on usage and
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# $Id: sgmlparser.tcl,v 1.7 2006-12-19 13:27:09 matben Exp $
+# $Id: sgmlparser.tcl,v 1.8 2007-02-01 14:54:31 matben Exp $
 
 package require sgml 1.9
 
@@ -606,7 +606,9 @@ proc sgml::parseEvent {sgml args} {
 			    }
 			} elseif {![regexp ^$Name\$ $tag]} {
 			    uplevel #0 $options(-errorcommand) [list illegalcharacter "illegal character in processing instruction target \"$tag\""]
-			} elseif {[regexp {[xX][mM][lL]} $tag]} {
+
+			    # Mats: to allow for "<?xml-stylesheet type='text/xsl' href='log.xsl'?>"
+			} elseif {0 && [regexp {[xX][mM][lL]} $tag]} {
 			    uplevel #0 $options(-errorcommand) [list illegalcharacters "characters \"xml\" not permitted in processing instruction target \"$tag\""]
 			} elseif {![regsub {\?$} $param {} param]} {
 			    uplevel #0 $options(-errorcommand) [list missingquestion "PI: expected '?' character around line $state(line)"]

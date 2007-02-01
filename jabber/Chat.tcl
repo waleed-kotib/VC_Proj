@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.189 2007-01-24 13:44:20 matben Exp $
+# $Id: Chat.tcl,v 1.190 2007-02-01 14:54:31 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -788,11 +788,14 @@ proc ::Chat::MakeAndInsertHistory {chattoken} {
     set chatstate(havehistory) 0
     
     # We cannot merge old and new formats.
+    # New format(s):
     if {[::History::XHaveHistory $jidH]} {
 	
 	# Write the selected item list to tmp file.
-	set itemL [::History::XParseFiles $jidH  \
-	  -last $jprefs(chat,histLen) -maxage $jprefs(chat,histAge)]
+	# We MUST take a snaphot of our history before first message to avoid
+	# any duplicates.
+	set itemL [::History::XFastParseFiles $jidH \
+	  $jprefs(chat,histLen) $jprefs(chat,histAge)]
 	
 	set fileH [::tfileutils::tempfile $this(tmpPath) ""]
 	set fd [open $fileH w]
@@ -803,17 +806,17 @@ proc ::Chat::MakeAndInsertHistory {chattoken} {
 	set chatstate(historyfile) $fileH
 	set chatstate(historytype) xml	
 	set chatstate(havehistory) 1
-    } else {
+	
+	# Old format:
+    } elseif {[::History::HaveMessageFile $jidH]} {
     
 	# We MUST take a snaphot of our history before first message to avoid
 	# any duplicates.
-	if {[::History::HaveMessageFile $jidH]} {
-	    set fileH [::tfileutils::tempfile $this(tmpPath) ""]
-	    file copy -force [::History::GetMessageFile $jidH] $fileH
-	    set chatstate(historyfile) $fileH
-	    set chatstate(historytype) old
-	    set chatstate(havehistory) 1
-	}
+	set fileH [::tfileutils::tempfile $this(tmpPath) ""]
+	file copy -force [::History::GetMessageFile $jidH] $fileH
+	set chatstate(historyfile) $fileH
+	set chatstate(historytype) old
+	set chatstate(havehistory) 1
     }
     HistoryCmd $chattoken
 }
@@ -821,6 +824,7 @@ proc ::Chat::MakeAndInsertHistory {chattoken} {
 # Chat::GetHistory --
 # 
 #       Find any matching history record and return as list.
+#       This is the OLD history format.
 
 proc ::Chat::GetHistory {chattoken args} {
     global  prefs this
@@ -2236,8 +2240,8 @@ proc ::Chat::Invite {dlgtoken} {
 	}
 
 	# We must reparse the history to get the latest.
-	set itemL [::History::XParseFiles $jidH  \
-	  -last $jprefs(chat,histLen) -maxage $jprefs(chat,histAge)]
+	set itemL [::History::XFastParseFiles $jidH  \
+	  $jprefs(chat,histLen) $jprefs(chat,histAge)]
 	foreach itemE $itemL {
 	    set xmppE [lindex [tinydom::children $itemE] 0]
 	    if {[tinydom::tagname $xmppE] eq "message"} {
@@ -2254,21 +2258,6 @@ proc ::Chat::Invite {dlgtoken} {
 		$jstate(jlib) send_message $roomjid -type groupchat  \
 		  -body $body -xlist [list $xelem]
 	    }
-	}
-	
-	# This is the old history; keep as backup.
-	if {0} {
-	    
-	    set result [GetHistory $chattoken -last $jprefs(chat,histLen) -maxage $jprefs(chat,histAge)]
-	    foreach elem $result {
-		array set arrResult $elem
-		set dateISO [clock format $arrResult(-secs) -format "%Y%m%dT%H:%M:%S"]
-		set xelem [wrapper::createtag "x"     \
-		  -attrlist [list xmlns jabber:x:delay from $arrResult(-name) stamp $dateISO]]
-		$jstate(jlib) send_message $roomjid -type groupchat  \
-		  -body $arrResult(-body) -xlist [list $xelem]
-	    }
-	    
 	}
 
 	# Third Invite the second user
