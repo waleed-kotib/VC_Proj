@@ -781,7 +781,8 @@
 ::msgcat::mcset nl nativeFrench				Français
 ::msgcat::mcset nl nativeGerman				Deutsch
 ::msgcat::mcset nl nativeItalian			Italiano
-::msgcat::mcset nl nativeKorean				한국�::msgcat::mcset nl nativePolish				Polski
+::msgcat::mcset nl nativeKorean				한국�
+::msgcat::mcset nl nativePolish				Polski
 ::msgcat::mcset nl nativeRussian			русский
 ::msgcat::mcset nl nativeSpanish			Castellano
 ::msgcat::mcset nl nativeSwedish			Svenska 
