@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.27 2007-02-03 06:42:06 matben Exp $
+# $Id: History.tcl,v 1.28 2007-02-03 06:43:49 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -220,9 +220,6 @@ proc ::History::XFastParseFiles {jid nlast maxage} {
     variable xmlPostfix
 
     if {[XHaveHistory $jid]} {
-	
-	set t [clock clicks -milliseconds]
-	
 	set files [XGetAllFileNames $jid]
 	set nleft $nlast
 	set elemL ""
@@ -239,14 +236,11 @@ proc ::History::XFastParseFiles {jid nlast maxage} {
 		break
 	    }	    
 	}
-	puts "XFastSelection: [expr [clock clicks -milliseconds]-$t]"
-	set t [clock clicks -milliseconds]
 
 	# Parse into xmllists to fit tcl.
 	set token [tinydom::parse $xmlPrefix$elemL$xmlPostfix]
 	set xmllist [tinydom::documentElement $token]
 	tinydom::cleanup $token
-	puts "tinydom::parse [expr [clock clicks -milliseconds]-$t]"
 	return [wrapper::getchildren $xmllist]
     } else {
 	return {}
