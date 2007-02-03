@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: IaxPrefs.tcl,v 1.7 2006-06-20 10:14:17 matben Exp $
+# $Id: IaxPrefs.tcl,v 1.8 2007-02-03 15:59:23 matben Exp $
 
 package provide IaxPrefs 0.1
 
@@ -15,7 +15,6 @@ namespace eval ::IaxPrefs {
     ::hooks::register prefsSaveHook             ::IaxPrefs::SavePrefsHook
     ::hooks::register prefsCancelHook           ::IaxPrefs::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook     ::IaxPrefs::UserDefaultsHook
-    ::hooks::register prefsDestroyHook          ::IaxPrefs::DestroyPrefsHook
 }
 
 ################## Preferences Stuff ###################
@@ -110,9 +109,12 @@ proc ::IaxPrefs::BuildPage {page} {
     grid  $waccount  -sticky ew -padx 8
     grid  $wnb       -sticky ew
     
-    $wnb add [DevicesFrame $wnb.de] -text [mc Devices]
+    # Switch off devices since can create a misery for some users!
+    #$wnb add [DevicesFrame $wnb.de] -text [mc Devices]
     $wnb add [FiltersFrame $wnb.fi] -text [mc Filters]
     #$wnb add [CodecsFrame  $wnb.co] -text [mc Codecs]
+
+    bind $page <Destroy> +[namespace current]::Free
 }
 
 proc ::IaxPrefs::AccountFrame {win} {
@@ -292,7 +294,7 @@ proc ::IaxPrefs::UserDefaultsHook { } {
     }
 }
 
-proc ::IaxPrefs::DestroyPrefsHook { } {
+proc ::IaxPrefs::Free { } {
     variable tmpPrefs
 
     unset -nocomplain tmpPrefs
