@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.164 2007-01-19 15:15:26 matben Exp $
+# $Id: jabberlib.tcl,v 1.165 2007-02-03 15:59:23 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -201,6 +201,9 @@ namespace eval jlib {
 	pubsub          http://jabber.org/protocol/pubsub
     }
     
+    # This is likely to change when XEP accepted.
+    set jxmlns(entitytime) "http://www.xmpp.org/extensions/xep-0202.html#ns"
+    
     # Auto away and extended away are only set when the
     # current status has a lower priority than away or xa respectively.
     # After an idea by Zbigniew Baniewski.
@@ -252,6 +255,7 @@ proc jlib::getxmlns {name} {
   
 proc jlib::new {clientcmd args} {    
 
+    variable jxmlns
     variable statics
     variable objectmap
     variable uid
@@ -336,7 +340,10 @@ proc jlib::new {clientcmd args} {
       [namespace current]::handle_get_time
     iq_register $jlibname get jabber:iq:version \
       [namespace current]::handle_get_version
-    
+
+    iq_register $jlibname get $jxmlns(entitytime) \
+      [namespace current]::handle_entity_time
+
     # Create the actual jlib instance procedure.
     proc $jlibname {cmd args}   \
       "eval jlib::cmdproc {$jlibname} \$cmd \$args"
@@ -3397,6 +3404,8 @@ proc jlib::handle_get_time {jlibname from subiq args} {
     
     array set argsA $args
     
+    # Applications using 'jabber:iq:time' SHOULD use the old format, 
+    # not the format defined in XEP-0082.
     set secs [clock seconds]
     set utc [clock format $secs -format "%Y%m%dT%H:%M:%S" -gmt 1]
     set tz "GMT"
@@ -3418,6 +3427,61 @@ proc jlib::handle_get_time {jlibname from subiq args} {
     eval {send_iq $jlibname "result" [list $xmllist]} $opts
 
     # Tell jlib's iq-handler that we handled the event.
+    return 1
+}
+
+# Support for XEP-0202 Entity Time.
+
+proc jlib::get_entity_time {jlibname to cmd} {
+    variable jxmlns
+
+    set xmllist [wrapper::createtag "time"  \
+      -attrlist [list xmlns $jxmlns(entitytime)]]
+    send_iq $jlibname "get" [list $xmllist] -to $to -command        \
+      [list [namespace current]::invoke_iq_callback $jlibname $cmd]
+    return
+}
+
+proc jlib::handle_entity_time {jlibname from subiq args} {    
+    variable jxmlns
+
+    array set argsA $args
+
+    # Figure out our time zone in terms of HH:MM.
+    # Compare with the GMT time and take the diff.
+    set secs [clock seconds]
+    set format "%S + 60*(%M + 60*(%H + 24*%j))"
+    set local [clock format $secs -format $format]
+    set gmt   [clock format $secs -format $format -gmt 1]
+
+    # Remove leading zeros since they will be interpreted as octals.
+    regsub -all {0+([1-9]+)} $local {\1} local
+    regsub -all {0+([1-9]+)} $gmt   {\1} gmt
+    set local [expr $local]
+    set gmt [expr $gmt]
+    set mindiff [expr {($local - $gmt)/60}]
+    set zhour [expr {$mindiff/60}]
+    set zmin [expr {$mindiff % 60}]
+    set tzo [format "%02d:%02d" $zhour $zmin]
+    
+    # 
+    # <utc>2006-12-19T17:58:35Z</utc> 
+    set utc [clock format $secs -format "%Y-%m-%dT%H:%M:%SZ" -gmt 1]
+
+    set subtags [list  \
+      [wrapper::createtag "tzo" -chdata $tzo] \
+      [wrapper::createtag "utc" -chdata $utc] ]
+    set xmllist [wrapper::createtag "time" -subtags $subtags  \
+      -attrlist [list xmlns $jxmlns(entitytime)]]
+
+    set opts {}
+    if {[info exists argsA(-from)]} {
+	lappend opts -to $argsA(-from)
+    }
+    if {[info exists argsA(-id)]} {
+	lappend opts -id $argsA(-id)
+    }
+    eval {send_iq $jlibname "result" [list $xmllist]} $opts
     return 1
 }
     

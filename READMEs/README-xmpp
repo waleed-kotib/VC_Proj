@@ -58,6 +58,7 @@ these XEPs have the form of a library or support protocol for other functions.
    0077 | In-Band Registration          | complete
    0078 | Non-SASL Authentication       | complete
    0085 | Chat State Notifications      | complete
+   0082 | XMPP Date and Time Profiles   | informational (see 0202)
    0090 | Entity Time                   | complete
    0091 | Delayed Delivery              | complete
    0092 | Software Version              | complete
@@ -73,6 +74,6 @@ these XEPs have the form of a library or support protocol for other functions.
    0166 | Jingle                        | complete
    0170 | Recommended Order of Stream.. | except for stream compression
    0179 | Jingle IAX Transport Method   | complete
-
+   0202 | Entity Time                   | understands but not speak before accepted
 
 
