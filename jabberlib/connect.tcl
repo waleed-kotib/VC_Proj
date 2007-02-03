@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2006-2007  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.21 2007-01-16 08:22:57 matben Exp $
+# $Id: connect.tcl,v 1.22 2007-02-03 06:42:06 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -756,7 +756,7 @@ proc jlib::connect::auth_cb {jlibname type queryE} {
     debug "jlib::connect::auth_cb type=$type, queryE=$queryE"
 
     if {$type eq "error"} {
-	foreach {errcode errmsg} $queryE break
+	lassign $queryE errcode errmsg
 	finish $jlibname $errcode $errmsg
     } else {
 

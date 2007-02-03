@@ -975,6 +975,8 @@
 ::msgcat::mcset kr starttls-failure       {"%s" 서버와의 TLS 교신 실패.}
 ::msgcat::mcset kr sasl-no-mechanisms     {이 서버는 SASL 인증을 지원하지 않습니다.}
 
+::msgcat::mcset kr sasl-protocol-error    {Authentication failed due to internal protocol error.}
+
 # A collective description of all stream errors.
 ::msgcat::mcset kr xmpp-streams-error     {서버로 부터 다음 코드의 스트림 오류 코드를 받았습니다: %s}
 

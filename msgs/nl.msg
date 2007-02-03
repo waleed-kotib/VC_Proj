@@ -968,6 +968,8 @@
 ::msgcat::mcset nl starttls-failure			{Beveiligd verbinden via TLS met server "%s" mislukte.}
 ::msgcat::mcset nl sasl-no-mechanisms			{De server ondersteunt authenticatie met SASL niet.}
 
+::msgcat::mcset nl sasl-protocol-error                  {Authentication failed due to internal protocol error.}
+
 # A collective description of all stream errors.
 ::msgcat::mcset nl xmpp-streams-error			{Streamfout van de server ontvangen met foutcode: %s}
 

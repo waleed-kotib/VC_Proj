@@ -978,6 +978,8 @@ iż Ty będziesz dostępny, podczas gdy Twoja wiadomość będzie czytana przez 
 ::msgcat::mcset pl starttls-failure       {Nieudana negocjacja TLS z serwerem "%s".}
 ::msgcat::mcset pl sasl-no-mechanisms     {Serwer nie ma możliwości uwierzytelniania poprzez mechanizm SASL.}
 
+::msgcat::mcset pl sasl-protocol-error    {Authentication failed due to internal protocol error.}
+
 # A collective description of all stream errors.
 ::msgcat::mcset pl xmpp-streams-error     {Sygnał błędu transmisji z serwera. Kod błędu: %s}
 

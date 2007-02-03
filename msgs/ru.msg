@@ -896,6 +896,7 @@ you happen to be online while this message is being read. Do you want to send it
 ::msgcat::mcset ru starttls-nofeature     {The server "%s" has no support for TLS.}
 ::msgcat::mcset ru starttls-failure       {TLS negotiating with server "%s" failed.}
 ::msgcat::mcset ru sasl-no-mechanisms     {The server has no support for SASL authentication.}
+::msgcat::mcset ru sasl-protocol-error    {Authentication failed due to internal protocol error.}
 
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration 

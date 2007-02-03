@@ -1009,6 +1009,8 @@
 ::msgcat::mcset es starttls-failure       {Error durante la conexion TLS con el servidor "%s".}
 ::msgcat::mcset es sasl-no-mechanisms     {El servidor no soporta la autenticacion via SASL.}
 
+::msgcat::mcset es sasl-protocol-error    {Authentication failed due to internal protocol error.}
+
 # A collective description of all stream errors.
 ::msgcat::mcset es xmpp-streams-error     {Se ha recibido un error del servidor con el codigo: %s}
 
