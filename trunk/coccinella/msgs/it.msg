@@ -978,6 +978,8 @@
 ::msgcat::mcset it starttls-failure {Errore durante la negoziazione TLS con il server "%s".}
 ::msgcat::mcset it sasl-no-mechanisms     {Il server non ha il supporto per l'autenticazione SASL.}
 
+::msgcat::mcset it sasl-protocol-error    {Authentication failed due to internal protocol error.}
+
 # A collective description of all stream errors.
 ::msgcat::mcset it xmpp-streams-error {Ricevuto un errore di flusso dati dal server con codice: %s}
 

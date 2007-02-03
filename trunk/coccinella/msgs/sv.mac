@@ -973,7 +973,8 @@ där användarnamnet är okänt).}
 
 ::msgcat::mcset sv starttls-nofeature     {Servern "%s" saknar stöd för TLS.}
 ::msgcat::mcset sv starttls-failure        {TLS förhandling med servern "%s" misslyckades.}
-::msgcat::mcset sv sasl-no-mechanisms     {The server has no support for SASL authentication.}
+::msgcat::mcset sv sasl-no-mechanisms     {Servern saknar stöd för SASL autentisering.}
+::msgcat::mcset sv sasl-protocol-error    {Autentiseringen misslyckades på grund av ett protokoll fel.} 
 
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration 

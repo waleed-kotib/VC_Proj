@@ -1003,6 +1003,7 @@ you happen to be online while this message is being read. Do you want to send it
 ::msgcat::mcset fr starttls-nofeature     {Le serveur "%s" ne supporte pas le TLS.}
 ::msgcat::mcset fr starttls-failure       {Erreur lors de la sécurisation TLS avec le serveur "%s".}
 ::msgcat::mcset fr sasl-no-mechanisms     {The server has no support for SASL authentication.}
+::msgcat::mcset fr sasl-protocol-error    {Authentication failed due to internal protocol error.}
 
 # A collective description of all stream errors.
 ::msgcat::mcset fr xmpp-streams-error {We received a stream error from the server with code: %s}

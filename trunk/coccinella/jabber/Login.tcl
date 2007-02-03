@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.110 2007-01-27 14:59:26 matben Exp $
+# $Id: Login.tcl,v 1.111 2007-02-03 06:42:06 matben Exp $
 
 package provide Login 1.0
 
@@ -702,6 +702,9 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	}
 	sasl-no-mechanisms {
 	    set str [mc sasl-no-mechanisms]
+	}
+	sasl-protocol-error {
+	    set str [mc sasl-protocol-error]
 	}
 	xmpp-streams-error* {
 	    set streamstag ""

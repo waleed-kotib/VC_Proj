@@ -989,6 +989,8 @@ wenn Sie nicht online sind, während diese Nachricht gelesen wird. Möchten Sie tr
 ::msgcat::mcset de starttls-failure        {TLS-Aushandlung mit Server "%s" fehlerhaft.}
 ::msgcat::mcset de sasl-no-mechanisms     {Der Server bietet keine Unterstützung für SASL-Authentifizierung.}
 
+::msgcat::mcset de sasl-protocol-error    {Authentication failed due to internal protocol error.}
+
 # A collective description of all stream errors.
 ::msgcat::mcset de xmpp-streams-error           {Stream-Fehler vom Server mit Code: %s}
 

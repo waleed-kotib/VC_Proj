@@ -11,7 +11,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #  
-# $Id: Iax.tcl,v 1.19 2007-02-01 14:54:31 matben Exp $
+# $Id: Iax.tcl,v 1.20 2007-02-03 06:42:06 matben Exp $
 
 namespace eval ::Iax {
 
@@ -19,7 +19,7 @@ namespace eval ::Iax {
 }
 
 proc ::Iax::Init { } {
-
+    
     if {![component::exists Phone]} {
 	return
     }
@@ -33,7 +33,7 @@ proc ::Iax::Init { } {
 	return
     }
     component::register IAX "Provides the iax client softphone."
-    
+
     ::Phone::RegisterPhone iax "IAX Phone"  \
       ::Iax::InitProc ::Iax::CmdProc ::Iax::DeleteProc
     
@@ -50,9 +50,9 @@ proc ::Iax::Init { } {
     
     # @@@ temporary
     ::Phone::SetPhone iax
-    
-    ::JingleIAX::Init
 
+    ::JingleIAX::Init
+    
     # Keep track of internal iaxclient state to be able to detect changes.
     variable iaxstate
     set iaxstate(old) "free"
@@ -77,7 +77,7 @@ proc ::Iax::InitProc {} {
 proc ::Iax::CmdProc {type args} {
     variable iaxstate
     
-    ::Debug 4 "::Iax::CmdProc $type"
+    ::Debug 4 "::Iax::CmdProc $type $args"
     
     set value [lindex $args 0]
 
