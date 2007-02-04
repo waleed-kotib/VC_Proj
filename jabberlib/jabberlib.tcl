@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.165 2007-02-03 15:59:23 matben Exp $
+# $Id: jabberlib.tcl,v 1.166 2007-02-04 15:27:59 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3448,8 +3448,14 @@ proc jlib::handle_entity_time {jlibname from subiq args} {
     array set argsA $args
 
     # Figure out our time zone in terms of HH:MM.
-    # Compare with the GMT time and take the diff.
+    # Compare with the GMT time and take the diff. Avoid year wrap around.
     set secs [clock seconds]
+    set day [clock format $secs -format "%j"]
+    if {$day eq "001"} {
+	incr secs [expr {24*60*60}]
+    } elseif {($day eq "365") || ($day eq "366")} {
+	incr secs [expr {-2*24*60*60}]    
+    }
     set format "%S + 60*(%M + 60*(%H + 24*%j))"
     set local [clock format $secs -format $format]
     set gmt   [clock format $secs -format $format -gmt 1]
@@ -3460,11 +3466,12 @@ proc jlib::handle_entity_time {jlibname from subiq args} {
     set local [expr $local]
     set gmt [expr $gmt]
     set mindiff [expr {($local - $gmt)/60}]
-    set zhour [expr {$mindiff/60}]
+    set sign [expr {$mindiff >= 0 ? "" : "-"}]
+    set zhour [expr {abs($mindiff)/60}]
     set zmin [expr {$mindiff % 60}]
-    set tzo [format "%02d:%02d" $zhour $zmin]
+    set tzo [format "$sign%.2d:%.2d" $zhour $zmin]
     
-    # 
+    # Time format according to XEP-0082 (XMPP Date and Time Profiles).
     # <utc>2006-12-19T17:58:35Z</utc> 
     set utc [clock format $secs -format "%Y-%m-%dT%H:%M:%SZ" -gmt 1]
 

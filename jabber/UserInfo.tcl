@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.15 2006-09-13 07:56:01 matben Exp $
+# $Id: UserInfo.tcl,v 1.16 2007-02-04 15:27:59 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -68,6 +68,12 @@ proc ::UserInfo::Get {jid {node ""}} {
     $jlib get_time $jid [list [namespace current]::TimeCB $token]
     incr priv(ncount)
 
+    # Entity time XEP-0202. Switch on when accepted and in common use.
+    if {0} {
+	$jlib get_entity_time $jid [list [namespace current]::EntityTimeCB $token]
+	incr priv(ncount)
+    }
+    
     # vCard
     if {$room} {
 	$jlib vcard send_get $jid [list [namespace current]::VCardCB $token]
@@ -234,6 +240,33 @@ proc ::UserInfo::TimeCB {token jlibname type subiq} {
 	AddError $token $str1
     } else {
 	set str [::Jabber::GetTimeString $subiq]
+	set priv(strtime) [mc jamesslocaltime $jid $str]
+    }    
+}
+
+proc ::UserInfo::EntityTimeCB {token jlibname type subiq} {
+    
+    if {![Exists $token]} {
+	return
+    }
+    upvar ${token}::priv priv    
+
+    incr priv(ncount) -1
+    if {$priv(ncount) <= 0} {
+	$priv(warrow) stop
+    }
+    
+    set jid $priv(jid)
+
+    if {$type eq "error"} {
+	set str [mc {Local Time}]
+	append str "\n"
+	set str1 [mc jamesserrtime $jid [lindex $subiq 1]]
+	append str $str1
+	::Jabber::AddErrorLog $jid $str1
+	AddError $token $str1
+    } else {
+	set str [::Jabber::GetEntityTimeString $subiq]
 	set priv(strtime) [mc jamesslocaltime $jid $str]
     }    
 }

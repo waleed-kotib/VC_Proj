@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.195 2007-01-27 14:59:26 matben Exp $
+# $Id: Jabber.tcl,v 1.196 2007-02-04 15:27:59 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1555,8 +1555,8 @@ proc ::Jabber::GetTimeString {subiq} {
     
     # Display the cdata of <display>, or <utc>.
     foreach child [wrapper::getchildren $subiq] {
-	set tag [lindex $child 0]
-	set $tag [lindex $child 3]
+	set tag  [wrapper::gettag $child]
+	set $tag [wrapper::getcdata $child]
     }
     if {[info exists display]} {
 	set msg $display
@@ -1566,6 +1566,43 @@ proc ::Jabber::GetTimeString {subiq} {
 	# ???
     } else {
 	set msg "unknown"
+    }
+    return $msg
+}
+
+proc ::Jabber::GetEntityTimeString {timeE} {
+    
+    foreach child [wrapper::getchildren $timeE] {
+	set tag  [wrapper::gettag $child]
+	set $tag [wrapper::getcdata $child]
+    }
+    if {![info exists tzo] || ![info exists utc]} {
+	return ""
+    }
+    set msg ""
+    
+    # NB: 'clock scan' can't be applied directly due to the time zone suffix!
+    # Typical values:  01:00  -06:00 etc.
+    if {[regexp {(^.+[0-9])([^0-9]*)$} $utc - utc1 utc2]} {
+	if {[catch {clock scan $utc1} secs]} {
+	    return ""
+	}
+	
+	# NOT YET WORKING!!!!!!!!!!!!!!!!!!
+	
+	lassign [split $tzo :] hours minutes
+	if {[string match -* $hours]} {
+	    set sign -1
+	} else {
+	    set sign +1
+	}
+
+	# Remove leading zeros since they will be interpreted as octals.
+	regsub {0+([1-9])} $hours {\1} hours
+	regsub {0+([1-9])} $hours {\1} h
+	set offset [expr {$sign*60*($minutes + 60*$hours)}]
+	incr secs $offset
+	set msg [clock format $secs -format "%c"]
     }
     return $msg
 }
