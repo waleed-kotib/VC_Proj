@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.61 2007-01-27 14:59:26 matben Exp $
+# $Id: Register.tcl,v 1.62 2007-02-04 15:27:59 matben Exp $
 
 package provide Register 1.0
 
@@ -722,7 +722,9 @@ namespace eval ::GenRegister:: {
 #       Uses iq get-set method.
 #       
 # Arguments:
-#       args   -server, -autoget 0/1
+#       args   -server
+#              -autoget 0/1
+#              -serverstate (combobox -state)
 #       
 # Results:
 #       "cancel" or "register".
@@ -740,7 +742,8 @@ proc ::GenRegister::NewDlg {args} {
     variable $token
     upvar 0 $token state
 
-    array set argsArr $args
+    set argsA(-serverstate) readonly
+    array set argsA $args
 
     set w $wDlgs(jreg)${uid}
     set state(w)          $w
@@ -792,15 +795,15 @@ proc ::GenRegister::NewDlg {args} {
     # Get all (browsed) services that support registration.
     set regServers [$jstate(jlib) disco getjidsforfeature "jabber:iq:register"]
     set wcomboserver $frserv.eserv
-    ttk::combobox $wcomboserver -state readonly  \
+    ttk::combobox $wcomboserver -state $argsA(-serverstate)  \
       -textvariable $token\(server) -values $regServers
     
     # Find the default registration server.
     if {$regServers != {}} {
 	set state(server) [lindex $regServers 0]
     }
-    if {[info exists argsArr(-server)]} {
-	set state(server) $argsArr(-server)
+    if {[info exists argsA(-server)]} {
+	set state(server) $argsA(-server)
 	$wcomboserver state {disabled}
     }
     pack $frserv -side top -anchor w -fill x
@@ -864,7 +867,7 @@ proc ::GenRegister::NewDlg {args} {
     } $wbox.msg $w $w $w]    
     #after idle $script
 
-    if {[info exists argsArr(-autoget)] && $argsArr(-autoget)} {
+    if {[info exists argsA(-autoget)] && $argsA(-autoget)} {
 	after idle [list [namespace current]::Get $token]
     }
     wm resizable $w 0 0
@@ -1022,7 +1025,7 @@ proc ::GenRegister::Simple {w args} {
     if {[winfo exists $w]} {
 	return
     }
-    array set argsArr $args
+    array set argsA $args
     
     ::UI::Toplevel $w -class JRegister -macstyle documentProc \
       -usemacmainmenu 1 -macclass {document closeBox}
@@ -1081,8 +1084,8 @@ proc ::GenRegister::Simple {w args} {
     if {$regServers != {}} {
 	set server [lindex $regServers 0]
     }
-    if {[info exists argsArr(-server)]} {
-	set server $argsArr(-server)
+    if {[info exists argsA(-server)]} {
+	set server $argsA(-server)
 	$wmid.combo state disabled
     }
 
