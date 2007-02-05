@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: UserActions.tcl,v 1.46 2006-08-20 13:41:19 matben Exp $
+# $Id: UserActions.tcl,v 1.47 2007-02-05 14:54:17 matben Exp $
 
 package provide UserActions 1.0
 
@@ -103,6 +103,9 @@ proc ::UserActions::DoConnect { } {
     }
 }
 
+# @@@ Much of this should be put in a kind of application destructor.
+#     Maybe as: bind <Destroy> . Destructor
+
 # UserActions::DoQuit ---
 #
 #       Is called just before quitting to be able to save various
@@ -160,6 +163,8 @@ proc ::UserActions::DoQuit {args} {
          
     # Save to the preference file and quit...
     ::PrefUtils::SaveToFile
+    
+    file delete $this(pidFile)
         
     # Cleanup. Beware, no windows with open movies must exist here!
     catch {file delete -force $this(tmpPath)}

@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It sets up the global 'this' array for useful things.
 #      
-#  Copyright (c) 2004-2006  Mats Bengtsson
+#  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.58 2007-02-03 06:42:06 matben Exp $
+# $Id: Init.tcl,v 1.59 2007-02-05 14:54:17 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -143,6 +143,24 @@ proc ::Init::SetThis {mainScript} {
     
     # Find user name.
     set this(username) [GetUserName]
+    
+    # Write a pid file with our pid that gets deleted when quit.
+    # This is a way to detect if we are running.
+    set this(pidFile) [file join $this(prefsPath) coccinella.pid]
+    set fd [open $this(pidFile) w]
+    puts -nonewline $fd [pid]
+    close $fd
+    
+    # Write a file to the prefs dir with our execution path.
+    if {[info exists ::starkit::topdir]} {
+	set exe [file nativename [info nameofexecutable]]
+    } else {
+	set exe "wish \"$mainScript\""
+    }
+    set this(execFile) [file join $this(prefsPath) launchCmd]
+    set fd [open $this(execFile) w]
+    puts -nonewline $fd $exe
+    close $fd
 }
 
 # Init::GetDefaultPrefsPath --
