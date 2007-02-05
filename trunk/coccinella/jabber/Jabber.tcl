@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.197 2007-02-05 07:52:20 matben Exp $
+# $Id: Jabber.tcl,v 1.198 2007-02-05 14:54:17 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1585,9 +1585,9 @@ proc ::Jabber::GetEntityTimeString {timeE} {
     # Typical values:  01:00  -06:00 etc.
     if {[regexp {(^.+[0-9])([^0-9]*)$} $utc - utc1 utc2]} {
 	
-	# ERROR: I get 5 hours diff here compared to original value!
-	# Something wrong with 'clock scan' and this format!
-
+	# NB; I get 5 hours diff here compared to original value
+	# if using 'clock scan' directly on utc1! Skip the "T".
+	regsub {T} $utc1 { } utc1
 	if {[catch {clock scan $utc1 -gmt 1} secs]} {
 	    return ""
 	}
