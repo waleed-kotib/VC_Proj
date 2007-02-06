@@ -21,6 +21,7 @@ component::attempt Speech       [file join $dir Speech.tcl]      ::Speech::Load
 component::attempt SpotLight    [file join $dir SpotLight.tcl]   ::SpotLight::Init    
 component::attempt TtkDialog    [file join $dir TtkDialog.tcl]   ::TtkDialog::Init
 component::attempt URIRegistry  [file join $dir URIRegistry.tcl] ::URIRegistry::Init
+component::attempt URIRegisterKDE  [file join $dir URIRegisterKDE.tcl] URIRegisterKDE::Init
 component::attempt WhiteboardMK [file join $dir WhiteboardMK.tcl]  ::WhiteboardMK::Init
 
 if {[tk windowingsystem] eq "aqua"} {
