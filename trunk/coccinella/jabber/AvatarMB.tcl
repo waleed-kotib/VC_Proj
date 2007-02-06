@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.10 2006-12-15 08:07:14 matben Exp $
+# $Id: AvatarMB.tcl,v 1.11 2007-02-06 15:16:10 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -89,6 +89,13 @@ proc ::AvatarMB::InitPrefsHook { } {
     global  prefs
     
     set prefs(dir,avatarPick) ""
+    if {[tk windowingsystem] eq "aqua"} {
+	# gif and 48x48 
+	set iChatPath [file nativename "~/Pictures/iChat Icons/"]
+	if {[file isdirectory $iChatPath]} {
+	    set prefs(dir,avatarPick) $iChatPath
+	}
+    }
     ::PrefUtils::Add [list  \
       [list prefs(dir,avatarPick)  prefs_dir_avatarPick  $prefs(dir,avatarPick)]]
 }
