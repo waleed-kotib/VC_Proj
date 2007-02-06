@@ -14,8 +14,21 @@
 
 You can put an url in a web page to launch The Coccinella. Use a link:
 <a href="xmpp:matben@athlon.se">xmpp:matben@athlon.se</a>
-This works presently only on Windows, and you need to launch Coccinella
+This works presently only on Windows and on unix systems with the KDE
+environment:
+
+<UL TYPE="SQUARE">
+    <LI>On <B>Windows</B> you need to launch Coccinella
 at least once with administrator privilegies to make it work.
+    <LI>On <B>KDE</B> systems it writes a file ~/.kde/share/services/xmpp.protocol the 
+first time Coccinella is launched, which is in turn used by KDE to
+communicate with The Coccinella. It seems that the desktop environment
+caches this info so a second login may be necessary for this to take effect.
+Not all web browsers seem to understand the KDE desktop but at least
+Konqueror does.
+</UL>
+
+<p>
 Note that the JID you supplu in the uri is <EM>not</EM> your own login JID
 but the target address for any action specified.
 The login uses the active profile in the application, not the JID in the uri!

@@ -21,6 +21,7 @@ Coccinella-0.95.16 (200702??):
  o chat subject now set by pressing Return in subject field
  o users name attribute can now be edited directly in situ (in roster)
  o faster chat history parsing
+ o added uri support for the KDE desktop environment
 
 Coccinella-0.95.15 (20061117):
 
