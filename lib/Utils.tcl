@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.61 2006-12-21 11:23:47 matben Exp $
+# $Id: Utils.tcl,v 1.62 2007-02-07 13:24:37 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -686,7 +686,9 @@ proc ::Text::ParseURI {w word} {
 }
 
 proc ::Text::UrlButton {url} {
-    if {![regexp {^http://.+} $url]} {
+
+    # If no xxx:// assume http://
+    if {![regexp {^[a-z]+://} $url]} {
 	set url "http://$url"
     }
     if {[::Utils::IsWellformedUrl $url]} {
