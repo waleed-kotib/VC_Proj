@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2006  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.80 2006-11-16 14:28:54 matben Exp $
+# $Id: MUC.tcl,v 1.81 2007-02-07 09:01:16 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -97,6 +97,8 @@ namespace eval ::MUC:: {
 # MUC::Invite --
 # 
 #       Make an invitation to a room.
+#       NB: Keep the 'invite' state array untile we close/cancel or until
+#           we get a response.
 
 proc ::MUC::Invite {roomjid {continue ""}} {
     global this wDlgs
@@ -173,7 +175,7 @@ proc ::MUC::Invite {roomjid {continue ""}} {
     ttk::button $frbot.btok -text [mc OK]  \
       -default active -command [list [namespace current]::DoInvite $token]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::CancelInvite $token]
+      -command [list [namespace current]::InviteClose $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btok -side right
@@ -186,37 +188,25 @@ proc ::MUC::Invite {roomjid {continue ""}} {
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
-    
-    # Grab and focus.
-    set oldFocus [focus]
     focus $wmid.ejid
-    
-    # Wait here for a button press and window to be destroyed.
-    tkwait variable $token\(finished)
-
-    catch {focus $oldFocus}
-    ::UI::SaveWinGeom $wDlgs(jmucinvite) $w
-    catch {destroy $invite(w)}
-    set finished $invite(finished)
-    unset invite
-    return [expr {($finished <= 0) ? "cancel" : "ok"}]
 }
 
-proc ::MUC::InviteCloseCmd {token wclose} {
+proc ::MUC::InviteClose {token} {    
     global  wDlgs
     variable $token
     upvar 0 $token invite
 
-    ::UI::SaveWinGeom $wDlgs(jmucinvite) $invite(w)
-    set invite(finished) 0
-    return
+    ::UI::SaveWinPrefixGeom $wDlgs(jmucinvite)
+    destroy $invite(w)
+    
+    # Be sure to keep state array if sent out an invitation.
+    if {$invite(finished) != 1} {
+	unset -nocomplain invite
+    }
 }
 
-proc ::MUC::CancelInvite {token} {
-    variable $token
-    upvar 0 $token invite
-
-    set invite(finished) 0
+proc ::MUC::InviteCloseCmd {token wclose} {
+    InviteClose $token
 }
 
 proc ::MUC::DoInvite {token} {
@@ -228,8 +218,10 @@ proc ::MUC::DoInvite {token} {
     set reason   $invite(reason)
     set roomjid  $invite(roomjid)
     set continue $invite(continue)
-    InviteCloseCmd $token $invite(w)
-    
+
+    set invite(finished) 1
+    InviteClose $token
+
     set opts [list -command [list [namespace current]::InviteCB $token]]
     if {$reason ne ""} {
 	set opts [list -reason $reason]
@@ -239,25 +231,24 @@ proc ::MUC::DoInvite {token} {
     }
 
     eval {$jstate(jlib) muc invite $roomjid $jid} $opts
-    set invite(finished) 1
 }
 
 proc ::MUC::InviteCB {token jlibname type args} {
     variable $token
     upvar 0 $token invite
     
-    array set argsArr $args
+    array set argsA $args
     
     if {$type eq "error"} {
 	set msg [mc mucErrInvite $invite(jid) $invite(roomjid)]
-	if {[info exists argsArr(-error)]} {
-	    set errcode [lindex $argsArr(-error) 0]
-	    set errmsg [lindex $argsArr(-error) 1]
+	if {[info exists argsA(-error)]} {
+	    set errcode [lindex $argsA(-error) 0]
+	    set errmsg [lindex $argsA(-error) 1]
 	    append msg " " [mc mucErrInviteCode $errmsg]
 	}
 	::UI::MessageBox -icon error -title [mc Error] -type ok -message $msg
     }
-    unset invite
+    unset -nocomplain invite
 }
 
 # MUC::MUCMessage --
@@ -270,12 +261,12 @@ proc ::MUC::MUCMessage {jlibname xmlns msgElem args} {
     # This seems handled by the muc component by sending a message.
     return
    
-    array set argsArr $args
-    if {![info exists argsArr(-x)]} {
+    array set argsA $args
+    if {![info exists argsA(-x)]} {
 	return
     }
-    set from $argsArr(-from)
-    set xlist $argsArr(-x)
+    set from $argsA(-from)
+    set xlist $argsA(-x)
     
     set invite 0
     foreach c [wrapper::getchildren $xlist] {
