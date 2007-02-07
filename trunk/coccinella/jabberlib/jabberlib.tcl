@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.166 2007-02-04 15:27:59 matben Exp $
+# $Id: jabberlib.tcl,v 1.167 2007-02-07 09:02:14 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2981,6 +2981,7 @@ proc jlib::send_message {jlibname to args} {
 	set msgcmd($uid) $argsA(-command)
 	incr msgcmd(uid)
 	lappend args -id $uid
+	unset argsA(-command)
 	
 	# There exist a weird situation if we send to ourself.
 	# Skip this registered command the 1st time we get this,
@@ -2990,7 +2991,7 @@ proc jlib::send_message {jlibname to args} {
 	}
 	
     }
-    set xmllist [eval {send_message_xmllist $to} $args]
+    set xmllist [eval {send_message_xmllist $to} [array get argsA]]
     send $jlibname $xmllist
     return
 }
