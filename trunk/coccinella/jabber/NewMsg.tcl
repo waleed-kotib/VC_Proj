@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the new message dialog fo the jabber part.
 #      
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.77 2007-01-27 14:59:26 matben Exp $
+# $Id: NewMsg.tcl,v 1.78 2007-02-08 14:57:24 matben Exp $
 
 package require ui::entryex
 
@@ -161,6 +161,7 @@ proc ::NewMsg::OnMenu {} {
 # Arguments:
 #       args   ?-to jid -subject theSubject -quotemessage msg -time time
 #              -forwardmessage msg -message msg -tolist jidlist?
+#              -replyxmldata xmldata -forwardxmldata xmldata
 #       
 # Results:
 #       shows window.
@@ -171,16 +172,21 @@ proc ::NewMsg::Build {args} {
     variable locals  
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
-    
+
     ::Debug 2 "::NewMsg::Build args='$args'"
 
     # One shot initialization (static) and dynamic initialization.
     if {!$locals(inited)} {
-	NewMsg::Init
+	Init
     }
-    NewMsg::InitEach
+    InitEach
    
     set w $wDlgs(jsendmsg)[incr locals(dlguid)]
+    
+    # TODO: instead use
+    variable $w
+    upvar 0 $w state
+    
     set locals($w,num) $locals(dlguid)
     if {[winfo exists $w]} {
 	return
@@ -196,7 +202,16 @@ proc ::NewMsg::Build {args} {
     }
     array set opts $args
     set locals($w,subject) $opts(-subject)
-    if {$opts(-quotemessage) == ""} {
+    set locals($w,xdata) 0
+
+    if {[info exists opts(-replyxmldata)] && [llength $opts(-replyxmldata)]} {
+	set xdataE [wrapper::getfirstchild $opts(-replyxmldata) x "jabber:x:data"]
+	if {[llength $xdataE]} {
+	    set locals($w,xdata) 1
+	    set locals($w,xdataE) $xdataE
+	}
+    }
+    if {($opts(-quotemessage) eq "") || $locals($w,xdata)} {
 	set quotestate "disabled"
     } else {
 	set quotestate "normal"
@@ -206,11 +221,6 @@ proc ::NewMsg::Build {args} {
     ::UI::Toplevel $w -class NewMsg \
       -usemacmainmenu 1 -macstyle documentProc -closecommand ::NewMsg::CloseHook
     wm title $w [mc {New Message}]
-    
-    # Toplevel menu for mac only.
-    if {[string match "mac*" $this(platform)]} {
-	$w configure -menu [::JUI::GetRosterWmenu]
-    }
     
     # Global frame.
     ttk::frame $w.frall
@@ -255,7 +265,7 @@ proc ::NewMsg::Build {args} {
 	    set wtray $wtop.tray
 	    ::ttoolbar::ttoolbar $wtray
 	    pack $wtray -side $buttonRowSide -fill y
-	    if {$topBannerImage == ""} {
+	    if {$topBannerImage eq ""} {
 		pack $wtray -fill both -expand 1
 	    }
 	}
@@ -263,16 +273,16 @@ proc ::NewMsg::Build {args} {
 	    set wtray $wbot.tray
 	    ::ttoolbar::ttoolbar $wtray
 	    pack $wtray -side $buttonRowSide -fill y
-	    if {$botBannerImage == ""} {
+	    if {$botBannerImage eq ""} {
 		pack $wtray -fill both -expand 1
 	    }
 	}
     }
-    if {$topBannerImage != ""} {
+    if {$topBannerImage ne ""} {
 	ttk::label $wtop.banner -anchor $buttonAnchor -image $topBannerImage
 	pack  $wtop.banner -side $buttonRowSide -fill x -expand 1
     }
-    if {$botBannerImage != ""} {
+    if {$botBannerImage ne ""} {
 	ttk::label $wbot.banner -anchor $buttonAnchor -image $botBannerImage
 	pack  $wbot.banner -side $buttonRowSide -fill x -expand 1
     }
@@ -350,18 +360,33 @@ proc ::NewMsg::Build {args} {
     pack  [::Emoticons::MenuButton $frsub.smile -text $wtext] -side right
     pack  [ttk::frame $frsub.space] -side right
     
-    # Text.
-    frame $wtxt -bd 1 -relief sunken
-    pack  $wtxt -side top -fill both -expand 1
-    text $wtext -height 8 -width 48 -wrap word \
-      -yscrollcommand [list ::UI::ScrollSet $wysc \
-      [list grid $wysc -column 1 -row 0 -sticky ns]]
-    ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
-    grid  $wtext  -column 0 -row 0 -sticky news
-    grid  $wysc   -column 1 -row 0 -sticky ns
-    grid columnconfigure $wtxt 0 -weight 1
-    grid rowconfigure $wtxt 0 -weight 1
-
+    # @@@ Maybe this should be handled more systematically?
+    if {$locals($w,xdata)} {
+	::UI::ScrollFrame $wtxt -padding {8 12} -bd 1 -relief sunken \
+	  -propagate 0
+	set wint [::UI::ScrollFrameInterior $wtxt]
+	set wform $wint.form
+	set formtoken [::JForms::XDataFrame $wform $xdataE -tilestyle Small]
+	pack $wform -fill both -expand 1	
+	pack  $wtxt -side top -fill both -expand 1
+	
+	set locals($w,formtoken) $formtoken
+	$frsub.smile state {disabled}
+    } else {
+    
+	# Text.
+	frame $wtxt -bd 1 -relief sunken
+	pack  $wtxt -side top -fill both -expand 1
+	text $wtext -height 8 -width 48 -wrap word \
+	  -yscrollcommand [list ::UI::ScrollSet $wysc \
+	  [list grid $wysc -column 1 -row 0 -sticky ns]]
+	ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
+	grid  $wtext  -column 0 -row 0 -sticky news
+	grid  $wysc   -column 1 -row 0 -sticky ns
+	grid columnconfigure $wtxt 0 -weight 1
+	grid rowconfigure $wtxt 0 -weight 1
+    }
+    
     set locals($w,w)        $w
     set locals($w,wtext)    $wtext
     set locals($w,waddcan)  $waddcan
@@ -372,12 +397,12 @@ proc ::NewMsg::Build {args} {
     set locals($w,finished) 0
     set locals($w,wtray)    $wtray
     
-    if {$opts(-forwardmessage) != ""} {
+    if {$opts(-forwardmessage) ne ""} {
 	$wtext insert end "\nForwarded message from $opts(-to) written at $opts(-time)\n\
 --------------------------------------------------------------------\n\
 $opts(-forwardmessage)"
     }
-    if {$opts(-message) != ""} {
+    if {$opts(-message) ne ""} {
 	$wtext insert end $opts(-message)
     }
     
@@ -594,7 +619,7 @@ proc ::NewMsg::BackSpaceInAddr {w wfr n} {
     if {$n == 1} {
 	return
     }
-    if {$locals($w,addr$n) == ""} {
+    if {$locals($w,addr$n) eq ""} {
 	
 	# Shift all lines below this one up one step, empty last one,
 	# and if more than 4 lines, delete it completely.
@@ -795,13 +820,11 @@ proc ::NewMsg::DoSend {w} {
     global  prefs wDlgs
     
     variable locals
-    upvar ::Jabber::jstate jstate
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
 	::UI::MessageBox -type ok -icon error -parent $w \
-	  -title [mc {Not Connected}] \
-	  -message [mc jamessnotconnected]
+	  -title [mc {Not Connected}] -message [mc jamessnotconnected]
 	return
     }
     
@@ -819,13 +842,13 @@ proc ::NewMsg::DoSend {w} {
 		    set type ok
 		}
 		set ans [::UI::MessageBox -type $type -parent $w -message $msg]
-		if {$ans == "yes"} {
+		if {$ans eq "yes"} {
 		    continue
-		} elseif {$ans == "no"} {
+		} elseif {$ans eq "no"} {
 		    return
-		} elseif {$ans == "cancel"} {
+		} elseif {$ans eq "cancel"} {
 		    return
-		} elseif {$ans == "ok"} {
+		} elseif {$ans eq "ok"} {
 		    return
 		}
 	    }
@@ -839,18 +862,23 @@ proc ::NewMsg::DoSend {w} {
 	  -icon error -type ok -parent $w -message [mc jamessaddrmiss]
 	return
     }
-    set wtext $locals($w,wtext)
-    set str [string trimright [::Text::TransformToPureText $wtext]]
-    
-    if {[string length $locals($w,subject)] > 0} {
-	set subopt [list -subject $locals($w,subject)]
+    set opts [list]
+    set xmllist [list]
+    set str ""
+    if {$locals($w,xdata)} {
+	lappend opts -xlist [::JForms::GetXDataForm $locals($w,formtoken)]
     } else {
-	set subopt {}
-    }
-    if {[string length $str] || [llength $subopt]} {
-	foreach jid $addrList {
-	    eval {::Jabber::JlibCmd send_message $jid} $subopt {-body $str}
+	set wtext $locals($w,wtext)
+	set str [string trimright [::Text::TransformToPureText $wtext]]
+	if {[string length $str]} {
+	    lappend opts -body $str
 	}
+    }
+    if {[string length $locals($w,subject)] > 0} {
+	lappend opts -subject $locals($w,subject)
+    }
+    foreach jid $addrList {
+	eval {::Jabber::JlibCmd send_message $jid} $opts
     }
     set locals($w,finished) 1
     ::UI::SaveWinGeom $wDlgs(jsendmsg) $w
@@ -860,7 +888,6 @@ proc ::NewMsg::DoSend {w} {
 proc ::NewMsg::DoQuote {w message to time} {
     
     variable locals
-    upvar ::Jabber::jstate jstate
 
     set wtext $locals($w,wtext)
     regsub -all "\n" $message "\n> " quoteMsg
@@ -877,11 +904,15 @@ proc ::NewMsg::SaveMsg {w} {
     
     variable locals
     
-    set wtext $locals($w,wtext)
+    if {$locals($w,xdata)} {
+	set allText [::JForms::GetXDataAsText $locals($w,formtoken)]
+    } else {
+	set wtext $locals($w,wtext)
+	set allText [::Text::TransformToPureText $wtext]
+    }
     set ans [tk_getSaveFile -title [mc {Save Message}] \
       -initialfile Untitled.txt]
     if {[string length $ans]} {
-	set allText [::Text::TransformToPureText $wtext]
 	set fd [open $ans w]
 	fconfigure $fd -encoding utf-8
 	for {set i 1} {$i <= $locals($w,addrline)} {incr i} {
@@ -903,11 +934,16 @@ proc ::NewMsg::SaveMsg {w} {
 proc ::NewMsg::DoPrint {w} {
     
     variable locals
-    upvar ::Jabber::jstate jstate
         
-    set allText [::Text::TransformToPureText $locals($w,wtext)]    
-    ::UserActions::DoPrintText $locals($w,wtext)  \
-      -data $allText -font CociSmallFont    
+    if {$locals($w,xdata)} {
+
+	# @@@ Missing a way to print pure text not from text widget.
+	set allText [::JForms::GetXDataAsText $locals($w,formtoken)]
+    } else {
+	set allText [::Text::TransformToPureText $locals($w,wtext)]    
+	::UserActions::DoPrintText $locals($w,wtext)  \
+	  -data $allText -font CociSmallFont    
+    }
 }
 
 proc ::NewMsg::CloseHook {wclose} {
@@ -925,12 +961,12 @@ proc ::NewMsg::QuitAppHook { } {
 	if {[winfo exists $w]} {
 	    set wtext $locals($w,wtext)
 	    set allText [$wtext get 1.0 "end - 1 char"]
-	    if {$allText != ""} {
+	    if {$allText ne ""} {
 		set str "There are unsaved messages. Do you still want to quit?"
 		set ans [::UI::MessageBox -title [mc {To Send or Not}]  \
 		  -icon warning -type yesno -default "no" \
 		  -message $str]
-		if {$ans == "no"} {
+		if {$ans eq "no"} {
 		    # @@@ mising return check here!
 		    return 
 		}
@@ -945,23 +981,31 @@ proc ::NewMsg::QuitAppHook { } {
 proc ::NewMsg::CloseDlg {w} {
     global  wDlgs
     variable locals
-    
-    set wtext $locals($w,wtext)
-    set allText [$wtext get 1.0 "end - 1 char"]
+
+    set warn 0
+    if {$locals($w,xdata)} {
+
+    } else {
+	set wtext $locals($w,wtext)
+	set allText [$wtext get 1.0 "end - 1 char"]
+	if {[string length $allText]} {
+	    set warn 1
+	}
+    }
     set doDestroy 0
-    if {$allText != ""} {
+    if {$warn} {
 	set ans [::UI::MessageBox -title [mc {To Send or Not}]  \
 	  -icon warning -type yesnocancel -default "no" -parent $w \
 	  -message [mc jamesssavemsg]]
-	if {$ans == "yes"} {
+	if {$ans eq "yes"} {
 	    set ansFile [tk_getSaveFile -title [mc {Save Message}] \
 		-initialfile Untitled.txt]
 	    if {[string length $ansFile] > 0} {
 		set doDestroy 1
 	    }
-	} elseif {$ans == "no"} {
+	} elseif {$ans eq "no"} {
 	    set doDestroy 1
-	} elseif {$ans == "cancel"} {
+	} elseif {$ans eq "cancel"} {
 	}
     } else {
 	set doDestroy 1
