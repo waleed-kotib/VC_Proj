@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.78 2007-02-08 14:57:24 matben Exp $
+# $Id: NewMsg.tcl,v 1.79 2007-02-08 15:33:08 matben Exp $
 
 package require ui::entryex
 
@@ -957,11 +957,17 @@ proc ::NewMsg::QuitAppHook { } {
     variable locals
     
     # Any open windows with unsaved message?
+    set warn 0
     foreach {key w} [array get locals *,w] {
 	if {[winfo exists $w]} {
-	    set wtext $locals($w,wtext)
-	    set allText [$wtext get 1.0 "end - 1 char"]
-	    if {$allText ne ""} {
+	    if {$locals($w,xdata)} {
+
+	    } else {
+		set wtext $locals($w,wtext)
+		set allText [$wtext get 1.0 "end - 1 char"]
+		set warn 1
+	    }
+	    if {$warn} {
 		set str "There are unsaved messages. Do you still want to quit?"
 		set ans [::UI::MessageBox -title [mc {To Send or Not}]  \
 		  -icon warning -type yesno -default "no" \
