@@ -5,9 +5,9 @@
 #      If an 'jabber:x:data' namespaced element is given, the methods
 #      involved with this method are used. Else straight (simple) model.
 #      
-#  Copyright (c) 2002-2005  Mats Bengtsson
+#  Copyright (c) 2002-2007  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.26 2006-12-01 08:55:13 matben Exp $
+# $Id: JForms.tcl,v 1.27 2007-02-08 14:57:24 matben Exp $
 # 
 #      Updated to version 2.5 of XEP-0004
 #  
@@ -21,7 +21,8 @@ namespace eval ::JForms:: {
     
     # Public functions:
     # 
-    #   ::JForms::Build w queryElem ?-key value ...?
+    #   ::JForms::Build w queryE ?-key value ...?
+    #   ::JForms::XDataFrame w xdataE ?-tilestyle, -width?
     #   ::JForms::GetXML token
     #   ::JForms::GetState token key
     
@@ -45,7 +46,7 @@ namespace eval ::JForms:: {
 #       
 # Arguments:
 #       w           the megawidget form.
-#       queryElem   query-element
+#       queryE      query-element
 #       args:       -tilestyle (|Small|Mixed)
 #                   -xdata (0|1)
 #                   -width
@@ -53,7 +54,7 @@ namespace eval ::JForms:: {
 # Results:
 #       token
 
-proc ::JForms::Build {w queryElem args} {
+proc ::JForms::Build {w queryE args} {
     variable uid
     upvar ::Jabber::jprefs jprefs
 
@@ -69,8 +70,8 @@ proc ::JForms::Build {w queryElem args} {
     }
     array set opts $args
     
-    set xmllist [wrapper::getchildren $queryElem]
-    set queryXmlns [wrapper::getattribute $queryElem xmlns]
+    set xmllist [wrapper::getchildren $queryE]
+    set queryXmlns [wrapper::getattribute $queryE xmlns]
 
     set state(w)       $w
     set state(xmllist) $xmllist
@@ -84,8 +85,8 @@ proc ::JForms::Build {w queryElem args} {
 	set clist [wrapper::getnamespacefromchilds $xmllist x "jabber:x:data"]
 	if {$clist != {}} {
 	    set xdata 1
-	    set xdataElem [lindex $clist 0]
-	    set state(xdataElem) $xdataElem
+	    set xdataE [lindex $clist 0]
+	    set state(xdataE) $xdataE
 	}
     }
     set state(xdata) $xdata
@@ -94,14 +95,7 @@ proc ::JForms::Build {w queryElem args} {
     if {$opts(-tilestyle) eq "Small"} {
 	set wp [string trim $w .]	
 	set state(textLabelStyle) Small.TLabel
-	option add *$wp*TLabel.style        Small.TLabel        widgetDefault
-	option add *$wp*TLabelframe.style   Small.TLabelframe   widgetDefault
-	option add *$wp*TButton.style       Small.TButton       widgetDefault
-	option add *$wp*TMenubutton.style   Small.TMenubutton   widgetDefault
-	option add *$wp*TRadiobutton.style  Small.TRadiobutton  widgetDefault
-	option add *$wp*TCheckbutton.style  Small.TCheckbutton  widgetDefault
-	option add *$wp*TEntry.style        Small.TEntry        widgetDefault
-	option add *$wp*TEntry.font         CociSmallFont       60
+	OptionAddSmall $w
     } elseif {$opts(-tilestyle) eq "Mixed"} {
 	set state(textLabelStyle) Small.TLabel
     }
@@ -110,9 +104,57 @@ proc ::JForms::Build {w queryElem args} {
     } else {
 	BuildPlainFrame $token
     }
-    bind $w <Destroy> [list [namespace current]::Free $token]
-    
+    bind $w <Destroy> [list [namespace current]::Free $token]    
     return $token
+}
+
+
+proc ::JForms::XDataFrame {w xdataE args} {
+    variable uid
+    
+    # State variable to collect instance specific variables.
+    set token [namespace current]::[incr uid]
+    variable $token
+    upvar 0 $token state
+
+    array set opts {
+	-tilestyle ""
+	-width     0
+    }
+    array set opts $args
+
+    set state(w)      $w
+    set state(xdata)  1
+    set state(xdataE) $xdataE
+    foreach {key val} [array get opts] {
+	set state(opt,$key) $val
+    }
+    set state(textLabelStyle) TLabel
+    if {$opts(-tilestyle) eq "Small"} {
+	set wp [string trim $w .]	
+	set state(textLabelStyle) Small.TLabel
+	OptionAddSmall $w
+    } elseif {$opts(-tilestyle) eq "Mixed"} {
+	set state(textLabelStyle) Small.TLabel
+    }
+
+    BuildXDataFrame $token
+    bind $w <Destroy> [list [namespace current]::Free $token]    
+    return $token
+}
+
+proc ::JForms::OptionAddSmall {w} {
+    
+    set wp [string trim $w .]	
+
+    option add *$wp*TLabel.style        Small.TLabel        widgetDefault
+    option add *$wp*TLabelframe.style   Small.TLabelframe   widgetDefault
+    option add *$wp*TButton.style       Small.TButton       widgetDefault
+    option add *$wp*TMenubutton.style   Small.TMenubutton   widgetDefault
+    option add *$wp*TRadiobutton.style  Small.TRadiobutton  widgetDefault
+    option add *$wp*TCheckbutton.style  Small.TCheckbutton  widgetDefault
+    option add *$wp*TEntry.style        Small.TEntry        widgetDefault
+    option add *$wp*TEntry.font         CociSmallFont       60
 }
 
 proc ::JForms::BindEntry {w event cmd} {
@@ -312,18 +354,18 @@ proc ::JForms::BuildXDataFrame {token} {
     set w $state(w)
     ttk::frame $w
 
-    set xdataElem $state(xdataElem)
-    set xmllist [wrapper::getchildren $xdataElem]
+    set xdataE $state(xdataE)
+    set xmllist [wrapper::getchildren $xdataE]
 
     set state(wraplengthList) {}
     set state(i) 0
     set state(anyrequired) 0
-    
+            
     # Handle tag by tag.
     foreach elem $xmllist {
 
 	set tag [wrapper::gettag $elem]
-	
+		
 	switch -exact -- $tag {	    
 	    title {
 		NewTitle $token $elem
@@ -421,15 +463,17 @@ proc ::JForms::NewInstructions {token elem} {
     variable $token
     upvar 0 $token state
     
-    set wlab $state(w).l[incr state(i)]
     set cdata [wrapper::getcdata $elem]
-    ttk::label $wlab -style $state(textLabelStyle) -text $cdata -justify left
-    grid  $wlab  -sticky w -pady 2
-
-    if {$state(opt,-width)} {
-	$wlab configure -wraplength $state(opt,-width)
+    if {[string length $cdata]} {
+	set wlab $state(w).l[incr state(i)]
+	ttk::label $wlab -style $state(textLabelStyle) -text $cdata -justify left
+	grid  $wlab  -sticky w -pady 2
+	
+	if {$state(opt,-width)} {
+	    $wlab configure -wraplength $state(opt,-width)
+	}
+	lappend state(wraplengthList) $wlab
     }
-    lappend state(wraplengthList) $wlab
 }
 
 proc ::JForms::NewLabelEntry {token elem} {
@@ -782,8 +826,7 @@ proc ::JForms::AnyRequired {token elem} {
     }
 }
 
-proc ::JForms::GetDefaultValue {elem {defValue ""}} {
-    
+proc ::JForms::GetDefaultValue {elem {defValue ""}} {    
     set valueElem [wrapper::getfirstchildwithtag $elem "value"]
     if {$valueElem != {}} {
 	set defValue [wrapper::getcdata $valueElem]
@@ -792,7 +835,6 @@ proc ::JForms::GetDefaultValue {elem {defValue ""}} {
 }
 
 proc ::JForms::GetDefaultList {elem} {
-    
     set defValueList {}
     foreach c [wrapper::getchildswithtag $elem "value"] {
 	lappend defValueList [wrapper::getcdata $c]
@@ -800,8 +842,7 @@ proc ::JForms::GetDefaultList {elem} {
     return $defValueList
 }
 
-proc ::JForms::GetLabelFromVar {var} {
-    
+proc ::JForms::GetLabelFromVar {var} {    
     return [string totitle [string map {_ " "} $var]]
 }
 
@@ -902,6 +943,83 @@ proc ::JForms::GetXDataForm {token} {
       -attrlist {xmlns jabber:x:data type submit} -subtags $xmllist]]
 }
 
+# JForms::GetXDataAsText --
+# 
+#       A method to translate a form into plain text suitable to save to file
+#       or to print.
+
+proc ::JForms::GetXDataAsText {token} {
+    variable $token
+    upvar 0 $token state
+    
+    set xdataE $state(xdataE)
+    set xmllist [wrapper::getchildren $xdataE]
+    set text ""
+    
+    # Handle tag by tag.
+    foreach elem $xmllist {
+
+	set tag [wrapper::gettag $elem]
+		
+	switch -exact -- $tag {	    
+	    title - instructions {
+		append text [wrapper::getcdata $elem]
+		append text \n
+	    }
+	    field {
+		set attr(type) "text-single"
+		array set attr [wrapper::getattrlist $elem]
+		set var $attr(var)
+		if {[info exists attr(label)]} {
+		    set str $attr(label)
+		} else {
+		    set str [GetLabelFromVar $var]
+		}
+		
+		
+		switch -exact -- $attr(type) {
+		    text-single - text-private - boolean - jid-single {
+			append text $str
+			append text ": "
+			append text $state(var,$var)
+			append text \n
+		    }
+		    text-multi - jid-multi {
+			set wtxt $state(widget,$var)
+			append text $str
+			append text ":"
+			append text \n
+			append text [$wtxt get 1.0 end]
+			append text \n
+		    }
+		    list-single {
+			append text $str
+			append text ": "
+			append text $state(label,$var)
+			append text \n
+		    }
+		    list-multi {
+			set wtxt $state(widget,$var)
+			append text $str
+			append text ":"
+			append text \n
+			set wlb $state(widget,$var)
+			foreach ind [$wlb curselection] {
+			    append text [$wlb get $ind]
+			    append text \n
+			}
+			append text \n
+		    }
+		    default {
+			# empty
+		    }
+		}
+	    }
+	}
+    }
+    return $text
+}
+
 proc ::JForms::GetXDataTextMultiForm {token var} {
     variable $token
     upvar 0 $token state
@@ -949,18 +1067,18 @@ proc ::JForms::GetXDataListMultiForm {token var} {
 # Results:
 #       a hierarchical list: {{jid1 val1 val2 ...} {jid2 val1 val2 ...} ... }
 
-proc ::JForms::ResultList {token queryElem} {
+proc ::JForms::ResultList {token queryE} {
     variable $token
     upvar 0 $token state
         
     if {$state(xdata)} {
-	return [ResultXDataList $token $queryElem]	
+	return [ResultXDataList $token $queryE]	
     } else {
-	return [ResultPlainList $token $queryElem]	
+	return [ResultPlainList $token $queryE]	
     }
 }
 
-proc ::JForms::ResultPlainList {token queryElem} {
+proc ::JForms::ResultPlainList {token queryE} {
     variable $token
     upvar 0 $token state
         
@@ -969,7 +1087,7 @@ proc ::JForms::ResultPlainList {token queryElem} {
     # Loop through the items. Make sure we get them in the order specified 
     # in 'reported'.
     # We are not guaranteed to receive every field.
-    foreach item [wrapper::getchildren $queryElem] {
+    foreach item [wrapper::getchildren $queryE] {
 	unset -nocomplain attrArr itemArr
 	array set attr [wrapper::getattrlist $item]
 	set itemArr(jid) $attr(jid)
@@ -1009,12 +1127,12 @@ proc ::JForms::ResultPlainList {token queryElem} {
 #          <query xmlns='jabber:iq:search'><truncated/>
 #               <x type='result' xmlns='jabber:x:data'>
 
-proc ::JForms::ResultXDataList {token queryElem} {
+proc ::JForms::ResultXDataList {token queryE} {
     variable $token
     upvar 0 $token state
     
     set res {}
-    set xElem [wrapper::getfirstchild $queryElem x "jabber:x:data"]
+    set xElem [wrapper::getfirstchild $queryE x "jabber:x:data"]
     if {$xElem == {}} {
 	return -code error "Did not identify the <x> element in search result"
     }
@@ -1089,155 +1207,6 @@ proc ::JForms::GetState {token key} {
 proc ::JForms::Free {token} {
     
     unset -nocomplain $token
-}
-
-
-# Test code:
-if {0} {
-    
-    # Plain:
-    set xmllist {query {xmlns jabber:iq:register} 0 {} {
-	{password {} 1 {} {}} 
-	{password {} 1 {} {}} 
-	{instructions {} 0 {Choose a username and password to register with this server. This is some extra text just to test the width option.} {}} 
-	{name {} 1 {} {}} 
-	{email {} 1 {} {}} {username {} 1 {} {}}}
-    }
-    set w .t1
-    toplevel $w
-    ::JForms::Build $w.f $xmllist -tilestyle Mixed -width 180
-    pack $w.f -fill both -expand 1 
-
-    set w .t6
-    set width 200
-    toplevel $w
-    ::UI::ScrollFrame $w.f -padding {8 12} -propagate 0 -width $width
-    set fr [::UI::ScrollFrameInterior $w.f]
-    ::JForms::Build $fr.f $xmllist -tilestyle Small -width [expr $width-2*12-16]
-    pack $w.f -fill both -expand 1
-    pack $fr.f -fill both -expand 1
-    
-    set xmllist {query {xmlns jabber:iq:conference} 0 {} {
-	{name {} 0 Girls {}} {nick {} 1 {} {}}}
-    }
-    set w .t7
-    set width 200
-    toplevel $w
-    ::UI::ScrollFrame $w.f -padding {8 12} -propagate 0 -width $width
-    set fr [::UI::ScrollFrameInterior $w.f]
-    ::JForms::Build $fr.f $xmllist -tilestyle Small -width [expr $width-2*12-16]
-    pack $w.f -fill both -expand 1
-    pack $fr.f -fill both -expand 1
-
-    # xdata:                                                                                                                                        
-    set xmllist {
-	query {xmlns http://jabber.org/protocol/muc#owner} 0 {} {
-	    {instructions {} 0 {You need an x:data capable client to configure room} {}} 
-	    {x {xmlns jabber:x:data} 0 {} {
-		{title {} 0 {Configuratie voor junk@conference.l4l.be} {}}
-		{field {label Kamernaam var title type text-single} 0 {} {{value {} 0 {} {}}}} 
-		{field {label {Gebruikers toestaan het onderwerp te wijzigen} var allow_change_subj type boolean} 0 {} {{value {} 0 1 {}}}} 
-		{field {label {Gebruikers toestaan om andere gebruikers te query-en} var allow_query_users type boolean} 0 {} {{value {} 0 1 {}}}} 
-		{field {label {Gebruikers toestaan om privéberichten te versturen} var allow_private_messages type boolean} 0 {} {{value {} 0 1 {}}}} 
-		{field {label {Kamer doorzoekbaar maken} var public type boolean} 0 {} {{value {} 0 1 {}}}} 
-		{field {label {Deelnemerslijst publiek maken} var public_list type boolean} 0 {} {{value {} 0 1 {}}}} 
-		{field {label {Kamer blijvend maken} var persistent type boolean} 0 {} {{value {} 0 0 {}}}} 
-		{field {label {Kamer moderated maken} var moderated type boolean} 0 {} {{value {} 0 0 {}}}} 
-		{field {label {Gebruikers standaard als leden instellen} var members_by_default type boolean} 0 {} {{value {} 0 1 {}}}} 
-		{field {label {Kamer enkel toegankelijk maken voor leden} var members_only type boolean} 0 {} {{value {} 0 0 {}}}} 
-		{field {label {Gebruikers toestaan om uitnodigingen te sturen} var allow_user_invites type boolean} 0 {} {{value {} 0 0 {}}}} 
-		{field {label {Kamer beveiligen met een wachtwoord} var password_protected type boolean} 0 {} {{value {} 0 0 {}}}} 
-		{field {label Wachtwoord var password type text-private} 0 {} {{value {} 0 {} {}}}} 
-		{field {label {Kamer anoniem maken} var anonymous type boolean} 0 {} {{value {} 0 1 {}}}} 
-		{field {label {Logs inschakelen} var logging type boolean} 0 {} {{value {} 0 0 {}}}}}
-	    }
-	}
-    }
-    set w .t2
-    toplevel $w
-    ::JForms::Build $w.f $xmllist -tilestyle Mixed
-    pack $w.f -fill both -expand 1 
-    
-    set xmllist {
-	query {xmlns jabber:iq:search} 0 {} {
-	    {instructions {} 0 {U hebt een x:data compatibele client nodig om te kunnen zoeken} {}} 
-	    {x {type form xmlns jabber:x:data} 0 {} {
-		{title {} 0 {Gebruikers zoeken in vjud.l4l.be} {}}
-		{instructions {} 0 {Vul de velden in om te zoeken naar Jabbergebruikers op deze server} {}} 
-		{field {label Gebruiker var user type text-single} 1 {} {}}
-		{field {label {Volledige naam} var fn type text-single} 1 {} {}} 
-		{field {label Naam var given type text-single} 1 {} {}} 
-		{field {label Tussennaam var middle type text-single} 1 {} {}} 
-		{field {label Achternaam var family type text-single} 1 {} {}} 
-		{field {label Bijnaam var nickname type text-single} 1 {} {}} 
-		{field {label Geboortedatum var bday type text-single} 1 {} {}} 
-		{field {label Land var ctry type text-single} 1 {} {}} 
-		{field {label Plaats var locality type text-single} 1 {} {}} 
-		{field {label E-mail var email type text-single} 1 {} {}} 
-		{field {label Organisatie var orgname type text-single} 1 {} {}} 
-		{field {label Afdeling var orgunit type text-single} 1 {} {}}
-		{field {label JIDs var jmulti type jid-multi} 1 {} {}}
-	    }
-	    }
-	}
-    }
-    set w .t3
-    toplevel $w
-    ::JForms::Build $w.f $xmllist -tilestyle Mixed -width 180
-    pack $w.f -fill both -expand 1
-
-    set w .t4
-    toplevel $w
-    ::UI::ScrollFrame $w.f -padding {8 12}
-    set fr [::UI::ScrollFrameInterior $w.f]
-    ::JForms::Build $fr.f $xmllist -tilestyle Small -width 160
-    pack $w.f -fill both -expand 1
-    pack $fr.f -fill both -expand 1
-
-    set w .t5
-    toplevel $w
-    ::UI::ScrollFrame $w.f -padding {8 12} -propagate 0
-    set fr [::UI::ScrollFrameInterior $w.f]
-    ::JForms::Build $fr.f $xmllist -tilestyle Small -width 180
-    pack $w.f -fill both -expand 1
-    pack $fr.f -fill both -expand 1
-
-    set result {
-	query {xmlns jabber:iq:search} 0 {} {
-	    {x {type result xmlns jabber:x:data} 0 {} {
-		{title {} 0 {Zoekresultaten van vjud.l4l.be} {}} 
-		{reported {} 0 {} {
-		    {field {label JID var jid} 1 {} {}} 
-		    {field {label {Volledige naam} var fn} 1 {} {}} 
-		    {field {label Naam var given} 1 {} {}} 
-		    {field {label Tussennaam var middle} 1 {} {}} 
-		    {field {label Achternaam var family} 1 {} {}} 
-		    {field {label Bijnaam var nickname} 1 {} {}} 
-		    {field {label Geboortedatum var bday} 1 {} {}} 
-		    {field {label Land var ctry} 1 {} {}} 
-		    {field {label Plaats var locality} 1 {} {}} 
-		    {field {label E-mail var email} 1 {} {}} 
-		    {field {label Organisatie var orgname} 1 {} {}} 
-		    {field {label Afdeling var orgunit} 1 {} {}}}
-		} 
-		{item {} 0 {} {
-		    {field {var jid} 0 {} {{value {} 0 marilu@l4l.be {}}}} 
-		    {field {var fn} 0 {} {{value {} 0 {Mats Bengtsson} {}}}} 
-		    {field {var family} 0 {} {{value {} 0 Bengtsson {}}}} 
-		    {field {var given} 0 {} {{value {} 0 Mats {}}}} 
-		    {field {var middle} 0 {} {{value {} 0 G {}}}} 
-		    {field {var nickname} 0 {} {{value {} 0 {} {}}}} 
-		    {field {var bday} 0 {} {{value {} 0 {} {}}}} 
-		    {field {var ctry} 0 {} {{value {} 0 {} {}}}} 
-		    {field {var locality} 0 {} {{value {} 0 {} {}}}} 
-		    {field {var email} 0 {} {{value {} 0 matben@users.sf.net {}}}} 
-		    {field {var orgname} 0 {} {{value {} 0 {} {}}}} 
-		    {field {var orgunit} 0 {} {{value {} 0 {} {}}}}}}
-		}
-	    }
-	}
-    }
-
 }
 
 #-------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.141 2007-01-22 16:09:53 matben Exp $
+# $Id: UI.tcl,v 1.142 2007-02-08 14:57:24 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -846,20 +846,17 @@ proc ::UI::ScrollFrame {w args} {
 }
 
 proc ::UI::ScrollFrameResize {w} {
-        
     set bbox [$w.can bbox twin]
     set width [winfo width $w.can.f]
     $w.can configure -width $width -scrollregion $bbox
 }
 
 proc ::UI::ScrollFrameResizeScroll {w} {
-	
     set bbox [$w.can bbox all]
     $w.can configure -scrollregion $bbox
 }
 
-proc ::UI::ScrollFrameResizeBg {w} {
-    
+proc ::UI::ScrollFrameResizeBg {w} {    
     set bbox [$w.can bbox all]
     set width  [winfo width $w.can]
     set height [winfo height $w.can]
@@ -867,8 +864,7 @@ proc ::UI::ScrollFrameResizeBg {w} {
     $w.can.bg configure -width $width -height $height
 }
 
-proc ::UI::ScrollFrameInterior {w} {
- 
+proc ::UI::ScrollFrameInterior {w} { 
     return $w.can.f
 }
 

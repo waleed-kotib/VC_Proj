@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements a mailbox for jabber messages.
 #      
-#  Copyright (c) 2002-2006  Mats Bengtsson
+#  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.101 2006-11-14 15:08:21 matben Exp $
+# $Id: MailBox.tcl,v 1.102 2007-02-08 14:57:24 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -140,6 +140,224 @@ proc ::MailBox::InitHandler {jlibName} {
 
 }
 
+# MailBox::MessageHook --
+#
+#       Called when we get an incoming message. Stores the message.
+#       Should never be called for whiteboard messages.
+#
+# Arguments:
+#       bodytxt     the body chdata
+#       args        the xml attributes and elements as a '-key value' list
+#       
+# Results:
+#       updates UI.
+
+proc ::MailBox::MessageHook {bodytxt args} {
+    global  prefs
+
+    variable locals
+    variable mailbox
+    variable uidmsg
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Debug 2 "::MailBox::MessageHook bodytxt='$bodytxt', args='$args'"
+
+    array set argsA $args
+    set xmldata $argsA(-xmldata)
+    set uuid $argsA(-uuid)
+    
+    set xdataE [wrapper::getfirstchild $xmldata x "jabber:x:data"]
+    set haveSubject 0
+    if {[info exists argsA(-subject)] && [string length $argsA(-subject)]} {
+	set haveSubject 1
+    }    
+	
+    # Ignore messages with empty body, subject or no xdata form. 
+    # They are probably not for display.
+    if {($bodytxt eq "") && !$haveSubject && ![llength $xdataE]} {
+	return
+    }
+    
+    # Non whiteboard 'normal' messages treated as chat messages.
+    if {$jprefs(chat,normalAsChat)} {
+	return
+    }
+    
+    # The inbox should only be read once to be economical.
+    if {!$locals(mailboxRead)} {
+	ReadMailbox
+    }
+
+    # Show in mailbox. Sorting?
+    set w [GetToplevel]
+    set wtbl $locals(wtbl)
+    
+    if {[MKHaveMetakit]} {
+	set stamp [::Jabber::GetDelayStamp $xmldata]
+	if {$stamp ne ""} {
+	    set secs [clock scan $stamp -gmt 1]
+	} else {
+	    set secs [clock seconds]
+	}
+	set time [clock format $secs -format "%Y%m%dT%H:%M:%S"]
+	MKAdd $uuid $time 0 $xmldata ""
+	if {$w ne ""} {
+	    MKInsertRow $uuid $time 0 $xmldata ""
+	}
+	set idxuuid $uuid
+    } else {
+	set bodytxt [string trimright $bodytxt "\n"]
+	set messageList [eval {MakeMessageList $bodytxt} $args]    
+	
+	# All messages cached in 'mailbox' array.
+	set mailbox($uidmsg) $messageList
+	
+	# Always cache it in inbox.
+	PutMessageInInbox $messageList
+	if {$w ne ""} {
+	    InsertRow $wtbl $mailbox($uidmsg) end
+	}
+	set idxuuid $uidmsg
+    }    
+    if {$w ne ""} {
+	$wtbl see end
+    }
+    ::JUI::MailBoxState nonempty
+
+    # @@@ as hook instead when solved the uuid vs. uidmsg mixup!
+    if {$jprefs(showMsgNewWin) && ($bodytxt ne "")} {
+	::GotMsg::GotMsg $idxuuid
+    }
+}
+
+# MailBox::HandleRawWBMessage --
+# 
+#       Same as above, but for raw whiteboard messages.
+
+proc ::MailBox::HandleRawWBMessage {jlibname xmlns xmldata args} {
+    global  prefs this
+
+    variable mailbox
+    variable uidmsg
+    variable locals
+    
+    ::Debug 2 "::MailBox::HandleRawWBMessage args=$args"
+    array set argsA $args
+    if {![info exists argsA(-x)]} {
+	return
+    }
+    
+    # We get this message from jlib and need therefore to generate a uuid.
+    set uuid [uuid::uuid generate]
+	
+    # The inbox should only be read once to be economical.
+    if {!$locals(mailboxRead)} {
+	ReadMailbox
+    }
+    
+    # Show in mailbox.
+    set w [GetToplevel]
+    set wtbl $locals(wtbl)
+
+    set rawList  [::JWB::GetRawCanvasMessageList $argsA(-x) $xmlns]
+    set filePath [file join $this(inboxCanvasPath) $uuid.can]
+    ::CanvasFile::DataToFile $filePath $rawList
+
+    if {[MKHaveMetakit]} {
+	set stamp [::Jabber::GetDelayStamp $xmldata]
+	if {$stamp ne ""} {
+	    set secs [clock scan $stamp -gmt 1]
+	} else {
+	    set secs [clock seconds]
+	}
+	set time [clock format $secs -format "%Y%m%dT%H:%M:%S"]
+	
+	# @@@ This will be duplicate storage!
+	MKAdd $uuid $time 0 $xmldata $uuid.can
+	if {$w ne ""} {
+	    MKInsertRow $uuid $time 0 $xmldata $uuid.can
+	}
+    } else {
+	set messageList [eval {MakeMessageList ""} $args]
+	lappend messageList -canvasuid $uuid
+	set mailbox($uidmsg) $messageList
+	PutMessageInInbox $messageList
+	if {$w ne ""} {
+	    InsertRow $wtbl $mailbox($uidmsg) end
+	}
+    }
+    if {$w ne ""} {
+	$wtbl see end
+    }
+    ::JUI::MailBoxState nonempty
+    
+    eval {::hooks::run newWBMessageHook} $args
+
+    # We have handled this message completely.
+    return 1
+}
+
+# MailBox::HandleSVGWBMessage --
+# 
+#       As above but for SVG whiteboard messages.
+
+proc ::MailBox::HandleSVGWBMessage {jlibname xmlns xmldata args} {
+    global  prefs
+
+    variable mailbox
+    variable uidmsg
+    variable locals
+    
+    ::Debug 2 "::MailBox::HandleSVGWBMessage args='$args'"
+    array set argsA $args
+    if {![info exists argsA(-x)]} {
+	return
+    }
+	
+    # The inbox should only be read once to be economical.
+    if {!$locals(mailboxRead)} {
+	ReadMailbox
+    }
+    set w [GetToplevel]
+    set wtbl $locals(wtbl)
+
+    if {[MKHaveMetakit]} {
+	set stamp [::Jabber::GetDelayStamp $xmldata]
+	if {$stamp ne ""} {
+	    set secs [clock scan $stamp -gmt 1]
+	} else {
+	    set secs [clock seconds]
+	}
+	set time [clock format $secs -format "%Y%m%dT%H:%M:%S"]
+	
+	# @@@ We don't detect the svgwb part of xml as a whiteboard.
+	#     Fix when adapting SVG.
+	MKAdd $uuid $time 0 $xmldata ""
+	if {$w ne ""} {
+	    MKInsertRow $uuid $time 0 $xmldata ""
+	}
+    } else {
+	set messageList [eval {MakeMessageList ""} $args]
+
+	# Store svg in x element.
+	lappend messageList -x $argsA(-x)
+	
+	set mailbox($uidmsg) $messageList
+	PutMessageInInbox $messageList
+	if {$w ne ""} {
+	    InsertRow $wtbl $mailbox($uidmsg) end
+	}
+    }
+    if {$w ne ""} {
+	$wtbl see end
+    }
+    ::JUI::MailBoxState nonempty
+    
+    eval {::hooks::run newWBMessageHook} $args
+
+    # We have handled this message completely.
+    return 1
+}
 
 proc ::MailBox::LaunchHook { } {
     upvar ::Jabber::jprefs jprefs
@@ -324,6 +542,7 @@ proc ::MailBox::Build {args} {
       [list grid $wyscmsg -column 1 -row 0 -sticky ns]] \
       -state disabled
     $wtextmsg tag configure normal
+    $wtextmsg tag configure xdata -foreground red
     bindtags $wtextmsg [linsert [bindtags $wtextmsg] 0 ReadOnlyText]
     ttk::scrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
 
@@ -803,224 +1022,6 @@ proc ::MailBox::GetCanvasHexUID {id} {
     return $ans
 }
 
-# MailBox::MessageHook --
-#
-#       Called when we get an incoming message. Stores the message.
-#       Should never be called for whiteboard messages.
-#
-# Arguments:
-#       bodytxt     the body chdata
-#       args        the xml attributes and elements as a '-key value' list
-#       
-# Results:
-#       updates UI.
-
-proc ::MailBox::MessageHook {bodytxt args} {
-    global  prefs
-
-    variable locals
-    variable mailbox
-    variable uidmsg
-    upvar ::Jabber::jprefs jprefs
-    
-    ::Debug 2 "::MailBox::MessageHook bodytxt='$bodytxt', args='$args'"
-
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
-    set uuid $argsA(-uuid)
-        
-    # Ignore messages with empty body and subject. 
-    # They are probably not for display.
-    if {$bodytxt eq ""} {
-	if {![info exists argsA(-subject)]} {
-	    return
-	}
-	if {$argsA(-subject) eq ""} {
-	    return
-	}
-    }
-    
-    # Non whiteboard 'normal' messages treated as chat messages.
-    if {$jprefs(chat,normalAsChat)} {
-	return
-    }
-    
-    # The inbox should only be read once to be economical.
-    if {!$locals(mailboxRead)} {
-	ReadMailbox
-    }
-
-    # Show in mailbox. Sorting?
-    set w [GetToplevel]
-    set wtbl $locals(wtbl)
-    
-    if {[MKHaveMetakit]} {
-	set stamp [::Jabber::GetDelayStamp $xmldata]
-	if {$stamp ne ""} {
-	    set secs [clock scan $stamp -gmt 1]
-	} else {
-	    set secs [clock seconds]
-	}
-	set time [clock format $secs -format "%Y%m%dT%H:%M:%S"]
-	MKAdd $uuid $time 0 $xmldata ""
-	if {$w ne ""} {
-	    MKInsertRow $uuid $time 0 $xmldata ""
-	}
-	set idxuuid $uuid
-    } else {
-	set bodytxt [string trimright $bodytxt "\n"]
-	set messageList [eval {MakeMessageList $bodytxt} $args]    
-	
-	# All messages cached in 'mailbox' array.
-	set mailbox($uidmsg) $messageList
-	
-	# Always cache it in inbox.
-	PutMessageInInbox $messageList
-	if {$w ne ""} {
-	    InsertRow $wtbl $mailbox($uidmsg) end
-	}
-	set idxuuid $uidmsg
-    }    
-    if {$w ne ""} {
-	$wtbl see end
-    }
-    ::JUI::MailBoxState nonempty
-
-    # @@@ as hook instead when solved the uuid vs. uidmsg mixup!
-    if {$jprefs(showMsgNewWin) && ($bodytxt ne "")} {
-	::GotMsg::GotMsg $idxuuid
-    }
-}
-
-# MailBox::HandleRawWBMessage --
-# 
-#       Same as above, but for raw whiteboard messages.
-
-proc ::MailBox::HandleRawWBMessage {jlibname xmlns xmldata args} {
-    global  prefs this
-
-    variable mailbox
-    variable uidmsg
-    variable locals
-    
-    ::Debug 2 "::MailBox::HandleRawWBMessage args=$args"
-    array set argsA $args
-    if {![info exists argsA(-x)]} {
-	return
-    }
-    
-    # We get this message from jlib and need therefore to generate a uuid.
-    set uuid [uuid::uuid generate]
-	
-    # The inbox should only be read once to be economical.
-    if {!$locals(mailboxRead)} {
-	ReadMailbox
-    }
-    
-    # Show in mailbox.
-    set w [GetToplevel]
-    set wtbl $locals(wtbl)
-
-    set rawList  [::JWB::GetRawCanvasMessageList $argsA(-x) $xmlns]
-    set filePath [file join $this(inboxCanvasPath) $uuid.can]
-    ::CanvasFile::DataToFile $filePath $rawList
-
-    if {[MKHaveMetakit]} {
-	set stamp [::Jabber::GetDelayStamp $xmldata]
-	if {$stamp ne ""} {
-	    set secs [clock scan $stamp -gmt 1]
-	} else {
-	    set secs [clock seconds]
-	}
-	set time [clock format $secs -format "%Y%m%dT%H:%M:%S"]
-	
-	# @@@ This will be duplicate storage!
-	MKAdd $uuid $time 0 $xmldata $uuid.can
-	if {$w ne ""} {
-	    MKInsertRow $uuid $time 0 $xmldata $uuid.can
-	}
-    } else {
-	set messageList [eval {MakeMessageList ""} $args]
-	lappend messageList -canvasuid $uuid
-	set mailbox($uidmsg) $messageList
-	PutMessageInInbox $messageList
-	if {$w ne ""} {
-	    InsertRow $wtbl $mailbox($uidmsg) end
-	}
-    }
-    if {$w ne ""} {
-	$wtbl see end
-    }
-    ::JUI::MailBoxState nonempty
-    
-    eval {::hooks::run newWBMessageHook} $args
-
-    # We have handled this message completely.
-    return 1
-}
-
-# MailBox::HandleSVGWBMessage --
-# 
-#       As above but for SVG whiteboard messages.
-
-proc ::MailBox::HandleSVGWBMessage {jlibname xmlns xmldata args} {
-    global  prefs
-
-    variable mailbox
-    variable uidmsg
-    variable locals
-    
-    ::Debug 2 "::MailBox::HandleSVGWBMessage args='$args'"
-    array set argsA $args
-    if {![info exists argsA(-x)]} {
-	return
-    }
-	
-    # The inbox should only be read once to be economical.
-    if {!$locals(mailboxRead)} {
-	ReadMailbox
-    }
-    set w [GetToplevel]
-    set wtbl $locals(wtbl)
-
-    if {[MKHaveMetakit]} {
-	set stamp [::Jabber::GetDelayStamp $xmldata]
-	if {$stamp ne ""} {
-	    set secs [clock scan $stamp -gmt 1]
-	} else {
-	    set secs [clock seconds]
-	}
-	set time [clock format $secs -format "%Y%m%dT%H:%M:%S"]
-	
-	# @@@ We don't detect the svgwb part of xml as a whiteboard.
-	#     Fix when adapting SVG.
-	MKAdd $uuid $time 0 $xmldata ""
-	if {$w ne ""} {
-	    MKInsertRow $uuid $time 0 $xmldata ""
-	}
-    } else {
-	set messageList [eval {MakeMessageList ""} $args]
-
-	# Store svg in x element.
-	lappend messageList -x $argsA(-x)
-	
-	set mailbox($uidmsg) $messageList
-	PutMessageInInbox $messageList
-	if {$w ne ""} {
-	    InsertRow $wtbl $mailbox($uidmsg) end
-	}
-    }
-    if {$w ne ""} {
-	$wtbl see end
-    }
-    ::JUI::MailBoxState nonempty
-    
-    eval {::hooks::run newWBMessageHook} $args
-
-    # We have handled this message completely.
-    return 1
-}
-
 proc ::MailBox::MakeMessageList {body args} {
     variable locals
     variable uidmsg
@@ -1332,7 +1333,7 @@ proc ::MailBox::DisplayAny {item} {
 
     set jid3 [$T item element cget $item cFrom eText -text]
     set uid  [$T item element cget $item cUid  eText -text]
-    jlib::splitjid $jid3 jid2 res
+    set jid2 [jlib::barejid $jid3]
 	    
     DisplayTextMsg $uid
 
@@ -1376,7 +1377,15 @@ proc ::MailBox::DisplayTextMsg {uid} {
     $wtextmsg mark set insert end
     
     if {[MKHaveMetakit]} {
+	array set v [MKGet $uid]
 	lassign [MKGetContentList $uid] subject from date body
+	set xdataE [wrapper::getfirstchild $v(xmldata) x "jabber:x:data"]
+	if {[llength $xdataE]} {
+	    $wtextmsg insert end \
+	      "This message contains a form that you can fill in by pressing the Reply button" \
+	      xdata
+	    $wtextmsg insert end \n
+	}
     } else {
 	set subject [lindex $mailbox($uid) $mailboxindex(subject)]
 	set from    [lindex $mailbox($uid) $mailboxindex(from)]
@@ -1406,19 +1415,22 @@ proc ::MailBox::ReplyTo { } {
     set uid  [$T item element cget $item cUid eText -text]
 
     if {[MKHaveMetakit]} {
+	array set v [MKGet $uid]
+	set xmldata $v(xmldata)
 	lassign [MKGetContentList $uid] subject from date body
     } else {
 	set subject [lindex $mailbox($uid) $mailboxindex(subject)]
 	set from    [lindex $mailbox($uid) $mailboxindex(from)]
 	set date    [lindex $mailbox($uid) $mailboxindex(date)]
 	set body    [lindex $mailbox($uid) $mailboxindex(message)]
+	set xmldata [list]
     }    
     set to [::Jabber::JlibCmd getrecipientjid $from]
     if {![regexp -nocase {^ *re:} $subject]} {
 	set subject "Re: $subject"
     }
     ::NewMsg::Build -to $to -subject $subject  \
-      -quotemessage $body -time $date
+      -quotemessage $body -time $date -replyxmldata $xmldata
 }
 
 proc ::MailBox::ForwardTo { } {
@@ -1434,15 +1446,19 @@ proc ::MailBox::ForwardTo { } {
     set uid  [$T item element cget $item cUid eText -text]
 
     if {[MKHaveMetakit]} {
+	array set v [MKGet $uid]
+	set xmldata $v(xmldata)
 	lassign [MKGetContentList $uid] subject from date body
     } else {
 	set subject [lindex $mailbox($uid) $mailboxindex(subject)]
 	set from    [lindex $mailbox($uid) $mailboxindex(from)]
 	set date    [lindex $mailbox($uid) $mailboxindex(date)]
 	set body    [lindex $mailbox($uid) $mailboxindex(message)]
+	set xmldata [list]
     }
     set subject "Forwarded: $subject"
-    ::NewMsg::Build -subject $subject -forwardmessage $body -time $date
+    ::NewMsg::Build -subject $subject -forwardmessage $body -time $date \
+      -forwardxmldata $xmldata
 }
 
 proc ::MailBox::DoPrint { } {
@@ -1887,6 +1903,7 @@ proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
     set bodyE    [wrapper::getfirstchildwithtag $xmldata body]
     set subject [wrapper::getcdata $subjectE]
     set body    [wrapper::getcdata $bodyE]
+    set xdataE [wrapper::getfirstchild $xmldata x "jabber:x:data"]
     
     set iswb 0
     if {[file extension $file] eq ".can"} {
@@ -2006,8 +2023,8 @@ proc ::MailBox::MKExportToXMLFile {fileName} {
     set fd [open $fileName w]
     fconfigure $fd -encoding utf-8
     puts $fd "<?xml version='1.0' encoding='UTF-8'?>"
-    puts $fd "<!DOCTYPE mailbox>"
     puts $fd "<?xml-stylesheet type='text/xsl' href='mailbox.xsl'?>"
+    puts $fd "<!DOCTYPE mailbox>"
     puts $fd "<mailbox date='$today' view='inbox' label='$label'>"
     
     mk::loop cursor $path {

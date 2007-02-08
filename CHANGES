@@ -22,6 +22,7 @@ Coccinella-0.95.16 (200702??):
  o users name attribute can now be edited directly in situ (in roster)
  o faster chat history parsing
  o added uri support for the KDE desktop environment
+ o added support to handle xdata forms embedded in normal messages
 
 Coccinella-0.95.15 (20061117):
 
