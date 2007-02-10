@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.190 2007-02-01 14:54:31 matben Exp $
+# $Id: Chat.tcl,v 1.191 2007-02-10 07:55:08 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -168,6 +168,9 @@ namespace eval ::Chat:: {
         composing,close      gone
         composing,send       active
     }
+    
+    # Shall we allow multiple chast threads (and dialogs) per JID?
+    variable allowMultiThreadPerJID 0
 }
 
 # Chat::OnToolButton --
@@ -441,7 +444,8 @@ proc ::Chat::GotMsg {body args} {
 
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-
+    variable allowMultiThreadPerJID
+    
     ::Debug 2 "::Chat::GotMsg args='$args'"
 
     array set argsA $args
@@ -450,14 +454,13 @@ proc ::Chat::GotMsg {body args} {
     
     # -from is a 3-tier jid /resource included.
     set jid $argsA(-from)
-    jlib::splitjidex $jid node domain res
-    set jid2  [jlib::joinjid $node $domain ""]
+    set jid2  [jlib::barejid $jid]
     set mjid  [jlib::jidmap $jid]
-    set mjid2 [jlib::jidmap $jid2]
+    set mjid2 [jlib::barejid $mjid]
     
     # We must follow the thread...
     # There are several cases to deal with: Have thread page, have dialog?
-    if {[info exists argsA(-thread)]} {
+    if {[info exists argsA(-thread)] && $allowMultiThreadPerJID} {
 	set threadID $argsA(-thread)
 	set chattoken [GetTokenFrom chat threadid $threadID]
     } else {
@@ -1291,7 +1294,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set mjid [jlib::jidmap $jid]
     set mfrom [jlib::jidmap $argsA(-from)]
     jlib::splitjidex $jid node domain res
-    jlib::splitjid   $mjid jid2 -
+    set jid2 [jlib::barejid $mjid]
 
     # Chatting with room member must be made with full JID.
     if {[$jlib service isroom $jid2]} {
