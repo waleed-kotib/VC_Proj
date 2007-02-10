@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.35 2007-01-01 15:24:16 matben Exp $
+# $Id: Status.tcl,v 1.36 2007-02-10 15:12:22 matben Exp $
 
 package provide Status 1.0
 
@@ -821,7 +821,7 @@ proc ::Status::ExCustomDlg {varName args} {
     ui::dialog $w -type okcancel -message [mc jamessstatuscust] \
       -detail [mc jamessstatuscustdtl] -icon info  \
       -command ::Status::ExCustomDlgCmd -geovariable prefs(winGeom,$w)  \
-      -title [mc {Custom Message}]
+      -title [mc {Custom Message}] -menu [::UI::GetMainMenu]
     set fr [$w clientframe]
     ui::optionmenu $fr.m -menulist $menuDef -direction flush  \
       -variable [namespace current]::$w\(show)

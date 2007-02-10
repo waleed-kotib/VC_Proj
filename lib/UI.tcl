@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.142 2007-02-08 14:57:24 matben Exp $
+# $Id: UI.tcl,v 1.143 2007-02-10 15:12:22 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -473,11 +473,11 @@ proc ::UI::MessageBox {args} {
     
     eval {::hooks::run newMessageBox} $args
     
-    array set argsArr $args
-    if {[info exists argsArr(-message)]} {
-	set argsArr(-message) [FormatTextForMessageBox $argsArr(-message)]
+    array set argsA $args
+    if {[info exists argsA(-message)]} {
+	set argsA(-message) [FormatTextForMessageBox $argsA(-message)]
     }
-    set ans [eval {tk_messageBox} [array get argsArr]]
+    set ans [eval {tk_messageBox} [array get argsA]]
     return $ans
 }
 
@@ -555,20 +555,20 @@ proc ::UI::Toplevel {w args} {
     global  this prefs
     variable topcache
     
-    array set argsArr {
+    array set argsA {
 	-allowclose       1
 	-usemacmainmenu   0
     }
-    array set argsArr $args
+    array set argsA $args
     set opts {}
-    if {[info exists argsArr(-class)]} {
-	lappend opts -class $argsArr(-class)
+    if {[info exists argsA(-class)]} {
+	lappend opts -class $argsA(-class)
     }
-    if {[info exists argsArr(-closecommand)]} {
-	set topcache($w,-closecommand) $argsArr(-closecommand)
+    if {[info exists argsA(-closecommand)]} {
+	set topcache($w,-closecommand) $argsA(-closecommand)
     }
     if {[tk windowingsystem] eq "aqua"} {
-	if {$argsArr(-usemacmainmenu)} {
+	if {$argsA(-usemacmainmenu)} {
 	    lappend opts -menu [GetMainMenu]
 	}
     }
@@ -579,22 +579,22 @@ proc ::UI::Toplevel {w args} {
     # We direct all close events through DoCloseWindow so things can
     # be handled from there.
     wm protocol $w WM_DELETE_WINDOW [list ::UI::DoCloseWindow $w "wm"]
-    if {$argsArr(-allowclose)} {
+    if {$argsA(-allowclose)} {
 	bind $w <Escape> [list ::UI::DoCloseWindow $w "command"]
     }
     if {[tk windowingsystem] eq "aqua"} {
-	if {[info exists argsArr(-macclass)]} {
-	    eval {::tk::unsupported::MacWindowStyle style $w} $argsArr(-macclass)
-	} elseif {[info exists argsArr(-macstyle)]} {
-	    ::tk::unsupported::MacWindowStyle style $w $argsArr(-macstyle)
+	if {[info exists argsA(-macclass)]} {
+	    eval {::tk::unsupported::MacWindowStyle style $w} $argsA(-macclass)
+	} elseif {[info exists argsA(-macstyle)]} {
+	    ::tk::unsupported::MacWindowStyle style $w $argsA(-macstyle)
 	}
 	# Unreliable!!!
 	# ::UI::SetAquaProxyIcon $w
     }
-    if {$argsArr(-allowclose)} {
+    if {$argsA(-allowclose)} {
 	bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w "command"]
     }
-    if {$argsArr(-usemacmainmenu)} {
+    if {$argsA(-usemacmainmenu)} {
 	SetMenubarAcceleratorBinds $w [GetMainMenu]
     }
     if {$prefs(opacity) != 100} {

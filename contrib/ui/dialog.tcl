@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005-2006 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.19 2006-12-05 13:54:33 matben Exp $
+# $Id: dialog.tcl,v 1.20 2007-02-10 15:12:22 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -159,8 +159,9 @@ snit::widget ui::dialog::widget {
     variable fadeoutID
     variable isDone 0
     
-    delegate option -message to message as -text
     delegate option -detail  to detail  as -text
+    delegate option -menu    to hull
+    delegate option -message to message as -text
 
     option -command                   \
       -default ui::dialog::Nop
@@ -232,7 +233,7 @@ snit::widget ui::dialog::widget {
 	if {[info exists dialogTypes($dlgtype)]} {
 	    array set options $dialogTypes($dlgtype)
 	}
-	$self configurelist $args	
+	$self configurelist $args
 	
 	if {[tk windowingsystem] eq "aqua"} {
 	    if {$options(-modal)} {
@@ -240,6 +241,8 @@ snit::widget ui::dialog::widget {
 	    } else {
 		::tk::unsupported::MacWindowStyle style $win document closeBox
 	    }
+	} else {
+	    $win configure -menu ""
 	}
 	if {![winfo exists $options(-parent)]} {
 	    return -code error "bad window path name \"$options(-parent)\""
@@ -467,7 +470,10 @@ if {0} {
     set fr [$w clientframe]
     pack [ttk::checkbutton $fr.c -text $str2] -side left
     
-    
+    set w [ui::dialog -message $str -detail $str -modal 1 -menu [::UI::GetMainMenu]]
+    ::UI::SetMenubarAcceleratorBinds $w $m
+    $w grab
+
 }
 
 #-------------------------------------------------------------------------------
