@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.167 2007-02-07 09:02:14 matben Exp $
+# $Id: jabberlib.tcl,v 1.168 2007-02-10 15:12:22 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3647,7 +3647,7 @@ proc jlib::auto_away_cmd {jlibname what} {
 proc jlib::getrecipientjid {jlibname jid} {
     variable statics
     
-    splitjid $jid jid2 resource 
+    set jid2 [jlib::barejid $jid]
     set isroom [[namespace current]::service::isroom $jlibname $jid2]
     if {$isroom} {
 	return $jid

@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.29 2006-11-04 08:42:10 matben Exp $
+# $Id: wrapper.tcl,v 1.30 2007-02-10 15:12:22 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -246,7 +246,7 @@ proc wrapper::parsereentrant {id xml} {
 
 proc wrapper::elementstart {id tagname attrlist args} {
     variable wrapper
-    
+        
     # Check args, to see if empty element and/or namespace. 
     # Put xmlns in attribute list.
     array set argsarr $args
