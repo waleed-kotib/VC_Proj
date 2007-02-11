@@ -9,7 +9,7 @@
 #       o handle xmlns namespaces same as TclXML
 #       o entity syntax optional ending ";" ?
 #       
-# $Id: qdxml.tcl,v 1.3 2007-02-10 15:12:22 matben Exp $
+# $Id: qdxml.tcl,v 1.4 2007-02-11 16:09:21 matben Exp $
 
 package provide qdxml 0.1
 
@@ -60,9 +60,11 @@ proc qdxml::create {args} {
 	-elementendcommand    {}
 	-characterdatacommand {}
 	-ignorewhitespace     1
+	defaultNSURI          {}
+	haveDocElement        0
+	state                 {}
 	status                ""
 	rest                  ""
-	haveDocElement        0
     }
     eval {configure $token} $args
     return $token
@@ -71,9 +73,36 @@ proc qdxml::create {args} {
 proc qdxml::configure {token args} {
     variable $token
     upvar 0 $token state
+    
+    puts "qdxml::configure $args"
 
-    # A bit primitive FTM.
-    array set state $args
+    set options [lsort [array names state -*]]
+    set usage [join $options ", "]
+    if {[llength $args] == 0} {
+	set result {}
+	foreach name $options {
+	    lappend result $name $state($name)
+	}
+	return $result
+    }
+    regsub -all -- - $options {} options
+    set pat ^-([join $options |])$
+    if {[llength $args] == 1} {
+	set name [lindex $args 0]
+	if {[regexp -- $pat $name]} {
+	    return $state($name)
+	} else {
+	    return -code error "Unknown option $name, must be: $usage"
+	}
+    } else {
+	foreach {name value} $args {
+	    if {[regexp -- $pat $name]} {
+		set state($name) $value
+	    } else {
+		return -code error "Unknown option $name, must be: $usage"
+	    }
+	}
+    }
 }
 
 proc qdxml::parse {token xml} {
@@ -189,9 +218,11 @@ proc qdxml::reset {token} {
     upvar 0 $token state
 
     array set state {
+	defaultNSURI          {}
+	haveDocElement        0
+	state                 {}
 	status                ""
 	rest                  ""
-	haveDocElement        0
     }
 }
 
@@ -199,25 +230,44 @@ proc qdxml::ElementOpen {token tag attr args} {
     variable $token
     upvar 0 $token state
 
+    lappend state(stack) $tag
+
     # Check for namespace declarations
     set nsdecls {}
     if {[llength $attr]} {
-
-    
-
-
+	array set attrA $attr
+	foreach {name value} [array get attrA xmlns*] {
+	    unset attrA($name)
+	    if {[string equal $name "xmlns"]} {
+		# default NS declaration:  xmlns='uri'
+		lappend state(defaultNSURI) $value
+		lappend state(defaultNS) [llength $state(stack)]
+		lappend nsdecls $value {}
+	    } else {
+		#  xmlns:stream='uri'
+		set prefix [lindex [split $name :] 1]
+		set namespaces($prefix,[llength $state(stack)]) $value
+		lappend nsdecls $value $prefix
+	    }
+	}
 	if {[llength $nsdecls]} {
 	    set nsdecls [list -namespacedecls $nsdecls]
 	}
+	set attr [array get attrA]
     }    
 
-    # Check whether this element has an expanded name
+    # Check whether this element has an expanded name:  
+    #    <prefix:tag xmlns:prefix='uri' .../>
     set ns {}
+    if {[regexp {([^:]+):(.*)$} $tag - prefix tag]} {
 
-    
+	
+    } elseif {[llength $state(defaultNSURI)]} {
+	set ns [list -namespace [lindex $state(defaultNSURI) end]]
+    }
     
     set code [catch {
-	uplevel #0 $state(-elementstartcommand) [list $tag $attr] $nsdecls $args
+	uplevel #0 $state(-elementstartcommand) [list $tag $attr] $ns $nsdecls $args
     }]
     return -code $code -errorinfo $::errorInfo
 }
@@ -225,7 +275,9 @@ proc qdxml::ElementOpen {token tag attr args} {
 proc qdxml::ElementClose {token tag args} {
     variable $token
     upvar 0 $token state
-        
+
+    set state(stack) [lreplace $state(stack) end end]
+
     set code [catch {
 	uplevel #0 $state(-elementendcommand) [list $tag] $args
     }]
