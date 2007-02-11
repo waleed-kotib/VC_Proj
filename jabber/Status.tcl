@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.37 2007-02-11 11:34:11 matben Exp $
+# $Id: Status.tcl,v 1.38 2007-02-11 14:14:46 matben Exp $
 
 package provide Status 1.0
 
@@ -125,10 +125,10 @@ proc ::Status::MainFree {w statusVar} {
     unset -nocomplain $menuVar
 }
 
-proc ::Status::MainMenuCmd {mt varName} {
+proc ::Status::MainMenuCmd {mt varName args} {
     upvar $varName status
     
-    MainCmd $mt $status
+    eval {MainCmd $mt $status} $args
 }
 
 # Status::BuildMainMenu --
@@ -342,7 +342,7 @@ proc ::Status::SetWithMessage {varName args} {
     global  wDlgs
 
     upvar $varName show
-
+    
     # Singleton.
     set w $wDlgs(jpresmsg)
     if {[winfo exists $w]} {
@@ -425,7 +425,7 @@ proc ::Status::SetWithMessage {varName args} {
     wm resizable $w 0 0
     bind $w <Return> {}
     bind $w <Destroy> +[subst { if {"%W" eq "$w"} {::Status::FreeDlg %W} }]
-        
+    
     return
 }
 
