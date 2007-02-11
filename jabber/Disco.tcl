@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.101 2007-02-04 15:27:59 matben Exp $
+# $Id: Disco.tcl,v 1.102 2007-02-11 11:34:10 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -1466,6 +1466,12 @@ proc ::Disco::AddServerDlg { } {
     upvar ::Jabber::jprefs jprefs
     
     set w $wDlgs(jdisaddserv)
+
+    # Singleton.
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
     wm title $w [mc {Add Server}]
@@ -1535,17 +1541,8 @@ proc ::Disco::AddServerDlg { } {
 	
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
-    
-    # Grab and focus.
-    set oldFocus [focus]
+
     focus $wfr.e
-    catch {grab $w}
-    
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
-    
-    catch {grab release $w}
-    catch {focus $oldFocus}
 }
 
 proc ::Disco::AddServerNone { } {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.143 2007-02-10 15:12:22 matben Exp $
+# $Id: UI.tcl,v 1.144 2007-02-11 11:34:12 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -17,7 +17,7 @@ namespace eval ::UI:: {
     global  this
 
     # Add all event hooks.
-    #::hooks::register initHook               ::UI::InitHook
+    ::hooks::register launchFinalHook         ::UI::LaunchFinalHook
     ::hooks::register firstLaunchHook         ::UI::FirstLaunchHook
 
     # Icons
@@ -83,32 +83,14 @@ namespace eval ::UI:: {
 	}
     }
     
-    # Dialog images.
-    foreach name {info error warning question} {
-	set im [::Theme::GetImage [option get . ${name}64Image {}]]
-	ui::dialog::setimage $name $im
-    }
-    ui::dialog::setbadge [::Theme::GetImage [option get . badgeImage {}]]
-    set im [::Theme::GetImage [option get . applicationImage {}]]
-    ui::dialog::setimage coccinella $im
-    
     # System colors.
     set wtmp [listbox ._tmp_listbox]
-    set this(sysHighlight)     [$wtmp	cget -selectbackground]
+    set this(sysHighlight)     [$wtmp cget -selectbackground]
     set this(sysHighlightText) [$wtmp cget -selectforeground]
     destroy $wtmp
     
     # Hardcoded configurations.
     set ::config(ui,pruneMenus) {}
-}
-
-proc ::UI::InitHook { } {
-    
-    # In initHook UI before hooks BAD!
-
-    # Various initializations for canvas stuff and UI.
-    #::UI::Init
-    #::UI::InitMenuDefs  
 }
 
 proc ::UI::FirstLaunchHook { } {
@@ -130,6 +112,19 @@ proc ::UI::Init {} {
     ::Theme::GetImageWithNameEx [option get . buttonOKImage {}]
     ::Theme::GetImageWithNameEx [option get . buttonCancelImage {}]
     ::Theme::GetImageWithNameEx [option get . buttonTrayImage {}]
+}
+
+proc ::UI::LaunchFinalHook { } {
+        
+    # Dialog images.
+    foreach name {info error warning question} {
+	set im [::Theme::GetImage [option get . ${name}64Image {}]]
+	ui::dialog::setimage $name $im
+    }
+    ui::dialog::setbadge [::Theme::GetImage [option get . badgeImage {}]]
+    set im [::Theme::GetImage [option get . applicationImage {}]]
+    ui::dialog::setimage coccinella $im
+    ui::dialog defaultmenu [::UI::GetMainMenu]
 }
 
 proc ::UI::InitCommonBinds { } {
