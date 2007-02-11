@@ -3,9 +3,9 @@
 #       Flexible dialog box.
 #       Some code from ttk::dialog.
 #
-# Copyright (c) 2005-2006 Mats Bengtsson
+# Copyright (c) 2005-2007 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.20 2007-02-10 15:12:22 matben Exp $
+# $Id: dialog.tcl,v 1.21 2007-02-11 11:34:09 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -61,6 +61,9 @@ namespace eval ui::dialog {
     }    
 }
 
+# TODO:
+#   o use typemethod instead for these! See defaultmenu.
+#   
 # These two must be able to call before any dialog instance created.
 # We always take copies to be on the safe side.
 
@@ -153,6 +156,7 @@ snit::widget ui::dialog::widget {
     typevariable dialogTypes	;# map -type => list of dialog options
     typevariable buttonOptions	;# map button name => list of button options
     typevariable wmalpha       0
+    typevariable defaultmenu   {}
     
     variable client
     variable timeoutID
@@ -217,6 +221,13 @@ snit::widget ui::dialog::widget {
 	    set wmalpha 0
 	}
     }
+    
+    typemethod defaultmenu {args} {
+	if {[llength $args]} {
+	    set defaultmenu $args
+	}
+	return $defaultmenu
+    }
 
     constructor {args} {
 	upvar ::ui::dialog::images images
@@ -233,7 +244,10 @@ snit::widget ui::dialog::widget {
 	if {[info exists dialogTypes($dlgtype)]} {
 	    array set options $dialogTypes($dlgtype)
 	}
-	$self configurelist $args
+	set argsA(-menu) $defaultmenu
+	array set argsA $args
+	
+	$self configurelist [array get argsA]
 	
 	if {[tk windowingsystem] eq "aqua"} {
 	    if {$options(-modal)} {
@@ -470,7 +484,8 @@ if {0} {
     set fr [$w clientframe]
     pack [ttk::checkbutton $fr.c -text $str2] -side left
     
-    set w [ui::dialog -message $str -detail $str -modal 1 -menu [::UI::GetMainMenu]]
+    ui::dialog defaultmenu [::UI::GetMainMenu]
+    set w [ui::dialog -message $str -detail $str2 -modal 1]
     ::UI::SetMenubarAcceleratorBinds $w $m
     $w grab
 

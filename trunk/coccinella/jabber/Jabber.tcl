@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.198 2007-02-05 14:54:17 matben Exp $
+# $Id: Jabber.tcl,v 1.199 2007-02-11 11:34:10 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -687,8 +687,7 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	    }
 	}
 	if {$msg ne ""} {
-	    ::ui::dialog -title [mc Info] -icon info -type ok \
-	      -message $msg
+	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	}
 	
 	# Auto subscribe to subscribers to me.
@@ -701,8 +700,7 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	    }
 	    $jlib send_presence -to $from -type "subscribe"
 	    set msg [mc jamessautosubs $from]
-	    ::ui::dialog -title [mc Info] -icon info -type ok \
-	      -message $msg
+	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	}
     }
     return 1
@@ -1853,7 +1851,7 @@ proc ::Jabber::Passwd::OnMenu { } {
 # Arguments:
 #       
 # Results:
-#       "cancel" or "set".
+#       none
 
 proc ::Jabber::Passwd::Build { } {
     global  this wDlgs
@@ -1867,7 +1865,10 @@ proc ::Jabber::Passwd::Build { } {
     set validate ""
 
     set w $wDlgs(jpasswd)
+
+    # Singleton.
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
@@ -1925,18 +1926,6 @@ proc ::Jabber::Passwd::Build { } {
     wm resizable $w 0 0
     ::UI::SetWindowPosition $w
     bind $w <Return> [list $frbot.btok invoke]
-    
-    # Grab and focus.
-    set oldFocus [focus]
-    focus $w
-    catch {grab $w}
-    
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
-    
-    catch {grab release $w}
-    catch {focus $oldFocus}
-    return [expr {($finished <= 0) ? "cancel" : "set"}]
 }
 
 proc ::Jabber::Passwd::Close {w} {
@@ -1946,9 +1935,8 @@ proc ::Jabber::Passwd::Close {w} {
 }
 
 proc ::Jabber::Passwd::Cancel {w} {
-    variable finished
     
-    set finished 0
+    ::UI::SaveWinPrefixGeom $w
     destroy $w
 }
 
@@ -2052,6 +2040,7 @@ proc ::Jabber::Logout::WithStatus { } {
 
     ::Debug 2 "::Jabber::Logout::WithStatus"
 
+    # Singleton.
     set w $wDlgs(joutst)
     if {[winfo exists $w]} {
 	raise $w
@@ -2115,37 +2104,24 @@ proc ::Jabber::Logout::WithStatus { } {
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
-    
-    # Grab and focus.
-    set oldFocus [focus]
     focus $frmid.estat
-    catch {grab $w}
-    
-    # Wait here for a button press and window to be destroyed.
-    tkwait variable [namespace current]::finished
-    
-    # Clean up.
-    catch {grab release $w}
-    catch {focus $oldFocus}
-    ::UI::SaveWinGeom $w
-    destroy $w
-    return [expr {($finished <= 0) ? "cancel" : "logout"}]
+
+    return $w
 }
 
 proc ::Jabber::Logout::DoCancel {w} {
-    variable finished
-    
     ::UI::SaveWinGeom $w
-    set finished 0
+    destroy $w
 }
 
 proc ::Jabber::Logout::DoLogout {w} {
     variable finished
     variable wtextstatus
     
+    ::UI::SaveWinGeom $w
     set msg [string trimright [$wtextstatus get 1.0 end]]
     ::Jabber::DoCloseClientConnection -status $msg
-    set finished 1
+    destroy $w
 }
 
 #-------------------------------------------------------------------------------

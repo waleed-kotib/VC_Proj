@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.62 2007-02-04 15:27:59 matben Exp $
+# $Id: Register.tcl,v 1.63 2007-02-11 11:34:11 matben Exp $
 
 package provide Register 1.0
 
@@ -130,7 +130,7 @@ proc ::RegisterEx::OnMenu {} {
 #               -autoget
 #       
 # Results:
-#       none
+#       w
 
 proc ::RegisterEx::New {args} {
     global  this wDlgs config
@@ -141,6 +141,7 @@ proc ::RegisterEx::New {args} {
     
     ::Debug 2 "::RegisterEx::New args=$args"
     
+    # Singleton. IMPORTANT! SInce we cannot have multiple connections.
     if {[winfo exists $win]} {
 	raise $win
 	return
@@ -151,7 +152,6 @@ proc ::RegisterEx::New {args} {
     variable $token
     upvar 0 $token state
 	
-    #set w $wDlgs(jreg)[incr uid]
     set w $win
     set state(w) $w
     array set state {
@@ -304,6 +304,8 @@ proc ::RegisterEx::New {args} {
     catch {focus $oldFocus}
     catch {destroy $state(w)}
     Free $token
+    
+    return $w
 }
 
 # Not used for the moment due to the grab stuff.
@@ -343,8 +345,7 @@ proc ::RegisterEx::CloseCmd {token w} {
     return stop
 }
 
-proc ::RegisterEx::Free {token} {
-    
+proc ::RegisterEx::Free {token} {    
     unset -nocomplain $token
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.36 2007-02-10 15:12:22 matben Exp $
+# $Id: Status.tcl,v 1.37 2007-02-11 11:34:11 matben Exp $
 
 package provide Status 1.0
 
@@ -324,8 +324,7 @@ proc ::Status::MainWithMessage {} {
     upvar ::Jabber::jstate jstate
     
     set status [::Jabber::JlibCmd mypresencestatus]
-
-    return [SetWithMessage -show $jstate(show) -status $status]
+    SetWithMessage -show $jstate(show) -status $status
 }
 
 #-- Generic status dialog ------------------------------------------------------
@@ -337,13 +336,14 @@ proc ::Status::MainWithMessage {} {
 # Arguments:
 #       
 # Results:
-#       "cancel" or "set".
+#       none
 
 proc ::Status::SetWithMessage {varName args} {
     global  wDlgs
 
     upvar $varName show
 
+    # Singleton.
     set w $wDlgs(jpresmsg)
     if {[winfo exists $w]} {
 	raise $w
@@ -354,7 +354,6 @@ proc ::Status::SetWithMessage {varName args} {
     variable $w
     upvar #0 $w state
     
-    set state(finished) -1
     set state(varName)  $varName
     set state(args)     $args
     set state(-to)      ""
@@ -365,7 +364,7 @@ proc ::Status::SetWithMessage {varName args} {
     # We must work with a temporary varName for status.
     set state(show) $show
     
-    ::UI::Toplevel $w -macstyle documentProc \
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} -closecommand [namespace current]::CloseStatus
     wm title $w [mc {Set Status}]
 
@@ -404,6 +403,7 @@ proc ::Status::SetWithMessage {varName args} {
 	
     # Any existing presence status?
     $wtext insert end $state(-status)
+    set state(wtext) $wtext
 	
     # Button part.
     set frbot $wbox.b
@@ -424,27 +424,12 @@ proc ::Status::SetWithMessage {varName args} {
     
     wm resizable $w 0 0
     bind $w <Return> {}
-    
-    set state(wtext) $wtext
-    
-    # Grab and focus.
-    set oldFocus [focus]
-    focus $w
-    catch {grab $w}
-    
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
-    
-    catch {grab release $w}
-    catch {focus $oldFocus}
-    set finished $state(finished)
-    unset -nocomplain state
-    return [expr {($finished <= 0) ? "cancel" : "set"}]
+    bind $w <Destroy> +[subst { if {"%W" eq "$w"} {::Status::FreeDlg %W} }]
+        
+    return
 }
 
 proc ::Status::StatusMsgRadioCmd {w} {
-    upvar ::Jabber::jprefs jprefs
-
     variable $w
     upvar #0 $w state
 
@@ -452,16 +437,11 @@ proc ::Status::StatusMsgRadioCmd {w} {
 }
 
 proc ::Status::CloseStatus {w} {
-    
     ::UI::SaveWinGeom $w
 }
 
 proc ::Status::SetStatusCancel {w} {    
-    variable $w
-    upvar #0 $w state
-
     ::UI::SaveWinGeom $w
-    set state(finished) 0
     destroy $w
 }
 
@@ -484,8 +464,14 @@ proc ::Status::BtSetStatus {w} {
 	eval {::Jabber::SetStatus $state(show)} $opts
     }
     ::UI::SaveWinGeom $w
-    set state(finished) 1
     destroy $w
+}
+
+proc ::Status::FreeDlg {w} {
+    variable $w
+    upvar #0 $w state
+
+    unset -nocomplain state
 }
 
 #-------------------------------------------------------------------------------
@@ -796,6 +782,7 @@ proc ::Status::ExCustomDlg {varName args} {
     global  wDlgs
     variable mapShowElemToText
 
+    # Singleton.
     set w $wDlgs(jpresmsg)
     if {[winfo exists $w]} {
 	raise $w
@@ -821,7 +808,7 @@ proc ::Status::ExCustomDlg {varName args} {
     ui::dialog $w -type okcancel -message [mc jamessstatuscust] \
       -detail [mc jamessstatuscustdtl] -icon info  \
       -command ::Status::ExCustomDlgCmd -geovariable prefs(winGeom,$w)  \
-      -title [mc {Custom Message}] -menu [::UI::GetMainMenu]
+      -title [mc {Custom Message}]
     set fr [$w clientframe]
     ui::optionmenu $fr.m -menulist $menuDef -direction flush  \
       -variable [namespace current]::$w\(show)
@@ -833,7 +820,7 @@ proc ::Status::ExCustomDlg {varName args} {
     grid columnconfigure $fr 0 -minsize $maxw
     grid columnconfigure $fr 1 -weight 1
     
-    bind $w <Destroy> +[list ::Status::ExCustomDlgFree $w]
+    bind $w <Destroy> +[subst { if {"%W" eq "$w"} {::Status::ExCustomDlgFree %W} }]
 }
 
 proc ::Status::ExCustomDlgCmd {w button} {

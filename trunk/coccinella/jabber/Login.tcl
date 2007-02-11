@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.111 2007-02-03 06:42:06 matben Exp $
+# $Id: Login.tcl,v 1.112 2007-02-11 11:34:10 matben Exp $
 
 package provide Login 1.0
 
@@ -63,6 +63,7 @@ proc ::Login::Dlg { } {
     variable tmpProfArr
     upvar ::Jabber::jprefs jprefs
     
+    # Singleton.
     set w $wDlgs(jlogin)
     if {[winfo exists $w]} {
 	raise $w
@@ -367,8 +368,7 @@ proc ::Login::Close {w} {
     trace vdelete [namespace current]::menuVar w  \
       [namespace current]::TraceMenuVar
     array unset tmpProfArr
-    catch {grab release $w}
-    catch {destroy $w}    
+    destroy $w
 }
 
 # Login::Reset --
