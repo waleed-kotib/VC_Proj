@@ -32,6 +32,7 @@ package ifneeded moviecontroller 1.0 [list source [file join $dir moviecontrolle
 package ifneeded notebox 1.0 [list source [file join $dir notebox.tcl]]
 package ifneeded pipes 1.0 [list source [file join $dir pipes.tcl]]
 package ifneeded putfile 1.0 [list source [file join $dir putfile.tcl]]
+package ifneeded qdxml 0.1 [list source [file join $dir qdxml.tcl]]
 package ifneeded sha1 1.0.3 [list source [file join $dir sha1.tcl]]
 package ifneeded snit 1.1 [list source [file join $dir snit.tcl]]
 package ifneeded socks4 0.1 [list source [file join $dir socks4.tcl]]

@@ -4,12 +4,12 @@
 #   It is adapted to streaming xml without any entities except for the standard
 #   ones, and has minimal error checking. Expect it to be optimized for XMPP.
 # 
-#   NOT COMPLETED!    
 #   TODO:
-#       o handle xmlns namespaces same as TclXML
 #       o entity syntax optional ending ";" ?
+#       o handle resets
+#       o error handling?
 #       
-# $Id: qdxml.tcl,v 1.4 2007-02-11 16:09:21 matben Exp $
+# $Id: qdxml.tcl,v 1.5 2007-02-12 15:01:07 matben Exp $
 
 package provide qdxml 0.1
 
@@ -62,19 +62,26 @@ proc qdxml::create {args} {
 	-ignorewhitespace     1
 	defaultNSURI          {}
 	haveDocElement        0
+	namespaces            {}
 	state                 {}
 	status                ""
 	rest                  ""
     }
     eval {configure $token} $args
+    
+    proc $token {cmd args}   \
+      "eval qdxml::cmdproc {$token} \$cmd \$args"
+    
     return $token
+}
+
+proc qdxml::cmdproc {token cmd args} {
+    return [eval {$cmd $token} $args]   
 }
 
 proc qdxml::configure {token args} {
     variable $token
     upvar 0 $token state
-    
-    puts "qdxml::configure $args"
 
     set options [lsort [array names state -*]]
     set usage [join $options ", "]
@@ -99,17 +106,16 @@ proc qdxml::configure {token args} {
 	    if {[regexp -- $pat $name]} {
 		set state($name) $value
 	    } else {
-		return -code error "Unknown option $name, must be: $usage"
+		#return -code error "Unknown option $name, must be: $usage"
 	    }
 	}
     }
 }
 
 proc qdxml::parse {token xml} {
-
     set xmllist [tokenise $token $xml]
     parseEvent $token $xmllist
-    return ""
+    return
 }
 
 proc qdxml::tokenise {token xml} {
@@ -137,11 +143,6 @@ proc qdxml::tokenise {token xml} {
 	# Cache it for next round.
 	set state(rest) $rest
     }
-
-    puts "------------------------------"
-    puts $xml
-    puts "------------------------------"
-
     return $xml
 }
 
@@ -150,16 +151,13 @@ proc qdxml::parseEvent {token xmllist} {
     upvar 0 $token state
     variable Wsp
     
-    set state(status) parse
+    set state(status) "parse"
 
     foreach {tag close param text} $xmllist {
 	
 	set empty [ParseEmpty $tag $param]
-
-	puts "tag=$tag, close=$close, param=$param, text=$text"
 	set len [string length $tag]
 	set decl [regexp {^\?|!.*} $tag]
-	puts "\t $len,$decl,$close,$empty"
 	
 	switch -glob -- $len,$decl,$close,$empty {
 	    0,0,, {
@@ -173,12 +171,14 @@ proc qdxml::parseEvent {token xmllist} {
 		set attr [ParseAttrs $param]
 		if {[string length $state(-elementstartcommand)]} {
 		    set code [catch {ElementOpen $token $tag $attr}]
+		    if {$state(status) eq "reset"} { return }
 		}
 	    }
 	    *,0,/, {
 		# End tag for an element.
 		if {[string length $state(-elementendcommand)]} {
 		    set code [catch {ElementClose $token $tag}]
+		    if {$state(status) eq "reset"} { return }
 		}
 	    }
 	    *,0,,/ {
@@ -190,9 +190,11 @@ proc qdxml::parseEvent {token xmllist} {
 		set attr [ParseAttrs $param]
 		if {[string length $state(-elementstartcommand)]} {
 		    set code [catch {ElementOpen $token $tag $attr -empty 1}]
+		    if {$state(status) eq "reset"} { return }
 		}
 		if {[string length $state(-elementendcommand)]} {
 		    set code [catch {ElementClose $token $tag -empty 1}]
+		    if {$state(status) eq "reset"} { return }
 		}
 	    }
 	    *,1,* {
@@ -206,11 +208,12 @@ proc qdxml::parseEvent {token xmllist} {
 	# Process character data.
 	if {$state(haveDocElement) && [string length $text]} {
 	    if {[string length $state(-characterdatacommand)]} {
-		PCDATA $token $text
+		set code [catch {PCDATA $token $text}]
+		if {$state(status) eq "reset"} { return }
 	    }
 	}
     }
-    return {}
+    return
 }
 
 proc qdxml::reset {token} {
@@ -220,8 +223,9 @@ proc qdxml::reset {token} {
     array set state {
 	defaultNSURI          {}
 	haveDocElement        0
+	namespaces            {}
 	state                 {}
-	status                ""
+	status                "reset"
 	rest                  ""
     }
 }
@@ -230,7 +234,10 @@ proc qdxml::ElementOpen {token tag attr args} {
     variable $token
     upvar 0 $token state
 
+    upvar #0 $state(namespaces) namespaces
+
     lappend state(stack) $tag
+    set slen [llength $state(stack)]
 
     # Check for namespace declarations
     set nsdecls {}
@@ -241,12 +248,12 @@ proc qdxml::ElementOpen {token tag attr args} {
 	    if {[string equal $name "xmlns"]} {
 		# default NS declaration:  xmlns='uri'
 		lappend state(defaultNSURI) $value
-		lappend state(defaultNS) [llength $state(stack)]
+		lappend state(defaultNS) $slen
 		lappend nsdecls $value {}
 	    } else {
 		#  xmlns:stream='uri'
 		set prefix [lindex [split $name :] 1]
-		set namespaces($prefix,[llength $state(stack)]) $value
+		set namespaces($prefix,$slen) $value
 		lappend nsdecls $value $prefix
 	    }
 	}
@@ -260,8 +267,11 @@ proc qdxml::ElementOpen {token tag attr args} {
     #    <prefix:tag xmlns:prefix='uri' .../>
     set ns {}
     if {[regexp {([^:]+):(.*)$} $tag - prefix tag]} {
-
-	
+	set nsspec [lsort -dictionary -decreasing [array names namespaces $prefix,*]]
+	if {[llength $nsspec]} {
+	    set nsuri $namespaces([lindex $nsspec 0])
+	    set ns [list -namespace $nsuri]
+	}	
     } elseif {[llength $state(defaultNSURI)]} {
 	set ns [list -namespace [lindex $state(defaultNSURI) end]]
     }
@@ -276,10 +286,34 @@ proc qdxml::ElementClose {token tag args} {
     variable $token
     upvar 0 $token state
 
+    upvar #0 $state(namespaces) namespaces
+
+    # Check whether this element has an expanded name:
+    #    </prefix:tag>
+    set ns {}
+    if {[regexp {([^:]+):(.*)$} $tag - prefix tag]} {
+	set nsspec [lsort -dictionary -decreasing [array names namespaces $prefix,*]]
+	set nsuri $namespaces([lindex $nsspec 0])
+	set ns [list -namespace $nsuri]
+    } elseif {[llength $state(defaultNSURI)]} {
+	set ns [list -namespace [lindex $state(defaultNSURI) end]]
+    }
+    
+    # Pop namespace stacks, if any
+    set slen [llength $state(stack)]
+    if {[llength $state(defaultNS)]} {
+	if {$slen == [lindex $state(defaultNS) end]} {
+	    set state(defaultNS) [lreplace $state(defaultNS) end end]
+	}
+    }
+    foreach nsspec [array names namespaces *,$slen] {
+	unset namespaces($nsspec)
+    }    
+    
     set state(stack) [lreplace $state(stack) end end]
 
     set code [catch {
-	uplevel #0 $state(-elementendcommand) [list $tag] $args
+	uplevel #0 $state(-elementendcommand) [list $tag] $ns $args
     }]
     return -code $code -errorinfo $::errorInfo
 }
@@ -330,8 +364,12 @@ proc qdxml::ParseAttrs {attrs} {
 
 proc qdxml::Entity {value} {
     
+    # Speedup of 10% !
+    if {[string first & $value] == -1} {
+	return $value
+    }
     set value [string map {{&amp;} {&} {&lt;} {<} {&gt;} {>} {&quot;} {"} {&apos;} {'}} $value]
-    
+        
     # @@@ optional ending ";" ???
     
     # Protect Tcl special characters
@@ -347,10 +385,11 @@ proc qdxml::Entity {value} {
 
 
 if {0} {
-    proc Start {args} {puts "Start: -------- $args"}
-    proc End {args} {puts "End: -------- $args"}
+    proc Start {tag attr args} {puts "Start: -------- $args"}
+    proc End {tag args} {puts "End: -------- $args"}
     proc Data {args} {puts "Data: -------- $args"}
     set f /Users/matben/Desktop/test.xml
+    set f /Users/matben/Desktop/stream.xml
     set fd [open $f r]
     set xml [read $fd]
     close $fd
@@ -358,7 +397,21 @@ if {0} {
       -elementstartcommand  Start \
       -elementendcommand    End   \
       -characterdatacommand Data]
-    qdxml::parse $token $xml
+    $token parse $xml
+
+    # Timing.
+    set f /Users/matben/Desktop/long.xml
+    set fd [open $f r]
+    set xml [read $fd]; set a 1
+    close $fd
+    set token [qdxml::create]
+    time {$token parse $xml} 10
+
+    # 3.5 times slower! (parserclass tcl)
+    set p [xml::parser]
+    time {$p parse $xml} 10
+
 
 }
+
 

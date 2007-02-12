@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.30 2007-02-10 15:12:22 matben Exp $
+# $Id: wrapper.tcl,v 1.31 2007-02-12 15:01:08 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -152,6 +152,16 @@ proc wrapper::new {streamstartcmd streamendcmd parsecmd errorcmd} {
 	  -defaultexpandinternalentities 0
     }
     
+    # Experiment.
+    if {0} {
+	package require qdxml
+	set token [qdxml::create \
+	  -elementstartcommand  [list [namespace current]::elementstart $id]   \
+	  -elementendcommand    [list [namespace current]::elementend $id]     \
+	  -characterdatacommand [list [namespace current]::chdata $id]]
+	set wrapper($id,parser) $token
+    }
+    
     # Current level; 0 before root tag; 1 just after root tag, 2 after 
     # command tag, etc.
     set wrapper($id,level) 0
@@ -246,7 +256,7 @@ proc wrapper::parsereentrant {id xml} {
 
 proc wrapper::elementstart {id tagname attrlist args} {
     variable wrapper
-        
+            
     # Check args, to see if empty element and/or namespace. 
     # Put xmlns in attribute list.
     array set argsarr $args
@@ -422,7 +432,7 @@ proc wrapper::reset {id} {
 	  -ignorewhitespace     1                                              \
 	  -defaultexpandinternalentities 0
     }
-    
+
     # Cleanup internal state vars.
     set lev 2
     while {[info exists wrapper($id,tree,$lev)]} {
