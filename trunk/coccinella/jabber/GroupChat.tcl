@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.180 2007-01-26 13:50:14 matben Exp $
+# $Id: GroupChat.tcl,v 1.181 2007-02-13 09:08:10 matben Exp $
 
 package require Create
 package require Enter
@@ -318,7 +318,7 @@ proc ::GroupChat::EnterHook {roomjid protocol} {
     
     ::Debug 2 "::GroupChat::EnterHook roomjid=$roomjid $protocol"
   
-    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    set chattoken [GetTokenFrom chat roomjid [jlib::ESC $roomjid]]
     if {$chattoken eq ""} {
 
 	# If we haven't a window for this roomjid, make one!
@@ -359,7 +359,7 @@ proc ::GroupChat::SetProtocol {roomjid _protocol} {
     # We need a separate cache for this since the room may not yet exist.
     set protocol($roomjid) $_protocol
     
-    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    set chattoken [GetTokenFrom chat roomjid [jlib::ESC $roomjid]]
     if {$chattoken eq ""} {
 	return
     }
@@ -452,7 +452,7 @@ proc ::GroupChat::NewChat {roomjid} {
 	set dlgtoken [GetFirstDlgToken]
 	if {$dlgtoken eq ""} {
 	    set dlgtoken [Build $roomjid]
-	    set chattoken [GetTokenFrom chat roomjid $roomjid]
+	    set chattoken [GetTokenFrom chat roomjid [jlib::ESC $roomjid]]
 	} else {
 	    set chattoken [NewPage $dlgtoken $roomjid]
 	}
@@ -496,7 +496,7 @@ proc ::GroupChat::GotMsg {body args} {
     jlib::splitjid $from roomjid res
         
     # If we haven't a window for this roomjid, make one!
-    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    set chattoken [GetTokenFrom chat roomjid [jlib::ESC $roomjid]]
     if {$chattoken eq ""} {
 	set chattoken [NewChat $roomjid]
     }
@@ -1470,8 +1470,7 @@ proc ::GroupChat::GetTokenFrom {type key pattern} {
 		variable $token
 		upvar 0 $token xstate
 	    }
-	}
-	
+	}	
 	if {[info exists xstate($key)] && [string match $pattern $xstate($key)]} {
 	    return $token
 	}
@@ -1502,8 +1501,7 @@ proc ::GroupChat::GetAllTokensFrom {type key pattern} {
 		variable $token
 		upvar 0 $token xstate
 	    }
-	}
-	
+	}	
 	if {[info exists xstate($key)] && [string match $pattern $xstate($key)]} {
 	    lappend alltokens $token
 	}
@@ -2327,7 +2325,7 @@ proc ::GroupChat::Exit {chattoken} {
 proc ::GroupChat::ExitRoomJID {roomjid} {
 
     set roomjid [jlib::jidmap $roomjid]
-    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    set chattoken [GetTokenFrom chat roomjid [jlib::ESC $roomjid]]
     if {$chattoken ne ""} {
 	return [ExitAndClose $chattoken]
     } else {
@@ -2509,7 +2507,7 @@ proc ::GroupChat::PresenceEvent {jlibname xmldata} {
     }
     jlib::splitjid $from roomjid nick
         
-    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    set chattoken [GetTokenFrom chat roomjid [jlib::ESC $roomjid]]
     if {$chattoken ne ""} {
 	if {[string equal $type "available"]} {
 	    SetUser $roomjid $from
@@ -2622,7 +2620,7 @@ proc ::GroupChat::SetUser {roomjid jid3} {
     # If we haven't a window for this thread, make one!
     # @@@ This shouldn't be necessary since we fill in all users when
     #     making the room widget.
-    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    set chattoken [GetTokenFrom chat roomjid [jlib::ESC $roomjid]]
     if {$chattoken eq ""} {
 	set chattoken [NewChat $roomjid]
     }       
@@ -2813,7 +2811,7 @@ proc ::GroupChat::RemoveUser {roomjid jid3} {
     ::Debug 4 "::GroupChat::RemoveUser roomjid=$roomjid, jid3=$jid3"
     
     set roomjid [jlib::jidmap $roomjid]
-    set chattoken [GetTokenFrom chat roomjid $roomjid]
+    set chattoken [GetTokenFrom chat roomjid [jlib::ESC $roomjid]]
     if {$chattoken ne ""} {
 	TreeRemoveUser $chattoken $jid3
     }

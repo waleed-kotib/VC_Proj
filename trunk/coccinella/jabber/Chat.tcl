@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.191 2007-02-10 07:55:08 matben Exp $
+# $Id: Chat.tcl,v 1.192 2007-02-13 09:08:10 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -467,7 +467,7 @@ proc ::Chat::GotMsg {body args} {
 	
 	# Try to find a reasonable fallback for clients that fail here (Psi).
 	# Find if we have registered any chat for this jid 2/3.
-	set chattoken [GetTokenFrom chat jid ${mjid2}*]
+	set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
 	if {$chattoken eq ""} {
 	    
 	    # Need to create a new thread ID.
@@ -509,7 +509,7 @@ proc ::Chat::GotMsg {body args} {
     set chatstate(jid)         $mjid
     set chatstate(fromjid)     $jid
     set chatstate(displayname) [::Roster::GetDisplayName $jid2]
-    
+        
     set w $dlgstate(w)
 
     # Check for ChatState (XEP-0085) support
@@ -629,7 +629,7 @@ proc ::Chat::GotNormalMsg {body args} {
     array set argsA $args
     set jid2 [jlib::barejid $argsA(-from)]
     set mjid2 [jlib::jidmap $jid2]
-    set chattoken [GetTokenFrom chat jid ${mjid2}*]
+    set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
     
     if {($chattoken ne "") && [info exists argsA(-x)]} {
 	eval {XEventHandleAnyXElem $chattoken $argsA(-x)} $args
@@ -1728,7 +1728,7 @@ proc ::Chat::SetAnyAvatar {chattoken} {
 
 proc ::Chat::AvatarNewPhotoHook {jid2} {
     
-    foreach chattoken [GetAllTokensFrom chat jid2 ${jid2}*] {
+    foreach chattoken [GetAllTokensFrom chat jid2 [jlib::ESC $jid2]*] {
 	SetAnyAvatar $chattoken
     }    
 }
@@ -2308,7 +2308,7 @@ proc ::Chat::BuildSavedDialogs { } {
     foreach spec $dlgArr($mejidmap) {
 	set jid  [lindex $spec 0]
 	set opts [lindex $spec 1 end]
-	set chattoken [GetTokenFrom chat jid ${jid}*]
+	set chattoken [GetTokenFrom chat jid [jlib::ESC $jid]*]
 	if {$chattoken eq ""} {
 	    set chattoken [StartThread $jid]
 	    InsertHistory $chattoken
@@ -2756,7 +2756,7 @@ proc ::Chat::GetWindow {jid} {
 
     set jid2 [jlib::barejid $jid]
     set mjid2 [jlib::jidmap $jid2]
-    set chattoken [GetTokenFrom chat jid ${mjid2}*]
+    set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
     if {$chattoken ne ""} {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
@@ -2807,8 +2807,7 @@ proc ::Chat::GetTokenFrom {type key pattern} {
 		variable $token
 		upvar 0 $token xstate
 	    }
-	}
-	
+	}	
 	if {[info exists xstate($key)] && [string match $pattern $xstate($key)]} {
 	    return $token
 	}
@@ -2836,8 +2835,7 @@ proc ::Chat::GetAllTokensFrom {type key pattern} {
 		variable $token
 		upvar 0 $token xstate
 	    }
-	}
-	
+	}	
 	if {[info exists xstate($key)] && [string match $pattern $xstate($key)]} {
 	    lappend alltokens $token
 	}
