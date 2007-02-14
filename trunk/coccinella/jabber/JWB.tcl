@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.74 2007-01-20 16:26:23 matben Exp $
+# $Id: JWB.tcl,v 1.75 2007-02-14 08:17:53 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1234,17 +1234,16 @@ proc ::JWB::HandleNonCanvasCmds {type cmdList args} {
 		if {[regexp {^RESIZE IMAGE: +([^ ]+) +([^ ]+) +([-0-9]+)$}  \
 		  $cmd match utag utagNew zoom]} {
 		    array set argsA $args
+		    set from $argsA(-from)
 		    set w ""
 		
 		    # Make sure whiteboard exists.
 		    switch -- $type {
 			chat - groupchat {
-			    set w [eval {GetWtopFromMessage \
-			      $type $argsA(-from)} $args]
+			    set w [eval {GetWtopFromMessage $type $from} $args]
 			    if {$w eq ""} {
 				continue
-				set w [eval {
-				    NewWhiteboardTo $argsA(-from)} $args]
+				set w [eval {NewWhiteboardTo $from} $args]
 			    }
 			}
 		    }

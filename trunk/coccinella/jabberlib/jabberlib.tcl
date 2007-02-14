@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.169 2007-02-13 09:08:11 matben Exp $
+# $Id: jabberlib.tcl,v 1.170 2007-02-14 08:17:53 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2299,7 +2299,7 @@ proc jlib::presence_ex_run_hook {jlibname int xmldata} {
     if {$from eq ""} {
 	set from $locals(server)
     }
-    jlib::splitjid $from from2 -
+    set from2 [jlib::barejid $from]
     set pkey "$int,$type,$from,$from2"
             
     # Make matching in two steps, attributes and elements.
