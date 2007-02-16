@@ -73,7 +73,7 @@
 ::msgcat::mcset es Filter		{Filtro}
 ::msgcat::mcset es Filters		{Filtros}
 
-::msgcat::mcset es Find
+::msgcat::mcset es Find                 {Buscar}
 
 ::msgcat::mcset es Finish		{Terminar}
 ::msgcat::mcset es Finished		{Terminado}
@@ -102,7 +102,7 @@
 
 ::msgcat::mcset es Key			Clave
 
-::msgcat::mcset es Language
+::msgcat::mcset es Language             Idioma
 ::msgcat::mcset es Last			{Último}
 ::msgcat::mcset es Less			{Menos}
 ::msgcat::mcset es Login		{Conectarse}
@@ -425,11 +425,11 @@
 ::msgcat::mcset es mTakeSnapShot        {Coger captura}
 
 #Translate
-::msgcat::mcset es mTimeCode            {Timecode}
-::msgcat::mcset es mFontSize            {Font Size}
+::msgcat::mcset es mTimeCode            {Codificacion horaria}
+::msgcat::mcset es mFontSize            {Tamano de la fuente}
 ::msgcat::mcset es mNormalFont          {Normal}
-::msgcat::mcset es mLargerFont          {Larger}
-::msgcat::mcset es mLargeFont           {Large}
+::msgcat::mcset es mLargerFont          {Mas grande}
+::msgcat::mcset es mLargeFont           {Grande}
 
 ::msgcat::mcset es mUserInfo            {Informacion del usuario}
 ::msgcat::mcset es mEditBookmarks       {Editar favoritos}
@@ -441,11 +441,11 @@
 ::msgcat::mcset es mFind         	{Buscar}
 ::msgcat::mcset es mFindAgain         	{Siguiente coincidencia}
 
-::msgcat::mcset es mFindPrevious        {Find Previous}
-::msgcat::mcset es mCustomStatus        {Custom Status...}
-::msgcat::mcset es mImport              {Import}
-::msgcat::mcset es mExport              {Export}
-::msgcat::mcset es mEmoticonSet         {Emoticon Set...}
+::msgcat::mcset es mFindPrevious        {Buscar siguiente}
+::msgcat::mcset es mCustomStatus        {Estado personalizado...}
+::msgcat::mcset es mImport              {Importar}
+::msgcat::mcset es mExport              {Exportar}
+::msgcat::mcset es mEmoticonSet         {Avatar...}
 ::msgcat::mcset es mRoster              {Roster...}
 
 
@@ -480,7 +480,7 @@
 ::msgcat::mcset es mJiveCall            {Llamar a...}
 ::msgcat::mcset es mJiveForward         {Deviar la llamada actual a...}
 
-::msgcat::mcset es mEditNick            {Edit Nickname}
+::msgcat::mcset es mEditNick            {Editar nick}
 
 # Textos cortos únicamente.
 ::msgcat::mcset es {30 days}			{30 días}
@@ -534,7 +534,7 @@
 ::msgcat::mcset es {Disco method}               {Metodo Disco}
 ::msgcat::mcset es {Do Not Disturb}		{No molestar}
 
-::msgcat::mcset es {Do not save password}
+::msgcat::mcset es {No recordar password}
 
 ::msgcat::mcset es {Edit Fonts}			{Editar las fuentes}
 ::msgcat::mcset es {Edit Item}			{Editar el objeto}
@@ -661,7 +661,7 @@
 ::msgcat::mcset es {Personal URL}		{URL personal}
 ::msgcat::mcset es {Pick Directory}		{Elegir un directorio}
 ::msgcat::mcset es {Pick File}			{Elegir un archivo}
-::msgcat::mcset es {Pick Image File}
+::msgcat::mcset es {Pick Image File}            {Elegir una imagen}
 ::msgcat::mcset es {Pick skin}			{Seleccionar tema}
 ::msgcat::mcset es {Plugin Info}		{Información sobre el plugin}
 ::msgcat::mcset es {Plugin Control}		{Control del plugin}
@@ -674,7 +674,7 @@
 ::msgcat::mcset es {Proxy Port}		        {Puerto del Proxy}
 ::msgcat::mcset es {Proxy Server}	        {Servidor Proxy}
 ::msgcat::mcset es {Proxy Setup}		{Configuración del proxy}
-::msgcat::mcset es {Public Jabber Servers}
+::msgcat::mcset es {Public Jabber Servers}      {Servidores de Jabber publicos}
 ::msgcat::mcset es {Put File Error}		{Error al insertar el archivo}
 ::msgcat::mcset es {Put Image/Movie}		{Insertar imagen/vídeo}
 ::msgcat::mcset es {Reject receive}		{Rechazar la recepción}
@@ -685,7 +685,7 @@
 ::msgcat::mcset es {Register Now}		{Registrarse ahora}
 ::msgcat::mcset es {Register Service}		{Servicio de registro}
 ::msgcat::mcset es {Remove Item}		{Borrar el objeto}
-::msgcat::mcset es {Remove Photo}
+::msgcat::mcset es {Remove Photo}               {Eliminar foto}
 ::msgcat::mcset es {Room name}			{Nombre de la sala}
 ::msgcat::mcset es {Room name (optional)}	{Nombre de la sala (opcional)}
 ::msgcat::mcset es {Roster & Services}		{Contactos y servicios}
@@ -700,7 +700,7 @@
 ::msgcat::mcset es {Search Specifications}	{Buscar especificaciones}
 ::msgcat::mcset es {Select a new nickname} 	{Seleccione un nuevo nombre de usuario}
 ::msgcat::mcset es {Select Font}		{Elegir fuente}
-::msgcat::mcset es {Select Photo}
+::msgcat::mcset es {Select Photo}               {Elegir foto}
 ::msgcat::mcset es {Send File}			{Enviar archivo}
 ::msgcat::mcset es {Send Live}			{Enviar en directo}
 ::msgcat::mcset es {Server Info}		{Información sobre el servidor}
@@ -713,9 +713,9 @@
 ::msgcat::mcset es {Settings Panels}		{Paneles de configuración}
 ::msgcat::mcset es {Setup Assistant}		{Asistente de configuración}
 
-::msgcat::mcset es {Show Text and Image}
-::msgcat::mcset es {Show Text}
-::msgcat::mcset es {Show Image}
+::msgcat::mcset es {Show Text and Image}        {Mostrar texto e imagenes}
+::msgcat::mcset es {Show Text}                  {Mostrar texto}
+::msgcat::mcset es {Show Image}                 {Mostrar imagenes}
 
 ::msgcat::mcset es {Slide Show}			{Presentación}
 ::msgcat::mcset es {Slide Show Folder}		{Directorio para las Presentaciones}
