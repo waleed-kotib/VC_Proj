@@ -5,7 +5,7 @@
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.34 2007-01-22 16:09:52 matben Exp $
+# $Id: svg2can.tcl,v 1.35 2007-02-26 13:26:53 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -787,8 +787,6 @@ proc svg2can::ParseLineEx {xmllist paropts transAttr args} {
 		lappend opts -tags $value
 	    }
 	    style {
-		puts "\t style=$value"
-		puts "\t StyleToOptsEx=[StyleToOptsEx [StyleAttrToList $value]]"
 		eval {lappend opts} [StyleToOptsEx [StyleAttrToList $value]]
 	    }
 	    transform {
@@ -799,7 +797,6 @@ proc svg2can::ParseLineEx {xmllist paropts transAttr args} {
 	    }
 	}
     }
-    puts "opts=$opts"
     if {[llength $transAttr]} {
 	lappend opts -matrix [TransformAttrListToMatrix $transAttr]
     }
