@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.79 2007-02-08 15:33:08 matben Exp $
+# $Id: NewMsg.tcl,v 1.80 2007-02-26 13:26:53 matben Exp $
 
 package require ui::entryex
 
@@ -831,7 +831,7 @@ proc ::NewMsg::DoSend {w} {
     # Loop through address list. 
     set addrList {}
     for {set i 1} {$i <= $locals($w,addrline)} {incr i} {
-	set addr $locals($w,addr$i)
+	set addr [string trim $locals($w,addr$i)]
 	if {[string length $addr] > 0} {
 	    if {![jlib::jidvalidate $addr]} {
 		if {$locals($w,addrline) > 1} {

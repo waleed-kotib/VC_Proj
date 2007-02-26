@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.63 2007-02-11 11:34:11 matben Exp $
+# $Id: Register.tcl,v 1.64 2007-02-26 13:26:53 matben Exp $
 
 package provide Register 1.0
 
@@ -468,7 +468,7 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
     
     if {[string equal $type "error"]} {
 	::UI::MessageBox -type ok -icon error  \
-	  -message [mc jamesserrregget [lindex $subiq 0] [lindex $subiq 1]]
+	  -message [mc jamesserrregget [lindex $iqchild 0] [lindex $iqchild 1]]
 	return
     } 
     

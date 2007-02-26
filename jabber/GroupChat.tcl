@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.181 2007-02-13 09:08:10 matben Exp $
+# $Id: GroupChat.tcl,v 1.182 2007-02-26 13:26:53 matben Exp $
 
 package require Create
 package require Enter
@@ -387,43 +387,38 @@ proc ::GroupChat::NormalMsgHook {body args} {
     upvar ::Jabber::xmppxmlns xmppxmlns
     
     array set argsA $args
-
-    set isinvite 0
-    if {[info exists argsA(-x)]} {
+    set xmldata $argsA(-xmldata)
     
-	::Debug 2 "::GroupChat::NormalMsgHook args='$args'"
-
-	set xList $argsA(-x)
-	set cList [wrapper::getnamespacefromchilds $xList x $xmppxmlns(muc,user)]
-	set roomjid $argsA(-from)
-	
-	if {$cList != {}} {
-	    set inviteElem [wrapper::getfirstchildwithtag [lindex $cList 0] invite]
-	    if {$inviteElem != {}} {
-		set isinvite 1
-		set str2 ""
-		set invitejid [wrapper::getattribute $inviteElem from]
-		set reasonElem [wrapper::getfirstchildwithtag $inviteElem reason]
-		if {$reasonElem != {}} {
-		    append str2 "Reason: [wrapper::getcdata $reasonElem]"
-		}
-		set passwordElem [wrapper::getfirstchildwithtag $cList password]
-		if {$passwordElem != {}} {
-		    append str2 " Password: [wrapper::getcdata $passwordElem]"
-		}
-	    }
-	} else {
-	    set cList [wrapper::getnamespacefromchilds $xList x \
-	      "jabber:x:conference"]
-	    if {$cList != {}} {
-		set isinvite 1
-		set xElem [lindex $cList 0]
-		set invitejid [wrapper::getattribute $xElem jid]
-		set str2 "Reason: [wrapper::getcdata $xElem]"
-	    }	    
+    set isinvite 0
+        
+    set roomjid [wrapper::getattribute $xmldata from]
+    set xuserE [wrapper::getfirstchild $xmldata x $xmppxmlns(muc,user)]
+    
+    if {[llength $xuserE]} {
+	set isinvite 1
+	set str2 ""
+	set inviteE [wrapper::getfirstchildwithtag $xuserE invite]
+	set reasonE [wrapper::getfirstchildwithtag $inviteE reason]
+	set invitejid [wrapper::getattribute $inviteE from]
+	if {[llength $reasonE]} {
+	    append str2 "Reason: [wrapper::getcdata $reasonE]"
 	}
+	set passwordE [wrapper::getfirstchildwithtag $xuserE password]
+	if {[llength $passwordE]} {
+	    append str2 " Password: [wrapper::getcdata $passwordE]"
+	}
+    } else {
+	set cinviteE [wrapper::getfirstchild $xmldata x "jabber:x:conference"]
+	if {[llength $cinviteE]} {
+	    set isinvite 1
+	    set invitejid [wrapper::getattribute $cinviteE jid]
+	    set str2 "Reason: [wrapper::getcdata $cinviteE]"
+	}	    
     }
     if {$isinvite} {
+
+	::Debug 2 "::GroupChat::NormalMsgHook args='$args'"
+
 	set str [mc jamessgcinvite $roomjid $invitejid]
 	append str " " $str2
 	set ans [::UI::MessageBox -title [mc Invite] -icon info -type yesno \

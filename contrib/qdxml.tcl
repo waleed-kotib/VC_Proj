@@ -9,7 +9,7 @@
 #       o handle resets
 #       o error handling?
 #       
-# $Id: qdxml.tcl,v 1.5 2007-02-12 15:01:07 matben Exp $
+# $Id: qdxml.tcl,v 1.6 2007-02-26 13:26:53 matben Exp $
 
 package provide qdxml 0.1
 
@@ -56,16 +56,20 @@ proc qdxml::create {args} {
     upvar 0 $token state
 
     array set state {
-	-elementstartcommand  {}
-	-elementendcommand    {}
-	-characterdatacommand {}
-	-ignorewhitespace     1
-	defaultNSURI          {}
-	haveDocElement        0
-	namespaces            {}
-	state                 {}
-	status                ""
-	rest                  ""
+	-characterdatacommand          {}
+	-defaultexpandinternalentities 0
+	-elementstartcommand           {}
+	-elementendcommand             {}
+	-errorcommand                  {}
+	-final                         0
+	-ignorewhitespace              1
+	-reportempty                   1
+	defaultNSURI                   {}
+	haveDocElement                 0
+	namespaces                     {}
+	rest                           ""
+	state                          ""
+	status                         ""
     }
     eval {configure $token} $args
     
@@ -106,7 +110,7 @@ proc qdxml::configure {token args} {
 	    if {[regexp -- $pat $name]} {
 		set state($name) $value
 	    } else {
-		#return -code error "Unknown option $name, must be: $usage"
+		return -code error "Unknown option $name, must be: $usage"
 	    }
 	}
     }
