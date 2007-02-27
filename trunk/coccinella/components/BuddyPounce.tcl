@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.14 2006-09-15 13:18:17 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.15 2007-02-27 10:02:13 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -655,20 +655,20 @@ proc ::BuddyPounce::CloseHook {wclose} {
 
 proc ::BuddyPounce::NewChatMsgHook {body args} {
 
-    array set argsArr $args
-    if {[info exists argsArr(-from)]} {
-	jlib::splitjid $argsArr(-from) jid2 res
-	eval {Event $jid2 chat} $args
-    }
+    array set argsA $args
+    set xmldata $argsA(-xmldata)
+    set from [wrapper::getattribute $xmldata from]
+    set jid2 [jlib::barejid $from]
+    eval {Event $jid2 chat} $args
 }
 
 proc ::BuddyPounce::NewMsgHook {body args} {
     
-    array set argsArr $args
-    if {[info exists argsArr(-from)]} {
-	jlib::splitjid $argsArr(-from) jid2 res
-	eval {Event $jid2 msg} $args
-    }
+    array set argsA $args
+    set xmldata $argsA(-xmldata)
+    set from [wrapper::getattribute $xmldata from]
+    set jid2 [jlib::barejid $from]
+    eval {Event $jid2 msg} $args
 }
 
 proc ::BuddyPounce::PresenceHook {jid type args} {

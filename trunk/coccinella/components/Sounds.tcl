@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.28 2007-01-01 15:16:28 matben Exp $
+# $Id: Sounds.tcl,v 1.29 2007-02-27 10:02:13 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -306,17 +306,14 @@ proc ::Sounds::PlayMIDI {fileName} {
 }
 
 proc ::Sounds::Msg {type snd body args} {
-    
-    array set argsArr $args
-    
+        
     # We sometimes get non text stuff messages, like jabber:x:event etc.
-    if {[string length $body] == 0} {
+    if {![string length $body]} {
 	return
     }
-    set from ""
-    if {[info exists argsArr(-from)]} {
-	set from $argsArr(-from)
-    }
+    array set argsA $args
+    set xmldata $argsA(-xmldata)
+    set from [wrapper::getattribute $xmldata from]
     
     # We shouldn't make noise for our own messages.
     switch -- $type {
@@ -325,15 +322,15 @@ proc ::Sounds::Msg {type snd body args} {
 	}
 	chat {
 	    set myjid [::Jabber::GetMyJid]
-	    jlib::splitjid $myjid jid2 res
+	    set jid2 [jlib::barejid $myjid]
 	    if {[string match ${jid2}* $from]} {
 		return
 	    }
 	}
 	groupchat {
-	    jlib::splitjid $from roomjid res
+	    set roomjid [jlib::barejid $from]
 	    set myjid [::Jabber::GetMyJid $roomjid]
-	    if {[string equal $myjid $from]} {
+	    if {[jlib::jidequal $myjid $from]} {
 		return
 	    }
 	}

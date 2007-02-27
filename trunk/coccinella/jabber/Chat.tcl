@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.192 2007-02-13 09:08:10 matben Exp $
+# $Id: Chat.tcl,v 1.193 2007-02-27 10:02:13 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -448,12 +448,11 @@ proc ::Chat::GotMsg {body args} {
     
     ::Debug 2 "::Chat::GotMsg args='$args'"
 
-    array set argsA $args
-    
+    array set argsA $args    
     set xmldata $argsA(-xmldata)
     
     # -from is a 3-tier jid /resource included.
-    set jid $argsA(-from)
+    set jid [wrapper::getattribute $xmldata from]
     set jid2  [jlib::barejid $jid]
     set mjid  [jlib::jidmap $jid]
     set mjid2 [jlib::barejid $mjid]
@@ -553,20 +552,18 @@ proc ::Chat::GotMsg {body args} {
     } 
 
     set opts {}
-    if {[info exists argsA(-x)]} {
-        set tm [::Jabber::GetAnyDelayElem $argsA(-x)]
-        if {$tm ne ""} {
-           set secs [clock scan $tm -gmt 1]
-           lappend opts -secs $secs
-        }
+    set tm [::Jabber::GetDelayStamp $xmldata]
+    if {$tm ne ""} {
+	set secs [clock scan $tm -gmt 1]
+	lappend opts -secs $secs
+    }
 
-        # If doesn't come a ChatState event (XEP-0085).
-        # See if we've got a jabber:x:event (XEP-0022).
-        # 
-        # @@@ Should we handle this with hooks?
-        if {$chatstate(havecs) eq "true"} {
-            eval {XEventHandleAnyXElem $chattoken $argsA(-x)} $args
-        }
+    # If doesn't come a ChatState event (XEP-0085).
+    # See if we've got a jabber:x:event (XEP-0022).
+    # 
+    # @@@ Should we handle this with hooks?
+    if {[info exists argsA(-x)] && $chatstate(havecs) eq "true"} {
+	eval {XEventHandleAnyXElem $chattoken} $args
     }
 
     # This is important since clicks may have reset the insert mark.
@@ -627,12 +624,13 @@ proc ::Chat::GotNormalMsg {body args} {
     
     # Try identify if composing event sent as normal message.
     array set argsA $args
-    set jid2 [jlib::barejid $argsA(-from)]
+    set xmldata $argsA(-xmldata)
+    set jid2 [jlib::barejid [wrapper::getattribute $xmldata from]]
     set mjid2 [jlib::jidmap $jid2]
     set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
     
     if {($chattoken ne "") && [info exists argsA(-x)]} {
-	eval {XEventHandleAnyXElem $chattoken $argsA(-x)} $args
+	eval {XEventHandleAnyXElem $chattoken} $args
     }
 }
 
@@ -2999,15 +2997,15 @@ proc ::Chat::GetFirstSashPos { } {
 
 # Handle incoming jabber:x:event (XEP-0022).
 
-proc ::Chat::XEventHandleAnyXElem {chattoken xElem args} {
+proc ::Chat::XEventHandleAnyXElem {chattoken args} {
 
     # See if we've got a jabber:x:event (XEP-0022).
     # 
     #  Should we handle this with hooks????
-    set xevent [lindex [wrapper::getnamespacefromchilds $xElem x \
-      "jabber:x:event"] 0]
-    if {$xevent != {}} {
-	array set argsA $args
+    array set argsA $args
+    set xmldata $argsA(-xmldata)
+    set xeventE [wrapper::getfirstchild $xmldata x "jabber:x:event"]
+    if {[llength $xeventE]} {
 
 	# If we get xevents as normal messages, send them as normal as well.
 	if {[info exists argsA(-type)]} {
@@ -3020,11 +3018,11 @@ proc ::Chat::XEventHandleAnyXElem {chattoken xElem args} {
 		set chatstate(xevent,type) normal
 	    }
 	}
-	eval {XEventRecv $chattoken $xevent} $args
+	eval {XEventRecv $chattoken $xeventE} $args
     }
 }
 
-proc ::Chat::XEventRecv {chattoken xevent args} {
+proc ::Chat::XEventRecv {chattoken xeventE args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 	
@@ -3040,15 +3038,15 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
 	set msgid $argsA(-id)
 	lappend chatstate(xevent,msgidlist) $msgid
     }
-    set composeElem [wrapper::getfirstchildwithtag $xevent "composing"]
-    set idElem      [wrapper::getfirstchildwithtag $xevent "id"]
+    set composeE [wrapper::getfirstchildwithtag $xeventE "composing"]
+    set idE      [wrapper::getfirstchildwithtag $xeventE "id"]
         
-    if {($msgid ne "") && ($composeElem != {}) && ($idElem == {})} {
+    if {($msgid ne "") && ($composeE != {}) && ($idE == {})} {
 	
 	# 1) Request for event notification
 	set chatstate(xevent,msgid) $msgid
 	
-    } elseif {($composeElem != {}) && ($idElem != {})} {
+    } elseif {($composeE != {}) && ($idE != {})} {
 	
 	# 2) Notification of message composing
 	jlib::splitjid $chatstate(jid) jid2 res
@@ -3066,7 +3064,7 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
 
 	$chatstate(wnotifier) configure -image $dlgstate(iconNotifier)
 	set chatstate(notifier) " [mc chatcompreply $name]"
-    } elseif {($composeElem == {}) && ($idElem != {})} {
+    } elseif {($composeE == {}) && ($idE != {})} {
 	
 	# 3) Cancellations of message composing
 	$chatstate(wnotifier) configure -image ""

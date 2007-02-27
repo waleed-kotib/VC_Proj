@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano Damas
 #
-# $Id: SpotLight.tcl,v 1.4 2006-12-06 09:07:30 matben Exp $
+# $Id: SpotLight.tcl,v 1.5 2007-02-27 10:02:13 matben Exp $
 
 namespace eval ::SpotLight:: { }
 
@@ -64,9 +64,10 @@ proc ::SpotLight::ChatMessageHook {body args} {
         return
     }
     array set argsA $args
+    set xmldata $argsA(-xmldata)
 
     # -from is a 3-tier jid /resource included.
-    set jid $argsA(-from)
+    set jid [wrapper::getattribute $xmldata from]
     set jid2 [jlib::barejid $jid]
 
     if {[::Chat::HaveChat $jid]} {

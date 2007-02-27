@@ -4,7 +4,7 @@
 #       
 #       Contributions and testing by Antonio Cano damas
 #       
-# $Id: JivePhone.tcl,v 1.23 2006-08-21 09:45:48 matben Exp $
+# $Id: JivePhone.tcl,v 1.24 2007-02-27 10:02:13 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -302,54 +302,53 @@ proc ::JivePhone::MessageHook {body args} {
     variable popMenuDef
     variable state
     variable callID
-
+    
     Debug "::JivePhone::MessageHook $args"
     
     array set argsArr $args
-    if {[info exists argsArr(-xmldata)]} {
-	set elem [wrapper::getfirstchildwithtag $argsArr(-xmldata) "phone-event"]
-	if {$elem != {}} {
-	    set status [wrapper::getattribute $elem "status"]
-	    if {$status eq ""} {
-		set status available
-	    }
-	    set cidElem [wrapper::getfirstchildwithtag $elem callerID]
-	    if {$cidElem != {}} {
-		set cid [wrapper::getcdata $cidElem]
-	    } else {
-		set cid [mc {Unknown}]
-	    }
-	    set image [::Rosticons::Get [string tolower phone/$status]]
-	    
-	    set win [::JUI::SetAlternativeStatusImage jivephone $image]
-	    set type [wrapper::getattribute $elem "type"]
-
-	    # @@@ What to do more?
-	    if {$type eq "RING" } {
-		set callID [wrapper::getattribute $elem "callID"]
-
-		::Roster::RegisterPopupEntry $popMenuDef(forward)
-		bind $win <Button-1> [list ::JivePhone::DoDial "FORWARD"]
-		::balloonhelp::balloonforwindow $win [mc phoneMakeForward]
-		eval {::hooks::run jivePhoneEvent $type $cid $callID} $args
-	    }
-	    if {$type eq "HANG_UP"} {
-		::Roster::DeRegisterPopupEntry mJiveForward
-
-		bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
-		::balloonhelp::balloonforwindow $win [mc phoneMakeCall]
-		eval {::hooks::run jivePhoneEvent $type $cid ""} $args
-	    }
-	    
-	    # Provide a default notifier?
-#	    if {[hooks::info jivePhoneEvent] eq {}} {
-#		NotifyCall::InboundCall{ $cid }
-#		set title [mc phoneRing]
-#		set msg [mc phoneRingFrom $cid]
-#		ui::dialog -icon info -buttons {} -title $title  \
-#		  -message $msg -timeout 4000
-#	    }
+    set xmldata $argsArr(-xmldata)
+    set elem [wrapper::getfirstchildwithtag $xmldata "phone-event"]
+    if {[llength $elem]} {
+	set status [wrapper::getattribute $elem "status"]
+	if {$status eq ""} {
+	    set status available
 	}
+	set cidElem [wrapper::getfirstchildwithtag $elem callerID]
+	if {$cidElem != {}} {
+	    set cid [wrapper::getcdata $cidElem]
+	} else {
+	    set cid [mc {Unknown}]
+	}
+	set image [::Rosticons::Get [string tolower phone/$status]]
+	
+	set win [::JUI::SetAlternativeStatusImage jivephone $image]
+	set type [wrapper::getattribute $elem "type"]
+	
+	# @@@ What to do more?
+	if {$type eq "RING" } {
+	    set callID [wrapper::getattribute $elem "callID"]
+	    
+	    ::Roster::RegisterPopupEntry $popMenuDef(forward)
+	    bind $win <Button-1> [list ::JivePhone::DoDial "FORWARD"]
+	    ::balloonhelp::balloonforwindow $win [mc phoneMakeForward]
+	    eval {::hooks::run jivePhoneEvent $type $cid $callID} $args
+	}
+	if {$type eq "HANG_UP"} {
+	    ::Roster::DeRegisterPopupEntry mJiveForward
+	    
+	    bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
+	    ::balloonhelp::balloonforwindow $win [mc phoneMakeCall]
+	    eval {::hooks::run jivePhoneEvent $type $cid ""} $args
+	}
+	
+	# Provide a default notifier?
+	#	    if {[hooks::info jivePhoneEvent] eq {}} {
+	#		NotifyCall::InboundCall{ $cid }
+	#		set title [mc phoneRing]
+	#		set msg [mc phoneRingFrom $cid]
+	#		ui::dialog -icon info -buttons {} -title $title  \
+	#		  -message $msg -timeout 4000
+	#	    }
     }
     return
 }

@@ -4,7 +4,7 @@
 #       background.
 #       This is just a first sketch.
 #       
-# $Id: Notifier.tcl,v 1.4 2005-09-26 14:43:47 matben Exp $
+# $Id: Notifier.tcl,v 1.5 2007-02-27 10:02:13 matben Exp $
 
 namespace eval ::Notifier:: {
     
@@ -42,22 +42,37 @@ proc ::Notifier::InitPrefsHook { } {
 
 proc ::Notifier::MessageHook {body args} {
     
-    array set argsArr $args
-    set str "You just received a new message from $argsArr(-from)"
+    if {![string length $body]} {
+	return
+    }
+    array set argsA $args
+    set xmldata $argsA(-xmldata)
+    set from [wrapper::getattribute $xmldata from]
+    set str "You just received a new message from $from"
     after 200 [list ::Notifier::DisplayMsg $str]
 }
 
 proc ::Notifier::ChatHook {body args} {
     
-    array set argsArr $args
-    set str "You just received a new chat message from $argsArr(-from)"
+    if {![string length $body]} {
+	return
+    }
+    array set argsA $args
+    set xmldata $argsA(-xmldata)
+    set from [wrapper::getattribute $xmldata from]
+    set str "You just received a new chat message from $from"
     after 200 [list ::Notifier::DisplayMsg $str]
 }
 
 proc ::Notifier::ThreadHook {body args} {
     
-    array set argsArr $args
-    set str "The user $argsArr(-from) just started a new chat thread"
+    if {![string length $body]} {
+	return
+    }
+    array set argsA $args
+    set xmldata $argsA(-xmldata)
+    set from [wrapper::getattribute $xmldata from]
+    set str "The user $from just started a new chat thread"
     after 200 [list ::Notifier::DisplayMsg $str]
 }
 

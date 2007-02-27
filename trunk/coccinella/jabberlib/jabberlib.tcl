@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.170 2007-02-14 08:17:53 matben Exp $
+# $Id: jabberlib.tcl,v 1.171 2007-02-27 10:02:14 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3958,7 +3958,6 @@ proc jlib::joinjid {node domain resource} {
 #       for prohibited characters.
 
 proc jlib::jidequal {jid1 jid2} {
-    
     return [string equal [jidmap $jid1] [jidmap $jid2]]
 }
 
