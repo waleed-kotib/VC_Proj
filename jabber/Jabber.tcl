@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.199 2007-02-11 11:34:10 matben Exp $
+# $Id: Jabber.tcl,v 1.200 2007-02-27 10:02:13 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -552,12 +552,13 @@ proc ::Jabber::MessageHandler {jlibname xmldata} {
     set body ""
 
     # The hooks are expecting a -key value list of preprocessed xml.
-    # @@@ In the future we may deliver the full xmldata instead.
+    # @@@ In the future we shall deliver the full xmldata instead.
     set opts [list -xmldata $xmldata]
     
     foreach {name value} [wrapper::getattrlist $xmldata] {
 	lappend opts -$name $value
     }
+    set xElist [list]
     foreach E [wrapper::getchildren $xmldata] {
 	set tag    [wrapper::gettag $E]
 	set chdata [wrapper::getcdata $E]
@@ -570,11 +571,17 @@ proc ::Jabber::MessageHandler {jlibname xmldata} {
 	    subject - thread {
 		lappend opts -$tag $chdata
 	    }
+	    x {
+		lappend xElist $E
+	    }
 	    default {
 		lappend opts -$tag $E
 	    }
 	}	
     }    
+    if {[llength $xElist]} {
+	lappend opts -x $xElist
+    }
     
     switch -- $type {
 	error {
@@ -1406,7 +1413,7 @@ proc ::Jabber::GetCapsExtSubtags {name} {
 #       If no such element it returns empty.
 #       
 # Arguments:
-#       xlist       Must be an hierarchical xml list of <x> elements.  
+#       xlist       Must be an xml list of <x> elements.  
 #       
 # Results:
 #       jabber:x:delay stamp attribute or empty. This is ISO 8601.

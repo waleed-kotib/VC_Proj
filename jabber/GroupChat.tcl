@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.182 2007-02-26 13:26:53 matben Exp $
+# $Id: GroupChat.tcl,v 1.183 2007-02-27 10:02:13 matben Exp $
 
 package require Create
 package require Enter
@@ -389,10 +389,10 @@ proc ::GroupChat::NormalMsgHook {body args} {
     array set argsA $args
     set xmldata $argsA(-xmldata)
     
-    set isinvite 0
-        
     set roomjid [wrapper::getattribute $xmldata from]
     set xuserE [wrapper::getfirstchild $xmldata x $xmppxmlns(muc,user)]
+    
+    set isinvite 0
     
     if {[llength $xuserE]} {
 	set isinvite 1
@@ -480,11 +480,9 @@ proc ::GroupChat::GotMsg {body args} {
     ::Debug 2 "::GroupChat::GotMsg args='$args'"
     
     array set argsA $args
-    
-    # We must follow the roomjid...
-    if {[info exists argsA(-from)]} {
-	set from $argsA(-from)
-    } else {
+    set xmldata $argsA(-xmldata)    
+    set from [wrapper::getattribute $xmldata from]
+    if {$from eq ""} {
 	return
     }
     set from [jlib::jidmap $from]

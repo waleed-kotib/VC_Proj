@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.102 2007-02-08 14:57:24 matben Exp $
+# $Id: MailBox.tcl,v 1.103 2007-02-27 10:02:13 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1027,29 +1027,28 @@ proc ::MailBox::MakeMessageList {body args} {
     variable uidmsg
         
     array set argsA {
-	-from unknown -subject {}
+	-subject {}
     }
     array set argsA $args
-
-    jlib::splitjid $argsA(-from) jid2 res
+    set xmldata $argsA(-xmldata)
+    set from [wrapper::getattribute $xmldata from]
+    set jid2 [jlib::barejid $from]
 
     # Here we should probably check som 'jabber:x:delay' element...
     # This is ISO 8601.
     set secs ""
-    if {[info exists argsA(-x)]} {
-	set tm [::Jabber::GetAnyDelayElem $argsA(-x)]
-	if {$tm != ""} {
-	    # Always use local time!
-	    set secs [clock scan $tm -gmt 1]
-	}
+    set tm [::Jabber::GetDelayStamp $xmldata]
+    if {$tm ne ""} {
+	# Always use local time!
+	set secs [clock scan $tm -gmt 1]
     }
-    if {$secs == ""} {
+    if {$secs eq ""} {
 	set secs [clock seconds]
     }
     set date [clock format $secs -format "%Y%m%dT%H:%M:%S"]
 
     # List format for messages.
-    return [list $argsA(-subject) $argsA(-from) $date 0 [incr uidmsg] $body]
+    return [list $argsA(-subject) $from $date 0 [incr uidmsg] $body]
 }
 
 proc ::MailBox::PutMessageInInbox {row} {
