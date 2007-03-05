@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.200 2007-02-27 10:02:13 matben Exp $
+# $Id: Jabber.tcl,v 1.201 2007-03-05 14:48:58 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -96,9 +96,7 @@ namespace eval ::Jabber:: {
     
     # Server port actually used.
     set jstate(servPort) {}
-    
-    set jstate(haveJabberUI) 0
-        
+            
     # Keep noncritical error text here.
     set jerror {}
     
@@ -491,10 +489,7 @@ proc ::Jabber::Init { } {
     $jlibname presence_register unsubscribe  [namespace code UnsubscribeEvent]
     $jlibname presence_register unsubscribed [namespace code UnsubscribedEvent]
         
-    if {[string equal $prefs(protocol) "jabber"]} {
-	::JUI::Build $wDlgs(jmain)
-	set jstate(haveJabberUI) 1
-    }
+    ::JUI::Build $wDlgs(jmain)
     
     # Register file transport mechanism used when responding to a disco info
     # request to the specified node.

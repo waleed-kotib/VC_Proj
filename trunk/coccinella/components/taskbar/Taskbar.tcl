@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.25 2006-12-03 16:29:34 matben Exp $
+# $Id: Taskbar.tcl,v 1.26 2007-03-05 14:48:58 matben Exp $
 
 package require balloonhelp
 
@@ -28,14 +28,10 @@ namespace eval ::Taskbar:: {
 }
 
 proc ::Taskbar::Load { } {
-    global  tcl_platform prefs this
+    global  tcl_platform this
     
     ::Debug 2 "::Taskbar::Load"
     
-    if {![string equal $prefs(protocol) "jabber"]} {
-	return 0
-    }
-
     switch -- [tk windowingsystem] {
 	win32 {
 	    if {![WinInit]} {

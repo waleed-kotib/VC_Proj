@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.80 2007-02-26 13:26:53 matben Exp $
+# $Id: NewMsg.tcl,v 1.81 2007-03-05 14:48:58 matben Exp $
 
 package require ui::entryex
 
@@ -199,12 +199,15 @@ proc ::NewMsg::Build {args} {
 	-forwardmessage ""
 	-time           ""
 	-message        ""
+	-forwardxmldata {}
+	-replyxmldata   {}
     }
     array set opts $args
+    set locals($w,opts) [array get opts]
     set locals($w,subject) $opts(-subject)
     set locals($w,xdata) 0
 
-    if {[info exists opts(-replyxmldata)] && [llength $opts(-replyxmldata)]} {
+    if {[llength $opts(-replyxmldata)]} {
 	set xdataE [wrapper::getfirstchild $opts(-replyxmldata) x "jabber:x:data"]
 	if {[llength $xdataE]} {
 	    set locals($w,xdata) 1
@@ -827,6 +830,7 @@ proc ::NewMsg::DoSend {w} {
 	  -title [mc {Not Connected}] -message [mc jamessnotconnected]
 	return
     }
+    array set oopts $locals($w,opts)
     
     # Loop through address list. 
     set addrList {}
@@ -865,6 +869,12 @@ proc ::NewMsg::DoSend {w} {
     set opts [list]
     set xmllist [list]
     set str ""
+    if {[llength $oopts(-replyxmldata)]} {
+	set threadE [wrapper::getfirstchildwithtag $oopts(-replyxmldata) thread]
+	if {[llength $threadE]} {
+	    lappend opts -thread [wrapper::getcdata $threadE]
+	}
+    }
     if {$locals($w,xdata)} {
 	lappend opts -xlist [::JForms::GetXDataForm $locals($w,formtoken)]
     } else {
