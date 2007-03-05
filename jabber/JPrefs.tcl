@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.44 2006-12-15 08:07:14 matben Exp $
+# $Id: JPrefs.tcl,v 1.45 2007-03-05 14:48:58 matben Exp $
 
 package require ui::fontselector
 
@@ -192,11 +192,7 @@ proc ::JPrefs::UpdateAutoAwaySettings { } {
     global  prefs
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-        
-    if {!$jstate(haveJabberUI)} {
-	return
-    }
-   
+           
     set opts {}
     if {$jprefs(autoaway) && [string is integer -strict $jprefs(awaymin)]} {
 	lappend opts -autoawaymins $jprefs(awaymin)
@@ -473,9 +469,6 @@ proc ::JPrefs::SavePrefsHook { } {
     variable tmpJPrefs
     variable tmpPrefs
     
-    if {!$jstate(haveJabberUI)} {
-	return
-    }
     if {$tmpPrefs(themeName) == [mc None]} {
 	set tmpPrefs(themeName) ""
     }

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.143 2007-01-15 15:09:30 matben Exp $	
+# $Id: Coccinella.tcl,v 1.144 2007-03-05 14:48:58 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -273,19 +273,6 @@ set state(launchStatus) preferences
 # @@@ There is a conflict here if some prefs settings depend on, say protocol.
 ::PrefUtils::ParseCommandLineOptions $argv
 
-switch -- $prefs(protocol) {
-    jabber {
-	# empty ???
-    }
-    symmetric - server - client {
-	package require P2P
-	package require P2PNet
-    }
-    default {
-	return -code error "Unknown protocol \"$prefs(protocol)\""
-    }
-}
-
 # Check that the mime type preference settings are consistent.
 ::Types::VerifyInternal
 
@@ -310,20 +297,8 @@ switch -- $prefs(protocol) {
 ::Splash::SetMsg ""
 after 500 {catch {destroy $::wDlgs(splash)}}
 
-switch -- $prefs(protocol) {
-    jabber {
-	::Jabber::Init
-    }
-    symmetric - server - client {
-	::WB::BuildWhiteboard [::P2P::GetMainWindow] -usewingeom 1
-	if {$prefs(firstLaunch)} {
-	    wm withdraw [::P2P::GetMainWindow]
-	}
-	
-	# The most convenient solution is to create the namespaces at least.
-	namespace eval ::Jabber:: {}
-    }
-}
+::Jabber::Init
+
 if {$prefs(firstLaunch)} {
     ::hooks::run firstLaunchHook
 }

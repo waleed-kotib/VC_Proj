@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Httpd.tcl,v 1.4 2005-08-14 07:17:55 matben Exp $
+# $Id: Httpd.tcl,v 1.5 2007-03-05 14:48:58 matben Exp $
     
 package provide Httpd 1.0
 
@@ -41,7 +41,7 @@ proc ::Httpd::Httpd { } {
     
     # Start the tinyhttpd server, in its own thread if available.
     
-    if {($prefs(protocol) ne "client") && $prefs(haveHttpd)} {
+    if {$prefs(haveHttpd)} {
 	set script [list ::tinyhttpd::start -port $prefs(httpdPort)  \
 	  -rootdirectory $this(httpdRootPath)]
 	
