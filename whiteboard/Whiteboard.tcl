@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.72 2007-01-22 09:06:54 matben Exp $
+# $Id: Whiteboard.tcl,v 1.73 2007-03-07 09:20:01 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -3064,16 +3064,6 @@ proc ::WB::FontChanged {w what} {
 proc ::WB::StartStopAnimatedWave {w start} {
     upvar ::WB::${w}::wapp wapp
     
-    
-    #set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
-    #::UI::StartStopAnimatedWave $wapp(statmess) $waveImage $start
-}
-
-proc ::WB::StartStopAnimatedWaveOnMain {start} {
-    global  wDlgs
-    
-    set w [::P2P::GetMainWindow]
-    upvar ::WB::${w}::wapp wapp
     
     #set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
     #::UI::StartStopAnimatedWave $wapp(statmess) $waveImage $start

@@ -1035,13 +1035,6 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 
 
 # Preferences:
-::msgcat::mcset en prefnetconf  {Network and Server Configuration}
-::msgcat::mcset en prefnethead  {We can either connect to a Jabber server, or connect directly to another client. Many user interface elements depend on which configuration you pick.}
-::msgcat::mcset en prefnetauto  {If a client connects to this server, a connection to that clients server is made automatically.}
-::msgcat::mcset en prefnetjabb  {The Jabber server system. Extensive user administration using dialogs via the "Jabber" menu. Uses a XML based protocol.}
-::msgcat::mcset en prefnetmulti {Connect automatically to all clients in this network when connecting any of them.}
-::msgcat::mcset en prefnetadv   {A client normally runs two different servers, the built in server, which is always present in the peer-to-peer case, and a http server.\
-The jabber server refers normally to a remote server, and its port is usually 5222. The port numbers set below usually only take effect after a relaunch.}
 ::msgcat::mcset en prefsounsynwb {Have synthetic speech of text written in the whiteboard}
 ::msgcat::mcset en prefsounsynno {Have synthetic speech of normal messages}
 ::msgcat::mcset en prefsounsynch {Have synthetic speech of chat}

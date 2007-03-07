@@ -1072,14 +1072,6 @@ you happen to be online while this message is being read. Do you want to send it
 
 
 # Préférences :
-::msgcat::mcset fr prefnetconf  {Configuration Réseau et Serveur}
-::msgcat::mcset fr prefnethead  {Vous pouvez soit vous connecter à un serveur Jabber, soit directement à un autre client. Beaucoup d'éléments de l'interface dépendent\
-  de la configuration que vous choisissez.}
-::msgcat::mcset fr prefnetauto  {Si un client se connecte à ce serveur, une connexion au serveur de ce client est automatiquement réalisée.}
-::msgcat::mcset fr prefnetjabb  {Le système de serveur Jabber. Configuration avancée via le menu "Jabber". Utilise un protocole basé sur XML.}
-::msgcat::mcset fr prefnetmulti {Connecter automatiquement à tous les clients de ce réseau lors de la connexion à l'un d'entre eux.}
-::msgcat::mcset fr prefnetadv   {Un client lance normalement deux serveurs différents, le serveur intégré (toujours présent en cas de peer-to-peer),\
-  et le serveur HTTP. Le serveur Jabber se réfère normalement à un serveur distant par le port 5222. Vous devez redémarrer Coccinella pour que les nouveaux numéros de ports soient pris en compte.}
 ::msgcat::mcset fr prefsounsynwb {Synthèse du texte saisi dans le tableau}
 ::msgcat::mcset fr prefsounsynno {Synthèse des messages normaux}
 ::msgcat::mcset fr prefsounsynch {Synthèse des discussions}

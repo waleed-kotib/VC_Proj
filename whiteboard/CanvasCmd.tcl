@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.13 2006-08-24 07:01:37 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.14 2007-03-07 09:20:01 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -448,33 +448,6 @@ proc ::CanvasCmd::DoPutCanvas {wcan {toIPnum all}} {
     file delete $absFilePath
 }
 
-# CanvasCmd::DoGetCanvas --
-#
-#       .
-#       
-# Arguments:
-#       w           toplevel widget path
-#       
-# Results:
-#       .
-
-proc ::CanvasCmd::DoGetCanvas {w} {
-    
-    # The dialog to select remote client.
-    set getCanIPNum [::Dialogs::GetCanvas .getcan]
-    Debug 2 "DoGetCanvas:: getCanIPNum=$getCanIPNum"
-
-    if {$getCanIPNum eq ""} {
-	return
-    }    
-    set wcan [::WB::GetCanvasFromWtop $w]
-    
-    # Erase everything in own canvas.
-    DoEraseAll $wcan local
-    
-    # GET CANVAS.
-    ::WB::SendGenMessageList $w [list "GET CANVAS:"] -ips $getCanIPNum
-}
 
 # CanvasCmd::DoSendCanvas --
 #

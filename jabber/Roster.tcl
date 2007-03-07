@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.185 2007-01-27 14:59:27 matben Exp $
+# $Id: Roster.tcl,v 1.186 2007-03-07 09:19:52 matben Exp $
 
 package require RosterTree
 package require RosterPlain
@@ -41,6 +41,7 @@ namespace eval ::Roster:: {
     option add *Roster*box.relief           sunken          50
     
     option add *Roster.padding              4               50
+    option add *Roster*WaveLabel.borderWidth  0             50
         
     # Specials.
     option add *Roster.waveImage            wave            widgetDefault
@@ -222,8 +223,7 @@ proc ::Roster::Build {w} {
     set rstyle  "normal"
     
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
-    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
-      -type image -image $waveImage
+    ::wavelabel::wavelabel $wwave -type image -image $waveImage
     pack $wwave -side bottom -fill x -padx 8 -pady 2
     
     # D = -border 1 -relief sunken

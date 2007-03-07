@@ -1033,12 +1033,6 @@
 
 
 # Preferences:
-::msgcat::mcset nl prefnetconf				{Netwerkinstellingen}
-::msgcat::mcset nl prefnethead				{U kunt verbinden met een Jabber-server of direct met een andere client. Veel onderdelen van de interface hangen af van welke optie u kiest.}
-::msgcat::mcset nl prefnetauto				{Als een andere client contact opneemt dan zal die verbonden worden met de ingebouwde server.}
-::msgcat::mcset nl prefnetjabb				{Client-serveropstelling. Uitgebreid gebruikersbeheer met vensters via het menu "Jabber".}
-::msgcat::mcset nl prefnetmulti				{Automatisch met alle clients in het netwerk verbinden wanneer er met één verbonden wordt.}
-::msgcat::mcset nl prefnetadv				{Een client draait twee verschillende servers: een ingebouwde server voor P2P en een HTTP-server. Wijzigingen worden pas doorgevoerd na een herstart van Coccinella.}
 ::msgcat::mcset nl prefsounsynwb			{Laat de tekst in het whiteboard uitspreken door een synthetische stem}
 ::msgcat::mcset nl prefsounsynno			{Laat de tekst in normale berichten uitspreken door een synthetische stem}
 ::msgcat::mcset nl prefsounsynch			{Laat de tekst in chatsessies uitspreken door een synthetische stem}

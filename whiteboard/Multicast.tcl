@@ -2,7 +2,7 @@
 #      
 #  Copyright (c) 1999-2003  Mats Bengtsson
 #  
-# $Id: Multicast.tcl,v 1.7 2006-08-20 13:41:20 matben Exp $
+# $Id: Multicast.tcl,v 1.8 2007-03-07 09:20:01 matben Exp $
 
 package provide Multicast 1.0
 
@@ -212,10 +212,7 @@ proc ::Multicast::CleanupMulticastQTStream {wtop fid fullName token} {
     set wcan [::WB::GetCanvasFromWtop $wtop]
     set no_ {^2[0-9]+}
     catch {close $fid}
-    
-    # Waiting is over.
-    ::WB::StartStopAnimatedWaveOnMain 0
-    
+        
     # Access state as a Tcl array.
     # Check errors. 
     if {[info exists state(status)] &&  \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Import.tcl,v 1.26 2006-10-08 06:46:27 matben Exp $
+# $Id: Import.tcl,v 1.27 2007-03-07 09:20:01 matben Exp $
 
 package require http
 package require httpex
@@ -221,12 +221,8 @@ proc ::Import::DoImport {wcan opts args} {
 	QuickTimeTcl {	    
 
 	    # Let the receiving client be able to load async over http
-	    # via QuickTime for instance. Avoid mac server socket bug.
-	    # Not possible if we are a "client" only.
-	    if {![string equal $this(platform) "macintosh"] &&  \
-	      ![string equal $prefs(protocol) "client"]} {
-		set optArr(-preferred-transport) "http"
-	    }
+	    # via QuickTime for instance.
+	    set optArr(-preferred-transport) "http"
 	    set putOpts [array get optArr]
 	    if {$drawLocal} {
 		if {$isLocal} {
@@ -249,12 +245,8 @@ proc ::Import::DoImport {wcan opts args} {
 	snack {
 
 	    # Let the receiving client be able to load async over http
-	    # via QuickTime for instance. Avoid mac server socket bug.
-	    # Not possible if we are a "client" only.
-	    if {![string equal $this(platform) "macintosh"] &&  \
-	      ![string equal $prefs(protocol) "client"]} {
-		set optArr(-preferred-transport) "http"
-	    }
+	    # via QuickTime for instance.
+	    set optArr(-preferred-transport) "http"
 	    set putOpts [array get optArr]
 	    if {$drawLocal} {
 		if {$isLocal} {
@@ -269,12 +261,8 @@ proc ::Import::DoImport {wcan opts args} {
 	xanim {	    
 
 	    # Let the receiving client be able to load async over http
-	    # via QuickTime for instance. Avoid mac server socket bug.
-	    # Not possible if we are a "client" only.
-	    if {![string equal $this(platform) "macintosh"] &&  \
-	      ![string equal $prefs(protocol) "client"]} {
-		set optArr(-preferred-transport) "http"
-	    }
+	    # via QuickTime for instance.
+	    set optArr(-preferred-transport) "http"
 	    set putOpts [array get optArr]
 	    if {$drawLocal} {
 		if {$isLocal} {

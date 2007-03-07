@@ -1038,13 +1038,6 @@ Som alternativ använd en webbläsare för att hitta en SDP fil, ladda ner den till
 
 
 # Preferences:
-::msgcat::mcset sv prefnetconf  {Nätverks och server konfiguration}
-::msgcat::mcset sv prefnethead  {Vi kan antingen öppna förbindelse med en Jabber server, eller direkt till en annan klient. Utseendet på programmet beror på vilket du väljer.}
-::msgcat::mcset sv prefnetauto  {Om en klient kopplar upp sig mot vår server, så sker en uppkoppling till denna klient automatiskt.}
-::msgcat::mcset sv prefnetjabb  {Jabber server systemet. Omfattande användar administration via "Jabber" menyn. Använder ett XML baserat protokoll.}
-::msgcat::mcset sv prefnetmulti {Automatisk förbindelse till alla klienter i detta nätverket när uppkoppling mot någon.}
-::msgcat::mcset sv prefnetadv   {En klient kör normalt två olika servrar, den inbyggda som alltid existerar för peer-to-peer, samt en http server.\
-Jabber servern hänvisar typiskt till en extern server vars portnummer normalt är 5222. Portnummerna nedan verkställs normalt endast när programmet startas om.}
 ::msgcat::mcset sv prefsounsynwb {Använd syntetiskt tal för text i skrivtavlan}
 ::msgcat::mcset sv prefsounsynno {Använd syntetiskt tal för normala meddelanden}
 ::msgcat::mcset sv prefsounsynch {Använd syntetiskt tal när chattar}

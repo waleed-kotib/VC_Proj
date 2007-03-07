@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: GetFileIface.tcl,v 1.11 2006-08-20 13:41:20 matben Exp $
+# $Id: GetFileIface.tcl,v 1.12 2007-03-07 09:20:01 matben Exp $
 
 package require getfile
 package require uriencode
@@ -503,26 +503,7 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
 #       
 
 proc ::GetFileIface::DoImport {mime opts args} {
-    global  prefs
-    
-    ::Debug 3 "+        ::GetFileIface::DoImport"
-
-    if {[string equal $prefs(protocol) "jabber"]} {
-	eval {::JWB::DispatchToImporter $mime $opts} $args
-    } else {
-	if {[::Plugins::HaveImporterForMime $mime]} {
-	    set servCan [::WB::GetServerCanvasFromWtop [::P2P::GetMainWindow]]
-	    set errMsg [eval {
-		::Import::DoImport $servCan $opts
-	    } $args]
-	} else {
-	    set errMsg [mc messfailmimeimp $mime]
-	}
-	if {$errMsg ne ""} {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
-	      -message "Failed importing: $errMsg"
-	}
-    }
+    eval {::JWB::DispatchToImporter $mime $opts} $args
 }
 
 # GetFileIface::NewBrokenImage --
