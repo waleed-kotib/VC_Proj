@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.51 2006-08-14 13:08:03 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.52 2007-03-07 09:19:52 matben Exp $
 
 package provide FactoryDefaults 1.0
 
@@ -53,13 +53,8 @@ proc FactoryDefaults { } {
     set prefs(sashPos) {}
     
     # ip numbers, port numbers, and names.
-    set prefs(thisServPort) 8235
     set prefs(remotePort) 8235
-    set prefs(reflectPort) 8144
-    
-    # The tinyhttpd server port number and base directory.
-    set prefs(httpdPort) 8077
-    
+        
     # File transport method: put/get or http.
     set prefs(trptMethod) putget
     #set prefs(trptMethod) http
@@ -72,17 +67,7 @@ proc FactoryDefaults { } {
     
     # Wraplength of text in message box for windows.
     set prefs(msgWrapLength) 60
-    
-    # Network options: symmetric network, or a central server?
-    # Jabber server or our own (standard) protocol?
-    # Options: 
-    #    jabber:        default
-    #    symmetric:     client and server in one
-    #    central:       abondoned
-    #    client:        client only; may only use client sockets. Special!
-    #    server:        server only; may only use server sockets. Special!
-    set prefs(protocol) jabber
-        
+            
     # Start server when launching application, if not client only?
     set prefs(autoStartServer) 1
     

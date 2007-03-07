@@ -28,12 +28,6 @@ What is this?
 
 The Jabber system:
 
-    The Coccinella can be configured into two main modes.  The services
-    supported by these two modes are very different.  You switch between 
-    these two modes using the Preferences/Preferences...  menu, and the
-    "General/Network Setup" panel.
-    	The recommended way of running this application is the Jabber way.
-
     * Jabber Server: The Jabber Instant Messaging system is an XML based 
       system that works similar to ICQ, AIM etc.  It delivers messages 
       seamlessly between many instant messaging system and Jabber clients.  
@@ -42,17 +36,11 @@ The Jabber system:
       "www.jabber.org" or "www.jabberstudio.org" for more information, 
       and to obtain your own server.
 
-      To get started with a Jabber server, register an account (if you 
+    * To get started with a Jabber server, register an account (if you 
       haven't already) using the Jabber/New Account...  menu, and fill in 
       the fields.  When you later log on, you do it from the Jabber/Login...
       menu, and pick the server you have an account at. Or just use the
       Setup Assistant menu command.
-
-    * Peer-to-peer: This is the "raw" configuration, where users connect 
-      directly to each other, and not via an external server.  This mode 
-      does not deliver the kind of user administration that is supplied by 
-      the Jabber system, such as contact lists, online/offline, offline 
-      delivery etc. It is therefore NOT recommended to use.
 
 Installation:
 

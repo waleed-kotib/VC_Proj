@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.13 2007-01-18 09:06:43 matben Exp $
+# $Id: Proxy.tcl,v 1.14 2007-03-07 09:19:52 matben Exp $
  
 package require autoproxy
 package require autosocks
@@ -15,10 +15,11 @@ package provide Proxy 1.0
 namespace eval ::Proxy:: {
     
     ::hooks::register prefsInitHook          ::Proxy::InitPrefsHook
-    ::hooks::register prefsBuildHook         ::Proxy::BuildPrefsHook
-    ::hooks::register prefsSaveHook          ::Proxy::SavePrefsHook
-    ::hooks::register prefsCancelHook        ::Proxy::CancelPrefsHook
-    ::hooks::register prefsUserDefaultsHook  ::Proxy::UserDefaultsHook
+    # All these handled from PrefNet instead.
+    #::hooks::register prefsBuildHook         ::Proxy::BuildPrefsHook
+    #::hooks::register prefsSaveHook          ::Proxy::SavePrefsHook
+    #::hooks::register prefsCancelHook        ::Proxy::CancelPrefsHook
+    #::hooks::register prefsUserDefaultsHook  ::Proxy::UserDefaultsHook
 }
 
 proc ::Proxy::InitPrefsHook { } {
@@ -121,7 +122,6 @@ proc ::Proxy::AutoSocksConfig { } {
 proc ::Proxy::AutoSocksOff { } {
     autosocks::config -proxy {} -proxyno {} -proxyhost {} -proxyport {} \
       -proxyusername {} -proxypassword {}
-
 }
 
 proc ::Proxy::BuildPrefsHook {wtree nbframe} {
@@ -133,33 +133,51 @@ proc ::Proxy::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::Proxy::BuildPage {wpage} {
+    
+    set anchor [option get . dialogAnchor {}]
+    
+    set wc $wpage.c
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    pack $wc -side top -anchor $anchor
+
+    # Proxy:
+    ttk::labelframe $wc.p -text [mc Proxy]  \
+      -padding [option get . groupSmallPadding {}]
+    pack $wc.p -side top -fill x -anchor $anchor
+
+    BuildFrame $wc.p.f
+    pack $wc.p.f -side top -fill x -anchor $anchor
+
+    # NAT:
+    ttk::labelframe $wc.n -text [mc {NAT Address}] \
+      -padding [option get . groupSmallPadding {}]
+    pack $wc.n -side top -fill x -anchor $anchor -pady 8
+    
+    BuildNATFrame $wc.n.f
+    pack $wc.n.f -side top -fill x -anchor $anchor
+
+    return $wpage
+}
+
+proc ::Proxy::BuildFrame {wprx_} {
     global  prefs
     variable tmpPrefs
     variable wnoproxy
     variable wprx
-    variable wnat
-    
-    set stun 0
-    if {![catch {package require stun}]} {
-	set stun 1
-    }
+
+    set wprx $wprx_
     
     set prefs(noproxy) [lsort -unique $prefs(noproxy)]
     
-    foreach key {setNATip NATip \
-      useproxy proxy_type proxy_host proxy_port \
-      proxy_user proxy_pass noproxy} {
+    foreach key {
+	setNATip    NATip 
+	useproxy    proxy_type  proxy_host  proxy_port 
+	proxy_user  proxy_pass  noproxy
+    } {
 	set tmpPrefs($key) $prefs($key)
     }
-    
-    set wc $wpage.c
-    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
-    pack $wc -side top -anchor [option get . dialogAnchor {}]
-    
-    set wprx $wc.proxy
-    set wnat $wc.nat
+        
     variable wprxuse $wprx.use
-    variable wnatuse $wnat.use
     variable wuser   $wprx.euser
     variable wpass   $wprx.epass
     
@@ -168,10 +186,9 @@ proc ::Proxy::BuildPage {wpage} {
 	{"SOCKS 4"     -value socks4}
 	{"SOCKS 5"     -value socks5}
     }
-    
+        
     # Proxy.
-    ttk::labelframe $wprx -text [mc Proxy]  \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $wprx
     
     ttk::label $wprx.msg -wraplength 300 -justify left \
       -text [mc prefproxymsg]
@@ -218,10 +235,31 @@ proc ::Proxy::BuildPage {wpage} {
 	$wnoproxy insert end "\n"
     }
     SetUseProxyState
+    return $wprx
+}
+
+proc ::Proxy::BuildNATFrame {wnat_} {
+    global  prefs
+    variable tmpPrefs
+    variable wnat
+    
+    set wnat $wnat_
+    variable wnatuse $wnat.use
+
+    set stun 0
+    if {![catch {package require stun}]} {
+	set stun 1
+    }
+
+    foreach key {
+	setNATip    NATip 
+    } {
+	set tmpPrefs($key) $prefs($key)
+    }
 
     # NAT address.
-    ttk::labelframe $wnat -text [mc {NAT Address}] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $wnat
+
     ttk::checkbutton $wnat.use -text [mc prefnatip] \
       -command [namespace code SetUseNATState]  \
       -variable [namespace current]::tmpPrefs(setNATip)
@@ -237,12 +275,8 @@ proc ::Proxy::BuildPage {wpage} {
     if {$stun} {
 	grid  $wnat.stun  -column 1 -row 1 -padx 4
     }
-    SetUseNATState
-    
-    set anchor [option get . dialogAnchor {}]
-
-    pack  $wprx  -side top -fill x -anchor $anchor
-    pack  $wnat  -side top -fill x -anchor $anchor -pady 10
+    SetUseNATState    
+    return $wnat
 }
 
 proc ::Proxy::GetStun {} {
@@ -368,7 +402,6 @@ proc ::Proxy::CancelPrefsHook { } {
     	
     foreach key [array names keySpecs] {
 	if {![string equal $prefs($key) $tmpPrefs($key)]} {
-	    #puts "\t key=$key, $prefs($key), $tmpPrefs($key)"
 	    ::Preferences::HasChanged
 	    break
 	}

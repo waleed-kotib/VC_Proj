@@ -1043,13 +1043,6 @@
 
 
 # Preferences:
-::msgcat::mcset kr prefnetconf  {네트워크/서버 설정}
-::msgcat::mcset kr prefnethead  {재버 서버나 다른 사용자에게 집겁 연결할 수 있습니다. 당신이 집은 설정에 따라 여러 사용자 환경을 구성합니다.}
-::msgcat::mcset kr prefnetauto  {사용자 프로그램이 서버에 연결되면, 서버상의 다른 사용자에게는 자동적으로 연결된다.}
-::msgcat::mcset kr prefnetjabb  {재버 서버 시스템. "재버"메뉴를 통해서 확장된 사용자 관리를 할 수 있다. XML 기반 프로토콜을 사용하라.}
-::msgcat::mcset kr prefnetmulti {이중에 하나라도 연결되면, 이 네트워크에 있는 모든 이들에게 자동을 연결하라.}
-::msgcat::mcset kr prefnetadv   {사용자 프로그램은 두개의 서버에서 작동하는데, 서버내에 구성된 것은 항상 P-P 방식으로 작동하고, 다른 하나는 웹 서버이다.\
-재버 서버는 일반적으로 원격 서버로 언급되고, 보통 5222 포트를 사용한다. 아래의 입력한 포트는 프로그램을 다시 실행해야 작동한다.}
 ::msgcat::mcset kr prefsounsynwb {칠판에 쓰여진 문자의 합성 음성을 듣기}
 ::msgcat::mcset kr prefsounsynno {일반 메세지의 합성 음성을 듣기}
 ::msgcat::mcset kr prefsounsynch {대화의 합성 음성을 듣기}

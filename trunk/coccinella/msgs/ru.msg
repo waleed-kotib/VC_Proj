@@ -958,13 +958,6 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 
 
 # Preferences:
-::msgcat::mcset ru prefnetconf  {Настройка сервера и сети}
-::msgcat::mcset ru prefnethead  {Можно подключится к любому жаббер серверу или подключатся к другоиу клиенту. Большая часть интерфейса зависит от того что вы выбирите.}
-::msgcat::mcset ru prefnetauto  {Если клиент подключен к серверу, подключение к другим клиентам сервер сделает сам.}
-::msgcat::mcset ru prefnetjabb  {Jabber серверная система. Управление клиентами осуществляется через меню "Жаббер". Используя XML-основанный протокол.}
-::msgcat::mcset ru prefnetmulti {Подключатся автоматически к всем клиентам в этой сети  когда конектися кто-то из них.}
-::msgcat::mcset ru prefnetadv   {Клиент обычно запускает два разных сервера, которые всягда учавствуют в peer-to-peer случае, и http сервер.\
-Жаббер сервер обычно удаленный, и использует порт 5222. При измении порта нужно перезагрузить прогрмму.}
 ::msgcat::mcset ru prefsounsynwb {Have synthetic speech of text written in the whiteboard}
 ::msgcat::mcset ru prefsounsynno {Have synthetic speech of normal messages}
 ::msgcat::mcset ru prefsounsynch {Have synthetic speech of chat}

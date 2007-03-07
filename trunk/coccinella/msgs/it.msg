@@ -1043,12 +1043,6 @@
 
 
 # Preferences:
-::msgcat::mcset it prefnetconf {Configurazione rete e server}
-::msgcat::mcset it prefnethead {Ci si può collegare a un server Jabber, oppure direttamente a un altro client. Molti elementi dell'interfaccia utente dipendono dalla configurazione che scegli.}
-::msgcat::mcset it prefnetauto {Se un client si connette a questo server, la connessione al server di quel client verrà avviata automaticamente.}
-::msgcat::mcset it prefnetjabb {Il sistema server di Jabber. Configurazione avanzata tramite il menù "Jabber". Usa un protocollo basato su XML.}
-::msgcat::mcset it prefnetmulti {Connetti automaticamente a tutti i client di questa rete appena ne connetti uno di essi.}
-::msgcat::mcset it prefnetadv {Un client normalmente esegue due servizi: il server integrato che è sempre presente nella modalità punto-a-punto, ed un server HTTP. Il Jabber server è normalmente un sistema remoto su porta 5222. I numeri di porta qui sotto hanno effetto solo dopo un riavvio del programma.}
 ::msgcat::mcset it prefsounsynwb {Pronuncia il testo presente nella lavagna.}
 ::msgcat::mcset it prefsounsynno {Pronuncia i messaggi normali}
 ::msgcat::mcset it prefsounsynch {Pronuncia le chat}

@@ -1042,13 +1042,6 @@ Można również przy pomocy przeglądarki Internetowej zlokalizować plik SDP, 
 
 
 # Preferences:
-::msgcat::mcset pl prefnetconf  {Konfiguracja: parametry sieci i serwera}
-::msgcat::mcset pl prefnethead  {Można nawiązać połączenie albo z którymś z serwerów Jabbera, albo bezpośrednio z innym "klientem". Uwaga: wiele elementów interfejsu użytkownika zależy od wybranego sposobu połączenia.}
-::msgcat::mcset pl prefnetauto  {Jeśli nastąpi połączenie z tym "korespondentem", automatycznie zostanie nawiązane także połączenie z serwerem tegoż klienta.}
-::msgcat::mcset pl prefnetjabb  {Sieć serwerów tworzących sieć Jabber. Dokładniejsze zarządzanie udostępnione z menu "Jabber". Sieć używa protokołu korzystającego z języka XML.}
-::msgcat::mcset pl prefnetmulti {Automatyczne połączenie z wszystkimi "klientami" tworzącymi sieć, przy połączeniu z którymkolwiek z nich.}
-::msgcat::mcset pl prefnetadv   {"Klient" przeważnie uruchamia 2 osobne serwery: serwer wbudowany, zawsze dostępny w przypadku połączenia P2P, oraz serwer HTTP.\
-"Serwer Jabber" zwykle odnosi się do serwera zdalnego, działającego zwykle na porcie nr 5222. W przypadku zmiany numerów portów w oknach poniżej, należy po konfiguracji zrestartować program.}
 ::msgcat::mcset pl prefsounsynwb {Czytanie głosem tekstów pisanych w Tablicy}
 ::msgcat::mcset pl prefsounsynno {Czytanie głosem wiadomości}
 ::msgcat::mcset pl prefsounsynch {Czytanie głosem rozmów}

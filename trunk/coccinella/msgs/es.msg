@@ -1075,14 +1075,6 @@
 
 
 # Preferencias:
-::msgcat::mcset es prefnetconf  {Configuración de Red y Servidor}
-::msgcat::mcset es prefnethead  {Usted puede conectarse a un servidor Jabber, o bien directement a otro cliente. Muchos elementos de la interfaz dependerán\
-  de la configuración que elija.}
-::msgcat::mcset es prefnetauto  {Si un cliente se conecta a este servidor, una conexión con el servidor de este cliente será automáticamente realizada.}
-::msgcat::mcset es prefnetjabb  {El sistema de servidor Jabber. Configuración avanzada via el menú "Jabber". Utilice un protocolo basado en XML.}
-::msgcat::mcset es prefnetmulti {Conectar automáticamente a todos los clientes de esta red durante la conexión entre algunos de ellos.}
-::msgcat::mcset es prefnetadv   {Si un cliente arranca normalmente dos servidores diferentes, el servidor integrado (siempre presente en el caso de punto-a-punto),\
-  y el servidor HTTP. El servidor Jabber se refiere normalmente a un servidor distante por el puerto 5222. Usted debe reiniciar Coccinella para que los nuevos números de puerto sean tenidos en cuenta.}
 ::msgcat::mcset es prefsounsynwb {Sintetizar el texto que aparezca en la pizarra}
 ::msgcat::mcset es prefsounsynno {Sintetizar los mensajes normales}
 ::msgcat::mcset es prefsounsynch {Sintetizar las charlas}

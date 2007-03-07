@@ -1056,13 +1056,6 @@ wenn Sie nicht online sind, während diese Nachricht gelesen wird. Möchten Sie tr
 
 
 # Preferences:
-::msgcat::mcset de prefnetconf  {Netzwerk- und Server-Konfiguration}
-::msgcat::mcset de prefnethead  {Wir können uns mit einem Jabber-Server oder direkt mit einem anderen Client verbinden. Viele Elemente hängen davon ab, welche Konfiguration Sie wählen.}
-::msgcat::mcset de prefnetauto  {Wenn sich ein Client mit diesem Server verbindet, wird automatisch eine Verbindung zum Server dieses Clients aufgebaut.}
-::msgcat::mcset de prefnetjabb  {Das Jabber Server-System. Extensive Benutzerverwaltung über Dialoge im "Jabber"-Menu. Benutzt ein XMLbbasiertes Protokoll.}
-::msgcat::mcset de prefnetmulti {Automatisch mit allen Clients in diesem Netzwerk verbinden, wenn mit einem Verbindung aufgenommen wird.}
-::msgcat::mcset de prefnetadv   {Ein Client startet gewöhnlich 2 verschiedene Server, den eingebauten für Peer-to-Peer-Verbindungen, und einen http-Server.\
-  Der Jabber-Server meint normalerweise einen entfernten Server dessen Port gewöhnlicherweise 5222 ist. Die unten gesetzten Portnummern werden erst nach einem Neustart wirksam.}
 ::msgcat::mcset de prefsounsynwb {Sprachausgabe für Text aus der Zeichenfläche}
 ::msgcat::mcset de prefsounsynno {Sprachausgabe für normale Nachrichten}
 ::msgcat::mcset de prefsounsynch {Sprachausgabe für Chat}

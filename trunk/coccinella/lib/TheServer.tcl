@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.29 2005-08-14 07:17:55 matben Exp $
+# $Id: TheServer.tcl,v 1.30 2007-03-07 09:19:52 matben Exp $
     
 package provide TheServer 1.0
 
@@ -32,7 +32,7 @@ proc ::TheServer::LaunchHook { } {
     # there was a timing problem in '::TheServer::DoStartServer'.
     # Don't start the server if we are a client only.
 
-    if {($prefs(protocol) ne "client") && $prefs(autoStartServer)} {
+    if {$prefs(autoStartServer)} {
 	after $prefs(afterStartServer) [list ::TheServer::DoStartServer $prefs(thisServPort)]
     }
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.144 2007-02-11 11:34:12 matben Exp $
+# $Id: UI.tcl,v 1.145 2007-03-07 09:19:52 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -374,29 +374,11 @@ proc ::UI::WelcomeCanvas { } {
 }
 
 proc ::UI::GetMainWindow { } {
-    global  prefs
-    
-    switch -- $prefs(protocol) {
-	jabber {
-	    return [::JUI::GetMainWindow]
-	}
-	default {
-	    return [::P2P::GetMainWindow]
-	}
-    }
+    return [::JUI::GetMainWindow]
 }
 
 proc ::UI::GetMainMenu { } {
-    global  prefs
-    
-    switch -- $prefs(protocol) {
-	jabber {
-	    return [::JUI::GetMainMenu]
-	}
-	default {
-	    return [GetMenuFromWindow [::P2P::GetMainWindow]]
-	}
-    }
+    return [::JUI::GetMainMenu]
 }
 
 proc ::UI::GetMenuFromWindow {w} {
