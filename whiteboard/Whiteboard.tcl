@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.73 2007-03-07 09:20:01 matben Exp $
+# $Id: Whiteboard.tcl,v 1.74 2007-03-09 07:54:04 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -24,34 +24,35 @@ package require ItemInspector
 package require Plugins
 package require PutFileIface
 package require WBPrefs
+package require UI
 
 package provide Whiteboard 1.0
 
 namespace eval ::WB:: {
         
     # Add all event hooks.
+    ::hooks::register initHook            ::WB::InitHook
+    ::hooks::register prefsInitHook       ::WB::InitPrefsHook
     ::hooks::register quitAppHook         ::WB::QuitAppHook
     ::hooks::register quitAppHook         ::WB::SaveAnyState
     ::hooks::register whiteboardCloseHook ::WB::CloseWhiteboard
     ::hooks::register loginHook           ::WB::LoginHook
     ::hooks::register logoutHook          ::WB::LogoutHook
-    ::hooks::register earlyInitHook       ::WB::EarlyInitHook
-    ::hooks::register prefsInitHook       ::WB::InitPrefsHook
 
     # Tool button mappings.
     variable btNo2Name 
     variable btName2No
     array set btNo2Name	{
-	00 point 01 move 10 line  11 arrow 
-	20 rect  21 oval 30 pen   31 brush
-	40 text  41 del  50 paint 51 poly 
-	60 arc   61 rot
+	00 point  01 move  10 line   11 arrow 
+	20 rect   21 oval  30 pen    31 brush
+	40 text   41 del   50 paint  51 poly 
+	60 arc    61 rot
     }
     array set btName2No {
-	point 00 move 01 line  10 arrow 11 
-	rect  20 oval 21 pen   30 brush 31
-	text  40 del  41 paint 50 poly  51 
-	arc   60 rot  61
+	point 00  move 01  line  10  arrow 11 
+	rect  20  oval 21  pen   30  brush 31
+	text  40  del  41  paint 50  poly  51 
+	arc   60  rot  61
     }
 
     # Use option database for customization.
@@ -255,10 +256,9 @@ proc ::WB::InitPrefsHook { } {
       [list state(canGridOn)       state_canGridOn       $state(canGridOn)]  ]    
 }
 
-proc ::WB::EarlyInitHook { } {
-
-    ::WB::Init
-    ::WB::InitMenuDefs   
+proc ::WB::InitHook { } {
+    Init
+    InitMenuDefs   
 }
 
 # WB::Init --
@@ -375,6 +375,16 @@ proc ::WB::InitMenuDefs { } {
 	set haveAppleMenu 0
     }
     
+    # Defines which menus to use; names and labels.
+    variable menuBarDef
+    set menuBarDef {
+	file    mFile
+	edit    mEdit
+	prefs   mPreferences
+	items   mLibrary
+	info    mInfo
+    }
+	
     # All menu definitions for the main (whiteboard) windows as:
     #      {{type name cmd state accelerator opts} {{...} {...} ...}}
     
@@ -599,11 +609,15 @@ proc ::WB::InitMenuDefs { } {
     }
     
     # Used only on mac until the -postcommand bug fixed.
-    set menuDefs(main,items) [MakeItemMenuDef $this(itemPath)]
-    set altItemsMenuDefs     [MakeItemMenuDef $this(altItemPath)]
-    if {[llength $altItemsMenuDefs]} {
-	lappend menuDefs(main,items) {separator}
-	set menuDefs(main,items) [concat $menuDefs(main,items) $altItemsMenuDefs]
+    if {[tk windowingsystem] eq "aqua"} {
+	set menuDefs(main,items) [MakeItemMenuDef $this(itemPath)]
+	set altItemsMenuDefs     [MakeItemMenuDef $this(altItemPath)]
+	if {[llength $altItemsMenuDefs]} {
+	    lappend menuDefs(main,items) {separator}
+	    set menuDefs(main,items) [concat $menuDefs(main,items) $altItemsMenuDefs]
+	}
+    } else {
+	set menuDefs(main,items) [list]
     }
     
     # When registering new menu entries they shall be added at:
@@ -742,7 +756,7 @@ proc ::WB::BuildWhiteboard {w args} {
     # network events to attempt drawing etc. Beware!!!
      
     # Start with menus.
-    BuildWhiteboardMenus $w
+    BuildMenus $w
 	
     # Special for X11 menus to look ok.
     if {[tk windowingsystem] eq "x11"} {
@@ -2064,7 +2078,7 @@ proc ::WB::OnKeyAnyArrow {wcan detail} {
     }
 }
 
-# WB::BuildWhiteboardMenus --
+# WB::BuildMenus --
 #
 #       Makes all menus for a toplevel window.
 #
@@ -2074,18 +2088,19 @@ proc ::WB::OnKeyAnyArrow {wcan detail} {
 # Results:
 #       menu created
 
-proc ::WB::BuildWhiteboardMenus {w} {
+proc ::WB::BuildMenus {w} {
     global  this wDlgs prefs dashFull2Short
     
     variable menuDefs
+    variable menuBarDef
     upvar ::WB::${w}::wapp wapp
     upvar ::WB::${w}::state state
     upvar ::WB::${w}::opts opts
     
-    ::Debug 2 "::WB::BuildWhiteboardMenus"
+    ::Debug 2 "::WB::BuildMenus"
 	
-    set wcan      $wapp(can)
-    set wmenu     $wapp(menu)
+    set wcan   $wapp(can)
+    set wmenu  $wapp(menu)
     
     if {$prefs(haveMenus)} {
 	menu $wmenu -tearoff 0
@@ -2100,22 +2115,17 @@ proc ::WB::BuildWhiteboardMenus {w} {
     if {$haveAppleMenu} {
 	::UI::BuildAppleMenu $w $wmenu.apple $opts(-state)
     }
-    ::UI::NewMenu $w $wmenu.file   mFile        $menuDefs(main,file)  
-    ::UI::NewMenu $w $wmenu.edit   mEdit        $menuDefs(main,edit)  
-    ::UI::NewMenu $w $wmenu.prefs  mPreferences $menuDefs(main,prefs) 
-    if {[tk windowingsystem] eq "aqua"} {
-	::UI::NewMenu $w $wmenu.items  mLibrary $menuDefs(main,items) 
-    } else {
-	::UI::NewMenu $w $wmenu.items  mLibrary {} 
-	$wmenu.items configure -postcommand  \
-	  [list ::WB::BuildItemsMenu $w $wmenu.items]
+    foreach {name mLabel} $menuBarDef {
+	BuildMenu $w $wmenu $name
+    }    
+    if {[tk windowingsystem] ne "aqua"} {
+	$wmenu.items configure \
+	  -postcommand [list ::WB::BuildItemsMenu $w $wmenu.items]
     }
-    
+
     # Plugin menus if any.
-    ::UI::BuildPublicMenus $w $wmenu
-    
-    ::UI::NewMenu $w $wmenu.info mInfo $menuDefs(main,info)
-    
+    BuildRegisteredMenus $w $wmenu
+
     # The edit menu binds directly to canvas.
     ::UI::SetMenuAcceleratorBinds $w $wmenu.file
     ::UI::SetMenuAcceleratorBinds $w $wmenu.prefs
@@ -2142,6 +2152,75 @@ proc ::WB::BuildWhiteboardMenus {w} {
     } else {
 	pack $wmenu -side top -fill x
     }
+}
+
+proc ::WB::BuildMenu {w wmenu name} {
+    variable menuDefs
+    variable menuBarDef
+    variable extraMenuDefs
+    variable menuDefsInsertInd
+
+    array set mLabel $menuBarDef
+    set menuMerged $menuDefs(main,$name)
+    if {[info exists extraMenuDefs(main,$name)]} {
+	set menuMerged [eval {
+	    linsert $menuMerged $menuDefsInsertInd(main,$name)
+	} $extraMenuDefs(main,$name)]
+    }
+    ::UI::NewMenu $w $wmenu.$name  $mLabel($name)  $menuMerged
+}
+
+# WB::RegisterNewMenu --
+# 
+#       Registers a new whiteboard menu.
+#       
+# Arguments:
+#       mtail       widget tail name
+#       name        menu label
+#       menuSpec    {type name cmd accelerator opts} {{...} {...} ...}
+#       
+# Results:
+#       menu entries added when whiteboard built.
+
+proc ::WB::RegisterNewMenu {mtail name menuSpec} {    
+    variable menuSpecPublic 
+	
+    # Make a new menu
+    if {[lsearch $menuSpecPublic(wpaths) $mtail] < 0} {
+	lappend menuSpecPublic(wpaths) $mtail
+    }
+    set menuSpecPublic($mtail,name) $name
+    set menuSpecPublic($mtail,specs) [list $menuSpec]
+}
+
+proc ::WB::BuildRegisteredMenus {w wmenu} {
+    variable menuSpecPublic
+    
+    foreach mtail $menuSpecPublic(wpaths) {
+	set name  $menuSpecPublic($mtail,name)
+	set specs $menuSpecPublic($mtail,specs)
+	::UI::NewMenu $w $wmenu.$mtail $name $specs
+    }
+}
+
+# WB::RegisterMenuEntry --
+# 
+#       Lets plugins/components register their own menu entry.
+
+proc ::WB::RegisterMenuEntry {name menuSpec} {
+    
+    # Keeps track of all registered menu entries.
+    variable extraMenuDefs
+    
+    # Add these entries in a section above the bottom section.
+    # Add separator to section component entries.
+    
+    if {![info exists extraMenuDefs(main,$name)]} {
+
+	# Add separator if this is the first addon entry.
+	set extraMenuDefs(main,$name) {separator}
+    }
+    lappend extraMenuDefs(main,$name) $menuSpec
 }
 
 # WB::MenubarSetState --

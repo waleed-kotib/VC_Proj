@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.202 2007-03-07 09:19:51 matben Exp $
+# $Id: Jabber.tcl,v 1.203 2007-03-09 07:54:04 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -46,7 +46,6 @@ package require JPrefs
 package require JPubServers
 package require JUI
 package require JUser
-package require JWB
 package require Login
 package require MailBox
 package require MUC
@@ -250,6 +249,24 @@ namespace eval ::Jabber:: {
     }
   
     variable killerId 
+}
+
+# If the whiteboard/ complete dir is there we get whiteboard support.
+
+namespace eval ::Jabber {
+    variable haveWhiteboard 0    
+}
+
+proc ::Jabber::LoadWhiteboard {} {
+    variable haveWhiteboard
+    if {![catch {package require JWB}]} {
+	set haveWhiteboard 1
+    }
+}
+
+proc ::Jabber::HaveWhiteboard {} {
+    variable haveWhiteboard
+    return $haveWhiteboard
 }
 
 # Jabber::FactoryDefaults --

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.144 2007-03-05 14:48:58 matben Exp $	
+# $Id: Coccinella.tcl,v 1.145 2007-03-09 07:54:03 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -213,7 +213,6 @@ set packages(application) {
     UI
     UserActions
     Utils
-    Whiteboard
 }
 foreach class {generic uibase application} {
     foreach name $packages($class) {
@@ -246,6 +245,7 @@ package require Jabber
 ::Splash::SetMsg [mc splashinit]
 FactoryDefaults
 ::Jabber::FactoryDefaults
+::Jabber::LoadWhiteboard
 
 # To provide code to be run before loading componenets.
 ::Debug 2 "--> earlyInitHook"

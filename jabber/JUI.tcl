@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.157 2007-01-26 13:50:14 matben Exp $
+# $Id: JUI.tcl,v 1.158 2007-03-09 07:54:03 matben Exp $
 
 package provide JUI 1.0
 
@@ -100,6 +100,12 @@ proc ::JUI::Init { } {
     variable menuDefs
     variable inited
     
+    set menuDefs(rost,file) [list]
+    if {[::Jabber::HaveWhiteboard]} {
+	lappend menuDefs(rost,file) \
+	  [list {command   mNewWhiteboard  {::JWB::OnMenuNewWhiteboard}  N}]
+    }
+    
     if {[string match "mac*" $this(platform)]} {
 	set menuDefs(rost,file) {
 	    {command   mNewWhiteboard      {::JWB::OnMenuNewWhiteboard}  N}
@@ -111,6 +117,7 @@ proc ::JUI::Init { } {
 	    }}
 	    {cascade   mExport             {}                         {} {} {
 		{command  mRoster          {::Roster::ExportRoster}   {}}
+		{command  mInbox           {::MailBox::MKExportDlg}   {}}
 	    }}
 	    {separator}
 	    {command   mQuit               {::UserActions::DoQuit}    Q}

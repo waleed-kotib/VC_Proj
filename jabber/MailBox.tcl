@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.103 2007-02-27 10:02:13 matben Exp $
+# $Id: MailBox.tcl,v 1.104 2007-03-09 07:54:04 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -2013,9 +2013,27 @@ proc ::MailBox::MKImportOld {} {
     mk::file commit mailbox
 }
 
+proc ::MailBox::MKExportDlg {} {
+    
+    if {![MKHaveMetakit]} {
+	tk_messageBox -message "Metakit is necessary to export as xml file."
+	return
+    }
+    set fileName [tk_getSaveFile -title [mc {Save File}] \
+      -initialfile myinbox.xml -defaultextension .xml \
+      -filetypes {{XML File} {.xml}}]
+    if {[llength $fileName]} {
+	MKExportToXMLFile $fileName
+    }
+}
+
 proc ::MailBox::MKExportToXMLFile {fileName} {
     global  this
+    variable locals
     
+    if {!$locals(mailboxRead)} {
+	ReadMailbox
+    }
     set path mailbox.inbox
     set label [mk::get mailbox.label!0 label]
     set today [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
