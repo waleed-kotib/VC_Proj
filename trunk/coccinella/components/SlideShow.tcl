@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.22 2006-10-03 06:57:37 matben Exp $
+#       $Id: SlideShow.tcl,v 1.23 2007-03-09 07:54:03 matben Exp $
 
 package require undo
 
@@ -40,7 +40,7 @@ proc ::SlideShow::Load { } {
     ::hooks::register whiteboardCloseHook            ::SlideShow::CloseHook
     ::hooks::register menuPostCommand                ::SlideShow::MenuPostHook
     
-    ::UI::Public::RegisterMenuEntry file $menuspec
+    ::WB::RegisterMenuEntry file $menuspec
     
     component::register SlideShow  \
       "Slide show for the whiteboard. It starts from an image and automatically\

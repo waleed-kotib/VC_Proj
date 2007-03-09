@@ -11,12 +11,13 @@ proc ::ComponentExample::Init { } {
 
     ::Debug 2 "::ComponentExample::Init"
     
-    set menuspec [list  \
-      command {More Junk...} [namespace current]::Cmd  {} {} {}]
+    set menuspec {
+	command {More Junk...} ::ComponentExample::Cmd  {} {}
+    }
     set popMenuSpec [list "Plugin Junk" user [namespace current]::Cmd]
     
-    ::UI::Public::RegisterNewMenu junk "Mats Junk" $menuspec
-    ::UI::Public::RegisterMenuEntry file $menuspec
+    ::WB::RegisterNewMenu junk "Mats Junk" $menuspec
+    ::WB::RegisterMenuEntry file $menuspec
     ::JUI::RegisterMenuEntry jabber $menuspec
     ::JUI::RegisterMenuEntry file $menuspec
     ::Roster::RegisterPopupEntry $popMenuSpec

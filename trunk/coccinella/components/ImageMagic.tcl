@@ -6,7 +6,7 @@
 # 
 # Unix/Linux only.
 #
-# $Id: ImageMagic.tcl,v 1.7 2005-11-04 15:14:55 matben Exp $
+# $Id: ImageMagic.tcl,v 1.8 2007-03-09 07:54:03 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -38,7 +38,7 @@ proc ::ImageMagic::Init { } {
 	set menuspec [list \
 	    command [mc {Take Snapshot}] {::ImageMagic::ImportWindowSnapShot $w} normal {} {} {} \
 	]
-	::UI::Public::RegisterNewMenu addon [mc mAddons] $menuspec
+      ::WB::RegisterNewMenu addon [mc mAddons] $menuspec
     }
 }
 

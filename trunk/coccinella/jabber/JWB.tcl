@@ -3,13 +3,14 @@
 #      This file is part of The Coccinella application. 
 #      It provides the glue between jabber and the whiteboard.
 #      
-#  Copyright (c) 2004-2005  Mats Bengtsson
+#  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.75 2007-02-14 08:17:53 matben Exp $
+# $Id: JWB.tcl,v 1.76 2007-03-09 07:54:04 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
 package require ui::entryex
+package require Whiteboard
 
 package provide JWB 1.0
 
@@ -142,21 +143,6 @@ proc ::JWB::InitUI { } {
     }
     if {[::Plugins::HavePackage QuickTimeTcl]} {
 	package require Multicast
-    }
-     
-    # Get any registered menu entries. 
-    # Mac: add above last separator; Others: add at end
-    # @@@ I don't like this solution!
-    if {[tk windowingsystem] eq "aqua"} {
-	set ind [lindex [lsearch -exact -all $menuDefsFile separator] end]
-	incr ind
-    } else {
-	set ind end
-    }
-    set mdef [::UI::Public::GetRegisteredMenuDefs file]
-    if {$mdef != {}} {
-	set menuDefsFile [linsert $menuDefsFile $ind {separator}]
-	set menuDefsFile [linsert $menuDefsFile $ind $mdef]
     }
     ::WB::SetMenuDefs file $menuDefsFile
     

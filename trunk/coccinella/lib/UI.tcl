@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.145 2007-03-07 09:19:52 matben Exp $
+# $Id: UI.tcl,v 1.146 2007-03-09 07:54:04 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1068,7 +1068,7 @@ proc ::UI::GetPrefixedToplevels {wprefix} {
 proc ::UI::NewMenu {w wmenu label menuSpec args} {    
     variable mapWmenuToWtop
     variable cachedMenuSpec
-            
+    
     # Need to cache the complete menuSpec's since needed in MenuMethod.
     set cachedMenuSpec($w,$wmenu) $menuSpec
     set mapWmenuToWtop($wmenu)    $w
@@ -1464,113 +1464,6 @@ proc ::UI::AlertBox {msg args} {
 	::UI::AlertBoxInit
     }
     eval {::alertbox::alertbox $msg} $alertArgs $args
-}
-
-#--- The public interfaces -----------------------------------------------------
-
-namespace eval ::UI::Public:: {
-    
-    # This is supposed to collect some "public" interfaces useful for
-    # 'plugins' and 'components'.
-}
-
-# UI::Public::RegisterNewMenu --
-#
-#       
-# Arguments:
-#       wpath       
-#       name
-#       menuSpec    {type label command state accelerator opts {subspec}}
-#       
-# Results:
-#       menu entries added when whiteboard built.
-
-proc ::UI::Public::RegisterNewMenu {mtail name menuSpec} {    
-    upvar ::UI::menuSpecPublic menuSpecPublic 
-	
-    # Make a new menu
-    if {[lsearch $menuSpecPublic(wpaths) $mtail] < 0} {
-	lappend menuSpecPublic(wpaths) $mtail
-    }
-    set menuSpecPublic($mtail,name) $name
-    set menuSpecPublic($mtail,specs) [list $menuSpec]
-}
-
-# UI::Public::RegisterMenuEntry --
-# 
-#       Lets plugins/components register their own menu entry.
-
-proc ::UI::Public::RegisterMenuEntry {mtail menuSpec} {
-    upvar ::WB::menuDefs menuDefs 
-    upvar ::WB::menuDefsInsertInd menuDefsInsertInd 
-    
-    # Keeps track of all registered menu entries.
-    variable mainMenuSpec
-    
-    # Add these entries in a section above the bottom section.
-    # Add separator to section component entries.
-    
-    if {![info exists mainMenuSpec($mtail)]} {
-
-	# Add separator if this is the first addon entry.
-	set menuDefs(main,$mtail) [linsert $menuDefs(main,$mtail)  \
-	  $menuDefsInsertInd(main,$mtail) {separator}]
-	incr menuDefsInsertInd(main,$mtail)
-	set mainMenuSpec($mtail) {}
-    }
-    set menuDefs(main,$mtail) [linsert $menuDefs(main,$mtail)  \
-      $menuDefsInsertInd(main,$mtail) $menuSpec]
-    set mainMenuSpec($mtail) [concat $mainMenuSpec($mtail) $menuSpec]
-}
-
-proc ::UI::Public::GetRegisteredMenuDefs {mtail} {
-    variable mainMenuSpec
-    
-    if {[info exists mainMenuSpec($mtail)]} {
-	return $mainMenuSpec($mtail)
-    } else {
-	return {}
-    }
-}
-
-#--- There are actually more; sort out later -----------------------------------
-
-proc ::UI::BuildPublicMenus {w wmenu} {
-    variable menuSpecPublic
-    
-    foreach mtail $menuSpecPublic(wpaths) {	
-	set m [menu ${wmenu}.${mtail} -tearoff 0]
-	$wmenu add cascade -label $menuSpecPublic($mtail,name) -menu $m
-	foreach menuSpec $menuSpecPublic($mtail,specs) {
-	    BuildMenuEntryFromSpec $w $m $menuSpec
-	}
-    }
-}
-
-# UI::BuildMenuEntryFromSpec  --
-#
-#       Builds a single menu entry for a menu. Can be called recursively.
-#       
-# Arguments:
-#       menuSpec    {type label command state accelerator opts {subspec}}
-#      
-# Results:
-#       none
-
-proc ::UI::BuildMenuEntryFromSpec {w m menuSpec} {
-    
-    foreach {type label cmd state accel opts submenu} $menuSpec {
-	if {[llength $submenu]} {
-	    set mt [menu ${m}.sub -tearoff 0]
-	    $m add cascade -label $label -menu $mt
-	    foreach subm $submenu {
-		BuildMenuEntryFromSpec $mt $subm
-	    }
-	} else {
-	    set cmd [subst -nocommands $cmd]
-	    eval {$m add $type -label $label -command $cmd -state $state} $opts
-	}
-    }
 }
 
 # UI::LabelButton --

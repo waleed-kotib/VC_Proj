@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.27 2007-02-08 14:57:24 matben Exp $
+# $Id: JForms.tcl,v 1.28 2007-03-09 07:54:03 matben Exp $
 # 
 #      Updated to version 2.5 of XEP-0004
 #  
@@ -377,7 +377,6 @@ proc ::JForms::BuildXDataFrame {token} {
 		set attr(type) "text-single"
 		array set attr [wrapper::getattrlist $elem]
 		
-		
 		switch -exact -- $attr(type) {
 		    text-single - text-private {
 			NewLabelEntry $token $elem
@@ -607,14 +606,14 @@ proc ::JForms::NewListSingle {token elem} {
     set defValue [lindex $defValueList 0]
     
     # Handle exceptions:
-    if {$labelList == {}} {
+    if {![llength $labelList]} {
 	
 	# 1) No <option/> elements. Weird!
 	set labelList "None"
 	set defValue  "None"
 	set defLabel  "None"
 	set state(label2value,$var,$defLabel) $defValue
-    } elseif {[llength $defValueList] == 0} {
+    } elseif {![llength $defValueList]} {
 	
 	# 2) No <value/> element.
 	set defLabel [lindex $labelList 0]
@@ -657,12 +656,28 @@ proc ::JForms::NewListMulti {token elem} {
     if {[AnyRequired $token $elem]} {
 	append str " (*)"
     }
-
+    
     # Build menu list and mapping from label to value.
     set state(type,$var) $attr(type)
-    lassign [ParseMultiOpts $token $elem $var] defValueList labelList
+    lassign [ParseMultiOpts $token $elem $var] defValueList labelList    
     set defValue [lindex $defValueList 0]
-    set defLabel $state(value2label,$var,$defValue)
+
+    # Handle exceptions:
+    if {![llength $labelList]} {
+	
+	# 1) No <option/> elements. Weird!
+	set labelList "None"
+	set defValue  "None"
+	set defLabel  "None"
+	set state(label2value,$var,$defLabel) $defValue
+    } elseif {![llength $defValueList]} {
+	
+	# 2) No <value/> element.
+	set defLabel [lindex $labelList 0]
+	set defValue $state(label2value,$var,$defLabel)
+    } else {
+	set defLabel $state(value2label,$var,$defValue)
+    }
     set state(label,$var) $defLabel
     set state(def,$var)   $defValue
     set state(var,$var)   $defValue
@@ -818,7 +833,7 @@ proc ::JForms::AnyRequired {token elem} {
     upvar 0 $token state
     
     set requiredElem [wrapper::getfirstchildwithtag $elem "required"]
-    if {$requiredElem != {}} {
+    if {[llength $requiredElem]} {
 	set state(anyrequired) 1
 	return 1
     } else {
@@ -827,15 +842,15 @@ proc ::JForms::AnyRequired {token elem} {
 }
 
 proc ::JForms::GetDefaultValue {elem {defValue ""}} {    
-    set valueElem [wrapper::getfirstchildwithtag $elem "value"]
-    if {$valueElem != {}} {
-	set defValue [wrapper::getcdata $valueElem]
+    set valueE [wrapper::getfirstchildwithtag $elem "value"]
+    if {[llength $valueE]} {
+	set defValue [wrapper::getcdata $valueE]
     }
     return $defValue
 }
 
 proc ::JForms::GetDefaultList {elem} {
-    set defValueList {}
+    set defValueList [list]
     foreach c [wrapper::getchildswithtag $elem "value"] {
 	lappend defValueList [wrapper::getcdata $c]
     }
@@ -855,28 +870,28 @@ proc ::JForms::ParseMultiOpts {token elem var} {
     upvar 0 $token state
     
     # Build menu list and mapping from label to value.
-    set defaultList {}
-    set labelList  {}
+    set defaultL [list]
+    set labelL   [list]
     foreach c [wrapper::getchildren $elem] {
 	
 	switch -- [wrapper::gettag $c] {
 	    value {
-		lappend defaultList [wrapper::getcdata $c]				    
+		lappend defaultL [wrapper::getcdata $c]				    
 	    }
 	    option {
 		set label [wrapper::getattribute $c "label"]
-		set valelem [wrapper::getfirstchildwithtag $c "value"]
+		set valueE [wrapper::getfirstchildwithtag $c "value"]
 		set val $label
-		if {$valelem != {}} {
-		    set val [wrapper::getcdata $valelem]
+		if {[llength $valueE]} {
+		    set val [wrapper::getcdata $valueE]
 		}
 		set state(label2value,$var,$label) $val
 		set state(value2label,$var,$val)   $label
-		lappend labelList $label
+		lappend labelL $label
 	    }
 	}
     }
-    return [list $defaultList $labelList]
+    return [list $defaultL $labelL]
 }
 
 proc ::JForms::GetXDataForm {token} {
