@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.76 2007-03-09 07:54:04 matben Exp $
+# $Id: JWB.tcl,v 1.77 2007-03-11 14:37:49 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -141,7 +141,7 @@ proc ::JWB::InitUI { } {
 	{command   mPageSetup          {::WB::OnMenuPageSetup}       {}}
 	{command   mPrintCanvas        {::WB::OnMenuPrintCanvas}     P}
     }
-    if {[::Plugins::HavePackage QuickTimeTcl]} {
+    if {[::Media::HavePackage QuickTimeTcl]} {
 	package require Multicast
     }
     ::WB::SetMenuDefs file $menuDefsFile
@@ -1803,7 +1803,7 @@ proc ::JWB::DispatchToImporter {mime opts args} {
     }
     
     if {$display} {
-	if {[::Plugins::HaveImporterForMime $mime]} {
+	if {[::Media::HaveImporterForMime $mime]} {
 	    set wcan [::WB::GetCanvasFromWtop $w]
 	    set errMsg [eval {::Import::DoImport $wcan $opts} $args]
 	    if {$errMsg ne ""} {

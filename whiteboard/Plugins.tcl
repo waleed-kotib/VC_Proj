@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Plugins.tcl,v 1.24 2006-09-14 13:48:22 matben Exp $
+# $Id: Plugins.tcl,v 1.25 2007-03-11 14:37:50 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -71,21 +71,24 @@
 #  
 #-------------------------------------------------------------------------------
 
-package provide Plugins 1.0
+# @@@ TODO: try to use as much from Media as possible.
 
+package require Media
 package require Types
 
-namespace eval ::Plugins:: {
+package provide Plugins 1.0
+
+namespace eval ::Plugins {
     global tcl_platform
     
     # Define all hooks for preference settings. Be early!
+    ::hooks::register initHook               ::Plugins::InitHook
     ::hooks::register prefsInitHook          ::Plugins::InitPrefsHook     10
     ::hooks::register prefsBuildHook         ::Plugins::BuildPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Plugins::UserDefaultsHook
     ::hooks::register prefsSaveHook          ::Plugins::SaveHook
     ::hooks::register prefsCancelHook        ::Plugins::CancelHook
     ::hooks::register prefsDestroyHook       ::Plugins::DestroyPrefsHook
-    ::hooks::register initHook               ::Plugins::InitHook
 
     variable inited 0
     variable packages2Platform
@@ -98,13 +101,13 @@ namespace eval ::Plugins:: {
     # Supported binary files, that is, images movies etc.
     # Start with the core Tk supported formats. Mac 'TYPE'.
     set plugin(tk,loaded) 1
-    set supSuff(text) {.txt}
+    set supSuff(text)  {.txt}
     set supSuff(image) {}
     set supSuff(audio) {}
     set supSuff(video) {}
     set supSuff(application) {}
 
-    set supMacTypes(text) {TEXT}
+    set supMacTypes(text)  {TEXT}
     set supMacTypes(image) {}
     set supMacTypes(audio) {}
     set supMacTypes(video) {}
@@ -112,7 +115,7 @@ namespace eval ::Plugins:: {
 
     # Map keywords and package names to the supported MIME types.
     # Start by initing, MIME types added below.
-    set supportedMimeTypes(text) text/plain
+    set supportedMimeTypes(text)  text/plain
     set supportedMimeTypes(image) {}
     set supportedMimeTypes(audio) {}
     set supportedMimeTypes(video) {}
@@ -127,14 +130,7 @@ namespace eval ::Plugins:: {
 	tkpng              {macosx      windows     unix}
     }
     array set helpers2Platform {xanim unix} 
-    
-    # Snack buggy on NT4.
-    #if {($tcl_platform(os) eq "Windows NT") &&  \
-    #  ($tcl_platform(osVersion) == 4.0)} {
-#	set packages2Platform(snack)  \
-#	  [lsearch -inline -not -all $packages2Platform(snack) "windows"]
-    #}
-    
+        
     array set plugType2DescArr {
 	internal    "Internal Plugin"
 	external    "External Plugin"
@@ -153,8 +149,6 @@ namespace eval ::Plugins:: {
 proc ::Plugins::Init { } {
     global this
     variable mimeTypeDoWhat
-    variable packages2Platform
-    variable supportedMimeTypes
     variable prefMimeType2Package
     variable supSuff
     variable supMacTypes
@@ -196,15 +190,14 @@ proc ::Plugins::InitTk { } {
     global this
     variable plugin
     variable supportedMimeTypes
-    variable packages2Platform
     variable supSuff
 
     set plugin(tk,type) "internal"
     set plugin(tk,desc) "Supported by the core"
     set plugin(tk,ver) [info tclversion]
     set plugin(tk,importProc) ::Import::DrawImage
-    set plugin(tk,icon,12) [image create photo -format gif -file \
-      [file join $this(imagePath) tklogo12.gif]]
+    set plugin(tk,icon,12) [image create photo -format gif \
+      -file [file join $this(imagePath) tklogo12.gif]]
     #set supSuff(tk) {.gif}
     set supportedMimeTypes(tk) {image/gif image/x-portable-pixmap}
     set plugin(tk,mimes) $supportedMimeTypes(tk)
@@ -230,10 +223,10 @@ proc ::Plugins::InitQuickTimeTcl { } {
     set plugin(QuickTimeTcl,trpt,video) http
     
     # Define any 16x16 icon to spice up the UI.
-    set plugin(QuickTimeTcl,icon,16) [image create photo -format png -file \
-      [file join $this(imagePath) quicktime16.png]]
-    set plugin(QuickTimeTcl,icon,12) [image create photo -format gif -file \
-      [file join $this(imagePath) quicktime12.gif]]
+    set plugin(QuickTimeTcl,icon,16) [image create photo -format png \
+      -file [file join $this(imagePath) quicktime16.png]]
+    set plugin(QuickTimeTcl,icon,12) [image create photo -format gif \
+      -file [file join $this(imagePath) quicktime12.gif]]
     
     # We must list supported MIME types for each package.
     # For QuickTime:
@@ -321,7 +314,6 @@ proc ::Plugins::InitTkPNG { } {
 proc ::Plugins::InitXanim { } {
     variable plugin
     variable supportedMimeTypes
-    variable packages2Platform
 
     set plugin(xanim,type) "application"
     set plugin(xanim,desc) "A unix/Linux only application that is used\
@@ -528,9 +520,6 @@ proc ::Plugins::PostProcessInfo { } {
 	set mimeTypeDoWhat($mime) $prefMimeType2Package($mime)
     }
     set prefMimeType2Package(image/gif) tk
-
-    # By default, no importing takes place, thus {}. WRONG!!!
-    #set prefMimeType2Package(text/plain) {}
 }
 
 # Plugins::GetAllPackages --
@@ -590,20 +579,11 @@ proc ::Plugins::MakeTypeListDialogOption { } {
 	application {}
     }
     
-    if {$this(platform) eq "macintosh"}  {
-	
-	# On Mac either file extension or 'type' must match.
-	set typelist(text) [list  \
-	  [list Text $supSuff(text)]  \
-	  [list Text {} $supMacTypes(text)] ]
-    } else {
-	set typelist(text) [list  \
-	  [list Text $supSuff(text)]]
-    }
+    set typelist(text) [list [list Text $supSuff(text)]]
     
     switch -- $this(platform) {
 	
-	macintosh - macosx - windows - unix {    
+	macosx - windows - unix {    
 	    set typelist(image) [list   \
 	      [list Image $supSuff(image)]  \
 	      [list Image {} $supMacTypes(image)] ]
@@ -665,9 +645,9 @@ proc ::Plugins::MakeTypeListDialogOption { } {
 
 proc ::Plugins::InitHook { } {
     
-    ::Plugins::VerifyPackagesForMimeTypes
-    if {[::Plugins::HavePackage QuickTimeTcl]} {
-	::Plugins::QuickTimeTclInitHook
+    VerifyPackagesForMimeTypes
+    if {[HavePackage QuickTimeTcl]} {
+	QuickTimeTclInitHook
     }
 }
 
@@ -1103,12 +1083,12 @@ proc ::Plugins::Register {name defList canvasBindList} {
     
     ::Debug 2 "::Plugins::Register name=$name"
     
-    set defListDefaults {\
-      type          external          \
-      desc          ""                \
-      platform      ""                \
-      importProc    ""                \
-      mimes         ""                \
+    set defListDefaults {
+      type          external
+      desc          ""
+      platform      ""
+      importProc    ""
+      mimes         ""
     }    
     
     # Set default values that may be overwritten.
@@ -1215,7 +1195,7 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
     variable canvasClassBinds
     variable canvasInstBinds
     
-    ::Debug 3 "::Plugins::SetCanvasBinds oldTool=$oldTool, newTool=$newTool"
+    ::Debug 4 "::Plugins::SetCanvasBinds oldTool=$oldTool, newTool=$newTool"
 
     # Canvas class bindings.
     foreach key [array names canvasClassBinds *,name] {

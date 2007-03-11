@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.50 2006-12-13 15:14:28 matben Exp $
+# $Id: VCard.tcl,v 1.51 2007-03-11 14:37:49 matben Exp $
 
 package provide VCard 1.0
 
@@ -537,8 +537,7 @@ proc ::VCard::VerifyPhotoFile {f} {
     set ok 0
     set suff [file extension $f]
     if {[regexp {(.gif|.jpg|.jpeg|.png)} $suff]} {
-	set ok [::Plugins::HaveImporterForMime  \
-	  [::Types::GetMimeTypeForFileName $f]]
+	set ok [::Media::HaveImporterForMime [::Types::GetMimeTypeForFileName $f]]
     }
     return $ok
 }
@@ -552,11 +551,11 @@ proc ::VCard::SelectPhoto {etoken} {
 	{{Image Files}  {.gif}}
 	{{GIF Files}    {.gif}}
     }
-    if {[::Plugins::HaveImporterForMime image/png]} {
+    if {[::Media::HaveImporterForMime image/png]} {
 	lappend suffs .png
 	lappend types {{PNG Files}    {.png}}
     }
-    if {[::Plugins::HaveImporterForMime image/jpeg]} {
+    if {[::Media::HaveImporterForMime image/jpeg]} {
 	lappend suffs .jpg .jpeg
 	lappend types {{JPEG Files}   {.jpg .jpeg}}
     }

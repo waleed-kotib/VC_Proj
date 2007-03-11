@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.158 2007-03-09 07:54:03 matben Exp $
+# $Id: JUI.tcl,v 1.159 2007-03-11 14:37:48 matben Exp $
 
 package provide JUI 1.0
 
@@ -103,11 +103,11 @@ proc ::JUI::Init { } {
     set menuDefs(rost,file) [list]
     if {[::Jabber::HaveWhiteboard]} {
 	lappend menuDefs(rost,file) \
-	  [list {command   mNewWhiteboard  {::JWB::OnMenuNewWhiteboard}  N}]
+	  {command   mNewWhiteboard  {::JWB::OnMenuNewWhiteboard}  N}
     }
     
-    if {[string match "mac*" $this(platform)]} {
-	set menuDefs(rost,file) {
+    if {[string equal $this(platform) "macosx"]} {
+	set mDefsFile {
 	    {command   mNewWhiteboard      {::JWB::OnMenuNewWhiteboard}  N}
 	    {command   mCloseWindow        {::UI::CloseWindowEvent}  W}
 	    {command   mPreferences...     {::Preferences::Build}     {}}
@@ -117,13 +117,13 @@ proc ::JUI::Init { } {
 	    }}
 	    {cascade   mExport             {}                         {} {} {
 		{command  mRoster          {::Roster::ExportRoster}   {}}
-		{command  mInbox           {::MailBox::MKExportDlg}   {}}
+		{command  mMessageInbox    {::MailBox::MKExportDlg}   {}}
 	    }}
 	    {separator}
 	    {command   mQuit               {::UserActions::DoQuit}    Q}
 	}
     } else {
-	set menuDefs(rost,file) {
+	set mDefsFile {
 	    {command   mNewWhiteboard      {::JWB::OnMenuNewWhiteboard}  N}
 	    {command   mPreferences...     {::Preferences::Build}     {}}
 	    {separator}
@@ -132,11 +132,14 @@ proc ::JUI::Init { } {
 	    }}
 	    {cascade   mExport             {}                         {} {} {
 		{command  mRoster          {::Roster::ExportRoster}   {}}
+		{command  mMessageInbox    {::MailBox::MKExportDlg}   {}}
 	    }}
 	    {separator}
 	    {command   mQuit               {::UserActions::DoQuit}    Q}
 	}
     }
+    set menuDefs(rost,file) [concat $menuDefs(rost,file) $mDefsFile]
+    
     set menuDefs(rost,jabber) {    
 	{command     mNewAccount    {::RegisterEx::OnMenu}            {}}
 	{cascade     mRegister      {}                                {} {} {}}

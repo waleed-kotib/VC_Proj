@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.15 2007-02-27 10:02:13 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.16 2007-03-11 14:37:47 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -38,36 +38,12 @@ proc ::BuddyPounce::Init { } {
       a particular user becomes online, offline etc."
         
     # Audio formats.
-    variable audioSuffixes {}
-    
-    switch -- $this(platform) {
-	macosx - macintosh {
-	    if {![catch {package require QuickTimeTcl}]} {
-		lappend audioSuffixes .aif .aiff .wav .mp3
-	    }
-	}
-	windows {
-	    if {![catch {package require QuickTimeTcl}]} {
-		lappend audioSuffixes .aif .aiff .wav .mp3
-	    }
-	    if {![catch {package require snack}]} {
-		lappend audioSuffixes .aif .aiff .wav .mp3
-	    }	    
-	}
-	default {
-	    if {![catch {package require snack}]} {
-		lappend audioSuffixes .aif .aiff .wav .mp3
-	    }	    
-	}
+    variable audioSuffixes [list]
+    foreach mime [::Media::GetSupportedMimesForBase audio] {
+	set audioSuffixes [concat $audioSuffixes \
+	  [::Types::GetSuffixListForMime $mime]]
     }
-    # This doesn't work due to the order of which things are loaded.
-    if {0} {
-	foreach subtype {aiff aiff wav mpeg} suff {.aif .aiff .wav .mp3} {
-	    if {[::Plugins::HaveImporterForMime audio/$subtype]} {
-		lappend audioSuffixes $suff
-	    }
-	}
-    }
+    set audioSuffixes [lsort -unique $audioSuffixes]
     
     # Unique id needed to create instance tokens.
     variable uid 0

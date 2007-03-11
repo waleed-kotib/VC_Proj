@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.146 2007-03-09 07:54:04 matben Exp $
+# $Id: UI.tcl,v 1.147 2007-03-11 14:37:49 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -334,7 +334,7 @@ proc ::UI::InitMenuDefs { } {
       $menuDefs(main,info,aboutquicktimetcl)]
     
     # Make platform specific things and special menus etc. Indices!!! BAD!
-    if {$haveAppleMenu && ![::Plugins::HavePackage QuickTimeTcl]} {
+    if {$haveAppleMenu && ![::Media::HavePackage QuickTimeTcl]} {
 	lset menuDefs(main,apple) 1 3 disabled
     }
 }

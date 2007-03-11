@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.45 2006-12-15 08:07:14 matben Exp $
+# $Id: Emoticons.tcl,v 1.46 2007-03-11 14:37:48 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -53,9 +53,9 @@ proc ::Emoticons::Init { } {
     }
 
     # Cache stuff we need later.
-    set priv(havepng)      [::Plugins::HaveImporterForMime image/png]
-    set priv(QuickTimeTcl) [::Plugins::HavePackage QuickTimeTcl]
-    set priv(Img)          [::Plugins::HavePackage Img]
+    set priv(havepng)      [::Media::HaveImporterForMime image/png]
+    set priv(QuickTimeTcl) [::Media::HavePackage QuickTimeTcl]
+    set priv(Img)          [::Media::HavePackage Img]
     if {$priv(Img)} {
 	set priv(needtmp)   0
 	set priv(pngformat) [list -format png]

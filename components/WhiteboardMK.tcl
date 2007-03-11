@@ -2,12 +2,15 @@
 # 
 #       Registers a metakit file format for whiteboards.
 #       
-# $Id: WhiteboardMK.tcl,v 1.2 2006-08-24 07:01:36 matben Exp $
+# $Id: WhiteboardMK.tcl,v 1.3 2007-03-11 14:37:48 matben Exp $
 
 namespace eval ::WhiteboardMK {}
 
 proc ::WhiteboardMK::Init { } {
     
+    if {![::Jabber::HaveWhiteboard]} {
+	return
+    }
     if {[catch {
 	package require vfs
 	package require vfs::mk4

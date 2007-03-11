@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.29 2006-12-13 15:14:27 matben Exp $
+# $Id: Avatar.tcl,v 1.30 2007-03-11 14:37:48 matben Exp $
 
 # @@@ Issues:
 # 
@@ -1604,11 +1604,11 @@ proc ::Avatar::PrefsFile { } {
 	{{Image Files}  {.gif}}
 	{{GIF Image}    {.gif}}
     }
-    if {[::Plugins::HaveImporterForMime image/png]} {
+    if {[::Media::HaveImporterForMime image/png]} {
 	lappend suffs .png
 	lappend types {{PNG Image}    {.png}}
     }
-    if {[::Plugins::HaveImporterForMime image/jpeg]} {
+    if {[::Media::HaveImporterForMime image/jpeg]} {
 	lappend suffs .jpg .jpeg
 	lappend types {{JPEG Image}    {.jpg .jpeg}}
     }

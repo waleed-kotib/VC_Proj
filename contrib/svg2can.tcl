@@ -5,7 +5,7 @@
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.35 2007-02-26 13:26:53 matben Exp $
+# $Id: svg2can.tcl,v 1.36 2007-03-11 14:37:48 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -93,7 +93,7 @@ namespace eval svg2can {
     
     variable priv
     set priv(havetkpath) 0
-    if {![catch {package require tkpath 0.2}]} {
+    if {![catch {package require tkpath 0.2.4}]} {
 	set priv(havetkpath) 1
     }
     
@@ -184,11 +184,8 @@ proc svg2can::cache_free {key} {
 	    image {
 		image delete $token
 	    }
-	    lineargradient {
-		::tkpath::lineargradient delete $token
-	    }
-	    radialgradient {
-		::tkpath::radialgradient delete $token
+	    gradient {
+		::tkpath::gradient delete $token
 	    }
 	}
     }
@@ -1678,7 +1675,7 @@ proc svg2can::AttrToCoords {type attrlist} {
 
 proc svg2can::CreateLinearGradient {xmllist} {
     variable gradientIDToToken
-
+    
     set x1 0
     set y1 0
     set x2 1
@@ -1702,11 +1699,11 @@ proc svg2can::CreateLinearGradient {xmllist} {
 	    return -code error "unrecognized gradient uri \"$value\""
 	}
 	set hreftoken $gradientIDToToken($uri)
-	set units  [::tkpath::lineargradient cget $hreftoken -units]
-	set method [::tkpath::lineargradient cget $hreftoken -method]
-	set hrefstops [::tkpath::lineargradient cget $hreftoken -stops]
+	set units  [::tkpath::gradient cget $hreftoken -units]
+	set method [::tkpath::gradient cget $hreftoken -method]
+	set hrefstops [::tkpath::gradient cget $hreftoken -stops]
 	foreach {x1 y1 x2 y2} \
-	  [::tkpath::lineargradient cget $hreftoken -lineartransition] { break }	
+	  [::tkpath::gradient cget $hreftoken -lineartransition] { break }	
     }    
     
     foreach {key value} [getattr $xmllist] {	
@@ -1739,10 +1736,10 @@ proc svg2can::CreateLinearGradient {xmllist} {
 	    set stops $hrefstops
 	}
     }
-    set token [::tkpath::lineargradient create -method $method -units $units \
+    set token [::tkpath::gradient create linear -method $method -units $units \
       -lineartransition [list $x1 $y1 $x2 $y2] -stops $stops]
     set gradientIDToToken($id) $token
-    cache_add lineargradient $token
+    cache_add gradient $token
 }
 
 proc svg2can::CreateRadialGradient {xmllist} {
@@ -1780,10 +1777,10 @@ proc svg2can::CreateRadialGradient {xmllist} {
 	return
     }
     set stops [ParseGradientStops $xmllist]    
-    set token [::tkpath::radialgradient create -method $method -units $units \
+    set token [::tkpath::gradient create radial -method $method -units $units \
       -radialtransition [list $cx $cy $r $fx $fy] -stops $stops]
     set gradientIDToToken($id) $token
-    cache_add radialgradient $token
+    cache_add gradient $token
 }
 
 proc svg2can::ParseGradientStops {xmllist} {
@@ -1868,9 +1865,9 @@ proc svg2can::parseFillToList {value} {
 	#puts "\t id=$id"
 	if {[info exists gradientIDToToken($id)]} {
 	    #puts "\t gradientIDToToken=$gradientIDToToken($id)"
-	    return [list -fillgradient $gradientIDToToken($id)]
+	    return [list -fill $gradientIDToToken($id)]
 	} else {
-	    puts "--------> missing gradientIDToToken"
+	    puts "--------> missing gradientIDToToken id=$id"
 	    return [list -fill black]
 	}
     } else {
@@ -2051,7 +2048,6 @@ proc svg2can::StyleToOptsEx {styleList args} {
     foreach {key value} $styleList {    
 	switch -- $key {
 	    fill {
-		# Two possibilities: -fill or -fillgradient
 		foreach {name val} [parseFillToList $value] { break }
 		set optsA($name) $val
 	    } 
