@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.23 2007-03-09 07:54:03 matben Exp $
+#       $Id: SlideShow.tcl,v 1.24 2007-03-11 14:37:47 matben Exp $
 
 package require undo
 
@@ -14,6 +14,10 @@ namespace eval ::SlideShow:: {
 
 proc ::SlideShow::Load { } {
     variable priv
+    
+    if {![::Jabber::HaveWhiteboard]} {
+	return
+    }
 
     ::Debug 2 "::SlideShow::Load"
     
@@ -139,7 +143,7 @@ proc ::SlideShow::InitHook { } {
     set mimes {image/gif image/png image/jpeg}
     set priv(mimes) {}
     foreach mime $mimes {
-	if {[::Plugins::HaveImporterForMime $mime]} {
+	if {[::Media::HaveImporterForMime $mime]} {
 	    lappend priv(mimes) $mime
 	}
     }

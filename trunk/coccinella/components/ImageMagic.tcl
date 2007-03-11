@@ -6,7 +6,7 @@
 # 
 # Unix/Linux only.
 #
-# $Id: ImageMagic.tcl,v 1.8 2007-03-09 07:54:03 matben Exp $
+# $Id: ImageMagic.tcl,v 1.9 2007-03-11 14:37:47 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -112,8 +112,8 @@ proc ::ImageMagic::BuildDialog {w} {
 	
 	# Verify that we've got an importer for the format.
 	set theMime [::Types::GetMimeTypeForFileName x.$type]
-	if {![::Plugins::HaveImporterForMime $theMime]} {
-	    ${frbt}.${type} configure -state disabled
+	if {![::Media::HaveImporterForMime $theMime]} {
+	    $frbt.$type configure -state disabled
 	}
     }
     

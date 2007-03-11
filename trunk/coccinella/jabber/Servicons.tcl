@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Servicons.tcl,v 1.6 2006-10-19 14:05:42 matben Exp $
+# $Id: Servicons.tcl,v 1.7 2007-03-11 14:37:49 matben Exp $
 
 package require Icondef
 
@@ -68,9 +68,9 @@ proc ::Servicons::Init { } {
     }
 
     # Cache stuff we need later.
-    set priv(havepng)      [::Plugins::HaveImporterForMime image/png]
-    set priv(QuickTimeTcl) [::Plugins::HavePackage QuickTimeTcl]
-    set priv(Img)          [::Plugins::HavePackage Img]
+    set priv(havepng)      [::Media::HaveImporterForMime image/png]
+    set priv(QuickTimeTcl) [::Media::HavePackage QuickTimeTcl]
+    set priv(Img)          [::Media::HavePackage Img]
     if {$priv(Img)} {
 	set priv(needtmp)   0
 	set priv(pngformat) [list -format png]

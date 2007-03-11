@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.193 2007-02-27 10:02:13 matben Exp $
+# $Id: Chat.tcl,v 1.194 2007-03-11 14:37:48 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1186,10 +1186,12 @@ proc ::Chat::Build {threadID args} {
       -text [mc Print] -image $iconPrint  \
       -disabledimage $iconPrintDis   \
       -command [list [namespace current]::Print $dlgtoken]
-    $wtray newbutton whiteboard  \
-      -text [mc Whiteboard] -image $iconWB  \
-      -disabledimage $iconWBDis   \
-      -command [list [namespace current]::Whiteboard $dlgtoken]
+    if {[::Jabber::HaveWhiteboard]} {
+	$wtray newbutton whiteboard  \
+	  -text [mc Whiteboard] -image $iconWB  \
+	  -disabledimage $iconWBDis   \
+	  -command [list [namespace current]::Whiteboard $dlgtoken]
+    }
     $wtray newbutton invite \
       -text [mc Invite] -image $iconInvite \
       -disabledimage $iconInviteDis  \
@@ -2025,7 +2027,7 @@ proc ::Chat::SetState {chattoken state} {
     foreach name {send sendfile} {
 	$wtray buttonconfigure $name -state $state 
     }
-    if {![::Roster::IsCoccinella $chatstate(jid)]} {
+    if {[$wtray exists whiteboard] && ![::Roster::IsCoccinella $chatstate(jid)]} {
 	$wtray buttonconfigure whiteboard -state disabled
     }	
     $chatstate(wtextsnd) configure -state $state

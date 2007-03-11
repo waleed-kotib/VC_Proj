@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.16 2006-04-13 10:45:05 matben Exp $
+# $Id: Types.tcl,v 1.17 2007-03-11 14:37:49 matben Exp $
 
 package provide Types 1.0
 
@@ -235,9 +235,9 @@ namespace eval ::Types:: {
     }
 }
 
-# ::Types::Init --
+# Types::Init --
 
-proc ::Types::Init { } {
+proc ::Types::Init {} {
     variable mime2SuffList
     variable mime2MacTypeList
     variable suff2MimeList
@@ -286,7 +286,7 @@ proc ::Types::Init { } {
 #       Checks that we haven't missed something when setting up our arrays.
 #       Is always run "offline".
 
-proc ::Types::QuickCheck { } {
+proc ::Types::QuickCheck {} {
     variable mime2SuffList
     variable mime2Desc
     variable mime2MacTypeList
@@ -294,7 +294,7 @@ proc ::Types::QuickCheck { } {
     variable suff2MacType
  
     set allSuffs {}
-    foreach m [::Types::GetAllMime] {
+    foreach m [GetAllMime] {
 	if {![info exists mime2SuffList($m)]} {
 	    puts "$m\t\tmissing mime2SuffList"
 	} else {
@@ -324,7 +324,7 @@ proc ::Types::QuickCheck { } {
 #       default values are filled in. Typically run after getting preferences
 #       to stop any corruption.
 
-proc ::Types::VerifyInternal { } {
+proc ::Types::VerifyInternal {} {
     variable mime2SuffList
     variable mime2Desc
     variable mime2MacTypeList
@@ -332,7 +332,7 @@ proc ::Types::VerifyInternal { } {
     variable suff2MacType
     
     set allSuffs {}
-    foreach m [::Types::GetAllMime] {
+    foreach m [GetAllMime] {
 	if {![info exists mime2SuffList($m)]} {
 	    set mime2SuffList($m) {}
 	}
@@ -374,7 +374,7 @@ proc ::Types::GetMimeTypeForFileName {fileName} {
     variable inited
     
     if {!$inited} {
-	::Types::Init
+	Init
     }    
     set fext [string tolower [file extension $fileName]]
     if {[string equal $this(platform) "macintosh"]} {
@@ -409,7 +409,7 @@ proc ::Types::GetMimeTypeForMacFile {fileName} {
     variable inited
 
     if {!$inited} {
-	::Types::Init
+	Init
     }    
     set fext [string tolower [file extension $fileName]]
     if {[string length $fext]}  {
@@ -520,7 +520,7 @@ proc ::Types::SetSuffixListForMime {mime suffList} {
     set mime2SuffList($mime) $suffList
 }
 
-proc ::Types::GetSuffixListArr { } {
+proc ::Types::GetSuffixListArr {} {
     variable mime2SuffList
 
     return [array get mime2SuffList]
@@ -560,7 +560,7 @@ proc ::Types::SetDescriptionForMime {mime desc} {
     set mime2Desc($mime) $desc
 }
 
-proc ::Types::GetDescriptionArr { } {
+proc ::Types::GetDescriptionArr {} {
     variable mime2Desc
 
     return [array get mime2Desc]
@@ -574,13 +574,13 @@ proc ::Types::SetDescriptionArr {descListName} {
     array set mime2Desc [array get locArrName]
 }
 
-proc ::Types::GetAllMime { } {
+proc ::Types::GetAllMime {} {
     variable mime2SuffList
     
     return [array names mime2SuffList]
 }
 
-proc ::Types::GetSuffMimeArr { } {
+proc ::Types::GetSuffMimeArr {} {
     variable prefSuff2MimeType
     
     return [array get prefSuff2MimeType]
@@ -606,7 +606,7 @@ proc ::Types::SetMimeTextOrNot {mime what} {
     set mimeIsText($mime) $what
 }
 
-proc ::Types::GetIsMimeTextArr { } {
+proc ::Types::GetIsMimeTextArr {} {
     variable mimeIsText
 
     return [array get mimeIsText]

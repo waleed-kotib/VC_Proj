@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Speech.tcl,v 1.9 2005-11-04 15:14:55 matben Exp $
+# $Id: Speech.tcl,v 1.10 2007-03-11 14:37:47 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -215,8 +215,7 @@ proc ::Speech::InitPrefsHook { } {
        
     ::Debug 2 "::Speech::InitPrefsHook sprefs(haveSpeech)=$sprefs(haveSpeech)"
     
-    # Default in/out voices. They will be set to actual values in 
-    # ::Plugins::VerifySpeech  
+    # Default in/out voices.
     set sprefs(voiceUs)    ""
     set sprefs(voiceOther) ""
 

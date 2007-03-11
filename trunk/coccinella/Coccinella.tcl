@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.145 2007-03-09 07:54:03 matben Exp $	
+# $Id: Coccinella.tcl,v 1.146 2007-03-11 14:37:46 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -201,8 +201,8 @@ set packages(application) {
     FactoryDefaults
     Httpd
     HttpTrpt
+    Media
     Network
-    Plugins
     Preferences
     PrefGeneral
     PrefNet

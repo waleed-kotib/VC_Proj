@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.102 2007-02-11 11:34:10 matben Exp $
+# $Id: Disco.tcl,v 1.103 2007-03-11 14:37:48 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -70,68 +70,6 @@ namespace eval ::Disco:: {
 	services              1
 	store                 1
     }
-    
-    # Template for the browse popup menu.
-    variable popMenuDefs
-
-    set popMenuDefs(disco,def) {
-	{command    mMessage       {::NewMsg::Build -to $jid} }
-	{command    mChat          {::Chat::StartThread $jid} }
-	{command    mWhiteboard    {::JWB::NewWhiteboardTo $jid} }
-	{command    mEnterRoom     {
-	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
-	} }
-	{command    mCreateRoom    {
-	    ::GroupChat::EnterOrCreate create -server $jid
-	} }
-	{separator}
-	{command    mInfo          {::UserInfo::Get $jid $node} }
-	{separator}
-	{command    mSearch        {
-	    ::Search::Build -server $jid -autoget 1
-	} }
-	{command    mRegister      {
-	    ::GenRegister::NewDlg -server $jid -autoget 1
-	} }
-	{command    mUnregister    {::Register::Remove $jid} }
-	{separator}
-	{cascade    mShow          {
-	    {check  mBackgroundImage  {::Disco::SetBackgroundImage} {
-		-variable ::Jabber::jprefs(disco,useBgImage)
-	    } }
-	} }
-	{command    mRefresh       {::Disco::Refresh $vstruct} }
-	{command    mAddServer     {::Disco::AddServerDlg}     }
-    }
-
-    # List the features of that each menu entry can handle:
-    #   conference: groupchat service, not room
-    #   room:       groupchat room
-    #   register:   registration support
-    #   search:     search support
-    #   user:       user that can be communicated with
-    #   wb:         whiteboarding
-    #   jid:        generic type
-    #   "":         not specific
-    
-    # This does not work if nodes. The limitation is in the protocol.
-
-    set popMenuDefs(disco,type) {
-	{mMessage       {user}          }
-	{mChat          {user}          }
-	{mWhiteboard    {wb room}       }
-	{mEnterRoom     {room}          }
-	{mCreateRoom    {conference}    }
-	{mInfo          {jid}           }
-	{mSearch        {search}        }
-	{mRegister      {register}      }
-	{mUnregister    {register}      }
-	{mShow          {normal}     {
-	    {mBackgroundImage  {normal} }
-	}}
-	{mRefresh       {jid}           }
-	{mAddServer     {}              }
-    }
 
     # Keeps track of all registered menu entries.
     variable regPopMenuDef {}
@@ -171,7 +109,78 @@ proc ::Disco::InitPrefsHook {} {
 proc ::Disco::InitHook { } {
     upvar ::Jabber::jprefs jprefs
 
-    set jprefs(disco,tmpServers) {}    
+    set jprefs(disco,tmpServers) {} 
+    InitMenus
+}
+
+proc ::Disco::InitMenus {} {
+    
+    # Template for the disco popup menu.
+    variable popMenuDefs
+
+    set mDefs {
+	{command    mMessage       {::NewMsg::Build -to $jid} }
+	{command    mChat          {::Chat::StartThread $jid} }
+	{command    mEnterRoom     {
+	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
+	} }
+	{command    mCreateRoom    {
+	    ::GroupChat::EnterOrCreate create -server $jid
+	} }
+	{separator}
+	{command    mInfo          {::UserInfo::Get $jid $node} }
+	{separator}
+	{command    mSearch        {
+	    ::Search::Build -server $jid -autoget 1
+	} }
+	{command    mRegister      {
+	    ::GenRegister::NewDlg -server $jid -autoget 1
+	} }
+	{command    mUnregister    {::Register::Remove $jid} }
+	{separator}
+	{cascade    mShow          {
+	    {check  mBackgroundImage  {::Disco::SetBackgroundImage} {
+		-variable ::Jabber::jprefs(disco,useBgImage)
+	    } }
+	} }
+	{command    mRefresh       {::Disco::Refresh $vstruct} }
+	{command    mAddServer     {::Disco::AddServerDlg}     }
+    }
+    if {[::Jabber::HaveWhiteboard]} {
+	set mDefs [linsert $mDefs 2 \
+	  {command    mWhiteboard    {::JWB::NewWhiteboardTo $jid} }]
+
+    }
+    set popMenuDefs(disco,def) $mDefs
+
+    # List the features of that each menu entry can handle:
+    #   conference: groupchat service, not room
+    #   room:       groupchat room
+    #   register:   registration support
+    #   search:     search support
+    #   user:       user that can be communicated with
+    #   wb:         whiteboarding
+    #   jid:        generic type
+    #   "":         not specific
+    
+    # This does not work if nodes. The limitation is in the protocol.
+
+    set popMenuDefs(disco,type) {
+	{mMessage       {user}          }
+	{mChat          {user}          }
+	{mWhiteboard    {wb room}       }
+	{mEnterRoom     {room}          }
+	{mCreateRoom    {conference}    }
+	{mInfo          {jid}           }
+	{mSearch        {search}        }
+	{mRegister      {register}      }
+	{mUnregister    {register}      }
+	{mShow          {normal}     {
+	    {mBackgroundImage  {normal} }
+	}}
+	{mRefresh       {jid}           }
+	{mAddServer     {}              }
+    }
 }
 
 proc ::Disco::NewJlibHook {jlibName} {

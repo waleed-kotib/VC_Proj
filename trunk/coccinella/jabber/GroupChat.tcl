@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.183 2007-02-27 10:02:13 matben Exp $
+# $Id: GroupChat.tcl,v 1.184 2007-03-11 14:37:48 matben Exp $
 
 package require Create
 package require Enter
@@ -20,6 +20,7 @@ package provide GroupChat 1.0
 namespace eval ::GroupChat:: {
 
     # Add all event hooks.
+    ::hooks::register initHook                ::GroupChat::InitHook
     ::hooks::register quitAppHook             ::GroupChat::QuitAppHook
     ::hooks::register quitAppHook             ::GroupChat::GetFirstPanePos
     ::hooks::register newGroupChatMessageHook ::GroupChat::GotMsg
@@ -137,32 +138,6 @@ namespace eval ::GroupChat:: {
     # Keep track of if we have made autojoin when getting bookmarks.
     variable autojoinDone 0
 
-    variable popMenuDefs
-    set popMenuDefs(groupchat,def) {
-	{command   mMessage       {::NewMsg::Build -to $jid}    }
-	{command   mChat          {::Chat::StartThread $jid}    }
-	{command   mSendFile      {::FTrans::Send $jid}         }
-	{command   mUserInfo      {::UserInfo::Get $jid}        }
-	{command   mWhiteboard    {::JWB::NewWhiteboardTo $jid} }
-	{command   mEditNick      {::GroupChat::TreeEditUserStart $chattoken $jid} }
-	{check     mIgnore        {::GroupChat::Ignore $chattoken $jid} {
-	    -variable $chattoken\(ignore,$jid)
-	}}
-    }
-    set popMenuDefs(groupchat,type) {
-	{mMessage       user        }
-	{mChat          user        }
-	{mSendFile      user        }
-	{mUserInfo      user        }
-	{mWhiteboard    wb          }
-	{mEditNick      me          }
-	{mIgnore        user        }
-    }
-
-    # Keeps track of all registered menu entries.
-    variable regPopMenuDef {}
-    variable regPopMenuType {}
-
     variable userRoleToStr
     set userRoleToStr(moderator)   [mc Moderators]
     set userRoleToStr(none)        [mc None]
@@ -190,6 +165,45 @@ namespace eval ::GroupChat:: {
     # @@@ Should get this from a global reaource.
     variable buttonPressMillis 1000
     variable waitUntilEditMillis 2000
+}
+
+proc ::GroupChat::InitHook {} {
+    InitMenus
+}
+
+proc ::GroupChat::InitMenus {} {
+
+    variable popMenuDefs
+    set mDefs {
+	{command   mMessage       {::NewMsg::Build -to $jid}    }
+	{command   mChat          {::Chat::StartThread $jid}    }
+	{command   mSendFile      {::FTrans::Send $jid}         }
+	{command   mUserInfo      {::UserInfo::Get $jid}        }	
+	{command   mEditNick      {::GroupChat::TreeEditUserStart $chattoken $jid} }
+	{check     mIgnore        {::GroupChat::Ignore $chattoken $jid} {
+	    -variable $chattoken\(ignore,$jid)
+	}}
+    }
+    if {[::Jabber::HaveWhiteboard]} {
+	set mDefs [linsert $mDefs 4 \
+	  {command   mWhiteboard    {::JWB::NewWhiteboardTo $jid} }]
+
+    }
+    set popMenuDefs(groupchat,def) $mDefs
+
+    set popMenuDefs(groupchat,type) {
+	{mMessage       user        }
+	{mChat          user        }
+	{mSendFile      user        }
+	{mUserInfo      user        }
+	{mWhiteboard    wb          }
+	{mEditNick      me          }
+	{mIgnore        user        }
+    }
+
+    # Keeps track of all registered menu entries.
+    variable regPopMenuDef {}
+    variable regPopMenuType {}
 }
 
 proc ::GroupChat::QuitAppHook { } {
