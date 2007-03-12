@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.104 2007-03-09 07:54:04 matben Exp $
+# $Id: MailBox.tcl,v 1.105 2007-03-12 13:19:56 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1380,10 +1380,13 @@ proc ::MailBox::DisplayTextMsg {uid} {
 	lassign [MKGetContentList $uid] subject from date body
 	set xdataE [wrapper::getfirstchild $v(xmldata) x "jabber:x:data"]
 	if {[llength $xdataE]} {
-	    $wtextmsg insert end \
-	      "This message contains a form that you can fill in by pressing the Reply button" \
-	      xdata
-	    $wtextmsg insert end \n
+	    set type [wrapper::getattribute $xdataE type]
+	    if {$type eq "form"} {
+		$wtextmsg insert end \
+		  "This message contains a form that you can fill in by pressing the Reply button" \
+		  xdata
+		$wtextmsg insert end \n
+	    }
 	}
     } else {
 	set subject [lindex $mailbox($uid) $mailboxindex(subject)]
@@ -1902,7 +1905,6 @@ proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
     set bodyE    [wrapper::getfirstchildwithtag $xmldata body]
     set subject [wrapper::getcdata $subjectE]
     set body    [wrapper::getcdata $bodyE]
-    set xdataE [wrapper::getfirstchild $xmldata x "jabber:x:data"]
     
     set iswb 0
     if {[file extension $file] eq ".can"} {

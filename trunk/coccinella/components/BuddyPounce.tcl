@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.16 2007-03-11 14:37:47 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.17 2007-03-12 13:19:56 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -39,7 +39,7 @@ proc ::BuddyPounce::Init { } {
         
     # Audio formats.
     variable audioSuffixes [list]
-    foreach mime [::Media::GetSupportedMimesForBase audio] {
+    foreach mime [::Media::GetSupportedMimesForMimeBase audio] {
 	set audioSuffixes [concat $audioSuffixes \
 	  [::Types::GetSuffixListForMime $mime]]
     }

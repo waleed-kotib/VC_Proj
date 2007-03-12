@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.81 2007-03-05 14:48:58 matben Exp $
+# $Id: NewMsg.tcl,v 1.82 2007-03-12 13:19:56 matben Exp $
 
 package require ui::entryex
 
@@ -210,8 +210,11 @@ proc ::NewMsg::Build {args} {
     if {[llength $opts(-replyxmldata)]} {
 	set xdataE [wrapper::getfirstchild $opts(-replyxmldata) x "jabber:x:data"]
 	if {[llength $xdataE]} {
-	    set locals($w,xdata) 1
-	    set locals($w,xdataE) $xdataE
+	    set type [wrapper::getattribute $xdataE type]
+	    if {$type eq "form"} {
+		set locals($w,xdata) 1
+		set locals($w,xdataE) $xdataE
+	    }
 	}
     }
     if {($opts(-quotemessage) eq "") || $locals($w,xdata)} {

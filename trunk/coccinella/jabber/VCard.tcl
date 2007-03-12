@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.51 2007-03-11 14:37:49 matben Exp $
+# $Id: VCard.tcl,v 1.52 2007-03-12 13:19:56 matben Exp $
 
 package provide VCard 1.0
 
@@ -546,22 +546,11 @@ proc ::VCard::SelectPhoto {etoken} {
     
     upvar $etoken elem
     
-    set suffs {.gif}
-    set types {
-	{{Image Files}  {.gif}}
-	{{GIF Files}    {.gif}}
-    }
-    if {[::Media::HaveImporterForMime image/png]} {
-	lappend suffs .png
-	lappend types {{PNG Files}    {.png}}
-    }
-    if {[::Media::HaveImporterForMime image/jpeg]} {
-	lappend suffs .jpg .jpeg
-	lappend types {{JPEG Files}   {.jpg .jpeg}}
-    }
-    lset types 0 1 $suffs
-    set fileName [tk_getOpenFile -title [mc {Pick Image File}] \
-      -filetypes $types]
+    set mimeL {image/gif image/png image/jpeg}
+    set suffL [::Types::GetSuffixListForMimeList $mimeL]
+    set types [concat [list [list {Image Files} $suffL]] \
+      [::Media::GetDlgFileTypesForMimeList $mimeL]]
+    set fileName [tk_getOpenFile -title [mc {Pick Image File}] -filetypes $types]
     if {[file exists $fileName]} {
 	SetPhotoFile $etoken $fileName   
     }

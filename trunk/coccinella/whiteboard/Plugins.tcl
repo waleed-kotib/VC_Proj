@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Plugins.tcl,v 1.25 2007-03-11 14:37:50 matben Exp $
+# $Id: Plugins.tcl,v 1.26 2007-03-12 13:19:56 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -23,7 +23,7 @@
 #                    It contains a bin (binary) element as well which is the
 #                    the union of all MIME types except text.
 #                    This should only be used internally to compile the
-#                    dialog -typelist values.
+#                    dialog -filetypes values.
 #                    
 # supportedMimeTypes: maps package name to supported MIME types for that package,
 #                    and maps from MIME type (image, audio, video) to MIME type.

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.17 2007-03-11 14:37:49 matben Exp $
+# $Id: Types.tcl,v 1.18 2007-03-12 13:19:56 matben Exp $
 
 package provide Types 1.0
 
@@ -520,6 +520,17 @@ proc ::Types::SetSuffixListForMime {mime suffList} {
     set mime2SuffList($mime) $suffList
 }
 
+proc ::Types::GetSuffixListForMimeList {mimeL} {
+    variable mime2SuffList
+    set suffL [list]
+    foreach mime $mimeL {
+	if {[info exists mime2SuffList($mime)]} {
+	    set suffL [concat $suffL $mime2SuffList($mime)]
+	}
+    }
+    return [lsort -unique $suffL]
+}
+
 proc ::Types::GetSuffixListArr {} {
     variable mime2SuffList
 
@@ -550,7 +561,7 @@ proc ::Types::GetDescriptionForMime {mime} {
     if {[info exists mime2Desc($mime)]} {
 	return $mime2Desc($mime)
     } else {
-	return
+	return $mime
     }
 }
 
