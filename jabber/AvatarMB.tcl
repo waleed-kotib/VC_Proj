@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.12 2007-03-11 14:37:48 matben Exp $
+# $Id: AvatarMB.tcl,v 1.13 2007-03-12 13:19:56 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -553,20 +553,12 @@ proc ::AvatarMB::MenuPickRecent {w} {
 proc ::AvatarMB::MenuNew {} {
     global  prefs
     
-    set suffs {.gif}
-    set types {
-	{{Image Files}  {.gif}}
-	{{GIF Image}    {.gif}}
-    }
-    if {[::Media::HaveImporterForMime image/png]} {
-	lappend suffs .png
-	lappend types {{PNG Image}    {.png}}
-    }
-    if {[::Media::HaveImporterForMime image/jpeg]} {
-	lappend suffs .jpg .jpeg
-	lappend types {{JPEG Image}    {.jpg .jpeg}}
-    }
-    lset types 0 1 $suffs
+    set suffL [concat \
+      [::Types::GetSuffixListForMime image/gif] \
+      [::Types::GetSuffixListForMime image/png] \
+      [::Types::GetSuffixListForMime image/jpeg]]
+    set types [concat [list [list {Image Files} $suffL]] \
+      [::Media::GetDlgFileTypesForMimeList {image/gif image/png image/jpeg}]]
     set opts {}
     if {[file isdirectory $prefs(dir,avatarPick)]} {
 	lappend opts -initialdir $prefs(dir,avatarPick)

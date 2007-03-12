@@ -7,7 +7,7 @@
 #       
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Avatar.tcl,v 1.30 2007-03-11 14:37:48 matben Exp $
+# $Id: Avatar.tcl,v 1.31 2007-03-12 13:19:56 matben Exp $
 
 # @@@ Issues:
 # 
@@ -1599,22 +1599,11 @@ proc ::Avatar::PrefsFile { } {
     variable tmpphoto
     variable tmpprefs
     
-    set suffs {.gif}
-    set types {
-	{{Image Files}  {.gif}}
-	{{GIF Image}    {.gif}}
-    }
-    if {[::Media::HaveImporterForMime image/png]} {
-	lappend suffs .png
-	lappend types {{PNG Image}    {.png}}
-    }
-    if {[::Media::HaveImporterForMime image/jpeg]} {
-	lappend suffs .jpg .jpeg
-	lappend types {{JPEG Image}    {.jpg .jpeg}}
-    }
-    lset types 0 1 $suffs
-    set fileName [tk_getOpenFile -title [mc {Pick Image File}]  \
-      -filetypes $types]
+    set mimeL {image/gif image/png image/jpeg}
+    set suffL [::Types::GetSuffixListForMimeList $mimeL]
+    set types [concat [list [list {Image Files} $suffL]] \
+      [::Media::GetDlgFileTypesForMimeList $mimeL]]
+    set fileName [tk_getOpenFile -title [mc {Pick Image File}] -filetypes $types]
     if {$fileName ne ""} {
 	if {[CreateAndVerifyPhoto $fileName me]} {
 	    $wphoto configure -image $me

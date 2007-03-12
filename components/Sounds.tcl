@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.29 2007-02-27 10:02:13 matben Exp $
+# $Id: Sounds.tcl,v 1.30 2007-03-12 13:19:56 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -45,34 +45,23 @@ namespace eval ::Sounds:: {
 #       Tries to load the sounds component.
 
 proc ::Sounds::Load { } {
-    global  this
     variable priv
     
     ::Debug 2 "::Sounds::Load"
 
     set priv(canPlay)      0
-    set priv(QuickTimeTcl) 0
-    set priv(snack)        0
     set priv(inited)       0
+    set priv(QuickTimeTcl) [::Media::HavePackage QuickTimeTcl]
+    set priv(snack)        [::Media::HavePackage snack]
 
-    switch -- $this(platform) {
-	macosx - macintosh - windows {
-	    if {[catch {package require QuickTimeTcl}]} {
-		return
-	    }
-	    set priv(QuickTimeTcl) 1
-	}
-	default {
-	    if {[catch {package require snack}]} {
-		return
-	    }
-	    set priv(snack) 1
-	}
-    }    
+    # Skip if both 0.
+    if {!$priv(QuickTimeTcl) && !$priv(snack)} {
+	return
+    }
     set priv(canPlay) 1
    
     # We should register ourselves.
-    component::register Sounds "Provides alert sounds through QuickTimeTcl\
+    component::register Sounds "Provides alert sounds through QuickTime\
       or the Snack audio package."
 
     # Make sure we get called when certain events happen.

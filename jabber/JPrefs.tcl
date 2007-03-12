@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.45 2007-03-05 14:48:58 matben Exp $
+# $Id: JPrefs.tcl,v 1.46 2007-03-12 13:19:56 matben Exp $
 
 package require ui::fontselector
 
@@ -436,13 +436,9 @@ proc ::JPrefs::DefaultChatFont { } {
 proc ::JPrefs::PickBgImage {where} {
     variable tmpJPrefs
 
-    set types {
-	{{GIF Files}        {.gif}        }
-	{{GIF Files}        {}        GIFF}
-    }
-    set ans [tk_getOpenFile -title [mc {Open GIF Image}] \
-      -filetypes $types -defaultextension ".gif"]
-    if {$ans != ""} {
+    set types [::Media::GetDlgFileTypesForMimeBase image]
+    set ans [tk_getOpenFile -title [mc {Pick Image File}] -filetypes $types]
+    if {$ans ne ""} {
 	set tmpJPrefs($where,bgImagePath) $ans
     }
 }
