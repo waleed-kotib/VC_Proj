@@ -5,7 +5,7 @@
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.36 2007-03-11 14:37:48 matben Exp $
+# $Id: svg2can.tcl,v 1.37 2007-03-13 14:29:33 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -325,7 +325,7 @@ proc svg2can::ParseElemRecursive {xmllist paropts transformL args} {
 
 proc svg2can::ParseElemRecursiveEx {xmllist paropts transAttr args} {
 
-    set cmdList {}
+    set cmdList [list]
     set tag [gettag $xmllist]
     
     switch -- $tag {
@@ -373,11 +373,32 @@ proc svg2can::ParseElemRecursiveEx {xmllist paropts transAttr args} {
 		}
 	    }
 	}
-	use - defs - marker - symbol {
+	defs {
+	    eval {ParseDefs $xmllist $paropts $transAttr} $args
+	}
+	use - marker - symbol {
 	    # todo
 	}
     }
     return $cmdList
+}
+
+proc svg2can::ParseDefs {xmllist paropts transAttr args} {
+    
+    # @@@ Only gradients so far.
+    
+    foreach c [getchildren $xmllist] {
+	set tag [gettag $c]
+    
+	switch -- $tag {
+	    linearGradient {
+		CreateLinearGradient $c
+	    }
+	    radialGradient {
+		CreateRadialGradient $c
+	    }
+	}
+    }    
 }
 
 # svg2can::ParseCircle, ParseEllipse, ParseLine, ParseRect, ParsePath, 
@@ -1688,7 +1709,8 @@ proc svg2can::CreateLinearGradient {xmllist} {
     # Any 'linearGradient' attributes which are defined on the
     # referenced element which are not defined on this element are 
     # inherited by this element.
-    set idx [lsearch -exact [getattr $xmllist] xlink:href]
+    set attr [getattr $xmllist]
+    set idx [lsearch -exact $attr xlink:href]
     if {$idx >= 0 && [expr {$idx % 2 == 0}]} {
 	set value [lindex $attr [incr idx]]
 	if {![string match {\#*} $value]} {
@@ -1706,7 +1728,7 @@ proc svg2can::CreateLinearGradient {xmllist} {
 	  [::tkpath::gradient cget $hreftoken -lineartransition] { break }	
     }    
     
-    foreach {key value} [getattr $xmllist] {	
+    foreach {key value} $attr {	
 	switch -- $key {
 	    x1 - y1 - x2 - y2 {
 		set $key [parseUnaryOrPercentage $value]
@@ -1750,11 +1772,40 @@ proc svg2can::CreateRadialGradient {xmllist} {
     set r  0.5
     set fx 0.5
     set fy 0.5
-    
     set method pad
     set units bbox
+    set stops {}
     
-    # @@@ TODO xlink:href as above.
+    # We first need to find out if any xlink:href attribute since:
+    # Any 'linearGradient' attributes which are defined on the
+    # referenced element which are not defined on this element are 
+    # inherited by this element.
+    set attr [getattr $xmllist]
+    set idx [lsearch -exact $attr xlink:href]
+    if {$idx >= 0 && [expr {$idx % 2 == 0}]} {
+	set value [lindex $attr [incr idx]]
+	if {![string match {\#*} $value]} {
+	    return -code error "unrecognized gradient uri \"$value\""
+	}
+	set uri [string range $value 1 end]
+	if {![info exists gradientIDToToken($uri)]} {
+	    return -code error "unrecognized gradient uri \"$value\""
+	}
+	set hreftoken $gradientIDToToken($uri)
+	set units  [::tkpath::gradient cget $hreftoken -units]
+	set method [::tkpath::gradient cget $hreftoken -method]
+	set hrefstops [::tkpath::gradient cget $hreftoken -stops]
+	set transL [::tkpath::gradient cget $hreftoken -radialtransition]
+	set cx [lindex $transL 0]
+	set cy [lindex $transL 1]
+	if {[llength $transL] > 2} {
+	    set r [lindex $transL 2]
+	    if {[llength $transL] == 5} {
+		set fx [lindex $transL 3]
+		set fy [lindex $transL 4]
+	    }
+	}
+    }    
 
     foreach {key value} [getattr $xmllist] {	
 	switch -- $key {
@@ -1776,7 +1827,15 @@ proc svg2can::CreateRadialGradient {xmllist} {
     if {![info exists id]} {
 	return
     }
+    # If this element has no defined gradient stops, and the referenced element 
+    # does, then this element inherits the gradient stop from the referenced 
+    # element.
     set stops [ParseGradientStops $xmllist]    
+    if {$stops eq {}} {
+	if {[info exists hrefstops]} {
+	    set stops $hrefstops
+	}
+    }
     set token [::tkpath::gradient create radial -method $method -units $units \
       -radialtransition [list $cx $cy $r $fx $fy] -stops $stops]
     set gradientIDToToken($id) $token
