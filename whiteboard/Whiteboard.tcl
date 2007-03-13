@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the actual whiteboard.
 #      
-#  Copyright (c) 2002-2006  Mats Bengtsson
+#  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.74 2007-03-09 07:54:04 matben Exp $
+# $Id: Whiteboard.tcl,v 1.75 2007-03-13 08:36:01 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -24,6 +24,7 @@ package require ItemInspector
 package require Plugins
 package require PutFileIface
 package require WBPrefs
+package require WDialogs
 package require UI
 
 package provide Whiteboard 1.0
@@ -31,6 +32,7 @@ package provide Whiteboard 1.0
 namespace eval ::WB:: {
         
     # Add all event hooks.
+    ::hooks::register firstLaunchHook     ::WB::FirstLaunchHook
     ::hooks::register initHook            ::WB::InitHook
     ::hooks::register prefsInitHook       ::WB::InitPrefsHook
     ::hooks::register quitAppHook         ::WB::QuitAppHook
@@ -254,6 +256,10 @@ proc ::WB::InitPrefsHook { } {
       [list state(smooth)          state_smooth          $state(smooth)]         \
       [list state(dash)            state_dash            $state(dash)]           \
       [list state(canGridOn)       state_canGridOn       $state(canGridOn)]  ]    
+}
+
+proc ::WB::FirstLaunchHook {} {
+    ::WDialogs::WelcomeCanvas
 }
 
 proc ::WB::InitHook { } {
@@ -560,8 +566,8 @@ proc ::WB::InitMenuDefs { } {
     }
 
     set menuDefs(main,info) {    
-	{command     mOnServer       {::Dialogs::ShowInfoServer}         {}}	
-	{command     mOnPlugins      {::Dialogs::InfoOnPlugins}          {}}	
+	{command     mOnServer       {::WDialogs::ShowInfoServer}         {}}	
+	{command     mOnPlugins      {::WDialogs::InfoOnPlugins}          {}}	
 	{separator}
 	{cascade     mHelpOn             {}                                {} {} {}}
     }
@@ -580,7 +586,7 @@ proc ::WB::InitMenuDefs { } {
 	# Important to protect any $ since we do 'subst'.
 	set f [string map {$ \\$} $f]
 	lappend infoDefs [list \
-	  command m${name} [list ::Dialogs::Canvas $f -title $name]  {}]
+	  command m${name} [list ::WDialogs::Canvas $f -title $name]  {}]
     }
     lset menuDefs(main,info) end end $infoDefs
     

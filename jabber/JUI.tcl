@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.159 2007-03-11 14:37:48 matben Exp $
+# $Id: JUI.tcl,v 1.160 2007-03-13 08:36:00 matben Exp $
 
 package provide JUI 1.0
 
@@ -108,7 +108,6 @@ proc ::JUI::Init { } {
     
     if {[string equal $this(platform) "macosx"]} {
 	set mDefsFile {
-	    {command   mNewWhiteboard      {::JWB::OnMenuNewWhiteboard}  N}
 	    {command   mCloseWindow        {::UI::CloseWindowEvent}  W}
 	    {command   mPreferences...     {::Preferences::Build}     {}}
 	    {separator}
@@ -124,7 +123,6 @@ proc ::JUI::Init { } {
 	}
     } else {
 	set mDefsFile {
-	    {command   mNewWhiteboard      {::JWB::OnMenuNewWhiteboard}  N}
 	    {command   mPreferences...     {::Preferences::Build}     {}}
 	    {separator}
 	    {cascade   mImport             {}                         {} {} {

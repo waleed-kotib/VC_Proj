@@ -3,9 +3,11 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Roster GUI part.
 #      
-#  Copyright (c) 2001-2006  Mats Bengtsson
+#  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.186 2007-03-07 09:19:52 matben Exp $
+# $Id: Roster.tcl,v 1.187 2007-03-13 08:36:00 matben Exp $
+
+# @@@ TODO: rewrite the popup menu code to use AMenu!
 
 package require RosterTree
 package require RosterPlain
@@ -18,6 +20,7 @@ namespace eval ::Roster:: {
     global  this prefs
     
     # Add all event hooks we need.
+    ::hooks::register earlyInitHook          ::Roster::EarlyInitHook
     ::hooks::register loginHook              ::Roster::LoginCmd
     ::hooks::register logoutHook             ::Roster::LogoutHook
     ::hooks::register quitAppHook            ::Roster::QuitHook
@@ -79,34 +82,75 @@ namespace eval ::Roster:: {
       invisible       [mc mInvisible]     \
       unavailable     [mc mNotAvailable]]
     
+    # Various time values.
+    variable timer
+    set timer(msg,ms) 10000
+    set timer(exitroster,secs) 0
+    set timer(pres,secs) 4
+}
+
+proc ::Roster::EarlyInitHook {} {
+    InitMenus
+}
+
+proc ::Roster::InitMenus {} {
+
+    # @@@ TODO: rewrite the popup menu code to use AMenu!
+
     # Template for the roster popup menu.
     variable popMenuDefs
     
     # General.
-    set popMenuDefs(roster,def) {
-	command     mMessage       {head group user}  {::NewMsg::Build -to $jid -tolist $jidlist} {}
-	command     mChat          {user available}   {::Chat::StartThread $jid3}         {}
-	command     mWhiteboard    {wb available}     {::JWB::NewWhiteboardTo $jid3} {}
-	command     mSendFile      {user available}   {::FTrans::Send $jid3}             {}
-	separator   {}             {}                 {} {}
-	command     mAddNewUser    {}                 {::JUser::NewDlg}            {}
-	command     mEditUser      {user}             {::JUser::EditDlg $jid}      {}
-	command     mUserInfo      {user}             {::UserInfo::Get $jid3}             {}
-	command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
-	command     mRemoveContact {user}             {::Roster::SendRemove $jid}         {}
-	separator   {}             {}                 {} {}
-	cascade     mShow          {normal}           {
-	    check     mOffline     {normal}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
-	    check     mTransports  {normal}     {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)}
-	    check     mBackgroundImage {normal} {::Roster::BackgroundImage} {-variable ::Jabber::jprefs(rost,useBgImage)}
-	} {}
-	cascade     mSort          {}                 {
-	    radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value +1}
-	    radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -1}
-	} {}
-	cascade     mStyle         {normal}           {@::Roster::StyleMenu} {}
-	command     mRefreshRoster {}                 {::Roster::Refresh} {}
-    }  
+    if {[::Jabber::HaveWhiteboard]} {
+	set popMenuDefs(roster,def) {
+	    command     mMessage       {head group user}  {::NewMsg::Build -to $jid -tolist $jidlist} {}
+	    command     mChat          {user available}   {::Chat::StartThread $jid3}         {}
+	    command     mWhiteboard    {wb available}     {::JWB::NewWhiteboardTo $jid3} {}
+	    command     mSendFile      {user available}   {::FTrans::Send $jid3}             {}
+	    separator   {}             {}                 {} {}
+	    command     mAddNewUser    {}                 {::JUser::NewDlg}            {}
+	    command     mEditUser      {user}             {::JUser::EditDlg $jid}      {}
+	    command     mUserInfo      {user}             {::UserInfo::Get $jid3}             {}
+	    command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
+	    command     mRemoveContact {user}             {::Roster::SendRemove $jid}         {}
+	    separator   {}             {}                 {} {}
+	    cascade     mShow          {normal}           {
+		check     mOffline     {normal}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
+		check     mTransports  {normal}     {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)}
+		check     mBackgroundImage {normal} {::Roster::BackgroundImage} {-variable ::Jabber::jprefs(rost,useBgImage)}
+	    } {}
+	    cascade     mSort          {}                 {
+		radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value +1}
+		radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -1}
+	    } {}
+	    cascade     mStyle         {normal}           {@::Roster::StyleMenu} {}
+	    command     mRefreshRoster {}                 {::Roster::Refresh} {}
+	}  
+    } else {
+	set popMenuDefs(roster,def) {
+	    command     mMessage       {head group user}  {::NewMsg::Build -to $jid -tolist $jidlist} {}
+	    command     mChat          {user available}   {::Chat::StartThread $jid3}         {}
+	    command     mSendFile      {user available}   {::FTrans::Send $jid3}             {}
+	    separator   {}             {}                 {} {}
+	    command     mAddNewUser    {}                 {::JUser::NewDlg}            {}
+	    command     mEditUser      {user}             {::JUser::EditDlg $jid}      {}
+	    command     mUserInfo      {user}             {::UserInfo::Get $jid3}             {}
+	    command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
+	    command     mRemoveContact {user}             {::Roster::SendRemove $jid}         {}
+	    separator   {}             {}                 {} {}
+	    cascade     mShow          {normal}           {
+		check     mOffline     {normal}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
+		check     mTransports  {normal}     {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)}
+		check     mBackgroundImage {normal} {::Roster::BackgroundImage} {-variable ::Jabber::jprefs(rost,useBgImage)}
+	    } {}
+	    cascade     mSort          {}                 {
+		radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value +1}
+		radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -1}
+	    } {}
+	    cascade     mStyle         {normal}           {@::Roster::StyleMenu} {}
+	    command     mRefreshRoster {}                 {::Roster::Refresh} {}
+	}
+    }
 
     # Transports.
     set popMenuDefs(roster,trpt,def) {
@@ -121,12 +165,6 @@ namespace eval ::Roster:: {
 	command     mUnregister    {trpt}             {::Register::Remove $jid3}      {}
 	command     mRefreshRoster {}                 {::Roster::Refresh}             {}
     }  
-    
-    # Various time values.
-    variable timer
-    set timer(msg,ms) 10000
-    set timer(exitroster,secs) 0
-    set timer(pres,secs) 4
 }
 
 proc ::Roster::JabberInitHook {jlibname} {
