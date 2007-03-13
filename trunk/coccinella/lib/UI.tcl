@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.147 2007-03-11 14:37:49 matben Exp $
+# $Id: UI.tcl,v 1.148 2007-03-13 08:36:01 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -95,7 +95,6 @@ namespace eval ::UI:: {
 
 proc ::UI::FirstLaunchHook { } {
     SetupAss
-    WelcomeCanvas
 }
 
 # UI::Init --
@@ -354,23 +353,6 @@ proc ::UI::SetupAss { } {
     ::UI::CenterWindow $wDlgs(setupass)
     raise $wDlgs(setupass)
     tkwait window $wDlgs(setupass)
-}
-
-# UI::WelcomeCanvas --
-# 
-#       Is it the first time it is launched, then show the welcome canvas.
-
-proc ::UI::WelcomeCanvas { } {
-    global  this
-    
-    set systemLocale [lindex [split $this(systemLocale) _] 0]
-    set floc [file join $this(docsPath) Welcome_${systemLocale}.can]
-    if {[file exists $floc]} {
-	set f $floc
-    } else {
-	set f [file join $this(docsPath) Welcome_en.can]
-    }
-    ::Dialogs::Canvas $f -title [mc {Welcome}] -encoding utf-8
 }
 
 proc ::UI::GetMainWindow { } {

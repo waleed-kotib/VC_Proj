@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.105 2007-03-12 13:19:56 matben Exp $
+# $Id: MailBox.tcl,v 1.106 2007-03-13 08:36:00 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -131,13 +131,14 @@ proc ::MailBox::InitHandler {jlibName} {
     upvar ::Jabber::coccixmlns coccixmlns
     
     # Register for the whiteboard messages we want. Duplicate protocols.
-    $jstate(jlib) message_register normal coccinella:wb  \
-      [namespace current]::HandleRawWBMessage
-    $jstate(jlib) message_register normal $coccixmlns(whiteboard)  \
-      [namespace current]::HandleRawWBMessage
-    $jstate(jlib) message_register normal "http://jabber.org/protocol/svgwb" \
-      [namespace current]::HandleSVGWBMessage
-
+    if {[::Jabber::HaveWhiteboard]} {
+	$jstate(jlib) message_register normal coccinella:wb  \
+	  [namespace current]::HandleRawWBMessage
+	$jstate(jlib) message_register normal $coccixmlns(whiteboard)  \
+	  [namespace current]::HandleRawWBMessage
+	$jstate(jlib) message_register normal "http://jabber.org/protocol/svgwb" \
+	  [namespace current]::HandleSVGWBMessage
+    }
 }
 
 # MailBox::MessageHook --
@@ -1337,28 +1338,30 @@ proc ::MailBox::DisplayAny {item} {
     DisplayTextMsg $uid
 
     # If any whiteboard stuff in message...
-    if {[MKHaveMetakit]} {
-	array set v [MKGet $uid]
-	if {$v(file) ne ""} {
-	    DisplayWhiteboardFile $jid3 $v(file)
-	}
-    } else {
-	variable mailbox
-	variable mailboxindex
-
-	set uidcan [GetCanvasHexUID $uid]
-	set svgElem [GetAnySVGElements $mailbox($uid)]
-	
-	# The "raw" protocol stores the canvas in a separate file indicated by
-	# the -canvasuid key in the message list.
-	# The SVG protocol stores the complete x element in the mailbox 
-	# -x listOfElements
-	
-	# The "raw" protocol.
-	if {[string length $uidcan] > 0} {	
-	    DisplayWhiteboardFile $jid3 $uidcan.can
-	} elseif {[llength $svgElem]} {
-	    DisplayXElementSVG $jid3 $svgElem
+    if {[::Jabber::HaveWhiteboard]} {
+	if {[MKHaveMetakit]} {
+	    array set v [MKGet $uid]
+	    if {$v(file) ne ""} {
+		DisplayWhiteboardFile $jid3 $v(file)
+	    }
+	} else {
+	    variable mailbox
+	    variable mailboxindex
+	    
+	    set uidcan [GetCanvasHexUID $uid]
+	    set svgElem [GetAnySVGElements $mailbox($uid)]
+	    
+	    # The "raw" protocol stores the canvas in a separate file indicated by
+	    # the -canvasuid key in the message list.
+	    # The SVG protocol stores the complete x element in the mailbox 
+	    # -x listOfElements
+	    
+	    # The "raw" protocol.
+	    if {[string length $uidcan] > 0} {	
+		DisplayWhiteboardFile $jid3 $uidcan.can
+	    } elseif {[llength $svgElem]} {
+		DisplayXElementSVG $jid3 $svgElem
+	    }
 	}
     }
 }

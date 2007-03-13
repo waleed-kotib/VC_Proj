@@ -22,5 +22,6 @@ package ifneeded Multicast 1.0 [list source [file join $dir Multicast.tcl]]
 package ifneeded Plugins 1.0 [list source [file join $dir Plugins.tcl]]
 package ifneeded PutFileIface 1.0 [list source [file join $dir PutFileIface.tcl]]
 package ifneeded WBPrefs 1.0 [list source [file join $dir WBPrefs.tcl]]
+package ifneeded WDialogs 1.0 [list source [file join $dir WDialogs.tcl]]
 package ifneeded Whiteboard 1.0 [list source [file join $dir Whiteboard.tcl]]
 

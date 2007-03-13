@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.184 2007-03-11 14:37:48 matben Exp $
+# $Id: GroupChat.tcl,v 1.185 2007-03-13 08:36:00 matben Exp $
 
 package require Create
 package require Enter
@@ -389,7 +389,9 @@ proc ::GroupChat::SetProtocol {roomjid _protocol} {
 	set wtray $dlgstate(wtray)
 	$wtray buttonconfigure invite -state normal
 	$wtray buttonconfigure info   -state normal
-        $wtray buttonconfigure whiteboard   -state normal
+	if {[$wtray exists whiteboard]} {
+	    $wtray buttonconfigure whiteboard -state normal
+	}
     }
 }
 
@@ -637,10 +639,12 @@ proc ::GroupChat::Build {roomjid} {
     $wtray newbutton print -text [mc Print] \
       -image $iconPrint -disabledimage $iconPrintDis   \
       -command [list [namespace current]::Print $dlgtoken]
-    $wtray newbutton whiteboard -text [mc Whiteboard] \
-      -image $iconWB -disabledimage $iconWBDis    \
-      -command [list [namespace current]::Whiteboard $dlgtoken] 
-
+    if {[::Jabber::HaveWhiteboard]} {
+	$wtray newbutton whiteboard -text [mc Whiteboard] \
+	  -image $iconWB -disabledimage $iconWBDis    \
+	  -command [list [namespace current]::Whiteboard $dlgtoken] 
+    }
+    
     ::hooks::run buildGroupChatButtonTrayHook $wtray $roomjid
     
     set shortBtWidth [expr [$wtray minwidth] + 8]
@@ -661,7 +665,9 @@ proc ::GroupChat::Build {roomjid} {
     if {!( [info exists protocol($roomjid)] && ($protocol($roomjid) eq "muc") )} {
 	$wtray buttonconfigure invite -state disabled
 	$wtray buttonconfigure info   -state disabled
-        $wtray buttonconfigure whiteboard   -state disabled
+	if {[$wtray exists whiteboard]} {
+	    $wtray buttonconfigure whiteboard -state disabled
+	}
     }
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jgc)]]
