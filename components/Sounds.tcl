@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.30 2007-03-12 13:19:56 matben Exp $
+# $Id: Sounds.tcl,v 1.31 2007-03-13 15:01:34 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -589,8 +589,10 @@ proc ::Sounds::SavePrefsHook { } {
 	    }
 	}
     }
+    
+    # The snack play_gain seems to be set globally on the machine which is BAD!
     if {$priv(snack)} {
-	snack::audio play_gain [expr int($sprefs(volume))]
+	# snack::audio play_gain [expr int($sprefs(volume))]
     }
 }
 

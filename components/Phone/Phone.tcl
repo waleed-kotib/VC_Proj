@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: Phone.tcl,v 1.21 2006-11-02 14:13:56 matben Exp $
+# $Id: Phone.tcl,v 1.22 2007-03-13 15:01:35 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -184,7 +184,8 @@ proc ::Phone::LoadPrefs { } {
     set statePhone(outputVolume0) [CommandPhone getoutputlevel]
 
     SetInputLevel [expr double($statePhone(inputVolume0))*100]
-    SetOutputLevel [expr double($statePhone(outputVolume0))*100]
+    # This seems to be a bad idea since volume is set globally!
+    # SetOutputLevel [expr double($statePhone(outputVolume0))*100]
 
     InitPhone
     ::hooks::run phoneInit
