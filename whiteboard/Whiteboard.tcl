@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.75 2007-03-13 08:36:01 matben Exp $
+# $Id: Whiteboard.tcl,v 1.76 2007-03-13 14:29:33 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -181,47 +181,48 @@ namespace eval ::WB:: {
 #       that is inherited by instance specific 'state' array '::WB::${w}::state'
 
 proc ::WB::InitPrefsHook { } {
-    global  state prefs this
+    global  prefs this
+    variable gstate
     
     ::Debug 2 "::WB::InitPrefsHook"
     
     # The tool buttons.
-    set state(tool)      "point"
-    set state(toolPrev)  "point"
-    set state(toolCache) "point"
+    set gstate(tool)      "point"
+    set gstate(toolPrev)  "point"
+    set gstate(toolCache) "point"
         
     # Bg color for canvas.
-    set state(bgColCan) white
+    set gstate(bgColCan) white
     
     # fg and bg colors set in color selector; bgCol always white.
-    set state(fgCol) black
-    set state(bgCol) white
+    set gstate(fgCol) black
+    set gstate(bgCol) white
     
     # Grid on or off.
-    set state(canGridOn) 0                  
+    set gstate(canGridOn) 0                  
     
     # Line thickness.
-    set state(penThick) 1	
+    set gstate(penThick) 1	
     
     # Brush thickness.
-    set state(brushThick) 8	
+    set gstate(brushThick) 8	
     
     # Fill color for circles, polygons etc.
-    set state(fill) 0
+    set gstate(fill) 0
     
     # If polygons should be smoothed.
-    set state(smooth) 0
+    set gstate(smooth) 0
     
     # Arc styles.
-    set state(arcstyle) "arc"
+    set gstate(arcstyle) "arc"
     
     # Dash style.
-    set state(dash) { }
+    set gstate(dash) { }
     
     # Font prefs set in menus. Sizes according to html.
-    set state(fontSize) 2
-    set state(font) Helvetica
-    set state(fontWeight) normal
+    set gstate(fontSize) 2
+    set gstate(font) Helvetica
+    set gstate(fontWeight) normal
             
     # Constrain movements to 45 degrees, else 90 degree intervals.
     set prefs(45) 1
@@ -243,19 +244,19 @@ proc ::WB::InitPrefsHook { } {
     ::PrefUtils::Add [list  \
       [list prefs(45)              prefs_45              $prefs(45)]             \
       [list prefs(shortsMulticastQT) prefs_shortsMulticastQT $prefs(shortsMulticastQT) userDefault] \
-      [list state(tool)            state_tool            $state(tool)]           \
-      [list state(bgColCan)        state_bgColCan        $state(bgColCan)]       \
-      [list state(fgCol)           state_fgCol           $state(fgCol)]          \
-      [list state(penThick)        state_penThick        $state(penThick)]       \
-      [list state(brushThick)      state_brushThick      $state(brushThick)]     \
-      [list state(fill)            state_fill            $state(fill)]           \
-      [list state(arcstyle)        state_arcstyle        $state(arcstyle)]       \
-      [list state(fontSize)        state_fontSize        $state(fontSize)]       \
-      [list state(font)            state_font            $state(font)]           \
-      [list state(fontWeight)      state_fontWeight      $state(fontWeight)]     \
-      [list state(smooth)          state_smooth          $state(smooth)]         \
-      [list state(dash)            state_dash            $state(dash)]           \
-      [list state(canGridOn)       state_canGridOn       $state(canGridOn)]  ]    
+      [list ::WB::gstate(tool)        wb_gstate_tool        $gstate(tool)]           \
+      [list ::WB::gstate(bgColCan)    wb_gstate_bgColCan    $gstate(bgColCan)]       \
+      [list ::WB::gstate(fgCol)       wb_gstate_fgCol       $gstate(fgCol)]          \
+      [list ::WB::gstate(penThick)    wb_gstate_penThick    $gstate(penThick)]       \
+      [list ::WB::gstate(brushThick)  wb_gstate_brushThick  $gstate(brushThick)]     \
+      [list ::WB::gstate(fill)        wb_gstate_fill        $gstate(fill)]           \
+      [list ::WB::gstate(arcstyle)    wb_gstate_arcstyle    $gstate(arcstyle)]       \
+      [list ::WB::gstate(fontSize)    wb_gstate_fontSize    $gstate(fontSize)]       \
+      [list ::WB::gstate(font)        wb_gstate_font        $gstate(font)]           \
+      [list ::WB::gstate(fontWeight)  wb_gstate_fontWeight  $gstate(fontWeight)]     \
+      [list ::WB::gstate(smooth)      wb_gstate_smooth      $gstate(smooth)]         \
+      [list ::WB::gstate(dash)        wb_gstate_dash        $gstate(dash)]           \
+      [list ::WB::gstate(canGridOn)   wb_gstate_canGridOn   $gstate(canGridOn)]  ]    
 }
 
 proc ::WB::FirstLaunchHook {} {
@@ -689,6 +690,7 @@ proc ::WB::GetNewToplevelPath { } {
 proc ::WB::BuildWhiteboard {w args} {
     global  this prefs
     
+    variable gstate
     variable dims
     variable wbicons
     variable iconsInitted
@@ -741,7 +743,7 @@ proc ::WB::BuildWhiteboard {w args} {
     
     # Init some of the state variables.
     # Inherit from the factory + preferences state.
-    array set state [array get ::state]
+    array set state [array get gstate]
     set state(fileName) ""
     if {$opts(-state) eq "disabled"} {
 	set state(tool) "point"
@@ -1083,13 +1085,10 @@ proc ::WB::GarbageImages {w} {
 
 proc ::WB::SaveWhiteboardState {w} {
     upvar ::WB::${w}::wapp wapp
-      
+    variable gstate
+    
     # Read back instance specific 'state' into generic 'state'.
-    array set ::state [array get ::WB::${w}::state]
-
-    # Widget geometries:
-    #::WB::SaveWhiteboardDims $w
-    #::UI::SaveWinGeom whiteboard $wapp(toplevel)
+    array set gstate [array get ::WB::${w}::state]
 }
 
 proc ::WB::SaveAnyState { } {
