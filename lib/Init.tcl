@@ -5,9 +5,9 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.61 2007-02-26 13:26:53 matben Exp $
+# $Id: Init.tcl,v 1.62 2007-03-14 08:47:44 matben Exp $
 
-namespace eval ::Init:: { }
+namespace eval ::Init {}
 
 proc ::Init::SetThis {mainScript} {
     global  this auto_path tcl_platform prefs
@@ -167,7 +167,7 @@ proc ::Init::SetThis {mainScript} {
 # 
 #       Finds the actual file path to our default prefs dir.
 
-proc ::Init::GetDefaultPrefsPath { } {
+proc ::Init::GetDefaultPrefsPath {} {
     global  this
     
     # Path where preferences etc are stored.
@@ -180,43 +180,78 @@ proc ::Init::GetDefaultPrefsPath { } {
 	    set prefsPath [file nativename ~/.coccinella]
 	}
 	windows {
-	    foreach key {USERPROFILE APPDATA HOME HOMEPATH \
-	      ALLUSERSPROFILE CommonProgramFiles HOMEDRIVE} {
-		if {[info exists ::env($key)] && [file writable $::env($key)]} {
-		    set winPrefsDir $::env($key)
-		    break
+
+	    # The default prefs dir is now obtained from the registry.
+	    # If any old be sure to copy to new.
+	    set appPath [GetWindowsAppPath]
+	    set prefsPath [file join $appPath Coccinella]
+	    if {![file isdirectory $prefsPath]} {
+		set oldPath [GetWindowsAdhocPrefsPath]
+		if {[file isdirectory $oldPath]} {
+		    file copy -force -- $oldPath $appPath
+		    file delete -force -- $oldPath
 		}
-	    }
-	    if {![info exists winPrefsDir]} {
-		set vols [lsort [file volumes]]
-		set vols [lsearch -all -inline -glob -not $vols A:*]
-		set vols [lsearch -all -inline -glob -not $vols B:*]
-		
-		# If none of the above are writable this is unlikely.
-		if {[file writable [lindex $vols 0]]} {
-		    set winPrefsDir [lindex $vols 0]
-		} else {
-		    if {[info exists starkit::topdir]} {
-			set dir [file dirname [info nameofexecutable]]
-		    } else {
-			set dir [file dirname [file dirname $this(script)]]
-		    }
-		    if {[file writable $dir]} {
-			set winPrefsDir $dir
-		    }
-		}
-	    }
-	    if {[info exists winPrefsDir]} {
-		set prefsPath [file join $winPrefsDir Coccinella]
-	    } else {
-		set prefsPath ""
 	    }
 	}
     }
     return $prefsPath
 }
 
-proc ::Init::IsAppOnRemovableDrive { } {
+proc ::Init::GetWindowsAppPath {} {
+    
+    set appPath ""
+
+    catch {
+	package require registry
+	set shellFoldersKey \
+		 {HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders}
+	set appPath [registry get $shellFoldersKey AppData]
+	regsub -all {%([a-zA-Z]+)%} $appPath \$::env(\\1) appPath
+	set appPath [subst -nobackslashes -nocommands $appPath]
+	if {![file isdirectory $appPath]} {
+	    file mkdir $appPath
+	}
+    } 
+    return $appPath
+}
+
+proc ::Init::GetWindowsAdhocPrefsPath {} {
+
+    set prefsPath ""
+
+    foreach key {USERPROFILE APPDATA HOME HOMEPATH \
+      ALLUSERSPROFILE CommonProgramFiles HOMEDRIVE} {
+	if {[info exists ::env($key)] && [file writable $::env($key)]} {
+	    set winPrefsDir $::env($key)
+	    break
+	}
+    }
+    if {![info exists winPrefsDir]} {
+	set vols [lsort [file volumes]]
+	set vols [lsearch -all -inline -glob -not $vols A:*]
+	set vols [lsearch -all -inline -glob -not $vols B:*]
+	
+	# If none of the above are writable this is unlikely.
+	if {[file writable [lindex $vols 0]]} {
+	    set winPrefsDir [lindex $vols 0]
+	} else {
+	    if {[info exists starkit::topdir]} {
+		set dir [file dirname [info nameofexecutable]]
+	    } else {
+		set dir [file dirname [file dirname $this(script)]]
+	    }
+	    if {[file writable $dir]} {
+		set winPrefsDir $dir
+	    }
+	}
+    }
+    if {[info exists winPrefsDir]} {
+	set prefsPath [file join $winPrefsDir Coccinella]
+    }
+    return $prefsPath
+}
+
+proc ::Init::IsAppOnRemovableDrive {} {
     global  this
     
     set ans 0
@@ -249,7 +284,7 @@ proc ::Init::IsAppOnRemovableDrive { } {
 #       It doesn't check for its existence.
 #       You MUST have 'IsAppOnRemovableDrive' for this to make sense.
 
-proc ::Init::GetAppDrivePrefsPath { } {
+proc ::Init::GetAppDrivePrefsPath {} {
     global  this
     
     set lapp   [file split $this(appPath)]
@@ -272,7 +307,7 @@ proc ::Init::GetAppDrivePrefsPath { } {
 #       Is supposed to set all standard paths that are dependent on 
 #       this(prefsPath).
 
-proc ::Init::SetPrefsPaths { } {
+proc ::Init::SetPrefsPaths {} {
     global  this
     
     set path $this(prefsPath)
@@ -322,7 +357,7 @@ proc ::Init::SetPrefsPaths { } {
 # 
 #       Helpers to allow switching prefs location.
 
-proc ::Init::SetPrefsPathToDefault { } {
+proc ::Init::SetPrefsPathToDefault {} {
     global  this
     
     set this(prefsPath) [GetDefaultPrefsPath]
@@ -332,7 +367,7 @@ proc ::Init::SetPrefsPathToDefault { } {
     ::Init::MakePrefsDirs
 }
 
-proc ::Init::SetPrefsPathToRemovable { } {
+proc ::Init::SetPrefsPathToRemovable {} {
     global  this
     
     set this(prefsPath) [GetAppDrivePrefsPath]
@@ -342,7 +377,7 @@ proc ::Init::SetPrefsPathToRemovable { } {
     ::Init::MakePrefsDirs
 }
 
-proc ::Init::GetUserName { } {
+proc ::Init::GetUserName {} {
     global  this
       
     # Find user name.
@@ -360,7 +395,7 @@ proc ::Init::GetUserName { } {
     return $username
 }
 
-proc ::Init::SetThisVersion { } {
+proc ::Init::SetThisVersion {} {
     global  this
     
     # The application major and minor version numbers; should only be written to
@@ -374,7 +409,7 @@ proc ::Init::SetThisVersion { } {
     set this(vers,previous) $this(vers,full)
 }
 
-proc ::Init::SetThisEmbedded { } {
+proc ::Init::SetThisEmbedded {} {
     global  this
     
     # We may be embedded in another application, say an ActiveX component.
@@ -388,7 +423,7 @@ proc ::Init::SetThisEmbedded { } {
     }
 }
 
-proc ::Init::MakePrefsDirs { } {
+proc ::Init::MakePrefsDirs {} {
     global  this tcl_platform
     
     foreach name {
@@ -423,7 +458,7 @@ proc ::Init::MakePrefsDirs { } {
     }
 }
 
-proc ::Init::SetAutoPath { } {
+proc ::Init::SetAutoPath {} {
     global  auto_path this prefs
     
     # Add our lib and whiteboard directory to our search path.
@@ -448,7 +483,7 @@ proc ::Init::SetAutoPath { } {
     set auto_path [concat [list [file join $this(path) TclXML]] $auto_path]
 }
 
-proc ::Init::Msgcat { } {
+proc ::Init::Msgcat {} {
     global  prefs this
     
     package require msgcat
@@ -575,7 +610,7 @@ proc ::Init::TempDir {} {
     return [file normalize [pwd]]
 }
 
-proc ::Init::LoadPackages { } {
+proc ::Init::LoadPackages {} {
     global  this auto_path
     
     # Take precautions and load only our own tile, treectrl.
@@ -663,7 +698,7 @@ proc ::Init::LoadPackages { } {
 #       in resources/. 
 #       array set config {-junk "The Junk" ...}
 
-proc ::Init::Config { } {
+proc ::Init::Config {} {
     global  this config
     
     set f [file join $this(resourcePath) config.tcl]
@@ -672,7 +707,7 @@ proc ::Init::Config { } {
     }
 }
 
-proc ::Init::SetHostname { } {
+proc ::Init::SetHostname {} {
     global  this
     
     set this(hostname) [info hostname]
