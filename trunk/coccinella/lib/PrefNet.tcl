@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: PrefNet.tcl,v 1.7 2007-03-07 09:19:52 matben Exp $
+# $Id: PrefNet.tcl,v 1.8 2007-03-14 08:47:44 matben Exp $
  
 package provide PrefNet 1.0
 
@@ -72,13 +72,16 @@ proc ::PrefNet::BuildTabPage {wpage} {
     pack $nb -side top -anchor $anchor
     
     ::Proxy::BuildFrame $nb.proxy
-    $nb add $nb.proxy -text [mc Proxy] -sticky n -padding $padding
+    $nb.proxy configure -padding $padding
+    $nb add $nb.proxy -text [mc Proxy] -sticky n
     
     ::Proxy::BuildNATFrame $nb.nat
-    $nb add $nb.nat -text [mc NAT] -sticky n -padding $padding
+    $nb.nat configure -padding $padding
+    $nb add $nb.nat -text [mc NAT] -sticky n
      
     BuildServersFrame $nb.serv
-    $nb add $nb.serv -text [mc Servers] -sticky n -padding $padding
+    $nb.serv configure -padding $padding
+    $nb add $nb.serv -text [mc Servers] -sticky n
 
     return $wpage
 }
@@ -93,7 +96,7 @@ proc ::PrefNet::BuildServersFrame {w} {
     set tmpServPrefs(httpdPort)         $prefs(httpdPort)
     set tmpServPrefs(bytestreams,port)  $jprefs(bytestreams,port)
 
-    ttk::frame $w 
+    ttk::frame $w
     ttk::label $w.lserv -text "[mc {Built in server port}]:"
     ttk::label $w.lhttp -text "[mc {HTTP port}]:"
     ttk::label $w.lbs   -text "[mc {File transfer port}]:"
