@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.62 2007-02-07 13:24:37 matben Exp $
+# $Id: Utils.tcl,v 1.63 2007-03-15 13:17:12 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -231,8 +231,13 @@ proc ::Utils::FormatBytes {bytes} {
     return $str
 }
 
-proc ::Utils::UnixGetWebBrowser { } {
-    global  this prefs env
+# Utils::UnixGetWebBrowser, UnixGetAllWebBrowsers ... --
+# 
+#       These functions get the execution paths to the applications,
+#       not the application names. Always from the auto_execok command.
+
+proc ::Utils::UnixGetWebBrowser {} {
+    global  prefs env
     
     set browser {}
     set e [auto_execok $prefs(webBrowser)]
@@ -250,25 +255,29 @@ proc ::Utils::UnixGetWebBrowser { } {
 	set browser [KDEGetBrowser]
     }
     if {$browser eq {}} {
-	foreach name {firefox galeon konqueror mozilla-firefox \
-	  mozilla-firebird mozilla netscape iexplorer opera} {
-	    if {[llength [set e [auto_execok $name]]]} {
-		set browser [lindex $e 0]
-		break
-	    }
-	}
+	set browser [lindex [UnixGetAllWebBrowsers] 0]
     }
     set prefs(webBrowser) $browser
     return $browser
 }
 
-proc ::Utils::UnixGetEmailClient { } {
-    global  prefs env
+proc ::Utils::UnixGetAllWebBrowsers {} {
+    set browsers [KDEGetBrowser]
+    foreach name {
+	firefox galeon konqueror mozilla-firefox
+	mozilla-firebird mozilla netscape iexplorer opera
+    } {
+	if {[llength [set e [auto_execok $name]]]} {
+	    lappend browsers [lindex $e 0]
+	}
+    }
+    return [lsort -unique $browsers]
+}
+
+proc ::Utils::UnixGetEmailClient {} {
+    global  prefs
     
-    # @@@ Temporary solution...
     set mail {}
-    set prefs(mailClient) {}
-    
     set e [auto_execok $prefs(mailClient)]
     if {[llength $e]} {
 	set mail [lindex $e 0]
@@ -277,17 +286,22 @@ proc ::Utils::UnixGetEmailClient { } {
 	set mail [KDEGetEmailClient]
     }
     if {$mail eq {}} {
-	foreach name {thunderbird kmail} {
-	    if {[llength [set e [auto_execok $name]]] > 0} {
-		set mail [lindex $e 0]
-		break
-	    }
-	}
+	set mail [lindex [UnixGetAllEmailClients] 0]
     }
     return $mail
 }
 
-proc ::Utils::KDEGetBrowser { } {
+proc ::Utils::UnixGetAllEmailClients {} {
+    set mailers [KDEGetEmailClient]
+    foreach name {thunderbird kmail} {
+	if {[llength [set e [auto_execok $name]]]} {
+	    lappend mailers [lindex $e 0]
+	}
+    }
+    return [lsort -unique $mailers]
+}
+
+proc ::Utils::KDEGetBrowser {} {
     set name [KDEGetConfigValue ~/.kde/share/config/kdeglobals BrowserApplication]
     if {[llength [set e [auto_execok $name]]]} {
 	return $e
@@ -296,7 +310,7 @@ proc ::Utils::KDEGetBrowser { } {
     }
 }
 
-proc ::Utils::KDEGetEmailClient { } {
+proc ::Utils::KDEGetEmailClient {} {
     set name [KDEGetConfigValue ~/.kde/share/config/emaildefaults EmailClient]
     if {[llength [set e [auto_execok $name]]]} {
 	return $e
@@ -342,7 +356,7 @@ proc ::Utils::UnixOpenUrl {url} {
     if {$browser eq ""} {
 	::UI::MessageBox -icon error -type ok -message \
 	  "Couldn't localize a web browser on this system.\
-	  Define a shell variable env(BROWSER) to point to a web browser."
+	  Define a shell variable \"BROWSER\" to point to a web browser."
     }
 }
 
