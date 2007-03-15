@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.92 2007-03-15 13:17:12 matben Exp $
+# $Id: Preferences.tcl,v 1.93 2007-03-15 15:30:30 matben Exp $
  
 package require mnotebook
 package require tree
@@ -212,6 +212,7 @@ proc ::Preferences::Build {args} {
     set tableName2Item(General) $item
     
     set item [$T item create -button 1]
+    #set item [$T item create -button 1 -tags Jabber]
     $T item style set $item cTree styText cTag styText
     $T item text $item cTree [mc Jabber] cTag [list Jabber]
     $T item lastchild root $item

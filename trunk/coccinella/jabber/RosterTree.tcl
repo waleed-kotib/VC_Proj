@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.35 2007-01-27 14:59:30 matben Exp $
+# $Id: RosterTree.tcl,v 1.36 2007-03-15 15:30:30 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -755,6 +755,7 @@ proc ::RosterTree::CreateWithTag {tag parent} {
     variable tag2items
     
     set item [$T item create -parent $parent]
+    #set item [$T item create -parent $parent -tags $tag]
     
     # Handle the hidden cTag column.
     $T item style set $item cTag styTag
