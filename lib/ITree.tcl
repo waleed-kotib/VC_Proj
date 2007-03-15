@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.13 2007-03-15 13:17:12 matben Exp $
+# $Id: ITree.tcl,v 1.14 2007-03-15 15:30:30 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -221,6 +221,7 @@ proc ::ITree::Item {T v args} {
 	
     }
     set item [$T item create -open $isopen -parent $parent]
+    #set item [$T item create -open $isopen -parent $parent -tags $v]
     set tag2item($T,$v) $item
 
     $T item element configure $item cTag eText -text $v

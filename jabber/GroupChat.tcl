@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.186 2007-03-15 13:17:11 matben Exp $
+# $Id: GroupChat.tcl,v 1.187 2007-03-15 15:30:30 matben Exp $
 
 package require Create
 package require Enter
@@ -1848,6 +1848,7 @@ proc ::GroupChat::TreeCreateWithTag {T tag parent} {
     variable tag2item
     
     set item [$T item create -parent $parent]
+    #set item [$T item create -parent $parent -tags [treeutil::protecttags $tag]]
     
     # Handle the hidden cTag column.
     $T item style set $item cTag styTag
@@ -1861,6 +1862,7 @@ proc ::GroupChat::TreeCreateWithTag {T tag parent} {
 proc ::GroupChat::TreeFindWithTag {T tag} {
     variable tag2item
     
+    # return [$T item id "tag [treeutil::protecttags $tag]"]
     if {[info exists tag2item($T,$tag)]} {
 	return $tag2item($T,$tag)
     } else {

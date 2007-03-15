@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under BSD-style license.
 #  
-#  $Id: treeutil.tcl,v 1.10 2006-01-05 15:06:16 matben Exp $
+#  $Id: treeutil.tcl,v 1.11 2007-03-15 15:30:30 matben Exp $
 
 # USAGE:
 # 
@@ -231,10 +231,15 @@ proc treeutil::setdboptions {w wclass prefix} {
 }
 
 proc treeutil::configurecolumns {w args} {
-    
     foreach C [$w column list -visible] {
 	eval {$w column configure $C} $args
     }
+}
+
+proc treeutil::protecttags {tags} {
+    # the characters "|" and "&" are special to treectrl.
+    regsub -all {([|&])} $tags {\\\1} tags
+    return $tags
 }
 
 
