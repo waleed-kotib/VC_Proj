@@ -111,6 +111,9 @@
 ::msgcat::mcset kr Moderators	  진행자
 ::msgcat::mcset kr More		  더
 ::msgcat::mcset kr Name		  이름
+
+::msgcat::mcset kr Network
+
 ::msgcat::mcset kr Never	  결코
 ::msgcat::mcset kr New		  새
 ::msgcat::mcset kr Next		  다음

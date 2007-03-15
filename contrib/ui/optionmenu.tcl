@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005-2007 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.12 2007-01-28 12:21:18 matben Exp $
+# $Id: optionmenu.tcl,v 1.13 2007-03-15 13:17:11 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -85,8 +85,10 @@ snit::widgetadaptor ui::optionmenu::widget {
 	# If the variable exists must set our own nameVar.
 	if {[info exists $options(-variable)]} {
 	    set value [set $options(-variable)]
-	    set menuValue $value
-	    set nameVar $val2name($value)
+	    if {[info exists val2name($value)]} {
+		set menuValue $value
+		set nameVar $val2name($value)
+	    }
 	}
 	
 	# If variable is changed must update us.

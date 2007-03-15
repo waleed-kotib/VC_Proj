@@ -10,7 +10,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.52 2007-03-07 09:19:52 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.53 2007-03-15 13:17:12 matben Exp $
 
 package provide FactoryDefaults 1.0
 
@@ -230,27 +230,6 @@ proc FactoryDefaults { } {
 	set this(ipver) 6
     }
     
-    switch -- $this(platform) {
-	unix {
-	    if {[info exists ::env(BROWSER)]} {
-		if {[llength [auto_execok $::env(BROWSER)]] > 0} {
-		    set prefs(webBrowser) $::env(BROWSER)
-		} else {	    
-		    set prefs(webBrowser) ""
-		}
-	    } else {
-		set prefs(webBrowser) ""
-	    }
-	}
-	macosx {
-	    set prefs(webBrowser) {Safari}
-	}
-	windows {
-	    
-	    # Not used anymore. Uses the registry instead.
-	    set prefs(webBrowser) {C:/Program/Internet Explorer/IEXPLORE.EXE}
-	}
-    }
     set prefs(incomingPath) [file join $this(prefsPath) Incoming]
     
     # Make sure we've got the necessary directories.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.91 2006-03-10 15:39:33 matben Exp $
+# $Id: Preferences.tcl,v 1.92 2007-03-15 13:17:12 matben Exp $
  
 package require mnotebook
 package require tree
@@ -64,7 +64,6 @@ proc ::Preferences::SetMiscPrefs { } {
       [list prefs(postscriptOpts)  prefs_postscriptOpts  $prefs(postscriptOpts)] \
       [list prefs(firstLaunch)     prefs_firstLaunch     $prefs(firstLaunch)     userDefault] \
       [list prefs(unixPrintCmd)    prefs_unixPrintCmd    $prefs(unixPrintCmd)]   \
-      [list prefs(webBrowser)      prefs_webBrowser      $prefs(webBrowser)]     \
       [list prefs(userPath)        prefs_userPath        $prefs(userPath)]       \
       [list prefs(winGeom)         prefs_winGeom         $prefs(winGeom)]        \
       [list prefs(paneGeom)        prefs_paneGeom        $prefs(paneGeom)]       \

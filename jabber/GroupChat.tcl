@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.185 2007-03-13 08:36:00 matben Exp $
+# $Id: GroupChat.tcl,v 1.186 2007-03-15 13:17:11 matben Exp $
 
 package require Create
 package require Enter
@@ -1671,6 +1671,7 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     set S [$T style create styTag]
     $T style elements $S {eText}
 
+    # @@@ use column -itemstyle instead for 2.2
     $T configure -defaultstyle {{} styTag}
 
     # This automatically cleans up the tag array.

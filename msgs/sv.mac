@@ -105,6 +105,7 @@
 ::msgcat::mcset sv Moderators           {Moderatorer}
 ::msgcat::mcset sv More                 {Mer}
 ::msgcat::mcset sv Name                 {Namn}
+::msgcat::mcset sv Network		{NŠtverk}
 ::msgcat::mcset sv Never		{Aldrig}
 ::msgcat::mcset sv New 			{Nytt}
 ::msgcat::mcset sv Next 		{NŠsta}

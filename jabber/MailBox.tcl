@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.106 2007-03-13 08:36:00 matben Exp $
+# $Id: MailBox.tcl,v 1.107 2007-03-15 13:17:11 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -659,6 +659,7 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set S [$T style create styTag]
     $T style elements $S {eText}
     
+    # @@@ use column -itemstyle instead for 2.2
     $T configure -defaultstyle {styImage stySubject styText styText  \
       styTag styTag styTag}
 

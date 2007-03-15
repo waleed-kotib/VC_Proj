@@ -117,6 +117,7 @@
 ::msgcat::mcset de Moderators	Moderatoren
 ::msgcat::mcset de More		Mehr
 ::msgcat::mcset de Name  	Name
+::msgcat::mcset de Network	Netzwerk
 ::msgcat::mcset de Never	Niemals
 ::msgcat::mcset de New		Neu
 ::msgcat::mcset de Next		Weiter

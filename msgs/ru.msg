@@ -94,6 +94,9 @@
 ::msgcat::mcset ru Moderators	{Модераторы}
 ::msgcat::mcset ru More			{Больше}
 ::msgcat::mcset ru Name			{Имя}
+
+::msgcat::mcset ru Network
+
 ::msgcat::mcset ru Never			{Никогда}
 ::msgcat::mcset ru New			{Новый}
 ::msgcat::mcset ru Next

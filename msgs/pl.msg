@@ -116,6 +116,7 @@
 ::msgcat::mcset pl Moderators	Moderatorzy
 ::msgcat::mcset pl More		Więcej
 ::msgcat::mcset pl Name		Nazwa
+::msgcat::mcset pl Network      Sieci
 ::msgcat::mcset pl Never	Nigdy
 ::msgcat::mcset pl New		Nowy
 ::msgcat::mcset pl Next		Dalej

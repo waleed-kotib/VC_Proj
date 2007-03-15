@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.26 2006-09-14 13:15:49 matben Exp $
+# $Id: Rosticons.tcl,v 1.27 2007-03-15 13:17:12 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -496,6 +496,7 @@ proc ::Rosticons::PTreeSelect {T wysc} {
     set S [$T style create styTag]
     $T style elements $S {eText}
 
+    # @@@ use column -itemstyle instead for 2.2
     $T configure -defaultstyle {styButton styStd styTag}
 
     $T notify bind $T <Selection>      { ::Rosticons::POnSelect %T }
@@ -615,6 +616,7 @@ proc ::Rosticons::PTreeShow {T wysc} {
     $T style elements $S {eImage}
     $T style layout $S eImage -padx 6 -pady 2 -expand ew
 
+    # @@@ use column -itemstyle instead for 2.2
     $T configure -defaultstyle {styText styImage}
 }
 

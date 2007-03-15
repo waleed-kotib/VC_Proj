@@ -116,6 +116,7 @@
 ::msgcat::mcset es Moderators		{Moderadores}
 ::msgcat::mcset es More			{Más}
 ::msgcat::mcset es Name 		{Nombre}
+::msgcat::mcset es Network		{Red}
 ::msgcat::mcset es Never		{Nunca}
 ::msgcat::mcset es New			{Nuevo}
 ::msgcat::mcset es Next			{Siguiente}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.12 2006-09-26 12:23:35 matben Exp $
+# $Id: ITree.tcl,v 1.13 2007-03-15 13:17:12 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -67,6 +67,7 @@ proc ::ITree::New {T wxsc wysc args} {
     set S [$T style create styTag]
     $T style elements $S {eText}
 
+    # @@@ use column -itemstyle instead for 2.2
     $T configure -defaultstyle {styStd styTag}
 
     $T notify bind $T <Selection>      { ::ITree::Selection %T }

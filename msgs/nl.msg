@@ -110,6 +110,7 @@
 ::msgcat::mcset nl Moderators				{Moderators}
 ::msgcat::mcset nl More					{Meer}
 ::msgcat::mcset nl Name					{Naam}
+::msgcat::mcset nl Network			        {Netwerk}
 ::msgcat::mcset nl Never				{Nooit}
 ::msgcat::mcset nl New					{Nieuw bericht}
 ::msgcat::mcset nl Next					{Volgende}

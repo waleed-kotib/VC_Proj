@@ -116,6 +116,7 @@
 ::msgcat::mcset fr Moderators		{Modérateurs}
 ::msgcat::mcset fr More			{Plus}
 ::msgcat::mcset fr Name			{Nom}
+::msgcat::mcset fr Network		{Réseau}
 ::msgcat::mcset fr Never		{Jamais}
 ::msgcat::mcset fr New			{Nouveau}
 ::msgcat::mcset fr Next			{Suivant}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.160 2007-03-13 08:36:00 matben Exp $
+# $Id: JUI.tcl,v 1.161 2007-03-15 13:17:11 matben Exp $
 
 package provide JUI 1.0
 
@@ -1083,7 +1083,7 @@ proc ::JUI::InitPrefsHook { } {
 
     set jprefs(ui,main,show,toolbar)  1
     set jprefs(ui,main,show,notebook) 1
-    set jprefs(ui,main,show,minimal)  0
+    set jprefs(ui,main,show,minimal)  1
     
     set plist {}
     foreach key {toolbar notebook minimal} {

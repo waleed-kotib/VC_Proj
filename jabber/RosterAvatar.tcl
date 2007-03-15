@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.21 2007-01-26 13:50:16 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.22 2007-03-15 13:17:11 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -396,6 +396,7 @@ proc ::RosterAvatar::Configure {_T} {
     set S [$T style create styTag]
     $T style elements $S {eText}
     
+    # @@@ use column -itemstyle instead for 2.2
     $T configure -defaultstyle {styStatus {}}
     
     $T notify install <Header-invoke>

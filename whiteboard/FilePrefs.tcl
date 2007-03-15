@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.13 2006-09-14 13:15:50 matben Exp $
+# $Id: FilePrefs.tcl,v 1.14 2007-03-15 13:17:16 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -189,6 +189,7 @@ proc ::FilePrefs::TreeCtrl {T wysc} {
     set S [$T style create styMime]
     $T style elements $S {eText}
 
+    # @@@ use column -itemstyle instead for 2.2
     $T configure -defaultstyle {styText styImageText styMime}
 
     $T notify install <Header-invoke>
