@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 20052006  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.13 2006-09-08 07:03:34 matben Exp $
+# $Id: RosterTwo.tcl,v 1.14 2007-03-16 13:54:38 matben Exp $
 
 package require RosterTree
 
@@ -56,6 +56,7 @@ proc ::RosterTwo::Configure {_T} {
     # Two columns: 
     #   0) the tree 
     #   1) hidden for tags
+    # @@@ treectrl2.2.3 -tag -> -tags
     $T column create -tag cTree -itembackground $stripes -resize 0 -expand 1
     $T column create -tag cTag -visible 0
     $T configure -treecolumn cTree -showheader 0

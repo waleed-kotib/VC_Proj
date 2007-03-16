@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.93 2007-03-15 15:30:30 matben Exp $
+# $Id: Preferences.tcl,v 1.94 2007-03-16 13:54:38 matben Exp $
  
 package require mnotebook
 package require tree
@@ -138,6 +138,8 @@ proc ::Preferences::Show {{page {}}} {
     if {$page ne ""} {
 	if {[info exists tableName2Item($page)]} {
 	    $wtree selection clear all
+	    # @@@ treectrl2.2.3
+	    # $wtree selection add "tag $page"
 	    $wtree selection add $tableName2Item($page)
 	}
     }
@@ -204,6 +206,8 @@ proc ::Preferences::Build {args} {
     pack $wysc  -side right -fill y
     
     # Fill tree.
+    # @@@ treectrl2.2.3   
+    # set item [$T item create -button 1 -tags [list General]]
     set item [$T item create -button 1]
     $T item style set $item cTree styText cTag styText
     $T item text $item cTree [mc General] cTag [list General]
@@ -211,8 +215,9 @@ proc ::Preferences::Build {args} {
 
     set tableName2Item(General) $item
     
+    # @@@ treectrl2.2.3   
+    # set item [$T item create -button 1 -tags [list Jabber]]
     set item [$T item create -button 1]
-    #set item [$T item create -button 1 -tags Jabber]
     $T item style set $item cTree styText cTag styText
     $T item text $item cTree [mc Jabber] cTag [list Jabber]
     $T item lastchild root $item
@@ -266,6 +271,8 @@ proc ::Preferences::Build {args} {
 	set selectPage {General}
     }
     if {[info exists tableName2Item($selectPage)]} {
+	# @@@ treectrl2.2.3
+	# $T selection add "tag $selectPage"
 	$T selection add $tableName2Item($selectPage)
     }
     
@@ -291,6 +298,7 @@ proc ::Preferences::TreeCtrl {T wysc} {
     set bg [option get $T columnBackground {}]
     set fillT {white {selected focus} black {selected !focus}}
 
+    # @@@ treectrl2.2.3 -tag -> -tags
     $T column create -text [mc {Settings Panels}] -tag cTree  \
       -itembackground $stripes -resize 0 -expand 1 -borderwidth $bd  \
       -background $bg
@@ -319,6 +327,8 @@ proc ::Preferences::NewTableItem {name text} {
     
     set T $wtree
     
+    # @@@ treectrl2.2.3   
+    # set item [$T item create -tags [lindex $name end]]
     set item [$T item create]
     $T item style set $item cTree styText cTag styText
     $T item text $item cTree $text cTag $name
@@ -329,6 +339,9 @@ proc ::Preferences::NewTableItem {name text} {
 	$T item lastchild root $item
     } else {
 	set root [lindex $name 0]
+	# @@@ treectrl2.2.3   
+	# set ritem [$T item id "tag $root"]
+	# $T item lastchild $ritem $item
 	set ritem $tableName2Item($root)
 	$T item lastchild $ritem $item
     }
@@ -338,8 +351,11 @@ proc ::Preferences::NewTableItem {name text} {
 }
 
 proc ::Preferences::HaveTableItem {name} {
+    variable wtree
     variable tableName2Item
 
+    # @@@ treectrl2.2.3   
+    # return [llength [$wtree item id "tag $name"]]
     if {[info exists tableName2Item($name)]} {
 	return 1
     } else {

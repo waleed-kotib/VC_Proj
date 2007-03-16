@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.107 2007-03-15 13:17:11 matben Exp $
+# $Id: MailBox.tcl,v 1.108 2007-03-16 13:54:38 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -615,6 +615,7 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
 
+    # @@@ treectrl2.2.3 -tag -> -tags
     $T column create -tag cWhiteboard -image $locals(iconWB16)  \
       -itembackground $stripes -resize 0 -borderwidth $bd -background $bg
     $T column create -tag cSubject -expand 1 -text [mc Subject] \
@@ -627,6 +628,7 @@ proc ::MailBox::TreeCtrl {T wysc} {
       -background $bg
     $T column create -tag cSecs -visible 0
     $T column create -tag cRead -visible 0
+    # @@@ treectrl2.2.3
     $T column create -tag cUid  -visible 0
 
     set fill    [list $this(sysHighlight) {selected focus} gray {selected !focus}]
@@ -727,10 +729,15 @@ proc ::MailBox::InsertRow {wtbl row i} {
     set smartdate [::Utils::SmartClockFormat $secs -showsecs 0]
 
     set T $wtbl
+    # @@@ treectrl2.2.3
+    # set item [$T item create -tags $uidmsg]
     set item [$T item create]
     $T item text $item  \
       cSubject $subject cFrom $from   cDate $smartdate  \
       cSecs    $secs    cRead $isread cUid  $uidmsg
+    # $T item text $item  \
+    #   cSubject $subject cFrom $from   cDate $smartdate  \
+    #   cSecs    $secs    cRead $isread
     $T item lastchild root $item
     
     if {$haswb} {
@@ -885,6 +892,8 @@ proc ::MailBox::MarkMsgAsRead {uid} {
     if {[winfo exists $wDlgs(jinbox)]} {
 	set T $locals(wtbl)
 	set item $tableUid2Item($uid)
+	# @@@ treectrl2.2.3
+	# $T item state set "tag $uid" read
 	$T item state set $item read
     }
 }
@@ -1915,10 +1924,15 @@ proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
 	set iswb 1
     }
     set T $locals(wtbl)
+    # @@@ treectrl2.2.3
+    # set item [$T item create -tags $uuuid]
     set item [$T item create]
     $T item text $item  \
       cSubject $subject cFrom $from   cDate $smartdate  \
       cSecs    $secs    cRead $isread cUid  $uuid
+    # $T item text $item  \
+    #   cSubject $subject cFrom $from   cDate $smartdate  \
+    #   cSecs    $secs    cRead $isread
     $T item lastchild root $item
     
     if {$iswb} {

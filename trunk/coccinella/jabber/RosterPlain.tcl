@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.27 2007-01-26 13:50:16 matben Exp $
+# $Id: RosterPlain.tcl,v 1.28 2007-03-16 13:54:38 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -136,6 +136,7 @@ proc ::RosterPlain::Configure {_T} {
     # Two columns: 
     #   0) the tree 
     #   1) hidden for tags
+    # @@@ treectrl2.2.3 -tag -> -tags
     $T column create -tag cTree -itembackground $stripes -resize 0  \
       -expand 1 -squeeze 1
     $T column create -tag cTag -visible 0

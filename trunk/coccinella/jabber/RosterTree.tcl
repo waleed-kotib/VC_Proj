@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.36 2007-03-15 15:30:30 matben Exp $
+# $Id: RosterTree.tcl,v 1.37 2007-03-16 13:54:38 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -750,12 +750,16 @@ namespace eval ::RosterTree {
     variable tag2items
 }
 
+# @@@ treectrl2.2.3
+# Check list structure of tags!
+
 proc ::RosterTree::CreateWithTag {tag parent} {
     variable T
     variable tag2items
     
     set item [$T item create -parent $parent]
-    #set item [$T item create -parent $parent -tags $tag]
+    # @@@ treectrl2.2.3
+    # set item [$T item create -parent $parent -tags [treeutil::protect $tag]]
     
     # Handle the hidden cTag column.
     $T item style set $item cTag styTag
@@ -770,6 +774,10 @@ proc ::RosterTree::DeleteWithTag {tag} {
     variable T
     variable tag2items
     
+    # @@@ treectrl2.2.3
+    # foreach item [$T item id "tag [treeutil::protect $tag]"] {
+    #    $T item delete $item
+    # }
     if {[info exists tag2items($tag)]} {
 	foreach item $tag2items($tag) {
 	    $T item delete $item
@@ -784,6 +792,9 @@ proc ::RosterTree::DeleteWithTag {tag} {
 proc ::RosterTree::RemoveTags {item} {
     variable T
     variable tag2items
+
+    # @@@ treectrl2.2.3
+    # return
     
     # We must delete all 'tag2items' that may point to us.
     set tag [$T item element cget $item cTag eText -text]
@@ -798,8 +809,11 @@ proc ::RosterTree::RemoveTags {item} {
 }
 
 proc ::RosterTree::FindWithTag {tag} {
+    variable T
     variable tag2items
     
+    # @@@ treectrl2.2.3
+    # return [$T item id "tag [treeutil::protect $tag]"]
     if {[info exists tag2items($tag)]} {
 	return $tag2items($tag)
     } else {
@@ -810,6 +824,9 @@ proc ::RosterTree::FindWithTag {tag} {
 proc ::RosterTree::FindWithFirstTag {tag0} {
     variable tag2items
     
+    # @@@ treectrl2.2.3
+    # This is tricky; shall we handle a list of tags as separate tags?
+    # return [$T item id "tag [treeutil::protect $tag0]"]
     set items {}
     foreach {key value} [array get tag2items "$tag0 *"] {
 	set items [concat $items $value]
@@ -824,7 +841,10 @@ proc ::RosterTree::FindWithFirstTag {tag0} {
 proc ::RosterTree::FindChildrenOfTag {tag} {
     variable T
     variable tag2items
-    
+
+    # @@@ treectrl2.2.3
+    # return [$T item children "tag [treeutil::protect $tag]"]
+
     # NEVER use the non unique 'jid *' tag here!
     set items {}
     if {[info exists tag2items($tag)]} {
@@ -837,12 +857,16 @@ proc ::RosterTree::FindChildrenOfTag {tag} {
 proc ::RosterTree::GetTagOfItem {item} {
     variable T
     
+    # @@@ treectrl2.2.3
+    # return [$T item cget $item -tags]
     return [$T item element cget $item cTag eText -text]
 }
 
 proc ::RosterTree::ExistsWithTag {tag} {
     variable tag2items
 
+    # @@@ treectrl2.2.3
+    # ???
     return [info exists tag2items($tag)]
 }
 

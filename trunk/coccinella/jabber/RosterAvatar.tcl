@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.22 2007-03-15 13:17:11 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.23 2007-03-16 13:54:38 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -282,6 +282,8 @@ proc ::RosterAvatar::Configure {_T} {
     #   2) hidden for tags
     #   
     # minwidth 24 = 16 + {4 2}
+
+    # @@@ treectrl2.2.3 -tag -> -tags
     $T column create -tag cStatus  \
       -itembackground $stripes -resize 0 -minwidth 24 -button 1  \
       -borderwidth $bd -background $bg

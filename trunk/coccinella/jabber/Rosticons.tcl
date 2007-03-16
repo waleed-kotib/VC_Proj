@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements handling and parsing of roster icons.
 #      
-#  Copyright (c) 2005-2006  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.28 2007-03-15 15:30:30 matben Exp $
+# $Id: Rosticons.tcl,v 1.29 2007-03-16 13:54:38 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -448,6 +448,9 @@ proc ::Rosticons::BuildPrefsPage {wpage} {
     grid  $msg   -  -      -sticky w -pady 4
     grid columnconfigure $box 1 -minsize 12
     
+    # @@@ treectrl2.2.3
+    # set item [$T item id "tag status"]
+    # $wselect selection add $item
     $wselect selection add $tag2item(status)
     
     bind $wpage <Destroy> [namespace current]::PFree
@@ -471,6 +474,7 @@ proc ::Rosticons::PTreeSelect {T wysc} {
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
 
+    # @@@ treectrl2.2.3 -tag -> -tags
     $T column create -tag cButton -resize 0 -borderwidth $bd  \
       -background $bg -squeeze 1
     $T column create -tag cTree   -resize 0 -borderwidth $bd  \
@@ -555,7 +559,8 @@ proc ::Rosticons::PFillTree {T} {
 	    set typeName [::Roster::GetNameFromTrpt $type]
 	}
 	set pitem [$T item create -open 1 -button 1 -parent root]
-	#set pitem [$T item create -open 1 -button 1 -parent root -tags $type]
+	# @@@ treectrl2.2.3
+	# set pitem [$T item create -open 1 -button 1 -parent root -tags $type]
 	$T item element configure $pitem cButton eButton -window $wcheck
 	$T item element configure $pitem cTree eText -text $typeName \
 	  -font CociSmallBoldFont
@@ -578,7 +583,8 @@ proc ::Rosticons::PFillTree {T} {
 	    
 	    set tag [list $type $name]
 	    set item [$T item create -parent $pitem]
-	    #set item [$T item create -parent $pitem -tags $tag]
+	    # @@@ treectrl2.2.3
+	    # set item [$T item create -parent $pitem -tags $tag]
 	    $T item element configure $item cButton eButton -window $wradio
 	    $T item element configure $item cTree eText -text $str
 	    $T item element configure $item cTag eText -text $tag
@@ -602,6 +608,7 @@ proc ::Rosticons::PTreeShow {T wysc} {
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
    
+    # @@@ treectrl2.2.3 -tag -> -tags
     $T column create -tag cKey   -text [mc Key] -expand 1 -squeeze 1  \
       -borderwidth $bd -background $bg
     $T column create -tag cImage -text [mc Icon] -expand 1 -justify center  \

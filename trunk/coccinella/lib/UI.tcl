@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.148 2007-03-13 08:36:01 matben Exp $
+# $Id: UI.tcl,v 1.149 2007-03-16 13:54:38 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -50,18 +50,22 @@ namespace eval ::UI:: {
 	3h3xWaEICgRhjBi6FgMpvDEpwuCBg3sVAQA7
     }]
     
-    # Aqua gray arrows.
+    # Aqua gray arrows. PNG
     set icons(openAqua) [image create photo -data {
-	R0lGODlhCQAJAPMAMf///62trZycnJSUlIyMjISEhHNzcwAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAJAAkAAAQccJhJzZB1DlBy
-	AUCQBSBHfSVApSBhECxoxKCQRgA7
+	iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAkklEQVR42pXP
+	IQ4CQQyF4X+HE+HInAAJx0BXIZGI5xB7ATQrucEgkRxh5QrE4DAdQjbsZHmq
+	Tb62KfyRxsxWQJphtw2AmV2ATQXeJS2DN3sgV/AOIABIegDtBOwk3T7YcwSG
+	Ecx+FYBFKVJKzxjjC1h/4ZOkc2nCaFML9F4Pfo2fWFIuzwAHSf0k9oEOuFYe
+	npc3YZcnhZloj+wAAAAASUVORK5CYII=
     }]
     set icons(closeAqua) [image create photo -data {
-	R0lGODlhCQAJAPMAMf///62trZycnJSUlIyMjISEhHNzcwAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAJAAkAAAQacAxAKzCmBHtx
-	tp5HUGEolMbYYQWYbZbEUREAOw==
+	iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAh0lEQVR42o2R
+	IQ6DQBREXwkH4Ap1lUiuUEeP0oyqrKyYYLnFcovK2h4BicS1hjVkw+4zP5k8
+	MZMPgKSeAqrtBkkfSV2JDNACb0lB0iUln7Yav12+AiPwsj3n5MgCPIHR9lpl
+	NjXAAIR95xQzcLN9PZIX4A6cbU8xrEuGpeQJeNj+HhbLPSPyB7B0KtfTwC8y
+	AAAAAElFTkSuQmCC
     }]
-    
+
     # WinXP lool-alikes +- signs.
     set icons(openPM) [image create photo -data {
 	R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
