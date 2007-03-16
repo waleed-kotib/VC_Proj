@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.14 2007-03-15 15:30:30 matben Exp $
+# $Id: ITree.tcl,v 1.15 2007-03-16 13:54:38 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -48,8 +48,10 @@ proc ::ITree::New {T wxsc wysc args} {
     set stripeBackground [option get $T stripeBackground {}]
     set stripes [list $stripeBackground {}]
 
+    # @@@ treectrl2.2.3 -tag -> -tags
     $T column create -tag cTree  \
       -itembackground $stripes -resize 0 -expand 1
+    # @@@ treectrl2.2.3
     $T column create -tag cTag -visible 0
     $T configure -treecolumn cTree
 
@@ -221,7 +223,10 @@ proc ::ITree::Item {T v args} {
 	
     }
     set item [$T item create -open $isopen -parent $parent]
-    #set item [$T item create -open $isopen -parent $parent -tags $v]
+    # @@@ treectrl2.2.3   
+    # Can the order of the tags list be trusted???
+    # set item [$T item create -open $isopen -parent $parent \
+    #     -tags [list [treeutil::protect $v]]]
     set tag2item($T,$v) $item
 
     $T item element configure $item cTag eText -text $v
@@ -232,7 +237,9 @@ proc ::ITree::Item {T v args} {
 
 proc ::ITree::IsItem {T v} {
     variable tag2item
-    
+
+    # @@@ treectrl2.2.3   
+    # return [llength [$T item id "tag [list [treeutil::protect $v]]"]]
     set ans 0
     if {[info exists tag2item($T,$v)]} {
 	if {[$T item id $tag2item($T,$v)] ne ""} {
@@ -245,6 +252,8 @@ proc ::ITree::IsItem {T v} {
 proc ::ITree::GetItem {T v} {
     variable tag2item
     
+    # @@@ treectrl2.2.3
+    # return [$T item id "tag [list [treeutil::protect $v]]"]
     set item ""
     if {[info exists tag2item($T,$v)]} {
 	if {[$T item id $tag2item($T,$v)] ne ""} {
@@ -257,6 +266,8 @@ proc ::ITree::GetItem {T v} {
 proc ::ITree::ItemConfigure {T v args} {
     variable tag2item
     
+    # @@@ treectrl2.2.3
+    # set item [$T item id "tag [treeutil::protect $v]"]
     if {[info exists tag2item($T,$v)]} {
 	set item $tag2item($T,$v)
 	
@@ -281,7 +292,13 @@ proc ::ITree::ItemConfigure {T v args} {
 proc ::ITree::Children {T v} {
     variable tag2item
     
-    set vchilds {}
+    set vchilds [list]
+    # @@@ treectrl2.2.3
+    # set item [$T item id "tag [treeutil::protect $v]"]
+    # set citems [$T item children $item]
+    # foreach item $citems {
+    #     lappend vchilds [$T item cget $item -tags]
+    # }
     if {[info exists tag2item($T,$v)]} {
 	set citems [$T item children $tag2item($T,$v)]
 	foreach item $citems {
@@ -294,6 +311,8 @@ proc ::ITree::Children {T v} {
 proc ::ITree::Sort {T v args} {
     variable tag2item
     
+    # @@@ treectrl2.2.3
+    # eval {$T item sort "tag [treeutil::protect $v]" -column cTree} $args
     if {[info exists tag2item($T,$v)]} {
 	set item $tag2item($T,$v)
 	eval {$T item sort $item -column cTree} $args
@@ -315,7 +334,13 @@ proc ::ITree::Sort {T v args} {
 proc ::ITree::FindAllTagMatches {T tag} {
     variable tag2item
     
-    set vlist {}
+    # @@@ treectrl2.2.3
+    # set vlist [list]
+    # set items [$T item id "tag [treeutil::protect $tag]"]
+    # foreach item $items {
+    #     lappend vlist [$T item cget $item -tags]
+    # }
+    set vlist [list]
     foreach {key item} [array get tag2item "$T,*{$tag}*"] {
 	lappend vlist [string map [list "$T," ""] $key]
     }
@@ -329,6 +354,10 @@ proc ::ITree::FindAllTagMatches {T tag} {
 proc ::ITree::FindEndItems {T tagend} {
     variable tag2item
 
+    # @@@ treectrl2.2.3
+    # set vlist [list]
+    # set items [$T item id "tag [treeutil::protect $tag]"]
+    # Find another method!
     set vlist {}
     foreach {key item} [array get tag2item "$T,*{$tagend}"] {
 	lappend vlist [string map [list "$T," ""] $key]
@@ -342,6 +371,8 @@ proc ::ITree::DeleteItem {T v} {
     if {[info exists tag2item($T,$v)]} {
 	set item $tag2item($T,$v)
 	$T item delete $item
+	# @@@ treectrl2.2.3
+	# $T item delete "tag [treeutil::protect $v]"
     }    
 }
 
@@ -354,6 +385,8 @@ proc ::ITree::UnsetTags {T item} {
 
 proc ::ITree::DeleteChildren {T v} {
     
+    # @@@ treectrl2.2.3
+    # $T item delete "tag [treeutil::protect $v] children"
     foreach vchild [Children $T $v] {
 	DeleteItem $T $vchild
     }

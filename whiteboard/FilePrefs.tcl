@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.14 2007-03-15 13:17:16 matben Exp $
+# $Id: FilePrefs.tcl,v 1.15 2007-03-16 13:54:38 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -159,12 +159,14 @@ proc ::FilePrefs::TreeCtrl {T wysc} {
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
 
+    # @@@ treectrl2.2.3 -tag -> -tags
     $T column create -tag cDescription -text [mc Description] \
       -itembackground $stripes -expand 1 -squeeze 1 -borderwidth $bd \
       -background $bg
     $T column create -tag cHandled -text [mc {Handled By}] \
       -itembackground $stripes -expand 1 -squeeze 1 -borderwidth $bd \
       -background $bg
+    # @@@ treectrl2.2.3
     $T column create -tag cMime -visible 0
 
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
@@ -186,6 +188,7 @@ proc ::FilePrefs::TreeCtrl {T wysc} {
 
     $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
 
+    # @@@ treectrl2.2.3
     set S [$T style create styMime]
     $T style elements $S {eText}
 
@@ -204,7 +207,10 @@ proc ::FilePrefs::TreeCtrl {T wysc} {
 proc ::FilePrefs::InsertRow {T mime desc doWhat icon} {
     variable tableMime2Item
          
+    # @@@ treectrl2.2.3
+    # set item [$T item create -tags $mime]
     set item [$T item create]
+    # $T item text $item cDescription $desc cHandled $doWhat
     $T item text $item cDescription $desc cHandled $doWhat cMime $mime
     $T item lastchild root $item
     if {[regexp {(unavailable|reject|save|ask)} $doWhat]} {
@@ -218,6 +224,8 @@ proc ::FilePrefs::InsertRow {T mime desc doWhat icon} {
 proc ::FilePrefs::SetTableForMime {T mime desc doWhat icon} {
     variable tableMime2Item
 
+    # @@@ treectrl2.2.3
+    # set item [$T item id "tags $mime"]
     if {[info exists tableMime2Item($mime)]} {
 	set item $tableMime2Item($mime)
 	$T item text $item cDescription $desc cHandled $doWhat cMime $mime

@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the group chat GUI part.
 #      
-#  Copyright (c) 2001-2006  Mats Bengtsson
+#  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.187 2007-03-15 15:30:30 matben Exp $
+# $Id: GroupChat.tcl,v 1.188 2007-03-16 13:54:38 matben Exp $
 
 package require Create
 package require Enter
@@ -1639,6 +1639,7 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     
     # The columns.
     $T column create -tag cTree -resize 0 -expand 1
+    # @@@ treectrl2.2.3 -tag -> -tags
     $T column create -tag cTag  -visible 0
     
     # The elements.
@@ -1761,6 +1762,8 @@ proc ::GroupChat::TreePopup {chattoken T x y} {
     if {[lindex $id 0] eq "item"} {
 	set item [lindex $id 1]
 	set tag [$T item element cget $item cTag eText -text]
+	# @@@ treectrl2.2.3
+	# set tag [$T item cget $item -tags]
     } else {
 	set tag {}
     }
@@ -1844,11 +1847,15 @@ proc ::GroupChat::TreeSortRoleCmd {T item1 item2} {
     }
 }
 
+# @@@ treectrl2.2.3
+# Check list structure of tags!
+
 proc ::GroupChat::TreeCreateWithTag {T tag parent} {
     variable tag2item
     
     set item [$T item create -parent $parent]
-    #set item [$T item create -parent $parent -tags [treeutil::protecttags $tag]]
+    # @@@ treectrl2.2.3
+    # set item [$T item create -parent $parent -tags [treeutil::protect $tag]]
     
     # Handle the hidden cTag column.
     $T item style set $item cTag styTag
@@ -1862,7 +1869,8 @@ proc ::GroupChat::TreeCreateWithTag {T tag parent} {
 proc ::GroupChat::TreeFindWithTag {T tag} {
     variable tag2item
     
-    # return [$T item id "tag [treeutil::protecttags $tag]"]
+    # @@@ treectrl2.2.3
+    # return [$T item id "tag [treeutil::protect $tag]"]
     if {[info exists tag2item($T,$tag)]} {
 	return $tag2item($T,$tag)
     } else {
@@ -1874,6 +1882,8 @@ proc ::GroupChat::TreeSetIgnoreState {T jid3 {prefix ""}} {
     variable tag2item
     
     set tag [list jid $jid3]
+    # @@@ treectrl2.2.3
+    # $T item state set "tag [treeutil::protect $tag]" ${prefix}ignore
     if {[info exists tag2item($T,$tag)]} {
 	set item $tag2item($T,$tag)
 	$T item state set $item ${prefix}ignore
@@ -1888,6 +1898,8 @@ proc ::GroupChat::TreeEditUserStart {chattoken jid3} {
     set T $chatstate(wusers)
     set tag [list jid $jid3]
     
+    # @@@ treectrl2.2.3
+    # set item [$T item id "tag [treeutil::protect $tag]"]
     if {[info exists tag2item($T,$tag)]} {
 	set item $tag2item($T,$tag)
 	set image [::Roster::GetPresenceIconFromJid $jid3]
@@ -1931,6 +1943,8 @@ proc ::GroupChat::TreeEditUserEnd {chattoken jid3} {
     set T $chatstate(wusers)
     set tag [list jid $jid3]
     
+    # @@@ treectrl2.2.3
+    # set item [$T item id "tag [treeutil::protect $tag]"]
     if {[info exists tag2item($T,$tag)]} {
 	set item $tag2item($T,$tag)
 	set image [::Roster::GetPresenceIconFromJid $jid3]
@@ -1956,6 +1970,8 @@ proc ::GroupChat::TreeRemoveUser {chattoken jid3} {
 proc ::GroupChat::TreeDeleteItem {T tag} {
     variable tag2item
     
+    # @@@ treectrl2.2.3
+    # $T item delete "tag [treeutil::protect $tag]"
     if {[info exists tag2item($T,$tag)]} {
 	set item $tag2item($T,$tag)
 	$T item delete $item
@@ -1965,6 +1981,8 @@ proc ::GroupChat::TreeDeleteItem {T tag} {
 proc ::GroupChat::TreeUnsetTags {T item} {
     variable tag2item
 
+    # @@@ treectrl2.2.3
+    # return
     set tag [$T item element cget $item cTag eText -text]
     unset -nocomplain tag2item($T,$tag)    
 }
