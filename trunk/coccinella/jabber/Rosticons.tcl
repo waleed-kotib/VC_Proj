@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.29 2007-03-16 13:54:38 matben Exp $
+# $Id: Rosticons.tcl,v 1.30 2007-03-18 08:01:06 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -400,7 +400,6 @@ proc ::Rosticons::BuildPrefsHook {wtree nbframe} {
 proc ::Rosticons::BuildPrefsPage {wpage} {
     variable wselect
     variable wshow
-    variable tag2item
 
     set wc $wpage.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
@@ -449,9 +448,7 @@ proc ::Rosticons::BuildPrefsPage {wpage} {
     grid columnconfigure $box 1 -minsize 12
     
     # @@@ treectrl2.2.3
-    # set item [$T item id "tag status"]
-    # $wselect selection add $item
-    $wselect selection add $tag2item(status)
+    $wselect selection add status
     
     bind $wpage <Destroy> [namespace current]::PFree
 }
@@ -474,12 +471,10 @@ proc ::Rosticons::PTreeSelect {T wysc} {
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
 
-    # @@@ treectrl2.2.3 -tag -> -tags
-    $T column create -tag cButton -resize 0 -borderwidth $bd  \
+    $T column create -tags cButton -resize 0 -borderwidth $bd  \
       -background $bg -squeeze 1
-    $T column create -tag cTree   -resize 0 -borderwidth $bd  \
+    $T column create -tags cTree   -resize 0 -borderwidth $bd  \
       -background $bg -expand 1
-    $T column create -tag cTag -visible 0
     $T configure -treecolumn cTree
 
     $T element create eText text -lines 1
@@ -500,8 +495,8 @@ proc ::Rosticons::PTreeSelect {T wysc} {
     set S [$T style create styTag]
     $T style elements $S {eText}
 
-    # @@@ use column -itemstyle instead for 2.2
-    $T configure -defaultstyle {styButton styStd styTag}
+    $T column configure cButton -itemstyle styButton
+    $T column configure cTree -itemstyle styStd
 
     $T notify bind $T <Selection>      { ::Rosticons::POnSelect %T }
 }
@@ -511,7 +506,7 @@ proc ::Rosticons::POnSelect {T} {
     
     set item [$T selection get]
     if {[llength $item] == 1} {
-	set tag [$T item element cget $item cTag eText -text]
+	set tag [lindex [$T item tag names $item] 0]
 	if {[llength $tag] == 1} {
 	    set type $tag
 	    set name $ptmp(name,$type)
@@ -526,7 +521,6 @@ proc ::Rosticons::POnSelect {T} {
 proc ::Rosticons::PFillTree {T} {    
     variable state
     variable ptmp
-    variable tag2item
     upvar ::Jabber::jprefs jprefs
     
     foreach type $state(types) {
@@ -558,14 +552,10 @@ proc ::Rosticons::PFillTree {T} {
 	} else {
 	    set typeName [::Roster::GetNameFromTrpt $type]
 	}
-	set pitem [$T item create -open 1 -button 1 -parent root]
-	# @@@ treectrl2.2.3
-	# set pitem [$T item create -open 1 -button 1 -parent root -tags $type]
+	set pitem [$T item create -open 1 -button 1 -parent root -tags $type]
 	$T item element configure $pitem cButton eButton -window $wcheck
 	$T item element configure $pitem cTree eText -text $typeName \
 	  -font CociSmallBoldFont
-	$T item element configure $pitem cTag eText -text $type	
-	set tag2item($type) $pitem
 	
 	set names $state(names,$type)
 	
@@ -582,13 +572,9 @@ proc ::Rosticons::PFillTree {T} {
 	    }
 	    
 	    set tag [list $type $name]
-	    set item [$T item create -parent $pitem]
-	    # @@@ treectrl2.2.3
-	    # set item [$T item create -parent $pitem -tags $tag]
+	    set item [$T item create -parent $pitem -tags [list $tag]]
 	    $T item element configure $item cButton eButton -window $wradio
 	    $T item element configure $item cTree eText -text $str
-	    $T item element configure $item cTag eText -text $tag
-	    set tag2item($tag) $item
 	}
 	if {[llength $names] == 1} {
 	    $wradio configure -state disabled
@@ -608,10 +594,9 @@ proc ::Rosticons::PTreeShow {T wysc} {
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
    
-    # @@@ treectrl2.2.3 -tag -> -tags
-    $T column create -tag cKey   -text [mc Key] -expand 1 -squeeze 1  \
+    $T column create -tags cKey   -text [mc Key] -expand 1 -squeeze 1  \
       -borderwidth $bd -background $bg
-    $T column create -tag cImage -text [mc Icon] -expand 1 -justify center  \
+    $T column create -tags cImage -text [mc Icon] -expand 1 -justify center  \
       -borderwidth $bd -background $bg
 
     $T element create eText text -lines 1
@@ -625,8 +610,8 @@ proc ::Rosticons::PTreeShow {T wysc} {
     $T style elements $S {eImage}
     $T style layout $S eImage -padx 6 -pady 2 -expand ew
 
-    # @@@ use column -itemstyle instead for 2.2
-    $T configure -defaultstyle {styText styImage}
+    $T column configure cKey -itemstyle styText
+    $T column configure cImage -itemstyle styImage
 }
 
 proc ::Rosticons::PFillKeyImageTree {type name} {
@@ -712,10 +697,8 @@ proc ::Rosticons::UserDefaultsHook {} {
 
 proc ::Rosticons::PFree {} {
     variable ptmp
-    variable tag2item
     
     unset -nocomplain ptmp
-    unset -nocomplain tag2item
 }
 
 #-------------------------------------------------------------------------------

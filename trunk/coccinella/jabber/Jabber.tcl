@@ -4,14 +4,13 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.203 2007-03-09 07:54:04 matben Exp $
+# $Id: Jabber.tcl,v 1.204 2007-03-18 08:01:05 matben Exp $
 
 package require balloonhelp
 package require chasearrows
 package require http 2.3
 package require sha1
 package require tinyfileutils
-package require tree
 package require uriencode
 package require wavelabel
 

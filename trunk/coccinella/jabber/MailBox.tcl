@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.108 2007-03-16 13:54:38 matben Exp $
+# $Id: MailBox.tcl,v 1.109 2007-03-18 08:01:06 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -86,8 +86,6 @@ namespace eval ::MailBox:: {
     # Running id for incoming messages; never reused.
     variable uidmsg 1000
     
-    variable tableUid2Item
-
     # The actual mailbox content.
     # Content: {subject from date isread uidmsg message ?-key value ...?}
     variable mailbox
@@ -615,21 +613,18 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
 
-    # @@@ treectrl2.2.3 -tag -> -tags
-    $T column create -tag cWhiteboard -image $locals(iconWB16)  \
+    $T column create -tags cWhiteboard -image $locals(iconWB16)  \
       -itembackground $stripes -resize 0 -borderwidth $bd -background $bg
-    $T column create -tag cSubject -expand 1 -text [mc Subject] \
+    $T column create -tags cSubject -expand 1 -text [mc Subject] \
       -itembackground $stripes -button 1 -borderwidth $bd -background $bg
-    $T column create -tag cFrom    -expand 1 -text [mc From]    \
+    $T column create -tags cFrom    -expand 1 -text [mc From]    \
       -itembackground $stripes -button 1 -squeeze 1 -borderwidth $bd  \
       -background $bg
-    $T column create -tag cDate    -expand 1 -text [mc Date]    \
+    $T column create -tags cDate    -expand 1 -text [mc Date]    \
       -itembackground $stripes -button 1 -arrow up -borderwidth $bd  \
       -background $bg
-    $T column create -tag cSecs -visible 0
-    $T column create -tag cRead -visible 0
-    # @@@ treectrl2.2.3
-    $T column create -tag cUid  -visible 0
+    $T column create -tags cSecs -visible 0
+    $T column create -tags cRead -visible 0
 
     set fill    [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     set fillT   {white {selected focus} black {selected !focus}}
@@ -661,10 +656,13 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set S [$T style create styTag]
     $T style elements $S {eText}
     
-    # @@@ use column -itemstyle instead for 2.2
-    $T configure -defaultstyle {styImage stySubject styText styText  \
-      styTag styTag styTag}
-
+    $T column configure cWhiteboard -itemstyle styImage
+    $T column configure cSubject -itemstyle stySubject
+    $T column configure cFrom -itemstyle styText
+    $T column configure cDate -itemstyle styText
+    $T column configure cSecs -itemstyle styTag
+    $T column configure cRead -itemstyle styTag
+    
     $T notify install <Header-invoke>
     $T notify bind $T <Header-invoke> [list [namespace current]::HeaderCmd %T %C]
     $T notify bind $T <Selection> [list [namespace current]::Selection %T]
@@ -705,7 +703,6 @@ proc ::MailBox::InsertRow {wtbl row i} {
     
     variable mailboxindex
     variable locals
-    variable tableUid2Item
     
     # row:   {subject from date isread uidmsg message ?-key value ...?}
     
@@ -729,15 +726,10 @@ proc ::MailBox::InsertRow {wtbl row i} {
     set smartdate [::Utils::SmartClockFormat $secs -showsecs 0]
 
     set T $wtbl
-    # @@@ treectrl2.2.3
-    # set item [$T item create -tags $uidmsg]
-    set item [$T item create]
+    set item [$T item create -tags $uidmsg]
     $T item text $item  \
       cSubject $subject cFrom $from   cDate $smartdate  \
-      cSecs    $secs    cRead $isread cUid  $uidmsg
-    # $T item text $item  \
-    #   cSubject $subject cFrom $from   cDate $smartdate  \
-    #   cSecs    $secs    cRead $isread
+      cSecs    $secs    cRead $isread
     $T item lastchild root $item
     
     if {$haswb} {
@@ -749,7 +741,6 @@ proc ::MailBox::InsertRow {wtbl row i} {
     } else {
 	$T item state set $item unread
     }
-    set tableUid2Item($uidmsg) $item
 }
 
 # MailBox::Selection --
@@ -854,7 +845,7 @@ proc ::MailBox::UpdateDateAndTime {T} {
     variable locals
     
     foreach item [$T item children root] {
-	set uid  [$T item element cget $item cUid eText -text]
+	set uid  [$T item tag names $item]
 	set secs [$T item element cget $item cSecs eText -text]
 	set smartdate [::Utils::SmartClockFormat $secs -showsecs 0]
 	$T item element configure $item cDate eText -text $smartdate
@@ -876,7 +867,6 @@ proc ::MailBox::DisplayMessageHook {body args} {
 proc ::MailBox::MarkMsgAsRead {uid} {
     global  wDlgs
     variable locals
-    variable tableUid2Item
     
     if {[MKHaveMetakit]} {
 	MKMarkAsRead $uid
@@ -890,11 +880,7 @@ proc ::MailBox::MarkMsgAsRead {uid} {
 	}
     }
     if {[winfo exists $wDlgs(jinbox)]} {
-	set T $locals(wtbl)
-	set item $tableUid2Item($uid)
-	# @@@ treectrl2.2.3
-	# $T item state set "tag $uid" read
-	$T item state set $item read
+	$locals(wtbl) item state set $uid read
     }
 }
 
@@ -1130,7 +1116,7 @@ proc ::MailBox::TrashMsg { } {
     set select [$T item id "root lastchild"]
     
     foreach item $items {
-	set uid  [$T item element cget $item cUid eText -text]
+	set uid [$T item tag names $item]
 	
 	set fileTail ""
 	if {[MKHaveMetakit]} {
@@ -1274,7 +1260,7 @@ proc ::MailBox::OnDestroyWhiteboard {w} {
 	# Deselect any selected whiteboards on destroy.
 	set T $locals(wtbl)
 	foreach item [$T selection get] {
-	    set uid  [$T item element cget $item cUid  eText -text]
+	    set uid [$T item tag names $item]
 
 	    if {[MKHaveMetakit]} {
 		array set v [MKGet $uid]
@@ -1302,7 +1288,7 @@ proc ::MailBox::DoubleClickMsg {T} {
 	return
     }
     set item [$T selection get]
-    set uid  [$T item element cget $item cUid eText -text]
+    set uid [$T item tag names $item]
 
     if {[MKHaveMetakit]} {
 	lassign [MKGetContentList $uid] subject from date body
@@ -1342,7 +1328,7 @@ proc ::MailBox::DisplayAny {item} {
     set T $locals(wtbl)
 
     set jid3 [$T item element cget $item cFrom eText -text]
-    set uid  [$T item element cget $item cUid  eText -text]
+    set uid  [$T item tag names $item]
     set jid2 [jlib::barejid $jid3]
 	    
     DisplayTextMsg $uid
@@ -1427,7 +1413,7 @@ proc ::MailBox::ReplyTo { } {
 	return
     }
     set item [$T selection get]
-    set uid  [$T item element cget $item cUid eText -text]
+    set uid [$T item tag names $item]
 
     if {[MKHaveMetakit]} {
 	array set v [MKGet $uid]
@@ -1458,7 +1444,7 @@ proc ::MailBox::ForwardTo { } {
 	return
     }
     set item [$T selection get]
-    set uid  [$T item element cget $item cUid eText -text]
+    set uid [$T item tag names $item]
 
     if {[MKHaveMetakit]} {
 	array set v [MKGet $uid]
@@ -1907,7 +1893,6 @@ proc ::MailBox::MKInsertAll {} {
 }
 
 proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
-    variable tableUid2Item
     variable locals
     
     set secs [clock scan $time]
@@ -1924,15 +1909,10 @@ proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
 	set iswb 1
     }
     set T $locals(wtbl)
-    # @@@ treectrl2.2.3
-    # set item [$T item create -tags $uuuid]
-    set item [$T item create]
+    set item [$T item create -tags $uuid]
     $T item text $item  \
       cSubject $subject cFrom $from   cDate $smartdate  \
-      cSecs    $secs    cRead $isread cUid  $uuid
-    # $T item text $item  \
-    #   cSubject $subject cFrom $from   cDate $smartdate  \
-    #   cSecs    $secs    cRead $isread
+      cSecs    $secs    cRead $isread
     $T item lastchild root $item
     
     if {$iswb} {
@@ -1944,7 +1924,6 @@ proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
     } else {
 	$T item state set $item unread
     }
-    set tableUid2Item($uuid) $item
 }
 
 proc ::MailBox::MKMarkAsRead {uuid} {
