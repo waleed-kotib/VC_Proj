@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.62 2007-03-14 08:47:44 matben Exp $
+# $Id: Init.tcl,v 1.63 2007-03-18 08:01:06 matben Exp $
 
 namespace eval ::Init {}
 
@@ -644,7 +644,7 @@ proc ::Init::LoadPackages {} {
     # treectrl is required.
     ::Splash::SetMsg "[mc splashlook] treectrl..."
     set ::treectrl_library [file join $this(binLibPath) treectrl]
-    if {[catch {package require treectrl 2.1} msg]} {
+    if {[catch {package require treectrl 2.2} msg]} {
 	tk_messageBox -icon error \
 	  -message "This application requires the treectrl widget to work! $::errorInfo"
 	exit

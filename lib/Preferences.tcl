@@ -3,12 +3,11 @@
 #       This file is part of The Coccinella application. It implements the
 #       preferences dialog window.
 #      
-#  Copyright (c) 1999-2005  Mats Bengtsson
+#  Copyright (c) 1999-2007  Mats Bengtsson
 #  
-# $Id: Preferences.tcl,v 1.94 2007-03-16 13:54:38 matben Exp $
+# $Id: Preferences.tcl,v 1.95 2007-03-18 08:01:07 matben Exp $
  
 package require mnotebook
-package require tree
 
 package provide Preferences 1.0
 
@@ -127,7 +126,6 @@ proc ::Preferences::QuitAppHook { } {
 proc ::Preferences::Show {{page {}}} {
     global  wDlgs
     variable wtree
-    variable tableName2Item
     
     set w $wDlgs(prefs)
     if {[winfo exists $w]} {
@@ -136,12 +134,8 @@ proc ::Preferences::Show {{page {}}} {
 	Build
     }
     if {$page ne ""} {
-	if {[info exists tableName2Item($page)]} {
-	    $wtree selection clear all
-	    # @@@ treectrl2.2.3
-	    # $wtree selection add "tag $page"
-	    $wtree selection add $tableName2Item($page)
-	}
+	$wtree selection clear all
+	$wtree selection add [list $page]
     }
 }
 
@@ -153,9 +147,8 @@ proc ::Preferences::Build {args} {
     variable finished
     variable nbframe
     variable lastPage
-    variable tableName2Item
     
-    array set argsArr $args
+    array set argsA $args
 
     set w $wDlgs(prefs)
     if {[winfo exists $w]} {
@@ -206,24 +199,16 @@ proc ::Preferences::Build {args} {
     pack $wysc  -side right -fill y
     
     # Fill tree.
-    # @@@ treectrl2.2.3   
-    # set item [$T item create -button 1 -tags [list General]]
-    set item [$T item create -button 1]
-    $T item style set $item cTree styText cTag styText
-    $T item text $item cTree [mc General] cTag [list General]
+    set item [$T item create -button 1 -tags [list {General}]]
+    $T item style set $item cTree styText
+    $T item text $item cTree [mc General]
     $T item lastchild root $item
 
-    set tableName2Item(General) $item
-    
-    # @@@ treectrl2.2.3   
-    # set item [$T item create -button 1 -tags [list Jabber]]
-    set item [$T item create -button 1]
-    $T item style set $item cTree styText cTag styText
-    $T item text $item cTree [mc Jabber] cTag [list Jabber]
+    set item [$T item create -button 1 -tags [list {Jabber}]]
+    $T item style set $item cTree styText
+    $T item text $item cTree [mc Jabber]
     $T item lastchild root $item
 
-    set tableName2Item(Jabber) $item
-    
     # The notebook and its pages.
     set nbframe [::mnotebook::mnotebook $wcont.nb -borderwidth 1 -relief sunken]
     pack $nbframe -expand 1 -fill both -padx 4 -pady 4
@@ -263,19 +248,17 @@ proc ::Preferences::Build {args} {
     bind $w <Return> {}
     
     # Which page to be in front?
-    if {[info exists argsArr(-page)]} {
-	set selectPage $argsArr(-page)
+    if {[info exists argsA(-page)]} {
+	set selectPage $argsA(-page)
     } elseif {$lastPage ne ""} {
 	set selectPage $lastPage
     } else {
 	set selectPage {General}
     }
-    if {[info exists tableName2Item($selectPage)]} {
-	# @@@ treectrl2.2.3
-	# $T selection add "tag $selectPage"
-	$T selection add $tableName2Item($selectPage)
+    set item [$T item id [list $selectPage]]
+    if {[llength $item]} {
+	$T selection add $item
     }
-    
     wm deiconify $w
     
     # Grab and focus.
@@ -298,12 +281,10 @@ proc ::Preferences::TreeCtrl {T wysc} {
     set bg [option get $T columnBackground {}]
     set fillT {white {selected focus} black {selected !focus}}
 
-    # @@@ treectrl2.2.3 -tag -> -tags
-    $T column create -text [mc {Settings Panels}] -tag cTree  \
+     $T column create -text [mc {Settings Panels}] -tags cTree  \
       -itembackground $stripes -resize 0 -expand 1 -borderwidth $bd  \
       -background $bg
-    $T column create -tag cTag -visible 0
-    $T configure -treecolumn cTree
+     $T configure -treecolumn cTree
 
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     $T element create eText text -lines 1 -fill $fillT
@@ -316,22 +297,16 @@ proc ::Preferences::TreeCtrl {T wysc} {
     $T style layout $S eBorder -detach yes -iexpand xy -indent 0
 
     $T notify bind $T <Selection>  [list [namespace current]::Selection %T]
-    bind $T <Destroy>             +[list [namespace current]::OnDestroy %W]
 }
 
 proc ::Preferences::NewTableItem {name text} {
     variable wtree
-    variable tableName2Item
-    
-    ::Debug 6 "::Preferences::NewTableItem $name"
-    
+        
     set T $wtree
     
-    # @@@ treectrl2.2.3   
-    # set item [$T item create -tags [lindex $name end]]
-    set item [$T item create]
-    $T item style set $item cTree styText cTag styText
-    $T item text $item cTree $text cTag $name
+    set item [$T item create -tags [list $name]]
+    $T item style set $item cTree styText
+    $T item text $item cTree $text
 
     set n [llength $name]
     if {$n == 1} {
@@ -339,34 +314,39 @@ proc ::Preferences::NewTableItem {name text} {
 	$T item lastchild root $item
     } else {
 	set root [lindex $name 0]
-	# @@@ treectrl2.2.3   
-	# set ritem [$T item id "tag $root"]
-	# $T item lastchild $ritem $item
-	set ritem $tableName2Item($root)
+	set ritem [$T item id [list $root]]
 	$T item lastchild $ritem $item
     }
-    set tableName2Item($name) $item
-    
     return $item
 }
 
 proc ::Preferences::HaveTableItem {name} {
     variable wtree
-    variable tableName2Item
-
-    # @@@ treectrl2.2.3   
-    # return [llength [$wtree item id "tag $name"]]
-    if {[info exists tableName2Item($name)]} {
-	return 1
-    } else {
-	return 0
-    }
+    return [llength [$wtree item id [list $name]]]
 }
 
-proc ::Preferences::OnDestroy {T} {
-    variable tableName2Item
+# Preferences::Selection --
+#
+#       Callback when selecting item in tree.
+#
+# Arguments:
+#       T           tree widget
+#       
+# Results:
+#       new page displayed
 
-    unset -nocomplain tableName2Item
+proc ::Preferences::Selection {T} {
+    variable nbframe
+
+    if {[$T selection count] != 1} {
+	return
+    }
+    set item [$T selection get]    
+    set tag [lindex [$T item tag names $item] 0]
+    set page [lindex $tag end]
+    if {[$nbframe exists $page]} {
+	$nbframe displaypage $page
+    }
 }
 
 # Preferences::ResetToFactoryDefaults --
@@ -512,16 +492,15 @@ proc ::Preferences::Cancel { } {
 proc ::Preferences::CleanUp { } {
     variable wtoplevel
     variable wtree
-    variable tableName2Item
+    variable lastPage
     
     # Which page to be in front next time?
     set T $wtree
     set item [$T selection get]
     if {[llength $item] == 1} {
-	set lastPage [$T item element cget $item cTag eText -text]
+	set lastPage [lindex [$T item tag names $item] 0]
     }
     ::UI::SaveWinGeom $wtoplevel
-    unset -nocomplain tableName2Item
 }
 
 # Preferences::HasChanged --
@@ -541,46 +520,6 @@ proc ::Preferences::NeedRestart { } {
     variable needRestart
 
     set needRestart 1
-}
-
-proc ::Preferences::Selection {T} {
-    variable nbframe
-
-    if {[$T selection count] != 1} {
-	return
-    }
-    set item [$T selection get]
-    set tag  [$T item element cget $item cTag eText -text]
-    set page [lindex $tag end]
-    
-    if {[$nbframe exists $page]} {
-	$nbframe displaypage $page
-    }
-}
-
-# Preferences::SelectCmd --
-#
-#       Callback when selecting item in tree.
-#
-# Arguments:
-#       w           tree widget
-#       v           tree item path
-#       
-# Results:
-#       new page displayed
-
-proc ::Preferences::SelectCmd {w v} {
-    variable nbframe
-    
-    if {[llength $v] && ([$w itemconfigure $v -dir] == 0)} {
-	#$nbframe displaypage [lindex $v end]
-    }    
-    if {[llength $v]} {
-	set page [lindex $v end]
-	if {[$nbframe exists $page]} {
-	    $nbframe displaypage $page
-	}
-    }    
 }
 
 #-------------------------------------------------------------------------------
