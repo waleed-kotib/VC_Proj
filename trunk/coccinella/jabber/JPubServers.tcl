@@ -4,11 +4,12 @@
 #       
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: JPubServers.tcl,v 1.3 2006-02-03 07:17:17 matben Exp $
+# $Id: JPubServers.tcl,v 1.4 2007-03-19 08:04:10 matben Exp $
 
 package require chasearrows
 package require httpex
 package require tinydom
+package require qdxml
 
 package provide JPubServers 1.0
 
@@ -79,9 +80,9 @@ proc ::JPubServers::Build {w {command ""}} {
     frame $wtbfr -borderwidth 1 -relief sunken
     pack $wtbfr -side top -fill both -expand 1
     tablelist::tablelist $wtbl \
-      -columns [list 16 [mc Address] 30 [mc Name]]  \
-      -yscrollcommand [list $wysc set] -stretch all \
-      -width 70 -height 16
+      -columns [list 40 [mc Address]] -stretch all \
+      -yscrollcommand [list $wysc set] \
+      -width 40 -height 16
     ttk::scrollbar $wysc -orient vertical -command [list $wtbl yview]
 
     grid  $wtbl  $wysc  -sticky news
@@ -125,7 +126,7 @@ proc ::JPubServers::Build {w {command ""}} {
 	  \"$url\": $token"
 	return
     } else {
-	set state(statusmsg) "Getting server list from $url"
+	set state(statusmsg) "Getting server list"
 	$warrows start
     }
     if {[winfo exists $w]} {
@@ -209,22 +210,23 @@ proc ::JPubServers::HttpCommand {w token} {
 	    
 	    # Get and parse xml.
 	    set xml [::httpex::data $token]    
-	    set token [tinydom::parse $xml]
-	    set xmllist [tinydom::documentElement $token]
-	    set serverList {}
+	    set xtoken [tinydom::parse $xml -package qdxml]
+	    set xmllist [tinydom::documentElement $xtoken]
+	    set jidL [list]
 	    
 	    foreach elem [tinydom::children $xmllist] {
 		switch -- [tinydom::tagname $elem] {
 		    item {
 			unset -nocomplain attrArr
 			array set attrArr [tinydom::attrlist $elem]
-			lappend serverList  \
-			  [list $attrArr(jid) $attrArr(name)]
+			if {[info exists attrArr(jid)]} {
+			    lappend jidL [list $attrArr(jid)]
+			}
 		    }
 		}
 	    }
-
-	    $state(wtbl) insertlist end $serverList
+	    $state(wtbl) insertlist end $jidL
+	    tinydom::cleanup $xtoken
 	}
     }
     ::httpex::cleanup $token

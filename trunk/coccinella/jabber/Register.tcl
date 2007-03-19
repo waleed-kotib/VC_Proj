@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the registration UI parts for jabber.
 #      
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.64 2007-02-26 13:26:53 matben Exp $
+# $Id: Register.tcl,v 1.65 2007-03-19 08:04:10 matben Exp $
 
 package provide Register 1.0
 
@@ -128,6 +128,7 @@ proc ::RegisterEx::OnMenu {} {
 #               -username
 #               -password
 #               -autoget
+#               -publicservers
 #       
 # Results:
 #       w
@@ -158,6 +159,7 @@ proc ::RegisterEx::New {args} {
 	finished  -1
 	-autoget   0
 	-server    ""
+	-publicservers 1
     }
     array set state $args
     
@@ -218,7 +220,10 @@ proc ::RegisterEx::New {args} {
     pack  $frmid  -side top -fill both -expand 1
 
     ttk::label $frmid.lserv -text "[mc {Jabber Server}]:" -anchor e
-    ttk::entry $frmid.eserv -width 22    \
+    #ttk::entry $frmid.eserv -width 22    \
+    #  -textvariable $token\(-server) -validate key  \
+    #  -validatecommand {::Jabber::ValidateDomainStr %S}
+    ttk::combobox $frmid.eserv -width 22    \
       -textvariable $token\(-server) -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
 	
@@ -233,9 +238,18 @@ proc ::RegisterEx::New {args} {
     # More options and chasing arrows.
     set wmore $wbox.more
     ttk::frame $wmore
-    ttk::button $wmore.tri -style Small.Toolbutton \
-      -compound left -image [::UI::GetIcon mactriangleclosed] \
-      -text "[mc More]..." -command [list [namespace current]::MoreOpts $token]
+    if {0} {
+	ttk::button $wmore.tri -style Small.Toolbutton \
+	  -compound left -image [::UI::GetIcon mactriangleclosed] \
+	  -text "[mc More]..." -command [list [namespace current]::MoreOpts $token]
+    } elseif {1} {
+	ttk::button $wmore.tri -style Small.Plain -padding {6 1} \
+	  -compound left -image [::UI::GetIcon closeAqua] \
+	  -text "[mc More]..." -command [list [namespace current]::MoreOpts $token]
+    } else {
+	ttk::checkbutton $wmore.tri -style Arrow.TCheckbutton \
+	    -command [list [namespace current]::MoreOpts $token]
+    }
     ::chasearrows::chasearrows $wmore.arr -size 16
     ttk::label $wmore.ls -style Small.TLabel \
       -textvariable $token\(status)
@@ -292,6 +306,12 @@ proc ::RegisterEx::New {args} {
     if {$state(-autoget)} {
 	$state(wbtok) invoke
     }
+    if {$state(-publicservers)} {
+	catch {
+	    ::httpex::get $jprefs(urlServersList) \
+	      -command  [list [namespace current]::HttpCommand $token]
+	} state(httptoken)
+    }
     
     # Wait here for a button press and window to be destroyed.
     tkwait variable $token\(finished)
@@ -306,6 +326,41 @@ proc ::RegisterEx::New {args} {
     Free $token
     
     return $w
+}
+
+proc ::RegisterEx::HttpCommand {token htoken} {
+    variable $token
+    upvar 0 $token state
+    
+    if {[::httpex::state $htoken] ne "final"} {
+	return
+    }
+    if {[::httpex::status $htoken] eq "ok"} {
+	
+	# Get and parse xml.
+	set xml [::httpex::data $htoken]    
+	set xtoken [tinydom::parse $xml -package qdxml]
+	set xmllist [tinydom::documentElement $xtoken]
+	set jidL [list]
+	
+	foreach elem [tinydom::children $xmllist] {
+	    switch -- [tinydom::tagname $elem] {
+		item {
+		    unset -nocomplain attrArr
+		    array set attrArr [tinydom::attrlist $elem]
+		    if {[info exists attrArr(jid)]} {
+			lappend jidL [list $attrArr(jid)]
+		    }
+		}
+	    }
+	}
+	if {[winfo exists $state(wserv)]} {
+	    $state(wserv) configure -values $jidL
+	}
+	tinydom::cleanup $xtoken
+    }
+    ::httpex::cleanup $htoken
+    unset -nocomplain state(httptoken)
 }
 
 # Not used for the moment due to the grab stuff.
@@ -345,7 +400,13 @@ proc ::RegisterEx::CloseCmd {token w} {
     return stop
 }
 
-proc ::RegisterEx::Free {token} {    
+proc ::RegisterEx::Free {token} { 
+    variable $token
+    upvar 0 $token state
+ 
+    if {[info exists state(httptoken)]} {
+	catch {::httpex::reset $state(httptoken)}
+    }
     unset -nocomplain $token
 }
 
@@ -354,7 +415,7 @@ proc ::RegisterEx::MoreOpts {token} {
     upvar 0 $token state
       
     grid  $state(wfmore)  -  -  -sticky ew
-    $state(wtri) configure -image [::UI::GetIcon mactriangleopen] \
+    $state(wtri) configure -image [::UI::GetIcon openAqua] \
       -text "[mc Less]..." -command [list [namespace current]::LessOpts $token]
 }
 
@@ -363,7 +424,7 @@ proc ::RegisterEx::LessOpts {token} {
     upvar 0 $token state
     
     grid remove $state(wfmore)
-    $state(wtri) configure -image [::UI::GetIcon mactriangleclosed] \
+    $state(wtri) configure -image [::UI::GetIcon closeAqua] \
       -text "[mc More]..." -command [list [namespace current]::MoreOpts $token]
 }
 
