@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinydom.tcl,v 1.11 2006-12-21 11:23:47 matben Exp $
+# $Id: tinydom.tcl,v 1.12 2007-03-19 08:04:10 matben Exp $
 
 package require xml
 
@@ -25,12 +25,27 @@ namespace eval tinydom {
     variable cache
 }
 
-proc tinydom::parse {xml} {
+proc tinydom::parse {xml args} {
     variable xmlobj
     variable uid
     variable cache
 
-    set xmlparser [xml::parser]
+    array set argsA {
+	-package xml
+    }
+    array set argsA $args
+    switch -- $argsA(-package) {
+	xml {
+	    set xmlparser [xml::parser]
+	}
+	qdxml {
+	    package require qdxml
+	    set xmlparser [qdxml::create]
+	}
+	default {
+	    return -code error "unknown -package \"$argsA(-package)\""
+	}
+    }
     $xmlparser configure -reportempty 1   \
       -elementstartcommand  [namespace current]::XmlElementStart     \
       -elementendcommand    [namespace current]::XmlElementEnd       \

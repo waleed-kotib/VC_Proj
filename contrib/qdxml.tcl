@@ -9,7 +9,7 @@
 #       o handle resets
 #       o error handling?
 #       
-# $Id: qdxml.tcl,v 1.6 2007-02-26 13:26:53 matben Exp $
+# $Id: qdxml.tcl,v 1.7 2007-03-19 08:04:10 matben Exp $
 
 package provide qdxml 0.1
 
@@ -77,6 +77,13 @@ proc qdxml::create {args} {
       "eval qdxml::cmdproc {$token} \$cmd \$args"
     
     return $token
+}
+
+proc qdxml::delete {token} {
+    variable $token
+    upvar 0 $token state
+    
+    unset -nocomplain state
 }
 
 proc qdxml::cmdproc {token cmd args} {

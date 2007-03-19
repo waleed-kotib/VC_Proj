@@ -10,7 +10,7 @@ Coccinella-0.9*
  o removed the p2p whiteboard mode
  o the whiteboard code can now optionally be removed from the application
  o added settings on unix for default web browser and email client
-
+ o automatically gets a list with free jabber servers when registering new account
 
 Coccinella-0.95.16 (20070214):
 
