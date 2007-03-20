@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.188 2007-03-16 13:54:38 matben Exp $
+# $Id: GroupChat.tcl,v 1.189 2007-03-20 08:21:57 matben Exp $
 
 package require Create
 package require Enter
@@ -1638,9 +1638,7 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     $T state define ignore
     
     # The columns.
-    $T column create -tag cTree -resize 0 -expand 1
-    # @@@ treectrl2.2.3 -tag -> -tags
-    $T column create -tag cTag  -visible 0
+    $T column create -tags cTree -resize 0 -expand 1
     
     # The elements.
     $T element create eImage     image
@@ -1675,19 +1673,12 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     # @@@ use column -itemstyle instead for 2.2
     $T configure -defaultstyle {{} styTag}
 
-    # This automatically cleans up the tag array.
-    $T notify bind UsersTreeTag <ItemDelete> {
-	foreach item %i {
-	    ::GroupChat::TreeUnsetTags %T $item
-	} 
-    }
     bindtags $T [concat UsersTreeTag [bindtags $T]]
     
     bind $T <Button-1>        [list ::GroupChat::TreeButtonPress $chattoken %W %x %y ]
     bind $T <ButtonRelease-1> [list ::GroupChat::TreeButtonRelease $chattoken %W %x %y ]
     bind $T <<ButtonPopup>>   [list ::GroupChat::TreePopup $chattoken %W %x %y ]
     bind $T <Double-1>        { ::GroupChat::DoubleClick %W %x %y }        
-    bind $T <Destroy>         {+::GroupChat::TreeOnDestroy %W }
     bind $T <KeyPress>        +[list ::GroupChat::TreeEditTimerCancel $chattoken]
     
     ::treeutil::setdboptions $T $w utree
@@ -1731,7 +1722,7 @@ proc ::GroupChat::TreeButtonRelease {chattoken T x y} {
     set id [$T identify $x $y]
     if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
 	set item [lindex $id 1]
-	set tags [$T item element cget $item cTag eText -text]
+	set tags [treeutil::deprotect [lindex [$T item tag names $item] 0]]
 	if {[lindex $tags 0] eq "jid"} {
 	    set jid [lindex $tags 1]
 	    set nick [::Jabber::JlibCmd service mynick $chatstate(roomjid)]
@@ -1756,16 +1747,12 @@ proc ::GroupChat::TreeEditTimerCancel {chattoken} {
 }
 
 proc ::GroupChat::TreePopup {chattoken T x y} {
-    variable tag2item
-
     set id [$T identify $x $y]
     if {[lindex $id 0] eq "item"} {
 	set item [lindex $id 1]
-	set tag [$T item element cget $item cTag eText -text]
-	# @@@ treectrl2.2.3
-	# set tag [$T item cget $item -tags]
+	set tag [treeutil::deprotect [lindex [$T item tag names $item] 0]]
     } else {
-	set tag {}
+	set tag [list]
     }
     Popup $chattoken $T $tag $x $y
 }
@@ -1779,7 +1766,7 @@ proc ::GroupChat::DoubleClick {T x y} {
     set id [$T identify $x $y]
     if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
 	set item [lindex $id 1]
-	set tags [$T item element cget $item cTag eText -text]
+	set tags [treeutil::deprotect [lindex [$T item tag names $item] 0]]
 	if {[lindex $tags 0] eq "jid"} {
 	    set jid [lindex $tags 1]		    
 	    if {[string equal $jprefs(rost,dblClk) "normal"]} {
@@ -1830,8 +1817,8 @@ proc ::GroupChat::TreeCreateUserItem {chattoken jid3} {
 proc ::GroupChat::TreeSortRoleCmd {T item1 item2} {
     variable userRoleSortOrder
 
-    set tag1 [$T item element cget $item1 cTag eText -text]
-    set tag2 [$T item element cget $item2 cTag eText -text]
+    set tag1 [treeutil::deprotect [lindex [$T item tag names $item1] 0]]
+    set tag2 [treeutil::deprotect [lindex [$T item tag names $item2] 0]]
     if {([lindex $tag1 0] eq "role") && ([lindex $tag2 0] eq "role")} {
 	set role1 [lindex $tag1 1]
 	set role2 [lindex $tag2 1]
@@ -1847,45 +1834,18 @@ proc ::GroupChat::TreeSortRoleCmd {T item1 item2} {
     }
 }
 
-# @@@ treectrl2.2.3
-# Check list structure of tags!
-
 proc ::GroupChat::TreeCreateWithTag {T tag parent} {
-    variable tag2item
-    
-    set item [$T item create -parent $parent]
-    # @@@ treectrl2.2.3
-    # set item [$T item create -parent $parent -tags [treeutil::protect $tag]]
-    
-    # Handle the hidden cTag column.
-    $T item style set $item cTag styTag
-    $T item element configure $item cTag eText -text $tag
-    
-    set tag2item($T,$tag) $item
-
-    return $item
+    return [$T item create -parent $parent -tags [list [treeutil::protect $tag]]]
 }
 
 proc ::GroupChat::TreeFindWithTag {T tag} {
-    variable tag2item
-    
-    # @@@ treectrl2.2.3
-    # return [$T item id "tag [treeutil::protect $tag]"]
-    if {[info exists tag2item($T,$tag)]} {
-	return $tag2item($T,$tag)
-    } else {
-	return {}
-    }
+    return [$T item id [list [treeutil::protect $tag]]]
 }
 
 proc ::GroupChat::TreeSetIgnoreState {T jid3 {prefix ""}} {
-    variable tag2item
-    
     set tag [list jid $jid3]
-    # @@@ treectrl2.2.3
-    # $T item state set "tag [treeutil::protect $tag]" ${prefix}ignore
-    if {[info exists tag2item($T,$tag)]} {
-	set item $tag2item($T,$tag)
+    set item [$T item id [list [treeutil::protect $tag]]]
+    if {[llength $item]} {
 	$T item state set $item ${prefix}ignore
     }
 }
@@ -1893,15 +1853,12 @@ proc ::GroupChat::TreeSetIgnoreState {T jid3 {prefix ""}} {
 proc ::GroupChat::TreeEditUserStart {chattoken jid3} {
     variable $chattoken
     upvar 0 $chattoken chatstate
-    variable tag2item
     
     set T $chatstate(wusers)
     set tag [list jid $jid3]
     
-    # @@@ treectrl2.2.3
-    # set item [$T item id "tag [treeutil::protect $tag]"]
-    if {[info exists tag2item($T,$tag)]} {
-	set item $tag2item($T,$tag)
+    set item [$T item id [list [treeutil::protect $tag]]]
+    if {[llength $item]} {
 	set image [::Roster::GetPresenceIconFromJid $jid3]
 	set wentry $T.entry
 	set chatstate(editNick) [jlib::resourcejid $jid3]
@@ -1919,7 +1876,7 @@ proc ::GroupChat::TreeEditUserStart {chattoken jid3} {
 	  [list ::GroupChat::TreeOnReturnEdit $chattoken $jid3]
 	bind $wentry <FocusOut> \
 	  [list ::GroupChat::TreeEditUserEnd $chattoken $jid3]
-    }    
+    }
 }
 
 proc ::GroupChat::TreeOnReturnEdit {chattoken jid3} {
@@ -1938,15 +1895,12 @@ proc ::GroupChat::TreeOnReturnEdit {chattoken jid3} {
 proc ::GroupChat::TreeEditUserEnd {chattoken jid3} {
     variable $chattoken
     upvar 0 $chattoken chatstate
-    variable tag2item
 
     set T $chatstate(wusers)
     set tag [list jid $jid3]
     
-    # @@@ treectrl2.2.3
-    # set item [$T item id "tag [treeutil::protect $tag]"]
-    if {[info exists tag2item($T,$tag)]} {
-	set item $tag2item($T,$tag)
+    set item [$T item id [list [treeutil::protect $tag]]]
+    if {[llength $item]} {
 	set image [::Roster::GetPresenceIconFromJid $jid3]
 	set text [jlib::resourcejid $jid3]
 	$T item style set $item cTree styUser
@@ -1968,36 +1922,14 @@ proc ::GroupChat::TreeRemoveUser {chattoken jid3} {
 }
 
 proc ::GroupChat::TreeDeleteItem {T tag} {
-    variable tag2item
-    
-    # @@@ treectrl2.2.3
-    # $T item delete "tag [treeutil::protect $tag]"
-    if {[info exists tag2item($T,$tag)]} {
-	set item $tag2item($T,$tag)
+    set item [$T item id [list [treeutil::protect $tag]]]
+    if {[llength $item]} {
 	$T item delete $item
-    }    
-}
-
-proc ::GroupChat::TreeUnsetTags {T item} {
-    variable tag2item
-
-    # @@@ treectrl2.2.3
-    # return
-    set tag [$T item element cget $item cTag eText -text]
-    unset -nocomplain tag2item($T,$tag)    
+    }
 }
 
 proc ::GroupChat::TreeDeleteAll {T} {
-    variable tag2item
-    
     $T item delete all
-    array unset tag2item $T,*
-}
-
-proc ::GroupChat::TreeOnDestroy {T} {
-    variable tag2item
-    
-    array unset tag2item $T,*
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

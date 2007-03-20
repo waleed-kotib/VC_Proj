@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.13 2007-03-12 13:19:56 matben Exp $
+# $Id: AvatarMB.tcl,v 1.14 2007-03-20 08:21:57 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -212,7 +212,7 @@ proc ::AvatarMB::Popdown {mb} {
     grab -global $menu
 }
 
-proc AvatarMB::TransferGrab {mb} {
+proc ::AvatarMB::TransferGrab {mb} {
     variable state
     #puts "AvatarMB::TransferGrab"
     if {$state(pulldown)} {
