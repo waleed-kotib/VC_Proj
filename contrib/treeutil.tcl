@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under BSD-style license.
 #  
-#  $Id: treeutil.tcl,v 1.12 2007-03-16 13:54:38 matben Exp $
+#  $Id: treeutil.tcl,v 1.13 2007-03-20 08:21:57 matben Exp $
 
 # USAGE:
 # 
@@ -236,11 +236,21 @@ proc treeutil::configurecolumns {w args} {
     }
 }
 
+# treeutil::protect, deprotect --
+# 
+#       A tag is just a string of characters, and it may take any form, 
+#       including that of an integer, although the characters 
+#       '(', ')', '&', '|', '^' and '!' should be avoided. 
+#       Tags must therefore be protected if they contain any of these specials.
+
 proc treeutil::protect {tags} {
-    # A tag is just a string of characters, and it may take any form, 
-    # including that of an integer, although the characters 
-    # '(', ')', '&', '|', '^' and '!' should be avoided. 
     regsub -all {([()&|^!])} $tags {\\\1} tags
+    return $tags
+}
+
+proc treeutil::deprotect {tags} {
+    # Inverse of protect. 
+    regsub -all {\\([()&|^!])} $tags {\1} tags
     return $tags
 }
 
