@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.76 2007-03-13 14:29:33 matben Exp $
+# $Id: Whiteboard.tcl,v 1.77 2007-03-21 11:07:53 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -2200,7 +2200,7 @@ proc ::WB::RegisterNewMenu {mtail name menuSpec} {
 
 proc ::WB::BuildRegisteredMenus {w wmenu} {
     variable menuSpecPublic
-    
+        
     foreach mtail $menuSpecPublic(wpaths) {
 	set name  $menuSpecPublic($mtail,name)
 	set specs $menuSpecPublic($mtail,specs)

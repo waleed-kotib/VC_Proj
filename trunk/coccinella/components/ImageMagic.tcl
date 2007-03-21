@@ -6,7 +6,7 @@
 # 
 # Unix/Linux only.
 #
-# $Id: ImageMagic.tcl,v 1.9 2007-03-11 14:37:47 matben Exp $
+# $Id: ImageMagic.tcl,v 1.10 2007-03-21 11:07:53 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -36,7 +36,7 @@ proc ::ImageMagic::Init { } {
 	# 'type' 'label' 'command' 'opts' {subspec}
 	# where subspec defines a cascade menu recursively
 	set menuspec [list \
-	    command [mc {Take Snapshot}] {::ImageMagic::ImportWindowSnapShot $w} normal {} {} {} \
+	    command [mc {Take Snapshot}] {::ImageMagic::ImportWindowSnapShot $w} {} {} \
 	]
       ::WB::RegisterNewMenu addon [mc mAddons] $menuspec
     }

@@ -162,6 +162,14 @@ Known Bugs:
 
     set debugLevel 4
 
+Developers:
+
+    The main SourceForge page: http://coccinella.sourceforge.net/
+    For building the coccinella from sources see: 
+      http://coccinella.sourceforge.net/build/
+
+    o It is possible to run and build the Coccinella without whiteboard support.
+      You just drag out the coccinella/whiteboard/ folder.
 
 XML/SVG:
 
@@ -188,18 +196,11 @@ The Beetle:
 
     Don't be afraid for the 'Coccinella' (ladybug), it's tame!
 
-Special Contributions:
-
-    * Raymond Tang: resolving links, adding ImageMagick support, local
-      incoming dir...
-
 Who:
 
     It has been developed by:
-
     Mats Bengtsson   
     matben@users.sourceforge.net
-    phone: +46 13 136114
 
     MADE IN SWEDEN
 
