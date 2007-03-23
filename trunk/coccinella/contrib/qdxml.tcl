@@ -9,7 +9,7 @@
 #       o handle resets
 #       o error handling?
 #       
-# $Id: qdxml.tcl,v 1.7 2007-03-19 08:04:10 matben Exp $
+# $Id: qdxml.tcl,v 1.8 2007-03-23 13:04:03 matben Exp $
 
 package provide qdxml 0.1
 
@@ -219,6 +219,9 @@ proc qdxml::parseEvent {token xmllist} {
 	# Process character data.
 	if {$state(haveDocElement) && [string length $text]} {
 	    if {[string length $state(-characterdatacommand)]} {
+		
+		# Restore protected special characters
+		set text [DeProtect $text]
 		set code [catch {PCDATA $token $text}]
 		if {$state(status) eq "reset"} { return }
 	    }
@@ -239,6 +242,15 @@ proc qdxml::reset {token} {
 	status                "reset"
 	rest                  ""
     }
+}
+
+# qdxml::DeProtect --
+# 
+#       Restore protected special characters.
+
+proc qdxml::DeProtect {text} {    
+    regsub -all {\\([]$[{}\\])} $text {\1} text
+    return $text
 }
 
 proc qdxml::ElementOpen {token tag attr args} {
@@ -287,6 +299,9 @@ proc qdxml::ElementOpen {token tag attr args} {
 	set ns [list -namespace [lindex $state(defaultNSURI) end]]
     }
     
+    # Restore protected special characters.
+    # @@@ Not sure if these is the right place?
+    set attr [DeProtect $attr]
     set code [catch {
 	uplevel #0 $state(-elementstartcommand) [list $tag $attr] $ns $nsdecls $args
     }]
