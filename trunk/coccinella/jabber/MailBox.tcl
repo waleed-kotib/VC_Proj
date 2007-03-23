@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.109 2007-03-18 08:01:06 matben Exp $
+# $Id: MailBox.tcl,v 1.110 2007-03-23 08:22:14 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -2020,7 +2020,7 @@ proc ::MailBox::MKExportDlg {} {
     }
     set fileName [tk_getSaveFile -title [mc {Save File}] \
       -initialfile myinbox.xml -defaultextension .xml \
-      -filetypes {{XML File} {.xml}}]
+      -filetypes { {"XML File" {.xml}} }]
     if {[llength $fileName]} {
 	MKExportToXMLFile $fileName
     }
