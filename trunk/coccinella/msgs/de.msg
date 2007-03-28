@@ -1226,7 +1226,6 @@ namespace eval ::EditShortcuts:: {
 
 # Setup assistant:
 ::msgcat::mcset de suintro1 	{Dies ist ein Assistent, der Ihnen beim Eingeben der Daten hilft, die für ein neues oder bestehendes Konto auf einem Jabber-Server erforderlich sind.}
-::msgcat::mcset de suintro2 	{Wenn Sie im "Peer-to-Peer"-Modus arbeiten wollen, geben Sie das einfach im Einstellungsdialog an und starten Coccinella erneut.}
 ::msgcat::mcset de suintro3 	{Sie können jederzeit den "zurück"-Knopf zum Zurücksprung nutzen. Folgen Sie den Anweisungen auf jeder Seite und drücken Sie "Weiter", bis alles fertig ist.}
 ::msgcat::mcset de sulang       {Wählen Sie einen Sprachkatalog. Wenn Sie den Sprachkatalog ändern, betrifft dies nur Oberflächenelemente, die nach der Änderung erstellt wurden.}
 ::msgcat::mcset de suservmsg	{Geben Sie den Namen des Jabber-Servers ein, auf dem Sie ein Konto einrichten möchten. Bei einem bestehenden Konto auf einem Jabber-Server geben Sie dessen Namen an.\

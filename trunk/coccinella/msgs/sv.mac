@@ -1210,7 +1210,6 @@ specialla rumsinställningar.}
 
 # Setup assistant:
 ::msgcat::mcset sv suintro1 	{Det här är en inställningsassistent som hjälper dig att fylla i nödvändiga uppgifter för ett nytt eller existerande konto på en Jabber server.}
-::msgcat::mcset sv suintro2 	{Om du kommer att köra i "peer-to-peer" mod så anger du detta i Inställnings dialogen och startar om Coccinella.}
 ::msgcat::mcset sv suintro3 	{När som helst kan du trycka på Föregående knappen för att gå tillbaks. Följ instruktionerna på varje sida och tryck på Nästa knappen till sista sidan.}
 ::msgcat::mcset sv sulang       {Välj språkkatalog. Om du ändrar språkkatalogen kommer detta endast att få effekt på textelement som skapas efter denna ändring.}
 ::msgcat::mcset sv suservmsg	{Fyll i namnet på Jabber servern som du önskar ha ditt konto på. Om du redan har ett konto på en Jabber server så fyll i det namnet.\

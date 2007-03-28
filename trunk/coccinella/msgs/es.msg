@@ -1255,7 +1255,6 @@ namespace eval ::EditShortcuts:: {
 
 # Assistant de configuration :
 ::msgcat::mcset es suintro1 	{Bienvenido al asistente de configuración que le ayudará introducir la información necesaria para añadir una cuenta antigua o nueva sobre un servidor Jabber.}
-::msgcat::mcset es suintro2 	{Si quiera utilizar el modo peer-to-peer, Deberá indicarlo en el panel de preferencias y reiniciar Coccinella.}
 ::msgcat::mcset es suintro3 	{En cualquier momento podrá hacer click sobre "Anterior" para retroceder. Siga las instrucciones de cada página y haga click en "Siguiente"\
   hasta que haya terminado.}
 ::msgcat::mcset es sulang       {Elija su idioma. Si cambia el idioma, los cambios no serán efectuados hasta que se vuelvan a cargar los elementos de la interfaz.}

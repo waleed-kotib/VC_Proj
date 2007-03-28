@@ -1126,7 +1126,6 @@ namespace eval ::EditShortcuts:: {
    
 # Setup assistant:
 ::msgcat::mcset ru suintro1 	{This is a setup assistant to help you fill in the necessary things that is needed for a new or an existing account on a Jabber server.}
-::msgcat::mcset ru suintro2 	{If you are going to run in peer-to-peer mode, you just set this in the Preferences panel, and relaunch the Coccinella.}
 ::msgcat::mcset ru suintro3 	{Any time you may press the Previous button to go back. Follow the instructions on each page, and press the Next button until finished.}
 ::msgcat::mcset ru sulang       {Pick a language catalog. If you change the language catalog this will only affect interface elements created after it has been set.}
 ::msgcat::mcset ru suservmsg	{Fill in the name of the Jabber server you wish to have your account on. If you already have an existing account on a Jabber server, fill in the name of that server.\

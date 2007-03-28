@@ -1212,7 +1212,6 @@ namespace eval ::EditShortcuts:: {
 
 # Setup assistant:
 ::msgcat::mcset kr suintro1 	{설정 지원은 재버 서버에 새롭게 등록하거나 계정을 설정하는데 필요한 것을 채우는 것을 지원합니다.}
-::msgcat::mcset kr suintro2 	{p-p 모드로 작동하려면, 설정판에서 설정을 하고 다시 실행해야 합니다.}
 ::msgcat::mcset kr suintro3 	{언제든지 전 과정으로 가려면, 이전 버튼을 누르면 됩니다. 각 페이지의 지시에 따르고, 다음 버튼을 눌르면 됩니다.}
 ::msgcat::mcset kr sulang       {언어를 집으세요. 조정한 내용은 이후에 생성되는 창에서 부터 적용됩니다.}
 ::msgcat::mcset kr suservmsg	{당신의 계정이 있는 재버 서버의 이름을 채우시오. 개버 서버에 이미 계정이 있다면, 서버의 이름을 채우시오.\
