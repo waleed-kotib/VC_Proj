@@ -1201,7 +1201,6 @@ namespace eval ::EditShortcuts:: {
 
 # Setup assistant:
 ::msgcat::mcset it suintro1 {Questo è un assistente di configurazione che ti aiuterà a scrivere le informazioni necessarie per un account Jabber nuovo oppure già esistente.}
-::msgcat::mcset it suintro2 {Se vuoi lavorare in modalità punto-a-punto, impostalo nelle preferenze e riavvia coccinella.}
 ::msgcat::mcset it suintro3 {In ogni momento puoi premere il bottone "precedente" per tornare indietro. Segui le istruzioni in ogni pagina e vai avanti una pagina alla volta, fino all'ultima.}
 ::msgcat::mcset it sulang {Scegli una lingua. Se cambi la lingua ciò avrà effetto solo sugli elementi che verranno mostrati su schermo da quel momento in poi.}
 ::msgcat::mcset it suservmsg {Scrivi il nome del server Jabber su cui vuoi fare l'iscrizione. Se hai già un account su un server Jabber, scrivi il nome di quel server. Un server molto conosciuto è "jabber.org".}

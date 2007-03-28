@@ -1208,7 +1208,6 @@ namespace eval ::EditShortcuts:: {
 
 # Setup assistant:
 ::msgcat::mcset pl suintro1 	{Pomocnik Konfiguracyjny (Asystent Ustawień) pomoże dokonać wpisów niezbędnych w celu założenia nowego konta Jabberowego, lub korzystania z już istniejącego.}
-::msgcat::mcset pl suintro2 	{Jeżeli zamierzasz "działać" w trybie peer-to-peer, po prostu zaznacz to w panelu preferencji - i zrestartuj program.}
 ::msgcat::mcset pl suintro3 	{W każdej chwili możesz cofnąć się klikając przycisk "Poprzedni". Kieruj się instrukcjami znalezionymi na każdej stronie, klikając przycisk "Następny" aż do zakończenia konfiguracji.}
 ::msgcat::mcset pl sulang       {Wskaż katalog z wersjami językowymi. Jeśli dokonasz zmiany katalogu, wpłynie ona jedynie na te elementy interfejsu użytkownika, które zostały utworzone po tej zmianie.}
 ::msgcat::mcset pl suservmsg	{Podaj nazwę serwera Jabbera, na którym chcesz mieć konto; podaj tę nazwę także w przypadku, jeżeli już masz tamże założone jakieś konto.\

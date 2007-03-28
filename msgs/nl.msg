@@ -1187,7 +1187,6 @@ namespace eval ::EditShortcuts:: {
 
 # Setup assistant:
 ::msgcat::mcset nl suintro1				{Deze assistent helpt u bij het instellen van een Jabber-account.}
-::msgcat::mcset nl suintro2				{Als u P2P-modus wilt gebruiken dan moet u dit instellen onder "Voorkeuren" en daarna Coccinella herstarten.}
 ::msgcat::mcset nl suintro3				{U kunt altijd op de knop "Vorige" klikken om terug te gaan. Klik op de knop "Volgende" om naar de volgende stap te gaan.}
 ::msgcat::mcset nl sulang				{Kies uw taal. U moet Coccinella herstarten voor de hele interface aangepast is aan de gekozen taal.}
 ::msgcat::mcset nl suservmsg				{Voer de naam van de Jabber-server in waar u een account op wilt aanmaken. Als u al een account hebt op een Jabber-server, voer dan de naam in van die server. (bv: "jabber.org")}
