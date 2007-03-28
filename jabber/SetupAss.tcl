@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.40 2006-09-13 14:09:11 matben Exp $
+# $Id: SetupAss.tcl,v 1.41 2007-03-28 13:34:19 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -77,15 +77,13 @@ proc ::Jabber::SetupAss::SetupAss { } {
     ttk::frame $p1.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p1.fr.msg1 -style Small.TLabel \
       -wraplength 260 -justify left -anchor w -text [mc suintro1]
-    ttk::label $p1.fr.msg2 -style Small.TLabel \
-      -wraplength 260 -justify left -anchor w -text [mc suintro2]
     ttk::label $p1.fr.msg3 -style Small.TLabel \
       -wraplength 260 -justify left -anchor w -text [mc suintro3]
     
-    pack $p1.fr.msg1 $p1.fr.msg2 $p1.fr.msg3 -side top -anchor w -fill x -pady 4
+    pack $p1.fr.msg1 $p1.fr.msg3 -side top -anchor w -fill x -pady 4
     pack $p1.fr -side top -fill x
     
-    lappend wrapthese $p1.fr.msg1 $p1.fr.msg2 $p1.fr.msg3
+    lappend wrapthese $p1.fr.msg1 $p1.fr.msg3
     
     # Language catalog.
     set plang [$su newpage "language" -headtext [mc Language]]
