@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 20052006  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.14 2007-03-16 13:54:38 matben Exp $
+# $Id: RosterTwo.tcl,v 1.15 2007-04-02 08:01:52 matben Exp $
 
 package require RosterTree
 
@@ -53,12 +53,7 @@ proc ::RosterTwo::Configure {_T} {
     set imS 16
     set dX [expr {$imS + 3*$px}]
 
-    # Two columns: 
-    #   0) the tree 
-    #   1) hidden for tags
-    # @@@ treectrl2.2.3 -tag -> -tags
-    $T column create -tag cTree -itembackground $stripes -resize 0 -expand 1
-    $T column create -tag cTag -visible 0
+    $T column create -tags cTree -itembackground $stripes -resize 0 -expand 1
     $T configure -treecolumn cTree -showheader 0
 
     # The elements.
@@ -98,7 +93,6 @@ proc ::RosterTwo::Init { } {
     upvar ::Jabber::jprefs jprefs
 	
     $T item delete all
-    ::RosterTree::FreeTags
 
     # Available:
     set item [CreateHeadItem available]
@@ -309,7 +303,7 @@ proc ::RosterTwo::SetItemAlternative {jid key type image} {
 proc ::RosterTwo::CreateWithTag {tag style text text2 image parent} {
     variable T
     
-    # Base class constructor. Handles the cTag column and tag.
+    # Base class constructor. Handles the tag.
     set item [::RosterTree::CreateWithTag $tag $parent]
     
     $T item style set $item cTree $style

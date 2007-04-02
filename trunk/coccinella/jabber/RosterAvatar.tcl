@@ -5,14 +5,13 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.23 2007-03-16 13:54:38 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.24 2007-04-02 08:01:52 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
 #       1) there must be a cTree column which makes up the tree part;
 #          the first text element in cTree is used for sorting
-#       2) there must be an invisible cTag column    
-#       3) the tags must be consistent, see RosterTree
+#       2) the tags must be consistent, see RosterTree
 #       
 #   A "roster style" handles all item creation and deletion, and is responsible
 #   for handling groups, pending, and transport folders.
@@ -31,7 +30,7 @@ namespace eval ::RosterAvatar {
     variable thisRosterStyles {avatar avatarlarge flat flatsmall}
         
     # Register this style.
-    ::RosterTree::RegisterStyle avatar Avatar  \
+    ::RosterTree::RegisterStyle avatar "Avatar"  \
       ::RosterAvatar::Configure   \
       ::RosterAvatar::Init        \
       ::RosterAvatar::Delete      \
@@ -47,7 +46,7 @@ namespace eval ::RosterAvatar {
       ::RosterAvatar::DeleteItem  \
       ::RosterAvatar::SetItemAlternative
 
-    ::RosterTree::RegisterStyle flat Flat  \
+    ::RosterTree::RegisterStyle flat "Flat"  \
       ::RosterAvatar::Configure   \
       ::RosterAvatar::Init        \
       ::RosterAvatar::Delete      \
@@ -156,7 +155,6 @@ proc ::RosterAvatar::InitDB { } {
     option add *Roster.avatar:eNotify-fill            "#ffd6d6"         widgetDefault
     option add *Roster.avatar:eNotify-outline         "#e2a19d"         widgetDefault
     option add *Roster.avatar:eNotify-outlinewidth    1                 widgetDefault
-    option add *Roster.avatar:eNotify-draw            {1 notify 0 {}}   widgetDefault
 
     # If no background image:
     option add *Roster.avatar:eBorder-outline:nbg      gray              widgetDefault
@@ -172,6 +170,7 @@ proc ::RosterAvatar::InitDB { } {
     option add *Roster.avatar:styAvailable:eAltImage1-padx      2       widgetDefault
     option add *Roster.avatar:styAvailable:eAvBorder-padx       {2 4}   widgetDefault
     option add *Roster.avatar:styAvailable:eAvBorder-pady       {1 2}   widgetDefault
+    option add *Roster.avatar:styAvailable:eNotify-draw         {1 notify 0 {}}   widgetDefault
 
     option add *Roster.avatar:styUnavailable:eOffText-padx      4       widgetDefault
     option add *Roster.avatar:styUnavailable:eOffText-pady      4       widgetDefault
@@ -179,11 +178,13 @@ proc ::RosterAvatar::InitDB { } {
     option add *Roster.avatar:styUnavailable:eAltImage1-padx    2       widgetDefault
     option add *Roster.avatar:styUnavailable:eAvBorder-padx     {2 4}   widgetDefault
     option add *Roster.avatar:styUnavailable:eAvBorder-pady     {1 2}   widgetDefault
+    option add *Roster.avatar:styUnavailable:eNotify-draw       {1 notify 0 {}}   widgetDefault
 
     option add *Roster.avatar:styEntry:eAvBorder-padx           {2 4}   widgetDefault
     option add *Roster.avatar:styEntry:eAvBorder-pady           {1 2}   widgetDefault
 
     option add *Roster.avatar:styFolder:eImage-padx             2       widgetDefault
+    option add *Roster.avatar:styFolder:eImage-pady             {1 2}   widgetDefault
     option add *Roster.avatar:styFolder:eFolderText-padx        4       widgetDefault
     option add *Roster.avatar:styFolder:eNumText-padx           4       widgetDefault
 
@@ -197,7 +198,15 @@ proc ::RosterAvatar::InitDB { } {
     option add *Roster.flatsmall:eOnText-font         CociSmallFont     widgetDefault
     option add *Roster.flatsmall:eOffText-font        CociSmallFont     widgetDefault
     option add *Roster.flatsmall:eFolderText-font     $fontFS           widgetDefault    
-    
+
+    option add *Roster.flat:styFolder:eFolderImage-pady         {1 2}   widgetDefault
+    option add *Roster.flat:styFolder:eFolderText-padx          4       widgetDefault
+    option add *Roster.flat:styFolder:eFolderText-pady          4       widgetDefault
+
+    option add *Roster.flatsmall:styFolder:eFolderImage-pady    {1 2}   widgetDefault
+    option add *Roster.flatsmall:styFolder:eFolderText-padx     4       widgetDefault
+    option add *Roster.flatsmall:styFolder:eFolderText-pady     4       widgetDefault
+
     set initedDB 1
 }
 
@@ -259,6 +268,7 @@ proc ::RosterAvatar::Configure {_T} {
 	    set optionClass $styleName
 	}
     }
+    ::Debug 4 "\t styleName=$styleName, styleClass=$styleClass, optionClass=$optionClass"
     
     # After 'avatarSize'.
     InitDBStyle
@@ -266,8 +276,13 @@ proc ::RosterAvatar::Configure {_T} {
     # This is a dummy option.
     set stripeBackground [option get $T stripeBackground {}]
     set stripes [list $stripeBackground {}]
-    set minW $avatarSize
-    set minH $avatarSize
+    if {$styleClass eq "avatar"} {
+	set minW $avatarSize
+	set minH $avatarSize
+    } else {
+	set minW 0
+	set minH 0
+    }
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
 
@@ -276,23 +291,19 @@ proc ::RosterAvatar::Configure {_T} {
 	$T state define notify
     }
 
-    # Three columns: 
+    # Two columns: 
     #   0) status
     #   1) the tree 
-    #   2) hidden for tags
     #   
     # minwidth 24 = 16 + {4 2}
 
-    # @@@ treectrl2.2.3 -tag -> -tags
-    $T column create -tag cStatus  \
+    $T column create -tags cStatus  \
       -itembackground $stripes -resize 0 -minwidth 24 -button 1  \
       -borderwidth $bd -background $bg
-    $T column create -tag cTree    \
+    $T column create -tags cTree    \
       -itembackground $stripes -resize 0 -expand 1 -squeeze 1  \
       -text [mc {Contact Name}] -button 1 -arrow up -borderwidth $bd \
       -background $bg
-    $T column create -tag cTag     \
-      -visible 0
     $T configure -showheader 1
 
     # Define a new item state
@@ -429,7 +440,7 @@ proc ::RosterAvatar::EditCmd {id} {
     
     if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
 	set item [lindex $id 1]
-	set tags [$T item element cget $item cTag eText -text]
+	set tags [::RosterTree::GetTagOfItem $item]
 	if {[lindex $tags 0] eq "jid"} {
 	    set jid [lindex $tags 1]
 	    set text [$T item text $item cTree]
@@ -466,6 +477,7 @@ proc ::RosterAvatar::EditCmd {id} {
 	    bind $wentry <Return>   [namespace code [list EditOnReturn $item]]
 	    bind $wentry <KP_Enter> [namespace code [list EditOnReturn $item]]
 	    bind $wentry <FocusOut> [namespace code [list EditEnd $item]]
+	    bind $wentry <Escape>   [namespace code [list EditEnd $item]]
 	}
     }
 }
@@ -623,10 +635,8 @@ proc ::RosterAvatar::SortStatus {item1 item2} {
 
 proc ::RosterAvatar::Init { } {
     variable T
-    upvar ::Jabber::jprefs jprefs
 	
     $T item delete all
-    ::RosterTree::FreeTags
 }
 
 # RosterAvatar::OnAvatarPhoto --
@@ -824,9 +834,10 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     }
 
     # Update any groups.
-    foreach item [::RosterTree::FindWithFirstTag group] {
-	set n [llength [$T item children $item]]
-	$T item element configure $item cTree eNumText -text "($n)"
+    variable pendingChildNumbers
+    if {![info exists pendingChildNumbers]} {
+	set pendingChildNumbers 1
+	after idle [namespace code ConfigureChildNumbers]
     }
 
     # Design the balloon help window message.
@@ -834,6 +845,19 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
 	eval {Balloon $jid $presence $item} $args
     }
     return $items
+}
+
+proc ::RosterAvatar::ConfigureChildNumbers {} {
+    variable T
+    variable pendingChildNumbers
+
+    unset -nocomplain pendingChildNumbers
+
+    # Update any groups.
+    foreach item [::RosterTree::FindWithFirstTag group] {
+	set n [llength [$T item children $item]]
+	$T item element configure $item cTree eNumText -text "($n)"
+    }
 }
 
 proc ::RosterAvatar::PutItemInHead {item ptag ptext pimage} {
@@ -971,12 +995,12 @@ proc ::RosterAvatar::FreeAltCache {} {
 proc ::RosterAvatar::CreateWithTag {tag style tElem text image parent} {
     variable T
     
-    # Base class constructor. Handles the cTag column and tag.
+    # Base class constructor. Handles the tag.
     set item [::RosterTree::CreateWithTag $tag $parent]
     
     $T item style set $item cTree $style
     $T item element configure $item  \
-      cStatus eImage -image $image ,  \
+      cStatus eImage -image $image , \
       cTree   $tElem -text  $text
 
     return $item

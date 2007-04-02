@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.189 2007-03-20 08:21:57 matben Exp $
+# $Id: GroupChat.tcl,v 1.190 2007-04-02 08:01:52 matben Exp $
 
 package require Create
 package require Enter
@@ -1839,12 +1839,12 @@ proc ::GroupChat::TreeCreateWithTag {T tag parent} {
 }
 
 proc ::GroupChat::TreeFindWithTag {T tag} {
-    return [$T item id [list [treeutil::protect $tag]]]
+    return [$T item id [list tag [list [treeutil::protect $tag]]]]
 }
 
 proc ::GroupChat::TreeSetIgnoreState {T jid3 {prefix ""}} {
     set tag [list jid $jid3]
-    set item [$T item id [list [treeutil::protect $tag]]]
+    set item [$T item id [list tag [list [treeutil::protect $tag]]]]
     if {[llength $item]} {
 	$T item state set $item ${prefix}ignore
     }
@@ -1857,7 +1857,7 @@ proc ::GroupChat::TreeEditUserStart {chattoken jid3} {
     set T $chatstate(wusers)
     set tag [list jid $jid3]
     
-    set item [$T item id [list [treeutil::protect $tag]]]
+    set item [$T item id [list tag [list [treeutil::protect $tag]]]]
     if {[llength $item]} {
 	set image [::Roster::GetPresenceIconFromJid $jid3]
 	set wentry $T.entry
@@ -1899,7 +1899,7 @@ proc ::GroupChat::TreeEditUserEnd {chattoken jid3} {
     set T $chatstate(wusers)
     set tag [list jid $jid3]
     
-    set item [$T item id [list [treeutil::protect $tag]]]
+    set item [$T item id [list tag [list [treeutil::protect $tag]]]]
     if {[llength $item]} {
 	set image [::Roster::GetPresenceIconFromJid $jid3]
 	set text [jlib::resourcejid $jid3]
@@ -1922,7 +1922,7 @@ proc ::GroupChat::TreeRemoveUser {chattoken jid3} {
 }
 
 proc ::GroupChat::TreeDeleteItem {T tag} {
-    set item [$T item id [list [treeutil::protect $tag]]]
+    set item [$T item id [list tag [list [treeutil::protect $tag]]]]
     if {[llength $item]} {
 	$T item delete $item
     }

@@ -5,12 +5,10 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.37 2007-03-16 13:54:38 matben Exp $
+# $Id: RosterTree.tcl,v 1.38 2007-04-02 08:01:52 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
-#   We keep an invisible column cTag for tag storage, and an array 'tag2items'
-#   that maps a tag to a set of items. 
 #   One jid can belong to several groups (bad) which doesn't make {jid $jid}
 #   unique!
 #   Always use mapped JIDs.
@@ -308,13 +306,8 @@ proc ::RosterTree::New {_T wxsc wysc} {
     SetBinds
     $T configure -backgroundimage [BackgroundImage]
     $T notify bind $T <Selection> {+::RosterTree::Selection }
-    
-    # This automatically cleans up the tag array.
-    $T notify bind RosterTreeTag <ItemDelete> {
-	foreach item %i {
-	    ::RosterTree::RemoveTags $item
-	} 
-    }
+
+    # @@@ Needed?
     bindtags $T [concat RosterTreeTag [bindtags $T]]
 }
 
@@ -327,7 +320,6 @@ proc ::RosterTree::SetBinds {} {
     bind $T <ButtonRelease-1> {+::RosterTree::ButtonRelease %x %y }        
     bind $T <Double-1>        {+::RosterTree::DoubleClick %x %y }        
     bind $T <<ButtonPopup>>   {+::RosterTree::Popup %x %y }
-    bind $T <Destroy>         {+::RosterTree::OnDestroy }
     bind $T <Key-Return>      {+::RosterTree::OnReturn }
     bind $T <KP_Enter>        {+::RosterTree::OnReturn }
     bind $T <Key-BackSpace>   {+::RosterTree::OnBackSpace }
@@ -407,9 +399,7 @@ proc ::RosterTree::EditButtonRelease {x y} {
 proc ::RosterTree::EditOnReturn {jid name} {
     variable T
     upvar ::Jabber::jstate jstate
-    
-    puts "::RosterTree::EditOnReturn $jid $name"
-    
+        
     set jid [$jstate(jlib) roster getrosterjid $jid]
     set groups [$jstate(jlib) roster getgroups $jid]
     $jstate(jlib) roster send_set $jid -name $name -groups $groups
@@ -419,7 +409,7 @@ proc ::RosterTree::EditOnReturn {jid name} {
 proc ::RosterTree::EditEnd {jid} {
     variable T
     upvar ::Jabber::jstate jstate
-    
+        
     # Restore item with its original style.
     set jid [$jstate(jlib) roster getrosterjid $jid]
     eval {::Roster::SetItem $jid} [$jstate(jlib) roster getrosteritem $jid]
@@ -497,7 +487,7 @@ proc ::RosterTree::OnReturn {} {
     
     set id [$T selection get]
     if {[$T selection count] == 1} {
-	set tags [$T item element cget $id cTag eText -text]
+	set tags [GetTagOfItem $id]
 	if {[lindex $tags 0] eq "jid"} {
 	    set jid [lindex $tags 1]
 	    ActionDoubleClick $jid
@@ -508,9 +498,9 @@ proc ::RosterTree::OnReturn {} {
 proc ::RosterTree::OnBackSpace {} {
     variable T
 
-    set id [$T selection get]
+    set item [$T selection get]
     if {[$T selection count] == 1} {
-	set tags [$T item element cget $id cTag eText -text]
+	set tags [GetTagOfItem $item]
 	if {[lindex $tags 0] eq "jid"} {
 	    set jid [lindex $tags 1]
 	    set jid2 [jlib::barejid $jid]
@@ -557,7 +547,7 @@ proc ::RosterTree::DoubleClick {x y} {
     set id [$T identify $x $y]
     if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
 	set item [lindex $id 1]
-	set tags [$T item element cget $item cTag eText -text]
+	set tags [GetTagOfItem $item]
 	if {[lindex $tags 0] eq "jid"} {
 	    set jid [lindex $tags 1]
 	    ActionDoubleClick $jid
@@ -598,8 +588,8 @@ proc ::RosterTree::GetSelected { } {
     
     set selected {}
     foreach item [$T selection get] {
-	set tag [$T item element cget $item cTag eText -text]
-	lappend selected $tag
+	set tags [GetTagOfItem $item]
+	lappend selected $tags
     }
     return $selected
 }
@@ -638,7 +628,7 @@ proc ::RosterTree::Popup {x y} {
     set id [$T identify $x $y]
     if {[lindex $id 0] eq "item"} {
 	set item [lindex $id 1]
-	set tags [$T item element cget $item cTag eText -text]
+	set tags [GetTagOfItem $item]
 	set mtag [lindex $tags 0]
 
 	switch -- $mtag {
@@ -708,7 +698,6 @@ proc ::RosterTree::Popup {x y} {
 }
 
 proc ::RosterTree::FindAllJIDInItem {item} {
-
     return [FindAllWithTagInItem $item jid]
 }
 
@@ -726,112 +715,60 @@ proc ::RosterTree::FindAllJIDInItem {item} {
 proc ::RosterTree::FindAllWithTagInItem {item type} {
     variable T
     
-    set jids {}
+    set jidL [list]
     foreach citem [$T item children $item] {
 	if {[$T item numchildren $citem]} {
-	    set jids [concat $jids [FindAllWithTagInItem $citem $type]]
+	    set jidL [concat $jidL [FindAllWithTagInItem $citem $type]]
 	}
-	set tag [$T item element cget $citem cTag eText -text]
-	if {[lindex $tag 0] eq $type} {
-	    lappend jids [lindex $tag 1]
+	set tags [GetTagOfItem $citem]
+	if {[lindex $tags 0] eq $type} {
+	    lappend jidL [lindex $tags 1]
 	}
     }
-    return $jids
+    return $jidL
 }
 
 # ---------------------------------------------------------------------------- #
 
-# A few more generic functions.
-# They isolate the 'tag2items' array from the rest.
+# A few generic functions to isolate the tags handlings in treectrl.
+# 
+#       Use tags as {0-tag0 1-tag1 2-tag2 ...} to resolve issues like:
+#       {group jid} and {jid group}. Although "group" isn't likely to be a 
+#       domain name we don't want to depend on it.
+#       In other words, tags are ordered.
 
-namespace eval ::RosterTree {
-    
-    # Internal array.
-    variable tag2items
+proc ::RosterTree::PrepTags {tags} {
+    set n -1
+    set tagL [list]
+    set tags [treeutil::protect $tags]
+    foreach tag $tags {
+	lappend tagL [incr n]-$tag
+    }
+    return $tagL
 }
-
-# @@@ treectrl2.2.3
-# Check list structure of tags!
 
 proc ::RosterTree::CreateWithTag {tag parent} {
     variable T
-    variable tag2items
-    
-    set item [$T item create -parent $parent]
-    # @@@ treectrl2.2.3
-    # set item [$T item create -parent $parent -tags [treeutil::protect $tag]]
-    
-    # Handle the hidden cTag column.
-    $T item style set $item cTag styTag
-    $T item element configure $item cTag eText -text $tag
-    
-    lappend tag2items($tag) $item
-
-    return $item
+    return [$T item create -parent $parent -tags [PrepTags $tag]]
 }
 
 proc ::RosterTree::DeleteWithTag {tag} {
     variable T
-    variable tag2items
     
-    # @@@ treectrl2.2.3
-    # foreach item [$T item id "tag [treeutil::protect $tag]"] {
-    #    $T item delete $item
-    # }
-    if {[info exists tag2items($tag)]} {
-	foreach item $tag2items($tag) {
-	    $T item delete $item
-	}    
-    }
-}
-
-# RosterTree::RemoveTags --
-# 
-#       Callback for <ItemDelete> events used to cleanup the tag2items array.
-
-proc ::RosterTree::RemoveTags {item} {
-    variable T
-    variable tag2items
-
-    # @@@ treectrl2.2.3
-    # return
-    
-    # We must delete all 'tag2items' that may point to us.
-    set tag [$T item element cget $item cTag eText -text]
-    set items $tag2items($tag)
-    set idx [lsearch $items $item]
-    if {$idx >= 0} {
-	set tag2items($tag) [lreplace $items $idx $idx]
-    }
-    if {$tag2items($tag) eq {}} {
-	unset tag2items($tag)
+    # This must be failsafe if item not exists.
+    foreach item [FindWithTag $tag] {
+	$T item delete $item
     }
 }
 
 proc ::RosterTree::FindWithTag {tag} {
     variable T
-    variable tag2items
-    
-    # @@@ treectrl2.2.3
-    # return [$T item id "tag [treeutil::protect $tag]"]
-    if {[info exists tag2items($tag)]} {
-	return $tag2items($tag)
-    } else {
-	return {}
-    }
+    return [$T item id [list tag [join [PrepTags $tag] " && "]]]
 }
 
 proc ::RosterTree::FindWithFirstTag {tag0} {
-    variable tag2items
-    
-    # @@@ treectrl2.2.3
-    # This is tricky; shall we handle a list of tags as separate tags?
-    # return [$T item id "tag [treeutil::protect $tag0]"]
-    set items {}
-    foreach {key value} [array get tag2items "$tag0 *"] {
-	set items [concat $items $value]
-    }
-    return $items
+    variable T
+    return [$T item id [list tag [treeutil::protect 0-$tag0]]]
 }
 
 # RosterTree::FindChildrenOfTag --
@@ -840,45 +777,31 @@ proc ::RosterTree::FindWithFirstTag {tag0} {
 
 proc ::RosterTree::FindChildrenOfTag {tag} {
     variable T
-    variable tag2items
-
-    # @@@ treectrl2.2.3
-    # return [$T item children "tag [treeutil::protect $tag]"]
-
-    # NEVER use the non unique 'jid *' tag here!
-    set items {}
-    if {[info exists tag2items($tag)]} {
-	set pitem [lindex $tag2items($tag) 0]
-	set items [$T item children $pitem]
-    }
-    return $items
+    return [$T item children [list tag [join [PrepTags $tag] " && "]]]
 }
 
 proc ::RosterTree::GetTagOfItem {item} {
     variable T
     
-    # @@@ treectrl2.2.3
-    # return [$T item cget $item -tags]
-    return [$T item element cget $item cTag eText -text]
+    set tagL [list]
+    foreach tag [treeutil::deprotect [$T item cget $item -tags]] {
+	lappend tagL [string range $tag 2 end]
+    }
+    return $tagL
 }
 
 proc ::RosterTree::ExistsWithTag {tag} {
-    variable tag2items
-
-    # @@@ treectrl2.2.3
-    # ???
-    return [info exists tag2items($tag)]
+    return [llength [FindWithTag $tag]]
 }
 
-proc ::RosterTree::FreeTags {} {
-    variable tag2items
+proc ::RosterTree::DbgDumpRoster {} {
+    variable T
     
-    unset -nocomplain tag2items
-}
-
-proc ::RosterTree::OnDestroy {} {
-
-    FreeTags
+    puts "::RosterTree::DbgDumpRoster:"
+    foreach item [$T item id all] {
+	set tags [treeutil::deprotect [$T item cget $item -tags]]
+	puts "\t item=$item, tags=$tags"
+    }
 }
 
 # ---------------------------------------------------------------------------- #
@@ -1271,7 +1194,7 @@ proc ::RosterTree::GetClosedItems {item} {
     set closed {}
     if {[$T item numchildren $item]} {
 	if {![$T item isopen $item] && [$T item compare root != $item]} {
-	    set tags [$T item element cget $item cTag eText -text]
+	    set tags [GetTagOfItem $item]
 	    lappend closed $tags
 	}
 	foreach citem [$T item children $item] {
