@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.187 2007-03-13 08:36:00 matben Exp $
+# $Id: Roster.tcl,v 1.188 2007-04-02 08:01:52 matben Exp $
 
 # @@@ TODO: rewrite the popup menu code to use AMenu!
 
@@ -268,6 +268,7 @@ proc ::Roster::Build {w} {
     frame $wbox
     pack  $wbox -side top -fill both -expand 1
         
+    # @@@ We shall have a more generic interface here than just a tree.
     ::RosterTree::New $wtree $wxsc $wysc
     ::RosterTree::StyleConfigure $wtree
     ::RosterTree::StyleInit

@@ -5,14 +5,13 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.28 2007-03-16 13:54:38 matben Exp $
+# $Id: RosterPlain.tcl,v 1.29 2007-04-02 08:01:52 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
 #       1) there must be a cTree column which makes up the tree part;
 #          the first text element in cTree is used for sorting
-#       2) there must be an invisible cTag column    
-#       3) the tags must be consistent, see RosterTree
+#       2) the tags must be consistent, see RosterTree
 #       
 #   A "roster style" handles all item creation and deletion, and is responsible
 #   for handling groups, pending, and transport folders.
@@ -66,7 +65,6 @@ proc ::RosterPlain::InitDB { } {
     option add *Roster.plain:eNotify-fill             "#ffd6d6"         widgetDefault
     option add *Roster.plain:eNotify-outline          "#e2a19d"         widgetDefault
     option add *Roster.plain:eNotify-outlinewidth     1                 widgetDefault
-    option add *Roster.plain:eNotify-draw             {1 notify 0 {}}   widgetDefault
 
     # If no background image:
     option add *Roster.plain:eBorder-outline:nbg      gray              widgetDefault
@@ -87,11 +85,13 @@ proc ::RosterPlain::InitDB { } {
     option add *Roster.plain:styAvailable:eImage-pady    {1 2}          widgetDefault
     option add *Roster.plain:styAvailable:eAltImage0-padx 4             widgetDefault
     option add *Roster.plain:styAvailable:eAltImage1-padx 2             widgetDefault
+    option add *Roster.plain:styAvailable:eNotify-draw    {1 notify 0 {}}   widgetDefault
 
     option add *Roster.plain:styUnavailable:eText-padx     2            widgetDefault
     option add *Roster.plain:styUnavailable:eImage-pady    {1 2}        widgetDefault
     option add *Roster.plain:styUnavailable:eAltImage0-padx 4           widgetDefault
     option add *Roster.plain:styUnavailable:eAltImage1-padx 2           widgetDefault
+    option add *Roster.plain:styUnavailable:eNotify-draw    {1 notify 0 {}}   widgetDefault
 
     option add *Roster.plain:styTransport:eText-padx       4            widgetDefault
     option add *Roster.plain:styTransport:eImage-pady      {1 2}        widgetDefault
@@ -133,13 +133,10 @@ proc ::RosterPlain::Configure {_T} {
 	$T state define notify
     }
 
-    # Two columns: 
+    # One column: 
     #   0) the tree 
-    #   1) hidden for tags
-    # @@@ treectrl2.2.3 -tag -> -tags
-    $T column create -tag cTree -itembackground $stripes -resize 0  \
+    $T column create -tags cTree -itembackground $stripes -resize 0  \
       -expand 1 -squeeze 1
-    $T column create -tag cTag -visible 0
     $T configure -treecolumn cTree -showheader 0
 
     # The elements.
@@ -209,13 +206,15 @@ proc ::RosterPlain::Configure {_T} {
     ::RosterTree::EditSetBinds [namespace code EditCmd]
 }
 
+# @@@ treectrl has some native support for editing but I don't know...
+
 proc ::RosterPlain::EditCmd {id} {
     variable T
     variable tmpEdit
     
     if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
 	set item [lindex $id 1]
-	set tags [$T item element cget $item cTag eText -text]
+	set tags [::RosterTree::GetTagOfItem $item]
 	if {[lindex $tags 0] eq "jid"} {
 	    set jid [lindex $tags 1]
 	    set image [$T item element cget $item cTree eImage -image]
@@ -235,6 +234,7 @@ proc ::RosterPlain::EditCmd {id} {
 	    bind $wentry <Return>   [list ::RosterPlain::EditOnReturn $item]
 	    bind $wentry <KP_Enter> [list ::RosterPlain::EditOnReturn $item]
 	    bind $wentry <FocusOut> [list ::RosterPlain::EditEnd $item]
+	    bind $wentry <Escape>   [list ::RosterPlain::EditEnd $item]
 	}
     }
 }
@@ -253,6 +253,15 @@ proc ::RosterPlain::EditEnd {item} {
     unset tmpEdit
 }
 
+# @@@ Just for testing. Make persistant over roster styles!
+proc ::RosterPlain::SetJIDState {mjid state} {
+    variable T
+    
+    foreach item [::RosterTree::FindWithTag [list jid $mjid]] {
+	$T item state set $item $state
+    }
+}
+
 # RosterPlain::Init --
 # 
 #       Creates the items for the initial logged out state.
@@ -263,7 +272,6 @@ proc ::RosterPlain::Init { } {
     upvar ::Jabber::jprefs jprefs
     
     $T item delete all
-    ::RosterTree::FreeTags
     
     set onlineImage  [::Rosticons::Get application/online]
     set offlineImage [::Rosticons::Get application/offline]
@@ -367,6 +375,25 @@ proc ::RosterPlain::CreateItem {jid presence args} {
     }
     
     # Configure number of available/unavailable users.
+    variable pendingChildNumbers
+    if {![info exists pendingChildNumbers]} {
+	set pendingChildNumbers 1
+	after idle [namespace code ConfigureChildNumbers]
+    }
+
+    # Design the balloon help window message.
+    foreach item $jitems {
+	eval {Balloon $jid $presence $item} $args
+    }
+    return $items
+}
+
+proc ::RosterPlain::ConfigureChildNumbers {} {
+    variable T
+    variable pendingChildNumbers
+
+    unset -nocomplain pendingChildNumbers
+    
     foreach type {
 	available unavailable transport pending
     } itype {
@@ -382,16 +409,11 @@ proc ::RosterPlain::CreateItem {jid presence args} {
     }
     
     # Update any groups.
+    # @@@ Do this as an idle call?
     foreach item [::RosterTree::FindWithFirstTag group] {
 	set n [llength [$T item children $item]]
 	$T item element configure $item cTree eNumText -text "($n)"
     }
-
-    # Design the balloon help window message.
-    foreach item $jitems {
-	eval {Balloon $jid $presence $item} $args
-    }
-    return $items
 }
 
 proc ::RosterPlain::ConfigureItem {item style text image} {
@@ -488,7 +510,7 @@ proc ::RosterPlain::FreeAltCache {} {
 proc ::RosterPlain::CreateWithTag {tag style text image parent} {
     variable T
     
-    # Base class constructor. Handles the cTag column and tag.
+    # Base class constructor. Handles the tag.
     set item [::RosterTree::CreateWithTag $tag $parent]
     
     $T item style set $item cTree $style
