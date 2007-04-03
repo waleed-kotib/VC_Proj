@@ -5,7 +5,7 @@
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.18 2007-04-03 14:14:35 matben Exp $
+#  $Id: Mood.tcl,v 1.19 2007-04-03 14:33:12 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -213,6 +213,7 @@ proc ::Mood::CustomMoodDlg {} {
     variable mood2mLabel
     variable menuMoodVar
     variable moodMessageDlg
+    variable moodStateDlg
     
     set moodStateDlg $menuMoodVar
     set moodMessageDlg ""
