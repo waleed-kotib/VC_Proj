@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.15 2006-12-01 08:55:14 matben Exp $
+# $Id: pubsub.tcl,v 1.16 2007-04-03 14:11:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -674,7 +674,7 @@ proc jlib::pubsub::event {jlibname ns msgE args} {
 namespace eval jlib::pubsub {
     
     jlib::ensamble_register pubsub  \
-      [namespace current]::init    \
+      [namespace current]::init     \
       [namespace current]::cmdproc
 }
 

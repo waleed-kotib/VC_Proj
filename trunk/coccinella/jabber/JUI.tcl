@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.161 2007-03-15 13:17:11 matben Exp $
+# $Id: JUI.tcl,v 1.162 2007-04-03 14:11:13 matben Exp $
 
 package provide JUI 1.0
 
@@ -905,6 +905,10 @@ proc ::JUI::JabberPostCommand {wmenu} {
     global wDlgs config
     variable state
     variable jwapp
+    
+    if {[llength [grab current]]} {
+
+    }
     
     # For aqua we must do this only for .jmain
     if {[::UI::IsToplevelActive $wDlgs(jmain)]} {

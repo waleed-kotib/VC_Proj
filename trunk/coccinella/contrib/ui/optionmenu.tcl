@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005-2007 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.13 2007-03-15 13:17:11 matben Exp $
+# $Id: optionmenu.tcl,v 1.14 2007-04-03 14:11:12 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -55,29 +55,33 @@ snit::widgetadaptor ui::optionmenu::widget {
 	foreach mdef $options(-menulist) {
 	    array unset opts
 	    set name [lindex $mdef 0]
-	    set value $name
-	    array set opts [lrange $mdef 1 end]
-	    if {[info exists opts(-value)]} {
-		set value $opts(-value)
+	    if {$name eq "separator"} {
+		$m add separator
+	    } else {
+		set value $name
+		array set opts [lrange $mdef 1 end]
+		if {[info exists opts(-value)]} {
+		    set value $opts(-value)
+		}
+		set name2val($name) $value
+		set val2name($value) $name
+		if {![info exists firstValue]} {
+		    set firstValue $value
+		}
+		if {[info exists opts(-image)]} {
+		    set val2im($value) $opts(-image)
+		}
+		if {[tk windowingsystem] eq "aqua"} {
+		    unset -nocomplain opts(-image)
+		}
+		if {[set len [string length $name]] > $maxLen} {
+		    set maxLen $len
+		    set longest $name
+		}
+		# @@@ TODO: keep a -value since labels can be identical!
+		eval {$m add radiobutton -label $name -variable [myvar menuValue] \
+		  -command [list $self Command] -compound left} [array get opts]
 	    }
-	    set name2val($name) $value
-	    set val2name($value) $name
-	    if {![info exists firstValue]} {
-		set firstValue $value
-	    }
-	    if {[info exists opts(-image)]} {
-		set val2im($value) $opts(-image)
-	    }
-	    if {[tk windowingsystem] eq "aqua"} {
-		unset -nocomplain opts(-image)
-	    }
-	    if {[set len [string length $name]] > $maxLen} {
-		set maxLen $len
-		set longest $name
-	    }
-	    # @@@ TODO: keep a -value since labels can be identical!
-	    eval {$m add radiobutton -label $name -variable [myvar menuValue] \
-	      -command [list $self Command] -compound left} [array get opts]
 	}
 	set value $firstValue
 	set menuValue $firstValue
