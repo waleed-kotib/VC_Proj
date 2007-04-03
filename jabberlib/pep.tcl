@@ -1,15 +1,13 @@
 #  pep.tcl --
 #
 #      This file is part of the jabberlib. It contains support code
-#      for the Personal Eventing PubSub (xmlns='http://jabber.org/protocol/pubsub') XEP-0163.
+#      for the Personal Eventing PubSub 
+#      (xmlns='http://jabber.org/protocol/pubsub') XEP-0163.
 #
-#       The current code reflects the PEP XEP prior to the simplification
-#       of version 1.0. NEW PEP means version 1.0.
-#
-#  Copyright (c) 2006 Mats Bengtsson
+#  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #
-# $Id: pep.tcl,v 1.4 2007-01-13 14:25:24 matben Exp $
+# $Id: pep.tcl,v 1.5 2007-04-03 14:11:14 matben Exp $
 #
 ############################# USAGE ############################################
 #
@@ -19,17 +17,14 @@
 #      jlibName pep publish
 #      jlibName pep retract
 #      jlibName pep subscribe
-#      
-#      jlibName pep have_auto_subscribe node
-#      jlibName pep list_auto_subscribe
-#      jlibName pep set_auto_subscribe node
-#      jlibName pep unset_auto_subscribe node
 #
 ################################################################################
 #
-#   Simplifications with PEP version 1.0:
-#     o no need to create node if wants default configuration
-#     o no need to subscribe to nodes
+#   With PEP version 1.0 and mutual presence subscriptions we only need:
+#   
+#      jlibName pep have
+#      jlibName pep publish
+#      jlibName pep retract
 #     
 #   Typical names and nodes:
 #           activity    'http://jabber.org/protocol/activity'
@@ -37,13 +32,11 @@
 #           mood        'http://jabber.org/protocol/mood'
 #           tune        'http://jabber.org/protocol/tune'
 #     
-#   TODO
-#     Implement "Contact Notification Filtering" using the caps/disco info stuff
 
 package require jlib::disco
 package require jlib::pubsub
 
-package provide jlib::pep 0.2
+package provide jlib::pep 0.3
 
 namespace eval jlib::pep {
 
@@ -54,7 +47,6 @@ namespace eval jlib::pep {
     }
 
     variable state
-    variable debug 4
 }
 
 # jlib::pep::init --
@@ -79,7 +71,7 @@ proc jlib::pep::cmdproc {jlibname cmd args} {
 #       Disco server for PEP, disco own bare JID, create pubsub node.
 #       
 #       1) Disco server for pubsub/pep support
-#       2) Create node if not there             (not necessary for 1.0)
+#       2) Create node if not there             (optional)
 #       3) Publish item
 
 # jlib::pep::have --
@@ -122,8 +114,6 @@ proc  jlib::pep::OnPepDisco {cmd jlibname type from subiq args} {
 
 proc jlib::pep::create {jlibname node args} {
     variable xmlns
-    
-    Debug 4 "jlib::pep::create node=$node"
     
     array set argsA {
 	-access_model presence
@@ -189,18 +179,14 @@ proc jlib::pep::publish {jlibname node itemE args} {
 #       none
 
 proc jlib::pep::retract {jlibname node} {
- 
-    # ??? xmlns name ???
-    # Empty <item/>  ???
-
-    #set pepE [wrapper::createtag $node -attrlist [list xmlns $xmlns($node)]]
-    #set itemE [wrapper::createtag item -subtags [list $pepE]]
-
     set itemE [wrapper::createtag item]
     $jlibname pubsub retract $node [list $itemE]
 }
 
 # Others PEP -------------------------------------------------------------------
+# 
+#       In normal circumstances with mutual presence subscriptions we don't
+#       need to do pusub subscribe.
 # 
 #       1) disco bare JID      (not necessary for 1.0)
 #       2) subscribe to node   (not necessary for 1.0)
@@ -218,16 +204,13 @@ proc jlib::pep::retract {jlibname node} {
 
 proc jlib::pep::subscribe {jlibname jid node args} {
     
-    # NEW PEP:
     # If an entity is not subscribed to the account owner's presence, 
     # it MUST subscribe to a node using....
     set myjid2 [$jlibname myjid2]
     eval {$jlibname pubsub subscribe $jid $myjid2 -node $node} $args
 }
 
-#
-# This is the way to do things prior to PEP version 1.0.
-# 
+# @@@ OUTDATED; BACKUP !!!!!!!!!!!!!!!
 
 # jlib::pep::set_auto_subscribe --
 # 
@@ -236,7 +219,6 @@ proc jlib::pep::subscribe {jlibname jid node args} {
 proc jlib::pep::set_auto_subscribe {jlibname node args} {    
     upvar ${jlibname}::pep::autosub  autosub
 
-    Debug 4 "jlib::pep::set_auto_subscribe node=$node"
     array set argsA {
 	-command    {}
     }
@@ -262,7 +244,8 @@ proc jlib::pep::set_auto_subscribe {jlibname node args} {
     # And register an event handler for any presence.    
     if {!$autosub(presreg)} {
 	set autosub(presreg) 1
-	$jlibname presence_register_int available [namespace code PresenceEvent]
+	$jlibname presence_register_int available  \
+	  [namespace code [list PresenceEvent $node]]
     }
 }
 
@@ -285,16 +268,15 @@ proc jlib::pep::have_auto_subscribe {jlibname node} {
 proc jlib::pep::unset_auto_subscribe {jlibname node} {
     upvar ${jlibname}::pep::autosub  autosub
     
-    Debug 4 "jlib::pep::unset_auto_subscribe node=$node"
-    
     array unset autosub $node,*
     if {![llength [array names autosub *,node]]} {
 	set autosub(presreg) 0
-	$jlibname presence_deregister_int available [namespace code PresenceEvent]
+	$jlibname presence_deregister_int available \
+	  [namespace code [list PresenceEvent $node]]
     }
 }
 
-proc jlib::pep::PresenceEvent {jlibname xmldata} {
+proc jlib::pep::PresenceEvent {jlibname xmldata node} {
     upvar ${jlibname}::pep::autosub  autosub
     variable state
     
@@ -310,7 +292,7 @@ proc jlib::pep::PresenceEvent {jlibname xmldata} {
     if {[$jlibname disco iscategorytype gateway/* $from]} {
         return
     }
-
+    
     # We should be careful not to disco/publish for each presence change.
     # @@@ There is a small glitch here if user changes presence before we
     #     received its disco result.
@@ -324,8 +306,6 @@ proc jlib::pep::PresenceEvent {jlibname xmldata} {
 
 proc jlib::pep::OnDiscoItems {node jlibname type from subiq args} {
     
-    Debug 4 "::pep::OnDiscoItems node=$node"
-
     # Get contact PEP nodes.
     if {$type eq "result"} {
 	set nodes [$jlibname disco nodes $from]
@@ -339,13 +319,6 @@ proc jlib::pep::OnDiscoItems {node jlibname type from subiq args} {
 	    $jlibname pubsub subscribe $from $myjid2 -node $node  \
 	      -command $autosub($node,-command)
 	}
-    }
-}
-
-proc jlib::pep::Debug {num str} {
-    variable debug
-    if {$num <= $debug} {
-	puts $str
     }
 }
 

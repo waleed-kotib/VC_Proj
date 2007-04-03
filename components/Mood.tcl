@@ -1,15 +1,13 @@
 # Mood.tcl --
 # 
 #       User Mood using PEP recommendations over PubSub library code.
-#       The current code reflects the PEP XEP prior to the simplification
-#       of version 0.15. NEW PEP means version 0.15+
 #
-#  Copyright (c) 2006 Mats Bengtsson
+#  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
 #  @@@ TODO: There seems to be a problem resetting mood to none (retract?)
 #  
-#  $Id: Mood.tcl,v 1.16 2006-12-01 08:55:13 matben Exp $
+#  $Id: Mood.tcl,v 1.17 2007-04-03 14:11:12 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -23,6 +21,7 @@ proc ::Mood::Init { } {
     ::Debug 2 "::Mood::Init"
 
     # Add event hooks.
+    ::hooks::register jabberInitHook        ::Mood::JabberInitHook
     ::hooks::register loginHook             ::Mood::LoginHook
     ::hooks::register logoutHook            ::Mood::LogoutHook
 
@@ -31,6 +30,7 @@ proc ::Mood::Init { } {
 
     variable xmlns
     set xmlns(mood)        "http://jabber.org/protocol/mood"
+    set xmlns(mood+notify) "http://jabber.org/protocol/mood+notify"
     set xmlns(node_config) "http://jabber.org/protocol/pubsub#node_config"
 
     variable state
@@ -120,6 +120,26 @@ proc ::Mood::Init { } {
       [mc mWorried]     worried]
 }
 
+# Mood::JabberInitHook --
+# 
+#       Here we announce that we have mood support and is interested in
+#       getting notifications.
+
+proc ::Mood::JabberInitHook {jlibname} {
+    variable xmlns
+    
+    set E [list [wrapper::createtag "identity"  \
+      -attrlist [list category hierarchy type leaf name "User Mood"]]]
+    lappend E [wrapper::createtag "feature" \
+      -attrlist [list var $xmlns(mood)]]    
+    lappend E [wrapper::createtag "feature" \
+      -attrlist [list var $xmlns(mood+notify)]]
+    
+    ::Jabber::RegisterCapsExtKey mood $E
+    ::Jabber::AddClientXmlns $xmlns(mood)
+    ::Jabber::AddClientXmlns $xmlns(mood+notify)
+}
+
 # Setting own mood -------------------------------------------------------------
 #
 #       Disco server for PEP, disco own bare JID, create pubsub node.
@@ -132,29 +152,23 @@ proc ::Mood::LoginHook {} {
    
     # Disco server for pubsub/pep support.
     set server [::Jabber::JlibCmd getserver]
-    ::Jabber::JlibCmd pep have $server ::Mood::HavePEP
-    ::Jabber::JlibCmd pubsub register_event ::Mood::Event -node $xmlns(mood)
+    ::Jabber::JlibCmd pep have $server [namespace code HavePEP]
+    ::Jabber::JlibCmd pubsub register_event [namespace code Event] \
+      -node $xmlns(mood)
 }
 
 proc ::Mood::HavePEP {jlibname have} {
-    variable xmlns
     variable menuDef
 
     if {$have} {
 	::JUI::RegisterMenuEntry jabber $menuDef
-	::Jabber::JlibCmd pep set_auto_subscribe $xmlns(mood)
     }
 }
 
 proc ::Mood::LogoutHook {} {
-    variable xmlns
     variable state
     
     ::JUI::DeRegisterMenuEntry jabber mMood
-
-    ::Jabber::JlibCmd pubsub deregister_event ::Mood::Event -node $xmlns(mood)
-    ::Jabber::JlibCmd pep unset_auto_subscribe $xmlns(mood)
-
     unset -nocomplain state
 }
 
@@ -169,6 +183,7 @@ proc ::Mood::MenuCmd {} {
 }
 
 #--------------------------------------------------------------------
+
 proc ::Mood::Publish {mood {text ""}} {
     variable moodNode
     variable xmlns
@@ -182,8 +197,7 @@ proc ::Mood::Publish {mood {text ""}} {
       -attrlist [list xmlns $xmlns(mood)] -subtags $moodChildEs]
     set itemE [wrapper::createtag item -subtags [list $moodE]]
 
-    ::Jabber::JlibCmd pep publish mood $itemE
-    
+    ::Jabber::JlibCmd pep publish $xmlns(mood) $itemE
 }
 
 proc ::Mood::Retract {} {
@@ -195,123 +209,60 @@ proc ::Mood::Retract {} {
 #--------------------------------------------------------------
 
 proc ::Mood::CustomMoodDlg {} {
-    global  this wDlgs
-    variable moodMessageDlg
-    variable moodState
-    variable menuMoodVar
     variable myMoods
     variable mood2mLabel
-    variable moodStateDlg
-
-    set w ".mumdlg"
-    if {[winfo exists $w]} {
-	raise $w
-	return
-    }
-    ::UI::Toplevel $w \
-      -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
-      -closecommand [namespace current]::CloseCmd
-    wm title $w [mc {moodDlg}]
-
-    ::UI::SetWindowPosition $w ".mumdlg"
+    variable menuMoodVar
+    variable moodMessageDlg
     
     set moodStateDlg $menuMoodVar
     set moodMessageDlg ""
-
-    # Global frame.
-    ttk::frame $w.frall
-    pack $w.frall -fill both -expand 1
-
-    set wbox $w.frall.f
-    ttk::frame $wbox -padding [option get . dialogPadding {}]
-    pack $wbox -fill both -expand 1
-
-    ttk::label $wbox.msg  \
-      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc selectCustomMood]
-    pack $wbox.msg -side top -anchor w
-
-    set frmid $wbox.frmid
-    ttk::frame $frmid
-    pack $frmid -side top -fill both -expand 1
-
-    ttk::label $frmid.lmood -text "[mc {mMood}]:" 
     
-    set mDef {}
+    set str "Pick your mood that will be shown to other users."
+    set dtl "Only users with clients that understand this protocol will be able to display your mood."
+    set w [ui::dialog -message $str -detail $dtl -icon info \
+      -type okcancel -modal 1 -geovariable ::prefs(winGeom,customMood) \
+      -title [mc selectCustomMood] -command [namespace code CustomCmd]]
+    set fr [$w clientframe]
+
+    set mDef [list]
     lappend mDef [list [mc None] -value "-"]
+    lappend mDef [list separator]
     foreach mood $myMoods {
 	lappend mDef [list [mc $mood2mLabel($mood)] -value $mood] 
     }
-    ui::optionmenu $frmid.cmood -menulist $mDef -direction flush \
+    ttk::label $fr.lmood -text "[mc {mMood}]:"     
+    ui::optionmenu $fr.cmood -menulist $mDef -direction flush \
       -variable [namespace current]::moodStateDlg
 
-    ttk::label $frmid.ltext -text "[mc {moodMessage}]:"
-    ttk::entry $frmid.etext -textvariable [namespace current]::moodMessageDlg
+    ttk::label $fr.ltext -text "[mc {moodMessage}]:"
+    ttk::entry $fr.etext -textvariable [namespace current]::moodMessageDlg
 
-    grid  $frmid.lmood    $frmid.cmood  -sticky e -pady 2
-    grid  $frmid.ltext    $frmid.etext  -sticky e -pady 2
-    grid $frmid.cmood $frmid.etext -sticky ew
-    grid columnconfigure $frmid 1 -weight 1
+    grid  $fr.lmood    $fr.cmood  -sticky e -pady 2
+    grid  $fr.ltext    $fr.etext  -sticky e -pady 2
+    grid $fr.cmood $fr.etext -sticky ew
+    grid columnconfigure $fr 1 -weight 1
 
-    # Button part.
-    set frbot $wbox.b
-    set wenter  $frbot.btok
-    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $wenter -text [mc OK] \
-      -default active -command [list [namespace current]::sendMoodEnter $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::CancelEnter $w]
-
-
-    set padx [option get . buttonPadX {}]
-    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
-	pack $frbot.btok -side right
-	pack $frbot.btcancel -side right -padx $padx
-    } else {
-	pack $frbot.btcancel -side right
-	pack $frbot.btok -side right -padx $padx
-    }
-    pack $frbot -side bottom -fill x
-
-    wm resizable $w 0 0
-
-    bind $w <Return> [list $wenter invoke]
-
-    # Trick to resize the labels wraplength.
-    set script [format {
-	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
-    } $wbox.msg $w]
-    after idle $script
+    set mbar [::UI::GetMainMenu]
+    ui::dialog defaultmenu $mbar
+    ::UI::MenubarDisableBut $mbar edit
+    $w grab    
+    ::UI::MenubarEnableAll $mbar
 }
 
-proc ::Mood::sendMoodEnter {w} {
+proc ::Mood::CustomCmd {w bt} {
     variable moodStateDlg
     variable moodMessageDlg
-    variable mapMoodTextToElem
     variable menuMoodVar
-
-    if {$moodStateDlg eq "-"} {
-        Retract
-    } else {
-        Publish $moodStateDlg $moodMessageDlg
+    
+    if {$bt eq "ok"} {
+	if {$moodStateDlg eq "-"} {
+	    Retract
+	} else {
+	    Publish $moodStateDlg $moodMessageDlg
+	}
+	set menuMoodVar $moodStateDlg	
     }
-    set menuMoodVar $moodStateDlg
-
-    ::UI::SaveWinGeom $w
-    destroy $w
 }
-
-proc ::Mood::CancelEnter {w} {
-
-    ::UI::SaveWinGeom $w
-    destroy $w
-}
-
-proc ::Mood::CloseCmd {w} {
-    ::UI::SaveWinGeom $w
-}
-
-#------------------------------------------------------------------
 
 # Mood::Event --
 # 
@@ -362,4 +313,5 @@ proc ::Mood::Event {jlibname xmldata} {
     }
 }
 
+#-------------------------------------------------------------------------------
 

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.43 2006-12-01 08:55:14 matben Exp $
+# $Id: disco.tcl,v 1.44 2007-04-03 14:11:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -162,8 +162,7 @@ proc jlib::disco::cmdproc {jlibname cmd args} {
 #       Components register their feature elements for disco/info.
 #       Clients must handle this using the disco handler.
 
-proc jlib::disco::registerfeature {feature} {
- 
+proc jlib::disco::registerfeature {feature} { 
     variable features
   
     lappend features $feature
@@ -171,7 +170,6 @@ proc jlib::disco::registerfeature {feature} {
 }
 
 proc jlib::disco::getregisteredfeatures {} {
-    
     variable features
 
     return $features
