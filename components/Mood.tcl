@@ -5,9 +5,7 @@
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  @@@ TODO: There seems to be a problem resetting mood to none (retract?)
-#  
-#  $Id: Mood.tcl,v 1.17 2007-04-03 14:11:12 matben Exp $
+#  $Id: Mood.tcl,v 1.18 2007-04-03 14:14:35 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -201,7 +199,9 @@ proc ::Mood::Publish {mood {text ""}} {
 }
 
 proc ::Mood::Retract {} {
-    ::Jabber::JlibCmd pep retract mood
+    variable xmlns
+
+    ::Jabber::JlibCmd pep retract $xmlns(mood)
 }
 
 #--------------------------------------------------------------
