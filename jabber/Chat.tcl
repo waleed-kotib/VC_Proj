@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements chat type of UI for jabber.
 #      
-#  Copyright (c) 2001-2006  Mats Bengtsson
+#  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.194 2007-03-11 14:37:48 matben Exp $
+# $Id: Chat.tcl,v 1.195 2007-04-05 13:12:48 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2484,6 +2484,7 @@ proc ::Chat::Send {dlgtoken} {
     upvar 0 $dlgtoken dlgstate
     variable cprefs
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::xmppxmlns xmppxmlns
     
     ::Debug 2 "::Chat::Send "
     
@@ -2564,8 +2565,8 @@ proc ::Chat::Send {dlgtoken} {
             set chatstate(havecs) false
         }
         ChangeChatState $chattoken send
-        set csxmlns "http://jabber.org/protocol/chatstates"
-        lappend cselems [wrapper::createtag $chatstate(chatstate) -attrlist [list xmlns $csxmlns]]
+        lappend cselems [wrapper::createtag $chatstate(chatstate) \
+	  -attrlist [list xmlns $xmppxmlns(chatstates)]]
         lappend opts -xlist $cselems
     }
      
@@ -3221,10 +3222,10 @@ proc ::Chat::ChangeChatState {chattoken trigger} {
 
 proc ::Chat::SendChatState {chattoken state} {
     upvar 0 $chattoken chatstate
+    upvar ::Jabber::xmppxmlns xmppxmlns
 
-    set csxmlns "http://jabber.org/protocol/chatstates"
     set cselems [list  \
-      [wrapper::createtag $state -attrlist [list xmlns $csxmlns]]]
+      [wrapper::createtag $state -attrlist [list xmlns $xmppxmlns(chatstates)]]]
 
     eval {::Jabber::JlibCmd send_message $chatstate(jid)  \
       -thread $chatstate(threadid) -type chat -xlist $cselems}

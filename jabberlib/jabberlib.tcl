@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.171 2007-02-27 10:02:14 matben Exp $
+# $Id: jabberlib.tcl,v 1.172 2007-04-05 13:12:51 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3335,7 +3335,7 @@ proc jlib::oob_set {jlibname to cmd url args} {
     set children [list [wrapper::createtag "url" -chdata $url]]
     array set argsA $args
     if {[info exists argsA(-desc)] && [string length $argsA(-desc)]} {
-	lappend children [wrapper::createtag {desc} -chdata $argsA(-desc)]
+	lappend children [wrapper::createtag "desc" -chdata $argsA(-desc)]
     }
     set xmllist [wrapper::createtag query -attrlist $attrlist  \
       -subtags $children]

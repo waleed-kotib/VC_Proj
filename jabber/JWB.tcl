@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.77 2007-03-11 14:37:49 matben Exp $
+# $Id: JWB.tcl,v 1.78 2007-04-05 13:12:48 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -40,6 +40,8 @@ proc ::JWB::Init {jlibName} {
     
     ::Debug 4 "::JWB::Init"
     
+    set jlib $jstate(jlib)
+    
     ::hooks::register whiteboardPreBuildHook       ::JWB::PreBuildHook
     ::hooks::register whiteboardPostBuildHook      ::JWB::PostBuildHook
     ::hooks::register whiteboardBuildEntryHook     ::JWB::BuildEntryHook
@@ -70,28 +72,37 @@ proc ::JWB::Init {jlibName} {
     #  -filtertags [namespace current]::FilterTags
     
     # Register for the messages we want. Duplicate protocols.
-    $jstate(jlib) message_register normal coccinella:wb  \
+    $jlib message_register normal "coccinella:wb"  \
       [namespace current]::HandleSpecialMessage 20
-    $jstate(jlib) message_register chat coccinella:wb  \
+    $jlib message_register chat "coccinella:wb"  \
       [namespace current]::HandleRawChatMessage
-    $jstate(jlib) message_register groupchat coccinella:wb  \
+    $jlib message_register groupchat "coccinella:wb"  \
       [namespace current]::HandleRawGroupchatMessage
 
-    $jstate(jlib) message_register normal $coccixmlns(whiteboard)  \
+    $jlib message_register normal $coccixmlns(whiteboard)  \
       [namespace current]::HandleSpecialMessage 20
-    $jstate(jlib) message_register chat $coccixmlns(whiteboard)  \
+    $jlib message_register chat $coccixmlns(whiteboard)  \
       [namespace current]::HandleRawChatMessage
-    $jstate(jlib) message_register groupchat $coccixmlns(whiteboard)  \
+    $jlib message_register groupchat $coccixmlns(whiteboard)  \
       [namespace current]::HandleRawGroupchatMessage
 
     # Not completed SVG protocol...
-    $jstate(jlib) message_register chat $xmlnsSVGWB \
+    $jlib message_register chat $xmlnsSVGWB \
       [namespace current]::HandleSVGWBChatMessage
-    $jstate(jlib) message_register groupchat $xmlnsSVGWB \
+    $jlib message_register groupchat $xmlnsSVGWB \
       [namespace current]::HandleSVGWBGroupchatMessage
 
-    ::Jabber::AddClientXmlns [list "coccinella:wb"]
+    set E [list]
+    lappend E [wrapper::createtag "identity"  \
+      -attrlist [list category hierarchy type leaf name "Whiteboard"]]
+    lappend E [wrapper::createtag "feature" \
+      -attrlist [list var "coccinella:wb"]]    
+    lappend E [wrapper::createtag "feature" \
+      -attrlist [list var $coccixmlns(whiteboard)]]
     
+    $jlib caps register whiteboard $E \
+      [list "coccinella:wb" $coccixmlns(whiteboard)]
+        
     # Get protocol handlers, present and future.
     GetRegisteredHandlers
     

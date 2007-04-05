@@ -5,7 +5,7 @@
 #  Copyright (c) 2006 Antonio Cano damas  
 #  Copyright (c) 2006 Mats Bengtsson
 #  
-# $Id: JingleIax.tcl,v 1.34 2006-12-01 08:55:13 matben Exp $
+# $Id: JingleIax.tcl,v 1.35 2007-04-05 13:12:48 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -68,13 +68,6 @@ proc ::JingleIAX::Init { } {
 
     jlib::jingle::register iax 50  \
       [list $mediaElem] [list $transportElem] ::JingleIAX::IQHandler
-
-    # Caps specific iax stuff.
-    set subtags [list [wrapper::createtag "identity"  \
-      -attrlist [list category hierarchy type leaf name "IAX Phone"]]]
-    lappend subtags [wrapper::createtag "feature" \
-      -attrlist [list var $xmlns(transport)]]
-    ::Jabber::RegisterCapsExtKey iax $subtags
 }
 
 proc ::JingleIAX::InitHook {} {
@@ -89,7 +82,16 @@ proc ::JingleIAX::InitHook {} {
 #       Do jlib instance specific stuff here.
 
 proc ::JingleIAX::JabberInitHook {jlib} {
-    
+    variable xmlns
+
+    # Caps specific iax stuff.
+    set subtags [list [wrapper::createtag "identity"  \
+      -attrlist [list category hierarchy type leaf name "IAX Phone"]]]
+    lappend subtags [wrapper::createtag "feature" \
+      -attrlist [list var $xmlns(transport)]]
+
+    $jlib caps register iax $subtags $xmlns(transport)
+
     # @@@ Subject to experimentation!
     # Add an: 	  
     #   <x xmlns='http://jabber.org/protocol/jingle/media/audio' type='available'/>

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jingle.tcl,v 1.8 2006-12-01 08:55:14 matben Exp $
+# $Id: jingle.tcl,v 1.9 2007-04-05 13:12:51 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -165,6 +165,9 @@ proc jlib::jingle::first_register {} {
 #       Jabber Registrar.
 #       Disco features are automatically registered but caps are not.
 #       
+#       NB: Currently this must be called before any jlib instance created,
+#           that is, before jlib::jingle::init!
+#       
 # Arguments:
 #       name:       unique name 
 #       priority:   number between 0-100
@@ -179,7 +182,7 @@ proc jlib::jingle::first_register {} {
 proc jlib::jingle::register {name priority mediaElems transportElems cmd} {
     variable jingle
     variable inited_reg
-    
+        
     set jingle($name,name)       $name
     set jingle($name,prio)       $priority
     set jingle($name,cmd)        $cmd
@@ -213,7 +216,7 @@ proc jlib::jingle::register {name priority mediaElems transportElems cmd} {
 
 # jlib::jingle::init --
 # 
-#       Sets up jabberlib handlers and makes a new instance if an jingle object.
+#       Sets up jabberlib handlers and makes a new instance if a jingle object.
   
 proc jlib::jingle::init {jlibname args} {
     variable inited

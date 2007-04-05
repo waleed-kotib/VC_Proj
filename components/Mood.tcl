@@ -5,7 +5,7 @@
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.19 2007-04-03 14:33:12 matben Exp $
+#  $Id: Mood.tcl,v 1.20 2007-04-05 13:12:48 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -126,16 +126,15 @@ proc ::Mood::Init { } {
 proc ::Mood::JabberInitHook {jlibname} {
     variable xmlns
     
-    set E [list [wrapper::createtag "identity"  \
-      -attrlist [list category hierarchy type leaf name "User Mood"]]]
+    set E [list]
+    lappend E [wrapper::createtag "identity"  \
+      -attrlist [list category hierarchy type leaf name "User Mood"]]
     lappend E [wrapper::createtag "feature" \
       -attrlist [list var $xmlns(mood)]]    
     lappend E [wrapper::createtag "feature" \
       -attrlist [list var $xmlns(mood+notify)]]
     
-    ::Jabber::RegisterCapsExtKey mood $E
-    ::Jabber::AddClientXmlns $xmlns(mood)
-    ::Jabber::AddClientXmlns $xmlns(mood+notify)
+    $jlibname caps register mood $E [list $xmlns(mood) $xmlns(mood+notify)]
 }
 
 # Setting own mood -------------------------------------------------------------

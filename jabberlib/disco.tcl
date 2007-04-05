@@ -2,9 +2,9 @@
 #  
 #      This file is part of the jabberlib.
 #      
-#  Copyright (c) 2004-2006  Mats Bengtsson
+#  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.44 2007-04-03 14:11:14 matben Exp $
+# $Id: disco.tcl,v 1.45 2007-04-05 13:12:51 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -89,8 +89,7 @@ namespace eval jlib::disco {
     }
     
     # Components register their feature elements for disco/info.
-    variable features
-    set features $xmlns(disco)
+    variable features [list]
 
     # Note: jlib::ensamble_register is last in this file!
 }
@@ -134,7 +133,12 @@ proc jlib::disco::init {jlibname args} {
     # Clear any cache info we may have collected since likely invalid offline.
     $jlibname presence_register_int unavailable [namespace current]::unavail_cb
 
-    set info(conferences) {}
+    # Register our own features.
+    registerfeature $xmlns(disco)
+    registerfeature $xmlns(items)
+    registerfeature $xmlns(info)
+    
+    set info(conferences) [list]
     
     return
 }
@@ -159,8 +163,15 @@ proc jlib::disco::cmdproc {jlibname cmd args} {
 
 # jlib::disco::registerfeature --
 # 
-#       Components register their feature elements for disco/info.
+# @@@ Make instance specific instead!
+# 
+#       Components register their feature elements for disco#info.
 #       Clients must handle this using the disco handler.
+#       NB: This is only for 'basic' features not associated with a caps ext
+#           token. Those are handled by jlib::caps::register.
+#       NB: We consider everything inside jlib to be 'basic' but also client
+#           level features can be basic.
+#       NB: Features registered here MUST NEVER change within a certain version.
 
 proc jlib::disco::registerfeature {feature} { 
     variable features

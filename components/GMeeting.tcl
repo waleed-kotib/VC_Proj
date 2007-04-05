@@ -2,7 +2,7 @@
 # 
 #       Interface for launching Gnome Meeting.
 #
-# $Id: GMeeting.tcl,v 1.12 2006-08-21 09:45:47 matben Exp $
+# $Id: GMeeting.tcl,v 1.13 2007-04-05 13:12:48 matben Exp $
 
 namespace eval ::GMeeting:: {
     
@@ -20,8 +20,27 @@ proc ::GMeeting::Init { } {
     if {$cmd == {}} {
 	return
     }	
-   
-    set xmlnsdiscoinfo "http://jabber.org/protocol/disco#info"
+    
+    set menuspec [list  \
+      command {Gnome Meeting...} [namespace current]::MenuCmd {} {} {}]
+    set menuSpec \
+      [list command "Gnome Meeting..." user {::GMeeting::RosterCmd $jid3} {}]
+        
+    ::Roster::RegisterPopupEntry $menuSpec    
+
+    ::hooks::register jabberInitHook  ::GMeeting::JabberInitHook
+    
+    component::register GnomeMeeting  \
+      "Provides a method to launch Gnome Meeting"
+}
+
+proc ::GMeeting::JabberInitHook {jlibname} {
+
+    array set xmlns {
+	h323    "http://jabber.org/protocol/voip/h323"
+	sip     "http://jabber.org/protocol/voip/sip"
+	callto  "http://jabber.org/protocol/voip/callto"
+    }
     
     # Need to create all elements when responding to a disco info
     # request to the specified node.
@@ -29,28 +48,12 @@ proc ::GMeeting::Init { } {
 	set subtags($uri) [list [wrapper::createtag "identity" -attrlist  \
 	  [list category hierarchy type leaf name $name]]]
 	lappend subtags($uri) [wrapper::createtag "feature" \
-	  -attrlist [list var $xmlnsdiscoinfo]]
-	lappend subtags($uri) [wrapper::createtag "feature" \
 	  -attrlist [list var "http://jabber.org/protocol/voip/$uri"]]
     }
-    
-    set menuspec [list  \
-      command {Gnome Meeting...} [namespace current]::MenuCmd {} {} {}]
-    set menuSpec \
-      [list command "Gnome Meeting..." user {::GMeeting::RosterCmd $jid3} {}]
-        
-    #::JUI::RegisterMenuEntry jabber $menuspec
-    ::Roster::RegisterPopupEntry $menuSpec
-    ::Jabber::RegisterCapsExtKey voip_h323  $subtags(h323)
-    ::Jabber::RegisterCapsExtKey voip_sip   $subtags(sip)
-    ::Jabber::RegisterCapsExtKey voipgm2    $subtags(callto)
 
-    ::Jabber::AddClientXmlns "http://jabber.org/protocol/voip/h323"
-    ::Jabber::AddClientXmlns "http://jabber.org/protocol/voip/sip"
-    ::Jabber::AddClientXmlns "http://jabber.org/protocol/voip/callto"
-    
-    component::register GnomeMeeting  \
-      "Provides a method to launch Gnome Meeting"
+    $jlibname caps register voip_h323 $subtags(h323)   $xmlns(h232)
+    $jlibname caps register voip_sip  $subtags(sip)    $xmlns(sip)
+    $jlibname caps register voipgm2   $subtags(callto) $xmlns(callto)
 }
 
 proc ::GMeeting::MenuCmd {args} {

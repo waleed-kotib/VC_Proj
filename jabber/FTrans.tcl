@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the UI for file-transfer.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.15 2006-08-20 13:41:18 matben Exp $
+# $Id: FTrans.tcl,v 1.16 2007-04-05 13:12:48 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -18,6 +18,7 @@ package provide FTrans 1.0
 namespace eval ::FTrans {
 
     ::hooks::register prefsInitHook          ::FTrans::InitPrefsHook
+    ::hooks::register jabberInitHook         ::FTrans::JabberInitHook
     
     set title [mc {Send File}]
         
@@ -27,14 +28,15 @@ namespace eval ::FTrans {
     
     variable uid 0
     
-    variable xmlns
-    array set xmlns {
-	oob            "jabber:iq:oob"
-	file-transfer  "http://jabber.org/protocol/si/profile/file-transfer"
-    }
-    
     # Handler for incoming file-transfer requests (set).
     jlib::ftrans::registerhandler ::FTrans::SetHandler
+}
+
+proc ::FTrans::JabberInitHook {jlib} {
+    upvar ::Jabber::xmppxmlns xmppxmlns
+    
+    # si/profile/file-transfer registered in jlib::ftrans
+    jlib::disco::registerfeature $xmppxmlns(oob)
 }
 
 proc ::FTrans::InitPrefsHook { } {
@@ -291,7 +293,6 @@ proc ::FTrans::Nop {args} { }
 #       Initiator function. Must be 3-tier jid.
 
 proc ::FTrans::Send {jid args} {
-    variable xmlns
     upvar ::Jabber::jstate jstate
     
     if {[$jstate(jlib) disco isdiscoed info $jid]} {
@@ -342,14 +343,16 @@ proc ::FTrans::DiscoCB {w jlibname type jid subiq} {
     }
 }
 
+# @@@ Shall be done using caps instead!
+
 proc ::FTrans::DiscoGetFeature {jid} {
-    variable xmlns
+    upvar ::Jabber::xmppxmlns xmppxmlns
     upvar ::Jabber::jstate jstate
     
-    if {[$jstate(jlib) disco hasfeature $xmlns(file-transfer) $jid]} {
-	return $xmlns(file-transfer)
-    } elseif {[$jstate(jlib) disco hasfeature $xmlns(oob) $jid]} {
-	return $xmlns(oob)
+    if {[$jstate(jlib) disco hasfeature $xmppxmlns(file-transfer) $jid]} {
+	return $xmppxmlns(file-transfer)
+    } elseif {[$jstate(jlib) disco hasfeature $xmppxmlns(oob) $jid]} {
+	return $xmppxmlns(oob)
     } else {
 	return
     }
@@ -360,7 +363,7 @@ proc ::FTrans::DiscoGetFeature {jid} {
 #       Callback from Send button.
 
 proc ::FTrans::DoSend {win jid fileName desc} {
-    variable xmlns
+    upvar ::Jabber::xmppxmlns xmppxmlns
     upvar ::Jabber::jstate jstate
     
     set fileName [string trim $fileName]
@@ -390,7 +393,7 @@ proc ::FTrans::DoSend {win jid fileName desc} {
 	  -message [mc jamessnofiletrpt $jid]
 	return
     }
-    if {$feature eq $xmlns(file-transfer)} {
+    if {$feature eq $xmppxmlns(file-transfer)} {
 	
 	# Do this each time since we may have changed proxy settings.
 	BytestreamsConfigure
