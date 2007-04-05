@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Disco application part.
 #      
-#  Copyright (c) 2004-2006  Mats Bengtsson
+#  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.104 2007-04-03 14:11:13 matben Exp $
+# $Id: Disco.tcl,v 1.105 2007-04-05 13:12:48 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -37,9 +37,6 @@ namespace eval ::Disco:: {
     option add *Disco.waveImage             wave            widgetDefault
     option add *Disco.fontStyleMixed        0               widgetDefault    
     option add *Disco.minimalPadding        {0}             widgetDefault
-    
-    # Used for discoing ourselves using a node hierarchy.
-    variable debugNodes 0
     
     # If number children smaller than this do disco#info.
     variable discoInfoLimit 12
@@ -527,24 +524,25 @@ proc ::Disco::IsBranchNode {jid node} {
 proc ::Disco::ParseGetInfo {from queryE args} {
     global  prefs this
     variable xmlns
-    variable debugNodes
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     upvar ::Jabber::xmppxmlns xmppxmlns
     
     ::Debug 2 "::Disco::ParseGetInfo: from=$from args='$args'"
     
-    array set argsArr $args
+    array set argsA $args
     set ishandled 1
     set type "result"
     set found 0
+    set jlib $jstate(jlib)
     
     # Return any id!
-    set opts {}
-    if {[info exists argsArr(-id)]} {
-	set opts [list -id $argsArr(-id)]
+    set opts [list]
+    if {[info exists argsA(-id)]} {
+	lappend opts -id $argsA(-id)
     }
     set node [wrapper::getattribute $queryE node]
+
     ::Debug 4 "\t node=$node"
     
     # Every entity MUST have at least one identity, and every entity MUST 
@@ -554,59 +552,48 @@ proc ::Disco::ParseGetInfo {from queryE args} {
     if {$node eq ""} {
 	    
 	# No node. Adding private namespaces.
-	set vars [concat  \
-	  [jlib::disco::getregisteredfeatures] [::Jabber::GetClientXmlnsList]]
-	set subtags [list [wrapper::createtag "identity" -attrlist  \
-	  [list category client type pc name Coccinella]]]
-	lappend subtags [wrapper::createtag "feature" \
-	  -attrlist [list var $xmppxmlns(disco,info)]]
+	# Add everything supported, both 'basic' and 'ext'.
+	set vars [concat [$jlib caps getallfeatures] \
+	  [jlib::disco::getregisteredfeatures]]
+	set elem [list]
+	lappend elem [wrapper::createtag "identity" -attrlist  \
+	  [list category client type pc name Coccinella]]
 	foreach var $vars {
-	    lappend subtags [wrapper::createtag "feature" \
+	    lappend elem [wrapper::createtag "feature" \
 	      -attrlist [list var $var]]
 	}	
 	set found 1
     } elseif {[string equal $node "$coccixmlns(caps)#$this(vers,full)"]} {
 	
-	# Return version number.
-	set subtags [list [wrapper::createtag "identity" -attrlist  \
-	  [list category hierarchy type leaf name "Version"]]]
-	lappend subtags [wrapper::createtag "feature" \
-	  -attrlist [list var "jabber:iq:version"]]
+	# Return 'basic' features that are not related to any 'ext' token.
+	set elem [list]
+	set vars [jlib::disco::getregisteredfeatures]
+	lappend elem [wrapper::createtag "identity" -attrlist  \
+	  [list category client type pc name Coccinella]]
+	lappend elem [wrapper::createtag "identity" -attrlist  \
+	  [list category hierarchy type leaf name Coccinella]]
+	foreach var $vars {
+	    lappend elem [wrapper::createtag "feature" \
+	      -attrlist [list var $var]]
+	}	
 	set found 1
-   } else {
-    
+    } else {
+	
 	# Find any matching exts.
-	set exts [::Jabber::GetCapsExtKeyList]
+	set exts [$jlib caps getexts]
 	foreach ext $exts {
 	    if {[string equal $node "$coccixmlns(caps)#$ext"]} {
 		set found 1
-		set subtags [::Jabber::GetCapsExtSubtags $ext]
+		set elem [$jlib caps getxmllist $ext]
 		break
 	    }
-	}
-    }
-    
-    # If still no hit see if node matches...
-    if {!$found && $debugNodes} {
-	if {$node eq "A"} {
-	    set subtags [list [wrapper::createtag "identity" -attrlist  \
-	      [list category hierarchy type leaf]]]
-	    lappend subtags [wrapper::createtag "feature" \
-	      -attrlist [list var $xmppxmlns(disco,info)]]
-	    set found 1
-	} elseif {$node eq "B"} {
-	    set subtags [list [wrapper::createtag "identity" -attrlist  \
-	      [list category hierarchy type branch]]]
-	    lappend subtags [wrapper::createtag "feature" \
-	      -attrlist [list var $xmppxmlns(disco,info)]]
-	    set found 1
 	}
     }
     if {!$found} {
 	
 	# This entity is not found.
-	set subtags [list [wrapper::createtag "error" \
-	  -attrlist {code 404 type cancel} \
+	set elem [list [wrapper::createtag "error" \
+	  -attrlist [list code 404 type cancel] \
 	  -subtags [list [wrapper::createtag "item-not-found" \
 	  -attrlist [list xmlns urn:ietf:xml:params:ns:xmpp-stanzas]]]]]
 	set type "error"
@@ -616,7 +603,7 @@ proc ::Disco::ParseGetInfo {from queryE args} {
     } else {
 	set attr [list xmlns $xmlns(info) node $node]
     }
-    set xmllist [wrapper::createtag "query" -subtags $subtags -attrlist $attr]
+    set xmllist [wrapper::createtag "query" -subtags $elem -attrlist $attr]
     eval {$jstate(jlib) send_iq $type [list $xmllist] -to $from} $opts
     
     return $ishandled
@@ -634,20 +621,20 @@ proc ::Disco::ParseGetInfo {from queryE args} {
 proc ::Disco::ParseGetItems {from queryE args} {
     global  prefs this
     variable xmlns
-    variable debugNodes
     upvar ::Jabber::jstate jstate    
     upvar ::Jabber::coccixmlns coccixmlns
     
     ::Debug 2 "::Disco::ParseGetItems from=$from args='$args'"
 
-    array set argsArr $args
+    array set argsA $args
     set ishandled 0
     set found 0
+    set jlib $jstate(jlib)
     
     # Return any id!
-    set opts {}
-    if {[info exists argsArr(-id)]} {
-	set opts [list -id $argsArr(-id)]
+    set opts [list]
+    if {[info exists argsA(-id)]} {
+	lappend opts -id $argsA(-id)
     }
     set node [wrapper::getattribute $queryE node]
     
@@ -655,8 +642,8 @@ proc ::Disco::ParseGetItems {from queryE args} {
     if {$node eq ""} {
 	set type "result"
 	set found 1
-	if {[info exists argsArr(-to)]} {
-	    set myjid $argsArr(-to)
+	if {[info exists argsA(-to)]} {
+	    set myjid $argsA(-to)
 	} else {
 	    set myjid [::Jabber::GetMyJid]
 	}
@@ -664,19 +651,11 @@ proc ::Disco::ParseGetItems {from queryE args} {
 	set cnode "$coccixmlns(caps)#$this(vers,full)"
 	lappend subtags [wrapper::createtag "item" \
 	  -attrlist [list jid $myjid node $cnode]]
-	set exts [::Jabber::GetCapsExtKeyList]
+	set exts [$jlib caps getexts]
 	foreach ext $exts {
 	    set cnode "$coccixmlns(caps)#$ext"
 	    lappend subtags [wrapper::createtag "item" \
 	      -attrlist [list jid $myjid node $cnode]]
-	}
-	if {$debugNodes} {
-	
-	    # This is just some dummy nodes used for debugging.
-	    lappend subtags [wrapper::createtag "item" \
-	      -attrlist [list jid $myjid node A name "Name A"]]
-	    lappend subtags [wrapper::createtag "item" \
-	      -attrlist [list jid $myjid node B name "Empty branch"]]
 	}
 	set attr [list xmlns $xmlns(items)]
 	set xmllist [wrapper::createtag "query" -attrlist $attr -subtags $subtags]
@@ -1261,10 +1240,10 @@ proc ::Disco::PresenceHook {jid presence args} {
     upvar ::Jabber::jstate jstate
          
     jlib::splitjid $jid jid2 res
-    array set argsArr $args
+    array set argsA $args
     set res ""
-    if {[info exists argsArr(-resource)]} {
-	set res $argsArr(-resource)
+    if {[info exists argsA(-resource)]} {
+	set res $argsA(-resource)
     }
     set jid3 $jid2/$res
     set jlib $jstate(jlib)

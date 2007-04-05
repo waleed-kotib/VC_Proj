@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.162 2007-04-03 14:11:13 matben Exp $
+# $Id: JUI.tcl,v 1.163 2007-04-05 13:12:48 matben Exp $
 
 package provide JUI 1.0
 
@@ -837,6 +837,8 @@ proc ::JUI::RegisterMenuEntry {name menuSpec} {
     lappend extraMenuDefs(rost,$name) $menuSpec
     
     # If already built menu need to rebuild it.
+    # @@@ On Mac submenus are not properly built.
+    #     Need to open mailbox or click the desktop for them to build!
     if {[winfo exists $jwapp(w)]} {
 	BuildMenu $name
     }
@@ -905,11 +907,7 @@ proc ::JUI::JabberPostCommand {wmenu} {
     global wDlgs config
     variable state
     variable jwapp
-    
-    if {[llength [grab current]]} {
-
-    }
-    
+        
     # For aqua we must do this only for .jmain
     if {[::UI::IsToplevelActive $wDlgs(jmain)]} {
 	::UI::MenuMethod $wmenu entryconfigure mShow -state normal
@@ -998,7 +996,20 @@ proc ::JUI::JabberPostCommand {wmenu} {
       
     ::hooks::run menuPostCommand main-jabber $wmenu
     
-    # Workaround for mac bug.
+    # Workaround for mac bug. Still problems building submenus.
+    update idletasks
+    if {[tk windowingsystem] eq "aqua"} {
+	# Nothing helps!
+	#$wmenu add command -label bug
+	#$wmenu delete end
+
+	#menu $wmenu.bug
+	#$wmenu.bug add command -label bug
+	#$wmenu add cascade -menu $wmenu.bug
+	#update idletasks
+	#destroy $wmenu.bug
+	#$wmenu delete end
+    }
     update idletasks
 }
 

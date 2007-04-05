@@ -22,16 +22,18 @@ proc ::ComponentExample::Init { } {
     ::JUI::RegisterMenuEntry file $menuspec
     ::Roster::RegisterPopupEntry $popMenuSpec
     
+    ::hooks::register jabberInitHook  ::ComponentExample::JabberInitHook
+
+    component::register ComponentExample  \
+      "This is justa dummy example of the component mechanism."
+}
+
+proc ::ComponentExample::JabberInitHook {jlibname} {
     
     set xmlnsj "http://jabber.org/protocol/jingle"
     set subtags [list [wrapper::createtag "feature" \
-	  -attrlist [list var $xmlnsj]]]
-    ::Jabber::RegisterCapsExtKey jingle $subtags
-    ::Jabber::AddClientXmlns $xmlnsj
-
-    
-    component::register ComponentExample  \
-      "This is justa dummy example of the component mechanism."
+      -attrlist [list var $xmlnsj]]]    
+    $jlibname caps register jingle $subtags $xmlnsj
 }
 
 proc ::ComponentExample::Cmd { } {    

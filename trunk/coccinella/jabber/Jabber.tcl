@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.205 2007-04-03 14:11:13 matben Exp $
+# $Id: Jabber.tcl,v 1.206 2007-04-05 13:12:48 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -147,26 +147,27 @@ namespace eval ::Jabber:: {
     # XML namespaces defined here.
     variable coccixmlns
     array set coccixmlns {
-	coccinella      "http://coccinella.sourceforge.net/protocol/coccinella"
+	caps            "http://coccinella.sourceforge.net/protocol/caps"
 	servers         "http://coccinella.sourceforge.net/protocol/servers"
 	whiteboard      "http://coccinella.sourceforge.net/protocol/whiteboard"
-	public          "http://coccinella.sourceforge.net/protocol/private"
-	caps            "http://coccinella.sourceforge.net/protocol/caps"
     }
     
     # Standard jabber (xmpp + XEP) protocol namespaces.
     variable xmppxmlns
     array set xmppxmlns {
-	amp         "http://jabber.org/protocol/amp"
-	caps        "http://jabber.org/protocol/caps"
-	disco       "http://jabber.org/protocol/disco"
-	disco,info  "http://jabber.org/protocol/disco#info"
-	disco,items "http://jabber.org/protocol/disco#items"
-	ibb         "http://jabber.org/protocol/ibb"
-	muc         "http://jabber.org/protocol/muc"
-	muc,admin   "http://jabber.org/protocol/muc#admin"
-	muc,owner   "http://jabber.org/protocol/muc#owner"
-	muc,user    "http://jabber.org/protocol/muc#user"
+	amp             "http://jabber.org/protocol/amp"
+	caps            "http://jabber.org/protocol/caps"
+	chatstates      "http://jabber.org/protocol/chatstates"
+	disco           "http://jabber.org/protocol/disco"
+	disco,info      "http://jabber.org/protocol/disco#info"
+	disco,items     "http://jabber.org/protocol/disco#items"
+	file-transfer   "http://jabber.org/protocol/si/profile/file-transfer"
+	ibb             "http://jabber.org/protocol/ibb"
+	muc             "http://jabber.org/protocol/muc"
+	muc,admin       "http://jabber.org/protocol/muc#admin"
+	muc,owner       "http://jabber.org/protocol/muc#owner"
+	muc,user        "http://jabber.org/protocol/muc#user"
+	oob             "jabber:iq:oob"
     }
     
     # Standard xmlns supported. Components add their own.
@@ -174,14 +175,11 @@ namespace eval ::Jabber:: {
     set clientxmlns {
 	"jabber:client"
 	"jabber:iq:last"
-	"jabber:iq:oob"
 	"jabber:iq:time"
 	"jabber:iq:version"
 	"jabber:x:event"
     }    
-    foreach {key xmlns} [array get coccixmlns] {
-	lappend clientxmlns $xmlns
-    }
+    lappend clientxmlns $coccixmlns(servers)
     
     # Short error names.
     variable errorCodeToShort
@@ -471,6 +469,7 @@ proc ::Jabber::Init { } {
     variable jprefs
     variable coccixmlns
     variable xmppxmlns
+    variable clientxmlns
     
     ::Debug 2 "::Jabber::Init"
         
@@ -504,28 +503,20 @@ proc ::Jabber::Init { } {
     $jlibname presence_register subscribed   [namespace code SubscribedEvent]
     $jlibname presence_register unsubscribe  [namespace code UnsubscribeEvent]
     $jlibname presence_register unsubscribed [namespace code UnsubscribedEvent]
+    
+    foreach xmlns $clientxmlns {
+	jlib::disco::registerfeature $xmlns
+    }
+	
+    ::JUI::Build $wDlgs(jmain)    
         
-    ::JUI::Build $wDlgs(jmain)
-    
-    # Register file transport mechanism used when responding to a disco info
-    # request to the specified node.
-    # In a component based system this should be done by the transport component.
-    set subtags [list [wrapper::createtag "identity"  \
-      -attrlist [list category hierarchy type leaf name "File transfer"]]]
-    lappend subtags [wrapper::createtag "feature" \
-      -attrlist [list var $xmppxmlns(disco,info)]]
-    lappend subtags [wrapper::createtag "feature" \
-      -attrlist [list var $coccixmlns(servers)]]
-    lappend subtags [wrapper::createtag "feature" \
-      -attrlist [list var jabber:iq:oob]]
-
-    RegisterCapsExtKey ftrans $subtags
-    
     # Stuff that need an instance of jabberlib register here.
     ::Debug 4 "--> jabberInitHook"
     ::hooks::run jabberInitHook $jlibname
     
     # Register extra presence elements.
+    # NB: Must be after jabberInitHook since components may register their
+    #     caps extensions there.
     $jlibname register_presence_stanza [CreateCapsPresElement] -type available
     $jlibname register_presence_stanza [CreateCoccinellaPresElement] -type available
 }
@@ -1380,37 +1371,14 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
 proc ::Jabber::CreateCapsPresElement { } {
     global  this
     variable coccixmlns
-    variable capsExtArr
     variable xmppxmlns
 
     set node $coccixmlns(caps)
-    set exts [lsort [array names capsExtArr]]
+    set exts [JlibCmd caps getexts]
     set xmllist [wrapper::createtag c -attrlist \
       [list xmlns $xmppxmlns(caps) node $node ver $this(vers,full) ext $exts]]
 
     return $xmllist
-}
-
-proc ::Jabber::RegisterCapsExtKey {name subtags} {    
-    variable capsExtArr
-    
-    set capsExtArr($name) $subtags
-}
-
-proc ::Jabber::GetCapsExtKeyList { } {
-    variable capsExtArr
-    
-    return [lsort [array names capsExtArr]]
-}
-
-proc ::Jabber::GetCapsExtSubtags {name} {
-    variable capsExtArr
-    
-    if {[info exists capsExtArr($name)]} {
-	return $capsExtArr($name)
-    } else {
-	return {}
-    }
 }
     
 # Jabber::GetAnyDelayElem --
@@ -1825,22 +1793,6 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
     
      # Tell jlib's iq-handler that we handled the event.
     return 1
-}
-
-# ::Jabber::AddClientXmlns --
-# 
-#       Reserved for specific client xmlns, not library ones.
-
-proc ::Jabber::AddClientXmlns {xmlnsList} {
-    variable clientxmlns
-    
-    set clientxmlns [concat $clientxmlns $xmlnsList]
-}
-
-proc ::Jabber::GetClientXmlnsList { } {
-    variable clientxmlns
-    
-    return $clientxmlns
 }
 
 # The ::Jabber::Passwd:: namespace -------------------------------------------

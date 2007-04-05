@@ -17,9 +17,9 @@
 #     jid -> node+ver -> disco info
 #     jid -> node+ext -> disco info
 #  
-#  Copyright (c) 2005-2006  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.17 2006-12-01 08:55:14 matben Exp $
+# $Id: caps.tcl,v 1.18 2007-04-05 13:12:48 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -53,8 +53,13 @@ namespace eval jlib::caps {
 proc jlib::caps::init {jlibname args} {
         
     namespace eval ${jlibname}::caps {
+	variable ext
 	variable state
     }
+    
+    # The cache for disco results. Must not be instance specific.
+    variable caps
+    
     jlib::presence_register_int $jlibname available    \
       [namespace current]::avail_cb
     jlib::presence_register_int $jlibname unavailable  \
@@ -74,6 +79,64 @@ proc jlib::caps::cmdproc {jlibname cmd args} {
     # Just dispatch the command to the right procedure.
     return [eval {$cmd $jlibname} $args]
 }
+
+#--- First, handle our own caps stuff ------------------------------------------
+
+# jlib::caps::register --
+# 
+#       Register an 'ext' token and associated disco#info element.
+#       The 'name' is the ext token.
+#       The 'features' must be the 'var' attributes in 'xmllist'.
+
+proc jlib::caps::register {jlibname name xmllist features} {
+    upvar ${jlibname}::caps::ext ext
+    
+    set ext(name,$name)     $name
+    set ext(xmllist,$name)  $xmllist
+    set ext(features,$name) $features
+}
+
+proc jlib::caps::getexts {jlibname} {
+    upvar ${jlibname}::caps::ext ext
+    
+    set exts [list]
+    foreach {key name} [array get ext name,*] {
+	lappend exts $name
+    }
+    return [lsort $exts]
+}
+
+proc jlib::caps::getxmllist {jlibname name} {
+    upvar ${jlibname}::caps::ext ext
+    
+    if {[info exists ext(xmllist,$name)]} {
+	return $ext(xmllist,$name)
+    } else {
+	return [list]
+    }
+}
+
+proc jlib::caps::getfeatures {jlibname name} {
+    upvar ${jlibname}::caps::ext ext
+    
+    if {[info exists ext(features,$name)]} {
+	return $ext(features,$name)
+    } else {
+	return [list]
+    }
+}
+
+proc jlib::caps::getallfeatures {jlibname} {
+    upvar ${jlibname}::caps::ext ext
+    
+    set features [list]
+    foreach {key featureL} [array get ext features,*] {
+	set features [concat $features $featureL]
+    }
+    return [lsort -unique $features]
+}
+
+#--- Second, handle all users caps stuff ---------------------------------------
 
 # jlib::caps::disco_ver --
 # 
@@ -115,6 +178,7 @@ proc jlib::caps::disco_ext {jlibname jid ext cmd} {
 
 proc jlib::caps::disco_what {jlibname jid what value cmd} {
     upvar ${jlibname}::caps::state state
+    variable caps
     
     set node [$jlibname roster getcapsattr $jid node]
         
@@ -126,8 +190,8 @@ proc jlib::caps::disco_what {jlibname jid what value cmd} {
 
     set key $what,$node,$value
     
-    if {[info exists state(subiq,$key)]} {
-	uplevel #0 $cmd [list $jlibname result $jid $state(subiq,$key)]
+    if {[info exists caps(subiq,$key)]} {
+	uplevel #0 $cmd [list $jlibname result $jid $caps(subiq,$key)]
     } elseif {[info exists state(pending,$key)]} {
 	lappend state(invoke,$key) $cmd
     } else {
@@ -152,6 +216,7 @@ proc jlib::caps::disco_what {jlibname jid what value cmd} {
 
 proc jlib::caps::disco_cb {node what value jlibname type from subiq args} {
     upvar ${jlibname}::caps::state state
+    variable caps
 
     set key $what,$node,$value
 
@@ -175,7 +240,7 @@ proc jlib::caps::disco_cb {node what value jlibname type from subiq args} {
     set jid [jlib::jidmap $from]
     
     # Cache the returned element to be reused for all node+ver combinations.
-    set state(subiq,$key) $subiq
+    set caps(subiq,$key) $subiq
     unset -nocomplain state(pending,$key)
     
     # Invoke all stacked requests including the the first one.
@@ -267,6 +332,29 @@ proc jlib::caps::reset {jlibname} {
     upvar ${jlibname}::caps::state state
     
     unset -nocomplain state
+}
+
+proc jlib::caps::writecache {fileName} {
+    variable caps
+
+    set fd [open $fileName w]
+    fconfigure $fd -encoding utf-8
+    foreach {key value} [array get caps] {
+	puts $fd [list set caps($key) $value]
+    }
+    close $fd
+}
+
+proc jlib::caps::readcache {fileName} {
+    variable caps
+
+    source $fileName
+}
+
+proc jlib::caps::freecache {} {
+    variable caps
+
+    unset -nocomplain caps
 }
 
 # We have to do it here since need the initProc before doing this.
