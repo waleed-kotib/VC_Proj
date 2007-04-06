@@ -16,10 +16,12 @@
 #     
 #     jid -> node+ver -> disco info
 #     jid -> node+ext -> disco info
+#     
+#  NB: The ext must be consistent over all versions (ver).
 #  
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.18 2007-04-05 13:12:48 matben Exp $
+# $Id: caps.tcl,v 1.19 2007-04-06 14:03:33 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -27,14 +29,14 @@
 #      caps - convenience command library for caps: Entity Capabilities 
 #      
 #   INSTANCE COMMANDS
-#      jlibname caps disco_ver jid cmd
-#      jlibname caps disco_ext jid ext cmd
-#      
-#      The callbacks cmd must look like:
-#      
-#      	    tclProc {jlibname type from subiq args}
-#      	    
-#      and the 'from' argument must not be the jid from the original call.
+#      jlibname caps register name xmllist features
+#      jlibname caps configure ?-autodisco 0|1?
+#      jlibname caps getexts
+#      jlibname caps getxmllist name
+#      jlibname caps getallfeatures
+#      jlibname caps getfeatures name
+#           
+#      The 'name' is here the ext token.
 
 package require jlib::disco
 package require jlib::roster
@@ -51,14 +53,28 @@ namespace eval jlib::caps {
 }
 
 proc jlib::caps::init {jlibname args} {
-        
+           
+    # Instance specific arrays.
     namespace eval ${jlibname}::caps {
 	variable ext
-	variable state
+	variable options
     }
+    upvar ${jlibname}::caps::options options
+    array set options {
+	-autodisco 0
+    }
+    eval {configure $jlibname} $args
+    
+    # Since the caps element from a JID is globally defined there is no need
+    # to keep its state instance specific (per jlibname).
     
     # The cache for disco results. Must not be instance specific.
     variable caps
+    
+    # This collects various mappings and states:
+    #  o It keeps track of mapping jid -> node+ver+exts
+    #  o
+    variable state
     
     jlib::presence_register_int $jlibname available    \
       [namespace current]::avail_cb
@@ -69,9 +85,22 @@ proc jlib::caps::init {jlibname args} {
 }
 
 proc jlib::caps::configure {jlibname args} {
+    upvar ${jlibname}::caps::options options
     
-    # Empty so far...
-    # Could think of some auto disco mechanism.
+    if {[llength $args]} {
+	foreach {key value} $args {
+	    switch -- $key {
+		-autodisco {
+		    set options(-autodisco) $value
+		}
+		default {
+		    return -code error "unrecognized option \"$key\""
+		}
+	    }
+	}
+    } else {
+	return [array get options]
+    }
 }
 
 proc jlib::caps::cmdproc {jlibname cmd args} {
@@ -129,11 +158,11 @@ proc jlib::caps::getfeatures {jlibname name} {
 proc jlib::caps::getallfeatures {jlibname} {
     upvar ${jlibname}::caps::ext ext
     
-    set features [list]
-    foreach {key featureL} [array get ext features,*] {
-	set features [concat $features $featureL]
+    set featureL [list]
+    foreach {key features} [array get ext features,*] {
+	set featureL [concat $featureL $features]
     }
-    return [lsort -unique $features]
+    return [lsort -unique $featureL]
 }
 
 #--- Second, handle all users caps stuff ---------------------------------------
@@ -153,59 +182,47 @@ proc jlib::caps::getallfeatures {jlibname} {
 #       request to exactly one of the users that sent a particular presenece
 #       element caps combination of node and ver.
 
-proc jlib::caps::disco_ver {jlibname jid cmd} {
+proc jlib::caps::disco_ver {jlibname jid} {
 
     set ver [$jlibname roster getcapsattr $jid ver]
-    disco_what $jlibname $jid ver $ver $cmd
+    disco $jlibname $jid ver $ver
 }
 
 # jlib::caps::disco_ext --
 # 
 #       Disco the 'ext' via the caps node+ext cache.
+#       
+#       We MUST have got a presence caps element for this user with the
+#       corresponding 'ext' token.
 
-proc jlib::caps::disco_ext {jlibname jid ext cmd} {
+proc jlib::caps::disco_ext {jlibname jid ext} {
 
-    disco_what $jlibname $jid ext $ext $cmd
+    disco $jlibname $jid ext $ext
 }
 
-# jlib::caps::disco_what --
+# jlib::caps::disco --
 # 
-#       Internal use only. See 'disco_ver'.
+#       Internal use only. See disco_ver and disco_ext.
 #       
 # Arguments:
 #       what:       "ver" or "ext"
 #       value:      value for 'ver' or the name of the 'ext'.
 
-proc jlib::caps::disco_what {jlibname jid what value cmd} {
-    upvar ${jlibname}::caps::state state
+proc jlib::caps::disco {jlibname jid what value} {
+    variable state
     variable caps
     
     set node [$jlibname roster getcapsattr $jid node]
-        
-    # There are three situations here:
-    #   1) if we have cached this info just return it
-    #   2) if pending disco for node+ver then just add to stack to be invoked
-    #   3) else need to disco
-    # This is all done per node+ver in contrast to 'disco get_async' jid+node
-
     set key $what,$node,$value
+    	
+    # Mark that we have a pending node+ver or node+ext request.
+    set state(pending,$key) 1
+    lappend state(get,$key) $jid
     
-    if {[info exists caps(subiq,$key)]} {
-	uplevel #0 $cmd [list $jlibname result $jid $caps(subiq,$key)]
-    } elseif {[info exists state(pending,$key)]} {
-	lappend state(invoke,$key) $cmd
-    } else {
-	
-	# Mark that we have a pending node+ver request and add command to list.
-	set state(pending,$key) 1
-	lappend state(get,$key) $jid
-	lappend state(invoke,$key) $cmd
-	
-	# It should be safe to use 'disco get_async' here.
-	# Need to provide node+ver for error recovery.
-	set cb [list [namespace current]::disco_cb $node $what $value]
-	$jlibname disco get_async info $jid $cb -node ${node}#${value}
-    }
+    # It should be safe to use 'disco get_async' here.
+    # Need to provide node+ver for error recovery.
+    set cb [list [namespace current]::disco_cb $node $what $value]
+    $jlibname disco get_async info $jid $cb -node ${node}#${value}
 }
 
 # jlib::caps::disco_cb --
@@ -214,42 +231,39 @@ proc jlib::caps::disco_what {jlibname jid what value cmd} {
 #       We must take care of a situation where the jid went unavailable,
 #       or otherwise returns an error, and try to use another jid.
 
-proc jlib::caps::disco_cb {node what value jlibname type from subiq args} {
-    upvar ${jlibname}::caps::state state
+proc jlib::caps::disco_cb {node what value jlibname type from queryE args} {
+    variable state
     variable caps
 
     set key $what,$node,$value
 
     if {$type eq "error"} {
+	
+	# If one client with a certain 'key' fails it is likely all will
+	# fail since they are assumed to be identical, unless it failed
+	# because it went offline.
     
+	
+	
 	# Try to find another jid with this node+ver instead that has not
 	# been previously tried.
-	if {[info exists state(jids,$key)]} {
+	if {0 && [info exists state(jids,$key)]} {
 	    foreach nextjid $state(jids,$key) {
 		if {[lsearch $state(get,$key) $nextjid] < 0} {
 		    lappend state(get,$key) $nextjid
 		    set cb [list [namespace current]::disco_cb $node $what $value]
 		    $jlibname disco get_async info $nextjid $cb -node ${node}#${value}
-		    return
 		}
 	    }
 	}
 	
 	# We end up here when there are no more jids to ask.
-    }
-    set jid [jlib::jidmap $from]
-    
-    # Cache the returned element to be reused for all node+ver combinations.
-    set caps(subiq,$key) $subiq
-    unset -nocomplain state(pending,$key)
-    
-    # Invoke all stacked requests including the the first one.
-    if {[info exists state(invoke,$key)]} {
-	foreach cmd $state(invoke,$key) {
-	    uplevel #0 $cmd [list $jlibname $type $jid $subiq] $args
-	}
-	unset -nocomplain state(invoke,$key)
-	unset -nocomplain state(get,$key)
+    } else {
+	set jid [jlib::jidmap $from]
+	
+	# Cache the returned element to be reused for all node+ver combinations.
+	set caps(queryE,$key) $queryE
+	unset -nocomplain state(pending,$key)
     }
 }
 
@@ -261,36 +275,85 @@ proc jlib::caps::disco_cb {node what value jlibname type from subiq args} {
 #       obtained for individual jids using 'roster getcapsattr'.
 
 proc jlib::caps::avail_cb {jlibname xmldata} {
-    upvar ${jlibname}::caps::state state
+    upvar ${jlibname}::caps::options options
+    variable state
+    variable caps
     
     set jid [wrapper::getattribute $xmldata from]
     set jid [jlib::jidmap $jid]
 
     set node [$jlibname roster getcapsattr $jid node]
-    set ver  [$jlibname roster getcapsattr $jid ver]
-    set ext  [$jlibname roster getcapsattr $jid ext]
-        
-    # Skip if client have not a caps presence element.
+	
+    # Skip if the client doesn't have a caps presence element.
     if {$node eq ""} {
 	return
     }
+    set ver [$jlibname roster getcapsattr $jid ver]
+    set ext [$jlibname roster getcapsattr $jid ext]
         	    
-    # Map jid -> node+ver+ext
-    set state(jid,$jid,node) $node
-    set state(jid,$jid,ver)  $ver
-    set state(jid,$jid,ext)  $ext
+    # Map jid -> node+ver+ext. Note that 'ext' may be empty.
+    set state(jid,node,$jid) $node
+    set state(jid,ver,$jid)  $ver
+    set state(jid,ext,$jid)  $ext
 	    
-    # Map node+ver -> jids    
-    lappend state(jids,ver,$node,$ver) $jid
-    set state(jids,ver,$node,$ver) [lsort -unique $state(jids,ver,$node,$ver)]
+    # For each combinations node+ver and node+ext we must be able to collect
+    # a list of JIDs where we shall pick a random one to disco.    
+    # Avoid a linear search. Better to use the array hash mechanism.
     
-    # Map node+ext -> jids
+    set state(jids,ver,$ver,$node,$jid) $jid
     foreach e $ext {
-	lappend state(jids,ext,$node,$e) $jid
-	set state(jids,ext,$node,$e) [lsort -unique $state(jids,ext,$node,$e)]
+	set state(jids,ext,$e,$node,$jid) $jid
     }
-
+        
+    # If auto disco then try to disco all node+ver and node+exts which we
+    # don't have and aren't waiting for.
+    if {$options(-autodisco)} {
+	set key ver,$node,$ver
+	if {![info exists caps(queryE,$key)]} {
+	    if {![info exists state(pending,$key)]} {
+		set rjid [get_random_jid_ver $node $ver]
+		disco $jlibname $rjid ver $ver
+	    }
+	}
+	foreach e $ext {
+	    set key ext,$node,$e
+	    if {![info exists caps(queryE,$key)]} {
+		if {![info exists state(pending,$key)]} {
+		    set rjid [get_random_jid_ext $node $e]
+		    disco $jlibname $rjid ext $e
+		}
+	    }
+	}
+    }
     return 0
+}
+
+# jlib::caps::get_random_jid_ver, get_randon_jid_ext --
+# 
+#       Methods to pick a random JID from node+ver or node+ext.
+
+proc jlib::caps::get_random_jid_ver {node ver} {
+    variable state
+    
+    set keys [array names state jids,ver,$ver,$node,*]
+    if {[llength $keys]} {
+	set idx [expr {int(rand()*[llength $keys])}]
+	return $state([lindex $keys $idx])
+    } else {
+	return 
+    }
+}
+
+proc jlib::caps::get_random_jid_ext {node ext} {
+    variable state
+    
+    set keys [array names state jids,ext,$ext,$node,*]
+    if {[llength $keys]} {
+	set idx [expr {int(rand()*[llength $keys])}]
+	return $state([lindex $keys $idx])
+    } else {
+	return 
+    }
 }
 
 # jlib::caps::unavail_cb --
@@ -299,37 +362,30 @@ proc jlib::caps::avail_cb {jlibname xmldata} {
 #       Frees internal cache related to this jid.
 
 proc jlib::caps::unavail_cb {jlibname xmldata} {
-    upvar ${jlibname}::caps::state state
+    variable state
 
     set jid [wrapper::getattribute $xmldata from]
     set jid [jlib::jidmap $jid]
     
     # JID may not have caps.
-    if {![info exists state(jid,$jid,node)]} {
+    if {![info exists state(jid,node,$jid)]} {
 	return
     }
-    set node $state(jid,$jid,node)
-    set ver  $state(jid,$jid,ver)
-    set ext  $state(jid,$jid,ext)
+    set node $state(jid,node,$jid)
+    set ver  $state(jid,ver,$jid)
+    set ext  $state(jid,ext,$jid)
         
-    # Free node+ver -> jids mapping
-    if {[info exists state(jids,ver,$node,$ver)]} {
-	jlib::util::lprune state(jids,ver,$node,$ver) $jid
-    }
-    
-    # Free node+ext -> jids mappings
-    foreach e $ext {
-	if {[info exists state(jids,ext,$node,$e)]} {
-	    jlib::util::lprune state(jids,ext,$node,$e) $jid
-	}    
-    }
-    array unset state jid,[jlib::ESC $jid],*
+    set jidESC [jlib::ESC $jid]
+    array unset state jid,node,$jidESC
+    array unset state jid,ver,$jidESC
+    array unset state jid,ext,$jidESC
+    array unset state jids,*,$jidESC
 
     return 0
 }
 
 proc jlib::caps::reset {jlibname} {
-    upvar ${jlibname}::caps::state state
+    variable state
     
     unset -nocomplain state
 }
@@ -366,12 +422,3 @@ namespace eval jlib::caps {
       [namespace current]::cmdproc
 }
 
-# Test code:
-if {0} {
-    proc cb {args} {puts "------$args"}
-    set jlib jlib::jlib1
-    set jid sgi@sgi.se/coccinella
-    $jlib caps disco_ver $jid cb
-    $jlib caps disco_ext $jid ftrans cb
-    
-}
