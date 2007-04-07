@@ -21,7 +21,7 @@
 #  
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.19 2007-04-06 14:03:33 matben Exp $
+# $Id: caps.tcl,v 1.20 2007-04-07 13:52:45 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -30,7 +30,7 @@
 #      
 #   INSTANCE COMMANDS
 #      jlibname caps register name xmllist features
-#      jlibname caps configure ?-autodisco 0|1?
+#      jlibname caps configure ?-autodisco 0|1? -command tclProc
 #      jlibname caps getexts
 #      jlibname caps getxmllist name
 #      jlibname caps getallfeatures
@@ -41,7 +41,7 @@
 package require jlib::disco
 package require jlib::roster
 
-package provide jlib::caps 0.1
+package provide jlib::caps 0.2
 
 namespace eval jlib::caps {
     
@@ -62,6 +62,7 @@ proc jlib::caps::init {jlibname args} {
     upvar ${jlibname}::caps::options options
     array set options {
 	-autodisco 0
+	-command   {}
     }
     eval {configure $jlibname} $args
     
@@ -91,7 +92,14 @@ proc jlib::caps::configure {jlibname args} {
 	foreach {key value} $args {
 	    switch -- $key {
 		-autodisco {
-		    set options(-autodisco) $value
+		    if {[string is boolean -strict $value]} {
+			set options(-autodisco) $value
+		    } else {
+			return -code error "expected boolean for -autodisco"
+		    }
+		}
+		-command {
+		    set options(-command) $value
 		}
 		default {
 		    return -code error "unrecognized option \"$key\""
@@ -217,7 +225,6 @@ proc jlib::caps::disco {jlibname jid what value} {
     	
     # Mark that we have a pending node+ver or node+ext request.
     set state(pending,$key) 1
-    lappend state(get,$key) $jid
     
     # It should be safe to use 'disco get_async' here.
     # Need to provide node+ver for error recovery.
@@ -232,38 +239,33 @@ proc jlib::caps::disco {jlibname jid what value} {
 #       or otherwise returns an error, and try to use another jid.
 
 proc jlib::caps::disco_cb {node what value jlibname type from queryE args} {
+    upvar ${jlibname}::caps::options options
     variable state
     variable caps
 
     set key $what,$node,$value
+    unset -nocomplain state(pending,$key)
 
     if {$type eq "error"} {
 	
 	# If one client with a certain 'key' fails it is likely all will
 	# fail since they are assumed to be identical, unless it failed
 	# because it went offline.
-    
-	
-	
-	# Try to find another jid with this node+ver instead that has not
-	# been previously tried.
-	if {0 && [info exists state(jids,$key)]} {
-	    foreach nextjid $state(jids,$key) {
-		if {[lsearch $state(get,$key) $nextjid] < 0} {
-		    lappend state(get,$key) $nextjid
-		    set cb [list [namespace current]::disco_cb $node $what $value]
-		    $jlibname disco get_async info $nextjid $cb -node ${node}#${value}
-		}
+	# @@@ Risk for infinite loop?
+	if {$options(-autodisco) && ![$jlibname roster isavailable $from]} {
+	    set rjid [get_random_jid $what $node $value]
+	    if {$rjid ne ""} {
+		disco $jlibname $rjid $what $value
 	    }
 	}
-	
-	# We end up here when there are no more jids to ask.
     } else {
 	set jid [jlib::jidmap $from]
 	
 	# Cache the returned element to be reused for all node+ver combinations.
 	set caps(queryE,$key) $queryE
-	unset -nocomplain state(pending,$key)
+	if {[llength $options(-command)]} {
+	    uplevel #0 $options(-command) [list $jlibname $from $queryE]
+	}
     }
 }
 
@@ -311,16 +313,20 @@ proc jlib::caps::avail_cb {jlibname xmldata} {
 	set key ver,$node,$ver
 	if {![info exists caps(queryE,$key)]} {
 	    if {![info exists state(pending,$key)]} {
-		set rjid [get_random_jid_ver $node $ver]
-		disco $jlibname $rjid ver $ver
+		set rjid [get_random_jid ver $node $ver]
+		if {$rjid ne ""} {
+		    disco $jlibname $rjid ver $ver
+		}
 	    }
 	}
 	foreach e $ext {
 	    set key ext,$node,$e
 	    if {![info exists caps(queryE,$key)]} {
 		if {![info exists state(pending,$key)]} {
-		    set rjid [get_random_jid_ext $node $e]
-		    disco $jlibname $rjid ext $e
+		    set rjid [get_random_jid ext $node $e]
+		    if {$rjid ne ""} {
+			disco $jlibname $rjid ext $e
+		    }
 		}
 	    }
 	}
@@ -328,9 +334,13 @@ proc jlib::caps::avail_cb {jlibname xmldata} {
     return 0
 }
 
-# jlib::caps::get_random_jid_ver, get_randon_jid_ext --
+# jlib::caps::get_random_jid_ver, get_random_jid_ext --
 # 
 #       Methods to pick a random JID from node+ver or node+ext.
+
+proc jlib::caps::get_random_jid {what node value} {
+    get_random_jid_$what $node $value
+}
 
 proc jlib::caps::get_random_jid_ver {node ver} {
     variable state
