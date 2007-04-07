@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005-2007 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.21 2007-02-11 11:34:09 matben Exp $
+# $Id: dialog.tcl,v 1.22 2007-04-07 13:52:45 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -222,11 +222,15 @@ snit::widget ui::dialog::widget {
 	}
     }
     
-    typemethod defaultmenu {args} {
-	if {[llength $args]} {
-	    set defaultmenu $args
+    typemethod defaultmenu {menu} {
+	if {[llength $menu]} {
+	    set defaultmenu $menu
 	}
 	return $defaultmenu
+    }
+    
+    typemethod button {name args} {
+	eval {StockButton $name} $args
     }
 
     constructor {args} {

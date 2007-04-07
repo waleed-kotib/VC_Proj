@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. It implements user
 #      interface elements.
 #      
-#  Copyright (c) 2002-2005  Mats Bengtsson
+#  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.149 2007-03-16 13:54:38 matben Exp $
+# $Id: UI.tcl,v 1.150 2007-04-07 13:52:45 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -28,6 +28,7 @@ namespace eval ::UI:: {
     option add *error64Image             error64        widgetDefault
     option add *warning64Image           warning64      widgetDefault
     option add *question64Image          question64     widgetDefault
+    option add *internet64Image          internet64     widgetDefault
 
     option add *badgeImage               Coccinella     widgetDefault
     option add *applicationImage         coccinella64   widgetDefault
@@ -120,7 +121,7 @@ proc ::UI::Init {} {
 proc ::UI::LaunchFinalHook { } {
         
     # Dialog images.
-    foreach name {info error warning question} {
+    foreach name {info error warning question internet} {
 	set im [::Theme::GetImage [option get . ${name}64Image {}]]
 	ui::dialog::setimage $name $im
     }

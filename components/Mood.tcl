@@ -5,7 +5,7 @@
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.20 2007-04-05 13:12:48 matben Exp $
+#  $Id: Mood.tcl,v 1.21 2007-04-07 13:52:44 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -281,7 +281,9 @@ proc ::Mood::Event {jlibname xmldata} {
 	    set node [wrapper::getattribute $itemsE node]    
 	    set itemE [wrapper::getfirstchildwithtag $itemsE item]
 	    set moodE [wrapper::getfirstchildwithtag $itemE mood]
-	
+	    if {![llength $moodE]} {
+		return
+	    }
 	    set text ""
 	    set mood ""
 	    foreach E [wrapper::getchildren $moodE] {
