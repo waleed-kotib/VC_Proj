@@ -5,7 +5,7 @@
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.21 2007-04-07 13:52:44 matben Exp $
+#  $Id: Mood.tcl,v 1.22 2007-04-08 13:41:54 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -278,6 +278,7 @@ proc ::Mood::Event {jlibname xmldata} {
     if {[llength $eventE]} {
 	set itemsE [wrapper::getfirstchildwithtag $eventE items]
 	if {[llength $itemsE]} {
+	    # @@@ Do I need to check the node?
 	    set node [wrapper::getattribute $itemsE node]    
 	    set itemE [wrapper::getfirstchildwithtag $itemsE item]
 	    set moodE [wrapper::getfirstchildwithtag $itemE mood]

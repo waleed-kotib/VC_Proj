@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.31 2007-02-12 15:01:08 matben Exp $
+# $Id: wrapper.tcl,v 1.32 2007-04-08 13:41:55 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -91,7 +91,7 @@ namespace eval wrapper {
     set wrapper(uid) 0
     
     # Keep all 'id's in this list.
-    set wrapper(list) {}
+    set wrapper(list) [list]
     
     variable xmldefaults {-isempty 1 -attrlist {} -chdata {} -subtags {}}
 }
@@ -596,7 +596,7 @@ proc wrapper::createtag {tagname args} {
     }
     
     # Build sub elements list.
-    set sublist {}
+    set sublist [list]
     foreach child $xmlarr(-subtags) {
 	lappend sublist $child
     }
@@ -713,7 +713,7 @@ proc wrapper::splitxml {xmllist tagVar attrVar cdataVar childVar} {
 
 proc wrapper::getchildswithtag {xmllist tag} {
     
-    set clist {}
+    set clist [list]
     foreach celem [lindex $xmllist 4] {
 	if {[string equal [lindex $celem 0] $tag]} {
 	    lappend clist $celem
@@ -724,7 +724,7 @@ proc wrapper::getchildswithtag {xmllist tag} {
 
 proc wrapper::getfirstchildwithtag {xmllist tag} {
     
-    set c {}
+    set c [list]
     foreach celem [lindex $xmllist 4] {
 	if {[string equal [lindex $celem 0] $tag]} {
 	    set c $celem
@@ -736,7 +736,7 @@ proc wrapper::getfirstchildwithtag {xmllist tag} {
 
 proc wrapper::getfirstchildwithxmlns {xmllist ns} {
     
-    set c {}
+    set c [list]
     foreach celem [lindex $xmllist 4] {
 	unset -nocomplain attr
 	array set attr [lindex $celem 1]
@@ -750,7 +750,7 @@ proc wrapper::getfirstchildwithxmlns {xmllist ns} {
 
 proc wrapper::getchildswithtagandxmlns {xmllist tag ns} {
 
-    set clist {}
+    set clist [list]
     foreach celem [lindex $xmllist 4] {
 	if {[string equal [lindex $celem 0] $tag]} {
 	    unset -nocomplain attr
@@ -765,7 +765,7 @@ proc wrapper::getchildswithtagandxmlns {xmllist tag ns} {
 
 proc wrapper::getfirstchild {xmllist tag ns} {
     
-    set elem {}
+    set elem [list]
     foreach celem [lindex $xmllist 4] {
 	if {[string equal [lindex $celem 0] $tag]} {
 	    unset -nocomplain attr
@@ -781,7 +781,7 @@ proc wrapper::getfirstchild {xmllist tag ns} {
 
 proc wrapper::getfromchilds {childs tag} {
     
-    set clist {}
+    set clist [list]
     foreach celem $childs {
 	if {[string equal [lindex $celem 0] $tag]} {
 	    lappend clist $celem
@@ -792,7 +792,7 @@ proc wrapper::getfromchilds {childs tag} {
 
 proc wrapper::deletefromchilds {childs tag} {
     
-    set clist {}
+    set clist [list]
     foreach celem $childs {
 	if {![string equal [lindex $celem 0] $tag]} {
 	    lappend clist $celem
@@ -803,7 +803,7 @@ proc wrapper::deletefromchilds {childs tag} {
 
 proc wrapper::getnamespacefromchilds {childs tag ns} {
     
-    set clist {}
+    set clist [list]
     foreach celem $childs {
 	if {[string equal [lindex $celem 0] $tag]} {
 	    unset -nocomplain attr
@@ -885,7 +885,7 @@ proc wrapper::setchildlist {xmllist childlist} {
 
 proc wrapper::setchildwithtag {xmllist elem} {
     set tag [lindex $elem 0]
-    set clist {}
+    set clist [list]
     foreach c [lindex $xmllist 4] {
 	if {[lindex $c 0] ne $tag} {
 	    lappend clist $c
@@ -901,7 +901,7 @@ proc wrapper::setchildwithtag {xmllist elem} {
 #       xmllist must be nonempty.
 
 proc wrapper::deletechildswithtag {xmllist tag} {
-    set clist {}
+    set clist [list]
     foreach c [lindex $xmllist 4] {
 	if {[lindex $c 0] ne $tag} {
 	    lappend clist $c
@@ -999,7 +999,7 @@ proc wrapper::parse_xmllist_to_array {xmllist arrName {key {}}} {
 	# This is a leaf of the tree structure.
 	set locArr($key) [lindex $xmllist 3]
     }
-    return {}
+    return
 }
 
 #-------------------------------------------------------------------------------

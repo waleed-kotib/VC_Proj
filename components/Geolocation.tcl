@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #  
-#  $Id: Geolocation.tcl,v 1.2 2007-04-07 13:52:44 matben Exp $
+#  $Id: Geolocation.tcl,v 1.3 2007-04-08 13:41:54 matben Exp $
 
 package require jlib::pep
 
@@ -18,6 +18,7 @@ proc ::Geolocation::Init { } {
     ::hooks::register jabberInitHook        ::Geolocation::JabberInitHook
     ::hooks::register loginHook             ::Geolocation::LoginHook
     ::hooks::register logoutHook            ::Geolocation::LogoutHook
+    ::hooks::register buildUserInfoDlgHook  ::Geolocation::UserInfoHook
 
     variable xmlns
     set xmlns(geoloc)        "http://jabber.org/protocol/geoloc"
@@ -25,13 +26,58 @@ proc ::Geolocation::Init { } {
     set xmlns(node_config)   "http://jabber.org/protocol/pubsub#node_config"
 
     variable menuDef
-    set menuDef [list command Geolocation ::Geolocation::Dlg {} {}]
+    set menuDef [list command Geolocation... ::Geolocation::Dlg {} {}]
     
     variable help
-    set help(alt)       "Altitude in meters above or below sea level"
-    set help(country)   "The nation where the user is located"
-    set help(lat)       "Latitude in decimal degrees North"
-    set help(lon)       "Longitude in decimal degrees East"
+    set	help(alt)         "Altitude in meters above or below sea level"
+    set	help(area)        "A named area such as a campus or neighborhood"
+    set	help(bearing)     "GPS bearing (direction in which the entity is heading to reach its next waypoint), measured in decimal degrees relative to true north"
+    set	help(building)    "A specific building on a street or in an area"
+    set	help(country)     "The nation where the user is located"
+    set	help(datum)       "GPS datum"
+    set	help(description) "A natural-language name for or description of the location"
+    set	help(error)       "Horizontal GPS error in arc minutes"
+    set	help(floor)       "A particular floor in a building"
+    set	help(lat)         "Latitude in decimal degrees North"
+    set	help(locality)    "A locality within the administrative region, such as a town or city"
+    set	help(lon)         "Longitude in decimal degrees East"
+    set	help(postalcode)  "A code used for postal delivery"
+    set	help(region)      "An administrative region of the nation, such as a state or province"
+    set	help(room)        "A particular room in a building"
+    set	help(street)      "A thoroughfare within the locality, or a crossing of two thoroughfares"
+    set	help(text)        "A catch-all element that captures any other information about the location"
+    set	help(timestamp)   "UTC timestamp specifying the moment when the reading was taken"
+    
+    variable taglabel
+    set	taglabel(alt)         [mc {Altitude}]
+    set	taglabel(area)        [mc {Named Area}]
+    set	taglabel(bearing)     [mc {GPS Bearing}]
+    set	taglabel(building)    [mc {Building}]
+    set	taglabel(country)     [mc {Country}]
+    set	taglabel(datum)       [mc {GPS Datum}]
+    set	taglabel(description) [mc {Description}]
+    set	taglabel(error)       [mc {GPS Error}]
+    set	taglabel(floor)       [mc {Floor}]
+    set	taglabel(lat)         [mc {Latitude}]
+    set	taglabel(locality)    [mc {Locality}]
+    set	taglabel(lon)         [mc {Longitude}]
+    set	taglabel(postalcode)  [mc {Postalcode}]
+    set	taglabel(region)      [mc {Region}]
+    set	taglabel(room)        [mc {Room}]
+    set	taglabel(street)      [mc {Street}]
+    set	taglabel(text)        [mc {Text}]
+    set	taglabel(timestamp)   [mc {Timestamp}]
+    
+    # string is the default if not defined.
+    variable xs
+    array set xs {
+	alt         decimal
+	bearing     decimal
+	error       decimal
+	lat         decimal
+	lon         decimal
+	timestamp   datetime
+    }
     
     # This is our cache for other users geoloc.
     variable geoloc
@@ -79,7 +125,7 @@ proc ::Geolocation::HavePEP {jlibname have} {
 proc ::Geolocation::LogoutHook {} {
     variable state
     
-    ::JUI::DeRegisterMenuEntry jabber Geolocation
+    ::JUI::DeRegisterMenuEntry jabber Geolocation...
     unset -nocomplain state
 }
 
@@ -87,6 +133,7 @@ proc ::Geolocation::Dlg {} {
     variable xmlns
     variable gearth 0
     variable help
+    variable taglabel
     
     set str "Set your geographic location that will be shown to other users."
     set dtl "Enter the information you have available below. A minimal list contains only latitude and longitude."
@@ -101,21 +148,14 @@ proc ::Geolocation::Dlg {} {
     upvar 0 $w state
     set token [namespace current]::$w
 
-    set state(lat) ""
-    set state(lon) ""
-
     foreach name {
 	alt
 	country
 	lat
 	lon
-    } str {
-	Altitude
-	Country
-	Latitude
-	Longitude
     } {
-	ttk::label $fr.l$name -text [mc $str]:
+	set str $taglabel($name)
+	ttk::label $fr.l$name -text ${str}:
 	ttk::entry $fr.e$name -textvariable $token\($name)
 	
 	grid  $fr.l$name  $fr.e$name  -sticky e -pady 2
@@ -144,17 +184,36 @@ proc ::Geolocation::Dlg {} {
 	$fr.e$name configure -validate key \
 	  -validatecommand [namespace code [list ValidateF %d %P]]    
     }
+    trace add variable $token\(lat) write [namespace code [list Trace $w]]
+    trace add variable $token\(lon) write [namespace code [list Trace $w]]
+
+    set state(lat) ""
+    set state(lon) ""
     
     # Get our own published geolocation and fill in.
     set myjid2 [::Jabber::JlibCmd  myjid2]
-    set cb [namespace code [list DiscoCB $w]]
-    ::Jabber::JlibCmd disco get_async info $myjid2 $cb -node $xmlns(geoloc)
+    set cb [namespace code [list ItemsCB $w]]
+    ::Jabber::JlibCmd pubsub items $myjid2 $xmlns(geoloc) -command $cb
         
     set mbar [::UI::GetMainMenu]
     ui::dialog defaultmenu $mbar
     ::UI::MenubarDisableBut $mbar edit
     $w grab    
     ::UI::MenubarEnableAll $mbar
+}
+
+proc ::Geolocation::Trace {w name1 name2 op} {
+    variable $w
+    upvar 0 $w state
+    
+    puts "::Geolocation::Trace $w $name1 $name2 $op"
+    
+    set fr [$w clientframe]
+    if {($state(lat) ne "") && ($state(lon) ne "")} {
+	$fr.www state {!disabled}
+    } else {
+	$fr.www state {disabled}    
+    }
 }
 
 proc ::Geolocation::LaunchUrl {w} {
@@ -181,16 +240,33 @@ proc ::Geolocation::ValidateF {insert P} {
     }
 }
 
-proc ::Geolocation::DiscoCB {w jlibname type from queryE args} {
+proc ::Geolocation::ItemsCB {w type subiq args} {
     variable $w
     upvar 0 $w state
+    variable xmlns
     
-    puts "::Geolocation::DiscoCB $queryE"
+    puts "::Geolocation::ItemsCB $w $args"
     
     # Fill in the form.
     if {[winfo exists $w]} {
-	
-	
+	foreach itemsE [wrapper::getchildren $subiq] {
+	    set tag [wrapper::gettag $itemsE]
+	    set node [wrapper::getattribute $itemsE "node"]
+	    if {[string equal $tag "items"] && [string equal $node $xmlns(geoloc)]} {
+		set itemE [wrapper::getfirstchildwithtag $itemsE item]
+		set geolocE [wrapper::getfirstchildwithtag $itemE geoloc]
+		if {![llength $geolocE]} {
+		    return
+		}
+		foreach E [wrapper::getchildren $geolocE] {
+		    set tag  [wrapper::gettag $E]
+		    set data [wrapper::getcdata $E]
+		    if {[string length $data]} {
+			set state($tag) $data
+		    }
+		}
+	    }
+	}
     }
 }
 
@@ -221,8 +297,8 @@ proc ::Geolocation::Publish {w} {
 	    lappend childL [wrapper::createtag $key -chdata $value]
 	}
     }
-    set geolocE [list [wrapper::createtag "geoloc" \
-      -attrlist [list xml:lang [jlib::getlang]] -subtags $childL]]
+    set geolocE [wrapper::createtag "geoloc" \
+      -attrlist [list xml:lang [jlib::getlang]] -subtags $childL]
     set itemE [wrapper::createtag item -subtags [list $geolocE]]
 
     ::Jabber::JlibCmd pep publish $xmlns(geoloc) $itemE
@@ -248,30 +324,57 @@ proc ::Geolocation::Event {jlibname xmldata} {
     set geoloc($from) $xmldata
 
     ::hooks::run geolocEvent $xmldata
+}
 
-    return
+proc ::Geolocation::UserInfoHook {jid wnb} {
+    variable geoloc
+    variable help
+    variable taglabel
 
-    # Use this code for discoCB instead!
+    set mjid [jlib::jidmap $jid]
+    if {![info exists geoloc($mjid)]} {
+	return
+    }
     
+    $wnb add [ttk::frame $wnb.geo] -text [mc {Geo}] -sticky news
+
+    set wpage $wnb.geo.f
+    ttk::frame $wpage -padding [option get . notebookPagePadding {}]
+    pack  $wpage  -side top -anchor [option get . dialogAnchor {}]
+
+    # Extract all geoloc data we have cached and write an entry for each.
+    set xmldata $geoloc($jid)
     set eventE [wrapper::getfirstchildwithtag $xmldata event]
     if {[llength $eventE]} {
-	set itemsE [wrapper::getfirstchildwithtag $eventE items]
-	if {[llength $itemsE]} {
-	    set itemE [wrapper::getfirstchildwithtag $itemsE item]
-	    set geolocE [wrapper::getfirstchildwithtag $itemE geoloc]
-	    if {![llength $geolocE]} {
-		return
-	    }
-	    foreach E [wrapper::getchildren $geolocE] {
-		set tag  [wrapper::gettag $E]
-		set data [wrapper::getcdata $E]
-		set
-	    
-	    
+	foreach itemsE [wrapper::getchildren $subiq] {
+	    set tag [wrapper::gettag $itemsE]
+	    set node [wrapper::getattribute $itemsE "node"]
+	    if {[string equal $tag "items"] && [string equal $node $xmlns(geoloc)]} {
+		set itemE [wrapper::getfirstchildwithtag $itemsE item]
+		set geolocE [wrapper::getfirstchildwithtag $itemE geoloc]
+		if {![llength $geolocE]} {
+		    return
+		}
+		foreach E [wrapper::getchildren $geolocE] {
+		    set tag  [wrapper::gettag $E]
+		    set data [wrapper::getcdata $E]
+		    if {[string length $data]} {
+			
+			set str $taglabel($name)
+			ttk::label $wpage.l$name -text ${str}:
+			ttk::label $wpage.e$name -text $data
+			
+			grid  $wpage.l$name  -sticky e -pady 2
+			grid  $wpage.e$name  -sticky w -pady 2
+			
+			::balloonhelp::balloonforwindow $wpage.l$name $help($name)
+			::balloonhelp::balloonforwindow $wpage.e$name $help($name)
+		    }
+		}
 	    }
 	}
     }
+    
 }
-
 
 
