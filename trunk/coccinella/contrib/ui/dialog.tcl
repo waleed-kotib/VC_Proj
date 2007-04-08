@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2005-2007 Mats Bengtsson
 #       
-# $Id: dialog.tcl,v 1.22 2007-04-07 13:52:45 matben Exp $
+# $Id: dialog.tcl,v 1.23 2007-04-08 13:41:54 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -233,6 +233,10 @@ snit::widget ui::dialog::widget {
 	eval {StockButton $name} $args
     }
 
+    typemethod type {name args} {
+	eval {StockDialog $name} $args
+    }
+
     constructor {args} {
 	upvar ::ui::dialog::images images
 	
@@ -289,6 +293,7 @@ snit::widget ui::dialog::widget {
 	set bottom $f.b
 	ttk::frame $f.b
 	
+	# Reversed order for Mac.
 	set buttons $options(-buttons)
 	if {[option get $win buttonOrder {}] eq "cancelok"} {
 	    set buttons {}
@@ -307,10 +312,17 @@ snit::widget ui::dialog::widget {
 	    $bottom.$bt configure -command [list $self Done $bt]
 	    grid $bottom.$bt -row 0 -column $column -sticky ew
 	    grid columnconfigure $bottom $column -uniform buttons
+	    
+	    # Using empty frame for padding.
 	    if {$bt ne [lindex $buttons end]} {
 		incr column
 		ttk::frame $bottom.$column
 		grid columnconfigure $bottom $column -minsize $padx
+	    }
+	}
+	if {[option get $win buttonOrder {}] eq "cancelok"} {
+	    if {[llength $buttons] > 2} {
+		#grid 
 	    }
 	}
 	if {$buttons eq {}} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.16 2007-02-04 15:27:59 matben Exp $
+# $Id: UserInfo.tcl,v 1.17 2007-04-08 13:41:54 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -112,6 +112,8 @@ proc ::UserInfo::Get {jid {node ""}} {
 	::JUI::SetStatusMessage [mc vcardget $jid]
 	$priv(warrow) start
     }
+    
+    ::hooks::run buildUserInfoDlgHook $jid $priv(wnb)
     
     return $token
 }
