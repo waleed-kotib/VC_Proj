@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.190 2007-04-02 08:01:52 matben Exp $
+# $Id: GroupChat.tcl,v 1.191 2007-04-09 07:14:25 matben Exp $
 
 package require Create
 package require Enter
@@ -1839,7 +1839,7 @@ proc ::GroupChat::TreeCreateWithTag {T tag parent} {
 }
 
 proc ::GroupChat::TreeFindWithTag {T tag} {
-    return [$T item id [list tag [list [treeutil::protect $tag]]]]
+    return [$T item id [list tag [treeutil::protect $tag]]]
 }
 
 proc ::GroupChat::TreeSetIgnoreState {T jid3 {prefix ""}} {
