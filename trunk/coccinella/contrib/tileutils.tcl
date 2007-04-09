@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.43 2007-04-08 13:41:54 matben Exp $
+# $Id: tileutils.tcl,v 1.44 2007-04-09 08:03:05 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -359,11 +359,19 @@ proc tileutils::configstyles {name} {
 		}
 	    }
 	}	    
-	set fgmap [array get foreground]
-	lappend fgmap active red {!disabled active} blue
+	array set mapA {
+	    { active !background !disabled} red 
+	    {!active !background !disabled} blue
+	}
+	if {[info exists foreground(background)]} {
+	    set mapA(background) $foreground(background)
+	}
+	if {[info exists foreground(disabled)]} {
+	    set mapA(disabled) $foreground(disabled)
+	}
 	style configure Url  \
 	  -padding 2 -relief flat -font $fonts(underlineDefault) -foreground blue
-	style map Url -foreground $fgmap
+	style map Url -foreground [array get mapA]
 	style configure Small.Url -font $fonts(underlineSmall)
 	
 	# This is a toolbutton style menubutton with a small downarrow.
