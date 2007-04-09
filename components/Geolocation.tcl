@@ -1,10 +1,11 @@
 # Geolocation.tcl --
 # 
 #       User geolocation using PEP recommendations over PubSub library code.
+#       XEP-0080: User Geolocation
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #  
-#  $Id: Geolocation.tcl,v 1.3 2007-04-08 13:41:54 matben Exp $
+#  $Id: Geolocation.tcl,v 1.4 2007-04-09 13:44:48 matben Exp $
 
 package require jlib::pep
 
@@ -12,7 +13,7 @@ namespace eval ::Geolocation:: { }
 
 proc ::Geolocation::Init { } {
 
-    component::register Geolocation "This is Geo Location (XEP-010?)."
+    component::register Geolocation "This is Geo Location (XEP-0080)."
 
     # Add event hooks.
     ::hooks::register jabberInitHook        ::Geolocation::JabberInitHook
@@ -205,9 +206,7 @@ proc ::Geolocation::Dlg {} {
 proc ::Geolocation::Trace {w name1 name2 op} {
     variable $w
     upvar 0 $w state
-    
-    puts "::Geolocation::Trace $w $name1 $name2 $op"
-    
+        
     set fr [$w clientframe]
     if {($state(lat) ne "") && ($state(lon) ne "")} {
 	$fr.www state {!disabled}
@@ -219,9 +218,7 @@ proc ::Geolocation::Trace {w name1 name2 op} {
 proc ::Geolocation::LaunchUrl {w} {
     variable $w
     upvar 0 $w state
-    
-    parray state
- 
+
     set lat $state(lat)
     set lon $state(lon)
     set url "http://www.mapquest.com/maps/map.adp?latlongtype=decimal&latitude=${lat}&longitude=${lon}"
@@ -244,8 +241,6 @@ proc ::Geolocation::ItemsCB {w type subiq args} {
     variable $w
     upvar 0 $w state
     variable xmlns
-    
-    puts "::Geolocation::ItemsCB $w $args"
     
     # Fill in the form.
     if {[winfo exists $w]} {
@@ -274,8 +269,6 @@ proc ::Geolocation::DlgCmd {w bt} {
     variable $w
     upvar 0 $w state
     variable xmlns
-    
-    puts "::Geolocation::DlgCmd $bt"
     
     if {$bt eq "ok"} {
 	Publish $w
@@ -327,11 +320,12 @@ proc ::Geolocation::Event {jlibname xmldata} {
 }
 
 proc ::Geolocation::UserInfoHook {jid wnb} {
+    variable xmlns
     variable geoloc
     variable help
     variable taglabel
 
-    set mjid [jlib::jidmap $jid]
+    set mjid [jlib::jidmap [jlib::barejid $jid]]
     if {![info exists geoloc($mjid)]} {
 	return
     }
@@ -342,11 +336,18 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
     ttk::frame $wpage -padding [option get . notebookPagePadding {}]
     pack  $wpage  -side top -anchor [option get . dialogAnchor {}]
 
+    ttk::label $wpage._lbl -text "This is geographic data for the user"
+    grid  $wpage._lbl  -  -pady 2
+    
+    ttk::button $wpage.mapquest -style Url -text www.mapquest.com
+    grid  $wpage.mapquest  -  -pady 2
+    $wpage.mapquest state {disabled}
+    
     # Extract all geoloc data we have cached and write an entry for each.
-    set xmldata $geoloc($jid)
+    set xmldata $geoloc($mjid)
     set eventE [wrapper::getfirstchildwithtag $xmldata event]
     if {[llength $eventE]} {
-	foreach itemsE [wrapper::getchildren $subiq] {
+	foreach itemsE [wrapper::getchildren $eventE] {
 	    set tag [wrapper::gettag $itemsE]
 	    set node [wrapper::getattribute $itemsE "node"]
 	    if {[string equal $tag "items"] && [string equal $node $xmlns(geoloc)]} {
@@ -358,23 +359,29 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
 		foreach E [wrapper::getchildren $geolocE] {
 		    set tag  [wrapper::gettag $E]
 		    set data [wrapper::getcdata $E]
+		    set state($tag) $data
 		    if {[string length $data]} {
 			
-			set str $taglabel($name)
-			ttk::label $wpage.l$name -text ${str}:
-			ttk::label $wpage.e$name -text $data
+			set str $taglabel($tag)
+			ttk::label $wpage.l$tag -text ${str}:
+			ttk::label $wpage.e$tag -text $data
 			
-			grid  $wpage.l$name  -sticky e -pady 2
-			grid  $wpage.e$name  -sticky w -pady 2
+			grid  $wpage.l$tag  $wpage.e$tag  -pady 2
+			grid $wpage.l$tag -sticky e
+			grid $wpage.e$tag -sticky w
 			
-			::balloonhelp::balloonforwindow $wpage.l$name $help($name)
-			::balloonhelp::balloonforwindow $wpage.e$name $help($name)
+			::balloonhelp::balloonforwindow $wpage.l$tag $help($tag)
+			::balloonhelp::balloonforwindow $wpage.e$tag $help($tag)
 		    }
 		}
 	    }
 	}
+    }    
+    if {[info exists state(lat)] && [info exists state(lon)]} {
+	$wpage.mapquest state {!disabled}
+	set url "http://www.mapquest.com/maps/map.adp?latlongtype=decimal&latitude=$state(lat)&longitude=$state(lon)"
+	$wpage.mapquest configure -command [list ::Utils::OpenURLInBrowser $url]
     }
-    
 }
 
 

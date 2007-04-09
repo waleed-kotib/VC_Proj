@@ -12,6 +12,7 @@ Coccinella-0.9*
  o added settings on unix for default web browser and email client
  o automatically gets a list with free jabber servers when registering new account
  o updated pep/mood code to version 1.0 of the PEP protocol
+ o support for geolocation
 
 Coccinella-0.95.16 (20070214):
 
