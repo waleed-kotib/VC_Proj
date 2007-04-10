@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.16 2007-04-03 14:11:14 matben Exp $
+# $Id: pubsub.tcl,v 1.17 2007-04-10 08:48:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -457,12 +457,17 @@ proc jlib::pubsub::retract {jlibname node items args} {
     
     variable xmlns
 
-    set opts {}
+    set opts [list]
+    set attr [list node $node]
 
     foreach {key value} $args {
 	switch -- $key {
 	    -command {
 		lappend opts $name $value
+	    }
+	    -notify {
+		# Must be boolean.
+		lappend attr notify $value
 	    }
 	    -to {
 		lappend opts -to $value
@@ -470,7 +475,7 @@ proc jlib::pubsub::retract {jlibname node items args} {
 	}
     }
     set subtags [list [wrapper::createtag retract \
-      -attrlist [list node $node] -subtags $items]]
+      -attrlist $attr -subtags $items]]
     set xmllist [list [wrapper::createtag pubsub \
       -attrlist [list xmlns $xmlns(pubsub)] -subtags $subtags]]
     eval {jlib::send_iq $jlibname set $xmllist} $opts

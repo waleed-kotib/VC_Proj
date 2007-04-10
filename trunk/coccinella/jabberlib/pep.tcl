@@ -7,7 +7,7 @@
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #
-# $Id: pep.tcl,v 1.5 2007-04-03 14:11:14 matben Exp $
+# $Id: pep.tcl,v 1.6 2007-04-10 08:48:14 matben Exp $
 #
 ############################# USAGE ############################################
 #
@@ -24,7 +24,7 @@
 #   
 #      jlibName pep have
 #      jlibName pep publish
-#      jlibName pep retract
+#      jlibName pep retract ?-notify 0|1?
 #     
 #   Typical names and nodes:
 #           activity    'http://jabber.org/protocol/activity'
@@ -178,9 +178,9 @@ proc jlib::pep::publish {jlibname node itemE args} {
 # Results:
 #       none
 
-proc jlib::pep::retract {jlibname node} {
+proc jlib::pep::retract {jlibname node args} {
     set itemE [wrapper::createtag item]
-    $jlibname pubsub retract $node [list $itemE]
+    eval {$jlibname pubsub retract $node [list $itemE]} $args
 }
 
 # Others PEP -------------------------------------------------------------------
