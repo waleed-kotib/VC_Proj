@@ -5,7 +5,7 @@
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.22 2007-04-08 13:41:54 matben Exp $
+#  $Id: Mood.tcl,v 1.23 2007-04-10 08:48:14 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -156,8 +156,14 @@ proc ::Mood::LoginHook {} {
 
 proc ::Mood::HavePEP {jlibname have} {
     variable menuDef
+    variable xmlns
 
     if {$have} {
+
+	# Get our own published mood and fill in.
+	set myjid2 [::Jabber::JlibCmd  myjid2]
+	::Jabber::JlibCmd pubsub items $myjid2 $xmlns(mood) \
+	  -command [namespace code ItemsCB]
 	::JUI::RegisterMenuEntry jabber $menuDef
     }
 }
@@ -167,6 +173,40 @@ proc ::Mood::LogoutHook {} {
     
     ::JUI::DeRegisterMenuEntry jabber mMood
     unset -nocomplain state
+}
+
+proc ::Mood::ItemsCB {type subiq args} {
+    variable xmlns
+    variable menuMoodVar
+    variable moodMessageDlg
+    
+    if {$type eq "error"} {
+	return
+    }
+    foreach itemsE [wrapper::getchildren $subiq] {
+	set tag [wrapper::gettag $itemsE]
+	set node [wrapper::getattribute $itemsE "node"]
+	if {[string equal $tag "items"] && [string equal $node $xmlns(mood)]} {
+	    set itemE [wrapper::getfirstchildwithtag $itemsE item]
+	    set moodE [wrapper::getfirstchildwithtag $itemE mood]
+	    if {![llength $moodE]} {
+		return
+	    }
+	    set text ""
+	    set mood ""
+	    foreach E [wrapper::getchildren $moodE] {
+		set tag [wrapper::gettag $E]
+		switch -- $tag {
+		    text {
+			set moodMessageDlg [wrapper::getcdata $E]
+		    }
+		    default {
+			set menuMoodVar $tag
+		    }
+		}
+	    }
+	}
+    }
 }
 
 proc ::Mood::MenuCmd {} {
@@ -200,7 +240,7 @@ proc ::Mood::Publish {mood {text ""}} {
 proc ::Mood::Retract {} {
     variable xmlns
 
-    ::Jabber::JlibCmd pep retract $xmlns(mood)
+    ::Jabber::JlibCmd pep retract $xmlns(mood) -notify 1
 }
 
 #--------------------------------------------------------------
@@ -278,42 +318,66 @@ proc ::Mood::Event {jlibname xmldata} {
     if {[llength $eventE]} {
 	set itemsE [wrapper::getfirstchildwithtag $eventE items]
 	if {[llength $itemsE]} {
-	    # @@@ Do I need to check the node?
-	    set node [wrapper::getattribute $itemsE node]    
-	    set itemE [wrapper::getfirstchildwithtag $itemsE item]
-	    set moodE [wrapper::getfirstchildwithtag $itemE mood]
-	    if {![llength $moodE]} {
-		return
-	    }
+	    set mjid [jlib::jidmap $from]
 	    set text ""
 	    set mood ""
-	    foreach E [wrapper::getchildren $moodE] {
-		set tag [wrapper::gettag $E]
-		switch -- $tag {
-		    text {
-			set text [wrapper::getcdata $E]
-		    }
-		    default {
-			set mood $tag
+
+	    # @@@ Do I need to check the node?
+	    set node [wrapper::getattribute $itemsE node]    
+	    set retractE [wrapper::getfirstchildwithtag $itemsE retract]
+	    if {[llength $retractE]} {
+		set msg "No mood"
+		set state($mjid,mood) ""
+		set state($mjid,text) ""
+	    } else {
+		set itemE [wrapper::getfirstchildwithtag $itemsE item]
+		set moodE [wrapper::getfirstchildwithtag $itemE mood]
+		if {![llength $moodE]} {
+		    return
+		}
+		foreach E [wrapper::getchildren $moodE] {
+		    set tag [wrapper::gettag $E]
+		    switch -- $tag {
+			text {
+			    set text [wrapper::getcdata $E]
+			}
+			default {
+			    set mood $tag
+			}
 		    }
 		}
-	    }
-	    set mjid [jlib::jidmap $from]
+		set mjid [jlib::jidmap $from]
 	    
-	    # Cache the result.
-	    set state($mjid,mood) $mood
-	    set state($mjid,text) $text
+		# Cache the result.
+		set state($mjid,mood) $mood
+		set state($mjid,text) $text
 	    
-	    if {$mood eq ""} {
-		set msg ""
-	    } else {
-		set msg "[mc mMood]: [mc $mood] $text"
+		if {$mood eq ""} {
+		    set msg ""
+		} else {
+		    set msg "[mc mMood]: [mc $mood] $text"
+		}
 	    }
 	    ::RosterTree::BalloonRegister mood $from $msg
 	    
 	    ::hooks::run moodEvent $xmldata $mood $text
 	}
     }
+}
+
+# Test
+if {0} {
+    set xmlns(mood)        "http://jabber.org/protocol/mood"
+    proc cb {args} {puts "---> $args"}
+    set jlib ::jlib::jlib1
+    set myjid2 [$jlib myjid2]
+    $jlib pubsub items $myjid2 $xmlns(mood)
+    $jlib disco send_get items $myjid2 cb
+    $jlib pep retract $xmlns(mood)
+    
+    
+    
+    
 }
 
 #-------------------------------------------------------------------------------

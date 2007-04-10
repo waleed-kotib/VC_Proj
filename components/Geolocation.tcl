@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #  
-#  $Id: Geolocation.tcl,v 1.4 2007-04-09 13:44:48 matben Exp $
+#  $Id: Geolocation.tcl,v 1.5 2007-04-10 08:48:14 matben Exp $
 
 package require jlib::pep
 
@@ -241,6 +241,10 @@ proc ::Geolocation::ItemsCB {w type subiq args} {
     variable $w
     upvar 0 $w state
     variable xmlns
+    
+    if {$type eq "error"} {
+	return
+    }
     
     # Fill in the form.
     if {[winfo exists $w]} {
