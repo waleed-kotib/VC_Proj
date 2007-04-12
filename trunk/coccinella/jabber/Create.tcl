@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: Create.tcl,v 1.7 2006-10-03 13:09:26 matben Exp $
+# $Id: Create.tcl,v 1.8 2007-04-12 13:57:23 matben Exp $
 
 package provide Create 1.0
 
@@ -32,7 +32,7 @@ proc ::Create::Build {args} {
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Create::Build args='$args'"
-    array set argsArr $args
+    array set argsA $args
     
     # State variable to collect instance specific variables.
     set token [namespace current]::[incr uid]
@@ -56,11 +56,11 @@ proc ::Create::Build {args} {
 	roomname    ""
 	nickname    ""
     }
-    if {[info exists argsArr(-roomname)]} {
-	set state(roomname) $argsArr(-roomname)
+    if {[info exists argsA(-roomname)]} {
+	set state(roomname) $argsA(-roomname)
     }
-    if {[info exists argsArr(-nickname)]} {
-	set state(nickname) $argsArr(-nickname)
+    if {[info exists argsA(-nickname)]} {
+	set state(nickname) $argsA(-nickname)
     }
     set state(w)              $w
     set state(wraplength)     300
@@ -108,16 +108,16 @@ proc ::Create::Build {args} {
     grid columnconfigure $frtop 1 -weight 1
     
     # Find the default conferencing server.
-    if {[info exists argsArr(-server)]} {
+    if {[info exists argsA(-server)]} {
 	
 	# Bes ure to get domain part only!
-	jlib::splitjidex $argsArr(-server) - domain -
+	jlib::splitjidex $argsA(-server) - domain -
 	set state(server) $domain
 	$frtop.eserv state {disabled}
     } else {
 	set state(server) [lindex $serviceList 0]
     }
-    if {$confServers eq {}} {
+    if {![llength $confServers]} {
 	$frtop.eserv state {disabled}
 	$frtop.eroom state {disabled}
 	$frtop.enick state {disabled}
@@ -146,11 +146,20 @@ proc ::Create::Build {args} {
     }
     pack $frbot -side bottom -fill x
 
-    if {$confServers eq {}} {
+    if {![llength $confServers]} {
 	$wbtget    state {disabled}
 	$wbtcreate state {disabled}
     }
 
+    # MUC rooms can be created directly (instant) without getting the form.
+    # But in this case we must have nonempty room name and nick name.
+    if {($state(roomname) eq "") || ($state(nickname) eq "")} {
+	$wbtcreate state {disabled}
+    }
+    if {$state(roomname) eq ""} {
+	$wbtget state {disabled}
+    }
+    
     # This part must be built dynamically from the 'get' xml data.
     # May be different for each conference server.
     
@@ -175,11 +184,20 @@ proc ::Create::Build {args} {
     
     bind $w <Return> [list $wbtget invoke]
     
-    if {$confServers != {}} {
-	trace variable $token\(server) w  \
-	  [list [namespace current]::TraceServer $token]
+    if {[llength $confServers]} {
+	trace add variable $token\(server) write \
+	  [namespace code [list TraceCreateState $token]]
 	SetState $token
     }
+    trace add variable $token\(roomname) write \
+      [namespace code [list TraceCreateState $token]]
+    trace add variable $token\(nickname) write \
+      [namespace code [list TraceCreateState $token]]
+
+    trace add variable $token\(roomname) write \
+      [namespace code [list TraceGetState $token]]
+    trace add variable $token\(nickname) write \
+      [namespace code [list TraceGetState $token]]
     
     # Grab and focus.
     set oldFocus [focus]
@@ -199,10 +217,10 @@ proc ::Create::Build {args} {
     return [expr {($finished <= 0) ? "cancel" : "create"}]
 }
 
-#       MUC rooms can be created directly (instant) without getting the form.
+# MUC rooms can be created directly (instant) without getting the form.
+# But in this case we must have nonempty room name and nick name.
 
-proc ::Create::TraceServer {token name junk1 junk2} {    
-    
+proc ::Create::TraceCreateState {token name junk1 junk2} {        
     SetState $token
 }
 
@@ -216,10 +234,25 @@ proc ::Create::SetState {token} {
     set muc [$jstate(jlib) disco hasfeature $xmppxmlns(muc) $state(server)]
     set state(usemuc) $muc
     if {$muc} {
-	$state(wbtcreate) state {!disabled}
+	if {($state(roomname) eq "") || ($state(nickname) eq "")} {
+	    $state(wbtcreate) state {disabled}
+	} else {
+	    $state(wbtcreate) state {!disabled}	
+	}
     } else {
 	$state(wbtcreate) state {disabled}
     }    
+}
+
+proc ::Create::TraceGetState {token name junk1 junk2} {        
+    variable $token
+    upvar 0 $token state
+
+    if {($state(roomname) eq "") || ($state(nickname) eq "")} {
+	$state(wbtget) state {disabled}
+    } else {
+	$state(wbtget) state {!disabled}
+    }
 }
 
 proc ::Create::Close {token w} {
@@ -384,7 +417,7 @@ proc ::Create::CreateMUCCB {token jlibname xmldata} {
     
     # We should check that we've got an 
     # <created xmlns='http://jabber.org/protocol/muc#owner'/> element.
-    if {![info exists argsArr(-created)]} {
+    if {![info exists argsA(-created)]} {
     
     }
     $jstate(jlib) muc getroom $state(roomjid)  \
@@ -544,7 +577,7 @@ proc ::Create::GCBuild {args} {
     } else {
 	set enter(nickname) $jprefs(defnick)
     }
-    array set argsArr $args
+    array set argsA $args
     
     # Global frame.
     ttk::frame $w.frall
@@ -584,20 +617,20 @@ proc ::Create::GCBuild {args} {
     grid  $frmid.lserv  $frmid.lroom  $frmid.lnick -sticky e
     grid  $frmid.eserv  $frmid.eroom  $frmid.enick -sticky ew
     
-    if {[info exists argsArr(-roomjid)]} {
-	jlib::splitjidex $argsArr(-roomjid) node service res
+    if {[info exists argsA(-roomjid)]} {
+	jlib::splitjidex $argsA(-roomjid) node service res
 	set enter(roomname) $node
 	set enter(server)   $service
 	$wcomboserver state {disabled}
 	$frmid.eroom  state {disabled}
     }
-    if {[info exists argsArr(-server)]} {
-	set server $argsArr(-server)
-	set enter(server) $argsArr(-server)
+    if {[info exists argsA(-server)]} {
+	set server $argsA(-server)
+	set enter(server) $argsA(-server)
 	$wcomboserver state {disabled}
     }
-    if {[info exists argsArr(-nickname)]} {
-	set enter(nickname) $argsArr(-nickname)
+    if {[info exists argsA(-nickname)]} {
+	set enter(nickname) $argsA(-nickname)
     }
     
     # Button part.
