@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.82 2007-03-12 13:19:56 matben Exp $
+# $Id: NewMsg.tcl,v 1.83 2007-04-13 13:52:48 matben Exp $
 
 package require ui::entryex
 
@@ -72,19 +72,6 @@ namespace eval ::NewMsg:: {
     set locals(dlguid) 0
     set locals(inited) 0
     set locals(initedaddr) 0
-    
-    # {subtype popupText entryText}
-    variable transportDefs
-    array set transportDefs {
-	jabber      {Jabber     {Jabber ID:}          }
-	icq         {ICQ        {ICQ number:}         }
-	aim         {AIM        {AIM:}                }
-	msn         {MSN        {MSN:}                }
-	yahoo       {Yahoo      {Yahoo:}              }
-	irc         {IRC        {IRC:}                }
-	smtp        {Email      {Email address, @->%:}}
-	x-gadugadu  {Gadu-Gadu  {Address:}            }
-    }
 }
 
 # NewMsg::Init --
@@ -109,30 +96,28 @@ proc ::NewMsg::Init {} {
 proc ::NewMsg::InitEach { } {
     
     variable locals
-    variable transportDefs
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "NewMsg::InitEach"
     
-    set trpts {}
-    foreach subtype [lsort [array names transportDefs]] {
-	set jids [$jstate(jlib) disco getjidsforcategory "gateway/$subtype"]
-	if {[llength $jids]} {
-	    lappend trpts $subtype
-	    set locals(servicejid,$subtype) [lindex $jids 0]
-	}
-    }    
+    set trpts [list]
+    set catL [$jstate(jlib) disco getallcategories gateway/*]
+    regsub -all -- {gateway/} $catL {} trpts
+    foreach type $trpts {
+	set jidL [$jstate(jlib) disco getjidsforcategory gateway/$type]
+	set locals(servicejid,$type) [lindex $jidL 0]
+    }
 
-    # Disco doesn't return jabber. Make sure it's first.
-    set trpts [lsearch -all -not -inline $trpts jabber]
-    set trpts [concat jabber $trpts]
-    set locals(servicejid,jabber) $jstate(server)
+    # Disco doesn't return xmpp. Make sure it's first.
+    set trpts [lsort [lsearch -all -not -inline $trpts xmpp]]
+    set trpts [concat xmpp $trpts]
+    set locals(servicejid,xmpp) $jstate(server)
     set locals(ourtransports) $trpts
-    
-    # Build popup defs. Keep order of transportDefs.
-    set locals(menuDefs) {}
+
+    # Build popup defs.
+    set locals(menuDefs) [list]
     foreach trpt $trpts {
-	lappend locals(menuDefs) $trpt [lindex $transportDefs($trpt) 0]
+	lappend locals(menuDefs) $trpt [::Gateway::GetShort $trpt]
     }
 }
 
@@ -457,7 +442,6 @@ $opts(-forwardmessage)"
 
 proc ::NewMsg::FillInAddresses {w jidlist} {
     variable locals
-    variable transportDefs
     upvar ::Jabber::jstate jstate
     
     # If -tolist option. This can have jid's with and without any resource.
@@ -483,7 +467,7 @@ proc ::NewMsg::FillInAddresses {w jidlist} {
 	if {[info exists host2type($host)]} {
 	    set type $host2type($host)
 	    set locals($w,poptrpt$n) $type
-	    set locals($w,enttrpt$n) [lindex $transportDefs($type) 1]
+	    set locals($w,enttrpt$n) [::Gateway::GetPrompt $type]
 	}
 	incr n
     }
@@ -544,7 +528,6 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
 proc ::NewMsg::FillAddrLine {w wfr n} {
     
     variable locals
-    variable transportDefs
     
     set bg1   [option get $wfr entry1Background {}]
     set bgpop [option get $wfr popup1Background {}]
@@ -558,7 +541,7 @@ proc ::NewMsg::FillAddrLine {w wfr n} {
     bind $wfr.f${n}.la <ButtonRelease-1> [list ::NewMsg::TrptPopupRelease $w $n]
     set locals($w,fillline) $n
     set locals($w,poptrpt$n) jabber
-    set locals($w,enttrpt$n) [lindex $transportDefs(jabber) 1]
+    set locals($w,enttrpt$n) [::Gateway::GetPrompt xmpp]
 }
 
 proc ::NewMsg::ButtonInAddr {w wfr n} {
@@ -712,42 +695,18 @@ proc ::NewMsg::KeyUpDown {updown w wfr n} {
 proc ::NewMsg::PopupCmd {w n} {
     
     variable locals
-    variable transportDefs
     
     set num     $locals($w,num)
     set wfrport $locals($w,wfrport)
     set trpt    $locals($w,poptrpt$n)
-    if {[info exists transportDefs($trpt)]} {
-	set locals($w,enttrpt$n) [lindex $transportDefs($trpt) 1]
-    }
+    set locals($w,enttrpt$n) [::Gateway::GetPrompt $trpt]
     
     # Seems to be necessary to achive any selection.
     set wentry $wfrport.addr$n
     focus $wentry
 
-    switch -- $trpt {
-	jabber {
-	    set locals($w,addr$n) "userName@$locals(servicejid,jabber)"
-	}
-	aim {
-	    set locals($w,addr$n) "usersName@$locals(servicejid,aim)"
-	}
-	yahoo {
-	    set locals($w,addr$n) "usersName@$locals(servicejid,yahoo)"
-	}
-	icq {
-	    set locals($w,addr$n) "screeNumber@$locals(servicejid,icq)"
-	}
-	msn {
-	    set locals($w,addr$n) "userName%hotmail.com@$locals(servicejid,msn)"
-	}
-	email - smtp {
-	    set locals($w,addr$n) "userName%emailserver@$locals(servicejid,smtp)"
-	}
-	default {
-	    set locals($w,addr$n) ""
-	}
-    }
+    set locals($w,addr$n) [format [::Gateway::GetTemplateJID $trpt] \
+      $locals(servicejid,$trpt)]    
     set ind [string first @ $locals($w,addr$n)]
     if {$ind > 0} {
 	$wentry selection range 0 $ind
@@ -801,7 +760,6 @@ proc ::NewMsg::TrptPopup {w n x y} {
     if {![string equal $this(platform) "unix"]} {
 	$wfr.f${n}.la configure -image $locals(popupbtpush)
     }
-    #tk_popup $locals(wpopupbase)${num}_${n} [expr int($x)] [expr int($y)] $ind
     tk_popup $locals(wpopupbase)${num}_${n} [expr int($x)] [expr int($y)]
 }
 

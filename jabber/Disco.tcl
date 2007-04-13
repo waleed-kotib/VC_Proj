@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.105 2007-04-05 13:12:48 matben Exp $
+# $Id: Disco.tcl,v 1.106 2007-04-13 13:52:47 matben Exp $
 
 package require jlib::disco
 package require ITree
@@ -339,9 +339,11 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 	# Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
 	# and general (discoInfoHook) hooks.
 	foreach c $cattypes {
-	    set ct [split $c /]
-	    set hname [string totitle [lindex $ct 0]][string totitle [lindex $ct 1]]   
-	    eval {::hooks::run discoInfo${hname}Hook $type $from $queryE} $args
+	    lassign [split $c /] dicategory ditype
+	    set catT [string totitle $dicategory]
+	    set typT [string totitle $ditype]
+	    eval {::hooks::run discoInfo${catT}Hook $type $from $queryE} $args
+	    eval {::hooks::run discoInfo${catT}${typT}Hook $type $from $queryE} $args
 	}
 	eval {::hooks::run discoInfoHook $type $from $queryE} $args
     }

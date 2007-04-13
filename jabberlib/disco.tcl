@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.45 2007-04-05 13:12:51 matben Exp $
+# $Id: disco.tcl,v 1.46 2007-04-13 13:52:48 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -218,7 +218,7 @@ proc jlib::disco::send_get {jlibname type jid cmd args} {
     
     set jid [jlib::jidmap $jid]
     set node ""
-    set opts {}
+    set opts [list]
     if {[set idx [lsearch $args -node]] >= 0} {
 	set node [lindex $args [incr idx]]
 	set opts [list -node $node]
@@ -243,7 +243,7 @@ proc jlib::disco::get_async {jlibname type jid cmd args} {
 
     set jid [jlib::jidmap $jid]
     set node ""
-    set opts {}
+    set opts [list]
     if {[set idx [lsearch $args -node]] >= 0} {
 	set node [lindex $args [incr idx]]
 	set opts [list -node $node]
@@ -397,16 +397,16 @@ proc jlib::disco::parse_get_items {jlibname from queryE} {
     # This is perhaps not a robust way.
     if {0} {
 	if {![info exists items($from,parent)]} {
-	    set items($from,parent)  {}
-	    set items($from,parents) {}
+	    set items($from,parent)  [list]
+	    set items($from,parents) [list]
 	}
 	if {![info exists items($from,$pnode,parent2)]} {
-	    set items($from,$pnode,parent2)  {}
-	    set items($from,$pnode,parents2) {}
+	    set items($from,$pnode,parent2)  [list]
+	    set items($from,$pnode,parents2) [list]
 	}
     }
     if {![info exists items($from,$pnode,paL)]} {
-	set items($from,$pnode,paL)  {}
+	set items($from,$pnode,paL)  [list]
     }
     
     # Cache children of category='conference' as rooms.
@@ -478,8 +478,8 @@ proc jlib::disco::parse_get_items {jlibname from queryE} {
 	    # Init if the first one.
 	    if {$pnode eq ""} {
 		set xcase 3
-		set items($jid,$node,pnode) {}
-		set items($jid,$node,pnodes) {}
+		set items($jid,$node,pnode) [list]
+		set items($jid,$node,pnodes) [list]
 	    } else {
 		set xcase 1
 		set items($jid,$node,pnode) $pnode
@@ -658,7 +658,7 @@ proc jlib::disco::name {jlibname jid {node ""}} {
     } elseif {[info exists info($jid,$node,name)]} {
 	return $info($jid,$node,name)
     } else {
-	return {}
+	return
     }
 }
 
@@ -674,7 +674,7 @@ proc jlib::disco::features {jlibname jid {node ""}} {
     if {[info exists info($jid,$node,features)]} {
 	return $info($jid,$node,features)
     } else {
-	return {}
+	return
     }
 }
 
@@ -706,7 +706,7 @@ proc jlib::disco::types {jlibname jid {node ""}} {
     if {[info exists info($jid,$node,cattypes)]} {
 	return $info($jid,$node,cattypes)
     } else {
-	return {}
+	return
     }
 }
 
@@ -742,7 +742,7 @@ proc jlib::disco::getjidsforfeature {jlibname feature} {
 	set info($feature,featurelist) [lsort -unique $info($feature,featurelist)]
 	return $info($feature,featurelist)
     } else {
-	return {}
+	return
     }
 }
 
@@ -761,11 +761,11 @@ proc jlib::disco::getjidsforcategory {jlibname pattern} {
     
     upvar ${jlibname}::disco::info info
     
-    set jidlist {}    
+    set jidL [list]   
     foreach {key jids} [array get info "$pattern,typelist"] {
-	set jidlist [concat $jidlist $jids]
+	set jidL [concat $jidL $jids]
     }
-    return $jidlist
+    return $jidL
 }    
 
 # jlib::disco::getallcategories --
@@ -783,11 +783,11 @@ proc jlib::disco::getallcategories {jlibname pattern} {
     
     upvar ${jlibname}::disco::info info
     
-    set ans {}
-    foreach {key catlist} [array get info "$pattern,cattypes"] {
-	lappend ans $catlist
+    set cattypes [list]
+    foreach {key jids} [array get info "$pattern,typelist"] {
+	lappend cattypes [string map {,typelist ""} $key]
     }
-    return [lsort -unique $ans]
+    return [lsort -unique $cattypes]
 }    
 
 proc jlib::disco::getconferences {jlibname} {
@@ -826,7 +826,7 @@ proc jlib::disco::children {jlibname jid} {
     if {[info exists items($jid,,children)]} {
 	return $items($jid,,children)
     } else {
-	return {}
+	return
     }
 }
 
@@ -838,7 +838,7 @@ proc jlib::disco::childs {jlibname jid {node ""}} {
     if {[info exists items($jid,$node,childs)]} {
 	return $items($jid,$node,childs)
     } else {
-	return {}
+	return
     }
 }
 
@@ -854,7 +854,7 @@ proc jlib::disco::nodes {jlibname jid {node ""}} {
     if {[info exists items($jid,$node,nodes)]} {
 	return $items($jid,$node,nodes)
     } else {
-	return {}
+	return
     }
 }
 
@@ -869,7 +869,7 @@ proc jlib::disco::parentlist {jlibname jid {node ""}} {
 	set items($jid,$node,paL) [lsort -unique $items($jid,$node,paL)]
 	return $items($jid,$node,paL)
     } else {
-	return {}
+	return
     }
 }
 
@@ -879,7 +879,7 @@ proc jlib::disco::getparentrecursive {jlibname jid {node ""}} {
 
     set jid [jlib::jidmap $jid]
     if {[info exists items($jid,$node,paL)]} {
-	set plist {}
+	set plist [list]
 	set pitem $items($jid,$node,paL)
 	while {$pitem ne {}} {
 	    
@@ -887,7 +887,7 @@ proc jlib::disco::getparentrecursive {jlibname jid {node ""}} {
 	}
 	
     } else {
-	return {}
+	return
     }
 }
 
@@ -931,7 +931,7 @@ proc jlib::disco::reset {jlibname {jid ""} {node ""}} {
 	array unset info
 	array unset rooms
 
-	set info(conferences) {}
+	set info(conferences) [list]
     } else {
 	set jid [jlib::jidmap $jid]	
 	
@@ -957,7 +957,7 @@ proc jlib::disco::ResetJid {jlibname jid} {
 
     if {$jid == {}} {
 	unset -nocomplain items info rooms
-	set info(conferences) {}
+	set info(conferences) [list]
     } else {
 	
 	if {0} {
