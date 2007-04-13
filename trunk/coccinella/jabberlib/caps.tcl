@@ -2,6 +2,7 @@
 #  
 #   This file is part of the jabberlib. It handles the internal cache
 #   for caps (xmlns='http://jabber.org/protocol/caps') XEP-0115.
+#   It is updated to version 1.3 of XEP-0115.
 #      
 #   A typical caps element looks like:
 #   
@@ -21,7 +22,7 @@
 #  
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.20 2007-04-07 13:52:45 matben Exp $
+# $Id: caps.tcl,v 1.21 2007-04-13 13:52:48 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -432,3 +433,15 @@ namespace eval jlib::caps {
       [namespace current]::cmdproc
 }
 
+# Tests
+if {0} {
+    
+    proc cb {args} {}
+    set jlib ::jlib::jlib1
+    set jid matben@localhost/coccinella
+    set caps "http://coccinella.sourceforge.net/protocol/caps"
+    set ver 0.95.17
+    $jlib disco send_get info $jid cb -node $caps#$ver
+    $jlib disco send_get info $jid cb -node $caps#whiteboard
+    $jlib disco send_get info $jid cb -node $caps#iax
+}

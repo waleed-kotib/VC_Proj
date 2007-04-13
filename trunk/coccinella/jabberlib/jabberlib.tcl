@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.172 2007-04-05 13:12:51 matben Exp $
+# $Id: jabberlib.tcl,v 1.173 2007-04-13 13:52:48 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -398,7 +398,7 @@ proc jlib::init_inst {jlibname} {
     set locals(trigAutoAway)  1
     set locals(server)        ""
 
-    set features(trace) {}
+    set features(trace) [list]
 }
 
 # jlib::havesasl --
@@ -513,7 +513,7 @@ proc jlib::config {jlibname args} {
     set options [lsort [array names opts -*]]
     set usage [join $options ", "]
     if {[llength $args] == 0} {
-	set result {}
+	set result [list]
 	foreach name $options {
 	    lappend result $name $opts($name)
 	}
@@ -731,8 +731,8 @@ proc jlib::resetsocket {jlibname} {
     catch {close $lib(sock)}
     catch {after cancel $locals(aliveid)}
 
-    set lib(socketfilter,out) {}
-    set lib(socketfilter,in)  {}
+    set lib(socketfilter,out) [list]
+    set lib(socketfilter,in)  [list]
 }
 
 # jlib::recvsocket --
@@ -1114,7 +1114,7 @@ proc jlib::iq_handler {jlibname xmldata} {
     
     # Make an argument list ('-key value' pairs) suitable for callbacks.
     # Make variables of the attributes.
-    set arglist {}
+    set arglist [list]
     foreach {key value} [array get attrArr] {
 	set $key $value
 	lappend arglist -$key $value
@@ -1133,8 +1133,12 @@ proc jlib::iq_handler {jlibname xmldata} {
 	set afrom $locals(server)
     }
     
-    # @@@ The child must be a single <query> element (or any namespaced element).
-    # WRONG WRONG !!!!!!!!!!!!!!!
+    # @@@ Section 9.2.3 of RFC 3920 states in part:
+    # 6. An IQ stanza of type "result" MUST include zero or one child elements.
+    # 7. An IQ stanza of type "error" SHOULD include the child element 
+    # contained in the associated "get" or "set" and MUST include an <error/> 
+    # child....
+    
     set childlist [wrapper::getchildren $xmldata]
     set subiq [lindex $childlist 0]
     set xmlns [wrapper::getattribute $subiq xmlns]
@@ -1309,7 +1313,7 @@ proc jlib::message_handler {jlibname xmldata} {
    
     # Extract the message sub-elements.
     # @@@ really bad solution... Deliver full element instead
-    set xmlnsList  {}
+    set xmlnsList  [list]
     foreach child $childlist {
 	
 	# Extract the message sub-elements XML data items.
@@ -1486,7 +1490,7 @@ proc jlib::features_handler {jlibname xmllist} {
 	    mechanisms {
 		
 		# SASL
-		set mechanisms {}
+		set mechanisms [list]
 		if {$xmlns eq $xmppxmlns(sasl)} {
 		    set features(sasl) 1
 		    foreach mechelem $children {
@@ -1975,7 +1979,7 @@ proc jlib::bind_resource {jlibname resource cmd} {
     variable xmppxmlns
 
     # If resource is an empty string request the server to create it.
-    set subtags {}
+    set subtags [list]
     if {$resource ne ""} {
 	set subtags [list [wrapper::createtag resource -chdata $resource]]
     }
@@ -2277,7 +2281,7 @@ proc jlib::pres_reg_ex {jlibname int func args} {
     set pat "$type,$from,$from2"
     
     # The 'opts' must be ordered.
-    set opts {}
+    set opts [list]
     foreach key [array names aopts] {
 	lappend opts $key $aopts($key)
     }
@@ -2304,7 +2308,7 @@ proc jlib::presence_ex_run_hook {jlibname int xmldata} {
             
     # Make matching in two steps, attributes and elements.
     # First the attributes.
-    set matched {}
+    set matched [list]
     foreach {pat value} [array get expreshook $int,*] {
 
 	if {[string match $pat $pkey]} {
@@ -2334,7 +2338,7 @@ proc jlib::presence_ex_run_hook {jlibname int xmldata} {
     if {[llength $matched]} {
 	
 	# Start by collecting all tags and xmlns we have in 'xmldata'.
-	set tagxmlns {}
+	set tagxmlns [list]
 	foreach c [wrapper::getchildren $xmldata] {
 	    set xmlns [wrapper::getattribute $c xmlns]
 	    lappend tagxmlns [list [wrapper::gettag $c] $xmlns]	    
@@ -2398,7 +2402,7 @@ proc jlib::pres_dereg_ex {jlibname int func args} {
     if {[info exists expreshook($int,$pat)]} {
 
 	# The 'opts' must be ordered.
-	set opts {}
+	set opts [list]
 	foreach key [array names aopts] {
 	    lappend opts $key $aopts($key)
 	}
@@ -2658,8 +2662,8 @@ proc jlib::send_iq {jlibname type xmldata args} {
 
 proc jlib::iq_get {jlibname xmlns args} {
 
-    set opts {}
-    set sublists {}
+    set opts [list]
+    set sublists [list]
     set attrlist [list xmlns $xmlns]
     foreach {key value} $args {
 	
@@ -2687,8 +2691,8 @@ proc jlib::iq_get {jlibname xmlns args} {
 
 proc jlib::iq_set {jlibname xmlns args} {
 
-    set opts {}
-    set sublists {}
+    set opts [list]
+    set sublists [list]
     foreach {key value} $args {
 	
 	switch -- $key {
@@ -2739,7 +2743,7 @@ proc jlib::send_auth {jlibname username resource cmd args} {
     set subelements [list  \
       [wrapper::createtag "username" -chdata $username]  \
       [wrapper::createtag "resource" -chdata $resource]]
-    set toopt {}
+    set toopt [list]
 
     foreach {key value} $args {
 	switch -- $key {
@@ -2921,7 +2925,7 @@ proc jlib::search_get {jlibname to cmd} {
 
 proc jlib::search_set {jlibname to cmd args} {
 
-    set argsA(-subtags) {}
+    set argsA(-subtags) [list]
     array set argsA $args
 
     set xmllist [wrapper::createtag "query"  \
@@ -3004,7 +3008,7 @@ proc jlib::send_message_xmllist {to args} {
     
     array set argsA $args
     set attr [list to $to]
-    set children {}
+    set children [list]
     
     foreach {name value} $args {
 	set par [string trimleft $name "-"]
@@ -3066,8 +3070,8 @@ proc jlib::send_presence {jlibname args} {
     
     Debug 3 "jlib::send_presence args='$args'"
     
-    set attrlist {}
-    set children {}
+    set attrlist [list]
+    set children [list]
     set directed 0
     set keep     0
     set type "available"
@@ -3215,7 +3219,7 @@ proc jlib::get_registered_presence_stanzas {jlibname {tag *} {xmlns *}} {
     
     upvar ${jlibname}::pres pres
     
-    set stanzas {}
+    set stanzas [list]
     foreach key [array names pres -glob stanza,$tag,$xmlns,*] {
 	lassign [split $key ,] - t x type
 	set spec [list $t $x $pres($key)]
@@ -3371,7 +3375,7 @@ proc jlib::handle_get_last {jlibname from subiq args} {
     set xmllist [wrapper::createtag "query"  \
       -attrlist [list xmlns jabber:iq:last seconds $secs]]
     
-    set opts {}
+    set opts [list]
     if {[info exists argsA(-from)]} {
 	lappend opts -to $argsA(-from)
     }
@@ -3418,7 +3422,7 @@ proc jlib::handle_get_time {jlibname from subiq args} {
     set xmllist [wrapper::createtag "query" -subtags $subtags  \
       -attrlist {xmlns jabber:iq:time}]
 
-    set opts {}
+    set opts [list]
     if {[info exists argsA(-from)]} {
 	lappend opts -to $argsA(-from)
     }
@@ -3482,7 +3486,7 @@ proc jlib::handle_entity_time {jlibname from subiq args} {
     set xmllist [wrapper::createtag "time" -subtags $subtags  \
       -attrlist [list xmlns $jxmlns(entitytime)]]
 
-    set opts {}
+    set opts [list]
     if {[info exists argsA(-from)]} {
 	lappend opts -to $argsA(-from)
     }
@@ -3517,7 +3521,7 @@ proc jlib::handle_get_version {jlibname from subiq args} {
     array set argsA $args
     
     # Return any id!
-    set opts {}
+    set opts [list]
     if {[info exists argsA(-id)]} {
 	set opts [list -id $argsA(-id)]
     }
@@ -3751,7 +3755,7 @@ proc jlib::UnicodeListToRE {ulist} {
 namespace eval jlib {
     
     # Characters that need to be escaped since non valid.
-    #       XEP-0106 EXPERIMENTAL!  Think OUTDATED???
+    #       XEP-0106: JID Escaping  seems still alive.
     variable jidesc { "#\&'/:<>@}
     
     # Prohibited ASCII characters.
@@ -3763,15 +3767,16 @@ namespace eval jlib {
     append asciiProhibit(domain) $asciiC12C22
     append asciiProhibit(domain) /@   
 
-    # The nodeprep prohibits these characters in addition.
-    #x22 (") 
-    #x26 (&) 
-    #x27 (') 
-    #x2F (/) 
-    #x3A (:) 
-    #x3C (<) 
-    #x3E (>) 
-    #x40 (@) 
+    # The nodeprep prohibits these characters in addition:
+    # All whitespace characters (which reduce to U+0020, also called SP) 
+    # U+0022 (") 
+    # U+0026 (&) 
+    # U+0027 (') 
+    # U+002F (/) 
+    # U+003A (:) 
+    # U+003C (<) 
+    # U+003E (>) 
+    # U+0040 (@) 
     set    asciiProhibit(node) {"&'/:<>@} 
     append asciiProhibit(node) $asciiC11 
     append asciiProhibit(node) $asciiC12C22
@@ -4032,7 +4037,7 @@ proc jlib::nodeprep {node} {
     
     set node [nodemap $node]
     if {[regexp ".*\[${asciiProhibit(node)}\].*" $node]} {
-	return -code error "username contains illegal character(s)"
+	return -code error "node part contains illegal character(s)"
     }
     return $node
 }

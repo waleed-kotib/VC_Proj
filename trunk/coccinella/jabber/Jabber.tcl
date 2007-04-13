@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.206 2007-04-05 13:12:48 matben Exp $
+# $Id: Jabber.tcl,v 1.207 2007-04-13 13:52:47 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -38,6 +38,7 @@ package require Create
 package require Disco
 package require Emoticons
 package require FTrans
+package require Gateway
 package require GotMsg
 package require GroupChat
 package require JForms

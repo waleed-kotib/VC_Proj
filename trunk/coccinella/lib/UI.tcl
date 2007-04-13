@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.150 2007-04-07 13:52:45 matben Exp $
+# $Id: UI.tcl,v 1.151 2007-04-13 13:52:48 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -824,7 +824,6 @@ proc ::UI::ScrollFrameResizeBg {w} {
     set bbox [$w.can bbox all]
     set width  [winfo width $w.can]
     set height [winfo height $w.can]
-    #$w.can.bg configure -width $width -height [lindex $bbox 3]
     $w.can.bg configure -width $width -height $height
 }
 
@@ -844,6 +843,9 @@ proc ::UI::ScrollSet {wscrollbar geocmd offset size} {
     } else {
 	set manager [lindex $geocmd 0]
 	$manager forget $wscrollbar
+	
+	# This helps as a workaround for one of horiz/vert blank areas.
+	update idletasks
     }
 }
 
