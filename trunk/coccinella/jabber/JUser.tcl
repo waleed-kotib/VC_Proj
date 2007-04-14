@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.26 2007-01-28 12:21:18 matben Exp $
+# $Id: JUser.tcl,v 1.27 2007-04-14 12:32:16 matben Exp $
 
 package provide JUser 1.0
 
@@ -49,7 +49,7 @@ proc ::JUser::NewDlg {args} {
     variable $token
     upvar 0 $token state
     
-    array set argsArr $args
+    array set argsA $args
     
     set w $wDlgs(jrostadduser)${uid}
     set state(w) $w
@@ -127,8 +127,8 @@ proc ::JUser::NewDlg {args} {
     set state(jid)   ""
     set state(name)  ""
     set state(group) ""
-    if {[info exists argsArr(-jid)]} {
-	set state(jid) $argsArr(-jid)
+    if {[info exists argsA(-jid)]} {
+	set state(jid) $argsA(-jid)
     }
     
     # Cache state variables for the dialog.
@@ -238,7 +238,7 @@ proc ::JUser::DoAdd {token} {
 	}
     }
     
-    set opts {}
+    set opts [list]
     if {[string length $name]} {
 	lappend opts -name $name
     }
@@ -315,21 +315,7 @@ proc ::JUser::TrptCmd {token jid} {
 
     # Seems to be necessary to achive any selection.
     focus $wjid
-
-    switch -- $type {
-	jabber - aim - yahoo {
-	    set state(jid) "userName@$jid"
-	}
-	icq {
-	    set state(jid) "screeNumber@$jid"
-	}
-	msn {
-	    set state(jid) "userName%hotmail.com@$jid"
-	}
-	default {
-	    set state(jid) "userName@$jid"
-	}
-    }
+    set state(jid) [format [::Gateway::GetTemplateJID $type] $jid]
     set ind [string first @ $state(jid)]
     if {$ind > 0} {
 	$wjid selection range 0 $ind
@@ -425,7 +411,7 @@ proc ::JUser::EditUserDlg {jid} {
 
     # Get 'name' and 'group(s)'.
     set name ""
-    set groups {}
+    set groups [list]
     set subscribe 0
     set unsubscribe 0
     set subscription "none"
@@ -606,11 +592,11 @@ proc ::JUser::DoEdit {token} {
 	
     # This is the only situation when a client "sets" a roster item.
     # The actual roster item is pushed back to us, and not set from here.
-    set opts {}
+    set opts [list]
     if {[string length $name]} {
 	lappend opts -name $name
     }
-    set groups {}
+    set groups [list]
     for {set igroup 0} {$igroup < $state(ngroups)} {incr igroup} { 
 	if {[info exists state(group${igroup})]} {
 	    set group $state(group${igroup})

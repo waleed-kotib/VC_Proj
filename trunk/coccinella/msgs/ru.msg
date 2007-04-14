@@ -618,6 +618,9 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Save Canvas}
 ::msgcat::mcset ru {Save File}				{Сохранить файл}
 ::msgcat::mcset ru {Save Message}		{Сохранить сообщение}
+
+::msgcat::mcset ru {Save password}
+
 ::msgcat::mcset ru {Scramble password}		{Смешанный пароль}
 ::msgcat::mcset ru {Search results}			{Результаты поиска}
 ::msgcat::mcset ru {Search Service}		{Сервис поиска}

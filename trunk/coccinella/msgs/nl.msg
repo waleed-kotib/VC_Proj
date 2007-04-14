@@ -676,6 +676,9 @@
 ::msgcat::mcset nl {Save Canvas}			{Doek opslaan}
 ::msgcat::mcset nl {Save File}				{Bestand opslaan}
 ::msgcat::mcset nl {Save Message}			{Bericht opslaan}
+
+::msgcat::mcset nl {Save password}
+
 ::msgcat::mcset nl {Scramble password}			{Wachtwoord vervormen}
 ::msgcat::mcset nl {Search results}			{Zoekresultaten}
 ::msgcat::mcset nl {Search Service}			{Zoeken}

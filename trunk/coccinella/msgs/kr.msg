@@ -675,6 +675,9 @@
 ::msgcat::mcset kr {Save Canvas}	      {캔버스 저장하기}
 ::msgcat::mcset kr {Save File}		      {파일 저장하기}
 ::msgcat::mcset kr {Save Message}	      {메세지 저장하기}
+
+::msgcat::mcset kr {Save password}
+
 ::msgcat::mcset kr {Scramble password}	      {암호 뒤섞기}
 ::msgcat::mcset kr {Search results}	      {찾은 결과}
 ::msgcat::mcset kr {Search Service}	      {찾기 서비스}

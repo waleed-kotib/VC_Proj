@@ -686,6 +686,9 @@
 ::msgcat::mcset de {Save Canvas}          {Zeichenfläche speichern}
 ::msgcat::mcset de {Save File}            {Datei speichern}
 ::msgcat::mcset de {Save Message}         {Nachricht speichern}
+
+::msgcat::mcset de {Save password}
+
 ::msgcat::mcset de {Scramble password}    {Passwort verschlüsseln}
 ::msgcat::mcset de {Search results}       {Such-Ergebnisse}
 ::msgcat::mcset de {Search Service}       {Dienst suchen}

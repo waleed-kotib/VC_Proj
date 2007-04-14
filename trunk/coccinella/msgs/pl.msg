@@ -682,6 +682,9 @@
 ::msgcat::mcset pl {Save Canvas}          {Zapisz tło ("płótno")}
 ::msgcat::mcset pl {Save File}            {Zapisz plik}
 ::msgcat::mcset pl {Save Message}         {Zapisz wiadomość}
+
+::msgcat::mcset pl {Save password}
+
 ::msgcat::mcset pl {Scramble password}    {Hasło zakodowane}
 ::msgcat::mcset pl {Search results}       {Rezultaty szukania}
 ::msgcat::mcset pl {Search Service}       {Zbadaj serwis}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.188 2007-04-02 08:01:52 matben Exp $
+# $Id: Roster.tcl,v 1.189 2007-04-14 12:32:16 matben Exp $
 
 # @@@ TODO: rewrite the popup menu code to use AMenu!
 
@@ -1185,6 +1185,8 @@ proc ::Roster::ShowTransports {} {
 
 #--- Transport utilities -------------------------------------------------------
 
+# @@@ These should eventually move to Gateway!
+
 namespace eval ::Roster:: {
     
     # name description ...
@@ -1279,7 +1281,7 @@ proc ::Roster::GetTransportNames { } {
     variable allTransports
     upvar ::Jabber::jstate jstate
     
-    set trpts {}
+    set trpts [list]
     foreach type $allTransports {
 	if {$type eq "jabber"} {
 	    continue

@@ -13,7 +13,7 @@
 #       
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: Gateway.tcl,v 1.1 2007-04-13 13:52:47 matben Exp $
+# $Id: Gateway.tcl,v 1.2 2007-04-14 12:32:16 matben Exp $
 
 package provide Gateway 1.0
 
@@ -38,6 +38,7 @@ namespace eval ::Gateway {
 	gadu-gadu   Gadu-Gadu
 	icq         ICQ
 	irc         IRC
+	jabber      Jabber
 	msn         MSN
 	smtp        Email
 	x-gadugadu  Gadu-Gadu
@@ -71,6 +72,7 @@ namespace eval ::Gateway {
     array set template {
 	aim         userName@%s
 	icq         screeNumber@%s
+	jabber      userName@%s
 	msn         userName%%hotmail.com@%s
 	smtp        userName%%emailserver@%s
 	xmpp        userName@%s
@@ -183,7 +185,7 @@ proc ::Gateway::GetDesc {type} {
     }
 }
 
-# @@@ I haven't found a gateway where this works :-(
+# @@@ I haven't found a single gateway where this works :-(
 
 proc ::Gateway::GetJIDFromPrompt {prompt gatewayjid cmd} {
     variable xmlns

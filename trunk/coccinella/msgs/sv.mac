@@ -673,6 +673,7 @@
 ::msgcat::mcset sv {Save Canvas}           {Spara canvas}
 ::msgcat::mcset sv {Save File}		   {Spara fil}
 ::msgcat::mcset sv {Save Message}	   {Spara meddelande}
+::msgcat::mcset sv {Save password}         {Spara lösenord}
 ::msgcat::mcset sv {Scramble password}     {Kasta om lösenord}
 ::msgcat::mcset sv {Search results}	   {Sökresultat}
 ::msgcat::mcset sv {Search Service}        {Söktjänst}

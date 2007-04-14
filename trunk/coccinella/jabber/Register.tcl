@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.65 2007-03-19 08:04:10 matben Exp $
+# $Id: Register.tcl,v 1.66 2007-04-14 12:32:16 matben Exp $
 
 package provide Register 1.0
 
@@ -102,7 +102,7 @@ namespace eval ::RegisterEx:: {
     set ::config(registerex,server)           ""
     set ::config(registerex,autoget)          0
     set ::config(registerex,autologin)        1
-    set ::config(registerex,notsavepassword)  0
+    set ::config(registerex,savepassword)     1
     
     # Allow only a single instance of this dialog.
     variable win $::wDlgs(jreg)_ibr
@@ -163,7 +163,7 @@ proc ::RegisterEx::New {args} {
     }
     array set state $args
     
-    set state(notsavepassword) $config(registerex,notsavepassword)
+    set state(savepassword) $config(registerex,savepassword)
     
     # Let any config override any options.
     if {$config(registerex,server) ne ""} {
@@ -626,7 +626,7 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
     }
 
     ttk::checkbutton $wfr.csavepw -style Small.TCheckbutton  \
-      -text [mc {Do not save password}] -variable $token\(notsavepassword)
+      -text [mc {Save password}] -variable $token\(savepassword)
     grid  x  $wfr.csavepw  -sticky w
 
     if {$isRegistered} {
@@ -714,10 +714,10 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
     } else {
 	
 	# Create a new profile.
-	if {$state(notsavepassword)} {
-	    ::Profiles::Set {} $server $username {}
-	} else {
+	if {$state(savepassword)} {
 	    ::Profiles::Set {} $server $username $password	    
+	} else {
+	    ::Profiles::Set {} $server $username {}
 	}
 	if {$config(registerex,autologin)} {
 	    
