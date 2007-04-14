@@ -695,6 +695,9 @@
 ::msgcat::mcset es {Save Canvas}		{Guardar el dibujo}
 ::msgcat::mcset es {Save File}			{Guardar el archivo}
 ::msgcat::mcset es {Save Message}		{Guardar el mensaje}
+
+::msgcat::mcset es {Save password}
+
 ::msgcat::mcset es {Scramble password}		{Ocultar contraseña}
 ::msgcat::mcset es {Search results}		{Buscar resultados}
 ::msgcat::mcset es {Search Service}		{Buscar servicio}

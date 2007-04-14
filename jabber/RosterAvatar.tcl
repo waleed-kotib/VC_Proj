@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.24 2007-04-02 08:01:52 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.25 2007-04-14 12:32:16 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -436,30 +436,36 @@ proc ::RosterAvatar::EditCmd {id} {
     variable T
     variable tmpEdit
     
-    #puts "::RosterAvatar::EditCmd $id"
+    puts "::RosterAvatar::EditCmd $id"
+    
+    # item+column+elem
+    array set what $id
+    parray what
     
     if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
 	set item [lindex $id 1]
 	set tags [::RosterTree::GetTagOfItem $item]
+	puts "\t item=$item, tags=$tags"
+	puts "\t item style set=[$T item style set $item cTree]"
 	if {[lindex $tags 0] eq "jid"} {
 	    set jid [lindex $tags 1]
 	    set text [$T item text $item cTree]
 	    
 	    # @@@ I'd like a way to get the style form item but found none :-(
 	    set elements [$T item style elements $item cTree]
-	    #puts "elements=$elements"
+	    puts "\t elements=$elements"
 	    if {[lsearch $elements eOnText] >= 0} {
 		set font [$T item element cget $item cTree eOnText -font]
-		#puts "item element configure=[$T item element configure $item cTree eOnText]"
+		puts "\t item element configure=[$T item element configure $item cTree eOnText]"
 	    } else {
 		set font [$T item element cget $item cTree eOffText -font]		
-		#puts "item element configure=[$T item element configure $item cTree eOffText]"
+		puts "\t item element configure=[$T item element configure $item cTree eOffText]"
 	    }
-	    #puts "font=$font"
+	    puts "\t font=$font"
 	    if {[::RosterTree::GetStyle] eq "flatsmall"} {
-		set font CociDefaultFont
-	    } else {
 		set font CociSmallFont
+	    } else {
+		set font CociDefaultFont
 	    }
 	    set wentry $T.entry
 	    set tmpEdit(entry) $wentry
@@ -470,8 +476,7 @@ proc ::RosterAvatar::EditCmd {id} {
 	    ttk::entry $wentry -font $font \
 	      -textvariable [namespace current]::tmpEdit(text) -width 1
 	    $T item style set $item cTree styEntry
-	    $T item element configure $item cTree \
-	      eWindow -window $wentry
+	    $T item element configure $item cTree eWindow -window $wentry
 	    focus $wentry
 
 	    bind $wentry <Return>   [namespace code [list EditOnReturn $item]]

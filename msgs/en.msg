@@ -671,6 +671,7 @@
 ::msgcat::mcset en {Save Canvas}
 ::msgcat::mcset en {Save File}
 ::msgcat::mcset en {Save Message}
+::msgcat::mcset en {Save password}
 ::msgcat::mcset en {Scramble password}
 ::msgcat::mcset en {Search results}
 ::msgcat::mcset en {Search Service}
