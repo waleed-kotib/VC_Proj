@@ -3,23 +3,23 @@
 #      This file is part of The Coccinella application. 
 #      It implements a simple generic treectrl interface.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.15 2007-03-16 13:54:38 matben Exp $
+# $Id: ITree.tcl,v 1.16 2007-04-16 09:15:00 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
-#       v = {tag tag ...}
+#       v = {v0 v1 ...}
 #       
 #  We MUST keep the complete tree structure for an item in order to uniquely 
 #  identify it in the tree.
+#  
 
 package provide ITree 1.0
 
 namespace eval ::ITree {
 
     variable buttonPressMillis 1000
-    variable tag2item
     variable options
 }
 
@@ -48,11 +48,8 @@ proc ::ITree::New {T wxsc wysc args} {
     set stripeBackground [option get $T stripeBackground {}]
     set stripes [list $stripeBackground {}]
 
-    # @@@ treectrl2.2.3 -tag -> -tags
-    $T column create -tag cTree  \
+    $T column create -tags cTree  \
       -itembackground $stripes -resize 0 -expand 1
-    # @@@ treectrl2.2.3
-    $T column create -tag cTag -visible 0
     $T configure -treecolumn cTree
 
     $T element create eImage image
@@ -66,11 +63,7 @@ proc ::ITree::New {T wxsc wysc args} {
     $T style layout $S eImage -expand ns -ipady 2 -minheight 16
     $T style layout $S eBorder -detach yes -iexpand xy -indent 0
 
-    set S [$T style create styTag]
-    $T style elements $S {eText}
-
-    # @@@ use column -itemstyle instead for 2.2
-    $T configure -defaultstyle {styStd styTag}
+    $T column configure cTree -itemstyle styStd
 
     $T notify bind $T <Selection>      { ::ITree::Selection %T }
     $T notify bind $T <Expand-after>   { ::ITree::OpenTreeCmd %T %I }
@@ -79,15 +72,29 @@ proc ::ITree::New {T wxsc wysc args} {
     bind $T <ButtonRelease-1> { ::ITree::ButtonRelease %W %x %y }        
     bind $T <Double-1>        { ::ITree::DoubleClick %W %x %y }        
     bind $T <<ButtonPopup>>   { ::ITree::Popup %W %x %y }
-    bind $T <Destroy>         {+::ITree::OnDestroy %W }
-    
-    # This automatically cleans up the tag array.
-    $T notify bind RosterTreeTag <ItemDelete> {
-	foreach item %i {
-	    ::ITree::UnsetTags %T $item
-	} 
-    }
-    bindtags $T [concat RosterTreeTag [bindtags $T]]
+    bind $T <Destroy>         { ::ITree::OnDestroy %W }
+}
+
+# ITree::PrepTags --
+# 
+#       Always add two tags:
+#       1) v-$v
+#       2) e-$vend
+#       
+#       where v = {v0 v1 v2 ... vend}.
+#       Since we need to find items bu their end tags (v).
+
+proc ::ITree::PrepTags {v} {
+    return [treeutil::protect [list v-$v e-[lindex $v end]]]
+}
+
+proc ::ITree::VTag {v} {
+    return [treeutil::protect v-$v]
+}
+
+proc ::ITree::GetV {T item} {
+    set vtag [treeutil::deprotect [lindex [$T item tag names $item] 0]]
+    return [string range $vtag 2 end]
 }
 
 proc ::ITree::GetStyle {T} {
@@ -109,7 +116,7 @@ proc ::ITree::Selection {T} {
 	set n [$T selection count]
 	if {$n == 1} {
 	    set item [$T selection get]
-	    set v [$T item element cget $item cTag eText -text]
+	    set v [GetV $T $item]
 	    $options($T,-selection) $T $v
 	}
     }
@@ -119,7 +126,7 @@ proc ::ITree::OpenTreeCmd {T item} {
     variable options
 
     if {[info exists options($T,-open)]} {
-	set v [$T item element cget $item cTag eText -text]
+	set v [GetV $T $item]
 	$options($T,-open) $T $v
     }
 }
@@ -128,7 +135,7 @@ proc ::ITree::CloseTreeCmd {T item} {
     variable options
 
     if {[info exists options($T,-close)]} {
-	set v [$T item element cget $item cTag eText -text]
+	set v [GetV $T $item]
 	$options($T,-close) $T $v
     }
 }
@@ -178,9 +185,9 @@ proc ::ITree::DoubleClick {T x y} {
 	set id [$T identify $x $y]
 	if {[lindex $id 0] eq "item"} {
 	    set item [lindex $id 1]
-	    set v [$T item element cget $item cTag eText -text]
+	    set v [GetV $T $item]
 	} elseif {$id eq ""} {
-	    set v {}
+	    set v [list]
 	}
 	$options($T,-doublebutton) $T $v
     }
@@ -201,16 +208,15 @@ proc ::ITree::DoPopup {T x y command} {
 	set id [$T identify $x $y]
 	if {[lindex $id 0] eq "item"} {
 	    set item [lindex $id 1]
-	    set v [$T item element cget $item cTag eText -text]
+	    set v [GetV $T $item]
 	} elseif {$id eq ""} {
-	    set v {}
+	    set v [list]
 	}
 	$command $T $v $x $y
     }
 }
 
 proc ::ITree::Item {T v args} {
-    variable tag2item
         
     set isopen 0
     if {[set idx [lsearch $args -open]] >= 0} {
@@ -219,70 +225,36 @@ proc ::ITree::Item {T v args} {
     set parent root
     if {[llength $v] > 1} {
 	set parentv [lrange $v 0 end-1]
-	set parent $tag2item($T,$parentv)
-	
+	set parent [$T item id [list tag [treeutil::protect v-$parentv]]]
     }
-    set item [$T item create -open $isopen -parent $parent]
-    # @@@ treectrl2.2.3   
-    # Can the order of the tags list be trusted???
-    # set item [$T item create -open $isopen -parent $parent \
-    #     -tags [list [treeutil::protect $v]]]
-    set tag2item($T,$v) $item
-
-    $T item element configure $item cTag eText -text $v
-    eval {ItemConfigure $T $v} $args
-            
+    set item [$T item create -open $isopen -parent $parent -tags [PrepTags $v]]]
+    eval {ItemConfigure $T $v} $args       
     return $item
 }
 
 proc ::ITree::IsItem {T v} {
-    variable tag2item
-
-    # @@@ treectrl2.2.3   
-    # return [llength [$T item id "tag [list [treeutil::protect $v]]"]]
-    set ans 0
-    if {[info exists tag2item($T,$v)]} {
-	if {[$T item id $tag2item($T,$v)] ne ""} {
-	    set ans 1
-	}
-    }
-    return $ans
+    return [llength [$T item id [list tag [treeutil::protect v-$v]]]]
 }
 
 proc ::ITree::GetItem {T v} {
-    variable tag2item
-    
-    # @@@ treectrl2.2.3
-    # return [$T item id "tag [list [treeutil::protect $v]]"]
-    set item ""
-    if {[info exists tag2item($T,$v)]} {
-	if {[$T item id $tag2item($T,$v)] ne ""} {
-	    set item $tag2item($T,$v)
-	}
-    }
-    return $item
+    return [$T item id [list tag [treeutil::protect v-$v]]]
 }
 
 proc ::ITree::ItemConfigure {T v args} {
-    variable tag2item
     
-    # @@@ treectrl2.2.3
-    # set item [$T item id "tag [treeutil::protect $v]"]
-    if {[info exists tag2item($T,$v)]} {
-	set item $tag2item($T,$v)
+    set item [$T item id [list tag [treeutil::protect v-$v]]]
 	
-	# Dispatch to the right element.
-	foreach {key value} $args {
-	    switch -- $key {
-		-text - -font - -lines - -justify - -textvariable {
-		    $T item element configure $item cTree eText $key $value
-		}
-		-image {
-		    $T item element configure $item cTree eImage $key $value
-		}
-		-button {
-		    $T item configure $item $key $value
-		}
+    # Dispatch to the right element.
+    foreach {key value} $args {
+	switch -- $key {
+	    -text - -font - -lines - -justify - -textvariable {
+		$T item element configure $item cTree eText $key $value
+	    }
+	    -image {
+		$T item element configure $item cTree eImage $key $value
+	    }
+	    -button {
+		$T item configure $item $key $value
 	    }
 	}
     }
@@ -290,113 +262,52 @@ proc ::ITree::ItemConfigure {T v args} {
 }
 
 proc ::ITree::Children {T v} {
-    variable tag2item
-    
+
     set vchilds [list]
-    # @@@ treectrl2.2.3
-    # set item [$T item id "tag [treeutil::protect $v]"]
-    # set citems [$T item children $item]
-    # foreach item $citems {
-    #     lappend vchilds [$T item cget $item -tags]
-    # }
-    if {[info exists tag2item($T,$v)]} {
-	set citems [$T item children $tag2item($T,$v)]
-	foreach item $citems {
-	    lappend vchilds [$T item element cget $item cTag eText -text]
-	}
+    set citems [$T item children [list tag [treeutil::protect v-$v]]]
+    foreach item $citems {
+	set v [GetV $T $item]
+	lappend vchilds $v
     }
     return $vchilds
 }
 
 proc ::ITree::Sort {T v args} {
-    variable tag2item
-    
-    # @@@ treectrl2.2.3
-    # eval {$T item sort "tag [treeutil::protect $v]" -column cTree} $args
-    if {[info exists tag2item($T,$v)]} {
-	set item $tag2item($T,$v)
-	eval {$T item sort $item -column cTree} $args
-    }    
-}
-
-# ITree::FindAllTagMatches --
-# 
-#       This assumes that the tags are a list of sub tags and where
-#       we try to find all theat matches this particular sub tag.
-#
-# Arguments:
-#       T       tree widget
-#       tag     an element of the tag list
-#       
-# Results:
-#       a list of complete matching tags
-
-proc ::ITree::FindAllTagMatches {T tag} {
-    variable tag2item
-    
-    # @@@ treectrl2.2.3
-    # set vlist [list]
-    # set items [$T item id "tag [treeutil::protect $tag]"]
-    # foreach item $items {
-    #     lappend vlist [$T item cget $item -tags]
-    # }
-    set vlist [list]
-    foreach {key item} [array get tag2item "$T,*{$tag}*"] {
-	lappend vlist [string map [list "$T," ""] $key]
-    }
-    return $vlist
+    eval {$T item sort [list tag [treeutil::protect v-$v]] -column cTree} $args
 }
 
 # ITree::FindEndItems--
 # 
 #       This is equivalent of getting all parents of this item.
 
-proc ::ITree::FindEndItems {T tagend} {
-    variable tag2item
+proc ::ITree::FindEndItems {T vend} {
 
-    # @@@ treectrl2.2.3
-    # set vlist [list]
-    # set items [$T item id "tag [treeutil::protect $tag]"]
-    # Find another method!
-    set vlist {}
-    foreach {key item} [array get tag2item "$T,*{$tagend}"] {
-	lappend vlist [string map [list "$T," ""] $key]
+    set items [$T item id [list tag [treeutil::protect e-$vend]]]
+    set vlist [list]
+    foreach item $items {
+	lappend vlist [GetV $T $item]
     }
     return $vlist
 }
 
 proc ::ITree::DeleteItem {T v} {
-    variable tag2item
-    
-    if {[info exists tag2item($T,$v)]} {
-	set item $tag2item($T,$v)
+    set item [$T item id [list tag [treeutil::protect v-$v]]]
+    if {[llength $item]} {
 	$T item delete $item
-	# @@@ treectrl2.2.3
-	# $T item delete "tag [treeutil::protect $v]"
-    }    
-}
-
-proc ::ITree::UnsetTags {T item} {
-    variable tag2item
-
-    set v [$T item element cget $item cTag eText -text]
-    unset -nocomplain tag2item($T,$v)    
+    }
 }
 
 proc ::ITree::DeleteChildren {T v} {
     
-    # @@@ treectrl2.2.3
-    # $T item delete "tag [treeutil::protect $v] children"
-    foreach vchild [Children $T $v] {
-	DeleteItem $T $vchild
+    # This must be failsafe if item not exists.
+    set items [$T item children [list tag [treeutil::protect v-$v]]]
+    foreach item $items {
+	$T item delete $item
     }
 }
 
 proc ::ITree::OnDestroy {T} {
-    variable options
-    variable tag2item
-    
+    variable options    
     array unset options $T,*
-    array unset tag2item $T,*
 }
 
