@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.189 2007-04-14 12:32:16 matben Exp $
+# $Id: Roster.tcl,v 1.190 2007-04-17 14:53:39 matben Exp $
 
 # @@@ TODO: rewrite the popup menu code to use AMenu!
 
@@ -1120,7 +1120,7 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     
     array set argsA $args
     
-    ::Debug 4 "GetPresenceIcon jid=$jid, presence=$presence, args=$args"
+    ::Debug 6 "GetPresenceIcon jid=$jid, presence=$presence, args=$args"
     
     # Construct the 'type/sub' specifying the icon.
     set itype status

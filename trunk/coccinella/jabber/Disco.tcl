@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.106 2007-04-13 13:52:47 matben Exp $
+# $Id: Disco.tcl,v 1.107 2007-04-17 14:53:38 matben Exp $
+# 
+# @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
 package require jlib::disco
 package require ITree

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.29 2007-04-02 08:01:52 matben Exp $
+# $Id: RosterPlain.tcl,v 1.30 2007-04-17 14:53:39 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -133,10 +133,12 @@ proc ::RosterPlain::Configure {_T} {
 	$T state define notify
     }
 
-    # One column: 
+    # Two columns: 
     #   0) the tree 
+    #   1) hidden for tags
     $T column create -tags cTree -itembackground $stripes -resize 0  \
       -expand 1 -squeeze 1
+    $T column create -tags cTag -visible 0
     $T configure -treecolumn cTree -showheader 0
 
     # The elements.
@@ -197,6 +199,8 @@ proc ::RosterPlain::Configure {_T} {
 
     set S [$T style create styTag]
     $T style elements $S {eText}
+
+    $T column configure cTag -itemstyle styTag
 
     $T notify bind $T <Selection>      { ::RosterTree::Selection }
     $T notify bind $T <Expand-after>   { ::RosterTree::OpenTreeCmd %I }
@@ -272,6 +276,7 @@ proc ::RosterPlain::Init { } {
     upvar ::Jabber::jprefs jprefs
     
     $T item delete all
+    ::RosterTree::FreeTags
     
     set onlineImage  [::Rosticons::Get application/online]
     set offlineImage [::Rosticons::Get application/offline]
@@ -388,6 +393,10 @@ proc ::RosterPlain::CreateItem {jid presence args} {
     return $items
 }
 
+# RosterPlain::ConfigureChildNumbers --
+# 
+#       Add an extra "(#)" to each directory that shows the content.
+
 proc ::RosterPlain::ConfigureChildNumbers {} {
     variable T
     variable pendingChildNumbers
@@ -409,7 +418,6 @@ proc ::RosterPlain::ConfigureChildNumbers {} {
     }
     
     # Update any groups.
-    # @@@ Do this as an idle call?
     foreach item [::RosterTree::FindWithFirstTag group] {
 	set n [llength [$T item children $item]]
 	$T item element configure $item cTree eNumText -text "($n)"
@@ -510,7 +518,7 @@ proc ::RosterPlain::FreeAltCache {} {
 proc ::RosterPlain::CreateWithTag {tag style text image parent} {
     variable T
     
-    # Base class constructor. Handles the tag.
+    # Base class constructor. Handles the cTag column and tag.
     set item [::RosterTree::CreateWithTag $tag $parent]
     
     $T item style set $item cTree $style
