@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements an avatar style roster tree using treectrl.
 #      
-#  Copyright (c) 2005-2006  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.25 2007-04-14 12:32:16 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.26 2007-04-17 14:53:39 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -291,9 +291,10 @@ proc ::RosterAvatar::Configure {_T} {
 	$T state define notify
     }
 
-    # Two columns: 
+    # Three columns: 
     #   0) status
     #   1) the tree 
+    #   2) hidden for tags
     #   
     # minwidth 24 = 16 + {4 2}
 
@@ -304,6 +305,8 @@ proc ::RosterAvatar::Configure {_T} {
       -itembackground $stripes -resize 0 -expand 1 -squeeze 1  \
       -text [mc {Contact Name}] -button 1 -arrow up -borderwidth $bd \
       -background $bg
+    $T column create -tags cTag     \
+      -visible 0
     $T configure -showheader 1
 
     # Define a new item state
@@ -333,9 +336,10 @@ proc ::RosterAvatar::Configure {_T} {
     # @@@ Have available/unavailable as states instead of separate styles?
     
     # Styles collecting the elements ---
+    # Need a text element since sorting on 2.2 bails out if no text element.
     # Status:
     set S [$T style create styStatus]
-    $T style elements $S {eBorder eImage}
+    $T style elements $S {eBorder eImage eText}
     $T style layout $S eImage  -expand news
     $T style layout $S eBorder -detach 1 -iexpand xy
 
@@ -409,8 +413,8 @@ proc ::RosterAvatar::Configure {_T} {
     set S [$T style create styTag]
     $T style elements $S {eText}
     
-    # @@@ use column -itemstyle instead for 2.2
-    $T configure -defaultstyle {styStatus {}}
+    $T column configure cStatus -itemstyle styStatus
+    $T column configure cTag    -itemstyle styTag
     
     $T notify install <Header-invoke>
     $T notify bind $T <Selection>      { ::RosterTree::Selection }
@@ -519,6 +523,8 @@ proc ::RosterAvatar::Sort {item order} {
 proc ::RosterAvatar::HeaderCmd {T C} {
     variable sortColumn
 	    
+    puts "::RosterAvatar::HeaderCmd C=$C, sortColumn=$sortColumn"
+    
     if {[$T column compare $C == $sortColumn]} {
 	if {[$T column cget $sortColumn -arrow] eq "down"} {
 	    set order -increasing
@@ -567,7 +573,7 @@ proc ::RosterAvatar::SortColumn {C order} {
 	}
     }
     
-    switch -- [$T column cget $C -tag] {
+    switch -- [$T column cget $C -tags] {
 	cTree {
 	    eval {$T item sort root $order -column $C} $opts
 	}
@@ -642,6 +648,7 @@ proc ::RosterAvatar::Init { } {
     variable T
 	
     $T item delete all
+    ::RosterTree::FreeTags
 }
 
 # RosterAvatar::OnAvatarPhoto --
@@ -740,7 +747,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     variable rosterBaseStyle
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 4 "::RosterAvatar::CreateItem jid=$jid, presence=$presence"
+    ::Debug 6 "::RosterAvatar::CreateItem jid=$jid, presence=$presence"
 
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
@@ -1000,7 +1007,7 @@ proc ::RosterAvatar::FreeAltCache {} {
 proc ::RosterAvatar::CreateWithTag {tag style tElem text image parent} {
     variable T
     
-    # Base class constructor. Handles the tag.
+    # Base class constructor. Handles the cTag column and tag.
     set item [::RosterTree::CreateWithTag $tag $parent]
     
     $T item style set $item cTree $style

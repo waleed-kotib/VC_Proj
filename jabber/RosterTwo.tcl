@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements a two line style roster tree using treectrl.
 #      
-#  Copyright (c) 20052006  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.15 2007-04-02 08:01:52 matben Exp $
+# $Id: RosterTwo.tcl,v 1.16 2007-04-17 14:53:39 matben Exp $
 
 package require RosterTree
 
@@ -53,7 +53,11 @@ proc ::RosterTwo::Configure {_T} {
     set imS 16
     set dX [expr {$imS + 3*$px}]
 
+    # Two columns: 
+    #   0) the tree 
+    #   1) hidden for tags
     $T column create -tags cTree -itembackground $stripes -resize 0 -expand 1
+    $T column create -tags cTag -visible 0
     $T configure -treecolumn cTree -showheader 0
 
     # The elements.
@@ -93,6 +97,7 @@ proc ::RosterTwo::Init { } {
     upvar ::Jabber::jprefs jprefs
 	
     $T item delete all
+    ::RosterTree::FreeTags
 
     # Available:
     set item [CreateHeadItem available]
@@ -225,6 +230,30 @@ proc ::RosterTwo::CreateItem {jid presence args} {
 	}
 	ConfigureItem $item $style $text $text2 $image
     }
+
+    # Configure number of available/unavailable users.
+    variable pendingChildNumbers
+    if {![info exists pendingChildNumbers]} {
+	set pendingChildNumbers 1
+	after idle [namespace code ConfigureChildNumbers]
+    }
+
+    # Design the balloon help window message.
+    foreach item $jitems {
+	eval {Balloon $jid $presence $item} $args
+    }
+    return $items
+}
+
+# RosterPlain::ConfigureChildNumbers --
+# 
+#       Add an extra "(#)" to each directory that shows the content.
+
+proc ::RosterTwo::ConfigureChildNumbers {} {
+    variable T
+    variable pendingChildNumbers
+
+    unset -nocomplain pendingChildNumbers
     
     # Configure number of available/unavailable users.
     foreach type {available unavailable transport pending} {
@@ -244,12 +273,6 @@ proc ::RosterTwo::CreateItem {jid presence args} {
 	set htext "$n users"
 	$T item element configure $item cTree eText2 -text $htext
     }
-    
-    # Design the balloon help window message.
-    foreach item $jitems {
-	eval {Balloon $jid $presence $item} $args
-    }
-    return $items
 }
 
 proc ::RosterTwo::ConfigureItem {item style text text2 image} {
@@ -303,7 +326,7 @@ proc ::RosterTwo::SetItemAlternative {jid key type image} {
 proc ::RosterTwo::CreateWithTag {tag style text text2 image parent} {
     variable T
     
-    # Base class constructor. Handles the tag.
+    # Base class constructor. Handles the cTag column and tag.
     set item [::RosterTree::CreateWithTag $tag $parent]
     
     $T item style set $item cTree $style

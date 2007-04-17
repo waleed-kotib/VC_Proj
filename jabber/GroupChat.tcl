@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.191 2007-04-09 07:14:25 matben Exp $
+# $Id: GroupChat.tcl,v 1.192 2007-04-17 14:53:38 matben Exp $
 
 package require Create
 package require Enter
@@ -1570,7 +1570,7 @@ proc ::GroupChat::GetTokenList {type} {
 #   Functions to handle the treectrl widget.
 #   It isolates some details to the rest of the code.
 #   
-#   An invisible column stores tags for each item:
+#   Tags for each item:
 #       {role $role}
 #           {jid $jid}
 #           {jid $jid}
@@ -1666,12 +1666,6 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     $T style layout $S eRoleImage -expand ns
     $T style layout $S eRoleText  -squeeze x -expand ns
     $T style layout $S eBorder    -detach 1 -iexpand xy
-
-    set S [$T style create styTag]
-    $T style elements $S {eText}
-
-    # @@@ use column -itemstyle instead for 2.2
-    $T configure -defaultstyle {{} styTag}
 
     bindtags $T [concat UsersTreeTag [bindtags $T]]
     
