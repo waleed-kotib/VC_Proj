@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.30 2007-04-17 14:53:39 matben Exp $
+# $Id: RosterPlain.tcl,v 1.31 2007-04-18 14:15:13 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -216,30 +216,46 @@ proc ::RosterPlain::EditCmd {id} {
     variable T
     variable tmpEdit
     
-    if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
-	set item [lindex $id 1]
-	set tags [::RosterTree::GetTagOfItem $item]
-	if {[lindex $tags 0] eq "jid"} {
-	    set jid [lindex $tags 1]
-	    set image [$T item element cget $item cTree eImage -image]
-	    set text  [$T item element cget $item cTree eText -text]
-	    set wentry $T.entry
-	    set tmpEdit(entry) $wentry
-	    set tmpEdit(text)  $text
-	    set tmpEdit(jid)   $jid
-	    destroy $wentry
-	    ttk::entry $wentry -font CociSmallFont \
-	      -textvariable [namespace current]::tmpEdit(text) -width 1
-	    $T item style set $item cTree styEntry
-	    $T item element configure $item cTree \
-	      eImage -image $image + eWindow -window $wentry
-	    focus $wentry
-
-	    bind $wentry <Return>   [list ::RosterPlain::EditOnReturn $item]
-	    bind $wentry <KP_Enter> [list ::RosterPlain::EditOnReturn $item]
-	    bind $wentry <FocusOut> [list ::RosterPlain::EditEnd $item]
-	    bind $wentry <Escape>   [list ::RosterPlain::EditEnd $item]
-	}
+    # Protect for second entries.
+    if {[info exists tmpEdit]} {
+	return
+    }
+    if {!(([lindex $id 0] eq "item") && ([llength $id] == 6))} {
+	return
+    }
+    
+    # item+column+elem
+    array set what $id        
+    
+    # Sort out clicks that aren't in the right place.
+    if {$what(elem) ne "eText"} {
+	return
+    }
+    set item [lindex $id 1]
+    if {[$T item style set $item cTree] eq "styEntry"} {
+	return
+    }
+    set tags [::RosterTree::GetTagOfItem $item]
+    if {[lindex $tags 0] eq "jid"} {
+	set jid [lindex $tags 1]
+	set image [$T item element cget $item cTree eImage -image]
+	set text  [$T item element cget $item cTree eText -text]
+	set wentry $T.entry
+	set tmpEdit(entry) $wentry
+	set tmpEdit(text)  $text
+	set tmpEdit(jid)   $jid
+	destroy $wentry
+	ttk::entry $wentry -font CociSmallFont \
+	  -textvariable [namespace current]::tmpEdit(text) -width 1
+	$T item style set $item cTree styEntry
+	$T item element configure $item cTree \
+	  eImage -image $image + eWindow -window $wentry
+	focus $wentry
+	
+	bind $wentry <Return>   [list ::RosterPlain::EditOnReturn $item]
+	bind $wentry <KP_Enter> [list ::RosterPlain::EditOnReturn $item]
+	bind $wentry <FocusOut> [list ::RosterPlain::EditEnd $item]
+	bind $wentry <Escape>   [list ::RosterPlain::EditEnd $item]
     }
 }
 
@@ -278,6 +294,9 @@ proc ::RosterPlain::Init { } {
     $T item delete all
     ::RosterTree::FreeTags
     
+    # Seems necessary if we switch style while editing; online below offline!
+    update idletasks
+        
     set onlineImage  [::Rosticons::Get application/online]
     set offlineImage [::Rosticons::Get application/offline]
     
