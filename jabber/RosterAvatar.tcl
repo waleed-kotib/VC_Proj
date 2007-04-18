@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.26 2007-04-17 14:53:39 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.27 2007-04-18 14:15:13 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -440,54 +440,59 @@ proc ::RosterAvatar::EditCmd {id} {
     variable T
     variable tmpEdit
     
-    puts "::RosterAvatar::EditCmd $id"
+    # Protect for second entries.
+    if {[info exists tmpEdit]} {
+	return
+    }
+    if {!(([lindex $id 0] eq "item") && ([llength $id] == 6))} {
+	return
+    }
     
     # item+column+elem
     array set what $id
-    parray what
     
-    if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
-	set item [lindex $id 1]
-	set tags [::RosterTree::GetTagOfItem $item]
-	puts "\t item=$item, tags=$tags"
-	puts "\t item style set=[$T item style set $item cTree]"
-	if {[lindex $tags 0] eq "jid"} {
-	    set jid [lindex $tags 1]
-	    set text [$T item text $item cTree]
-	    
-	    # @@@ I'd like a way to get the style form item but found none :-(
-	    set elements [$T item style elements $item cTree]
-	    puts "\t elements=$elements"
-	    if {[lsearch $elements eOnText] >= 0} {
-		set font [$T item element cget $item cTree eOnText -font]
-		puts "\t item element configure=[$T item element configure $item cTree eOnText]"
-	    } else {
-		set font [$T item element cget $item cTree eOffText -font]		
-		puts "\t item element configure=[$T item element configure $item cTree eOffText]"
-	    }
-	    puts "\t font=$font"
-	    if {[::RosterTree::GetStyle] eq "flatsmall"} {
-		set font CociSmallFont
-	    } else {
-		set font CociDefaultFont
-	    }
-	    set wentry $T.entry
-	    set tmpEdit(entry) $wentry
-	    set tmpEdit(text)  $text
-	    set tmpEdit(font)  $font
-	    set tmpEdit(jid)   $jid
-	    destroy $wentry
-	    ttk::entry $wentry -font $font \
-	      -textvariable [namespace current]::tmpEdit(text) -width 1
-	    $T item style set $item cTree styEntry
-	    $T item element configure $item cTree eWindow -window $wentry
-	    focus $wentry
-
-	    bind $wentry <Return>   [namespace code [list EditOnReturn $item]]
-	    bind $wentry <KP_Enter> [namespace code [list EditOnReturn $item]]
-	    bind $wentry <FocusOut> [namespace code [list EditEnd $item]]
-	    bind $wentry <Escape>   [namespace code [list EditEnd $item]]
+    # Sort out clicks that aren't in the right place.
+    if {![info exists what(elem)]} {
+	return
+    }
+    if {!(($what(elem) eq "eOnText") || ($what(elem) eq "eOffText"))} {
+	return
+    }
+    set item [lindex $id 1]
+    if {[$T item style set $item cTree] eq "styEntry"} {
+	return
+    }
+    set tags [::RosterTree::GetTagOfItem $item]
+    #puts "\t item=$item, tags=$tags"
+    #puts "\t item style set=[$T item style set $item cTree]"
+    if {[lindex $tags 0] eq "jid"} {
+	set jid [lindex $tags 1]
+	set text [$T item text $item cTree]
+	
+	# @@@ I'd like a way to get the style from item but found none :-(
+	set font [$T item element cget $item cTree $what(elem) -font]
+	#puts "\t font=$font"
+	if {[::RosterTree::GetStyle] eq "flatsmall"} {
+	    set font CociSmallFont
+	} else {
+	    set font CociDefaultFont
 	}
+	set wentry $T.entry
+	set tmpEdit(entry) $wentry
+	set tmpEdit(text)  $text
+	set tmpEdit(font)  $font
+	set tmpEdit(jid)   $jid
+	destroy $wentry
+	ttk::entry $wentry -font $font \
+	  -textvariable [namespace current]::tmpEdit(text) -width 1
+	$T item style set $item cTree styEntry
+	$T item element configure $item cTree eWindow -window $wentry
+	focus $wentry
+	
+	bind $wentry <Return>   [namespace code [list EditOnReturn $item]]
+	bind $wentry <KP_Enter> [namespace code [list EditOnReturn $item]]
+	bind $wentry <FocusOut> [namespace code [list EditEnd $item]]
+	bind $wentry <Escape>   [namespace code [list EditEnd $item]]
     }
 }
 

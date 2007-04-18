@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ITree.tcl,v 1.17 2007-04-17 06:13:30 matben Exp $
+# $Id: ITree.tcl,v 1.18 2007-04-18 14:15:13 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -48,11 +48,9 @@ proc ::ITree::New {T wxsc wysc args} {
     set stripeBackground [option get $T stripeBackground {}]
     set stripes [list $stripeBackground {}]
 
-    # @@@ treectrl2.2.3 -tag -> -tags
-    $T column create -tag cTree  \
+    $T column create -tags cTree  \
       -itembackground $stripes -resize 0 -expand 1
-    # @@@ treectrl2.2.3
-    $T column create -tag cTag -visible 0
+    $T column create -tags cTag -visible 0
     $T configure -treecolumn cTree
 
     $T element create eImage image
@@ -69,8 +67,8 @@ proc ::ITree::New {T wxsc wysc args} {
     set S [$T style create styTag]
     $T style elements $S {eText}
 
-    # @@@ use column -itemstyle instead for 2.2
-    $T configure -defaultstyle {styStd styTag}
+    $T column configure cTree -itemstyle styStd
+    $T column configure cTag  -itemstyle styTag
 
     $T notify bind $T <Selection>      { ::ITree::Selection %T }
     $T notify bind $T <Expand-after>   { ::ITree::OpenTreeCmd %T %I }

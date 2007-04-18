@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.39 2007-04-17 14:53:39 matben Exp $
+# $Id: RosterTree.tcl,v 1.40 2007-04-18 14:15:13 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -61,8 +61,15 @@ namespace eval ::RosterTree {
 }
 
 proc ::RosterTree::RegisterStyle {
-    name label configProc initProc deleteProc
-    createItemProc deleteItemProc setItemAltProc} {
+    name 
+    label 
+    configProc 
+    initProc 
+    deleteProc
+    createItemProc 
+    deleteItemProc 
+    setItemAltProc
+} {
 	
     variable plugin
     
@@ -104,11 +111,11 @@ proc ::RosterTree::GetPreviousStyle {} {
 proc ::RosterTree::GetAllStyles {} {
     variable plugin
  
-    set names {}
+    set names [list]
     foreach {key name} [array get plugin *,name] {
 	lappend names $name
     }
-    set styles {}
+    set styles [list]
     foreach name [lsort $names] {
 	lappend styles $name $plugin($name,label)
     }
@@ -356,7 +363,6 @@ proc ::RosterTree::Free {} {
     }
 }
 
-
 # Edit stuff --------------------------
 
 namespace eval ::RosterTree:: {
@@ -407,9 +413,7 @@ proc ::RosterTree::EditButtonRelease {x y} {
 proc ::RosterTree::EditOnReturn {jid name} {
     variable T
     upvar ::Jabber::jstate jstate
-    
-    puts "::RosterTree::EditOnReturn $jid $name"
-    
+        
     set jid [$jstate(jlib) roster getrosterjid $jid]
     set groups [$jstate(jlib) roster getgroups $jid]
     $jstate(jlib) roster send_set $jid -name $name -groups $groups
@@ -809,7 +813,9 @@ proc ::RosterTree::FindWithTag {tag} {
 proc ::RosterTree::FindWithFirstTag {tag0} {
     variable tag2items
     
-    set items {}
+    # Note that we don't need escaping here since tag0 is guranteed to be free
+    # from any special chars.
+    set items [list]
     foreach {key value} [array get tag2items "$tag0 *"] {
 	set items [concat $items $value]
     }
@@ -825,7 +831,7 @@ proc ::RosterTree::FindChildrenOfTag {tag} {
     variable tag2items
     
     # NEVER use the non unique 'jid *' tag here!
-    set items {}
+    set items [list]
     if {[info exists tag2items($tag)]} {
 	set pitem [lindex $tag2items($tag) 0]
 	set items [$T item children $pitem]
@@ -855,7 +861,6 @@ proc ::RosterTree::FreeTags {} {
 }
 
 proc ::RosterTree::OnDestroy {} {
-
     FreeTags
 }
 

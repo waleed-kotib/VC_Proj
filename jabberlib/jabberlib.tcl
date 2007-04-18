@@ -3,9 +3,9 @@
 #       This is the main part of the jabber lib, a Tcl library for interacting
 #       with jabber servers. The core parts are known under the name XMPP.
 #
-# Copyright (c) 2001-2006  Mats Bengtsson
+# Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.173 2007-04-13 13:52:48 matben Exp $
+# $Id: jabberlib.tcl,v 1.174 2007-04-18 14:15:13 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 

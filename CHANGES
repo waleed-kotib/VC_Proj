@@ -13,6 +13,7 @@ Coccinella-0.9*
  o automatically gets a list with free jabber servers when registering new account
  o updated pep/mood code to version 1.0 of the PEP protocol
  o support for geolocation
+ o much faster roster population code
 
 Coccinella-0.95.16 (20070214):
 
