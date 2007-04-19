@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: Proxy.tcl,v 1.14 2007-03-07 09:19:52 matben Exp $
+# $Id: Proxy.tcl,v 1.15 2007-04-19 09:31:41 matben Exp $
  
 package require autoproxy
 package require autosocks
@@ -159,13 +159,13 @@ proc ::Proxy::BuildPage {wpage} {
     return $wpage
 }
 
-proc ::Proxy::BuildFrame {wprx_} {
+proc ::Proxy::BuildFrame {w} {
     global  prefs
     variable tmpPrefs
     variable wnoproxy
     variable wprx
 
-    set wprx $wprx_
+    set wprx $w.prxy
     
     set prefs(noproxy) [lsort -unique $prefs(noproxy)]
     
@@ -188,7 +188,9 @@ proc ::Proxy::BuildFrame {wprx_} {
     }
         
     # Proxy.
+    ttk::frame $w
     ttk::frame $wprx
+    pack $wprx -side top -anchor [option get . dialogAnchor {}]
     
     ttk::label $wprx.msg -wraplength 300 -justify left \
       -text [mc prefproxymsg]
@@ -235,15 +237,15 @@ proc ::Proxy::BuildFrame {wprx_} {
 	$wnoproxy insert end "\n"
     }
     SetUseProxyState
-    return $wprx
+    return $w
 }
 
-proc ::Proxy::BuildNATFrame {wnat_} {
+proc ::Proxy::BuildNATFrame {w} {
     global  prefs
     variable tmpPrefs
     variable wnat
     
-    set wnat $wnat_
+    set wnat $w.nat
     variable wnatuse $wnat.use
 
     set stun 0
@@ -258,7 +260,9 @@ proc ::Proxy::BuildNATFrame {wnat_} {
     }
 
     # NAT address.
+    ttk::frame $w
     ttk::frame $wnat
+    pack $wnat -side top -anchor [option get . dialogAnchor {}]
 
     ttk::checkbutton $wnat.use -text [mc prefnatip] \
       -command [namespace code SetUseNATState]  \
@@ -276,7 +280,7 @@ proc ::Proxy::BuildNATFrame {wnat_} {
 	grid  $wnat.stun  -column 1 -row 1 -padx 4
     }
     SetUseNATState    
-    return $wnat
+    return $w
 }
 
 proc ::Proxy::GetStun {} {

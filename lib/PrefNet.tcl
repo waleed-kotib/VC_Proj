@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: PrefNet.tcl,v 1.8 2007-03-14 08:47:44 matben Exp $
+# $Id: PrefNet.tcl,v 1.9 2007-04-19 09:31:41 matben Exp $
  
 package provide PrefNet 1.0
 
@@ -73,15 +73,15 @@ proc ::PrefNet::BuildTabPage {wpage} {
     
     ::Proxy::BuildFrame $nb.proxy
     $nb.proxy configure -padding $padding
-    $nb add $nb.proxy -text [mc Proxy] -sticky n
+    $nb add $nb.proxy -text [mc Proxy] -sticky news
     
     ::Proxy::BuildNATFrame $nb.nat
     $nb.nat configure -padding $padding
-    $nb add $nb.nat -text [mc NAT] -sticky n
+    $nb add $nb.nat -text [mc NAT] -sticky news
      
     BuildServersFrame $nb.serv
     $nb.serv configure -padding $padding
-    $nb add $nb.serv -text [mc Servers] -sticky n
+    $nb add $nb.serv -text [mc Servers] -sticky news
 
     return $wpage
 }
@@ -97,23 +97,28 @@ proc ::PrefNet::BuildServersFrame {w} {
     set tmpServPrefs(bytestreams,port)  $jprefs(bytestreams,port)
 
     ttk::frame $w
-    ttk::label $w.lserv -text "[mc {Built in server port}]:"
-    ttk::label $w.lhttp -text "[mc {HTTP port}]:"
-    ttk::label $w.lbs   -text "[mc {File transfer port}]:"
-    ttk::entry $w.eserv -width 6 -textvariable  \
+    
+    set f $w.f
+    ttk::frame $f
+    pack $f -side top -anchor [option get . dialogAnchor {}]
+
+    ttk::label $f.lserv -text "[mc {Built in server port}]:"
+    ttk::label $f.lhttp -text "[mc {HTTP port}]:"
+    ttk::label $f.lbs   -text "[mc {File transfer port}]:"
+    ttk::entry $f.eserv -width 6 -textvariable  \
       [namespace current]::tmpServPrefs(thisServPort)
-    ttk::entry $w.ehttp -width 6 -textvariable  \
+    ttk::entry $f.ehttp -width 6 -textvariable  \
       [namespace current]::tmpServPrefs(httpdPort)
-    ttk::entry $w.ebs -width 6 -textvariable  \
+    ttk::entry $f.ebs -width 6 -textvariable  \
       [namespace current]::tmpServPrefs(bytestreams,port)
 
-    grid  $w.lserv  $w.eserv  -sticky e -pady 2
-    grid  $w.lhttp  $w.ehttp  -sticky e -pady 2
-    grid  $w.lbs    $w.ebs    -sticky e -pady 2
-    grid columnconfigure $w 0 -weight 1
+    grid  $f.lserv  $f.eserv  -sticky e -pady 2
+    grid  $f.lhttp  $f.ehttp  -sticky e -pady 2
+    grid  $f.lbs    $f.ebs    -sticky e -pady 2
+    grid columnconfigure $f 0 -weight 1
     
     if {!$prefs(haveHttpd)} {
-	$w.ehttp state {disabled}
+	$f.ehttp state {disabled}
     }
     bind $w <Destroy> [namespace code ServersFree]
     return $w
