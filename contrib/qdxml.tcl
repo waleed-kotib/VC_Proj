@@ -9,7 +9,7 @@
 #       o handle resets
 #       o error handling?
 #       
-# $Id: qdxml.tcl,v 1.8 2007-03-23 13:04:03 matben Exp $
+# $Id: qdxml.tcl,v 1.9 2007-04-21 13:26:42 matben Exp $
 
 package provide qdxml 0.1
 
@@ -414,8 +414,7 @@ if {0} {
     proc Start {tag attr args} {puts "Start: -------- $args"}
     proc End {tag args} {puts "End: -------- $args"}
     proc Data {args} {puts "Data: -------- $args"}
-    set f /Users/matben/Desktop/test.xml
-    set f /Users/matben/Desktop/stream.xml
+    set f /Users/matben/Tcl/Coccinella/CociTests/xml-files/jabber.ru.utf8.xml
     set fd [open $f r]
     set xml [read $fd]
     close $fd
@@ -425,15 +424,20 @@ if {0} {
       -characterdatacommand Data]
     $token parse $xml
 
-    # Timing.
-    set f /Users/matben/Desktop/long.xml
+    # Timing:
+    # xml::tcl/qdxml = 3.1
+    set f /Users/matben/Tcl/Coccinella/CociTests/xml-files/jabber.ru.utf8.xml
+    # xml::tcl/qdxml = 3.4   
+    set f /Users/matben/Tcl/Coccinella/CociTests/xml-files/long.xml
+    # xml::tcl/qdxml = 5.1 
+    set f /Users/matben/Tcl/Coccinella/CociTests/xml-files/test.xml
     set fd [open $f r]
     set xml [read $fd]; set a 1
     close $fd
     set token [qdxml::create]
     time {$token parse $xml} 10
 
-    # 3.5 times slower! (parserclass tcl)
+    # parserclass tcl
     set p [xml::parser]
     time {$p parse $xml} 10
 
