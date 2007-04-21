@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.32 2007-04-08 13:41:55 matben Exp $
+# $Id: wrapper.tcl,v 1.33 2007-04-21 13:26:42 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -165,11 +165,11 @@ proc wrapper::new {streamstartcmd streamendcmd parsecmd errorcmd} {
     # Current level; 0 before root tag; 1 just after root tag, 2 after 
     # command tag, etc.
     set wrapper($id,level) 0
-    set wrapper($id,levelonetag) {}
+    set wrapper($id,levelonetag) ""
     
     # Level 1 is the main tag, <stream:stream>, and level 2
     # is the command tag, such as <message>. We don't handle level 1 xmldata.
-    set wrapper($id,tree,2) {}   
+    set wrapper($id,tree,2) [list]
     
     set wrapper($id,refcount) 0
     set wrapper($id,stack) ""
@@ -256,7 +256,7 @@ proc wrapper::parsereentrant {id xml} {
 
 proc wrapper::elementstart {id tagname attrlist args} {
     variable wrapper
-            
+
     # Check args, to see if empty element and/or namespace. 
     # Put xmlns in attribute list.
     array set argsarr $args
@@ -302,6 +302,12 @@ proc wrapper::elementstart {id tagname attrlist args} {
 
 proc wrapper::elementend {id tagname args} {
     variable wrapper
+
+    # tclxml doesn't do the reset properly but continues to send us endtags.
+    # qdxml behaves better!
+    if {!$wrapper($id,level)} {
+	return
+    }
     
     # Check args, to see if empty element
     set isempty 0
@@ -407,7 +413,7 @@ proc wrapper::chdata {id chardata} {
 
 proc wrapper::reset {id} {   
     variable wrapper
-	
+    
     # This resets the actual XML parser. Not sure this is actually needed.
     $wrapper($id,parser) reset
     
@@ -434,16 +440,12 @@ proc wrapper::reset {id} {
     }
 
     # Cleanup internal state vars.
-    set lev 2
-    while {[info exists wrapper($id,tree,$lev)]} {
-	unset wrapper($id,tree,$lev)
-	incr lev
-    }
+    array unset wrapper $id,tree,*
     
     # Reset also our internal wrapper to its initial position.
     set wrapper($id,level) 0
-    set wrapper($id,levelonetag) {}
-    set wrapper($id,tree,2) {}  
+    set wrapper($id,levelonetag) ""
+    set wrapper($id,tree,2) [list] 
 
     set wrapper($id,refcount) 0
     set wrapper($id,stack) ""
@@ -464,7 +466,6 @@ proc wrapper::xmlerror {id args} {
     variable wrapper
 
     uplevel #0 $wrapper($id,errorcmd) $args
-    return
 }
 
 # wrapper::createxml --
