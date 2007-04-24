@@ -2,7 +2,7 @@
 # 
 #       Interface for launching Gnome Meeting.
 #
-# $Id: GMeeting.tcl,v 1.13 2007-04-05 13:12:48 matben Exp $
+# $Id: GMeeting.tcl,v 1.14 2007-04-24 13:54:25 matben Exp $
 
 namespace eval ::GMeeting:: {
     
@@ -51,7 +51,7 @@ proc ::GMeeting::JabberInitHook {jlibname} {
 	  -attrlist [list var "http://jabber.org/protocol/voip/$uri"]]
     }
 
-    $jlibname caps register voip_h323 $subtags(h323)   $xmlns(h232)
+    $jlibname caps register voip_h323 $subtags(h323)   $xmlns(h323)
     $jlibname caps register voip_sip  $subtags(sip)    $xmlns(sip)
     $jlibname caps register voipgm2   $subtags(callto) $xmlns(callto)
 }
