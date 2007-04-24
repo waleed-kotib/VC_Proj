@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.31 2007-04-18 14:15:13 matben Exp $
+# $Id: RosterPlain.tcl,v 1.32 2007-04-24 07:48:15 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -360,8 +360,8 @@ proc ::RosterPlain::CreateItem {jid presence args} {
     # Defaults:
     set jtext  [eval {MakeDisplayText $jid $presence} $args]
     set jimage [eval {GetPresenceIcon $jid $presence} $args]
-    set items  {}
-    set jitems {}
+    set items  [list]
+    set jitems [list]
         
     # Creates a list {item tag ?item tag? ...} for items.
     set itemTagList [eval {::RosterTree::CreateItemBase $jid $presence} $args]
@@ -421,7 +421,7 @@ proc ::RosterPlain::ConfigureChildNumbers {} {
     variable pendingChildNumbers
 
     unset -nocomplain pendingChildNumbers
-    
+
     foreach type {
 	available unavailable transport pending
     } itype {

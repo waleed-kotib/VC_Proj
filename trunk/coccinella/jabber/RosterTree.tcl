@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.40 2007-04-18 14:15:13 matben Exp $
+# $Id: RosterTree.tcl,v 1.41 2007-04-24 07:48:15 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -27,6 +27,7 @@ package provide RosterTree 1.0
 namespace eval ::RosterTree {
 
     ::hooks::register logoutHook             ::RosterTree::LogoutHook
+    ::hooks::register menuJMainEditPostHook  ::RosterTree::EditMenuHook
 
     # Actual:
     #option add *Roster*TreeCtrl.indent          18              widgetDefault
@@ -744,132 +745,138 @@ proc ::RosterTree::FindAllWithTagInItem {item type} {
 }
 
 # ---------------------------------------------------------------------------- #
+#
+# There are two methods to keep track of mapping tags to items:
+#    o Keeping an external array (fastest): "array"
+#    o Internal to TreeCtrl: "treectrl"
 
-# A few more generic functions.
-# They isolate the 'tag2items' array from the rest.
+set rosterTreeTagMethod "array"
 
-namespace eval ::RosterTree {
+if {$rosterTreeTagMethod eq "array"} {
     
-    # Internal array.
-    variable tag2items
-}
-
-proc ::RosterTree::CreateWithTag {tag parent} {
-    variable T
-    variable tag2items
+    # A few more generic functions.
+    # They isolate the 'tag2items' array from the rest.
     
-    set item [$T item create -parent $parent]
-    
-    # Handle the hidden cTag column.
-    $T item style set $item cTag styTag
-    $T item element configure $item cTag eText -text $tag
-    
-    lappend tag2items($tag) $item
-
-    return $item
-}
-
-proc ::RosterTree::DeleteWithTag {tag} {
-    variable T
-    variable tag2items
-    
-    if {[info exists tag2items($tag)]} {
-	foreach item $tag2items($tag) {
-	    $T item delete $item
-	}    
+    namespace eval ::RosterTree {
+	
+	# Internal array.
+	variable tag2items
     }
-}
-
-# RosterTree::RemoveTags --
-# 
-#       Callback for <ItemDelete> events used to cleanup the tag2items array.
-
-proc ::RosterTree::RemoveTags {item} {
-    variable T
-    variable tag2items
     
-    # We must delete all 'tag2items' that may point to us.
-    set tag [$T item element cget $item cTag eText -text]
-    set items $tag2items($tag)
-    set idx [lsearch $items $item]
-    if {$idx >= 0} {
-	set tag2items($tag) [lreplace $items $idx $idx]
-    }
-    if {$tag2items($tag) eq {}} {
-	unset tag2items($tag)
-    }
-}
-
-proc ::RosterTree::FindWithTag {tag} {
-    variable tag2items
+    proc ::RosterTree::CreateWithTag {tag parent} {
+	variable T
+	variable tag2items
     
-    if {[info exists tag2items($tag)]} {
-	return $tag2items($tag)
-    } else {
-	return
+	set item [$T item create -parent $parent]
+	
+	# Handle the hidden cTag column.
+	$T item style set $item cTag styTag
+	$T item element configure $item cTag eText -text $tag
+	lappend tag2items($tag) $item	
+	return $item
     }
-}
-
-proc ::RosterTree::FindWithFirstTag {tag0} {
-    variable tag2items
     
-    # Note that we don't need escaping here since tag0 is guranteed to be free
-    # from any special chars.
-    set items [list]
-    foreach {key value} [array get tag2items "$tag0 *"] {
-	set items [concat $items $value]
+    proc ::RosterTree::DeleteWithTag {tag} {
+	variable T
+	variable tag2items
+	
+	if {[info exists tag2items($tag)]} {
+	    foreach item $tag2items($tag) {
+		$T item delete $item
+	    }    
+	}
     }
-    return $items
-}
-
-# RosterTree::FindChildrenOfTag --
-# 
-#       The caller MUST verify that the tag is actually unique.
-
-proc ::RosterTree::FindChildrenOfTag {tag} {
-    variable T
-    variable tag2items
     
-    # NEVER use the non unique 'jid *' tag here!
-    set items [list]
-    if {[info exists tag2items($tag)]} {
-	set pitem [lindex $tag2items($tag) 0]
-	set items [$T item children $pitem]
+    # RosterTree::RemoveTags --
+    # 
+    #       Callback for <ItemDelete> events used to cleanup the tag2items array.
+    
+    proc ::RosterTree::RemoveTags {item} {
+	variable T
+	variable tag2items
+	
+	# We must delete all 'tag2items' that may point to us.
+	set tag [$T item element cget $item cTag eText -text]
+	set items $tag2items($tag)
+	set idx [lsearch $items $item]
+	if {$idx >= 0} {
+	    set tag2items($tag) [lreplace $items $idx $idx]
+	}
+	if {$tag2items($tag) eq {}} {
+	    unset tag2items($tag)
+	}
     }
-    return $items
-}
-
-proc ::RosterTree::GetTagOfItem {item} {
-    variable T
-    variable tag2items
-    return [$T item element cget $item cTag eText -text]
-}
-
-proc ::RosterTree::GetTagOfItem {item} {
-    variable T    
-    return [$T item element cget $item cTag eText -text]
-}
-
-proc ::RosterTree::ExistsWithTag {tag} {
-    variable tag2items
-    return [info exists tag2items($tag)]
-}
-
-proc ::RosterTree::FreeTags {} {
-    variable tag2items    
-    unset -nocomplain tag2items
-}
-
-proc ::RosterTree::OnDestroy {} {
-    FreeTags
-}
-
+    
+    proc ::RosterTree::FindWithTag {tag} {
+	variable tag2items
+	
+	if {[info exists tag2items($tag)]} {
+	    return $tag2items($tag)
+	} else {
+	    return
+	}
+    }
+    
+    proc ::RosterTree::FindWithFirstTag {tag0} {
+	variable tag2items
+	
+	# Note that we don't need escaping here since tag0 is guranteed to be free
+	# from any special chars.
+	set items [list]
+	foreach {key value} [array get tag2items "$tag0 *"] {
+	    set items [concat $items $value]
+	}
+	return $items
+    }
+    
+    # RosterTree::FindChildrenOfTag --
+    # 
+    #       The caller MUST verify that the tag is actually unique.
+    
+    proc ::RosterTree::FindChildrenOfTag {tag} {
+	variable T
+	variable tag2items
+	
+	# NEVER use the non unique 'jid *' tag here!
+	set items [list]
+	if {[info exists tag2items($tag)]} {
+	    set pitem [lindex $tag2items($tag) 0]
+	    set items [$T item children $pitem]
+	}
+	return $items
+    }
+    
+    proc ::RosterTree::GetTagOfItem {item} {
+	variable T
+	variable tag2items
+	return [$T item element cget $item cTag eText -text]
+    }
+    
+    proc ::RosterTree::GetTagOfItem {item} {
+	variable T    
+	return [$T item element cget $item cTag eText -text]
+    }
+    
+    proc ::RosterTree::ExistsWithTag {tag} {
+	variable tag2items
+	return [info exists tag2items($tag)]
+    }
+    
+    proc ::RosterTree::FreeTags {} {
+	variable tag2items    
+	unset -nocomplain tag2items
+    }
+    
+    proc ::RosterTree::OnDestroy {} {
+	FreeTags
+    }
+    
 # ---------------------------------------------------------------------------- #
 
 # This was an attempt to use the built in tags of treectrl 2.2 but timings
 # showed that this code was slower. We keep it here for backup storage.
 
-if {0} {
+} else {
     
     # A few generic functions to isolate the tags handlings in treectrl.
     # 
@@ -986,7 +993,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
 	return
     }
     array set argsA $args
-    set itemTagList {}
+    set itemTagList [list]
 
     set mjid [jlib::jidmap $jid]
     
@@ -1354,7 +1361,7 @@ proc ::RosterTree::GetParent {item} {
 
 proc ::RosterTree::Sort {item {order -increasing}} {
     variable plugin
-
+    
     set name $plugin(selected)
     if {[info exists plugin($name,sortProc)]} {
 	$plugin($name,sortProc) $item $order
@@ -1366,15 +1373,27 @@ proc ::RosterTree::Sort {item {order -increasing}} {
 proc ::RosterTree::SortDefault {item order} {
     variable T    
     
+    # Sort recursively for each directory.
     foreach citem [$T item children $item] {
 	if {[$T item numchildren $citem]} {
-	    Sort $citem $order
+	    SortDefault $citem $order
 	}
     }
+    
+    # Do not sort the first children of root!
     if {$item ne "root"} {
-	if {[$T item numchildren $item]} {
-	    $T item sort $item $order -dictionary -column cTree  \
-	      -command ::RosterTree::SortCommand
+	
+	# TreeCtrl 2.2.3 has a problem doing custom sorting (-command)
+	# for large rosters, see:
+	# 
+	set n [$T item numchildren $item]
+	if {$n} {
+	    if {$n > 50} {
+		$T item sort $item $order -column cTree -dictionary
+	    } else {
+		$T item sort $item $order -column cTree  \
+		  -command ::RosterTree::SortCommand
+	    }
 	}
     }
 }
@@ -1425,6 +1444,26 @@ proc ::RosterTree::DeleteEmptyPendTrpt {} {
 		$T item delete $item
 	    }
 	}
+    }
+}
+
+# RosterTree::EditMenuHook --
+# 
+#       Menu post command hook for doing roster searches.
+
+proc ::RosterTree::EditMenuHook {wmenu} {
+    
+    if {[winfo exists [focus]]} {
+	set wclass [winfo class [focus]]
+	set w [winfo toplevel [focus]]
+
+	# ::RosterTree::EditMenuHook focus=.jmain.f.ro.box.tree, wclass=TreeCtrl
+
+	#::UI::MenuMethod $wmenu entryconfigure mFind -state normal
+	#if {[winfo exists $wfind]} {
+	 #   ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+	#    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
+	#}
     }
 }
 
