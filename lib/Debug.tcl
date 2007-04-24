@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It provides a few routines to help debugging.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Debug.tcl,v 1.5 2006-12-03 08:42:48 matben Exp $
+# $Id: Debug.tcl,v 1.6 2007-04-24 07:48:15 matben Exp $
 
 # If no debug printouts, no console.
 if {$debugLevel == 0} {
@@ -37,6 +37,19 @@ proc ::CallTrace {num} {
 	    puts "\t$i: [string range [info level $i] 0 80] ..."
 	}
     }
+}
+
+set ::dbgt 0
+
+#       You must initiate by setting its start value:
+#         set ::t [clock clicks -milliseconds]
+
+proc ::Timer {str} {
+    if {$::dbgt} {
+	puts "milliseconds ($str): [expr [clock clicks -milliseconds]-$::t]"
+	set ::t [clock clicks -milliseconds]
+	flush stdout
+    }   
 }
 
 # Optional and custom designed.

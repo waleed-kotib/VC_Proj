@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.27 2007-04-18 14:15:13 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.28 2007-04-24 07:48:15 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -336,10 +336,9 @@ proc ::RosterAvatar::Configure {_T} {
     # @@@ Have available/unavailable as states instead of separate styles?
     
     # Styles collecting the elements ---
-    # Need a text element since sorting on 2.2 bails out if no text element.
     # Status:
     set S [$T style create styStatus]
-    $T style elements $S {eBorder eImage eText}
+    $T style elements $S {eBorder eImage}
     $T style layout $S eImage  -expand news
     $T style layout $S eBorder -detach 1 -iexpand xy
 
@@ -527,8 +526,6 @@ proc ::RosterAvatar::Sort {item order} {
 
 proc ::RosterAvatar::HeaderCmd {T C} {
     variable sortColumn
-	    
-    puts "::RosterAvatar::HeaderCmd C=$C, sortColumn=$sortColumn"
     
     if {[$T column compare $C == $sortColumn]} {
 	if {[$T column cget $sortColumn -arrow] eq "down"} {
@@ -558,7 +555,7 @@ proc ::RosterAvatar::SortColumn {C order} {
     variable T
 
     # Keep transports and pending always at the end.
-    set opts -dictionary
+    set opts [list]
     
     # Be sure to have transport & pending last.
     # Shall only test this if not alone.
@@ -580,6 +577,7 @@ proc ::RosterAvatar::SortColumn {C order} {
     
     switch -- [$T column cget $C -tags] {
 	cTree {
+	    lappend opts -dictionary
 	    eval {$T item sort root $order -column $C} $opts
 	}
 	cStatus {

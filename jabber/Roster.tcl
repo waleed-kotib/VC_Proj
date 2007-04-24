@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.190 2007-04-17 14:53:39 matben Exp $
+# $Id: Roster.tcl,v 1.191 2007-04-24 07:48:15 matben Exp $
 
 # @@@ TODO: rewrite the popup menu code to use AMenu!
 
@@ -451,7 +451,7 @@ proc ::Roster::Refresh { } {
 proc ::Roster::SortIdle {item} {
     variable sortID
     variable wtree
-        
+    
     unset -nocomplain sortID
     if {[$wtree item id $item] ne ""} {
 	Sort $item
@@ -782,7 +782,7 @@ proc ::Roster::PresenceEvent {jlibname xmldata} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "---presence->"
-    
+        
     set from [wrapper::getattribute $xmldata from]
     set type [wrapper::getattribute $xmldata type]
     if {$type eq ""} {
@@ -924,10 +924,10 @@ proc ::Roster::SetItem {jid args} {
     #    Remove also jid2.
 
     set jlib $jstate(jlib)
-    
+
     if {!$inroster} {
     	set resList [$jlib roster getresources $jid]
-	if {$resList ne {}} {
+	if {[llength $resList]} {
 	    foreach res $resList {
 		::RosterTree::StyleDeleteItem $jid/$res
 	    }
@@ -946,14 +946,13 @@ proc ::Roster::SetItem {jid args} {
 	    }
 	}
     }
-    
     if {$add} {
     
 	# Add only the one with highest priority.
 	set jid2 [jlib::barejid $jid]
 	set res [$jlib roster gethighestresource $jid2]
 	array set presA [$jlib roster getpresence $jid2 -resource $res]
-	
+
 	# For online users we replace the actual resource with max priority one.
 	# Make sure we do not duplicate resource for jid3 roster items!
 	if {$res ne ""} {
@@ -964,12 +963,12 @@ proc ::Roster::SetItem {jid args} {
 	set items [eval {
 	    ::RosterTree::StyleCreateItem $jid $presA(-type)
 	} $args [array get presA]]
-	
+
 	if {!$inroster && ![info exists sortID] && [llength $items]} {
 	    set pitem [::RosterTree::GetParent [lindex $items end]]
 	    set sortID [after idle [namespace current]::SortIdle $pitem]
        }
-    }
+   }
 }
 
 # Roster::Presence --
@@ -1015,7 +1014,7 @@ proc ::Roster::Presence {jid presence args} {
     # First remove if there, then add in the right tree dir.
     ::RosterTree::StyleDeleteItem $jid
 
-    set items {}
+    set items [list]
     
     # Put in our roster tree.
     if {[string equal $presence "unavailable"]} {
