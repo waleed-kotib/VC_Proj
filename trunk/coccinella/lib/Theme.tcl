@@ -2,9 +2,9 @@
 #
 #       Some utitilty procedures useful when theming widgets and UI.
 #       
-#  Copyright (c) 2003-2006  Mats Bengtsson
+#  Copyright (c) 2003-2007  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.34 2006-12-28 13:26:46 matben Exp $
+# $Id: Theme.tcl,v 1.35 2007-04-24 13:43:36 matben Exp $
 
 package provide Theme 1.0
 
@@ -65,7 +65,7 @@ proc ::Theme::Init { } {
     
     # Any theme specific resource files.
     foreach dir [list $this(themesPath) $this(altThemesPath)] {
-	set rdir [file join $dir $this(resources)]
+	set rdir [file join $dir $prefs(themeName) $this(resources)]
 	if {[file isdirectory $rdir]} {
 	    option readfile [file join $rdir default.rdb] userDefault
 	    set f [file join $rdir $this(platform).rdb]
@@ -81,6 +81,8 @@ proc ::Theme::Init { } {
 	option add *TToolbar.styleText  Small.Plain      60
     }
 	
+    FontConfigStandard
+    
     # Any named fonts from any resource file must be constructed.
     PostProcessFontDefs
 }
@@ -150,6 +152,30 @@ proc ::Theme::Fonts { } {
     set fontopts(size)      $size
     set fontopts(smallsize) $smallsize
     set fontopts(largesize) $largesize
+}
+
+# Theme::FontConfigStandard --
+# 
+#       A resource file can override the standard font attributes as hardcoded
+#       above.
+
+proc ::Theme::FontConfigStandard {} {
+    variable fontopts
+
+    # Beware, resource names must start with lower case!
+    foreach name {
+	CociDefaultFont CociSmallFont CociSmallBoldFont CociTinyFont CociLargeFont
+    } {
+	set rname [string tolower [string index $name 0]][string range $name 1 end]
+	set spec [option get . $rname {}]
+	if {[string length $spec]} {
+	    eval {font configure $name} $spec
+	    if {$name eq "CociSmallFont"} {
+		array set fontA [font configure $name]
+		set fontopts(smallsize) $fontA(-size)
+	    }
+	}
+    }
 }
 
 proc ::Theme::FontConfigSize {increase} {
@@ -224,7 +250,7 @@ proc ::Theme::NameAndLocalePrefs { } {
 proc ::Theme::GetAllAvailable { } {
     global  this
     
-    set allThemes {}
+    set allThemes [list]
     foreach dir [list $this(themesPath) $this(altThemesPath)] {
 	foreach name [glob -nocomplain -tails -types d -directory $dir *] {
 	    switch -- $name {
