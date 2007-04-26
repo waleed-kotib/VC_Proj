@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.41 2007-04-24 07:48:15 matben Exp $
+# $Id: RosterTree.tcl,v 1.42 2007-04-26 14:15:44 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -27,9 +27,12 @@ package provide RosterTree 1.0
 namespace eval ::RosterTree {
 
     ::hooks::register logoutHook             ::RosterTree::LogoutHook
-    ::hooks::register menuJMainEditPostHook  ::RosterTree::EditMenuHook
+    ::hooks::register quitAppHook            ::RosterTree::QuitHook
+    ::hooks::register menuJMainEditPostHook  ::RosterTree::EditMenuPostHook
 
     # Actual:
+    option add *RosterTree.borderWidth      1               50
+    option add *RosterTree.relief           sunken          50
     #option add *Roster*TreeCtrl.indent          18              widgetDefault
 
     # Fake:
@@ -61,6 +64,10 @@ namespace eval ::RosterTree {
       [list ::RosterTree::plugin(selected)  rosterTree_selected  $plugin(selected)]]
 }
 
+# RosterTree::RegisterStyle --
+# 
+#       Basic registration function for styles.
+
 proc ::RosterTree::RegisterStyle {
     name 
     label 
@@ -84,10 +91,20 @@ proc ::RosterTree::RegisterStyle {
     set plugin($name,setItemAlt)  $setItemAltProc
 }
 
+# RosterTree::RegisterStyleSort --
+# 
+#       Optional registration of sort proc.
+
 proc ::RosterTree::RegisterStyleSort {name sortProc} {    
     variable plugin
     
     set plugin($name,sortProc) $sortProc
+}
+
+proc ::RosterTree::RegisterStyleFind {name findProc} {    
+    variable plugin
+    
+    set plugin($name,find) $findProc
 }
 
 proc ::RosterTree::SetStyle {name} {
@@ -299,11 +316,20 @@ proc ::RosterTree::LoadStyle {name} {
 # 
 #       Create the treectrl widget and do common initializations.
 
-proc ::RosterTree::New {_T wxsc wysc} {
+proc ::RosterTree::New {w} {
     variable T
+    variable wfind
     
-    set T $_T
-            
+    # D = -border 1 -relief sunken
+    frame $w -class RosterTree
+
+    set wxsc    $w.xsc
+    set wysc    $w.ysc
+    set wtree   $w.tree
+    set wfind   $w.find
+    
+    set T $wtree
+	    
     treectrl $T -usetheme 1 -selectmode extended  \
       -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 0  \
       -xscrollcommand [list ::UI::ScrollSet $wxsc     \
@@ -324,6 +350,20 @@ proc ::RosterTree::New {_T wxsc wysc} {
 	} 
     }
     bindtags $T [concat RosterTreeTag [bindtags $T]]
+    
+    ::RosterTree::StyleConfigure $wtree
+    ::RosterTree::StyleInit
+
+    ttk::scrollbar $wxsc -command [list $wtree xview] -orient horizontal
+    ttk::scrollbar $wysc -command [list $wtree yview] -orient vertical
+
+    grid  $wtree  -row 0 -column 0 -sticky news
+    grid  $wysc   -row 0 -column 1 -sticky ns
+    grid  $wxsc   -row 1 -column 0 -sticky ew
+    grid columnconfigure $w 0 -weight 1
+    grid rowconfigure    $w 0 -weight 1
+
+    return $T
 }
 
 proc ::RosterTree::SetBinds {} {
@@ -346,6 +386,24 @@ proc ::RosterTree::DBOptions {rosterStyle} {
     variable T
     
     ::treeutil::setdboptions $T [::Roster::GetRosterWindow] $rosterStyle
+}
+
+proc ::RosterTree::Find {} {
+    variable wfind
+    variable T    
+    
+    if {![winfo exists $wfind]} {
+	UI::TSearch $wfind $T cTree -padding {6 2}
+	grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky ew
+    }
+}
+
+proc ::RosterTree::FindAgain {dir} {
+    variable wfind
+
+    if {[winfo exists $wfind]} {
+	$wfind [expr {$dir == 1 ? "Next" : "Previous"}]
+    }
 }
 
 # RosterTree::Free --
@@ -1327,6 +1385,14 @@ proc ::RosterTree::LogoutHook {} {
     unset -nocomplain balloon 
 }
 
+proc ::RosterTree::QuitHook { } {
+    variable T        
+    
+    if {[info exists T] && [winfo exists $T]} {
+	GetClosed
+    }
+}
+
 # RosterTree::GetClosed --
 # 
 #       Keep track of all closed tree items. Default is all open.
@@ -1359,9 +1425,39 @@ proc ::RosterTree::GetParent {item} {
     return [$T item parent $item]
 }
 
+# RosterTree::SortAtIdle --
+# 
+#       Doing 'after idle' is not perfect since it is executed after the 
+#       items have been drawn.
+
+proc ::RosterTree::SortAtIdle {item {order -increasing}} {
+    variable sortID
+    
+    if {![info exists sortID($item)]} {
+	
+	# If we get a request to sort 'root' then cancel all other idle sorts.
+	if {($item eq "root") || ($item == 0)} {
+	    foreach id [array names sortID] {
+		after cancel $id
+	    }
+	}
+	set sortID($item) [after idle [namespace current]::SortIdle $item $order]
+    }
+}
+
+proc ::RosterTree::SortIdle {item order} {
+    variable T    
+    variable sortID
+    
+    unset -nocomplain sortID($item)
+    if {[$T item id $item] ne ""} {
+	Sort $item $order
+    }
+}
+
 proc ::RosterTree::Sort {item {order -increasing}} {
     variable plugin
-    
+
     set name $plugin(selected)
     if {[info exists plugin($name,sortProc)]} {
 	$plugin($name,sortProc) $item $order
@@ -1385,7 +1481,8 @@ proc ::RosterTree::SortDefault {item order} {
 	
 	# TreeCtrl 2.2.3 has a problem doing custom sorting (-command)
 	# for large rosters, see:
-	# 
+	#   [ 1706359 ] custom sorting can be extremly slow
+	#   at tktreectrl.sf.net
 	set n [$T item numchildren $item]
 	if {$n} {
 	    if {$n > 50} {
@@ -1447,23 +1544,20 @@ proc ::RosterTree::DeleteEmptyPendTrpt {} {
     }
 }
 
-# RosterTree::EditMenuHook --
+# JUI::EditMenuPostHook --
 # 
-#       Menu post command hook for doing roster searches.
+#       Menu post command hook for doing roster/disco searches.
 
-proc ::RosterTree::EditMenuHook {wmenu} {
+proc ::RosterTree::EditMenuPostHook {wmenu} {
+    variable T
+    variable wfind
     
-    if {[winfo exists [focus]]} {
-	set wclass [winfo class [focus]]
-	set w [winfo toplevel [focus]]
-
-	# ::RosterTree::EditMenuHook focus=.jmain.f.ro.box.tree, wclass=TreeCtrl
-
-	#::UI::MenuMethod $wmenu entryconfigure mFind -state normal
-	#if {[winfo exists $wfind]} {
-	 #   ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
-	#    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
-	#}
+    if {[winfo ismapped $T]} {
+	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
+	if {[winfo exists $wfind]} {
+	    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
+	}
     }
 }
 

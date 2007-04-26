@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2007  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.35 2007-04-24 13:43:36 matben Exp $
+# $Id: Theme.tcl,v 1.36 2007-04-26 14:15:45 matben Exp $
 
 package provide Theme 1.0
 
@@ -256,6 +256,13 @@ proc ::Theme::GetAllAvailable { } {
 	    switch -- $name {
 		CVS {
 		    # empty
+		}
+		KDE {
+		    
+		    # We can't get those fonts without 'xft'.
+		    if {![catch {tk::pkgconfig get fontsystem} fs] && $fs eq "xft"} {
+			lappend allThemes $name
+		    }
 		}
 		default {
 		    lappend allThemes $name
