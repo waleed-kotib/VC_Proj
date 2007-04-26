@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements jabber GUI parts.
 #      
-#  Copyright (c) 2001-2006  Mats Bengtsson
+#  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.163 2007-04-05 13:12:48 matben Exp $
+# $Id: JUI.tcl,v 1.164 2007-04-26 14:15:44 matben Exp $
 
 package provide JUI 1.0
 
@@ -408,6 +408,7 @@ proc ::JUI::Build {w} {
     set jwapp(tsep)      $wall.sep
     set jwapp(notebook)  $wnb
     set jwapp(roster)    $wroster
+    set jwapp(rostcont)  $wrostco
     set jwapp(mystatus)  $wfstat.bst
     set jwapp(myjid)     $wfstat.me
     set jwapp(statcont)  $wstatcont
@@ -419,7 +420,11 @@ proc ::JUI::Build {w} {
     ::UI::SetWindowGeometry $w
     wm minsize $w $minW 300
     wm maxsize $w 800 2000
-    
+
+    bind $w <<Find>>         [namespace code Find]
+    bind $w <<FindAgain>>    [namespace code [list FindAgain +1]]  
+    bind $w <<FindPrevious>> [namespace code [list FindAgain -1]]  
+
     ::hooks::run jabberBuildMain
     
     # Handle the prefs "Show" state.
@@ -1108,6 +1113,48 @@ proc ::JUI::InitPrefsHook { } {
 	lappend plist [list $name $rsrc $val]
     }
     ::PrefUtils::Add $plist
+}
+
+# JUI::Find, FindAgain --
+# 
+#       Handle searches in a generic way by just dispatching to relevant target.
+
+proc ::JUI::Find {} {
+    variable jwapp
+    
+    # Dispatch to Roster or Disco or any other page displayed.
+    # NB: tile 0.7.8+ has tagged notebook pages.
+    if {[winfo ismapped $jwapp(notebook)]} {
+
+	# We assume that the roster page has index 0.
+	set current [$jwapp(notebook) index current]
+	if {$current == 0} {
+	    ::Roster::Find
+	} else {
+	    # TODO (Disco etc.)
+	}
+    } else {
+	::Roster::Find	
+    }
+}
+
+proc ::JUI::FindAgain {dir} {
+    variable jwapp
+    
+    # Dispatch to Roster or Disco or any other page displayed.
+    # NB: tile 0.7.8+ has tagged notebook pages.
+    if {[winfo ismapped $jwapp(notebook)]} {
+
+	# We assume that the roster page has index 0.
+	set current [$jwapp(notebook) index current]
+	if {$current == 0} {
+	    ::Roster::FindAgain $dir
+	} else {
+	    # TODO (Disco etc.)
+	}
+    } else {
+	::Roster::FindAgain $dir
+    }
 }
 
 #-------------------------------------------------------------------------------

@@ -5,14 +5,16 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.191 2007-04-24 07:48:15 matben Exp $
+# $Id: Roster.tcl,v 1.192 2007-04-26 14:15:44 matben Exp $
 
-# @@@ TODO: rewrite the popup menu code to use AMenu!
+# @@@ TODO: 1) rewrite the popup menu code to use AMenu!
+#           2) abstract all RosterTree calls to allow for any kind of roster
 
 package require RosterTree
 package require RosterPlain
 package require RosterTwo
 package require RosterAvatar
+package require UI::TSearch
 
 package provide Roster 1.0
 
@@ -23,7 +25,6 @@ namespace eval ::Roster:: {
     ::hooks::register earlyInitHook          ::Roster::EarlyInitHook
     ::hooks::register loginHook              ::Roster::LoginCmd
     ::hooks::register logoutHook             ::Roster::LogoutHook
-    ::hooks::register quitAppHook            ::Roster::QuitHook
     ::hooks::register uiMainToggleMinimal    ::Roster::ToggleMinimalHook
     ::hooks::register jabberInitHook         ::Roster::JabberInitHook
     
@@ -39,10 +40,7 @@ namespace eval ::Roster:: {
     
     # Standard widgets and standard options.
     option add *Roster.borderWidth          0               50
-    option add *Roster.relief               flat            50
-    option add *Roster*box.borderWidth      1               50
-    option add *Roster*box.relief           sunken          50
-    
+    option add *Roster.relief               flat            50    
     option add *Roster.padding              4               50
     option add *Roster*WaveLabel.borderWidth  0             50
         
@@ -120,8 +118,8 @@ proc ::Roster::InitMenus {} {
 		check     mBackgroundImage {normal} {::Roster::BackgroundImage} {-variable ::Jabber::jprefs(rost,useBgImage)}
 	    } {}
 	    cascade     mSort          {}                 {
-		radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value +1}
-		radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -1}
+		radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -increasing}
+		radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -decreasing}
 	    } {}
 	    cascade     mStyle         {normal}           {@::Roster::StyleMenu} {}
 	    command     mRefreshRoster {}                 {::Roster::Refresh} {}
@@ -144,8 +142,8 @@ proc ::Roster::InitMenus {} {
 		check     mBackgroundImage {normal} {::Roster::BackgroundImage} {-variable ::Jabber::jprefs(rost,useBgImage)}
 	    } {}
 	    cascade     mSort          {}                 {
-		radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value +1}
-		radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -1}
+		radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -increasing}
+		radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -decreasing}
 	    } {}
 	    cascade     mStyle         {normal}           {@::Roster::StyleMenu} {}
 	    command     mRefreshRoster {}                 {::Roster::Refresh} {}
@@ -263,24 +261,10 @@ proc ::Roster::Build {w} {
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
     ::wavelabel::wavelabel $wwave -type image -image $waveImage
     pack $wwave -side bottom -fill x -padx 8 -pady 2
-    
-    # D = -border 1 -relief sunken
-    frame $wbox
-    pack  $wbox -side top -fill both -expand 1
         
     # @@@ We shall have a more generic interface here than just a tree.
-    ::RosterTree::New $wtree $wxsc $wysc
-    ::RosterTree::StyleConfigure $wtree
-    ::RosterTree::StyleInit
-
-    ttk::scrollbar $wxsc -command [list $wtree xview] -orient horizontal
-    ttk::scrollbar $wysc -command [list $wtree yview] -orient vertical
-
-    grid  $wtree  -row 0 -column 0 -sticky news
-    grid  $wysc   -row 0 -column 1 -sticky ns
-    grid  $wxsc   -row 1 -column 0 -sticky ew
-    grid columnconfigure $wbox 0 -weight 1
-    grid rowconfigure    $wbox 0 -weight 1
+    set wtree [::RosterTree::New $wbox]
+    pack  $wbox -side top -fill both -expand 1
     
     # Cache any expensive stuff.
     set icons(whiteboard12) [::Theme::GetImage [option get $w whiteboard12Image {}]]
@@ -290,6 +274,14 @@ proc ::Roster::Build {w} {
 	StyleMinimal
     }
     return $w
+}
+
+proc ::Roster::Find {} {
+    ::RosterTree::Find
+}
+
+proc ::Roster::FindAgain {dir} {
+    ::RosterTree::FindAgain $dir
 }
 
 proc ::Roster::ToggleMinimalHook {minimal} {
@@ -341,12 +333,6 @@ proc ::Roster::GetRosterWindow { } {
     variable wroster
     
     return $wroster
-}
-
-proc ::Roster::GetWtree { } {
-    variable wtree
-    
-    return $wtree
 }
 
 proc ::Roster::BackgroundImage { } {
@@ -426,14 +412,6 @@ proc ::Roster::LogoutHook { } {
     }
 }
 
-proc ::Roster::QuitHook { } {
-    variable wtree    
-    
-    if {[info exists wtree] && [winfo exists $wtree]} {
-	::RosterTree::GetClosed
-    }
-}
-
 proc ::Roster::Refresh { } {
     variable wwave
     upvar ::Jabber::jstate jstate
@@ -445,35 +423,21 @@ proc ::Roster::Refresh { } {
     $wwave animate 1
 }
 
-# Doing 'after idle' is not perfect since it is executed after the items have
-# been drawn.
+proc ::Roster::SortAtIdle {{item root}} {
+    upvar ::Jabber::jprefs jprefs
 
-proc ::Roster::SortIdle {item} {
-    variable sortID
-    variable wtree
-    
-    unset -nocomplain sortID
-    if {[$wtree item id $item] ne ""} {
-	Sort $item
-    }
+    ::RosterTree::SortAtIdle $item $jprefs(rost,sort)
 }
 
 proc ::Roster::Sort {{item root}} {
     upvar ::Jabber::jprefs jprefs
-	
-    if {$jprefs(rost,sort) == 1} {
-	set order -increasing
-    } else {
-	set order -decreasing
-    }
-    ::RosterTree::Sort $item $order
+
+    ::RosterTree::Sort $item $jprefs(rost,sort)
 }
 
 # Roster::SendRemove --
 #
 #       Method to remove another user from my roster.
-#
-#
 
 proc ::Roster::SendRemove {jidrm} {    
     upvar ::Jabber::jstate jstate
@@ -610,7 +574,7 @@ proc ::Roster::BuildMenu {m menuDef _jidlist clicked status group} {
     set jid $jid2
 
     # The jidlist is expected to be with no resource part.
-    set jidlist {}
+    set jidlist [list]
     foreach u $_jidlist {
 	jlib::splitjid $u jid2 -
 	lappend jidlist $jid2
@@ -872,23 +836,25 @@ proc ::Roster::PresenceEvent {jlibname xmldata} {
 }
 
 proc ::Roster::RepopulateTree { } {
-    variable wtree
     upvar ::Jabber::jstate jstate
     
     ::RosterTree::GetClosed
     ::RosterTree::StyleInit
+    set jlib $jstate(jlib)
     
-    foreach jid [$jstate(jlib) roster getusers] {
-	eval {SetItem $jid} [$jstate(jlib) roster getrosteritem $jid]
+    foreach jid [$jlib roster getusers] {
+	eval {SetItem $jid} [$jlib roster getrosteritem $jid]
     }
-    Sort
+    SortAtIdle
+    #Sort
 }
 
 proc ::Roster::ExitRoster { } {
     variable wwave
     variable timer
 
-    Sort
+    SortAtIdle
+    #Sort
     ::JUI::SetStatusMessage [mc jarostupdate]
     $wwave animate -1
     set timer(exitroster,secs) [clock seconds]
@@ -913,7 +879,6 @@ proc ::Roster::SetItem {jid args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     variable inroster
-    variable sortID
 
     ::Debug 2 "::Roster::SetItem jid=$jid, args='$args'"
     
@@ -964,10 +929,10 @@ proc ::Roster::SetItem {jid args} {
 	    ::RosterTree::StyleCreateItem $jid $presA(-type)
 	} $args [array get presA]]
 
-	if {!$inroster && ![info exists sortID] && [llength $items]} {
+	if {!$inroster && [llength $items]} {
 	    set pitem [::RosterTree::GetParent [lindex $items end]]
-	    set sortID [after idle [namespace current]::SortIdle $pitem]
-       }
+	    ::RosterTree::SortAtIdle $pitem $jprefs(rost,sort)
+	}
    }
 }
 
@@ -985,7 +950,6 @@ proc ::Roster::SetItem {jid args} {
 
 proc ::Roster::Presence {jid presence args} {
     variable timer
-    variable sortID
     variable icons
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
@@ -1043,9 +1007,9 @@ proc ::Roster::Presence {jid presence args} {
     }
     
     # This minimizes the cost of sorting.
-    if {[llength $items] && ![info exists sortID]} {
+    if {[llength $items]} {
 	set pitem [::RosterTree::GetParent [lindex $items end]]
-	set sortID [after idle [namespace current]::SortIdle $pitem]
+	::RosterTree::SortAtIdle $pitem $jprefs(rost,sort)
     }
     
     # We set timed messages for presences only if significantly after login.
@@ -1408,7 +1372,7 @@ proc ::Roster::InitPrefsHook { } {
     set jprefs(rost,dblClk)         chat
     set jprefs(rost,showOffline)    1
     set jprefs(rost,showTrpts)      1
-    set jprefs(rost,sort)          +1
+    set jprefs(rost,sort)           -increasing
     
     set jprefs(rost,useWBrosticon)  0
     

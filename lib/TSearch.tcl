@@ -1,13 +1,14 @@
 # TSearch.tcl
 #
 #       Megawidget for searching a TreeCtrl widget.
+#       Guard against dynamic changes in TreeCtrl. Must be 100% bullet proof!
 #       
 # Copyright (c) 2007 Mats Bengtsson
 #       
-# $Id: TSearch.tcl,v 1.1 2007-04-25 14:06:59 matben Exp $
+# $Id: TSearch.tcl,v 1.2 2007-04-26 14:15:44 matben Exp $
 
 package require snit 1.0
-package require tileutils 0.1
+package require tileutils
 
 package provide UI::TSearch 1.0
 
@@ -23,20 +24,22 @@ interp alias {} UI::TSearch    {} UI::TSearch::widget
 
 snit::widgetadaptor UI::TSearch::widget {
     
-    variable wtree
+    variable T
     variable wentry
     variable wnext
     variable column
-    variable string      {}
-    variable itemCurrent {}
-    variable itemsFound  {}
+    variable string      ""
+    variable icurrent     ""
+    variable ifound  [list]
+    variable buttonStates [list]
+     
     
     delegate method * to hull
     delegate option * to hull 
 
-    constructor {_wtree _column args} {
+    constructor {_T _column args} {
 	
-	set wtree $_wtree
+	set T $_T
 	set column $_column
 	set wentry $win.entry
 	set wnext $win.next
@@ -66,7 +69,10 @@ snit::widgetadaptor UI::TSearch::widget {
 	$wnext state {disabled}
 	focus $wentry
 	trace add variable [myvar string] write [list $self Trace]	
-	bind $wentry <Return> [list $self Find]
+
+	bind $wentry <Return>        [list $self Find]
+	bind $wentry <KeyPress-Up>   [list $self Previous]
+	bind $wentry <KeyPress-Down> [list $self Next]
 	
 	return
     }
@@ -76,79 +82,137 @@ snit::widgetadaptor UI::TSearch::widget {
     }
 
     method Trace {name1 name2 op} {
-	$self Event
-    }
-
-    method Event {} {
-	
-	# Reset search state.
-	$wtree selection clear
-	$wentry state {!invalid}
-	set itemsFound [list]
-	set itemCurrent {}
+	$self Reset
     }
     
+    method Clear {} {
+	set string ""
+	$self Reset
+    }
+    
+    # Reset search state.
+
+    method Reset {} {
+	$T selection clear
+	$wentry state {!invalid}
+	$wnext  state {disabled}
+	set ifound [list]
+	set icurrent ""
+	set buttonStates [list]
+    }
+    
+    # Selects an item.
+
     method Hit {item} {
-	set itemCurrent $item
-	$wtree selection clear
-	$wtree selection add $itemCurrent
-	$wtree see $itemCurrent
-	set ancestors [$wtree item ancestors $itemCurrent]
-	puts "ancestors=$ancestors"
+	if {[$T item id $item] ne ""} {
+	    $self GetButtonStates $item
+	    
+	    set icurrent $item
+	    $self SeeItem $item
+	    $T selection clear
+	    $T selection add $icurrent
+	}
+    }
+    
+    # Stores a list {item isopen ...} for all ancestors of 'item'.
+
+    method GetButtonStates {item} {
 	
+	# Get all ancestors, the last one is always the 'root'.
+	set ancestors [$T item ancestors $item]
+	set openL [list]
+	foreach item $ancestors {
+	    lappend openL $item [$T item isopen $item]
+	}
+	set buttonStates $openL
+    }
+    
+    # Uses the current 'buttonStates' list and recreates each ancestors
+    # button state.
+    
+    method SetButtonStates {} {
+	foreach {item isopen} $buttonStates {
+	    if {[$T item id $item] ne ""} {
+		$T item [expr {$isopen ? "expand" : "collapse"}] $item
+	    }
+	}
+    }
+    
+    method SeeItem {item} {
+	foreach aitem [$T item ancestors $item] {
+	    $T item expand $aitem
+	}
+	$T see $item	
     }
     
     method Find {} {
-	$wtree selection clear
+	$T selection clear
 	set itemL [list]
-	set itemsFound [list]
+	set ifound [list]
 	if {[string length $string]} {
 	    set lstring [string tolower $string]
-	    foreach item [$wtree item descendants root] {
-		set text [$wtree item text $item $column]
+	    foreach item [$T item descendants root] {
+		set text [$T item text $item $column]
 		if {[string match *${lstring}* [string tolower $text]]} {
 		    lappend itemL $item
 		}
 	    }
 	}
-	set itemsFound $itemL
+	set ifound $itemL
 	set len [llength $itemL]
 	if {$len > 1} {
 	    $wnext state {!disabled}
-	} elseif {!$len} {
+	} elseif {$len == 0} {
 	    $wentry state {invalid}
+	    $wnext  state {disabled}
 	}
 	if {$len} {
 	    $self Hit [lindex $itemL 0]
 	} else {
-	    set itemCurrent {}
+	    set icurrent ""
 	}
-	puts "itemL=$itemL"
+    }
+    
+    method GetNext {} {
+	set item [lsearch -inline $ifound $icurrent]
+	if {[string length $item]} {
+	    if {[$T item id $item] ne "")} {
+		return $item
+	    } else {
+		set idx [lsearch $ifound $icurrent]
+		set ifound [lreplace $ifound $idx $idx]
+		return ""
+	    }
+	} else {
+	    return ""
+	}
     }
 
     method Next {} {
-	$wtree selection clear
-	set ind [lsearch $itemsFound $itemCurrent]
+	$self SetButtonStates
+	$T selection clear
+	set ind [lsearch $ifound $icurrent]
 	if {$ind >= 0} {
-	    if {[expr {$ind+1}] == [llength $itemsFound]} {
+	    if {[expr {$ind+1}] == [llength $ifound]} {
 		set ind 0
 	    } else {
 		incr ind
 	    }
-	    $self Hit [lindex $itemsFound $ind]
+	    $self Hit [lindex $ifound $ind]
 	}
     }
 
     method Previous {} {
-	$wtree selection clear
-	set ind [lsearch $itemsFound $itemCurrent]
+	$self SetButtonStates
+	$T selection clear
+	set ind [lsearch $ifound $icurrent]
 	if {$ind >= 0} {
 	    if {$ind == 0} {
-		set ind [expr {[llength $itemsFound] - 1}]
+		set ind [expr {[llength $ifound] - 1}]
 	    } else {
 		incr ind -1
 	    }
-	    $self Hit [lindex $itemsFound $ind]
+	    $self Hit [lindex $ifound $ind]
 	}
     }
     
