@@ -5,7 +5,7 @@
 #       
 # Copyright (c) 2007 Mats Bengtsson
 #       
-# $Id: TSearch.tcl,v 1.2 2007-04-26 14:15:44 matben Exp $
+# $Id: TSearch.tcl,v 1.3 2007-04-27 06:59:27 matben Exp $
 
 package require snit 1.0
 package require tileutils
@@ -24,18 +24,26 @@ interp alias {} UI::TSearch    {} UI::TSearch::widget
 
 snit::widgetadaptor UI::TSearch::widget {
     
+    # Widget paths.
     variable T
     variable wentry
     variable wnext
+    # Search column.
     variable column
+    # Textvariable string in entry widget.
     variable string      ""
+    # Item that is the currently found one.
     variable icurrent     ""
+    # List of items from a find operation.
     variable ifound  [list]
+    # List of {item isopen ...} for all ancestors of the current item which is
+    # needed to restore its ancestors open states when picking next item.
     variable buttonStates [list]
      
-    
     delegate method * to hull
     delegate option * to hull 
+    
+    option -nextstyle   -default Small.Url
 
     constructor {_T _column args} {
 	
@@ -58,7 +66,8 @@ snit::widgetadaptor UI::TSearch::widget {
 	  -text "[mc Find]:"
 	ttk::entry $win.entry -style Small.Search.TEntry -font CociSmallFont \
 	  -textvariable [myvar string]
-	ttk::button $win.next -style Small.Url -command [list $self Next] \
+	ttk::button $win.next -style $options(-nextstyle) \
+	  -command [list $self Next] \
 	  -text [mc Next] -takefocus 0
 	
 	grid  $win.close  $win.find  $win.entry  $win.next
@@ -98,6 +107,7 @@ snit::widgetadaptor UI::TSearch::widget {
 	$wnext  state {disabled}
 	set ifound [list]
 	set icurrent ""
+	$self SetButtonStates
 	set buttonStates [list]
     }
     

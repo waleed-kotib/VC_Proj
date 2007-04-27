@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.16 2007-04-17 14:53:39 matben Exp $
+# $Id: RosterTwo.tcl,v 1.17 2007-04-27 06:59:27 matben Exp $
 
 package require RosterTree
 
@@ -22,6 +22,8 @@ namespace eval ::RosterTwo {
       ::RosterTwo::DeleteItem  \
       ::RosterTwo::SetItemAlternative
         
+    ::RosterTree::RegisterStyleFindColumn two cTree
+
     # Only if this style is in use!!!
     # These are needed to handle foreign IM systems.
     ::hooks::register  discoInfoHook        ::RosterTwo::DiscoInfoHook
