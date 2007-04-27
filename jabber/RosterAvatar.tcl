@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.28 2007-04-24 07:48:15 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.29 2007-04-27 06:59:27 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -62,6 +62,10 @@ namespace eval ::RosterAvatar {
       ::RosterAvatar::DeleteItem  \
       ::RosterAvatar::SetItemAlternative
 
+    ::RosterTree::RegisterStyleFindColumn avatar       cTree
+    ::RosterTree::RegisterStyleFindColumn avatarlarge  cTree
+    ::RosterTree::RegisterStyleFindColumn flat         cTree
+    ::RosterTree::RegisterStyleFindColumn flatsmall    cTree
 
     ::RosterTree::RegisterStyleSort avatar      ::RosterAvatar::Sort
     ::RosterTree::RegisterStyleSort avatarlarge ::RosterAvatar::Sort

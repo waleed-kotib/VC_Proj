@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.42 2007-04-26 14:15:44 matben Exp $
+# $Id: RosterTree.tcl,v 1.43 2007-04-27 06:59:27 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -101,11 +101,27 @@ proc ::RosterTree::RegisterStyleSort {name sortProc} {
     set plugin($name,sortProc) $sortProc
 }
 
-proc ::RosterTree::RegisterStyleFind {name findProc} {    
+# RosterTree::RegisterStyleFindColumn --
+# 
+#       The generic find megawidget needs to know which column to search.
+#       If a style doesn't register it it means no find possible.
+
+proc ::RosterTree::RegisterStyleFindColumn {name findColumn} {    
     variable plugin
     
-    set plugin($name,find) $findProc
+    set plugin($name,findColumn) $findColumn
 }
+
+proc ::RosterTree::GetStyleFindColumn {} {
+    variable plugin
+    
+    set name $plugin(selected)
+    if {[info exists plugin($name,findColumn)]} {
+	return $plugin($name,findColumn)
+    } else {
+	return 
+    }
+}    
 
 proc ::RosterTree::SetStyle {name} {
     variable plugin
@@ -310,6 +326,13 @@ proc ::RosterTree::LoadStyle {name} {
     if {$previous ne ""} {
 	StyleDelete $previous
     }
+    
+    # Guard against a situation where we have no search support.
+    if {[GetStyleFindColumn] eq ""} {
+	FindDestroy
+    } else {
+	FindReset
+    }
 }
 
 # RosterTree::New --
@@ -388,13 +411,21 @@ proc ::RosterTree::DBOptions {rosterStyle} {
     ::treeutil::setdboptions $T [::Roster::GetRosterWindow] $rosterStyle
 }
 
+# RosterTree::Find, FindAgain --
+# 
+#       This is a generic mechanism for searching a TreeCtrl roster.
+#       UI::TSearch shall work for any TreeCtrl widget.
+
 proc ::RosterTree::Find {} {
     variable wfind
     variable T    
     
     if {![winfo exists $wfind]} {
-	UI::TSearch $wfind $T cTree -padding {6 2}
-	grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky ew
+	set column [GetStyleFindColumn]
+	if {$column ne ""} {
+	    UI::TSearch $wfind $T $column -padding {6 2}
+	    grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky ew
+	}
     }
 }
 
@@ -403,6 +434,18 @@ proc ::RosterTree::FindAgain {dir} {
 
     if {[winfo exists $wfind]} {
 	$wfind [expr {$dir == 1 ? "Next" : "Previous"}]
+    }
+}
+
+proc ::RosterTree::FindDestroy {} {
+    variable wfind
+    destroy $wfind
+}
+
+proc ::RosterTree::FindReset {} {
+    variable wfind
+    if {[winfo exists $wfind]} {
+	$wfind Reset
     }
 }
 
@@ -903,13 +946,7 @@ if {$rosterTreeTagMethod eq "array"} {
 	}
 	return $items
     }
-    
-    proc ::RosterTree::GetTagOfItem {item} {
-	variable T
-	variable tag2items
-	return [$T item element cget $item cTag eText -text]
-    }
-    
+        
     proc ::RosterTree::GetTagOfItem {item} {
 	variable T    
 	return [$T item element cget $item cTag eText -text]
@@ -1552,7 +1589,7 @@ proc ::RosterTree::EditMenuPostHook {wmenu} {
     variable T
     variable wfind
     
-    if {[winfo ismapped $T]} {
+    if {[winfo ismapped $T] && [string length [GetStyleFindColumn]]} {
 	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
 	if {[winfo exists $wfind]} {
 	    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal

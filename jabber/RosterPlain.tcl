@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.32 2007-04-24 07:48:15 matben Exp $
+# $Id: RosterPlain.tcl,v 1.33 2007-04-27 06:59:27 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -34,6 +34,8 @@ namespace eval ::RosterPlain {
       ::RosterPlain::CreateItem  \
       ::RosterPlain::DeleteItem  \
       ::RosterPlain::SetItemAlternative
+    
+    ::RosterTree::RegisterStyleFindColumn plain cTree
     
     # Only if this style is in use!!!
     # These are needed to handle foreign IM systems.
