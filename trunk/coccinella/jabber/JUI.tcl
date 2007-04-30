@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.164 2007-04-26 14:15:44 matben Exp $
+# $Id: JUI.tcl,v 1.165 2007-04-30 14:21:05 matben Exp $
 
 package provide JUI 1.0
 
@@ -78,7 +78,7 @@ namespace eval ::JUI:: {
     }
     
     # Configurations:
-    set ::config(url,home) "http://hem.fyristorg.com/matben/"
+    set ::config(url,home) "http://thecoccinella.org"
     set ::config(url,bugs)  \
       "http://sourceforge.net/tracker/?group_id=68334&atid=520863"
         

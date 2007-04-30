@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.151 2007-04-13 13:52:48 matben Exp $
+# $Id: UI.tcl,v 1.152 2007-04-30 14:21:05 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -76,6 +76,12 @@ namespace eval ::UI:: {
 	R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
 	AAADIEi1XAowghVNpNACQY33XAEFRiCEp2Cki0AQQ6wozUIkADs=
     }]
+    
+    # Have a blank 1x1 image just for spacer.
+    set icons(blank-1x1) [image create photo -data {
+	iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABmJLR0QA/wD/
+	AP+gvaeTAAAADUlEQVQI12NgYGBgAAAABQABXvMqOgAAAABJRU5ErkJggg==
+    }]    
     
     switch -- [tk windowingsystem] {
 	aqua {
@@ -845,7 +851,7 @@ proc ::UI::ScrollSet {wscrollbar geocmd offset size} {
 	$manager forget $wscrollbar
 	
 	# This helps as a workaround for one of horiz/vert blank areas.
-	update idletasks
+	#update idletasks
     }
 }
 

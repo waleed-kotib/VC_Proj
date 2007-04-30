@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.30 2006-05-16 06:06:28 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.31 2007-04-30 14:21:05 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -265,7 +265,7 @@ Server: tinyhttpd/1.0"
     <div id='clearfooter'></div>
     <div id='footerouter'>
     <div id="footer">
-        <a href="http://hem.fyristorg.com/matben/">@powered</a>
+        <a href="http://thecoccinella.org/">@powered</a>
     </div>
     </div>
     </body>

@@ -187,7 +187,7 @@ Distribution:
 Home:
 
     The present home of the Coccinella is at
-    "http://hem.fyristorg.com/matben", where links to the extensions also 
+    "http://thecoccinella.org", where links to the extensions also 
     can be found.
     Look at "http://coccinella.sourceforge.net" which is the official
     developer home.
