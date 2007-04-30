@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.192 2007-04-26 14:15:44 matben Exp $
+# $Id: Roster.tcl,v 1.193 2007-04-30 14:21:05 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -252,11 +252,12 @@ proc ::Roster::Build {w} {
     # Tree frame with scrollbars.
     set wroster $w
     set wbox    $w.box
-    set wxsc    $wbox.xsc
-    set wysc    $wbox.ysc
-    set wtree   $wbox.tree
     set wwave   $w.wa
     set rstyle  "normal"
+    
+    # DIdn't help the grid bug.
+    #ttk::label $w.pad -compound image -image [::UI::GetIcon blank-1x1]
+    #pack $w.pad -side bottom -fill x    
     
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
     ::wavelabel::wavelabel $wwave -type image -image $waveImage
@@ -264,7 +265,7 @@ proc ::Roster::Build {w} {
         
     # @@@ We shall have a more generic interface here than just a tree.
     set wtree [::RosterTree::New $wbox]
-    pack  $wbox -side top -fill both -expand 1
+    pack $wbox -side top -fill both -expand 1
     
     # Cache any expensive stuff.
     set icons(whiteboard12) [::Theme::GetImage [option get $w whiteboard12Image {}]]
@@ -930,7 +931,9 @@ proc ::Roster::SetItem {jid args} {
 	} $args [array get presA]]
 
 	if {!$inroster && [llength $items]} {
-	    set pitem [::RosterTree::GetParent [lindex $items end]]
+
+	    # If more than one item pick the parent of the first (group).
+	    set pitem [::RosterTree::GetParent [lindex $items 0]]
 	    ::RosterTree::SortAtIdle $pitem $jprefs(rost,sort)
 	}
    }
@@ -1008,7 +1011,9 @@ proc ::Roster::Presence {jid presence args} {
     
     # This minimizes the cost of sorting.
     if {[llength $items]} {
-	set pitem [::RosterTree::GetParent [lindex $items end]]
+
+	# If more than one item pick the parent of the first (group).
+	set pitem [::RosterTree::GetParent [lindex $items 0]]
 	::RosterTree::SortAtIdle $pitem $jprefs(rost,sort)
     }
     

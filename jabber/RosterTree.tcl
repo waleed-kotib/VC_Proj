@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.43 2007-04-27 06:59:27 matben Exp $
+# $Id: RosterTree.tcl,v 1.44 2007-04-30 14:21:05 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -195,9 +195,9 @@ proc ::RosterTree::StyleCreateItem {jid presence args} {
     variable plugin
     
     set name $plugin(selected)
-    set ans [eval {$plugin($name,createItem) $jid $presence} $args]
+    set items [eval {$plugin($name,createItem) $jid $presence} $args]
     StyleConfigureAltImages $jid
-    return $ans
+    return $items
 }
 
 proc ::RosterTree::StyleDeleteItem {jid} {
@@ -1109,7 +1109,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
 	if {[llength $itemTagList] == 4} {
 	    lappend dirtags [lindex $itemTagList 1]
 	}
-    } elseif {[info exists argsA(-groups)] && ($argsA(-groups) ne "")} {
+    } elseif {[info exists argsA(-groups)] && [llength $argsA(-groups)]} {
 	
 	# Group(s):
 	foreach group $argsA(-groups) {
