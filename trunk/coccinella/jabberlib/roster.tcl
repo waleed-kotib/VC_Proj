@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.52 2007-01-25 14:33:15 matben Exp $
+# $Id: roster.tcl,v 1.53 2007-05-01 06:30:46 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -249,7 +249,7 @@ proc jlib::roster::send_get_cb {jlibname cmd type queryE} {
 proc jlib::roster::set_handler {jlibname from queryE args} {
     
     handle_roster $jlibname $queryE    
-    return 0
+    return 1
 }
 
 proc jlib::roster::handle_roster {jlibname queryE} {

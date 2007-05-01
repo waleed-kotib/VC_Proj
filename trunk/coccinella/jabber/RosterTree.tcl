@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.44 2007-04-30 14:21:05 matben Exp $
+# $Id: RosterTree.tcl,v 1.45 2007-05-01 06:30:45 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1514,7 +1514,7 @@ proc ::RosterTree::SortDefault {item order} {
     }
     
     # Do not sort the first children of root!
-    if {$item ne "root"} {
+    if {($item ne "root") && ($item != 0)} {
 	
 	# TreeCtrl 2.2.3 has a problem doing custom sorting (-command)
 	# for large rosters, see:
