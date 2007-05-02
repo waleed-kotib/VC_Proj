@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.45 2007-05-01 06:30:45 matben Exp $
+# $Id: RosterTree.tcl,v 1.46 2007-05-02 14:00:33 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -20,7 +20,8 @@
 #     {jid $jid}                      <- not unique if belongs to many groups!
 #     {group $group $presence}        <- note
 #     {transport $jid}
-#     {pending $jid}
+#     
+#   TODO: change {transport $jid} -> {jid $jid} for consistency
 
 package provide RosterTree 1.0
 
@@ -748,7 +749,7 @@ proc ::RosterTree::Popup {x y} {
 	set mtag [lindex $tags 0]
 
 	switch -- $mtag {
-	    pending - transport {
+	    transport {
 		set status $mtag
 	    }
 	    jid {
@@ -790,13 +791,6 @@ proc ::RosterTree::Popup {x y} {
 		set jidlist [FindAllJIDInItem $item]
 	    }
 	}
-	pending {
-	    # @@@ empty ???
-	    set status unavailable
-	    lappend clicked user
-	    set jid3 [lindex $tags 1]
-	    set jidlist [list $jid3]
-	}
 	transport {
 	    lappend clicked trpt
 	    set jid3 [lindex $tags 1]
@@ -814,7 +808,6 @@ proc ::RosterTree::Popup {x y} {
 }
 
 proc ::RosterTree::FindAllJIDInItem {item} {
-
     return [FindAllWithTagInItem $item jid]
 }
 
@@ -824,7 +817,7 @@ proc ::RosterTree::FindAllJIDInItem {item} {
 #
 # Arguments:
 #       item        tree item
-#       type        jid, transport, pending
+#       type        jid, transport
 #       
 # Results:
 #       list of jids
@@ -1088,7 +1081,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
 	return
     }
     array set argsA $args
-    set itemTagList [list]
+    set itemTagL [list]
 
     set mjid [jlib::jidmap $jid]
     
@@ -1098,17 +1091,23 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     if {$istrpt} {
 	
 	# Transports:
-	set itemTagList [CreateItemWithParent $mjid transport]
-	if {[llength $itemTagList] == 4} {
-	    lappend dirtags [lindex $itemTagList 1]
+	set itemTagL [CreateItemWithParent $mjid transport]
+	if {[llength $itemTagL] == 4} {
+	    lappend dirtags [lindex $itemTagL 1]
 	}
     } elseif {[info exists argsA(-ask)] && ($argsA(-ask) eq "subscribe")} {
 	
 	# Pending:
-	set itemTagList [CreateItemWithParent $mjid pending]
-	if {[llength $itemTagList] == 4} {
-	    lappend dirtags [lindex $itemTagList 1]
+	set ptag [list head pending]
+	set pitem [FindWithTag $ptag]
+	if {$pitem eq ""} {
+	    set pitem [CreateWithTag $ptag root]
+	    $T item configure $pitem -button 1
+	    lappend itemTagL $pitem $ptag
 	}
+	set tag [list jid $mjid]
+	set item [CreateWithTag $tag $pitem]
+	lappend itemTagL $item $tag
     } elseif {[info exists argsA(-groups)] && [llength $argsA(-groups)]} {
 	
 	# Group(s):
@@ -1123,12 +1122,12 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
 		set pitem [CreateWithTag $ptag $ppitem]
 		$T item configure $pitem -button 1
 		lappend dirtags $ptag
-		lappend itemTagList $pitem $ptag
+		lappend itemTagL $pitem $ptag
 	    }
 	    set tag [list jid $mjid]
 	    set item [CreateWithTag $tag $pitem]
 	}
-	lappend itemTagList $item $tag 
+	lappend itemTagL $item $tag 
     } else {
 	
 	# No groups associated with this item.
@@ -1136,7 +1135,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
 	set ptag [list head $presence]
 	set pitem [FindWithTag $ptag]
 	set item [CreateWithTag $tag $pitem]
-	lappend itemTagList $item $tag 
+	lappend itemTagL $item $tag 
     }
     
     # If we created a directory and that is on the closed item list.
@@ -1149,7 +1148,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     }
         
     # @@@ wrong if several groups.
-    return $itemTagList
+    return $itemTagL
 }
 
 # RosterTree::CreateItemWithParent --
@@ -1161,19 +1160,19 @@ proc ::RosterTree::CreateItemWithParent {jid type} {
 
     ::Debug 6 "::RosterTree::CreateItemWithParent jid=$jid, type=$type"
     
-    set itemTagList {}
+    set itemTagL [list]
     set ptag [list head $type]
     set pitem [FindWithTag $ptag]
     if {$pitem eq ""} {
 	set pitem [CreateWithTag $ptag root]
 	$T item configure $pitem -button 1
-	lappend itemTagList $pitem $ptag
+	lappend itemTagL $pitem $ptag
     }
     set tag [list $type $jid]
     set item [CreateWithTag $tag $pitem]
-    lappend itemTagList $item $tag
+    lappend itemTagL $item $tag
     
-    return $itemTagList
+    return $itemTagL
 }
 
 # RosterTree::DeleteItemBase --
@@ -1190,15 +1189,14 @@ proc ::RosterTree::DeleteItemBase {jid} {
     
     set mjid3 [jlib::jidmap $jid]
     jlib::splitjid $mjid3 mjid2 res
-    
+        
     set tag [list jid $mjid2]
     DeleteWithTag $tag
     if {$res ne ""} {
 	DeleteWithTag [list jid $mjid3]
     }
     
-    # Pending and transports.
-    DeleteWithTag [list pending $mjid3]
+    # Transports.
     DeleteWithTag [list transport $mjid3]
 }
 

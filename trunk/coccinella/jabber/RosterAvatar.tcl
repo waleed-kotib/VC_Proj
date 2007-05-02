@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.29 2007-04-27 06:59:27 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.30 2007-05-02 14:00:32 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -795,7 +795,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     # Defaults:
     set jtext  [eval {MakeDisplayText $jid $presence} $args]
     set jimage [eval {GetPresenceIcon $jid $presence} $args]
-    set items  {}
+    set items  [list]
         
     set status $presence
     if {[info exists argsArr(-show)]} {
@@ -803,12 +803,15 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     }
     if {$istrpt} {
 	set type transport
+	set tagType transport
     } elseif {[info exists argsArr(-ask)] && ($argsArr(-ask) eq "subscribe")} {
 	set type pending
+	set tagType jid
     } else {
 	set type jid
+	set tagType jid
     }
-    set tag  [list $type $mjid]
+    set tag  [list $tagType $mjid]
     set style $styleMap($presence)
     set elem $tElemMap($presence)
     set jidStatus($mjid) $status
@@ -842,7 +845,6 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
 	    set pitem [FindWithTag $ptag]
 	    if {$pitem eq ""} {
 		set pitem [CreateWithTag $ptag styFolder eFolderText $group "" root]
-		#$T item element configure $pitem cTree eImage -image $image 
 		SetMouseOverBinds $pitem
 	    }
 	    $T item lastchild $pitem $item

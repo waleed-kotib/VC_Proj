@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.17 2007-04-27 06:59:27 matben Exp $
+# $Id: RosterTwo.tcl,v 1.18 2007-05-02 14:00:33 matben Exp $
 
 package require RosterTree
 
@@ -222,9 +222,6 @@ proc ::RosterTwo::CreateItem {jid presence args} {
 		set style styStd
 		set text  [::RosterTree::MCHead $tag1]
 		set image [::Rosticons::Get application/$tag1]
-	    }
-	    pending {
-		set style styStd
 	    }
 	    transport {
 		set style styStd
