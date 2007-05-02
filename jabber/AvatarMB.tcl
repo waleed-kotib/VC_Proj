@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.14 2007-03-20 08:21:57 matben Exp $
+# $Id: AvatarMB.tcl,v 1.15 2007-05-02 14:00:32 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -573,6 +573,7 @@ proc ::AvatarMB::MenuNew {} {
 }
 
 proc ::AvatarMB::SetFileToShare {fileName} {
+    
     #puts "::AvatarMB::SetFileToShare"
     
     # Share only if not identical to existing one.

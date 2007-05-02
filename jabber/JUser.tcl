@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.27 2007-04-14 12:32:16 matben Exp $
+# $Id: JUser.tcl,v 1.28 2007-05-02 14:00:32 matben Exp $
 
 package provide JUser 1.0
 
@@ -190,6 +190,9 @@ proc ::JUser::DoAdd {token} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
+    
+    # We MUST use the bare JID else hell breaks lose.
+    set state(jid) [jlib::barejid $state(jid)]
     
     set jid   $state(jid)
     set name  $state(name)

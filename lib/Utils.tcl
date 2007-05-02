@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.63 2007-03-15 13:17:12 matben Exp $
+# $Id: Utils.tcl,v 1.64 2007-05-02 14:00:33 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -610,6 +610,16 @@ proc ::Text::RegisterURI {re cmd} {
 # Text::ParseMsg --
 # 
 #       Parses message text (body).
+#       
+# Arguments:
+#       type        chat|groupchat|normal
+#       jid         JID to send to
+#       w           text widget
+#       str         the text
+#       tagList     current text tag list
+#       
+# Results:
+#       none
 
 proc ::Text::ParseMsg {type jid w str tagList} {
     
@@ -619,6 +629,11 @@ proc ::Text::ParseMsg {type jid w str tagList} {
     if {$len == 0} {
 	return
     }
+    
+    if {[hooks::run textPreParseHook $type $jid $w $str $tagList] ne "stop"} {	    
+	return
+    }
+    
     set start 0
     while {[regexp -start $start -indices -- $wsp $str match]} {
 	lassign $match matchStart matchEnd

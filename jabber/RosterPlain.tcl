@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.33 2007-04-27 06:59:27 matben Exp $
+# $Id: RosterPlain.tcl,v 1.34 2007-05-02 14:00:33 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -390,9 +390,6 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 		set text  [::RosterTree::MCHead $tag1]
 		set image [::Rosticons::Get application/$tag1]
 	    }
-	    pending {
-		set style styUnavailable
-	    }
 	    transport {
 		set style styTransport
 	    }
@@ -427,7 +424,7 @@ proc ::RosterPlain::ConfigureChildNumbers {} {
     foreach type {
 	available unavailable transport pending
     } itype {
-	jid jid transport pending
+	jid jid transport jid
     } {
 	set tag [list head $type]
 	set item [FindWithTag $tag]
