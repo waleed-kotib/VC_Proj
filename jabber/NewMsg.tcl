@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.83 2007-04-13 13:52:48 matben Exp $
+# $Id: NewMsg.tcl,v 1.84 2007-05-04 11:59:00 matben Exp $
 
 package require ui::entryex
 
@@ -830,6 +830,7 @@ proc ::NewMsg::DoSend {w} {
     set opts [list]
     set xmllist [list]
     set str ""
+    set stop 0
     if {[llength $oopts(-replyxmldata)]} {
 	set threadE [wrapper::getfirstchildwithtag $oopts(-replyxmldata) thread]
 	if {[llength $threadE]} {
@@ -844,12 +845,19 @@ proc ::NewMsg::DoSend {w} {
 	if {[string length $str]} {
 	    lappend opts -body $str
 	}
+	
+	# Have hook for complete text.
+	if {[hooks::run sendTextNormalHook $addrList $str] eq "stop"} {	    
+	    set stop 1
+	}
     }
     if {[string length $locals($w,subject)] > 0} {
 	lappend opts -subject $locals($w,subject)
     }
-    foreach jid $addrList {
-	eval {::Jabber::JlibCmd send_message $jid} $opts
+    if {!$stop} {
+	foreach jid $addrList {
+	    eval {::Jabber::JlibCmd send_message $jid} $opts
+	}
     }
     set locals($w,finished) 1
     ::UI::SaveWinGeom $wDlgs(jsendmsg) $w

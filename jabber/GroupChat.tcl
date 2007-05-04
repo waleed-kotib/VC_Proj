@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.192 2007-04-17 14:53:38 matben Exp $
+# $Id: GroupChat.tcl,v 1.193 2007-05-04 11:59:00 matben Exp $
 
 package require Create
 package require Enter
@@ -945,8 +945,21 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     bind $wtextsend <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $chattoken]
     bind $wroom <Destroy> +[list ::GroupChat::OnDestroyChat $chattoken]
+    
+    ::hooks::run buildGroupChatWidget $roomjid
 
     return $chattoken
+}
+
+proc ::GroupChat::GetWidget {roomjid value} {
+    
+    set chattoken [GetTokenFrom chat roomjid [jlib::ESC $roomjid]]
+    if {$chattoken ne ""} {
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+	
+	return $chatstate($value)
+    }
 }
 
 proc ::GroupChat::OnFocusInSubject {chattoken} {
@@ -1838,7 +1851,7 @@ proc ::GroupChat::TreeFindWithTag {T tag} {
 
 proc ::GroupChat::TreeSetIgnoreState {T jid3 {prefix ""}} {
     set tag [list jid $jid3]
-    set item [$T item id [list tag [list [treeutil::protect $tag]]]]
+    set item [$T item id [list tag [treeutil::protect $tag]]]
     if {[llength $item]} {
 	$T item state set $item ${prefix}ignore
     }
@@ -1851,7 +1864,7 @@ proc ::GroupChat::TreeEditUserStart {chattoken jid3} {
     set T $chatstate(wusers)
     set tag [list jid $jid3]
     
-    set item [$T item id [list tag [list [treeutil::protect $tag]]]]
+    set item [$T item id [list tag [treeutil::protect $tag]]]
     if {[llength $item]} {
 	set image [::Roster::GetPresenceIconFromJid $jid3]
 	set wentry $T.entry
@@ -1893,7 +1906,7 @@ proc ::GroupChat::TreeEditUserEnd {chattoken jid3} {
     set T $chatstate(wusers)
     set tag [list jid $jid3]
     
-    set item [$T item id [list tag [list [treeutil::protect $tag]]]]
+    set item [$T item id [list tag [treeutil::protect $tag]]]
     if {[llength $item]} {
 	set image [::Roster::GetPresenceIconFromJid $jid3]
 	set text [jlib::resourcejid $jid3]
@@ -1916,7 +1929,7 @@ proc ::GroupChat::TreeRemoveUser {chattoken jid3} {
 }
 
 proc ::GroupChat::TreeDeleteItem {T tag} {
-    set item [$T item id [list tag [list [treeutil::protect $tag]]]]
+    set item [$T item id [list tag [treeutil::protect $tag]]]
     if {[llength $item]} {
 	$T item delete $item
     }
@@ -2390,15 +2403,20 @@ proc ::GroupChat::SendChat {chattoken} {
 
     # Get text to send. Strip off any ending newlines from Return.
     # There might by smiley icons in the text widget. Parse them to text.
-    set allText [::Text::TransformToPureText $wtextsend]
-    set allText [string trimright $allText]
-    if {$allText ne ""} {	
-	::Jabber::JlibCmd send_message $roomjid -type groupchat -body $allText
-    }
+    set text [::Text::TransformToPureText $wtextsend]
+    set text [string trimright $text]
     
     # Clear send.
     $wtextsend delete 1.0 end
-    set chatstate(hot1stmsg) 1
+    
+    # Have hook for complete text.
+    if {[::hooks::run sendTextGroupChatHook $roomjid $text] eq "stop"} {	    
+	return
+    }
+
+    if {[string length $text]} {	
+	::Jabber::JlibCmd send_message $roomjid -type groupchat -body $text
+    }
 }
 
 proc ::GroupChat::ActiveCmd {chattoken} {

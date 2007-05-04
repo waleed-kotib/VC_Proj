@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-# $Id: Utils.tcl,v 1.64 2007-05-02 14:00:33 matben Exp $
+# $Id: Utils.tcl,v 1.65 2007-05-04 11:59:00 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -630,7 +630,8 @@ proc ::Text::ParseMsg {type jid w str tagList} {
 	return
     }
     
-    if {[hooks::run textPreParseHook $type $jid $w $str $tagList] ne "stop"} {	    
+    # Have hook for complete text.
+    if {[hooks::run textPreParseHook $type $jid $w $str $tagList] eq "stop"} {	    
 	return
     }
     
