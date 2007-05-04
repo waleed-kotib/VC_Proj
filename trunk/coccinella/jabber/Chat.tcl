@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.195 2007-04-05 13:12:48 matben Exp $
+# $Id: Chat.tcl,v 1.196 2007-05-04 11:59:00 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2519,12 +2519,18 @@ proc ::Chat::Send {dlgtoken} {
 
     # Get text to send. Strip off any ending newlines.
     # There might by smiley icons in the text widget. Parse them to text.
-    set allText [::Text::TransformToPureText $wtextsnd]
-    set allText [string trimright $allText]
-    if {$allText eq ""} {
+    set text [::Text::TransformToPureText $wtextsnd]
+    set text [string trimright $text]
+    $wtextsnd delete 1.0 end
+    if {$text eq ""} {
 	return
     }
    
+    # Have hook for complete text.
+    if {[hooks::run sendTextChatHook $jid $text] eq "stop"} {	    
+	return
+    }
+
     # This is important since clicks may have reset the insert mark.
     $chatstate(wtext) mark set insert end
 
@@ -2574,20 +2580,19 @@ proc ::Chat::Send {dlgtoken} {
     # Need to reconstruct our xmldata. Add -from for our history record.
     set myjid [::Jabber::JlibCmd myjid]
     set xmldata [eval {jlib::send_message_xmllist $jid  \
-       -thread $threadID -type chat -body $allText -from $myjid} $opts]
+       -thread $threadID -type chat -body $text -from $myjid} $opts]
     ::History::XPutItem send $jid2 $xmldata
 
     eval {::Jabber::JlibCmd send_message $jid  \
-      -thread $threadID -type chat -body $allText} $opts
+      -thread $threadID -type chat -body $text} $opts
 
     set dlgstate(lastsentsecs) [clock seconds]
     
-    # Add to chat window and clear send.        
-    InsertMessage $chattoken me $allText
-    $wtextsnd delete 1.0 end
+    # Add to chat window.        
+    InsertMessage $chattoken me $text
 
     set opts [list -from $jid2]
-    eval {::hooks::run displayChatMessageHook $allText} $opts
+    eval {::hooks::run displayChatMessageHook $text} $opts
 }
 
 proc ::Chat::TraceJid {dlgtoken name junk1 junk2} {
