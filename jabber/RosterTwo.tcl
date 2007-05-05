@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.18 2007-05-02 14:00:33 matben Exp $
+# $Id: RosterTwo.tcl,v 1.19 2007-05-05 10:42:04 matben Exp $
 
 package require RosterTree
 
@@ -183,8 +183,8 @@ proc ::RosterTwo::CreateItem {jid presence args} {
     set status [$jlib roster getstatus $jid]
     set since  [$jlib roster availablesince $jid]
     set jimage [eval {GetPresenceIcon $jid $presence} $args]
-    set items  {}
-    set jitems {}
+    set items  [list]
+    set jitems [list]
     
     # Creates a list {item tag ?item tag? ...} for items.
     set itemTagList [eval {::RosterTree::CreateItemBase $jid $presence} $args]
@@ -222,9 +222,6 @@ proc ::RosterTwo::CreateItem {jid presence args} {
 		set style styStd
 		set text  [::RosterTree::MCHead $tag1]
 		set image [::Rosticons::Get application/$tag1]
-	    }
-	    transport {
-		set style styStd
 	    }
 	}
 	ConfigureItem $item $style $text $text2 $image

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterPlain.tcl,v 1.34 2007-05-02 14:00:33 matben Exp $
+# $Id: RosterPlain.tcl,v 1.35 2007-05-05 10:42:04 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -17,6 +17,8 @@
 #   for handling groups, pending, and transport folders.
 #   It is also responsible for setting icons for foreign im systems, identifying
 #   coccinellas etc.
+#   
+#   NB: 1) styTransport not used anymore, good/bad?
 
 package require RosterTree
 
@@ -337,6 +339,7 @@ proc ::RosterPlain::Delete {} {
 #
 #       Uses 'CreateItemBase' to get a list of items with tags and then 
 #       configures each of them according to our style.
+#       Rephrased: 'CreateItemBase' makes the content and 'CreateItem' styles it.
 #
 # Arguments:
 #       jid         for available JID always use the JID as reported in the
@@ -390,9 +393,6 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 		set text  [::RosterTree::MCHead $tag1]
 		set image [::Rosticons::Get application/$tag1]
 	    }
-	    transport {
-		set style styTransport
-	    }
 	}
 	ConfigureItem $item $style $text $image
     }
@@ -421,15 +421,11 @@ proc ::RosterPlain::ConfigureChildNumbers {} {
 
     unset -nocomplain pendingChildNumbers
 
-    foreach type {
-	available unavailable transport pending
-    } itype {
-	jid jid transport jid
-    } {
+    foreach type {available unavailable transport pending} {
 	set tag [list head $type]
 	set item [FindWithTag $tag]
 	if {$item ne ""} {
-	    set all [::RosterTree::FindAllWithTagInItem $item $itype]
+	    set all [::RosterTree::FindAllJIDInItem $item]
 	    set n [llength $all]
 	    $T item element configure $item cTree eNumText -text "($n)"
 	}

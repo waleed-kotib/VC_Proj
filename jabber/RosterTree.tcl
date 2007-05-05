@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.46 2007-05-02 14:00:33 matben Exp $
+# $Id: RosterTree.tcl,v 1.47 2007-05-05 10:42:04 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -19,9 +19,6 @@
 #     {head available/unavailable/transport/pending}
 #     {jid $jid}                      <- not unique if belongs to many groups!
 #     {group $group $presence}        <- note
-#     {transport $jid}
-#     
-#   TODO: change {transport $jid} -> {jid $jid} for consistency
 
 package provide RosterTree 1.0
 
@@ -736,11 +733,11 @@ proc ::RosterTree::Popup {x y} {
 
     ::balloonhelp::cancel
     
-    set tags    {}
-    set clicked {}
-    set status  {}
-    set jidlist {}
-    set group   {}
+    set tags    [list]
+    set clicked [list]
+    set status  [list]
+    set jidL    [list]
+    set group   [list]
 
     set id [$T identify $x $y]
     if {[lindex $id 0] eq "item"} {
@@ -749,7 +746,7 @@ proc ::RosterTree::Popup {x y} {
 	set mtag [lindex $tags 0]
 
 	switch -- $mtag {
-	    transport {
+	    XXX-transport {
 		set status $mtag
 	    }
 	    jid {
@@ -773,9 +770,14 @@ proc ::RosterTree::Popup {x y} {
     
     switch -- $mtag {
 	jid {
-	    lappend clicked user
 	    set jid3 [lindex $tags 1]
-	    set jidlist [list $jid3]
+	    set jidL [list $jid3]
+	    set istrpt [::Roster::IsTransportHeuristics $jid3]
+	    if {$istrpt} {
+		lappend clicked trpt
+	    } else {
+		lappend clicked user
+	    }
 	    if {[::Roster::IsCoccinella $jid3]} {
 		lappend clicked wb
 	    }
@@ -783,18 +785,18 @@ proc ::RosterTree::Popup {x y} {
 	group {
 	    lappend clicked group
 	    set group [lindex $tags 1]
-	    set jidlist [FindAllJIDInItem $item]
+	    set jidL [FindAllJIDInItem $item]
 	}
 	head {
 	    if {[regexp {(available|unavailable)} [lindex $tags 1]]} {
 		lappend clicked head
-		set jidlist [FindAllJIDInItem $item]
+		set jidL [FindAllJIDInItem $item]
 	    }
 	}
-	transport {
+	XXX-transport {
 	    lappend clicked trpt
 	    set jid3 [lindex $tags 1]
-	    set jidlist [list $jid3]
+	    set jidL [list $jid3]
 	    # Transports in own directory.
 	    if {[$jstate(jlib) roster isavailable $jid3]} {
 		set status available
@@ -804,7 +806,7 @@ proc ::RosterTree::Popup {x y} {
 	}
     }
     
-    ::Roster::DoPopup $jidlist $clicked $status $group $x $y
+    ::Roster::DoPopup $jidL $clicked $status $group $x $y
 }
 
 proc ::RosterTree::FindAllJIDInItem {item} {
@@ -817,7 +819,7 @@ proc ::RosterTree::FindAllJIDInItem {item} {
 #
 # Arguments:
 #       item        tree item
-#       type        jid, transport
+#       type        jid
 #       
 # Results:
 #       list of jids
@@ -1091,23 +1093,17 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     if {$istrpt} {
 	
 	# Transports:
-	set itemTagL [CreateItemWithParent $mjid transport]
+	set itemTagL [CreateJIDItemWithParent $mjid transport]
 	if {[llength $itemTagL] == 4} {
 	    lappend dirtags [lindex $itemTagL 1]
 	}
     } elseif {[info exists argsA(-ask)] && ($argsA(-ask) eq "subscribe")} {
 	
 	# Pending:
-	set ptag [list head pending]
-	set pitem [FindWithTag $ptag]
-	if {$pitem eq ""} {
-	    set pitem [CreateWithTag $ptag root]
-	    $T item configure $pitem -button 1
-	    lappend itemTagL $pitem $ptag
+	set itemTagL [CreateJIDItemWithParent $mjid pending]
+	if {[llength $itemTagL] == 4} {
+	    lappend dirtags [lindex $itemTagL 1]
 	}
-	set tag [list jid $mjid]
-	set item [CreateWithTag $tag $pitem]
-	lappend itemTagL $item $tag
     } elseif {[info exists argsA(-groups)] && [llength $argsA(-groups)]} {
 	
 	# Group(s):
@@ -1151,14 +1147,15 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     return $itemTagL
 }
 
-# RosterTree::CreateItemWithParent --
+# RosterTree::CreateJIDItemWithParent --
 # 
-#       Helper to create items including any missing parent.
+#       Helper to create a jid item including any missing parent.
+#       No styles are associated with items. Do not use this alone.
+#       
+#       item tag list {item tag ?item tag?}
 
-proc ::RosterTree::CreateItemWithParent {jid type} {
+proc ::RosterTree::CreateJIDItemWithParent {jid type} {
     variable T
-
-    ::Debug 6 "::RosterTree::CreateItemWithParent jid=$jid, type=$type"
     
     set itemTagL [list]
     set ptag [list head $type]
@@ -1168,7 +1165,7 @@ proc ::RosterTree::CreateItemWithParent {jid type} {
 	$T item configure $pitem -button 1
 	lappend itemTagL $pitem $ptag
     }
-    set tag [list $type $jid]
+    set tag [list jid $jid]
     set item [CreateWithTag $tag $pitem]
     lappend itemTagL $item $tag
     
@@ -1195,9 +1192,6 @@ proc ::RosterTree::DeleteItemBase {jid} {
     if {$res ne ""} {
 	DeleteWithTag [list jid $mjid3]
     }
-    
-    # Transports.
-    DeleteWithTag [list transport $mjid3]
 }
 
 # RosterTree::BasePostProcessDiscoInfo --
@@ -1214,39 +1208,38 @@ proc ::RosterTree::DeleteItemBase {jid} {
 
 proc ::RosterTree::BasePostProcessDiscoInfo {from column elem} {
     variable T
+    upvar ::Jabber::jstate jstate
 	
-    set jids [::Roster::GetUsersWithSameHost $from]
-
-    foreach jid $jids {
+    # Investigate all roster items that are in any way related to the discoe'd
+    # item. We'll get the roster JIDs, usually bare JID.
+    set jidL [::Roster::GetUsersWithSameHost $from]
+    foreach jid $jidL {
 	
 	# Ordinary users and so far unrecognized transports.
 	set istrpt [::Roster::IsTransportHeuristics $jid]
 	set icon [::Roster::GetPresenceIconFromJid $jid]
+	set tag [list jid $jid]	
 
-	set tag [list jid $jid]
-	foreach item [FindWithTag $tag] {
+	if {$istrpt} {
 	    
-	    # Need to identify any associated transport and place it
-	    # in the transport if not there.
-	    if {$istrpt} {
-		
-		# It was placed among the users, move to transports.
-		$T item delete $item
-		CreateItemFromJID $jid
-	    } else {
-		if {$icon ne ""} {
-		    $T item element configure $item $column $elem -image $icon
+	    # If we find a transport not in {head transport} move it.
+	    # Delete it and put it back using generic method to get all set.
+	    foreach item [FindWithTag $tag] {
+		if {[GetItemsHeadClass $item] ne "transport"} {
+		    set jlib $jstate(jlib)
+		    DeleteWithTag $tag
+		    eval {::Roster::SetItem $jid} [$jlib roster getrosteritem $jid]
+		    break
 		}
 	    }
 	}
 	
-	# Set icons for already recognized transports.
-	set tag [list transport $jid]
-	foreach item [FindWithTag $tag] {
-	    if {$icon ne ""} {
+	# Set icons for transports and users from this transport.
+	if {$icon ne ""} {
+	    foreach item [FindWithTag $tag] {
 		$T item element configure $item $column $elem -image $icon
 	    }
-	}
+	}	
     }
 }
 
@@ -1458,6 +1451,16 @@ proc ::RosterTree::GetParent {item} {
     variable T
     
     return [$T item parent $item]
+}
+# RosterTree::GetItemsHeadClass --
+# 
+#       Method to get an items 
+
+proc ::RosterTree::GetItemsHeadClass {item} {
+    variable T
+
+    set head [lindex [$T item ancestors $item] end-1]
+    return [lindex [GetTagOfItem $head] 1]
 }
 
 # RosterTree::SortAtIdle --
