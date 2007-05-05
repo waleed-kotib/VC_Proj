@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.31 2007-05-05 10:42:04 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.32 2007-05-05 10:57:13 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -289,6 +289,7 @@ proc ::RosterAvatar::Configure {_T} {
     }
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
+    set simage [::Rosticons::Get status/available]
 
     # Define a new item state
     if {[lsearch [$T state names] notify] < 0} {
@@ -304,7 +305,7 @@ proc ::RosterAvatar::Configure {_T} {
 
     $T column create -tags cStatus  \
       -itembackground $stripes -resize 0 -minwidth 24 -button 1  \
-      -borderwidth $bd -background $bg
+      -borderwidth $bd -background $bg -image $simage
     $T column create -tags cTree    \
       -itembackground $stripes -resize 0 -expand 1 -squeeze 1  \
       -text [mc {Contact Name}] -button 1 -arrow up -borderwidth $bd \
@@ -424,6 +425,13 @@ proc ::RosterAvatar::Configure {_T} {
     $T notify bind $T <Expand-after>   { ::RosterTree::OpenTreeCmd %I }
     $T notify bind $T <Collapse-after> { ::RosterTree::CloseTreeCmd %I }
     $T notify bind $T <Header-invoke>  { ::RosterAvatar::HeaderCmd %T %C }
+    
+    # Have movable columns.
+    $T column dragconfigure -enable yes
+    $T notify install <ColumnDrag-receive>
+    $T notify bind $T <ColumnDrag-receive> {
+	%T column move %C %b
+    }
     
     set sortColumn cTree
 
