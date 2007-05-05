@@ -3,9 +3,9 @@
 #      This file is part of the jabberlib. 
 #      It provides support for the bytestreams protocol (XEP-0065).
 #      
-#  Copyright (c) 2005-2006  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.23 2006-12-13 15:14:28 matben Exp $
+# $Id: bytestreams.tcl,v 1.24 2007-05-05 10:42:04 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -19,7 +19,11 @@
 #
 #	
 #   INSTANCE COMMANDS
-#       jlibName bytestream ...
+#   
+#       jlibName bytestream configure ?-address -port -timeout ms -proxyhost?
+#       
+#       jlibName bytestream initiate to sid cmd ?-streamhosts -fastmode?
+#       
 #      
 ############################# CHANGES ##########################################
 #
@@ -56,22 +60,22 @@
 #                     streamhosts + fast
 #                 --------------------------->
 #                 
-#                         streamhosts
+#                         streamhosts (fastmode)
 #                 <---------------------------
 #                 
 #                      connect_host (s5)
 #                 <---------------------------
 #                 
-#                     i_connect_host (s5)
+#                     i_connect_host (s5) (fastmode)
 #                 --------------------------->
 #                 
 #                       streamhost-used
 #          sock   <---------------------------
 #                 
-#                       streamhost-used
+#                       streamhost-used (fastmode)
 #       sock_fast --------------------------->
 #                 
-#       Initiator picks one of 0-2 sockets and sends a CR.
+#       Initiator picks one of 0-2 sockets and fastmode sends a CR.
 
 package require sha1
 package require jlib
@@ -123,11 +127,13 @@ proc jlib::bytestreams::init {jlibname args} {
 	set static(-port)      0
 	set static(-address)   ""
 	set static(-timeoutms) 30000
+	set static(-proxyhost) [list]
     }
 
-    # Register some standard iq handlers that is handled internally.
+    # Register standard iq handler that is handled internally.
     $jlibname iq_register set $xmlns(bs) [namespace current]::handle_set
-
+    eval {configure $jlibname} $args
+    
     return
 }
 
@@ -150,6 +156,15 @@ proc jlib::bytestreams::configure {jlibname args} {
 	    -port - -timeoutms {
 		if {![string is integer -strict $value]} {
 		    return -code error "$key must be integer number"
+		}
+		set static($key) $value
+	    }
+	    -proxyhost {
+		if {[llength $value] != 3} {
+		    return -code error "$key must be a list {jid ip port}"
+		}
+		if {![string is integer -strict [lindex $value 2]]} {
+		    return -code error "port must be an integer number"
 		}
 		set static($key) $value
 	    }
@@ -186,9 +201,13 @@ proc jlib::bytestreams::i_or_t {jlibname sid} {
 #
 # These are all functions to use by a initiator (sender).
 
-# jlib::bytestreams::si_open, si_send, si_close --
+# si_open, si_send, si_close --
 # 
 #       Bindings for si.
+
+# jlib::bytestreams::si_open --
+# 
+#       Constructor for an initiator object.
 
 proc jlib::bytestreams::si_open {jlibname jid sid args} {
     
@@ -216,7 +235,7 @@ proc jlib::bytestreams::si_open {jlibname jid sid args} {
 	set ip [jlib::getip $jlibname]
     }
     set myjid [jlib::myjid $jlibname]
-    set hash  [::sha1::sha1 ${sid}${myjid}${jid}]
+    set hash  [::sha1::sha1 $sid$myjid$jid]
     
     set istate($sid,ip)    $ip
     set istate($sid,state) open
@@ -261,10 +280,10 @@ proc jlib::bytestreams::si_open_cb {jlibname sid type subiq args} {
     if {$type eq "result"} {
 	if {[wrapper::gettag $subiq] eq "query"  \
 	  && [wrapper::getattribute $subiq xmlns] eq $xmlns(bs)} {
-	    set usedElem [wrapper::getfirstchildwithtag $subiq "streamhost-used"]
-	    if {$usedElem ne {}} {
+	    set usedE [wrapper::getfirstchildwithtag $subiq "streamhost-used"]
+	    if {$usedE ne {}} {
 		set istate($sid,streamhost-used)  \
-		  [wrapper::getattribute $usedElem "jid"]
+		  [wrapper::getattribute $usedE "jid"]
 	    }
 	}
     }
@@ -320,7 +339,7 @@ proc jlib::bytestreams::si_open_cb {jlibname sid type subiq args} {
 	    if {[info exists istate($sid,fast,id)]} {
 		set id  $istate($sid,fast,id)
 		set jid $istate($sid,fast,jid)
-		set qel $istate($sid,fast,queryElem)
+		set qel $istate($sid,fast,queryE)
 		$jlibname send_iq_error $jid $id 404 cancel item-not-found $qel 		
 	    }
 	    si_open_report $jlibname $sid $type $subiq
@@ -459,7 +478,7 @@ proc jlib::bytestreams::initiate {jlibname to sid cmd args} {
 #       This is the initiators handler when provided streamhosts by the
 #       target which only happens in fastmode.
 
-proc jlib::bytestreams::i_handle_set {jlibname sid id jid hosts queryElem} {
+proc jlib::bytestreams::i_handle_set {jlibname sid id jid hosts queryE} {
 
     upvar ${jlibname}::bytestreams::istate istate
     #puts "jlib::bytestreams::i_handle_set (i)"
@@ -472,7 +491,7 @@ proc jlib::bytestreams::i_handle_set {jlibname sid id jid hosts queryElem} {
     set istate($sid,fast,state)  inited
     set istate($sid,fast,hosts)  $hosts
     set istate($sid,fast,rhosts) $hosts
-    set istate($sid,fast,queryElem) $queryElem
+    set istate($sid,fast,queryE) $queryE
      
     # Try connecting the host(s) in turn.
     i_connect_host $jlibname $sid
@@ -508,7 +527,7 @@ proc jlib::bytestreams::i_connect_host {jlibname sid} {
     
     set jid $istate($sid,fast,jid)
     set myjid [$jlibname myjid]
-    set hash [::sha1::sha1 ${sid}${jid}${myjid}]    
+    set hash [::sha1::sha1 $sid$jid$myjid]    
     
     set cmd [list [namespace current]::i_connect_host_cb $jlibname $sid]
     if {[catch {
@@ -766,34 +785,34 @@ proc jlib::bytestreams::ifree {jlibname sid} {
 # Result:
 #       MUST return 0 or 1!
 
-proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
+proc jlib::bytestreams::handle_set {jlibname from queryE args} {
     variable xmlns    
     variable fastmode
     
     #puts "jlib::bytestreams::handle_set (t+i)"
     
-    array set argsArr $args
-    array set attr [wrapper::getattrlist $queryElem]
-    if {![info exists argsArr(-id)]} {
+    array set argsA $args
+    array set attr [wrapper::getattrlist $queryE]
+    if {![info exists argsA(-id)]} {
 	# We cannot handle this since missing id-attribute.
 	return 0
     }
     if {![info exists attr(sid)]} {
-	eval {return_error $jlibname $queryElem 400 modify bad-request} $args
+	eval {return_error $jlibname $queryE 400 modify bad-request} $args
 	return 1
     }
-    set id  $argsArr(-id)
+    set id  $argsA(-id)
     set sid $attr(sid)
     set jid $from
 
     # We make sure that we have already got a si with this sid.
     if {![jlib::si::havesi $jlibname $sid]} {
-	eval {return_error $jlibname $queryElem 406 cancel not-acceptable} $args
+	eval {return_error $jlibname $queryE 406 cancel not-acceptable} $args
 	return 1
     }
 
     set hosts {}
-    foreach elem [wrapper::getchildren $queryElem] {
+    foreach elem [wrapper::getchildren $queryE] {
 	if {[wrapper::gettag $elem] eq "streamhost"} {
 	    array unset sattr
 	    array set sattr [wrapper::getattrlist $elem]
@@ -806,14 +825,14 @@ proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
     }
     #puts "\t hosts=$hosts"
     if {![llength $hosts]} {
-	eval {return_error $jlibname $queryElem 400 modify bad-request} $args
+	eval {return_error $jlibname $queryE 400 modify bad-request} $args
 	return 1
     }
     
     # In fastmode we may get a streamhosts offer for reversed socks5 connections.
     if {[is_initiator $jlibname $sid]} {
 	if {$fastmode} {
-	    i_handle_set $jlibname $sid $id $jid $hosts $queryElem
+	    i_handle_set $jlibname $sid $id $jid $hosts $queryE
 	} else {
 	    # @@@ inconsistency!
 	    return 0
@@ -821,7 +840,7 @@ proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
     } else {
 	
 	# This is the normal execution path.
-	t_handle_set $jlibname $sid $id $jid $hosts $queryElem
+	t_handle_set $jlibname $sid $id $jid $hosts $queryE
     }
     return 1
 }
@@ -830,7 +849,7 @@ proc jlib::bytestreams::handle_set {jlibname from queryElem args} {
 # 
 #       This is like the constructor of a target sid object.
 
-proc jlib::bytestreams::t_handle_set {jlibname sid id jid hosts queryElem} {
+proc jlib::bytestreams::t_handle_set {jlibname sid id jid hosts queryE} {
     variable fastmode
     variable xmlns
     
@@ -845,12 +864,12 @@ proc jlib::bytestreams::t_handle_set {jlibname sid id jid hosts queryElem} {
     set tstate($sid,state)  open
     set tstate($sid,hosts)  $hosts
     set tstate($sid,rhosts) $hosts
-    set tstate($sid,queryElem) $queryElem
+    set tstate($sid,queryE) $queryE
     
     if {$fastmode} {
-	set fastElem [wrapper::getchildswithtagandxmlns $queryElem "fast"  \
+	set fastE [wrapper::getchildswithtagandxmlns $queryE "fast"  \
 	  $xmlns(fast)]
-	if {[llength $fastElem]} {
+	if {[llength $fastE]} {
 	    
 	    set haveserver 1
 	    if {![info exists static(sock)]} {
@@ -873,7 +892,7 @@ proc jlib::bytestreams::t_handle_set {jlibname sid id jid hosts queryElem} {
 		    set ip [jlib::getip $jlibname]
 		}
 		set myjid [jlib::myjid $jlibname]
-		set hash  [::sha1::sha1 ${sid}${myjid}${jid}]
+		set hash  [::sha1::sha1 $sid$myjid$jid]
 		set tstate($sid,hash) $hash
 		set hash2sid($hash) $sid
 		
@@ -1026,7 +1045,7 @@ proc jlib::bytestreams::connect_host {jlibname sid} {
     
     set jid $tstate($sid,jid)
     set myjid [$jlibname myjid]
-    set hash [::sha1::sha1 ${sid}${jid}${myjid}]    
+    set hash [::sha1::sha1 $sid$jid$myjid]    
     
     set cmd [list [namespace current]::connect_host_cb $jlibname $sid]
     if {[catch {
@@ -1168,11 +1187,11 @@ proc  jlib::bytestreams::readable {jlibname sid sock} {
 proc jlib::bytestreams::send_used {jlibname to id hostjid} {
     variable xmlns
     
-    set usedElem [wrapper::createtag "streamhost-used" \
+    set usedE [wrapper::createtag "streamhost-used" \
       -attrlist [list jid $hostjid]]
     set xmllist [wrapper::createtag "query" \
       -attrlist [list xmlns $xmlns(bs)] \
-      -subtags [list $usedElem]]
+      -subtags [list $usedE]]
 
     $jlibname send_iq "result" [list $xmllist] -to $to -id $id
 }
@@ -1296,7 +1315,7 @@ proc jlib::bytestreams::send_error {jlibname sid errcode errtype stanza} {
     
     set id  $tstate($sid,id)
     set jid $tstate($sid,jid)
-    set qel $tstate($sid,queryElem)
+    set qel $tstate($sid,queryE)
     jlib::send_iq_error $jlibname $jid $id $errcode $errtype $stanza $qel 
 }
 
@@ -1350,11 +1369,11 @@ proc jlib::bytestreams::activate {jlibname to sid targetjid args} {
 	    }
 	}
     }
-    set activateElem [wrapper::createtag "activate" \
+    set activateE [wrapper::createtag "activate" \
       -attrlist [list jid $targetjid]]
     set xmllist [wrapper::createtag "query" \
       -attrlist [list xmlns $xmlns(bs) sid $sid] \
-      -subtags [list $activateElem]]
+      -subtags [list $activateE]]
 
     eval {$jlibname send_iq "set" [list $xmllist] -to $to} $opts
 }
@@ -1384,7 +1403,7 @@ proc jlib::bytestreams::connector {jlibname sid jid hosts cmd} {
       [list [namespace current]::connector_timeout_cb $jlibname $sid]]
     
     set myjid [jlib::myjid $jlibname]
-    set hash  [::sha1::sha1 ${sid}${myjid}${jid}]
+    set hash  [::sha1::sha1 $sid$myjid$jid]
 
     foreach host $hosts {
 	lassign $host hostjid addr port

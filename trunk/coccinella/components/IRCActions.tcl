@@ -8,8 +8,9 @@
 #  
 #  @@@ TODO: 1) Not sure how to handle /msg
 #            2) Configurable nick alert
+#            3) Implement -command for error notice
 #  
-# $Id: IRCActions.tcl,v 1.1 2007-05-04 11:59:00 matben Exp $
+# $Id: IRCActions.tcl,v 1.2 2007-05-05 10:42:03 matben Exp $
 
 namespace eval ::IRCActions:: {
     
@@ -94,13 +95,22 @@ proc ::IRCActions::Join {roomjid room} {
 	set joinJID ${room}@${domain}
     }
     set nick [::Jabber::JlibCmd muc mynick $roomjid]
-    ::Enter::EnterRoom $joinJID $nick
+    ::Enter::EnterRoom $joinJID $nick -command [namespace code ErrorJoin]
+}
+
+proc ::IRCActions::ErrorJoin {type args} {
+    # TODO
 }
 
 proc ::IRCActions::Nick {roomjid nick} {
     
     # Do this for all rooms we participate?
-    ::Jabber::JlibCmd muc setnick $roomjid $nick
+    ::Jabber::JlibCmd muc setnick $roomjid $nick \
+      -command [namespace code ErrorNick]
+}
+
+proc ::IRCActions::ErrorNick {jlibname xmldata} {
+    # TODO
 }
 
 proc ::IRCActions::Msg {roomjid value} {
@@ -156,7 +166,7 @@ proc ::IRCActions::Complete {roomjid} {
     set wtext [::GroupChat::GetWidget $roomjid wtextsend]
     set start [$wtext index "insert -1 c wordstart"]
     set stop  [$wtext index "insert -1 c wordend"]
-    set str [$wtext get $start $stop]
+    set str   [$wtext get $start $stop]
 
     set participants [::Jabber::JlibCmd muc participants $roomjid]
     set nicks [list]

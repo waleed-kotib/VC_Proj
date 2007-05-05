@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.30 2007-05-02 14:00:32 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.31 2007-05-05 10:42:04 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -803,7 +803,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     }
     if {$istrpt} {
 	set type transport
-	set tagType transport
+	set tagType jid
     } elseif {[info exists argsArr(-ask)] && ($argsArr(-ask) eq "subscribe")} {
 	set type pending
 	set tagType jid

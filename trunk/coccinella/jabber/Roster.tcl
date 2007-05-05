@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.193 2007-04-30 14:21:05 matben Exp $
+# $Id: Roster.tcl,v 1.194 2007-05-05 10:42:04 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -518,7 +518,7 @@ proc ::Roster::DeRegisterPopupEntry {mLabel} {
 # Arguments:
 #       jidlist     this is a list of actual jid's, can be any form
 #       clicked
-#       status      'available', 'unavailable', 'transports', or 'pending'
+#       status      'available', 'unavailable'
 #       group       name of group if any
 #       
 # Results:
@@ -1320,16 +1320,16 @@ proc ::Roster::IsTransportHeuristics {jid} {
 proc ::Roster::GetUsersWithSameHost {jid} {
     upvar ::Jabber::jstate jstate
 
-    set jidlist {}
+    set jidL [list]
     jlib::splitjidex $jid - host -
 
     foreach ujid [$jstate(jlib) roster getusers] {
 	jlib::splitjidex $ujid - uhost -
 	if {$host eq $uhost} {
-	    lappend jidlist $ujid
+	    lappend jidL $ujid
 	}
     }
-    return $jidlist
+    return $jidL
 }
 
 proc ::Roster::RemoveUsers {jidlist} {
