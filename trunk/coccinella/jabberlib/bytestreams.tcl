@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.24 2007-05-05 10:42:04 matben Exp $
+# $Id: bytestreams.tcl,v 1.25 2007-05-07 12:05:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -21,8 +21,7 @@
 #   INSTANCE COMMANDS
 #   
 #       jlibName bytestream configure ?-address -port -timeout ms -proxyhost?
-#       
-#       jlibName bytestream initiate to sid cmd ?-streamhosts -fastmode?
+#       jlibName bytestream send_initiate to sid cmd ?-streamhosts -fastmode?
 #       
 #      
 ############################# CHANGES ##########################################
@@ -124,10 +123,12 @@ proc jlib::bytestreams::init {jlibname args} {
 	variable static
 	
 	# Server port 0 says that arbitrary port can be chosen.
-	set static(-port)      0
-	set static(-address)   ""
-	set static(-timeoutms) 30000
-	set static(-proxyhost) [list]
+	set static(-address)        ""
+	set static(-buffersize)     4096
+	set static(-port)           0
+	set static(-s5timeoutms)    8000  ;# TODO
+	set static(-timeoutms)      30000
+	set static(-proxyhost)      [list]
     }
 
     # Register standard iq handler that is handled internally.
@@ -229,6 +230,8 @@ proc jlib::bytestreams::si_open {jlibname jid sid args} {
 	}
     }
     
+    # Provide our streamhosts. 
+    # First, the local one.
     if {$static(-address) ne ""} {
 	set ip $static(-address)
     } else {
@@ -243,13 +246,22 @@ proc jlib::bytestreams::si_open {jlibname jid sid args} {
     set istate($sid,hash)  $hash
     set hash2sid($hash)    $sid
     set host [list $myjid -host $ip -port $static(port)]
-
+    set streamhosts [list $host]
+    
+    # Second, the proxy host if any.
+    if {[llength $static(-proxyhost)]} {
+	lassign $static(-proxyhost) pjid pip pport
+	set proxyhost [list $pjid -host $pip -port $pport]
+	lappend streamhosts $proxyhost
+    }
+    
     # Schedule a timeout until we get a streamhost-used returned.
     set istate($sid,timeoutid) [after $static(-timeoutms)  \
       [list [namespace current]::si_timeout_cb $jlibname $sid]]
     
+    # Initiate the stream to the target.
     set si_open_cb [list [namespace current]::si_open_cb $jlibname $sid]
-    initiate $jlibname $jid $sid $si_open_cb -streamhost $host  \
+    send_initiate $jlibname $jid $sid $si_open_cb -streamhosts $streamhosts \
       -fastmode $fastmode
 
     return
@@ -264,6 +276,13 @@ proc jlib::bytestreams::si_timeout_cb {jlibname sid} {
     ifinish $jlibname $sid
 }
 
+# @@@ Try to make all this event based instead for cleaner code.
+
+# jlib::bytestreams::si_open_cb --
+# 
+#       The target either returns an error if it failed to connect any
+#       streamhost, else it replies eith a 'streamhost-used' element.
+
 proc jlib::bytestreams::si_open_cb {jlibname sid type subiq args} {
     
     variable xmlns
@@ -277,17 +296,19 @@ proc jlib::bytestreams::si_open_cb {jlibname sid type subiq args} {
     }
         
     # Collect streamhost used.
+    # @@@ Check if well formed???
     if {$type eq "result"} {
 	if {[wrapper::gettag $subiq] eq "query"  \
 	  && [wrapper::getattribute $subiq xmlns] eq $xmlns(bs)} {
 	    set usedE [wrapper::getfirstchildwithtag $subiq "streamhost-used"]
-	    if {$usedE ne {}} {
+	    if {[llength $usedE]} {
 		set istate($sid,streamhost-used)  \
 		  [wrapper::getattribute $usedE "jid"]
 	    }
 	}
     }
     
+    # Fastmode only:
     if {$istate($sid,fast)} {
 	if {$type eq "error"} {
 	    set istate($sid,state) error    
@@ -345,6 +366,8 @@ proc jlib::bytestreams::si_open_cb {jlibname sid type subiq args} {
 	    si_open_report $jlibname $sid $type $subiq
 	}
     } else {	
+	
+	# Normal non-fastmode execution path.
 	if {$type eq "error"} {
 	    set istate($sid,state) error    
 	    si_open_report $jlibname $sid $type $subiq
@@ -362,6 +385,10 @@ proc jlib::bytestreams::si_open_cb {jlibname sid type subiq args} {
 	}
     }
 }
+
+# jlib::bytestreams::si_open_report --
+# 
+#       This prepares the callback to 'si' as a response to 'si_open.
 
 proc jlib::bytestreams::si_open_report {jlibname sid type subiq} {
     
@@ -388,6 +415,10 @@ proc jlib::bytestreams::si_send {jlibname sid data} {
     }
 }
 
+# jlib::bytestreams::si_close --
+# 
+#       Destroys an initiator object.
+
 proc jlib::bytestreams::si_close {jlibname sid} {
     
     upvar ${jlibname}::bytestreams::istate istate
@@ -407,50 +438,33 @@ proc jlib::bytestreams::is_initiator {jlibname sid} {
 
 #--- Generic initiator code ----------------------------------------------------
 
-# jlib::bytestreams::s5i_server --
+# jlib::bytestreams::send_initiate --
 # 
-#       Start socks5 server.
-
-proc jlib::bytestreams::s5i_server {jlibname} {
-    
-    upvar ${jlibname}::bytestreams::static static
-    #puts "jlib::bytestreams::s5i_server (i)"
-    
-    # Note the difference between static(-port) and static(port) !
-    set connectProc [list [namespace current]::s5i_accept $jlibname]
-    set sock [socket -server $connectProc $static(-port)]
-    set static(sock) $sock
-    set static(port) [lindex [fconfigure $sock -sockname] 2]
-    
-    # Test fast mode...
-    #close $sock
-}
-
-# jlib::bytestreams::initiate --
-# 
-#       -streamhost {jid (-host -port | -zeroconf)}
+#       -streamhosts {{jid (-host -port | -zeroconf)} {...} ...}
 #       -fastmode
 #       
 #       Stateless code that never access the istate array.
 
-proc jlib::bytestreams::initiate {jlibname to sid cmd args} {
+proc jlib::bytestreams::send_initiate {jlibname to sid cmd args} {
     variable xmlns    
     #puts "jlib::bytestreams::initiate (i)"
 
     set attrlist [list xmlns $xmlns(bs) sid $sid mode tcp]
-    set sublist {}
-    set opts {}
+    set sublist [list]
+    set opts [list]
     foreach {key value} $args {
 	
 	switch -- $key {
-	    -streamhost {
-		set jid [lindex $value 0]
-		set hostattr [list jid $jid]
-		foreach {hkey hvalue} [lrange $value 1 end] {
-		    lappend hostattr [string trimleft $hkey -] $hvalue
+	    -streamhosts {
+		foreach hostspec $value {
+		    set jid [lindex $hostspec 0]
+		    set hostattr [list jid $jid]
+		    foreach {hkey hvalue} [lrange $hostspec 1 end] {
+			lappend hostattr [string trimleft $hkey -] $hvalue
+		    }
+		    lappend sublist \
+		      [wrapper::createtag "streamhost" -attrlist $hostattr]
 		}
-		lappend sublist \
-		  [wrapper::createtag "streamhost" -attrlist $hostattr]
 	    }
 	    -fastmode {
 		if {$value} {
@@ -498,6 +512,8 @@ proc jlib::bytestreams::i_handle_set {jlibname sid id jid hosts queryE} {
 }
 
 #...............................................................................
+
+# @@@ See 'connector' for i+t agnostic version.
 
 # jlib::bytestreams::i_connect_host --
 # 
@@ -604,12 +620,37 @@ proc jlib::bytestreams::i_connect_host_final {jlibname sid {error ""}} {
 
 #...............................................................................
 
-# The initiator socks5 functions -----------------------------------------------
+# Server side socks5 functions -------------------------------------------------
 # 
+# Normally used by the initiator except in fastmode where it is also used by
+# the target.
 # This is stateless code that never directly access the istate array.
 # Think of it like an object:
 #       [in]:  sock, addr, port
 #       [out]: sid, sock
+#       
+# NB: We don't return any errors on the server sdie; this is up to the client.
+
+# jlib::bytestreams::s5i_server --
+# 
+#       Start socks5 server. We use the server for the streams and keep it
+#       running for the lifetime of the application.
+
+proc jlib::bytestreams::s5i_server {jlibname} {
+    
+    upvar ${jlibname}::bytestreams::static static
+    #puts "jlib::bytestreams::s5i_server (i)"
+    
+    # Note the difference between static(-port) and static(port) !
+    set connectProc [list [namespace current]::s5i_accept $jlibname]
+    set sock [socket -server $connectProc $static(-port)]
+    set static(sock) $sock
+    set static(port) [lindex [fconfigure $sock -sockname] 2]
+    
+    # Test fast mode...
+    #close $sock
+    return $static(port)
+}
 
 # jlib::bytestreams::s5i_accept --
 # 
@@ -620,24 +661,23 @@ proc jlib::bytestreams::i_connect_host_final {jlibname sid {error ""}} {
 
 proc jlib::bytestreams::s5i_accept {jlibname sock addr port} {
 
-    #puts "jlib::bytestreams::s5i_accept (i)"
+   #puts "jlib::bytestreams::s5i_accept (i)"
     
     fconfigure $sock -translation binary -blocking 0
-
     fileevent $sock readable \
       [list [namespace current]::s5i_read_methods $jlibname $sock]
 }
 
 proc jlib::bytestreams::s5i_read_methods {jlibname sock} {
    
-    #puts "jlib::bytestreams::s5i_read_methods (i)"   
+   #puts "jlib::bytestreams::s5i_read_methods (i)"   
     
     fileevent $sock readable {}
     if {[catch {read $sock} data] || [eof $sock]} {
 	catch {close $sock}
 	return
     }
-    #puts "\t read [string length $data]"
+   #puts "\t read [string length $data]"
     
     # Pick method. Must be \x00
     binary scan $data ccc* ver nmethods methods
@@ -662,14 +702,14 @@ proc jlib::bytestreams::s5i_read_methods {jlibname sock} {
 proc jlib::bytestreams::s5i_read_auth {jlibname sock} {
     
     upvar ${jlibname}::bytestreams::hash2sid hash2sid
-    #puts "jlib::bytestreams::s5i_read_auth (i)"
+   #puts "jlib::bytestreams::s5i_read_auth (i)"
 
     fileevent $sock readable {}
     if {[catch {read $sock} data] || [eof $sock]} {
 	catch {close $sock}
 	return
     }    
-    #puts "\t read [string length $data]"
+   #puts "\t read [string length $data]"
     
     binary scan $data ccccc ver cmd rsv atyp len
     if {$ver != 5 || $cmd != 1 || $atyp != 3} {
@@ -697,6 +737,7 @@ proc jlib::bytestreams::s5i_read_auth {jlibname sock} {
 	}
 	#puts "\t wrote [string length $reply]"
     } else {
+	#puts "\t missing sid"
 	set reply [string replace $data 1 1 \x02]
 	catch {
 	    puts -nonewline $sock $reply
@@ -739,6 +780,10 @@ proc jlib::bytestreams::s5i_register_socket {jlibname sid sock} {
 
 # End s5i ----------------------------------------------------------------------
 
+# jlib::bytestreams::ifinish --
+# 
+#       Close all sockets and make sure to free all memory.
+
 proc jlib::bytestreams::ifinish {jlibname sid} {
 
     upvar ${jlibname}::bytestreams::istate istate
@@ -753,6 +798,10 @@ proc jlib::bytestreams::ifinish {jlibname sid} {
     }
     ifree $jlibname $sid
 }
+
+# jlib::bytestreams::ifree --
+# 
+#       Releases all memory for an initiator object.
 
 proc jlib::bytestreams::ifree {jlibname sid} {
     
@@ -811,16 +860,15 @@ proc jlib::bytestreams::handle_set {jlibname from queryE args} {
 	return 1
     }
 
-    set hosts {}
-    foreach elem [wrapper::getchildren $queryE] {
-	if {[wrapper::gettag $elem] eq "streamhost"} {
-	    array unset sattr
-	    array set sattr [wrapper::getattrlist $elem]
-	    if {[info exists sattr(jid)]    \
-	      && [info exists sattr(host)]  \
-	      && [info exists sattr(port)]} {
-		lappend hosts [list $sattr(jid) $sattr(host) $sattr(port)]
-	    }
+    # Get streamhosts keeping their order.
+    set hosts [list]
+    foreach elem [wrapper::getchildswithtag $queryE "streamhost"] {
+	array unset sattr
+	array set sattr [wrapper::getattrlist $elem]
+	if {[info exists sattr(jid)]    \
+	  && [info exists sattr(host)]  \
+	  && [info exists sattr(port)]} {
+	    lappend hosts [list $sattr(jid) $sattr(host) $sattr(port)]
 	}
     }
     #puts "\t hosts=$hosts"
@@ -867,8 +915,7 @@ proc jlib::bytestreams::t_handle_set {jlibname sid id jid hosts queryE} {
     set tstate($sid,queryE) $queryE
     
     if {$fastmode} {
-	set fastE [wrapper::getchildswithtagandxmlns $queryE "fast"  \
-	  $xmlns(fast)]
+	set fastE [wrapper::getchildswithtagandxmlns $queryE "fast" $xmlns(fast)]
 	if {[llength $fastE]} {
 	    
 	    set haveserver 1
@@ -885,7 +932,8 @@ proc jlib::bytestreams::t_handle_set {jlibname sid id jid hosts queryE} {
 		set tstate($sid,fast) 1
 		set tstate($sid,fast,state) initiate
 		
-		# Provide a streamhost to the initiator.
+		# Provide our streamhosts. 
+		# First, the local one.
 		if {$static(-address) ne ""} {
 		    set ip $static(-address)
 		} else {
@@ -897,10 +945,19 @@ proc jlib::bytestreams::t_handle_set {jlibname sid id jid hosts queryE} {
 		set hash2sid($hash) $sid
 		
 		set host [list $myjid -host $ip -port $static(port)]
+		set streamhosts [list $host]
+		
+		# Second, the proxy host if any.
+		if {[llength $static(-proxyhost)]} {
+		    lassign $static(-proxyhost) pjid pip pport
+		    set proxyhost [list $pjid -host $pip -port $pport]
+		    lappend streamhosts $proxyhost
+		}
 		
 		set t_initiate_cb  \
 		  [list [namespace current]::t_initiate_cb $jlibname $sid]
-		initiate $jlibname $jid $sid $t_initiate_cb -streamhost $host
+		send_initiate $jlibname $jid $sid $t_initiate_cb \
+		  -streamhosts $streamhosts
 	    }
 	}
     }
@@ -1022,6 +1079,8 @@ proc jlib::bytestreams::fast_read_CR_cb {jlibname sid {error ""}} {
 # jlib::bytestreams::connect_host --
 # 
 #       Is called recursively for each host until socks5 connection established.
+#       
+#       @@@ Switch to 'connector' object independent of (i) + (t)
 
 proc jlib::bytestreams::connect_host {jlibname sid} {
     
@@ -1155,6 +1214,7 @@ proc jlib::bytestreams::read_CR_cb {jlibname sid {error ""}} {
 proc  jlib::bytestreams::readable {jlibname sid sock} {
     
     upvar ${jlibname}::bytestreams::tstate tstate
+    upvar ${jlibname}::bytestreams::static static
     #puts "jlib::bytestreams::readable (t)"
 
     # We may have been reset or something.
@@ -1170,8 +1230,8 @@ proc  jlib::bytestreams::readable {jlibname sid sock} {
 	tfinish $jlibname $sid
     } else {
 	
-	# @@@ not sure about 4096, should size be specified?
-	set data [read $sock 4096]
+	# @@@ Keep tranck of number bytes read?
+	set data [read $sock $static(-buffersize)]
 	set len [string length $data]
 	#puts "\t len=$len"
     
@@ -1196,7 +1256,9 @@ proc jlib::bytestreams::send_used {jlibname to id hostjid} {
     $jlibname send_iq "result" [list $xmllist] -to $to -id $id
 }
 
-# The target socks5 functions --------------------------------------------------
+# The client socks5 functions --------------------------------------------------
+# 
+# Normally used by the target but in fastmode also used by the initiator.
 #
 # This object handles everything to make a single socks5 connection + 
 # authentication.
@@ -1210,7 +1272,7 @@ proc jlib::bytestreams::send_used {jlibname to id hostjid} {
 
 proc jlib::bytestreams::socks5 {addr port hash cmd} {
 
-    #puts "jlib::bytestreams::socks5 (t)"
+   #puts "jlib::bytestreams::socks5 (t)"
     
     if {[catch {
 	set sock [socket -async $addr $port]
@@ -1225,7 +1287,7 @@ proc jlib::bytestreams::socks5 {addr port hash cmd} {
 
 proc jlib::bytestreams::s5t_write_method {hash sock cmd} {
     
-    #puts "jlib::bytestreams::s5t_write_method (t)"
+   #puts "jlib::bytestreams::s5t_write_method (t)"
     fileevent $sock writable {}
     
     # Announce method (\x00).
@@ -1234,6 +1296,7 @@ proc jlib::bytestreams::s5t_write_method {hash sock cmd} {
 	flush $sock
 	#puts "\t wrote 3: 'x05x01x00'"
     } err]} {
+	catch {close $sock}
 	eval $cmd error-network-write
 	return
     }
@@ -1243,7 +1306,7 @@ proc jlib::bytestreams::s5t_write_method {hash sock cmd} {
 
 proc jlib::bytestreams::s5t_method_result {hash sock cmd} {
     
-    #puts "jlib::bytestreams::s5t_method_result (t)"
+   #puts "jlib::bytestreams::s5t_method_result (t)"
     
     fileevent $sock readable {}
     if {[catch {read $sock} data] || [eof $sock]} {
@@ -1251,7 +1314,7 @@ proc jlib::bytestreams::s5t_method_result {hash sock cmd} {
 	eval $cmd error-network-read
 	return
     }    
-    #puts "\t read [string length $data]"
+   #puts "\t read [string length $data]"
     binary scan $data cc ver method
     if {($ver != 5) || ($method != 0)} {
 	catch {close $sock}
@@ -1274,7 +1337,7 @@ proc jlib::bytestreams::s5t_method_result {hash sock cmd} {
 
 proc jlib::bytestreams::s5t_auth_result {sock cmd} {
     
-    #puts "jlib::bytestreams::s5t_auth_result (t)"
+   #puts "jlib::bytestreams::s5t_auth_result (t)"
     
     fileevent $sock readable {}
     if {[catch {read $sock} data] || [eof $sock]} {
@@ -1282,7 +1345,7 @@ proc jlib::bytestreams::s5t_auth_result {sock cmd} {
 	eval $cmd error-network-read
 	return
     }
-    #puts "\t read [string length $data]"
+   #puts "\t read [string length $data]"
     binary scan $data cc ver method
     if {($ver != 5) || ($method != 0)} {
 	catch {close $sock}
@@ -1353,6 +1416,7 @@ proc jlib::bytestreams::tfree {jlibname sid} {
 # jlib::bytestreams::activate --
 # 
 #       Initiator requests activation of bytestream.
+#       This is only necessary for proxy streamhosts.
 
 proc jlib::bytestreams::activate {jlibname to sid targetjid args} {
     variable xmlns
@@ -1387,52 +1451,144 @@ namespace eval jlib::bytestreams {
       [namespace current]::cmdproc
 }
 
-#-------------------------------------------------------------------------------
+# connector --------------------------------------------------------------------
 
-# TODO...
+# jlib::bytestreams::connector --
+# 
+#       Standalone object which is target and initiator agnostic that tries
+#       to make socks5 connections to the hosts in turn. Invokes the callback
+#       for the first succesful connection or an error if none worked.
+#       The 'sid' is the characteristic identifier of an object.
+#       
+#       [in]:  sid, jid, hosts, cmd
+#       [out]: result (-error | -host -socket)
 
 proc jlib::bytestreams::connector {jlibname sid jid hosts cmd} {
     
     upvar ${jlibname}::bytestreams::conn conn
-    upvar ${jlibname}::bytestreams::static static
+   #puts "jlib::bytestreams::connector"
     
     set conn($sid,jid)   $jid
     set conn($sid,hosts) $hosts
     set conn($sid,cmd)   $cmd
-    set conn($sid,timeoutid) [after $static(-timeoutms)  \
-      [list [namespace current]::connector_timeout_cb $jlibname $sid]]
+    set conn($sid,idx)   [expr {[llength $hosts]-1}]
     
     set myjid [jlib::myjid $jlibname]
     set hash  [::sha1::sha1 $sid$myjid$jid]
+    set conn($sid,hash) $hash
+    
+    connector_sock $jlibname $sid
+    return
+}
 
-    foreach host $hosts {
-	lassign $host hostjid addr port
-	set s5_cb [list [namespace current]::connector_s5_cb $jlibname $sid ...]
-	if {![catch {
-	    set sock [socks5 $addr $port $hash $s5_cb]
-	}]} {
-	    set conn($sid,sock,) $sock
-	}
+# jlib::bytestreams::connector_sock --
+# 
+#       Tries to make a socks5 connection to streamhost with 'idx' index.
+#       If 'idx' goes negative we report an error.
+
+proc jlib::bytestreams::connector_sock {jlibname sid} {
+    
+    upvar ${jlibname}::bytestreams::conn conn
+    upvar ${jlibname}::bytestreams::static static
+   #puts "jlib::bytestreams::connector_sock"
+    
+    if {[info exists conn($sid,timeoutid)]} {
+	after cancel $conn($sid,timeoutid)
+	unset conn($sid,timeoutid)
+    }
+    if {$conn($sid,idx) < 0} {
+	connector_final $jlibname $sid "error"
+	return
+    }
+    set conn($sid,timeoutid) [after $static(-s5timeoutms)  \
+      [list [namespace current]::connector_timeout_cb $jlibname $sid]]
+    
+    set host [lindex $conn($sid,hosts) $conn($sid,idx)]
+    lassign $host hostjid addr port
+   #puts "\t host=$host"
+    set s5_cb [list [namespace current]::connector_s5_cb $jlibname $sid]
+    if {[catch {
+	set conn($sid,sock) [socks5 $addr $port $conn($sid,hash) $s5_cb]
+    }]} {
+	
+	# Retry with next streamhost if any.
+	incr conn($sid,idx) -1
+	connector_sock $jlibname $sid
     }
 }
 
-proc jlib::bytestreams::connector_s5_cb {jlibname sid } {
+proc jlib::bytestreams::connector_s5_cb {jlibname sid {err ""}} {
         
     upvar ${jlibname}::bytestreams::conn conn
+   #puts "jlib::bytestreams::connector_s5_cb err=$err"
     
+    if {$err eq ""} {
+	connector_final $jlibname $sid
+    } else {
+	incr conn($sid,idx) -1
+	connector_sock $jlibname $sid
+    }
 }
 
-proc jlib::bytestreams::connector_timeout_cb {jlibname sid } {
+proc jlib::bytestreams::connector_timeout_cb {jlibname sid} {
 	
     upvar ${jlibname}::bytestreams::conn conn
+   #puts "jlib::bytestreams::connector_timeout_cb"
     
-    set cmd $conn($sid,cmd)
-    eval $cmd timeout
+    # On timeouts we are responsible for closing the socket.
+    unset conn($sid,timeoutid)
+    if {[info exists conn($sid,sock)]} {
+	catch {close $conn($sid,sock)}
+    }
+    incr conn($sid,idx) -1
+    connector_sock $jlibname $sid
 }
 
 proc jlib::bytestreams::connector_reset {jlibname sid} {
 	
     upvar ${jlibname}::bytestreams::conn conn
+   #puts "jlib::bytestreams::connector_reset"
+    
+    if {[info exists conn($sid,timeoutid)]} {
+	after cancel $conn($sid,timeoutid)
+	unset conn($sid,timeoutid)
+    }
+    if {[info exists conn($sid,sock)]} {
+	catch {close $conn($sid,sock)}
+    }
+    connector_final $jlibname $sid "reset"
+}
+
+proc jlib::bytestreams::connector_final {jlibname sid {err ""}} {
+    
+    upvar ${jlibname}::bytestreams::conn conn
+   #puts "jlib::bytestreams::connector_final err=$err"
+
+    if {[info exists conn($sid,timeoutid)]} {
+	after cancel $conn($sid,timeoutid)
+	unset conn($sid,timeoutid)
+    }
+    set cmd $conn($sid,cmd)
+    if {$err eq ""} {
+	set host [lindex $conn($sid,hosts) $conn($sid,idx)]
+	eval $cmd ok -host $host -socket $conn($sid,sock)
+    } else {
+	eval $cmd error -error $err
+    }
+    array unset conn $sid,*
+}
+
+if {0} {
+    # Testing
+    set jlib ::jlib::jlib1
+    set port [$jlib bytestreams s5i_server]
+    set hosts [list \
+      [list proxy.localhost junk.se 8237] \
+      [list matben@localhost 127.0.0.1 $port]]
+    proc cb {args} {puts "---> $args"}
+    set sid [jlib::generateuuid]
+    $jlib bytestreams connector $sid matben@localhost $hosts cb
     
 }
+
 

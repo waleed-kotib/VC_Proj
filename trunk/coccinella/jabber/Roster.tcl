@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.194 2007-05-05 10:42:04 matben Exp $
+# $Id: Roster.tcl,v 1.195 2007-05-07 12:05:38 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1052,7 +1052,6 @@ proc ::Roster::IsCoccinella {jid3} {
 }
 
 proc ::Roster::GetPresenceIconFromKey {key} {
-
     return [::Rosticons::Get status/$key]
 }
 
