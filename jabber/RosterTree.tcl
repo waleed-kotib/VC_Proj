@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.47 2007-05-05 10:42:04 matben Exp $
+# $Id: RosterTree.tcl,v 1.48 2007-05-07 12:05:38 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1213,19 +1213,25 @@ proc ::RosterTree::BasePostProcessDiscoInfo {from column elem} {
     # Investigate all roster items that are in any way related to the discoe'd
     # item. We'll get the roster JIDs, usually bare JID.
     set jidL [::Roster::GetUsersWithSameHost $from]
+    
+    if {[llength $jidL]} {
+	parray ::RosterTree::tag2items
+    }
+    
     foreach jid $jidL {
 	
 	# Ordinary users and so far unrecognized transports.
 	set istrpt [::Roster::IsTransportHeuristics $jid]
 	set icon [::Roster::GetPresenceIconFromJid $jid]
 	set tag [list jid $jid]	
-
+	
 	if {$istrpt} {
-	    
+	    	    
 	    # If we find a transport not in {head transport} move it.
 	    # Delete it and put it back using generic method to get all set.
 	    foreach item [FindWithTag $tag] {
-		if {[GetItemsHeadClass $item] ne "transport"} {
+		#if {[GetItemsHeadClass $item] ne "transport"}
+		if {![HasItemAncestorWithTag $item [list head transport]]} {
 		    set jlib $jstate(jlib)
 		    DeleteWithTag $tag
 		    eval {::Roster::SetItem $jid} [$jlib roster getrosteritem $jid]
@@ -1452,15 +1458,38 @@ proc ::RosterTree::GetParent {item} {
     
     return [$T item parent $item]
 }
+
 # RosterTree::GetItemsHeadClass --
 # 
-#       Method to get an items 
+#       Method to get an items head tag or class.
+#       This relies on that it exists a head item where transports etc. are put.
 
 proc ::RosterTree::GetItemsHeadClass {item} {
     variable T
+    
+    set ancestors [$T item ancestors $item]
+    if {[llength $ancestors] >= 2} {
+	set head [lindex $ancestors end-1]
+	return [lindex [GetTagOfItem $head] 1]
+    } else {
+	return ""
+    }
+}
 
-    set head [lindex [$T item ancestors $item] end-1]
-    return [lindex [GetTagOfItem $head] 1]
+# RosterTree::HasItemAncestorWithTag --
+# 
+#       Searches its ancestors for an item with given tag.
+#       Smarter than 'GetItemsHeadClass'?
+
+proc ::RosterTree::HasItemAncestorWithTag {item tag} {
+    variable T
+    
+    set aitem [FindWithTag $tag]
+    if {$aitem ne ""} {
+	return [$T item isancestor $item $aitem]
+    } else {
+	return 0
+    }
 }
 
 # RosterTree::SortAtIdle --

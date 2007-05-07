@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.66 2007-04-14 12:32:16 matben Exp $
+# $Id: Register.tcl,v 1.67 2007-05-07 12:05:38 matben Exp $
 
 package provide Register 1.0
 
@@ -72,7 +72,7 @@ proc ::Register::Remove {{jid {}}} {
 	  [list ::Register::RemoveCallback $jid]
 	
 	# Remove also from our profile if our login account.
-	if {[ljib::jidequal $jid $jstate(server)]} {
+	if {[jlib::jidequal $jid $jstate(server)]} {
 	    set profile [::Profiles::FindProfileNameFromJID $jstate(mejid)]
 	    if {$profile ne ""} {
 		::Profiles::Remove $profile
