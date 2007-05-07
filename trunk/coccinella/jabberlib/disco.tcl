@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.46 2007-04-13 13:52:48 matben Exp $
+# $Id: disco.tcl,v 1.47 2007-05-07 07:09:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -912,8 +912,12 @@ proc jlib::disco::handle_get {discotype jlibname from queryE args} {
 
 proc jlib::disco::unavail_cb {jlibname xmldata} {
 
-    set jid [wrapper::getattribute $xmldata from]
-    reset $jlibname $jid
+    # This screws up gateway handling completely since a gateway is still
+    # a gateway even if unavailable!
+    # @@@ Perhaps we shall make a distinction here between ordinary users
+    # and services?
+    #set jid [wrapper::getattribute $xmldata from]
+    #reset $jlibname $jid
 }
 
 # jlib::disco::reset --
@@ -955,7 +959,7 @@ proc jlib::disco::ResetJid {jlibname jid} {
     upvar ${jlibname}::disco::info  info
     upvar ${jlibname}::disco::rooms rooms
 
-    if {$jid == {}} {
+    if {$jid eq ""} {
 	unset -nocomplain items info rooms
 	set info(conferences) [list]
     } else {
