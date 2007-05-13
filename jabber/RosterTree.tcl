@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.48 2007-05-07 12:05:38 matben Exp $
+# $Id: RosterTree.tcl,v 1.49 2007-05-13 13:36:03 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1213,10 +1213,6 @@ proc ::RosterTree::BasePostProcessDiscoInfo {from column elem} {
     # Investigate all roster items that are in any way related to the discoe'd
     # item. We'll get the roster JIDs, usually bare JID.
     set jidL [::Roster::GetUsersWithSameHost $from]
-    
-    if {[llength $jidL]} {
-	parray ::RosterTree::tag2items
-    }
     
     foreach jid $jidL {
 	

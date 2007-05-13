@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.13 2006-12-01 08:55:14 matben Exp $
+# $Id: ftrans.tcl,v 1.14 2007-05-13 13:36:04 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -103,7 +103,7 @@ proc jlib::ftrans::cmdproc {jlibname cmd args} {
 #       High level interface to the file-transfer profile for si.
 #       
 # Arguments:
-#       jlibname:   the instance of this ibb.
+#       jlibname:   the instance of this
 #       jid:
 #       args:       
 #       
@@ -178,7 +178,7 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
 	    set istate($sid,fd) $fd
 	}
     }
-    set subElems {}
+    set subElems [list]
     if {[string length $opts(-description)]} {
 	set descElem [wrapper::createtag "desc" -chdata $opts(-description)]
 	set subElems [list $descElem]
@@ -188,7 +188,7 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
 	lappend attrs date $opts(-date)
     }
     if {[string length $opts(-hash)]} {
-	lappend attrs date $opts(-hash)
+	lappend attrs hash $opts(-hash)
     }    
     set fileElem [wrapper::createtag "file" -attrlist $attrs -subtags $subElems]
     
@@ -411,6 +411,7 @@ proc jlib::ftrans::open_handler {jlibname sid jid iqChild respCmd} {
 	    lappend opts -$key $tstate($sid,$key)
 	}
     }
+    lappend opts -queryE $iqChild
     
     # Make a call up to application level to pick destination file.
     # This is an idle call in order to not block.

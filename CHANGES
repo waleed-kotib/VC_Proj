@@ -15,6 +15,7 @@ Coccinella-0.9*
  o support for geolocation
  o much faster roster population code
  o added roster search method
+ o added md5 hash checks for file transfer (bytestreams)
 
 Coccinella-0.95.16 (20070214):
 

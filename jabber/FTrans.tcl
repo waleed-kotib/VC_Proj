@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.16 2007-04-05 13:12:48 matben Exp $
+# $Id: FTrans.tcl,v 1.17 2007-05-13 13:36:03 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -17,8 +17,10 @@ package provide FTrans 1.0
 
 namespace eval ::FTrans {
 
-    ::hooks::register prefsInitHook          ::FTrans::InitPrefsHook
-    ::hooks::register jabberInitHook         ::FTrans::JabberInitHook
+    ::hooks::register prefsInitHook                   ::FTrans::InitPrefsHook
+    ::hooks::register jabberInitHook                  ::FTrans::JabberInitHook
+    ::hooks::register discoInfoProxyBytestreamsHook   ::FTrans::DiscoHook
+    ::hooks::register logoutHook                      ::FTrans::LogoutHook
     
     set title [mc {Send File}]
         
@@ -49,6 +51,31 @@ proc ::FTrans::InitPrefsHook { } {
       ]    
 }
 
+proc ::FTrans::DiscoHook {type from queryE args} {
+    upvar ::Jabber::jstate jstate
+    
+    $jstate(jlib) bytestreams get_proxy $from \
+      [namespace code [list GetProxyCB $from]]
+}
+
+proc ::FTrans::GetProxyCB {from jlib type queryE} {
+    
+    if {$type eq "result"} {
+	set hostE [wrapper::getfirstchildwithtag $queryE "streamhost"]
+	if {[llength $hostE]} {
+	    array set attr [wrapper::getattrlist $hostE]
+	    $jlib bytestreams configure \
+	      -proxyhost [list $from $attr(host) $attr(port)]
+	}
+    }
+}
+
+proc ::FTrans::LogoutHook {} {
+    upvar ::Jabber::jstate jstate
+    
+    $jstate(jlib) bytestreams configure -proxyhost ""
+}
+
 proc ::FTrans::BytestreamsConfigure {} {
     global  prefs
     upvar ::Jabber::jprefs jprefs
@@ -59,6 +86,19 @@ proc ::FTrans::BytestreamsConfigure {} {
 	lappend opts -address $prefs(NATip)
     }
     eval {$jstate(jlib) bytestreams configure} $opts
+}
+
+proc ::FTrans::MD5 {fileName} {
+    
+    # We don't use the md5x package since that is way too slow if pure tcl.
+    # Assumes the following output form:
+    # MD5 (sigslot.pdf) = 7ea44817f6def146ee180d0fff114b87
+    set hash ""
+    if {[llength [set cmd [auto_execok md5]]]} {
+	set ans [exec $cmd $fileName]
+	regexp { +([0-9a-f]+$)} $ans - hash
+    }
+    return $hash
 }
 
 #... Initiator (sender) section ................................................
@@ -394,6 +434,7 @@ proc ::FTrans::DoSend {win jid fileName desc} {
 	return
     }
     if {$feature eq $xmppxmlns(file-transfer)} {
+	lappend opts -hash [MD5 $fileName]
 	
 	# Do this each time since we may have changed proxy settings.
 	BytestreamsConfigure
@@ -583,6 +624,13 @@ proc ::FTrans::TCommand {token jlibname sid status {errmsg ""}} {
 	catch {file delete $state(fileName)}
     } elseif {$status eq "reset"} {
 	catch {file delete $state(fileName)}
+    }
+    
+    # Check file integrity using md5.
+    if {[info exists state(-hash)]} {
+	set hash [MD5 $state(fileName)]
+	ui::dialog -icon error -type ok -title [mc Error]  \
+	  -message "The MD5 checksums didn't agree which may point to file corruption"    
     }
     destroy $state(w)
     ::timing::free $sid
