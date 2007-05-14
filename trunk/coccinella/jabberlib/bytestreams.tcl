@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.26 2007-05-13 13:36:04 matben Exp $
+# $Id: bytestreams.tcl,v 1.27 2007-05-14 07:19:21 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -449,8 +449,10 @@ proc jlib::bytestreams::si_open_cb {jlibname sid type subiq args} {
 #       Selects the first succesful stream and kills the others. 
 #       If all streams have failed we report the error to si.
 #       
-#       NB: ifast_* means that we are in fast mode; the suffix normally 
-#           indicates which stream we are dealing with.
+#       NB1: ifast_* means that we are in fast mode; the suffix normally 
+#            indicates which stream we are dealing with.
+#       NB2: we do not send any iq response here, which should only be done when
+#            calling 'ifast_select_fast'.
 
 proc jlib::bytestreams::ifast_error_normal {jlibname sid} {
 
@@ -546,17 +548,12 @@ proc jlib::bytestreams::ifast_select_fast {jlibname sid} {
     upvar ${jlibname}::bytestreams::istate istate
     debug "jlib::bytestreams::ifast_select_fast (i)"
     
-    set sock    $istate($sid,fast,sock)
-    set id      $istate($sid,fast,id)
-    set jid     $istate($sid,fast,jid)
-    set hostjid $istate($sid,fast,hostjid)
-    send_used $jlibname $jid $id $hostjid
 
     # Activate the fast stream. Set normal stream to error so we wont use it.
     debug "\t select fast, send CR"
+    set sock $istate($sid,fast,sock)
     set istate($sid,active,sock) $sock
     set istate($sid,fast,state) activated
-    set istate($sid,state) error   
     if {[catch {
 	puts -nonewline $sock "\r"
 	flush $sock
@@ -567,6 +564,7 @@ proc jlib::bytestreams::ifast_select_fast {jlibname sid} {
     
 	# Shut down the 'normal' stream:
 	# Must close down any connections to our own streamhost.
+	set istate($sid,state) error   
 	if {[info exists istate($sid,sock)]} {
 	    debug_sock "close $istate($sid,sock)"
 	    catch {close $istate($sid,sock)}
@@ -776,7 +774,12 @@ proc jlib::bytestreams::i_connect_cb {jlibname sid result args} {
 	set sock $argsA(-socket)
 	set host $argsA(-streamhost)
 	set hostjid [lindex $host 0]
-
+	
+	# Deliver 'streamhost-used' to the target.
+	set id  $istate($sid,fast,id)
+	set jid $istate($sid,fast,jid)
+	send_used $jlibname $jid $id $hostjid
+	
 	set istate($sid,fast,sock)    $sock
 	set istate($sid,fast,host)    $host
 	set istate($sid,fast,hostjid) $hostjid
@@ -1493,7 +1496,7 @@ proc  jlib::bytestreams::readable {jlibname sid sock} {
 
 # jlib::bytestreams::send_used --
 # 
-#       Target notifies initiator of connection.
+#       Target (also initiator in fast mode) notifies initiator of connection.
 
 proc jlib::bytestreams::send_used {jlibname to id hostjid} {
     variable xmlns
@@ -1684,7 +1687,8 @@ namespace eval jlib::bytestreams {
 #       to make socks5 connections to the hosts in turn. Invokes the callback
 #       for the first succesful connection or an error if none worked.
 #       The 'sid' is the characteristic identifier of an object.
-#       It sets its own timeouts.
+#       It sets its own timeouts. Needs also a unique 'key' if using multiple
+#       connectors for one sid.
 #       
 #       NB1: SHA1(SID + Initiator JID + Target JID)
 #       NB2: the initiator may have two connector objects if fast + proxy.

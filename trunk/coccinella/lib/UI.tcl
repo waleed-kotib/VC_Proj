@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.152 2007-04-30 14:21:05 matben Exp $
+# $Id: UI.tcl,v 1.153 2007-05-14 07:19:21 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -850,8 +850,15 @@ proc ::UI::ScrollSet {wscrollbar geocmd offset size} {
 	set manager [lindex $geocmd 0]
 	$manager forget $wscrollbar
 	
+	#puts "\t $manager forget $wscrollbar"
+	#puts "\t geocmd=$geocmd"
+	
 	# This helps as a workaround for one of horiz/vert blank areas.
-	#update idletasks
+	if {0 && $manager eq "grid"} {
+	    set wmaster [winfo parent $wscrollbar]
+	    array set opts [lrange $geocmd 2 end]
+	    after idle [list grid rowconfigure $wmaster 1 -minsize 0]
+	}
     }
 }
 

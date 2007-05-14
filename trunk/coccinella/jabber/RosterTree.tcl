@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.49 2007-05-13 13:36:03 matben Exp $
+# $Id: RosterTree.tcl,v 1.50 2007-05-14 07:19:21 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -421,7 +421,8 @@ proc ::RosterTree::Find {} {
     if {![winfo exists $wfind]} {
 	set column [GetStyleFindColumn]
 	if {$column ne ""} {
-	    UI::TSearch $wfind $T $column -padding {6 2}
+	    UI::TSearch $wfind $T $column -padding {6 2} \
+	      -closecommand [namespace code FindDestroy]
 	    grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky ew
 	}
     }
@@ -437,7 +438,11 @@ proc ::RosterTree::FindAgain {dir} {
 
 proc ::RosterTree::FindDestroy {} {
     variable wfind
+    set wmaster [winfo parent $wfind]
     destroy $wfind
+    
+    # Workaround for the grid bug.
+    after idle [list grid rowconfigure $wmaster 2 -minsize 0]
 }
 
 proc ::RosterTree::FindReset {} {
