@@ -5,7 +5,7 @@
 #       
 # Copyright (c) 2007 Mats Bengtsson
 #       
-# $Id: TSearch.tcl,v 1.3 2007-04-27 06:59:27 matben Exp $
+# $Id: TSearch.tcl,v 1.4 2007-05-14 07:19:21 matben Exp $
 
 package require snit 1.0
 package require tileutils
@@ -43,7 +43,8 @@ snit::widgetadaptor UI::TSearch::widget {
     delegate method * to hull
     delegate option * to hull 
     
-    option -nextstyle   -default Small.Url
+    option -nextstyle    -default Small.Url
+    option -closecommand -default [list]
 
     constructor {_T _column args} {
 	
@@ -227,7 +228,11 @@ snit::widgetadaptor UI::TSearch::widget {
     }
     
     method Close {} {
-	destroy $win
+	if {[llength $options(-closecommand)]} {
+	    uplevel $options(-closecommand)
+	} else {
+	    destroy $win
+	}
     }
 }
     
