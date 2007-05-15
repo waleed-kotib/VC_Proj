@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.50 2007-05-14 07:19:21 matben Exp $
+# $Id: RosterTree.tcl,v 1.51 2007-05-15 14:09:34 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -353,11 +353,11 @@ proc ::RosterTree::New {w} {
 	    
     treectrl $T -usetheme 1 -selectmode extended  \
       -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 0  \
-      -xscrollcommand [list ::UI::ScrollSet $wxsc     \
-      [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
-      -yscrollcommand [list ::UI::ScrollSet $wysc     \
-      [list grid $wysc -row 0 -column 1 -sticky ns]]  \
-      -borderwidth 0 -highlightthickness 0            \
+      -xscrollcommand [list ::UI::ScrollSetStdGrid $wxsc     \
+      [list grid $wxsc -row 1 -column 0 -sticky ew]]         \
+      -yscrollcommand [list ::UI::ScrollSetStdGrid $wysc     \
+      [list grid $wysc -row 0 -column 1 -sticky ns]]         \
+      -borderwidth 0 -highlightthickness 0                   \
       -height 0 -width 0
     
     SetBinds
@@ -383,7 +383,7 @@ proc ::RosterTree::New {w} {
     grid  $wxsc   -row 1 -column 0 -sticky ew
     grid columnconfigure $w 0 -weight 1
     grid rowconfigure    $w 0 -weight 1
-
+    
     return $T
 }
 
