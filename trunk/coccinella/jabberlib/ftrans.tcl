@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.14 2007-05-13 13:36:04 matben Exp $
+# $Id: ftrans.tcl,v 1.15 2007-05-16 12:19:28 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -497,15 +497,16 @@ proc jlib::ftrans::close_handler {jlibname sid {errmsg ""}} {
     upvar ${jlibname}::ftrans::tstate tstate
     #puts "jlib::ftrans::close_handler (t)"
     
+    # Be sure to close the file before doing the callback, else md5 bail out!
+    if {[string length $tstate($sid,-channel)]} {
+	close $tstate($sid,-channel)
+    }
     if {[string length $tstate($sid,-command)]} {
 	if {[string length $errmsg]} {
 	    uplevel #0 $tstate($sid,-command) [list $jlibname $sid error $errmsg]	    
 	} else {
 	    uplevel #0 $tstate($sid,-command) [list $jlibname $sid ok]
 	}
-    }
-    if {[string length $tstate($sid,-channel)]} {
-	close $tstate($sid,-channel)
     }
     tfree $jlibname $sid
 }

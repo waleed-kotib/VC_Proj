@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.27 2007-05-14 07:19:21 matben Exp $
+# $Id: bytestreams.tcl,v 1.28 2007-05-16 12:19:28 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -1825,9 +1825,9 @@ proc jlib::bytestreams::connector_final {jlibname sid key {err ""}} {
     array unset conn $x,*
 }
 
-proc jlib::bytestreams::debug {msg} {if {1} {puts $msg}}
+proc jlib::bytestreams::debug {msg} {if {0} {puts $msg}}
 
-proc jlib::bytestreams::debug_sock {msg} {if {1} {puts $msg}}
+proc jlib::bytestreams::debug_sock {msg} {if {0} {puts $msg}}
 
 #-------------------------------------------------------------------------------
 
