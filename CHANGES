@@ -5,7 +5,7 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.9*
+Coccinella-0.96.0 (200705??)
 
  o removed the p2p whiteboard mode
  o the whiteboard code can now optionally be removed from the application

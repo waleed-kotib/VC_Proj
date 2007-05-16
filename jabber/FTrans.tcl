@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.17 2007-05-13 13:36:03 matben Exp $
+# $Id: FTrans.tcl,v 1.18 2007-05-16 12:19:28 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -91,12 +91,21 @@ proc ::FTrans::BytestreamsConfigure {} {
 proc ::FTrans::MD5 {fileName} {
     
     # We don't use the md5x package since that is way too slow if pure tcl.
-    # Assumes the following output form:
+    # Assumes the following output form for md5:
     # MD5 (sigslot.pdf) = 7ea44817f6def146ee180d0fff114b87
+    # And for md5sum:
+    # 7ea44817f6def146ee180d0fff114b87  sigslot.pdf
     set hash ""
     if {[llength [set cmd [auto_execok md5]]]} {
-	set ans [exec $cmd $fileName]
+	puts "cmd=$cmd"
+	set ans [exec $cmd [list $fileName]]
+	puts "md5: '$ans'"
 	regexp { +([0-9a-f]+$)} $ans - hash
+    } elseif {[llength [set cmd [auto_execok md5sum]]]} {
+	puts "cmd=$cmd"
+	set ans [exec $cmd [list $fileName]]
+	puts "md5sum: '$ans'"
+	regexp {^([0-9a-f]+)} $ans - hash
     }
     return $hash
 }
@@ -624,13 +633,17 @@ proc ::FTrans::TCommand {token jlibname sid status {errmsg ""}} {
 	catch {file delete $state(fileName)}
     } elseif {$status eq "reset"} {
 	catch {file delete $state(fileName)}
-    }
+    } else {
     
-    # Check file integrity using md5.
-    if {[info exists state(-hash)]} {
-	set hash [MD5 $state(fileName)]
-	ui::dialog -icon error -type ok -title [mc Error]  \
-	  -message "The MD5 checksums didn't agree which may point to file corruption"    
+	# Check file integrity using md5.
+	if {[info exists state(-hash)] && [string length $state(-hash)]} {
+	    set hash [MD5 $state(fileName)]
+	    puts "\t state(-hash)=$state(-hash), hash=$hash, state(fileName)=$state(fileName)"
+	    if {[string length $hash] && ($hash ne $state(-hash))} {
+		ui::dialog -icon error -type ok -title [mc Error]  \
+		  -message "The MD5 checksums didn't agree which may point to file corruption"
+	    }
+	}
     }
     destroy $state(w)
     ::timing::free $sid
