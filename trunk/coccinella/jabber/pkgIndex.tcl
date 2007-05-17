@@ -8,6 +8,7 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
+package ifneeded Adhoc      1.0 [list source [file join $dir Adhoc.tcl]]
 package ifneeded Avatar     1.0 [list source [file join $dir Avatar.tcl]]
 package ifneeded AvatarMB   1.0 [list source [file join $dir AvatarMB.tcl]]
 package ifneeded Chat       1.0 [list source [file join $dir Chat.tcl]]

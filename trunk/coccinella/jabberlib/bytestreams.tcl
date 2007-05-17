@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.28 2007-05-16 12:19:28 matben Exp $
+# $Id: bytestreams.tcl,v 1.29 2007-05-17 14:42:16 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -80,7 +80,7 @@
 #           (1) iq query/response
 #           (2) socks5 connections and negotiations, denoted s5 here
 #       They interact and depend on each other. (f) means fast mode only.
-#       As seen from the intiator:
+#       As seen from the initiator:
 # 
 #           (a) iq-stream initiate (send)
 #       (f) (b) iq-stream target provides streamhosts to initiator (recv)
@@ -88,8 +88,8 @@
 #       (f) (2) s5 fast socket to targets streamhost
 #           (3) s5 socket initiator to proxy
 #           
-#       iq-stream (1) controls (a) and (c)
-#       iq-stream (2) controls (b)
+#       iq-stream (a) controls (1) and (3)
+#       iq-stream (b) controls (2)
 #       
 #       There are three possible s5 streams:
 #           

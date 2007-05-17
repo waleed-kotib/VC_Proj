@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.154 2007-05-15 14:09:37 matben Exp $
+# $Id: UI.tcl,v 1.155 2007-05-17 14:42:17 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -299,6 +299,7 @@ proc ::UI::InitDlgs { } {
 	jpopupdisco     .jpopupdi
 	jpopuproster    .jpopupro
 	jpopupgroupchat .jpopupgc
+	jadhoc          .jadhoc
     }
 }
 

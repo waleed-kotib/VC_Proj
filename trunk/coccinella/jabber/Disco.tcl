@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.107 2007-04-17 14:53:38 matben Exp $
+# $Id: Disco.tcl,v 1.108 2007-05-17 14:42:16 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -144,6 +144,7 @@ proc ::Disco::InitMenus {} {
 	} }
 	{command    mRefresh       {::Disco::Refresh $vstruct} }
 	{command    mAddServer     {::Disco::AddServerDlg}     }
+	{cascade    "Ad-Hoc Commands"   {}     }
     }
     if {[::Jabber::HaveWhiteboard]} {
 	set mDefs [linsert $mDefs 2 \
@@ -179,6 +180,7 @@ proc ::Disco::InitMenus {} {
 	}}
 	{mRefresh       {jid}           }
 	{mAddServer     {}              }
+	{"Ad-Hoc Commands" {disabled}    }
     }
 }
 
@@ -915,7 +917,7 @@ proc ::Disco::Popup {w vstruct x y} {
     # Make a list of all the features of the clicked item.
     # This is then matched against each menu entries type to set its state.
 
-    set clicked {}
+    set clicked [list]
     if {[lsearch -glob $categoryList "conference/*"] >= 0} {
 	lappend clicked conference
     }
@@ -965,7 +967,7 @@ proc ::Disco::Popup {w vstruct x y} {
     set m $wDlgs(jpopupdisco)
     catch {destroy $m}
     menu $m -tearoff 0  \
-      -postcommand [list ::Disco::PostMenuCmd $m $mType $clicked]
+      -postcommand [list ::Disco::PostMenuCmd $m $mType $clicked $jid $node]
     
     ::AMenu::Build $m $mDef -varlist [list jid $jid node $node vstruct $vstruct]
     
@@ -978,9 +980,7 @@ proc ::Disco::Popup {w vstruct x y} {
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
 }
 
-proc ::Disco::PostMenuCmd {m mType clicked} {
-
-    ::hooks::run discoPostCommandHook $m $clicked  
+proc ::Disco::PostMenuCmd {m mType clicked jid node} {
 
     foreach mspec $mType {
 	lassign $mspec name type subType
@@ -989,6 +989,8 @@ proc ::Disco::PostMenuCmd {m mType clicked} {
 	# We use the 'type' and 'clicked' lists to set the state.
 	if {$type eq "normal"} {
 	    set state normal
+	} elseif {$type eq "disabled"} {
+	    set state disabled
 	} elseif {[listintersectnonempty $type $clicked]} {
 	    set state normal
 	} elseif {$type eq ""} {
@@ -1002,9 +1004,11 @@ proc ::Disco::PostMenuCmd {m mType clicked} {
 	}
 	if {[llength $subType]} {
 	    set mt [$m entrycget $midx -menu]
-	    PostMenuCmd $mt $subType $clicked
+	    PostMenuCmd $mt $subType $clicked $jid $node
 	}
     }
+    
+    ::hooks::run discoPostCommandHook $m $clicked $jid $node
 }
 
 proc ::Disco::Selection {T v} {

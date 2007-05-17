@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.207 2007-04-13 13:52:47 matben Exp $
+# $Id: Jabber.tcl,v 1.208 2007-05-17 14:42:16 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -31,6 +31,7 @@ package require jlib::si
 package require jlib::vcard
 
 # We should have some component mechanism that lets packages load themselves.
+package require Adhoc
 package require Avatar
 package require AvatarMB
 package require Chat
