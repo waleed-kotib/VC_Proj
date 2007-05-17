@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.28 2007-03-09 07:54:03 matben Exp $
+# $Id: JForms.tcl,v 1.29 2007-05-17 14:42:16 matben Exp $
 # 
 #      Updated to version 2.5 of XEP-0004
 #  
@@ -515,6 +515,7 @@ proc ::JForms::NewLabelEntry {token elem} {
 	$wlab configure -wraplength $state(opt,-width)
     }
     lappend state(wraplengthList) $wlab
+    BalloonDesc $elem $wlab $went
 }
 
 # JForms::NewTextMulti --
@@ -580,6 +581,7 @@ proc ::JForms::NewTextMulti {token elem} {
 	$wlab configure -wraplength $state(opt,-width)
     }
     lappend state(wraplengthList) $wlab
+    BalloonDesc $elem $wlab $wtxt
 }
 
 proc ::JForms::NewListSingle {token elem} {
@@ -640,6 +642,7 @@ proc ::JForms::NewListSingle {token elem} {
 	$wlab configure -wraplength $state(opt,-width)
     }
     lappend state(wraplengthList) $wlab
+    BalloonDesc $elem $wlab $wpop
 }
 
 proc ::JForms::NewListMulti {token elem} {
@@ -715,6 +718,7 @@ proc ::JForms::NewListMulti {token elem} {
 	$wlab configure -wraplength $state(opt,-width)
     }
     lappend state(wraplengthList) $wlab
+    BalloonDesc $elem $wlab $wlb
 }   
 
 proc ::JForms::NewJidMulti {token elem} {
@@ -765,6 +769,7 @@ proc ::JForms::NewJidMulti {token elem} {
 	$wlab configure -wraplength $state(opt,-width)
     }
     lappend state(wraplengthList) $wlab
+    BalloonDesc $elem $wlab $wtxt
 }
 
 proc ::JForms::NewBoolean {token elem} {
@@ -797,6 +802,7 @@ proc ::JForms::NewBoolean {token elem} {
 
     # Unused by ttk::checkbutton
     #lappend state(wraplengthList) $wch
+    BalloonDesc $elem $wch
 }
 
 proc ::JForms::NewFixed {token elem} {
@@ -812,6 +818,7 @@ proc ::JForms::NewFixed {token elem} {
 	    $wlab configure -wraplength $state(opt,-width)
 	}
 	lappend state(wraplengthList) $wlab
+	BalloonDesc $elem $wlab
     }
 }
 
@@ -826,6 +833,16 @@ proc ::JForms::NewHidden {token elem} {
     set state(def,$var)  $defValue
     set state(var,$var)  $defValue
     set state(type,$var) $attr(type)
+}
+
+proc ::JForms::BalloonDesc {fieldE args} {
+    
+    set descE [wrapper::getfirstchildwithtag $fieldE desc]
+    if {[llength $descE]} {
+	foreach w $args {
+	    ::balloonhelp::balloonforwindow $w [wrapper::getcdata $descE]
+	}
+    }
 }
 
 proc ::JForms::AnyRequired {token elem} {

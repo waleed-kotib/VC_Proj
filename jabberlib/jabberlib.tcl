@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.174 2007-04-18 14:15:13 matben Exp $
+# $Id: jabberlib.tcl,v 1.175 2007-05-17 14:42:16 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2631,15 +2631,12 @@ proc jlib::send_iq {jlibname type xmldata args} {
     } elseif {[info exists argsA(-id)]} {
 	lappend attrlist "id" $argsA(-id)
     }
-    if {[info exists argsA(-to)]} {
-	lappend attrlist "to" $argsA(-to)
+    unset -nocomplain argsA(-id) argsA(-command)
+    foreach {key value} [array get argsA] {
+	set name [string trimleft $key -]
+	lappend attrlist $name $value
     }
-    if {[llength $xmldata]} {
-	set xmllist [wrapper::createtag "iq" -attrlist $attrlist \
-	  -subtags $xmldata]
-    } else {
-	set xmllist [wrapper::createtag "iq" -attrlist $attrlist]
-    }
+    set xmllist [wrapper::createtag "iq" -attrlist $attrlist -subtags $xmldata]
     
     send $jlibname $xmllist
     return

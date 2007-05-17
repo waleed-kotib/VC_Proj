@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.47 2007-05-07 07:09:27 matben Exp $
+# $Id: disco.tcl,v 1.48 2007-05-17 14:42:16 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -28,6 +28,7 @@
 #      jlibname disco getconferences
 #      jlibname disco getjidsforcategory pattern
 #      jlibname disco getjidsforfeature feature
+#      jlibname disco getxml jid ?node?
 #      jlibname disco features jid ?node?
 #      jlibname disco hasfeature feature jid ?node?
 #      jlibname disco isroom jid
@@ -390,7 +391,7 @@ proc jlib::disco::parse_get_items {jlibname from queryE} {
     set pnode [wrapper::getattribute $queryE "node"]
     set pitem [list $from $pnode]
     
-    set items($from,$pnode,xml) [getfulliq result $queryE]
+    set items($from,$pnode,xml) [getfulliq result $queryE -from $from]
     unset -nocomplain items($from,$pnode,children) items($from,$pnode,nodes)
     unset -nocomplain items($from,$pnode,childs)
     
@@ -527,7 +528,7 @@ proc jlib::disco::parse_get_info {jlibname from queryE} {
     set node [wrapper::getattribute $queryE "node"]
 
     array unset info [jlib::ESC $from],[jlib::ESC $node],*
-    set info($from,$node,xml) [getfulliq result $queryE]
+    set info($from,$node,xml) [getfulliq result $queryE -from $from]
     set isconference 0
     
     foreach c [wrapper::getchildren $queryE] {
@@ -617,6 +618,10 @@ proc jlib::disco::isdiscoed {jlibname discotype jid {node ""}} {
 	    return [info exists info($jid,$node,xml)]
 	}
     }
+}
+
+proc jlib::disco::getxml {jlibname discotype jid {node ""}} {
+    return [get $jlibname $discotype xml $jid $node]
 }
 
 proc jlib::disco::get {jlibname discotype key jid {node ""}} {
