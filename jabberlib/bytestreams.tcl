@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.29 2007-05-17 14:42:16 matben Exp $
+# $Id: bytestreams.tcl,v 1.30 2007-05-18 07:18:35 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -297,13 +297,17 @@ proc jlib::bytestreams::si_open {jlibname jid sid args} {
     set hash2sid($hash) $sid
     set host [list $myjid -host $ip -port $static(port)]
     set streamhosts [list $host]
+    set opts [list]
+    lappend opts -fastmode $fastmode
     
     # Second, the proxy host if any.
     if {[llength $static(-proxyhost)]} {
 	lassign $static(-proxyhost) pjid pip pport
 	set proxyhost [list $pjid -host $pip -port $pport]
 	lappend streamhosts $proxyhost
+	lappend opts -proxyjid $pjid
     }
+    lappend opts -streamhosts $streamhosts
     
     # Schedule a timeout until we get a streamhost-used returned.
     set istate($sid,timeoutid) [after $static(-timeoutms)  \
@@ -311,8 +315,7 @@ proc jlib::bytestreams::si_open {jlibname jid sid args} {
     
     # Initiate the stream to the target.
     set si_open_cb [list [namespace current]::si_open_cb $jlibname $sid]
-    send_initiate $jlibname $jid $sid $si_open_cb -streamhosts $streamhosts \
-      -fastmode $fastmode
+    eval {send_initiate $jlibname $jid $sid $si_open_cb} $opts
 
     return
 }
@@ -643,19 +646,12 @@ proc jlib::bytestreams::send_initiate {jlibname to sid cmd args} {
     set attrlist [list xmlns $xmlns(bs) sid $sid mode tcp]
     set sublist [list]
     set opts [list]
+    set proxyjid ""
     foreach {key value} $args {
 	
 	switch -- $key {
 	    -streamhosts {
-		foreach hostspec $value {
-		    set jid [lindex $hostspec 0]
-		    set hostattr [list jid $jid]
-		    foreach {hkey hvalue} [lrange $hostspec 1 end] {
-			lappend hostattr [string trimleft $hkey -] $hvalue
-		    }
-		    lappend sublist \
-		      [wrapper::createtag "streamhost" -attrlist $hostattr]
-		}
+		set streamhosts $value
 	    }
 	    -fastmode {
 		if {$value} {
@@ -665,9 +661,31 @@ proc jlib::bytestreams::send_initiate {jlibname to sid cmd args} {
 		      -attrlist [list xmlns $xmlns(fast)]]
 		}
 	    }
+	    -proxyjid {
+		# Mark proxy: <proxy xmlns="http://affinix.com/jabber/stream"/> 
+		set proxyjid $value
+	    }
 	    default {
 		return -code error "unknown option \"$key\""
 	    }
+	}
+    }
+    
+    # Need to do it here in order to handle any proxy element.
+    if {[info exists streamhosts]} {
+	foreach hostspec $streamhosts {
+	    set jid [lindex $hostspec 0]
+	    set hostattr [list jid $jid]
+	    foreach {hkey hvalue} [lrange $hostspec 1 end] {
+		lappend hostattr [string trimleft $hkey -] $hvalue
+	    }
+	    set ssub [list]
+	    if {[jlib::jidequal $proxyjid $jid]} {
+		set ssub [list [wrapper::createtag proxy \
+		  -attrlist [list xmlns $xmlns(fast)]]]
+	    }
+	    lappend sublist [wrapper::createtag "streamhost" \
+	      -attrlist $hostattr -subtags $ssub]
 	}
     }
     
