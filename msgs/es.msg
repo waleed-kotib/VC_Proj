@@ -482,6 +482,7 @@
 ::msgcat::mcset es mJiveForward         {Deviar la llamada actual a...}
 
 ::msgcat::mcset es mEditNick            {Editar nick}
+::msgcat::mcset es mAdHocCommands       {Ad-Hoc Commands}
 
 # Textos cortos únicamente.
 ::msgcat::mcset es {30 days}			{30 días}

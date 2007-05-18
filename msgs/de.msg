@@ -478,6 +478,7 @@
 ::msgcat::mcset de mBackgroundImage     {Hintergrundbild}
 
 ::msgcat::mcset de mEditNick            {Edit Nickname}
+::msgcat::mcset de mAdHocCommands       {Ad-Hoc Commands}
 
 
 # Short texts only. Use english as database key.

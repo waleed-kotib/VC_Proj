@@ -469,6 +469,7 @@
 ::msgcat::mcset kr mBackgroundImage     {배경 그림}
 
 ::msgcat::mcset kr mEditNick            {Edit Nickname}
+::msgcat::mcset kr mAdHocCommands       {Ad-Hoc Commands}
 
 
 # Short texts only. Use english text as database key.

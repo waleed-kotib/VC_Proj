@@ -17,6 +17,7 @@ Coccinella-0.96.0 (200705??)
  o added roster search method
  o added md5 hash checks for file transfer (bytestreams)
  o added proxy support for bytestreams
+ o added support for XEP-0050: Ad-Hoc Commands 
 
 Coccinella-0.95.16 (20070214):
 

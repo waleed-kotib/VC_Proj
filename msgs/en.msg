@@ -465,6 +465,7 @@
 ::msgcat::mcset en mJiveForward         {Forward Call}
 ::msgcat::mcset en mBackgroundImage     {Background Image}
 ::msgcat::mcset en mEditNick            {Edit Nickname}
+::msgcat::mcset en mAdHocCommands       {Ad-Hoc Commands}
 
 
 # Short texts only. Use english text as database key.

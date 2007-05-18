@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.108 2007-05-17 14:42:16 matben Exp $
+# $Id: Disco.tcl,v 1.109 2007-05-18 14:12:03 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -144,7 +144,7 @@ proc ::Disco::InitMenus {} {
 	} }
 	{command    mRefresh       {::Disco::Refresh $vstruct} }
 	{command    mAddServer     {::Disco::AddServerDlg}     }
-	{cascade    "Ad-Hoc Commands"   {}     }
+	{cascade    mAdHocCommands {}                          }
     }
     if {[::Jabber::HaveWhiteboard]} {
 	set mDefs [linsert $mDefs 2 \
@@ -180,7 +180,7 @@ proc ::Disco::InitMenus {} {
 	}}
 	{mRefresh       {jid}           }
 	{mAddServer     {}              }
-	{"Ad-Hoc Commands" {disabled}    }
+	{mAdHocCommands {disabled}      }
     }
 }
 

@@ -480,6 +480,7 @@
 ::msgcat::mcset fr mJiveForward         {Forward Call}
 ::msgcat::mcset fr mBackgroundImage     {Background Image}
 ::msgcat::mcset fr mEditNick            {Edit Nickname}
+::msgcat::mcset fr mAdHocCommands       {Ad-Hoc Commands}
 
 
 # Courts textes uniquement. Anglais pour les clés de la base de données.

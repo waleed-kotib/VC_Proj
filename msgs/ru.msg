@@ -384,6 +384,7 @@
 ::msgcat::mcset ru mOffline         	{Офлайн}
 ::msgcat::mcset ru mTransports         	{Транспорты}
 ::msgcat::mcset ru mEditNick            {Edit Nickname}
+::msgcat::mcset ru mAdHocCommands       {Ad-Hoc Commands}
 
 
 # Short texts only. Use english text as database key.
