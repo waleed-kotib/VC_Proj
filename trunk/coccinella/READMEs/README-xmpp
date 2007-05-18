@@ -50,10 +50,11 @@ these XEPs have the form of a library or support protocol for other functions.
    0045 | Multi-User Chat               | complete
    0047 | In-Band Bytestreams           | complete
    0048 | Bookmark Storage              | for conference rooms
+   0050 | Ad-Hoc Commands               | complete
    0054 | vcard-temp                    | complete
    0055 | Jabber Search                 | complete
    0060 | Publish-Subscribe             | complete
-   0065 | SOCKS5 Bytestreams            | proxies not implemented
+   0065 | SOCKS5 Bytestreams            | complete
    0066 | Out of Band Data              | complete
    0077 | In-Band Registration          | complete
    0078 | Non-SASL Authentication       | complete
@@ -65,7 +66,7 @@ these XEPs have the form of a library or support protocol for other functions.
    0095 | Stream Initiation             | complete
    0096 | File Transfer                 | complete
    0107 | User Mood                     | complete
-   0115 | Entity Capabilities           | partial
+   0115 | Entity Capabilities           | complete; only library level
    0138 | Stream Compression            | untested; only library level
    0147 | XMPP URI Scheme Query Comp... | almost complete
    0153 | vCard-Based Avatars           | complete

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.29 2007-05-17 14:42:16 matben Exp $
+# $Id: JForms.tcl,v 1.30 2007-05-18 14:12:03 matben Exp $
 # 
 #      Updated to version 2.5 of XEP-0004
 #  
@@ -24,7 +24,7 @@ namespace eval ::JForms:: {
     #   ::JForms::Build w queryE ?-key value ...?
     #   ::JForms::XDataFrame w xdataE ?-tilestyle, -width?
     #   ::JForms::GetXML token
-    #   ::JForms::GetState token key
+    #   ::JForms::GetStateValue token key
     
     # Internal state:
     # 
@@ -915,7 +915,7 @@ proc ::JForms::GetXDataForm {token} {
     variable $token
     upvar 0 $token state
     
-    set xmllist {}
+    set xmllist [list]
 
     foreach {key val} [array get state var,*] {
 	set var [string map {var, ""} $key]
@@ -1222,6 +1222,27 @@ proc ::JForms::ResultXDataList {token queryE} {
     return $res
 }
 
+# JForms::SetState --
+# 
+#       Used to put the form in a disabled state.
+
+proc ::JForms::SetState {token _state} {
+    variable $token
+    upvar 0 $token state
+    
+    set w $state(w)
+    SetStateRecursive $state(w) $_state
+}
+
+proc ::JForms::SetStateRecursive {win _state} {
+    foreach w [winfo children $win] {
+	SetStateRecursive $w $_state
+    }
+    if {[winfo class $win] eq "TEntry"} {
+	$win state $_state
+    }
+}
+
 proc ::JForms::GetReported {token} {
     variable $token
     upvar 0 $token state
@@ -1229,7 +1250,7 @@ proc ::JForms::GetReported {token} {
     return $state(reported)
 }
 
-proc ::JForms::GetState {token key} {
+proc ::JForms::GetStateValue {token key} {
     variable $token
     upvar 0 $token state
 

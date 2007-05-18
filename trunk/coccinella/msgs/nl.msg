@@ -469,6 +469,8 @@
 ::msgcat::mcset nl mBackgroundImage			{Achtergrondafbeelding}
 ::msgcat::mcset nl mEditNick				{Bijnaam bewerken}
 
+::msgcat::mcset nl mAdHocCommands                       {Ad-Hoc Commands}
+
 
 # Short texts only. Use english as database key.
 ::msgcat::mcset nl {30 days}				{30 dagen}

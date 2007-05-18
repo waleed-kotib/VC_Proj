@@ -475,6 +475,7 @@
 ::msgcat::mcset it mBackgroundImage {Immagine di Sfondo}
 
 ::msgcat::mcset it mEditNick            {Edit Nickname}
+::msgcat::mcset it mAdHocCommands       {Ad-Hoc Commands}
 
 # Short texts only. Use english text as database key.
 ::msgcat::mcset it {30 days} {30 giorni}

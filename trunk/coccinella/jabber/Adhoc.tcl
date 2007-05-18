@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: Adhoc.tcl,v 1.1 2007-05-17 14:42:16 matben Exp $
+# $Id: Adhoc.tcl,v 1.2 2007-05-18 14:12:02 matben Exp $
+
+# @@@ Maybe all this should be a component?
 
 package provide Adhoc 1.0
 
@@ -13,12 +15,9 @@ namespace eval ::Adhoc {
 
     ::hooks::register discoInfoHook                   ::Adhoc::DiscoInfoHook
     ::hooks::register discoPostCommandHook            ::Adhoc::PostMenuHook
-    ::hooks::register logoutHook                      ::Adhoc::LogoutHook
     
     variable prefs
     set prefs(autoDisco) 1
-    
-    variable state
     
     variable xmlns
     set xmlns(commands) "http://jabber.org/protocol/commands"
@@ -42,43 +41,22 @@ proc ::Adhoc::DiscoInfoHook {type from queryE args} {
     }
 }
 
-proc ::Adhoc::LogoutHook {} {
-    variable state
-
-    unset -nocomplain state
-}
-
 proc ::Adhoc::GetCommandList {jid cmd} {
     variable xmlns
     ::Jabber::JlibCmd disco get_async items $jid $cmd -node $xmlns(commands)
 }
 
 proc ::Adhoc::GetCommandListCB {jlibname type from queryE args} {
-    
-    return
-    if {$type eq "error"} {
-	return
-    }
-    unset -nocomplain state($from,items)
-    foreach itemE [wrapper::wrapper::getchildren $queryE] {
-	if {[wrapper::gettag $itemE] eq "item"} {
-	    
-	    
-	    
-	}
-    }
-    
+    # empty
 }
 
 proc ::Adhoc::PostMenuHook {m clicked jid node} {
     variable xmlns
     
-    #puts "::Adhoc::PostMenuHook m=$m, clicked=$clicked, jid=$jid, node=$node"
-    
     if {![::Jabber::JlibCmd disco hasfeature $xmlns(commands) $jid $node]} {
 	return
     }
-    set name "Ad-Hoc Commands"
+    set name mAdHocCommands
     set midx [::AMenu::GetMenuIndex $m $name]
     if {$midx eq ""} {
 	# Probably a submenu.
@@ -103,6 +81,44 @@ proc ::Adhoc::PostMenuHook {m clicked jid node} {
     }
 }
 
+proc ::Adhoc::FindLabelForJIDNode {jid node} {
+    variable xmlns
+
+    set label $jid
+    set xmllist [::Jabber::JlibCmd disco getxml items $jid $xmlns(commands)]
+    set queryE [wrapper::getfirstchildwithtag $xmllist query]
+    foreach itemE [::wrapper::getchildren $queryE] {
+	if {[wrapper::gettag $itemE] eq "item"} {
+	    set xjid  [wrapper::getattribute $itemE jid]
+	    set xnode [wrapper::getattribute $itemE node]
+	    if {($jid eq $xjid) && ($node eq $xnode)} {
+		set name [wrapper::getattribute $itemE name]
+		set label $name
+		if {$label eq ""} {
+		    set label $jid
+		}
+		break
+	    }
+	}
+    }
+    return $label
+}
+
+proc ::Adhoc::GetActions {queryE} {
+    
+    set actions [list]
+    set commandE [wrapper::getfirstchildwithtag $queryE command]
+    if {[llength $commandE]} {
+	set actionsE [wrapper::getfirstchildwithtag $commandE actions]
+	if {[llength $actionsE]} {
+	    foreach E [wrapper::getchildren $actionsE] {
+		lappend actions [wrapper::gettag $E]
+	    }
+	}
+    }
+    return $actions
+}
+
 proc ::Adhoc::Execute {jid node} {
     variable xmlns
 
@@ -118,8 +134,9 @@ proc ::Adhoc::ExecuteCB {jid node type subiq args} {
     if {$type eq "error"} {
 	set errcode [lindex $subiq 0]
 	set errmsg  [lindex $subiq 1]
+	set label [FindLabelForJIDNode $jid $node]
 	ui::dialog -icon error -title [mc Error] \
-	  -message "Ad-Hoc command to $jid ($node) failed because: $errmsg"
+	  -message "Ad-Hoc command for \"$label\" at $jid failed because: $errmsg"
     } else {
 	BuildDlg $jid $node $subiq
     }
@@ -128,12 +145,16 @@ proc ::Adhoc::ExecuteCB {jid node type subiq args} {
 proc ::Adhoc::BuildDlg {jid node queryE} {
     global  wDlgs
     variable uid
+
+    # Collect some useful attributes.
+    set sessionid [wrapper::getattribute $queryE sessionid]
+    set status    [wrapper::getattribute $queryE status]
     
     set w $wDlgs(jadhoc)[incr uid]
     ::UI::Toplevel $w -class AdHoc  \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace code Close]
-    wm title $w "Ad-Hoc for $jid and $node"
+    wm title $w "Ad-Hoc for $jid"
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jadhoc)]]
     if {$nwin == 1} {
@@ -142,42 +163,52 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
 
     ttk::frame $w.all -padding [option get . dialogPadding {}]
     pack $w.all -side top -fill both -expand 1
-
+    
+    # Duplicates the form, typically.
+    #set label [FindLabelForJIDNode $jid $node]
+    #ttk::label $w.all.lbl -text $label
+    #pack $w.all.lbl -side top
+    
     set wform $w.all.form
     set ftoken [::JForms::Build $wform $queryE -width 300]
     pack $wform -side top -fill both -expand 1
 
     set bot $w.all.bot
     ttk::frame $bot -padding [option get . okcancelTopPadding {}]
-    ttk::button $bot.close -text [mc Close] -default active \
-      -command [namespace code [list Close $w]]
-    ttk::button $bot.next -text [mc Next] \
-      -command [namespace code [list Next $w]]
-    set padx [option get . buttonPadX {}]
-    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+
+    if {$status eq "completed"} {
+	
+	# completed: The command has completed. The command session has ended.
+	# Typical if a command does not require any interaction.
+	ttk::button $bot.close -text [mc Close] -default active \
+	  -command [namespace code [list Close $w]]
 	pack $bot.close -side right
-	pack $bot.next -side right -padx $padx
+	
+	::JForms::SetState $ftoken disabled
     } else {
+	ttk::button $bot.next -text [mc Next] -default active \
+	  -command [namespace code [list Next $w]]
+	ttk::button $bot.prev -text [mc Previous] \
+	  -command [namespace code [list Prev $w]]
+	$bot.prev state {disabled}
+	set padx [option get . buttonPadX {}]
 	pack $bot.next -side right
-	pack $bot.close -side right -padx $padx
+	pack $bot.prev -side right -padx $padx
     }
     ::chasearrows::chasearrows $bot.arr -size 16
     pack $bot.arr -side left -padx 5 -pady 5
     
     pack $bot -side bottom -fill x
     
-
+    # Keep instance specific state array.
     variable $w
     upvar 0 $w state    
-
-    # Collect some useful attributes.
-    set sessionid [wrapper::getattribute $queryE sessionid]
-    set status    [wrapper::getattribute $queryE status]
 
     set state(w)          $w
     set state(wform)      $wform
     set state(wclose)     $bot.close
     set state(wnext)      $bot.next
+    set state(wprev)      $bot.prev
     set state(warrows)    $bot.arr
     set state(ftoken)     $ftoken
     set state(jid)        $jid
@@ -185,9 +216,6 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
     set state(sessionid)  $sessionid
     set state(status)     $status
     
-    if {$status eq "completed"} {
-	$bot.next state {disabled}
-    }
 }
 
 proc ::Adhoc::Next {w} {
@@ -196,11 +224,15 @@ proc ::Adhoc::Next {w} {
     variable xmlns
     
     $state(warrows) start
+    $state(wprev) state {disabled}
     $state(wnext) state {disabled}
     
+    set xdataEs [::JForms::GetXML $state(ftoken)]
+    set attr [list xmlns $xmlns(commands) node $state(node) action execute \
+      sessionid $state(sessionid)]
     set commandE [wrapper::createtag command \
-      -attrlist [list xmlns $xmlns(commands) node $node action execute]]
-    ::Jabber::JlibCmd send_iq set [list $commandE] -to $jid \
+      -attrlist $attr -subtags $xdataEs]
+    ::Jabber::JlibCmd send_iq set [list $commandE] -to $state(jid) \
       -command [namespace code [list NextCB $w]] \
       -xml:lang [jlib::getlang]
 }
@@ -210,17 +242,67 @@ proc ::Adhoc::NextCB {w type queryE args} {
     if {![winfo exists $w]} {
 	return
     }
+    variable $w
+    upvar 0 $w state
+
     $state(warrows) stop
     $state(wnext) state {!disabled}
+    set status [wrapper::getattribute $queryE status]
     
     if {$type eq "error"} {
 	set errcode [lindex $subiq 0]
 	set errmsg  [lindex $subiq 1]
 	ui::dialog -icon error -title [mc Error] \
-	  -message "Ad-Hoc command to $jid ($node) failed because: $errmsg"
+	  -message "Ad-Hoc command to $state(jid) ($state(node)) failed because: $errmsg"
+	Close $w
+    } elseif {$status eq "completed"} {
+	Close $w
     } else {
-
+	set wform $state(wform)
+	destroy $wform
+	set state(ftoken) [::JForms::Build $wform $queryE -width 300]
+	pack $wform -side top -fill both -expand 1
+	set actions [GetActions $queryE]
+	
     }
+}
+
+proc ::Adhoc::Prev {w} {
+    variable $w
+    upvar 0 $w state
+    variable xmlns
+
+    $state(warrows) start
+    $state(wprev) state {disabled}
+    $state(wnext) state {disabled}
+
+    
+    
+}
+
+proc ::Adhoc::PrevCB {w type queryE args} {
+    
+    if {![winfo exists $w]} {
+	return
+    }
+    variable $w
+    upvar 0 $w state
+
+    $state(warrows) stop
+    set status [wrapper::getattribute $queryE status]
+
+    if {$type eq "error"} {
+	set errcode [lindex $subiq 0]
+	set errmsg  [lindex $subiq 1]
+	ui::dialog -icon error -title [mc Error] \
+	  -message "Ad-Hoc command to $state(jid) ($state(node)) failed because: $errmsg"
+	Close $w
+    } elseif {$status eq "completed"} {
+	Close $w
+    } else {
+    
+    
+    }    
 }
 
 proc ::Adhoc::Close {w} {
