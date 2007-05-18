@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterAvatar.tcl,v 1.33 2007-05-07 12:05:38 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.34 2007-05-18 06:45:53 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -838,6 +838,14 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
 	set pitem [PutItemInHead $item $ptag $ptext $pimage]
 	set n [llength [$T item children $pitem]]
 	$T item element configure $pitem cTree eNumText -text "($n)"
+	
+	# Always put pending last, after any transport.
+	if {$type eq "transport"} {
+	    set pending [FindWithTag [list head pending]]
+	    if {$pending ne ""} {
+		$T item prevsibling $pending $pitem
+	    }
+	}
     } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) ne "")} {
 	
 	# Group(s):
