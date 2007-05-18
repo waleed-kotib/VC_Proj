@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.51 2007-05-15 14:09:34 matben Exp $
+# $Id: RosterTree.tcl,v 1.52 2007-05-18 06:36:06 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1093,7 +1093,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     set mjid [jlib::jidmap $jid]
     
     # Keep track of any dirs created.
-    set dirtags {}
+    set dirtags [list]
 	
     if {$istrpt} {
 	
@@ -1101,6 +1101,12 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
 	set itemTagL [CreateJIDItemWithParent $mjid transport]
 	if {[llength $itemTagL] == 4} {
 	    lappend dirtags [lindex $itemTagL 1]
+	    
+	    # Always put pending last, after any transport.
+	    set pending [FindWithTag [list head pending]]
+	    if {$pending ne ""} {
+		$T item prevsibling $pending [lindex $itemTagL 0]
+	    }
 	}
     } elseif {[info exists argsA(-ask)] && ($argsA(-ask) eq "subscribe")} {
 	
