@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: Adhoc.tcl,v 1.3 2007-05-19 06:48:24 matben Exp $
+# $Id: Adhoc.tcl,v 1.4 2007-05-19 14:51:25 matben Exp $
 
 # @@@ Maybe all this should be a component?
 
@@ -104,31 +104,6 @@ proc ::Adhoc::FindLabelForJIDNode {jid node} {
     return $label
 }
 
-# Adhoc::GetActions --
-# 
-#       Extract any action element from the commands element:
-#           <actions execute='complete'>
-#               <prev/>
-#               <complete/>
-#           </actions> 
-
-proc ::Adhoc::GetActions {queryE} {
-    
-    set actions [list]
-    set execute ""
-    set commandE [wrapper::getfirstchildwithtag $queryE command]
-    if {[llength $commandE]} {
-	set actionsE [wrapper::getfirstchildwithtag $commandE actions]
-	if {[llength $actionsE]} {
-	    set execute [wrapper::getattribute $actionsE execute]
-	    foreach E [wrapper::getchildren $actionsE] {
-		lappend actions [wrapper::gettag $E]
-	    }
-	}
-    }
-    return [list $actions $execute]
-}
-
 proc ::Adhoc::Execute {jid node} {
     variable xmlns
 
@@ -194,6 +169,7 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
 	  -command [namespace code [list Close $w]]
 	pack $bot.close -side right
 	
+	bind $w <Return> [list $bot.close invoke]
 	::JForms::SetState $ftoken disabled
     } else {
 	ttk::button $bot.next -text [mc Next] -default active \
@@ -226,6 +202,36 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
     set state(sessionid)  $sessionid
     set state(status)     $status
     
+    if {$status ne "completed"} {
+	SetActionButtons $w $queryE
+    }
+    
+    return $w
+}
+
+# Adhoc::GetActions --
+# 
+#       Extract any action element from the commands element:
+#           <actions execute='complete'>
+#               <prev/>
+#               <complete/>
+#           </actions> 
+
+proc ::Adhoc::GetActions {queryE} {
+    
+    set actions [list]
+    set execute ""
+    set commandE [wrapper::getfirstchildwithtag $queryE command]
+    if {[llength $commandE]} {
+	set actionsE [wrapper::getfirstchildwithtag $commandE actions]
+	if {[llength $actionsE]} {
+	    set execute [wrapper::getattribute $actionsE execute]
+	    foreach E [wrapper::getchildren $actionsE] {
+		lappend actions [wrapper::gettag $E]
+	    }
+	}
+    }
+    return [list $actions $execute]
 }
 
 proc ::Adhoc::Action {w action} {
@@ -246,6 +252,9 @@ proc ::Adhoc::Action {w action} {
       -command [namespace code [list ActionCB $w]] \
       -xml:lang [jlib::getlang]
 }
+
+# @@@ Not very much tested since I can't find any service with the more advanced
+#     functions, lika an actions element.
 
 proc ::Adhoc::ActionCB {w type queryE args} {
     
@@ -274,35 +283,47 @@ proc ::Adhoc::ActionCB {w type queryE args} {
 	set state(ftoken) [::JForms::Build $wform $queryE -width 300]
 	pack $wform -side top -fill both -expand 1
 
-	$state(wprev) -default normal
-	$state(wnext) -default normal
 	if {$status eq "completed"} {
+	    $state(wprev) configure -default normal
+	    $state(wnext) configure -default normal
 	    $state(wnext) state {!disabled}
 	    $state(wnext) configure -text [mc Close] -default active \
 	      -command [namespace code [list Close $w]]
 	} else {
-	    lassign [GetActions $queryE] actions execute
-	    foreach action $actions {
-		switch -- $action {
-		    next - prev {
-			$state(w$action) state {!disabled}
-			$state(w$action) configure \
-			  -command [namespace code [list Action $w $action]]
-		    }
-		    complete {
-			$state(wnext) state {!disabled}
-			$state(wnext) configure -text [mc Finish] \
-			  -default active \
-			  -command [namespace code [list Close $w]]
-		    }
-		}
-	    }
-	    switch -- $execute {
-		next - prev {
-		    $state(w$execute) -default active
-		}
-	    }
+	    SetActionButtons $w $queryE
 	}	
+    }
+}
+
+proc ::Adhoc::SetActionButtons {w queryE} {
+    variable $w
+    upvar 0 $w state
+    
+    $state(wprev) configure -default normal
+    $state(wnext) configure -default normal
+    bind $w <Return> {}
+
+    lassign [GetActions $queryE] actions execute
+    foreach action $actions {
+	switch -- $action {
+	    next - prev {
+		$state(w$action) state {!disabled}
+		$state(w$action) configure \
+		  -command [namespace code [list Action $w $action]]
+	    }
+	    complete {
+		$state(wnext) state {!disabled}
+		$state(wnext) configure -text [mc Finish] \
+		  -default active \
+		  -command [namespace code [list Close $w]]
+	    }
+	}
+    }
+    switch -- $execute {
+	next - prev {
+	    $state(w$execute) configure -default active
+	    bind $w <Return> [list $state(w$execute) invoke]
+	}
     }
 }
 
