@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Servicons.tcl,v 1.7 2007-03-11 14:37:49 matben Exp $
+# $Id: Servicons.tcl,v 1.8 2007-05-19 14:37:24 matben Exp $
 
 package require Icondef
 
@@ -29,6 +29,7 @@ namespace eval ::Servicons:: {
 	headline/rss          headline/newmail
 	conference/irc        conference/text
 	pubsub/generic        pubsub/service
+	search/text           directory/user
     }
 }
 
@@ -143,13 +144,13 @@ proc ::Servicons::GetFromTypeList {typelist} {
     variable priv
     variable alias
     
-    if {$typelist eq {}} {
+    if {![llength $typelist]} {
 	return ""
     }
     set typelist [string map [array get alias] $typelist]
     
     # Do a priority search: server, gateway, and the rest...
-    set sorted {}
+    set sorted [list]
     lappend sorted [lsearch -glob -inline $typelist server/*]
     lappend sorted [lsearch -glob -inline $typelist gateway/*]
     set typelist [lsearch -glob -inline -not -all $typelist server/*]
