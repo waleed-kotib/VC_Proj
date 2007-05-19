@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: FTrans.tcl,v 1.19 2007-05-18 14:12:03 matben Exp $
+# $Id: FTrans.tcl,v 1.20 2007-05-19 14:14:03 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -60,12 +60,16 @@ proc ::FTrans::DiscoHook {type from queryE args} {
 
 proc ::FTrans::GetProxyCB {from jlib type queryE} {
     
+    # It happens that Wildfire doesn't return a host attribute if it
+    # cannot resolve its host.
     if {$type eq "result"} {
 	set hostE [wrapper::getfirstchildwithtag $queryE "streamhost"]
 	if {[llength $hostE]} {
 	    array set attr [wrapper::getattrlist $hostE]
-	    $jlib bytestreams configure \
-	      -proxyhost [list $from $attr(host) $attr(port)]
+	    if {[info exists attr(host)] && [info exists attr(port)]} {
+		$jlib bytestreams configure \
+		  -proxyhost [list $from $attr(host) $attr(port)]
+	    }
 	}
     }
 }
