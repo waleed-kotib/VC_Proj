@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: Adhoc.tcl,v 1.4 2007-05-19 14:51:25 matben Exp $
+# $Id: Adhoc.tcl,v 1.5 2007-05-20 13:31:31 matben Exp $
 
 # @@@ Maybe all this should be a component?
 
@@ -125,6 +125,15 @@ proc ::Adhoc::ExecuteCB {jid node type subiq args} {
     } else {
 	BuildDlg $jid $node $subiq
     }
+}
+
+proc ::Adhoc::Cancel {jid node} {
+    variable xmlns
+
+    set commandE [wrapper::createtag command \
+      -attrlist [list xmlns $xmlns(commands) node $node action cancel]]
+    ::Jabber::JlibCmd send_iq set [list $commandE] -to $jid \
+      -xml:lang [jlib::getlang]
 }
 
 proc ::Adhoc::BuildDlg {jid node queryE} {
@@ -267,6 +276,7 @@ proc ::Adhoc::ActionCB {w type queryE args} {
     $state(warrows) stop
  
     set status [wrapper::getattribute $queryE status]
+    set state(status) $status
     
     if {$type eq "error"} {
 	set errcode [lindex $subiq 0]
@@ -332,6 +342,9 @@ proc ::Adhoc::Close {w} {
     variable $w
     upvar 0 $w state
     
+    if {$state(status) ne "completed"} {
+	Cancel $state(jid) $state(node)
+    }
     ::UI::SaveWinGeom $wDlgs(jadhoc) $w
     unset -nocomplain state
     destroy $w
