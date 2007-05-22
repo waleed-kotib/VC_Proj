@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: AvatarMB.tcl,v 1.15 2007-05-02 14:00:32 matben Exp $
+# $Id: AvatarMB.tcl,v 1.16 2007-05-22 13:23:38 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -40,6 +40,7 @@ namespace eval ::AvatarMB {
     set state(pulldown) 0
 
     # Try make a fake menu (FMenu) entry widget.
+    # Perhaps this should be moved to tileutils and be made more generic?
     set blue ::AvatarMB::blue
     image create photo $blue -width 2 -height 2
     $blue blank
@@ -49,37 +50,47 @@ namespace eval ::AvatarMB {
     image create photo $blank -width 4 -height 4
     $blank blank
 
-    style element create FMenu.background image $blank  \
-      -padding {0} -sticky news  \
-      -map [list {active !disabled} $blue]
-    
-    if {0} {
-	# Tile BUG
-	style layout FMenu {
-	    FMenu.background -sticky news -border 1 -children {
-		FMenu.padding -sticky news -border 1 -children {
-		    FMenu.label -side left
+    foreach name [tile::availableThemes] {
+	
+	# @@@ We could be more economical here and load theme only when needed.
+	if {[catch {package require tile::theme::$name}]} {
+	    continue
+	}
+
+	style theme settings $name {
+	    style element create FMenu.background image $blank  \
+	      -padding {0} -sticky news  \
+	      -map [list {active !disabled} $blue]
+	    
+	    if {0} {
+		# Tile BUG
+		style layout FMenu {
+		    FMenu.background -sticky news -border 1 -children {
+			FMenu.padding -sticky news -border 1 -children {
+			    FMenu.label -side left
+			}
+		    }
 		}
 	    }
-	}
-    }
-    style layout FMenu {
-	FMenu.background -children {
-	    FMenu.padding -children {
-		FMenu.label -side left
+	    style layout FMenu {
+		FMenu.background -children {
+		    FMenu.padding -children {
+			FMenu.label -side left
+		    }
+		}
 	    }
+	    
+	    array set foreground [style map . -foreground]
+	    unset -nocomplain foreground(active)
+	    unset -nocomplain foreground(selected)
+	    unset -nocomplain foreground(focus)
+	    set foreground([list active !disabled]) white
+	    
+	    style configure FMenu  \
+	      -padding {18 2 10 2} -borderwidth 0 -relief flat
+	    style map FMenu -foreground [array get foreground]
 	}
     }
-    
-    array set foreground [style map . -foreground]
-    unset -nocomplain foreground(active)
-    unset -nocomplain foreground(selected)
-    unset -nocomplain foreground(focus)
-    set foreground([list active !disabled]) white
-
-    style configure FMenu  \
-      -padding {18 2 10 2} -borderwidth 0 -relief flat
-    style map FMenu -foreground [array get foreground]
     
     bind AvatarMBMenu <FocusIn> {}
     bind AvatarMBMenu <Destroy> {+::AvatarMB::MenuFree %W}
