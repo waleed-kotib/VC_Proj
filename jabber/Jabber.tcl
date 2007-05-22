@@ -1,10 +1,11 @@
 #  Jabber.tcl ---
 #  
 #      This file is part of The Coccinella application. 
+#      It is the main arganizer for all jabber application code.
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.208 2007-05-17 14:42:16 matben Exp $
+# $Id: Jabber.tcl,v 1.209 2007-05-22 09:18:17 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -625,7 +626,7 @@ proc ::Jabber::MessageHandler {jlibname xmldata} {
 # Jabber::(Un)Subscribe(d)Event --
 # 
 #       Registered handlers for these presence event types.
-#       Note that XMPP IM requires all from attributes to be bare JIDs.
+#       Note that XMPP IM requires all 'from' attributes to be bare JIDs.
 
 proc ::Jabber::SubscribeEvent {jlibname xmldata} {
     variable jstate
@@ -706,8 +707,7 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	    
 	    # Explicitly set the users group.
 	    if {[string length $jprefs(subsc,group)]} {
-		$jlib roster send_set $from  \
-		  -groups [list $jprefs(subsc,group)]
+		$jlib roster send_set $from -groups [list $jprefs(subsc,group)]
 	    }
 	    $jlib send_presence -to $from -type "subscribe"
 	    set msg [mc jamessautosubs $from]
@@ -768,6 +768,11 @@ proc ::Jabber::UnsubscribeEvent {jlibname xmldata} {
     return 1
 }
 
+# Jabber::UnsubscribedEvent --
+# 
+#       RFC 3921: "unsubscribed -- The subscription request has been denied or a
+#                 previously-granted subscription has been cancelled."
+
 proc ::Jabber::UnsubscribedEvent {jlibname xmldata} {
     variable jstate
     variable jprefs
@@ -779,14 +784,22 @@ proc ::Jabber::UnsubscribedEvent {jlibname xmldata} {
     
     # If we fail to subscribe someone due to a technical reason we
     # have subscription='none'
+    # NB: If the other user removes us from its roster we also get a presence
+    #     'unsubscribed'. 
+
     if {$subscription eq "none"} {
-	set msg [mc jamessfailedsubsc $from]
-	set status [$jlib roster getstatus $from]
-	if {$status ne ""} {
-	    append msg " " $status
+	set ask [$jlib roster getask $from]
+	
+	# This is never the case. DOn't know how to differentiate the two cases?
+	if {$ask eq "subscribe"} {
+	    set msg [mc jamessfailedsubsc $from]
+	    set status [$jlib roster getstatus $from]
+	    if {$status ne ""} {
+		append msg " " $status
+	    }
+	    ::ui::dialog -title [mc {Subscription Failed}]  \
+	      -icon info -type ok -message $msg
 	}
-	::ui::dialog -title [mc {Subscription Failed}]  \
-	  -icon info -type ok -message $msg
 	if {$jprefs(rost,rmIfUnsub)} {
 	    
 	    # Remove completely from our roster.

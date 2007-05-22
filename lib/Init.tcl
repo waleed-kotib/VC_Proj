@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.63 2007-03-18 08:01:06 matben Exp $
+# $Id: Init.tcl,v 1.64 2007-05-22 09:18:18 matben Exp $
 
 namespace eval ::Init {}
 
@@ -334,19 +334,16 @@ proc ::Init::SetPrefsPaths {} {
 	    
 	    # On a central installation need to have local dirs for write access.
 	    set this(userPrefsFilePath) [file nativename [file join $path $pname]]
-	    set this(oldPrefsFilePath) [file nativename ~/.whiteboard]
 	    set this(inboxCanvasPath) [file nativename [file join $path canvases]]
 	    set this(historyPath) [file nativename [file join $path history]]
 	}
 	macosx {
 	    set this(userPrefsFilePath) [file join $path $pname]
-	    set this(oldPrefsFilePath) $this(userPrefsFilePath)
 	    set this(inboxCanvasPath) [file join $path Canvases]
 	    set this(historyPath) [file join $path History]
 	}
 	windows {
 	    set this(userPrefsFilePath) [file join $path $pname]
-	    set this(oldPrefsFilePath) [file join C: "WBPREFS.TXT"]
 	    set this(inboxCanvasPath) [file join $path Canvases]
 	    set this(historyPath) [file join $path History]
 	}

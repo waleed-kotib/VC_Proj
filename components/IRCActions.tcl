@@ -10,7 +10,7 @@
 #            2) Configurable nick alert
 #            3) Implement -command for error notice
 #  
-# $Id: IRCActions.tcl,v 1.2 2007-05-05 10:42:03 matben Exp $
+# $Id: IRCActions.tcl,v 1.3 2007-05-22 09:18:17 matben Exp $
 
 namespace eval ::IRCActions:: {
     
@@ -23,7 +23,7 @@ proc ::IRCActions::Init { } {
     component::register IRCActions "Implements IRC style actions for groupchats, /join. /topic, /invite, /nick, /me etc."
 
     # Add event hooks.
-    ::hooks::register sendTextGroupChatHook [namespace current]::TextHook
+    ::hooks::register sendTextGroupChatHook [namespace current]::TextGroupChatHook
     ::hooks::register buildGroupChatWidget  [namespace current]::BuildGroupChatHook
     ::hooks::register textParseWordHook     [namespace current]::ParseWordHook
     ::hooks::register displayGroupChatMessageHook [namespace current]::DisplayHook
@@ -36,6 +36,8 @@ proc ::IRCActions::Init { } {
     #Ê/topic String -> Changes the topic of the channel
     #Ê/invite nick #channel -> Sends an invitation to nick for enter into channel
     # /kick #channel nickname -> Kicks nickname off a given channel.
+    # /leave -> exit room
+    # /part  -> exit room
 
     variable RE
     set RE(join) {
@@ -46,12 +48,16 @@ proc ::IRCActions::Init { } {
 	{^ */nick (.+)$}  
 	{::IRCActions::Nick}
     }
-    set RE(XXXmsg) {
-	{^ */XXXmsg (.+)$}  
+    set RE(msg) {
+	{^ */msg (.+)$}  
 	{::IRCActions::Msg}
     }
     set RE(topic) {
 	{^ */topic (.+)$}  
+	{::IRCActions::Topic}
+    }
+    set RE(subject) {
+	{^ */subject (.+)$}  
 	{::IRCActions::Topic}
     }
     set RE(invite) {
@@ -62,15 +68,26 @@ proc ::IRCActions::Init { } {
 	{^ */kick (.+)$}  
 	{::IRCActions::Kick}
     }
+    set RE(leave) {
+	{^ */leave}  
+	{::IRCActions::Leave}
+    }
+    set RE(part) {
+	{^ */part}  
+	{::IRCActions::Leave}
+    }
 
     variable lastWord ""
 }
 
-proc ::IRCActions::TextHook {roomjid str} {
+proc ::IRCActions::TextGroupChatHook {roomjid str} {
     variable RE
     	
     # Avoid expensive regexp's.
     if {[string first "/" $str] < 0} {
+	return
+    }
+    if {![regexp {^ */[a-z]+} $str]} {
 	return
     }
     set handled ""
@@ -114,17 +131,14 @@ proc ::IRCActions::ErrorNick {jlibname xmldata} {
 }
 
 proc ::IRCActions::Msg {roomjid value} {
-    
-    return
-    
-    # @@@ This is not the best solution since we interfere a lot by hijacking.
-    # Could perhaps have been made with the textParseWordHook if we keep a state.
+
+    if {$value eq ""} {
+	return
+    }
     set nick [lindex $value 0]
     set msg [lrange $value 1 end]
-    
-
-    # We are responsible to send this off.
-    ::Jabber::JlibCmd send_message $roomjid -type groupchat -body $text 
+    set jid $roomjid/$nick
+    ::Chat::StartThread $jid -message $msg
 }
 
 proc ::IRCActions::Topic {roomjid subject} {
@@ -154,6 +168,10 @@ proc ::IRCActions::Kick {roomjid value} {
     
     # Must be this room and no other.
     ::Jabber::JlibCmd muc setrole $roomjid $nick "none" 
+}
+
+proc ::IRCActions::Leave {roomjid value} {
+    ::GroupChat::ExitRoomJID $roomjid
 }
 
 proc ::IRCActions::BuildGroupChatHook {roomjid} {

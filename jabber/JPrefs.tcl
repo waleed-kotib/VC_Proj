@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.46 2007-03-12 13:19:56 matben Exp $
+# $Id: JPrefs.tcl,v 1.47 2007-05-22 09:18:17 matben Exp $
 
 package require ui::fontselector
 
@@ -19,6 +19,7 @@ namespace eval ::JPrefs:: {
     ::hooks::register prefsSaveHook          ::JPrefs::SavePrefsHook
     ::hooks::register prefsCancelHook        ::JPrefs::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::JPrefs::UserDefaultsHook
+    ::hooks::register quitAppHook            ::JPrefs::QuitAppHook
 }
 
 
@@ -108,6 +109,11 @@ proc ::JPrefs::InitPrefsHook { } {
       [list prefs(opacity)         prefs_opacity          $prefs(opacity)]  \
       ]
 
+    # Set default to empty to save it each time.
+    set prefs(tileTheme) ""
+    ::PrefUtils::AddMustSave [list  \
+      [list prefs(tileTheme)       prefs_tileTheme        $prefs(tileTheme)]  \
+      ]
 }
 
 proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
@@ -295,6 +301,9 @@ proc ::JPrefs::BuildAppearancePage {page} {
     grid  $wthe.l   $wthe.p
 
     # Tile's themes (skins).
+    # This is applied immediately and unaffected by Cancel/Save actions.
+    # The theme state is kept in two variables: 
+    #   ::tile::currentTheme and prefs(tileTheme)
     set wskin $wap.skin
     set wmenu $wskin.b.m
     ttk::frame $wskin
@@ -343,6 +352,19 @@ proc ::JPrefs::BuildAppearancePage {page} {
     grid  $wap.bgpick  $wap.bgdefk  $wap.btfont  $wap.dfont  -sticky ew
     
     pack  $wap  -side top -fill x
+    
+    bind $page <Destroy> +[namespace code OnDestroyAppearancePage]
+}
+
+proc ::JPrefs::OnDestroyAppearancePage {} {
+    global  prefs
+    variable tmpPrefs
+    variable tmpJPrefs
+
+    set prefs(tileTheme) $::tile::currentTheme
+    
+    unset -nocomplain tmpPrefs
+    unset -nocomplain tmpJPrefs
 }
 
 proc ::JPrefs::BuildQtSetup {} {
@@ -536,9 +558,14 @@ proc ::JPrefs::UserDefaultsHook { } {
 proc ::JPrefs::DestroyPrefsHook { } {
     variable tmpPrefs
     variable tmpJPrefs
-
+    
     unset -nocomplain tmpPrefs
     unset -nocomplain tmpJPrefs
+}
+
+proc ::JPrefs::QuitAppHook {} {
+    global  prefs
+    set prefs(tileTheme) $::tile::currentTheme
 }
 
 #-------------------------------------------------------------------------------
