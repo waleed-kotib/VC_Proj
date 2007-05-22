@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: Adhoc.tcl,v 1.5 2007-05-20 13:31:31 matben Exp $
+# $Id: Adhoc.tcl,v 1.6 2007-05-22 09:18:17 matben Exp $
 
 # @@@ Maybe all this should be a component?
 
@@ -127,15 +127,6 @@ proc ::Adhoc::ExecuteCB {jid node type subiq args} {
     }
 }
 
-proc ::Adhoc::Cancel {jid node} {
-    variable xmlns
-
-    set commandE [wrapper::createtag command \
-      -attrlist [list xmlns $xmlns(commands) node $node action cancel]]
-    ::Jabber::JlibCmd send_iq set [list $commandE] -to $jid \
-      -xml:lang [jlib::getlang]
-}
-
 proc ::Adhoc::BuildDlg {jid node queryE} {
     global  wDlgs
     variable uid
@@ -143,6 +134,8 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
     # Collect some useful attributes.
     set sessionid [wrapper::getattribute $queryE sessionid]
     set status    [wrapper::getattribute $queryE status]
+    
+    puts "::Adhoc::BuildDlg $jid $node, status=$status"
     
     set w $wDlgs(jadhoc)[incr uid]
     ::UI::Toplevel $w -class AdHoc  \
@@ -240,6 +233,7 @@ proc ::Adhoc::GetActions {queryE} {
 	    }
 	}
     }
+    puts "::Adhoc::GetActions [list $actions $execute]"
     return [list $actions $execute]
 }
 
@@ -247,6 +241,8 @@ proc ::Adhoc::Action {w action} {
     variable $w
     upvar 0 $w state
     variable xmlns
+    
+    puts "::Adhoc::Action action=$action"
 
     $state(warrows) start
     $state(wprev) state {disabled}
@@ -278,14 +274,14 @@ proc ::Adhoc::ActionCB {w type queryE args} {
     set status [wrapper::getattribute $queryE status]
     set state(status) $status
     
+    puts "::Adhoc::ActionCB type=$type, status=$status"
+    
     if {$type eq "error"} {
 	set errcode [lindex $subiq 0]
 	set errmsg  [lindex $subiq 1]
 	set label [FindLabelForJIDNode $state(jid) $state(node)]
 	ui::dialog -icon error -title [mc Error] \
 	  -message "Ad-Hoc command for \"$label\" at $jid failed because: $errmsg"
-	Close $w
-    } elseif {$status eq "completed"} {
 	Close $w
     } else {
 	set wform $state(wform)
@@ -337,13 +333,25 @@ proc ::Adhoc::SetActionButtons {w queryE} {
     }
 }
 
+proc ::Adhoc::Cancel {w} {
+    variable $w
+    upvar 0 $w state
+    variable xmlns
+
+    set attr [list xmlns $xmlns(commands) node $state(node) action cancel \
+      sessionid $state(sessionid)]
+    set commandE [wrapper::createtag command -attrlist $attr]
+    ::Jabber::JlibCmd send_iq set [list $commandE] -to $state(jid) \
+      -xml:lang [jlib::getlang]
+}
+
 proc ::Adhoc::Close {w} {
     global  wDlgs
     variable $w
     upvar 0 $w state
     
     if {$state(status) ne "completed"} {
-	Cancel $state(jid) $state(node)
+	Cancel $w
     }
     ::UI::SaveWinGeom $wDlgs(jadhoc) $w
     unset -nocomplain state

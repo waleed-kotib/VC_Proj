@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.151 2007-05-16 12:20:09 matben Exp $	
+# $Id: Coccinella.tcl,v 1.152 2007-05-22 09:18:17 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -170,9 +170,9 @@ update
 ::Init::LoadPackages
 
 set state(launchStatus) tile
-set tileTheme [option get . tileTheme {}]
-if {[lsearch -exact [tile::availableThemes] $tileTheme] >= 0} {
-    tile::setTheme $tileTheme
+set prefs(tileTheme) [option get . prefs_tileTheme {}]
+if {[lsearch -exact [tile::availableThemes] $prefs(tileTheme)] >= 0} {
+    tile::setTheme $prefs(tileTheme)
 }
 
 # The packages are divided into categories depending on their degree

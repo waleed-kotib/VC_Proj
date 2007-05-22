@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 1999-2006  Mats Bengtsson
 #
-# $Id: PrefUtils.tcl,v 1.8 2006-12-13 15:14:28 matben Exp $
+# $Id: PrefUtils.tcl,v 1.9 2007-05-22 09:18:18 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -65,7 +65,6 @@ proc ::PrefUtils::Init { } {
     set prefs(master)          {}
 
     set prefsFilePath $this(userPrefsFilePath)
-    set old $this(oldPrefsFilePath)
     
     # Pre prefs file if any. Lower priority!
     if {[file exists $this(prePrefsFile)]} {
@@ -78,11 +77,6 @@ proc ::PrefUtils::Init { } {
 	if {[catch {option readfile $prefsFilePath} err]} {
 	    tk_messageBox -type ok -icon error \
 	      -message "Error reading preference file: $prefsFilePath."
-	}
-    } elseif {[file exists $old]} {
-	if {[catch {option readfile $old} err]} {
-	    tk_messageBox -type ok -icon error \
-	      -message "Error reading preference file: $old."
 	}
     }
     
