@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.77 2007-03-21 11:07:53 matben Exp $
+# $Id: Whiteboard.tcl,v 1.78 2007-05-22 12:59:16 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -81,6 +81,7 @@ namespace eval ::WB:: {
     option add *TopWhiteboard.connected16Image     connected       widgetDefault
     option add *TopWhiteboard.waveImage            wave            widgetDefault
     option add *TopWhiteboard.resizeHandleImage    resizehandle    widgetDefault
+    option add *TopWhiteboard.logoImage            ladybug         widgetDefault
 
     # Drawing tool buttons.
     foreach tname [array names btName2No] {
@@ -813,7 +814,7 @@ proc ::WB::BuildWhiteboard {w args} {
     pack  $w.fmain.cc         -fill both -expand 1 -side right
     
     # The 'Coccinella'.
-    set wapp(bugImage) [::Theme::GetImage ladybug]
+    set wapp(bugImage) [::Theme::GetImage [option get $w logoImage {}]]
     ttk::label $wapp(buglabel) -borderwidth 0 -image $wapp(bugImage)
     pack $wapp(buglabel) -side bottom -fill x    
     
