@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.68 2006-11-14 13:46:39 matben Exp $
+# $Id: Profiles.tcl,v 1.69 2007-05-23 12:17:08 matben Exp $
 
 package provide Profiles 1.0
 
@@ -98,10 +98,13 @@ proc ::Profiles::InitHook { } {
     set cprofiles $config(profiles,profiles)
     set cselected $config(profiles,selected)
 
+    # Not sure this is a good idea if they are hardcoded???
+    # Username and password must be saved to profile but it can screw up if we
+    # previously have used a different config profiles.
     ::PrefUtils::Add [list  \
       [list ::Profiles::cprofiles   cprofiles          $cprofiles   userDefault] \
       [list ::Profiles::cselected   selected_cprofile  $cselected   userDefault]]
-
+    
     # Sanity check.
     SanityCheck
     
@@ -519,10 +522,14 @@ proc ::Profiles::GetSelectedName { } {
     variable selected
     variable cselected
 
+    # Keep fallback if selected profile does not exist.
+    set all [GetAllNames]
     if {$config(profiles,do)} {
+	if {[lsearch -exact $all $cselected] < 0} {
+	    set cselected [lindex $all 0]
+	}
 	set prof $cselected
     } else {
-	set all [GetAllNames]
 	if {[lsearch -exact $all $selected] < 0} {
 	    set selected [lindex $all 0]
 	}
