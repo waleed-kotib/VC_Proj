@@ -1112,6 +1112,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset ru jauserinnote {Добавьте Ваше описание к этому пользователю}
 ::msgcat::mcset ru jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
 ::msgcat::mcset ru jaloginjid   {Введите ваш jid типа "joey@myjabb.org", или выбирете профиль. Вы должны быть зарегистрированы на сервере.}
+
+::msgcat::mcset ru jaloginjidpure 	{Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
+
 ::msgcat::mcset ru jaregalready {You are already registered with this service. These are your current settings of your registration parameters.}
 ::msgcat::mcset ru jaactiveret  {If checked Return sends message else use Ctrl/Cmd-Return}
 ::msgcat::mcset ru jainvitegchat {Пригласить в %s}

@@ -1192,6 +1192,7 @@ Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jauserinnote {Lägg till dina personliga anteckningar om denna kontakt}
 ::msgcat::mcset sv jaregisterex {Skriv jabber serverns namn där du vill registrera. Tryck sedan på Hämta knappen för att få registreringsinfo. Fyll i och registrera.}
 ::msgcat::mcset sv jaloginjid   {Fyll i din Jabber ID som "joey@myjabb.org", eller välj profil. Du måste ha ett konto på servern sedan tidigare.}
+::msgcat::mcset sv jaloginjidpure 	{Fyll i din Jabber ID som "joey@myjabb.org". Du måste ha ett konto på servern sedan tidigare.}
 ::msgcat::mcset sv jaregalready {Du är redan registrerad hos den här tjänsten. Detta är dina nuvarande registreringsparametrar.}
 ::msgcat::mcset sv jaactiveret  {Om kryssad så skickar Retur annars använd Ctrl/Cmd-Retur}
 ::msgcat::mcset sv jainvitegchat {Bjud in användare till gruppchatt i rum %s}

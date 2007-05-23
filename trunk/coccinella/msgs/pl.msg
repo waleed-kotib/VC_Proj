@@ -1194,6 +1194,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jauserinnote {Możesz o tym użytkowniku napisać coś "od siebie"}
 ::msgcat::mcset pl jaregisterex {Podaj nazwę serwera Jabbera, gdzie zamierzasz się zarejestrować, po czym kliknij przycisk "Pobierz", aby pobrać formularz rejestracyjny. Wypełnij go, aby móc dokonać rejestracji.}
 ::msgcat::mcset pl jaloginjid   {Podaj swój JID w postaci "joey@myjabb.org", lub wybierz profil - zakłada się, że masz już wcześniej założone konto na wskazanym serwerze.}
+
+::msgcat::mcset pl jaloginjidpure 	{Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
+
 ::msgcat::mcset pl jaregalready {Wygląda na to, że rejestracji dokonano już uprzednio - oto bieżące ustawienia Twoich danych rejestracyjnych.}
 ::msgcat::mcset pl jaactiveret {Zaznaczenie tej opcji powoduje, że naciśnięcie Enter/Return wysyła wiadomość - w przeciwnym wypadku użyj Ctrl/Cmd-Return}
 ::msgcat::mcset pl jainvitegchat {Zaproś użytkownika do udziału w konferencji w pokoju %s}

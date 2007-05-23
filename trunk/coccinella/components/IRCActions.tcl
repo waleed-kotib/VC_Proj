@@ -10,7 +10,7 @@
 #            2) Configurable nick alert
 #            3) Implement -command for error notice
 #  
-# $Id: IRCActions.tcl,v 1.3 2007-05-22 09:18:17 matben Exp $
+# $Id: IRCActions.tcl,v 1.4 2007-05-23 12:45:41 matben Exp $
 
 namespace eval ::IRCActions:: {
     
@@ -84,10 +84,7 @@ proc ::IRCActions::TextGroupChatHook {roomjid str} {
     variable RE
     	
     # Avoid expensive regexp's.
-    if {[string first "/" $str] < 0} {
-	return
-    }
-    if {![regexp {^ */[a-z]+} $str]} {
+    if {[string index [string trimleft $str] 0] ne "/"} {
 	return
     }
     set handled ""

@@ -1234,7 +1234,10 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jadisrmall {Borrar todos los servidores que han sido automaticamente encontrados.}
 ::msgcat::mcset es jauserinnote {Agregue sus notas personales acerca de este usuario}
 ::msgcat::mcset es jaregisterex {Complete el nombre de los servidores Jabber con los que desea registrar. Pulse el botón "Get" para recibir la información de registro. Complete la información y finalice el registro.}
-::msgcat::mcset es jaloginjid   {Introduzca su jid con el formato "joey@myjabb.org", o seleccione un perfil. Debe de tener una cuenta en el servidor.}
+::msgcat::mcset es jaloginjid   {Introduzca su JID con el formato "joey@myjabb.org", o seleccione un perfil. Debe de tener una cuenta en el servidor.}
+
+::msgcat::mcset es jaloginjidpure 	{Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
+
 ::msgcat::mcset es jaregalready {Esta registrado en este servicio. Su configuracion actual en el servicio.}
 ::msgcat::mcset es jaactiveret {Si esta activo la 'Tecla Enter' enviara los mensajes, sino use la combinacion de teclas Ctrl/Cmd-Return}
 ::msgcat::mcset es jainvitegchat {Invite a un usuario a la sala de chat en grupo %s}

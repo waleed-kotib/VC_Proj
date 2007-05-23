@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: Adhoc.tcl,v 1.6 2007-05-22 09:18:17 matben Exp $
+# $Id: Adhoc.tcl,v 1.7 2007-05-23 12:45:41 matben Exp $
 
 # @@@ Maybe all this should be a component?
 
@@ -223,8 +223,8 @@ proc ::Adhoc::GetActions {queryE} {
     
     set actions [list]
     set execute ""
-    set commandE [wrapper::getfirstchildwithtag $queryE command]
-    if {[llength $commandE]} {
+    if {[wrapper::gettag $queryE] eq "command"} {
+	set commandE $queryE
 	set actionsE [wrapper::getfirstchildwithtag $commandE actions]
 	if {[llength $actionsE]} {
 	    set execute [wrapper::getattribute $actionsE execute]
