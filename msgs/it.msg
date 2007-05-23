@@ -1186,6 +1186,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset it jauserinnote {Aggiungi le tue note personali riguardo questo utente.}
 ::msgcat::mcset it jaregisterex {Scrivi il nome del server Jabber a cui ti vuoi connettere, poi premi "Ricevi" per leggere le informazioni necessarie all'iscrizione. Riempi i campi richiesti ed iscriviti.}
 ::msgcat::mcset it jaloginjid {Immetti il tuo JID nella forma "nomeutente@jabber.org", oppure scegli un profilo. È necessario avere già un account sul server scelto.}
+
+::msgcat::mcset it jaloginjidpure 	{Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
+
 ::msgcat::mcset it jaregalready {Sei già iscritto a questo servizio. Questi sono i valori correnti dei tuoi parametri di iscrizione.}
 ::msgcat::mcset it jaactiveret {Se selezionato, i messaggi vengono inviati premendo INVIO, altrimeti si deve usare ctrl+INVIO (o cmd+INVIO).}
 ::msgcat::mcset it jainvitegchat {Invita un utente alla chat di gruppo nella stanza %s}

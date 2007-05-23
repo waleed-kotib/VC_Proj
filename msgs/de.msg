@@ -1211,6 +1211,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jauserinnote {Ihre persönlichen Notizen über diesen Benutzer hinzufügen}
 ::msgcat::mcset de jaregisterex {Tragen Sie die Jabber-Server, bei denen Sie sich registrieren möchten. Drücken Sie dann die Abrufschaltfläche, um die gewünschten Registrierungsinformationen zu erhalten. Geben Sie diese Informationen ein und registrieren Sie sich.}
 ::msgcat::mcset de jaloginjid   {Geben Sie Ihr JID als "joey@myjabb.org" ein oder wählen Sie Profil. Sie sollten bereits ein Konto bei diesem Server haben.}
+
+::msgcat::mcset de jaloginjidpure 	{Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
+
 ::msgcat::mcset de jaregalready {Sie sind bereits bei diesem Dienst registriert. Dies sind die derzeitigen Einstellungen Ihrer Registrierungs-Parameter.}
 ::msgcat::mcset de jaactiveret {Wenn aktiviert, sendet Return Nachrichten, sonst benutzen Sie bitte Strg/-Return}
 ::msgcat::mcset de jainvitegchat {Laden Sie einen Anwender zum Gruppen-Chat im Raum %s ein}

@@ -1175,6 +1175,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jauserinnote				{Opmerkingen over deze contactpersoon kunt u hier bewaren.}
 ::msgcat::mcset nl jaregisterex				{Voer de naam in van de Jabber-server waarop u een account wilt aanmaken. Klik dan op de knop "Ophalen" om de vereiste gegevens op te halen. Voer de gevraagde gegevens in en maak de account aan.}
 ::msgcat::mcset nl jaloginjid				{Voer uw Jabber ID in (bv: "jantje@voorbeeld.org") of kies een profiel.}
+
+::msgcat::mcset nl jaloginjidpure           	        {Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
+
 ::msgcat::mcset nl jaregalready				{U bent al geregistreerd op deze dienst. Dit zijn uw huidige instellingen van uw registratie.}
 ::msgcat::mcset nl jaactiveret				{Als dit is aangevinkt, zal de enter-toets het bericht verzenden. Anders moet u ctrl/cmd + enter gebruiken.}
 ::msgcat::mcset nl jainvitegchat			{Nodig een contactpersoon uit op de chatruimte %s}

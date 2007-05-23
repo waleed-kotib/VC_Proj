@@ -1196,6 +1196,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset kr jauserinnote {이 사용자에 대한 자신의 개인 메모하기}
 ::msgcat::mcset kr jaregisterex {당신이 등록하길 원하는 재버 서버 이름을 적으시오. 그리고 등록 양식를 얻기 위해 받기 버튼을 누르시오. 양식을 채워 등록하세요.}
 ::msgcat::mcset kr jaloginjid   {"joey@myjabb.org"처럼 당신의 jid를 적거나 프로파일을 선택하시요. 이 서버에 게정을 이미 가지고 있어야 합니다.}
+
+::msgcat::mcset kr jaloginjidpure 	{Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
+
 ::msgcat::mcset kr jaregalready {이미 이 서버에 등록되었습니다. 당신의 현재 등록된 설정을 다음과 같습니다.}
 ::msgcat::mcset kr jaactiveret  {메세지를 보내기위해 Return 체크하던지 아니면 Ctrl/Cmd-Return 을 사용하세요}
 ::msgcat::mcset kr jainvitegchat {%s 방에 그룹 대화를 위해 사용자를 초대하기}

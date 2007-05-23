@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.112 2007-02-11 11:34:10 matben Exp $
+# $Id: Login.tcl,v 1.113 2007-05-23 12:45:41 matben Exp $
 
 package provide Login 1.0
 
@@ -26,7 +26,7 @@ namespace eval ::Login:: {
     ::hooks::register launchFinalHook ::Login::LaunchHook
     
     # Config settings.
-    set ::config(login,style) "jid"  ;# jid | username | parts
+    set ::config(login,style) "jid"  ;# jid | username | parts | jidpure
     set ::config(login,more)         1
     set ::config(login,profiles)     1
     set ::config(login,autosave)     0
@@ -99,6 +99,8 @@ proc ::Login::Dlg { } {
 
     if {$config(login,style) eq "jid"} {
 	set str [mc jaloginjid]
+    } elseif {$config(login,style) eq "jidpure"} {
+	set str [mc jaloginjidpure]
     } elseif {$config(login,style) eq "parts"} {
 	set str [mc jalogin]
     } elseif {$config(login,style) eq "username"} {
@@ -147,6 +149,11 @@ proc ::Login::Dlg { } {
 	grid  $frmid.lpass  $frmid.epass  -sticky e -pady 2
 	
 	grid  $frmid.popup  -sticky ew
+	grid  $frmid.ejid   $frmid.epass  -sticky ew
+    } elseif {$config(login,style) eq "jidpure"} {
+	grid  $frmid.ljid   $frmid.ejid   -sticky e -pady 2
+	grid  $frmid.lpass  $frmid.epass  -sticky e -pady 2
+	
 	grid  $frmid.ejid   $frmid.epass  -sticky ew
     } elseif {$config(login,style) eq "parts"} {
 	grid  $frmid.lpop   $frmid.popup  -sticky e -pady 2
@@ -413,7 +420,7 @@ proc ::Login::DoLogin {} {
     # Reset any pending open states.
     Reset
 
-    if {$config(login,style) eq "jid"} {
+    if {($config(login,style) eq "jid") || ($config(login,style) eq "jidpure")} {
 	jlib::splitjidex $jid username server resource
     }
     
