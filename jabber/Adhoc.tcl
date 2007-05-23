@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: Adhoc.tcl,v 1.7 2007-05-23 12:45:41 matben Exp $
+# $Id: Adhoc.tcl,v 1.8 2007-05-23 13:26:37 matben Exp $
 
 # @@@ Maybe all this should be a component?
 
@@ -140,7 +140,7 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
     set w $wDlgs(jadhoc)[incr uid]
     ::UI::Toplevel $w -class AdHoc  \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
-      -closecommand [namespace code Close]
+      -closecommand [namespace code CloseCmd]
     wm title $w "Ad-Hoc for $jid"
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jadhoc)]]
@@ -168,7 +168,7 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
 	# completed: The command has completed. The command session has ended.
 	# Typical if a command does not require any interaction.
 	ttk::button $bot.close -text [mc Close] -default active \
-	  -command [namespace code [list Close $w]]
+	  -command [namespace code [list CloseCmd $w]]
 	pack $bot.close -side right
 	
 	bind $w <Return> [list $bot.close invoke]
@@ -321,7 +321,7 @@ proc ::Adhoc::SetActionButtons {w queryE} {
 		$state(wnext) state {!disabled}
 		$state(wnext) configure -text [mc Finish] \
 		  -default active \
-		  -command [namespace code [list Close $w]]
+		  -command [namespace code [list Action $w complete]]
 	    }
 	}
     }
@@ -329,6 +329,10 @@ proc ::Adhoc::SetActionButtons {w queryE} {
 	next - prev {
 	    $state(w$execute) configure -default active
 	    bind $w <Return> [list $state(w$execute) invoke]
+	}
+	complete {
+	    $state(wnext) configure -default active
+	    bind $w <Return> [list $state(wnext) invoke]
 	}
     }
 }
@@ -345,14 +349,19 @@ proc ::Adhoc::Cancel {w} {
       -xml:lang [jlib::getlang]
 }
 
-proc ::Adhoc::Close {w} {
-    global  wDlgs
+proc ::Adhoc::CloseCmd {w} {
     variable $w
     upvar 0 $w state
     
     if {$state(status) ne "completed"} {
 	Cancel $w
     }
+    Close $w
+}
+
+proc ::Adhoc::Close {w} {
+    global  wDlgs
+
     ::UI::SaveWinGeom $wDlgs(jadhoc) $w
     unset -nocomplain state
     destroy $w
