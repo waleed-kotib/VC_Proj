@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: Adhoc.tcl,v 1.8 2007-05-23 13:26:37 matben Exp $
+# $Id: Adhoc.tcl,v 1.9 2007-05-24 13:22:37 matben Exp $
 
 # @@@ Maybe all this should be a component?
 
@@ -21,6 +21,8 @@ namespace eval ::Adhoc {
     
     variable xmlns
     set xmlns(commands) "http://jabber.org/protocol/commands"
+    set xmlns(xdata)    "jabber:x:data"
+    set xmlns(oob)      "jabber:x:oob"
     
     variable uid 0
 }
@@ -127,21 +129,25 @@ proc ::Adhoc::ExecuteCB {jid node type subiq args} {
     }
 }
 
-proc ::Adhoc::BuildDlg {jid node queryE} {
+proc ::Adhoc::BuildDlg {jid node subiq} {
     global  wDlgs
     variable uid
 
     # Collect some useful attributes.
-    set sessionid [wrapper::getattribute $queryE sessionid]
-    set status    [wrapper::getattribute $queryE status]
-    
-    puts "::Adhoc::BuildDlg $jid $node, status=$status"
+    set sessionid [wrapper::getattribute $subiq sessionid]
+    set status    [wrapper::getattribute $subiq status]
     
     set w $wDlgs(jadhoc)[incr uid]
+        
+    # Keep instance specific state array.
+    variable $w
+    upvar 0 $w state    
+
     ::UI::Toplevel $w -class AdHoc  \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace code CloseCmd]
-    wm title $w "Ad-Hoc for $jid"
+    set label [FindLabelForJIDNode $jid $node]
+    wm title $w "Ad-Hoc for \"$label\""
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jadhoc)]]
     if {$nwin == 1} {
@@ -157,9 +163,11 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
     # pack $w.all.lbl -side top
     
     set wform $w.all.form
-    set ftoken [::JForms::Build $wform $queryE -width 300]
+    #set xtoken [::JForms::Build $wform $subiq -width 300]
+    PayloadFrame $w $wform $subiq
     pack $wform -side top -fill both -expand 1
 
+    set xtoken $state(xtoken)
     set bot $w.all.bot
     ttk::frame $bot -padding [option get . okcancelTopPadding {}]
 
@@ -172,7 +180,7 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
 	pack $bot.close -side right
 	
 	bind $w <Return> [list $bot.close invoke]
-	::JForms::SetState $ftoken disabled
+	::JForms::SetState $xtoken disabled
     } else {
 	ttk::button $bot.next -text [mc Next] -default active \
 	  -command [namespace code [list Action $w execute]]
@@ -187,10 +195,6 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
     pack $bot.arr -side left -padx 5 -pady 5
     
     pack $bot -side bottom -fill x
-    
-    # Keep instance specific state array.
-    variable $w
-    upvar 0 $w state    
 
     set state(w)          $w
     set state(wform)      $wform
@@ -198,17 +202,47 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
     set state(wnext)      $bot.next
     set state(wprev)      $bot.prev
     set state(warrows)    $bot.arr
-    set state(ftoken)     $ftoken
+    set state(xtoken)     $xtoken
     set state(jid)        $jid
     set state(node)       $node
     set state(sessionid)  $sessionid
     set state(status)     $status
     
     if {$status ne "completed"} {
-	SetActionButtons $w $queryE
+	SetActionButtons $w $subiq
+    }   
+    return $w
+}
+
+# Adhoc::PayloadFrame --
+# 
+#       Build the payload frame from the xml payload of the command element.
+#       Normally a single jabber:x:data element but can also be jabber:x:oob
+#       elements.
+#       
+#       XEP-0050: When the precedence of these payload elements becomes 
+#       important (such as when both "jabber:x:data" and "jabber:x:oob" 
+#       elements are present), the order of the elements SHOULD be used. 
+#       Those elements that come earlier in the child list take precedence 
+#       over those later in the child list. 
+
+proc ::Adhoc::PayloadFrame {w wform subiq} {
+    variable $w
+    upvar 0 $w state
+    variable xmlns
+    
+    foreach E [wrapper::getchildren $subiq] {
+	if {([wrapper::gettag $E] eq "x") && \
+	  ([wrapper::getattribute $E xmlns] eq $xmlns(xdata))} {
+	    set state(xtoken) [::JForms::XDataFrame $wform $E -width 300]
+	    break
+	} elseif {([wrapper::gettag $E] eq "query") && \
+	  ([wrapper::getattribute $E xmlns] eq $xmlns(oob))} {
+	    
+	    # @@@ It is unclear what this looks like.
+	}
     }
     
-    return $w
 }
 
 # Adhoc::GetActions --
@@ -219,12 +253,12 @@ proc ::Adhoc::BuildDlg {jid node queryE} {
 #               <complete/>
 #           </actions> 
 
-proc ::Adhoc::GetActions {queryE} {
+proc ::Adhoc::GetActions {subiq} {
     
     set actions [list]
     set execute ""
-    if {[wrapper::gettag $queryE] eq "command"} {
-	set commandE $queryE
+    if {[wrapper::gettag $subiq] eq "command"} {
+	set commandE $subiq
 	set actionsE [wrapper::getfirstchildwithtag $commandE actions]
 	if {[llength $actionsE]} {
 	    set execute [wrapper::getattribute $actionsE execute]
@@ -233,7 +267,6 @@ proc ::Adhoc::GetActions {queryE} {
 	    }
 	}
     }
-    puts "::Adhoc::GetActions [list $actions $execute]"
     return [list $actions $execute]
 }
 
@@ -242,13 +275,11 @@ proc ::Adhoc::Action {w action} {
     upvar 0 $w state
     variable xmlns
     
-    puts "::Adhoc::Action action=$action"
-
     $state(warrows) start
     $state(wprev) state {disabled}
     $state(wnext) state {disabled}
     
-    set xdataEs [::JForms::GetXML $state(ftoken)]
+    set xdataEs [::JForms::GetXML $state(xtoken)]
     set attr [list xmlns $xmlns(commands) node $state(node) action $action \
       sessionid $state(sessionid)]
     set commandE [wrapper::createtag command \
@@ -258,10 +289,7 @@ proc ::Adhoc::Action {w action} {
       -xml:lang [jlib::getlang]
 }
 
-# @@@ Not very much tested since I can't find any service with the more advanced
-#     functions, lika an actions element.
-
-proc ::Adhoc::ActionCB {w type queryE args} {
+proc ::Adhoc::ActionCB {w type subiq args} {
     
     if {![winfo exists $w]} {
 	return
@@ -271,10 +299,8 @@ proc ::Adhoc::ActionCB {w type queryE args} {
 
     $state(warrows) stop
  
-    set status [wrapper::getattribute $queryE status]
+    set status [wrapper::getattribute $subiq status]
     set state(status) $status
-    
-    puts "::Adhoc::ActionCB type=$type, status=$status"
     
     if {$type eq "error"} {
 	set errcode [lindex $subiq 0]
@@ -286,7 +312,7 @@ proc ::Adhoc::ActionCB {w type queryE args} {
     } else {
 	set wform $state(wform)
 	destroy $wform
-	set state(ftoken) [::JForms::Build $wform $queryE -width 300]
+	set state(xtoken) [::JForms::Build $wform $subiq -width 300]
 	pack $wform -side top -fill both -expand 1
 
 	if {$status eq "completed"} {
@@ -296,12 +322,15 @@ proc ::Adhoc::ActionCB {w type queryE args} {
 	    $state(wnext) configure -text [mc Close] -default active \
 	      -command [namespace code [list Close $w]]
 	} else {
-	    SetActionButtons $w $queryE
+	    SetActionButtons $w $subiq
 	}	
+	
+	# There can be one or many jabber:iq:oob elements as well.
+	
     }
 }
 
-proc ::Adhoc::SetActionButtons {w queryE} {
+proc ::Adhoc::SetActionButtons {w subiq} {
     variable $w
     upvar 0 $w state
     
@@ -309,7 +338,7 @@ proc ::Adhoc::SetActionButtons {w queryE} {
     $state(wnext) configure -default normal
     bind $w <Return> {}
 
-    lassign [GetActions $queryE] actions execute
+    lassign [GetActions $subiq] actions execute
     foreach action $actions {
 	switch -- $action {
 	    next - prev {
