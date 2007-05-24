@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.33 2007-04-21 13:26:42 matben Exp $
+# $Id: wrapper.tcl,v 1.34 2007-05-24 13:22:38 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -672,7 +672,7 @@ proc wrapper::setattr {attrlist attrname value} {
     return [array get attrArr]
 }
 
-# wrapper::gettag, getattrlist, getisempty, ,getcdata, getchildren  --
+# wrapper::gettag, getattrlist, getisempty, getcdata, getchildren  --
 #
 #       Accessor functions for 'xmllist'.
 #       {tag attrlist isempty cdata {grandchild1 grandchild2 ...}}

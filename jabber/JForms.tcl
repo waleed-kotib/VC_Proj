@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.30 2007-05-18 14:12:03 matben Exp $
+# $Id: JForms.tcl,v 1.31 2007-05-24 13:22:38 matben Exp $
 # 
 #      Updated to version 2.5 of XEP-0004
 #  
@@ -107,7 +107,6 @@ proc ::JForms::Build {w queryE args} {
     bind $w <Destroy> [list [namespace current]::Free $token]    
     return $token
 }
-
 
 proc ::JForms::XDataFrame {w xdataE args} {
     variable uid
@@ -346,6 +345,21 @@ proc ::JForms::GetPlainForm {token} {
 #       </field>
 #   </x> 
 #   
+#       There is an alternative form with multiple items:
+#       
+#   <x xmlns="jabber:x:data" type="result">
+#       <reported>
+#           <field var="name" type="text-single" label="Name"/>
+#           <field var="desc" type="text-multi" label="Description"/>
+#           <field var="count" type="text-single" label="User Count"/>
+#	</reported>
+#	<item>
+#           <field var="shared"><value>0</value></field>
+#           <field var="desc"><value></value></field>
+#           <field var="count"><value>0</value></field>
+#       </item>
+#   </x>
+
 
 proc ::JForms::BuildXDataFrame {token} {
     variable $token
@@ -410,6 +424,12 @@ proc ::JForms::BuildXDataFrame {token} {
 		    }
 		}
 	    }
+	    reported {
+		ParseReported $token $elem
+	    }
+	    item {
+		ParseItem $token $elem
+	    }
 	}
     } 
     if {$state(anyrequired)} {
@@ -440,6 +460,91 @@ proc ::JForms::ConfigWraplengthList {token} {
     set width [expr {[winfo width $state(w)] - 2}]
     foreach wlab $state(wraplengthList) {
 	$wlab configure -wraplength $width
+    }
+}
+
+# JForms::ParseReported --
+# 
+#       Parses a reported element which is used by form type='result' and
+#       typically followed by a number of field elements.
+#       XEP-0004: 3.4 Multiple Items in Form Results 
+
+proc ::JForms::ParseReported {token elem} {
+    variable $token
+    upvar 0 $token state
+    
+    set i 0
+    
+    # XEP-0004: (if it is "fixed", it MAY possess a 'var' attribute) 
+    foreach fieldE [wrapper::getchildren $elem] {
+	if {[wrapper::gettag $fieldE] ne "field"} {
+	    continue
+	}
+	unset -nocomplain attr
+	set attr(type) "text-single"
+	array set attr [wrapper::getattrlist $fieldE]
+	if {[info exists attr(var)]} {
+	    set var $attr(var)
+	} else {
+	    set var fixed-[incr i]
+	}
+	set label $var
+	if {[info exists attr(label)]} {
+	    set label $attr(label)
+	}
+	lappend state(reported,vars) $var
+	set state(reported,$var,type) $attr(type)
+	set state(reported,$var,label) $label
+    }
+    
+    # Make a header.
+    set i 0
+    lassign [grid size $state(w)] ncol nrow
+    foreach var $state(reported,vars) {
+	set wlab $state(w).l[incr state(i)]
+	ttk::label $wlab -text $state(reported,$var,label)
+	grid  $wlab  -row $nrow -column $i -padx 4 -pady 2
+	set state(reported,$var,column) $i
+	incr i
+    }
+}
+
+# JForms::ParseItem --
+# 
+#       XEP-0004: 3.4 Multiple Items in Form Results 
+
+proc ::JForms::ParseItem {token elem} {
+    variable $token
+    upvar 0 $token state
+    
+    set i 0
+    lassign [grid size $state(w)] ncol nrow
+    foreach fieldE [wrapper::getchildren $elem] {
+	if {[wrapper::gettag $fieldE] ne "field"} {
+	    continue
+	}
+	unset -nocomplain attr
+	set attr(type) "text-single"
+	array set attr [wrapper::getattrlist $fieldE]
+	if {[info exists attr(var)]} {
+	    set var $attr(var)
+	    if {[info exists state(reported,$var,column)]} {
+		set value ""
+		
+		switch -- $state(reported,$var,type) {
+		    text-single - boolean - jid-single - fixed {
+			set value [GetDefaultValue $fieldE]
+		    }
+		    jid-multi - list-multi - text-multi {
+			# @@@ TODO
+		    }
+		}
+		set wlab $state(w).l[incr state(i)]
+		set c $state(reported,$var,column)
+		ttk::label $wlab -text $value
+		grid  $wlab  -row $nrow -column $c -padx 4
+	    }
+	}	
     }
 }
 
@@ -809,6 +914,7 @@ proc ::JForms::NewFixed {token elem} {
     variable $token
     upvar 0 $token state
     
+    # XEP-0004: (if it is "fixed", it MAY possess a 'var' attribute) 
     set w $state(w)
     foreach value [GetDefaultList $elem] {
 	set wlab $w.l[incr state(i)]    
