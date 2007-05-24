@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.195 2007-05-07 12:05:38 matben Exp $
+# $Id: Roster.tcl,v 1.196 2007-05-24 14:57:50 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1341,7 +1341,7 @@ proc ::Roster::RemoveUsers {jidlist} {
 
 proc ::Roster::ExportRoster {} {
     set fileName [tk_getSaveFile -defaultextension .xml -initialfile roster.xml]
-    if {[file exists $fileName]} {
+    if {$fileName ne ""} {
 	SaveRosterToFile $fileName
     }
 }
