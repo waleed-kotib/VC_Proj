@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.64 2007-05-22 09:18:18 matben Exp $
+# $Id: Init.tcl,v 1.65 2007-05-25 12:42:15 matben Exp $
 
 namespace eval ::Init {}
 
@@ -398,8 +398,8 @@ proc ::Init::SetThisVersion {} {
     # The application major and minor version numbers; should only be written to
     # default file, never read.
     set this(vers,major)    0
-    set this(vers,minor)   95
-    set this(vers,release) 17
+    set this(vers,minor)   96
+    set this(vers,release)  0
     set this(vers,full) $this(vers,major).$this(vers,minor).$this(vers,release)
 
     # This is used only to track upgrades.
