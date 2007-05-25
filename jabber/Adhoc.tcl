@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: Adhoc.tcl,v 1.9 2007-05-24 13:22:37 matben Exp $
+# $Id: Adhoc.tcl,v 1.10 2007-05-25 09:35:26 matben Exp $
 
 # @@@ Maybe all this should be a component?
 
@@ -25,6 +25,11 @@ namespace eval ::Adhoc {
     set xmlns(oob)      "jabber:x:oob"
     
     variable uid 0
+    
+    variable noteType
+    set noteType(info)  "The note is informational only. This is not really an exceptional condition."
+    set noteType(warn)  "The note indicates a warning. Possibly due to illogical (yet valid) data."
+    set noteType(error) "The note indicates an error. The text should indicate the reason for the error."
 }
 
 proc ::Adhoc::DiscoInfoHook {type from queryE args} {
@@ -143,6 +148,10 @@ proc ::Adhoc::BuildDlg {jid node subiq} {
     variable $w
     upvar 0 $w state    
 
+    set state(w)          $w
+    set state(sessionid)  $sessionid
+    set state(status)     $status
+
     ::UI::Toplevel $w -class AdHoc  \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace code CloseCmd]
@@ -162,12 +171,13 @@ proc ::Adhoc::BuildDlg {jid node subiq} {
     # ttk::label $w.all.lbl -text $label
     # pack $w.all.lbl -side top
     
-    set wform $w.all.form
-    #set xtoken [::JForms::Build $wform $subiq -width 300]
-    PayloadFrame $w $wform $subiq
-    pack $wform -side top -fill both -expand 1
+    # NB: We may not always get an xdata element, it could be note elements,
+    #     or jabber:x:oob.
+    set state(wmain)  $w.all.main
+    set state(wform)  $w.all.main.form
+    set state(wnotes) $w.all.main.notes
+    PayloadFrame $w $subiq
 
-    set xtoken $state(xtoken)
     set bot $w.all.bot
     ttk::frame $bot -padding [option get . okcancelTopPadding {}]
 
@@ -180,7 +190,6 @@ proc ::Adhoc::BuildDlg {jid node subiq} {
 	pack $bot.close -side right
 	
 	bind $w <Return> [list $bot.close invoke]
-	::JForms::SetState $xtoken disabled
     } else {
 	ttk::button $bot.next -text [mc Next] -default active \
 	  -command [namespace code [list Action $w execute]]
@@ -196,17 +205,12 @@ proc ::Adhoc::BuildDlg {jid node subiq} {
     
     pack $bot -side bottom -fill x
 
-    set state(w)          $w
-    set state(wform)      $wform
     set state(wclose)     $bot.close
     set state(wnext)      $bot.next
     set state(wprev)      $bot.prev
     set state(warrows)    $bot.arr
-    set state(xtoken)     $xtoken
     set state(jid)        $jid
     set state(node)       $node
-    set state(sessionid)  $sessionid
-    set state(status)     $status
     
     if {$status ne "completed"} {
 	SetActionButtons $w $subiq
@@ -218,7 +222,7 @@ proc ::Adhoc::BuildDlg {jid node subiq} {
 # 
 #       Build the payload frame from the xml payload of the command element.
 #       Normally a single jabber:x:data element but can also be jabber:x:oob
-#       elements.
+#       elements and a number of note elements.
 #       
 #       XEP-0050: When the precedence of these payload elements becomes 
 #       important (such as when both "jabber:x:data" and "jabber:x:oob" 
@@ -226,7 +230,19 @@ proc ::Adhoc::BuildDlg {jid node subiq} {
 #       Those elements that come earlier in the child list take precedence 
 #       over those later in the child list. 
 
-proc ::Adhoc::PayloadFrame {w wform subiq} {
+proc ::Adhoc::PayloadFrame {w subiq} {
+    variable $w
+    upvar 0 $w state
+    
+    ttk::frame $state(wmain)
+    pack $state(wmain) -side top -fill both -expand 1
+
+    XDataFrame $w $subiq
+    NotesFrame $w $subiq
+    OOBFrame $w $subiq
+}
+
+proc ::Adhoc::XDataFrame {w subiq} {
     variable $w
     upvar 0 $w state
     variable xmlns
@@ -234,15 +250,60 @@ proc ::Adhoc::PayloadFrame {w wform subiq} {
     foreach E [wrapper::getchildren $subiq] {
 	if {([wrapper::gettag $E] eq "x") && \
 	  ([wrapper::getattribute $E xmlns] eq $xmlns(xdata))} {
+	    set wform $state(wform)
 	    set state(xtoken) [::JForms::XDataFrame $wform $E -width 300]
+	    pack $wform -side top -fill both -expand 1
+	    
+	    if {$state(status) eq "completed"} {
+		::JForms::SetState $state(xtoken) disabled
+	    }
 	    break
-	} elseif {([wrapper::gettag $E] eq "query") && \
+	}
+    }  
+}
+
+proc ::Adhoc::NotesFrame {w subiq} {
+    variable $w
+    upvar 0 $w state
+    variable xmlns
+    variable noteType
+    
+    set i 0
+    set wnotes $state(wnotes)
+    foreach E [wrapper::getchildren $subiq] {
+	if {[wrapper::gettag $E] eq "note"} {
+	    if {![winfo exists $wnotes]} {
+		ttk::frame $wnotes
+		pack $wnotes -side top -fill both -expand 1
+	    }
+	    set wlab $wnotes.l$i
+	    ttk::label $wlab -text [wrapper::getcdata $E]
+	    grid  $wlab  -sticky w
+	    
+	    set type [wrapper::getattribute $E type]
+	    if {$type eq ""} {
+		set type "info"
+	    }
+	    if {[info exists noteType($type)]} {
+		::balloonhelp::balloonforwindow $wlab $noteType($type)
+	    }
+	    incr i
+	}
+    }
+}
+
+proc ::Adhoc::OOBFrame {w subiq} {
+    variable $w
+    upvar 0 $w state
+    variable xmlns
+    
+    foreach E [wrapper::getchildren $subiq] {
+	if {([wrapper::gettag $E] eq "query") && \
 	  ([wrapper::getattribute $E xmlns] eq $xmlns(oob))} {
 	    
 	    # @@@ It is unclear what this looks like.
 	}
     }
-    
 }
 
 # Adhoc::GetActions --
@@ -310,11 +371,11 @@ proc ::Adhoc::ActionCB {w type subiq args} {
 	  -message "Ad-Hoc command for \"$label\" at $jid failed because: $errmsg"
 	Close $w
     } else {
-	set wform $state(wform)
-	destroy $wform
-	set state(xtoken) [::JForms::Build $wform $subiq -width 300]
-	pack $wform -side top -fill both -expand 1
-
+	
+	set wmain $state(wmain)
+	destroy $wmain
+	PayloadFrame $w $subiq
+	
 	if {$status eq "completed"} {
 	    $state(wprev) configure -default normal
 	    $state(wnext) configure -default normal
