@@ -1,6 +1,6 @@
 # Russian language version of the Coccinella message catalog.
 #
-# Translated by Gescheit(xmmp://gescheit@jabber.ttn.ru)
+# Translated by Alexander Balezin(xmmp://gescheit@jabber.ttn.ru)
 # gescheit@list.ru
 #
 # General type of text, such as "OK", "Cancel", and the like. 
@@ -20,6 +20,7 @@
 ::msgcat::mcset ru Apply			{Применить}
 ::msgcat::mcset ru Available		{Доступен}
 ::msgcat::mcset ru Away			{Ушел}
+::msgcat::mcset ru Back			{Назад}
 ::msgcat::mcset ru Binary		{Бинарный}
 ::msgcat::mcset ru Birthday		{День рождения}
 ::msgcat::mcset ru Block			{Блокировка}
@@ -60,11 +61,12 @@
 ::msgcat::mcset ru Error		{Ошибки}
 ::msgcat::mcset ru Exit		{Выход}
 ::msgcat::mcset ru File		{Файл...}
+::msgcat::mcset ru Next		{Далее}
 
 ::msgcat::mcset ru Find
 
-::msgcat::mcset ru Finish		{Закончен}
-::msgcat::mcset ru Finished	{Закончен}
+::msgcat::mcset ru Finish		{Готово}
+::msgcat::mcset ru Finished		{Закончен}
 ::msgcat::mcset ru First		{Первый}
 ::msgcat::mcset ru Filter		{Фильтр}
 ::msgcat::mcset ru Friends		{Друзья}
@@ -99,10 +101,10 @@
 
 ::msgcat::mcset ru Never			{Никогда}
 ::msgcat::mcset ru New			{Новый}
-::msgcat::mcset ru Next
-::msgcat::mcset ru Nick
+::msgcat::mcset ru Next			{Далее}
+::msgcat::mcset ru Nick			{Ник}
 ::msgcat::mcset ru Nickname		{Ник}
-::msgcat::mcset ru No
+::msgcat::mcset ru No		
 ::msgcat::mcset ru no
 ::msgcat::mcset ru None
 ::msgcat::mcset ru Notes			{Обо мне}
@@ -137,14 +139,14 @@
 ::msgcat::mcset ru Reply		{Ответить}
 ::msgcat::mcset ru Resource	{Ресурс}
 ::msgcat::mcset ru Restart
-::msgcat::mcset ru Room
+::msgcat::mcset ru Room	{Комната}
 ::msgcat::mcset ru Roster	{Ростер}
 ::msgcat::mcset ru Save		{Сохранить}
 ::msgcat::mcset ru Search	{Поиск}
 ::msgcat::mcset ru Select		{Выбрать}
 ::msgcat::mcset ru Send		{Послать}
-::msgcat::mcset ru Server
-::msgcat::mcset ru Servers
+::msgcat::mcset ru Server	{Сервер}
+::msgcat::mcset ru Servers	{Сервера}
 ::msgcat::mcset ru Service
 ::msgcat::mcset ru Set			{Установить}
 ::msgcat::mcset ru Settings		{Настройки}
@@ -162,7 +164,7 @@
 ::msgcat::mcset ru Subscribed
 ::msgcat::mcset ru Subscription	{Подписка}
 ::msgcat::mcset ru Subscriptions	{Подписки}
-::msgcat::mcset ru Text
+::msgcat::mcset ru Text		
 ::msgcat::mcset ru Time
 ::msgcat::mcset ru Timeout
 ::msgcat::mcset ru Title			{Должность}
@@ -183,8 +185,8 @@
 ::msgcat::mcset ru Whiteboard	{Доска для рисования}
 ::msgcat::mcset ru Width	{Ширина}
 ::msgcat::mcset ru Work		{Работа}
-::msgcat::mcset ru Yes
-::msgcat::mcset ru yes
+::msgcat::mcset ru Yes		{Да}
+::msgcat::mcset ru yes		{да}
 
 # A few words that are not unambiguous and have therefore a prefix.
 ::msgcat::mcset ru program-Application        Application
@@ -227,7 +229,7 @@
 ::msgcat::mcset ru mLibrary		{Библиотеки}
 ::msgcat::mcset ru mInfo		{Инфо}
 ::msgcat::mcset ru mAddons		{Аддоны}
-::msgcat::mcset ru mPlugins		{Плугины}
+::msgcat::mcset ru mPlugins		{Плагины}
 ::msgcat::mcset ru unavailable		{Недоступно}
 ::msgcat::mcset ru {Advanced...}		{Еще}
 ::msgcat::mcset ru {Connect using HTTP}	{Подключатся через HTTP}
@@ -271,7 +273,7 @@
 ::msgcat::mcset ru mFlip				{Вращать}
 ::msgcat::mcset ru mHorizontal		{Горизонтально}
 ::msgcat::mcset ru mVertical			{Вертикально}
-::msgcat::mcset ru mImageLarger		{Увеличеть изображениеr}
+::msgcat::mcset ru mImageLarger		{Увеличить изображение}
 ::msgcat::mcset ru mImageSmaller		{Уменьшить изображение}
 ::msgcat::mcset ru mBackgroundColor	{Цвет фона...}
 ::msgcat::mcset ru mGrid				{Сетка}
@@ -280,7 +282,7 @@
 ::msgcat::mcset ru mFill				{Заполнить}
 ::msgcat::mcset ru mFillColor			{Заполнить цветом...}
 ::msgcat::mcset ru mOutlineColor		{Outline Color}
-::msgcat::mcset ru mLineSmoothness	{Гладкая лининя}
+::msgcat::mcset ru mLineSmoothness	{Гладкая линия}
 ::msgcat::mcset ru mStraighten   		{Выпрямить}
 ::msgcat::mcset ru mArcs			{Дуги}
 ::msgcat::mcset ru mPieslice			{Pieslice}
@@ -351,22 +353,22 @@
 ::msgcat::mcset ru mTimeCode		{Timecode}
 ::msgcat::mcset ru mUserInfo			{Информация о пользовател...}
 ::msgcat::mcset ru mEditBookmarks	{Закладки}
-
+::msgcat::mcset ru mDisco               {Дисковери}
 ::msgcat::mcset ru mCustomStatus        {Custom Status...}
-::msgcat::mcset ru mImport              {Import}
-::msgcat::mcset ru mExport              {Export}
+::msgcat::mcset ru mImport              {Импорт}
+::msgcat::mcset ru mExport              {Экспорт}
 ::msgcat::mcset ru mEmoticonSet         {Emoticon Set...}
 ::msgcat::mcset ru mRoster              {Roster...}
 ::msgcat::mcset ru mFontSize            {Font Size}
-::msgcat::mcset ru mNormalFont          {Normal}
-::msgcat::mcset ru mLargerFont          {Larger}
-::msgcat::mcset ru mLargeFont           {Large}
+::msgcat::mcset ru mNormalFont          {Средне}
+::msgcat::mcset ru mLargerFont          {Больше}
+::msgcat::mcset ru mLargeFont           {Большой}
 
 # Popups
 ::msgcat::mcset ru mMessage     	{Сообщение...}
 ::msgcat::mcset ru mWhiteboard     	{Доской...}
 ::msgcat::mcset ru mLastLogin/Activity  {Последний раз в сети}
-::msgcat::mcset ru mEditUser     	{Изменит юзера...}
+::msgcat::mcset ru mEditUser     	{Изменить юзера...}
 ::msgcat::mcset ru mRemoveUser     	{Удалить юзера...}
 ::msgcat::mcset ru mRefreshRoster     	{Обновить ростер}
 ::msgcat::mcset ru mVersion     	{Версия}
@@ -384,7 +386,6 @@
 ::msgcat::mcset ru mOffline         	{Офлайн}
 ::msgcat::mcset ru mTransports         	{Транспорты}
 ::msgcat::mcset ru mEditNick            {Edit Nickname}
-::msgcat::mcset ru mAdHocCommands       {Ad-Hoc Commands}
 
 
 # Short texts only. Use english text as database key.
@@ -394,14 +395,13 @@
 ::msgcat::mcset ru {Remove Photo}	{Удалить фото}
 ::msgcat::mcset ru {Show Popup}		{Показывать 
 всплывающие окна}
-::msgcat::mcset ru {Send Message with subject}			{Послать сообщениес темой}
+::msgcat::mcset ru {Send Message with subject}			{Послать сообщение с темой}
 ::msgcat::mcset ru {No registered history for %s}			{Нет истории для %s}
 ::msgcat::mcset ru {ejabberd}			{сервер - ejabberd}
 ::msgcat::mcset ru {Send File}			{Послать файл}
 ::msgcat::mcset ru {New Chat}		{Новый чат}
 ::msgcat::mcset ru {All Off}		{Отключить всё}
-::msgcat::mcset ru {Set a specific action when something happens with "%s", which can be changed 
-status, or if you receive a message etc. Pick events using the tabs below.}		{Странно, но не работает}
+::msgcat::mcset ru {Установить особое событие когда что-нибудь происходит с "%s". Это может быть и смена статуса и получение сообщения от него и т.д. Выбирете события используя эти вкладки.}		{Странно, но не работает}
 ::msgcat::mcset ru {Sounds Set}			{Установка звуков}
 ::msgcat::mcset ru {MIDI Player}			{MIDI плеер}
 ::msgcat::mcset ru {Disco method}			{Disco метод}
@@ -433,14 +433,14 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Active <Return>}
 ::msgcat::mcset ru {Add New User}		{Добавить нового пользователя}
 ::msgcat::mcset ru {Add permanently}
-::msgcat::mcset ru {Add Server}
+::msgcat::mcset ru {Add Server}			{Добавить сервер}
 ::msgcat::mcset ru {Add Shortcut}
 ::msgcat::mcset ru {Address 1}			{Адрес 1}
 ::msgcat::mcset ru {Address 2}			{Адрес 1}
 ::msgcat::mcset ru {Advanced Setup}		{Расширенные настройки}
 ::msgcat::mcset ru {Advanced Configuration}	{Расширенная конфигурация}
 ::msgcat::mcset ru {Alert sounds}
-::msgcat::mcset ru {Play Sound}			{Проигровать звук}
+::msgcat::mcset ru {Play Sound}			{Проигрывать звук}
 ::msgcat::mcset ru {Emoticons}			{Смайлики}
 ::msgcat::mcset ru {As text}
 ::msgcat::mcset ru {Ask each time}			{Постоянно спрашивать}
@@ -462,7 +462,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Component Info}
 ::msgcat::mcset ru {Conference server}		{Сервер конференций}
 ::msgcat::mcset ru {Contact Type}			{Тип подключения}
-::msgcat::mcset ru {Create Room}
+::msgcat::mcset ru {Create Room}			{Создать комнату}
 ::msgcat::mcset ru {Default group}			{Группа по умолчанию}
 ::msgcat::mcset ru {Default Logout Status}
 ::msgcat::mcset ru {Default nickname}			{Имя с которым вы войдете в конференцию по умолчанию}
@@ -470,11 +470,11 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Delete Rule}				{Удалить правило}
 ::msgcat::mcset ru {Disk Cache}				{Размер кеша}
 ::msgcat::mcset ru {Different Passwords}
-::msgcat::mcset ru {Do Not Disturb}
-
-::msgcat::mcset ru {Do not save password}
-
-::msgcat::mcset ru {Edit Fonts}		{Изменить шрифт}
+::msgcat::mcset ru {Do Not Disturb}			{Не беспокоить}
+::msgcat::mcset ru {Use proxy}				{Использовать прокси}
+::msgcat::mcset ru {Proxy Type}				{Тип прокси}
+::msgcat::mcset ru {Do not save password}		{Не сохранять пароль}
+::msgcat::mcset ru {Edit Fonts}				{Изменить шрифт}
 ::msgcat::mcset ru {Edit Item}
 ::msgcat::mcset ru {Edit Shortcut}
 ::msgcat::mcset ru {Edit Shortcuts}
@@ -492,9 +492,9 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {File coding}
 ::msgcat::mcset ru {File Mappings}		{}
 ::msgcat::mcset ru {File suffixes}
-::msgcat::mcset ru {File Transfer}
+::msgcat::mcset ru {File Transfer}		{Передача файла}
 ::msgcat::mcset ru {File Transfer Error}
-::msgcat::mcset ru {First name}	{Имя}
+::msgcat::mcset ru {First name}			{Имя}
 ::msgcat::mcset ru {Font Size}			{Размер шрифта}
 ::msgcat::mcset ru {Font Weight}		{Ширина шрифта}
 ::msgcat::mcset ru {Format mm/dd/yyyy}	{Формат мм/дд/гггг}
@@ -510,7 +510,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Host name}
 ::msgcat::mcset ru {HTTP port}
 ::msgcat::mcset ru {Import using}
-::msgcat::mcset ru {Import/Remove fonts}	{Добавлени/Удаление шрифтов}
+::msgcat::mcset ru {Import/Remove fonts}	{Добавление/Удаление шрифтов}
 ::msgcat::mcset ru {Incoming Message}		{Входящее сообщение}
 ::msgcat::mcset ru {Incoming Messages}		{Входящие сообщения}
 ::msgcat::mcset ru {Incoming Presence}		{Входящее присутствие}
@@ -538,8 +538,8 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Mailbox Error}
 ::msgcat::mcset ru {MIME type}
 ::msgcat::mcset ru {Multi Connect}
-::msgcat::mcset ru {My nickname for own display}
-::msgcat::mcset ru {My Status}
+::msgcat::mcset ru {My nickname for own display}	{Мой ник показываемый для всех}
+::msgcat::mcset ru {My Status}				{Мой статус}
 ::msgcat::mcset ru {Name of list}			{Имя списка}
 ::msgcat::mcset ru {Network Error}
 ::msgcat::mcset ru {Network Setup}		{Настройка сети}
@@ -570,6 +570,8 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {One hour} 			{Один час}
 ::msgcat::mcset ru {One day} 			{Один день}
 ::msgcat::mcset ru {One week} 			{Одна неделя}
+::msgcat::mcset ru {New Profile} 		{Новый профиль}
+::msgcat::mcset ru {Delete Profile} 		{Удалить профиль}
 
 
 ::msgcat::mcset ru {Bookmark this room}	{Добавить в закладки эту комнату}
@@ -601,14 +603,16 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Privacy List}
 ::msgcat::mcset ru {Profile Name}		{Имя профиля}
 ::msgcat::mcset ru {Proxy Setup}		{Настройка прокси}
+::msgcat::mcset ru {Proxy Server}		{Прокси сервер}
+::msgcat::mcset ru {Proxy Port}			{Порт}
 ::msgcat::mcset ru {Put File Error}
 ::msgcat::mcset ru {Put Image/Movie}
 ::msgcat::mcset ru {Reject receive}
 ::msgcat::mcset ru {Request To User}
-::msgcat::mcset ru {Retype Password}		{Повторите новый пароль}
+::msgcat::mcset ru {Retype Password}		{Повторите пароль}
 ::msgcat::mcset ru {Revert Panel}			{Вернуть эту настройку}
-::msgcat::mcset ru {Register New Account}
-::msgcat::mcset ru {Register Now}
+::msgcat::mcset ru {Register New Account}	{Зарегистрировать новый аккаунт}
+::msgcat::mcset ru {Register Now}		{Зарегистрироваться сейчас}
 ::msgcat::mcset ru {Register Service}
 ::msgcat::mcset ru {Remove Item}
 ::msgcat::mcset ru {Room name}			{Имя комнаты}
@@ -619,22 +623,19 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Save Canvas}
 ::msgcat::mcset ru {Save File}				{Сохранить файл}
 ::msgcat::mcset ru {Save Message}		{Сохранить сообщение}
-
-::msgcat::mcset ru {Save password}
-
 ::msgcat::mcset ru {Scramble password}		{Смешанный пароль}
 ::msgcat::mcset ru {Search results}			{Результаты поиска}
 ::msgcat::mcset ru {Search Service}		{Сервис поиска}
 ::msgcat::mcset ru {Search Specifications}
-::msgcat::mcset ru {Select a new nickname}	{Выбирете новое имя}
-::msgcat::mcset ru {Select Font}			{Выбирете шрифт}
+::msgcat::mcset ru {Select a new nickname}	{Выберете новое имя}
+::msgcat::mcset ru {Select Font}			{Выберете шрифт}
 ::msgcat::mcset ru {Послать файл}
 ::msgcat::mcset ru {Send Live}
 ::msgcat::mcset ru {Server Info}			{Инфо о сервере}
 ::msgcat::mcset ru {Service server}
 ::msgcat::mcset ru {Set Directed Presence}
-::msgcat::mcset ru {Set New Nickname}
-::msgcat::mcset ru {Set New Topic}		{Установить новую тему}
+::msgcat::mcset ru {Set New Nickname}		{Установить новый ник}
+::msgcat::mcset ru {Set New Topic}			{Установить новую тему}
 ::msgcat::mcset ru {Set Status}			{Установить статус}
 ::msgcat::mcset ru {Settings Panels}		{Панель настроек}
 ::msgcat::mcset ru {Setup Assistant}
@@ -646,28 +647,31 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Slide Show}
 ::msgcat::mcset ru {Slide Show Folder}
 ::msgcat::mcset ru {Software Update}		{Апдейт программы}
-::msgcat::mcset ru {Sounds & Speech}
-::msgcat::mcset ru {Start Chat}			{Начать чат}
+::msgcat::mcset ru {Sounds & Speech}		
+::msgcat::mcset ru {Start Chat}			{Чат}
 ::msgcat::mcset ru {Status message}
 ::msgcat::mcset ru {Status when logging out}
 ::msgcat::mcset ru {Subscription Failed}
 ::msgcat::mcset ru {Subscription Pending}
 ::msgcat::mcset ru {Synthetic speech}
-::msgcat::mcset ru {System fonts}		{Системный шрифт}
-::msgcat::mcset ru {Take Snapshot}	{Сделать скриншот}
+::msgcat::mcset ru {System fonts}			{Системный шрифт}
+::msgcat::mcset ru {Take Snapshot}		{Сделать скриншот}
 ::msgcat::mcset ru {Games}			{Игры}
-::msgcat::mcset ru {heart}			{сердечко}
-::msgcat::mcset ru {Tel (voice)}		{Телефон}
+::msgcat::mcset ru {heart}				{сердечко}
+::msgcat::mcset ru {Tel (voice)}			{Телефон}
 ::msgcat::mcset ru {Tel (fax)}			{Факс}
-::msgcat::mcset кг {This IP number}	{Номер IP}
-::msgcat::mcset ru {Thread started}	{Тред начат}
-::msgcat::mcset ru {To/from JID}		{Для/от JID}
-::msgcat::mcset ru {To Jabber ID}		{Для JID}
+::msgcat::mcset ru {This IP number}		{Номер IP}
+::msgcat::mcset ru {Thread started}		{Тред начат}
+::msgcat::mcset ru {To/from JID}			{Для/от JID}
+::msgcat::mcset ru {To Jabber ID}			{Для JID}
 ::msgcat::mcset ru {To Send or Not}
 ::msgcat::mcset ru {Type of File}			{Тип файла}
 ::msgcat::mcset ru {Unknown: Prompt user}
 ::msgcat::mcset ru {Url of homepage}		{Url домашней страницы}
 ::msgcat::mcset ru {Use SSL for security}	{Использовать SSL}
+::msgcat::mcset ru {Use Secure Connection}	{Использовать безопасное подключение}
+::msgcat::mcset ru {Use TLS and SASL authentication}	{Использовать TLS и SASL аутефикацию}
+::msgcat::mcset ru {Use TLS on separate port (old)}	{Использовать TLS на другом порту(устарело)}
 ::msgcat::mcset ru {User Info}
 ::msgcat::mcset ru {User is}				{Пользователь}
 ::msgcat::mcset ru {User is offline}			{Пользователь отключился}
@@ -687,22 +691,22 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Ten seconds}			{Десять секунд}
 ::msgcat::mcset ru {One minute}			{Одна минута}
 ::msgcat::mcset ru {Ten minutes}			{Десять минут}
-::msgcat::mcset ru {One hour}
-::msgcat::mcset ru {One day} 
-::msgcat::mcset ru {One week}
+::msgcat::mcset ru {One hour}			{Один час}
+::msgcat::mcset ru {One day} 			{Один день}
+::msgcat::mcset ru {One week}			{Одна неделя}
 
 # Language names.
-::msgcat::mcset ru {Danish}  
-::msgcat::mcset ru {Dutch}  
-::msgcat::mcset ru {English}
-::msgcat::mcset ru {French}    
-::msgcat::mcset ru {German}    
-::msgcat::mcset ru {Italian}   
-::msgcat::mcset ru {Korean}    
-::msgcat::mcset ru {Polish}    
-::msgcat::mcset ru {Russian}   
-::msgcat::mcset ru {Spanish}   
-::msgcat::mcset ru {Swedish}   
+::msgcat::mcset ru {Danish}  		
+::msgcat::mcset ru {Dutch}  	
+::msgcat::mcset ru {English}	Английский
+::msgcat::mcset ru {French}    	Французский
+::msgcat::mcset ru {German}	Немецкий    
+::msgcat::mcset ru {Italian}   	Итальянский
+::msgcat::mcset ru {Korean}    	Корейский
+::msgcat::mcset ru {Polish}    	Польский
+::msgcat::mcset ru {Russian}   	Русский
+::msgcat::mcset ru {Spanish}   	Испанский
+::msgcat::mcset ru {Swedish}   	Шведский
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
@@ -714,7 +718,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru nativeItalian
 ::msgcat::mcset ru nativeKorean
 ::msgcat::mcset ru nativePolish 
-::msgcat::mcset ru nativeRussian 
+::msgcat::mcset ru nativeRussian 	Русский
 ::msgcat::mcset ru nativeSpanish    Castellano
 ::msgcat::mcset ru nativeSwedish    Svenska 
 
@@ -754,7 +758,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru messblockbadjid	{The JID "%s" is not well formed. Do you want to add it anyway?}
 ::msgcat::mcset ru messfieldsmissing	{One or more fields are missing. Try again or cancel.}
 ::msgcat::mcset ru messrmstandardfonts	{Стандартные шрифт: Times, Helvetica, и Courier не могут быть удалены}
-::msgcat::mcset ru messprefschanged	{Некоторые настройки были изменины. Вы хотите выйти без сохранения?}
+::msgcat::mcset ru messprefschanged	{Некоторые настройки были изменены. Вы хотите выйти без сохранения?}
 ::msgcat::mcset ru messerrpreffile	{Ошибка открытия файла %s.}
 ::msgcat::mcset ru messfailserver	{Невозможно открыть сокет для сервера. Возможно вы не подключены.}
 ::msgcat::mcset ru messopenhelpfile	{You are about to open a helpfile in the canvas thereby erasing the present stuff. Do you want this to happen?}
@@ -765,7 +769,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru messprotocolch	{Вы изменили настройки связанные с сетью. Надо перезагрузить приложение. Вы хотите продолжить?}
 ::msgcat::mcset ru messpasswddifferent  {The two passwords do not match. Please try again.}
 ::msgcat::mcset ru messaupdatelatest    {You already have the latest version available (%s)}
-::msgcat::mcset ru messprefsrestart     {Одна или несколько настроек изменина, чтобы получить результат перезагрузите программу}
+::msgcat::mcset ru messprefsrestart     {Одна или несколько настроек изменена, чтобы получить результат перезагрузите программу}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset ru jamesserrsend	{We received an error when sending a message to "%s". The error code is %s, and the error message: %s}
@@ -940,14 +944,14 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 
 
 
-::msgcat::mcset ru httptrptok                   {Закончено получие файла %s}
+::msgcat::mcset ru httptrptok                   {Файла %s - получен} 
 ::msgcat::mcset ru httptrpterror                {File transport error when getting the file %s: %s}
 ::msgcat::mcset ru httptrpteof                  {Сервер закрыл сокет без ответа.}
 ::msgcat::mcset ru httptrptnon200               {File transport error when getting the file %s: code %s; %s}
 ::msgcat::mcset ru httptrptreset                {File transport of %s was reset}
 
 ::msgcat::mcset ru uastatpointmac 	{Point tool, click to mark, double click to inspect, press to popup}
-::msgcat::mcset ru uastatpoint		{Инструменты для рисования, выбирете для выделения, двойной клик для проверки, правый клик для настроек}
+::msgcat::mcset ru uastatpoint		{Инструменты для рисования, выберете для выделения, двойной клик для проверки, правый клик для настроек}
 ::msgcat::mcset ru uastatmove	{Перемещениеl}
 ::msgcat::mcset ru uastatline		{Рисование прямых}
 ::msgcat::mcset ru uastatarrow	{Стрелы}
@@ -958,13 +962,20 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 ::msgcat::mcset ru uastatpen		{Ручка}
 ::msgcat::mcset ru uastatbrush	{Кисть}
 ::msgcat::mcset ru uastatpaint		{Закраска, Shift + клик для прозрачности}
-::msgcat::mcset ru uastatpoly		{Многоугольникl, пробел для отменыl}
+::msgcat::mcset ru uastatpoly		{Многоугольникl, пробел для отмены!}
 ::msgcat::mcset ru uastatarc		{Дуги, клик для установки центра, пробел для отмены}
 ::msgcat::mcset ru uastatarc2		{Дуги, кликни и тащи}
-::msgcat::mcset ru uastatrot		{Вращать, сначало надо выбрать, что вращать}
+::msgcat::mcset ru uastatrot		{Вращать, с начало надо выбрать, что вращать}
 
 
 # Preferences:
+::msgcat::mcset ru prefnetconf  {Настройка сервера и сети}
+::msgcat::mcset ru prefnethead  {Можно подключится к любому jabber серверу или подключатся к другоиу клиенту. Большая часть интерфейса зависит от того что вы выбирите.}
+::msgcat::mcset ru prefnetauto  {Если клиент подключен к серверу, подключение к другим клиентам сервер сделает сам.}
+::msgcat::mcset ru prefnetjabb  {Jabber серверная система. Управление клиентами осуществляется через меню "Жаббер". Используя XML-основанный протокол.}
+::msgcat::mcset ru prefnetmulti {Подключатся автоматически к всем клиентам в этой сети  когда подключается кто-то из них.}
+::msgcat::mcset ru prefnetadv   {Клиент обычно запускает два разных сервера, которые всегда участвуют в peer-to-peer случае, и http сервер.\
+Жаббер сервер обычно удаленный, и использует порт 5222. При изменении порта нужно перезагрузить программу.}
 ::msgcat::mcset ru prefsounsynwb {Have synthetic speech of text written in the whiteboard}
 ::msgcat::mcset ru prefsounsynno {Have synthetic speech of normal messages}
 ::msgcat::mcset ru prefsounsynch {Have synthetic speech of chat}
@@ -976,6 +987,8 @@ If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup
 ::msgcat::mcset ru prefprof      {Здесь необходимо вводить параметры для подключения к Jabber серверу.}
 ::msgcat::mcset ru prefpers      {Your personal info is stored in your preferences file, but may also be stored on the Jabber User Directory. Server stored info is searchable by any user.}
 ::msgcat::mcset ru prefaaset     {Настройки, касающегося вашего статуса:}
+::msgcat::mcset ru prefproxymsg  {Настройки прокси разные для каждого профиля. Передача файлов не будет работать если вы используете Http прокси!}
+::msgcat::mcset ru prefproxyexc  {Исключая адреса(* для группы)}
 ::msgcat::mcset ru prefminaw     {Минут до установки статуса "Нет на месте":}
 ::msgcat::mcset ru prefminea     {Минут до установки статуса "Нет на месте и надолго":}
 ::msgcat::mcset ru prefsuif      {Если кто-то хочет получить регистрацию  и...}
@@ -985,14 +998,14 @@ If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup
 ::msgcat::mcset ru prefrorm      {Удалять пользователей если не авторизованы}
 ::msgcat::mcset ru prefroallow   {Разрешить пользователей без авторизации}
 ::msgcat::mcset ru prefroclr     {Отчищать ростер при отлогировании}
-::msgcat::mcset ru prefrochat    {Чат при двайном щелчке, иначе обычное сообщение}
+::msgcat::mcset ru prefrochat    {Чат при двойном щелчке, иначе обычное сообщение}
 ::msgcat::mcset ru prefrosysicons {Показывать иконку в трее}
 ::msgcat::mcset ru prefrohideoff {Не показывать отключенных пользователей}
 ::msgcat::mcset ru prefrohidetrpt {Не показывать транспорт}
 ::msgcat::mcset ru prefblonly    {Получать сообщения только от тех кто в ростере}
 ::msgcat::mcset ru prefblbl      {Блокировать JID's (* wildcards possible):}
 ::msgcat::mcset ru prefblmsg     {Write the complete JID for the user you want to block. A JID must be of the form "joewest@jabber.org"}
-::msgcat::mcset ru prefcufont    {Выбирете шрифт для окна чата:}
+::msgcat::mcset ru prefcufont    {Выберите шрифт для окна чата:}
 ::msgcat::mcset ru prefcushow    {Показывать входящие сообщения в новом окне}
 ::msgcat::mcset ru prefcusave    {Сохранять входящие}
 ::msgcat::mcset ru prefcuautologin  {Автоматически подключаться при запуске}
@@ -1006,7 +1019,7 @@ If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup
 ::msgcat::mcset ru prefcuremdlgs {Запоминать открытые диалоги между сессиями}
 ::msgcat::mcset ru preffmhelp    {Помощник для файловых плагинов}
 ::msgcat::mcset ru preffmsave    {Just save to disk in incoming directory}
-::msgcat::mcset ru preffontmsg   {Внимание: перед импортирование других шрифтов кроме (Times, Helvetica or Courier), вы должны убедится что они есть у всех остальных клиентов.}
+::msgcat::mcset ru preffontmsg   {Внимание: перед импортированием других шрифтов кроме (Times, Helvetica or Courier), вы должны убедится что они есть у всех остальных клиентов.}
 ::msgcat::mcset ru prefcahow     {How to handle files already received:}
 ::msgcat::mcset ru prefcanev     {Never accept a cached file, always load a new one}
 ::msgcat::mcset ru prefcaalw     {Always accept a cached file, never load a new one} 
@@ -1015,17 +1028,17 @@ If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup
 ::msgcat::mcset ru prefshortip   {Complete ip number or name}
 ::msgcat::mcset ru prefshortwa   {Warning: you have edited the shortcuts. Don't you want to save them?}
 
-::msgcat::mcset ru preffilecache {Кэш используестя для хранения локальных копий файлов от других пользователей которое понижает 
+::msgcat::mcset ru preffilecache {Кэш используется для хранения локальных копий файлов от других пользователей которое понижает 
 время для  работа транспорта. Размер кэша устанавливается ниже.}
 ::msgcat::mcset ru prefcachecmp  {Кэшированные файлы сверяются с удаленными}
-::msgcat::mcset ru prefnatip     {Использовать следющий ip адрес для внешней сети}
+::msgcat::mcset ru prefnatip     {Использовать следующий ip адрес для внешней сети}
 ::msgcat::mcset ru prefmucconf   {Multi-User-Chat c конференциями as fallback}
 ::msgcat::mcset ru prefrostbgim  {Использовать фоновое изображение (gif) в }
-::msgcat::mcset ru preftheme     {Выбирете тему (ниобходима перезагрузка)}
+::msgcat::mcset ru preftheme     {Выберите тему (необходима перезагрузка)}
 ::msgcat::mcset ru prefplugctrl  {Вы можете отменить эти пакеты, если не хотите чтоб они не загружались.}
 ::msgcat::mcset ru prefchactret  {Всегда использовать <Return> в окне диалога}
 ::msgcat::mcset ru prefchnormal  {Показывать входящие сообщения как сообщения чата}
-::msgcat::mcset ru prefprofname  {Введите желаемое имя профайла}
+::msgcat::mcset ru prefprofname  {Введите желаемое имя профиля}
 ::msgcat::mcset ru prefstabui    {Использовать закладочный интерфейс}
 ::msgcat::mcset ru prefsusesasl  {Использовать SASL-авторизационный метод}
 ::msgcat::mcset ru prefprivmsg   {Каждый пользователь может иметь много фильтров. Только активные или фильтры по умолчанию \
@@ -1034,13 +1047,13 @@ If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup
 ::msgcat::mcset ru prefprivnotex {Filter options unavailable at this server}
 ::msgcat::mcset ru prefprivobtained {Получать список фильтров с сервера}
 ::msgcat::mcset ru prefprivgetlist {Получение фильтра "%s"}
-::msgcat::mcset ru prefprivrules {Each list contains one or many rules, each rule specify the type of events it acts on, and the action it shall take.\
- Если вы выберете группу для блока то она должна существовать в ростере.}
+::msgcat::mcset ru prefprivrules {Каждый список может содержать много правил, каждое правило тип события и тип действия.\
+ Если выЕсли Вы выбирете группу для блока то она должна существовать в ростере.}
 ::msgcat::mcset ru prefuserinactive {Пользователь был долго не активен}  
 ::msgcat::mcset ru preficonsel   {Выбор набора иконок будет работать после сохранения}
 ::msgcat::mcset ru prefwbscroll  {Вы можете ввести больше чем стандартный размер %sx%s}
 ::msgcat::mcset ru prefssbts     {Показывать кнопки назад и вперед}
-::msgcat::mcset ru prefssresize  {Менять размеры холста автоматическиa в соответствии размерам изображения}
+::msgcat::mcset ru prefssresize  {Менять размеры холста автоматически в соответствии размерам изображения}
 
 #--- Translate!
 ::msgcat::mcset ru prefdrivesame {Always store user preferences on same drive as program}
@@ -1066,13 +1079,13 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset ru janewpass    {Установите новый пароль для:}
 ::msgcat::mcset ru jasubwant    {The user "%s" wants to subscibe to your presence.}
 ::msgcat::mcset ru jasubopts    {Choose from the options below. Picking a nick name and group is optional, and for your personal use only.}
-::msgcat::mcset ru jasubgetvcard {Получить визтку пользователя}
+::msgcat::mcset ru jasubgetvcard {Получить визитку пользователя}
 ::msgcat::mcset ru jasubsndmsg  {Послать сообщение этому пользователю:}
 ::msgcat::mcset ru jasuballow   {Allow "%s" to see my presence}
 ::msgcat::mcset ru jasubadd     {Add "%s" to my roster}
 ::msgcat::mcset ru jarostadd	{Добавить пользователя в список контактов. Имя или группа могут быть изменены в любое время. Чтобы добавить пользователей из других IM систем вы должны уже иметь аккаунт\
   в той системе, и Jabber транспорт или шлюз.}
-::msgcat::mcset ru jarostset	{Изменения имени и группы "%s". Они могут быть изменены в любое время.}
+::msgcat::mcset ru jarostset	{Изменения имени и группы "%s".}
 ::msgcat::mcset ru jarostsub	{Авторизовать пользователя}
 ::msgcat::mcset ru jarostunsub	{Удалить авторизацию}
 ::msgcat::mcset ru jasearch	{Поиск пользователей. Нажмите "Получить" если вы хотите отчичтить формы.}
@@ -1090,9 +1103,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset ru jawaitserver	{Ожидание ответа сервера...}
 ::msgcat::mcset ru jaregmsg	{Registration for a specific service with this server. If already registered you may alter your personal info with this dialog.}
 ::msgcat::mcset ru jastatavailable {Доступно}
-::msgcat::mcset ru jastatchat	{Чат: с удовльствием початюсь}
+::msgcat::mcset ru jastatchat	{Чат: с удовольствием початюсь}
 ::msgcat::mcset ru jastataway	{Нет на месте: в сети но нет меня на месте}
-::msgcat::mcset ru jastatxa	{Extended away: online, but inactive a while}
+::msgcat::mcset ru jastatxa		{Extended away: online, but inactive a while}
 ::msgcat::mcset ru jastatdnd	{DND: не беспокоить!}
 ::msgcat::mcset ru jastatinvisible {Невидимый}
 ::msgcat::mcset ru javersinfo	{Информация о версии %s}
@@ -1110,56 +1123,52 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset ru jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
 ::msgcat::mcset ru jadisrmall   {Remove all servers that are automatically and permanently discovered.}
 ::msgcat::mcset ru jauserinnote {Добавьте Ваше описание к этому пользователю}
-::msgcat::mcset ru jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
-::msgcat::mcset ru jaloginjid   {Введите ваш jid типа "joey@myjabb.org", или выбирете профиль. Вы должны быть зарегистрированы на сервере.}
+::msgcat::mcset ru jaregisterex {Напишите имя Вашего jabber сервера на котором вы хотите зарегистрироваться. Затем нажмите кнопку "Получить" для получения регистрационной информации. Заполните нужные данные и зарегистрируйтесь.}
+::msgcat::mcset ru jaloginjid   {Введите Ваш jid типа "i_am@krevetko.org", или выберите профиль. Вы должны быть зарегистрированы на сервере.}
 
 ::msgcat::mcset ru jaloginjidpure 	{Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
 
 ::msgcat::mcset ru jaregalready {You are already registered with this service. These are your current settings of your registration parameters.}
 ::msgcat::mcset ru jaactiveret  {If checked Return sends message else use Ctrl/Cmd-Return}
 ::msgcat::mcset ru jainvitegchat {Пригласить в %s}
-::msgcat::mcset ru jaxformreq   {Поля отмеченые  (*) обязательны для заполнения}
-
-
-::msgcat::mcset ru jamessnorooms		{Не обнаруженно ниодной комнаты в %s.}
-# remove-- ::msgcat::mcset ru jasettopic   {Set new topic for this groupchat.}
-::msgcat::mcset ru jasettopic2			{Установить тему для этой комнаты.}
+::msgcat::mcset ru jaxformreq   {Поля отмеченные  (*) обязательны для заполнения}
+::msgcat::mcset ru jamessnorooms		{Не обнаружено ни одной комнаты в %s.}
+::msgcat::mcset ru jasettopic2		{Установить тему для этой комнаты.}
 ::msgcat::mcset ru jagcsyncpres		{Синхронизировать комнатуc с присутствием пользователя}
-
-#--- Translate ---
-::msgcat::mcset ru jaseliconset {Select iconsets to be used for each group. Each group may be deselected.}
-#--- Translate ---
+::msgcat::mcset ru jaseliconset {Выберите набор иконок используемый для каждой группы.}
 
    
 # Setup assistant:
-::msgcat::mcset ru suintro1 	{This is a setup assistant to help you fill in the necessary things that is needed for a new or an existing account on a Jabber server.}
-::msgcat::mcset ru suintro3 	{Any time you may press the Previous button to go back. Follow the instructions on each page, and press the Next button until finished.}
-::msgcat::mcset ru sulang       {Pick a language catalog. If you change the language catalog this will only affect interface elements created after it has been set.}
-::msgcat::mcset ru suservmsg	{Fill in the name of the Jabber server you wish to have your account on. If you already have an existing account on a Jabber server, fill in the name of that server.\
-  A typical name is "jabber.org".}
+::msgcat::mcset ru suintro1 	{Этот помощник поможет вам заполнить необходимую информацию о существующем или о новом аккаунте.}
+::msgcat::mcset ru suintro2 	{Если вы хотите зайти в пиринговый(peer-to-peer) режим, просто включите его в панеле настроек и перезапустите Coccinella.}
+::msgcat::mcset ru suintro3 	{В любое время вы можете нажать кнопки "Вперед" или "Назад". Следуйте инструкции на каждой странице и нажимайте далее пока не закончиться.}
+::msgcat::mcset ru sulang       {Выберите каталог с языковыми файлами. Смена каталога повлияет только на элементы интерфейса созданные после смены каталога.}
+::msgcat::mcset ru suservmsg	{Напишите имя Jabber сервера на котором вы бы хотели получить аккаунт. Если у Вас уже есть аккаунт то напишите сервер на котором зарегистрированы.\
+ Обычно это "jabber.ru".}
 ::msgcat::mcset ru suusermsg	{Fill in your username and password. The username must not exist at the specified server, unless you are already registered.\
   If the username is already in use by another, you will receive a note about this when trying to register.}
-::msgcat::mcset ru suregmsg	{Do you want to register your account now if it is a new one? You must already be connected to a network (without firewall) to register.}
-::msgcat::mcset ru sufinmsg	{That's all. Also, be nice to the bug ;-)}
+::msgcat::mcset ru supubserv	{Получить список публичных и открытых jabber серверов}
+::msgcat::mcset ru suregmsg	{Вы хотите зарегистрировать этот аккаунт? Для этого вы должны быть подключены к интернету (без фаерволла).}
+::msgcat::mcset ru sufinmsg	{На этом всё. Будьте рады нашим багам;-)}
 ::msgcat::mcset ru suheadtxt	{Помощник настройки Coccinella}
+::msgcat::mcset ru suservlist	{Список jabber серверов}
 
 
 
 ::msgcat::mcset ru vcardget	{Получение визитки пользователя %s. Ожидание ответа сервера...}
-::msgcat::mcset ru vcarderrget	{Не удалось получить визтку. Результат: %s}
+::msgcat::mcset ru vcarderrget	{Не удалось получить визитку. Результат: %s}
 ::msgcat::mcset ru vcardrec	{Визитка получена.}
 
 
-
 ::msgcat::mcset ru autoupdatenot        {Отключить проверку обновлений}
-::msgcat::mcset ru oobmsg               {позволить пользователю %s скачать фалй с вашего встроеннго сервера. Описание по желанию.}
+::msgcat::mcset ru oobmsg               {Позволяет пользователю %s скачать файл с вашего встроеннго сервера. Описание по желанию.}
 ::msgcat::mcset ru chatcompreply        {%s пишет в ответ}
 
 # Get file
 ::msgcat::mcset ru getcontacting   {Соединение с %s. Ожидание ответа...}
 ::msgcat::mcset ru geteoferr       {Соединение с %s завершилось неудачей: получен eof.}
-::msgcat::mcset ru getconnerr	    {Соединение с %s окнчилось ошибкой.}
-::msgcat::mcset ru getnegotiate    {Соединение с сервером %s устананавливается...}
+::msgcat::mcset ru getconnerr	    {Соединение с %s окончилось ошибкой.}
+::msgcat::mcset ru getnegotiate    {Соединение с сервером %s устанавливается...}
 ::msgcat::mcset ru getreaderr      {Ошибка чтения ответа сервера %s.}
 ::msgcat::mcset ru getunknownprot  {Сервер %s ответил в не соответствии протоколу}
 ::msgcat::mcset ru getnot200	    {От сервера %s получен код %s: "%s"}
@@ -1178,7 +1187,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset ru putnot200	    {От сервера %s получен код %s: "%s"}
 ::msgcat::mcset ru putstarts	    {Клиент %s принял файл %s. Начинаем передачу...}
 ::msgcat::mcset ru putended	    {Передача %s преждевременно прервалась.}
-::msgcat::mcset ru putfinished	    {Заершена передача файла "%s" к %s.}
+::msgcat::mcset ru putfinished	    {Завершена передача файла "%s" к %s.}
 ::msgcat::mcset ru putneterr	    {Ошибка сети при закачке %s.}
 
 # END --------------------------------------------------------------------------
