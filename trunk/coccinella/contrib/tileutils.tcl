@@ -4,7 +4,9 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: tileutils.tcl,v 1.44 2007-04-09 08:03:05 matben Exp $
+#  This file is BSD style licensed.
+#  
+# $Id: tileutils.tcl,v 1.45 2007-06-04 05:39:59 matben Exp $
 #
 
 package provide tileutils 0.1
