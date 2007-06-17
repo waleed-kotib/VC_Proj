@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #  
-#  $Id: Geolocation.tcl,v 1.5 2007-04-10 08:48:14 matben Exp $
+#  $Id: Geolocation.tcl,v 1.6 2007-06-17 07:18:27 matben Exp $
 
 package require jlib::pep
 
@@ -304,7 +304,7 @@ proc ::Geolocation::Publish {w} {
 proc ::Geolocation::Retract {w} {
     variable xmlns
 
-    ::Jabber::JlibCmd pep retract $xmlns(geoloc)
+    ::Jabber::JlibCmd pep retract $xmlns(geoloc) -notify 1
 }
 
 # Geolocation::Event --
