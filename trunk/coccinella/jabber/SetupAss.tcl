@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.41 2007-03-28 13:34:19 matben Exp $
+# $Id: SetupAss.tcl,v 1.42 2007-06-18 06:00:07 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -173,7 +173,7 @@ proc ::Jabber::SetupAss::SetupAss { } {
     ttk::frame $p5.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p5.fr.msg1 -style Small.TLabel \
       -wraplength 260 -justify left -text [mc sufinmsg]
-    ttk::label $p5.fr.piga -image [::Theme::GetImage ladybug]
+    ttk::label $p5.fr.piga -image [::Theme::GetImage logo]
     
     grid  $p5.fr.msg1  -sticky n
     grid  $p5.fr.piga  -pady 8
