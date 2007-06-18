@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.110 2007-03-23 08:22:14 matben Exp $
+# $Id: MailBox.tcl,v 1.111 2007-06-18 06:00:07 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -159,7 +159,7 @@ proc ::MailBox::MessageHook {bodytxt args} {
     variable uidmsg
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::MailBox::MessageHook bodytxt='$bodytxt', args='$args'"
+    ::Debug 4 "::MailBox::MessageHook bodytxt='$bodytxt', args='$args'"
 
     array set argsA $args
     set xmldata $argsA(-xmldata)
