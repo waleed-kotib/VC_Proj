@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: Whiteboard.tcl,v 1.78 2007-05-22 12:59:16 matben Exp $
+# $Id: Whiteboard.tcl,v 1.79 2007-06-18 05:57:18 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -81,7 +81,7 @@ namespace eval ::WB:: {
     option add *TopWhiteboard.connected16Image     connected       widgetDefault
     option add *TopWhiteboard.waveImage            wave            widgetDefault
     option add *TopWhiteboard.resizeHandleImage    resizehandle    widgetDefault
-    option add *TopWhiteboard.logoImage            ladybug         widgetDefault
+    option add *TopWhiteboard.logoImage            logo            widgetDefault
 
     # Drawing tool buttons.
     foreach tname [array names btName2No] {
