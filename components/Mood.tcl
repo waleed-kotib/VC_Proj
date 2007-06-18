@@ -5,7 +5,7 @@
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.23 2007-04-10 08:48:14 matben Exp $
+#  $Id: Mood.tcl,v 1.24 2007-06-18 12:23:35 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -307,6 +307,12 @@ proc ::Mood::CustomCmd {w bt} {
 # Mood::Event --
 # 
 #       Mood event handler for incoming mood messages.
+#       
+#       RECV: <message from='matben@jabber.se' to='mari@jabber.se/coccinella'>
+#                <event xmlns='http://jabber.org/protocol/pubsub#event'>
+#                   <items node='http://jabber.org/protocol/mood'><retract/></items>
+#                 </event></message>
+
 
 proc ::Mood::Event {jlibname xmldata} {
     variable state
@@ -326,7 +332,7 @@ proc ::Mood::Event {jlibname xmldata} {
 	    set node [wrapper::getattribute $itemsE node]    
 	    set retractE [wrapper::getfirstchildwithtag $itemsE retract]
 	    if {[llength $retractE]} {
-		set msg "No mood"
+		set msg ""
 		set state($mjid,mood) ""
 		set state($mjid,text) ""
 	    } else {
