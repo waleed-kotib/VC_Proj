@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2006 Antonio Cano Damas
 #
-# $Id: SpotLight.tcl,v 1.5 2007-02-27 10:02:13 matben Exp $
+# $Id: SpotLight.tcl,v 1.6 2007-06-24 14:51:05 matben Exp $
 
 namespace eval ::SpotLight:: { }
 
@@ -12,7 +12,9 @@ proc ::SpotLight::Init { } {
     global this
     global tcl_platform
 
-
+    # I switch off this since buggy!
+    return
+    
     #---- Check support of Indexer into our Operating System -------
     if {![string equal $this(platform) "macosx"]} {
         if {![string equal $this(platform) "windows"]} {
