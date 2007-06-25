@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2007  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.36 2007-04-26 14:15:45 matben Exp $
+# $Id: Theme.tcl,v 1.37 2007-06-25 06:28:43 matben Exp $
 
 package provide Theme 1.0
 
@@ -319,30 +319,12 @@ proc ::Theme::GetImage {name {subPath ""}} {
     set ans ""
     
     # Create only if not there already.
-    if {[lsearch [image names] $nsname] == -1} {
-	set theme $prefs(themeName)
-	
-	# Build up a list of search paths.
-	set paths {}
-	if {$theme ne ""} {
-	    set dir [file join $this(themesPath) $theme]
-	    if {[file isdirectory $dir]} {
-		lappend paths [file join $dir $subPath]
-	    } else {
-		set dir [file join $this(altThemesPath) $theme]
-		if {[file isdirectory $dir]} {
-		    lappend paths [file join $dir $subPath]
-		}
-	    }
-	}
-	
-	# This MUST always be searched for last since it is our fallback.
-	lappend paths [file join $this(path) $subPath]
-	
+    if {[lsearch [image names] $nsname] == -1} {	
+	set paths [GetSearchPaths $subPath]
 	set found 0
 	foreach path $paths {
 	    foreach fmt {png gif} {
-		set f [file join $path ${name}.${fmt}]
+		set f [file join $path $name.$fmt]
 		if {[file exists $f]} {
 		    image create photo $nsname -file $f -format $fmt
 		    set ans $nsname
@@ -356,6 +338,36 @@ proc ::Theme::GetImage {name {subPath ""}} {
 	set ans $nsname
     }
     return $ans
+}
+
+# ::Theme::GetSearchPaths --
+# 
+#       Finds the paths where images shall be searched.
+#       Normally the 'subPath' is 'images'.
+#       Adds a themed search path if we have a themed image directory.
+
+proc ::Theme::GetSearchPaths {subPath} {
+    global  this prefs
+    
+    set theme $prefs(themeName)
+    
+    # Build up a list of search paths.
+    set paths [list]
+    if {$theme ne ""} {
+	set dir [file join $this(themesPath) $theme]
+	if {[file isdirectory $dir]} {
+	    lappend paths [file join $dir $subPath]
+	} else {
+	    set dir [file join $this(altThemesPath) $theme]
+	    if {[file isdirectory $dir]} {
+		lappend paths [file join $dir $subPath]
+	    }
+	}
+    }
+    
+    # This MUST always be searched for last since it is our fallback.
+    lappend paths [file join $this(path) $subPath]
+    return $paths
 }
 
 # ::Theme::GetImageWithNameEx--
@@ -390,6 +402,27 @@ proc ::Theme::GetImageFromExisting {name arrName} {
 	set imname $arr($name)
     }
     return $imname
+}
+
+# ::Theme::FindExactImageFile --
+# 
+#       Searches the exact image name and returns its complete path if found.
+
+proc ::Theme::FindExactImageFile {name {subPath ""}} {
+    global  prefs this
+    
+    if {$subPath eq ""} {
+	set subPath $this(images)
+    }
+    set paths [GetSearchPaths $subPath]
+    foreach path $paths {
+	    set f [file join $path $name]
+	    if {[file exists $f]} {
+		return $f
+	    }
+	}
+    }    
+    return
 }
 
 #-------------------------------------------------------------------------------

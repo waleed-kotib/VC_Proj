@@ -1352,6 +1352,7 @@ Om användarnamnet är upptaget så får du ett meddelande om detta när du registrer
 ::msgcat::mcset sv mWorried     Bekymrad
 
 ::msgcat::mcset sv moodEvent   Humörändring
+::msgcat::mcset sv moodRetracted {tog tillbaka humör}
 ::msgcat::mcset sv heIs        är
 ::msgcat::mcset sv because     därför
 ::msgcat::mcset sv angry       arg

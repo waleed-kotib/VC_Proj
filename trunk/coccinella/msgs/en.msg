@@ -1345,6 +1345,7 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en mWorried     Worried
 
 ::msgcat::mcset en moodEvent   {Mood change}
+::msgcat::mcset en moodRetracted {retracted mood}
 ::msgcat::mcset en heIs        is
 ::msgcat::mcset en because     because
 ::msgcat::mcset en angry       angry

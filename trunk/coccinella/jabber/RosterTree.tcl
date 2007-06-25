@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.52 2007-05-18 06:36:06 matben Exp $
+# $Id: RosterTree.tcl,v 1.53 2007-06-25 06:28:43 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1375,8 +1375,11 @@ proc ::RosterTree::BalloonRegister {key jid msg} {
     variable balloon
     upvar ::Jabber::jstate jstate
     
+    #puts "=========::RosterTree::BalloonRegister $key $jid msg=$msg"
+    
     set mjid [jlib::jidmap $jid]
     if {$msg eq ""} {
+	puts "\t unset -nocomplain balloon($key,$mjid)"
 	unset -nocomplain balloon($key,$mjid)
     } else {
 	set balloon($key,$mjid) $msg
