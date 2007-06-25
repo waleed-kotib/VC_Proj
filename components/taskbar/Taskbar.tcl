@@ -1,34 +1,20 @@
 #  Taskbar.tcl ---
 #  
 #      This file is part of The Coccinella application. 
-#      It implements the taskbar on Windows.
+#      It implements the taskbar on Windows and the tray on X11.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.26 2007-03-05 14:48:58 matben Exp $
+# $Id: Taskbar.tcl,v 1.27 2007-06-25 06:28:42 matben Exp $
 
 package require balloonhelp
 
-namespace eval ::Taskbar:: {
-    
-    variable icon ""
-    variable wmenu
-    variable wtray .tskbar
-    variable wtearoff ""
-    variable iconFile coccinella.ico
-    
-    switch -- [tk windowingsystem] {
-	win32 {
-	    set wmenu .tskbrpop
-	}
-	x11 {
-	    set wmenu .tskbar.pop
-	}
-    }
-}
+namespace eval ::Taskbar:: {}
 
 proc ::Taskbar::Load { } {
     global  tcl_platform this
+    variable wtray .tskbar
+    variable wtearoff ""
     
     ::Debug 2 "::Taskbar::Load"
     
@@ -67,26 +53,32 @@ proc ::Taskbar::WinInit { } {
     global  this prefs
     variable icon
     variable iconFile
+    variable wtray
+    variable wmenu
     
     if {[catch {package require Winico}]} {
 	return 0
     }
+    set wmenu .tskbrpop
+    set icon ""
 
-    # We have a hardcoded file path for the ico file. (option database?)
+    option add *taskbarIconWin   coccinella.ico   widgetDefault
+    
     # The Winico is pretty buggy! Need to cd to avoid path troubles!
+    set iconf [option get . taskbarIconWin {}]
+    set iconFile [::Theme::FindExactImageFile $iconf]
     set oldDir [pwd]
-    set dir  [file dirname [info script]]
-    set path [file join $dir $iconFile]
+    set dir [file dirname $iconFile]
 
     # Winico doesn't understand vfs!
     if {[info exists starkit::topdir]} {
-	set tmp [file join $this(tmpPath) $iconFile]
-	file copy -force $path $tmp
+	set tmp [file join $this(tmpPath) $iconf]
+	file copy -force $iconFile $tmp
 	cd $this(tmpPath)
     } else {
 	cd $dir
     }
-    if {[catch {set icon [winico create $iconFile]} err]} {
+    if {[catch {set icon [winico create $iconf]} err]} {
 	::Debug 2 "\t winico create $iconFile failed"
 	cd $oldDir
 	return 0
@@ -94,7 +86,7 @@ proc ::Taskbar::WinInit { } {
     cd $oldDir
 
     set statusStr [::Roster::MapShowToText [::Jabber::GetMyStatus]]
-    set str [encoding convertto "$prefs(theAppName) - $statusStr"]
+    set str "$prefs(theAppName) - $statusStr"
 
     winico taskbar add $icon \
       -callback [list [namespace current]::WinCmd %m %X %Y] -text $str
@@ -105,11 +97,17 @@ proc ::Taskbar::WinInit { } {
 proc ::Taskbar::X11Init { } {
     global  prefs
     variable wtray
+    variable wmenu
     
     if {[catch {package require tktray}]} {
 	return 0
     }
-    ::tktray::icon $wtray -image [::Theme::GetImage coccinella32]
+    set wmenu $wtray.pop
+
+    option add *taskbarIcon   coccinella32   widgetDefault
+
+    set image [::Theme::GetImage [option get . taskbarIcon {}]]
+    ::tktray::icon $wtray -image $image
 
     bind $wtray <ButtonRelease-1> { ::Taskbar::X11Cmd %X %Y }
     bind $wtray <Button-3>        { ::Taskbar::X11Popup %X %Y }
@@ -330,9 +328,9 @@ proc ::Taskbar::SetPresenceHook {type args} {
     # This can be used to update any specific icon in taskbar.
     switch -- [tk windowingsystem] {
 	win32 {
-	    if {$icon != ""} {
+	    if {$icon ne ""} {
 		set statusStr [::Roster::MapShowToText [::Jabber::GetMyStatus]]
-		set str [encoding convertto "$prefs(theAppName) - $statusStr"]
+		set str "$prefs(theAppName) - $statusStr"
 		winico taskbar modify $icon -text $str
 	    }
 	}
