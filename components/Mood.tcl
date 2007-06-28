@@ -5,7 +5,7 @@
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.24 2007-06-18 12:23:35 matben Exp $
+#  $Id: Mood.tcl,v 1.25 2007-06-28 06:14:20 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -239,7 +239,7 @@ proc ::Mood::Publish {mood {text ""}} {
 
 proc ::Mood::Retract {} {
     variable xmlns
-
+    
     ::Jabber::JlibCmd pep retract $xmlns(mood) -notify 1
 }
 
@@ -307,12 +307,6 @@ proc ::Mood::CustomCmd {w bt} {
 # Mood::Event --
 # 
 #       Mood event handler for incoming mood messages.
-#       
-#       RECV: <message from='matben@jabber.se' to='mari@jabber.se/coccinella'>
-#                <event xmlns='http://jabber.org/protocol/pubsub#event'>
-#                   <items node='http://jabber.org/protocol/mood'><retract/></items>
-#                 </event></message>
-
 
 proc ::Mood::Event {jlibname xmldata} {
     variable state
@@ -324,12 +318,16 @@ proc ::Mood::Event {jlibname xmldata} {
     if {[llength $eventE]} {
 	set itemsE [wrapper::getfirstchildwithtag $eventE items]
 	if {[llength $itemsE]} {
+
+	    set node [wrapper::getattribute $itemsE node]    
+	    if {$node ne $xmlns(mood)} {
+		return
+	    }
+
 	    set mjid [jlib::jidmap $from]
 	    set text ""
 	    set mood ""
 
-	    # @@@ Do I need to check the node?
-	    set node [wrapper::getattribute $itemsE node]    
 	    set retractE [wrapper::getfirstchildwithtag $itemsE retract]
 	    if {[llength $retractE]} {
 		set msg ""
@@ -352,7 +350,6 @@ proc ::Mood::Event {jlibname xmldata} {
 			}
 		    }
 		}
-		set mjid [jlib::jidmap $from]
 	    
 		# Cache the result.
 		set state($mjid,mood) $mood

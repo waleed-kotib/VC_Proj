@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.196 2007-05-24 14:57:50 matben Exp $
+# $Id: Roster.tcl,v 1.197 2007-06-28 06:14:20 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -171,7 +171,16 @@ proc ::Roster::JabberInitHook {jlibname} {
     $jlibname presence_register unavailable [namespace code PresenceEvent]   
 }
 
-proc ::Roster::GetNameOrjid {jid} {
+# Roster::GetNameOrJID, GetShortName, GetDisplayName --
+# 
+#       Utilities to get JID identifiers for UI display.
+#       Priorities:
+#         1) name attribute in roster item
+#         2) user nickname
+#         3) node part if on login server
+#         4) JID
+
+proc ::Roster::GetNameOrJID {jid} {
     upvar ::Jabber::jstate jstate
        
     set name [$jstate(jlib) roster getname $jid]
@@ -186,14 +195,17 @@ proc ::Roster::GetShortName {jid} {
     
     set name [$jstate(jlib) roster getname $jid]
     if {$name eq ""} {	
-	jlib::splitjidex $jid node domain res
-	if {$node eq ""} {
-	    set name $domain
-	} else {
-	    if {[string equal [$jstate(jlib) getthis server] $domain]} {
-		set name $node
+	set name [::Nickname::Get [jlib::barejid $jid]]
+	if {$name eq ""} {	
+	    jlib::splitjidex $jid node domain res
+	    if {$node eq ""} {
+		set name $domain
 	    } else {
-		set name $jid
+		if {[string equal [$jstate(jlib) getthis server] $domain]} {
+		    set name $node
+		} else {
+		    set name $jid
+		}
 	    }
 	}
     }
@@ -205,11 +217,14 @@ proc ::Roster::GetDisplayName {jid} {
     
     set name [$jstate(jlib) roster getname $jid]
     if {$name eq ""} {
-	jlib::splitjidex $jid node domain res
-	if {$node eq ""} {
-	    set name $domain
-	} else {
-	    set name $node
+	set name [::Nickname::Get [jlib::barejid $jid]]
+	if {$name eq ""} {	
+	    jlib::splitjidex $jid node domain res
+	    if {$node eq ""} {
+		set name $domain
+	    } else {
+		set name $node
+	    }
 	}
     }
     return $name

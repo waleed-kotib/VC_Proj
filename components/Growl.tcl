@@ -3,7 +3,7 @@
 #       Growl notifier bindings for MacOSX.
 #       This is just a first sketch.
 #       
-# $Id: Growl.tcl,v 1.19 2007-06-18 12:23:35 matben Exp $
+# $Id: Growl.tcl,v 1.20 2007-06-28 06:14:20 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -112,7 +112,7 @@ proc ::Growl::PresenceHook {jid type args} {
 	
 	# This just translates the show code into a readable text.
 	set showMsg [::Roster::MapShowToText $show]
-	set djid $jid
+	set djid [::Roster::GetDisplayName $jid]
 	if {[::Jabber::JlibCmd service isroom $jid]} {
 	    if {[info exists argsA(-from)]} {
 		set djid $argsA(-from)

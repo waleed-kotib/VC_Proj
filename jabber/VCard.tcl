@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.52 2007-03-12 13:19:56 matben Exp $
+# $Id: VCard.tcl,v 1.53 2007-06-28 06:14:21 matben Exp $
 
 package provide VCard 1.0
 
@@ -201,7 +201,8 @@ proc ::VCard::Build {token} {
     if {$type eq "own"} {
 	wm title $w [mc {My vCard}]
     } else {
-	wm title $w "[mc {vCard Info}]: $jid"
+	set djid [::Roster::GetDisplayName $jid]
+	wm title $w "[mc {vCard Info}]: $djid"
     }
     set priv(vcardjid) $jid
     set elem(jid) $jid

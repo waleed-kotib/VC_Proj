@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.33 2006-08-14 13:08:03 matben Exp $
+# $Id: Subscribe.tcl,v 1.34 2007-06-28 06:14:21 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -206,7 +206,7 @@ proc ::Subscribe::Accept {token} {
 	
     # Add user to my roster. Send subscription request.	
     if {$sendsubsc} {
-	set opts {}
+	set opts [list]
 	if {[string length $state(name)]} {
 	    lappend opts -name $state(name)
 	}
@@ -215,7 +215,13 @@ proc ::Subscribe::Accept {token} {
 	}
 	eval {$jlib roster send_set $jid  \
 	  -command [namespace current]::ResProc} $opts
-	$jlib send_presence -to $jid -type "subscribe"
+	
+	set opts [list]
+	set nickname [::Profiles::GetSelected -nickname]
+	if {$nickname ne ""} {
+	    lappend opts -xlist [list [::Nickname::Element $nickname]]
+	}
+	eval {$jlib send_presence -to $jid -type "subscribe"} $opts
     }  
     
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)

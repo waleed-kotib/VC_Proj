@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.84 2007-05-04 11:59:00 matben Exp $
+# $Id: NewMsg.tcl,v 1.85 2007-06-28 06:14:20 matben Exp $
 
 package require ui::entryex
 
@@ -782,6 +782,7 @@ proc ::NewMsg::CommandReturnKeyPress {w} {
 
 proc ::NewMsg::DoSend {w} {
     global  prefs wDlgs
+    upvar ::Jabber::jstate jstate
     
     variable locals
     
@@ -854,9 +855,19 @@ proc ::NewMsg::DoSend {w} {
     if {[string length $locals($w,subject)] > 0} {
 	lappend opts -subject $locals($w,subject)
     }
+    set jlib $jstate(jlib)
     if {!$stop} {
 	foreach jid $addrList {
-	    eval {::Jabber::JlibCmd send_message $jid} $opts
+	    set jid2 [jlib::barejid $jid]
+	    set opts2 [list]
+	    if {![$jlib roster isitem $jid2]} {
+		set opts2 [list]
+		set nickname [::Profiles::GetSelected -nickname]
+		if {$nickname ne ""} {
+		    lappend opts2 -xlist [list [::Nickname::Element $nickname]]
+		}
+	    }
+	    eval {$jlib send_message $jid} $opts $opts2
 	}
     }
     set locals($w,finished) 1

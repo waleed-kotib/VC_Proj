@@ -2,9 +2,9 @@
 #  
 #      This file implements code for handling profiles.
 #      
-#  Copyright (c) 2003-2005  Mats Bengtsson
+#  Copyright (c) 2003-2007  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.69 2007-05-23 12:17:08 matben Exp $
+# $Id: Profiles.tcl,v 1.70 2007-06-28 06:14:20 matben Exp $
 
 package provide Profiles 1.0
 
@@ -22,8 +22,11 @@ namespace eval ::Profiles:: {
     option add *JProfiles*TRadiobutton.style  Small.TRadiobutton  widgetDefault
     option add *JProfiles*TCheckbutton.style  Small.TCheckbutton  widgetDefault
     option add *JProfiles*TEntry.style        Small.TEntry        widgetDefault
-    option add *JProfiles*TScale.style        Small.Horizontal.TScale        widgetDefault
-    option add *JProfiles*TNotebook.Tab.style  Small.Tab   widgetDefault
+    option add *JProfiles*TScale.style        Small.Horizontal.TScale  widgetDefault
+    option add *JProfiles*TNotebook.Tab.style Small.Tab           widgetDefault
+
+    # Customization. @@@ TODO
+    option add *JProfileFrame.showNickname    1                   widgetDefault
 
     # Internal storage:
     #   {name1 {server1 username1 password1 ?-key value ...?}
@@ -38,6 +41,8 @@ namespace eval ::Profiles:: {
     #           -priority
     #           -secure     0|1
     #           -method     ssl|tlssasl|sasl
+    #           -resource
+    #           -nickname
     #           
     #           Note the naming convention for -method!
     #            ssl        using direct tls socket connection
@@ -51,6 +56,7 @@ namespace eval ::Profiles:: {
     # Profile name of selected profile.
     variable selected
     
+    # @@@ using resource option database instead ???
     # Configurations:
     # This is a way to hardcode some or all of the profile. Same format.
     # Public APIs must cope with this. Both Get and Set functions.
@@ -59,7 +65,8 @@ namespace eval ::Profiles:: {
     set ::config(profiles,profiles)   {}
     set ::config(profiles,selected)   {}
     set ::config(profiles,prefspanel) 1
-    
+    set ::config(profiles,style)      "parts"  ;# jid | parts
+
     # The 'config' array shall never be written to, and since not all elements
     # of the profile are fixed, we need an additional profile that is written
     # to the prefs file. It must furthermore not interfere with the other 
@@ -492,10 +499,23 @@ proc ::Profiles::Get {name key} {
 	    options {
 		return [lrange [lindex $prof $idx] 3 end]
 	    }
+	    default {
+		array set tmp [lrange [lindex $prof $idx] 3 end]
+		if {[info exists tmp($key)]} {
+		    return $tmp($key)
+		} else {
+		    # @@@ Default???
+		    return
+		}
+	    }
 	}
     } else {
 	return -code error "profile \"$name\" does not exist"
     }
+}
+
+proc ::Profiles::GetSelected {key} {
+    return [Get [GetSelectedName] $key]
 }
 
 proc ::Profiles::GetProfile {name} {
@@ -673,6 +693,7 @@ proc ::Profiles::GetDefaultOpts {server} {
 	}
 	# DO NOT add this!
 	#-resource       ""
+	#-nickname       ""
 
 	#set defaultOpts(-port) $jprefs(port)
 	if {!$this(package,tls)} {
@@ -871,12 +892,14 @@ namespace eval ::Profiles {
 #       Megawidget profile frame.
 
 proc ::Profiles::FrameWidget {w moreless args} {
-    global  prefs
+    global  prefs config
     variable wallframes
             
     set token [namespace current]::$w
     variable $w
     upvar 0 $w state
+    
+    Debug 2 "::Profiles::FrameWidget w=$w"
     
     lappend wallframes $w
     set state(moreless) $moreless
@@ -893,15 +916,18 @@ proc ::Profiles::FrameWidget {w moreless args} {
     set state(selected) $selected
     set profile $selected
     
+    # We keep two state arrays: 'state' and 'mstate'.
+    # The 'state' array keeps temporary space for all profiles and
+    # contains the text variables of the actual frame but not the notebook.
+    # The 'mstate' array keep tracks of the notebook textvariables.
+    
     # Init textvariables.
     set state(profile)  $selected
     set state(server)   $state(prof,$profile,server)
     set state(username) $state(prof,$profile,username)
     set state(password) $state(prof,$profile,password)
-    
-    set allNames [GetAllNames]
-    
-    eval {ttk::frame $w} $args
+        
+    eval {ttk::frame $w -class JProfileFrame} $args
     
     ttk::label $w.msg -text [mc prefprof] -wraplength 200 -justify left
     grid  $w.msg  -  -sticky ew
@@ -913,10 +939,14 @@ proc ::Profiles::FrameWidget {w moreless args} {
     
     set wmenu [eval {
 	ttk::optionmenu $wui.pop $token\(profile)
-    } $allNames]
+    } [GetAllNames]]
     trace add variable $token\(profile) write  \
       [list [namespace current]::FrameTraceProfile $w]
     
+    # Depending on 'config(profiles,style)' not all get mapped.
+    ttk::label $wui.ljid -text "[mc {Jabber ID}]:" -anchor e
+    ttk::entry $wui.ejid -font CociSmallFont \
+      -width 22 -textvariable $token\(jid)
     ttk::label $wui.lserv -text "[mc {Jabber Server}]:" -anchor e
     ttk::entry $wui.eserv -font CociSmallFont \
       -width 22 -textvariable $token\(server) -validate key  \
@@ -933,14 +963,27 @@ proc ::Profiles::FrameWidget {w moreless args} {
     ttk::entry $wui.eres -font CociSmallFont \
       -width 22 -textvariable $token\(resource) -validate key  \
       -validatecommand {::Jabber::ValidateResourceStr %S}
+    ttk::label $wui.lnick -text "[mc Nickname]:" -anchor e
+    ttk::entry $wui.enick -font CociSmallFont \
+      -width 22 -textvariable $token\(nickname)
 
-    grid  $wui.lpop   $wui.pop    -sticky e -pady 2
-    grid  $wui.lserv  $wui.eserv  -sticky e -pady 2
-    grid  $wui.luser  $wui.euser  -sticky e -pady 2
-    grid  $wui.lpass  $wui.epass  -sticky e -pady 2
-    grid  $wui.lres   $wui.eres   -sticky e -pady 2
-    
-    grid  $wui.pop  $wui.eserv  $wui.euser  $wui.epass  $wui.eres  -sticky ew
+    if {$config(profiles,style) eq "jid"} {
+	# @@@ TODO
+	grid  $wui.lpop   $wui.pop    -sticky e -pady 2
+	grid  $wui.ljid   $wui.ejid   -sticky e -pady 2
+	grid  $wui.lnick  $wui.enick  -sticky e -pady 2
+
+	grid  $wui.pop  $wui.ejid  $wui.enick -sticky ew
+    } elseif {$config(profiles,style) eq "parts"} {
+	grid  $wui.lpop   $wui.pop    -sticky e -pady 2
+	grid  $wui.lserv  $wui.eserv  -sticky e -pady 2
+	grid  $wui.luser  $wui.euser  -sticky e -pady 2
+	grid  $wui.lpass  $wui.epass  -sticky e -pady 2
+	grid  $wui.lres   $wui.eres   -sticky e -pady 2
+	grid  $wui.lnick  $wui.enick  -sticky e -pady 2
+
+	grid  $wui.pop  $wui.eserv  $wui.euser  $wui.epass  $wui.eres  $wui.enick -sticky ew
+    }
     
     set wuserinfofocus $wui.eserv
         
@@ -1003,12 +1046,13 @@ proc ::Profiles::FrameWidget {w moreless args} {
     variable $mtoken
     upvar 0 $mtoken mstate
 
+    # Translate the current profile to its 'state' and 'mstate' arrays.
     foreach {key value} [array get state prof,$profile,-*] {
 	set optname [string map [list prof,$profile,- ""] $key]
 	
 	switch -- $optname {
-	    resource {
-		set state(resource) $value
+	    resource - nickname {
+		set state($optname) $value
 	    }
 	    default {
 		set mstate($optname) $value
@@ -1070,6 +1114,7 @@ proc ::Profiles::FrameMakeTmpProfiles {w} {
 	set state(prof,$name,username)  [lindex $spec 1]
 	set state(prof,$name,password)  [lindex $spec 2]
 	set state(prof,$name,-resource) ""
+	set state(prof,$name,-nickname) ""
 	foreach {key value} [lrange $spec 3 end] {
 	    set state(prof,$name,$key) $value
 	}
@@ -1128,6 +1173,7 @@ proc ::Profiles::FrameSetCurrentFromTmp {w pname} {
     set state(username) $state(prof,$pname,username)
     set state(password) $state(prof,$pname,password)
     set state(resource) ""
+    set state(nickname) ""
 
     set mtoken [namespace current]::${w}-more
     variable $mtoken
@@ -1139,14 +1185,17 @@ proc ::Profiles::FrameSetCurrentFromTmp {w pname} {
 	set optname [string map [list prof,$pname,- ""] $key]
 	Debug 4 "\t key=$key, value=$value, optname=$optname"
 	
-	# The 'resource' is a bit special...
-	if {$optname eq "resource"} {
-	    set state(resource) $value
-	} else {
-	    set mstate($optname) $value
+	switch -- $optname {
+	    resource - nickname {
+		set state($optname) $value
+	    }
+	    default {
+		set mstate($optname) $value
+	    }
 	}
     }
     set state(selected) $pname
+    set state(jid) [jlib::joinjid $state(username) $state(server) $state(resource)]
     
     NotebookSetAnyConfigState $state(wtabnb) $pname
     NotebookDefaultWidgetStates $state(wtabnb)
@@ -1168,6 +1217,7 @@ proc ::Profiles::FrameSaveCurrentToTmp {w pname} {
 	set state(prof,$pname,username)  $state(username)
 	set state(prof,$pname,password)  $state(password)
 	set state(prof,$pname,-resource) $state(resource)
+	set state(prof,$pname,-nickname) $state(nickname)
 	
 	set server $state(server)
 
@@ -1264,6 +1314,7 @@ proc ::Profiles::FrameNewCmd {w} {
     set state(username) ""
     set state(password) ""
     set state(resource) ""
+    set state(nickname) ""
     
     set mtoken [namespace current]::${w}-more
     NotebookSetDefaults $mtoken ""
@@ -1332,9 +1383,9 @@ proc ::Profiles::FrameGetProfiles {w} {
 	    set value $state($key)
 
 	    switch -- $optname {
-		resource {
+		resource - nickname {
 		    if {[string length $value]} {
-			lappend plist -resource $value 
+			lappend plist -$optname $value 
 		    }
 		}
 		default {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.209 2007-05-22 09:18:17 matben Exp $
+# $Id: Jabber.tcl,v 1.210 2007-06-28 06:14:20 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -52,6 +52,7 @@ package require Login
 package require MailBox
 package require MUC
 package require NewMsg
+package require Nickname
 package require OOB
 package require Privacy
 package require Profiles

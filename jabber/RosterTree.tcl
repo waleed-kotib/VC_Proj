@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.53 2007-06-25 06:28:43 matben Exp $
+# $Id: RosterTree.tcl,v 1.54 2007-06-28 06:14:21 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -27,6 +27,7 @@ namespace eval ::RosterTree {
     ::hooks::register logoutHook             ::RosterTree::LogoutHook
     ::hooks::register quitAppHook            ::RosterTree::QuitHook
     ::hooks::register menuJMainEditPostHook  ::RosterTree::EditMenuPostHook
+    ::hooks::register nicknameEventHook      ::RosterTree::NicknameEventHook
 
     # Actual:
     option add *RosterTree.borderWidth      1               50
@@ -1273,6 +1274,7 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
     
     # Format item:
     #  - If 'name' attribute, use this, else
+    #  - If nickname
     #  - if user belongs to login server, use only prefix, else
     #  - show complete 2-tier jid
     # If resource add it within parenthesis '(presence)' but only if Online.
@@ -1296,11 +1298,14 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
 	if {[info exists argsA(-name)] && ($argsA(-name) ne "")} {
 	    set str $argsA(-name)
 	} else {
-	    jlib::splitjidex $jid node domain res
-	    if {$domain eq $jstate(server)} {
-		set str $node
-	    } else {
-		set str [jlib::barejid $jid]
+	    set str [::Nickname::Get [jlib::barejid $jid]]
+	    if {$str eq ""} {	
+		jlib::splitjidex $jid node domain res
+		if {$domain eq $jstate(server)} {
+		    set str $node
+		} else {
+		    set str [jlib::barejid $jid]
+		}
 	    }
 	}
 	if {$presence eq "available"} {
@@ -1435,6 +1440,14 @@ proc ::RosterTree::QuitHook { } {
     if {[info exists T] && [winfo exists $T]} {
 	GetClosed
     }
+}
+
+proc ::RosterTree::NicknameEventHook {xmldata jid nickname} {
+    upvar ::Jabber::jstate jstate
+    
+    # Just repopulate item.
+    set jid [$jstate(jlib) roster getrosterjid $jid]
+    eval {::Roster::SetItem $jid} [$jstate(jlib) roster getrosteritem $jid]    
 }
 
 # RosterTree::GetClosed --
