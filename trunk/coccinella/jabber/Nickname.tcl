@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: Nickname.tcl,v 1.1 2007-06-26 13:47:51 matben Exp $
+# $Id: Nickname.tcl,v 1.2 2007-06-28 06:14:20 matben Exp $
 
 package provide Nickname 1.0
 
@@ -97,27 +97,29 @@ proc ::Nickname::Retract {} {
 
 proc ::Nickname::Event {jlibname xmldata} {
     variable state
+    variable xmlns
 
-    puts "::Nickname::Event +++++++++++++++++++++"
+    #puts "\n::Nickname::Event +++++++++++++++++++++\n"
     
     # The server MUST set the 'from' address on the notification to the 
     # bare JID (<node@domain.tld>) of the account owner.
     set from [wrapper::getattribute $xmldata from]
+    
+    # Buggy ejabberd PEP patch!
+    set from [jlib::barejid $from]
     set eventE [wrapper::getfirstchildwithtag $xmldata event]
     if {[llength $eventE]} {
 	set itemsE [wrapper::getfirstchildwithtag $eventE items]
 	if {[llength $itemsE]} {
 	    
 	    set node [wrapper::getattribute $itemsE node]    
-	    if {$node ne $xmlns(nick)]} {
+	    if {$node ne $xmlns(nick)} {
 		return
 	    }
 
-	    set mjid [jlib::jidmap $from]
 	    set retractE [wrapper::getfirstchildwithtag $itemsE retract]
 	    if {[llength $retractE]} {
-		set msg ""
-		set state($mjid,nick) ""
+		set nick ""
 	    } else {
 		set itemE [wrapper::getfirstchildwithtag $itemsE item]
 		set nickE [wrapper::getfirstchildwithtag $itemE nick]
@@ -125,11 +127,30 @@ proc ::Nickname::Event {jlibname xmldata} {
 		    return
 		}
 		set nick [wrapper::getcdata $nickE]
-		
-		# Cache the result.
-		set state($mjid,nick) $nick
 	    }
-	    ::hooks::run nickEvent $xmldata $nick
+	    
+	    # Cache the result.
+	    set mjid [jlib::jidmap $from]
+	    set state($mjid,nick) $nick
+
+	    # 'from' shall be a bare JID.
+	    ::hooks::run nicknameEventHook $xmldata $from $nick
 	}
     }   
 }
+
+# Nickname::Get --
+# 
+#       Get users nickname if any. Must use the bare jid.
+
+proc ::Nickname::Get {jid} {
+    variable state
+  
+    set mjid [jlib::jidmap $jid]
+    if {[info exists state($mjid,nick)]} {
+	return $state($mjid,nick)
+    } else {
+	return ""
+    }
+}
+

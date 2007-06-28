@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.196 2007-05-04 11:59:00 matben Exp $
+# $Id: Chat.tcl,v 1.197 2007-06-28 06:14:20 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -31,6 +31,7 @@ namespace eval ::Chat:: {
 
     ::hooks::register avatarNewPhotoHook         ::Chat::AvatarNewPhotoHook
     ::hooks::register menuChatEditPostHook       ::Chat::MenuEditPostHook
+    ::hooks::register nicknameEventHook          ::Chat::NicknameEventHook
 
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Chat::InitPrefsHook
@@ -1310,7 +1311,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(displayname)      [::Roster::GetDisplayName $jid2]
     set chatstate(dlgtoken)         $dlgtoken
     set chatstate(threadid)         $threadID
-    set chatstate(nameorjid)        [::Roster::GetNameOrjid $jid2]
+    set chatstate(nameorjid)        [::Roster::GetNameOrJID $jid2]
     set chatstate(state)            normal    
     set chatstate(subject)          ""
     set chatstate(lastsubject)      ""
@@ -1323,7 +1324,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(xevent,type)      chat
     set chatstate(nhiddenmsgs)      0
     set chatstate(havehistory)      0
-
+    set chatstate(havesent)         0
+    
     set chatstate(havecs)           first
     set chatstate(chatstate)        active
 
@@ -1516,6 +1518,20 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     after idle [list raise [winfo toplevel $wthread]]
     
     return $chattoken
+}
+
+proc ::Chat::NicknameEventHook {xmldata jid nickname} {
+    
+    set jid2 $jid
+    
+    foreach chattoken [GetAllTokensFrom chat jid2 [jlib::ESC $jid2]*] {
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+
+	set chatstate(displayname) [::Roster::GetDisplayName $jid2]
+	set chatstate(nameorjid)   [::Roster::GetNameOrJID $jid2]
+	SetTitle $chattoken
+    }        
 }
 
 proc ::Chat::OnFocusInSubject {chattoken} {
@@ -2488,6 +2504,8 @@ proc ::Chat::Send {dlgtoken} {
     
     ::Debug 2 "::Chat::Send "
     
+    set jlib $jstate(jlib)
+
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
 	::UI::MessageBox -type ok -icon error -title [mc {Not Connected}] \
@@ -2551,31 +2569,43 @@ proc ::Chat::Send {dlgtoken} {
       [string equal $chatstate(xevent,status) "composing"]} {
 	XEventSendCancelCompose $chattoken
     }
+    set xlist [list]
     
     # Requesting composing notification.
     if {$cprefs(usexevents)} {
 	lappend opts -id [incr cprefs(xeventid)]
-	lappend opts -xlist [list \
-	  [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
-	  -subtags [list [wrapper::createtag "composing"]]]]
+	lappend xlist [wrapper::createtag "x" -attrlist {xmlns jabber:x:event} \
+	  -subtags [list [wrapper::createtag "composing"]]]
     }
 
 
     #-- The <active ...> tag is only sended in the first message, 
     #-- for next messages we have to check if the contact has reply to us with the same active tag
     #-- this check is done with chatstate(havecs) but we need to send for first anyway
-    set cselems {}
+    set cselems [list]
     if { ($chatstate(havecs) eq "first") || ($chatstate(havecs) eq "true") } {
         #-- The cselems is sended for first and then wait for a right reply 
         if {$chatstate(havecs) eq "first"} {
             set chatstate(havecs) false
         }
         ChangeChatState $chattoken send
-        lappend cselems [wrapper::createtag $chatstate(chatstate) \
+	set csE [wrapper::createtag $chatstate(chatstate) \
 	  -attrlist [list xmlns $xmppxmlns(chatstates)]]
-        lappend opts -xlist $cselems
+        lappend cselems $csE
+        lappend xlist $csE
     }
-     
+    
+    # Handle any nickname. Only first message.
+    if {!$chatstate(havesent) && ![$jlib roster isitem $jid2]} {
+	set nickname [::Profiles::GetSelected -nickname]
+	if {$nickname ne ""} {
+	    lappend xlist [::Nickname::Element $nickname]
+	}
+    }     
+    if {[llength $xlist]} {
+	lappend opts -xlist $xlist
+    }
+    
     # Put in history file.
     # Need to reconstruct our xmldata. Add -from for our history record.
     set myjid [::Jabber::JlibCmd myjid]
@@ -2583,20 +2613,21 @@ proc ::Chat::Send {dlgtoken} {
        -thread $threadID -type chat -body $text -from $myjid} $opts]
     ::History::XPutItem send $jid2 $xmldata
 
-    eval {::Jabber::JlibCmd send_message $jid  \
-      -thread $threadID -type chat -body $text} $opts
+    eval {$jlib send_message $jid -thread $threadID -type chat -body $text} $opts
 
     set dlgstate(lastsentsecs) [clock seconds]
     
     # Add to chat window.        
     InsertMessage $chattoken me $text
 
+    set chatstate(havesent) 1
+    
     set opts [list -from $jid2]
     eval {::hooks::run displayChatMessageHook $text} $opts
 }
 
 proc ::Chat::TraceJid {dlgtoken name junk1 junk2} {
-    variable $dlgtoken
+    variable $dlgtoken 
     upvar 0 $dlgtoken dlgstate
     
     # Call by name.
@@ -2827,7 +2858,7 @@ proc ::Chat::GetTokenFrom {type key pattern} {
 
 proc ::Chat::GetAllTokensFrom {type key pattern} {
     
-    set alltokens {}
+    set alltokens [list]
     
     # Search all tokens for this key into state array.
     foreach token [GetTokenList $type] {

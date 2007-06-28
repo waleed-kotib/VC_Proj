@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.54 2007-05-22 09:18:18 matben Exp $
+# $Id: roster.tcl,v 1.55 2007-06-28 06:14:21 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -724,11 +724,7 @@ proc jlib::roster::isitem {jlibname jid} {
     upvar ${jlibname}::roster::rostA rostA
     
     set mjid [jlib::jidmap $jid]
-    if {[info exists rostA($mjid,item)]} {
-	return 1
-    } else {
-	return 0
-    }
+    return [expr {[info exists rostA($mjid,item)] ? 1 : 0}]
 }
 
 # jlib::roster::getrosterjid --

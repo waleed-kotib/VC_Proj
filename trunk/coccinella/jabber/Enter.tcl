@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Enter.tcl,v 1.9 2006-10-03 13:09:26 matben Exp $
+# $Id: Enter.tcl,v 1.10 2007-06-28 06:14:20 matben Exp $
 
 package provide Enter 1.0
 
@@ -80,8 +80,13 @@ proc ::Enter::Build {protocol args} {
     }
     set state(protocol) $protocol
     if {$jprefs(defnick) eq ""} {
-	jlib::splitjidex [Jabber::JlibCmd myjid] node - -
-	set state(nickname) $node
+	set nickname [::Profiles::GetSelected -nickname]
+	if {$nickname ne ""} {
+	    set state(nickname) $nickname
+	} else {
+	    jlib::splitjidex [Jabber::JlibCmd myjid] node - -
+	    set state(nickname) $node
+	}
     } else {
 	set state(nickname) $jprefs(defnick)
     }

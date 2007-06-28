@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.17 2007-04-08 13:41:54 matben Exp $
+# $Id: UserInfo.tcl,v 1.18 2007-06-28 06:14:21 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -307,7 +307,8 @@ proc ::UserInfo::Build {token} {
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand ::UserInfo::CloseHook
-    wm title $w "[mc {User Info}]: $jid"
+    set djid [::Roster::GetDisplayName $jid]
+    wm title $w "[mc {User Info}]: $djid"
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(juserinfo)]]
     if {$nwin == 1} {

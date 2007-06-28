@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.28 2007-05-02 14:00:32 matben Exp $
+# $Id: JUser.tcl,v 1.29 2007-06-28 06:14:20 matben Exp $
 
 package provide JUser 1.0
 
@@ -255,8 +255,13 @@ proc ::JUser::DoAdd {token} {
     eval {$jlib roster send_set $jid -command $cb} $opts    
 
     # Send subscribe request.
-    $jlib send_presence -type "subscribe" -to $jid \
-      -command [namespace current]::PresError
+    set opts [list]
+    set nickname [::Profiles::GetSelected -nickname]
+    if {$nickname ne ""} {
+	lappend opts -xlist [list [::Nickname::Element $nickname]]
+    }
+    eval {$jlib send_presence -to $jid -type "subscribe" \
+      -command [namespace current]::PresError} $opts
         
     ::UI::SaveWinPrefixGeom $wDlgs(jrostadduser)
     set state(finished) 1
@@ -619,8 +624,13 @@ proc ::JUser::DoEdit {token} {
     
     # Send (un)subscribe request.
     if {$subscribe} {
-	$jlib send_presence -type "subscribe" -to $jid \
-	  -command [namespace current]::PresError
+	set opts [list]
+	set nickname [::Profiles::GetSelected -nickname]
+	if {$nickname ne ""} {
+	    lappend opts -xlist [list [::Nickname::Element $nickname]]
+	}
+	eval {$jlib send_presence -to $jid -type "subscribe" \
+	  -command [namespace current]::PresError} $opts
     } elseif {$unsubscribe} {
 	$jlib send_presence -type "unsubscribe" -to $jid \
 	  -command [namespace current]::PresError
