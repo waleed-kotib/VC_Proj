@@ -890,6 +890,7 @@
 ::msgcat::mcset nl jamesserrregget			{Ophalen van registratiegegevens mislukte. Foutcode %s met als foutmelding: %s.}
 ::msgcat::mcset nl jamesserrregset			{Registratie met dienst "%s" mislukte. Foutcode %s met als foutmelding: %s.}
 ::msgcat::mcset nl jamessokreg				{Registratie met dienst "%s" is gelukt.}
+::msgcat::mcset nl jamessjidinvalid  	                {De Jabber ID is niet juist.}
 ::msgcat::mcset nl jamessinvalidjid			{De Jabber ID is niet juist. U moet onderaan een geldige Jabber ID opgeven in het veld (bv: 'gebruikersnaam@voorbeeld.org').}
 ::msgcat::mcset nl jamessnotconnected			{Kon niet verzenden: er is geen verbinding met een server.}
 ::msgcat::mcset nl jamessaddrmiss			{U moet minstens één geldig adres opgeven.}

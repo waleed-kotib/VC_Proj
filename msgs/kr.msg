@@ -889,6 +889,7 @@
 ::msgcat::mcset kr jamesserrregget	{등록정보를 받아오지 못했습니다. 오류코드는 %s입니다. 오류문: %s}
 ::msgcat::mcset kr jamesserrregset	{서비스 "%s"의 등록 실패. 오류코드는 %s입니다. 오류문: %s}
 ::msgcat::mcset kr jamessokreg		{서비스 "%s"의 등록 성공}
+::msgcat::mcset kr jamessjidinvalid	{The JID address is not well formed.}
 ::msgcat::mcset kr jamessinvalidjid	{JID 주소가 제대로 구성되지 않았습니다. 제대로 된 주소인지 칠판 밑칸을 확인해 보세요.\
   아마도, 다음과 같이 되어 있을 것입니다. 'username@jabber.org'.}
 ::msgcat::mcset kr jamessnotconnected	{서버에 연결되지 않아서 보낼 수 없습니다}
