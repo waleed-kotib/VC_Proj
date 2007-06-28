@@ -892,6 +892,7 @@
 ::msgcat::mcset pl jamesserrregget	{Nieudana próba pobrania formularza rejestracyjnego. Kod błędu: %s - informacja: %s}
 ::msgcat::mcset pl jamesserrregset	{Nieudana rejestracja w serwisie "%s". Kod błędu: %s - informacja: %s}
 ::msgcat::mcset pl jamessokreg		{Pomyślna rejestracja w serwisie "%s".}
+::msgcat::mcset pl jamessjidinvalid	{Adres JID wygląda na źle podany.}
 ::msgcat::mcset pl jamessinvalidjid	{Adres JID wygląda na źle podany. Najpierw upewnij się, że pole na samym dole Tablicy zawiera prawidłowo podany JID.\
   JID winien wyglądać w stylu 'username@jabber.org'.}
 ::msgcat::mcset pl jamessnotconnected	{Bez połączenia z serwerem nic nie da się wysłać}

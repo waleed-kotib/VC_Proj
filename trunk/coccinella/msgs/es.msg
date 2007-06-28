@@ -917,6 +917,7 @@
 ::msgcat::mcset es jamesserrregget	{La recuperación de la información de inscripción ha fallado. Código del error : %s (%s)}
 ::msgcat::mcset es jamesserrregset	{La inscripción en el servicio "%s" ha fallado. Código del error : %s (%s)}
 ::msgcat::mcset es jamessokreg		{La inscripción en el servicio "%s" ha sido realizada.}
+::msgcat::mcset es jamessjidinvalid	{El JID está mal configurado.}
 ::msgcat::mcset es jamessinvalidjid	{El JID está mal configurado. Compruebe que en el borde inferior de la pizarra aparece una dirección correcta, debe tener la forma "contacto@jabber.org".}
 ::msgcat::mcset es jamessnotconnected	{Usted debe estar conectado con el servidor para enviar !}
 ::msgcat::mcset es jamessaddrmiss	{Usted debe cumplimentar con al menos una dirección correcta.}

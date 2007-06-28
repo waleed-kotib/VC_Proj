@@ -879,6 +879,7 @@
 ::msgcat::mcset en jamesserrregget	{Failed obtaining registration info. Error code %s with message: %s}
 ::msgcat::mcset en jamesserrregset	{Failed registering with service "%s". Error code %s with message: %s}
 ::msgcat::mcset en jamessokreg		{Registration with service "%s" was succesful.}
+::msgcat::mcset en jamessjidinvalid	{The JID address is not well formed.}
 ::msgcat::mcset en jamessinvalidjid	{The JID address is not well formed. Please be sure that the entry at the bottom of the whiteboard contains a valid address before you act.\
   It should look something like 'username@jabber.org'.}
 ::msgcat::mcset en jamessnotconnected	{Can't send when not connected to server}

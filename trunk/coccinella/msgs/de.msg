@@ -900,6 +900,7 @@
 ::msgcat::mcset de jamesserrregget	{Fehler beim Abruf der Registrierungs-Information. Fehlercode %s mit Nachricht: %s}
 ::msgcat::mcset de jamesserrregset	{Fehler bei Dienstregistrierung "%s". Fehlercode %s mit Nachricht: %s}
 ::msgcat::mcset de jamessokreg		{Registrierung bei Dienst "%s" war erfolgreich.}
+::msgcat::mcset de jamessjidinvalid	{Die JID-Adresse ist nicht korrekt.}
 ::msgcat::mcset de jamessinvalidjid	{Die JID-Adresse ist nicht korrekt. Stellen Sie sicher, das der Eintrag am unteren Rand eine gültige Adresse enthält. Sie sollte aussehen wie 'username@jabber.org'.}
 ::msgcat::mcset de jamessnotconnected	{Ohne Serververbindung kein Senden möglich}
 ::msgcat::mcset de jamessaddrmiss	{Sie müssen mindestens eine gültige Adresse eintragen}

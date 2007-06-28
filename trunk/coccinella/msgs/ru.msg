@@ -817,6 +817,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru jamesserrregget	{Failed obtaining registration info. Error code %s with message: %s}
 ::msgcat::mcset ru jamesserrregset	{Failed registering with service "%s". Error code %s with message: %s}
 ::msgcat::mcset ru jamessokreg		{Registration with service "%s" was succesful.}
+::msgcat::mcset ru jamessjidinvalid	{The JID address is not well formed.}
 ::msgcat::mcset ru jamessinvalidjid	{The JID address is not well formed. Please be sure that the entry at the bottom of the whiteboard contains a valid address before you act.\
   It should look something like 'username@jabber.org'.}
 ::msgcat::mcset ru jamessnotconnected	{Can't send when not connected to server}

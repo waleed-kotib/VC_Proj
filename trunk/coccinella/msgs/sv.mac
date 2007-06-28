@@ -883,6 +883,7 @@ Vill du fortsätta ändå?}
 ::msgcat::mcset sv jamesserrregget	{Misslyckades med att få registrerings info. Felkoden %s med felmeddelande: %s}
 ::msgcat::mcset sv jamesserrregset	{Misslyckades med att registrera tjänsten "%s". Felkoden %s med felmeddelande: %s}
 ::msgcat::mcset sv jamessokreg		{Registreringen av tjänsten "%s" lyckades.}
+::msgcat::mcset sv jamessjidinvalid	{JID adressen har inte rätt form.}
 ::msgcat::mcset sv jamessinvalidjid	{JID adressen har inte rätt form. Kontrollera att fältet i nederkanten av skrivtavlan innehåller en riktig adress innan du handlar.\
 Den ska vara av typen 'username@jabber.org'.}
 ::msgcat::mcset sv jamessnotconnected	{Kan ej skicka något när ej ansluten till servern.}

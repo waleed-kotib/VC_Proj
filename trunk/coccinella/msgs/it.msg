@@ -894,6 +894,7 @@
 ::msgcat::mcset it jamesserrregget {Errore durante il recupero delle informazioni di iscrizione. Codire di errore %s, messaggio di errore: %s}
 ::msgcat::mcset it jamesserrregset {L'iscrizione al servizio "%s" è fallita. Codice errore %s, messaggio: %s}
 ::msgcat::mcset it jamessokreg {Iscrizione al servizio "%s" andata a buon fine.}
+::msgcat::mcset it jamessjidinvalid	{L'indirizzo JID non è ben formato.}
 ::msgcat::mcset it jamessinvalidjid {L'indirizzo JID non è ben formato. Per favore, prima di lavorare assicurati che la dicitura nella parte basse della lavagna contenga un indirizzo valido. Dovrebbe essere qualcosa del tipo "nomeutente@jabber.org".}
 ::msgcat::mcset it jamessnotconnected {Non si può inviare nulla se non si è connessi ad un server.}
 ::msgcat::mcset it jamessaddrmiss {Bisogna inserire almeno un indirizzo valido.}
