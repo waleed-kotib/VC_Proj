@@ -5,7 +5,16 @@
 #       
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: Nickname.tcl,v 1.2 2007-06-28 06:14:20 matben Exp $
+# $Id: Nickname.tcl,v 1.3 2007-07-05 07:28:28 matben Exp $
+
+# @@@ There is one thing I don't yet understand. While I always publish any 
+# nickname when I log on, online users will receive the event, but what about
+# users which are already online when I log in? I wont receive any event
+# since they already have published their nickname. Perhaps I need to:
+# 
+#   $jlibname pubsub items $jid "http://jabber.org/protocol/nick"
+# 
+# for all users?
 
 package provide Nickname 1.0
 

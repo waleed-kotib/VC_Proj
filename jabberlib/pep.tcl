@@ -7,7 +7,7 @@
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #
-# $Id: pep.tcl,v 1.6 2007-04-10 08:48:14 matben Exp $
+# $Id: pep.tcl,v 1.7 2007-07-05 07:28:28 matben Exp $
 #
 ############################# USAGE ############################################
 #
@@ -366,6 +366,7 @@ if {0} {
     $jlibname disco send_get info $jid cb
     $jlibname disco send_get items $jid cb    
     $jlibname roster getsubscription $jid
+    $jlibname pubsub items $jid $moodNode
     
     # PEP
     # Owner

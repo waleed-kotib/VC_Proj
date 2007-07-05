@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.17 2007-04-10 08:48:14 matben Exp $
+# $Id: pubsub.tcl,v 1.18 2007-07-05 07:28:28 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -335,7 +335,7 @@ proc jlib::pubsub::items {jlibname to node args} {
 
     set opts [list -to $to]
     set attr [list node $node]
-    set itemids {}
+    set itemids [list]
     foreach {key value} $args {
 	set name [string trimleft $key -]
 	
@@ -351,7 +351,7 @@ proc jlib::pubsub::items {jlibname to node args} {
 	    }
 	}
     }
-    set items {}
+    set items [list]
     foreach id $itemids {
 	lappend items [wrapper::createtag item -attrlist [list id $id]]
     }

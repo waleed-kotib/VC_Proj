@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2007  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.70 2007-06-28 06:14:20 matben Exp $
+# $Id: Profiles.tcl,v 1.71 2007-07-05 07:28:28 matben Exp $
 
 package provide Profiles 1.0
 
@@ -25,7 +25,7 @@ namespace eval ::Profiles:: {
     option add *JProfiles*TScale.style        Small.Horizontal.TScale  widgetDefault
     option add *JProfiles*TNotebook.Tab.style Small.Tab           widgetDefault
 
-    # Customization. @@@ TODO
+    # Customization. @@@ TODO; config() ???
     option add *JProfileFrame.showNickname    1                   widgetDefault
 
     # Internal storage:
@@ -65,7 +65,7 @@ namespace eval ::Profiles:: {
     set ::config(profiles,profiles)   {}
     set ::config(profiles,selected)   {}
     set ::config(profiles,prefspanel) 1
-    set ::config(profiles,style)      "parts"  ;# jid | parts
+    set ::config(profiles,style)      "jid"  ;# jid | parts
 
     # The 'config' array shall never be written to, and since not all elements
     # of the profile are fixed, we need an additional profile that is written
@@ -720,6 +720,29 @@ proc ::Profiles::GetDefaultOptValue {name server} {
     return $arr(-$name)
 }
 
+# Profiles::MachineResource --
+# 
+#       Get a default resource in the form "Coccinella@My Box".
+
+proc ::Profiles::MachineResource {} {
+    global  tcl_platform prefs this
+    variable hostname
+    
+    if {[string equal $tcl_platform(platform) "windows"]} {
+	return $prefs(appName)@$this(hostname)
+    } else {
+	if {![info exists hostname]} {
+	    set bpath [auto_execok hostname]
+	    if {[llength $bpath]} {
+		set hostname [eval exec $bpath -s]
+	    } else {
+		set hostname $this(hostname)
+	    }
+	}
+	return $prefs(appName)@$hostname
+    }
+}
+
 #- User Profiles Page ----------------------------------------------------------
 
 proc ::Profiles::BuildHook {wtree nbframe} {
@@ -942,30 +965,36 @@ proc ::Profiles::FrameWidget {w moreless args} {
     } [GetAllNames]]
     trace add variable $token\(profile) write  \
       [list [namespace current]::FrameTraceProfile $w]
+
+    if {$config(profiles,style) eq "jid"} {
+	set width 26
+    } else {
+	set width 22
+    }
     
     # Depending on 'config(profiles,style)' not all get mapped.
     ttk::label $wui.ljid -text "[mc {Jabber ID}]:" -anchor e
     ttk::entry $wui.ejid -font CociSmallFont \
-      -width 22 -textvariable $token\(jid)
+      -width $width -textvariable $token\(jid)
     ttk::label $wui.lserv -text "[mc {Jabber Server}]:" -anchor e
     ttk::entry $wui.eserv -font CociSmallFont \
-      -width 22 -textvariable $token\(server) -validate key  \
+      -width $width -textvariable $token\(server) -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
     ttk::label $wui.luser -text "[mc Username]:" -anchor e
     ttk::entry $wui.euser -font CociSmallFont \
-      -width 22 -textvariable $token\(username) -validate key  \
+      -width $width -textvariable $token\(username) -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStr %S}
     ttk::label $wui.lpass -text "[mc Password]:" -anchor e
     ttk::entry $wui.epass -font CociSmallFont \
-      -width 22 -show {*} -textvariable $token\(password) -validate key  \
+      -width $width -show {*} -textvariable $token\(password) -validate key  \
       -validatecommand {::Jabber::ValidatePasswordStr %S}
     ttk::label $wui.lres -text "[mc Resource]:" -anchor e
     ttk::entry $wui.eres -font CociSmallFont \
-      -width 22 -textvariable $token\(resource) -validate key  \
+      -width $width -textvariable $token\(resource) -validate key  \
       -validatecommand {::Jabber::ValidateResourceStr %S}
     ttk::label $wui.lnick -text "[mc Nickname]:" -anchor e
     ttk::entry $wui.enick -font CociSmallFont \
-      -width 22 -textvariable $token\(nickname)
+      -width $width -textvariable $token\(nickname)
 
     if {$config(profiles,style) eq "jid"} {
 	# @@@ TODO
@@ -974,6 +1003,8 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	grid  $wui.lnick  $wui.enick  -sticky e -pady 2
 
 	grid  $wui.pop  $wui.ejid  $wui.enick -sticky ew
+
+	set wuserinfofocus $wui.ejid
     } elseif {$config(profiles,style) eq "parts"} {
 	grid  $wui.lpop   $wui.pop    -sticky e -pady 2
 	grid  $wui.lserv  $wui.eserv  -sticky e -pady 2
@@ -983,9 +1014,10 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	grid  $wui.lnick  $wui.enick  -sticky e -pady 2
 
 	grid  $wui.pop  $wui.eserv  $wui.euser  $wui.epass  $wui.eres  $wui.enick -sticky ew
+
+	set wuserinfofocus $wui.eserv
     }
     
-    set wuserinfofocus $wui.eserv
         
     set wbt $w.bt 
     ttk::frame $wbt -padding {0 4 0 6}
@@ -1109,15 +1141,18 @@ proc ::Profiles::FrameMakeTmpProfiles {w} {
     array unset state prof,*
     
     foreach {name spec} [GetList] {
+	lassign [lrange $spec 0 2] server username password
 	set state(prof,$name,name) $name
-	set state(prof,$name,server)    [lindex $spec 0]
-	set state(prof,$name,username)  [lindex $spec 1]
-	set state(prof,$name,password)  [lindex $spec 2]
+	set state(prof,$name,server)    $server
+	set state(prof,$name,username)  $username
+	set state(prof,$name,password)  $password
 	set state(prof,$name,-resource) ""
 	set state(prof,$name,-nickname) ""
 	foreach {key value} [lrange $spec 3 end] {
 	    set state(prof,$name,$key) $value
 	}
+	set jid [jlib::joinjid $username $server $state(prof,$name,-resource)]
+	set state(prof,$name,jid) $jid
     }
 }
 
@@ -1172,6 +1207,7 @@ proc ::Profiles::FrameSetCurrentFromTmp {w pname} {
     set state(server)   $state(prof,$pname,server)
     set state(username) $state(prof,$pname,username)
     set state(password) $state(prof,$pname,password)
+    set state(jid)      $state(prof,$pname,jid)
     set state(resource) ""
     set state(nickname) ""
 
@@ -1216,6 +1252,7 @@ proc ::Profiles::FrameSaveCurrentToTmp {w pname} {
 	set state(prof,$pname,server)    $state(server)
 	set state(prof,$pname,username)  $state(username)
 	set state(prof,$pname,password)  $state(password)
+	set state(prof,$pname,jid)       $state(jid)
 	set state(prof,$pname,-resource) $state(resource)
 	set state(prof,$pname,-nickname) $state(nickname)
 	
@@ -1240,16 +1277,26 @@ proc ::Profiles::FrameSaveCurrentToTmp {w pname} {
 }
 
 proc ::Profiles::FrameVerifyNonEmpty {w} {
+    global  config
     variable $w
     upvar 0 $w state
 
     set ans 1
-    
-    # Check that necessary entries are non-empty, at least.
-    if {($state(server) eq "") || ($state(username) eq "")} {
-	::UI::MessageBox -type ok -icon error  \
-	  -title [mc Error] -message [mc messfillserveruser]
-	set ans 0
+
+    if {$config(profiles,style) eq "jid"} {
+	if {![jlib::jidvalidate $state(jid)]} {
+	    ::UI::MessageBox -type ok -icon error  \
+	      -title [mc Error] -message [mc jamessjidinvalid]
+	    set ans 0
+	}
+    } else {
+	
+	# Check that necessary entries are non-empty, at least.
+	if {($state(server) eq "") || ($state(username) eq "")} {
+	    ::UI::MessageBox -type ok -icon error  \
+	      -title [mc Error] -message [mc messfillserveruser]
+	    set ans 0
+	}
     }
     return $ans
 }
@@ -1281,7 +1328,7 @@ proc ::Profiles::FrameGetAllTmpNames {w} {
     variable $w
     upvar 0 $w state
     
-    set names {}
+    set names [list]
     foreach {key name} [array get state prof,*,name] {
 	lappend names $name
     }    
@@ -1312,6 +1359,7 @@ proc ::Profiles::FrameNewCmd {w} {
     set state(profile)  $uname
     set state(server)   ""
     set state(username) ""
+    set state(jid)      ""
     set state(password) ""
     set state(resource) ""
     set state(nickname) ""
@@ -1362,6 +1410,7 @@ proc ::Profiles::FrameGetSelected {w} {
 }
 
 proc ::Profiles::FrameGetProfiles {w} {
+    global  config
     variable $w
     upvar 0 $w state
     
@@ -1370,12 +1419,21 @@ proc ::Profiles::FrameGetProfiles {w} {
     # Get present dialog state into tmp array first.
     FrameSaveCurrentToTmp $w $state(profile)
     
-    set profileL {}
+    # The 'resource' handled differently depending on the style.
+    set profileL [list]
     foreach name [FrameGetAllTmpNames $w] {
-	set s $state(prof,$name,server)
-	set u $state(prof,$name,username)
+	if {$config(profiles,style) eq "jid"} {
+	    jlib::splitjidex $state(prof,$name,jid) u s resource
+	    
+	} elseif {$config(profiles,style) eq "parts"} {
+	    set s $state(prof,$name,server)
+	    set u $state(prof,$name,username)
+	}
 	set p $state(prof,$name,password)
 	set plist [list $s $u $p]
+	if {$config(profiles,style) eq "jid"} {
+	    lappend plist -resource $resource
+	}
 	
 	# Set the optional options as "-key value ...". Sorted!
 	foreach key [lsort [array names state prof,$name,-*]] {
@@ -1383,7 +1441,14 @@ proc ::Profiles::FrameGetProfiles {w} {
 	    set value $state($key)
 
 	    switch -- $optname {
-		resource - nickname {
+		resource {
+		    if {$config(profiles,style) eq "parts"} {
+			if {[string length $value]} {
+			    lappend plist -$optname $value 
+			}
+		    }
+		}
+		nickname {
 		    if {[string length $value]} {
 			lappend plist -$optname $value 
 		    }

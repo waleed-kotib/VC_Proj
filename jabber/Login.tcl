@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.113 2007-05-23 12:45:41 matben Exp $
+# $Id: Login.tcl,v 1.114 2007-07-05 07:28:28 matben Exp $
 
 package provide Login 1.0
 
@@ -514,7 +514,8 @@ proc ::Login::LaunchHook { } {
 	if {[info exists optsArr(-resource)] && ($optsArr(-resource) ne "")} {
 	    set res $optsArr(-resource)
 	} else {
-	    set res "coccinella"
+	    #set res "coccinella"
+	    set res [::Profiles::MachineResource]
 	}
 	eval {::Login::HighLogin $domain $node $res $password \
 	  [namespace current]::AutoLoginCB} $opts
@@ -591,9 +592,10 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     ::JUI::SetConnectState "connectinit"
     
     set pending 1
+    set defResource [::Profiles::MachineResource]
 
     jlib::connect::configure              \
-      -defaultresource "coccinella"       \
+      -defaultresource $defResource       \
       -defaultport $jprefs(port)          \
       -defaultsslport $jprefs(sslport)    \
       -dnssrv $config(login,dnssrv)       \
