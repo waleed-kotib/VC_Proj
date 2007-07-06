@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2007  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.71 2007-07-05 07:28:28 matben Exp $
+# $Id: Profiles.tcl,v 1.72 2007-07-06 13:54:18 matben Exp $
 
 package provide Profiles 1.0
 
@@ -734,7 +734,11 @@ proc ::Profiles::MachineResource {} {
 	if {![info exists hostname]} {
 	    set bpath [auto_execok hostname]
 	    if {[llength $bpath]} {
-		set hostname [eval exec $bpath -s]
+		if {[catch {
+		    set hostname [eval exec $bpath -s]
+		}]} {
+		    set hostname $this(hostname)
+		}
 	    } else {
 		set hostname $this(hostname)
 	    }
