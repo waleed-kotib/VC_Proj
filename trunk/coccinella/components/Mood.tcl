@@ -5,7 +5,7 @@
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-#  $Id: Mood.tcl,v 1.25 2007-06-28 06:14:20 matben Exp $
+#  $Id: Mood.tcl,v 1.26 2007-07-06 07:31:50 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -310,6 +310,7 @@ proc ::Mood::CustomCmd {w bt} {
 
 proc ::Mood::Event {jlibname xmldata} {
     variable state
+    variable xmlns
     
     # The server MUST set the 'from' address on the notification to the 
     # bare JID (<node@domain.tld>) of the account owner.
