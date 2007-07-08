@@ -1,6 +1,6 @@
 # Dutch language version of the Coccinella message catalog.
 #
-# Dutch translation by Sander Devrieze (s.devrieze at pandora.be), 2004-2006.
+# Dutch translation by Sander Devrieze (s.devrieze at pandora.be), 2004-2007.
 # and Bart Van Hove (bartvanhove at skynet.be), 2004.
 #
 # General type of text, such as "OK", "Cancel", and the like. 
@@ -435,7 +435,7 @@
 ::msgcat::mcset nl mFontSize				{Lettergrootte}
 ::msgcat::mcset nl mNormalFont				{Normaal}
 ::msgcat::mcset nl mLargerFont				{Groter}
-::msgcat::mcset nl mLargeFont				{Groot}
+::msgcat::mcset nl mLargeFont				{Grootst}
 
 # Popups
 ::msgcat::mcset nl mMessage				{Bericht...}
