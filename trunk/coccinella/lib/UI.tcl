@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: UI.tcl,v 1.155 2007-05-17 14:42:17 matben Exp $
+# $Id: UI.tcl,v 1.156 2007-07-09 13:16:31 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1743,7 +1743,7 @@ proc ::UI::GenericCCPMenuStates {} {
     if {[winfo exists $w]} {
 
 	switch -- [winfo class $w] {
-	    TEntry {
+	    TEntry - TCombobox {
 		set haveSelection [$w selection present]
 		set state [$w state]
 		if {[lsearch $state disabled] >= 0} {
