@@ -43,7 +43,14 @@ this directory. The process is essentially repeated for each directory.
 
 Now try it...
 
-Use the following code to do this:
+There is a cvs module 'tools' in the coccinella cvs repository which
+contains some scripts to assist when doing i18n work. Get it from:
+
+cvs -d:pserver:anonymous@coccinella.cvs.sourceforge.net:/cvsroot/coccinella login
+cvs -z3 -d:pserver:anonymous@coccinella.cvs.sourceforge.net:/cvsroot/coccinella co -P tools
+
+and look into its tools/i18n/ directory.
+
 
 ........................................................................
 
