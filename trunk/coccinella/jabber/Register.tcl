@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.67 2007-05-07 12:05:38 matben Exp $
+# $Id: Register.tcl,v 1.68 2007-07-09 12:55:45 matben Exp $
 
 package provide Register 1.0
 
@@ -83,12 +83,19 @@ proc ::Register::Remove {{jid {}}} {
 
 proc ::Register::RemoveCallback {jid jlibName type theQuery} {
     
+    upvar ::Jabber::jstate jstate
+
     if {[string equal $type "error"]} {
 	lassign $theQuery errcode errmsg
-	::UI::MessageBox -icon error -title [mc Unregister] -type ok  \
+	ui::dialog -icon error -title [mc Unregister] -type ok  \
 	  -message [mc jamesserrunreg $jid $errcode $errmsg]
     } else {
-	::UI::MessageBox -icon info -title [mc Unregister] -type ok  \
+	
+	# If we don't do this the server may shut us down instead.
+	if {[jlib::jidequal $jid $jstate(server)]} {
+	    ::Jabber::DoCloseClientConnection
+	}
+	ui::dialog -icon info -title [mc Unregister] -type ok  \
 	  -message [mc jamessokunreg $jid]
     }
 }
@@ -312,6 +319,9 @@ proc ::RegisterEx::New {args} {
 	      -command  [list [namespace current]::HttpCommand $token]
 	} state(httptoken)
     }
+    
+    ::Jabber::JlibCmd connect configure \
+      -defaultresource [::Profiles::MachineResource]
     
     # Wait here for a button press and window to be destroyed.
     tkwait variable $token\(finished)
@@ -698,7 +708,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
     set server   $state(-server)
     set username $state(elem,username)
     set password $state(elem,password)
-    set resource "coccinella"
+    set resource [::Profiles::MachineResource]
 
     if {[string equal $type "error"]} {
 	set errcode [lindex $theQuery 0]
@@ -708,8 +718,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	} else {
 	    set msg [mc jamessregerr $errmsg]
 	}
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message $msg
+	::UI::MessageBox -title [mc Error] -icon error -type ok -message $msg
 	NotBusy $token
     } else {
 	
@@ -726,7 +735,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	    $jstate(jlib) connect register $jid $password
 	    $jstate(jlib) connect auth -command [namespace code AuthCB]
 	} else {
-	    ::UI::MessageBox -icon info -type ok \
+	    ui::dialog -icon info -type ok \
 	      -message [mc jamessregisterok $server]
 	
 	    # Disconnect. This should reset both wrapper and XML parser!
@@ -757,12 +766,12 @@ proc ::RegisterEx::AuthCB {jlibname status {errcode ""} {errmsg ""}} {
 	    ::Login::SetStatus
 
 	    set jid [::Jabber::GetMyJid]
-	    ::UI::MessageBox -icon info -type ok -message [mc jamessregloginok $jid]
+	    ui::dialog -icon info -type ok -message [mc jamessregloginok $jid]
 	    $jlibname connect free
 	}
 	error {
 	    set str [mc xmpp-stanzas-short-$errcode]
-	    ::UI::MessageBox -icon error -type ok -title [mc Error] -message $str
+	    ui::dialog -icon error -type ok -title [mc Error] -message $str
 	    $jlibname connect free
 	}
 	default {
