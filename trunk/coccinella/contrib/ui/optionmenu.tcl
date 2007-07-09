@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005-2007 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.14 2007-04-03 14:11:12 matben Exp $
+# $Id: optionmenu.tcl,v 1.15 2007-07-09 14:04:09 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -49,6 +49,7 @@ snit::widgetadaptor ui::optionmenu::widget {
 	menu $m -tearoff 0
 	set maxLen 0
 	set nameVar [lindex $options(-menulist) 0 0]
+	set longest ""
 	
 	# Build the menu.
 
@@ -82,6 +83,9 @@ snit::widgetadaptor ui::optionmenu::widget {
 		eval {$m add radiobutton -label $name -variable [myvar menuValue] \
 		  -command [list $self Command] -compound left} [array get opts]
 	    }
+	}
+	if {![info exists firstValue]} {
+	    set firstValue ""
 	}
 	set value $firstValue
 	set menuValue $firstValue
