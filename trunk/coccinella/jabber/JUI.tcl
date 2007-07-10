@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.166 2007-07-09 13:16:31 matben Exp $
+# $Id: JUI.tcl,v 1.167 2007-07-10 14:01:17 matben Exp $
 
 package provide JUI 1.0
 
@@ -890,7 +890,6 @@ proc ::JUI::FilePostCommand {wmenu} {
 proc ::JUI::EditPostCommand {wmenu} {
     
     foreach {mkey mstate} [::UI::GenericCCPMenuStates] {
-	puts "$mkey $mstate"
 	::UI::MenuMethod $wmenu entryconfigure $mkey -state $mstate
     }	
     ::UI::MenuMethod $wmenu entryconfigure mFind -state disabled

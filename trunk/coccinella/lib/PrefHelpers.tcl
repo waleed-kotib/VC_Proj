@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2007  Mats Bengtsson
 #  
-# $Id: PrefHelpers.tcl,v 1.1 2007-03-15 13:17:12 matben Exp $
+# $Id: PrefHelpers.tcl,v 1.2 2007-07-10 14:01:17 matben Exp $
  
 package provide PrefHelpers 1.0
 
@@ -91,7 +91,7 @@ proc ::PrefHelpers::BuildPage {wpage} {
     ttk::frame $wc -padding $padding
     pack $wc -side top -anchor $anchor
 
-    ttk::label $wc.l -text "External Helpers"
+    ttk::label $wc.l -text [mc {External Helpers}]
     ttk::separator $wc.s -orient horizontal
     ttk::frame $wc.f -padding {20 4 0 0}
     
@@ -101,10 +101,10 @@ proc ::PrefHelpers::BuildPage {wpage} {
     grid columnconfigure $wc 1 -weight 1
     
     set f $wc.f
-    ttk::label $f.lbrowser -text "Default Browser:"
+    ttk::label $f.lbrowser -text [mc {Default Browser:}]
     ui::optionmenu $f.mbrowser -menulist $menuBrowsers \
       -variable [namespace current]::tmp(webBrowser)
-    ttk::label $f.lmail -text "Default Mail Client:"
+    ttk::label $f.lmail -text [mc {Default Mail Client:}]
     ui::optionmenu $f.mmail -menulist $menuMail \
       -variable [namespace current]::tmp(mailClient)
     
