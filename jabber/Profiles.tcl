@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2007  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.72 2007-07-06 13:54:18 matben Exp $
+# $Id: Profiles.tcl,v 1.73 2007-07-10 14:01:17 matben Exp $
 
 package provide Profiles 1.0
 
@@ -465,6 +465,25 @@ proc ::Profiles::GetList { } {
     }
 }
 
+# Profiles::SortList --
+# 
+#       In order to do direct comparisons the option parts must be sorted.
+
+proc ::Profiles::SortList {plist} {
+    
+    set sorted [list]
+    foreach {name spec} $plist {
+	array unset specA
+	array set specA [lrange $spec 3 end]
+	set opts [list]
+	foreach key [lsort [array names specA]] {
+	    lappend opts $key $specA($key)
+	}
+	lappend sorted $name [concat [lrange $spec 0 2] $opts]
+    }
+    return $sorted
+}
+
 proc ::Profiles::SetList {_profiles} {
     variable profiles
     
@@ -798,9 +817,11 @@ proc ::Profiles::CancelHook { } {
 	    ::Preferences::HasChanged
 	    return
 	}
-	array set profA [GetList]
-	array set prefA [FrameGetProfiles $wprefspage]
+	array set profA [SortList [GetList]]
+	array set prefA [SortList [FrameGetProfiles $wprefspage]]
 	if {![arraysequal prefA profA]} {
+	    #parray profA
+	    #parray prefA
 	    ::Preferences::HasChanged
 	}
     }
@@ -1004,9 +1025,10 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	# @@@ TODO
 	grid  $wui.lpop   $wui.pop    -sticky e -pady 2
 	grid  $wui.ljid   $wui.ejid   -sticky e -pady 2
+	grid  $wui.lpass  $wui.epass  -sticky e -pady 2
 	grid  $wui.lnick  $wui.enick  -sticky e -pady 2
 
-	grid  $wui.pop  $wui.ejid  $wui.enick -sticky ew
+	grid  $wui.pop  $wui.ejid  $wui.epass  $wui.enick -sticky ew
 
 	set wuserinfofocus $wui.ejid
     } elseif {$config(profiles,style) eq "parts"} {
