@@ -820,7 +820,7 @@
 ::msgcat::mcset en messblockbadjid	{The JID "%s" is not well formed. Do you want to add it anyway?}
 ::msgcat::mcset en messfieldsmissing	{One or more fields are missing. Try again or cancel.}
 ::msgcat::mcset en messrmstandardfonts	{The standard fonts, Times, Helvetica, and Courier, may not be removed}
-::msgcat::mcset en messprefschanged	{The preferences have changed. Do you want to cancel anyway?}
+::msgcat::mcset en messprefschanged	{The preferences have been changed. Do you want to cancel anyway?}
 ::msgcat::mcset en messerrpreffile	{Error opening file %s.}
 ::msgcat::mcset en messfailserver	{Couldn't start server socket. Perhaps you are not connected.}
 ::msgcat::mcset en messopenhelpfile	{You are about to open a helpfile in the canvas thereby erasing the present stuff. Do you want this to happen?}
