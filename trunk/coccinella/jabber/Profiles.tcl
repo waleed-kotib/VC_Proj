@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2007  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.73 2007-07-10 14:01:17 matben Exp $
+# $Id: Profiles.tcl,v 1.74 2007-07-11 06:28:20 matben Exp $
 
 package provide Profiles 1.0
 
@@ -1458,7 +1458,9 @@ proc ::Profiles::FrameGetProfiles {w} {
 	set p $state(prof,$name,password)
 	set plist [list $s $u $p]
 	if {$config(profiles,style) eq "jid"} {
-	    lappend plist -resource $resource
+	    if {[string length $resource]} {
+		lappend plist -resource $resource
+	    }
 	}
 	
 	# Set the optional options as "-key value ...". Sorted!
