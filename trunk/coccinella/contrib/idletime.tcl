@@ -5,7 +5,7 @@
 #  Copyright (c) 2007
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: idletime.tcl,v 1.1 2007-07-11 12:58:38 matben Exp $
+#  $Id: idletime.tcl,v 1.2 2007-07-12 07:05:11 matben Exp $
 
 package provide idletime 1.0
 
@@ -13,7 +13,9 @@ namespace eval ::idletime {
 
     variable lastmouse [winfo pointerxy .]
     variable state
-    variable pollms 5000
+    
+    # Keep a 2 secs resolution which should be enough for autoaway.
+    variable pollms 2000
     variable tclidlems 0
     variable inactiveProc
     
@@ -31,11 +33,15 @@ namespace eval ::idletime {
 			set inactiveProc {carbon::inactive}			
 		    }
 		} else {
-		    # TODO
+		    if {![catch {package require tkinactive}]} {
+			set inactiveProc tkinactive
+		    }
 		}
 	    }
 	    windows {
-		# TODO
+		if {![catch {package require tkinactive}]} {
+		    set inactiveProc tkinactive
+		}
 	    }
 	}
     } else {
