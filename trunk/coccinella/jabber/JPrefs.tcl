@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.47 2007-05-22 09:18:17 matben Exp $
+# $Id: JPrefs.tcl,v 1.48 2007-07-13 15:14:40 matben Exp $
 
 package require ui::fontselector
 
@@ -29,16 +29,7 @@ proc ::JPrefs::InitPrefsHook { } {
     
     # Defaults...
     set prefs(opacity) 100.0
-    
-    # Auto away page:
-    set jprefs(autoaway)     0
-    set jprefs(xautoaway)    0
-    set jprefs(awaymin)      0
-    set jprefs(xawaymin)     0
-    set jprefs(awaymsg)      ""
-    set jprefs(xawaymsg)     [mc prefuserinactive]
-    set jprefs(logoutStatus) ""
-        
+            
     # Save inbox when quit?
     set jprefs(inboxSave) 0
     
@@ -61,16 +52,7 @@ proc ::JPrefs::InitPrefsHook { } {
     
     set jprefs(rememberDialogs) 0
 
-    ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(autoaway)         jprefs_autoaway          $jprefs(autoaway)]  \
-      [list ::Jabber::jprefs(xautoaway)        jprefs_xautoaway         $jprefs(xautoaway)]  \
-      [list ::Jabber::jprefs(awaymin)          jprefs_awaymin           $jprefs(awaymin)]  \
-      [list ::Jabber::jprefs(xawaymin)         jprefs_xawaymin          $jprefs(xawaymin)]  \
-      [list ::Jabber::jprefs(awaymsg)          jprefs_awaymsg           $jprefs(awaymsg)]  \
-      [list ::Jabber::jprefs(xawaymsg)         jprefs_xawaymsg          $jprefs(xawaymsg)]  \
-      [list ::Jabber::jprefs(logoutStatus)     jprefs_logoutStatus      $jprefs(logoutStatus)]  \
-      ]
-    
+
     # Personal info page:
     # List all iq:register personal info elements.
     set jprefs(iqRegisterElem)   \
@@ -118,15 +100,9 @@ proc ::JPrefs::InitPrefsHook { } {
 
 proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
         
-    ::Preferences::NewTableItem {Jabber {Auto Away}} [mc {Auto Away}]
     ::Preferences::NewTableItem {Jabber Appearance} [mc Appearance]
     ::Preferences::NewTableItem {Jabber Customization} [mc Customization]
-    
-    # Auto Away page -------------------------------------------------------
-    set wpage [$nbframe page {Auto Away}]
-    
-    ::JPrefs::BuildAutoAwayPage $wpage
- 	    
+     	    
     # Appearance page -------------------------------------------------------
     set wpage [$nbframe page {Appearance}]    
     ::JPrefs::BuildAppearancePage $wpage
@@ -136,83 +112,6 @@ proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
     ::JPrefs::BuildCustomPage $wpage
     
     bind <Destroy> $nbframe +::JPrefs::DestroyPrefsHook
-}
-
-proc ::JPrefs::BuildAutoAwayPage {page} {
-    upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
-    
-    foreach key {autoaway awaymin xautoaway xawaymin awaymsg xawaymsg \
-      logoutStatus} {
-	set tmpJPrefs($key) $jprefs($key)
-    }
-    
-    set wc $page.c
-    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
-    pack $wc -side top -anchor [option get . dialogAnchor {}]
-
-    # Auto away stuff.
-    set waf $wc.fm
-    set was $wc.fs
-
-    ttk::label $wc.lab -text [mc prefaaset]
-    ttk::frame $waf
-    ttk::checkbutton $waf.lminaw -text [mc prefminaw]  \
-      -variable [namespace current]::tmpJPrefs(autoaway)
-    ttk::entry $waf.eminaw -font CociSmallFont  \
-      -width 3  \
-      -validate key -validatecommand {::Utils::ValidMinutes %S} \
-      -textvariable [namespace current]::tmpJPrefs(awaymin)
-    ttk::checkbutton $waf.lminxa -text [mc prefminea]  \
-      -variable [namespace current]::tmpJPrefs(xautoaway)
-    ttk::entry $waf.eminxa -font CociSmallFont \
-      -width 3  \
-      -validate key -validatecommand {::Utils::ValidMinutes %S} \
-      -textvariable [namespace current]::tmpJPrefs(xawaymin)
-
-    grid  $waf.lminaw  $waf.eminaw  -sticky w -pady 1
-    grid  $waf.lminxa  $waf.eminxa  -sticky w -pady 1
-
-    ttk::frame $was
-    ttk::label $was.lawmsg -text "[mc {Away status}]:"
-    ttk::entry $was.eawmsg -font CociSmallFont \
-      -width 32  \
-      -textvariable [namespace current]::tmpJPrefs(awaymsg)
-    ttk::label $was.lxa -text "[mc {Extended Away status}]:"
-    ttk::entry $was.examsg -font CociSmallFont \
-      -width 32  \
-      -textvariable [namespace current]::tmpJPrefs(xawaymsg)
-    
-    grid  $was.lawmsg  $was.eawmsg  -sticky e -pady 1
-    grid  $was.lxa     $was.examsg  -sticky e -pady 1
-
-    pack  $wc.lab  $waf  $was  -side top -anchor w
-}
-
-# JPrefs::UpdateAutoAwaySettings --
-#
-#       If changed present auto away settings, may need to configure
-#       our jabber object.
-
-proc ::JPrefs::UpdateAutoAwaySettings { } { 
-    global  prefs
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-           
-    set opts {}
-    if {$jprefs(autoaway) && [string is integer -strict $jprefs(awaymin)]} {
-	lappend opts -autoawaymins $jprefs(awaymin)
-    } else {
-	lappend opts -autoawaymins 0
-    }
-    lappend opts -awaymsg $jprefs(awaymsg)
-    if {$jprefs(xautoaway) && [string is integer -strict $jprefs(xawaymin)]} {
-	lappend opts -xautoawaymins $jprefs(xawaymin)
-    } else {
-	lappend opts -xautoawaymins 0
-    }
-    lappend opts -xawaymsg $jprefs(xawaymsg)
-    eval {$jstate(jlib) config} $opts
 }
 
 proc ::JPrefs::BuildAppearancePage {page} {
@@ -508,9 +407,6 @@ proc ::JPrefs::SavePrefsHook { } {
     
     array set jprefs [array get tmpJPrefs]
     array set prefs  [array get tmpPrefs]
-    
-    # If changed present auto away settings, may need to reconfigure.
-    ::JPrefs::UpdateAutoAwaySettings    
 
     # Roster background image.
     if {$newBackground} {

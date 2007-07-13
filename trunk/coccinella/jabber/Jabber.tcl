@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.210 2007-06-28 06:14:20 matben Exp $
+# $Id: Jabber.tcl,v 1.211 2007-07-13 15:14:40 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -33,6 +33,7 @@ package require jlib::vcard
 
 # We should have some component mechanism that lets packages load themselves.
 package require Adhoc
+package require AutoAway
 package require Avatar
 package require AvatarMB
 package require Chat
@@ -477,14 +478,7 @@ proc ::Jabber::Init { } {
     
     ::Debug 2 "::Jabber::Init"
         
-    # Check if we need to set any auto away options.
-    set opts {}
-    if {$jprefs(autoaway) && ($jprefs(awaymin) > 0)} {
-	lappend opts -autoawaymins $jprefs(awaymin) -awaymsg $jprefs(awaymsg)
-    }
-    if {$jprefs(xautoaway) && ($jprefs(xawaymin) > 0)} {
-	lappend opts -xautoawaymins $jprefs(xawaymin) -xawaymsg $jprefs(xawaymsg)
-    }
+    set opts [list]
     
     # Add the three element callbacks.
     lappend opts  \
@@ -887,11 +881,6 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    SetClosedState
 	    ::UI::MessageBox -icon error -type ok -message [mc jamessconnbroken]
 	}
-	away - xa {
-	    set jstate(show) $what
-	    ::hooks::run setPresenceHook $what
-	    #after idle ::Jabber::AutoAway
-	}
 	streamerror - xmpp-streams-error* {
 	    DoCloseClientConnection
 	    if {[info exists argsA(-errormsg)]} {
@@ -936,17 +925,6 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	}
     }
     return $ishandled
-}
-
-proc ::Jabber::AutoAway {} {
-    
-    # This is a naive try to avoid that the modal dialog blocks. BAD!!!
-    set tm [clock format [clock seconds] -format "%H:%M:%S"]
-    set ans [::UI::MessageBox -icon info -type yesno -default yes \
-      -message [mc jamessautoawayset $tm]]
-    if {$ans eq "yes"} {
-	SetStatus available
-    }
 }
 
 # Jabber::DebugCmd --
