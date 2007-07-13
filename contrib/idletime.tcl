@@ -5,7 +5,7 @@
 #  Copyright (c) 2007
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: idletime.tcl,v 1.2 2007-07-12 07:05:11 matben Exp $
+#  $Id: idletime.tcl,v 1.3 2007-07-13 15:14:40 matben Exp $
 
 package provide idletime 1.0
 
@@ -58,6 +58,17 @@ proc ::idletime::init {} {
     poll
 }
 
+proc ::idletime::stop {} {
+    variable afterID
+
+    foreach key {poll tcl} {
+	if {[info exists afterID($key)]} {
+	    after cancel $afterID($key)
+	    unset afterID($key)
+	}
+    }
+}
+
 proc ::idletime::add {procName secs} {
     variable state
     variable shot
@@ -79,10 +90,9 @@ proc ::idletime::poll {} {
     variable shot
     variable pollms
     variable inactiveProc
+    variable afterID
     
     set idlesecs [expr {[eval $inactiveProc]/1000}]
-    
-    #puts "::idletime::poll idlesecs=$idlesecs"
     
     foreach {name secs} [array get state] {
 	if {$idlesecs >= $secs} {
@@ -99,7 +109,7 @@ proc ::idletime::poll {} {
 	    }
 	}
     }    
-    after $pollms [namespace code poll]
+    set afterID(poll) [after $pollms [namespace code poll]]
 }
 
 # Pure tcl implementation that handles mouse moves only.
@@ -113,16 +123,16 @@ proc ::idletime::tcltimer {} {
     variable lastmouse
     variable pollms
     variable tclidlems
+    variable afterID
     
     set mouse [winfo pointerxy .]
-    #puts "mouse=$mouse, lastmouse=$lastmouse"
     if {$mouse eq $lastmouse} {
 	incr tclidlems $pollms
     } else {
 	set tclidlems 0
     }
     set lastmouse $mouse
-    after $pollms [namespace code tcltimer]
+    set afterID(tcl) [after $pollms [namespace code tcltimer]]
 }
 
 # idletime::AquaIdleTime --

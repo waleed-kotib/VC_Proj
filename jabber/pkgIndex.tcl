@@ -10,6 +10,7 @@
 
 package ifneeded Adhoc      1.0 [list source [file join $dir Adhoc.tcl]]
 package ifneeded Avatar     1.0 [list source [file join $dir Avatar.tcl]]
+package ifneeded AutoAway   1.0 [list source [file join $dir AutoAway.tcl]]
 package ifneeded AvatarMB   1.0 [list source [file join $dir AvatarMB.tcl]]
 package ifneeded Chat       1.0 [list source [file join $dir Chat.tcl]]
 package ifneeded Create     1.0 [list source [file join $dir Create.tcl]]

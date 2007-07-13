@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.175 2007-05-17 14:42:16 matben Exp $
+# $Id: jabberlib.tcl,v 1.176 2007-07-13 15:14:40 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -532,6 +532,8 @@ proc jlib::config {jlibname args} {
 	array set argsA $args
 	
 	# Reschedule auto away only if changed. Before setting new opts!
+	# Better to use 'tk inactive' or 'tkinactive' and handle this on
+	# application level.
 	if {[info exists argsA(-autoawaymins)] &&  \
 	  ($argsA(-autoawaymins) != $opts(-autoawaymins))} {
 	    schedule_auto_away $jlibname
@@ -3567,6 +3569,8 @@ proc jlib::schedule_keepalive {jlibname} {
 # jlib::schedule_auto_away, cancel_auto_away, auto_away_cmd
 #
 #       Procedures for auto away things.
+#       Better to use 'tk inactive' or 'tkinactive' and handle this on
+#       application level.
 
 proc jlib::schedule_auto_away {jlibname} {       
 
@@ -3601,6 +3605,8 @@ proc jlib::cancel_auto_away {jlibname} {
 # jlib::auto_away_cmd --
 # 
 #       what:       "away", or "xaway"
+#       
+#       @@@ Replaced by idletime and AutoAway
 
 proc jlib::auto_away_cmd {jlibname what} {      
 
