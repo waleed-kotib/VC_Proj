@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.176 2007-07-13 15:14:40 matben Exp $
+# $Id: jabberlib.tcl,v 1.177 2007-07-15 07:55:38 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3755,11 +3755,47 @@ proc jlib::UnicodeListToRE {ulist} {
     return [subst $str]
 }
 
+# jlib::MakeHexHexEscList --
+# 
+#       Takes a list of characters and transforms them to their hexhex form.
+#       Used by: XEP-0106: JID Escaping
+
+proc jlib::MakeHexHexEscList {clist} {
+    
+    set hexlist [list]
+    foreach c $clist {
+	scan $c %c n
+	lappend hexlist [format %x $n]
+    }
+    return $hexlist
+}
+
+proc jlib::MakeHexHexCharMap {clist} {
+    
+    set map [list]
+    foreach c $clist h [MakeHexHexEscList $clist] {
+	lappend map $c \\$h
+    }
+    return $map
+}
+
+proc jlib::MakeHexHexInvCharMap {clist} {
+    
+    set map [list]
+    foreach c $clist h [MakeHexHexEscList $clist] {
+	lappend map \\$h $c
+    }
+    return $map
+}
+
 namespace eval jlib {
     
     # Characters that need to be escaped since non valid.
-    #       XEP-0106: JID Escaping  seems still alive.
-    variable jidesc { "#\&'/:<>@}
+    #       XEP-0106: JID Escaping
+    variable jidEsc { "\&'/:<>@\\}
+    variable jidEscL {" " \" \& ' / : < > @ \\}
+    variable jidEscMap [MakeHexHexCharMap $jidEscL]
+    variable jidEscInvMap [MakeHexHexInvCharMap $jidEscL]
     
     # Prohibited ASCII characters.
     set asciiC12C22 {\x00-\x1f\x80-\x9f\x7f\xa0}
@@ -4110,51 +4146,44 @@ proc jlib::MapStr {str } {
     # TODO
 }
 
-# jlib::encodeusername, decodeusername, decodejid --
+# jlib::escapestr, unescapestr, escapejid, unescapejid --
 # 
-#       Jid escaping.
-#       XEP-0106 EXPERIMENTAL!
+#       XEP-0106: JID Escaping 
+#       NB1: 'escapstr' and 'unescapstr' must only be applied to the node 
+#            part of a JID.
+#       NB2: 'escapstr' must never be applied twice!
 
-proc jlib::encodeusername {username} {    
-    variable jidesc
-    
-    set str $username
-    set ndx 0
-    while {[regexp -start $ndx -indices -- "\[$jidesc\]" $str r]} {
-	set ndx [lindex $r 0]
-	scan [string index $str $ndx] %c chr
-	set rep "#[format %.2x $chr];"
-	set str [string replace $str $ndx $ndx $rep]
-	incr ndx 3
-    }
-    return $str
+proc jlib::escapestr {str} {    
+    variable jidEscMap
+    return [string map $jidEscMap $str]
 }
 
-proc jlib::decodeusername {username} {
-    
-    # Be sure that only the specific characters are being decoded.
-    foreach sub {{#(20);} {#(22);} {#(23);} {#(26);} {#(27);} {#(2f);}  \
-      {#(3a);} {#(3c);} {#(3e);} {#(40);}} {
-	regsub -all $sub $username {[format %c 0x\1]} username
-    }	
-    return [subst $username]
+proc jlib::unescapestr {str} {
+    variable jidEscInvMap    
+    return [string map $jidEscInvMap $str]
 }
 
-proc jlib::decodejid {jid} {
-    
-    set jidlist [split $jid @]
-    if {[llength $jidlist] == 2} {
-	return "[decodeusername [lindex $jidlist 0]]@[lindex $jidlist 1]"
+proc jlib::escapejid {jid} {
+  
+    # Node part:
+    set idx [string first @ $jid]
+    if {$idx > 0} {
+	set node [string range $jid 0 [expr {$idx-1}]]
+	set rest [string range $jid [expr {$idx+1}] end]
+	return [escapestr $node]@$rest
     } else {
 	return $jid
     }
 }
 
-proc jlib::getdisplayusername {jid} {
-
-    set jidlist [split $jid @]
-    if {[llength $jidlist] == 2} {
-	return [decodeusername [lindex $jidlist 0]]
+proc jlib::unescapejid {jid} {
+  
+    # Node part:
+    set idx [string first @ $jid]
+    if {$idx > 0} {
+	set node [string range $jid 0 [expr {$idx-1}]]
+	set rest [string range $jid [expr {$idx+1}] end]
+	return [unescapestr $node]@$rest
     } else {
 	return $jid
     }
