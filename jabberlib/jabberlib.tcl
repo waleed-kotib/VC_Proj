@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.177 2007-07-15 07:55:38 matben Exp $
+# $Id: jabberlib.tcl,v 1.178 2007-07-16 13:23:49 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3793,9 +3793,8 @@ namespace eval jlib {
     # Characters that need to be escaped since non valid.
     #       XEP-0106: JID Escaping
     variable jidEsc { "\&'/:<>@\\}
-    variable jidEscL {" " \" \& ' / : < > @ \\}
-    variable jidEscMap [MakeHexHexCharMap $jidEscL]
-    variable jidEscInvMap [MakeHexHexInvCharMap $jidEscL]
+    variable jidEscMap [MakeHexHexCharMap [split $jidEsc ""]]
+    variable jidEscInvMap [MakeHexHexInvCharMap [split $jidEsc ""]]
     
     # Prohibited ASCII characters.
     set asciiC12C22 {\x00-\x1f\x80-\x9f\x7f\xa0}

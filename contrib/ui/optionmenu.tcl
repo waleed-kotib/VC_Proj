@@ -4,7 +4,7 @@
 # 
 # Copyright (c) 2005-2007 Mats Bengtsson
 #       
-# $Id: optionmenu.tcl,v 1.15 2007-07-09 14:04:09 matben Exp $
+# $Id: optionmenu.tcl,v 1.16 2007-07-16 13:23:49 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -37,20 +37,81 @@ snit::widgetadaptor ui::optionmenu::widget {
     delegate method * to hull
     
     option -command  -default {}
-    option -menulist -default {}
+    option -menulist -default {} -configuremethod OnConfigMenulist
     option -variable
     
     constructor {args} {
 	from args -textvariable
 	installhull using ttk::menubutton
-	$self configurelist $args
-	
+	set menuValue ""
 	set m $win.menu
 	menu $m -tearoff 0
+
+	$self configurelist $args
+	
+	
+	# If the variable exists must set our own nameVar.
+	if {[info exists $options(-variable)]} {
+	    set value [set $options(-variable)]
+	    if {[info exists val2name($value)]} {
+		set menuValue $value
+		set nameVar $val2name($value)
+	    }
+	}
+	
+	# If variable is changed must update us.
+	if {$options(-variable) ne ""} {
+	    trace add variable $options(-variable) write [list $self Trace]
+	}
+
+	$win configure -textvariable [myvar nameVar] -menu $m -compound left
+	if {[info exists val2im($menuValue)]} {
+	    $win configure -image $val2im($menuValue)
+	}
+	return
+    }
+    
+    destructor {
+	if {$options(-variable) ne ""} {
+	    trace remove variable $options(-variable) write [list $self Trace]
+	}
+    }
+    
+    method Command {} {
+	set nameVar $val2name($menuValue)
+	if {[info exists val2im($menuValue)]} {
+	    $win configure -image $val2im($menuValue)
+	}
+	if {$options(-variable) ne ""} {
+	    uplevel #0 [list set $options(-variable) $menuValue]
+	}
+	if {$options(-command) ne ""} {
+	    uplevel #0 $options(-command) [list $menuValue]
+	}
+    }
+    
+    method Trace {varName index op} {
+	if {[info exists $options(-variable)]} {
+	    set value [set $options(-variable)]
+	    set menuValue $value
+	    set nameVar $val2name($value)
+	}
+    }
+    
+    method OnConfigMenulist {option value} {
+	set options($option) $value
+	$self BuildMenuList
+    }
+    
+    method BuildMenuList {} {
+	set m $win.menu
+	destroy $m
+	menu $m -tearoff 0
+
 	set maxLen 0
 	set nameVar [lindex $options(-menulist) 0 0]
 	set longest ""
-	
+
 	# Build the menu.
 
 	foreach mdef $options(-menulist) {
@@ -87,55 +148,8 @@ snit::widgetadaptor ui::optionmenu::widget {
 	if {![info exists firstValue]} {
 	    set firstValue ""
 	}
-	set value $firstValue
 	set menuValue $firstValue
 	
-	# If the variable exists must set our own nameVar.
-	if {[info exists $options(-variable)]} {
-	    set value [set $options(-variable)]
-	    if {[info exists val2name($value)]} {
-		set menuValue $value
-		set nameVar $val2name($value)
-	    }
-	}
-	
-	# If variable is changed must update us.
-	if {$options(-variable) ne ""} {
-	    trace add variable $options(-variable) write [list $self Trace]
-	}
-
-	$win configure -textvariable [myvar nameVar] -menu $m -compound left
-	if {[info exists val2im($value)]} {
-	    $win configure -image $val2im($value)
-	}
-	return
-    }
-    
-    destructor {
-	if {$options(-variable) ne ""} {
-	    trace remove variable $options(-variable) write [list $self Trace]
-	}
-    }
-    
-    method Command {} {
-	set nameVar $val2name($menuValue)
-	if {[info exists val2im($menuValue)]} {
-	    $win configure -image $val2im($menuValue)
-	}
-	if {$options(-variable) ne ""} {
-	    uplevel #0 [list set $options(-variable) $menuValue]
-	}
-	if {$options(-command) ne ""} {
-	    uplevel #0 $options(-command) [list $menuValue]
-	}
-    }
-    
-    method Trace {varName index op} {
-	if {[info exists $options(-variable)]} {
-	    set value [set $options(-variable)]
-	    set menuValue $value
-	    set nameVar $val2name($value)
-	}
     }
     
     method set {value} {

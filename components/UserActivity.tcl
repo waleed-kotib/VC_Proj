@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #  
-#  $Id: UserActivity.tcl,v 1.1 2007-07-15 13:36:06 matben Exp $
+#  $Id: UserActivity.tcl,v 1.2 2007-07-16 13:23:49 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -13,8 +13,6 @@ package require ui::optionmenu
 namespace eval ::UserActivity {}
 
 proc ::UserActivity::Init {} {
-    
-    return
 
     component::register UserActivity "This is User Activity (XEP-0108)."
 
@@ -35,6 +33,94 @@ proc ::UserActivity::Init {} {
 
     variable menuDef
     set menuDef [list command "User Activity..." ::UserActivity::Dlg {} {}]
+    
+    variable subActivities
+    set subActivities(doing_chores) {
+	buying_groceries 
+	cleaning 
+	cooking 
+	doing_maintenance 
+	doing_the_dishes 
+	doing_the_laundry 
+	gardening 
+	running_an_errand 
+	walking_the_dog 
+    }
+    set subActivities(drinking) {
+	having_a_beer 
+	having_coffee 
+	having_tea 
+    }
+    set subActivities(eating) {
+	having_a_snack 
+	having_breakfast 
+	having_dinner 
+	having_lunch 
+    }
+    set subActivities(exercising) {
+	cycling 
+	hiking 
+	jogging 
+	playing_sports 
+	running 
+	skiing 
+	swimming 
+	working_out 
+    }
+    set subActivities(grooming) {
+	at_the_spa 
+	brushing_teeth 
+	getting_a_haircut 
+	shaving 
+	taking_a_bath 
+	taking_a_shower 
+    }
+    set subActivities(having_appointment) {}
+
+    set subActivities(inactive) {
+	day_off 
+	hanging_out 
+	on_vacation 
+	scheduled_holiday 
+	sleeping 
+    }
+    set subActivities(relaxing) {
+	gaming 
+	going_out 
+	partying 
+	reading 
+	rehearsing 
+	shopping 
+	socializing 
+	sunbathing 
+	watching_tv 
+	watching_a_movie 
+    }
+    set subActivities(talking) {
+	in_real_life 
+	on_the_phone 
+	on_video_phone 
+    }
+    set subActivities(traveling) {
+	commuting 
+	cycling 
+	driving 
+	in_a_car 
+	on_a_bus 
+	on_a_plane 
+	on_a_train 
+	on_a_trip 
+	walking 
+    }
+    set subActivities(working) {
+	coding 
+	in_a_meeting 
+	studying 
+	writing 
+    }
+    
+    variable allActivities    
+    set allActivities [lsort [array names subActivities]]
 }
 
 # UserActivity::JabberInitHook --
@@ -87,10 +173,13 @@ proc ::UserActivity::LogoutHook {} {
 }
 
 proc ::UserActivity::Dlg {} {
+    variable allActivities    
+    variable subActivities
+    variable xmlns
     
     
     set str "Set your activity that will be shown to other users."
-    set dtl "Enter the information you have available below. A minimal list contains only latitude and longitude."
+    set dtl "Select from the first button your general activity, and optionally, your specific actvity from the second button. You may also add an descriptive text"
     set w [ui::dialog -message $str -detail $dtl -icon internet \
       -buttons {ok cancel remove} -modal 1 \
       -geovariable ::prefs(winGeom,activity) \
@@ -101,10 +190,112 @@ proc ::UserActivity::Dlg {} {
     variable $w
     upvar 0 $w state
     set token [namespace current]::$w
+    
+    set state(activity) [lindex $allActivities 0]
+    set state(specific) -
+    set state(text) ""
 
+    set mDef [list]
+    foreach name $allActivities {
+	set dname [string totitle [string map {_ " "} $name]]
+	lappend mDef [list [mc $dname] -value $name]
+    }
+    ttk::label $fr.la -text "[mc General]:"
+    ui::optionmenu $fr.activity -menulist $mDef -direction flush \
+      -variable $token\(activity)
+    ttk::label $fr.ls -text "[mc Specific]:"
+    ui::optionmenu $fr.specific -direction flush \
+      -variable $token\(specific)
+    ttk::label $fr.lt -text "[mc Message]:"
+    ttk::entry $fr.text -textvariable $token\(text)
     
+    set maxw [$fr.activity maxwidth]
+
+    grid  $fr.la  $fr.activity  -sticky e -pady 1
+    grid  $fr.ls  $fr.specific  -sticky e -pady 1
+    grid  $fr.lt  $fr.text      -sticky e -pady 1
+    grid $fr.activity  $fr.specific  $fr.text  -sticky ew
+    grid columnconfigure $fr 1 -minsize $maxw
+
+    trace add variable $token\(activity) write [namespace code [list Trace $w]]
+    ConfigSpecificMenu $w $state(activity)
+        
+    # Get our own published activity and fill in.
+    set myjid2 [::Jabber::JlibCmd  myjid2]
+    set cb [namespace code [list ItemsCB $w]]
+    ::Jabber::JlibCmd pubsub items $myjid2 $xmlns(activity) -command $cb
+
+}
+
+proc ::UserActivity::ItemsCB {w type subiq args} {
+    variable $w
+    upvar 0 $w state
+    variable xmlns
     
+    if {$type eq "error"} {
+	return
+    }
+
+    puts "::UserActivity::ItemsCB"
     
+    return
+    
+    if {[winfo exists $w]} {
+	foreach itemsE [wrapper::getchildren $subiq] {
+	    set tag [wrapper::gettag $itemsE]
+	    set node [wrapper::getattribute $itemsE "node"]
+	    if {[string equal $tag "items"] && [string equal $node $xmlns(activity)]} {
+		set itemE [wrapper::getfirstchildwithtag $itemsE item]
+		set activityE [wrapper::getfirstchildwithtag $itemE activity]
+		if {![llength $activityE]} {
+		    return
+		}
+		foreach E [wrapper::getchildren $activityE] {
+		    set tag [wrapper::gettag $E]
+		    switch -- $tag {
+			text {
+			    set state(text) [wrapper::getcdata $E]
+			}
+			default {
+			    set state(activity) $tag
+			    set specificE [lindex [wrapper::getchildren $E] 0]
+			    if {[llength $specificE]} {
+				set state(specific) [wrapper::getcdata $specificE]
+			    }
+			}
+		    }
+		}
+		
+		
+	    }
+	}
+    }
+}
+
+proc ::UserActivity::Trace {w name1 name2 op} {
+    upvar $name1 var
+	
+    if {$name2 eq ""} {
+	set val $var
+    } else {
+	set val $var($name2)
+    }
+    ConfigSpecificMenu $w $val
+}
+
+proc ::UserActivity::ConfigSpecificMenu {w activity} {
+    variable subActivities
+        
+    set fr [$w clientframe]
+    
+    set mDef [list]
+    lappend mDef [list [mc None] -value "-"]
+    lappend mDef [list separator]
+    foreach name $subActivities($activity) {
+	set dname [string totitle [string map {_ " "} $name]]
+	lappend mDef [list [mc $dname] -value $name]
+    }
+    $fr.specific configure -menulist $mDef
 }
 
 proc ::UserActivity::DlgCmd {w bt} {
@@ -125,18 +316,25 @@ proc ::UserActivity::Publish {w} {
     upvar 0 $w state
     variable xmlns
     
-    # Create gelocation stanza before publish.
-    set childL [list]
-    foreach {key value} [array get state] {
-	if {[string length $value]} {
-	    lappend childL [wrapper::createtag $key -chdata $value]
-	}
+    set specificE [list]
+    if {$state(specific) ne "-"} {
+	set specificE [list [wrapper::createtag $state(specific)]]
     }
-    set activityE [wrapper::createtag "activity" \
-      -attrlist [list xml:lang [jlib::getlang]] -subtags $childL]
+    set childL [list [wrapper::createtag $state(activity) -subtags $specificE]]
+    if {[string trim $state(text)] ne ""} {
+	lappend childL [wrapper::createtag "text" \
+	  -attrlist [list xml:lang [jlib::getlang]] -chdata $state(text)]
+    }
+    set activityE [wrapper::createtag "activity" -subtags $childL]
     set itemE [wrapper::createtag item -subtags [list $activityE]]
 
     ::Jabber::JlibCmd pep publish $xmlns(activity) $itemE
+}
+
+proc ::UserActivity::Retract {w} {
+    variable xmlns
+
+    ::Jabber::JlibCmd pep retract $xmlns(activity) -notify 1
 }
 
 # UserActivity::Event --
@@ -161,8 +359,9 @@ proc ::UserActivity::Event {jlibname xmldata} {
 	    }
 
 	    set mjid [jlib::jidmap $from]
+	    set activity ""
+	    set specific ""
 	    set text ""
-	    set mood ""
 
 	    set retractE [wrapper::getfirstchildwithtag $itemsE retract]
 	    if {[llength $retractE]} {
@@ -171,35 +370,46 @@ proc ::UserActivity::Event {jlibname xmldata} {
 		set state($mjid,text) ""
 	    } else {
 		set itemE [wrapper::getfirstchildwithtag $itemsE item]
-		set moodE [wrapper::getfirstchildwithtag $itemE mood]
-		if {![llength $moodE]} {
+		set activityE [wrapper::getfirstchildwithtag $itemE activity]
+		if {![llength $activityE]} {
 		    return
 		}
-		foreach E [wrapper::getchildren $moodE] {
+		foreach E [wrapper::getchildren $activityE] {
 		    set tag [wrapper::gettag $E]
 		    switch -- $tag {
 			text {
 			    set text [wrapper::getcdata $E]
 			}
 			default {
-			    set mood $tag
+			    set activity $tag
+			    set specificE [lindex [wrapper::getchildren $E] 0]
+			    if {[llength $specificE]} {
+				set specific [wrapper::getcdata $specificE]
+			    }
 			}
 		    }
 		}
 	    
 		# Cache the result.
-		set state($mjid,mood) $mood
+		set state($mjid,activity) $activity
+		set state($mjid,specific) $specific
 		set state($mjid,text) $text
 	    
-		if {$mood eq ""} {
+		if {$activity eq ""} {
 		    set msg ""
 		} else {
-		    set msg "[mc mMood]: [mc $mood] $text"
+		    set msg "[mc Activity]: [mc $activity]"
+		    if {$specific ne ""} {
+			append msg " - $specific"
+		    }
+		    if {$text ne ""} {
+			append msg " - $text"
+		    }
 		}
 	    }
-	    ::RosterTree::BalloonRegister mood $from $msg
+	    ::RosterTree::BalloonRegister activity $from $msg
 	    
-	    ::hooks::run activityEvent $xmldata $mood $text
+	    ::hooks::run activityEvent $xmldata $activity $specific $text
 	}
     }
 }
