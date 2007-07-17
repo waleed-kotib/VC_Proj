@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #  
-#  $Id: UserActivity.tcl,v 1.2 2007-07-16 13:23:49 matben Exp $
+#  $Id: UserActivity.tcl,v 1.3 2007-07-17 12:30:37 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -27,7 +27,7 @@ proc ::UserActivity::Init {} {
     set moodNode "http://jabber.org/protocol/activity "
 
     variable xmlns
-    set xmlns(activity)        "http://jabber.org/protocol/activity "
+    set xmlns(activity)        "http://jabber.org/protocol/activity"
     set xmlns(activity+notify) "http://jabber.org/protocol/activity+notify"
     set xmlns(node_config)     "http://jabber.org/protocol/pubsub#node_config"
 
@@ -180,7 +180,7 @@ proc ::UserActivity::Dlg {} {
     
     set str "Set your activity that will be shown to other users."
     set dtl "Select from the first button your general activity, and optionally, your specific actvity from the second button. You may also add an descriptive text"
-    set w [ui::dialog -message $str -detail $dtl -icon internet \
+    set w [ui::dialog -message $str -detail $dtl -icon info \
       -buttons {ok cancel remove} -modal 1 \
       -geovariable ::prefs(winGeom,activity) \
       -title "User Activity" -command [namespace code DlgCmd]]
@@ -219,7 +219,7 @@ proc ::UserActivity::Dlg {} {
 
     trace add variable $token\(activity) write [namespace code [list Trace $w]]
     ConfigSpecificMenu $w $state(activity)
-        
+            
     # Get our own published activity and fill in.
     set myjid2 [::Jabber::JlibCmd  myjid2]
     set cb [namespace code [list ItemsCB $w]]
@@ -227,19 +227,47 @@ proc ::UserActivity::Dlg {} {
 
 }
 
+proc ::UserActivity::Trace {w name1 name2 op} {
+    variable $w
+    upvar 0 $w state
+    upvar $name1 var
+    
+    if {0} {
+	# Never managed to figure out this :-(
+	if {$name2 eq ""} {
+	    set val $var
+	} else {
+	    set val $var($name2)
+	}
+	ConfigSpecificMenu $w $val
+    }
+    ConfigSpecificMenu $w $state(activity)
+}
+
+proc ::UserActivity::ConfigSpecificMenu {w activity} {
+    variable subActivities
+        
+    set fr [$w clientframe]
+    
+    set mDef [list]
+    lappend mDef [list [mc None] -value "-"]
+    lappend mDef [list separator]
+    foreach name $subActivities($activity) {
+	set dname [string totitle [string map {_ " "} $name]]
+	lappend mDef [list [mc $dname] -value $name]
+    }
+    $fr.specific configure -menulist $mDef
+}
+
 proc ::UserActivity::ItemsCB {w type subiq args} {
     variable $w
     upvar 0 $w state
     variable xmlns
+    variable subActivities
     
     if {$type eq "error"} {
 	return
-    }
-
-    puts "::UserActivity::ItemsCB"
-    
-    return
-    
+    }    
     if {[winfo exists $w]} {
 	foreach itemsE [wrapper::getchildren $subiq] {
 	    set tag [wrapper::gettag $itemsE]
@@ -257,45 +285,28 @@ proc ::UserActivity::ItemsCB {w type subiq args} {
 			    set state(text) [wrapper::getcdata $E]
 			}
 			default {
-			    set state(activity) $tag
+			    if {![info exists subActivities($tag)]} {
+				return
+			    }
+			    set activity $tag
+			    set state(activity) $activity
 			    set specificE [lindex [wrapper::getchildren $E] 0]
 			    if {[llength $specificE]} {
-				set state(specific) [wrapper::getcdata $specificE]
+				set specific [wrapper::gettag $specificE]
+				if {[lsearch $subActivities($activity) $specific] >= 0} {
+				    set state(specific) $specific
+				} else {
+				    set state(specific) -
+				}
+			    } else {
+				set state(specific) -
 			    }
 			}
 		    }
 		}
-		
-		
 	    }
 	}
     }
-}
-
-proc ::UserActivity::Trace {w name1 name2 op} {
-    upvar $name1 var
-	
-    if {$name2 eq ""} {
-	set val $var
-    } else {
-	set val $var($name2)
-    }
-    ConfigSpecificMenu $w $val
-}
-
-proc ::UserActivity::ConfigSpecificMenu {w activity} {
-    variable subActivities
-        
-    set fr [$w clientframe]
-    
-    set mDef [list]
-    lappend mDef [list [mc None] -value "-"]
-    lappend mDef [list separator]
-    foreach name $subActivities($activity) {
-	set dname [string totitle [string map {_ " "} $name]]
-	lappend mDef [list [mc $dname] -value $name]
-    }
-    $fr.specific configure -menulist $mDef
 }
 
 proc ::UserActivity::DlgCmd {w bt} {
@@ -384,7 +395,7 @@ proc ::UserActivity::Event {jlibname xmldata} {
 			    set activity $tag
 			    set specificE [lindex [wrapper::getchildren $E] 0]
 			    if {[llength $specificE]} {
-				set specific [wrapper::getcdata $specificE]
+				set specific [wrapper::gettag $specificE]
 			    }
 			}
 		    }
@@ -398,9 +409,11 @@ proc ::UserActivity::Event {jlibname xmldata} {
 		if {$activity eq ""} {
 		    set msg ""
 		} else {
-		    set msg "[mc Activity]: [mc $activity]"
+		    set dname [string totitle [string map {_ " "} $activity]]
+		    set msg "[mc Activity]: [mc $dname]"
 		    if {$specific ne ""} {
-			append msg " - $specific"
+			set dname [string totitle [string map {_ " "} $specific]]
+			append msg " - [mc $dname]"
 		    }
 		    if {$text ne ""} {
 			append msg " - $text"
@@ -413,3 +426,5 @@ proc ::UserActivity::Event {jlibname xmldata} {
 	}
     }
 }
+
+
