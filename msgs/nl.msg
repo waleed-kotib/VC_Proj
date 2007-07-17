@@ -375,7 +375,7 @@
 ::msgcat::mcset nl mRoster/Services			{Roster/diensten}
 ::msgcat::mcset nl mMessageInbox			{Postvak in}
 ::msgcat::mcset nl mSearch				{Zoeken...}
-::msgcat::mcset nl mAddNewUser				{Nieuwe contactpersoon toevoegen...}
+::msgcat::mcset nl mAddNewUser				{Contactpersoon toevoegen...}
 ::msgcat::mcset nl mSendMessage				{Bericht verzenden...}
 ::msgcat::mcset nl mChat				{Chat...}
 ::msgcat::mcset nl mStatus				{Aanwezigheid}
@@ -479,7 +479,7 @@
 ::msgcat::mcset nl {About QuickTimeTcl}			{Over QuickTimeTcl}
 ::msgcat::mcset nl {About %s}				{Over %s}
 ::msgcat::mcset nl {Active <Return>}			{Actieve <enter>}
-::msgcat::mcset nl {Add New User}			{Nieuwe contactpersoon toevoegen}
+::msgcat::mcset nl {Add New User}			{Contactpersoon toevoegen}
 ::msgcat::mcset nl {Add permanently}			{Permanent}
 ::msgcat::mcset nl {Add Server}				{Server toevoegen}
 ::msgcat::mcset nl {Add Shortcut}			{Snelkoppeling toevoegen}
@@ -678,9 +678,7 @@
 ::msgcat::mcset nl {Save Canvas}			{Doek opslaan}
 ::msgcat::mcset nl {Save File}				{Bestand opslaan}
 ::msgcat::mcset nl {Save Message}			{Bericht opslaan}
-
-::msgcat::mcset nl {Save password}
-
+::msgcat::mcset nl {Save password}			{Wachtwoord oplsaan}
 ::msgcat::mcset nl {Scramble password}			{Wachtwoord vervormen}
 ::msgcat::mcset nl {Search results}			{Zoekresultaten}
 ::msgcat::mcset nl {Search Service}			{Zoeken}
@@ -1177,8 +1175,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jaregisterex				{Voer de naam in van de Jabber-server waarop u een account wilt aanmaken. Klik dan op de knop "Ophalen" om de vereiste gegevens op te halen. Voer de gevraagde gegevens in en maak de account aan.}
 ::msgcat::mcset nl jaloginjid				{Voer uw Jabber ID in (bv: "jantje@voorbeeld.org") of kies een profiel.}
 
-::msgcat::mcset nl jaloginjidpure           	        {Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
-
+::msgcat::mcset nl jaloginjidpure           	        {Voer uw Jabber ID in in de vorm "iemand@jabberserver.org". U moet al een account hebben op deze server.}
 ::msgcat::mcset nl jaregalready				{U bent al geregistreerd op deze dienst. Dit zijn uw huidige instellingen van uw registratie.}
 ::msgcat::mcset nl jaactiveret				{Als dit is aangevinkt, zal de enter-toets het bericht verzenden. Anders moet u ctrl/cmd + enter gebruiken.}
 ::msgcat::mcset nl jainvitegchat			{Nodig een contactpersoon uit op de chatruimte %s}
@@ -1332,8 +1329,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl mSleepy				Slaperig
 ::msgcat::mcset nl mStressed				Gestresseerd
 ::msgcat::mcset nl mWorried				Ongerust
-
 ::msgcat::mcset nl moodEvent				{Wijziging van stemming}
+::msgcat::mcset nl moodRetracted			{Ingetrokkend stemming}
 ::msgcat::mcset nl heIs					is
 ::msgcat::mcset nl because				omdat
 ::msgcat::mcset nl angry				boos
@@ -1352,7 +1349,6 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl sleepy				slaperig
 ::msgcat::mcset nl stressed				gestresseerd
 ::msgcat::mcset nl worried				ongerust
-
 ::msgcat::mcset nl moodDlg				{Stemming}
 ::msgcat::mcset nl selectCustomMood			{Stemming kiezen}
 ::msgcat::mcset nl moodMessage				{Bericht bij stemming}
