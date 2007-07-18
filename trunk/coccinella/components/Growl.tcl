@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Growl.tcl,v 1.21 2007-07-18 09:40:09 matben Exp $
+# $Id: Growl.tcl,v 1.22 2007-07-18 14:09:03 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -61,7 +61,8 @@ proc ::Growl::MessageHook {body args} {
     set xmldata $argsA(-xmldata)
     set jid [wrapper::getattribute $xmldata from]
     set jid2 [jlib::barejid $jid]
-    set title "Message From: $jid2"
+    set ujid [jlib::unescapejid $jid2]
+    set title "Message From: $ujid"
     if {[info exists argsA(-subject)]} {
 	set subject $argsA(-subject)
     } else {
@@ -82,11 +83,12 @@ proc ::Growl::ChatMessageHook {body args} {
     # -from is a 3-tier jid /resource included.
     set jid [wrapper::getattribute $xmldata from]
     set jid2 [jlib::barejid $jid]
+    set ujid [jlib::unescapejid $jid2]
     
     if {[::Chat::HaveChat $jid]} {
 	return
     }
-    set title "Message From: $jid2"
+    set title "Message From: $ujid"
     
     # Not sure if only new subjects should be added.
     # If we've got a threadid we can always geta a handle on to
@@ -149,7 +151,8 @@ proc ::Growl::FileTransferRecvHook {jid name size} {
     if {![::UI::IsAppInFront]} {
 	set title [mc {Get File}]
 	set str "[mc Size]: [::Utils::FormatBytes $size]"
-	set msg [mc jamessoobask $jid $name $str]
+	set ujid [jlib::unescapejid $jid]
+	set msg [mc jamessoobask $ujid $name $str]
 	growl post fileTransfer $title $msg $cociFile
     }
 }
@@ -169,13 +172,14 @@ proc ::Growl::MoodEventHook {xmldata mood text} {
 
     set title [mc moodEvent]
     set from [wrapper::getattribute $xmldata from]
+    set ujid [jlib::unescapejid $from]
     if {$mood ne ""} {
-	set msg "$from [mc heIs] [mc $mood]"
+	set msg "$ujid [mc heIs] [mc $mood]"
 	if {$text ne ""} {
 	    append msg " " [mc because] " " $text
 	}
     } else {
-	set msg "$from [mc moodRetracted]"
+	set msg "$ujid [mc moodRetracted]"
     }
     growl post moodEvent $title $msg $cociFile
 } 

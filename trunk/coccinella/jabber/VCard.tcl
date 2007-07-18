@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: VCard.tcl,v 1.53 2007-06-28 06:14:21 matben Exp $
+# $Id: VCard.tcl,v 1.54 2007-07-18 14:09:04 matben Exp $
 
 package provide VCard 1.0
 
@@ -205,7 +205,7 @@ proc ::VCard::Build {token} {
 	wm title $w "[mc {vCard Info}]: $djid"
     }
     set priv(vcardjid) $jid
-    set elem(jid) $jid
+    set elem(jid) [jlib::unescapejid $jid]
     
     # Global frame.
     set wall $w.fr

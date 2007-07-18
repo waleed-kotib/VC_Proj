@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.29 2007-06-28 06:14:20 matben Exp $
+# $Id: JUser.tcl,v 1.30 2007-07-18 14:09:03 matben Exp $
 
 package provide JUser 1.0
 
@@ -128,7 +128,7 @@ proc ::JUser::NewDlg {args} {
     set state(name)  ""
     set state(group) ""
     if {[info exists argsA(-jid)]} {
-	set state(jid) $argsA(-jid)
+	set state(jid) [jlib::unescapejid $argsA(-jid)]
     }
     
     # Cache state variables for the dialog.
@@ -194,7 +194,7 @@ proc ::JUser::DoAdd {token} {
     # We MUST use the bare JID else hell breaks lose.
     set state(jid) [jlib::barejid $state(jid)]
     
-    set jid   $state(jid)
+    set jid   [jlib::escapejid $state(jid)]
     set name  $state(name)
     set group $state(group)
 
@@ -281,8 +281,9 @@ proc ::JUser::SetCB {jid type queryE} {
     
     if {[string equal $type "error"]} {
 	foreach {errcode errmsg} $queryE break
-	::UI::MessageBox -icon error -type ok -message \
-	  [mc jamessfailsetnick $jid $errcode $errmsg]
+	set ujid [jlib::unescapejid $jid]
+	::UI::MessageBox -icon error -type ok \
+	  -message [mc jamessfailsetnick $ujid $errcode $errmsg]
     }	
 }
 
@@ -303,7 +304,8 @@ proc ::JUser::PresError {jlibname xmldata} {
 	if {[llength $errspec]} {
 	    set errcode [lindex $errspec 0]
 	    set errmsg  [lindex $errspec 1]
-	    set str "We received an error when (un)subscribing to $from.\
+	    set ujid [jlib::unescapejid $from]
+	    set str "We received an error when (un)subscribing to $ujid.\
 	      The error is: $errmsg ($errcode).\
 	      Do you want to remove it from your roster?"
 	    set ans [::UI::MessageBox -icon error -type yesno -message $str]
@@ -368,7 +370,8 @@ proc ::JUser::EditTransportDlg {jid} {
     set trpttype [lindex [$jlib disco types $host] 0]
     set subtype [lindex [split $trpttype /] 1]
     set typename [::Roster::GetNameFromTrpt $subtype]
-    set msg [mc jamessowntrpt $typename $jid3 $subscription]
+    set ujid [jlib::unescapejid $jid3]
+    set msg [mc jamessowntrpt $typename $ujid $subscription]
 
     ::UI::MessageBox -title [mc {Transport Info}] -type ok -message $msg \
       -icon info
@@ -389,7 +392,7 @@ proc ::JUser::EditUserDlg {jid} {
     variable $token
     upvar 0 $token state
     
-    set w $wDlgs(jrostedituser)${uid}
+    set w $wDlgs(jrostedituser)$uid
     set state(w) $w
     set state(finished) -1
     
@@ -446,13 +449,15 @@ proc ::JUser::EditUserDlg {jid} {
     set state(ngroups)     [llength $groups]
     set state(subscribe)   $subscribe
     set state(unsubscribe) $unsubscribe
+    
+    set ujid [jlib::unescapejid $jid]
     if {$istransport} {
 	jlib::splitjidex $jid node host res
 	set trpttype [lindex [$jlib disco types $host] 0]
 	set subtype [lindex [split $trpttype /] 1]
-	set msg [mc jamessowntrpt $subtype $jid $subscription]
+	set msg [mc jamessowntrpt $subtype $ujid $subscription]
     } else {
-	set msg [mc jarostset $jid]
+	set msg [mc jarostset $ujid]
     }
 
     # Global frame.

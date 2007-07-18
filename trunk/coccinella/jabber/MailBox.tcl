@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2007  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.111 2007-06-18 06:00:07 matben Exp $
+# $Id: MailBox.tcl,v 1.112 2007-07-18 14:09:04 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -724,6 +724,8 @@ proc ::MailBox::InsertRow {wtbl row i} {
     set uidmsg  [lindex $row $mailboxindex(uidmsg)]
     set secs    [clock scan $date]
     set smartdate [::Utils::SmartClockFormat $secs -showsecs 0]
+    
+    set from [jlib::unescapejid $from]
 
     set T $wtbl
     set item [$T item create -tags $uidmsg]
@@ -1077,9 +1079,9 @@ proc ::MailBox::SaveMsg { } {
     }
     set item [$T selection get]
     set from [$T item element cget $item cFrom eText -text]
-    jlib::splitjid $from jid2 res
+    set jid2 [jlib::barejid $from]
     
-    set ans [tk_getSaveFile -title {Save message} -initialfile $jid2.txt]
+    set ans [tk_getSaveFile -title [mc {Save message}] -initialfile $jid2.txt]
     if {[string length $ans]} {
 	if {[catch {open $ans w} fd]} {
 	    ::UI::MessageBox -title {Open Failed} -parent $wtbl -type ok \
@@ -1903,6 +1905,8 @@ proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
     set bodyE    [wrapper::getfirstchildwithtag $xmldata body]
     set subject [wrapper::getcdata $subjectE]
     set body    [wrapper::getcdata $bodyE]
+    
+    set from [jlib::unescapejid $from]
     
     set iswb 0
     if {[file extension $file] eq ".can"} {

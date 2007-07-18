@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.197 2007-06-28 06:14:20 matben Exp $
+# $Id: Roster.tcl,v 1.198 2007-07-18 14:09:04 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -223,7 +223,7 @@ proc ::Roster::GetDisplayName {jid} {
 	    if {$node eq ""} {
 		set name $domain
 	    } else {
-		set name $node
+		set name [jlib::unescapestr $node]
 	    }
 	}
     }

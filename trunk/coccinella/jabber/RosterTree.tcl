@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTree.tcl,v 1.54 2007-06-28 06:14:21 matben Exp $
+# $Id: RosterTree.tcl,v 1.55 2007-07-18 14:09:04 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1287,7 +1287,7 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
     set server $jstate(server)
 
     if {$istrpt} {
-	set str $jid
+	set str [jlib::unescapejid $jid]
 	if {[info exists argsA(-show)]} {
 	    set sstr [::Roster::MapShowToText $argsA(-show)]
 	    append str " ($sstr)" 
@@ -1302,9 +1302,10 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
 	    if {$str eq ""} {	
 		jlib::splitjidex $jid node domain res
 		if {$domain eq $jstate(server)} {
-		    set str $node
+		    set str [jlib::unescapestr $node]
 		} else {
-		    set str [jlib::barejid $jid]
+		    set ujid [jlib::unescapejid $jid]
+		    set str [jlib::barejid $ujid]
 		}
 	    }
 	}
@@ -1333,7 +1334,7 @@ proc ::RosterTree::Balloon {jid presence item args} {
     set mjid [jlib::jidmap $jid]
 
     # Design the balloon help window message.
-    set msg $jid
+    set msg [jlib::unescapejid $jid]
     if {[info exists argsA(-show)]} {
 	set show $argsA(-show)
     } else {

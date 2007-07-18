@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.49 2006-08-27 13:14:02 matben Exp $
+# $Id: GotMsg.tcl,v 1.50 2007-07-18 14:09:03 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -113,10 +113,11 @@ proc ::GotMsg::Show {thisMsgId} {
     
     # Use nick name.
     set rname [$jlib roster getname $jid2]
+    set ujid [jlib::unescapejid $jid]
     if {[string length $rname]} {
-	set username "$rname <${jid}>"
+	set username "$rname <$ujid>"
     } else {
-	set username $jid
+	set username $ujid
     }
     if {[jlib::jidequal $jid $jstate(mejidres)]} {
 	set show [::Jabber::GetMyStatus]
