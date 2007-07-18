@@ -3,8 +3,23 @@
 # <a href='xmpp:jid[?query]'/>
 # 
 # See: http://msdn.microsoft.com/workshop/networking/pluggable/overview/appendix_a.asp
+#
+#  Copyright (c) 2007 Mats Bengtsson
+#  
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#   
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#   
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# $Id: URIRegistry.tcl,v 1.7 2006-08-07 12:36:55 matben Exp $
+# $Id: URIRegistry.tcl,v 1.8 2007-07-18 09:40:10 matben Exp $
 
 namespace eval ::URIRegistry:: { }
 
