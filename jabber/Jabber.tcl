@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Jabber.tcl,v 1.211 2007-07-13 15:14:40 matben Exp $
+# $Id: Jabber.tcl,v 1.212 2007-07-18 14:09:03 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1154,7 +1154,6 @@ proc ::Jabber::EndSession { } {
 #       boolean: 0 if reject, 1 if accept
 
 proc ::Jabber::ValidateDomainStr {str} {
-    
     if {[catch {jlib::nameprep $str} err]} {
 	bell
 	return 0
@@ -1163,8 +1162,7 @@ proc ::Jabber::ValidateDomainStr {str} {
     }
 }
 
-proc ::Jabber::ValidateUsernameStr {str} {
-    
+proc ::Jabber::ValidateUsernameStr {str} {    
     if {[catch {jlib::nodeprep $str} err]} {
 	bell
 	return 0
@@ -1173,8 +1171,16 @@ proc ::Jabber::ValidateUsernameStr {str} {
     }
 }
 
+proc ::Jabber::ValidateUsernameStrEsc {str} {    
+    if {[catch {jlib::nodeprep [jlib::escapestr $str]} err]} {
+	bell
+	return 0
+    } else {
+	return 1
+    }
+}
+
 proc ::Jabber::ValidateResourceStr {str} {
-    
     if {[catch {jlib::resourceprep $str} err]} {
 	bell
 	return 0

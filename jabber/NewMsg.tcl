@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.85 2007-06-28 06:14:20 matben Exp $
+# $Id: NewMsg.tcl,v 1.86 2007-07-18 14:09:04 matben Exp $
 
 package require ui::entryex
 
@@ -429,18 +429,18 @@ $opts(-forwardmessage)"
     
     # We need to fill in addresses after the geometry handling!
     if {[llength $opts(-tolist)]} {
-	set jidlist $opts(-tolist)
+	set jidL $opts(-tolist)
     } elseif {$opts(-to) ne ""} {
-	set jidlist [list $opts(-to)]
+	set jidL [list $opts(-to)]
     } else {
-	set jidlist {}
+	set jidL [list]
     }
-    if {[llength $jidlist]} {
-	after 200 [list ::NewMsg::FillInAddresses $w $jidlist]
+    if {[llength $jidL]} {
+	after 200 [list ::NewMsg::FillInAddresses $w $jidL]
     }
 }
 
-proc ::NewMsg::FillInAddresses {w jidlist} {
+proc ::NewMsg::FillInAddresses {w jidL} {
     variable locals
     upvar ::Jabber::jstate jstate
     
@@ -453,14 +453,15 @@ proc ::NewMsg::FillInAddresses {w jidlist} {
     }
     set waddr $locals($w,wfrport)
     set n 1
-    foreach jid $jidlist {
+    foreach jid $jidL {
 	if {$n > 4} {
 	    NewAddrLine $w $waddr $n
 	}
 	if {$n > 1} {
 	    FillAddrLine $w $waddr $n
 	}	    
-	set locals($w,addr$n) [$jstate(jlib) getrecipientjid $jid]
+	set ujid [jlib::unescapejid [$jstate(jlib) getrecipientjid $jid]]
+	set locals($w,addr$n) $ujid
 	
 	# Set popup if transport.
 	jlib::splitjidex $jid node host res
@@ -488,7 +489,7 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     
     set locals(wpopupbase) ._[string range $wDlgs(jsendmsg) 1 end]_trpt
     
-    set jidlist [$jstate(jlib) roster getusers]
+    set jidL [$jstate(jlib) roster getusers]
     set num $locals($w,num)
     frame $wfr.f$n -bd 0
     entry $wfr.f$n.trpt -width 18 -bd 0 -highlightthickness 0 \
@@ -500,7 +501,7 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     
     set wentry $wfr.addr$n
     ui::entryex $wentry -type tk  \
-      -library $jidlist -bd 0 -highlightthickness 0 \
+      -library $jidL -bd 0 -highlightthickness 0 \
       -textvariable [namespace current]::locals($w,addr$n) -state disabled \
       -bg $bg2 -fg $fg2 -disabledbackground $bg4
     
@@ -795,11 +796,12 @@ proc ::NewMsg::DoSend {w} {
     array set oopts $locals($w,opts)
     
     # Loop through address list. 
-    set addrList {}
+    set jidL [list]
     for {set i 1} {$i <= $locals($w,addrline)} {incr i} {
 	set addr [string trim $locals($w,addr$i)]
-	if {[string length $addr] > 0} {
-	    if {![jlib::jidvalidate $addr]} {
+	set jid [jlib::escapejid $addr]
+	if {[string length $jid] > 0} {
+	    if {![jlib::jidvalidate $jid]} {
 		if {$locals($w,addrline) > 1} {
 		    set msg [mc jamessskipsendq $addr]
 		    set type yesnocancel
@@ -818,12 +820,12 @@ proc ::NewMsg::DoSend {w} {
 		    return
 		}
 	    }
-	    lappend addrList $addr
+	    lappend jidL $jid
 	}
     }
     
     # Be sure there are at least one jid.
-    if {[llength $addrList] == 0} {
+    if {[llength $jidL] == 0} {
 	::UI::MessageBox -title [mc {No Address}]  \
 	  -icon error -type ok -parent $w -message [mc jamessaddrmiss]
 	return
@@ -848,7 +850,7 @@ proc ::NewMsg::DoSend {w} {
 	}
 	
 	# Have hook for complete text.
-	if {[hooks::run sendTextNormalHook $addrList $str] eq "stop"} {	    
+	if {[hooks::run sendTextNormalHook $jidL $str] eq "stop"} {	    
 	    set stop 1
 	}
     }
@@ -857,7 +859,7 @@ proc ::NewMsg::DoSend {w} {
     }
     set jlib $jstate(jlib)
     if {!$stop} {
-	foreach jid $addrList {
+	foreach jid $jidL {
 	    set jid2 [jlib::barejid $jid]
 	    set opts2 [list]
 	    if {![$jlib roster isitem $jid2]} {

@@ -66,6 +66,7 @@ these XEPs have the form of a library or support protocol for other functions.
    0095 | Stream Initiation             | complete
    0096 | File Transfer                 | complete
    0107 | User Mood                     | complete
+   0108 | User Activity                 | complete
    0115 | Entity Capabilities           | complete; only library level
    0138 | Stream Compression            | untested; only library level
    0147 | XMPP URI Scheme Query Comp... | almost complete

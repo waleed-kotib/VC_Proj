@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2007  Mats Bengtsson
 #  
-# $Id: jabberlib.tcl,v 1.178 2007-07-16 13:23:49 matben Exp $
+# $Id: jabberlib.tcl,v 1.179 2007-07-18 14:09:04 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2305,7 +2305,7 @@ proc jlib::presence_ex_run_hook {jlibname int xmldata} {
     if {$from eq ""} {
 	set from $locals(server)
     }
-    set from2 [jlib::barejid $from]
+    set from2 [barejid $from]
     set pkey "$int,$type,$from,$from2"
             
     # Make matching in two steps, attributes and elements.
@@ -3654,7 +3654,7 @@ proc jlib::auto_away_cmd {jlibname what} {
 proc jlib::getrecipientjid {jlibname jid} {
     variable statics
     
-    set jid2 [jlib::barejid $jid]
+    set jid2 [barejid $jid]
     set isroom [[namespace current]::service::isroom $jlibname $jid2]
     if {$isroom} {
 	return $jid
@@ -4165,6 +4165,7 @@ proc jlib::unescapestr {str} {
 proc jlib::escapejid {jid} {
   
     # Node part:
+    # @@@ I think there is a protocol flaw here!!!
     set idx [string first @ $jid]
     if {$idx > 0} {
 	set node [string range $jid 0 [expr {$idx-1}]]
@@ -4178,6 +4179,7 @@ proc jlib::escapejid {jid} {
 proc jlib::unescapejid {jid} {
   
     # Node part:
+    # @@@ I think there is a protocol flaw here!!!
     set idx [string first @ $jid]
     if {$idx > 0} {
 	set node [string range $jid 0 [expr {$idx-1}]]

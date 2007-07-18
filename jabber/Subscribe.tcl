@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.34 2007-06-28 06:14:21 matben Exp $
+# $Id: Subscribe.tcl,v 1.35 2007-07-18 14:09:04 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -52,7 +52,7 @@ proc ::Subscribe::NewDlg {jid} {
     variable $token
     upvar 0 $token state
     
-    set w $wDlgs(jsubsc)${uid}
+    set w $wDlgs(jsubsc)$uid
     set state(w)        $w
     set state(jid)      $jid
     set state(finished) -1
@@ -101,7 +101,8 @@ proc ::Subscribe::NewDlg {jid} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
 
-    set str [mc jasubwant $jid]
+    set ujid [jlib::unescapejid $jid]
+    set str [mc jasubwant $ujid]
     if {!$havesubsc} {
 	append str " [mc jasubopts]"
     }

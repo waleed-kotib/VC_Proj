@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.115 2007-07-18 07:56:26 matben Exp $
+# $Id: Login.tcl,v 1.116 2007-07-18 14:09:04 matben Exp $
 
 package provide Login 1.0
 
@@ -509,7 +509,7 @@ proc ::Login::LaunchHook { } {
     if {$password eq ""} {
 	set ujid [jlib::unescapejid $jid]
 	set ans [::UI::MegaDlgMsgAndEntry  \
-	  [mc {Password}] [mc enterpassword [$ujid] "[mc Password]:" \
+	  [mc {Password}] [mc enterpassword $ujid] "[mc Password]:" \
 	  password [mc Cancel] [mc OK] -show {*}]
     }
     if {$ans eq "ok"} {

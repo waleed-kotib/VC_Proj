@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: RosterTwo.tcl,v 1.19 2007-05-05 10:42:04 matben Exp $
+# $Id: RosterTwo.tcl,v 1.20 2007-07-18 14:09:04 matben Exp $
 
 package require RosterTree
 
@@ -175,10 +175,11 @@ proc ::RosterTwo::CreateItem {jid presence args} {
     
     # Defaults:
     set name [$jlib roster getname $jid2]
+    set ujid [jlib::unescapejid $jid]
     if {$name ne ""} {
-	set jtext "$name ($jid)"
+	set jtext "$name ($ujid)"
     } else {
-	set jtext $jid
+	set jtext $ujid
     }
     set status [$jlib roster getstatus $jid]
     set since  [$jlib roster availablesince $jid]
