@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.114 2007-07-05 07:28:28 matben Exp $
+# $Id: Login.tcl,v 1.115 2007-07-18 07:56:26 matben Exp $
 
 package provide Login 1.0
 
@@ -133,7 +133,7 @@ proc ::Login::Dlg { } {
     ttk::label $frmid.luser -text "[mc Username]:" -anchor e
     ttk::entry $frmid.euser -width 22   \
       -textvariable [namespace current]::username -validate key  \
-      -validatecommand {::Jabber::ValidateUsernameStr %S}
+      -validatecommand {::Jabber::ValidateUsernameStrEsc %S}
     ttk::label $frmid.lpass -text "[mc Password]:" -anchor e
     ttk::entry $frmid.epass -width 22   \
       -textvariable [namespace current]::password -show {*} -validate key \
@@ -301,6 +301,8 @@ proc ::Login::TraceMenuVar {name key op} {
     set username $tmpProfArr($profile,username)
     set password $tmpProfArr($profile,password)
     
+    set username [jlib::unescapestr $username]
+    
     if {$config(login,more)} {
 	::Profiles::NotebookSetDefaults [namespace current]::moreOpts $server
 	
@@ -423,6 +425,7 @@ proc ::Login::DoLogin {} {
     if {($config(login,style) eq "jid") || ($config(login,style) eq "jidpure")} {
 	jlib::splitjidex $jid username server resource
     }
+    set username [jlib::escapestr $username]
     
     # Check 'server', 'username' and 'password' if acceptable.
     foreach name {server username password} {
@@ -504,8 +507,9 @@ proc ::Login::LaunchHook { } {
     set jid [jlib::joinjid $node $domain ""]
     set ans "ok"
     if {$password eq ""} {
+	set ujid [jlib::unescapejid $jid]
 	set ans [::UI::MegaDlgMsgAndEntry  \
-	  [mc {Password}] [mc enterpassword $jid] "[mc Password]:" \
+	  [mc {Password}] [mc enterpassword [$ujid] "[mc Password]:" \
 	  password [mc Cancel] [mc OK] -show {*}]
     }
     if {$ans eq "ok"} {
