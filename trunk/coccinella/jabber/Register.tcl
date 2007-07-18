@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2007  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.68 2007-07-09 12:55:45 matben Exp $
+# $Id: Register.tcl,v 1.69 2007-07-18 07:53:05 matben Exp $
 
 package provide Register 1.0
 
@@ -88,7 +88,7 @@ proc ::Register::RemoveCallback {jid jlibName type theQuery} {
     if {[string equal $type "error"]} {
 	lassign $theQuery errcode errmsg
 	ui::dialog -icon error -title [mc Unregister] -type ok  \
-	  -message [mc jamesserrunreg $jid $errcode $errmsg]
+	  -message [mc jamesserrunreg [jlib::unescapejid $jid] $errcode $errmsg]
     } else {
 	
 	# If we don't do this the server may shut us down instead.
@@ -96,7 +96,7 @@ proc ::Register::RemoveCallback {jid jlibName type theQuery} {
 	    ::Jabber::DoCloseClientConnection
 	}
 	ui::dialog -icon info -title [mc Unregister] -type ok  \
-	  -message [mc jamessokunreg $jid]
+	  -message [mc jamessokunreg [jlib::unescapejid $jid]]
     }
 }
 
@@ -320,8 +320,7 @@ proc ::RegisterEx::New {args} {
 	} state(httptoken)
     }
     
-    ::Jabber::JlibCmd connect configure \
-      -defaultresource [::Profiles::MachineResource]
+    jlib::connect::configure -defaultresource [::Profiles::MachineResource]
     
     # Wait here for a button press and window to be destroyed.
     tkwait variable $token\(finished)
@@ -580,7 +579,7 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
 	    ttk::label $wfr.l$tag -text $str -anchor e
 	    if {$tag eq "username"} {
 		ttk::entry $wfr.e$tag  -textvariable $token\(elem,$tag) \
-		  -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
+		  -validate key -validatecommand {::Jabber::ValidateUsernameStrEsc %S}
 	    } elseif {$tag eq "password"} {
 		ttk::entry $wfr.e$tag -textvariable $token\(elem,$tag) \
 		  -show {*} -validate key  \
@@ -654,6 +653,8 @@ proc ::RegisterEx::SendRegister {token} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
+    
+    ::Debug 2 "::RegisterEx::SendRegister"
 
     # Error checking.
     if {[info exists state(elem,password)]} {
@@ -667,8 +668,9 @@ proc ::RegisterEx::SendRegister {token} {
     }
     
     # Collect relevant elements.
-    set sub {}
+    set subL [list]
     foreach {key value} [array get state elem,*] {
+	set value [string trim $value]
 	if {$value eq ""} {
 	    continue
 	}
@@ -678,15 +680,19 @@ proc ::RegisterEx::SendRegister {token} {
 	    instructions - registered - password2 {
 		# empty.
 	    }
+	    username {
+		set name [jlib::escapestr $value]
+		lappend subL [wrapper::createtag $tag -chdata $name]
+	    }
 	    default {
-		lappend sub [wrapper::createtag $tag -chdata $value]
+		lappend subL [wrapper::createtag $tag -chdata $value]
 	    }
 	}
     }
     
     # We need to do it the crude way.
     set queryElem [wrapper::createtag "query" \
-      -attrlist {xmlns jabber:iq:register} -subtags $sub]
+      -attrlist {xmlns jabber:iq:register} -subtags $subL]
     $jstate(jlib) send_iq "set" [list $queryElem] \
       -to $state(-server) \
       -command [list [namespace current]::SendRegisterCB $token]
@@ -706,9 +712,11 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	return
     }
     set server   $state(-server)
-    set username $state(elem,username)
-    set password $state(elem,password)
+    set username [string trim $state(elem,username)]
+    set password [string trim $state(elem,password)]
     set resource [::Profiles::MachineResource]
+    
+    set username [jlib::escapestr $username]
 
     if {[string equal $type "error"]} {
 	set errcode [lindex $theQuery 0]
@@ -766,7 +774,8 @@ proc ::RegisterEx::AuthCB {jlibname status {errcode ""} {errmsg ""}} {
 	    ::Login::SetStatus
 
 	    set jid [::Jabber::GetMyJid]
-	    ui::dialog -icon info -type ok -message [mc jamessregloginok $jid]
+	    ui::dialog -icon info -type ok \
+	      -message [mc jamessregloginok [jlib::unescapejid $jid]]
 	    $jlibname connect free
 	}
 	error {
@@ -1039,10 +1048,12 @@ proc ::GenRegister::ResultCallback {token type subiq args} {
     set jid $state(server)
 
     if {[string equal $type "error"]} {
-	::UI::MessageBox -type ok -icon error -message \
-	  [mc jamesserrregset $jid [lindex $subiq 0] [lindex $subiq 1]]
+	::UI::MessageBox -type ok -icon error \
+	  -message [mc jamesserrregset [jlib::unescapejid $jid] \
+	  [lindex $subiq 0] [lindex $subiq 1]]
     } else {
-	::UI::MessageBox -type ok -icon info -message [mc jamessokreg $jid]
+	::UI::MessageBox -type ok -icon info \
+	  -message [mc jamessokreg [jlib::unescapejid $jid]]
     }
     
     # Time to clean up.
