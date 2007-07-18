@@ -2,9 +2,22 @@
 # 
 #       Use fsdialog on unix to replace the standard ugly ones.
 #
-#  Copyright (c) 2006 Mats Bengtsson
+#  Copyright (c) 2007 Mats Bengtsson
 #  
-#  $Id: TtkDialog.tcl,v 1.3 2006-12-15 14:12:09 matben Exp $
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#   
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#   
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#  
+#  $Id: TtkDialog.tcl,v 1.4 2007-07-18 09:40:10 matben Exp $
 
 namespace eval ::TtkDialog {
     variable scriptDir [file dirname [info script]]
