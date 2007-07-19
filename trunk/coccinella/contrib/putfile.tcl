@@ -3,8 +3,10 @@
 #	Client-side put file to remote peer for whiteboard.
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
+#  
+#  This file is distributed under BSD style license.
 #
-# $Id: putfile.tcl,v 1.6 2005-08-26 15:02:34 matben Exp $
+# $Id: putfile.tcl,v 1.7 2007-07-19 06:28:11 matben Exp $
 # 
 # USAGE ########################################################################
 #

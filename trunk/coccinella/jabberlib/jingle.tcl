@@ -7,7 +7,9 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jingle.tcl,v 1.9 2007-04-05 13:12:51 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: jingle.tcl,v 1.10 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

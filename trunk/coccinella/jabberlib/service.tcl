@@ -5,7 +5,9 @@
 #       
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.25 2007-01-20 16:26:23 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: service.tcl,v 1.26 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

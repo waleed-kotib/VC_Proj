@@ -3,8 +3,10 @@
 #       Megawidget font selector.
 # 
 # Copyright (c) 2005 Mats Bengtsson
+#  
+# This file is distributed under BSD style license.
 #       
-# $Id: fontselector.tcl,v 1.5 2006-10-02 13:52:05 matben Exp $
+# $Id: fontselector.tcl,v 1.6 2007-07-19 06:28:12 matben Exp $
 
 package require snit 1.0
 package require tile

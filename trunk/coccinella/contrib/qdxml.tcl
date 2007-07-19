@@ -8,8 +8,10 @@
 #       o entity syntax optional ending ";" ?
 #       o handle resets
 #       o error handling?
+#  
+#  This file is distributed under BSD style license.
 #       
-# $Id: qdxml.tcl,v 1.9 2007-04-21 13:26:42 matben Exp $
+# $Id: qdxml.tcl,v 1.10 2007-07-19 06:28:11 matben Exp $
 
 package provide qdxml 0.1
 

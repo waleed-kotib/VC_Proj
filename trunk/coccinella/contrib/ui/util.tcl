@@ -3,8 +3,10 @@
 #       Various utility functions internal to ui*
 # 
 # Copyright (c) 2005 Mats Bengtsson
+#  
+# This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.9 2006-10-20 09:26:49 matben Exp $
+# $Id: util.tcl,v 1.10 2007-07-19 06:28:12 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?

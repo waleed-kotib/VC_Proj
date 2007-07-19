@@ -11,7 +11,9 @@
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.25 2006-09-24 06:38:15 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: jlibsasl.tcl,v 1.26 2007-07-19 06:28:17 matben Exp $
 
 package require jlib
 package require saslmd5

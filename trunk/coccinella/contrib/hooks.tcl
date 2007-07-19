@@ -4,8 +4,10 @@
 #       for callbacks when certain events happen.
 #       
 #       Code idea from Alexey Shchepin, (and Vince Darley) Many Thanks!
+#  
+#  This file is distributed under BSD style license.
 #       
-# $Id: hooks.tcl,v 1.7 2005-12-04 13:29:11 matben Exp $
+# $Id: hooks.tcl,v 1.8 2007-07-19 06:28:11 matben Exp $
 
 package provide hooks 1.0
 

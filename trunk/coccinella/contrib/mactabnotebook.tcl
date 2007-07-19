@@ -6,9 +6,10 @@
 #      Code idee from Harrison & McLennan
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
-#  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.31 2005-08-14 06:56:45 matben Exp $
+#  This file is distributed under BSD style license.
+#  
+# $Id: mactabnotebook.tcl,v 1.32 2007-07-19 06:28:11 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

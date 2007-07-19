@@ -3,8 +3,10 @@
 #      Provides a http transport mechanism for jabberlib. 
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
+#  
+# This file is distributed under BSD style license.
 #
-# $Id: jlibhttp.tcl,v 1.14 2006-09-25 07:21:56 matben Exp $
+# $Id: jlibhttp.tcl,v 1.15 2007-07-19 06:28:17 matben Exp $
 # 
 # USAGE ########################################################################
 #

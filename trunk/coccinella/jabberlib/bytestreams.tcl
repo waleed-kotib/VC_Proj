@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: bytestreams.tcl,v 1.30 2007-05-18 07:18:35 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: bytestreams.tcl,v 1.31 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

@@ -8,7 +8,9 @@
 #  @@@ Treectrl is problematic since items come and go and are not free'd.
 #      Perhaps a callback based method instead?
 #  
-# $Id: balloonhelp.tcl,v 1.26 2007-01-27 14:59:26 matben Exp $
+#  This file is distributed under BSD style license.
+#  
+# $Id: balloonhelp.tcl,v 1.27 2007-07-19 06:28:11 matben Exp $
 
 package require treeutil
 

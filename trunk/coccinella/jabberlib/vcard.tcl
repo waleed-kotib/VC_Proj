@@ -4,8 +4,10 @@
 #      It handles vcard stuff and provides cache for it as well.
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
+# 
+# This file is distributed under BSD style license.
 #  
-# $Id: vcard.tcl,v 1.11 2006-12-21 11:23:47 matben Exp $
+# $Id: vcard.tcl,v 1.12 2007-07-19 06:28:18 matben Exp $
 # 
 ############################# USAGE ############################################
 #

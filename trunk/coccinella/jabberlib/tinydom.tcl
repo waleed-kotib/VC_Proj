@@ -5,9 +5,9 @@
 #
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
+# This file is distributed under BSD style license.
 #  
-# $Id: tinydom.tcl,v 1.12 2007-03-19 08:04:10 matben Exp $
+# $Id: tinydom.tcl,v 1.13 2007-07-19 06:28:18 matben Exp $
 
 package require xml
 

@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.18 2007-07-05 07:28:28 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: pubsub.tcl,v 1.19 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

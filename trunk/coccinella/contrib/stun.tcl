@@ -8,9 +8,10 @@
 #      It is so far limited to simple client requests.
 #      
 #  Copyright (c) 2006  Mats Bengtsson
-#  BSD-style License
 #  
-# $Id: stun.tcl,v 1.4 2006-03-09 14:52:37 matben Exp $
+#  This file is distributed under BSD style license.
+#  
+# $Id: stun.tcl,v 1.5 2007-07-19 06:28:11 matben Exp $
 
 # USAGE:
 # 

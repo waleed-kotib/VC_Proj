@@ -4,7 +4,9 @@
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.48 2007-05-17 14:42:16 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: disco.tcl,v 1.49 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

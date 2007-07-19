@@ -5,10 +5,12 @@
 #      proxy configured.
 #
 #  (c) 2007  Mats Bengtsson
+#  
+#  This file is distributed under BSD style license.
 #
 #  This source file is distributed under the BSD license.
 #  
-# $Id: autosocks.tcl,v 1.7 2007-01-18 09:06:43 matben Exp $
+# $Id: autosocks.tcl,v 1.8 2007-07-19 06:28:11 matben Exp $
 
 package provide autosocks 0.1
 

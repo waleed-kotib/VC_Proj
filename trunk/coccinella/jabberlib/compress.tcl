@@ -6,10 +6,12 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
+# This file is distributed under BSD style license.
+#  
 #  Note: with zlib 1.0 it seems that we can import zlib compression
 #        on the socket channel using zlib stream socket ... ???
 #  
-# $Id: compress.tcl,v 1.3 2006-12-01 08:55:14 matben Exp $
+# $Id: compress.tcl,v 1.4 2007-07-19 06:28:17 matben Exp $
 
 package require jlib
 package require zlib

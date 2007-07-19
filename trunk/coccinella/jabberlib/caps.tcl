@@ -22,7 +22,9 @@
 #  
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.21 2007-04-13 13:52:48 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: caps.tcl,v 1.22 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

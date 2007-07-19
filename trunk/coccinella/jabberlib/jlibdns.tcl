@@ -7,7 +7,9 @@
 #      
 #  Copyright (c) 2006  Mats Bengtsson
 #  
-# $Id: jlibdns.tcl,v 1.4 2006-12-01 08:55:14 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: jlibdns.tcl,v 1.5 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

@@ -4,8 +4,10 @@
 #       Only a convenient wrapper around ui::dialog.
 #
 # Copyright (c) 2006 Mats Bengtsson
+#  
+# This file is distributed under BSD style license.
 #       
-# $Id: megaentry.tcl,v 1.1 2006-09-12 13:28:34 matben Exp $
+# $Id: megaentry.tcl,v 1.2 2007-07-19 06:28:12 matben Exp $
 
 package require ui::dialog
 

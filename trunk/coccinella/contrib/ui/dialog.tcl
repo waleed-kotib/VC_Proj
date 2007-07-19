@@ -4,8 +4,10 @@
 #       Some code from ttk::dialog.
 #
 # Copyright (c) 2005-2007 Mats Bengtsson
+#  
+# This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.23 2007-04-08 13:41:54 matben Exp $
+# $Id: dialog.tcl,v 1.24 2007-07-19 06:28:11 matben Exp $
 
 package require snit 1.0
 package require tile

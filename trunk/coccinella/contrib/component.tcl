@@ -1,8 +1,10 @@
 # component.tcl --
 # 
 #       Provides a structure for code components.
+#  
+#  This file is distributed under BSD style license.
 #       
-# $Id: component.tcl,v 1.7 2005-12-27 14:53:55 matben Exp $
+# $Id: component.tcl,v 1.8 2007-07-19 06:28:11 matben Exp $
 
 package provide component 1.0
 

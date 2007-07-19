@@ -4,9 +4,10 @@
 #      It implements a combined label and dynamic status animation.
 #      
 #  Copyright (c) 2004  Mats Bengtsson
-#  This source file is distributed under the BSD license.
+#  
+#  This file is distributed under BSD style license.
 #
-# $Id: wavelabel.tcl,v 1.9 2005-09-19 06:37:20 matben Exp $
+# $Id: wavelabel.tcl,v 1.10 2007-07-19 06:28:11 matben Exp $
 #
 # ########################### USAGE ############################################
 #

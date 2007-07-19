@@ -3,8 +3,10 @@
 #       Progress megawidgets.
 #
 # Copyright (c) 2005 Mats Bengtsson
+#  
+# This file is distributed under BSD style license.
 #       
-# $Id: progress.tcl,v 1.9 2005-10-28 06:48:41 matben Exp $
+# $Id: progress.tcl,v 1.10 2007-07-19 06:28:12 matben Exp $
 
 package require snit 1.0
 package require tile 0.7

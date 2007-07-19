@@ -6,8 +6,10 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
+#  
+# This file is distributed under BSD style license.
 #
-# $Id: pep.tcl,v 1.7 2007-07-05 07:28:28 matben Exp $
+# $Id: pep.tcl,v 1.8 2007-07-19 06:28:17 matben Exp $
 #
 ############################# USAGE ############################################
 #

@@ -5,8 +5,10 @@
 #       It is similar to hooks, but each registered function process its
 #       input arguments and returns a result string, which is then used for
 #       next call etc.
+#  
+#  This file is distributed under BSD style license.
 #       
-# $Id: pipes.tcl,v 1.2 2005-08-26 15:02:34 matben Exp $
+# $Id: pipes.tcl,v 1.3 2007-07-19 06:28:11 matben Exp $
 
 package provide pipes 1.0
 

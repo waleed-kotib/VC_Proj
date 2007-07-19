@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: stanzaerror.tcl,v 1.7 2006-09-13 14:09:12 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: stanzaerror.tcl,v 1.8 2007-07-19 06:28:18 matben Exp $
 # 
 
 package provide stanzaerror 1.0

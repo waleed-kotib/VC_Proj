@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: si.tcl,v 1.16 2006-12-01 08:55:14 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: si.tcl,v 1.17 2007-07-19 06:28:17 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using

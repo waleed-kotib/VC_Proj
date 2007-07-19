@@ -3,9 +3,10 @@
 #       Set global idle time callbacks.
 #       
 #  Copyright (c) 2007
-#  This source file is distributed under the BSD license.
 #  
-#  $Id: idletime.tcl,v 1.3 2007-07-13 15:14:40 matben Exp $
+#  This file is distributed under BSD style license.
+#  
+#  $Id: idletime.tcl,v 1.4 2007-07-19 06:28:11 matben Exp $
 
 package provide idletime 1.0
 

@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.17 2007-01-16 08:22:57 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: jlibtls.tcl,v 1.18 2007-07-19 06:28:17 matben Exp $
 
 package require tls
 package require jlib

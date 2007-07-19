@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.20 2006-12-01 08:55:14 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: ibb.tcl,v 1.21 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

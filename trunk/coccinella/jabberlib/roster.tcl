@@ -5,7 +5,9 @@
 #
 # Copyright (c) 2001-2006  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.55 2007-06-28 06:14:21 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: roster.tcl,v 1.56 2007-07-19 06:28:17 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except

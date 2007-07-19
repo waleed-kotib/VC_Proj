@@ -4,9 +4,10 @@
 #      It implements a toolbar mega widget using tile.
 #      
 #  Copyright (c) 2005-2006  Mats Bengtsson
-#  This source file is distributed under the BSD license.
 #  
-# $Id: ttoolbar.tcl,v 1.12 2007-01-27 14:59:26 matben Exp $
+#  This file is distributed under BSD style license.
+#  
+# $Id: ttoolbar.tcl,v 1.13 2007-07-19 06:28:11 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

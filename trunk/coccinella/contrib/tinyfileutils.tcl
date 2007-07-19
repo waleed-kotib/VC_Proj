@@ -4,7 +4,9 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: tinyfileutils.tcl,v 1.7 2006-04-13 10:45:05 matben Exp $
+#  This file is distributed under BSD style license.
+#  
+# $Id: tinyfileutils.tcl,v 1.8 2007-07-19 06:28:11 matben Exp $
 
 package provide tinyfileutils 1.0
 

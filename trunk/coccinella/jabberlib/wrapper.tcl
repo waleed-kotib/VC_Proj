@@ -6,12 +6,11 @@
 # procedures are called by functions in jabberlib, and
 # they in turn call the TclXML library functions.
 #
-# Seems to be originally written by Kerem HADIMLI, with additions
-# from Todd Bradley. Completely rewritten from scratch by Mats Bengtsson.
-# The algorithm for building parse trees has been completely redesigned.
-# Only some structures and API names are kept essentially unchanged.
+#  Copyright (c) 2002-2007  Mats Bengtsson
+#  
+# This file is distributed under BSD style license.
 #
-# $Id: wrapper.tcl,v 1.34 2007-05-24 13:22:38 matben Exp $
+# $Id: wrapper.tcl,v 1.35 2007-07-19 06:28:18 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 

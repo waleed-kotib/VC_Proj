@@ -4,9 +4,9 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-#  This particular package is BSD licensed. 
+#  This file is distributed under BSD style license.
 #
-# $Id: can2svg.tcl,v 1.21 2006-06-08 13:55:05 matben Exp $
+# $Id: can2svg.tcl,v 1.22 2007-07-19 06:28:11 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
