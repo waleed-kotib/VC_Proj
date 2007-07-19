@@ -436,7 +436,7 @@
 ::msgcat::mcset nl mNormalFont				{Normaal}
 ::msgcat::mcset nl mLargerFont				{Groter}
 ::msgcat::mcset nl mLargeFont				{Grootst}
-::msgcat::mcset nl mHugeFont                            {Huge}
+::msgcat::mcset nl mHugeFont                            {Enorm}
 
 # Popups
 ::msgcat::mcset nl mMessage				{Bericht...}
@@ -679,7 +679,7 @@
 ::msgcat::mcset nl {Save Canvas}			{Doek opslaan}
 ::msgcat::mcset nl {Save File}				{Bestand opslaan}
 ::msgcat::mcset nl {Save Message}			{Bericht opslaan}
-::msgcat::mcset nl {Save password}			{Wachtwoord oplsaan}
+::msgcat::mcset nl {Save password}			{Wachtwoord opslaan}
 ::msgcat::mcset nl {Scramble password}			{Wachtwoord vervormen}
 ::msgcat::mcset nl {Search results}			{Zoekresultaten}
 ::msgcat::mcset nl {Search Service}			{Zoeken}
@@ -1331,7 +1331,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl mStressed				Gestresseerd
 ::msgcat::mcset nl mWorried				Ongerust
 ::msgcat::mcset nl moodEvent				{Wijziging van stemming}
-::msgcat::mcset nl moodRetracted			{Ingetrokkend stemming}
+::msgcat::mcset nl moodRetracted			{Ingetrokken stemming}
 ::msgcat::mcset nl heIs					is
 ::msgcat::mcset nl because				omdat
 ::msgcat::mcset nl angry				boos
