@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.194 2007-07-19 06:28:12 matben Exp $
+# $Id: GroupChat.tcl,v 1.195 2007-07-19 14:11:28 matben Exp $
 
 package require Create
 package require Enter
@@ -1388,10 +1388,11 @@ proc ::GroupChat::SetTitle {chattoken} {
 
     set name    $chatstate(roomName)
     set roomjid $chatstate(roomjid)
+    set ujid [jlib::unescapejid $roomjid]
     if {$name ne ""} {
 	set str "[mc Groupchat]: $name"
     } else {
-	set str "[mc Groupchat]: $roomjid"
+	set str "[mc Groupchat]: $ujid"
     }
 
     # Put an extra (*) in the windows title if not in focus.

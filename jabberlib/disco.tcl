@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: disco.tcl,v 1.49 2007-07-19 06:28:17 matben Exp $
+# $Id: disco.tcl,v 1.50 2007-07-19 14:11:28 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -170,11 +170,11 @@ proc jlib::disco::cmdproc {jlibname cmd args} {
 # 
 #       Components register their feature elements for disco#info.
 #       Clients must handle this using the disco handler.
-#       NB: This is only for 'basic' features not associated with a caps ext
-#           token. Those are handled by jlib::caps::register.
-#       NB: We consider everything inside jlib to be 'basic' but also client
-#           level features can be basic.
-#       NB: Features registered here MUST NEVER change within a certain version.
+#       NB1: This is only for 'basic' features not associated with a caps ext
+#            token. Those are handled by jlib::caps::register.
+#       NB2: We consider everything inside jlib to be 'basic' but also client
+#            level features can be basic.
+#       NB3: Features registered here MUST NEVER change within a certain version.
 
 proc jlib::disco::registerfeature {feature} { 
     variable features

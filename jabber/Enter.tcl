@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.11 2007-07-19 06:28:12 matben Exp $
+# $Id: Enter.tcl,v 1.12 2007-07-19 14:11:28 matben Exp $
 
 package provide Enter 1.0
 
@@ -49,17 +49,17 @@ proc ::Enter::Build {protocol args} {
     upvar ::Jabber::xmppxmlns xmppxmlns
     upvar ::Jabber::jprefs jprefs
 
-    array set argsArr {
+    array set argsA {
 	-autobrowse     0
     }
-    array set argsArr $args
+    array set argsA $args
 
     set service ""
-    if {[info exists argsArr(-roomjid)]} {
-	set roomjid $argsArr(-roomjid)
+    if {[info exists argsA(-roomjid)]} {
+	set roomjid $argsA(-roomjid)
 	jlib::splitjidex $roomjid node service -
-    } elseif {[info exists argsArr(-server)]} {
-	set service $argsArr(-server)
+    } elseif {[info exists argsA(-server)]} {
+	set service $argsA(-server)
     }
     set services [$jstate(jlib) disco getconferences]
 
@@ -133,8 +133,8 @@ proc ::Enter::Build {protocol args} {
       -command [list [namespace current]::BmarkPopup $token]
     
     # Find the default conferencing server.
-    if {[info exists argsArr(-server)]} {
-	set state(server) $argsArr(-server)
+    if {[info exists argsA(-server)]} {
+	set state(server) $argsA(-server)
     } elseif {[llength $services]} {
 	set state(server) [lindex $services 0]
     }
@@ -142,7 +142,7 @@ proc ::Enter::Build {protocol args} {
     set state(state-room)     normal
     set state(state-nickname) normal
     set state(state-password) normal
-    set state(-autobrowse)    $argsArr(-autobrowse)
+    set state(-autobrowse)    $argsA(-autobrowse)
 
     # Second menubutton: rooms for above server. Fill in below.
     # Combobox since we sometimes want to enter room manually.
@@ -174,25 +174,26 @@ proc ::Enter::Build {protocol args} {
     grid  $wbrowse  -padx 10
     grid columnconfigure $frmid 1 -weight 1
 
-    if {[info exists argsArr(-roomjid)]} {
-	jlib::splitjidex $argsArr(-roomjid) state(roomname) state(server) -
+    if {[info exists argsA(-roomjid)]} {
+	jlib::splitjidex $argsA(-roomjid) r state(server) -
+	set state(roomname) [jlib::unescapestr $r]
 	set state(state-server) disabled
 	set state(state-room)   disabled
     }
-    if {[info exists argsArr(-server)]} {
-	set state(server) $argsArr(-server)
+    if {[info exists argsA(-server)]} {
+	set state(server) $argsA(-server)
 	set state(state-server) disabled
     }
-    if {[info exists argsArr(-command)]} {
-	set state(-command) $argsArr(-command)
+    if {[info exists argsA(-command)]} {
+	set state(-command) $argsA(-command)
     }
-    if {[info exists argsArr(-nickname)]} {
-	set state(nickname) $argsArr(-nickname)
+    if {[info exists argsA(-nickname)]} {
+	set state(nickname) $argsA(-nickname)
 	set state(state-nickname) disabled
 	$frmid.enick state {disabled}
     }
-    if {[info exists argsArr(-password)]} {
-	set state(password) $argsArr(-password)
+    if {[info exists argsA(-password)]} {
+	set state(password) $argsA(-password)
 	set state(state-password) disabled
 	$frmid.epass state {disabled}
     }
@@ -245,9 +246,9 @@ proc ::Enter::Build {protocol args} {
     ::balloonhelp::balloonforwindow $wbmark [mc Bookmarks]
 
     set oldFocus [focus]
-    if {[info exists argsArr(-roomjid)]} {
+    if {[info exists argsA(-roomjid)]} {
     	focus $frmid.enick
-    } elseif {[info exists argsArr(-server)]} {
+    } elseif {[info exists argsA(-server)]} {
     	focus $frmid.eroom
     } else {
     	focus $frmid.eserv
@@ -350,7 +351,7 @@ proc ::Enter::BmarkCmd {token name jid opts} {
     array set optsArr $opts
     jlib::splitjidex $jid node domain -
     set state(server)   $domain
-    set state(roomname) $node
+    set state(roomname) [jlib::unescapestr $node]
     if {[info exists optsArr(-nick)]} {
 	set state(nickname) $optsArr(-nick)
     }
@@ -427,25 +428,23 @@ proc ::Enter::FillRoomList {token} {
     
     ::Debug 4 "::Enter::FillRoomList"
     
-    set roomList {}
+    set roomL [list]
     if {[string length $state(server)]} {
 	set allRooms [$jstate(jlib) disco children $state(server)]
 	foreach roomjid $allRooms {
-	    set idx [string first "@" $roomjid]
-	    if {$idx > 0} {
-		lappend roomList [string range $roomjid 0 [incr idx -1]]
-	    }
+	    jlib::splitjidex $roomjid node - -
+	    lappend roomL [jlib::unescapestr $node]
 	}
     }
-    if {![llength $roomList]} {
+    if {![llength $roomL]} {
 	::ui::dialog -type ok -icon error -title "No Rooms"  \
 	  -message [mc jamessnorooms $state(server)]
 	return
     }
     
-    set roomList [lsort $roomList]
-    $state(wroom) configure -values $roomList
-    set state(roomname) [lindex $roomList 0]
+    set roomL [lsort $roomL]
+    $state(wroom) configure -values $roomL
+    set state(roomname) [lindex $roomL 0]
 }
 
 proc ::Enter::BusyEnterDlgIncr {token {num 1}} {
@@ -496,7 +495,8 @@ proc ::Enter::PrepDoEnter {token} {
     
     ::Debug 4 ""
 
-    set roomjid [jlib::jidmap $state(roomname)@$state(server)]
+    set node [jlib::escapestr $state(roomname)]
+    set roomjid [jlib::jidmap $node@$state(server)]
     set service $state(server)
     set state(roomjid) $roomjid
     

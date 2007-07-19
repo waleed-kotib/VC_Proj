@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Create.tcl,v 1.9 2007-07-19 06:28:12 matben Exp $
+# $Id: Create.tcl,v 1.10 2007-07-19 14:11:28 matben Exp $
 
 package provide Create 1.0
 
@@ -70,7 +70,7 @@ proc ::Create::Build {args} {
 	nickname    ""
     }
     if {[info exists argsA(-roomname)]} {
-	set state(roomname) $argsA(-roomname)
+	set state(roomname) [jlib::unescapestr $argsA(-roomname)]
     }
     if {[info exists argsA(-nickname)]} {
 	set state(nickname) $argsA(-nickname)
@@ -108,7 +108,7 @@ proc ::Create::Build {args} {
     eval {ttk::optionmenu $frtop.eserv $token\(server)} $serviceList
     ttk::label $frtop.lroom -text "[mc {Room name}]:"    
     ttk::entry $frtop.eroom -textvariable $token\(roomname)  \
-      -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
+      -validate key -validatecommand {::Jabber::ValidateUsernameStrEsc %S}
     ttk::label $frtop.lnick -text "[mc {Nick name}]:"    
     ttk::entry $frtop.enick -textvariable $token\(nickname)  \
       -validate key -validatecommand {::Jabber::ValidateResourceStr %S}
@@ -285,7 +285,8 @@ proc ::Create::Cancel {token} {
     
     # No jidmap since may not be valid.
     # Is this according to MUC?
-    set roomjid [jlib::jidmap $state(roomname)@$state(server)]
+    set node [jlib::escapestr $state(roomname)]
+    set roomjid [jlib::jidmap $node@$state(server)]
     if {$roomjid ne ""} {
 	catch {$jstate(jlib) muc setroom $roomjid cancel}
     }
@@ -324,7 +325,8 @@ proc ::Create::Get {token} {
 	return
     }
 
-    set roomjid [jlib::joinjid $state(roomname) $state(server) ""]
+    set node [jlib::escapestr $state(roomname)]
+    set roomjid [jlib::joinjid $node $state(server) ""]
     if {![jlib::jidvalidate $roomjid]} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
 	  -message "Not a valid roomname"
@@ -497,7 +499,8 @@ proc ::Create::SetRoom {token} {
 
     $state(wsearrows) stop
     
-    set roomjid [jlib::joinjid $state(roomname) $state(server) ""]
+    set node [jlib::escapestr $state(roomname)]
+    set roomjid [jlib::joinjid $node $state(server) ""]
     if {![jlib::jidvalidate $roomjid]} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
 	  -message "Not a valid roomname"
@@ -616,7 +619,7 @@ proc ::Create::GCBuild {args} {
     ttk::label $frmid.lroom -text "[mc Room]:" -anchor e
     ttk::entry $frmid.eroom -width 24    \
       -textvariable $token\(roomname) -validate key  \
-      -validatecommand {::Jabber::ValidateUsernameStr %S}
+      -validatecommand {::Jabber::ValidateUsernameStrEsc %S}
     ttk::label $frmid.lnick -text "[mc {Nick name}]:" \
       -anchor e
     ttk::entry $frmid.enick -width 24    \
@@ -632,7 +635,7 @@ proc ::Create::GCBuild {args} {
     
     if {[info exists argsA(-roomjid)]} {
 	jlib::splitjidex $argsA(-roomjid) node service res
-	set enter(roomname) $node
+	set enter(roomname) [jlib::unescapestr $node]
 	set enter(server)   $service
 	$wcomboserver state {disabled}
 	$frmid.eroom  state {disabled}
@@ -708,7 +711,8 @@ proc ::Create::GCDoEnter {token} {
 	return
     }
 
-    set roomjid [jlib::jidmap [jlib::joinjid $enter(roomname) $enter(server) ""]]
+    set node [jlib::escapestr $enter(roomname)]
+    set roomjid [jlib::jidmap [jlib::joinjid $node $enter(server) ""]]
     set roomjid [jlib::jidmap $roomjid]
     $jstate(jlib) groupchat enter $roomjid $enter(nickname) \
       -command [namespace current]::EnterCallback
@@ -725,6 +729,7 @@ proc ::Create::EnterCallback {jlibname xmldata} {
 	set type "available"
     }    
     if {[string equal $type "error"]} {
+	set ujid [jlib::unescapejid $from]
 	set msg [mc mucErrEnter $from]
 	set errspec [jlib::getstanzaerrorspec $xmldata]
 	if {[llength $errspec]} {
