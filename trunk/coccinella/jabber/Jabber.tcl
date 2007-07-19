@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.213 2007-07-19 06:28:16 matben Exp $
+# $Id: Jabber.tcl,v 1.214 2007-07-19 08:05:21 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1455,8 +1455,9 @@ proc ::Jabber::GetLast {to args} {
 
 proc ::Jabber::GetLastResult {from silent jlibname type subiq} {    
 
+    set ujid [jlib::unescapejid $from]
     if {[string equal $type "error"]} {
-	set msg [mc jamesserrlastactive $from [lindex $subiq 1]]
+	set msg [mc jamesserrlastactive $ujid [lindex $subiq 1]]
 	::Jabber::AddErrorLog $from $msg	    
 	if {!$silent} {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
@@ -1466,7 +1467,7 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 	array set attrArr [wrapper::getattrlist $subiq]
 	if {![info exists attrArr(seconds)]} {
 	    ::UI::MessageBox -title [mc {Last Activity}] -icon info  \
-	      -type ok -message [mc jamesserrnotimeinfo $from]
+	      -type ok -message [mc jamesserrnotimeinfo $ujid]
 	} else {
 	    ::UI::MessageBox -title [mc {Last Activity}] -icon info  \
 	      -type ok -message [GetLastString $from $subiq]
@@ -1476,11 +1477,12 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 
 proc ::Jabber::GetLastString {jid subiq} {
     
+    set ujid [jlib::unescapejid $jid]
     array set attrArr [wrapper::getattrlist $subiq]
     if {![info exists attrArr(seconds)]} {
-	set str [mc jamesserrnotimeinfo $jid]
+	set str [mc jamesserrnotimeinfo $ujid]
     } elseif {![string is integer -strict $attrArr(seconds)]} {
-	set str [mc jamesserrnotimeinfo $jid]
+	set str [mc jamesserrnotimeinfo $ujid]
     } else {
 	set secs [expr [clock seconds] - $attrArr(seconds)]
 	set uptime [clock format $secs -format "%a %b %d %H:%M:%S %Y"]
@@ -1493,11 +1495,11 @@ proc ::Jabber::GetLastString {jid subiq} {
 	# Time interpreted differently for different jid types.
 	if {$jid ne ""} {
 	    if {[regexp {^[^@]+@[^/]+/.*$} $jid match]} {
-		set msg1 [mc jamesstimeused $jid]
+		set msg1 [mc jamesstimeused $ujid]
 	    } elseif {[regexp {^.+@[^/]+$} $jid match]} {
-		set msg1 [mc jamesstimeconn $jid]
+		set msg1 [mc jamesstimeconn $ujid]
 	    } else {
-		set msg1 [mc jamesstimeservstart $jid]
+		set msg1 [mc jamesstimeservstart $ujid]
 	    }
 	} else {
 	    set msg1 [mc jamessuptime]
@@ -1528,18 +1530,19 @@ proc ::Jabber::GetTime {to args} {
 
 proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
 
+    set ujid [jlib::unescapejid $from]
     if {[string equal $type "error"]} {
 	::Jabber::AddErrorLog $from  \
 	  "We received an error when quering its time info.\
 	  The error was: [lindex $subiq 1]"	    
 	if {!$silent} {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
-	      -message [mc jamesserrtime $from [lindex $subiq 1]]
+	      -message [mc jamesserrtime $ujid [lindex $subiq 1]]
 	}
     } else {
 	set msg [GetTimeString $subiq]
 	::UI::MessageBox -title [mc {Local Time}] -icon info -type ok \
-	  -message [mc jamesslocaltime $from $msg]
+	  -message [mc jamesslocaltime $ujid $msg]
     }
 }
 
@@ -1625,12 +1628,13 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     
     variable uidvers
     
+    set ujid [jlib::unescapejid $from]
     if {[string equal $type "error"]} {
 	::Jabber::AddErrorLog $from  \
-	  [mc jamesserrvers $from [lindex $subiq 1]]
+	  [mc jamesserrvers $ujid [lindex $subiq 1]]
 	if {!$silent} {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
-	      -message [mc jamesserrvers $from [lindex $subiq 1]]
+	      -message [mc jamesserrvers $ujid [lindex $subiq 1]]
 	}
 	return
     }
