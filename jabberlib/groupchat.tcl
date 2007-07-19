@@ -4,7 +4,9 @@
 #       
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: groupchat.tcl,v 1.8 2007-01-20 16:26:23 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: groupchat.tcl,v 1.9 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

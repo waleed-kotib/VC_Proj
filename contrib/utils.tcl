@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: utils.tcl,v 1.6 2006-05-25 14:09:39 matben Exp $
+#  This file is distributed under BSD style license.
+#  
+# $Id: utils.tcl,v 1.7 2007-07-19 06:28:11 matben Exp $
 
 package provide utils 1.0
     

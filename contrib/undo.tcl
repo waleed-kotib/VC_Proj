@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: undo.tcl,v 1.5 2006-08-20 13:41:17 matben Exp $
+#  This file is distributed under BSD style license.
+#  
+# $Id: undo.tcl,v 1.6 2007-07-19 06:28:11 matben Exp $
 
 package provide undo 0.1
 

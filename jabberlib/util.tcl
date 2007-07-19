@@ -4,8 +4,10 @@
 #      It provides small utility functions.
 #      
 #  Copyright (c) 2006  Mats Bengtsson
+# 
+# This file is distributed under BSD style license.
 #  
-# $Id: util.tcl,v 1.3 2006-05-24 08:38:15 matben Exp $
+# $Id: util.tcl,v 1.4 2007-07-19 06:28:18 matben Exp $
 
 package provide jlib::util 0.1
 

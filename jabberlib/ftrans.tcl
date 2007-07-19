@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: ftrans.tcl,v 1.15 2007-05-16 12:19:28 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: ftrans.tcl,v 1.16 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

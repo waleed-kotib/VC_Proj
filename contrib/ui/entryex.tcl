@@ -3,8 +3,10 @@
 #       Extended entry widget.
 # 
 # Copyright (c) 2005 Mats Bengtsson
+#  
+# This file is distributed under BSD style license.
 #       
-# $Id: entryex.tcl,v 1.4 2006-04-05 14:16:45 matben Exp $
+# $Id: entryex.tcl,v 1.5 2007-07-19 06:28:12 matben Exp $
 
 package require snit 1.0
 package require tile

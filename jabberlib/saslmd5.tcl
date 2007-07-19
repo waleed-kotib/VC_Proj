@@ -9,9 +9,10 @@
 #       It also includes the PLAIN mechanism, so saslmd5 is a misnomer.
 #       
 #  Copyright (c) 2004  Mats Bengtsson
-#  BSD license
 #  
-# $Id: saslmd5.tcl,v 1.10 2006-04-27 07:48:49 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: saslmd5.tcl,v 1.11 2007-07-19 06:28:17 matben Exp $
 
 package require base64
 package require md5 2.0

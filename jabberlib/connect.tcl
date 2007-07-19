@@ -6,7 +6,9 @@
 #      
 #  Copyright (c) 2006-2007  Mats Bengtsson
 #  
-# $Id: connect.tcl,v 1.22 2007-02-03 06:42:06 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: connect.tcl,v 1.23 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

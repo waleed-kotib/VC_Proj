@@ -7,7 +7,20 @@
 #      
 #  Copyright (c) 2003-2006  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.81 2007-02-07 09:01:16 matben Exp $
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#   
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#   
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#  
+# $Id: MUC.tcl,v 1.82 2007-07-19 06:28:16 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex

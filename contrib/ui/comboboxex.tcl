@@ -3,8 +3,10 @@
 #       Extended ttk::combobox widget.
 # 
 # Copyright (c) 2006 Mats Bengtsson
+#  
+# This file is distributed under BSD style license.
 #       
-# $Id: comboboxex.tcl,v 1.1 2006-04-05 14:16:45 matben Exp $
+# $Id: comboboxex.tcl,v 1.2 2007-07-19 06:28:11 matben Exp $
 
 package require snit 1.0
 package require tile

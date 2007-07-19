@@ -3,8 +3,10 @@
 #
 #
 # Copyright (c) 2005 Mats Bengtsson
+#  
+# This file is distributed under BSD style license.
 #       
-# $Id: toplevel.tcl,v 1.2 2005-10-02 12:44:41 matben Exp $
+# $Id: toplevel.tcl,v 1.3 2007-07-19 06:28:12 matben Exp $
 
 package require snit 1.0
 package require tile

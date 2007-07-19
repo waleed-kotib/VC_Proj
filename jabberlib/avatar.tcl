@@ -9,7 +9,9 @@
 #  Copyright (c) 2005-2006  Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
-# $Id: avatar.tcl,v 1.25 2006-12-01 08:55:14 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: avatar.tcl,v 1.26 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

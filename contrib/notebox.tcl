@@ -3,9 +3,10 @@
 #       A single instance notifier window where simple messages can be added.
 #       
 #  Copyright (c) 2004
+#  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: notebox.tcl,v 1.2 2006-04-13 10:45:05 matben Exp $
+#  $Id: notebox.tcl,v 1.3 2007-07-19 06:28:11 matben Exp $
 
 package provide notebox 1.0
 

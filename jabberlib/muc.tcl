@@ -7,7 +7,9 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: muc.tcl,v 1.38 2007-01-20 16:26:23 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: muc.tcl,v 1.39 2007-07-19 06:28:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #

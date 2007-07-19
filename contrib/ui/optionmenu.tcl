@@ -3,8 +3,10 @@
 #       Menubutton with associated menu.
 # 
 # Copyright (c) 2005-2007 Mats Bengtsson
+#  
+# This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.16 2007-07-16 13:23:49 matben Exp $
+# $Id: optionmenu.tcl,v 1.17 2007-07-19 06:28:12 matben Exp $
 
 package require snit 1.0
 package require tile

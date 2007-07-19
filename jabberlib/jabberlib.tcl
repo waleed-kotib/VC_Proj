@@ -4,8 +4,10 @@
 #       with jabber servers. The core parts are known under the name XMPP.
 #
 # Copyright (c) 2001-2007  Mats Bengtsson
+# 
+# This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.179 2007-07-18 14:09:04 matben Exp $
+# $Id: jabberlib.tcl,v 1.180 2007-07-19 06:28:17 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 

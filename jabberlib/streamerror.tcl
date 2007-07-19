@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: streamerror.tcl,v 1.5 2006-09-13 14:09:12 matben Exp $
+# This file is distributed under BSD style license.
+#  
+# $Id: streamerror.tcl,v 1.6 2007-07-19 06:28:18 matben Exp $
 # 
 
 # The syntax for stream errors is as follows:

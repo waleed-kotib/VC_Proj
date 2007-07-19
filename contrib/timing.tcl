@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: timing.tcl,v 1.3 2006-06-08 13:55:05 matben Exp $
+#  This file is distributed under BSD style license.
+#  
+# $Id: timing.tcl,v 1.4 2007-07-19 06:28:11 matben Exp $
 
 package provide timing 1.0
 

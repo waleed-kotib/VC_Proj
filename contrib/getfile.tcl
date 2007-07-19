@@ -3,8 +3,10 @@
 #	Server-side get file from remote peer for whiteboard.
 #
 #  Copyright (c) 2003-2005  Mats Bengtsson
+#  
+#  This file is distributed under BSD style license.
 #
-# $Id: getfile.tcl,v 1.3 2005-08-26 15:02:34 matben Exp $
+# $Id: getfile.tcl,v 1.4 2007-07-19 06:28:11 matben Exp $
 # 
 # USAGE ########################################################################
 #

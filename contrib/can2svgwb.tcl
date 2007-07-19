@@ -3,9 +3,10 @@
 #      This file provides translation from canvas commands to ...
 #      
 #  Copyright (c) 2004  Mats Bengtsson
-#  This source file is distributed under the BSD license.
+#  
+#  This file is distributed under BSD style license.
 #
-# $Id: can2svgwb.tcl,v 1.7 2004-10-12 13:48:56 matben Exp $
+# $Id: can2svgwb.tcl,v 1.8 2007-07-19 06:28:11 matben Exp $
 
 package require can2svg
 

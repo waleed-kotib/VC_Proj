@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: wizard.tcl,v 1.9 2006-01-10 08:46:46 matben Exp $
+#  This file is distributed under BSD style license.
+#  
+# $Id: wizard.tcl,v 1.10 2007-07-19 06:28:11 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

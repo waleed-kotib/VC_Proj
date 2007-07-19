@@ -4,11 +4,12 @@
 #       http server.
 #      
 #  Copyright (c) 2002-2006  Mats Bengtsson
-#  This source file is distributed under the BSD license.
+#  
+#  This file is distributed under BSD style license.
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.31 2007-04-30 14:21:05 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.32 2007-07-19 06:28:11 matben Exp $
 
 # ########################### USAGE ############################################
 #
