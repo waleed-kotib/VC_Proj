@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.168 2007-07-19 06:28:12 matben Exp $
+# $Id: JUI.tcl,v 1.169 2007-07-19 12:41:20 matben Exp $
 
 package provide JUI 1.0
 
@@ -202,6 +202,8 @@ proc ::JUI::Init { } {
 		{-variable prefs(fontSizePlus) -value 1}}
 		{radio   mLargeFont     {::Theme::FontConfigSize +2}    {}
 		{-variable prefs(fontSizePlus) -value 2}}
+		{radio   mHugeFont      {::Theme::FontConfigSize +6}    {}
+		{-variable prefs(fontSizePlus) -value 6}}
 	    } }
 	    {separator}
 	    {command     mCoccinellaHome {::JUI::OpenCoccinellaURL}     {}}
