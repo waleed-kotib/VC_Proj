@@ -363,6 +363,7 @@
 ::msgcat::mcset ru mNormalFont          {Средне}
 ::msgcat::mcset ru mLargerFont          {Больше}
 ::msgcat::mcset ru mLargeFont           {Большой}
+::msgcat::mcset ru mHugeFont            {Huge}
 
 # Popups
 ::msgcat::mcset ru mMessage     	{Сообщение...}

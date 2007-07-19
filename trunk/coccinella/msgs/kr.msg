@@ -436,6 +436,7 @@
 ::msgcat::mcset kr mNormalFont          {Normal}
 ::msgcat::mcset kr mLargerFont          {Larger}
 ::msgcat::mcset kr mLargeFont           {Large}
+::msgcat::mcset kr mHugeFont            {Huge}
 
 # Popups
 ::msgcat::mcset kr mMessage     	{메세지...}

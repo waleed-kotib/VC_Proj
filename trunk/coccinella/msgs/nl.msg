@@ -436,6 +436,7 @@
 ::msgcat::mcset nl mNormalFont				{Normaal}
 ::msgcat::mcset nl mLargerFont				{Groter}
 ::msgcat::mcset nl mLargeFont				{Grootst}
+::msgcat::mcset nl mHugeFont                            {Huge}
 
 # Popups
 ::msgcat::mcset nl mMessage				{Bericht...}

@@ -431,6 +431,7 @@
 ::msgcat::mcset es mNormalFont          {Normal}
 ::msgcat::mcset es mLargerFont          {Mas grande}
 ::msgcat::mcset es mLargeFont           {Grande}
+::msgcat::mcset es mHugeFont            {Huge}
 
 ::msgcat::mcset es mUserInfo            {Informacion del usuario}
 ::msgcat::mcset es mEditBookmarks       {Editar favoritos}

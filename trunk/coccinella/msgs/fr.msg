@@ -444,6 +444,7 @@
 ::msgcat::mcset fr mNormalFont          {Normal}
 ::msgcat::mcset fr mLargerFont          {Larger}
 ::msgcat::mcset fr mLargeFont           {Large}
+::msgcat::mcset fr mHugeFont            {Huge}
 
 
 # Popups.
