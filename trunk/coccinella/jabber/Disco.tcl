@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.111 2007-07-19 08:05:21 matben Exp $
+# $Id: Disco.tcl,v 1.112 2007-07-19 14:11:28 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -121,7 +121,7 @@ proc ::Disco::InitPrefsHook {} {
 proc ::Disco::InitHook { } {
     upvar ::Jabber::jprefs jprefs
 
-    set jprefs(disco,tmpServers) {} 
+    set jprefs(disco,tmpServers) [list]
     InitMenus
 }
 
@@ -339,6 +339,12 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 	    set opts [list] 
 	    if {$name ne ""} {
 		lappend opts -text $name
+	    } else {
+		if {$node ne ""} {
+		    lappend opts -text $node
+		} else {
+		    lappend opts -text [jlib::unescapejid $from]		    
+		}
 	    }
 	    if {$icon ne ""} {
 		lappend opts -image $icon
@@ -1099,15 +1105,16 @@ proc ::Disco::TreeItem {vstruct} {
     variable treeuid
     upvar ::Jabber::jstate  jstate
     upvar ::Jabber::jprefs  jprefs
-    
-    # We disco servers jid 'items+info', and disco its childrens 'info'.    
+
     ::Debug 4 "::Disco::TreeItem vstruct='$vstruct'"
+
+    # We disco servers jid 'items+info', and disco its childrens 'info'.    
     
     set jid   [lindex $vstruct end 0]
     set node  [lindex $vstruct end 1]
     set pjid  [lindex $vstruct end-1 0]
     set pnode [lindex $vstruct end-1 1]
-        
+    
     # If this is a tree root element add only if a discoed server.
     if {($pjid eq "") && ($pnode eq "")} {
 	set all [concat $jprefs(disco,tmpServers) $jprefs(disco,autoServers)]
@@ -1147,13 +1154,14 @@ proc ::Disco::TreeItem {vstruct} {
 	    set icon [::Roster::GetPresenceIconFromJid $jid]
 	} else {
 	    set name [$jstate(jlib) disco name $jid $node]
+	    #puts "\t jid=$jid, node=$node, name=$name"
 	    if {$name eq ""} {
 		if {$node eq ""} {
-		    set name $jid
+		    set name [jlib::unescapejid $jid]
 		} else {
 		    set name $node
 		}
-	    }
+	    }	
 	    set icon [::Servicons::GetFromTypeList $cattypes]
 	    
 	    # Fallbacks:
@@ -1203,9 +1211,10 @@ proc ::Disco::MakeBalloonHelp {vstruct} {
     set jid  [lindex $vstruct end 0]
     set node [lindex $vstruct end 1]
 
-    set jidtxt $jid
-    if {[string length $jid] > 30} {
-	set jidtxt "[string range $jid 0 28]..."
+    set ujid [jlib::unescapejid $jid]
+    set jidtxt $ujid
+    if {[string length $ujid] > 30} {
+	set jidtxt "[string range $ujid 0 28]..."
     }
     set msg "jid: $jidtxt"
     if {$node ne ""} {
@@ -1573,7 +1582,7 @@ proc ::Disco::AddServerDo {w} {
 	    set jprefs(disco,autoServers) \
 	      [lsort -unique $jprefs(disco,autoServers)]
 	} else {
-	    lappend jprefs(disco,tmpServers) $addservervar
+	    lappend jprefs(disco,tmpServers) $jid
 	    set jprefs(disco,tmpServers) \
 	      [lsort -unique $jprefs(disco,tmpServers)]
 	}

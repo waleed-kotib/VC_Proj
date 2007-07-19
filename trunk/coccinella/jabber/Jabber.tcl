@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.214 2007-07-19 08:05:21 matben Exp $
+# $Id: Jabber.tcl,v 1.215 2007-07-19 14:11:28 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -518,6 +518,7 @@ proc ::Jabber::Init { } {
     foreach xmlns $clientxmlns {
 	jlib::disco::registerfeature $xmlns
     }
+    jlib::disco::registerfeature {jid\20escaping}
 	
     ::JUI::Build $wDlgs(jmain)    
         

@@ -10,6 +10,7 @@ Coccinella-0.96.? (200708??)
  o added support for XEP-0172: User Nickname
  o added autoaway which detects any system inactivity like mouse and keyboard
  o added user activity XEP-0108: User Activity
+ o added support for XEP-0106: JID Escaping
 
 Coccinella-0.96.0 (20070525)
 
