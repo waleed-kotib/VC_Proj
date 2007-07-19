@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.110 2007-07-19 06:28:12 matben Exp $
+# $Id: Disco.tcl,v 1.111 2007-07-19 08:05:21 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -336,7 +336,7 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 	foreach vstruct $vlist {
 	    set icon [::Servicons::GetFromTypeList $cattypes]
 	    set name [$jstate(jlib) disco name $from $node]
-	    set opts {}	    
+	    set opts [list] 
 	    if {$name ne ""} {
 		lappend opts -text $name
 	    }
@@ -1339,11 +1339,12 @@ proc ::Disco::InfoResultCB {type jid queryE args} {
     upvar ::Jabber::nsToText nsToText
     upvar ::Jabber::jstate jstate
 
+    set ujid [jlib::unescapejid $jid]
     set node [wrapper::getattribute $queryE node]
     if {$node eq ""} {
-	set txt $jid
+	set txt $ujid
     } else {
-	set txt "$jid, node $node"
+	set txt "$ujid, node $node"
     }
 
     set w .jdinfo[incr dlguid]
@@ -1388,10 +1389,11 @@ proc ::Disco::BuildInfoPage {win jid {node ""}} {
     upvar ::Jabber::nsToText nsToText
     upvar ::Jabber::jstate jstate
     
+    set ujid [jlib::unescapejid $jid]
     if {$node eq ""} {
-	set str $jid
+	set str $ujid
     } else {
-	set str "$jid, node $node"
+	set str "$ujid, node $node"
     }
     ttk::frame $win
     ttk::label $win.l -padding {0 0 0 8} \
@@ -1564,9 +1566,10 @@ proc ::Disco::AddServerDo {w} {
     
     destroy $w
     if {$addservervar ne ""} {
-	DiscoServer $addservervar -command ::Disco::AddServerCB
+	set jid [jlib::escapejid $addservervar]
+	DiscoServer $jid -command ::Disco::AddServerCB
 	if {$permdiscovar} {
-	    lappend jprefs(disco,autoServers) $addservervar
+	    lappend jprefs(disco,autoServers) $jid
 	    set jprefs(disco,autoServers) \
 	      [lsort -unique $jprefs(disco,autoServers)]
 	} else {

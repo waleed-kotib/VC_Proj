@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.198 2007-07-19 06:28:12 matben Exp $
+# $Id: Chat.tcl,v 1.199 2007-07-19 08:05:21 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -275,7 +275,7 @@ proc ::Chat::StartThreadDlg {args} {
     pack $frmid -side top -fill both -expand 1
 
     set jidlist [::Jabber::RosterCmd getusers -type available]
-    ttk::label $frmid.luser -text "[mc {Jabber user ID}]:"  \
+    ttk::label $frmid.luser -text "[mc {Jabber ID}]:"  \
       -anchor e
     ui::comboboxex $frmid.euser -library $jidlist -width 26  \
       -textvariable [namespace current]::user
@@ -304,7 +304,7 @@ proc ::Chat::StartThreadDlg {args} {
     bind $w <Return> [list $frbot.btok invoke]
     
     if {[info exists argsA(-jid)]} {
-	set user $argsA(-jid)
+	set user [jlib::unescapestr $argsA(-jid)]
     }
 
     # Grab and focus.
@@ -335,8 +335,9 @@ proc ::Chat::DoStart {w} {
     
     set ans yes
     
-    if {![jlib::jidvalidate $user]} {
-	set ans [::UI::MessageBox -message [mc jamessbadjid $user] \
+    set jid [jlib::escapejid $user]
+    if {![jlib::jidvalidate $jid]} {
+	set ans [::UI::MessageBox -message [mc jamessbadjid $jid] \
 	  -icon error -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
@@ -344,7 +345,7 @@ proc ::Chat::DoStart {w} {
     }    
     
     # User must be online.
-    if {![$jstate(jlib) roster isavailable $user]} {
+    if {![$jstate(jlib) roster isavailable $jid]} {
 	set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
 	  -default no  \
 	  -message "The user you intend chatting with,\
@@ -356,7 +357,7 @@ proc ::Chat::DoStart {w} {
     set finished 1
     destroy $w
     if {$ans eq "yes"} {
-	StartThread $user
+	StartThread $jid
     }
 }
 
@@ -683,8 +684,8 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 		set name $host
 		set from $host
 	    } else {
-		set name $node
-		set from ${node}@${host}
+		set name [jlib::unescapestr $node]
+		set from $node@$host
 	    }
 	    if {$jprefs(chat,mynick) ne ""} {
 		set name $jprefs(chat,mynick)
@@ -1702,7 +1703,8 @@ proc ::Chat::SetTitle {chattoken} {
         
     set str "[mc Chat]: $chatstate(displayname)"
     if {$chatstate(displayname) ne $chatstate(fromjid)} {
-	append str " ($chatstate(fromjid))"
+	set ujid [jlib::unescapestr $chatstate(fromjid)]
+	append str " ($ujid)"
     }
 
     # Put an extra (*) in the windows title if not in focus.

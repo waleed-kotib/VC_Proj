@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.19 2007-07-19 06:28:17 matben Exp $
+# $Id: UserInfo.tcl,v 1.20 2007-07-19 08:05:21 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -122,7 +122,8 @@ proc ::UserInfo::Get {jid {node ""}} {
     NotesPage $token
     
     if {[::Jabber::IsConnected]} {
-	::JUI::SetStatusMessage [mc vcardget $jid]
+	set ujid [jlib::unescapejid $jid]
+	::JUI::SetStatusMessage [mc vcardget $ujid]
 	$priv(warrow) start
     }
     
@@ -177,11 +178,12 @@ proc ::UserInfo::VersionCB {token jlibname type subiq} {
     }
 
     set jid $priv(jid)
+    set ujid [jlib::unescapejid $jid]
     
     if {$type == "error"} {
 	set str [mc {Version Info}]
 	append str "\n"
-	append str [mc jamesserrvers $jid [lindex $subiq 1]]
+	append str [mc jamesserrvers $ujid [lindex $subiq 1]]
 	::Jabber::AddErrorLog $jid $str
 	AddError $token $str
     } else {
@@ -216,11 +218,12 @@ proc ::UserInfo::LastCB {token jlibname type subiq} {
     }
     
     set jid $priv(jid)
+    set ujid [jlib::unescapejid $jid]
     
     if {$type eq "error"} {
 	set str [mc {Last Activity}]
 	append str "\n"
-	set str1 [mc jamesserrlastactive $jid [lindex $subiq 1]]
+	set str1 [mc jamesserrlastactive $ujid [lindex $subiq 1]]
 	append str $str1
 	::Jabber::AddErrorLog $jid $str1
 	AddError $token $str1
@@ -245,17 +248,18 @@ proc ::UserInfo::TimeCB {token jlibname type subiq} {
     }
     
     set jid $priv(jid)
+    set ujid [jlib::unescapejid $jid]
 
     if {$type eq "error"} {
 	set str [mc {Local Time}]
 	append str "\n"
-	set str1 [mc jamesserrtime $jid [lindex $subiq 1]]
+	set str1 [mc jamesserrtime $ujid [lindex $subiq 1]]
 	append str $str1
 	::Jabber::AddErrorLog $jid $str1
 	AddError $token $str1
     } else {
 	set str [::Jabber::GetTimeString $subiq]
-	set priv(strtime) [mc jamesslocaltime $jid $str]
+	set priv(strtime) [mc jamesslocaltime $ujid $str]
     }    
 }
 
@@ -272,17 +276,18 @@ proc ::UserInfo::EntityTimeCB {token jlibname type subiq} {
     }
     
     set jid $priv(jid)
+    set ujid [jlib::unescapejid $jid]
 
     if {$type eq "error"} {
 	set str [mc {Local Time}]
 	append str "\n"
-	set str1 [mc jamesserrtime $jid [lindex $subiq 1]]
+	set str1 [mc jamesserrtime $ujid [lindex $subiq 1]]
 	append str $str1
 	::Jabber::AddErrorLog $jid $str1
 	AddError $token $str1
     } else {
 	set str [::Jabber::GetEntityTimeString $subiq]
-	set priv(strtime) [mc jamesslocaltime $jid $str]
+	set priv(strtime) [mc jamesslocaltime $ujid $str]
     }    
 }
 
@@ -297,14 +302,16 @@ proc ::UserInfo::VCardCB {token jlibname type subiq} {
     if {$priv(ncount) <= 0} {
 	$priv(warrow) stop
     }
+    set jid $priv(jid)
+    set ujid [jlib::unescapejid $jid]
 
     if {$type eq "error"} {
 	set errmsg "([lindex $subiq 0]) [lindex $subiq 1]"
 	set str [mc vcarderrget $errmsg]
-	::Jabber::AddErrorLog $priv(jid) $str
+	::Jabber::AddErrorLog $jid $str
 	AddError $token $str
     } else {
-	set ${token}::elem(jid) $priv(jid)
+	set ${token}::elem(jid) [jlib::unescapejid $priv(jid)]
 	::VCard::ParseXmlList $subiq ${token}::elem
 	::VCard::Pages $priv(wnb) ${token}::elem "other"
     }

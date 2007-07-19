@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.55 2007-07-19 06:28:17 matben Exp $
+# $Id: VCard.tcl,v 1.56 2007-07-19 08:05:21 matben Exp $
 
 package provide VCard 1.0
 
@@ -269,6 +269,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     upvar $etoken elem
         
     ::Debug 4 "::VCard::Pages etoken=$etoken, type=$type"
+    parray elem
     
     # Start with the Basic Info -------------------------------------------------
    
