@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.112 2007-07-19 14:11:28 matben Exp $
+# $Id: Disco.tcl,v 1.113 2007-07-20 06:08:41 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1490,8 +1490,10 @@ proc ::Disco::AddServerDlg { } {
 	return
     }
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
-      -macclass {document closeBox}
+      -macclass {document closeBox} \
+      -closecommand [namespace code AddCloseCmd]
     wm title $w [mc {Add Server}]
+    ::UI::SetWindowPosition $w
     
     set width 260
     
@@ -1545,7 +1547,7 @@ proc ::Disco::AddServerDlg { } {
     ttk::button $frbot.btok -text [mc Add] \
       -command [list [namespace current]::AddServerDo $w]
     ttk::button $frbot.btcancel -text [mc Close] \
-      -command [list destroy $w]
+      -command [namespace code [list AddCancel $w]]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btok -side right
@@ -1562,10 +1564,19 @@ proc ::Disco::AddServerDlg { } {
     focus $wfr.e
 }
 
+proc ::Disco::AddCloseCmd {w} {
+    ::UI::SaveWinGeom $w   
+}
+
 proc ::Disco::AddServerNone { } {
     upvar ::Jabber::jprefs jprefs
     
     set jprefs(disco,autoServers) {}
+}
+
+proc ::Disco::AddCancel {w} {
+    ::UI::SaveWinGeom $w   
+    destroy $w
 }
 
 proc ::Disco::AddServerDo {w} {
@@ -1573,6 +1584,7 @@ proc ::Disco::AddServerDo {w} {
     variable addservervar
     variable permdiscovar
     
+    ::UI::SaveWinGeom $w   
     destroy $w
     if {$addservervar ne ""} {
 	set jid [jlib::escapejid $addservervar]
@@ -1592,8 +1604,9 @@ proc ::Disco::AddServerDo {w} {
 proc ::Disco::AddServerCB {type from queryE args} {
     
     if {$type eq "error"} {
+	set ujid [jlib::unescapejid $from]
 	ui::dialog -icon error -title [mc Error] \
-	  -message "We failed discovering the server $from ." \
+	  -message "We failed discovering the server \"$ujid\"" \
 	  -detail [lindex $queryE 1]
     }
 }
