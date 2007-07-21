@@ -476,6 +476,7 @@
 ::msgcat::mcset en {About QuickTimeTcl}
 ::msgcat::mcset en {About %s}
 ::msgcat::mcset en {Active <Return>}
+::msgcat::mcset en {Add Contact}
 ::msgcat::mcset en {Add New User}
 ::msgcat::mcset en {Add permanently}
 ::msgcat::mcset en {Add Server}
@@ -502,6 +503,7 @@
 ::msgcat::mcset en {Cache folder}
 ::msgcat::mcset en {Canvas Size}
 ::msgcat::mcset en {Chat History}
+::msgcat::mcset en {Chat System}
 ::msgcat::mcset en {Chat With}
 ::msgcat::mcset en {Clear Disk Cache Now}
 ::msgcat::mcset en {Company Name}
@@ -1147,6 +1149,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jasubadd     {Add "%s" to my roster}
 ::msgcat::mcset en jarostadd	{Add a jabber user to my roster. Nick name and group may be set or changed at any time. To add a user from a foreign IM system you must have an account already\
   on that system, and that you use it when registering with the Jabber servers transport or gateway.}
+::msgcat::mcset en jarostadd2   {Select the chat system and contact ID of the contact you would like to add. Nickname and group are optional and can be set or changed later.}
 ::msgcat::mcset en jarostset	{Set nick name and group of user "%s" to what you want. They may be set or changed at any time later.}
 ::msgcat::mcset en jarostsub	{Subscribe to this user}
 ::msgcat::mcset en jarostunsub	{Unsubscribe to this user}

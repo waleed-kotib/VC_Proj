@@ -485,6 +485,7 @@
 ::msgcat::mcset pl {About QuickTimeTcl}   {O QuickTimeTcl}
 ::msgcat::mcset pl {About %s}             {O %s}
 ::msgcat::mcset pl {Active <Return>}      {<Enter> wysyła}
+::msgcat::mcset pl {Add Contact}
 ::msgcat::mcset pl {Add New User}         {Dodaj nową osobę}
 ::msgcat::mcset pl {Add permanently}      {Dodaj na stałe}
 ::msgcat::mcset pl {Add Server}           {Dodaj serwer}
@@ -511,6 +512,7 @@
 ::msgcat::mcset pl {Cache folder}         {Katalog buforowy}
 ::msgcat::mcset pl {Canvas Size}          {Rozmiar tła ("płótna") rysunku}
 ::msgcat::mcset pl {Chat History}         {Zapis rozmowy}
+::msgcat::mcset pl {Chat System}
 ::msgcat::mcset pl {Chat With}            {Rozmowa z}
 ::msgcat::mcset pl {Clear Disk Cache Now} {Skasuj zawartość bufora}
 ::msgcat::mcset pl {Company Name}         {Nazwa firmy}
@@ -1156,6 +1158,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jasubadd     {Dodaj "%s" do listy konatktów}
 ::msgcat::mcset pl jarostadd	{Dodaj użytkownika sieci Jabber do listy. Pseudonim i grupa mogą być w dowolnej chwili nadane lub zmienione. Aby móc dodać użytkownika innego niż Jabber systemu IM, musisz mieć w tymże systemie\
   wcześniej już założone konto, i użyć go najpierw w trakcie rejestracji w transporcie (lub bramie) do tego serwisu IM, udostępnianym przez serwera Jabbera.}
+
+::msgcat::mcset pl jarostadd2   {Select the chat system and contact ID of the contact you would like to add. Nickname and group are optional and can be set or changed later.}
+
 ::msgcat::mcset pl jarostset	{Pseudonim i grupę użytkownika "%s" możesz ustawić dowolnie - w każdej chwili będzie można jeszcze to zmienić.}
 ::msgcat::mcset pl jarostsub	{Wystąp o autoryzację}
 ::msgcat::mcset pl jarostunsub	{Zrezygnuj z autoryzacji}

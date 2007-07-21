@@ -480,6 +480,7 @@
 ::msgcat::mcset kr {About QuickTimeTcl}	      {QuickTimeTcl에 대하여}
 ::msgcat::mcset kr {About %s}		      {%s에 대하여}
 ::msgcat::mcset kr {Active <Return>}	      {<Return> 활성화}
+::msgcat::mcset kr {Add Contact}
 ::msgcat::mcset kr {Add New User}	      {새 사용자 더하기}
 ::msgcat::mcset kr {Add permanently}	      {영구적으로 더하기}
 ::msgcat::mcset kr {Add Server}		      {서버 더하기}
@@ -506,6 +507,7 @@
 ::msgcat::mcset kr {Cache folder}	      {캐쉬 폴더}
 ::msgcat::mcset kr {Canvas Size}	      {캔버스 크기}
 ::msgcat::mcset kr {Chat History}	      {대화 기록}
+::msgcat::mcset kr {Chat System}
 ::msgcat::mcset kr {Chat With}		      {함께 대화}
 ::msgcat::mcset kr {Clear Disk Cache Now}     {지금 캐쉬 디스크 지우기}
 ::msgcat::mcset kr {Company Name}	      {회사명}
@@ -1158,6 +1160,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset kr jasubadd     {"%s"님을 내 목록에 더하기}
 ::msgcat::mcset kr jarostadd	{나의 대화상대 명부에 재버 사용자를 등록하기, 언제든지 별명과 모둠은 설정하거나 바꿀수 있다. 외부 인터넷 메신저시스템의 사용자를 더하려면, 해당 시스템에 미리 계정을 가지고 있어야만 한다\
   , 그리고, 게이트웨이나 전송을 위한 재버 서버로 등록할 때 이를 사용하여야 한다.}
+
+::msgcat::mcset kr jarostadd2   {Select the chat system and contact ID of the contact you would like to add. Nickname and group are optional and can be set or changed later.}
+
 ::msgcat::mcset kr jarostset	{"%s"님의 별명과 그룹을 당신이 원하는 데로 지정하기. 이후로 적용됩니다.}
 ::msgcat::mcset kr jarostsub	{이 사용자에게 등록신청하기}
 ::msgcat::mcset kr jarostunsub	{이 사용자에게 등록해지하기}

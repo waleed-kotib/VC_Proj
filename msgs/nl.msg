@@ -480,6 +480,7 @@
 ::msgcat::mcset nl {About QuickTimeTcl}			{Over QuickTimeTcl}
 ::msgcat::mcset nl {About %s}				{Over %s}
 ::msgcat::mcset nl {Active <Return>}			{Actieve <enter>}
+::msgcat::mcset nl {Add Contact}
 ::msgcat::mcset nl {Add New User}			{Contactpersoon toevoegen}
 ::msgcat::mcset nl {Add permanently}			{Permanent}
 ::msgcat::mcset nl {Add Server}				{Server toevoegen}
@@ -506,6 +507,7 @@
 ::msgcat::mcset nl {Cache folder}			{Cachemap}
 ::msgcat::mcset nl {Canvas Size}			{Grootte van doek}
 ::msgcat::mcset nl {Chat History}			{Geschiedenis}
+::msgcat::mcset nl {Chat System}
 ::msgcat::mcset nl {Chat With}				{Chatten met}
 ::msgcat::mcset nl {Clear Disk Cache Now}		{Schijfcache wissen}
 ::msgcat::mcset nl {Company Name}			{Bedrijf}
@@ -1136,6 +1138,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jasuballow				{"%s" toestaan om mijn aanwezigheid te zien}
 ::msgcat::mcset nl jasubadd				{"%s" toevoegen aan mijn roster}
 ::msgcat::mcset nl jarostadd				{Een bijnaam en een groep zijn optioneel. Een contactpersoon op een ander netwerk kunt u pas toevoegen als u een account hebt op dat netwerk en als u geregistreerd bent op een Jabber-transport voor dat netwerk.}
+
+::msgcat::mcset nl jarostadd2                           {Select the chat system and contact ID of the contact you would like to add. Nickname and group are optional and can be set or changed later.}
+
 ::msgcat::mcset nl jarostset				{Stel de bijnaam en de groep van "%s" in. Deze gegevens kunnen later nog altijd ingesteld of gewijzigd worden.}
 ::msgcat::mcset nl jarostsub				{Deze contactpersoon autoriseren}
 ::msgcat::mcset nl jarostunsub				{Autorisatie van deze contactpersoon verwijderen}
