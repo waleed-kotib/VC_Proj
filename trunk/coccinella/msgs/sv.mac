@@ -476,6 +476,7 @@
 ::msgcat::mcset sv {About QuickTimeTcl}    {Om QuickTimeTcl}
 ::msgcat::mcset sv {About %s}              {Om %s}
 ::msgcat::mcset sv {Active <Return>}	   {Aktiv <Return>}
+::msgcat::mcset sv {Add Contact}           {Lägg till kontakt}
 ::msgcat::mcset sv {Add New User}          {Lägg till ny kontakt}
 ::msgcat::mcset sv {Add permanently}       {Lägg till permanent}
 ::msgcat::mcset sv {Add Server}		   {Lägg till server}
@@ -502,6 +503,7 @@
 ::msgcat::mcset sv {Cache folder}          {Filminnesmapp}
 ::msgcat::mcset sv {Canvas Size}           {Dukstorlek}
 ::msgcat::mcset sv {Chat History}	   {Chatt historik}
+::msgcat::mcset sv {Chat System}           {Chatt system}
 ::msgcat::mcset sv {Chat With}             {Chatta med}
 ::msgcat::mcset sv {Clear Disk Cache Now}  {Töm diskminnet nu}
 ::msgcat::mcset sv {Company Name}	   {Företag}
@@ -1152,6 +1154,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset sv jarostadd	{Lägg till en jabber användare till min roster. Kortnamn och grupp kan ändras när som helst senare.\
 För att lägga till en användare från ett annat IM system så måste du ha ett konto för det systemet sedan tidigare och att du använder detta konto när du registrerar dig hos Jabber serverns\
 transport komponent.}
+::msgcat::mcset sv jarostadd2   {Välj ett chatt system och kontakt ID för kontakten du vill lägga till. Kortnamn och grupp är ej nödvändiga och kan sättas senare.}
 ::msgcat::mcset sv jarostset	{Sätt kortnamn och grupp för "%s" till självvalt namn. De kan ändras när som helst senare.}
 ::msgcat::mcset sv jarostsub	{Prenumerera på den här användaren}
 ::msgcat::mcset sv jarostunsub	{Sluta prenumerera på den här användaren}

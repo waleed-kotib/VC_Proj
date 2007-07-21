@@ -432,6 +432,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {About QuickTimeTcl}
 ::msgcat::mcset ru {About %s}
 ::msgcat::mcset ru {Active <Return>}
+::msgcat::mcset ru {Add Contact}
 ::msgcat::mcset ru {Add New User}		{Добавить нового пользователя}
 ::msgcat::mcset ru {Add permanently}
 ::msgcat::mcset ru {Add Server}			{Добавить сервер}
@@ -457,6 +458,7 @@ configuration.}			{Блин}
 ::msgcat::mcset ru {Cache folder}			{Директория дл кэша}
 ::msgcat::mcset ru {Canvas Size}			{Размер холста}
 ::msgcat::mcset ru {Chat History}
+::msgcat::mcset ru {Chat System}
 ::msgcat::mcset ru {Chat With}
 ::msgcat::mcset ru {Clear Disk Cache Now}	{Отчиcтить дискоговый кэш сейчас}
 ::msgcat::mcset ru {Company Name}		{Компания}
@@ -1087,6 +1089,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset ru jasubadd     {Add "%s" to my roster}
 ::msgcat::mcset ru jarostadd	{Добавить пользователя в список контактов. Имя или группа могут быть изменены в любое время. Чтобы добавить пользователей из других IM систем вы должны уже иметь аккаунт\
   в той системе, и Jabber транспорт или шлюз.}
+
+::msgcat::mcset ru jarostadd2   {Select the chat system and contact ID of the contact you would like to add. Nickname and group are optional and can be set or changed later.}
+
 ::msgcat::mcset ru jarostset	{Изменения имени и группы "%s".}
 ::msgcat::mcset ru jarostsub	{Авторизовать пользователя}
 ::msgcat::mcset ru jarostunsub	{Удалить авторизацию}

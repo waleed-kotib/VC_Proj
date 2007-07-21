@@ -491,6 +491,7 @@
 ::msgcat::mcset fr {About QuickTimeTcl}		{À propos de QuickTimeTcl}
 ::msgcat::mcset fr {About %s}                   {À propos de %s}
 ::msgcat::mcset fr {Active <Return>}		{Appuyer sur <entrée>}
+::msgcat::mcset fr {Add Contact}
 ::msgcat::mcset fr {Add New User}		{Ajouter un nouvel utilisateur}
 ::msgcat::mcset fr {Add permanently}		{Ajouter définitivement}
 ::msgcat::mcset fr {Add Server}			{Ajouter un serveur}
@@ -517,6 +518,7 @@
 ::msgcat::mcset fr {Cache folder}		{Répertoire du cache}
 ::msgcat::mcset fr {Canvas Size}		{Taille du dessin}
 ::msgcat::mcset fr {Chat History}		{Historique de la discussion}
+::msgcat::mcset fr {Chat System}
 ::msgcat::mcset fr {Chat With}			{Discuter avec}
 ::msgcat::mcset fr {Clear Disk Cache Now}	{Vider le cache}
 ::msgcat::mcset fr {Company Name}		{Nom de l'entreprise}
@@ -1190,6 +1192,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jasubadd     {Ajouter "%s" à mes contacts}
 ::msgcat::mcset fr jarostadd	{Ajouter un utilisateur Jabber à mes contacts. Le pseudo et le groupe peuvent être changés à tout moment.\
   Pour ajouter un utilisateur d'un autre système de messagerie, vous devez avoir un compte actif sur ce système qui doit être enregistré sur les serveurs de transport Jabber.}
+
+::msgcat::mcset fr jarostadd2   {Select the chat system and contact ID of the contact you would like to add. Nickname and group are optional and can be set or changed later.}
+
 ::msgcat::mcset fr jarostset	{Choisir un pseudo et un groupe à l'utilisateur "%s". Ces informations peuvent être modifiées ultérieurement..}
 ::msgcat::mcset fr jarostsub	{S'inscrire auprès de cet utilisateur}
 ::msgcat::mcset fr jarostunsub	{Se désinscrire auprès de cet utilisateur}
