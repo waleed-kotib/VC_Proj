@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.200 2007-07-21 07:40:34 matben Exp $
+# $Id: Roster.tcl,v 1.201 2007-07-21 14:26:58 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1188,6 +1188,7 @@ namespace eval ::Roster:: {
     # Excluding smtp since it works differently.
     variable trptToAddressName {
 	jabber      {Jabber ID}
+	xmpp        {Jabber ID}
 	icq         {ICQ (number)}
 	aim         {AIM}
 	msn         {MSN}
@@ -1198,6 +1199,7 @@ namespace eval ::Roster:: {
     }
     variable trptToName {
 	jabber      {Jabber}
+	xmpp        {Jabber}
 	icq         {ICQ}
 	aim         {AIM}
 	msn         {MSN}
@@ -1208,7 +1210,7 @@ namespace eval ::Roster:: {
 	x-gadugadu  {Gadu-Gadu}
     }
     variable nameToTrpt {
-	{Jabber}           jabber
+	{Jabber}           xmpp
 	{ICQ}              icq
 	{AIM}              aim
 	{MSN}              msn
@@ -1224,10 +1226,11 @@ namespace eval ::Roster:: {
     variable  nameToTrptArr
     array set nameToTrptArr $nameToTrpt
     
-    variable allTransports {}
+    variable allTransports [list]
     foreach {name spec} $trptToName {
 	lappend allTransports $name
     }
+    set allTransports [lsearch -all -inline -not $allTransports "jabber"]
 }
 
 proc ::Roster::GetNameFromTrpt {type} {
@@ -1258,10 +1261,10 @@ proc ::Roster::GetAllTransportJids { } {
     upvar ::Jabber::jstate jstate
     
     set alltrpts [$jstate(jlib) disco getjidsforcategory "gateway/*"]
-    set jabbjids [$jstate(jlib) disco getjidsforcategory "gateway/jabber"]
+    set xmppjids [$jstate(jlib) disco getjidsforcategory "gateway/xmpp"]
     
     # Exclude jabber services and login server.
-    foreach jid $jabbjids {
+    foreach jid $xmppjids {
 	set alltrpts [lsearch -all -inline -not $alltrpts $jid]
     }
     return [lsearch -all -inline -not $alltrpts $jstate(server)]
@@ -1278,7 +1281,7 @@ proc ::Roster::GetTransportNames { } {
     
     set trpts [list]
     foreach type $allTransports {
-	if {$type eq "jabber"} {
+	if {$type eq "xmpp"} {
 	    continue
 	}
 	set jidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]

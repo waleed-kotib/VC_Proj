@@ -26,7 +26,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Gateway.tcl,v 1.4 2007-07-21 07:40:34 matben Exp $
+# $Id: Gateway.tcl,v 1.5 2007-07-21 14:26:58 matben Exp $
 
 package provide Gateway 1.0
 
@@ -215,13 +215,54 @@ proc ::Gateway::OnGetJIDFromPrompt {cmd jlibname type queryE args} {
     uplevel #0 $cmd [list $jid]
 }
 
-# Try this instead:
+# Gateway::EscapePercent --
+# 
+#       For msn, smtp and others that don't support JID Escaping XEP-0106
 
-proc ::Gateway::GetJIDFromPromptHeuristics {prompt type gatewayjid} {
-    
-    # First verify that we don't already have the valid JID.
-    
-    # @@@ TODO when the JID escaping debacle has been sorted out...
-    
+proc ::Gateway::EscapePercent {type prompt} {
+    if {($type eq "msn") || ($type eq "smtp")} {
+	return [string map {@ %} $prompt]
+    } else {
+	return $prompt
+    }
 }
+
+# Try this instead:
+# The 'prompt' is a system native ID, typically, but can be a complete JID.
+
+proc ::Gateway::GetJIDFromPromptHeuristics {prompt type} {
+    upvar ::Jabber::jstate jstate
+    
+    puts "::Gateway::GetJIDFromPromptHeuristics prompt=$prompt, type=$type"
+    
+    if {$type eq "xmpp"} {
+	return $prompt
+    }
+
+    # First verify that we don't already have the JID with gateway JID.
+    set gjidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
+    foreach gjid $gjidL {
+	jlib::splitjidex $prompt node domain res
+	if {[jlib::jidequal $domain $gjid]} {
+	    set haveEsc [$jstate(jlib) disco hasfeature {jid\20escaping} $gjid]
+	    if {$haveEsc} {
+		set enode [jlib::escapestr $node]
+	    } else {
+		set enode [EscapePercent $type $node]
+	    }
+	    return $enode@$gjid
+	}
+    }
+    
+    # Just pick the first gateway we find.
+    set gjid [lindex $gjidL 0]
+    set haveEsc [$jstate(jlib) disco hasfeature {jid\20escaping} $gjid]
+    if {$haveEsc} {
+	set enode [jlib::escapestr $prompt]
+    } else {
+	set enode [EscapePercent $type $prompt]
+    }
+    return $enode@$gjid
+}
+
 
