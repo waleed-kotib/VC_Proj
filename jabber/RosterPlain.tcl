@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.36 2007-07-19 06:28:16 matben Exp $
+# $Id: RosterPlain.tcl,v 1.37 2007-07-21 11:03:15 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -410,18 +410,23 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 	ConfigureItem $item $style $text $image
     }
     
-    # Configure number of available/unavailable users.
-    variable pendingChildNumbers
-    if {![info exists pendingChildNumbers]} {
-	set pendingChildNumbers 1
-	after idle [namespace code ConfigureChildNumbers]
-    }
+    ConfigureChildNumbersAtIdle
 
     # Design the balloon help window message.
     foreach item $jitems {
 	eval {Balloon $jid $presence $item} $args
     }
     return $items
+}
+
+proc ::RosterPlain::ConfigureChildNumbersAtIdle {} {
+    variable pendingChildNumbers    
+    
+    # Configure number of available/unavailable users.
+    if {![info exists pendingChildNumbers]} {
+	set pendingChildNumbers 1
+	after idle [namespace code ConfigureChildNumbers]
+    }
 }
 
 # RosterPlain::ConfigureChildNumbers --
@@ -472,6 +477,7 @@ proc ::RosterPlain::DeleteItem {jid} {
     # Delete any empty leftovers.
     ::RosterTree::DeleteEmptyGroups
     ::RosterTree::DeleteEmptyPendTrpt
+    ConfigureChildNumbersAtIdle
 }
 
 proc ::RosterPlain::CreateItemFromJID {jid} {    

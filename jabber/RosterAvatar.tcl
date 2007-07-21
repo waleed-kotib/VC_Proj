@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.35 2007-07-19 06:28:16 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.36 2007-07-21 11:03:14 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -880,18 +880,23 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
 	# empty
     }
 
-    # Update any groups.
-    variable pendingChildNumbers
-    if {![info exists pendingChildNumbers]} {
-	set pendingChildNumbers 1
-	after idle [namespace code ConfigureChildNumbers]
-    }
+    ConfigureChildNumbersAtIdle
 
     # Design the balloon help window message.
     foreach item $items {
 	eval {Balloon $jid $presence $item} $args
     }
     return $items
+}
+
+proc ::RosterAvatar::ConfigureChildNumbersAtIdle {} {
+    variable pendingChildNumbers    
+    
+    # Configure number of available/unavailable users.
+    if {![info exists pendingChildNumbers]} {
+	set pendingChildNumbers 1
+	after idle [namespace code ConfigureChildNumbers]
+    }
 }
 
 proc ::RosterAvatar::ConfigureChildNumbers {} {
@@ -954,8 +959,6 @@ proc ::RosterAvatar::OnButton1 {item} {
 
 proc ::RosterAvatar::DeleteItem {jid} {
     variable jidStatus
- 
-    ::Debug 2 "::RosterAvatar::DeleteItem, jid=$jid"
     
     # Sibling of '::RosterTree::CreateItemBase'.
     ::RosterTree::DeleteItemBase $jid
@@ -963,6 +966,7 @@ proc ::RosterAvatar::DeleteItem {jid} {
     # Delete any empty leftovers.
     ::RosterTree::DeleteEmptyGroups
     ::RosterTree::DeleteEmptyPendTrpt
+    ConfigureChildNumbersAtIdle
     
     unset -nocomplain jidStatus($jid)
 }
