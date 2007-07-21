@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.199 2007-07-19 08:05:21 matben Exp $
+# $Id: Chat.tcl,v 1.200 2007-07-21 07:40:34 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1274,7 +1274,7 @@ proc ::Chat::Build {threadID args} {
 #       chattoken
 
 proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
-    global  prefs this
+    global  prefs this wDlgs
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
 
@@ -1487,8 +1487,6 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 	ActiveCmd $chattoken
     }
     
-    after 10 [list ::UI::SetSashPos $w $wpane]
-    
     focus $wtextsnd
    
     # jabber:x:event
@@ -1524,6 +1522,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(wfind)    $wfind
     
     bind $wthread <Destroy> +[list ::Chat::OnDestroyThread $chattoken]
+    
+    ::UI::SetSashPos $wDlgs(jchat) $wpane
 
     ::Avatar::GetAsyncIfExists $jid2
     SetAnyAvatar $chattoken

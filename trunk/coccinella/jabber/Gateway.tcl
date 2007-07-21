@@ -26,7 +26,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Gateway.tcl,v 1.3 2007-07-19 06:28:12 matben Exp $
+# $Id: Gateway.tcl,v 1.4 2007-07-21 07:40:34 matben Exp $
 
 package provide Gateway 1.0
 
@@ -215,4 +215,13 @@ proc ::Gateway::OnGetJIDFromPrompt {cmd jlibname type queryE args} {
     uplevel #0 $cmd [list $jid]
 }
 
+# Try this instead:
+
+proc ::Gateway::GetJIDFromPromptHeuristics {prompt type gatewayjid} {
+    
+    # First verify that we don't already have the valid JID.
+    
+    # @@@ TODO when the JID escaping debacle has been sorted out...
+    
+}
 

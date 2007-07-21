@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.199 2007-07-19 06:28:16 matben Exp $
+# $Id: Roster.tcl,v 1.200 2007-07-21 07:40:34 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1288,7 +1288,7 @@ proc ::Roster::GetTransportNames { } {
     }    
 
     # Disco doesn't return jabber. Make sure it's first.
-    return [concat [list [list $jstate(server) jabber [GetNameFromTrpt jabber]]] $trpts]
+    return [concat [list [list $jstate(server) xmpp [GetNameFromTrpt jabber]]] $trpts]
 }
 
 proc ::Roster::IsTransport {jid} {
