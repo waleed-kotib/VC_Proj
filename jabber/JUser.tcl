@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.31 2007-07-19 06:28:12 matben Exp $
+# $Id: JUser.tcl,v 1.32 2007-07-21 07:40:34 matben Exp $
 
 package provide JUser 1.0
 
@@ -64,14 +64,14 @@ proc ::JUser::NewDlg {args} {
     
     array set argsA $args
     
-    set w $wDlgs(jrostadduser)${uid}
+    set w $wDlgs(jrostadduser)$uid
     set state(w) $w
     set state(finished) -1
 
     ::UI::Toplevel $w -class JUser \
       -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox} -closecommand [namespace current]::CloseCmd
-    wm title $w [mc {Add New User}]
+    wm title $w [mc {Add Contact}]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jrostadduser)]]
     if {$nwin == 1} {
@@ -84,6 +84,7 @@ proc ::JUser::NewDlg {args} {
     # Find all our groups for any jid.
     set allGroups [$jstate(jlib) roster getgroups]
     set trpts [::Roster::GetTransportNames]
+    set groupValues [concat [list [mc None]] $allGroups]
     
     set menuDef [list]
     foreach spec $trpts {
@@ -100,7 +101,7 @@ proc ::JUser::NewDlg {args} {
     pack $wall -fill both -expand 1
 
     ttk::label $wall.head -style Headlabel \
-      -text [mc {Add New User}] -compound left \
+      -text [mc {Add Contact}] -compound left \
       -image [list $im background $imd]
     pack $wall.head -side top -fill both -expand 1
 
@@ -112,23 +113,23 @@ proc ::JUser::NewDlg {args} {
     pack $wbox -fill both -expand 1
 
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 280 -justify left -text [mc jarostadd]
+      -padding {0 0 0 6} -wraplength 280 -justify left -text [mc jarostadd2]
     pack $wbox.msg -side top -anchor w
 
     set frmid $wbox.frmid
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
-    ttk::label $frmid.ltype -text "[mc {Contact Type}]:"
+    ttk::label $frmid.ltype -text "[mc {Chat System}]:"
     ui::optionmenu $frmid.type -menulist $menuDef -direction flush  \
       -variable $token\(type) -command [namespace code [list TrptCmd $token]]
-    ttk::label $frmid.ljid -text "[mc {Jabber user ID}]:" -anchor e
+    ttk::label $frmid.ljid -text "[mc {Jabber ID}]:" -anchor e
     ttk::entry $frmid.ejid -textvariable $token\(jid)
-    ttk::label $frmid.lnick -text "[mc {Nick name}]:" -anchor e
+    ttk::label $frmid.lnick -text "[mc {Nickname}]:" -anchor e
     ttk::entry $frmid.enick -textvariable $token\(name)
     ttk::label $frmid.lgroup -text "[mc Group]:" -anchor e
     ttk::combobox $frmid.egroup  \
-      -textvariable $token\(group) -values [concat None $allGroups]
+      -textvariable $token\(group) -values $groupValues
     
     grid  $frmid.ltype   $frmid.type   -sticky e -pady 2
     grid  $frmid.ljid    $frmid.ejid   -sticky e -pady 2
@@ -258,7 +259,7 @@ proc ::JUser::DoAdd {token} {
     if {[string length $name]} {
 	lappend opts -name $name
     }
-    if {($group ne "None") && ($group ne "")} {
+    if {($group ne [mc None]) && ($group ne "")} {
 	lappend opts -groups [list $group]
     }
     
@@ -339,10 +340,13 @@ proc ::JUser::TrptCmd {token jid} {
     # Seems to be necessary to achive any selection.
     focus $wjid
     set state(jid) [format [::Gateway::GetTemplateJID $type] $jid]
+    #set state(jid) [::Gateway::GetPrompt $type]
+    #puts "\t type=$type"
     set ind [string first @ $state(jid)]
     if {$ind > 0} {
 	$wjid selection range 0 $ind
     }
+    #$wjid selection range 0 end
 }
 
 proc ::JUser::CloseCmd {wclose} {
@@ -498,7 +502,7 @@ proc ::JUser::EditUserDlg {jid} {
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
-    ttk::label $frmid.lnick -text "[mc {Nick name}]:" -anchor e
+    ttk::label $frmid.lnick -text "[mc {Nickname}]:" -anchor e
     ttk::entry $frmid.enick -textvariable $token\(name)
     grid  $frmid.lnick   $frmid.enick   -pady 2
     grid  $frmid.lnick  -sticky e
