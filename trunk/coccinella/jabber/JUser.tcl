@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.32 2007-07-21 07:40:34 matben Exp $
+# $Id: JUser.tcl,v 1.33 2007-07-21 14:26:58 matben Exp $
 
 package provide JUser 1.0
 
@@ -207,10 +207,17 @@ proc ::JUser::DoAdd {token} {
     
     # We MUST use the bare JID else hell breaks lose.
     set state(jid) [jlib::barejid $state(jid)]
+    set gjid $state(type)
+    set type $state(servicetype,$gjid)
+
     
-    set jid   [jlib::escapejid $state(jid)]
+    # The user inputs the chat systems native ID typically. Get JID.
+    set jid [::Gateway::GetJIDFromPromptHeuristics $state(jid) $type]        
+    #set jid   [jlib::escapejid $state(jid)]
     set name  $state(name)
     set group $state(group)
+    
+    puts "::JUser::DoAdd $state(jid) $state(type) : jid=$jid"
 
     # In any case the jid should be well formed.
     if {![jlib::jidvalidate $jid]} {
@@ -339,14 +346,16 @@ proc ::JUser::TrptCmd {token jid} {
 
     # Seems to be necessary to achive any selection.
     focus $wjid
-    set state(jid) [format [::Gateway::GetTemplateJID $type] $jid]
-    #set state(jid) [::Gateway::GetPrompt $type]
-    #puts "\t type=$type"
+    #set state(jid) [format [::Gateway::GetTemplateJID $type] $jid]
+    set state(jid) [::Gateway::GetPrompt $type]
+    puts "\t type=$type"
     set ind [string first @ $state(jid)]
     if {$ind > 0} {
-	$wjid selection range 0 $ind
+	#$wjid selection range 0 $ind
     }
-    #$wjid selection range 0 end
+    $wjid selection range 0 end
+    
+    puts "::Gateway::GetJIDFromPromptHeuristics: [::Gateway::GetJIDFromPromptHeuristics $state(jid) $type]"
 }
 
 proc ::JUser::CloseCmd {wclose} {
