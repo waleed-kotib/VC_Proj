@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.33 2007-07-21 14:26:58 matben Exp $
+# $Id: JUser.tcl,v 1.34 2007-07-22 07:54:54 matben Exp $
 
 package provide JUser 1.0
 
@@ -120,9 +120,11 @@ proc ::JUser::NewDlg {args} {
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
+    # NB: the state(jid) is actually the prompt which is a real JID
+    # on xmpp systems and the native ID on foreign IM systems.
     ttk::label $frmid.ltype -text "[mc {Chat System}]:"
     ui::optionmenu $frmid.type -menulist $menuDef -direction flush  \
-      -variable $token\(type) -command [namespace code [list TrptCmd $token]]
+      -variable $token\(gjid) -command [namespace code [list TrptCmd $token]]
     ttk::label $frmid.ljid -text "[mc {Jabber ID}]:" -anchor e
     ttk::entry $frmid.ejid -textvariable $token\(jid)
     ttk::label $frmid.lnick -text "[mc {Nickname}]:" -anchor e
@@ -205,9 +207,11 @@ proc ::JUser::DoAdd {token} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
+    set jlib $jstate(jlib)
+
     # We MUST use the bare JID else hell breaks lose.
     set state(jid) [jlib::barejid $state(jid)]
-    set gjid $state(type)
+    set gjid $state(gjid)
     set type $state(servicetype,$gjid)
 
     
@@ -217,7 +221,7 @@ proc ::JUser::DoAdd {token} {
     set name  $state(name)
     set group $state(group)
     
-    puts "::JUser::DoAdd $state(jid) $state(type) : jid=$jid"
+    Debug 2 "::JUser::DoAdd type=$type, jid=$state(jid), gjid=$state(gjid), jid=$jid"
 
     # In any case the jid should be well formed.
     if {![jlib::jidvalidate $jid]} {
@@ -227,10 +231,9 @@ proc ::JUser::DoAdd {token} {
 	    return
 	}
     }
-    set jlib $jstate(jlib)
     
     # Warn if already in our roster.
-    set allUsers [$jlib roster getusers]
+    set users [$jlib roster getusers]
     if {[$jlib roster isitem $jid]} {
 	set ans [::UI::MessageBox -message [mc jamessalreadyinrost $jid] \
 	  -icon error -type yesno]
@@ -246,8 +249,8 @@ proc ::JUser::DoAdd {token} {
 	if {[lsearch [::Roster::GetAllTransportJids] $host] >= 0} {	    
 	
 	    # If this requires a transport component we must be registered.
-	    set transport [lsearch -inline -regexp $allUsers "^${host}.*"]
-	    if {$transport eq "" } {
+	    set transport [lsearch -inline -regexp $users "^${host}.*"]
+	    if {![llength $transport]} {
 		
 		# Seems we are not registered.
 		set ans [::UI::MessageBox -type yesnocancel -icon error \
@@ -256,10 +259,16 @@ proc ::JUser::DoAdd {token} {
 		    ::GenRegister::NewDlg -server $host -autoget 1
 		    return
 		} elseif {$ans eq "cancel"} {
+		    # Destroy also add dialog?
 		    return
 		}
 	    }
 	}
+    }
+    
+    # If 'name' not set then set it to the foreign system ID.
+    if {($type ne "xmpp") && ($name eq "")} {
+	set name $state(jid)
     }
     
     set opts [list]
@@ -348,14 +357,11 @@ proc ::JUser::TrptCmd {token jid} {
     focus $wjid
     #set state(jid) [format [::Gateway::GetTemplateJID $type] $jid]
     set state(jid) [::Gateway::GetPrompt $type]
-    puts "\t type=$type"
     set ind [string first @ $state(jid)]
     if {$ind > 0} {
 	#$wjid selection range 0 $ind
     }
     $wjid selection range 0 end
-    
-    puts "::Gateway::GetJIDFromPromptHeuristics: [::Gateway::GetJIDFromPromptHeuristics $state(jid) $type]"
 }
 
 proc ::JUser::CloseCmd {wclose} {

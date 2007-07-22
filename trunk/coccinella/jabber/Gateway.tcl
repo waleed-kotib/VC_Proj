@@ -5,9 +5,9 @@
 #       This is part of XEP-0100: Gateway Interaction, sect. 6.3
 #       
 #       NB1: We cache this info after logged out since it is assumed to
-#       be fairly persistant.
+#            be fairly persistant.
 #       NB2: We assume that any particular gateway/type is representative 
-#       for all gateways belonging to that group independent of JID.
+#            for all gateways belonging to that group independent of JID.
 #       
 #       @@@ Put all this in action when gateways are more reliable!
 #       
@@ -26,7 +26,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Gateway.tcl,v 1.5 2007-07-21 14:26:58 matben Exp $
+# $Id: Gateway.tcl,v 1.6 2007-07-22 07:54:53 matben Exp $
 
 package provide Gateway 1.0
 
@@ -232,8 +232,6 @@ proc ::Gateway::EscapePercent {type prompt} {
 
 proc ::Gateway::GetJIDFromPromptHeuristics {prompt type} {
     upvar ::Jabber::jstate jstate
-    
-    puts "::Gateway::GetJIDFromPromptHeuristics prompt=$prompt, type=$type"
     
     if {$type eq "xmpp"} {
 	return $prompt
