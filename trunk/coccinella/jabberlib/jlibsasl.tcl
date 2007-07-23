@@ -6,14 +6,15 @@
 #      It also makes the resource binding and session initiation.
 #      
 #        o sasl authentication
-#        o bind resource
-#        o establish session
+#         skipped:
+#        X bind resource
+#        X establish session
 #      
 #  Copyright (c) 2004-2006  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: jlibsasl.tcl,v 1.26 2007-07-19 06:28:17 matben Exp $
+# $Id: jlibsasl.tcl,v 1.27 2007-07-23 15:11:43 matben Exp $
 
 package require jlib
 package require saslmd5
@@ -395,11 +396,14 @@ proc jlib::sasl_success {jlibname tag xmllist} {
 	sasl_final $jlibname error [list network-failure $err]
 	return
     }
-	
+    sasl_final $jlibname result $xmllist
+
+    return
+    
     # Wait for the resource binding feature (optional) or session (mandantory):
     trace_stream_features $jlibname  \
       [namespace current]::auth_sasl_features_write
-    return {}
+    return
 }
 
 proc jlib::auth_sasl_features_write {jlibname} {

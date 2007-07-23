@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.180 2007-07-19 06:28:17 matben Exp $
+# $Id: jabberlib.tcl,v 1.181 2007-07-23 15:11:43 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -780,8 +780,8 @@ proc jlib::set_socket_filter {jlibname outcmd incmd} {
     
     upvar ${jlibname}::lib lib
 
-    set lib(socketfilter,out) $outCmd
-    set lib(socketfilter,in)  $inCmd
+    set lib(socketfilter,out) $outcmd
+    set lib(socketfilter,in)  $incmd
 
     fconfigure $lib(sock) -translation binary
 }
