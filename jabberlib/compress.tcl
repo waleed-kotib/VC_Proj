@@ -11,7 +11,7 @@
 #  Note: with zlib 1.0 it seems that we can import zlib compression
 #        on the socket channel using zlib stream socket ... ???
 #  
-# $Id: compress.tcl,v 1.4 2007-07-19 06:28:17 matben Exp $
+# $Id: compress.tcl,v 1.5 2007-07-23 15:11:43 matben Exp $
 
 package require jlib
 package require zlib
@@ -22,9 +22,13 @@ namespace eval jlib::compress {
 
     variable methods {zlib}
     
+    # NB: There are two namespaces:
+    #     'http://jabber.org/features/compress' 
+    #     'http://jabber.org/protocol/compress' 
     variable xmlns
     array set xmlns {
-	compress    "http://jabber.org/features/compress"
+	features/compress    "http://jabber.org/features/compress"
+	protocol/compress    "http://jabber.org/protocol/compress"
     }
 }
 
@@ -44,14 +48,13 @@ proc jlib::compress::start {jlibname cmd} {
     set state(cmd) $cmd
     set state(-method) [lindex $methods 0]
 
-    # Set up callbacks for the xmlns that is of interest to us.
-    $jlibname element_register $xmlns(compress) [namespace current]::parse
+    # Set up callback for the xmlns that is of interest to us.
+    $jlibname element_register $xmlns(protocol/compress) [namespace code parse]
 
     if {[$jlibname have_feature]} {
 	compress $jlibname
     } else {
-	$jlibname trace_stream_features  \
-	  [namespace current]::features_write
+	$jlibname trace_stream_features [namespace code features_write]
     }
 }
 
@@ -84,10 +87,14 @@ proc jlib::compress::compress {jlibname} {
 	finish $jlibname
 	return
     }
+    
+    # @@@ MUST match methods!!!
+    # A compliant implementation MUST implement the ZLIB compression method...
+    
     set methodE [wrapper::createtag method -chdata $state(-method)]
 
     set xmllist [wrapper::createtag compress  \
-      -attrlist [list xmlns $xmlns(compress)] -subtags [list $methodE]]
+      -attrlist [list xmlns $xmlns(protocol/compress)] -subtags [list $methodE]]
     $jlibname send $xmllist
 
     # Wait for 'compressed' or 'failure' element.
@@ -129,8 +136,7 @@ proc jlib::compress::compressed {jlibname xmldata} {
     # We must clear out any server info we've received so far.
     $jlibname stream_reset
     
-    $jlibname set_socket_filter  \
-      [namespace current]::out [namespace current]::in
+    $jlibname set_socket_filter [namespace code out] [namespace code in]
     
     if {[catch {
 	$jlibname sendstream -version 1.0
@@ -149,6 +155,7 @@ proc jlib::compress::out {data} {
 }
 
 proc jlib::compress::in {data} {
+    puts "jlib::compress::in"
     return [zlib decompress $data]
 }
 
@@ -173,7 +180,7 @@ proc jlib::compress::finish {jlibname {errcode ""} {errmsg ""}} {
     puts "jlib::compress:finish errcode=$errcode, errmsg=$errmsg"
 
     $jlibname trace_stream_features {}
-    $jlibname element_deregister $xmlns(compress) [namespace current]::parse
+    $jlibname element_deregister $xmlns(protocol/compress) [namespace code parse]
     
     if {$errcode ne ""} {
 	uplevel #0 $state(cmd) $jlibname [list $errcode $errmsg]

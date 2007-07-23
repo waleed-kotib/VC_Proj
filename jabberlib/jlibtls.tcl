@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: jlibtls.tcl,v 1.18 2007-07-19 06:28:17 matben Exp $
+# $Id: jlibtls.tcl,v 1.19 2007-07-23 15:11:43 matben Exp $
 
 package require tls
 package require jlib
@@ -149,67 +149,6 @@ proc jlib::tls_handshake_fin {jlibname} {
     # We must clear out any server info we've received so far.
     stream_reset $jlibname
     set sock $lib(sock)
-    
-    # The tls package resets the encoding to: -encoding binary
-    if {[catch {
-	fconfigure $sock -encoding utf-8
-	sendstream $jlibname -version 1.0
-    } err]} {
-	tls_finish $jlibname network-failure $err
-	return
-    }
-
-    # Wait for the SASL features. Seems to be the only way to detect success.
-    trace_stream_features $jlibname [namespace current]::tls_features_write_2nd
-    return
-}
-
-proc jlib::tls_proceedBU {jlibname tag xmllist} {    
-    global  errorCode
-    upvar ${jlibname}::lib lib
-    upvar ${jlibname}::locals locals
-    
-    Debug 2 "jlib::tls_proceed"
-    
-    set sock $lib(sock)
-    
-    puts "[fileevent $sock readable]"
-
-    # Make it a SSL connection.
-    tls::import $sock -cafile "" -certfile "" -keyfile "" \
-      -request 1 -server 0 -require 0 -ssl2 no -ssl3 yes -tls1 yes
-
-    set retry 0
-
-    # Do SSL handshake.
-    while {1} {
-	if {$retry > 100} { 
-	    close $sock
-	    set err "too long retry to setup SSL connection"
-	    tls_finish $jlibname starttls-failure $err
-	    return
-	}
-	#puts "retry=$retry"
-	if {[catch {tls::handshake $sock} err]} {
-	    #puts "\t catch err=$err, errorCode=$::errorCode"
-	    #if {[string match "*resource temporarily unavailable*" $err]}
-	    if {[lindex $errorCode 1] eq "EAGAIN"} {
-		after 50  
-		incr retry
-	    } else {
-		close $sock
-		tls_finish $jlibname starttls-failure $err
-		return
-	    }
-	} else {
-	    break
-	}
-    }   
-
-    wrapper::reset $lib(wrap)
-    
-    # We must clear out any server info we've received so far.
-    stream_reset $jlibname
     
     # The tls package resets the encoding to: -encoding binary
     if {[catch {

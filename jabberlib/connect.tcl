@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.23 2007-07-19 06:28:17 matben Exp $
+# $Id: connect.tcl,v 1.24 2007-07-23 15:11:43 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -105,6 +105,7 @@ proc jlib::connect::init_static {} {
     foreach name {
 	tls        jlibsasl        jlibtls  
 	jlib::dns  jlib::compress  jlib::http
+	jlib::bind
     } {
 	set have($name) 0
 	if {![catch {package require $name}]} {
@@ -636,11 +637,13 @@ proc jlib::connect::init_stream_cb {jlibname args} {
 	    uplevel #0 $state(-command) $jlibname starttls
 	}
 	$jlibname starttls jlib::connect::starttls_cb
-    } elseif {$state(usecompress)} {
+    } elseif {1 && $state(usecompress)} {
+	
+	# ?????????
 	if {$state(-command) ne {}} {
 	    uplevel #0 $state(-command) $jlibname startcompress
 	}
-	jlib::compress::start $jlibname jlib::connect::compress_cb
+	jlib::compress::start $jlibname [namespace code compress_cb]
     } elseif {$state(-noauth)} {
 	finish $jlibname
     } else {
@@ -669,26 +672,6 @@ proc jlib::connect::starttls_cb {jlibname type args} {
 	} else {
 	    auth $jlibname
 	}
-    }
-}
-
-proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {    
-    upvar ${jlibname}::connect::state state
-    
-    if {![info exists state]} return
-    
-    debug "jlib::connect::compress_cb"
-  
-    # Note: Failure of compression setup SHOULD NOT be treated as an 
-    # unrecoverable error and therefore SHOULD NOT result in a stream error. 
-    if {$errcode ne ""} {
-	finish $jlibname $errcode $errmsg
-	return
-    }
-    if {$state(-noauth)} {
-	finish $jlibname
-    } else {
-	auth $jlibname
     }
 }
 
@@ -737,16 +720,16 @@ proc jlib::connect::auth {jlibname args} {
     
     if {$state(usesasl)} {
 	$jlibname auth_sasl $username $resource $password \
-	  jlib::connect::auth_cb
+	  [namespace code auth_cb]
     } elseif {$state(-digest)} {
 	set digested [::sha1::sha1 $state(streamid)$password]
 	$jlibname send_auth $username $resource   \
-	  jlib::connect::auth_cb -digest $digested
+	  [namespace code auth_cb] -digest $digested
     } else {
 
 	# Plain password authentication.
 	$jlibname send_auth $username $resource  \
-	  jlib::connect::auth_cb -password $password
+	  [namespace code auth_cb] -password $password
     }
 }
 
@@ -764,6 +747,49 @@ proc jlib::connect::auth_cb {jlibname type queryE} {
 
 	# We have a new stream.
 	set state(streamid) [$jlibname getstreamattr id]
+	if {$state(usecompress)} {
+	    if {$state(-command) ne {}} {
+		uplevel #0 $state(-command) $jlibname startcompress
+	    }
+	    jlib::compress::start $jlibname [namespace code compress_cb]
+	} else {
+	    jlib::bind::resource $jlibname $state(resource) [namespace code bind_cb]
+	}
+    }
+}
+
+proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {    
+    upvar ${jlibname}::connect::state state
+    
+    if {![info exists state]} return
+    
+    debug "jlib::connect::compress_cb"
+  
+    # Note: Failure of compression setup SHOULD NOT be treated as an 
+    # unrecoverable error and therefore SHOULD NOT result in a stream error. 
+    if {$errcode ne ""} {
+	finish $jlibname $errcode $errmsg
+	return
+    }
+    
+    # We have a new stream.
+    # ????????????????
+    set state(streamid) [$jlibname getstreamattr id]
+    if {$state(-noauth)} {
+	finish $jlibname
+    } else {
+	jlib::bind::resource $jlibname $state(resource) [namespace code bind_cb]
+    }
+}
+
+proc jlib::connect::bind_cb {jlibname type subiq} {
+
+    debug "jlib::connect::bind_cb"
+    
+    if {$type eq "error"} {
+	lassign $queryE errcode errmsg
+	finish $jlibname $errcode $errmsg
+    } else {
 	finish $jlibname
     }
 }
@@ -882,15 +908,19 @@ if {0} {
 	puts "---> $args"
 	#puts [jlib::connect::get_state ::jlib::jlib1]
     }
-    ::jlib::jlib1 connect connect matben@localhost xxx -command cb    
-    ::jlib::jlib1 connect connect matben@devrieze.dyndns.org xxx \
+    set pw xxx
+    ::jlib::jlib1 connect connect matben@localhost $pw -command cb    
+    ::jlib::jlib1 connect connect matben@devrieze.dyndns.org $pw \
       -command cb -secure 1 -method tlssasl
    
     ::jlib::jlib1 connect connect matben@sgi.se xxx -command cb  \
       -http 1 -httpurl http://sgi.se:5280/http-poll/
 
-    ::jlib::jlib1 connect connect matben@jabber.ru xxx -command cb  \
-      -compress 1 -secure 1 -method tls
+    ::jlib::jlib1 connect connect openfire.matben@sgi.se $pw \
+      -command cb -compress 1 -secure 1 -method tlssasl
+    
+    ::jlib::jlib1 connect connect openfire.matben@sgi.se $pw \
+      -command cb -compress 1
 
     jlib::jlib1 closestream
 }
