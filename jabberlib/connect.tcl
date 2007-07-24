@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.24 2007-07-23 15:11:43 matben Exp $
+# $Id: connect.tcl,v 1.25 2007-07-24 06:54:09 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -752,8 +752,10 @@ proc jlib::connect::auth_cb {jlibname type queryE} {
 		uplevel #0 $state(-command) $jlibname startcompress
 	    }
 	    jlib::compress::start $jlibname [namespace code compress_cb]
-	} else {
+	} elseif {$state(usesasl)} {
 	    jlib::bind::resource $jlibname $state(resource) [namespace code bind_cb]
+	} else {
+	    finish $jlibname
 	}
     }
 }
