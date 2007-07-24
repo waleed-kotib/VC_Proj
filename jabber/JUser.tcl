@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.34 2007-07-22 07:54:54 matben Exp $
+# $Id: JUser.tcl,v 1.35 2007-07-24 06:53:18 matben Exp $
 
 package provide JUser 1.0
 
@@ -32,6 +32,9 @@ namespace eval ::JUser:: {
 
     # Hooks for add user dialog.
     ::hooks::register quitAppHook  ::JUser::QuitAppHook 
+
+    # Configurations:
+    set ::config(adduser,warn-non-xmpp) 1
 }
 
 proc ::JUser::QuitAppHook { } {
@@ -346,22 +349,30 @@ proc ::JUser::PresError {jlibname xmldata} {
     }
 }
 
-proc ::JUser::TrptCmd {token jid} {
+proc ::JUser::TrptCmd {token gjid} {
+    global  config
     variable $token
     upvar 0 $token state
 	
     set wjid $state(wjid)
-    set type $state(servicetype,$jid)
+    set type $state(servicetype,$gjid)
 
     # Seems to be necessary to achive any selection.
     focus $wjid
-    #set state(jid) [format [::Gateway::GetTemplateJID $type] $jid]
+    #set state(jid) [format [::Gateway::GetTemplateJID $type] $gjid]
     set state(jid) [::Gateway::GetPrompt $type]
     set ind [string first @ $state(jid)]
     if {$ind > 0} {
 	#$wjid selection range 0 $ind
     }
     $wjid selection range 0 end
+    
+    # If this requires a transport component we must be registered.
+    if {$config(adduser,warn-non-xmpp)} {
+	if {($type ne "xmpp") && ![::Jabber::JlibCmd roster isitem $gjid]} {
+	    tk_messageBox -icon warning -parent $state(w) -message "You are currently not registered with this transport and if you proceed you will be asked to register with your own account on this system."
+	}
+    }
 }
 
 proc ::JUser::CloseCmd {wclose} {
