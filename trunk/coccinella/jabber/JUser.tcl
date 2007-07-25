@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.35 2007-07-24 06:53:18 matben Exp $
+# $Id: JUser.tcl,v 1.36 2007-07-25 12:45:10 matben Exp $
 
 package provide JUser 1.0
 
@@ -143,6 +143,7 @@ proc ::JUser::NewDlg {args} {
 
     grid $frmid.type $frmid.ejid $frmid.enick $frmid.egroup -sticky ew
 
+    set state(gjid)  [lindex $trpts 0 0]
     set state(jid)   ""
     set state(name)  ""
     set state(group) ""
