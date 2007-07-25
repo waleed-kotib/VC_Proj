@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.113 2007-07-20 06:08:41 matben Exp $
+# $Id: Disco.tcl,v 1.114 2007-07-25 13:40:18 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1476,10 +1476,17 @@ proc ::Disco::OnMenuAddServer { } {
 
 # @@@ We should make this a generic way to disco any JID!
 
+namespace eval ::Disco {
+    
+    option add *DiscoAdd.settingsImage           settings         widgetDefault
+    option add *DiscoAdd.settingsDisImage        settingsDis      widgetDefault
+
+}
+
 proc ::Disco::AddServerDlg { } {
     global  wDlgs
-    variable addservervar ""
-    variable permdiscovar 0
+    variable dlgaddjid ""
+    variable dlgpermanent 0
     upvar ::Jabber::jprefs jprefs
     
     set w $wDlgs(jdisaddserv)
@@ -1489,18 +1496,29 @@ proc ::Disco::AddServerDlg { } {
 	raise $w
 	return
     }
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+    ::UI::Toplevel $w -class DiscoAdd -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox} \
       -closecommand [namespace code AddCloseCmd]
     wm title $w [mc {Add Server}]
     ::UI::SetWindowPosition $w
     
     set width 260
-    
+
+    set im  [::Theme::GetImage [option get $w settingsImage {}]]
+    set imd [::Theme::GetImage [option get $w settingsDisImage {}]]
+
     # Global frame.
     set wall $w.frall
     ttk::frame $wall
     pack $wall -fill both -expand 1
+
+    ttk::label $wall.head -style Headlabel \
+      -text [mc {Add Server}] -compound left \
+      -image [list $im background $imd]
+    pack $wall.head -side top -fill both -expand 1
+
+    ttk::separator $wall.s -orient horizontal
+    pack $wall.s -side top -fill x
     
     set wbox $wall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
@@ -1511,37 +1529,42 @@ proc ::Disco::AddServerDlg { } {
     pack $wbox.msg -side top -anchor w
     
     set wfr $wbox.fr
-    ttk::labelframe $wfr -text [mc Add] \
-      -padding [option get . notebookPageSmallPadding {}]
+    ttk::frame $wfr
     pack $wfr -side top -fill x -pady 4
-    ttk::label $wfr.l -text "[mc Server]:"
-    ttk::entry $wfr.e -textvariable [namespace current]::addservervar
+    ttk::label $wfr.l -text "[mc {Jabber ID}]:"
+    ttk::entry $wfr.e -textvariable [namespace current]::dlgaddjid
     #  -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
     ttk::checkbutton $wfr.ch -style Small.TCheckbutton \
       -text [mc {Add permanently}] \
-      -variable [namespace current]::permdiscovar
+      -variable [namespace current]::dlgpermanent
 
     grid  $wfr.l  $wfr.e   -padx 2 -pady 2
     grid  x       $wfr.ch  -pady 2 -sticky ew
     grid  $wfr.l  -sticky e
     grid  $wfr.e  -sticky ew
+    grid columnconfigure $wfr 1 -weight 1
     
-    set wfr2 $wbox.fr2
-    ttk::labelframe $wfr2 -text [mc Remove] \
-      -padding [option get . notebookPageSmallPadding {}]
-    pack $wfr2 -side top -fill x -pady 4
-    ttk::label $wfr2.l -style Small.TLabel \
-      -wraplength [expr $width-10] -justify left\
-      -text [mc jadisrmall]
-    ttk::button $wfr2.b -style Small.TButton \
-      -text [mc Remove] -command [namespace current]::AddServerNone
-
-    pack  $wfr2.l  -side top
-    pack  $wfr2.b  -side right -padx 6 -pady 2
+    if {0} {
+	
+	set wfr2 $wbox.fr2
+	ttk::labelframe $wfr2 -text [mc Remove] \
+	  -padding [option get . notebookPageSmallPadding {}]
+	pack $wfr2 -side top -fill x -pady 4
+	ttk::label $wfr2.l -style Small.TLabel \
+	  -wraplength [expr $width-10] -justify left\
+	  -text [mc jadisrmall]
+	ttk::button $wfr2.b -style Small.TButton \
+	  -text [mc Remove] -command [namespace current]::AddServerNone
+	
+	pack  $wfr2.l  -side top
+	pack  $wfr2.b  -side right -padx 6 -pady 2
+	
+	if {$jprefs(disco,autoServers) == {}} {
+	    $wfr2.b configure -state disabled
+	}
     
-    if {$jprefs(disco,autoServers) == {}} {
-	$wfr2.b configure -state disabled
     }
+    
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $frbot.btok -text [mc Add] \
@@ -1568,10 +1591,10 @@ proc ::Disco::AddCloseCmd {w} {
     ::UI::SaveWinGeom $w   
 }
 
-proc ::Disco::AddServerNone { } {
+proc ::Disco::AddServerNone {} {
     upvar ::Jabber::jprefs jprefs
     
-    set jprefs(disco,autoServers) {}
+    set jprefs(disco,autoServers) [list]
 }
 
 proc ::Disco::AddCancel {w} {
@@ -1581,15 +1604,15 @@ proc ::Disco::AddCancel {w} {
 
 proc ::Disco::AddServerDo {w} {
     upvar ::Jabber::jprefs jprefs
-    variable addservervar
-    variable permdiscovar
+    variable dlgaddjid
+    variable dlgpermanent
     
     ::UI::SaveWinGeom $w   
     destroy $w
-    if {$addservervar ne ""} {
-	set jid [jlib::escapejid $addservervar]
+    if {$dlgaddjid ne ""} {
+	set jid [jlib::escapejid $dlgaddjid]
 	DiscoServer $jid -command ::Disco::AddServerCB
-	if {$permdiscovar} {
+	if {$dlgpermanent} {
 	    lappend jprefs(disco,autoServers) $jid
 	    set jprefs(disco,autoServers) \
 	      [lsort -unique $jprefs(disco,autoServers)]
