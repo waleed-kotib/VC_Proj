@@ -1174,6 +1174,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jamucentermsg			{Kies een dienst voor chatruimtes, een chatruimte, een bijnaam en eventueel een wachtwoord indien nodig. Klik dan op de knop "Betreden". Met de knop "Browse" kunt u zien welke chatruimtes er bestaan op de gekozen dienst.}
 ::msgcat::mcset nl jainmsgshow				{Inkomende berichten in dit venster tonen}
 ::msgcat::mcset nl jadisaddserv				{Hier kunt u een server al dan niet permanent aan de lijst toevoegen. De server van uw account is altijd zichtbaar.}
+
+::msgcat::mcset nl jadisaddserv2                        {Add a server to discover and use its chatrooms and other services.}
+
 ::msgcat::mcset nl jadisrmall				{Permanente servers uit de lijst verwijderen.}
 ::msgcat::mcset nl jauserinnote				{Opmerkingen over deze contactpersoon kunt u hier bewaren.}
 ::msgcat::mcset nl jaregisterex				{Voer de naam in van de Jabber-server waarop u een account wilt aanmaken. Klik dan op de knop "Ophalen" om de vereiste gegevens op te halen. Voer de gevraagde gegevens in en maak de account aan.}

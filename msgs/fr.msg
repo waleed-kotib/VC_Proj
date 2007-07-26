@@ -1231,6 +1231,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jamucentermsg {Tapez votre pseudo et appuyez sur Entrée pour entrer dans le salon. Vous pouvez Parcourir pour trouver la liste des salons chaque service. Les salons privés peuvent vous demander un mot de passe.}
 ::msgcat::mcset fr jainmsgshow {Montrer les messages entrants dans cette fenêtre}
 ::msgcat::mcset fr jadisaddserv {Découvrir un autre serveur pour les salons de discussions et autres services. Vous pouvez ajouter un serveur définitivement quand il est découvert automatiquement. Le serveur de connexion est automatiquement découvert.}
+
+::msgcat::mcset fr jadisaddserv2 {Add a server to discover and use its chatrooms and other services.}
+
 ::msgcat::mcset fr jadisrmall {Enlever les serveurs qui étaient automatiquement et définitivement découverts.}
 ::msgcat::mcset fr jauserinnote {Ajouter vos notes personnelles sur cet utilisateur}
 ::msgcat::mcset fr jaregisterex {Indiquez le nom du serveur Jabber sur lequel vous voulez vous enregistrer. Cliquez ensuite su le bouton Recevoir pour obtenir les informations d'inscription. Remplissez ces informations et inscrivez-vous.}

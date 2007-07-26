@@ -1128,6 +1128,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset ru jamucentermsg {Введите ваш ник и нажмите "Enter" для захода в комнату. Вы можете просмотреть список доступных комнат.	Для частных комнат может понадобиться пароль.}
 ::msgcat::mcset ru jainmsgshow  {Показывать входящие сообщения в этом окне}
 ::msgcat::mcset ru jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
+
+::msgcat::mcset ru jadisaddserv2 {Add a server to discover and use its chatrooms and other services.}
+
 ::msgcat::mcset ru jadisrmall   {Remove all servers that are automatically and permanently discovered.}
 ::msgcat::mcset ru jauserinnote {Добавьте Ваше описание к этому пользователю}
 ::msgcat::mcset ru jaregisterex {Напишите имя Вашего jabber сервера на котором вы хотите зарегистрироваться. Затем нажмите кнопку "Получить" для получения регистрационной информации. Заполните нужные данные и зарегистрируйтесь.}

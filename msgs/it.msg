@@ -1189,6 +1189,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset it jamucentermsg {Scrivi il tuo nickname e premi INVIO per entrare nella stanza. Clicca su "Browse" per ricevere la lista delle stanze disponibili per il servizio scelto. Alcune stanze richiedono una password per l'ingresso.}
 ::msgcat::mcset it jainmsgshow {Mostra nella finestra i messaggi in arrivo}
 ::msgcat::mcset it jadisaddserv {Cerca un altro server di conferenza ed altri servizi. Puoi aggiungere un server in maniera permanente, e sarà ispezionato automaticamente. Il server di connessione viene sempre ispezionato.}
+
+::msgcat::mcset it jadisaddserv2 {Add a server to discover and use its chatrooms and other services.}
+
 ::msgcat::mcset it jadisrmall {Rimuovere tutti i server che sono automaticamente e permanentemente ispezionati.}
 ::msgcat::mcset it jauserinnote {Aggiungi le tue note personali riguardo questo utente.}
 ::msgcat::mcset it jaregisterex {Scrivi il nome del server Jabber a cui ti vuoi connettere, poi premi "Ricevi" per leggere le informazioni necessarie all'iscrizione. Riempi i campi richiesti ed iscriviti.}

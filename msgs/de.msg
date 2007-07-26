@@ -1214,6 +1214,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jamucentermsg {Spitznamen eingeben und Enter drücken, um den Raum zu betreten. Sie können blättern, um die verfügbaren Räume für diesen Dienst zu sehen. Räume nur für Mitglieder können ein Passwort erfordern.}
 ::msgcat::mcset de jainmsgshow {Eingehende Nachrichten in diesem Fenster zeigen}
 ::msgcat::mcset de jadisaddserv {Suchen Sie einen weiteren Server für Gruppenräume und andere Dienste. Sie können einen Server permanent hinzufügen, der dann automatisch erkannt wird. Der Anmelde-Server wird immer erkannt.}
+
+::msgcat::mcset de jadisaddserv2 {Add a server to discover and use its chatrooms and other services.}
+
 ::msgcat::mcset de jadisrmall {Alle Server entfernen, die automatisch und permanent erkannt wurden.}
 ::msgcat::mcset de jauserinnote {Ihre persönlichen Notizen über diesen Benutzer hinzufügen}
 ::msgcat::mcset de jaregisterex {Tragen Sie die Jabber-Server, bei denen Sie sich registrieren möchten. Drücken Sie dann die Abrufschaltfläche, um die gewünschten Registrierungsinformationen zu erhalten. Geben Sie diese Informationen ein und registrieren Sie sich.}

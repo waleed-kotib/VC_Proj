@@ -1193,6 +1193,7 @@ Vissa rum kan kräva medlemskap och lösenord.}
 ::msgcat::mcset sv jainmsgshow  {Visa inkommande meddelanden i detta fönster}
 ::msgcat::mcset sv jadisaddserv {Undersök en annan server för gruppchatt rum eller andra tjänster. Du kan välja att lägga till den permanent och den kommer då att upptäckas automatiskt.\
 Inloggningsservern upptäcks alltid.}
+::msgcat::mcset sv jadisaddserv2 {Lägg till en server att upptäcka (disco) och att utnyttja dess chattrum och andra tjänster.}
 ::msgcat::mcset sv jadisrmall   {Tag bort samtliga servrar som permanent upptäcks automatiskt.}
 ::msgcat::mcset sv jauserinnote {Lägg till dina personliga anteckningar om denna kontakt}
 ::msgcat::mcset sv jaregisterex {Skriv jabber serverns namn där du vill registrera. Tryck sedan på Hämta knappen för att få registreringsinfo. Fyll i och registrera.}
