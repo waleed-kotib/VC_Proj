@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.79 2007-07-19 06:28:15 matben Exp $
+# $Id: JWB.tcl,v 1.80 2007-07-26 14:18:53 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -446,7 +446,7 @@ proc ::JWB::BuildEntryHook {w wcomm} {
     }
 
     ttk::label $wframe.ljid -style Small.TLabel \
-      -text "[mc {Jabber ID}]:" -padding {16 4 4 4}
+      -text "[mc {Contact ID}]:" -padding {16 4 4 4}
     ui::entryex $wframe.ejid -font CociSmallFont  \
       -library $jidlist -textvariable [namespace current]::jwbstate($w,jid)
     ttk::checkbutton $wframe.to -style Small.TCheckbutton \

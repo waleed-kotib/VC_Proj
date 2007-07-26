@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.20 2007-07-19 08:05:21 matben Exp $
+# $Id: UserInfo.tcl,v 1.21 2007-07-26 14:18:54 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -328,7 +328,7 @@ proc ::UserInfo::Build {token} {
       -macclass {document closeBox} \
       -closecommand ::UserInfo::CloseHook
     set djid [::Roster::GetDisplayName $jid]
-    wm title $w "[mc {User Info}]: $djid"
+    wm title $w "[mc {Business Card}]: $djid"
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(juserinfo)]]
     if {$nwin == 1} {

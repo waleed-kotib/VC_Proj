@@ -4,17 +4,17 @@
 #      It implements stream compression as defined in XEP-0138: 
 #      Stream Compression
 #      
-#  Copyright (c) 2006  Mats Bengtsson
+#  Copyright (c) 2006-2007  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #  
 #  Note: with zlib 1.0 it seems that we can import zlib compression
 #        on the socket channel using zlib stream socket ... ???
 #  
-# $Id: compress.tcl,v 1.5 2007-07-23 15:11:43 matben Exp $
+# $Id: compress.tcl,v 1.6 2007-07-26 14:18:54 matben Exp $
 
 package require jlib
-package require zlib
+#package require zlib
 
 package provide jlib::compress 0.1
 
@@ -151,11 +151,19 @@ proc jlib::compress::compressed {jlibname xmldata} {
 #       Actual compression takes place here.
 
 proc jlib::compress::out {data} {
+    puts "jlib::compress::out¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬"
     return [zlib compress $data]
 }
 
+set jlib::compress::n -1
+
 proc jlib::compress::in {data} {
-    puts "jlib::compress::in"
+    variable n
+    puts "jlib::compress::in...................."
+    set ::_data([incr n]) $data
+    return
+    
+    # This just crashes or gives "data error"
     return [zlib decompress $data]
 }
 

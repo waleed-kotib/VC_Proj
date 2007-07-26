@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.75 2007-07-19 06:28:16 matben Exp $
+# $Id: Profiles.tcl,v 1.76 2007-07-26 14:18:53 matben Exp $
 
 package provide Profiles 1.0
 
@@ -876,7 +876,7 @@ proc ::Profiles::BuildDialog { } {
     pack $w.frall -fill both -expand 1
 
     ttk::label $w.frall.head -style Headlabel \
-      -text [mc Profiles] -compound left \
+      -text [mc "Edit Profiles"] -compound left \
       -image [list $im background $imd]
     pack  $w.frall.head  -side top -fill both -expand 1
 

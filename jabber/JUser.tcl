@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.37 2007-07-26 13:21:51 matben Exp $
+# $Id: JUser.tcl,v 1.38 2007-07-26 14:18:53 matben Exp $
 
 package provide JUser 1.0
 
@@ -129,7 +129,7 @@ proc ::JUser::NewDlg {args} {
     ttk::label $frmid.ltype -text "[mc {Chat System}]:"
     ui::optionmenu $frmid.type -menulist $menuDef -direction flush  \
       -variable $token\(gjid) -command [namespace code [list TrptCmd $token]]
-    ttk::label $frmid.ljid -text "[mc {Jabber ID}]:" -anchor e
+    ttk::label $frmid.ljid -text "[mc {Contact ID}]:" -anchor e
     ttk::entry $frmid.ejid -textvariable $token\(jid)
     ttk::label $frmid.lnick -text "[mc {Nickname}]:" -anchor e
     ttk::entry $frmid.enick -textvariable $token\(name)
@@ -451,7 +451,7 @@ proc ::JUser::EditUserDlg {jid} {
     if {$istransport} {
 	set title [mc {Transport Info}]
     } else {
-	set title [mc {Edit User}]
+	set title [mc {Edit Contact}]
     }
 
     ::UI::Toplevel $w -class JUser \
@@ -508,7 +508,7 @@ proc ::JUser::EditUserDlg {jid} {
 	set subtype [lindex [split $trpttype /] 1]
 	set msg [mc jamessowntrpt $subtype $ujid $subscription]
     } else {
-	set msg [mc jarostset $ujid]
+	set msg [mc jarostset2 $ujid]
     }
 
     # Global frame.
@@ -561,12 +561,12 @@ proc ::JUser::EditUserDlg {jid} {
 	switch -- $subscription {
 	    from - none {
 		ttk::checkbutton $frmid.csubs -style Small.TCheckbutton \
-		  -text [mc jarostsub]  \
+		  -text [mc jarostsub2]  \
 		  -variable $token\(subscribe)
 	    }
 	    both - to {
 		ttk::checkbutton $frmid.csubs -style Small.TCheckbutton \
-		  -text [mc jarostunsub]  \
+		  -text [mc jarostunsub2]  \
 		  -variable $token\(unsubscribe)
 	    }
 	}
@@ -591,7 +591,7 @@ proc ::JUser::EditUserDlg {jid} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Set] -default active \
+    ttk::button $frbot.btok -text [mc Save] -default active \
       -command [list [namespace current]::DoEdit $token]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelEdit $token]
@@ -604,7 +604,7 @@ proc ::JUser::EditUserDlg {jid} {
 	pack $frbot.btok -side right -padx $padx
     }
     if {!$istransport} {
-	ttk::button $frbot.bvcard -text "[mc {Get vCard}]..."  \
+	ttk::button $frbot.bvcard -text [mc mBusinessCard]  \
 	  -command [list ::VCard::Fetch other $jid]
 	pack $frbot.bvcard -side right
     }

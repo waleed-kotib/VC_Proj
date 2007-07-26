@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.87 2007-07-19 06:28:16 matben Exp $
+# $Id: NewMsg.tcl,v 1.88 2007-07-26 14:18:53 matben Exp $
 
 package require ui::entryex
 
@@ -224,7 +224,7 @@ proc ::NewMsg::Build {args} {
     # Toplevel of class NewMsg.
     ::UI::Toplevel $w -class NewMsg \
       -usemacmainmenu 1 -macstyle documentProc -closecommand ::NewMsg::CloseHook
-    wm title $w [mc {New Message}]
+    wm title $w [mc Message]
     
     # Global frame.
     ttk::frame $w.frall

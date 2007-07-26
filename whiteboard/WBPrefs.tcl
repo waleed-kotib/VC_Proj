@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: WBPrefs.tcl,v 1.13 2007-07-19 06:28:19 matben Exp $
+# $Id: WBPrefs.tcl,v 1.14 2007-07-26 14:18:54 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -340,7 +340,7 @@ proc ::WBPrefs::BuildPagePrivacy {page} {
       -padding [option get . groupSmallPadding {}]
     pack $wpr -side top
     
-    ttk::label $wpr.msg -text [mc prefpriv] -wraplength 340 -justify left
+    ttk::label $wpr.msg -text [mc prefpriv2] -wraplength 340 -justify left
     ttk::checkbutton $wpr.only -text [mc Privacy]  \
       -variable [namespace current]::tmpPrefs(privacy)
     

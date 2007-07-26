@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.169 2007-07-19 12:41:20 matben Exp $
+# $Id: JUI.tcl,v 1.170 2007-07-26 14:18:53 matben Exp $
 
 package provide JUI 1.0
 
@@ -162,7 +162,7 @@ proc ::JUI::Init { } {
 	  {-variable ::JUI::state(mailbox,visible)}}
 	{separator}
 	{command     mSearch        {::Search::OnMenu}                {}}
-	{command     mAddNewUser    {::JUser::OnMenu}                 {}}
+	{command     mAddContact    {::JUser::OnMenu}                 {}}
 	{cascade     mDisco         {}                                {} {} {
 	    {command mAddServer     {::Disco::OnMenuAddServer}        {}}
 	}}
@@ -175,7 +175,7 @@ proc ::JUI::Init { } {
 	{command     mCreateRoom    {::GroupChat::OnMenuCreate}       {}}
 	{command     mEditBookmarks {::GroupChat::OnMenuBookmark}     {}}
 	{separator}
-	{command     mvCard         {::VCard::OnMenu}                 {}}
+	{command     mvCard2        {::VCard::OnMenu}                 {}}
 	{cascade     mShow          {}                                {} {} {
 	    {check   mToolbar       {::JUI::OnMenuToggleToolbar}      {} 
 	    {-variable ::JUI::state(show,toolbar)}}
@@ -223,6 +223,8 @@ proc ::JUI::Init { } {
 		{-variable prefs(fontSizePlus) -value 1}}
 		{radio   mLargeFont     {::Theme::FontConfigSize +2}    {}
 		{-variable prefs(fontSizePlus) -value 2}}
+		{radio   mHugeFont      {::Theme::FontConfigSize +6}    {}
+		{-variable prefs(fontSizePlus) -value 6}}
 	    } }
 	    {separator}
 	    {command     mAboutCoccinella  {::Splash::SplashScreen}      {}}
@@ -982,11 +984,11 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mPassword -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mSearch -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mAddNewUser -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mAddContact -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mChat -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mvCard -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state normal
@@ -1001,11 +1003,11 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mPassword -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mSearch -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mAddNewUser -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mAddContact -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mChat -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mvCard -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state disabled

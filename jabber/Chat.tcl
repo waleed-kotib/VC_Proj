@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.200 2007-07-21 07:40:34 matben Exp $
+# $Id: Chat.tcl,v 1.201 2007-07-26 14:18:52 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -275,7 +275,7 @@ proc ::Chat::StartThreadDlg {args} {
     pack $frmid -side top -fill both -expand 1
 
     set jidlist [::Jabber::RosterCmd getusers -type available]
-    ttk::label $frmid.luser -text "[mc {Jabber ID}]:"  \
+    ttk::label $frmid.luser -text "[mc {Contact ID}]:"  \
       -anchor e
     ui::comboboxex $frmid.euser -library $jidlist -width 26  \
       -textvariable [namespace current]::user

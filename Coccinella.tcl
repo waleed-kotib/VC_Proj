@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.152 2007-05-22 09:18:17 matben Exp $	
+# $Id: Coccinella.tcl,v 1.153 2007-07-26 14:18:52 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -142,7 +142,7 @@ source [file join $thisPath lib Init.tcl]
 ::Init::SetAutoPath
 
 set prefs(appName)    "Coccinella"
-set prefs(theAppName) "The Coccinella"
+set prefs(theAppName) "Coccinella"
 
 # Read our prefs file containing the theme name and locale needed before splash.
 package require PrefUtils

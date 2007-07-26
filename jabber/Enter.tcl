@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.12 2007-07-19 14:11:28 matben Exp $
+# $Id: Enter.tcl,v 1.13 2007-07-26 14:18:53 matben Exp $
 
 package provide Enter 1.0
 
@@ -152,7 +152,7 @@ proc ::Enter::Build {protocol args} {
     
     ttk::label $frmid.lroom -text "[mc {Room name}]:"
     ttk::::combobox $wroom -textvariable $token\(roomname)
-    ttk::label $frmid.lnick -text "[mc {Nick name}]:"
+    ttk::label $frmid.lnick -text "[mc {Nickname}]:"
     ttk::entry $frmid.enick -textvariable $token\(nickname)
     ttk::label $frmid.lpass -text "[mc Password]:"
     ttk::entry $frmid.epass -textvariable $token\(password)  \

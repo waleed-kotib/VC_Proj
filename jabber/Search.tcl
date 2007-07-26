@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.28 2007-07-19 06:28:17 matben Exp $
+# $Id: Search.tcl,v 1.29 2007-07-26 14:18:54 matben Exp $
 
 package provide Search 1.0
 
@@ -31,8 +31,8 @@ namespace eval ::Search:: {
     variable popMenuDefs
     
     set popMenuDefs {
-	{command    mAddNewUser  {::JUser::NewDlg -jid $jid} }
-	{command    mvCard       {::VCard::Fetch other $jid} }	
+	{command    mAddContact  {::JUser::NewDlg -jid $jid} }
+	{command    mvCard2      {::VCard::Fetch other $jid} }	
     }
 }
 
@@ -281,7 +281,7 @@ proc ::Search::PostMenuCmd {m jid} {
     upvar ::Jabber::jstate jstate
 
     if {[$jstate(jlib) roster isitem $jid]} {
-	set midx [::AMenu::GetMenuIndex $m mAddNewUser]
+	set midx [::AMenu::GetMenuIndex $m mAddContact]
 	$m entryconfigure $midx -state disabled
     }
 }

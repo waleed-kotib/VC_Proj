@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Create.tcl,v 1.10 2007-07-19 14:11:28 matben Exp $
+# $Id: Create.tcl,v 1.11 2007-07-26 14:18:53 matben Exp $
 
 package provide Create 1.0
 
@@ -109,7 +109,7 @@ proc ::Create::Build {args} {
     ttk::label $frtop.lroom -text "[mc {Room name}]:"    
     ttk::entry $frtop.eroom -textvariable $token\(roomname)  \
       -validate key -validatecommand {::Jabber::ValidateUsernameStrEsc %S}
-    ttk::label $frtop.lnick -text "[mc {Nick name}]:"    
+    ttk::label $frtop.lnick -text "[mc {Nickname}]:"    
     ttk::entry $frtop.enick -textvariable $token\(nickname)  \
       -validate key -validatecommand {::Jabber::ValidateResourceStr %S}
     
@@ -165,7 +165,7 @@ proc ::Create::Build {args} {
     }
 
     # MUC rooms can be created directly (instant) without getting the form.
-    # But in this case we must have nonempty room name and nick name.
+    # But in this case we must have nonempty room name and nickname.
     if {($state(roomname) eq "") || ($state(nickname) eq "")} {
 	$wbtcreate state {disabled}
     }
@@ -231,7 +231,7 @@ proc ::Create::Build {args} {
 }
 
 # MUC rooms can be created directly (instant) without getting the form.
-# But in this case we must have nonempty room name and nick name.
+# But in this case we must have nonempty room name and nickname.
 
 proc ::Create::TraceCreateState {token name junk1 junk2} {        
     SetState $token
@@ -620,7 +620,7 @@ proc ::Create::GCBuild {args} {
     ttk::entry $frmid.eroom -width 24    \
       -textvariable $token\(roomname) -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStrEsc %S}
-    ttk::label $frmid.lnick -text "[mc {Nick name}]:" \
+    ttk::label $frmid.lnick -text "[mc {Nickname}]:" \
       -anchor e
     ttk::entry $frmid.enick -width 24    \
       -textvariable $token\(nickname) -validate key  \

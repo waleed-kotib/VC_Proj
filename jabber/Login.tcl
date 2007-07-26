@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.117 2007-07-19 06:28:16 matben Exp $
+# $Id: Login.tcl,v 1.118 2007-07-26 14:18:53 matben Exp $
 
 package provide Login 1.0
 
@@ -111,7 +111,7 @@ proc ::Login::Dlg { } {
     pack  $wbox  -fill both -expand 1
 
     if {$config(login,style) eq "jid"} {
-	set str [mc jaloginjid]
+	set str [mc jaloginjid2]
     } elseif {$config(login,style) eq "jidpure"} {
 	set str [mc jaloginjidpure]
     } elseif {$config(login,style) eq "parts"} {
@@ -224,7 +224,7 @@ proc ::Login::Dlg { } {
       -default active -command [namespace current]::DoLogin
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::DoCancel $w]
-    ttk::button $frbot.btprof -text [mc Profiles]  \
+    ttk::button $frbot.btprof -text "[mc {Edit Profiles}]..." \
       -command [namespace current]::Profiles
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
