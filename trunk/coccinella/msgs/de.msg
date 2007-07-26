@@ -480,6 +480,7 @@
 
 ::msgcat::mcset de mEditNick            {Edit Nickname}
 ::msgcat::mcset de mAdHocCommands       {Ad-Hoc Commands}
+::msgcat::mcset de mRemoveListing       {Remove Listing}
 
 
 # Short texts only. Use english as database key.

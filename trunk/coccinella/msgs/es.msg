@@ -484,6 +484,7 @@
 
 ::msgcat::mcset es mEditNick            {Editar nick}
 ::msgcat::mcset es mAdHocCommands       {Ad-Hoc Commands}
+::msgcat::mcset es mRemoveListing       {Remove Listing}
 
 # Textos cortos únicamente.
 ::msgcat::mcset es {30 days}			{30 días}
