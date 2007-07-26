@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.115 2007-07-26 12:07:35 matben Exp $
+# $Id: Disco.tcl,v 1.116 2007-07-26 12:48:53 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -157,6 +157,7 @@ proc ::Disco::InitMenus {} {
 	} }
 	{command    mRefresh       {::Disco::Refresh $vstruct} }
 	{command    mAddServer     {::Disco::AddServerDlg}     }
+	{command    mRemoveListing {::Disco::RemoveListing $jid}}
 	{cascade    mAdHocCommands {}                          }
     }
     if {[::Jabber::HaveWhiteboard]} {
@@ -193,6 +194,7 @@ proc ::Disco::InitMenus {} {
 	}}
 	{mRefresh       {jid}           }
 	{mAddServer     {}              }
+	{mRemoveListing {root}          }
 	{mAdHocCommands {disabled}      }
     }
 }
@@ -962,6 +964,9 @@ proc ::Disco::Popup {w vstruct x y} {
     if {($jid ne "") && ($node eq "")} {
 	lappend clicked jid
     }
+    if {[llength $vstruct] == 1} {
+	lappend clicked root
+    }
     
     ::Debug 2 "\t clicked=$clicked"
     
@@ -1629,6 +1634,19 @@ proc ::Disco::AddServerErrorCheck {from} {
     upvar ::Jabber::jprefs jprefs
     
     lprune jprefs(disco,autoServers) $from
+}
+
+proc ::Disco::RemoveListing {jid} {
+    upvar ::Jabber::jprefs jprefs
+    variable wtree
+    
+    set mjid [jlib::jidmap $jid]
+    lprune jprefs(disco,autoServers) $mjid
+    
+    # @@@ Should we issue a warning if things depends on the disco listing?
+    
+    
+    ::ITree::DeleteItem $wtree [list [list $mjid {}]]    
 }
 
 proc ::Disco::MainMenuPostHook {type wmenu} {
