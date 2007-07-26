@@ -1187,6 +1187,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jamucentermsg {Enter your nick name and press Enter to go into the room. You may Browse to get the available rooms for the specific service.	Members only room may require a password.}
 ::msgcat::mcset en jainmsgshow  {Show incoming messages in this window}
 ::msgcat::mcset en jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
+::msgcat::mcset en jadisaddserv2 {Add a server to discover and use its chatrooms and other services.}
 ::msgcat::mcset en jadisrmall   {Remove all servers that are automatically and permanently discovered.}
 ::msgcat::mcset en jauserinnote {Add your personal notes about this user}
 ::msgcat::mcset en jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}

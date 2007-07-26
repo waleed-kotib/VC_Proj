@@ -1199,6 +1199,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset kr jamucentermsg {별명을 쓰고, 방에 들어가기 위해 엔터를 치세요. 특정 서비스를 젝오하는 방을 검색할 수 있습니다. 회원 전용 방은 암호를 요구합니다.}
 ::msgcat::mcset kr jainmsgshow  {이창에서 받은 메세지 보여주기}
 ::msgcat::mcset kr jadisaddserv {그룹 대화방과 다른 서비스를 위한 다른 서버를 찾기. 자동으로 찾아지면 이를 고정적으로 서버에 더할 수 있다. 로그인 서버는 항상 보여진다.}
+
+::msgcat::mcset kr jadisaddserv2 {Add a server to discover and use its chatrooms and other services.}
+
 ::msgcat::mcset kr jadisrmall   {자동으로 또는 항시적으로 보여지는 서버 모두를 제거하기.}
 ::msgcat::mcset kr jauserinnote {이 사용자에 대한 자신의 개인 메모하기}
 ::msgcat::mcset kr jaregisterex {당신이 등록하길 원하는 재버 서버 이름을 적으시오. 그리고 등록 양식를 얻기 위해 받기 버튼을 누르시오. 양식을 채워 등록하세요.}

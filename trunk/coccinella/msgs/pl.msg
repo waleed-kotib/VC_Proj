@@ -1197,6 +1197,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jamucentermsg {Aby wejść do pokoju, podaj swój pseudonim i naciśnij <Enter>. Z pomocą przeglądarki ("Zasoby") można uzyskać listę dostępnych pokoi. Pokoje "tylko dla zaproszonych" mogą wymagać hasła.}
 ::msgcat::mcset pl jainmsgshow  {W tym oknie można przejrzeć nadchodzące wiadomości}
 ::msgcat::mcset pl jadisaddserv {Szukaj pokoi konferencyjnych (i innych serwisów) na jakimś innym serwerze - można dopisać jego adres na stałe, dzięki czemu będzie automatycznie przeszukiwany po każdym połączeniu. Serwer, na który się logujesz, jest przeglądany zawsze.}
+
+::msgcat::mcset pl jadisaddserv2 {Add a server to discover and use its chatrooms and other services.}
+
 ::msgcat::mcset pl jadisrmall   {Usuń adresy wszystkich serwerów dodanych na stałe, przeglądanych automatycznie.}
 ::msgcat::mcset pl jauserinnote {Możesz o tym użytkowniku napisać coś "od siebie"}
 ::msgcat::mcset pl jaregisterex {Podaj nazwę serwera Jabbera, gdzie zamierzasz się zarejestrować, po czym kliknij przycisk "Pobierz", aby pobrać formularz rejestracyjny. Wypełnij go, aby móc dokonać rejestracji.}

@@ -1238,6 +1238,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jamucentermsg {Introduzca su usuario y pulse la tecla "Intro" para acceder a la sala de chat. Puede buscar para ver las salas de chat disponibles en el servicio. Solo las salas restringidas necesitan contraseñia.}
 ::msgcat::mcset es jainmsgshow {Mostrar los mensajes entrantes en esta ventana}
 ::msgcat::mcset es jadisaddserv {Encuentra otros servicios o salas de chat en el servidor. Puede añadir otro servidor de forma permanente para que posteriormente activado de forma automática.El servidor al que se accede de forma automatica mostrará todos los servicios.}
+
+::msgcat::mcset es jadisaddserv2 {Add a server to discover and use its chatrooms and other services.}
+
 ::msgcat::mcset es jadisrmall {Borrar todos los servidores que han sido automaticamente encontrados.}
 ::msgcat::mcset es jauserinnote {Agregue sus notas personales acerca de este usuario}
 ::msgcat::mcset es jaregisterex {Complete el nombre de los servidores Jabber con los que desea registrar. Pulse el botón "Get" para recibir la información de registro. Complete la información y finalice el registro.}
