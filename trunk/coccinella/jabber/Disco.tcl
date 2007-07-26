@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.114 2007-07-25 13:40:18 matben Exp $
+# $Id: Disco.tcl,v 1.115 2007-07-26 12:07:35 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1525,13 +1525,13 @@ proc ::Disco::AddServerDlg { } {
     pack $wbox -fill both -expand 1
 
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc jadisaddserv]
+      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc jadisaddserv2]
     pack $wbox.msg -side top -anchor w
     
     set wfr $wbox.fr
     ttk::frame $wfr
     pack $wfr -side top -fill x -pady 4
-    ttk::label $wfr.l -text "[mc {Jabber ID}]:"
+    ttk::label $wfr.l -text "[mc Server]:"
     ttk::entry $wfr.e -textvariable [namespace current]::dlgaddjid
     #  -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
     ttk::checkbutton $wfr.ch -style Small.TCheckbutton \
@@ -1543,28 +1543,7 @@ proc ::Disco::AddServerDlg { } {
     grid  $wfr.l  -sticky e
     grid  $wfr.e  -sticky ew
     grid columnconfigure $wfr 1 -weight 1
-    
-    if {0} {
-	
-	set wfr2 $wbox.fr2
-	ttk::labelframe $wfr2 -text [mc Remove] \
-	  -padding [option get . notebookPageSmallPadding {}]
-	pack $wfr2 -side top -fill x -pady 4
-	ttk::label $wfr2.l -style Small.TLabel \
-	  -wraplength [expr $width-10] -justify left\
-	  -text [mc jadisrmall]
-	ttk::button $wfr2.b -style Small.TButton \
-	  -text [mc Remove] -command [namespace current]::AddServerNone
-	
-	pack  $wfr2.l  -side top
-	pack  $wfr2.b  -side right -padx 6 -pady 2
-	
-	if {$jprefs(disco,autoServers) == {}} {
-	    $wfr2.b configure -state disabled
-	}
-    
-    }
-    
+        
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $frbot.btok -text [mc Add] \
@@ -1608,9 +1587,15 @@ proc ::Disco::AddServerDo {w} {
     variable dlgpermanent
     
     ::UI::SaveWinGeom $w   
-    destroy $w
     if {$dlgaddjid ne ""} {
 	set jid [jlib::escapejid $dlgaddjid]
+	if {![jlib::jidvalidate $jid]} {
+	    set ans [::UI::MessageBox -message [mc jamessbadjid $jid] \
+	      -icon error -type yesno]
+	    if {[string equal $ans "no"]} {
+		return
+	    }
+	}
 	DiscoServer $jid -command ::Disco::AddServerCB
 	if {$dlgpermanent} {
 	    lappend jprefs(disco,autoServers) $jid
@@ -1622,6 +1607,7 @@ proc ::Disco::AddServerDo {w} {
 	      [lsort -unique $jprefs(disco,tmpServers)]
 	}
     }
+    destroy $w
 }
 
 proc ::Disco::AddServerCB {type from queryE args} {
