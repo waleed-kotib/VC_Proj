@@ -471,6 +471,7 @@
 ::msgcat::mcset nl mEditNick				{Bijnaam bewerken}
 
 ::msgcat::mcset nl mAdHocCommands                       {Ad-Hoc Commands}
+::msgcat::mcset nl mRemoveListing                       {Remove Listing}
 
 
 # Short texts only. Use english as database key.

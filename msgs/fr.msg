@@ -482,6 +482,7 @@
 ::msgcat::mcset fr mBackgroundImage     {Background Image}
 ::msgcat::mcset fr mEditNick            {Edit Nickname}
 ::msgcat::mcset fr mAdHocCommands       {Ad-Hoc Commands}
+::msgcat::mcset fr mRemoveListing       {Remove Listing}
 
 
 # Courts textes uniquement. Anglais pour les clés de la base de données.

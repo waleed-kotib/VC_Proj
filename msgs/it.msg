@@ -477,6 +477,7 @@
 
 ::msgcat::mcset it mEditNick            {Edit Nickname}
 ::msgcat::mcset it mAdHocCommands       {Ad-Hoc Commands}
+::msgcat::mcset it mRemoveListing       {Remove Listing}
 
 # Short texts only. Use english text as database key.
 ::msgcat::mcset it {30 days} {30 giorni}
