@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.201 2007-07-21 14:26:58 matben Exp $
+# $Id: Roster.tcl,v 1.202 2007-07-26 14:18:54 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -119,9 +119,9 @@ proc ::Roster::InitMenus {} {
 	    command     mWhiteboard    {wb available}     {::JWB::NewWhiteboardTo $jid3} {}
 	    command     mSendFile      {user available}   {::FTrans::Send $jid3}             {}
 	    separator   {}             {}                 {} {}
-	    command     mAddNewUser    {}                 {::JUser::NewDlg}            {}
-	    command     mEditUser      {user}             {::JUser::EditDlg $jid}      {}
-	    command     mUserInfo      {user}             {::UserInfo::Get $jid3}             {}
+	    command     mAddContact    {}                 {::JUser::NewDlg}            {}
+	    command     mEditContact   {user}             {::JUser::EditDlg $jid}      {}
+	    command     mBusinessCard  {user}             {::UserInfo::Get $jid3}             {}
 	    command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
 	    command     mRemoveContact {user}             {::Roster::SendRemove $jid}         {}
 	    separator   {}             {}                 {} {}
@@ -143,9 +143,9 @@ proc ::Roster::InitMenus {} {
 	    command     mChat          {user available}   {::Chat::StartThread $jid3}         {}
 	    command     mSendFile      {user available}   {::FTrans::Send $jid3}             {}
 	    separator   {}             {}                 {} {}
-	    command     mAddNewUser    {}                 {::JUser::NewDlg}            {}
-	    command     mEditUser      {user}             {::JUser::EditDlg $jid}      {}
-	    command     mUserInfo      {user}             {::UserInfo::Get $jid3}             {}
+	    command     mAddContact    {}                 {::JUser::NewDlg}            {}
+	    command     mEditContact   {user}             {::JUser::EditDlg $jid}      {}
+	    command     mBusinessCard  {user}             {::UserInfo::Get $jid3}             {}
 	    command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
 	    command     mRemoveContact {user}             {::Roster::SendRemove $jid}         {}
 	    separator   {}             {}                 {} {}
@@ -166,9 +166,9 @@ proc ::Roster::InitMenus {} {
     # Transports.
     set popMenuDefs(roster,trpt,def) {
 	command     mLastLogin/Activity {user}        {::Jabber::GetLast $jid}        {}
-	command     mvCard         {user}             {::VCard::Fetch other $jid}     {}
-	command     mAddNewUser    {}                 {::JUser::NewDlg}        {}
-	command     mEditUser      {user}             {::JUser::EditDlg $jid}  {}
+	command     mvCard2        {user}             {::VCard::Fetch other $jid}     {}
+	command     mAddContact    {}                 {::JUser::NewDlg}        {}
+	command     mEditContact   {user}             {::JUser::EditDlg $jid}  {}
 	command     mVersion       {user}             {::Jabber::GetVersion $jid3}    {}
 	command     mLoginTrpt     {trpt unavailable} {::Roster::LoginTrpt $jid3}     {}
 	command     mLogoutTrpt    {trpt available}   {::Roster::LogoutTrpt $jid3}    {}

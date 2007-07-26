@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.36 2007-07-19 06:28:17 matben Exp $
+# $Id: Subscribe.tcl,v 1.37 2007-07-26 14:18:54 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -115,7 +115,7 @@ proc ::Subscribe::NewDlg {jid} {
     pack $wbox -fill both -expand 1
 
     set ujid [jlib::unescapejid $jid]
-    set str [mc jasubwant $ujid]
+    set str [mc jasubwant2 $ujid]
     if {!$havesubsc} {
 	append str " [mc jasubopts]"
     }
@@ -130,7 +130,7 @@ proc ::Subscribe::NewDlg {jid} {
 	ttk::frame $frmid
 	pack $frmid -side top -fill both -expand 1
 	
-	ttk::label $frmid.lnick -text "[mc {Nick name}]:" -anchor e
+	ttk::label $frmid.lnick -text "[mc {Nickname}]:" -anchor e
 	ttk::entry $frmid.enick -width 24 -textvariable $token\(name)
 	ttk::label $frmid.lgroup -text "[mc Group]:" -anchor e
 	ttk::combobox $frmid.egroup -values [concat None $allGroups] \

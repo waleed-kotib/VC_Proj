@@ -19,6 +19,7 @@
 ::msgcat::mcset en Apply
 ::msgcat::mcset en Author
 ::msgcat::mcset en Available
+::msgcat::mcset en Avatar
 ::msgcat::mcset en Away
 ::msgcat::mcset en Back
 ::msgcat::mcset en Binary
@@ -374,8 +375,9 @@
 ::msgcat::mcset en mMessageInbox	{Message Inbox}
 ::msgcat::mcset en mSearch		{Search...}
 ::msgcat::mcset en mAddNewUser		{Add New User...}
+::msgcat::mcset en mAddContact          {Add Contact...}
 ::msgcat::mcset en mSendMessage		{Send Message...}
-::msgcat::mcset en mChat		{Chat}
+::msgcat::mcset en mChat		{Chat...}
 ::msgcat::mcset en mStatus		{Status}
 ::msgcat::mcset en mDirStatus           {Directed Status}
 ::msgcat::mcset en mAvailable		{Available}
@@ -389,6 +391,7 @@
 ::msgcat::mcset en mExitRoom		{Exit Room}
 ::msgcat::mcset en mCreateRoom		{Create Room...}
 ::msgcat::mcset en mvCard		{vCard...}
+::msgcat::mcset en mvCard2		{Edit Business Card...}
 ::msgcat::mcset en mRemoveAccount	{Remove Account}
 ::msgcat::mcset en mErrorLog		{Error Log...}
 ::msgcat::mcset en mDebug		{Debug}
@@ -416,6 +419,7 @@
 ::msgcat::mcset en mTakeSnapShot        {Take Snapshot}
 ::msgcat::mcset en mTimeCode            {Timecode}
 ::msgcat::mcset en mUserInfo            {User Info...}
+::msgcat::mcset en mBusinessCard        {View Business Card...}
 ::msgcat::mcset en mEditBookmarks       {Edit Bookmarks...}
 ::msgcat::mcset en mToolbar         	{Toolbar}
 ::msgcat::mcset en mNotebook         	{Notebook}
@@ -440,6 +444,7 @@
 ::msgcat::mcset en mWhiteboard     	{Whiteboard...}
 ::msgcat::mcset en mLastLogin/Activity  {Last Login/Activity}
 ::msgcat::mcset en mEditUser     	{Edit User...}
+::msgcat::mcset en mEditContact     	{Edit Contact...}
 ::msgcat::mcset en mRemoveUser     	{Remove User...}
 ::msgcat::mcset en mRefreshRoster     	{Refresh Roster}
 ::msgcat::mcset en mVersion     	{Version}
@@ -449,7 +454,7 @@
 ::msgcat::mcset en mAddServer     	{Add Server...}
 ::msgcat::mcset en mLocalTime     	{Local Time...}
 ::msgcat::mcset en mSendFile     	{Send File...}
-::msgcat::mcset en mChatHistory     	{Chat History}
+::msgcat::mcset en mChatHistory     	{Chat History...}
 ::msgcat::mcset en mLoginTrpt     	{Login To Transport}
 ::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
 ::msgcat::mcset en mRemoveContact  	{Remove Contact...}
@@ -461,7 +466,7 @@
 ::msgcat::mcset en mIncreasing         	{Increasing}
 ::msgcat::mcset en mDecreasing         	{Decreasing}
 ::msgcat::mcset en mStyle         	{Style}
-::msgcat::mcset en mCall         	{Call}
+::msgcat::mcset en mCall         	{Call...}
 ::msgcat::mcset en mJiveCall         	{Call}
 ::msgcat::mcset en mJiveForward         {Forward Call}
 ::msgcat::mcset en mBackgroundImage     {Background Image}
@@ -501,6 +506,7 @@
 ::msgcat::mcset en {Broken Image}
 ::msgcat::mcset en {Buddy Pouncing}
 ::msgcat::mcset en {Built in server port}
+::msgcat::mcset en {Business Card}
 ::msgcat::mcset en {Cache folder}
 ::msgcat::mcset en {Canvas Size}
 ::msgcat::mcset en {Chat History}
@@ -511,6 +517,7 @@
 ::msgcat::mcset en {Component Info}
 ::msgcat::mcset en {Conference server}
 ::msgcat::mcset en {Connect using HTTP}
+::msgcat::mcset en {Contact ID}
 ::msgcat::mcset en {Contact Type}
 ::msgcat::mcset en {Create Room}
 ::msgcat::mcset en {Default group}
@@ -524,11 +531,13 @@
 ::msgcat::mcset en {Disco method}
 ::msgcat::mcset en {Do Not Disturb}
 ::msgcat::mcset en {Do not save password}
+::msgcat::mcset en {Edit Business Card}
 ::msgcat::mcset en {Edit Fonts}
 ::msgcat::mcset en {Edit Item}
+::msgcat::mcset en {Edit Profiles}
 ::msgcat::mcset en {Edit Shortcut}
 ::msgcat::mcset en {Edit Shortcuts}
-::msgcat::mcset en {Edit User}
+::msgcat::mcset en {Edit Contact}
 ::msgcat::mcset en {Email address}
 ::msgcat::mcset en {Email addresses}
 ::msgcat::mcset en {Empty Fields}
@@ -599,7 +608,6 @@
 ::msgcat::mcset en {My Avatar}
 ::msgcat::mcset en {My nickname for own display}
 ::msgcat::mcset en {My Status}
-::msgcat::mcset en {My vCard}
 ::msgcat::mcset en {Name of list}
 ::msgcat::mcset en {Network Error}
 ::msgcat::mcset en {Network Setup}
@@ -619,7 +627,6 @@
 ::msgcat::mcset en {New User}
 ::msgcat::mcset en {New Version}
 ::msgcat::mcset en {NAT Address}
-::msgcat::mcset en {Nick name}
 ::msgcat::mcset en {No Address}
 ::msgcat::mcset en {No Available}
 ::msgcat::mcset en {No Inbox}
@@ -723,7 +730,7 @@
 ::msgcat::mcset en {Unknown: Prompt user}
 ::msgcat::mcset en {Url of homepage}
 ::msgcat::mcset en {Use proxy}
-::msgcat::mcset en {Use Secure Connection}
+::msgcat::mcset en {Use secure connection}
 ::msgcat::mcset en {Use SSL for security}
 ::msgcat::mcset en {Use TLS and SASL authentication}
 ::msgcat::mcset en {Use TLS on separate port (old)}
@@ -840,6 +847,7 @@
 # Messages for tk_messageBox:
 ::msgcat::mcset en jamesserrsend	{We received an error when sending a message to "%s". The error code is %s, and the error message: %s}
 ::msgcat::mcset en jamessallowsub	{User %s allowed you to subscribe to its presence.}
+::msgcat::mcset en jamessallowsub2	{%s allowed you to subscribe to his/her presence. You now can see his/her presence updates.}
 ::msgcat::mcset en jamessunsub		{User %s has unsubscribed your presence and is removed from your roster.}
 ::msgcat::mcset en jamessunsubpres	{User %s has unsubscribed your presence.}
 ::msgcat::mcset en jamessunsubask	{User %s has unsubscribed from your presence. Do you want to remove %s from your roster?}
@@ -868,7 +876,7 @@
 ::msgcat::mcset en jamessillegalchar	{Illegal character(s) in %s: "%s"!}
 ::msgcat::mcset en jamessbadjid		{The jid "%s" is not well formed. Do you want to continue anyway?}
 ::msgcat::mcset en jamessalreadyinrost	{The jid "%s" is already in your roster. Do you want to continue anyway?}
-::msgcat::mcset en jamessfailsetnick	{There was a failure when setting the nick name or group of user "%s". The error code is %s with the message: %s}
+::msgcat::mcset en jamessfailsetnick	{There was a failure when setting the nickname or group of user "%s". The error code is %s with the message: %s}
 ::msgcat::mcset en jamessnamemissing	{The %s is missing or is too short!}
 ::msgcat::mcset en jamessnosocket	{Couldn't create socket to server "%s". Maybe networking is not functioning or server is down. Message: %s}
 ::msgcat::mcset en jamesstimeoutserver	{Timeout when waiting for server "%s" to respond.}
@@ -1091,6 +1099,7 @@ this font installed on their system.}
 ::msgcat::mcset en prefcaalw     {Always accept a cached file, never load a new one} 
 ::msgcat::mcset en prefcaor      {..or accept cached file if not older than:}
 ::msgcat::mcset en prefpriv      {If checking the privacy button, you are only able to edit your own canvas items. Items created by others are not possible to edit.}
+::msgcat::mcset en prefpriv2     {If this option is enabled, you can only edit your own canvas items. Items created by others cannot be edited.}
 ::msgcat::mcset en prefshortip   {Complete ip number or name}
 ::msgcat::mcset en prefshortwa   {Warning: you have edited the shortcuts. Don't you want to save them?}
 
@@ -1143,17 +1152,21 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en janewaccount {Write jabber server ip number or name. Pick your username and password.}
 ::msgcat::mcset en janewpass    {Set new password for:}
 ::msgcat::mcset en jasubwant    {The user "%s" wants to subscibe to your presence.}
-::msgcat::mcset en jasubopts    {Choose from the options below. Picking a nick name and group is optional, and for your personal use only.}
+::msgcat::mcset en jasubwant2   {Do you want "%s" to see your presence?}
+::msgcat::mcset en jasubopts    {Choose from the options below. Picking a nickname and group is optional, and for your personal use only.}
 ::msgcat::mcset en jasubgetvcard {Get this persons vCard}
 ::msgcat::mcset en jasubsndmsg  {Send a message to this person:}
 ::msgcat::mcset en jasuballow   {Allow "%s" to see my presence}
 ::msgcat::mcset en jasubadd     {Add "%s" to my roster}
-::msgcat::mcset en jarostadd	{Add a jabber user to my roster. Nick name and group may be set or changed at any time. To add a user from a foreign IM system you must have an account already\
+::msgcat::mcset en jarostadd	{Add a jabber user to my roster. Nickname and group may be set or changed at any time. To add a user from a foreign IM system you must have an account already\
   on that system, and that you use it when registering with the Jabber servers transport or gateway.}
 ::msgcat::mcset en jarostadd2   {Select the chat system and contact ID of the contact you would like to add. Nickname and group are optional and can be set or changed later.}
-::msgcat::mcset en jarostset	{Set nick name and group of user "%s" to what you want. They may be set or changed at any time later.}
+::msgcat::mcset en jarostset	{Set nickname and group of user "%s" to what you want. They may be set or changed at any time later.}
+::msgcat::mcset en jarostset2	{Edit nickname and group of contact "%s". You also can request or remove presence subscription.}
 ::msgcat::mcset en jarostsub	{Subscribe to this user}
 ::msgcat::mcset en jarostunsub	{Unsubscribe to this user}
+::msgcat::mcset en jarostsub2	{Request presence subscription}
+::msgcat::mcset en jarostunsub2	{Remove presence subscription}
 ::msgcat::mcset en jasearch	{Search user with the specified service. Press the Get button if you want a new form to fill in.}
 ::msgcat::mcset en jasearchwait	{Waiting for Get to be pressed}
 ::msgcat::mcset en jaservclosed	{Server connection closed down.}
@@ -1185,7 +1198,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jasettopic2  {Set new topic for this room.}
 ::msgcat::mcset en jadirpresmsg {Send directed presence to the user "%s".}
 ::msgcat::mcset en jatlsnegot   {Negotiating TLS security...}
-::msgcat::mcset en jamucentermsg {Enter your nick name and press Enter to go into the room. You may Browse to get the available rooms for the specific service.	Members only room may require a password.}
+::msgcat::mcset en jamucentermsg {Enter your nickname and press Enter to go into the room. You may Browse to get the available rooms for the specific service.	Members only room may require a password.}
 ::msgcat::mcset en jainmsgshow  {Show incoming messages in this window}
 ::msgcat::mcset en jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
 ::msgcat::mcset en jadisaddserv2 {Add a server to discover and use its chatrooms and other services.}
@@ -1193,6 +1206,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jauserinnote {Add your personal notes about this user}
 ::msgcat::mcset en jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
 ::msgcat::mcset en jaloginjid   {Enter your JID as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
+::msgcat::mcset en jaloginjid2   {Enter your Jabber ID as "joey@myjabb.org", or choose a profile. You should already have a Jabber ID.}
 ::msgcat::mcset en jaloginjidpure 	{Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
 ::msgcat::mcset en jaregalready {You are already registered with this service. These are your current settings of your registration parameters.}
 ::msgcat::mcset en jaactiveret  {If checked Return sends message else use Ctrl/Cmd-Return}
@@ -1206,7 +1220,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jachathist   {Show or hide the chat history}
 ::msgcat::mcset en jawaitdisco  {Waiting for disco result...}
 ::msgcat::mcset en jagclogoutmsg {You have logged out and exited the room}
-::msgcat::mcset en jagcreqnick  {Please enter your desired nick name for the room %s}
+::msgcat::mcset en jagcreqnick  {Please enter your desired nickname for the room %s}
 
 ::msgcat::mcset en {InfoRoomDesc}       {This dialog makes available a number of options and actions for a room. Your role and affiliation determines your privilege to act.\
 Further restrictions may exist depending on specific room configuration.}
@@ -1286,7 +1300,7 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en putneterr	    {Network error when putting to %s.}
 
 # These are specific for phones (VoIP)
-::msgcat::mcset en phoneMakeCall           {Make a call}
+::msgcat::mcset en phoneMakeCall           {Call}
 ::msgcat::mcset en phoneMakeForward        {Forward current call to...}
 ::msgcat::mcset en phoneRing               {Ring, ring...}
 ::msgcat::mcset en phoneRingFrom           {Phone is ringing from %s}

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.157 2007-07-19 06:28:18 matben Exp $
+# $Id: UI.tcl,v 1.158 2007-07-26 14:18:54 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -544,7 +544,7 @@ proc ::UI::Toplevel {w args} {
 	-usemacmainmenu   0
     }
     array set argsA $args
-    set opts {}
+    set opts [list]
     if {[info exists argsA(-class)]} {
 	lappend opts -class $argsA(-class)
     }
@@ -960,14 +960,6 @@ proc ::UI::SaveWinGeomUseSize {key geom} {
     set prefs(winGeom,$key) $geom
 }
 
-proc ::UI::SaveSashPos {key w} {
-    global  prefs
-    
-    if {[winfo exists $w]} {
-	set prefs(sashPos,$key) [$w sashpos 0]
-    }
-}
-
 proc ::UI::SetWindowPosition {w {key ""}} {
     global  prefs
     
@@ -1008,13 +1000,24 @@ proc ::UI::SetWindowGeometry {w {key ""}} {
     }
 }
 
-# @@@ not working...
+proc ::UI::SaveSashPos {key w} {
+    global  prefs
+    
+    if {[winfo exists $w]} {
+	update
+	set prefs(sashPos,$key) [$w sashpos 0]
+    }
+}
 
 proc ::UI::SetSashPos {key w} {
     global  prefs
     
-    if {[info exists prefs(sashPos,$key)]} {
-	$w sashpos 0 $prefs(sashPos,$key)
+    # @@@ Not working!
+    if {0} {
+	if {[info exists prefs(sashPos,$key)]} {
+	    update idletasks
+	    $w sashpos 0 $prefs(sashPos,$key)
+	}
     }
 }
 

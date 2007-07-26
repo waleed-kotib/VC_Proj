@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.17 2007-07-19 06:28:12 matben Exp $
+# $Id: optionmenu.tcl,v 1.18 2007-07-26 14:18:52 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -50,8 +50,7 @@ snit::widgetadaptor ui::optionmenu::widget {
 	menu $m -tearoff 0
 
 	$self configurelist $args
-	
-	
+		
 	# If the variable exists must set our own nameVar.
 	if {[info exists $options(-variable)]} {
 	    set value [set $options(-variable)]
@@ -150,8 +149,7 @@ snit::widgetadaptor ui::optionmenu::widget {
 	if {![info exists firstValue]} {
 	    set firstValue ""
 	}
-	set menuValue $firstValue
-	
+	set menuValue $firstValue	
     }
     
     method set {value} {

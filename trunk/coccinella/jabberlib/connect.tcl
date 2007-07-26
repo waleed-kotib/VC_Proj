@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.25 2007-07-24 06:54:09 matben Exp $
+# $Id: connect.tcl,v 1.26 2007-07-26 14:18:54 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -921,7 +921,7 @@ if {0} {
     ::jlib::jlib1 connect connect openfire.matben@sgi.se $pw \
       -command cb -compress 1 -secure 1 -method tlssasl
     
-    ::jlib::jlib1 connect connect openfire.matben@sgi.se $pw \
+    ::jlib::jlib1 connect connect matben@jabber.ru $pw \
       -command cb -compress 1
 
     jlib::jlib1 closestream

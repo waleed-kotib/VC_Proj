@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.57 2007-07-21 14:26:58 matben Exp $
+# $Id: VCard.tcl,v 1.58 2007-07-26 14:18:54 matben Exp $
 
 package provide VCard 1.0
 
@@ -212,10 +212,10 @@ proc ::VCard::Build {token} {
     }
 
     if {$type eq "own"} {
-	wm title $w [mc {My vCard}]
+	wm title $w [mc {Edit Business Card}]
     } else {
 	set djid [::Roster::GetDisplayName $jid]
-	wm title $w "[mc {vCard Info}]: $djid"
+	wm title $w "[mc {Business Card}]: $djid"
     }
     set priv(vcardjid) $jid
     set elem(jid) [jlib::unescapejid $jid]
@@ -290,7 +290,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     grid  $pbi.efirst  $pbi.emiddle  $pbi.efam  -sticky ew -padx 1 -pady 2
     
     # Other part.
-    ttk::label $pbi.nick   -text "[mc {Nick name}]:"
+    ttk::label $pbi.nick   -text "[mc {Nickname}]:"
     ttk::label $pbi.email  -text "[mc {Email address}]:"
     ttk::label $pbi.jid    -text "[mc {Jabber ID}]:"
     ttk::entry $pbi.enick  -textvariable $etoken\(nickname)
@@ -382,8 +382,8 @@ proc ::VCard::Pages {nbframe etoken type} {
     ttk::frame $wp1
     pack $wp1 -side left -padx 4 -fill y
 
-    ttk::label $wp1.l -text "[mc {Users Avatar}]:"
-    ttk::button $wp1.b -text [mc {Select Photo}]  \
+    ttk::label $wp1.l -text "[mc {Avatar}]:"
+    ttk::button $wp1.b -text "[mc {Select Photo}]..."  \
       -command [list ::VCard::SelectPhoto $etoken]
     ttk::button $wp1.br -text [mc {Remove Photo}] \
       -command [list ::VCard::DeletePhoto $etoken]

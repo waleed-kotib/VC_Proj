@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.181 2007-07-23 15:11:43 matben Exp $
+# $Id: jabberlib.tcl,v 1.182 2007-07-26 14:18:54 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -4153,6 +4153,8 @@ proc jlib::MapStr {str } {
 #       NB1: 'escapstr' and 'unescapstr' must only be applied to the node 
 #            part of a JID.
 #       NB2: 'escapstr' must never be applied twice!
+#       NB3: it is currently unclear if escaping should be allowed on "ordinary"
+#            user JIDs
 
 proc jlib::escapestr {str} {    
     variable jidEscMap
