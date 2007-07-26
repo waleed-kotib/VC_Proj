@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the UI for adding and editing users.
 #      
-#  Copyright (c) 2004-2005  Mats Bengtsson
+#  Copyright (c) 2004-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.36 2007-07-25 12:45:10 matben Exp $
+# $Id: JUser.tcl,v 1.37 2007-07-26 13:21:51 matben Exp $
 
 package provide JUser 1.0
 
@@ -34,7 +34,8 @@ namespace eval ::JUser:: {
     ::hooks::register quitAppHook  ::JUser::QuitAppHook 
 
     # Configurations:
-    set ::config(adduser,warn-non-xmpp) 1
+    set ::config(adduser,warn-non-xmpp-onselect) 0
+    set ::config(adduser,add-non-xmpp-onselect)  1
 }
 
 proc ::JUser::QuitAppHook { } {
@@ -229,11 +230,9 @@ proc ::JUser::DoAdd {token} {
 
     # In any case the jid should be well formed.
     if {![jlib::jidvalidate $jid]} {
-	set ans [::UI::MessageBox -message [mc jamessbadjid $jid] \
-	  -icon error -type yesno]
-	if {[string equal $ans "no"]} {
-	    return
-	}
+	set ans [::UI::MessageBox -message [mc jamessjidinvalid $jid] \
+	  -icon error -parent $state(w)]
+	return
     }
     
     # Warn if already in our roster.
@@ -369,9 +368,17 @@ proc ::JUser::TrptCmd {token gjid} {
     $wjid selection range 0 end
     
     # If this requires a transport component we must be registered.
-    if {$config(adduser,warn-non-xmpp)} {
+    if {$config(adduser,warn-non-xmpp-onselect)} {
 	if {($type ne "xmpp") && ![::Jabber::JlibCmd roster isitem $gjid]} {
 	    tk_messageBox -icon warning -parent $state(w) -message "You are currently not registered with this transport and if you proceed you will be asked to register with your own account on this system."
+	}
+    } elseif {$config(adduser,add-non-xmpp-onselect)} {
+	if {($type ne "xmpp") && ![::Jabber::JlibCmd roster isitem $gjid]} {
+	    set ans [::UI::MessageBox -type yesno -icon warning \
+	      -parent $state(w) -message [mc jamessaddforeign $gjid]]
+	    if {$ans eq "yes"} {
+		::GenRegister::NewDlg -server $gjid -autoget 1
+	    }
 	}
     }
 }
