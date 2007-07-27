@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.182 2007-07-26 14:18:54 matben Exp $
+# $Id: jabberlib.tcl,v 1.183 2007-07-27 13:50:14 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -4212,7 +4212,8 @@ proc jlib::setdebug {args} {
 
 proc jlib::generateuuid {} {
     set MAX_INT 0x7FFFFFFF
-    set hex1 [format {%x} [string range [clock clicks] end-9 end]]
+    # Bugfix Eric Hassold from Evolane
+    set hex1 [format {%x} [expr {[clock clicks] & $MAX_INT}]]
     set hex2 [format {%x} [expr {int($MAX_INT*rand())}]]
     return $hex1-$hex2
 }

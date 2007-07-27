@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.45 2007-06-04 05:39:59 matben Exp $
+# $Id: tileutils.tcl,v 1.46 2007-07-27 13:50:14 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -14,6 +14,17 @@ package provide tileutils 0.1
 
 if {[tk windowingsystem] eq "aqua"} {
     interp alias {} ttk::scrollbar {} scrollbar
+}
+
+# Fixes by Eric Hassold from Evolane while waiting for tile 0.8...
+
+proc ::ttk::deprecated'warning {old new} { } 
+
+namespace eval ::tile {} 
+if {![info exists ::tile::currentTheme]} { 
+    if {[info exists ::ttk::currentTheme]} { 
+	upvar \#0 ::ttk::currentTheme ::tile::currentTheme 
+    } 
 }
 
 namespace eval ::tileutils {
