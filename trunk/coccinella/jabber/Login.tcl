@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.118 2007-07-26 14:18:53 matben Exp $
+# $Id: Login.tcl,v 1.119 2007-07-27 12:16:20 matben Exp $
 
 package provide Login 1.0
 
@@ -712,7 +712,7 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	
     switch -glob -- $errcode {
 	connect-failed - network-failure - networkerror {
-	    set str [mc jamessnosocket $state(server) $errmsg]
+	    set str [mc jamessnosocket2 $state(server) $errmsg]
 	}
 	timeout {
 	    set str [mc jamesstimeoutserver $state(server)]

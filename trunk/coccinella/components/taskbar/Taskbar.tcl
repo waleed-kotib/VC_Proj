@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.29 2007-07-26 14:18:52 matben Exp $
+# $Id: Taskbar.tcl,v 1.30 2007-07-27 12:16:20 matben Exp $
 
 package require balloonhelp
 
@@ -159,7 +159,7 @@ proc ::Taskbar::InitHook { } {
     
     set menuDef {
 	{cascade  mStatus           {}                      {-image @STAT -compound left}}
-	{command  mHideMain         ::Taskbar::HideMain                  }
+	{command  mMinimize         ::Taskbar::HideMain                  }
 	{command  mSendMessage      ::NewMsg::Build         {-image @MSG -compound left}}
 	{command  mPreferences...   ::Preferences::Build    {-image @SET -compound left}}
 	{command  mAddContact       ::JUser::NewDlg  {-image @ADD -compound left}}
@@ -320,14 +320,14 @@ proc ::Taskbar::Update {w} {
 	zoomed - normal {
 	    set state1 disabled
 	    set state2 normal
-	    $m entryconfigure $menuIndex(mHideMain)  \
-	      -label [mc mHideMain] -command ::Taskbar::HideMain
+	    $m entryconfigure $menuIndex(mMinimize)  \
+	      -label [mc mMinimize] -command ::Taskbar::HideMain
 	}
 	default {
 	    set state1 normal
 	    set state2 disabled
-	    $m entryconfigure $menuIndex(mHideMain)  \
-	      -label [mc mShowMain] -command ::Taskbar::ShowMain
+	    $m entryconfigure $menuIndex(mMinimize)  \
+	      -label [mc mRestore] -command ::Taskbar::ShowMain
 	}
     }
 }
