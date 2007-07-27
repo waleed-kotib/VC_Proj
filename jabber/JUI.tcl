@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.170 2007-07-26 14:18:53 matben Exp $
+# $Id: JUI.tcl,v 1.171 2007-07-27 13:50:14 matben Exp $
 
 package provide JUI 1.0
 
@@ -130,6 +130,7 @@ proc ::JUI::Init { } {
 	    {cascade   mExport             {}                         {} {} {
 		{command  mRoster          {::Roster::ExportRoster}   {}}
 		{command  mMessageInbox    {::MailBox::MKExportDlg}   {}}
+		{command  mvCard2          {::VCard::OnMenuExport}    {}}
 	    }}
 	    {separator}
 	    {command   mQuit               {::UserActions::DoQuit}    Q}
@@ -144,6 +145,7 @@ proc ::JUI::Init { } {
 	    {cascade   mExport             {}                         {} {} {
 		{command  mRoster          {::Roster::ExportRoster}   {}}
 		{command  mMessageInbox    {::MailBox::MKExportDlg}   {}}
+		{command  mvCard2          {::VCard::OnMenuExport}    {}}
 	    }}
 	    {separator}
 	    {command   mQuit               {::UserActions::DoQuit}    Q}

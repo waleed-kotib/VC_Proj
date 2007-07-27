@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.58 2007-07-26 14:18:54 matben Exp $
+# $Id: VCard.tcl,v 1.59 2007-07-27 13:50:14 matben Exp $
 
 package provide VCard 1.0
 
@@ -26,7 +26,8 @@ package require mactabnotebook
 namespace eval ::VCard::  {
         
     # Add all event hooks.
-    ::hooks::register initHook   ::VCard::InitHook    
+    ::hooks::register initHook          ::VCard::InitHook    
+    ::hooks::register menuPostCommand   ::VCard::MainMenuPostHook
     
     variable uid 0
 }
@@ -90,6 +91,7 @@ proc ::VCard::Fetch {type {jid {}}} {
 #       This is our callback from the 'vcard send_get' procedure.
 
 proc ::VCard::FetchCallback {token jlibName result theQuery} {
+    upvar ${token}::priv priv
     
     ::Debug 4 "::VCard::FetchCallback"
     
@@ -107,6 +109,7 @@ proc ::VCard::FetchCallback {token jlibName result theQuery} {
     if {[llength $theQuery]} {
         ParseXmlList $theQuery ${token}::elem
     }
+    set priv(theQuery) $theQuery
     Build $token
     Fill $token
 }
@@ -203,7 +206,8 @@ proc ::VCard::Build {token} {
     set jid  $priv(jid)
     set type $priv(type)
     
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+    ::UI::Toplevel $w -class VCard \
+      -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} -closecommand ::VCard::CloseHook
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jvcard)]]
@@ -616,7 +620,7 @@ proc ::VCard::SetVCard {token}  {
     array unset  elem w,*
     
     # Collect all non empty entries, and send a vCard set.
-    set argList {}
+    set argList [list]
     foreach {key value} [array get elem] {
 	if {[string length $value]} {
 	    lappend argList -$key $value
@@ -655,21 +659,33 @@ proc ::VCard::SyncAvatar {token} {
 }
 
 proc ::VCard::CloseHook {wclose} {
-
     set token [GetTokenFrom w $wclose]
     if {$token ne ""} {
 	Close $token
     }   
 }
 
+proc ::VCard::GetTokenList {} {
+    return [namespace children [namespace current]]
+}
+
 proc ::VCard::GetTokenFrom {key pattern} {
-    
-    foreach ns [namespace children [namespace current]] {
+    foreach ns [GetTokenList] {
 	set val [set ${ns}::priv($key)]
 	if {[string match $pattern $val]} {
 	    return $ns
 	}
     }
+    return
+}
+
+proc ::VCard::GetFrontToken {} {
+    if {[winfo exists [focus]]} {
+	if {[winfo class [winfo toplevel [focus]]] eq "VCard"} {
+	    set w [winfo toplevel [focus]]
+	    return [GetTokenFrom w $w]
+	}
+    }   
     return
 }
 
@@ -694,6 +710,54 @@ proc ::VCard::SetVCardCallback {jlibName type theQuery} {
 	  -message "Failed setting the vCard. The result was: $theQuery"
 	return
     }
+}
+
+proc ::VCard::MainMenuPostHook {type wmenu} {
+    
+    if {$type eq "main-file"} {
+	set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
+	set token [GetFrontToken]
+	if {$token eq ""} {
+	    ::UI::MenuMethod $m entryconfigure mvCard2 -state disabled
+	} else {
+	    
+	    # @@@ We could chack any selected in the roster...
+	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
+	}
+	update idletasks
+    }
+}
+
+proc ::VCard::OnMenuExport {} {
+    set token [GetFrontToken]
+    if {$token ne ""} {
+	ExportXML $token
+    }
+}
+
+proc ::VCard::ExportXML {token} {
+    set fileName [tk_getSaveFile -defaultextension .xml -initialfile vcard.xml]
+    if {$fileName ne ""} {
+	SaveToFile $token $fileName
+    }
+}
+
+proc ::VCard::SaveToFile {token fileName} {
+    upvar ${token}::priv priv
+    
+    # @@@ Get directly from dialog instead.
+    if {[llength $priv(theQuery)]} {
+	set xml [wrapper::formatxml $priv(theQuery)]
+    } else {
+	set xml ""
+    }
+    set fd [open $fileName w]
+    fconfigure $fd -encoding utf-8
+
+    puts $fd "<?xml version='1.0' encoding='UTF-8'?>"
+    puts $fd "<!-- vCard for $priv(jid) -->"
+    puts $fd $xml
+    close $fd
 }
 
 proc ::VCard::Free {token} {

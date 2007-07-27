@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.201 2007-07-26 14:18:52 matben Exp $
+# $Id: Chat.tcl,v 1.202 2007-07-27 13:50:14 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2920,7 +2920,7 @@ proc ::Chat::GetTokenList {type} {
     
     # For some strange reason [info vars] reports non existing arrays.
     set nskey [namespace current]::$type
-    set tokens {}
+    set tokens [list]
     foreach token [concat  \
       [info vars ${nskey}\[0-9\]] \
       [info vars ${nskey}\[0-9\]\[0-9\]] \
