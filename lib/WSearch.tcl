@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: WSearch.tcl,v 1.5 2007-07-19 06:28:18 matben Exp $
+# $Id: WSearch.tcl,v 1.6 2007-07-27 09:37:25 matben Exp $
 
 package require snit 1.0
 package require tileutils 0.1
@@ -89,7 +89,10 @@ snit::widgetadaptor UI::WSearch::widget {
 	}
 	focus $wentry
 	trace add variable [myvar string] write [list $self Trace]
-	
+
+	bind $wentry <KeyPress-Up>    [list $self Previous]
+	bind $wentry <KeyPress-Down>  [list $self Next]
+
 	return
     }
     
