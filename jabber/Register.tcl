@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.70 2007-07-19 06:28:16 matben Exp $
+# $Id: Register.tcl,v 1.71 2007-07-27 12:16:21 matben Exp $
 
 package provide Register 1.0
 
@@ -200,7 +200,7 @@ proc ::RegisterEx::New {args} {
       -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token]
-    wm title $w [mc {Register New Account}]
+    wm title $w [mc {Register Account}]
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jreg)]]
     if {$nwin == 1} {
 	::UI::SetWindowPosition $w $wDlgs(jreg)
@@ -214,7 +214,7 @@ proc ::RegisterEx::New {args} {
     pack  $w.frall  -fill x
     
     ttk::label $w.frall.head -style Headlabel \
-      -text [mc {New Account}] -compound left \
+      -text [mc {Register Account}] -compound left \
       -image [list $im background $imd]
     pack  $w.frall.head  -side top -fill both -expand 1
 
@@ -228,7 +228,7 @@ proc ::RegisterEx::New {args} {
     if {$state(-server) ne ""} {
 	set str [mc jaregisterexserv $state(-server)]
     } else {
-	set str [mc jaregisterex]
+	set str [mc jaregisterex2]
     }
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 320 -justify left -anchor w -text $str
@@ -239,7 +239,7 @@ proc ::RegisterEx::New {args} {
     ttk::frame $frmid
     pack  $frmid  -side top -fill both -expand 1
 
-    ttk::label $frmid.lserv -text "[mc {Jabber Server}]:" -anchor e
+    ttk::label $frmid.lserv -text "[mc Server]:" -anchor e
     #ttk::entry $frmid.eserv -width 22    \
     #  -textvariable $token\(-server) -validate key  \
     #  -validatecommand {::Jabber::ValidateDomainStr %S}
@@ -484,7 +484,7 @@ proc ::RegisterEx::Get {token} {
     
     # Verify.
     if {$state(-server) eq ""} {
-	::UI::MessageBox -type ok -icon error -message [mc jamessregnoserver]
+	::UI::MessageBox -type ok -icon error -message [mc jamessregnoserver2]
 	return
     }	
     # This is just to check the validity!
@@ -976,7 +976,7 @@ proc ::GenRegister::Get {token} {
     # Verify.
     if {[string length $state(server)] == 0} {
 	::UI::MessageBox -type ok -icon error  \
-	  -message [mc jamessregnoserver]
+	  -message [mc jamessregnoserver2]
 	return
     }	
     $state(wcomboserver) state disabled

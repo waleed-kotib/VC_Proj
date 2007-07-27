@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.38 2007-07-26 14:18:53 matben Exp $
+# $Id: JUser.tcl,v 1.39 2007-07-27 12:16:20 matben Exp $
 
 package provide JUser 1.0
 
@@ -36,6 +36,7 @@ namespace eval ::JUser:: {
     # Configurations:
     set ::config(adduser,warn-non-xmpp-onselect) 0
     set ::config(adduser,add-non-xmpp-onselect)  1
+    set ::config(adduser,dlg-type-ask-register)  yesnocancel
 }
 
 proc ::JUser::QuitAppHook { } {
@@ -207,7 +208,7 @@ proc ::JUser::CancelAdd {token} {
 }
 
 proc ::JUser::DoAdd {token} {
-    global  wDlgs
+    global  wDlgs config
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
@@ -256,7 +257,8 @@ proc ::JUser::DoAdd {token} {
 	    if {![llength $transport]} {
 		
 		# Seems we are not registered.
-		set ans [::UI::MessageBox -type yesnocancel -icon error \
+		set ans [::UI::MessageBox \
+		  -type $config(adduser,dlg-type-ask-register) -icon error \
 		  -parent $state(w) -message [mc jamessaddforeign $host]]
 		if {$ans eq "yes"} {
 		    ::GenRegister::NewDlg -server $host -autoget 1

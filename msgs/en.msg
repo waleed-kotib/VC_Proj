@@ -369,10 +369,12 @@
 ::msgcat::mcset en mLogout		{Logout}
 ::msgcat::mcset en mLogoutWith          {Logout With Message...}
 ::msgcat::mcset en mHideMain            {Hide Main}
+::msgcat::mcset en mMinimize            {Minimize}
 ::msgcat::mcset en mShowMain            {Show Main}
+::msgcat::mcset en mRestore             {Restore}
 ::msgcat::mcset en mPassword		{Password...}
 ::msgcat::mcset en mRoster/Services	{Roster/Services}
-::msgcat::mcset en mMessageInbox	{Message Inbox}
+::msgcat::mcset en mMessageInbox	{Message Inbox...}
 ::msgcat::mcset en mSearch		{Search...}
 ::msgcat::mcset en mAddNewUser		{Add New User...}
 ::msgcat::mcset en mAddContact          {Add Contact...}
@@ -485,6 +487,7 @@
 ::msgcat::mcset en {Add Contact}
 ::msgcat::mcset en {Add New User}
 ::msgcat::mcset en {Add permanently}
+::msgcat::mcset en {Add Profile}
 ::msgcat::mcset en {Add Server}
 ::msgcat::mcset en {Add Shortcut}
 ::msgcat::mcset en {Address 1}
@@ -670,6 +673,7 @@
 ::msgcat::mcset en {Request To User}
 ::msgcat::mcset en {Retype Password}
 ::msgcat::mcset en {Revert Panel}
+::msgcat::mcset en {Register Account}
 ::msgcat::mcset en {Register New Account}
 ::msgcat::mcset en {Register Now}
 ::msgcat::mcset en {Register Service}
@@ -812,7 +816,6 @@
 # Messages for tk_messageBox:
 ::msgcat::mcset en messfailedhttp	{Failed starting the internal http server: %s}
 ::msgcat::mcset en messinfoscript	{Due to the 'info script' bug on Mac you need to explicitly pick the 'Whiteboard-%s' folder in the following dialog.}
-::msgcat::mcset en messfailedsock	{Couldn't create socket to server. Maybe networking is not functioning or server is down. The error code is: %s}
 ::msgcat::mcset en messeofconnect	{Something went wrong when opening connection. Got an eof.}	
 ::msgcat::mcset en messfailconnect	{Something went wrong when opening connection to %s}
 ::msgcat::mcset en messtimeout		{Timeout when waiting for connection to open.}
@@ -879,6 +882,7 @@
 ::msgcat::mcset en jamessfailsetnick	{There was a failure when setting the nickname or group of user "%s". The error code is %s with the message: %s}
 ::msgcat::mcset en jamessnamemissing	{The %s is missing or is too short!}
 ::msgcat::mcset en jamessnosocket	{Couldn't create socket to server "%s". Maybe networking is not functioning or server is down. Message: %s}
+::msgcat::mcset en jamessnosocket2	{Could not connect to "%s". Either there are server or network issues, or you misspelled the server's name. Message: %s}
 ::msgcat::mcset en jamesstimeoutserver	{Timeout when waiting for server "%s" to respond.}
 ::msgcat::mcset en jamessregisterok	{The registration to server "%s" was succesful. Now you just need to Login using the same username and password.}
 ::msgcat::mcset en jamessremoveaccount	{You are about to remove your account from this server. This process cannot be undone. Do you really want to continue?}
@@ -888,6 +892,7 @@
 ::msgcat::mcset en jamesspasswderr	{Setting new password failed with the error code %s and message: "%s"}
 ::msgcat::mcset en jamesspasswdok	{Setting new password was succesful}
 ::msgcat::mcset en jamessregnoserver	{We require the server to be set.}
+::msgcat::mcset en jamessregnoserver2	{Please enter or select first a server.}
 ::msgcat::mcset en jamesserrregget	{Failed obtaining registration info. Error code %s with message: %s}
 ::msgcat::mcset en jamesserrregset	{Failed registering with service "%s". Error code %s with message: %s}
 ::msgcat::mcset en jamessokreg		{Registration with service "%s" was succesful.}
@@ -1060,6 +1065,7 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 ::msgcat::mcset en prefshortcut  {Here you add or edit shortcuts that are only applicable to "peer-to-peer" connections, and are not used by the Jabber system.\
 If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup" panel, these shortcuts don't apply.}
 ::msgcat::mcset en prefprof      {Here you set the necessary things that are specific to an account on a Jabber server. The server you pick here will also be the server you logon to.}
+::msgcat::mcset en prefprof2     {Edit, add or delete profiles. The selected profile will become the default.}
 ::msgcat::mcset en prefpers      {Your personal info is stored in your preferences file, but may also be stored on the Jabber User Directory. Server stored info is searchable by any user.}
 ::msgcat::mcset en prefaaset     {Set automatic away status:}
 ::msgcat::mcset en prefminaw     {Minutes before status Away:}
@@ -1113,6 +1119,7 @@ this font installed on their system.}
 ::msgcat::mcset en prefchactret  {Always use active <Return> in chat dialog}
 ::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset en prefprofname  {Enter desired name of user profile}
+::msgcat::mcset en prefprofname2 {Enter the name for the new profile.}
 ::msgcat::mcset en prefstabui    {Use tabbed notebook interface}
 ::msgcat::mcset en prefsusesasl  {Use SASL authentication method}
 ::msgcat::mcset en prefprivmsg   {Each user may administrate zero or many lists. Only the active or default list affect message processing. Any active list affects only the session.\
@@ -1205,6 +1212,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jadisrmall   {Remove all servers that are automatically and permanently discovered.}
 ::msgcat::mcset en jauserinnote {Add your personal notes about this user}
 ::msgcat::mcset en jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
+::msgcat::mcset en jaregisterex2 {Select a server from the list or manually enter one. Then press Get to retrieve the registration fields and instructions. Complete these fields and hit Register.}
 ::msgcat::mcset en jaloginjid   {Enter your JID as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
 ::msgcat::mcset en jaloginjid2   {Enter your Jabber ID as "joey@myjabb.org", or choose a profile. You should already have a Jabber ID.}
 ::msgcat::mcset en jaloginjidpure 	{Enter your JID as "joey@myjabb.org". You should already have an account with this server.}

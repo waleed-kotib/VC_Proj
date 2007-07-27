@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.76 2007-07-26 14:18:53 matben Exp $
+# $Id: Profiles.tcl,v 1.77 2007-07-27 12:16:21 matben Exp $
 
 package provide Profiles 1.0
 
@@ -865,7 +865,7 @@ proc ::Profiles::BuildDialog { } {
     ::UI::Toplevel $w -class JProfiles \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::Profiles::CloseDlgHook
-    wm title $w [mc Profiles]
+    wm title $w [mc {Edit Profiles}]
     ::UI::SetWindowPosition $w
     
     set im   [::Theme::GetImage [option get $w settingsImage {}]]
@@ -990,7 +990,7 @@ proc ::Profiles::FrameWidget {w moreless args} {
         
     eval {ttk::frame $w -class JProfileFrame} $args
     
-    ttk::label $w.msg -text [mc prefprof] -wraplength 200 -justify left
+    ttk::label $w.msg -text [mc prefprof2] -wraplength 200 -justify left
     grid  $w.msg  -  -sticky ew
     
     set wui $w.u
@@ -1067,9 +1067,9 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	grid  $wui  -sticky ew
 	grid  $wbt  -sticky ew    
     }
-    ttk::button $wbt.new -text [mc {New Profile}] \
+    ttk::button $wbt.new -text "[mc {Add Profile}]..." \
       -command [list [namespace current]::FrameNewCmd $w]
-    ttk::button $wbt.del -text [mc {Delete Profile}] \
+    ttk::button $wbt.del -text "[mc {Delete Profile}]..." \
       -command [list [namespace current]::FrameDeleteCmd $w]
 
     if {0} {
@@ -1381,8 +1381,9 @@ proc ::Profiles::FrameNewCmd {w} {
     set newName ""
     
     # First get a unique profile name.
-    set ans [::UI::MegaDlgMsgAndEntry [mc Profile] [mc prefprofname] \
-      "[mc {Profile Name}]:" newName [mc Cancel] [mc OK]]
+    # @@@ Switch to ui::dialog
+    set ans [::UI::MegaDlgMsgAndEntry [mc {Add Profile}] [mc prefprofname2] \
+      "[mc {Profile name}]:" newName [mc Cancel] [mc OK]]
     if {$ans eq "cancel" || $newName eq ""} {
 	return
     }
@@ -1600,7 +1601,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     set wstate(sasl)          $wse.sasl
 
     ttk::checkbutton $wse.tls -style Small.TCheckbutton  \
-      -text [mc {Use Secure Connection}] -variable $token\(secure)  \
+      -text [mc {Use secure connection}] -variable $token\(secure)  \
       -command [list ::Profiles::NotebookSecCmd $w]
     ttk::radiobutton $wse.sasl -style Small.TRadiobutton  \
       -text [mc prefsusesasl]  \
