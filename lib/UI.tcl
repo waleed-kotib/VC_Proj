@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.158 2007-07-26 14:18:54 matben Exp $
+# $Id: UI.tcl,v 1.159 2007-07-27 08:05:32 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -336,7 +336,6 @@ proc ::UI::RegisterDlgName {nameDlgFlatA} {
 proc ::UI::InitMenuDefs { } {
     global  prefs this
     variable menuDefs
-
 	
     if {[string match "mac*" $this(platform)] && $prefs(haveMenus)} {
 	set haveAppleMenu 1
@@ -345,7 +344,7 @@ proc ::UI::InitMenuDefs { } {
     }
     
     # All menu definitions for the main (whiteboard) windows as:
-    #      {{type name cmd state accelerator opts} {{...} {...} ...}}
+    #      {{type name cmd accelerator opts} {{...} {...} ...}}
 
     set menuDefs(main,info,aboutwhiteboard)  \
       {command   mAboutCoccinella    {::Splash::SplashScreen}   {}}
@@ -353,13 +352,11 @@ proc ::UI::InitMenuDefs { } {
       {command   mAboutQuickTimeTcl  {::Dialogs::AboutQuickTimeTcl} {}}
 
     # Mac only.
-    set menuDefs(main,apple) [list \
-      $menuDefs(main,info,aboutwhiteboard)  \
-      $menuDefs(main,info,aboutquicktimetcl)]
+    set menuDefs(main,apple) [list $menuDefs(main,info,aboutwhiteboard)]
     
-    # Make platform specific things and special menus etc. Indices!!! BAD!
-    if {$haveAppleMenu && ![::Media::HavePackage QuickTimeTcl]} {
-	lset menuDefs(main,apple) 1 3 disabled
+    # Make platform specific things.
+    if {$haveAppleMenu && [::Media::HavePackage QuickTimeTcl]} {
+	lappend menuDefs(main,apple) $menuDefs(main,info,aboutquicktimetcl)
     }
 }
 
