@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.171 2007-07-27 13:50:14 matben Exp $
+# $Id: JUI.tcl,v 1.172 2007-07-28 05:50:16 matben Exp $
 
 package provide JUI 1.0
 
@@ -899,6 +899,10 @@ proc ::JUI::FilePostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mCloseWindow -state disabled
 	}
     }
+    
+    # Disable some menus by default and let any hooks enable them.
+    set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
+    ::UI::MenuMethod $m entryconfigure mvCard2 -state disabled
       
     ::hooks::run menuPostCommand main-file $wmenu
     
