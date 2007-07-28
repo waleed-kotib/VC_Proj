@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the user info dialog with help of VCard etc.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.21 2007-07-26 14:18:54 matben Exp $
+# $Id: UserInfo.tcl,v 1.22 2007-07-28 05:50:16 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -27,6 +27,8 @@ package require VCard
 namespace eval ::UserInfo::  {
         
     # Add all event hooks.
+    ::hooks::register menuPostCommand   ::UserInfo::MainMenuPostHook
+    ::hooks::register onMenuVCardExport ::UserInfo::OnMenuExportHook
 
     variable uid 0
 }
@@ -311,6 +313,7 @@ proc ::UserInfo::VCardCB {token jlibname type subiq} {
 	::Jabber::AddErrorLog $jid $str
 	AddError $token $str
     } else {
+	set priv(subiq) $subiq
 	set ${token}::elem(jid) [jlib::unescapejid $priv(jid)]
 	::VCard::ParseXmlList $subiq ${token}::elem
 	::VCard::Pages $priv(wnb) ${token}::elem "other"
@@ -324,7 +327,8 @@ proc ::UserInfo::Build {token} {
     set w   $priv(w)
     set jid $priv(jid)
     
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+    ::UI::Toplevel $w -class UserInfo \
+      -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand ::UserInfo::CloseHook
     set djid [::Roster::GetDisplayName $jid]
@@ -388,19 +392,7 @@ proc ::UserInfo::Exists {token} {
     }
 }
 
-proc ::UserInfo::GetTokenFrom {key pattern} {
-    
-    foreach ns [namespace children [namespace current]] {
-	set val [set ${ns}::priv($key)]
-	if {[string match $pattern $val]} {
-	    return $ns
-	}
-    }
-    return
-}
-
-proc ::UserInfo::Save {token} {
-    
+proc ::UserInfo::Save {token} {    
     SaveNotes $token
     Close $token
 }
@@ -546,12 +538,52 @@ proc ::UserInfo::SaveNotes {token} {
     }
 }
 
-proc ::UserInfo::CloseHook {wclose} {
+proc ::UserInfo::GetTokenFrom {key pattern} {    
+    foreach ns [namespace children [namespace current]] {
+	set val [set ${ns}::priv($key)]
+	if {[string match $pattern $val]} {
+	    return $ns
+	}
+    }
+    return
+}
 
+proc ::UserInfo::CloseHook {wclose} {
     set token [GetTokenFrom w $wclose]
     if {$token != ""} {
 	Close $token
     }   
+}
+
+proc ::UserInfo::GetFrontToken {} {
+    if {[winfo exists [focus]]} {
+	if {[winfo class [winfo toplevel [focus]]] eq "UserInfo"} {
+	    set w [winfo toplevel [focus]]
+	    return [GetTokenFrom w $w]
+	}
+    }   
+    return
+}
+
+proc ::UserInfo::MainMenuPostHook {type wmenu} {
+    
+    if {$type eq "main-file"} {
+	set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
+	set token [GetFrontToken]
+	if {$token ne ""} {
+	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
+	}
+    }
+}
+
+proc ::UserInfo::OnMenuExportHook {} {
+    set token [GetFrontToken]
+    if {$token ne ""} {
+	upvar ${token}::priv priv    
+	::VCard::ExportXML $token $priv(jid)
+	return stop
+    }
+    return
 }
 
 proc ::UserInfo::Free {token} {

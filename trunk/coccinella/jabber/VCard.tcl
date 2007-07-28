@@ -2,7 +2,7 @@
 #  
 #      This file is part of The Coccinella application. 
 #      
-#  Copyright (c) 2001-2006  Mats Bengtsson
+#  Copyright (c) 2001-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -17,18 +17,17 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.59 2007-07-27 13:50:14 matben Exp $
+# $Id: VCard.tcl,v 1.60 2007-07-28 05:50:16 matben Exp $
 
 package provide VCard 1.0
-
-package require mactabnotebook
 
 namespace eval ::VCard::  {
         
     # Add all event hooks.
     ::hooks::register initHook          ::VCard::InitHook    
     ::hooks::register menuPostCommand   ::VCard::MainMenuPostHook
-    
+    ::hooks::register onMenuVCardExport ::VCard::OnMenuExportHook
+
     variable uid 0
 }
 
@@ -62,6 +61,8 @@ proc ::VCard::Fetch {type {jid {}}} {
 	# We must use the 2-tier jid here!
         set jid [::Jabber::JlibCmd myjid2]
     }
+    
+    # @@@ Should use a named array as token instead of using namespaces.
     
     # Keep a separate instance specific namespace for each VCard.
     set token [namespace current]::[incr uid]
@@ -599,10 +600,9 @@ proc ::VCard::DeletePhoto {etoken} {
     unset -nocomplain elem(photo_binval)
 }
 
-proc ::VCard::SetVCard {token}  {
-
+proc ::VCard::CreateList {token} {
+    
     upvar ${token}::elem elem
-    upvar ${token}::priv priv
     
     set wemails  $elem(w,emails)
     set wdesctxt $elem(w,desctxt)
@@ -616,21 +616,24 @@ proc ::VCard::SetVCard {token}  {
       [regsub -all "(\[^ \n\t]+)(\[ \n\t]*)" [$wemails get 1.0 end] {\1 } tmp]
     set elem(email_internet) [string trim $tmp]
     set elem(desc) [string trim [$wdesctxt get 1.0 end]]
-        
-    array unset  elem w,*
-    
+
     # Collect all non empty entries, and send a vCard set.
     set argList [list]
     foreach {key value} [array get elem] {
-	if {[string length $value]} {
+	if {![string match w,* $key] && [string length $value]} {
 	    lappend argList -$key $value
 	}
     }
-    eval {::Jabber::JlibCmd vcard send_set ::VCard::SetVCardCallback} $argList
+    return $argList
+}
+
+proc ::VCard::SetVCard {token}  {
+
+    eval {::Jabber::JlibCmd vcard send_set ::VCard::SetVCardCallback} \
+      [CreateList $token]
     
     # Sync the photo (also empty) with our avatar.
-    SyncAvatar $token
-    
+    SyncAvatar $token    
     Close $token
 }
 
@@ -717,37 +720,43 @@ proc ::VCard::MainMenuPostHook {type wmenu} {
     if {$type eq "main-file"} {
 	set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
 	set token [GetFrontToken]
-	if {$token eq ""} {
-	    ::UI::MenuMethod $m entryconfigure mvCard2 -state disabled
-	} else {
-	    
-	    # @@@ We could chack any selected in the roster...
+	if {$token ne ""} {
 	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
 	}
-	update idletasks
     }
 }
+
+# VCard::OnMenuExport --
+# 
+#       We do this event based since also the UserInfo dialog may export
+#       a vCard. If we can export we must return "stop".
 
 proc ::VCard::OnMenuExport {} {
+    ::hooks::run onMenuVCardExport
+}
+
+proc ::VCard::OnMenuExportHook {} {
     set token [GetFrontToken]
     if {$token ne ""} {
-	ExportXML $token
+	upvar ${token}::priv priv
+	ExportXML $token $priv(jid)
+	return stop
     }
+    return
 }
 
-proc ::VCard::ExportXML {token} {
+proc ::VCard::ExportXML {token jid} {
     set fileName [tk_getSaveFile -defaultextension .xml -initialfile vcard.xml]
     if {$fileName ne ""} {
-	SaveToFile $token $fileName
+	SaveToFile $token $fileName $jid
     }
 }
 
-proc ::VCard::SaveToFile {token fileName} {
-    upvar ${token}::priv priv
+proc ::VCard::SaveToFile {token fileName jid} {
     
-    # @@@ Get directly from dialog instead.
-    if {[llength $priv(theQuery)]} {
-	set xml [wrapper::formatxml $priv(theQuery)]
+    set vcardE [eval {::Jabber::JlibCmd vcard create} [CreateList $token]]
+    if {[llength $vcardE]} {
+	set xml [wrapper::formatxml $vcardE]
     } else {
 	set xml ""
     }
@@ -755,7 +764,7 @@ proc ::VCard::SaveToFile {token fileName} {
     fconfigure $fd -encoding utf-8
 
     puts $fd "<?xml version='1.0' encoding='UTF-8'?>"
-    puts $fd "<!-- vCard for $priv(jid) -->"
+    puts $fd "<!-- vCard for $jid -->"
     puts $fd $xml
     close $fd
 }

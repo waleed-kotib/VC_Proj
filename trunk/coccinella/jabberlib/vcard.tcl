@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: vcard.tcl,v 1.12 2007-07-19 06:28:18 matben Exp $
+# $Id: vcard.tcl,v 1.13 2007-07-28 05:50:16 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -295,7 +295,7 @@ proc jlib::vcard::get_cache {jlibname jid} {
     }
 }
 
-# jlib::vcard::send_set --
+# jlib::vcard::send_set, createvcard --
 #
 #       Sends our vCard to the server. Internally we use all lower case
 #       but the spec (XEP-0054) says that all tags be all upper case.
@@ -311,41 +311,51 @@ proc jlib::vcard::get_cache {jlibname jid} {
 #       none.
 
 proc jlib::vcard::send_set {jlibname cmd args} {
-    variable xmlns
+    upvar ${jlibname}::vcard::state state
+    
+    set jid [$jlibname myjid2]
+    set xmllist [eval {create $jlibname} $args]
+    set state(cache,$jid) $xmllist
+    jlib::send_iq $jlibname "set" [list $xmllist] -command \
+      [list [namespace current]::send_set_cb $jlibname $cmd]    
+    return
+}
 
+proc jlib::vcard::create {jlibname args} {
+    variable xmlns
+    
     set attrlist [list xmlns $xmlns(vcard)]    
     
     # Form all the sub elements by inspecting the -key.
     array set arr $args
-    set subelem {}
-    set subsubelem {}
+    set subE [list]
     
     # All "sub" elements with no children.
     foreach tag {fn nickname bday url title role desc} {
 	if {[info exists arr(-$tag)]} {
-	    lappend subelem [wrapper::createtag [string toupper $tag] \
+	    lappend subE [wrapper::createtag [string toupper $tag] \
 	      -chdata $arr(-$tag)]
 	}
     }
     if {[info exists arr(-email_internet_pref)]} {
-	set elem {}
+	set elem [list]
 	lappend elem [wrapper::createtag "INTERNET"]
 	lappend elem [wrapper::createtag "PREF"]
-	lappend subelem [wrapper::createtag "EMAIL" \
+	lappend subE [wrapper::createtag "EMAIL" \
 	  -chdata $arr(-email_internet_pref) -subtags $elem]
     }
     if {[info exists arr(-email_internet)]} {
 	foreach email $arr(-email_internet) {
-	    set elem {}
+	    set elem [list]
 	    lappend elem [wrapper::createtag "INTERNET"]
-	    lappend subelem [wrapper::createtag "EMAIL" \
+	    lappend subE [wrapper::createtag "EMAIL" \
 	      -chdata $email -subtags $elem]
 	}
     }
     
     # All "subsub" elements.
     foreach tag {n org} {
-	set elem {}
+	set elem [list]
 	foreach key [array names arr "-${tag}_*"] {
 	    regexp -- "-${tag}_(.+)" $key match sub
 	    lappend elem [wrapper::createtag [string toupper $sub] \
@@ -354,7 +364,7 @@ proc jlib::vcard::send_set {jlibname cmd args} {
     
 	# Insert subsub elements where they belong.
 	if {[llength $elem]} {
-	    lappend subelem [wrapper::createtag [string toupper $tag] \
+	    lappend subE [wrapper::createtag [string toupper $tag] \
 	      -subtags $elem]
 	}
     }
@@ -371,7 +381,7 @@ proc jlib::vcard::send_set {jlibname cmd args} {
 	      -chdata $arr($key)]
 	}		
 	if {$haveThisTag} {
-	    lappend subelem [wrapper::createtag [string toupper $head] \
+	    lappend subE [wrapper::createtag [string toupper $head] \
 	      -subtags $elem]
 	}
     }	
@@ -382,7 +392,7 @@ proc jlib::vcard::send_set {jlibname cmd args} {
 	    set elem {}
 	    lappend elem [wrapper::createtag [string toupper $second]]
 	    lappend elem [wrapper::createtag [string toupper $third]]
-	    lappend subelem [wrapper::createtag "TEL" -chdata $arr($tag) \
+	    lappend subE [wrapper::createtag "TEL" -chdata $arr($tag) \
 	      -subtags $elem]
 	}
     }
@@ -394,16 +404,10 @@ proc jlib::vcard::send_set {jlibname cmd args} {
 	if {[info exists arr(-photo_type)]} {
 	    lappend elem [wrapper::createtag "TYPE" -chdata $arr(-photo_type)]
 	}
-	lappend subelem [wrapper::createtag "PHOTO" -subtags $elem]
+	lappend subE [wrapper::createtag "PHOTO" -subtags $elem]
     }
     
-    set jid [$jlibname myjid2]
-    set xmllist [wrapper::createtag "vCard" -attrlist $attrlist \
-      -subtags $subelem]
-    set state(cache,$jid) $xmllist
-    jlib::send_iq $jlibname "set" [list $xmllist] -command \
-      [list [namespace current]::send_set_cb $jlibname $cmd]    
-    return
+    return [wrapper::createtag "vCard" -attrlist $attrlist -subtags $subE]
 }
 
 proc jlib::vcard::send_set_cb {jlibname cmd type subiq args} {
