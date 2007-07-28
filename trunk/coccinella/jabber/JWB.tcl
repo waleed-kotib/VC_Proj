@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.80 2007-07-26 14:18:53 matben Exp $
+# $Id: JWB.tcl,v 1.81 2007-07-28 13:30:31 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -433,7 +433,8 @@ proc ::JWB::BuildEntryHook {w wcomm} {
     set imOn  [::Theme::GetImage [option get $w connected16Image {}] $subPath]
     set iconResize [::Theme::GetImage [option get $w resizeHandleImage {}]]
     
-    set jidlist [$jstate(jlib) roster getusers]
+    # @@@ We should also require that users are coccinella...
+    set jidlist [$jstate(jlib) roster getusers -type available]
     
     set wframe $wcomm.f
     ttk::frame $wframe
