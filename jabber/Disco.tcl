@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.116 2007-07-26 12:48:53 matben Exp $
+# $Id: Disco.tcl,v 1.117 2007-07-28 13:22:39 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -985,6 +985,11 @@ proc ::Disco::Popup {w vstruct x y} {
     }
     foreach line $regPopMenuType {
 	lappend mType $line
+    }
+    
+    # Special hack to avoid the Register/Unregister of the login server.
+    if {[jlib::jidequal [$jstate(jlib) getserver] $jid]} {
+	lprune clicked "register"
     }
     
     # Make the appropriate menu.
