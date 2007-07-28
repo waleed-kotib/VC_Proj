@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: TtkDialog.tcl,v 1.4 2007-07-18 09:40:10 matben Exp $
+#  $Id: TtkDialog.tcl,v 1.5 2007-07-28 14:07:56 matben Exp $
 
 namespace eval ::TtkDialog {
     variable scriptDir [file dirname [info script]]
@@ -26,6 +26,7 @@ namespace eval ::TtkDialog {
 proc ::TtkDialog::Init { } {
     variable scriptDir
     
+    # X11 only!
     if {[tk windowingsystem] ne "x11"} {
 	return
     }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.159 2007-07-27 08:05:32 matben Exp $
+# $Id: UI.tcl,v 1.160 2007-07-28 14:07:56 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -30,7 +30,8 @@ namespace eval ::UI:: {
     global  this
 
     # Add all event hooks.
-    ::hooks::register launchFinalHook         ::UI::LaunchFinalHook
+    #::hooks::register launchFinalHook         ::UI::LaunchFinalHook
+    ::hooks::register initFinalHook         ::UI::LaunchFinalHook
     ::hooks::register firstLaunchHook         ::UI::FirstLaunchHook
 
     # Icons

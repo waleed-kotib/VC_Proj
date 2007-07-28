@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.153 2007-07-26 14:18:52 matben Exp $	
+# $Id: Coccinella.tcl,v 1.154 2007-07-28 14:07:56 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -300,9 +300,13 @@ after 500 {catch {destroy $::wDlgs(splash)}}
 
 ::Jabber::Init
 
+::Debug 2 "--> initFinalHook"
+::hooks::run initFinalHook
+
 if {$prefs(firstLaunch)} {
     ::hooks::run firstLaunchHook
 }
+
 update idletasks
 
 ::Debug 2 "--> launchFinalHook"
