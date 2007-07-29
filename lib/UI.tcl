@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.160 2007-07-28 14:07:56 matben Exp $
+# $Id: UI.tcl,v 1.161 2007-07-29 10:28:14 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -372,7 +372,7 @@ proc ::UI::SetupAss { } {
 
     catch {destroy $wDlgs(splash)}
     update
-    ::Jabber::SetupAss::SetupAss
+    ::SetupAss::SetupAss
     ::UI::CenterWindow $wDlgs(setupass)
     raise $wDlgs(setupass)
     tkwait window $wDlgs(setupass)

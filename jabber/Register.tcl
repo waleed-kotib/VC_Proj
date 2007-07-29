@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.72 2007-07-29 07:07:06 matben Exp $
+# $Id: Register.tcl,v 1.73 2007-07-29 10:28:14 matben Exp $
 
 package provide Register 1.0
 
@@ -61,10 +61,18 @@ proc ::Register::Remove {{jid {}}} {
     ::Debug 2 "::Register::Remove jid=$jid"
     
     set ans "yes"
+    set login 0
     if {$jid eq ""} {
 	set jid $jstate(server)
-	set ans [::UI::MessageBox -icon warning -title [mc Unregister] \
-	  -type yesno -default no -message [mc jamessremoveaccount]]
+	set login 1
+    } else {
+	if {[jlib::jidequal [$jstate(jlib) getserver] $jid]} {
+	    set login 1
+	}
+    }
+    if {$login} {
+	set ans [::UI::MessageBox -icon warning -title [mc {Remove Account}] \
+	  -type yesno -default no -message [mc jamessremoveaccount2]]
     } else {
 	set jidlist [::Roster::GetUsersWithSameHost $jid]
 	if {[llength $jidlist]} {

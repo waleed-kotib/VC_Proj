@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.46 2007-07-27 13:50:14 matben Exp $
+# $Id: tileutils.tcl,v 1.47 2007-07-29 10:28:14 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -275,7 +275,7 @@ proc tileutils::configstyles {name} {
 	style configure SunkenMenubutton -padding {0}
 
 	# Search entry (from Michael Kirkham).
-	set pad [style default TEntry -padding]
+	set pad [style configure TEntry -padding]
 	switch -- [llength $pad] {
 	    0 { set pad [list 4 0 0 0] }
 	    1 { set pad [list [expr {$pad+4}] $pad $pad $pad] }

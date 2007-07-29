@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.38 2007-07-29 07:07:06 matben Exp $
+# $Id: Subscribe.tcl,v 1.39 2007-07-29 10:28:14 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -77,7 +77,7 @@ proc ::Subscribe::NewDlg {jid} {
     ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token] \
       -usemacmainmenu 1 -class JSubscribe
-    wm title $w [mc Subscribe]  
+    wm title $w [mc {Presence Subscription}]  
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsubsc)]]
     if {$nwin == 1} {
@@ -106,7 +106,7 @@ proc ::Subscribe::NewDlg {jid} {
 	set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
 
 	ttk::label $wall.head -style Headlabel \
-	  -text [mc Subscribe] -compound left \
+	  -text [mc {Presence Subscription}] -compound left \
 	  -image [list $im background $imd]
 	pack $wall.head -side top -fill both -expand 1
 	
@@ -120,7 +120,7 @@ proc ::Subscribe::NewDlg {jid} {
     set ujid [jlib::unescapejid $jid]
     set str [mc jasubwant2 $ujid]
     if {!$havesubsc} {
-	append str " [mc jasubopts]"
+	append str " [mc jasubopts2]"
     }
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 200 -justify left -text $str
@@ -147,11 +147,11 @@ proc ::Subscribe::NewDlg {jid} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Accept] -default active \
+    ttk::button $frbot.btok -text [mc Yes] -default active \
       -command [list [namespace current]::Accept $token]
-    ttk::button $frbot.btcancel -text [mc Deny]  \
+    ttk::button $frbot.btcancel -text [mc No]  \
       -command [list [namespace current]::Deny $token]
-    ttk::button $frbot.bvcard -text "[mc {Get vCard}]..."  \
+    ttk::button $frbot.bvcard -text [mc mBusinessCard] \
       -command [list ::VCard::Fetch other $jid]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -296,7 +296,7 @@ proc ::Subscribe::InitPrefsHook { } {
 
 proc ::Subscribe::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Subscriptions} [mc Subscriptions]
+    ::Preferences::NewTableItem {Jabber Subscriptions} [mc {Presence Subscription}]
     
     # Subscriptions page ---------------------------------------------------
     set wpage [$nbframe page {Subscriptions}]
@@ -319,7 +319,7 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     ttk::labelframe $wsubs -text [mc Subscribe] \
       -padding [option get . groupSmallPadding {}]
 
-    ttk::label $wsubs.la1 -text [mc prefsuif]
+    ttk::label $wsubs.la1 -text [mc prefsuif2]
     ttk::label $wsubs.lin -text [mc prefsuis]
     ttk::label $wsubs.lnot -text [mc prefsuisnot]
     ttk::separator $wsubs.s -orient vertical
@@ -340,7 +340,7 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     }
     
     set wauto [ttk::frame $wc.auto]
-    ttk::checkbutton $wauto.autosub -text [mc prefsuauto] \
+    ttk::checkbutton $wauto.autosub -text [mc prefsuauto2] \
       -variable [namespace current]::tmpJPrefs(subsc,auto)
     ttk::label $wauto.autola -text [mc {Default group}]:
     ttk::entry $wauto.autoent -font CociSmallFont -width 22   \

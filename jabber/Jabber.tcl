@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.217 2007-07-29 07:07:06 matben Exp $
+# $Id: Jabber.tcl,v 1.218 2007-07-29 10:28:14 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -700,11 +700,11 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	    accept {
 		$jlib send_presence -to $from -type "subscribed"
 		set autoaccepted 1
-		set msg [mc jamessautoaccepted $from]
+		set msg [mc jamessautoaccepted2 $from]
 	    }
 	    reject {
 		$jlib send_presence -to $from -type "unsubscribed"
-		set msg [mc jamessautoreject $from]
+		set msg [mc jamessautoreject2 $from]
 	    }
 	    ask {
 		::Subscribe::NewDlg $from
@@ -722,7 +722,7 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 		$jlib roster send_set $from -groups [list $jprefs(subsc,group)]
 	    }
 	    $jlib send_presence -to $from -type "subscribe"
-	    set msg [mc jamessautosubs $from]
+	    set msg [mc jamessautosubs2 $from]
 	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	}
     }
@@ -739,7 +739,7 @@ proc ::Jabber::SubscribedEvent {jlibname xmldata} {
     if {[::Roster::IsTransportHeuristics $from]} {
 	# silent.
     } else {
-	::ui::dialog -title [mc Subscribed] -icon info -type ok  \
+	::ui::dialog -title [mc {Presence Subscription}] -icon info -type ok \
 	  -message [mc jamessallowsub2 $from]
     }
     return 1

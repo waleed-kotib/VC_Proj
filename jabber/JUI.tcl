@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.172 2007-07-28 05:50:16 matben Exp $
+# $Id: JUI.tcl,v 1.173 2007-07-29 10:28:14 matben Exp $
 
 package provide JUI 1.0
 
@@ -187,12 +187,12 @@ proc ::JUI::Init { } {
 	    {-variable ::JUI::state(show,minimal)}} }
 	}
 	{separator}
-	{command     mRemoveAccount {::Register::OnMenuRemove}        {}}	
+	{command     mRemoveAccount... {::Register::OnMenuRemove}        {}}	
     }
 
     if {[tk windowingsystem] eq "aqua"} {
 	set menuDefs(rost,info) {    
-	    {command     mSetupAssistant {::Jabber::SetupAss::SetupAss} {}}
+	    {command     mSetupAssistant {::SetupAss::SetupAss}         {}}
 	    {command     mComponents    {::Dialogs::InfoComponents}     {}}
 	    {command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
 	    {checkbutton mDebug         {::Jabber::DebugCmd}            {} \
@@ -213,7 +213,7 @@ proc ::JUI::Init { } {
 	}
     } else {
 	set menuDefs(rost,info) {    
-	    {command     mSetupAssistant {::Jabber::SetupAss::SetupAss} {}}
+	    {command     mSetupAssistant {::SetupAss::SetupAss}          {}}
 	    {command     mComponents    {::Dialogs::InfoComponents}      {}}
 	    {command     mErrorLog      {::Jabber::ErrorLogDlg}          {}}
 	    {checkbutton mDebug         {::Jabber::DebugCmd}             {} \
@@ -998,7 +998,7 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mDisco -state normal
 	}
 	disconnect {
@@ -1017,7 +1017,7 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mDisco -state disabled
 	}	
     }    

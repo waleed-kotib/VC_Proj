@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.43 2007-07-19 06:28:17 matben Exp $
+# $Id: SetupAss.tcl,v 1.44 2007-07-29 10:28:14 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -28,7 +28,7 @@ package require JPubServers
 
 package provide SetupAss 1.0
 
-namespace eval ::Jabber::SetupAss::  {
+namespace eval ::SetupAss::  {
 
     variable server
     variable haveRegistered 0
@@ -43,7 +43,7 @@ namespace eval ::Jabber::SetupAss::  {
     set ::config(setupass,page,server) 1
 }
 
-proc ::Jabber::SetupAss::SetupAss { } {
+proc ::SetupAss::SetupAss { } {
     global  this prefs wDlgs config
     
     variable finished
@@ -208,7 +208,7 @@ proc ::Jabber::SetupAss::SetupAss { } {
     after idle $script
 }
 
-proc ::Jabber::SetupAss::NextPage {w page} {
+proc ::SetupAss::NextPage {w page} {
     variable server
     variable username
     variable password
@@ -242,7 +242,7 @@ proc ::Jabber::SetupAss::NextPage {w page} {
     }
 }
     
-proc ::Jabber::SetupAss::DefaultLang { } {
+proc ::SetupAss::DefaultLang { } {
     global  prefs
     variable locale
     
@@ -250,7 +250,7 @@ proc ::Jabber::SetupAss::DefaultLang { } {
     set locale [lindex [split [::msgcat::mclocale] _] 0]
 }
 
-proc ::Jabber::SetupAss::DoClose {w} {
+proc ::SetupAss::DoClose {w} {
     
     set ans [::UI::MessageBox -type yesno -parent $w -icon info \
       -message [mc messsuassclose]]
@@ -259,7 +259,7 @@ proc ::Jabber::SetupAss::DoClose {w} {
     }
 }
 
-proc ::Jabber::SetupAss::DoRegister { } {    
+proc ::SetupAss::DoRegister { } {    
     variable server
     variable username
     variable password
@@ -270,7 +270,7 @@ proc ::Jabber::SetupAss::DoRegister { } {
     set haveRegistered 1
 }
 
-proc ::Jabber::SetupAss::DoFinish {w} {
+proc ::SetupAss::DoFinish {w} {
     global  this prefs
     variable server
     variable username
@@ -294,12 +294,12 @@ proc ::Jabber::SetupAss::DoFinish {w} {
     destroy $w
 }
 
-proc ::Jabber::SetupAss::ServersDlg {w} {
+proc ::SetupAss::ServersDlg {w} {
 
     ::JPubServers::New [namespace current]::ServersCmd
 }
 
-proc ::Jabber::SetupAss::ServersCmd {_server} {
+proc ::SetupAss::ServersCmd {_server} {
     variable server
     
     set server $_server

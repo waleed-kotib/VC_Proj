@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.21 2007-07-19 06:28:12 matben Exp $
+# $Id: FTrans.tcl,v 1.22 2007-07-29 10:28:14 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -361,7 +361,7 @@ proc ::FTrans::Send {jid args} {
 	set feature [DiscoGetFeature $jid]
 	if {$feature eq ""} {
 	    ui::dialog -type ok -icon error -title [mc {Error}]  \
-	      -message [mc jamessnofiletrpt $jid]
+	      -message [mc jamessnofiletrpt2 $jid]
 	} else {
 	    eval {Build $jid} $args
 	}
@@ -397,7 +397,7 @@ proc ::FTrans::DiscoCB {w jlibname type jid subiq} {
 	$w status ""
 	if {($type eq "error") || ([DiscoGetFeature $jid] eq "")} {
 	    ui::dialog -type ok -icon error -title [mc {Error}]  \
-	      -message [mc jamessnofiletrpt $jid]
+	      -message [mc jamessnofiletrpt2 $jid]
 	    destroy $w
 	} else {
 	    $w state !disabled
