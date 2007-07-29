@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.202 2007-07-26 14:18:54 matben Exp $
+# $Id: Roster.tcl,v 1.203 2007-07-29 10:28:14 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -475,8 +475,8 @@ proc ::Roster::SendRemove {jidrm} {
 
     set jid $jidrm
 
-    set ans [::UI::MessageBox -title [mc {Remove Item}] \
-      -message [mc jamesswarnremove] -icon warning -type yesno -default no]
+    set ans [::UI::MessageBox -title [mc {Remove Contact}] \
+      -message [mc jamesswarnremove2] -icon warning -type yesno -default no]
     if {[string equal $ans "yes"]} {
 	$jstate(jlib) roster send_remove $jid
     }

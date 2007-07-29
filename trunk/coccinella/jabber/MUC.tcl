@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.83 2007-07-29 07:07:06 matben Exp $
+# $Id: MUC.tcl,v 1.84 2007-07-29 10:28:14 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -132,7 +132,7 @@ proc ::MUC::Invite {roomjid {continue ""}} {
     ::UI::Toplevel $w -class JMUCInvite \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand [list [namespace current]::InviteCloseCmd $token]
-    wm title $w [mc {Invite User}]
+    wm title $w [mc {Invite Contact}]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucinvite)]]
     if {$nwin == 1} {
@@ -156,7 +156,7 @@ proc ::MUC::Invite {roomjid {continue ""}} {
 	set imd  [::Theme::GetImage [option get $w inviteDisImage {}]]
 
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc {Invite User}] -compound left \
+	  -text [mc {Invite Contact}] -compound left \
 	  -image [list $im background $imd]
 	pack $w.frall.head -side top -anchor w
 	
@@ -168,7 +168,7 @@ proc ::MUC::Invite {roomjid {continue ""}} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
     
-    set msg [mc jainvitegchat $node]
+    set msg [mc jainvitegchat2 $node]
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 300 -justify left -text $msg
     pack $wbox.msg -side top -anchor w
@@ -177,7 +177,7 @@ proc ::MUC::Invite {roomjid {continue ""}} {
     ttk::frame $wmid
     pack $wmid -side top -fill x -expand 1
     
-    ttk::label $wmid.la -text "[mc Invite] JID:"
+    ttk::label $wmid.la -text "[mc {Contact ID}]:"
     ui::comboboxex $wmid.ejid -library $jidlist -textvariable $token\(jid)  \
       -values $jidlist
     ttk::label $wmid.lre -text "[mc Reason]:"

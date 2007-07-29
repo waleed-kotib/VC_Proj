@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.118 2007-07-29 07:07:06 matben Exp $
+# $Id: Disco.tcl,v 1.119 2007-07-29 10:28:14 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -884,18 +884,6 @@ proc ::Disco::UnRegisterPopupEntry {name} {
     }
 }
 
-if {0} {
-    # test
-    set menuDef {
-	{command "Hej och HŒ" {puts skit}}
-	{command "Nej och GŒ" {puts piss}}
-    }
-    set menuType {
-	{"Hej och HŒ"  {jid}}
-    }
-    ::Disco::RegisterPopupEntry $menuDef $menuType
-}
-
 # Disco::Popup --
 #
 #       Handle popup menu in disco dialog.
@@ -1565,7 +1553,7 @@ proc ::Disco::AddServerDlg { } {
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $frbot.btok -text [mc Add] \
       -command [list [namespace current]::AddServerDo $w]
-    ttk::button $frbot.btcancel -text [mc Close] \
+    ttk::button $frbot.btcancel -text [mc Cancel] \
       -command [namespace code [list AddCancel $w]]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {

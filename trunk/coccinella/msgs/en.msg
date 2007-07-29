@@ -395,6 +395,7 @@
 ::msgcat::mcset en mvCard		{vCard...}
 ::msgcat::mcset en mvCard2		{Edit Business Card...}
 ::msgcat::mcset en mRemoveAccount	{Remove Account}
+::msgcat::mcset en mRemoveAccount...	{Remove Account...}
 ::msgcat::mcset en mErrorLog		{Error Log...}
 ::msgcat::mcset en mDebug		{Debug}
 ::msgcat::mcset en mOnServer		{On &Server...}
@@ -457,8 +458,8 @@
 ::msgcat::mcset en mLocalTime     	{Local Time...}
 ::msgcat::mcset en mSendFile     	{Send File...}
 ::msgcat::mcset en mChatHistory     	{Chat History...}
-::msgcat::mcset en mLoginTrpt     	{Login To Transport}
-::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
+::msgcat::mcset en mLoginTrpt     	{Login to Transport}
+::msgcat::mcset en mLogoutTrpt     	{Logout from Transport}
 ::msgcat::mcset en mRemoveContact  	{Remove Contact...}
 ::msgcat::mcset en mShow         	{Show}
 ::msgcat::mcset en mOffline         	{Offline}
@@ -580,6 +581,7 @@
 ::msgcat::mcset en {Incoming Presence}
 ::msgcat::mcset en {Info Room}
 ::msgcat::mcset en {Inspect Associations}
+::msgcat::mcset en {Invite Contact}
 ::msgcat::mcset en {Invite User}
 ::msgcat::mcset en {IP address}
 ::msgcat::mcset en {Is connected}
@@ -661,6 +663,7 @@
 ::msgcat::mcset en {Postal Code}
 ::msgcat::mcset en {Preferred Protocol}
 ::msgcat::mcset en {Presence Error}
+::msgcat::mcset en {Presence Subscription}
 ::msgcat::mcset en {Privacy List}
 ::msgcat::mcset en {Profile Name}
 ::msgcat::mcset en {Proxy Port}
@@ -677,6 +680,8 @@
 ::msgcat::mcset en {Register New Account}
 ::msgcat::mcset en {Register Now}
 ::msgcat::mcset en {Register Service}
+::msgcat::mcset en {Remove Account}
+::msgcat::mcset en {Remove Contact}
 ::msgcat::mcset en {Remove Item}
 ::msgcat::mcset en {Remove Photo}
 ::msgcat::mcset en {Room name}
@@ -765,12 +770,12 @@
 ::msgcat::mcset en {Edit the owner list}
 
 # Time intervals.
-::msgcat::mcset en {Ten seconds}
-::msgcat::mcset en {One minute}
-::msgcat::mcset en {Ten minutes}
-::msgcat::mcset en {One hour} 
-::msgcat::mcset en {One day} 
-::msgcat::mcset en {One week} 
+::msgcat::mcset en {Ten Seconds}
+::msgcat::mcset en {One Minute}
+::msgcat::mcset en {Ten Minutes}
+::msgcat::mcset en {One Hour} 
+::msgcat::mcset en {One Day} 
+::msgcat::mcset en {One Week} 
 
 # Language names.
 ::msgcat::mcset en {Danish} 
@@ -850,15 +855,18 @@
 # Messages for tk_messageBox:
 ::msgcat::mcset en jamesserrsend	{We received an error when sending a message to "%s". The error code is %s, and the error message: %s}
 ::msgcat::mcset en jamessallowsub	{User %s allowed you to subscribe to its presence.}
-::msgcat::mcset en jamessallowsub2	{%s allowed you to subscribe to his/her presence. You now can see his/her presence updates.}
+::msgcat::mcset en jamessallowsub2	{%s allows you to see his/her presence.}
 ::msgcat::mcset en jamessunsub		{User %s has unsubscribed your presence and is removed from your roster.}
 ::msgcat::mcset en jamessunsubpres	{User %s has unsubscribed your presence.}
 ::msgcat::mcset en jamessunsubask	{User %s has unsubscribed from your presence. Do you want to remove %s from your roster?}
 ::msgcat::mcset en jamessunsubscribed	{You are unsubscribed from %s's presence.}
 ::msgcat::mcset en jamesserrpres	{We received a presence error. The error code is %s and message: %s}
 ::msgcat::mcset en jamessautoaccepted	{You have just automatically accepted a subscription request from %s.}
+::msgcat::mcset en jamessautoaccepted2	{%s can see your presence.}
 ::msgcat::mcset en jamessautoreject	{You have just automatically rejected a subscription request from %s.}
+::msgcat::mcset en jamessautoreject2	{%s cannot see your presence.}
 ::msgcat::mcset en jamessautosubs	{You have just automatically subscribed to %s presence.}
+::msgcat::mcset en jamessautosubs2	{You can see %s's presence.}
 
 
 ::msgcat::mcset en jamessconnbroken	{The connection was unexpectedly broken.}
@@ -875,7 +883,8 @@
 ::msgcat::mcset en jamesserrvers	{We received an error when quering %s for its version. The error was: %s}
 ::msgcat::mcset en jamesserrautoupdate 	{We received an error when quering %s for updated client software. The error was: %s}
 ::msgcat::mcset en jamesswarberasewb	{Do you want to erase the whiteboard first?}
-::msgcat::mcset en jamesswarnremove	{Removing an item in your roster is not an undoable process. You need to subscribe once more to this user if you want to add it back. Do you want to continue anyway?}
+::msgcat::mcset en jamesswarnremove	{Removing an item in your roster cannot be undone. You need add this user again if you want to add it back. Do you want to continue anyway?}
+::msgcat::mcset en jamesswarnremove2	{Do you really want to remove this contact? This process cannot be undone.}
 ::msgcat::mcset en jamessillegalchar	{Illegal character(s) in %s: "%s"!}
 ::msgcat::mcset en jamessbadjid		{The jid "%s" is not well formed. Do you want to continue anyway?}
 ::msgcat::mcset en jamessalreadyinrost	{The jid "%s" is already in your roster. Do you want to continue anyway?}
@@ -886,6 +895,7 @@
 ::msgcat::mcset en jamesstimeoutserver	{Timeout when waiting for server "%s" to respond.}
 ::msgcat::mcset en jamessregisterok	{The registration to server "%s" was succesful. Now you just need to Login using the same username and password.}
 ::msgcat::mcset en jamessremoveaccount	{You are about to remove your account from this server. This process cannot be undone. Do you really want to continue?}
+::msgcat::mcset en jamessremoveaccount2	{Do you really want to remove your account? This process cannot be undone.}
 ::msgcat::mcset en jamesserrunreg	{We received an error when trying to unregister from "%s". Code %s, and message %s}
 ::msgcat::mcset en jamessokunreg	{You are now unregistered from "%s"}
 ::msgcat::mcset en jamesspasswddiff	{The passwords do not agree. Please check once again.}
@@ -933,8 +943,8 @@
 ::msgcat::mcset en jamesserrinboxread	{Got an error when trying to read the Jabber message box file "%s": %s}
 ::msgcat::mcset en jamesschatclose	{If you close this chat window you also loose the complete conversation. Do you actually like to close?}
 ::msgcat::mcset en jamessgchatfields	{We require that all fields are nonempty before entering room.}
-::msgcat::mcset en jamessconfmsg	{Select a conference service and a room name. Then push "Get" to obtain the specification for entering the desired room since each room & server\
-  may have different requirements.}
+::msgcat::mcset en jamessconfmsg	{Select a conference service and a room name. Then push Get to obtain the specification for entering the desired room since each room & server\
+may have different requirements.}
 ::msgcat::mcset en jamesssavemsg	{Do you want to save this message before closing?}
 ::msgcat::mcset en jamessskipsendq	{The address "%s" is not well formed. Do you want to skip it and send to the rest?}
 ::msgcat::mcset en jamessillformresend	{The address "%s" is not well formed. Please modify it and resend.}
@@ -954,6 +964,7 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
 ::msgcat::mcset en jamessnorooms                {Failed to find any rooms at %s.}
 ::msgcat::mcset en jamessnofiletrpt             {We couldn't see that %s supports file transfer.}
+::msgcat::mcset en jamessnofiletrpt2		{%s does not support file transfer.}
 ::msgcat::mcset en jamessfiletrpterr            {Failed to get file %s from %s: %s}
 ::msgcat::mcset en jamesswarnsendcanoff         {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless\
 you happen to be online while this message is being read. Do you want to send it anyway?}
@@ -1071,9 +1082,11 @@ If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup
 ::msgcat::mcset en prefminaw     {Minutes before status Away:}
 ::msgcat::mcset en prefminea     {Minutes before status Extended Away:}
 ::msgcat::mcset en prefsuif      {If someone wants to subscribe to my presence and...}
+::msgcat::mcset en prefsuif2     {If someone wants to see my presence and...}
 ::msgcat::mcset en prefsuis      {...is already in my roster:}
 ::msgcat::mcset en prefsuisnot   {...is not in my roster:}
 ::msgcat::mcset en prefsuauto    {Automatically subscribe to subscribers to me}
+::msgcat::mcset en prefsuauto2   {Move people who add me to their roster to a group}
 ::msgcat::mcset en prefrorm      {Remove user if unsubscribed}
 ::msgcat::mcset en prefroallow   {Allow users without subscription}
 ::msgcat::mcset en prefroclr     {Clear roster when logout}
@@ -1159,8 +1172,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en janewaccount {Write jabber server ip number or name. Pick your username and password.}
 ::msgcat::mcset en janewpass    {Set new password for:}
 ::msgcat::mcset en jasubwant    {The user "%s" wants to subscibe to your presence.}
-::msgcat::mcset en jasubwant2   {Do you want "%s" to see your presence?}
+::msgcat::mcset en jasubwant2   {Do you want %s to see your presence?}
 ::msgcat::mcset en jasubopts    {Choose from the options below. Picking a nickname and group is optional, and for your personal use only.}
+::msgcat::mcset en jasubopts2   {Entering a nickname and group is optional, and for your personal use only.}
 ::msgcat::mcset en jasubgetvcard {Get this persons vCard}
 ::msgcat::mcset en jasubsndmsg  {Send a message to this person:}
 ::msgcat::mcset en jasuballow   {Allow "%s" to see my presence}
@@ -1175,6 +1189,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jarostsub2	{Request presence subscription}
 ::msgcat::mcset en jarostunsub2	{Remove presence subscription}
 ::msgcat::mcset en jasearch	{Search user with the specified service. Press the Get button if you want a new form to fill in.}
+::msgcat::mcset en jasearch2	{Search contact with the specified service. Press the Get button if you want a new form to fill in.}
 ::msgcat::mcset en jasearchwait	{Waiting for Get to be pressed}
 ::msgcat::mcset en jaservclosed	{Server connection closed down.}
 ::msgcat::mcset en jarostupdate {The roster is up to date}
@@ -1219,6 +1234,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jaregalready {You are already registered with this service. These are your current settings of your registration parameters.}
 ::msgcat::mcset en jaactiveret  {If checked Return sends message else use Ctrl/Cmd-Return}
 ::msgcat::mcset en jainvitegchat {Invite a user for groupchat in room %s}
+::msgcat::mcset en jainvitegchat2	{Invite contact to chatroom %s.}
 ::msgcat::mcset en jaxformreq   {Labels with (*) are required}
 ::msgcat::mcset en jagcsyncpres {Synchronize chatroom with user presence}
 ::msgcat::mcset en jaloginuser  {Enter your username and password to login to %s.}
@@ -1397,7 +1413,7 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en moodDlg              {Mood}
 ::msgcat::mcset en selectCustomMood     {Select a mood}
 ::msgcat::mcset en moodMessage          {Reason for mood}
-::msgcat::mcset en mCustomMood              {Custom mood}
+::msgcat::mcset en mCustomMood          {Custom mood}
 
 # END --------------------------------------------------------------------------
 

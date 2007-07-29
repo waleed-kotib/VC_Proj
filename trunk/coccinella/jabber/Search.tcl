@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.29 2007-07-26 14:18:54 matben Exp $
+# $Id: Search.tcl,v 1.30 2007-07-29 10:28:14 matben Exp $
 
 package provide Search 1.0
 
@@ -102,7 +102,7 @@ proc ::Search::Build {args} {
     
     ttk::label $wleft.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength $wraplength -justify left \
-      -text [mc jasearch]
+      -text [mc jasearch2]
     pack $wleft.msg -side top -anchor w
     
     set frtop $wleft.top

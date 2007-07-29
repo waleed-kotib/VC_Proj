@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.203 2007-07-29 07:07:05 matben Exp $
+# $Id: Chat.tcl,v 1.204 2007-07-29 10:28:14 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -261,7 +261,7 @@ proc ::Chat::StartThreadDlg {args} {
 	set imd [::Theme::GetImage [option get $w chatDisImage {}]]
 	
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc {Chat With}] -compound left   \
+	  -text [mc {Start Chat}] -compound left   \
 	  -image [list $im background $imd]
 	pack $w.frall.head -side top -fill both -expand 1
 	
@@ -3359,10 +3359,10 @@ proc ::Chat::BuildPrefsPage {wpage} {
     ttk::label $whi.lage -text "[mc {Not older than}]:"
     set mb $whi.mbage
     set menuDef [list                       \
-	[list [mc {Ten seconds}]     -value 10]    \
-	[list [mc {One minute}]      -value 60]    \
-	[list [mc {Ten minutes}]     -value 600]   \
-	[list [mc {One hour}]        -value 3600]  \
+	[list [mc {Ten Seconds}]     -value 10]    \
+	[list [mc {One Minute}]      -value 60]    \
+	[list [mc {Ten Minutes}]     -value 600]   \
+	[list [mc {One Hour}]        -value 3600]  \
 	[list [mc {No Restriction}]  -value 0]     \
     ]
     ui::optionmenu $mb -menulist $menuDef -direction flush \
@@ -3376,7 +3376,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
 
     set wni $wc.ni
     ttk::frame $wc.ni
-    ttk::label $wni.lni -text [mc {My nickname for own display}]
+    ttk::label $wni.lni -text "[mc {My nickname for own display}]:"
     ttk::entry $wni.eni -textvariable [namespace current]::tmpJPrefs(chat,mynick)
 
     grid  $wni.lni  $wni.eni  -sticky w
