@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.216 2007-07-26 14:18:53 matben Exp $
+# $Id: Jabber.tcl,v 1.217 2007-07-29 07:07:06 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -264,6 +264,9 @@ namespace eval ::Jabber:: {
     }
   
     variable killerId 
+    
+    set ::config(version,show-head) 1
+    set ::config(logout,show-head)  1
 }
 
 # If the whiteboard/ complete dir is there we get whiteboard support.
@@ -1625,7 +1628,7 @@ proc ::Jabber::GetVersion {to args} {
 }
 
 proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
-    global  prefs this
+    global  prefs this config
     
     variable uidvers
     
@@ -1645,21 +1648,23 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
       -macclass {document closeBox}
     wm title $w [mc {Version Info}]
 
-    set im  [::Theme::GetImage info]
-    set imd [::Theme::GetImage infoDis]
-
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
     
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc {Version Info}] -compound left \
-      -image [list $im background $imd]
-    pack $w.frall.head -side top -anchor w
+    if {$config(version,show-head)} {
+	set im  [::Theme::GetImage info]
+	set imd [::Theme::GetImage infoDis]
 
-    ttk::separator $w.frall.s -orient horizontal
-    pack $w.frall.s -side top -fill x
-
+	ttk::label $w.frall.head -style Headlabel \
+	  -text [mc {Version Info}] -compound left \
+	  -image [list $im background $imd]
+	pack $w.frall.head -side top -anchor w
+	
+	ttk::separator $w.frall.s -orient horizontal
+	pack $w.frall.s -side top -fill x
+    }
+    
     set wbox $w.frall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
@@ -2014,7 +2019,7 @@ proc ::Jabber::Logout::OnMenuStatus { } {
 }
 
 proc ::Jabber::Logout::WithStatus { } {
-    global  prefs this wDlgs
+    global  prefs this wDlgs config
 
     variable finished -1
     variable wtextstatus
@@ -2036,20 +2041,22 @@ proc ::Jabber::Logout::WithStatus { } {
     wm title $w [mc {Logout With Message}]
     ::UI::SetWindowPosition $w
 
-    set im   [::Theme::GetImage [option get $w connectImage {}]]
-    set imd  [::Theme::GetImage [option get $w connectDisImage {}]]
-
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
     
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc Logout] -compound left \
-      -image [list $im background $imd]
-    pack $w.frall.head -side top -fill both -expand 1
+    if {$config(logout,show-head)} {
+	set im   [::Theme::GetImage [option get $w connectImage {}]]
+	set imd  [::Theme::GetImage [option get $w connectDisImage {}]]
 
-    ttk::separator $w.frall.s -orient horizontal
-    pack $w.frall.s -side top -fill x
+	ttk::label $w.frall.head -style Headlabel \
+	  -text [mc Logout] -compound left \
+	  -image [list $im background $imd]
+	pack $w.frall.head -side top -fill both -expand 1
+	
+	ttk::separator $w.frall.s -orient horizontal
+	pack $w.frall.s -side top -fill x
+    }
     
     set wbox $w.frall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]

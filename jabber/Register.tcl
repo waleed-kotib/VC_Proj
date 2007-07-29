@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.71 2007-07-27 12:16:21 matben Exp $
+# $Id: Register.tcl,v 1.72 2007-07-29 07:07:06 matben Exp $
 
 package provide Register 1.0
 
@@ -123,6 +123,7 @@ namespace eval ::RegisterEx:: {
     set ::config(registerex,autoget)          0
     set ::config(registerex,autologin)        1
     set ::config(registerex,savepassword)     1
+    set ::config(registerex,show-head)        1
     
     # Allow only a single instance of this dialog.
     variable win $::wDlgs(jreg)_ibr
@@ -206,21 +207,22 @@ proc ::RegisterEx::New {args} {
 	::UI::SetWindowPosition $w $wDlgs(jreg)
     }
 
-    set im   [::Theme::GetImage [option get $w registerImage {}]]
-    set imd  [::Theme::GetImage [option get $w registerDisImage {}]]
-	
     # Global frame.
     ttk::frame $w.frall
     pack  $w.frall  -fill x
     
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc {Register Account}] -compound left \
-      -image [list $im background $imd]
-    pack  $w.frall.head  -side top -fill both -expand 1
-
-    ttk::separator $w.frall.s -orient horizontal
-    pack  $w.frall.s  -side top -fill x
-
+    if {$config(registerex,show-head)} {
+	set im   [::Theme::GetImage [option get $w registerImage {}]]
+	set imd  [::Theme::GetImage [option get $w registerDisImage {}]]
+	    
+	ttk::label $w.frall.head -style Headlabel \
+	  -text [mc {Register Account}] -compound left \
+	  -image [list $im background $imd]
+	pack  $w.frall.head  -side top -fill both -expand 1
+	
+	ttk::separator $w.frall.s -orient horizontal
+	pack  $w.frall.s  -side top -fill x
+    }
     set wbox $w.frall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack  $wbox  -fill both -expand 1
@@ -807,6 +809,8 @@ proc ::RegisterEx::AuthCB {jlibname status {errcode ""} {errmsg ""}} {
 namespace eval ::GenRegister:: {
 
     variable uid 0
+    
+    set ::config(genregister,show-head) 1
 }
 
 # GenRegister::NewDlg --
@@ -823,7 +827,7 @@ namespace eval ::GenRegister:: {
 #       "cancel" or "register".
      
 proc ::GenRegister::NewDlg {args} {
-    global  this wDlgs
+    global  this wDlgs config
 
     variable uid
     upvar ::Jabber::jstate jstate
@@ -856,22 +860,23 @@ proc ::GenRegister::NewDlg {args} {
 	::UI::SetWindowPosition $w $wDlgs(jreg)
     }
 
-    set im   [::Theme::GetImage [option get $w registerImage {}]]
-    set imd  [::Theme::GetImage [option get $w registerDisImage {}]]
-
     # Global frame.
     set wall $w.fr
     ttk::frame $wall
     pack $wall -fill x
     
-    ttk::label $wall.head -style Headlabel \
-      -text [mc {Register Service}] -compound left \
-      -image [list $im background $imd]
-    pack $wall.head -side top -fill both
+    if {$config(genregister,show-head)} {
+	set im   [::Theme::GetImage [option get $w registerImage {}]]
+	set imd  [::Theme::GetImage [option get $w registerDisImage {}]]
 
-    ttk::separator $wall.s -orient horizontal
-    pack $wall.s -side top -fill x
-
+	ttk::label $wall.head -style Headlabel \
+	  -text [mc {Register Service}] -compound left \
+	  -image [list $im background $imd]
+	pack $wall.head -side top -fill both
+	
+	ttk::separator $wall.s -orient horizontal
+	pack $wall.s -side top -fill x
+    }
     set wbox $wall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1

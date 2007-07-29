@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.117 2007-07-28 13:22:39 matben Exp $
+# $Id: Disco.tcl,v 1.118 2007-07-29 07:07:06 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -97,6 +97,9 @@ namespace eval ::Disco:: {
     variable wtab   -
     variable wtree  -
     variable wdisco -
+    
+    set ::config(disco,show-head-on-result)  1
+    set ::config(disco,show-head-add-server) 1
 }
 
 proc ::Disco::InitPrefsHook {} {
@@ -1352,7 +1355,7 @@ proc ::Disco::InfoCmdCB {jlibname type jid queryE args} {
 }
 
 proc ::Disco::InfoResultCB {type jid queryE args} {
-    global  this
+    global  this disco config
     
     variable dlguid
     upvar ::Jabber::nsToText nsToText
@@ -1370,22 +1373,24 @@ proc ::Disco::InfoResultCB {type jid queryE args} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
     wm title $w "Disco Info: $txt"
-    
-    set im  [::Theme::GetImage info]
-    set imd [::Theme::GetImage infoDis]
 
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
     
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc {Disco Info}] -compound left \
-      -image [list $im background $imd]
-    pack $w.frall.head -side top -anchor w
+    if {$config(disco,show-head-on-result)} {	
+	set im  [::Theme::GetImage info]
+	set imd [::Theme::GetImage infoDis]
 
-    ttk::separator $w.frall.s -orient horizontal
-    pack $w.frall.s -side top -fill x
-
+	ttk::label $w.frall.head -style Headlabel \
+	  -text [mc {Disco Info}] -compound left \
+	  -image [list $im background $imd]
+	pack $w.frall.head -side top -anchor w
+	
+	ttk::separator $w.frall.s -orient horizontal
+	pack $w.frall.s -side top -fill x
+    }
+    
     set wbox $w.frall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
@@ -1494,7 +1499,7 @@ namespace eval ::Disco {
 }
 
 proc ::Disco::AddServerDlg { } {
-    global  wDlgs
+    global  wDlgs config
     variable dlgaddjid ""
     variable dlgpermanent 0
     upvar ::Jabber::jprefs jprefs
@@ -1514,21 +1519,23 @@ proc ::Disco::AddServerDlg { } {
     
     set width 260
 
-    set im  [::Theme::GetImage [option get $w settingsImage {}]]
-    set imd [::Theme::GetImage [option get $w settingsDisImage {}]]
-
     # Global frame.
     set wall $w.frall
     ttk::frame $wall
     pack $wall -fill both -expand 1
 
-    ttk::label $wall.head -style Headlabel \
-      -text [mc {Add Server}] -compound left \
-      -image [list $im background $imd]
-    pack $wall.head -side top -fill both -expand 1
+    if {$config(disco,show-head-add-server)} {	
+	set im  [::Theme::GetImage [option get $w settingsImage {}]]
+	set imd [::Theme::GetImage [option get $w settingsDisImage {}]]
 
-    ttk::separator $wall.s -orient horizontal
-    pack $wall.s -side top -fill x
+	ttk::label $wall.head -style Headlabel \
+	  -text [mc {Add Server}] -compound left \
+	  -image [list $im background $imd]
+	pack $wall.head -side top -fill both -expand 1
+	
+	ttk::separator $wall.s -orient horizontal
+	pack $wall.s -side top -fill x
+    }
     
     set wbox $wall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]

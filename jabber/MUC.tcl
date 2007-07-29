@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.82 2007-07-19 06:28:16 matben Exp $
+# $Id: MUC.tcl,v 1.83 2007-07-29 07:07:06 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -89,6 +89,9 @@ namespace eval ::MUC:: {
 	    $wgrant.btvoice      $wrevoke.btvoice      $wlist.btvoice
 	    $wother.btkick}
     }
+    
+    set ::config(muc,show-head-invite) 1
+    set ::config(muc,show-head-info)   1
 }
 
 
@@ -114,7 +117,7 @@ namespace eval ::MUC:: {
 #           we get a response.
 
 proc ::MUC::Invite {roomjid {continue ""}} {
-    global this wDlgs
+    global this wDlgs config
     
     variable inviteuid
     variable dlguid
@@ -144,21 +147,23 @@ proc ::MUC::Invite {roomjid {continue ""}} {
     set invite(finished) -1
     set invite(roomjid)  $roomjid
 
-    set im   [::Theme::GetImage [option get $w inviteImage {}]]
-    set imd  [::Theme::GetImage [option get $w inviteDisImage {}]]
-
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
     
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc {Invite User}] -compound left \
-      -image [list $im background $imd]
-    pack $w.frall.head -side top -anchor w
+    if {$config(muc,show-head-invite)} {
+	set im   [::Theme::GetImage [option get $w inviteImage {}]]
+	set imd  [::Theme::GetImage [option get $w inviteDisImage {}]]
 
-    ttk::separator $w.frall.s -orient horizontal
-    pack $w.frall.s -side top -fill x
-
+	ttk::label $w.frall.head -style Headlabel \
+	  -text [mc {Invite User}] -compound left \
+	  -image [list $im background $imd]
+	pack $w.frall.head -side top -anchor w
+	
+	ttk::separator $w.frall.s -orient horizontal
+	pack $w.frall.s -side top -fill x
+    }
+    
     set wbox $w.frall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
@@ -335,7 +340,7 @@ namespace eval ::MUC:: {
 #       Displays an info dialog for MUC room configuration.
 
 proc ::MUC::BuildInfo {roomjid} {
-    global this wDlgs
+    global this wDlgs config
     
     variable dlguid
     upvar ::Jabber::jstate jstate
@@ -368,21 +373,23 @@ proc ::MUC::BuildInfo {roomjid} {
       -closecommand [namespace current]::InfoCloseHook
     wm title $w "[mc {Info Room}]: $roomName"
     
-    set im   [::Theme::GetImage [option get $w infoImage {}]]
-    set imd  [::Theme::GetImage [option get $w infoDisImage {}]]
-
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
     
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc {Info Room}] -compound left \
-      -image [list $im background $imd]
-    pack $w.frall.head -side top -anchor w
+    if {$config(muc,show-head-info)} {
+	set im   [::Theme::GetImage [option get $w infoImage {}]]
+	set imd  [::Theme::GetImage [option get $w infoDisImage {}]]
 
-    ttk::separator $w.frall.s -orient horizontal
-    pack $w.frall.s -side top -fill x
-
+	ttk::label $w.frall.head -style Headlabel \
+	  -text [mc {Info Room}] -compound left \
+	  -image [list $im background $imd]
+	pack $w.frall.head -side top -anchor w
+	
+	ttk::separator $w.frall.s -orient horizontal
+	pack $w.frall.s -side top -fill x
+    }
+    
     set wbox $w.frall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
