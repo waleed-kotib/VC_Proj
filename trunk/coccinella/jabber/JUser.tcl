@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.39 2007-07-27 12:16:20 matben Exp $
+# $Id: JUser.tcl,v 1.40 2007-07-29 07:07:06 matben Exp $
 
 package provide JUser 1.0
 
@@ -37,6 +37,7 @@ namespace eval ::JUser:: {
     set ::config(adduser,warn-non-xmpp-onselect) 0
     set ::config(adduser,add-non-xmpp-onselect)  1
     set ::config(adduser,dlg-type-ask-register)  yesnocancel
+    set ::config(adduser,show-head)              1
 }
 
 proc ::JUser::QuitAppHook { } {
@@ -57,7 +58,7 @@ proc ::JUser::OnMenu {} {
 #       Add new user dialog.
 
 proc ::JUser::NewDlg {args} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs config
 
     variable uid
     upvar ::Jabber::jstate jstate
@@ -83,9 +84,6 @@ proc ::JUser::NewDlg {args} {
 	::UI::SetWindowPosition $w $wDlgs(jrostadduser)
     }
 
-    set im  [::Theme::GetImage [option get $w adduserImage {}]]
-    set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
-
     # Find all our groups for any jid.
     set allGroups [$jstate(jlib) roster getgroups]
     set trpts [::Roster::GetTransportNames]
@@ -105,14 +103,18 @@ proc ::JUser::NewDlg {args} {
     ttk::frame $wall
     pack $wall -fill both -expand 1
 
-    ttk::label $wall.head -style Headlabel \
-      -text [mc {Add Contact}] -compound left \
-      -image [list $im background $imd]
-    pack $wall.head -side top -fill both -expand 1
+    if {$config(adduser,show-head)} {
+	set im  [::Theme::GetImage [option get $w adduserImage {}]]
+	set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
 
-    ttk::separator $wall.s -orient horizontal
-    pack $wall.s -side top -fill x
-
+	ttk::label $wall.head -style Headlabel \
+	  -text [mc {Add Contact}] -compound left \
+	  -image [list $im background $imd]
+	pack $wall.head -side top -fill both -expand 1
+	
+	ttk::separator $wall.s -orient horizontal
+	pack $wall.s -side top -fill x
+    }
     set wbox $wall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1

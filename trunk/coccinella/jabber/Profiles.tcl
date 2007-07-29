@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.77 2007-07-27 12:16:21 matben Exp $
+# $Id: Profiles.tcl,v 1.78 2007-07-29 07:07:06 matben Exp $
 
 package provide Profiles 1.0
 
@@ -79,7 +79,8 @@ namespace eval ::Profiles:: {
     set ::config(profiles,selected)   {}
     set ::config(profiles,prefspanel) 1
     set ::config(profiles,style)      "jid"  ;# jid | parts
-
+    set ::config(profiles,show-head)  1
+    
     # The 'config' array shall never be written to, and since not all elements
     # of the profile are fixed, we need an additional profile that is written
     # to the prefs file. It must furthermore not interfere with the other 
@@ -853,7 +854,7 @@ namespace eval ::Profiles {
 #       Standalone dialog profile settings dialog.
 
 proc ::Profiles::BuildDialog { } {
-    global  wDlgs
+    global  wDlgs config
     variable wdlgpage
     
     set w $wDlgs(jprofiles)
@@ -868,21 +869,22 @@ proc ::Profiles::BuildDialog { } {
     wm title $w [mc {Edit Profiles}]
     ::UI::SetWindowPosition $w
     
-    set im   [::Theme::GetImage [option get $w settingsImage {}]]
-    set imd  [::Theme::GetImage [option get $w settingsDisImage {}]]
-
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
 
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc "Edit Profiles"] -compound left \
-      -image [list $im background $imd]
-    pack  $w.frall.head  -side top -fill both -expand 1
+    if {$config(profiles,show-head)} {
+	set im   [::Theme::GetImage [option get $w settingsImage {}]]
+	set imd  [::Theme::GetImage [option get $w settingsDisImage {}]]
 
-    ttk::separator $w.frall.s -orient horizontal
-    pack  $w.frall.s  -side top -fill x
-
+	ttk::label $w.frall.head -style Headlabel \
+	  -text [mc "Edit Profiles"] -compound left \
+	  -image [list $im background $imd]
+	pack  $w.frall.head  -side top -fill both -expand 1
+	
+	ttk::separator $w.frall.s -orient horizontal
+	pack  $w.frall.s  -side top -fill x
+    }
     set wpage $w.frall.page
     set wdlgpage $wpage
     FrameWidget $wpage 1 -padding [option get . dialogPadding {}]

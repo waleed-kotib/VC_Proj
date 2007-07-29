@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.37 2007-07-26 14:18:54 matben Exp $
+# $Id: Subscribe.tcl,v 1.38 2007-07-29 07:07:06 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -39,6 +39,8 @@ namespace eval ::Subscribe:: {
     # Store everything in 'locals($uid, ... )'.
     variable locals   
     variable uid 0
+    
+    set ::config(subscribe,show-head) 1
 }
 
 # Subscribe::NewDlg --
@@ -52,7 +54,7 @@ namespace eval ::Subscribe:: {
 #       none
 
 proc ::Subscribe::NewDlg {jid} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs config
 
     variable uid
     upvar ::Jabber::jstate jstate
@@ -82,9 +84,6 @@ proc ::Subscribe::NewDlg {jid} {
 	::UI::SetWindowPosition $w $wDlgs(jsubsc)
     }
   
-    set im  [::Theme::GetImage [option get $w adduserImage {}]]
-    set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
-
     set jlib $jstate(jlib)
 
     # Find all our groups for any jid.
@@ -102,14 +101,18 @@ proc ::Subscribe::NewDlg {jid} {
     ttk::frame $wall
     pack $wall -fill both -expand 1
 
-    ttk::label $wall.head -style Headlabel \
-      -text [mc Subscribe] -compound left \
-      -image [list $im background $imd]
-    pack $wall.head -side top -fill both -expand 1
+    if {$config(subscribe,show-head)} {
+	set im  [::Theme::GetImage [option get $w adduserImage {}]]
+	set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
 
-    ttk::separator $wall.s -orient horizontal
-    pack $wall.s -side top -fill x
-
+	ttk::label $wall.head -style Headlabel \
+	  -text [mc Subscribe] -compound left \
+	  -image [list $im background $imd]
+	pack $wall.head -side top -fill both -expand 1
+	
+	ttk::separator $wall.s -orient horizontal
+	pack $wall.s -side top -fill x
+    }
     set wbox $wall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1

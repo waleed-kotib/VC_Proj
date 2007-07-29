@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.119 2007-07-27 12:16:20 matben Exp $
+# $Id: Login.tcl,v 1.120 2007-07-29 07:07:06 matben Exp $
 
 package provide Login 1.0
 
@@ -46,6 +46,7 @@ namespace eval ::Login:: {
     set ::config(login,autoregister) 0
     set ::config(login,dnssrv)       1
     set ::config(login,dnstxthttp)   1
+    set ::config(login,show-head)    1
 }
 
 # Login::Dlg --
@@ -90,22 +91,24 @@ proc ::Login::Dlg { } {
     wm title $w [mc Login]
 
     ::UI::SetWindowPosition $w
-    
-    set connectim   [::Theme::GetImage [option get $w connectImage {}]]
-    set connectimd  [::Theme::GetImage [option get $w connectDisImage {}]]
-    
+        
     # Global frame.
     ttk::frame $w.frall
     pack  $w.frall  -fill x
                                  
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc Login] -compound left \
-      -image [list $connectim background $connectimd]
-    pack  $w.frall.head  -side top -fill both -expand 1
+    if {$config(login,show-head)} {
+	set connectim   [::Theme::GetImage [option get $w connectImage {}]]
+	set connectimd  [::Theme::GetImage [option get $w connectDisImage {}]]
 
-    ttk::separator $w.frall.s -orient horizontal
-    pack  $w.frall.s  -side top -fill x
-
+	ttk::label $w.frall.head -style Headlabel \
+	  -text [mc Login] -compound left \
+	  -image [list $connectim background $connectimd]
+	pack  $w.frall.head  -side top -fill both -expand 1
+	
+	ttk::separator $w.frall.s -orient horizontal
+	pack  $w.frall.s  -side top -fill x
+    }
+    
     set wbox $w.frall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack  $wbox  -fill both -expand 1

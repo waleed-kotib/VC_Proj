@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.202 2007-07-27 13:50:14 matben Exp $
+# $Id: Chat.tcl,v 1.203 2007-07-29 07:07:05 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -185,6 +185,8 @@ namespace eval ::Chat:: {
     
     # Shall we allow multiple chast threads (and dialogs) per JID?
     variable allowMultiThreadPerJID 0
+    
+    set ::config(chat,show-head) 1
 }
 
 # Chat::OnToolButton --
@@ -229,7 +231,7 @@ proc ::Chat::OnMenu { } {
 #       updates UI.
 
 proc ::Chat::StartThreadDlg {args} {
-    global  prefs this wDlgs
+    global  prefs this wDlgs config
 
     variable finished -1
     variable user ""
@@ -254,16 +256,18 @@ proc ::Chat::StartThreadDlg {args} {
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
     
-    set im  [::Theme::GetImage [option get $w chatImage {}]]
-    set imd [::Theme::GetImage [option get $w chatDisImage {}]]
-
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc {Chat With}] -compound left   \
-      -image [list $im background $imd]
-    pack $w.frall.head -side top -fill both -expand 1
-
-    ttk::separator $w.frall.s -orient horizontal
-    pack $w.frall.s -side top -fill x
+    if {$config(chat,show-head)} {
+	set im  [::Theme::GetImage [option get $w chatImage {}]]
+	set imd [::Theme::GetImage [option get $w chatDisImage {}]]
+	
+	ttk::label $w.frall.head -style Headlabel \
+	  -text [mc {Chat With}] -compound left   \
+	  -image [list $im background $imd]
+	pack $w.frall.head -side top -fill both -expand 1
+	
+	ttk::separator $w.frall.s -orient horizontal
+	pack $w.frall.s -side top -fill x
+    }
     
     # Entries etc.
     set wbox $w.frall.f

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: OOB.tcl,v 1.55 2007-07-19 06:28:16 matben Exp $
+# $Id: OOB.tcl,v 1.56 2007-07-29 07:07:06 matben Exp $
 
 # NOTE: Parts if this code is obsolete (the send part) but the receiving
 #       part is still retained for backwards compatibility.
@@ -41,6 +41,8 @@ namespace eval ::OOB:: {
 
     # Running number for token.
     variable uid 0
+    
+    set ::config(oob,show-head-send) 1
 }
 
 proc ::OOB::InitHook { } {
@@ -70,7 +72,7 @@ proc ::OOB::InitJabberHook {jlibname} {
 #       jid         a full 3-tier jid
 
 proc ::OOB::BuildSet {jid} {
-    global  this wDlgs
+    global  this wDlgs config
     
     variable finished
     variable localpath ""
@@ -94,21 +96,23 @@ proc ::OOB::BuildSet {jid} {
     wm title $w [mc {Send File}]
     set locals(jid) $jid
     
-    set im   [::Theme::GetImage [option get $w sendFileImage {}]]
-    set imd  [::Theme::GetImage [option get $w sendFileDisImage {}]]
-
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
 
-    ttk::label $w.frall.head -style Headlabel \
-      -text [mc {Send File}] -compound left \
-      -image [list $im background $imd]
-    pack $w.frall.head -side top -anchor w
+    if {$config(oob,show-head-send)} {
+	set im   [::Theme::GetImage [option get $w sendFileImage {}]]
+	set imd  [::Theme::GetImage [option get $w sendFileDisImage {}]]
 
-    ttk::separator $w.frall.s -orient horizontal
-    pack $w.frall.s -side top -fill x
-
+	ttk::label $w.frall.head -style Headlabel \
+	  -text [mc {Send File}] -compound left \
+	  -image [list $im background $imd]
+	pack $w.frall.head -side top -anchor w
+	
+	ttk::separator $w.frall.s -orient horizontal
+	pack $w.frall.s -side top -fill x
+    }
+    
     set wbox $w.frall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
