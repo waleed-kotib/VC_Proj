@@ -5,7 +5,7 @@
 #       While the 'avatar' package handles the actual image data, this package
 #       keeps an image in sync with avatar image data.
 #       
-#  Copyright (c) 2005-2006  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.32 2007-07-19 06:28:12 matben Exp $
+# $Id: Avatar.tcl,v 1.33 2007-07-30 08:16:02 matben Exp $
 
 # @@@ Issues:
 # 
@@ -29,6 +29,7 @@
 
 package require sha1       ; # tcllib                           
 package require jlib::avatar
+package require ui::util
 
 package provide Avatar 1.0
 
@@ -964,7 +965,8 @@ proc ::Avatar::PutPhotoCreateSizes {jid2} {
 	if {[info exists photo($mjid2,$size)]} {
 	    set name $photo($mjid2,$size)
 	    if {[image inuse $name]} {
-		set tmp [CreateScaledPhoto $orig $size]
+		#set tmp [CreateScaledPhoto $orig $size]
+		set tmp [::ui::image::scale $orig $size]
 		$name copy $tmp -compositingrule set -shrink
 		image delete $tmp
 	    } else {
@@ -1042,7 +1044,8 @@ proc ::Avatar::GetPhotoOfSize {jid2 size} {
 
 	# Is not there, create!
 	set name $photo($mjid2,orig)
-	set new [CreateScaledPhoto $name $size]
+	#set new [CreateScaledPhoto $name $size]
+	set new [::ui::image::scale $name $size]
 	set photo($mjid2,$size) $new
 	return $new
     } elseif {[HaveCachedJID $jid2]} {
@@ -1051,7 +1054,8 @@ proc ::Avatar::GetPhotoOfSize {jid2 size} {
 	# If succesful; Note that only orig created.
 	if {[info exists photo($mjid2,orig)]} {
 	    set name $photo($mjid2,orig)
-	    set new [CreateScaledPhoto $name $size]
+	    #set new [CreateScaledPhoto $name $size]
+	    set new [::ui::image::scale $name $size]
 	    set photo($mjid2,$size) $new
 	    return $new
 	}
@@ -1142,6 +1146,8 @@ proc ::Avatar::FreeAllPhotos { } {
 }
 
 #--- Utilities -----------------------------------------------------------------
+
+# OBSOLETE !!!   Moved to ui::util !!!
 
 # These always scale down an image.
 

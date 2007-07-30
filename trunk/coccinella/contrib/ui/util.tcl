@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.10 2007-07-19 06:28:12 matben Exp $
+# $Id: util.tcl,v 1.11 2007-07-30 08:16:02 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -64,6 +64,32 @@ namespace eval ui {
 	}
     }    
 }
+
+# ui::from --
+# 
+#       The from command plucks an option value from a list of options and their 
+#       values. If it is found, it and its value are removed from the list, 
+#       and the value is returned. 
+
+proc ui::from {argvName option {defvalue ""}} {
+    upvar $argvName argv
+
+    set ioption [lsearch -exact $argv $option]
+    if {$ioption == -1} {
+	return $defvalue
+    } else {
+	set ivalue [expr {$ioption + 1}]
+	set value [lindex $argv $ivalue]
+	
+	set argv [lreplace $argv $ioption $ivalue] 
+
+	return $value
+    }
+}
+
+# ui::autoname --
+# 
+#       Generates an unique nonexisting toplevel window name.
 
 proc ui::autoname {} {
     variable dlg
@@ -294,6 +320,106 @@ proc ui::EntryInsert {win s} {
     # Stop class handler from executing, else we get double characters.
     # @@@ Problem: this also stops handlers bound to the toplevel bindtag!!!!!
     return -code break
+}
+
+# ::ui::image::scale --
+# 
+#       Always scales down an image.
+#
+#       Scales a photo using tk's primitive methods while waiting for tkpath!
+#       Note that always a new image is produced for each call!
+#       If image with 'name' is smaller or equal 'size' then just return 
+#       a copy of 'name', else create a new scaled one that is smaller or 
+#       equal to 'size'.
+
+namespace eval ::ui::image {}
+
+proc ::ui::image::scale {name size} {
+    
+    set width  [image width $name]
+    set height [image height $name]
+    set max [expr {$width > $height ? $width : $height}]
+    
+    # We never scale up an image, only scale down.
+    if {$size >= $max} {
+	set new [image create photo]
+	$new copy $name
+	return $new
+    } else {
+	lassign [GetScaleMN $max $size] M N
+	return [ScalePhotoM->N $name $M $N]
+    }
+}
+
+proc ::ui::image::ScalePhotoM->N {name M N} {
+    
+    set new [image create photo]
+    if {$N == 1} {
+	$new copy $name -subsample $M
+    } else {
+	set tmp [image create photo]
+	$tmp copy $name -zoom $M
+	$new copy $tmp -subsample $N
+	image delete $tmp
+    }
+    return $new
+}
+
+# ui::image::GetScaleMN --
+# 
+#       Get scale rational number that scales from 'from' pixels to smaller or 
+#       equal to 'to' pixels.
+
+proc ::ui::image::GetScaleMN {from to} {
+    variable scaleTable
+
+    if {![info exists scaleTable]} {
+	MakeScaleTable
+    }
+    
+    # If requires smaller scale factor than min (1/8):
+    set M [lindex $scaleTable {end 0}]
+    set N [lindex $scaleTable {end 1}]
+    if {[expr {$M*$from > $N*$to}]} {
+	set M 1
+	set N [expr {int(double($from)/double($to) + 1)}]
+    } elseif {$from == $to} {
+	set M 1
+	set N 1
+    } else {
+	foreach r $scaleTable {
+	    set N [lindex $r 0]
+	    set M [lindex $r 1]
+	    if {[expr {$N*$from <= $M*$to}]} {
+		break
+	    }
+	}
+    }
+    return [list $N $M]
+}
+
+proc ::ui::image::MakeScaleTable { } {
+    variable scaleTable
+    
+    # {{numerator denominator} ...}
+    set r \
+      {{1 2} {1 3} {1 4} {1 5} {1 6} {1 7} {1 8}
+	     {2 3}       {2 5}       {2 7}
+		   {3 4} {3 5}       {3 7} {3 8}
+			 {4 5}       {4 7}  
+			       {5 6} {5 7} {5 8}
+				     {6 7}
+					   {7 8}}
+
+    # Sort in decreasing order!
+    set scaleTable [lsort -decreasing -command ::ui::image::MakeScaleTableCmd $r]
+}
+
+proc ::ui::image::MakeScaleTableCmd {f1 f2} {
+    
+    set r1 [expr {double([lindex $f1 0])/double([lindex $f1 1])}]
+    set r2 [expr {double([lindex $f2 0])/double([lindex $f2 1])}]
+    return [expr {$r1 > $r2 ? 1 : -1}]
 }
 
 #-------------------------------------------------------------------------------
