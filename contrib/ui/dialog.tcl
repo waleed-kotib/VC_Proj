@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.24 2007-07-19 06:28:11 matben Exp $
+# $Id: dialog.tcl,v 1.25 2007-07-30 08:16:02 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -280,15 +280,22 @@ snit::widget ui::dialog::widget {
 	set icon $options(-icon)
 	if {$options(-badge) && [info exists images($icon,badge)]} {
 	    set im $images($icon,badge)
-	} else {
+	} elseif {[string length $icon]} {
 	    set im $images($icon)
+	} else {
+	    set im ""
+	}
+	if {[string length $icon]} {
+	    set minsize 64
+	} else {
+	    set minsize 0
 	}
 	ttk::label $top.icon -image $im
 	
 	grid $top.icon    -column 0 -row 0 -rowspan 2 -sticky n
 	grid $top.message -column 1 -row 0 -sticky nw
 	grid $top.detail  -column 1 -row 1 -sticky nw
-	grid columnconfigure $top 0 -minsize 64
+	grid columnconfigure $top 0 -minsize $minsize
 	grid columnconfigure $top 1 -minsize $wraplength
 
 	set client $top.client
@@ -411,7 +418,7 @@ snit::widget ui::dialog::widget {
     
     method ValidateIcon {option value} {
 	upvar ::ui::dialog::images images
-	if {![info exists images($value)]} {
+	if {[string length $value] && ![info exists images($value)]} {
 	    set valid [join $images(names) ", "]
 	    return -code error "unrecognized icon $value, must be one of $valid"
 	}
