@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.161 2007-07-29 10:28:14 matben Exp $
+# $Id: UI.tcl,v 1.162 2007-07-30 14:16:31 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -149,6 +149,9 @@ proc ::UI::LaunchFinalHook { } {
     set im [::Theme::GetImage [option get . applicationImage {}]]
     ui::dialog::setimage coccinella $im
     ui::dialog defaultmenu [::UI::GetMainMenu]
+
+    # For ui::openimage
+    option add *Dialog*image.style  Sunken.TLabel  widgetDefault
 }
 
 proc ::UI::InitCommonBinds { } {

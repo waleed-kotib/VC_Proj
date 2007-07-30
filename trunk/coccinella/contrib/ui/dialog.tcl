@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.25 2007-07-30 08:16:02 matben Exp $
+# $Id: dialog.tcl,v 1.26 2007-07-30 14:16:31 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -27,15 +27,16 @@ namespace eval ui::dialog {
     option add *Dialog.f.t.message.wrapLength      300            widgetDefault
     option add *Dialog.f.t.detail.wrapLength       300            widgetDefault
     option add *Dialog.f.t.message.font            DlgDefaultFont widgetDefault
-    option add *Dialog.f.t.detail.font             DlgSmallFont   widgetDefault
-    
+    option add *Dialog.f.t.detail.font             DlgSmallFont   widgetDefault    
+    option add *Dialog.f.b.padding                 { 0 12  0  0}  widgetDefault
+
     switch -- [tk windowingsystem] {
 	aqua {
 	    option add *Dialog.f.padding           {20 15 20 16}  widgetDefault
 	    option add *Dialog.f.t.message.padding { 0  0  0  6}  widgetDefault
-	    option add *Dialog.f.t.detail.padding  { 0  0  0  8}  widgetDefault
+	    #option add *Dialog.f.t.detail.padding  { 0  0  0  8}  widgetDefault
 	    option add *Dialog.f.t.icon.padding    { 0  0 16  0}  widgetDefault
-	    option add *Dialog.f.t.client.padding  { 0  0  0  8}  widgetDefault
+	    option add *Dialog.f.t.client.padding  { 0 12  0  8}  widgetDefault
 	    option add *Dialog.buttonAnchor        e              widgetDefault
 	    option add *Dialog.buttonOrder         "cancelok"     widgetDefault
 	    option add *Dialog.buttonPadX          8              widgetDefault
@@ -43,9 +44,9 @@ namespace eval ui::dialog {
 	win32 {
 	    option add *Dialog.f.padding           {12  6}        widgetDefault
 	    option add *Dialog.f.t.message.padding { 0  0  0  4}  widgetDefault
-	    option add *Dialog.f.t.detail.padding  { 0  0  0  6}  widgetDefault
+	    #option add *Dialog.f.t.detail.padding  { 0  0  0  6}  widgetDefault
 	    option add *Dialog.f.t.icon.padding    { 0  0  8  0}  widgetDefault
-	    option add *Dialog.f.t.client.padding  { 0  0  0  8}  widgetDefault
+	    option add *Dialog.f.t.client.padding  { 0 12  0  8}  widgetDefault
 	    option add *Dialog.buttonAnchor        center         widgetDefault
 	    option add *Dialog.buttonOrder         "okcancel"     widgetDefault
 	    option add *Dialog.buttonPadX          4              widgetDefault
@@ -53,9 +54,9 @@ namespace eval ui::dialog {
 	x11 {
 	    option add *Dialog.f.padding           {12  6}        widgetDefault
 	    option add *Dialog.f.t.message.padding { 0  0  0  4}  widgetDefault
-	    option add *Dialog.f.t.detail.padding  { 0  0  0  6}  widgetDefault
+	    #option add *Dialog.f.t.detail.padding  { 0  0  0  6}  widgetDefault
 	    option add *Dialog.f.t.icon.padding    { 0  0  8  0}  widgetDefault
-	    option add *Dialog.f.t.client.padding  { 0  0  0  8}  widgetDefault
+	    option add *Dialog.f.t.client.padding  { 0 12  0  8}  widgetDefault
 	    option add *Dialog.buttonAnchor        e              widgetDefault
 	    option add *Dialog.buttonOrder         "okcancel"     widgetDefault
 	    option add *Dialog.buttonPadX          4              widgetDefault
@@ -496,9 +497,9 @@ if {0} {
     proc cmd2 {w bt} {puts "cmd: bt=$bt, dlgvar=$::dlgvar"}
 
     set str "These two must be able to call before any dialog instance created."
-    set str2 "Elvis has left the building"
-    ui::dialog -message $str -detail $str
-    ui::dialog -message $str -detail $str  \
+    set str2 "Elvis has left the building and is driving his white Cadillac."
+    ui::dialog -message $str -detail $str2
+    ui::dialog -message $str -detail $str2  \
       -icon error -buttons {yes no cancel} -default yes -variable dlgvar
     ui::dialog -message "Check destroy from -command" -command cmd1
     ui::dialog -message $str -type yesnocancel -command cmd2 -variable dlgvar

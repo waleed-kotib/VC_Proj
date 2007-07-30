@@ -18,7 +18,6 @@
 
 ! contributed widgets
 !
-*MacTabnotebook.style:               mac
 *Tablelist.highlightThickness:       3
 *Tree.styleIcons:                     triangle
 *Tree.treeColor:                     
