@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.80 2007-07-19 06:28:19 matben Exp $
+# $Id: Whiteboard.tcl,v 1.81 2007-07-30 14:16:31 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -943,9 +943,11 @@ proc ::WB::MoveCanvasToPage {w name} {
     
     # Repack the WBCanvas in notebook page.
     pack forget $wapp(frcan)
-    ::mactabnotebook::mactabnotebook $wapp(nb)  \
-      -selectcommand [namespace current]::SelectPageCmd  \
-      -closebutton 1
+    
+    # Has to be remade using ttk::notebook
+    #::mactabnotebook::mactabnotebook $wapp(nb)  \
+    #  -selectcommand [namespace current]::SelectPageCmd  \
+    #  -closebutton 1
     pack $wapp(nb) -in $wapp(ccon) -fill both -expand true -side right
     set wpage [$wapp(nb) newpage $name]	
     pack $wapp(frcan) -in $wpage -fill both -expand true -side right

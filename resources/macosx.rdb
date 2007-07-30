@@ -35,7 +35,6 @@
 
 ! contributed widgets
 !
-*MacTabnotebook.style:              aqua
 *Tablelist.highlightThickness:      3
 *Tablelist.BorderWidth:             1              
 *Tree.background:                   white
