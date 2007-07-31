@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.78 2007-07-29 07:07:06 matben Exp $
+# $Id: Profiles.tcl,v 1.79 2007-07-31 12:25:09 matben Exp $
 
 package provide Profiles 1.0
 
@@ -1651,7 +1651,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     
     ttk::button $whttp.bproxy -style Small.TButton  \
       -text "[mc {Proxy Setup}]..."  \
-      -command [list ::Preferences::Show {General {Proxy Setup}}]
+      -command [list ::Preferences::Show {General {Network}}]
 
     ttk::label $whttp.lpoll -style Small.TLabel  \
       -text [mc {Poll interval (secs)}]
