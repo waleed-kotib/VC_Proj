@@ -7,7 +7,14 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.26 2007-07-30 14:16:31 matben Exp $
+# $Id: dialog.tcl,v 1.27 2007-07-31 07:28:32 matben Exp $
+
+# Public commands:
+# 
+#   ui::dialog ?w? ?args?
+#   ui::dialog::modal ?args?
+#   ui::dialog::setimage name image
+#   ui::dialog::setbadge image
 
 package require snit 1.0
 package require tile
@@ -23,6 +30,8 @@ namespace eval ui::dialog {
 
     variable images
     set images(names) {}
+    
+    variable buttonModal ""
     
     option add *Dialog.f.t.message.wrapLength      300            widgetDefault
     option add *Dialog.f.t.detail.wrapLength       300            widgetDefault
@@ -140,6 +149,33 @@ proc ui::dialog::BadgeImage {image} {
 }
 
 proc ui::dialog::Nop {args} { }
+
+# ui::dialog --
+# 
+#       Implements a simple dialog like tk_messageBox but much more flexible.
+#             
+# Arguments:
+#       args:
+#         -badge        0 | 1
+#         -buttons      list of button names {ok cancel yes no retry abort ignore}
+#         -cancel       cancel button name
+#         -command      tclProc {w buttonName}
+#         -default      "" | buttonName
+#         -detail       text
+#         -geovariable  varName
+#         -icon         "" | info | question | error | warning
+#         -menu
+#         -message      text
+#         -modal        0 | 1
+#         -parent       widgetPath
+#         -timeout      millisecs
+#         -title        text
+#         -type         ok | okcancel | retrycancel |yesno |yesnocancel | 
+#                       abortretryignore
+#         -variable     varName
+#                       
+# Results:
+#       widgetPath
 
 proc ui::dialog {args} {
  
@@ -486,6 +522,28 @@ snit::widget ui::dialog::widget {
     }
 }
 
+proc ui::dialog::ModalCmd {w button} {
+    variable buttonModal
+    set buttonModal $button
+}
+
+# ui::openimage::modal --
+# 
+#       As ui::openimage but it is a modal dialog and returns any selected
+#       file name.
+
+proc ui::dialog::modal {args} {
+    variable buttonModal
+ 
+    set w [ui::autoname]
+    ui::from args -modal
+    ui::from args -command
+    eval {widget $w -modal 1 -command [namespace code ModalCmd]} $args
+    ui::Grab $w
+    return $buttonModal
+}
+
+
 if {0} {
     # Tests... Run from inside Coccinella.
     foreach name {info error warning question} {
@@ -506,15 +564,17 @@ if {0} {
     ui::dialog -message "Check timeout for auto destruction"  \
       -timeout 4000 -buttons {}
     set w [ui::dialog -message $str -detail $str  \
-      -icon error -type yesnocancel -modal 1]
+      -icon error -type yesnocancel]
     set fr [$w clientframe]
     pack [ttk::checkbutton $fr.c -text $str2] -side left
     
     ui::dialog defaultmenu [::UI::GetMainMenu]
     set w [ui::dialog -message $str -detail $str2 -modal 1]
-    ::UI::SetMenubarAcceleratorBinds $w $m
-    $w grab
+    ::UI::SetMenubarAcceleratorBinds $w [::UI::GetMainMenu]
 
+    ui::dialog::modal -message "This is a modal dialog" -detail $str2 \
+      -icon error -type yesnocancel
+    
 }
 
 #-------------------------------------------------------------------------------

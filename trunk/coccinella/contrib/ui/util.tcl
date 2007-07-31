@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.11 2007-07-30 08:16:02 matben Exp $
+# $Id: util.tcl,v 1.12 2007-07-31 07:28:32 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -80,9 +80,7 @@ proc ui::from {argvName option {defvalue ""}} {
     } else {
 	set ivalue [expr {$ioption + 1}]
 	set value [lindex $argv $ivalue]
-	
 	set argv [lreplace $argv $ioption $ivalue] 
-
 	return $value
     }
 }

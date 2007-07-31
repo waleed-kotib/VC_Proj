@@ -6,7 +6,14 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: openimage.tcl,v 1.2 2007-07-30 14:16:31 matben Exp $
+# $Id: openimage.tcl,v 1.3 2007-07-31 07:28:32 matben Exp $
+
+# Public commands:
+# 
+#   ui::openimage w ?args?
+#   ui::openimage::modal ?args?
+#   
+# @@@ Add support for dnd
 
 package require snit 1.0
 package require tile
@@ -15,7 +22,10 @@ package require ui::util
 
 package provide ui::openimage 0.1
 
-namespace eval ui::openimage {}
+namespace eval ui::openimage {
+
+    variable fileNameModal ""
+}
 
 interp alias {} ui::openimage {} ui::openimage::widget
 
@@ -29,6 +39,22 @@ interp alias {} ui::openimage {} ui::openimage::widget
 #	$self configurelist $args
 #    }
 # }
+
+# ui::openimage::widget --
+# 
+#       Implements a simple open image widget which can act as a preference
+#       dialog. Built on top of ui::dialog.
+#       
+# Arguments:
+#       w           widgetPath
+#       args:       all from ui::dialog and
+#         -defaultfile  fileName
+#         -filetypes    for tk_getOpenFile
+#         -initialfile  fileName
+#         -size         integer
+#                       
+# Results:
+#       widgetPath
 
 proc ui::openimage::widget {w args} {    
     upvar 0 $w state
@@ -70,11 +96,11 @@ proc ui::openimage::widget {w args} {
 
     ttk::frame $fr.r
     ttk::button $fr.r.new \
-      -command [namespace code [list New $w]] -text [msgcat::mc New]
+      -command [namespace code [list New $w]] -text [::msgcat::mc New...]
     ttk::button $fr.r.rem \
-      -command [namespace code [list Remove $w]] -text [msgcat::mc Remove]
+      -command [namespace code [list Remove $w]] -text [::msgcat::mc Remove]
     ttk::button $fr.r.def \
-      -command [namespace code [list Default $w]] -text [msgcat::mc Default]
+      -command [namespace code [list Default $w]] -text [::msgcat::mc Default]
 
     grid  $fr.r.new  -pady 2 -sticky ew
     grid  $fr.r.rem  -pady 2 -sticky ew
@@ -139,6 +165,7 @@ proc ui::openimage::Remove {w} {
     upvar 0 $w state
     variable $w
 
+    set state(fileName) "-"
     set state(image)  ""
     set state(scaled) ""
     set state(maxsize) 0
@@ -195,8 +222,6 @@ proc ::ui::openimage::Balloon {w show} {
 	set H [image height $state(image)]
 	set x [expr {[winfo rootx $wimage] + [winfo height $wimage]/2 -$W/2}]
 	set y [expr {[winfo rooty $wimage] + [winfo height $wimage]}]
-	# Not working too well!
-	ui::KeepOnScreen $win x y $W $H
 	wm geometry $win +${x}+${y}
 	wm deiconify $win
     } else {
@@ -208,9 +233,13 @@ proc ui::openimage::Cmd {w bt} {
     upvar 0 $w state
     variable $w
     
-    puts "ui::openimage::Cmd bt=$bt"
+    # We must have a way to differentiate between cancel and remove.
+    #   cancel: ""
+    #   remove: "-"
     if {$bt ne "ok"} {
 	set state(fileName) ""
+    } elseif {![file exists $state(fileName)]} {
+	set state(fileName) "-"	
     }
     if {$state(-command) ne {}} {
 	set rc [catch [linsert $state(-command) end $state(fileName)] result]
@@ -231,6 +260,27 @@ proc ui::openimage::destructor {w} {
     unset -nocomplain state
 }
 
+proc ui::openimage::ModalCmd {fileName} {
+    variable fileNameModal
+    set fileNameModal $fileName
+}
+
+# ui::openimage::modal --
+# 
+#       As ui::openimage but it is a modal dialog and returns any selected
+#       file name.
+
+proc ui::openimage::modal {args} {
+    variable fileNameModal
+ 
+    set w [ui::autoname]
+    ui::from args -modal
+    ui::from args -command
+    eval {widget $w -modal 1 -command [namespace code ModalCmd]} $args
+    ui::Grab $w
+    return $fileNameModal
+}
+
 if {0} {
     # Test:
     
@@ -248,6 +298,9 @@ if {0} {
       -initialfile /Users/matben/Docs/code/oil/20060211-173572-4.jpg \
       -defaultfile /Users/matben/Graphics/Avatars/boy_avatar_lnx/Icons/128X128/boy_1.png
     
+    ui::openimage::modal -message $str -detail $str2 -filetypes $types \
+      -initialfile /Users/matben/Tcl/cvs/coccinella/images/cociexec.gif \
+      -defaultfile /Users/matben/Graphics/Avatars/boy_avatar_lnx/Icons/128X128/boy_1.png
     
 }
 
