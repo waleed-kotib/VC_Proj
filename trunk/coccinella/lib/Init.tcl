@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.67 2007-07-19 06:28:18 matben Exp $
+# $Id: Init.tcl,v 1.68 2007-08-01 08:06:27 matben Exp $
 
 namespace eval ::Init {}
 
@@ -339,6 +339,7 @@ proc ::Init::SetPrefsPaths {} {
     set this(recentAvatarPath)  [file join $path avatar recent]
     set this(altThemesPath)     [file join $path themes]
     set this(scriptsPath)       [file join $path scripts]
+    set this(backgroundsPath)   [file join $path backgrounds]
 
     set pname $this(prefsName)
 
@@ -450,6 +451,7 @@ proc ::Init::MakePrefsDirs {} {
 	altServiconsPath
 	altThemesPath
 	scriptsPath
+	backgroundsPath
     } {
 	if {[file isfile $this($name)]} {
 	    file delete -force $this($name)

@@ -468,6 +468,7 @@
 ::msgcat::mcset kr mJiveCall         	{콜}
 ::msgcat::mcset kr mJiveForward         {콜 전달하기}
 ::msgcat::mcset kr mBackgroundImage     {배경 그림}
+::msgcat::mcset kr mBackgroundImage...  {배경 그림}
 
 ::msgcat::mcset kr mEditNick            {Edit Nickname}
 ::msgcat::mcset kr mAdHocCommands       {Ad-Hoc Commands}

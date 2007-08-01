@@ -474,6 +474,7 @@
 ::msgcat::mcset it mJiveCall {Chiamata}
 ::msgcat::mcset it mJiveForward {Inoltra Chiamata}
 ::msgcat::mcset it mBackgroundImage {Immagine di Sfondo}
+::msgcat::mcset it mBackgroundImage... {Immagine di Sfondo...}
 
 ::msgcat::mcset it mEditNick            {Edit Nickname}
 ::msgcat::mcset it mAdHocCommands       {Ad-Hoc Commands}

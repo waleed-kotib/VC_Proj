@@ -475,6 +475,7 @@
 ::msgcat::mcset es mTransports          {Transportes de otras redes}
 ::msgcat::mcset es mSort                {Ordenar}
 ::msgcat::mcset es mBackgroundImage     {Imagen de fondo}
+::msgcat::mcset es mBackgroundImage...  {Imagen de fondo...}
 ::msgcat::mcset es mIncreasing          {Ascendente}
 ::msgcat::mcset es mDecreasing          {Descendente}
 ::msgcat::mcset es mStyle               {Estilo de vista}
