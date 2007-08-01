@@ -18,11 +18,12 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.203 2007-07-29 10:28:14 matben Exp $
+# $Id: Roster.tcl,v 1.204 2007-08-01 08:06:27 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
 
+package require ui::openimage
 package require RosterTree
 package require RosterPlain
 package require RosterTwo
@@ -128,7 +129,7 @@ proc ::Roster::InitMenus {} {
 	    cascade     mShow          {normal}           {
 		check     mOffline     {normal}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
 		check     mTransports  {normal}     {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)}
-		check     mBackgroundImage {normal} {::Roster::BackgroundImage} {-variable ::Jabber::jprefs(rost,useBgImage)}
+		command   mBackgroundImage... {normal} {::Roster::BackgroundImage} {}
 	    } {}
 	    cascade     mSort          {}                 {
 		radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -increasing}
@@ -152,7 +153,7 @@ proc ::Roster::InitMenus {} {
 	    cascade     mShow          {normal}           {
 		check     mOffline     {normal}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
 		check     mTransports  {normal}     {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)}
-		check     mBackgroundImage {normal} {::Roster::BackgroundImage} {-variable ::Jabber::jprefs(rost,useBgImage)}
+		command   mBackgroundImage... {normal} {::Roster::BackgroundImage} {}
 	    } {}
 	    cascade     mSort          {}                 {
 		radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -increasing}
@@ -365,14 +366,7 @@ proc ::Roster::GetRosterWindow { } {
 }
 
 proc ::Roster::BackgroundImage { } {
-    upvar ::Jabber::jprefs jprefs
-    
-    if {$jprefs(rost,useBgImage)} {
-	set image [::RosterTree::BackgroundImage]
-    } else {
-	set image ""
-    }
-    ::RosterTree::ConfigBgImage $image
+    ::RosterTree::BackgroundImageCmd
 }
 
 proc ::Roster::Animate {{step 1}} {
@@ -1411,6 +1405,10 @@ proc ::Roster::InitPrefsHook { } {
     
     set jprefs(rost,useWBrosticon)  0
     
+    # The rosters background image is partly controlled by option database.
+    set jprefs(rost,useBgImage)     1
+    set jprefs(rost,defaultBgImage) 1
+    
     # Keep track of all closed tree items. Default is all open.
     set jprefs(rost,closedItems) {}
 	
@@ -1422,6 +1420,8 @@ proc ::Roster::InitPrefsHook { } {
       [list ::Jabber::jprefs(rost,showOffline) jprefs_rost_showOffline  $jprefs(rost,showOffline)]  \
       [list ::Jabber::jprefs(rost,showTrpts)   jprefs_rost_showTrpts    $jprefs(rost,showTrpts)]  \
       [list ::Jabber::jprefs(rost,closedItems) jprefs_rost_closedItems  $jprefs(rost,closedItems)]  \
+      [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
+      [list ::Jabber::jprefs(rost,defaultBgImage) jprefs_rost_defaultBgImage  $jprefs(rost,defaultBgImage)]  \
       ]
     
 }

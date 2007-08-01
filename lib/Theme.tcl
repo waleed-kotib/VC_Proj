@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.38 2007-07-19 06:28:18 matben Exp $
+# $Id: Theme.tcl,v 1.39 2007-08-01 08:06:27 matben Exp $
 
 package provide Theme 1.0
 
@@ -422,14 +422,37 @@ proc ::Theme::GetImageFromExisting {name arrName} {
 #       Searches the exact image name and returns its complete path if found.
 
 proc ::Theme::FindExactImageFile {name {subPath ""}} {
-    global  prefs this
+    global  this
     
     if {$subPath eq ""} {
 	set subPath $this(images)
     }
     set paths [GetSearchPaths $subPath]
     foreach path $paths {
-	    set f [file join $path $name]
+	set f [file join $path $name]
+	if {[file exists $f]} {
+	    return $f
+	}
+    }    
+    return
+}
+
+# ::Theme::FindImageFileWithSuffixes --
+# 
+#       Searches each path for matching image file with any of the suffixes.
+#       Note the search order where the search paths has higher precedence
+#       than the image formats.
+
+proc ::Theme::FindImageFileWithSuffixes {name suffL {subPath ""}} {
+    global  this
+    
+    if {$subPath eq ""} {
+	set subPath $this(images)
+    }
+    set paths [GetSearchPaths $subPath]
+    foreach path $paths {
+	foreach suff $suffL {
+	    set f [file join $path $name$suff]
 	    if {[file exists $f]} {
 		return $f
 	    }

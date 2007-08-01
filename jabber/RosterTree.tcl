@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.56 2007-07-19 06:28:16 matben Exp $
+# $Id: RosterTree.tcl,v 1.57 2007-08-01 08:06:27 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -375,7 +375,7 @@ proc ::RosterTree::New {w} {
       -height 0 -width 0
     
     SetBinds
-    $T configure -backgroundimage [BackgroundImage]
+    $T configure -backgroundimage [BackgroundImageGet]
     $T notify bind $T <Selection> {+::RosterTree::Selection }
     
     # This automatically cleans up the tag array.
@@ -559,41 +559,142 @@ proc ::RosterTree::EditTimerCancel {} {
 
 # -------------------------------------
 
-proc ::RosterTree::SetBackgroundImage {} {
-    
-    ConfigBgImage [BackgroundImage]
-}
+# RosterTree::BackgroundImageCmd --
+# 
+#       There are two separate ways the current background image may be selected:
+#         1) as defined by the theme
+#         2) a user picked one which is cached in this(backgroundsPath)
 
-proc ::RosterTree::BackgroundImage {} {
-    variable T    
+proc ::RosterTree::BackgroundImageCmd {} {
+    global  this
+    variable T
     upvar ::Jabber::jprefs jprefs
-        
-    set bgimage ""
     
-    # Create background image if nonstandard.
-    if {$jprefs(rost,useBgImage)} {
-	if {[file exists $jprefs(rost,bgImagePath)]} {
-	    # @@@ Free any old???
-	    if {[catch {
-		set bgimage [image create photo -file $jprefs(rost,bgImagePath)]
-	    }]} {
-		set bgimage ""
-	    }
-	}
-
-	# Default and fallback..
-	if {$bgimage eq ""} {
-	    set bgimage [::Theme::GetImage [option get $T rosterImage {}]]
+    set mimes {image/gif image/png image/jpeg}
+    set mimeL [list]
+    set typeL [list]
+    foreach mime $mimes {
+	if {[::Media::HaveImporterForMime $mime]} {
+	    lappend mimeL $mime
+	    lappend typeL [string toupper [lindex [split $mime /] 1]]
 	}
     }
-    return $bgimage
+    set suffL [::Types::GetSuffixListForMimeList $mimeL]
+    set types [concat [list [list {Image Files} $suffL]] \
+      [::Media::GetDlgFileTypesForMimeList $mimeL]]
+
+    puts "jprefs(rost,useBgImage)=$jprefs(rost,useBgImage)"
+    
+    # Default file (as defined by the theme):
+    set defaultFile [BackgroundImageGetThemedFile $suffL]
+    
+    # Current file:
+    set currentFile [BackgroundImageGetFile $suffL $defaultFile]
+
+    puts "\t defaultFile=$defaultFile"
+    puts "\t currentFile=$currentFile"
+    
+    # Dialog:
+    set typeText [join $typeL ", "]
+    set str "Select an image file for the roster background. To remove any background image press Remove and Save."
+    set str2 "The supported image formats are "
+    append str2 $typeText
+    append str2 "."
+    set fileName [ui::openimage::modal -message $str -detail $str2 \
+      -filetypes $types -initialfile $currentFile -defaultfile $defaultFile \
+      -geovariable prefs(winGeom,jrosterimage) -title [mc {Select Image}]]
+
+    set image ""
+    puts "\t fileName=$fileName"
+    if {$fileName eq ""} {
+	return
+    } elseif {$fileName eq "-"} {
+	set jprefs(rost,useBgImage) 0
+    } elseif {[file exists $fileName]} {
+	set fileName [file normalize $fileName]
+	set jprefs(rost,useBgImage) 1
+	if {$fileName eq $defaultFile} {
+	    set jprefs(rost,defaultBgImage) 1
+	} else {
+	    set jprefs(rost,defaultBgImage) 0
+	}
+	
+	# Don't copy file if it is already there.
+	set suff [file extension $fileName]
+	set dst [file normalize [file join $this(backgroundsPath) roster$suff]]
+	puts "dst=$dst"
+	
+	# Cache file. There shall only be one roster.* file there.
+	if {$fileName ne $dst} {
+	    
+	    # Clear roster.* cache.
+	    ::tfileutils::deleteallfiles $this(backgroundsPath) 
+	    set suff [file extension $fileName]
+	    file copy -force $fileName $dst
+	    set image [image create photo -file $fileName]
+	}	
+    }
+    puts "jprefs(rost,useBgImage)=$jprefs(rost,useBgImage)"
+    puts "jprefs(rost,defaultBgImage)=$jprefs(rost,defaultBgImage)"
+    
+    BackgroundImageConfig $image
 }
 
-proc ::RosterTree::ConfigBgImage {image} {
+proc ::RosterTree::BackgroundImageGetThemedFile {suffL} {
     variable T
     
-    $T configure -backgroundimage $image
+    set name [option get $T rosterImage {}]
+    set fileName [::Theme::FindImageFileWithSuffixes $name $suffL]
+    set fileName [file normalize $fileName]
+}
+
+proc ::RosterTree::BackgroundImageGetFile {suffL defaultFile} {
+    global  this
+    upvar ::Jabber::jprefs jprefs
     
+    if {$jprefs(rost,useBgImage)} {
+	if {$jprefs(rost,defaultBgImage)} {
+	    set fileName $defaultFile
+	} else {
+	    set pattern [list]
+	    foreach suff $suffL {
+		lappend pattern "roster$suff"
+	    }    
+	    set files [eval {glob -nocomplain -directory $this(backgroundsPath)} $pattern]
+	    set fileName [lindex $files 0]
+	}
+    } else {
+	set fileName ""
+    }    
+    return $fileName
+}
+
+proc ::RosterTree::BackgroundImageGet {} {
+        
+    set image ""
+    set mimes {image/gif image/png image/jpeg}
+    set suffL [::Media::GetSupportedSuffixesForMimeList $mimes]
+    set fileName [BackgroundImageGetFile $suffL \
+      [BackgroundImageGetThemedFile $suffL]]
+    if {[file exists $fileName]} {
+	if {[catch {
+	    set image [image create photo -file $fileName]
+	}]} {
+	    set image ""
+	}
+    }
+    return $image
+}
+
+proc ::RosterTree::BackgroundImageConfig {image} {
+    variable T
+    
+    # Garbage collection.
+    set old [$T cget -backgroundimage]
+    $T configure -backgroundimage $image
+    if {$old ne ""} {
+	image delete $old
+    }    
     ::hooks::run rosterTreeConfigure -backgroundimage $image
 }
 

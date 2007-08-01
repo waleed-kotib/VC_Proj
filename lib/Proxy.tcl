@@ -18,21 +18,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Proxy.tcl,v 1.16 2007-07-19 06:28:18 matben Exp $
+# $Id: Proxy.tcl,v 1.17 2007-08-01 08:06:27 matben Exp $
  
 package require autoproxy
 package require autosocks
 
 package provide Proxy 1.0
 
-namespace eval ::Proxy:: {
+namespace eval ::Proxy {
     
     ::hooks::register prefsInitHook          ::Proxy::InitPrefsHook
-    # All these handled from PrefNet instead.
-    #::hooks::register prefsBuildHook         ::Proxy::BuildPrefsHook
-    #::hooks::register prefsSaveHook          ::Proxy::SavePrefsHook
-    #::hooks::register prefsCancelHook        ::Proxy::CancelPrefsHook
-    #::hooks::register prefsUserDefaultsHook  ::Proxy::UserDefaultsHook
 }
 
 proc ::Proxy::InitPrefsHook { } {
@@ -135,14 +130,6 @@ proc ::Proxy::AutoSocksConfig { } {
 proc ::Proxy::AutoSocksOff { } {
     autosocks::config -proxy {} -proxyno {} -proxyhost {} -proxyport {} \
       -proxyusername {} -proxypassword {}
-}
-
-proc ::Proxy::BuildPrefsHook {wtree nbframe} {
-    
-    ::Preferences::NewTableItem {General {Proxy Setup}} [mc {Proxy Setup}]
-    
-    set wpage [$nbframe page {Proxy Setup}]    
-    ::Proxy::BuildPage $wpage
 }
 
 proc ::Proxy::BuildPage {wpage} {

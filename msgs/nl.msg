@@ -468,6 +468,7 @@
 ::msgcat::mcset nl mJiveCall				{Telefoneer}
 ::msgcat::mcset nl mJiveForward				{Telefoongesprek omleiden}
 ::msgcat::mcset nl mBackgroundImage			{Achtergrondafbeelding}
+::msgcat::mcset nl mBackgroundImage...			{Achtergrondafbeelding...}
 ::msgcat::mcset nl mEditNick				{Bijnaam bewerken}
 
 ::msgcat::mcset nl mAdHocCommands                       {Ad-Hoc Commands}

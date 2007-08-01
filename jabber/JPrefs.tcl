@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.49 2007-07-19 06:28:12 matben Exp $
+# $Id: JPrefs.tcl,v 1.50 2007-08-01 08:06:27 matben Exp $
 
 package require ui::fontselector
 
@@ -50,10 +50,6 @@ proc ::JPrefs::InitPrefsHook { } {
     
     # List of additional servers to automatically disco.
     set jprefs(disco,autoServers) {}
-    
-    # The rosters background image is partly controlled by option database.
-    set jprefs(rost,useBgImage)     1
-    set jprefs(rost,bgImagePath)    ""
 
     # Empty here means use option database.
     set jprefs(chatFont) ""
@@ -89,8 +85,6 @@ proc ::JPrefs::InitPrefsHook { } {
       [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $jprefs(chatFont)]  \
       [list ::Jabber::jprefs(chat,tabbedui)    jprefs_chat_tabbedui     $jprefs(chat,tabbedui)]  \
       [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $jprefs(inboxSave)]  \
-      [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
-      [list ::Jabber::jprefs(rost,bgImagePath) jprefs_rost_bgImagePath  $jprefs(rost,bgImagePath)]  \
       [list ::Jabber::jprefs(autoLogin)        jprefs_autoLogin         $jprefs(autoLogin)]  \
       [list ::Jabber::jprefs(disco,autoServers)  jprefs_disco_autoServers  $jprefs(disco,autoServers)]  \
       [list ::Jabber::jprefs(rememberDialogs)  jprefs_rememberDialogs   $jprefs(rememberDialogs)]  \
@@ -134,7 +128,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     variable tmpPrefs
     upvar ::Jabber::jprefs jprefs
     
-    foreach key {rost,useBgImage rost,bgImagePath chat,tabbedui chatFont} {
+    foreach key {rost,useBgImage chat,tabbedui chatFont} {
 	set tmpJPrefs($key) $jprefs($key)
     }
     foreach key {opacity} {
@@ -188,14 +182,6 @@ proc ::JPrefs::BuildAppearancePage {page} {
     ttk::checkbutton $wap.tab -text [mc prefstabui]  \
       -variable [namespace current]::tmpJPrefs(chat,tabbedui)
 
-    # Roster bg image.
-    ttk::checkbutton $wap.bgim -text [mc prefrostbgim] \
-      -variable [namespace current]::tmpJPrefs(rost,useBgImage)
-    ttk::button $wap.bgpick -text "[mc {Pick}]..."  \
-      -command [list [namespace current]::PickBgImage rost] -style Small.TButton
-    ttk::button $wap.bgdefk -text [mc {Default}]  \
-      -command [list [namespace current]::DefaultBgImage rost] -style Small.TButton
-	    
     # Chat font.
     ttk::label  $wap.lfont -text [mc prefcufont]
     ttk::button $wap.btfont -text "[mc Pick]..." -style Small.TButton \
@@ -253,7 +239,6 @@ proc ::JPrefs::BuildAppearancePage {page} {
     }
     
     grid  $wap.tab    -            -            -padx 2 -pady 2 -sticky w
-    grid  $wap.bgim   $wap.bgpick  $wap.bgdefk  -padx 2 -pady 2 -sticky w
     grid  $wap.lfont  $wap.btfont  $wap.dfont   -padx 2 -pady 2 -sticky w
     grid  $wthe       -            -            -padx 2 -pady 2 -sticky w
     grid  $wskin      -            -            -padx 2 -pady 2 -sticky w
@@ -261,7 +246,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	grid  $wop    -            -            -padx 2 -pady 2 -sticky w
     }
     grid  $wap.lfont  -sticky e
-    grid  $wap.bgpick  $wap.bgdefk  $wap.btfont  $wap.dfont  -sticky ew
+    grid  $wap.btfont  $wap.dfont  -sticky ew
     
     pack  $wap  -side top -fill x
     
@@ -293,8 +278,7 @@ proc ::JPrefs::BuildCustomPage {page} {
     variable tmpPrefs
     upvar ::Jabber::jprefs jprefs
         
-    foreach key {inboxSave rost,useBgImage rost,bgImagePath  \
-      autoLogin notifier,state rememberDialogs} {
+    foreach key {inboxSave autoLogin notifier,state rememberDialogs} {
 	if {[info exists jprefs($key)]} {
 	    set tmpJPrefs($key) $jprefs($key)
 	}
@@ -367,22 +351,6 @@ proc ::JPrefs::DefaultChatFont { } {
     set tmpJPrefs(chatFont) ""
 }
 
-proc ::JPrefs::PickBgImage {where} {
-    variable tmpJPrefs
-
-    set types [::Media::GetDlgFileTypesForMimeBase image]
-    set ans [tk_getOpenFile -title [mc {Pick Image File}] -filetypes $types]
-    if {$ans ne ""} {
-	set tmpJPrefs($where,bgImagePath) $ans
-    }
-}
-
-proc ::JPrefs::DefaultBgImage {where} {
-    variable tmpJPrefs
-
-    set tmpJPrefs($where,bgImagePath) ""
-}
-
 proc ::JPrefs::SetOpacity {opacity} {
     
     foreach w [winfo children .] {
@@ -410,21 +378,10 @@ proc ::JPrefs::SavePrefsHook { } {
     if {$prefs(opacity) != $tmpPrefs(opacity)} {
 	SetOpacity $tmpPrefs(opacity)
     }
-
-    # Roster background image: change only if needed.
-    set newBackground 0
-    if {($jprefs(rost,useBgImage) != $tmpJPrefs(rost,useBgImage)) || \
-      ($jprefs(rost,bgImagePath) != $tmpJPrefs(rost,bgImagePath))} {
-	set newBackground 1
-    }
     
     array set jprefs [array get tmpJPrefs]
     array set prefs  [array get tmpPrefs]
 
-    # Roster background image.
-    if {$newBackground} {
-	::RosterTree::SetBackgroundImage
-    }
     ::Chat::SetFont $jprefs(chatFont)
 }
 

@@ -474,6 +474,7 @@
 ::msgcat::mcset pl mJiveCall            {Rozmowa "jive"}
 ::msgcat::mcset pl mJiveForward         {Przekazanie rozmowy}
 ::msgcat::mcset pl mBackgroundImage     {Grafika tła}
+::msgcat::mcset pl mBackgroundImage...  {Grafika tła...}
 
 ::msgcat::mcset pl mEditNick            {Edit Nickname}
 ::msgcat::mcset pl mAdHocCommands       {Ad-Hoc Commands}

@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: tinyfileutils.tcl,v 1.8 2007-07-19 06:28:11 matben Exp $
+# $Id: tinyfileutils.tcl,v 1.9 2007-08-01 08:06:27 matben Exp $
 
 package provide tinyfileutils 1.0
 
@@ -239,6 +239,15 @@ proc ::tfileutils::tempfile {tmpdir prefix} {
     } else {
 	return -code error "Failed to find an unused temporary file name"
     }
+}
+
+# tfileutils::deleteallfiles --
+# 
+#       Deletes all files in a directory but keeps the directory.
+
+proc ::tfileutils::deleteallfiles {dir {pattern *}} {
+    set files [eval {glob -nocomplain -directory $dir} $pattern]
+    eval {file delete -force} $files
 }
 
 #------------------------------------------------------------------------------
