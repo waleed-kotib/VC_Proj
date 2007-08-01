@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.57 2007-08-01 08:06:27 matben Exp $
+# $Id: RosterTree.tcl,v 1.58 2007-08-01 13:55:43 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -48,7 +48,7 @@ namespace eval ::RosterTree {
     #option add *Roster*TreeCtrl.indent          18              widgetDefault
 
     # Fake:
-    option add *Roster*TreeCtrl.rosterImage     sky             widgetDefault
+    option add *Roster*TreeCtrl.rosterImage     cociexec    widgetDefault
 
     # @@@ Should get this from a global reaource.
     variable buttonPressMillis 1000
@@ -557,7 +557,7 @@ proc ::RosterTree::EditTimerCancel {} {
     unset -nocomplain editTimer
 }
 
-# -------------------------------------
+# BackgroundImage... Try to make as generic as possible!
 
 # RosterTree::BackgroundImageCmd --
 # 
@@ -583,7 +583,9 @@ proc ::RosterTree::BackgroundImageCmd {} {
     set types [concat [list [list {Image Files} $suffL]] \
       [::Media::GetDlgFileTypesForMimeList $mimeL]]
 
-    puts "jprefs(rost,useBgImage)=$jprefs(rost,useBgImage)"
+    #puts "\n before"
+    #puts "jprefs(rost,useBgImage)=$jprefs(rost,useBgImage)"
+    #puts "jprefs(rost,defaultBgImage)=$jprefs(rost,defaultBgImage)"
     
     # Default file (as defined by the theme):
     set defaultFile [BackgroundImageGetThemedFile $suffL]
@@ -591,21 +593,24 @@ proc ::RosterTree::BackgroundImageCmd {} {
     # Current file:
     set currentFile [BackgroundImageGetFile $suffL $defaultFile]
 
-    puts "\t defaultFile=$defaultFile"
-    puts "\t currentFile=$currentFile"
+    #puts "\t defaultFile=$defaultFile"
+    #puts "\t currentFile=$currentFile"
     
     # Dialog:
     set typeText [join $typeL ", "]
-    set str "Select an image file for the roster background. To remove any background image press Remove and Save."
+    set str "Select an image file for the roster background. To remove a background image press Remove and Save."
     set str2 "The supported image formats are "
     append str2 $typeText
     append str2 "."
-    set fileName [ui::openimage::modal -message $str -detail $str2 \
+    set mbar [::UI::GetMainMenu]
+    ::UI::MenubarDisableBut $mbar edit
+    set fileName [ui::openimage::modal -message $str -detail $str2 -menu $mbar \
       -filetypes $types -initialfile $currentFile -defaultfile $defaultFile \
       -geovariable prefs(winGeom,jrosterimage) -title [mc {Select Image}]]
+    ::UI::MenubarEnableAll $mbar
 
     set image ""
-    puts "\t fileName=$fileName"
+    #puts "\t fileName=$fileName"
     if {$fileName eq ""} {
 	return
     } elseif {$fileName eq "-"} {
@@ -622,7 +627,7 @@ proc ::RosterTree::BackgroundImageCmd {} {
 	# Don't copy file if it is already there.
 	set suff [file extension $fileName]
 	set dst [file normalize [file join $this(backgroundsPath) roster$suff]]
-	puts "dst=$dst"
+	#puts "dst=$dst"
 	
 	# Cache file. There shall only be one roster.* file there.
 	if {$fileName ne $dst} {
@@ -631,11 +636,16 @@ proc ::RosterTree::BackgroundImageCmd {} {
 	    ::tfileutils::deleteallfiles $this(backgroundsPath) 
 	    set suff [file extension $fileName]
 	    file copy -force $fileName $dst
-	    set image [image create photo -file $fileName]
 	}	
+	if {[catch {
+	    set image [image create photo -file $fileName]
+	}]} {
+	    set image ""
+	}
     }
-    puts "jprefs(rost,useBgImage)=$jprefs(rost,useBgImage)"
-    puts "jprefs(rost,defaultBgImage)=$jprefs(rost,defaultBgImage)"
+    #puts "after"
+    #puts "jprefs(rost,useBgImage)=$jprefs(rost,useBgImage)"
+    #puts "jprefs(rost,defaultBgImage)=$jprefs(rost,defaultBgImage)"
     
     BackgroundImageConfig $image
 }
@@ -645,13 +655,14 @@ proc ::RosterTree::BackgroundImageGetThemedFile {suffL} {
     
     set name [option get $T rosterImage {}]
     set fileName [::Theme::FindImageFileWithSuffixes $name $suffL]
-    set fileName [file normalize $fileName]
+    return [file normalize $fileName]
 }
 
 proc ::RosterTree::BackgroundImageGetFile {suffL defaultFile} {
     global  this
     upvar ::Jabber::jprefs jprefs
     
+    set fileName ""
     if {$jprefs(rost,useBgImage)} {
 	if {$jprefs(rost,defaultBgImage)} {
 	    set fileName $defaultFile
@@ -663,8 +674,6 @@ proc ::RosterTree::BackgroundImageGetFile {suffL defaultFile} {
 	    set files [eval {glob -nocomplain -directory $this(backgroundsPath)} $pattern]
 	    set fileName [lindex $files 0]
 	}
-    } else {
-	set fileName ""
     }    
     return $fileName
 }

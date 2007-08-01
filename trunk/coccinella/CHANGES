@@ -13,6 +13,7 @@ Coccinella-0.96.? (200709??)
  o added support for XEP-0106: JID Escaping
  o vCards can be exported to xml files
  o major revision of user experience
+ o easier way to manage background images
 
 Coccinella-0.96.0 (20070525)
 

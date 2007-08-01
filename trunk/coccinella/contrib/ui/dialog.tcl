@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.27 2007-07-31 07:28:32 matben Exp $
+# $Id: dialog.tcl,v 1.28 2007-08-01 13:55:43 matben Exp $
 
 # Public commands:
 # 
@@ -570,7 +570,6 @@ if {0} {
     
     ui::dialog defaultmenu [::UI::GetMainMenu]
     set w [ui::dialog -message $str -detail $str2 -modal 1]
-    ::UI::SetMenubarAcceleratorBinds $w [::UI::GetMainMenu]
 
     ui::dialog::modal -message "This is a modal dialog" -detail $str2 \
       -icon error -type yesnocancel
