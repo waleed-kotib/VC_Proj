@@ -2,8 +2,8 @@
 README-scripts
 --------------
 
-This folder is supposed to contain high level scripts to perform various
-actions normally implemented at application level, such as:
+This folder is supposed to contain high level scripts using jabberlib to 
+perform various actions normally implemented at application level, such as:
 
   o register account
   o remove account

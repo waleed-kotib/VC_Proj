@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.12 2007-07-31 07:28:32 matben Exp $
+# $Id: util.tcl,v 1.13 2007-08-01 13:55:43 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -243,11 +243,104 @@ proc ui::GetToplevels {wclass} {
     return $wtops
 }
 
+## Grab utilities. From tile. To be replaced with tiles when stable.
+#
+# Rules:
+#	Each call to [grabWindow $w] or [globalGrab $w] must be
+#	matched with a call to [releaseGrab $w] in LIFO order.
+#
+#	Do not call [grabWindow $w] for a window that currently
+#	appears on the grab stack.
+#
+#	See #1239190 for more discussion.
+#
+namespace eval ui {
+    variable Grab 		;# map: window name -> grab token
+
+    # grab token details:
+    #	Two-element list containing:
+    #	1) a script to evaluate to restore the previous grab (if any);
+    #	2) a script to evaluate to restore the focus (if any)
+}
+
+# SaveGrab --
+#	Record current grab and focus windows.
+#
+proc ui::SaveGrab {w} {
+    variable Grab
+
+    set restoreGrab [set restoreFocus ""]
+
+    set grabbed [grab current]
+    if {$grabbed ne ""} {
+	switch [grab status $grabbed] {
+	    global { set restoreGrab [list grab -global $grabbed] }
+	    local  { set restoreGrab [list grab $grabbed] }
+	}
+    }
+
+    set focus [focus]
+    if {$focus ne ""} {
+	set restoreFocus [list focus -force $focus]
+    }
+
+    set Grab($w) [list $restoreGrab $restoreFocus]
+}
+
+# RestoreGrab --
+#	Restore previous grab and focus windows.
+#	If called more than once without an intervening [SaveGrab $w],
+#	does nothing.
+#
+proc ui::RestoreGrab {w} {
+    variable Grab
+
+    if {![info exists Grab($w)]} {	# Ignore
+	return;
+    }
+
+    # The previous grab/focus window may have been destroyed,
+    # unmapped, or some other abnormal condition; ignore any errors.
+    #
+    foreach script $Grab($w) {
+	catch $script
+    }
+
+    unset Grab($w)
+}
+
+# ui::grabWindow $w --
+#	Records the current focus and grab windows, sets an application-modal 
+#	grab on window $w.
+#
+proc ui::grabWindow {w} {
+    SaveGrab $w
+    grab $w
+}
+
+# ui::globalGrab $w --
+#	Same as grabWindow, but sets a global grab on $w.
+#
+proc ui::globalGrab {w} {
+    SaveGrab $w
+    grab -global $w
+}
+
+# ui::releaseGrab --
+#	Release the grab previously set by [ui::grabWindow] 
+#	or [ui::globalGrab].
+#
+proc ui::releaseGrab {w} {
+    grab release $w
+    RestoreGrab $w
+}
+
 proc ui::Grab {win} {
-    grab $win
+    ui::grabWindow $win
     tkwait window $win
 }
 
+# do not use this! Need edit menu.
 proc ui::GrabAndWait {win} {
     grab $win
     MenubarDisable $win

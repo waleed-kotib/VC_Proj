@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.79 2007-07-31 12:25:09 matben Exp $
+# $Id: Profiles.tcl,v 1.80 2007-08-01 13:55:43 matben Exp $
 
 package provide Profiles 1.0
 
@@ -962,7 +962,7 @@ proc ::Profiles::FrameWidget {w moreless args} {
     variable $w
     upvar 0 $w state
     
-    Debug 2 "::Profiles::FrameWidget w=$w"
+    Debug 2 "::Profiles::FrameWidget w=$w, token$token"
     
     lappend wallframes $w
     set state(moreless) $moreless
@@ -1172,7 +1172,8 @@ proc ::Profiles::FrameLessOpts {w} {
 
 # Profiles::FrameMakeTmpProfiles --
 #
-#       Make temp array for profiles.
+#       Make temp array for profiles. Always keep any escaping!
+#       Only unescaped in entries -textvariables
 
 proc ::Profiles::FrameMakeTmpProfiles {w} {    
     variable $w
@@ -1248,9 +1249,11 @@ proc ::Profiles::FrameSetCurrentFromTmp {w pname} {
     set state(server)   $state(prof,$pname,server)
     set state(username) $state(prof,$pname,username)
     set state(password) $state(prof,$pname,password)
-    set state(jid)      $state(prof,$pname,jid)
     set state(resource) ""
     set state(nickname) ""
+    
+    # Escaping...
+    set state(username) [jlib::unescapestr $state(username)]
 
     set mtoken [namespace current]::${w}-more
     variable $mtoken
@@ -1291,9 +1294,9 @@ proc ::Profiles::FrameSaveCurrentToTmp {w pname} {
 	
 	set state(prof,$pname,name)      $pname
 	set state(prof,$pname,server)    $state(server)
-	set state(prof,$pname,username)  $state(username)
+	set state(prof,$pname,username)  [jlib::escapestr $state(username)]
 	set state(prof,$pname,password)  $state(password)
-	set state(prof,$pname,jid)       $state(jid)
+	set state(prof,$pname,jid)       [jlib::escapejid $state(jid)]
 	set state(prof,$pname,-resource) $state(resource)
 	set state(prof,$pname,-nickname) $state(nickname)
 	
@@ -1325,7 +1328,8 @@ proc ::Profiles::FrameVerifyNonEmpty {w} {
     set ans 1
 
     if {$config(profiles,style) eq "jid"} {
-	if {![jlib::jidvalidate $state(jid)]} {
+	set ejid [jlib::escapejid $state(jid)]
+	if {![jlib::jidvalidate $ejid]} {
 	    ::UI::MessageBox -type ok -icon error  \
 	      -title [mc Error] -message [mc jamessjidinvalid]
 	    set ans 0
