@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.58 2007-08-01 13:55:43 matben Exp $
+# $Id: RosterTree.tcl,v 1.59 2007-08-02 07:57:44 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -633,7 +633,7 @@ proc ::RosterTree::BackgroundImageCmd {} {
 	if {$fileName ne $dst} {
 	    
 	    # Clear roster.* cache.
-	    ::tfileutils::deleteallfiles $this(backgroundsPath) 
+	    ::tfileutils::deleteallfiles $this(backgroundsPath) roster.*
 	    set suff [file extension $fileName]
 	    file copy -force $fileName $dst
 	}	
