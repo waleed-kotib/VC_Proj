@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.59 2007-08-02 07:57:44 matben Exp $
+# $Id: RosterTree.tcl,v 1.60 2007-08-02 09:30:23 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -582,10 +582,6 @@ proc ::RosterTree::BackgroundImageCmd {} {
     set suffL [::Types::GetSuffixListForMimeList $mimeL]
     set types [concat [list [list {Image Files} $suffL]] \
       [::Media::GetDlgFileTypesForMimeList $mimeL]]
-
-    #puts "\n before"
-    #puts "jprefs(rost,useBgImage)=$jprefs(rost,useBgImage)"
-    #puts "jprefs(rost,defaultBgImage)=$jprefs(rost,defaultBgImage)"
     
     # Default file (as defined by the theme):
     set defaultFile [BackgroundImageGetThemedFile $suffL]
@@ -593,9 +589,6 @@ proc ::RosterTree::BackgroundImageCmd {} {
     # Current file:
     set currentFile [BackgroundImageGetFile $suffL $defaultFile]
 
-    #puts "\t defaultFile=$defaultFile"
-    #puts "\t currentFile=$currentFile"
-    
     # Dialog:
     set typeText [join $typeL ", "]
     set str "Select an image file for the roster background. To remove a background image press Remove and Save."
@@ -606,11 +599,10 @@ proc ::RosterTree::BackgroundImageCmd {} {
     ::UI::MenubarDisableBut $mbar edit
     set fileName [ui::openimage::modal -message $str -detail $str2 -menu $mbar \
       -filetypes $types -initialfile $currentFile -defaultfile $defaultFile \
-      -geovariable prefs(winGeom,jrosterimage) -title [mc {Select Image}]]
+      -geovariable prefs(winGeom,jrosterimage) -title [mc mBackgroundImage]]
     ::UI::MenubarEnableAll $mbar
 
     set image ""
-    #puts "\t fileName=$fileName"
     if {$fileName eq ""} {
 	return
     } elseif {$fileName eq "-"} {
@@ -627,7 +619,6 @@ proc ::RosterTree::BackgroundImageCmd {} {
 	# Don't copy file if it is already there.
 	set suff [file extension $fileName]
 	set dst [file normalize [file join $this(backgroundsPath) roster$suff]]
-	#puts "dst=$dst"
 	
 	# Cache file. There shall only be one roster.* file there.
 	if {$fileName ne $dst} {
@@ -643,9 +634,6 @@ proc ::RosterTree::BackgroundImageCmd {} {
 	    set image ""
 	}
     }
-    #puts "after"
-    #puts "jprefs(rost,useBgImage)=$jprefs(rost,useBgImage)"
-    #puts "jprefs(rost,defaultBgImage)=$jprefs(rost,defaultBgImage)"
     
     BackgroundImageConfig $image
 }
