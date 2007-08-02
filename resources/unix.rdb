@@ -4,7 +4,7 @@
 !
 *backgroundGeneral:                  #dcdad5
 
-*tileTheme:                          clam
+*prefs_tileTheme:                    clam
 
 ! general settings for all widgets
 !
