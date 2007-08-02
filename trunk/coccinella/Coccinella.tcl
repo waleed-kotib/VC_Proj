@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.154 2007-07-28 14:07:56 matben Exp $	
+# $Id: Coccinella.tcl,v 1.155 2007-08-02 13:00:32 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -173,6 +173,10 @@ set state(launchStatus) tile
 set prefs(tileTheme) [option get . prefs_tileTheme {}]
 if {[lsearch -exact [tile::availableThemes] $prefs(tileTheme)] >= 0} {
     tile::setTheme $prefs(tileTheme)
+} elseif {[tk windowingsystem] eq "x11"} {
+    
+    # We use the 'clam' theme as a fallback (and default in resources).
+    catch {tile::setTheme clam}
 }
 
 # The packages are divided into categories depending on their degree
