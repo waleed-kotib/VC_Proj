@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: tinyfileutils.tcl,v 1.9 2007-08-01 08:06:27 matben Exp $
+# $Id: tinyfileutils.tcl,v 1.10 2007-08-02 07:57:44 matben Exp $
 
 package provide tinyfileutils 1.0
 
@@ -247,7 +247,9 @@ proc ::tfileutils::tempfile {tmpdir prefix} {
 
 proc ::tfileutils::deleteallfiles {dir {pattern *}} {
     set files [eval {glob -nocomplain -directory $dir} $pattern]
-    eval {file delete -force} $files
+    if {[llength $files]} {
+	eval {file delete -force} $files
+    }
 }
 
 #------------------------------------------------------------------------------
