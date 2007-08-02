@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.80 2007-08-01 13:55:43 matben Exp $
+# $Id: Profiles.tcl,v 1.81 2007-08-02 06:50:02 matben Exp $
 
 package provide Profiles 1.0
 
@@ -1037,7 +1037,6 @@ proc ::Profiles::FrameWidget {w moreless args} {
       -width $width -textvariable $token\(nickname)
 
     if {$config(profiles,style) eq "jid"} {
-	# @@@ TODO
 	grid  $wui.lpop   $wui.pop    -sticky e -pady 2
 	grid  $wui.ljid   $wui.ejid   -sticky e -pady 2
 	grid  $wui.lpass  $wui.epass  -sticky e -pady 2
@@ -1249,11 +1248,13 @@ proc ::Profiles::FrameSetCurrentFromTmp {w pname} {
     set state(server)   $state(prof,$pname,server)
     set state(username) $state(prof,$pname,username)
     set state(password) $state(prof,$pname,password)
+    set state(jid)      $state(prof,$pname,jid)
     set state(resource) ""
     set state(nickname) ""
     
     # Escaping...
     set state(username) [jlib::unescapestr $state(username)]
+    set state(jid)      [jlib::unescapejid $state(jid)]
 
     set mtoken [namespace current]::${w}-more
     variable $mtoken
@@ -1275,13 +1276,13 @@ proc ::Profiles::FrameSetCurrentFromTmp {w pname} {
 	}
     }
     set state(selected) $pname
-    set state(jid) [jlib::joinjid $state(username) $state(server) $state(resource)]
     
     NotebookSetAnyConfigState $state(wtabnb) $pname
     NotebookDefaultWidgetStates $state(wtabnb)
 }
 
 proc ::Profiles::FrameSaveCurrentToTmp {w pname} {
+    global  config
     variable $w
     upvar 0 $w state
     
@@ -1291,13 +1292,28 @@ proc ::Profiles::FrameSaveCurrentToTmp {w pname} {
     # But only of the profile already exists since we may have just deleted it!
     if {[info exists state(prof,$pname,name)]} {
 	Debug 2 "\t exists state(prof,$pname,name)"
+
+	# Make sure that state(prof,* always is complete with *all* entries!
+	set state(prof,$pname,name) $pname
 	
-	set state(prof,$pname,name)      $pname
-	set state(prof,$pname,server)    $state(server)
-	set state(prof,$pname,username)  [jlib::escapestr $state(username)]
+	if {$config(profiles,style) eq "jid"} {
+	    set jid [jlib::escapejid $state(jid)]
+	    set state(prof,$pname,jid) $jid
+
+	    jlib::splitjidex $jid username server resource
+	    set state(prof,$pname,server)    $server
+	    set state(prof,$pname,username)  $username
+	    set state(prof,$pname,-resource) $resource
+	} else {
+	    set username [jlib::escapestr $state(username)]
+	    set state(prof,$pname,server)    $state(server)
+	    set state(prof,$pname,username)  $username
+	    set state(prof,$pname,-resource) $state(resource)
+	    
+	    set state(prof,$pname,jid) \
+	      [jlib::joinjid $username $state(server) $state(resource)]
+	}
 	set state(prof,$pname,password)  $state(password)
-	set state(prof,$pname,jid)       [jlib::escapejid $state(jid)]
-	set state(prof,$pname,-resource) $state(resource)
 	set state(prof,$pname,-nickname) $state(nickname)
 	
 	set server $state(server)
