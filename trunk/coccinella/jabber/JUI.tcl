@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.173 2007-07-29 10:28:14 matben Exp $
+# $Id: JUI.tcl,v 1.174 2007-08-03 06:34:50 matben Exp $
 
 package provide JUI 1.0
 
@@ -165,9 +165,7 @@ proc ::JUI::Init { } {
 	{separator}
 	{command     mSearch        {::Search::OnMenu}                {}}
 	{command     mAddContact    {::JUser::OnMenu}                 {}}
-	{cascade     mDisco         {}                                {} {} {
-	    {command mAddServer     {::Disco::OnMenuAddServer}        {}}
-	}}
+	{command     mDiscoverServer... {::Disco::OnMenuAddServer}    {}}
 	{separator}
 	{command     mSendMessage   {::NewMsg::OnMenu}                M}
 	{command     mChat          {::Chat::OnMenu}                  T}
@@ -999,7 +997,7 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mDisco -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer -state normal
 	}
 	disconnect {
 	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state normal
@@ -1018,7 +1016,7 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mDisco -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer -state disabled
 	}	
     }    
       

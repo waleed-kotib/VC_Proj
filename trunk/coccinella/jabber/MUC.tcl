@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.84 2007-07-29 10:28:14 matben Exp $
+# $Id: MUC.tcl,v 1.85 2007-08-03 06:34:50 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -540,28 +540,28 @@ proc ::MUC::FillTable {roomjid} {
     
     # Fill in tablelist.
     set jlib $jstate(jlib)
-    set presList [$jlib roster getpresence $roomjid -type available]
-    set resourceList [$jlib roster getresources $roomjid -type available]
+    set resourceL [$jlib roster getresources $roomjid -type available]
     set irow 0
     
-    foreach res $resourceList {
+    foreach res $resourceL {
 	set xelem [$jlib roster getx $roomjid/$res "muc#user"]
 	set aff none
 	set role none
 	foreach elem [wrapper::getchildren $xelem] {
 	    if {[string equal [lindex $elem 0] "item"]} {
-		unset -nocomplain attrArr
-		array set attrArr [lindex $elem 1]
-		if {[info exists attrArr(affiliation)]} {
-		    set aff $attrArr(affiliation)
+		unset -nocomplain attrA
+		array set attrA [lindex $elem 1]
+		if {[info exists attrA(affiliation)]} {
+		    set aff $attrA(affiliation)
 		}
-		if {[info exists attrArr(role)]} {
-		    set role $attrArr(role)
+		if {[info exists attrA(role)]} {
+		    set role $attrA(role)
 		}
 		break
 	    }
 	}
-	$wtbl insert end [list $res [mc $role] [mc $aff]]
+	set ures [jlib::unescapestr $res]
+	$wtbl insert end [list $ures [mc $role] [mc $aff]]
 	if {[string equal $res $mynick]} {
 	    set locals($roomjid,myaff)  $aff
 	    set locals($roomjid,myrole) $role
@@ -709,13 +709,14 @@ proc ::MUC::GrantRevoke {roomjid which type} {
 	return
     }
     set row [$wtbl get $item]
-    foreach {nick role aff} $row break
+    lassign $row unick role aff
+    set nick [jlib::escapestr $unick]
     jlib::splitjidex $roomjid roomName - -
     
     set ans [eval {
       ::UI::MegaDlgMsgAndEntry} [subst $dlgDefs($which,$type)] \
       {"Reason:" reason [mc Cancel] [mc OK]}]
-    set opts {}
+    set opts [list]
     if {$reason ne ""} {
 	set opts [list -reason $reason]
     }
@@ -738,12 +739,13 @@ proc ::MUC::Kick {roomjid} {
 	return
     }
     set row [$wtbl get $item]
-    foreach {nick role aff} $row break
+    lassign $row unick role aff
+    set nick [jlib::escapestr $unick]
     jlib::splitjidex $roomjid roomName - -
     
     set ans [::UI::MegaDlgMsgAndEntry  \
       {Kick Participant}  \
-      "Kick the participant \"$nick\" from the room \"$roomName\""  \
+      "Kick the participant \"$unick\" from the room \"$roomName\""  \
       "Reason:"  \
       reason [mc Cancel] [mc OK]]
     set opts {}
@@ -768,12 +770,13 @@ proc ::MUC::Ban {roomjid} {
 	return
     }
     set row [$wtbl get $item]
-    foreach {nick role aff} $row break
+    lassign $row unick role aff
+    set nick [jlib::escapestr $unick]
     jlib::splitjidex $roomjid roomName - -
 
     set ans [::UI::MegaDlgMsgAndEntry  \
       {Ban User}  \
-      "Ban the user \"$nick\" from the room \"$roomName\""  \
+      "Ban the user \"$unick\" from the room \"$roomName\""  \
       "Reason:"  \
       reason [mc Cancel] [mc OK]]
     
