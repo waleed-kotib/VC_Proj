@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.176 2007-08-03 07:58:09 matben Exp $
+# $Id: JUI.tcl,v 1.177 2007-08-03 08:07:48 matben Exp $
 
 package provide JUI 1.0
 
@@ -125,6 +125,8 @@ proc ::JUI::Init { } {
 	    {command  mvCard2          {::VCard::OnMenuExport}    {}}
 	}}
 	{separator}
+	{command   mvCard2             {::VCard::OnMenu}          {}}
+	{separator}
 	{command   mQuit               {::UserActions::DoQuit}    Q}
     }
     if {[tk windowingsystem] eq "aqua"} {
@@ -156,7 +158,6 @@ proc ::JUI::Init { } {
 	{command     mCreateRoom    {::GroupChat::OnMenuCreate}       {}}
 	{command     mEditBookmarks {::GroupChat::OnMenuBookmark}     {}}
 	{separator}
-	{command     mvCard2        {::VCard::OnMenu}                 {}}
 	{cascade     mShow          {}                                {} {} {
 	    {check   mToolbar       {::JUI::OnMenuToggleToolbar}      {} 
 	    {-variable ::JUI::state(show,toolbar)}}
@@ -874,7 +875,16 @@ proc ::JUI::FilePostCommand {wmenu} {
     # Disable some menus by default and let any hooks enable them.
     set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
     ::UI::MenuMethod $m entryconfigure mvCard2 -state disabled
-      
+
+    switch -- [GetConnectState] {
+	connectfin - connect {
+	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state normal
+	}
+	disconnect {
+	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state disabled
+	}	
+    }    
+
     ::hooks::run menuPostCommand main-file $wmenu
     
     # Workaround for mac bug.
@@ -965,7 +975,6 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mChat -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state normal
@@ -984,7 +993,6 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mChat -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state disabled
