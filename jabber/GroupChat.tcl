@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.196 2007-07-26 14:18:53 matben Exp $
+# $Id: GroupChat.tcl,v 1.197 2007-08-03 06:34:50 matben Exp $
 
 package require Create
 package require Enter
@@ -1830,6 +1830,7 @@ proc ::GroupChat::TreeCreateUserItem {chattoken jid3} {
 	$T item style set $item cTree styUser
     }
     set text [$jstate(jlib) service nick $jid3]
+    set text [jlib::unescapestr $text]
     set image [::Roster::GetPresenceIconFromJid $jid3]
     $T item element configure $item cTree  \
       eText -text $text + eImage -image $image
@@ -2086,7 +2087,8 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
     
     switch -- $whom {
 	me - they {
-	    set nick [::Jabber::JlibCmd service nick $from]	    
+	    set nick [::Jabber::JlibCmd service nick $from]
+	    set nick [jlib::unescapestr $nick]
 	}
     }
     set history 0

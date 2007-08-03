@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.13 2007-07-26 14:18:53 matben Exp $
+# $Id: Enter.tcl,v 1.14 2007-08-03 06:34:50 matben Exp $
 
 package provide Enter 1.0
 
@@ -98,7 +98,7 @@ proc ::Enter::Build {protocol args} {
 	    set state(nickname) $nickname
 	} else {
 	    jlib::splitjidex [Jabber::JlibCmd myjid] node - -
-	    set state(nickname) $node
+	    set state(nickname) [jlib::unescapestr $node]
 	}
     } else {
 	set state(nickname) $jprefs(defnick)
@@ -552,21 +552,22 @@ proc ::Enter::DoEnter {token} {
     ::Debug 4 "::Enter::DoEnter"
  
     set roomjid $state(roomjid)
-    set opts {}
+    set opts [list]
     if {$state(password) ne ""} {
 	lappend opts -password $state(password)
     }
+    set nickname [jlib::escapestr $state(nickname)]
     
     # We must figure out which protocol to use, muc or gc-1.0?
     switch -- $state(protocol) {
 	"muc" {
 	    set callback [list [namespace current]::MUCCallback $token]
-	    eval {$jstate(jlib) muc enter $roomjid $state(nickname)  \
+	    eval {$jstate(jlib) muc enter $roomjid $nickname \
 		  -command $callback} $opts
 	}
 	"gc-1.0" {
 	    set callback [list [namespace current]::GCCallback $token]
-	    $jstate(jlib) groupchat enter $roomjid $state(nickname) \
+	    $jstate(jlib) groupchat enter $roomjid $nickname \
 	      -command $callback
 	}
     }
@@ -574,13 +575,12 @@ proc ::Enter::DoEnter {token} {
     if {$state(protocol) eq "muc"} {
 	set xE [list [wrapper::createtag "x" -attrlist [list xmlns $xmppxmlns(muc)]]]
     } else {
-	set xE {}
+	set xE [list]
     }
 
-    set from $roomjid/$state(nickname)
+    set from $roomjid/$nickname
     set attr [list from $from to $roomjid]
-    set xmldata [wrapper::createtag "presence"  \
-      -attrlist $attr -subtags $xE]
+    set xmldata [wrapper::createtag "presence" -attrlist $attr -subtags $xE]
     ::History::XPutItem send $roomjid $xmldata
 }
 
