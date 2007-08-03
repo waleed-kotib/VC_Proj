@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.81 2007-08-02 06:50:02 matben Exp $
+# $Id: Profiles.tcl,v 1.82 2007-08-03 14:09:18 matben Exp $
 
 package provide Profiles 1.0
 
@@ -80,6 +80,7 @@ namespace eval ::Profiles:: {
     set ::config(profiles,prefspanel) 1
     set ::config(profiles,style)      "jid"  ;# jid | parts
     set ::config(profiles,show-head)  1
+    set ::config(profiles,ask-register-on-new)  1
     
     # The 'config' array shall never be written to, and since not all elements
     # of the profile are fixed, we need an additional profile that is written
@@ -302,6 +303,10 @@ proc ::Profiles::Set {name server username password args} {
     
     # Keep them sorted.
     SortProfileList
+    
+    # Make a "live update" on any mapped UI.
+    FrameReloadProfile $name
+    
     return
 }
 
@@ -947,7 +952,7 @@ namespace eval ::Profiles {
     
     # We must keep a list of all existing FrameWidgets in order to create
     # unique profile names.
-    variable wallframes {}
+    variable wallframes [list]
 }
 
 # Profiles::FrameWidget --
@@ -1366,7 +1371,7 @@ proc ::Profiles::MakeUniqueProfileName {name} {
     variable wallframes
     
     # Create a unique profile name if not given.
-    set names {}
+    set names [list]
     foreach w $wallframes {
 	set names [concat $names [FrameGetAllTmpNames $w]]
     }
@@ -1397,25 +1402,43 @@ proc ::Profiles::FrameGetAllTmpNames {w} {
 }
 
 proc ::Profiles::FrameNewCmd {w} {
+    global  config
     variable $w
     upvar 0 $w state
         
-    set newName ""
+    set token [namespace current]::$w    
+    set state(dlgname) ""
     
     # First get a unique profile name.
-    # @@@ Switch to ui::dialog
-    set ans [::UI::MegaDlgMsgAndEntry [mc {Add Profile}] [mc prefprofname2] \
-      "[mc {Profile name}]:" newName [mc Cancel] [mc OK]]
-    if {$ans eq "cancel" || $newName eq ""} {
+    # @@@ Perhaps make a maga dialog of this, modal plus returns entry,
+    #     similar to tk_getOpenFile.
+
+    set mbar [::UI::GetMainMenu]
+    ::UI::MenubarDisableBut $mbar edit
+    set wdlg [ui::dialog -type okcancel -icon "" -modal 1 \
+      -variable $token\(dlgbt) -geovariable prefs(winGeom,jprofname) \
+      -title [mc {Add Profile}] -message [mc prefprofname2]]
+    set wint [$wdlg clientframe]
+    ttk::label $wint.l -text "[mc {Profile name}]:"
+    ttk::entry $wint.e -textvariable $token\(dlgname)
+    grid  $wint.l  $wint.e
+    grid $wint.l -sticky e
+    grid $wint.e -sticky ew
+    grid columnconfigure $wint 1 -weight 1
+    focus $wint.e
+    $wdlg grab
+    ::UI::MenubarEnableAll $mbar
+    set ans $state(dlgbt)
+
+    if {$ans eq "cancel" || $state(dlgname) eq ""} {
 	return
     }
-    Debug 2 "::Profiles::FrameNewCmd state(selected)$state(selected), newName=$newName"
+    Debug 2 "::Profiles::FrameNewCmd state(selected)$state(selected), state(dlgbt)=$state(dlgbt), state(dlgname)=$state(dlgname)"
 
     set wmenu $state(wmenu)
     
-    set uname [MakeUniqueProfileName $newName]
-    $wmenu add radiobutton -label $uname  \
-      -variable [namespace current]::$w\(profile)
+    set uname [MakeUniqueProfileName $state(dlgname)]
+    $wmenu add radiobutton -label $uname -variable $token\(profile)
 
     set state(selected) $uname
     set state(profile)  $uname
@@ -1432,6 +1455,17 @@ proc ::Profiles::FrameNewCmd {w} {
     # Must do this for it to be automatically saved.
     set state(prof,$uname,name) $uname
     focus $state(wfocus)
+    
+    if {$config(profiles,ask-register-on-new)} {
+	if {![::Jabber::IsConnected]} {
+	    update idletasks
+	    set ans [tk_messageBox -icon question -type yesno -parent $w \
+	      -message "Do you want to register a new account?"]
+	    if {$ans eq "yes"} {
+		::RegisterEx::New -profile $uname
+	    }
+	}
+    }
 }
 
 proc ::Profiles::FrameDeleteCmd {w} {
@@ -1530,6 +1564,39 @@ proc ::Profiles::FrameGetProfiles {w} {
 	lappend profileL $name $plist
     }
     return $profileL
+}
+
+proc ::Profiles::FrameReloadProfile {name} {
+    
+    puts "::Profiles::FrameReloadProfile"
+    
+    set profile [GetProfile $name]
+    lassign [lrange $profile 0 2] server username password
+
+    foreach w [ui::findallwithclass JProfileFrame] {
+	
+	puts "\t w=$w"
+	
+	variable $w
+	upvar 0 $w state
+
+	set state(prof,$name,name)      $name
+	set state(prof,$name,server)    $server
+	set state(prof,$name,username)  $username
+	set state(prof,$name,password)  $password
+	set state(prof,$name,-resource) ""
+	set state(prof,$name,-nickname) ""
+	foreach {key value} [lrange $profile 3 end] {
+	    set state(prof,$name,$key) $value
+	}
+	set jid [jlib::joinjid $username $server $state(prof,$name,-resource)]
+	set state(prof,$name,jid) $jid
+	
+	puts "\t selected $state(selected)"
+	if {$state(selected) eq $name} {
+	    FrameSetCurrentFromTmp $w $name
+	}
+    }
 }
 
 proc ::Profiles::FrameOnDestroy {w} {

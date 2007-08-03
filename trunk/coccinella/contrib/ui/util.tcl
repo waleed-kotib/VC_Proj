@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.13 2007-08-01 13:55:43 matben Exp $
+# $Id: util.tcl,v 1.14 2007-08-03 14:09:18 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -97,6 +97,28 @@ proc ui::autoname {} {
 	set w $dlg[format %08x [expr {int($max*rand())}]]
     }
     return $w
+}
+
+# ui::findallwithclass --
+# 
+#       Find all widgets starting from . or given of a certain class.
+
+proc ui::findallwithclass {class {parent .}} {    
+    set widgets [list]
+    set Q $parent
+    while {[llength $Q]} {
+	set QN [list]
+	foreach w $Q {
+	    if {[winfo class $w] eq $class} {
+		lappend widgets $w
+	    }
+	    foreach child [winfo children $w] {
+		lappend QN $child
+	    }
+	}
+	set Q $QN
+    }    
+    return $widgets
 }
 
 # ui::PositionClassWindow --

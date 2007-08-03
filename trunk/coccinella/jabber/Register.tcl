@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.73 2007-07-29 10:28:14 matben Exp $
+# $Id: Register.tcl,v 1.74 2007-08-03 14:09:18 matben Exp $
 
 package provide Register 1.0
 
@@ -158,6 +158,7 @@ proc ::RegisterEx::OnMenu {} {
 #               -password
 #               -autoget
 #               -publicservers
+#               -profile
 #       
 # Results:
 #       w
@@ -176,7 +177,10 @@ proc ::RegisterEx::New {args} {
 	raise $win
 	return
     }
-        
+    
+    # Avoid any inconsistent UI state by closing any login dialog.
+    foreach wlogin [ui::findallwithclass JLogin] {::Login::Close $wlogin}
+    
     # State variable to collect instance specific variables.
     set token [namespace current]::[incr uid]
     variable $token
@@ -753,11 +757,16 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	NotBusy $token
     } else {
 	
-	# Create a new profile.
-	if {$state(savepassword)} {
-	    ::Profiles::Set {} $server $username $password	    
+	# Create a new profile or use a given one.
+	if {[info exists state(-profile)]} {
+	    set pname $state(-profile)
 	} else {
-	    ::Profiles::Set {} $server $username {}
+	    set pname ""
+	}
+	if {$state(savepassword)} {
+	    ::Profiles::Set $pname $server $username $password	    
+	} else {
+	    ::Profiles::Set $pname $server $username {}
 	}
 	if {$config(registerex,autologin)} {
 	    

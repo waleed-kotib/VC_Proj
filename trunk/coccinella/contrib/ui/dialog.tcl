@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.28 2007-08-01 13:55:43 matben Exp $
+# $Id: dialog.tcl,v 1.29 2007-08-03 14:09:18 matben Exp $
 
 # Public commands:
 # 
@@ -538,7 +538,11 @@ proc ui::dialog::modal {args} {
     set w [ui::autoname]
     ui::from args -modal
     ui::from args -command
+    set postCmd [ui::from args -postcommand]
     eval {widget $w -modal 1 -command [namespace code ModalCmd]} $args
+    if {[llength $postCmd]} {
+	uplevel #0 $postCmd $w
+    }
     ui::Grab $w
     return $buttonModal
 }

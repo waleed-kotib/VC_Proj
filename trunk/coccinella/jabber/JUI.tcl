@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.177 2007-08-03 08:07:48 matben Exp $
+# $Id: JUI.tcl,v 1.178 2007-08-03 14:09:18 matben Exp $
 
 package provide JUI 1.0
 
@@ -299,7 +299,7 @@ proc ::JUI::Build {w} {
     $wmenu.file configure  \
       -postcommand [list ::JUI::FilePostCommand $wmenu.file]
     $wmenu.action configure  \
-      -postcommand [list ::JUI::JabberPostCommand $wmenu.action]
+      -postcommand [list ::JUI::ActionPostCommand $wmenu.action]
     $wmenu.info configure  \
       -postcommand [list ::JUI::InfoPostCommand $wmenu.info]
     if {[tk windowingsystem] eq "aqua"} {
@@ -912,7 +912,7 @@ proc ::JUI::EditPostCommand {wmenu} {
     update idletasks
 }
 
-proc ::JUI::JabberPostCommand {wmenu} {
+proc ::JUI::ActionPostCommand {wmenu} {
     global wDlgs config
     variable state
     variable jwapp
