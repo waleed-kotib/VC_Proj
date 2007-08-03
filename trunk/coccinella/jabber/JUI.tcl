@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.175 2007-08-03 06:59:37 matben Exp $
+# $Id: JUI.tcl,v 1.176 2007-08-03 07:58:09 matben Exp $
 
 package provide JUI 1.0
 
@@ -112,47 +112,28 @@ proc ::JUI::Init { } {
     # Menu definitions for the Roster/services window.
     variable menuDefs
     variable inited
-    
-    set menuDefs(rost,file) [list]
-    if {[::Jabber::HaveWhiteboard]} {
-	lappend menuDefs(rost,file) \
-	  {command   mNewWhiteboard  {::JWB::OnMenuNewWhiteboard}  N}
+            
+    set mDefsFile {
+	{command   mPreferences...     {::Preferences::Build}     {}}
+	{separator}
+	{cascade   mImport             {}                         {} {} {
+	    {command  mEmoticonSet     {::Emoticons::ImportSet}   {}}
+	}}
+	{cascade   mExport             {}                         {} {} {
+	    {command  mRoster          {::Roster::ExportRoster}   {}}
+	    {command  mMessageInbox    {::MailBox::MKExportDlg}   {}}
+	    {command  mvCard2          {::VCard::OnMenuExport}    {}}
+	}}
+	{separator}
+	{command   mQuit               {::UserActions::DoQuit}    Q}
     }
-    
-    if {[string equal $this(platform) "macosx"]} {
-	set mDefsFile {
-	    {command   mCloseWindow        {::UI::CloseWindowEvent}  W}
-	    {command   mPreferences...     {::Preferences::Build}     {}}
-	    {separator}
-	    {cascade   mImport             {}                         {} {} {
-		{command  mEmoticonSet     {::Emoticons::ImportSet}   {}}
-	    }}
-	    {cascade   mExport             {}                         {} {} {
-		{command  mRoster          {::Roster::ExportRoster}   {}}
-		{command  mMessageInbox    {::MailBox::MKExportDlg}   {}}
-		{command  mvCard2          {::VCard::OnMenuExport}    {}}
-	    }}
-	    {separator}
-	    {command   mQuit               {::UserActions::DoQuit}    Q}
-	}
-    } else {
-	set mDefsFile {
-	    {command   mPreferences...     {::Preferences::Build}     {}}
-	    {separator}
-	    {cascade   mImport             {}                         {} {} {
-		{command  mEmoticonSet     {::Emoticons::ImportSet}   {}}
-	    }}
-	    {cascade   mExport             {}                         {} {} {
-		{command  mRoster          {::Roster::ExportRoster}   {}}
-		{command  mMessageInbox    {::MailBox::MKExportDlg}   {}}
-		{command  mvCard2          {::VCard::OnMenuExport}    {}}
-	    }}
-	    {separator}
-	    {command   mQuit               {::UserActions::DoQuit}    Q}
-	}
+    if {[tk windowingsystem] eq "aqua"} {
+	set closeM [list {command   mCloseWindow  {::UI::CloseWindowEvent}  W}]
+	set menuDefs(rost,file) [concat $closeM $mDefsFile]
+    } else {    
+	set menuDefs(rost,file) $mDefsFile
     }
-    set menuDefs(rost,file) [concat $menuDefs(rost,file) $mDefsFile]
-    
+        
     set menuDefs(rost,action) {    
 	{command     mNewAccount    {::RegisterEx::OnMenu}            {}}
 	{cascade     mRegister      {}                                {} {} {}}
@@ -188,49 +169,41 @@ proc ::JUI::Init { } {
 	{command     mRemoveAccount... {::Register::OnMenuRemove}        {}}	
     }
 
+    if {[::Jabber::HaveWhiteboard]} {
+	set mWhiteboard \
+	  {command   mNewWhiteboard  {::JWB::OnMenuNewWhiteboard}  N}
+	set idx [lsearch $menuDefs(rost,action) *mChat*]
+	incr idx
+	set menuDefs(rost,action) \
+	  [linsert $menuDefs(rost,action) $idx $mWhiteboard]
+    }
+    
+    set mDefsInfo {    
+	{command     mSetupAssistant {::SetupAss::SetupAss}         {}}
+	{command     mComponents    {::Dialogs::InfoComponents}     {}}
+	{command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
+	{checkbutton mDebug         {::Jabber::DebugCmd}            {} \
+	  {-variable ::Jabber::jstate(debugCmd)}}
+	{cascade     mFontSize      {}                              {} {} {
+	    {radio   mNormalFont    {::Theme::FontConfigSize  0}    {}
+	    {-variable prefs(fontSizePlus) -value 0}}
+	    {radio   mLargerFont    {::Theme::FontConfigSize +1}    {}
+	    {-variable prefs(fontSizePlus) -value 1}}
+	    {radio   mLargeFont     {::Theme::FontConfigSize +2}    {}
+	    {-variable prefs(fontSizePlus) -value 2}}
+	    {radio   mHugeFont      {::Theme::FontConfigSize +6}    {}
+	    {-variable prefs(fontSizePlus) -value 6}}
+	} }
+	{separator}
+	{command     mCoccinellaHome {::JUI::OpenCoccinellaURL}     {}}
+	{command     mBugReport      {::JUI::OpenBugURL}            {}}
+    }
     if {[tk windowingsystem] eq "aqua"} {
-	set menuDefs(rost,info) {    
-	    {command     mSetupAssistant {::SetupAss::SetupAss}         {}}
-	    {command     mComponents    {::Dialogs::InfoComponents}     {}}
-	    {command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
-	    {checkbutton mDebug         {::Jabber::DebugCmd}            {} \
-	      {-variable ::Jabber::jstate(debugCmd)}}
-	    {cascade     mFontSize      {}                              {} {} {
-		{radio   mNormalFont    {::Theme::FontConfigSize  0}    {}
-		{-variable prefs(fontSizePlus) -value 0}}
-		{radio   mLargerFont    {::Theme::FontConfigSize +1}    {}
-		{-variable prefs(fontSizePlus) -value 1}}
-		{radio   mLargeFont     {::Theme::FontConfigSize +2}    {}
-		{-variable prefs(fontSizePlus) -value 2}}
-		{radio   mHugeFont      {::Theme::FontConfigSize +6}    {}
-		{-variable prefs(fontSizePlus) -value 6}}
-	    } }
-	    {separator}
-	    {command     mCoccinellaHome {::JUI::OpenCoccinellaURL}     {}}
-	    {command     mBugReport      {::JUI::OpenBugURL}            {}}
-	}
+	set menuDefs(rost,info) $mDefsInfo
     } else {
-	set menuDefs(rost,info) {    
-	    {command     mSetupAssistant {::SetupAss::SetupAss}          {}}
-	    {command     mComponents    {::Dialogs::InfoComponents}      {}}
-	    {command     mErrorLog      {::Jabber::ErrorLogDlg}          {}}
-	    {checkbutton mDebug         {::Jabber::DebugCmd}             {} \
-	      {-variable ::Jabber::jstate(debugCmd)}}
-	    {cascade     mFontSize      {}                              {} {} {
-		{radio   mNormalFont    {::Theme::FontConfigSize  0}    {}
-		{-variable prefs(fontSizePlus) -value 0}}
-		{radio   mLargerFont    {::Theme::FontConfigSize +1}    {}
-		{-variable prefs(fontSizePlus) -value 1}}
-		{radio   mLargeFont     {::Theme::FontConfigSize +2}    {}
-		{-variable prefs(fontSizePlus) -value 2}}
-		{radio   mHugeFont      {::Theme::FontConfigSize +6}    {}
-		{-variable prefs(fontSizePlus) -value 6}}
-	    } }
-	    {separator}
-	    {command     mAboutCoccinella  {::Splash::SplashScreen}      {}}
-	    {command     mCoccinellaHome   {::JUI::OpenCoccinellaURL}    {}}
-	    {command     mBugReport        {::JUI::OpenBugURL}           {}}
-	}
+	set mAbout {command  mAboutCoccinella  {::Splash::SplashScreen}  {}}
+	set idx [lsearch $mDefsInfo *mCoccinellaHome*]
+	set menuDefs(rost,info) [linsert $mDefsInfo $idx $mAbout]
     }
 
     set menuDefs(rost,edit) {    
