@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.119 2007-07-29 10:28:14 matben Exp $
+# $Id: Disco.tcl,v 1.120 2007-08-03 06:59:37 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1651,7 +1651,7 @@ proc ::Disco::RemoveListing {jid} {
 
 proc ::Disco::MainMenuPostHook {type wmenu} {
     
-    if {$type eq "main-jabber"} {
+    if {$type eq "main-action"} {
 	set m [::UI::MenuMethod $wmenu entrycget mRegister -menu]
 	$m delete 0 end
 	

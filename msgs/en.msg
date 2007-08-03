@@ -294,6 +294,7 @@
 ::msgcat::mcset en mEdit		{Edit}
 ::msgcat::mcset en mPreferences		{Preferences}
 ::msgcat::mcset en mJabber		{Jabber}
+::msgcat::mcset en mAction		{Action}
 ::msgcat::mcset en mItems		{Items}
 ::msgcat::mcset en mLibrary		{Library}
 ::msgcat::mcset en mInfo		{Info}
@@ -441,6 +442,8 @@
 ::msgcat::mcset en mLargerFont          {Larger}
 ::msgcat::mcset en mLargeFont           {Large}
 ::msgcat::mcset en mHugeFont            {Huge}
+::msgcat::mcset en mDiscoverServer      {Discover Server}
+::msgcat::mcset en mDiscoverServer...   {Discover Server...}
 
 # Popups
 ::msgcat::mcset en mMessage     	{Message...}
