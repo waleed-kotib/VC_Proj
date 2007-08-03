@@ -18,7 +18,7 @@ proc ::ComponentExample::Init { } {
     
     ::WB::RegisterNewMenu junk "Mats Junk" $menuspec
     ::WB::RegisterMenuEntry file $menuspec
-    ::JUI::RegisterMenuEntry jabber $menuspec
+    ::JUI::RegisterMenuEntry action $menuspec
     ::JUI::RegisterMenuEntry file $menuspec
     ::Roster::RegisterPopupEntry $popMenuSpec
     

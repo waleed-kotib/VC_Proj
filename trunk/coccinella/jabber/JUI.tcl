@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.174 2007-08-03 06:34:50 matben Exp $
+# $Id: JUI.tcl,v 1.175 2007-08-03 06:59:37 matben Exp $
 
 package provide JUI 1.0
 
@@ -153,7 +153,7 @@ proc ::JUI::Init { } {
     }
     set menuDefs(rost,file) [concat $menuDefs(rost,file) $mDefsFile]
     
-    set menuDefs(rost,jabber) {    
+    set menuDefs(rost,action) {    
 	{command     mNewAccount    {::RegisterEx::OnMenu}            {}}
 	{cascade     mRegister      {}                                {} {} {}}
 	{command     mLogin         {::Jabber::OnMenuLogInOut}        L}
@@ -244,14 +244,14 @@ proc ::JUI::Init { } {
     }
     
     # We should do this for all menus eventaully.
-    ::UI::PruneMenusFromConfig mJabber menuDefs(rost,jabber)
+    ::UI::PruneMenusFromConfig mJabber menuDefs(rost,action)
     ::UI::PruneMenusFromConfig mInfo   menuDefs(rost,info)
         
     # When registering new menu entries they shall be added at:
     variable menuDefsInsertInd
 
     # Let components register their menus *after* the last separator.
-    foreach name {file edit jabber info} {
+    foreach name {file edit action info} {
 	set idx [lindex [lsearch -all $menuDefs(rost,$name) separator] end]
 	if {$idx < 0} {
 	    set idx [llength $menuDefs(rost,$name)]
@@ -263,7 +263,7 @@ proc ::JUI::Init { } {
     variable menuBarDef
     set menuBarDef {
 	file    mFile
-	jabber  mJabber
+	action  mAction
 	info    mInfo
     }
     if {[tk windowingsystem] eq "aqua"} {
@@ -324,8 +324,8 @@ proc ::JUI::Build {w} {
     # individual platforms' menu managers.
     $wmenu.file configure  \
       -postcommand [list ::JUI::FilePostCommand $wmenu.file]
-    $wmenu.jabber configure  \
-      -postcommand [list ::JUI::JabberPostCommand $wmenu.jabber]
+    $wmenu.action configure  \
+      -postcommand [list ::JUI::JabberPostCommand $wmenu.action]
     $wmenu.info configure  \
       -postcommand [list ::JUI::InfoPostCommand $wmenu.info]
     if {[tk windowingsystem] eq "aqua"} {
@@ -1020,7 +1020,7 @@ proc ::JUI::JabberPostCommand {wmenu} {
 	}	
     }    
       
-    ::hooks::run menuPostCommand main-jabber $wmenu
+    ::hooks::run menuPostCommand main-action $wmenu
     
     # Workaround for mac bug. Still problems building submenus.
     update idletasks

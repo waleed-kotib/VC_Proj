@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.28 2007-07-18 09:40:09 matben Exp $
+#  $Id: Mood.tcl,v 1.29 2007-08-03 06:59:37 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -176,7 +176,7 @@ proc ::Mood::HavePEP {jlibname have} {
 	set myjid2 [::Jabber::JlibCmd  myjid2]
 	::Jabber::JlibCmd pubsub items $myjid2 $xmlns(mood) \
 	  -command [namespace code ItemsCB]
-	::JUI::RegisterMenuEntry jabber $menuDef
+	::JUI::RegisterMenuEntry action $menuDef
     }
 }
 

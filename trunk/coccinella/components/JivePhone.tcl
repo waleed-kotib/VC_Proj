@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.25 2007-07-18 09:40:09 matben Exp $
+# $Id: JivePhone.tcl,v 1.26 2007-08-03 06:59:37 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -231,7 +231,7 @@ proc ::JivePhone::WeHavePhone { } {
 	return
     }
     ::Roster::RegisterPopupEntry $popMenuDef(call)
-    ::JUI::RegisterMenuEntry  jabber $menuDef
+    ::JUI::RegisterMenuEntry  action $menuDef
     
     set image [::Rosticons::Get [string tolower phone/available]]
     set win [::JUI::SetAlternativeStatusImage jivephone $image]
