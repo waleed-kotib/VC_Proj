@@ -9,3 +9,4 @@
 # full path name of this file's directory.
 
 package ifneeded jlibs::register   0.1 [list source [file join $dir register.tcl]]
+package ifneeded jlibs::unregister 0.1 [list source [file join $dir unregister.tcl]]
