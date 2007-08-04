@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.178 2007-08-03 14:09:18 matben Exp $
+# $Id: JUI.tcl,v 1.179 2007-08-04 07:25:38 matben Exp $
 
 package provide JUI 1.0
 
@@ -982,7 +982,11 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer -state normal
 	}
 	disconnect {
-	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state normal
+	    if {[llength [ui::findallwithclass JLogin]]} {
+		::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
+	    } else {
+		::UI::MenuMethod $wmenu entryconfigure mNewAccount -state normal
+	    }
 	    ::UI::MenuMethod $wmenu entryconfigure mRegister -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
 	      -label [mc mLogin]
