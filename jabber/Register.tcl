@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.74 2007-08-03 14:09:18 matben Exp $
+# $Id: Register.tcl,v 1.75 2007-08-04 07:25:38 matben Exp $
 
 package provide Register 1.0
 
@@ -179,6 +179,7 @@ proc ::RegisterEx::New {args} {
     }
     
     # Avoid any inconsistent UI state by closing any login dialog.
+    # This shouldn't happen.
     foreach wlogin [ui::findallwithclass JLogin] {::Login::Close $wlogin}
     
     # State variable to collect instance specific variables.
@@ -364,6 +365,26 @@ proc ::RegisterEx::New {args} {
     return $w
 }
 
+proc ::RegisterEx::GetTokenFrom {key} {
+    
+    set ns [namespace current]::
+    foreach token [concat  \
+      [info vars ${ns}\[0-9\]] \
+      [info vars ${ns}\[0-9\]\[0-9\]] \
+      [info vars ${ns}\[0-9\]\[0-9\]\[0-9\]] \
+      [info vars ${ns}\[0-9\]\[0-9\]\[0-9\]\[0-9\]] \
+      [info vars ${ns}\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]] {
+	if {[array exists $token]} {
+	    variable $token
+	    upvar 0 $token state    
+	    if {[info exists state($key)]} {
+		return $token   
+	    }
+	}
+    }   
+    return
+}
+
 proc ::RegisterEx::HttpCommand {token htoken} {
     variable $token
     upvar 0 $token state
@@ -421,6 +442,10 @@ proc ::RegisterEx::Cancel {token} {
     
     set state(finished) 0
     ::Jabber::DoCloseClientConnection
+}
+
+proc ::RegisterEx::CloseAny {} {
+    Cancel [GetTokenFrom w]
 }
 
 proc ::RegisterEx::CloseCmd {token w} {

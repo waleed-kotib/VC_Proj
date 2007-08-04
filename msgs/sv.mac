@@ -18,6 +18,7 @@
 ::msgcat::mcset sv Apply		{Använd}
 ::msgcat::mcset sv Author               {Författare}
 ::msgcat::mcset sv Available		{Tillgänglig}
+::msgcat::mcset sv Avatar               {Avatar}
 ::msgcat::mcset sv Away			{Borta}
 ::msgcat::mcset sv Back                 {Tillbaka}
 ::msgcat::mcset sv Binary               {Binärt}
@@ -389,6 +390,7 @@
 ::msgcat::mcset sv mvCard		{vCard...}
 ::msgcat::mcset sv mvCard2              {Redigera visitkort...}
 ::msgcat::mcset sv mRemoveAccount	{Radera konto}
+::msgcat::mcset sv mRemoveAccount...    {Radera konto...}
 ::msgcat::mcset sv mErrorLog		{Fellogg...}
 ::msgcat::mcset sv mDebug		{Debugga}
 ::msgcat::mcset sv mOnServer		{Om servern...}
@@ -434,6 +436,13 @@
 ::msgcat::mcset sv mLargerFont          {Större}
 ::msgcat::mcset sv mLargeFont           {Stor}
 ::msgcat::mcset sv mHugeFont            {Jättestor}
+::msgcat::mcset sv mDiscoverServer      {Undersök server}
+::msgcat::mcset sv mDiscoverServer...   {Undersök server...}
+::msgcat::mcset sv mAddContact          {Lägg till kontakt...}
+::msgcat::mcset sv mEditContact         {Redigera kontakt...}
+::msgcat::mcset sv mRestore             {Normal}
+::msgcat::mcset sv mAction              {Utför}
+::msgcat::mcset sv mMinimize            {Minimera}
 
 
 # Popups
@@ -505,6 +514,7 @@
 ::msgcat::mcset sv {Broken Image}          {Bruten bild}
 ::msgcat::mcset sv {Buddy Pouncing}        {Buddy pouncing}
 ::msgcat::mcset sv {Built in server port}  {Inbyggd server port}
+::msgcat::mcset sv {Business Card}         {Visitkort}
 ::msgcat::mcset sv {Cache folder}          {Filminnesmapp}
 ::msgcat::mcset sv {Canvas Size}           {Dukstorlek}
 ::msgcat::mcset sv {Chat History}	   {Chatt historik}
@@ -515,6 +525,7 @@
 ::msgcat::mcset sv {Component Info}        {Komponentinfo}
 ::msgcat::mcset sv {Conference server}	   {Konferanstjänst}
 ::msgcat::mcset sv {Connect using HTTP}    {Anslut över HTTP}
+::msgcat::mcset sv {Contact ID}            {Kontakt ID}
 ::msgcat::mcset sv {Contact Type}          {Kontakttyp}
 ::msgcat::mcset sv {Create Room}	   {Skapa rum}
 ::msgcat::mcset sv {Default group}         {Standard grupp}
@@ -531,8 +542,10 @@
 ::msgcat::mcset sv {Do not save password}  {Spara ej lösenordet}
 
 ::msgcat::mcset sv {Edit Business Card}    {Redigera visitkort}
+::msgcat::mcset sv {Edit Contact}          {Redigera kontakt}
 ::msgcat::mcset sv {Edit Fonts}            {Redigera typsnitt}
 ::msgcat::mcset sv {Edit Item}             {Redigera objekt}
+::msgcat::mcset sv {Edit Profiles}         {Redigera profil}
 ::msgcat::mcset sv {Edit Shortcut}         {Redigera genväg}
 ::msgcat::mcset sv {Edit Shortcuts}        {Redigera genvägar}
 ::msgcat::mcset sv {Edit User}		   {Redigera användare}
@@ -575,6 +588,7 @@
 ::msgcat::mcset sv {Incoming Presence}     {Inkommande närvaro}
 ::msgcat::mcset sv {Info Room}             {Rumsinfo}
 ::msgcat::mcset sv {Inspect Associations}  {Inspektera association}
+::msgcat::mcset sv {Invite Contact}        {Bjud in kontakt}
 ::msgcat::mcset sv {Invite User}           {Bjud in användare}
 ::msgcat::mcset sv {IP address}            {IP adress}
 ::msgcat::mcset sv {Is connected}          {Är uppkopplad}
@@ -658,6 +672,7 @@
 ::msgcat::mcset sv {Postal Code}	   {Postnummer}
 ::msgcat::mcset sv {Preferred Protocol}    {Förstahands protokoll}
 ::msgcat::mcset sv {Presence Error}	   {Presence fel}
+::msgcat::mcset sv {Presence Subscription} {Närvaru prenumeration}
 ::msgcat::mcset sv {Privacy List}          {Integritetslista}
 ::msgcat::mcset sv {Profile Name}          {Profilnamn}
 ::msgcat::mcset sv {Proxy Port}            {Proxyport}
@@ -670,9 +685,12 @@
 ::msgcat::mcset sv {Request To User}       {Förfrågan till användaren}
 ::msgcat::mcset sv {Retype Password}       {Upprepa lösenord}
 ::msgcat::mcset sv {Revert Panel}          {Återställ panelen}
+::msgcat::mcset sv {Register Account}      {Registrera konto}
 ::msgcat::mcset sv {Register New Account}  {Registrera nytt konto}
 ::msgcat::mcset sv {Register Now}	   {Registrera nu}
 ::msgcat::mcset sv {Register Service}	   {Registrera tjänst}
+::msgcat::mcset sv {Remove Account}        {Avregistrera konto}
+::msgcat::mcset sv {Remove Contact}        {Tag bort kontakt}
 ::msgcat::mcset sv {Remove Item}	   {Tag bort användare}
 ::msgcat::mcset sv {Remove Photo}          {Tag bort foto}
 ::msgcat::mcset sv {Room name}		   {Rumsnamn}
@@ -730,7 +748,7 @@
 ::msgcat::mcset sv {Unknown: Prompt user}  {Okänt: Fråga användare}
 ::msgcat::mcset sv {Url of homepage}       {Url till hemsidan}
 ::msgcat::mcset sv {Use proxy}             {Använd proxy}
-::msgcat::mcset sv {Use Secure Connection} {Använd säker uppkoppling}
+::msgcat::mcset sv {Use secure connection} {Använd säker uppkoppling}
 ::msgcat::mcset sv {Use SSL for security}  {Använd SSL för säkerhet}
 ::msgcat::mcset sv {Use TLS and SASL authentication} {Använd TLS och SASL autentisering}
 ::msgcat::mcset sv {Use TLS on separate port (old)} {Använd TLS på separat nätverksport}
@@ -850,14 +868,18 @@
 # Messages for tk_messageBox:
 ::msgcat::mcset sv jamesserrsend	{Vi fick ett fel när skickade meddelande till "%s". Felkoden är %s och felmeddelandet: %s}
 ::msgcat::mcset sv jamessallowsub	{Användaren %s tillät dig att prenumerera på sin närvaro.}
+::msgcat::mcset sv jamessallowsub2      {%s tillåter dig att se dess närvaro.}
 ::msgcat::mcset sv jamessunsub		{Användaren %s har upphört med sin prenumeration på din närvaro och tas bort från din roster.}
 ::msgcat::mcset sv jamessunsubpres	{Användaren %s har upphört med sin prenumeration på din närvaro.}
 ::msgcat::mcset sv jamessunsubask	{Användaren %s har upphört med sin prenumeration på din närvaro. Vill du ta bort %s från din roster?}
 ::msgcat::mcset sv jamessunsubscribed	{Du har tagit bort din prenumeration på %s närvaro.}
 ::msgcat::mcset sv jamesserrpres	{Vi mottog ett "presence" fel. Felkoden är %s och felmeddelandet: %s}
 ::msgcat::mcset sv jamessautoaccepted	{Du har just automatiskt accepterat en prenumeration från %s.}
+::msgcat::mcset sv jamessautoaccepted2  {%s kan se din närvaro.}
 ::msgcat::mcset sv jamessautoreject	{Du har just automatiskt nekat en prenumeration från %s.}
+::msgcat::mcset sv jamessautoreject2    {%s kan ej se din närvaro.}
 ::msgcat::mcset sv jamessautosubs	{Du har just automatiskt prenumererat på %s närvaro.}
+::msgcat::mcset sv jamessautosubs2      {Du kan se %s närvaro.}
 ::msgcat::mcset sv jamessconnbroken	{Förbindelsen bröts oväntat.}
 ::msgcat::mcset sv jamessautoawayset 	{Auto frånvarande har satts %s. Vill du bli tillgänglig igen?}
 ::msgcat::mcset sv jamesserrgetpublic	{Mottog ett felmeddelande när hämtade "public data" från %s. Felkoden är %s och felmeddelandet: %s}
@@ -874,12 +896,14 @@
 ::msgcat::mcset sv jamesswarberasewb	{Vill du radera skrivtavlan först?}
 ::msgcat::mcset sv jamesswarnremove	{Att ta bort en användare från din roster kan inte göras ogjort. Du måste göra en ny prenumeration av denna användare om du önskar en förnyad prenumeration.\
 Vill du fortsätta ändå?}
+::msgcat::mcset sv jamesswarnremove2    {Vill du verkligen ta bort den här kontakten? Detta kan inte göras ogjort.}
 ::msgcat::mcset sv jamessillegalchar	{Ogiltigt tecken i %s: "%s"!}
 ::msgcat::mcset sv jamessbadjid		{JID:n "%s" har ej korrekt form. Vill du fortsätta ändå?}
 ::msgcat::mcset sv jamessalreadyinrost	{JID:n "%s" existerar redan i din roster. Vill du fortsätta ändå?}
 ::msgcat::mcset sv jamessfailsetnick	{Det blev ett fel när satte kortnamn eller grupp för användaren "%s". Felkoden är %s och felmeddelandet: %s}
 ::msgcat::mcset sv jamessnamemissing	{Fältet %s fattas eller är för kort!}
 ::msgcat::mcset sv jamessnosocket	{Misslyckades med att upprätta en förbindelse med servern "%s". Kanske nätverket eller servern är ur funktion. Meddelandet är : %s}
+::msgcat::mcset sv jamessnosocket2      {Kunde ej ansluta till "%s". Antingen så är det fel på server eller nätverk, eller så var serverns namn felstavat. Felmeddelande: %s}
 ::msgcat::mcset sv jamesstimeoutserver	{Timeout när väntade på att servern "%s" skulle svara.}
 ::msgcat::mcset sv jamessregisterok	{Registreringen hos servern "%s" lyckades. Nu måste du bara logga på med samma namn och lösenord.}
 ::msgcat::mcset sv jamessremoveaccount	{Du är på gång att ta bort ditt konto på denna servern. Det här kan inte göras ogjort. Vill du verkligen fortsätta?}
@@ -890,6 +914,7 @@ Vill du fortsätta ändå?}
 ::msgcat::mcset sv jamesspasswderr	{Bytet av lösenord misslyckades med felkod %s och felmeddelande "%s"}
 ::msgcat::mcset sv jamesspasswdok	{Att sätta nytt lösenord fungerade.}
 ::msgcat::mcset sv jamessregnoserver	{Vi kräver att serverns namn fylls i.}
+::msgcat::mcset sv jamessregnoserver2   {Var vänlig att välj eller fyll i en server först.}
 ::msgcat::mcset sv jamesserrregget	{Misslyckades med att få registrerings info. Felkoden %s med felmeddelande: %s}
 ::msgcat::mcset sv jamesserrregset	{Misslyckades med att registrera tjänsten "%s". Felkoden %s med felmeddelande: %s}
 ::msgcat::mcset sv jamessokreg		{Registreringen av tjänsten "%s" lyckades.}
@@ -949,6 +974,7 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv jamessgcinvite               {Du har blivit inbjuden till en gruppchatt %s av %s. Vill du delta?}
 ::msgcat::mcset sv jamessnorooms                {Hittade inga rum hos %s.}
 ::msgcat::mcset sv jamessnofiletrpt             {Vi kunde inte se att %s har stöd för filöverföring.}
+::msgcat::mcset sv jamessnofiletrpt2            {%s stöder ej filöverföring.}
 ::msgcat::mcset sv jamessfiletrpterr            {Misslyckades med att ta emot filen %s från %s: %s}
 ::msgcat::mcset sv jamesswarnsendcanoff         {Användaren du vill skicka till, "%s", är inte tillgänglig och om detta meddelande innehåller bilder eller likanande så kommer mottagaren inte att få\
 dessa om du inte händelsevis är tillgänglig när mottagaren läser det. Vill du skicka trots detta?}
@@ -1067,9 +1093,11 @@ Uppgifter som är serverlagrade är sökbara för samtliga användare.}
 ::msgcat::mcset sv prefminaw     {Minuter innan automatisk frånvarande status:}
 ::msgcat::mcset sv prefminea     {Minuter innan automatisk extra frånvarande status:}
 ::msgcat::mcset sv prefsuif      {Om någon vill prenumerera på min närvaro och...}
+::msgcat::mcset sv prefsuif2     {Om någon vill se min närvaro och...}
 ::msgcat::mcset sv prefsuis      {...redan finns i min roster:}
 ::msgcat::mcset sv prefsuisnot   {...ej finns i min roster:}
 ::msgcat::mcset sv prefsuauto    {Prenumerera automatiskt på de som prenumererar på mig}
+::msgcat::mcset sv prefsuauto2   {Flytta nya användare i kontaktlistan till en grupp}
 ::msgcat::mcset sv prefrorm      {Ta bort användare om prenumerationen upphör}	
 ::msgcat::mcset sv prefroallow   {Tillåt användare utan prenumeration}
 ::msgcat::mcset sv prefroclr     {Radera rostern när loggar ut}
@@ -1102,6 +1130,7 @@ detta typsnitt installerat på sina system.}
 ::msgcat::mcset sv prefcaalw     {Acceptera alltid en sparad fil, ladda aldrig en ny}
 ::msgcat::mcset sv prefcaor      {..eller acceptera sparad fil om inte äldre än:}
 ::msgcat::mcset sv prefpriv      {Om integritets knappen förkryssad så kan du endast redigera canvas objekt som du skapat själv. Objekt skapade av andra är inte möjliga att redigera.}
+::msgcat::mcset sv prefpriv2     {Om detta är valt kan du endast redigera dina egna objekt. Objeckt skapade av andra kan inte bli redigerade.}
 ::msgcat::mcset sv prefshortip   {Fullständigt ipnummer eller namn}
 ::msgcat::mcset sv prefshortwa   {Varning: du har redigerat genvägarna. Vill du inte spara dom?}
 
@@ -1155,7 +1184,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset sv janewaccount {Fyll i Jabber serverns namn eller ip nummer. Välj användarnamn och lösenord.}
 ::msgcat::mcset sv janewpass    {Sätt nytt lösenord för:}
 ::msgcat::mcset sv jasubwant    {Användaren "%s" önskar prenumerera på din närvaro.}
+::msgcat::mcset sv jasubwant2   {Vill du att %s ska se din närvaro?}
 ::msgcat::mcset sv jasubopts    {Välj från möjligheterna nedan. Kortnamn och grupp är inte obligatoriskt utan enbart för din personliga användning.}
+::msgcat::mcset sv jasubopts2   {Kortnamn och grupp är inte obligatoriskt utan enbart för din personliga användning.}
 ::msgcat::mcset sv jasubgetvcard {Hämta den här personens vCard}
 ::msgcat::mcset sv jasubsndmsg  {Skicka ett meddelande till den här personen:}
 ::msgcat::mcset sv jasuballow   {Tillåt "%s" att se min närvaro}
@@ -1165,10 +1196,13 @@ För att lägga till en användare från ett annat IM system så måste du ha ett kont
 transport komponent.}
 ::msgcat::mcset sv jarostadd2   {Välj ett chatt system och kontakt ID för kontakten du vill lägga till. Kortnamn och grupp är ej nödvändiga och kan sättas senare.}
 ::msgcat::mcset sv jarostset	{Sätt kortnamn och grupp för "%s" till självvalt namn. De kan ändras när som helst senare.}
+::msgcat::mcset sv jarostset2   {Redigera kortnamn och grupp för kontakt "%s". Du kan också begära eller ta bort en närvaro prenumeration.}
 ::msgcat::mcset sv jarostsub	{Prenumerera på den här användaren}
 ::msgcat::mcset sv jarostsub2   {Fråga efter en prenumeration på närvaron}
 ::msgcat::mcset sv jarostunsub	{Sluta prenumerera på den här användaren}
+::msgcat::mcset sv jarostunsub2 {Tag bort närvaro prenumerationen}
 ::msgcat::mcset sv jasearch	{Sök efter användare med den valda tjänsten. Tryck på Hämta knappen om du önskar nytt formulär.}
+::msgcat::mcset sv jasearch2    {Sök efter kontakt med given service. Tryck på Hämta knappen om du vill ha ett nytt formulär.}
 ::msgcat::mcset sv jasearchwait	{Väntar på att Hämta knappen ska tryckas på}
 ::msgcat::mcset sv jaservclosed	{Serverförbindelsen stängdes.}
 ::msgcat::mcset sv jarostupdate {Rostern är uppdaterad}
@@ -1214,6 +1248,7 @@ Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jaregalready {Du är redan registrerad hos den här tjänsten. Detta är dina nuvarande registreringsparametrar.}
 ::msgcat::mcset sv jaactiveret  {Om kryssad så skickar Retur annars använd Ctrl/Cmd-Retur}
 ::msgcat::mcset sv jainvitegchat {Bjud in användare till gruppchatt i rum %s}
+::msgcat::mcset sv jainvitegchat2  {Bjud in kontakt till chattrum %s}
 ::msgcat::mcset sv jaxformreq   {Fält med (*) är obligatoriska}
 ::msgcat::mcset sv jagcsyncpres {Synkronisera gruppchat med användarens närvaro}
 ::msgcat::mcset sv jaloginuser  {Skriv in ditt användarnamn och lösenord för att logga in på %s.}

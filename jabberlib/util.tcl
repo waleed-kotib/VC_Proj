@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: util.tcl,v 1.4 2007-07-19 06:28:18 matben Exp $
+# $Id: util.tcl,v 1.5 2007-08-04 07:25:38 matben Exp $
 
 package provide jlib::util 0.1
 
@@ -43,4 +43,24 @@ proc jlib::util::lprune {listName elem} {
 	uplevel [list set $listName [lreplace $listValue $idx $idx]]
     }
     return
+}
+
+# jlib::util::from --
+# 
+#       The from command plucks an option value from a list of options and their 
+#       values. If it is found, it and its value are removed from the list, 
+#       and the value is returned. 
+
+proc jlib::util::from {argvName option {defvalue ""}} {
+    upvar $argvName argv
+
+    set ioption [lsearch -exact $argv $option]
+    if {$ioption == -1} {
+	return $defvalue
+    } else {
+	set ivalue [expr {$ioption + 1}]
+	set value [lindex $argv $ivalue]
+	set argv [lreplace $argv $ioption $ivalue] 
+	return $value
+    }
 }

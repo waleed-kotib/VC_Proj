@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.82 2007-08-03 14:09:18 matben Exp $
+# $Id: Profiles.tcl,v 1.83 2007-08-04 07:25:38 matben Exp $
 
 package provide Profiles 1.0
 
@@ -1568,15 +1568,12 @@ proc ::Profiles::FrameGetProfiles {w} {
 
 proc ::Profiles::FrameReloadProfile {name} {
     
-    puts "::Profiles::FrameReloadProfile"
+    Debug 4 "::Profiles::FrameReloadProfile name=$name"
     
     set profile [GetProfile $name]
     lassign [lrange $profile 0 2] server username password
 
     foreach w [ui::findallwithclass JProfileFrame] {
-	
-	puts "\t w=$w"
-	
 	variable $w
 	upvar 0 $w state
 
@@ -1592,7 +1589,6 @@ proc ::Profiles::FrameReloadProfile {name} {
 	set jid [jlib::joinjid $username $server $state(prof,$name,-resource)]
 	set state(prof,$name,jid) $jid
 	
-	puts "\t selected $state(selected)"
 	if {$state(selected) eq $name} {
 	    FrameSetCurrentFromTmp $w $name
 	}
