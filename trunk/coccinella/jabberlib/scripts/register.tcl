@@ -6,7 +6,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: register.tcl,v 1.1 2007-08-04 07:25:38 matben Exp $
+# $Id: register.tcl,v 1.2 2007-08-04 08:35:54 matben Exp $
 
 package require jlib
 package require jlib::connect
@@ -36,13 +36,12 @@ proc jlibs::register::register {jid password cmd args} {
     set state(jlib)     $jlib
     
     jlib::util::from args -command
-    jlib::util::from args -noauth
-    
+    jlib::util::from args -noauth    
     jlib::splitjidex $jid node server -
     
     eval {$jlib connect connect $server {} \
       -noauth 1 -command [namespace code cmdC]} $args
-    return
+    return $jlib
 }
 
 proc jlibs::register::cmdC {jlib status {errcode ""} {errmsg ""}} {
@@ -90,6 +89,10 @@ proc jlibs::register::cmdS {jlib type iqchild args} {
     }
 }
 
+proc jlibs::register::reset {jlib} {
+    finish $jlib reset
+}
+
 proc jlibs::register::finish {jlib status {err ""}} {
     variable $jlib
     upvar 0 $jlib state
@@ -105,7 +108,7 @@ proc jlibs::register::noop {args} {}
 if {0} {
     # Test:
     proc cmd {args} {puts "---> $args"}
-    jlibs::register xzeq@localhost xxx cmd
+    jlibs::register xyz@localhost xxx cmd
 }
 
 
