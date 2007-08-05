@@ -290,196 +290,193 @@
 
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
-::msgcat::mcset en mFile		{File}
-::msgcat::mcset en mEdit		{Edit}
-::msgcat::mcset en mPreferences		{Preferences}
-::msgcat::mcset en mJabber		{Jabber}
-::msgcat::mcset en mAction		{Action}
-::msgcat::mcset en mItems		{Items}
-::msgcat::mcset en mLibrary		{Library}
-::msgcat::mcset en mInfo		{Info}
-::msgcat::mcset en mAddons		{Addons}
-::msgcat::mcset en mPlugins		{Plugins}
-
-::msgcat::mcset en mAboutWhiteboard   	{About Whiteboard...}
-::msgcat::mcset en mAboutCoccinella   	{About Coccinella...}
-::msgcat::mcset en mAboutQuickTimeTcl	{About QuickTimeTcl...}
-::msgcat::mcset en mWelcome     	{Welcome}
-::msgcat::mcset en mNew			{New}
-::msgcat::mcset en mNewWhiteboard	{New Whiteboard}
-::msgcat::mcset en mOpenConnection	{&Open Connection...}
-::msgcat::mcset en mCloseWindow		{&Close Window}
-::msgcat::mcset en mStartServer		{Start Server}
-::msgcat::mcset en mOpenImage/Movie	{Open &Image/Movie...}
-::msgcat::mcset en mOpenURLStream	{Open URL Stream...}
-::msgcat::mcset en mPutCanvas		{Put Canvas}
-::msgcat::mcset en mGetCanvas		{Get Canvas...}
-::msgcat::mcset en mPutFile		{Put File...}
-::msgcat::mcset en mStopPut/Get/Open	{Stop Put/Get/Open}
-::msgcat::mcset en mOpenCanvas		{Open Canvas...}
-::msgcat::mcset en mSaveCanvas		{&Save Canvas...}
-::msgcat::mcset en mSaveAs		{Save As...}
-::msgcat::mcset en mSaveAsItem          {Save As Item...}
-::msgcat::mcset en mSaveImageAs         {Save Image As...}
-::msgcat::mcset en mPageSetup		{Page Setup...}
-::msgcat::mcset en mPrintCanvas		{Print Canvas...}
-::msgcat::mcset en mQuit		{&Quit}
-::msgcat::mcset en mAll			{&All}
-::msgcat::mcset en mEraseAll		{Erase All}
-::msgcat::mcset en mUndo		{Undo}
-::msgcat::mcset en mRedo		{Redo}
-::msgcat::mcset en mCut			{Cut}
-::msgcat::mcset en mCopy		{&Copy}
-::msgcat::mcset en mPaste		{&Paste}
-::msgcat::mcset en mInspectItem		{Inspect Item...}
-::msgcat::mcset en mRaise		{&Raise}
-::msgcat::mcset en mLower		{&Lower}
-::msgcat::mcset en mLarger		{Larger}
-::msgcat::mcset en mSmaller		{Smaller}
-::msgcat::mcset en mFlip		{Flip}
-::msgcat::mcset en mHorizontal		{Horizontal}
-::msgcat::mcset en mVertical		{Vertical}
-::msgcat::mcset en mImageLarger		{Image Larger}
-::msgcat::mcset en mImageSmaller	{Image Smaller}
-::msgcat::mcset en mBackgroundColor	{Background Color...}
-::msgcat::mcset en mGrid		{Grid}
-::msgcat::mcset en mThickness		{Thickness}
-::msgcat::mcset en mBrushThickness	{Brush Thickness}
-::msgcat::mcset en mFill		{Fill}
-::msgcat::mcset en mFillColor		{Fill Color...}
-::msgcat::mcset en mOutlineColor	{Outline Color}
-::msgcat::mcset en mLineSmoothness	{Line Smoothness}
-::msgcat::mcset en mStraighten   	{Straighten}
-::msgcat::mcset en mArcs		{Arcs}
-::msgcat::mcset en mPieslice		{Pieslice}
-::msgcat::mcset en mChord		{Chord}
-::msgcat::mcset en mArc			{Arc}
-::msgcat::mcset en mDash		{Dash}
-::msgcat::mcset en mShiftConstrain	{Shift Constrain}
-::msgcat::mcset en mTo90degrees		{To 90 degrees}
-::msgcat::mcset en mTo45degrees		{To 45 degrees}
-::msgcat::mcset en mFont		{Font}
-::msgcat::mcset en mSize		{Size}
-::msgcat::mcset en mWeight		{Weight}
-::msgcat::mcset en mNormal		{Normal}
-::msgcat::mcset en mBold		{Bold}
-::msgcat::mcset en mItalic		{Italic}
-::msgcat::mcset en mPreferences...	{Preferences...}
-::msgcat::mcset en mNewAccount		{New Account...}
-::msgcat::mcset en mLogin		{Login...}
-::msgcat::mcset en mLogout		{Logout}
-::msgcat::mcset en mLogoutWith          {Logout With Message...}
-::msgcat::mcset en mHideMain            {Hide Main}
-::msgcat::mcset en mMinimize            {Minimize}
-::msgcat::mcset en mShowMain            {Show Main}
-::msgcat::mcset en mRestore             {Restore}
-::msgcat::mcset en mPassword		{Password...}
-::msgcat::mcset en mRoster/Services	{Roster/Services}
-::msgcat::mcset en mMessageInbox	{Message Inbox...}
-::msgcat::mcset en mSearch		{Search...}
-::msgcat::mcset en mAddNewUser		{Add New User...}
-::msgcat::mcset en mAddContact          {Add Contact...}
-::msgcat::mcset en mSendMessage		{Send Message...}
-::msgcat::mcset en mChat		{Chat...}
-::msgcat::mcset en mStatus		{Status}
-::msgcat::mcset en mDirStatus           {Directed Status}
-::msgcat::mcset en mAvailable		{Available}
-::msgcat::mcset en mAway		{Away}
-::msgcat::mcset en mDoNotDisturb	{Do Not Disturb}
-::msgcat::mcset en mNotAvailable	{Not Available}
-::msgcat::mcset en mExtendedAway        {Extended Away}
-::msgcat::mcset en mInvisible           {Invisible}
-::msgcat::mcset en mAttachMessage	{Attach Message...}
-::msgcat::mcset en mEnterRoom		{Enter Room...}
-::msgcat::mcset en mExitRoom		{Exit Room}
-::msgcat::mcset en mCreateRoom		{Create Room...}
-::msgcat::mcset en mvCard		{vCard...}
-::msgcat::mcset en mvCard2		{Edit Business Card...}
-::msgcat::mcset en mRemoveAccount	{Remove Account}
-::msgcat::mcset en mRemoveAccount...	{Remove Account...}
-::msgcat::mcset en mErrorLog		{Error Log...}
-::msgcat::mcset en mDebug		{Debug}
-::msgcat::mcset en mOnServer		{On &Server...}
-::msgcat::mcset en mOnClients		{On &Clients...}
-::msgcat::mcset en mOnPlugins		{On &Plugins...}
-::msgcat::mcset en mHelpOn		{Help On}
-::msgcat::mcset en mNetworkSetup	{Network Setup}
-::msgcat::mcset en mServers		{Servers}
-::msgcat::mcset en mJabberTransport	{Jabber Transport}
-::msgcat::mcset en mSmileyLegend	{Smiley Legend}
-::msgcat::mcset en mSetupAssistant	{Setup Assistant...}
-::msgcat::mcset en mImageLarger		{Image Larger}
-::msgcat::mcset en mImageSmaller	{Image Smaller}
-::msgcat::mcset en mExportImage		{Export Image...}
-::msgcat::mcset en mExportMovie		{Export Movie...}
-::msgcat::mcset en mSyncPlayback	{Sync Playback}
-::msgcat::mcset en mColor		{Color...}
-::msgcat::mcset en mAddSpeechBubble	{Add Speech Bubble}
-::msgcat::mcset en mUpdateCheck  	{Update Check}
-::msgcat::mcset en mReloadImage  	{Reload Image}
-::msgcat::mcset en mCoccinellaHome  	{Coccinella Home...}
-::msgcat::mcset en mComponents 	        {Components...}
-::msgcat::mcset en mBugReport  	        {Report Bug...}
-::msgcat::mcset en mTakeSnapShot        {Take Snapshot}
-::msgcat::mcset en mTimeCode            {Timecode}
-::msgcat::mcset en mUserInfo            {User Info...}
-::msgcat::mcset en mBusinessCard        {View Business Card...}
-::msgcat::mcset en mEditBookmarks       {Edit Bookmarks...}
-::msgcat::mcset en mToolbar         	{Toolbar}
-::msgcat::mcset en mNotebook         	{Notebook}
-::msgcat::mcset en mMinimal         	{Minimal}
-::msgcat::mcset en mDisco         	{Disco}
-::msgcat::mcset en mFind         	{Find}
-::msgcat::mcset en mFindAgain         	{Find Again}
-::msgcat::mcset en mFindPrevious        {Find Previous}
-::msgcat::mcset en mCustomStatus        {Custom Status...}
-::msgcat::mcset en mImport              {Import}
-::msgcat::mcset en mExport              {Export}
-::msgcat::mcset en mEmoticonSet         {Emoticon Set...}
-::msgcat::mcset en mRoster              {Roster...}
-::msgcat::mcset en mFontSize            {Font Size}
-::msgcat::mcset en mNormalFont          {Normal}
-::msgcat::mcset en mLargerFont          {Larger}
-::msgcat::mcset en mLargeFont           {Large}
-::msgcat::mcset en mHugeFont            {Huge}
-::msgcat::mcset en mDiscoverServer      {Discover Server}
-::msgcat::mcset en mDiscoverServer...   {Discover Server...}
-
-# Popups
-::msgcat::mcset en mMessage     	{Message...}
-::msgcat::mcset en mWhiteboard     	{Whiteboard...}
-::msgcat::mcset en mLastLogin/Activity  {Last Login/Activity}
-::msgcat::mcset en mEditUser     	{Edit User...}
-::msgcat::mcset en mEditContact     	{Edit Contact...}
-::msgcat::mcset en mRemoveUser     	{Remove User...}
-::msgcat::mcset en mRefreshRoster     	{Refresh Roster}
-::msgcat::mcset en mVersion     	{Version}
-::msgcat::mcset en mRegister     	{Register}
-::msgcat::mcset en mUnregister     	{Unregister}
-::msgcat::mcset en mRefresh     	{Refresh}
-::msgcat::mcset en mAddServer     	{Add Server...}
-::msgcat::mcset en mLocalTime     	{Local Time...}
-::msgcat::mcset en mSendFile     	{Send File...}
-::msgcat::mcset en mChatHistory     	{Chat History...}
-::msgcat::mcset en mLoginTrpt     	{Login to Transport}
-::msgcat::mcset en mLogoutTrpt     	{Logout from Transport}
-::msgcat::mcset en mRemoveContact  	{Remove Contact...}
-::msgcat::mcset en mShow         	{Show}
-::msgcat::mcset en mOffline         	{Offline}
-::msgcat::mcset en mTransports         	{Transports}
-::msgcat::mcset en mIgnore         	{Ignore}
-::msgcat::mcset en mSort         	{Sort}
-::msgcat::mcset en mIncreasing         	{Increasing}
-::msgcat::mcset en mDecreasing         	{Decreasing}
-::msgcat::mcset en mStyle         	{Style}
-::msgcat::mcset en mCall         	{Call...}
-::msgcat::mcset en mJiveCall         	{Call}
-::msgcat::mcset en mJiveForward         {Forward Call}
-::msgcat::mcset en mBackgroundImage     {Background Image}
-::msgcat::mcset en mBackgroundImage...  {Background Image...}
-::msgcat::mcset en mEditNick            {Edit Nickname}
-::msgcat::mcset en mAdHocCommands       {Ad-Hoc Commands}
-::msgcat::mcset en mRemoveListing       {Remove Listing}
+::msgcat::mcset en mAboutCoccinella      {About Coccinella...}
+::msgcat::mcset en mAboutQuickTimeTcl    {About QuickTimeTcl...}
+::msgcat::mcset en mAboutWhiteboard      {About Whiteboard...}
+::msgcat::mcset en mAction               {Action}
+::msgcat::mcset en mAdHocCommands        {Ad-Hoc Commands}
+::msgcat::mcset en mAddContact           {Add Contact...}
+::msgcat::mcset en mAddNewUser           {Add New User...}
+::msgcat::mcset en mAddServer            {Add Server...}
+::msgcat::mcset en mAddSpeechBubble      {Add Speech Bubble}
+::msgcat::mcset en mAddons               {Addons}
+::msgcat::mcset en mAll                  {&All}
+::msgcat::mcset en mArc                  {Arc}
+::msgcat::mcset en mArcs                 {Arcs}
+::msgcat::mcset en mAttachMessage        {Attach Message...}
+::msgcat::mcset en mAvailable            {Available}
+::msgcat::mcset en mAway                 {Away}
+::msgcat::mcset en mBackgroundColor      {Background Color...}
+::msgcat::mcset en mBackgroundImage      {Background Image}
+::msgcat::mcset en mBackgroundImage...   {Background Image...}
+::msgcat::mcset en mBold                 {Bold}
+::msgcat::mcset en mBrushThickness       {Brush Thickness}
+::msgcat::mcset en mBugReport            {Report Bug...}
+::msgcat::mcset en mBusinessCard         {View Business Card...}
+::msgcat::mcset en mCall                 {Call...}
+::msgcat::mcset en mChat                 {Chat...}
+::msgcat::mcset en mChatHistory          {Chat History...}
+::msgcat::mcset en mChord                {Chord}
+::msgcat::mcset en mCloseWindow          {&Close Window}
+::msgcat::mcset en mCoccinellaHome       {Coccinella Home...}
+::msgcat::mcset en mColor                {Color...}
+::msgcat::mcset en mComponents           {Components...}
+::msgcat::mcset en mCopy                 {&Copy}
+::msgcat::mcset en mCreateRoom           {Create Room...}
+::msgcat::mcset en mCustomStatus         {Custom Status...}
+::msgcat::mcset en mCut                  {Cut}
+::msgcat::mcset en mDash                 {Dash}
+::msgcat::mcset en mDebug                {Debug}
+::msgcat::mcset en mDecreasing           {Decreasing}
+::msgcat::mcset en mDirStatus            {Directed Status}
+::msgcat::mcset en mDisco                {Disco}
+::msgcat::mcset en mDiscoverServer       {Discover Server}
+::msgcat::mcset en mDiscoverServer...    {Discover Server...}
+::msgcat::mcset en mDoNotDisturb         {Do Not Disturb}
+::msgcat::mcset en mEdit                 {Edit}
+::msgcat::mcset en mEditBookmarks        {Edit Bookmarks...}
+::msgcat::mcset en mEditContact          {Edit Contact...}
+::msgcat::mcset en mEditNick             {Edit Nickname}
+::msgcat::mcset en mEditProfiles         {Edit Profiles}
+::msgcat::mcset en mEditProfiles...      {Edit Profiles...}
+::msgcat::mcset en mEditUser             {Edit User...}
+::msgcat::mcset en mEmoticonSet          {Emoticon Set...}
+::msgcat::mcset en mEnterRoom            {Enter Room...}
+::msgcat::mcset en mEraseAll             {Erase All}
+::msgcat::mcset en mErrorLog             {Error Log...}
+::msgcat::mcset en mExitRoom             {Exit Room}
+::msgcat::mcset en mExport               {Export}
+::msgcat::mcset en mExportImage          {Export Image...}
+::msgcat::mcset en mExportMovie          {Export Movie...}
+::msgcat::mcset en mExtendedAway         {Extended Away}
+::msgcat::mcset en mFile                 {File}
+::msgcat::mcset en mFill                 {Fill}
+::msgcat::mcset en mFillColor            {Fill Color...}
+::msgcat::mcset en mFind                 {Find}
+::msgcat::mcset en mFindAgain            {Find Again}
+::msgcat::mcset en mFindPrevious         {Find Previous}
+::msgcat::mcset en mFlip                 {Flip}
+::msgcat::mcset en mFont                 {Font}
+::msgcat::mcset en mFontSize             {Font Size}
+::msgcat::mcset en mGetCanvas            {Get Canvas...}
+::msgcat::mcset en mGrid                 {Grid}
+::msgcat::mcset en mHelpOn               {Help On}
+::msgcat::mcset en mHideMain             {Hide Main}
+::msgcat::mcset en mHorizontal           {Horizontal}
+::msgcat::mcset en mHugeFont             {Huge}
+::msgcat::mcset en mIgnore               {Ignore}
+::msgcat::mcset en mImageLarger          {Image Larger}
+::msgcat::mcset en mImageSmaller         {Image Smaller}
+::msgcat::mcset en mImport               {Import}
+::msgcat::mcset en mIncreasing           {Increasing}
+::msgcat::mcset en mInfo                 {Info}
+::msgcat::mcset en mInspectItem          {Inspect Item...}
+::msgcat::mcset en mInvisible            {Invisible}
+::msgcat::mcset en mItalic               {Italic}
+::msgcat::mcset en mItems                {Items}
+::msgcat::mcset en mJabber               {Jabber}
+::msgcat::mcset en mJabberTransport      {Jabber Transport}
+::msgcat::mcset en mJiveCall             {Call}
+::msgcat::mcset en mJiveForward          {Forward Call}
+::msgcat::mcset en mLargeFont            {Large}
+::msgcat::mcset en mLarger               {Larger}
+::msgcat::mcset en mLargerFont           {Larger}
+::msgcat::mcset en mLastLogin/Activity   {Last Login/Activity}
+::msgcat::mcset en mLibrary              {Library}
+::msgcat::mcset en mLineSmoothness       {Line Smoothness}
+::msgcat::mcset en mLocalTime            {Local Time...}
+::msgcat::mcset en mLogin                {Login...}
+::msgcat::mcset en mLoginTrpt            {Login to Transport}
+::msgcat::mcset en mLogout               {Logout}
+::msgcat::mcset en mLogoutTrpt           {Logout from Transport}
+::msgcat::mcset en mLogoutWith           {Logout With Message...}
+::msgcat::mcset en mLower                {&Lower}
+::msgcat::mcset en mMessage              {Message...}
+::msgcat::mcset en mMessageInbox         {Message Inbox...}
+::msgcat::mcset en mMinimal              {Minimal}
+::msgcat::mcset en mMinimize             {Minimize}
+::msgcat::mcset en mNetworkSetup         {Network Setup}
+::msgcat::mcset en mNew                  {New}
+::msgcat::mcset en mNewAccount           {New Account...}
+::msgcat::mcset en mNewWhiteboard        {New Whiteboard}
+::msgcat::mcset en mNormal               {Normal}
+::msgcat::mcset en mNormalFont           {Normal}
+::msgcat::mcset en mNotAvailable         {Not Available}
+::msgcat::mcset en mNotebook             {Notebook}
+::msgcat::mcset en mOffline              {Offline}
+::msgcat::mcset en mOnClients            {On &Clients...}
+::msgcat::mcset en mOnPlugins            {On &Plugins...}
+::msgcat::mcset en mOnServer             {On &Server...}
+::msgcat::mcset en mOpenCanvas           {Open Canvas...}
+::msgcat::mcset en mOpenConnection       {&Open Connection...}
+::msgcat::mcset en mOpenImage/Movie      {Open &Image/Movie...}
+::msgcat::mcset en mOpenURLStream        {Open URL Stream...}
+::msgcat::mcset en mOutlineColor         {Outline Color}
+::msgcat::mcset en mPageSetup            {Page Setup...}
+::msgcat::mcset en mPassword             {Password...}
+::msgcat::mcset en mPaste                {&Paste}
+::msgcat::mcset en mPieslice             {Pieslice}
+::msgcat::mcset en mPlugins              {Plugins}
+::msgcat::mcset en mPreferences          {Preferences}
+::msgcat::mcset en mPreferences...       {Preferences...}
+::msgcat::mcset en mPrintCanvas          {Print Canvas...}
+::msgcat::mcset en mPutCanvas            {Put Canvas}
+::msgcat::mcset en mPutFile              {Put File...}
+::msgcat::mcset en mQuit                 {&Quit}
+::msgcat::mcset en mRaise                {&Raise}
+::msgcat::mcset en mRedo                 {Redo}
+::msgcat::mcset en mRefresh              {Refresh}
+::msgcat::mcset en mRefreshRoster        {Refresh Roster}
+::msgcat::mcset en mRegister             {Register}
+::msgcat::mcset en mReloadImage          {Reload Image}
+::msgcat::mcset en mRemoveAccount        {Remove Account}
+::msgcat::mcset en mRemoveAccount...     {Remove Account...}
+::msgcat::mcset en mRemoveContact        {Remove Contact...}
+::msgcat::mcset en mRemoveListing        {Remove Listing}
+::msgcat::mcset en mRemoveUser           {Remove User...}
+::msgcat::mcset en mRestore              {Restore}
+::msgcat::mcset en mRoster               {Roster...}
+::msgcat::mcset en mRoster/Services      {Roster/Services}
+::msgcat::mcset en mSaveAs               {Save As...}
+::msgcat::mcset en mSaveAsItem           {Save As Item...}
+::msgcat::mcset en mSaveCanvas           {&Save Canvas...}
+::msgcat::mcset en mSaveImageAs          {Save Image As...}
+::msgcat::mcset en mSearch               {Search...}
+::msgcat::mcset en mSendFile             {Send File...}
+::msgcat::mcset en mSendMessage          {Send Message...}
+::msgcat::mcset en mServers              {Servers}
+::msgcat::mcset en mSetupAssistant       {Setup Assistant...}
+::msgcat::mcset en mShiftConstrain       {Shift Constrain}
+::msgcat::mcset en mShow                 {Show}
+::msgcat::mcset en mShowMain             {Show Main}
+::msgcat::mcset en mSize                 {Size}
+::msgcat::mcset en mSmaller              {Smaller}
+::msgcat::mcset en mSmileyLegend         {Smiley Legend}
+::msgcat::mcset en mSort                 {Sort}
+::msgcat::mcset en mStartServer          {Start Server}
+::msgcat::mcset en mStatus               {Status}
+::msgcat::mcset en mStopPut/Get/Open     {Stop Put/Get/Open}
+::msgcat::mcset en mStraighten           {Straighten}
+::msgcat::mcset en mStyle                {Style}
+::msgcat::mcset en mSyncPlayback         {Sync Playback}
+::msgcat::mcset en mTakeSnapShot         {Take Snapshot}
+::msgcat::mcset en mThickness            {Thickness}
+::msgcat::mcset en mTimeCode             {Timecode}
+::msgcat::mcset en mTo45degrees          {To 45 degrees}
+::msgcat::mcset en mTo90degrees          {To 90 degrees}
+::msgcat::mcset en mToolbar              {Toolbar}
+::msgcat::mcset en mTransports           {Transports}
+::msgcat::mcset en mUndo                 {Undo}
+::msgcat::mcset en mUnregister           {Unregister}
+::msgcat::mcset en mUpdateCheck          {Update Check}
+::msgcat::mcset en mUserInfo             {User Info...}
+::msgcat::mcset en mVersion              {Version}
+::msgcat::mcset en mVertical             {Vertical}
+::msgcat::mcset en mWeight               {Weight}
+::msgcat::mcset en mWelcome              {Welcome}
+::msgcat::mcset en mWhiteboard           {Whiteboard...}
+::msgcat::mcset en mvCard                {vCard...}
+::msgcat::mcset en mvCard2               {Edit Business Card...}
 
 
 # Short texts only. Use english text as database key.

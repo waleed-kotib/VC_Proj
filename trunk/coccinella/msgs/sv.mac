@@ -288,197 +288,191 @@
 
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
-::msgcat::mcset sv mFile		{Arkiv}
-::msgcat::mcset sv mEdit		{Redigera}
-::msgcat::mcset sv mPreferences		{Inställningar}
-::msgcat::mcset sv mJabber		{Jabber}
-::msgcat::mcset sv mItems		{Objekt}
-::msgcat::mcset sv mLibrary		{Bibliotek}
-::msgcat::mcset sv mInfo		{Info}
-::msgcat::mcset sv mAddons		{Addons}
-::msgcat::mcset sv mPlugins		{Plugginer}
-
-::msgcat::mcset sv mAboutWhiteboard   	{Om Whiteboard...}
-::msgcat::mcset sv mAboutCoccinella   	{Om Coccinella...}
-::msgcat::mcset sv mAboutQuickTimeTcl	{Om QuickTimeTcl...}
-::msgcat::mcset sv mWelcome     	{Välkommen}
-::msgcat::mcset sv mNew			{Nytt}
-::msgcat::mcset sv mNewWhiteboard	{Ny skrivtavla}
-::msgcat::mcset sv mOpenConnection	{Öppna förbindelse...}
-::msgcat::mcset sv mCloseWindow		{Stäng fönster}
-::msgcat::mcset sv mStartServer		{Starta servern}
-::msgcat::mcset sv mOpenImage/Movie	{Öppna bild/film...}
-::msgcat::mcset sv mOpenURLStream	{Öppna URL ström...}
-::msgcat::mcset sv mPutCanvas		{Skicka canvas}
-::msgcat::mcset sv mGetCanvas		{Hämta canvas...}
-::msgcat::mcset sv mPutFile		{Skicka fil...}
-::msgcat::mcset sv mStopPut/Get/Open	{Stoppa samtliga}
-::msgcat::mcset sv mOpenCanvas		{Öppna canvas...}
-::msgcat::mcset sv mSaveCanvas		{Spara canvas...}
-::msgcat::mcset sv mSaveAs		{Spara som...}
-::msgcat::mcset sv mSaveAsItem          {Spara som objekt...}
-::msgcat::mcset sv mSaveImageAs         {Spara bild som...}
-::msgcat::mcset sv mPageSetup		{Utskriftsformat...}
-::msgcat::mcset sv mPrintCanvas		{Skriv ut canvas...}
-::msgcat::mcset sv mQuit		{Avsluta}
-::msgcat::mcset sv mAll			{Alla}
-::msgcat::mcset sv mEraseAll		{Radera alla}
-::msgcat::mcset sv mUndo		{Ångra}
-::msgcat::mcset sv mRedo		{Upprepa}
-::msgcat::mcset sv mCut			{Klipp ut}
-::msgcat::mcset sv mCopy		{Kopiera}
-::msgcat::mcset sv mPaste		{Klistra in}
-::msgcat::mcset sv mInspectItem		{Undersök objekt...}
-::msgcat::mcset sv mRaise		{Höj}
-::msgcat::mcset sv mLower		{Sänk}
-::msgcat::mcset sv mLarger		{Större}
-::msgcat::mcset sv mSmaller		{Mindre}
-::msgcat::mcset sv mFlip		{Flippa}
-::msgcat::mcset sv mHorizontal		{Horisontellt}
-::msgcat::mcset sv mVertical		{Vertikalt}
-::msgcat::mcset sv mImageLarger		{Förstora bild}
-::msgcat::mcset sv mImageSmaller	{Förminska bild}
-::msgcat::mcset sv mBackgroundColor	{Bakgrundsfärg...}
-::msgcat::mcset sv mGrid		{Gridd}
-::msgcat::mcset sv mThickness		{Vidd}
-::msgcat::mcset sv mBrushThickness	{Penselvidd}
-::msgcat::mcset sv mFill		{Fyll}
-::msgcat::mcset sv mFillColor		{Fyllnadsfärg...}
-::msgcat::mcset sv mOutlineColor	{Randfärg}
-::msgcat::mcset sv mLineSmoothness	{Linjeutjämning}
-::msgcat::mcset sv mStraighten   	{Räta ut}
-::msgcat::mcset sv mArcs		{Bågar}
-::msgcat::mcset sv mPieslice		{Pajsnitt}
-::msgcat::mcset sv mChord		{Korda}
-::msgcat::mcset sv mArc			{Båge}
-::msgcat::mcset sv mDash		{Streckat}
-::msgcat::mcset sv mShiftConstrain	{Skiftbegränsning}
-::msgcat::mcset sv mTo90degrees		{Till 90 grader}
-::msgcat::mcset sv mTo45degrees		{Till 45 grader}
-::msgcat::mcset sv mFont		{Typsnitt}
-::msgcat::mcset sv mSize		{Storlek}
-::msgcat::mcset sv mWeight		{Stil}
-::msgcat::mcset sv mNormal		{Normal}
-::msgcat::mcset sv mBold		{Fet}
-::msgcat::mcset sv mItalic		{Kursiv}
-::msgcat::mcset sv mPreferences...	{Inställningar...}
-::msgcat::mcset sv mNewAccount		{Nytt konto...}
-::msgcat::mcset sv mLogin		{Anslut...}
-::msgcat::mcset sv mLogout		{Logga ut}
-::msgcat::mcset sv mLogoutWith          {Logga ut meddelande...}
-::msgcat::mcset sv mHideMain            {Göm}
-::msgcat::mcset sv mShowMain            {Visa}
-::msgcat::mcset sv mPassword		{Lösenord...}
-::msgcat::mcset sv mRoster/Services	{Roster/Services}
-::msgcat::mcset sv mMessageInbox	{Inkorg}
-::msgcat::mcset sv mSearch		{Leta...}
-::msgcat::mcset sv mAddNewUser		{Ny kontakt...}
-::msgcat::mcset sv mSendMessage		{Skicka meddelande...}
-::msgcat::mcset sv mChat		{Chatta}
-::msgcat::mcset sv mStatus		{Status}
-::msgcat::mcset sv mDirStatus           {Riktad status}
-::msgcat::mcset sv mAvailable		{Tillgänglig}
-::msgcat::mcset sv mAway		{Borta}
-::msgcat::mcset sv mDoNotDisturb	{Stör ej}
-::msgcat::mcset sv mExtendedAway        {Borta länge}
-::msgcat::mcset sv mInvisible           {Osynlig}
-::msgcat::mcset sv mNotAvailable	{Ej tillgänglig}
-::msgcat::mcset sv mAttachMessage	{Bifoga meddelande...}
-::msgcat::mcset sv mEnterRoom		{Gå in i rum...}
-::msgcat::mcset sv mExitRoom		{Lämna rum}
-::msgcat::mcset sv mCreateRoom		{Skapa rum...}
-::msgcat::mcset sv mvCard		{vCard...}
-::msgcat::mcset sv mvCard2              {Redigera visitkort...}
-::msgcat::mcset sv mRemoveAccount	{Radera konto}
-::msgcat::mcset sv mRemoveAccount...    {Radera konto...}
-::msgcat::mcset sv mErrorLog		{Fellogg...}
-::msgcat::mcset sv mDebug		{Debugga}
-::msgcat::mcset sv mOnServer		{Om servern...}
-::msgcat::mcset sv mOnClients		{Om clienter...}
-::msgcat::mcset sv mOnPlugins		{Om plugin...}
-::msgcat::mcset sv mHelpOn		{Hjälp om}
-::msgcat::mcset sv mNetworkSetup	{Nätverksinställning}
-::msgcat::mcset sv mServers		{Servrar}
-::msgcat::mcset sv mJabberTransport	{Jabber transport}
-::msgcat::mcset sv mSmileyLegend	{Smiley förklaringar}
-::msgcat::mcset sv mSetupAssistant	{Inställningsassistent...}
-::msgcat::mcset sv mImageLarger		{Förstora bilden}
-::msgcat::mcset sv mImageSmaller	{Förminska bilden}
-::msgcat::mcset sv mExportImage		{Exportera bilden...}
-::msgcat::mcset sv mExportMovie		{Exportera filmen...}
-::msgcat::mcset sv mSyncPlayback	{Synka uppspelning}
-::msgcat::mcset sv mColor		{Färg...}
-::msgcat::mcset sv mAddSpeechBubble	{Lägg till pratbubbla}
-::msgcat::mcset sv mUpdateCheck  	{Uppdaterings koll}
-::msgcat::mcset sv mReloadImage  	{Hämta bild igen}
-::msgcat::mcset sv mCoccinellaHome  	{Coccinella hem...}
-::msgcat::mcset sv mComponents 	        {Komponenter...}
-::msgcat::mcset sv mBugReport  	        {Rapportera bug...}
-::msgcat::mcset sv mTakeSnapShot        {Tag bild}
-::msgcat::mcset sv mTimeCode            {Tidskod}
-::msgcat::mcset sv mUserInfo            {Kontaktinfo...}
-::msgcat::mcset sv mBusinessCard        {Visa visitkort...}
-::msgcat::mcset sv mEditBookmarks       {Redigera bokmärken...}
-::msgcat::mcset sv mToolbar         	{Verktygsfält}
-::msgcat::mcset sv mNotebook         	{Tabbar}
-::msgcat::mcset sv mMinimal         	{Minimal}
-::msgcat::mcset sv mDisco         	{Disco}
-::msgcat::mcset sv mFind         	{Sök}
-::msgcat::mcset sv mFindAgain         	{Sök igen}
-::msgcat::mcset sv mFindPrevious        {Sök bakåt}
-::msgcat::mcset sv mCustomStatus        {Anpassat meddelande...}
-::msgcat::mcset sv mImport              {Importera}
-::msgcat::mcset sv mExport              {Exportera}
-::msgcat::mcset sv mEmoticonSet         {Smileysamling...}
-::msgcat::mcset sv mRoster              {Användarlista...}
-::msgcat::mcset sv mFontSize            {Typsnittsstorlek}
-::msgcat::mcset sv mNormalFont          {Normal}
-::msgcat::mcset sv mLargerFont          {Större}
-::msgcat::mcset sv mLargeFont           {Stor}
-::msgcat::mcset sv mHugeFont            {Jättestor}
-::msgcat::mcset sv mDiscoverServer      {Undersök server}
-::msgcat::mcset sv mDiscoverServer...   {Undersök server...}
-::msgcat::mcset sv mAddContact          {Lägg till kontakt...}
-::msgcat::mcset sv mEditContact         {Redigera kontakt...}
-::msgcat::mcset sv mRestore             {Normal}
-::msgcat::mcset sv mAction              {Utför}
-::msgcat::mcset sv mMinimize            {Minimera}
-
-
-# Popups
-::msgcat::mcset sv mMessage     	{Meddelande...}
-::msgcat::mcset sv mWhiteboard     	{Skrivtavla...}
-::msgcat::mcset sv mLastLogin/Activity  {Senaste påloggning/aktivitet}
-::msgcat::mcset sv mEditUser     	{Redigera användare...}
-::msgcat::mcset sv mRemoveUser     	{Tag bort användare...}
-::msgcat::mcset sv mRefreshRoster     	{Uppdatera rostern}
-::msgcat::mcset sv mVersion     	{Version}
-::msgcat::mcset sv mRegister     	{Registrera}
-::msgcat::mcset sv mUnregister     	{Avregistrera}
-::msgcat::mcset sv mRefresh     	{Uppdatera}
-::msgcat::mcset sv mAddServer     	{Lägg till server...}
-::msgcat::mcset sv mLocalTime     	{Lokal tid...}
-::msgcat::mcset sv mSendFile     	{Skicka fil...}
-::msgcat::mcset sv mChatHistory     	{Chatt historik}
-::msgcat::mcset sv mLoginTrpt     	{Logga på transport}
-::msgcat::mcset sv mLogoutTrpt     	{Logga ut transport}
-::msgcat::mcset sv mRemoveContact  	{Tag bort kontakt...}
-::msgcat::mcset sv mShow         	{Visa}
-::msgcat::mcset sv mOffline         	{Ej tillgängliga}
-::msgcat::mcset sv mTransports         	{Transporter}
-::msgcat::mcset sv mIgnore         	{Ignorera}
-::msgcat::mcset sv mSort         	{Sortera}
-::msgcat::mcset sv mIncreasing         	{Ökande}
-::msgcat::mcset sv mDecreasing         	{Minskande}
-::msgcat::mcset sv mStyle         	{Stil}
-::msgcat::mcset sv mCall         	{Ring}
-::msgcat::mcset sv mJiveCall         	{Ring}
-::msgcat::mcset sv mJiveForward         {Vidarekoppla}
-::msgcat::mcset sv mBackgroundImage     {Bakgrundsbild}
-::msgcat::mcset sv mBackgroundImage...  {Bakgrundsbild...}
-::msgcat::mcset sv mEditNick            {Ändra kortnamn}
-::msgcat::mcset sv mAdHocCommands       {Ad-hoc kommando}
-::msgcat::mcset sv mRemoveListing       {Tag bort lista}
+::msgcat::mcset sv mAboutCoccinella      {Om Coccinella...}
+::msgcat::mcset sv mAboutQuickTimeTcl    {Om QuickTimeTcl...}
+::msgcat::mcset sv mAboutWhiteboard      {Om Whiteboard...}
+::msgcat::mcset sv mAction               {Utför}
+::msgcat::mcset sv mAdHocCommands        {Ad-hoc kommando}
+::msgcat::mcset sv mAddContact           {Lägg till kontakt...}
+::msgcat::mcset sv mAddNewUser           {Ny kontakt...}
+::msgcat::mcset sv mAddServer            {Lägg till server...}
+::msgcat::mcset sv mAddSpeechBubble      {Lägg till pratbubbla}
+::msgcat::mcset sv mAddons               {Addons}
+::msgcat::mcset sv mAll                  {Alla}
+::msgcat::mcset sv mArc                  {Båge}
+::msgcat::mcset sv mArcs                 {Bågar}
+::msgcat::mcset sv mAttachMessage        {Bifoga meddelande...}
+::msgcat::mcset sv mAvailable            {Tillgänglig}
+::msgcat::mcset sv mAway                 {Borta}
+::msgcat::mcset sv mBackgroundColor      {Bakgrundsfärg...}
+::msgcat::mcset sv mBackgroundImage      {Bakgrundsbild}
+::msgcat::mcset sv mBackgroundImage...   {Bakgrundsbild...}
+::msgcat::mcset sv mBold                 {Fet}
+::msgcat::mcset sv mBrushThickness       {Penselvidd}
+::msgcat::mcset sv mBugReport            {Rapportera bug...}
+::msgcat::mcset sv mBusinessCard         {Visa visitkort...}
+::msgcat::mcset sv mCall                 {Ring}
+::msgcat::mcset sv mChat                 {Chatta}
+::msgcat::mcset sv mChatHistory          {Chatt historik}
+::msgcat::mcset sv mChord                {Korda}
+::msgcat::mcset sv mCloseWindow          {Stäng fönster}
+::msgcat::mcset sv mCoccinellaHome       {Coccinella hem...}
+::msgcat::mcset sv mColor                {Färg...}
+::msgcat::mcset sv mComponents           {Komponenter...}
+::msgcat::mcset sv mCopy                 {Kopiera}
+::msgcat::mcset sv mCreateRoom           {Skapa rum...}
+::msgcat::mcset sv mCustomStatus         {Anpassat meddelande...}
+::msgcat::mcset sv mCut                  {Klipp ut}
+::msgcat::mcset sv mDash                 {Streckat}
+::msgcat::mcset sv mDebug                {Debugga}
+::msgcat::mcset sv mDecreasing           {Minskande}
+::msgcat::mcset sv mDirStatus            {Riktad status}
+::msgcat::mcset sv mDisco                {Disco}
+::msgcat::mcset sv mDiscoverServer       {Undersök server}
+::msgcat::mcset sv mDiscoverServer...    {Undersök server...}
+::msgcat::mcset sv mDoNotDisturb         {Stör ej}
+::msgcat::mcset sv mEdit                 {Redigera}
+::msgcat::mcset sv mEditBookmarks        {Redigera bokmärken...}
+::msgcat::mcset sv mEditContact          {Redigera kontakt...}
+::msgcat::mcset sv mEditNick             {Ändra kortnamn}
+::msgcat::mcset sv mEditUser             {Redigera användare...}
+::msgcat::mcset sv mEmoticonSet          {Smileysamling...}
+::msgcat::mcset sv mEnterRoom            {Gå in i rum...}
+::msgcat::mcset sv mEraseAll             {Radera alla}
+::msgcat::mcset sv mErrorLog             {Fellogg...}
+::msgcat::mcset sv mExitRoom             {Lämna rum}
+::msgcat::mcset sv mExport               {Exportera}
+::msgcat::mcset sv mExportImage          {Exportera bilden...}
+::msgcat::mcset sv mExportMovie          {Exportera filmen...}
+::msgcat::mcset sv mExtendedAway         {Borta länge}
+::msgcat::mcset sv mFile                 {Arkiv}
+::msgcat::mcset sv mFill                 {Fyll}
+::msgcat::mcset sv mFillColor            {Fyllnadsfärg...}
+::msgcat::mcset sv mFind                 {Sök}
+::msgcat::mcset sv mFindAgain            {Sök igen}
+::msgcat::mcset sv mFindPrevious         {Sök bakåt}
+::msgcat::mcset sv mFlip                 {Flippa}
+::msgcat::mcset sv mFont                 {Typsnitt}
+::msgcat::mcset sv mFontSize             {Typsnittsstorlek}
+::msgcat::mcset sv mGetCanvas            {Hämta canvas...}
+::msgcat::mcset sv mGrid                 {Gridd}
+::msgcat::mcset sv mHelpOn               {Hjälp om}
+::msgcat::mcset sv mHideMain             {Göm}
+::msgcat::mcset sv mHorizontal           {Horisontellt}
+::msgcat::mcset sv mHugeFont             {Jättestor}
+::msgcat::mcset sv mIgnore               {Ignorera}
+::msgcat::mcset sv mImageLarger          {Förstora bilden}
+::msgcat::mcset sv mImageSmaller         {Förminska bilden}
+::msgcat::mcset sv mImport               {Importera}
+::msgcat::mcset sv mIncreasing           {Ökande}
+::msgcat::mcset sv mInfo                 {Info}
+::msgcat::mcset sv mInspectItem          {Undersök objekt...}
+::msgcat::mcset sv mInvisible            {Osynlig}
+::msgcat::mcset sv mItalic               {Kursiv}
+::msgcat::mcset sv mItems                {Objekt}
+::msgcat::mcset sv mJabber               {Jabber}
+::msgcat::mcset sv mJabberTransport      {Jabber transport}
+::msgcat::mcset sv mJiveCall             {Ring}
+::msgcat::mcset sv mJiveForward          {Vidarekoppla}
+::msgcat::mcset sv mLargeFont            {Stor}
+::msgcat::mcset sv mLarger               {Större}
+::msgcat::mcset sv mLargerFont           {Större}
+::msgcat::mcset sv mLastLogin/Activity   {Senaste påloggning/aktivitet}
+::msgcat::mcset sv mLibrary              {Bibliotek}
+::msgcat::mcset sv mLineSmoothness       {Linjeutjämning}
+::msgcat::mcset sv mLocalTime            {Lokal tid...}
+::msgcat::mcset sv mLogin                {Anslut...}
+::msgcat::mcset sv mLoginTrpt            {Logga på transport}
+::msgcat::mcset sv mLogout               {Logga ut}
+::msgcat::mcset sv mLogoutTrpt           {Logga ut transport}
+::msgcat::mcset sv mLogoutWith           {Logga ut meddelande...}
+::msgcat::mcset sv mLower                {Sänk}
+::msgcat::mcset sv mMessage              {Meddelande...}
+::msgcat::mcset sv mMessageInbox         {Inkorg}
+::msgcat::mcset sv mMinimal              {Minimal}
+::msgcat::mcset sv mMinimize             {Minimera}
+::msgcat::mcset sv mNetworkSetup         {Nätverksinställning}
+::msgcat::mcset sv mNew                  {Nytt}
+::msgcat::mcset sv mNewAccount           {Nytt konto...}
+::msgcat::mcset sv mNewWhiteboard        {Ny skrivtavla}
+::msgcat::mcset sv mNormal               {Normal}
+::msgcat::mcset sv mNormalFont           {Normal}
+::msgcat::mcset sv mNotAvailable         {Ej tillgänglig}
+::msgcat::mcset sv mNotebook             {Tabbar}
+::msgcat::mcset sv mOffline              {Ej tillgängliga}
+::msgcat::mcset sv mOnClients            {Om clienter...}
+::msgcat::mcset sv mOnPlugins            {Om plugin...}
+::msgcat::mcset sv mOnServer             {Om servern...}
+::msgcat::mcset sv mOpenCanvas           {Öppna canvas...}
+::msgcat::mcset sv mOpenConnection       {Öppna förbindelse...}
+::msgcat::mcset sv mOpenImage/Movie      {Öppna bild/film...}
+::msgcat::mcset sv mOpenURLStream        {Öppna URL ström...}
+::msgcat::mcset sv mOutlineColor         {Randfärg}
+::msgcat::mcset sv mPageSetup            {Utskriftsformat...}
+::msgcat::mcset sv mPassword             {Lösenord...}
+::msgcat::mcset sv mPaste                {Klistra in}
+::msgcat::mcset sv mPieslice             {Pajsnitt}
+::msgcat::mcset sv mPlugins              {Plugginer}
+::msgcat::mcset sv mPreferences          {Inställningar}
+::msgcat::mcset sv mPreferences...       {Inställningar...}
+::msgcat::mcset sv mPrintCanvas          {Skriv ut canvas...}
+::msgcat::mcset sv mPutCanvas            {Skicka canvas}
+::msgcat::mcset sv mPutFile              {Skicka fil...}
+::msgcat::mcset sv mQuit                 {Avsluta}
+::msgcat::mcset sv mRaise                {Höj}
+::msgcat::mcset sv mRedo                 {Upprepa}
+::msgcat::mcset sv mRefresh              {Uppdatera}
+::msgcat::mcset sv mRefreshRoster        {Uppdatera rostern}
+::msgcat::mcset sv mRegister             {Registrera}
+::msgcat::mcset sv mReloadImage          {Hämta bild igen}
+::msgcat::mcset sv mRemoveAccount        {Radera konto}
+::msgcat::mcset sv mRemoveAccount...     {Radera konto...}
+::msgcat::mcset sv mRemoveContact        {Tag bort kontakt...}
+::msgcat::mcset sv mRemoveListing        {Tag bort lista}
+::msgcat::mcset sv mRemoveUser           {Tag bort användare...}
+::msgcat::mcset sv mRestore              {Normal}
+::msgcat::mcset sv mRoster               {Användarlista...}
+::msgcat::mcset sv mRoster/Services      {Roster/Services}
+::msgcat::mcset sv mSaveAs               {Spara som...}
+::msgcat::mcset sv mSaveAsItem           {Spara som objekt...}
+::msgcat::mcset sv mSaveCanvas           {Spara canvas...}
+::msgcat::mcset sv mSaveImageAs          {Spara bild som...}
+::msgcat::mcset sv mSearch               {Leta...}
+::msgcat::mcset sv mSendFile             {Skicka fil...}
+::msgcat::mcset sv mSendMessage          {Skicka meddelande...}
+::msgcat::mcset sv mServers              {Servrar}
+::msgcat::mcset sv mSetupAssistant       {Inställningsassistent...}
+::msgcat::mcset sv mShiftConstrain       {Skiftbegränsning}
+::msgcat::mcset sv mShow                 {Visa}
+::msgcat::mcset sv mShowMain             {Visa}
+::msgcat::mcset sv mSize                 {Storlek}
+::msgcat::mcset sv mSmaller              {Mindre}
+::msgcat::mcset sv mSmileyLegend         {Smiley förklaringar}
+::msgcat::mcset sv mSort                 {Sortera}
+::msgcat::mcset sv mStartServer          {Starta servern}
+::msgcat::mcset sv mStatus               {Status}
+::msgcat::mcset sv mStopPut/Get/Open     {Stoppa samtliga}
+::msgcat::mcset sv mStraighten           {Räta ut}
+::msgcat::mcset sv mStyle                {Stil}
+::msgcat::mcset sv mSyncPlayback         {Synka uppspelning}
+::msgcat::mcset sv mTakeSnapShot         {Tag bild}
+::msgcat::mcset sv mThickness            {Vidd}
+::msgcat::mcset sv mTimeCode             {Tidskod}
+::msgcat::mcset sv mTo45degrees          {Till 45 grader}
+::msgcat::mcset sv mTo90degrees          {Till 90 grader}
+::msgcat::mcset sv mToolbar              {Verktygsfält}
+::msgcat::mcset sv mTransports           {Transporter}
+::msgcat::mcset sv mUndo                 {Ångra}
+::msgcat::mcset sv mUnregister           {Avregistrera}
+::msgcat::mcset sv mUpdateCheck          {Uppdaterings koll}
+::msgcat::mcset sv mUserInfo             {Kontaktinfo...}
+::msgcat::mcset sv mVersion              {Version}
+::msgcat::mcset sv mVertical             {Vertikalt}
+::msgcat::mcset sv mWeight               {Stil}
+::msgcat::mcset sv mWelcome              {Välkommen}
+::msgcat::mcset sv mWhiteboard           {Skrivtavla...}
+::msgcat::mcset sv mvCard                {vCard...}
+::msgcat::mcset sv mvCard2               {Redigera visitkort...}
 
 
 
