@@ -17,7 +17,9 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.83 2007-08-04 07:25:38 matben Exp $
+# $Id: Profiles.tcl,v 1.84 2007-08-05 07:52:17 matben Exp $
+
+package require ui::megaentry
 
 package provide Profiles 1.0
 
@@ -1407,7 +1409,6 @@ proc ::Profiles::FrameNewCmd {w} {
     upvar 0 $w state
         
     set token [namespace current]::$w    
-    set state(dlgname) ""
     
     # First get a unique profile name.
     # @@@ Perhaps make a maga dialog of this, modal plus returns entry,
@@ -1415,29 +1416,19 @@ proc ::Profiles::FrameNewCmd {w} {
 
     set mbar [::UI::GetMainMenu]
     ::UI::MenubarDisableBut $mbar edit
-    set wdlg [ui::dialog -type okcancel -icon "" -modal 1 \
-      -variable $token\(dlgbt) -geovariable prefs(winGeom,jprofname) \
+    
+    set newName [ui::megaentry -label "[mc {Profile name}]:" -icon "" \
+      -geovariable prefs(winGeom,jprofname) \
       -title [mc {Add Profile}] -message [mc prefprofname2]]
-    set wint [$wdlg clientframe]
-    ttk::label $wint.l -text "[mc {Profile name}]:"
-    ttk::entry $wint.e -textvariable $token\(dlgname)
-    grid  $wint.l  $wint.e
-    grid $wint.l -sticky e
-    grid $wint.e -sticky ew
-    grid columnconfigure $wint 1 -weight 1
-    focus $wint.e
-    $wdlg grab
     ::UI::MenubarEnableAll $mbar
-    set ans $state(dlgbt)
 
-    if {$ans eq "cancel" || $state(dlgname) eq ""} {
+    if {$newName eq ""} {
 	return
     }
-    Debug 2 "::Profiles::FrameNewCmd state(selected)$state(selected), state(dlgbt)=$state(dlgbt), state(dlgname)=$state(dlgname)"
 
     set wmenu $state(wmenu)
     
-    set uname [MakeUniqueProfileName $state(dlgname)]
+    set uname [MakeUniqueProfileName $newName]
     $wmenu add radiobutton -label $uname -variable $token\(profile)
 
     set state(selected) $uname
