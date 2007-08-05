@@ -6,7 +6,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: unregister.tcl,v 1.1 2007-08-04 08:35:54 matben Exp $
+# $Id: unregister.tcl,v 1.2 2007-08-05 07:50:40 matben Exp $
 
 package require jlib
 package require jlib::connect
@@ -37,10 +37,9 @@ proc jlibs::unregister::unregister {jid password cmd args} {
     
     jlib::util::from args -command
     jlib::util::from args -noauth    
-    jlib::splitjidex $jid node server -
     
-    eval {$jlib connect connect $server {} \
-      -noauth 1 -command [namespace code cmdC]} $args
+    eval {$jlib connect connect $jid $password \
+      -command [namespace code cmdC]} $args
     return $jlib
 }
 
@@ -53,11 +52,19 @@ proc jlibs::unregister::cmdC {jlib status {errcode ""} {errmsg ""}} {
     }
     if {$status eq "ok"} {
 	jlib::splitjidex $state(jid) node server -
-	$jlib register_remove $server [namespace code noop] 
-	finish $jlib ok
+	$jlib register_remove $server [namespace code cmdR] 
     } elseif {$status eq "error"} {
 	finish $jlib error $errcode
     }    
+}
+
+proc jlibs::unregister::cmdR {jlib type subiq} {
+    
+    if {$type eq "result"} {
+	finish $jlib ok    
+    } else {
+	finish $jlib error $subiq
+    }
 }
 
 proc jlibs::unregister::reset {jlib} {
