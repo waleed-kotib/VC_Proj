@@ -3,11 +3,11 @@
 #       A mega widget dialog with a message and a single entry.
 #       Only a convenient wrapper around ui::dialog.
 #
-# Copyright (c) 2006 Mats Bengtsson
+# Copyright (c) 2006-2007 Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: megaentry.tcl,v 1.2 2007-07-19 06:28:12 matben Exp $
+# $Id: megaentry.tcl,v 1.3 2007-08-05 07:52:17 matben Exp $
 
 package require ui::dialog
 
@@ -17,42 +17,34 @@ proc ui::megaentry {args} {
  
     set w [autoname]
     variable $w
-    upvar #0 $w state
+    upvar 0 $w state
+    set token [namespace current]::$w    
 
-    array set dlgA {
-	-modal 1
-    }
-    array set dlgA $args
-    unset -nocomplain dlgA(-label) dlgA(-textvariable)
-    set dlgA(-variable) $w\(var)
-
-    array set optA {
-	-label  ""
-    }
-    array set optA $args
-
-    eval {ui::dialog::widget $w} [array get dlgA]
+    set state(-label)        [ui::from args -label]
+    set state(-modal)        [ui::from args -modal]
+    ui::from args -textvariable
+    ui::from args -type
+    ui::from args -variable
+    
+    set state(-textvariable) ""
+    
+    eval {ui::dialog::widget $w -type okcancel -variable $token\(dlgbt)} $args
     set fr [$w clientframe]
-    ttk::label $fr.l -text $optA(-label)
-    ttk::entry $fr.e -textvariable $w\(textvar)
+    ttk::label $fr.l -text $state(-label)
+    ttk::entry $fr.e -textvariable $token\(-textvariable)
     
     grid  $fr.l  $fr.e  -sticky e
     grid $fr.e -sticky ew
     grid columnconfigure $fr 1 -weight 1
     
-    if {[info exists optA(-textvariable)]} {
-	upvar $optA(-textvariable) textvar
-	if {![info exists textvar]} {
-	    set textvar ""
-	}
-	$fr.e insert end $textvar
-    }
+    focus $fr.e    
     Grab $w
     
-    if {[info exists state(textvar)]} {
-	set textvar $state(textvar)
-    }    
-    set ans $state(var)
+    if {$state(dlgbt) eq "ok"} {
+	set ans $state(-textvariable)
+    } else {
+	set ans ""
+    }
     unset -nocomplain state
     return $ans
 }
@@ -60,8 +52,6 @@ proc ui::megaentry {args} {
 if {0} {
     set str "These two must be able to call before any dialog instance created."
     set str2 "Elvis has left the building"
-    set ans [ui::megaentry -message $str -detail $str2 -label Enter -textvariable xvar -type okcancel]
-    puts "xvar=$xvar"
-    
+    set ans [ui::megaentry -message $str -detail $str2 -label Enter]    
 }
 
