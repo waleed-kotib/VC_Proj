@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.121 2007-08-04 07:25:38 matben Exp $
+# $Id: Login.tcl,v 1.122 2007-08-05 14:54:27 matben Exp $
 
 package provide Login 1.0
 
@@ -85,7 +85,8 @@ proc ::Login::Dlg { } {
     }
     
     # Avoid any inconsistent UI state by closing any register dialog.
-    ::RegisterEx::CloseAny
+    # NB: Shall never happen since grab on Register dialog!
+    #::RegisterEx::CloseAny
 
     set wtoplevel $w
     

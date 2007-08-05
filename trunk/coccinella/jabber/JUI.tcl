@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.179 2007-08-04 07:25:38 matben Exp $
+# $Id: JUI.tcl,v 1.180 2007-08-05 14:54:27 matben Exp $
 
 package provide JUI 1.0
 
@@ -125,6 +125,7 @@ proc ::JUI::Init { } {
 	    {command  mvCard2          {::VCard::OnMenuExport}    {}}
 	}}
 	{separator}
+	{command   mEditProfiles...    {::Profiles::BuildDialog}  {}}
 	{command   mvCard2             {::VCard::OnMenu}          {}}
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}    Q}
@@ -158,15 +159,6 @@ proc ::JUI::Init { } {
 	{command     mCreateRoom    {::GroupChat::OnMenuCreate}       {}}
 	{command     mEditBookmarks {::GroupChat::OnMenuBookmark}     {}}
 	{separator}
-	{cascade     mShow          {}                                {} {} {
-	    {check   mToolbar       {::JUI::OnMenuToggleToolbar}      {} 
-	    {-variable ::JUI::state(show,toolbar)}}
-	    {check   mNotebook      {::JUI::OnMenuToggleNotebook}     {} 
-	    {-variable ::JUI::state(show,notebook)}}
-	    {check   mMinimal       {::JUI::OnMenuToggleMinimal}      {} 
-	    {-variable ::JUI::state(show,minimal)}} }
-	}
-	{separator}
 	{command     mRemoveAccount... {::Register::OnMenuRemove}        {}}	
     }
 
@@ -195,6 +187,14 @@ proc ::JUI::Init { } {
 	    {radio   mHugeFont      {::Theme::FontConfigSize +6}    {}
 	    {-variable prefs(fontSizePlus) -value 6}}
 	} }
+	{cascade     mShow          {}                                {} {} {
+	    {check   mToolbar       {::JUI::OnMenuToggleToolbar}      {} 
+	    {-variable ::JUI::state(show,toolbar)}}
+	    {check   mNotebook      {::JUI::OnMenuToggleNotebook}     {} 
+	    {-variable ::JUI::state(show,notebook)}}
+	    {check   mMinimal       {::JUI::OnMenuToggleMinimal}      {} 
+	    {-variable ::JUI::state(show,minimal)}} }
+	}
 	{separator}
 	{command     mCoccinellaHome {::JUI::OpenCoccinellaURL}     {}}
 	{command     mBugReport      {::JUI::OpenBugURL}            {}}
@@ -878,9 +878,11 @@ proc ::JUI::FilePostCommand {wmenu} {
 
     switch -- [GetConnectState] {
 	connectfin - connect {
+	    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state normal
 	}
 	disconnect {
+	    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state disabled
 	}	
     }    
@@ -916,30 +918,6 @@ proc ::JUI::ActionPostCommand {wmenu} {
     global wDlgs config
     variable state
     variable jwapp
-        
-    # For aqua we must do this only for .jmain
-    if {[::UI::IsToplevelActive $wDlgs(jmain)]} {
-	::UI::MenuMethod $wmenu entryconfigure mShow -state normal
-	
-	# Set -variable values.
-	if {[winfo ismapped $jwapp(wtbar)]} {
-	    set state(show,toolbar) 1
-	} else {
-	    set state(show,toolbar) 0
-	}
-	if {[winfo ismapped $jwapp(notebook)]} {
-	    set state(show,notebook) 1
-	} else {
-	    set state(show,notebook) 0
-	}
-	if {[::Roster::StyleGet] eq "minimal"} {
-	    set state(show,minimal) 1
-	} else {
-	    set state(show,minimal) 0
-	}
-    } else {
-	::UI::MenuMethod $wmenu entryconfigure mShow -state disabled
-    }
     
     # Set -variable value.
     if {[::MailBox::IsVisible]} {
@@ -1025,6 +1003,9 @@ proc ::JUI::ActionPostCommand {wmenu} {
 }
 
 proc ::JUI::InfoPostCommand {wmenu} {
+    global wDlgs config
+    variable state
+    variable jwapp
 
     switch -- [GetConnectState] {
 	connectinit {
@@ -1037,6 +1018,30 @@ proc ::JUI::InfoPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant -state normal
 	}	
     }    
+	
+    # For aqua we must do this only for .jmain
+    if {[::UI::IsToplevelActive $wDlgs(jmain)]} {
+	::UI::MenuMethod $wmenu entryconfigure mShow -state normal
+	
+	# Set -variable values.
+	if {[winfo ismapped $jwapp(wtbar)]} {
+	    set state(show,toolbar) 1
+	} else {
+	    set state(show,toolbar) 0
+	}
+	if {[winfo ismapped $jwapp(notebook)]} {
+	    set state(show,notebook) 1
+	} else {
+	    set state(show,notebook) 0
+	}
+	if {[::Roster::StyleGet] eq "minimal"} {
+	    set state(show,minimal) 1
+	} else {
+	    set state(show,minimal) 0
+	}
+    } else {
+	::UI::MenuMethod $wmenu entryconfigure mShow -state disabled
+    }
 	
     ::hooks::run menuPostCommand main-info $wmenu
     

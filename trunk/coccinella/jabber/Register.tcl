@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.75 2007-08-04 07:25:38 matben Exp $
+# $Id: Register.tcl,v 1.76 2007-08-05 14:54:27 matben Exp $
 
 package provide Register 1.0
 
@@ -255,9 +255,6 @@ proc ::RegisterEx::New {args} {
     pack  $frmid  -side top -fill both -expand 1
 
     ttk::label $frmid.lserv -text "[mc Server]:" -anchor e
-    #ttk::entry $frmid.eserv -width 22    \
-    #  -textvariable $token\(-server) -validate key  \
-    #  -validatecommand {::Jabber::ValidateDomainStr %S}
     ttk::combobox $frmid.eserv -width 22    \
       -textvariable $token\(-server) -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
