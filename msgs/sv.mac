@@ -335,6 +335,8 @@
 ::msgcat::mcset sv mEditBookmarks        {Redigera bokmärken...}
 ::msgcat::mcset sv mEditContact          {Redigera kontakt...}
 ::msgcat::mcset sv mEditNick             {Ändra kortnamn}
+::msgcat::mcset sv mEditProfiles         {Redigera profiler}
+::msgcat::mcset sv mEditProfiles...      {Redigera profiler...}
 ::msgcat::mcset sv mEditUser             {Redigera användare...}
 ::msgcat::mcset sv mEmoticonSet          {Smileysamling...}
 ::msgcat::mcset sv mEnterRoom            {Gå in i rum...}

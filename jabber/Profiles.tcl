@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.84 2007-08-05 07:52:17 matben Exp $
+# $Id: Profiles.tcl,v 1.85 2007-08-05 14:54:27 matben Exp $
 
 package require ui::megaentry
 
@@ -25,21 +25,40 @@ package provide Profiles 1.0
 
 namespace eval ::Profiles:: {
     
+    # Configurations:
+    # This is a way to hardcode some or all of the profile. Same format.
+    # Public APIs must cope with this. Both Get and Set functions.
+    # If 'do' then there MUST be valid values in config array.
+    set ::config(profiles,do)         0
+    set ::config(profiles,profiles)   {}
+    set ::config(profiles,selected)   {}
+    set ::config(profiles,prefspanel) 1
+    set ::config(profiles,style)      "jid"  ;# jid | parts
+    set ::config(profiles,show-head)  1
+    set ::config(profiles,ask-register-on-new)  1
+    set ::config(profiles,display-in-prefs)     0
+    set ::config(profiles,font-size)  normal ;# normal | small
+    
     # Define all hooks that are needed.
     ::hooks::register prefsInitHook          ::Profiles::InitHook
-    ::hooks::register prefsBuildHook         ::Profiles::BuildHook         20
-    ::hooks::register prefsSaveHook          ::Profiles::SaveHook
-    ::hooks::register prefsCancelHook        ::Profiles::CancelHook
+    if {$::config(profiles,display-in-prefs)} {
+	::hooks::register prefsBuildHook         ::Profiles::BuildHook         20
+	::hooks::register prefsSaveHook          ::Profiles::SaveHook
+	::hooks::register prefsCancelHook        ::Profiles::CancelHook
+    }
     
-    option add *JProfiles*TLabel.style        Small.TLabel        widgetDefault
-    option add *JProfiles*TButton.style       Small.TButton       widgetDefault
-    option add *JProfiles*TMenubutton.style   Small.TMenubutton   widgetDefault
-    option add *JProfiles*TRadiobutton.style  Small.TRadiobutton  widgetDefault
-    option add *JProfiles*TCheckbutton.style  Small.TCheckbutton  widgetDefault
-    option add *JProfiles*TEntry.style        Small.TEntry        widgetDefault
-    option add *JProfiles*TScale.style        Small.Horizontal.TScale  widgetDefault
-    option add *JProfiles*TNotebook.Tab.style Small.Tab           widgetDefault
-
+    if {$::config(profiles,font-size) eq "small"} {
+	option add *JProfiles*TLabel.style        Small.TLabel        widgetDefault
+	option add *JProfiles*TButton.style       Small.TButton       widgetDefault
+	option add *JProfiles*TMenubutton.style   Small.TMenubutton   widgetDefault
+	option add *JProfiles*TRadiobutton.style  Small.TRadiobutton  widgetDefault
+	option add *JProfiles*TCheckbutton.style  Small.TCheckbutton  widgetDefault
+	option add *JProfiles*TEntry.style        Small.TEntry        widgetDefault
+	option add *JProfiles*TEntry.font         CociSmallFont       widgetDefault
+	option add *JProfiles*TScale.style        Small.Horizontal.TScale  widgetDefault
+	option add *JProfiles*TNotebook.Tab.style Small.Tab           widgetDefault
+    }
+    
     # Customization. @@@ TODO; config() ???
     option add *JProfileFrame.showNickname    1                   widgetDefault
 
@@ -70,19 +89,6 @@ namespace eval ::Profiles:: {
     
     # Profile name of selected profile.
     variable selected
-    
-    # @@@ using resource option database instead ???
-    # Configurations:
-    # This is a way to hardcode some or all of the profile. Same format.
-    # Public APIs must cope with this. Both Get and Set functions.
-    # If 'do' then there MUST be valid values in config array.
-    set ::config(profiles,do)         0
-    set ::config(profiles,profiles)   {}
-    set ::config(profiles,selected)   {}
-    set ::config(profiles,prefspanel) 1
-    set ::config(profiles,style)      "jid"  ;# jid | parts
-    set ::config(profiles,show-head)  1
-    set ::config(profiles,ask-register-on-new)  1
     
     # The 'config' array shall never be written to, and since not all elements
     # of the profile are fixed, we need an additional profile that is written
@@ -999,7 +1005,8 @@ proc ::Profiles::FrameWidget {w moreless args} {
         
     eval {ttk::frame $w -class JProfileFrame} $args
     
-    ttk::label $w.msg -text [mc prefprof2] -wraplength 200 -justify left
+    ttk::label $w.msg -style Small.TLabel \
+      -text [mc prefprof2] -wraplength 200 -justify left
     grid  $w.msg  -  -sticky ew
     
     set wui $w.u
@@ -1021,27 +1028,22 @@ proc ::Profiles::FrameWidget {w moreless args} {
     
     # Depending on 'config(profiles,style)' not all get mapped.
     ttk::label $wui.ljid -text "[mc {Jabber ID}]:" -anchor e
-    ttk::entry $wui.ejid -font CociSmallFont \
-      -width $width -textvariable $token\(jid)
+    ttk::entry $wui.ejid -width $width -textvariable $token\(jid)
     ttk::label $wui.lserv -text "[mc {Jabber Server}]:" -anchor e
-    ttk::entry $wui.eserv -font CociSmallFont \
-      -width $width -textvariable $token\(server) -validate key  \
-      -validatecommand {::Jabber::ValidateDomainStr %S}
+    ttk::entry $wui.eserv -width $width -textvariable $token\(server) \
+      -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
     ttk::label $wui.luser -text "[mc Username]:" -anchor e
-    ttk::entry $wui.euser -font CociSmallFont \
-      -width $width -textvariable $token\(username) -validate key  \
-      -validatecommand {::Jabber::ValidateUsernameStr %S}
+    ttk::entry $wui.euser -width $width -textvariable $token\(username) \
+      -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
     ttk::label $wui.lpass -text "[mc Password]:" -anchor e
-    ttk::entry $wui.epass -font CociSmallFont \
-      -width $width -show {*} -textvariable $token\(password) -validate key  \
+    ttk::entry $wui.epass -width $width -show {*} \
+      -textvariable $token\(password) -validate key \
       -validatecommand {::Jabber::ValidatePasswordStr %S}
     ttk::label $wui.lres -text "[mc Resource]:" -anchor e
-    ttk::entry $wui.eres -font CociSmallFont \
-      -width $width -textvariable $token\(resource) -validate key  \
-      -validatecommand {::Jabber::ValidateResourceStr %S}
+    ttk::entry $wui.eres -width $width -textvariable $token\(resource) \
+      -validate key -validatecommand {::Jabber::ValidateResourceStr %S}
     ttk::label $wui.lnick -text "[mc Nickname]:" -anchor e
-    ttk::entry $wui.enick -font CociSmallFont \
-      -width $width -textvariable $token\(nickname)
+    ttk::entry $wui.enick -width $width -textvariable $token\(nickname)
 
     if {$config(profiles,style) eq "jid"} {
 	grid  $wui.lpop   $wui.pop    -sticky e -pady 2
@@ -1097,9 +1099,15 @@ proc ::Profiles::FrameWidget {w moreless args} {
     # Triangle switch for more options.
     set wtri $wopt.tri
     if {$moreless} {
-	ttk::button $wtri -style Small.Toolbutton -padding {6 1} \
-	  -compound left -image [::UI::GetIcon mactriangleclosed] \
-	  -text "[mc More]..." -command [list [namespace current]::FrameMoreOpts $w]
+	if {0} {
+	    ttk::button $wtri -style Small.Toolbutton -padding {6 1} \
+	      -compound left -image [::UI::GetIcon mactriangleclosed] \
+	      -text "[mc More]..." -command [list [namespace current]::FrameMoreOpts $w]
+	} elseif {1} {
+	    ttk::button $wtri -style Small.Plain -padding {6 1} \
+	      -compound left -image [::UI::GetIcon closeAqua] \
+	      -text "[mc More]..." -command [list [namespace current]::FrameMoreOpts $w]
+	}
 	pack $wtri -side top -anchor w
     }
     
@@ -1164,7 +1172,7 @@ proc ::Profiles::FrameMoreOpts {w} {
 
     pack $state(wmore) -side top -fill x -padx 2
     $state(wtri) configure -command [list [namespace current]::FrameLessOpts $w] \
-      -image [::UI::GetIcon mactriangleopen] -text "[mc Less]..."   
+      -image [::UI::GetIcon openAqua] -text "[mc Less]..."   
 }
 
 proc ::Profiles::FrameLessOpts {w} {
@@ -1173,7 +1181,7 @@ proc ::Profiles::FrameLessOpts {w} {
 
     pack forget $state(wmore)
     $state(wtri) configure -command [list [namespace current]::FrameMoreOpts $w] \
-      -image [::UI::GetIcon mactriangleclosed] -text "[mc More]..."   
+      -image [::UI::GetIcon closeAqua] -text "[mc More]..."   
 }
 
 # Profiles::FrameMakeTmpProfiles --
@@ -1489,6 +1497,11 @@ proc ::Profiles::FrameDeleteCmd {w} {
     }
 }
 
+proc ::Profiles::FrameUnregister {} {
+    
+    jlibs::unregister xyz@localhost xxx cmd
+}
+
 proc ::Profiles::FrameGetSelected {w} {
     variable $w
     upvar 0 $w state
@@ -1735,7 +1748,6 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     grid  $whttp.http    -             -sticky w  -pady 1
     grid  $whttp.u       -             -sticky ew -pady 1
     grid  $whttp.bproxy  -                        -pady 1
-    #grid  $whttp.lpoll   $whttp.spoll  -sticky w  -pady 1
     grid columnconfigure $whttp 1 -weight 1    
 
     if {!$this(package,tls)} {
