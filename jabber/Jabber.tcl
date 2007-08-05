@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.218 2007-07-29 10:28:14 matben Exp $
+# $Id: Jabber.tcl,v 1.219 2007-08-05 10:56:25 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -43,6 +43,11 @@ package require jlib::ibb
 package require jlib::pubsub
 package require jlib::si
 package require jlib::vcard
+
+# All jlib scripts we may ever want.
+package require jlibs::register
+package require jlibs::unregister
+package require jlibs::message
 
 # We should have some component mechanism that lets packages load themselves.
 package require Adhoc
@@ -2000,7 +2005,7 @@ proc ::Jabber::OnMenuLogInOut { } {
 	disconnect {
 	    ::Login::Dlg
 	}
-    }    
+    }  
 }
 
 # The ::Jabber::Logout:: namespace ---------------------------------------------

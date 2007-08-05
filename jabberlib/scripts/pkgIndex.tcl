@@ -10,3 +10,4 @@
 
 package ifneeded jlibs::register   0.1 [list source [file join $dir register.tcl]]
 package ifneeded jlibs::unregister 0.1 [list source [file join $dir unregister.tcl]]
+package ifneeded jlibs::message    0.1 [list source [file join $dir message.tcl]]
