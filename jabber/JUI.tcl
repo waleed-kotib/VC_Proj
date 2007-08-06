@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.181 2007-08-06 07:49:53 matben Exp $
+# $Id: JUI.tcl,v 1.182 2007-08-06 13:48:40 matben Exp $
 
 package provide JUI 1.0
 
@@ -105,7 +105,6 @@ namespace eval ::JUI:: {
     set jwapp(w) -
 }
 
-
 proc ::JUI::Init { } {
     global  this
     
@@ -116,6 +115,12 @@ proc ::JUI::Init { } {
     set mDefsFile {
 	{command   mPreferences...     {::Preferences::Build}     {}}
 	{separator}
+	{command   mNewAccount         {::RegisterEx::OnMenu}     {}}
+	{command   mRemoveAccount...   {::Register::OnMenuRemove} {}}	
+	{separator}
+	{command   mEditProfiles...    {::Profiles::BuildDialog}  {}}
+	{command   mvCard2             {::VCard::OnMenu}          {}}
+	{separator}
 	{cascade   mImport             {}                         {} {} {
 	    {command  mEmoticonSet     {::Emoticons::ImportSet}   {}}
 	}}
@@ -124,9 +129,6 @@ proc ::JUI::Init { } {
 	    {command  mMessageInbox    {::MailBox::MKExportDlg}   {}}
 	    {command  mvCard2          {::VCard::OnMenuExport}    {}}
 	}}
-	{separator}
-	{command   mEditProfiles...    {::Profiles::BuildDialog}  {}}
-	{command   mvCard2             {::VCard::OnMenu}          {}}
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}    Q}
     }
@@ -138,7 +140,6 @@ proc ::JUI::Init { } {
     }
         
     set menuDefs(rost,action) {    
-	{command     mNewAccount    {::RegisterEx::OnMenu}            {}}
 	{cascade     mRegister      {}                                {} {} {}}
 	{command     mLogin         {::Jabber::OnMenuLogInOut}        L}
 	{command     mLogoutWith    {::Jabber::Logout::OnMenuStatus}  {}}
@@ -158,8 +159,6 @@ proc ::JUI::Init { } {
 	{command     mEnterRoom     {::GroupChat::OnMenuEnter}        R}
 	{command     mCreateRoom    {::GroupChat::OnMenuCreate}       {}}
 	{command     mEditBookmarks {::GroupChat::OnMenuBookmark}     {}}
-	{separator}
-	{command     mRemoveAccount... {::Register::OnMenuRemove}        {}}	
     }
 
     if {[::Jabber::HaveWhiteboard]} {
@@ -877,7 +876,12 @@ proc ::JUI::FilePostCommand {wmenu} {
     ::UI::MenuMethod $m entryconfigure mvCard2 -state disabled
 
     switch -- [GetConnectState] {
+	connectinit {
+	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
+	}
 	connectfin - connect {
+	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state normal
 	}
@@ -888,6 +892,12 @@ proc ::JUI::FilePostCommand {wmenu} {
 		::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state normal
 	    }
 	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state disabled
+	    if {[llength [ui::findallwithclass JLogin]]} {
+		::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
+	    } else {
+		::UI::MenuMethod $wmenu entryconfigure mNewAccount -state normal
+	    }
+	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state disabled
 	}	
     }    
 
@@ -941,12 +951,10 @@ proc ::JUI::ActionPostCommand {wmenu} {
     
     switch -- [GetConnectState] {
 	connectinit {
-	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
 	      -label [mc mLogout]
 	}
 	connectfin - connect {
-	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mRegister -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
 	      -label [mc mLogout]
@@ -960,15 +968,9 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state normal
 	}
 	disconnect {
-	    if {[llength [ui::findallwithclass JLogin]]} {
-		::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
-	    } else {
-		::UI::MenuMethod $wmenu entryconfigure mNewAccount -state normal
-	    }
 	    ::UI::MenuMethod $wmenu entryconfigure mRegister -state disabled
 	    if {[llength [ui::findallwithclass JProfiles]]} {
 		::UI::MenuMethod $wmenu entryconfigure mLogin -state disabled  \
@@ -987,7 +989,6 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state disabled
 	}	
     }    
