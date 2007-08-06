@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.86 2007-08-06 07:49:54 matben Exp $
+# $Id: Profiles.tcl,v 1.87 2007-08-06 12:42:09 matben Exp $
 
 package require ui::megaentry
 
@@ -924,6 +924,21 @@ proc ::Profiles::BuildDialog { } {
     pack $frbot -side bottom -fill x
 
     wm resizable $w 0 0
+    after 100 [list [namespace current]::GetNormalSize $w]
+}
+
+proc ::Profiles::GetNormalSize {w} {
+    variable size
+    
+    set geom [::UI::ParseWMGeometry [wm geometry $w]]
+    set size(width)  [lindex $geom 0]
+    set size(height) [lindex $geom 1]
+}
+
+proc ::Profiles::SetNormalSize {w} {
+    variable size
+
+    wm geometry $w $size(width)x$size(height)
 }
 
 proc ::Profiles::CloseDlgHook {wclose} {
@@ -1115,11 +1130,11 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	}
 	pack $wtri -side top -anchor w
     }
-    
+
     # More options.
     set wfrmore $wopt.frmore
     ttk::frame $wfrmore
-
+    
     if {!$moreless} {
 	pack $wfrmore -side top -fill x
     }
@@ -1186,6 +1201,12 @@ proc ::Profiles::FrameLessOpts {w} {
     variable $w
     upvar 0 $w state
 
+    set wtop [winfo toplevel $w]
+    if {[winfo class $wtop] eq "JProfiles"} {
+	SetNormalSize [winfo toplevel $w]
+	update idletasks
+	after 100 [list wm geometry $wtop {}]
+    }
     pack forget $state(wmore)
     #$state(wtri) configure -command [list [namespace current]::FrameMoreOpts $w] \
     #  -image [::UI::GetIcon closeAqua] -text "[mc More]..."   
