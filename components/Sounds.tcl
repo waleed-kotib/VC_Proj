@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.32 2007-07-18 09:40:10 matben Exp $
+# $Id: Sounds.tcl,v 1.33 2007-08-06 13:19:15 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -457,12 +457,17 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
-    set walrt $wc.fr
-    ttk::labelframe $walrt -text [mc {Alert sounds}] \
-      -padding [option get . groupSmallPadding {}]
-    pack  $walrt  -side top -fill x
+    ttk::frame $wc.alrt -padding {0 0 0 6}
+    ttk::label $wc.alrt.l -text [mc {Alert sounds}]
+    ttk::separator $wc.alrt.s -orient horizontal
+    
+    grid  $wc.alrt.l  $wc.alrt.s  -sticky w
+    grid $wc.alrt.s -sticky ew
+    grid columnconfigure $wc.alrt 1 -weight 1
+    
+    pack  $wc.alrt  -side top -anchor w -fill x
    
-    set fss $walrt.fss
+    set fss $wc.fss
     ttk::frame $fss
     ttk::label $fss.l -text "[mc {Sound Set}]:"
     eval {ttk::optionmenu $fss.p [namespace current]::tmpPrefs(soundSet)} \
@@ -471,14 +476,14 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     grid  $fss.l  $fss.p  -sticky w -padx 2
     grid  $fss.p  -sticky ew
     
-    ttk::label $walrt.lbl -text [mc prefsounpick]
+    ttk::label $wc.lbl -text [mc prefsounpick]
 
-    set wmid $walrt.m
+    set wmid $wc.m
     ttk::frame $wmid
 
-    pack  $walrt.fss  -side top -anchor w
-    pack  $walrt.lbl  -side top -anchor w -pady 8
-    pack  $walrt.m    -side top
+    pack  $wc.fss  -side top -anchor w
+    pack  $wc.lbl  -side top -anchor w -pady 8
+    pack  $wc.m    -side top
     
     foreach name $allSounds {
 	set txt $nameToText($name)
@@ -490,7 +495,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
 	grid  $wmid.b$name  -sticky ew
     }
 
-    set fvol $walrt.fvol
+    set fvol $wc.fvol
     ttk::frame $fvol
     ttk::label $fvol.l -text "[mc Volume]:"
     ttk::scale $fvol.v -orient horizontal -from 0 -to 100 \
@@ -500,8 +505,8 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     pack  $fvol.v  -side left -padx 4
     pack  $fvol  -side top -pady 4 -anchor [option get . dialogAnchor {}]
 
-    ttk::button $walrt.midi -text [mc {MIDI Player}] -command ::Sounds::MidiPlayer
-    pack  $walrt.midi -pady 4
+    ttk::button $wc.midi -text [mc {MIDI Player}] -command ::Sounds::MidiPlayer
+    pack  $wc.midi -pady 2
     
     bind $wpage <Destroy> {+::Sounds::PrefsFree}
 }
