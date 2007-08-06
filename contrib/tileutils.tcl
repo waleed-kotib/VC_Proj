@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.47 2007-07-29 10:28:14 matben Exp $
+# $Id: tileutils.tcl,v 1.48 2007-08-06 07:49:53 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -363,7 +363,20 @@ proc tileutils::configstyles {name} {
 	}
 	style configure Arrow.TCheckbutton  \
 	  -padding {0} -borderwidth 0 -relief flat
-
+	
+	# Aqua type arrow checkbutton with text.
+	style layout ArrowText.TCheckbutton {
+	    ArrowText.border -sticky news -border 0 -children {
+		ArrowText.padding -sticky news -border 0 -children {
+		    arrowCheckIcon -side left
+		    ArrowText.label -side left
+		}
+	    }
+	}
+	style configure ArrowText.TCheckbutton  \
+	  -padding {0} -borderwidth 6 -relief flat
+	style configure ArrowText.TCheckbutton -font CociSmallFont
+	
 	# Url clickable link:
 	style layout Url {
 	    Url.background -children {

@@ -6,7 +6,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: message.tcl,v 1.1 2007-08-05 07:50:40 matben Exp $
+# $Id: message.tcl,v 1.2 2007-08-06 07:49:54 matben Exp $
 
 package require jlib
 package require jlib::connect
@@ -69,9 +69,9 @@ proc jlibs::message::cmdC {jlib status {errcode ""} {errmsg ""}} {
 	    }
 	}
 	eval {$jlib send_message $state(to)} $opts
-	finish $jlib ok
+	finish $jlib
     } elseif {$status eq "error"} {
-	finish $jlib error $errcode
+	finish $jlib $errcode
     }    
 }
 
@@ -79,13 +79,17 @@ proc jlibs::message::reset {jlib} {
     finish $jlib reset
 }
 
-proc jlibs::message::finish {jlib status {err ""}} {
+proc jlibs::message::finish {jlib {err ""}} {
     variable $jlib
     upvar 0 $jlib state
     
     $jlib closestream
     
-    uplevel #0 $state(cmd) [list $jlib $status] 
+    if {$err ne ""} {
+	uplevel #0 $state(cmd) [list $jlib error $err] 
+    } else {
+	uplevel #0 $state(cmd) [list $jlib ok] 
+    }
     unset -nocomplain state
 }
 

@@ -6,7 +6,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: register.tcl,v 1.2 2007-08-04 08:35:54 matben Exp $
+# $Id: register.tcl,v 1.3 2007-08-06 07:49:54 matben Exp $
 
 package require jlib
 package require jlib::connect
@@ -54,7 +54,7 @@ proc jlibs::register::cmdC {jlib status {errcode ""} {errmsg ""}} {
     if {$status eq "ok"} {
 	$jlib register_get [namespace code cmdG] 
     } elseif {$status eq "error"} {
-	finish $jlib error $errcode
+	finish $jlib $errcode
     }    
 }
 
@@ -71,7 +71,7 @@ proc jlibs::register::cmdG {jlib type iqchild} {
 	# Assuming minimal registration fileds.
 	$jlib register_set $node $state(password) [namespace code cmdS]
     } else {
-	finish $jlib error $iqchild
+	finish $jlib $iqchild
     }
 }
 
@@ -83,9 +83,9 @@ proc jlibs::register::cmdS {jlib type iqchild args} {
 	return
     }
     if {$type eq "result"} {
-	finish $jlib ok
+	finish $jlib
     } else {
-	finish $jlib error $iqchild
+	finish $jlib $iqchild
     }
 }
 
@@ -93,13 +93,17 @@ proc jlibs::register::reset {jlib} {
     finish $jlib reset
 }
 
-proc jlibs::register::finish {jlib status {err ""}} {
+proc jlibs::register::finish {jlib {err ""}} {
     variable $jlib
     upvar 0 $jlib state
     
     $jlib closestream
     
-    uplevel #0 $state(cmd) [list $jlib $status] 
+    if {$err ne ""} {
+	uplevel #0 $state(cmd) [list $jlib error $err] 
+    } else {
+	uplevel #0 $state(cmd) [list $jlib ok] 
+    }
     unset -nocomplain state
 }
 

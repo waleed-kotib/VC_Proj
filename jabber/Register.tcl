@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.76 2007-08-05 14:54:27 matben Exp $
+# $Id: Register.tcl,v 1.77 2007-08-06 07:49:54 matben Exp $
 
 package provide Register 1.0
 
@@ -274,13 +274,16 @@ proc ::RegisterEx::New {args} {
 	ttk::button $wmore.tri -style Small.Toolbutton \
 	  -compound left -image [::UI::GetIcon mactriangleclosed] \
 	  -text "[mc More]..." -command [list [namespace current]::MoreOpts $token]
-    } elseif {1} {
+    } elseif {0} {
 	ttk::button $wmore.tri -style Small.Plain -padding {6 1} \
 	  -compound left -image [::UI::GetIcon closeAqua] \
 	  -text "[mc More]..." -command [list [namespace current]::MoreOpts $token]
     } else {
-	ttk::checkbutton $wmore.tri -style Arrow.TCheckbutton \
-	    -command [list [namespace current]::MoreOpts $token]
+	set state(morevar) 0
+	ttk::checkbutton $wmore.tri -style ArrowText.TCheckbutton \
+	  -onvalue 0 -offvalue 1 -variable $token\(morevar) \
+	  -text "  [mc More]..." \
+	  -command [list [namespace current]::MoreOpts $token]
     }
     ::chasearrows::chasearrows $wmore.arr -size 16
     ttk::label $wmore.ls -style Small.TLabel \
@@ -473,8 +476,10 @@ proc ::RegisterEx::MoreOpts {token} {
     upvar 0 $token state
       
     grid  $state(wfmore)  -  -  -sticky ew
-    $state(wtri) configure -image [::UI::GetIcon openAqua] \
-      -text "[mc Less]..." -command [list [namespace current]::LessOpts $token]
+    #$state(wtri) configure -image [::UI::GetIcon openAqua] \
+    #  -text "[mc Less]..." -command [list [namespace current]::LessOpts $token]
+    $state(wtri) configure -text "  [mc Less]..." \
+      -command [list [namespace current]::LessOpts $token]
 }
 
 proc ::RegisterEx::LessOpts {token} {
@@ -482,8 +487,10 @@ proc ::RegisterEx::LessOpts {token} {
     upvar 0 $token state
     
     grid remove $state(wfmore)
-    $state(wtri) configure -image [::UI::GetIcon closeAqua] \
-      -text "[mc More]..." -command [list [namespace current]::MoreOpts $token]
+    #$state(wtri) configure -image [::UI::GetIcon closeAqua] \
+    #  -text "[mc More]..." -command [list [namespace current]::MoreOpts $token]
+    $state(wtri) configure -text "  [mc More]..." \
+      -command [list [namespace current]::MoreOpts $token]
 }
 
 proc ::RegisterEx::NotBusy {token} {

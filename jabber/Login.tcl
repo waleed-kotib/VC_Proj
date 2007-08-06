@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements functions for logging in at different application levels.
 #      
-#  Copyright (c) 2001-2006  Mats Bengtsson
+#  Copyright (c) 2001-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.122 2007-08-05 14:54:27 matben Exp $
+# $Id: Login.tcl,v 1.123 2007-08-06 07:49:54 matben Exp $
 
 package provide Login 1.0
 
@@ -41,7 +41,7 @@ namespace eval ::Login:: {
     # Config settings.
     set ::config(login,style) "jid"  ;# jid | username | parts | jidpure
     set ::config(login,more)         1
-    set ::config(login,profiles)     1
+    set ::config(login,profiles)     0 ;# this leads to an inconsistent state!
     set ::config(login,autosave)     0
     set ::config(login,autoregister) 0
     set ::config(login,dnssrv)       1
@@ -75,6 +75,7 @@ proc ::Login::Dlg { } {
     variable wtabnb
     variable wpopupMenu
     variable tmpProfArr
+    variable morevar
     upvar ::Jabber::jprefs jprefs
     
     # Singleton.
@@ -201,13 +202,15 @@ proc ::Login::Dlg { } {
 	    ttk::button $wtri -style Small.Toolbutton -padding {6 1} \
 	      -compound left -image [::UI::GetIcon mactriangleclosed] \
 	      -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
-	} elseif {1} {
+	} elseif {0} {
 	    ttk::button $wtri -style Small.Plain -padding {6 1} \
 	      -compound left -image [::UI::GetIcon closeAqua] \
 	      -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
 	} else {
+	    set morevar 0
 	    ttk::checkbutton $wtri -style ArrowText.TCheckbutton \
-	      -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
+	      -onvalue 0 -offvalue 1 -variable [namespace current]::morevar \
+	      -text "  [mc More]..." -command [list [namespace current]::MoreOpts $w]
 	}
 	pack $wtri -side top -anchor w
 	
@@ -357,22 +360,28 @@ proc ::Login::SetNormalSize {w} {
 proc ::Login::MoreOpts {w} {
     variable wtri
     variable wfrmore
+    variable morevar
 
     pack $wfrmore -side top -fill x -padx 2
+    #$wtri configure -command [list [namespace current]::LessOpts $w] \
+    #  -image [::UI::GetIcon openAqua] -text "[mc Less]..."   
     $wtri configure -command [list [namespace current]::LessOpts $w] \
-      -image [::UI::GetIcon openAqua] -text "[mc Less]..."   
+      -text "  [mc Less]..."   
 }
 
 proc ::Login::LessOpts {w} {
     variable wtri
     variable wfrmore
+    variable morevar
 
     SetNormalSize $w
     update idletasks
     
     pack forget $wfrmore
+    #$wtri configure -command [list [namespace current]::MoreOpts $w] \
+    #  -image [::UI::GetIcon closeAqua] -text "[mc More]..."   
     $wtri configure -command [list [namespace current]::MoreOpts $w] \
-      -image [::UI::GetIcon closeAqua] -text "[mc More]..."   
+      -text "  [mc More]..."   
     after 100 [list wm geometry $w {}]
 }
 

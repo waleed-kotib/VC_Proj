@@ -6,7 +6,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: unregister.tcl,v 1.2 2007-08-05 07:50:40 matben Exp $
+# $Id: unregister.tcl,v 1.3 2007-08-06 07:49:54 matben Exp $
 
 package require jlib
 package require jlib::connect
@@ -24,6 +24,7 @@ interp alias {} jlibs::unregister {} jlibs::unregister::unregister
 
 proc jlibs::unregister::unregister {jid password cmd args} {
     
+    #puts "jlibs::unregister::unregister"
     set jlib [jlib::new [namespace code noop]]
 
     variable $jlib
@@ -54,16 +55,16 @@ proc jlibs::unregister::cmdC {jlib status {errcode ""} {errmsg ""}} {
 	jlib::splitjidex $state(jid) node server -
 	$jlib register_remove $server [namespace code cmdR] 
     } elseif {$status eq "error"} {
-	finish $jlib error $errcode
+	finish $jlib $errcode
     }    
 }
 
 proc jlibs::unregister::cmdR {jlib type subiq} {
     
     if {$type eq "result"} {
-	finish $jlib ok    
+	finish $jlib    
     } else {
-	finish $jlib error $subiq
+	finish $jlib $subiq
     }
 }
 
@@ -71,13 +72,18 @@ proc jlibs::unregister::reset {jlib} {
     finish $jlib reset
 }
 
-proc jlibs::unregister::finish {jlib status {err ""}} {
+proc jlibs::unregister::finish {jlib {err ""}} {
     variable $jlib
     upvar 0 $jlib state
     
+    #puts "jlibs::unregister::finish"
     $jlib closestream
     
-    uplevel #0 $state(cmd) [list $jlib $status] 
+    if {$err ne ""} {
+	uplevel #0 $state(cmd) [list $jlib error $err] 
+    } else {
+	uplevel #0 $state(cmd) [list $jlib ok] 
+    }
     unset -nocomplain state
 }
 
