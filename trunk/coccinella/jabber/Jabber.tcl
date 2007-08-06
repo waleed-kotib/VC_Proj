@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.219 2007-08-05 10:56:25 matben Exp $
+# $Id: Jabber.tcl,v 1.220 2007-08-06 07:49:53 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -2003,7 +2003,9 @@ proc ::Jabber::OnMenuLogInOut { } {
 	    ::Login::Reset
 	}
 	disconnect {
-	    ::Login::Dlg
+	    if {![llength [ui::findallwithclass JProfiles]]} {
+		::Login::Dlg
+	    }
 	}
     }  
 }

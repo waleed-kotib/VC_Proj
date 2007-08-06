@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.85 2007-08-05 14:54:27 matben Exp $
+# $Id: Profiles.tcl,v 1.86 2007-08-06 07:49:54 matben Exp $
 
 package require ui::megaentry
 
@@ -1103,10 +1103,15 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	    ttk::button $wtri -style Small.Toolbutton -padding {6 1} \
 	      -compound left -image [::UI::GetIcon mactriangleclosed] \
 	      -text "[mc More]..." -command [list [namespace current]::FrameMoreOpts $w]
-	} elseif {1} {
+	} elseif {0} {
 	    ttk::button $wtri -style Small.Plain -padding {6 1} \
 	      -compound left -image [::UI::GetIcon closeAqua] \
 	      -text "[mc More]..." -command [list [namespace current]::FrameMoreOpts $w]
+	} else {
+	    set state(morevar) 0
+	    ttk::checkbutton $wtri -style ArrowText.TCheckbutton \
+	      -onvalue 0 -offvalue 1 -variable $token\(morevar) \
+	      -text "  [mc More]..." -command [list [namespace current]::FrameMoreOpts $w]
 	}
 	pack $wtri -side top -anchor w
     }
@@ -1171,8 +1176,10 @@ proc ::Profiles::FrameMoreOpts {w} {
     upvar 0 $w state
 
     pack $state(wmore) -side top -fill x -padx 2
+    #$state(wtri) configure -command [list [namespace current]::FrameLessOpts $w] \
+    #  -image [::UI::GetIcon openAqua] -text "[mc Less]..."   
     $state(wtri) configure -command [list [namespace current]::FrameLessOpts $w] \
-      -image [::UI::GetIcon openAqua] -text "[mc Less]..."   
+      -text "  [mc Less]..."   
 }
 
 proc ::Profiles::FrameLessOpts {w} {
@@ -1180,8 +1187,10 @@ proc ::Profiles::FrameLessOpts {w} {
     upvar 0 $w state
 
     pack forget $state(wmore)
+    #$state(wtri) configure -command [list [namespace current]::FrameMoreOpts $w] \
+    #  -image [::UI::GetIcon closeAqua] -text "[mc More]..."   
     $state(wtri) configure -command [list [namespace current]::FrameMoreOpts $w] \
-      -image [::UI::GetIcon closeAqua] -text "[mc More]..."   
+      -text "  [mc More]..."   
 }
 
 # Profiles::FrameMakeTmpProfiles --
@@ -1474,16 +1483,29 @@ proc ::Profiles::FrameDeleteCmd {w} {
     set profile $state(profile)
         
     Debug 2 "::Profiles::FrameDeleteCmd profile=$profile"
-    set ans "yes"
+    set ans "no"
     
     # The present state may be something that has not been stored yet.
     if {[info exists state(prof,$profile,server)]} {
+	set str "This will remove the selected profile. Do you also want to remove any user account for this profile? This action cannot be undone."
 	set ans [::UI::MessageBox -title [mc Warning]  \
-	  -type yesno -icon warning -default yes  \
+	  -type yesnocancel -icon warning -default yes  \
 	  -parent [winfo toplevel $w] \
-	  -message [mc messremoveprofile]]
+	  -message $str]
     }
+    set delete 0
     if {$ans eq "yes"} {
+	set delete 1
+	set jid      $state(prof,$profile,jid)
+	set password $state(prof,$profile,password)
+	
+	# Direct calls seem to hang my Mac :-(
+	after idle [list jlibs::unregister $jid $password \
+	  [namespace code [list FrameUnregisterCB $jid]]]
+    } elseif {$ans eq "no"} {
+	set delete 1
+    }
+    if {$delete} {
 	set wmenu $state(wmenu)
 	set idx [$wmenu index $profile]
 	if {$idx >= 0} {
@@ -1497,9 +1519,14 @@ proc ::Profiles::FrameDeleteCmd {w} {
     }
 }
 
-proc ::Profiles::FrameUnregister {} {
-    
-    jlibs::unregister xyz@localhost xxx cmd
+proc ::Profiles::FrameUnregisterCB {jid jlib status {err ""}} {
+
+    Debug 2 "::Profiles::FrameUnregisterCB status=$status"
+    if {$status eq "error"} {
+	lassign $err errcode errmsg
+	ui::dialog -type ok -icon error -title [mc Error] \
+	  -message [mc jamesserrunreg [jlib::unescapejid $jid] $errcode $errmsg]
+    }
 }
 
 proc ::Profiles::FrameGetSelected {w} {

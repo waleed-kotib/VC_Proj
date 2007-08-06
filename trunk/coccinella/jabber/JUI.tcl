@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.180 2007-08-05 14:54:27 matben Exp $
+# $Id: JUI.tcl,v 1.181 2007-08-06 07:49:53 matben Exp $
 
 package provide JUI 1.0
 
@@ -882,7 +882,11 @@ proc ::JUI::FilePostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state normal
 	}
 	disconnect {
-	    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state normal
+	    if {[llength [ui::findallwithclass JLogin]]} {
+		::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
+	    } else {
+		::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state normal
+	    }
 	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state disabled
 	}	
     }    
@@ -957,7 +961,7 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state normal
 	}
 	disconnect {
 	    if {[llength [ui::findallwithclass JLogin]]} {
@@ -966,8 +970,13 @@ proc ::JUI::ActionPostCommand {wmenu} {
 		::UI::MenuMethod $wmenu entryconfigure mNewAccount -state normal
 	    }
 	    ::UI::MenuMethod $wmenu entryconfigure mRegister -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
-	      -label [mc mLogin]
+	    if {[llength [ui::findallwithclass JProfiles]]} {
+		::UI::MenuMethod $wmenu entryconfigure mLogin -state disabled  \
+		  -label [mc mLogin]
+	    } else {
+		::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
+		  -label [mc mLogin]
+	    }
 	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mPassword -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mSearch -state disabled
@@ -979,7 +988,7 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state disabled
 	}	
     }    
       
