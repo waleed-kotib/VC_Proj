@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.23 2007-08-07 07:50:25 matben Exp $
+# $Id: UserInfo.tcl,v 1.24 2007-08-07 14:15:37 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -366,8 +366,12 @@ proc ::UserInfo::Build {token} {
 	pack $frbot.btcancel -side right
 	pack $frbot.btok -side right -padx $padx
     }
+    ttk::button $frbot.export -text [mc mExport...] \
+      -command [list [namespace current]::Export $token]
+    pack $frbot.export -side left
+
     set warrow $frbot.arr
-    pack [::chasearrows::chasearrows $warrow -size 16] -side left
+    pack [::chasearrows::chasearrows $warrow -size 16] -side left -padx 6
 
     pack $frbot -side bottom -fill x
 
@@ -582,6 +586,11 @@ proc ::UserInfo::MainMenuPostHook {type wmenu} {
 	    }
 	}
     }
+}
+
+proc ::UserInfo::Export {token} {
+    upvar ${token}::priv priv    
+    ::VCard::ExportXML $token $priv(jid)
 }
 
 proc ::UserInfo::OnMenuExportHook {} {
