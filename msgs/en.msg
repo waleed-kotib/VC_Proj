@@ -295,7 +295,7 @@
 ::msgcat::mcset en mAboutWhiteboard      {About Whiteboard...}
 ::msgcat::mcset en mAction               {Action}
 ::msgcat::mcset en mAdHocCommands        {Ad-Hoc Commands}
-::msgcat::mcset en mAddContact           {Add Contact...}
+::msgcat::mcset en mAddContact...        {Add Contact...}
 ::msgcat::mcset en mAddNewUser           {Add New User...}
 ::msgcat::mcset en mAddServer            {Add Server...}
 ::msgcat::mcset en mAddSpeechBubble      {Add Speech Bubble}
@@ -314,7 +314,8 @@
 ::msgcat::mcset en mBugReport            {Report Bug...}
 ::msgcat::mcset en mBusinessCard         {View Business Card...}
 ::msgcat::mcset en mCall                 {Call...}
-::msgcat::mcset en mChat                 {Chat...}
+::msgcat::mcset en mChat                 {Chat}
+::msgcat::mcset en mChat...              {Chat...}
 ::msgcat::mcset en mChatHistory          {Chat History...}
 ::msgcat::mcset en mChord                {Chord}
 ::msgcat::mcset en mCloseWindow          {&Close Window}
@@ -385,7 +386,7 @@
 ::msgcat::mcset en mLibrary              {Library}
 ::msgcat::mcset en mLineSmoothness       {Line Smoothness}
 ::msgcat::mcset en mLocalTime            {Local Time...}
-::msgcat::mcset en mLogin                {Login...}
+::msgcat::mcset en mLogin...             {Login...}
 ::msgcat::mcset en mLoginTrpt            {Login to Transport}
 ::msgcat::mcset en mLogout               {Logout}
 ::msgcat::mcset en mLogoutTrpt           {Logout from Transport}
@@ -397,7 +398,7 @@
 ::msgcat::mcset en mMinimize             {Minimize}
 ::msgcat::mcset en mNetworkSetup         {Network Setup}
 ::msgcat::mcset en mNew                  {New}
-::msgcat::mcset en mNewAccount           {New Account...}
+::msgcat::mcset en mNewAccount...        {New Account...}
 ::msgcat::mcset en mNewWhiteboard        {New Whiteboard}
 ::msgcat::mcset en mNormal               {Normal}
 ::msgcat::mcset en mNormalFont           {Normal}
@@ -413,7 +414,7 @@
 ::msgcat::mcset en mOpenURLStream        {Open URL Stream...}
 ::msgcat::mcset en mOutlineColor         {Outline Color}
 ::msgcat::mcset en mPageSetup            {Page Setup...}
-::msgcat::mcset en mPassword             {Password...}
+::msgcat::mcset en mPassword...          {Password...}
 ::msgcat::mcset en mPaste                {&Paste}
 ::msgcat::mcset en mPieslice             {Pieslice}
 ::msgcat::mcset en mPlugins              {Plugins}
@@ -443,9 +444,9 @@
 ::msgcat::mcset en mSaveImageAs          {Save Image As...}
 ::msgcat::mcset en mSearch               {Search...}
 ::msgcat::mcset en mSendFile             {Send File...}
-::msgcat::mcset en mSendMessage          {Send Message...}
+::msgcat::mcset en mSendMessage...       {Send Message...}
 ::msgcat::mcset en mServers              {Servers}
-::msgcat::mcset en mSetupAssistant       {Setup Assistant...}
+::msgcat::mcset en mSetupAssistant...    {Setup Assistant...}
 ::msgcat::mcset en mShiftConstrain       {Shift Constrain}
 ::msgcat::mcset en mShow                 {Show}
 ::msgcat::mcset en mShowMain             {Show Main}
@@ -476,7 +477,8 @@
 ::msgcat::mcset en mWelcome              {Welcome}
 ::msgcat::mcset en mWhiteboard           {Whiteboard...}
 ::msgcat::mcset en mvCard                {vCard...}
-::msgcat::mcset en mvCard2               {Edit Business Card...}
+::msgcat::mcset en mvCard2               {Business Card}
+::msgcat::mcset en mEditvCard2...        {Edit Business Card...}
 
 
 # Short texts only. Use english text as database key.
@@ -972,6 +974,7 @@ you happen to be online while this message is being read. Do you want to send it
 ::msgcat::mcset en jamessstatuscust             {Set your message for any of the presence states.}
 ::msgcat::mcset en jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
 ::msgcat::mcset en jamessproxy-failure          {The proxy server reported an error. The error code is "%s".}
+::msgcat::mcset en jamessaskregister            {Do you want to register a new account?}
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors

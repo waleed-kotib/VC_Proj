@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.30 2007-07-27 12:16:20 matben Exp $
+# $Id: Taskbar.tcl,v 1.31 2007-08-07 07:50:21 matben Exp $
 
 package require balloonhelp
 
@@ -160,9 +160,9 @@ proc ::Taskbar::InitHook { } {
     set menuDef {
 	{cascade  mStatus           {}                      {-image @STAT -compound left}}
 	{command  mMinimize         ::Taskbar::HideMain                  }
-	{command  mSendMessage      ::NewMsg::Build         {-image @MSG -compound left}}
+	{command  mSendMessage...   ::NewMsg::Build         {-image @MSG -compound left}}
 	{command  mPreferences...   ::Preferences::Build    {-image @SET -compound left}}
-	{command  mAddContact       ::JUser::NewDlg  {-image @ADD -compound left}}
+	{command  mAddContact...    ::JUser::NewDlg  {-image @ADD -compound left}}
 	{cascade  mInfo  {
 	    {command  mAboutCoccinella  ::Splash::SplashScreen  {-image @COCI -compound left}}
 	    {command  mCoccinellaHome   ::JUI::OpenCoccinellaURL}
@@ -255,8 +255,8 @@ proc ::Taskbar::Post {m} {
 	set state0 normal
 	set state3 disabled
     }
-    $m entryconfigure $menuIndex(mSendMessage) -state $state0 
-    $m entryconfigure $menuIndex(mAddContact) -state $state0
+    $m entryconfigure $menuIndex(mSendMessage...) -state $state0 
+    $m entryconfigure $menuIndex(mAddContact...) -state $state0
     
     set mstatus [$m entrycget $menuIndex(mStatus) -menu]
     $mstatus delete 0 end
@@ -290,8 +290,8 @@ proc ::Taskbar::LoginHook { } {
     
     if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
 	set m $wtearoff
-	$m entryconfigure $menuIndex(mSendMessage) -state normal
-	$m entryconfigure $menuIndex(mAddContact) -state normal
+	$m entryconfigure $menuIndex(mSendMessage...) -state normal
+	$m entryconfigure $menuIndex(mAddContact...) -state normal
     }
 }
 
@@ -301,8 +301,8 @@ proc ::Taskbar::LogoutHook { } {
 
     if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
 	set m $wtearoff
-	$m entryconfigure $menuIndex(mSendMessage) -state disabled 
-	$m entryconfigure $menuIndex(mAddContact) -state disabled
+	$m entryconfigure $menuIndex(mSendMessage...) -state disabled 
+	$m entryconfigure $menuIndex(mAddContact...) -state disabled
     }
 }
 

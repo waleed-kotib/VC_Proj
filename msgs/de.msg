@@ -372,19 +372,20 @@
 ::msgcat::mcset de mBold		{Fett}
 ::msgcat::mcset de mItalic		{Kursiv}
 ::msgcat::mcset de mPreferences...	{Einstellungen...}
-::msgcat::mcset de mNewAccount		{Neues Konto...}
-::msgcat::mcset de mLogin		{Anmelden...}
+::msgcat::mcset de mNewAccount...	{Neues Konto...}
+::msgcat::mcset de mLogin...		{Anmelden...}
 ::msgcat::mcset de mLogout		{Abmelden}
 ::msgcat::mcset de mLogoutWith          {Abmelden mit Nachricht...}
 ::msgcat::mcset de mHideMain            {Hauptfenster ausblenden}
 ::msgcat::mcset de mShowMain            {Hauptfenster anzeigen}
-::msgcat::mcset de mPassword		{Passwort...}
+::msgcat::mcset de mPassword...		{Passwort...}
 ::msgcat::mcset de mRoster/Services	{Kontakte/Dienste}
 ::msgcat::mcset de mMessageInbox	{Nachrichten-Eingang}
 ::msgcat::mcset de mSearch		{Suche...}
 ::msgcat::mcset de mAddNewUser		{Benutzer hinzufügen...}
-::msgcat::mcset de mSendMessage		{Nachricht senden...}
-::msgcat::mcset de mChat		{Chat...}
+::msgcat::mcset de mSendMessage...	{Nachricht senden...}
+::msgcat::mcset de mChat		{Chat}
+::msgcat::mcset de mChat...		{Chat...}
 ::msgcat::mcset de mStatus		{Status}
 ::msgcat::mcset de mDirStatus           {Spezieller Status}
 ::msgcat::mcset de mAvailable		{Verfügbar}
@@ -409,7 +410,7 @@
 ::msgcat::mcset de mServers		{Server}
 ::msgcat::mcset de mJabberTransport	{Jabber-Transport}
 ::msgcat::mcset de mSmileyLegend	{Smiley-Legende}
-::msgcat::mcset de mSetupAssistant	{Einrichtungs-Assistent...}
+::msgcat::mcset de mSetupAssistant...	{Einrichtungs-Assistent...}
 ::msgcat::mcset de mImageLarger		{Bild größer}
 ::msgcat::mcset de mImageSmaller	{Bild kleiner}
 ::msgcat::mcset de mExportImage		{Bild exportieren ...}
