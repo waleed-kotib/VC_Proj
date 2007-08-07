@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.44 2007-07-29 10:28:14 matben Exp $
+# $Id: SetupAss.tcl,v 1.45 2007-08-07 13:30:47 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -40,11 +40,13 @@ namespace eval ::SetupAss::  {
     option add *SetupAss*assistantDisImage    assistantDis     widgetDefault
     
     # We could be much more general here...
-    set ::config(setupass,page,server) 1
+    set ::config(setupass,page,server)    1
+    set ::config(setupass,public-servers) 1
 }
 
-proc ::SetupAss::SetupAss { } {
+proc ::SetupAss::SetupAss {} {
     global  this prefs wDlgs config
+    upvar ::Jabber::jprefs jprefs
     
     variable finished
     variable inited
@@ -53,6 +55,9 @@ proc ::SetupAss::SetupAss { } {
     variable username  ""
     variable password  ""
     variable password2 ""
+    variable wserver   ""
+    variable wregister
+    variable wwizard
 
     if {!$inited} {
     
@@ -74,7 +79,6 @@ proc ::SetupAss::SetupAss { } {
     set im  [::Theme::GetImage [option get $w assistantImage {}]]
     set imd [::Theme::GetImage [option get $w assistantDisImage {}]]
 
-    set ns [namespace current]
     set su $w.su
     wizard::wizard $su  \
       -image [list $im background $imd]  \
@@ -83,7 +87,8 @@ proc ::SetupAss::SetupAss { } {
       -nextpagecommand [list [namespace current]::NextPage $w]
     pack $su -expand 1 -fill both
     
-    set wrapthese {}
+    set wwizard $su
+    set wrapthese [list]
     
     # Front page.
     set p1 [$su newpage "intro" -headtext [mc suheadtxt]]
@@ -121,21 +126,42 @@ proc ::SetupAss::SetupAss { } {
 	ttk::frame $fr2 -padding [option get . notebookPagePadding {}]
 	ttk::label $fr2.msg1 -style Small.TLabel \
 	  -wraplength 260 -justify left -text [mc suservmsg]
-	ttk::button $fr2.bt -text [mc Get] \
-	  -command [list [namespace current]::ServersDlg .jsuserv]
-	ttk::label $fr2.msg2 -style Small.TLabel \
-	  -wraplength 260 -justify left -text [mc supubserv]
+	
+	if {0} {
+	    ttk::button $fr2.bt -text [mc Get] \
+	      -command [list [namespace current]::ServersDlg .jsuserv]
+	    ttk::label $fr2.msg2 -style Small.TLabel \
+	      -wraplength 260 -justify left -text [mc supubserv]
+	    ttk::label $fr2.la -text "[mc Server]:"
+	    ttk::entry $fr2.serv -width 28 -textvariable [namespace current]::server \
+	      -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
+	    
+	    grid  $fr2.msg1  -          -sticky nw -pady $pady
+	    grid  $fr2.bt    $fr2.msg2  -sticky ew -pady $pady
+	    grid  $fr2.la    $fr2.serv  -sticky e  -pady $pady
+	    grid  $fr2.serv  -sticky ew
+	}
+	
 	ttk::label $fr2.la -text "[mc Server]:"
-	ttk::entry $fr2.serv -width 28 -textvariable ${ns}::server \
+	ttk::combobox $fr2.serv -textvariable [namespace current]::server \
 	  -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
 	
-	grid  $fr2.msg1  -          -sticky nw -pady $pady
-	grid  $fr2.bt    $fr2.msg2  -sticky ew -pady $pady
-	grid  $fr2.la    $fr2.serv  -sticky e  -pady $pady
-	grid  $fr2.serv  -sticky ew
+	grid  $fr2.msg1  -        -sticky nw -pady $pady
+	grid  $fr2.la  $fr2.serv  -sticky e  -pady $pady
+	grid $fr2.serv -sticky ew
+	grid columnconfigure $fr2 1 -weight 1
+
 	pack  $fr2 -side top -fill x
 	
+	set wserver $fr2.serv
 	lappend wrapthese $fr2.msg1
+	
+	if {$config(setupass,public-servers)} {
+	    catch {
+		::httpex::get $jprefs(urlServersList) \
+		  -command [namespace current]::HttpCommand
+	    } httptoken	    
+	}
     }
     
     # Username & Password.
@@ -145,15 +171,15 @@ proc ::SetupAss::SetupAss { } {
     ttk::label $fr3.msg1 -style Small.TLabel \
       -wraplength 260 -justify left -text [mc suusermsg]
     ttk::label $fr3.srv  -text "[mc Server]:"
-    ttk::label $fr3.srv2 -textvariable ${ns}::server
+    ttk::label $fr3.srv2 -textvariable [namespace current]::server
     ttk::label $fr3.lan  -text "[mc Username]:"
     ttk::label $fr3.lap  -text "[mc Password]:"
     ttk::label $fr3.lap2 -text "[mc {Retype Password}]:"
-    ttk::entry $fr3.name -textvariable ${ns}::username \
+    ttk::entry $fr3.name -textvariable [namespace current]::username \
        -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
-    ttk::entry $fr3.pass -textvariable ${ns}::password -show {*} \
+    ttk::entry $fr3.pass -textvariable [namespace current]::password -show {*} \
       -validate key -validatecommand {::Jabber::ValidatePasswordStr %S}
-    ttk::entry $fr3.pass2 -textvariable ${ns}::password2 -show {*} \
+    ttk::entry $fr3.pass2 -textvariable [namespace current]::password2 -show {*} \
       -validate key -validatecommand {::Jabber::ValidatePasswordStr %S} 
      
     grid  $fr3.msg1  -           -pady $pady -sticky w
@@ -179,6 +205,7 @@ proc ::SetupAss::SetupAss { } {
     grid  $p4.fr.btreg  -pady 8
     pack  $p4.fr -side top -fill x
 
+    set wregister $p4.fr.btreg
     lappend wrapthese $p4.fr.msg1
 
     # Finish.
@@ -206,6 +233,42 @@ proc ::SetupAss::SetupAss { } {
 	}
     } $wrapthese $w]    
     after idle $script
+    
+    ::UI::CenterWindow $w
+}
+
+proc ::SetupAss::HttpCommand {htoken} {
+    variable wserver
+    
+    if {[::httpex::state $htoken] ne "final"} {
+	return
+    }
+    if {[::httpex::status $htoken] eq "ok"} {
+	
+	# Get and parse xml.
+	set xml [::httpex::data $htoken]    
+	set xtoken [tinydom::parse $xml -package qdxml]
+	set xmllist [tinydom::documentElement $xtoken]
+	set jidL [list]
+	
+	foreach elem [tinydom::children $xmllist] {
+	    switch -- [tinydom::tagname $elem] {
+		item {
+		    unset -nocomplain attrArr
+		    array set attrArr [tinydom::attrlist $elem]
+		    if {[info exists attrArr(jid)]} {
+			lappend jidL [list $attrArr(jid)]
+		    }
+		}
+	    }
+	}
+	if {[winfo exists $wserver]} {
+	    $wserver configure -values $jidL
+	    $wserver set ""
+	}
+	tinydom::cleanup $xtoken
+    }
+    ::httpex::cleanup $htoken
 }
 
 proc ::SetupAss::NextPage {w page} {
@@ -213,7 +276,10 @@ proc ::SetupAss::NextPage {w page} {
     variable username
     variable password
     variable password2
-    
+    variable wserver
+    variable wregister
+    variable wwizard
+        
     # Verify that it is ok before showing the next page.
     switch -- $page {
 	username {
@@ -233,12 +299,20 @@ proc ::SetupAss::NextPage {w page} {
 	    if {$server eq ""} {
 		::UI::MessageBox -icon error -title [mc Error] \
 		  -message [mc suservmsg] -parent $w
+		focus $wserver
 		return -code 3
 	    }
 	}
 	language {
 	    	    
 	}
+    }
+    
+    # Avoid inconsistent state.
+    if {[::Jabber::IsConnected]} {
+	$wregister state {disabled}
+    } else {
+	$wregister state {!disabled}
     }
 }
     
@@ -254,7 +328,7 @@ proc ::SetupAss::DoClose {w} {
     
     set ans [::UI::MessageBox -type yesno -parent $w -icon info \
       -message [mc messsuassclose]]
-    if {$ans == "yes"} {
+    if {$ans eq "yes"} {
 	destroy $w
     }
 }
@@ -264,10 +338,15 @@ proc ::SetupAss::DoRegister { } {
     variable username
     variable password
     variable haveRegistered
+    variable wregister
 
+    # This dialog grabs.
     ::RegisterEx::New -autoget 1 -server $server  \
       -username $username -password $password
     set haveRegistered 1
+    if {[::Jabber::IsConnected]} {
+	$wregister state {disabled}
+    }
 }
 
 proc ::SetupAss::DoFinish {w} {
