@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.60 2007-07-28 05:50:16 matben Exp $
+# $Id: VCard.tcl,v 1.61 2007-08-07 14:08:40 matben Exp $
 
 package provide VCard 1.0
 
@@ -257,6 +257,10 @@ proc ::VCard::Build {token} {
 	  -command [list [namespace current]::Close $token]
 	pack $frbot.btcancel -side right
     }
+    ttk::button $frbot.export -text [mc mExport...] \
+      -command [list [namespace current]::Export $token]
+    pack $frbot.export -side left
+    
     pack $frbot -side bottom -fill x
     
     ttk::notebook::enableTraversal $wnb
@@ -724,6 +728,11 @@ proc ::VCard::MainMenuPostHook {type wmenu} {
 	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
 	}
     }
+}
+
+proc ::VCard::Export {token} {    
+    upvar ${token}::priv priv
+    ExportXML $token $priv(jid)
 }
 
 # VCard::OnMenuExport --
