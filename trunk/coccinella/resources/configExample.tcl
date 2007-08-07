@@ -18,5 +18,5 @@ array set config {
     registerex,server       ""
     registerex,autoget      0
     setupass,page,server    1
-    ui,pruneMenus           {mInfo {mDebug mCoccinellaHome} mJabber {mNewAccount}}
+    ui,pruneMenus           {mInfo {mDebug mCoccinellaHome} mJabber {mNewAccount...}}
 }

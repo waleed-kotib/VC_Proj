@@ -373,19 +373,20 @@
 ::msgcat::mcset fr mBold		{Gras}
 ::msgcat::mcset fr mItalic		{Italique}
 ::msgcat::mcset fr mPreferences...	{&Préférences...}
-::msgcat::mcset fr mNewAccount		{Nouveau compte...}
-::msgcat::mcset fr mLogin		{Se connecter...}
+::msgcat::mcset fr mNewAccount...	{Nouveau compte...}
+::msgcat::mcset fr mLogin...		{Se connecter...}
 ::msgcat::mcset fr mLogout		{Se déconnecter}
 ::msgcat::mcset fr mLogoutWith          {Se déconnecter avec le message...}
 ::msgcat::mcset fr mHideMain            {Cacher}
 ::msgcat::mcset fr mShowMain            {Montrer}
-::msgcat::mcset fr mPassword		{&Mot de passe...}
+::msgcat::mcset fr mPassword...		{&Mot de passe...}
 ::msgcat::mcset fr mRoster/Services	{Contacts/services}
 ::msgcat::mcset fr mMessageInbox	{Messages}
 ::msgcat::mcset fr mSearch		{Cherche&r...}
 ::msgcat::mcset fr mAddNewUser		{Ajouter un nouvel utilisateur...}
-::msgcat::mcset fr mSendMessage		{Envo&yer un message...}
+::msgcat::mcset fr mSendMessage...	{Envo&yer un message...}
 ::msgcat::mcset fr mChat		{Discussion}
+::msgcat::mcset fr mChat...		{Discussion...}
 ::msgcat::mcset fr mStatus		{Statut}
 ::msgcat::mcset fr mDirStatus           {Statut désiré}
 ::msgcat::mcset fr mAvailable		{Disponible}
@@ -410,7 +411,7 @@
 ::msgcat::mcset fr mServers		{Serveurs}
 ::msgcat::mcset fr mJabberTransport	{Transport Jabber}
 ::msgcat::mcset fr mSmileyLegend	{Légende des frimousses}
-::msgcat::mcset fr mSetupAssistant	{&Assistant de configuration}
+::msgcat::mcset fr mSetupAssistant...	{&Assistant de configuration}
 ::msgcat::mcset fr mImageLarger		{Agrandir l'image}
 ::msgcat::mcset fr mImageSmaller	{Rétrécir l'image}
 ::msgcat::mcset fr mExportImage		{Exporter l'image...}

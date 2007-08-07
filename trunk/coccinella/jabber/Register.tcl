@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.77 2007-08-06 07:49:54 matben Exp $
+# $Id: Register.tcl,v 1.78 2007-08-07 07:50:25 matben Exp $
 
 package provide Register 1.0
 
@@ -180,7 +180,7 @@ proc ::RegisterEx::New {args} {
     
     # Avoid any inconsistent UI state by closing any login dialog.
     # This shouldn't happen.
-    foreach wlogin [ui::findallwithclass JLogin] {::Login::Close $wlogin}
+    foreach wlogin [ui::findalltoplevelwithclass JLogin] {::Login::Close $wlogin}
     
     # State variable to collect instance specific variables.
     set token [namespace current]::[incr uid]

@@ -293,7 +293,7 @@
 ::msgcat::mcset sv mAboutWhiteboard      {Om Whiteboard...}
 ::msgcat::mcset sv mAction               {Utför}
 ::msgcat::mcset sv mAdHocCommands        {Ad-hoc kommando}
-::msgcat::mcset sv mAddContact           {Lägg till kontakt...}
+::msgcat::mcset sv mAddContact...        {Lägg till kontakt...}
 ::msgcat::mcset sv mAddNewUser           {Ny kontakt...}
 ::msgcat::mcset sv mAddServer            {Lägg till server...}
 ::msgcat::mcset sv mAddSpeechBubble      {Lägg till pratbubbla}
@@ -313,6 +313,7 @@
 ::msgcat::mcset sv mBusinessCard         {Visa visitkort...}
 ::msgcat::mcset sv mCall                 {Ring}
 ::msgcat::mcset sv mChat                 {Chatta}
+::msgcat::mcset sv mChat...              {Chatta...}
 ::msgcat::mcset sv mChatHistory          {Chatt historik}
 ::msgcat::mcset sv mChord                {Korda}
 ::msgcat::mcset sv mCloseWindow          {Stäng fönster}
@@ -383,7 +384,7 @@
 ::msgcat::mcset sv mLibrary              {Bibliotek}
 ::msgcat::mcset sv mLineSmoothness       {Linjeutjämning}
 ::msgcat::mcset sv mLocalTime            {Lokal tid...}
-::msgcat::mcset sv mLogin                {Anslut...}
+::msgcat::mcset sv mLogin...             {Anslut...}
 ::msgcat::mcset sv mLoginTrpt            {Logga på transport}
 ::msgcat::mcset sv mLogout               {Logga ut}
 ::msgcat::mcset sv mLogoutTrpt           {Logga ut transport}
@@ -395,7 +396,7 @@
 ::msgcat::mcset sv mMinimize             {Minimera}
 ::msgcat::mcset sv mNetworkSetup         {Nätverksinställning}
 ::msgcat::mcset sv mNew                  {Nytt}
-::msgcat::mcset sv mNewAccount           {Nytt konto...}
+::msgcat::mcset sv mNewAccount...        {Nytt konto...}
 ::msgcat::mcset sv mNewWhiteboard        {Ny skrivtavla}
 ::msgcat::mcset sv mNormal               {Normal}
 ::msgcat::mcset sv mNormalFont           {Normal}
@@ -411,7 +412,7 @@
 ::msgcat::mcset sv mOpenURLStream        {Öppna URL ström...}
 ::msgcat::mcset sv mOutlineColor         {Randfärg}
 ::msgcat::mcset sv mPageSetup            {Utskriftsformat...}
-::msgcat::mcset sv mPassword             {Lösenord...}
+::msgcat::mcset sv mPassword...          {Lösenord...}
 ::msgcat::mcset sv mPaste                {Klistra in}
 ::msgcat::mcset sv mPieslice             {Pajsnitt}
 ::msgcat::mcset sv mPlugins              {Plugginer}
@@ -441,9 +442,9 @@
 ::msgcat::mcset sv mSaveImageAs          {Spara bild som...}
 ::msgcat::mcset sv mSearch               {Leta...}
 ::msgcat::mcset sv mSendFile             {Skicka fil...}
-::msgcat::mcset sv mSendMessage          {Skicka meddelande...}
+::msgcat::mcset sv mSendMessage...       {Skicka meddelande...}
 ::msgcat::mcset sv mServers              {Servrar}
-::msgcat::mcset sv mSetupAssistant       {Inställningsassistent...}
+::msgcat::mcset sv mSetupAssistant...    {Inställningsassistent...}
 ::msgcat::mcset sv mShiftConstrain       {Skiftbegränsning}
 ::msgcat::mcset sv mShow                 {Visa}
 ::msgcat::mcset sv mShowMain             {Visa}
@@ -474,7 +475,8 @@
 ::msgcat::mcset sv mWelcome              {Välkommen}
 ::msgcat::mcset sv mWhiteboard           {Skrivtavla...}
 ::msgcat::mcset sv mvCard                {vCard...}
-::msgcat::mcset sv mvCard2               {Redigera visitkort...}
+::msgcat::mcset sv mvCard2               {Visitkort}
+::msgcat::mcset sv mEditvCard2...        {Redigera visitkort...}
 
 
 
@@ -977,6 +979,7 @@ dessa om du inte händelsevis är tillgänglig när mottagaren läser det. Vill du sk
 ::msgcat::mcset sv jamessstatuscust             {Sätt ett meddelande för något av närvaro tillstånden.}
 ::msgcat::mcset sv jamessstatuscustdtl          {De mest använda tillstånden och meddelanden är enkelt nåbara som menyer.}
 ::msgcat::mcset sv jamessproxy-failure          {Proxy servern rapporterade ett fel. Felkoden är "%s".}
+::msgcat::mcset sv jamessaskregister            {Vill du registrera ett nytt användarkonto?}
 
 
 # This maps Defined Error Conditions to clear text messages.

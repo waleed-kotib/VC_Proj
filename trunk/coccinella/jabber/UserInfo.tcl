@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.22 2007-07-28 05:50:16 matben Exp $
+# $Id: UserInfo.tcl,v 1.23 2007-08-07 07:50:25 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -568,10 +568,18 @@ proc ::UserInfo::GetFrontToken {} {
 proc ::UserInfo::MainMenuPostHook {type wmenu} {
     
     if {$type eq "main-file"} {
+	
+	# Need to have a different one for aqua due to the menubar.
 	set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
-	set token [GetFrontToken]
-	if {$token ne ""} {
-	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
+	if {[tk windowingsystem] eq "aqua"} {
+	    set token [GetFrontToken]
+	    if {$token ne ""} {
+		::UI::MenuMethod $m entryconfigure mvCard2 -state normal
+	    }
+	} else {
+	    if {[llength [ui::findalltoplevelwithclass UserInfo]]} {
+
+	    }
 	}
     }
 }

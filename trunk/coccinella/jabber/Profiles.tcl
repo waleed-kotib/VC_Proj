@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.87 2007-08-06 12:42:09 matben Exp $
+# $Id: Profiles.tcl,v 1.88 2007-08-07 07:50:25 matben Exp $
 
 package require ui::megaentry
 
@@ -860,6 +860,8 @@ namespace eval ::Profiles {
     
     option add *JProfiles*settingsImage        settings         widgetDefault
     option add *JProfiles*settingsDisImage     settingsDis      widgetDefault
+
+    bind JProfiles <Destroy> +::Profiles::DialogOnDestroy
 }
 
 # Profiles::BuildDialog --
@@ -875,6 +877,7 @@ proc ::Profiles::BuildDialog { } {
 	raise $w
 	return
     }
+    ::JUI::SetToolbarButtonState connect disabled
     
     ::UI::Toplevel $w -class JProfiles \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
@@ -967,6 +970,10 @@ proc ::Profiles::CancelDlg {w} {
     
     ::UI::SaveWinGeom $w
     destroy $w
+}
+
+proc ::Profiles::DialogOnDestroy {} {
+    ::JUI::SetToolbarButtonState connect normal   
 }
 
 #-------------------------------------------------------------------------------
@@ -1489,7 +1496,7 @@ proc ::Profiles::FrameNewCmd {w} {
 	if {![::Jabber::IsConnected]} {
 	    update idletasks
 	    set ans [tk_messageBox -icon question -type yesno -parent $w \
-	      -message "Do you want to register a new account?"]
+	      -message [mc jamessaskregister]]
 	    if {$ans eq "yes"} {
 		::RegisterEx::New -profile $uname
 	    }

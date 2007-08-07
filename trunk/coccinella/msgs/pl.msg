@@ -371,19 +371,20 @@
 ::msgcat::mcset pl mBold		{Wytłuszczony}
 ::msgcat::mcset pl mItalic		{Kursywa}
 ::msgcat::mcset pl mPreferences...	{Preferencje...}
-::msgcat::mcset pl mNewAccount		{Załóż nowe konto...}
-::msgcat::mcset pl mLogin		{Zaloguj się...}
+::msgcat::mcset pl mNewAccount...	{Załóż nowe konto...}
+::msgcat::mcset pl mLogin...		{Zaloguj się...}
 ::msgcat::mcset pl mLogout		{Wyloguj się}
 ::msgcat::mcset pl mLogoutWith          {Wyloguj z opisem...}
 ::msgcat::mcset pl mHideMain            {Ukryj główne okno}
 ::msgcat::mcset pl mShowMain            {Pokaż główne okno}
-::msgcat::mcset pl mPassword		{Zmień hasło...}
+::msgcat::mcset pl mPassword...		{Zmień hasło...}
 ::msgcat::mcset pl mRoster/Services	{Roster/Usługi}
 ::msgcat::mcset pl mMessageInbox	{Skrzynka odbiorcza}
 ::msgcat::mcset pl mSearch		{Przeszukaj...}
 ::msgcat::mcset pl mAddNewUser		{Dodaj kontakt...}
-::msgcat::mcset pl mSendMessage		{Wyślij wiadomość do...}
+::msgcat::mcset pl mSendMessage...	{Wyślij wiadomość do...}
 ::msgcat::mcset pl mChat		{Chętnie pogawędzę}
+::msgcat::mcset pl mChat...		{Chętnie pogawędzę...}
 ::msgcat::mcset pl mStatus		{Zmień swój status}
 ::msgcat::mcset pl mDirStatus           {Niech widzi inny status}
 ::msgcat::mcset pl mAvailable		{Dostępny}
@@ -408,7 +409,7 @@
 ::msgcat::mcset pl mServers		{Serwery}
 ::msgcat::mcset pl mJabberTransport	{Jabber Transport}
 ::msgcat::mcset pl mSmileyLegend	{Panel "emotek"}
-::msgcat::mcset pl mSetupAssistant	{Asystent ustawień...}
+::msgcat::mcset pl mSetupAssistant...	{Asystent ustawień...}
 ::msgcat::mcset pl mImageLarger		{Powiększ obraz}
 ::msgcat::mcset pl mImageSmaller	{Zmniejsz obraz}
 ::msgcat::mcset pl mExportImage		{Wyeksportuj grafikę...}

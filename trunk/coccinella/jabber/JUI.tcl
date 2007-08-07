@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.182 2007-08-06 13:48:40 matben Exp $
+# $Id: JUI.tcl,v 1.183 2007-08-07 07:50:24 matben Exp $
 
 package provide JUI 1.0
 
@@ -115,11 +115,13 @@ proc ::JUI::Init { } {
     set mDefsFile {
 	{command   mPreferences...     {::Preferences::Build}     {}}
 	{separator}
-	{command   mNewAccount         {::RegisterEx::OnMenu}     {}}
+	{command   mNewAccount...      {::RegisterEx::OnMenu}     {}}
 	{command   mRemoveAccount...   {::Register::OnMenuRemove} {}}	
+	{command   mPassword...        {::Jabber::Passwd::OnMenu} {}}
+	{command   mSetupAssistant...  {::SetupAss::SetupAss}     {}}
 	{separator}
 	{command   mEditProfiles...    {::Profiles::BuildDialog}  {}}
-	{command   mvCard2             {::VCard::OnMenu}          {}}
+	{command   mEditvCard2...      {::VCard::OnMenu}          {}}
 	{separator}
 	{cascade   mImport             {}                         {} {} {
 	    {command  mEmoticonSet     {::Emoticons::ImportSet}   {}}
@@ -140,20 +142,16 @@ proc ::JUI::Init { } {
     }
         
     set menuDefs(rost,action) {    
-	{cascade     mRegister      {}                                {} {} {}}
-	{command     mLogin         {::Jabber::OnMenuLogInOut}        L}
+	{command     mLogin...         {::Jabber::OnMenuLogInOut}        L}
 	{command     mLogoutWith    {::Jabber::Logout::OnMenuStatus}  {}}
-	{command     mPassword      {::Jabber::Passwd::OnMenu}        {}}
-	{separator}
-	{checkbutton mMessageInbox  {::MailBox::OnMenu}               I \
-	  {-variable ::JUI::state(mailbox,visible)}}
 	{separator}
 	{command     mSearch        {::Search::OnMenu}                {}}
-	{command     mAddContact    {::JUser::OnMenu}                 {}}
+	{command     mAddContact... {::JUser::OnMenu}                 {}}
 	{command     mDiscoverServer... {::Disco::OnMenuAddServer}    {}}
+	{cascade     mRegister      {}                                {} {} {}}
 	{separator}
-	{command     mSendMessage   {::NewMsg::OnMenu}                M}
-	{command     mChat          {::Chat::OnMenu}                  T}
+	{command     mSendMessage... {::NewMsg::OnMenu}                M}
+	{command     mChat...       {::Chat::OnMenu}                  T}
 	{cascade     mStatus        {}                                {} {} {}}
 	{separator}
 	{command     mEnterRoom     {::GroupChat::OnMenuEnter}        R}
@@ -164,18 +162,16 @@ proc ::JUI::Init { } {
     if {[::Jabber::HaveWhiteboard]} {
 	set mWhiteboard \
 	  {command   mNewWhiteboard  {::JWB::OnMenuNewWhiteboard}  N}
-	set idx [lsearch $menuDefs(rost,action) *mChat*]
+	set idx [lsearch $menuDefs(rost,action) *mChat...*]
 	incr idx
 	set menuDefs(rost,action) \
 	  [linsert $menuDefs(rost,action) $idx $mWhiteboard]
     }
     
     set mDefsInfo {    
-	{command     mSetupAssistant {::SetupAss::SetupAss}         {}}
 	{command     mComponents    {::Dialogs::InfoComponents}     {}}
-	{command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
-	{checkbutton mDebug         {::Jabber::DebugCmd}            {} \
-	  {-variable ::Jabber::jstate(debugCmd)}}
+	{checkbutton mMessageInbox  {::MailBox::OnMenu}               I \
+	  {-variable ::JUI::state(mailbox,visible)}}
 	{cascade     mFontSize      {}                              {} {} {
 	    {radio   mNormalFont    {::Theme::FontConfigSize  0}    {}
 	    {-variable prefs(fontSizePlus) -value 0}}
@@ -195,8 +191,12 @@ proc ::JUI::Init { } {
 	    {-variable ::JUI::state(show,minimal)}} }
 	}
 	{separator}
-	{command     mCoccinellaHome {::JUI::OpenCoccinellaURL}     {}}
+	{command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
+	{checkbutton mDebug         {::Jabber::DebugCmd}            {} \
+	  {-variable ::Jabber::jstate(debugCmd)}}
 	{command     mBugReport      {::JUI::OpenBugURL}            {}}
+	{separator}
+	{command     mCoccinellaHome {::JUI::OpenCoccinellaURL}     {}}
     }
     if {[tk windowingsystem] eq "aqua"} {
 	set menuDefs(rost,info) $mDefsInfo
@@ -508,6 +508,12 @@ proc ::JUI::BuildMenu {name} {
 	} $extraMenuDefs(rost,$name)]
     }
     ::UI::NewMenu $w $wmenu.$name  $mLabel($name)  $menuMerged
+}
+
+proc ::JUI::SetToolbarButtonState {name state} {
+    variable jwapp
+    
+    $jwapp(wtbar) buttonconfigure $name -state $state      
 }
 
 proc ::JUI::RosterMoveFromPage { } {
@@ -877,26 +883,28 @@ proc ::JUI::FilePostCommand {wmenu} {
 
     switch -- [GetConnectState] {
 	connectinit {
-	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled
 	}
 	connectfin - connect {
-	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mPassword... -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mEditvCard2... -state normal
 	}
 	disconnect {
-	    if {[llength [ui::findallwithclass JLogin]]} {
+	    if {[llength [ui::findalltoplevelwithclass JLogin]]} {
 		::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
 	    } else {
 		::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state normal
 	    }
-	    ::UI::MenuMethod $wmenu entryconfigure mvCard2 -state disabled
-	    if {[llength [ui::findallwithclass JLogin]]} {
-		::UI::MenuMethod $wmenu entryconfigure mNewAccount -state disabled
-	    } else {
-		::UI::MenuMethod $wmenu entryconfigure mNewAccount -state normal
-	    }
+	    ::UI::MenuMethod $wmenu entryconfigure mPassword... -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mEditvCard2... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state disabled
 	}	
     }    
@@ -933,13 +941,6 @@ proc ::JUI::ActionPostCommand {wmenu} {
     variable state
     variable jwapp
     
-    # Set -variable value.
-    if {[::MailBox::IsVisible]} {
-	set state(mailbox,visible) 1
-    } else {
-	set state(mailbox,visible) 0
-    }
-    
     # The status menu.
     set m [::UI::MenuMethod $wmenu entrycget mStatus -menu]
     $m delete 0 end
@@ -951,19 +952,18 @@ proc ::JUI::ActionPostCommand {wmenu} {
     
     switch -- [GetConnectState] {
 	connectinit {
-	    ::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
+	    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
 	      -label [mc mLogout]
 	}
 	connectfin - connect {
 	    ::UI::MenuMethod $wmenu entryconfigure mRegister -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
+	    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
 	      -label [mc mLogout]
 	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mPassword -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mSearch -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mAddContact -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mChat -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mAddContact... -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mChat... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
@@ -972,19 +972,18 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	}
 	disconnect {
 	    ::UI::MenuMethod $wmenu entryconfigure mRegister -state disabled
-	    if {[llength [ui::findallwithclass JProfiles]]} {
-		::UI::MenuMethod $wmenu entryconfigure mLogin -state disabled  \
-		  -label [mc mLogin]
+	    if {[llength [ui::findalltoplevelwithclass JProfiles]]} {
+		::UI::MenuMethod $wmenu entryconfigure mLogin... -state disabled  \
+		  -label [mc mLogin...]
 	    } else {
-		::UI::MenuMethod $wmenu entryconfigure mLogin -state normal  \
-		  -label [mc mLogin]
+		::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
+		  -label [mc mLogin...]
 	    }
 	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mPassword -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mSearch -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mAddContact -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mChat -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mAddContact... -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mChat... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
@@ -1016,18 +1015,13 @@ proc ::JUI::InfoPostCommand {wmenu} {
     global wDlgs config
     variable state
     variable jwapp
-
-    switch -- [GetConnectState] {
-	connectinit {
-	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant -state disabled
-	}
-	connectfin - connect {
-	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant -state disabled
-	}
-	disconnect {
-	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant -state normal
-	}	
-    }    
+    
+    # Set -variable value. BUG?
+    if {[::MailBox::IsVisible]} {
+	set state(mailbox,visible) 1
+    } else {
+	set state(mailbox,visible) 0
+    }
 	
     # For aqua we must do this only for .jmain
     if {[::UI::IsToplevelActive $wDlgs(jmain)]} {

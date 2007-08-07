@@ -365,19 +365,20 @@
 ::msgcat::mcset nl mBold				{Vet}
 ::msgcat::mcset nl mItalic				{Cursief}
 ::msgcat::mcset nl mPreferences...			{Voorkeuren...}
-::msgcat::mcset nl mNewAccount				{Nieuwe account...}
-::msgcat::mcset nl mLogin				{Aanmelden...}
+::msgcat::mcset nl mNewAccount...			{Nieuwe account...}
+::msgcat::mcset nl mLogin...				{Aanmelden...}
 ::msgcat::mcset nl mLogout				{Afmelden}
 ::msgcat::mcset nl mLogoutWith				{Met bericht afmelden...}
 ::msgcat::mcset nl mHideMain				{Hoofdvenster verbergen}
 ::msgcat::mcset nl mShowMain				{Hoofdvenster laten zien}
-::msgcat::mcset nl mPassword				{&Wachtwoord...}
+::msgcat::mcset nl mPassword...				{&Wachtwoord...}
 ::msgcat::mcset nl mRoster/Services			{Roster/diensten}
 ::msgcat::mcset nl mMessageInbox			{Postvak in}
 ::msgcat::mcset nl mSearch				{Zoeken...}
 ::msgcat::mcset nl mAddNewUser				{Contactpersoon toevoegen...}
-::msgcat::mcset nl mSendMessage				{Bericht verzenden...}
-::msgcat::mcset nl mChat				{Chat...}
+::msgcat::mcset nl mSendMessage...			{Bericht verzenden...}
+::msgcat::mcset nl mChat				{Chat}
+::msgcat::mcset nl mChat...				{Chat...}
 ::msgcat::mcset nl mStatus				{Aanwezigheid}
 ::msgcat::mcset nl mDirStatus				{Voorgeschreven aanwezigheid}
 ::msgcat::mcset nl mAvailable				{Beschikbaar}
@@ -402,7 +403,7 @@
 ::msgcat::mcset nl mServers				{Servers}
 ::msgcat::mcset nl mJabberTransport			{Jabber-transport}
 ::msgcat::mcset nl mSmileyLegend			{Smiley legende}
-::msgcat::mcset nl mSetupAssistant			{Installatie&assistent...}
+::msgcat::mcset nl mSetupAssistant...			{Installatie&assistent...}
 ::msgcat::mcset nl mImageLarger				{Afbeelding vergroten}
 ::msgcat::mcset nl mImageSmaller			{Afbeelding verkleinen}
 ::msgcat::mcset nl mExportImage				{Afbeelding exporteren...}

@@ -6,7 +6,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: register.tcl,v 1.3 2007-08-06 07:49:54 matben Exp $
+# $Id: register.tcl,v 1.4 2007-08-07 07:50:25 matben Exp $
 
 package require jlib
 package require jlib::connect
@@ -68,7 +68,7 @@ proc jlibs::register::cmdG {jlib type iqchild} {
     if {$type eq "result"} {
 	jlib::splitjidex $state(jid) node server -
 
-	# Assuming minimal registration fileds.
+	# Assuming minimal registration fields.
 	$jlib register_set $node $state(password) [namespace code cmdS]
     } else {
 	finish $jlib $iqchild

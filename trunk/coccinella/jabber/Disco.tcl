@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.120 2007-08-03 06:59:37 matben Exp $
+# $Id: Disco.tcl,v 1.121 2007-08-07 07:50:21 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -135,7 +135,7 @@ proc ::Disco::InitMenus {} {
 
     set mDefs {
 	{command    mMessage       {::NewMsg::Build -to $jid} }
-	{command    mChat          {::Chat::StartThread $jid} }
+	{command    mChat...       {::Chat::StartThread $jid} }
 	{command    mEnterRoom     {
 	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
 	} }
@@ -184,7 +184,7 @@ proc ::Disco::InitMenus {} {
 
     set popMenuDefs(disco,type) {
 	{mMessage       {user}          }
-	{mChat          {user}          }
+	{mChat...       {user}          }
 	{mWhiteboard    {wb room}       }
 	{mEnterRoom     {room}          }
 	{mCreateRoom    {conference}    }

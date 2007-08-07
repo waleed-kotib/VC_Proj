@@ -299,19 +299,20 @@
 ::msgcat::mcset ru mBold		{Жирный}
 ::msgcat::mcset ru mItalic		{Наклонный}
 ::msgcat::mcset ru mPreferences...	{Настройки...}
-::msgcat::mcset ru mNewAccount		{Новый аккаунт...}
-::msgcat::mcset ru mLogin		{Логин...}
+::msgcat::mcset ru mNewAccount...	{Новый аккаунт...}
+::msgcat::mcset ru mLogin...		{Логин...}
 ::msgcat::mcset ru mLogout		{Отключится}
 ::msgcat::mcset ru mLogoutWith          {Отключится со статусом...}
 ::msgcat::mcset ru mHideMain            {Hide Main}
 ::msgcat::mcset ru mShowMain            {Show Main}
-::msgcat::mcset ru mPassword		{Пароль}
+::msgcat::mcset ru mPassword...		{Пароль}
 ::msgcat::mcset ru mRoster/Services	{Roster/Services}
 ::msgcat::mcset ru mMessageInbox	{Входящие}
 ::msgcat::mcset ru mSearch		{Поиск...}
 ::msgcat::mcset ru mAddNewUser		{Добавить юзера...}
-::msgcat::mcset ru mSendMessage		{Послать сообщение...}
+::msgcat::mcset ru mSendMessage...	{Послать сообщение...}
 ::msgcat::mcset ru mChat		{Чат}
+::msgcat::mcset ru mChat...		{Чат...}
 ::msgcat::mcset ru mStatus		{Статус}
 ::msgcat::mcset ru mDirStatus           {Направленный статус}
 ::msgcat::mcset ru mAvailable		{Доступен}
@@ -336,7 +337,7 @@
 ::msgcat::mcset ru mServers			{Сервера}
 ::msgcat::mcset ru mJabberTransport	{Jabber транспорт}
 ::msgcat::mcset ru mSmileyLegend		{Smiley Legend}
-::msgcat::mcset ru mSetupAssistant	{Помощник настроек..}
+::msgcat::mcset ru mSetupAssistant...	{Помощник настроек..}
 ::msgcat::mcset ru mImageLarger		{Image Larger}
 ::msgcat::mcset ru mImageSmaller		{Image Smaller}
 ::msgcat::mcset ru mExportImage		{Export Image...}

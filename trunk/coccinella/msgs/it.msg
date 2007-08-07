@@ -373,19 +373,20 @@
 ::msgcat::mcset it mBold {Grassetto}
 ::msgcat::mcset it mItalic {Corsivo/Italico}
 ::msgcat::mcset it mPreferences... {&Preferenze...}
-::msgcat::mcset it mNewAccount {Nuovo account...}
-::msgcat::mcset it mLogin {Connetti...}
+::msgcat::mcset it mNewAccount... {Nuovo account...}
+::msgcat::mcset it mLogin... {Connetti...}
 ::msgcat::mcset it mLogout {Disconnetti}
 ::msgcat::mcset it mLogoutWith {Disconnetti con messaggio...}
 ::msgcat::mcset it mHideMain {Nascondi}
 ::msgcat::mcset it mShowMain {Mostra}
-::msgcat::mcset it mPassword {&Password...}
+::msgcat::mcset it mPassword... {&Password...}
 ::msgcat::mcset it mRoster/Services {Contatti/Servizi}
 ::msgcat::mcset it mMessageInbox {Messaggi}
 ::msgcat::mcset it mSearch {Ce&rca...}
 ::msgcat::mcset it mAddNewUser {Aggiungi nuovo utente...}
-::msgcat::mcset it mSendMessage {In&via messaggio...}
+::msgcat::mcset it mSendMessage... {In&via messaggio...}
 ::msgcat::mcset it mChat {Chat}
+::msgcat::mcset it mChat... {Chat...}
 ::msgcat::mcset it mStatus {Stato}
 ::msgcat::mcset it mDirStatus {Stato desiderato}
 ::msgcat::mcset it mAvailable {Disponibile}
@@ -410,7 +411,7 @@
 ::msgcat::mcset it mServers {Servers}
 ::msgcat::mcset it mJabberTransport {Trasporto Jabber}
 ::msgcat::mcset it mSmileyLegend {Legenda smiley}
-::msgcat::mcset it mSetupAssistant {&Configurazione assistita}
+::msgcat::mcset it mSetupAssistant... {&Configurazione assistita}
 ::msgcat::mcset it mExportImage {Esporta immagine...}
 ::msgcat::mcset it mExportMovie {Esporta filmato...}
 ::msgcat::mcset it mSyncPlayback {Riproduzione sincronizzata}

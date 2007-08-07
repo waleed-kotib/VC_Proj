@@ -370,19 +370,20 @@
 ::msgcat::mcset kr mBold		{굵은체}
 ::msgcat::mcset kr mItalic		{이탤릭체}
 ::msgcat::mcset kr mPreferences...	{설정...}
-::msgcat::mcset kr mNewAccount		{새 계정...}
-::msgcat::mcset kr mLogin		{로그인...}
+::msgcat::mcset kr mNewAccount...	{새 계정...}
+::msgcat::mcset kr mLogin...		{로그인...}
 ::msgcat::mcset kr mLogout		{로그아웃}
 ::msgcat::mcset kr mLogoutWith          {메세지를 두고 로그아웃...}
 ::msgcat::mcset kr mHideMain            {주메뉴 감추기}
 ::msgcat::mcset kr mShowMain            {주메뉴 보이기}
-::msgcat::mcset kr mPassword		{암호...}
+::msgcat::mcset kr mPassword...		{암호...}
 ::msgcat::mcset kr mRoster/Services	{명부/서비스}
 ::msgcat::mcset kr mMessageInbox	{받은 메세지함}
 ::msgcat::mcset kr mSearch		{찾기...}
 ::msgcat::mcset kr mAddNewUser		{새 사용자 더하기...}
-::msgcat::mcset kr mSendMessage		{메세지 보내기...}
+::msgcat::mcset kr mSendMessage...	{메세지 보내기...}
 ::msgcat::mcset kr mChat		{대화}
+::msgcat::mcset kr mChat...		{대화...}
 ::msgcat::mcset kr mStatus		{상태}
 ::msgcat::mcset kr mDirStatus           {지시된 상태}
 ::msgcat::mcset kr mAvailable		{접속 가능}
@@ -407,7 +408,7 @@
 ::msgcat::mcset kr mServers		{서버}
 ::msgcat::mcset kr mJabberTransport	{재버 송수신}
 ::msgcat::mcset kr mSmileyLegend	{스마일리 범례}
-::msgcat::mcset kr mSetupAssistant	{설정 도움...}
+::msgcat::mcset kr mSetupAssistant...	{설정 도움...}
 ::msgcat::mcset kr mImageLarger		{그림 큰 것}
 ::msgcat::mcset kr mImageSmaller	{그림 작은 것}
 ::msgcat::mcset kr mExportImage		{그림 보내기...}
