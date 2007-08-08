@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.162 2007-07-30 14:16:31 matben Exp $
+# $Id: UI.tcl,v 1.163 2007-08-08 13:01:08 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1528,117 +1528,6 @@ proc ::UI::LabelButton {w args} {
     bind $w <Enter> [list $w configure -fg $lopts(-activeforeground) -cursor hand2]
     bind $w <Leave> [list $w configure -fg $lopts(-foreground) -cursor $cursor]
     return $w
-}
-
-namespace eval ::UI:: {
-    
-    variable megauid 0
-}
-
-# UI::MegaDlgMsgAndEntry --
-# 
-#       A mega widget dialog with a message and a single entry.
-
-proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok args} {
-    global this
-    
-    variable megauid
-    upvar $varName entryVar
-    
-    set entryopts {}
-    foreach {key value} $args {
-	switch -- $key {
-	    -show {
-		lappend entryopts $key $value
-	    }
-	}
-    }
-    if {![info exists entryVar]} {
-	set entryVar ""
-    }
-    
-    set w .mega[incr megauid]
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox} \
-      -closecommand ::UI::MegaDlgMsgCloseCmd
-    wm title $w $title
-
-    # Widget specific storage.
-    variable $w
-    upvar #0 $w state
-
-    set state(button) 0
-    
-    # Global frame.
-    ttk::frame $w.frall
-    pack $w.frall -fill both -expand 1
-
-    set wbox $w.frall.f
-    ttk::frame $wbox -padding [option get . dialogPadding {}]
-    pack $wbox -fill both -expand 1
-
-    ttk::label $wbox.msg  \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text $msg
-    pack $wbox.msg -side top -anchor w
-    
-    set wmid $wbox.m
-    set wentry $wmid.e
-    ttk::frame $wmid
-    pack  $wmid  -side top -fill x
-    
-    ttk::label $wmid.l -text $label
-    eval {ttk::entry $wentry} $entryopts
-
-    grid  $wmid.l  $wmid.e
-    grid  $wmid.e  -sticky ew
-    grid columnconfigure $wmid 1 -weight 1
-    
-    $wentry insert end $entryVar
-    
-    # Button part.
-    set frbot $wbox.b
-    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text $btok  \
-      -default active -command [list set $w\(button) ok]
-    ttk::button $frbot.btcancel -text $btcancel  \
-      -command [list set $w\(button) cancel]
-    set padx [option get . buttonPadX {}]
-    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
-	pack $frbot.btok -side right
-	pack $frbot.btcancel -side right -padx $padx
-    } else {
-	pack $frbot.btcancel -side right
-	pack $frbot.btok -side right -padx $padx
-    }
-    pack $frbot -side top -fill x
-    
-    wm resizable $w 0 0
-    bind $w <Return> [list $frbot.btok invoke]
-    bind $w <Escape> [list $frbot.btcancel invoke]
-    
-    # Grab and focus.
-    set oldFocus [focus]
-    focus $wentry
-    catch {grab $w}
-    
-    # Wait here for a button press.
-    tkwait variable $w\(button)
-    
-    set entryVar [$wentry get]
-    catch {grab release $w}
-    catch {destroy $w}
-    catch {focus $oldFocus}
-    set button $state(button)
-    unset -nocomplain state
-    
-    return $button
-}
-
-proc ::UI::MegaDlgMsgCloseCmd {w} {
-    variable $w
-    upvar #0 $w state
-    set state(button) cancel
-    return stop
 }
 
 # UI::OkCancelButtons --

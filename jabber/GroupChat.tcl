@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.198 2007-08-07 07:50:21 matben Exp $
+# $Id: GroupChat.tcl,v 1.199 2007-08-08 13:01:07 matben Exp $
 
 package require Create
 package require Enter
@@ -190,8 +190,8 @@ proc ::GroupChat::InitMenus {} {
     set mDefs {
 	{command   mMessage       {::NewMsg::Build -to $jid}    }
 	{command   mChat...       {::Chat::StartThread $jid}    }
-	{command   mSendFile      {::FTrans::Send $jid}         }
-	{command   mBusinessCard  {::UserInfo::Get $jid}        }	
+	{command   mSendFile...      {::FTrans::Send $jid}         }
+	{command   mBusinessCard...  {::UserInfo::Get $jid}        }	
 	{command   mEditNick      {::GroupChat::TreeEditUserStart $chattoken $jid} }
 	{check     mIgnore        {::GroupChat::Ignore $chattoken $jid} {
 	    -variable $chattoken\(ignore,$jid)
@@ -207,8 +207,8 @@ proc ::GroupChat::InitMenus {} {
     set popMenuDefs(groupchat,type) {
 	{mMessage       user        }
 	{mChat...       user        }
-	{mSendFile      user        }
-	{mBusinessCard  user        }
+	{mSendFile...      user        }
+	{mBusinessCard...  user        }
 	{mWhiteboard    wb          }
 	{mEditNick      me          }
 	{mIgnore        user        }

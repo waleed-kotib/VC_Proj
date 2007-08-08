@@ -376,7 +376,7 @@
 ::msgcat::mcset fr mNewAccount...	{Nouveau compte...}
 ::msgcat::mcset fr mLogin...		{Se connecter...}
 ::msgcat::mcset fr mLogout		{Se déconnecter}
-::msgcat::mcset fr mLogoutWith          {Se déconnecter avec le message...}
+::msgcat::mcset fr mLogoutWith...       {Se déconnecter avec le message...}
 ::msgcat::mcset fr mHideMain            {Cacher}
 ::msgcat::mcset fr mShowMain            {Montrer}
 ::msgcat::mcset fr mPassword...		{&Mot de passe...}
@@ -459,9 +459,9 @@
 ::msgcat::mcset fr mRegister     	{S'inscrire}
 ::msgcat::mcset fr mUnregister     	{Se désinscrire}
 ::msgcat::mcset fr mRefresh     	{Rafraîchir}
-::msgcat::mcset fr mAddServer     	{Ajouter un serveur...}
+::msgcat::mcset fr mAddServer...     	{Ajouter un serveur...}
 ::msgcat::mcset fr mLocalTime     	{Heure locale...}
-::msgcat::mcset fr mSendFile     	{Envoyer un message...}
+::msgcat::mcset fr mSendFile...     	{Envoyer un message...}
 ::msgcat::mcset fr mChatHistory     	{Historique de la discussion}
 ::msgcat::mcset fr mLoginTrpt     	{Se connecter à un serveur de transport}
 ::msgcat::mcset fr mLogoutTrpt     	{Se déconnecter d'un serveur de transport}
@@ -470,7 +470,7 @@
 ::msgcat::mcset fr mOffline		{Déconnecté}
 ::msgcat::mcset fr mTransports		{Transports}
 ::msgcat::mcset fr mIgnore         	{Ignorer}
-::msgcat::mcset fr mEditBookmarks	{Éditer les marque-pages...}
+::msgcat::mcset fr mEditBookmarks...	{Éditer les marque-pages...}
 
 # Translate
 ::msgcat::mcset fr mSort                {Sort}

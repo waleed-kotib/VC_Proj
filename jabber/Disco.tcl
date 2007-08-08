@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.122 2007-08-08 09:18:37 matben Exp $
+# $Id: Disco.tcl,v 1.123 2007-08-08 13:01:07 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -159,7 +159,7 @@ proc ::Disco::InitMenus {} {
 	    } }
 	} }
 	{command    mRefresh       {::Disco::Refresh $vstruct} }
-	{command    mAddServer     {::Disco::AddServerDlg}     }
+	{command    mAddServer...  {::Disco::AddServerDlg}     }
 	{command    mRemoveListing {::Disco::RemoveListing $jid}}
 	{cascade    mAdHocCommands {}                          }
     }
@@ -196,7 +196,7 @@ proc ::Disco::InitMenus {} {
 	    {mBackgroundImage  {normal} }
 	}}
 	{mRefresh       {jid}           }
-	{mAddServer     {}              }
+	{mAddServer...  {}              }
 	{mRemoveListing {root}          }
 	{mAdHocCommands {disabled}      }
     }

@@ -375,7 +375,7 @@
 ::msgcat::mcset de mNewAccount...	{Neues Konto...}
 ::msgcat::mcset de mLogin...		{Anmelden...}
 ::msgcat::mcset de mLogout		{Abmelden}
-::msgcat::mcset de mLogoutWith          {Abmelden mit Nachricht...}
+::msgcat::mcset de mLogoutWith...       {Abmelden mit Nachricht...}
 ::msgcat::mcset de mHideMain            {Hauptfenster ausblenden}
 ::msgcat::mcset de mShowMain            {Hauptfenster anzeigen}
 ::msgcat::mcset de mPassword...		{Passwort...}
@@ -429,7 +429,7 @@
 ::msgcat::mcset de mShow 		Zeige
 ::msgcat::mcset de mOffline     	Abgemeldet
 ::msgcat::mcset de mTransports  	Transporte
-::msgcat::mcset de mEditBookmarks       {Lesezeichen bearbeiten...}
+::msgcat::mcset de mEditBookmarks...    {Lesezeichen bearbeiten...}
 ::msgcat::mcset de mToolbar             Werkzeugleiste
 ::msgcat::mcset de mNotebook            Notizbuch
 ::msgcat::mcset de mMinimal             Minimal
@@ -461,9 +461,9 @@
 ::msgcat::mcset de mRegister     	{Eintragen}
 ::msgcat::mcset de mUnregister     	{Austragen}
 ::msgcat::mcset de mRefresh     	{Aktualisieren}
-::msgcat::mcset de mAddServer     	{Server hinzufügen...}
+::msgcat::mcset de mAddServer...     	{Server hinzufügen...}
 ::msgcat::mcset de mLocalTime     	{Lokale Zeit...}
-::msgcat::mcset de mSendFile     	{Datei senden...}
+::msgcat::mcset de mSendFile...     	{Datei senden...}
 ::msgcat::mcset de mChatHistory     	{Chat-Verlauf}
 ::msgcat::mcset de mLoginTrpt     	{Beim Transport anmelden}
 ::msgcat::mcset de mLogoutTrpt     	{Beim Transport abmelden}

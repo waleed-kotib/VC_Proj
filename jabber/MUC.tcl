@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.85 2007-08-03 06:34:50 matben Exp $
+# $Id: MUC.tcl,v 1.86 2007-08-08 13:01:08 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -713,15 +713,18 @@ proc ::MUC::GrantRevoke {roomjid which type} {
     set nick [jlib::escapestr $unick]
     jlib::splitjidex $roomjid roomName - -
     
-    set ans [eval {
-      ::UI::MegaDlgMsgAndEntry} [subst $dlgDefs($which,$type)] \
-      {"Reason:" reason [mc Cancel] [mc OK]}]
-    set opts [list]
-    if {$reason ne ""} {
-	set opts [list -reason $reason]
-    }
+    set sdef [subst $dlgDefs($which,$type)]
+    set title [lindex $sdef 0]
+    set msg   [lindex $sdef 1]
+    set ans [ui::megaentry -label "[mc {Profile name}]:" -icon "" \
+      -geovariable prefs(winGeom,jmucact) -title $title -message $msg]
 
-    if {$ans eq "ok"} {
+    if {$ans ne ""} {
+	set reason [ui::megaentrytext $ans]
+	set opts [list]
+	if {$reason ne ""} {
+	    lappend opts -reason $reason
+	}
 	eval {$jstate(jlib) muc $actionDefs($which,$type,cmd) $roomjid  \
 	  $nick $actionDefs($which,$type,what)  \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
@@ -743,17 +746,17 @@ proc ::MUC::Kick {roomjid} {
     set nick [jlib::escapestr $unick]
     jlib::splitjidex $roomjid roomName - -
     
-    set ans [::UI::MegaDlgMsgAndEntry  \
-      {Kick Participant}  \
-      "Kick the participant \"$unick\" from the room \"$roomName\""  \
-      "Reason:"  \
-      reason [mc Cancel] [mc OK]]
-    set opts {}
-    if {$reason ne ""} {
-	set opts [list -reason $reason]
-    }
-    
-    if {$ans eq "ok"} {
+    set title [mc {Kick Participant}]
+    set msg   "Kick the participant \"$unick\" from the room \"$roomName\""
+    set ans [ui::megaentry -label "[mc Reason]:" -icon "" \
+      -geovariable prefs(winGeom,jmucact) -title $title -message $msg]
+
+    if {$ans ne ""} {
+	set reason [ui::megaentrytext $ans]
+	set opts [list]
+	if {$reason ne ""} {
+	    lappend opts -reason $reason
+	}
 	eval {$jstate(jlib) muc setrole $roomjid $nick "none" \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
@@ -774,18 +777,17 @@ proc ::MUC::Ban {roomjid} {
     set nick [jlib::escapestr $unick]
     jlib::splitjidex $roomjid roomName - -
 
-    set ans [::UI::MegaDlgMsgAndEntry  \
-      {Ban User}  \
-      "Ban the user \"$unick\" from the room \"$roomName\""  \
-      "Reason:"  \
-      reason [mc Cancel] [mc OK]]
-    
-    set opts {}
-    if {$reason ne ""} {
-	set opts [list -reason $reason]
-    }
-    
-    if {$ans eq "ok"} {
+    set title [mc {Ban User}]
+    set msg   "Ban the user \"$unick\" from the room \"$roomName\""
+    set ans [ui::megaentry -label "[mc Reason]:" -icon "" \
+      -geovariable prefs(winGeom,jmucact) -title $title -message $msg]
+        
+    if {$ans ne ""} {
+	set reason [ui::megaentrytext $ans]
+	set opts [list]
+	if {$reason ne ""} {
+	    lappend opts -reason $reason
+	}
 	eval {$jstate(jlib) muc setaffiliation $roomjid $nick "outcast" \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
@@ -1498,19 +1500,18 @@ proc ::MUC::SetNick {roomjid} {
     variable locals
     upvar ::Jabber::jstate jstate
         
-    set nickname ""
-    set ans [::UI::MegaDlgMsgAndEntry  \
-      [mc {Set New Nickname}]  \
-      [mc {Select a new nickname}]  \
-      "[mc {New Nickname}]:"  \
-      nickname [mc Cancel] [mc OK]]
-    
-    # Perhaps check that characters are valid?
-    if {($ans eq "ok") && ($nickname ne "")} {
-	$jstate(jlib) muc setnick $roomjid $nickname \
-	  -command [namespace current]::PresCallback
+    set title [mc {Set New Nickname}]
+    set msg   [mc {Select a new nickname}]
+    set ans [ui::megaentry -label "[mc {New Nickname}]:" -icon question \
+      -geovariable prefs(winGeom,jmucnick) -title $title -message $msg]
+	
+    if {$ans ne ""} {
+	set nickname [ui::megaentrytext $ans]
+	if {$nickname ne ""} {
+	    $jstate(jlib) muc setnick $roomjid $nickname \
+	      -command [namespace current]::PresCallback
+	}
     }
-    return $ans
 }
 
 namespace eval ::MUC:: {

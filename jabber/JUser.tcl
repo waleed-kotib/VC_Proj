@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.40 2007-07-29 07:07:06 matben Exp $
+# $Id: JUser.tcl,v 1.41 2007-08-08 13:01:08 matben Exp $
 
 package provide JUser 1.0
 
@@ -608,7 +608,7 @@ proc ::JUser::EditUserDlg {jid} {
 	pack $frbot.btok -side right -padx $padx
     }
     if {!$istransport} {
-	ttk::button $frbot.bvcard -text [mc mBusinessCard]  \
+	ttk::button $frbot.bvcard -text [mc mBusinessCard...]  \
 	  -command [list ::VCard::Fetch other $jid]
 	pack $frbot.bvcard -side right
     }

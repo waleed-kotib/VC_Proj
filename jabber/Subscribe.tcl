@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.39 2007-07-29 10:28:14 matben Exp $
+# $Id: Subscribe.tcl,v 1.40 2007-08-08 13:01:08 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -151,7 +151,7 @@ proc ::Subscribe::NewDlg {jid} {
       -command [list [namespace current]::Accept $token]
     ttk::button $frbot.btcancel -text [mc No]  \
       -command [list [namespace current]::Deny $token]
-    ttk::button $frbot.bvcard -text [mc mBusinessCard] \
+    ttk::button $frbot.bvcard -text [mc mBusinessCard...] \
       -command [list ::VCard::Fetch other $jid]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {

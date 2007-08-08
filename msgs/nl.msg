@@ -368,7 +368,7 @@
 ::msgcat::mcset nl mNewAccount...			{Nieuwe account...}
 ::msgcat::mcset nl mLogin...				{Aanmelden...}
 ::msgcat::mcset nl mLogout				{Afmelden}
-::msgcat::mcset nl mLogoutWith				{Met bericht afmelden...}
+::msgcat::mcset nl mLogoutWith...			{Met bericht afmelden...}
 ::msgcat::mcset nl mHideMain				{Hoofdvenster verbergen}
 ::msgcat::mcset nl mShowMain				{Hoofdvenster laten zien}
 ::msgcat::mcset nl mPassword...				{&Wachtwoord...}
@@ -419,7 +419,7 @@
 ::msgcat::mcset nl mTakeSnapShot			{Momentopname}
 ::msgcat::mcset nl mTimeCode				{Tijdcode}
 ::msgcat::mcset nl mUserInfo				{Info over contactpersoon...}
-::msgcat::mcset nl mEditBookmarks			{Bladwijzers bewerken...}
+::msgcat::mcset nl mEditBookmarks...			{Bladwijzers bewerken...}
 ::msgcat::mcset nl mToolbar				{Werkbalk}
 ::msgcat::mcset nl mNotebook				{Laptop}
 ::msgcat::mcset nl mMinimal				{Minimaal}
@@ -450,9 +450,9 @@
 ::msgcat::mcset nl mRegister				{Registreren}
 ::msgcat::mcset nl mUnregister				{Registratie ongedaan maken}
 ::msgcat::mcset nl mRefresh				{Verversen}
-::msgcat::mcset nl mAddServer				{Server toevoegen...}
+::msgcat::mcset nl mAddServer...			{Server toevoegen...}
 ::msgcat::mcset nl mLocalTime				{Lokale tijd...}
-::msgcat::mcset nl mSendFile				{Bestand verzenden...}
+::msgcat::mcset nl mSendFile...				{Bestand verzenden...}
 ::msgcat::mcset nl mChatHistory				{Geschiedenis...}
 ::msgcat::mcset nl mLoginTrpt				{Transport aanmelden}
 ::msgcat::mcset nl mLogoutTrpt				{Transport afmelden}
