@@ -373,7 +373,7 @@
 ::msgcat::mcset kr mNewAccount...	{새 계정...}
 ::msgcat::mcset kr mLogin...		{로그인...}
 ::msgcat::mcset kr mLogout		{로그아웃}
-::msgcat::mcset kr mLogoutWith          {메세지를 두고 로그아웃...}
+::msgcat::mcset kr mLogoutWith...       {메세지를 두고 로그아웃...}
 ::msgcat::mcset kr mHideMain            {주메뉴 감추기}
 ::msgcat::mcset kr mShowMain            {주메뉴 보이기}
 ::msgcat::mcset kr mPassword...		{암호...}
@@ -424,7 +424,7 @@
 ::msgcat::mcset kr mTakeSnapShot        {스냅사진 만들기}
 ::msgcat::mcset kr mTimeCode            {시간표시}
 ::msgcat::mcset kr mUserInfo            {사용자 정보...}
-::msgcat::mcset kr mEditBookmarks       {북마크 편집하기...}
+::msgcat::mcset kr mEditBookmarks...    {북마크 편집하기...}
 ::msgcat::mcset kr mToolbar         	{툴바}
 ::msgcat::mcset kr mNotebook         	{공책}
 ::msgcat::mcset kr mMinimal         	{Minimal}
@@ -450,9 +450,9 @@
 ::msgcat::mcset kr mRegister     	{등록}
 ::msgcat::mcset kr mUnregister     	{등록해지}
 ::msgcat::mcset kr mRefresh     	{정리}
-::msgcat::mcset kr mAddServer     	{서버 더하기...}
+::msgcat::mcset kr mAddServer...     	{서버 더하기...}
 ::msgcat::mcset kr mLocalTime     	{지역 시간...}
-::msgcat::mcset kr mSendFile     	{파일 보내기...}
+::msgcat::mcset kr mSendFile...     	{파일 보내기...}
 ::msgcat::mcset kr mChatHistory     	{대화 기록}
 ::msgcat::mcset kr mLoginTrpt     	{Login To Transport}
 ::msgcat::mcset kr mLogoutTrpt     	{Logout From Transport}

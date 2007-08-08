@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: megaentry.tcl,v 1.4 2007-08-08 09:18:37 matben Exp $
+# $Id: megaentry.tcl,v 1.5 2007-08-08 13:01:07 matben Exp $
 
 package require ui::dialog
 
@@ -22,6 +22,7 @@ proc ui::megaentry {args} {
 
     set state(-label) [ui::from args -label]
     set state(-modal) [ui::from args -modal]
+    set state(-show)  [ui::from args -show]
     set state(-value) [ui::from args -value]
     ui::from args -textvariable
     ui::from args -type
@@ -33,6 +34,9 @@ proc ui::megaentry {args} {
     set fr [$w clientframe]
     ttk::label $fr.l -text $state(-label)
     ttk::entry $fr.e -textvariable $token\(-textvariable)
+    if {$state(-show) ne ""} {
+	$fr.e configure -show $state(show)
+    }
     
     grid  $fr.l  $fr.e  -sticky e
     grid $fr.e -sticky ew
@@ -45,12 +49,22 @@ proc ui::megaentry {args} {
     Grab $w
     
     if {$state(dlgbt) eq "ok"} {
-	set ans $state(-textvariable)
+	# Return result this way to be able to set empty results which is not
+	# possible else.
+	set ans [list "ok" $state(-textvariable)]
     } else {
 	set ans ""
     }
     unset -nocomplain state
     return $ans
+}
+
+# ui::megaentrytext --
+# 
+#       Simple accessor function to get entry text.
+
+proc ui::megaentrytext {ans} {
+    return [lindex $ans 1]
 }
 
 if {0} {

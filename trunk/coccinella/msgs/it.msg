@@ -376,7 +376,7 @@
 ::msgcat::mcset it mNewAccount... {Nuovo account...}
 ::msgcat::mcset it mLogin... {Connetti...}
 ::msgcat::mcset it mLogout {Disconnetti}
-::msgcat::mcset it mLogoutWith {Disconnetti con messaggio...}
+::msgcat::mcset it mLogoutWith... {Disconnetti con messaggio...}
 ::msgcat::mcset it mHideMain {Nascondi}
 ::msgcat::mcset it mShowMain {Mostra}
 ::msgcat::mcset it mPassword... {&Password...}
@@ -425,7 +425,7 @@
 ::msgcat::mcset it mTakeSnapShot {Scatta foto}
 ::msgcat::mcset it mTimeCode {Timecode}
 ::msgcat::mcset it mUserInfo {Informazioni utente}
-::msgcat::mcset it mEditBookmarks {Modifica preferiti}
+::msgcat::mcset it mEditBookmarks... {Modifica preferiti}
 ::msgcat::mcset it mToolbar {Strumenti}
 ::msgcat::mcset it mNotebook {Taccuino}
 ::msgcat::mcset it mMinimal {Minimale}
@@ -456,9 +456,9 @@
 ::msgcat::mcset it mRegister {Iscrizione}
 ::msgcat::mcset it mUnregister {Annullamento Iscrizione}
 ::msgcat::mcset it mRefresh {Aggiorna}
-::msgcat::mcset it mAddServer {Aggiungi server...}
+::msgcat::mcset it mAddServer... {Aggiungi server...}
 ::msgcat::mcset it mLocalTime {Ora locale...}
-::msgcat::mcset it mSendFile {Invia file...}
+::msgcat::mcset it mSendFile... {Invia file...}
 ::msgcat::mcset it mChatHistory {Archivio storico messaggi}
 ::msgcat::mcset it mLoginTrpt {Connetti a un server di trasporti}
 ::msgcat::mcset it mLogoutTrpt {Disconnetti dal server di trasporti}

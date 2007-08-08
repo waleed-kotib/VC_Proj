@@ -296,8 +296,7 @@
 ::msgcat::mcset en mAction               {Action}
 ::msgcat::mcset en mAdHocCommands        {Ad-Hoc Commands}
 ::msgcat::mcset en mAddContact...        {Add Contact...}
-::msgcat::mcset en mAddNewUser           {Add New User...}
-::msgcat::mcset en mAddServer            {Add Server...}
+::msgcat::mcset en mAddServer...         {Add Server...}
 ::msgcat::mcset en mAddSpeechBubble      {Add Speech Bubble}
 ::msgcat::mcset en mAddons               {Addons}
 ::msgcat::mcset en mAll                  {&All}
@@ -312,7 +311,7 @@
 ::msgcat::mcset en mBold                 {Bold}
 ::msgcat::mcset en mBrushThickness       {Brush Thickness}
 ::msgcat::mcset en mBugReport            {Report Bug...}
-::msgcat::mcset en mBusinessCard         {View Business Card...}
+::msgcat::mcset en mBusinessCard...      {View Business Card...}
 ::msgcat::mcset en mCall                 {Call...}
 ::msgcat::mcset en mChat                 {Chat}
 ::msgcat::mcset en mChat...              {Chat...}
@@ -335,8 +334,9 @@
 ::msgcat::mcset en mDiscoverServer...    {Discover Server...}
 ::msgcat::mcset en mDoNotDisturb         {Do Not Disturb}
 ::msgcat::mcset en mEdit                 {Edit}
-::msgcat::mcset en mEditBookmarks        {Edit Bookmarks...}
-::msgcat::mcset en mEditContact          {Edit Contact...}
+::msgcat::mcset en mEditBookmarks...     {Edit Bookmarks...}
+::msgcat::mcset en mEditvCard2...        {Edit Business Card...}
+::msgcat::mcset en mEditContact...       {Edit Contact...}
 ::msgcat::mcset en mEditNick             {Edit Nickname}
 ::msgcat::mcset en mEditProfiles         {Edit Profiles}
 ::msgcat::mcset en mEditProfiles...      {Edit Profiles...}
@@ -391,7 +391,7 @@
 ::msgcat::mcset en mLoginTrpt            {Login to Transport}
 ::msgcat::mcset en mLogout               {Logout}
 ::msgcat::mcset en mLogoutTrpt           {Logout from Transport}
-::msgcat::mcset en mLogoutWith           {Logout With Message...}
+::msgcat::mcset en mLogoutWith...        {Logout With Message...}
 ::msgcat::mcset en mLower                {&Lower}
 ::msgcat::mcset en mMessage              {Message...}
 ::msgcat::mcset en mMessageInbox         {Message Inbox...}
@@ -444,7 +444,7 @@
 ::msgcat::mcset en mSaveCanvas           {&Save Canvas...}
 ::msgcat::mcset en mSaveImageAs          {Save Image As...}
 ::msgcat::mcset en mSearch...            {Search...}
-::msgcat::mcset en mSendFile             {Send File...}
+::msgcat::mcset en mSendFile...          {Send File...}
 ::msgcat::mcset en mSendMessage...       {Send Message...}
 ::msgcat::mcset en mServers              {Servers}
 ::msgcat::mcset en mSetupAssistant...    {Setup Assistant...}
@@ -479,7 +479,6 @@
 ::msgcat::mcset en mWhiteboard           {Whiteboard...}
 ::msgcat::mcset en mvCard                {vCard...}
 ::msgcat::mcset en mvCard2               {Business Card}
-::msgcat::mcset en mEditvCard2...        {Edit Business Card...}
 
 
 # Short texts only. Use english text as database key.

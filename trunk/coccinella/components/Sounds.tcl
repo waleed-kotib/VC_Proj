@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.34 2007-08-08 09:18:37 matben Exp $
+# $Id: Sounds.tcl,v 1.35 2007-08-08 13:01:07 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -407,7 +407,7 @@ proc  ::Sounds::InitPrefsHook { } {
       [list ::Sounds::sprefs(midiCmd)  sound_midiCmd $sprefs(midiCmd)]  \
       ]
     
-    set optList {}
+    set optList [list]
     foreach name $allSounds {
 	set sprefs($name) 1
 	lappend optList [list ::Sounds::sprefs($name) sound_${name} $sprefs($name)]
@@ -450,7 +450,8 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     } else {
 	set tmpPrefs(soundSet) $sprefs(soundSet)
     }
-    set tmpPrefs(volume) $sprefs(volume)
+    set tmpPrefs(volume)  $sprefs(volume)
+    set tmpPrefs(midiCmd) $sprefs(midiCmd)
     set soundSets [concat [list [mc Default]] [GetAllSets]]
     
     set wc $wpage.c
@@ -521,22 +522,10 @@ proc ::Sounds::MidiPlayer { } {
       syntax."
     set label "MIDI command:"
     
-    if {0} {
-	set ans [ui::megaentry -title $title -message $msg -label $label \
-	  -value $tmpPrefs(midiCmd)]
-	if {$ans ne ""} {
-	    set tmpPrefs(midiCmd) $ans
-	}
-    }
-    
-    if {1} {
-	set varName [namespace current]::midiCmd
-	
-	set ans [::UI::MegaDlgMsgAndEntry $title $msg $label $varName \
-	  [mc Cancel] [mc OK]]
-	if {$ans eq "ok"} {
-	    set tmpPrefs(midiCmd) [set $varName]
-	}
+    set ans [ui::megaentry -title $title -message $msg -label $label \
+      -value $tmpPrefs(midiCmd)]
+    if {$ans ne ""} {
+	set tmpPrefs(midiCmd) [ui::megaentrytext $ans]
     }
 }
 

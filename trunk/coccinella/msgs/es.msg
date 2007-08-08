@@ -376,7 +376,7 @@
 ::msgcat::mcset es mNewAccount...	{Nueva cuenta...}
 ::msgcat::mcset es mLogin...		{Conectarse...}
 ::msgcat::mcset es mLogout		{Desconectarse}
-::msgcat::mcset es mLogoutWith          {Desconectarse con el mensaje...}
+::msgcat::mcset es mLogoutWith...       {Desconectarse con el mensaje...}
 ::msgcat::mcset es mHideMain            {Ocultar}
 ::msgcat::mcset es mShowMain            {Mostrar}
 ::msgcat::mcset es mPassword...		{&Contraseña...}
@@ -435,7 +435,7 @@
 ::msgcat::mcset es mHugeFont            {Huge}
 
 ::msgcat::mcset es mUserInfo            {Informacion del usuario}
-::msgcat::mcset es mEditBookmarks       {Editar favoritos}
+::msgcat::mcset es mEditBookmarks...    {Editar favoritos}
 ::msgcat::mcset es mToolbar		{Barra de herramientas}
 ::msgcat::mcset es mNotebook		{Pestañas}
 ::msgcat::mcset es mMinimal		{Reducido}
@@ -463,9 +463,9 @@
 ::msgcat::mcset es mRegister     	{Registrarse}
 ::msgcat::mcset es mUnregister     	{Desregistrarse}
 ::msgcat::mcset es mRefresh     	{Refrescar}
-::msgcat::mcset es mAddServer     	{Añadir un servidor...}
+::msgcat::mcset es mAddServer...     	{Añadir un servidor...}
 ::msgcat::mcset es mLocalTime     	{Hora local...}
-::msgcat::mcset es mSendFile     	{Enviar un mensaje...}
+::msgcat::mcset es mSendFile...     	{Enviar un mensaje...}
 ::msgcat::mcset es mChatHistory     	{Historial del chat}
 ::msgcat::mcset es mLoginTrpt     	{Conectarse a un servidor de transporte}
 ::msgcat::mcset es mLogoutTrpt     	{Desconectarse de un servidor de transporte}

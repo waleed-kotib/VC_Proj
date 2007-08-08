@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.123 2007-08-06 07:49:54 matben Exp $
+# $Id: Login.tcl,v 1.124 2007-08-08 13:01:08 matben Exp $
 
 package provide Login 1.0
 
@@ -535,20 +535,20 @@ proc ::Login::LaunchHook { } {
     set node     [::Profiles::Get $profname node]
     set password [::Profiles::Get $profname password]
     set jid [jlib::joinjid $node $domain ""]
-    set ans "ok"
+    set ans ""
     if {$password eq ""} {
 	set ujid [jlib::unescapejid $jid]
-	set ans [::UI::MegaDlgMsgAndEntry  \
-	  [mc {Password}] [mc enterpassword $ujid] "[mc Password]:" \
-	  password [mc Cancel] [mc OK] -show {*}]
+	set ans [ui::megaentry -label "[mc Password]:" -icon question \
+	  -geovariable prefs(winGeom,jautologin) -show {*} \
+	  -title [mc Password] -message [mc enterpassword $ujid]]
     }
-    if {$ans eq "ok"} {
+    if {$ans ne ""} {
+	set password [ui::megaentrytext $ans]
 	set opts   [::Profiles::Get $profname options]
 	array set optsArr $opts
 	if {[info exists optsArr(-resource)] && ($optsArr(-resource) ne "")} {
 	    set res $optsArr(-resource)
 	} else {
-	    #set res "coccinella"
 	    set res [::Profiles::MachineResource]
 	}
 	eval {::Login::HighLogin $domain $node $res $password \

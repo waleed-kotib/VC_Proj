@@ -302,7 +302,7 @@
 ::msgcat::mcset ru mNewAccount...	{Новый аккаунт...}
 ::msgcat::mcset ru mLogin...		{Логин...}
 ::msgcat::mcset ru mLogout		{Отключится}
-::msgcat::mcset ru mLogoutWith          {Отключится со статусом...}
+::msgcat::mcset ru mLogoutWith...       {Отключится со статусом...}
 ::msgcat::mcset ru mHideMain            {Hide Main}
 ::msgcat::mcset ru mShowMain            {Show Main}
 ::msgcat::mcset ru mPassword...		{Пароль}
@@ -353,7 +353,7 @@
 ::msgcat::mcset ru mTakeSnapShot        {Скриншот}
 ::msgcat::mcset ru mTimeCode		{Timecode}
 ::msgcat::mcset ru mUserInfo			{Информация о пользовател...}
-::msgcat::mcset ru mEditBookmarks	{Закладки}
+::msgcat::mcset ru mEditBookmarks...	{Закладки}
 ::msgcat::mcset ru mDisco               {Дисковери}
 ::msgcat::mcset ru mCustomStatus        {Custom Status...}
 ::msgcat::mcset ru mImport              {Импорт}
@@ -377,9 +377,9 @@
 ::msgcat::mcset ru mRegister     	{Зарегистрироваться}
 ::msgcat::mcset ru mUnregister     	{Unregister}
 ::msgcat::mcset ru mRefresh     	{Обновить}
-::msgcat::mcset ru mAddServer     	{Добавить сервер...}
+::msgcat::mcset ru mAddServer...     	{Добавить сервер...}
 ::msgcat::mcset ru mLocalTime     	{Локальное время...}
-::msgcat::mcset ru mSendFile     	{Послать файл...}
+::msgcat::mcset ru mSendFile...     	{Послать файл...}
 ::msgcat::mcset ru mChatHistory     	{Журнал}
 ::msgcat::mcset ru mLoginTrpt     	{Подключится к транспорту}
 ::msgcat::mcset ru mLogoutTrpt     	{Отключится от транспорта}

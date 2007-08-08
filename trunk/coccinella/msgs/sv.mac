@@ -295,7 +295,7 @@
 ::msgcat::mcset sv mAdHocCommands        {Ad-hoc kommando}
 ::msgcat::mcset sv mAddContact...        {Lägg till kontakt...}
 ::msgcat::mcset sv mAddNewUser           {Ny kontakt...}
-::msgcat::mcset sv mAddServer            {Lägg till server...}
+::msgcat::mcset sv mAddServer...         {Lägg till server...}
 ::msgcat::mcset sv mAddSpeechBubble      {Lägg till pratbubbla}
 ::msgcat::mcset sv mAddons               {Addons}
 ::msgcat::mcset sv mAll                  {Alla}
@@ -310,7 +310,7 @@
 ::msgcat::mcset sv mBold                 {Fet}
 ::msgcat::mcset sv mBrushThickness       {Penselvidd}
 ::msgcat::mcset sv mBugReport            {Rapportera bug...}
-::msgcat::mcset sv mBusinessCard         {Visa visitkort...}
+::msgcat::mcset sv mBusinessCard...      {Visa visitkort...}
 ::msgcat::mcset sv mCall                 {Ring}
 ::msgcat::mcset sv mChat                 {Chatta}
 ::msgcat::mcset sv mChat...              {Chatta...}
@@ -333,8 +333,9 @@
 ::msgcat::mcset sv mDiscoverServer...    {Undersök server...}
 ::msgcat::mcset sv mDoNotDisturb         {Stör ej}
 ::msgcat::mcset sv mEdit                 {Redigera}
-::msgcat::mcset sv mEditBookmarks        {Redigera bokmärken...}
-::msgcat::mcset sv mEditContact          {Redigera kontakt...}
+::msgcat::mcset sv mEditBookmarks...     {Redigera bokmärken...}
+::msgcat::mcset sv mEditvCard2...        {Redigera visitkort...}
+::msgcat::mcset sv mEditContact...       {Redigera kontakt...}
 ::msgcat::mcset sv mEditNick             {Ändra kortnamn}
 ::msgcat::mcset sv mEditProfiles         {Redigera profiler}
 ::msgcat::mcset sv mEditProfiles...      {Redigera profiler...}
@@ -389,7 +390,7 @@
 ::msgcat::mcset sv mLoginTrpt            {Logga på transport}
 ::msgcat::mcset sv mLogout               {Logga ut}
 ::msgcat::mcset sv mLogoutTrpt           {Logga ut transport}
-::msgcat::mcset sv mLogoutWith           {Logga ut meddelande...}
+::msgcat::mcset sv mLogoutWith...        {Logga ut meddelande...}
 ::msgcat::mcset sv mLower                {Sänk}
 ::msgcat::mcset sv mMessage              {Meddelande...}
 ::msgcat::mcset sv mMessageInbox         {Inkorg}
@@ -442,7 +443,7 @@
 ::msgcat::mcset sv mSaveCanvas           {Spara canvas...}
 ::msgcat::mcset sv mSaveImageAs          {Spara bild som...}
 ::msgcat::mcset sv mSearch...            {Leta...}
-::msgcat::mcset sv mSendFile             {Skicka fil...}
+::msgcat::mcset sv mSendFile...          {Skicka fil...}
 ::msgcat::mcset sv mSendMessage...       {Skicka meddelande...}
 ::msgcat::mcset sv mServers              {Servrar}
 ::msgcat::mcset sv mSetupAssistant...    {Inställningsassistent...}
@@ -477,7 +478,6 @@
 ::msgcat::mcset sv mWhiteboard           {Skrivtavla...}
 ::msgcat::mcset sv mvCard                {vCard...}
 ::msgcat::mcset sv mvCard2               {Visitkort}
-::msgcat::mcset sv mEditvCard2...        {Redigera visitkort...}
 
 
 

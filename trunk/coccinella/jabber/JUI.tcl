@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.184 2007-08-08 09:18:37 matben Exp $
+# $Id: JUI.tcl,v 1.185 2007-08-08 13:01:08 matben Exp $
 
 package provide JUI 1.0
 
@@ -143,7 +143,7 @@ proc ::JUI::Init { } {
         
     set menuDefs(rost,action) {    
 	{command     mLogin...      {::Jabber::OnMenuLogInOut}        L}
-	{command     mLogoutWith    {::Jabber::Logout::OnMenuStatus}  {}}
+	{command     mLogoutWith... {::Jabber::Logout::OnMenuStatus}  {}}
 	{separator}
 	{command     mSendMessage... {::NewMsg::OnMenu}                M}
 	{command     mChat...       {::Chat::OnMenu}                  T}
@@ -156,7 +156,7 @@ proc ::JUI::Init { } {
 	{separator}
 	{command     mEnterRoom     {::GroupChat::OnMenuEnter}        R}
 	{command     mCreateRoom    {::GroupChat::OnMenuCreate}       {}}
-	{command     mEditBookmarks {::GroupChat::OnMenuBookmark}     {}}
+	{command     mEditBookmarks... {::GroupChat::OnMenuBookmark}     {}}
     }
 
     if {[::Jabber::HaveWhiteboard]} {
@@ -959,7 +959,7 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mRegister -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
 	      -label [mc mLogout]
-	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mSearch... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mAddContact... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state normal
@@ -967,7 +967,7 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state normal
 	}
 	disconnect {
@@ -979,7 +979,7 @@ proc ::JUI::ActionPostCommand {wmenu} {
 		::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
 		  -label [mc mLogin...]
 	    }
-	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mSearch... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mAddContact... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state disabled
@@ -987,7 +987,7 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state disabled
 	}	
     }    
