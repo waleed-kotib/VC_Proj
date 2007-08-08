@@ -380,7 +380,7 @@
 ::msgcat::mcset pl mPassword...		{Zmień hasło...}
 ::msgcat::mcset pl mRoster/Services	{Roster/Usługi}
 ::msgcat::mcset pl mMessageInbox	{Skrzynka odbiorcza}
-::msgcat::mcset pl mSearch		{Przeszukaj...}
+::msgcat::mcset pl mSearch...		{Przeszukaj...}
 ::msgcat::mcset pl mAddNewUser		{Dodaj kontakt...}
 ::msgcat::mcset pl mSendMessage...	{Wyślij wiadomość do...}
 ::msgcat::mcset pl mChat		{Chętnie pogawędzę}

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.183 2007-08-07 07:50:24 matben Exp $
+# $Id: JUI.tcl,v 1.184 2007-08-08 09:18:37 matben Exp $
 
 package provide JUI 1.0
 
@@ -142,17 +142,17 @@ proc ::JUI::Init { } {
     }
         
     set menuDefs(rost,action) {    
-	{command     mLogin...         {::Jabber::OnMenuLogInOut}        L}
+	{command     mLogin...      {::Jabber::OnMenuLogInOut}        L}
 	{command     mLogoutWith    {::Jabber::Logout::OnMenuStatus}  {}}
-	{separator}
-	{command     mSearch        {::Search::OnMenu}                {}}
-	{command     mAddContact... {::JUser::OnMenu}                 {}}
-	{command     mDiscoverServer... {::Disco::OnMenuAddServer}    {}}
-	{cascade     mRegister      {}                                {} {} {}}
 	{separator}
 	{command     mSendMessage... {::NewMsg::OnMenu}                M}
 	{command     mChat...       {::Chat::OnMenu}                  T}
 	{cascade     mStatus        {}                                {} {} {}}
+	{separator}
+	{command     mSearch...     {::Search::OnMenu}                {}}
+	{command     mAddContact... {::JUser::OnMenu}                 {}}
+	{cascade     mRegister      {}                                {} {} {}}
+	{command     mDiscoverServer... {::Disco::OnMenuAddServer}    {}}
 	{separator}
 	{command     mEnterRoom     {::GroupChat::OnMenuEnter}        R}
 	{command     mCreateRoom    {::GroupChat::OnMenuCreate}       {}}
@@ -960,7 +960,7 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
 	      -label [mc mLogout]
 	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mSearch -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mSearch... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mAddContact... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mChat... -state normal
@@ -980,7 +980,7 @@ proc ::JUI::ActionPostCommand {wmenu} {
 		  -label [mc mLogin...]
 	    }
 	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mSearch -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mSearch... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mAddContact... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mChat... -state disabled
@@ -1069,6 +1069,8 @@ proc ::JUI::SetConnectState {state} {
     variable connectState
     
     set connectState $state
+    ::hooks::run connectState $state
+    
     return $connectState
 }
 

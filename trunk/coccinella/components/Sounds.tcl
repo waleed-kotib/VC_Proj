@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.33 2007-08-06 13:19:15 matben Exp $
+# $Id: Sounds.tcl,v 1.34 2007-08-08 09:18:37 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -520,12 +520,23 @@ proc ::Sounds::MidiPlayer { } {
       Your system midi player command must have the \"command fileName\"\
       syntax."
     set label "MIDI command:"
-    set varName [namespace current]::midiCmd
-
-    set ans [::UI::MegaDlgMsgAndEntry $title $msg $label $varName \
-     [mc Cancel] [mc OK]]
-    if {$ans eq "ok"} {
-	set tmpPrefs(midiCmd) [set $varName]
+    
+    if {0} {
+	set ans [ui::megaentry -title $title -message $msg -label $label \
+	  -value $tmpPrefs(midiCmd)]
+	if {$ans ne ""} {
+	    set tmpPrefs(midiCmd) $ans
+	}
+    }
+    
+    if {1} {
+	set varName [namespace current]::midiCmd
+	
+	set ans [::UI::MegaDlgMsgAndEntry $title $msg $label $varName \
+	  [mc Cancel] [mc OK]]
+	if {$ans eq "ok"} {
+	    set tmpPrefs(midiCmd) [set $varName]
+	}
     }
 }
 

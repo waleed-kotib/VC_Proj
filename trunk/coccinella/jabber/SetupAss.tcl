@@ -3,7 +3,7 @@
 #       Uses the wizard package to build a setup assistant for the
 #       Coccinella. 
 #
-#  Copyright (c) 2001-2006  Mats Bengtsson
+#  Copyright (c) 2001-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.45 2007-08-07 13:30:47 matben Exp $
+# $Id: SetupAss.tcl,v 1.46 2007-08-08 09:18:37 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -39,6 +39,9 @@ namespace eval ::SetupAss::  {
     option add *SetupAss*assistantImage       assistant        widgetDefault
     option add *SetupAss*assistantDisImage    assistantDis     widgetDefault
     
+    # Event hooks:
+    ::hooks::register  connectState  ::SetupAss::ConnectStateHook
+    
     # We could be much more general here...
     set ::config(setupass,page,server)    1
     set ::config(setupass,public-servers) 1
@@ -56,7 +59,7 @@ proc ::SetupAss::SetupAss {} {
     variable password  ""
     variable password2 ""
     variable wserver   ""
-    variable wregister
+    variable wregister ""
     variable wwizard
 
     if {!$inited} {
@@ -307,13 +310,6 @@ proc ::SetupAss::NextPage {w page} {
 	    	    
 	}
     }
-    
-    # Avoid inconsistent state.
-    if {[::Jabber::IsConnected]} {
-	$wregister state {disabled}
-    } else {
-	$wregister state {!disabled}
-    }
 }
     
 proc ::SetupAss::DefaultLang { } {
@@ -347,6 +343,25 @@ proc ::SetupAss::DoRegister { } {
     if {[::Jabber::IsConnected]} {
 	$wregister state {disabled}
     }
+}
+
+proc ::SetupAss::ConnectStateHook {state} {
+    global  wDlgs
+    variable wregister
+
+    if {![winfo exists $wDlgs(setupass)]} {
+	return
+    }
+    
+    # Avoid inconsistent state.
+    switch $state {
+	connectinit - connectfin - connect {
+	    $wregister state {disabled}
+	}
+	disconnect {
+	    $wregister state {!disabled}
+	}
+    }   
 }
 
 proc ::SetupAss::DoFinish {w} {

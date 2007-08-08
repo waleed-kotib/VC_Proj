@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.121 2007-08-07 07:50:21 matben Exp $
+# $Id: Disco.tcl,v 1.122 2007-08-08 09:18:37 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -145,7 +145,7 @@ proc ::Disco::InitMenus {} {
 	{separator}
 	{command    mInfo          {::UserInfo::Get $jid $node} }
 	{separator}
-	{command    mSearch        {
+	{command    mSearch...     {
 	    ::Search::Build -server $jid -autoget 1
 	} }
 	{command    mRegister      {
@@ -189,7 +189,7 @@ proc ::Disco::InitMenus {} {
 	{mEnterRoom     {room}          }
 	{mCreateRoom    {conference}    }
 	{mInfo          {jid}           }
-	{mSearch        {search}        }
+	{mSearch...     {search}        }
 	{mRegister      {register}      }
 	{mUnregister    {register}      }
 	{mShow          {normal}     {

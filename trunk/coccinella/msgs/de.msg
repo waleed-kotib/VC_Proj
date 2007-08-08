@@ -381,7 +381,7 @@
 ::msgcat::mcset de mPassword...		{Passwort...}
 ::msgcat::mcset de mRoster/Services	{Kontakte/Dienste}
 ::msgcat::mcset de mMessageInbox	{Nachrichten-Eingang}
-::msgcat::mcset de mSearch		{Suche...}
+::msgcat::mcset de mSearch...		{Suche...}
 ::msgcat::mcset de mAddNewUser		{Benutzer hinzufügen...}
 ::msgcat::mcset de mSendMessage...	{Nachricht senden...}
 ::msgcat::mcset de mChat		{Chat}

@@ -347,6 +347,7 @@
 ::msgcat::mcset en mErrorLog             {Error Log...}
 ::msgcat::mcset en mExitRoom             {Exit Room}
 ::msgcat::mcset en mExport               {Export}
+::msgcat::mcset en mExport...            {Export...}
 ::msgcat::mcset en mExportImage          {Export Image...}
 ::msgcat::mcset en mExportMovie          {Export Movie...}
 ::msgcat::mcset en mExtendedAway         {Extended Away}
@@ -442,7 +443,7 @@
 ::msgcat::mcset en mSaveAsItem           {Save As Item...}
 ::msgcat::mcset en mSaveCanvas           {&Save Canvas...}
 ::msgcat::mcset en mSaveImageAs          {Save Image As...}
-::msgcat::mcset en mSearch               {Search...}
+::msgcat::mcset en mSearch...            {Search...}
 ::msgcat::mcset en mSendFile             {Send File...}
 ::msgcat::mcset en mSendMessage...       {Send Message...}
 ::msgcat::mcset en mServers              {Servers}
@@ -975,6 +976,9 @@ you happen to be online while this message is being read. Do you want to send it
 ::msgcat::mcset en jamessstatuscustdtl          {The most frequent states and corresponding messages are easily reachable as menu entries.}
 ::msgcat::mcset en jamessproxy-failure          {The proxy server reported an error. The error code is "%s".}
 ::msgcat::mcset en jamessaskregister            {Do you want to register a new account?}
+::msgcat::mcset en jamessprofaskrem             {This will remove the selected profile. Do you also want to remove any user account for this profile? This action cannot be undone.}
+::msgcat::mcset en jamessgeneditwarnclose       {There are edits made to this dialog. Do you want to save them before closing?}
+
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors

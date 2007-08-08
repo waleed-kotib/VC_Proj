@@ -345,6 +345,7 @@
 ::msgcat::mcset sv mErrorLog             {Fellogg...}
 ::msgcat::mcset sv mExitRoom             {Lämna rum}
 ::msgcat::mcset sv mExport               {Exportera}
+::msgcat::mcset sv mExport...            {Exportera...}
 ::msgcat::mcset sv mExportImage          {Exportera bilden...}
 ::msgcat::mcset sv mExportMovie          {Exportera filmen...}
 ::msgcat::mcset sv mExtendedAway         {Borta länge}
@@ -440,7 +441,7 @@
 ::msgcat::mcset sv mSaveAsItem           {Spara som objekt...}
 ::msgcat::mcset sv mSaveCanvas           {Spara canvas...}
 ::msgcat::mcset sv mSaveImageAs          {Spara bild som...}
-::msgcat::mcset sv mSearch               {Leta...}
+::msgcat::mcset sv mSearch...            {Leta...}
 ::msgcat::mcset sv mSendFile             {Skicka fil...}
 ::msgcat::mcset sv mSendMessage...       {Skicka meddelande...}
 ::msgcat::mcset sv mServers              {Servrar}
@@ -980,6 +981,8 @@ dessa om du inte händelsevis är tillgänglig när mottagaren läser det. Vill du sk
 ::msgcat::mcset sv jamessstatuscustdtl          {De mest använda tillstånden och meddelanden är enkelt nåbara som menyer.}
 ::msgcat::mcset sv jamessproxy-failure          {Proxy servern rapporterade ett fel. Felkoden är "%s".}
 ::msgcat::mcset sv jamessaskregister            {Vill du registrera ett nytt användarkonto?}
+::msgcat::mcset sv jamessprofaskrem             {Du raderar den valda användarprofilen. Vill du också radera användarkontot för den här profilen? Det här kan inte göras ogjort.}
+::msgcat::mcset sv jamessgeneditwarnclose       {Det har gjorts ändringar i den här dialogen. Vill du spara dessa innan den stängs?}
 
 
 # This maps Defined Error Conditions to clear text messages.

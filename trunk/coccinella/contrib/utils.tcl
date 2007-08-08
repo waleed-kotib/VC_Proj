@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: utils.tcl,v 1.7 2007-07-19 06:28:11 matben Exp $
+# $Id: utils.tcl,v 1.8 2007-08-08 09:18:37 matben Exp $
 
 package provide utils 1.0
     
@@ -128,26 +128,6 @@ proc lsearchsublists {args} {
 # compare with an arbitrary list where at least one of the element
 # must fulfill the logic implied by 'type', say {user unavailable} (=0)
 
-# fromoptionlist --
-# 
-#       This command plucks an option value from a list of options and their 
-#       values. listName must be the name of a variable containing such a list; 
-#       name is the name of the specific option. It looks for option in the 
-#       option list. If it is found, it and its value are removed from the 
-#       list, and the value is returned. If option doesn't appear in the list,
-#       then the value is returned. 
-
-proc fromoptionlist {listName name {value ""}} {
-    upvar $listName listValue
-   
-    if {[set idx [lsearch $listValue $name]] >= 0} {
-	set idx2 [expr {$idx+1}]
-	set value [lindex $listValue $idx2]
-	uplevel set $listName [list [lreplace $listValue $idx $idx2]]
-    }
-    return $value
-}
-
 # ESCglobs --
 #
 #	array get and array unset accepts glob characters. These need to be
@@ -156,6 +136,10 @@ proc fromoptionlist {listName name {value ""}} {
 proc ESCglobs {s} {
     return [string map {* \\* ? \\? [ \\[ ] \\] \\ \\\\} $s]
 }
+
+# arraysequal --
+# 
+#       Compare two arrays.
 
 proc arraysequal {arrName1 arrName2} {
     upvar 1 $arrName1 arr1 $arrName2 arr2
@@ -202,6 +186,22 @@ proc arraysequalnames {arrName1 arrName2 names} {
 	}
     }
     return 1
+}
+
+# arraygetsublist --
+# 
+#       Extracts a flat array from another array that matches 'prefix',
+#       and strips off all prefix. Use dict instead when that comes.
+
+proc arraygetsublist {arrName prefix} {
+    upvar 1 $arrName arr
+    set subL [list]
+    set len [string length $prefix]
+    foreach {name value} [array get arr $prefix*] {
+	set key [string range $name $len end]
+	lappend subL $key $value
+    }
+    return $subL
 }
 
 if {![llength [info commands lassign]]} {

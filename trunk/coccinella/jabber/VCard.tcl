@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.61 2007-08-07 14:08:40 matben Exp $
+# $Id: VCard.tcl,v 1.62 2007-08-08 09:18:37 matben Exp $
 
 package provide VCard 1.0
 
@@ -755,7 +755,8 @@ proc ::VCard::OnMenuExportHook {} {
 }
 
 proc ::VCard::ExportXML {token jid} {
-    set fileName [tk_getSaveFile -defaultextension .xml -initialfile vcard.xml]
+    set f [uriencode::quote $jid].xml
+    set fileName [tk_getSaveFile -defaultextension .xml -initialfile $f]
     if {$fileName ne ""} {
 	SaveToFile $token $fileName $jid
     }
