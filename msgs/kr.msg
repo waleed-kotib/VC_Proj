@@ -379,7 +379,7 @@
 ::msgcat::mcset kr mPassword...		{암호...}
 ::msgcat::mcset kr mRoster/Services	{명부/서비스}
 ::msgcat::mcset kr mMessageInbox	{받은 메세지함}
-::msgcat::mcset kr mSearch		{찾기...}
+::msgcat::mcset kr mSearch...		{찾기...}
 ::msgcat::mcset kr mAddNewUser		{새 사용자 더하기...}
 ::msgcat::mcset kr mSendMessage...	{메세지 보내기...}
 ::msgcat::mcset kr mChat		{대화}

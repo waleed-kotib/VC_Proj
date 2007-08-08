@@ -382,7 +382,7 @@
 ::msgcat::mcset fr mPassword...		{&Mot de passe...}
 ::msgcat::mcset fr mRoster/Services	{Contacts/services}
 ::msgcat::mcset fr mMessageInbox	{Messages}
-::msgcat::mcset fr mSearch		{Cherche&r...}
+::msgcat::mcset fr mSearch...		{Cherche&r...}
 ::msgcat::mcset fr mAddNewUser		{Ajouter un nouvel utilisateur...}
 ::msgcat::mcset fr mSendMessage...	{Envo&yer un message...}
 ::msgcat::mcset fr mChat		{Discussion}

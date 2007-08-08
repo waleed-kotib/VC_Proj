@@ -308,7 +308,7 @@
 ::msgcat::mcset ru mPassword...		{Пароль}
 ::msgcat::mcset ru mRoster/Services	{Roster/Services}
 ::msgcat::mcset ru mMessageInbox	{Входящие}
-::msgcat::mcset ru mSearch		{Поиск...}
+::msgcat::mcset ru mSearch...		{Поиск...}
 ::msgcat::mcset ru mAddNewUser		{Добавить юзера...}
 ::msgcat::mcset ru mSendMessage...	{Послать сообщение...}
 ::msgcat::mcset ru mChat		{Чат}

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.88 2007-08-07 07:50:25 matben Exp $
+# $Id: Profiles.tcl,v 1.89 2007-08-08 09:18:37 matben Exp $
 
 package require ui::megaentry
 
@@ -38,6 +38,7 @@ namespace eval ::Profiles:: {
     set ::config(profiles,ask-register-on-new)  1
     set ::config(profiles,display-in-prefs)     0
     set ::config(profiles,font-size)  normal ;# normal | small
+    set ::config(profiles,warn-on-cancel) 1
     
     # Define all hooks that are needed.
     ::hooks::register prefsInitHook          ::Profiles::InitHook
@@ -847,8 +848,6 @@ proc ::Profiles::CancelHook { } {
 	array set profA [SortList [GetList]]
 	array set prefA [SortList [FrameGetProfiles $wprefspage]]
 	if {![arraysequal prefA profA]} {
-	    #parray profA
-	    #parray prefA
 	    ::Preferences::HasChanged
 	}
     }
@@ -959,15 +958,30 @@ proc ::Profiles::SaveDlg {w} {
     if {![FrameVerifyNonEmpty $wdlgpage]} {
 	return
     }
-    ::UI::SaveWinGeom $w
     SetList [FrameGetProfiles $wdlgpage]
     SetSelectedName [FrameGetSelected $wdlgpage]
     ::Login::LoadProfiles
-    destroy $w
+    Close $w
 }
 
 proc ::Profiles::CancelDlg {w} {
+    global  config
+    variable wdlgpage
     
+    if {$config(profiles,warn-on-cancel)} {
+	if {![FrameUnedited $wdlgpage]} {
+	    set ans [tk_messageBox -parent $w -icon warning -type yesno \
+	      -message [mc jamessgeneditwarnclose]]
+	    if {$ans eq "yes"} {
+		SaveDlg $w
+		return
+	    }
+	}
+    }
+    Close $w
+}
+
+proc ::Profiles::Close {w} {
     ::UI::SaveWinGeom $w
     destroy $w
 }
@@ -1232,6 +1246,7 @@ proc ::Profiles::FrameMakeTmpProfiles {w} {
     
     # New... Profiles
     array unset state prof,*
+    array unset state init,*
     
     foreach {name spec} [GetList] {
 	lassign [lrange $spec 0 2] server username password
@@ -1246,6 +1261,12 @@ proc ::Profiles::FrameMakeTmpProfiles {w} {
 	}
 	set jid [jlib::joinjid $username $server $state(prof,$name,-resource)]
 	set state(prof,$name,jid) $jid
+    }
+    
+    # Make a copy of the initial state to detect changes.
+    foreach {name value} [array get state prof,*] {
+	set key "init,[string range $name 5 end]"
+	set state($key) $value
     }
 }
 
@@ -1448,11 +1469,26 @@ proc ::Profiles::FrameGetAllTmpNames {w} {
     return [lsort -dictionary $names]
 }
 
+proc ::Profiles::FrameUnedited {w} {
+    variable $w
+    upvar 0 $w state
+    
+    # Get present dialog state into tmp array first.
+    FrameSaveCurrentToTmp $w $state(profile)
+
+    array set current [arraygetsublist state prof,]
+    array set initial [arraygetsublist state init,]
+    return [arraysequal current initial]
+}
+
 proc ::Profiles::FrameNewCmd {w} {
     global  config
     variable $w
     upvar 0 $w state
         
+    # Get present dialog state into tmp array first.
+    FrameSaveCurrentToTmp $w $state(profile)
+
     set token [namespace current]::$w    
     
     # First get a unique profile name.
@@ -1498,6 +1534,23 @@ proc ::Profiles::FrameNewCmd {w} {
 	    set ans [tk_messageBox -icon question -type yesno -parent $w \
 	      -message [mc jamessaskregister]]
 	    if {$ans eq "yes"} {
+		
+		# At this stage we shall ask to save any edit states and then
+		# close ourselves in order to avoid inconsistencies.
+		# Do not count in this new profile.
+
+		array set current [arraygetsublist state prof,]
+		array set initial [arraygetsublist state init,]
+		array unset current $uname,*
+		set wtop [winfo toplevel $w]
+		if {![arraysequal current initial]} {
+		    set ans [tk_messageBox -parent $wtop -icon warning \
+		      -type yesno -message [mc jamessgeneditwarnclose]]
+		    if {$ans eq "yes"} {
+			SetList [FrameGetProfiles $w]
+		    }
+		}
+		Close $wtop
 		::RegisterEx::New -profile $uname
 	    }
 	}
@@ -1515,11 +1568,9 @@ proc ::Profiles::FrameDeleteCmd {w} {
     
     # The present state may be something that has not been stored yet.
     if {[info exists state(prof,$profile,server)]} {
-	set str "This will remove the selected profile. Do you also want to remove any user account for this profile? This action cannot be undone."
 	set ans [::UI::MessageBox -title [mc Warning]  \
 	  -type yesnocancel -icon warning -default yes  \
-	  -parent [winfo toplevel $w] \
-	  -message $str]
+	  -parent [winfo toplevel $w] -message [mc jamessprofaskrem]]
     }
     set delete 0
     if {$ans eq "yes"} {

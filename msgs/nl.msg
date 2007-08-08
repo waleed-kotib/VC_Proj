@@ -374,7 +374,7 @@
 ::msgcat::mcset nl mPassword...				{&Wachtwoord...}
 ::msgcat::mcset nl mRoster/Services			{Roster/diensten}
 ::msgcat::mcset nl mMessageInbox			{Postvak in}
-::msgcat::mcset nl mSearch				{Zoeken...}
+::msgcat::mcset nl mSearch...				{Zoeken...}
 ::msgcat::mcset nl mAddNewUser				{Contactpersoon toevoegen...}
 ::msgcat::mcset nl mSendMessage...			{Bericht verzenden...}
 ::msgcat::mcset nl mChat				{Chat}

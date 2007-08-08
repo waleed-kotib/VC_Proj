@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: megaentry.tcl,v 1.3 2007-08-05 07:52:17 matben Exp $
+# $Id: megaentry.tcl,v 1.4 2007-08-08 09:18:37 matben Exp $
 
 package require ui::dialog
 
@@ -20,8 +20,9 @@ proc ui::megaentry {args} {
     upvar 0 $w state
     set token [namespace current]::$w    
 
-    set state(-label)        [ui::from args -label]
-    set state(-modal)        [ui::from args -modal]
+    set state(-label) [ui::from args -label]
+    set state(-modal) [ui::from args -modal]
+    set state(-value) [ui::from args -value]
     ui::from args -textvariable
     ui::from args -type
     ui::from args -variable
@@ -37,6 +38,9 @@ proc ui::megaentry {args} {
     grid $fr.e -sticky ew
     grid columnconfigure $fr 1 -weight 1
     
+    if {$state(-value) ne ""} {
+	$fr.e insert 0 $state(-value)
+    }
     focus $fr.e    
     Grab $w
     

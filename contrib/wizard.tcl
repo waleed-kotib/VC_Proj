@@ -3,11 +3,11 @@
 #      This file is part of The Coccinella application.
 #      It implements a setup assistant toplevel interface.
 #      
-#  Copyright (c) 2002-2005  Mats Bengtsson
+#  Copyright (c) 2002-2007  Mats Bengtsson
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: wizard.tcl,v 1.10 2007-07-19 06:28:11 matben Exp $
+# $Id: wizard.tcl,v 1.11 2007-08-08 09:18:37 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -274,6 +274,12 @@ proc ::wizard::WidgetProc {w command args} {
 	configure {
 	    set result [eval {Configure $w} $args]
 	}
+	currentpage {
+	    if {[llength $args]} {
+		error "wrong # args: should be $w currentpage"
+	    }
+	    set result [CurrentPage $w]
+	}
 	deletepage {
 	    set result [eval {DeletePage $w} $args]
 	}
@@ -419,6 +425,12 @@ proc ::wizard::NewPage {w name args} {
     return $page
 }
 
+proc ::wizard::CurrentPage {w} {
+    upvar ::wizard::${w}::suInfo suInfo
+
+    return $suInfo(current)
+}
+
 # wizard::DeletePage --
 #
 #       Deletes a page in the widget.
@@ -549,6 +561,7 @@ proc ::wizard::Display {w name} {
     if {$widgetGlobals(debug) > 1} {
 	puts "::wizard::Display w=$w, name=$name"
     }
+
     set ind [lsearch -exact $suInfo(pages) $name]
     set lastInd [expr [llength $suInfo(pages)] - 1]
     if {$widgetGlobals(debug) > 1} {

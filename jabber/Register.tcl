@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.78 2007-08-07 07:50:25 matben Exp $
+# $Id: Register.tcl,v 1.79 2007-08-08 09:18:37 matben Exp $
 
 package provide Register 1.0
 
@@ -549,6 +549,7 @@ proc ::RegisterEx::Get {token} {
 	}
 	lappend opts -$key $value
     }
+    ::JUI::SetConnectState "connectinit"
 
     # Asks for a socket to the server.
     set cb [list ::RegisterEx::ConnectCB $token]
@@ -572,6 +573,7 @@ proc ::RegisterEx::ConnectCB {token jlibname status {errcode ""} {errmsg ""}} {
 	NotBusy $token
 	set str [::Login::GetErrorStr $errcode $errmsg]
 	::UI::MessageBox -icon error -type ok -message $str
+	::JUI::SetConnectState "disconnect"
 	$jstate(jlib) connect free
     }
 }
@@ -842,6 +844,7 @@ proc ::RegisterEx::AuthCB {jlibname status {errcode ""} {errmsg ""}} {
 	error {
 	    set str [mc xmpp-stanzas-short-$errcode]
 	    ui::dialog -icon error -type ok -title [mc Error] -message $str
+	    ::JUI::SetConnectState "disconnect"
 	    $jlibname connect free
 	}
 	default {
