@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.29 2007-08-03 14:09:18 matben Exp $
+# $Id: dialog.tcl,v 1.30 2007-08-09 07:47:03 matben Exp $
 
 # Public commands:
 # 
@@ -29,10 +29,12 @@ namespace eval ui::dialog {
     variable buttonOptions	;# map button name => list of button options
 
     variable images
-    set images(names) {}
+    set images(names) [list]
     
     variable buttonModal ""
     
+    # Padding strategy: message {0} but detail and client handles their top
+    # padding themselves.
     option add *Dialog.f.t.message.wrapLength      300            widgetDefault
     option add *Dialog.f.t.detail.wrapLength       300            widgetDefault
     option add *Dialog.f.t.message.font            DlgDefaultFont widgetDefault
@@ -42,30 +44,30 @@ namespace eval ui::dialog {
     switch -- [tk windowingsystem] {
 	aqua {
 	    option add *Dialog.f.padding           {20 15 20 16}  widgetDefault
-	    option add *Dialog.f.t.message.padding { 0  0  0  6}  widgetDefault
-	    #option add *Dialog.f.t.detail.padding  { 0  0  0  8}  widgetDefault
+	    option add *Dialog.f.t.message.padding { 0  0  0  0}  widgetDefault
+	    option add *Dialog.f.t.detail.padding  { 0 12  0  0}  widgetDefault
 	    option add *Dialog.f.t.icon.padding    { 0  0 16  0}  widgetDefault
-	    option add *Dialog.f.t.client.padding  { 0 12  0  8}  widgetDefault
+	    option add *Dialog.f.t.client.padding  { 0 12  0  0}  widgetDefault
 	    option add *Dialog.buttonAnchor        e              widgetDefault
 	    option add *Dialog.buttonOrder         "cancelok"     widgetDefault
 	    option add *Dialog.buttonPadX          8              widgetDefault
 	}
 	win32 {
 	    option add *Dialog.f.padding           {12  6}        widgetDefault
-	    option add *Dialog.f.t.message.padding { 0  0  0  4}  widgetDefault
-	    #option add *Dialog.f.t.detail.padding  { 0  0  0  6}  widgetDefault
+	    option add *Dialog.f.t.message.padding { 0  0  0  0}  widgetDefault
+	    option add *Dialog.f.t.detail.padding  { 0  8  0  0}  widgetDefault
 	    option add *Dialog.f.t.icon.padding    { 0  0  8  0}  widgetDefault
-	    option add *Dialog.f.t.client.padding  { 0 12  0  8}  widgetDefault
+	    option add *Dialog.f.t.client.padding  { 0 12  0  0}  widgetDefault
 	    option add *Dialog.buttonAnchor        center         widgetDefault
 	    option add *Dialog.buttonOrder         "okcancel"     widgetDefault
 	    option add *Dialog.buttonPadX          4              widgetDefault
 	}
 	x11 {
 	    option add *Dialog.f.padding           {12  6}        widgetDefault
-	    option add *Dialog.f.t.message.padding { 0  0  0  4}  widgetDefault
-	    #option add *Dialog.f.t.detail.padding  { 0  0  0  6}  widgetDefault
+	    option add *Dialog.f.t.message.padding { 0  0  0  0}  widgetDefault
+	    option add *Dialog.f.t.detail.padding  { 0  8  0  0}  widgetDefault
 	    option add *Dialog.f.t.icon.padding    { 0  0  8  0}  widgetDefault
-	    option add *Dialog.f.t.client.padding  { 0 12  0  8}  widgetDefault
+	    option add *Dialog.f.t.client.padding  { 0 12  0  0}  widgetDefault
 	    option add *Dialog.buttonAnchor        e              widgetDefault
 	    option add *Dialog.buttonOrder         "okcancel"     widgetDefault
 	    option add *Dialog.buttonPadX          4              widgetDefault
@@ -196,6 +198,8 @@ snit::widget ui::dialog::widget {
     typevariable buttonOptions	;# map button name => list of button options
     typevariable wmalpha       0
     typevariable defaultmenu   {}
+    typevariable positiontype  {}
+    typevariable screenmargin  {20 20 300 100}
     
     variable client
     variable timeoutID
@@ -275,7 +279,17 @@ snit::widget ui::dialog::widget {
     typemethod type {name args} {
 	eval {StockDialog $name} $args
     }
+    
+    typemethod positiontype {name} {
+	# Error checking!
+	set positiontype $name
+    }
 
+    typemethod GetPositionAtIndex {idx} {
+	
+	
+    }
+    
     constructor {args} {
 	upvar ::ui::dialog::images images
 	
@@ -329,12 +343,15 @@ snit::widget ui::dialog::widget {
 	}
 	ttk::label $top.icon -image $im
 	
-	grid $top.icon    -column 0 -row 0 -rowspan 2 -sticky n
+	grid $top.icon    -column 0 -row 0 -rowspan 3 -sticky n
 	grid $top.message -column 1 -row 0 -sticky nw
-	grid $top.detail  -column 1 -row 1 -sticky nw
 	grid columnconfigure $top 0 -minsize $minsize
 	grid columnconfigure $top 1 -minsize $wraplength
 
+	# This stops -detail from being configurable :-(
+	if {[$top.detail cget -text] ne ""} {
+	    grid  $top.detail  -column 1 -row 1 -sticky nw
+	}
 	set client $top.client
 	set bottom $f.b
 	ttk::frame $f.b
@@ -441,6 +458,13 @@ snit::widget ui::dialog::widget {
     
     # Private methods:
     
+    method OnConfigDetail {option value} {
+	puts "OnConfigDetail $option $value"
+	
+	
+	set options($option) $value
+    }
+    
     method OnConfigTitle {option value} {
 	wm title $win $value
 	set options($option) $value
@@ -527,10 +551,9 @@ proc ui::dialog::ModalCmd {w button} {
     set buttonModal $button
 }
 
-# ui::openimage::modal --
+# ui::dialog::modal --
 # 
-#       As ui::openimage but it is a modal dialog and returns any selected
-#       file name.
+#       As ui::dialog but it is a modal dialog and returns the pressed button.
 
 proc ui::dialog::modal {args} {
     variable buttonModal

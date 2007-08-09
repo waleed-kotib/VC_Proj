@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ITree.tcl,v 1.19 2007-07-19 06:28:18 matben Exp $
+# $Id: ITree.tcl,v 1.20 2007-08-09 07:47:04 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -214,7 +214,7 @@ proc ::ITree::DoPopup {T x y command} {
 	    set item [lindex $id 1]
 	    set v [$T item element cget $item cTag eText -text]
 	} elseif {$id eq ""} {
-	    set v {}
+	    set v [list]
 	}
 	$command $T $v $x $y
     }
@@ -385,6 +385,15 @@ proc ::ITree::DeleteItem {T v} {
 	# @@@ treectrl2.2.3
 	# $T item delete "tag [treeutil::protect $v]"
     }    
+}
+
+proc ::ITree::GetSelection {T} {
+   
+    set vL [list]
+    foreach item [$T selection get] {
+	lappend vL [$T item element cget $item cTag eText -text]
+    }
+    return $vL
 }
 
 proc ::ITree::UnsetTags {T item} {

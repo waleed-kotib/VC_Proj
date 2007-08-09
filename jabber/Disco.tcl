@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.123 2007-08-08 13:01:07 matben Exp $
+# $Id: Disco.tcl,v 1.124 2007-08-09 07:47:03 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -29,13 +29,15 @@ package provide Disco 1.0
 
 namespace eval ::Disco:: {
 
-    ::hooks::register initHook             ::Disco::InitHook
-    ::hooks::register jabberInitHook       ::Disco::NewJlibHook
-    ::hooks::register loginHook            ::Disco::LoginHook     20
-    ::hooks::register logoutHook           ::Disco::LogoutHook
-    ::hooks::register presenceHook         ::Disco::PresenceHook
-    ::hooks::register uiMainToggleMinimal  ::Disco::ToggleMinimalHook
-    ::hooks::register menuPostCommand      ::Disco::MainMenuPostHook
+    ::hooks::register initHook               ::Disco::InitHook
+    ::hooks::register jabberInitHook         ::Disco::NewJlibHook
+    ::hooks::register loginHook              ::Disco::LoginHook     20
+    ::hooks::register logoutHook             ::Disco::LogoutHook
+    ::hooks::register presenceHook           ::Disco::PresenceHook
+    ::hooks::register uiMainToggleMinimal    ::Disco::ToggleMinimalHook
+    ::hooks::register menuPostCommand        ::Disco::MainMenuPostHook
+    ::hooks::register menuJMainFilePostHook  ::Disco::FileMenuPostHook
+    ::hooks::register onMenuVCardExport      ::Disco::OnMenuExportVCardHook
     
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook        ::Disco::InitPrefsHook
@@ -279,7 +281,7 @@ proc ::Disco::GetInfo {jid args} {
 	-command    ""
     }
     array set arr $args
-    set opts {}
+    set opts [list]
     if {$arr(-node) ne ""} {
 	lappend opts -node $arr(-node)
     }
@@ -296,7 +298,7 @@ proc ::Disco::GetItems {jid args} {
 	-command    ""
     }
     array set arr $args
-    set opts {}
+    set opts [list]
     if {$arr(-node) ne ""} {
 	lappend opts -node $arr(-node)
     }
@@ -1674,6 +1676,30 @@ proc ::Disco::MainMenuPostHook {type wmenu} {
 	}
 	update idletasks
     }
+}
+
+proc ::Disco::FileMenuPostHook {wmenu} {
+    variable wtree
+    
+    if {[winfo exists $wtree] && [winfo ismapped $wtree]} {
+	set vL [::ITree::GetSelection $wtree]
+	if {[llength $vL] == 1} {
+	    set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
+	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
+	}
+    }    
+}
+
+proc ::Disco::OnMenuExportVCardHook {} {
+    variable wtree
+    
+    if {[winfo exists $wtree] && [winfo ismapped $wtree]} {
+	set vL [::ITree::GetSelection $wtree]
+	if {[llength $vL] == 1} {
+	    set jid [lindex $vL 0 end 0]
+	    ::VCard::ExportXMLFromJID $jid
+	}
+    }    
 }
 
 #-------------------------------------------------------------------------------

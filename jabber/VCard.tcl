@@ -17,16 +17,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.62 2007-08-08 09:18:37 matben Exp $
+# $Id: VCard.tcl,v 1.63 2007-08-09 07:47:04 matben Exp $
 
 package provide VCard 1.0
 
 namespace eval ::VCard::  {
         
     # Add all event hooks.
-    ::hooks::register initHook          ::VCard::InitHook    
-    ::hooks::register menuPostCommand   ::VCard::MainMenuPostHook
-    ::hooks::register onMenuVCardExport ::VCard::OnMenuExportHook
+    ::hooks::register initHook               ::VCard::InitHook    
+    ::hooks::register menuVCardFilePostHook  ::VCard::FileMenuPostHook
+    ::hooks::register onMenuVCardExport      ::VCard::OnMenuExportHook
 
     variable uid 0
 }
@@ -719,9 +719,12 @@ proc ::VCard::SetVCardCallback {jlibName type theQuery} {
     }
 }
 
-proc ::VCard::MainMenuPostHook {type wmenu} {
+proc ::VCard::FileMenuPostHook {wmenu} {
     
-    if {$type eq "main-file"} {
+    puts "::VCard::FileMenuPostHook"
+    if {[tk windowingsystem] eq "aqua"} {
+	
+	# Need to have a different one for aqua due to the menubar.
 	set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
 	set token [GetFrontToken]
 	if {$token ne ""} {
@@ -754,6 +757,26 @@ proc ::VCard::OnMenuExportHook {} {
     return
 }
 
+proc ::VCard::ExportXMLFromJID {jid} {
+    set f [uriencode::quote $jid].xml
+    set fileName [tk_getSaveFile -defaultextension .xml -initialfile $f]
+    if {$fileName ne ""} {
+	::Jabber::JlibCmd vcard send_get $jid \
+	  [namespace code [list ExportJIDCB $jid $fileName]]
+    }
+}
+
+proc ::VCard::ExportJIDCB {jid fileName jlib type vcardE} {
+    
+    if {$type eq "result"} {
+	SaveElementToFile $fileName $jid $vcardE
+    } else {
+	set errmsg "([lindex $vcardE 0]) [lindex $vcardE 1]"
+	ui::dialog -title [mc Error] -icon error -type ok \
+	  -message [mc vcarderrget $errmsg]
+    }
+}
+
 proc ::VCard::ExportXML {token jid} {
     set f [uriencode::quote $jid].xml
     set fileName [tk_getSaveFile -defaultextension .xml -initialfile $f]
@@ -765,6 +788,11 @@ proc ::VCard::ExportXML {token jid} {
 proc ::VCard::SaveToFile {token fileName jid} {
     
     set vcardE [eval {::Jabber::JlibCmd vcard create} [CreateList $token]]
+    SaveElementToFile $fileName $jid $vcardE
+}
+
+proc ::VCard::SaveElementToFile {fileName jid vcardE} {
+    
     if {[llength $vcardE]} {
 	set xml [wrapper::formatxml $vcardE]
     } else {

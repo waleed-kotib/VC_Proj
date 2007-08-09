@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.206 2007-08-08 13:01:08 matben Exp $
+# $Id: Roster.tcl,v 1.207 2007-08-09 07:47:03 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -121,8 +121,8 @@ proc ::Roster::InitMenus {} {
 	    command     mSendFile...   {user available}   {::FTrans::Send $jid3}             {}
 	    separator   {}             {}                 {} {}
 	    command     mAddContact... {}                 {::JUser::NewDlg}            {}
-	    command     mEditContact...   {user}             {::JUser::EditDlg $jid}      {}
-	    command     mBusinessCard...  {user}             {::UserInfo::Get $jid3}             {}
+	    command     mEditContact...  {user}             {::JUser::EditDlg $jid}      {}
+	    command     mBusinessCard... {user}             {::UserInfo::Get $jid3}             {}
 	    command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
 	    command     mRemoveContact {user}             {::Roster::SendRemove $jid}         {}
 	    separator   {}             {}                 {} {}
@@ -145,8 +145,8 @@ proc ::Roster::InitMenus {} {
 	    command     mSendFile...   {user available}   {::FTrans::Send $jid3}             {}
 	    separator   {}             {}                 {} {}
 	    command     mAddContact... {}                 {::JUser::NewDlg}            {}
-	    command     mEditContact...   {user}             {::JUser::EditDlg $jid}      {}
-	    command     mBusinessCard...  {user}             {::UserInfo::Get $jid3}             {}
+	    command     mEditContact...  {user}             {::JUser::EditDlg $jid}      {}
+	    command     mBusinessCard... {user}             {::UserInfo::Get $jid3}             {}
 	    command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
 	    command     mRemoveContact {user}             {::Roster::SendRemove $jid}         {}
 	    separator   {}             {}                 {} {}

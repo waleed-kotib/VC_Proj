@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: megaentry.tcl,v 1.5 2007-08-08 13:01:07 matben Exp $
+# $Id: megaentry.tcl,v 1.6 2007-08-09 07:47:03 matben Exp $
 
 package require ui::dialog
 
@@ -49,8 +49,8 @@ proc ui::megaentry {args} {
     Grab $w
     
     if {$state(dlgbt) eq "ok"} {
-	# Return result this way to be able to set empty results which is not
-	# possible else.
+	# Return result this way to be able to set empty results 
+	# which are not possible else.
 	set ans [list "ok" $state(-textvariable)]
     } else {
 	set ans ""
@@ -71,5 +71,6 @@ if {0} {
     set str "These two must be able to call before any dialog instance created."
     set str2 "Elvis has left the building"
     set ans [ui::megaentry -message $str -detail $str2 -label Enter]    
+    set ans [ui::megaentry -message $str -icon "" -label Enter]    
 }
 

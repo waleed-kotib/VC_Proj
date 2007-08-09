@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.185 2007-08-08 13:01:08 matben Exp $
+# $Id: JUI.tcl,v 1.186 2007-08-09 07:47:03 matben Exp $
 
 package provide JUI 1.0
 
@@ -446,6 +446,17 @@ proc ::JUI::NotebookTabChanged {} {
 	}
     }
     $jwapp(wtbar) buttonconfigure chat -state $state  
+}
+
+proc ::JUI::NotebookGetPage {} {
+    variable jwapp
+   
+    if {[winfo ismapped $jwapp(notebook)]} {
+	set current [$jwapp(notebook) index current]
+
+    } else {
+	return "roster"
+    }
 }
 
 proc ::JUI::BuildToolbar {w wtbar} {
@@ -911,6 +922,12 @@ proc ::JUI::FilePostCommand {wmenu} {
 
     ::hooks::run menuPostCommand main-file $wmenu
     
+    # Dedicated hook for a particular dialog class.
+    if {[winfo exists [focus]]} {
+	set wclass [winfo class [winfo toplevel [focus]]]
+	::hooks::run menu${wclass}FilePostHook $wmenu
+    }
+    
     # Workaround for mac bug.
     update idletasks
 }
@@ -994,6 +1011,12 @@ proc ::JUI::ActionPostCommand {wmenu} {
       
     ::hooks::run menuPostCommand main-action $wmenu
     
+    # Dedicated hook for a particular dialog class.
+    if {[winfo exists [focus]]} {
+	set wclass [winfo class [winfo toplevel [focus]]]
+	::hooks::run menu${wclass}ActionPostHook $wmenu
+    }
+
     # Workaround for mac bug. Still problems building submenus.
     update idletasks
     if {[tk windowingsystem] eq "aqua"} {

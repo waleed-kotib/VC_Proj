@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.60 2007-08-02 09:30:23 matben Exp $
+# $Id: RosterTree.tcl,v 1.61 2007-08-09 07:47:03 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -39,7 +39,9 @@ namespace eval ::RosterTree {
 
     ::hooks::register logoutHook             ::RosterTree::LogoutHook
     ::hooks::register quitAppHook            ::RosterTree::QuitHook
+    ::hooks::register menuJMainFilePostHook  ::RosterTree::FileMenuPostHook
     ::hooks::register menuJMainEditPostHook  ::RosterTree::EditMenuPostHook
+    ::hooks::register onMenuVCardExport      ::RosterTree::OnMenuExportVCardHook
     ::hooks::register nicknameEventHook      ::RosterTree::NicknameEventHook
 
     # Actual:
@@ -805,7 +807,7 @@ proc ::RosterTree::ActionDoubleClick {jid} {
     }
 }
 
-proc ::RosterTree::OnButtonMotion { } {
+proc ::RosterTree::OnButtonMotion {} {
     variable buttonAfterId
     
     if {[info exists buttonAfterId]} {
@@ -814,7 +816,7 @@ proc ::RosterTree::OnButtonMotion { } {
     }    
 }
 
-proc ::RosterTree::GetSelected { } {
+proc ::RosterTree::GetSelected {} {
     variable T
     
     set selected {}
@@ -825,9 +827,9 @@ proc ::RosterTree::GetSelected { } {
     return $selected
 }
 
-proc ::RosterTree::GetSelectedJID { } {
+proc ::RosterTree::GetSelectedJID {} {
     
-    set jidL {}
+    set jidL [list]
     set tags [GetSelected]
     foreach tag $tags {
 	lassign $tag mtag jid
@@ -1746,6 +1748,18 @@ proc ::RosterTree::DeleteEmptyPendTrpt {} {
     }
 }
 
+proc ::RosterTree::FileMenuPostHook {wmenu} {
+    variable T
+    
+    if {[winfo ismapped $T]} {
+	set jidL [GetSelectedJID]
+	if {[llength $jidL] == 1} {
+	    set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
+	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
+	}
+    }
+}
+
 # JUI::EditMenuPostHook --
 # 
 #       Menu post command hook for doing roster/disco searches.
@@ -1759,6 +1773,17 @@ proc ::RosterTree::EditMenuPostHook {wmenu} {
 	if {[winfo exists $wfind]} {
 	    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
+	}
+    }
+}
+
+proc ::RosterTree::OnMenuExportVCardHook {} {
+    variable T
+    
+    if {[winfo ismapped $T]} {
+	set jidL [GetSelectedJID]
+	if {[llength $jidL] == 1} {
+	    ::VCard::ExportXMLFromJID [lindex $jidL 0]
 	}
     }
 }

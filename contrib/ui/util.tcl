@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.15 2007-08-06 14:05:01 matben Exp $
+# $Id: util.tcl,v 1.16 2007-08-09 07:47:03 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -174,7 +174,7 @@ proc ui::SetGeometryEx {win geoVar wclass {part "geo"}} {
     # Only first window of this class is positioned if wclass.
     set act 1
     if {[string length $wclass]} {
-	if {[llength [GetToplevels $wclass]] != 1} {
+	if {[llength [findalltoplevelwithclass $wclass]] != 1} {
 	    set act 0
 	}
     }
@@ -266,17 +266,6 @@ proc ui::GetPaddingHeight {padding} {
 	    return [expr {[lindex $padding 1] + [lindex $padding 3]}]
 	}
     }
-}
-
-
-proc ui::GetToplevels {wclass} {
-    set wtops {}
-    foreach w [winfo children .] {
-	if {[winfo class $w] eq "$wclass"} {
-	    lappend wtops $w
-	}
-    }
-    return $wtops
 }
 
 ## Grab utilities. From tile. To be replaced with tiles when stable.
