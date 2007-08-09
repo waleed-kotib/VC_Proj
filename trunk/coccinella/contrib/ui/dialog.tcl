@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.30 2007-08-09 07:47:03 matben Exp $
+# $Id: dialog.tcl,v 1.31 2007-08-09 14:14:16 matben Exp $
 
 # Public commands:
 # 
@@ -194,17 +194,21 @@ snit::widget ui::dialog::widget {
     hulltype toplevel
     widgetclass Dialog
     
-    typevariable dialogTypes	;# map -type => list of dialog options
-    typevariable buttonOptions	;# map button name => list of button options
-    typevariable wmalpha       0
-    typevariable defaultmenu   {}
-    typevariable positiontype  {}
-    typevariable screenmargin  {20 20 300 100}
+    typevariable dialogTypes      ;# map -type => list of dialog options
+    typevariable buttonOptions	  ;# map button name => list of button options
+    typevariable wmalpha          0
+    typevariable defaultmenu      {}
+    typevariable positionType     {}
+    typevariable screenmargin     {}
+    typevariable typicalDlgSize   {}
+    typevariable centerPos        {}
+    typevariable dialogStack      {}
     
     variable client
     variable timeoutID
     variable fadeoutID
     variable isDone 0
+    variable stackIdx
     
     delegate option -detail  to detail  as -text
     delegate option -menu    to hull
@@ -280,14 +284,17 @@ snit::widget ui::dialog::widget {
 	eval {StockDialog $name} $args
     }
     
-    typemethod positiontype {name} {
-	# Error checking!
-	set positiontype $name
-    }
-
-    typemethod GetPositionAtIndex {idx} {
+    typemethod positiontype {args} {
+	if {[llength $args] == 0} {
+	    return $positionType
+	}
+	if {[llength $args] > 1} {
+	    return -code error "Usage: \"ui::dialog positiontype ?stack?\""
+	}	
 	
-	
+	# Important, else we get an infinite loop!
+	GetInitialPosition
+	set positionType $args
     }
     
     constructor {args} {
@@ -408,7 +415,19 @@ snit::widget ui::dialog::widget {
 
 	if {[string length $options(-geovariable)]} {
 	    ui::PositionWindow $win $options(-geovariable)
-	}	
+	} elseif {$positionType eq "stack"} {
+	    
+	    # Get first free slot in 'dialogStack'.
+	    if {[llength $dialogStack]} {
+		set idx [expr {[lindex $dialogStack end] + 1}]
+	    } else {
+		set idx 0
+	    }
+	    set stackIdx $idx
+	    lappend dialogStack $idx
+	    foreach {x y} [GetPositionAtIndex $idx] { break }
+	    wm geometry $win +$x+$y
+	}
 	if {$options(-modal)} {
 	    # This doesn't work because we are destroyed after grab is released!
 	    #ui::Grab $win
@@ -426,7 +445,13 @@ snit::widget ui::dialog::widget {
 	if {[info exists fadeoutID]} {
 	    after cancel $fadeoutID
 	}
-	
+	if {[info exists stackIdx]} {
+	    set idx [lsearch $dialogStack $stackIdx]
+	    if {$idx >= 0} {
+		set dialogStack [lreplace $dialogStack $idx $idx]
+	    }
+	}
+	    
 	# This happens when the dialog isn't closed with any of the buttons.
 	if {!$isDone} {
 	    
@@ -456,14 +481,48 @@ snit::widget ui::dialog::widget {
 	set dialogTypes($dlgtype) $args
     }
     
-    # Private methods:
-    
-    method OnConfigDetail {option value} {
-	puts "OnConfigDetail $option $value"
-	
-	
-	set options($option) $value
+    # Get a typical size so we can start positioning.
+    proc GetInitialPosition {} {
+	if {[llength $centerPos]} {
+	    return $centerPos
+	}
+	set str [string repeat "xx " 36]
+	set w [ui::dialog -message $str -detail $str]
+	wm withdraw $w
+	update idletasks
+	set dW [winfo reqwidth $w]
+	set dH [winfo reqheight $w]
+	set sW [winfo screenwidth .]
+	set sH [winfo screenheight .]
+	destroy $w
+	set x [expr {($sW - $dW)/2}]
+	set y [expr {3*($sH - $dH)/7}]
+	puts "GetInitialPosition $x $y"
+	set centerPos [list $x $y]
+	set typicalDlgSize [list $dW $dH]
+	return $centerPos
     }
+
+    proc GetPositionAtIndex {idx} {
+	
+	# Do calculations using an inset of the actual screen and then
+	# scale back to the actual screen.
+	foreach {x0 y0} [GetInitialPosition] { break }
+	foreach {dW dH} $typicalDlgSize { break }
+	
+	# This is the inset screen rectangle (x, y, width, height)
+	set inset(x) 20
+	set inset(y) 20
+	set inset(w) [expr {[winfo screenwidth .] - $inset(x) - $dW}]
+	set inset(h) [expr {[winfo screenheight .] - $inset(y) - $dH}]
+	puts "x0=$x0, y0=$y0, dW=$dW, dH=$dH"
+	
+	set x [expr {($x0 + $idx*30 - $inset(x)) % $inset(w) + $inset(x)}]
+	set y [expr {($y0 + $idx*20 - $inset(y)) % $inset(h) + $inset(y)}]
+	return [list $x $y]
+    }
+    
+    # Private methods:
     
     method OnConfigTitle {option value} {
 	wm title $win $value
@@ -601,6 +660,13 @@ if {0} {
     ui::dialog::modal -message "This is a modal dialog" -detail $str2 \
       -icon error -type yesnocancel
     
+    # Test stacking:
+    ui::dialog positiontype stack
+    set str "These two must be able to call before any dialog instance created."
+    set str2 "Elvis has left the building and is driving his white Cadillac."
+    for {set i 0} {$i < 30} {incr i} {
+	ui::dialog -message $str -detail "$str2 Number $i"
+    }
 }
 
 #-------------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.16 2007-08-09 07:47:03 matben Exp $
+# $Id: util.tcl,v 1.17 2007-08-09 14:14:16 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -462,7 +462,7 @@ proc ::ui::image::scale {name size} {
 	$new copy $name
 	return $new
     } else {
-	lassign [GetScaleMN $max $size] M N
+	foreach {M N} [GetScaleMN $max $size] { break }
 	return [ScalePhotoM->N $name $M $N]
     }
 }
