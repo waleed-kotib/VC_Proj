@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.24 2007-08-07 14:15:37 matben Exp $
+# $Id: UserInfo.tcl,v 1.25 2007-08-09 07:47:04 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -27,8 +27,8 @@ package require VCard
 namespace eval ::UserInfo::  {
         
     # Add all event hooks.
-    ::hooks::register menuPostCommand   ::UserInfo::MainMenuPostHook
-    ::hooks::register onMenuVCardExport ::UserInfo::OnMenuExportHook
+    ::hooks::register menuUserInfoFilePostHook   ::UserInfo::FileMenuPostHook
+    ::hooks::register onMenuVCardExport          ::UserInfo::OnMenuExportHook
 
     variable uid 0
 }
@@ -569,21 +569,15 @@ proc ::UserInfo::GetFrontToken {} {
     return
 }
 
-proc ::UserInfo::MainMenuPostHook {type wmenu} {
+proc ::UserInfo::FileMenuPostHook {wmenu} {
     
-    if {$type eq "main-file"} {
+    if {[tk windowingsystem] eq "aqua"} {
 	
 	# Need to have a different one for aqua due to the menubar.
 	set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
-	if {[tk windowingsystem] eq "aqua"} {
-	    set token [GetFrontToken]
-	    if {$token ne ""} {
-		::UI::MenuMethod $m entryconfigure mvCard2 -state normal
-	    }
-	} else {
-	    if {[llength [ui::findalltoplevelwithclass UserInfo]]} {
-
-	    }
+	set token [GetFrontToken]
+	if {$token ne ""} {
+	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
 	}
     }
 }
