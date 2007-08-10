@@ -979,6 +979,7 @@ you happen to be online while this message is being read. Do you want to send it
 ::msgcat::mcset en jamessgeneditwarnclose       {There are edits made to this dialog. Do you want to save them before closing?}
 
 
+
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
 # 
@@ -1175,9 +1176,9 @@ namespace eval ::EditShortcuts:: {
 }
 
 
-::msgcat::mcset en jalogin 	{Write Jabber server ip number or name, or choose from the popup menu. You should already have an account with this server.}
-::msgcat::mcset en janewaccount {Write jabber server ip number or name. Pick your username and password.}
-::msgcat::mcset en janewpass    {Set new password for:}
+::msgcat::mcset en jalogin 	        {Write Jabber server ip number or name, or choose from the popup menu. You should already have an account with this server.}
+::msgcat::mcset en janewaccount         {Write jabber server ip number or name. Pick your username and password.}
+::msgcat::mcset en janewpass            {Set new password for:}
 ::msgcat::mcset en jasubwant    {The user "%s" wants to subscibe to your presence.}
 ::msgcat::mcset en jasubwant2   {Do you want %s to see your presence?}
 ::msgcat::mcset en jasubopts    {Choose from the options below. Picking a nickname and group is optional, and for your personal use only.}
@@ -1252,6 +1253,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jawaitdisco  {Waiting for disco result...}
 ::msgcat::mcset en jagclogoutmsg {You have logged out and exited the room}
 ::msgcat::mcset en jagcreqnick  {Please enter your desired nickname for the room %s}
+::msgcat::mcset en jaopenbgimage {Select an image file for the background. To remove a background image press Remove and Save.}
+::msgcat::mcset en jasuppimagefmts {The supported image formats are }
+
 
 ::msgcat::mcset en {InfoRoomDesc}       {This dialog makes available a number of options and actions for a room. Your role and affiliation determines your privilege to act.\
 Further restrictions may exist depending on specific room configuration.}

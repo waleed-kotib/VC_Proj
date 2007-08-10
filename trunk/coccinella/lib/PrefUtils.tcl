@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. It defines some 
 #      utilities for keeping the user preferences. 
 #      
-#  Copyright (c) 1999-2006  Mats Bengtsson
+#  Copyright (c) 1999-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: PrefUtils.tcl,v 1.10 2007-07-19 06:28:18 matben Exp $
+# $Id: PrefUtils.tcl,v 1.11 2007-08-10 08:07:51 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -106,28 +106,28 @@ proc ::PrefUtils::Init { } {
 #       Take care of the priority for each variable.
 #
 # Arguments:
-#       prefsList a list of lists where each sublist defines an item in the
+#       prefsL a list of lists where each sublist defines an item in the
 #                 following way: 
-#                 {theVarName itsResourceName itsHardCodedDefaultValue priority}
+#                 {varName resourceName defaultValue ?priority?}
 #                        
 # Results:
 #       none
 
-proc ::PrefUtils::Add {prefsList} {
-    AddToMaster $prefsList
+proc ::PrefUtils::Add {prefsL} {
+    AddToMaster $prefsL
 }
 
-proc ::PrefUtils::AddMustSave {prefsList} {
-    AddToMaster $prefsList mustSave
+proc ::PrefUtils::AddMustSave {prefsL} {
+    AddToMaster $prefsL mustSave
 }
 
-proc ::PrefUtils::AddToMaster {prefsList {key ""}} {
+proc ::PrefUtils::AddToMaster {prefsL {key ""}} {
     global  prefs
     
     variable priNameToNum
     
-    foreach item $prefsList {
-	foreach {varName resName defaultValue} $item break
+    foreach item $prefsL {
+	foreach {varName resName defaultValue} $item { break }
 	
 	# The default priority for hardcoded values are 20 (factoryDefault).
 	if {[llength $item] >= 4} {

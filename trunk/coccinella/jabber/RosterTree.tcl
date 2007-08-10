@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.61 2007-08-09 07:47:03 matben Exp $
+# $Id: RosterTree.tcl,v 1.62 2007-08-10 08:07:51 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -593,13 +593,13 @@ proc ::RosterTree::BackgroundImageCmd {} {
 
     # Dialog:
     set typeText [join $typeL ", "]
-    set str "Select an image file for the roster background. To remove a background image press Remove and Save."
-    set str2 "The supported image formats are "
-    append str2 $typeText
-    append str2 "."
+    set str [mc jaopenbgimage]
+    set dtl [mc jasuppimagefmts]
+    append dtl $typeText
+    append dtl "."
     set mbar [::UI::GetMainMenu]
     ::UI::MenubarDisableBut $mbar edit
-    set fileName [ui::openimage::modal -message $str -detail $str2 -menu $mbar \
+    set fileName [ui::openimage::modal -message $str -detail $dtl -menu $mbar \
       -filetypes $types -initialfile $currentFile -defaultfile $defaultFile \
       -geovariable prefs(winGeom,jrosterimage) -title [mc mBackgroundImage]]
     ::UI::MenubarEnableAll $mbar

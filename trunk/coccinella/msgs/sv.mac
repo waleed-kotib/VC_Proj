@@ -1261,6 +1261,8 @@ Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jawaitdisco  {Väntar på disco resultat...}
 ::msgcat::mcset sv jagclogoutmsg {Du har loggat ut och lämnat rummet}
 ::msgcat::mcset sv jagcreqnick  {Vänligen skriv in ditt önskade kortnamn for rummet %s}
+::msgcat::mcset sv jaopenbgimage {Välj en bildfil till bakgrund. Tag bort bakgrunden genom att trycka på "Tag bort" och "Spara".}
+::msgcat::mcset sv jasuppimagefmts {Möjliga bildformat är }
 
 
 ::msgcat::mcset sv InfoRoomDesc {Den här dialogen möjliggör ett antal rumsinställningar. Din roll och adoption bestämmer din rättighet att agera. Ytterligare restriktioner kan finnas beroende på\
