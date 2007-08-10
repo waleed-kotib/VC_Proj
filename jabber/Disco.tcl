@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.124 2007-08-09 07:47:03 matben Exp $
+# $Id: Disco.tcl,v 1.125 2007-08-10 14:14:52 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -50,10 +50,10 @@ namespace eval ::Disco:: {
     option add *Disco.padding               4               50
 
     # Specials.
-    option add *Disco.backgroundImage       cociexec        widgetDefault
-    option add *Disco.waveImage             wave            widgetDefault
-    option add *Disco.fontStyleMixed        0               widgetDefault    
-    option add *Disco.minimalPadding        {0}             widgetDefault
+    option add *Disco*TreeCtrl.backgroundImage    cociexec        widgetDefault
+    option add *Disco.waveImage                   wave            widgetDefault
+    option add *Disco.fontStyleMixed              0               widgetDefault    
+    option add *Disco.minimalPadding             {0}             widgetDefault
     
     # If number children smaller than this do disco#info.
     variable discoInfoLimit 12
@@ -117,9 +117,13 @@ proc ::Disco::InitPrefsHook {} {
     set jprefs(disco,useBgImage)     1
     set jprefs(disco,bgImagePath)    ""
 
+    # The disco background image is partly controlled by option database.
+    set jprefs(disco,useBgImage)     1
+    set jprefs(disco,defaultBgImage) 1
+
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(disco,useBgImage)   jprefs_disco_useBgImage   $jprefs(disco,useBgImage)]  \
-      [list ::Jabber::jprefs(disco,bgImagePath)  jprefs_disco_bgImagePath  $jprefs(disco,bgImagePath)] \
+      [list ::Jabber::jprefs(disco,useBgImage)     jprefs_disco_useBgImage     $jprefs(disco,useBgImage)]  \
+      [list ::Jabber::jprefs(disco,defaultBgImage) jprefs_disco_defaultBgImage $jprefs(disco,defaultBgImage)] \
       ]
 }
 
@@ -156,9 +160,7 @@ proc ::Disco::InitMenus {} {
 	{command    mUnregister    {::Register::Remove $jid} }
 	{separator}
 	{cascade    mShow          {
-	    {check  mBackgroundImage  {::Disco::SetBackgroundImage} {
-		-variable ::Jabber::jprefs(disco,useBgImage)
-	    } }
+	    {command mBackgroundImage... {::Disco::BackgroundImageCmd}}
 	} }
 	{command    mRefresh       {::Disco::Refresh $vstruct} }
 	{command    mAddServer...  {::Disco::AddServerDlg}     }
@@ -787,7 +789,7 @@ proc ::Disco::Build {w} {
       -buttonpopup ::Disco::Popup
     
     ::ITree::ElementLayout $wtree image -minwidth 16
-    SetBackgroundImage
+    $wtree configure -backgroundimage [BackgroundImageGet]
 
     grid  $wtree  -row 0 -column 0 -sticky news
     grid  $wysc   -row 0 -column 1 -sticky ns
@@ -847,18 +849,149 @@ proc ::Disco::StyleGet { } {
     return $dstyle
 }
 
-proc ::Disco::SetBackgroundImage { } {
+
+# BackgroundImage... Try to make as generic as possible! 
+# Too much duplicate from roster :-(
+
+# Disco::BackgroundImageCmd --
+# 
+#       There are two separate ways the current background image may be selected:
+#         1) as defined by the theme
+#         2) a user picked one which is cached in this(backgroundsPath)
+
+proc ::Disco::BackgroundImageCmd {} {
+    global  this
+    variable T
     upvar ::Jabber::jprefs jprefs
-    variable wtree
-    variable wdisco
     
-    if {$jprefs(disco,useBgImage)} {
-	set image [::Theme::GetImage [option get $wdisco backgroundImage {}]]
-    } else {
-	set image ""
+    set mimes {image/gif image/png image/jpeg}
+    set mimeL [list]
+    set typeL [list]
+    foreach mime $mimes {
+	if {[::Media::HaveImporterForMime $mime]} {
+	    lappend mimeL $mime
+	    lappend typeL [string toupper [lindex [split $mime /] 1]]
+	}
     }
-    $wtree configure -backgroundimage $image
+    set suffL [::Types::GetSuffixListForMimeList $mimeL]
+    set types [concat [list [list {Image Files} $suffL]] \
+      [::Media::GetDlgFileTypesForMimeList $mimeL]]
+    
+    # Default file (as defined by the theme):
+    set defaultFile [BackgroundImageGetThemedFile $suffL]
+    
+    # Current file:
+    set currentFile [BackgroundImageGetFile $suffL $defaultFile]
+
+    # Dialog:
+    set typeText [join $typeL ", "]
+    set str [mc jaopenbgimage]
+    set dtl [mc jasuppimagefmts]
+    append dtl $typeText
+    append dtl "."
+    set mbar [::UI::GetMainMenu]
+    ::UI::MenubarDisableBut $mbar edit
+    set fileName [ui::openimage::modal -message $str -detail $dtl -menu $mbar \
+      -filetypes $types -initialfile $currentFile -defaultfile $defaultFile \
+      -geovariable prefs(winGeom,jbackgroundimage) -title [mc mBackgroundImage]]
+    ::UI::MenubarEnableAll $mbar
+
+    set image ""
+    if {$fileName eq ""} {
+	return
+    } elseif {$fileName eq "-"} {
+	set jprefs(disco,useBgImage) 0
+    } elseif {[file exists $fileName]} {
+	set fileName [file normalize $fileName]
+	set jprefs(disco,useBgImage) 1
+	if {$fileName eq $defaultFile} {
+	    set jprefs(disco,defaultBgImage) 1
+	} else {
+	    set jprefs(disco,defaultBgImage) 0
+	}
+	
+	# Don't copy file if it is already there.
+	set suff [file extension $fileName]
+	set dst [file normalize [file join $this(backgroundsPath) disco$suff]]
+	
+	# Cache file. There shall only be one roster.* file there.
+	if {$fileName ne $dst} {
+	    
+	    # Clear roster.* cache.
+	    ::tfileutils::deleteallfiles $this(backgroundsPath) disco.*
+	    set suff [file extension $fileName]
+	    file copy -force $fileName $dst
+	}	
+	if {[catch {
+	    set image [image create photo -file $fileName]
+	}]} {
+	    set image ""
+	}
+    }    
+    BackgroundImageConfig $image
 }
+
+proc ::Disco::BackgroundImageGetThemedFile {suffL} {
+    variable wtree
+    
+    puts "::Disco::BackgroundImageGetThemedFile"
+    set name [option get $wtree backgroundImage {}]
+    puts "\t name=$name"
+    set fileName [::Theme::FindImageFileWithSuffixes $name $suffL]
+    puts "\t fileName=$fileName"
+    return [file normalize $fileName]
+}
+
+proc ::Disco::BackgroundImageGetFile {suffL defaultFile} {
+    global  this
+    upvar ::Jabber::jprefs jprefs
+    
+    set fileName ""
+    if {$jprefs(disco,useBgImage)} {
+	if {$jprefs(disco,defaultBgImage)} {
+	    set fileName $defaultFile
+	} else {
+	    set pattern [list]
+	    foreach suff $suffL {
+		lappend pattern "disco$suff"
+	    }    
+	    set files [eval {glob -nocomplain -directory $this(backgroundsPath)} $pattern]
+	    set fileName [lindex $files 0]
+	}
+    }    
+    return $fileName
+}
+
+proc ::Disco::BackgroundImageGet {} {
+	
+    set image ""
+    set mimes {image/gif image/png image/jpeg}
+    set suffL [::Media::GetSupportedSuffixesForMimeList $mimes]
+    set fileName [BackgroundImageGetFile $suffL \
+      [BackgroundImageGetThemedFile $suffL]]
+    if {[file exists $fileName]} {
+	if {[catch {
+	    set image [image create photo -file $fileName]
+	}]} {
+	    set image ""
+	}
+    }
+    return $image
+}
+
+proc ::Disco::BackgroundImageConfig {image} {
+    variable wtree
+    
+    # Garbage collection.
+    set old [$wtree cget -backgroundimage]
+    $wtree configure -backgroundimage $image
+    if {$old ne ""} {
+	image delete $old
+    }    
+    ::hooks::run discoTreeConfigure -backgroundimage $image
+}
+
+
 
 # Disco::RegisterPopupEntry --
 # 

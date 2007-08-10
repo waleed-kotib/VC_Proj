@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.207 2007-08-09 07:47:03 matben Exp $
+# $Id: Roster.tcl,v 1.208 2007-08-10 14:14:52 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1410,7 +1410,7 @@ proc ::Roster::InitPrefsHook { } {
     set jprefs(rost,defaultBgImage) 1
     
     # Keep track of all closed tree items. Default is all open.
-    set jprefs(rost,closedItems) {}
+    set jprefs(rost,closedItems) [list]
 	
     ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(rost,clrLogout)   jprefs_rost_clrRostWhenOut $jprefs(rost,clrLogout)]  \

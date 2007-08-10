@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.62 2007-08-10 08:07:51 matben Exp $
+# $Id: RosterTree.tcl,v 1.63 2007-08-10 14:14:52 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -310,16 +310,6 @@ proc ::RosterTree::FreeAllAltImagesCache {} {
     
     unset -nocomplain altImageCache
 }
-
-# Debug stuff:
-if {0} {
-    ::RosterTree::StyleSetItemAlternative mari@localhost phone image [::Rosticons::Get phone/available]
-    ::RosterTree::StyleSetItemAlternative mari@localhost xxxxx image [::Rosticons::Get phone/on_phone]
-    ::RosterTree::StyleSetItemAlternative killer@localhost phone image [::Rosticons::Get phone/on_phone]
-    parray ::RosterTree::altImageCache
-    parray ::RosterPlain::altImageKeyToElem
-    parray ::RosterAvatar::altImageKeyToElem
-}
     
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -601,7 +591,7 @@ proc ::RosterTree::BackgroundImageCmd {} {
     ::UI::MenubarDisableBut $mbar edit
     set fileName [ui::openimage::modal -message $str -detail $dtl -menu $mbar \
       -filetypes $types -initialfile $currentFile -defaultfile $defaultFile \
-      -geovariable prefs(winGeom,jrosterimage) -title [mc mBackgroundImage]]
+      -geovariable prefs(winGeom,jbackgroundimage) -title [mc mBackgroundImage]]
     ::UI::MenubarEnableAll $mbar
 
     set image ""
@@ -635,8 +625,7 @@ proc ::RosterTree::BackgroundImageCmd {} {
 	}]} {
 	    set image ""
 	}
-    }
-    
+    }    
     BackgroundImageConfig $image
 }
 
