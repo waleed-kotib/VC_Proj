@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.31 2007-08-09 14:14:16 matben Exp $
+# $Id: dialog.tcl,v 1.32 2007-08-10 08:07:51 matben Exp $
 
 # Public commands:
 # 
@@ -198,11 +198,12 @@ snit::widget ui::dialog::widget {
     typevariable buttonOptions	  ;# map button name => list of button options
     typevariable wmalpha          0
     typevariable defaultmenu      {}
-    typevariable positionType     {}
-    typevariable screenmargin     {}
+    typevariable layoutPolicy     {}
+    typevariable screenMargin     {20 20 20 20}
     typevariable typicalDlgSize   {}
     typevariable centerPos        {}
     typevariable dialogStack      {}
+    typevariable stackOffset      {30 20}
     
     variable client
     variable timeoutID
@@ -284,17 +285,20 @@ snit::widget ui::dialog::widget {
 	eval {StockDialog $name} $args
     }
     
-    typemethod positiontype {args} {
+    typemethod layoutpolicy {args} {
 	if {[llength $args] == 0} {
-	    return $positionType
+	    return $layoutPolicy
 	}
 	if {[llength $args] > 1} {
-	    return -code error "Usage: \"ui::dialog positiontype ?stack?\""
+	    return -code error "Usage: \"ui::dialog layoutpolicy ?stack?\""
 	}	
-	
-	# Important, else we get an infinite loop!
+	if {![regexp {^stack$} $args]} {
+	    return -code error "Usage: \"ui::dialog layoutpolicy ?stack?\""
+	}	
+
+	# Important, else we get an infinite loop if called from constructor!
 	GetInitialPosition
-	set positionType $args
+	set layoutPolicy $args
     }
     
     constructor {args} {
@@ -415,7 +419,7 @@ snit::widget ui::dialog::widget {
 
 	if {[string length $options(-geovariable)]} {
 	    ui::PositionWindow $win $options(-geovariable)
-	} elseif {$positionType eq "stack"} {
+	} elseif {$layoutPolicy eq "stack"} {
 	    
 	    # Get first free slot in 'dialogStack'.
 	    if {[llength $dialogStack]} {
@@ -497,7 +501,6 @@ snit::widget ui::dialog::widget {
 	destroy $w
 	set x [expr {($sW - $dW)/2}]
 	set y [expr {3*($sH - $dH)/7}]
-	puts "GetInitialPosition $x $y"
 	set centerPos [list $x $y]
 	set typicalDlgSize [list $dW $dH]
 	return $centerPos
@@ -506,19 +509,19 @@ snit::widget ui::dialog::widget {
     proc GetPositionAtIndex {idx} {
 	
 	# Do calculations using an inset of the actual screen and then
-	# scale back to the actual screen.
+	# scale back to the actual screen coordinates.
 	foreach {x0 y0} [GetInitialPosition] { break }
 	foreach {dW dH} $typicalDlgSize { break }
 	
 	# This is the inset screen rectangle (x, y, width, height)
-	set inset(x) 20
-	set inset(y) 20
-	set inset(w) [expr {[winfo screenwidth .] - $inset(x) - $dW}]
-	set inset(h) [expr {[winfo screenheight .] - $inset(y) - $dH}]
-	puts "x0=$x0, y0=$y0, dW=$dW, dH=$dH"
-	
-	set x [expr {($x0 + $idx*30 - $inset(x)) % $inset(w) + $inset(x)}]
-	set y [expr {($y0 + $idx*20 - $inset(y)) % $inset(h) + $inset(y)}]
+	foreach {left top right bottom} $screenMargin { break }
+	set inset(x) $left
+	set inset(y) $top
+	set inset(w) [expr {[winfo screenwidth .] - $right - $dW}]
+	set inset(h) [expr {[winfo screenheight .] - $bottom - $dH}]	
+	foreach {offX offY} $stackOffset { break }
+	set x [expr {($x0 + $idx*$offX - $inset(x)) % $inset(w) + $inset(x)}]
+	set y [expr {($y0 + $idx*$offY - $inset(y)) % $inset(h) + $inset(y)}]
 	return [list $x $y]
     }
     
@@ -661,7 +664,7 @@ if {0} {
       -icon error -type yesnocancel
     
     # Test stacking:
-    ui::dialog positiontype stack
+    ui::dialog layoutpolicy stack
     set str "These two must be able to call before any dialog instance created."
     set str2 "Elvis has left the building and is driving his white Cadillac."
     for {set i 0} {$i < 30} {incr i} {
