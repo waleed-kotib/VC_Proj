@@ -18,13 +18,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.1 2007-08-11 06:44:34 matben Exp $
+# $Id: MegaPresence.tcl,v 1.2 2007-08-11 13:56:29 matben Exp $
 
 package provide MegaPresence 1.0
 
 namespace eval ::MegaPresence {
 
-    option add *MegaPresence.f.padding       {8 6 8 4}     50
+    option add *MegaPresence.padding       {0 2 0 2}     50
+    option add *MegaPresence.box.padding   {0 6 8 4}     50
     option add *MegaPresence*TLabel.style  Small.TLabel  widgetDefault
     
     variable widgets
@@ -57,9 +58,6 @@ proc ::MegaPresence::Build {w} {
     variable widgets
     
     ttk::frame $w -class MegaPresence
-    ttk::frame $w.f
-    
-    set widgets(iframe) $w.f
     
     if {1} {
 	set widgets(collapse) 0
@@ -68,29 +66,35 @@ proc ::MegaPresence::Build {w} {
 	  -variable [namespace current]::widgets(collapse)
 	pack $w.arrow -side left -anchor n	
 	bind $w.arrow <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
-    }
-    pack $w.f -fill both -expand 1
+    }    
+    set box $w.box
+    set widgets(box) $w.box
+    ttk::frame $box
+    pack $box -fill x -expand 1
 
     if {$config(ui,status,menu) eq "plain"} {
-	::Status::MainButton $w.f.pres ::Jabber::jstate(show)
+	::Status::MainButton $box.pres ::Jabber::jstate(show)
     } elseif {$config(ui,status,menu) eq "dynamic"} {
-	::Status::ExMainButton $w.f.pres ::Jabber::jstate(show+status)
+	::Status::ExMainButton $box.pres ::Jabber::jstate(show+status) \
+	  -style SunkenMenubutton
     }
-    pack $w.f.pres -side left
+    ttk::label $box.lpres -text [mc Status]
     
-    ::AvatarMB::Button $w.f.avatar
-    pack $w.f.avatar -side right
+    grid  $box.pres   -column 0 -row 0
+    grid  $box.lpres  -column 0 -row 1
     
-    ttk::frame $w.f.box -padding {8 0}
-    pack $w.f.box -fill x
+    ::AvatarMB::Button $box.avatar
+    ttk::label $box.lavatar -text [mc Avatar]
     
-    set column 0
-    set box $w.f.box
+    grid  $box.avatar   -column 100 -row 0
+    grid  $box.lavatar  -column 100 -row 1
+    
+    set column 1
     foreach name $widgets(all) {
 	set opts [uplevel #0 $widgets($name,cmd) $box.$column]
 	eval {grid  $box.$column  -row 0 -column $column} $opts
 	ttk::label $box.l$column -text $widgets($name,label)
-	grid  $box.l$column  -row 1 -column $column -padx 2 -pady 2
+	grid  $box.l$column  -row 1 -column $column -padx 2 -pady 0
 	set widgets($name,column) $column
 	set widgets($name,win) $box.$column
 	set widgets($name,lwin) $box.l$column
@@ -108,11 +112,10 @@ proc ::MegaPresence::Build {w} {
 proc ::MegaPresence::CollapseCmd {w} {
     variable widgets
 
-    set f $widgets(iframe)
     if {$widgets(collapse)} {
-	pack forget $f
+	pack forget $widgets(box)
     } else {
-	pack $f -fill both -expand 1
+	pack $widgets(box) -fill both -expand 1
     }
     event generate $w <<Xxx>>
 }

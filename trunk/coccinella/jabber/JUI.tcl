@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.187 2007-08-11 06:44:34 matben Exp $
+# $Id: JUI.tcl,v 1.188 2007-08-11 13:56:29 matben Exp $
 
 package provide JUI 1.0
 
@@ -341,12 +341,6 @@ proc ::JUI::Build {w} {
     ttk::separator $wall.sep -orient horizontal
     pack $wall.sep -side top -fill x
     
-    # Experiment!
-    if {$config(ui,main,mega-presence)} {
-	::MegaPresence::Build $wall.mp
-	pack $wall.mp -side bottom -fill x -padx 4 -pady 2
-    }
-    
     # Status frame. 
     # Need two frames so we can pack resize icon in the corner.
     set wbot $wall.bot
@@ -362,6 +356,12 @@ proc ::JUI::Build {w} {
     set wfstat $wbot.f
     ttk::frame $wfstat
     pack $wfstat -fill x
+    
+    # Experiment!
+    if {$config(ui,main,mega-presence)} {
+	::MegaPresence::Build $wall.mp
+	pack $wall.mp -side bottom -fill x -padx 4 -pady 2
+    }
 
     # Avatar menu button.
     ::AvatarMB::Button $wfstat.ava

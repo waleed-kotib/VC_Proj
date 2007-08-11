@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.40 2007-08-11 06:44:34 matben Exp $
+# $Id: Status.tcl,v 1.41 2007-08-11 13:56:29 matben Exp $
 
 package provide Status 1.0
 
@@ -510,15 +510,15 @@ proc ::Status::ExInitPrefsHook {} {
 # 
 #       Make a status menu button for login status only.
 
-proc ::Status::ExMainButton {w varName} {
+proc ::Status::ExMainButton {w varName args} {
     upvar $varName showStatus
     
     # We cannot use jstate(show+status) directly here due to the special use
     # of the "available" entry for login.
     set menuVar [namespace current]::menuVar($w)
     set $menuVar $showStatus
-    ExButton $w $menuVar -command [list ::Status::ExMainCmd $w]  \
-      -postcommand [list ::Status::ExMainPostCmd $w]
+    eval {ExButton $w $menuVar -command [list ::Status::ExMainCmd $w]  \
+      -postcommand [list ::Status::ExMainPostCmd $w]} $args
 
     trace add variable $varName write [list ::Status::ExMainTrace $w]
     bind $w <Destroy> +[list ::Status::ExMainFree %W $varName]
@@ -600,9 +600,11 @@ proc ::Status::ExBuildMainMenu {m} {
 
 proc ::Status::ExButton {w varName args} {    
     upvar $varName showStatus
+    
+    set style [ui::from args -style MiniMenubutton]
         
     set show [lindex $showStatus 0]	
-    ttk::menubutton $w -style MiniMenubutton  \
+    ttk::menubutton $w -style $style \
       -compound image -image [::Rosticons::Get status/$show]
     set wmenu $w.menu
     menu $wmenu -tearoff 0  \
