@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Nickname.tcl,v 1.4 2007-07-19 06:28:16 matben Exp $
+# $Id: Nickname.tcl,v 1.5 2007-08-11 06:44:34 matben Exp $
 
 # @@@ There is one thing I don't yet understand. While I always publish any 
 # nickname when I log on, online users will receive the event, but what about
@@ -101,7 +101,12 @@ proc ::Nickname::Element {nickname} {
 proc ::Nickname::Publish {nickname} {
     variable xmlns
 
-    set itemE [wrapper::createtag item -subtags [list [Element $nickname]]]
+    #   NB:  It is currently unclear there should be an id attribute in the item
+    #        element since PEP doesn't use it but pubsub do, and the experimental
+    #        OpenFire PEP implementation.
+    #set itemE [wrapper::createtag item -subtags [list [Element $nickname]]]
+    set itemE [wrapper::createtag item \
+      -attrlist [list id current] -subtags [list [Element $nickname]]]
     ::Jabber::JlibCmd pep publish $xmlns(nick) $itemE
 }
 

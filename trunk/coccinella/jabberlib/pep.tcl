@@ -9,7 +9,7 @@
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: pep.tcl,v 1.8 2007-07-19 06:28:17 matben Exp $
+# $Id: pep.tcl,v 1.9 2007-08-11 06:44:34 matben Exp $
 #
 ############################# USAGE ############################################
 #
@@ -34,6 +34,9 @@
 #           mood        'http://jabber.org/protocol/mood'
 #           tune        'http://jabber.org/protocol/tune'
 #     
+#   NB:  It is currently unclear there should be an id attribute in the item
+#        element since PEP doesn't use it but pubsub do, and the experimental
+#        OpenFire PEP implementation.
 
 package require jlib::disco
 package require jlib::pubsub
@@ -181,7 +184,9 @@ proc jlib::pep::publish {jlibname node itemE args} {
 #       none
 
 proc jlib::pep::retract {jlibname node args} {
-    set itemE [wrapper::createtag item]
+    #set itemE [wrapper::createtag item]
+    # Se comment above about this one.
+    set itemE [wrapper::createtag item -attrlist [list id current]]
     eval {$jlibname pubsub retract $node [list $itemE]} $args
 }
 
