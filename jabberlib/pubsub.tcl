@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: pubsub.tcl,v 1.19 2007-07-19 06:28:17 matben Exp $
+# $Id: pubsub.tcl,v 1.20 2007-08-11 06:44:34 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -121,8 +121,8 @@ proc jlib::pubsub::create {jlibname args} {
     
     variable xmlns
     
-    set attr {}
-    set opts {}
+    set attr [list]
+    set opts [list]
     set configure 0
     foreach {key value} $args {
 	set name [string trimleft $key -]
@@ -169,7 +169,7 @@ proc jlib::pubsub::configure {jlibname type to node args} {
     variable xmlns
 
     set opts [list -to $to]
-    set xE {}
+    set xE [list]
     foreach {key value} $args {
 	switch -- $key {
 	    -command {
@@ -272,7 +272,7 @@ proc jlib::pubsub::subscriptions {jlibname type to node args} {
     variable xmlns
 
     set opts [list -to $to]
-    set subsEs {}
+    set subsEs [list]
     foreach {key value} $args {
 	switch -- $key {
 	    -command {
@@ -309,7 +309,7 @@ proc jlib::pubsub::affiliations {jlibname type to node args} {
     variable xmlns
     
     set opts [list -to $to]
-    set affEs {}
+    set affEs [list]
     foreach {key value} $args {
 	switch -- $key {
 	    -command {
@@ -386,7 +386,7 @@ proc jlib::pubsub::options {jlibname type to jid node args} {
 
     set opts [list -to $to]
     set attr [list node $node jid $jid]
-    set xdata {}
+    set xdata [list]
 
     foreach {key value} $args {
 	switch -- $key {
@@ -429,8 +429,8 @@ proc jlib::pubsub::publish {jlibname node args} {
 
     variable xmlns
     
-    set opts {}
-    set itemEs {}
+    set opts [list]
+    set itemEs [list]
     foreach {key value} $args {	
 	switch -- $key {
 	    -command {
@@ -649,7 +649,7 @@ proc jlib::pubsub::event {jlibname ns msgE args} {
     set xmldata $aargs(-xmldata)
     
     set from [wrapper::getattribute $xmldata from]
-    set nodes {}
+    set nodes [list]
     
     set eventEs [wrapper::getchildswithtagandxmlns $xmldata event $xmlns(event)]
     foreach eventE $eventEs {

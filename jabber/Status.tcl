@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements various UI parts for setting status (presence).
 #      
-#  Copyright (c) 2004-2006  Mats Bengtsson
+#  Copyright (c) 2004-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.39 2007-07-19 06:28:17 matben Exp $
+# $Id: Status.tcl,v 1.40 2007-08-11 06:44:34 matben Exp $
 
 package provide Status 1.0
 
@@ -176,7 +176,7 @@ proc ::Status::Button {w varName args} {
     upvar $varName status
     variable menuBuildCmd
         
-    set argsA(-command) {}
+    set argsA(-command) [list]
     array set argsA $args
 
     set wmenu $w.menu
@@ -224,7 +224,7 @@ proc ::Status::ConfigImage {w show} {
 	# empty
     } else {
 	$w configure -image [::Rosticons::Get status/$show]
-    }
+    }    
 }
 
 # Status::BuildGenericMenu --
@@ -619,6 +619,8 @@ proc ::Status::ExGetMenu {w} {
 }
 
 proc ::Status::ExTrace {w varName index op} {
+    global  config
+    variable mapShowElemToText
     
     if {[winfo exists $w]} {
 	upvar $varName var
@@ -630,6 +632,13 @@ proc ::Status::ExTrace {w varName index op} {
 	}
 	set show [lindex $showStatus 0]
 	$w configure -image [::Rosticons::Get status/$show]
+
+	set str $mapShowElemToText($show)
+	set status [lindex $showStatus 1]
+	if {$status ne ""} {
+	    append str " " $config(status,menu,separator) $status
+	}
+	::balloonhelp::balloonforwindow $w $str
     }
 }
 

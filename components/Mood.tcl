@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.29 2007-08-03 06:59:37 matben Exp $
+#  $Id: Mood.tcl,v 1.30 2007-08-11 06:44:34 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -244,7 +244,13 @@ proc ::Mood::Publish {mood {text ""}} {
     }
     set moodE [wrapper::createtag mood  \
       -attrlist [list xmlns $xmlns(mood)] -subtags $moodChildEs]
-    set itemE [wrapper::createtag item -subtags [list $moodE]]
+
+    #   NB:  It is currently unclear there should be an id attribute in the item
+    #        element since PEP doesn't use it but pubsub do, and the experimental
+    #        OpenFire PEP implementation.
+    #set itemE [wrapper::createtag item -subtags [list $moodE]]
+    set itemE [wrapper::createtag item \
+      -attrlist [list id current] -subtags [list $moodE]]
 
     ::Jabber::JlibCmd pep publish $xmlns(mood) $itemE
 }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.220 2007-08-06 07:49:53 matben Exp $
+# $Id: Jabber.tcl,v 1.221 2007-08-11 06:44:34 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -69,6 +69,7 @@ package require JUI
 package require JUser
 package require Login
 package require MailBox
+package require MegaPresence
 package require MUC
 package require NewMsg
 package require Nickname

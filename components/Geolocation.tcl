@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: Geolocation.tcl,v 1.8 2007-08-03 06:59:37 matben Exp $
+#  $Id: Geolocation.tcl,v 1.9 2007-08-11 06:44:34 matben Exp $
 
 package require jlib::pep
 
@@ -309,7 +309,13 @@ proc ::Geolocation::Publish {w} {
     }
     set geolocE [wrapper::createtag "geoloc" \
       -attrlist [list xml:lang [jlib::getlang]] -subtags $childL]
-    set itemE [wrapper::createtag item -subtags [list $geolocE]]
+
+    #   NB:  It is currently unclear there should be an id attribute in the item
+    #        element since PEP doesn't use it but pubsub do, and the experimental
+    #        OpenFire PEP implementation.
+    #set itemE [wrapper::createtag item -subtags [list $geolocE]]
+    set itemE [wrapper::createtag item \
+      -attrlist [list id current] -subtags [list $geolocE]]
 
     ::Jabber::JlibCmd pep publish $xmlns(geoloc) $itemE
 }

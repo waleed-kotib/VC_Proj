@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.186 2007-08-09 07:47:03 matben Exp $
+# $Id: JUI.tcl,v 1.187 2007-08-11 06:44:34 matben Exp $
 
 package provide JUI 1.0
 
@@ -97,6 +97,7 @@ namespace eval ::JUI:: {
         
     set ::config(ui,status,menu)    dynamic   ;# plain|dynamic
     set ::config(ui,main,infoLabel) server    ;# mejid|mejidres|status|server
+    set ::config(ui,main,mega-presence) 1
     
     # Collection of useful and common widget paths.
     variable jwapp
@@ -339,6 +340,12 @@ proc ::JUI::Build {w} {
     # The top separator shall only be mapped between the toolbar and the notebook.
     ttk::separator $wall.sep -orient horizontal
     pack $wall.sep -side top -fill x
+    
+    # Experiment!
+    if {$config(ui,main,mega-presence)} {
+	::MegaPresence::Build $wall.mp
+	pack $wall.mp -side bottom -fill x -padx 4 -pady 2
+    }
     
     # Status frame. 
     # Need two frames so we can pack resize icon in the corner.
