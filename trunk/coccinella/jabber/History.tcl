@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: History.tcl,v 1.29 2007-07-19 06:28:12 matben Exp $
+# $Id: History.tcl,v 1.30 2007-08-12 08:17:45 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -342,7 +342,7 @@ proc ::History::XParseXMLToItemList {jid} {
 #       xmldata
 
 proc ::History::XPutItem {tag jid xmldata} {
-            
+    
     set time [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
     set attr [list time $time]
     set itemE [wrapper::createtag $tag  \
@@ -721,7 +721,7 @@ proc ::History::XInsertText {w} {
     foreach itemE $itemL {
 	set itemTag [tinydom::tagname $itemE]
 	
-	if {$itemTag ne "send" && $itemTag ne "recv"} {
+	if {($itemTag ne "send") && ($itemTag ne "recv")} {
 	    continue
 	}
 	set xmppE [lindex [tinydom::children $itemE] 0]
@@ -777,6 +777,15 @@ proc ::History::XInsertText {w} {
 		set bodyE [tinydom::getfirstchildwithtag $xmppE body]
 		if {$bodyE ne {}} {
 		    set body [tinydom::chdata $bodyE]
+		}
+		set subjectE [tinydom::getfirstchildwithtag $xmppE subject]
+		if {$subjectE ne {}} {
+		    if {$body ne ""} {
+			append body ", "
+		    }
+		    append body "[mc Subject]: "
+		    append body [tinydom::chdata $subjectE]
+		    set tag sys
 		}
 	    }
 	    presence {
