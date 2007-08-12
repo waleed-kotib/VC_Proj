@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.164 2007-08-10 08:07:51 matben Exp $
+# $Id: UI.tcl,v 1.165 2007-08-12 14:22:51 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1416,17 +1416,17 @@ proc ::UI::DoTopMenuPopup {w wmenu} {
 # These Grab/GrabRelease handle menus as well.
 
 proc ::UI::Grab {w} {
-    catch {grab $w}
 	
     # Disable menubar except Edit menu.
     set mb [$w cget -menu]
     if {$mb ne ""} {
 	MenubarDisableBut $mb edit
     }
+    ui::grabWindow $w
 }
 
 proc ::UI::GrabRelease {w} {    
-    catch {grab release $w}
+    ui::releaseGrab $w
     
     # Enable menubar.
     set mb [$w cget -menu]
