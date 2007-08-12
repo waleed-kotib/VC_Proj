@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.17 2007-08-09 14:14:16 matben Exp $
+# $Id: util.tcl,v 1.18 2007-08-12 14:22:51 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -361,39 +361,9 @@ proc ui::releaseGrab {w} {
 }
 
 proc ui::Grab {win} {
-    ui::grabWindow $win
+    grabWindow $win
     tkwait window $win
-}
-
-# do not use this! Need edit menu.
-proc ui::GrabAndWait {win} {
-    grab $win
-    MenubarDisable $win
-    tkwait window $win
-    MenubarNormal $win
-}
-
-proc ui::MenubarDisable {win} {
-
-    # Accelerators must be handled from OnMenu* commands.
-    # @@@ Must allow cut/copy/paste from edit menu.
-    set mbar [$win cget -menu]
-    if {$mbar ne ""} {
-	set iend [$mbar index end]
-	for {set idx 0} {$idx <= $iend} {incr idx} {
-	    $mbar entryconfigure $idx -state disabled
-	}
-    }
-}
-
-proc ui::MenubarNormal {win} {
-    set mbar [$win cget -menu]
-    if {$mbar ne ""} {
-	set iend [$mbar index end]
-	for {set ind 0} {$ind <= $iend} {incr ind} {
-	    $mbar entryconfigure $ind -state normal
-	}    
-    }
+    releaseGrab $win
 }
 
 # ui::EntryInsert --

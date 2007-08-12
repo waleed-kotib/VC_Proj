@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.30 2007-08-11 06:44:34 matben Exp $
+#  $Id: Mood.tcl,v 1.31 2007-08-12 14:22:50 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -303,7 +303,7 @@ proc ::Mood::CustomMoodDlg {} {
     set mbar [::UI::GetMainMenu]
     ui::dialog defaultmenu $mbar
     ::UI::MenubarDisableBut $mbar edit
-    $w grab    
+    $w grab
     ::UI::MenubarEnableAll $mbar
 }
 

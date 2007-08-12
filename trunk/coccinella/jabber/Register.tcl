@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.79 2007-08-08 09:18:37 matben Exp $
+# $Id: Register.tcl,v 1.80 2007-08-12 14:22:51 matben Exp $
 
 package provide Register 1.0
 
@@ -331,7 +331,6 @@ proc ::RegisterEx::New {args} {
     set state(wtabnb)  $wtabnb
     
     # Grab and focus.
-    set oldFocus [focus]
     focus $frmid.eserv
     ::UI::Grab $w
     
@@ -358,7 +357,6 @@ proc ::RegisterEx::New {args} {
 
     ::UI::SaveWinPrefixGeom $wDlgs(jreg)
     ::UI::GrabRelease $w
-    catch {focus $oldFocus}
     catch {destroy $state(w)}
     Free $token
     
