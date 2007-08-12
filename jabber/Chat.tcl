@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.204 2007-07-29 10:28:14 matben Exp $
+# $Id: Chat.tcl,v 1.205 2007-08-12 08:17:44 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -570,7 +570,7 @@ proc ::Chat::GotMsg {body args} {
         }
     } 
 
-    set opts {}
+    set opts [list]
     set tm [::Jabber::GetDelayStamp $xmldata]
     if {$tm ne ""} {
 	set secs [clock scan $tm -gmt 1]
@@ -653,6 +653,8 @@ proc ::Chat::GotNormalMsg {body args} {
     }
 }
 
+# NB: @@@ Change this to take complete xml stanzas instead!
+
 # Chat::InsertMessage --
 # 
 #       Puts message in text chat window.
@@ -711,16 +713,22 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
 	    }
 	}
 	sys {
-	    
-	    # This can indicate wrong from of setting subject ourself.
 	    set from ""
 	    if {[info exists argsA(-jidfrom)]} {
 		set from $argsA(-jidfrom)
 	    }
 	    set jid2 [jlib::barejid $from]
+	    
+	    # Figure out where this comes from.
 	    if {[::Jabber::JlibCmd service isroom $jid2]} {
 		set name [::Jabber::JlibCmd service nick $jid]
 		set from $jid2/$name
+	    } elseif {[jlib::jidequal $chatstate(jid2) $jid2]} {
+		set name $chatstate(displayname)
+		set from $jid2
+	    } elseif {$jid2 ne ""} {
+		set name [::Roster::GetDisplayName $jid2]
+		set from $jid2
 	    } else {
 		set name $chatstate(displayname)
 		set from $jid2
@@ -982,7 +990,7 @@ proc ::Chat::InsertHistoryXML {chattoken} {
 
     foreach itemE $itemL {
 	set itemTag [tinydom::tagname $itemE]	
-	if {$itemTag ne "send" && $itemTag ne "recv"} {
+	if {($itemTag ne "send") && ($itemTag ne "recv")} {
 	    continue
 	}
 	set time [tinydom::getattribute $itemE time]
@@ -1003,7 +1011,15 @@ proc ::Chat::InsertHistoryXML {chattoken} {
 		if {$bodyE ne {}} {
 		    set body [tinydom::chdata $bodyE]
 		}
-		# Subject?
+		set subjectE [tinydom::getfirstchildwithtag $xmppE subject]
+		if {$subjectE ne {}} {
+		    if {$body ne ""} {
+			append body ", "
+		    }
+		    append body "[mc Subject]: "
+		    append body [tinydom::chdata $subjectE]
+		    set tag sys
+		}
 	    }
 	    presence {
 		set show [tinydom::getattribute $xmppE type]
@@ -1578,15 +1594,16 @@ proc ::Chat::OnReturnSubject {chattoken} {
 
     set threadID $chatstate(threadid)
     set chatstate(fromjid) [$jstate(jlib) getrecipientjid $chatstate(fromjid)]
-    set jid [jlib::jidmap $chatstate(fromjid)]  
-    set jid2 [jlib::barejid $jid]
-    set myjid [$jstate(jlib) myjid]
+    set jid     [jlib::jidmap $chatstate(fromjid)]  
+    set jid2    [jlib::barejid $jid]
+    set myjid   [$jstate(jlib) myjid]
+    set subject $chatstate(subject)
     $chatstate(wtext) mark set insert end
-    InsertMessage $chattoken sys "[mc Subject]: $chatstate(subject)"
+    InsertMessage $chattoken sys "[mc Subject]: $subject" -jidfrom $myjid
     set xmldata [jlib::send_message_xmllist $jid  \
-       -thread $threadID -type chat -from $myjid]
+       -thread $threadID -type chat -from $myjid -subject $subject]
     ::History::XPutItem send $jid2 $xmldata
-    $jstate(jlib) send_message $jid -type chat -subject $chatstate(subject) \
+    $jstate(jlib) send_message $jid -type chat -subject $subject \
       -thread $threadID
     set chatstate(subjectOld) $chatstate(subject)
     set dlgstate(lastsentsecs) [clock seconds]
@@ -2092,11 +2109,9 @@ proc ::Chat::SetFocus {dlgtoken chattoken} {
 	upvar 0 $ctoken cstate
 	if {[info exists cstate(w)]} {
 	    set cstate(focus) [focus]
-	    #puts "\t ctoken=$ctoken, cstate(focus)=$cstate(focus)"
 	}
     }
     if {[info exists chatstate(focus)]} {
-	#puts "\t exists chatstate(focus)=$chatstate(focus)"
 	set wfocus $chatstate(focus)
     } else {
 	set wfocus $chatstate(wtextsnd)
