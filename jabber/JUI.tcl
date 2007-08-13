@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.188 2007-08-11 13:56:29 matben Exp $
+# $Id: JUI.tcl,v 1.189 2007-08-13 14:39:49 matben Exp $
 
 package provide JUI 1.0
 
@@ -340,7 +340,13 @@ proc ::JUI::Build {w} {
     # The top separator shall only be mapped between the toolbar and the notebook.
     ttk::separator $wall.sep -orient horizontal
     pack $wall.sep -side top -fill x
-    
+   
+    # Experiment!
+    if {$config(ui,main,mega-presence)} {
+	::JUI::SlotBuild $wall.mp
+	pack $wall.mp -side bottom -fill x
+    }
+
     # Status frame. 
     # Need two frames so we can pack resize icon in the corner.
     set wbot $wall.bot
@@ -356,12 +362,6 @@ proc ::JUI::Build {w} {
     set wfstat $wbot.f
     ttk::frame $wfstat
     pack $wfstat -fill x
-    
-    # Experiment!
-    if {$config(ui,main,mega-presence)} {
-	::MegaPresence::Build $wall.mp
-	pack $wall.mp -side bottom -fill x -padx 4 -pady 2
-    }
 
     # Avatar menu button.
     ::AvatarMB::Button $wfstat.ava
@@ -409,6 +409,7 @@ proc ::JUI::Build {w} {
     set jwapp(mystatus)  $wfstat.bst
     set jwapp(myjid)     $wfstat.me
     set jwapp(statcont)  $wstatcont
+    set jwapp(wslot)    $wall.mp
     
     # Add an extra margin for Login/Logout string lengths.
     set trayMinW [expr {[$wtbar minwidth] + 12}]
@@ -432,6 +433,46 @@ proc ::JUI::Build {w} {
 	RosterMoveFromPage
     }
     return $w
+}
+
+# JUI::SlotRegister --
+# 
+#       A number of functions to allow components to abtain slots of space
+#       in the main window.
+
+proc ::JUI::SlotRegister {name cmd} {
+    variable slot
+    
+    lappend slot(all) $name
+    set slot($name,name) $name
+    set slot($name,cmd)  $cmd
+    return $name
+}
+
+proc ::JUI::SlotBuild {w} {
+    variable slot
+    
+    ttk::frame $w -class RosterSlots
+    set row 0
+    foreach name $slot(all) {
+	ttk::separator $w.s$row -orient horizontal
+	pack $w.s$row -side top -fill x
+	uplevel #0 $slot($name,cmd) $w.$row
+	pack $w.$row -side top -fill x -expand 1
+	set slot($name,row) $row
+	set slot($name,sep) $w.s$row
+	set slot($name,win) $w.$row
+	set slot($name,display) 1
+	incr row
+    }
+    return $w
+}
+
+proc ::JUI::SlotClose {name} {
+    variable slot
+
+    pack forget $slot($name,win)
+    #destroy $slot($name,sep)
 }
 
 proc ::JUI::NotebookTabChanged {} {

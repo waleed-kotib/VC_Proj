@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.31 2007-08-07 07:50:25 matben Exp $
+# $Id: Search.tcl,v 1.32 2007-08-13 14:39:49 matben Exp $
 
 package provide Search 1.0
 
@@ -32,8 +32,18 @@ namespace eval ::Search:: {
     
     set popMenuDefs {
 	{command    mAddContact...  {::JUser::NewDlg -jid $jid} }
-	{command    mvCard2      {::VCard::Fetch other $jid} }	
+	{command    mvCard2         {::VCard::Fetch other $jid} }	
     }
+
+    option add *SearchSlot.padding       {4 2 2 2}     50
+    option add *SearchSlot.box.padding   {0 2 4 2}     50
+    option add *SearchSlot*TLabel.style  Small.TLabel  widgetDefault
+    
+    variable widgets
+    set widgets(all) [list]
+
+    # ::hooks::register initHook
+    ::JUI::SlotRegister search ::Search::SlotBuild
 }
 
 proc ::Search::OnMenu {} {
@@ -448,6 +458,86 @@ proc ::Search::CloseCmd {w} {
     
     ::UI::SaveWinPrefixGeom $wDlgs(jsearch)
     destroy $w
+}
+
+#--- Roster Slot --------------------------------------------------------------
+
+proc ::Search::SlotBuild {w} {
+    variable widgets
+
+    ttk::frame $w -class SearchSlot
+    
+    if {1} {
+	set widgets(collapse) 0
+	ttk::checkbutton $w.arrow -style Arrow.TCheckbutton \
+	  -command [list [namespace current]::SlotCollapse $w] \
+	  -variable [namespace current]::widgets(collapse)
+	pack $w.arrow -side left -anchor n	
+	bind $w.arrow <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
+
+	set subPath [file join images 16]
+	set im  [::Theme::GetImage closeAqua $subPath]
+	set ima [::Theme::GetImage closeAquaActive $subPath]
+	ttk::button $w.close -style Plain  \
+	  -image [list $im active $ima] -compound image  \
+	  -command [namespace code [list SlotClose $w]]
+	pack $w.close -side right -anchor n	
+    }    
+    set box $w.box
+    set widgets(box) $w.box
+    ttk::frame $box
+    pack $box -fill x -expand 1
+    
+    ttk::label $box.l -text "Search JUD:"
+    ttk::entry $box.e
+    
+    grid  $box.l  $box.e
+    grid $box.e -sticky ew
+    grid columnconfigure $box 1 -weight 1
+    
+    return $w
+}
+
+proc ::Search::SlotCollapse {w} {
+    variable widgets
+
+    if {$widgets(collapse)} {
+	pack forget $widgets(box)
+    } else {
+	pack $widgets(box) -fill both -expand 1
+    }
+    event generate $w <<Xxx>>
+}
+
+proc ::Search::SlotPopup {w x y} {
+    variable widgets
+    
+    set m $w.m
+    destroy $m
+    menu $m -tearoff 0
+    
+    foreach field {Name JID "First Name"} {
+	$m add checkbutton -label $field \
+	  -command [namespace code [list SlotMenuCmd $w $field]] \
+	  -variable [namespace current]::widgets($field,display)
+    }
+    
+    update idletasks
+    
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
+    tk_popup $m [expr {int($X) - 0}] [expr {int($Y) - 0}]   
+    
+    return -code break
+}
+
+proc ::Search::SlotMenuCmd {w field} {
+    
+    
+}
+
+proc ::Search::SlotClose {w} {
+    ::JUI::SlotClose search
 }
 
 #-------------------------------------------------------------------------------

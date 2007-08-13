@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.26 2007-07-26 14:18:54 matben Exp $
+# $Id: connect.tcl,v 1.27 2007-08-13 14:39:49 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -391,6 +391,8 @@ proc jlib::connect::connect {jlibname jid password args} {
 	}
     }
     jlib::set_async_error_handler $jlibname [namespace code async_error]
+    
+    return
 }
 
 proc jlib::connect::verify {jlibname} {    
@@ -631,15 +633,18 @@ proc jlib::connect::init_stream_cb {jlibname args} {
 	}
     }
 
+    # XEP-0138: Stream Compression:
+    # If both TLS (whether including TLS compression or not) and stream 
+    # compression are used, then TLS MUST be negotiated first, followed by 
+    # negotiation of stream compression.
+
     if {$state(usetls)} {
 	set state(state) starttls
 	if {$state(-command) ne {}} {
 	    uplevel #0 $state(-command) $jlibname starttls
 	}
 	$jlibname starttls jlib::connect::starttls_cb
-    } elseif {1 && $state(usecompress)} {
-	
-	# ?????????
+    } elseif {$state(usecompress)} {
 	if {$state(-command) ne {}} {
 	    uplevel #0 $state(-command) $jlibname startcompress
 	}
@@ -672,6 +677,30 @@ proc jlib::connect::starttls_cb {jlibname type args} {
 	} else {
 	    auth $jlibname
 	}
+    }
+}
+
+proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {    
+    upvar ${jlibname}::connect::state state
+    
+    if {![info exists state]} return
+    
+    debug "jlib::connect::compress_cb"
+  
+    # Note: Failure of compression setup SHOULD NOT be treated as an 
+    # unrecoverable error and therefore SHOULD NOT result in a stream error. 
+    if {$errcode ne ""} {
+	finish $jlibname $errcode $errmsg
+	return
+    }
+    
+    # We have a new stream.
+    # ????????????????
+    set state(streamid) [$jlibname getstreamattr id]
+    if {$state(-noauth)} {
+	finish $jlibname
+    } else {
+	auth $jlibname
     }
 }
 
@@ -747,12 +776,7 @@ proc jlib::connect::auth_cb {jlibname type queryE} {
 
 	# We have a new stream.
 	set state(streamid) [$jlibname getstreamattr id]
-	if {$state(usecompress)} {
-	    if {$state(-command) ne {}} {
-		uplevel #0 $state(-command) $jlibname startcompress
-	    }
-	    jlib::compress::start $jlibname [namespace code compress_cb]
-	} elseif {$state(usesasl)} {
+	if {$state(usesasl)} {
 	    jlib::bind::resource $jlibname $state(resource) [namespace code bind_cb]
 	} else {
 	    finish $jlibname
@@ -760,31 +784,7 @@ proc jlib::connect::auth_cb {jlibname type queryE} {
     }
 }
 
-proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {    
-    upvar ${jlibname}::connect::state state
-    
-    if {![info exists state]} return
-    
-    debug "jlib::connect::compress_cb"
-  
-    # Note: Failure of compression setup SHOULD NOT be treated as an 
-    # unrecoverable error and therefore SHOULD NOT result in a stream error. 
-    if {$errcode ne ""} {
-	finish $jlibname $errcode $errmsg
-	return
-    }
-    
-    # We have a new stream.
-    # ????????????????
-    set state(streamid) [$jlibname getstreamattr id]
-    if {$state(-noauth)} {
-	finish $jlibname
-    } else {
-	jlib::bind::resource $jlibname $state(resource) [namespace code bind_cb]
-    }
-}
-
-proc jlib::connect::bind_cb {jlibname type subiq} {
+proc jlib::connect::bind_cb {jlibname type queryE} {
 
     debug "jlib::connect::bind_cb"
     
@@ -922,7 +922,7 @@ if {0} {
       -command cb -compress 1 -secure 1 -method tlssasl
     
     ::jlib::jlib1 connect connect matben@jabber.ru $pw \
-      -command cb -compress 1
+      -command cb -compress 1 -secure 1 -method sasl
 
     jlib::jlib1 closestream
 }

@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.183 2007-07-27 13:50:14 matben Exp $
+# $Id: jabberlib.tcl,v 1.184 2007-08-13 14:39:49 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -165,6 +165,7 @@ namespace eval jlib {
     set statics(inited) 0
     set statics(presenceTypeExp)  \
       {(available|unavailable|subscribe|unsubscribe|subscribed|unsubscribed|invisible|probe)}
+    set statics(instanceCmds) [list]
     
     variable version 1.0
     
@@ -232,6 +233,17 @@ proc jlib::getxmlns {name} {
     } else {
 	return -code error "unknown xmlns for $name"
     }
+}
+
+# jlib::register_instance --
+#     
+#       Packages can register here to get notified when a new jlib instance is
+#       created.
+
+proc jlib::register_instance {cmd} {
+    variable statics
+    
+    lappend statics(instanceCmds) $cmd
 }
 
 # jlib::new --
@@ -321,14 +333,14 @@ proc jlib::new {clientcmd args} {
     set lib(clientcmd)      $clientcmd
     set lib(async_handler)  ""
     set lib(wrap)           $wrapper
-    set lib(resetCmds)      {}
+    set lib(resetCmds)      [list]
     
     set lib(isinstream) 0
     set lib(state)      ""
     set lib(transport,name) ""
 
-    set lib(socketfilter,out) {}
-    set lib(socketfilter,in)  {}
+    set lib(socketfilter,out) [list]
+    set lib(socketfilter,in)  [list]
 
     init_inst $jlibname
             
@@ -440,7 +452,7 @@ proc jlib::havetls { } {
 # jlib::register_package --
 # 
 #       This is supposed to be a method for jlib::* packages to register
-#       themself just so we know they are there. SO far only for the 'roster'.
+#       themself just so we know they are there. So far only for the 'roster'.
 
 proc jlib::register_package {name} {
     variable statics
@@ -611,6 +623,10 @@ proc jlib::state {jlibname} {
     return $lib(state)
 }
 
+# jlib::register_reset --
+# 
+#       Packages can register here to get notified when the jlib stream is reset.
+
 proc jlib::register_reset {jlibname cmd} {
     
     upvar ${jlibname}::lib lib
@@ -710,7 +726,7 @@ proc jlib::putssocket {jlibname xml} {
     Debug 2 "SEND: $xml"
 
     if {$lib(socketfilter,out) ne {}} {
-	set xml [$lib(socketfilter,out) $xml]
+	set xml [$lib(socketfilter,out) $jlibname $xml]
     }
     if {[catch {puts -nonewline $lib(sock) $xml} err]} {
 	# Error propagated to the caller that calls clientcmd.
@@ -767,7 +783,7 @@ proc jlib::recvsocket {jlibname} {
 	return
     }
     if {$lib(socketfilter,in) ne {}} {
-	set data [$lib(socketfilter,in) $data]
+	set data [$lib(socketfilter,in) $jlibname $data]
     }
     Debug 2 "RECV: $data"
     
