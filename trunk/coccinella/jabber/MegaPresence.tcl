@@ -18,18 +18,21 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.2 2007-08-11 13:56:29 matben Exp $
+# $Id: MegaPresence.tcl,v 1.3 2007-08-13 14:39:49 matben Exp $
 
 package provide MegaPresence 1.0
 
 namespace eval ::MegaPresence {
 
-    option add *MegaPresence.padding       {0 2 0 2}     50
-    option add *MegaPresence.box.padding   {0 6 8 4}     50
+    option add *MegaPresence.padding       {4 2 2 2}     50
+    option add *MegaPresence.box.padding   {0 6 2 4}     50
     option add *MegaPresence*TLabel.style  Small.TLabel  widgetDefault
     
     variable widgets
     set widgets(all) [list]
+    
+    # ::hooks::register initHook
+    ::JUI::SlotRegister megapresence ::MegaPresence::Build
 }
 
 proc ::MegaPresence::Register {name label cmd} {
@@ -66,6 +69,14 @@ proc ::MegaPresence::Build {w} {
 	  -variable [namespace current]::widgets(collapse)
 	pack $w.arrow -side left -anchor n	
 	bind $w.arrow <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
+
+	set subPath [file join images 16]
+	set im  [::Theme::GetImage closeAqua $subPath]
+	set ima [::Theme::GetImage closeAquaActive $subPath]
+	ttk::button $w.close -style Plain  \
+	  -image [list $im active $ima] -compound image  \
+	  -command [namespace code [list Close $w]]
+	pack $w.close -side right -anchor n	
     }    
     set box $w.box
     set widgets(box) $w.box
@@ -153,5 +164,10 @@ proc ::MegaPresence::MenuCmd {w name} {
 	grid forget $widgets($name,win) $widgets($name,lwin)
     }
 }
+
+proc ::MegaPresence::Close {w} {
+    ::JUI::SlotClose megapresence
+}
+
 
 

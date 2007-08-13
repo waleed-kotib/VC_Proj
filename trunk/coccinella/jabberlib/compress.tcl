@@ -8,13 +8,16 @@
 #  
 # This file is distributed under BSD style license.
 #  
-#  Note: with zlib 1.0 it seems that we can import zlib compression
-#        on the socket channel using zlib stream socket ... ???
-#  
-# $Id: compress.tcl,v 1.6 2007-07-26 14:18:54 matben Exp $
+#  NB: There are several zlib packages floating around the net with the same
+#      name!. But we must have the one implemented for TIP 234, see
+#      http://www.tcl.tk/cgi-bin/tct/tip/234.html.
+#      This is currently of version 2.0.1 so we rely on this when doing
+#      package require. Beware!
+#      
+# $Id: compress.tcl,v 1.7 2007-08-13 14:39:49 matben Exp $
 
 package require jlib
-#package require zlib
+package require -exact zlib 2.0.1
 
 package provide jlib::compress 0.1
 
@@ -30,6 +33,11 @@ namespace eval jlib::compress {
 	features/compress    "http://jabber.org/features/compress"
 	protocol/compress    "http://jabber.org/protocol/compress"
     }
+    jlib::register_instance [namespace code instance]
+}
+
+proc jlib::compress::instance {jlibname} {
+    $jlibname register_reset [namespace code reset]
 }
 
 proc jlib::compress::start {jlibname cmd} {
@@ -37,7 +45,7 @@ proc jlib::compress::start {jlibname cmd} {
     variable xmlns
     variable methods
     
-    puts "jlib::compress::start"
+    #puts "jlib::compress::start"
     
     # Instance specific namespace.
     namespace eval ${jlibname}::compress {
@@ -47,6 +55,10 @@ proc jlib::compress::start {jlibname cmd} {
     
     set state(cmd) $cmd
     set state(-method) [lindex $methods 0]
+    
+    # Set up the streams for zlib.
+    set state(compress)   [zlib stream compress]
+    set state(decompress) [zlib stream decompress]
 
     # Set up callback for the xmlns that is of interest to us.
     $jlibname element_register $xmlns(protocol/compress) [namespace code parse]
@@ -60,7 +72,7 @@ proc jlib::compress::start {jlibname cmd} {
 
 proc jlib::compress::features_write {jlibname} {
     
-     puts "jlib::compress::features_write"
+     #puts "jlib::compress::features_write"
     
      $jlibname trace_stream_features {}
      compress $jlibname
@@ -76,7 +88,7 @@ proc jlib::compress::compress {jlibname} {
     variable xmlns
     upvar ${jlibname}::compress::state state
     
-    puts "jlib::compress::compress"
+    #puts "jlib::compress::compress"
        
     # Note: If the initiating entity did not understand any of the advertised 
     # compression methods, it SHOULD ignore the compression option and 
@@ -102,7 +114,7 @@ proc jlib::compress::compress {jlibname} {
 
 proc jlib::compress::parse {jlibname xmldata} {
     
-    puts "jlib::compress::parse"
+    #puts "jlib::compress::parse"
     
     set tag [wrapper::gettag $xmldata]
     
@@ -122,7 +134,7 @@ proc jlib::compress::parse {jlibname xmldata} {
 
 proc jlib::compress::compressed {jlibname xmldata} {
     
-    puts "jlib::compress::compressed"
+    #puts "jlib::compress::compressed"
     
     # Example 5. Receiving Entity Acknowledges Stream Compression 
     #     <compressed xmlns='http://jabber.org/protocol/compress'/> 
@@ -144,32 +156,34 @@ proc jlib::compress::compressed {jlibname xmldata} {
 	finish $jlibname network-failure $err
 	return
     }
+    finish $jlibname
 }
 
 # jlib::compress::out, in --
 # 
 #       Actual compression takes place here.
+#       XEP says:
+#       When using ZLIB for compression, the sending application SHOULD 
+#       complete a partial flush of ZLIB when its current send is complete. 
 
-proc jlib::compress::out {data} {
-    puts "jlib::compress::out¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬"
-    return [zlib compress $data]
+proc jlib::compress::out {jlibname data} {
+    upvar ${jlibname}::compress::state state
+
+    $state(compress) put -flush $data
+    return [$state(compress) get]
 }
 
-set jlib::compress::n -1
-
-proc jlib::compress::in {data} {
-    variable n
-    puts "jlib::compress::in...................."
-    set ::_data([incr n]) $data
-    return
+proc jlib::compress::in {jlibname cdata} {
+    upvar ${jlibname}::compress::state state
     
-    # This just crashes or gives "data error"
-    return [zlib decompress $data]
+    $state(decompress) put $cdata
+    #$state(decompress) flush
+    return [$state(decompress) get]
 }
 
 proc jlib::compress::failure {jlibname xmldata} {
     
-    puts "jlib::compress::failure"
+    #puts "jlib::compress::failure"
     
     set c [wrapper::getchildren $xmldata]
     if {[llength $c]} {
@@ -185,8 +199,9 @@ proc jlib::compress::finish {jlibname {errcode ""} {errmsg ""}} {
     upvar ${jlibname}::compress::state state
     variable xmlns
     
-    puts "jlib::compress:finish errcode=$errcode, errmsg=$errmsg"
+    #puts "jlib::compress:finish errcode=$errcode, errmsg=$errmsg"
 
+    # NB: We must keep our state array for the lifetime of the stream.
     $jlibname trace_stream_features {}
     $jlibname element_deregister $xmlns(protocol/compress) [namespace code parse]
     
@@ -195,7 +210,21 @@ proc jlib::compress::finish {jlibname {errcode ""} {errmsg ""}} {
     } else {
 	uplevel #0 $state(cmd) $jlibname
     }
-    unset state
 }
 
+proc jlib::compress::reset {jlibname} {
+    
+    upvar ${jlibname}::compress::state state
+
+    #puts "jlib::compress::reset"
+    
+    if {[info exists state(compress)]} {
+	$state(compress) close
+	unset state(compress)
+    }
+    if {[info exists state(decompress)]} {
+	$state(decompress) close
+	unset state(decompress)
+    }
+}
 
