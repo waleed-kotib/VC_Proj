@@ -14,7 +14,7 @@
 #      This is currently of version 2.0.1 so we rely on this when doing
 #      package require. Beware!
 #      
-# $Id: compress.tcl,v 1.7 2007-08-13 14:39:49 matben Exp $
+# $Id: compress.tcl,v 1.8 2007-08-14 12:21:24 matben Exp $
 
 package require jlib
 package require -exact zlib 2.0.1
@@ -226,5 +226,6 @@ proc jlib::compress::reset {jlibname} {
 	$state(decompress) close
 	unset state(decompress)
     }
+    unset -nocomplain state
 }
 
