@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.189 2007-08-13 14:39:49 matben Exp $
+# $Id: JUI.tcl,v 1.190 2007-08-14 14:05:44 matben Exp $
 
 package provide JUI 1.0
 
@@ -243,6 +243,9 @@ proc ::JUI::Init { } {
     if {[tk windowingsystem] eq "aqua"} {
 	set menuBarDef [linsert $menuBarDef 2 edit mEdit]
     }
+    
+    SlotRegister xstatus ::JUI::BuildMessageSlot
+
     set inited 1
 }
 
@@ -473,6 +476,89 @@ proc ::JUI::SlotClose {name} {
 
     pack forget $slot($name,win)
     #destroy $slot($name,sep)
+}
+
+# A kind of status slot. FIX NAME!
+
+namespace eval ::JUI {
+    
+    option add *MessageSlot.padding       {4 2 2 2}     50
+    option add *MessageSlot.box.padding   {8 2 8 2}     50
+    option add *MessageSlot*TEntry.font   CociSmallFont widgetDefault
+}
+
+proc ::JUI::BuildMessageSlot {w} {
+    variable widgets
+    
+    ttk::frame $w -class MessageSlot
+    
+    if {1} {
+	set widgets(collapse) 0
+	ttk::checkbutton $w.arrow -style Arrow.TCheckbutton \
+	  -command [list [namespace current]::MessageSlotCollapse $w] \
+	  -variable [namespace current]::widgets(collapse)
+	pack $w.arrow -side left -anchor n	
+	bind $w.arrow <<ButtonPopup>> [list [namespace current]::MessageSlotPopup $w %x %y]
+
+	set subPath [file join images 16]
+	set im  [::Theme::GetImage closeAqua $subPath]
+	set ima [::Theme::GetImage closeAquaActive $subPath]
+	ttk::button $w.close -style Plain  \
+	  -image [list $im active $ima] -compound image  \
+	  -command [namespace code [list SlotClose $w]]
+	pack $w.close -side right -anchor n	
+    }    
+    set widgets(value) mejid
+    set box $w.box
+    set widgets(box) $w.box
+    ttk::frame $box
+    pack $box -fill x -expand 1
+    
+    ttk::label $box.e -style Small.Sunken.TLabel \
+      -textvariable ::Jabber::jstate(mejid)
+    
+    grid  $box.e  -sticky ew
+    grid columnconfigure $box 0 -weight 1
+    
+    return $w
+}
+
+proc ::JUI::MessageSlotCollapse {w} {
+    variable widgets
+
+    if {$widgets(collapse)} {
+	pack forget $widgets(box)
+    } else {
+	pack $widgets(box) -fill both -expand 1
+    }
+    event generate $w <<Xxx>>
+}
+
+proc ::JUI::MessageSlotPopup {w x y} {
+    
+    set m $w.m
+    destroy $m
+    menu $m -tearoff 0
+    
+    foreach value {mejid mejidres server status} \
+      label [list [mc "Own JID"] [mc "Own full JID"] [mc Server] [mc Status]] {
+	$m add radiobutton -label $label \
+	  -variable [namespace current]::widgets(value) -value $value \
+	  -command [namespace code [list MessageSlotMenuCmd $w $value]]
+    }    
+    update idletasks
+    
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
+    tk_popup $m [expr {int($X) - 0}] [expr {int($Y) - 0}]   
+    
+    return -code break
+}
+
+proc ::JUI::MessageSlotMenuCmd {w value} {
+    variable widgets
+
+    $widgets(box).e configure -textvariable ::Jabber::jstate($value)
 }
 
 proc ::JUI::NotebookTabChanged {} {
