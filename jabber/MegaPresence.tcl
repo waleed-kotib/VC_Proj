@@ -18,14 +18,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.3 2007-08-13 14:39:49 matben Exp $
+# $Id: MegaPresence.tcl,v 1.4 2007-08-14 14:05:44 matben Exp $
 
 package provide MegaPresence 1.0
 
 namespace eval ::MegaPresence {
 
     option add *MegaPresence.padding       {4 2 2 2}     50
-    option add *MegaPresence.box.padding   {0 6 2 4}     50
+    option add *MegaPresence.box.padding   {0 2 2 2}     50
     option add *MegaPresence*TLabel.style  Small.TLabel  widgetDefault
     
     variable widgets

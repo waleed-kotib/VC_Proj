@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.32 2007-08-13 14:39:49 matben Exp $
+# $Id: Search.tcl,v 1.33 2007-08-14 14:05:44 matben Exp $
 
 package provide Search 1.0
 
@@ -36,8 +36,9 @@ namespace eval ::Search:: {
     }
 
     option add *SearchSlot.padding       {4 2 2 2}     50
-    option add *SearchSlot.box.padding   {0 2 4 2}     50
+    option add *SearchSlot.box.padding   {4 2 8 2}     50
     option add *SearchSlot*TLabel.style  Small.TLabel  widgetDefault
+    option add *SearchSlot*TEntry.font   CociSmallFont widgetDefault
     
     variable widgets
     set widgets(all) [list]
