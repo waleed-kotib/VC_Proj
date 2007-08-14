@@ -14,7 +14,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: jlibsasl.tcl,v 1.27 2007-07-23 15:11:43 matben Exp $
+# $Id: jlibsasl.tcl,v 1.28 2007-08-14 12:21:24 matben Exp $
 
 package require jlib
 package require saslmd5
@@ -74,7 +74,7 @@ proc jlib::auth_sasl {jlibname username resource password cmd} {
     upvar ${jlibname}::locals locals
     variable xmppxmlns
     
-    Debug 2 "jlib::auth_sasl"
+    Debug 4 "jlib::auth_sasl"
         
     # Cache our login jid.
     set locals(username) $username
@@ -98,7 +98,7 @@ proc jlib::sasl_features {jlibname} {
 
     upvar ${jlibname}::locals locals
 
-    Debug 2 "jlib::sasl_features"
+    Debug 4 "jlib::sasl_features"
     
     # Verify that sasl is supported before going on.
     set features [get_feature $jlibname "mechanisms"]
@@ -147,7 +147,7 @@ proc jlib::auth_sasl_continue {jlibname} {
     variable xmppxmlns
     variable cyrussasl 
 
-    Debug 2 "jlib::auth_sasl_continue"
+    Debug 4 "jlib::auth_sasl_continue"
     
     if {$cyrussasl} {
 
@@ -191,7 +191,7 @@ proc jlib::auth_sasl_continue {jlibname} {
 	set code [lindex $ans 0]
 	set out  [lindex $ans 1]
     }
-    Debug 2 "\t -operation start: code=$code, out=$out"
+    Debug 4 "\t -operation start: code=$code, out=$out"
     
     switch -- $code {
 	0 {	    
@@ -292,14 +292,14 @@ proc jlib::saslmd5_callback {jlibname data} {
 	    set value ""
 	}
     }
-    Debug 2 "jlib::saslmd5_callback id=$arr(id), value=$value"
+    Debug 4 "jlib::saslmd5_callback id=$arr(id), value=$value"
     
     return $value
 }
 
 proc jlib::sasl_challenge {jlibname tag xmllist} {
     
-    Debug 2 "jlib::sasl_challenge"
+    Debug 4 "jlib::sasl_challenge"
     
     sasl_step $jlibname [wrapper::getcdata $xmllist]
     return
@@ -313,7 +313,7 @@ proc jlib::sasl_step {jlibname serverin64} {
     variable cyrussasl
 
     set serverin [decode64 $serverin64]
-    Debug 2 "jlib::sasl_step, serverin=$serverin"
+    Debug 4 "jlib::sasl_step, serverin=$serverin"
     
     # Note that 'step' returns the output if succesful, not a serialized array!
     if {$cyrussasl} {
@@ -324,7 +324,7 @@ proc jlib::sasl_step {jlibname serverin64} {
     } else {
 	foreach {code output} [$lib(sasl,token) step -input $serverin] {break}
     }
-    Debug 2 "\t code=$code \n\t output=$output"
+    Debug 4 "\t code=$code \n\t output=$output"
     
     switch -- $code {
 	0 {	    
@@ -353,7 +353,7 @@ proc jlib::sasl_failure {jlibname tag xmllist} {
     upvar ${jlibname}::locals locals
     variable xmppxmlns
 
-    Debug 2 "jlib::sasl_failure"
+    Debug 4 "jlib::sasl_failure"
     
     if {[wrapper::getattribute $xmllist xmlns] eq $xmppxmlns(sasl)} {
 	set errelem [lindex [wrapper::getchildren $xmllist] 0]
@@ -372,7 +372,7 @@ proc jlib::sasl_success {jlibname tag xmllist} {
     
     upvar ${jlibname}::lib lib
 
-    Debug 2 "jlib::sasl_success"
+    Debug 4 "jlib::sasl_success"
     
     # Upon receiving a success indication within the SASL negotiation, the
     # client MUST send a new stream header to the server, to which the
@@ -450,7 +450,7 @@ proc jlib::sasl_final {jlibname type subiq} {
     upvar ${jlibname}::locals locals
     variable xmppxmlns
     
-    Debug 2 "jlib::sasl_final"
+    Debug 4 "jlib::sasl_final"
 
     # We are no longer interested in these.
     element_deregister $jlibname $xmppxmlns(sasl) [namespace current]::sasl_parse

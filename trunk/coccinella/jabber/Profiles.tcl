@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.90 2007-08-08 13:01:08 matben Exp $
+# $Id: Profiles.tcl,v 1.91 2007-08-14 12:21:24 matben Exp $
 
 package require ui::megaentry
 
@@ -737,6 +737,7 @@ proc ::Profiles::GetDefaultOpts {server} {
 	    -secure         0
 	    -method         sasl
 	    -port           ""
+	    -compress       0
 	}
 	# DO NOT add this!
 	#-resource       ""
@@ -1775,25 +1776,14 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::frame $wcon -padding [option get . notebookPageSmallPadding {}]
     pack  $wcon  -side top -anchor [option get . dialogAnchor {}]
 
-    set wstate(ip)            $wcon.eip
-    set wstate(port)          $wcon.eport
-
-    ttk::label $wcon.lip -style Small.TLabel \
-      -text "[mc {IP address}]:"
-    ttk::entry $wcon.eip -font CociSmallFont \
-      -textvariable $token\(ip)
-    ttk::label $wcon.lport -style Small.TLabel \
-      -text "[mc Port]:"
-    ttk::entry $wcon.eport -font CociSmallFont \
-      -textvariable $token\(port) -width 6 -validate key  \
-      -validatecommand {::Register::ValidatePortNumber %S}
 	
     set wse $wcon.se
     ttk::frame $wcon.se
 
-    set wstate(mssl)          $wse.mssl
-    set wstate(mtls)          $wse.mtls
-    set wstate(sasl)          $wse.sasl
+    set wstate(mssl)  $wse.mssl
+    set wstate(mtls)  $wse.mtls
+    set wstate(sasl)  $wse.sasl
+    set wstate(comp)  $wse.comp
 
     ttk::checkbutton $wse.tls -style Small.TCheckbutton  \
       -text [mc {Use secure connection}] -variable $token\(secure)  \
@@ -1807,17 +1797,39 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::radiobutton $wse.mssl -style Small.TRadiobutton  \
       -text [mc {Use TLS on separate port (old)}]  \
       -variable $token\(method) -value ssl
+    ttk::checkbutton $wse.comp -style Small.TCheckbutton  \
+      -text [mc {Use stream compression}] -variable $token\(compress)
     
     grid  $wse.tls     -          -sticky w
     grid  x            $wse.sasl  -sticky w
     grid  x            $wse.mtls  -sticky w
     grid  x            $wse.mssl  -sticky w
+    grid  x            $wse.comp  -sticky w
     grid columnconfigure $wse 0 -minsize 24
     
-    grid  $wcon.lip    $wcon.eip    -sticky e -pady 1
-    grid  $wcon.lport  $wcon.eport  -sticky e -pady 1
     grid  $wcon.se     -            -sticky ew -pady 1    
-    grid $wcon.eip $wcon.eport  -sticky w
+
+    # IP page.
+    $w add [ttk::frame $w.ip] -text [mc {IP}] -sticky news
+    set wip $w.ip.f
+    ttk::frame $wip -padding [option get . notebookPageSmallPadding {}]
+    pack  $wip  -side top -fill x -anchor [option get . dialogAnchor {}]
+    
+    ttk::label $wip.lip -style Small.TLabel -text "[mc {IP address}]:"
+    ttk::entry $wip.eip -font CociSmallFont -textvariable $token\(ip)
+    ttk::label $wip.lport -style Small.TLabel -text "[mc Port]:"
+    ttk::entry $wip.eport -font CociSmallFont \
+      -textvariable $token\(port) -width 6 -validate key  \
+      -validatecommand {::Register::ValidatePortNumber %S}
+    
+    grid  $wip.lip    $wip.eip    -sticky e -pady 1
+    grid  $wip.lport  $wip.eport  -sticky e -pady 1
+    grid $wip.eip -sticky ew
+    grid $wip.eport -sticky w
+    grid columnconfigure $wip 1 -weight 1
+    
+    set wstate(ip)   $wip.eip
+    set wstate(port) $wip.eport
 
     # HTTP
     $w add [ttk::frame $w.http] -text [mc {HTTP}] -sticky news
@@ -1858,6 +1870,9 @@ proc ::Profiles::NotebookOptionWidget {w token} {
 
     if {!$this(package,tls)} {
 	$wse.tls state {disabled}
+    }
+    if {[catch {package require jlib::compress}]} {
+	$wse.comp state {disabled}
     }
 
     # Set defaults.
@@ -1927,10 +1942,16 @@ proc ::Profiles::NotebookSecCmd {w} {
 	} else {
 	    $wstate(sasl) state {disabled}
 	}
+	if {[catch {package require jlib::compress}]} {
+	    $wstate(comp)  state {disabled}
+	} else {
+	    $wstate(comp)  state {!disabled}
+	}
     } else {
 	$wstate(mssl)  state {disabled}
 	$wstate(mtls)  state {disabled}
 	$wstate(sasl)  state {disabled}
+	$wstate(comp)  state {disabled}
     }
 }
 

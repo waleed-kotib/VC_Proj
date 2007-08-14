@@ -746,6 +746,7 @@
 ::msgcat::mcset en {Use SSL for security}
 ::msgcat::mcset en {Use TLS and SASL authentication}
 ::msgcat::mcset en {Use TLS on separate port (old)}
+::msgcat::mcset en {Use stream compression}
 ::msgcat::mcset en {User Info}
 ::msgcat::mcset en {User is}
 ::msgcat::mcset en {User is offline}

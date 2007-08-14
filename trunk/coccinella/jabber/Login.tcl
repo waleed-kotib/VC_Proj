@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.124 2007-08-08 13:01:08 matben Exp $
+# $Id: Login.tcl,v 1.125 2007-08-14 12:21:24 matben Exp $
 
 package provide Login 1.0
 
@@ -495,7 +495,7 @@ proc ::Login::DoLogin {} {
 	}
     }
     
-    set opts {}
+    set opts [list]
     foreach {key value} [array get moreOpts] {
 	lappend opts -$key $value
     }

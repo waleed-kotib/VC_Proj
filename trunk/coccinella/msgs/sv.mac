@@ -751,6 +751,7 @@
 ::msgcat::mcset sv {Use SSL for security}  {Använd SSL för säkerhet}
 ::msgcat::mcset sv {Use TLS and SASL authentication} {Använd TLS och SASL autentisering}
 ::msgcat::mcset sv {Use TLS on separate port (old)} {Använd TLS på separat nätverksport}
+::msgcat::mcset sv {Use stream compression} {Använd data komprimering}
 ::msgcat::mcset sv {User Info}             {Kontaktinfo}
 ::msgcat::mcset sv {User is}		   {Användare är}
 ::msgcat::mcset sv {User is offline}       {Användare är borta}

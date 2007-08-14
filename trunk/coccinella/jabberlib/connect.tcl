@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.27 2007-08-13 14:39:49 matben Exp $
+# $Id: connect.tcl,v 1.28 2007-08-14 12:21:24 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -66,6 +66,10 @@
 #       2.  Stream compression
 #       3.  Resource binding 
 #       4.  IM session establishment 
+#       
+#   BUT XEP-0138: Stream Compression says:
+#       Negotiation of stream compression SHOULD be completed before 
+#       authentication via SASL...
 #       
 
 package require jlib
@@ -212,7 +216,7 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 #       cmd         callback command
 #       args:
 #           -command          tclProc
-#           -compress         0|1               (untested)
+#           -compress         0|1
 #           -defaulthttpurl   url
 #           -defaultport      5222
 #           -defaultresource  
@@ -225,7 +229,7 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 #           -http             0|1
 #           -httpurl          url
 #           -ip
-#           -secure           0|1
+#           -secure           0|1        @@@ Change this to -xmpp ?
 #           -method           ssl|tlssasl|sasl
 #           -noauth           0|1
 #           -port
@@ -238,6 +242,9 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 #            tlssasl    in stream tls negotiation + sasl, xmpp compliant
 #                       XMPP requires sasl after starttls!
 #            sasl       only sasl authentication
+#            
+#         o @@@ Perhaps a better way is to use a -xmpp switch that sets
+#               the main mode of operation, and then use whatever as sub switches.
 #            
 #         o The http proxy is configured from the http package.
 #         o The SOCKS proxy is configured from the autosocks package.
@@ -313,12 +320,12 @@ proc jlib::connect::connect {jlibname jid password args} {
 		set state(usessl) 1
 	    }
 	}
+	if {$state(-compress)} {
+	    set state(usecompress) 1
+	}
     }
     if {$state(-compress) && ($state(usetls) || $state(usessl))} {
 	#return -code error "connot have -compress and tls at the same time"
-    }
-    if {$state(-compress)} {
-	set state(usecompress) 1
     }
 
     # Any stream version. XMPP requires 1.0.
@@ -919,7 +926,7 @@ if {0} {
       -http 1 -httpurl http://sgi.se:5280/http-poll/
 
     ::jlib::jlib1 connect connect openfire.matben@sgi.se $pw \
-      -command cb -compress 1 -secure 1 -method tlssasl
+      -command cb -compress 1 -secure 1 -method sasl
     
     ::jlib::jlib1 connect connect matben@jabber.ru $pw \
       -command cb -compress 1 -secure 1 -method sasl
