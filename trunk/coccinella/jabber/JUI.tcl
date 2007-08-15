@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.190 2007-08-14 14:05:44 matben Exp $
+# $Id: JUI.tcl,v 1.191 2007-08-15 09:29:57 matben Exp $
 
 package provide JUI 1.0
 
@@ -244,7 +244,7 @@ proc ::JUI::Init { } {
 	set menuBarDef [linsert $menuBarDef 2 edit mEdit]
     }
     
-    SlotRegister xstatus ::JUI::BuildMessageSlot
+    SlotRegister xmessage ::JUI::BuildMessageSlot
 
     set inited 1
 }
@@ -456,26 +456,24 @@ proc ::JUI::SlotBuild {w} {
     variable slot
     
     ttk::frame $w -class RosterSlots
+    #frame $w -class RosterSlots -bg red
     set row 0
     foreach name $slot(all) {
-	ttk::separator $w.s$row -orient horizontal
-	pack $w.s$row -side top -fill x
 	uplevel #0 $slot($name,cmd) $w.$row
-	pack $w.$row -side top -fill x -expand 1
+	grid  $w.$row  -row $row -sticky ew
 	set slot($name,row) $row
-	set slot($name,sep) $w.s$row
 	set slot($name,win) $w.$row
 	set slot($name,display) 1
 	incr row
     }
+    grid columnconfigure $w 0 -weight 1
     return $w
 }
 
 proc ::JUI::SlotClose {name} {
     variable slot
 
-    pack forget $slot($name,win)
-    #destroy $slot($name,sep)
+    grid forget $slot($name,win)
 }
 
 # A kind of status slot. FIX NAME!
@@ -505,7 +503,7 @@ proc ::JUI::BuildMessageSlot {w} {
 	set ima [::Theme::GetImage closeAquaActive $subPath]
 	ttk::button $w.close -style Plain  \
 	  -image [list $im active $ima] -compound image  \
-	  -command [namespace code [list SlotClose $w]]
+	  -command [namespace code [list MessageSlotClose $w]]
 	pack $w.close -side right -anchor n	
     }    
     set widgets(value) mejid
@@ -515,7 +513,7 @@ proc ::JUI::BuildMessageSlot {w} {
     pack $box -fill x -expand 1
     
     ttk::label $box.e -style Small.Sunken.TLabel \
-      -textvariable ::Jabber::jstate(mejid)
+      -textvariable ::Jabber::jstate(mejid) -anchor w
     
     grid  $box.e  -sticky ew
     grid columnconfigure $box 0 -weight 1
@@ -559,6 +557,10 @@ proc ::JUI::MessageSlotMenuCmd {w value} {
     variable widgets
 
     $widgets(box).e configure -textvariable ::Jabber::jstate($value)
+}
+
+proc ::JUI::MessageSlotClose {w} {
+    SlotClose xmessage
 }
 
 proc ::JUI::NotebookTabChanged {} {

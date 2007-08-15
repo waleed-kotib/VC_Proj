@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.91 2007-08-14 12:21:24 matben Exp $
+# $Id: Profiles.tcl,v 1.92 2007-08-15 09:29:57 matben Exp $
 
 package require ui::megaentry
 
@@ -1224,7 +1224,7 @@ proc ::Profiles::FrameLessOpts {w} {
     upvar 0 $w state
 
     set wtop [winfo toplevel $w]
-    if {[winfo class $wtop] eq "JProfiles"} {
+    if {0 && [winfo class $wtop] eq "JProfiles"} {
 	SetNormalSize [winfo toplevel $w]
 	update idletasks
 	after 100 [list wm geometry $wtop {}]
@@ -1810,7 +1810,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     grid  $wcon.se     -            -sticky ew -pady 1    
 
     # IP page.
-    $w add [ttk::frame $w.ip] -text [mc {IP}] -sticky news
+    $w add [ttk::frame $w.ip] -text [mc Server] -sticky news
     set wip $w.ip.f
     ttk::frame $wip -padding [option get . notebookPageSmallPadding {}]
     pack  $wip  -side top -fill x -anchor [option get . dialogAnchor {}]
@@ -1832,7 +1832,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     set wstate(port) $wip.eport
 
     # HTTP
-    $w add [ttk::frame $w.http] -text [mc {HTTP}] -sticky news
+    $w add [ttk::frame $w.http] -text [mc Proxy] -sticky news
     set whttp $w.http.f
     ttk::frame $whttp -padding [option get . notebookPageSmallPadding {}]
     pack  $whttp  -side top -fill x -anchor [option get . dialogAnchor {}]
@@ -1842,7 +1842,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     set wstate(httpproxy)     $whttp.bproxy
 
     ttk::checkbutton $whttp.http -style Small.TCheckbutton \
-      -text [mc {Connect using HTTP}] -variable $token\(http)  \
+      -text [mc {Use HTTP proxy }] -variable $token\(http)  \
       -command [list ::Profiles::NotebookHttpCmd $w]
     
     ttk::frame $whttp.u

@@ -18,14 +18,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.4 2007-08-14 14:05:44 matben Exp $
+# $Id: MegaPresence.tcl,v 1.5 2007-08-15 09:29:57 matben Exp $
 
 package provide MegaPresence 1.0
 
 namespace eval ::MegaPresence {
 
     option add *MegaPresence.padding       {4 2 2 2}     50
-    option add *MegaPresence.box.padding   {0 2 2 2}     50
+    option add *MegaPresence.box.padding   {4 2 8 2}     50
     option add *MegaPresence*TLabel.style  Small.TLabel  widgetDefault
     
     variable widgets
@@ -103,7 +103,7 @@ proc ::MegaPresence::Build {w} {
     set column 1
     foreach name $widgets(all) {
 	set opts [uplevel #0 $widgets($name,cmd) $box.$column]
-	eval {grid  $box.$column  -row 0 -column $column} $opts
+	eval {grid  $box.$column  -row 0 -column $column -padx 4} $opts
 	ttk::label $box.l$column -text $widgets($name,label)
 	grid  $box.l$column  -row 1 -column $column -padx 2 -pady 0
 	set widgets($name,column) $column
