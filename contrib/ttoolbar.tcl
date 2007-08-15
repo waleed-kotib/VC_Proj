@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: ttoolbar.tcl,v 1.13 2007-07-19 06:28:11 matben Exp $
+# $Id: ttoolbar.tcl,v 1.14 2007-08-15 13:10:18 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -90,6 +90,7 @@ proc ::ttoolbar::Init { } {
 
 	style theme settings $name {
 	    
+	    # This produces fairly hard edged borders.
 	    style layout TToolbar.TButton {
 		TToolbar.border -children {
 		    TToolbar.padding -children {
@@ -105,6 +106,17 @@ proc ::ttoolbar::Init { } {
 		pressed  sunken
 		active   raised
 	    }
+	    
+	    # On XP this gives the typical smooth borders.
+	    style layout TToolbarXP.TButton {
+		Menubutton.button -expand 1 -sticky news -children {
+		    Menubutton.padding -expand 1 -sticky we -children {
+			Menubutton.label -sticky {}
+		    }
+		}
+	    }	
+	    style configure TToolbarXP.TButton   \
+	      -padding 4
         }
     }
     
@@ -136,9 +148,13 @@ proc ::ttoolbar::Init { } {
     option add *TToolbar.packTextPadY        0                widgetDefault
     option add *TToolbar.showBalloon         1                widgetDefault
     option add *TToolbar.styleCollapse       TToolbar.TCheckbutton widgetDefault
-    option add *TToolbar.styleImage          TToolbar.TButton widgetDefault
     option add *TToolbar.styleText           Toolbutton       widgetDefault
-
+    if {[tk windowingsyste] eq "win32"} {
+	option add *TToolbar.styleImage          TToolbarXP.TButton widgetDefault
+    } else {
+	option add *TToolbar.styleImage          TToolbar.TButton widgetDefault
+    }
+    
     variable widgetCommands {
 	buttonconfigure cget configure exists minwidth newbutton
     }
