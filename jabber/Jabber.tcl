@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.221 2007-08-11 06:44:34 matben Exp $
+# $Id: Jabber.tcl,v 1.222 2007-08-15 09:29:57 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -108,8 +108,8 @@ namespace eval ::Jabber:: {
     set jstate(meres)    ""
     set jstate(server)   ""
     
-    set jstate(sock) {}
-    set jstate(ipNum) {}
+    set jstate(sock)  ""
+    set jstate(ipNum) ""
     
     # Keep variables for our presence/show/status which are used in menus etc.
     set jstate(show) "unavailable"
@@ -117,7 +117,7 @@ namespace eval ::Jabber:: {
     set jstate(show+status) [list $jstate(show) $jstate(status)]
     
     # Server port actually used.
-    set jstate(servPort) {}
+    set jstate(servPort) ""
             
     # Keep noncritical error text here.
     set jerror {}

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.68 2007-08-01 08:06:27 matben Exp $
+# $Id: Init.tcl,v 1.69 2007-08-15 09:29:58 matben Exp $
 
 namespace eval ::Init {}
 
@@ -547,7 +547,7 @@ proc ::Init::Msgcat {} {
     }
     
     # Test here if you want a particular message catalog (en, nl, de, fr, sv,...).
-    #::msgcat::mclocale nl
+    #::msgcat::mclocale en
     uplevel #0 [list ::msgcat::mcload $this(msgcatPath)]
     
     # This is a method to override default messages with custom ones for each
