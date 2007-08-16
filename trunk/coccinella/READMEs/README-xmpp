@@ -68,7 +68,7 @@ these XEPs have the form of a library or support protocol for other functions.
    0096 | File Transfer                 | complete
    0107 | User Mood                     | complete
    0108 | User Activity                 | complete
-   0115 | Entity Capabilities           | complete; only library level
+   0115 | Entity Capabilities           | complete; only library level (**
    0138 | Stream Compression            | complete
    0147 | XMPP URI Scheme Query Comp... | almost complete
    0153 | vCard-Based Avatars           | complete
@@ -81,5 +81,5 @@ these XEPs have the form of a library or support protocol for other functions.
 
 
 (*  XEP-0138 and XEOP-0170 have different opinions on order of compression
-
+(** not updated with hashed versions
 

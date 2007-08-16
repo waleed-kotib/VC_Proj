@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.5 2007-08-15 09:29:57 matben Exp $
+# $Id: MegaPresence.tcl,v 1.6 2007-08-16 09:49:39 matben Exp $
 
 package provide MegaPresence 1.0
 
@@ -56,13 +56,19 @@ if {1} {
     }
 }
 
-proc ::MegaPresence::Build {w} {
+proc ::MegaPresence::Build {w args} {
     global  config
     variable widgets
     
+    array set argsA {
+	-collapse 1
+    }
+    set argsA(-close) [namespace code [list Close $w]]
+    array set argsA $args
+    
     ttk::frame $w -class MegaPresence
     
-    if {1} {
+    if {$argsA(-collapse)} {
 	set widgets(collapse) 0
 	ttk::checkbutton $w.arrow -style Arrow.TCheckbutton \
 	  -command [list [namespace current]::CollapseCmd $w] \
@@ -75,7 +81,7 @@ proc ::MegaPresence::Build {w} {
 	set ima [::Theme::GetImage closeAquaActive $subPath]
 	ttk::button $w.close -style Plain  \
 	  -image [list $im active $ima] -compound image  \
-	  -command [namespace code [list Close $w]]
+	  -command $argsA(-close)]
 	pack $w.close -side right -anchor n	
     }    
     set box $w.box
@@ -86,8 +92,8 @@ proc ::MegaPresence::Build {w} {
     if {$config(ui,status,menu) eq "plain"} {
 	::Status::MainButton $box.pres ::Jabber::jstate(show)
     } elseif {$config(ui,status,menu) eq "dynamic"} {
-	::Status::ExMainButton $box.pres ::Jabber::jstate(show+status) \
-	  -style SunkenMenubutton
+	::Status::ExMainButton $box.pres ::Jabber::jstate(show+status)
+	#	-style SunkenMenubutton
     }
     ttk::label $box.lpres -text [mc Status]
     

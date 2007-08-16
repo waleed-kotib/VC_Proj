@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.92 2007-08-15 09:29:57 matben Exp $
+# $Id: Profiles.tcl,v 1.93 2007-08-16 09:49:39 matben Exp $
 
 package require ui::megaentry
 
@@ -1804,7 +1804,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     grid  x            $wse.sasl  -sticky w
     grid  x            $wse.mtls  -sticky w
     grid  x            $wse.mssl  -sticky w
-    grid  x            $wse.comp  -sticky w
+    grid  $wse.comp    -          -sticky w
     grid columnconfigure $wse 0 -minsize 24
     
     grid  $wcon.se     -            -sticky ew -pady 1    

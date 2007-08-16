@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.191 2007-08-15 09:29:57 matben Exp $
+# $Id: JUI.tcl,v 1.192 2007-08-16 09:49:39 matben Exp $
 
 package provide JUI 1.0
 
@@ -97,7 +97,8 @@ namespace eval ::JUI:: {
         
     set ::config(ui,status,menu)    dynamic   ;# plain|dynamic
     set ::config(ui,main,infoLabel) server    ;# mejid|mejidres|status|server
-    set ::config(ui,main,mega-presence) 1
+    set ::config(ui,main,slots)     0
+    set ::config(ui,main,combi-status) 0
     
     # Collection of useful and common widget paths.
     variable jwapp
@@ -345,43 +346,65 @@ proc ::JUI::Build {w} {
     pack $wall.sep -side top -fill x
    
     # Experiment!
-    if {$config(ui,main,mega-presence)} {
-	::JUI::SlotBuild $wall.mp
-	pack $wall.mp -side bottom -fill x
+    if {$config(ui,main,slots)} {
+	::JUI::SlotBuild $wall.slot
+	pack $wall.slot -side bottom -fill x
     }
 
     # Status frame. 
     # Need two frames so we can pack resize icon in the corner.
-    set wbot $wall.bot
-    ttk::frame $wbot
-    pack $wbot -side bottom -fill x
-    if {[tk windowingsystem] ne "aqua"} {
-	ttk::label $wbot.size -compound image -image $iconResize
-    } else {
-	ttk::frame $wbot.size -width 8
-    }
-    pack  $wbot.size -side right -anchor s
-        
-    set wfstat $wbot.f
-    ttk::frame $wfstat
-    pack $wfstat -fill x
+    if {$config(ui,main,combi-status)} {
+	set wbot $wall.bot
+	ttk::frame $wbot
+	pack $wbot -side bottom -fill x
+	
+	if {[tk windowingsystem] ne "aqua"} {
+	    ttk::label $wbot.size -compound image -image $iconResize
+	} else {
+	    ttk::frame $wbot.size -width 8
+	}
+	pack  $wbot.size -side right -anchor s
+	
+	set wfstat $wbot.f
+	ttk::frame $wfstat
+	pack $wfstat -fill x
+	
+	# Avatar menu button.
+	::AvatarMB::Button $wfstat.ava
+	
+	set wstatcont $wfstat.cont
+	if {$config(ui,status,menu) eq "plain"} {
+	    ::Status::MainButton $wfstat.bst ::Jabber::jstate(show)
+	} elseif {$config(ui,status,menu) eq "dynamic"} {
+	    ::Status::ExMainButton $wfstat.bst ::Jabber::jstate(show+status)
+	}
+	
+	set infoLabel $config(ui,main,infoLabel)
+	ttk::frame $wfstat.cont
+	ttk::label $wfstat.me -textvariable ::Jabber::jstate($infoLabel) -anchor w
+	pack  $wfstat.ava  -side right -padx 3 -pady 1
+	pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
+	pack  $wfstat.me  -padx 3 -pady 4 -fill x -expand 1
 
-    # Avatar menu button.
-    ::AvatarMB::Button $wfstat.ava
-
-    set wstatcont $wfstat.cont
-    if {$config(ui,status,menu) eq "plain"} {
-	::Status::MainButton $wfstat.bst ::Jabber::jstate(show)
-    } elseif {$config(ui,status,menu) eq "dynamic"} {
-	::Status::ExMainButton $wfstat.bst ::Jabber::jstate(show+status)
+	set jwapp(mystatus)  $wfstat.bst
+	set jwapp(myjid)     $wfstat.me
+	set jwapp(statcont)  $wstatcont
     }
     
-    set infoLabel $config(ui,main,infoLabel)
-    ttk::frame $wfstat.cont
-    ttk::label $wfstat.me -textvariable ::Jabber::jstate($infoLabel) -anchor w
-    pack  $wfstat.ava  -side right -padx 3 -pady 1
-    pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
-    pack  $wfstat.me  -padx 3 -pady 4 -fill x -expand 1
+    if {1} {
+	set im  [::Theme::GetImage coci-es-32]
+	set ima [::Theme::GetImage coci-es-shadow-32]
+	ttk::frame $wall.logo
+	pack $wall.logo -side bottom -fill x
+	ttk::button $wall.logo.b -style Plain \
+	  -image [list $im {active !pressed} $ima {active pressed} $im] \
+	  -command [namespace code CociCmd]
+	pack $wall.logo.b -side top -pady 2
+	
+	::MegaPresence::Build $wall.logo.mp -collapse 0
+	
+	set jwapp(wmp) $wall.logo.mp
+    }
     
     # Notebook.
     set wnb $wall.nb
@@ -409,10 +432,7 @@ proc ::JUI::Build {w} {
     set jwapp(notebook)  $wnb
     set jwapp(roster)    $wroster
     set jwapp(rostcont)  $wrostco
-    set jwapp(mystatus)  $wfstat.bst
-    set jwapp(myjid)     $wfstat.me
-    set jwapp(statcont)  $wstatcont
-    set jwapp(wslot)    $wall.mp
+    set jwapp(wslot)     $wall.mp
     
     # Add an extra margin for Login/Logout string lengths.
     set trayMinW [expr {[$wtbar minwidth] + 12}]
@@ -437,6 +457,18 @@ proc ::JUI::Build {w} {
     }
     return $w
 }
+
+proc ::JUI::CociCmd {} {
+    variable jwapp
+    
+    if {[winfo ismapped $jwapp(wmp)]} {
+	pack forget $jwapp(wmp)
+    } else {
+	pack $jwapp(wmp) -side bottom -fill x
+    }
+}
+
+# @@@ EXPERIMENTAL!
 
 # JUI::SlotRegister --
 # 
