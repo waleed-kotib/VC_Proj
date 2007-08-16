@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.192 2007-08-16 09:49:39 matben Exp $
+# $Id: JUI.tcl,v 1.193 2007-08-16 13:29:00 matben Exp $
 
 package provide JUI 1.0
 
@@ -63,6 +63,9 @@ namespace eval ::JUI:: {
     option add *JMain.waveImage                   wave            widgetDefault
     option add *JMain.resizeHandleImage           resizehandle    widgetDefault
 
+    option add *JMain.cociEs32                    coci-es-32      widgetDefault
+    option add *JMain.cociEsActive32              coci-es-shadow-32 widgetDefault
+
     # Standard widgets.
     switch -- [tk windowingsystem] {
 	aqua - x11 {
@@ -99,12 +102,14 @@ namespace eval ::JUI:: {
     set ::config(ui,main,infoLabel) server    ;# mejid|mejidres|status|server
     set ::config(ui,main,slots)     0
     set ::config(ui,main,combi-status) 0
+    set ::config(ui,main,toy-status) 1
     
     # Collection of useful and common widget paths.
     variable jwapp
     variable inited 0
     
     set jwapp(w) -
+    set jwapp(mystatus) -
 }
 
 proc ::JUI::Init { } {
@@ -391,19 +396,25 @@ proc ::JUI::Build {w} {
 	set jwapp(statcont)  $wstatcont
     }
     
-    if {1} {
-	set im  [::Theme::GetImage coci-es-32]
-	set ima [::Theme::GetImage coci-es-shadow-32]
+    # Experimental.
+    if {$config(ui,main,toy-status)} {
+	set im  [::Theme::GetImage [option get $w cociEs32 {}]]
+	set ima [::Theme::GetImage [option get $w cociEsActive32 {}]]
 	ttk::frame $wall.logo
 	pack $wall.logo -side bottom -fill x
 	ttk::button $wall.logo.b -style Plain \
 	  -image [list $im {active !pressed} $ima {active pressed} $im] \
 	  -command [namespace code CociCmd]
-	pack $wall.logo.b -side top -pady 2
+	pack $wall.logo.b -side top -fill x -padx 12 -pady 2
 	
-	::MegaPresence::Build $wall.logo.mp -collapse 0
+	set wmp $wall.logo.mp
+	::MegaPresence::Build $wmp -collapse 0
+	bind $wall.logo.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
 	
-	set jwapp(wmp) $wall.logo.mp
+	::balloonhelp::balloonforwindow $wall.logo.b "Open presence control pane"
+	
+	set jwapp(wtoy) $wall.logo.b
+	set jwapp(wmp)  $wmp
     }
     
     # Notebook.
@@ -463,8 +474,10 @@ proc ::JUI::CociCmd {} {
     
     if {[winfo ismapped $jwapp(wmp)]} {
 	pack forget $jwapp(wmp)
+	::balloonhelp::balloonforwindow $jwapp(wtoy) "Open presence control pane"
     } else {
 	pack $jwapp(wmp) -side bottom -fill x
+	::balloonhelp::balloonforwindow $jwapp(wtoy) "Hide presence control pane"
     }
 }
 
@@ -896,8 +909,10 @@ proc ::JUI::RosterIconsChangedHook { } {
     variable jwapp
     upvar ::Jabber::jstate jstate
     
-    set status $jstate(show)
-    $jwapp(mystatus) configure -image [::Rosticons::Get status/$status]
+    if {[winfo exists $jwapp(mystatus)]} {
+	set status $jstate(show)
+	$jwapp(mystatus) configure -image [::Rosticons::Get status/$status]
+    }
 }
 
 proc ::JUI::RosterSelectionHook { } {
