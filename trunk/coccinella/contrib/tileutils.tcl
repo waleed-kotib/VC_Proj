@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.48 2007-08-06 07:49:53 matben Exp $
+# $Id: tileutils.tcl,v 1.49 2007-08-16 13:29:00 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -417,7 +417,7 @@ proc tileutils::configstyles {name} {
 	style layout Plain {
 	    Plain.border -sticky news -border 1 -children {
 		Plain.padding -sticky news -border 1 -children {
-		    Plain.label -side left
+		    Plain.label
 		}
 	    }
 	}

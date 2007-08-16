@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.6 2007-08-16 09:49:39 matben Exp $
+# $Id: MegaPresence.tcl,v 1.7 2007-08-16 13:29:00 matben Exp $
 
 package provide MegaPresence 1.0
 
@@ -71,10 +71,10 @@ proc ::MegaPresence::Build {w args} {
     if {$argsA(-collapse)} {
 	set widgets(collapse) 0
 	ttk::checkbutton $w.arrow -style Arrow.TCheckbutton \
-	  -command [list [namespace current]::CollapseCmd $w] \
+	  -command [namespace code [list CollapseCmd $w]] \
 	  -variable [namespace current]::widgets(collapse)
 	pack $w.arrow -side left -anchor n	
-	bind $w.arrow <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
+	bind $w.arrow <<ButtonPopup>> [namespace code [list Popup %W $w %x %y]]
 
 	set subPath [file join images 16]
 	set im  [::Theme::GetImage closeAqua $subPath]
@@ -105,7 +105,9 @@ proc ::MegaPresence::Build {w args} {
     
     grid  $box.avatar   -column 100 -row 0
     grid  $box.lavatar  -column 100 -row 1
-    
+
+    ::balloonhelp::balloonforwindow $box.avatar [mc Avatar]
+
     set column 1
     foreach name $widgets(all) {
 	set opts [uplevel #0 $widgets($name,cmd) $box.$column]
@@ -116,6 +118,8 @@ proc ::MegaPresence::Build {w args} {
 	set widgets($name,win) $box.$column
 	set widgets($name,lwin) $box.l$column
 	set widgets($name,display) 1
+	::balloonhelp::balloonforwindow $box.$column $widgets($name,label)
+	
 	incr column
     }
     
@@ -137,7 +141,7 @@ proc ::MegaPresence::CollapseCmd {w} {
     event generate $w <<Xxx>>
 }
 
-proc ::MegaPresence::Popup {w x y} {
+proc ::MegaPresence::Popup {W w x y} {
     variable widgets
 
     set m $w.m
@@ -152,8 +156,8 @@ proc ::MegaPresence::Popup {w x y} {
     
     update idletasks
     
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
+    set X [expr [winfo rootx $W] + $x]
+    set Y [expr [winfo rooty $W] + $y]
     tk_popup $m [expr {int($X) - 0}] [expr {int($Y) - 0}]   
     
     return -code break
