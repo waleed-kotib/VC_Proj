@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.63 2007-08-10 14:14:52 matben Exp $
+# $Id: RosterTree.tcl,v 1.64 2007-08-16 09:49:39 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -363,8 +363,7 @@ proc ::RosterTree::New {w} {
       [list grid $wxsc -row 1 -column 0 -sticky ew]]         \
       -yscrollcommand [list ::UI::ScrollSetStdGrid $wysc     \
       [list grid $wysc -row 0 -column 1 -sticky ns]]         \
-      -borderwidth 0 -highlightthickness 0                   \
-      -height 0 -width 0
+      -borderwidth 0 -highlightthickness 0 -height 0 -width 0
     
     SetBinds
     $T configure -backgroundimage [BackgroundImageGet]
