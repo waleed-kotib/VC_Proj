@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.28 2007-08-14 12:21:24 matben Exp $
+# $Id: connect.tcl,v 1.29 2007-08-16 07:11:15 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -66,10 +66,6 @@
 #       2.  Stream compression
 #       3.  Resource binding 
 #       4.  IM session establishment 
-#       
-#   BUT XEP-0138: Stream Compression says:
-#       Negotiation of stream compression SHOULD be completed before 
-#       authentication via SASL...
 #       
 
 package require jlib
@@ -141,6 +137,7 @@ proc jlib::connect::init_static {} {
 	-minpollsecs      4
 	-noauth           0
 	-port             ""
+	-saslthencomp     1
 	-secure           0
 	-timeout          30000
 	-transport        tcp      
@@ -233,6 +230,7 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 #           -method           ssl|tlssasl|sasl
 #           -noauth           0|1
 #           -port
+#           -saslthencomp     0|1       This is the normal order for compression
 #           -timeout          millisecs
 #           -transport        tcp|http
 #           
@@ -591,7 +589,7 @@ proc jlib::connect::init_stream {jlibname} {
 	uplevel #0 $state(-command) $jlibname initstream
     }
     
-    set opts {}
+    set opts [list]
     if {[info exists state(version)]} {
 	lappend opts -version $state(version)
     }
@@ -640,6 +638,7 @@ proc jlib::connect::init_stream_cb {jlibname args} {
 	}
     }
 
+    # This XEP is superseeded by XEP-0170
     # XEP-0138: Stream Compression:
     # If both TLS (whether including TLS compression or not) and stream 
     # compression are used, then TLS MUST be negotiated first, followed by 
@@ -651,7 +650,9 @@ proc jlib::connect::init_stream_cb {jlibname args} {
 	    uplevel #0 $state(-command) $jlibname starttls
 	}
 	$jlibname starttls jlib::connect::starttls_cb
-    } elseif {$state(usecompress)} {
+	
+	# This is the order ejabberd expects, compression before sasl.
+    } elseif {!$state(-saslthencomp) && $state(usecompress)} {
 	if {$state(-command) ne {}} {
 	    uplevel #0 $state(-command) $jlibname startcompress
 	}
@@ -684,30 +685,6 @@ proc jlib::connect::starttls_cb {jlibname type args} {
 	} else {
 	    auth $jlibname
 	}
-    }
-}
-
-proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {    
-    upvar ${jlibname}::connect::state state
-    
-    if {![info exists state]} return
-    
-    debug "jlib::connect::compress_cb"
-  
-    # Note: Failure of compression setup SHOULD NOT be treated as an 
-    # unrecoverable error and therefore SHOULD NOT result in a stream error. 
-    if {$errcode ne ""} {
-	finish $jlibname $errcode $errmsg
-	return
-    }
-    
-    # We have a new stream.
-    # ????????????????
-    set state(streamid) [$jlibname getstreamattr id]
-    if {$state(-noauth)} {
-	finish $jlibname
-    } else {
-	auth $jlibname
     }
 }
 
@@ -783,10 +760,44 @@ proc jlib::connect::auth_cb {jlibname type queryE} {
 
 	# We have a new stream.
 	set state(streamid) [$jlibname getstreamattr id]
-	if {$state(usesasl)} {
+	if {$state(-saslthencomp) && $state(usecompress)} {
+	    if {$state(-command) ne {}} {
+		uplevel #0 $state(-command) $jlibname startcompress
+	    }
+	    jlib::compress::start $jlibname [namespace code compress_cb]
+	} elseif {$state(usesasl)} {
 	    jlib::bind::resource $jlibname $state(resource) [namespace code bind_cb]
 	} else {
 	    finish $jlibname
+	}
+    }
+}
+
+proc jlib::connect::compress_cb {jlibname {errcode ""} {errmsg ""}} {    
+    upvar ${jlibname}::connect::state state
+    
+    if {![info exists state]} return
+    
+    debug "jlib::connect::compress_cb"
+  
+    # Note: Failure of compression setup SHOULD NOT be treated as an 
+    # unrecoverable error and therefore SHOULD NOT result in a stream error. 
+    if {$errcode ne ""} {
+	finish $jlibname $errcode $errmsg
+	return
+    }
+    
+    # We have a new stream.
+    set state(streamid) [$jlibname getstreamattr id]
+    if {$state(-saslthencomp)} {
+	jlib::bind::resource $jlibname $state(resource) [namespace code bind_cb]
+    } else {
+	
+	# If we have taken compression before SASL then go back.
+	if {$state(-noauth)} {
+	    finish $jlibname
+	} else {
+	    auth $jlibname
 	}
     }
 }
