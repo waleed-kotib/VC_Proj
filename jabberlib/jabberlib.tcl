@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.184 2007-08-13 14:39:49 matben Exp $
+# $Id: jabberlib.tcl,v 1.185 2007-08-16 13:05:15 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3570,9 +3570,8 @@ proc jlib::schedule_keepalive {jlibname} {
     upvar ${jlibname}::lib lib
     
     if {$opts(-keepalivesecs) && $lib(isinstream)} {
-	Debug 2 "SEND:"
 	if {[catch {
-	    puts -nonewline $lib(sock) "\n"
+	    uplevel #0 $lib(transport,send) [list $jlibname "\n"]
 	    flush $lib(sock)
 	} err]} {
 	    kill $jlibname
