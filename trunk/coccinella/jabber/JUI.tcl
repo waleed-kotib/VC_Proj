@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.193 2007-08-16 13:29:00 matben Exp $
+# $Id: JUI.tcl,v 1.194 2007-08-16 13:45:48 matben Exp $
 
 package provide JUI 1.0
 
@@ -411,7 +411,7 @@ proc ::JUI::Build {w} {
 	::MegaPresence::Build $wmp -collapse 0
 	bind $wall.logo.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
 	
-	::balloonhelp::balloonforwindow $wall.logo.b "Open presence control pane"
+	::balloonhelp::balloonforwindow $wall.logo.b "Open presence control panel"
 	
 	set jwapp(wtoy) $wall.logo.b
 	set jwapp(wmp)  $wmp
@@ -474,10 +474,10 @@ proc ::JUI::CociCmd {} {
     
     if {[winfo ismapped $jwapp(wmp)]} {
 	pack forget $jwapp(wmp)
-	::balloonhelp::balloonforwindow $jwapp(wtoy) "Open presence control pane"
+	::balloonhelp::balloonforwindow $jwapp(wtoy) "Open presence control panel"
     } else {
 	pack $jwapp(wmp) -side bottom -fill x
-	::balloonhelp::balloonforwindow $jwapp(wtoy) "Hide presence control pane"
+	::balloonhelp::balloonforwindow $jwapp(wtoy) "Hide presence control panel"
     }
 }
 
