@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.41 2007-08-11 13:56:29 matben Exp $
+# $Id: Status.tcl,v 1.42 2007-08-17 07:01:14 matben Exp $
 
 package provide Status 1.0
 
@@ -610,7 +610,8 @@ proc ::Status::ExButton {w varName args} {
     menu $wmenu -tearoff 0  \
       -postcommand [list ::Status::ExPostCmd $wmenu $varName $args]
     $w configure -menu $wmenu
-    
+    ExSetBalloon $w $showStatus
+
     trace add variable $varName write [list [namespace current]::ExTrace $w]
     bind $w <Destroy> +[list ::Status::ExFree %W $varName]
     return $w
@@ -621,8 +622,6 @@ proc ::Status::ExGetMenu {w} {
 }
 
 proc ::Status::ExTrace {w varName index op} {
-    global  config
-    variable mapShowElemToText
     
     if {[winfo exists $w]} {
 	upvar $varName var
@@ -634,14 +633,21 @@ proc ::Status::ExTrace {w varName index op} {
 	}
 	set show [lindex $showStatus 0]
 	$w configure -image [::Rosticons::Get status/$show]
-
-	set str $mapShowElemToText($show)
-	set status [lindex $showStatus 1]
-	if {$status ne ""} {
-	    append str " " $config(status,menu,separator) $status
-	}
-	::balloonhelp::balloonforwindow $w $str
+	ExSetBalloon $w $showStatus
     }
+}
+
+proc ::Status::ExSetBalloon {w showStatus} {
+    global  config
+    variable mapShowElemToText
+ 
+    set show [lindex $showStatus 0]
+    set str $mapShowElemToText($show)
+    set status [lindex $showStatus 1]
+    if {$status ne ""} {
+	append str " " $config(status,menu,separator) $status
+    }
+    ::balloonhelp::balloonforwindow $w $str
 }
 
 proc ::Status::ExFree {w varName} {
