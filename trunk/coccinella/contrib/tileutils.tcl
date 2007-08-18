@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.50 2007-08-18 09:17:06 matben Exp $
+# $Id: tileutils.tcl,v 1.51 2007-08-18 14:10:59 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -54,21 +54,23 @@ proc tileutils::ThemeChanged {} {
     
     array set style [style configure .]
     array set map   [style map .]
+    
+    # Seems X11 has some system option db that must be overridden.
+    if {[tk windowingsystem] eq "x11"} {
+	set priority 60
+    } else {
+	set priority startupFile
+    }
     if {[info exists style(-background)]} {
 	set color $style(-background)
-	
-	# Seems X11 has some system option db that must be overridden.
-	if {[tk windowingsystem] eq "x11"} {
-	    set priority 60
-	} else {
-	    set priority startupFile
-	}
+
 	# The highlightBackground needs a better solution.
 	# text ._text; set textbg [._text cget -background]; destroy ._text
 	option add *ChaseArrows.background        $color $priority
 	option add *Listbox.highlightBackground   $color $priority
 	option add *Menu.background               $color $priority
-	#option add *Spinbox.background            $color $priority
+	option add *Spinbox.buttonBackground      $color $priority
+	option add *Spinbox.highlightBackground   $color $priority
 	option add *Text.highlightBackground      $color $priority
 	option add *TreeCtrl.columnBackground     $color $priority
 	option add *WaveLabel.columnBackground    $color $priority
@@ -80,6 +82,9 @@ proc tileutils::ThemeChanged {} {
 		}
 	    }
 	}
+    }
+    if {[info exists style(-selectbackground)]} {
+	option add *Spinbox.selectBackground $style(-selectbackground) $priority
     }
 }
 
@@ -97,10 +102,14 @@ proc tileutils::ListboxThemeChanged {win} {
 proc tileutils::SpinboxThemeChanged {win} {
     
     array set style [style configure .]    
-    if {[info exists style(-background)]} {
-	if {[winfo class $win] eq "Spinbox"} {
+    if {[winfo class $win] eq "Spinbox"} {
+	if {[info exists style(-background)]} {
 	    set color $style(-background)
-	    #$win configure -background $color
+	    $win configure -buttonbackground $color
+	    $win configure -highlightbackground $color
+	}
+	if {[info exists style(-selectbackground)]} {
+	    $win configure -selectbackground $style(-selectbackground)
 	}
     }
 }

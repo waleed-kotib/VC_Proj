@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.1 2007-08-18 09:17:06 matben Exp $
+# $Id: black.tcl,v 1.2 2007-08-18 14:10:59 matben Exp $
 
 namespace eval tile {
     namespace eval theme {
@@ -27,7 +27,7 @@ namespace eval tile::theme::black {
 	-dark		"#222222"
 	-darker 	"#121212"
 	-darkest	"black"
-	-lighter	"#828282"
+	-lighter	"#626262"
 	-lightest 	"#ffffff"
 	-selectbg	"#4a6984"
 	-selectfg	"#ffffff"
@@ -77,6 +77,47 @@ namespace eval tile::theme::black {
 	    -padding {6 2 6 2}
 	  
 	  
+    }
+    
+    bind ThemeChanged <<ThemeChanged>> {+tile::theme::black::ThemeChanged }
+    if {[tk windowingsystem] ne "aqua"} {
+	bind Menu <<ThemeChanged>> {+tile::theme::black::MenuThemeChanged %W }
+    }
+
+    proc ThemeChanged {} {
+	
+	if {$tile::currentTheme ne "black"} {
+	    return
+	}
+	array set style [style configure .]
+	array set map   [style map .]
+	
+	# Seems X11 has some system option db that must be overridden.
+	if {[tk windowingsystem] eq "x11"} {
+	    set priority 60
+	} else {
+	    set priority startupFile
+	}
+	if {[info exists style(-foreground)]} {
+	    set color $style(-foreground)
+	    option add *Menu.foreground $color $priority
+	    option add *Menu.activeForeground $color $priority
+	}
+    }
+
+    proc MenuThemeChanged {win} {
+	
+	if {$tile::currentTheme ne "black"} {
+	    return
+	}
+	array set style [style configure .]    
+	if {[info exists style(-foreground)]} {
+	    if {[winfo class $win] eq "Menu"} {
+		set color $style(-foreground)
+		$win configure -foreground $color
+		$win configure -activeforeground $color
+	    }
+	}
     }
 }
 

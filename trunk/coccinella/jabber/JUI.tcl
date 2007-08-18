@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.194 2007-08-16 13:45:48 matben Exp $
+# $Id: JUI.tcl,v 1.195 2007-08-18 14:10:59 matben Exp $
 
 package provide JUI 1.0
 
@@ -132,6 +132,7 @@ proc ::JUI::Init { } {
 	{separator}
 	{cascade   mImport             {}                         {} {} {
 	    {command  mEmoticonSet     {::Emoticons::ImportSet}   {}}
+	    {command  mvCard2...       {::VCard::Import}          {}}
 	}}
 	{cascade   mExport             {}                         {} {} {
 	    {command  mRoster          {::Roster::ExportRoster}   {}}
@@ -394,6 +395,31 @@ proc ::JUI::Build {w} {
 	set jwapp(mystatus)  $wfstat.bst
 	set jwapp(myjid)     $wfstat.me
 	set jwapp(statcont)  $wstatcont
+    }
+    
+    # Experimental.
+    if {1} {
+	set wcomb $wall.comb
+	ttk::frame $wcomb -padding {8 4 8 4}
+	pack $wcomb -side top -fill x
+	
+	::AvatarMB::Button $wcomb.ava
+	if {$config(ui,status,menu) eq "plain"} {
+	    ::Status::MainButton $wcomb.bst ::Jabber::jstate(show)
+	} elseif {$config(ui,status,menu) eq "dynamic"} {
+	    ::Status::ExMainButton $wcomb.bst ::Jabber::jstate(show+status) \
+	      -style Plain
+	}
+	ttk::label $wcomb.nick -style Small.TLabel -text "My nickname" -anchor w
+	ttk::combobox $wcomb.x -style Small.TCombobox \
+	  -textvariable ::Jabber::jstate(status)
+	
+	grid  $wcomb.ava  $wcomb.bst  $wcomb.nick  -padx 2
+	grid  ^           x           $wcomb.x     -padx 2
+	grid $wcomb.nick -stick ew
+	grid $wcomb.x -stick ew
+	grid columnconfigure $wcomb 2 -weight 1
+	
     }
     
     # Experimental.
@@ -1075,6 +1101,9 @@ proc ::JUI::FilePostCommand {wmenu} {
     set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
     ::UI::MenuMethod $m entryconfigure mvCard2 -state disabled
 
+    set mimport [::UI::MenuMethod $wmenu entrycget mImport -menu]
+    ::UI::MenuMethod $mimport entryconfigure mvCard2... -state disabled
+
     switch -- [GetConnectState] {
 	connectinit {
 	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
@@ -1087,6 +1116,8 @@ proc ::JUI::FilePostCommand {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
 	    ::UI::MenuMethod $wmenu entryconfigure mEditvCard2... -state normal
+
+	    ::UI::MenuMethod $mimport entryconfigure mvCard2... -state normal
 	}
 	disconnect {
 	    if {[llength [ui::findalltoplevelwithclass JLogin]]} {
