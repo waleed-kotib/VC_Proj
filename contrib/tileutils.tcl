@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.49 2007-08-16 13:29:00 matben Exp $
+# $Id: tileutils.tcl,v 1.50 2007-08-18 09:17:06 matben Exp $
 #
 
 package provide tileutils 0.1
@@ -37,15 +37,16 @@ namespace eval ::tileutils {
     if {[lsearch [bindtags .] ThemeChanged] < 0} {
 	bindtags . [linsert [bindtags .] 1 ThemeChanged]
     }
-    bind ThemeChanged <<ThemeChanged>> { tileutils::ThemeChanged }
-    bind Listbox      <<ThemeChanged>> { tileutils::ListboxThemeChanged %W }
-    bind Text         <<ThemeChanged>> { tileutils::TextThemeChanged %W }
+    bind ThemeChanged <<ThemeChanged>> {+tileutils::ThemeChanged }
+    bind Listbox      <<ThemeChanged>> {+tileutils::ListboxThemeChanged %W }
+    bind Spinbox      <<ThemeChanged>> {+tileutils::SpinboxThemeChanged %W }
+    bind Text         <<ThemeChanged>> {+tileutils::TextThemeChanged %W }
     if {[tk windowingsystem] eq "x11"} {
-	bind TreeCtrl <<ThemeChanged>> { tileutils::TreeCtrlThemeChanged %W }
+	bind TreeCtrl <<ThemeChanged>> {+tileutils::TreeCtrlThemeChanged %W }
     }
     if {[tk windowingsystem] ne "aqua"} {
-	bind Menu      <<ThemeChanged>> { tileutils::MenuThemeChanged %W }
-	bind WaveLabel <<ThemeChanged>> { tileutils::WaveLabelThemeChanged %W }
+	bind Menu      <<ThemeChanged>> {+tileutils::MenuThemeChanged %W }
+	bind WaveLabel <<ThemeChanged>> {+tileutils::WaveLabelThemeChanged %W }
     }
 }
 
@@ -65,9 +66,10 @@ proc tileutils::ThemeChanged {} {
 	# The highlightBackground needs a better solution.
 	# text ._text; set textbg [._text cget -background]; destroy ._text
 	option add *ChaseArrows.background        $color $priority
-	option add *Listbox.highlightBackground   white  $priority
+	option add *Listbox.highlightBackground   $color $priority
 	option add *Menu.background               $color $priority
-	option add *Text.highlightBackground      white  $priority
+	#option add *Spinbox.background            $color $priority
+	option add *Text.highlightBackground      $color $priority
 	option add *TreeCtrl.columnBackground     $color $priority
 	option add *WaveLabel.columnBackground    $color $priority
 	if {[info exists map(-background)]} {
@@ -88,6 +90,17 @@ proc tileutils::ListboxThemeChanged {win} {
 	if {[winfo class $win] eq "Listbox"} {
 	    set color $style(-background)
 	    $win configure -highlightbackground $color
+	}
+    }
+}
+
+proc tileutils::SpinboxThemeChanged {win} {
+    
+    array set style [style configure .]    
+    if {[info exists style(-background)]} {
+	if {[winfo class $win] eq "Spinbox"} {
+	    set color $style(-background)
+	    #$win configure -background $color
 	}
     }
 }
