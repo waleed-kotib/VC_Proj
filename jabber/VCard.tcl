@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.63 2007-08-09 07:47:04 matben Exp $
+# $Id: VCard.tcl,v 1.64 2007-08-18 14:10:59 matben Exp $
 
 package provide VCard 1.0
 
@@ -805,6 +805,42 @@ proc ::VCard::SaveElementToFile {fileName jid vcardE} {
     puts $fd "<!-- vCard for $jid -->"
     puts $fd $xml
     close $fd
+}
+
+proc ::VCard::Import {} {
+    
+    set ans [tk_messageBox -icon question -type yesno \
+      -message "This will replace your current business card. Do you actually want this?"]
+    if {$ans ne "yes"} {
+	return
+    }
+    set fileName [tk_getOpenFile -defaultextension .xml \
+      -title [mc {Open vCard}] -filetypes {{"vCard" ".xml"}}]
+    if {$fileName ne ""} {
+	if {[file extension $fileName] ne ".xml"} {
+	    tk_messageBox -icon error -message "File must have an extension \".xml\""
+	    return
+	}
+	ImportFromFile $fileName
+    }
+}
+
+proc ::VCard::ImportFromFile {fileName} {
+    
+    set fd [open $fileName r]
+    fconfigure $fd -encoding utf-8
+    set xml [read $fd]
+    close $fd
+    
+    
+}
+
+# http://en.wikipedia.org/wiki/VCard
+
+proc ::VCard::ImportVCFtoXML {fileName} {
+    
+    
+    
 }
 
 proc ::VCard::Free {token} {
