@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.65 2007-08-19 06:50:10 matben Exp $
+# $Id: VCard.tcl,v 1.66 2007-08-19 09:35:24 matben Exp $
 
 package provide VCard 1.0
 
@@ -851,8 +851,13 @@ proc ::VCard::ImportFromFile {fileName} {
 
 proc ::VCard::ImportVCFtoXML {fileName} {
     
+
+    # In case of multiple contacts per file pick only the first one.
+    set fd [open $fileName r]
+
     
-    
+    close $fd
+
 }
 
 proc ::VCard::Free {token} {
