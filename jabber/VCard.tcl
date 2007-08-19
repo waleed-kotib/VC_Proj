@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.64 2007-08-18 14:10:59 matben Exp $
+# $Id: VCard.tcl,v 1.65 2007-08-19 06:50:10 matben Exp $
 
 package provide VCard 1.0
 
@@ -818,7 +818,8 @@ proc ::VCard::Import {} {
       -title [mc {Open vCard}] -filetypes {{"vCard" ".xml"}}]
     if {$fileName ne ""} {
 	if {[file extension $fileName] ne ".xml"} {
-	    tk_messageBox -icon error -message "File must have an extension \".xml\""
+	    tk_messageBox -icon error -title [mc Error] \
+	      -message "File must have an extension \".xml\""
 	    return
 	}
 	ImportFromFile $fileName
@@ -832,7 +833,18 @@ proc ::VCard::ImportFromFile {fileName} {
     set xml [read $fd]
     close $fd
     
+    # Just check that the root element looks OK.
+    set token [tinydom::parse $xml]
+    set xmllist [tinydom::documentElement $token]
     
+    if {([tinydom::tagname $xmllist] ne "vCard") || \
+      ([tinydom::getattribute $xmllist xmlns] ne "vcard-temp")} {
+	tk_messageBox -icon error -title [mc Error] \
+	  -message "Not a proper vCard XML format"
+	return
+    }
+    ::Jabber::JlibCmd send_iq "set" [list $xmllist]
+    tinydom::cleanup $token
 }
 
 # http://en.wikipedia.org/wiki/VCard
