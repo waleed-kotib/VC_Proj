@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.165 2007-08-12 14:22:51 matben Exp $
+# $Id: UI.tcl,v 1.166 2007-08-19 09:35:24 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -499,6 +499,29 @@ proc ::UI::FormatTextForMessageBox {txt {width ""}} {
 	return $txt
     } else {
 	return $txt
+    }
+}
+
+# UI::Text --
+# 
+#       Faking Aqua text widget. Note that the container frame is returned.
+#       From comp.lang.tcl Thank You!
+
+proc ::UI::Text {w args} {
+    
+    if {[tk windowingsystem] eq "aqua"} {	
+	set wcont [string range $w 0 [string last "." $w]]_cont
+	ttk::frame $wcont -style TEntry
+	eval {text $w -borderwidth 0 -highlightthickness 0} $args
+	
+	bind $w <FocusIn>  [list $wcont state focus]
+	bind $w <FocusOut> [list $wcont state {!focus}]
+
+	pack $w -in $wcont -padx 5 -pady 5 -fill both -expand 1
+	return $wcont
+    } else {
+	eval $w $args
+	return $w
     }
 }
 

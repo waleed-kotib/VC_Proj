@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.205 2007-08-12 08:17:44 matben Exp $
+# $Id: Chat.tcl,v 1.206 2007-08-19 09:35:23 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -187,6 +187,7 @@ namespace eval ::Chat:: {
     variable allowMultiThreadPerJID 0
     
     set ::config(chat,show-head) 1
+    set ::config(chat,aqua-text) 1
 }
 
 # Chat::OnToolButton --
@@ -1294,7 +1295,7 @@ proc ::Chat::Build {threadID args} {
 #       chattoken
 
 proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
-    global  prefs this wDlgs
+    global  prefs this wDlgs config
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
 
@@ -1467,14 +1468,22 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     pack $wpane -side top -fill both -expand 1    
 
     # Text chat dialog.
-    frame $wtxt	-bd 1 -relief sunken
-    text $wtext -height 12 -width 1 -state disabled -cursor {} -wrap word  \
-      -yscrollcommand [list ::UI::ScrollSet $wysc \
-      [list grid $wysc -column 1 -row 0 -sticky ns]]
+    if {([tk windowingsystem] eq "aqua") && $config(chat,aqua-text)} {
+	frame $wtxt
+	set wcont [::UI::Text $wtext -height 12 -width 1 -state disabled -cursor {} -wrap word  \
+	  -yscrollcommand [list ::UI::ScrollSet $wysc \
+	  [list grid $wysc -column 1 -row 0 -sticky ns]]]
+    } else {
+	frame $wtxt -bd 1 -relief sunken
+	text $wtext -height 12 -width 1 -state disabled -cursor {} -wrap word  \
+	  -yscrollcommand [list ::UI::ScrollSet $wysc \
+	  [list grid $wysc -column 1 -row 0 -sticky ns]]
+	set wcont $wtext
+    }
     ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
     bindtags $wtext [linsert [bindtags $wtext] 0 ReadOnlyText]
     
-    grid  $wtext  -column 0 -row 0 -sticky news
+    grid  $wcont  -column 0 -row 0 -sticky news
     grid  $wysc   -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxt 0 -weight 1
     grid rowconfigure    $wtxt 0 -weight 1
@@ -1483,13 +1492,21 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     ConfigureTextTags $w $wtext
 
     # Text send.
-    frame $wtxtsnd -bd 1 -relief sunken
-    text  $wtextsnd -height 2 -width 1 -wrap word \
-      -yscrollcommand [list ::UI::ScrollSet $wyscsnd \
-      [list grid $wyscsnd -column 1 -row 0 -sticky ns]]
+    if {([tk windowingsystem] eq "aqua") && $config(chat,aqua-text)} {
+	frame $wtxtsnd
+	set wcont2 [::UI::Text  $wtextsnd -height 2 -width 1 -wrap word \
+	  -yscrollcommand [list ::UI::ScrollSet $wyscsnd \
+	  [list grid $wyscsnd -column 1 -row 0 -sticky ns]]]
+    } else {
+	frame $wtxtsnd -bd 1 -relief sunken
+	text  $wtextsnd -height 2 -width 1 -wrap word \
+	  -yscrollcommand [list ::UI::ScrollSet $wyscsnd \
+	  [list grid $wyscsnd -column 1 -row 0 -sticky ns]]
+	set wcont2 $wtextsnd
+    }
     ttk::scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
     
-    grid  $wtextsnd  -column 0 -row 0 -sticky news
+    grid  $wcont2    -column 0 -row 0 -sticky news
     grid  $wyscsnd   -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxtsnd 0 -weight 1
     grid rowconfigure $wtxtsnd 0 -weight 1

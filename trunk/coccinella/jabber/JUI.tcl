@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.195 2007-08-18 14:10:59 matben Exp $
+# $Id: JUI.tcl,v 1.196 2007-08-19 09:35:24 matben Exp $
 
 package provide JUI 1.0
 
@@ -411,7 +411,7 @@ proc ::JUI::Build {w} {
 	      -style Plain
 	}
 	ttk::label $wcomb.nick -style Small.TLabel -text "My nickname" -anchor w
-	ttk::combobox $wcomb.x -style Small.TCombobox \
+	ttk::combobox $wcomb.x -style Small.TCombobox -font CociSmallFont \
 	  -textvariable ::Jabber::jstate(status)
 	
 	grid  $wcomb.ava  $wcomb.bst  $wcomb.nick  -padx 2

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.199 2007-08-08 13:01:07 matben Exp $
+# $Id: GroupChat.tcl,v 1.200 2007-08-19 09:35:23 matben Exp $
 
 package require Create
 package require Enter
@@ -178,6 +178,8 @@ namespace eval ::GroupChat:: {
     # @@@ Should get this from a global reaource.
     variable buttonPressMillis 1000
     variable waitUntilEditMillis 2000
+
+    set ::config(groupchat,aqua-text) 1
 }
 
 proc ::GroupChat::InitHook {} {
@@ -884,13 +886,21 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     pack $wpanev -side top -fill both -expand 1    
 
     # Text send.
-    frame $wfrsend -height 40 -width 300 -bd 1 -relief sunken
-    text  $wtextsend -height 2 -width 1 -font CociSmallFont -wrap word \
-      -yscrollcommand [list ::UI::ScrollSet $wyscsend \
-      [list grid $wyscsend -column 1 -row 0 -sticky ns]]
+    if {([tk windowingsystem] eq "aqua") && $config(groupchat,aqua-text)} {
+	frame $wfrsend -height 40 -width 300
+	set wscont [::UI::Text $wtextsend -height 2 -width 1 -font CociSmallFont -wrap word \
+	  -yscrollcommand [list ::UI::ScrollSet $wyscsend \
+	  [list grid $wyscsend -column 1 -row 0 -sticky ns]]]
+    } else {
+	frame $wfrsend -height 40 -width 300 -bd 1 -relief sunken
+	text  $wtextsend -height 2 -width 1 -font CociSmallFont -wrap word \
+	  -yscrollcommand [list ::UI::ScrollSet $wyscsend \
+	  [list grid $wyscsend -column 1 -row 0 -sticky ns]]
+	set wscont $wtextsend
+    }
     ttk::scrollbar $wyscsend -orient vertical -command [list $wtextsend yview]
 
-    grid  $wtextsend  -column 0 -row 0 -sticky news
+    grid  $wscont     -column 0 -row 0 -sticky news
     grid  $wyscsend   -column 1 -row 0 -sticky ns
     grid columnconfigure $wfrsend 0 -weight 1
     grid rowconfigure    $wfrsend 0 -weight 1
@@ -901,15 +911,24 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     $wpanev add $wfrsend -weight 1
     
     # Chat text widget.
-    frame $wfrchat -bd 1 -relief sunken
-    text  $wtext -height 12 -width 40 -font CociSmallFont -state disabled  \
-      -wrap word -cursor {}  \
-      -yscrollcommand [list ::UI::ScrollSet $wysc \
-      [list grid $wysc -column 1 -row 0 -sticky ns -padx 2]]
+    if {([tk windowingsystem] eq "aqua") && $config(groupchat,aqua-text)} {
+	frame $wfrchat
+	set wtcont [::UI::Text $wtext -height 12 -width 40 -font CociSmallFont -state disabled  \
+	  -wrap word -cursor {}  \
+	  -yscrollcommand [list ::UI::ScrollSet $wysc \
+	  [list grid $wysc -column 1 -row 0 -sticky ns -padx 2]]]
+    } else {
+	frame $wfrchat -bd 1 -relief sunken
+	text  $wtext -height 12 -width 40 -font CociSmallFont -state disabled  \
+	  -wrap word -cursor {}  \
+	  -yscrollcommand [list ::UI::ScrollSet $wysc \
+	  [list grid $wysc -column 1 -row 0 -sticky ns -padx 2]]
+	set wtcont $wtext
+    }
     ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
     bindtags $wtext [linsert [bindtags $wtext] 0 ReadOnlyText]
  
-    grid  $wtext  -column 0 -row 0 -sticky news
+    grid  $wtcont -column 0 -row 0 -sticky news
     grid  $wysc   -column 1 -row 0 -sticky ns -padx 2
     grid columnconfigure $wfrchat 0 -weight 1
     grid rowconfigure    $wfrchat 0 -weight 1
