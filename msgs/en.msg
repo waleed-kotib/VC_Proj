@@ -479,6 +479,7 @@
 ::msgcat::mcset en mWhiteboard           {Whiteboard...}
 ::msgcat::mcset en mvCard                {vCard...}
 ::msgcat::mcset en mvCard2               {Business Card}
+::msgcat::mcset en mvCard2...            {Business Card...}
 
 
 # Short texts only. Use english text as database key.
