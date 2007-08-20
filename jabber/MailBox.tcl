@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.114 2007-08-20 06:05:17 matben Exp $
+# $Id: MailBox.tcl,v 1.115 2007-08-20 14:48:10 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -325,6 +325,9 @@ proc ::MailBox::HandleSVGWBMessage {jlibname xmlns xmldata args} {
     if {![info exists argsA(-x)]} {
 	return
     }
+    
+    # We get this message from jlib and need therefore to generate a uuid.
+    set uuid [uuid::uuid generate]
 	
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {
