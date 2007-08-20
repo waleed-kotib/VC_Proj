@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.31 2007-08-12 14:22:50 matben Exp $
+#  $Id: Mood.tcl,v 1.32 2007-08-20 13:37:00 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -183,7 +183,7 @@ proc ::Mood::HavePEP {jlibname have} {
 proc ::Mood::LogoutHook {} {
     variable state
     
-    ::JUI::DeRegisterMenuEntry jabber mMood
+    ::JUI::DeRegisterMenuEntry action mMood
     unset -nocomplain state
 }
 

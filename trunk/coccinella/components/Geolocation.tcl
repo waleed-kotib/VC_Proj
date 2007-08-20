@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: Geolocation.tcl,v 1.9 2007-08-11 06:44:34 matben Exp $
+#  $Id: Geolocation.tcl,v 1.10 2007-08-20 13:37:00 matben Exp $
 
 package require jlib::pep
 
@@ -139,7 +139,7 @@ proc ::Geolocation::HavePEP {jlibname have} {
 proc ::Geolocation::LogoutHook {} {
     variable state
     
-    ::JUI::DeRegisterMenuEntry jabber Geolocation...
+    ::JUI::DeRegisterMenuEntry action Geolocation...
     unset -nocomplain state
 }
 

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.26 2007-08-03 06:59:37 matben Exp $
+# $Id: JivePhone.tcl,v 1.27 2007-08-20 13:37:00 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -250,7 +250,7 @@ proc ::JivePhone::LogoutHook { } {
 
     ::Roster::DeRegisterPopupEntry mJiveCall
     ::Roster::DeRegisterPopupEntry mJiveForward
-    ::JUI::DeRegisterMenuEntry jabber mJiveCall
+    ::JUI::DeRegisterMenuEntry action mJiveCall
     ::JUI::RemoveAlternativeStatusImage jivephone
     
     if {[winfo exists $state(wstatus)]} {
