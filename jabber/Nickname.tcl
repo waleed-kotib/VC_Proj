@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Nickname.tcl,v 1.5 2007-08-11 06:44:34 matben Exp $
+# $Id: Nickname.tcl,v 1.6 2007-08-20 13:41:44 matben Exp $
 
 # @@@ There is one thing I don't yet understand. While I always publish any 
 # nickname when I log on, online users will receive the event, but what about
@@ -108,12 +108,15 @@ proc ::Nickname::Publish {nickname} {
     set itemE [wrapper::createtag item \
       -attrlist [list id current] -subtags [list [Element $nickname]]]
     ::Jabber::JlibCmd pep publish $xmlns(nick) $itemE
+    
+    ::hooks::run setNicknameHook $nickname
 }
 
 proc ::Nickname::Retract {} {
     variable xmlns
     
     ::Jabber::JlibCmd pep retract $xmlns(nick) -notify 1
+    ::hooks::run setNicknameHook ""
 }
 
 # Getting others nicknames -----------------------------------------------------

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.222 2007-08-15 09:29:57 matben Exp $
+# $Id: Jabber.tcl,v 1.223 2007-08-20 13:41:44 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1099,12 +1099,14 @@ proc ::Jabber::DoCloseClientConnection {args} {
     
     # Send unavailable information.
     if {[$jstate(jlib) isinstream]} {
-	set opts {}
+	set opts [list]
 	if {[string length $argsA(-status)] > 0} {
 	    lappend opts -status $argsA(-status)
 	}
 	eval {$jstate(jlib) send_presence -type unavailable} $opts
-	
+
+	eval {::hooks::run setPresenceHook unavailable} $opts
+
 	# Do the actual closing.
 	#       There is a potential problem if called from within a xml parser 
 	#       callback which makes the subsequent parsing to fail. (after idle?)
@@ -1277,12 +1279,12 @@ proc ::Jabber::SetStatus {type args} {
     # Any -status take precedence, even if empty.
     array set argsA $args
     
-    set presArgs {}
+    set presA [list]
     foreach {key value} [array get argsA] {
 	
 	switch -- $key {
 	    -to - -priority - -status - -xlist - -extras {
-		lappend presArgs $key $value
+		lappend presA $key $value
 	    }
 	}
     }
@@ -1293,12 +1295,12 @@ proc ::Jabber::SetStatus {type args} {
 		# empty
 	    }
 	    invisible - unavailable {
-		lappend presArgs -type $type
+		lappend presA -type $type
 	    }
 	    away - dnd - xa - chat {
 		# Seems Psi gets confused by this.
-		#lappend presArgs -type "available" -show $type
-		lappend presArgs -show $type
+		#lappend presA -type "available" -show $type
+		lappend presA -show $type
 	    }
 	}	
     }
@@ -1318,7 +1320,7 @@ proc ::Jabber::SetStatus {type args} {
     
     # It is somewhat unclear here if we should have a type attribute
     # when sending initial presence, see XMPP 5.1.
-    eval {$jstate(jlib) send_presence} $presArgs
+    eval {$jstate(jlib) send_presence} $presA
 	
     eval {::hooks::run setPresenceHook $type} $args
     

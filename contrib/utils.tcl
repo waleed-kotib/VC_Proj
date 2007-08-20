@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: utils.tcl,v 1.8 2007-08-08 09:18:37 matben Exp $
+# $Id: utils.tcl,v 1.9 2007-08-20 13:41:44 matben Exp $
 
 package provide utils 1.0
     
@@ -90,6 +90,73 @@ proc listintersectnonempty {alist blist} {
     }
     return 0
 }
+
+# A few routines: # Copyright (c) 1997-1999 Jeffrey Hobbs 
+# 
+# lintersect -- 
+#   returns list of items that exist only in all lists 
+# Arguments: 
+#   args        lists 
+# Returns: 
+#   The list of common items, uniq'ed, order independent 
+#
+proc lintersect {args} {
+    set len [llength $args]
+    if {$len <= 1} {
+	return [lindex $args 0]
+    }
+    array set a {}
+    foreach l [lindex $args 0] {
+	set a($l) 1
+    }
+    foreach list [lrange $args 1 end] {
+	foreach l $list {
+	    if {[info exists a($l)]} {
+		incr a($l)
+	    }
+	}
+    }
+    set retval {}
+    foreach l [array names a] {
+	if {$a($l) == $len} {
+	    lappend retval $l
+	}
+    }
+    return $retval
+} 
+
+# lunique -- 
+#   order independent list unique proc.  most efficient, but requires 
+#   __LIST never be an element of the input list 
+# Arguments: 
+#   __LIST      list of items to make unique 
+# Returns: 
+#   list of only unique items, order not defined 
+#   
+proc lunique {__LIST} {
+    if {[llength $__LIST]} {
+	foreach $__LIST $__LIST break
+	unset __LIST
+	return [info locals]
+    }
+} 
+
+# luniqueo -- 
+#   order dependent list unique proc 
+# Arguments: 
+#   ls          list of items to make unique 
+# Returns: 
+#   list of only unique items in same order as input 
+#   
+proc luniqueo {ls} {
+    set rs {}
+    foreach l $ls {
+	if {[info exist ($l)]} { continue }
+	lappend rs $l
+	set ($l) {}
+    }
+    return $rs
+} 
 
 # lsearchsublists --
 # 
