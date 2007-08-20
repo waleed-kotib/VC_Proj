@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.6 2007-08-11 06:44:34 matben Exp $
+#  $Id: UserActivity.tcl,v 1.7 2007-08-20 13:37:00 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -182,7 +182,7 @@ proc ::UserActivity::HavePEP {jlibname have} {
 
 proc ::UserActivity::LogoutHook {} {
     
-    ::JUI::DeRegisterMenuEntry jabber "User Activity..."
+    ::JUI::DeRegisterMenuEntry action "User Activity..."
 }
 
 proc ::UserActivity::Dlg {} {
