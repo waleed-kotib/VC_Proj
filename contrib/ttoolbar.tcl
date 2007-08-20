@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: ttoolbar.tcl,v 1.14 2007-08-15 13:10:18 matben Exp $
+# $Id: ttoolbar.tcl,v 1.15 2007-08-20 05:47:38 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -106,17 +106,6 @@ proc ::ttoolbar::Init { } {
 		pressed  sunken
 		active   raised
 	    }
-	    
-	    # On XP this gives the typical smooth borders.
-	    style layout TToolbarXP.TButton {
-		Menubutton.button -expand 1 -sticky news -children {
-		    Menubutton.padding -expand 1 -sticky we -children {
-			Menubutton.label -sticky {}
-		    }
-		}
-	    }	
-	    style configure TToolbarXP.TButton   \
-	      -padding 4
         }
     }
     
@@ -150,9 +139,9 @@ proc ::ttoolbar::Init { } {
     option add *TToolbar.styleCollapse       TToolbar.TCheckbutton widgetDefault
     option add *TToolbar.styleText           Toolbutton       widgetDefault
     if {[tk windowingsyste] eq "win32"} {
-	option add *TToolbar.styleImage          TToolbarXP.TButton widgetDefault
+	option add *TToolbar.styleImage      Toolbutton       widgetDefault
     } else {
-	option add *TToolbar.styleImage          TToolbar.TButton widgetDefault
+	option add *TToolbar.styleImage      TToolbar.TButton widgetDefault
     }
     
     variable widgetCommands {
