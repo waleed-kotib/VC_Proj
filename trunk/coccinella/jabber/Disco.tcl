@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.125 2007-08-10 14:14:52 matben Exp $
+# $Id: Disco.tcl,v 1.126 2007-08-20 06:05:17 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -934,11 +934,8 @@ proc ::Disco::BackgroundImageCmd {} {
 proc ::Disco::BackgroundImageGetThemedFile {suffL} {
     variable wtree
     
-    puts "::Disco::BackgroundImageGetThemedFile"
     set name [option get $wtree backgroundImage {}]
-    puts "\t name=$name"
     set fileName [::Theme::FindImageFileWithSuffixes $name $suffL]
-    puts "\t fileName=$fileName"
     return [file normalize $fileName]
 }
 
@@ -1290,7 +1287,6 @@ proc ::Disco::TreeItem {vstruct} {
 	    set icon [::Roster::GetPresenceIconFromJid $jid]
 	} else {
 	    set name [$jstate(jlib) disco name $jid $node]
-	    #puts "\t jid=$jid, node=$node, name=$name"
 	    if {$name eq ""} {
 		if {$node eq ""} {
 		    set name [jlib::unescapejid $jid]

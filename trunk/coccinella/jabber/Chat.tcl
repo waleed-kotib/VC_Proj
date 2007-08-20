@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.206 2007-08-19 09:35:23 matben Exp $
+# $Id: Chat.tcl,v 1.207 2007-08-20 06:05:17 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -187,7 +187,6 @@ namespace eval ::Chat:: {
     variable allowMultiThreadPerJID 0
     
     set ::config(chat,show-head) 1
-    set ::config(chat,aqua-text) 1
 }
 
 # Chat::OnToolButton --
@@ -1468,7 +1467,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     pack $wpane -side top -fill both -expand 1    
 
     # Text chat dialog.
-    if {([tk windowingsystem] eq "aqua") && $config(chat,aqua-text)} {
+    if {$config(ui,aqua-text)} {
 	frame $wtxt
 	set wcont [::UI::Text $wtext -height 12 -width 1 -state disabled -cursor {} -wrap word  \
 	  -yscrollcommand [list ::UI::ScrollSet $wysc \
@@ -1492,7 +1491,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     ConfigureTextTags $w $wtext
 
     # Text send.
-    if {([tk windowingsystem] eq "aqua") && $config(chat,aqua-text)} {
+    if {$config(ui,aqua-text)} {
 	frame $wtxtsnd
 	set wcont2 [::UI::Text  $wtextsnd -height 2 -width 1 -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wyscsnd \

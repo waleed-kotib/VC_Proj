@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.196 2007-08-19 09:35:24 matben Exp $
+# $Id: JUI.tcl,v 1.197 2007-08-20 06:05:17 matben Exp $
 
 package provide JUI 1.0
 
@@ -98,11 +98,18 @@ namespace eval ::JUI:: {
     set ::config(url,bugs)  \
       "http://sourceforge.net/tracker/?group_id=68334&atid=520863"
         
-    set ::config(ui,status,menu)    dynamic   ;# plain|dynamic
-    set ::config(ui,main,infoLabel) server    ;# mejid|mejidres|status|server
-    set ::config(ui,main,slots)     0
-    set ::config(ui,main,combi-status) 0
-    set ::config(ui,main,toy-status) 1
+    set ::config(ui,status,menu)        dynamic   ;# plain|dynamic
+    set ::config(ui,main,infoLabel)     server    ;# mejid|mejidres|status|server
+    set ::config(ui,main,slots)         0
+    set ::config(ui,main,combi-status)  0
+    set ::config(ui,main,toy-status)    1
+    
+    # This is a trick to get the aqua text borders.
+    if {[tk windowingsystem] eq "aqua"} {
+	set ::config(ui,aqua-text)      1
+    } else {
+	set ::config(ui,aqua-text)      0
+    }
     
     # Collection of useful and common widget paths.
     variable jwapp
