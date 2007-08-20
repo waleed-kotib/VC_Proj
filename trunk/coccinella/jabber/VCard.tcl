@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.66 2007-08-19 09:35:24 matben Exp $
+# $Id: VCard.tcl,v 1.67 2007-08-20 13:41:44 matben Exp $
 
 package provide VCard 1.0
 
@@ -847,17 +847,71 @@ proc ::VCard::ImportFromFile {fileName} {
     tinydom::cleanup $token
 }
 
-# http://en.wikipedia.org/wiki/VCard
+# VCard::ImportVCFtoXML --
+# 
+#       Import a vcf file. Incomplete! Untested!
+# 
+#       http://en.wikipedia.org/wiki/VCard
+#       http://tools.ietf.org/html/rfc2426
+# 
 
 proc ::VCard::ImportVCFtoXML {fileName} {
     
-
-    # In case of multiple contacts per file pick only the first one.
-    set fd [open $fileName r]
-
+    set opts [list]
     
+    # In case of multiple contacts per file pick only the first one.
+    # Encoding?
+    set fd [open $fileName r]
+    while {[gets $fd line] != -1} {
+	set idx1 [string first ":" $line]
+	set idx2 [string first ";" $line]
+	set idx [expr {($idx1 > $idx2) ? $idx1 : $idx2}]
+	if {$idx == -1} {
+	    continue
+	}
+	set type [string tolower [string range $line 0 [expr {$idx - 1}]]]
+	set value [string range $line [expr {$idx + 1}] end]
+	
+	switch -- $type {
+	    begin {
+		
+	    }
+	    end {
+		break
+	    }
+	    fn - nickname - bday {
+		lappend opts -$type $value
+	    }
+	    n {
+		set valueL [split $value ";"]
+		lassign $valueL family given add pref suff
+		foreach n {family given} {
+		    set v [set $name]
+		    if {$v ne ""} {
+			lappend opts -${type}_${n}
+		    }
+		}
+	    }
+	    photo {
+		# @@@ TODO
+	    }
+	    adr {
+		
+		
+	    }
+	    tel {
+		
+		
+	    }
+	    
+	    
+	}	
+    }    
     close $fd
 
+    
+    set vcardE [eval {::Jabber::JlibCmd vcard create} $opts]
+    
 }
 
 proc ::VCard::Free {token} {

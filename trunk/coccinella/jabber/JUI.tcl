@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.197 2007-08-20 06:05:17 matben Exp $
+# $Id: JUI.tcl,v 1.198 2007-08-20 13:41:44 matben Exp $
 
 package provide JUI 1.0
 
@@ -406,27 +406,8 @@ proc ::JUI::Build {w} {
     
     # Experimental.
     if {1} {
-	set wcomb $wall.comb
-	ttk::frame $wcomb -padding {8 4 8 4}
-	pack $wcomb -side top -fill x
-	
-	::AvatarMB::Button $wcomb.ava
-	if {$config(ui,status,menu) eq "plain"} {
-	    ::Status::MainButton $wcomb.bst ::Jabber::jstate(show)
-	} elseif {$config(ui,status,menu) eq "dynamic"} {
-	    ::Status::ExMainButton $wcomb.bst ::Jabber::jstate(show+status) \
-	      -style Plain
-	}
-	ttk::label $wcomb.nick -style Small.TLabel -text "My nickname" -anchor w
-	ttk::combobox $wcomb.x -style Small.TCombobox -font CociSmallFont \
-	  -textvariable ::Jabber::jstate(status)
-	
-	grid  $wcomb.ava  $wcomb.bst  $wcomb.nick  -padx 2
-	grid  ^           x           $wcomb.x     -padx 2
-	grid $wcomb.nick -stick ew
-	grid $wcomb.x -stick ew
-	grid columnconfigure $wcomb 2 -weight 1
-	
+	BuildCombiBox $wall.comb
+	pack $wall.comb -side top -fill x
     }
     
     # Experimental.
@@ -501,6 +482,198 @@ proc ::JUI::Build {w} {
     }
     return $w
 }
+
+#--- Presence Combi Box --------------------------------------------------------
+
+# @@@ PEP Nickname push on login???
+
+namespace eval ::JUI {
+    
+    option add *PresenceCombiBox.padding {8 4 8 4} widgetDefault
+    
+    variable combiBox
+    set combiBox(w) -
+    set combiBox(status)  ""
+    set combiBox(statusL) [list]
+    
+    ::hooks::register loginHook           ::JUI::CombiBoxLoginHook
+    ::hooks::register logoutHook          ::JUI::CombiBoxLogoutHook
+    ::hooks::register setPresenceHook     ::JUI::CombiBoxPresenceHook
+    ::hooks::register setNicknameHook     ::JUI::CombiBoxNicknameHook
+
+}
+
+proc ::JUI::BuildCombiBox {w} {
+    global  config
+    variable combiBox
+    
+    ttk::frame $w -class PresenceCombiBox
+    
+    ::AvatarMB::Button $w.ava
+    if {$config(ui,status,menu) eq "plain"} {
+	::Status::MainButton $w.bst ::Jabber::jstate(show)
+    } elseif {$config(ui,status,menu) eq "dynamic"} {
+	::Status::ExMainButton $w.bst ::Jabber::jstate(show+status)
+    }
+    ttk::label $w.nick -style Small.TLabel -text [mc mNotAvailable] -anchor w
+    ttk::combobox $w.combo -style Small.TCombobox -font CociSmallFont \
+      -values $combiBox(statusL) \
+      -textvariable [namespace current]::combiBox(status)
+    
+    set wcombo $w.combo
+    $wcombo state {disabled}
+
+    bind $wcombo <<ComboboxSelected>> ::JUI::CombiBoxSetStatus
+    bind $wcombo <Return>             ::JUI::CombiBoxSetStatus
+    bind $wcombo <KP_Enter>           ::JUI::CombiBoxSetStatus
+    bind $wcombo <FocusOut>           ::JUI::CombiBoxOnFocusOut
+    
+    grid  $w.ava  $w.bst  $w.nick   -padx 4
+    grid  ^       ^       $w.combo  -padx 4
+    grid $w.nick -stick ew
+    grid $w.combo -stick ew
+    grid columnconfigure $w 2 -weight 1
+    
+    ::balloonhelp::balloonforwindow $w.nick "Displays your JID or nickname"
+    
+    set combiBox(w) $w
+    set combiBox(wnick)  $w.nick
+    set combiBox(wenick) $w.enick
+    set combiBox(wcombo) $w.combo    
+    
+    return $w
+}
+
+proc ::JUI::CombiBoxLoginHook {} {
+    upvar ::Jabber::jstate jstate
+    variable combiBox
+    
+    if {![winfo exists $combiBox(w)]} {
+	return
+    }
+    set myjid [$jstate(jlib) myjid]
+    set ujid [jlib::unescapestr [jlib::barejid $myjid]]
+    set wnick $combiBox(wnick)
+    $wnick configure -text $ujid
+
+    set server [::Jabber::JlibCmd getserver]
+    ::Jabber::JlibCmd pep have $server [namespace code CombiBoxHavePEP]
+}
+
+proc ::JUI::CombiBoxHavePEP {jlib have} {
+    variable combiBox
+    if {$have} {
+	::balloonhelp::balloonforwindow $combiBox(wnick) "Click to set your nickname (PEP)"
+	bind $combiBox(wnick) <Button-1> ::JUI::CombiBoxOnNick
+    }
+}
+
+proc ::JUI::CombiBoxLogoutHook {} {
+    variable combiBox
+    
+    if {![winfo exists $combiBox(w)]} {
+	return
+    }
+    destroy $combiBox(wenick)
+    bind $combiBox(wnick) <Button-1> {}
+    $combiBox(wnick) configure -text [mc mNotAvailable]
+    set combiBox(nick) ""
+    
+    # Leave the previous JID/nick?
+    #$combiBox(wnick) configure -text ""    
+}
+
+proc ::JUI::CombiBoxNicknameHook {nickname} {
+    variable combiBox
+    upvar ::Jabber::jstate jstate
+    
+    if {$nickname eq ""} {
+	set myjid [$jstate(jlib) myjid]
+	set ujid [jlib::unescapestr [jlib::barejid $myjid]]
+	$combiBox(wnick) configure -text $ujid
+    } else {
+	$combiBox(wnick) configure -text $nickname	
+    }
+}
+
+proc ::JUI::CombiBoxPresenceHook {type args} {
+    variable combiBox
+    
+    if {![winfo exists $combiBox(w)]} {
+	return
+    }
+    array set argsA $args
+    if {[info exists argsA(-to)]} {
+	return
+    }
+    set wcombo $combiBox(wcombo)
+    if {$type eq "unavailable"} {
+	$wcombo state {disabled}
+    } else {
+	$wcombo state {!disabled}
+    }
+    if {[info exists argsA(-status)] && [string length $argsA(-status)]} {
+	set status $argsA(-status)
+	set combiBox(status) $status
+	lappend combiBox(statusL) $status
+	set combiBox(statusL) [lsort -unique $combiBox(statusL)]
+	$wcombo configure -values $combiBox(statusL)
+    } else {
+	set combiBox(status) ""
+    }
+}
+
+proc ::JUI::CombiBoxOnNick {} {
+    variable combiBox
+    
+    set wenick $combiBox(wenick)
+    destroy $wenick
+    ttk::entry $wenick -font CociSmallFont \
+      -textvariable [namespace current]::combiBox(nick)
+    grid  $wenick  -column 2 -row 0 -padx 4 -stick ew
+    set combiBox(focus) [focus]
+    focus $wenick
+    
+    bind $wenick <Return>   ::JUI::CombiBoxNickReturn
+    bind $wenick <KP_Enter> ::JUI::CombiBoxNickReturn
+    bind $wenick <FocusOut> ::JUI::CombiBoxNickEditEnd
+}
+
+proc ::JUI::CombiBoxNickReturn {} {
+    variable combiBox
+    
+    if {$combiBox(nick) ne ""} {
+	::Nickname::Publish $combiBox(nick)
+    } else {
+	::Nickname::Retract
+    }
+    catch {focus $combiBox(focus)}
+}
+
+proc ::JUI::CombiBoxNickEditEnd {} {
+    variable combiBox
+  
+    destroy $combiBox(wenick)
+}
+
+proc ::JUI::CombiBoxSetStatus {} {
+    upvar ::Jabber::jstate jstate
+    variable combiBox
+    
+    ::Jabber::SetStatus $jstate(show) -status $combiBox(status)
+    ::Status::ExAddMessage $jstate(show) $combiBox(status)
+    catch {focus [winfo toplevel $combiBox(w)]}
+}
+
+proc ::JUI::CombiBoxOnFocusOut {} {
+    upvar ::Jabber::jstate jstate
+    variable combiBox
+
+    # Reset to actual value.
+    set combiBox(status) $jstate(status)
+}
+
+#-------------------------------------------------------------------------------
 
 proc ::JUI::CociCmd {} {
     variable jwapp
