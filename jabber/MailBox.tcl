@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.113 2007-07-19 06:28:16 matben Exp $
+# $Id: MailBox.tcl,v 1.114 2007-08-20 06:05:17 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -435,7 +435,7 @@ proc ::MailBox::ShowHide {args} {
 #       Creates the inbox window.
 
 proc ::MailBox::Build {args} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs config
     
     variable locals  
     variable mailbox
@@ -548,18 +548,28 @@ proc ::MailBox::Build {args} {
     set wfrmsg $wpane.frmsg    
     set wtextmsg $wfrmsg.text
     set wyscmsg  $wfrmsg.ysc
-    frame $wfrmsg -bd 1 -relief sunken
-    text $wtextmsg -height 4 -width 1 -wrap word \
-      -yscrollcommand [list ::UI::ScrollSet $wyscmsg \
-      [list grid $wyscmsg -column 1 -row 0 -sticky ns]] \
-      -state disabled
+    
+    if {$config(ui,aqua-text)} {
+	frame $wfrmsg
+	set wcont [::UI::Text $wtextmsg -height 4 -width 1 -wrap word \
+	  -yscrollcommand [list ::UI::ScrollSet $wyscmsg \
+	  [list grid $wyscmsg -column 1 -row 0 -sticky ns]] \
+	  -state disabled]
+    } else {
+	frame $wfrmsg -bd 1 -relief sunken
+	text $wtextmsg -height 4 -width 1 -wrap word \
+	  -yscrollcommand [list ::UI::ScrollSet $wyscmsg \
+	  [list grid $wyscmsg -column 1 -row 0 -sticky ns]] \
+	  -state disabled
+	set wcont $wtextmsg
+    }
     $wtextmsg tag configure normal
     $wtextmsg tag configure xdata -foreground red
     bindtags $wtextmsg [linsert [bindtags $wtextmsg] 0 ReadOnlyText]
     ttk::scrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
 
-    grid  $wtextmsg  -column 0 -row 0 -sticky news
-    grid  $wyscmsg   -column 1 -row 0 -sticky ns
+    grid  $wcont    -column 0 -row 0 -sticky news
+    grid  $wyscmsg  -column 1 -row 0 -sticky ns
     grid columnconfigure $wfrmsg 0 -weight 1
     grid rowconfigure $wfrmsg 0 -weight 1
     

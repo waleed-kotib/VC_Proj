@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.200 2007-08-19 09:35:23 matben Exp $
+# $Id: GroupChat.tcl,v 1.201 2007-08-20 06:05:17 matben Exp $
 
 package require Create
 package require Enter
@@ -179,7 +179,6 @@ namespace eval ::GroupChat:: {
     variable buttonPressMillis 1000
     variable waitUntilEditMillis 2000
 
-    set ::config(groupchat,aqua-text) 1
 }
 
 proc ::GroupChat::InitHook {} {
@@ -886,7 +885,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     pack $wpanev -side top -fill both -expand 1    
 
     # Text send.
-    if {([tk windowingsystem] eq "aqua") && $config(groupchat,aqua-text)} {
+    if {$config(ui,aqua-text)} {
 	frame $wfrsend -height 40 -width 300
 	set wscont [::UI::Text $wtextsend -height 2 -width 1 -font CociSmallFont -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wyscsend \
@@ -911,7 +910,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     $wpanev add $wfrsend -weight 1
     
     # Chat text widget.
-    if {([tk windowingsystem] eq "aqua") && $config(groupchat,aqua-text)} {
+    if {$config(ui,aqua-text)} {
 	frame $wfrchat
 	set wtcont [::UI::Text $wtext -height 12 -width 40 -font CociSmallFont -state disabled  \
 	  -wrap word -cursor {}  \

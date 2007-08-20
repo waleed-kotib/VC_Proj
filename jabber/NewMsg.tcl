@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.88 2007-07-26 14:18:53 matben Exp $
+# $Id: NewMsg.tcl,v 1.89 2007-08-20 06:05:17 matben Exp $
 
 package require ui::entryex
 
@@ -165,7 +165,7 @@ proc ::NewMsg::OnMenu {} {
 #       shows window.
 
 proc ::NewMsg::Build {args} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs config
     
     variable locals  
     upvar ::Jabber::jstate jstate
@@ -379,13 +379,23 @@ proc ::NewMsg::Build {args} {
     } else {
     
 	# Text.
-	frame $wtxt -bd 1 -relief sunken
-	pack  $wtxt -side top -fill both -expand 1
-	text $wtext -height 8 -width 48 -wrap word \
-	  -yscrollcommand [list ::UI::ScrollSet $wysc \
-	  [list grid $wysc -column 1 -row 0 -sticky ns]]
+	if {$config(ui,aqua-text)} {
+	    frame $wtxt
+	    set wcont [::UI::Text $wtext -height 8 -width 48 -wrap word \
+	      -yscrollcommand [list ::UI::ScrollSet $wysc \
+	      [list grid $wysc -column 1 -row 0 -sticky ns]]]
+	} else {
+	    frame $wtxt -bd 1 -relief sunken
+	    text $wtext -height 8 -width 48 -wrap word \
+	      -yscrollcommand [list ::UI::ScrollSet $wysc \
+	      [list grid $wysc -column 1 -row 0 -sticky ns]]
+	    set wcont $wtext
+	}
 	ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
-	grid  $wtext  -column 0 -row 0 -sticky news
+
+	pack  $wtxt -side top -fill both -expand 1
+
+	grid  $wcont  -column 0 -row 0 -sticky news
 	grid  $wysc   -column 1 -row 0 -sticky ns
 	grid columnconfigure $wtxt 0 -weight 1
 	grid rowconfigure $wtxt 0 -weight 1
