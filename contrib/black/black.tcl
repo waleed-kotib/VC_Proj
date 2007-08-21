@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.2 2007-08-18 14:10:59 matben Exp $
+# $Id: black.tcl,v 1.3 2007-08-21 10:33:34 matben Exp $
 
 namespace eval tile {
     namespace eval theme {
@@ -20,6 +20,9 @@ namespace eval tile::theme::black {
     #variable I
     #array set I [tile::LoadImages $imgdir *.png]
 
+    variable dir [file dirname [info script]]
+    
+    # NB: These colors must be in sync with the ones in black.rdb
     variable colors
     array set colors {
 	-disabledfg	"#999999"
@@ -72,6 +75,9 @@ namespace eval tile::theme::black {
 	  style configure TEntry \
 	    -fieldbackground white -foreground black \
 	    -padding {2 0}
+	  style configure TCombobox \
+	    -fieldbackground white -foreground black \
+	    -padding {2 0}
 	  
 	  style configure TNotebook.Tab \
 	    -padding {6 2 6 2}
@@ -83,30 +89,24 @@ namespace eval tile::theme::black {
     if {[tk windowingsystem] ne "aqua"} {
 	bind Menu <<ThemeChanged>> {+tile::theme::black::MenuThemeChanged %W }
     }
+    bind Menu <<ThemeChanged>> {+tile::theme::black::TreeCtrlThemeChanged %W }
 
     proc ThemeChanged {} {
+	variable dir
 	
-	if {$tile::currentTheme ne "black"} {
-	    return
-	}
-	array set style [style configure .]
-	array set map   [style map .]
-	
-	# Seems X11 has some system option db that must be overridden.
-	if {[tk windowingsystem] eq "x11"} {
-	    set priority 60
-	} else {
-	    set priority startupFile
-	}
-	if {[info exists style(-foreground)]} {
-	    set color $style(-foreground)
-	    option add *Menu.foreground $color $priority
-	    option add *Menu.activeForeground $color $priority
+	if {$tile::currentTheme eq "black"} {
+
+	    # Seems X11 has some system option db that must be overridden.
+	    if {[tk windowingsystem] eq "x11"} {
+		set priority 60
+	    } else {
+		set priority startupFile
+	    }
+	    option readfile [file join $dir black.rdb] $priority
 	}
     }
 
-    proc MenuThemeChanged {win} {
-	
+    proc MenuThemeChanged {win} {	
 	if {$tile::currentTheme ne "black"} {
 	    return
 	}
@@ -118,6 +118,14 @@ namespace eval tile::theme::black {
 		$win configure -activeforeground $color
 	    }
 	}
+    }
+    
+    proc TreeCtrlThemeChanged {win} {
+	if {$tile::currentTheme ne "black"} {
+	    return
+	}
+	
+	
     }
 }
 
