@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.198 2007-08-20 13:41:44 matben Exp $
+# $Id: JUI.tcl,v 1.199 2007-08-21 06:48:52 matben Exp $
 
 package provide JUI 1.0
 
@@ -509,7 +509,7 @@ proc ::JUI::BuildCombiBox {w} {
     
     ttk::frame $w -class PresenceCombiBox
     
-    ::AvatarMB::Button $w.ava
+    ::AvatarMB::Button $w.ava -postalign left
     if {$config(ui,status,menu) eq "plain"} {
 	::Status::MainButton $w.bst ::Jabber::jstate(show)
     } elseif {$config(ui,status,menu) eq "dynamic"} {

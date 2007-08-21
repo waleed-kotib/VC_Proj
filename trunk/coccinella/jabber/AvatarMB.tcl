@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.17 2007-07-19 06:28:12 matben Exp $
+# $Id: AvatarMB.tcl,v 1.18 2007-08-21 06:48:52 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -128,6 +128,16 @@ proc ::AvatarMB::Button {mb args} {
     variable widget
     variable state
     
+    # Keep instance specific state array.
+    variable $mb
+    upvar 0 $mb xstate    
+    
+    array set xstate {
+	-postposition above
+	-postalign    right
+    }
+    array set xstate $args
+
     # Bug in 8.4.1 but ok in 8.4.9
     if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
 	label $mb -relief sunken -bd 1 -bg white
@@ -188,6 +198,8 @@ proc ::AvatarMB::Button {mb args} {
 
 proc ::AvatarMB::ButtonFree {mb} {
     variable state
+    variable $mb
+    upvar 0 $mb xstate    
     
     hooks::deregister avatarMyNewPhotoHook [list ::AvatarMB::MyNewPhotoHook $mb]
     
@@ -195,6 +207,7 @@ proc ::AvatarMB::ButtonFree {mb} {
     if {$photo ne $state(blank)} {
 	image delete $photo
     }
+    unset -nocomplain xstate
 }
 
 proc ::AvatarMB::MyNewPhotoHook {mb} {
@@ -272,14 +285,17 @@ proc ::AvatarMB::RestoreOldGrab {} {
 }
 
 proc ::AvatarMB::PostMenu {mb} {
+    variable $mb
+    upvar 0 $mb xstate    
+
     set menu $mb.menu
     Menu $menu
     wm withdraw $menu
     update idletasks
     
     # PositionAlign sould perhaps be an option.
-    foreach {x y} [PostPosition $mb above] { break }
-    foreach {x y} [PositionAlign $mb right $x $y] { break }
+    foreach {x y} [PostPosition $mb $xstate(-postposition)] { break }
+    foreach {x y} [PositionAlign $mb $xstate(-postalign) $x $y] { break }
     foreach {x y} [PositionOnScreen $mb $x $y] { break }
     wm geometry $menu +$x+$y
     wm deiconify $menu
