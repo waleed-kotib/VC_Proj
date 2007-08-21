@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.36 2007-07-21 11:03:14 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.37 2007-08-21 14:12:20 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -291,8 +291,7 @@ proc ::RosterAvatar::Configure {_T} {
     InitDBStyle
     
     # This is a dummy option.
-    set stripeBackground [option get $T stripeBackground {}]
-    set stripes [list $stripeBackground {}]
+    set itemBackground [option get $T itemBackground {}]
     if {$styleClass eq "avatar"} {
 	set minW $avatarSize
 	set minH $avatarSize
@@ -317,10 +316,10 @@ proc ::RosterAvatar::Configure {_T} {
     # minwidth 24 = 16 + {4 2}
 
     $T column create -tags cStatus  \
-      -itembackground $stripes -resize 0 -minwidth 24 -button 1  \
+      -itembackground $itemBackground -resize 0 -minwidth 24 -button 1  \
       -borderwidth $bd -background $bg -image $simage
     $T column create -tags cTree    \
-      -itembackground $stripes -resize 0 -expand 1 -squeeze 1  \
+      -itembackground $itemBackground -resize 0 -expand 1 -squeeze 1  \
       -text [mc {Contact Name}] -button 1 -arrow up -borderwidth $bd \
       -background $bg
     $T column create -tags cTag     \

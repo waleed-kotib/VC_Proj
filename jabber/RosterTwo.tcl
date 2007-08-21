@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTwo.tcl,v 1.22 2007-07-21 11:03:15 matben Exp $
+# $Id: RosterTwo.tcl,v 1.23 2007-08-21 14:12:20 matben Exp $
 
 package require RosterTree
 
@@ -54,8 +54,7 @@ proc ::RosterTwo::Configure {_T} {
     set T $_T
     
     # This is a dummy option.
-    set stripeBackground [option get $T stripeBackground {}]
-    set stripes [list $stripeBackground {}]
+    set itemBackground [option get $T itemBackground {}]
     set outline white
     if {[$T cget -backgroundimage] eq ""} {
 	set outline gray
@@ -71,7 +70,8 @@ proc ::RosterTwo::Configure {_T} {
     # Two columns: 
     #   0) the tree 
     #   1) hidden for tags
-    $T column create -tags cTree -itembackground $stripes -resize 0 -expand 1
+    $T column create -tags cTree -itembackground $itemBackground -resize 0 \
+      -expand 1
     $T column create -tags cTag -visible 0
     $T configure -treecolumn cTree -showheader 0
 
