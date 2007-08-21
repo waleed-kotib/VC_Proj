@@ -17,13 +17,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.39 2007-08-01 08:06:27 matben Exp $
+# $Id: Theme.tcl,v 1.40 2007-08-21 14:12:21 matben Exp $
 
 package provide Theme 1.0
 
-namespace eval ::Theme:: {
-
-}
+namespace eval ::Theme {}
 
 # Theme::Init --
 #

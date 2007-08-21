@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ITree.tcl,v 1.20 2007-08-09 07:47:04 matben Exp $
+# $Id: ITree.tcl,v 1.21 2007-08-21 14:12:20 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -58,11 +58,10 @@ proc ::ITree::New {T wxsc wysc args} {
       -height 0 -width 0
     
     # This is a dummy option.
-    set stripeBackground [option get $T stripeBackground {}]
-    set stripes [list $stripeBackground {}]
+    set itemBackground [option get $T itemBackground {}]
 
     $T column create -tags cTree  \
-      -itembackground $stripes -resize 0 -expand 1
+      -itembackground $itemBackground -resize 0 -expand 1
     $T column create -tags cTag -visible 0
     $T configure -treecolumn cTree
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FilePrefs.tcl,v 1.17 2007-07-19 06:28:19 matben Exp $
+# $Id: FilePrefs.tcl,v 1.18 2007-08-21 14:12:21 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -167,16 +167,15 @@ proc ::FilePrefs::TreeCtrl {T wysc} {
       -borderwidth 0 -highlightthickness 0
     
     # This is a dummy option.
-    set stripeBackground [option get $T stripeBackground {}]
-    set stripes [list $stripeBackground {}]
+    set itemBackground [option get $T itemBackground {}]
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
 
     $T column create -tags cDescription -text [mc Description] \
-      -itembackground $stripes -expand 1 -squeeze 1 -borderwidth $bd \
+      -itembackground $itemBackground -expand 1 -squeeze 1 -borderwidth $bd \
       -background $bg
     $T column create -tags cHandled -text [mc {Handled By}] \
-      -itembackground $stripes -expand 1 -squeeze 1 -borderwidth $bd \
+      -itembackground $itemBackground -expand 1 -squeeze 1 -borderwidth $bd \
       -background $bg
 
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]

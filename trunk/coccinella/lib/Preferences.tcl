@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.96 2007-07-19 06:28:18 matben Exp $
+# $Id: Preferences.tcl,v 1.97 2007-08-21 14:12:20 matben Exp $
  
 package require mnotebook
 
@@ -288,14 +288,13 @@ proc ::Preferences::TreeCtrl {T wysc} {
       -borderwidth 0 -highlightthickness 0 -indent 0 -width 140
 
     # This is a dummy option.
-    set stripeBackground [option get $T stripeBackground {}]
-    set stripes [list $stripeBackground {}]
+    set itemBackground [option get $T itemBackground {}]
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
     set fillT {white {selected focus} black {selected !focus}}
 
      $T column create -text [mc {Settings Panels}] -tags cTree  \
-      -itembackground $stripes -resize 0 -expand 1 -borderwidth $bd  \
+      -itembackground $itemBackground -resize 0 -expand 1 -borderwidth $bd  \
       -background $bg
      $T configure -treecolumn cTree
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.31 2007-07-19 06:28:16 matben Exp $
+# $Id: Rosticons.tcl,v 1.32 2007-08-21 14:12:20 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -478,8 +478,7 @@ proc ::Rosticons::PTreeSelect {T wysc} {
     #  [list grid $wysc -row 0 -column 1 -sticky ns]]
    
     # This is a dummy option.
-    set stripeBackground [option get $T stripeBackground {}]
-    set stripes [list $stripeBackground {}]
+    set itemBackground [option get $T itemBackground {}]
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]

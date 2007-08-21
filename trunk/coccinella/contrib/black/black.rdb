@@ -2,6 +2,8 @@
 *Menu.activeForeground:             white
 *Menu.background:                   #424242
 *Menu.activebackground:             #626262
-*TreeCtrl.stripeBackground:         #88deff
+*TreeCtrl.background:               gray70
+*TreeCtrl.itemBackground:           gray90 gray80
+
 
 

@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.3 2007-08-21 10:33:34 matben Exp $
+# $Id: black.tcl,v 1.4 2007-08-21 14:12:20 matben Exp $
 
 namespace eval tile {
     namespace eval theme {
@@ -85,15 +85,16 @@ namespace eval tile::theme::black {
 	  
     }
     
+    # It could be important that we first read black.rdb and then invoke
+    # the specific handlers.
     bind ThemeChanged <<ThemeChanged>> {+tile::theme::black::ThemeChanged }
-    if {[tk windowingsystem] ne "aqua"} {
-	bind Menu <<ThemeChanged>> {+tile::theme::black::MenuThemeChanged %W }
-    }
-    bind Menu <<ThemeChanged>> {+tile::theme::black::TreeCtrlThemeChanged %W }
+    bind Menu         <<ThemeChanged>> {+tile::theme::black::MenuThemeChanged %W }
+    bind TreeCtrl     <<ThemeChanged>> {+tile::theme::black::TreeCtrlThemeChanged %W }
 
     proc ThemeChanged {} {
 	variable dir
 	
+	puts "ThemeChanged black"
 	if {$tile::currentTheme eq "black"} {
 
 	    # Seems X11 has some system option db that must be overridden.
@@ -121,11 +122,15 @@ namespace eval tile::theme::black {
     }
     
     proc TreeCtrlThemeChanged {win} {
-	if {$tile::currentTheme ne "black"} {
-	    return
-	}
-	
-	
+	puts "TreeCtrlThemeChanged black $win"
+	if {$tile::currentTheme eq "black"} {
+	    set background [option get $win background {}]
+	    $win configure -background $background
+	    set itemBackground [option get $win itemBackground {}]
+	    treeutil::configurecolumns $win \
+	      -itembackground $itemBackground
+	    
+	}	
     }
 }
 
