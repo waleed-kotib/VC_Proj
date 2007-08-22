@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under BSD-style license.
 #  
-#  $Id: treeutil.tcl,v 1.13 2007-03-20 08:21:57 matben Exp $
+#  $Id: treeutil.tcl,v 1.14 2007-08-22 15:02:48 matben Exp $
 
 # USAGE:
 # 
@@ -200,7 +200,7 @@ proc treeutil::setdboptions {w wclass prefix} {
     
     # Element options:
     foreach ename [$w element names] {
-	set eopts {}
+	set eopts [list]
 	foreach ospec [$w element configure $ename] {
 	    set oname  [lindex $ospec 0]
 	    set dvalue [lindex $ospec 3]
@@ -217,7 +217,7 @@ proc treeutil::setdboptions {w wclass prefix} {
     # Style layout options:
     foreach style [$w style names] {
 	foreach ename [$w style elements $style] {
-	    set sopts {}
+	    set sopts [list]
 	    foreach {key value} [$w style layout $style $ename] {
 		set dbname ${prefix}:${style}:${ename}${key}
 		set dbvalue [option get $wclass $dbname {}]
@@ -230,9 +230,55 @@ proc treeutil::setdboptions {w wclass prefix} {
     }
 }
 
+# treeutil::configurecolumns --
+# 
+#       Configure all columns.
+
 proc treeutil::configurecolumns {w args} {
     foreach C [$w column list -visible] {
 	eval {$w column configure $C} $args
+    }
+}
+
+# treeutil::configureelements --
+# 
+#       Configure all elements.
+#           -elementName-option value ...
+
+proc treeutil::configureelements {w args} {
+    foreach {key value} $args {
+	set idx [string first "-" $key 1]
+	set E [string range $key 1 [expr {$idx-1}]]
+	set option [string range $key $idx end]
+	$w element configure $E $option $value
+    }
+}
+
+# treeutil::configurestyles --
+# 
+#       Configure all styles.
+#           -styleName:elementName-option value
+
+proc treeutil::configurestyles {w args} {
+    foreach {key value} $args {
+	set idx1 [string first ":" $key 1]
+	set idx2 [string first "-" $key 2]
+	set S [string range $key 1 [expr {$idx1-1}]]
+	set E [string range $key [expr {$idx1+1}] [expr {$idx2-1}]]
+	set option [string range $key $idx2 end]
+	$w style layout $S $E $option $value
+    }
+}
+
+# treeutil::configureelementtype --
+#  
+#       Simplified way of configuring a certain element type.
+
+proc treeutil::configureelementtype {w type args} {
+    foreach E [$w element names] {
+	if {[$w element type $E] eq $type} {
+	    eval {$w element configure $E} $args
+	}
     }
 }
 
