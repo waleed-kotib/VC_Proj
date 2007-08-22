@@ -12,10 +12,10 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.155 2007-08-02 13:00:32 matben Exp $	
+# $Id: Coccinella.tcl,v 1.156 2007-08-22 13:29:24 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
-set debugLevel 0
+set debugLevel 4
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -178,6 +178,7 @@ if {[lsearch -exact [tile::availableThemes] $prefs(tileTheme)] >= 0} {
     # We use the 'clam' theme as a fallback (and default in resources).
     catch {tile::setTheme clam}
 }
+::Theme::ReadTileResources
 
 # The packages are divided into categories depending on their degree
 # of generality.
@@ -224,6 +225,7 @@ foreach class {generic uibase application} {
 	package require $name
     }
 }
+tileutils::configure -themechanged ::Theme::TileThemeChanged
 
 # Platform dependent packages.
 switch -- $this(platform) {

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.40 2007-08-21 14:12:21 matben Exp $
+# $Id: Theme.tcl,v 1.41 2007-08-22 13:29:24 matben Exp $
 
 package provide Theme 1.0
 
@@ -36,7 +36,6 @@ namespace eval ::Theme {}
 
 proc ::Theme::Init { } {
     global  this prefs
-    variable fontopts
         
     # Handle theme name and locale from prefs file.
     NameAndLocalePrefs
@@ -45,33 +44,41 @@ proc ::Theme::Init { } {
     Fonts
     FontConfigSize $prefs(fontSizePlus)
     
+    # Read widget resources.
+    ReadResources    
+    
+    FontConfigStandard
+    
+    # Any named fonts from any resource file must be constructed.
+    PostProcessFontDefs
+}
+
+proc ::Theme::ReadResources {} {
+    global  this prefs
+    
     # Priorities.
     # widgetDefault: 20
     # startupFile:   40
     # userDefault:   60
     # interactive:   80 (D)
 
+    # Seems X11 has some system option db that must be overridden.
+    if {[tk windowingsystem] eq "x11"} {
+	set priority 60
+    } else {
+	set priority startupFile
+    }
+
     # Read resource database files in a hierarchical order.
     # 1) always read the default rdb file.
     # 2) read rdb file for this specific platform, if exists.
     # 3) read rdb file for any theme we have chosen. Search first
     #    inside the sources and then in the alternative user directory.
-    option readfile [file join $this(resourcePath) default.rdb] startupFile
+    # 4) read any theme specific rdb file if exists (after tile loaded).
+    option readfile [file join $this(resourcePath) default.rdb] $priority
     set f [file join $this(resourcePath) $this(platform).rdb]
     if {[file exists $f]} {
-	option readfile $f startupFile
-    }
-    
-    # My RH9 KDE system has some weird X rdb settings somewhere. Fix.
-    if {[tk windowingsystem] eq "x11"} {
-	option add *ChaseArrows.background        "#dcdad5" 60
-	option add *Listbox.background            white     60
-	option add *Listbox.highlightBackground   "#dcdad5" 60
-	option add *Menu.background               "#dcdad5" 60
-	option add *Text.background               white     60
-	option add *Text.highlightBackground      "#dcdad5" 60
-	option add *TreeCtrl.background           white     60
-	option add *WaveLabel.background          "#dcdad5" 60
+	option readfile $f $priority
     }
     
     # Any theme specific resource files.
@@ -91,11 +98,35 @@ proc ::Theme::Init { } {
     if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
 	option add *TToolbar.styleText  Small.Plain      60
     }
-	
-    FontConfigStandard
-    
-    # Any named fonts from any resource file must be constructed.
-    PostProcessFontDefs
+}
+
+# Theme::ReadTileResources --
+# 
+#       Read any standard tile theme specific resources, typically for Menu
+#       and TreeCtrl.
+
+proc ::Theme::ReadTileResources {} {
+    global  this
+
+    if {[tk windowingsystem] eq "x11"} {
+	set priority 60
+    } else {
+	set priority startupFile
+    }
+    set f [file join $this(resourcePath) $tile::currentTheme.rdb]
+    if {[file exists $f]} {
+	option readfile $f $priority
+    }
+}
+
+# Theme::TileThemeChanged --
+# 
+#       This is a handler for tileutils ThemeChanged events which must be
+#       invoked before widget specific handlers are.
+
+proc ::Theme::TileThemeChanged {} {
+    ReadResources
+    ReadTileResources 
 }
 
 # Theme::Fonts --

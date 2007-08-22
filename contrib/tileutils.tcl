@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.53 2007-08-21 14:12:20 matben Exp $
+# $Id: tileutils.tcl,v 1.54 2007-08-22 13:29:24 matben Exp $
 #
 
 package require treeutil
@@ -35,6 +35,14 @@ namespace eval ::tileutils {
     #     other themes may want to set their own options and these must
     #     therfore come after the standard handlers.
 
+    # NB: Order if ThemeChanged handlers important:
+    # 
+    # .    tileutils::ThemeChanged      <- read all rdb files for standard tile themes
+    # .    theme specific handler       <- read theme specific rdb file
+    # Menu tileutils::MenuThemeChanged  <- configure using resources
+    # 
+    # Menu can be any non ttk widget, typically TreeCtrl.
+    
     proc BindFirst {tag event cmd} {
 	set script [bind $tag $event]
 	bind $tag $event "$cmd\n$script"
@@ -76,8 +84,6 @@ proc tileutils::configure {args} {
 
 proc tileutils::ThemeChanged {} {
     variable options
-    
-    puts "tileutils::ThemeChanged"
     
     # Give interested parties a chance to read a new option database file etc.
     if {$options(-themechanged) ne {}} {
@@ -130,49 +136,23 @@ proc tileutils::ThemeChanged {} {
 
 proc tileutils::ListboxThemeChanged {win} {
     
-    array set style [list -foreground black]
-    array set style [style configure .]    
     if {[winfo class $win] eq "Listbox"} {
+	array set style [list -foreground black]
+	array set style [style configure .]    
+
 	if {[info exists style(-background)]} {
 	    $win configure -highlightbackground $style(-background)
 	}
     }
 }
 
-proc tileutils::SpinboxThemeChanged {win} {
-    
-    array set style [list -foreground black]
-    array set style [style configure .]    
-    if {[winfo class $win] eq "Spinbox"} {
-	if {[info exists style(-background)]} {
-	    set color $style(-background)
-	    $win configure -buttonbackground $color
-	    $win configure -highlightbackground $color
-	}
-	if {[info exists style(-selectbackground)]} {
-	    $win configure -selectbackground $style(-selectbackground)
-	}
-    }
-}
-
-proc tileutils::TextThemeChanged {win} {
-    
-    array set style [list -foreground black]
-    array set style [style configure .]    
-    if {[winfo class $win] eq "Text"} {
-	if {[info exists style(-background)]} {
-	    set color $style(-background)
-	    $win configure -highlightbackground $color
-	}
-    }
-}
-
 proc tileutils::MenuThemeChanged {win} {
 
-    array set style [list -foreground black]
-    array set style [style configure .]    
-    array set map   [style map .]
     if {[winfo class $win] eq "Menu"} {
+	array set style [list -foreground black]
+	array set style [style configure .]    
+	array set map   [style map .]
+
 	if {[info exists style(-background)]} {
 	    set color $style(-background)
 	    $win configure -bg $color
@@ -186,41 +166,97 @@ proc tileutils::MenuThemeChanged {win} {
 	    }
 	}
 	if {[info exists style(-foreground)]} {
-	    $win configure -fg $style(-foreground)
+	    set color $style(-foreground)
+	    $win configure -foreground $color
+	    $win configure -activeforeground $color
+	    if {[info exists map(-foreground)]} {
+		foreach {state col} $map(-foreground) {
+		    if {[lsearch $state active] >= 0} {
+			$win configure -activeforeground $col
+			break
+		    }
+		}
+	    }
 	}
+    }
+}
+
+proc tileutils::SpinboxThemeChanged {win} {
+    
+    if {[winfo class $win] eq "Spinbox"} {
+	array set style [list -foreground black]
+	array set style [style configure .]    
+
+	if {[info exists style(-background)]} {
+	    set color $style(-background)
+	    $win configure -buttonbackground $color
+	    $win configure -highlightbackground $color
+	}
+	if {[info exists style(-selectbackground)]} {
+	    $win configure -selectbackground $style(-selectbackground)
+	}
+    }
+}
+
+proc tileutils::TextThemeChanged {win} {
+    
+    if {[winfo class $win] eq "Text"} {
+	array set style [list -foreground black]
+	array set style [style configure .]    
+
+	if {[info exists style(-background)]} {
+	    set color $style(-background)
+	    #$win configure -highlightbackground $color
+	}
+    }
+}
+
+# tileutils::TreeCtrlThemeChanged --
+# 
+#       TreeCtrl is a bit special. Provided any theme specific TreeCtrl 
+#       resources has been read in, we configure it from its resources.
+#       Some standard options from the tile style.
+
+proc tileutils::TreeCtrlThemeChanged {win} {
+    
+    if {[winfo class $win] eq "TreeCtrl"} {
+	
+	# Style options.
+	array set style [list -foreground black]
+	array set style [style configure .]    
+	
+	# Resource options.
+	set background [option get $win background {}]
+	$win configure -background $background
+	
+	set columnOpts [list]
+	if {[info exists style(-background)]} {
+	    lappend columnOpts -background $style(-background)
+	}
+	if {[info exists style(-foreground)]} {
+	    lappend columnOpts -textcolor $style(-foreground)
+	}
+	foreach dbname {itemBackground} optname {itembackground} {
+	    set value [option get $win $dbname {}]
+	    if {$value ne ""} {
+		lappend columnOpts -$optname $value
+	    }
+	}
+	eval {treeutil::configurecolumns $win} $columnOpts
     }
 }
 
 proc tileutils::WaveLabelThemeChanged {win} {
 
-    array set style [list -foreground black]
-    array set style [style configure .]    
     if {[winfo class $win] eq "WaveLabel"} {
+	array set style [list -foreground black]
+	array set style [style configure .]    
+
 	if {[info exists style(-background)]} {
 	    set color $style(-background)
 	    $win configure -background $color
+	    $win configure -columnbackground $color
 	}
-    }
-}
-
-# TreeCtrl is a bit special.
-
-proc tileutils::TreeCtrlThemeChanged {win} {
-    
-    puts "tileutils::TreeCtrlThemeChanged"
-    array set style [list -foreground black]
-    array set style [style configure .]    
-    if {[winfo class $win] eq "TreeCtrl"} {
-	if {[info exists style(-background)]} {
-	    treeutil::configurecolumns $win -background $style(-background)
-	}
-
-
-	set background [option get $win background {}]
-	$win configure -background $background
-	set itemBackground [option get $win itemBackground {}]
-	treeutil::configurecolumns $win \
-	  -itembackground $itemBackground
     }
 }
    
