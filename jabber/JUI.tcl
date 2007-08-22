@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.200 2007-08-21 14:12:20 matben Exp $
+# $Id: JUI.tcl,v 1.201 2007-08-22 12:57:14 matben Exp $
 
 package provide JUI 1.0
 
@@ -86,11 +86,6 @@ namespace eval ::JUI:: {
 	option add *JMain*me.style              Small.Sunken.TLabel startupFile
 	# Alternative.
 	#option add *JMain*me.style              LSafari startupFile
-    }
-    
-    # Special for X11 menus to look ok.
-    if {[tk windowingsystem] eq "x11"} {
-	option add *JMain.Menu.borderWidth        0               50
     }
     
     # Configurations:
@@ -289,8 +284,10 @@ proc ::JUI::Build {w} {
     if {!$inited} {
 	Init
     }
-    ::UI::Toplevel $w -class JMain \
-      -macstyle documentProc -closecommand ::JUI::CloseHook  \
+    #::UI::Toplevel $w -class JMain \
+    #  -macstyle documentProc -closecommand ::JUI::CloseHook  \
+    #  -allowclose 0
+    ::UI::Toplevel $w -class JMain -closecommand ::JUI::CloseHook \
       -allowclose 0
     wm title $w $prefs(appName)
     ::UI::SetWindowGeometry $w
