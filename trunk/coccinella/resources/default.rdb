@@ -28,8 +28,6 @@
 
 ! general settings for all widgets
 !
-!*background:                         #dedede
-!*highlightBackground:                #dedede
 *highlightColor:                     #6363ce
 *disabledForeground:                 #7a7a7a
 
@@ -64,6 +62,8 @@
 *Listbox.borderWidth:                1
 *Listbox.Font:                       CociSmallFont
 *Listbox.highlightThickness:         2
+*Menu.foreground:                    black
+*Menu.activeForeground:              black
 *Menu.font:                          CociSmallFont
 *Message.Font:                       CociSmallFont
 *Radiobutton.Font:                   CociSmallFont

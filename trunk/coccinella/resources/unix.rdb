@@ -21,18 +21,22 @@
 *Label.highlightBackground:          #dcdad5
 *Labelframe.background:              #dcdad5
 *Labelframe.highlightBackground:     #dcdad5
+*Listbox.background:                 white
+*Listbox.highlightBackground:        #dcdad5
 *Radiobutton.background:             #dcdad5
 *Radiobutton.highlightBackground:    #dcdad5
-*Text.highlightBackground:           #dcdad5
+*Text.background:                    white
 
 ! tk standard widgets (clam theme background)
 !
 *Menu.background:                    #dcdad5
-*Menu.borderWidth:                   1
+*Menu.borderWidth:                   0
+*Menu.activeBorderWidth:             1
 *Scrollbar.borderWidth:              1
 *Scrollbar.width:                    12
 *Scrollbar.troughColor:              #bdbdbd
 
+*TreeCtrl.background:                white
 *TreeCtrl.columnBackground:          #dcdad5
 
 ! contributed widgets

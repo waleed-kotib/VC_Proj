@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.4 2007-08-21 14:12:20 matben Exp $
+# $Id: black.tcl,v 1.5 2007-08-22 13:29:24 matben Exp $
 
 namespace eval tile {
     namespace eval theme {
@@ -88,13 +88,10 @@ namespace eval tile::theme::black {
     # It could be important that we first read black.rdb and then invoke
     # the specific handlers.
     bind ThemeChanged <<ThemeChanged>> {+tile::theme::black::ThemeChanged }
-    bind Menu         <<ThemeChanged>> {+tile::theme::black::MenuThemeChanged %W }
-    bind TreeCtrl     <<ThemeChanged>> {+tile::theme::black::TreeCtrlThemeChanged %W }
 
     proc ThemeChanged {} {
 	variable dir
 	
-	puts "ThemeChanged black"
 	if {$tile::currentTheme eq "black"} {
 
 	    # Seems X11 has some system option db that must be overridden.
@@ -105,32 +102,6 @@ namespace eval tile::theme::black {
 	    }
 	    option readfile [file join $dir black.rdb] $priority
 	}
-    }
-
-    proc MenuThemeChanged {win} {	
-	if {$tile::currentTheme ne "black"} {
-	    return
-	}
-	array set style [style configure .]    
-	if {[info exists style(-foreground)]} {
-	    if {[winfo class $win] eq "Menu"} {
-		set color $style(-foreground)
-		$win configure -foreground $color
-		$win configure -activeforeground $color
-	    }
-	}
-    }
-    
-    proc TreeCtrlThemeChanged {win} {
-	puts "TreeCtrlThemeChanged black $win"
-	if {$tile::currentTheme eq "black"} {
-	    set background [option get $win background {}]
-	    $win configure -background $background
-	    set itemBackground [option get $win itemBackground {}]
-	    treeutil::configurecolumns $win \
-	      -itembackground $itemBackground
-	    
-	}	
     }
 }
 
