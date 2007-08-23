@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.54 2007-08-22 13:29:24 matben Exp $
+# $Id: tileutils.tcl,v 1.55 2007-08-23 13:01:28 matben Exp $
 #
 
 package require treeutil
@@ -227,7 +227,8 @@ proc tileutils::TreeCtrlThemeChanged {win} {
 	
 	# Resource options.
 	set background [option get $win background {}]
-	$win configure -background $background
+	set useTheme   [option get $win useTheme {}]
+	$win configure -background $background -usetheme $useTheme
 	
 	set columnOpts [list]
 	if {[info exists style(-background)]} {

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.41 2007-08-22 13:29:24 matben Exp $
+# $Id: Theme.tcl,v 1.42 2007-08-23 13:01:30 matben Exp $
 
 package provide Theme 1.0
 
@@ -117,6 +117,8 @@ proc ::Theme::ReadTileResources {} {
     if {[file exists $f]} {
 	option readfile $f $priority
     }
+    
+    # @@@ Try configure fonts???
 }
 
 # Theme::TileThemeChanged --

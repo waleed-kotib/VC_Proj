@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.64 2007-08-16 09:49:39 matben Exp $
+# $Id: RosterTree.tcl,v 1.65 2007-08-23 13:01:29 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -45,8 +45,8 @@ namespace eval ::RosterTree {
     ::hooks::register nicknameEventHook      ::RosterTree::NicknameEventHook
 
     # Actual:
-    option add *RosterTree.borderWidth      1               50
-    option add *RosterTree.relief           sunken          50
+    option add *RosterTree.borderWidth        1               50
+    option add *RosterTree.relief             sunken          50
     #option add *Roster*TreeCtrl.indent          18              widgetDefault
 
     # Fake:
@@ -357,7 +357,7 @@ proc ::RosterTree::New {w} {
     
     set T $wtree
 	    
-    treectrl $T -usetheme 1 -selectmode extended  \
+    treectrl $T -selectmode extended  \
       -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 0  \
       -xscrollcommand [list ::UI::ScrollSetStdGrid $wxsc     \
       [list grid $wxsc -row 1 -column 0 -sticky ew]]         \

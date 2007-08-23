@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FilePrefs.tcl,v 1.18 2007-08-21 14:12:21 matben Exp $
+# $Id: FilePrefs.tcl,v 1.19 2007-08-23 13:01:30 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -161,7 +161,7 @@ proc ::FilePrefs::TreeCtrl {T wysc} {
     global  this
     variable sortColumn
     
-    treectrl $T -usetheme 1 -selectmode browse  \
+    treectrl $T -selectmode browse  \
       -showroot 0 -showrootbutton 0 -showbuttons 0 -showlines 0  \
       -yscrollcommand [list $wysc set]  \
       -borderwidth 0 -highlightthickness 0
