@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.19 2007-08-23 13:01:29 matben Exp $
+# $Id: AvatarMB.tcl,v 1.20 2007-08-23 14:25:57 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -55,18 +55,7 @@ proc ::AvatarMB::Init {} {
     variable initted
     
     set initted 1
-    
-    set active "#3874d1"
-    set border "#cccccc"
-    set bg [style configure . -background]
-    if {$bg ne ""} {
-	set border [::colorutils::getdarker $bg]
-    }
-    set lightactive [::colorutils::getlighter $active]
-    
-    set widget(active)      $active
-    set widget(border)      $border
-    set widget(lightactive) $lightactive
+        
     set widget(background)  white
     set widget(buttonsize)  24
     set widget(menusize)    32
@@ -77,10 +66,6 @@ proc ::AvatarMB::Init {} {
 
     # Try make a fake menu (FMenu) entry widget.
     # Perhaps this should be moved to tileutils and be made more generic?
-    #set blue ::AvatarMB::blue
-    #image create photo $blue -width 2 -height 2
-    #$blue blank
-    #$blue put [list [list $active $active] [list $active $active]]
 
     set blank ::AvatarMB::blank
     image create photo $blank -width 4 -height 4
