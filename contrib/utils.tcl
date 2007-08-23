@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: utils.tcl,v 1.9 2007-08-20 13:41:44 matben Exp $
+# $Id: utils.tcl,v 1.10 2007-08-23 13:01:29 matben Exp $
 
 package provide utils 1.0
     
@@ -91,7 +91,8 @@ proc listintersectnonempty {alist blist} {
     return 0
 }
 
-# A few routines: # Copyright (c) 1997-1999 Jeffrey Hobbs 
+# A few routines: 
+# Copyright (c) 1997-1999 Jeffrey Hobbs 
 # 
 # lintersect -- 
 #   returns list of items that exist only in all lists 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.32 2007-08-21 14:12:20 matben Exp $
+# $Id: Rosticons.tcl,v 1.33 2007-08-23 13:01:29 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -469,7 +469,7 @@ proc ::Rosticons::BuildPrefsPage {wpage} {
 proc ::Rosticons::PTreeSelect {T wysc} {
     global  this
     
-    treectrl $T -usetheme 1 -selectmode single  \
+    treectrl $T -selectmode single  \
       -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 0  \
       -borderwidth 0 -highlightthickness 0 -indent 10 \
       -yscrollcommand [list $wysc set]
@@ -596,8 +596,7 @@ proc ::Rosticons::PFillTree {T} {
 
 proc ::Rosticons::PTreeShow {T wysc} {
     
-    treectrl $T -usetheme 1  \
-      -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 1  \
+    treectrl $T -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 1 \
       -borderwidth 0 -highlightthickness 0 -indent 10  \
       -yscrollcommand [list $wysc set]
       #-yscrollcommand [list ::UI::ScrollSet $wysc     \

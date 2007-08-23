@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.18 2007-08-21 06:48:52 matben Exp $
+# $Id: AvatarMB.tcl,v 1.19 2007-08-23 13:01:29 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -30,8 +30,31 @@ namespace eval ::AvatarMB {
 
     ::hooks::register  prefsInitHook   ::AvatarMB::InitPrefsHook
 
+    variable initted 0
+}
+
+proc ::AvatarMB::InitPrefsHook { } {
+    global  prefs
+    
+    set prefs(dir,avatarPick) ""
+    if {[tk windowingsystem] eq "aqua"} {
+	# gif and 48x48 
+	set iChatPath [file nativename "~/Pictures/iChat Icons/"]
+	if {[file isdirectory $iChatPath]} {
+	    set prefs(dir,avatarPick) $iChatPath
+	}
+    }
+    ::PrefUtils::Add [list  \
+      [list prefs(dir,avatarPick)  prefs_dir_avatarPick  $prefs(dir,avatarPick)]]
+}
+
+proc ::AvatarMB::Init {} {
+       
     # Static variables.
     variable widget
+    variable initted
+    
+    set initted 1
     
     set active "#3874d1"
     set border "#cccccc"
@@ -54,10 +77,10 @@ namespace eval ::AvatarMB {
 
     # Try make a fake menu (FMenu) entry widget.
     # Perhaps this should be moved to tileutils and be made more generic?
-    set blue ::AvatarMB::blue
-    image create photo $blue -width 2 -height 2
-    $blue blank
-    $blue put [list [list $active $active] [list $active $active]]
+    #set blue ::AvatarMB::blue
+    #image create photo $blue -width 2 -height 2
+    #$blue blank
+    #$blue put [list [list $active $active] [list $active $active]]
 
     set blank ::AvatarMB::blank
     image create photo $blank -width 4 -height 4
@@ -68,12 +91,55 @@ namespace eval ::AvatarMB {
 	# @@@ We could be more economical here and load theme only when needed.
 	if {[catch {package require tile::theme::$name}]} {
 	    continue
-	}
+	}	
 
 	style theme settings $name {
+	 	    
+	    set activeDef "#3874d1"
+	    set active $activeDef
+	    array unset style
+	    array unset map
+	    array set style [list -foreground black]
+	    array set style [style configure .]    
+	    array set map   [style map .]
+
+	    if {[info exists map(-background)]} {
+		foreach {mstate mcol} $map(-background) {
+		    if {[lsearch $mstate active] >= 0} {
+			set active $mcol
+			break
+		    }
+		}
+	    }
+	    if {$active eq $activeDef} {
+		set activeForeground white
+	    } else {
+		set activeForeground black
+	    }
+	    array unset foreground
+	    set foreground([list active !disabled]) $activeForeground
+	    if {[info exists map(-foreground)]} {
+		foreach {mstate mcol} $map(-foreground) {
+		    if {[lsearch $mstate active] >= 0} {
+			set activeForeground $mcol
+			break
+		    }
+		}
+		array set foreground $map(-foreground)
+	    }
+	    set foreground([list active !disabled]) $activeForeground
+	    unset -nocomplain foreground(active)
+	    unset -nocomplain foreground(selected)
+	    unset -nocomplain foreground(focus)
+
+	    set activeim ::AvatarMB::active$name
+	    image create photo $activeim -width 2 -height 2
+	    $activeim blank
+	    $activeim put [list [list $active $active] [list $active $active]]
+	    
 	    style element create FMenu.background image $blank  \
 	      -padding {0} -sticky news  \
-	      -map [list {active !disabled} $blue]
+	      -map [list {active !disabled} $activeim]
 	    
 	    if {0} {
 		# Tile BUG
@@ -91,14 +157,7 @@ namespace eval ::AvatarMB {
 			FMenu.label -side left
 		    }
 		}
-	    }
-	    
-	    array set foreground [style map . -foreground]
-	    unset -nocomplain foreground(active)
-	    unset -nocomplain foreground(selected)
-	    unset -nocomplain foreground(focus)
-	    set foreground([list active !disabled]) white
-	    
+	    }	    
 	    style configure FMenu  \
 	      -padding {18 2 10 2} -borderwidth 0 -relief flat
 	    style map FMenu -foreground [array get foreground]
@@ -109,24 +168,14 @@ namespace eval ::AvatarMB {
     bind AvatarMBMenu <Destroy> {+::AvatarMB::MenuFree %W}
 }
 
-proc ::AvatarMB::InitPrefsHook { } {
-    global  prefs
-    
-    set prefs(dir,avatarPick) ""
-    if {[tk windowingsystem] eq "aqua"} {
-	# gif and 48x48 
-	set iChatPath [file nativename "~/Pictures/iChat Icons/"]
-	if {[file isdirectory $iChatPath]} {
-	    set prefs(dir,avatarPick) $iChatPath
-	}
-    }
-    ::PrefUtils::Add [list  \
-      [list prefs(dir,avatarPick)  prefs_dir_avatarPick  $prefs(dir,avatarPick)]]
-}
-
 proc ::AvatarMB::Button {mb args} {
     variable widget
     variable state
+    variable initted
+
+    if {!$initted} {
+	Init
+    }
     
     # Keep instance specific state array.
     variable $mb
@@ -214,15 +263,12 @@ proc ::AvatarMB::MyNewPhotoHook {mb} {
     variable widget
     variable state
     
-    #puts "::AvatarMB::MyNewPhotoHook mb=$mb"
-    
     set photo [$mb cget -image]
     if {$photo ne $state(blank)} {
 	image delete $photo
     }
     set size $widget(buttonsize)
     set myphoto [::Avatar::GetMyPhoto]
-    #puts "\t myphoto=$myphoto, GetShareOption=[::Avatar::GetShareOption]"
     if {($myphoto ne "") && [::Avatar::GetShareOption]} {
 	set photo [::Avatar::CreateScaledPhoto $myphoto $size]
 	$mb configure -image $photo
@@ -233,13 +279,12 @@ proc ::AvatarMB::MyNewPhotoHook {mb} {
 
 proc ::AvatarMB::Pulldown {mb} {
     variable state
-    #puts "::AvatarMB::Pulldown $mb"
+
     set state(pulldown) 1
     PostMenu $mb    
 }
 
 proc ::AvatarMB::Popdown {mb} {
-    #puts "::AvatarMB::Popdown $mb"
     set menu $mb.menu
     PostMenu $mb
     SaveGrabInfo $mb
@@ -251,7 +296,7 @@ proc ::AvatarMB::Popdown {mb} {
 
 proc ::AvatarMB::TransferGrab {mb} {
     variable state
-    #puts "AvatarMB::TransferGrab"
+
     if {$state(pulldown)} {
 	set state(pulldown) 0
 	set menu $mb.menu
@@ -366,6 +411,26 @@ proc ::AvatarMB::PositionOnScreen {mb x y} {
 proc ::AvatarMB::Menu {m args} {
     variable widget
     
+    set active "#3874d1"
+    array set style [list -foreground black -background gray80]
+    array set style [style configure .]    
+    array set map   [style map .]
+
+    if {[info exists map(-background)]} {
+	foreach {mstate mcol} $map(-background) {
+	    if {[lsearch $mstate active] >= 0} {
+		set active $mcol
+		break
+	    }
+	}
+    }
+    set lightactive [::colorutils::getlighter $active]
+    set border [::colorutils::getdarker $style(-background)]
+
+    set widget(active)      $active
+    set widget(lightactive) $lightactive
+    set widget(border)      $border
+        
     toplevel $m -class AvatarMBMenu -bd 0 -relief flat -takefocus 0
     
     wm overrideredirect $m 1
@@ -458,7 +523,6 @@ proc ::AvatarMB::Menu {m args} {
 
 proc ::AvatarMB::MenuFree {m} {
     variable priv
-    #puts "::AvatarMB::MenuFree $m"
     
     array unset priv win2file,*
     eval {image delete} $priv(images)
@@ -493,13 +557,11 @@ proc ::AvatarMB::AvatarLeave {w} {
 }
 
 proc ::AvatarMB::MenuPress {w} {
-    #puts "::AvatarMB::MenuPress"
     MenuActivate $w
     return -code break
 }
 
 proc ::AvatarMB::MenuRelease {w} {
-    #puts "::AvatarMB::MenuRelease"
     MenuActivate $w
     return -code break
 }
@@ -528,7 +590,6 @@ proc ::AvatarMB::MenuParent {w} {
 }
 
 proc ::AvatarMB::MenuUnpost {m} {
-    #puts "::AvatarMB::MenuUnpost m=$m"
     grab release $m
     RestoreOldGrab
     destroy $m
@@ -572,8 +633,6 @@ proc ::AvatarMB::MenuPickRecent {w} {
     variable priv
     variable widget
     
-    #puts "::AvatarMB::MenuPickRecent w=$w"
-    
     if {[$w cget -state] eq "normal"} {
 	set parent [winfo parent $w]
 	$parent configure -bg $widget(border)
@@ -614,26 +673,19 @@ proc ::AvatarMB::MenuNew {} {
 
 proc ::AvatarMB::SetFileToShare {fileName} {
     
-    #puts "::AvatarMB::SetFileToShare"
-    
     # Share only if not identical to existing one.
     if {[::Avatar::IsMyPhotoSharedFromFile $fileName]} {
-	#puts "\t IsMyPhotoSharedFromFile=1"
 	::Avatar::SetShareOption 1
 	::Avatar::AddRecentFile $fileName
     } else {
-	#puts "\t IsMyPhotoSharedFromFile=0"
 	if {[::Avatar::SetAndShareMyAvatarFromFile $fileName]} {
-	    #puts "\t ::Avatar::SetAndShareMyAvatarFromFile=1"
 	    ::Avatar::AddRecentFile $fileName
 	} else {
-	    #puts "\t ::Avatar::SetAndShareMyAvatarFromFile=0"	    
 	}
     }
 }
 
 proc ::AvatarMB::MenuClear {} {
-    #puts "::AvatarMB::MenuClear ---"
     ::Avatar::ClearRecent
 }
 
@@ -642,7 +694,6 @@ proc ::AvatarMB::MenuRemove {} {
 }
 
 proc ::AvatarMB::OnButtonRelease {m x y} {
-    #puts "::AvatarMB::OnButtonRelease $x $y"
     MenuUnpost $m
 }
 

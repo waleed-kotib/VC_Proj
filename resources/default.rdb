@@ -74,6 +74,7 @@
 *Text.highlightThickness:            2
 *TreeCtrl.background:                white
 *TreeCtrl.Font:                      CociSmallFont
+*TreeCtrl.useTheme:                  1
 
 ! contributed widgets
 !

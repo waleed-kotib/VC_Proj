@@ -1,2 +1,3 @@
-*TreeCtrl.background:               gray70
-*TreeCtrl.itemBackground:           gray90 gray80
+*TreeCtrl.background:               gray75
+*TreeCtrl.itemBackground:           gray92 gray84
+*TreeCtrl.useTheme:                 0

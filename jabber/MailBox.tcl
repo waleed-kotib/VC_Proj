@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.116 2007-08-21 14:12:20 matben Exp $
+# $Id: MailBox.tcl,v 1.117 2007-08-23 13:01:29 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -621,7 +621,7 @@ proc ::MailBox::TreeCtrl {T wysc} {
     variable locals  
     variable sortColumn
     
-    treectrl $T -usetheme 1 -selectmode extended  \
+    treectrl $T -selectmode extended  \
       -showroot 0 -showrootbutton 0 -showbuttons 0 -showlines 0  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns]]  \

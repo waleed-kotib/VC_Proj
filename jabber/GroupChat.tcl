@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.201 2007-08-20 06:05:17 matben Exp $
+# $Id: GroupChat.tcl,v 1.202 2007-08-23 13:01:29 matben Exp $
 
 package require Create
 package require Enter
@@ -1672,7 +1672,7 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
 	TreeInitDB
     }
     
-    treectrl $T -usetheme 1 -selectmode extended  \
+    treectrl $T -selectmode extended  \
       -showroot 0 -showrootbutton 0 -showbuttons 0 -showheader 0  \
       -yscrollcommand [list ::UI::ScrollSet $wysc     \
       [list grid $wysc -row 0 -column 1 -sticky ns]]  \

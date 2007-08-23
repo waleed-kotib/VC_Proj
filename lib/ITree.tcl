@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ITree.tcl,v 1.21 2007-08-21 14:12:20 matben Exp $
+# $Id: ITree.tcl,v 1.22 2007-08-23 13:01:29 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -47,7 +47,7 @@ proc ::ITree::New {T wxsc wysc args} {
     set fillT {white {selected focus} black {selected !focus}}
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
 
-    treectrl $T -usetheme 1 -selectmode extended  \
+    treectrl $T -selectmode extended  \
       -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 0  \
       -xscrollcommand [list ::UI::ScrollSet $wxsc     \
       [list grid $wxsc -row 1 -column 0 -sticky ew]]  \

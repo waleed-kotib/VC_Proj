@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.201 2007-08-22 12:57:14 matben Exp $
+# $Id: JUI.tcl,v 1.202 2007-08-23 13:01:29 matben Exp $
 
 package provide JUI 1.0
 
@@ -284,10 +284,8 @@ proc ::JUI::Build {w} {
     if {!$inited} {
 	Init
     }
-    #::UI::Toplevel $w -class JMain \
-    #  -macstyle documentProc -closecommand ::JUI::CloseHook  \
-    #  -allowclose 0
-    ::UI::Toplevel $w -class JMain -closecommand ::JUI::CloseHook \
+    ::UI::Toplevel $w -class JMain \
+      -macstyle documentProc -closecommand ::JUI::CloseHook  \
       -allowclose 0
     wm title $w $prefs(appName)
     ::UI::SetWindowGeometry $w
@@ -322,7 +320,6 @@ proc ::JUI::Build {w} {
     }
     $w configure -menu $wmenu
     ::UI::SetMenubarAcceleratorBinds $w $wmenu
-
     
     # Global frame.
     set wall $w.f
@@ -612,8 +609,7 @@ proc ::JUI::CombiBoxPresenceHook {type args} {
     if {[info exists argsA(-status)] && [string length $argsA(-status)]} {
 	set status $argsA(-status)
 	set combiBox(status) $status
-	lappend combiBox(statusL) $status
-	set combiBox(statusL) [lrange [lsort -unique $combiBox(statusL)] 0 12]
+	set combiBox(statusL) [lrange [linsert $combiBox(statusL) 0 $status] 0 12]
 	$wcombo configure -values $combiBox(statusL)
     } else {
 	set combiBox(status) ""
