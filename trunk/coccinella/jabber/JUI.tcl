@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.202 2007-08-23 13:01:29 matben Exp $
+# $Id: JUI.tcl,v 1.203 2007-08-23 14:27:29 matben Exp $
 
 package provide JUI 1.0
 
@@ -609,7 +609,8 @@ proc ::JUI::CombiBoxPresenceHook {type args} {
     if {[info exists argsA(-status)] && [string length $argsA(-status)]} {
 	set status $argsA(-status)
 	set combiBox(status) $status
-	set combiBox(statusL) [lrange [linsert $combiBox(statusL) 0 $status] 0 12]
+	set combiBox(statusL) \
+	  [lrange [luniqueo [linsert $combiBox(statusL) 0 $status]] 0 12]
 	$wcombo configure -values $combiBox(statusL)
     } else {
 	set combiBox(status) ""
