@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.126 2007-08-20 06:05:17 matben Exp $
+# $Id: Disco.tcl,v 1.127 2007-08-24 13:33:13 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -86,8 +86,8 @@ namespace eval ::Disco:: {
     }
 
     # Keeps track of all registered menu entries.
-    variable regPopMenuDef {}
-    variable regPopMenuType {}
+    variable regPopMenuDef  [list]
+    variable regPopMenuType [list]
 
     variable dlguid 0
 
@@ -998,8 +998,8 @@ proc ::Disco::RegisterPopupEntry {menuDef menuType} {
     variable regPopMenuDef
     variable regPopMenuType
     
-    set regPopMenuDef  [concat $regPopMenuDef $menuDef]
-    set regPopMenuType [concat $regPopMenuType $menuType]
+    lappend regPopMenuDef  $menuDef
+    lappend regPopMenuType $menuType
 }
 
 proc ::Disco::UnRegisterPopupEntry {name} {
@@ -1106,9 +1106,7 @@ proc ::Disco::Popup {w vstruct x y} {
 	}
 	set mDef [linsert $mDef $idx {separator}]
     }
-    foreach line $regPopMenuType {
-	lappend mType $line
-    }
+    set mType [concat $mType $regPopMenuType]
     
     # Special hack to avoid the Register/Unregister of the login server.
     if {[jlib::jidequal [$jstate(jlib) getserver] $jid]} {
@@ -1117,7 +1115,7 @@ proc ::Disco::Popup {w vstruct x y} {
     
     # Make the appropriate menu.
     set m $wDlgs(jpopupdisco)
-    catch {destroy $m}
+    destroy $m
     menu $m -tearoff 0  \
       -postcommand [list ::Disco::PostMenuCmd $m $mType $clicked $jid $node]
     

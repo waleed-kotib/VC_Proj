@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.20 2007-08-23 14:25:57 matben Exp $
+# $Id: AvatarMB.tcl,v 1.21 2007-08-24 13:33:13 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -422,12 +422,6 @@ proc ::AvatarMB::Menu {m args} {
     wm transient $m
     wm resizable $m 0 0 
     
-    if {[tk windowingsystem] eq "aqua"} {
-	#tk::unsupported::MacWindowStyle style $m help none
-	#tk::unsupported::MacWindowStyle style $m toolbar none
-	#tk::unsupported::MacWindowStyle style $m floating none
-	#tk::unsupported::MacWindowStyle style $m moveableModal none
-    }
     ttk::frame $m.f -padding {0 4}
     pack $m.f -fill both -expand 1
     set f $m.f

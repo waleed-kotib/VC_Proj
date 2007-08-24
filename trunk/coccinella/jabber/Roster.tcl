@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.208 2007-08-10 14:14:52 matben Exp $
+# $Id: Roster.tcl,v 1.209 2007-08-24 13:33:13 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -71,6 +71,10 @@ namespace eval ::Roster:: {
     # Keep track of when in roster callback.
     variable inroster 0
 
+    # Keeps track of all registered menu entries.
+    variable regPopMenuDef  [list]
+    variable regPopMenuType [list]
+
     # Mappings from <show> element to displayable text and vice versa.
     # chat away xa dnd
     variable mapShowTextToElem
@@ -107,76 +111,94 @@ proc ::Roster::EarlyInitHook {} {
 
 proc ::Roster::InitMenus {} {
 
-    # @@@ TODO: rewrite the popup menu code to use AMenu!
-
     # Template for the roster popup menu.
     variable popMenuDefs
-    
-    # General.
-    if {[::Jabber::HaveWhiteboard]} {
-	set popMenuDefs(roster,def) {
-	    command     mMessage       {head group user}  {::NewMsg::Build -to $jid -tolist $jidlist} {}
-	    command     mChat...       {user available}   {::Chat::StartThread $jid3}         {}
-	    command     mWhiteboard    {wb available}     {::JWB::NewWhiteboardTo $jid3} {}
-	    command     mSendFile...   {user available}   {::FTrans::Send $jid3}             {}
-	    separator   {}             {}                 {} {}
-	    command     mAddContact... {}                 {::JUser::NewDlg}            {}
-	    command     mEditContact...  {user}             {::JUser::EditDlg $jid}      {}
-	    command     mBusinessCard... {user}             {::UserInfo::Get $jid3}             {}
-	    command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
-	    command     mRemoveContact {user}             {::Roster::SendRemove $jid}         {}
-	    separator   {}             {}                 {} {}
-	    cascade     mShow          {normal}           {
-		check     mOffline     {normal}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
-		check     mTransports  {normal}     {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)}
-		command   mBackgroundImage... {normal} {::Roster::BackgroundImage} {}
-	    } {}
-	    cascade     mSort          {}                 {
-		radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -increasing}
-		radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -decreasing}
-	    } {}
-	    cascade     mStyle         {normal}           {@::Roster::StyleMenu} {}
-	    command     mRefreshRoster {}                 {::Roster::Refresh} {}
-	}  
-    } else {
-	set popMenuDefs(roster,def) {
-	    command     mMessage       {head group user}  {::NewMsg::Build -to $jid -tolist $jidlist} {}
-	    command     mChat...       {user available}   {::Chat::StartThread $jid3}         {}
-	    command     mSendFile...   {user available}   {::FTrans::Send $jid3}             {}
-	    separator   {}             {}                 {} {}
-	    command     mAddContact... {}                 {::JUser::NewDlg}            {}
-	    command     mEditContact...  {user}             {::JUser::EditDlg $jid}      {}
-	    command     mBusinessCard... {user}             {::UserInfo::Get $jid3}             {}
-	    command     mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}   {}
-	    command     mRemoveContact {user}             {::Roster::SendRemove $jid}         {}
-	    separator   {}             {}                 {} {}
-	    cascade     mShow          {normal}           {
-		check     mOffline     {normal}     {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)}
-		check     mTransports  {normal}     {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)}
-		command   mBackgroundImage... {normal} {::Roster::BackgroundImage} {}
-	    } {}
-	    cascade     mSort          {}                 {
-		radio     mIncreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -increasing}
-		radio     mDecreasing  {}     {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -decreasing}
-	    } {}
-	    cascade     mStyle         {normal}           {@::Roster::StyleMenu} {}
-	    command     mRefreshRoster {}                 {::Roster::Refresh} {}
-	}
+      
+    # Standard popup menu.
+    set mDefs {
+	{command     mMessage         {::NewMsg::Build -to $jid -tolist $jidlist} }
+	{command     mChat...         {::Chat::StartThread $jid3} }
+	{command     mSendFile...     {::FTrans::Send $jid3} }
+	{separator}
+	{command     mAddContact...   {::JUser::NewDlg} }
+	{command     mEditContact...  {::JUser::EditDlg $jid} }
+	{command     mBusinessCard... {::UserInfo::Get $jid3} }
+	{command     mChatHistory     {::Chat::BuildHistoryForJid $jid} }
+	{command     mRemoveContact   {::Roster::SendRemove $jid} }
+	{separator}
+	{cascade     mShow            {
+	    {check     mOffline       {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)} }
+	    {check     mTransports    {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)} }
+	    {command   mBackgroundImage...  {::Roster::BackgroundImage} }
+	} }
+	{cascade     mSort            {
+	    {radio     mIncreasing    {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -increasing} }
+	    {radio     mDecreasing    {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -decreasing} }
+	} }
+	{cascade     mStyle           {@::Roster::StyleMenu} }
+	{command     mRefreshRoster   {::Roster::Refresh} }
     }
-
-    # Transports.
-    set popMenuDefs(roster,trpt,def) {
-	command     mLastLogin/Activity {user}        {::Jabber::GetLast $jid}        {}
-	command     mvCard2        {user}             {::VCard::Fetch other $jid}     {}
-	command     mAddContact...    {}                 {::JUser::NewDlg}        {}
-	command     mEditContact...   {user}             {::JUser::EditDlg $jid}  {}
-	command     mVersion       {user}             {::Jabber::GetVersion $jid3}    {}
-	command     mLoginTrpt     {trpt unavailable} {::Roster::LoginTrpt $jid3}     {}
-	command     mLogoutTrpt    {trpt available}   {::Roster::LogoutTrpt $jid3}    {}
-	separator   {}             {}                 {} {}
-	command     mUnregister    {trpt}             {::Register::Remove $jid3}      {}
-	command     mRefreshRoster {}                 {::Roster::Refresh}             {}
+    set mTypes {
+	{mMessage       {head group user}     }
+	{mChat...       {user available}      }
+	{mWhiteboard    {wb available}        }
+	{mSendFile...   {user available}      }
+	{mAddContact... {}                    }
+	{mEditContact...  {user}              }
+	{mBusinessCard... {user}              }
+	{mChatHistory   {user always}         }
+	{mRemoveContact {user}                }
+	{mShow          {normal}           {
+	    {mOffline     {normal}            }
+	    {mTransports  {normal}            }
+	    {mBackgroundImage... {normal}     }
+	}}
+	{mSort          {}                 {
+	    {mIncreasing  {}                  }
+	    {mDecreasing  {}                  }
+	}}
+	{mStyle         {normal}              }
+	{mRefreshRoster {}                    }
+    }
+    if {[::Jabber::HaveWhiteboard]} {
+	set mWBDef  {command     mWhiteboard      {::JWB::NewWhiteboardTo $jid3}}
+	set mWBType {mWhiteboard    {wb available}        }
+	
+	# Insert whiteboard menu *after* Chat.
+	set idx [lsearch -glob $mDefs "* mChat... *"]
+	incr idx
+	set mDefs  [linsert $mDefs $idx $mWBDef]
+	set mTypes [linsert $mTypes $idx $mWBType]
+    }
+    set popMenuDefs(roster,def)  $mDefs
+    set popMenuDefs(roster,type) $mTypes
+    
+    # Transports popup menu.
+    set mDefs {
+	{command     mLastLogin/Activity  {::Jabber::GetLast $jid} }
+	{command     mvCard2              {::VCard::Fetch other $jid} }
+	{command     mAddContact...       {::JUser::NewDlg} }
+	{command     mEditContact...      {::JUser::EditDlg $jid} }
+	{command     mVersion             {::Jabber::GetVersion $jid3} }
+	{command     mLoginTrpt           {::Roster::LoginTrpt $jid3} }
+	{command     mLogoutTrpt          {::Roster::LogoutTrpt $jid3} }
+	{separator}
+	{command     mUnregister          {::Register::Remove $jid3} }
+	{command     mRefreshRoster       {::Roster::Refresh} }
     }  
+    set mTypes {
+	{mLastLogin/Activity  {user}                }
+	{mvCard2              {user}                }
+	{mAddContact...       {}                    }
+	{mEditContact...      {user}                }
+	{mVersion             {user}                }
+	{mLoginTrpt           {trpt unavailable}    }
+	{mLogoutTrpt          {trpt available}      }
+	{mUnregister          {trpt}                }
+	{mRefreshRoster       {}                    }
+    }  
+    set popMenuDefs(roster,trpt,def)  $mDefs
+    set popMenuDefs(roster,trpt,type) $mTypes
 }
 
 proc ::Roster::JabberInitHook {jlibname} {
@@ -479,57 +501,27 @@ proc ::Roster::SendRemove {jidrm} {
 # Roster::RegisterPopupEntry --
 # 
 #       Components or plugins can add their own menu entries here.
+#       Only for the standard popup menu.
 
-proc ::Roster::RegisterPopupEntry {menuSpec} {
-    variable popMenuDefs
+proc ::Roster::RegisterPopupEntry {menuDef menuType} {
+    variable regPopMenuDef
+    variable regPopMenuType
     
-    # Keeps track of all registered menu entries.
-    variable regPopMenuSpec
-    
-    # Index of last separator.
-    set ind [lindex [lsearch -all $popMenuDefs(roster,def) "separator"] end]
-    if {![info exists regPopMenuSpec]} {
-	
-	# Add separator if this is the first addon entry.
-	incr ind 5
-	set popMenuDefs(roster,def) \
-	  [linsert $popMenuDefs(roster,def) $ind separator {} {} {} {}]
-	set regPopMenuSpec {}
-	set ind [lindex [lsearch -all $popMenuDefs(roster,def) "separator"] end]
-    }
-    
-    # Add new entry just before the last separator
-    set v $popMenuDefs(roster,def)
-    set popMenuDefs(roster,def) \
-      [concat [lrange $v 0 [expr $ind-1]] $menuSpec [lrange $v $ind end]]
-    set regPopMenuSpec [concat $regPopMenuSpec $menuSpec]
+    lappend regPopMenuDef  $menuDef
+    lappend regPopMenuType $menuType
 }
 
 proc ::Roster::DeRegisterPopupEntry {mLabel} {
-    variable popMenuDefs
-    variable regPopMenuSpec
+    variable regPopMenuDef
+    variable regPopMenuType
     
-    if {[info exists regPopMenuSpec]} {
-	
-	# First remove from the 'regPopMenuSpec' list.
-	set idx [lsearch $regPopMenuSpec $mLabel]
-	set rem [expr {$idx % 5}]
-	if {$idx > 0 && $rem == 1} {
-	    set midx [expr {$idx/5}]
-	    set i0 [expr {5 * $midx}]
-	    set i1 [expr {$i0 + 4}]
-	    set regPopMenuSpec [lreplace $regPopMenuSpec $i0 $i1]	    
-	}
-	
-	# Then remove from 'popMenuDefs'.
-	set v $popMenuDefs(roster,def)
-	set idx [lsearch $v $mLabel]
-	if {$idx > 0 && $rem == 1} {
-	    set midx [expr {$idx/5}]
-	    set i0 [expr {5 * $midx}]
-	    set i1 [expr {$i0 + 4}]
-	    set popMenuDefs(roster,def) [lreplace $v $i0 $i1]	    
-	}
+    set idx [lsearch -glob $regPopMenuDef "* $mLabel *"]
+    if {$idx >= 0} {
+	set regPopMenuDef [lreplace $regPopMenuDef $idx $idx]
+    }
+    set idx [lsearch -glob $regPopMenuType "$mLabel *"]
+    if {$idx >= 0} {
+	set regPopMenuType [lreplace $regPopMenuType $idx $idx]
     }
 }
 
@@ -538,7 +530,7 @@ proc ::Roster::DeRegisterPopupEntry {mLabel} {
 #       Handle popup menu in roster.
 #       
 # Arguments:
-#       jidlist     this is a list of actual jid's, can be any form
+#       jidL        this is a list of actual jid's, can be any form
 #       clicked
 #       status      'available', 'unavailable'
 #       group       name of group if any
@@ -546,34 +538,62 @@ proc ::Roster::DeRegisterPopupEntry {mLabel} {
 # Results:
 #       popup menu displayed
 
-proc ::Roster::DoPopup {jidlist clicked status group x y} {
+proc ::Roster::DoPopup {jidL clicked status group x y} {
     global  wDlgs
     variable popMenuDefs
+    variable regPopMenuDef
+    variable regPopMenuType
     variable wtree
         
-    # Keep a temporary array that maps from mLabel to menu index.
-    variable tmpMenuIndex
-        
-    ::Debug 2 "::Roster::DoPopup jidlist=$jidlist, clicked=$clicked, status=$status"
-        
+    ::Debug 2 "::Roster::DoPopup jidL=$jidL, clicked=$clicked, status=$status, group=$group"
+
+    # We always get a list of jids, typically with only one element.
+    set jid3 [lindex $jidL 0]
+    set jid2 [jlib::barejid $jid3]
+    set jid $jid2
+
+    # The jidlist is expected to be with no resource part.
+    set jidlist [list]
+    foreach u $jidL {
+	lappend jidlist [jlib::barejid $u]
+    }
+
+    set specialMenu 0
+    foreach click $clicked {
+	if {[info exists popMenuDefs(roster,$click,def)]} {
+	    set mDef  $popMenuDefs(roster,$click,def)
+	    set mType $popMenuDefs(roster,$click,type)
+	    set specialMenu 1
+	    break
+	}
+    }
+    if {!$specialMenu} {
+    
+	# Insert any registered popup menu entries.
+	set mDef  $popMenuDefs(roster,def)
+	set mType $popMenuDefs(roster,type)
+	if {[llength $regPopMenuDef]} {
+	    set idx [lindex [lsearch -glob -all $mDef {sep*}] end]
+	    if {$idx eq ""} {
+		set idx end
+	    }
+	    foreach line $regPopMenuDef {
+		set mDef [linsert $mDef $idx $line]
+	    }
+	    set mDef [linsert $mDef $idx {separator}]
+	}
+	set mType [concat $mType $regPopMenuType]
+    }
+    
     # Make the appropriate menu.
     set m $wDlgs(jpopuproster)
     set i 0
-    catch {destroy $m}
-    menu $m -tearoff 0
-    
-    set menuDef $popMenuDefs(roster,def)	
-    foreach click $clicked {
-	if {[info exists popMenuDefs(roster,$click,def)]} {
-	    set menuDef $popMenuDefs(roster,$click,def)
-	}
-    }
-    
-    # We build menus using this proc to be able to make cascades.
-    BuildMenu $m $menuDef $jidlist $clicked $status $group
-    
-    ::hooks::run rosterPostCommandHook $m $jidlist $clicked $status  
-    array unset tmpMenuIndex
+    destroy $m
+    menu $m -tearoff 0 \
+      -postcommand [list ::Roster::PostMenuCmd $m $mType $clicked $jidL $status]
+        
+    ::AMenu::Build $m $mDef \
+      -varlist [list jid $jid jid3 $jid3 jidlist $jidlist clicked $clicked group $group]
 
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
@@ -584,111 +604,47 @@ proc ::Roster::DoPopup {jidlist clicked status group x y} {
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
 }
 
-# Roster::BuildMenu --
-# 
-#       Build popup menu recursively if necessary.
+proc ::Roster::PostMenuCmd {m mType clicked jidL status} {
 
-proc ::Roster::BuildMenu {m menuDef _jidlist clicked status group} {
-    variable tmpMenuIndex
-    
-    # We always get a list of jids, typically with only one element.
-    set jid3 [lindex $_jidlist 0]
-    jlib::splitjid $jid3 jid2 -
-    set jid $jid2
-
-    # The jidlist is expected to be with no resource part.
-    set jidlist [list]
-    foreach u $_jidlist {
-	jlib::splitjid $u jid2 -
-	lappend jidlist $jid2
-    }
-    
-    set i 0
-    
-    foreach {op item type cmd opts} $menuDef {	
-	set locname [mc $item]
-	# If need sudstitutions in opts:
-	#set opts [eval list $opts]
-
-	switch -- $op {
-	    command {
-    
-		# Substitute the jid arguments. Preserve list structure!
-		set cmd [eval list $cmd]
-		eval {$m add command -label $locname -command [list after 40 $cmd]  \
-		  -state disabled} $opts
-	    }
-	    radio {
-		set cmd [eval list $cmd]
-		eval {$m add radiobutton -label $locname -command [list after 40 $cmd]  \
-		  -state disabled} $opts
-	    }
-	    check {
-		set cmd [eval list $cmd]
-		eval {$m add checkbutton -label $locname -command [list after 40 $cmd]  \
-		  -state disabled} $opts
-	    }
-	    separator {
-		$m add separator
-		continue
-	    }
-	    cascade {
-		set mt [menu $m.sub$i -tearoff 0]
-		eval {$m add cascade -label $locname -menu $mt -state disabled} $opts
-		if {[string index $cmd 0] eq "@"} {
-		    eval [string range $cmd 1 end] $mt
-		} else {
-		    BuildMenu $mt $cmd $_jidlist $clicked $status $group
-		}		
-		incr i
-	    } 
-	    default {
-		return -code error "the op $op should never happen!"
-	    }
-	}
-	set tmpMenuIndex($item) [$m index $locname]
+    foreach mspec $mType {
+	lassign $mspec name type subType
 	
+	# State of menu entry. 
+	# We use the 'type' and 'clicked' lists to set the state.
+	set state disabled
 	if {$type eq "normal"} {
 	    set state normal
-	} else {
-	    if {![::Jabber::IsConnected] && ([lsearch $type always] < 0)} {
-		continue
-	    }
-	    
-	    # State of menu entry. 
-	    # We use the 'type' and 'clicked' lists to set the state.
-	    if {[listintersectnonempty $type $clicked]} {
-		set state normal
-	    } elseif {$type eq ""} {
-		set state normal
-	    } else {
+	} elseif {$type eq "disabled"} {
+	    set state disabled
+	} elseif {![::Jabber::IsConnected] && ([lsearch $type always] < 0)} {
+	    set state disabled
+	} elseif {[listintersectnonempty $type $clicked]} {
+	    set state normal
+	} elseif {$type eq ""} {
+	    set state normal
+	}
+
+	# If any available/unavailable these must also be fulfilled.
+	if {[lsearch $type available] >= 0} {
+	    if {$status ne "available"} {
 		set state disabled
 	    }
-	    
-	    # If any available/unavailable these must also be fulfilled.
-	    if {[lsearch $type available] >= 0} {
-		if {$status ne "available"} {
-		    set state disabled
-		}
-	    } elseif {[lsearch $type unavailable] >= 0} {
-		if {$status ne "unavailable"} {
-		    set state disabled
-		}
+	} elseif {[lsearch $type unavailable] >= 0} {
+	    if {$status ne "unavailable"} {
+		set state disabled
 	    }
 	}
-	if {[string equal $state "normal"]} {
-	    $m entryconfigure $locname -state normal
+
+	set midx [::AMenu::GetMenuIndex $m $name]
+	if {[string equal $state "disabled"]} {
+	    $m entryconfigure $midx -state disabled
+	}
+	if {[llength $subType]} {
+	    set mt [$m entrycget $midx -menu]
+	    PostMenuCmd $mt $subType $clicked $jidL $status
 	}
     }
-}
-
-proc ::Roster::SetMenuEntryState {m mLabel state} {
-    variable tmpMenuIndex
-    
-    if {[info exists tmpMenuIndex($mLabel)]} {
-	set idx $tmpMenuIndex($mLabel)
-	$m entryconfigure $idx -state $state
-    }
+    ::hooks::run rosterPostCommandHook $m $jidL $clicked $status  
 }
 
 proc ::Roster::StyleMenu {m} {

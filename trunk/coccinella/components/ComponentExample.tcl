@@ -14,13 +14,14 @@ proc ::ComponentExample::Init { } {
     set menuspec {
 	command {More Junk...} ::ComponentExample::Cmd  {} {}
     }
-    set popMenuSpec [list "Plugin Junk" user [namespace current]::Cmd]
+    set mDef [list command "Plugin Junk" [namespace current]::Cmd]
+    set mType {"Plugin Junk" user}
     
     ::WB::RegisterNewMenu junk "Mats Junk" $menuspec
     ::WB::RegisterMenuEntry file $menuspec
     ::JUI::RegisterMenuEntry action $menuspec
     ::JUI::RegisterMenuEntry file $menuspec
-    ::Roster::RegisterPopupEntry $popMenuSpec
+    ::Roster::RegisterPopupEntry $mDef $mType
     
     ::hooks::register jabberInitHook  ::ComponentExample::JabberInitHook
 
