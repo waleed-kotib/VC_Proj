@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.37 2007-08-21 14:12:20 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.38 2007-08-24 16:26:16 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -437,6 +437,8 @@ proc ::RosterAvatar::Configure {_T} {
     $T notify bind $T <Expand-after>   { ::RosterTree::OpenTreeCmd %I }
     $T notify bind $T <Collapse-after> { ::RosterTree::CloseTreeCmd %I }
     $T notify bind $T <Header-invoke>  { ::RosterAvatar::HeaderCmd %T %C }
+
+    bind $T <ButtonPress-1>  { ::RosterAvatar::FullSize %W %x %y }
     
     # Have movable columns.
     $T column dragconfigure -enable yes
@@ -486,15 +488,12 @@ proc ::RosterAvatar::EditCmd {id} {
 	return
     }
     set tags [::RosterTree::GetTagOfItem $item]
-    #puts "\t item=$item, tags=$tags"
-    #puts "\t item style set=[$T item style set $item cTree]"
     if {[lindex $tags 0] eq "jid"} {
 	set jid [lindex $tags 1]
 	set text [$T item text $item cTree]
 	
 	# @@@ I'd like a way to get the style from item but found none :-(
 	set font [$T item element cget $item cTree $what(elem) -font]
-	#puts "\t font=$font"
 	if {[::RosterTree::GetStyle] eq "flatsmall"} {
 	    set font CociSmallFont
 	} else {
@@ -664,6 +663,46 @@ proc ::RosterAvatar::SortStatus {item1 item2} {
 	}
     }
     return $ans
+}
+
+proc ::RosterAvatar::FullSize {T x y} {
+    variable avatarSize
+    
+    set id [$T identify $x $y]
+     if {$id eq ""} {
+	return
+    }
+    if {([lindex $id 0] eq "item") && ([llength $id] == 6)} {
+	if {[lindex $id 5] eq "eAvatarImage"} {
+	    set item [lindex $id 1]
+	    set tags [::RosterTree::GetTagOfItem $item]
+	    if {[lindex $tags 0] eq "jid"} {
+		set jid [lindex $tags 1]
+		set image [::Avatar::GetPhoto [jlib::barejid $jid]]
+		if {$image ne ""} {
+		    if {([image width $image] < $avatarSize) && \
+		      ([image height $image] < $avatarSize)} {
+			return
+		    }
+		    set win [ui::autoname]
+		    toplevel $win -bd 0 -relief flat
+		    wm overrideredirect $win 1
+		    wm transient $win
+		    wm resizable $win 0 0
+		    
+		    if {[tk windowingsystem] eq "aqua"} {
+			tk::unsupported::MacWindowStyle style $win help none
+		    }
+		    label $win.l -bd 0 -bg white -compound none -image $image
+		    pack $win.l
+		    bind $win.l <Leave> [list destroy $win]
+		    set x [expr {[winfo rootx $T] + $x - 20}]
+		    set y [expr {[winfo rooty $T] + $y - 20}]
+		    wm geometry $win +$x+$y
+		}
+	    }
+	}
+    }    
 }
 
 # RosterAvatar::Init --
