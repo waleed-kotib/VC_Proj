@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JingleIax.tcl,v 1.36 2007-07-18 09:40:10 matben Exp $
+# $Id: JingleIax.tcl,v 1.37 2007-08-24 13:33:13 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -56,8 +56,12 @@ proc ::JingleIAX::Init { } {
     # This shall be done generically and dispatched to relevant softphone.
     #--------------- Variables Uses For PopUP Menus -------------------------
     variable popMenuDef
+    variable popMenuType
     set popMenuDef(call) {
-	command  mCall  {user avaliable} {::JingleIAX::SessionInitiate $jid3} {}
+	command  mCall {::JingleIAX::SessionInitiate $jid3}
+    }
+    set popMenuType(call) {
+	mCall  {user avaliable}
     }
 
     #---------------  Other Variables and States ------------------
@@ -85,8 +89,9 @@ proc ::JingleIAX::Init { } {
 
 proc ::JingleIAX::InitHook {} {
     variable popMenuDef  
+    variable popMenuType
         
-    ::Roster::RegisterPopupEntry $popMenuDef(call) 
+    ::Roster::RegisterPopupEntry $popMenuDef(call) $popMenuType(call)
 }
 
 # JingleIAX::JabberInitHook --
@@ -162,13 +167,18 @@ proc ::JingleIAX::LogoutHook { } {
 # 
 #       Active/Disable the menu entry depending on JID.
 
-proc ::JingleIAX::RosterPostCommandHook {wmenu jidlist clicked status} {
+proc ::JingleIAX::RosterPostCommandHook {m jidlist clicked status} {
     variable xmlns
 
     Debug "RosterPostCommandHook jidlist=$jidlist, clicked=$clicked, status=$status"
 
     set jid [lindex $jidlist 0]
-    ::Roster::SetMenuEntryState $wmenu mCall disabled
+    set midx [::AMenu::GetMenuIndex $m mCall]
+    if {$midx eq ""} {
+	# Probably a submenu.
+	return
+    }
+    $m entryconfigure $midx -state disabled
     if {$status ne "available"} {
 	return
     }
@@ -178,7 +188,7 @@ proc ::JingleIAX::RosterPostCommandHook {wmenu jidlist clicked status} {
     if {$xelem ne {}} {
 	set status [wrapper::getattribute $xelem type]
 	if {$status eq "available"} {
-            ::Roster::SetMenuEntryState $wmenu mCall normal
+	    $m entryconfigure $midx -state normal
 	}
     }
 }

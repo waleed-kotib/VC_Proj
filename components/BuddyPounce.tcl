@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.18 2007-07-18 09:40:09 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.19 2007-08-24 13:33:13 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -30,7 +30,7 @@ namespace eval ::BuddyPounce:: {
     
 }
 
-proc ::BuddyPounce::Init { } {
+proc ::BuddyPounce::Init {} {
     global  this
     
     ::Debug 2 "::BuddyPounce::Init"
@@ -43,10 +43,13 @@ proc ::BuddyPounce::Init { } {
     ::hooks::register prefsInitHook            ::BuddyPounce::InitPrefsHook
     
     # Register popmenu entry.
-    set popMenuSpec {
-	command {Buddy Pouncing} {group user} {::BuddyPounce::Build $clicked $jid $group} {}
+    set menuDef {
+	command {Buddy Pouncing} {::BuddyPounce::Build $clicked $jid $group}
     }
-    ::Roster::RegisterPopupEntry $popMenuSpec
+    set menuType {
+	{Buddy Pouncing} {group user}
+    }
+    ::Roster::RegisterPopupEntry $menuDef $menuType
     
     component::register BuddyPounce  \
       "Buddy pouncing enables you to make various things happen when\
@@ -100,7 +103,7 @@ proc ::BuddyPounce::Init { } {
     }
 }
 
-proc ::BuddyPounce::InitPrefsHook { } {
+proc ::BuddyPounce::InitPrefsHook {} {
     
     variable budprefsany
         
@@ -111,7 +114,7 @@ proc ::BuddyPounce::InitPrefsHook { } {
       ]    
 }
 
-proc ::BuddyPounce::GetJidPrefsArr { } {    
+proc ::BuddyPounce::GetJidPrefsArr {} {    
     variable budprefs
     return [array get budprefs]
 }

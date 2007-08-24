@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.65 2007-08-23 13:01:29 matben Exp $
+# $Id: RosterTree.tcl,v 1.66 2007-08-24 13:33:13 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -853,9 +853,6 @@ proc ::RosterTree::Popup {x y} {
 	set mtag [lindex $tags 0]
 
 	switch -- $mtag {
-	    XXX-transport {
-		set status $mtag
-	    }
 	    jid {
 		set jid [lindex $tags 1]
 		if {[$jstate(jlib) roster isavailable $jid]} {
@@ -898,17 +895,6 @@ proc ::RosterTree::Popup {x y} {
 	    if {[regexp {(available|unavailable)} [lindex $tags 1]]} {
 		lappend clicked head
 		set jidL [FindAllJIDInItem $item]
-	    }
-	}
-	XXX-transport {
-	    lappend clicked trpt
-	    set jid3 [lindex $tags 1]
-	    set jidL [list $jid3]
-	    # Transports in own directory.
-	    if {[$jstate(jlib) roster isavailable $jid3]} {
-		set status available
-	    } else {
-		set status unavailable
 	    }
 	}
     }

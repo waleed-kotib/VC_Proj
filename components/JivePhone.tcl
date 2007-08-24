@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.27 2007-08-20 13:37:00 matben Exp $
+# $Id: JivePhone.tcl,v 1.28 2007-08-24 13:33:13 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -61,11 +61,18 @@ proc ::JivePhone::Init { } {
 
     #--------------- Variables Uses For PopUP Menus -------------------------
     variable popMenuDef
+    variable popMenuType
     set popMenuDef(call) {
-	command  mJiveCall  {user available} {::JivePhone::DialJID $jid "DIAL"} {}
+	command  mJiveCall {::JivePhone::DialJID $jid "DIAL"}
     }
     set popMenuDef(forward) {
-	command  mJiveForward  {user available} {::JivePhone::DialJID $jid "FORWARD"} {}
+	command  mJiveForward {::JivePhone::DialJID $jid "FORWARD"}
+    }
+    set popMenuType(call) {
+	mJiveCall {user available}
+    }
+    set popMenuType(forward) {
+	mJiveCall {user available}
     }
 
     variable menuDef
@@ -77,7 +84,7 @@ proc ::JivePhone::Init { } {
     variable wtab -
     variable abline
 
-    set popMenuDef(addressbook,def) {
+    set popMenuDef(addressbook) {
         mJiveCall      jid       {::JivePhone::DialExtension $jid "DIAL"}
         separator      {}        {}
         mNewAB         jid       {::JivePhone::NewAddressbookDlg}
@@ -224,13 +231,14 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
 proc ::JivePhone::WeHavePhone { } {
     variable state
     variable popMenuDef
+    variable popMenuType
     variable menuDef
 
     NewPage    
     if {$state(setui)} {
 	return
     }
-    ::Roster::RegisterPopupEntry $popMenuDef(call)
+    ::Roster::RegisterPopupEntry $popMenuDef(call) $popMenuType(call)
     ::JUI::RegisterMenuEntry  action $menuDef
     
     set image [::Rosticons::Get [string tolower phone/available]]
@@ -313,6 +321,7 @@ proc ::JivePhone::PresenceHook {jid type args} {
 proc ::JivePhone::MessageHook {body args} {    
     variable xmlns
     variable popMenuDef
+    variable popMenuType
     variable state
     variable callID
     
@@ -341,7 +350,7 @@ proc ::JivePhone::MessageHook {body args} {
 	if {$type eq "RING" } {
 	    set callID [wrapper::getattribute $elem "callID"]
 	    
-	    ::Roster::RegisterPopupEntry $popMenuDef(forward)
+	    ::Roster::RegisterPopupEntry $popMenuDef(forward) $popMenuType(forward)
 	    bind $win <Button-1> [list ::JivePhone::DoDial "FORWARD"]
 	    ::balloonhelp::balloonforwindow $win [mc phoneMakeForward]
 	    eval {::hooks::run jivePhoneEvent $type $cid $callID} $args
@@ -366,7 +375,7 @@ proc ::JivePhone::MessageHook {body args} {
     return
 }
 
-proc ::JivePhone::RosterPostCommandHook {wmenu jidlist clicked status} {
+proc ::JivePhone::RosterPostCommandHook {m jidlist clicked status} {
     variable state
     
     set jid3 [lindex $jidlist 0]
@@ -386,11 +395,21 @@ proc ::JivePhone::RosterPostCommandHook {wmenu jidlist clicked status} {
 	    
 	    switch -- $state(status,$jid3) {
 		AVAILABLE - HANG_UP {
-		    ::Roster::SetMenuEntryState $wmenu mJiveCall normal
+		    set midx [::AMenu::GetMenuIndex $m mJiveCall]
+		    if {$midx eq ""} {
+			# Probably a submenu.
+			return
+		    }
+		    $m entryconfigure $midx -state normal
 		}
 		XXXX {
 		    # @@@ ???
-		    ::Roster::SetMenuEntryState $wmenu mJiveForward normal
+		    set midx [::AMenu::GetMenuIndex $m mJiveForward]
+		    if {$midx eq ""} {
+			# Probably a submenu.
+			return
+		    }
+		    $m entryconfigure $midx -state normal
 		}
 	    }
 	}
@@ -769,7 +788,7 @@ proc ::JivePhone::Popup {w v x y} {
     catch {destroy $m}
     menu $m -tearoff 0
 
-    foreach {item type cmd} $popMenuDef(addressbook,def) {
+    foreach {item type cmd} $popMenuDef(addressbook) {
         if {[string index $cmd 0] == "@"} {
             set mt [menu ${m}.sub${i} -tearoff 0]
             set locname [mc $item]

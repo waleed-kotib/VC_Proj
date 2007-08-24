@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: GMeeting.tcl,v 1.15 2007-07-18 09:40:09 matben Exp $
+# $Id: GMeeting.tcl,v 1.16 2007-08-24 13:33:13 matben Exp $
 
 namespace eval ::GMeeting:: {
     
@@ -35,13 +35,10 @@ proc ::GMeeting::Init { } {
     if {$cmd == {}} {
 	return
     }	
-    
-    set menuspec [list  \
-      command {Gnome Meeting...} [namespace current]::MenuCmd {} {} {}]
-    set menuSpec \
-      [list command "Gnome Meeting..." user {::GMeeting::RosterCmd $jid3} {}]
-        
-    ::Roster::RegisterPopupEntry $menuSpec    
+    set mDef [list command "Gnome Meeting..." {::GMeeting::RosterCmd $jid3}]
+    set mType {"Gnome Meeting..." user}
+	
+    ::Roster::RegisterPopupEntry $mDef $mType    
 
     ::hooks::register jabberInitHook  ::GMeeting::JabberInitHook
     
