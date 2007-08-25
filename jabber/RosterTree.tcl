@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.66 2007-08-24 13:33:13 matben Exp $
+# $Id: RosterTree.tcl,v 1.67 2007-08-25 07:36:52 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -377,8 +377,8 @@ proc ::RosterTree::New {w} {
     }
     bindtags $T [concat RosterTreeTag [bindtags $T]]
     
-    ::RosterTree::StyleConfigure $wtree
-    ::RosterTree::StyleInit
+    StyleConfigure $wtree
+    StyleInit
 
     ttk::scrollbar $wxsc -command [list $wtree xview] -orient horizontal
     ttk::scrollbar $wysc -command [list $wtree yview] -orient vertical

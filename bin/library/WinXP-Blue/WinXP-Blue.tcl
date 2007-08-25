@@ -8,7 +8,7 @@
 # demos/themes directory and maybe modify the demos/themes/pkgIndex.tcl
 # file.
 #
-# $Id: WinXP-Blue.tcl,v 1.2 2007-08-21 06:29:58 matben Exp $
+# $Id: WinXP-Blue.tcl,v 1.3 2007-08-25 07:36:51 matben Exp $
 
 package require tkpng 0.7
 
@@ -26,11 +26,12 @@ namespace eval tile::theme::winxpblue {
 	  -selectforeground "#ffffff" ;
 	
 	# gtkrc has #ece9d8 for background, notebook_active looks like #efebde
-	
+
+	# Mats: changed -background  disabled
 	style map "." -foreground {
 	    disabled	"#565248"
 	} -background {
-	    disabled	"#e3e1dd"
+	    disabled    "#ece9d8"
 	    pressed	"#bab5ab"
 	    active	"#c1d2ee"
 	}
