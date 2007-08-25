@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.209 2007-08-24 13:33:13 matben Exp $
+# $Id: Roster.tcl,v 1.210 2007-08-25 07:36:52 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -326,6 +326,11 @@ proc ::Roster::Build {w} {
 	StyleMinimal
     }
     return $w
+}
+
+proc ::Roster::GetTree {} {
+    variable wtree    
+    return $wtree
 }
 
 proc ::Roster::Find {} {

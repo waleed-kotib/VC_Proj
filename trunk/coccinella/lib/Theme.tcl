@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.42 2007-08-23 13:01:30 matben Exp $
+# $Id: Theme.tcl,v 1.43 2007-08-25 07:36:52 matben Exp $
 
 package provide Theme 1.0
 
@@ -46,11 +46,6 @@ proc ::Theme::Init { } {
     
     # Read widget resources.
     ReadResources    
-    
-    FontConfigStandard
-    
-    # Any named fonts from any resource file must be constructed.
-    PostProcessFontDefs
 }
 
 proc ::Theme::ReadResources {} {
@@ -117,8 +112,6 @@ proc ::Theme::ReadTileResources {} {
     if {[file exists $f]} {
 	option readfile $f $priority
     }
-    
-    # @@@ Try configure fonts???
 }
 
 # Theme::TileThemeChanged --
@@ -129,6 +122,12 @@ proc ::Theme::ReadTileResources {} {
 proc ::Theme::TileThemeChanged {} {
     ReadResources
     ReadTileResources 
+
+    # Configure any standard fonts the tile theme may have set.
+    FontConfigStandard
+    
+    # Any named fonts from any resource file must be constructed.
+    PostProcessFontDefs
 }
 
 # Theme::Fonts --
