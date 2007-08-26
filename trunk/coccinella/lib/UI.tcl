@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.166 2007-08-19 09:35:24 matben Exp $
+# $Id: UI.tcl,v 1.167 2007-08-26 14:43:35 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -43,7 +43,8 @@ namespace eval ::UI:: {
     option add *question64Image          question64     widgetDefault
     option add *internet64Image          internet64     widgetDefault
 
-    option add *badgeImage               Coccinella     widgetDefault
+    #option add *badgeImage               Coccinella     widgetDefault
+    option add *badgeImage               coci-es-shadow-32     widgetDefault
     option add *applicationImage         coccinella64   widgetDefault
     
     # components stuff.
@@ -108,6 +109,7 @@ namespace eval ::UI:: {
     }
     
     # System colors.
+    # @@@ This wont be right in a themed environment!
     set wtmp [listbox ._tmp_listbox]
     set this(sysHighlight)     [$wtmp cget -selectbackground]
     set this(sysHighlightText) [$wtmp cget -selectforeground]
