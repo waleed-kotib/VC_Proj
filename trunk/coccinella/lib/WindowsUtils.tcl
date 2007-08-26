@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. It implements things
 #      that are windows only, like a glue to win only packages.
 #      
-#  Copyright (c) 2002-2006  Mats Bengtsson
+#  Copyright (c) 2002-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #  
 #  See: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/shellcc/platform/shell/programmersguide/shell_adv/registeringapps.asp
 #  
-# $Id: WindowsUtils.tcl,v 1.14 2007-07-19 06:28:18 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.15 2007-08-26 14:38:13 matben Exp $
 
 package require registry
 package provide WindowsUtils 1.0
@@ -53,7 +53,7 @@ proc ::Windows::OpenURI {uri} {
     regsub -all {\\} $appCmd  {\\\\} appCmd
     
     # Outlook uses a mailurl:%1 which I don't know how to interpret.
-    regsub {%1} $appCmd $uri appCmd
+    set appCmd [string map [list {%1} $uri] $appCmd]
     
     if {[catch {
 	eval exec $appCmd &
@@ -62,7 +62,7 @@ proc ::Windows::OpenURI {uri} {
     }
 }
 
-# Slight rewrite of Chris Nelson's Wiki contribution.
+# Slight rewrite of Chris Nelson's Wiki contribution: http://wiki.tcl.tk/557
 
 proc ::Windows::OpenUrl {url} {
     variable ProgramFiles
@@ -70,8 +70,6 @@ proc ::Windows::OpenUrl {url} {
     set ext .html
 
     # Get the application key for HTML files
-    set appKey [registry get HKEY_CLASSES_ROOT\\$ext ""]
-
     set appKey [registry get [format {HKEY_CLASSES_ROOT\%s} $ext] {}]
     set key [format {HKEY_CLASSES_ROOT\%s\shell\open\command} $appKey] 
 	 
@@ -95,11 +93,18 @@ proc ::Windows::OpenUrl {url} {
     
     # Substitute the url name into the command for %1
     # Not always needed (opennew).
-    regsub {%1} $appCmd $url appCmd
+    set havePercent [string match {*"%1"*} $appCmd]
+    set finCmd [string map [list {%1} $url] $appCmd]
     
-    # Invoke the command
+    # Invoke the command. 
+    # It seems that if there is a "%1" we shall use that for url else just append?
     if {[catch {
-	eval exec $appCmd [list $url] &
+	if {$havePercent} {
+	    eval exec $finCmd &
+	} else {
+	    # This wont work with Firefox.
+	    eval exec $finCmd [list $url] &
+	}
     } err]} {
 	tk_messageBox -icon error -message $err
     }

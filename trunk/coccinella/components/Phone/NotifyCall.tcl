@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.16 2007-07-18 09:40:10 matben Exp $
+# $Id: NotifyCall.tcl,v 1.17 2007-08-26 14:38:13 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -281,6 +281,51 @@ proc ::NotifyCall::SetTalkingState {win} {
     upvar #0 $win state
 
     $state(wanswer) state {disabled}
+}
+
+# Slot for roster main window --- @@@ TODO
+
+proc ::NotifyCall::Slot {win} {
+    
+    # Have state array with same name as frame.
+    variable $win
+    upvar #0 $win state
+	  
+    # Level controls.
+    set subPath [file join components Phone timages]
+    set images(microphone) [::Theme::GetImage microphone $subPath]
+    set images(speaker)    [::Theme::GetImage speaker $subPath]    
+
+    ttk::frame $win -padding {4 2}
+    
+    # Microphone.
+    ttk::progressbar $win.pmic -orient horizontal  \
+      -variable $win\(inlevel)
+    ttk::scale $win.smic -orient horizontal -length 60 -from 0 -to 100  \
+      -variable $win\(microphone-100)  \
+      -command [list ::NotifyCall::MicCmd $win]
+    ttk::checkbutton $win.cmic -style Toolbutton  \
+      -variable $win\(cmicrophone) -image $images(microphone)  \
+      -onvalue 0 -offvalue 1 -padding {1}  \
+      -command [list ::NotifyCall::Mute $win microphone]
+
+    # Speakers.
+    ttk::progressbar $win.pspk -orient horizontal  \
+      -variable $win\(outlevel)
+    ttk::scale $win.sspk -orient horizontal -length 60 -from 0 -to 100  \
+      -variable $win\(speaker-100)  \
+      -command [list ::NotifyCall::SpkCmd $win]
+    ttk::checkbutton $win.cspk -style Toolbutton  \
+      -variable $win\(cspeaker) -image $images(speaker)  \
+      -onvalue 0 -offvalue 1 -padding {1}  \
+      -command [list ::NotifyCall::Mute $win speaker]
+
+    grid  $win.pmic  $win.smic  $win.cmic  -padx 2
+    grid  $win.pspk  $win.sspk  $win.cspk  -padx 2
+    grid $win.pmic $win.pspk -sticky ew
+    grid columnconfigure $win 0 -weight 1
+    
+    return $win
 }
 
 #-----------------------------------------------------------------------

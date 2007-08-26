@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.203 2007-08-23 14:27:29 matben Exp $
+# $Id: JUI.tcl,v 1.204 2007-08-26 14:38:13 matben Exp $
 
 package provide JUI 1.0
 
@@ -96,8 +96,9 @@ namespace eval ::JUI:: {
     set ::config(ui,status,menu)        dynamic   ;# plain|dynamic
     set ::config(ui,main,infoLabel)     server    ;# mejid|mejidres|status|server
     set ::config(ui,main,slots)         0
-    set ::config(ui,main,combi-status)  0
-    set ::config(ui,main,toy-status)    1
+    set ::config(ui,main,combi-status)  1
+    set ::config(ui,main,toy-status)    0
+    set ::config(ui,main,combibox)      0
     
     # This is a trick to get the aqua text borders.
     if {[tk windowingsystem] eq "aqua"} {
@@ -114,7 +115,7 @@ namespace eval ::JUI:: {
     set jwapp(mystatus) -
 }
 
-proc ::JUI::Init { } {
+proc ::JUI::Init {} {
     global  this
     
     # Menu definitions for the Roster/services window.
@@ -399,7 +400,7 @@ proc ::JUI::Build {w} {
     }
     
     # Experimental.
-    if {1} {
+    if {$config(ui,main,combibox)} {
 	BuildCombiBox $wall.comb
 	pack $wall.comb -side top -fill x
     }
@@ -556,6 +557,10 @@ proc ::JUI::CombiBoxLoginHook {} {
 
 proc ::JUI::CombiBoxHavePEP {jlib have} {
     variable combiBox
+
+    if {![winfo exists $combiBox(w)]} {
+	return
+    }
     if {$have} {
 	::balloonhelp::balloonforwindow $combiBox(wnick) "Click to set your nickname (PEP)"
 	bind $combiBox(wnick) <Button-1> ::JUI::CombiBoxOnNick
@@ -581,6 +586,9 @@ proc ::JUI::CombiBoxNicknameHook {nickname} {
     variable combiBox
     upvar ::Jabber::jstate jstate
     
+    if {![winfo exists $combiBox(w)]} {
+	return
+    }
     if {$nickname eq ""} {
 	set myjid [$jstate(jlib) myjid]
 	set ujid [jlib::unescapestr [jlib::barejid $myjid]]
