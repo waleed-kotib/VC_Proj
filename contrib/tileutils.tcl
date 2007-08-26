@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.55 2007-08-23 13:01:28 matben Exp $
+# $Id: tileutils.tcl,v 1.56 2007-08-26 14:38:13 matben Exp $
 #
 
 package require treeutil
@@ -117,6 +117,7 @@ proc tileutils::ThemeChanged {} {
 	if {[info exists map(-background)]} {
 	    foreach {state col} $map(-background) {
 		if {[lsearch $state active] >= 0} {
+		    set activeBackground 1
 		    option add *Menu.activeBackground $col $priority
 		    break
 		}
@@ -124,15 +125,38 @@ proc tileutils::ThemeChanged {} {
 	}
     }
     if {[info exists style(-foreground)]} {
-	option add *Menu.foreground  $style(-foreground) $priority
+	set color $style(-foreground)
+	option add *Menu.foreground  $color $priority
+	if {[info exists map(-foreground)]} {
+	    foreach {state col} $map(-foreground) {
+		if {[lsearch $state active] >= 0} {
+		    set activeForeground 1
+		    option add *Menu.activeForeground $col $priority
+		    break
+		}
+	    }
+	}
     }
     if {[info exists style(-selectbackground)]} {
-	option add *Spinbox.selectBackground  $style(-selectbackground) $priority
+	set color $style(-selectbackground)
+	if {![info exists activeBackground]} {
+	    option add *Menu.activeBackground     $color $priority
+	}
+	option add *Spinbox.selectBackground  $color $priority
+    }
+    if {[info exists style(-selectforeground)]} {
+	set color $style(-selectforeground)
+	if {![info exists activeForeground]} {
+	    option add *Menu.activeForeground     $color $priority
+	}
+	option add *Spinbox.selectForeground  $color $priority
     }
 }
 
-# Class bindings for ThemeChanged events.
-# This is for pure tk widgets and not the ttk ones.
+#   Class bindings for ThemeChanged events.
+#   They affect and configure existing widgets.
+#   This is for pure tk widgets and not the ttk ones.
+#   Things can seem to be a bit ad hoc.
 
 proc tileutils::ListboxThemeChanged {win} {
     
@@ -159,6 +183,8 @@ proc tileutils::MenuThemeChanged {win} {
 	    if {[info exists map(-background)]} {
 		foreach {state col} $map(-background) {
 		    if {[lsearch $state active] >= 0} {
+			#puts "map(-background) $win configure -activebackground $col"
+			set activeBackground 1
 			$win configure -activebackground $col
 			break
 		    }
@@ -172,10 +198,24 @@ proc tileutils::MenuThemeChanged {win} {
 	    if {[info exists map(-foreground)]} {
 		foreach {state col} $map(-foreground) {
 		    if {[lsearch $state active] >= 0} {
+			#puts "map(-foreground) $win configure -activeforeground $col"
+			set activeForeground 1
 			$win configure -activeforeground $col
 			break
 		    }
 		}
+	    }
+	}
+	if {![info exists activeBackground]} {
+	    if {[info exists style(-selectbackground)]} {
+		#puts "style(-selectbackground) $win configure -activebackground $style(-selectbackground)"
+		$win configure -activebackground $style(-selectbackground)
+	    }
+	}
+	if {![info exists activeForeground]} {
+	    if {[info exists style(-selectforeground)]} {
+		#puts "style(-selectforeground) $win configure -activeforeground $style(-selectforeground)"
+		$win configure -activeforeground $style(-selectforeground)
 	    }
 	}
     }

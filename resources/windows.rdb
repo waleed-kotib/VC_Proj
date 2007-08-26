@@ -22,6 +22,8 @@
 *Label.highlightBackground:          #ece9d8
 *Labelframe.background:              #ece9d8
 *Labelframe.highlightBackground:     #ece9d8
+*Menu.activeBackground:              SystemHighlight
+*Menu.activeForeground:              SystemHighlightText
 *Radiobutton.background:             #ece9d8
 *Radiobutton.highlightBackground:    #ece9d8
 

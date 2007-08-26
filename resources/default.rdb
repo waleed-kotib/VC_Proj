@@ -62,8 +62,6 @@
 *Listbox.borderWidth:                1
 *Listbox.Font:                       CociSmallFont
 *Listbox.highlightThickness:         2
-*Menu.foreground:                    black
-*Menu.activeForeground:              black
 *Menu.font:                          CociSmallFont
 *Message.Font:                       CociSmallFont
 *Radiobutton.Font:                   CociSmallFont
