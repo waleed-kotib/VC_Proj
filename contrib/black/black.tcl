@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.5 2007-08-22 13:29:24 matben Exp $
+# $Id: black.tcl,v 1.6 2007-08-27 15:15:25 matben Exp $
 
 namespace eval tile {
     namespace eval theme {
@@ -63,6 +63,7 @@ namespace eval tile::theme::black {
 	      -selectforeground [list  !focus white] \
 	      ;
                 
+	  # ttk widgets.
 	  style configure TButton \
 	    -width -8 -padding {5 1} -relief raised
 	  style configure TMenubutton \
@@ -82,12 +83,17 @@ namespace eval tile::theme::black {
 	  style configure TNotebook.Tab \
 	    -padding {6 2 6 2}
 	  
+	  # Standard tk widgets.
+	  style map Menu \
+	    -background [list active $colors(-lighter)] \
+	    -foreground [list disabled $colors(-disabledfg)]
+
 	  
     }
     
     # It could be important that we first read black.rdb and then invoke
     # the specific handlers.
-    bind ThemeChanged <<ThemeChanged>> {+tile::theme::black::ThemeChanged }
+    #bind ThemeChanged <<ThemeChanged>> {+tile::theme::black::ThemeChanged }
 
     proc ThemeChanged {} {
 	variable dir

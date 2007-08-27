@@ -68,8 +68,8 @@
 *Scale.Font:                         CociSmallFont
 *Text.background:                    white
 *Text.Font:                          CociSmallFont
-*Text.highlightBackground:           white
-*Text.highlightThickness:            2
+!*Text.highlightBackground:           white
+!*Text.highlightThickness:            2
 *TreeCtrl.background:                white
 *TreeCtrl.Font:                      CociSmallFont
 *TreeCtrl.useTheme:                  1
