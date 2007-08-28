@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.57 2007-08-27 15:15:25 matben Exp $
+# $Id: tileutils.tcl,v 1.58 2007-08-28 08:08:59 matben Exp $
 #
 
 package require treeutil
@@ -42,19 +42,31 @@ namespace eval tile {
 	# Set only the switches that are not in [style configure .]
 	# or [style map .].
 	
+	if {[tk windowingsystem] eq "aqua"} {
+	    set highlightThickness 3
+	} else {
+	    set highlightThickness 2
+	}
+	
 	style theme settings $name {
 	    
+	    style configure . -highlightthickness $highlightThickness
+	    style configure Listbox -background white
 	    style configure Text -background white
+	    style configure TreeCtrl -usetheme 0
 	    
 	    switch $name {
 		alt {
 		    array set colors [array get tile::theme::alt::colors]
 		}
 		aqua {
-		    # No Menu
+		    style configure TreeCtrl -usetheme 1
 		}
 		clam {
 		    array set colors [array get tile::theme::clam::colors]
+		    style configure TreeCtrl \
+		      -background gray75 \
+		      -itembackground {gray92 gray84}
 		}
 		classic {
 		    array set colors [array get tile::theme::classic::colors]
@@ -87,6 +99,8 @@ namespace eval tile {
 
 
 namespace eval ::tileutils {
+    
+    # Much of these comments are OUTDATED!!!
     
     # NB: We must have the standard <<ThemeChanged>> handlers first since
     #     other themes may want to set their own options and these must
@@ -155,57 +169,16 @@ proc tileutils::ThemeChanged {} {
     array set style [style configure .]
     array set map   [style map .]
     
-    # Seems X11 has some system option db that must be overridden.
-    if {[tk windowingsystem] eq "x11"} {
-	set priority 60
-    } else {
-	set priority startupFile
-    }
-    if {[info exists style(-background)]} {
-	set color $style(-background)
-
-	# The highlightBackground needs a better solution.
-	# text ._text; set textbg [._text cget -background]; destroy ._text
-	option add *ChaseArrows.background        $color $priority
-	option add *Listbox.highlightBackground   $color $priority
-	option add *Spinbox.buttonBackground      $color $priority
-	option add *Spinbox.highlightBackground   $color $priority
-	#option add *Text.highlightBackground      white  $priority
-	#option add *Text.highlightBackground      $color $priority
-	option add *TreeCtrl.columnBackground     $color $priority
-	option add *WaveLabel.columnBackground    $color $priority
-    }
-    if {[info exists style(-selectbackground)]} {
-	set color $style(-selectbackground)
-	option add *Spinbox.selectBackground  $color $priority
-    }
-    if {[info exists style(-selectforeground)]} {
-	set color $style(-selectforeground)
-	option add *Spinbox.selectForeground  $color $priority
-    }
-}
-
-#   Class bindings for ThemeChanged events.
-#   They affect and configure existing widgets.
-#   This is for pure tk widgets and not the ttk ones.
-
-proc tileutils::ListboxThemeChanged {win} {
+    # Override any class specific settings for some widgets.
+    array set textStyle [array get style]
+    array set textStyle [style configure Text]
+    array set lbStyle [array get style]
+    array set lbStyle [style configure Listbox]
     
-    if {[winfo class $win] eq "Listbox"} {
-	array set style [list -foreground black]
-	array set style [style configure .]    
+    array set menuMap [style map .]
+    array set menuMap [style map Menu]
 
-	if {[info exists style(-background)]} {
-	    $win configure -highlightbackground $style(-background)
-	}
-    }
-}
-
-proc tileutils::MenuThemeChanged {win} {
-
-    if {[winfo class $win] ne "Menu"} {
-	return
-    }
+    puts "tileutils::ThemeChanged"
     
     # We configure the resource database here as well since it saves code.
     # Seems X11 has some system option db that must be overridden.
@@ -214,6 +187,114 @@ proc tileutils::MenuThemeChanged {win} {
     } else {
 	set priority startupFile
     }
+    
+    if {[info exists style(-background)]} {
+	set color $style(-background)
+	option add *ChaseArrows.background      $color $priority
+	option add *Entry.highlightBackground   $color $priority
+	option add *Listbox.background          $lbStyle(-background) $priority
+	option add *Listbox.highlightBackground $color $priority
+	option add *Menu.background             $color $priority
+	option add *Menu.activeBackground       $color $priority
+	option add *Spinbox.buttonBackground    $color $priority
+	option add *Spinbox.highlightBackground $color $priority
+	option add *Text.highlightBackground    $textStyle(-background) $priority
+	option add *TreeCtrl.columnBackground   $color $priority
+	option add *WaveLabel.columnBackground  $color $priority
+	
+	if {[info exists menuMap(-background)]} {
+	    foreach {state col} $menuMap(-background) {
+		if {[lsearch $state active] >= 0} {
+		    option add *Menu.activeBackground $col $priority
+		    break
+		}
+	    }
+	}
+    }
+    if {[info exists style(-foreground)]} {
+	set color $style(-foreground)
+	option add *Menu.foreground             $color $priority
+	option add *Menu.activeForeground       $color $priority
+	option add *Menu.disabledForeground     $color $priority
+	
+	if {[info exists menuMap(-foreground)]} {
+	    foreach {state col} $menuMap(-foreground) {
+		if {[lsearch $state active] >= 0} {
+		    option add *Menu.activeForeground $col $priority
+		}
+		if {[lsearch $state disabled] >= 0} {
+		    option add *Menu.disabledForeground $col $priority
+		}
+	    }
+	}
+    }
+    if {[info exists style(-selectbackground)]} {
+	set color $style(-selectbackground)
+	option add *Listbox.selectBackground    $color $priority
+	option add *Spinbox.selectBackground    $color $priority
+	option add *Text.selectBackground       $color $priority
+    }
+    if {[info exists style(-selectborderwidth)]} {
+	set color $style(-selectborderwidth)
+	option add *Listbox.selectBorderWidth   $color $priority
+	option add *Text.selectBorderWidth      $color $priority
+    }
+    if {[info exists style(-selectforeground)]} {
+	set color $style(-selectforeground)
+	option add *Listbox.selectForeground    $color $priority
+	option add *Spinbox.selectForeground    $color $priority
+	option add *Text.selectForeground       $color $priority
+    }
+
+}
+
+#   Class bindings for ThemeChanged events.
+#   They affect and configure existing widgets.
+#   This is for pure tk widgets and not the ttk ones.
+
+proc tileutils::ListboxThemeChanged {win} {
+    
+    if {[winfo class $win] ne "Listbox"} {
+	return
+    }
+	    
+    # Some themes miss this one.
+    array set style [list -foreground black]
+    array set style [style configure .]    
+    array set style [style configure Listbox]    
+    array set map   [style map .]
+    array set map   [style map Listbox]
+
+    if {[info exists style(-background)]} {
+	set color $style(-background)
+	$win configure -highlightbackground $color
+    }
+    if {[info exists style(-selectbackground)]} {
+	set color $style(-selectbackground)
+	$win configure -selectbackground $color
+    }
+    if {[info exists style(-selectborderwidth)]} {
+	set color $style(-selectborderwidth)
+	$win configure -selectborderwidth $color
+    }
+    if {[info exists style(-selectforeground)]} {
+	set color $style(-selectforeground)
+	$win configure -selectforeground $color
+    }
+}
+
+proc tileutils::MenuThemeChanged {win} {
+
+    if {[winfo class $win] ne "Menu"} {
+	return
+    }
+        
+    # @@@ I could think of an alternative here:
+    # style theme settings default {
+    #    array set style [style configure .]
+    #    array set map   [style map .]
+    # }
+    # etc. and then cache all in style(name) and map(name).
     
     # Some themes miss this one.
     array set style [list -foreground black]
@@ -226,13 +307,10 @@ proc tileutils::MenuThemeChanged {win} {
 	set color $style(-background)
 	$win configure -background $color
 	$win configure -activebackground $color
-	option add *Menu.background       $color $priority
-	option add *Menu.activeBackground $color $priority
 	if {[info exists map(-background)]} {
 	    foreach {state col} $map(-background) {
 		if {[lsearch $state active] >= 0} {
 		    $win configure -activebackground  $col
-		    option add *Menu.activeBackground $col $priority
 		    break
 		}
 	    }
@@ -243,18 +321,13 @@ proc tileutils::MenuThemeChanged {win} {
 	$win configure -foreground $color
 	$win configure -activeforeground $color
 	$win configure -disabledforeground $color
-	option add *Menu.foreground         $color $priority
-	option add *Menu.activeForeground   $color $priority
-	option add *Menu.disabledForeground $color $priority
 	if {[info exists map(-foreground)]} {
 	    foreach {state col} $map(-foreground) {
 		if {[lsearch $state active] >= 0} {
 		    $win configure -activeforeground  $col
-		    option add *Menu.activeForeground $col $priority
 		}
 		if {[lsearch $state disabled] >= 0} {
 		    $win configure -disabledforeground  $col
-		    option add *Menu.disabledForeground $col $priority
 		}
 	    }
 	}
@@ -263,18 +336,29 @@ proc tileutils::MenuThemeChanged {win} {
 
 proc tileutils::SpinboxThemeChanged {win} {
     
-    if {[winfo class $win] eq "Spinbox"} {
-	array set style [list -foreground black]
-	array set style [style configure .]    
-
-	if {[info exists style(-background)]} {
-	    set color $style(-background)
-	    $win configure -buttonbackground $color
-	    $win configure -highlightbackground $color
-	}
-	if {[info exists style(-selectbackground)]} {
-	    $win configure -selectbackground $style(-selectbackground)
-	}
+    if {[winfo class $win] ne "Spinbox"} {
+	return
+    }
+    array set style [list -foreground black]
+    array set style [style configure .]    
+    array set style [style configure Spinbox]    
+    
+    if {[info exists style(-background)]} {
+	set color $style(-background)
+	$win configure -buttonbackground $color
+	$win configure -highlightbackground $color
+    }
+    if {[info exists style(-selectbackground)]} {
+	set color $style(-selectbackground)
+	$win configure -selectbackground $color
+    }
+    if {[info exists style(-selectborderwidth)]} {
+	set color $style(-selectborderwidth)
+	$win configure -selectborderwidth $color
+    }
+    if {[info exists style(-selectforeground)]} {
+	set color $style(-selectforeground)
+	$win configure -selectforeground $color
     }
 }
 
@@ -282,11 +366,6 @@ proc tileutils::TextThemeChanged {win} {
     
     if {[winfo class $win] ne "Text"} {
 	return
-    }
-    if {[tk windowingsystem] eq "x11"} {
-	set priority 60
-    } else {
-	set priority startupFile
     }
     array set style [list -foreground black]
     array set style [style configure .]    
@@ -297,17 +376,18 @@ proc tileutils::TextThemeChanged {win} {
     if {[info exists style(-background)]} {
 	set color $style(-background)
 	$win configure -highlightbackground $color
-	option add *Text.highlightBackground  $color  $priority
     }
     if {[info exists style(-selectbackground)]} {
 	set color $style(-selectbackground)
 	$win configure -selectbackground $color
-	option add *Text.selectBackground  $color  $priority
+    }
+    if {[info exists style(-selectborderwidth)]} {
+	set color $style(-selectborderwidth)
+	$win configure -selectborderwidth $color
     }
     if {[info exists style(-selectforeground)]} {
 	set color $style(-selectforeground)
 	$win configure -selectforeground $color
-	option add *Text.selectForeground  $color  $priority
     }
 }
 

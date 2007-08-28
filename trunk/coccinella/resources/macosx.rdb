@@ -30,7 +30,7 @@
 
 *Entry.highlightThickness:          3
 *Labelframe.Foreground:             black
-*Listbox.highlightThickness:        3
+!*Listbox.highlightThickness:        3
 *Text.highlightThickness:           3
 
 ! contributed widgets

@@ -58,10 +58,10 @@
 *Entry.highlightThickness:           2
 *Label.Font:                         CociSmallFont
 *Labelframe.Font:                    CociSmallBoldFont
-*Listbox.background:                 white
-*Listbox.borderWidth:                1
+!*Listbox.background:                 white
+!*Listbox.borderWidth:                1
 *Listbox.Font:                       CociSmallFont
-*Listbox.highlightThickness:         2
+!*Listbox.highlightThickness:         2
 *Menu.font:                          CociSmallFont
 *Message.Font:                       CociSmallFont
 *Radiobutton.Font:                   CociSmallFont
