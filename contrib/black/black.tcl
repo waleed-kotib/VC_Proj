@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.6 2007-08-27 15:15:25 matben Exp $
+# $Id: black.tcl,v 1.7 2007-08-28 08:08:59 matben Exp $
 
 namespace eval tile {
     namespace eval theme {
@@ -93,7 +93,7 @@ namespace eval tile::theme::black {
     
     # It could be important that we first read black.rdb and then invoke
     # the specific handlers.
-    #bind ThemeChanged <<ThemeChanged>> {+tile::theme::black::ThemeChanged }
+    bind ThemeChanged <<ThemeChanged>> {+tile::theme::black::ThemeChanged }
 
     proc ThemeChanged {} {
 	variable dir
