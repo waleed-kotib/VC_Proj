@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.117 2007-08-23 13:01:29 matben Exp $
+# $Id: MailBox.tcl,v 1.118 2007-08-29 06:30:11 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -633,21 +633,24 @@ proc ::MailBox::TreeCtrl {T wysc} {
     # State for an unread message.
     $T state define unread
 
-    # This is a dummy option.
+    # These are dummy options.
     set itemBg [option get $T itemBackground {}]
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
+    set fg [option get $T textColor {}]
 
     $T column create -tags cWhiteboard -image $locals(iconWB16)  \
-      -itembackground $itemBg -resize 0 -borderwidth $bd -background $bg
+      -itembackground $itemBg -resize 0 -borderwidth $bd -background $bg \
+      -textcolor $fg
     $T column create -tags cSubject -expand 1 -text [mc Subject] \
-      -itembackground $itemBg -button 1 -borderwidth $bd -background $bg
+      -itembackground $itemBg -button 1 -borderwidth $bd -background $bg \
+      -textcolor $fg
     $T column create -tags cFrom    -expand 1 -text [mc From]    \
       -itembackground $itemBg -button 1 -squeeze 1 -borderwidth $bd  \
-      -background $bg
+      -background $bg -textcolor $fg
     $T column create -tags cDate    -expand 1 -text [mc Date]    \
       -itembackground $itemBg -button 1 -arrow up -borderwidth $bd  \
-      -background $bg
+      -background $bg  -textcolor $fg
     $T column create -tags cSecs -visible 0
     $T column create -tags cRead -visible 0
 

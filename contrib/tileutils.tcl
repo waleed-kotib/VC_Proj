@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.58 2007-08-28 08:08:59 matben Exp $
+# $Id: tileutils.tcl,v 1.59 2007-08-29 06:30:11 matben Exp $
 #
 
 package require treeutil
@@ -31,7 +31,7 @@ if {![info exists ::tile::currentTheme]} {
 
 
 namespace eval tile {
-
+        
     foreach name [tile::availableThemes] {
 
 	# @@@ We could be more economical here and load theme only when needed.
@@ -44,8 +44,10 @@ namespace eval tile {
 	
 	if {[tk windowingsystem] eq "aqua"} {
 	    set highlightThickness 3
+	    set showLines 0
 	} else {
 	    set highlightThickness 2
+	    set showLines 1
 	}
 	
 	style theme settings $name {
@@ -53,44 +55,60 @@ namespace eval tile {
 	    style configure . -highlightthickness $highlightThickness
 	    style configure Listbox -background white
 	    style configure Text -background white
-	    style configure TreeCtrl -usetheme 0
+	    style configure TreeCtrl \
+	      -background white -itembackground {gray90 {}} \
+	      -showlines $showLines -usetheme 0
 	    
 	    switch $name {
 		alt {
 		    array set colors [array get tile::theme::alt::colors]
+		    style configure TreeCtrl \
+		      -background gray75 -itembackground {gray92 gray84}
 		}
 		aqua {
-		    style configure TreeCtrl -usetheme 1
+		    style configure TreeCtrl \
+		      -itembackground {"#dedeff" {}} -usetheme 1
 		}
 		clam {
 		    array set colors [array get tile::theme::clam::colors]
 		    style configure TreeCtrl \
-		      -background gray75 \
-		      -itembackground {gray92 gray84}
+		      -background gray75 -itembackground {gray92 gray84}
 		}
 		classic {
 		    array set colors [array get tile::theme::classic::colors]
+		    style configure TreeCtrl \
+		      -background gray75 -itembackground {gray92 gray84}
 		}
 		default {
 		    array set colors [array get tile::theme::default::colors]
 		}
 		keramik {
 		    array set colors [array get tile::theme::keramik::colors]
+		    style configure TreeCtrl \
+		      -background gray75 -itembackground {gray92 gray84}
 		}
 		step {
 		    array set colors [array get tile::theme::step::colors]
+		    style configure TreeCtrl \
+		      -background gray75 -itembackground {gray92 gray84}
 		}
 		winnative {
 		    style map Menu \
 		      -background {active SystemHighlight} \
 		      -foreground {active SystemHighlightText disabled SystemGrayText}
+		    style configure TreeCtrl \
+		      -itembackground {"#dedeff" {}}
 		}
 		winxpblue {
+		    style configure TreeCtrl \
+		      -background white -itembackground {gray92 gray84}
 		}
 		xpnative {
 		    style map Menu \
 		      -background {active SystemHighlight} \
 		      -foreground {active SystemHighlightText disabled SystemGrayText}
+		    style configure TreeCtrl \
+		      -itembackground {"#dedeff" {}}
 		}
 	    }
 	}
@@ -164,7 +182,14 @@ proc tileutils::ThemeChanged {} {
     if {$options(-themechanged) ne {}} {
 	uplevel #0 $options(-themechanged)
     }
-        
+
+    # @@@ I could think of an alternative here:
+    # style theme settings default {
+    #    array set style [style configure .]
+    #    array set map   [style map .]
+    # }
+    # etc. and then cache all in style(name) and map(name).
+
     array set style [list -foreground black]
     array set style [style configure .]
     array set map   [style map .]
@@ -174,6 +199,8 @@ proc tileutils::ThemeChanged {} {
     array set textStyle [style configure Text]
     array set lbStyle [array get style]
     array set lbStyle [style configure Listbox]
+    array set treeStyle [array get style]
+    array set treeStyle [style configure TreeCtrl]
     
     array set menuMap [style map .]
     array set menuMap [style map Menu]
@@ -216,7 +243,8 @@ proc tileutils::ThemeChanged {} {
 	option add *Menu.foreground             $color $priority
 	option add *Menu.activeForeground       $color $priority
 	option add *Menu.disabledForeground     $color $priority
-	
+	option add *TreeCtrl.textColor          $color $priority
+
 	if {[info exists menuMap(-foreground)]} {
 	    foreach {state col} $menuMap(-foreground) {
 		if {[lsearch $state active] >= 0} {
@@ -245,7 +273,9 @@ proc tileutils::ThemeChanged {} {
 	option add *Spinbox.selectForeground    $color $priority
 	option add *Text.selectForeground       $color $priority
     }
-
+    option add *TreeCtrl.itemBackground   $treeStyle(-itembackground) $priority
+    option add *TreeCtrl.showLines        $treeStyle(-showlines)      $priority
+    option add *TreeCtrl.useTheme         $treeStyle(-usetheme)       $priority
 }
 
 #   Class bindings for ThemeChanged events.
@@ -261,24 +291,27 @@ proc tileutils::ListboxThemeChanged {win} {
     # Some themes miss this one.
     array set style [list -foreground black]
     array set style [style configure .]    
-    array set style [style configure Listbox]    
+    array set lbStyle [array get style]
+    array set lbStyle [style configure Listbox]
     array set map   [style map .]
     array set map   [style map Listbox]
 
     if {[info exists style(-background)]} {
+	# highlightBackground is drawn outside the border and must blend
+	# with normal background.
 	set color $style(-background)
 	$win configure -highlightbackground $color
     }
-    if {[info exists style(-selectbackground)]} {
-	set color $style(-selectbackground)
+    if {[info exists lbStyle(-selectbackground)]} {
+	set color $lbStyle(-selectbackground)
 	$win configure -selectbackground $color
     }
-    if {[info exists style(-selectborderwidth)]} {
-	set color $style(-selectborderwidth)
+    if {[info exists lbStyle(-selectborderwidth)]} {
+	set color $lbStyle(-selectborderwidth)
 	$win configure -selectborderwidth $color
     }
-    if {[info exists style(-selectforeground)]} {
-	set color $style(-selectforeground)
+    if {[info exists lbStyle(-selectforeground)]} {
+	set color $lbStyle(-selectforeground)
 	$win configure -selectforeground $color
     }
 }
@@ -374,6 +407,8 @@ proc tileutils::TextThemeChanged {win} {
     array set map   [style map Text]
     
     if {[info exists style(-background)]} {
+	# highlightBackground is drawn inside the border and must blend
+	# with Text background.
 	set color $style(-background)
 	$win configure -highlightbackground $color
     }
@@ -393,38 +428,33 @@ proc tileutils::TextThemeChanged {win} {
 
 # tileutils::TreeCtrlThemeChanged --
 # 
-#       TreeCtrl is a bit special. Provided any theme specific TreeCtrl 
-#       resources has been read in, we configure it from its resources.
-#       Some standard options from the tile style.
+#       TreeCtrl is a bit special.
 
 proc tileutils::TreeCtrlThemeChanged {win} {
     
-    if {[winfo class $win] eq "TreeCtrl"} {
-	
-	# Style options.
-	array set style [list -foreground black]
-	array set style [style configure .]    
-	
-	# Resource options.
-	set background [option get $win background {}]
-	set useTheme   [option get $win useTheme {}]
-	$win configure -background $background -usetheme $useTheme
-	
-	set columnOpts [list]
-	if {[info exists style(-background)]} {
-	    lappend columnOpts -background $style(-background)
-	}
-	if {[info exists style(-foreground)]} {
-	    lappend columnOpts -textcolor $style(-foreground)
-	}
-	foreach dbname {itemBackground} optname {itembackground} {
-	    set value [option get $win $dbname {}]
-	    if {$value ne ""} {
-		lappend columnOpts -$optname $value
-	    }
-	}
-	eval {treeutil::configurecolumns $win} $columnOpts
+    if {[winfo class $win] ne "TreeCtrl"} {
+	return
     }
+    
+    # Style options.
+    array set style [list -foreground black]
+    array set style [style configure .]    
+    array set treeStyle [array get style]
+    array set treeStyle [style configure TreeCtrl]
+    $win configure -background $treeStyle(-background) \
+      -usetheme $treeStyle(-usetheme) -showlines $treeStyle(-showlines)
+    
+    set columnOpts [list]
+    if {[info exists style(-background)]} {
+	lappend columnOpts -background $style(-background)
+    }
+    if {[info exists style(-foreground)]} {
+	lappend columnOpts -textcolor $style(-foreground)
+    }
+    if {[info exists treeStyle(-itembackground)]} {
+	lappend columnOpts -itembackground $treeStyle(-itembackground)
+    }
+    eval {treeutil::configurecolumns $win} $columnOpts
 }
 
 proc tileutils::WaveLabelThemeChanged {win} {

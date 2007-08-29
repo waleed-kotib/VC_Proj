@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.33 2007-08-23 13:01:29 matben Exp $
+# $Id: Rosticons.tcl,v 1.34 2007-08-29 06:30:11 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -482,11 +482,12 @@ proc ::Rosticons::PTreeSelect {T wysc} {
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
-
+    set fg [option get $T textColor {}]
+    
     $T column create -tags cButton -resize 0 -borderwidth $bd  \
-      -background $bg -squeeze 1
+      -background $bg -textcolor $fg -squeeze 1
     $T column create -tags cTree   -resize 0 -borderwidth $bd  \
-      -background $bg -expand 1
+      -background $bg -textcolor $fg -expand 1
     $T configure -treecolumn cTree
 
     $T element create eText text -lines 1

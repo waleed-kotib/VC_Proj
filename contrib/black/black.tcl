@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.7 2007-08-28 08:08:59 matben Exp $
+# $Id: black.tcl,v 1.8 2007-08-29 06:30:11 matben Exp $
 
 namespace eval tile {
     namespace eval theme {
@@ -88,6 +88,8 @@ namespace eval tile::theme::black {
 	    -background [list active $colors(-lighter)] \
 	    -foreground [list disabled $colors(-disabledfg)]
 
+	  style configure TreeCtrl \
+	    -background gray50 -itembackground {gray80 gray70}
 	  
     }
     
