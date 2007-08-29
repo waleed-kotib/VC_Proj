@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.8 2007-08-29 06:30:11 matben Exp $
+# $Id: black.tcl,v 1.9 2007-08-29 06:39:01 matben Exp $
 
 namespace eval tile {
     namespace eval theme {
@@ -91,25 +91,6 @@ namespace eval tile::theme::black {
 	  style configure TreeCtrl \
 	    -background gray50 -itembackground {gray80 gray70}
 	  
-    }
-    
-    # It could be important that we first read black.rdb and then invoke
-    # the specific handlers.
-    bind ThemeChanged <<ThemeChanged>> {+tile::theme::black::ThemeChanged }
-
-    proc ThemeChanged {} {
-	variable dir
-	
-	if {$tile::currentTheme eq "black"} {
-
-	    # Seems X11 has some system option db that must be overridden.
-	    if {[tk windowingsystem] eq "x11"} {
-		set priority 60
-	    } else {
-		set priority startupFile
-	    }
-	    option readfile [file join $dir black.rdb] $priority
-	}
     }
 }
 
