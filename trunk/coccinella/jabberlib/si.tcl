@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: si.tcl,v 1.17 2007-07-19 06:28:17 matben Exp $
+# $Id: si.tcl,v 1.18 2007-08-29 06:30:11 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -184,47 +184,59 @@ proc jlib::si::cmdproc {jlibname cmd args} {
 #       'open' method. 
 #       The 'args' ar transparently delivered to the streams 'open' method.
 
-proc jlib::si::send_set {jlibname jid sid mime profile profileElem cmd args} {
+proc jlib::si::send_set {jlibname jid sid mime profile profileE cmd args} {
     
     #puts "jlib::si::send_set (i)"
     
-    variable xmlns
-    variable trpt
+    set siE [constructor $jlibname $sid $mime $profile $profileE]
+    jlib::send_iq $jlibname set [list $siE] -to $jid  \
+      -command [list [namespace current]::send_set_cb $jlibname $sid]
+    return
+}
+
+# jlib::si::constructor --
+# 
+#       Makes a new si instance. Does everything except deleivering it.
+#       Returns the si element.
+
+proc jlib::si::constructor {jlibname jid sid mime profile profileE cmd args} {
     upvar ${jlibname}::si::istate istate
     
-    set istate($sid,jid)     $jid
-    set istate($sid,mime)    $mime
-    set istate($sid,profile) $profile
-    set istate($sid,openCmd) $cmd
-    set istate($sid,args)    $args
+    set istate($sid,jid)      $jid
+    set istate($sid,mime)     $mime
+    set istate($sid,profile)  $profile
+    set istate($sid,openCmd)  $cmd
+    set istate($sid,args)     $args
     foreach {key val} $args {
 	set istate($sid,$key) $val
     }
-    
-    set optionElems {}
-    foreach name $trpt(names) {
-	set valueElem [wrapper::createtag "value" -chdata $trpt($name,ns)]
-	lappend optionElems [wrapper::createtag "option"  \
-	  -subtags [list $valueElem]]
-    }
-    set fieldElem [wrapper::createtag "field"      \
-      -attrlist {var stream-method type list-single} \
-      -subtags $optionElems]
-    set xElem [wrapper::createtag "x"              \
-      -attrlist {xmlns jabber:x:data type form}    \
-      -subtags [list $fieldElem]]
-    set featureElem [wrapper::createtag "feature"  \
-      -attrlist [list xmlns $xmlns(neg)]           \
-      -subtags [list $xElem]]
-        
-    set siElem [wrapper::createtag "si"  \
-      -attrlist [list xmlns $xmlns(si) id $sid mime-type $mime profile $profile] \
-      -subtags [list $profileElem $featureElem]]
-    
-    jlib::send_iq $jlibname set [list $siElem] -to $jid  \
-      -command [list [namespace current]::send_set_cb $jlibname $sid]
+    return [element $sid $mime $profile $profileE]
+}
 
-    return
+# jlib::si::element --
+# 
+#       Just create the si element. Nothing cached.
+
+proc jlib::si::element {sid mime profile profileE} {
+    variable xmlns
+    variable trpt
+    
+    set optionEs [list]
+    foreach name $trpt(names) {
+	set valueE [wrapper::createtag "value" -chdata $trpt($name,ns)]
+	lappend optionEs [wrapper::createtag "option" -subtags [list $valueE]]
+    }
+    set fieldE [wrapper::createtag "field"      \
+      -attrlist {var stream-method type list-single} -subtags $optionEs]
+    set xE [wrapper::createtag "x"              \
+      -attrlist {xmlns jabber:x:data type form} -subtags [list $fieldE]]
+    set featureE [wrapper::createtag "feature"  \
+      -attrlist [list xmlns $xmlns(neg)] -subtags [list $xE]]
+    set siE [wrapper::createtag "si"  \
+      -attrlist [list xmlns $xmlns(si) id $sid mime-type $mime profile $profile] \
+      -subtags [list $profileE $featureE]]
+
+    return $siE
 }
 
 # jlib::si::send_set_cb --
@@ -255,10 +267,10 @@ proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
     }
 
     set value {}
-    set valueElem [wrapper::getchilddeep $iqChild [list  \
+    set valueE [wrapper::getchilddeep $iqChild [list  \
       [list "feature" $xmlns(neg)] [list "x" $xmlns(xdata)] "field" "value"]]
-    if {[llength $valueElem]} {
-	set value [wrapper::getcdata $valueElem]
+    if {[llength $valueE]} {
+	set value [wrapper::getcdata $valueE]
     }
     
     # Find if matching transport.
@@ -411,11 +423,11 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
 
     # Extract all streams and pick one with highest priority.
     set values {}
-    set fieldElem [wrapper::getchilddeep $iqChild [list  \
+    set fieldE [wrapper::getchilddeep $iqChild [list  \
       [list "feature" $xmlns(neg)] [list "x" $xmlns(xdata)] "field"]]
-    if {[llength $fieldElem]} {
-	set optionElems [wrapper::getchildswithtag $fieldElem "option"]
-	foreach c $optionElems {
+    if {[llength $fieldE]} {
+	set optionEs [wrapper::getchildswithtag $fieldE "option"]
+	foreach c $optionEs {
 	    lappend values [wrapper::getcdata  \
 	      [lindex [wrapper::getchildren $c] 0]]
 	}
@@ -440,8 +452,8 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
     }
         
     # Get profile element. Can have any tag but xmlns must be $profile.
-    set profileElem [wrapper::getfirstchildwithxmlns $iqChild $profile]
-    if {![llength $profileElem]} {
+    set profileE [wrapper::getfirstchildwithxmlns $iqChild $profile]
+    if {![llength $profileE]} {
 	send_error $jlibname $from $iqattr(-id) $sid 400 cancel bad-request  \
 	return 1
     }
@@ -476,9 +488,9 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
 #       
 # Arguments:
 #       type        'result' or 'error' if user accepts the stream or not.
-#       profileElem any extra profile element; can be empty.
+#       profileE    any extra profile element; can be empty.
 
-proc jlib::si::profile_response {jlibname sid type profileElem args} {
+proc jlib::si::profile_response {jlibname sid type profileE args} {
     
     #puts "jlib::si::profile_response (t) type=$type"
     
@@ -498,28 +510,23 @@ proc jlib::si::profile_response {jlibname sid type profileElem args} {
     # Accepted stream initiation.
 
     # Construct si element from selected profile.
-    set valueElem [wrapper::createtag "value"  \
-      -chdata $tstate($sid,stream)]
-    set fieldElem [wrapper::createtag "field"  \
-      -attrlist {var stream-method}            \
-      -subtags [list $valueElem]]
-    set xElem [wrapper::createtag "x"          \
-      -attrlist [list xmlns $xmlns(xdata) type submit]  \
-      -subtags [list $fieldElem]]
-    set featureElem [wrapper::createtag "feature"  \
-      -attrlist [list xmlns $xmlns(neg)]           \
-      -subtags [list $xElem]]
+    set valueE [wrapper::createtag "value" -chdata $tstate($sid,stream)]
+    set fieldE [wrapper::createtag "field" \
+      -attrlist {var stream-method} -subtags [list $valueE]]
+    set xE [wrapper::createtag "x"          \
+      -attrlist [list xmlns $xmlns(xdata) type submit] -subtags [list $fieldE]]
+    set featureE [wrapper::createtag "feature"  \
+      -attrlist [list xmlns $xmlns(neg)] -subtags [list $xE]]
 
-    # Include 'profileElem' if nonempty.
-    set siChilds [list $featureElem]
-    if {[llength $profileElem]} {
-	lappend siChilds $profileElem
+    # Include 'profileE' if nonempty.
+    set siChilds [list $featureE]
+    if {[llength $profileE]} {
+	lappend siChilds $profileE
     }
-    set siElem [wrapper::createtag "si"  \
-      -attrlist [list xmlns $xmlns(si)]  \
-      -subtags $siChilds]
+    set siE [wrapper::createtag "si"  \
+      -attrlist [list xmlns $xmlns(si)] -subtags $siChilds]
     
-    jlib::send_iq $jlibname result [list $siElem] -to $jid -id $id
+    jlib::send_iq $jlibname result [list $siE] -to $jid -id $id
 
     return
 }

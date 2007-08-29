@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.16 2007-07-19 06:28:17 matben Exp $
+# $Id: ftrans.tcl,v 1.17 2007-08-29 06:30:11 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -327,10 +327,10 @@ proc jlib::ftrans::initiatorinfo {jlibname} {
     
     upvar ${jlibname}::ftrans::istate istate
 
-    set iList {}
+    set iList [list]
     foreach skey [array names istate *,sid] {
 	set sid $istate($skey)
-	set opts {}
+	set opts [list]
 	foreach {key value} [array get istate $sid,*] {
 	    set name [string map [list $sid, ""] $key]
 	    lappend opts $name $value
@@ -344,7 +344,7 @@ proc jlib::ftrans::getinitiatorstate {jlibname sid} {
     
     upvar ${jlibname}::ftrans::istate istate
     
-    set opts {}
+    set opts [list]
     foreach {key value} [array get istate $sid,*] {
 	set name [string map [list $sid, ""] $key]
 	lappend opts $name $value
@@ -407,7 +407,7 @@ proc jlib::ftrans::open_handler {jlibname sid jid iqChild respCmd} {
     }
     set tstate($sid,cmd)   $respCmd
     set tstate($sid,bytes) 0
-    set opts {}
+    set opts [list]
     foreach key {mime desc hash date} {
 	if {[string length $tstate($sid,$key)]} {
 	    lappend opts -$key $tstate($sid,$key)
@@ -548,10 +548,10 @@ proc jlib::ftrans::targetinfo {jlibname} {
     
     upvar ${jlibname}::ftrans::tstate tstate
 
-    set tList {}
+    set tList [list]
     foreach skey [array names tstate *,sid] {
 	set sid $tstate($skey)
-	set opts {}
+	set opts [list]
 	foreach {key value} [array get tstate $sid,*] {
 	    set name [string map [list $sid, ""] $key]
 	    lappend opts $name $value
@@ -565,7 +565,7 @@ proc jlib::ftrans::gettargetstate {jlibname sid} {
     
     upvar ${jlibname}::ftrans::tstate tstate
     
-    set opts {}
+    set opts [list]
     foreach {key value} [array get tstate $sid,*] {
 	set name [string map [list $sid, ""] $key]
 	lappend opts $name $value

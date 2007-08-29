@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.38 2007-08-24 16:26:16 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.39 2007-08-29 06:30:11 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -301,6 +301,7 @@ proc ::RosterAvatar::Configure {_T} {
     }
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
+    set fg [option get $T textColor {}]
     set simage [::Rosticons::Get status/available]
 
     # Define a new item state
@@ -317,11 +318,11 @@ proc ::RosterAvatar::Configure {_T} {
 
     $T column create -tags cStatus  \
       -itembackground $itemBackground -resize 0 -minwidth 24 -button 1  \
-      -borderwidth $bd -background $bg -image $simage
+      -borderwidth $bd -background $bg -image $simage -textcolor $fg
     $T column create -tags cTree    \
       -itembackground $itemBackground -resize 0 -expand 1 -squeeze 1  \
       -text [mc {Contact Name}] -button 1 -arrow up -borderwidth $bd \
-      -background $bg
+      -background $bg -textcolor $fg
     $T column create -tags cTag     \
       -visible 0
     $T configure -showheader 1
