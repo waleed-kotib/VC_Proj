@@ -3,11 +3,11 @@
 #      This file is part of the jabberlib. 
 #      It provides support for the stream initiation protocol (XEP-0095).
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: si.tcl,v 1.18 2007-08-29 06:30:11 matben Exp $
+# $Id: si.tcl,v 1.19 2007-08-31 08:13:56 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -123,8 +123,8 @@ proc jlib::si::registertransport {name ns priority openProc sendProc closeProc} 
     set trpt($name,close) $closeProc
 
     # Keep these in sync.
-    set trpt(names)   {}
-    set trpt(streams) {}
+    set trpt(names)   [list]
+    set trpt(streams) [list]
     foreach spec $trpt(list) {
 	set nm [lindex $spec 0]
 	lappend trpt(names)   $nm
@@ -163,6 +163,7 @@ proc jlib::si::init {jlibname args} {
 	variable tstate
     } 
     $jlibname iq_register set $xmlns(si) [namespace current]::handle_set
+    $jlibname iq_register get $xmlns(si) [namespace current]::handle_get
 }
 
 proc jlib::si::cmdproc {jlibname cmd args} {
@@ -188,18 +189,18 @@ proc jlib::si::send_set {jlibname jid sid mime profile profileE cmd args} {
     
     #puts "jlib::si::send_set (i)"
     
-    set siE [constructor $jlibname $sid $mime $profile $profileE]
+    set siE [i_constructor $jlibname $sid $jid $mime $profile $profileE $cmd]
     jlib::send_iq $jlibname set [list $siE] -to $jid  \
       -command [list [namespace current]::send_set_cb $jlibname $sid]
     return
 }
 
-# jlib::si::constructor --
+# jlib::si::i_constructor --
 # 
 #       Makes a new si instance. Does everything except deleivering it.
 #       Returns the si element.
 
-proc jlib::si::constructor {jlibname jid sid mime profile profileE cmd args} {
+proc jlib::si::i_constructor {jlibname sid jid mime profile profileE cmd args} {
     upvar ${jlibname}::si::istate istate
     
     set istate($sid,jid)      $jid
@@ -256,7 +257,55 @@ proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
 	ifree $jlibname $sid
 	return
     }
- 
+    eval {i_handler $jlibname $sid $iqChild} $args
+}
+
+# jlib::si::handle_get --
+# 
+#       This handles incoming iq-get/si elements. The 'sid' must already exist
+#       since this belongs to the initiator side! We obtain this call as a
+#       response to an si element sent. It should behave as 'send_set_cb'. 
+
+proc jlib::si::handle_get {jlibname from iqChild args} {
+
+    upvar ${jlibname}::si::istate istate    
+    #puts "jlib::si::handle_get (i)"
+    
+    array set argsA $args
+    array set attr [wrapper::getattrlist $iqChild]
+    if {![info exists attr(id)]} {
+	return 0
+    }
+    set sid $attr(id)    
+    if {![info exists argsA(-id)]} {
+	return 0
+    }
+    set id $argsA(-id)
+    
+    # Verify that we have actually initiated this stream.
+    if {![info exists istate($sid,jid)]} {
+	jlib::send_iq_error $jlibname $from $id 403 cancel forbidden
+	return 1
+    }
+    eval {i_handler $jlibname $sid $iqChild} $args
+    
+    # We must respond ourselves.
+    $jlibname send_iq result {} -to $from -id $id
+    
+    return 1
+}
+
+# jlib::si::i_handler --
+# 
+#       Handles both responses to an iq-set call and an incoming iq-get.
+
+proc jlib::si::i_handler {jlibname sid iqChild args} {
+    
+    variable xmlns
+    variable trpt
+    upvar ${jlibname}::si::istate istate
+    #puts "jlib::si::i_handler (i)"
+
     # Verify that it is consistent.
     if {![string equal [wrapper::gettag $iqChild] "si"]} {
 	
@@ -266,7 +315,7 @@ proc jlib::si::send_set_cb {jlibname sid type iqChild args} {
 	return
     }
 
-    set value {}
+    set value ""
     set valueE [wrapper::getchilddeep $iqChild [list  \
       [list "feature" $xmlns(neg)] [list "x" $xmlns(xdata)] "field" "value"]]
     if {[llength $valueE]} {
@@ -390,7 +439,7 @@ proc jlib::si::ifree {jlibname sid} {
 #       profile in question. It is the responsibility of this callback to
 #       deliver the result via the command in its argument.
 
-proc jlib::si::handle_set {jlibname from iqChild args} {
+proc jlib::si::handle_set {jlibname from siE args} {
     
     variable xmlns
     variable trpt
@@ -400,6 +449,10 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
     #puts "jlib::si::handle_set (t)"
     
     array set iqattr $args
+    if {![info exists iqattr(-id)]} {
+	return 0
+    }
+    set id $iqattr(-id)
     
     # Note: there are two different 'id'!
     # These are the attributes of the si element.
@@ -408,53 +461,33 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
 	mime-type   ""
 	profile     ""
     }
-    array set attr [wrapper::getattrlist $iqChild]
+    array set attr [wrapper::getattrlist $siE]
     set sid     $attr(id)
     set profile $attr(profile)
     
     # This is a profile we don't understand.
     if {![info exists prof($profile,open)]} {
-	set errElem [wrapper::createtag "bad-profile"  \
+	set errE [wrapper::createtag "bad-profile"  \
 	  -attrlist [list xmlns $xmlns(si)]]
-	send_error $jlibname $from $iqattr(-id) $sid 400 cancel bad-request  \
-	  $errElem
+	send_error $jlibname $from $id $sid 400 cancel "bad-request" $errE
 	return 1
     }
 
     # Extract all streams and pick one with highest priority.
-    set values {}
-    set fieldE [wrapper::getchilddeep $iqChild [list  \
-      [list "feature" $xmlns(neg)] [list "x" $xmlns(xdata)] "field"]]
-    if {[llength $fieldE]} {
-	set optionEs [wrapper::getchildswithtag $fieldE "option"]
-	foreach c $optionEs {
-	    lappend values [wrapper::getcdata  \
-	      [lindex [wrapper::getchildren $c] 0]]
-	}
-    }
-    
-    # Pick first matching since priority ordered.
-    set stream {}
-    foreach name $values {
-	if {[lsearch $trpt(streams) $name] >= 0} {
-	    set stream $name
-	    break
-	}
-    }
+    set stream [pick_stream $siE]
     
     # No valid stream :-(
     if {![string length $stream]} {
-	set errElem [wrapper::createtag "no-valid-streams"  \
+	set errE [wrapper::createtag "no-valid-streams"  \
 	  -attrlist [list xmlns $xmlns(si)]]
-	send_error $jlibname $from $iqattr(-id) $sid 400 cancel bad-request  \
-	  $errElem
+	send_error $jlibname $from $id $sid 400 cancel "bad-request" $errE
 	return 1
     }
         
     # Get profile element. Can have any tag but xmlns must be $profile.
-    set profileE [wrapper::getfirstchildwithxmlns $iqChild $profile]
+    set profileE [wrapper::getfirstchildwithxmlns $siE $profile]
     if {![llength $profileE]} {
-	send_error $jlibname $from $iqattr(-id) $sid 400 cancel bad-request  \
+	send_error $jlibname $from $id $sid 400 cancel "bad-request"
 	return 1
     }
 
@@ -469,7 +502,7 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
     # Invoke registered handler for this profile.
     set respCmd [list [namespace current]::profile_response $jlibname $sid]
     set rc [catch {
-	eval $prof($profile,open) [list $jlibname $sid $jid $iqChild $respCmd]
+	eval $prof($profile,open) [list $jlibname $sid $jid $siE $respCmd]
     }]
     if {$rc == 1} {
 	# error
@@ -477,9 +510,103 @@ proc jlib::si::handle_set {jlibname from iqChild args} {
     } elseif {$rc == 3 || $rc == 4} {
 	# break or continue
 	return 0
-    } 
-    
+    }     
     return 1
+}
+
+# jlib::si::t_handler --
+# 
+#       This shall only be used when we get an embedded si-element which we
+#       respond by an iq-get/si call.
+#       
+# Arguments:
+#       jlibname:   the instance of this jlib.
+#       args:       -channel
+#                   -command
+#                   -progress
+#
+# Results:
+#       empty if OK else an error token.
+
+proc jlib::si::t_handler {jlibname from siE cmd args} {
+    
+    variable xmlns
+    variable trpt
+    variable prof
+    upvar ${jlibname}::si::tstate tstate
+    
+    #puts "jlib::si::t_handler (t)"
+    
+    # These are the attributes of the si element.
+    array set attr {
+	id          ""
+	mime-type   ""
+	profile     ""
+    }
+    array set attr [wrapper::getattrlist $siE]
+    set sid     $attr(id)
+    set profile $attr(profile)
+    
+    if {![info exists prof($profile,open)]} {
+	return "bad-profile"
+    }
+    set stream [pick_stream $siE]
+    if {![string length $stream]} {
+	return "no-valid-streams"
+    }
+    set profileE [wrapper::getfirstchildwithxmlns $siE $profile]
+    if {![llength $profileE]} {
+	return "bad-request"
+    }
+    set tstate($sid,profile)   $profile
+    set tstate($sid,stream)    $stream
+    set tstate($sid,mime-type) $attr(mime-type)
+    foreach {key val} $args {
+	set tstate($sid,$key)  $val
+    }
+    set jid $tstate($sid,-from)
+    
+    # We invoke the target handler without requesting any response.
+    eval $prof($profile,open) [list $jlibname $sid $jid $siE {}] $args
+
+    # Instead we must make an iq-get/si call which is otherwise identical to a
+    # iq-result/si.
+    set siE [t_element $jlibname $sid $profileE]
+    jlib::send_iq $jlibname get [list $siE] -to $jid -command $cmd
+
+    return
+}
+
+# jlib::si::pick_stream --
+# 
+#       Extracts the highest priority stream from an si element. Empty if error.
+
+proc jlib::si::pick_stream {siE} {
+    
+    variable xmlns
+    variable trpt
+
+    # Extract all streams and pick one with highest priority.
+    set values [list]
+    set fieldE [wrapper::getchilddeep $siE [list  \
+      [list "feature" $xmlns(neg)] [list "x" $xmlns(xdata)] "field"]]
+    if {[llength $fieldE]} {
+	set optionEs [wrapper::getchildswithtag $fieldE "option"]
+	foreach c $optionEs {
+	    set firstE [lindex [wrapper::getchildren $c] 0]
+	    lappend values [wrapper::getcdata $firstE]
+	}
+    }
+    
+    # Pick first matching since priority ordered.
+    set stream ""
+    foreach name $values {
+	if {[lsearch $trpt(streams) $name] >= 0} {
+	    set stream $name
+	    break
+	}
+    }
+    return $stream
 }
 
 # jlib::si::profile_response --
@@ -504,12 +631,25 @@ proc jlib::si::profile_response {jlibname sid type profileE args} {
     if {[string equal $type "error"]} {
 	# @@@ We could have a text element here...
 	send_error $jlibname $jid $id $sid 403 cancel forbidden
-	return
+    } else {
+
+	# Accepted stream initiation.
+	# Construct si element from selected profile.
+	set siE [t_element $jlibname $sid $profileE]
+	jlib::send_iq $jlibname result [list $siE] -to $jid -id $id
     }
+    return
+}
 
-    # Accepted stream initiation.
+# jlib::si::t_element --
+# 
+#       Construct si element from selected profile.
 
-    # Construct si element from selected profile.
+proc jlib::si::t_element {jlibname sid profileE} {
+    
+    variable xmlns
+    upvar ${jlibname}::si::tstate tstate
+
     set valueE [wrapper::createtag "value" -chdata $tstate($sid,stream)]
     set fieldE [wrapper::createtag "field" \
       -attrlist {var stream-method} -subtags [list $valueE]]
@@ -525,10 +665,7 @@ proc jlib::si::profile_response {jlibname sid type profileE args} {
     }
     set siE [wrapper::createtag "si"  \
       -attrlist [list xmlns $xmlns(si)] -subtags $siChilds]
-    
-    jlib::send_iq $jlibname result [list $siE] -to $jid -id $id
-
-    return
+    return $siE
 }
 
 # jlib::si::reset --

@@ -2,11 +2,11 @@
 #  
 #      This file provides translation from canvas commands to XML/SVG format.
 #      
-#  Copyright (c) 2002-2005  Mats Bengtsson
+#  Copyright (c) 2002-2007  Mats Bengtsson
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: can2svg.tcl,v 1.22 2007-07-19 06:28:11 matben Exp $
+# $Id: can2svg.tcl,v 1.23 2007-08-31 08:13:56 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -23,6 +23,7 @@
 #      
 #      can2svg::can2svg canvasCmd ?options?
 #           options:    -httpbasedir  path
+#                       -imagehandler       tclProc
 #                       -ovalasellipse 0|1
 #                       -reusedefs     0|1
 #                       -uritype    file|http
@@ -152,12 +153,13 @@ proc can2svg::config {args} {
 #       
 # Arguments:
 #       cmd         canvas create commands without prepending widget path.
-#       args    -httpbasedir  path
-#               -ovalasellipse 0|1
-#               -reusedefs     0|1
-#               -uritype    file|http
-#               -usestyleattribute 0|1
-#               -usetags    0|all|first|last
+#       args    -httpbasedir        path
+#               -imagehandler       tclProc
+#               -ovalasellipse      0|1
+#               -reusedefs          0|1
+#               -uritype            file|http
+#               -usestyleattribute  0|1
+#               -usetags            0|all|first|last
 #       
 # Results:
 #   xml data
@@ -177,10 +179,13 @@ proc can2svg::can2svg {cmd args} {
 #       
 # Arguments:
 #       cmd         canvas create command without prepending widget path.
-#       args    -httpbasedir  path
-#               -uritype    file|http
-#               -usestyleattribute 0|1
-#               -usetags    0|all|first|last
+#       args    -httpbasedir        path
+#               -imagehandler       tclProc
+#               -ovalasellipse      0|1
+#               -reusedefs          0|1
+#               -uritype            file|http
+#               -usestyleattribute  0|1
+#               -usetags            0|all|first|last
 #       
 # Results:
 #       a list of xmllist = {tag attrlist isempty cdata {child1 child2 ...}}
@@ -195,14 +200,14 @@ proc can2svg::svgasxmllist {cmd args} {
     
     set nonum_ {[^0-9]}
     set wsp_ {[ ]+}
-    set xmlListList {}
+    set xmlLL [list]
     
-    array set argsArr [array get confopts]
-    array set argsArr $args
-    set args [array get argsArr]
+    array set argsA [array get confopts]
+    array set argsA $args
+    set args [array get argsA]
     
     if {![string equal [lindex $cmd 0] "create"]} {
-	return {}
+	return
     }
     
     set type [lindex $cmd 1]
@@ -212,7 +217,7 @@ proc can2svg::svgasxmllist {cmd args} {
     set indopt [lsearch -regexp $rest "-${nonum_}"]
     if {$indopt < 0} {
 	set ind end
-	set opts {}
+	set opts [list]
     } else {
 	set ind [expr $indopt - 1]
 	set opts [lrange $rest $indopt end]
@@ -223,45 +228,45 @@ proc can2svg::svgasxmllist {cmd args} {
     if {[llength $coo] == 1} {
 	set coo [lindex $coo 0]
     }
-    array set optArr $opts
+    array set optA $opts
     
     # Is the item in normal state? If not, return.
-    if {[info exists optArr(-state)] && $optArr(-state) != "normal"} {
-      return {}
+    if {[info exists optA(-state)] && $optA(-state) != "normal"} {
+	return
     }
     
     # Figure out if we've got a spline.
     set haveSpline 0
-    if {[info exists optArr(-smooth)] && ($optArr(-smooth) != "0") &&  \
-      [info exists optArr(-splinesteps)] && ($optArr(-splinesteps) > 2)} {
+    if {[info exists optA(-smooth)] && ($optA(-smooth) != "0") &&  \
+      [info exists optA(-splinesteps)] && ($optA(-splinesteps) > 2)} {
 	set haveSpline 1
     }
-    if {[info exists optArr(-fill)]} {
-	set fillValue $optArr(-fill)
+    if {[info exists optA(-fill)]} {
+	set fillValue $optA(-fill)
 	if {![regexp {#[0-9]+} $fillValue]} {
 	    set fillValue [FormatColorName $fillValue]
 	}
     } else {
 	set fillValue black
     }
-    if {[string length $argsArr(-filtertags)] && [info exists optArr(-tags)]} {
-	set tag [uplevel #0 $argsArr(-filtertags) [list $optArr(-tags)]]
+    if {[string length $argsA(-filtertags)] && [info exists optA(-tags)]} {
+	set tag [uplevel #0 $argsA(-filtertags) [list $optA(-tags)]]
 	set idAttr [list id $tag]
-    } elseif {($argsArr(-usetags) != "0") && [info exists optArr(-tags)]} {
+    } elseif {($argsA(-usetags) != "0") && [info exists optA(-tags)]} {
 	
 	# Remove any 'current' tag.
-	set optArr(-tags) \
-	  [lsearch -all -not -inline $optArr(-tags) current]
+	set optA(-tags) \
+	  [lsearch -all -not -inline $optA(-tags) current]
 	
-	switch -- $argsArr(-usetags) {
+	switch -- $argsA(-usetags) {
 	    all {			
-		set idAttr [list id $optArr(-tags)]
+		set idAttr [list id $optA(-tags)]
 	    }
 	    first {
-		set idAttr [list id [lindex $optArr(-tags) 0]]
+		set idAttr [list id [lindex $optA(-tags) 0]]
 	    }
 	    last {
-		set idAttr [list id [lindex $optArr(-tags) end]]
+		set idAttr [list id [lindex $optA(-tags) end]]
 	    }
 	}
     } else {
@@ -269,37 +274,37 @@ proc can2svg::svgasxmllist {cmd args} {
     }
     
     # If we need a marker (arrow head) need to make that first.
-    if {[info exists optArr(-arrow)] && ![string equal $optArr(-arrow) "none"]} {
-	if {[info exists optArr(-arrowshape)]} {
+    if {[info exists optA(-arrow)] && ![string equal $optA(-arrow) "none"]} {
+	if {[info exists optA(-arrowshape)]} {
 	    
 	    # Make a key of the arrowshape list into the array.
-	    regsub -all -- $wsp_ $optArr(-arrowshape) _ shapeKey
+	    regsub -all -- $wsp_ $optA(-arrowshape) _ shapeKey
 	    set arrowKey ${fillValue}_${shapeKey}
-	    set arrowShape $optArr(-arrowshape)
+	    set arrowShape $optA(-arrowshape)
 	} else {
 	    set arrowKey ${fillValue}
 	    set arrowShape {8 10 3}
 	}
-	if {!$argsArr(-reusedefs) || \
+	if {!$argsA(-reusedefs) || \
 	  ![info exists defsArrowMarkerArr($arrowKey)]} {
 	    set defsArrowMarkerArr($arrowKey)  \
 	      [eval {MakeArrowMarker} $arrowShape {$fillValue}]
-	    set xmlListList \
-	      [concat $xmlListList $defsArrowMarkerArr($arrowKey)]
+	    set xmlLL \
+	      [concat $xmlLL $defsArrowMarkerArr($arrowKey)]
 	}
     }
     
     # If we need a stipple bitmap, need to make that first. Limited!!!
     # Only: gray12, gray25, gray50, gray75
     foreach key {-stipple -outlinestipple} {
-	if {[info exists optArr($key)] &&  \
-	  ([lsearch $grayStipples $optArr($key)] >= 0)} {
-	    set stipple $optArr($key)
+	if {[info exists optA($key)] &&  \
+	  ([lsearch $grayStipples $optA($key)] >= 0)} {
+	    set stipple $optA($key)
 	    if {![info exists defsStipplePatternArr($stipple)]} {
 		set defsStipplePatternArr($stipple)  \
 		  [MakeGrayStippleDef $stipple]
 	    }
-	    lappend xmlListList $defsStipplePatternArr($stipple)
+	    lappend xmlLL $defsStipplePatternArr($stipple)
 	}
     }
     
@@ -314,17 +319,24 @@ proc can2svg::svgasxmllist {cmd args} {
 		set attr [concat $attr $idAttr]
 	    }
 	    set attr [concat $attr [MakeAttrList \
-	      $type $opts $argsArr(-usestyleattribute)]]
-	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+	      $type $opts $argsA(-usestyleattribute)]]
+	    lappend xmlLL [MakeXMLList $elem -attrlist $attr]
 	}
 	bitmap - image {
-            if {[info exists optArr(-image)]} {
+            if {[info exists optA(-image)]} {
 	        set elem "image"
 	        set attr [eval {MakeImageAttr $coo $opts} $args]
 	        if {[string length $idAttr] > 0} {
 	            set attr [concat $attr $idAttr]
 	        }
-	        lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+		set subEs [list]
+		if {[info exists argsA(-imagehandler)]} {
+		    set subE [uplevel #0 $argsA(-imagehandler) [list $cmd] $args]
+		    if {[llength $subE]} {
+			set subEs [list $subE]
+		    }
+		}
+		lappend xmlLL [MakeXMLList $elem -attrlist $attr -subtags $subEs]
 	    }
 	}
 	line {
@@ -333,13 +345,13 @@ proc can2svg::svgasxmllist {cmd args} {
 		set attr [concat $attr $idAttr]
 	    }		    
 	    set attr [concat $attr [MakeAttrList \
-	      $type $opts $argsArr(-usestyleattribute)]]
-	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+	      $type $opts $argsA(-usestyleattribute)]]
+	    lappend xmlLL [MakeXMLList $elem -attrlist $attr]
 	}
 	oval {
 	    set attr [CoordsToAttr $type $coo $opts elem]	    
 	    foreach {x y w h} [NormalizeRectCoords $coo] break
-	    if {[expr $w == $h] && !$argsArr(-ovalasellipse)} {
+	    if {[expr $w == $h] && !$argsA(-ovalasellipse)} {
 		# set elem "circle";# circle needs an r: not an rx & ry
 		set elem "ellipse"
 	    } else {
@@ -349,8 +361,8 @@ proc can2svg::svgasxmllist {cmd args} {
 		set attr [concat $attr $idAttr]
 	    }
 	    set attr [concat $attr [MakeAttrList \
-	      $type $opts $argsArr(-usestyleattribute)]]
-	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+	      $type $opts $argsA(-usestyleattribute)]]
+	    lappend xmlLL [MakeXMLList $elem -attrlist $attr]
 	}
 	polygon {
 	    set attr [CoordsToAttr $type $coo $opts elem]	    
@@ -358,8 +370,8 @@ proc can2svg::svgasxmllist {cmd args} {
 		set attr [concat $attr $idAttr]
 	    }
 	    set attr [concat $attr [MakeAttrList \
-	      $type $opts $argsArr(-usestyleattribute)]]
-	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+	      $type $opts $argsA(-usestyleattribute)]]
+	    lappend xmlLL [MakeXMLList $elem -attrlist $attr]
 	}
 	rectangle {
 	    set attr [CoordsToAttr $type $coo $opts elem]	    
@@ -367,24 +379,24 @@ proc can2svg::svgasxmllist {cmd args} {
 		set attr [concat $attr $idAttr]
 	    }
 	    set attr [concat $attr [MakeAttrList \
-	      $type $opts $argsArr(-usestyleattribute)]]
-	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+	      $type $opts $argsA(-usestyleattribute)]]
+	    lappend xmlLL [MakeXMLList $elem -attrlist $attr]
 	}
 	text {
 	    set elem "text"
 	    set chdata ""
 	    set nlines 1
-	    if {[info exists optArr(-font)]} {
-		set theFont $optArr(-font)
+	    if {[info exists optA(-font)]} {
+		set theFont $optA(-font)
 	    } else {
 		set theFont $defaultFont
 	    }
 	    set ascent [font metrics $theFont -ascent]
 	    set lineSpace [font metrics $theFont -linespace]
-	    if {[info exists optArr(-text)]} {
-		set chdata $optArr(-text)
+	    if {[info exists optA(-text)]} {
+		set chdata $optA(-text)
 		
-		if {[info exists optArr(-width)]} {
+		if {[info exists optA(-width)]} {
 		    
 		    # MICK O'DONNELL: if the text is wrapped in the wgt, we need
 		    # to simulate linebreaks
@@ -395,16 +407,16 @@ proc can2svg::svgasxmllist {cmd args} {
 		    set lines [split $chdata \n]
 		    set newlines {}
 		    foreach line $lines {
-			set lines2 [SplitWrappedLines $line $theFont $optArr(-width)]
+			set lines2 [SplitWrappedLines $line $theFont $optA(-width)]
 			set newlines [concat $newlines $lines2]
 		    }
 		    set chdata [join $newlines \n]
-		    if {!$argsArr(-allownewlines) || \
+		    if {!$argsA(-allownewlines) || \
 		      ([llength $newlines] > [llength $lines])} {
 			set nlines [expr [regexp -all "\n" $chdata] + 1]
 		    }
 		} else {
-		    if {!$argsArr(-allownewlines)} {
+		    if {!$argsA(-allownewlines)} {
 			set nlines [expr [regexp -all "\n" $chdata] + 1]
 		    }
 		}
@@ -412,8 +424,8 @@ proc can2svg::svgasxmllist {cmd args} {
 	    
 	    # Figure out the coords of the first baseline.
 	    set anchor center
-	    if {[info exists optArr(-anchor)]} {
-		set anchor $optArr(-anchor)
+	    if {[info exists optA(-anchor)]} {
+		set anchor $optA(-anchor)
 	    }		    		    
 	    
 	    foreach {xbase ybase}  \
@@ -424,7 +436,7 @@ proc can2svg::svgasxmllist {cmd args} {
 		set attr [concat $attr $idAttr]
 	    }
 	    set attr [concat $attr [MakeAttrList \
-	      $type $opts $argsArr(-usestyleattribute)]]
+	      $type $opts $argsA(-usestyleattribute)]]
 	    set dy 0
 	    if {$nlines > 1} {
 		
@@ -435,10 +447,10 @@ proc can2svg::svgasxmllist {cmd args} {
 		      -attrlist [list "x" $xbase "dy" $dy] -chdata $line]
 		    set dy $lineSpace
 		}
-		lappend xmlListList [MakeXMLList $elem -attrlist $attr \
+		lappend xmlLL [MakeXMLList $elem -attrlist $attr \
 		  -subtags $subList]
 	    } else {
-		lappend xmlListList [MakeXMLList $elem -attrlist $attr \
+		lappend xmlLL [MakeXMLList $elem -attrlist $attr \
 		  -chdata $chdata]
 	    }
 	}
@@ -446,16 +458,16 @@ proc can2svg::svgasxmllist {cmd args} {
 	    
 	    # There is no svg for this; must be handled by application layer.	    
 	    #puts "window: $cmd"
-	    if {[string length $argsArr(-windowitemhandler)]} {
+	    if {[string length $argsA(-windowitemhandler)]} {
 		set xmllist \
-		  [uplevel #0 $argsArr(-windowitemhandler) [list $cmd] $args]
+		  [uplevel #0 $argsA(-windowitemhandler) [list $cmd] $args]
 		if {[llength $xmllist]} {
-		    lappend xmlListList $xmllist
+		    lappend xmlLL $xmllist
 		}
 	    }
 	}
     }
-    return $xmlListList
+    return $xmlLL
 }
 
 # can2svg::CoordsToAttr --
@@ -471,12 +483,12 @@ proc can2svg::svgasxmllist {cmd args} {
 proc can2svg::CoordsToAttr {type coo opts svgElementVar} {
     upvar $svgElementVar elem 
 
-    array set optArr $opts
+    array set optA $opts
     
     # Figure out if we've got a spline.
     set haveSpline 0
-    if {[info exists optArr(-smooth)] && ($optArr(-smooth) != "0") &&  \
-      [info exists optArr(-splinesteps)] && ($optArr(-splinesteps) > 2)} {
+    if {[info exists optA(-smooth)] && ($optA(-smooth) != "0") &&  \
+      [info exists optA(-splinesteps)] && ($optA(-splinesteps) > 2)} {
 	set haveSpline 1
     }
     set attr {}
@@ -488,8 +500,8 @@ proc can2svg::CoordsToAttr {type coo opts svgElementVar} {
 	    set attr [list "d" $data]
 	}
 	bitmap - image {
-	    array set __optArr $opts
-            if {[info exists __optArr(-image)]} {
+	    array set __optA $opts
+            if {[info exists __optA(-image)]} {
 	        set elem "image"
 	        set attr [ImageCoordsToAttr $coo $opts]
 	    }
@@ -548,12 +560,12 @@ proc can2svg::MakeArcPath {coo opts} {
     variable pi
 
     # Canvas defaults.
-    array set optArr {
+    array set optA {
 	-extent 90
 	-start  0
 	-style  pieslice
     }
-    array set optArr $opts
+    array set optA $opts
 
     # Extract center and radius from bounding box.
     foreach {x1 y1 x2 y2} $coo break
@@ -562,8 +574,8 @@ proc can2svg::MakeArcPath {coo opts} {
     set rx [expr abs($x1 - $x2)/2.0]
     set ry [expr abs($y1 - $y2)/2.0]
 
-    set start  [expr $anglesToRadians * $optArr(-start)]
-    set extent [expr $anglesToRadians * $optArr(-extent)]
+    set start  [expr $anglesToRadians * $optA(-start)]
+    set extent [expr $anglesToRadians * $optA(-extent)]
 
     # NOTE: direction of angles are opposite for Tk and SVG!    
     set theta1 [expr -1*$start]
@@ -588,7 +600,7 @@ proc can2svg::MakeArcPath {coo opts} {
     append data [format " %.1f %.1f %.1f %1d %1d %.1f %.1f"  \
       $rx $ry $phi $fa $fs $x2 $y2]
     
-    switch -- $optArr(-style) {
+    switch -- $optA(-style) {
 	arc {
 	    # empty.
 	}
@@ -610,7 +622,7 @@ proc can2svg::MakeArcPathNonA {coo opts} {
 
     variable anglesToRadians
 
-    array set optArr $opts
+    array set optA $opts
     
     foreach {x1 y1 x2 y2} $coo break
     set cx [expr ($x1 + $x2)/2.0]
@@ -621,8 +633,8 @@ proc can2svg::MakeArcPathNonA {coo opts} {
     
     # This approximation gives a maximum half pixel error.
     set deltaPhi [expr 2.0/sqrt($rmin)]
-    set extent   [expr $anglesToRadians * $optArr(-extent)]
-    set start    [expr $anglesToRadians * $optArr(-start)]
+    set extent   [expr $anglesToRadians * $optA(-extent)]
+    set start    [expr $anglesToRadians * $optA(-start)]
     set nsteps   [expr int(abs($extent)/$deltaPhi) + 2]
     set delta    [expr $extent/$nsteps]
     set data [format "M %.1f %.1f L"  \
@@ -632,9 +644,9 @@ proc can2svg::MakeArcPathNonA {coo opts} {
 	append data [format " %.1f %.1f"  \
 	  [expr $cx + $rx*cos($phi)] [expr $cy - $ry*sin($phi)]]
     }
-    if {[info exists optArr(-style)]} {
+    if {[info exists optA(-style)]} {
 	
-	switch -- $optArr(-style) {
+	switch -- $optA(-style) {
 	    chord {
 		append data " Z"
 	    }
@@ -686,13 +698,13 @@ proc can2svg::MakeStyleAttr {type opts} {
 
 proc can2svg::MakeStyleList {type opts args} {
     
-    array set argsArr {
+    array set argsA {
 	-setdefaults 1 
     }
-    array set argsArr $args
+    array set argsA $args
     
     # Defaults for everything except text.
-    if {$argsArr(-setdefaults) && ![string equal $type "text"]} {
+    if {$argsA(-setdefaults) && ![string equal $type "text"]} {
 	array set styleArr {fill none stroke black}
     }
     set fillCol black
@@ -992,20 +1004,20 @@ proc can2svg::BreakChar {char} {
 proc can2svg::MakeImageAttr {coo opts args} {
     variable confopts
     
-    array set optArr {-anchor nw}
-    array set optArr $opts
-    array set argsArr $args
+    array set optA {-anchor nw}
+    array set optA $opts
+    array set argsA $args
     
     set attrList [ImageCoordsToAttr $coo $opts]
 
     # We should make this an URI.
-    set theImage $optArr(-image)
-    set theFile [$theImage cget -file]
-    if {$theFile != ""} {
-	if {[string equal $argsArr(-uritype) "file"]} {
-	    set uri [FileUriFromLocalFile $theFile]
-	} elseif {[string equal $argsArr(-uritype) "http"]} {
-	    set uri [HttpFromLocalFile $theFile]
+    set image $optA(-image)
+    set fileName [$image cget -file]
+    if {$fileName ne ""} {
+	if {[string equal $argsA(-uritype) "file"]} {
+	    set uri [FileUriFromLocalFile $fileName]
+	} elseif {[string equal $argsA(-uritype) "http"]} {
+	    set uri [HttpFromLocalFile $fileName]
 	}
 	lappend attrList "xlink:href" $uri
     } else {
@@ -1015,10 +1027,10 @@ proc can2svg::MakeImageAttr {coo opts args} {
 }
 
 proc can2svg::ImageCoordsToAttr {coo opts} {
-    array set optArr {-anchor nw}
-    array set optArr $opts
-    if {[info exists optArr(-image)]} {
-	set theImage $optArr(-image)
+    array set optA {-anchor nw}
+    array set optA $opts
+    if {[info exists optA(-image)]} {
+	set theImage $optA(-image)
 	set w [image width $theImage]
 	set h [image height $theImage]
     } else {
@@ -1026,7 +1038,7 @@ proc can2svg::ImageCoordsToAttr {coo opts} {
     }
     foreach {x0 y0} $coo break
     
-    switch -- $optArr(-anchor) {
+    switch -- $optA(-anchor) {
 	nw {
 	    set x $x0
 	    set y $y0
@@ -1380,11 +1392,11 @@ proc can2svg::canvas2file {wcan path args} {
     variable defsArrowMarkerArr
     variable defsStipplePatternArr
     
-    array set argsArr [array get confopts]
+    array set argsA [array get confopts]
     foreach {x y width height} [$wcan cget -scrollregion] break
-    array set argsArr [list -width $width -height $height]
-    array set argsArr $args
-    set args [array get argsArr]
+    array set argsA [list -width $width -height $height]
+    array set argsA $args
+    set args [array get argsA]
     
     # Need to make a fresh start for marker def's.
     unset -nocomplain defsArrowMarkerArr defsStipplePatternArr
@@ -1411,7 +1423,7 @@ proc can2svg::canvas2file {wcan path args} {
 	set cmd [concat "create" $type $co $opcmd]
 	append xml "\t[eval {can2svg $cmd} $args]\n"	
     }
-    puts $fd [makedocument $argsArr(-width) $argsArr(-height) $xml]
+    puts $fd [makedocument $argsA(-width) $argsA(-height) $xml]
     close $fd
 }
 
@@ -1491,7 +1503,7 @@ proc can2svg::MakeXMLList {tagname args} {
     }
     
     # Build sub elements list.
-    set sublist {}
+    set sublist [list]
     foreach child $xmlarr(-subtags) {
 	lappend sublist $child
     }

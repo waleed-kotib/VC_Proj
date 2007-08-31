@@ -3,11 +3,11 @@
 #      This file is part of the jabberlib. 
 #      It provides support for the file-transfer profile (XEP-0096).
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.17 2007-08-29 06:30:11 matben Exp $
+# $Id: ftrans.tcl,v 1.18 2007-08-31 08:13:56 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -82,7 +82,7 @@ proc jlib::ftrans::init {jlibname args} {
 #       Just dispatches the command to the right procedure.
 #
 # Arguments:
-#       jlibname:   the instance of this ibb.
+#       jlibname:   the instance of this jlib.
 #       cmd:        
 #       args:       all args to the cmd procedure.
 #       
@@ -105,7 +105,7 @@ proc jlib::ftrans::cmdproc {jlibname cmd args} {
 #       High level interface to the file-transfer profile for si.
 #       
 # Arguments:
-#       jlibname:   the instance of this
+#       jlibname:   the instance of this jlib.
 #       jid:
 #       args:       
 #       
@@ -113,12 +113,49 @@ proc jlib::ftrans::cmdproc {jlibname cmd args} {
 #       sid to identify this transaction.
 
 proc jlib::ftrans::send {jlibname jid cmd args} {
-
-    #puts "jlib::ftrans::send (i)"
-    
     variable xmlns
     upvar ${jlibname}::ftrans::istate istate
- 
+    #puts "jlib::ftrans::send $args"
+
+    set sid [jlib::generateuuid]
+    set fileE [eval {i_constructor $jlibname $sid $jid $cmd} $args]
+
+    # The 'block-size' is crucial here; must tell the stream in question.
+    set cmd [namespace current]::open_cb
+    jlib::si::send_set $jlibname $jid $sid $istate($sid,-mime) $xmlns(ftrans)  \
+      $fileE $cmd -block-size $istate($sid,-block-size)
+    
+    return $sid
+}
+
+# jlib::ftrans::element --
+# 
+#       Makes an ftrans instance and returns the si element.
+
+proc jlib::ftrans::element {jlibname jid cmd args} {
+    variable xmlns
+    upvar ${jlibname}::ftrans::istate istate
+    
+    set sid [jlib::generateuuid]
+    set fileE [eval {i_constructor $jlibname $sid $jid $cmd} $args]
+    set cmd [namespace current]::open_cb
+
+    set siE [jlib::si::i_constructor $jlibname $jid $sid $istate($sid,-mime) \
+      $xmlns(ftrans) $fileE $cmd -block-size $istate($sid,-block-size)]
+    
+    return $siE
+}
+
+# jlib::ftrans::i_constructor --
+# 
+#       This is the initiator constructor of a file transfer object.
+#       Makes a new ftrans instance but doesn't do any networking.
+#       Returns the file element.
+
+proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
+    variable xmlns
+    upvar ${jlibname}::ftrans::istate istate
+    
     # 4096 is the recommended block-size
     array set opts {
 	-progress     ""
@@ -134,7 +171,8 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
       && ![info exists opts(-base64)]} {
 	return -code error "must have any of -data, -file, or -base64"
     }
-
+    #puts "jlib::ftrans::i_constructor $args"
+    
     # @@@ TODO
     if {![info exists opts(-file)]} {return -code error "todo"}    
     
@@ -161,9 +199,6 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
 	    return -code error "must have exactly one of -data, -file, or -base64"
 	}
     }
-    
-    set sid [jlib::generateuuid]
-
     set istate($sid,sid)    $sid
     set istate($sid,jid)    $jid
     set istate($sid,cmd)    $cmd
@@ -182,8 +217,8 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
     }
     set subElems [list]
     if {[string length $opts(-description)]} {
-	set descElem [wrapper::createtag "desc" -chdata $opts(-description)]
-	set subElems [list $descElem]
+	set descE [wrapper::createtag "desc" -chdata $opts(-description)]
+	set subElems [list $descE]
     }
     set attrs [list xmlns $xmlns(ftrans) name $name size $size]
     if {[string length $opts(-date)]} {
@@ -192,14 +227,9 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
     if {[string length $opts(-hash)]} {
 	lappend attrs hash $opts(-hash)
     }    
-    set fileElem [wrapper::createtag "file" -attrlist $attrs -subtags $subElems]
+    set fileE [wrapper::createtag "file" -attrlist $attrs -subtags $subElems]
     
-    # The 'block-size' is crucial here; must tell the stream in question.
-    set cmd [namespace current]::open_cb
-    jlib::si::send_set $jlibname $jid $sid $opts(-mime) $xmlns(ftrans)  \
-      $fileElem $cmd -block-size $opts(-block-size)
-      
-    return $sid
+    return $fileE
 }
 
 proc jlib::ftrans::open_cb {jlibname type sid subiq} {
@@ -367,8 +397,20 @@ proc jlib::ftrans::ifree {jlibname sid} {
 # jlib::ftrans::open_handler --
 # 
 #       Callback when si receives this specific profile (file-transfer).
+#       It is called as an iq-set/si handler.
+#       
+#       There are two ways this can work:
+#       1) We provide an respCmd tclProc which is used by the application
+#          layer to either accept or deny the file. The application handler
+#          must be registered. It invokes a callback given any -channel,
+#          -command, and -progess.
+#       2) With an empty respCmd we shall receive the file and provide any
+#          -channel, -command, and -progess.
+#          
+#       Alternative 1 is the normal situation for manual file transfers,
+#       and 2 is used when we receive embedded si-elements.
 
-proc jlib::ftrans::open_handler {jlibname sid jid iqChild respCmd} {
+proc jlib::ftrans::open_handler {jlibname sid jid siE respCmd args} {
     
     variable handler
     variable xmlns
@@ -378,16 +420,52 @@ proc jlib::ftrans::open_handler {jlibname sid jid iqChild respCmd} {
     if {![info exists handler]} {
 	return -code break
     }
+    eval {t_constructor $jlibname $sid $jid $siE} $args
     
-    set siElem $iqChild
-    set fileElem [wrapper::getfirstchild $siElem "file" $xmlns(ftrans)]
-    if {![llength $fileElem]} {
+    set tstate($sid,cmd) $respCmd
+    
+    if {$respCmd ne ""} {
+	set opts [list]
+	foreach key {mime desc hash date} {
+	    if {[string length $tstate($sid,$key)]} {
+		lappend opts -$key $tstate($sid,$key)
+	    }
+	}
+	lappend opts -queryE $siE
+	
+	# Make a call up to application level to pick destination file.
+	# This is an idle call in order to not block.
+	set cmd [list [namespace current]::accept $jlibname $sid]
+	after idle [list eval $handler  \
+	  [list $jlibname $jid $tstate($sid,name) $tstate($sid,size) $cmd] $opts]
+    }
+    return
+}
+
+proc jlib::ftrans::t_constructor {jlibname sid jid siE args} {
+    
+    variable handler
+    variable xmlns
+    upvar ${jlibname}::ftrans::tstate tstate
+    #puts "jlib::ftrans::t_constructor"
+
+    array set opts {
+	-channel    ""
+	-command    ""
+	-progress   ""
+    }
+    array set opts $args
+    set fileE [wrapper::getfirstchild $siE "file" $xmlns(ftrans)]
+    if {![llength $fileE]} {
 	# Exception
 	return
     }
     set tstate($sid,sid)  $sid
     set tstate($sid,jid)  $jid
-    set tstate($sid,mime) [wrapper::getattribute $siElem "mime-type"]
+    set tstate($sid,mime) [wrapper::getattribute $siE "mime-type"]
+    foreach {key value} [array get opts] {
+	set tstate($sid,$key) $value
+    }
     
     # File element attributes 'name' and 'size' are required!
     array set attr {
@@ -396,30 +474,18 @@ proc jlib::ftrans::open_handler {jlibname sid jid iqChild respCmd} {
 	date        ""
 	hash        ""
     }
-    array set attr [wrapper::getattrlist $fileElem]
+    array set attr [wrapper::getattrlist $fileE]
     foreach {name value} [array get attr] {
 	set tstate($sid,$name) $value
     }
     set tstate($sid,desc) ""
-    set descElem [wrapper::getfirstchildwithtag $fileElem "desc"]
-    if {[llength $descElem]} {
-	set tstate($sid,desc) [wrapper::getcdata $descElem]
+    set descE [wrapper::getfirstchildwithtag $fileE "desc"]
+    if {[llength $descE]} {
+	set tstate($sid,desc) [wrapper::getcdata $descE]
     }
-    set tstate($sid,cmd)   $respCmd
     set tstate($sid,bytes) 0
-    set opts [list]
-    foreach key {mime desc hash date} {
-	if {[string length $tstate($sid,$key)]} {
-	    lappend opts -$key $tstate($sid,$key)
-	}
-    }
-    lappend opts -queryE $iqChild
-    
-    # Make a call up to application level to pick destination file.
-    # This is an idle call in order to not block.
-    set cmd [list [namespace current]::accept $jlibname $sid]
-    after idle [list eval $handler  \
-      [list $jlibname $jid $attr(name) $attr(size) $cmd] $opts]
+    set tstate($sid,data)  ""
+
     return
 }
 
@@ -427,9 +493,11 @@ proc jlib::ftrans::open_handler {jlibname sid jid iqChild respCmd} {
 # 
 #       Used by profile handler to accept/reject file transfer.
 #       
-#       -channel
-#       -command
-#       -progress
+# Arguments:
+#       jlibname:   the instance of this jlib.
+#       args:       -channel
+#                   -command
+#                   -progress
 
 proc jlib::ftrans::accept {jlibname sid accepted args} {
     
@@ -452,13 +520,21 @@ proc jlib::ftrans::accept {jlibname sid accepted args} {
     } else {
 	set type error
     }
-    set tstate($sid,data) ""
-
     set respCmd $tstate($sid,cmd)
     eval $respCmd [list $type {}]
     if {!$accepted} {
 	tfree $jlibname $sid
     }
+}
+
+# jlib::ftrans::send_get --
+# 
+#       Despite the 'get' this belongs to the target since it is a response
+#       to an embedded si-element.
+
+proc jlib::ftrans::send_get {jlibname } {
+    
+    # -> si
 }
 
 # jlib::ftrans::recv --

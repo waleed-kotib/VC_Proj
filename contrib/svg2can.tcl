@@ -2,11 +2,11 @@
 #  
 #      This file provides translation from canvas commands to XML/SVG format.
 #      
-#  Copyright (c) 2004-2006  Mats Bengtsson
+#  Copyright (c) 2004-2007  Mats Bengtsson
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: svg2can.tcl,v 1.38 2007-07-19 06:28:11 matben Exp $
+# $Id: svg2can.tcl,v 1.39 2007-08-31 08:13:56 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -46,6 +46,7 @@ namespace eval svg2can {
 	-foreignobjecthandler ""
 	-httphandler          ""
 	-imagehandler         ""
+	-imagehandlerex       ""
     }
 
     variable textAnchorMap
@@ -238,6 +239,7 @@ proc svg2can::parsesvgdocument {xmllist args} {
 #       args        configuration options
 #          -httphandler
 #    	   -imagehandler            
+#    	   -imagehandlerex            
 #       
 # Results:
 #       a list of canvas commands without the widgetPath
@@ -610,6 +612,11 @@ proc svg2can::ParseImage {xmllist paropts transformL args} {
     }
     lappend opts -tags $tags -anchor nw
     set opts [MergePresentationAttr image $opts $presAttr]
+
+    if {[string length $paroptsA(-imagehandlerex)]} {		    
+	uplevel #0 $paroptsA(-imagehandlerex) [list $xmllist $opts]
+	return
+    }
     
     # Handle the xlink:href attribute.
     if {[info exists xlinkhref]} {
@@ -663,6 +670,7 @@ proc svg2can::ParseImageEx {xmllist paropts transAttr args} {
     set presAttr {}
     array set attrA $args
     array set attrA [getattr $xmllist]
+    array set paroptsA $paropts
 
     foreach {key value} [array get attrA] {	
 	switch -- $key {
@@ -697,6 +705,10 @@ proc svg2can::ParseImageEx {xmllist paropts transAttr args} {
     lappend opts -width $width -height $height
     if {[llength $transAttr]} {
 	lappend opts -matrix [TransformAttrListToMatrix $transAttr]
+    }
+    if {[string length $paroptsA(-imagehandlerex)]} {		    
+	uplevel #0 $paroptsA(-imagehandlerex) [list $xmllist $opts]
+	return
     }
 
     # Handle the xlink:href attribute.
