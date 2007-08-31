@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.185 2007-08-16 13:05:15 matben Exp $
+# $Id: jabberlib.tcl,v 1.186 2007-08-31 08:13:56 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1284,8 +1284,7 @@ proc jlib::send_iq_error {jlibname jid id errcode errtype stanza {extraElem {}}}
       -attrlist [list code $errcode type $errtype]  \
       -subtags $errChilds]
     set iqElem [wrapper::createtag "iq"  \
-      -attrlist [list type error to $jid id $id]  \
-      -subtags [list $errElem]]
+      -attrlist [list type error to $jid id $id] -subtags [list $errElem]]
 
     send $jlibname $iqElem
 }
