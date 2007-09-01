@@ -1094,6 +1094,7 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 ::msgcat::mcset en prefcusave            {Save message inbox between sessions}
 ::msgcat::mcset en prefcushow            {Show incoming messages in new window}
 ::msgcat::mcset en prefcuupdate          {Automatically check for new Coccinella version}
+::msgcat::mcset en prefdirsame           {Store preferences in same directory as program}
 ::msgcat::mcset en prefdrivesame         {Always store user preferences on same drive as program}
 ::msgcat::mcset en prefdriwdef           {You have chosen to store your preferences in the default place. Unless you also remove or move your personal settings at "%s" it will automatically be used the next time you launch Coccinella. Do you want them removed now?}
 ::msgcat::mcset en prefdriwsame          {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible. Do you want to continue?}
