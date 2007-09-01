@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasUtils.tcl,v 1.42 2007-07-19 06:28:19 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.43 2007-09-01 07:49:06 matben Exp $
 
 package require sha1
 package require can2svg
@@ -2411,7 +2411,7 @@ proc ::CanvasUtils::ItemFree {w} {
 
 proc ::CanvasUtils::GetCompleteCanvas {wcan} {
     
-    set cmdList {}
+    set cmdList [list]
     
     foreach id [$wcan find all] {
 	set tags [$wcan gettags $id]

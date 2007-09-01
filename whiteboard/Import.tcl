@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Import.tcl,v 1.28 2007-07-19 06:28:19 matben Exp $
+# $Id: Import.tcl,v 1.29 2007-09-01 07:49:06 matben Exp $
 
 package require http
 package require httpex
@@ -440,7 +440,7 @@ proc ::Import::DrawImage {wcan optsVar args} {
     if {[info exists optArr(-below)]} {
 	catch {$wcan lower $utag $optArr(-below)}
     }
-    lappend opts -width [image width $imageName]  \
+    lappend opts -width [image width $imageName] \
       -height [image height $imageName]
 
     # Cache options.

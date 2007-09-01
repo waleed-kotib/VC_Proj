@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.81 2007-07-28 13:30:31 matben Exp $
+# $Id: JWB.tcl,v 1.82 2007-09-01 07:49:05 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -845,7 +845,7 @@ proc ::JWB::SendRawMessageList {jid msgList args} {
     upvar ::Jabber::jstate jstate
  
     # Form an <x xmlns='coccinella:wb'><raw> element in message.
-    set subx {}
+    set subx [list]
     foreach cmd $msgList {
 	lappend subx [wrapper::createtag "raw" -chdata $cmd]
     }
@@ -872,20 +872,21 @@ proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
     if {$jprefs(useSVGT)} {
 	
 	# Form SVG element.
-	set subx {}
+	set subx [list]
 	set wcan [::WB::GetCanvasFromWtop $w]
 	foreach cmd $cmdList {
 	    set cmd [::CanvasUtils::FontHtmlToPixelSize $cmd]
 	    set subx [concat $subx \
 	      [can2svgwb::svgasxmllist $cmd -usestyleattribute 0 -canvas $wcan \
-	      -unknownimporthandler ::CanvasUtils::GetSVGForeignFromImportCmd]]
+	      -unknownimporthandler ::CanvasUtils::GetSVGForeignFromImportCmd \
+	      -importimagehandler [namespace code [list SVGImageImportElem $w]]]]
 	}
 	set xlist [list [wrapper::createtag x -attrlist  \
 	  [list xmlns $xmlnsSVGWB] -subtags $subx]]
     } else {
     
 	# Form an <x xmlns='coccinella:wb'><raw> element in message.
-	set subx {}
+	set subx [list]
 	foreach cmd $cmdList {
 	    lappend subx [wrapper::createtag "raw" -chdata "CANVAS: $cmd"]
 	}
@@ -899,6 +900,26 @@ proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
     # Needs more testing...
     # lappend xlist $ampElem
     return $xlist
+}
+
+proc ::JWB::SVGImageImportElem {w cmd args} {
+    variable jwbstate
+    
+    set rest [lrange $cmd 2 end]
+    set idx [lsearch $cmd -url]
+    if {$idx == -1} {
+	return
+    }
+    set url [lindex $cmd [incr idx]]
+    set dir [can2svg::config -httpbasedir]
+    array set uri [::uri::split $url http]
+    set fileName [file normalize [file join $dir $uri(path)]]
+    if {![file exists $fileName]} {
+	return
+    }    
+    set jid $jwbstate($w,jid)
+    set siE [::Jabber::JlibCmd filetransfer element $jid ftrans -file $fileName]
+    return $siE
 }
 
 # JWB::DoSendCanvas --
@@ -923,7 +944,7 @@ proc ::JWB::DoSendCanvas {w} {
 	    }
 	}
 	::CanvasCmd::DoSendCanvas $w
-	::WB::CloseWhiteboard     $w
+	::WB::CloseWhiteboard $w
     } else {
 	::UI::MessageBox -icon warning -type ok -parent $w \
 	  -message [mc jamessinvalidjid]
@@ -1114,7 +1135,7 @@ proc ::JWB::HandleSVGWBGroupchatMessage {jlibname xmlns msgElem args} {
 
 proc ::JWB::GetRawMessageList {xlist xmlns} {
     
-    set rawElemList {}
+    set rawElemList [list]
     
     foreach xelem $xlist {
 	array set attrArr [wrapper::getattrlist $xelem]
@@ -1135,7 +1156,7 @@ proc ::JWB::GetRawMessageList {xlist xmlns} {
 
 proc ::JWB::GetRawCanvasMessageList {xlist xmlns} {
     
-    set cmdList {}
+    set cmdList [list]
     
     foreach xelem $xlist {
 	array set attrArr [wrapper::getattrlist $xelem]
@@ -1160,18 +1181,31 @@ proc ::JWB::GetSVGWBMessageList {w xlist} {
     variable xmlnsSVGWB
 
     set wcan [::WB::GetCanvasFromWtop $w]
-    set cmdList {}
+    set cmdList [list]
     
     foreach xelem $xlist {
 	array set attrArr [wrapper::getattrlist $xelem]
 	if {[string equal $attrArr(xmlns) $xmlnsSVGWB]} {
 	    set cmdList [svgwb2can::parsesvgdocument $xelem -canvas $wcan \
-	      -foreignobjecthandler \
-	      [list [namespace current]::SVGForeignObjectHandler $w] \
-	      -httphandler [list [namespace current]::SVGHttpHandler $w]]
+	      -foreignobjecthandler [namespace code [list SVGForeignObjectHandler $w]] \
+	      -httphandler [namespace code [list SVGHttpHandler $w]] \
+	      -imagehandlerex [namespace code [list SVGImageHandlerEx $w]]]
 	}
     }
     return $cmdList
+}
+
+# JWB::SVGImageHandlerEx --
+# 
+#       Gets called for each image element we find in the document.
+#       It takes care of any si element for getting the image.
+
+proc ::JWB::SVGImageHandlerEx {w xmllist opts} {
+    
+    puts "::JWB::SVGImageHandlerEx"
+    
+    
+    
 }
 
 # JWB::SVGForeignObjectHandler --

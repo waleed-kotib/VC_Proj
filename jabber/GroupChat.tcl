@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.202 2007-08-23 13:01:29 matben Exp $
+# $Id: GroupChat.tcl,v 1.203 2007-09-01 07:49:05 matben Exp $
 
 package require Create
 package require Enter
@@ -360,7 +360,7 @@ proc ::GroupChat::EnterHook {roomjid protocol} {
 	TreeDeleteAll $chatstate(wusers)
 	AddUsers $chattoken
 	SetState $chattoken normal
-	$chatstate(wbtexit) configure -text [mc Exit]
+	#$chatstate(wbtexit) configure -text [mc Exit]
 
 	set chatstate(show)           "available"
 	set chatstate(oldShow)        "available"
@@ -800,7 +800,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set chatstate(w) $w    
 
     # Button part.
-    set wbtexit   $wbot.btcancel
+    #set wbtexit   $wbot.btcancel
     set wgroup    $wbot.grp
     set wbtstatus $wgroup.stat
     set wbtbmark  $wgroup.bmark
@@ -808,8 +808,8 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     ttk::frame $wbot
     ttk::button $wbot.btok -text [mc Send]  \
       -default active -command [list [namespace current]::Send $dlgtoken]
-    ttk::button $wbot.btcancel -text [mc Exit]  \
-      -command [list [namespace current]::ExitAndClose $chattoken]
+    #ttk::button $wbot.btcancel -text [mc Exit]  \
+     # -command [list [namespace current]::ExitAndClose $chattoken]
 
     ttk::frame $wgroup
     ttk::checkbutton $wgroup.active -style Toolbutton \
@@ -846,9 +846,9 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $wbot.btok  -side right
-	pack $wbot.btcancel -side right -padx $padx
+	#pack $wbot.btcancel -side right -padx $padx
     } else {
-	pack $wbot.btcancel -side right
+	#pack $wbot.btcancel -side right
 	pack $wbot.btok -side right -padx $padx
     }
     pack  $wgroup -side left
@@ -951,7 +951,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set chatstate(wbtsend)      $wbtsend
     set chatstate(wbtstatus)    $wbtstatus
     set chatstate(wbtbmark)     $wbtbmark
-    set chatstate(wbtexit)      $wbtexit
+    #set chatstate(wbtexit)      $wbtexit
     
     set ancient [expr {[clock clicks -milliseconds] - 1000000}]
     foreach whom {me you sys} {
@@ -1375,7 +1375,7 @@ proc ::GroupChat::SetLogout {chattoken} {
     set myjid $chatstate(roomjid)/$nick
     TreeRemoveUser $chattoken $myjid
 
-    $chatstate(wbtexit) configure -text [mc Close]
+    #$chatstate(wbtexit) configure -text [mc Close]
     
     set chatstate(show)           "unavailable"
     set chatstate(oldShow)        "unavailable"

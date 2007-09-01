@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.18 2007-08-31 08:13:56 matben Exp $
+# $Id: ftrans.tcl,v 1.19 2007-09-01 07:49:05 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -188,6 +188,9 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
 	0,0,1 {
 	    set dtype file
 	    set fileName $opts(-file)
+	    
+	    # @@@ Maybe we should delay this until the file is requested?
+	    # open_cb
 	    if {[catch {open $fileName {RDONLY}} fd]} {
 		return -code error "failed open file \"$fileName\""
 	    }
@@ -525,16 +528,6 @@ proc jlib::ftrans::accept {jlibname sid accepted args} {
     if {!$accepted} {
 	tfree $jlibname $sid
     }
-}
-
-# jlib::ftrans::send_get --
-# 
-#       Despite the 'get' this belongs to the target since it is a response
-#       to an embedded si-element.
-
-proc jlib::ftrans::send_get {jlibname } {
-    
-    # -> si
 }
 
 # jlib::ftrans::recv --

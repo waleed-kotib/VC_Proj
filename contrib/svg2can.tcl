@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: svg2can.tcl,v 1.39 2007-08-31 08:13:56 matben Exp $
+# $Id: svg2can.tcl,v 1.40 2007-09-01 07:49:05 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -273,7 +273,7 @@ proc svg2can::parseelement {xmllist args} {
 
 proc svg2can::ParseElemRecursive {xmllist paropts transformL args} {
 
-    set cmdList {}
+    set cmdList [list]
     set tag [gettag $xmllist]
     
     # Handle any tranform attribute; may be recursive, so keep a list.

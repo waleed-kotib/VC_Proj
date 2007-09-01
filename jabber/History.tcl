@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: History.tcl,v 1.30 2007-08-12 08:17:45 matben Exp $
+# $Id: History.tcl,v 1.31 2007-09-01 07:49:05 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -965,7 +965,7 @@ proc ::History::BuildHistory {jid dlgtype args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btcancel -text [mc Close] \
+    ttk::button $frbot.btcancel -text [mc Cancel] \
       -command [list destroy $w]
     ttk::button $frbot.btclear -text [mc Clear]  \
       -command [list [namespace current]::ClearHistory $jid $wtext]
@@ -976,14 +976,14 @@ proc ::History::BuildHistory {jid dlgtype args} {
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btcancel -side right
+	pack $frbot.btsave   -side right -padx $padx
+	pack $frbot.btprint  -side right
+	pack $frbot.btclear  -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right -padx $padx
+	pack $frbot.btsave   -side right
 	pack $frbot.btclear  -side right -padx $padx
 	pack $frbot.btprint  -side right
-	pack $frbot.btsave   -side right -padx $padx
-    } else {
-	pack $frbot.btsave   -side right
-	pack $frbot.btprint  -side right -padx $padx
-	pack $frbot.btclear  -side right
-	pack $frbot.btcancel -side right -padx $padx
     }
     pack $frbot -side bottom -fill x
     
