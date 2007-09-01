@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PrefGeneral.tcl,v 1.4 2007-07-19 06:28:18 matben Exp $
+# $Id: PrefGeneral.tcl,v 1.5 2007-09-01 14:46:30 matben Exp $
  
 package provide PrefGeneral 1.0
 
@@ -28,24 +28,31 @@ namespace eval ::PrefGeneral:: {
     ::hooks::register prefsBuildHook         ::PrefGeneral::BuildPrefsHook
     ::hooks::register prefsSaveHook          ::PrefGeneral::SavePrefsHook
     ::hooks::register prefsCancelHook        ::PrefGeneral::CancelPrefsHook
+    
+    # Mutually exclusive.
+    set ::config(prefs,sameDrive)  0
+    set ::config(prefs,sameDir)    1
 }
 
-proc ::PrefGeneral::InitPrefsHook { } {
+proc ::PrefGeneral::InitPrefsHook {} {
     global  prefs
     
     # This is actually never used from the prefs file.
     set prefs(prefsSameDrive) 0
+    set prefs(prefsSameDir)   0
     
     ::PrefUtils::Add [list  \
       [list prefs(prefsSameDrive)  prefs_prefsSameDrive  $prefs(prefsSameDrive)] \
+      [list prefs(prefsSameDir)    prefs_prefsSameDir    $prefs(prefsSameDir)] \
       ]
 }
 
 proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
-    global  this prefs
+    global  this prefs config
     variable tmpPrefs
     
     set tmpPrefs(prefsSameDrive) $prefs(prefsSameDrive)
+    set tmpPrefs(prefsSameDir)   $prefs(prefsSameDir)
     
     set wpage [$nbframe page {General}]
     set wc $wpage.c
@@ -57,8 +64,13 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
     ttk::frame $wc.d
     ttk::label $wd.l -text [mc Settings]
     ttk::separator $wd.s -orient horizontal
-    ttk::checkbutton $wd.c -text [mc prefdrivesame] \
-      -variable [namespace current]::tmpPrefs(prefsSameDrive)
+    if {$config(prefs,sameDrive)} {
+	ttk::checkbutton $wd.c -text [mc prefdrivesame] \
+	  -variable [namespace current]::tmpPrefs(prefsSameDrive)
+    } elseif {$config(prefs,sameDir)} {
+	ttk::checkbutton $wd.c -text [mc prefdirsame] \
+	  -variable [namespace current]::tmpPrefs(prefsSameDir)
+    }
     
     grid  $wd.l  $wd.s  -sticky w
     grid  $wd.c  -      -sticky w -pady 1
@@ -67,16 +79,27 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
     
     pack $wd -side top -fill x -anchor w
     
-    # If the app not lives on another drive.
-    if { ![::Init::IsAppOnRemovableDrive] } {
-	set prefs(prefsSameDrive) 0
-	$wd.c state {disabled}
-    }
-    
-    # Don't know how to detect removable drives here.
-    if { $this(platform) eq "unix" } {
-	set prefs(prefsSameDrive) 0
-	$wd.c state {disabled}
+    if {$config(prefs,sameDrive)} {
+
+	# If the app not lives on another drive.
+	if { ![::Init::IsAppOnRemovableDrive] } {
+	    set prefs(prefsSameDrive) 0
+	    $wd.c state {disabled}
+	}
+	
+	# Don't know how to detect removable drives here.
+	if { $this(platform) eq "unix" } {
+	    set prefs(prefsSameDrive) 0
+	    $wd.c state {disabled}
+	}
+    } elseif {$config(prefs,sameDir)} {
+
+	# Must verify that application folder writable.
+	set psplit [file split $this(appPath)]
+	if {![file writable [eval file join [lrange $psplit 0 end-1]]]} {
+	    set prefs(prefsSameDir) 0
+	    $wd.c state {disabled}
+	}
     }
         
     # Language.
@@ -100,34 +123,59 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::PrefGeneral::SavePrefsHook {} {
-    global prefs this
+    global prefs this config
     variable tmpPrefs
     
-    if {$tmpPrefs(prefsSameDrive) && !$prefs(prefsSameDrive)} {
-	set ans [tk_messageBox -icon question -type yesno  \
-	  -message [mc prefdriwsame]]
-	if {$ans eq "yes"} {
-	    set prefs(prefsSameDrive) $tmpPrefs(prefsSameDrive)
+    if {$config(prefs,sameDrive)} {
+	if {$tmpPrefs(prefsSameDrive) && !$prefs(prefsSameDrive)} {
+	    set ans [tk_messageBox -icon question -type yesno  \
+	      -message [mc prefdriwsame]]
+	    if {$ans eq "yes"} {
+		set prefs(prefsSameDrive) 1
+		
+		# Need to change all paths that depend on this(prefsPath) and make
+		# sure dirs are there (removable drive).
+		::Init::SetPrefsPathToRemovable
+		::hooks::run prefsFilePathChangedHook
+	    }
+	} elseif {!$tmpPrefs(prefsSameDrive) && $prefs(prefsSameDrive)} {
 	    
-	    # Need to change all paths that depend on this(prefsPath) and make
-	    # sure dirs are there (removable drive).
-	    ::Init::SetPrefsPathToRemovable
+	    # Remove prefs file so we wont detect it next time we are launched.
+	    set prefFile [file join [::Init::GetAppDrivePrefsPath] $this(prefsName)]
+	    if {[file exists $prefFile]} {
+		set ans [tk_messageBox -icon question -type yesno  \
+		  -message [mc prefdriwdef $prefFile]]
+		if {$ans eq "yes"} {
+		    file delete $prefFile
+		}	
+	    }
+	    ::Init::SetPrefsPathToDefault
+	    set prefs(prefsSameDrive) 0
 	    ::hooks::run prefsFilePathChangedHook
 	}
-    } elseif {!$tmpPrefs(prefsSameDrive) && $prefs(prefsSameDrive)} {
-	
-	# Remove prefs file so we wont detect it next time we are launched.
-	set prefFile [file join [::Init::GetAppDrivePrefsPath] $this(prefsName)]
-	if {[file exists $prefFile]} {
-	    set ans [tk_messageBox -icon question -type yesno  \
-	      -message [mc prefdriwdef $prefFile]]
-	    if {$ans eq "yes"} {
-		file delete $prefFile
-	    }	
-	}
-	::Init::SetPrefsPathToDefault
-	set prefs(prefsSameDrive) $tmpPrefs(prefsSameDrive)
-	::hooks::run prefsFilePathChangedHook
+    } elseif {$config(prefs,sameDir)} {
+	if {$tmpPrefs(prefsSameDir) && !$prefs(prefsSameDir)} {
+	    set prefs(prefsSameDir) 1
+	    
+	    # Need to change all paths that depend on this(prefsPath) and make
+	    # sure dirs are there.
+	    ::Init::SetPrefsPathToAppDir
+	    ::hooks::run prefsFilePathChangedHook
+	} elseif {!$tmpPrefs(prefsSameDir) && $prefs(prefsSameDir)} {
+
+	    # Remove prefs file so we wont detect it next time we are launched.
+	    set prefFile [file join [::Init::GetAppDirPrefsPath] $this(prefsName)]
+	    if {[file exists $prefFile]} {
+		set ans [tk_messageBox -icon question -type yesno  \
+		  -message [mc prefdriwdef $prefFile]]
+		if {$ans eq "yes"} {
+		    file delete $prefFile
+		}	
+	    }
+	    ::Init::SetPrefsPathToDefault
+	    set prefs(prefsSameDir) 0
+	    ::hooks::run prefsFilePathChangedHook
+	}	
     }
     
     # Load any new message catalog.

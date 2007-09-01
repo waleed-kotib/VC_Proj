@@ -1170,6 +1170,7 @@ Om du väljer att blockera en grupp så måste denna finnas i din roster.}
 ::msgcat::mcset sv prefproxyexc  {Uteslut följande adresser (* som jokertecken)}
 
 
+::msgcat::mcset sv prefdirsame           {Spara användarinställningar i samma mapp som programmet}
 ::msgcat::mcset sv prefdrivesame {Spara alltid användarinställningar på samma disk som programmet}
 ::msgcat::mcset sv prefdriwsame  {Du har valt att spara dina inställningar på samma disk som programmet. Om denna disk inte är löstagbar så kan dina inställningar bli synliga. Vill du fortsätta?}
 ::msgcat::mcset sv prefdriwdef   {Du har valt att spara dina inställningar på normala stället. Om du inte också tar bort inställningarna "%s" så kommer de att användas nästa gång. Vill du ta bort dem nu?}

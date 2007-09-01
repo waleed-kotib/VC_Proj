@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.70 2007-09-01 07:49:05 matben Exp $
+# $Id: Init.tcl,v 1.71 2007-09-01 14:46:30 matben Exp $
 
 namespace eval ::Init {}
 
@@ -61,6 +61,21 @@ proc ::Init::SetThis {mainScript} {
     set this(appPath)           $path
     if {[info exists starkit::topdir]} {
 	set this(appPath) [file dirname [info nameofexecutable]]
+    } elseif {$this(platform) eq "macosx"} {
+	
+	# If we have an application bundle we must get the .app folder.
+	# bundle typically 'Coccinella-0.96.0.app'
+	set psplit [file split $this(appPath)]
+	set bundle [lsearch -glob -inline $psplit *.app]
+	if {$bundle ne ""} {
+	    set appBundle [lsearch -glob -inline \
+	      [file split [info nameofexecutable]] *.app]
+	    if {$appBundle eq $bundle} {
+		set idx [lsearch -glob $psplit *.app]
+		incr idx -1
+		set this(appPath) [eval file join [lrange $psplit 0 $idx]]
+	    }
+	}
     }
     
     # Path where preferences etc are stored.
@@ -91,6 +106,15 @@ proc ::Init::SetThis {mainScript} {
 	    set this(prefsPath) $prefsPathDrive
 	}    
     }
+    
+    # Search for the prefs file in the applicatons folder first.
+    set this(prefsPathAppDir) 0
+    set prefsPathDir [GetAppDirPrefsPath]
+    set prefFile [file join $prefsPathDir $this(prefsName)]
+    if {[file exists $prefFile] && [file writable $prefFile]} {
+	set this(prefsPathAppDir) 1
+	set this(prefsPath) $prefsPathDir
+    }    
     
     # Sets all paths that are dependent on this(prefsPath).
     SetPrefsPaths
@@ -315,6 +339,14 @@ proc ::Init::GetAppDrivePrefsPath {} {
     return $path
 }
 
+#       One above this(appPath).
+
+proc ::Init::GetAppDirPrefsPath {} {
+    global  this
+    set psplit [file split $this(appPath)]
+    return [eval file join [lrange $psplit 0 end-1] $this(prefsDriverDir)]
+}
+
 # Init::SetPrefsPaths --
 # 
 #       Is supposed to set all standard paths that are dependent on 
@@ -373,6 +405,7 @@ proc ::Init::SetPrefsPathToDefault {} {
     
     set this(prefsPath) [GetDefaultPrefsPath]
     set this(prefsPathRemovable) 0
+    set this(prefsPathAppDir) 0
 
     SetPrefsPaths
     MakePrefsDirs
@@ -383,7 +416,18 @@ proc ::Init::SetPrefsPathToRemovable {} {
     
     set this(prefsPath) [GetAppDrivePrefsPath]
     set this(prefsPathRemovable) 1
+    set this(prefsPathAppDir) 0
     
+    SetPrefsPaths
+    MakePrefsDirs
+}
+
+proc ::Init::SetPrefsPathToAppDir {} {
+    global  this
+
+    set this(prefsPath) [GetAppDirPrefsPath]
+    set this(prefsPathAppDir) 1
+
     SetPrefsPaths
     MakePrefsDirs
 }
