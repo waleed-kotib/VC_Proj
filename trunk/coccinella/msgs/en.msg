@@ -501,6 +501,7 @@
 ::msgcat::mcset en {Advanced Configuration}
 ::msgcat::mcset en {Advanced Setup}
 ::msgcat::mcset en {Alert sounds}
+::msgcat::mcset en {Alternative Room JID}
 ::msgcat::mcset en {As text}
 ::msgcat::mcset en {Ask each time}
 ::msgcat::mcset en {Auto Away}
@@ -880,6 +881,7 @@
 ::msgcat::mcset en jamessconfservempty   {We require the server to be filled with a valid name.}
 ::msgcat::mcset en jamessconnbroken      {The connection was unexpectedly broken.}
 ::msgcat::mcset en jamessenterroomempty  {We require both the server and room name entries to be filled with valid names.}
+::msgcat::mcset en jamessenterroomretry  {Error when entering room "%s": %s Do you want to retry?}
 ::msgcat::mcset en jamesserragentget     {We got an error when obtaining agents: %s}
 ::msgcat::mcset en jamesserrautoupdate   {We received an error when quering %s for updated client software. The error was: %s}
 ::msgcat::mcset en jamesserrbrowse       {We got an error when browsing "%s": %s}

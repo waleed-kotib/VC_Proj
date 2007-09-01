@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.69 2007-08-15 09:29:58 matben Exp $
+# $Id: Init.tcl,v 1.70 2007-09-01 07:49:05 matben Exp $
 
 namespace eval ::Init {}
 
@@ -300,7 +300,7 @@ proc ::Init::IsAppOnRemovableDrive {} {
 proc ::Init::GetAppDrivePrefsPath {} {
     global  this
     
-    set lapp   [file split $this(appPath)]
+    set lapp [file split $this(appPath)]
 
     if {$this(platform) eq "windows"} {
 	set path [file join [lindex $lapp 0] $this(prefsDriverDir)]
@@ -374,8 +374,8 @@ proc ::Init::SetPrefsPathToDefault {} {
     set this(prefsPath) [GetDefaultPrefsPath]
     set this(prefsPathRemovable) 0
 
-    ::Init::SetPrefsPaths
-    ::Init::MakePrefsDirs
+    SetPrefsPaths
+    MakePrefsDirs
 }
 
 proc ::Init::SetPrefsPathToRemovable {} {
@@ -384,8 +384,8 @@ proc ::Init::SetPrefsPathToRemovable {} {
     set this(prefsPath) [GetAppDrivePrefsPath]
     set this(prefsPathRemovable) 1
     
-    ::Init::SetPrefsPaths
-    ::Init::MakePrefsDirs
+    SetPrefsPaths
+    MakePrefsDirs
 }
 
 proc ::Init::GetUserName {} {

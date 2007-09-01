@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: can2svgwb.tcl,v 1.9 2007-08-31 08:13:56 matben Exp $
+# $Id: can2svgwb.tcl,v 1.10 2007-09-01 07:49:05 matben Exp $
 
 package require can2svg
 
@@ -28,6 +28,7 @@ namespace eval can2svgwb {
 #       cmd         canvas command without prepending widget path.
 #       args    -canvas     widgetPath
 #               -httpbasedir  path
+#               -imagehandler tclProc
 #               -unknownimporthandler
 #               -uritype    file|http
 #               -usetags    0|all|first|last
@@ -39,7 +40,7 @@ namespace eval can2svgwb {
 proc can2svgwb::svgasxmllist {cmd args} {
     
     set instr [lindex $cmd 0]
-    set xmllist {}
+    set xmllist [list]
     
     switch -- $instr {
 	create {
@@ -66,12 +67,12 @@ proc can2svgwb::svgasxmllist {cmd args} {
 
 proc can2svgwb::Parseconfigure {cmd args} {
     
-    array set argsArr $args
+    array set argsA $args
     set id [lindex $cmd 1]
     set opts [lrange $cmd 2 end]
     # How on earth to get the item type???????????????????????????
-    if {[info exists argsArr(-canvas)]} {
-	set type [$argsArr(-canvas) type $id]
+    if {[info exists argsA(-canvas)]} {
+	set type [$argsA(-canvas) type $id]
     } else {
 	# Fallback.
 	set type polygon
@@ -82,7 +83,7 @@ proc can2svgwb::Parseconfigure {cmd args} {
     switch -- $type {
 	arc {
 	    # Make a new one seems simplest.
-	    set arccmd [concat {create arc} [$argsArr(-canvas) coords $id] $opts]
+	    set arccmd [concat {create arc} [$argsA(-canvas) coords $id] $opts]
 	    set xmllist [lindex [eval {can2svg::svgasxmllist $arccmd} $args] 0]
 	    set attrlist [wrapper::getattrlist $xmllist]
 	    #puts "------arccomd=$arccmd"
@@ -99,11 +100,11 @@ proc can2svgwb::Parseconfigure {cmd args} {
 
 proc can2svgwb::Parsecoords {cmd args} {
     
-    array set argsArr $args
+    array set argsA $args
     set id [lindex $cmd 1]
     # How on earth to get the item type???????????????????????????
-    if {[info exists argsArr(-canvas)]} {
-	set type [$argsArr(-canvas) type $id]
+    if {[info exists argsA(-canvas)]} {
+	set type [$argsA(-canvas) type $id]
     } else {
 	return {}
     }
@@ -119,7 +120,7 @@ proc can2svgwb::Parsecoords {cmd args} {
 	default {
     
 	    # Need opts of item.
-	    set opts [GetOptsList $argsArr(-canvas) $id]
+	    set opts [GetOptsList $argsA(-canvas) $id]
 	    set attrlist [can2svg::CoordsToAttr $type $coo $opts svgElement]
 	}
     }
@@ -148,13 +149,12 @@ proc can2svgwb::GetOptsList {w id} {
 #       import 112.0 112.0 -tags xyz/132542970 -url http://.../aMSN_128.png 
 #           -width 128 -height 128
 
-
 proc can2svgwb::Parseimport {cmd args} {
 
     # Assume image for the moment...
     # We don't have the -image option here.
     
-    array set argsArr $args
+    array set argsA $args
     
     # How to know if image or window item? -mime REQUIRED!
     set ind [lsearch $cmd -mime]
@@ -164,16 +164,17 @@ proc can2svgwb::Parseimport {cmd args} {
     }
     set type [lindex [split [lindex $cmd [incr ind]] /] 0]
     if {[string equal $type "image"]} {
-	return [ParseImportImage $cmd]
+	return [eval {ParseImportImage $cmd} $args]
     } else {
-	if {[string length $argsArr(-unknownimporthandler)]} {
-	    return [uplevel #0 $argsArr(-unknownimporthandler) [list $cmd] $args]
+	if {[string length $argsA(-unknownimporthandler)]} {
+	    return [uplevel #0 $argsA(-unknownimporthandler) [list $cmd] $args]
 	}
     }
 }
 
-proc can2svgwb::ParseImportImage {cmd} {
+proc can2svgwb::ParseImportImage {cmd args} {
     
+    array set argsA $args
     set attrlist [list x [lindex $cmd 1] y [lindex $cmd 2]]
     foreach {key value} [lrange $cmd 3 end] {
 	
@@ -189,7 +190,14 @@ proc can2svgwb::ParseImportImage {cmd} {
 	    }
 	}	
     }
-    return [wrapper::createtag image -attrlist $attrlist]
+    set subEs [list]
+    if {[info exists argsA(-importimagehandler)]} {
+	set subE [uplevel #0 $argsA(-importimagehandler) [list $cmd] $args]
+	if {[llength $subE]} {
+	    set subEs [list $subE]
+	}
+    }
+    return [wrapper::createtag image -attrlist $attrlist -subtags $subEs]
 }
 
 proc can2svgwb::Parsedchars {cmd} {

@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: si.tcl,v 1.19 2007-08-31 08:13:56 matben Exp $
+# $Id: si.tcl,v 1.20 2007-09-01 07:49:05 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -97,7 +97,7 @@ namespace eval jlib::si {
     
     # Storage for registered transports.
     variable trpt
-    set trpt(list) {}
+    set trpt(list) [list]
         
     jlib::disco::registerfeature $xmlns(si)
 

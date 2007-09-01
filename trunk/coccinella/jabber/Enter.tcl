@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements groupchat enter UI independent of protocol used.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.14 2007-08-03 06:34:50 matben Exp $
+# $Id: Enter.tcl,v 1.15 2007-09-01 07:49:05 matben Exp $
 
 package provide Enter 1.0
 
@@ -621,10 +621,8 @@ proc ::Enter::MUCCallback {token jlibname xmldata} {
 		401 - not-authorized {
 		    
 		    # Password required.
-		    set msg "Error when entering room \"$roomjid\":\
-		      $errmsg Do you want to retry?"
 		    set ans [::UI::MessageBox -type yesno -icon error  \
-		      -message $msg]
+		      -message [mc jamessenterroomretry $roomjid $errmsg]]
 		    if {$ans eq "yes"} {
 			set retry 1
 			Build "muc" -roomjid $state(roomjid)  \

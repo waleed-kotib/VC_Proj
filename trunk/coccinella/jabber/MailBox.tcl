@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.118 2007-08-29 06:30:11 matben Exp $
+# $Id: MailBox.tcl,v 1.119 2007-09-01 07:49:05 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1238,8 +1238,7 @@ proc ::MailBox::DisplayXElementSVG {jid3 xlist} {
     upvar ::Jabber::jstate jstate
     ::Debug 2 "::MailBox::DisplayXElementSVG jid3=$jid3"
     
-    jlib::splitjid $jid3 jid2 res
-    
+    set jid2 [jlib::barejid $jid3]    
     set w [MakeWhiteboard $jid2]
     
     # Only if user available shall we try to import.

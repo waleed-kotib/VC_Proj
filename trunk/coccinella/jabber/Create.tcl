@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements a create dialog for groupchat using the 'muc' protocol.
 #      
-#  Copyright (c) 2006  Mats Bengtsson
+#  Copyright (c) 2006-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Create.tcl,v 1.11 2007-07-26 14:18:53 matben Exp $
+# $Id: Create.tcl,v 1.12 2007-09-01 07:49:05 matben Exp $
 
 package provide Create 1.0
 
@@ -329,7 +329,7 @@ proc ::Create::Get {token} {
     set roomjid [jlib::joinjid $node $state(server) ""]
     if {![jlib::jidvalidate $roomjid]} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -message "Not a valid roomname"
+	  -message [mc jamessjidinvalid]
 	return
     }
     $state(wpopupserver) state {disabled}

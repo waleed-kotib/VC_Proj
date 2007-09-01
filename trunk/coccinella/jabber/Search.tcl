@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.33 2007-08-14 14:05:44 matben Exp $
+# $Id: Search.tcl,v 1.34 2007-09-01 07:49:05 matben Exp $
 
 package provide Search 1.0
 
@@ -166,7 +166,7 @@ proc ::Search::Build {args} {
     }
     if {$argsArr(-server) != ""} {
 	set sstate(server) $argsArr(-server)
-	$wcomboserver configure -state disabled
+	$wcomboserver state {disabled}
     }
     if {$searchServ eq {}} {
 	$wbtget       state {disabled}
@@ -377,6 +377,7 @@ proc ::Search::GetCB {jlibName type subiq} {
 	pack $woobtxt -side top -fill x
     }
 
+    $sstate(wcomboserver) state {!disabled}
     $sstate(wbtsearch) configure -default active
     $sstate(wbtget)    configure -default disabled   
     $sstate(wbtsearch) state {!disabled}

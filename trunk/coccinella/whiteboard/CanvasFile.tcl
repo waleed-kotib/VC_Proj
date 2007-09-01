@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasFile.tcl,v 1.29 2007-07-19 06:28:18 matben Exp $
+# $Id: CanvasFile.tcl,v 1.30 2007-09-01 07:49:05 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -827,7 +827,7 @@ proc ::CanvasFile::SVGFileToCanvas {w filePath} {
     set xmllist [tinydom::documentElement [tinydom::parse $xml]]
     
     # Update the utags...
-    set cmdList [svg2can::parsesvgdocument $xmllist  \
+    set cmdList [svg2can::parsesvgdocument $xmllist \
       -imagehandler [list ::CanvasFile::SVGImageHandler $w] \
       -foreignobjecthandler [list ::CanvasUtils::SVGForeignObjectHandler $w]]
     foreach cmd $cmdList {

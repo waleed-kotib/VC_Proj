@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: can2svg.tcl,v 1.23 2007-08-31 08:13:56 matben Exp $
+# $Id: can2svg.tcl,v 1.24 2007-09-01 07:49:05 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -22,14 +22,14 @@
 #                      -width
 #      
 #      can2svg::can2svg canvasCmd ?options?
-#           options:    -httpbasedir  path
+#           options:    -httpbasedir        path
 #                       -imagehandler       tclProc
-#                       -ovalasellipse 0|1
-#                       -reusedefs     0|1
-#                       -uritype    file|http
-#                       -usestyleattribute 0|1
-#                       -usetags    0|all|first|last
-#                       -windowitemhandler
+#                       -ovalasellipse      0|1
+#                       -reusedefs          0|1
+#                       -uritype            file|http
+#                       -usestyleattribute  0|1
+#                       -usetags            0|all|first|last
+#                       -windowitemhandler  tclProc
 #                       
 #      can2svg::config ?options?
 #           options:	-allownewlines      0
@@ -40,7 +40,7 @@
 #	                -uritype            file
 #	                -usetags            all
 #	                -usestyleattribute  1
-#                       -windowitemhandler
+#                       -windowitemhandler  tclProc
 #
 # ########################### CHANGES ##########################################
 #
@@ -307,6 +307,7 @@ proc can2svg::svgasxmllist {cmd args} {
 	    lappend xmlLL $defsStipplePatternArr($stipple)
 	}
     }
+    puts "can2svg::svgasxmllist cmd=$cmd, args=$args"
     
     switch -- $type {
 	
@@ -1498,7 +1499,7 @@ proc can2svg::MakeXMLList {tagname args} {
     if {[llength $args] > 0} {
 	array set xmlarr $args
     }
-    if {!(($xmlarr(-chdata) == "") && ($xmlarr(-subtags) == ""))} {
+    if {!(($xmlarr(-chdata) eq "") && ($xmlarr(-subtags) eq ""))} {
 	set xmlarr(-isempty) 0
     }
     

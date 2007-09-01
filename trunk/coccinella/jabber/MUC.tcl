@@ -5,7 +5,7 @@
 #      
 #      This code is not completed!!!!!!!
 #      
-#  Copyright (c) 2003-2006  Mats Bengtsson
+#  Copyright (c) 2003-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.86 2007-08-08 13:01:08 matben Exp $
+# $Id: MUC.tcl,v 1.87 2007-09-01 07:49:05 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -1536,7 +1536,7 @@ proc ::MUC::Destroy {roomjid} {
     if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y
     }
-    wm title $w "Destroy Room: $roomName"
+    wm title $w "[mc {Destroy Room}]: $roomName"
     ::UI::SetWindowPosition $w $wDlgs(jmucdestroy)
     set findestroy -1
     
@@ -1557,9 +1557,9 @@ proc ::MUC::Destroy {roomjid} {
     ttk::frame $wmid
     pack $wmid -side top -fill x -expand 1
     
-    ttk::label $wmid.la -text "Alternative Room Jid:"
+    ttk::label $wmid.la -text [mc {Alternative Room JID}]
     ttk::entry $wmid.ejid -textvariable [namespace current]::destroyjid
-    ttk::label $wmid.lre -text "Reason:"
+    ttk::label $wmid.lre -text "[mc Reason]:"
     ttk::entry $wmid.ere -textvariable [namespace current]::destroyreason
     
     grid  $wmid.la   $wmid.ejid  -sticky e -padx 2 -pady 2
