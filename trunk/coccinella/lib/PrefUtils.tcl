@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: PrefUtils.tcl,v 1.11 2007-08-10 08:07:51 matben Exp $
+# $Id: PrefUtils.tcl,v 1.12 2007-09-02 07:54:02 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -237,6 +237,9 @@ proc ::PrefUtils::SaveToFile { } {
 	set msg "Error renaming preferences file: $err"
 	::UI::MessageBox -type ok -message $msg -icon error
 	return
+    }
+    if {$this(platform) eq "windows"} {
+	file attributes $userPrefsFile -hidden 1
     }
 }
 

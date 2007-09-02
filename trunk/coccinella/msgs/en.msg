@@ -1,5 +1,22 @@
 # English language version of the Coccinella message catalog.
 #
+#       The English catalog is the master of all other catalogs
+#       
+#       Contibutors:
+#         da  Mogens Pedersen  Mogens.Pedersen@skolekom.dk
+#         de  Hermann J. Beckers (hj dot beckers at onlinehome dot de)
+#         es  Néstor Díaz (n3storm at grupoikusnet.com) 2004
+#             Antonio F. Cano (antonio at grupoikusnet.com) 2006
+#             Agustin Vericat (agustin at grupoikusnet.com) 2006
+#         fr  Guillaume Ayoub (xovni at wanadoo.fr)
+#         it  Mirko Graziani (contatto@imatica.it)
+#         kr  Dylan Park, Korea NVC Center (hanmaum@krnvc.org) 
+#         nl  Sander Devrieze (s.devrieze at pandora.be), 2004-2007,
+#             and Bart Van Hove (bartvanhove at skynet.be), 2004
+#         pl  Zbigniew Baniewski (zb at ispid.com.pl)
+#         ru  Alexander Balezin (xmmp://gescheit@jabber.ttn.ru) gescheit@list.ru
+#         sv  Mats Bengtsson
+#
 # General type of text, such as "OK", "Cancel", and the like. 
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
@@ -141,6 +158,8 @@
 ::msgcat::mcset en Profile
 ::msgcat::mcset en Profiles
 ::msgcat::mcset en Progress
+::msgcat::mcset en Proxy
+::msgcat::mcset en Proxy...
 ::msgcat::mcset en Quit?
 ::msgcat::mcset en Quote
 ::msgcat::mcset en Reason
@@ -743,7 +762,7 @@
 ::msgcat::mcset en {Type of File}
 ::msgcat::mcset en {Unknown: Prompt user}
 ::msgcat::mcset en {Url of homepage}
-::msgcat::mcset en {Use HTTP proxy }
+::msgcat::mcset en {Use HTTP transport}
 ::msgcat::mcset en {Use SSL for security}
 ::msgcat::mcset en {Use TLS and SASL authentication}
 ::msgcat::mcset en {Use TLS on separate port (old)}

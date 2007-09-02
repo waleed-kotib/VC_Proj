@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.59 2007-08-29 06:30:11 matben Exp $
+# $Id: tileutils.tcl,v 1.60 2007-09-02 07:54:02 matben Exp $
 #
 
 package require treeutil
@@ -205,8 +205,6 @@ proc tileutils::ThemeChanged {} {
     array set menuMap [style map .]
     array set menuMap [style map Menu]
 
-    puts "tileutils::ThemeChanged"
-    
     # We configure the resource database here as well since it saves code.
     # Seems X11 has some system option db that must be overridden.
     if {[tk windowingsystem] eq "x11"} {

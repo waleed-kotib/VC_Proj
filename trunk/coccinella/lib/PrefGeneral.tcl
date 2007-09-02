@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PrefGeneral.tcl,v 1.5 2007-09-01 14:46:30 matben Exp $
+# $Id: PrefGeneral.tcl,v 1.6 2007-09-02 07:54:02 matben Exp $
  
 package provide PrefGeneral 1.0
 
@@ -28,28 +28,22 @@ namespace eval ::PrefGeneral:: {
     ::hooks::register prefsBuildHook         ::PrefGeneral::BuildPrefsHook
     ::hooks::register prefsSaveHook          ::PrefGeneral::SavePrefsHook
     ::hooks::register prefsCancelHook        ::PrefGeneral::CancelPrefsHook
-    
-    # Mutually exclusive.
-    set ::config(prefs,sameDrive)  0
-    set ::config(prefs,sameDir)    1
 }
 
 proc ::PrefGeneral::InitPrefsHook {} {
     global  prefs
     
-    # This is actually never used from the prefs file.
+    # These are actually never used from the prefs file.
     set prefs(prefsSameDrive) 0
     set prefs(prefsSameDir)   0
-    
-    ::PrefUtils::Add [list  \
-      [list prefs(prefsSameDrive)  prefs_prefsSameDrive  $prefs(prefsSameDrive)] \
-      [list prefs(prefsSameDir)    prefs_prefsSameDir    $prefs(prefsSameDir)] \
-      ]
 }
 
 proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
     global  this prefs config
     variable tmpPrefs
+    
+    # Seems to be duplicated.
+    set prefs(prefsSameDir) $this(prefsPathAppDir)
     
     set tmpPrefs(prefsSameDrive) $prefs(prefsSameDrive)
     set tmpPrefs(prefsSameDir)   $prefs(prefsSameDir)
@@ -156,6 +150,7 @@ proc ::PrefGeneral::SavePrefsHook {} {
     } elseif {$config(prefs,sameDir)} {
 	if {$tmpPrefs(prefsSameDir) && !$prefs(prefsSameDir)} {
 	    set prefs(prefsSameDir) 1
+	    set this(prefsPathAppDir) 1
 	    
 	    # Need to change all paths that depend on this(prefsPath) and make
 	    # sure dirs are there.
@@ -174,6 +169,7 @@ proc ::PrefGeneral::SavePrefsHook {} {
 	    }
 	    ::Init::SetPrefsPathToDefault
 	    set prefs(prefsSameDir) 0
+	    set this(prefsPathAppDir) 0
 	    ::hooks::run prefsFilePathChangedHook
 	}	
     }
