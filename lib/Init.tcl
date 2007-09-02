@@ -18,12 +18,17 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.71 2007-09-01 14:46:30 matben Exp $
+# $Id: Init.tcl,v 1.72 2007-09-02 07:54:02 matben Exp $
 
-namespace eval ::Init {}
+namespace eval ::Init {
+    
+    # Mutually exclusive.
+    set ::config(prefs,sameDrive)  0
+    set ::config(prefs,sameDir)    1
+}
 
 proc ::Init::SetThis {mainScript} {
-    global  this auto_path tcl_platform prefs
+    global  this auto_path tcl_platform prefs config
     
     # If we store the prefs file on a removable drive, use this folder name:
     #    F:\CoccinellaPrefs  etc.  
@@ -93,28 +98,31 @@ proc ::Init::SetThis {mainScript} {
 	    set this(prefsName) "WBPREFS.TXT"
 	}
     }
+    if {$config(prefs,sameDrive)} {
 
-    # Handle the situation where the app lives on a removable drive (USB stick).
-    # If it lives on a removable drive, and if we find an existing prefs 
-    # file there, then we should relate all prefs related paths to it.
-    set this(prefsPathRemovable) 0
-    if {[IsAppOnRemovableDrive]} {
-	set prefsPathDrive [GetAppDrivePrefsPath]
-	set prefFile [file join $prefsPathDrive $this(prefsName)]
+	# Handle the situation where the app lives on a removable drive (USB stick).
+	# If it lives on a removable drive, and if we find an existing prefs 
+	# file there, then we should relate all prefs related paths to it.
+	set this(prefsPathRemovable) 0
+	if {[IsAppOnRemovableDrive]} {
+	    set prefsPathDrive [GetAppDrivePrefsPath]
+	    set prefFile [file join $prefsPathDrive $this(prefsName)]
+	    if {[file exists $prefFile] && [file writable $prefFile]} {
+		set this(prefsPathRemovable) 1
+		set this(prefsPath) $prefsPathDrive
+	    }    
+	}
+    } elseif {$config(prefs,sameDir)} {
+	
+	# Search for the prefs file in the applicatons folder first.
+	set this(prefsPathAppDir) 0
+	set prefsPathDir [GetAppDirPrefsPath]
+	set prefFile [file join $prefsPathDir $this(prefsName)]
 	if {[file exists $prefFile] && [file writable $prefFile]} {
-	    set this(prefsPathRemovable) 1
-	    set this(prefsPath) $prefsPathDrive
-	}    
+	    set this(prefsPathAppDir) 1
+	    set this(prefsPath) $prefsPathDir
+	}
     }
-    
-    # Search for the prefs file in the applicatons folder first.
-    set this(prefsPathAppDir) 0
-    set prefsPathDir [GetAppDirPrefsPath]
-    set prefFile [file join $prefsPathDir $this(prefsName)]
-    if {[file exists $prefFile] && [file writable $prefFile]} {
-	set this(prefsPathAppDir) 1
-	set this(prefsPath) $prefsPathDir
-    }    
     
     # Sets all paths that are dependent on this(prefsPath).
     SetPrefsPaths

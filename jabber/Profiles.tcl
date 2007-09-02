@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.93 2007-08-16 09:49:39 matben Exp $
+# $Id: Profiles.tcl,v 1.94 2007-09-02 07:54:02 matben Exp $
 
 package require ui::megaentry
 
@@ -1809,11 +1809,21 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     
     grid  $wcon.se     -            -sticky ew -pady 1    
 
+    if {!$this(package,tls)} {
+	$wse.tls state {disabled}
+    }
+    if {[catch {package require jlib::compress}]} {
+	$wse.comp state {disabled}
+    }
+
     # IP page.
     $w add [ttk::frame $w.ip] -text [mc Server] -sticky news
-    set wip $w.ip.f
-    ttk::frame $wip -padding [option get . notebookPageSmallPadding {}]
-    pack  $wip  -side top -fill x -anchor [option get . dialogAnchor {}]
+    ttk::frame $w.ip.f -padding [option get . notebookPageSmallPadding {}]
+    pack  $w.ip.f  -side top -fill x -anchor [option get . dialogAnchor {}]
+    
+    set wip $w.ip.f.t
+    ttk::frame $wip
+    pack  $wip  -side top -fill x
     
     ttk::label $wip.lip -style Small.TLabel -text "[mc {IP address}]:"
     ttk::entry $wip.eip -font CociSmallFont -textvariable $token\(ip)
@@ -1830,50 +1840,38 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     
     set wstate(ip)   $wip.eip
     set wstate(port) $wip.eport
+    
+    # HTTP.
+    set whttp $w.ip.f.b
+    ttk::frame $whttp -padding {0 4 0 0}
+    pack  $whttp  -side top -fill x
 
-    # HTTP
-    $w add [ttk::frame $w.http] -text [mc Proxy] -sticky news
-    set whttp $w.http.f
-    ttk::frame $whttp -padding [option get . notebookPageSmallPadding {}]
-    pack  $whttp  -side top -fill x -anchor [option get . dialogAnchor {}]
-
-    set wstate(http)          $whttp.http
-    set wstate(httpurl)       $whttp.u.eurl
-    set wstate(httpproxy)     $whttp.bproxy
-
+    set wstate(http)      $whttp.http
+    set wstate(httpurl)   $whttp.eurl
+    set wstate(httpproxy) $whttp.bproxy
+    
     ttk::checkbutton $whttp.http -style Small.TCheckbutton \
-      -text [mc {Use HTTP proxy }] -variable $token\(http)  \
+      -text [mc {Use HTTP transport}] -variable $token\(http)  \
       -command [list ::Profiles::NotebookHttpCmd $w]
-    
-    ttk::frame $whttp.u
-    ttk::label $whttp.u.lurl -style Small.TLabel  \
-      -text "[mc {URL}]:"
-    ttk::entry $whttp.u.eurl -font CociSmallFont  \
-      -textvariable $token\(httpurl)
-    grid  $whttp.u.lurl  $whttp.u.eurl  -sticky w
-    grid  $whttp.u.eurl  -sticky ew
-    grid columnconfigure $whttp.u 1 -weight 1
-    
-    ttk::button $whttp.bproxy -style Small.TButton  \
-      -text "[mc {Proxy Setup}]..."  \
+
+    ttk::label $whttp.lurl -style Small.TLabel -text "[mc {URL}]:"
+    ttk::entry $whttp.eurl -font CociSmallFont -textvariable $token\(httpurl)
+    ttk::button $whttp.bproxy -style Small.TButton -text [mc Proxy...] \
       -command [list ::Preferences::Show {General {Network}}]
-
-    ttk::label $whttp.lpoll -style Small.TLabel  \
-      -text [mc {Poll interval (secs)}]
-    spinbox $whttp.spoll -textvariable $token\(minpollsecs) \
-      -width 3 -state readonly -increment 1 -from 1 -to 120
+    if {0} {
+	ttk::label $whttp.lpoll -style Small.TLabel  \
+	  -text [mc {Poll interval (secs)}]
+	spinbox $whttp.spoll -textvariable $token\(minpollsecs) \
+	  -width 3 -state readonly -increment 1 -from 1 -to 120
+    }
     
-    grid  $whttp.http    -             -sticky w  -pady 1
-    grid  $whttp.u       -             -sticky ew -pady 1
-    grid  $whttp.bproxy  -                        -pady 1
-    grid columnconfigure $whttp 1 -weight 1    
-
-    if {!$this(package,tls)} {
-	$wse.tls state {disabled}
-    }
-    if {[catch {package require jlib::compress}]} {
-	$wse.comp state {disabled}
-    }
+    grid  $whttp.http  -            -            $whttp.bproxy
+    grid  x            $whttp.lurl  $whttp.eurl  -
+    grid $whttp.http -sticky w
+    grid $whttp.bproxy -sticky e
+    grid $whttp.eurl -sticky ew
+    grid columnconfigure $whttp 0 -minsize 24
+    grid columnconfigure $whttp 2 -weight 1
 
     # Set defaults.
     NotebookSetDefaults $token ""
