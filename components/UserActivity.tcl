@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.7 2007-08-20 13:37:00 matben Exp $
+#  $Id: UserActivity.tcl,v 1.8 2007-09-02 13:39:38 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -45,7 +45,7 @@ proc ::UserActivity::Init {} {
     set xmlns(node_config)     "http://jabber.org/protocol/pubsub#node_config"
 
     variable menuDef
-    set menuDef [list command "User Activity..." ::UserActivity::Dlg {} {}]
+    set menuDef [list command mUserActivity... ::UserActivity::Dlg {} {}]
     
     variable subActivities
     set subActivities(doing_chores) {
@@ -182,7 +182,7 @@ proc ::UserActivity::HavePEP {jlibname have} {
 
 proc ::UserActivity::LogoutHook {} {
     
-    ::JUI::DeRegisterMenuEntry action "User Activity..."
+    ::JUI::DeRegisterMenuEntry action mUserActivity...
 }
 
 proc ::UserActivity::Dlg {} {
@@ -191,12 +191,11 @@ proc ::UserActivity::Dlg {} {
     variable xmlns
     
     
-    set str "Set your activity that will be shown to other users."
-    set dtl "Select from the first button your general activity, and optionally, your specific actvity from the second button. You may also add an descriptive text"
-    set w [ui::dialog -message $str -detail $dtl -icon info \
+    set w [ui::dialog -message [mc activityPickMsg] \
+      -detail [mc activityPickDtl] -icon info \
       -buttons {ok cancel remove} -modal 1 \
       -geovariable ::prefs(winGeom,activity) \
-      -title "User Activity" -command [namespace code DlgCmd]]
+      -title [mc "User Activity"] -command [namespace code DlgCmd]]
     set fr [$w clientframe]
     
     # State array variable.
@@ -429,7 +428,7 @@ proc ::UserActivity::Event {jlibname xmldata} {
 		    set msg ""
 		} else {
 		    set dname [string totitle [string map {_ " "} $activity]]
-		    set msg "[mc Activity]: [mc $dname]"
+		    set msg "[mc {User Activity}]: [mc $dname]"
 		    if {$specific ne ""} {
 			set dname [string totitle [string map {_ " "} $specific]]
 			append msg " - [mc $dname]"
