@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.60 2007-09-02 07:54:02 matben Exp $
+# $Id: tileutils.tcl,v 1.61 2007-09-02 08:10:44 matben Exp $
 #
 
 package require treeutil
@@ -150,6 +150,7 @@ namespace eval ::tileutils {
 	bindtags . [linsert [bindtags .] 1 ThemeChanged]
     }
     bind ThemeChanged <<ThemeChanged>> {tileutils::ThemeChanged }
+    bind ChaseArrows  <<ThemeChanged>> {tileutils::ChaseArrowsThemeChanged %W }
     bind Listbox      <<ThemeChanged>> {tileutils::ListboxThemeChanged %W }
     bind Spinbox      <<ThemeChanged>> {tileutils::SpinboxThemeChanged %W }
     bind Text         <<ThemeChanged>> {tileutils::TextThemeChanged %W }
@@ -279,6 +280,15 @@ proc tileutils::ThemeChanged {} {
 #   Class bindings for ThemeChanged events.
 #   They affect and configure existing widgets.
 #   This is for pure tk widgets and not the ttk ones.
+
+proc tileutils::ChaseArrowsThemeChanged {win} {
+    
+    array set style [style configure .]    
+    if {[info exists style(-background)]} {
+	set color $style(-background)
+	$win configure -background $color
+    }
+}
 
 proc tileutils::ListboxThemeChanged {win} {
     
