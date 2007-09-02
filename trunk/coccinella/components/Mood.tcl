@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.32 2007-08-20 13:37:00 matben Exp $
+#  $Id: Mood.tcl,v 1.33 2007-09-02 13:39:38 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -275,9 +275,8 @@ proc ::Mood::CustomMoodDlg {} {
     set moodStateDlg $menuMoodVar
     set moodMessageDlg ""
     
-    set str "Pick your mood that will be shown to other users."
-    set dtl "Only users with clients that understand this protocol will be able to display your mood."
-    set w [ui::dialog -message $str -detail $dtl -icon info \
+    set w [ui::dialog -message [mc moodPickMsg] -detail [mc moodPickDtl] \
+      -icon info \
       -type okcancel -modal 1 -geovariable ::prefs(winGeom,customMood) \
       -title [mc selectCustomMood] -command [namespace code CustomCmd]]
     set fr [$w clientframe]

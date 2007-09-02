@@ -1,7 +1,7 @@
 # Geolocation.tcl --
 # 
-#       User geolocation using PEP recommendations over PubSub library code.
-#       XEP-0080: User Geolocation
+#       User location using XEP recommendations over PubSub library code.
+#       XEP-0080: User Location (formerly User Geolocation)
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #  
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: Geolocation.tcl,v 1.10 2007-08-20 13:37:00 matben Exp $
+#  $Id: Geolocation.tcl,v 1.11 2007-09-02 13:39:38 matben Exp $
 
 package require jlib::pep
 
@@ -42,6 +42,7 @@ proc ::Geolocation::Init { } {
     variable menuDef
     set menuDef [list command Geolocation... ::Geolocation::Dlg {} {}]
     
+    # These help strings are for the message catalogs.
     variable help
     set	help(alt)         "Altitude in meters above or below sea level"
     set	help(area)        "A named area such as a campus or neighborhood"
@@ -146,15 +147,13 @@ proc ::Geolocation::LogoutHook {} {
 proc ::Geolocation::Dlg {} {
     variable xmlns
     variable gearth 0
-    variable help
     variable taglabel
     
-    set str "Set your geographic location that will be shown to other users."
-    set dtl "Enter the information you have available below. A minimal list contains only latitude and longitude."
-    set w [ui::dialog -message $str -detail $dtl -icon internet \
+    set w [ui::dialog -message [mc locationPickMsg] \
+      -detail [mc locationPickDtl] -icon internet \
       -buttons {ok cancel remove} -modal 1 \
       -geovariable ::prefs(winGeom,geoloc) \
-      -title "User Geolocation" -command [namespace code DlgCmd]]
+      -title [mc "User Location"] -command [namespace code DlgCmd]]
     set fr [$w clientframe]
     
     # State array variable.
@@ -175,8 +174,9 @@ proc ::Geolocation::Dlg {} {
 	grid  $fr.l$name  $fr.e$name  -sticky e -pady 2
 	grid $fr.e$name -sticky ew
 	
-	::balloonhelp::balloonforwindow $fr.l$name $help($name)
-	::balloonhelp::balloonforwindow $fr.e$name $help($name)
+	set str [mc location[string totitle $name]]
+	::balloonhelp::balloonforwindow $fr.l$name $str
+	::balloonhelp::balloonforwindow $fr.e$name $str
     }
     
     ttk::button $fr.www -style Url -text www.mapquest.com \
@@ -186,7 +186,7 @@ proc ::Geolocation::Dlg {} {
 
     ttk::checkbutton $fr.gearth -style Small.TCheckbutton \
       -variable [namespace current]::gearth \
-      -text "Synchronize your data with Google Earth"
+      -text [mc "Synchronize your data with Google Earth"]
     
     $fr.gearth state {disabled}
     
@@ -359,7 +359,7 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
     ttk::frame $wpage -padding [option get . notebookPagePadding {}]
     pack  $wpage  -side top -anchor [option get . dialogAnchor {}]
 
-    ttk::label $wpage._lbl -text "This is geographic data for the user"
+    ttk::label $wpage._lbl -text [mc "This is location data for"]
     grid  $wpage._lbl  -  -pady 2
     
     ttk::button $wpage.mapquest -style Url -text www.mapquest.com
@@ -393,8 +393,9 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
 			grid $wpage.l$tag -sticky e
 			grid $wpage.e$tag -sticky w
 			
-			::balloonhelp::balloonforwindow $wpage.l$tag $help($tag)
-			::balloonhelp::balloonforwindow $wpage.e$tag $help($tag)
+			set bstr [mc location[string totitle $tag]]
+			::balloonhelp::balloonforwindow $wpage.l$tag $bstr
+			::balloonhelp::balloonforwindow $wpage.e$tag $bstr
 		    }
 		}
 	    }

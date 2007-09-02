@@ -1385,7 +1385,7 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en iaxPhoneComfort      {Comfort}
 ::msgcat::mcset en iaxPhoneCodec        {Codec}
 
-# Messages for Mood PEP
+# Messages for Mood XEP
 ::msgcat::mcset en mMood        Mood 
 ::msgcat::mcset en mAngry       Angry
 ::msgcat::mcset en mAnxious     Anxious
@@ -1429,6 +1429,148 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en selectCustomMood     {Select a mood}
 ::msgcat::mcset en moodMessage          {Reason for mood}
 ::msgcat::mcset en mCustomMood          {Custom mood}
+
+::msgcat::mcset en moodPickMsg          {Pick your mood that will be shown to other users.}
+::msgcat::mcset en moodPickDtl          {Only users with clients that understand this protocol will be able to display your mood.}
+
+# Messages for User Activity XEP
+::msgcat::mcset en {User Activity}     {User Activity}
+::msgcat::mcset en mUserActivity...    {User Activity...}
+
+::msgcat::mcset en {Traveling}
+::msgcat::mcset en {Commuting}
+::msgcat::mcset en {Cycling}
+::msgcat::mcset en {Driving}
+::msgcat::mcset en {In a car}
+::msgcat::mcset en {On a bus}
+::msgcat::mcset en {On a plane}
+::msgcat::mcset en {On a train}
+::msgcat::mcset en {On a trip}
+::msgcat::mcset en {Walking}
+
+::msgcat::mcset en {Eating}
+::msgcat::mcset en {Having a snack}
+::msgcat::mcset en {Having breakfast}
+::msgcat::mcset en {Having dinner}
+::msgcat::mcset en {Having lunch}
+
+::msgcat::mcset en {Doing chores}
+::msgcat::mcset en {Buying groceries}
+::msgcat::mcset en {Cleaning}
+::msgcat::mcset en {Cooking}
+::msgcat::mcset en {Doing maintenance}
+::msgcat::mcset en {Doing the dishes}
+::msgcat::mcset en {Doing the laundry}
+::msgcat::mcset en {Gardening}
+::msgcat::mcset en {Running an errand}
+::msgcat::mcset en {Walking the dog}
+
+::msgcat::mcset en {Working}
+::msgcat::mcset en {Coding}
+::msgcat::mcset en {In a meeting}
+::msgcat::mcset en {Studying}
+::msgcat::mcset en {Writing}
+
+::msgcat::mcset en {Exercising}
+::msgcat::mcset en {Cycling}
+::msgcat::mcset en {Hiking}
+::msgcat::mcset en {Jogging}
+::msgcat::mcset en {Playing sports}
+::msgcat::mcset en {Running}
+::msgcat::mcset en {Skiing}
+::msgcat::mcset en {Swimming}
+::msgcat::mcset en {Working out}
+
+::msgcat::mcset en {Talking}
+::msgcat::mcset en {In real life}
+::msgcat::mcset en {On the phone}
+::msgcat::mcset en {On video phone}
+
+::msgcat::mcset en {Relaxing}
+::msgcat::mcset en {Gaming}
+::msgcat::mcset en {Going out}
+::msgcat::mcset en {Partying}
+::msgcat::mcset en {Reading}
+::msgcat::mcset en {Rehearsing}
+::msgcat::mcset en {Shopping}
+::msgcat::mcset en {Socializing}
+::msgcat::mcset en {Sunbathing}
+::msgcat::mcset en {Watching tv}
+::msgcat::mcset en {Watching a movie}
+
+::msgcat::mcset en {Grooming}
+::msgcat::mcset en {At the spa}
+::msgcat::mcset en {Brushing teeth}
+::msgcat::mcset en {Getting a haircut}
+::msgcat::mcset en {Shaving}
+::msgcat::mcset en {Taking a bath}
+::msgcat::mcset en {Taking a shower}
+
+::msgcat::mcset en {Drinking}
+::msgcat::mcset en {Having a beer}
+::msgcat::mcset en {Having coffee}
+::msgcat::mcset en {Having tea}
+
+::msgcat::mcset en {Inactive}
+::msgcat::mcset en {Day off}
+::msgcat::mcset en {Hanging out}
+::msgcat::mcset en {On vacation}
+::msgcat::mcset en {Scheduled holiday}
+::msgcat::mcset en {Sleeping}
+
+::msgcat::mcset en {Having appointment}
+
+::msgcat::mcset en activityPickMsg      {Set your activity that will be shown to other users.}
+::msgcat::mcset en activityPickDtl      {Select from the first button your general activity, and optionally, your specific actvity from the second button. You may also add an descriptive text.}
+
+# XEP-0080: User Location
+::msgcat::mcset en {User Location}
+::msgcat::mcset en locationPickMsg      {Set your geographic location that will be shown to other users.}
+::msgcat::mcset en locationPickDtl      {Enter the information you have available below. A minimal list contains only latitude and longitude.}
+
+::msgcat::mcset en {Altitude}
+::msgcat::mcset en {Named Area}
+::msgcat::mcset en {GPS Bearing}
+::msgcat::mcset en {Building}
+::msgcat::mcset en {Country}
+::msgcat::mcset en {GPS Datum}
+::msgcat::mcset en {Description}
+::msgcat::mcset en {GPS Error}
+::msgcat::mcset en {Floor}
+::msgcat::mcset en {Latitude}
+::msgcat::mcset en {Locality}
+::msgcat::mcset en {Longitude}
+::msgcat::mcset en {Postalcode}
+::msgcat::mcset en {Region}
+::msgcat::mcset en {Room}
+::msgcat::mcset en {Street}
+::msgcat::mcset en {Text}
+::msgcat::mcset en {Timestamp}
+
+
+# Help strings:
+::msgcat::mcset en locationBearing      {GPS bearing (direction in which the entity is heading to reach its next waypoint), measured in decimal degrees relative to true north}
+::msgcat::mcset en locationAlt          {Altitude in meters above or below sea level}
+::msgcat::mcset en locationLon          {Longitude in decimal degrees East}
+::msgcat::mcset en locationError        {Horizontal GPS error in arc minutes}
+::msgcat::mcset en locationRegion       {An administrative region of the nation, such as a state or province}
+::msgcat::mcset en locationDescription  {A natural-language name for or description of the location}
+::msgcat::mcset en locationText         {A catch-all element that captures any other information about the location}
+::msgcat::mcset en locationRoom         {A particular room in a building}
+::msgcat::mcset en locationPostalcode   {A code used for postal delivery}
+::msgcat::mcset en locationBuilding     {A specific building on a street or in an area}
+::msgcat::mcset en locationStreet       {A thoroughfare within the locality, or a crossing of two thoroughfares}
+::msgcat::mcset en locationArea         {A named area such as a campus or neighborhood}
+::msgcat::mcset en locationLat          {Latitude in decimal degrees North}
+::msgcat::mcset en locationLocality     {A locality within the administrative region, such as a town or city}
+::msgcat::mcset en locationFloor        {A particular floor in a building}
+::msgcat::mcset en locationDatum        {GPS datum}
+::msgcat::mcset en locationTimestamp    {UTC timestamp specifying the moment when the reading was taken}
+::msgcat::mcset en locationCountry      {The nation where the user is located}
+
+::msgcat::mcset en {Synchronize your data with Google Earth}
+::msgcat::mcset en {This is location data for}
+
 
 # END --------------------------------------------------------------------------
 

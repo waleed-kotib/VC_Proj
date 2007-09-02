@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.80 2007-08-12 14:22:51 matben Exp $
+# $Id: Register.tcl,v 1.81 2007-09-02 13:39:38 matben Exp $
 
 package provide Register 1.0
 
@@ -474,8 +474,6 @@ proc ::RegisterEx::MoreOpts {token} {
     upvar 0 $token state
       
     grid  $state(wfmore)  -  -  -sticky ew
-    #$state(wtri) configure -image [::UI::GetIcon openAqua] \
-    #  -text "[mc Less]..." -command [list [namespace current]::LessOpts $token]
     $state(wtri) configure -text "  [mc Less]..." \
       -command [list [namespace current]::LessOpts $token]
 }
@@ -485,8 +483,6 @@ proc ::RegisterEx::LessOpts {token} {
     upvar 0 $token state
     
     grid remove $state(wfmore)
-    #$state(wtri) configure -image [::UI::GetIcon closeAqua] \
-    #  -text "[mc More]..." -command [list [namespace current]::MoreOpts $token]
     $state(wtri) configure -text "  [mc More]..." \
       -command [list [namespace current]::MoreOpts $token]
 }
