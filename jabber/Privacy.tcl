@@ -18,12 +18,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Privacy.tcl,v 1.17 2007-07-19 06:28:16 matben Exp $
+# $Id: Privacy.tcl,v 1.18 2007-09-03 14:13:20 matben Exp $
 
 package provide Privacy 1.0
 
 namespace eval ::Privacy:: {
     global  tcl_platform
+    
+    return
     
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Privacy::InitPrefsHook
