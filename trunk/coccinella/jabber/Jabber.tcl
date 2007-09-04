@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.225 2007-09-04 08:06:43 matben Exp $
+# $Id: Jabber.tcl,v 1.226 2007-09-04 12:47:12 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1094,7 +1094,6 @@ proc ::Jabber::DoCloseClientConnection {args} {
     
     ::Debug 2 "::Jabber::DoCloseClientConnection"
     
-    array set argsA [list -status $jprefs(logoutmsg)]    
     array set argsA $args
     
     # Send unavailable information.
@@ -1122,7 +1121,7 @@ proc ::Jabber::DoCloseClientConnection {args} {
 #       or as a result of any exception.
 #       Doesn't do any network transactions.
 
-proc ::Jabber::SetClosedState { } {
+proc ::Jabber::SetClosedState {} {
     variable jstate
     
     ::Debug 2 "::Jabber::SetClosedState"
@@ -1147,18 +1146,14 @@ proc ::Jabber::SetClosedState { } {
 #       This is supposed to be called only when doing Quit.
 #       Things are not cleaned up properly, since we kill ourselves.
 
-proc ::Jabber::EndSession { } {    
+proc ::Jabber::EndSession {} {    
     variable jstate
     variable jprefs
     
     # Send unavailable information. Silently in case we got a network error.
     if {[$jstate(jlib) isinstream]} {
-	set opts {}
-	if {[string length $jprefs(logoutmsg)] > 0} {
-	    lappend opts -status $jprefs(logoutmsg)
-	}
 	catch {
-	    eval {$jstate(jlib) send_presence -type unavailable} $opts
+	    $jstate(jlib) send_presence -type unavailable
 	}
 	
 	# Do the actual closing.
