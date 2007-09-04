@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.125 2007-08-14 12:21:24 matben Exp $
+# $Id: Login.tcl,v 1.126 2007-09-04 12:35:25 matben Exp $
 
 package provide Login 1.0
 
@@ -528,6 +528,14 @@ proc ::Login::LaunchHook { } {
     if {!$jprefs(autoLogin)} {
 	return
     }
+    LoginCmd
+}
+
+# Login::LoginCmd --
+# 
+#       A way to login using the currently selected profile without using dialog.
+
+proc ::Login::LoginCmd {} {
     
     # Use our selected profile.
     set profname [::Profiles::GetSelectedName]
@@ -535,25 +543,26 @@ proc ::Login::LaunchHook { } {
     set node     [::Profiles::Get $profname node]
     set password [::Profiles::Get $profname password]
     set jid [jlib::joinjid $node $domain ""]
-    set ans ""
+
     if {$password eq ""} {
 	set ujid [jlib::unescapejid $jid]
 	set ans [ui::megaentry -label "[mc Password]:" -icon question \
 	  -geovariable prefs(winGeom,jautologin) -show {*} \
 	  -title [mc Password] -message [mc enterpassword $ujid]]
-    }
-    if {$ans ne ""} {
-	set password [ui::megaentrytext $ans]
-	set opts   [::Profiles::Get $profname options]
-	array set optsArr $opts
-	if {[info exists optsArr(-resource)] && ($optsArr(-resource) ne "")} {
-	    set res $optsArr(-resource)
-	} else {
-	    set res [::Profiles::MachineResource]
+	if {$ans eq ""} {
+	    return
 	}
-	eval {::Login::HighLogin $domain $node $res $password \
-	  [namespace current]::AutoLoginCB} $opts
+	set password [ui::megaentrytext $ans]
     }
+    set opts   [::Profiles::Get $profname options]
+    array set optsArr $opts
+    if {[info exists optsArr(-resource)] && ($optsArr(-resource) ne "")} {
+	set res $optsArr(-resource)
+    } else {
+	set res [::Profiles::MachineResource]
+    }
+    eval {::Login::HighLogin $domain $node $res $password \
+      [namespace current]::AutoLoginCB} $opts
 }
 
 proc ::Login::QuitAppHook { } {

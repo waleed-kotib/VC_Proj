@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Carbon.tcl,v 1.4 2007-07-18 09:40:09 matben Exp $
+# $Id: Carbon.tcl,v 1.5 2007-09-04 12:35:24 matben Exp $
 
 namespace eval ::Carbon { 
 
@@ -87,6 +87,11 @@ proc ::Carbon::Sleep {type} {
 	sleep - willsleep {
 	    if {[::Jabber::IsConnected]} {
 		::Jabber::DoCloseClientConnection
+	    }
+	}
+	wakeup {
+	    if {![::Jabber::IsConnected]} {
+		# ::Login::LoginCmd
 	    }
 	}
     }
