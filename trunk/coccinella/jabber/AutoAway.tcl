@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.4 2007-09-04 12:35:25 matben Exp $
+# $Id: AutoAway.tcl,v 1.5 2007-09-04 13:17:30 matben Exp $
 
 package require idletime
 
@@ -50,10 +50,13 @@ namespace eval ::AutoAway {
 	unavailable     7
     }
     variable savedShowStatus {available ""}
+    variable wasAutoLoggedOut 0
 }
 
 proc ::AutoAway::LoginHook {} {
-    puts "::AutoAway::LoginHook"
+    variable wasAutoLoggedOut
+    
+    set wasAutoLoggedOut 0
     ::idletime::init
     Setup
 }
@@ -61,11 +64,9 @@ proc ::AutoAway::LoginHook {} {
 proc ::AutoAway::LogoutHook {} {    
     upvar ::Jabber::jprefs jprefs
 
-    puts "::AutoAway::LogoutHook"
-    ::idletime::stop
-    if {$jprefs(aalogin)} {
-	
-    }
+    #::idletime::stop
+    ::idletime::remove [namespace code AwayCmd]
+    ::idletime::remove [namespace code XAwayCmd]
 }
 
 proc ::AutoAway::InitPrefsHook {} {
@@ -112,8 +113,6 @@ proc ::AutoAway::InitPrefsHook {} {
 
 proc ::AutoAway::Setup {} { 
     upvar ::Jabber::jprefs jprefs
-    
-    #puts "::AutoAway::Setup"
 	       
     if {$jprefs(autoaway) && [string is integer -strict $jprefs(awaymin)]} {
 	::idletime::add [namespace code AwayCmd] [expr {60*$jprefs(awaymin)}]
@@ -144,6 +143,9 @@ proc ::AutoAway::XAwayCmd {what} {
 }
 
 proc ::AutoAway::LogoutCmd {what} {
+    variable wasAutoLoggedOut
+    
+    set wasAutoLoggedOut 1
     Cmd unavailable $what
 }
 
@@ -153,6 +155,7 @@ proc ::AutoAway::Cmd {show what} {
     variable statusPriority
     variable savedShowStatus
     variable pendingActive
+    variable wasAutoLoggedOut
     
     Debug 4 "::AutoAway::Cmd show=$show, what=$what"
     
@@ -190,6 +193,9 @@ proc ::AutoAway::Cmd {show what} {
 	# Must be sure to not trigger this twice!!!
 	if {![info exists pendingActive]} {
 	    set pendingActive [after idle [namespace code Active]]
+	}
+	if {$jprefs(autologout) && $wasAutoLoggedOut} {
+	    ::Login::LoginCmd   
 	}
     }
 }
@@ -243,7 +249,7 @@ proc ::AutoAway::BuildPage {page} {
     
     set varName [namespace current]::tmpJPrefs(autoaway)
     ttk::checkbutton $waa.lminaw -text [mc prefminaw] -variable $varName \
-      -command [namespace code [list SetEntryState $waa.eminaw $waa.eawmsg $varName]]
+      -command [namespace code [list SetEntryState [list $waa.eminaw $waa.eawmsg] $varName]]
     ttk::entry $waa.eminaw -font CociSmallFont -width 3 \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
       -textvariable [namespace current]::tmpJPrefs(awaymin)
@@ -252,7 +258,7 @@ proc ::AutoAway::BuildPage {page} {
       -textvariable [namespace current]::tmpJPrefs(awaymsg)
     ttk::frame $waa.paw -height 6
 
-    SetEntryState $waa.eminaw $waa.eawmsg $varName
+    SetEntryState [list $waa.eminaw $waa.eawmsg] $varName
 
     grid  $waa.lminaw  -         -            $waa.eminaw
     grid  x            $waa.law  $waa.eawmsg  -
@@ -262,7 +268,7 @@ proc ::AutoAway::BuildPage {page} {
 
     set varName [namespace current]::tmpJPrefs(xautoaway)
     ttk::checkbutton $waa.lminxa -text [mc prefminea] -variable $varName \
-      -command [namespace code [list SetEntryState $waa.eminxa $waa.examsg $varName]]
+      -command [namespace code [list SetEntryState [list $waa.eminxa $waa.examsg] $varName]]
     ttk::entry $waa.eminxa -font CociSmallFont -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
       -textvariable [namespace current]::tmpJPrefs(xawaymin)
@@ -271,7 +277,7 @@ proc ::AutoAway::BuildPage {page} {
       -textvariable [namespace current]::tmpJPrefs(xawaymsg)
     ttk::frame $waa.pxa -height 6
 
-    SetEntryState $waa.eminxa $waa.examsg $varName
+    SetEntryState [list $waa.eminxa $waa.examsg] $varName
 
     grid  $waa.lminxa  -         -            $waa.eminxa
     grid  x            $waa.lxa  $waa.examsg  -
@@ -281,7 +287,7 @@ proc ::AutoAway::BuildPage {page} {
         
     set varName [namespace current]::tmpJPrefs(autologout)
     ttk::checkbutton $waa.clo -text [mc prefminlogout] -variable $varName \
-      -command [namespace code [list SetEntryState $waa.elomin $waa.elomsg $varName]]
+      -command [namespace code [list SetEntryState [list $waa.elomin $waa.elomsg $waa.cli] $varName]]
     ttk::entry $waa.elomin -font CociSmallFont -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
       -textvariable [namespace current]::tmpJPrefs(logoutmin)
@@ -291,7 +297,7 @@ proc ::AutoAway::BuildPage {page} {
     ttk::checkbutton $waa.cli -text [mc prefaalogin] \
       -variable [namespace current]::tmpJPrefs(aalogin)
 
-    SetEntryState $waa.elomin $waa.elomsg $varName
+    SetEntryState [list $waa.elomin $waa.elomsg $waa.cli] $varName
     
     grid  $waa.clo  -         -            $waa.elomin
     grid  x         $waa.llo  $waa.elomsg  -
@@ -306,63 +312,17 @@ proc ::AutoAway::BuildPage {page} {
     pack  $waa  -side top -fill x
 }
 
-proc ::AutoAway::SetEntryState {win1 win2 varName} {
+proc ::AutoAway::SetEntryState {winL varName} {
     upvar #0 $varName var
     if {$var} {
-	$win1 state {!disabled}
-	$win2 state {!disabled}
+	foreach w $winL {
+	    $w state {!disabled}
+	}
     } else {
-	$win1 state {disabled}
-	$win2 state {disabled}
+	foreach w $winL {
+	    $w state {disabled}
+	}
     }
-}
-
-proc ::AutoAway::BuildPageXXX {page} {
-    upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
-    
-    foreach key {autoaway awaymin xautoaway xawaymin awaymsg xawaymsg \
-      logoutmsg} {
-	set tmpJPrefs($key) $jprefs($key)
-    }
-    
-    set wc $page.c
-    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
-    pack $wc -side top -anchor [option get . dialogAnchor {}]
-    
-    # Auto away stuff.
-    set waf $wc.fm
-
-    ttk::label $wc.lab -text [mc prefaaset]
-    ttk::frame $waf
-
-    ttk::checkbutton $waf.lminaw -text [mc prefminaw]  \
-      -variable [namespace current]::tmpJPrefs(autoaway)
-    ttk::entry $waf.eminaw -font CociSmallFont -width 3 \
-      -validate key -validatecommand {::Utils::ValidMinutes %S} \
-      -textvariable [namespace current]::tmpJPrefs(awaymin)
-    ttk::checkbutton $waf.lminxa -text [mc prefminea]  \
-      -variable [namespace current]::tmpJPrefs(xautoaway)
-    ttk::entry $waf.eminxa -font CociSmallFont -width 3  \
-      -validate key -validatecommand {::Utils::ValidMinutes %S} \
-      -textvariable [namespace current]::tmpJPrefs(xawaymin)
-
-    grid  $waf.lminaw  $waf.eminaw  -sticky w -pady 1
-    grid  $waf.lminxa  $waf.eminxa  -sticky w -pady 1
-
-    set was $wc.fs
-    ttk::frame $was
-    ttk::label $was.lawmsg -text "[mc {Away status}]:"
-    ttk::entry $was.eawmsg -font CociSmallFont -width 32  \
-      -textvariable [namespace current]::tmpJPrefs(awaymsg)
-    ttk::label $was.lxa -text "[mc {Extended Away status}]:"
-    ttk::entry $was.examsg -font CociSmallFont -width 32  \
-      -textvariable [namespace current]::tmpJPrefs(xawaymsg)
-    
-    grid  $was.lawmsg  $was.eawmsg  -sticky e -pady 1
-    grid  $was.lxa     $was.examsg  -sticky e -pady 1
-
-    pack  $wc.lab  $waf  $was  -side top -anchor w
 }
 
 proc ::AutoAway::SavePrefsHook {} {
