@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-#  $Id: idletime.tcl,v 1.4 2007-07-19 06:28:11 matben Exp $
+#  $Id: idletime.tcl,v 1.5 2007-09-04 08:06:43 matben Exp $
 
 package provide idletime 1.0
 
@@ -69,6 +69,10 @@ proc ::idletime::stop {} {
 	}
     }
 }
+
+# idletime::add --
+# 
+#       Adds or replaces a callback.
 
 proc ::idletime::add {procName secs} {
     variable state
