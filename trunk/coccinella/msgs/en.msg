@@ -1089,6 +1089,7 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 
 
 # Preferences:
+::msgcat::mcset en prefaalogin           {Login automatically if logged out}
 ::msgcat::mcset en prefaaset             {Set automatic away status:}
 ::msgcat::mcset en prefavashare          {Share this avatar with other users}
 ::msgcat::mcset en prefblbl              {Block the following JID's (* wildcards possible):}
@@ -1124,6 +1125,7 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 ::msgcat::mcset en preficonsel           {The selected iconset will take action when you save}
 ::msgcat::mcset en prefminaw             {Minutes before status Away:}
 ::msgcat::mcset en prefminea             {Minutes before status Extended Away:}
+::msgcat::mcset en prefminlogout         {Minutes before automatically logout:}
 ::msgcat::mcset en prefmucconf           {Multi-User-Chat with Conference as fallback}
 ::msgcat::mcset en prefnatip             {Use the following ip address as seen from the outside}
 ::msgcat::mcset en prefpers              {Your personal info is stored in your preferences file, but may also be stored on the Jabber User Directory. Server stored info is searchable by any user.}

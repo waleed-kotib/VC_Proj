@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.224 2007-09-01 07:49:05 matben Exp $
+# $Id: Jabber.tcl,v 1.225 2007-09-04 08:06:43 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1094,7 +1094,7 @@ proc ::Jabber::DoCloseClientConnection {args} {
     
     ::Debug 2 "::Jabber::DoCloseClientConnection"
     
-    array set argsA [list -status $jprefs(logoutStatus)]    
+    array set argsA [list -status $jprefs(logoutmsg)]    
     array set argsA $args
     
     # Send unavailable information.
@@ -1154,8 +1154,8 @@ proc ::Jabber::EndSession { } {
     # Send unavailable information. Silently in case we got a network error.
     if {[$jstate(jlib) isinstream]} {
 	set opts {}
-	if {[string length $jprefs(logoutStatus)] > 0} {
-	    lappend opts -status $jprefs(logoutStatus)
+	if {[string length $jprefs(logoutmsg)] > 0} {
+	    lappend opts -status $jprefs(logoutmsg)
 	}
 	catch {
 	    eval {$jstate(jlib) send_presence -type unavailable} $opts
