@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-#  $Id: idletime.tcl,v 1.5 2007-09-04 08:06:43 matben Exp $
+#  $Id: idletime.tcl,v 1.6 2007-09-04 12:35:24 matben Exp $
 
 package provide idletime 1.0
 
@@ -14,6 +14,7 @@ namespace eval ::idletime {
 
     variable lastmouse [winfo pointerxy .]
     variable state
+    variable status "stop"
     
     # Keep a 2 secs resolution which should be enough for autoaway.
     variable pollms 2000
@@ -52,7 +53,9 @@ namespace eval ::idletime {
 
 proc ::idletime::init {} {
     variable inactiveProc
- 
+    variable status 
+    
+    set status "run"
     if {$inactiveProc eq [namespace code tclinactive]} {
 	tcltimer
     }
@@ -61,6 +64,9 @@ proc ::idletime::init {} {
 
 proc ::idletime::stop {} {
     variable afterID
+    variable status 
+    
+    set status "stop"
 
     foreach key {poll tcl} {
 	if {[info exists afterID($key)]} {
@@ -96,9 +102,10 @@ proc ::idletime::poll {} {
     variable pollms
     variable inactiveProc
     variable afterID
+    variable status 
     
     set idlesecs [expr {[eval $inactiveProc]/1000}]
-    
+   
     foreach {name secs} [array get state] {
 	if {$idlesecs >= $secs} {
 	    
@@ -113,8 +120,12 @@ proc ::idletime::poll {} {
 		uplevel #0 $name active
 	    }
 	}
-    }    
-    set afterID(poll) [after $pollms [namespace code poll]]
+    }
+    
+    # We might have been stopped from a callback!
+    if {$status eq "run"} {
+	set afterID(poll) [after $pollms [namespace code poll]]
+    }
 }
 
 # Pure tcl implementation that handles mouse moves only.
