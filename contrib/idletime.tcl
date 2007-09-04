@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-#  $Id: idletime.tcl,v 1.6 2007-09-04 12:35:24 matben Exp $
+#  $Id: idletime.tcl,v 1.7 2007-09-04 13:17:30 matben Exp $
 
 package provide idletime 1.0
 
@@ -55,6 +55,10 @@ proc ::idletime::init {} {
     variable inactiveProc
     variable status 
     
+    # Protect from multiple calls.
+    if {$status eq "run"} {
+	return
+    }
     set status "run"
     if {$inactiveProc eq [namespace code tclinactive]} {
 	tcltimer
@@ -67,7 +71,6 @@ proc ::idletime::stop {} {
     variable status 
     
     set status "stop"
-
     foreach key {poll tcl} {
 	if {[info exists afterID($key)]} {
 	    after cancel $afterID($key)
