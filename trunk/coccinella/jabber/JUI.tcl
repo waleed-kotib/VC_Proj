@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.204 2007-08-26 14:38:13 matben Exp $
+# $Id: JUI.tcl,v 1.205 2007-09-05 13:21:00 matben Exp $
 
 package provide JUI 1.0
 
@@ -880,7 +880,8 @@ proc ::JUI::BuildToolbar {w wtbar} {
     }
     $wtbar newbutton newuser -text [mc Contact] \
       -image $iconAddUser -disabledimage $iconAddUserDis  \
-      -command ::JUser::NewDlg -state disabled
+      -command ::JUser::NewDlg -state disabled \
+      -balloontext [mc {Add Contact}]
     $wtbar newbutton chat -text [mc Chat] \
       -image $iconChat -disabledimage $iconChatDis  \
       -command ::Chat::OnToolButton -state disabled

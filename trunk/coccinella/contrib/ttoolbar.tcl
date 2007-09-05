@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: ttoolbar.tcl,v 1.15 2007-08-20 05:47:38 matben Exp $
+# $Id: ttoolbar.tcl,v 1.16 2007-09-05 13:21:00 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -30,8 +30,8 @@
 #      pathName configure ?option? ?value option value ...?
 #      pathName exists name
 #      pathName minwidth
-#      pathName newbutton name -text str -image name -disabledimage name 
-#                              -command cmd args
+#      pathName newbutton name ?-text str -image name -disabledimage name 
+#                              -command cmd -balloontext str?
 #
 # ########################### CHANGES ##########################################
 #
@@ -403,6 +403,16 @@ proc ::ttoolbar::Configure {w args} {
 		}
 	    }
 	}
+	if {$this(balloonhelp)} {
+	    foreach {key name} [array get locals *,name] {
+		if {[info exists locals($name,-balloontext)]} {
+		    set wimage $widgets($name,image)
+		    ::balloonhelp::delete $wimage
+		    ::balloonhelp::balloonforwindow $wimage \
+		      $locals($name,-balloontext)
+		}
+	    }
+	}
 	event generate $w <<TToolbarCompound>>
     }
 }
@@ -540,10 +550,18 @@ proc ::ttoolbar::ButtonConfigure {w name args} {
 		$wtext configure -text $value
 		
 		if {$this(balloonhelp) && $options(-showballoon)} {
-		    if {$options(-compound) eq "image"} {
+		    if {![info exists haveBalloon] && ($options(-compound) eq "image")} {
 			::balloonhelp::delete $wimage
 			::balloonhelp::balloonforwindow $wimage $value
 		    }
+		}
+	    }
+	    -balloontext {
+		if {$this(balloonhelp)} {
+		    set locals($name,$key) $value
+		    ::balloonhelp::delete $wimage
+		    ::balloonhelp::balloonforwindow $wimage $value
+		    set haveBalloon 1
 		}
 	    }
 	}
