@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.81 2007-09-02 13:39:38 matben Exp $
+# $Id: Register.tcl,v 1.82 2007-09-05 07:44:41 matben Exp $
 
 package provide Register 1.0
 
@@ -180,7 +180,9 @@ proc ::RegisterEx::New {args} {
     
     # Avoid any inconsistent UI state by closing any login dialog.
     # This shouldn't happen.
-    foreach wlogin [ui::findalltoplevelwithclass JLogin] {::Login::Close $wlogin}
+    foreach wlogin [ui::findalltoplevelwithclass JLogin] {
+	::Login::Close $wlogin
+    }
     
     # State variable to collect instance specific variables.
     set token [namespace current]::[incr uid]
@@ -254,8 +256,9 @@ proc ::RegisterEx::New {args} {
     ttk::frame $frmid
     pack  $frmid  -side top -fill both -expand 1
 
+    set wserv $frmid.eserv
     ttk::label $frmid.lserv -text "[mc Server]:" -anchor e
-    ttk::combobox $frmid.eserv -width 22    \
+    ttk::combobox $frmid.eserv -width 22 \
       -textvariable $token\(-server) -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
 	
@@ -320,12 +323,15 @@ proc ::RegisterEx::New {args} {
     pack $frbot -side bottom -fill x
     
     wm resizable $w 0 0
-    bind $w <Return> [list $frbot.btok invoke]
+    
+    bind $wserv <FocusIn> [namespace code [list OnFocusIn $token]]
+    bind $wserv <Return>  [namespace code [list DoGet $token]]
+    bind $w     <Return>  [namespace code [list DoGet $token]]
     
     set state(wbtok)   $frbot.btok
     set state(wprog)   $wmore.arr
     set state(wfriq)   $wbox.fiq
-    set state(wserv)   $frmid.eserv
+    set state(wserv)   $wserv
     set state(wtri)    $wmore.tri
     set state(wfmore)  $wmore.fmore
     set state(wtabnb)  $wtabnb
@@ -361,6 +367,16 @@ proc ::RegisterEx::New {args} {
     Free $token
     
     return $w
+}
+
+proc ::RegisterEx::OnFocusIn {token} {
+    
+
+}
+
+proc ::RegisterEx::DoGet {token} {
+    Get $token
+    return -code break
 }
 
 proc ::RegisterEx::GetTokenFrom {key} {
@@ -491,7 +507,6 @@ proc ::RegisterEx::NotBusy {token} {
     variable $token
     upvar 0 $token state
     
-    SetState $token !disabled
     $state(wprog) stop
     set state(status) ""
     ::JUI::SetStatusMessage ""
@@ -516,6 +531,9 @@ proc ::RegisterEx::Get {token} {
     
     ::Debug 2 "::RegisterEx::Get"
     
+    focus $state(w)
+    DestroyForm $token
+    
     # Kill any pending open states.
     ::Login::Reset
     
@@ -530,7 +548,7 @@ proc ::RegisterEx::Get {token} {
 	  -message [mc jamessillegalchar "server" $state(-server)]
 	return
     }
-    SetState $token disabled
+    SetState $token {disabled}
     set state(status) [mc jawaitserver]
     $state(wprog) start
 
@@ -564,6 +582,7 @@ proc ::RegisterEx::ConnectCB {token jlibname status {errcode ""} {errmsg ""}} {
 	$jstate(jlib) register_get [list [namespace current]::GetCB $token] \
 	  -to $state(-server)
     } elseif {$status eq "error"} {
+	SetState $token {!disabled}
 	NotBusy $token
 	set str [::Login::GetErrorStr $errcode $errmsg]
 	::UI::MessageBox -icon error -type ok -message $str
@@ -582,8 +601,10 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
     if {![info exists state]} {
 	return
     }
+    bind $state(w) <Return> [namespace code [list SendRegister $token]]
+    
     NotBusy $token
-    SetState $token disabled
+    SetState $token {disabled}
     if {!([info exists state(w)] && [winfo exists $state(w)])} {
 	return
     }
@@ -699,6 +720,14 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
     grid columnconfigure $wfr 1 -weight 1
     
     catch {focus $wfr.eusername}
+}
+
+proc ::RegisterEx::DestroyForm {token} {
+    variable $token
+    upvar 0 $token state
+   
+    eval destroy [winfo children $state(wfriq)]
+    array unset state elem,*
 }
 
 proc ::RegisterEx::SendRegister {token} {

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.42 2007-08-17 07:01:14 matben Exp $
+# $Id: Status.tcl,v 1.43 2007-09-05 07:44:41 matben Exp $
 
 package provide Status 1.0
 
@@ -722,7 +722,7 @@ proc ::Status::ExBuildMenu {m varName args} {
     set len2 [expr {$len-2}]
     
     foreach show $showL {
-	set opts {}
+	set opts [list]
 	if {[tk windowingsystem] ne "aqua"} {
 	    set opts [list -compound left \
 	      -image [::Rosticons::Get status/$show]]
@@ -789,7 +789,7 @@ proc ::Status::ExMenuCmd {m varName cmd} {
 proc ::Status::ExAddMessage {show status} {
     global  config
     upvar ::Jabber::jprefs jprefs
-    
+
     set statusL $jprefs(status,menu)
     set elem [list $show $status]
     set idx [lsearch $statusL $elem]
@@ -801,7 +801,7 @@ proc ::Status::ExAddMessage {show status} {
 
     # Put new show+status first in list.
     set statusL [linsert $statusL 0 $elem]
-    set len [llength $statusL]
+    set len $config(status,menu,len)
     if {[llength $statusL] > $len} {
 	set statusL [lrange $statusL 0 [expr {$len-1}]]
     }
