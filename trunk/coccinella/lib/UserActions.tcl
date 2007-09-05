@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserActions.tcl,v 1.49 2007-07-19 06:28:18 matben Exp $
+# $Id: UserActions.tcl,v 1.50 2007-09-05 10:04:39 matben Exp $
 
 package provide UserActions 1.0
 
@@ -144,25 +144,28 @@ proc ::UserActions::DoQuit {args} {
     ::hooks::run preQuitAppHook
     
     # Here we end the session if any.
-    ::hooks::run quitAppHook
+    set res [::hooks::run quitAppHook]
+    if {$res eq "stop"} {
+	return
+    }
     
     # If we used 'Edit/Revert To/Application Defaults' be sure to reset...
     set prefs(firstLaunch) 0
     
     # Get dialog window geometries.
-    set prefs(winGeom) {}
+    set prefs(winGeom) [list]
     foreach {key value} [array get prefs winGeom,*] {
 	regexp {winGeom,(.*)$} $key match winkey
 	lappend prefs(winGeom) $winkey $value
     }
     
     # Same for pane positions.
-    set prefs(paneGeom) {}
+    set prefs(paneGeom) [list]
     foreach {key value} [array get prefs paneGeom,*] {
 	regexp {paneGeom,(.*)$} $key match winkey
 	lappend prefs(paneGeom) $winkey $value
     }
-    set prefs(sashPos) {}
+    set prefs(sashPos) [list]
     foreach {key value} [array get prefs sashPos,*] {
 	regexp {sashPos,(.*)$} $key match winkey
 	lappend prefs(sashPos) $winkey $value

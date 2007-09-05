@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.47 2007-07-19 06:28:12 matben Exp $
+# $Id: Emoticons.tcl,v 1.48 2007-09-05 10:04:39 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -36,7 +36,7 @@ namespace eval ::Emoticons:: {
     set priv(defaultSet) "default"
 }
 
-proc ::Emoticons::Init { } {
+proc ::Emoticons::Init {} {
     global  this
     
     variable priv

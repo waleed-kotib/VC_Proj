@@ -538,6 +538,7 @@
 ::msgcat::mcset en {Business Card}
 ::msgcat::mcset en {Cache folder}
 ::msgcat::mcset en {Canvas Size}
+::msgcat::mcset en {Changes since previous release}
 ::msgcat::mcset en {Chat History}
 ::msgcat::mcset en {Chat System}
 ::msgcat::mcset en {Chat With}
@@ -901,8 +902,7 @@
 ::msgcat::mcset en jamessconnbroken      {The connection was unexpectedly broken.}
 ::msgcat::mcset en jamessenterroomempty  {We require both the server and room name entries to be filled with valid names.}
 ::msgcat::mcset en jamessenterroomretry  {Error when entering room "%s": %s Do you want to retry?}
-::msgcat::mcset en jamesserragentget     {We got an error when obtaining agents: %s}
-::msgcat::mcset en jamesserrautoupdate   {We received an error when quering %s for updated client software. The error was: %s}
+::msgcat::mcset en jamesserrautouphttp   {Failed connecting server "%s" to get update info: %s}
 ::msgcat::mcset en jamesserrbrowse       {We got an error when browsing "%s": %s}
 ::msgcat::mcset en jamesserrconfget      {Failed obtaining info entering room. Error code %s with message: %s}
 ::msgcat::mcset en jamesserrconfgetcre   {Failed obtaining info creating room. Error code %s with message: %s}
@@ -936,6 +936,7 @@
 ::msgcat::mcset en jamesslocaltime       {The local time for %s is: %s}
 ::msgcat::mcset en jamesslogin409        {The login failed with the error code %s because this username is already in use by another user. If this user is you, try to login instead.}
 ::msgcat::mcset en jamessloginerr        {The login failed with the error code %s and message: %s}
+::msgcat::mcset en jamessmsgwarnquit     {There are unsaved messages. Do you still want to quit?}
 ::msgcat::mcset en jamessnamemissing     {The %s is missing or is too short!}
 ::msgcat::mcset en jamessnofiletrpt      {We couldn't see that %s supports file transfer.}
 ::msgcat::mcset en jamessnofiletrpt2     {%s does not support file transfer.}
@@ -991,7 +992,6 @@
 ::msgcat::mcset en jamesswarnremove2     {Do you really want to remove this contact? This process cannot be undone.}
 ::msgcat::mcset en jamesswarnsendcanoff  {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless you happen to be online while this message is being read. Do you want to send it anyway?}
 ::msgcat::mcset en jamesswbchatlost      {The complete conversation will be lost when closing this chat whiteboard. Do you actually want to end this chat?}
-
 
 
 # This maps Defined Error Conditions to clear text messages.
@@ -1302,7 +1302,7 @@ Further restrictions may exist depending on specific room configuration.}
 
 
 
-::msgcat::mcset en autoupdatenot        {Do not automatically check for updates}
+::msgcat::mcset en autoupdatedo         {Automatically check for updates}
 ::msgcat::mcset en oobmsg               {Let user %s download a file from your built in server. The description is optional.}
 
 # Composing events
