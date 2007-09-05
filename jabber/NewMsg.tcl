@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.89 2007-08-20 06:05:17 matben Exp $
+# $Id: NewMsg.tcl,v 1.90 2007-09-05 10:04:39 matben Exp $
 
 package require ui::entryex
 
@@ -967,7 +967,7 @@ proc ::NewMsg::CloseHook {wclose} {
     return [CloseDlg $wclose]
 }
 
-proc ::NewMsg::QuitAppHook { } {
+proc ::NewMsg::QuitAppHook {} {
     global  wDlgs
     variable locals
     
@@ -983,20 +983,19 @@ proc ::NewMsg::QuitAppHook { } {
 		set warn 1
 	    }
 	    if {$warn} {
-		set str "There are unsaved messages. Do you still want to quit?"
 		set ans [::UI::MessageBox -title [mc {To Send or Not}]  \
 		  -icon warning -type yesno -default "no" \
-		  -message $str]
+		  -message [msg jamessmsgwarnquit]]
 		if {$ans eq "no"} {
 		    # @@@ mising return check here!
-		    return 
+		    return "stop"
 		}
 		break
 	    }
 	}
     }
-    
     ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)
+    return
 }
 
 proc ::NewMsg::CloseDlg {w} {

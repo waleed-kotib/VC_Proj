@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoUpdate.tcl,v 1.20 2007-08-10 08:07:51 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.21 2007-09-05 10:04:39 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -94,8 +94,8 @@ proc ::AutoUpdate::Get {args} {
 	::http::geturl $url -command [namespace code Command]
     } $tmopts} token]} {
 	if {!$opts(-silent)} {
-	    ::UI::MessageBox -icon error -type ok -message \
-	      "Failed connecting server \"$url\" to get update info: $token"
+	    ::UI::MessageBox -icon error -type ok \
+	      -message [mc jamesserrautouphttp $url $token]
 	}
     }
 }
@@ -143,8 +143,8 @@ proc ::AutoUpdate::Command {token} {
 	if {[package vcompare $this(vers,full) $releaseA(version)] == -1} {
 	    ::AutoUpdate::Dialog $releaseAttr $message $changesL
 	} elseif {!$opts(-silent)} {
-	    ::UI::MessageBox -icon info -type ok -message \
-	      [mc messaupdatelatest $this(vers,full)]
+	    ::UI::MessageBox -icon info -type ok \
+	      -message [mc messaupdatelatest $this(vers,full)]
 	}
 	tinydom::cleanup $token
     }
@@ -154,7 +154,7 @@ proc ::AutoUpdate::Command {token} {
 
 proc ::AutoUpdate::Dialog {releaseAttr message changesL} {
     global  this prefs
-    variable noautocheck
+    variable autocheck
     variable newVersion
     
     set w .aupdate
@@ -194,7 +194,7 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesL} {
     $wtext insert end "\n"
     
     foreach {name value} $releaseAttr {
-	$wtext insert end "\t[string totitle $name]:" attrtag
+	$wtext insert end "\t[mc [string totitle $name]]:" attrtag
 	
 	switch -- $name {
 	    url {
@@ -212,7 +212,7 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesL} {
 	}
 	$wtext insert end "\n"
     }
-    $wtext insert end "Changes since previous release:\n" changestag
+    $wtext insert end [mc "Changes since previous release"]:\n changestag
     foreach item $changesL {
 	$wtext insert end "o $item\n" itemtag
     }    
@@ -223,12 +223,12 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesL} {
     foreach {ystart yfrac} [$wtext yview] break
     $wtext configure -height [expr int([$wtext cget -height]/$yfrac) + 0]
     
-    set noautocheck 0
+    set autocheck 1
     if {[package vcompare $this(vers,full) $prefs(autoupdate,lastVersion)] <= 0} {
-    	set noautocheck 1
+    	set autocheck 0
     }
-    ttk::checkbutton $wbox.ch -text [mc autoupdatenot] \
-      -variable [namespace current]::noautocheck
+    ttk::checkbutton $wbox.ch -text [mc autoupdatedo] \
+      -variable [namespace current]::autocheck
     pack $wbox.ch -side top -anchor w -pady 8
     
     # Button part.
@@ -244,13 +244,13 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesL} {
 
 proc ::AutoUpdate::Destroy {w} {
     global  prefs
-    variable noautocheck
+    variable autocheck
     variable newVersion
     
-    if {$noautocheck} {
-	set prefs(autoupdate,lastVersion) $newVersion
-    } else {
+    if {$autocheck} {
 	set prefs(autoupdate,lastVersion) 0.0
+    } else {
+	set prefs(autoupdate,lastVersion) $newVersion
     }
 }
     
