@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.48 2007-09-05 10:04:39 matben Exp $
+# $Id: Emoticons.tcl,v 1.49 2007-09-05 12:12:21 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -111,7 +111,7 @@ proc ::Emoticons::Make {w word} {
     }
 }
 
-proc ::Emoticons::GetAllSets { } {
+proc ::Emoticons::GetAllSets {} {
     global  this
     variable priv
     variable state
@@ -140,7 +140,7 @@ proc ::Emoticons::GetAllSets { } {
 #       Gets the full path to our emoticons file/folder.
 #       Verifies that it exists and that can be mounted if zip archive.
 
-proc ::Emoticons::GetPrefSetPathExists { } {
+proc ::Emoticons::GetPrefSetPathExists {} {
     global  this
     variable priv
     upvar ::Jabber::jprefs jprefs
@@ -150,7 +150,7 @@ proc ::Emoticons::GetPrefSetPathExists { } {
     
     foreach dir [list $this(emoticonsPath) $this(altEmoticonsPath)] {
 	set f [file join $dir $jprefs(emoticonSet)]
-	set fjisp ${f}.jisp
+	set fjisp $f.jisp
 	if {[file exists $f]} {
 	    set path $f
 	    break
@@ -339,7 +339,7 @@ proc ::Emoticons::SetSmileyArr {name} {
     }
 }
 
-proc ::Emoticons::FreeSmileyArr { } {
+proc ::Emoticons::FreeSmileyArr {} {
     variable smiley
     variable smileyInv
     
@@ -368,13 +368,13 @@ proc ::Emoticons::FreeTmpSet {name} {
     array unset state $name,*
 }
 
-proc ::Emoticons::FreeAllTmpSets { } {
+proc ::Emoticons::FreeAllTmpSets {} {
     variable meta
     variable state
     variable tmpicons
     variable tmpiconsInv
 
-    set ims {}
+    set ims [list]
     foreach {key photo} [array get tmpicons ] {
 	lappend ims $photo
     }
@@ -537,7 +537,7 @@ proc ::Emoticons::InsertTextLegend {w name args} {
     $w configure -state disabled
 }
 
-proc ::Emoticons::ImportSet { } {
+proc ::Emoticons::ImportSet {} {
     global  this
     
     set types [list [list [mc {Jabber Iconset Archive}] {.jisp}]]
@@ -566,7 +566,7 @@ proc ::Emoticons::ImportSet { } {
 
 # Preference page --------------------------------------------------------------
 
-proc  ::Emoticons::InitPrefsHook { } {
+proc  ::Emoticons::InitPrefsHook {} {
     variable priv
     upvar ::Jabber::jprefs jprefs
 
@@ -650,7 +650,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     PrefsSetCmd $tmpSet
 }
 
-proc ::Emoticons::ImportSetToPrefs { } {
+proc ::Emoticons::ImportSetToPrefs {} {
     global  this
     variable wprefpage
     variable wiconsetmenu
@@ -663,7 +663,7 @@ proc ::Emoticons::ImportSetToPrefs { } {
 	set name [file rootname $tail]
 	if {[lsearch [GetAllSets] $name] >= 0} {
 	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message "Iconset \"$name\" already exists." \
+	      -message [mc jamessemoticonexists $name] \
 	      -parent [winfo toplevel $wprefpage]
 	    return
 	}
@@ -673,7 +673,7 @@ proc ::Emoticons::ImportSetToPrefs { } {
 	    LoadTmpIconSet $dst
 	} err]} {
 	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message "Failed loading iconset \"$name\". $err" \
+	      -message [mc jamessemoticonfail $name $err] \
 	      -parent [winfo toplevel $wprefpage]
 	} else {
 	    $wiconsetmenu add radiobutton -label $name  \
@@ -695,7 +695,7 @@ proc ::Emoticons::PrefsSetCmd {value} {
 	    LoadTmpIconSet $state($tmpSet,path)
 	} err]} {
 	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message "Failed loading iconset $tmpSet. $err" \
+	      -message [mc jamessemoticonfail $tmpSet $err] \
 	      -parent [winfo toplevel $wprefpage]
 	    set priv(havezip) 0
 	    set jprefs(emoticonSet) $priv(defaultSet)
@@ -707,11 +707,11 @@ proc ::Emoticons::PrefsSetCmd {value} {
     InsertTextLegend $wpreftext $tmpSet
 }
 
-proc ::Emoticons::FreePrefsPage { } {
+proc ::Emoticons::FreePrefsPage {} {
     
 }
 
-proc ::Emoticons::SavePrefsHook { } {
+proc ::Emoticons::SavePrefsHook {} {
     variable tmpSet
     upvar ::Jabber::jprefs jprefs
 
@@ -723,7 +723,7 @@ proc ::Emoticons::SavePrefsHook { } {
     set jprefs(emoticonSet) $tmpSet
 }
 
-proc ::Emoticons::CancelPrefsHook { } {
+proc ::Emoticons::CancelPrefsHook {} {
     variable tmpSet
     upvar ::Jabber::jprefs jprefs
 
@@ -736,7 +736,7 @@ proc ::Emoticons::CancelPrefsHook { } {
     FreeAllTmpSets
 }
 
-proc ::Emoticons::UserDefaultsHook { } {
+proc ::Emoticons::UserDefaultsHook {} {
     variable tmpSet
     upvar ::Jabber::jprefs jprefs
     

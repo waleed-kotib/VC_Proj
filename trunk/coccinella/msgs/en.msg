@@ -900,6 +900,8 @@
 ::msgcat::mcset en jamessconfmsg         {Select a conference service and a room name. Then push Get to obtain the specification for entering the desired room since each room & server may have different requirements.}
 ::msgcat::mcset en jamessconfservempty   {We require the server to be filled with a valid name.}
 ::msgcat::mcset en jamessconnbroken      {The connection was unexpectedly broken.}
+::msgcat::mcset en jamessemoticonexists  {Iconset "%s" already exists.}
+::msgcat::mcset en jamessemoticonfail    {Failed loading iconset "%s": %s}
 ::msgcat::mcset en jamessenterroomempty  {We require both the server and room name entries to be filled with valid names.}
 ::msgcat::mcset en jamessenterroomretry  {Error when entering room "%s": %s Do you want to retry?}
 ::msgcat::mcset en jamesserrautouphttp   {Failed connecting server "%s" to get update info: %s}
