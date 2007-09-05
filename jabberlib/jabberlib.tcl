@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.186 2007-08-31 08:13:56 matben Exp $
+# $Id: jabberlib.tcl,v 1.187 2007-09-05 14:23:37 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3756,7 +3756,8 @@ namespace eval jlib {
 #
 #	array get and array unset accepts glob characters. These need to be
 #	escaped if they occur as part of a JID.
-#	NB: 'string match pattern str' MUST have pattern escaped!
+#	NB1: 'string match pattern str' MUST have pattern escaped!
+#	NB2: This also applies to 'lsearch'!
 
 proc jlib::ESC {s} {
     return [string map {* \\* ? \\? [ \\[ ] \\] \\ \\\\} $s]
