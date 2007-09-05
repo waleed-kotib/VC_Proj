@@ -17,13 +17,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: LiveRosterImage.tcl,v 1.1 2007-08-25 07:36:52 matben Exp $
+#  $Id: LiveRosterImage.tcl,v 1.2 2007-09-05 07:44:41 matben Exp $
 
 namespace eval ::LiveRosterImage {}
 
 proc ::LiveRosterImage::Init {} {
     
     if {[catch {package require tkpath 0.2.6}]} {
+	return
+    }
+    if {[tk windowingsystem] ne "aqua"} {
 	return
     }
     component::register LiveRosterImage "Draw an overlay to the roster background image"
@@ -54,23 +57,38 @@ proc ::LiveRosterImage::Draw {} {
 
     # Find size for each line and adjust the font size.
     set family {Lucida Grande}
-    set size 24
+    set size 16
+    set maxSize 52
     set font [list $family $size]
     
     # Scale font size to fit.
     set len [font measure $font $showStr]
-    set size1 [expr {$size*($width - 40)/$len}]
+    set size1 [min [expr {$size*($width - 40)/$len}] $maxSize]
     set font1 [list $family $size1]
-    set linespace [font metrics $font1 -linespace]
-    set descent [font metrics $font1 -descent]
-    set y1 [expr {$linespace + 20}]
+    set linespace1 [font metrics $font1 -linespace]
+    set descent1 [font metrics $font1 -descent]
+    set y1 [expr {$linespace1 + 20}]
     
+    set str2L [list]
     if {$status ne ""} {
+	set str2L [list $status]
+	set n [string length $status]
 	set len [font measure $font $status]
-	set size2 [expr {$size*($width - 20)/$len}]
+
+	# Split status message into two lines if long.
+	if {$len >= $width} {
+	    set idx [string first " " $status [expr {$n/2}]]
+	    if {$idx >= 0} {
+		set str2L [list \
+		  [string range $status 0 [expr {$idx-1}]] \
+		  [string range $status [expr {$idx+1}] end]]
+		set len [font measure $font [lindex $str2L 0]]
+	    }
+	}
+	set size2 [min [expr {$size*($width - 20)/$len}] $maxSize]
 	set font2 [list $family $size2]
-	set linespace [font metrics $font2 -linespace]
-	set y2 [expr {$y1 + $descent + $linespace}]
+	set linespace2 [font metrics $font2 -linespace]
+	set y2 [expr {$y1 + $descent1 + $linespace2}]
     }
     
     set S [::tkpath::surface new $width $height]
@@ -89,9 +107,10 @@ proc ::LiveRosterImage::Draw {} {
     set width2 [expr {$width/2}]
     $S create ptext $width2 $y1 -text $showStr -textanchor middle \
       -fontfamily $family -fontsize $size1 -fill $fill -fillopacity $opacity
-    if {$status ne ""} {
-	$S create ptext $width2 $y2 -text $status -textanchor middle \
+    foreach str $str2L {
+	$S create ptext $width2 $y2 -text $str -textanchor middle \
 	  -fontfamily $family -fontsize $size2 -fill $fill -fillopacity $opacity
+	incr y2 $linespace2
     }
     set new [$S copy [image create photo]]
     $S destroy
@@ -99,7 +118,4 @@ proc ::LiveRosterImage::Draw {} {
     
     ::RosterTree::BackgroundImageConfig $new
 }
-
-
-
 
