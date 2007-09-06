@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.19 2007-08-24 13:33:13 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.20 2007-09-06 15:11:58 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -44,10 +44,10 @@ proc ::BuddyPounce::Init {} {
     
     # Register popmenu entry.
     set menuDef {
-	command {Buddy Pouncing} {::BuddyPounce::Build $clicked $jid $group}
+	command mBuddyPouncing {::BuddyPounce::Build $clicked $jid $group}
     }
     set menuType {
-	{Buddy Pouncing} {group user}
+	mBuddyPouncing {group user}
     }
     ::Roster::RegisterPopupEntry $menuDef $menuType
     
@@ -70,7 +70,7 @@ proc ::BuddyPounce::Init {} {
     # These define which the events are.
     variable events
     set events(keys) {available unavailable msg                chat}
-    set events(str)  {Online    Offline     {Incoming Message} {New Chat}}
+    set events(str)  {Online    Offline     {Incoming Message} {Chat}}
     
     variable actionlist
     set actionlist(keys) {msgbox sound chat msg}
@@ -85,21 +85,13 @@ proc ::BuddyPounce::Init {} {
     
     # And for 'any' which is not an array.
     variable budprefsany {}
-    
-    variable alertStr
-    array set alertStr {
-	available   {The user "%s" just went online!}
-	unavailable {The user "%s" just went offline!}
-	msg         {The user "%s" just sent you a message!}
-	chat        {The user "%s" just started a chat!}
-    }
-    
+        
     variable alertTitle 
     array set alertTitle {
-	available   {Online!}
-	unavailable {Offline!}
-	msg         {New message!}
-	chat        {New chat!}
+	available   {Online}
+	unavailable {Offline}
+	msg         {New Message}
+	chat        {New Chat}
     }
 }
 
@@ -146,7 +138,7 @@ proc ::BuddyPounce::Build {typeselected item group} {
     variable $token
     upvar 0 $token state
     
-    set w ${wdlg}${uid}
+    set w $wdlg$uid
     set state(w) $w
     
     if {[lsearch $typeselected user] >= 0} {
@@ -162,27 +154,19 @@ proc ::BuddyPounce::Build {typeselected item group} {
 	    set state(jid)  $jid
 	    set state(jid2) $jid2
 	    set state(type) jid
-	    set msg "Set a specific action when something happens with \"$jid\",\
-	      which can be a changed status, or if you receive a message etc.\
-	      Pick events using the tabs below."
+	    set msg [mc budpounce-user $jid]
 	    set title "[mc {Buddy Pouncing}]: $jid"
 	}
 	group {
 	    set state(group) $group
 	    set state(type)  group
-	    set msg "Set a specific action when something happens with\
-	      any contact belonging to the group \"$group\",\
-	      which can be a changed status, or if you receive a message etc.\
-	      Pick events using the tabs below."
+	    set msg [mc budpounce-group $group]
 	    set title "[mc {Buddy Pouncing}]: $group"
 	}
 	"" {
 	    set state(type) any
-	    set msg "Set a specific action when something happens with\
-	      any contact in your contact list,\
-	      which can be a changed status, or if you receive a message etc.\
-	      Pick events using the tabs below."
-	    set title "[mc {Buddy Pouncing}]: Any"
+	    set msg [mc budpounce-any]
+	    set title "[mc {Buddy Pouncing}]: [mc Any]"
 	}
 	default {
 	    unset state
@@ -272,7 +256,7 @@ proc ::BuddyPounce::Build {typeselected item group} {
 	
 	ttk::frame $wmsg.f1
 	pack  $wmsg.f1 -side top -anchor w
-	ttk::checkbutton $wmsg.f1.c -text "[mc {Send Message with subject}]:" \
+	ttk::checkbutton $wmsg.f1.c -text "[mc budpounce-sendmsg]:" \
 	  -variable $token\($ekey,msg)
 	ttk::entry $wmsg.f1.e -width 12 -textvariable $token\($ekey,msg,subject)
 	pack  $wmsg.f1.c $wmsg.f1.e -side left
@@ -519,7 +503,6 @@ proc ::BuddyPounce::Event {from eventkey args} {
     variable budprefs
     variable budprefsgroup
     variable budprefsany
-    variable alertStr
     variable alertTitle
     
     ::Debug 4 "::BuddyPounce::Event from = $from, eventkey=$eventkey"
@@ -565,8 +548,8 @@ proc ::BuddyPounce::Event {from eventkey args} {
 	
 	switch -- $action {
 	    msgbox {
-		::UI::AlertBox [format $alertStr($eventkey) $from] \
-		  -title $alertTitle($eventkey)
+		ui::dialog -message [mc budpounce-$eventkey $from] \
+		  -title [mc $alertTitle($eventkey)]
 	    }
 	    sound {
 		set soundfile [lsearch -inline -glob $actions soundfile:*]
@@ -596,7 +579,7 @@ proc ::BuddyPounce::Event {from eventkey args} {
 		    set body [string map {body: ""} $bodyopt]
 		    set body [subst -nocommands -novariables $body]
 		}
-		set opts {}
+		set opts [list]
 		if {[info exists argsArr(-body)]} {
 		    lappend opts -quotemessage $argsArr(-body)
 		}
@@ -611,7 +594,7 @@ proc ::BuddyPounce::GetAllSounds {} {
     global  this
     variable audioSuffixes
     
-    set all {}
+    set all [list]
     foreach f [glob -nocomplain -directory $this(soundsPath) *] {
 	if {[lsearch $audioSuffixes [file extension $f]] >= 0} {
 	    lappend all [file tail $f]
@@ -685,8 +668,7 @@ proc ::BuddyPounce::PresenceHook {jid type args} {
     }
 }
 
-proc ::BuddyPounce::PresenceUnavailableHook  {jid type args} {
-    
+proc ::BuddyPounce::PresenceUnavailableHook  {jid type args} {   
     Event $jid unavailable
 }
 

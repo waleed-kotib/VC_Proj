@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.63 2007-09-06 14:09:06 matben Exp $
+# $Id: tileutils.tcl,v 1.64 2007-09-06 15:11:58 matben Exp $
 #
 
 package require treeutil
@@ -232,7 +232,8 @@ proc tileutils::ThemeChanged {} {
 	option add *Menu.activeBackground       $color $priority
 	option add *Spinbox.buttonBackground    $color $priority
 	option add *Spinbox.highlightBackground $color $priority
-	option add *Text.highlightBackground    $textStyle(-background) $priority
+	#option add *Text.highlightBackground    $textStyle(-background) $priority
+	option add *Text.highlightBackground    $color $priority
 	option add *TreeCtrl.columnBackground   $color $priority
 	option add *WaveLabel.columnBackground  $color $priority
 	
