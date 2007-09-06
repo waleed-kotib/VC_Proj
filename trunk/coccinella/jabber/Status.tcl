@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.43 2007-09-05 07:44:41 matben Exp $
+# $Id: Status.tcl,v 1.44 2007-09-06 15:19:34 matben Exp $
 
 package provide Status 1.0
 
@@ -493,7 +493,7 @@ namespace eval ::Status:: {
     
     # @@@ Maybe these should go in the resource options database instead?
     set ::config(status,menu,len)           8
-    set ::config(status,menu,entry,len)     28
+    set ::config(status,menu,entry,len)     24
     set ::config(status,menu,dynamic,shows) {away}
     set ::config(status,menu,separator)     "- "
 }
