@@ -32,6 +32,7 @@
 ::msgcat::mcset en Affiliation
 ::msgcat::mcset en Agents
 ::msgcat::mcset en Allow
+::msgcat::mcset en Any
 ::msgcat::mcset en Appearance
 ::msgcat::mcset en Apply
 ::msgcat::mcset en Author
@@ -127,6 +128,7 @@
 ::msgcat::mcset en Network
 ::msgcat::mcset en Never
 ::msgcat::mcset en New
+::msgcat::mcset en New...
 ::msgcat::mcset en Next
 ::msgcat::mcset en Nick
 ::msgcat::mcset en Nickname
@@ -520,6 +522,7 @@
 ::msgcat::mcset en {Advanced Configuration}
 ::msgcat::mcset en {Advanced Setup}
 ::msgcat::mcset en {Alert sounds}
+::msgcat::mcset en {All Off}
 ::msgcat::mcset en {Alternative Room JID}
 ::msgcat::mcset en {As text}
 ::msgcat::mcset en {Ask each time}
@@ -682,6 +685,7 @@
 ::msgcat::mcset en {Pick File}
 ::msgcat::mcset en {Pick Image File}
 ::msgcat::mcset en {Pick skin}
+::msgcat::mcset en {Play Sound}
 ::msgcat::mcset en {Plugin Control}
 ::msgcat::mcset en {Plugin Info}
 ::msgcat::mcset en {Port number}
@@ -737,6 +741,7 @@
 ::msgcat::mcset en {Settings Panels}
 ::msgcat::mcset en {Setup Assistant}
 ::msgcat::mcset en {Show Image}
+::msgcat::mcset en {Show Popup}
 ::msgcat::mcset en {Show Text}
 ::msgcat::mcset en {Show Text and Image}
 ::msgcat::mcset en {Slide Show}
@@ -1575,6 +1580,18 @@ Further restrictions may exist depending on specific room configuration.}
 
 ::msgcat::mcset en {Synchronize your data with Google Earth}
 ::msgcat::mcset en {This is location data for}
+
+# Buddy pouncing:
+::msgcat::mcset en budpounce-user       {Set a specific action when something happens with "%s", which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
+::msgcat::mcset en budpounce-group      {Set a specific action when something happens with any contact belonging to the group "%s", which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
+::msgcat::mcset en budpounce-any        {Set a specific action when something happens with any contact in your contact list, which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
+::msgcat::mcset en budpounce-available  {The contact "%s" just went online!}
+::msgcat::mcset en budpounce-unavailable {The contact "%s" just went offline!}
+::msgcat::mcset en budpounce-msg        {The contact "%s" just sent you a message!}
+::msgcat::mcset en budpounce-chat       {The contact "%s" just started a chat!}
+::msgcat::mcset en budpounce-sendmsg    {Send message with subject}
+::msgcat::mcset en mBuddyPouncing       {Buddy Pouncing}
+
 
 
 # END --------------------------------------------------------------------------
