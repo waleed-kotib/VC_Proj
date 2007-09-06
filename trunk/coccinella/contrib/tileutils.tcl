@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.62 2007-09-06 13:20:47 matben Exp $
+# $Id: tileutils.tcl,v 1.63 2007-09-06 14:09:06 matben Exp $
 #
 
 package require treeutil
@@ -425,13 +425,12 @@ proc tileutils::TextThemeChanged {win} {
     array set style [list -foreground black]
     array set style [style configure .]    
     array set style [style configure Text]    
-    array set map   [style map .]
-    array set map   [style map Text]
+    array set styleB [style configure .]    
     
-    if {[info exists style(-background)]} {
+    if {[info exists styleB(-background)]} {
 	# highlightBackground is drawn inside the border and must blend
-	# with Text background.
-	set color $style(-background)
+	# with Text background. ???????? Wrong ?????
+	set color $styleB(-background)
 	$win configure -highlightbackground $color
     }
     if {[info exists style(-selectbackground)]} {
