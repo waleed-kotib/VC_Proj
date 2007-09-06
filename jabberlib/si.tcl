@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: si.tcl,v 1.20 2007-09-01 07:49:05 matben Exp $
+# $Id: si.tcl,v 1.21 2007-09-06 13:20:47 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -323,7 +323,7 @@ proc jlib::si::i_handler {jlibname sid iqChild args} {
     }
     
     # Find if matching transport.
-    if {[lsearch $trpt(streams) $value] >= 0} {
+    if {[lsearch -exact $trpt(streams) $value] >= 0} {
 	
 	# Open transport. 
 	# We provide a callback for the transport when open is finished.
@@ -601,7 +601,7 @@ proc jlib::si::pick_stream {siE} {
     # Pick first matching since priority ordered.
     set stream ""
     foreach name $values {
-	if {[lsearch $trpt(streams) $name] >= 0} {
+	if {[lsearch -exact $trpt(streams) $name] >= 0} {
 	    set stream $name
 	    break
 	}

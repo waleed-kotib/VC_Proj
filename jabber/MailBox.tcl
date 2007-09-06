@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.119 2007-09-01 07:49:05 matben Exp $
+# $Id: MailBox.tcl,v 1.120 2007-09-06 13:20:47 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -635,6 +635,7 @@ proc ::MailBox::TreeCtrl {T wysc} {
 
     # These are dummy options.
     set itemBg [option get $T itemBackground {}]
+    set itemFg [option get $T itemFill {}]
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
     set fg [option get $T textColor {}]
@@ -696,7 +697,10 @@ proc ::MailBox::TreeCtrl {T wysc} {
     $T notify bind $T <Selection> [list [namespace current]::Selection %T]
     bind $T <Double-1>            [list [namespace current]::DoubleClickMsg %W]
     bind $T <KeyPress-BackSpace>  [namespace current]::TrashMsg
-
+    
+    if {$itemFg ne ""} {
+	treeutil::configureelementtype $T text -fill $itemFg
+    }
     set sortColumn 0
 }
 

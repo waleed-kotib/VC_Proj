@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.9 2007-08-29 06:39:01 matben Exp $
+# $Id: black.tcl,v 1.10 2007-09-06 13:20:47 matben Exp $
 
 namespace eval tile {
     namespace eval theme {
@@ -37,7 +37,6 @@ namespace eval tile::theme::black {
     }
 
     style theme create black -parent clam -settings {
-
 
         # -----------------------------------------------------------------
         # Theme defaults
@@ -83,14 +82,14 @@ namespace eval tile::theme::black {
 	  style configure TNotebook.Tab \
 	    -padding {6 2 6 2}
 	  
-	  # Standard tk widgets.
+	  # tk widgets.
 	  style map Menu \
 	    -background [list active $colors(-lighter)] \
 	    -foreground [list disabled $colors(-disabledfg)]
 
 	  style configure TreeCtrl \
-	    -background gray50 -itembackground {gray80 gray70}
-	  
+	    -background gray30 -itembackground {gray60 gray50} \
+	    -itemfill white -itemaccentfill yellow
     }
 }
 

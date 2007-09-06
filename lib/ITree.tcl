@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ITree.tcl,v 1.22 2007-08-23 13:01:29 matben Exp $
+# $Id: ITree.tcl,v 1.23 2007-09-06 13:20:47 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -59,6 +59,7 @@ proc ::ITree::New {T wxsc wysc args} {
     
     # This is a dummy option.
     set itemBackground [option get $T itemBackground {}]
+    set itemFill [option get $T itemFill {}]
 
     $T column create -tags cTree  \
       -itembackground $itemBackground -resize 0 -expand 1
@@ -98,6 +99,10 @@ proc ::ITree::New {T wxsc wysc args} {
 	} 
     }
     bindtags $T [concat RosterTreeTag [bindtags $T]]
+
+    if {$itemFill ne ""} {
+	treeutil::configureelementtype $T text -fill $itemFill
+    }
 }
 
 proc ::ITree::GetStyle {T} {
@@ -223,7 +228,7 @@ proc ::ITree::Item {T v args} {
     variable tag2item
         
     set isopen 0
-    if {[set idx [lsearch $args -open]] >= 0} {
+    if {[set idx [lsearch -exact $args -open]] >= 0} {
 	set isopen [lindex $args [incr idx]]
     }
     set parent root

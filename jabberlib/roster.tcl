@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.56 2007-07-19 06:28:17 matben Exp $
+# $Id: roster.tcl,v 1.57 2007-09-06 13:20:47 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -412,7 +412,7 @@ proc jlib::roster::setitem {jlibname jid args} {
 	set rostA($mjid,$par) $value
 	if {[string equal $par "groups"]} {
 	    foreach gr $value {
-		if {[lsearch $rostA(groups) $gr] < 0} {
+		if {[lsearch -exact $rostA(groups) $gr] < 0} {
 		    lappend rostA(groups) $gr
 		}
 	    }

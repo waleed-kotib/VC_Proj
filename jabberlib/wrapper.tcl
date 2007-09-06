@@ -10,7 +10,7 @@
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: wrapper.tcl,v 1.35 2007-07-19 06:28:18 matben Exp $
+# $Id: wrapper.tcl,v 1.36 2007-09-06 13:20:47 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -310,7 +310,7 @@ proc wrapper::elementend {id tagname args} {
     
     # Check args, to see if empty element
     set isempty 0
-    set ind [lsearch $args {-empty}]
+    set ind [lsearch -exact $args {-empty}]
     if {$ind >= 0} {
 	set isempty [lindex $args [expr {$ind + 1}]]
     }

@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: util.tcl,v 1.5 2007-08-04 07:25:38 matben Exp $
+# $Id: util.tcl,v 1.6 2007-09-06 13:20:47 matben Exp $
 
 package provide jlib::util 0.1
 
@@ -23,9 +23,9 @@ if {![llength [info commands lassign]]} {
 #       Picks out the common list elements from two lists, their intersection.
 
 proc jlib::util::lintersect {list1 list2} {
-    set lans {}
+    set lans [list]
     foreach l $list1 {
-	if {[lsearch $list2 $l] >= 0} {
+	if {[lsearch -exact $list2 $l] >= 0} {
 	    lappend lans $l
 	}
     }
@@ -38,7 +38,7 @@ proc jlib::util::lintersect {list1 list2} {
 
 proc jlib::util::lprune {listName elem} {
     upvar $listName listValue    
-    set idx [lsearch $listValue $elem]
+    set idx [lsearch -exact $listValue $elem]
     if {$idx >= 0} {
 	uplevel [list set $listName [lreplace $listValue $idx $idx]]
     }
