@@ -923,6 +923,7 @@
 ::msgcat::mcset en jamesserrvers         {We received an error when quering %s for its version. The error was: %s}
 ::msgcat::mcset en jamessfailedsubsc     {Failed to make a subscription to %s. The user denied the subscription.}
 ::msgcat::mcset en jamessfailsetnick     {There was a failure when setting the nickname or group of user "%s". The error code is %s with the message: %s}
+::msgcat::mcset en jamessfatalerr        {Receieved a fatal error: %s The connection is closed.}
 ::msgcat::mcset en jamessfiletrpterr     {Failed to get file %s from %s: %s}
 ::msgcat::mcset en jamessgchatfields     {We require that all fields are nonempty before entering room.}
 ::msgcat::mcset en jamessgcinvite        {You have been invited to the groupchat room %s by %s. Do you want to join?}

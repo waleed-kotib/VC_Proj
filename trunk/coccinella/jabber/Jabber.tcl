@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.228 2007-09-05 07:44:41 matben Exp $
+# $Id: Jabber.tcl,v 1.229 2007-09-06 12:08:05 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -907,12 +907,9 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	streamerror - xmpp-streams-error* {
 	    DoCloseClientConnection
 	    if {[info exists argsA(-errormsg)]} {
-		set msg "Receieved a fatal error: "
-		append msg $argsA(-errormsg)
-		append msg "\n"
-		append msg "The connection is closed."
+		set msg [mc jamessfatalerr "$argsA(-errormsg)\n"]
 	    } else {
-		set msg "Receieved a fatal error. The connection is closed."
+		set msg [mc jamessfatalerr ""]
 	    }
 	    ::UI::MessageBox -title [mc {Fatal Error}] -icon error -type ok \
 	      -message $msg
