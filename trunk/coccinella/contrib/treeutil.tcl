@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under BSD-style license.
 #  
-#  $Id: treeutil.tcl,v 1.14 2007-08-22 15:02:48 matben Exp $
+#  $Id: treeutil.tcl,v 1.15 2007-09-06 13:20:47 matben Exp $
 
 # USAGE:
 # 
@@ -45,7 +45,7 @@ proc treeutil::bind {w item args} {
     if {$len > 2} {
 	return -code error "usage: ::treeutil::bind w item ?type? ?script?"
     }
-    set ans {}
+    set ans [list]
     set item [$w item id $item]
     if {$len == 0} {
 	foreach e $events {

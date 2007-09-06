@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.204 2007-09-05 12:30:59 matben Exp $
+# $Id: GroupChat.tcl,v 1.205 2007-09-06 13:20:47 matben Exp $
 
 package require Create
 package require Enter
@@ -275,8 +275,7 @@ proc ::GroupChat::OnMenuCreate {} {
 }
 
 proc ::GroupChat::IsInRoom {roomjid} {
-    set jidESC [jlib::ESC $roomjid]
-    if {[lsearch [::Jabber::JlibCmd service allroomsin] $jidESC] < 0} {
+    if {[lsearch -exact [::Jabber::JlibCmd service allroomsin] $roomjid] < 0} {
 	return 0
     } else {
 	return 1

@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: disco.tcl,v 1.50 2007-07-19 14:11:28 matben Exp $
+# $Id: disco.tcl,v 1.51 2007-09-06 13:20:47 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -222,7 +222,7 @@ proc jlib::disco::send_get {jlibname type jid cmd args} {
     set jid [jlib::jidmap $jid]
     set node ""
     set opts [list]
-    if {[set idx [lsearch $args -node]] >= 0} {
+    if {[set idx [lsearch -exact $args -node]] >= 0} {
 	set node [lindex $args [incr idx]]
 	set opts [list -node $node]
     }
@@ -247,7 +247,7 @@ proc jlib::disco::get_async {jlibname type jid cmd args} {
     set jid [jlib::jidmap $jid]
     set node ""
     set opts [list]
-    if {[set idx [lsearch $args -node]] >= 0} {
+    if {[set idx [lsearch -exact $args -node]] >= 0} {
 	set node [lindex $args [incr idx]]
 	set opts [list -node $node]
     }
@@ -413,7 +413,7 @@ proc jlib::disco::parse_get_items {jlibname from queryE} {
     }
     
     # Cache children of category='conference' as rooms.
-    if {[lsearch $info(conferences) $from] >= 0} {
+    if {[lsearch -exact $info(conferences) $from] >= 0} {
 	set isrooms 1
     } else {
 	set isrooms 0
@@ -695,7 +695,7 @@ proc jlib::disco::hasfeature {jlibname feature jid {node ""}} {
 
     set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,features)]} {
-	return [expr [lsearch $info($jid,$node,features) $feature] < 0 ? 0 : 1]
+	return [expr [lsearch -exact $info($jid,$node,features) $feature] < 0 ? 0 : 1]
     } else {
 	return 0
     }

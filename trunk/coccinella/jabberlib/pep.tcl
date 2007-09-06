@@ -9,7 +9,7 @@
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: pep.tcl,v 1.9 2007-08-11 06:44:34 matben Exp $
+# $Id: pep.tcl,v 1.10 2007-09-06 13:20:47 matben Exp $
 #
 ############################# USAGE ############################################
 #
@@ -316,7 +316,7 @@ proc jlib::pep::OnDiscoItems {node jlibname type from subiq args} {
     # Get contact PEP nodes.
     if {$type eq "result"} {
 	set nodes [$jlibname disco nodes $from]
-	if {[lsearch $nodes $node] >= 0} {
+	if {[lsearch -exact $nodes $node] >= 0} {
 
 	    # NEW PEP:
 	    # If an entity is not subscribed to the account owner's presence, 

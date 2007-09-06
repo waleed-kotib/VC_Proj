@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.67 2007-08-25 07:36:52 matben Exp $
+# $Id: RosterTree.tcl,v 1.68 2007-09-06 13:20:47 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -375,7 +375,13 @@ proc ::RosterTree::New {w} {
 	    ::RosterTree::RemoveTags $item
 	} 
     }
+    
+    # RosterTreeTag will be first.
     bindtags $T [concat RosterTreeTag [bindtags $T]]
+    
+    # Need a post TreeCtrl bind tag for ThemeChanged.
+    set idx [lsearch [bindtags $T] TreeCtrl]
+    bindtags $T [linsert [bindtags $T] [incr idx] TreeCtrlPost]
     
     StyleConfigure $wtree
     StyleInit

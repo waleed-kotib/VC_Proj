@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.98 2007-08-23 13:01:29 matben Exp $
+# $Id: Preferences.tcl,v 1.99 2007-09-06 13:20:47 matben Exp $
  
 package require mnotebook
 
@@ -288,13 +288,15 @@ proc ::Preferences::TreeCtrl {T wysc} {
 
     # This is a dummy option.
     set itemBackground [option get $T itemBackground {}]
+    set itemFill [option get $T itemFill {}]
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
+    set fg [option get $T textColor {}]
     set fillT {white {selected focus} black {selected !focus}}
 
      $T column create -text [mc {Settings Panels}] -tags cTree  \
       -itembackground $itemBackground -resize 0 -expand 1 -borderwidth $bd  \
-      -background $bg
+      -background $bg -textcolor $fg
      $T configure -treecolumn cTree
 
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
@@ -308,6 +310,10 @@ proc ::Preferences::TreeCtrl {T wysc} {
     $T style layout $S eBorder -detach yes -iexpand xy -indent 0
 
     $T notify bind $T <Selection>  [list [namespace current]::Selection %T]
+    
+    if {$itemFill ne ""} {
+	treeutil::configureelementtype $T text -fill $itemFill
+    }
 }
 
 proc ::Preferences::NewTableItem {name text} {

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.38 2007-08-21 14:12:20 matben Exp $
+# $Id: RosterPlain.tcl,v 1.39 2007-09-06 13:20:47 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -69,12 +69,16 @@ proc ::RosterPlain::InitDB { } {
     #   element options:    rosterStyle:elementName-option
     #   style options:      rosterStyle:styleName:elementName-option
 
+    variable fillT
+    variable fillB
+    variable fillNum
     set fillT {white {selected focus} black {selected !focus}}
     set fillB [list $this(sysHighlight) {selected focus} gray {selected !focus}]
+    set fillNum blue
 
     # Element options:
     option add *Roster.plain:eText-fill               $fillT            widgetDefault
-    option add *Roster.plain:eNumText-fill            blue              widgetDefault
+    option add *Roster.plain:eNumText-fill            $fillNum          widgetDefault
     option add *Roster.plain:eBorder-outline          white             widgetDefault
     option add *Roster.plain:eBorder-outlinewidth     1                 widgetDefault
     option add *Roster.plain:eBorder-fill             $fillB            widgetDefault
@@ -131,15 +135,17 @@ proc ::RosterPlain::Configure {_T} {
     if {!$initedDB} {
 	InitDB
     }
-
-    # This is a dummy option.
-    set itemBackground [option get $T itemBackground {}]
     set outline white
     if {[$T cget -backgroundimage] eq ""} {
 	set outline gray
     }
     set minH 17
     
+    array set style [list -itembackground {}]
+    array set style [style configure .]
+    array set style [style configure TreeCtrl]
+    set itemBackground $style(-itembackground)
+        
     # One pixel from the top border line and two pixels below since border
     # is drawn inside.
     set ipy {1 2}
@@ -158,7 +164,6 @@ proc ::RosterPlain::Configure {_T} {
     $T configure -treecolumn cTree -showheader 0
 
     # The elements.
-    set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     $T element create eImage image
     $T element create eAltImage0 image
     $T element create eAltImage1 image
@@ -224,6 +229,33 @@ proc ::RosterPlain::Configure {_T} {
 
     ::RosterTree::DBOptions $rosterStyle    
     ::RosterTree::EditSetBinds [namespace code EditCmd]
+    
+    bind TreeCtrlPost <<ThemeChanged>> {::RosterPlain::ThemeChanged }
+    
+    ConfigureStyles
+}
+
+proc ::RosterPlain::ThemeChanged {} {
+    ConfigureStyles
+}
+
+proc ::RosterPlain::ConfigureStyles {} {
+    variable T
+    variable fillT
+    variable fillNum
+    
+    array set style [list -foreground black -itembackground {} \
+      -itemaccentfill $fillNum]
+    array set style [style configure .]
+    array set style [style configure TreeCtrl]
+
+    set fill $style(-foreground)
+    if {[info exists style(-itemfill)]} {
+	set fill $style(-itemfill)
+    }    
+    treeutil::configureelementtype $T text -fill [linsert $fillT 0 $fill {}]
+
+    $T element configure eNumText -fill $style(-itemaccentfill)
 }
 
 # @@@ treectrl has some native support for editing but I don't know...
