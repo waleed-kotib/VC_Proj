@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FilePrefs.tcl,v 1.19 2007-08-23 13:01:30 matben Exp $
+# $Id: FilePrefs.tcl,v 1.20 2007-09-07 08:09:01 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -168,15 +168,17 @@ proc ::FilePrefs::TreeCtrl {T wysc} {
     
     # This is a dummy option.
     set itemBackground [option get $T itemBackground {}]
+    set itemFill [option get $T itemFill {}]
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
+    set fg [option get $T textColor {}]
 
     $T column create -tags cDescription -text [mc Description] \
       -itembackground $itemBackground -expand 1 -squeeze 1 -borderwidth $bd \
-      -background $bg
+      -background $bg -textcolor $fg
     $T column create -tags cHandled -text [mc {Handled By}] \
       -itembackground $itemBackground -expand 1 -squeeze 1 -borderwidth $bd \
-      -background $bg
+      -background $bg -textcolor $fg
 
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
 
@@ -204,6 +206,10 @@ proc ::FilePrefs::TreeCtrl {T wysc} {
     $T notify bind $T <Header-invoke> [list [namespace current]::HeaderCmd %T %C]
     $T notify bind $T <Selection>  [list [namespace current]::Selection %T]
     bind $T <Double-1>             [list [namespace current]::Double-1 %W]
+
+    if {$itemFill ne ""} {
+	treeutil::configureelementtype $T text -fill $itemFill
+    }
 
     set sortColumn 0
 }
