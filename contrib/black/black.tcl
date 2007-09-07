@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.10 2007-09-06 13:20:47 matben Exp $
+# $Id: black.tcl,v 1.11 2007-09-07 07:38:56 matben Exp $
 
 namespace eval tile {
     namespace eval theme {
@@ -91,6 +91,38 @@ namespace eval tile::theme::black {
 	    -background gray30 -itembackground {gray60 gray50} \
 	    -itemfill white -itemaccentfill yellow
     }
+}
+
+# A few tricks for Tablelist.
+
+namespace eval tablelist {}
+
+proc tablelist::blackTheme {} {
+    variable themeDefaults
+    array set colors [array get tile::theme::black::colors]
+    array set themeDefaults [list \
+	-background		white \
+	-foreground		black \
+	-disabledforeground	#999999 \
+	-stripebackground	"" \
+	-selectbackground	$colors(-selectbg) \
+	-selectforeground	$colors(-selectfg) \
+	-selectborderwidth	0 \
+	-font			TkTextFont \
+	-labelbackground	$colors(-frame) \
+	-labeldisabledBg	#dcdad5 \
+	-labelactiveBg		#eeebe7 \
+	-labelpressedBg		#eeebe7 \
+	-labelforeground	white \
+	-labeldisabledFg	#999999 \
+	-labelactiveFg		white \
+	-labelpressedFg		white \
+	-labelfont		TkDefaultFont \
+	-labelborderwidth	2 \
+	-labelpady		1 \
+	-arrowcolor		"" \
+	-arrowstyle		sunken10x9 \
+    ]
 }
 
 package provide tile::theme::black $::tile::theme::black::version

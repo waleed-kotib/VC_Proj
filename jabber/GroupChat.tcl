@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.205 2007-09-06 13:20:47 matben Exp $
+# $Id: GroupChat.tcl,v 1.206 2007-09-07 07:38:56 matben Exp $
 
 package require Create
 package require Enter
@@ -3116,14 +3116,14 @@ proc ::GroupChat::BookmarkSendGet {callback} {
     $jstate(jlib) send_iq get [list $queryElem] -command $callback
 }
 
-proc ::GroupChat::OnMenuBookmark { } {
+proc ::GroupChat::OnMenuBookmark {} {
     if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	EditBookmarks
     }   
 }
 
-proc ::GroupChat::EditBookmarks { } {
+proc ::GroupChat::EditBookmarks {} {
     global  wDlgs
     variable bookmarksVar
     
@@ -3142,12 +3142,13 @@ proc ::GroupChat::EditBookmarks { } {
     ::Bookmarks::Dialog $dlg [namespace current]::bookmarksVar  \
       -menu $m -geovariable prefs(winGeom,$dlg) -columns $columns  \
       -command [namespace current]::BookmarksDlgSave
+    
     ::UI::SetMenubarAcceleratorBinds $dlg $m
     
     $dlg boolean 4
     $dlg state disabled
     $dlg wait
-    
+
     BookmarkSendGet [namespace current]::BookmarkSendGetCB
 }
 
