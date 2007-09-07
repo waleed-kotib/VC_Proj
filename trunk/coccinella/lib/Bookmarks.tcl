@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Bookmarks.tcl,v 1.7 2007-07-19 06:28:18 matben Exp $
+# $Id: Bookmarks.tcl,v 1.8 2007-09-07 07:38:56 matben Exp $
 
 package require snit 1.0
 package require ui::util
@@ -64,14 +64,13 @@ snit::widget ::Bookmarks::Dialog {
     constructor {_bookmarksVar args} {
 	$self configurelist $args
 	set bookmarksVar $_bookmarksVar
-	
+		
 	# Operate on a temporary list.
 	if {[uplevel #0 {info exists bookmarksVar}]} {
 	    set tmpList [uplevel #0 [list set $bookmarksVar]]
 	} else {
-	    set tmpList {}
-	}
-	
+	    set tmpList [list]
+	}	
 	if {[tk windowingsystem] ne "aqua"} {
 	    $win configure -menu ""
 	}
