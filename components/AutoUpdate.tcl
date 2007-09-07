@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoUpdate.tcl,v 1.22 2007-09-05 14:23:37 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.23 2007-09-07 06:00:53 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -169,13 +169,12 @@ proc ::AutoUpdate::Command {locale token} {
 	      -message [mc messaupdatelatest $this(vers,full)]
 	}
 	tinydom::cleanup $token
-    }
-    ::http::cleanup $token
-    
-    # Try get the English catalog as a fallback.
-    if {$locale} {
+    } elseif {$locale} {
+
+	# Try get the English catalog as a fallback.
 	GetURL -locale 0
     }
+    ::http::cleanup $token
 }
 
 proc ::AutoUpdate::Dialog {releaseAttr message changesL} {
