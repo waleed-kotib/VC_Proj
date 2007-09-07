@@ -56,3 +56,8 @@
 *btok.compound:                      left
 *btcancel.image:                     buttoncancel
 *btcancel.compound:                  left
+
+*Dialog*ok.image:                    buttonok
+*Dialog*ok.compound:                 left
+*Dialog*cancel.image:                buttoncancel
+*Dialog*cancel.compound:             left
