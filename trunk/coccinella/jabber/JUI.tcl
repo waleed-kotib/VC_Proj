@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.205 2007-09-05 13:21:00 matben Exp $
+# $Id: JUI.tcl,v 1.206 2007-09-07 09:37:12 matben Exp $
 
 package provide JUI 1.0
 
@@ -1283,40 +1283,46 @@ proc ::JUI::FilePostCommand {wmenu} {
     # Disable some menus by default and let any hooks enable them.
     set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
     ::UI::MenuMethod $m entryconfigure mvCard2 -state disabled
-
+    
     set mimport [::UI::MenuMethod $wmenu entrycget mImport -menu]
     ::UI::MenuMethod $mimport entryconfigure mvCard2... -state disabled
-
-    switch -- [GetConnectState] {
-	connectinit {
-	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled
-	}
-	connectfin - connect {
-	    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mPassword... -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mEditvCard2... -state normal
-
-	    ::UI::MenuMethod $mimport entryconfigure mvCard2... -state normal
-	}
-	disconnect {
-	    if {[llength [ui::findalltoplevelwithclass JLogin]]} {
-		::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
+    
+    if {[llength [grab current]]} { 
+	# Only aqua.
+	catch {::UI::MenuDisableAllBut $wmenu mCloseWindow}
+    } else {
+	
+	switch -- [GetConnectState] {
+	    connectinit {
 		::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
-	    } else {
-		::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled
 	    }
-	    ::UI::MenuMethod $wmenu entryconfigure mPassword... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mEditvCard2... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state disabled
-	}	
-    }    
-
+	    connectfin - connect {
+		::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mPassword... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mEditvCard2... -state normal
+		
+		::UI::MenuMethod $mimport entryconfigure mvCard2... -state normal
+	    }
+	    disconnect {
+		if {[llength [ui::findalltoplevelwithclass JLogin]]} {
+		    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
+		    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
+		} else {
+		    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state normal
+		    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state normal
+		}
+		::UI::MenuMethod $wmenu entryconfigure mPassword... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mEditvCard2... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state disabled
+	    }	
+	}   
+    }
+    
     ::hooks::run menuPostCommand main-file $wmenu
     
     # Dedicated hook for a particular dialog class.
@@ -1364,47 +1370,52 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	::Status::ExBuildMainMenu $m
     }
     
-    switch -- [GetConnectState] {
-	connectinit {
-	    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
-	      -label [mc mLogout]
-	}
-	connectfin - connect {
-	    ::UI::MenuMethod $wmenu entryconfigure mRegister -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
-	      -label [mc mLogout]
-	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mSearch... -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mAddContact... -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mChat... -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state normal
-	}
-	disconnect {
-	    ::UI::MenuMethod $wmenu entryconfigure mRegister -state disabled
-	    if {[llength [ui::findalltoplevelwithclass JProfiles]]} {
-		::UI::MenuMethod $wmenu entryconfigure mLogin... -state disabled  \
-		  -label [mc mLogin...]
-	    } else {
+    if {[llength [grab current]]} { 
+	::UI::MenuDisableAll $wmenu
+    } else {
+	
+	switch -- [GetConnectState] {
+	    connectinit {
 		::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
-		  -label [mc mLogin...]
+		  -label [mc mLogout]
 	    }
-	    ::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mSearch... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mAddContact... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mChat... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mStatus -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state disabled
-	}	
-    }    
+	    connectfin - connect {
+		::UI::MenuMethod $wmenu entryconfigure mRegister -state normal
+		::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
+		  -label [mc mLogout]
+		::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mSearch... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mAddContact... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mChat... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mStatus -state normal
+		::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state normal
+		::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
+		::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state normal
+	    }
+	    disconnect {
+		::UI::MenuMethod $wmenu entryconfigure mRegister -state disabled
+		if {[llength [ui::findalltoplevelwithclass JProfiles]]} {
+		    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state disabled  \
+		      -label [mc mLogin...]
+		} else {
+		    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
+		      -label [mc mLogin...]
+		}
+		::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mSearch... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mAddContact... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mChat... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mStatus -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state disabled
+	    }	
+	}    
+    }
       
     ::hooks::run menuPostCommand main-action $wmenu
     
@@ -1442,31 +1453,35 @@ proc ::JUI::InfoPostCommand {wmenu} {
     } else {
 	set state(mailbox,visible) 0
     }
-	
-    # For aqua we must do this only for .jmain
-    if {[::UI::IsToplevelActive $wDlgs(jmain)]} {
-	::UI::MenuMethod $wmenu entryconfigure mShow -state normal
-	
-	# Set -variable values.
-	if {[winfo ismapped $jwapp(wtbar)]} {
-	    set state(show,toolbar) 1
-	} else {
-	    set state(show,toolbar) 0
-	}
-	if {[winfo ismapped $jwapp(notebook)]} {
-	    set state(show,notebook) 1
-	} else {
-	    set state(show,notebook) 0
-	}
-	if {[::Roster::StyleGet] eq "minimal"} {
-	    set state(show,minimal) 1
-	} else {
-	    set state(show,minimal) 0
-	}
+    if {[llength [grab current]]} { 
+	::UI::MenuDisableAll $wmenu
     } else {
-	::UI::MenuMethod $wmenu entryconfigure mShow -state disabled
-    }
 	
+	# For aqua we must do this only for .jmain
+	if {[::UI::IsToplevelActive $wDlgs(jmain)]} {
+	    ::UI::MenuMethod $wmenu entryconfigure mShow -state normal
+	    
+	    # Set -variable values.
+	    if {[winfo ismapped $jwapp(wtbar)]} {
+		set state(show,toolbar) 1
+	    } else {
+		set state(show,toolbar) 0
+	    }
+	    if {[winfo ismapped $jwapp(notebook)]} {
+		set state(show,notebook) 1
+	    } else {
+		set state(show,notebook) 0
+	    }
+	    if {[::Roster::StyleGet] eq "minimal"} {
+		set state(show,minimal) 1
+	    } else {
+		set state(show,minimal) 0
+	    }
+	} else {
+	    ::UI::MenuMethod $wmenu entryconfigure mShow -state disabled
+	}
+    }
+    
     ::hooks::run menuPostCommand main-info $wmenu
     
     # Workaround for mac bug.
