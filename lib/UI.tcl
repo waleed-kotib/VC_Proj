@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.167 2007-08-26 14:43:35 matben Exp $
+# $Id: UI.tcl,v 1.168 2007-09-07 12:25:08 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1416,7 +1416,7 @@ proc ::UI::MenuDisableAll {mw} {
     MenuDisableAllBut $mw {}
 }
 
-proc ::UI::MenuDisableAllBut {mw normalList} {
+proc ::UI::MenuDisableAllBut {mw normalL} {
 
     set iend [$mw index end]
     for {set i 0} {$i <= $iend} {incr i} {
@@ -1424,7 +1424,7 @@ proc ::UI::MenuDisableAllBut {mw normalList} {
 	    $mw entryconfigure $i -state disabled
 	}
     }
-    foreach name $normalList {
+    foreach name $normalL {
 	::UI::MenuMethod $mw entryconfigure $name -state normal
     }
 }
