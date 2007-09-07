@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.34 2007-08-29 06:30:11 matben Exp $
+# $Id: Rosticons.tcl,v 1.35 2007-09-07 08:04:41 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -605,11 +605,12 @@ proc ::Rosticons::PTreeShow {T wysc} {
  
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
+    set fg [option get $T textColor {}]
    
     $T column create -tags cKey   -text [mc Key] -expand 1 -squeeze 1  \
-      -borderwidth $bd -background $bg
+      -borderwidth $bd -background $bg -textcolor $fg
     $T column create -tags cImage -text [mc Icon] -expand 1 -justify center  \
-      -borderwidth $bd -background $bg
+      -borderwidth $bd -background $bg -textcolor $fg
 
     $T element create eText text -lines 1
     $T element create eImage image
