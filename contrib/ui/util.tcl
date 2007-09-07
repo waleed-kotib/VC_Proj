@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.18 2007-08-12 14:22:51 matben Exp $
+# $Id: util.tcl,v 1.19 2007-09-07 06:51:54 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -63,6 +63,18 @@ namespace eval ui {
 	    font configure DlgSmallFont   -family $family -size $small
 	}
     }    
+}
+
+# max, min ---
+#
+#    Finds max and min of numerical values. From the WikiWiki page.
+
+proc ui::max {args} {
+    lindex [lsort -real $args] end
+}
+
+proc ui::min {args} {
+    lindex [lsort -real $args] 0
 }
 
 # ui::from --
@@ -184,6 +196,11 @@ proc ui::SetGeometryEx {win geoVar wclass {part "geo"}} {
 	# Signs of x and y included!
 	if {[regexp $geoRE $var m wdth hght x - y -]} {
 	    KeepOnScreen $win x y $wdth $hght
+	    
+	    # Protect from corruption.
+	    set wdth [max $wdth 10]
+	    set hght [max $hght 10]
+	    
 	    if {($x > 0) && [string index $x 0] ne "+"} {
 		set x +$x
 	    }
