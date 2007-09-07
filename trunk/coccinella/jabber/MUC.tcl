@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.87 2007-09-01 07:49:05 matben Exp $
+# $Id: MUC.tcl,v 1.88 2007-09-07 12:25:08 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -425,8 +425,7 @@ proc ::MUC::BuildInfo {roomjid} {
       -columns $columns -stretch all -selectmode single  \
       -yscrollcommand [list $wysc set] -width 36 -height 8
     ttk::scrollbar $wysc -orient vertical -command [list $wtbl yview]
-    ttk::button $frtab.ref -style Small.TButton  \
-      -text [mc Refresh]  \
+    ttk::button $frtab.ref -style Small.TButton -text [mc Refresh]  \
       -command [list [namespace current]::Refresh $roomjid]
 
     grid  $wtbl       $wysc  -sticky news
@@ -1524,9 +1523,11 @@ proc ::MUC::Destroy {roomjid} {
     
     upvar ::Jabber::jstate jstate
     variable findestroy -1
-    variable destroyjid    ""
+    variable destroyAltJID ""
+    variable destroyRoomJID $roomjid
     variable destroyreason ""
     variable dlguid
+    variable wdestroyjid
     
     set w $wDlgs(jmucdestroy)[incr dlguid]
     ::UI::Toplevel $w \
@@ -1548,7 +1549,7 @@ proc ::MUC::Destroy {roomjid} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
     
-    set msg [mc mucDestroy]
+    set msg [mc mucDestroy $roomName]
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 300 -justify left -text $msg
     pack $wbox.msg -side top -anchor w
@@ -1558,12 +1559,20 @@ proc ::MUC::Destroy {roomjid} {
     pack $wmid -side top -fill x -expand 1
     
     ttk::label $wmid.la -text [mc {Alternative Room JID}]
-    ttk::entry $wmid.ejid -textvariable [namespace current]::destroyjid
+    ttk::combobox $wmid.ejid -textvariable [namespace current]::destroyAltJID
+    ttk::button $wmid.browse -text [mc Browse] \
+      -command [namespace code DestroyBrowse]
     ttk::label $wmid.lre -text "[mc Reason]:"
     ttk::entry $wmid.ere -textvariable [namespace current]::destroyreason
     
-    grid  $wmid.la   $wmid.ejid  -sticky e -padx 2 -pady 2
-    grid  $wmid.lre  $wmid.ere   -sticky e -padx 2 -pady 2
+    grid  $wmid.la   $wmid.ejid  $wmid.browse  -pady 2
+    grid  $wmid.lre  $wmid.ere   -             -pady 2
+    grid columnconfigure $wmid 1 -weight 1
+    grid $wmid.la $wmid.lre -sticky e
+    grid $wmid.ejid $wmid.ere -sticky ew
+    # -sticky e -padx 2 -pady 2
+    
+    set wdestroyjid $wmid.ejid
         
     # Button part.
     set frbot $wbox.b
@@ -1599,12 +1608,12 @@ proc ::MUC::Destroy {roomjid} {
     catch {destroy $w}
     catch {focus $oldFocus}
 
-    set opts {}
+    set opts [list]
     if {$destroyreason ne ""} {
 	set opts [list -reason $destroyreason]
     }
-    if {$destroyjid ne ""} {
-	set opts [list -alternativejid $destroyjid]
+    if {$destroyAltJID ne ""} {
+	set opts [list -alternativejid $destroyAltJID]
     }
 
     if {$findestroy > 0} {
@@ -1612,6 +1621,27 @@ proc ::MUC::Destroy {roomjid} {
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
     return [expr {($findestroy <= 0) ? "cancel" : "ok"}]
+}
+
+proc ::MUC::DestroyBrowse {} {
+    upvar ::Jabber::jstate jstate
+    variable destroyRoomJID
+    
+    jlib::splitjidex $destroyRoomJID - service -
+    $jstate(jlib) disco get_async items $service \
+      [namespace code DestroyBrowseCB]
+}
+
+proc ::MUC::DestroyBrowseCB {jlibname type jid subiq args} {
+    upvar ::Jabber::jstate jstate
+    variable wdestroyjid
+    variable destroyRoomJID
+  
+    if {[winfo exists $wdestroyjid] && ($type eq "result")} {
+	jlib::splitjidex $destroyRoomJID - service -
+	set allRooms [$jstate(jlib) disco children $service]
+	$wdestroyjid configure -values $allRooms
+    }    
 }
 
 proc ::MUC::DestroyCloseCmd {wclose} {

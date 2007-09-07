@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.229 2007-09-06 12:08:05 matben Exp $
+# $Id: Jabber.tcl,v 1.230 2007-09-07 12:25:08 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1986,7 +1986,7 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 # 
 #       Toggle login/logout. Menu and button bindings.
 
-proc ::Jabber::OnMenuLogInOut { } {
+proc ::Jabber::OnMenuLogInOut {} {
 
     if {[llength [grab current]]} { return }
 
@@ -2020,7 +2020,7 @@ proc ::Jabber::Logout::OnMenuStatus { } {
     }
 }
 
-proc ::Jabber::Logout::WithStatus { } {
+proc ::Jabber::Logout::WithStatus {} {
     global  prefs this wDlgs config
 
     variable finished -1
