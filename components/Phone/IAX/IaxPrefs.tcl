@@ -17,17 +17,17 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: IaxPrefs.tcl,v 1.9 2007-07-18 09:40:10 matben Exp $
+# $Id: IaxPrefs.tcl,v 1.10 2007-09-08 06:55:26 matben Exp $
 
 package provide IaxPrefs 0.1
 
 namespace eval ::IaxPrefs {
 
     ::hooks::register prefsInitHook             ::IaxPrefs::InitPrefsHook
-    ::hooks::register prefsBuildHook            ::IaxPrefs::BuildPrefsHook
-    ::hooks::register prefsSaveHook             ::IaxPrefs::SavePrefsHook
-    ::hooks::register prefsCancelHook           ::IaxPrefs::CancelPrefsHook
-    ::hooks::register prefsUserDefaultsHook     ::IaxPrefs::UserDefaultsHook
+    #::hooks::register prefsBuildHook            ::IaxPrefs::BuildPrefsHook
+    #::hooks::register prefsSaveHook             ::IaxPrefs::SavePrefsHook
+    #::hooks::register prefsCancelHook           ::IaxPrefs::CancelPrefsHook
+    #::hooks::register prefsUserDefaultsHook     ::IaxPrefs::UserDefaultsHook
 }
 
 ################## Preferences Stuff ###################

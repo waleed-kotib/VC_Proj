@@ -630,8 +630,11 @@
 ::msgcat::mcset en {Launch time}
 ::msgcat::mcset en {Local Time}
 ::msgcat::mcset en {Logged out}
+::msgcat::mcset en {Login again on wakeup}
 ::msgcat::mcset en {Login as invisible}
+::msgcat::mcset en {Logout on sleep}
 ::msgcat::mcset en {Logout With Message}
+::msgcat::mcset en {Machine Sleep}
 ::msgcat::mcset en {MIDI Player}
 ::msgcat::mcset en {MIME type}
 ::msgcat::mcset en {Mailbox Error}
