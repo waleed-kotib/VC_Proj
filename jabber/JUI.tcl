@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.206 2007-09-07 09:37:12 matben Exp $
+# $Id: JUI.tcl,v 1.207 2007-09-08 06:28:11 matben Exp $
 
 package provide JUI 1.0
 
@@ -68,7 +68,11 @@ namespace eval ::JUI:: {
 
     # Standard widgets.
     switch -- [tk windowingsystem] {
-	aqua - x11 {
+	aqua {
+	    option add *JMain*TNotebook.padding   {8 8 8 4}       50
+	    option add *JMain*bot.f.padding       {8 6 8 4}       50
+	}
+	x11 {
 	    option add *JMain*TNotebook.padding   {8 8 8 4}       50
 	    option add *JMain*bot.f.padding       {8 6 8 4}       50
 	}
