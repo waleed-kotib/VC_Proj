@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.207 2007-09-08 06:28:11 matben Exp $
+# $Id: JUI.tcl,v 1.208 2007-09-08 09:29:39 matben Exp $
 
 package provide JUI 1.0
 
@@ -73,7 +73,7 @@ namespace eval ::JUI:: {
 	    option add *JMain*bot.f.padding       {8 6 8 4}       50
 	}
 	x11 {
-	    option add *JMain*TNotebook.padding   {8 8 8 4}       50
+	    option add *JMain*TNotebook.padding   {2 4 2 2}       50
 	    option add *JMain*bot.f.padding       {8 6 8 4}       50
 	}
 	default {
