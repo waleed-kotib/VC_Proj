@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.40 2007-08-08 13:01:08 matben Exp $
+# $Id: Subscribe.tcl,v 1.41 2007-09-08 14:39:56 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -315,9 +315,17 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
     
+    ttk::frame $wc.head -padding {0 0 0 6}
+    ttk::label $wc.head.l -text [mc Subscribe]
+    ttk::separator $wc.head.s -orient horizontal
+
+    grid  $wc.head.l  $wc.head.s
+    grid $wc.head.s -sticky ew
+    grid columnconfigure $wc.head 1 -weight 1
+    pack  $wc.head  -side top -fill x
+
     set wsubs $wc.fr
-    ttk::labelframe $wsubs -text [mc Subscribe] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $wsubs
 
     ttk::label $wsubs.la1 -text [mc prefsuif2]
     ttk::label $wsubs.lin -text [mc prefsuis]
@@ -332,30 +340,33 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
       val { accept        reject        ask }   \
       txt { "Auto-accept" "Auto-reject" "Ask each time" } {
 	foreach val2 {inrost notinrost} {
-	    ttk::radiobutton $wsubs.${val2}${val}  \
+	    ttk::radiobutton $wsubs.$val2$val \
 	      -text [mc $txt] -value $val  \
 	      -variable [namespace current]::tmpJPrefs(subsc,$val2)	      
 	}
-	grid  $wsubs.inrost${val}  ^  $wsubs.notinrost${val}  -sticky w
+	grid  $wsubs.inrost$val  ^  $wsubs.notinrost$val  -sticky w
     }
     
-    set wauto [ttk::frame $wc.auto]
-    ttk::checkbutton $wauto.autosub -text [mc prefsuauto2] \
+    set wauto $wc.auto
+    ttk::frame $wauto
+    ttk::checkbutton $wauto.sub -text [mc prefsuauto2] \
       -variable [namespace current]::tmpJPrefs(subsc,auto)
-    ttk::label $wauto.autola -text [mc {Default group}]:
-    ttk::entry $wauto.autoent -font CociSmallFont -width 22   \
+    ttk::separator $wauto.s -orient horizontal
+    ttk::label $wauto.la -text [mc {Default group}]:
+    ttk::entry $wauto.ent -font CociSmallFont \
       -textvariable [namespace current]::tmpJPrefs(subsc,group)
     
-    grid  $wauto.autosub  -               -sticky w
-    grid  $wauto.autola   $wauto.autoent  
-    grid  $wauto.autoent  -sticky ew
+    grid  $wauto.sub  -           $wauto.s  -sticky w
+    grid  $wauto.la   $wauto.ent  -
+    grid $wauto.ent $wauto.s -sticky ew
     grid columnconfigure $wauto 1 -weight 1
+    #grid columnconfigure $wauto 2 -weight 1
     
     pack  $wsubs  -side top -fill x
     pack  $wauto  -side top -fill x -pady 12
 }
 
-proc ::Subscribe::SavePrefsHook { } {
+proc ::Subscribe::SavePrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
@@ -363,7 +374,7 @@ proc ::Subscribe::SavePrefsHook { } {
     unset tmpJPrefs
 }
 
-proc ::Subscribe::CancelPrefsHook { } {
+proc ::Subscribe::CancelPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	
@@ -375,7 +386,7 @@ proc ::Subscribe::CancelPrefsHook { } {
     }
 }
 
-proc ::Subscribe::UserDefaultsHook { } {
+proc ::Subscribe::UserDefaultsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	

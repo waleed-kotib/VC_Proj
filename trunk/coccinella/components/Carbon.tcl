@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Carbon.tcl,v 1.7 2007-09-08 06:55:26 matben Exp $
+# $Id: Carbon.tcl,v 1.8 2007-09-08 14:39:56 matben Exp $
 # 
 # @@@ Move the sleep stuff to something more generic.
 
@@ -27,7 +27,7 @@ namespace eval ::Carbon {
     variable nHiddenMsgs 0
 }
 
-proc ::Carbon::Init { } {
+proc ::Carbon::Init {} {
     
     if {[tk windowingsystem] ne "aqua"} {
 	return

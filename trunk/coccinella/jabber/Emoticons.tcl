@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.49 2007-09-05 12:12:21 matben Exp $
+# $Id: Emoticons.tcl,v 1.50 2007-09-08 14:39:56 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -607,14 +607,9 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
         
     ttk::label $wc.l -text [mc preficonsel]
     pack  $wc.l  -side top -anchor w -pady 4
-
-    set wfr $wc.fr
-    ttk::labelframe $wfr \
-      -padding [option get . groupSmallPadding {}]
-    pack $wfr -side top -anchor w -fill both -expand 1
     
     set wmb $wc.mb    
-    set menuDef {}
+    set menuDef [list]
     foreach name $allSets {
 	if {$name eq "default"} {
 	    lappend menuDef [list [mc Default] -value default]
@@ -624,8 +619,11 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     }
     ui::optionmenu $wmb -menulist $menuDef -variable [namespace current]::tmpSet \
       -command [namespace code PrefsSetCmd]
-    
-    $wfr configure -labelwidget $wmb
+    pack $wmb -side top -anchor w
+
+    set wfr $wc.fr
+    ttk::frame $wfr -padding [option get . groupSmallPadding {}]
+    pack $wfr -side top -anchor w -fill both -expand 1
     
     ttk::scrollbar $wfr.ysc -orient vertical -command [list $wfr.t yview]
     text $wfr.t -yscrollcommand [list $wfr.ysc set] -width 20 -height 14 \

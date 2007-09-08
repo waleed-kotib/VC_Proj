@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.230 2007-09-07 12:25:08 matben Exp $
+# $Id: Jabber.tcl,v 1.231 2007-09-08 14:39:56 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -902,7 +902,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    #::Jabber::DoCloseClientConnection
 	    SetClosedState
-	    ::UI::MessageBox -icon error -type ok -message [mc jamessconnbroken]
+	    ui::dialog -icon error -type ok -message [mc jamessconnbroken]
 	}
 	streamerror - xmpp-streams-error* {
 	    DoCloseClientConnection
@@ -911,7 +911,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    } else {
 		set msg [mc jamessfatalerr ""]
 	    }
-	    ::UI::MessageBox -title [mc {Fatal Error}] -icon error -type ok \
+	    ui::dialog -title [mc {Fatal Error}] -icon error -type ok \
 	      -message $msg
 	}
 	xmlerror {
@@ -928,7 +928,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 		set msg "Receieved a fatal XML parsing error.\
 		  The connection is closed down."
 	    }
-	    ::UI::MessageBox -title [mc {Fatal Error}] -icon error -type ok \
+	    ui::dialog -title [mc {Fatal Error}] -icon error -type ok \
 	      -message $msg
 	}
 	networkerror {
@@ -941,7 +941,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 		append msg "\n"
 		append msg $argsA(-errormsg)
 	    }
-	    ::UI::MessageBox -icon error -type ok -message $msg
+	    ui::dialog -icon error -type ok -message $msg
 	}
     }
     return $ishandled
