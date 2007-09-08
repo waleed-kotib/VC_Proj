@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Speech.tcl,v 1.11 2007-07-18 09:40:10 matben Exp $
+# $Id: Speech.tcl,v 1.12 2007-09-08 14:39:56 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -89,7 +89,7 @@ proc ::Speech::Init { } {
 #       Verifies that we actually have a speech package.
 #       Also checks voices available.
 
-proc ::Speech::Verify { } {
+proc ::Speech::Verify {} {
     variable sprefs
     
     # Voices consistency check.
@@ -203,7 +203,7 @@ proc ::Speech::Speak {msg {voice {}}} {
     }
 }
 
-proc ::Speech::SpeakGetVoices { } {
+proc ::Speech::SpeakGetVoices {} {
     global  this
     
     switch -- $this(platform) {
@@ -221,7 +221,7 @@ proc ::Speech::SpeakGetVoices { } {
 
 # Preference page --------------------------------------------------------------
 
-proc ::Speech::InitPrefsHook { } {
+proc ::Speech::InitPrefsHook {} {
     
     variable sprefs
     variable allprefskeys {speakWBText speakMsg speakChat voiceUs voiceOther}
@@ -258,7 +258,7 @@ proc ::Speech::BuildPrefsHook {wtree nbframe} {
     }
 }
 
-proc ::Speech::SavePrefsHook { } {
+proc ::Speech::SavePrefsHook {} {
     variable sprefs
     variable tmpPrefs
     variable allprefskeys
@@ -271,7 +271,7 @@ proc ::Speech::SavePrefsHook { } {
     }
 }
 
-proc ::Speech::CancelPrefsHook { } {
+proc ::Speech::CancelPrefsHook {} {
     variable sprefs
     variable tmpPrefs
     variable allprefskeys
@@ -288,13 +288,13 @@ proc ::Speech::CancelPrefsHook { } {
     }
 }
 
-proc ::Speech::DestroyPrefsHook { } {
+proc ::Speech::DestroyPrefsHook {} {
     variable tmpPrefs
     
     unset -nocomplain tmpPrefs
 }
 
-proc ::Speech::UserDefaultsPrefsHook { } {
+proc ::Speech::UserDefaultsPrefsHook {} {
     variable sprefs
     variable tmpPrefs
     
@@ -311,9 +311,17 @@ proc ::Speech::BuildPrefsPage {page} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
+    ttk::frame $wc.head -padding {0 0 0 6}
+    ttk::label $wc.head.l -text [mc "Synthetic speech"]
+    ttk::separator $wc.head.s -orient horizontal
+
+    grid  $wc.head.l  $wc.head.s
+    grid $wc.head.s -sticky ew
+    grid columnconfigure $wc.head 1 -weight 1
+    pack  $wc.head  -side top -fill x
+
     set wfr $wc.f
-    ttk::labelframe $wfr -text [mc {Synthetic speech}] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $wfr
     pack  $wfr  -side top
     
     ttk::checkbutton $wfr.speak     -text [mc prefsounsynwb]  \

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.50 2007-08-01 08:06:27 matben Exp $
+# $Id: JPrefs.tcl,v 1.51 2007-09-08 14:39:56 matben Exp $
 
 package require ui::fontselector
 
@@ -175,9 +175,17 @@ proc ::JPrefs::BuildAppearancePage {page} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
+    ttk::frame $wc.head -padding {0 0 0 6}
+    ttk::label $wc.head.l -text [mc Appearance]
+    ttk::separator $wc.head.s -orient horizontal
+
+    grid  $wc.head.l  $wc.head.s
+    grid $wc.head.s -sticky ew
+    grid columnconfigure $wc.head 1 -weight 1
+    pack  $wc.head  -side top -fill x
+
     set wap $wc.ap
-    ttk::labelframe $wap -text [mc Appearance] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $wap
      
     ttk::checkbutton $wap.tab -text [mc prefstabui]  \
       -variable [namespace current]::tmpJPrefs(chat,tabbedui)
@@ -288,9 +296,17 @@ proc ::JPrefs::BuildCustomPage {page} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
+    ttk::frame $wc.head -padding {0 0 0 6}
+    ttk::label $wc.head.l -text [mc Customization]
+    ttk::separator $wc.head.s -orient horizontal
+
+    grid  $wc.head.l  $wc.head.s
+    grid $wc.head.s -sticky ew
+    grid columnconfigure $wc.head 1 -weight 1
+    pack  $wc.head  -side top -fill x
+
     set wcu $wc.fr
-    ttk::labelframe $wcu -text [mc Customization] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $wcu
          
     ttk::checkbutton $wcu.savein -text [mc prefcusave] \
       -variable [namespace current]::tmpJPrefs(inboxSave)

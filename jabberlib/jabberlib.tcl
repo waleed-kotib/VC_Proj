@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.187 2007-09-05 14:23:37 matben Exp $
+# $Id: jabberlib.tcl,v 1.188 2007-09-08 14:39:56 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -769,7 +769,7 @@ proc jlib::resetsocket {jlibname} {
 proc jlib::recvsocket {jlibname} {
 
     upvar ${jlibname}::lib lib
-    
+        
     if {[catch {eof $lib(sock)} iseof] || $iseof} {
 	kill $jlibname
 	invoke_async_error $jlibname networkerror

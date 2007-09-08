@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.41 2007-08-08 13:01:08 matben Exp $
+# $Id: JUser.tcl,v 1.42 2007-09-08 14:39:56 matben Exp $
 
 package provide JUser 1.0
 
@@ -176,6 +176,8 @@ proc ::JUser::NewDlg {args} {
 	pack $frbot.btok -side right -padx $padx
     }
     pack $frbot -side top -fill x
+    
+    focus $frmid.ejid
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
@@ -679,8 +681,9 @@ proc ::JUser::DoEdit {token} {
     }
     set jlib $jstate(jlib)
 
-    set cb [list [namespace code SetCB] $jid]
-    eval {$jlib roster send_set $jid -command $cb} $opts    
+    # @@@ Not sure why I had this?
+    #set cb [list [namespace code SetCB] $jid]
+    #eval {$jlib roster send_set $jid -command $cb} $opts    
     
     # Send (un)subscribe request.
     if {$subscribe} {

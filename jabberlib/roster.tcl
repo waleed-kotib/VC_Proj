@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.57 2007-09-06 13:20:47 matben Exp $
+# $Id: roster.tcl,v 1.58 2007-09-08 14:39:56 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -263,7 +263,7 @@ proc jlib::roster::handle_roster {jlibname queryE} {
 	    continue
 	}
 	set subscription "none"
-	set opts {}
+	set opts [list]
 	set havejid 0
 	foreach {aname avalue} [wrapper::getattrlist $itemE] {
 	    set $aname $avalue
@@ -330,16 +330,16 @@ proc jlib::roster::send_set {jlibname jid args} {
     } elseif {[info exists rostA($mjid,groups)]} {
 	set groups $rostA($mjid,groups)
     } else {
-	set groups {}
+	set groups [list]
     }
     
     set attr [list jid $jid]
-    set name {}
+    set name ""
     if {[info exists argsA(-name)] && [string length $argsA(-name)]} {
 	set name $argsA(-name)
 	lappend attr name $name
     }
-    set groupEs {}
+    set groupEs [list]
     foreach group $groups {
 	if {$group ne ""} {
 	    lappend groupEs [wrapper::createtag "group" -chdata $group]
