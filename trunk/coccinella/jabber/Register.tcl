@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.82 2007-09-05 07:44:41 matben Exp $
+# $Id: Register.tcl,v 1.83 2007-09-08 06:41:15 matben Exp $
 
 package provide Register 1.0
 
@@ -193,6 +193,7 @@ proc ::RegisterEx::New {args} {
     set state(w) $w
     array set state {
 	finished  -1
+	cuid       0
 	-autoget   0
 	-server    ""
 	-publicservers 1
@@ -324,9 +325,8 @@ proc ::RegisterEx::New {args} {
     
     wm resizable $w 0 0
     
-    bind $wserv <FocusIn> [namespace code [list OnFocusIn $token]]
-    bind $wserv <Return>  [namespace code [list DoGet $token]]
-    bind $w     <Return>  [namespace code [list DoGet $token]]
+    bind $wserv <Return>  [namespace code [list OnGet $token]]
+    bind $w     <Return>  [namespace code [list OnGet $token]]
     
     set state(wbtok)   $frbot.btok
     set state(wprog)   $wmore.arr
@@ -369,13 +369,11 @@ proc ::RegisterEx::New {args} {
     return $w
 }
 
-proc ::RegisterEx::OnFocusIn {token} {
-    
-
-}
-
-proc ::RegisterEx::DoGet {token} {
+proc ::RegisterEx::OnGet {token} {
     Get $token
+    puts "::RegisterEx::OnGet"
+    
+    # Stop tophandler from executing.
     return -code break
 }
 
@@ -534,8 +532,11 @@ proc ::RegisterEx::Get {token} {
     focus $state(w)
     DestroyForm $token
     
+    # This is a counter to verify we only treat the last query.
+    incr state(cuid)
+    
     # Kill any pending open states.
-    ::Login::Reset
+    #::Login::Reset
     
     # Verify.
     if {$state(-server) eq ""} {
@@ -548,7 +549,7 @@ proc ::RegisterEx::Get {token} {
 	  -message [mc jamessillegalchar "server" $state(-server)]
 	return
     }
-    SetState $token {disabled}
+    #SetState $token {disabled}
     set state(status) [mc jawaitserver]
     $state(wprog) start
 
@@ -564,11 +565,11 @@ proc ::RegisterEx::Get {token} {
     ::JUI::SetConnectState "connectinit"
 
     # Asks for a socket to the server.
-    set cb [list ::RegisterEx::ConnectCB $token]
+    set cb [namespace code [list ConnectCB $token $state(cuid)]]
     eval {$jstate(jlib) connect connect $state(-server) {} -command $cb} $opts
 }
 
-proc ::RegisterEx::ConnectCB {token jlibname status {errcode ""} {errmsg ""}} {
+proc ::RegisterEx::ConnectCB {token cuid jlibname status {errcode ""} {errmsg ""}} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
@@ -579,19 +580,21 @@ proc ::RegisterEx::ConnectCB {token jlibname status {errcode ""} {errmsg ""}} {
 	return
     }
     if {$status eq "ok"} {
-	$jstate(jlib) register_get [list [namespace current]::GetCB $token] \
+	$jstate(jlib) register_get [namespace code [list GetCB $token $cuid]] \
 	  -to $state(-server)
     } elseif {$status eq "error"} {
 	SetState $token {!disabled}
 	NotBusy $token
-	set str [::Login::GetErrorStr $errcode $errmsg]
-	::UI::MessageBox -icon error -type ok -message $str
 	::JUI::SetConnectState "disconnect"
 	$jstate(jlib) connect free
+	if {$errcode ne "reset"} {
+	    set str [::Login::GetErrorStr $errcode $errmsg]
+	    ::UI::MessageBox -icon error -type ok -message $str
+	}
     }
 }
 
-proc ::RegisterEx::GetCB {token jlibName type iqchild} {    
+proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {    
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
@@ -601,24 +604,37 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
     if {![info exists state]} {
 	return
     }
-    bind $state(w) <Return> [namespace code [list SendRegister $token]]
-    
-    NotBusy $token
-    SetState $token {disabled}
     if {!([info exists state(w)] && [winfo exists $state(w)])} {
 	return
     }
     
+    # Must match last query.
+    if {$state(cuid) != $cuid} {
+	return
+    }
+    NotBusy $token
+    #SetState $token {disabled}
+    DestroyForm $token
+    
     if {[string equal $type "error"]} {
-	::UI::MessageBox -type ok -icon error  \
+	::UI::MessageBox -type ok -icon error \
 	  -message [mc jamesserrregget [lindex $iqchild 0] [lindex $iqchild 1]]
 	return
     } 
+    bind $state(w) <Return> [namespace code [list SendRegister $token]]
     
     $state(wbtok) state {!disabled}
     $state(wbtok) configure -text [mc Register] \
       -command [list [namespace current]::SendRegister $token]
     
+    # XEP-0077:
+    # ...an entity could receive any combination of iq:register, x:data, 
+    # and x:oob namespaces from a service in response to a request for 
+    # information. The precedence order is as follows: 
+    #   x:data 
+    #   iq:register 
+    #   x:oob 
+
     # Extract registration tags.
     foreach elem [wrapper::getchildren $iqchild] {
 	set tag [wrapper::gettag $elem]
@@ -715,6 +731,17 @@ proc ::RegisterEx::GetCB {token jlibName type iqchild} {
 	ttk::label $wfr.lregistered -text [mc registration-is-registered]  \
 	  -anchor w -wraplength 260 -justify left
 	grid  $wfr.lregistered  -  -sticky ew
+    }
+    
+    set oobE [wrapper::getfirstchildwithxmlns $iqchild "jabber:iq:oob"]
+    if {[llength $oobE]} {
+	set urlE [wrapper::getfirstchildwithtag $oobE "url"]
+	if {[llength $urlE]} {
+	    set url [wrapper::getcdata $urlE]
+	    ttk::button $wfr.oob -style Url \
+	      -text $url -command [list ::Utils::OpenURLInBrowser $url]
+	    grid  $wfr.oob
+	}
     }
     
     grid columnconfigure $wfr 1 -weight 1
