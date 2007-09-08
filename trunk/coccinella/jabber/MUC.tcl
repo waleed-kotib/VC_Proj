@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.88 2007-09-07 12:25:08 matben Exp $
+# $Id: MUC.tcl,v 1.89 2007-09-08 06:55:26 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -1570,7 +1570,6 @@ proc ::MUC::Destroy {roomjid} {
     grid columnconfigure $wmid 1 -weight 1
     grid $wmid.la $wmid.lre -sticky e
     grid $wmid.ejid $wmid.ere -sticky ew
-    # -sticky e -padx 2 -pady 2
     
     set wdestroyjid $wmid.ejid
         
@@ -1636,11 +1635,13 @@ proc ::MUC::DestroyBrowseCB {jlibname type jid subiq args} {
     upvar ::Jabber::jstate jstate
     variable wdestroyjid
     variable destroyRoomJID
+    variable destroyAltJID
   
     if {[winfo exists $wdestroyjid] && ($type eq "result")} {
 	jlib::splitjidex $destroyRoomJID - service -
 	set allRooms [$jstate(jlib) disco children $service]
 	$wdestroyjid configure -values $allRooms
+	set destroyAltJID [lindex $allRooms 0]
     }    
 }
 

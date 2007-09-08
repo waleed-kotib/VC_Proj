@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.83 2007-09-08 06:41:15 matben Exp $
+# $Id: Register.tcl,v 1.84 2007-09-08 06:55:26 matben Exp $
 
 package provide Register 1.0
 
@@ -733,14 +733,14 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
 	grid  $wfr.lregistered  -  -sticky ew
     }
     
-    set oobE [wrapper::getfirstchildwithxmlns $iqchild "jabber:iq:oob"]
+    set oobE [wrapper::getfirstchildwithxmlns $iqchild "jabber:x:oob"]
     if {[llength $oobE]} {
 	set urlE [wrapper::getfirstchildwithtag $oobE "url"]
 	if {[llength $urlE]} {
 	    set url [wrapper::getcdata $urlE]
 	    ttk::button $wfr.oob -style Url \
 	      -text $url -command [list ::Utils::OpenURLInBrowser $url]
-	    grid  $wfr.oob
+	    grid  $wfr.oob  -  -sticky w
 	}
     }
     
