@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements subscription parts.
 #      
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.41 2007-09-08 14:39:56 matben Exp $
+# $Id: Subscribe.tcl,v 1.42 2007-09-09 07:37:24 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -351,16 +351,16 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     ttk::frame $wauto
     ttk::checkbutton $wauto.sub -text [mc prefsuauto2] \
       -variable [namespace current]::tmpJPrefs(subsc,auto)
-    ttk::separator $wauto.s -orient horizontal
     ttk::label $wauto.la -text [mc {Default group}]:
     ttk::entry $wauto.ent -font CociSmallFont \
       -textvariable [namespace current]::tmpJPrefs(subsc,group)
     
-    grid  $wauto.sub  -           $wauto.s  -sticky w
-    grid  $wauto.la   $wauto.ent  -
-    grid $wauto.ent $wauto.s -sticky ew
-    grid columnconfigure $wauto 1 -weight 1
-    #grid columnconfigure $wauto 2 -weight 1
+    grid  $wauto.sub  -           -
+    grid  x           $wauto.la   $wauto.ent
+    grid $wauto.sub -sticky w
+    grid $wauto.ent -sticky ew
+    grid columnconfigure $wauto 0 -minsize 32
+    grid columnconfigure $wauto 2 -weight 1
     
     pack  $wsubs  -side top -fill x
     pack  $wauto  -side top -fill x -pady 12
