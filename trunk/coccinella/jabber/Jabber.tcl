@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.231 2007-09-08 14:39:56 matben Exp $
+# $Id: Jabber.tcl,v 1.232 2007-09-09 07:37:24 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -769,7 +769,7 @@ proc ::Jabber::UnsubscribeEvent {jlibname xmldata} {
     } else {
 	
 	$jlib send_presence -to $from -type "unsubscribed"
-	::UI::MessageBox -title [mc Unsubscribe] -icon info -type ok  \
+	::ui::dialog -title [mc Unsubscribe] -icon info -type ok  \
 	  -message [mc jamessunsubpres $from]
 	
 	# If there is any subscription to this jid's presence.
@@ -808,7 +808,7 @@ proc ::Jabber::UnsubscribedEvent {jlibname xmldata} {
     if {$subscription eq "none"} {
 	set ask [$jlib roster getask $from]
 	
-	# This is never the case. DOn't know how to differentiate the two cases?
+	# This is never the case. Don't know how to differentiate the two cases?
 	if {$ask eq "subscribe"} {
 	    set msg [mc jamessfailedsubsc $from]
 	    set status [$jlib roster getstatus $from]
@@ -856,7 +856,7 @@ proc ::Jabber::PresenceHandler {jlibname xmldata} {
 	    foreach {errcode errmsg} $errspec break		
 	    set msg [mc jamesserrpres $errcode $errmsg]
 	    if {$::config(talkative)} {
-		::UI::MessageBox -icon error -type ok  \
+		::ui::dialog -icon error -type ok  \
 		  -title [mc {Presence Error}] -message $msg
 	    }
 	    ::Jabber::AddErrorLog $from $msg
@@ -1068,7 +1068,7 @@ proc ::Jabber::IqSetGetCallback {method jlibName type theQuery} {
 		  and with message: $errmsg"
 	    }
 	}
-	::UI::MessageBox -icon error -type ok -title [mc Error] -message $msg
+	::ui::dialog -icon error -type ok -title [mc Error] -message $msg
     }
 }
 
@@ -1464,16 +1464,16 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 	set msg [mc jamesserrlastactive $ujid [lindex $subiq 1]]
 	::Jabber::AddErrorLog $from $msg	    
 	if {!$silent} {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	    ::ui::dialog -title [mc Error] -icon error -type ok \
 	      -message $msg
 	}
     } else {
 	array set attrArr [wrapper::getattrlist $subiq]
 	if {![info exists attrArr(seconds)]} {
-	    ::UI::MessageBox -title [mc {Last Activity}] -icon info  \
+	    ::ui::dialog -title [mc {Last Activity}] -icon info  \
 	      -type ok -message [mc jamesserrnotimeinfo $ujid]
 	} else {
-	    ::UI::MessageBox -title [mc {Last Activity}] -icon info  \
+	    ::ui::dialog -title [mc {Last Activity}] -icon info  \
 	      -type ok -message [GetLastString $from $subiq]
 	}
     }
@@ -1540,12 +1540,12 @@ proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
 	  "We received an error when quering its time info.\
 	  The error was: [lindex $subiq 1]"	    
 	if {!$silent} {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	    ::ui::dialog -title [mc Error] -icon error -type ok \
 	      -message [mc jamesserrtime $ujid [lindex $subiq 1]]
 	}
     } else {
 	set msg [GetTimeString $subiq]
-	::UI::MessageBox -title [mc {Local Time}] -icon info -type ok \
+	::ui::dialog -title [mc {Local Time}] -icon info -type ok \
 	  -message [mc jamesslocaltime $ujid $msg]
     }
 }
@@ -1637,7 +1637,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	::Jabber::AddErrorLog $from  \
 	  [mc jamesserrvers $ujid [lindex $subiq 1]]
 	if {!$silent} {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	    ::ui::dialog -title [mc Error] -icon error -type ok \
 	      -message [mc jamesserrvers $ujid [lindex $subiq 1]]
 	}
 	return
@@ -1948,7 +1948,7 @@ proc ::Jabber::Passwd::Doit {w} {
     ::Debug 2 "::Jabber::Passwd::Doit"
 
     if {![string equal $validate $password]} {
-	::UI::MessageBox -type ok -icon error -message [mc jamesspasswddiff]
+	::ui::dialog -type ok -icon error -message [mc jamesspasswddiff]
 	return
     }
     set finished 1
@@ -1968,7 +1968,7 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 	set errcode [lindex $theQuery 0]
 	set errmsg [lindex $theQuery 1]
 	set msg 
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	::ui::dialog -title [mc Error] -icon error -type ok \
 	  -message [mc jamesspasswderr $errcode $errmsg]
     } else {
 		
@@ -1977,7 +1977,7 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 	if {$name ne ""} {
 	    ::Profiles::SetWithKey $name password $password
 	}
-	::UI::MessageBox -title [mc {New Password}] -icon info -type ok \
+	::ui::dialog -title [mc {New Password}] -icon info -type ok \
 	  -message [mc jamesspasswdok]
     }
 }

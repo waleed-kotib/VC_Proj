@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.208 2007-09-08 09:29:39 matben Exp $
+# $Id: JUI.tcl,v 1.209 2007-09-09 07:37:24 matben Exp $
 
 package provide JUI 1.0
 
@@ -1291,9 +1291,8 @@ proc ::JUI::FilePostCommand {wmenu} {
     set mimport [::UI::MenuMethod $wmenu entrycget mImport -menu]
     ::UI::MenuMethod $mimport entryconfigure mvCard2... -state disabled
     
-    if {[llength [grab current]]} { 
-	# Only aqua.
-	catch {::UI::MenuDisableAllBut $wmenu mCloseWindow}
+    if {([tk windowingsystem] eq "aqua") && [llength [grab current]]} { 
+	::UI::MenuDisableAllBut $wmenu mCloseWindow
     } else {
 	
 	switch -- [GetConnectState] {
@@ -1374,7 +1373,7 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	::Status::ExBuildMainMenu $m
     }
     
-    if {[llength [grab current]]} { 
+    if {([tk windowingsystem] eq "aqua") && [llength [grab current]]} { 
 	::UI::MenuDisableAll $wmenu
     } else {
 	
@@ -1457,7 +1456,7 @@ proc ::JUI::InfoPostCommand {wmenu} {
     } else {
 	set state(mailbox,visible) 0
     }
-    if {[llength [grab current]]} { 
+    if {([tk windowingsystem] eq "aqua") && [llength [grab current]]} { 
 	::UI::MenuDisableAll $wmenu
     } else {
 	
