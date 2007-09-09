@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.58 2007-09-08 14:39:56 matben Exp $
+# $Id: roster.tcl,v 1.59 2007-09-09 12:41:15 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -169,7 +169,7 @@ proc jlib::roster::init {jlibname args} {
     $jlibname presence_register_int unavailable \
       [namespace code presence_handler] 10
     
-    set rostA(groups) {}
+    set rostA(groups) [list]
     set options(cmd) ""
     
     jlib::register_package roster
@@ -250,7 +250,16 @@ proc jlib::roster::send_get_cb {jlibname cmd type queryE} {
 
 proc jlib::roster::set_handler {jlibname from queryE args} {
     
-    handle_roster $jlibname $queryE    
+    handle_roster $jlibname $queryE
+    
+    # RFC 3921, sect 8.1:
+    # The 'from' and 'to' addresses are OPTIONAL in roster pushes; ...
+    # A client MUST acknowledge each roster push with an IQ stanza of 
+    # type "result"...
+    array set argsA $args
+    if {[info exists argsA(-id)]} {
+	$jlibname send_iq "result" {} -to $argsA(-id)
+    }
     return 1
 }
 
@@ -284,7 +293,7 @@ proc jlib::roster::handle_roster {jlibname queryE} {
 	    removeitem $jlibname $jid
 	} else {
 	    set itemA($mjid) $itemE
-	    set groups {}
+	    set groups [list]
 	    foreach groupE [wrapper::getchildswithtag $itemE group] {
 		lappend groups [wrapper::getcdata $groupE]
 	    }
