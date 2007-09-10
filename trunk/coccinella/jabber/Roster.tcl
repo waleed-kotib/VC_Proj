@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.211 2007-09-10 06:19:20 matben Exp $
+# $Id: Roster.tcl,v 1.212 2007-09-10 13:13:53 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -886,7 +886,7 @@ proc ::Roster::SetItem {jid args} {
     }
     
     set add 1
-    if {!$jprefs(rost,allowSubNone)} {
+    if {!$jprefs(rost,showSubNone)} {
 	
 	# Do not add items with subscription='none'.
 	if {[set idx [lsearch $args "-subscription"]] >= 0} {
@@ -1357,11 +1357,11 @@ proc ::Roster::InitPrefsHook { } {
     
     # Defaults...
     set jprefs(rost,rmIfUnsub)      1
-    set jprefs(rost,allowSubNone)   1
     set jprefs(rost,clrLogout)      1
     set jprefs(rost,dblClk)         chat
     set jprefs(rost,showOffline)    1
     set jprefs(rost,showTrpts)      1
+    set jprefs(rost,showSubNone)    1
     set jprefs(rost,sort)           -increasing
     
     set jprefs(rost,useWBrosticon)  0
@@ -1377,7 +1377,7 @@ proc ::Roster::InitPrefsHook { } {
       [list ::Jabber::jprefs(rost,clrLogout)   jprefs_rost_clrRostWhenOut $jprefs(rost,clrLogout)]  \
       [list ::Jabber::jprefs(rost,dblClk)      jprefs_rost_dblClk       $jprefs(rost,dblClk)]  \
       [list ::Jabber::jprefs(rost,rmIfUnsub)   jprefs_rost_rmIfUnsub    $jprefs(rost,rmIfUnsub)]  \
-      [list ::Jabber::jprefs(rost,allowSubNone) jprefs_rost_allowSubNone $jprefs(rost,allowSubNone)]  \
+      [list ::Jabber::jprefs(rost,showSubNone) jprefs_rost_showSubNone  $jprefs(rost,showSubNone)]  \
       [list ::Jabber::jprefs(rost,showOffline) jprefs_rost_showOffline  $jprefs(rost,showOffline)]  \
       [list ::Jabber::jprefs(rost,showTrpts)   jprefs_rost_showTrpts    $jprefs(rost,showTrpts)]  \
       [list ::Jabber::jprefs(rost,closedItems) jprefs_rost_closedItems  $jprefs(rost,closedItems)]  \
@@ -1401,7 +1401,7 @@ proc ::Roster::BuildPageRoster {page} {
     variable tmpJPrefs
     
     foreach key {
-	rmIfUnsub allowSubNone clrLogout dblClk showOffline showTrpts
+	rmIfUnsub showSubNone clrLogout dblClk showOffline showTrpts
     } {
 	set tmpJPrefs(rost,$key) $jprefs(rost,$key)
     }
@@ -1412,25 +1412,25 @@ proc ::Roster::BuildPageRoster {page} {
 
     ttk::checkbutton $wc.rmifunsub -text [mc prefrorm]  \
       -variable [namespace current]::tmpJPrefs(rost,rmIfUnsub)
-    ttk::checkbutton $wc.allsubno -text [mc prefroallow]  \
-      -variable [namespace current]::tmpJPrefs(rost,allowSubNone)
     ttk::checkbutton $wc.clrout -text [mc prefroclr]  \
       -variable [namespace current]::tmpJPrefs(rost,clrLogout)
     ttk::checkbutton $wc.dblclk -text [mc prefrochat] \
       -variable [namespace current]::tmpJPrefs(rost,dblClk)  \
       -onvalue chat -offvalue normal
-    ttk::checkbutton $wc.hideoff -text [mc "Show offline users"] \
+    ttk::checkbutton $wc.showoff -text [mc "Show offline users"] \
       -variable [namespace current]::tmpJPrefs(rost,showOffline)
-    ttk::checkbutton $wc.hidetrpt -text [mc "Show transports"] \
+    ttk::checkbutton $wc.showtrpt -text [mc "Show transports"] \
       -variable [namespace current]::tmpJPrefs(rost,showTrpts)
-
+    ttk::checkbutton $wc.showsubno -text [mc prefroshowsubno]  \
+      -variable [namespace current]::tmpJPrefs(rost,showSubNone)
+    
     grid  $wc.rmifunsub  -sticky w
-    grid  $wc.allsubno   -sticky w
     grid  $wc.clrout     -sticky w
     grid  $wc.dblclk     -sticky w
-    grid  $wc.hideoff    -sticky w
     grid  $wc.rmifunsub  -sticky w
-    grid  $wc.hidetrpt   -sticky w
+    grid  $wc.showoff    -sticky w
+    grid  $wc.showtrpt   -sticky w
+    grid  $wc.showsubno  -sticky w
     
     # My avatar. OUTDATED!
     #::Avatar::PrefsFrame $wc.ava

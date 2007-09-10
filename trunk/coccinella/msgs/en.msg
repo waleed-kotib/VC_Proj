@@ -1171,6 +1171,7 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 ::msgcat::mcset en prefrochat            {Chat when double-click user, else normal message}
 ::msgcat::mcset en prefroclr             {Clear roster when logout}
 ::msgcat::mcset en prefrorm              {Remove user if unsubscribed}
+::msgcat::mcset en prefroshowsubno       {Show users without any subscription}
 ::msgcat::mcset en prefrostbgim          {Use background image (gif) in roster}
 ::msgcat::mcset en prefrosysicons        {Use foreign IM system icons}
 ::msgcat::mcset en prefshortcut          {Here you add or edit shortcuts that are only applicable to "peer-to-peer" connections, and are not used by the Jabber system. If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup" panel, these shortcuts don't apply.}
