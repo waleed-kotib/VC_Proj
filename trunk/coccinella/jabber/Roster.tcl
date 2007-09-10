@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.210 2007-08-25 07:36:52 matben Exp $
+# $Id: Roster.tcl,v 1.211 2007-09-10 06:19:20 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1419,12 +1419,10 @@ proc ::Roster::BuildPageRoster {page} {
     ttk::checkbutton $wc.dblclk -text [mc prefrochat] \
       -variable [namespace current]::tmpJPrefs(rost,dblClk)  \
       -onvalue chat -offvalue normal
-    ttk::checkbutton $wc.hideoff -text [mc prefrohideoff] \
-      -variable [namespace current]::tmpJPrefs(rost,showOffline) \
-      -onvalue 0 -offvalue 1
-    ttk::checkbutton $wc.hidetrpt -text [mc prefrohidetrpt] \
-      -variable [namespace current]::tmpJPrefs(rost,showTrpts) \
-      -onvalue 0 -offvalue 1
+    ttk::checkbutton $wc.hideoff -text [mc "Show offline users"] \
+      -variable [namespace current]::tmpJPrefs(rost,showOffline)
+    ttk::checkbutton $wc.hidetrpt -text [mc "Show transports"] \
+      -variable [namespace current]::tmpJPrefs(rost,showTrpts)
 
     grid  $wc.rmifunsub  -sticky w
     grid  $wc.allsubno   -sticky w
