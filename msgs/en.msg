@@ -745,8 +745,10 @@
 ::msgcat::mcset en {Setup Assistant}
 ::msgcat::mcset en {Show Image}
 ::msgcat::mcset en {Show Popup}
+::msgcat::mcset en {Show offline users}
 ::msgcat::mcset en {Show Text}
 ::msgcat::mcset en {Show Text and Image}
+::msgcat::mcset en {Show transports}
 ::msgcat::mcset en {Slide Show}
 ::msgcat::mcset en {Slide Show Folder}
 ::msgcat::mcset en {Smooth freehand strokes}
@@ -1158,8 +1160,6 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 ::msgcat::mcset en prefroallow           {Allow users without subscription}
 ::msgcat::mcset en prefrochat            {Chat when double-click user, else normal message}
 ::msgcat::mcset en prefroclr             {Clear roster when logout}
-::msgcat::mcset en prefrohideoff         {Do not show offline users}
-::msgcat::mcset en prefrohidetrpt        {Do not show transports}
 ::msgcat::mcset en prefrorm              {Remove user if unsubscribed}
 ::msgcat::mcset en prefrostbgim          {Use background image (gif) in roster}
 ::msgcat::mcset en prefrosysicons        {Use foreign IM system icons}
