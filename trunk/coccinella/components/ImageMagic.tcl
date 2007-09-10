@@ -21,7 +21,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ImageMagic.tcl,v 1.11 2007-07-18 09:40:09 matben Exp $
+# $Id: ImageMagic.tcl,v 1.12 2007-09-10 12:31:55 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -106,11 +106,9 @@ proc ::ImageMagic::BuildDialog {w} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
 
-    set msg "Click on a window in the desktop or drag a rectangular "
-    append msg "area to import into the current whiteboard."
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 300 -justify left \
-      -text $msg
+      -text [mc immagic-msg]
     pack $wbox.msg -side top -fill x -anchor w
     
     ttk::label $wbox.la -text {Captured image format:} -style Small.TLabel
@@ -175,8 +173,8 @@ proc ::ImageMagic::ClearImportFiles {wcan} {
     variable tmpfiles
 
     if {$prefs(incomingFilePath) eq "" || [string match {*[*?]*} $prefs(incomingFilePath)]} {
-	set msg "Dangerous in-box path name '$prefs(incomingFilePath)'"
-	::UI::MessageBox -message $msg -icon warning
+	::UI::MessageBox -message [mc immagic-warn $prefs(incomingFilePath)] \
+	  -icon warning
 	return
     }
     if {![file exists $prefs(incomingFilePath)]} {
@@ -184,10 +182,10 @@ proc ::ImageMagic::ClearImportFiles {wcan} {
     }
     
     set all_files [glob -nocomplain [file join $prefs(incomingFilePath) {*}]]
-    if {$all_files ==""} {
+    if {$all_files == ""} {
 	return
     }
-    set msg "Click OK to remove files :\n[join $all_files \n]"
+    set msg [mc immagic-rem "\n[join $all_files \n]"]
     set ans [::UI::MessageBox -message $msg -type okcancel -icon warning]
     if {"$ans" eq "ok"} {
 	foreach file $all_files {

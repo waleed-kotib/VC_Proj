@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.15 2007-09-01 07:49:05 matben Exp $
+# $Id: Enter.tcl,v 1.16 2007-09-10 12:31:55 matben Exp $
 
 package provide Enter 1.0
 
@@ -556,7 +556,8 @@ proc ::Enter::DoEnter {token} {
     if {$state(password) ne ""} {
 	lappend opts -password $state(password)
     }
-    set nickname [jlib::escapestr $state(nickname)]
+    #set nickname [jlib::escapestr $state(nickname)]
+    set nickname $state(nickname)
     
     # We must figure out which protocol to use, muc or gc-1.0?
     switch -- $state(protocol) {
@@ -662,14 +663,15 @@ proc ::Enter::GCCallback {token jlibname xmldata} {
     ::History::XPutItem recv $roomjid $xmldata
 
     if {[string equal $type "error"]} {
-	set msg "We got an error when entering room \"$roomjid\"."
+	set ujid [jlib::unescapejid $from]
+	set msg [mc mucErrEnter $from]
 	set errspec [jlib::getstanzaerrorspec $xmldata]
 	if {[llength $errspec]} {
 	    set errcode [lindex $errspec 0]
 	    set errmsg  [lindex $errspec 1]
-	    append msg " The error code is $errcode: $errmsg"
+	    append msg [mc mucErrCode $errcode $errmsg]
 	}
-	::UI::MessageBox -title "Error Enter Room" -message $msg -icon error
+	::UI::MessageBox [mc mucErrEnterTitle] -message $msg -icon error
     } else {
     
 	# Cache groupchat protocol type (muc|conference|gc-1.0).

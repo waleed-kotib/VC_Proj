@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.35 2007-08-08 13:01:07 matben Exp $
+# $Id: Sounds.tcl,v 1.36 2007-09-10 12:31:55 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -515,14 +515,9 @@ proc ::Sounds::BuildPrefsPage {wpage} {
 proc ::Sounds::MidiPlayer { } {
     variable tmpPrefs
     
-    set title "External Midi Player"
-    set msg "Set midi command to use for playing MIDI sounds.\
-      This option is only relevant if you have a sound set with MIDI files.\
-      Your system midi player command must have the \"command fileName\"\
-      syntax."
-    set label "MIDI command:"
-    
-    set ans [ui::megaentry -title $title -message $msg -label $label \
+    set title [mc "External Midi Player"]
+    set label [mc "MIDI command"]:    
+    set ans [ui::megaentry -title [mc prefmidimsg] -message $msg -label $label \
       -value $tmpPrefs(midiCmd)]
     if {$ans ne ""} {
 	set tmpPrefs(midiCmd) [ui::megaentrytext $ans]

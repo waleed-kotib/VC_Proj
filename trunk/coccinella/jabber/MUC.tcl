@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.89 2007-09-08 06:55:26 matben Exp $
+# $Id: MUC.tcl,v 1.90 2007-09-10 12:31:56 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -746,7 +746,7 @@ proc ::MUC::Kick {roomjid} {
     jlib::splitjidex $roomjid roomName - -
     
     set title [mc {Kick Participant}]
-    set msg   "Kick the participant \"$unick\" from the room \"$roomName\""
+    set msg [mmc mucKick $unick $roomName]
     set ans [ui::megaentry -label "[mc Reason]:" -icon "" \
       -geovariable prefs(winGeom,jmucact) -title $title -message $msg]
 
@@ -777,7 +777,7 @@ proc ::MUC::Ban {roomjid} {
     jlib::splitjidex $roomjid roomName - -
 
     set title [mc {Ban User}]
-    set msg   "Ban the user \"$unick\" from the room \"$roomName\""
+    set msg [mc mucBan $unick $roomName]
     set ans [ui::megaentry -label "[mc Reason]:" -icon "" \
       -geovariable prefs(winGeom,jmucact) -title $title -message $msg]
         

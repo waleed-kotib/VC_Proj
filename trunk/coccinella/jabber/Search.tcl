@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.34 2007-09-01 07:49:05 matben Exp $
+# $Id: Search.tcl,v 1.35 2007-09-10 12:31:56 matben Exp $
 
 package provide Search 1.0
 
@@ -428,9 +428,9 @@ proc ::Search::ResultCallback {server type subiq} {
     if {[string equal $type "error"]} {
 	foreach {ecode emsg} [lrange $subiq 0 1] break
 	if {$ecode eq "406"} {
-	    set msg "There was an invalid field. Please correct it: $emsg"
+	    set msg [mc jamesssearchinval $emsg]
 	} else {
-	    set msg "Failed searching service. Error code $ecode with message: $emsg"
+	    set msg [mc jamesssearcherr $ecode $emsg]
 	}
 	::UI::MessageBox -type ok -icon error -message $msg
 	return

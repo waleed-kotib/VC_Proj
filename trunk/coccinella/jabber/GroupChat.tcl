@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.206 2007-09-07 07:38:56 matben Exp $
+# $Id: GroupChat.tcl,v 1.207 2007-09-10 12:31:55 matben Exp $
 
 package require Create
 package require Enter
@@ -2577,6 +2577,9 @@ proc ::GroupChat::InsertPresenceChange {chattoken xmldata} {
 	if {[info exists presA(-show)]} {
 	    set show $presA(-show)
 	}
+	
+	# The Gtalk server is playing games by sending out multiple identical
+	# presence to us. It acts very weird! No workaround.
 	set str [string tolower [::Roster::MapShowToText $show]]
 	if {[info exists presA(-status)]} {
 	    append str " " $presA(-status)

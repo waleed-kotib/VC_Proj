@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.17 2007-08-26 14:38:13 matben Exp $
+# $Id: NotifyCall.tcl,v 1.18 2007-09-10 12:31:55 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -334,7 +334,7 @@ proc ::NotifyCall::Slot {win} {
 
 proc ::NotifyCall::CloseDialer {w} {
     
-    set msg "Do you actually want to hang up?"
+    set msg [mc "Do you actually want to hang up?"]
     set ans [tk_messageBox -icon question -type yesno -message [mc $msg]]
     if {$ans eq "no"} {
 	return stop

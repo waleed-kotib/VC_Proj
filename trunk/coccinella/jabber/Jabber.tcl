@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.232 2007-09-09 07:37:24 matben Exp $
+# $Id: Jabber.tcl,v 1.233 2007-09-10 12:31:56 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -920,13 +920,9 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    DoCloseClientConnection
 	    if {[info exists argsA(-errormsg)]} {
-		set msg "Receieved a fatal XML parsing error: "
-		append msg $argsA(-errormsg)
-		append msg "\n"
-		append msg "The connection is closed down."
+		set msg [mc jamessfatalerr "$argsA(-errormsg)\n"]
 	    } else {
-		set msg "Receieved a fatal XML parsing error.\
-		  The connection is closed down."
+		set msg [mc jamessfatalerr ""]
 	    }
 	    ui::dialog -title [mc {Fatal Error}] -icon error -type ok \
 	      -message $msg
@@ -1037,39 +1033,6 @@ proc ::Jabber::ErrorLogDlg { } {
 	$wtext insert end "\n"
     }
     $wtext configure -state disabled
-}
-
-# Jabber::IqSetGetCallback --
-#
-#       Generic callback procedure when sending set/get iq element.
-#       
-# Arguments:
-#       method      description of the original call.
-#       jlibName:   the instance of this jlib.
-#       type:       "error" or "result".
-#       thequery:   if type="error", this is a list {errcode errmsg},
-#                   else it is the query element as a xml list structure.
-#       
-# Results:
-#       none.
-
-proc ::Jabber::IqSetGetCallback {method jlibName type theQuery} {    
-    variable jstate
-    
-    ::Debug 2 "::Jabber::IqSetGetCallback, method=$method, type=$type,\
-	  theQuery='$theQuery'"
-	
-    if {[string equal $type "error"]} {
-	foreach {errcode errmsg} $theQuery break
-	
-	switch -- $method {
-	    default {
-		set msg "Found an error for $method with code $errcode,\
-		  and with message: $errmsg"
-	    }
-	}
-	::ui::dialog -icon error -type ok -title [mc Error] -message $msg
-    }
 }
 
 # Jabber::DoCloseClientConnection --
@@ -1491,7 +1454,7 @@ proc ::Jabber::GetLastString {jid subiq} {
 	set secs [expr [clock seconds] - $attrArr(seconds)]
 	set uptime [clock format $secs -format "%a %b %d %H:%M:%S %Y"]
 	if {[wrapper::getcdata $subiq] ne ""} {
-	    set msg "The message: [wrapper::getcdata $subiq]"
+	    set msg "[mc {The message}]: [wrapper::getcdata $subiq]"
 	} else {
 	    set msg ""
 	}
