@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.68 2007-09-06 13:20:47 matben Exp $
+# $Id: RosterTree.tcl,v 1.69 2007-09-10 12:31:56 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -568,17 +568,10 @@ proc ::RosterTree::BackgroundImageCmd {} {
     upvar ::Jabber::jprefs jprefs
     
     set mimes {image/gif image/png image/jpeg}
-    set mimeL [list]
-    set typeL [list]
-    foreach mime $mimes {
-	if {[::Media::HaveImporterForMime $mime]} {
-	    lappend mimeL $mime
-	    lappend typeL [string toupper [lindex [split $mime /] 1]]
-	}
-    }
-    set suffL [::Types::GetSuffixListForMimeList $mimeL]
+    set suffL [::Media::GetSupportedSuffixesForMimeList $mimes]
+    set typeL [::Media::GetSupportedTypesForMimeList $mimes]
     set types [concat [list [list {Image Files} $suffL]] \
-      [::Media::GetDlgFileTypesForMimeList $mimeL]]
+      [::Media::GetDlgFileTypesForMimeList $mimes]]
     
     # Default file (as defined by the theme):
     set defaultFile [BackgroundImageGetThemedFile $suffL]

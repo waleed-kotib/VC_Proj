@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.33 2007-07-30 08:16:02 matben Exp $
+# $Id: Avatar.tcl,v 1.34 2007-09-10 12:31:55 matben Exp $
 
 # @@@ Issues:
 # 
@@ -323,23 +323,28 @@ proc ::Avatar::VerifyPhotoFile {fileName} {
 
     Debug "::Avatar::VerifyPhotoFile"
     
+    set mimes {image/gif image/png image/jpeg}
+    set mimeL [::Media::GetSupportedMimesForMimeList $mimes]
     set mime [::Types::GetMimeTypeForFileName $fileName]
-    if {[lsearch {image/gif image/png image/jpeg} $mime] < 0} {
-	set msg "Our avatar shall be either a PNG, JPEG or a GIF file."
+    if {[lsearch $mimeL $mime] < 0} {
+	set typeL [::Media::GetSupportedTypesForMimeList $mimes]
+	set typeText [join $typeL ", "]
+	set msg [mc jasuppimagefmts]
+	append msg $typeText
+	append msg "."	
 	return [list 0 $msg]
     }
 	
     # Make sure it is an image.
     if {[catch {set tmp [image create photo -file $fileName]}]} {
-	set msg "Failed to create an image from [file tail $fileName]"
-	return [list 0 $msg]
+	return [list 0 [mc jamessimagecreateerr [file tail $fileName]]]
     }
     
     # For the time being we limit sizes to 32, 48, or 64.
     set width  [image width $tmp]
     set height [image height $tmp]
     if {($width != $height) || ([lsearch $sizes $width] < 0)} {
-	set msg "We require that the avatar be square of size [join $sizes {, }]"
+	set msg [mc jamessavaerrsize [join $sizes {, }]]
 	set ans [list 0 $msg]
     } else {
 	set ans 1

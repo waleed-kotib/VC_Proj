@@ -564,6 +564,7 @@
 ::msgcat::mcset en {Disk Cache}
 ::msgcat::mcset en {Do Not Disturb}
 ::msgcat::mcset en {Do not save password}
+::msgcat::mcset en {Do you actually want to hang up?}
 ::msgcat::mcset en {Edit Business Card}
 ::msgcat::mcset en {Edit Contact}
 ::msgcat::mcset en {Edit Fonts}
@@ -578,6 +579,7 @@
 ::msgcat::mcset en {Enter/Create Room}
 ::msgcat::mcset en {Every time}
 ::msgcat::mcset en {Extended Away status}
+::msgcat::mcset en {External Midi Player}
 ::msgcat::mcset en {Factory Settings}
 ::msgcat::mcset en {Fatal Error}
 ::msgcat::mcset en {File Cache}
@@ -635,6 +637,7 @@
 ::msgcat::mcset en {Logout on sleep}
 ::msgcat::mcset en {Logout With Message}
 ::msgcat::mcset en {Machine Sleep}
+::msgcat::mcset en {MIDI command}
 ::msgcat::mcset en {MIDI Player}
 ::msgcat::mcset en {MIME type}
 ::msgcat::mcset en {Mailbox Error}
@@ -765,6 +768,7 @@
 ::msgcat::mcset en {Take Snapshot}
 ::msgcat::mcset en {Tel (fax)}
 ::msgcat::mcset en {Tel (voice)}
+::msgcat::mcset en {The message}
 ::msgcat::mcset en {This IP number}
 ::msgcat::mcset en {Thread started}
 ::msgcat::mcset en {To Jabber ID}
@@ -903,6 +907,7 @@
 ::msgcat::mcset en jamessautoreject2     {%s cannot see your presence.}
 ::msgcat::mcset en jamessautosubs        {You have just automatically subscribed to %s presence.}
 ::msgcat::mcset en jamessautosubs2       {You can see %s's presence.}
+::msgcat::mcset en jamessavaerrsize      {We require that the avatar be square of size %s.}
 ::msgcat::mcset en jamessbadjid          {The jid "%s" is not well formed. Do you want to continue anyway?}
 ::msgcat::mcset en jamesschatclose       {If you close this chat window you also loose the complete conversation. Do you actually like to close?}
 ::msgcat::mcset en jamesschatoffline     {This user is not online anymore and the message is therfore not sent.}
@@ -942,6 +947,7 @@
 ::msgcat::mcset en jamessgeneditwarnclose {There are edits made to this dialog. Do you want to save them before closing?}
 ::msgcat::mcset en jamessillegalchar     {Illegal character(s) in %s: "%s"!}
 ::msgcat::mcset en jamessillformresend   {The address "%s" is not well formed. Please modify it and resend.}
+::msgcat::mcset en jamessimagecreateerr  {Failed to create an image from "%s".}
 ::msgcat::mcset en jamessinroomerasewb   {Do you want to erase the whiteboard before entering a new room?}
 ::msgcat::mcset en jamessinroommiss      {We require that all fields are nonempty before entering room}
 ::msgcat::mcset en jamessinvalidjid      {The JID address is not well formed. Please be sure that the entry at the bottom of the whiteboard contains a valid address before you act. It should look something like 'username@jabber.org'.}
@@ -986,6 +992,8 @@
 ::msgcat::mcset en jamessremoveaccount   {You are about to remove your account from this server. This process cannot be undone. Do you really want to continue?}
 ::msgcat::mcset en jamessremoveaccount2  {Do you really want to remove your account? This process cannot be undone.}
 ::msgcat::mcset en jamesssavemsg         {Do you want to save this message before closing?}
+::msgcat::mcset en jamesssearcherr       {Failed searching service. Error code %s with message: %s}
+::msgcat::mcset en jamesssearchinval     {There was an invalid field. Please correct it: %s}
 ::msgcat::mcset en jamessskipsendq       {The address "%s" is not well formed. Do you want to skip it and send to the rest?}
 ::msgcat::mcset en jamessstatuscust      {Set your message for any of the presence states.}
 ::msgcat::mcset en jamessstatuscustdtl   {The most frequent states and corresponding messages are easily reachable as menu entries.}
@@ -1105,6 +1113,7 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 ::msgcat::mcset en prefaalogin           {Login automatically if logged out}
 ::msgcat::mcset en prefaaset             {Set automatic away status}
 ::msgcat::mcset en prefavashare          {Share this avatar with other users}
+
 ::msgcat::mcset en prefblbl              {Block the following JID's (* wildcards possible):}
 ::msgcat::mcset en prefblmsg             {Write the complete JID for the user you want to block. A JID must be of the form "joewest@jabber.org"}
 ::msgcat::mcset en prefblonly            {Only accept messages from people in my roster}
@@ -1136,6 +1145,7 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 ::msgcat::mcset en preffmsave            {Just save to disk in incoming directory}
 ::msgcat::mcset en preffontmsg           {Warning: by importing any other fonts than the standard three ones (Times, Helvetica or Courier), you must be confident that all remote clients also have this font installed on their system.}
 ::msgcat::mcset en preficonsel           {The selected iconset will take action when you save}
+::msgcat::mcset en prefmidimsg           {Set midi command to use for playing MIDI sounds. This option is only relevant if you have a sound set with MIDI files. Your system midi player command must have the "command fileName" syntax.}
 ::msgcat::mcset en prefminaw             {Minutes before status Away:}
 ::msgcat::mcset en prefminea             {Minutes before status Extended Away:}
 ::msgcat::mcset en prefminlogout         {Minutes before automatically logout:}
@@ -1293,6 +1303,9 @@ Further restrictions may exist depending on specific room configuration.}
 
 
 # Groupchat:
+::msgcat::mcset en mucBan           {Ban the participant "%s" from the room "%s"}
+::msgcat::mcset en mucChat2ConfInv  {Converting Chat into Conference}
+::msgcat::mcset en mucDestroy       {You are about to destroy the room "%s". Optionally you may give any present room participants an alternative room JID and a reason.}
 ::msgcat::mcset en mucErrEnter      {We got an error when entering room "%s".}
 ::msgcat::mcset en mucErrCode       {The error code is %s: %s}
 ::msgcat::mcset en mucErrEnterTitle {Error Enter Room}
@@ -1303,9 +1316,9 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en mucInvitePass    {The password "%s" is needed for entry.}
 ::msgcat::mcset en mucInviteQuest   {Do you want to join right away?}
 ::msgcat::mcset en mucInvite        {Invitation}
-::msgcat::mcset en mucDestroy       {You are about to destroy the room "%s". Optionally you may give any present room participants an alternative room JID and a reason.}
 ::msgcat::mcset en mucIQError       {We received an error when interaction with the room "%s": %s}
-::msgcat::mcset en mucChat2ConfInv  {Converting Chat into Conference}
+::msgcat::mcset en mucKick          {Kick the participant "%s" from the room "%s"}
+
 
 ::msgcat::mcset en vcardget	{Getting vCard from user %s. Waiting for server response...}
 ::msgcat::mcset en vcarderrget	{Failed getting the vCard. The result was: %s}
@@ -1595,6 +1608,10 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en budpounce-sendmsg    {Send message with subject}
 ::msgcat::mcset en mBuddyPouncing       {Buddy Pouncing}
 
+# Image magic:
+::msgcat::mcset en immagic-msg          {Click on a window in the desktop or drag a rectangular area to import into the current whiteboard.}
+::msgcat::mcset en immagic-warn         {Dangerous in-box path name "%s"}
+::msgcat::mcset en immagic-rem          {Click OK to remove files: %s}
 
 
 # END --------------------------------------------------------------------------
