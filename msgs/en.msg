@@ -644,7 +644,6 @@
 ::msgcat::mcset en {Make new text item for each line}
 ::msgcat::mcset en {Movie Options}
 ::msgcat::mcset en {Multi Connect}
-::msgcat::mcset en {My Avatar}
 ::msgcat::mcset en {My Status}
 ::msgcat::mcset en {My nickname for own display}
 ::msgcat::mcset en {NAT Address}
@@ -1112,8 +1111,6 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 # Preferences:
 ::msgcat::mcset en prefaalogin           {Login automatically if logged out}
 ::msgcat::mcset en prefaaset             {Set automatic away status}
-::msgcat::mcset en prefavashare          {Share this avatar with other users}
-
 ::msgcat::mcset en prefblbl              {Block the following JID's (* wildcards possible):}
 ::msgcat::mcset en prefblmsg             {Write the complete JID for the user you want to block. A JID must be of the form "joewest@jabber.org"}
 ::msgcat::mcset en prefblonly            {Only accept messages from people in my roster}
