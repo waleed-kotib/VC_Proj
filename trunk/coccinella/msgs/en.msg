@@ -536,7 +536,6 @@
 ::msgcat::mcset en {Block JID}
 ::msgcat::mcset en {Bookmark this room}
 ::msgcat::mcset en {Broken Image}
-::msgcat::mcset en {Buddy Pouncing}
 ::msgcat::mcset en {Built in server port}
 ::msgcat::mcset en {Business Card}
 ::msgcat::mcset en {Cache folder}
@@ -550,6 +549,7 @@
 ::msgcat::mcset en {Component Info}
 ::msgcat::mcset en {Conference server}
 ::msgcat::mcset en {Connect using HTTP}
+::msgcat::mcset en {Contact Actions}
 ::msgcat::mcset en {Contact ID}
 ::msgcat::mcset en {Contact Type}
 ::msgcat::mcset en {Create Room}
@@ -1604,7 +1604,7 @@ Further restrictions may exist depending on specific room configuration.}
 ::msgcat::mcset en budpounce-msg        {The contact "%s" just sent you a message!}
 ::msgcat::mcset en budpounce-chat       {The contact "%s" just started a chat!}
 ::msgcat::mcset en budpounce-sendmsg    {Send message with subject}
-::msgcat::mcset en mBuddyPouncing       {Buddy Pouncing}
+::msgcat::mcset en mContactActions      {Contact Actions}
 
 # Image magic:
 ::msgcat::mcset en immagic-msg          {Click on a window in the desktop or drag a rectangular area to import into the current whiteboard.}

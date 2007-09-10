@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.20 2007-09-06 15:11:58 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.21 2007-09-10 13:56:53 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -44,10 +44,10 @@ proc ::BuddyPounce::Init {} {
     
     # Register popmenu entry.
     set menuDef {
-	command mBuddyPouncing {::BuddyPounce::Build $clicked $jid $group}
+	command mContactActions {::BuddyPounce::Build $clicked $jid $group}
     }
     set menuType {
-	mBuddyPouncing {group user}
+	mContactActions {group user}
     }
     ::Roster::RegisterPopupEntry $menuDef $menuType
     
@@ -155,18 +155,18 @@ proc ::BuddyPounce::Build {typeselected item group} {
 	    set state(jid2) $jid2
 	    set state(type) jid
 	    set msg [mc budpounce-user $jid]
-	    set title "[mc {Buddy Pouncing}]: $jid"
+	    set title "[mc {Contact Actions}]: $jid"
 	}
 	group {
 	    set state(group) $group
 	    set state(type)  group
 	    set msg [mc budpounce-group $group]
-	    set title "[mc {Buddy Pouncing}]: $group"
+	    set title "[mc {Contact Actions}]: $group"
 	}
 	"" {
 	    set state(type) any
 	    set msg [mc budpounce-any]
-	    set title "[mc {Buddy Pouncing}]: [mc Any]"
+	    set title "[mc {Contact Actions}]: [mc Any]"
 	}
 	default {
 	    unset state
@@ -202,7 +202,7 @@ proc ::BuddyPounce::Build {typeselected item group} {
     pack $w.frall -fill both -expand 1
 
     ttk::label $w.frall.head -style Headlabel \
-      -text [mc {Buddy Pouncing}] -compound left
+      -text [mc {Contact Actions}] -compound left
     pack $w.frall.head -side top -fill both -expand 1
 
     ttk::separator $w.frall.s -orient horizontal
