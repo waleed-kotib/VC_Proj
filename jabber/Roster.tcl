@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.212 2007-09-10 13:13:53 matben Exp $
+# $Id: Roster.tcl,v 1.213 2007-09-10 15:05:24 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1431,11 +1431,6 @@ proc ::Roster::BuildPageRoster {page} {
     grid  $wc.showoff    -sticky w
     grid  $wc.showtrpt   -sticky w
     grid  $wc.showsubno  -sticky w
-    
-    # My avatar. OUTDATED!
-    #::Avatar::PrefsFrame $wc.ava
-    
-    #grid  $wc.ava        -sticky ew -pady 4
     
 }
 

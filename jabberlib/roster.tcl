@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.59 2007-09-09 12:41:15 matben Exp $
+# $Id: roster.tcl,v 1.60 2007-09-10 15:05:24 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -985,7 +985,7 @@ proc jlib::roster::getoldpresence {jlibname jid} {
     set jid [jlib::jidmap $jid]
     
     if {[info exists oldpresA($jid,type)]} {
-	set result {}
+	set result [list]
 	foreach key $rostGlobals(presTags) {
 	    if {[info exists oldpresA($jid,$key)]} {
 		lappend result -$key $oldpresA($jid,$key)
@@ -1020,7 +1020,7 @@ proc jlib::roster::getgroups {jlibname {jid {}}} {
 	if {[info exists rostA($jid,groups)]} {
 	    return $rostA($jid,groups)
 	} else {
-	    return {}
+	    return
 	}
     } else {
 	set rostA(groups) [lsort -unique $rostA(groups)]

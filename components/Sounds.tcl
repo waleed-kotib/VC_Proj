@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.36 2007-09-10 12:31:55 matben Exp $
+# $Id: Sounds.tcl,v 1.37 2007-09-10 15:05:24 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -57,7 +57,7 @@ namespace eval ::Sounds:: {
 # 
 #       Tries to load the sounds component.
 
-proc ::Sounds::Load { } {
+proc ::Sounds::Load {} {
     variable priv
     
     ::Debug 2 "::Sounds::Load"
@@ -81,7 +81,7 @@ proc ::Sounds::Load { } {
     InitEventHooks
 }
 
-proc ::Sounds::InitEventHooks { } {
+proc ::Sounds::InitEventHooks {} {
     
     # Add all event hooks.
     ::hooks::register quitAppHook             ::Sounds::Free 80
@@ -101,7 +101,7 @@ proc ::Sounds::InitEventHooks { } {
     ::hooks::register launchFinalHook        ::Sounds::InitHook
 }
 
-proc ::Sounds::InitHook { } {
+proc ::Sounds::InitHook {} {
     
     ::Debug 2 "::Sounds::InitHook"
     
@@ -119,7 +119,7 @@ proc ::Sounds::InitHook { } {
 # Results:
 #       none.
 
-proc ::Sounds::Init { } {
+proc ::Sounds::Init {} {
     global  this    
     variable allSounds
     variable priv
@@ -351,7 +351,7 @@ proc ::Sounds::Event {snd args} {
 #       Makes an alert sound corresponding to the jid's presence status.
 #
 # Arguments:
-#       jid  
+#       jid         bare JID
 #       presence    "available", "unavailable", or "unsubscribed"
 #       args        list of '-key value' pairs of presence attributes.
 #       
@@ -360,23 +360,40 @@ proc ::Sounds::Event {snd args} {
 
 proc ::Sounds::Presence {jid presence args} {
     
-    array set argsArr $args
-    jlib::splitjid $jid jid2 res
-	
+    array set argsA $args
+    
+    set xmldata $argsA(-xmldata)
+    set from [wrapper::getattribute $xmldata from]
+    set jid2 [jlib::barejid $from]
+    
+    set wasAvail [::Jabber::JlibCmd roster wasavailable $jid]
+    
     # Alert sounds.
     if {[::Jabber::JlibCmd service isroom $jid2]} {
 	PlayWhenIdle groupchatpres
-    } elseif {[info exists argsArr(-show)] && [string equal $argsArr(-show) "chat"]} {
-	PlayWhenIdle statchange
-    } elseif {[string equal $presence "available"]} {
-	PlayWhenIdle online
     } elseif {[string equal $presence "unavailable"]} {
 	PlayWhenIdle offline
-    }    
+    } elseif {$wasAvail} {
+	
+	# Pling only when also show changed.
+	set show ""
+	if {[info exists argsA(-show)]} {
+	    set show $argsA(-show)
+	}
+	set oldShow ""
+	array set oldPresA [::Jabber::JlibCmd roster getoldpresence $from]
+	if {[info exists oldPresA(-show)]} {
+	    set oldShow $oldPresA(-show)
+	}
+	if {$show ne $oldShow} {
+	    PlayWhenIdle statchange
+	}
+    } elseif {[string equal $presence "available"]} {
+	PlayWhenIdle online
+    }  
 }
 
-
-proc ::Sounds::Free { } {
+proc ::Sounds::Free {} {
     variable priv
     variable allSounds
     variable wqtframe
@@ -392,7 +409,7 @@ proc ::Sounds::Free { } {
 
 # Preference page --------------------------------------------------------------
 
-proc  ::Sounds::InitPrefsHook { } {
+proc  ::Sounds::InitPrefsHook {} {
     variable sprefs
     variable allSounds
     variable priv
@@ -512,7 +529,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     bind $wpage <Destroy> {+::Sounds::PrefsFree}
 }
 
-proc ::Sounds::MidiPlayer { } {
+proc ::Sounds::MidiPlayer {} {
     variable tmpPrefs
     
     set title [mc "External Midi Player"]
@@ -574,7 +591,7 @@ proc ::Sounds::PlayTmpPrefSound {name} {
     }
 }
 
-proc ::Sounds::SavePrefsHook { } {
+proc ::Sounds::SavePrefsHook {} {
     variable sprefs
     variable tmpPrefs
     variable allSounds
@@ -609,7 +626,7 @@ proc ::Sounds::SavePrefsHook { } {
     }
 }
 
-proc ::Sounds::CancelPrefsHook { } {
+proc ::Sounds::CancelPrefsHook {} {
     variable sprefs
     variable tmpPrefs
     variable allSounds
@@ -635,7 +652,7 @@ proc ::Sounds::CancelPrefsHook { } {
     }
 }
 
-proc ::Sounds::UserDefaultsHook { } {
+proc ::Sounds::UserDefaultsHook {} {
     variable sprefs
     variable tmpPrefs
     variable allSounds
@@ -650,7 +667,7 @@ proc ::Sounds::UserDefaultsHook { } {
     }
 }
 
-proc ::Sounds::GetAllSets { } {
+proc ::Sounds::GetAllSets {} {
     global  this
     
     set allsets {}
@@ -671,7 +688,7 @@ proc ::Sounds::GetAllSets { } {
     return $allsets
 }
 
-proc ::Sounds::PrefsFree { } {
+proc ::Sounds::PrefsFree {} {
     variable tmpPrefs
     
     unset -nocomplain tmpPrefs
