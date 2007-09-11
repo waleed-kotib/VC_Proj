@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.64 2007-09-06 15:11:58 matben Exp $
+# $Id: tileutils.tcl,v 1.65 2007-09-11 13:53:00 matben Exp $
 #
 
 package require treeutil
@@ -481,8 +481,7 @@ proc tileutils::TreeCtrlThemeChanged {win} {
     
     # Item options (styles):
     # NB: More specialized settings must be made by widget specific handlers.
-    #     This cannot be made using 'bind' since the widget specific bindings
-    #     are called before class bindings.
+    #     This must be made using the bindtag 'TreeCtrlPost'.
     set fill $treeStyle(-foreground)
     if {[info exists treeStyle(-itemfill)]} {
 	set fill $treeStyle(-itemfill)
