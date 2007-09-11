@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.69 2007-09-10 12:31:56 matben Exp $
+# $Id: RosterTree.tcl,v 1.70 2007-09-11 12:41:34 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1162,15 +1162,15 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     upvar ::Jabber::jstate  jstate
     upvar ::Jabber::jprefs  jprefs
     
-    ::Debug 6 "::RosterTree::CreateItemBase jid=$jid, presence=$presence"
+    #::Debug 6 "::RosterTree::CreateItemBase jid=$jid, presence=$presence"
 
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
     }
-    if {!$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
+    set istrpt [::Roster::IsTransportHeuristics $jid]
+    if {!$istrpt && !$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
 	return
     }
-    set istrpt [::Roster::IsTransportHeuristics $jid]
     if {$istrpt && !$jprefs(rost,showTrpts)} {
 	return
     }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.214 2007-09-11 07:07:44 matben Exp $
+# $Id: Roster.tcl,v 1.215 2007-09-11 12:41:34 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -161,7 +161,7 @@ proc ::Roster::InitMenus {} {
 	{mRefreshRoster {}                    }
     }
     if {[::Jabber::HaveWhiteboard]} {
-	set mWBDef  {command     mWhiteboard      {::JWB::NewWhiteboardTo $jid3}}
+	set mWBDef  {command   mWhiteboard   {::JWB::NewWhiteboardTo $jid3}}
 	set mWBType {mWhiteboard    {wb available}        }
 	
 	# Insert whiteboard menu *after* Chat.
@@ -183,7 +183,7 @@ proc ::Roster::InitMenus {} {
 	{command     mLoginTrpt           {::Roster::LoginTrpt $jid3} }
 	{command     mLogoutTrpt          {::Roster::LogoutTrpt $jid3} }
 	{separator}
-	{command     mUnregister          {::Register::Remove $jid3} }
+	{command     mUnregister          {::Roster::Unregister $jid3} }
 	{command     mRefreshRoster       {::Roster::Refresh} }
     }  
     set mTypes {
@@ -501,6 +501,11 @@ proc ::Roster::SendRemove {jidrm} {
     if {[string equal $ans "yes"]} {
 	$jstate(jlib) roster send_remove $jid
     }
+}
+
+proc ::Roster::Unregister {jid} {    
+    ::Register::Remove $jid
+    ::Jabber::JlibCmd roster send_remove [jlib::barejid $jid]
 }
     
 # Roster::RegisterPopupEntry --
