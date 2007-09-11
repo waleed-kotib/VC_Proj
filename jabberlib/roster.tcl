@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.60 2007-09-10 15:05:24 matben Exp $
+# $Id: roster.tcl,v 1.61 2007-09-11 07:07:44 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -258,7 +258,7 @@ proc jlib::roster::set_handler {jlibname from queryE args} {
     # type "result"...
     array set argsA $args
     if {[info exists argsA(-id)]} {
-	$jlibname send_iq "result" {} -to $argsA(-id)
+	$jlibname send_iq "result" {} -id $argsA(-id)
     }
     return 1
 }
