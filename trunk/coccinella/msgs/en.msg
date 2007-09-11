@@ -409,8 +409,10 @@
 ::msgcat::mcset en mLineSmoothness       {Line Smoothness}
 ::msgcat::mcset en mLocalTime            {Local Time...}
 ::msgcat::mcset en mLogin...             {Login...}
+::msgcat::mcset en mLoginTo              {Login to %s}
 ::msgcat::mcset en mLoginTrpt            {Login to Transport}
 ::msgcat::mcset en mLogout               {Logout}
+::msgcat::mcset en mLogoutFrom           {Logout from %s}
 ::msgcat::mcset en mLogoutTrpt           {Logout from Transport}
 ::msgcat::mcset en mLogoutWith...        {Logout With Message...}
 ::msgcat::mcset en mLower                {&Lower}

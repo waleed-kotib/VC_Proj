@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.213 2007-09-10 15:05:24 matben Exp $
+# $Id: Roster.tcl,v 1.214 2007-09-11 07:07:44 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -354,7 +354,7 @@ proc ::Roster::ToggleMinimalHook {minimal} {
     }
 }
 
-proc ::Roster::StyleMinimal { } {
+proc ::Roster::StyleMinimal {} {
     variable wroster
     variable wbox
     variable wwave
@@ -366,7 +366,7 @@ proc ::Roster::StyleMinimal { } {
     set rstyle "minimal"
 }
 
-proc ::Roster::StyleNormal { } {
+proc ::Roster::StyleNormal {} {
     variable wroster
     variable wbox
     variable wwave
@@ -380,19 +380,19 @@ proc ::Roster::StyleNormal { } {
     set rstyle "normal"
 }
 
-proc ::Roster::StyleGet { } {
+proc ::Roster::StyleGet {} {
     variable rstyle
 
     return $rstyle
 }
 
-proc ::Roster::GetRosterWindow { } {
+proc ::Roster::GetRosterWindow {} {
     variable wroster
     
     return $wroster
 }
 
-proc ::Roster::BackgroundImage { } {
+proc ::Roster::BackgroundImage {} {
     ::RosterTree::BackgroundImageCmd
 }
 
@@ -418,7 +418,7 @@ proc ::Roster::TimedMessage {str} {
     after $timer(msg,ms) [namespace current]::CancelTimedMessage
 }
 
-proc ::Roster::CancelTimedMessage { } {
+proc ::Roster::CancelTimedMessage {} {
 
     Message ""
 }
@@ -438,7 +438,7 @@ proc ::Roster::SetPresenceMessage {jid presence args} {
 # 
 #       The login hook command.
 
-proc ::Roster::LoginCmd { } {
+proc ::Roster::LoginCmd {} {
     upvar ::Jabber::jstate jstate
 
     $jstate(jlib) roster send_get
@@ -446,7 +446,7 @@ proc ::Roster::LoginCmd { } {
     set server [::Jabber::GetServerJid]
 }
 
-proc ::Roster::LogoutHook { } {
+proc ::Roster::LogoutHook {} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
         
@@ -462,7 +462,7 @@ proc ::Roster::LogoutHook { } {
     }
 }
 
-proc ::Roster::Refresh { } {
+proc ::Roster::Refresh {} {
     variable wwave
     upvar ::Jabber::jstate jstate
 
@@ -611,6 +611,24 @@ proc ::Roster::DoPopup {jidL clicked status group x y} {
 
 proc ::Roster::PostMenuCmd {m mType clicked jidL status} {
 
+    # Special handling of transport login/logout. Hack!
+    if {([llength $jidL] == 1) && ([lsearch $clicked trpt] >= 0)} {
+	set midx [::AMenu::GetMenuIndex $m mLoginTrpt]
+	if {$midx ne ""} {
+	    set jid [lindex $jidL 0]
+	    set types [::Jabber::JlibCmd disco types $jid]
+	    if {[regexp {gateway/([^ ]+)} $types - trpt]} {
+		if {[HaveNameForTrpt $trpt]} {
+		    set tname [GetNameFromTrpt $trpt]
+		    $m entryconfigure $midx -label [mc mLoginTo $tname]
+
+		    set midx [::AMenu::GetMenuIndex $m mLogoutTrpt]
+		    $m entryconfigure $midx -label [mc mLogoutFrom $tname]
+		}
+	    }
+	}
+    }
+    
     foreach mspec $mType {
 	lassign $mspec name type subType
 	
@@ -819,7 +837,7 @@ proc ::Roster::PresenceEvent {jlibname xmldata} {
     }
 }
 
-proc ::Roster::RepopulateTree { } {
+proc ::Roster::RepopulateTree {} {
     upvar ::Jabber::jstate jstate
     
     ::RosterTree::GetClosed
@@ -833,7 +851,7 @@ proc ::Roster::RepopulateTree { } {
     #Sort
 }
 
-proc ::Roster::ExitRoster { } {
+proc ::Roster::ExitRoster {} {
     variable wwave
     variable timer
 
@@ -1112,7 +1130,7 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     return [::Rosticons::Get $itype/$isub]
 }
 
-proc ::Roster::GetMyPresenceIcon { } {
+proc ::Roster::GetMyPresenceIcon {} {
     set status [::Jabber::GetMyStatus]
     return [::Rosticons::Get status/$status]
 }
@@ -1188,6 +1206,12 @@ namespace eval ::Roster:: {
     set allTransports [lsearch -all -inline -not $allTransports "jabber"]
 }
 
+proc ::Roster::HaveNameForTrpt {type} {
+    variable  trptToNameArr
+   
+    return [info exists trptToNameArr($type)]
+}
+
 proc ::Roster::GetNameFromTrpt {type} {
     variable  trptToNameArr
    
@@ -1212,7 +1236,7 @@ proc ::Roster::GetTrptFromName {name} {
 # 
 #       Method to get the jids of all services that are not jabber.
 
-proc ::Roster::GetAllTransportJids { } {
+proc ::Roster::GetAllTransportJids {} {
     upvar ::Jabber::jstate jstate
     
     set alltrpts [$jstate(jlib) disco getjidsforcategory "gateway/*"]
@@ -1229,7 +1253,7 @@ proc ::Roster::GetAllTransportJids { } {
 # 
 #       Utility to get a flat array of 'jid type name' for each transports.
 
-proc ::Roster::GetTransportNames { } {
+proc ::Roster::GetTransportNames {} {
     variable trptToName
     variable allTransports
     upvar ::Jabber::jstate jstate
@@ -1302,6 +1326,8 @@ proc ::Roster::IsTransportHeuristics {jid} {
     return $transport
 }
 
+#-------------------------------------------------------------------------------
+
 proc ::Roster::GetUsersWithSameHost {jid} {
     upvar ::Jabber::jstate jstate
 
@@ -1352,7 +1378,7 @@ proc ::Roster::SaveRosterToFile {fileName} {
 
 # Prefs page ...................................................................
 
-proc ::Roster::InitPrefsHook { } {
+proc ::Roster::InitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     
     # Defaults...
@@ -1434,7 +1460,7 @@ proc ::Roster::BuildPageRoster {page} {
     
 }
 
-proc ::Roster::SavePrefsHook { } {
+proc ::Roster::SavePrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
@@ -1449,7 +1475,7 @@ proc ::Roster::SavePrefsHook { } {
     unset tmpJPrefs
 }
 
-proc ::Roster::CancelPrefsHook { } {
+proc ::Roster::CancelPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	
@@ -1463,7 +1489,7 @@ proc ::Roster::CancelPrefsHook { } {
     #::Avatar::PrefsCancel
 }
 
-proc ::Roster::UserDefaultsHook { } {
+proc ::Roster::UserDefaultsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	
