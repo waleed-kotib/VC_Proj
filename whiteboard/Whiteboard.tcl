@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.81 2007-07-30 14:16:31 matben Exp $
+# $Id: Whiteboard.tcl,v 1.82 2007-09-11 08:00:21 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -187,6 +187,8 @@ namespace eval ::WB:: {
     if {![string match "mac*" $this(platform)]} {
 	set prefs(haveDash) 1
     }
+    
+    set ::config(wb,status-label) 0
 }
 
 # WB::InitPrefsHook --
@@ -702,7 +704,7 @@ proc ::WB::GetNewToplevelPath { } {
 #       new instance toplevel created.
 
 proc ::WB::BuildWhiteboard {w args} {
-    global  this prefs
+    global  this prefs config
     
     variable gstate
     variable dims
@@ -795,12 +797,14 @@ proc ::WB::BuildWhiteboard {w args} {
     pack  $wcomm  -side bottom -fill x
     
     # Status message part.
-    ttk::label $wapp(frstat) -style Small.TLabel \
-      -textvariable ::WB::${w}::state(msg) -anchor w -padding {16 2}
-    pack  $wapp(frstat)  -side top -fill x
+    if {$config(wb,status-label)} {
+	ttk::label $wapp(frstat) -style Small.TLabel \
+	  -textvariable ::WB::${w}::state(msg) -anchor w -padding {16 2}
+	pack  $wapp(frstat)  -side top -fill x
 
-    ttk::separator $wcomm.s -orient horizontal
-    pack  $wcomm.s  -side top -fill x
+	ttk::separator $wcomm.s -orient horizontal
+	pack  $wcomm.s  -side top -fill x
+    }
     
     # Build the header for the actual network setup. This is where we
     # may have mode specific parts, p2p, jabber...
@@ -1146,7 +1150,11 @@ proc ::WB::SaveWhiteboardDims {w} {
         	    
     # Update actual size values. 'Root' no menu, 'Tot' with menu.
     #set dims(wStatMess) [winfo width $wapp(statmess)]
-    set dims(wStatMess) [winfo width $wapp(frstat)]
+    if {[winfo exists $wapp(frstat)]} {
+	set dims(wStatMess) [winfo width $wapp(frstat)]
+    } else {
+	set dims(wStatMess) 0
+    }
     set dims(wRoot) [winfo width $w]
     set dims(hRoot) [winfo height $w]
     set dims(x) [winfo x $w]
@@ -2649,7 +2657,11 @@ proc ::WB::GetBasicWhiteboardMinsize {w} {
     }
     set hTool     [winfo reqheight $wapp(tool)]
     set hBugImage [image height $wapp(bugImage)]
-    set hStatus   [winfo reqheight $wapp(frstat)]
+    if {[winfo exists $wapp(frstat)]} {
+	set hStatus   [winfo reqheight $wapp(frstat)]
+    } else {
+	set hStatus 0
+    }
     
     # The min width.
     set wButtons  [$wapp(tbar) minwidth]
