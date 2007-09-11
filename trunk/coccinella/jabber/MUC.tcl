@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.90 2007-09-10 12:31:56 matben Exp $
+# $Id: MUC.tcl,v 1.91 2007-09-11 12:41:34 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -1551,7 +1551,7 @@ proc ::MUC::Destroy {roomjid} {
     
     set msg [mc mucDestroy $roomName]
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text $msg
+      -padding {0 0 0 6} -wraplength 360 -justify left -text $msg
     pack $wbox.msg -side top -anchor w
     
     set wmid $wbox.fr

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.39 2007-08-29 06:30:11 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.40 2007-09-11 12:41:34 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -819,10 +819,10 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
     }
-    if {!$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
+    set istrpt [::Roster::IsTransportHeuristics $jid]
+    if {!$istrpt && !$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
 	return
     }
-    set istrpt [::Roster::IsTransportHeuristics $jid]
     if {$istrpt && !$jprefs(rost,showTrpts)} {
 	return
     }

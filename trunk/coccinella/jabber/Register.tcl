@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.84 2007-09-08 06:55:26 matben Exp $
+# $Id: Register.tcl,v 1.85 2007-09-11 12:41:34 matben Exp $
 
 package provide Register 1.0
 
@@ -62,17 +62,23 @@ proc ::Register::Remove {{jid {}}} {
     
     set ans "yes"
     set login 0
+    set remove 0
+    set server [$jstate(jlib) getserver]
+    
     if {$jid eq ""} {
-	set jid $jstate(server)
+	set jid $server
 	set login 1
     } else {
-	if {[jlib::jidequal [$jstate(jlib) getserver] $jid]} {
+	if {[jlib::jidequal $server $jid]} {
 	    set login 1
 	}
     }
     if {$login} {
 	set ans [::UI::MessageBox -icon warning -title [mc {Remove Account}] \
 	  -type yesno -default no -message [mc jamessremoveaccount2]]
+	if {$ans eq "yes"} {
+	    set remove 1
+	}
     } else {
 	set jidlist [::Roster::GetUsersWithSameHost $jid]
 	if {[llength $jidlist]} {
@@ -83,17 +89,17 @@ proc ::Register::Remove {{jid {}}} {
 	    } elseif {$ans eq "yes"} {
 		::Roster::RemoveUsers $jidlist
 	    }
+	    set remove 1
 	}
     }
     
-    if {$ans eq "yes"} {
+    if {$remove} {
 	
 	# Do we need to obtain a key for this???
-	$jstate(jlib) register_remove $jid  \
-	  [list ::Register::RemoveCallback $jid]
+	$jstate(jlib) register_remove $jid [list ::Register::RemoveCallback $jid]
 	
 	# Remove also from our profile if our login account.
-	if {[jlib::jidequal $jid $jstate(server)]} {
+	if {$login} {
 	    set profile [::Profiles::FindProfileNameFromJID $jstate(mejid)]
 	    if {$profile ne ""} {
 		::Profiles::Remove $profile
