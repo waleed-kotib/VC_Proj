@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.39 2007-09-06 13:20:47 matben Exp $
+# $Id: RosterPlain.tcl,v 1.40 2007-09-11 13:53:00 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -252,8 +252,9 @@ proc ::RosterPlain::ConfigureStyles {} {
     set fill $style(-foreground)
     if {[info exists style(-itemfill)]} {
 	set fill $style(-itemfill)
-    }    
-    treeutil::configureelementtype $T text -fill [linsert $fillT 0 $fill {}]
+    }  
+    set stateFill [concat $fillT [list $fill {}]]
+    treeutil::configureelementtype $T text -fill $stateFill
 
     $T element configure eNumText -fill $style(-itemaccentfill)
 }
