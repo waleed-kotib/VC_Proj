@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Phone.tcl,v 1.23 2007-07-18 09:40:10 matben Exp $
+# $Id: Phone.tcl,v 1.24 2007-09-12 13:37:55 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -67,7 +67,7 @@ proc ::Phone::Init { } {
 	return
     }
 
-    component::register Phone "Provides protocol abstraction for softphones."
+    component::register Phone "Protocol abstraction for softphones"
     
     # This seems necessary since the 'package require' only searches two
     # directory levels?

@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.33 2007-09-02 13:39:38 matben Exp $
+#  $Id: Mood.tcl,v 1.34 2007-09-12 13:37:55 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -26,7 +26,7 @@ namespace eval ::Mood:: { }
 
 proc ::Mood::Init { } {
 
-    component::register Mood "This is User Mood (XEP-0107)."
+    component::register Mood "Communicate information about user moods"
 
     ::Debug 2 "::Mood::Init"
 
@@ -104,7 +104,7 @@ proc ::Mood::Init { } {
 	lappend subMenu [list radio $mood2mLabel($mood) ::Mood::MenuCmd {} $opts]
     }
     lappend subMenu {separator}
-    lappend subMenu [list command mCustomMood ::Mood::CustomMoodDlg {} {}]
+    lappend subMenu [list command mCustomMood... ::Mood::CustomMoodDlg {} {}]
     lset menuDef 5 $subMenu
     
     variable menuMoodVar
@@ -278,7 +278,7 @@ proc ::Mood::CustomMoodDlg {} {
     set w [ui::dialog -message [mc moodPickMsg] -detail [mc moodPickDtl] \
       -icon info \
       -type okcancel -modal 1 -geovariable ::prefs(winGeom,customMood) \
-      -title [mc selectCustomMood] -command [namespace code CustomCmd]]
+      -title [mc {Custom Mood}] -command [namespace code CustomCmd]]
     set fr [$w clientframe]
 
     set mDef [list]
@@ -291,7 +291,7 @@ proc ::Mood::CustomMoodDlg {} {
     ui::optionmenu $fr.cmood -menulist $mDef -direction flush \
       -variable [namespace current]::moodStateDlg
 
-    ttk::label $fr.ltext -text "[mc {moodMessage}]:"
+    ttk::label $fr.ltext -text "[mc Message]:"
     ttk::entry $fr.etext -textvariable [namespace current]::moodMessageDlg
 
     grid  $fr.lmood    $fr.cmood  -sticky e -pady 2

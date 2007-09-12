@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: URIRegisterKDE.tcl,v 1.3 2007-07-18 09:40:10 matben Exp $
+# $Id: URIRegisterKDE.tcl,v 1.4 2007-09-12 13:37:55 matben Exp $
 
 namespace eval URIRegisterKDE { }
 
@@ -36,8 +36,7 @@ proc URIRegisterKDE::Init { } {
     }
     Register
     
-    component::register URIRegisterKDE  \
-      {Uses KDE's service file for XMPP to handle uri parsing.}
+    component::register URIRegisterKDE "Adds XMPP uri parsing support in KDE"
 }
 
 # ParseURI::RegisterKDE --

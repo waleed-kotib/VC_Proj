@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ParseStyledText.tcl,v 1.3 2007-07-18 09:40:09 matben Exp $
+# $Id: ParseStyledText.tcl,v 1.4 2007-09-12 13:37:55 matben Exp $
 
 namespace eval ::ParseStyledText:: {
     
@@ -26,9 +26,8 @@ namespace eval ::ParseStyledText:: {
 
 proc ::ParseStyledText::Init { } {
     
-    component::register ParseStyledText  \
-      "Provides simplified text font style parsing in messages:\
-      *bold*, /italic/, and _underline_."
+    component::register ParseStyledText \
+      "Simplified text font style parsing: *bold*, /italic/, and _underline_."
 
     # Add event hooks.
     ::hooks::register textParseWordHook [namespace current]::ParseWordHook

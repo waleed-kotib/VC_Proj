@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.159 2007-09-10 12:31:55 matben Exp $	
+# $Id: Coccinella.tcl,v 1.160 2007-09-12 13:37:55 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -160,12 +160,12 @@ if {[tk windowingsystem] eq "windows"} {
 # Splash! Need a full update here, at least on Windows.
 package require Splash
 ::Splash::SplashScreen
-::Splash::SetMsg [mc splashsource]
+::Splash::SetMsg "[mc splashsource]..."
 set state(launchStatus) splash
 update
 
 # Make sure we have the extra packages necessary and some optional.
-::Splash::SetMsg [mc splashhost]
+::Splash::SetMsg "[mc splashhost]..."
 ::Init::SetHostname
 ::Init::LoadPackages
 
@@ -182,7 +182,7 @@ if {[lsearch -exact [tile::availableThemes] $prefs(tileTheme)] >= 0} {
 
 # The packages are divided into categories depending on their degree
 # of generality.
-::Splash::SetMsg [mc splashload]
+::Splash::SetMsg "[mc splashload]..."
 set state(launchStatus) packages
 
 set packages(generic) {
@@ -239,7 +239,7 @@ switch -- $this(platform) {
 ::UI::InitDlgs
 
 # The Jabber stuff. 
-::Splash::SetMsg [mc splashsourcejabb]
+::Splash::SetMsg "[mc splashsourcejabb]..."
 set state(launchStatus) jabber
 package require Jabber
 
@@ -249,7 +249,7 @@ package require Jabber
 # Standard (factory) preferences are set here.
 # These are the hardcoded, application default, values, and can be
 # overridden by the ones in user default file.
-::Splash::SetMsg [mc splashinit]
+::Splash::SetMsg "[mc splashinit]..."
 FactoryDefaults
 ::Jabber::FactoryDefaults
 ::Jabber::LoadWhiteboard
@@ -264,7 +264,7 @@ component::lappend_auto_path $this(componentPath)
 component::load
 
 # Set the user preferences from the preferences file.
-::Splash::SetMsg [mc splashprefs]
+::Splash::SetMsg "[mc splashprefs]..."
 set state(launchStatus) preferences
 ::Preferences::SetMiscPrefs
 

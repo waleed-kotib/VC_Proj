@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Speech.tcl,v 1.12 2007-09-08 14:39:56 matben Exp $
+# $Id: Speech.tcl,v 1.13 2007-09-12 13:37:55 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -58,11 +58,8 @@ proc ::Speech::Load { } {
     ::Speech::Init
     
     # We should register ourselves.
-    component::register Speech "Provides synthetic speech on Macs using\
-      TclSpeech and on Windows using MSSpeech.\
-      When enabled, a synthetic voice speaks out\
-      text that is written in the canvas as well as text received\
-      from remote clients. It is triggered by a punctation character (,.;)."
+    component::register Speech \
+      "Text-to-speech on Macs using TclSpeech and on Windows using MSSpeech"
 }
 
 proc ::Speech::Init { } {
@@ -251,7 +248,7 @@ proc ::Speech::BuildPrefsHook {wtree nbframe} {
     variable sprefs
     
     if {$sprefs(haveSpeech)} {
-	::Preferences::NewTableItem {General {Speech}} [mc {Speech}]
+	::Preferences::NewTableItem {General {Speech}} [mc "Text-to-Speech"]
 
 	set wpage [$nbframe page {Speech}]    
 	::Speech::BuildPrefsPage $wpage
@@ -324,11 +321,11 @@ proc ::Speech::BuildPrefsPage {page} {
     ttk::frame $wfr
     pack  $wfr  -side top
     
-    ttk::checkbutton $wfr.speak     -text [mc prefsounsynwb]  \
+    ttk::checkbutton $wfr.speak     -text [mc prefsounsynwb2]  \
       -variable [namespace current]::tmpPrefs(speakWBText)
-    ttk::checkbutton $wfr.speakmsg  -text [mc prefsounsynno]  \
+    ttk::checkbutton $wfr.speakmsg  -text [mc prefsounsynno2]  \
       -variable [namespace current]::tmpPrefs(speakMsg)
-    ttk::checkbutton $wfr.speakchat -text [mc prefsounsynch]  \
+    ttk::checkbutton $wfr.speakchat -text [mc prefsounsynch2]  \
       -variable [namespace current]::tmpPrefs(speakChat)
 
     grid $wfr.speak      -sticky w
@@ -351,8 +348,8 @@ proc ::Speech::BuildPrefsPage {page} {
     ttk::frame $wfvo
     grid  $wfvo  -pady 4
     
-    ttk::label $wfvo.in  -text [mc prefsounvoin]
-    ttk::label $wfvo.out -text [mc prefsounvoou]    
+    ttk::label $wfvo.in  -text "[mc prefsounvoin2]:"
+    ttk::label $wfvo.out -text "[mc prefsounvoou2]:" 
     eval {ttk::optionmenu $wfvo.pin \
       [namespace current]::tmpPrefs(voiceOther)} $voicelist
     eval {ttk::optionmenu $wfvo.pout   \

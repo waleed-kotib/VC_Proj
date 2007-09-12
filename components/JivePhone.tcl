@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.28 2007-08-24 13:33:13 matben Exp $
+# $Id: JivePhone.tcl,v 1.29 2007-09-12 13:37:55 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -38,7 +38,7 @@ namespace eval ::JivePhone:: { }
 proc ::JivePhone::Init { } {
     
     component::register JivePhone  \
-      "Provides support for the VoIP notification in the jive server"
+      "VoIP notifications from the Openfire plugin Asterisk-IM"
         
     # Add event hooks.
     ::hooks::register presenceHook          ::JivePhone::PresenceHook
@@ -607,8 +607,8 @@ proc ::JivePhone::DialExtension {extension type {callID ""}} {
 proc ::JivePhone::DialCB {dnid type subiq args} {
     
     if {$type eq "error"} {
-	ui::dialog -icon error -type ok -message [mc phoneFailedCalling $dnid] \
-	  -detail $subiq
+	ui::dialog -title [mc Error] -icon error -type ok \
+	  -message [mc phoneFailedCalling $dnid] -detail $subiq
     }
 }
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Growl.tcl,v 1.22 2007-07-18 14:09:03 matben Exp $
+# $Id: Growl.tcl,v 1.23 2007-09-12 13:37:55 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -149,10 +149,10 @@ proc ::Growl::FileTransferRecvHook {jid name size} {
     variable cociFile
     
     if {![::UI::IsAppInFront]} {
-	set title [mc {Get File}]
-	set str "[mc Size]: [::Utils::FormatBytes $size]"
+	set title [mc "Receive File"]
+	set str "\n[mc File]: $name\n[mc Size]: [::Utils::FormatBytes $size]\n\n"
 	set ujid [jlib::unescapejid $jid]
-	set msg [mc jamessoobask $ujid $name $str]
+	set msg [mc jamessoobask2 $ujid $str]
 	growl post fileTransfer $title $msg $cociFile
     }
 }

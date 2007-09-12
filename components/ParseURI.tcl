@@ -70,7 +70,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ParseURI.tcl,v 1.39 2007-07-18 09:40:10 matben Exp $
+# $Id: ParseURI.tcl,v 1.40 2007-09-12 13:37:55 matben Exp $
 
 package require uriencode
 
@@ -90,8 +90,7 @@ proc ::ParseURI::Init { } {
     ::Text::RegisterURI {^xmpp:.+} ::ParseURI::TextCmd
     ::Text::RegisterURI {^im:.+}   ::ParseURI::TextCmd
     
-    component::register ParseURI  \
-      {Any command line -uri xmpp:jid[?query] is parsed and processed.}
+    component::register ParseURI "Command line XMPP uri parsing and processing"
 }
 
 proc ::ParseURI::TextCmd {uri} {

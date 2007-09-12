@@ -18,20 +18,20 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.37 2007-09-10 15:05:24 matben Exp $
+# $Id: Sounds.tcl,v 1.38 2007-09-12 13:37:55 matben Exp $
 
 namespace eval ::Sounds:: {
 	
     variable nameToText 
     array set nameToText {
-	online          "User is online"
-	offline         "User is offline"
-	newmsg          "New incoming message"
-	newchatmsg      "New chat message"
+	online          "Contact is online"
+	offline         "Contact is offline"
+	newmsg          "Incoming message"
+	newchatmsg      "Incoming chat"
 	newchatthread   "New chat thread"
-	statchange      "User's status changed"
-	connected       "Is connected"
-	groupchatpres   "Groupchat presence change"
+	statchange      "Contact presence change"
+	connected       "Logged in"
+	groupchatpres   "Chatroom presence change"
     }
 
     # Map between sound name and file name for default sound set.
@@ -487,14 +487,14 @@ proc ::Sounds::BuildPrefsPage {wpage} {
    
     set fss $wc.fss
     ttk::frame $fss
-    ttk::label $fss.l -text "[mc {Sound Set}]:"
+    ttk::label $fss.l -text "[mc {Sound set}]:"
     eval {ttk::optionmenu $fss.p [namespace current]::tmpPrefs(soundSet)} \
       $soundSets
 
     grid  $fss.l  $fss.p  -sticky w -padx 2
     grid  $fss.p  -sticky ew
     
-    ttk::label $wc.lbl -text [mc prefsounpick]
+    ttk::label $wc.lbl -text "[mc prefsounpick2]:"
 
     set wmid $wc.m
     ttk::frame $wmid
@@ -533,9 +533,8 @@ proc ::Sounds::MidiPlayer {} {
     variable tmpPrefs
     
     set title [mc "External Midi Player"]
-    set label [mc "MIDI command"]:    
-    set ans [ui::megaentry -title [mc prefmidimsg] -message $msg -label $label \
-      -value $tmpPrefs(midiCmd)]
+    set ans [ui::megaentry -title $title -message [mc prefmidimsg] \
+      -label [mc "MIDI command"]: -value $tmpPrefs(midiCmd)]
     if {$ans ne ""} {
 	set tmpPrefs(midiCmd) [ui::megaentrytext $ans]
     }

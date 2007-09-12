@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: streamerror.tcl,v 1.6 2007-07-19 06:28:18 matben Exp $
+# $Id: streamerror.tcl,v 1.7 2007-09-12 13:37:55 matben Exp $
 # 
 
 # The syntax for stream errors is as follows:
@@ -26,7 +26,7 @@ namespace eval streamerror {
     
     # This maps Defined Conditions to clear text messages.
     # draft-ietf-xmpp-core23; 4.7.3 Defined Conditions
-    # @@@ Add to message catalogs.
+    # Applications use the error tag directly for the key into a message catalog.
     
     variable msg
     array set msg {
