@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: stanzaerror.tcl,v 1.8 2007-07-19 06:28:18 matben Exp $
+# $Id: stanzaerror.tcl,v 1.9 2007-09-12 07:20:46 matben Exp $
 # 
 
 package provide stanzaerror 1.0
@@ -15,8 +15,9 @@ package provide stanzaerror 1.0
 namespace eval stanzaerror {
     
     # This maps Defined Conditions to clear text messages.
-    # draft-ietf-xmpp-core23; 9.3.3 Defined Conditions
-    # @@@ Add to message catalogs.
+    # Extensible Messaging and Presence Protocol (XMPP): Core (RFC 3920)
+    # 9.3.3 Defined Conditions
+    # Applications use the error tag directly for the key into a message catalog.
     
     variable msg
     array set msg {

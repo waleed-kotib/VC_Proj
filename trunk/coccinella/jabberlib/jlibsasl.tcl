@@ -14,7 +14,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: jlibsasl.tcl,v 1.28 2007-08-14 12:21:24 matben Exp $
+# $Id: jlibsasl.tcl,v 1.29 2007-09-12 07:20:46 matben Exp $
 
 package require jlib
 package require saslmd5
@@ -356,12 +356,12 @@ proc jlib::sasl_failure {jlibname tag xmllist} {
     Debug 4 "jlib::sasl_failure"
     
     if {[wrapper::getattribute $xmllist xmlns] eq $xmppxmlns(sasl)} {
-	set errelem [lindex [wrapper::getchildren $xmllist] 0]
-	if {$errelem eq ""} {
-	    set errmsg "not-authorized"
-	} else {
-	    set errtag [wrapper::gettag $errelem]
+	set errE [lindex [wrapper::getchildren $xmllist] 0]
+	if {[llength $errE]} {
+	    set errtag [wrapper::gettag $errE]
 	    set errmsg [sasl_getmsg $errtag]
+	} else {
+	    set errmsg "not-authorized"
 	}
 	sasl_final $jlibname error [list $errtag $errmsg]
     }

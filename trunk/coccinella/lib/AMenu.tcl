@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AMenu.tcl,v 1.7 2007-07-19 06:28:18 matben Exp $
+# $Id: AMenu.tcl,v 1.8 2007-09-12 07:20:46 matben Exp $
 
 package provide AMenu 1.0
 
@@ -123,7 +123,7 @@ proc ::AMenu::GetMenuIndex {m name} {
 proc ::AMenu::GetMenuIndexArray {m} {
     variable menuIndex
     
-    set alist {}
+    set alist [list]
     foreach {key value} [array get menuIndex $m,*] {
 	set name [string map [list $m, ""] $key]
 	lappend alist $name $value
