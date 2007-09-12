@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.126 2007-09-04 12:35:25 matben Exp $
+# $Id: Login.tcl,v 1.127 2007-09-12 07:20:46 matben Exp $
 
 package provide Login 1.0
 
@@ -772,8 +772,15 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	    if {$state(state) eq "authenticate"} {
 		
 		# Added 'bad-auth' which seems to be a ejabberd anachronism.
-		set errcode [string map {bad-auth not-authorized} $errcode]		
-		set str [mc xmpp-stanzas-short-$errcode]
+		set errcode [string map {bad-auth not-authorized} $errcode]
+		set key xmpp-stanzas-short-$errcode
+		set str [mc $key]
+		if {$str eq $key} {
+		    set str [mc xmpp-stanzas-$errcode]
+		}
+		if {$errmsg ne ""} {
+		    append str " " $errmsg
+		}
 	    } else {
 		set str $errmsg
 	    }

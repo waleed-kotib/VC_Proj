@@ -1017,7 +1017,7 @@
 
 
 # This maps Defined Error Conditions to clear text messages.
-# RFC 3929 (XMPP Core): 6.4 SASL Errors
+# RFC 3920 (XMPP Core): 6.4 SASL Errors
 # 
 # These are much too formal to be used for user display and we therfore instead use the short forms below.
 
@@ -1037,6 +1037,34 @@
 ::msgcat::mcset en xmpp-stanzas-short-mechanism-too-weak  {Protocol error during the login process.}
 ::msgcat::mcset en xmpp-stanzas-short-not-authorized      {Login failed because of unknown user or wrong password.}
 ::msgcat::mcset en xmpp-stanzas-short-temporary-auth-failure {Protocol error during the login process.}
+
+# This maps Defined Conditions to clear text messages. 
+# They are slightly simplified.
+# Extensible Messaging and Presence Protocol (XMPP): Core (RFC 3920)
+# 9.3.3 Defined Conditions
+::msgcat::mcset en xmpp-stanzas-bad-request	      {The sender has sent XML that is malformed or that cannot be processed.}
+::msgcat::mcset en xmpp-stanzas-conflict	      {Access cannot be granted because an existing resource or session exists with the same name or address.}
+::msgcat::mcset en xmpp-stanzas-feature-not-implemented	 {The feature requested is not implemented by the recipient or server and therefore cannot be processed.}
+::msgcat::mcset en xmpp-stanzas-forbidden             {The requesting entity does not possess the required permissions to perform the action.}
+::msgcat::mcset en xmpp-stanzas-gone                  {The recipient or server can no longer be contacted at this address.}
+::msgcat::mcset en xmpp-stanzas-internal-server-error {The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error.}
+::msgcat::mcset en xmpp-stanzas-item-not-found        {The addressed JID or item requested cannot be found.}
+::msgcat::mcset en xmpp-stanzas-jid-malformed         {The sending entity has provided or communicated an XMPP address or aspect thereof that does not adhere to the syntax defined in Addressing Scheme.}
+::msgcat::mcset en xmpp-stanzas-not-acceptable        {The recipient or server understands the request but is refusing to process it because it does not meet criteria defined by the recipient or server.}
+::msgcat::mcset en xmpp-stanzas-not-allowed           {The recipient or server does not allow any entity to perform the action.}
+::msgcat::mcset en xmpp-stanzas-not-authorized        {The sender must provide proper credentials before being allowed to perform the action, or has provided improper credentials.}
+::msgcat::mcset en xmpp-stanzas-payment-required      {The requesting entity is not authorized to access the requested service because payment is required.}
+::msgcat::mcset en xmpp-stanzas-recipient-unavailable {The intended recipient is temporarily unavailable.}
+::msgcat::mcset en xmpp-stanzas-redirect              {The recipient or server is redirecting requests for this information to another entity, usually temporarily.}
+::msgcat::mcset en xmpp-stanzas-registration-required {The requesting entity is not authorized to access the requested service because registration is required.}
+::msgcat::mcset en xmpp-stanzas-remote-server-not-found {A remote server or service specified as part or all of the JID of the intended recipient does not exist.}
+::msgcat::mcset en xmpp-stanzas-remote-server-timeout {A remote server or service specified as part or all of the JID of the intended recipient (or required to fulfill a request) could not be contacted within a reasonable amount of time.}
+::msgcat::mcset en xmpp-stanzas-resource-constraint   {The server or recipient lacks the system resources necessary to service the request.}
+::msgcat::mcset en xmpp-stanzas-service-unavailable   {The server or recipient does not currently provide the requested service.}
+::msgcat::mcset en xmpp-stanzas-subscription-required {The requesting entity is not authorized to access the requested service because a subscription is required.}
+::msgcat::mcset en xmpp-stanzas-undefined-condition   {The error condition is not one of those defined by the other conditions in this list.}
+::msgcat::mcset en xmpp-stanzas-unexpected-request    {The recipient or server understood the request but was not expecting it at this time (e.g., the request was out of order).}
+
 
 
 # Related error conditions detected by the client.

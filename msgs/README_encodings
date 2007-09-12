@@ -1,55 +1,58 @@
 
-README for language encodings
------------------------------
+README for language catalogs
+----------------------------
 
-If you write your language specific message catalog saving it
-using the system encodings, which is likely unless you have an
-editor producing utf-8 text, you need to translate it using
-the utf-8 encoding. If you don't you'll se a number of '?'
-for your national characters.
+Howto make a new language catalog or to update an existing.
 
-This directory also contains an 'extract.tcl' script written by
-Vincent Ricard which extracts all translatable text strings from the sources
-and compares them with an existing catalog. I'm not completely sure
-how this works, seems to be missing dynamic strings like [mc $name] etc.
+Instructions (for unix systems):
 
-Instructions:
+1.  Check out the 'tools' module of coccinella as:
+      cvs -d:pserver:anonymous@coccinella.cvs.sourceforge.net:/cvsroot/coccinella login
+      cvs -z3 -d:pserver:anonymous@coccinella.cvs.sourceforge.net:/cvsroot/coccinella co -P tools
 
-1.   Copy the en.msg file to a file name describing your language code
-and platform. Say, "fr.win" for French on Windows. As an alternative
-you can take the Swedish message catalog, "sv.msg", as a template.
+2.  In tools/i18n/ you will find several tools that assist in making 
+    and analyzing message catalogs. Make sure the scripts are executable
+    before you use them.
 
-2.   Open it in your text editor. This file should be readable.
-Now you edit it in your system encoding. Change all occurences of
-"::msgcat::mcset en" to "::msgcat::mcset fr" if on a French system,
-for instance. The syntax for each entry in a message catalog is:
-::msgcat::mcset langCode key ?translatedString?
-Add the 'translatedString' if missing, and do translate if exists.
-Save your file as 'fr.sys', for instance.
+3.  Make sure you are in the coccinella source tree by 'cd coccinella/'.
+    Find the tools/i18n/template.tcl script and move it to coccinella/ or
+    use its full path when executing it.
 
-3.  Utf-8 encode the file using the script below. Now you pick a file
-name 'fr.msg' if French, for instance. Alternatively, use the 'iconv'
-command on unix/linux, or use an editor that handles utf-8.
-The 'iconv' utility on unix/linux is an alternative.
+    If you already have an existing language catalog, named xx.msg, you
+    update it using:
 
-4.  You new language catalog should now be loaded automatically.
+    ./template.tcl msgs/en.msg xx -targetfile msgs/xx.msg -sourcedir . -printreferencestrings 1
 
-5.  As a check that all entries in your message catalog exists you
-may use the small script at the end of this file.
+    You can play around with the switches and see what they do. Read the 
+    sources of template.tcl for the definite guide. If you don't already
+    have a catalog, then do:
+        
+    ./template.tcl msgs/en.msg xx -sourcedir . -printreferencestrings 1
 
-6.  Some components and packages have their own catalogs inside
-coccinella/msgs/components, see the README-msgs-components file inside
-this directory. The process is essentially repeated for each directory.
+    Both scripts produce a templete catalog 'template-xx.msg' in your
+    current directory. Move it to the msg/ directory for testing. 
+    Make sure you don't overwrite any existing catalog you want to save:
+
+    mv template-xx.msg msgs/
+
+4.  Now you need an editor that has the capabilities to handle utf-8
+    encoding because that is what is used throughout. There are some scripts
+    below that can transform a text file back and forth, but safest is to
+    use an editor. Alternatively, use the 'iconv' command on unix/linux.
+
+5.  Now it is up to you to load up with coffein to suit your mood, and start
+    authoring. The syntax for each entry in a message catalog is:
+        ::msgcat::mcset langCode key ?translatedString?
+    Add the 'translatedString' if missing, and do translate if exists.
+    Be sure that the 'translatedString' is enclosed in "{" and "}".
+
+6.  Your new language catalog should now be loaded automatically.
+
+7.  Some components and packages have their own catalogs inside
+    coccinella/msgs/components, see the README-msgs-components file inside
+    this directory. The process is essentially repeated for each directory.
 
 Now try it...
-
-There is a cvs module 'tools' in the coccinella cvs repository which
-contains some scripts to assist when doing i18n work. Get it from:
-
-cvs -d:pserver:anonymous@coccinella.cvs.sourceforge.net:/cvsroot/coccinella login
-cvs -z3 -d:pserver:anonymous@coccinella.cvs.sourceforge.net:/cvsroot/coccinella co -P tools
-
-and look into its tools/i18n/ directory.
 
 
 ........................................................................
@@ -95,147 +98,4 @@ if {$::tcl_platform(platform) == "macintosh"} {
 }
 
 ........................................................................
-
-# If you want to compare an existing message catalog with the original
-# en.msg to see if any parts missing use the script below.
-
-
-namespace eval ::msgcat:: {}
-if {[llength [info commands ::msgcat::mcset]]} {
-    rename ::msgcat::mcset ::msgcat::mcset_tmp
-}
-array unset table
-array unset uidc
-
-proc ::msgcat::mcset {lang key {str ""}} {
-    global table uidc
-
-    set uid [incr uidc($lang)]
-    set table(uid,$lang,$key) $uid
-    set table(iuid,$lang,$uid) $key
-    set table(str,$lang,$key) $str
-    set table(ns,$lang,$key) [uplevel 1 {namespace current}]
-    #if {$lang == "en"} {puts "uid=$uid, key=$key"}
-}
-proc evalcatalog {f} {
-    set fd [open $f "r"]
-    fconfigure $fd -encoding utf-8
-    uplevel 1 [read $fd]
-    close $fd
-}
-
-if {1} {
-    set dir [tk_chooseDirectory -title {Pick Catalog Directory}]
-    if {$dir == ""} return
-} else {
-    set dir [file dirname [info script]]
-}
-cd $dir
-if {![file exists en.msg]} {
-    tk_messageBox -message "Directory $dir does not contain en.msg"
-    return
-}
-set uidc(en) 0
-evalcatalog en.msg
-
-set files [glob *.msg]
-set files {en.msg da.msg de.msg fr.msg it.msg pl.msg}
-foreach f $files {
-    if {$f == "en.msg"} continue
-    if {[string match *_new.msg $f]} continue
-    set lang [file rootname [file tail $f]]
-    set uidc($lang) 0
-    puts "Processing $lang file $f"
-    evalcatalog $f
-    set missinguids {}
-    foreach name [lsort [array names table ns,en,*]] {
-	regexp {ns,en,(.*)} $name match key
-	if {![info exists table(ns,$lang,$key)]} {
-	    lappend missinguids $table(uid,en,$key)
-	    puts "\t missing: $key"
-	} elseif {$table(ns,en,$key) != $table(ns,$lang,$key)} {
-	    puts "\t wrong namespace: $key, \t $table(ns,$lang,$key) -> $table(ns,en,$key)"
-	}
-    }
-
-    # Print template missing entries.
-    foreach uid [lsort -integer $missinguids] {
-        set key  $table(iuid,en,$uid)
-	set str  $table(str,en,$key)
-        #puts "# [list ::msgcat::mcset $lang $key $str]"
-	if {$str eq ""} {
-	    puts "[list ::msgcat::mcset $lang $key]"
-	} else {
-	    puts "[list ::msgcat::mcset $lang $key $str]"
-	}
-    }
-
-    # If you want to create "patched" catalogs.
-    # Wrong encoding. NOT YET WORKING!!!
-    if {0} {
-	unset -nocomplain key2idx
-
-	# Read old first line by line.
-	set fd [open $f "r"]
-	fconfigure $fd -encoding utf-8
-	set lines [split [read $fd] \n]
-	close $fd
-
-	# Join multiple lines.
-	set tmp {}
-	set multi 0
-	foreach line $lines {
-	    if {$multi} {
-		set pline [string trimright [lindex $tmp end] \\]
-		lset tmp end "$pline [string trimleft $line]"
-	    } else {
-		lappend tmp $line
-	    }
-	    if {[regexp {.*\\$} $line]} {
-		set multi 1
-	    } else {
-		set multi 0
-	    }
-	}
-	set lines $tmp
-	
-	# Map key to line index.
-	set idx 0
-	foreach line $lines {
-	    if {[regexp {[ \t]*::msgcat::mcset} $line]} {
-		foreach {cmd l k} $line break
-		set key2idx($k) $idx
-	    }
-	    incr idx
-	}
-	set missinguids [lsort -integer -decreasing $missinguids]
-	
-	foreach uid $missinguids {
-	    set key  $table(iuid,en,$uid)
-	    set akey $table(iuid,en,[expr $uid+1])
-	    set pat [string map [list @lang $lang @key $akey] \
-	      {[ \t]*::msgcat::mcset +@lang +@key[\n\t ]}]
-	    set idx [lsearch -regexp $lines $pat]
-	    puts "idx=$idx, key=$key, akey=$akey"
-	    
-	    set str $table(str,en,$key)
-	    set line "#::msgcat::mcset [list $lang $key $str]"
-	    set lines [linsert $lines $idx $line]
-	}
-	
-	# New catalog.
-	set new [file join $dir ${lang}_new.msg]
-	set fd [open $new w]
-	fconfigure $fd -encoding utf-8
-	foreach line $lines {
-	    puts $fd $line
-	}
-	close $fd
-	puts "missinguids=$missinguids"
-	break
-    }
-}
-
-rename ::msgcat::mcset ""
-rename ::msgcat::mcset_tmp ::msgcat::mcset
 

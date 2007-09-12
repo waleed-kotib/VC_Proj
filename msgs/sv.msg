@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Mon Sep 10 15:08:23 CEST 2007
+# Generated: Wed Sep 12 08:39:02 CEST 2007
 
 # English language version of the Coccinella message catalog.
 #
@@ -50,7 +50,6 @@
 # Reference: {Allow}
 ::msgcat::mcset sv Allow                 {Tillåt}
 # Reference: {Any}
-# Translate
 ::msgcat::mcset sv Any                   {Any}
 # Reference: {Appearance}
 ::msgcat::mcset sv Appearance            {Utseende}
@@ -243,7 +242,6 @@
 # Reference: {New}
 ::msgcat::mcset sv New                   {Nytt}
 # Reference: {New...}
-# Translate, find in sources: contrib/ui/openimage.tcl:99
 ::msgcat::mcset sv New...                {New...}
 # Reference: {Next}
 ::msgcat::mcset sv Next                  {Nästa}
@@ -783,10 +781,14 @@
 ::msgcat::mcset sv mLocalTime            {Lokal tid...}
 # Reference: {Login...}
 ::msgcat::mcset sv mLogin...             {Anslut...}
+# Reference: {Login to %s}
+::msgcat::mcset sv mLoginTo              {Login to %s}
 # Reference: {Login to Transport}
 ::msgcat::mcset sv mLoginTrpt            {Logga på transport}
 # Reference: {Logout}
 ::msgcat::mcset sv mLogout               {Logga ut}
+# Reference: {Logout from %s}
+::msgcat::mcset sv mLogoutFrom           {Logout from %s}
 # Reference: {Logout from Transport}
 ::msgcat::mcset sv mLogoutTrpt           {Logga ut transport}
 # Reference: {Logout With Message...}
@@ -1007,7 +1009,6 @@
 # Reference: {Alert sounds}
 ::msgcat::mcset sv {Alert sounds}        {Pling & Plong}
 # Reference: {All Off}
-# Translate, find in sources: components/BuddyPounce.tcl:290
 ::msgcat::mcset sv {All Off}             {All Off}
 # Reference: {Alternative Room JID}
 ::msgcat::mcset sv {Alternative Room JID} {Alternative Room JID}
@@ -1035,8 +1036,6 @@
 ::msgcat::mcset sv {Bookmark this room}  {Sätt bokmärke på rummet}
 # Reference: {Broken Image}
 ::msgcat::mcset sv {Broken Image}        {Bruten bild}
-# Reference: {Buddy Pouncing}
-::msgcat::mcset sv {Buddy Pouncing}      {Buddy pouncing}
 # Reference: {Built in server port}
 ::msgcat::mcset sv {Built in server port} {Inbyggd server port}
 # Reference: {Business Card}
@@ -1046,7 +1045,6 @@
 # Reference: {Canvas Size}
 ::msgcat::mcset sv {Canvas Size}         {Dukstorlek}
 # Reference: {Changes since previous release}
-# Translate, find in sources: components/AutoUpdate.tcl:240
 ::msgcat::mcset sv {Changes since previous release} {Changes since previous release}
 # Reference: {Chat History}
 ::msgcat::mcset sv {Chat History}        {Chatt historik}
@@ -1064,6 +1062,8 @@
 ::msgcat::mcset sv {Conference server}   {Konferanstjänst}
 # Reference: {Connect using HTTP}
 ::msgcat::mcset sv {Connect using HTTP}  {Anslut över HTTP}
+# Reference: {Contact Actions}
+::msgcat::mcset sv {Contact Actions}     {Contact Actions}
 # Reference: {Contact ID}
 ::msgcat::mcset sv {Contact ID}          {Kontakt ID}
 # Reference: {Contact Type}
@@ -1093,7 +1093,6 @@
 # Reference: {Do not save password}
 ::msgcat::mcset sv {Do not save password} {Spara ej lösenordet}
 # Reference: {Do you actually want to hang up?}
-# Translate, find in sources: components/Phone/NotifyCall.tcl:337
 ::msgcat::mcset sv {Do you actually want to hang up?} {Do you actually want to hang up?}
 # Reference: {Edit Business Card}
 ::msgcat::mcset sv {Edit Business Card}  {Redigera visitkort}
@@ -1124,7 +1123,6 @@
 # Reference: {Extended Away status}
 ::msgcat::mcset sv {Extended Away status} {Extra frånvarande status}
 # Reference: {External Midi Player}
-# Translate, find in sources: components/Sounds.tcl:518
 ::msgcat::mcset sv {External Midi Player} {External Midi Player}
 # Reference: {Factory Settings}
 ::msgcat::mcset sv {Factory Settings}    {Fabriksinställning}
@@ -1231,20 +1229,16 @@
 # Reference: {Logged out}
 ::msgcat::mcset sv {Logged out}          {Utloggad}
 # Reference: {Login again on wakeup}
-# Translate, find in sources: components/Carbon.tcl:179
 ::msgcat::mcset sv {Login again on wakeup} {Login again on wakeup}
 # Reference: {Login as invisible}
 ::msgcat::mcset sv {Login as invisible}  {Anslut som osynlig}
 # Reference: {Logout on sleep}
-# Translate, find in sources: components/Carbon.tcl:174
 ::msgcat::mcset sv {Logout on sleep}     {Logout on sleep}
 # Reference: {Logout With Message}
 ::msgcat::mcset sv {Logout With Message} {Logga ut med meddelande}
 # Reference: {Machine Sleep}
-# Translate, find in sources: components/Carbon.tcl:162
 ::msgcat::mcset sv {Machine Sleep}       {Machine Sleep}
 # Reference: {MIDI command}
-# Translate, find in sources: components/Sounds.tcl:519
 ::msgcat::mcset sv {MIDI command}        {MIDI command}
 # Reference: {MIDI Player}
 ::msgcat::mcset sv {MIDI Player}         {MIDI spelare}
@@ -1258,8 +1252,6 @@
 ::msgcat::mcset sv {Movie Options}       {Film inställningar}
 # Reference: {Multi Connect}
 ::msgcat::mcset sv {Multi Connect}       {Multipelanslut}
-# Reference: {My Avatar}
-::msgcat::mcset sv {My Avatar}           {Min avatar}
 # Reference: {My Status}
 ::msgcat::mcset sv {My Status}           {Min status}
 # Reference: {My nickname for own display}
@@ -1353,7 +1345,6 @@
 # Reference: {Pick skin}
 ::msgcat::mcset sv {Pick skin}           {Välj skal}
 # Reference: {Play Sound}
-# Translate, find in sources: components/BuddyPounce.tcl:242
 ::msgcat::mcset sv {Play Sound}          {Play Sound}
 # Reference: {Plugin Control}
 ::msgcat::mcset sv {Plugin Control}      {Plugin kontroll}
@@ -1466,17 +1457,14 @@
 # Reference: {Show Image}
 ::msgcat::mcset sv {Show Image}          {Visa bild}
 # Reference: {Show Popup}
-# Translate, find in sources: components/BuddyPounce.tcl:239
 ::msgcat::mcset sv {Show Popup}          {Show Popup}
 # Reference: {Show offline users}
-# Translate, find in sources: jabber/Roster.tcl:1420
 ::msgcat::mcset sv {Show offline users}  {Show offline users}
 # Reference: {Show Text}
 ::msgcat::mcset sv {Show Text}           {Visa text}
 # Reference: {Show Text and Image}
 ::msgcat::mcset sv {Show Text and Image} {Visa text och bild}
 # Reference: {Show transports}
-# Translate, find in sources: jabber/Roster.tcl:1422
 ::msgcat::mcset sv {Show transports}     {Show transports}
 # Reference: {Slide Show}
 ::msgcat::mcset sv {Slide Show}          {Bildvisning}
@@ -1511,7 +1499,6 @@
 # Reference: {Tel (voice)}
 ::msgcat::mcset sv {Tel (voice)}         {Tele (vanlig)}
 # Reference: {The message}
-# Translate, find in sources: jabber/Jabber.tcl:1457
 ::msgcat::mcset sv {The message}         {The message}
 # Reference: {This IP number}
 ::msgcat::mcset sv {This IP number}      {Eget IP nummer}
@@ -1773,7 +1760,6 @@
 # Reference: {You can see %s's presence.}
 ::msgcat::mcset sv jamessautosubs2       {Du kan se %s närvaro.}
 # Reference: {We require that the avatar be square of size %s.}
-# Translate, find in sources: jabber/Avatar.tcl:347
 ::msgcat::mcset sv jamessavaerrsize      {We require that the avatar be square of size %s.}
 # Reference: {The jid "%s" is not well formed. Do you want to continue anyway?}
 ::msgcat::mcset sv jamessbadjid          {JID:n "%s" har ej korrekt form. Vill du fortsätta ändå?}
@@ -1790,17 +1776,14 @@
 # Reference: {The connection was unexpectedly broken.}
 ::msgcat::mcset sv jamessconnbroken      {Förbindelsen bröts oväntat.}
 # Reference: {Iconset "%s" already exists.}
-# Translate, find in sources: jabber/Emoticons.tcl:664
 ::msgcat::mcset sv jamessemoticonexists  {Iconset "%s" already exists.}
 # Reference: {Failed loading iconset "%s": %s}
-# Translate, find in sources: jabber/Emoticons.tcl:674 jabber/Emoticons.tcl:696
 ::msgcat::mcset sv jamessemoticonfail    {Failed loading iconset "%s": %s}
 # Reference: {We require both the server and room name entries to be filled with valid names.}
 ::msgcat::mcset sv jamessenterroomempty  {Både fälten för servern och rums namnet måste vara giltiga.}
 # Reference: {Error when entering room "%s": %s Do you want to retry?}
 ::msgcat::mcset sv jamessenterroomretry  {Error when entering room "%s": %s Do you want to retry?}
 # Reference: {Failed connecting server "%s" to get update info: %s}
-# Translate, find in sources: components/AutoUpdate.tcl:119
 ::msgcat::mcset sv jamesserrautouphttp   {Failed connecting server "%s" to get update info: %s}
 # Reference: {We got an error when browsing "%s": %s}
 ::msgcat::mcset sv jamesserrbrowse       {Vi fick ett fel när "browsade" "%s": %s}
@@ -1839,7 +1822,6 @@
 # Reference: {There was a failure when setting the nickname or group of user "%s". The error code is %s with the message: %s}
 ::msgcat::mcset sv jamessfailsetnick     {Det blev ett fel när satte kortnamn eller grupp för användaren "%s". Felkoden är %s och felmeddelandet: %s}
 # Reference: {Receieved a fatal error: %s The connection is closed.}
-# Translate, find in sources: jabber/Jabber.tcl:910 jabber/Jabber.tcl:912 jabber/Jabber.tcl:923 jabber/Jabber.tcl:925
 ::msgcat::mcset sv jamessfatalerr        {Receieved a fatal error: %s The connection is closed.}
 # Reference: {Failed to get file %s from %s: %s}
 ::msgcat::mcset sv jamessfiletrpterr     {Misslyckades med att ta emot filen %s från %s: %s}
@@ -1858,7 +1840,6 @@
 # Reference: {The address "%s" is not well formed. Please modify it and resend.}
 ::msgcat::mcset sv jamessillformresend   {Adressen "%s" är inte riktigt formad. Korrigera och skicka igen.}
 # Reference: {Failed to create an image from "%s".}
-# Translate, find in sources: jabber/Avatar.tcl:340
 ::msgcat::mcset sv jamessimagecreateerr  {Failed to create an image from "%s".}
 # Reference: {Do you want to erase the whiteboard before entering a new room?}
 ::msgcat::mcset sv jamessinroomerasewb   {Vill du radera skrivtavlan innan du går in i rummet?}
@@ -1875,7 +1856,6 @@
 # Reference: {The login failed with the error code %s and message: %s}
 ::msgcat::mcset sv jamessloginerr        {Påloggningen misslyckades med felkod %s  och felmeddelande: %s}
 # Reference: {There are unsaved messages. Do you still want to quit?}
-# Translate
 ::msgcat::mcset sv jamessmsgwarnquit     {There are unsaved messages. Do you still want to quit?}
 # Reference: {The %s is missing or is too short!}
 ::msgcat::mcset sv jamessnamemissing     {Fältet %s fattas eller är för kort!}
@@ -1950,10 +1930,8 @@
 # Reference: {Do you want to save this message before closing?}
 ::msgcat::mcset sv jamesssavemsg         {Vill du spara det här meddelandet innan fönstret stängs?}
 # Reference: {Failed searching service. Error code %s with message: %s}
-# Translate, find in sources: jabber/Search.tcl:433
 ::msgcat::mcset sv jamesssearcherr       {Failed searching service. Error code %s with message: %s}
 # Reference: {There was an invalid field. Please correct it: %s}
-# Translate, find in sources: jabber/Search.tcl:431
 ::msgcat::mcset sv jamesssearchinval     {There was an invalid field. Please correct it: %s}
 # Reference: {The address "%s" is not well formed. Do you want to skip it and send to the rest?}
 ::msgcat::mcset sv jamessskipsendq       {Adressen "%s" är inte riktigt formad. Vill du hoppa över denna och skicka till resterande?}
@@ -1996,7 +1974,7 @@
 
 
 # This maps Defined Error Conditions to clear text messages.
-# RFC 3929 (XMPP Core): 6.4 SASL Errors
+# RFC 3920 (XMPP Core): 6.4 SASL Errors
 # 
 # These are much too formal to be used for user display and we therfore instead use the short forms below.
 
@@ -2032,6 +2010,78 @@ där användarnamnet är okänt).}
 ::msgcat::mcset sv xmpp-stanzas-short-not-authorized {Påloggningen misslyckades på grund av felaktigt användarnamn eller lösenord.}
 # Reference: {Protocol error during the login process.}
 ::msgcat::mcset sv xmpp-stanzas-short-temporary-auth-failure {Protokollfel vid inloggningen.}
+
+# This maps Defined Conditions to clear text messages. 
+# They are slightly simplified.
+# Extensible Messaging and Presence Protocol (XMPP): Core (RFC 3920)
+# 9.3.3 Defined Conditions
+# Reference: {The sender has sent XML that is malformed or that cannot be processed.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-bad-request {The sender has sent XML that is malformed or that cannot be processed.}
+# Reference: {Access cannot be granted because an existing resource or session exists with the same name or address.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-conflict {Access cannot be granted because an existing resource or session exists with the same name or address.}
+# Reference: {The feature requested is not implemented by the recipient or server and therefore cannot be processed.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-feature-not-implemented {The feature requested is not implemented by the recipient or server and therefore cannot be processed.}
+# Reference: {The requesting entity does not possess the required permissions to perform the action.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-forbidden {The requesting entity does not possess the required permissions to perform the action.}
+# Reference: {The recipient or server can no longer be contacted at this address.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-gone     {The recipient or server can no longer be contacted at this address.}
+# Reference: {The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-internal-server-error {The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error.}
+# Reference: {The addressed JID or item requested cannot be found.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-item-not-found {The addressed JID or item requested cannot be found.}
+# Reference: {The sending entity has provided or communicated an XMPP address or aspect thereof that does not adhere to the syntax defined in Addressing Scheme.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-jid-malformed {The sending entity has provided or communicated an XMPP address or aspect thereof that does not adhere to the syntax defined in Addressing Scheme.}
+# Reference: {The recipient or server understands the request but is refusing to process it because it does not meet criteria defined by the recipient or server.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-not-acceptable {The recipient or server understands the request but is refusing to process it because it does not meet criteria defined by the recipient or server.}
+# Reference: {The recipient or server does not allow any entity to perform the action.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-not-allowed {The recipient or server does not allow any entity to perform the action.}
+# Reference: {The sender must provide proper credentials before being allowed to perform the action, or has provided improper credentials.}
+::msgcat::mcset sv xmpp-stanzas-not-authorized {Autentiseringen misslyckades därför att den initierande enheten ej erbjöd tillräckliga kreditiv (detta inkluderar men begränsas ej till fallet
+där användarnamnet är okänt).}
+# Reference: {The requesting entity is not authorized to access the requested service because payment is required.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-payment-required {The requesting entity is not authorized to access the requested service because payment is required.}
+# Reference: {The intended recipient is temporarily unavailable.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-recipient-unavailable {The intended recipient is temporarily unavailable.}
+# Reference: {The recipient or server is redirecting requests for this information to another entity, usually temporarily.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-redirect {The recipient or server is redirecting requests for this information to another entity, usually temporarily.}
+# Reference: {The requesting entity is not authorized to access the requested service because registration is required.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-registration-required {The requesting entity is not authorized to access the requested service because registration is required.}
+# Reference: {A remote server or service specified as part or all of the JID of the intended recipient does not exist.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-remote-server-not-found {A remote server or service specified as part or all of the JID of the intended recipient does not exist.}
+# Reference: {A remote server or service specified as part or all of the JID of the intended recipient (or required to fulfill a request) could not be contacted within a reasonable amount of time.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-remote-server-timeout {A remote server or service specified as part or all of the JID of the intended recipient (or required to fulfill a request) could not be contacted within a reasonable amount of time.}
+# Reference: {The server or recipient lacks the system resources necessary to service the request.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-resource-constraint {The server or recipient lacks the system resources necessary to service the request.}
+# Reference: {The server or recipient does not currently provide the requested service.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-service-unavailable {The server or recipient does not currently provide the requested service.}
+# Reference: {The requesting entity is not authorized to access the requested service because a subscription is required.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-subscription-required {The requesting entity is not authorized to access the requested service because a subscription is required.}
+# Reference: {The error condition is not one of those defined by the other conditions in this list.}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-undefined-condition {The error condition is not one of those defined by the other conditions in this list.}
+# Reference: {The recipient or server understood the request but was not expecting it at this time (e.g., the request was out of order).}
+# Translate
+::msgcat::mcset sv xmpp-stanzas-unexpected-request {The recipient or server understood the request but was not expecting it at this time (e.g., the request was out of order).}
+
 
 
 # Related error conditions detected by the client.
@@ -2160,9 +2210,6 @@ där användarnamnet är okänt).}
 ::msgcat::mcset sv prefaalogin           {Login automatically if logged out}
 # Reference: {Set automatic away status}
 ::msgcat::mcset sv prefaaset             {Sätt automatisk frånvarande status:}
-# Reference: {Share this avatar with other users}
-::msgcat::mcset sv prefavashare          {Dela den här avataren med andra}
-
 # Reference: {Block the following JID's (* wildcards possible):}
 ::msgcat::mcset sv prefblbl              {Blockera följande JID:er (* jokertecken tillåtna):}
 # Reference: {Write the complete JID for the user you want to block. A JID must be of the form "joewest@jabber.org"}
@@ -2226,7 +2273,6 @@ där användarnamnet är okänt).}
 # Reference: {The selected iconset will take action when you save}
 ::msgcat::mcset sv preficonsel           {Den valda ikonuppsättningen kommer att användas när du sparar}
 # Reference: {Set midi command to use for playing MIDI sounds. This option is only relevant if you have a sound set with MIDI files. Your system midi player command must have the "command fileName" syntax.}
-# Translate, find in sources: components/Sounds.tcl:520
 ::msgcat::mcset sv prefmidimsg           {Set midi command to use for playing MIDI sounds. This option is only relevant if you have a sound set with MIDI files. Your system midi player command must have the "command fileName" syntax.}
 # Reference: {Minutes before status Away:}
 ::msgcat::mcset sv prefminaw             {Minuter innan automatisk frånvarande status:}
@@ -2279,7 +2325,6 @@ där användarnamnet är okänt).}
 # Reference: {Remove user if unsubscribed}
 ::msgcat::mcset sv prefrorm              {Ta bort användare om prenumerationen upphör}
 # Reference: {Show users without any subscription}
-# Translate, find in sources: jabber/Roster.tcl:1424
 ::msgcat::mcset sv prefroshowsubno       {Show users without any subscription}
 # Reference: {Use background image (gif) in roster}
 ::msgcat::mcset sv prefrostbgim          {Använd bakgrundsbild i rostern}
@@ -2524,7 +2569,6 @@ namespace eval ::EditShortcuts:: {
 
 # Groupchat:
 # Reference: {Ban the participant "%s" from the room "%s"}
-# Translate, find in sources: jabber/MUC.tcl:780
 ::msgcat::mcset sv mucBan                {Ban the participant "%s" from the room "%s"}
 # Reference: {Converting Chat into Conference}
 ::msgcat::mcset sv mucChat2ConfInv       {Omvandla chatt till konferans.}
@@ -2553,7 +2597,6 @@ namespace eval ::EditShortcuts:: {
 # Reference: {We received an error when interaction with the room "%s": %s}
 ::msgcat::mcset sv mucIQError            {Vi fick att fel när interagerade med rummet "%s": %s}
 # Reference: {Kick the participant "%s" from the room "%s"}
-# Translate
 ::msgcat::mcset sv mucKick               {Kick the participant "%s" from the room "%s"}
 
 
@@ -2567,7 +2610,6 @@ namespace eval ::EditShortcuts:: {
 
 
 # Reference: {Automatically check for updates}
-# Translate, find in sources: components/AutoUpdate.tcl:255
 ::msgcat::mcset sv autoupdatedo          {Automatically check for updates}
 # Reference: {Let user %s download a file from your built in server. The description is optional.}
 ::msgcat::mcset sv oobmsg                {Låt användaren %s ladda ner en fil från din inbyggda server. Beskrivningen är ej nödvändig.}
@@ -3071,42 +3113,30 @@ namespace eval ::EditShortcuts:: {
 
 # Buddy pouncing:
 # Reference: {Set a specific action when something happens with "%s", which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
-# Translate, find in sources: components/BuddyPounce.tcl:157
 ::msgcat::mcset sv budpounce-user        {Set a specific action when something happens with "%s", which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
 # Reference: {Set a specific action when something happens with any contact belonging to the group "%s", which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
-# Translate, find in sources: components/BuddyPounce.tcl:163
 ::msgcat::mcset sv budpounce-group       {Set a specific action when something happens with any contact belonging to the group "%s", which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
 # Reference: {Set a specific action when something happens with any contact in your contact list, which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
-# Translate, find in sources: components/BuddyPounce.tcl:168
 ::msgcat::mcset sv budpounce-any         {Set a specific action when something happens with any contact in your contact list, which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
 # Reference: {The contact "%s" just went online!}
-# Translate
 ::msgcat::mcset sv budpounce-available   {The contact "%s" just went online!}
 # Reference: {The contact "%s" just went offline!}
-# Translate
 ::msgcat::mcset sv budpounce-unavailable {The contact "%s" just went offline!}
 # Reference: {The contact "%s" just sent you a message!}
-# Translate
 ::msgcat::mcset sv budpounce-msg         {The contact "%s" just sent you a message!}
 # Reference: {The contact "%s" just started a chat!}
-# Translate
 ::msgcat::mcset sv budpounce-chat        {The contact "%s" just started a chat!}
 # Reference: {Send message with subject}
-# Translate, find in sources: components/BuddyPounce.tcl:259
 ::msgcat::mcset sv budpounce-sendmsg     {Send message with subject}
-# Reference: {Buddy Pouncing}
-# Translate
-::msgcat::mcset sv mBuddyPouncing        {Buddy Pouncing}
+# Reference: {Contact Actions}
+::msgcat::mcset sv mContactActions       {Contact Actions}
 
 # Image magic:
 # Reference: {Click on a window in the desktop or drag a rectangular area to import into the current whiteboard.}
-# Translate, find in sources: components/ImageMagic.tcl:111
 ::msgcat::mcset sv immagic-msg           {Click on a window in the desktop or drag a rectangular area to import into the current whiteboard.}
 # Reference: {Dangerous in-box path name "%s"}
-# Translate, find in sources: components/ImageMagic.tcl:176
 ::msgcat::mcset sv immagic-warn          {Dangerous in-box path name "%s"}
 # Reference: {Click OK to remove files: %s}
-# Translate, find in sources: components/ImageMagic.tcl:188
 ::msgcat::mcset sv immagic-rem           {Click OK to remove files: %s}
 
 
