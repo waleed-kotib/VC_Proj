@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.8 2007-09-02 13:39:38 matben Exp $
+#  $Id: UserActivity.tcl,v 1.9 2007-09-12 13:37:55 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -27,7 +27,8 @@ namespace eval ::UserActivity {}
 
 proc ::UserActivity::Init {} {
 
-    component::register UserActivity "This is User Activity (XEP-0108)."
+    component::register UserActivity \
+      "Communicate information about user activities"
 
     ::Debug 2 "::UserActivity::Init"
 
@@ -45,7 +46,7 @@ proc ::UserActivity::Init {} {
     set xmlns(node_config)     "http://jabber.org/protocol/pubsub#node_config"
 
     variable menuDef
-    set menuDef [list command mUserActivity... ::UserActivity::Dlg {} {}]
+    set menuDef [list command mActivity... ::UserActivity::Dlg {} {}]
     
     variable subActivities
     set subActivities(doing_chores) {
@@ -182,7 +183,7 @@ proc ::UserActivity::HavePEP {jlibname have} {
 
 proc ::UserActivity::LogoutHook {} {
     
-    ::JUI::DeRegisterMenuEntry action mUserActivity...
+    ::JUI::DeRegisterMenuEntry action mActivity...
 }
 
 proc ::UserActivity::Dlg {} {
@@ -428,7 +429,7 @@ proc ::UserActivity::Event {jlibname xmldata} {
 		    set msg ""
 		} else {
 		    set dname [string totitle [string map {_ " "} $activity]]
-		    set msg "[mc {User Activity}]: [mc $dname]"
+		    set msg "[mc Activity]: [mc $dname]"
 		    if {$specific ne ""} {
 			set dname [string totitle [string map {_ " "} $specific]]
 			append msg " - [mc $dname]"

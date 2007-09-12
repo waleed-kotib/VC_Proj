@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: IaxPrefs.tcl,v 1.10 2007-09-08 06:55:26 matben Exp $
+# $Id: IaxPrefs.tcl,v 1.11 2007-09-12 13:37:55 matben Exp $
 
 package provide IaxPrefs 0.1
 
@@ -98,7 +98,7 @@ proc ::IaxPrefs::BuildPrefsHook {wtree nbframe} {
     if {![::Preferences::HaveTableItem {phone}]} {
         ::Preferences::NewTableItem {phone} [mc Phone]
     }
-    ::Preferences::NewTableItem {phone iax} [mc iaxPhone]
+    ::Preferences::NewTableItem {phone iax} [mc "IAX Phone"]
 
     set wpage [$nbframe page {iax}]
     BuildPage $wpage
@@ -134,7 +134,7 @@ proc ::IaxPrefs::AccountFrame {win} {
     global  prefs
     variable tmpPrefs
 
-    ttk::labelframe $win -text [mc iaxPhoneAccount] \
+    ttk::labelframe $win -text [mc "IAX Account"] \
       -padding [option get . groupSmallPadding {}]
     pack $win -side top -anchor w
 
@@ -142,19 +142,19 @@ proc ::IaxPrefs::AccountFrame {win} {
 	set tmpPrefs($key) $prefs(iaxPhone,$key)
     }
     
-    ttk::label $win.luser -text "[mc iaxPhoneUser]:"
+    ttk::label $win.luser -text "[mc Username]:"
     ttk::entry $win.user -textvariable [namespace current]::tmpPrefs(user)
 
-    ttk::label $win.lpassword -text "[mc iaxPhonePassword]:"
+    ttk::label $win.lpassword -text "[mc Password]:"
     ttk::entry $win.password -textvariable [namespace current]::tmpPrefs(password)
 
-    ttk::label $win.lhost -text "[mc iaxPhoneHost]:"
+    ttk::label $win.lhost -text "[mc Host]:"
     ttk::entry $win.host -textvariable [namespace current]::tmpPrefs(host)
 
-    ttk::label $win.lcidnum -text "[mc iaxPhoneCidNum]:"
+    ttk::label $win.lcidnum -text "[mc {Caller ID number}]:"
     ttk::entry $win.cidnum -textvariable [namespace current]::tmpPrefs(cidnum)
 
-    ttk::label $win.lcidname -text "[mc iaxPhoneCidName]:"
+    ttk::label $win.lcidname -text "[mc {Caller ID name}]:"
     ttk::entry $win.cidname -textvariable [namespace current]::tmpPrefs(cidname)
 
     grid  $win.luser      $win.user      -sticky e -pady 2
@@ -190,14 +190,14 @@ proc ::IaxPrefs::DevicesFrame {win} {
     foreach device $listInputDevices {
         lappend inputDevices [lindex $device 0]
     } 
-    ttk::label $win.linputDev -text "[mc iaxPhoneInputDev]:"
+    ttk::label $win.linputDev -text "[mc Microphone]:"
     ttk::combobox $win.input_dev -state readonly  \
       -textvariable [namespace current]::tmpPrefs(inputDevices) -values $inputDevices
 
     foreach device $listOutputDevices {
         lappend outputDevices [lindex $device 0]
     }
-    ttk::label $win.loutputDev -text "[mc iaxPhoneOutputDev]:"
+    ttk::label $win.loutputDev -text "[mc Speakers]:"
     ttk::combobox $win.output_dev -state readonly  \
       -textvariable [namespace current]::tmpPrefs(outputDevices)  \
       -values $outputDevices
@@ -220,15 +220,15 @@ proc ::IaxPrefs::FiltersFrame {win} {
     }
 #    set tmpPrefs(echo) $prefs(iaxPhone,echo)
 
-    ttk::checkbutton $win.agc -text "[mc iaxPhoneAGC]"  \
+    ttk::checkbutton $win.agc -text [mc "Automatic gain control (AGC)"] \
       -variable [namespace current]::tmpPrefs(agc)
-    ttk::checkbutton $win.aagc -text "[mc iaxPhoneAAGC]"  \
+    ttk::checkbutton $win.aagc -text [mc "Analog automatic gain control (AAGC)"]  \
       -variable [namespace current]::tmpPrefs(aagc)
-    ttk::checkbutton $win.noise -text "[mc iaxPhoneNoise]"  \
+    ttk::checkbutton $win.noise -text [mc "Noise reduction"] \
       -variable [namespace current]::tmpPrefs(noise)
-    ttk::checkbutton $win.comfort -text "[mc iaxPhoneComfort]"  \
+    ttk::checkbutton $win.comfort -text [mc "Comfort noise"] \
       -variable [namespace current]::tmpPrefs(comfort)
-#    ttk::checkbutton $win.echo -text "[mc iaxPhoneEcho]"  \
+#    ttk::checkbutton $win.echo -text [mc Echo] \
 #      -variable [namespace current]::tmpPrefs(echo)
 
     grid  $win.agc      -sticky w
@@ -236,7 +236,11 @@ proc ::IaxPrefs::FiltersFrame {win} {
     grid  $win.noise    -sticky w
     grid  $win.comfort  -sticky w
 #    grid  $win.echo   -sticky w
-    
+
+    ::balloonhelp::balloonforwindow $win.agc [mc agcTip]
+    ::balloonhelp::balloonforwindow $win.aagc [mc "Can prevent clipping"]
+    ::balloonhelp::balloonforwindow $win.comfort [mc comfortTip]
+
     return $win
 }
 
@@ -249,7 +253,7 @@ proc ::IaxPrefs::CodecsFrame {win} {
 
     set tmpPrefs(codec) $prefs(iaxPhone,codec)
 
-    ttk::label $win.lcodec -text "[mc iaxPhoneCodec]:"
+    ttk::label $win.lcodec -text "[mc Codec]:"
 
     ttk::radiobutton $win.codeci -text "iLBC" -variable [namespace current]::tmpPrefs(codec) -value "ILBC"
     ttk::radiobutton $win.codecs -text "Speex" -variable [namespace current]::tmpPrefs(codec) -value "SPEEX"
@@ -264,6 +268,12 @@ proc ::IaxPrefs::CodecsFrame {win} {
     grid  x            $win.codecu  -sticky w
     grid  x            $win.codecg  -sticky w
     grid $win.lcodec -padx 4
+
+    ::balloonhelp::balloonforwindow $win.codeci [mc ilbc]
+    ::balloonhelp::balloonforwindow $win.codecs [mc speex]
+    ::balloonhelp::balloonforwindow $win.codeca [mc alaw]
+    ::balloonhelp::balloonforwindow $win.codecu [mc ulaw]
+    ::balloonhelp::balloonforwindow $win.codecg [mc gsm]
     
     return $win
 }

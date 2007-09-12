@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: ICQ.tcl,v 1.15 2007-07-18 09:40:09 matben Exp $
+# $Id: ICQ.tcl,v 1.16 2007-09-12 13:37:55 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -32,8 +32,7 @@ proc ::ICQ::Init { } {
     ::hooks::register discoInfoGatewayIcqHook   ::ICQ::DiscoInfoHook
     ::hooks::register logoutHook                ::ICQ::LogoutHook
     
-    component::register ICQ  \
-      "The roster name is automatically set to the ICQ user's vCard nickname."
+    component::register ICQ "Use ICQ nickname in roster"
 
     # Cache for vCard nickname.
     variable vcardnick

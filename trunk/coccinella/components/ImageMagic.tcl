@@ -21,7 +21,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ImageMagic.tcl,v 1.12 2007-09-10 12:31:55 matben Exp $
+# $Id: ImageMagic.tcl,v 1.13 2007-09-12 13:37:55 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -45,15 +45,14 @@ proc ::ImageMagic::Init { } {
     # Register a menu entry for this component.
     if {$haveImageMagic} {
 	component::register ImageMagic  \
-	  "Provides bindings to Image Magics import command for taking\
-	  screenshots on X11."
+	  "ImageMagic import command bindings for taking screenshots on X11"
 	
 	# 'type' 'label' 'command' 'opts' {subspec}
 	# where subspec defines a cascade menu recursively
 	set menuspec [list \
 	    command [mc {Take Snapshot}] {::ImageMagic::ImportWindowSnapShot $w} {} {} \
 	]
-      ::WB::RegisterNewMenu addon [mc mAddons] $menuspec
+      ::WB::RegisterNewMenu addon [mc mPlugins] $menuspec
     }
 }
 
@@ -67,7 +66,7 @@ proc ::ImageMagic::ImportWindowSnapShot {w} {
     set wcan [::WB::GetCanvasFromWtop $w]
     
     if {$haveImageMagic == 0} {
-	::UI::MessageBox -icon error -type ok -message  \
+	::UI::MessageBox -title [mc Error] -icon error -type ok -message \
 	  "Failed to locate ImageMagic package! Can't do screen snap shot :-("
 	return
     }

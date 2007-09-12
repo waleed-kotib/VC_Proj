@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: Geolocation.tcl,v 1.11 2007-09-02 13:39:38 matben Exp $
+#  $Id: Geolocation.tcl,v 1.12 2007-09-12 13:37:55 matben Exp $
 
 package require jlib::pep
 
@@ -26,7 +26,8 @@ namespace eval ::Geolocation:: { }
 
 proc ::Geolocation::Init { } {
 
-    component::register Geolocation "This is Geo Location (XEP-0080)."
+    component::register Geolocation \
+      "Communicate information about the current geographical location"
 
     # Add event hooks.
     ::hooks::register jabberInitHook        ::Geolocation::JabberInitHook
@@ -40,7 +41,7 @@ proc ::Geolocation::Init { } {
     set xmlns(node_config)   "http://jabber.org/protocol/pubsub#node_config"
 
     variable menuDef
-    set menuDef [list command Geolocation... ::Geolocation::Dlg {} {}]
+    set menuDef [list command mLocation... ::Geolocation::Dlg {} {}]
     
     # These help strings are for the message catalogs.
     variable help
@@ -64,24 +65,24 @@ proc ::Geolocation::Init { } {
     set	help(timestamp)   "UTC timestamp specifying the moment when the reading was taken"
     
     variable taglabel
-    set	taglabel(alt)         [mc {Altitude}]
-    set	taglabel(area)        [mc {Named Area}]
-    set	taglabel(bearing)     [mc {GPS Bearing}]
-    set	taglabel(building)    [mc {Building}]
-    set	taglabel(country)     [mc {Country}]
-    set	taglabel(datum)       [mc {GPS Datum}]
-    set	taglabel(description) [mc {Description}]
-    set	taglabel(error)       [mc {GPS Error}]
-    set	taglabel(floor)       [mc {Floor}]
-    set	taglabel(lat)         [mc {Latitude}]
-    set	taglabel(locality)    [mc {Locality}]
-    set	taglabel(lon)         [mc {Longitude}]
-    set	taglabel(postalcode)  [mc {Postalcode}]
-    set	taglabel(region)      [mc {Region}]
-    set	taglabel(room)        [mc {Room}]
-    set	taglabel(street)      [mc {Street}]
-    set	taglabel(text)        [mc {Text}]
-    set	taglabel(timestamp)   [mc {Timestamp}]
+    set	taglabel(alt)         [mc Altitude]
+    set	taglabel(area)        [mc "Named Area"]
+    set	taglabel(bearing)     [mc "GPS Bearing"]
+    set	taglabel(building)    [mc Building]
+    set	taglabel(country)     [mc Country]
+    set	taglabel(datum)       [mc "GPS Datum"]
+    set	taglabel(description) [mc Description]
+    set	taglabel(error)       [mc "GPS Error"]
+    set	taglabel(floor)       [mc Floor]
+    set	taglabel(lat)         [mc Latitude]
+    set	taglabel(locality)    [mc Locality]
+    set	taglabel(lon)         [mc Longitude]
+    set	taglabel(postalcode)  [mc Postalcode]
+    set	taglabel(region)      [mc Region]
+    set	taglabel(room)        [mc Room]
+    set	taglabel(street)      [mc Street]
+    set	taglabel(text)        [mc Text]
+    set	taglabel(timestamp)   [mc Timestamp]
     
     # string is the default if not defined.
     variable xs
@@ -140,7 +141,7 @@ proc ::Geolocation::HavePEP {jlibname have} {
 proc ::Geolocation::LogoutHook {} {
     variable state
     
-    ::JUI::DeRegisterMenuEntry action Geolocation...
+    ::JUI::DeRegisterMenuEntry action mLocation...
     unset -nocomplain state
 }
 
@@ -153,7 +154,7 @@ proc ::Geolocation::Dlg {} {
       -detail [mc locationPickDtl] -icon internet \
       -buttons {ok cancel remove} -modal 1 \
       -geovariable ::prefs(winGeom,geoloc) \
-      -title [mc "User Location"] -command [namespace code DlgCmd]]
+      -title [mc Location] -command [namespace code DlgCmd]]
     set fr [$w clientframe]
     
     # State array variable.
@@ -186,7 +187,7 @@ proc ::Geolocation::Dlg {} {
 
     ttk::checkbutton $fr.gearth -style Small.TCheckbutton \
       -variable [namespace current]::gearth \
-      -text [mc "Synchronize your data with Google Earth"]
+      -text [mc "Synchronize with Google Earth"]
     
     $fr.gearth state {disabled}
     

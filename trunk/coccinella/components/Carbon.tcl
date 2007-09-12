@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Carbon.tcl,v 1.8 2007-09-08 14:39:56 matben Exp $
+# $Id: Carbon.tcl,v 1.9 2007-09-12 13:37:55 matben Exp $
 # 
 # @@@ Move the sleep stuff to something more generic.
 
@@ -176,7 +176,7 @@ proc ::Carbon::BuildPage {page} {
     ttk::label $ws.lmsg -text [mc Message]:
     ttk::entry $ws.emsg -font CociSmallFont -width 32  \
       -textvariable [namespace current]::tmp(sleeploutmsg)
-    ttk::checkbutton $ws.clin -text [mc "Login again on wakeup"] \
+    ttk::checkbutton $ws.clin -text [mc "Relogin on wakeup"] \
       -variable [namespace current]::tmp(sleeplogin)
 
     SetEntryState [list $ws.emsg $ws.clin] $varName

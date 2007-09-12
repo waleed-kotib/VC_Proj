@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.21 2007-09-10 13:56:53 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.22 2007-09-12 13:37:55 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -44,16 +44,14 @@ proc ::BuddyPounce::Init {} {
     
     # Register popmenu entry.
     set menuDef {
-	command mContactActions {::BuddyPounce::Build $clicked $jid $group}
+	command mContactActions... {::BuddyPounce::Build $clicked $jid $group}
     }
     set menuType {
-	mContactActions {group user}
+	mContactActions... {group user}
     }
     ::Roster::RegisterPopupEntry $menuDef $menuType
     
-    component::register BuddyPounce  \
-      "Buddy pouncing enables you to make various things happen when\
-      a particular user becomes online, offline etc."
+    component::register BuddyPounce "Set actions for contact events"
         
     # Audio formats.
     variable audioSuffixes [list]
@@ -69,8 +67,8 @@ proc ::BuddyPounce::Init {} {
     
     # These define which the events are.
     variable events
-    set events(keys) {available unavailable msg                chat}
-    set events(str)  {Online    Offline     {Incoming Message} {Chat}}
+    set events(keys) {available unavailable msg     chat}
+    set events(str)  {Online    Offline     Message Chat}
     
     variable actionlist
     set actionlist(keys) {msgbox sound chat msg}
@@ -90,8 +88,8 @@ proc ::BuddyPounce::Init {} {
     array set alertTitle {
 	available   {Online}
 	unavailable {Offline}
-	msg         {New Message}
-	chat        {New Chat}
+	msg         {Message}
+	chat        {Chat}
     }
 }
 
@@ -236,10 +234,10 @@ proc ::BuddyPounce::Build {typeselected item group} {
 	ttk::frame $wact -padding [option get . notebookPagePadding {}]
 	pack  $wact  -side top -anchor [option get . dialogAnchor {}]
 	
-	ttk::checkbutton $wact.alrt -text [mc {Show Popup}] \
+	ttk::checkbutton $wact.alrt -text [mc {Show popup}] \
 	  -variable $token\($ekey,msgbox)
 	
-	ttk::checkbutton $wact.lsound -text "[mc {Play Sound}]:" \
+	ttk::checkbutton $wact.lsound -text "[mc {Play sound}]:" \
 	  -variable $token\($ekey,sound)
 	eval {
 	    ttk::optionmenu $wact.msound $token\($ekey,soundfile)
@@ -248,7 +246,7 @@ proc ::BuddyPounce::Build {typeselected item group} {
 	set wpad $wact.pad[incr i]
 	ttk::frame $wpad -width [expr {$soundMaxWidth + 40}] -height 1
 
-	ttk::checkbutton $wact.chat -text [mc {Start Chat}] \
+	ttk::checkbutton $wact.chat -text [mc {Start chat}] \
 	  -variable $token\($ekey,chat)
 
 	set wmsg $wact.fmsg
@@ -287,7 +285,7 @@ proc ::BuddyPounce::Build {typeselected item group} {
       -command [list [namespace current]::OK $token]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $token]
-    ttk::button $frbot.btoff -text [mc {All Off}]  \
+    ttk::button $frbot.btoff -text [mc {Factory Settings}]  \
       -command [list [namespace current]::AllOff $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {

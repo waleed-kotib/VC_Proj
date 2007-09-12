@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: TtkDialog.tcl,v 1.5 2007-07-28 14:07:56 matben Exp $
+#  $Id: TtkDialog.tcl,v 1.6 2007-09-12 13:37:55 matben Exp $
 
 namespace eval ::TtkDialog {
     variable scriptDir [file dirname [info script]]
@@ -38,7 +38,7 @@ proc ::TtkDialog::Init { } {
 	return
     }
     uplevel #0 [list source $fsdialog]
-    component::register TtkDialog "Redefines the standard file selection dialogs"
+    component::register TtkDialog "Userfriendly file selection dialogs"
 
     interp alias {} tk_getOpenFile     {} ttk::getOpenFile
     interp alias {} tk_getSaveFile     {} ttk::getSaveFile

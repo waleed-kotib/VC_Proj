@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#       $Id: SlideShow.tcl,v 1.25 2007-07-18 09:40:10 matben Exp $
+#       $Id: SlideShow.tcl,v 1.26 2007-09-12 13:37:55 matben Exp $
 
 package require undo
 
@@ -35,8 +35,8 @@ proc ::SlideShow::Load { } {
     ::Debug 2 "::SlideShow::Load"
     
     set menuspec \
-      {cascade     {Slide Show}     {}                             {} {} {
-	{command   {Pick Directory} {::SlideShow::PickFolder $w}   {} {}}
+      {cascade     mSlideShow       {}                           {} {} {
+	{command   mOpenFolder...   {::SlideShow::PickFolder $w} {} {}}
 	{separator}
 	{command   {Previous}       {::SlideShow::Previous $w}   {} {}}
 	{command   {Next}           {::SlideShow::Next $w}       {} {}}
@@ -59,9 +59,7 @@ proc ::SlideShow::Load { } {
     
     ::WB::RegisterMenuEntry file $menuspec
     
-    component::register SlideShow  \
-      "Slide show for the whiteboard. It starts from an image and automatically\
-      saves any edits to canvas file when changing page."
+    component::register SlideShow "Whiteboard based slide show"
         
     # PNG
     set priv(imnext) [image create photo -data {
@@ -191,7 +189,7 @@ proc ::SlideShow::BuildPrefsHook {wtree nbframe} {
     if {![::Preferences::HaveTableItem Whiteboard]} {
 	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
     }
-    ::Preferences::NewTableItem {Whiteboard {SlideShow}} [mc {Slide Show}]
+    ::Preferences::NewTableItem {Whiteboard {SlideShow}} [mc mSlideShow]
     set wpage [$nbframe page {SlideShow}]    
     
     set wc $wpage.c
@@ -199,16 +197,15 @@ proc ::SlideShow::BuildPrefsHook {wtree nbframe} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
     set lfr $wc.fr
-    ttk::labelframe $lfr -text [mc {Slide Show}] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $lfr
     pack $lfr -side top -anchor w
 
     set tmpPrefs(slideShow,buttons)  $prefs(slideShow,buttons)
     set tmpPrefs(slideShow,autosize) $prefs(slideShow,autosize)
 
-    ttk::checkbutton $lfr.ss -text [mc prefssbts]  \
+    ttk::checkbutton $lfr.ss -text [mc "Show navigation buttons"] \
       -variable [namespace current]::tmpPrefs(slideShow,buttons)
-    ttk::checkbutton $lfr.size -text [mc prefssresize]  \
+    ttk::checkbutton $lfr.size -text [mc prefssresize2]  \
       -variable [namespace current]::tmpPrefs(slideShow,autosize)
  
     grid  $lfr.ss    -sticky w
@@ -276,7 +273,7 @@ proc ::SlideShow::PickFolder {w} {
 	lappend opts -initialdir $prefs(slideShow,dir)
     }
     set ans [eval {
-	tk_chooseDirectory -mustexist 1 -title [mc {Slide Show Folder}]} $opts]
+	tk_chooseDirectory -mustexist 1 -title [mc "Open Folder"]} $opts]
     if {$ans ne ""} {
 	
 	# Check first if any useful content?
@@ -421,7 +418,7 @@ proc ::SlideShow::SetMenuState {w} {
     global  prefs
     variable priv
     
-    set wmenu [::UI::GetMenu $w "Slide Show"]
+    set wmenu [::UI::GetMenu $w mSlideShow]
     if {[info exists priv($w,dir)] && [file isdirectory $priv($w,dir)]} {
 	::UI::MenuMethod $wmenu entryconfigure First -state normal
 	::UI::MenuMethod $wmenu entryconfigure Last  -state normal

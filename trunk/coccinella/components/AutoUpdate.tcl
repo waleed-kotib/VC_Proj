@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoUpdate.tcl,v 1.23 2007-09-07 06:00:53 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.24 2007-09-12 13:37:55 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -115,8 +115,8 @@ proc ::AutoUpdate::GetURL {args} {
 	::http::geturl $url -command [namespace code [list Command $opts(-locale)]]
     } $tmopts} token]} {
 	if {!$opts(-silent)} {
-	    ::UI::MessageBox -icon error -type ok \
-	      -message [mc jamesserrautouphttp $url $token]
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	      -message [mc jamesserrautouphttp2 $url $token]
 	}
     }
 }
@@ -165,7 +165,7 @@ proc ::AutoUpdate::Command {locale token} {
 	if {[package vcompare $this(vers,full) $releaseA(version)] == -1} {
 	    Dialog $releaseAttr $message $changesL
 	} elseif {!$opts(-silent)} {
-	    ::UI::MessageBox -icon info -type ok \
+	    ::UI::MessageBox -title [mc mUpdateCheck] -icon info -type ok \
 	      -message [mc messaupdatelatest $this(vers,full)]
 	}
 	tinydom::cleanup $token

@@ -18,13 +18,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.31 2007-08-07 07:50:21 matben Exp $
+# $Id: Taskbar.tcl,v 1.32 2007-09-12 13:37:55 matben Exp $
 
 package require balloonhelp
 
 namespace eval ::Taskbar:: {}
 
-proc ::Taskbar::Load { } {
+proc ::Taskbar::Load {} {
     global  tcl_platform this
     variable wtray .tskbar
     variable wtearoff ""
@@ -47,8 +47,7 @@ proc ::Taskbar::Load { } {
 	}
     }
         
-    component::register Taskbar  \
-      "Makes the taskbar icon on Windows and X11 which is handy as a shortcut."
+    component::register Taskbar "Creates a system tray icon"
     
     # Add all event hooks.
     ::hooks::register initHook           ::Taskbar::InitHook
@@ -62,7 +61,7 @@ proc ::Taskbar::Load { } {
     return 1
 }
 
-proc ::Taskbar::WinInit { } {
+proc ::Taskbar::WinInit {} {
     global  this prefs
     variable icon
     variable iconFile
@@ -107,7 +106,7 @@ proc ::Taskbar::WinInit { } {
     return 1
 }
 
-proc ::Taskbar::X11Init { } {
+proc ::Taskbar::X11Init {} {
     global  prefs
     variable wtray
     variable wmenu
@@ -133,12 +132,12 @@ proc ::Taskbar::X11Init { } {
     return 1
 }
 
-proc ::Taskbar::BuildMainHook { } {
+proc ::Taskbar::BuildMainHook {} {
     
     bind [::UI::GetMainWindow] <Map> [list [namespace current]::Update %W]
 }
 
-proc ::Taskbar::InitHook { } {
+proc ::Taskbar::InitHook {} {
     global  prefs this
     variable wmenu
     variable menuIndex
@@ -160,13 +159,13 @@ proc ::Taskbar::InitHook { } {
     set menuDef {
 	{cascade  mStatus           {}                      {-image @STAT -compound left}}
 	{command  mMinimize         ::Taskbar::HideMain                  }
-	{command  mSendMessage...   ::NewMsg::Build         {-image @MSG -compound left}}
+	{command  mMessage...       ::NewMsg::Build         {-image @MSG -compound left}}
 	{command  mPreferences...   ::Preferences::Build    {-image @SET -compound left}}
 	{command  mAddContact...    ::JUser::NewDlg  {-image @ADD -compound left}}
 	{cascade  mInfo  {
-	    {command  mAboutCoccinella  ::Splash::SplashScreen  {-image @COCI -compound left}}
-	    {command  mCoccinellaHome   ::JUI::OpenCoccinellaURL}
-	    {command  mBugReport        ::JUI::OpenBugURL       }
+	    {command  mAboutCoccinella    ::Splash::SplashScreen  {-image @COCI -compound left}}
+	    {command  mCoccinellaHome...  ::JUI::OpenCoccinellaURL}
+	    {command  mBugReport...       ::JUI::OpenBugURL       }
 	    } {-image @INFO -compound left}
 	}
 	{separator}
@@ -255,7 +254,7 @@ proc ::Taskbar::Post {m} {
 	set state0 normal
 	set state3 disabled
     }
-    $m entryconfigure $menuIndex(mSendMessage...) -state $state0 
+    $m entryconfigure $menuIndex(mMessage...) -state $state0 
     $m entryconfigure $menuIndex(mAddContact...) -state $state0
     
     set mstatus [$m entrycget $menuIndex(mStatus) -menu]
@@ -273,35 +272,35 @@ proc ::Taskbar::TearOff {wm wt} {
     set wtearoff $wt
 }
 
-proc ::Taskbar::HideMain { } {
+proc ::Taskbar::HideMain {} {
     
     ::UI::WithdrawAllToplevels
     Update [::UI::GetMainWindow]
 }
 
-proc ::Taskbar::ShowMain { } {
+proc ::Taskbar::ShowMain {} {
     
     ::UI::ShowAllToplevels
 }
 
-proc ::Taskbar::LoginHook { } {
+proc ::Taskbar::LoginHook {} {
     variable wtearoff
     variable menuIndex
     
     if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
 	set m $wtearoff
-	$m entryconfigure $menuIndex(mSendMessage...) -state normal
+	$m entryconfigure $menuIndex(mMessage...) -state normal
 	$m entryconfigure $menuIndex(mAddContact...) -state normal
     }
 }
 
-proc ::Taskbar::LogoutHook { } {
+proc ::Taskbar::LogoutHook {} {
     variable wtearoff
     variable menuIndex
 
     if {[winfo exists $wtearoff] && [winfo ismapped $wtearoff]} {
 	set m $wtearoff
-	$m entryconfigure $menuIndex(mSendMessage...) -state disabled 
+	$m entryconfigure $menuIndex(mMessage...) -state disabled 
 	$m entryconfigure $menuIndex(mAddContact...) -state disabled
     }
 }
@@ -368,7 +367,7 @@ proc ::Taskbar::CloseHook {wclose} {
     return $result
 }
 
-proc ::Taskbar::QuitAppHook { } {
+proc ::Taskbar::QuitAppHook {} {
     variable icon
     
     if {[tk windowingsystem] eq "win32"} {

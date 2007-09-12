@@ -23,7 +23,7 @@
 #            2) Configurable nick alert
 #            3) Implement -command for error notice
 #  
-# $Id: IRCActions.tcl,v 1.5 2007-07-18 09:40:09 matben Exp $
+# $Id: IRCActions.tcl,v 1.6 2007-09-12 13:37:55 matben Exp $
 
 namespace eval ::IRCActions:: {
     
@@ -33,7 +33,8 @@ namespace eval ::IRCActions:: {
 
 proc ::IRCActions::Init { } {
     
-    component::register IRCActions "Implements IRC style actions for groupchats, /join. /topic, /invite, /nick, /me etc."
+    component::register IRCActions \
+      "IRC style actions for chatrooms: /join. /topic, /invite, /nick, /me, amongst others"
 
     # Add event hooks.
     ::hooks::register sendTextGroupChatHook [namespace current]::TextGroupChatHook
