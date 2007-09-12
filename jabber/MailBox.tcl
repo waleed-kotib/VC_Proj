@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.120 2007-09-06 13:20:47 matben Exp $
+# $Id: MailBox.tcl,v 1.121 2007-09-12 11:55:31 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -118,7 +118,7 @@ namespace eval ::MailBox:: {
 # 
 #       Take care of things like translating any old version mailbox etc.
 
-proc ::MailBox::Init { } {    
+proc ::MailBox::Init {} {    
     variable locals
     variable icons
    
@@ -127,7 +127,7 @@ proc ::MailBox::Init { } {
     set locals(inited) 1
 }
 
-proc ::MailBox::InitPrefsHook { } {
+proc ::MailBox::InitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
         
     set jprefs(mailbox,dialog) 0
@@ -374,7 +374,7 @@ proc ::MailBox::HandleSVGWBMessage {jlibname xmlns xmldata args} {
     return 1
 }
 
-proc ::MailBox::LaunchHook { } {
+proc ::MailBox::LaunchHook {} {
     upvar ::Jabber::jprefs jprefs
     
     if {$jprefs(rememberDialogs) && $jprefs(mailbox,dialog)} {
@@ -382,12 +382,12 @@ proc ::MailBox::LaunchHook { } {
     }
 }
 
-proc ::MailBox::OnMenu { } {
+proc ::MailBox::OnMenu {} {
     if {[llength [grab current]]} { return }
     ShowHide
 }
 
-proc ::MailBox::IsVisible { } {
+proc ::MailBox::IsVisible {} {
     global wDlgs
 
     set w $wDlgs(jinbox)
@@ -925,7 +925,7 @@ proc ::MailBox::CloseHook {wclose} {
     return stop
 }
 
-proc ::MailBox::GetToplevel { } {    
+proc ::MailBox::GetToplevel {} {    
     variable locals
     
     if {[winfo exists $locals(w)]} {
@@ -998,7 +998,7 @@ proc ::MailBox::IsLastMessage {uid} {
     }
 }
 
-proc ::MailBox::AllRead { } {
+proc ::MailBox::AllRead {} {
 
     if {[MKHaveMetakit]} {
 	return [MKAllRead]
@@ -1099,7 +1099,7 @@ proc ::MailBox::PutMessageInInbox {row} {
     }
 }
 
-proc ::MailBox::SaveMsg { } {    
+proc ::MailBox::SaveMsg {} {    
     variable locals
     
     set wtextmsg $locals(wtextmsg)
@@ -1134,7 +1134,7 @@ proc ::MailBox::SaveMsg { } {
     }
 }
 
-proc ::MailBox::TrashMsg { } {
+proc ::MailBox::TrashMsg {} {
     global  prefs this
     
     variable locals
@@ -1346,7 +1346,7 @@ proc ::MailBox::DoubleClickMsg {T} {
     }
 }
 
-proc ::MailBox::MsgDisplayClear { } {    
+proc ::MailBox::MsgDisplayClear {} {    
     variable locals
     
     set wtextmsg $locals(wtextmsg)    
@@ -1435,7 +1435,7 @@ proc ::MailBox::DisplayTextMsg {uid} {
     eval {::hooks::run displayMessageHook $body} $opts
 }
 
-proc ::MailBox::ReplyTo { } {
+proc ::MailBox::ReplyTo {} {
     variable locals
     variable mailbox
     variable mailboxindex
@@ -1467,7 +1467,7 @@ proc ::MailBox::ReplyTo { } {
       -quotemessage $body -time $date -replyxmldata $xmldata
 }
 
-proc ::MailBox::ForwardTo { } {
+proc ::MailBox::ForwardTo {} {
     variable locals
     variable mailbox
     variable mailboxindex
@@ -1495,7 +1495,7 @@ proc ::MailBox::ForwardTo { } {
       -forwardxmldata $xmldata
 }
 
-proc ::MailBox::DoPrint { } {
+proc ::MailBox::DoPrint {} {
 
     variable locals
 
@@ -1510,7 +1510,7 @@ proc ::MailBox::SaveMailbox {args} {
     eval {SaveMailboxVer2} $args
 }
     
-proc ::MailBox::SaveMailboxVer1 { } {
+proc ::MailBox::SaveMailboxVer1 {} {
     global  this
     
     variable locals
@@ -1633,7 +1633,7 @@ proc ::MailBox::WriteInboxHeader {fid} {
     puts $fid "#   The data written at: [clock format [clock seconds]]\n#"    
 }
 
-proc ::MailBox::ReadMailbox { } {
+proc ::MailBox::ReadMailbox {} {
     global  this
     variable locals
     variable mailbox
@@ -1660,7 +1660,7 @@ proc ::MailBox::ReadMailbox { } {
     set locals(mailboxRead) 1
 }
 
-proc ::MailBox::TranslateAnyVer1ToCurrentVer { } {
+proc ::MailBox::TranslateAnyVer1ToCurrentVer {} {
     variable locals
     variable mailbox
     
@@ -1681,7 +1681,7 @@ proc ::MailBox::TranslateAnyVer1ToCurrentVer { } {
 #       Returns empty string if no mailbox exists, else the version number of
 #       any existing mailbox.
 
-proc ::MailBox::GetMailboxVersion { } {
+proc ::MailBox::GetMailboxVersion {} {
     global  this
     
     set version ""
@@ -1699,7 +1699,7 @@ proc ::MailBox::GetMailboxVersion { } {
     return $version
 }
 
-proc ::MailBox::ReadMailboxVer1 { } {
+proc ::MailBox::ReadMailboxVer1 {} {
     global  this
     variable locals
     variable uidmsg
@@ -1732,7 +1732,7 @@ proc ::MailBox::ReadMailboxVer1 { } {
     }
 }
 
-proc ::MailBox::ReadMailboxVer2 { } {
+proc ::MailBox::ReadMailboxVer2 {} {
     global  this
     variable locals
     variable uidmsg
@@ -1766,7 +1766,7 @@ proc ::MailBox::ReadMailboxVer2 { } {
     }
 }
 
-proc ::MailBox::HaveMailBox { } {
+proc ::MailBox::HaveMailBox {} {
     global  this
 
     if {[file exist $this(inboxFile)]} {
@@ -1777,7 +1777,7 @@ proc ::MailBox::HaveMailBox { } {
     return $ans
 }
 
-proc ::MailBox::DeleteMailbox { } {
+proc ::MailBox::DeleteMailbox {} {
     global prefs this
 
     if {[file exist $this(inboxFile)]} {
@@ -1793,13 +1793,12 @@ proc ::MailBox::DeleteMailbox { } {
 #       This gets called when we want user prefs on a removable drive or
 #       vice versa.
 
-proc ::MailBox::PrefsFilePathHook { } {
-    global wDlgs
+proc ::MailBox::PrefsFilePathHook {} {
     variable locals
     variable mailbox
     
     if {$locals(mailboxRead)} {
-	if {[winfo exists $wDlgs(jinbox)]} {
+	if {[winfo exists $locals(wtbl)]} {
 	    $locals(wtbl) item delete all
 	}
 	if {[MKHaveMetakit]} {
@@ -1807,11 +1806,13 @@ proc ::MailBox::PrefsFilePathHook { } {
 	}
 	unset -nocomplain mailbox
 	ReadMailbox
-	InsertAll
+	if {[winfo exists $locals(wtbl)]} {
+	    InsertAll
+	}
     }
 }
 
-proc ::MailBox::QuitHook { } {
+proc ::MailBox::QuitHook {} {
     global wDlgs
     upvar ::Jabber::jprefs jprefs
     variable locals
