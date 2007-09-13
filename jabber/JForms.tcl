@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: JForms.tcl,v 1.32 2007-07-19 06:28:12 matben Exp $
+# $Id: JForms.tcl,v 1.33 2007-09-13 08:25:39 matben Exp $
 # 
 #      Updated to version 2.5 of XEP-0004
 #  
@@ -266,7 +266,7 @@ proc ::JForms::PlainEntry {token child} {
 	lappend state(wraplengthList) $wlab
     } elseif {$tag eq "registered"} {
 	ttk::label $wlab -style $state(textLabelStyle) \
-	  -text [mc jaregalready] -justify left
+	  -text [mc jaregalready2] -justify left
 	grid  $wlab  -columnspan 2 -sticky w -pady 2
 	if {$state(opt,-width)} {
 	    $wlab configure -wraplength $state(opt,-width)

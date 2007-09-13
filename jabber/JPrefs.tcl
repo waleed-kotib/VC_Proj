@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.51 2007-09-08 14:39:56 matben Exp $
+# $Id: JPrefs.tcl,v 1.52 2007-09-13 08:25:39 matben Exp $
 
 package require ui::fontselector
 
@@ -187,37 +187,32 @@ proc ::JPrefs::BuildAppearancePage {page} {
     set wap $wc.ap
     ttk::frame $wap
      
-    ttk::checkbutton $wap.tab -text [mc prefstabui]  \
+    ttk::checkbutton $wap.tab -text [mc prefstabui2]  \
       -variable [namespace current]::tmpJPrefs(chat,tabbedui)
 
     # Chat font.
-    ttk::label  $wap.lfont -text [mc prefcufont]
-    ttk::button $wap.btfont -text "[mc Pick]..." -style Small.TButton \
+    ttk::label  $wap.lfont -text "[mc {Chat window}]:"
+    ttk::button $wap.btfont -text "[mc {Select Font}]..." -style Small.TButton \
       -command [namespace current]::PickFont
-    ttk::button $wap.dfont -text [mc {Default}]  \
+    ttk::button $wap.dfont -text [mc Default]  \
       -command [namespace current]::DefaultChatFont  \
       -style Small.TButton
 
-    set wthe $wap.the
-    ttk::frame $wthe
-    ttk::label $wthe.l -text "[mc preftheme]:"
-    eval {ttk::optionmenu $wthe.p [namespace current]::tmpPrefs(themeName)} \
+    ttk::label $wap.lthe -text "[mc Theme]:"
+    eval {ttk::optionmenu $wap.pthe [namespace current]::tmpPrefs(themeName)} \
       $allrsrc
     
-    grid  $wthe.l   $wthe.p
+    ::balloonhelp::balloonforwindow $wap.pthe [mc {Requires a restart of Coccinella}]
 
     # Tile's themes (skins).
     # This is applied immediately and unaffected by Cancel/Save actions.
     # The theme state is kept in two variables: 
     #   ::tile::currentTheme and prefs(tileTheme)
-    set wskin $wap.skin
-    set wmenu $wskin.b.m
-    ttk::frame $wskin
-    ttk::label $wskin.l -text "[mc {Pick skin}]:"
+    ttk::label $wap.lskin -text "[mc Skin]:"
     
-    ui::optionmenu $wskin.b -menulist $menuDef -variable ::tile::currentTheme \
+    ui::optionmenu $wap.bskin -menulist $menuDef -variable ::tile::currentTheme \
       -command tile::setTheme
-        
+	
     # This has been disabled since it starts a child interpreter which needs
     # another ::tileqt::library.
     set tileqt 0
@@ -226,7 +221,6 @@ proc ::JPrefs::BuildAppearancePage {page} {
     #	ttk::button $wskin.qt -text "Qt Theme" -command ::JPrefs::BuildQtSetup
     #}
     
-    grid  $wskin.l  $wskin.b
     #if {$tileqt} {
     #	grid  $wskin.qt  -column 2 -row 0 -padx 12
     #}
@@ -236,25 +230,21 @@ proc ::JPrefs::BuildAppearancePage {page} {
     set haveOpacity 0
     if {[info exists wmopts(-alpha)]} {
 	set haveOpacity 1
-	set wop $wap.op
-	ttk::frame $wop
-	ttk::label $wop.l -text "[mc {Set windows opacity}]:"
-	ttk::scale $wop.s -orient horizontal -from 50 -to 100 \
+	ttk::label $wap.lop -text "[mc {Windows opacity}]:"
+	ttk::scale $wap.sop -orient horizontal -from 50 -to 100 \
 	  -variable [namespace current]::tmpPrefs(opacity) \
 	  -value $tmpPrefs(opacity)
-
-	grid  $wop.l  $wop.s
     }
     
-    grid  $wap.tab    -            -            -padx 2 -pady 2 -sticky w
-    grid  $wap.lfont  $wap.btfont  $wap.dfont   -padx 2 -pady 2 -sticky w
-    grid  $wthe       -            -            -padx 2 -pady 2 -sticky w
-    grid  $wskin      -            -            -padx 2 -pady 2 -sticky w
+    grid  $wap.tab    -            -padx 2 -pady 2 -sticky w
+    grid  $wap.lfont  $wap.btfont  -padx 2 -pady 2 -sticky e
+    grid  x           $wap.dfont   -padx 2 -pady 2 -sticky ew
+    grid  $wap.lthe   $wap.pthe    -padx 2 -pady 2 -sticky e
+    grid  $wap.lskin  $wap.bskin   -padx 2 -pady 2 -sticky e
     if {$haveOpacity} {
-	grid  $wop    -            -            -padx 2 -pady 2 -sticky w
+	grid $wap.lop   $wap.sop   -padx 2 -pady 2 -sticky e
     }
-    grid  $wap.lfont  -sticky e
-    grid  $wap.btfont  $wap.dfont  -sticky ew
+    grid $wap.btfont $wap.pthe $wap.bskin -sticky ew
     
     pack  $wap  -side top -fill x
     
@@ -310,9 +300,9 @@ proc ::JPrefs::BuildCustomPage {page} {
          
     ttk::checkbutton $wcu.savein -text [mc prefcusave] \
       -variable [namespace current]::tmpJPrefs(inboxSave)
-    ttk::checkbutton $wcu.log -text [mc prefcuautologin] \
+    ttk::checkbutton $wcu.log -text [mc prefcuautologin2] \
       -variable [namespace current]::tmpJPrefs(autoLogin)
-    ttk::checkbutton $wcu.rem -text [mc prefcuremdlgs] \
+    ttk::checkbutton $wcu.rem -text [mc prefcuremdlgs2] \
       -variable [namespace current]::tmpJPrefs(rememberDialogs)
     if {[string equal $this(platform) "windows"]} {
 	ttk::checkbutton $wcu.not -text  "Show notfier window" \

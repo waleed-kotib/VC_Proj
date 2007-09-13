@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.5 2007-09-04 13:17:30 matben Exp $
+# $Id: AutoAway.tcl,v 1.6 2007-09-13 08:25:37 matben Exp $
 
 package require idletime
 
@@ -213,7 +213,7 @@ proc ::AutoAway::Active {} {
 
 proc ::AutoAway::BuildPrefsHook {wtree nbframe} {
 	
-    ::Preferences::NewTableItem {Jabber {Auto Away}} [mc {Auto Away}]
+    ::Preferences::NewTableItem {Jabber {Auto Away}} [mc "Auto Away"]
     
     # Auto Away page -------------------------------------------------------
     set wpage [$nbframe page {Auto Away}]    

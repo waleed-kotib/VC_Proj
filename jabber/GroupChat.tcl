@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.207 2007-09-10 12:31:55 matben Exp $
+# $Id: GroupChat.tcl,v 1.208 2007-09-13 08:25:38 matben Exp $
 
 package require Create
 package require Enter
@@ -189,12 +189,12 @@ proc ::GroupChat::InitMenus {} {
 
     variable popMenuDefs
     set mDefs {
-	{command   mMessage       {::NewMsg::Build -to $jid}    }
-	{command   mChat...       {::Chat::StartThread $jid}    }
-	{command   mSendFile...      {::FTrans::Send $jid}         }
-	{command   mBusinessCard...  {::UserInfo::Get $jid}        }	
-	{command   mEditNick      {::GroupChat::TreeEditUserStart $chattoken $jid} }
-	{check     mIgnore        {::GroupChat::Ignore $chattoken $jid} {
+	{command   mMessage...      {::NewMsg::Build -to $jid}    }
+	{command   mChat...         {::Chat::StartThread $jid}    }
+	{command   mSendFile...     {::FTrans::Send $jid}         }
+	{command   mBusinessCard... {::UserInfo::Get $jid}        }	
+	{command   mEditNick        {::GroupChat::TreeEditUserStart $chattoken $jid} }
+	{check     mIgnore          {::GroupChat::Ignore $chattoken $jid} {
 	    -variable $chattoken\(ignore,$jid)
 	}}
     }
@@ -206,13 +206,13 @@ proc ::GroupChat::InitMenus {} {
     set popMenuDefs(groupchat,def) $mDefs
 
     set popMenuDefs(groupchat,type) {
-	{mMessage       user        }
-	{mChat...       user        }
-	{mSendFile...      user        }
-	{mBusinessCard...  user        }
-	{mWhiteboard    wb          }
-	{mEditNick      me          }
-	{mIgnore        user        }
+	{mMessage...        user        }
+	{mChat...           user        }
+	{mSendFile...       user        }
+	{mBusinessCard...   user        }
+	{mWhiteboard        wb          }
+	{mEditNick          me          }
+	{mIgnore            user        }
     }
 
     # Keeps track of all registered menu entries.
@@ -334,7 +334,8 @@ proc ::GroupChat::EnterOrCreate {what args} {
 	    set ans [eval {::Create::Build} $args]
 	}
 	default {
-	    ::ui::dialog -icon error -message [mc jamessnogroupchat]
+	    ::ui::dialog -icon error -title [mc Error] \
+	      -message [mc jamessnogroupchat2]
 	}
     }    
     
@@ -449,7 +450,7 @@ proc ::GroupChat::NormalMsgHook {body args} {
 
 	::Debug 2 "::GroupChat::NormalMsgHook args='$args'"
 
-	set str [mc jamessgcinvite $roomjid $invitejid]
+	set str [mc jamessgcinvite2 $invitejid $roomjid]
 	append str " " $str2
 	set ans [::UI::MessageBox -title [mc Invite] -icon info -type yesno \
 	  -message $str]
@@ -647,7 +648,7 @@ proc ::GroupChat::Build {roomjid} {
     $wtray newbutton invite -text [mc Invite] \
       -image $iconInvite -disabledimage $iconInviteDis  \
       -command [list [namespace current]::Invite $dlgtoken]
-    $wtray newbutton info -text [mc Info] \
+    $wtray newbutton info -text [mc Configure] \
       -image $iconInfo -disabledimage $iconInfoDis    \
       -command [list [namespace current]::Info $dlgtoken]
     $wtray newbutton print -text [mc Print] \
@@ -857,7 +858,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set wbtsend $wbot.btok
 
     ::balloonhelp::balloonforwindow $wgroup.active [mc jaactiveret]
-    ::balloonhelp::balloonforwindow $wgroup.bmark  [mc {Bookmark this room}]
+    ::balloonhelp::balloonforwindow $wgroup.bmark  [mc "Bookmark this chatroom"]
 
     # Header fields.
     ttk::frame $wtop
@@ -1066,7 +1067,7 @@ proc ::GroupChat::MenuEditPostHook {wmenu} {
 	set wfind $chatstate(wfind)
 	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
 	if {[winfo exists $wfind]} {
-	    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
 	}
     }
@@ -1408,9 +1409,9 @@ proc ::GroupChat::SetTitle {chattoken} {
     set roomjid $chatstate(roomjid)
     set ujid [jlib::unescapejid $roomjid]
     if {$name ne ""} {
-	set str "[mc Groupchat]: $name"
+	set str "[mc Chatroom]: $name"
     } else {
-	set str "[mc Groupchat]: $ujid"
+	set str "[mc Chatroom]: $ujid"
     }
 
     # Put an extra (*) in the windows title if not in focus.
@@ -2296,7 +2297,7 @@ proc ::GroupChat::ExitWarn {chattoken} {
     }
     set roomjid $chatstate(roomjid)
     return [eval {::UI::MessageBox -icon warning -type yesno  \
-      -message [mc jamesswarnexitroom $roomjid]} $opts]
+      -message [mc jamesswarnexitroom2 $roomjid]} $opts]
 }
 
 # GroupChat::Exit --
@@ -2412,8 +2413,9 @@ proc ::GroupChat::SetNickCB {chattoken xmldata} {
 	    set errmsg  [lindex $errspec 1]
 	}
 	jlib::splitjidex $from roomName - -
-	::UI::MessageBox -type ok -icon error -title [mc Error]  \
-	  -message [mc mucIQError $roomName $errmsg]
+	set str [mc mucIQError2 $roomName]
+	append str "\n[mc Error]: $errmsg"
+	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
     }    
 }
 
@@ -2421,8 +2423,8 @@ proc ::GroupChat::Send {dlgtoken} {
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
-	::UI::MessageBox -type ok -icon error -title [mc {Not Connected}] \
-	  -message [mc jamessnotconnected]
+	::UI::MessageBox -type ok -icon error -title [mc Error] \
+	  -message [mc jamessnotconnected2]
 	return
     }
     SendChat [GetActiveChatToken $dlgtoken]
@@ -3137,7 +3139,7 @@ proc ::GroupChat::EditBookmarks {} {
     }
     set m [::UI::GetMainMenu]
     set columns [list  \
-      0 [mc Bookmark] 0 [mc Address]  \
+      0 [mc Chatroom] 0 [mc Location] \
       0 [mc Nickname] 0 [mc Password] \
       0 [mc {Auto Join}]]
 
@@ -3303,7 +3305,7 @@ proc ::GroupChat::InitPrefsHook { } {
 
 proc ::GroupChat::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Conference} [mc Conference]
+    ::Preferences::NewTableItem {Jabber Conference} [mc Chatroom]
     
     # Conference page ------------------------------------------------------
     set wpage [$nbframe page {Conference}]
@@ -3331,7 +3333,9 @@ proc ::GroupChat::BuildPageConf {page} {
     pack $wnick.e -fill x
     pack $wnick -side top -anchor w -pady 8 -fill x
     
-    ttk::checkbutton $wc.sync -text [mc jagcsyncpres]  \
+    ::balloonhelp::balloonforwindow $wnick.e [mc regitration-nick]
+
+    ttk::checkbutton $wc.sync -text [mc jagcsyncpres2] \
       -variable [namespace current]::tmpJPrefs(gchat,syncPres)	      
     pack $wc.sync -side top -anchor w
 }

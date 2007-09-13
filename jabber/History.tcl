@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: History.tcl,v 1.31 2007-09-01 07:49:05 matben Exp $
+# $Id: History.tcl,v 1.32 2007-09-13 08:25:38 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -833,7 +833,7 @@ proc ::History::XInsertText {w} {
 		    if {$xmppTag eq "presence" && $myShow ne $myPrevShow} {
 			if {$myShow eq "available"} {
 			    set prefix [GetTimeStr $secs $clockFormat $clockFormatNotToday]
-			    set str "$prefix [mc {Enter room}]"
+			    set str "$prefix [mc jagcloginmsg]"
 			    $wtext insert end $str\n histhead
 			    set havehisthead 1
 			} elseif {$myShow eq "unavailable"} {
@@ -1047,7 +1047,7 @@ proc ::History::MenuEditPostHook {wmenu} {
 	    ::UI::MenuMethod $wmenu entryconfigure mFind -state normal
 	    set wfind $state(wfind)
 	    if {[winfo exists $wfind]} {
-		::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+		::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal
 		::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
 	    }
 	}

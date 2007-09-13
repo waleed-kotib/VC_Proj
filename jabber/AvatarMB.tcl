@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.21 2007-08-24 13:33:13 matben Exp $
+# $Id: AvatarMB.tcl,v 1.22 2007-09-13 08:25:37 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -426,7 +426,7 @@ proc ::AvatarMB::Menu {m args} {
     pack $m.f -fill both -expand 1
     set f $m.f
     
-    ttk::label $f.l -text "Recent Avatars:"
+    ttk::label $f.l -text "[mc {Recent Avatars}]:"
     pack $f.l -side top -anchor w -padx 18 -pady 2
     
     ttk::frame $f.box
@@ -472,16 +472,18 @@ proc ::AvatarMB::Menu {m args} {
     
     bind $m <KeyPress> { }
     
-    ttk::button $f.new -style FMenu -text "Pick New..." \
+    ttk::button $f.new -style FMenu -text "[mc Open]..." \
       -command ::AvatarMB::MenuNew
     BindFMenu $f.new
     pack $f.new -side top -anchor w -fill x
 
-    ttk::button $f.edit -style FMenu -text "Edit..." -state disabled
-    BindFMenu $f.edit
-    pack $f.edit -side top -anchor w -fill x
-
-    ttk::button $f.clear -style FMenu -text "Clear Menu" \
+    if {0} {
+	ttk::button $f.edit -style FMenu -text "[mc Edit]..." -state disabled
+	BindFMenu $f.edit
+	pack $f.edit -side top -anchor w -fill x
+    }
+    
+    ttk::button $f.clear -style FMenu -text [mc mClearMenu] \
       -command ::AvatarMB::MenuClear
     BindFMenu $f.clear
     pack $f.clear -side top -anchor w -fill x
@@ -641,7 +643,7 @@ proc ::AvatarMB::MenuNew {} {
     if {[file isdirectory $prefs(dir,avatarPick)]} {
 	lappend opts -initialdir $prefs(dir,avatarPick)
     }
-    set fileName [eval {tk_getOpenFile -title [mc {Pick Image File}]  \
+    set fileName [eval {tk_getOpenFile -title [mc "Select Avatar"]  \
       -filetypes $types} $opts]
     if {[file exists $fileName]} {
 	set prefs(dir,avatarPick) [file dirname $fileName]

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.22 2007-07-29 10:28:14 matben Exp $
+# $Id: FTrans.tcl,v 1.23 2007-09-13 08:25:38 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -194,13 +194,13 @@ snit::widget ::FTrans::SendDialog {
 
 	ttk::label $wbox.msg -style Small.TLabel  \
 	  -padding {0 0 0 6} -wraplength 200 -anchor w -justify left \
-	  -text [mc oobmsg $jid]
+	  -text [mc oobmsg2 $jid]
 	pack $wbox.msg -side top -fill both -expand 1
 	
 	# Entries etc.
 	set frm $wbox.m
 	ttk::frame $frm
-	ttk::button $frm.btfile -text "[mc {File}]..." -width -10  \
+	ttk::button $frm.btfile -text "[mc {Select File}]..." -width -10  \
 	  -command [list $self GetFile]
 	ttk::entry $frm.efile -textvariable [myvar fileName]
 	ttk::label $frm.ldesc -text "[mc {Description}]:" -anchor e
@@ -282,7 +282,7 @@ snit::widget ::FTrans::SendDialog {
 	if {[file isdirectory $options(-initialdir)]} {
 	    set opts [list -initialdir $options(-initialdir)]
 	}
-	set ans [eval {tk_getOpenFile -title [mc {Pick File}]} $opts]
+	set ans [eval {tk_getOpenFile -title [mc "Select File"]} $opts]
 	if {[string length $ans]} {
 	    set fileName $ans
 	    set initialdir [file dirname $ans]
@@ -360,7 +360,7 @@ proc ::FTrans::Send {jid args} {
     if {[$jstate(jlib) disco isdiscoed info $jid]} {
 	set feature [DiscoGetFeature $jid]
 	if {$feature eq ""} {
-	    ui::dialog -type ok -icon error -title [mc {Error}]  \
+	    ui::dialog -type ok -icon error -title [mc Error] \
 	      -message [mc jamessnofiletrpt2 $jid]
 	} else {
 	    eval {Build $jid} $args
@@ -368,7 +368,7 @@ proc ::FTrans::Send {jid args} {
     } else {
 	set w [eval {Build $jid} $args]
 	$w state disabled
-	$w status [mc jawaitdisco]
+	$w status "[mc jawaitdisco]..."
 	set cb [list [namespace current]::DiscoCB $w]
 	$jstate(jlib) disco get_async info $jid $cb
     }
@@ -396,7 +396,7 @@ proc ::FTrans::DiscoCB {w jlibname type jid subiq} {
     if {[winfo exists $w]} {
 	$w status ""
 	if {($type eq "error") || ([DiscoGetFeature $jid] eq "")} {
-	    ui::dialog -type ok -icon error -title [mc {Error}]  \
+	    ui::dialog -type ok -icon error -title [mc Error]  \
 	      -message [mc jamessnofiletrpt2 $jid]
 	    destroy $w
 	} else {
@@ -433,14 +433,12 @@ proc ::FTrans::DoSend {win jid fileName desc} {
     # Verify that file is ok.	
     if {![string length $fileName]} {
 	::UI::MessageBox -type ok -icon error   \
-	  -title [mc {Pick File}] -parent $win  \
-	  -message "You must provide a file to send"
+	  -title [mc Error] -parent $win -message [mc jamessnofile2]
 	return -code break
     }
     if {![file exists $fileName]} {
 	::UI::MessageBox -type ok -icon error   \
-	  -title [mc {Pick File}] -parent $win  \
-	  -message "The picked file does not exist. Pick a new one."
+	  -title [mc Error] -parent $win -message [mc jamessfilenotexist]
 	return -code break
     }
     set opts [list -mime [::Types::GetMimeTypeForFileName $fileName]]
@@ -451,8 +449,8 @@ proc ::FTrans::DoSend {win jid fileName desc} {
     # Select protocol to be used: oob or file-transfer.
     set feature [DiscoGetFeature $jid]
     if {$feature eq ""} {
-	::UI::MessageBox -type ok -icon error -title [mc {Error}]  \
-	  -message [mc jamessnofiletrpt $jid]
+	::UI::MessageBox -type ok -icon error -title [mc Error]  \
+	  -message [mc jamessnofiletrpt2 $jid]
 	return
     }
     if {$feature eq $xmppxmlns(file-transfer)} {
@@ -490,11 +488,12 @@ proc ::FTrans::SendCommand {jlibname status sid {subiq ""}} {
 	
 	switch -- $stanza {
 	    forbidden {
-		set msg [mc jamessooberr406 $state(jid) $state(name)]
+		set msg [mc jamessooberr406b $state(jid) $state(name)]
 	    }
 	    default {
-		set msg [mc jamessooberr404 $state(name) $state(jid) \
-		  $stanza $errstr]
+		set msg [mc jamessooberr404b $state(name) $state(jid)]
+		append msg "\n[mc {Error code}]: $stanza"
+		append msg "\n[mc Message]: $errstr"
 	    }
 	}
 	ui::dialog -icon error -type ok -title [mc Error] -message $msg
@@ -515,13 +514,14 @@ proc ::FTrans::SendCommandOOB {fileName jid jlibname type subiq} {
 	
 	switch -- $errcode {
 	    406 {
-		set msg [mc jamessooberr406 $jid $tail]
+		set msg [mc jamessooberr406b $jid $tail]
 	    }
 	    default {
-		set msg [mc jamessooberr404 $tail $jid $errcode $errmsg]
+		set msg [mc jamessooberr404b $tail $jid]
+		append msg "\n[mc {Error code}]: $errcode"
+		append msg "\n[mc Message]: $errmsg"
 	    }
 	}
-	
 	ui::dialog -icon error -type ok -title [mc Error] -message $msg
     } else {
 	ui::dialog -icon info -type ok -title [mc {File Transfer}] \
@@ -549,14 +549,14 @@ proc ::FTrans::SetHandler {jlibname jid name size cmd args} {
     foreach {key value} $args {
 	set state($key) $value
     }
-    set str " [mc Size]: [::Utils::FormatBytes $size]"
+    set str "\n[mc File]: $name\n[mc Size]: [::Utils::FormatBytes $size]\n"
     if {[info exists state(-desc)]} {
-	append str " [mc Description]: $state(-desc)."
+	append str "[mc Description]: $state(-desc)\n"
     }
-    set msg [mc jamessoobask $jid $name $str]
+    set msg [mc jamessoobask2 $jid $name $str]
     
     # Nonmodal message dialog.
-    ui::dialog $state(w) -title [mc {Get File}] -icon question  \
+    ui::dialog $state(w) -title [mc "Receive File"] -icon question  \
       -type yesno -default yes -message $msg                    \
       -command [list [namespace current]::SetHandlerAnswer $token]
     
@@ -641,8 +641,10 @@ proc ::FTrans::TCommand {token jlibname sid status {errmsg ""}} {
     ::Debug 2 "---> ::FTrans::TCommand status=$status"
 
     if {$status eq "error"} {
-	ui::dialog -icon error -type ok -title [mc Error]  \
-	  -message [mc jamessfiletrpterr $state(name) $state(jid) $errmsg]
+	set str "[mc jamessfiletrpterr2 $state(name) $state(jid)]\n"
+	append str "[mc Error]: $errmsg"
+	ui::dialog -icon error -type ok -title [mc Error] -message $str
+
 	catch {file delete $state(fileName)}
     } elseif {$status eq "reset"} {
 	catch {file delete $state(fileName)}
@@ -653,7 +655,7 @@ proc ::FTrans::TCommand {token jlibname sid status {errmsg ""}} {
 	    set hash [MD5 $state(fileName)]
 	    if {[string length $hash] && ($hash ne $state(-hash))} {
 		ui::dialog -icon error -type ok -title [mc Error]  \
-		  -message "The MD5 checksums didn't agree which may point to file corruption"
+		  -message [mc jamessfilemd5]
 	    }
 	}
     }

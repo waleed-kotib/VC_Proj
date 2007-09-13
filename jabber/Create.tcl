@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Create.tcl,v 1.12 2007-09-01 07:49:05 matben Exp $
+# $Id: Create.tcl,v 1.13 2007-09-13 08:25:38 matben Exp $
 
 package provide Create 1.0
 
@@ -56,7 +56,7 @@ proc ::Create::Build {args} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document {closeBox resizable}} \
       -closecommand [list [namespace current]::Close $token]
-    wm title $w [mc {Create Room}]
+    wm title $w [mc {Create Chatroom}]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jcreateroom)]]
     if {$nwin == 1} {
@@ -76,11 +76,11 @@ proc ::Create::Build {args} {
 	set state(nickname) $argsA(-nickname)
     }
     set state(w)              $w
-    set state(wraplength)     300
+    set state(wraplength)     330
         
     set confServers [$jstate(jlib) disco getconferences]
     if {$confServers eq {}} {
-	set serviceList [list [mc {No Available}]]
+	set serviceList [list [mc "not available"]]
     } else {
 	set serviceList $confServers
     }
@@ -95,7 +95,7 @@ proc ::Create::Build {args} {
 
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength $state(wraplength) -justify left \
-      -text [mc jacreateroom]
+      -text [mc jacreateroom2]
     pack $wbox.msg -side top -anchor w
     
     set frtop        $wbox.top
@@ -104,12 +104,12 @@ proc ::Create::Build {args} {
     ttk::frame $frtop
     pack $frtop -side top -fill x
         
-    ttk::label $frtop.lserv -text "[mc {Conference server}]:"
+    ttk::label $frtop.lserv -text "[mc Service]:"
     eval {ttk::optionmenu $frtop.eserv $token\(server)} $serviceList
-    ttk::label $frtop.lroom -text "[mc {Room name}]:"    
+    ttk::label $frtop.lroom -text "[mc Chatroom]:"    
     ttk::entry $frtop.eroom -textvariable $token\(roomname)  \
       -validate key -validatecommand {::Jabber::ValidateUsernameStrEsc %S}
-    ttk::label $frtop.lnick -text "[mc {Nickname}]:"    
+    ttk::label $frtop.lnick -text "[mc Nickname]:"    
     ttk::entry $frtop.enick -textvariable $token\(nickname)  \
       -validate key -validatecommand {::Jabber::ValidateResourceStr %S}
     
@@ -119,7 +119,11 @@ proc ::Create::Build {args} {
     
     grid  $frtop.eserv  $frtop.eroom  $frtop.enick  -sticky ew
     grid columnconfigure $frtop 1 -weight 1
-    
+
+    ::balloonhelp::balloonforwindow $frtop.eserv [mc chatroomservice]
+    ::balloonhelp::balloonforwindow $frtop.eroom [mc chatroomselect]
+    ::balloonhelp::balloonforwindow $frtop.enick [mc registration-nick]
+
     # Find the default conferencing server.
     if {[info exists argsA(-server)]} {
 	
@@ -141,7 +145,7 @@ proc ::Create::Build {args} {
     set wbtcreate $frbot.btok
     set wbtget    $frbot.btget
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $wbtget -text [mc Get] -default active \
+    ttk::button $wbtget -text [mc Configure] -default active \
       -command [list [namespace current]::Get $token]
     ttk::button $wbtcreate -text [mc Create] \
       -command [list [namespace current]::SetRoom $token]
@@ -311,17 +315,17 @@ proc ::Create::Get {token} {
     # Verify:
     if {$state(server) eq ""} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -message [mc jamessnogroupchat]
+	  -title [mc Error] -message [mc jamessnogroupchat2]
 	return
     }
     if {$state(roomname) eq ""} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -message [mc jamessgcnoroomname]
+	  -title [mc Error] -message [mc jamessgcnoroomname2]
 	return
     }
     if {($state(usemuc) && ($state(nickname) eq ""))} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -message [mc jamessgcnoroomnick]
+	  -title [mc Error] -message [mc jamessgcnoroomnick]
 	return
     }
 
@@ -329,12 +333,12 @@ proc ::Create::Get {token} {
     set roomjid [jlib::joinjid $node $state(server) ""]
     if {![jlib::jidvalidate $roomjid]} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -message [mc jamessjidinvalid]
+	  -title [mc Error] -message [mc jamessjidinvalid2]
 	return
     }
     $state(wpopupserver) state {disabled}
     $state(wbtget)       state {disabled}
-    set state(status) [mc jawaitserver]
+    set state(status) "[mc jawaitform]..."
     
     # Send get create room. NOT the server!
     set state(roomjid) [jlib::jidmap $roomjid]
@@ -422,9 +426,13 @@ proc ::Create::CreateMUCCB {token jlibname xmldata} {
 	    set errcode [lindex $errspec 0]
 	    set errmsg  [lindex $errspec 1]
 	}
-	::UI::MessageBox -type ok -icon error \
-	  -message [mc jamesserrconfgetcre $errcode $errmsg]
-	set state(status) [mc jasearchwait]
+	set str [mc jamesserrconfgetcre2]
+	append str "\n" "[mc {Error code}]: $errcode\n"
+	append str "[mc Message]: $errmsg"
+	::UI::MessageBox -type ok -icon error -title [mc Error] \
+	  -message $str
+
+      set state(status) [mc jasearchwait]
 	$state(wpopupserver) configure -state normal
 	$state(wbtget) configure -state normal
 	return
@@ -458,9 +466,13 @@ proc ::Create::GetFormCB {token jlibName type subiq} {
     set state(status) ""
     
     if {$type eq "error"} {
-	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -message [mc jamesserrconfgetcre [lindex $subiq 0] [lindex $subiq 1]]
-	return
+	set str [mc jamesserrconfgetcre2]
+	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
+	append str "[mc Message]: [lindex $subiq 1]"
+	::UI::MessageBox -type ok -icon error -title [mc Error] -parent $state(w) \
+	  -message $str
+
+      return
     }
     
     # The form part.
@@ -503,7 +515,7 @@ proc ::Create::SetRoom {token} {
     set roomjid [jlib::joinjid $node $state(server) ""]
     if {![jlib::jidvalidate $roomjid]} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -message "Not a valid roomname"
+	  -title [mc Error] -message [mc jamessjidinvalid2]
 	return
     }
     set state(roomjid) [jlib::jidmap $roomjid]
@@ -532,8 +544,11 @@ proc ::Create::SetRoomCB {usemuc roomjid jlibName type subiq} {
     ::Debug 2 "::Create::SetRoomCB"
     
     if {$type eq "error"} {
-	::UI::MessageBox -type ok -icon error -message  \
-	  [mc jamessconffailed $roomjid [lindex $subiq 0] [lindex $subiq 1]]
+	set str [mc jamessconffailed2 $roomjid]
+	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
+	append str "[mc Message]: [lindex $subiq 1]"
+	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
+
     } elseif {[regexp {.+@([^@]+)$} $roomjid match service]} {
 		    
 	# Cache groupchat protocol type (muc|conference|gc-1.0).
@@ -565,7 +580,8 @@ proc ::Create::GCBuild {args} {
     ::Debug 2 "::Create::GCBuild chatservers=$chatservers args='$args'"
     
     if {0 && $chatservers == {}} {
-	::UI::MessageBox -icon error -message [mc jamessnogroupchat]
+	::UI::MessageBox -icon error -title [mc Error] \
+	  -message [mc jamessnogroupchat]
 	return
     }
 
@@ -578,7 +594,7 @@ proc ::Create::GCBuild {args} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox} \
       -closecommand [namespace current]::GCCloseEnterCB
-    wm title $w [mc {Enter/Create Room}]
+    wm title $w [mc "Enter/Create Chatroom"]
     
     set enter(w) $w
     array set enter {
@@ -611,16 +627,16 @@ proc ::Create::GCBuild {args} {
     set msg [mc jagchatmsg]
     ttk::label $frmid.msg -style Small.TLabel \
       -padding {0 0 0 6} -anchor w -wraplength 300 -justify left -text $msg
-    ttk::label $frmid.lserv -text "[mc Servers]:" -anchor e
+    ttk::label $frmid.lserv -text "[mc Service]:" -anchor e
 
     set wcomboserver $frmid.eserv
     ttk::combobox $wcomboserver -width 18  \
       -textvariable $token\(server) -values $chatservers
-    ttk::label $frmid.lroom -text "[mc Room]:" -anchor e
+    ttk::label $frmid.lroom -text "[mc Chatroom]:" -anchor e
     ttk::entry $frmid.eroom -width 24    \
       -textvariable $token\(roomname) -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStrEsc %S}
-    ttk::label $frmid.lnick -text "[mc {Nickname}]:" \
+    ttk::label $frmid.lnick -text "[mc Nickname]:" \
       -anchor e
     ttk::entry $frmid.enick -width 24    \
       -textvariable $token\(nickname) -validate key  \
@@ -707,7 +723,7 @@ proc ::Create::GCDoEnter {token} {
     if {($enter(server) eq "") || ($enter(roomname) eq "") ||  \
       ($enter(nickname) eq "")} {
 	::UI::MessageBox -icon error -title [mc Warning] -type ok -message \
-	  [mc jamessgchatfields] -parent $enter(w)
+	  [mc jamessgchatfields2] -parent $enter(w)
 	return
     }
 
@@ -730,14 +746,15 @@ proc ::Create::EnterCallback {jlibname xmldata} {
     }    
     if {[string equal $type "error"]} {
 	set ujid [jlib::unescapejid $from]
-	set msg [mc mucErrEnter $from]
+	set msg [mc mucErrEnter2 $from]
 	set errspec [jlib::getstanzaerrorspec $xmldata]
 	if {[llength $errspec]} {
 	    set errcode [lindex $errspec 0]
 	    set errmsg  [lindex $errspec 1]
-	    append msg [mc mucErrCode $errcode $errmsg]
+	    append msg "\n[mc {Error code}]: $errcode"
+	    append msg "\n[mc Message]: $errmsg"
 	}
-	::UI::MessageBox -title [mc mucErrEnterTitle] -message $msg -icon error
+	::UI::MessageBox -title [mc Error] -message $msg -icon error
 	return
     }
     

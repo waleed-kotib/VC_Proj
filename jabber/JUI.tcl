@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.209 2007-09-09 07:37:24 matben Exp $
+# $Id: JUI.tcl,v 1.210 2007-09-13 08:25:39 matben Exp $
 
 package provide JUI 1.0
 
@@ -74,7 +74,7 @@ namespace eval ::JUI:: {
 	}
 	x11 {
 	    option add *JMain*TNotebook.padding   {2 4 2 2}       50
-	    option add *JMain*bot.f.padding       {8 6 8 4}       50
+	    option add *JMain*bot.f.padding       {2 4 2 2}       50
 	}
 	default {
 	    option add *JMain*TNotebook.padding   {4 4 4 2}       50
@@ -131,20 +131,20 @@ proc ::JUI::Init {} {
 	{separator}
 	{command   mNewAccount...      {::RegisterEx::OnMenu}     {}}
 	{command   mRemoveAccount...   {::Register::OnMenuRemove} {}}	
-	{command   mPassword...        {::Jabber::Passwd::OnMenu} {}}
+	{command   mNewPassword...     {::Jabber::Passwd::OnMenu} {}}
 	{command   mSetupAssistant...  {::SetupAss::SetupAss}     {}}
 	{separator}
 	{command   mEditProfiles...    {::Profiles::BuildDialog}  {}}
-	{command   mEditvCard2...      {::VCard::OnMenu}          {}}
+	{command   mEditBC...          {::VCard::OnMenu}          {}}
 	{separator}
 	{cascade   mImport             {}                         {} {} {
-	    {command  mEmoticonSet     {::Emoticons::ImportSet}   {}}
-	    {command  mvCard2...       {::VCard::Import}          {}}
+	    {command  mIconSet...      {::Emoticons::ImportSet}   {}}
+	    {command  mBC...           {::VCard::Import}          {}}
 	}}
 	{cascade   mExport             {}                         {} {} {
-	    {command  mRoster          {::Roster::ExportRoster}   {}}
-	    {command  mMessageInbox    {::MailBox::MKExportDlg}   {}}
-	    {command  mvCard2          {::VCard::OnMenuExport}    {}}
+	    {command  mContacts...     {::Roster::ExportRoster}   {}}
+	    {command  mInbox...        {::MailBox::MKExportDlg}   {}}
+	    {command  mBC...           {::VCard::OnMenuExport}    {}}
 	}}
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}    Q}
@@ -160,23 +160,23 @@ proc ::JUI::Init {} {
 	{command     mLogin...      {::Jabber::OnMenuLogInOut}        L}
 	{command     mLogoutWith... {::Jabber::Logout::OnMenuStatus}  {}}
 	{separator}
-	{command     mSendMessage... {::NewMsg::OnMenu}                M}
+	{command     mMessage...    {::NewMsg::OnMenu}                M}
 	{command     mChat...       {::Chat::OnMenu}                  T}
 	{cascade     mStatus        {}                                {} {} {}}
 	{separator}
 	{command     mSearch...     {::Search::OnMenu}                {}}
 	{command     mAddContact... {::JUser::OnMenu}                 {}}
-	{cascade     mRegister      {}                                {} {} {}}
+	{cascade     mRegister...   {}                                {} {} {}}
 	{command     mDiscoverServer... {::Disco::OnMenuAddServer}    {}}
 	{separator}
-	{command     mEnterRoom     {::GroupChat::OnMenuEnter}        R}
-	{command     mCreateRoom    {::GroupChat::OnMenuCreate}       {}}
+	{command     mEnterRoom...  {::GroupChat::OnMenuEnter}        R}
+	{command     mCreateRoom... {::GroupChat::OnMenuCreate}       {}}
 	{command     mEditBookmarks... {::GroupChat::OnMenuBookmark}     {}}
     }
 
     if {[::Jabber::HaveWhiteboard]} {
 	set mWhiteboard \
-	  {command   mNewWhiteboard  {::JWB::OnMenuNewWhiteboard}  N}
+	  {command   mWhiteboard  {::JWB::OnMenuNewWhiteboard}  N}
 	set idx [lsearch $menuDefs(rost,action) *mChat...*]
 	incr idx
 	set menuDefs(rost,action) \
@@ -184,11 +184,11 @@ proc ::JUI::Init {} {
     }
     
     set mDefsInfo {    
-	{command     mComponents    {::Dialogs::InfoComponents}     {}}
-	{checkbutton mMessageInbox  {::MailBox::OnMenu}               I \
+	{command     mPlugins       {::Dialogs::InfoComponents}     {}}
+	{checkbutton mInbox...      {::MailBox::OnMenu}               I \
 	  {-variable ::JUI::state(mailbox,visible)}}
 	{cascade     mFontSize      {}                              {} {} {
-	    {radio   mNormalFont    {::Theme::FontConfigSize  0}    {}
+	    {radio   mNormal        {::Theme::FontConfigSize  0}    {}
 	    {-variable prefs(fontSizePlus) -value 0}}
 	    {radio   mLargerFont    {::Theme::FontConfigSize +1}    {}
 	    {-variable prefs(fontSizePlus) -value 1}}
@@ -200,7 +200,7 @@ proc ::JUI::Init {} {
 	{cascade     mShow          {}                                {} {} {
 	    {check   mToolbar       {::JUI::OnMenuToggleToolbar}      {} 
 	    {-variable ::JUI::state(show,toolbar)}}
-	    {check   mNotebook      {::JUI::OnMenuToggleNotebook}     {} 
+	    {check   mTabs          {::JUI::OnMenuToggleNotebook}     {} 
 	    {-variable ::JUI::state(show,notebook)}}
 	    {check   mMinimal       {::JUI::OnMenuToggleMinimal}      {} 
 	    {-variable ::JUI::state(show,minimal)}} }
@@ -209,15 +209,15 @@ proc ::JUI::Init {} {
 	{command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
 	{checkbutton mDebug         {::Jabber::DebugCmd}            {} \
 	  {-variable ::Jabber::jstate(debugCmd)}}
-	{command     mBugReport      {::JUI::OpenBugURL}            {}}
+	{command     mBugReport...  {::JUI::OpenBugURL}            {}}
 	{separator}
-	{command     mCoccinellaHome {::JUI::OpenCoccinellaURL}     {}}
+	{command     mCoccinellaHome... {::JUI::OpenCoccinellaURL}     {}}
     }
     if {[tk windowingsystem] eq "aqua"} {
 	set menuDefs(rost,info) $mDefsInfo
     } else {
 	set mAbout {command  mAboutCoccinella  {::Splash::SplashScreen}  {}}
-	set idx [lsearch $mDefsInfo *mCoccinellaHome*]
+	set idx [lsearch $mDefsInfo *mCoccinellaHome...*]
 	set menuDefs(rost,info) [linsert $mDefsInfo $idx $mAbout]
     }
 
@@ -227,7 +227,7 @@ proc ::JUI::Init {} {
 	{command   mPaste            {::UI::PasteEvent}         V}
 	{separator}
 	{command   mFind             {::UI::OnMenuFind}         F}
-	{command   mFindAgain        {::UI::OnMenuFindAgain}    G}
+	{command   mFindNext         {::UI::OnMenuFindAgain}    G}
 	{command   mFindPrevious     {::UI::OnMenuFindPrevious} Shift-G}
     }
     
@@ -870,7 +870,7 @@ proc ::JUI::BuildToolbar {w wtbar} {
     
     ::ttoolbar::ttoolbar $wtbar
     
-    $wtbar newbutton connect -text [mc Connect] \
+    $wtbar newbutton connect -text [mc Login] \
       -image $iconConnect -disabledimage $iconConnectDis \
       -command ::Jabber::OnMenuLogInOut
     if {[::MailBox::HaveMailBox]} {
@@ -886,7 +886,7 @@ proc ::JUI::BuildToolbar {w wtbar} {
       -image $iconAddUser -disabledimage $iconAddUserDis  \
       -command ::JUser::NewDlg -state disabled \
       -balloontext [mc {Add Contact}]
-    $wtbar newbutton chat -text [mc Chat] \
+    $wtbar newbutton chat -text [mc mChat] \
       -image $iconChat -disabledimage $iconChatDis  \
       -command ::Chat::OnToolButton -state disabled
 
@@ -1286,7 +1286,7 @@ proc ::JUI::FilePostCommand {wmenu} {
     
     # Disable some menus by default and let any hooks enable them.
     set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
-    ::UI::MenuMethod $m entryconfigure mvCard2 -state disabled
+    ::UI::MenuMethod $m entryconfigure mBC... -state disabled
     
     set mimport [::UI::MenuMethod $wmenu entrycget mImport -menu]
     ::UI::MenuMethod $mimport entryconfigure mvCard2... -state disabled
@@ -1303,12 +1303,12 @@ proc ::JUI::FilePostCommand {wmenu} {
 	    connectfin - connect {
 		::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
 		::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mPassword... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mNewPassword... -state normal
 		::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled
 		::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mEditvCard2... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mEditBC... -state normal
 		
-		::UI::MenuMethod $mimport entryconfigure mvCard2... -state normal
+		::UI::MenuMethod $mimport entryconfigure mBC... -state normal
 	    }
 	    disconnect {
 		if {[llength [ui::findalltoplevelwithclass JLogin]]} {
@@ -1318,9 +1318,9 @@ proc ::JUI::FilePostCommand {wmenu} {
 		    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state normal
 		    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state normal
 		}
-		::UI::MenuMethod $wmenu entryconfigure mPassword... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mNewPassword... -state disabled
 		::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mEditvCard2... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mEditBC... -state disabled
 		::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state disabled
 	    }	
 	}   
@@ -1344,7 +1344,7 @@ proc ::JUI::EditPostCommand {wmenu} {
 	::UI::MenuMethod $wmenu entryconfigure $mkey -state $mstate
     }	
     ::UI::MenuMethod $wmenu entryconfigure mFind -state disabled
-    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state disabled
+    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state disabled
     ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state disabled
     
     ::hooks::run menuPostCommand main-edit $wmenu
@@ -1383,22 +1383,22 @@ proc ::JUI::ActionPostCommand {wmenu} {
 		  -label [mc mLogout]
 	    }
 	    connectfin - connect {
-		::UI::MenuMethod $wmenu entryconfigure mRegister -state normal
+		::UI::MenuMethod $wmenu entryconfigure mRegister... -state normal
 		::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
 		  -label [mc mLogout]
 		::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state normal
 		::UI::MenuMethod $wmenu entryconfigure mSearch... -state normal
 		::UI::MenuMethod $wmenu entryconfigure mAddContact... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mMessage... -state normal
 		::UI::MenuMethod $wmenu entryconfigure mChat... -state normal
 		::UI::MenuMethod $wmenu entryconfigure mStatus -state normal
-		::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state normal
-		::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state normal
+		::UI::MenuMethod $wmenu entryconfigure mEnterRoom... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mCreateRoom... -state normal
 		::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state normal
 		::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state normal
 	    }
 	    disconnect {
-		::UI::MenuMethod $wmenu entryconfigure mRegister -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mRegister... -state disabled
 		if {[llength [ui::findalltoplevelwithclass JProfiles]]} {
 		    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state disabled  \
 		      -label [mc mLogin...]
@@ -1409,11 +1409,11 @@ proc ::JUI::ActionPostCommand {wmenu} {
 		::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state disabled
 		::UI::MenuMethod $wmenu entryconfigure mSearch... -state disabled
 		::UI::MenuMethod $wmenu entryconfigure mAddContact... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mSendMessage... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mMessage... -state disabled
 		::UI::MenuMethod $wmenu entryconfigure mChat... -state disabled
 		::UI::MenuMethod $wmenu entryconfigure mStatus -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mEnterRoom -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mCreateRoom -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mEnterRoom... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mCreateRoom... -state disabled
 		::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state disabled
 		::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state disabled
 	    }	

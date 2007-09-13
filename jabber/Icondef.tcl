@@ -36,7 +36,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Icondef.tcl,v 1.2 2007-07-19 06:28:12 matben Exp $
+# $Id: Icondef.tcl,v 1.3 2007-09-13 08:25:39 matben Exp $
 
 package provide Icondef 1.0
 
@@ -106,7 +106,7 @@ proc ::Icondef::Load {path imageArr metaArr} {
 	    set zipdir [lindex [glob -nocomplain -directory $mountpath *] 0]
 	    set dir $zipdir
 	} else {
-	    return -code error "cannot read jisp archive without vfs::zip"
+	    return -code error "Cannot read jisp archive without vfs::zip"
 	}
     }
     set icondefPath [file join $dir icondef.xml]

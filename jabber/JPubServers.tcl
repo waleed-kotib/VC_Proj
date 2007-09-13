@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPubServers.tcl,v 1.5 2007-07-19 06:28:12 matben Exp $
+# $Id: JPubServers.tcl,v 1.6 2007-09-13 08:25:39 matben Exp $
 
 package require chasearrows
 package require httpex
@@ -53,7 +53,7 @@ proc ::JPubServers::Build {w {command ""}} {
     upvar #0 $w state
 
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [mc {Public Jabber Servers}]
+    wm title $w [mc Servers]
     
     # Global frame.
     ttk::frame $w.frall
@@ -67,7 +67,7 @@ proc ::JPubServers::Build {w {command ""}} {
     set frbot $wbox.b
     set wset  $frbot.btok
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Set] -default active \
+    ttk::button $frbot.btok -text [mc OK] -default active \
       -state disabled -command [list [namespace current]::Set $w]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $w]
@@ -93,7 +93,7 @@ proc ::JPubServers::Build {w {command ""}} {
     frame $wtbfr -borderwidth 1 -relief sunken
     pack $wtbfr -side top -fill both -expand 1
     tablelist::tablelist $wtbl \
-      -columns [list 40 [mc Address]] -stretch all \
+      -columns [list 40 [mc Host]] -stretch all \
       -yscrollcommand [list $wysc set] \
       -width 40 -height 16
     ttk::scrollbar $wysc -orient vertical -command [list $wtbl yview]
@@ -208,13 +208,13 @@ proc ::JPubServers::HttpCommand {w token} {
 	      -message "Timeout while waiting for response."
 	}
 	error {
-	    ::UI::MessageBox -title "File transport error" -icon error -type ok \
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 	      -message "File transport error when getting server list:\
 	      [::httpex::error $token]"
 	}
 	eof {
-	    ::UI::MessageBox -title "File transport error" -icon error -type ok \
-	      -message "The server closed the socket without replying."	   
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	      -message [mc httptrpteof]
 	}
 	reset {
 	    # Did this ourself?

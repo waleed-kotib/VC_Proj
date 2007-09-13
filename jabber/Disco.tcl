@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.127 2007-08-24 13:33:13 matben Exp $
+# $Id: Disco.tcl,v 1.128 2007-09-13 08:25:38 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -140,32 +140,32 @@ proc ::Disco::InitMenus {} {
     variable popMenuDefs
 
     set mDefs {
-	{command    mMessage       {::NewMsg::Build -to $jid} }
-	{command    mChat...       {::Chat::StartThread $jid} }
-	{command    mEnterRoom     {
+	{command    mMessage...         {::NewMsg::Build -to $jid} }
+	{command    mChat...            {::Chat::StartThread $jid} }
+	{command    mEnterRoom...       {
 	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
 	} }
-	{command    mCreateRoom    {
+	{command    mCreateRoom...      {
 	    ::GroupChat::EnterOrCreate create -server $jid
 	} }
 	{separator}
-	{command    mInfo          {::UserInfo::Get $jid $node} }
+	{command    mBusinessCard...    {::UserInfo::Get $jid $node} }
 	{separator}
-	{command    mSearch...     {
+	{command    mSearch...          {
 	    ::Search::Build -server $jid -autoget 1
 	} }
-	{command    mRegister      {
+	{command    mRegister...        {
 	    ::GenRegister::NewDlg -server $jid -autoget 1
 	} }
-	{command    mUnregister    {::Register::Remove $jid} }
+	{command    mUnregister         {::Register::Remove $jid} }
 	{separator}
-	{cascade    mShow          {
-	    {command mBackgroundImage... {::Disco::BackgroundImageCmd}}
+	{cascade    mShow               {
+	    {command mBackgroundImage...  {::Disco::BackgroundImageCmd}}
 	} }
-	{command    mRefresh       {::Disco::Refresh $vstruct} }
-	{command    mAddServer...  {::Disco::AddServerDlg}     }
-	{command    mRemoveListing {::Disco::RemoveListing $jid}}
-	{cascade    mAdHocCommands {}                          }
+	{command    mRefresh            {::Disco::Refresh $vstruct} }
+	{command    mDiscoverServer...  {::Disco::AddServerDlg}     }
+	{command    mRemoveListing      {::Disco::RemoveListing $jid}}
+	{cascade    mAdHocCommands      {}                          }
     }
     if {[::Jabber::HaveWhiteboard]} {
 	set mDefs [linsert $mDefs 2 \
@@ -187,22 +187,22 @@ proc ::Disco::InitMenus {} {
     # This does not work if nodes. The limitation is in the protocol.
 
     set popMenuDefs(disco,type) {
-	{mMessage       {user}          }
-	{mChat...       {user}          }
-	{mWhiteboard    {wb room}       }
-	{mEnterRoom     {room}          }
-	{mCreateRoom    {conference}    }
-	{mInfo          {jid}           }
-	{mSearch...     {search}        }
-	{mRegister      {register}      }
-	{mUnregister    {register}      }
-	{mShow          {normal}     {
-	    {mBackgroundImage  {normal} }
+	{mMessage...          {user}          }
+	{mChat...             {user}          }
+	{mWhiteboard          {wb room}       }
+	{mEnterRoom...        {room}          }
+	{mCreateRoom...       {conference}    }
+	{mBusinessCard...     {jid}           }
+	{mSearch...           {search}        }
+	{mRegister...         {register}      }
+	{mUnregister          {register}      }
+	{mShow                {normal}     {
+	    {mBackgroundImage   {normal} }
 	}}
-	{mRefresh       {jid}           }
-	{mAddServer...  {}              }
-	{mRemoveListing {root}          }
-	{mAdHocCommands {disabled}      }
+	{mRefresh             {jid}           }
+	{mDiscoverServer...   {}              }
+	{mRemoveListing       {root}          }
+	{mAdHocCommands       {disabled}      }
     }
 }
 
@@ -732,7 +732,7 @@ proc ::Disco::NewPage { } {
 	  [option get [winfo toplevel $wnb] browser16DisImage {}]]
 	set imSpec [list $im disabled $imd background $imd]
 	# This seems to pick up *Disco.padding ?
-	$wnb add $wtab -text [mc Disco] -image $imSpec -compound left  \
+	$wnb add $wtab -text [mc Services] -image $imSpec -compound left  \
 	  -sticky news -padding 0
     }
 }
@@ -887,7 +887,7 @@ proc ::Disco::BackgroundImageCmd {} {
     set typeText [join $typeL ", "]
     set str [mc jaopenbgimage]
     set dtl [mc jasuppimagefmts]
-    append dtl $typeText
+    append dtl " " $typeText
     append dtl "."
     set mbar [::UI::GetMainMenu]
     ::UI::MenubarDisableBut $mbar edit
@@ -1518,7 +1518,7 @@ proc ::Disco::InfoResultCB {type jid queryE args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btcancel -text [mc Close] \
+    ttk::button $frbot.btcancel -text [mc Cancel] \
       -command [list destroy $w]
     pack $frbot.btcancel -side right
     pack $frbot -side top -fill x
@@ -1631,7 +1631,7 @@ proc ::Disco::AddServerDlg { } {
     ::UI::Toplevel $w -class DiscoAdd -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox} \
       -closecommand [namespace code AddCloseCmd]
-    wm title $w [mc {Add Server}]
+    wm title $w [mc "Discover Server"]
     ::UI::SetWindowPosition $w
     
     set width 260
@@ -1646,7 +1646,7 @@ proc ::Disco::AddServerDlg { } {
 	set imd [::Theme::GetImage [option get $w settingsDisImage {}]]
 
 	ttk::label $wall.head -style Headlabel \
-	  -text [mc {Add Server}] -compound left \
+	  -text [mc "Discover Server"] -compound left \
 	  -image [list $im background $imd]
 	pack $wall.head -side top -fill both -expand 1
 	
@@ -1669,7 +1669,7 @@ proc ::Disco::AddServerDlg { } {
     ttk::entry $wfr.e -textvariable [namespace current]::dlgaddjid
     #  -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
     ttk::checkbutton $wfr.ch -style Small.TCheckbutton \
-      -text [mc {Add permanently}] \
+      -text [mc "Discover permanently"] \
       -variable [namespace current]::dlgpermanent
 
     grid  $wfr.l  $wfr.e   -padx 2 -pady 2
@@ -1680,7 +1680,7 @@ proc ::Disco::AddServerDlg { } {
         
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Add] \
+    ttk::button $frbot.btok -text [mc Discover] \
       -command [list [namespace current]::AddServerDo $w]
     ttk::button $frbot.btcancel -text [mc Cancel] \
       -command [namespace code [list AddCancel $w]]
@@ -1724,8 +1724,8 @@ proc ::Disco::AddServerDo {w} {
     if {$dlgaddjid ne ""} {
 	set jid [jlib::escapejid $dlgaddjid]
 	if {![jlib::jidvalidate $jid]} {
-	    set ans [::UI::MessageBox -message [mc jamessbadjid $jid] \
-	      -icon error -type yesno]
+	    set ans [::UI::MessageBox -message [mc jamessbadjid2 $jid] \
+	      -title [mc Error] -icon error -type yesno]
 	    if {[string equal $ans "no"]} {
 		return
 	    }
@@ -1781,7 +1781,7 @@ proc ::Disco::RemoveListing {jid} {
 proc ::Disco::MainMenuPostHook {type wmenu} {
     
     if {$type eq "main-action"} {
-	set m [::UI::MenuMethod $wmenu entrycget mRegister -menu]
+	set m [::UI::MenuMethod $wmenu entrycget mRegister... -menu]
 	$m delete 0 end
 	
 	if {[::JUI::GetConnectState] eq "connectfin"} {
