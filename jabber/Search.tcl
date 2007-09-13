@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.35 2007-09-10 12:31:56 matben Exp $
+# $Id: Search.tcl,v 1.36 2007-09-13 15:53:40 matben Exp $
 
 package provide Search 1.0
 
@@ -31,8 +31,8 @@ namespace eval ::Search:: {
     variable popMenuDefs
     
     set popMenuDefs {
-	{command    mAddContact...  {::JUser::NewDlg -jid $jid} }
-	{command    mvCard2         {::VCard::Fetch other $jid} }	
+	{command    mAddContact...      {::JUser::NewDlg -jid $jid} }
+	{command    mBusinessCard...    {::VCard::Fetch other $jid} }	
     }
 
     option add *SearchSlot.padding       {4 2 2 2}     50
@@ -85,7 +85,7 @@ proc ::Search::Build {args} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document {closeBox resizable}}  \
       -closecommand ::Search::CloseCmd
-    wm title $w [mc {Search Service}]
+    wm title $w [mc Search]
     set sstate(w) $w
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsearch)]]
@@ -149,14 +149,16 @@ proc ::Search::Build {args} {
     set searchServ [::Jabber::JlibCmd disco getjidsforfeature "jabber:iq:search"]
     set wcomboserver $frtop.eserv
     set wbtget       $frtop.btget
-    ttk::label    $frtop.lserv -text "[mc {Search Service}]:"
-    ttk::button   $frtop.btget -text [mc Get] -default active \
+    ttk::label    $frtop.lserv -text "[mc Service]:"
+    ttk::button   $frtop.btget -text [mc "New Form"] -default active \
       -command [list ::Search::Get]
     ttk::combobox $frtop.eserv -values $searchServ \
       -textvariable [namespace current]::sstate(server) -state readonly
 
-    grid  $frtop.lserv  $frtop.btget  -sticky w  -pady 2
-    grid  $frtop.eserv  -             -sticky ew -pady 2
+    #grid  $frtop.lserv  $frtop.btget  -sticky w  -pady 2
+    #grid  $frtop.eserv  -             -sticky ew -pady 2
+    grid  $frtop.lserv  $frtop.eserv  -sticky w  -pady 2
+    grid  $frtop.btget  -             -sticky ew -pady 2
     grid columnconfigure $frtop 0 -weight 1
     
     # Find the default search server.
@@ -250,8 +252,8 @@ proc ::Search::TableCmd {w x y} {
 
 	# Warn if already in our roster.
 	if {[$jstate(jlib) roster isitem $jid]} {
-	    set ans [::UI::MessageBox -message [mc jamessalreadyinrost $jid] \
-	      -icon error -type ok]
+	    set ans [::UI::MessageBox -message [mc jamessalreadyinrost2 $jid] \
+	      -icon error -title [mc Error] -type ok]
 	} else {
 	    ::JUser::NewDlg -jid $jid
 	}
@@ -303,13 +305,13 @@ proc ::Search::Get { } {
     
     # Verify.
     if {$sstate(server) eq ""} {
-	::UI::MessageBox -type ok -icon error  \
-	  -message [mc jamessregnoserver]
+	::UI::MessageBox -type ok -icon error -title [mc Error] \
+	  -message [mc jamessregnoserver2]
 	return
     }	
     $sstate(wcomboserver) state {disabled}
     $sstate(wbtget)       state {disabled}
-    set sstate(status) [mc jawaitserver]
+    set sstate(status) "[mc jawaitserver]..."
     
     # Send get register.
     ::Jabber::JlibCmd search_get $sstate(server) ::Search::GetCB    
@@ -339,8 +341,10 @@ proc ::Search::GetCB {jlibName type subiq} {
     set sstate(status) ""
     
     if {$type eq "error"} {
-	::UI::MessageBox -type ok -icon error  \
-	  -message [mc jamesserrsearch [lindex $subiq 0] [lindex $subiq 1]]
+	set str [mc jamesserrsearch2]
+	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
+	append str "[mc Message]: [lindex $subiq 1]"
+	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
 	return
     }
     set subiqChildList [wrapper::getchildren $subiq]
@@ -428,11 +432,14 @@ proc ::Search::ResultCallback {server type subiq} {
     if {[string equal $type "error"]} {
 	foreach {ecode emsg} [lrange $subiq 0 1] break
 	if {$ecode eq "406"} {
-	    set msg [mc jamesssearchinval $emsg]
+	    set msg [mc jamesssearchinval2]
+	    append msg "\n[mc Message]: $emsg"
 	} else {
-	    set msg [mc jamesssearcherr $ecode $emsg]
+	    set msg [mc jamesssearcherr2]
+	    append msg "\n" "[mc {Error code}]: $ecode"
+	    append msg "\n" "[mc Message]: $emsg"
 	}
-	::UI::MessageBox -type ok -icon error -message $msg
+	::UI::MessageBox -type ok -title [mc Error] -icon error -message $msg
 	return
     } else {
 	

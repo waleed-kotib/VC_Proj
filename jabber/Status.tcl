@@ -18,11 +18,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.44 2007-09-06 15:19:34 matben Exp $
+# $Id: Status.tcl,v 1.45 2007-09-13 15:53:40 matben Exp $
 
 package provide Status 1.0
 
-namespace eval ::Status:: {
+namespace eval ::Status {
 
     ::hooks::register rosterIconsChangedHook    ::Status::RosticonsHook
     ::hooks::register prefsInitHook             ::Status::ExInitPrefsHook
@@ -421,7 +421,7 @@ proc ::Status::SetWithMessage {varName args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Set] -default active \
+    ttk::button $frbot.btok -text [mc OK] -default active \
       -command [list [namespace current]::BtSetStatus $w]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::SetStatusCancel $w]
@@ -747,7 +747,7 @@ proc ::Status::ExBuildMenu {m varName args} {
 	}
 	$m add separator
     }
-    $m add command -label [mc mCustomStatus]  \
+    $m add command -label [mc mCustomStatus...]  \
       -command [concat ::Status::ExCustomDlg $varName $args]
     update idletasks
     
@@ -834,11 +834,10 @@ proc ::Status::ExCustomDlg {varName args} {
 	set im [::Rosticons::Get status/$show]
 	lappend menuDef [list $mapShowElemToText($show) -value $show -image $im]
     }
-      
-    ui::dialog $w -type okcancel -message [mc jamessstatuscust] \
-      -detail [mc jamessstatuscustdtl] -icon info  \
+    ui::dialog $w -type okcancel -message [mc jamessstatuscust2] \
+      -detail [mc jamessstatuscustdtl2] -icon info  \
       -command ::Status::ExCustomDlgCmd -geovariable prefs(winGeom,$w)  \
-      -title [mc {Custom Message}]
+      -title [mc "Custom Status"]
     set fr [$w clientframe]
     ui::optionmenu $fr.m -menulist $menuDef -direction flush  \
       -variable [namespace current]::$w\(show)
@@ -850,6 +849,8 @@ proc ::Status::ExCustomDlg {varName args} {
     grid columnconfigure $fr 0 -minsize $maxw
     grid columnconfigure $fr 1 -weight 1
     
+    ::balloonhelp::balloonforwindow $fr.e [mc Message]
+
     bind $w <Destroy> +[subst { if {"%W" eq "$w"} {::Status::ExCustomDlgFree %W} }]
 }
 

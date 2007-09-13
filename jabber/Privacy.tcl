@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Privacy.tcl,v 1.18 2007-09-03 14:13:20 matben Exp $
+# $Id: Privacy.tcl,v 1.19 2007-09-13 15:53:40 matben Exp $
 
 package provide Privacy 1.0
 
@@ -164,7 +164,7 @@ proc ::Privacy::BuildPrefsPage {page} {
     
     ttk::button $wfrbt.new -text [mc New] -state disabled \
       -command [namespace current]::NewList
-    ttk::button $wfrbt.edit -text [mc Edit] -state disabled \
+    ttk::button $wfrbt.edit -text [mc mEdit] -state disabled \
       -command [namespace current]::EditList
     ttk::button $wfrbt.del -text [mc Delete] -state disabled \
       -command [namespace current]::DelList
@@ -675,11 +675,11 @@ proc ::Privacy::List::Build { } {
     set i 0    
     foreach {wtype wval wblk wact wdel}  \
       [list $wit.t$i $wit.v$i $wit.bl$i $wit.a$i $wit.bt$i] break
-    ttk::label $wtype -text [mc {Type}]
-    ttk::label $wval  -text [mc {Value}]
-    ttk::label $wblk  -text [mc {Block}]    
-    ttk::label $wact  -text [mc {Action}]    
-    ttk::label $wdel  -text [mc {Delete Rule}]    
+    ttk::label $wtype -text [mc Type]
+    ttk::label $wval  -text [mc Value]
+    ttk::label $wblk  -text [mc Block]    
+    ttk::label $wact  -text [mc Action]    
+    ttk::label $wdel  -text [mc "Delete Rule"]    
 
     grid  $wtype  $wval  $wblk  $wact  $wdel
     
@@ -703,7 +703,7 @@ proc ::Privacy::List::Build { } {
     set frbot $wbox.b
     set warrows $frbot.arr
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Set] \
+    ttk::button $frbot.btok -text [mc OK] \
       -default active -command [list [namespace current]::Set $token]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $token]

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.94 2007-09-02 07:54:02 matben Exp $
+# $Id: Profiles.tcl,v 1.95 2007-09-13 15:53:40 matben Exp $
 
 package require ui::megaentry
 
@@ -971,8 +971,8 @@ proc ::Profiles::CancelDlg {w} {
     
     if {$config(profiles,warn-on-cancel)} {
 	if {![FrameUnedited $wdlgpage]} {
-	    set ans [tk_messageBox -parent $w -icon warning -type yesno \
-	      -message [mc jamessgeneditwarnclose]]
+	    set ans [::UI::MessageBox -title [mc Warning] -parent $w \
+	      -icon warning -type yesno -message [mc jamessgeneditwarnclose2]]
 	    if {$ans eq "yes"} {
 		SaveDlg $w
 		return
@@ -1064,9 +1064,9 @@ proc ::Profiles::FrameWidget {w moreless args} {
     }
     
     # Depending on 'config(profiles,style)' not all get mapped.
-    ttk::label $wui.ljid -text "[mc {Jabber ID}]:" -anchor e
+    ttk::label $wui.ljid -text "[mc {Contact ID}]:" -anchor e
     ttk::entry $wui.ejid -width $width -textvariable $token\(jid)
-    ttk::label $wui.lserv -text "[mc {Jabber Server}]:" -anchor e
+    ttk::label $wui.lserv -text "[mc Server]:" -anchor e
     ttk::entry $wui.eserv -width $width -textvariable $token\(server) \
       -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
     ttk::label $wui.luser -text "[mc Username]:" -anchor e
@@ -1104,7 +1104,10 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	set wuserinfofocus $wui.eserv
     }
     
-        
+    ::balloonhelp::balloonforwindow $wui.ejid [mc contactid]
+    ::balloonhelp::balloonforwindow $wui.epass [mc registration-password]
+    ::balloonhelp::balloonforwindow $wui.enick [mc registration-nick]
+
     set wbt $w.bt 
     ttk::frame $wbt -padding {0 4 0 6}
     if {0} {
@@ -1421,7 +1424,7 @@ proc ::Profiles::FrameVerifyNonEmpty {w} {
 	set ejid [jlib::escapejid $state(jid)]
 	if {![jlib::jidvalidate $ejid]} {
 	    ::UI::MessageBox -type ok -icon error  \
-	      -title [mc Error] -message [mc jamessjidinvalid]
+	      -title [mc Error] -message [mc jamessjidinvalid2]
 	    set ans 0
 	}
     } else {
@@ -1546,7 +1549,7 @@ proc ::Profiles::FrameNewCmd {w} {
 		set wtop [winfo toplevel $w]
 		if {![arraysequal current initial]} {
 		    set ans [tk_messageBox -parent $wtop -icon warning \
-		      -type yesno -message [mc jamessgeneditwarnclose]]
+		      -type yesno -message [mc jamessgeneditwarnclose2]]
 		    if {$ans eq "yes"} {
 			SetList [FrameGetProfiles $w]
 		    }
@@ -1571,7 +1574,7 @@ proc ::Profiles::FrameDeleteCmd {w} {
     if {[info exists state(prof,$profile,server)]} {
 	set ans [::UI::MessageBox -title [mc Warning]  \
 	  -type yesnocancel -icon warning -default yes  \
-	  -parent [winfo toplevel $w] -message [mc jamessprofaskrem]]
+	  -parent [winfo toplevel $w] -message [mc jamessprofaskrem2]]
     }
     set delete 0
     if {$ans eq "yes"} {
@@ -1604,8 +1607,10 @@ proc ::Profiles::FrameUnregisterCB {jid jlib status {err ""}} {
     Debug 2 "::Profiles::FrameUnregisterCB status=$status"
     if {$status eq "error"} {
 	lassign $err errcode errmsg
-	ui::dialog -type ok -icon error -title [mc Error] \
-	  -message [mc jamesserrunreg [jlib::unescapejid $jid] $errcode $errmsg]
+	set str [mc jamesserrunreg2 [jlib::unescapejid $jid]]
+	append str "\n" "[mc {Error code}]: $errcode\n"
+	append str "[mc Message]: $errmsg"
+	ui::dialog -type ok -icon error -title [mc Error] -message $str
     }
 }
 
@@ -1755,7 +1760,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
       -text [mc {Scramble password}]  \
       -variable $token\(digest)
     ttk::label $wlog.lp -style Small.TLabel \
-      -text "[mc {Priority}]:"
+      -text "[mc Priority]:"
     spinbox $wlog.sp -font CociSmallFont \
       -textvariable $token\(priority) \
       -width 5 -increment 1 -from -128 -to 127 -validate all  \
@@ -1770,7 +1775,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     grid  $wlog.lp     $wlog.sp
     
     # Connection page.
-    $w add [ttk::frame $w.con] -text [mc {Connection}] -sticky news
+    $w add [ttk::frame $w.con] -text [mc Connection] -sticky news
 
     set wcon $w.con.f
     ttk::frame $wcon -padding [option get . notebookPageSmallPadding {}]
@@ -1786,19 +1791,19 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     set wstate(comp)  $wse.comp
 
     ttk::checkbutton $wse.tls -style Small.TCheckbutton  \
-      -text [mc {Use secure connection}] -variable $token\(secure)  \
+      -text [mc "Use secure connection"] -variable $token\(secure)  \
       -command [list ::Profiles::NotebookSecCmd $w]
     ttk::radiobutton $wse.sasl -style Small.TRadiobutton  \
-      -text [mc prefsusesasl]  \
+      -text [mc "Use SASL authentication"]  \
       -variable $token\(method) -value sasl
     ttk::radiobutton $wse.mtls -style Small.TRadiobutton  \
-      -text [mc {Use TLS and SASL authentication}]  \
+      -text [mc "Use TLS and SASL"]  \
       -variable $token\(method) -value tlssasl
     ttk::radiobutton $wse.mssl -style Small.TRadiobutton  \
-      -text [mc {Use TLS on separate port (old)}]  \
+      -text [mc "Use TLS on separate port (old)"]  \
       -variable $token\(method) -value ssl
     ttk::checkbutton $wse.comp -style Small.TCheckbutton  \
-      -text [mc {Use stream compression}] -variable $token\(compress)
+      -text [mc "Use compression"] -variable $token\(compress)
     
     grid  $wse.tls     -          -sticky w
     grid  x            $wse.sasl  -sticky w
@@ -1825,7 +1830,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::frame $wip
     pack  $wip  -side top -fill x
     
-    ttk::label $wip.lip -style Small.TLabel -text "[mc {IP address}]:"
+    ttk::label $wip.lip -style Small.TLabel -text "[mc Host]:"
     ttk::entry $wip.eip -font CociSmallFont -textvariable $token\(ip)
     ttk::label $wip.lport -style Small.TLabel -text "[mc Port]:"
     ttk::entry $wip.eport -font CociSmallFont \
@@ -1856,7 +1861,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
 
     ttk::label $whttp.lurl -style Small.TLabel -text "[mc {URL}]:"
     ttk::entry $whttp.eurl -font CociSmallFont -textvariable $token\(httpurl)
-    ttk::button $whttp.bproxy -style Small.TButton -text [mc Proxy...] \
+    ttk::button $whttp.bproxy -style Small.TButton -text "[mc Proxy]..." \
       -command [list ::Preferences::Show {General {Network}}]
     if {0} {
 	ttk::label $whttp.lpoll -style Small.TLabel  \

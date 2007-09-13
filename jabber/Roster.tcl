@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.215 2007-09-11 12:41:34 matben Exp $
+# $Id: Roster.tcl,v 1.216 2007-09-13 15:53:40 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -116,14 +116,14 @@ proc ::Roster::InitMenus {} {
       
     # Standard popup menu.
     set mDefs {
-	{command     mMessage         {::NewMsg::Build -to $jid -tolist $jidlist} }
+	{command     mMessage...      {::NewMsg::Build -to $jid -tolist $jidlist} }
 	{command     mChat...         {::Chat::StartThread $jid3} }
 	{command     mSendFile...     {::FTrans::Send $jid3} }
 	{separator}
 	{command     mAddContact...   {::JUser::NewDlg} }
 	{command     mEditContact...  {::JUser::EditDlg $jid} }
 	{command     mBusinessCard... {::UserInfo::Get $jid3} }
-	{command     mChatHistory     {::Chat::BuildHistoryForJid $jid} }
+	{command     mHistory...      {::Chat::BuildHistoryForJid $jid} }
 	{command     mRemoveContact   {::Roster::SendRemove $jid} }
 	{separator}
 	{cascade     mShow            {
@@ -136,17 +136,17 @@ proc ::Roster::InitMenus {} {
 	    {radio     mDecreasing    {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -decreasing} }
 	} }
 	{cascade     mStyle           {@::Roster::StyleMenu} }
-	{command     mRefreshRoster   {::Roster::Refresh} }
+	{command     mRefresh         {::Roster::Refresh} }
     }
     set mTypes {
-	{mMessage       {head group user}     }
+	{mMessage...    {head group user}     }
 	{mChat...       {user available}      }
 	{mWhiteboard    {wb available}        }
 	{mSendFile...   {user available}      }
 	{mAddContact... {}                    }
 	{mEditContact...  {user}              }
 	{mBusinessCard... {user}              }
-	{mChatHistory   {user always}         }
+	{mHistory...    {user always}         }
 	{mRemoveContact {user}                }
 	{mShow          {normal}           {
 	    {mOffline     {normal}            }
@@ -158,7 +158,7 @@ proc ::Roster::InitMenus {} {
 	    {mDecreasing  {}                  }
 	}}
 	{mStyle         {normal}              }
-	{mRefreshRoster {}                    }
+	{mRefresh       {}                    }
     }
     if {[::Jabber::HaveWhiteboard]} {
 	set mWBDef  {command   mWhiteboard   {::JWB::NewWhiteboardTo $jid3}}
@@ -176,7 +176,7 @@ proc ::Roster::InitMenus {} {
     # Transports popup menu.
     set mDefs {
 	{command     mLastLogin/Activity  {::Jabber::GetLast $jid} }
-	{command     mvCard2              {::VCard::Fetch other $jid} }
+	{command     mBusinessCard...     {::VCard::Fetch other $jid} }
 	{command     mAddContact...       {::JUser::NewDlg} }
 	{command     mEditContact...      {::JUser::EditDlg $jid} }
 	{command     mVersion             {::Jabber::GetVersion $jid3} }
@@ -184,18 +184,18 @@ proc ::Roster::InitMenus {} {
 	{command     mLogoutTrpt          {::Roster::LogoutTrpt $jid3} }
 	{separator}
 	{command     mUnregister          {::Roster::Unregister $jid3} }
-	{command     mRefreshRoster       {::Roster::Refresh} }
+	{command     mRefresh             {::Roster::Refresh} }
     }  
     set mTypes {
 	{mLastLogin/Activity  {user}                }
-	{mvCard2              {user}                }
+	{mBusinessCard...     {user}                }
 	{mAddContact...       {}                    }
 	{mEditContact...      {user}                }
 	{mVersion             {user}                }
 	{mLoginTrpt           {trpt unavailable}    }
 	{mLogoutTrpt          {trpt available}      }
 	{mUnregister          {trpt}                }
-	{mRefreshRoster       {}                    }
+	{mRefresh             {}                    }
     }  
     set popMenuDefs(roster,trpt,def)  $mDefs
     set popMenuDefs(roster,trpt,type) $mTypes
@@ -1420,7 +1420,7 @@ proc ::Roster::InitPrefsHook {} {
 
 proc ::Roster::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Roster} [mc Roster]
+    ::Preferences::NewTableItem {Jabber Roster} [mc Contacts]
         
     # Roster page ----------------------------------------------------------
     set wpage [$nbframe page {Roster}]
@@ -1441,11 +1441,11 @@ proc ::Roster::BuildPageRoster {page} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
-    ttk::checkbutton $wc.rmifunsub -text [mc prefrorm]  \
+    ttk::checkbutton $wc.rmifunsub -text [mc prefrorm2]  \
       -variable [namespace current]::tmpJPrefs(rost,rmIfUnsub)
-    ttk::checkbutton $wc.clrout -text [mc prefroclr]  \
+    ttk::checkbutton $wc.clrout -text [mc prefroclr2]  \
       -variable [namespace current]::tmpJPrefs(rost,clrLogout)
-    ttk::checkbutton $wc.dblclk -text [mc prefrochat] \
+    ttk::checkbutton $wc.dblclk -text [mc prefrochat2] \
       -variable [namespace current]::tmpJPrefs(rost,dblClk)  \
       -onvalue chat -offvalue normal
     ttk::checkbutton $wc.showoff -text [mc "Show offline users"] \
@@ -1463,6 +1463,7 @@ proc ::Roster::BuildPageRoster {page} {
     grid  $wc.showtrpt   -sticky w
     grid  $wc.showsubno  -sticky w
     
+    ::balloonhelp::balloonforwindow $wc.rmifunsub [mc subTo]
 }
 
 proc ::Roster::SavePrefsHook {} {

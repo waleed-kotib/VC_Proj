@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.42 2007-09-09 07:37:24 matben Exp $
+# $Id: Subscribe.tcl,v 1.43 2007-09-13 15:53:40 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -151,7 +151,7 @@ proc ::Subscribe::NewDlg {jid} {
       -command [list [namespace current]::Accept $token]
     ttk::button $frbot.btcancel -text [mc No]  \
       -command [list [namespace current]::Deny $token]
-    ttk::button $frbot.bvcard -text [mc mBusinessCard...] \
+    ttk::button $frbot.bvcard -text "[mc {View Business Card}]..." \
       -command [list ::VCard::Fetch other $jid]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -327,9 +327,10 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     set wsubs $wc.fr
     ttk::frame $wsubs
 
-    ttk::label $wsubs.la1 -text [mc prefsuif2]
-    ttk::label $wsubs.lin -text [mc prefsuis]
-    ttk::label $wsubs.lnot -text [mc prefsuisnot]
+    ttk::label $wsubs.la1 -text "[mc prefsuif2]..."
+    ttk::label $wsubs.lin -text "...[mc prefsuis2]:"
+    ttk::label $wsubs.lnot -text "...[mc prefsuisnot2]:"
+
     ttk::separator $wsubs.s -orient vertical
     
     grid  $wsubs.la1  -         -            -sticky w
@@ -338,7 +339,7 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     
     foreach  \
       val { accept        reject        ask }   \
-      txt { "Auto-accept" "Auto-reject" "Ask each time" } {
+      txt { "Auto-accept" "Auto-reject" "Always ask" } {
 	foreach val2 {inrost notinrost} {
 	    ttk::radiobutton $wsubs.$val2$val \
 	      -text [mc $txt] -value $val  \
@@ -349,7 +350,7 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     
     set wauto $wc.auto
     ttk::frame $wauto
-    ttk::checkbutton $wauto.sub -text [mc prefsuauto2] \
+    ttk::checkbutton $wauto.sub -text "[mc prefsuauto2]:" \
       -variable [namespace current]::tmpJPrefs(subsc,auto)
     ttk::label $wauto.la -text [mc {Default group}]:
     ttk::entry $wauto.ent -font CociSmallFont \

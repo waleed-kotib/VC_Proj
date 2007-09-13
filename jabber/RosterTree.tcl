@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.70 2007-09-11 12:41:34 matben Exp $
+# $Id: RosterTree.tcl,v 1.71 2007-09-13 15:53:40 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -583,7 +583,7 @@ proc ::RosterTree::BackgroundImageCmd {} {
     set typeText [join $typeL ", "]
     set str [mc jaopenbgimage]
     set dtl [mc jasuppimagefmts]
-    append dtl $typeText
+    append dtl " " $typeText
     append dtl "."
     set mbar [::UI::GetMainMenu]
     ::UI::MenubarDisableBut $mbar edit
@@ -1744,7 +1744,7 @@ proc ::RosterTree::EditMenuPostHook {wmenu} {
     if {[winfo ismapped $T] && [string length [GetStyleFindColumn]]} {
 	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
 	if {[winfo exists $wfind]} {
-	    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
 	}
     }
