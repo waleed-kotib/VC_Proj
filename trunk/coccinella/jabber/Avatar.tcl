@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.35 2007-09-10 13:29:34 matben Exp $
+# $Id: Avatar.tcl,v 1.36 2007-09-13 08:25:37 matben Exp $
 
 # @@@ Issues:
 # 
@@ -330,7 +330,7 @@ proc ::Avatar::VerifyPhotoFile {fileName} {
 	set typeL [::Media::GetSupportedTypesForMimeList $mimes]
 	set typeText [join $typeL ", "]
 	set msg [mc jasuppimagefmts]
-	append msg $typeText
+	append msg " " $typeText
 	append msg "."	
 	return [list 0 $msg]
     }

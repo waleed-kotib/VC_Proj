@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: ttoolbar.tcl,v 1.16 2007-09-05 13:21:00 matben Exp $
+# $Id: ttoolbar.tcl,v 1.17 2007-09-13 08:25:37 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -441,7 +441,7 @@ proc ::ttoolbar::Popup {w x y} {
     
     set [namespace current]::menutmp $options(-compound)
     
-    $m add radiobutton -label [::msgcat::mc {Show Text and Image}] \
+    $m add radiobutton -label [::msgcat::mc "Show Text and Icon"] \
       -command [list $w configure -compound both] \
       -variable [namespace current]::menutmp  \
       -value both
@@ -449,7 +449,7 @@ proc ::ttoolbar::Popup {w x y} {
       -command [list $w configure -compound text] \
       -variable [namespace current]::menutmp  \
       -value text
-    $m add radiobutton -label [::msgcat::mc {Show Image}] \
+    $m add radiobutton -label [::msgcat::mc "Show Icon"] \
       -command [list $w configure -compound image] \
       -variable [namespace current]::menutmp  \
       -value image

@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: wizard.tcl,v 1.11 2007-08-08 09:18:37 matben Exp $
+# $Id: wizard.tcl,v 1.12 2007-09-13 08:25:37 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -217,7 +217,7 @@ proc ::wizard::wizard {w args} {
     ttk::frame $widgets(btframe) -padding [option get . okcancelPadding {}]
     ttk::button $widgets(btforward) -text "[::msgcat::mc Next] >" \
       -command [list [namespace current]::ForwardCmd $w] -width -8
-    ttk::button $widgets(btbackward) -text "< [::msgcat::mc Back]" \
+    ttk::button $widgets(btbackward) -text "< [::msgcat::mc Previous]" \
       -command [list [namespace current]::BackwardCmd $w] -width -8
     ttk::button $widgets(btcancel) -text [::msgcat::mc Cancel] \
       -command [list [namespace current]::CloseCmd $w] -width -8

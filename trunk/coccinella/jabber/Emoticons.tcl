@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.50 2007-09-08 14:39:56 matben Exp $
+# $Id: Emoticons.tcl,v 1.51 2007-09-13 08:25:38 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -186,7 +186,7 @@ proc ::Emoticons::LoadTmpIconSet {path} {
 	    set zipdir [lindex [glob -nocomplain -directory $mountpath *] 0]
 	    set dir $zipdir
 	} else {
-	    return -code error "cannot read jisp archive without vfs::zip"
+	    return -code error "Cannot read jisp archive without vfs::zip"
 	}
     }
     set icondefPath [file join $dir icondef.xml]
@@ -520,7 +520,7 @@ proc ::Emoticons::InsertTextLegend {w name args} {
 	$w insert insert "\n"
     }
     
-    $w insert insert "\t[mc Image]\t[mc Text]\n"
+    $w insert insert "\t[mc Image]\t[mc text]\n"
     
     # Smileys:
     foreach ind [lsort -dictionary [array names tmpiconsInv $name,*]] {
@@ -540,9 +540,9 @@ proc ::Emoticons::InsertTextLegend {w name args} {
 proc ::Emoticons::ImportSet {} {
     global  this
     
-    set types [list [list [mc {Jabber Iconset Archive}] {.jisp}]]
+    set types [list [list [mc "Iconset Archive"] {.jisp}]]
     set fileName [tk_getOpenFile -filetypes $types \
-      -title [mc {Open jisp Archive}]]
+      -title [mc "Import Iconset"]]
     if {[file exists $fileName]} {
 	set tail [file tail $fileName]
 	set name [file rootname $tail]
@@ -605,7 +605,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     pack $wc -side top -fill both -expand 1 \
       -anchor [option get . dialogAnchor {}]
         
-    ttk::label $wc.l -text [mc preficonsel]
+    ttk::label $wc.l -text [mc preficonsel2]
     pack  $wc.l  -side top -anchor w -pady 4
     
     set wmb $wc.mb    
@@ -636,7 +636,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     
     set wpreftext $wfr.t
     
-    ttk::button $wc.imp -text [mc {Import Iconset...}]  \
+    ttk::button $wc.imp -text "[mc {Import Iconset}]..." \
       -command [namespace current]::ImportSetToPrefs
     pack $wc.imp -side top -anchor w -pady 4
     
@@ -653,9 +653,9 @@ proc ::Emoticons::ImportSetToPrefs {} {
     variable wprefpage
     variable wiconsetmenu
     
-    set types [list [list [mc {Jabber Iconset Archive}] {.jisp}]]
+    set types [list [list [mc "Iconset Archive"] {.jisp}]]
     set fileName [tk_getOpenFile -parent [winfo toplevel $wprefpage] \
-      -filetypes $types -title [mc {Open jisp Archive}]]
+      -filetypes $types -title [mc "Import Iconset"]]
     if {[file exists $fileName]} {
 	set tail [file tail $fileName]
 	set name [file rootname $tail]
@@ -670,9 +670,10 @@ proc ::Emoticons::ImportSetToPrefs {} {
 	if {[catch {
 	    LoadTmpIconSet $dst
 	} err]} {
+	    set str [mc jamessemoticonfail2 $name]
+	    append str "\n" "[mc Error]: $err"
 	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message [mc jamessemoticonfail $name $err] \
-	      -parent [winfo toplevel $wprefpage]
+	      -message $str -parent [winfo toplevel $wprefpage]
 	} else {
 	    $wiconsetmenu add radiobutton -label $name  \
 	      -variable [namespace current]::tmpSet
@@ -692,9 +693,10 @@ proc ::Emoticons::PrefsSetCmd {value} {
 	if {[catch {
 	    LoadTmpIconSet $state($tmpSet,path)
 	} err]} {
+	    set str [mc jamessemoticonfail2 $tmpSet]
+	    append str "\n" "[mc Error]: $err"
 	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message [mc jamessemoticonfail $tmpSet $err] \
-	      -parent [winfo toplevel $wprefpage]
+	      -message $str -parent [winfo toplevel $wprefpage]
 	    set priv(havezip) 0
 	    set jprefs(emoticonSet) $priv(defaultSet)
 	    set tmpSet $priv(defaultSet)

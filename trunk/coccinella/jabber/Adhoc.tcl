@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Adhoc.tcl,v 1.11 2007-07-19 06:28:12 matben Exp $
+# $Id: Adhoc.tcl,v 1.12 2007-09-13 08:25:37 matben Exp $
 
 # @@@ Maybe all this should be a component?
 
@@ -198,7 +198,7 @@ proc ::Adhoc::BuildDlg {jid node subiq} {
 	
 	# completed: The command has completed. The command session has ended.
 	# Typical if a command does not require any interaction.
-	ttk::button $bot.close -text [mc Close] -default active \
+	ttk::button $bot.close -text [mc Cancel] -default active \
 	  -command [namespace code [list CloseCmd $w]]
 	pack $bot.close -side right
 	
@@ -393,7 +393,7 @@ proc ::Adhoc::ActionCB {w type subiq args} {
 	    $state(wprev) configure -default normal
 	    $state(wnext) configure -default normal
 	    $state(wnext) state {!disabled}
-	    $state(wnext) configure -text [mc Close] -default active \
+	    $state(wnext) configure -text [mc Cancel] -default active \
 	      -command [namespace code [list Close $w]]
 	} else {
 	    SetActionButtons $w $subiq

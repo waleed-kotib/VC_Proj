@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.207 2007-08-20 06:05:17 matben Exp $
+# $Id: Chat.tcl,v 1.208 2007-09-13 08:25:37 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -249,7 +249,7 @@ proc ::Chat::StartThreadDlg {args} {
     
     ::UI::Toplevel $w -class StartChat  \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox}
-    wm title $w [mc {Start Chat}]
+    wm title $w [mc mChat]
     ::UI::SetWindowPosition $w
        
     # Global frame.
@@ -261,7 +261,7 @@ proc ::Chat::StartThreadDlg {args} {
 	set imd [::Theme::GetImage [option get $w chatDisImage {}]]
 	
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc {Start Chat}] -compound left   \
+	  -text [mc mChat] -compound left   \
 	  -image [list $im background $imd]
 	pack $w.frall.head -side top -fill both -expand 1
 	
@@ -341,8 +341,8 @@ proc ::Chat::DoStart {w} {
     
     set jid [jlib::escapejid $user]
     if {![jlib::jidvalidate $jid]} {
-	set ans [::UI::MessageBox -message [mc jamessbadjid $jid] \
-	  -icon error -type yesno]
+	set ans [::UI::MessageBox -message [mc jamessbadjid2 $jid] \
+	  -icon error -title [mc Error] -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
 	}
@@ -1213,7 +1213,7 @@ proc ::Chat::Build {threadID args} {
     if {0} {
 	# Too many buttons. Skip this one.
 	$wtray newbutton settings  \
-	  -text [mc Settings] -image $iconSettings \
+	  -text [mc mPreferences] -image $iconSettings \
 	  -disabledimage $iconSettingsDis \
 	  -command [list [namespace current]::Settings $dlgtoken]
     }
@@ -1644,7 +1644,7 @@ proc ::Chat::MenuEditPostHook {wmenu} {
 	set wfind $chatstate(wfind)
 	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
 	if {[winfo exists $wfind]} {
-	    ::UI::MenuMethod $wmenu entryconfigure mFindAgain -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal
 	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
 	}
     }
@@ -1738,7 +1738,7 @@ proc ::Chat::SetTitle {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
         
-    set str "[mc Chat]: $chatstate(displayname)"
+    set str "[mc mChat]: $chatstate(displayname)"
     if {$chatstate(displayname) ne $chatstate(fromjid)} {
 	set ujid [jlib::unescapestr $chatstate(fromjid)]
 	append str " ($ujid)"
@@ -2288,7 +2288,8 @@ proc ::Chat::Invite {dlgtoken} {
 
     set chatservers [$jstate(jlib) disco getconferences]
     if {0 && $chatservers eq {}} {
-	::UI::MessageBox -icon error -message [mc jamessnogroupchat]
+	::UI::MessageBox -icon error -title [mc Error] \
+	  -message [mc jamessnogroupchat2]
 	return
     }
     set server [lindex $chatservers 0]
@@ -2558,8 +2559,8 @@ proc ::Chat::Send {dlgtoken} {
 
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
-	::UI::MessageBox -type ok -icon error -title [mc {Not Connected}] \
-	  -message [mc jamessnotconnected]
+	::UI::MessageBox -type ok -icon error -title [mc Error] \
+	  -message [mc jamessnotconnected2]
 	return
     }
     set chattoken [GetActiveChatToken $dlgtoken]
@@ -2578,8 +2579,8 @@ proc ::Chat::Send {dlgtoken} {
     set chatstate(jid) $jid
     
     if {![jlib::jidvalidate $jid]} {
-	set ans [::UI::MessageBox -message [mc jamessbadjid $jid] \
-	  -icon error -type yesno]
+	set ans [::UI::MessageBox -message [mc jamessbadjid2 $jid] \
+	  -icon error -title [mc Error] -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
 	}
@@ -2682,7 +2683,7 @@ proc ::Chat::TraceJid {dlgtoken name junk1 junk2} {
     
     # Call by name.
     upvar $name locName    
-    wm title $dlgstate(w) "[mc Chat] ($chatstate(fromjid))"
+    wm title $dlgstate(w) "[mc mChat] ($chatstate(fromjid))"
 }
 
 proc ::Chat::SendFile {dlgtoken} {
@@ -3002,7 +3003,7 @@ proc ::Chat::Close {dlgtoken} {
     set ans "yes"
     if {0} {
 	set ans [::UI::MessageBox -icon info -parent $w -type yesno \
-	  -message [mc jamesschatclose]]
+	  -message [mc jamesschatclose2]]
     }
     if {$ans eq "yes"} {
 	set chattoken [GetActiveChatToken $dlgtoken]
@@ -3343,7 +3344,7 @@ proc ::Chat::InitPrefsHook { } {
 
 proc ::Chat::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Chat} [mc Chat]
+    ::Preferences::NewTableItem {Jabber Chat} [mc mChat]
     
     set wpage [$nbframe page {Chat}]    
     ::Chat::BuildPrefsPage $wpage
@@ -3364,7 +3365,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
  
-    ttk::checkbutton $wc.active -text [mc prefchactret]  \
+    ttk::checkbutton $wc.active -text [mc prefchactret2]  \
       -variable [namespace current]::tmpJPrefs(chatActiveRet)
     ttk::checkbutton $wc.newwin -text [mc prefcushow] \
       -variable [namespace current]::tmpJPrefs(showMsgNewWin)
@@ -3373,7 +3374,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
 
     ttk::separator $wc.sep -orient horizontal    
 
-    ttk::label $wc.lmb2 -text [mc prefcu2clk]
+    ttk::label $wc.lmb2 -text "[mc prefcu2clk]:"
     ttk::radiobutton $wc.rb2new -text [mc prefcuopen] \
       -value newwin -variable [namespace current]::tmpJPrefs(inbox2click)
     ttk::radiobutton $wc.rb2re   \
@@ -3387,14 +3388,14 @@ proc ::Chat::BuildPrefsPage {wpage} {
     ttk::label $whi.lhist -text "[mc {History length}]:"
     spinbox $whi.shist -width 4 -from 0 -increment 5 -to 1000 -state readonly \
       -textvariable [namespace current]::tmpJPrefs(chat,histLen)
-    ttk::label $whi.lage -text "[mc {Not older than}]:"
+    ttk::label $whi.lage -text "[mc {More recent than}]:"
     set mb $whi.mbage
     set menuDef [list                       \
-	[list [mc {Ten Seconds}]     -value 10]    \
-	[list [mc {One Minute}]      -value 60]    \
-	[list [mc {Ten Minutes}]     -value 600]   \
-	[list [mc {One Hour}]        -value 3600]  \
-	[list [mc {No Restriction}]  -value 0]     \
+	[list [mc {Ten seconds}]     -value 10]    \
+	[list [mc {One minute}]      -value 60]    \
+	[list [mc {Ten minutes}]     -value 600]   \
+	[list [mc {One hour}]        -value 3600]  \
+	[list [mc {No restriction}]  -value 0]     \
     ]
     ui::optionmenu $mb -menulist $menuDef -direction flush \
       -variable [namespace current]::tmpJPrefs(chat,histAge)
@@ -3403,15 +3404,19 @@ proc ::Chat::BuildPrefsPage {wpage} {
     grid columnconfigure $whi 1 -weight 1
     grid columnconfigure $whi 3 -minsize [$mb maxwidth]
 
+    ::balloonhelp::balloonforwindow $whi.shist [mc historymessages]
+
     ttk::separator $wc.sep3 -orient horizontal
 
     set wni $wc.ni
     ttk::frame $wc.ni
-    ttk::label $wni.lni -text "[mc {My nickname for own display}]:"
+    ttk::label $wni.lni -text "[mc {Local nickname}]:"
     ttk::entry $wni.eni -textvariable [namespace current]::tmpJPrefs(chat,mynick)
 
     grid  $wni.lni  $wni.eni  -sticky w
     grid columnconfigure $wni 1 -weight 1
+
+    ::balloonhelp::balloonforwindow $wni.eni [mc localnick]
 
     grid  $wc.active  -sticky w
     grid  $wc.newwin  -sticky w

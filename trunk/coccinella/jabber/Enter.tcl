@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.16 2007-09-10 12:31:55 matben Exp $
+# $Id: Enter.tcl,v 1.17 2007-09-13 08:25:38 matben Exp $
 
 package provide Enter 1.0
 
@@ -74,7 +74,7 @@ proc ::Enter::Build {protocol args} {
     ::UI::Toplevel $w \
       -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
       -closecommand [list [namespace current]::CloseCmd $token]
-    wm title $w [mc {Enter Room}]
+    wm title $w [mc "Enter Chatroom"]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
     if {$nwin == 1} {
@@ -113,7 +113,7 @@ proc ::Enter::Build {protocol args} {
     pack $wbox -fill both -expand 1
     
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc jamucentermsg]
+      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc jamucentermsg2]
     pack $wbox.msg -side top -anchor w
 
     set frmid $wbox.frmid
@@ -124,10 +124,10 @@ proc ::Enter::Build {protocol args} {
     set wbrowse $frmid.browse
     set wbmark  $frmid.bmark
     
-    ttk::label $frmid.lserv -text "[mc {Conference server}]:" 
+    ttk::label $frmid.lserv -text "[mc Service]:" 
     ttk::::combobox $wserver -width 16 -textvariable $token\(server) \
       -values $services
-    ttk::button $wbrowse -text [mc Browse] \
+    ttk::button $wbrowse -text [mc Discover] \
       -command [list [namespace current]::Browse $token]
     ttk::button $wbmark -style Popupbutton  \
       -command [list [namespace current]::BmarkPopup $token]
@@ -150,9 +150,9 @@ proc ::Enter::Build {protocol args} {
     set warrows   $frmid.st.arr
     set wstatus   $frmid.st.stat
     
-    ttk::label $frmid.lroom -text "[mc {Room name}]:"
+    ttk::label $frmid.lroom -text "[mc Chatroom]:"
     ttk::::combobox $wroom -textvariable $token\(roomname)
-    ttk::label $frmid.lnick -text "[mc {Nickname}]:"
+    ttk::label $frmid.lnick -text "[mc Nickname]:"
     ttk::entry $frmid.enick -textvariable $token\(nickname)
     ttk::label $frmid.lpass -text "[mc Password]:"
     ttk::entry $frmid.epass -textvariable $token\(password)  \
@@ -173,6 +173,12 @@ proc ::Enter::Build {protocol args} {
     grid  $wserver   $wroom    $frmid.enick  $frmid.epass  -sticky ew
     grid  $wbrowse  -padx 10
     grid columnconfigure $frmid 1 -weight 1
+
+    ::balloonhelp::balloonforwindow $wserver [mc chatroomservice]
+    ::balloonhelp::balloonforwindow $wbmark [mc Bookmarks]
+    ::balloonhelp::balloonforwindow $wroom [mc chatroomselect]
+    ::balloonhelp::balloonforwindow $frmid.enick [mc registration-nick]
+    ::balloonhelp::balloonforwindow $frmid.epass [mc registration-password]
 
     if {[info exists argsA(-roomjid)]} {
 	jlib::splitjidex $argsA(-roomjid) r state(server) -
@@ -386,7 +392,7 @@ proc ::Enter::GetRoomsCB {token browsename type jid subiq args} {
     switch -- $type {
 	error {
 	    ::ui::dialog -type ok -icon error -title [mc Error]  \
-	      -message [mc jamessnorooms $state(server)]  \
+	      -message [mc jamessnorooms2 $state(server)]  \
 	      -detail [lindex $subiq 1]
 	}
 	result - ok {
@@ -437,8 +443,8 @@ proc ::Enter::FillRoomList {token} {
 	}
     }
     if {![llength $roomL]} {
-	::ui::dialog -type ok -icon error -title "No Rooms"  \
-	  -message [mc jamessnorooms $state(server)]
+	::ui::dialog -type ok -icon error  -title [mc Error] \
+	  -message [mc jamessnorooms2 $state(server)]
 	return
     }
     
@@ -454,7 +460,7 @@ proc ::Enter::BusyEnterDlgIncr {token {num 1}} {
     incr state(statuscount) $num
     
     if {$state(statuscount) > 0} {
-	set state(status) [mc {Getting available rooms...}]
+	set state(status) "[mc {Loading available chatrooms}]..."
 	$state(warrows) start
 	SetState $token disabled
     } else {
@@ -476,7 +482,8 @@ proc ::Enter::PrepPrepDoEnter {token} {
     ::Debug 4 "::Enter::PrepPrepDoEnter"
 
     if {($state(roomname) eq "") || ($state(nickname) eq "")} {
-	::UI::MessageBox -type ok -icon error -message [mc jamessinroommiss]
+	::UI::MessageBox -type ok -icon error -title [mc Error] \
+	  -message [mc jamessgchatfields2]
     } else {
 	PrepDoEnter $token
     }
@@ -622,8 +629,9 @@ proc ::Enter::MUCCallback {token jlibname xmldata} {
 		401 - not-authorized {
 		    
 		    # Password required.
-		    set ans [::UI::MessageBox -type yesno -icon error  \
-		      -message [mc jamessenterroomretry $roomjid $errmsg]]
+		    set ans [::UI::MessageBox -type yesno -icon error \
+		      -title [mc Error]  \
+		      -message [mc jamessenterroomretry2 $roomjid $errmsg]]
 		    if {$ans eq "yes"} {
 			set retry 1
 			Build "muc" -roomjid $state(roomjid)  \
@@ -631,8 +639,11 @@ proc ::Enter::MUCCallback {token jlibname xmldata} {
 		    }
 		}
 		default {
-		    ::UI::MessageBox -type ok -icon error  \
-		      -message [mc jamesserrconfgetcre $errcode $errmsg]
+		    set str [mc jamesserrconfgetcre2]
+		    append str "\n" "[mc {Error code}]: $errcode\n"
+		    append str "[mc Message]: $errmsg"
+		    ::UI::MessageBox -type ok -icon error -title [mc Error]  \
+		      -message $str
 		}
 	    }
 	}
@@ -664,14 +675,15 @@ proc ::Enter::GCCallback {token jlibname xmldata} {
 
     if {[string equal $type "error"]} {
 	set ujid [jlib::unescapejid $from]
-	set msg [mc mucErrEnter $from]
+	set msg [mc mucErrEnter2 $from]
 	set errspec [jlib::getstanzaerrorspec $xmldata]
 	if {[llength $errspec]} {
 	    set errcode [lindex $errspec 0]
 	    set errmsg  [lindex $errspec 1]
-	    append msg [mc mucErrCode $errcode $errmsg]
+	    append msg "\n[mc {Error code}]: $errcode"
+	    append msg "\n[mc Message]: $errmsg"
 	}
-	::UI::MessageBox [mc mucErrEnterTitle] -message $msg -icon error
+	::UI::MessageBox -title [mc Error] -message $msg -icon error
     } else {
     
 	# Cache groupchat protocol type (muc|conference|gc-1.0).

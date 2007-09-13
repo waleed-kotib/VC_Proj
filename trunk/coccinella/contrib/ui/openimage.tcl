@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: openimage.tcl,v 1.3 2007-07-31 07:28:32 matben Exp $
+# $Id: openimage.tcl,v 1.4 2007-09-13 08:25:37 matben Exp $
 
 # Public commands:
 # 
@@ -96,9 +96,9 @@ proc ui::openimage::widget {w args} {
 
     ttk::frame $fr.r
     ttk::button $fr.r.new \
-      -command [namespace code [list New $w]] -text [::msgcat::mc New...]
+      -command [namespace code [list New $w]] -text "[::msgcat::mc {Open Image}]..."
     ttk::button $fr.r.rem \
-      -command [namespace code [list Remove $w]] -text [::msgcat::mc Remove]
+      -command [namespace code [list Remove $w]] -text [::msgcat::mc Clear]
     ttk::button $fr.r.def \
       -command [namespace code [list Default $w]] -text [::msgcat::mc Default]
 
@@ -153,7 +153,7 @@ proc ui::openimage::New {w} {
     upvar 0 $w state
     variable $w
 
-    set fileName [tk_getOpenFile -title [::msgcat::mc {Pick Image File}] \
+    set fileName [tk_getOpenFile -title [::msgcat::mc "Open Image"] \
       -filetypes $state(-filetypes)]
     if {[file exists $fileName]} {
 	PutImageFile $w $fileName

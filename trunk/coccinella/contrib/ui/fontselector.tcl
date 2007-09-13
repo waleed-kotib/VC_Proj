@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: fontselector.tcl,v 1.6 2007-07-19 06:28:12 matben Exp $
+# $Id: fontselector.tcl,v 1.7 2007-09-13 08:25:37 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -145,7 +145,7 @@ snit::widget ui::fontselector::widget {
 	# Button part.
 	set frbot  $win.frm.b
 	ttk::frame $frbot
-	ttk::button $frbot.btset -text [::msgcat::mc Select] -default active  \
+	ttk::button $frbot.btset -text [::msgcat::mc OK] -default active  \
 	  -command [list $self OK]
 	ttk::button $frbot.btcancel -text [::msgcat::mc Cancel]  \
 	  -command [list $self Cancel]
