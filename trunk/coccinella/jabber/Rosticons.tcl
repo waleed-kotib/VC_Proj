@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.35 2007-09-07 08:04:41 matben Exp $
+# $Id: Rosticons.tcl,v 1.36 2007-09-13 15:53:40 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -31,7 +31,6 @@
 #                  msn/
 #                 smtp/
 #               status/
-#           whiteboard/
 #                yahoo/
 #                
 #  The 'status' type is the usual jabber icons. The 'application' type is 
@@ -84,7 +83,6 @@ namespace eval ::Rosticons:: {
 	phone           "plain"
 	smtp            "default"
 	status          "Crystal"
-	whiteboard      "default"
 	yahoo           "Crystal"
     }
 
@@ -166,7 +164,7 @@ proc ::Rosticons::GetTypes { } {
 #       state(types)       listOfTypes
 #       
 #       type is typically:
-#       aim application gadu-gadu icq msn status whiteboard yahoo
+#       aim application gadu-gadu icq msn status yahoo
 
 proc ::Rosticons::GetAllTypeSets { } {
     global  this
@@ -227,7 +225,7 @@ proc ::Rosticons::GetAllTypeSets { } {
 #       Returns the image to use for this key.
 #       
 # Arguments:
-#       statuskey       type/subtype, ex: status/online, icq/xa, whiteboard/dnd
+#       statuskey       type/subtype, ex: status/online, icq/xa, 
 #                       application/* and phone/* are special
 #       
 # Results:
@@ -404,7 +402,7 @@ proc ::Rosticons::InitPrefsHook { } {
 
 proc ::Rosticons::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Rosticons} [mc {Rosticons}]
+    ::Preferences::NewTableItem {Jabber Rosticons} [mc "Contact Icons"]
     
     set wpage [$nbframe page {Rosticons}]    
     BuildPrefsPage $wpage
@@ -454,7 +452,7 @@ proc ::Rosticons::BuildPrefsPage {wpage} {
     grid columnconfigure $rbox 0 -weight 1   
         
     set msg $box.msg
-    ttk::label $msg -text [mc jaseliconset]
+    ttk::label $msg -text [mc jaseliconset2]
 
     grid  $lbox  x  $rbox  -sticky ew
     grid  $msg   -  -      -sticky w -pady 4
@@ -553,15 +551,13 @@ proc ::Rosticons::PFillTree {T} {
 	    $wcheck configure -state disabled
 	}
 	if {$type eq "status"} {
-	    set typeName "Jabber"
+	    set typeName [mc normal]
 	} elseif {$type eq "application"} {
 	    set typeName [mc program-Application]
 	} elseif {$type eq "phone"} {
 	    set typeName [mc Phone]
 	} elseif {$type eq "smtp"} {
 	    set typeName [mc Email]
-	} elseif {$type eq "whiteboard"} {
-	    set typeName [mc Whiteboard]
 	} else {
 	    set typeName [::Roster::GetNameFromTrpt $type]
 	}

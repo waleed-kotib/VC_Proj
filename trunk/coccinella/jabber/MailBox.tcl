@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.121 2007-09-12 11:55:31 matben Exp $
+# $Id: MailBox.tcl,v 1.122 2007-09-13 15:53:40 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -494,7 +494,7 @@ proc ::MailBox::Build {args} {
     set locals(wtbar) $wtbar
 
     $wtbar newbutton new  \
-      -text [mc New] -image $iconNew -disabledimage $iconNewDis  \
+      -text [mc Message] -image $iconNew -disabledimage $iconNewDis  \
       -command ::NewMsg::Build
     $wtbar newbutton reply  \
       -text [mc Reply] -image $iconReply -disabledimage $iconReplyDis  \
@@ -509,7 +509,7 @@ proc ::MailBox::Build {args} {
       -text [mc Print] -image $iconPrint -disabledimage $iconPrintDis  \
       -command ::MailBox::DoPrint -state disabled
     $wtbar newbutton trash  \
-      -text [mc Trash] -image $iconTrash -disabledimage $iconTrashDis  \
+      -text [mc Delete] -image $iconTrash -disabledimage $iconTrashDis  \
       -command ::MailBox::TrashMsg -state disabled
     
     ::hooks::run buildMailBoxButtonTrayHook $wtbar
@@ -1524,8 +1524,8 @@ proc ::MailBox::SaveMailboxVer1 {} {
     # Work on a temporary file and switch later.
     set tmpFile $this(inboxFile).tmp
     if {[catch {open $tmpFile w} fid]} {
-	::UI::MessageBox -type ok -icon error \
-	  -message [mc jamesserrinboxopen $tmpFile]
+	::UI::MessageBox -type ok -icon error -title [mc Error] \
+	  -message [mc jamesserrinboxopen2 $tmpFile]
 	return
     }
     #fconfigure $fid -encoding utf-8
@@ -1602,8 +1602,8 @@ proc ::MailBox::SaveMailboxVer2 {args} {
     # Work on a temporary file and switch later.
     set tmpFile $this(inboxFile).tmp
     if {[catch {open $tmpFile w} fid]} {
-	::UI::MessageBox -type ok -icon error \
-	  -message [mc jamesserrinboxopen $tmpFile]
+	::UI::MessageBox -type ok -icon error -title [mc Error] \
+	  -message [mc jamesserrinboxopen2 $tmpFile]
 	return
     }
     #fconfigure $fid -encoding utf-8
@@ -1709,8 +1709,8 @@ proc ::MailBox::ReadMailboxVer1 {} {
 
     if {[catch {source $this(inboxFile)} msg]} {
 	set tail [file tail $this(inboxFile)]
-	::UI::MessageBox -title [mc {Mailbox Error}] -icon error  \
-	  -type ok -message [mc jamesserrinboxread $tail $msg]
+	::UI::MessageBox -title [mc Error] -icon error  \
+	  -type ok -message [mc jamesserrinboxread2 $tail $msg]
     } else {
 	
 	# The mailbox on file is just a hierarchical list that needs to be
@@ -1743,8 +1743,8 @@ proc ::MailBox::ReadMailboxVer2 {} {
 
     if {[catch {source $this(inboxFile)} msg]} {
 	set tail [file tail $this(inboxFile)]
-	::UI::MessageBox -title [mc {Mailbox Error}] -icon error  \
-	  -type ok -message [mc jamesserrinboxread $tail $msg]
+	::UI::MessageBox -title [mc Error] -icon error  \
+	  -type ok -message [mc jamesserrinboxread2 $tail $msg]
     } else {
 	
 	# Keep the uidmsg in sync for each list in mailbox.

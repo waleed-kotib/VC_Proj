@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.85 2007-09-11 12:41:34 matben Exp $
+# $Id: Register.tcl,v 1.86 2007-09-13 15:53:40 matben Exp $
 
 package provide Register 1.0
 
@@ -82,8 +82,8 @@ proc ::Register::Remove {{jid {}}} {
     } else {
 	set jidlist [::Roster::GetUsersWithSameHost $jid]
 	if {[llength $jidlist]} {
-	    set ans [::UI::MessageBox -icon warning -title [mc Unregister] \
-	      -type yesnocancel -default no -message [mc register-trpt-unreg]]
+	    set ans [::UI::MessageBox -icon warning -title [mc Warning] \
+	      -type yesnocancel -default no -message [mc register-trpt-unreg2]]
 	    if {$ans eq "cancel"} {
 		return
 	    } elseif {$ans eq "yes"} {
@@ -114,8 +114,10 @@ proc ::Register::RemoveCallback {jid jlibName type theQuery} {
 
     if {[string equal $type "error"]} {
 	lassign $theQuery errcode errmsg
-	ui::dialog -icon error -title [mc Unregister] -type ok  \
-	  -message [mc jamesserrunreg [jlib::unescapejid $jid] $errcode $errmsg]
+	set str [mc jamesserrunreg2 [jlib::unescapejid $jid]]
+	append str "\n" "[mc {Error code}]: $errcode\n"
+	append str "[mc Message]: $errmsg"
+	ui::dialog -icon error -title [mc Error] -type ok -message $str
     } else {
 	
 	# If we don't do this the server may shut us down instead.
@@ -123,7 +125,7 @@ proc ::Register::RemoveCallback {jid jlibName type theQuery} {
 	    ::Jabber::DoCloseClientConnection
 	}
 	ui::dialog -icon info -title [mc Unregister] -type ok  \
-	  -message [mc jamessokunreg [jlib::unescapejid $jid]]
+	  -message [mc jamessokunreg2 [jlib::unescapejid $jid]]
     }
 }
 
@@ -223,7 +225,7 @@ proc ::RegisterEx::New {args} {
       -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token]
-    wm title $w [mc {Register Account}]
+    wm title $w [mc "New Account"]
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jreg)]]
     if {$nwin == 1} {
 	::UI::SetWindowPosition $w $wDlgs(jreg)
@@ -238,7 +240,7 @@ proc ::RegisterEx::New {args} {
 	set imd  [::Theme::GetImage [option get $w registerDisImage {}]]
 	    
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc {Register Account}] -compound left \
+	  -text [mc "New Account"] -compound left \
 	  -image [list $im background $imd]
 	pack  $w.frall.head  -side top -fill both -expand 1
 	
@@ -250,9 +252,9 @@ proc ::RegisterEx::New {args} {
     pack  $wbox  -fill both -expand 1
 
     if {$state(-server) ne ""} {
-	set str [mc jaregisterexserv $state(-server)]
+	set str [mc jaregisterexserv2 $state(-server)]
     } else {
-	set str [mc jaregisterex2]
+	set str [mc jaregisterex3]
     }
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 320 -justify left -anchor w -text $str
@@ -315,7 +317,7 @@ proc ::RegisterEx::New {args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Get] -default active \
+    ttk::button $frbot.btok -text [mc Next] -default active \
       -command [list [namespace current]::Get $token]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $token]
@@ -546,17 +548,18 @@ proc ::RegisterEx::Get {token} {
     
     # Verify.
     if {$state(-server) eq ""} {
-	::UI::MessageBox -type ok -icon error -message [mc jamessregnoserver2]
+	::UI::MessageBox -type ok -icon error -title [mc Error] \
+	  -message [mc jamessregnoserver2]
 	return
     }	
     # This is just to check the validity!
     if {[catch {jlib::nameprep $state(-server)} err]} {
-	::UI::MessageBox -icon error -type ok \
+	::UI::MessageBox -icon error -title [mc Error] -type ok \
 	  -message [mc jamessillegalchar "server" $state(-server)]
 	return
     }
     #SetState $token {disabled}
-    set state(status) [mc jawaitserver]
+    set state(status) "[mc jawaitserver]..."
     $state(wprog) start
 
     set opts [list -noauth 1]
@@ -623,8 +626,10 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
     DestroyForm $token
     
     if {[string equal $type "error"]} {
-	::UI::MessageBox -type ok -icon error \
-	  -message [mc jamesserrregget [lindex $iqchild 0] [lindex $iqchild 1]]
+	set str [mc jamesserrregget2]
+	append str "\n" "[mc {Error code}]: [lindex $iqchild 0]\n"
+	append str "[mc Message]: [lindex $iqchild 1]"
+	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
 	return
     } 
     bind $state(w) <Return> [namespace code [list SendRegister $token]]
@@ -685,7 +690,7 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
 	    grid  $wfr.l$tag  $wfr.e$tag  -sticky e -pady 2
 	    grid  $wfr.e$tag  -sticky ew
 	    if {$tag eq "password"} {
-		set str "[mc {Retype Password}]:"
+		set str "[mc {Retype password}]:"
 		if {[info exists state(-password)]} {
 		    set state(elem,${tag}2) $state(-password)
 		} else {
@@ -773,8 +778,8 @@ proc ::RegisterEx::SendRegister {token} {
     # Error checking.
     if {[info exists state(elem,password)]} {
 	if {$state(elem,password) ne $state(elem,password2)} {
-	    ::UI::MessageBox -icon error -title [mc {Different Passwords}] \
-	      -message [mc messpasswddifferent] -parent $state(w)
+	    ::UI::MessageBox -icon error -title [mc Error] \
+	      -message [mc messpasswddifferent2] -parent $state(w)
 	    set state(elem,password)  ""
 	    set state(elem,password2) ""
 	    return
@@ -836,9 +841,11 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	set errcode [lindex $theQuery 0]
 	set errmsg [lindex $theQuery 1]
 	if {$errcode == 409} {
-	    set msg [mc jamessregerrinuse $errmsg]
+	    set msg [mc jamessregerrinuse2]
+	    append msg "\n" "[mc Error]: $errmsg"
 	} else {
-	    set msg [mc jamessregerr $errmsg]
+	    set msg [mc jamessregerr2]
+	    append msg "\n" "[mc Error]: $errmsg"
 	}
 	::UI::MessageBox -title [mc Error] -icon error -type ok -message $msg
 	NotBusy $token
@@ -863,7 +870,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	    $jstate(jlib) connect auth -command [namespace code AuthCB]
 	} else {
 	    ui::dialog -icon info -type ok \
-	      -message [mc jamessregisterok $server]
+	      -message [mc jamessregisterok2 $server]
 	
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    # Beware: we are in the middle of a callback from the xml parser,
@@ -957,7 +964,7 @@ proc ::GenRegister::NewDlg {args} {
     ::UI::Toplevel $w -class JRegister -macstyle documentProc -usemacmainmenu 1 \
       -closecommand [list [namespace current]::CloseCmd $token] \
       -macclass {document closeBox}
-    wm title $w [mc {Register Service}]
+    wm title $w [mc Register]
     set wtop $w
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jreg)]]
@@ -975,7 +982,7 @@ proc ::GenRegister::NewDlg {args} {
 	set imd  [::Theme::GetImage [option get $w registerDisImage {}]]
 
 	ttk::label $wall.head -style Headlabel \
-	  -text [mc {Register Service}] -compound left \
+	  -text [mc Register] -compound left \
 	  -image [list $im background $imd]
 	pack $wall.head -side top -fill both
 	
@@ -988,12 +995,12 @@ proc ::GenRegister::NewDlg {args} {
     
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength $state(wraplength) \
-      -text [mc jaregmsg] -justify left
+      -text [mc jaregmsg2] -justify left
     pack $wbox.msg -side top -anchor w
     
     set frserv $wbox.serv
     ttk::frame $frserv
-    ttk::label $frserv.lserv -text "[mc {Service server}]:"
+    ttk::label $frserv.lserv -text "[mc Service]:"
     
     # Get all (browsed) services that support registration.
     set regServers [$jstate(jlib) disco getjidsforfeature "jabber:iq:register"]
@@ -1019,7 +1026,7 @@ proc ::GenRegister::NewDlg {args} {
     set wbtget      $frbot.btget
     set wbtcancel   $frbot.btcancel
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $wbtget -text [mc Get] -default active \
+    ttk::button $wbtget -text [mc Next] -default active \
       -command [list [namespace current]::Get $token]
     ttk::button $wbtregister -text [mc Register] -state disabled \
       -command [list [namespace current]::DoRegister $token]
@@ -1085,13 +1092,13 @@ proc ::GenRegister::Get {token} {
     
     # Verify.
     if {[string length $state(server)] == 0} {
-	::UI::MessageBox -type ok -icon error  \
+	::UI::MessageBox -title [mc Error] -type ok -icon error  \
 	  -message [mc jamessregnoserver2]
 	return
     }	
     $state(wcomboserver) state disabled
     $state(wbtget)       state disabled
-    set state(stattxt) [mc jawaitserver]
+    set state(stattxt) "[mc jawaitserver]..."
     
     # Send get register.
     $jstate(jlib) register_get [list ::GenRegister::GetCB $token] \
@@ -1112,7 +1119,7 @@ proc ::GenRegister::GetCB {token jlibName type subiq} {
     $state(wsearrows) stop
     
     if {[string equal $type "error"]} {
-	::UI::MessageBox -type ok -icon error  \
+	::UI::MessageBox -type ok -title [mc Error] -icon error \
 	  -message [mc jamesserrregget [lindex $subiq 0] [lindex $subiq 1]]
 	return
     }
@@ -1171,12 +1178,13 @@ proc ::GenRegister::ResultCallback {token type subiq args} {
     set jid $state(server)
 
     if {[string equal $type "error"]} {
-	::UI::MessageBox -type ok -icon error \
-	  -message [mc jamesserrregset [jlib::unescapejid $jid] \
-	  [lindex $subiq 0] [lindex $subiq 1]]
+	set str [mc jamesserrregset2 [jlib::unescapejid $jid]]
+	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
+	append str "[mc Message]: [lindex $subiq 1]"
+	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
     } else {
 	::UI::MessageBox -type ok -icon info \
-	  -message [mc jamessokreg [jlib::unescapejid $jid]]
+	  -message [mc jamessokreg2 [jlib::unescapejid $jid]]
     }
     
     # Time to clean up.
@@ -1234,7 +1242,7 @@ proc ::GenRegister::Simple {w args} {
     
     ::UI::Toplevel $w -class JRegister -macstyle documentProc \
       -usemacmainmenu 1 -macclass {document closeBox}
-    wm title $w [mc {Register Service}]
+    wm title $w [mc Register]
     set wtop $w
  
     set im   [::Theme::GetImage [option get $w registerImage {}]]
@@ -1246,7 +1254,7 @@ proc ::GenRegister::Simple {w args} {
     pack $wall -fill x
 
     ttk::label $wall.head -style Headlabel \
-      -text [mc {Register Service}] -compound left \
+      -text [mc Register] -compound left \
       -image [list $im background $imd]
     pack $wall.head -side top -fill both
 
@@ -1258,7 +1266,7 @@ proc ::GenRegister::Simple {w args} {
     pack $wbox -fill both -expand 1
 
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc jaregmsg]
+      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc jaregmsg2]
     pack $wbox.msg -side top -anchor w
 
     set wmid $wbox.m
@@ -1267,7 +1275,7 @@ proc ::GenRegister::Simple {w args} {
     
     set regServers [::Jabber::JlibCmd disco getjidsforfeature "jabber:iq:register"]
 
-    ttk::label $wmid.lserv -text "[mc {Service server}]:"
+    ttk::label $wmid.lserv -text "[mc Service]:"
     ttk::combobox $wmid.combo -state readonly  \
       -textvariable [namespace current]::server -values $regServers    
     ttk::label $wmid.luser -text "[mc Username]:" -anchor e
@@ -1353,10 +1361,12 @@ proc ::GenRegister::SimpleCallback {server jlibName type subiq} {
     ::Debug 2 "::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
 
     if {[string equal $type "error"]} {
-	::UI::MessageBox -type ok -icon error -message \
-	  [mc jamesserrregset $server [lindex $subiq 0] [lindex $subiq 1]]
+	set str [mc jamesserrregset2 $server]
+	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
+	append str "[mc Message]: [lindex $subiq 1]"
+	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
     } else {
-	::UI::MessageBox -type ok -icon info -message [mc jamessokreg $server]
+	::UI::MessageBox -type ok -icon info -message [mc jamessokreg2 $server]
     }
 }
 

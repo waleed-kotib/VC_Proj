@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: OOB.tcl,v 1.56 2007-07-29 07:07:06 matben Exp $
+# $Id: OOB.tcl,v 1.57 2007-09-13 15:53:40 matben Exp $
 
 # NOTE: Parts if this code is obsolete (the send part) but the receiving
 #       part is still retained for backwards compatibility.
@@ -119,7 +119,7 @@ proc ::OOB::BuildSet {jid} {
 
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 200 -anchor w -justify left \
-      -text [mc oobmsg $jid]
+      -text [mc oobmsg2 $jid]
     pack $wbox.msg -side top -fill both -expand 1
     
     lappend wrapthese $wbox.msg
@@ -127,7 +127,7 @@ proc ::OOB::BuildSet {jid} {
     # Entries etc.
     set frmid $wbox.frmid
     ttk::frame $frmid
-    ttk::button $frmid.btfile -text "[mc {File}]..." -width -10  \
+    ttk::button $frmid.btfile -text "[mc {Select File}]..." -width -10  \
       -command [namespace current]::FileOpenCmd
     ttk::entry $frmid.efile \
       -textvariable [namespace current]::localpath
@@ -245,7 +245,7 @@ proc ::OOB::FileOpen { } {
     if {[file isdirectory $locals(initialLocalDir)]} {
 	set opts [list -initialdir $locals(initialLocalDir)]
     }
-    set ans [eval {tk_getOpenFile -title [mc {Pick File}]} $opts]
+    set ans [eval {tk_getOpenFile -title [mc {Select File}]} $opts]
     if {[string length $ans]} {
 	set locals(initialLocalDir) [file dirname $ans]
     }
@@ -263,14 +263,13 @@ proc ::OOB::DoSend { } {
     upvar ::Jabber::jstate jstate
     
     if {$localpath == ""} {
-	::UI::MessageBox -type ok -title [mc {Pick File}] -message \
-	  "You must provide a file to send" -parent $wDlgs(joobs)
+	::UI::MessageBox -type ok -icon error -title [mc Error] -message \
+	  [mc jamessnofile2] -parent $wDlgs(joobs)
 	return
     }
     if {![file exists $localpath]} {
-	::UI::MessageBox -type ok -title [mc {Pick File}]  \
-	  -message "The picked file does not exist. Pick a new one." \
-	  -parent $wDlgs(joobs)
+	::UI::MessageBox -type ok -title [mc {Select File}]  \
+	  -message [mc jamessfilenotexist] -parent $wDlgs(joobs)
 	return
     }
 
@@ -321,11 +320,12 @@ proc ::OOB::SetCallback {token jlibName type theQuery} {
 	
 	switch -- $errcode {
 	    406 {
-		set msg [mc jamessooberr406 $state(jid) $state(tail)]
+		set msg [mc jamessooberr406b $state(jid) $state(tail)]
 	    }
 	    default {
-		set msg [mc jamessooberr404 $state(tail) $state(jid) \
-		  $errcode $errmsg]
+		set msg [mc jamessooberr404b $state(tail) $state(jid)]
+		append msg "\n" "[mc {Error code}]: $errcode"
+		append msg "\n" "[mc Message]: $errmsg"
 	    }
 	}
 	
@@ -364,20 +364,19 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
     }
     if {![info exists url]} {
 	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc jamessoobnourl $from]
+	  -message [mc jamessoobnourl2 $from]
 	return $ishandled
     }
     set tail [file tail [::Utils::GetFilePathFromUrl $url]]
     set tailDec [uriencode::decodefile $tail]
     
-    set str ""
+    set str "[mc File]: $tailDec"
     if {[info exists desc]} {
-	set str " [mc Description]: $desc"
+	append str "\n" "[mc Description]: $desc"
     }
-    set msg [mc jamessoobask $from $tailDec $str]
-    set ans [::UI::MessageBox -title [mc {Get File}] -icon info  \
-      -type yesno -default yes -message $msg]
-    if {$ans == "no"} {	
+    set msg [mc jamessoobask2 $from $str]
+    set ans [::UI::MessageBox -title [mc {Receive File}] -icon info  \
+    if {$ans eq "no"} {	
 	ReturnError $from $id $subiq 406
 	return $ishandled
     }
@@ -386,15 +385,15 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
     if {![regexp -nocase {^(([^:]*)://)?([^/:]+)(:([0-9]+))?(/.*)?$} $url \
       x prefix proto host y port path]} {
 	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc jamessoobbad $from $url]
+	  -message [mc jamessoobbad2 $from $url]
 	return $ishandled
     }
     if {[string length $proto] == 0} {
 	set proto http
     }
-    if {$proto != "http"} {
+    if {$proto ne "http"} {
 	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc jamessoonnohttp $from $proto]
+	  -message [mc jamessoonnohttp2 $from $proto]
 	return $ishandled
     }
     set userDir [::Utils::GetDirIfExist $prefs(userPath)]

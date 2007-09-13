@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.25 2007-08-09 07:47:04 matben Exp $
+# $Id: UserInfo.tcl,v 1.26 2007-09-13 15:53:40 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -125,7 +125,7 @@ proc ::UserInfo::Get {jid {node ""}} {
     
     if {[::Jabber::IsConnected]} {
 	set ujid [jlib::unescapejid $jid]
-	::JUI::SetStatusMessage [mc vcardget $ujid]
+	::JUI::SetStatusMessage "[mc vcardget $ujid]..."
 	$priv(warrow) start
     }
     
@@ -145,7 +145,7 @@ proc ::UserInfo::DiscoCB {token disconame type from subiq args} {
     if {$priv(ncount) <= 0} {
 	$priv(warrow) stop
     }
-    if {$type == "error"} {
+    if {$type eq "error"} {
 	
 	
 	return
@@ -183,13 +183,14 @@ proc ::UserInfo::VersionCB {token jlibname type subiq} {
     set ujid [jlib::unescapejid $jid]
     
     if {$type == "error"} {
-	set str [mc {Version Info}]
-	append str "\n"
-	append str [mc jamesserrvers $ujid [lindex $subiq 1]]
+	set str [mc Version]
+	append str "\n" "[mc jamesserrvers2 $ujid]\n"
+	append str "[mc Error]: [lindex $subiq 1]"
+
 	::Jabber::AddErrorLog $jid $str
 	AddError $token $str
     } else {
-	set str [mc {Version Info}]:
+	set str [mc Version]:
 	set f $priv(wpageversion)
 	set i 0
 	foreach c [wrapper::getchildren $subiq] {	    
@@ -223,12 +224,12 @@ proc ::UserInfo::LastCB {token jlibname type subiq} {
     set ujid [jlib::unescapejid $jid]
     
     if {$type eq "error"} {
-	set str [mc {Last Activity}]
-	append str "\n"
-	set str1 [mc jamesserrlastactive $ujid [lindex $subiq 1]]
-	append str $str1
-	::Jabber::AddErrorLog $jid $str1
-	AddError $token $str1
+	set str [mc "Last Activity"]
+	append str "\n" "[mc jamesserrlastactive2 $ujid]\n"
+	append str "[mc Error]: [lindex $subiq 1]"
+
+	::Jabber::AddErrorLog $jid $str
+	AddError $token $str
     } else {
 	if {![info exists priv(wpageversion)]} {
 	    LastAndVersionPage $token
@@ -253,10 +254,10 @@ proc ::UserInfo::TimeCB {token jlibname type subiq} {
     set ujid [jlib::unescapejid $jid]
 
     if {$type eq "error"} {
-	set str [mc {Local Time}]
-	append str "\n"
-	set str1 [mc jamesserrtime $ujid [lindex $subiq 1]]
-	append str $str1
+	set str [mc "Local Time"]
+	set str1 "\n" "[mc jamesserrtime2 $ujid]\n"
+	append str1 "[mc Error]: [lindex $subiq 1]"
+
 	::Jabber::AddErrorLog $jid $str1
 	AddError $token $str1
     } else {
@@ -281,15 +282,15 @@ proc ::UserInfo::EntityTimeCB {token jlibname type subiq} {
     set ujid [jlib::unescapejid $jid]
 
     if {$type eq "error"} {
-	set str [mc {Local Time}]
-	append str "\n"
-	set str1 [mc jamesserrtime $ujid [lindex $subiq 1]]
-	append str $str1
+	set str [mc "Local Time"]"
+	set str1 "\n" "[mc jamesserrtime2 $ujid]\n"
+	append str1 "[mc Error]: [lindex $subiq 1]"
+
 	::Jabber::AddErrorLog $jid $str1
 	AddError $token $str1
     } else {
 	set str [::Jabber::GetEntityTimeString $subiq]
-	set priv(strtime) [mc jamesslocaltime $ujid $str]
+	set priv(strtime) [mc jamesslocaltime2 $ujid $str]
     }    
 }
 
@@ -356,7 +357,7 @@ proc ::UserInfo::Build {token} {
     ttk::frame $frbot -padding [option get . okcancelNoTopPadding {}]
     ttk::button $frbot.btok -text [mc Save] \
       -command [list [namespace current]::Save $token]
-    ttk::button $frbot.btcancel -text [mc Close] \
+    ttk::button $frbot.btcancel -text [mc Cancel] \
       -command [list [namespace current]::Close $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -366,7 +367,7 @@ proc ::UserInfo::Build {token} {
 	pack $frbot.btcancel -side right
 	pack $frbot.btok -side right -padx $padx
     }
-    ttk::button $frbot.export -text [mc mExport...] \
+    ttk::button $frbot.export -text "[mc Export]..." \
       -command [list [namespace current]::Export $token]
     pack $frbot.export -side left
 
@@ -422,7 +423,7 @@ proc ::UserInfo::NotesPage {token} {
     ttk::frame $wpage -padding [option get . notebookPagePadding {}]
     pack  $wpage  -side top -fill x -anchor [option get . dialogAnchor {}]
     
-    ttk::label $wpage.l -style Small.TLabel -text [mc jauserinnote]
+    ttk::label $wpage.l -style Small.TLabel -text [mc jauserinnote2]
     pack  $wpage.l -side bottom -anchor w
     
     set wtext $wpage.t

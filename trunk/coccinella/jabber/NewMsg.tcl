@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.90 2007-09-05 10:04:39 matben Exp $
+# $Id: NewMsg.tcl,v 1.91 2007-09-13 15:53:40 matben Exp $
 
 package require ui::entryex
 
@@ -813,7 +813,7 @@ proc ::NewMsg::DoSend {w} {
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
 	::UI::MessageBox -type ok -icon error -parent $w \
-	  -title [mc {Not Connected}] -message [mc jamessnotconnected]
+	  -title [mc Error] -message [mc jamessnotconnected2]
 	return
     }
     array set oopts $locals($w,opts)
@@ -826,10 +826,10 @@ proc ::NewMsg::DoSend {w} {
 	if {[string length $jid] > 0} {
 	    if {![jlib::jidvalidate $jid]} {
 		if {$locals($w,addrline) > 1} {
-		    set msg [mc jamessskipsendq $addr]
+		    set msg [mc jamessskipsendq2 $addr]
 		    set type yesnocancel
 		} else {
-		    set msg [mc jamessillformresend $addr]
+		    set msg [mc jamessillformresend2 $addr]
 		    set type ok
 		}
 		set ans [::UI::MessageBox -type $type -parent $w -message $msg]
@@ -849,7 +849,7 @@ proc ::NewMsg::DoSend {w} {
     
     # Be sure there are at least one jid.
     if {[llength $jidL] == 0} {
-	::UI::MessageBox -title [mc {No Address}]  \
+	::UI::MessageBox -title [mc Error] \
 	  -icon error -type ok -parent $w -message [mc jamessaddrmiss]
 	return
     }
@@ -983,11 +983,11 @@ proc ::NewMsg::QuitAppHook {} {
 		set warn 1
 	    }
 	    if {$warn} {
-		set ans [::UI::MessageBox -title [mc {To Send or Not}]  \
+		set ans [::UI::MessageBox -title [mc Warning] \
 		  -icon warning -type yesno -default "no" \
-		  -message [msg jamessmsgwarnquit]]
+		  -message [mc jamessmsgwarnquit]]
 		if {$ans eq "no"} {
-		    # @@@ mising return check here!
+		    # @@@ missing return check here!
 		    return "stop"
 		}
 		break
@@ -1014,7 +1014,7 @@ proc ::NewMsg::CloseDlg {w} {
     }
     set doDestroy 0
     if {$warn} {
-	set ans [::UI::MessageBox -title [mc {To Send or Not}]  \
+	set ans [::UI::MessageBox -title [mc Warning]  \
 	  -icon warning -type yesnocancel -default "no" -parent $w \
 	  -message [mc jamesssavemsg]]
 	if {$ans eq "yes"} {

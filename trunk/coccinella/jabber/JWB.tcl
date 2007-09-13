@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.82 2007-09-01 07:49:05 matben Exp $
+# $Id: JWB.tcl,v 1.83 2007-09-13 15:53:40 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -150,20 +150,20 @@ proc ::JWB::InitUI { } {
     #     Aqua: handled in apple menu
     #     Else: handled in main window
     set menuDefsFile {
-	{command   mNewWhiteboard      {::JWB::OnMenuNewWhiteboard}  N}
-	{command   mOpenCanvas         {::WB::OnMenuOpenCanvas}      O}
-	{command   mOpenImage/Movie    {::WB::OnMenuImport}          I}
-	{command   mOpenURLStream      {::WB::OnMenuOpenURL}         {}}
+	{command   mNewWindow             {::JWB::OnMenuNewWhiteboard}  N}
+	{command   mOpenFile...           {::WB::OnMenuOpenCanvas}      O}
+	{command   mImportImage/Movie...  {::WB::OnMenuImport}          I}
+	{command   mOpenStream...         {::WB::OnMenuOpenURL}         {}}
 	{separator}
-	{command   mStopPut/Get/Open   {::JWB::Stop $w}              {}}
+	{command   mStopTrans             {::JWB::Stop $w}              {}}
 	{separator}
-	{command   mCloseWindow        {::UI::CloseWindowEvent}      W}
-	{command   mSaveCanvas         {::WB::OnMenuSaveCanvas}      S}
-	{command   mSaveAs             {::WB::OnMenuSaveAs}          {}}
-	{command   mSaveAsItem         {::WB::OnMenuSaveAsItem}      {}}
+	{command   mCloseWindow           {::UI::CloseWindowEvent}      W}
+	{command   mSave                  {::WB::OnMenuSaveCanvas}      S}
+	{command   mSaveAs                {::WB::OnMenuSaveAs}          {}}
+	{command   mSaveAsItem            {::WB::OnMenuSaveAsItem}      {}}
 	{separator}
-	{command   mPageSetup          {::WB::OnMenuPageSetup}       {}}
-	{command   mPrintCanvas        {::WB::OnMenuPrintCanvas}     P}
+	{command   mPageSetup             {::WB::OnMenuPageSetup}       {}}
+	{command   mPrint...              {::WB::OnMenuPrintCanvas}     P}
     }
     if {[::Media::HavePackage QuickTimeTcl]} {
 	package require Multicast
@@ -630,7 +630,7 @@ proc ::JWB::CloseHook {w} {
     switch -- $jwbstate($w,type) {
 	chat {
 	    set ans [::UI::MessageBox -icon info -parent $w -type yesno \
-	      -message [mc jamesswbchatlost]]
+	      -message [mc jamesswbchatlost2]]
 	    if {$ans ne "yes"} {
 		return stop
 	    }
@@ -799,7 +799,7 @@ proc ::JWB::CheckIfOnline {w} {
 	set isok [$jstate(jlib) roster isavailable $jwbstate($w,jid)]
 	if {!$isok} {
 	    ::UI::MessageBox -type ok -icon warning -parent $w \
-	      -message [mc jamesschatoffline]
+	      -message [mc jamesschatoffline2]
 	}
     }
     return $isok
@@ -938,7 +938,7 @@ proc ::JWB::DoSendCanvas {w} {
 	# If user not online no files may be sent off.
 	if {![$jstate(jlib) roster isavailable $jid]} {
 	    set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
-	      -message [mc jamesswarnsendcanoff $jid]]
+	      -message [mc jamesswarnsendcanoff2 $jid]]
 	    if {$ans eq "no"} {
 		return
 	    }
@@ -947,7 +947,7 @@ proc ::JWB::DoSendCanvas {w} {
 	::WB::CloseWhiteboard $w
     } else {
 	::UI::MessageBox -icon warning -type ok -parent $w \
-	  -message [mc jamessinvalidjid]
+	  -message [mc jamessinvalidjid2]
     }
 }
 

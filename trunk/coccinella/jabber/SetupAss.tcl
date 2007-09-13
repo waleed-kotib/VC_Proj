@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.46 2007-08-08 09:18:37 matben Exp $
+# $Id: SetupAss.tcl,v 1.47 2007-09-13 15:53:40 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -94,12 +94,12 @@ proc ::SetupAss::SetupAss {} {
     set wrapthese [list]
     
     # Front page.
-    set p1 [$su newpage "intro" -headtext [mc suheadtxt]]
+    set p1 [$su newpage "intro" -headtext [mc "Setup Assistant"]]
     ttk::frame $p1.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p1.fr.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -anchor w -text [mc suintro1]
+      -wraplength 260 -justify left -anchor w -text [mc suintro1a]
     ttk::label $p1.fr.msg3 -style Small.TLabel \
-      -wraplength 260 -justify left -anchor w -text [mc suintro3]
+      -wraplength 260 -justify left -anchor w -text [mc suintro3a]
     
     pack $p1.fr.msg1 $p1.fr.msg3 -side top -anchor w -fill x -pady 4
     pack $p1.fr -side top -fill x
@@ -110,7 +110,7 @@ proc ::SetupAss::SetupAss {} {
     set plang [$su newpage "language" -headtext [mc Language]]
     ttk::frame $plang.fr -padding [option get . notebookPagePadding {}]
     ttk::label $plang.fr.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -text [mc sulang]
+      -wraplength 260 -justify left -text [mc sulang2]
     ::Utils::LanguageMenubutton $plang.fr.pop [namespace current]::locale
     ttk::button $plang.fr.def -text [mc Default]  \
       -command [namespace current]::DefaultLang
@@ -122,28 +122,15 @@ proc ::SetupAss::SetupAss {} {
     
     lappend wrapthese $plang.fr.msg1
     
+    ::balloonhelp::balloonforwindow $plang.fr.pop [mc "Requires a restart"]
+    
     # Server.
     if {$config(setupass,page,server)} {
-	set p2 [$su newpage "server" -headtext [mc {Jabber Server}]]
+	set p2 [$su newpage "server" -headtext [mc "Select Server"]]
 	set fr2 $p2.fr
 	ttk::frame $fr2 -padding [option get . notebookPagePadding {}]
 	ttk::label $fr2.msg1 -style Small.TLabel \
-	  -wraplength 260 -justify left -text [mc suservmsg]
-	
-	if {0} {
-	    ttk::button $fr2.bt -text [mc Get] \
-	      -command [list [namespace current]::ServersDlg .jsuserv]
-	    ttk::label $fr2.msg2 -style Small.TLabel \
-	      -wraplength 260 -justify left -text [mc supubserv]
-	    ttk::label $fr2.la -text "[mc Server]:"
-	    ttk::entry $fr2.serv -width 28 -textvariable [namespace current]::server \
-	      -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
-	    
-	    grid  $fr2.msg1  -          -sticky nw -pady $pady
-	    grid  $fr2.bt    $fr2.msg2  -sticky ew -pady $pady
-	    grid  $fr2.la    $fr2.serv  -sticky e  -pady $pady
-	    grid  $fr2.serv  -sticky ew
-	}
+	  -wraplength 260 -justify left -text [mc suservmsg2]
 	
 	ttk::label $fr2.la -text "[mc Server]:"
 	ttk::combobox $fr2.serv -textvariable [namespace current]::server \
@@ -172,12 +159,12 @@ proc ::SetupAss::SetupAss {} {
     set fr3 $p3.fr
     ttk::frame $p3.fr -padding [option get . notebookPagePadding {}]
     ttk::label $fr3.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -text [mc suusermsg]
+      -wraplength 260 -justify left -text [mc suusermsg2]
     ttk::label $fr3.srv  -text "[mc Server]:"
     ttk::label $fr3.srv2 -textvariable [namespace current]::server
     ttk::label $fr3.lan  -text "[mc Username]:"
     ttk::label $fr3.lap  -text "[mc Password]:"
-    ttk::label $fr3.lap2 -text "[mc {Retype Password}]:"
+    ttk::label $fr3.lap2 -text "[mc {Retype password}]:"
     ttk::entry $fr3.name -textvariable [namespace current]::username \
        -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
     ttk::entry $fr3.pass -textvariable [namespace current]::password -show {*} \
@@ -197,11 +184,11 @@ proc ::SetupAss::SetupAss {} {
     lappend wrapthese $fr3.msg1
 
     # Register?
-    set p4 [$su newpage "register" -headtext [mc Register]]
+    set p4 [$su newpage "register" -headtext [mc "New Account"]]
     ttk::frame $p4.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p4.fr.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -text [mc suregmsg]
-    ttk::button $p4.fr.btreg -text "[mc {Register Now}]... "  \
+      -wraplength 260 -justify left -text [mc suregmsg2]
+    ttk::button $p4.fr.btreg -text "[mc {New Account}]... "  \
       -command [namespace current]::DoRegister
 
     grid  $p4.fr.msg1   -pady $pady -sticky w
@@ -215,7 +202,7 @@ proc ::SetupAss::SetupAss {} {
     set p5 [$su newpage "fin" -headtext [mc Finished]]
     ttk::frame $p5.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p5.fr.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -text [mc sufinmsg]
+      -wraplength 260 -justify left -text [mc sufinmsg2]
     ttk::label $p5.fr.piga -image [::Theme::GetImage logo]
     
     grid  $p5.fr.msg1  -sticky n
@@ -287,12 +274,12 @@ proc ::SetupAss::NextPage {w page} {
     switch -- $page {
 	username {
 	    if {($username eq "") || ($password eq "")} {
-		::UI::MessageBox -icon error -title [mc {Empty Fields}] \
+		::UI::MessageBox -icon error -title [mc Error] \
 		  -message [mc messsuassfillin] -parent $w
 		return -code 3
 	    } elseif {$password ne $password2} {
-		::UI::MessageBox -icon error -title [mc {Different Passwords}] \
-		  -message [mc messpasswddifferent] -parent $w
+		::UI::MessageBox -icon error -title [mc Error] \
+		  -message [mc messpasswddifferent2] -parent $w
 		set password ""
 		set password2 ""
 		return -code 3
@@ -301,7 +288,7 @@ proc ::SetupAss::NextPage {w page} {
 	server {
 	    if {$server eq ""} {
 		::UI::MessageBox -icon error -title [mc Error] \
-		  -message [mc suservmsg] -parent $w
+		  -message [mc suservmsg2] -parent $w
 		focus $wserver
 		return -code 3
 	    }
@@ -323,7 +310,7 @@ proc ::SetupAss::DefaultLang { } {
 proc ::SetupAss::DoClose {w} {
     
     set ans [::UI::MessageBox -type yesno -parent $w -icon info \
-      -message [mc messsuassclose]]
+      -title [mc "Setup Assistant"] -message [mc messsuassclose]]
     if {$ans eq "yes"} {
 	destroy $w
     }

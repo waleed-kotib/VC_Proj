@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.127 2007-09-12 07:20:46 matben Exp $
+# $Id: Login.tcl,v 1.128 2007-09-13 15:53:40 matben Exp $
 
 package provide Login 1.0
 
@@ -120,7 +120,7 @@ proc ::Login::Dlg { } {
     pack  $wbox  -fill both -expand 1
 
     if {$config(login,style) eq "jid"} {
-	set str [mc jaloginjid2]
+	set str [mc jaloginjid3]
     } elseif {$config(login,style) eq "jidpure"} {
 	set str [mc jaloginjidpure]
     } elseif {$config(login,style) eq "parts"} {
@@ -145,10 +145,10 @@ proc ::Login::Dlg { } {
     set wpopupMenu [ttk::optionmenu $wpopup [namespace current]::menuVar {}]
     
     # Depending on 'config(login,style)' not all get mapped.
-    ttk::label $frmid.ljid -text "[mc {Jabber ID}]:" -anchor e
+    ttk::label $frmid.ljid -text "[mc {Contact ID}]:" -anchor e
     ttk::entry $frmid.ejid -width 22    \
       -textvariable [namespace current]::jid
-    ttk::label $frmid.lserv -text "[mc {Jabber Server}]:" -anchor e
+    ttk::label $frmid.lserv -text "[mc Server]:" -anchor e
     ttk::entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
@@ -194,6 +194,9 @@ proc ::Login::Dlg { } {
     }
     grid columnconfigure $frmid 1 -weight 1
     
+    ::balloonhelp::balloonforwindow $frmid.ejid [mc contactid]
+    ::balloonhelp::balloonforwindow $frmid.epass [mc registration-password]
+
     # Triangle switch for more options.
     if {$config(login,more)} {
 	set wtri $wbox.tri
@@ -461,7 +464,7 @@ proc ::Login::DoLogin {} {
     foreach name {server username password} {
 	upvar 0 $name var
 	if {[string length $var] <= 1} {
-	    ::UI::MessageBox -icon error -type ok \
+	    ::UI::MessageBox -icon error -title [mc Error] -type ok \
 	      -message [mc jamessnamemissing $name]
 	    return
 	}
@@ -480,7 +483,7 @@ proc ::Login::DoLogin {} {
 		}
 	    }
 	} err]} {
-	    ::UI::MessageBox -icon error -type ok \
+	    ::UI::MessageBox -icon error -title [mc Error] -type ok \
 	      -message [mc jamessillegalchar $name $var]
 	    return
 	}
@@ -489,7 +492,7 @@ proc ::Login::DoLogin {} {
     # Verify http url if any.
     if {0 && [info exists moreOpts(http)] && $moreOpts(http)} {
 	if {![::Utils::IsWellformedUrl $moreOpts(httpurl)]} {
-	    ::UI::MessageBox -icon error -type ok \
+	    ::UI::MessageBox -icon error -title [mc Error] -type ok \
 	      -message "The url \"$moreOpts(httpurl)\" is invalid."
 	    return
 	}
@@ -629,7 +632,7 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     set highstate(args)    $args
     set highstate(pending) 1
 
-    ::JUI::SetStatusMessage [mc jawaitresp $server]
+    ::JUI::SetStatusMessage "[mc jawaitresp $server]..."
     ::JUI::StartStopAnimatedWave 1
     ::JUI::FixUIWhen "connectinit"
     ::JUI::SetConnectState "connectinit"
@@ -665,10 +668,10 @@ proc ::Login::HighLoginCB {token jlibname status {errcode ""} {errmsg ""}} {
 	    # empty
 	}
 	initstream {
-	    ::JUI::SetStatusMessage [mc jawaitxml $state(server)]
+	    ::JUI::SetStatusMessage "[mc jawaitxml $state(server)]..."
 	}
 	starttls {
-	    ::JUI::SetStatusMessage [mc jatlsnegot]
+	    ::JUI::SetStatusMessage "[mc jatlsnegot]..."
 	}
     }
 }
@@ -685,7 +688,7 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
     switch -- $status {
 	ok {
 	    set server [$jstate(jlib) getserver]
-	    set msg [mc jaauthok $server] 
+	    set msg [mc jaauthok2 $server] 
 	    ::JUI::FixUIWhen "connectfin"
 	    ::JUI::SetConnectState "connectfin"
 	    SetLoginStateRunHook
@@ -738,13 +741,15 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	
     switch -glob -- $errcode {
 	connect-failed - network-failure - networkerror {
-	    set str [mc jamessnosocket2 $state(server) $errmsg]
+	    set str [mc jamessnosocket3 $state(server)]
+	    append str "\n" "[mc Error]: $errmsg"
 	}
 	timeout {
-	    set str [mc jamesstimeoutserver $state(server)]
+	    set str [mc jamesstimeoutserver2 $state(server)]
 	}
 	409 {
-	    set str [mc jamesslogin409 $errcode]
+	    set msg "[mc {Error code}]: $errcode"
+	    set str [mc jamesslogin409b $msg]
 	}
 	starttls-nofeature {
 	    set str [mc starttls-nofeature $state(server)]
@@ -764,7 +769,8 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	    set str [mc xmpp-streams-error $streamstag]
 	}
 	proxy-failure {
-	    set str [mc jamessproxy-failure $errmsg]
+	    set str [mc jamessproxy-failure2]
+	    append str "\n" "[mc {Error code}]: $errmsg"
 	}
 	default {
 	    
@@ -814,8 +820,8 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
 	set type yesno
 	set default no
     }
-    set ans [::UI::MessageBox -icon error -type $type -default $default \
-      -message $str]
+    set ans [::UI::MessageBox -icon error -title [mc Error] -type $type \
+      -default $default -message $str]
     if {$ans eq "yes"} {
 	::RegisterEx::New -server $state(server) -autoget 1
     }
