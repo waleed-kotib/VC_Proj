@@ -23,7 +23,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Plugins.tcl,v 1.27 2007-07-19 06:28:19 matben Exp $
+# $Id: Plugins.tcl,v 1.28 2007-09-14 13:17:09 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1301,7 +1301,7 @@ proc ::Plugins::BuildPrefsHook {wtree nbframe} {
     if {![::Preferences::HaveTableItem Whiteboard]} {
 	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
     }
-    ::Preferences::NewTableItem {Whiteboard Plugins2} [mc Plugins]
+    ::Preferences::NewTableItem {Whiteboard Plugins2} [mc mPlugins]
 
     set wpage [$nbframe page Plugins2]
     ::Plugins::BuildPrefsPage $wpage
@@ -1318,12 +1318,13 @@ proc ::Plugins::BuildPrefsPage {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
     set pbl $wc.fr
-    ttk::labelframe $pbl -text [mc {Plugin Control}] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $pbl
     pack  $pbl  -side top -anchor w
     
+    set str [mc prefplugctrl2]
+    append str " [mc {Requires a restart}]."
     ttk::label $pbl.lhead -wraplength 300 -justify left \
-      -text [mc prefplugctrl] -padding {0 0 0 4}
+      -text $str -padding {0 0 0 4}
     pack $pbl.lhead -side top -anchor w
         
     set pfr $pbl.p
@@ -1340,6 +1341,9 @@ proc ::Plugins::BuildPrefsPage {page} {
 	ttk::checkbutton $pfr.c$i -text $plug  \
 	  -variable [namespace current]::tmpPrefPlugins($plug)
 	grid  $pfr.i$i  $pfr.c$i  -sticky w  -padx 4
+	
+	::balloonhelp::balloonforwindow $pfr.c$i [mc $plug]
+	
 	incr i
     }
     foreach plug $prefs(pluginBanList) {

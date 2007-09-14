@@ -18,14 +18,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: WDialogs.tcl,v 1.2 2007-07-19 06:28:19 matben Exp $
+# $Id: WDialogs.tcl,v 1.3 2007-09-14 13:17:09 matben Exp $
    
 package provide WDialogs 1.0
 
 namespace eval ::WDialogs:: {
 
 }
-
 
 # WDialogs::InfoOnPlugins ---
 #  
@@ -45,7 +44,7 @@ proc ::WDialogs::InfoOnPlugins { } {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [mc {Plugin Info}]
+    wm title $w [mc mPlugins]
     
     # Global frame.
     ttk::frame $w.frall
@@ -125,7 +124,7 @@ proc ::WDialogs::InfoOnPlugins { } {
 	$wtxt insert end "[::Plugins::GetDescForPlugin $plug]\n" ttxt
 	$wtxt insert end "\t[mc Version]:\t" tkey
 	$wtxt insert end "$txtver\n" ttxt
-	$wtxt insert end "\t[mc {File suffixes}]:\t" tkey
+	$wtxt insert end "\t[mc Extensions]:\t" tkey
 	$wtxt insert end "$txtsuf\n" ttxt
 	$wtxt insert end "\n"
     }
@@ -157,7 +156,7 @@ proc ::WDialogs::ShowInfoServer { } {
     array set boolToYesNo [list 0 [mc no] 1 [mc yes]]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w [mc {Server Info}]
+    wm title $w [mc Server]
     
     # Global frame.
     ttk::frame $w.frall
@@ -168,30 +167,29 @@ proc ::WDialogs::ShowInfoServer { } {
     pack $wbox -fill both -expand 1
     
     set fr $wbox.f
-    ttk::labelframe $fr -padding [option get . groupSmallPadding {}] \
-      -text [mc {Server Info}]
+    ttk::frame $fr -padding [option get . groupSmallPadding {}]
     pack $fr
     
     option add *$fr.TLabel.style Small.TLabel
     
-    ttk::label $fr.x1 -text "[mc {Is server up}]:"
+    ttk::label $fr.x1 -text "[mc Running]:"
     ttk::label $fr.x2 -text $boolToYesNo($state(isServerUp))
-    ttk::label $fr.a1 -text "[mc {This IP number}]:"
-    ttk::label $fr.b1 -text "[mc {Host name}]:"
+    ttk::label $fr.a1 -text "IP:"
+    ttk::label $fr.b1 -text "[mc Host]:"
     ttk::label $fr.c1 -text "[mc Username]:"
     ttk::label $fr.d1 -text "[mc Port]:"
-    ttk::label $fr.e1 -text "[mc Buffering]:"
-    ttk::label $fr.f1 -text "[mc Blocking]:"
-    ttk::label $fr.g1 -text "[mc {Is safe}]:"
+    ttk::label $fr.e1 -text "[mc {Buffering support}]:"
+    ttk::label $fr.f1 -text "[mc {Blocking support}]:"
+    ttk::label $fr.g1 -text "[mc Secured]:"
 
     if {!$state(isServerUp)} {
 	ttk::label $fr.a2 -text $this(ipnum)
 	ttk::label $fr.b2 -text $this(hostname)
 	ttk::label $fr.c2 -text $this(username)
-	ttk::label $fr.d2 -text [mc {Not available}]
-	ttk::label $fr.e2 -text [mc {Not available}]
-	ttk::label $fr.f2 -text [mc {Not available}]
-	ttk::label $fr.g2 -text [mc {Not available}]
+	ttk::label $fr.d2 -text [mc "not available"]
+	ttk::label $fr.e2 -text [mc "not available"]
+	ttk::label $fr.f2 -text [mc "not available"]
+	ttk::label $fr.g2 -text [mc "not available"]
 	
     } elseif {$state(isServerUp)} {
 	set sockname [fconfigure $state(serverSocket) -sockname]
@@ -199,8 +197,8 @@ proc ::WDialogs::ShowInfoServer { } {
 	ttk::label $fr.b2 -text $this(hostname)
 	ttk::label $fr.c2 -text $this(username)
 	ttk::label $fr.d2 -text $prefs(thisServPort)
-	ttk::label $fr.e2 -text [mc {Not available}]
-	ttk::label $fr.f2 -text [mc {Not available}]
+	ttk::label $fr.e2 -text [mc "not available"]
+	ttk::label $fr.f2 -text [mc "not available"]
 	ttk::label $fr.g2 -text "$boolToYesNo($prefs(makeSafeServ))"
 
     }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PluginTextPlain.tcl,v 1.16 2005-08-26 15:02:34 matben Exp $
+# $Id: PluginTextPlain.tcl,v 1.17 2007-09-14 13:17:08 matben Exp $
 
 
 namespace eval ::TextImporter:: {
@@ -252,7 +252,7 @@ proc ::TextImporter::SaveAs {id} {
 	return
     }
     if {[catch {file copy $locals(id2file,$id) $ans} err]} {
-	::UI::MessageBox -type ok -icon error -message \
+	::UI::MessageBox -type ok -title [mc Error] -icon error -message \
 	  "Failed copying file: $err"
 	return
     }

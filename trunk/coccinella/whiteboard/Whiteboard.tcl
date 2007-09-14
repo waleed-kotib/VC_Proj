@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.82 2007-09-11 08:00:21 matben Exp $
+# $Id: Whiteboard.tcl,v 1.83 2007-09-14 13:17:09 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -276,10 +276,10 @@ proc ::WB::InitPrefsHook { } {
 }
 
 proc ::WB::FirstLaunchHook {} {
-    ::WDialogs::WelcomeCanvas
+    #::WDialogs::WelcomeCanvas
 }
 
-proc ::WB::InitHook { } {
+proc ::WB::InitHook {} {
     Init
     InitMenuDefs   
 }
@@ -420,19 +420,19 @@ proc ::WB::InitMenuDefs { } {
 
     # Only basic functionality.
     set menuDefs(main,file) {
-	{command   mOpenImage/Movie {::WB::OnMenuImport}          I}
-	{command   mOpenURLStream   {::WB::OnMenuOpenURL}         {}}
-	{command   mOpenCanvas      {::WB::OnMenuOpenCanvas}      {}}
+	{command   mImportImage/Movie... {::WB::OnMenuImport}          I}
+	{command   mOpenStream...        {::WB::OnMenuOpenURL}         {}}
+	{command   mOpenFile...          {::WB::OnMenuOpenCanvas}      {}}
 	{separator}
-	{command   mCloseWindow     {::UI::CloseWindowEvent}      W}
-	{command   mSaveCanvas      {::WB::OnMenuSaveCanvas}      S}
-	{command   mSaveAs          {::WB::OnMenuSaveAs}          {}}
-	{command   mSaveAsItem      {::WB::OnMenuSaveAsItem}      {}}
+	{command   mCloseWindow          {::UI::CloseWindowEvent}      W}
+	{command   mSave                 {::WB::OnMenuSaveCanvas}      S}
+	{command   mSaveAs               {::WB::OnMenuSaveAs}          {}}
+	{command   mSaveAsItem           {::WB::OnMenuSaveAsItem}      {}}
 	{separator}
-	{command   mPageSetup       {::WB::OnMenuPageSetup}       {}}
-	{command   mPrintCanvas     {::WB::OnMenuPrintCanvas}     P}
+	{command   mPageSetup            {::WB::OnMenuPageSetup}       {}}
+	{command   mPrint...             {::WB::OnMenuPrintCanvas}     P}
 	{separator}
-	{command   mQuit            {::UserActions::DoQuit}       Q}
+	{command   mQuit                 {::UserActions::DoQuit}       Q}
     }
 	    
     # If embedded the embedding app should close us down.
@@ -449,10 +449,10 @@ proc ::WB::InitMenuDefs { } {
 	{command     mCut              {::UI::CutEvent}           X}
 	{command     mCopy             {::UI::CopyEvent}          C}
 	{command     mPaste            {::UI::PasteEvent}         V}
-	{command     mAll              {::WB::OnMenuAll}          A}
-	{command     mEraseAll         {::WB::OnMenuEraseAll}     {}}
+	{command     mSelectAll        {::WB::OnMenuAll}          A}
+	{command     mClear            {::WB::OnMenuEraseAll}     {}}
 	{separator}
-	{command     mInspectItem      {::WB::OnMenuItemInspector}  {}}
+	{command     mEditItem...      {::WB::OnMenuItemInspector}  {}}
 	{separator}
 	{command     mRaise            {::WB::OnMenuRaise}        R}
 	{command     mLower            {::WB::OnMenuLower}        L}
@@ -470,7 +470,7 @@ proc ::WB::InitMenuDefs { } {
     # These are used not only in the drop-down menus.
     set menuDefs(main,prefs,separator) 	{separator}
     set menuDefs(main,prefs,background)  \
-      {command     mBackgroundColor      {::CanvasCmd::SetCanvasBgColor $w}    {}}
+      {command     mBackgroundColor...   {::CanvasCmd::SetCanvasBgColor $w}    {}}
     set menuDefs(main,prefs,grid)  \
       {checkbutton mGrid             {::CanvasCmd::DoCanvasGrid $w}      {} \
       {-variable ::WB::${w}::state(canGridOn)}}
@@ -583,30 +583,11 @@ proc ::WB::InitMenuDefs { } {
     }
 
     set menuDefs(main,info) {    
-	{command     mOnServer       {::WDialogs::ShowInfoServer}         {}}	
-	{command     mOnPlugins      {::WDialogs::InfoOnPlugins}          {}}	
+	{command     mServer         {::WDialogs::ShowInfoServer}         {}}	
+	{command     mPlugins        {::WDialogs::InfoOnPlugins}          {}}	
 	{separator}
-	{cascade     mHelpOn             {}                                {} {} {}}
     }
-    
-    # Build "Help On" menu dynamically.
-    set infoDefs {}
-    set systemLocale [lindex [split $this(systemLocale) _] 0]
-    foreach fen [glob -nocomplain -directory $this(docsPath) *_en.can] {
-	set name [lindex [split [file tail $fen] _] 0]
-	set floc [file join $this(docsPath) ${name}_${systemLocale}.can]
-	if {[file exists $floc]} {
-	    set f $floc
-	} else {
-	    set f $fen
-	}
-	# Important to protect any $ since we do 'subst'.
-	set f [string map {$ \\$} $f]
-	lappend infoDefs [list \
-	  command m${name} [list ::WDialogs::Canvas $f -title $name]  {}]
-    }
-    lset menuDefs(main,info) end end $infoDefs
-    
+        
     # Make platform specific things and special menus etc. Indices!!! BAD!
     if {!$prefs(haveDash)} {
 	lset menuDefs(main,prefs) 7 3 disabled
@@ -620,7 +601,7 @@ proc ::WB::InitMenuDefs { } {
 	
     # Menu definitions for a minimal setup. Used on mac only.
     set menuDefs(min,file) {
-	{command   mNewWhiteboard    {::WB::NewWhiteboard}         N}
+	{command   mNewWindow        {::WB::NewWhiteboard}         N}
 	{command   mCloseWindow      {::UI::CloseWindowEvent}      W}
 	{separator}
 	{command   mQuit             {::UserActions::DoQuit}       Q}
@@ -831,9 +812,11 @@ proc ::WB::BuildWhiteboard {w args} {
     pack  $w.fmain.cc         -fill both -expand 1 -side right
     
     # The 'Coccinella'.
-    set wapp(bugImage) [::Theme::GetImage [option get $w logoImage {}]]
-    ttk::label $wapp(buglabel) -borderwidth 0 -image $wapp(bugImage)
-    pack $wapp(buglabel) -side bottom -fill x    
+    if {0} {
+	set wapp(bugImage) [::Theme::GetImage [option get $w logoImage {}]]
+	ttk::label $wapp(buglabel) -borderwidth 0 -image $wapp(bugImage)
+	pack $wapp(buglabel) -side bottom -fill x    
+    }
     
     # Make the tool buttons and invoke the one from the prefs file.
     CreateAllButtons $w
@@ -2656,7 +2639,8 @@ proc ::WB::GetBasicWhiteboardMinsize {w} {
 	set hTop [winfo reqheight $wapp(tbar)]
     }
     set hTool     [winfo reqheight $wapp(tool)]
-    set hBugImage [image height $wapp(bugImage)]
+    #set hBugImage [image height $wapp(bugImage)]
+    set hBugImage 0
     if {[winfo exists $wapp(frstat)]} {
 	set hStatus   [winfo reqheight $wapp(frstat)]
     } else {
@@ -2742,11 +2726,11 @@ proc ::WB::FilePostCommand {w wmenu} {
     if {$editable} {
 	::UI::MenuEnableAll $wmenu
 	if {![::Plugins::HavePackage QuickTimeTcl]} {
-	    ::UI::MenuMethod $wmenu entryconfigure mOpenURLStream -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mOpenStream... -state disabled
 	}
     } else {
 	::UI::MenuDisableAllBut $wmenu {
-	    mNew mCloseWindow mSaveCanvas mPageSetup mPrintCanvas
+	    mNewWindow mCloseWindow mSave mPageSetup mPrint...
 	}
     }
     ::hooks::run menuPostCommand whiteboard-file $wmenu
@@ -2899,16 +2883,16 @@ proc ::WB::EditPostCommandWhiteboard {w wmenu} {
     }
 
     # All and Erase All.
-    ::UI::MenuMethod $wmenu entryconfigure mAll -state normal
+    ::UI::MenuMethod $wmenu entryconfigure mSelectAll -state normal
     if {$normal} {
-	::UI::MenuMethod $wmenu entryconfigure mEraseAll -state normal
+	::UI::MenuMethod $wmenu entryconfigure mClear -state normal
     } else {
-	::UI::MenuMethod $wmenu entryconfigure mEraseAll -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mClear -state disabled
     }
     if {!$len || !$normal} {
 	
 	# There is no selection in the canvas or whiteboard disabled.
-	::UI::MenuMethod $wmenu entryconfigure mInspectItem -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mEditItem... -state disabled
 	::UI::MenuMethod $wmenu entryconfigure mRaise -state disabled
 	::UI::MenuMethod $wmenu entryconfigure mLower -state disabled
 	::UI::MenuMethod $wmenu entryconfigure mLarger -state disabled
@@ -2917,7 +2901,7 @@ proc ::WB::EditPostCommandWhiteboard {w wmenu} {
 	::UI::MenuMethod $wmenu entryconfigure mImageLarger -state disabled
 	::UI::MenuMethod $wmenu entryconfigure mImageSmaller -state disabled    
     } else {	
-	::UI::MenuMethod $wmenu entryconfigure mInspectItem -state normal
+	::UI::MenuMethod $wmenu entryconfigure mEditItem... -state normal
 	::UI::MenuMethod $wmenu entryconfigure mRaise -state normal
 	::UI::MenuMethod $wmenu entryconfigure mLower -state normal
 	if {$flip} {
@@ -3249,7 +3233,7 @@ proc ::WB::DnDDrop {wcan data type x y} {
 		incr y $prefs(offsetCopy)
 	    } else {
 		::UI::MessageBox -title [mc Error] -icon error -type ok \
-		  -message [mc messfailmimeimp $mime] -parent $w
+		  -message [mc messfailmimeimp2 $mime] -parent $w
 	    }
 	}
     }

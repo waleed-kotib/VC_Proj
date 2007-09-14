@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FilePrefs.tcl,v 1.20 2007-09-07 08:09:01 matben Exp $
+# $Id: FilePrefs.tcl,v 1.21 2007-09-14 13:17:09 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -75,7 +75,7 @@ proc ::FilePrefs::BuildPrefsHook {wtree nbframe} {
     if {![::Preferences::HaveTableItem Whiteboard]} {
 	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
     }
-    ::Preferences::NewTableItem {Whiteboard {File Mappings}} [mc {File Mappings}]
+    ::Preferences::NewTableItem {Whiteboard {File Mappings}} [mc "File Types"]
 
     # File Mappings ------------------------------------------------------------
     set wpage [$nbframe page {File Mappings}]    
@@ -113,8 +113,7 @@ proc ::FilePrefs::BuildPage {page} {
 
     # Frame for everything inside the labeled container.
     set wlc $wc.lc
-    ttk::labelframe $wlc -text [mc preffmhelp] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $wlc
     pack $wlc -side top
         
     # Make the multi column listbox using treectrl. 
@@ -143,9 +142,9 @@ proc ::FilePrefs::BuildPage {page} {
     
     ttk::button $wbuttons.rem -text [mc Delete]  \
       -command [namespace current]::DeleteAssociation
-    ttk::button $wbuttons.edit -text "[mc Edit]..."  \
+    ttk::button $wbuttons.edit -text "[mc {Edit File Type}]..."  \
       -command [list [namespace current]::OnInspect edit]
-    ttk::button $wbuttons.new -text "[mc New]..."  \
+    ttk::button $wbuttons.new -text "[mc {Add File Type}]..." \
       -command [list [namespace current]::OnInspect new]
 
     pack  $wbuttons.rem  $wbuttons.edit  $wbuttons.new  -side right -padx 10 -pady 5 \
@@ -173,10 +172,10 @@ proc ::FilePrefs::TreeCtrl {T wysc} {
     set bg [option get $T columnBackground {}]
     set fg [option get $T textColor {}]
 
-    $T column create -tags cDescription -text [mc Description] \
+    $T column create -tags cDescription -text [mc "File Type"] \
       -itembackground $itemBackground -expand 1 -squeeze 1 -borderwidth $bd \
       -background $bg -textcolor $fg
-    $T column create -tags cHandled -text [mc {Handled By}] \
+    $T column create -tags cHandled -text [mc "Open with"] \
       -itembackground $itemBackground -expand 1 -squeeze 1 -borderwidth $bd \
       -background $bg -textcolor $fg
 
@@ -402,14 +401,14 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
 
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} -class FilePrefsSet
-    wm title $w [mc {Inspect Associations}]
+    wm title $w [mc "Add/Edit File Type"]
     ::UI::SetWindowPosition $w
 
     set finishedInspect -1
     
     if {$what eq "edit"} {
 	set textVarMime   $mime
-	set textVarDesc   $tmpMime2Description($mime)
+	set textVarDesc   [mc $tmpMime2Description($mime)]
 	set textVarSuffix $tmpMime2SuffixList($mime)
 	set codingVar     $tmpMimeTypeIsText($mime)
 	
@@ -454,80 +453,69 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
 
-    # Frame for everything inside the labeled container: "Type of File".
+    # Frame for everything inside the labeled container: "File Type".
     set wty $wbox.fty
-    ttk::labelframe $wty -text [mc {Type of File}] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $wty -padding [option get . groupSmallPadding {}]
     pack $wty -fill x
     
-    ttk::label $wty.x1 -text "[mc Description]:"
+    ttk::label $wty.x1 -text "[mc Type]:"
     ttk::entry $wty.x2 -font CociSmallFont -width 30   \
       -textvariable [namespace current]::textVarDesc
     ttk::label $wty.x3 -text "[mc {MIME type}]:"
     ttk::entry $wty.x4 -font CociSmallFont -width 30   \
       -textvariable [namespace current]::textVarMime
-    ttk::label $wty.x5 -text "[mc {File suffixes}]:"
+    ttk::label $wty.x5 -text "[mc Extensions]:"
     ttk::entry $wty.x6 -font CociSmallFont -width 30   \
       -textvariable [namespace current]::textVarSuffix
     
-    grid  $wty.x1  $wty.x2  -sticky e -pady 2
-    grid  $wty.x3  $wty.x4  -sticky e -pady 2
-    grid  $wty.x5  $wty.x6  -sticky e -pady 2
-        
+    ttk::label $wty.x7 -text "[mc Encoding]:"
+    ttk::radiobutton $wty.x8 -text [mc text]  \
+      -variable [namespace current]::codingVar -value 1
+    ttk::radiobutton $wty.x9 -text [mc Binary]  \
+      -variable [namespace current]::codingVar -value 0
+    ttk::frame $wty.pad -height 8
+    ttk::label $wty.x10 -text "[mc mAction]:"
+    ttk::radiobutton $wty.x11 -text [mc {Reject file}]  \
+      -variable [namespace current]::receiveVar -value reject
+    ttk::radiobutton $wty.x12 -text [mc "Save to disk"]  \
+      -variable [namespace current]::receiveVar -value save
+    ttk::frame $wty.fr
+    ttk::radiobutton $wty.x13 -text "[mc {Open with}]:"  \
+      -variable [namespace current]::receiveVar -value import
+
+    set wMenu [eval {
+	ttk::optionmenu $wty.x13m [namespace current]::packageVar
+    } $packageList]
+    $wMenu configure -font CociSmallFont     
+
+    ttk::radiobutton $wty.x14 -text [mc {Always ask}]  \
+      -variable [namespace current]::receiveVar -value ask
+    
+    grid  $wty.x1  $wty.x2  -         -sticky e -pady 2
+    grid  $wty.x3  $wty.x4  -         -sticky e -pady 2
+    grid  $wty.x5  $wty.x6  -         -sticky e -pady 2
+    grid  $wty.x7  $wty.x8  -         -sticky w -pady 2
+    grid  x        $wty.x9  -         -sticky w -pady 2
+    grid  $wty.pad
+    grid  $wty.x10 $wty.x11 -         -sticky w -pady 2
+    grid  x        $wty.x12 -         -sticky w -pady 2
+    grid  x        $wty.x13 $wty.x13m -sticky w -pady 2
+    grid  x        $wty.x14 -         -sticky w -pady 2
+    
     if {$what eq "edit"} {
 	$wty.x2 state {disabled}
 	$wty.x4 state {disabled}
     }
-    
-    # Frame for everything inside the labeled container: "Handling".
-    set wha $wbox.fha
-    ttk::labelframe $wha -text [mc Handling] \
-      -padding [option get . groupSmallPadding {}]
-    pack $wha -fill x -pady 10
-
-    ttk::radiobutton $wha.x1 -text [mc {Reject receive}]  \
-      -variable [namespace current]::receiveVar -value reject
-    ttk::radiobutton $wha.x2 -text [mc preffmsave]  \
-      -variable [namespace current]::receiveVar -value save
-    ttk::frame $wha.fr
-    ttk::radiobutton $wha.x3 -text "[mc {Import using}]:"  \
-      -variable [namespace current]::receiveVar -value import
-
-
-
-
-    set wMenu [eval {
-	ttk::optionmenu $wha.x3m [namespace current]::packageVar
-    } $packageList]
-    $wMenu configure -font CociSmallFont     
-
-    ttk::radiobutton $wha.x8 -text [mc {Unknown: Prompt user}]  \
-      -variable [namespace current]::receiveVar -value ask
-    ttk::frame $wha.fc
-    ttk::label $wha.fc.l -text "[mc {File coding}]:"
-    ttk::radiobutton $wha.fc.t -text [mc {As text}]  \
-      -variable [namespace current]::codingVar -value 1
-    ttk::radiobutton $wha.fc.b -text [mc Binary]  \
-      -variable [namespace current]::codingVar -value 0
-    
-    grid  $wha.x1  -         -sticky w
-    grid  $wha.x2  -         -sticky w
-    grid  $wha.x3  $wha.x3m  -sticky w
-    grid  $wha.x8  -         -sticky w
-    grid  $wha.fc  -         -sticky w -padx 16
-    
-    grid  $wha.fc.l  $wha.fc.t  -sticky w
-    grid  x          $wha.fc.b  -sticky w
-        
+	
     # If we dont have any registered packages for this MIME, disable this
     # option.
     
     if {($what eq "edit") && ($packageList eq [mc None])} {
-	$wha.x3  state {disabled}
-	$wha.x3m state {disabled}
+	$wty.x13  state {disabled}
+	$wty.x13m state {disabled}
     }
     if {$what eq "new"} {
-	$wha.x3 state {disabled}
+	$wty.x13 state {disabled}
     }
     
     # Button part
