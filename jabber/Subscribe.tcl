@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.43 2007-09-13 15:53:40 matben Exp $
+# $Id: Subscribe.tcl,v 1.44 2007-09-14 13:41:26 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -296,10 +296,10 @@ proc ::Subscribe::InitPrefsHook { } {
 
 proc ::Subscribe::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Subscriptions} [mc {Presence Subscription}]
+    ::Preferences::NewTableItem {Jabber Subscription} [mc "Presence Subscription"]
     
     # Subscriptions page ---------------------------------------------------
-    set wpage [$nbframe page {Subscriptions}]
+    set wpage [$nbframe page {Subscription}]
     ::Subscribe::BuildPageSubscriptions $wpage    
 }
 
@@ -316,7 +316,7 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
     
     ttk::frame $wc.head -padding {0 0 0 6}
-    ttk::label $wc.head.l -text [mc Subscribe]
+    ttk::label $wc.head.l -text [mc "Presence Subscription"]
     ttk::separator $wc.head.s -orient horizontal
 
     grid  $wc.head.l  $wc.head.s
