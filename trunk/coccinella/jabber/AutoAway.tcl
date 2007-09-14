@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.6 2007-09-13 08:25:37 matben Exp $
+# $Id: AutoAway.tcl,v 1.7 2007-09-14 13:41:26 matben Exp $
 
 package require idletime
 
@@ -236,7 +236,7 @@ proc ::AutoAway::BuildPage {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
     
     ttk::frame $wc.head -padding {0 0 0 6}
-    ttk::label $wc.head.l -text [mc prefaaset]
+    ttk::label $wc.head.l -text [mc "Auto Away"]
     ttk::separator $wc.head.s -orient horizontal
     
     grid  $wc.head.l  $wc.head.s
