@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MacintoshUtils.tcl,v 1.13 2007-07-19 06:28:18 matben Exp $
+# $Id: MacintoshUtils.tcl,v 1.14 2007-09-14 08:11:46 matben Exp $
 
 package provide MacintoshUtils 1.0
 
@@ -31,75 +31,12 @@ namespace eval ::Mac::Printer:: {
 }
 
 proc ::Mac::Printer::PageSetup {w} {
-    global  prefs this
-        
-    switch -- $this(platform) {
-	macintosh {
-	    ::Mac::MacPrint::PageSetup $w
-	}
-	macosx {
-	    ::Mac::MacCarbonPrint::PageSetup $w
-	}
-    }
+    ::Mac::MacCarbonPrint::PageSetup $w
 }
 
 proc ::Mac::Printer::Print {w} {
-    global  prefs this
-
-    switch -- $this(platform) {
-	macintosh {
-	    ::Mac::MacPrint::PrintCanvas $w
-	}
-	macosx {
-	    ::Mac::MacCarbonPrint::PrintCanvas $w
-	}
-    }
+    ::Mac::MacCarbonPrint::PrintCanvas $w
 }
-
-#-- Mac Classic ----------------------------------------------------------------
-
-namespace eval ::Mac::MacPrint:: {
-    
-}
-
-proc ::Mac::MacPrint::PageSetup {w} {
-    global  prefs
-    variable cache
-    
-    if {$prefs(MacPrint)} {
-	set printObj [::macprint::pagesetup]
-	if {$printObj ne ""} {
-	    set cache($w,printObj) $printObj
-	}
-    } else {
-	::UI::MessageBox -icon error -title [mc {No Printing}] \
-	  -message [mc messprintnoextension]
-    }	    
-}
-    
-proc ::Mac::MacPrint::PrintCanvas {w} {
-    global  prefs
-    variable cache
-    
-    set wcan [::WB::GetCanvasFromWtop $w]
-
-    if {$prefs(MacPrint)} {
-	set ans [macprint::print]
-	if {$ans ne ""} {
-	    foreach {type printObject} $ans break
-	    set opts {}
-	    if {[info exists cache($w,printObj)]} {
-		lappend opts -printobject $cache($w,printObj)
-	    }
-	    eval {macprint::printcanvas $wcan $printObject} $opts
-	}
-    } else {
-	::UI::MessageBox -icon error -title [mc {No Printing}] \
-	  -message [mc messprintnoextension]
-    }	    
-}
-
-#-- Mac OS X -------------------------------------------------------------------
 
 namespace eval ::Mac::MacCarbonPrint:: {
     
@@ -115,8 +52,8 @@ proc ::Mac::MacCarbonPrint::PageSetup {w} {
 	    set cache($w,pageFormat) $pageFormat
 	}
     } else {
-	::UI::MessageBox -icon error -title [mc {No Printing}] \
-	  -message [mc messprintnoextension]
+	::UI::MessageBox -icon error -title [mc Error] \
+	  -message [mc messprintnoextension2]
     }
 }
 
@@ -137,8 +74,8 @@ proc ::Mac::MacCarbonPrint::PrintCanvas {w} {
 	    eval {maccarbonprint::printcanvas $wcan $printObject}
 	}
     } else {
-	::UI::MessageBox -icon error -title [mc {No Printing}] \
-	  -message [mc messprintnoextension]
+	::UI::MessageBox -icon error -title [mc Error] \
+	  -message [mc messprintnoextension2]
     }	    
 }
 
@@ -159,23 +96,9 @@ proc ::Mac::MacCarbonPrint::PrintText {wtext args} {
 	    eval {maccarbonprint::printtext $wtext $printObject} $args
 	}
     } else {
-	::UI::MessageBox -icon error -title [mc {No Printing}] \
-	  -message [mc messprintnoextension]
+	::UI::MessageBox -icon error -title [mc Error] \
+	  -message [mc messprintnoextension2]
     }	    
-}
-
-proc ::Mac::OpenUrl {url} {
-    global  this
-    
-    if {$this(package,Tclapplescript)} {
-	set script {
-	    tell application "Netscape Communicatorª"
-	    open(file "%s")
-	    Activate -1
-	    end tell
-	}
-	AppleScript execute [format $script $url]
-    }
 }
 
 # Synthetic Speech .............................................................

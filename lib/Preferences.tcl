@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.99 2007-09-06 13:20:47 matben Exp $
+# $Id: Preferences.tcl,v 1.100 2007-09-14 08:11:46 matben Exp $
  
 package require mnotebook
 
@@ -171,7 +171,7 @@ proc ::Preferences::Build {args} {
     ::UI::Toplevel $w -class Preferences \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::Preferences::CloseHook
-    wm title $w [mc Preferences]
+    wm title $w [mc mPreferences]
     wm withdraw $w
     ::UI::SetWindowPosition $w
     
@@ -294,7 +294,7 @@ proc ::Preferences::TreeCtrl {T wysc} {
     set fg [option get $T textColor {}]
     set fillT {white {selected focus} black {selected !focus}}
 
-     $T column create -text [mc {Settings Panels}] -tags cTree  \
+     $T column create -tags cTree  \
       -itembackground $itemBackground -resize 0 -expand 1 -borderwidth $bd  \
       -background $bg -textcolor $fg
      $T configure -treecolumn cTree
@@ -386,7 +386,7 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
     
     # Warn first.
     set ans [::UI::MessageBox -title [mc Warning] -type yesno -icon warning \
-      -message [mc messfactorydefaults] -default no]
+      -message [mc messfactorydefaults2] -default no]
     if {$ans eq "no"} {
 	return
     }
@@ -448,7 +448,7 @@ proc ::Preferences::SavePushBt { } {
     if {$needRestart} {
 	set ans [::UI::MessageBox -title [mc Warning]  \
 	  -type ok -parent $wDlgs(prefs) -icon info \
-	  -message [mc messprefsrestart]]
+	  -message [mc messprefsrestart2]]
     }
 
     # Save the preference file.

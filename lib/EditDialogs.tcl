@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: EditDialogs.tcl,v 1.17 2007-07-19 06:28:18 matben Exp $
+# $Id: EditDialogs.tcl,v 1.18 2007-09-14 08:11:45 matben Exp $
 
 package provide EditDialogs 1.0
 
@@ -122,7 +122,7 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
       -command [list [namespace current]::RemoveShortcuts $wlbox]
     
     # Trick: postpone command substitution; only variable substitution.
-    ttk::button $frbt.btedit -text "[mc Edit]..."  \
+    ttk::button $frbt.btedit -text "[mc mEdit]..."  \
       -command "[namespace current]::AddOrEditShortcuts edit   \
       [namespace current]::shortCopy \[$wlbox curselection] $wlbox"
     
@@ -222,7 +222,7 @@ proc ::EditShortcuts::DoCancel {nameOfShortcutList} {
     # Cancel, keep old shortcuts. If changed something then warn.
     if {$anyChange} {
 	set ans [::UI::MessageBox -icon error -type yesnocancel \
-	  -message [mc shortwarn]]
+	  -title [mc Warning] -message [mc shortwarn]]
 	if {[string equal $ans "yes"]} {
 	    DoSaveEditedShortcuts $nameOfShortcutList
 	    return

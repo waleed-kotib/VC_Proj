@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PrefHelpers.tcl,v 1.3 2007-07-19 06:28:18 matben Exp $
+# $Id: PrefHelpers.tcl,v 1.4 2007-09-14 08:11:46 matben Exp $
  
 package provide PrefHelpers 1.0
 
@@ -72,7 +72,7 @@ proc ::PrefHelpers::BuildPrefsHook {wtree nbframe} {
     if {![::Preferences::HaveTableItem General]} {
 	::Preferences::NewTableItem {General} [mc General]
     }
-    ::Preferences::NewTableItem {General {Helpers}} [mc {Helpers}]
+    ::Preferences::NewTableItem {General Helpers} [mc "Default Applications"]
     set wpage [$nbframe page {Helpers}]
     BuildPage $wpage
 }
@@ -114,17 +114,17 @@ proc ::PrefHelpers::BuildPage {wpage} {
     grid columnconfigure $wc 1 -weight 1
     
     set f $wc.f
-    ttk::label $f.lbrowser -text [mc {Default Browser:}]
+    ttk::label $f.lbrowser -text "[mc Browser]:"
     ui::optionmenu $f.mbrowser -menulist $menuBrowsers \
       -variable [namespace current]::tmp(webBrowser)
-    ttk::label $f.lmail -text [mc {Default Mail Client:}]
+    ttk::label $f.lmail -text "[mc {Email client}]:"
     ui::optionmenu $f.mmail -menulist $menuMail \
       -variable [namespace current]::tmp(mailClient)
     
     set maxw [max [$f.mbrowser maxwidth] [$f.mmail maxwidth]]
 
-    grid  $f.lbrowser  $f.mbrowser  -pady 2
-    grid  $f.lmail     $f.mmail     -pady 2
+    grid  $f.lbrowser  $f.mbrowser  -padx 2 -pady 2 -sticky e
+    grid  $f.lmail     $f.mmail     -padx 2 -pady 2 -sticky e
     grid $f.lbrowser $f.lmail -sticky e
     grid $f.mbrowser $f.mmail -sticky ew
     grid columnconfigure $f 1 -minsize [expr {$maxw + 10}]

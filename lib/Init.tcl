@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.72 2007-09-02 07:54:02 matben Exp $
+# $Id: Init.tcl,v 1.73 2007-09-14 08:11:46 matben Exp $
 
 namespace eval ::Init {
     
@@ -699,7 +699,7 @@ proc ::Init::LoadPackages {} {
 	}
 
 	if {[catch {uplevel #0 [list package require tile 0.7]} msg]} {
-	    tk_messageBox -icon error \
+	    tk_messageBox -icon error -title [mc Error] \
 	      -message "This application requires the tile package to work! $::errorInfo"
 	    exit
 	}
@@ -709,7 +709,7 @@ proc ::Init::LoadPackages {} {
     ::Splash::SetMsg "[mc splashlook] treectrl..."
     set ::treectrl_library [file join $this(binLibPath) treectrl]
     if {[catch {package require treectrl 2.2} msg]} {
-	tk_messageBox -icon error \
+	tk_messageBox -icon error -title [mc Error] \
 	  -message "This application requires the treectrl widget to work! $::errorInfo"
 	exit
     }
@@ -719,7 +719,7 @@ proc ::Init::LoadPackages {} {
     # tkpng is required for the gui.
     ::Splash::SetMsg "[mc splashlook] tkpng..."
     if {[catch {package require tkpng 0.7}]} {
-	tk_messageBox -icon error \
+	tk_messageBox -icon error -title [mc Error] \
 	  -message "The tkpng package is required for the GUI"
 	exit
     }

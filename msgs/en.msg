@@ -11,10 +11,10 @@
 #         fr  Guillaume Ayoub (xovni at wanadoo.fr)
 #         it  Mirko Graziani (contatto@imatica.it)
 #         kr  Dylan Park, Korea NVC Center (hanmaum@krnvc.org) 
-#         nl  Sander Devrieze (s.devrieze at pandora.be), 2004-2007,
-#             and Bart Van Hove (bartvanhove at skynet.be), 2004
+#         nl  Sander Devrieze (s.devrieze at pandora.be), 2004-2007
+#             Bart Van Hove (bartvanhove at skynet.be), 2004
 #         pl  Zbigniew Baniewski (zb at ispid.com.pl)
-#         ru  Alexander Balezin (xmmp://gescheit@jabber.ttn.ru) gescheit@list.ru
+#         ru  Alexander Balezin (xmpp:gescheit@jabber.ttn.ru) gescheit@list.ru
 #         sv  Mats Bengtsson
 #
 # General type of text, such as "OK", "Cancel", and the like. 

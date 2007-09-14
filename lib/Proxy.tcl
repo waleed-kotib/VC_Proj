@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Proxy.tcl,v 1.17 2007-08-01 08:06:27 matben Exp $
+# $Id: Proxy.tcl,v 1.18 2007-09-14 08:11:46 matben Exp $
  
 package require autoproxy
 package require autosocks
@@ -193,17 +193,17 @@ proc ::Proxy::BuildFrame {w} {
     pack $wprx -side top -anchor [option get . dialogAnchor {}]
     
     ttk::label $wprx.msg -wraplength 300 -justify left \
-      -text [mc prefproxymsg]
+      -text [mc prefproxymsg2]
     ttk::checkbutton $wprx.use -text [mc {Use proxy}]  \
       -command [namespace code SetUseProxyState]  \
       -variable [namespace current]::tmpPrefs(useproxy)  
-    ttk::label $wprx.lmb -text [mc {Proxy Type}]:
+    ttk::label $wprx.lmb -text [mc Type]:
     ui::optionmenu $wprx.mb -menulist $menulist -direction flush \
       -command [namespace code SetProxyType] \
       -variable [namespace current]::tmpPrefs(proxy_type)
-    ttk::label $wprx.lserv -text [mc {Proxy Server}]:
+    ttk::label $wprx.lserv -text [mc Host]:
     ttk::entry $wprx.eserv -textvariable [namespace current]::tmpPrefs(proxy_host)
-    ttk::label $wprx.lport -text [mc {Proxy Port}]:
+    ttk::label $wprx.lport -text [mc Port]:
     ttk::entry $wprx.eport -textvariable [namespace current]::tmpPrefs(proxy_port) \
       -width 6
     ttk::label $wprx.luser -text [mc Username]:
@@ -264,13 +264,13 @@ proc ::Proxy::BuildNATFrame {w} {
     ttk::frame $wnat
     pack $wnat -side top -anchor [option get . dialogAnchor {}]
 
-    ttk::checkbutton $wnat.use -text [mc prefnatip] \
+    ttk::checkbutton $wnat.use -text [mc prefnatip2] \
       -command [namespace code SetUseNATState]  \
       -variable [namespace current]::tmpPrefs(setNATip)
     ttk::entry $wnat.eip \
       -textvariable [namespace current]::tmpPrefs(NATip)
     if {$stun} {
-	ttk::button $wnat.stun -text [mc Get] -command ::Proxy::GetStun
+	ttk::button $wnat.stun -text [mc Detect] -command ::Proxy::GetStun
     }
     
     grid  $wnat.use  -  -sticky w

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.67 2007-08-20 13:41:44 matben Exp $
+# $Id: VCard.tcl,v 1.68 2007-09-14 08:11:45 matben Exp $
 
 package provide VCard 1.0
 
@@ -77,7 +77,7 @@ proc ::VCard::Fetch {type {jid {}}} {
     set priv(w)    $wDlgs(jvcard)$uid
     
     # We should query the server for this and then fill in.
-    ::JUI::SetStatusMessage [mc vcardget $jid]
+    ::JUI::SetStatusMessage "[mc vcardget2 $jid]..."
     if {$type eq "own"} {
 	::Jabber::JlibCmd vcard send_get_own  \
 	  [list [namespace current]::FetchCallback $token]
@@ -97,14 +97,14 @@ proc ::VCard::FetchCallback {token jlibName result theQuery} {
     ::Debug 4 "::VCard::FetchCallback"
     
     if {$result eq "error"} {
-	set errmsg "([lindex $theQuery 0]) [lindex $theQuery 1]"
-        ::UI::MessageBox -title [mc Error] -icon error -type ok \
-          -message [mc vcarderrget $errmsg]
+	set str [mc vcarderrget2]
+	append str "\n" "[mc Error]: ([lindex $theQuery 0]) [lindex $theQuery 1]"
+	::UI::MessageBox -title [mc Error] -icon error -type ok -message $str
         ::JUI::SetStatusMessage ""
 	Free $token
         return
     }
-    ::JUI::SetStatusMessage [mc vcardrec]
+    ::JUI::SetStatusMessage [mc vcardrec2]
     
     # The 'theQuery' now contains all the vCard data in a xml list.
     if {[llength $theQuery]} {
@@ -253,11 +253,11 @@ proc ::VCard::Build {token} {
 	    pack $frbot.btok -side right -padx $padx
 	}
     } else {
-	ttk::button $frbot.btcancel -text [mc Close] \
+	ttk::button $frbot.btcancel -text [mc Cancel] \
 	  -command [list [namespace current]::Close $token]
 	pack $frbot.btcancel -side right
     }
-    ttk::button $frbot.export -text [mc mExport...] \
+    ttk::button $frbot.export -text "[mc Export]..." \
       -command [list [namespace current]::Export $token]
     pack $frbot.export -side left
     
@@ -281,7 +281,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     
     # Start with the Basic Info -------------------------------------------------
    
-    $nbframe add [ttk::frame $nbframe.fbas] -text [mc {Basic Info}] -sticky news
+    $nbframe add [ttk::frame $nbframe.fbas] -text [mc General] -sticky news
 
     set pbi $nbframe.fbas.f
     ttk::frame $pbi -padding [option get . notebookPagePadding {}]
@@ -299,9 +299,9 @@ proc ::VCard::Pages {nbframe etoken type} {
     grid  $pbi.efirst  $pbi.emiddle  $pbi.efam  -sticky ew -padx 1 -pady 2
     
     # Other part.
-    ttk::label $pbi.nick   -text "[mc {Nickname}]:"
-    ttk::label $pbi.email  -text "[mc {Email address}]:"
-    ttk::label $pbi.jid    -text "[mc {Jabber ID}]:"
+    ttk::label $pbi.nick   -text "[mc Nickname]:"
+    ttk::label $pbi.email  -text "[mc Email]:"
+    ttk::label $pbi.jid    -text "[mc {Conatct ID}]:"
     ttk::entry $pbi.enick  -textvariable $etoken\(nickname)
     ttk::entry $pbi.eemail -textvariable $etoken\(email_internet_pref)
     ttk::entry $pbi.ejid   -textvariable $etoken\(jid)
@@ -314,6 +314,10 @@ proc ::VCard::Pages {nbframe etoken type} {
     
     $pbi.ejid state {readonly}
         
+    ::balloonhelp::balloonforwindow $pbi.ejid [mc contactid]
+    ::balloonhelp::balloonforwindow $pbi.enick [mc registration-nick]
+    ::balloonhelp::balloonforwindow $pbi.eemail [mc registration-email]
+
     # Description part.
     set wdesctxt $pbi.tdes
     ttk::label $pbi.ldes -text "[mc Description]:"    
@@ -333,7 +337,7 @@ proc ::VCard::Pages {nbframe etoken type} {
             
     # Personal Info page -------------------------------------------------------
     
-    $nbframe add [ttk::frame $nbframe.fp] -text [mc {Personal Info}] -sticky news
+    $nbframe add [ttk::frame $nbframe.fp] -text [mc Personal] -sticky news
 
     set pbp $nbframe.fp.f
     ttk::frame $pbp -padding [option get . notebookPagePadding {}]
@@ -344,7 +348,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     pack $wtop -fill x -expand 1
 
     foreach {name tag} {
-        {Personal URL}    url
+        Website           url
         Occupation        role
         Birthday          bday
     } {
@@ -367,10 +371,12 @@ proc ::VCard::Pages {nbframe etoken type} {
 	    grid  $wtop.e$tag  -sticky w	    
 	}
     }
-    ttk::label $wtop.frmt -style Small.TLabel -text [mc {Format mm/dd/yyyy}]
+    ttk::label $wtop.frmt -style Small.TLabel -text [mc "Format: mm/dd/yyyy"]
     grid  x  $wtop.frmt  -sticky w
     grid columnconfigure $wtop 1 -weight 1
-    
+
+    ::balloonhelp::balloonforwindow $wtop.eurl [mc registration-url]
+
     set wmid $pbp.m
     ttk::frame $wmid
     pack $wmid -fill x -expand 1 -pady 8
@@ -391,10 +397,10 @@ proc ::VCard::Pages {nbframe etoken type} {
     ttk::frame $wp1
     pack $wp1 -side left -padx 4 -fill y
 
-    ttk::label $wp1.l -text "[mc {Avatar}]:"
-    ttk::button $wp1.b -text "[mc {Select Photo}]..."  \
+    ttk::label $wp1.l -text "[mc Avatar]:"
+    ttk::button $wp1.b -text "[mc {Select Avatar}]..."  \
       -command [list ::VCard::SelectPhoto $etoken]
-    ttk::button $wp1.br -text [mc {Remove Photo}] \
+    ttk::button $wp1.br -text [mc "Remove Avatar"] \
       -command [list ::VCard::DeletePhoto $etoken]
         
     grid  $wp1.l   -sticky ne
@@ -433,15 +439,20 @@ proc ::VCard::Pages {nbframe etoken type} {
     pack  $pbh  -side top -anchor [option get . dialogAnchor {}]
         
     foreach {name tag} {
-        {Address 1}       adr_home_street
-        {Address 2}       adr_home_extadd
+        Address           adr_home_street
+        Address           adr_home_extadd
         City              adr_home_locality
-        State/Region      adr_home_region
-        {Postal Code}     adr_home_pcode
+        Region            adr_home_region
+        "Postal code"     adr_home_pcode
         Country           adr_home_country
-        {Tel (voice)}     tel_voice_home
-        {Tel (fax)}       tel_fax_home
+        "Tel (voice)"     tel_voice_home
+        "Tel (fax)"       tel_fax_home
     } {
+	if {$tag eq "adr_home_street"} {
+	    append name " 1"
+	} elseif {$tag eq "adr_home_extadd"} {
+	    append name " 2"
+	}
 	ttk::label $pbh.l$tag -text "[mc $name]:"
 	ttk::entry $pbh.e$tag -width 28 -textvariable $etoken\($tag)
         grid  $pbh.l$tag  $pbh.e$tag -sticky e -pady 2
@@ -456,18 +467,23 @@ proc ::VCard::Pages {nbframe etoken type} {
     pack  $pbw  -side top -anchor [option get . dialogAnchor {}]
 
     foreach {name tag} {
-        {Company Name}    org_orgname 
+        Company           org_orgname 
         Department        org_orgunit
         Title             title
-        {Address 1}       adr_work_street
-        {Address 2}       adr_work_extadd
+        Address           adr_work_street
+        Address           adr_work_extadd
         City              adr_work_locality
-        State/Region      adr_work_region
-        {Postal Code}     adr_work_pcode
+        Region            adr_work_region
+        "Postal code"     adr_work_pcode
         Country           adr_work_country
-        {Tel (voice)}     tel_voice_work
-        {Tel (fax)}       tel_fax_work
+        "Tel (voice)"     tel_voice_work
+        "Tel (fax)"       tel_fax_work
     } {
+	if {$tag eq "adr_home_street"} {
+	    append name " 1"
+	} elseif {$tag eq "adr_home_extadd"} {
+	    append name " 2"
+	}
 	ttk::label $pbw.l$tag -text "[mc $name]:"
 	ttk::entry $pbw.e$tag -width 28 -textvariable $etoken\($tag)
         grid  $pbw.l$tag  $pbw.e$tag  -sticky e -pady 2
@@ -573,7 +589,7 @@ proc ::VCard::SelectPhoto {etoken} {
     set suffL [::Types::GetSuffixListForMimeList $mimeL]
     set types [concat [list [list {Image Files} $suffL]] \
       [::Media::GetDlgFileTypesForMimeList $mimeL]]
-    set fileName [tk_getOpenFile -title [mc {Pick Image File}] -filetypes $types]
+    set fileName [tk_getOpenFile -title [mc "Select Avatar"] -filetypes $types]
     if {[file exists $fileName]} {
 	SetPhotoFile $etoken $fileName   
     }
