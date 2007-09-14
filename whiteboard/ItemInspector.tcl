@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ItemInspector.tcl,v 1.15 2007-07-19 06:28:19 matben Exp $
+# $Id: ItemInspector.tcl,v 1.16 2007-09-14 13:17:09 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -193,7 +193,7 @@ proc ::ItemInspector::Build {wcan itemid args} {
       -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token]
-    wm title $w [mc {Item Inspector}]
+    wm title $w [mc "Edit Item"]
     bind $wcan <Destroy> +[list [namespace current]::Cancel $token]
     
     set typWidth 24
@@ -203,8 +203,7 @@ proc ::ItemInspector::Build {wcan itemid args} {
     pack  $w.frall  -fill both -expand 1
 
     set w1 $w.frall.fr1
-    ttk::labelframe $w1 -padding [option get . groupSmallPadding {}]  \
-      -text [mc {Item Options}]
+    ttk::frame $w1 -padding [option get . groupSmallPadding {}]
     pack $w1
     
     # Overall frame for whole container.
@@ -246,7 +245,7 @@ proc ::ItemInspector::Build {wcan itemid args} {
     set state(type,value) $itemType
     set wlabel $frtot.l$line
     set wentry $frtot.e$line
-    ttk::label $wlabel -text "[mc {Item Type}]:"
+    ttk::label $wlabel -text "[mc Type]:"
     ttk::entry $wentry -width $typWidth -textvariable $token\(type)
     $wentry state {disabled}
     grid  $wlabel  $wentry  -padx 2 -pady 2
@@ -262,7 +261,7 @@ proc ::ItemInspector::Build {wcan itemid args} {
     incr line
     set wlabel $frtot.l$line
     set wentry $frtot.e$line
-    ttk::label $wlabel -text "[mc coordinates]:"
+    ttk::label $wlabel -text "[mc Coordinates]:"
     ttk::entry $wentry -width $typWidth -textvariable $token\(coords)
     $wentry state {disabled}
     grid  $wlabel  $wentry  -padx 2 -pady 2
@@ -728,8 +727,7 @@ proc ::ItemInspector::Movie {wcan winfr args} {
     pack  $w.frall  -fill both -expand 1
 
     set w1 $w.frall.fr1
-    ttk::labelframe $w1 -padding [option get . groupSmallPadding {}]  \
-      -text [mc {Movie Options}]
+    ttk::frame $w1 -padding [option get . groupSmallPadding {}]
     pack $w1
     
     # Overall frame for whole container.
@@ -881,7 +879,7 @@ proc ::ItemInspector::Broken {wcan itemid args} {
       -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token]
-    wm title $w {Item Inspector}
+    wm title $w " Edit Item"
     bind $wcan <Destroy> +[list [namespace current]::Cancel $token]
             
     # Global frame.

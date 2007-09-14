@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Import.tcl,v 1.29 2007-09-01 07:49:06 matben Exp $
+# $Id: Import.tcl,v 1.30 2007-09-14 13:17:09 matben Exp $
 
 package require http
 package require httpex
@@ -56,7 +56,7 @@ proc ::Import::ImportImageOrMovieDlg {wcan} {
     
     set userDir [::Utils::GetDirIfExist $prefs(userPath)]
     set opts [list -initialdir $userDir]
-    set fileName [eval {tk_getOpenFile -title [mc {Open Image/Movie}] \
+    set fileName [eval {tk_getOpenFile -title [mc "Import Image/Movie"] \
       -filetypes [::Plugins::GetTypeListDialogOption all]} $opts]
     if {$fileName eq ""} {
 	return
@@ -76,7 +76,7 @@ proc ::Import::ImportImageOrMovieDlg {wcan} {
 	}
     } else {
 	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc messfailmimeimp $mime]
+	  -message [mc messfailmimeimp2 $mime]
     }
 }
 
@@ -1374,7 +1374,7 @@ proc ::Import::QuickTimeTclCallback {gettoken wmovie msg {err {}}} {
 		append msg " $err"
 	    }
 	    ::WB::SetStatusMessage $w ""
-	    ::UI::MessageBox -icon error -type ok -message $msg
+	    ::UI::MessageBox -icon error -title [mc Error] -type ok -message $msg
 	    unset getstate
 	    return
 	}
@@ -2177,7 +2177,7 @@ proc ::Import::ReloadImage {w id} {
     set coords [$wcan coords $id]
         
     if {![info exists optsArr(-url)]} {
-	::UI::MessageBox -icon error -type ok -message \
+	::UI::MessageBox -icon error -title [mc Error] -type ok -message \
 	  "No url found for the file \"$fileTail\" with MIME type $mime"
 	return
     }
@@ -2198,8 +2198,8 @@ proc ::Import::ReloadImage {w id} {
 
 	# Display a broken image to indicate for the user.
 	eval {NewBrokenImage $wcan $coords} $opts
-	::UI::MessageBox -icon error -type ok -message \
-	  "Failed loading \"$optsArr(-url)\": $errMsg"
+	::UI::MessageBox -icon error -title [mc Error] -type ok \
+	  -message "Failed loading \"$optsArr(-url)\": $errMsg"
     }
 }
 

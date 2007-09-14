@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: WBPrefs.tcl,v 1.14 2007-07-26 14:18:54 matben Exp $
+# $Id: WBPrefs.tcl,v 1.15 2007-09-14 13:17:09 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -32,7 +32,6 @@ namespace eval ::WBPrefs:: {
     ::hooks::register prefsUserDefaultsHook  ::WBPrefs::UserDefaultsPrefsHook
     ::hooks::register prefsDestroyHook       ::WBPrefs::DestroyPrefsHook
 }
-
 
 proc ::WBPrefs::InitPrefsHook { } {
     global  prefs
@@ -73,8 +72,7 @@ proc ::WBPrefs::BuildPrefsHook {wtree nbframe} {
     if {![::Preferences::HaveTableItem Whiteboard]} {
 	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
     }
-    ::Preferences::NewTableItem {Whiteboard {Edit Fonts}} [mc {Edit Fonts}]
-    ::Preferences::NewTableItem {Whiteboard Privacy} [mc Privacy]
+    ::Preferences::NewTableItem {Whiteboard {Edit Fonts}} [mc Fonts]
     
     set wpage [$nbframe page {Whiteboard}]
     BuildWhiteboardPage $wpage
@@ -82,10 +80,6 @@ proc ::WBPrefs::BuildPrefsHook {wtree nbframe} {
     # Edit Fonts page ----------------------------------------------------------
     set wpage [$nbframe page {Edit Fonts}]
     BuildFontsPage $wpage
-    
-    # Privacy page -------------------------------------------------------------
-    set wpage [$nbframe page {Privacy}]
-    BuildPagePrivacy $wpage
 }
 
 proc ::WBPrefs::BuildWhiteboardPage {page} {
@@ -96,42 +90,45 @@ proc ::WBPrefs::BuildWhiteboardPage {page} {
     set tmpPrefs(canScrollHeight) $prefs(canScrollHeight)
     set tmpPrefs(wb,strokePost)   $prefs(wb,strokePost)
     set tmpPrefs(wb,nlNewText)    $prefs(wb,nlNewText)
-    
+    set tmpPrefs(privacy)	  $prefs(privacy)
+
     set wc $page.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
     set wsi $wc.si
-    ttk::labelframe $wsi -text [mc {Canvas Size}] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $wsi
     pack  $wsi  -side top -anchor w
     
-    ttk::label $wsi.lh -text [mc prefwbscroll $prefs(mincanScrollWidth) \
-      $prefs(mincanScrollHeight)]
-    pack  $wsi.lh -side top -anchor w -padx 6
     set afr $wsi.fr
     ttk::frame $afr
     pack  $afr -side top -anchor [option get . dialogAnchor {}]
-    ttk::label $afr.w -text "[mc Width]:"
-    ttk::label $afr.h -text "[mc Height]:"
-    ttk::entry $afr.width -font CociSmallFont \
-      -width 6 \
+    
+    ttk::label $afr.w -text [mc Width]
+    ttk::label $afr.x1 -text x
+    ttk::label $afr.x2 -text x
+    ttk::label $afr.h -text [mc Height]
+    ttk::entry $afr.width -font CociSmallFont -width 6 \
       -textvariable [namespace current]::tmpPrefs(canScrollWidth)
-    ttk::entry $afr.height -font CociSmallFont \
-      -width 6 \
+    ttk::entry $afr.height -font CociSmallFont -width 6 \
       -textvariable [namespace current]::tmpPrefs(canScrollHeight)  
     
-    grid  $afr.w   $afr.width   -pady 2
-    grid  $afr.h   $afr.height  -pady 2
-    grid  $afr.w  -padx 2 -sticky e
-    grid  $afr.h  -padx 2 -sticky e
+    grid  $afr.w      $afr.x1  $afr.h       -pady 2
+    grid  $afr.width  $afr.x2  $afr.height  -pady 2
+    
+    ::balloonhelp::balloonforwindow $afr.width  "[mc Default]: $prefs(mincanScrollWidth)"
+    ::balloonhelp::balloonforwindow $afr.height "[mc Default]: $prefs(mincanScrollHeight)"
 
     ttk::checkbutton $wc.spost -text [mc {Smooth freehand strokes}]  \
       -variable [namespace current]::tmpPrefs(wb,strokePost)
-    ttk::checkbutton $wc.nlnew -text [mc {Make new text item for each line}]  \
+    ttk::checkbutton $wc.nlnew -text [mc "Create new item for each line of text"] \
       -variable [namespace current]::tmpPrefs(wb,nlNewText)
-
-    pack  $wc.spost  $wc.nlnew  -side top -anchor w
+    ttk::checkbutton $wc.only -text [mc prefpriv3]  \
+      -variable [namespace current]::tmpPrefs(privacy)
+    
+    pack  $wc.spost  $wc.nlnew $wc.only -side top -anchor w
+    
+    ::balloonhelp::balloonforwindow $wc.only [mc prefpriv4]
 }
 
 # Fonts Page ...................................................................
@@ -150,14 +147,12 @@ proc ::WBPrefs::BuildFontsPage {page} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
-    ttk::label $wc.head -text [mc {Import/Remove fonts}]
-    ttk::label $wc.sysfont -text [mc {System fonts}]
-    ttk::label $wc.wifont -text [mc {Whiteboard fonts}]
+    ttk::label $wc.sysfont -text [mc System]
+    ttk::label $wc.wifont -text Coccinella
     ttk::frame $wc.fr1
     ttk::frame $wc.fr2
     ttk::frame $wc.fr3
 
-    grid  $wc.head     -        -
     grid  $wc.sysfont  x        $wc.wifont  -padx 4 -pady 6
     grid  $wc.fr1      $wc.fr2  $wc.fr3    
     grid  $wc.fr2   -sticky n -padx 4 -pady 2
@@ -181,13 +176,13 @@ proc ::WBPrefs::BuildFontsPage {page} {
     # Mid buttons.
     set btimport $wc.fr2.imp
     set btremove $wc.fr2.rm
-    ttk::button $btimport -text [mc {>>Import>>}] \
-      -command "[namespace current]::PushBtImport  \
+    ttk::button $btimport -text "  [mc Import]>>" \
+      -command "[namespace current]::PushBtImport \
       \[$wlbsys curselection] $wlbsys $wlbwb"
-    ttk::button $btremove -text [mc Remove]  \
-      -command "[namespace current]::PushBtRemove  \
+    ttk::button $btremove -text "<<[mc {Remove}]  " \
+      -command "[namespace current]::PushBtRemove \
       \[$wlbwb curselection] $wlbwb"
-    ttk::button $wc.fr2.std -text [mc {Standard}]    \
+    ttk::button $wc.fr2.std -text [mc Default] \
       -command [list [namespace current]::PushBtStandard $wlbwb]
     
     pack  $btimport  $btremove  $wc.fr2.std  -padx 1 -pady 6 -fill x
@@ -291,7 +286,7 @@ proc ::WBPrefs::PushBtRemove {indSel wapp} {
     # Check that not the standard fonts are removed.
     if {[lsearch {Times Helvetica Courier} $fntName] >= 0} {
 	::UI::MessageBox -message [mc messrmstandardfonts] \
-	  -icon error -type ok
+	  -icon error -title [mc Error] -type ok
 	return
     }
     $wapp delete $indSel	
@@ -323,29 +318,6 @@ proc ::WBPrefs::PushBtStandard {wapp} {
     # Insert the three standard fonts.
     $wapp delete 0 end
     eval $wapp insert 0 {Times Helvetica Courier}
-}
-
-proc ::WBPrefs::BuildPagePrivacy {page} {
-    global  prefs
-    variable tmpPrefs
-        
-    set tmpPrefs(privacy) $prefs(privacy)
-
-    set wc $page.c
-    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
-    pack $wc -side top -anchor [option get . dialogAnchor {}]
-
-    set wpr $wc.pr
-    ttk::labelframe $wpr -text [mc Privacy] \
-      -padding [option get . groupSmallPadding {}]
-    pack $wpr -side top
-    
-    ttk::label $wpr.msg -text [mc prefpriv2] -wraplength 340 -justify left
-    ttk::checkbutton $wpr.only -text [mc Privacy]  \
-      -variable [namespace current]::tmpPrefs(privacy)
-    
-    grid  $wpr.msg   -sticky w
-    grid  $wpr.only  -sticky w
 }
 
 proc ::WBPrefs::SavePrefsHook { } {

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasCmd.tcl,v 1.15 2007-07-19 06:28:18 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.16 2007-09-14 13:17:09 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -434,16 +434,16 @@ proc ::CanvasCmd::DoPutCanvas {wcan {toIPnum all}} {
 
     # Save canvas to temporary file.
     if {[catch {open $absFilePath w} fileId]} {
-	::UI::MessageBox -message [mc messfailopwrite $tmpFile $fileId] \
-	  -icon error -type ok
+	::UI::MessageBox -message [mc messfailopwrite2 $tmpFile $fileId] \
+	  -icon error -title [mc Error] -type ok
     }
     fconfigure $fileId -encoding utf-8
     ::CanvasFile::CanvasToChannel $wcan $fileId $absFilePath
     catch {close $fileId}
 
     if {[catch {open $absFilePath r} fileId]} {
-	::UI::MessageBox -message [mcset en messfailopread $tmpFile $fileId] \
-	  -icon error -type ok
+	::UI::MessageBox -message [mcset en messfailopread2 $tmpFile $fileId] \
+	  -icon error -title [mc Error] -type ok
     }
     fconfigure $fileId -encoding utf-8
     

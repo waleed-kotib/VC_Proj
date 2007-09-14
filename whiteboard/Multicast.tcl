@@ -15,7 +15,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Multicast.tcl,v 1.9 2007-07-19 06:28:19 matben Exp $
+# $Id: Multicast.tcl,v 1.10 2007-09-14 13:17:09 matben Exp $
 
 package provide Multicast 1.0
 
@@ -67,7 +67,7 @@ proc ::Multicast::OpenMulticast {wcan} {
       -text [mc openquicktime]
     pack $frtot -side top -fill both
     
-    ttk::label $frtot.lbltop -text [mc writeurl]
+    ttk::label $frtot.lbltop -text "[mc writeurl]:"
     eval {ttk::optionmenu $frtot.optm  \
       [namespace current]::selMulticastName} $shorts
     ttk::label $frtot.lblhttp -text {http://}
@@ -90,7 +90,7 @@ proc ::Multicast::OpenMulticast {wcan} {
       -command [list Multicast::OpenMulticastQTStream $wcan $frtot.entip]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list set [namespace current]::finished 0]
-    ttk::button $frbot.btedit -text "[mc Edit]..."   \
+    ttk::button $frbot.btedit -text "[mc mEdit]..."   \
       -command [list ::Multicast::DoAddOrEditQTMulticastShort edit $frtot.optm]
     ttk::button $frbot.btadd -text "[mc Add]..."   \
       -command [list ::Multicast::DoAddOrEditQTMulticastShort add $frtot.optm]
@@ -194,7 +194,7 @@ proc ::Multicast::OpenMulticastQTStream {wcan wentry} {
     unset -nocomplain port
     if {![regexp -nocase "($proto_)://($domain_)(:($port_))?($path_)$"  \
       $url match protocol domain junk port path]} {
-	::UI::MessageBox -message   \
+	::UI::MessageBox -title [mc Error] -message   \
 	  "Inconsistent url=$url." -icon error -type ok
 	set finished 0
 	return
@@ -230,12 +230,12 @@ proc ::Multicast::CleanupMulticastQTStream {wtop fid fullName token} {
     # Check errors. 
     if {[info exists state(status)] &&  \
       [string equal $state(status) "timeout"]} {
-	::UI::MessageBox -icon error -type ok -message   \
-	  "Timout event for url=$state(url)" 
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message "Timout event for url=$state(url)" 
 	return
     } elseif {[info exists state(status)] &&  \
       ![string equal $state(status) "ok"]} {
-	::UI::MessageBox -icon error -type ok -message   \
+	::UI::MessageBox -title [mc Error] -icon error -type ok -message   \
 	  "Not ok return code from url=$state(url); status=$state(status)"	  
 	return
     }
@@ -243,14 +243,14 @@ proc ::Multicast::CleanupMulticastQTStream {wtop fid fullName token} {
     # The http return status. Must be 2**.
     set httpCode [lindex $state(http) 1]
     if {![regexp "$no_" $httpCode]} {
-	::UI::MessageBox -icon error -type ok \
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
 	  -message "Failed open url=$url. Returned with code: $httpCode."
     }
     
     # Check that type of data is the wanted. Check further.
     if {[info exists state(type)] &&  \
       [string equal $state(type) "video/quicktime"]} {
-	::UI::MessageBox -icon error -type ok -message \
+	::UI::MessageBox -title [mc Error] -icon error -type ok -message \
 	  "Not correct file type returned from url=$state(url); \
 	  filetype=$state(type); expected video/quicktime."
 	return

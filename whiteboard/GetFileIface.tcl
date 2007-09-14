@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GetFileIface.tcl,v 1.13 2007-07-19 06:28:19 matben Exp $
+# $Id: GetFileIface.tcl,v 1.14 2007-09-14 13:17:09 matben Exp $
 
 package require getfile
 package require uriencode
@@ -289,7 +289,7 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime opts} {
 		return 321
 	    } else {
 		set ans [tk_chooseDirectory -initialdir $prefs(incomingPath) \
-		  -title [mc {Pick Directory}]]
+		  -title [mc "Open Folder"]]]
 		if {$ans eq ""} {
 		    return 321
 		} else {
@@ -398,8 +398,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
     if {[string equal $what "error"]} {
 	::WB::SetStatusMessage $w $str
 	if {$::config(talkative) >= 1} {
-	    ::UI::MessageBox -title [mc {Get File Error}] \
-	      -type ok -message $msg
+	    ::UI::MessageBox -title [mc Error] -type ok -message $msg
 	}
 	
 	# Perhaps we should show a broken image here???

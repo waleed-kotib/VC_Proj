@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PutFileIface.tcl,v 1.8 2007-07-19 06:28:19 matben Exp $
+# $Id: PutFileIface.tcl,v 1.9 2007-09-14 13:17:09 matben Exp $
 
 package require putfile
 package require uriencode
@@ -74,8 +74,7 @@ proc ::PutFileIface::PutFile {w fileName ip optList} {
 	  -progress [list [namespace current]::PutProgress $puttoken] \
 	  -command [list [namespace current]::PutCommand $puttoken]
     } tok]} {
-	::UI::MessageBox -title [mc {File Transfer Error}]  \
-	  -type ok -message $tok
+	::UI::MessageBox -title [mc Error] -type ok -message $tok
 	unset putstate
     } else {
 	set putstate(token) $tok
@@ -112,8 +111,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 	
 	# Depending on the flavour of the return code do different things.
 	if {$::config(talkative) >= 1} {
-	    ::UI::MessageBox -title [mc {Put File Error}]  \
-	      -type ok -message $str
+	    ::UI::MessageBox -title [mc Error] -type ok -message $str
 	} else {
 	    
 	    # The 'msg' is typically a low level error msg.
@@ -124,7 +122,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 		default {
 		    set errmsg "Failed while putting file \"$putstate(filetail)\""
 		    if {$::config(talkative) >= 1} {
-			::UI::MessageBox -title [mc {Put File Error}] \
+			::UI::MessageBox -title [mc Error] \
 			  -type ok -message $errmsg
 		    }
 		    ::WB::SetStatusMessage $w $errmsg

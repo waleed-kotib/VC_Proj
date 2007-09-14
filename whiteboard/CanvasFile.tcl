@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasFile.tcl,v 1.30 2007-09-01 07:49:05 matben Exp $
+# $Id: CanvasFile.tcl,v 1.31 2007-09-14 13:17:09 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -48,8 +48,8 @@ proc ::CanvasFile::DrawCanvasItemFromFile {w filePath args} {
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
-	::UI::MessageBox -icon error -type ok  \
-	  -message [mc messfailopread $tail $fd]
+	::UI::MessageBox -icon error -title [mc Error] -type ok  \
+	  -message [mc messfailopread2 $tail $fd]
 	return
     }
     fconfigure $fd -encoding utf-8
@@ -68,8 +68,8 @@ proc ::CanvasFile::OpenCanvas {wcan fileName args} {
     # Opens the data file.
     if {[catch {open $fileName r} fd]} {
 	set tail [file tail $fileName]
-	::UI::MessageBox -message [mc messfailopread $tail $fd] \
-	  -icon error -type ok
+	::UI::MessageBox -message [mc messfailopread2 $tail $fd] \
+	  -icon error -title [mc Error] -type ok
 	return
     }
     ::CanvasCmd::DoEraseAll $wcan   
@@ -497,8 +497,8 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
     
     if {[catch {open $filePath w} fd]} {
 	set tail [file tail $filePath]
-	::UI::MessageBox -message [mc messfailopread $tail $fd] \
-	  -icon error -type ok
+	::UI::MessageBox -message [mc messfailopread2 $tail $fd] \
+	  -icon error -title [mc Error] -type ok
 	return
     }
     fconfigure $fd -encoding utf-8
@@ -545,13 +545,13 @@ proc ::CanvasFile::OpenCanvasFileDlg {wcan {filePath {}}} {
 	    lappend typelist [list $regOpen($name,label) $regOpen($name,suffix)]
 	}
 
-	set ans [::UI::MessageBox -icon warning -type okcancel -default ok \
-	  -parent $w -message [mc messcanerasewarn]]
+	set ans [::UI::MessageBox -icon warning -title [mc Warning] -type okcancel -default ok \
+	  -parent $w -message [mc messcanerasewarn2]]
 	if {$ans eq "cancel"} {
 	    return
 	}
 	set userDir [::Utils::GetDirIfExist $prefs(userPath)]
-	set ans [tk_getOpenFile -title [mc {Open Canvas}]  \
+	set ans [tk_getOpenFile -title [mc "Open File"]  \
 	  -filetypes $typelist -defaultextension ".can"  \
 	  -initialdir $userDir]
 	if {$ans eq ""} {
@@ -662,7 +662,7 @@ proc ::CanvasFile::SaveCanvasFileDlg {wcan} {
     if {[string match "mac*" $this(platform)]} {
 	lappend opts -message "Pick .svg suffix for SVG, .can as default"
     }
-    set fileName [eval {tk_getSaveFile -title [mc {Save Canvas}] \
+    set fileName [eval {tk_getSaveFile -title [mc Save] \
       -defaultextension ".can"} $opts]
     if {$fileName eq ""} {
 	return
@@ -712,8 +712,8 @@ proc ::CanvasFile::SaveCanvas {wcan fileName args} {
 		# Opens the data file.
 		if {[catch {open $fileName w} fd]} {
 		    set tail [file tail $fileName]
-		    ::UI::MessageBox -icon error -type ok \
-		      -message [mc messfailopwrite $tail $fd]
+		    ::UI::MessageBox -icon error -title [mc Error] -type ok \
+		      -message [mc messfailopwrite2 $tail $fd]
 		    return
 		}	    
 		fconfigure $fd -encoding utf-8
@@ -743,8 +743,8 @@ proc ::CanvasFile::DoSaveAsItem {wcan} {
     set fileName $ans
     if {[catch {open $fileName w} fd]} {
 	set tail [file tail $fileName]
-	::UI::MessageBox -icon error -type ok \
-	  -message [mc messfailopwrite $tail $fd]
+	::UI::MessageBox -icon error -title [mc Error] -type ok \
+	  -message [mc messfailopwrite2 $tail $fd]
 	return
     }	    
     fconfigure $fd -encoding utf-8
@@ -818,8 +818,8 @@ proc ::CanvasFile::SVGFileToCanvas {w filePath} {
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
-	::UI::MessageBox -icon error -type ok -parent $w \
-	  -message [mc messfailopread $tail $fd]
+	::UI::MessageBox -icon error -title [mc Error] -type ok -parent $w \
+	  -message [mc messfailopread2 $tail $fd]
 	return
     }
     fconfigure $fd -encoding utf-8

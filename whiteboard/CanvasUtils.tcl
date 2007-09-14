@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasUtils.tcl,v 1.43 2007-09-01 07:49:06 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.44 2007-09-14 13:17:09 matben Exp $
 
 package require sha1
 package require can2svg
@@ -118,15 +118,15 @@ proc ::CanvasUtils::Init { } {
 	  {-value arc -variable ::CanvasUtils::popupVars(-arc)}}}
     }
     set menuDefs(pop,color)  \
-      {command   mColor        {::CanvasUtils::SetItemColorDialog $wcan $id -fill}   {}}
+      {command   mColor...     {::CanvasUtils::SetItemColorDialog $wcan $id -fill}   {}}
     set menuDefs(pop,fillcolor)  \
-      {command   mFillColor    {::CanvasUtils::SetItemColorDialog $wcan $id -fill}   {}}
+      {command   mFillColor... {::CanvasUtils::SetItemColorDialog $wcan $id -fill}   {}}
     set menuDefs(pop,outline)  \
       {command   mOutlineColor {::CanvasUtils::SetItemColorDialog $wcan $id -outline} {}}
     set menuDefs(pop,inspect)  \
-      {command   mInspectItem  {::ItemInspector::ItemInspector $wcan $id}   {}}
+      {command   mEditItem...  {::ItemInspector::ItemInspector $wcan $id}   {}}
     set menuDefs(pop,inspectqt)  \
-      {command   mInspectItem  {::ItemInspector::Movie $wcan $winfr}        {}}
+      {command   mEditItem...  {::ItemInspector::Movie $wcan $winfr}        {}}
     set menuDefs(pop,saveimageas)  \
       {command   mSaveImageAs  {::Import::SaveImageAsFile $wcan $id}        {}}
     set menuDefs(pop,imagelarger)  \
@@ -134,9 +134,9 @@ proc ::CanvasUtils::Init { } {
     set menuDefs(pop,imagesmaller)  \
       {command   mImageSmaller {::Import::ResizeImage $wcan -2 $id auto}    {}}
     set menuDefs(pop,exportimage)  \
-      {command   mExportImage  {::Import::ExportImageAsFile $wcan $id}     {}}
+      {command   mExportImage...  {::Import::ExportImageAsFile $wcan $id}     {}}
     set menuDefs(pop,exportmovie)  \
-      {command   mExportMovie  {::Import::ExportMovie $w $winfr}   {}}
+      {command   mExportMovie...  {::Import::ExportMovie $w $winfr}   {}}
     set menuDefs(pop,syncplay)  \
       {checkbutton  mSyncPlayback {::Import::SyncPlay $w $winfr}   {} {} \
 	{-variable ::CanvasUtils::popupVars(-syncplay)}}
@@ -146,7 +146,7 @@ proc ::CanvasUtils::Init { } {
 	{checkbutton  mTimeCode {::Import::TimeCode $w $winfr}   {} {} \
 	  {-variable ::CanvasUtils::popupVars(-timecode)}}
     set menuDefs(pop,inspectbroken)  \
-      {command   mInspectItem  {::ItemInspector::Broken $wcan $id}         {}}
+      {command   mEditItem...  {::ItemInspector::Broken $wcan $id}         {}}
     set menuDefs(pop,reloadimage)  \
       {command   mReloadImage  {::Import::ReloadImage $w $id}     {}}
     set menuDefs(pop,smoothness)  \
@@ -1597,8 +1597,7 @@ proc ::CanvasUtils::SetItemColorDialog {wcan id opt} {
     if {$presentColor eq ""} {
 	set presentColor black
     }
-    set color [tk_chooseColor -initialcolor $presentColor  \
-      -title [mc {New Color}]]
+    set color [tk_chooseColor -initialcolor $presentColor -title [mc Color]]
     if {$color ne ""} {
 	ItemConfigure $wcan $id $opt $color
     }
