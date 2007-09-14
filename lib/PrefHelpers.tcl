@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PrefHelpers.tcl,v 1.4 2007-09-14 08:11:46 matben Exp $
+# $Id: PrefHelpers.tcl,v 1.5 2007-09-14 14:16:16 matben Exp $
  
 package provide PrefHelpers 1.0
 
@@ -104,7 +104,7 @@ proc ::PrefHelpers::BuildPage {wpage} {
     ttk::frame $wc -padding $padding
     pack $wc -side top -anchor $anchor
 
-    ttk::label $wc.l -text [mc {External Helpers}]
+    ttk::label $wc.l -text [mc "Default Applications"]
     ttk::separator $wc.s -orient horizontal
     ttk::frame $wc.f -padding {20 4 0 0}
     
