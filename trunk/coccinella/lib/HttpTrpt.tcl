@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: HttpTrpt.tcl,v 1.9 2007-07-19 06:28:18 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.10 2007-09-14 08:11:45 matben Exp $
 
 package require httpex
 package require timing
@@ -63,7 +63,7 @@ proc ::HttpTrpt::Get {url fileName args} {
     }
     array set opts $args
     if {[catch {open $fileName w} fd]} {
-	set errstr [mc jamessoobfailopen $fileName]
+	set errstr [mc jamessoobfailopen2 $fileName]
 	if {$state(-command) != {}} {
 	    uplevel #0 $state(-command) [list $token error $errstr]
 	}
@@ -97,7 +97,7 @@ proc ::HttpTrpt::Get {url fileName args} {
 	  -progress [list [namespace current]::Progress $token] \
 	  -command  [list [namespace current]::Cmd $token]
     } httptoken]} {
-	set errmsg [mc httptrpterror $state(fileTail) $httptoken]
+	set errmsg [mc httptrpterror2 $state(fileTail) $httptoken]
 	if {$state(-command) != {}} {
  	    uplevel #0 $state(-command) [list $token error $errmsg]
 	}
@@ -128,7 +128,7 @@ proc ::HttpTrpt::Progress {token httptoken total current} {
 	    uplevel #0 $state(-progressmessage) [list $errmsg]
 	}
 	if {!$state(-silent)} {
-	    set str [mc httptrpterror $state(fileTail) $errmsg]
+	    set str [mc httptrpterror2 $state(fileTail) $errmsg]
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 	      -message $str
 	}
@@ -163,7 +163,7 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 	    set needupdate 1
 	}
 	if {$state(-progressmessage) != {}} {
-	    set msg "[mc Getting] \"$state(fileTail)\""
+	    set msg "[mc DOwnloading] \"$state(fileTail)\""
 	    uplevel #0 $state(-progressmessage) [list $msg]
 	}
 	set state(startmillis) $ms
@@ -222,29 +222,31 @@ proc ::HttpTrpt::Cmd {token httptoken} {
     switch -- $status {
 	timeout {
 	    set etitle [mc Timeout]
-	    set msg [mc jamessoobtimeout]
+	    set msg [mc jamessoobtimeout2]
 	    set eicon info
 	}
 	error {
-	    set etitle [mc {File transport error}]
-	    set msg [mc httptrpterror $state(fileTail) $httperr]
+	    set etitle [mc Error]
+	    set msg [mc httptrpterror2 $state(fileTail) $httperr]
 	    set eicon error
 	}
 	eof {
-	    set etitle [mc {File transport error}]
+	    set etitle [mc Error]
 	    set msg [mc httptrpteof]
 	    set eicon error
 	}
 	ok {
 	    if {$ncode != 200} {
-		set etitle [mc {File transport error}]
+		set etitle [mc Error]
 		set txt [httpex::ncodetotext $ncode]
-		set msg [mc httptrptnon200 $state(fileTail) $ncode $txt]
+		set msg [mc httptrptnon200a $state(fileTail)]
+		append msg "\n[mc {Error code}]: $ncode"
+		append msg "\n[mc Message]: $txt"
 		set eicon error
 		set retstatus error
 	    } else {
 		set show 0
-		set msg [mc httptrptok $state(fileTail)]
+		set msg [mc httptrptok2 $state(fileTail)]
 	    }
 	}
 	reset {

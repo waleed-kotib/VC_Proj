@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Bookmarks.tcl,v 1.8 2007-09-07 07:38:56 matben Exp $
+# $Id: Bookmarks.tcl,v 1.9 2007-09-14 08:11:45 matben Exp $
 
 package require snit 1.0
 package require ui::util
@@ -29,7 +29,7 @@ package provide Bookmarks 1.0
 
 namespace eval ::Bookmarks {
 
-    set title [mc Bookmarks]	
+    set title [mc "Edit Bookmarks"]	
     option add *Bookmarks.title         $title      widgetDefault
 }
 

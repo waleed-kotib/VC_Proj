@@ -20,7 +20,7 @@
 #  
 #  See: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/shellcc/platform/shell/programmersguide/shell_adv/registeringapps.asp
 #  
-# $Id: WindowsUtils.tcl,v 1.15 2007-08-26 14:38:13 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.16 2007-09-14 08:11:47 matben Exp $
 
 package require registry
 package provide WindowsUtils 1.0
@@ -58,7 +58,7 @@ proc ::Windows::OpenURI {uri} {
     if {[catch {
 	eval exec $appCmd &
     } err]} {
-	tk_messageBox -icon error -message $err
+	tk_messageBox -icon error -title [mc Error] -message $err
     }
 }
 
@@ -106,7 +106,7 @@ proc ::Windows::OpenUrl {url} {
 	    eval exec $finCmd [list $url] &
 	}
     } err]} {
-	tk_messageBox -icon error -message $err
+	tk_messageBox -icon error -title [mc Error] -message $err
     }
 }
 
@@ -148,7 +148,7 @@ proc ::Windows::OpenFileFromSuffix {path} {
     if {[catch {
 	eval exec $appCmd [list $path] &
     } err]} {
-	tk_messageBox -icon error -message $err
+	tk_messageBox -icon error -title [mc Error] -message $err
     }
 }
 

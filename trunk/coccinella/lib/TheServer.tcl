@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: TheServer.tcl,v 1.31 2007-07-19 06:28:18 matben Exp $
+# $Id: TheServer.tcl,v 1.32 2007-09-14 08:11:47 matben Exp $
     
 package provide TheServer 1.0
 
@@ -61,8 +61,8 @@ proc ::TheServer::DoStartServer {thisServPort} {
     if {[catch {
 	socket -server [namespace current]::SetupChannel $thisServPort
     } sock]} {
-	after 500 {::UI::MessageBox -message [mc messfailserver] \
-	  -icon error -type ok}
+	after 500 {::UI::MessageBox -message [mc messfailserver2] \
+	  -icon error -title [mc Error] -type ok}
     } else {
 	set state(serverSocket) $sock
 	set state(isServerUp) 1

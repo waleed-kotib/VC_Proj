@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserActions.tcl,v 1.50 2007-09-05 10:04:39 matben Exp $
+# $Id: UserActions.tcl,v 1.51 2007-09-14 08:11:47 matben Exp $
 
 package provide UserActions 1.0
 
@@ -41,8 +41,8 @@ proc ::UserActions::DoPrintCanvas {wcan} {
 	}
 	windows {
 	    if {!$this(package,printer)} {
-		::UI::MessageBox -icon error -title [mc {No Printing}] \
-		  -message [mc messprintnoextension]
+		::UI::MessageBox -icon error -title [mc Error] \
+		  -message [mc messprintnoextension2]
 	    } else {
 		::Windows::Printer::Print $wcan
 	    }
@@ -69,8 +69,8 @@ proc ::UserActions::DoPrintText {wtext args} {
 	}
 	windows {
 	    if {!$this(package,printer)} {
-		::UI::MessageBox -icon error -title [mc {No Printing}] \
-		  -message [mc messprintnoextension]
+		::UI::MessageBox -icon error -title [mc Error] \
+		  -message [mc messprintnoextension2]
 	    } else {
 		::Windows::Printer::DoPrintText $wtext
 	    }
@@ -90,8 +90,8 @@ proc ::UserActions::PageSetup {w} {
 	}
 	windows {
 	    if {!$this(package,printer)} {
-		::UI::MessageBox -icon error -title [mc {No Printing}] \
-		  -message [mc messprintnoextension]
+		::UI::MessageBox -icon error -title [mc Error] \
+		  -message [mc messprintnoextension2]
 	    } else {
 		::Windows::Printer::PageSetup
 	    }

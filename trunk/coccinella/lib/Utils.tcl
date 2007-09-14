@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.66 2007-07-19 06:28:18 matben Exp $
+# $Id: Utils.tcl,v 1.67 2007-09-14 08:11:47 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -367,7 +367,7 @@ proc ::Utils::UnixOpenUrl {url} {
 	}
     } 
     if {$browser eq ""} {
-	::UI::MessageBox -icon error -type ok -message \
+	::UI::MessageBox -icon error -type ok -title [mc Error] -message \
 	  "Couldn't localize a web browser on this system.\
 	  Define a shell variable \"BROWSER\" to point to a web browser."
     }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PrefGeneral.tcl,v 1.6 2007-09-02 07:54:02 matben Exp $
+# $Id: PrefGeneral.tcl,v 1.7 2007-09-14 08:11:46 matben Exp $
  
 package provide PrefGeneral 1.0
 
@@ -59,7 +59,7 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
     ttk::label $wd.l -text [mc Settings]
     ttk::separator $wd.s -orient horizontal
     if {$config(prefs,sameDrive)} {
-	ttk::checkbutton $wd.c -text [mc prefdrivesame] \
+	ttk::checkbutton $wd.c -text [mc prefdrivesame2] \
 	  -variable [namespace current]::tmpPrefs(prefsSameDrive)
     } elseif {$config(prefs,sameDir)} {
 	ttk::checkbutton $wd.c -text [mc prefdirsame] \
@@ -101,18 +101,19 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
     ttk::frame $wc.l -padding {0 6 0 0}
     ttk::label $wl.l -text [mc Language]
     ttk::separator $wl.s -orient horizontal
-    ttk::label $wl.m -style Small.TLabel \
-      -wraplength 360 -justify left -text [mc sulang]
+    ttk::label $wl.lr -text [mc "Requires a restart"]
     ::Utils::LanguageMenubutton $wl.mb [namespace current]::tmpPrefs(locale)
 
     grid  $wl.l   $wl.s  -sticky w
-    grid  $wl.m   -      -sticky w -pady 1
+    grid  $wl.lr   -      -sticky w -pady 1
     grid  $wl.mb  -      -sticky w
     grid $wl.s -sticky ew    
     grid columnconfigure $wl 1 -weight 1
 
     pack $wl -side top -fill x -anchor w
-    
+
+    #::balloonhelp::balloonforwindow $wl.mb [mc "Requires a restart"]
+
     bind $wpage <Destroy> {+::PrefGeneral::Free }
 }
 
@@ -138,7 +139,7 @@ proc ::PrefGeneral::SavePrefsHook {} {
 	    set prefFile [file join [::Init::GetAppDrivePrefsPath] $this(prefsName)]
 	    if {[file exists $prefFile]} {
 		set ans [tk_messageBox -icon question -type yesno  \
-		  -message [mc prefdriwdef $prefFile]]
+		  -message [mc prefdriwdef2 $prefFile]]
 		if {$ans eq "yes"} {
 		    file delete $prefFile
 		}	
@@ -162,7 +163,7 @@ proc ::PrefGeneral::SavePrefsHook {} {
 	    set prefFile [file join [::Init::GetAppDirPrefsPath] $this(prefsName)]
 	    if {[file exists $prefFile]} {
 		set ans [tk_messageBox -icon question -type yesno  \
-		  -message [mc prefdriwdef $prefFile]]
+		  -message [mc prefdriwdef2 $prefFile]]
 		if {$ans eq "yes"} {
 		    file delete $prefFile
 		}	

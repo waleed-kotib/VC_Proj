@@ -22,7 +22,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.19 2007-07-19 06:28:18 matben Exp $
+# $Id: Types.tcl,v 1.20 2007-09-14 08:11:47 matben Exp $
 
 package provide Types 1.0
 
@@ -102,63 +102,63 @@ namespace eval ::Types:: {
     variable mime2Desc
     array set mime2Desc {
 	application/x-world  {World Application}
-	application/x-3dmf   {3D Meta Format}
-	application/x-tcl    {Tcl Application}
-	application/x-itcl   {Itcl Application}
+	application/x-3dmf   {QuickDraw 3D Metafile}
+	application/x-tcl    {Tcl File}
+	application/x-itcl   {Itcl File}
 	application/sdp      {Session Description Protocol}
-	application/x-shockwave-flash  {Shockwave Flash}
+	application/x-shockwave-flash  {Adobe Flash Media}
 	application/macbinary {Mac Binary}
 	application/x-macbinary {Mac Binary}
 	application/vtk      {VTK 3D}
-	application/octet-stream {Generic Type}
-	application/pdf      {Portable Document Format}
-	application/postscript {Postscript Document}
-	application/rtf      {Rich Text Format}
-	application/x-javascript {Java Script}
-	application/x-tex    {TeX Document}
-	application/x-tar    {Tape Archive}
+	application/octet-stream {Generic File}
+	application/pdf      {PDF Document}
+	application/postscript {PostScript Document}
+	application/rtf      {RTF Document}
+	application/x-javascript {JavaScript File}
+	application/x-tex    {TeX File}
+	application/x-tar    {Archive Tar}
 	application/abiword  {Abi Word Document}
-	application/vnd.ms-excel {MS Excel Document}
-	application/vnd.ms-powerpoint {PowerPoint Slide Show}
-	application/msword   {Word Document}
+	application/vnd.ms-excel {Microsoft Excel Spreadsheet}
+	application/vnd.ms-powerpoint {Microsoft PowerPoint Presentation}
+	application/msword   {Microsoft Word Document}
 	audio/mpeg           {MPEG Audio}
 	audio/x-mpeg         {MPEG Audio}
-	audio/aiff           {AIFF Audio}
-	audio/x-aiff         {AIFF Audio}
-	audio/basic          {ULAW Audio}
+	audio/aiff           {AIFF/Amiga Audio}
+	audio/x-aiff         {AIFF/Amiga Audio}
+	audio/basic          {ULAW (Sun) Audio}
 	audio/x-sd2          {Streaming Audio}
 	audio/wav            {WAV Audio}
 	audio/x-wav          {WAV Audio}
 	audio/vnd.qcelp      {QCP Audio}
 	audio/midi           {MIDI Audio}
 	audio/x-midi         {MIDI Audio}
-	image/x-bmp          {Windows BMP Image}
-	image/vnd.fpx        {Image}
+	image/x-bmp          {BMP Image}
+	image/vnd.fpx        {FlashPix Image}
 	image/gif            {GIF Image}
 	image/jpeg           {JPEG Image}
 	image/x-macpaint     {Macpaint Image}
-	image/x-photoshop    {Photoshop Image}
+	image/x-photoshop    {Adobe Photoshop Image}
 	image/png            {PNG Image}
 	image/x-png          {PNG Image}
 	image/pict           {PICT Image}
 	image/x-sgi          {SGI Image}
-	image/x-targa        {Targa Truevision Image}
+	image/x-targa        {Truevision Targa Image}
 	image/tiff           {TIFF Image}
 	image/x-tiff         {TIFF Image}
-	image/x-portable-pixmap {Portable Pixmap}
-	text/plain           {Plain Text}
-	text/xml             {Extensible Markup Language}
-	text/richtext        {Rich Text Format}
-	text/html            {Hypertext Markup Language}
+	image/x-portable-pixmap {X PixMap Image}
+	text/plain           {Plain Text Document}
+	text/xml             {XML Document}
+	text/richtext        {RTF Document}
+	text/html            {HTML Document}
 	text/css             {Cascading Style Sheet}
 	video/quicktime      {QuickTime Video}
-	video/mpeg4          {MPEG 4 Video}
+	video/mpeg4          {MPEG-4 Video}
 	video/x-dv           {DV Video}
 	video/mpeg           {MPEG Video}
-	video/x-mpeg         {MPEG Video and Audio}
-	video/x-msvideo      {Microsoft Video}
-	video/avi            {Microsoft Video}
-	video/flc            {FLC Animation}
+	video/x-mpeg         {MPEG Video}
+	video/x-msvideo      {Microsoft AVI Video}
+	video/avi            {Microsoft AVI Video}
+	video/flc            {Autodesk's FLIC File}
     }
     
     
@@ -572,7 +572,7 @@ proc ::Types::GetDescriptionForMime {mime} {
     variable mime2Desc
 
     if {[info exists mime2Desc($mime)]} {
-	return $mime2Desc($mime)
+	return [mc $mime2Desc($mime)]
     } else {
 	return $mime
     }

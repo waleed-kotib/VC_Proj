@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Httpd.tcl,v 1.6 2007-07-19 06:28:18 matben Exp $
+# $Id: Httpd.tcl,v 1.7 2007-09-14 08:11:46 matben Exp $
     
 package provide Httpd 1.0
 
@@ -27,7 +27,7 @@ namespace eval ::Httpd:: {
     ::hooks::register initHook  ::Httpd::InitHook
 }
 
-proc ::Httpd::InitHook { } {
+proc ::Httpd::InitHook {} {
     global  prefs this auto_path
     
     # Start httpd thread. It enters its event loop if created without a sript.
@@ -47,7 +47,7 @@ proc ::Httpd::InitHook { } {
     Httpd
 }
 
-proc ::Httpd::Httpd { } {
+proc ::Httpd::Httpd {} {
     global  prefs this
     
     ::Debug 2 "::Httpd::Httpd"
@@ -75,8 +75,8 @@ proc ::Httpd::Httpd { } {
 		::tinyhttpd::addmimemappings [::Types::GetSuffMimeArr]
 	    }
 	} msg]} {
-	    ::UI::MessageBox -icon error -type ok \
-	      -message [mc messfailedhttp $msg]
+	    ::UI::MessageBox -icon error -title [mc Error] -type ok \
+	      -message [mc messfailedhttp2 $msg]
 	} else {
 	    
 	    # Stop before quitting.

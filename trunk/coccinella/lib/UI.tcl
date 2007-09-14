@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.168 2007-09-07 12:25:08 matben Exp $
+# $Id: UI.tcl,v 1.169 2007-09-14 08:11:47 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1464,7 +1464,7 @@ proc ::UI::GrabRelease {w} {
 #
 #       A method to remove specific menu entries from 'menuDefs' and
 #       'menuDefsInsertInd' using an entry in the 'config' array:
-#       config(ui,pruneMenus):   mInfo {mDebug mCoccinellaHome}
+#       config(ui,pruneMenus):   mInfo {mDebug mCoccinellaHome...}
 #
 # Arguments:
 #       name            the menus key label, mJabber, mEdit etc.

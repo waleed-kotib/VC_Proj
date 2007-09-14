@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: WSearch.tcl,v 1.6 2007-07-27 09:37:25 matben Exp $
+# $Id: WSearch.tcl,v 1.7 2007-09-14 08:11:47 matben Exp $
 
 package require snit 1.0
 package require tileutils 0.1
@@ -65,7 +65,7 @@ snit::widgetadaptor UI::WSearch::widget {
 	  -image [list $im active $ima] -compound image  \
 	  -command [list $self Close]
 	ttk::label $win.find -style Small.TLabel -padding {4 0 0 0}  \
-	  -text "[mc Find]:"
+	  -text "[mc Search]:"
 	ttk::entry $win.entry -style Small.Search.TEntry -font CociSmallFont \
 	  -textvariable [myvar string]
 	ttk::button $win.next -style Small.TButton -command [list $self Next] \

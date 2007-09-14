@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: PrefUtils.tcl,v 1.12 2007-09-02 07:54:02 matben Exp $
+# $Id: PrefUtils.tcl,v 1.13 2007-09-14 08:11:46 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -88,7 +88,7 @@ proc ::PrefUtils::Init { } {
     
     if {[file exists $prefsFilePath]} {
 	if {[catch {option readfile $prefsFilePath} err]} {
-	    tk_messageBox -type ok -icon error \
+	    tk_messageBox -type ok -title [mc Error] -icon error \
 	      -message "Error reading preference file: $prefsFilePath."
 	}
     }
@@ -214,8 +214,8 @@ proc ::PrefUtils::SaveToFile { } {
     # Work on a temporary file and switch later.
     set tmpFile $userPrefsFile.tmp
     if {[catch {open $tmpFile w} fid]} {
-	::UI::MessageBox -icon error -type ok \
-	  -message [mc messerrpreffile $tmpFile]
+	::UI::MessageBox -icon error -title [mc Error] -type ok \
+	  -message [mc messerrpreffile2 $tmpFile]
 	return
     }
     fconfigure $fid -encoding utf-8

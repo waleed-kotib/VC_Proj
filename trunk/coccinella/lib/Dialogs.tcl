@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Dialogs.tcl,v 1.71 2007-07-19 06:28:18 matben Exp $
+# $Id: Dialogs.tcl,v 1.72 2007-09-14 08:11:45 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -43,7 +43,7 @@ proc ::Dialogs::InfoComponents { } {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [mc {Component Info}]
+    wm title $w [mc mPlugins]
      
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
@@ -221,15 +221,15 @@ proc ::Dialogs::UnixPrintLpr {w wtoprint} {
 		# Note extra braces to protect eval'ing postscript!		
 		if {[catch {eval exec $psCmd <<    \
 		  {[eval $wtoprint postscript $prefs(postscriptOpts)]}} msg]} {
-		    ::UI::MessageBox -message  \
-		      "Error when printing: $msg" -icon error -type ok
+		    ::UI::MessageBox -message "Error when printing: $msg" \
+		      -title [mc Error] -icon error -type ok
 		}
 	    }
 	    Text {
 		if {[catch {eval exec $psCmd <<    \
 		  {[$wtoprint get 1.0 end]}} msg]} {
-		    ::UI::MessageBox -message  \
-		      "Error when printing: $msg" -icon error -type ok
+		    ::UI::MessageBox -message "Error when printing: $msg" \
+		      -title [mc Error] -icon error -type ok
 		}
 	    }
 	}
@@ -472,8 +472,8 @@ proc ::PSPageSetup::PushBtSave {  } {
 		if {![regexp "^${num_}$" $txtvarEnt($optName)]} {
 		    
 		    # Not a valid number.
-		    ::UI::MessageBox -icon error -type ok -message   \
-		      "Error: not a valid number for $optName" 		      
+		    ::UI::MessageBox -icon error -type ok -title [mc Error] \
+		      -message "Error: not a valid number for $optName" 		      
 		    return
 		}
 		set val $txtvarEnt($optName)$unit

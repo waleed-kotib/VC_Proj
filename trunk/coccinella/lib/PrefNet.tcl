@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PrefNet.tcl,v 1.10 2007-07-19 06:28:18 matben Exp $
+# $Id: PrefNet.tcl,v 1.11 2007-09-14 08:11:46 matben Exp $
  
 package provide PrefNet 1.0
 
@@ -51,7 +51,7 @@ proc ::PrefNet::BuildPrefsHook {wtree nbframe} {
     if {![::Preferences::HaveTableItem General]} {
 	::Preferences::NewTableItem {General} [mc General]
     }
-    ::Preferences::NewTableItem {General {Network}} [mc {Network}]
+    ::Preferences::NewTableItem {General {Network}} [mc Network]
     set wpage [$nbframe page {Network}]
     BuildTabPage $wpage
 }
@@ -94,7 +94,7 @@ proc ::PrefNet::BuildTabPage {wpage} {
      
     BuildServersFrame $nb.serv
     $nb.serv configure -padding $padding
-    $nb add $nb.serv -text [mc Servers] -sticky news
+    $nb add $nb.serv -text [mc Ports] -sticky news
 
     return $wpage
 }
@@ -115,9 +115,10 @@ proc ::PrefNet::BuildServersFrame {w} {
     ttk::frame $f
     pack $f -side top -anchor [option get . dialogAnchor {}]
 
-    ttk::label $f.lserv -text "[mc {Built in server port}]:"
-    ttk::label $f.lhttp -text "[mc {HTTP port}]:"
-    ttk::label $f.lbs   -text "[mc {File transfer port}]:"
+    ttk::label $f.lserv -text "[mc {Built in server}]:"
+    ttk::label $f.lhttp -text "HTTP:"
+    ttk::label $f.lbs   -text "[mc {File transfer}]:"
+
     ttk::entry $f.eserv -width 6 -textvariable  \
       [namespace current]::tmpServPrefs(thisServPort)
     ttk::entry $f.ehttp -width 6 -textvariable  \

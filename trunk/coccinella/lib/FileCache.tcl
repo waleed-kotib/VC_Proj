@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: FileCache.tcl,v 1.25 2007-07-19 06:28:18 matben Exp $
+# $Id: FileCache.tcl,v 1.26 2007-09-14 08:11:45 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -616,51 +616,50 @@ proc ::FileCache::BuildPage {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
     set pca $wc.fr
-    ttk::labelframe $pca -text [mc {File Cache}] \
-      -padding [option get . groupSmallPadding {}]
+    ttk::frame $pca
     pack  $pca  -side top -anchor w
     
-    ttk::label $pca.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc preffilecache]
-    pack $pca.msg -side top -anchor w
-
     set frca $pca.cas
     ttk::frame $frca
     pack $frca -fill x -pady 2
     
-    ttk::label $frca.dsk -text "[mc {Disk Cache}]:"
+    ttk::label $frca.dsk -text "[mc {Disk cache size}]:"
     ttk::entry $frca.emb \
       -width 6 -textvariable [namespace current]::tmpPrefs(mbsize)
-    ttk::label $frca.mb -text [mc {MBytes}]
-    ttk::button $frca.bt -text [mc {Clear Disk Cache Now}] \
+    ttk::label $frca.mb -text MB
+    ttk::button $frca.bt -text [mc "Clear Cache"] \
       -command [namespace current]::ClearCache
     
     pack  $frca.dsk  $frca.emb  $frca.mb  $frca.bt  -side left
 
-    set frfo $pca.fo
-    pack [ttk::frame $frfo] -pady 2
-    pack [ttk::label $frfo.fo -text "[mc {Cache folder}]:"] -side left
-    pack [ttk::button $frfo.bt -text "[mc {Choose}]..." \
-      -command [namespace current]::SetCachePath]  \
-      -side right 
+    ::balloonhelp::balloonforwindow $frca.emb [mc preffilecache2]
+
+    if {0} {
+	set frfo $pca.fo
+	pack [ttk::frame $frfo] -pady 2
+	pack [ttk::label $frfo.fo -text "[mc {Cache folder}]:"] -side left
+	pack [ttk::button $frfo.bt -text "[mc {Choose}]..." \
+	  -command [namespace current]::SetCachePath]  \
+	  -side right 
+    }
         
     set pwhen $wc.frw
-    ttk::labelframe $pwhen -text [mc prefcachecmp] \
+    ttk::labelframe $pwhen -text [mc "Synchronise cache"] \
       -padding [option get . groupSmallPadding {}]
     pack $pwhen -side top -fill x -pady 8
     foreach  \
-      val { always       launch             never   } \
-      txt { {Every time} {Once per session} {Never} } {
+      val { always       launch              never } \
+      txt { "Always"     "Once per session"  Never } {
 	ttk::radiobutton $pwhen.$val -text [mc $txt]   \
 	  -variable [namespace current]::tmpPrefs(checkCache) -value $val
 	grid $pwhen.$val -sticky w
     }
 }
 
-proc ::FileCache::SetCachePath { } {
+proc ::FileCache::SetCachePath {} {
     global  this prefs
     
-    set dir [tk_chooseDirectory -title [mc {Pick Cache Folder}] \
+    set dir [tk_chooseDirectory -title [mc "Open Folder"] \
       -initialdir $prefs(incomingPath) -mustexist 1]
     if {$dir ne ""} {
 	set prefs(incomingPath) $dir
