@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.26 2007-09-13 15:53:40 matben Exp $
+# $Id: UserInfo.tcl,v 1.27 2007-09-15 07:43:06 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -578,7 +578,7 @@ proc ::UserInfo::FileMenuPostHook {wmenu} {
 	set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
 	set token [GetFrontToken]
 	if {$token ne ""} {
-	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
+	    ::UI::MenuMethod $m entryconfigure mBC... -state normal
 	}
     }
 }

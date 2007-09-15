@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.210 2007-09-13 08:25:39 matben Exp $
+# $Id: JUI.tcl,v 1.211 2007-09-15 07:43:05 matben Exp $
 
 package provide JUI 1.0
 
@@ -1289,7 +1289,7 @@ proc ::JUI::FilePostCommand {wmenu} {
     ::UI::MenuMethod $m entryconfigure mBC... -state disabled
     
     set mimport [::UI::MenuMethod $wmenu entrycget mImport -menu]
-    ::UI::MenuMethod $mimport entryconfigure mvCard2... -state disabled
+    ::UI::MenuMethod $mimport entryconfigure mBC... -state disabled
     
     if {([tk windowingsystem] eq "aqua") && [llength [grab current]]} { 
 	::UI::MenuDisableAllBut $wmenu mCloseWindow
