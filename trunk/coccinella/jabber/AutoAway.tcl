@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.8 2007-09-15 13:16:12 matben Exp $
+# $Id: AutoAway.tcl,v 1.9 2007-09-15 14:36:35 matben Exp $
 
 package require idletime
 
@@ -247,8 +247,9 @@ proc ::AutoAway::BuildPage {page} {
     set waa $wc.aa
     ttk::frame $waa
     
+    set str "[mc prefminaw] ([mc Minutes]):"
     set varName [namespace current]::tmpJPrefs(autoaway)
-    ttk::checkbutton $waa.lminaw -text "[mc prefminaw]:" -variable $varName \
+    ttk::checkbutton $waa.lminaw -text $str -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.eminaw $waa.eawmsg] $varName]]
     ttk::entry $waa.eminaw -font CociSmallFont -width 3 \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
@@ -266,8 +267,9 @@ proc ::AutoAway::BuildPage {page} {
     grid $waa.lminaw -sticky w
     grid $waa.eawmsg -sticky ew
 
+    set str "[mc prefminea] ([mc Minutes]):"
     set varName [namespace current]::tmpJPrefs(xautoaway)
-    ttk::checkbutton $waa.lminxa -text "[mc prefminea]:" -variable $varName \
+    ttk::checkbutton $waa.lminxa -text $str -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.eminxa $waa.examsg] $varName]]
     ttk::entry $waa.eminxa -font CociSmallFont -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
@@ -285,8 +287,9 @@ proc ::AutoAway::BuildPage {page} {
     grid $waa.lminxa -sticky w
     grid $waa.eawmsg -sticky ew    
         
+    set str "[mc prefminlogout] ([mc Minutes]):"
     set varName [namespace current]::tmpJPrefs(autologout)
-    ttk::checkbutton $waa.clo -text [mc prefminlogout] -variable $varName \
+    ttk::checkbutton $waa.clo -text $str -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.elomin $waa.elomsg $waa.cli] $varName]]
     ttk::entry $waa.elomin -font CociSmallFont -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \

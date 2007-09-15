@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.195 2007-09-15 14:27:27 matben Exp $
+#   $Id: en.msg,v 1.196 2007-09-15 14:36:35 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -916,8 +916,8 @@
 ::msgcat::mcset en preffontmsg           {Warning: by importing any other fonts than the standard three ones (Times, Helvetica or Courier), you must be confident that all remote clients also have this font installed on their system.}
 ::msgcat::mcset en preficonsel2          {The selected iconset will become the default.}
 ::msgcat::mcset en prefmidimsg           {Set command to use for playing MIDI sounds. This option is only relevant if you use a sound set with MIDI files.}
-::msgcat::mcset en prefminaw             {Minutes before Away}
-::msgcat::mcset en prefminea             {Minutes before Extended Away}
+::msgcat::mcset en prefminaw             {Away after}
+::msgcat::mcset en prefminea             {Extended Away after}
 ::msgcat::mcset en prefminlogout         {Logout after}
 ::msgcat::mcset en prefnatip2            {Use the following external address}
 ::msgcat::mcset en prefplugctrl2         {Select the plugins you want to be loaded.}
