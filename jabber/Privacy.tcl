@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Privacy.tcl,v 1.19 2007-09-13 15:53:40 matben Exp $
+# $Id: Privacy.tcl,v 1.20 2007-09-15 14:27:24 matben Exp $
 
 package provide Privacy 1.0
 
@@ -533,7 +533,7 @@ namespace eval ::Privacy::List:: {
     
     # Need to map from menu entry to actual tag or attribute.
     variable strToTag
-    set strToTag(type,[mc Jid])          jid
+    set strToTag(type,[mc JID])          jid
     set strToTag(type,[mc Group])        group
     set strToTag(type,[mc Subscription]) subscription
     set strToTag(block,[mc {Incoming Messages}]) message

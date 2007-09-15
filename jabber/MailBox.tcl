@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.122 2007-09-13 15:53:40 matben Exp $
+# $Id: MailBox.tcl,v 1.123 2007-09-15 14:27:24 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1113,7 +1113,7 @@ proc ::MailBox::SaveMsg {} {
     set from [$T item element cget $item cFrom eText -text]
     set jid2 [jlib::barejid $from]
     
-    set ans [tk_getSaveFile -title [mc {Save message}] -initialfile $jid2.txt]
+    set ans [tk_getSaveFile -title [mc "Save Message"] -initialfile $jid2.txt]
     if {[string length $ans]} {
 	if {[catch {open $ans w} fd]} {
 	    ::UI::MessageBox -title {Open Failed} -parent $wtbl -type ok \

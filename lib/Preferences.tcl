@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.101 2007-09-15 13:16:12 matben Exp $
+# $Id: Preferences.tcl,v 1.102 2007-09-15 14:27:27 matben Exp $
  
 package require mnotebook
 
@@ -219,7 +219,7 @@ proc ::Preferences::Build {args} {
 
     set item [$T item create -button 1 -tags [list {Jabber}]]
     $T item style set $item cTree styText
-    $T item text $item cTree [mc Jabber]
+    $T item text $item cTree "Jabber"
     $T item lastchild root $item
 
     # The notebook and its pages.

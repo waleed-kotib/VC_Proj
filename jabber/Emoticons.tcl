@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.51 2007-09-13 08:25:38 matben Exp $
+# $Id: Emoticons.tcl,v 1.52 2007-09-15 14:27:24 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -579,7 +579,7 @@ proc  ::Emoticons::InitPrefsHook {} {
 
 proc ::Emoticons::BuildPrefsHook {wtree nbframe} {
 
-    ::Preferences::NewTableItem {Jabber Emoticons} [mc {Emoticons}]
+    ::Preferences::NewTableItem {Jabber Emoticons} [mc Emoticons]
     
     set wpage [$nbframe page {Emoticons}]    
     BuildPrefsPage $wpage

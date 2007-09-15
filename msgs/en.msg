@@ -21,8 +21,10 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.194 2007-09-15 13:16:13 matben Exp $
+#   $Id: en.msg,v 1.195 2007-09-15 14:27:27 matben Exp $
 
+::msgcat::mcset en Abort
+::msgcat::mcset en Action
 ::msgcat::mcset en Add
 ::msgcat::mcset en Address
 ::msgcat::mcset en Admin
@@ -41,6 +43,8 @@
 ::msgcat::mcset en City
 ::msgcat::mcset en Clear
 ::msgcat::mcset en Client
+::msgcat::mcset en Close
+::msgcat::mcset en Color
 ::msgcat::mcset en Company
 ::msgcat::mcset en Configure
 ::msgcat::mcset en Connection
@@ -53,17 +57,22 @@
 ::msgcat::mcset en Date
 ::msgcat::mcset en Default
 ::msgcat::mcset en Delete
+::msgcat::mcset en Deny
 ::msgcat::mcset en Department
 ::msgcat::mcset en Description
 ::msgcat::mcset en Detect
 ::msgcat::mcset en Discover
 ::msgcat::mcset en Downloading
+::msgcat::mcset en Edit
 ::msgcat::mcset en Email
+::msgcat::mcset en Emoticons
 ::msgcat::mcset en Encoding
 ::msgcat::mcset en Enter
 ::msgcat::mcset en Error
+::msgcat::mcset en Exit
 ::msgcat::mcset en Export
 ::msgcat::mcset en Extensions
+::msgcat::mcset en File
 ::msgcat::mcset en Filter
 ::msgcat::mcset en Finish
 ::msgcat::mcset en Finished
@@ -73,6 +82,7 @@
 ::msgcat::mcset en From
 ::msgcat::mcset en General
 ::msgcat::mcset en Get
+::msgcat::mcset en Getting
 ::msgcat::mcset en Grant
 ::msgcat::mcset en Group
 ::msgcat::mcset en Height
@@ -83,6 +93,7 @@
 ::msgcat::mcset en Image
 ::msgcat::mcset en Import
 ::msgcat::mcset en Inbox
+::msgcat::mcset en Info
 ::msgcat::mcset en Invite
 ::msgcat::mcset en Invitation
 ::msgcat::mcset en Key
@@ -102,6 +113,7 @@
 ::msgcat::mcset en More
 ::msgcat::mcset en Network
 ::msgcat::mcset en Never
+::msgcat::mcset en New
 ::msgcat::mcset en Next
 ::msgcat::mcset en Nickname
 ::msgcat::mcset en No
@@ -131,6 +143,7 @@
 ::msgcat::mcset en Proxy
 ::msgcat::mcset en Quit?
 ::msgcat::mcset en Quote
+::msgcat::mcset en Rate
 ::msgcat::mcset en Region
 ::msgcat::mcset en Register
 ::msgcat::mcset en Remaining
@@ -423,11 +436,13 @@
 ::msgcat::mcset en {Add File Type}
 ::msgcat::mcset en {Add/Edit File Type}
 ::msgcat::mcset en {Add Profile}
+::msgcat::mcset en {Alert sounds}
 ::msgcat::mcset en {All Supported Files}
 ::msgcat::mcset en {Alternative chatroom}
 ::msgcat::mcset en {Always ask}
 ::msgcat::mcset en {Auto Away}
 ::msgcat::mcset en {Auto Join}
+::msgcat::mcset en {Auto Reply}
 ::msgcat::mcset en {Auto-accept}
 ::msgcat::mcset en {Auto-reject}
 ::msgcat::mcset en {Blocking support}
@@ -436,19 +451,24 @@
 ::msgcat::mcset en {Buffering support}
 ::msgcat::mcset en {Built in server}
 ::msgcat::mcset en {Business Card}
+::msgcat::mcset en {Cache folder}
 ::msgcat::mcset en {Changes since previous release}
 ::msgcat::mcset en {Chat system}
 ::msgcat::mcset en {Chat window}
 ::msgcat::mcset en {Chat With}
 ::msgcat::mcset en {Chatroom presence change}
 ::msgcat::mcset en {Clear Cache}
+::msgcat::mcset en {Close page}
 ::msgcat::mcset en {Configure Chatroom}
 ::msgcat::mcset en {Contact Actions}
 ::msgcat::mcset en {Contact Icons}
 ::msgcat::mcset en {Contact ID}
+::msgcat::mcset en {Contact Name}
 ::msgcat::mcset en {Create Chatroom}
 ::msgcat::mcset en {Create new item for each line of text}
 ::msgcat::mcset en {Custom Status}
+::msgcat::mcset en {Default Applications}
+::msgcat::mcset en {Default group}
 ::msgcat::mcset en {Default nickname}
 ::msgcat::mcset en {Delete Profile}
 ::msgcat::mcset en {Discover permanently}
@@ -465,6 +485,7 @@
 ::msgcat::mcset en {Email client}
 ::msgcat::mcset en {Enter Chatroom}
 ::msgcat::mcset en {Enter/Create Chatroom}
+::msgcat::mcset en {Exit room}
 ::msgcat::mcset en {Error code}
 ::msgcat::mcset en {External Midi Player}
 ::msgcat::mcset en {Factory Settings}
@@ -475,6 +496,8 @@
 ::msgcat::mcset en {File Type}
 ::msgcat::mcset en {File Types}
 ::msgcat::mcset en {First name}
+::msgcat::mcset en {Font Size}
+::msgcat::mcset en {Font Weight}
 ::msgcat::mcset en {Format: mm/dd/yyyy}
 ::msgcat::mcset en {History length}
 ::msgcat::mcset en {Import Iconset}
@@ -494,6 +517,7 @@
 ::msgcat::mcset en {Logout With Message}
 ::msgcat::mcset en {MIDI command}
 ::msgcat::mcset en {MIDI Player}
+::msgcat::mcset en {MIME type}
 ::msgcat::mcset en {Multi Connect}
 ::msgcat::mcset en {My Status}
 ::msgcat::mcset en {NAT Address}
@@ -512,9 +536,10 @@
 ::msgcat::mcset en {Incoming message}
 ::msgcat::mcset en {New shortcut}
 ::msgcat::mcset en {No restriction}
-::msgcat::mcset en {No registered history for %s}
+::msgcat::mcset en {No registered history for}
 ::msgcat::mcset en {More recent than}
 ::msgcat::mcset en {Once per session}
+::msgcat::mcset en {Open Business Card}
 ::msgcat::mcset en {Open Failed}
 ::msgcat::mcset en {Open File}
 ::msgcat::mcset en {Open Folder}

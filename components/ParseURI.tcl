@@ -70,7 +70,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ParseURI.tcl,v 1.40 2007-09-12 13:37:55 matben Exp $
+# $Id: ParseURI.tcl,v 1.41 2007-09-15 14:27:23 matben Exp $
 
 package require uriencode
 
@@ -390,11 +390,11 @@ proc ::ParseURI::HandleJoinGroupchat {token} {
     if {$state(nick) eq ""} {
 	variable ans
 	set str [mc jagcreqnick $state(jid2)]
-	set w [ui::dialog -message $str -title [mc {Nick name}]  \
+	set w [ui::dialog -message $str -title [mc Nickname]  \
 	  -icon info -type okcancel -modal 1  \
 	  -variable [namespace current]::ans]
 	set fr [$w clientframe]
-	ttk::label $fr.l -text "[mc {Nick name}]:"
+	ttk::label $fr.l -text "[mc Nickname]:"
 	ttk::entry $fr.e -textvariable $token\(nick)
 	pack $fr.l -side left
 	pack $fr.e -side top -fill x

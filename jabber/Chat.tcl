@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.209 2007-09-15 13:16:12 matben Exp $
+# $Id: Chat.tcl,v 1.210 2007-09-15 14:27:23 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1845,7 +1845,7 @@ proc ::Chat::DrawCloseButton {dlgtoken} {
       -command [list [namespace current]::ClosePageCmd $dlgtoken]
     place $wclose -anchor ne -relx 1.0 -x -6 -y 6
 
-    ::balloonhelp::balloonforwindow $wclose [mc {Close page}]
+    ::balloonhelp::balloonforwindow $wclose [mc "Close page"]
     set dlgstate(wclose) $wclose
 }
 
