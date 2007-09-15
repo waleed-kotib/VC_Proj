@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.128 2007-09-13 15:53:40 matben Exp $
+# $Id: Login.tcl,v 1.129 2007-09-15 07:43:05 matben Exp $
 
 package provide Login 1.0
 
@@ -464,8 +464,9 @@ proc ::Login::DoLogin {} {
     foreach name {server username password} {
 	upvar 0 $name var
 	if {[string length $var] <= 1} {
+	    set mcname [mc [string totitle $nsme]]
 	    ::UI::MessageBox -icon error -title [mc Error] -type ok \
-	      -message [mc jamessnamemissing $name]
+	      -message [mc jamessnamemissing $mcname]
 	    return
 	}
 	if {$name eq "password"} {
@@ -784,6 +785,7 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 		if {$str eq $key} {
 		    set str [mc xmpp-stanzas-$errcode]
 		}
+		append str " " "($errcode)"
 		if {$errmsg ne ""} {
 		    append str " " $errmsg
 		}

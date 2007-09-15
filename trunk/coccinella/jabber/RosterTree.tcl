@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.71 2007-09-13 15:53:40 matben Exp $
+# $Id: RosterTree.tcl,v 1.72 2007-09-15 07:43:06 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1728,7 +1728,7 @@ proc ::RosterTree::FileMenuPostHook {wmenu} {
 	set jidL [GetSelectedJID]
 	if {[llength $jidL] == 1} {
 	    set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
-	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
+	    ::UI::MenuMethod $m entryconfigure mBC... -state normal
 	}
     }
 }

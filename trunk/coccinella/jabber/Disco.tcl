@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.128 2007-09-13 08:25:38 matben Exp $
+# $Id: Disco.tcl,v 1.129 2007-09-15 07:43:05 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1812,7 +1812,7 @@ proc ::Disco::FileMenuPostHook {wmenu} {
 	set vL [::ITree::GetSelection $wtree]
 	if {[llength $vL] == 1} {
 	    set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
-	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
+	    ::UI::MenuMethod $m entryconfigure mBC... -state normal
 	}
     }    
 }

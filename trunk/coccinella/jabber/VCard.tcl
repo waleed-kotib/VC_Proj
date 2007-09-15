@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.68 2007-09-14 08:11:45 matben Exp $
+# $Id: VCard.tcl,v 1.69 2007-09-15 07:43:06 matben Exp $
 
 package provide VCard 1.0
 
@@ -744,7 +744,7 @@ proc ::VCard::FileMenuPostHook {wmenu} {
 	set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
 	set token [GetFrontToken]
 	if {$token ne ""} {
-	    ::UI::MenuMethod $m entryconfigure mvCard2 -state normal
+	    ::UI::MenuMethod $m entryconfigure mBC... -state normal
 	}
     }
 }
